@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Run a command inside the `et` Lima VM, in the same directory as on the host
+# (the repo is mounted at the identical path).  With no args: interactive shell.
+#   scripts/vm make -C hello run
+set -euo pipefail
+VM="${ET_VM:-et}"
+if [[ "$(limactl list --format '{{.Status}}' "$VM" 2>/dev/null)" != "Running" ]]; then
+  limactl start "$VM" >/dev/null
+fi
+if [[ $# -eq 0 ]]; then
+  exec limactl shell --workdir "$PWD" "$VM"
+fi
+exec limactl shell --workdir "$PWD" "$VM" -- bash -lc 'export PATH=/opt/et/bin:$PATH; "$@"' bash "$@"

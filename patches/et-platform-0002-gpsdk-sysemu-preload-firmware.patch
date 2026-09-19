@@ -1,0 +1,69 @@
+diff --git a/gp-sdk/host/CMakeLists.txt b/gp-sdk/host/CMakeLists.txt
+index bffd6eb..df26535 100644
+--- a/gp-sdk/host/CMakeLists.txt
++++ b/gp-sdk/host/CMakeLists.txt
+@@ -23,6 +23,8 @@ find_package(runtime REQUIRED)
+ find_package(esperantoTrace REQUIRED)
+ find_package(hostUtils REQUIRED)
+ find_package(sw-sysemu REQUIRED)
++find_package(EsperantoBootLoader)
++find_package(EsperantoDeviceMinionRuntime)
+ 
+ find_package(PkgConfig REQUIRED)
+ pkg_check_modules(FFTW3F REQUIRED fftw3f)
+diff --git a/gp-sdk/host/sdk/CMakeLists.txt b/gp-sdk/host/sdk/CMakeLists.txt
+index 2cef11f..9da73db 100644
+--- a/gp-sdk/host/sdk/CMakeLists.txt
++++ b/gp-sdk/host/sdk/CMakeLists.txt
+@@ -10,6 +10,27 @@ add_library(etsoc_gpsdk STATIC
+     src/lib/GenericLauncher.cpp 
+ )
+ target_include_directories(etsoc_gpsdk PUBLIC include sdk/include)
++
++# Device firmware that sysemu has to preload (same source as the runtime tests).
++foreach(_fw BOOTROM_TRAMPOLINE_TO_BL2_ELF BL2_ELF MASTER_MINION_ELF MACHINE_MINION_ELF WORKER_MINION_ELF)
++  set(_${_fw} "")
++endforeach()
++if (EsperantoBootLoader_FOUND)
++  get_property(_BOOTROM_TRAMPOLINE_TO_BL2_ELF TARGET EsperantoBootLoader::BootromTrampolineToBL2.elf PROPERTY LOCATION)
++  get_property(_BL2_ELF TARGET EsperantoBootLoader::ServiceProcessorBL2_fast-boot.elf PROPERTY LOCATION)
++endif()
++if (EsperantoDeviceMinionRuntime_FOUND)
++  get_property(_MASTER_MINION_ELF TARGET EsperantoDeviceMinionRuntime::MasterMinion.elf PROPERTY LOCATION)
++  get_property(_MACHINE_MINION_ELF TARGET EsperantoDeviceMinionRuntime::MachineMinion.elf PROPERTY LOCATION)
++  get_property(_WORKER_MINION_ELF TARGET EsperantoDeviceMinionRuntime::WorkerMinion.elf PROPERTY LOCATION)
++endif()
++target_compile_definitions(etsoc_gpsdk PRIVATE
++    GPSDK_BOOTROM_TRAMPOLINE_TO_BL2_ELF="${_BOOTROM_TRAMPOLINE_TO_BL2_ELF}"
++    GPSDK_BL2_ELF="${_BL2_ELF}"
++    GPSDK_MASTER_MINION_ELF="${_MASTER_MINION_ELF}"
++    GPSDK_MACHINE_MINION_ELF="${_MACHINE_MINION_ELF}"
++    GPSDK_WORKER_MINION_ELF="${_WORKER_MINION_ELF}"
++)
+ target_link_libraries(etsoc_gpsdk 
+     PUBLIC 
+         deviceLayer::deviceLayer
+diff --git a/gp-sdk/host/sdk/src/lib/GenericLauncher.cpp b/gp-sdk/host/sdk/src/lib/GenericLauncher.cpp
+index 988aecb..2390811 100644
+--- a/gp-sdk/host/sdk/src/lib/GenericLauncher.cpp
++++ b/gp-sdk/host/sdk/src/lib/GenericLauncher.cpp
+@@ -31,6 +31,19 @@ emu::SysEmuOptions getDefaultOptions(std::string const& simulator_params) {
+ 
+   emu::SysEmuOptions sysEmuOptions;
+ 
++  // sysemu runs in-process and only boots the firmware it is told to preload;
++  // without these the Service Processor starts on empty memory and traps forever.
++  auto setIfExists = [](std::string& dst, const char* path) {
++    if (path[0] != '\0' && std::filesystem::exists(path)) {
++      dst = path;
++    }
++  };
++  setIfExists(sysEmuOptions.bootromTrampolineToBL2ElfPath, GPSDK_BOOTROM_TRAMPOLINE_TO_BL2_ELF);
++  setIfExists(sysEmuOptions.spBL2ElfPath, GPSDK_BL2_ELF);
++  setIfExists(sysEmuOptions.masterMinionElfPath, GPSDK_MASTER_MINION_ELF);
++  setIfExists(sysEmuOptions.machineMinionElfPath, GPSDK_MACHINE_MINION_ELF);
++  setIfExists(sysEmuOptions.workerMinionElfPath, GPSDK_WORKER_MINION_ELF);
++
+   sysEmuOptions.runDir = std::filesystem::current_path();
+   sysEmuOptions.maxCycles = kSysEmuMaxCycles;
+   sysEmuOptions.minionShiresMask = kSysEmuMinionShiresMask;

@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ET-SoC-1 test drive</title>
+<meta name="description" content="First contact with the AI Foundry ET platform: toolchain on a Mac, hello world on the simulator, and a first SGEMM on a real ET-SoC-1 card.">
+<style>
+:root {
+  color-scheme: light;
+  --surface: #fcfcfb;
+  --surface-raised: #ffffff;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --hairline: #e1e0d9;
+  --border: rgba(11,11,11,0.10);
+  --accent: #2a78d6;
+  --code-bg: #f3f2ee;
+  --good: #008300;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface: #1a1a19;
+    --surface-raised: #222220;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --hairline: #2c2c2a;
+    --border: rgba(255,255,255,0.10);
+    --accent: #3987e5;
+    --code-bg: #262624;
+    --good: #3fb950;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1a1a19;
+  --surface-raised: #222220;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --hairline: #2c2c2a;
+  --border: rgba(255,255,255,0.10);
+  --accent: #3987e5;
+  --code-bg: #262624;
+  --good: #3fb950;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--text-primary);
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+main { max-width: 880px; margin: 0 auto; padding: 40px 16px 64px; }
+header .eyebrow { color: var(--text-muted); font-size: 13px; letter-spacing: .02em; margin: 0 0 8px; }
+h1 { font-size: clamp(28px, 5vw, 38px); line-height: 1.15; margin: 0 0 12px; letter-spacing: -0.01em; }
+.lede { color: var(--text-secondary); font-size: 18px; margin: 0 0 28px; max-width: 70ch; }
+h2 { font-size: 22px; margin: 44px 0 12px; padding-top: 20px; border-top: 1px solid var(--hairline); }
+h3 { font-size: 17px; margin: 24px 0 6px; }
+p, li { max-width: 75ch; }
+a { color: var(--accent); text-underline-offset: 2px; }
+code { font: 0.9em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre code { background: none; padding: 0; font: inherit; }
+.muted { color: var(--text-muted); }
+.secondary { color: var(--text-secondary); }
+
+/* KPI row */
+.kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 8px 0 8px; }
+@media (min-width: 720px) { .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 380px) { .kpis { grid-template-columns: minmax(0, 1fr); } }
+.tile { background: var(--surface-raised); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px 16px; position: relative; overflow: hidden; }
+.tile::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); opacity: .85; }
+.tile .label { color: var(--text-secondary); font-size: 13px; margin: 0 0 6px; }
+.tile .value { font-weight: 600; font-size: clamp(24px, 6.5vw, 30px); line-height: 1.1; margin: 0; }
+.tile .note { color: var(--text-muted); font-size: 12.5px; margin: 6px 0 0; }
+.tile.hero { grid-column: 1 / -1; }
+.tile.hero .value { font-size: clamp(40px, 10vw, 56px); letter-spacing: -0.02em; white-space: nowrap; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: 12px 0; border: 1px solid var(--border); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--hairline); white-space: nowrap; }
+th { color: var(--text-secondary); font-weight: 600; font-size: 13px; background: var(--surface-raised); }
+tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.pass { color: var(--good); font-weight: 600; }
+caption { caption-side: bottom; text-align: left; color: var(--text-muted); font-size: 13px; padding: 8px 12px; }
+
+/* Findings */
+.finding { border: 1px solid var(--border); border-radius: 10px; padding: 4px 16px 12px; margin: 12px 0; background: var(--surface-raised); }
+.finding h3 { margin-top: 14px; }
+.tag { display: inline-block; font-size: 12px; font-weight: 600; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 999px; padding: 1px 9px; margin-left: 6px; vertical-align: 2px; }
+details { margin: 8px 0 4px; }
+summary { cursor: pointer; color: var(--accent); font-size: 14px; }
+ol.steps > li { margin: 6px 0; }
+footer { margin-top: 48px; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--hairline); padding-top: 16px; }
+</style>
+</head>
+<body>
+<main>
+<header data-ss-section="intro">
+  <p data-ss-id="intro-p-1" class="eyebrow">2026-09-18 · @yaroslavvb · AI Foundry ET platform</p>
+  <h1 data-ss-id="h1-et-soc-1-test-drive-from-a-laptop-simulator-to-s">ET-SoC-1 test drive: from a laptop simulator to silicon</h1>
+  <p data-ss-id="intro-p-2" class="lede">I built the ET toolchain and platform on a Mac and ran the hello worlds on the <code>sys_emu</code> simulator.
+  Then I ran a first real workload, a scalar fp32 matrix multiply, on an ET-SoC-1 card in the AI Foundry lab.
+  Below are the numbers, what broke on the way, and what's next.</p>
+</header>
+
+<section aria-label="Headline numbers" class="kpis" data-ss-section="headline-numbers">
+  <div data-ss-id="headline-numbers-div-1" class="tile hero">
+    <p class="label">Scalar fp32 SGEMM on one card, n = 1024</p>
+    <p class="value">127 GFLOP/s</p>
+    <p class="note">2048 harts on 32 shires, plain <code>fmadd.s</code> (no SIMD, no tensor unit yet)</p>
+  </div>
+  <div data-ss-id="headline-numbers-div-2" class="tile">
+    <p class="label">Speedup, 1 → 32 shires</p>
+    <p class="value">28.7×</p>
+    <p class="note">n = 512: 68.0 ms → 2.37 ms</p>
+  </div>
+  <div data-ss-id="headline-numbers-div-3" class="tile">
+    <p class="label">Mismatches vs host reference</p>
+    <p class="value">0 of 1.6M</p>
+    <p class="note">all silicon runs, fp32 vs double</p>
+  </div>
+  <div data-ss-id="headline-numbers-div-4" class="tile">
+    <p class="label">Device held per run</p>
+    <p class="value">0.2–0.3 s</p>
+    <p class="note">mostly runtime init; the card is shared</p>
+  </div>
+  <div data-ss-id="headline-numbers-div-5" class="tile">
+    <p class="label">Mac setup from scratch</p>
+    <p class="value">≈15 min</p>
+    <p class="note">M5 Max; the toolchain build is 7 of it</p>
+  </div>
+</section>
+
+<section data-ss-section="what-i-did">
+<h2 data-ss-id="h2-what-i-did">What I did</h2>
+<ol data-ss-id="what-i-did-ol-1" class="steps">
+  <li data-ss-id="what-i-did-li-1"><strong>Development environment on macOS.</strong> The build expects Ubuntu 24.04. I used a Lima VM running Ubuntu 24.04
+  natively on arm64, with 16 vCPUs and the repo mounted at the same path.
+  <ul>
+    <li>The ET RISC-V GCC (<code>aifoundry-org/riscv-gnu-toolchain</code>, branch <code>et</code>, GCC 15.2) has to be built from source,
+    because the release tarball is x86-only. That takes about 7 minutes.</li>
+    <li>The et-platform superbuild then takes about 2 minutes: firmware, <code>sys_emu</code>, runtime, and gp-sdk. Apart from fix 1 below, it needed no changes for arm64.</li>
+  </ul></li>
+  <li data-ss-id="what-i-did-li-2"><strong>Hello worlds on the simulator.</strong> Each run takes about 40 s, and about 37 s of that is simulated firmware booting 33 shires.
+    <ul>
+      <li><code>it_test_code_loading</code>, the README/CI hello world: <span class="pass">3/3 passed</span>.</li>
+      <li>gp-sdk <code>hello_world_launcher</code> + <code>print.elf</code>: prints <code>HELLO WORLD!!!!</code>. This needed a fix, below.</li>
+      <li>My own check-in kernel, where every hart writes one cache-line record: <span class="pass">2048/2048 harts</span> from 32 shires.</li>
+    </ul></li>
+  <li data-ss-id="what-i-did-li-3"><strong>A first workload on silicon.</strong> I wrote a small SGEMM in the style of
+    <a href="https://github.com/marty1885/et-testdrive">marty1885/et-testdrive</a>, using just the runtime API and <code>et-common-libs</code>.
+    That mattered because the lab machine's <code>/opt/et</code> is older and has no gp-sdk.
+    I verified it on the simulator on the laptop. Then I copied the sources to <code>aifoundry3</code> (4.5 MB),
+    built them there against its own toolchain, and ran them on the card with a hard 10 s cap.</li>
+</ol>
+</section>
+
+<section data-ss-section="sgemm-on-the-card">
+<h2 data-ss-id="h2-sgemm-on-the-card">SGEMM on the card</h2>
+<p data-ss-id="sgemm-on-the-card-p-1">This computes <code>C = A·B</code> for n×n fp32 matrices, checked against a double-precision host reference.</p>
+<ul data-ss-id="sgemm-on-the-card-ul-1">
+  <li>The unit of work is a 1×16 strip of C, which is exactly one 64-byte cache line. The minion L1 caches aren't coherent and write back whole lines,
+so giving each hart whole lines is what makes the parallel result correct.</li>
+  <li>The 16 accumulators stay in FP registers. The inner loop is 17 loads + 16 <code>fmadd.s</code> per step of k.</li>
+</ul>
+<div class="table-wrap">
+<table data-ss-id="sgemm-on-the-card-table-1">
+  <thead><tr><th class="num">n</th><th class="num">Shires</th><th class="num">Harts</th><th class="num">Time per launch</th><th class="num">GFLOP/s</th><th class="num">Mismatches</th></tr></thead>
+  <tbody>
+    <tr><td class="num">64</td><td class="num">1</td><td class="num">64</td><td class="num">0.31 ms</td><td class="num">1.7</td><td class="num">0 / 4,096</td></tr>
+    <tr><td class="num">512</td><td class="num">1</td><td class="num">64</td><td class="num">68.0 ms</td><td class="num">3.9</td><td class="num">0 / 262,144</td></tr>
+    <tr><td class="num">512</td><td class="num">32</td><td class="num">2,048</td><td class="num">2.37 ms</td><td class="num">113</td><td class="num">0 / 262,144</td></tr>
+    <tr><td class="num">1024</td><td class="num">32</td><td class="num">2,048</td><td class="num">16.8 ms</td><td class="num">127</td><td class="num">0 / 1,048,576</td></tr>
+  </tbody>
+  <caption>aifoundry3, one ET-SoC-1 card, 2026-09-18. Time is host-measured <code>kernelLaunch</code> → <code>waitForStream</code>, so launch overhead is included. The n ≥ 512 rows were launched 2–3× each; the spread was under 2%.</caption>
+</table>
+</div>
+<p data-ss-id="sgemm-on-the-card-p-2" class="secondary">For scale: the FOSDEM 2026 talk
+<a href="https://archive.fosdem.org/2026/events/attachments/T3PSFN-zero_to_matmul_with_the_et-soc-1/slides/267107/zerotomat_asnyquu.pdf">“Zero to matmul with the ET-SoC-1”</a>
+went from 13 GFLOP/s (naive scalar) to 10.25 TFLOP/s using SIMD, L2 scratchpad, and the tensor unit. That ladder is the roadmap from here.</p>
+</section>
+
+<section data-ss-section="things-worth-fixing-upstream">
+<h2 data-ss-id="h2-things-worth-fixing-upstream">Things worth fixing upstream</h2>
+
+<div data-ss-id="things-worth-fixing-upstream-div-1" class="finding">
+  <h3 data-ss-id="h3-1-fresh-et-platform-builds-fail-since-2026-08-05">1. Fresh et-platform builds fail since 2026-08-05 <span class="tag">build</span></h3>
+  <ul data-ss-id="things-worth-fixing-upstream-ul-1">
+    <li><code>ThirdParty()</code> pins easy_profiler to the <code>git describe</code> ref <code>v2.1.0-66-gcc0e154</code> but clones with <code>GIT_SHALLOW TRUE</code>.</li>
+    <li>Upstream easy_profiler got new commits on 2026-08-05, so a depth-1 clone no longer contains <code>cc0e154</code>.</li>
+    <li>The build dies with <code>fatal: invalid reference</code>.</li>
+  </ul>
+  <p data-ss-id="things-worth-fixing-upstream-p-1">Fix: clone the third-party repos fully, or pin full SHAs.</p>
+  <details data-ss-id="things-worth-fixing-upstream-details-1"><summary>Patch (1 line)</summary><pre data-ss-id="things-worth-fixing-upstream-pre-1"><code>diff --git a/cmake/ProjectFunctions.cmake b/cmake/ProjectFunctions.cmake
+index b237797..7f34554 100644
+--- a/cmake/ProjectFunctions.cmake
++++ b/cmake/ProjectFunctions.cmake
+@@ -38,7 +38,7 @@ function(ThirdParty name url tag cmake_args)
+         ${name}
+         GIT_REPOSITORY ${url}
+         GIT_TAG ${tag}
+-        GIT_SHALLOW TRUE
++        GIT_SHALLOW FALSE  # describe-style tags (vX-N-gSHA) are not reachable in a depth-1 clone once upstream moves
+         PREFIX ${CMAKE_BINARY_DIR}/${PROJECT_BASE_DIR}/${name}
+         CMAKE_ARGS
+                    -DCMAKE_INSTALL_PREFIX=${STAGING_DIR}
+</code></pre></details>
+</div>
+
+<div data-ss-id="things-worth-fixing-upstream-div-2" class="finding">
+  <h3 data-ss-id="h3-2-gp-sdk-launchers-can-t-boot-the-simulator-gp-s">2. gp-sdk launchers can’t boot the simulator <span class="tag">gp-sdk</span></h3>
+  <ul data-ss-id="things-worth-fixing-upstream-ul-2">
+    <li><code>GenericLauncher</code> never tells <code>sys_emu</code> which firmware to preload: SP BL2 and the master/machine/worker minion images.</li>
+    <li>With <code>--device_type=sysemu</code>, every gp-sdk launcher (<code>hello_world_launcher</code>, <code>saxpy_launcher</code>, …) boots the Service Processor on empty memory.</li>
+    <li>It then loops on “Trapping to the same address” and writes about a GB of log in 10 minutes.</li>
+    <li>The runtime’s own tests avoid this because <code>TestUtils.h</code> sets the paths.</li>
+  </ul>
+  <p data-ss-id="things-worth-fixing-upstream-p-2">Fix: set them the same way, from the installed CMake packages.</p>
+  <details data-ss-id="things-worth-fixing-upstream-details-2"><summary>Patch (GenericLauncher.cpp + CMake)</summary><pre data-ss-id="things-worth-fixing-upstream-pre-2"><code>diff --git a/gp-sdk/host/CMakeLists.txt b/gp-sdk/host/CMakeLists.txt
+index bffd6eb..df26535 100644
+--- a/gp-sdk/host/CMakeLists.txt
++++ b/gp-sdk/host/CMakeLists.txt
+@@ -23,6 +23,8 @@ find_package(runtime REQUIRED)
+ find_package(esperantoTrace REQUIRED)
+ find_package(hostUtils REQUIRED)
+ find_package(sw-sysemu REQUIRED)
++find_package(EsperantoBootLoader)
++find_package(EsperantoDeviceMinionRuntime)
+ 
+ find_package(PkgConfig REQUIRED)
+ pkg_check_modules(FFTW3F REQUIRED fftw3f)
+diff --git a/gp-sdk/host/sdk/CMakeLists.txt b/gp-sdk/host/sdk/CMakeLists.txt
+index 2cef11f..9da73db 100644
+--- a/gp-sdk/host/sdk/CMakeLists.txt
++++ b/gp-sdk/host/sdk/CMakeLists.txt
+@@ -10,6 +10,27 @@ add_library(etsoc_gpsdk STATIC
+     src/lib/GenericLauncher.cpp 
+ )
+ target_include_directories(etsoc_gpsdk PUBLIC include sdk/include)
++
++# Device firmware that sysemu has to preload (same source as the runtime tests).
++foreach(_fw BOOTROM_TRAMPOLINE_TO_BL2_ELF BL2_ELF MASTER_MINION_ELF MACHINE_MINION_ELF WORKER_MINION_ELF)
++  set(_${_fw} &quot;&quot;)
++endforeach()
++if (EsperantoBootLoader_FOUND)
++  get_property(_BOOTROM_TRAMPOLINE_TO_BL2_ELF TARGET EsperantoBootLoader::BootromTrampolineToBL2.elf PROPERTY LOCATION)
++  get_property(_BL2_ELF TARGET EsperantoBootLoader::ServiceProcessorBL2_fast-boot.elf PROPERTY LOCATION)
++endif()
++if (EsperantoDeviceMinionRuntime_FOUND)
++  get_property(_MASTER_MINION_ELF TARGET EsperantoDeviceMinionRuntime::MasterMinion.elf PROPERTY LOCATION)
++  get_property(_MACHINE_MINION_ELF TARGET EsperantoDeviceMinionRuntime::MachineMinion.elf PROPERTY LOCATION)
++  get_property(_WORKER_MINION_ELF TARGET EsperantoDeviceMinionRuntime::WorkerMinion.elf PROPERTY LOCATION)
++endif()
++target_compile_definitions(etsoc_gpsdk PRIVATE
++    GPSDK_BOOTROM_TRAMPOLINE_TO_BL2_ELF=&quot;${_BOOTROM_TRAMPOLINE_TO_BL2_ELF}&quot;
++    GPSDK_BL2_ELF=&quot;${_BL2_ELF}&quot;
++    GPSDK_MASTER_MINION_ELF=&quot;${_MASTER_MINION_ELF}&quot;
++    GPSDK_MACHINE_MINION_ELF=&quot;${_MACHINE_MINION_ELF}&quot;
++    GPSDK_WORKER_MINION_ELF=&quot;${_WORKER_MINION_ELF}&quot;
++)
+ target_link_libraries(etsoc_gpsdk 
+     PUBLIC 
+         deviceLayer::deviceLayer
+diff --git a/gp-sdk/host/sdk/src/lib/GenericLauncher.cpp b/gp-sdk/host/sdk/src/lib/GenericLauncher.cpp
+index 988aecb..2390811 100644
+--- a/gp-sdk/host/sdk/src/lib/GenericLauncher.cpp
++++ b/gp-sdk/host/sdk/src/lib/GenericLauncher.cpp
+@@ -31,6 +31,19 @@ emu::SysEmuOptions getDefaultOptions(std::string const&amp; simulator_params) {
+ 
+   emu::SysEmuOptions sysEmuOptions;
+ 
++  // sysemu runs in-process and only boots the firmware it is told to preload;
++  // without these the Service Processor starts on empty memory and traps forever.
++  auto setIfExists = [](std::string&amp; dst, const char* path) {
++    if (path[0] != &#x27;\0&#x27; &amp;&amp; std::filesystem::exists(path)) {
++      dst = path;
++    }
++  };
++  setIfExists(sysEmuOptions.bootromTrampolineToBL2ElfPath, GPSDK_BOOTROM_TRAMPOLINE_TO_BL2_ELF);
++  setIfExists(sysEmuOptions.spBL2ElfPath, GPSDK_BL2_ELF);
++  setIfExists(sysEmuOptions.masterMinionElfPath, GPSDK_MASTER_MINION_ELF);
++  setIfExists(sysEmuOptions.machineMinionElfPath, GPSDK_MACHINE_MINION_ELF);
++  setIfExists(sysEmuOptions.workerMinionElfPath, GPSDK_WORKER_MINION_ELF);
++
+   sysEmuOptions.runDir = std::filesystem::current_path();
+   sysEmuOptions.maxCycles = kSysEmuMaxCycles;
+   sysEmuOptions.minionShiresMask = kSysEmuMinionShiresMask;
+</code></pre></details>
+</div>
+
+<div data-ss-id="things-worth-fixing-upstream-div-3" class="finding">
+  <h3 data-ss-id="h3-3-a0-errata-1-29-and-the-compiler-question">3. A0 errata 1.29 and the compiler <span class="tag">question</span></h3>
+  <p data-ss-id="things-worth-fixing-upstream-p-3">Errata 1.29 (“VPURF timing path”): reading a VPU register one cycle after it was written can return stale data.
+  The workaround is a guard instruction, e.g. <code>fmv.x.w x0, fN</code> after loads. The FOSDEM matmul loop has one for this reason.</p>
+  <ul data-ss-id="things-worth-fixing-upstream-ul-3">
+    <li><strong>GCC 15.x doesn’t insert the guard.</strong> This applies to both the lab’s 15.1 and the laptop’s 15.2.
+    <code>sys_emu -vpurf_warn</code> flags essentially every FMA in this SGEMM (524,359 “type A” warnings at n = 64), and gp-sdk’s own <code>saxpy_vector.elf</code> as well.</li>
+    <li><strong>Silicon results were still correct</strong> for all 1.6 M outputs.</li>
+  </ul>
+  <p data-ss-id="things-worth-fixing-upstream-p-4">Open questions: are the lab cards A0 steppings, and is the compiler meant to handle this? For now: check new kernels with <code>-vpurf_warn</code>, and treat
+  “wrong only on silicon” as a prime suspect for this bug.</p>
+</div>
+
+<h3 data-ss-id="h3-smaller-notes">Smaller notes</h3>
+<ul data-ss-id="things-worth-fixing-upstream-ul-4">
+  <li>Esperanto’s trace decoder <code>dt2json</code>, referenced in the gp-sdk docs, isn’t open source.
+  A 60-line decoder on top of the header-only <code>et-trace</code> is enough to read kernel <code>et_printf</code> output.</li>
+  <li><code>GenericLauncher::loadKernel()</code> leaves <code>std::cout</code> in hex mode. My first “800/800 harts” result was really 2048/2048.</li>
+  <li>When the runtime starts <code>sys_emu</code>, it turns on the coherency, scratchpad, FLB, and tensor-store checkers by default. The errata checker is opt-in: <code>-vpurf_warn</code>.</li>
+  <li>On the card, runtime init takes about 0.19 s. Peak host RSS is about 2 GB for the duration of a run, which comes from the runtime’s mapped buffers.</li>
+</ul>
+</section>
+
+<section data-ss-section="next">
+<h2 data-ss-id="h2-next">Next</h2>
+<ol data-ss-id="next-ol-1" class="steps">
+  <li data-ss-id="next-li-1">8-wide <code>.ps</code> SIMD in the same kernel (<code>fbc.ps</code> / <code>flw.ps</code> / <code>fmadd.ps</code>), with register blocking.</li>
+  <li data-ss-id="next-li-2">Stage A and B in the L2 scratchpad instead of DRAM.</li>
+  <li data-ss-id="next-li-3">Tensor unit: <code>tensor_load</code> / <code>tensor_fma</code> / <code>tensor_store</code>, then overlap loads with FMAs.</li>
+  <li data-ss-id="next-li-4">Pick the real workload to prototype, once the matmul building blocks are in place.</li>
+</ol>
+</section>
+
+<section data-ss-section="reproduce">
+<h2 data-ss-id="h2-reproduce">Reproduce</h2>
+<p data-ss-id="reproduce-p-1" class="secondary">All commands run from the workspace repo. Commands in the first two blocks run on the Mac; the last runs on a lab machine.</p>
+<pre data-ss-id="reproduce-pre-1"><code># one-time: Lima VM + toolchain + et-platform (~15 min)
+scripts/create-vm.sh
+
+# simulator, on the laptop
+scripts/vm make run-hello        # 2048-hart check-in
+scripts/vm make run-sgemm        # SGEMM n=128 on sys_emu
+
+# real card: copy sources, build on the lab box, run with a hard cap
+scripts/deploy-lab.sh aifoundry3 workloads/sgemm
+ssh aifoundry3 'cd ~/nekko/build/sgemm &amp;&amp; timeout 10 host/sgemm_host -n 1024'</code></pre>
+</section>
+
+<footer data-ss-id="footer-sources">
+  Sources: <a href="https://github.com/aifoundry-org/et-platform">et-platform</a> ·
+  <a href="https://github.com/aifoundry-org/et-man">et-man</a> (PRM, errata) ·
+  <a href="https://github.com/openhwfoundation/core-et/tree/erbium">core-et (erbium)</a> ·
+  <a href="https://github.com/marty1885/et-testdrive">et-testdrive</a>.
+  All runs were on 2026-09-18. The laptop used et-platform <code>836a4ab</code>; aifoundry3 used its own, older install.
+</footer>
+</main>
+</body>
+</html>

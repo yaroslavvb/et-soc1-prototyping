@@ -1,0 +1,114 @@
+diff -ruN a/gp-sdk/device/riscv_helpers.cmake b/gp-sdk/device/riscv_helpers.cmake
+--- a/gp-sdk/device/riscv_helpers.cmake	2026-03-24 17:30:50.000000000 -0700
++++ b/gp-sdk/device/riscv_helpers.cmake	2026-09-18 16:53:44.573922848 -0700
+@@ -28,7 +28,7 @@
+   # reach xxx_kernel_arguments header exported by the kernel
+   set_property(TARGET ${TARGET_NAME} PROPERTY ENABLE_EXPORTS 1)
+  
+-  target_link_libraries(${TARGET_NAME}
++  target_link_libraries(${TARGET_NAME} PRIVATE  # nekko: keyword form, as in upstream HEAD
+     et-common-libs::cm-umode
+   )
+ 
+@@ -54,7 +54,7 @@
+ 
+   set(ELF_EXE_LINKER_FLAGS_BASE "-Wl,--no-relax -nostdlib -nostartfiles -Wl,--gc-sections  -e _start ${EXTRA_LINKER_OPTIONS} ${WRAPPED_FUNC} -Wl,--start-group  -lm -lgcc")
+   
+-  set(ELF_EXE_LINKER_FLAGS "${ELF_EXE_LINKER_FLAGS_BASE} -T ${LINKER_SCRIPT_ABS_PATH} -Wl,--defsym=BASE_ADDRESS=0")
++  set(ELF_EXE_LINKER_FLAGS "${ELF_EXE_LINKER_FLAGS_BASE} -T ${LINKER_SCRIPT_ABS_PATH} -Wl,--defsym=BASE_ADDRESS=0 -Wl,--emit-relocs")  # nekko: upstream 7e3b4c2 restored this; without it the entry-point table stays at 0x40
+   set(ELF_EXE_LINKER_FLAGS_DBG "${ELF_EXE_LINKER_FLAGS_BASE} -T ${LINKER_SCRIPT_ABS_PATH} -Wl,--defsym=BASE_ADDRESS=${DEBUG_ADDRESS}")
+   
+   target_compile_options(${TARGET_NAME} PRIVATE -falign-functions=64 -fno-jump-tables  -O3 -g3 $<$<C_COMPILER_ID:GNU>:-Wstack-usage=4096>)
+diff -ruN a/gp-sdk/device/sdk/CMakeLists.txt b/gp-sdk/device/sdk/CMakeLists.txt
+--- a/gp-sdk/device/sdk/CMakeLists.txt	2026-03-24 17:30:50.000000000 -0700
++++ b/gp-sdk/device/sdk/CMakeLists.txt	2026-09-18 16:53:44.578762106 -0700
+@@ -5,7 +5,7 @@
+ 
+ 
+ find_package(et-common-libs REQUIRED COMPONENTS cm-umode)
+-find_package(dnnLibrary REQUIRED)
++find_package(dnnLibrary)  # nekko: optional, only libautogen needs it
+ 
+ add_library(etsoc_crt0 STATIC
+   lib/deviceGpSdk.cc
+@@ -96,7 +96,9 @@
+ 
+ add_library(libc_stub STATIC libc_stub/et_errno.cc libc_stub/et_atexit.cc)
+ 
+-add_subdirectory(libautogen)
++if (dnnLibrary_FOUND)  # nekko: skip when dnnLibrary is not installed
++  add_subdirectory(libautogen)
++endif()
+ 
+ 
+ 
+diff -ruN a/gp-sdk/host/CMakeLists.txt b/gp-sdk/host/CMakeLists.txt
+--- a/gp-sdk/host/CMakeLists.txt	2026-03-24 17:30:50.000000000 -0700
++++ b/gp-sdk/host/CMakeLists.txt	2026-09-18 16:53:44.586335142 -0700
+@@ -21,9 +21,11 @@
+ find_package(deviceLayer REQUIRED)
+ find_package(runtime REQUIRED)
+ find_package(esperantoTrace REQUIRED)
++find_package(EsperantoBootLoader)  # nekko: patches/et-platform-0002 (sysemu firmware preload)
++find_package(EsperantoDeviceMinionRuntime)
+ 
+ find_package(PkgConfig REQUIRED)
+-pkg_check_modules(FFTW3F REQUIRED fftw3f)
++pkg_check_modules(FFTW3F fftw3f)  # nekko: optional, only fft_launcher needs it
+ 
+ include(SanitizerSupport)
+ 
+diff -ruN a/gp-sdk/host/sdk/CMakeLists.txt b/gp-sdk/host/sdk/CMakeLists.txt
+--- a/gp-sdk/host/sdk/CMakeLists.txt	2026-03-24 17:30:50.000000000 -0700
++++ b/gp-sdk/host/sdk/CMakeLists.txt	2026-09-18 16:53:44.586306093 -0700
+@@ -10,6 +10,27 @@
+     src/lib/GenericLauncher.cpp 
+ )
+ target_include_directories(etsoc_gpsdk PUBLIC include sdk/include)
++
++# Device firmware that sysemu has to preload (same source as the runtime tests).
++foreach(_fw BOOTROM_TRAMPOLINE_TO_BL2_ELF BL2_ELF MASTER_MINION_ELF MACHINE_MINION_ELF WORKER_MINION_ELF)
++  set(_${_fw} "")
++endforeach()
++if (EsperantoBootLoader_FOUND)
++  get_property(_BOOTROM_TRAMPOLINE_TO_BL2_ELF TARGET EsperantoBootLoader::BootromTrampolineToBL2.elf PROPERTY LOCATION)
++  get_property(_BL2_ELF TARGET EsperantoBootLoader::ServiceProcessorBL2_fast-boot.elf PROPERTY LOCATION)
++endif()
++if (EsperantoDeviceMinionRuntime_FOUND)
++  get_property(_MASTER_MINION_ELF TARGET EsperantoDeviceMinionRuntime::MasterMinion.elf PROPERTY LOCATION)
++  get_property(_MACHINE_MINION_ELF TARGET EsperantoDeviceMinionRuntime::MachineMinion.elf PROPERTY LOCATION)
++  get_property(_WORKER_MINION_ELF TARGET EsperantoDeviceMinionRuntime::WorkerMinion.elf PROPERTY LOCATION)
++endif()
++target_compile_definitions(etsoc_gpsdk PRIVATE
++    GPSDK_BOOTROM_TRAMPOLINE_TO_BL2_ELF="${_BOOTROM_TRAMPOLINE_TO_BL2_ELF}"
++    GPSDK_BL2_ELF="${_BL2_ELF}"
++    GPSDK_MASTER_MINION_ELF="${_MASTER_MINION_ELF}"
++    GPSDK_MACHINE_MINION_ELF="${_MACHINE_MINION_ELF}"
++    GPSDK_WORKER_MINION_ELF="${_WORKER_MINION_ELF}"
++)
+ target_link_libraries(etsoc_gpsdk 
+     PUBLIC 
+         deviceLayer::deviceLayer
+diff -ruN a/gp-sdk/host/sdk/src/lib/GenericLauncher.cpp b/gp-sdk/host/sdk/src/lib/GenericLauncher.cpp
+--- a/gp-sdk/host/sdk/src/lib/GenericLauncher.cpp	2026-03-24 17:30:50.000000000 -0700
++++ b/gp-sdk/host/sdk/src/lib/GenericLauncher.cpp	2026-09-18 16:53:44.585673422 -0700
+@@ -31,6 +31,19 @@
+ 
+   emu::SysEmuOptions sysEmuOptions;
+ 
++  // sysemu runs in-process and only boots the firmware it is told to preload;
++  // without these the Service Processor starts on empty memory and traps forever.
++  auto setIfExists = [](std::string& dst, const char* path) {
++    if (path[0] != '\0' && std::filesystem::exists(path)) {
++      dst = path;
++    }
++  };
++  setIfExists(sysEmuOptions.bootromTrampolineToBL2ElfPath, GPSDK_BOOTROM_TRAMPOLINE_TO_BL2_ELF);
++  setIfExists(sysEmuOptions.spBL2ElfPath, GPSDK_BL2_ELF);
++  setIfExists(sysEmuOptions.masterMinionElfPath, GPSDK_MASTER_MINION_ELF);
++  setIfExists(sysEmuOptions.machineMinionElfPath, GPSDK_MACHINE_MINION_ELF);
++  setIfExists(sysEmuOptions.workerMinionElfPath, GPSDK_WORKER_MINION_ELF);
++
+   sysEmuOptions.runDir = std::filesystem::current_path();
+   sysEmuOptions.maxCycles = kSysEmuMaxCycles;
+   sysEmuOptions.minionShiresMask = kSysEmuMinionShiresMask;

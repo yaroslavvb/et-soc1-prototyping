@@ -1,0 +1,13 @@
+diff --git a/cmake/ProjectFunctions.cmake b/cmake/ProjectFunctions.cmake
+index b237797..7f34554 100644
+--- a/cmake/ProjectFunctions.cmake
++++ b/cmake/ProjectFunctions.cmake
+@@ -38,7 +38,7 @@ function(ThirdParty name url tag cmake_args)
+         ${name}
+         GIT_REPOSITORY ${url}
+         GIT_TAG ${tag}
+-        GIT_SHALLOW TRUE
++        GIT_SHALLOW FALSE  # describe-style tags (vX-N-gSHA) are not reachable in a depth-1 clone once upstream moves
+         PREFIX ${CMAKE_BINARY_DIR}/${PROJECT_BASE_DIR}/${name}
+         CMAKE_ARGS
+                    -DCMAKE_INSTALL_PREFIX=${STAGING_DIR}
