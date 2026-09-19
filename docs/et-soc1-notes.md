@@ -81,6 +81,39 @@ What this means for kernels:
   Time with wall clock as well as `hpmcounter3`.
 - **Avoid concurrent PMU reads.** When both harts read `hpmcounter3` at once, one can get a wrong value (erratum 1.23).
 
+## On-chip communication, measured (aifoundry2, 2026-09-18)
+
+Measured with `workloads/nocbench` at 600 MHz. The full write-up, including the GPU comparison, is
+`docs/reports/2026-09-18-et-soc1-on-chip-communication.html`.
+
+The 32 compute shires sit on a 6x6 mesh, laid out as in marty1885's map (`MARTY` in `workloads/nocbench/analyze.py`).
+Between shires, every latency is a + b x (Manhattan distance on that map), and each hop costs 20 ns round trip
+(12 cycles at 600 MHz). A ring that visits all 32 shires one hop at a time:
+0 24 9 25 2 11 19 27 18 10 17 14 22 26 15 23 31 7 6 30 29 5 28 20 12 21 13 1 16 4 3 8.
+
+| Primitive | Round trip or cost | Notes |
+|---|---|---|
+| TensorSend/Recv, 32 B | 68 cycles on a tree edge; 114 elsewhere in the shire; 150 + 12/hop between shires | Tree edges in each neighbourhood: 0-1, 0-2, 0-4, 2-3, 4-5, 4-6, 6-7 (the fast local network). Each extra 32 B register costs 2.3-4.6 cycles. |
+| Combine on receive (FADD/FMAX/IADD/IMAX) | +0 cycles | |
+| TensorReduce + TensorBroadcast | 432 cycles for 32 minions; 1,368 for 1,024 | All 32 shires can reduce in parallel with no slowdown. |
+| Credits (CREDINC store + FCC wait) | 120 cycles in a shire (blocking); 148 + 12/hop across shires (polled) | |
+| FLB + credit barrier, 32 minions | 237 cycles | |
+| Chip barrier from global atomics + credits | ~5,000 cycles | The allreduce tree is 3.7x faster. |
+| Flag through global atomics (GPU-style) | 355-690 cycles | Depends on where the flag's L3 line lives, not on distance. |
+| Aggregate bandwidth, 1 KB messages | 3.0 TB/s on tree-edge pairs; 1.1 TB/s in shire rings; 0.09-0.16 TB/s across the mesh | TensorLoad from a remote scratchpad does 0.98 TB/s. |
+| Energy per byte | 0.8 pJ on tree edges, 2.3 in a shire, ~10 + 1.9/hop across the mesh | Card power above local idle. |
+
+Rules for kernels that talk:
+- **Never let a minion receive readies from two TensorSend partners at once.** The hardware keeps one peer-to-peer ready
+  bit per minion (`partner_ready_peer` in core-et `dcache_reduce.v`), not one per partner. Change partners only across a
+  barrier. Rings are safe, because a minion only ever sends to its `next`. Tree ops keep one bit per level and are safe.
+  `sys_emu` tracks every partner separately, so it will not catch this. On silicon it hangs the hart for good, the
+  firmware's abort cannot recover it, and the card then needs a reset. The lab admin asks to be pinged to power-cycle it.
+- **A blocked FCC wait cannot be interrupted either.** When credits cross shires, poll `fccnb` (CSR 0xCC0) with a bailout
+  before the blocking `csrw fcc`.
+- **Keep bulk traffic inside shires, or pull it with TensorLoad.** Messages are for small, latency-critical exchanges and
+  for in-network combines.
+
 ## Performance ladder (FOSDEM "Zero to matmul", 512x512 fp32)
 
 | Step | Result |

@@ -1,0 +1,290 @@
+{
+  "idle_w": 35.125,
+  "idle_samples": 78,
+  "info": {
+    "freqs": [
+      "ASIC Frequency Minion Shire: 600 Mhz",
+      "ASIC Frequency NOC: 400 Mhz",
+      "ASIC Frequency DDR: 933 Mhz",
+      "ASIC Frequency PCIE Shire: 1009 Mhz",
+      "ASIC Frequency IO Shire: 1000 Mhz",
+      "ASIC Frequency Mem Shire: 933 Mhz"
+    ],
+    "temp_before": [
+      "PMIC SYS Temperature Output: 80 c",
+      "IOSHIRE Current Temperature Output: 80 c",
+      "IOSHIRE Low Temperature Output: 75 c",
+      "IOSHIRE High Temperature Output: 83 c",
+      "MINSHIRE Current Temperature Output: 80 c",
+      "MINSHIRE Low Temperature Output: 73 c",
+      "MINSHIRE High Temperature Output: 87 c"
+    ],
+    "temp_after": [
+      "PMIC SYS Temperature Output: 79 c",
+      "IOSHIRE Current Temperature Output: 79 c",
+      "IOSHIRE Low Temperature Output: 75 c",
+      "IOSHIRE High Temperature Output: 83 c",
+      "MINSHIRE Current Temperature Output: 79 c",
+      "MINSHIRE Low Temperature Output: 73 c",
+      "MINSHIRE High Temperature Output: 87 c"
+    ]
+  },
+  "results": {
+    "spin": {
+      "what": "no messages: hart 0 of every minion in an integer loop",
+      "args": [
+        "--test",
+        "spin"
+      ],
+      "launches": 9,
+      "seconds": 4.162526,
+      "bytes": 0,
+      "gb_per_s": 0.0,
+      "gb_per_s_kernel": 0.0,
+      "ghz": 0.5994666666666667,
+      "power_samples": 35,
+      "mean_w": 38.15342857142857,
+      "mean_mhz": 600.0,
+      "mhz_values": [
+        600.0
+      ],
+      "mean_minion_mv": 518.0,
+      "min_w": 37.99,
+      "max_w": 38.33,
+      "above_idle_w": 3.02842857142857,
+      "pj_per_byte_vs_idle": null
+    },
+    "pair": {
+      "what": "1 KB messages between the two minions of each pair, inside a neighbourhood",
+      "args": [
+        "--test",
+        "shift",
+        "--rings",
+        "pair",
+        "--count",
+        "32"
+      ],
+      "launches": 13,
+      "seconds": 4.255133,
+      "bytes": 12730378485760,
+      "gb_per_s": 2991.769819124338,
+      "gb_per_s_kernel": 2991.915,
+      "ghz": 0.5991923076923077,
+      "power_samples": 36,
+      "mean_w": 37.62361111111111,
+      "mean_mhz": 600.0,
+      "mhz_values": [
+        600.0
+      ],
+      "mean_minion_mv": 518.0,
+      "min_w": 35.55,
+      "max_w": 37.81,
+      "above_idle_w": 2.49861111111111,
+      "pj_per_byte_vs_idle": 0.8351615472350842,
+      "pj_per_byte_vs_spin": -0.1770916522155881
+    },
+    "neigh": {
+      "what": "1 KB messages around rings of 8 (a neighbourhood)",
+      "args": [
+        "--test",
+        "shift",
+        "--rings",
+        "neigh",
+        "--count",
+        "32"
+      ],
+      "launches": 10,
+      "seconds": 4.228927,
+      "bytes": 4741083955200,
+      "gb_per_s": 1121.1080151537258,
+      "gb_per_s_kernel": 1121.1782,
+      "ghz": 0.59941,
+      "power_samples": 37,
+      "mean_w": 37.89,
+      "mean_mhz": 600.0,
+      "mhz_values": [
+        600.0
+      ],
+      "mean_minion_mv": 518.0,
+      "min_w": 35.68,
+      "max_w": 38.04,
+      "above_idle_w": 2.7650000000000006,
+      "pj_per_byte_vs_idle": 2.4663100813001186,
+      "pj_per_byte_vs_spin": -0.23497162438219513
+    },
+    "shire": {
+      "what": "1 KB messages around rings of 32 (a shire)",
+      "args": [
+        "--test",
+        "shift",
+        "--rings",
+        "shire",
+        "--count",
+        "32"
+      ],
+      "launches": 10,
+      "seconds": 4.211589,
+      "bytes": 4728679301120,
+      "gb_per_s": 1122.7779588938997,
+      "gb_per_s_kernel": 1122.8582000000001,
+      "ghz": 0.59945,
+      "power_samples": 37,
+      "mean_w": 37.88135135135135,
+      "mean_mhz": 600.0,
+      "mhz_values": [
+        600.0
+      ],
+      "mean_minion_mv": 518.0,
+      "min_w": 36.66,
+      "max_w": 38.11,
+      "above_idle_w": 2.7563513513513485,
+      "pj_per_byte_vs_idle": 2.454938957001576,
+      "pj_per_byte_vs_spin": -0.24232504559072168
+    },
+    "xshire1": {
+      "what": "1 KB messages from each minion to the same minion of the next shire ID",
+      "args": [
+        "--test",
+        "shift",
+        "--rings",
+        "xshire:1",
+        "--count",
+        "32"
+      ],
+      "launches": 9,
+      "seconds": 4.373645,
+      "bytes": 540835577856,
+      "gb_per_s": 123.65785925835317,
+      "gb_per_s_kernel": 123.70211111111111,
+      "ghz": 0.5995111111111111,
+      "power_samples": 38,
+      "mean_w": 37.24131578947368,
+      "mean_mhz": 600.0,
+      "mhz_values": [
+        600.0
+      ],
+      "mean_minion_mv": 518.0,
+      "min_w": 37.17,
+      "max_w": 37.35,
+      "above_idle_w": 2.1163157894736813,
+      "pj_per_byte_vs_idle": 17.114284544196675,
+      "pj_per_byte_vs_spin": -7.3761003742532045
+    },
+    "xshire16": {
+      "what": "1 KB messages between shires s and s+16",
+      "args": [
+        "--test",
+        "shift",
+        "--rings",
+        "xshire:16",
+        "--count",
+        "32"
+      ],
+      "launches": 9,
+      "seconds": 4.343451,
+      "bytes": 676211982336,
+      "gb_per_s": 155.6854175023501,
+      "gb_per_s_kernel": 155.73988888888888,
+      "ghz": 0.5995555555555556,
+      "power_samples": 31,
+      "mean_w": 37.528387096774196,
+      "mean_mhz": 600.0,
+      "mhz_values": [
+        600.0
+      ],
+      "mean_minion_mv": 518.0,
+      "min_w": 35.61,
+      "max_w": 37.84,
+      "above_idle_w": 2.403387096774196,
+      "pj_per_byte_vs_idle": 15.437458018429481,
+      "pj_per_byte_vs_spin": -4.014772126265061
+    },
+    "xshire8": {
+      "what": "1 KB messages around rings of 4 shires, 8 IDs apart",
+      "args": [
+        "--test",
+        "shift",
+        "--rings",
+        "xshire:8",
+        "--count",
+        "32"
+      ],
+      "launches": 9,
+      "seconds": 4.343096,
+      "bytes": 650004922368,
+      "gb_per_s": 149.66395455407846,
+      "gb_per_s_kernel": 149.7101111111111,
+      "ghz": 0.5995222222222223,
+      "power_samples": 38,
+      "mean_w": 37.13842105263158,
+      "mean_mhz": 600.0,
+      "mhz_values": [
+        600.0
+      ],
+      "mean_minion_mv": 518.0,
+      "min_w": 35.54,
+      "max_w": 37.79,
+      "above_idle_w": 2.0134210526315783,
+      "pj_per_byte_vs_idle": 13.452945691770184,
+      "pj_per_byte_vs_spin": -6.781910325844267
+    },
+    "shire-c4": {
+      "what": "128 B messages around rings of 32 (a shire)",
+      "args": [
+        "--test",
+        "shift",
+        "--rings",
+        "shire",
+        "--count",
+        "4"
+      ],
+      "launches": 13,
+      "seconds": 4.02619,
+      "bytes": 2226877366272,
+      "gb_per_s": 553.0979328526473,
+      "gb_per_s_kernel": 553.197,
+      "ghz": 0.5991846153846154,
+      "power_samples": 35,
+      "mean_w": 37.28028571428571,
+      "mean_mhz": 600.0,
+      "mhz_values": [
+        600.0
+      ],
+      "mean_minion_mv": 518.0,
+      "min_w": 36.08,
+      "max_w": 37.46,
+      "above_idle_w": 2.1552857142857107,
+      "pj_per_byte_vs_idle": 3.8967524307488377,
+      "pj_per_byte_vs_spin": -1.5786406082545898
+    },
+    "xshire1-c4": {
+      "what": "128 B messages from each minion to the same minion of the next shire ID",
+      "args": [
+        "--test",
+        "shift",
+        "--rings",
+        "xshire:1",
+        "--count",
+        "4"
+      ],
+      "launches": 10,
+      "seconds": 4.307721,
+      "bytes": 484172103680,
+      "gb_per_s": 112.39634685718968,
+      "gb_per_s_kernel": 112.4043,
+      "ghz": 0.59941,
+      "power_samples": 36,
+      "mean_w": 37.45194444444444,
+      "mean_mhz": 600.0,
+      "mhz_values": [
+        600.0
+      ],
+      "mean_minion_mv": 518.0,
+      "min_w": 35.13,
+      "max_w": 37.61,
+      "above_idle_w": 2.326944444444443,
+      "pj_per_byte_vs_idle": 20.70302558321623,
+      "pj_per_byte_vs_spin": -6.2411648296312485
+    }
+  }
+}
