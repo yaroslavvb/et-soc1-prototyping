@@ -149,6 +149,26 @@ def same_distances(la, lb, shires):
     return all(hops(i, j, la) == hops(i, j, lb) for i in shires for j in shires if i < j)
 
 
+def one_hop_ring(layout=MARTY):
+    """A cycle through every compute shire in which each step is one mesh hop (depth-first search that tries
+    the neighbour with the fewest free neighbours first). Returns the shire order starting at shire 0."""
+    nbr = {s: [t for t in layout if t != s and hops(s, t, layout) == 1] for s in layout}
+
+    def dfs(path, seen):
+        if len(path) == len(layout):
+            return path if hops(path[-1], path[0], layout) == 1 else None
+        for t in sorted(nbr[path[-1]], key=lambda u: len([v for v in nbr[u] if v not in seen])):
+            if t not in seen:
+                seen.add(t)
+                found = dfs(path + [t], seen)
+                if found:
+                    return found
+                seen.discard(t)
+        return None
+
+    return dfs([0], {0})
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("data_dir")
@@ -182,6 +202,17 @@ def main():
             a, b, r2, worst = fit_line(xs, ys)
             print(f"scratchpad loads from shire {src:2d}: {a:6.1f} + {b:5.2f} x hops  (r2 {r2:.4f}, worst {worst:.1f} cycles)")
             data["scp_rows"][str(src)] = {"a": a, "b": b, "r2": r2, "points": [[hops(src, t), row[t], t] for t in row if t != src]}
+        # Rows 0 and 7 ran at 600 MHz and row 31 at 800 MHz (its per-hop slope is 16/12 of theirs). If a load costs
+        # c minion cycles + (t0 + t_hop * hops) ns of fixed-time mesh transit, then per clock f (GHz):
+        # a(f) = c + t0 * f and b(f) = t_hop * f. Two clocks give c, t0 and t_hop.
+        fast, slow = data["scp_rows"].get("31"), data["scp_rows"].get("0")
+        if fast and slow:
+            f_slow, f_fast = 0.6, 0.6 * fast["b"] / slow["b"]
+            t_hop = slow["b"] / f_slow
+            t0 = (fast["a"] - slow["a"]) / (f_fast - f_slow)
+            c = slow["a"] - t0 * f_slow
+            print(f"scratchpad load = {c:.1f} minion cycles + ({t0:.1f} ns + {t_hop:.2f} ns x hops) of mesh time "
+                  f"(row 31 ran at {f_fast * 1000:.0f} MHz)")
 
     # Round trips by distance class: pingpong, credits, flags.
     classes = {}
@@ -223,6 +254,7 @@ def main():
         for (i, j), v in lat.items():
             by_h.setdefault(hops(i, j), []).append(v)
         print("  by hops: " + ", ".join(f"{h}: {statistics.median(v):.1f} (n={len(v)})" for h, v in sorted(by_h.items())))
+        print(f"  range {min(ys) / ghz:.0f}-{max(ys) / ghz:.0f} ns, median {statistics.median(ys) / ghz:.0f} ns")
         matrices[name] = {"ghz": ghz, "a": a, "b": b, "r2": r2, "worst": worst,
                           "pairs": [[i, j, v] for (i, j), v in sorted(lat.items())]}
         if args.search and name == "matrix-pingpong":
@@ -266,6 +298,9 @@ def main():
             a, b, r2, _ = fit_line([q["count"] for q in pts], [q["cycles"] for q in pts])
             print(f"  {key:10s} " + " ".join(f"{q['bytes']}B:{q['cycles']:.0f}" for q in pts)
                   + f"   fit {a:.1f} + {b:.2f} x COUNT (r2 {r2:.4f})")
+            if mode == "stream":
+                print(f"  {'':10s} one link: " + " ".join(f"{q['bytes']}B:{q['bytes'] / q['cycles'] * q['ghz']:.2f}GB/s"
+                                                        for q in pts if q["bytes"] in (1024, 4064)))
     data["sizes"] = sizes
 
     # Combine functions.
@@ -345,6 +380,15 @@ def main():
             loaded.setdefault(name, []).append([r["a_shire"], r["b_shire"], hops(r["a_shire"], r["b_shire"]),
                                                 r["count"], r["cycles_per_iter"]])
     data["loaded"] = loaded
+    if loaded.get("isolated-pairs") and loaded.get("loaded-pairs"):
+        iso = {(a, b, c): v for a, b, h, c, v in loaded["isolated-pairs"]}
+        worst = max(abs(v / iso[(a, b, c)] - 1) for a, b, h, c, v in loaded["loaded-pairs"] if (a, b, c) in iso)
+        print(f"\n16 cross-shire pairs at once vs one at a time: worst change {worst * 100:.1f}%")
+
+    ring = one_hop_ring()
+    print("one-hop ring through all 32 shires: " + " ".join(map(str, ring)))
+    print(f"shire-ID order 0..31 instead: {sum(hops(s_, s_ + 1) for s_ in range(31))} hops over 31 steps, "
+          f"up to {max(hops(s_, s_ + 1) for s_ in range(31))}")
 
     if args.embed:
         html = open(args.embed).read()

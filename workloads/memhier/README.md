@@ -33,8 +33,16 @@ Build on the lab machine:
 scripts/deploy-lab.sh aifoundry2 workloads/memhier
 ```
 
-Latency sweeps hold the card for about 3-6 s each, and their outputs are checked: the chase's final pointer
-must equal a host-side walk of the same chain.
+`run_lab.sh` reproduces every file in `docs/reports/data/2026-09-18-memhier-aifoundry2/`: the latency sweeps, the
+scratchpad map, the clock poll and the two energy runs. Each probe runs as its own `timeout 10` process, and the script
+waits for the card to be free before each one.
+
+```bash
+ssh aifoundry2 'cd ~/nekko && bash workloads/memhier/run_lab.sh build/memhier/host/memhier_host build/memhier-data'
+```
+
+Single probes look like this. Latency sweeps hold the card for about 3-6 s each, and their outputs are checked: the
+chase's final pointer must equal a host-side walk of the same chain.
 
 ```bash
 ssh aifoundry2 'cd ~/nekko/build/memhier && timeout 10 host/memhier_host --test chase > chase-dram.jsonl'

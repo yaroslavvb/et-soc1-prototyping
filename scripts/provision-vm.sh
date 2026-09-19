@@ -3,7 +3,7 @@
 # for ET-SOC1 development, following the "Local Build Instructions" in
 # external/et-platform/README.md:
 #   1. apt build dependencies
-#   2. ET RISC-V GNU toolchain (aifoundry-org/riscv-gnu-toolchain, branch `et`)
+#   2. ET RISC-V GNU toolchain (aifoundry-org/riscv-gnu-toolchain, branch `et`, pinned below)
 #      built from source -> /opt/et  (the prebuilt release tarball is x86_64-only)
 #   3. et-platform superbuild -> /opt/et (sysemu simulator, runtime, firmware, ...)
 #
@@ -17,6 +17,9 @@ SRC_DIR="${SRC_DIR:-$HOME/src}"          # VM-local disk (ext4, case-sensitive)
 BUILD_DIR="${BUILD_DIR:-$HOME/build}"    # VM-local disk
 JOBS="${JOBS:-$(nproc)}"
 STAGE="${1:-all}"
+# The toolchain commit the results in this repo were built with (GCC 15.2.0); its submodules follow it.
+# TOOLCHAIN_REF=et builds the branch tip instead.
+TOOLCHAIN_REF="${TOOLCHAIN_REF:-b4f9cd542b162d1c0308ff9216ab7c2d09b89116}"
 
 log() { printf '\n=== [%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
 
@@ -48,7 +51,8 @@ build_toolchain() {
   log "Building ET RISC-V GNU toolchain (rv64imfc / lp64f) -> $ET_PREFIX"
   mkdir -p "$SRC_DIR"
   if [[ ! -d "$SRC_DIR/riscv-gnu-toolchain" ]]; then
-    git clone https://github.com/aifoundry-org/riscv-gnu-toolchain "$SRC_DIR/riscv-gnu-toolchain"
+    git clone -b et https://github.com/aifoundry-org/riscv-gnu-toolchain "$SRC_DIR/riscv-gnu-toolchain"
+    git -C "$SRC_DIR/riscv-gnu-toolchain" -c advice.detachedHead=false checkout -q "$TOOLCHAIN_REF"
   fi
   cd "$SRC_DIR/riscv-gnu-toolchain"
   if [[ ! -f Makefile ]]; then

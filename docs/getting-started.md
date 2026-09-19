@@ -80,6 +80,16 @@ RISC-V GCC 15.1 and `sys_emu`. That is older than the gp-sdk that upstream docum
 Only one process at a time can open a card's management node (`/dev/et0_mgmt`). While someone runs `et-powertop`,
 `dev_mngt_service`, et-testdrive and the power logger all fail with "Device or resource busy".
 
+**Lab norms from the AI Foundry Discord** (#community-lab, read on 2026-09-18):
+
+- People claim a machine by posting "using aifoundry2" there, and "released" when they are done.
+- **Don't reset a card yourself.** On 2026-07-17 the lab admin, Afonso Oliveira, asked people not to reset the
+  ET-SoC-1 cards, because a software reset can hang one. If a card hangs, ping him and he will power-cycle it. We
+  reset aifoundry2 twice on 2026-09-18 with `dev_mngt_service -m DM_CMD_RESET_ETSOC -n 0`, both times with the user's
+  approval and before we had seen his request. It worked both times, but ask him first.
+- You can tell a card is wedged when every launch fails with `KernelLaunchCmIfaceMulticastFailed`, or with "Couldn't use
+  the HPSQ. Perhaps the Master Minion is hanged?".
+
 ## 3. Hello world
 
 On a lab machine, with nothing to build:
@@ -151,7 +161,8 @@ is space `16732875-c03e-434d-a643-7a432586c7f7`.
 ## 6. What is already on the lab machines
 
 - **aifoundry2** (`~yaroslavvb`):
-  - `~/nekko`: the deployed copy, built. The 18 Sep run is in `build/mmbench-power`.
+  - `~/nekko`: the deployed copy, built. The 18 Sep runs are in `build/mmbench-power`, `build/memhier` (chases),
+    `build/memhier-energy*` and `build/nocbench-data`. The outputs the reports use are committed under `docs/reports/data/`.
   - `~/et-testdrive`: built.
   - `~/et-hello`: scratch from the first session, superseded by `~/nekko`. Safe to delete.
 - **aifoundry3:** the `workloads/sgemm` build. See [workloads/sgemm/README.md](../workloads/sgemm/README.md).
@@ -169,3 +180,54 @@ Home directories are local to each machine.
   pattern. Kill by PID instead.
 - **The Mac has no `timeout` by default.** Run capped commands on the lab machine.
 - **Board power creeps up as the chip warms,** by about 3 W over 12 s. Compare runs of the same length.
+- **A hung transfer outlives the kernel abort.** If a TensorSend, TensorRecv or blocking credit wait (`csrw fcc`)
+  never completes, the stalled hart ignores the firmware's abort. The card then refuses launches until it is
+  power-cycled. Every wait must have a partner that answers it. When credits cross shires, poll `fccnb` with a
+  bailout first, as `workloads/nocbench` does.
+- **TensorSend has one "ready" bit per minion.** A minion must never have two partners that could both be ready at
+  once. Change partners only across a barrier. `sys_emu` tracks each partner separately, so a schedule that passes
+  on the simulator can still hang silicon. See `docs/et-soc1-notes.md`, "On-chip communication".
+
+## 8. Reproducing each report
+
+Each report is one HTML file in `docs/reports/`, with its raw measurements in `docs/reports/data/`. The charts read
+JSON that an analysis script embeds in the page. The prose and tables are written by hand from the script's
+printout. On 2026-09-18, each script regenerated its committed page byte for byte from the committed data. The
+GPU and A100 columns come from the sourced notes in `docs/reports/sources/`, not from our measurements.
+
+| Report | Code | Measure (on a lab machine) | Raw data | Regenerate the page |
+|---|---|---|---|---|
+| Matmul efficiency | `kernels/mmbench`, `launchers/mmbench` | section 4 | `docs/reports/data/2026-09-18-aifoundry2` | `scripts/mmbench-report-data.py DATA --embed HTML` |
+| Memory hierarchy | `workloads/memhier` | `workloads/memhier/README.md`: the chases, then `run_energy.py` | `docs/reports/data/2026-09-18-memhier-aifoundry2` | `python3 workloads/memhier/analyze.py DATA --embed HTML` |
+| On-chip communication | `workloads/nocbench` | `run_lab.sh`, then `run_energy.py` twice, the second time with `--only` in reverse order | `docs/reports/data/2026-09-18-nocbench-aifoundry2` | `python3 workloads/nocbench/analyze.py DATA --memhier docs/reports/data/2026-09-18-memhier-aifoundry2 --search --embed HTML` |
+| Sparsity | `workloads/sparsity` | `workloads/sparsity/README.md` | `docs/reports/data/2026-09-18-sparsity-aifoundry3` | `workloads/sparsity/README.md` |
+
+- **Measuring.** Build on the machine with `scripts/deploy-lab.sh aifoundry2 workloads/<name>`, or
+  `scripts/deploy-lab-gpsdk.sh` for `kernels/`. Follow the etiquette above, then copy the outputs back into a new
+  dated directory under `docs/reports/data/`. The runs print JSON lines that the analysis scripts read.
+  Workloads also run on the simulator with `--sysemu` (small sizes), which checks correctness but not speed.
+- **Analysis.** You need Python 3. The on-chip communication analysis also needs numpy. It prints every number
+  the page quotes, including the one-hop ring and the mesh-time decomposition.
+- **Publishing.** The spaces are private. Update one in place with its uuid, which is in the README. You can use the
+  CLI (section 5) or the spacesheep MCP: `stage_begin`, then `curl -X PUT` the file, then `deploy` with the uuid.
+  Afterwards check that the visibility is still private.
+- **What will differ.** Another card can have a different shire map if a different shire is fused off. It can
+  also run at another clock: the governor moves between 600 and 850 MHz, and time on the mesh is fixed in ns. And
+  it can idle at a different power, depending on its temperature and on other users. All of our runs are timestamped,
+  and those at 600 MHz say so in the data.
+
+## 9. Upstream versions
+
+| Component | Version used | Pinned in |
+|---|---|---|
+| et-platform: firmware, runtime, `sys_emu`, gp-sdk | `836a4ab` plus `patches/et-platform-*.patch` | `scripts/clone-upstream.sh`; built by `scripts/provision-vm.sh` |
+| RISC-V GCC 15.2 (aifoundry-org/riscv-gnu-toolchain, branch `et`) | `b4f9cd5` | `scripts/provision-vm.sh` (`TOOLCHAIN_REF`) |
+| et-man: PRM, datasheet, errata | `5fe80a3` | `scripts/clone-upstream.sh` |
+| core-et, branch erbium: RTL and design docs | `b38a1a3` | `scripts/clone-upstream.sh` |
+| et-testdrive | `c2035c5` | `scripts/clone-upstream.sh` |
+| etTopoScan | `ee3e9f2` | `scripts/clone-upstream.sh` |
+| gp-sdk on the lab machines | `06605ab` plus `patches/lab-gp-sdk-06605ab.patch` | `scripts/deploy-lab-gpsdk.sh` |
+| `/opt/et` on aifoundry1-3 | et-platform `353f20e` (Dec 2025): runtime 0.19.0, GCC 15.1 | installed by the lab |
+
+`UPSTREAM_LATEST=1 scripts/clone-upstream.sh` and `TOOLCHAIN_REF=et scripts/provision-vm.sh` build the branch tips
+instead of the pins.

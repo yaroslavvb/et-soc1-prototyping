@@ -6,7 +6,8 @@ A workspace for prototyping on AINekko / AI Foundry's **ET platform**, the open-
 
 **New machine? Start with [docs/getting-started.md](docs/getting-started.md).** It covers the current status,
 cloning, connecting to the lab machines over Tailscale, the hello worlds, rerunning the benchmark, and
-republishing the reports.
+republishing the reports. Its section 8 shows how to regenerate every report from the raw data committed here, and
+section 9 lists the pinned upstream versions.
 
 - `docs/et-soc1-notes.md` is a condensed guide: architecture, programming model, the memory-coherency trap,
   the FOSDEM "zero to matmul" optimization ladder, silicon errata, and simulator flags.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The latency, size and collective probes behind the report, run on a lab machine:
 #   ssh aifoundry2 'cd ~/nekko && bash workloads/nocbench/run_lab.sh build/nocbench/host/nocbench_host OUTDIR [GROUP...]'
-# Groups: classes counts stream functs matrix sync allreduce barrier xallreduce (default: all, in that order).
+# Groups: classes counts stream functs matrix sync allreduce barrier xallreduce loaded (default: all, in that order).
 # Each command is its own `timeout 10` process with --budget 8, and the script waits for the card to be
 # free (no other process holding the et_soc1 driver) before each one, with a pause in between.
 # A background loop logs board power and the minion clock (OUTDIR/clock.csv) from the service processor,
@@ -11,7 +11,7 @@ bin=${1:?usage: $0 <nocbench_host> <outdir> [group...]}
 out=${2:?usage: $0 <nocbench_host> <outdir> [group...]}
 shift 2
 groups=("$@")
-[[ ${#groups[@]} -gt 0 ]] || groups=(classes counts stream functs matrix sync allreduce barrier xallreduce)
+[[ ${#groups[@]} -gt 0 ]] || groups=(classes counts stream functs matrix sync allreduce barrier xallreduce loaded)
 mkdir -p "$out"
 
 # Minion 0.0 to: its neighbourhood, where 0-1, 0-2 and 0-4 are fast-local-network pairs and 0-3, 0-5, 0-6,
@@ -19,6 +19,8 @@ mkdir -p "$out"
 # shires 1, 3, 7 and 10 mesh hops away (marty1885's layout).
 CLASSES=0.0-0.1,0.0-0.2,0.0-0.4,0.0-0.3,0.0-0.5,0.0-0.6,0.0-0.7,0.1-0.2,0.0-0.8,0.0-0.16,0.0-0.24,0.0-0.31,0.0-8.0,0.0-24.0,0.0-1.0,0.0-5.0,0.0-31.0
 SHORT=0.0-0.1,0.0-0.7,0.0-8.0,0.0-31.0
+LOADED=$(for s in $(seq 0 15); do printf '%s.0-%s.0,' $s $((s + 16)); done)
+LOADED=${LOADED%,}
 
 wait_free() {
   for _ in $(seq 60); do
@@ -112,6 +114,11 @@ for g in "${groups[@]}"; do
     run barrier-shire32 --test barrier --scope shire --iters 4000 --warmup 100
     run barrier-chip1 --test barrier --scope chip --per-shire 1 --iters 2000 --warmup 50
     run barrier-chip32 --test barrier --scope chip --iters 2000 --warmup 50
+    ;;
+  loaded)
+    # 16 cross-shire pairs (s, s+16) one at a time, then all at once: does traffic slow the mesh down?
+    run isolated-pairs --test pairs --pairs $LOADED --counts 1,32 --iters 2000 --warmup 50
+    run loaded-pairs --test pairs --concurrent --pairs $LOADED --counts 1,32 --iters 2000 --warmup 50
     ;;
   *)
     echo "unknown group $g" >&2
