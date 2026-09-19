@@ -10,3 +10,5 @@ clone() {  # url dir [branch]
 clone https://github.com/aifoundry-org/et-platform.git et-platform
 clone https://github.com/aifoundry-org/et-man.git et-man
 clone https://github.com/openhwfoundation/core-et.git core-et erbium
+# marty1885's minimal host + kernel project: the template for workloads/, and a quick hello world on a card.
+clone https://github.com/marty1885/et-testdrive.git et-testdrive

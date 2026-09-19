@@ -10,8 +10,9 @@ before building. It skips any patch that is already applied.
 
 `lab-gp-sdk-06605ab.patch` is **not** applied by `provision-vm.sh`: it targets an older gp-sdk, for lab
 machines whose `/opt/et` predates current upstream. aifoundry2's install is et-platform `353f20e` (2025-12-30).
-Export gp-sdk at `06605ab`, the last version before it required the Erbium components that install lacks,
-apply the patch with `patch -p1` from the export's parent directory, and point `GP_SDK` at the result.
+`scripts/deploy-lab-gpsdk.sh <host>` handles it. It exports gp-sdk at `06605ab`, the last version before gp-sdk
+required the Erbium components that install lacks, applies this patch, installs the result where the Makefile
+expects gp-sdk on the host, and builds.
 
 | Patch | Why |
 |---|---|

@@ -3,6 +3,8 @@
 This workspace is for prototyping workloads on AINekko/AI Foundry's ET platform (the Esperanto ET-SoC-1:
 1088 RV64 "minion" cores with vector and tensor extensions). They run first on the `sys_emu` simulator,
 then on real cards in the AI Foundry lab. Read `docs/et-soc1-notes.md` before writing kernels.
+`docs/getting-started.md` has the current status, next steps, and how to resume on a new machine. Claude Code's memory
+is per-machine, so keep that page up to date when the state of the work changes.
 
 ## Environment
 - The host is macOS/arm64. All ET tooling runs in the Lima VM `et` (Ubuntu 24.04 arm64). The repo is mounted
@@ -30,6 +32,9 @@ then on real cards in the AI Foundry lab. Read `docs/et-soc1-notes.md` before wr
 - Workloads that must run there live in `workloads/<name>/`. They are standalone, in the et-testdrive style, using only the runtime API
   and `et-common-libs`, and they build against either install. `scripts/deploy-lab.sh <host> workloads/<name>` copies the sources
   and builds them on the machine. The kernel is built there too, with the lab toolchain.
+- gp-sdk kernels and launchers (`kernels/`, `launchers/`) also run there. `scripts/deploy-lab-gpsdk.sh <host>` installs gp-sdk
+  pinned to `06605ab` plus `patches/lab-gp-sdk-06605ab.patch` at `~/nekko/external/et-platform/gp-sdk` and builds with `nice -j4`.
+  Then run `make mmbench-check DEVICE=silicon` and `make bench-power` in `~/nekko`. Without the patch, kernels fault at PC 0x40.
 - **Etiquette. The cards are shared, and the user set these rules:**
   - Ask which machine to use, and stay off machines other sessions are using.
   - Check `uptime`/`ps` for other users before touching a card.

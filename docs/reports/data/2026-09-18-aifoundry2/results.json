@@ -1,0 +1,120 @@
+{
+  "idle_w": 30.61,
+  "idle_samples": 53,
+  "info": {
+    "freqs": [
+      "ASIC Frequency Minion Shire: 600 Mhz",
+      "ASIC Frequency NOC: 400 Mhz",
+      "ASIC Frequency DDR: 933 Mhz",
+      "ASIC Frequency PCIE Shire: 1009 Mhz",
+      "ASIC Frequency IO Shire: 1000 Mhz",
+      "ASIC Frequency Mem Shire: 933 Mhz"
+    ],
+    "temp_before": [
+      "PMIC SYS Temperature Output: 71 c",
+      "IOSHIRE Current Temperature Output: 72 c",
+      "IOSHIRE Low Temperature Output: 43 c",
+      "IOSHIRE High Temperature Output: 77 c",
+      "MINSHIRE Current Temperature Output: 71 c",
+      "MINSHIRE Low Temperature Output: 41 c",
+      "MINSHIRE High Temperature Output: 78 c"
+    ],
+    "temp_after": [
+      "PMIC SYS Temperature Output: 77 c",
+      "IOSHIRE Current Temperature Output: 78 c",
+      "IOSHIRE Low Temperature Output: 43 c",
+      "IOSHIRE High Temperature Output: 82 c",
+      "MINSHIRE Current Temperature Output: 77 c",
+      "MINSHIRE Low Temperature Output: 41 c",
+      "MINSHIRE High Temperature Output: 85 c"
+    ]
+  },
+  "results": [
+    {
+      "workload": "fp32-tensor-L2",
+      "mode": "fp32",
+      "private_pools": false,
+      "ntiles": 16,
+      "launches": 11,
+      "iters": 79891,
+      "busy_s": 12.401783,
+      "tflops": 9.510784860531748,
+      "flop_per_minion_cycle": 15.486,
+      "implied_ghz": 0.5997818181818182,
+      "check": [
+        "exact"
+      ],
+      "power_samples": 99,
+      "mean_w": 56.573232323232325,
+      "min_w": 54.67,
+      "max_w": 57.88,
+      "gflops_per_w": 168.11457415393352,
+      "gflops_per_w_above_idle": 366.31744237874966
+    },
+    {
+      "workload": "fp16-tensor-L2",
+      "mode": "fp16",
+      "private_pools": false,
+      "ntiles": 16,
+      "launches": 14,
+      "iters": 59918,
+      "busy_s": 11.839397,
+      "tflops": 19.019353772831504,
+      "flop_per_minion_cycle": 30.972,
+      "implied_ghz": 0.5996928571428571,
+      "check": [
+        "exact"
+      ],
+      "power_samples": 94,
+      "mean_w": 59.267978723404255,
+      "min_w": 57.64,
+      "max_w": 60.52,
+      "gflops_per_w": 320.9043767392894,
+      "gflops_per_w_above_idle": 663.66696536413
+    },
+    {
+      "workload": "int8-tensor-L2",
+      "mode": "int8",
+      "private_pools": false,
+      "ntiles": 16,
+      "launches": 5,
+      "iters": 321895,
+      "busy_s": 12.037222,
+      "tflops": 71.78404618607185,
+      "flop_per_minion_cycle": 116.8798,
+      "implied_ghz": 0.5999,
+      "check": [
+        "exact"
+      ],
+      "power_samples": 96,
+      "mean_w": 61.74979166666667,
+      "min_w": 60.0,
+      "max_w": 63.02,
+      "gflops_per_w": 1162.498597138131,
+      "gflops_per_w_above_idle": 2305.219217728823
+    },
+    {
+      "workload": "fp32-tensor-DRAM",
+      "mode": "fp32",
+      "private_pools": true,
+      "ntiles": 64,
+      "launches": 5,
+      "iters": 1328,
+      "busy_s": 11.489931,
+      "tflops": 0.3102562582838835,
+      "flop_per_minion_cycle": 0.5308,
+      "implied_ghz": 0.59988,
+      "check": [
+        "exact"
+      ],
+      "power_samples": 90,
+      "mean_w": 43.352555555555554,
+      "min_w": 42.5,
+      "max_w": 44.42,
+      "gflops_per_w": 7.156585218748995,
+      "gflops_per_w_above_idle": 24.348040464192177
+    }
+  ],
+  "shire_mask": "0xffffffff",
+  "device": "silicon"
+}
