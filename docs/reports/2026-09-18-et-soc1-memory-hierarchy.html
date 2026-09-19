@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ET-SoC-1 memory hierarchy</title>
+<meta name="description" content="Latency, bandwidth, capacity and energy per byte of every level of the ET-SoC-1 memory hierarchy, measured on a lab card, compared with published A100 numbers.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --code-bg: #f1f0ec;
+  --et: #2a78d6; --et2: #eb6834; --ref: #8c8b85;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+    --et: #3987e5; --et2: #d95926; --ref: #76756f;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+  --et: #3987e5; --et2: #d95926; --ref: #76756f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-text-size-adjust: 100%; }
+main { max-width: 940px; margin: 0 auto; padding: 28px 16px 72px; }
+h1 { font-size: 1.75rem; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; margin: 44px 0 10px; }
+h3 { font-size: 1rem; margin: 22px 0 8px; }
+.byline { color: var(--ink-2); font-size: 0.9rem; margin: 0 0 22px; }
+.lede { font-size: 1.05rem; }
+.muted { color: var(--ink-2); }
+.small { font-size: 0.85rem; color: var(--ink-2); }
+a { color: var(--et); }
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 18px 0 8px; }
+.kpi .label { font-size: 0.85rem; color: var(--ink-2); }
+.kpi .value { font-size: 1.9rem; font-weight: 600; line-height: 1.15; margin: 4px 0 2px; }
+.kpi .value .unit { font-size: 0.95rem; font-weight: 500; color: var(--ink-2); }
+.kpi .sub { font-size: 0.85rem; color: var(--ink-2); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.85rem; color: var(--ink-2); margin: 4px 0 10px; }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: 4px; margin-right: 6px; }
+.legend i.dot { width: 10px; height: 10px; border-radius: 50%; vertical-align: 0; }
+.chart { position: relative; width: 100%; }
+.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 300px; display: none; white-space: normal; }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.axis-line { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lab { fill: var(--ink-2); font-size: 12px; }
+.lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.s-et { stroke: var(--et); fill: none; stroke-width: 2; stroke-linejoin: round; }
+.s-et2 { stroke: var(--et2); fill: none; stroke-width: 2; stroke-linejoin: round; }
+.s-ref { stroke: var(--ref); fill: none; stroke-width: 2; stroke-linecap: round; }
+.d-et { fill: var(--et); stroke: var(--surface); stroke-width: 2; }
+.d-et2 { fill: var(--et2); stroke: var(--surface); stroke-width: 2; }
+.d-ref { fill: var(--ref); stroke: var(--surface); stroke-width: 2; }
+.conn { stroke: var(--axis); stroke-width: 2; }
+.cell { stroke: var(--surface); stroke-width: 2; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
+table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 0.86rem; }
+th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.lvl { font-weight: 600; white-space: nowrap; }
+td:nth-child(2) { min-width: 170px; }
+td:last-child { min-width: 240px; }
+ol li, ul li { margin: 5px 0; }
+.panels { display: grid; gap: 18px; }
+.chart-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<main>
+
+<h1>The ET-SoC-1 memory hierarchy, measured on silicon, next to the A100</h1>
+<p class="byline">Measured 18 Sep 2026 on <code>aifoundry2</code> in the AI Foundry lab: one ET-SoC-1 PCIe card, 32 GB LPDDR4X, 1,024 compute minions. A100 values are from published microbenchmarks and energy studies (sources at the end). Code: <code>workloads/memhier</code> in the <code>nekko</code> workspace.</p>
+
+<p class="lede">Pointer-chase and streaming probes give the card's memory hierarchy as a spec sheet. <b>ET-SoC-1's on-chip memories are fast and cheap per byte:</b> a load hits L1 in 8.8 ns and the shire's L2 in 78 ns, against 23 ns and 148 ns on an A100, at 7–9× less energy per byte. <b>They are also tiny per core:</b> the firmware leaves each hart only 512 B of L1 data cache. <b>Off chip the picture flips.</b> DRAM latency is about equal to the A100's HBM (~440 vs 405 ns), but the card streams 76 GB/s, about a twentieth of an A100, at roughly 1.4× the energy per byte.</p>
+
+<div class="kpis">
+  <div class="card kpi"><div class="label">L1 data cache hit</div><div class="value">8.8 <span class="unit">ns</span></div><div class="sub">5.25 cycles; 512 B per hart</div></div>
+  <div class="card kpi"><div class="label">L2 / local scratchpad hit</div><div class="value">78 <span class="unit">ns</span></div><div class="sub">47 cycles; 512 KB L2 + 2.5 MB scratchpad per shire</div></div>
+  <div class="card kpi"><div class="label">L3 hit (32 MB, over the mesh)</div><div class="value">~280 <span class="unit">ns</span></div><div class="sub">169 cycles at 600 MHz; 240–285 ns</div></div>
+  <div class="card kpi"><div class="label">DRAM</div><div class="value">~440 <span class="unit">ns</span></div><div class="sub">421–486 ns; 76 GB/s streaming</div></div>
+</div>
+
+<h2>Load latency against working-set size</h2>
+<p class="muted">One hart follows a random pointer chain over a working set of the given size, so every load waits for the one before it. Each step in the curve is a level of the hierarchy. The two ET lines are chains chased from two different shires. Gray segments are the A100's published pointer-chase plateaus. Latencies are in ns at 600 MHz for on-chip levels, whose latency in cycles is fixed; L3 and DRAM points use the clock actually measured during each run (the card's power governor varies it).</p>
+<div class="legend"><span><i style="background:var(--et)"></i>ET-SoC-1, chased from shire 0</span><span><i style="background:var(--et2)"></i>ET-SoC-1, from shire 24</span><span><i style="background:var(--ref)"></i>A100, published plateaus</span></div>
+<div class="card chart" id="lat"><div class="tip" id="lat-tip"></div></div>
+
+<h2>The hierarchy as a spec sheet</h2>
+<h3>ET-SoC-1 (measured)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Level</th><th>Capacity</th><th class="num">Latency</th><th class="num">Bandwidth, whole chip</th><th class="num">Energy per byte</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td class="lvl">L1 data cache</td><td>512 B per hart (2 sets × 4 ways × 64 B)</td><td class="num">5.25 cyc · 8.8 ns</td><td class="num">7.55 TB/s</td><td class="num">1.8 pJ</td><td>The firmware puts the L1 in scratchpad mode before every launch: sets 0–11 become a 3 KB tensor scratchpad. Hart 1 is the same size but pays +3 cycles on misses.</td></tr>
+<tr><td class="lvl">L2 read buffer</td><td>8 lines per bank × 4 banks = 2 KB</td><td class="num">36 cyc · 60 ns</td><td class="num">–</td><td class="num">–</td><td>A small clean-line cache in front of each L2 bank; spec: 10 vs 21 shire cycles.</td></tr>
+<tr><td class="lvl">L2 cache</td><td>512 KB per shire · 16 MB chip, private to each shire</td><td class="num">47 cyc · 78 ns</td><td class="num">2.80 TB/s</td><td class="num">4.3 pJ</td><td>About 144 B/cycle per shire at 600 MHz, 56% of the four banks' 256 B/cycle.</td></tr>
+<tr><td class="lvl">L2 scratchpad, local</td><td>2.5 MB per shire · 80 MB chip</td><td class="num">47 cyc · 78 ns</td><td class="num">2.57 TB/s</td><td class="num">2.8 pJ</td><td>Same SRAM and latency as L2, also cached in L1 and the read buffer, but a third cheaper per byte.</td></tr>
+<tr><td class="lvl">L2 scratchpad, remote</td><td>any other shire's 2.5 MB</td><td class="num">112–271 cyc · 186–452 ns</td><td class="num">0.98 TB/s</td><td class="num">6.3 pJ</td><td>12–16 cycles per mesh hop; latency is asymmetric between shire pairs.</td></tr>
+<tr><td class="lvl">L3</td><td>1 MB slice per shire · 32 MB chip, shared</td><td class="num">169 cyc · ~280 ns</td><td class="num">1.03 TB/s</td><td class="num">10.8 pJ</td><td>Lines are homed across all shires, so every L3 hit crosses the mesh.</td></tr>
+<tr><td class="lvl">DRAM</td><td>32 GB LPDDR4X, 16 × 16-bit channels at 933 MHz</td><td class="num">~440 ns (421–486)</td><td class="num">76 GB/s</td><td class="num">148 pJ</td><td>About 60% of the 128 GB/s the device reports. Energy is card power above idle, so a busy chip's ~11 W floor dominates.</td></tr>
+</tbody></table></div>
+
+<h3>A100 (published)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Level</th><th>Capacity</th><th class="num">Latency</th><th class="num">Bandwidth, measured</th><th class="num">Energy per byte</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td class="lvl">Registers</td><td>256 KB per SM · 27 MB</td><td class="num">4 cyc · 2.8 ns</td><td class="num">–</td><td class="num">–</td><td>Whitepaper; Abdelkhalik et al. 2022</td></tr>
+<tr><td class="lvl">L1 / shared memory</td><td>192 KB per SM · 20.25 MB (≤164 KB shared)</td><td class="num">33 cyc · 23 ns (shared 29 cyc · 21 ns)</td><td class="num">14.8 TB/s (19.5 peak)</td><td class="num">12.7 pJ</td><td>Luo et al. 2025; SC'25 Table 3</td></tr>
+<tr><td class="lvl">L2, near half</td><td>40 MB total, 2 × 20 MB</td><td class="num">208 cyc · 148 ns</td><td class="num">4.4 TB/s (7.2 peak)</td><td class="num">37.7 pJ</td><td>Luo et al. 2025; Chips and Cheese; SC'25</td></tr>
+<tr><td class="lvl">L2, far half</td><td>data past ~20 MB</td><td class="num">357 cyc · 253–313 ns</td><td class="num">–</td><td class="num">–</td><td>Luo et al. 2025; Chips and Cheese</td></tr>
+<tr><td class="lvl">HBM2 / HBM2e</td><td>40 GB / 80 GB</td><td class="num">570 cyc · 405 ns</td><td class="num">1.41 / 1.77 TB/s</td><td class="num">105 pJ</td><td>Luo et al.; Chips and Cheese; BabelStream; SC'25</td></tr>
+</tbody></table></div>
+<p class="small">A100 cycles are at the 1,410 MHz boost clock. Its energy per byte is the SC'25 whole-GPU incremental energy (1.6, 4.7 and 13.1 pJ/bit), which includes instruction and memory-controller overhead. That makes it the counterpart to ET's card power above idle, not a circuit-level figure: the HBM2e devices themselves are about 4.3 pJ/bit (34 pJ/B).</p>
+
+<h2>ET-SoC-1 against the A100, level by level</h2>
+<p class="muted">Each row puts the ET-SoC-1 value (blue) next to the A100's (gray) on a logarithmic scale. The ET scratchpad row is compared with the A100's shared memory, and ET's L3 with the far half of the A100's L2, the closest equivalents.</p>
+<div class="legend"><span><i class="dot" style="background:var(--et)"></i>ET-SoC-1, measured</span><span><i class="dot" style="background:var(--ref)"></i>A100, published</span></div>
+<div class="card"><div class="panels">
+  <div class="chart" id="cmp-lat"><div class="tip"></div></div>
+  <div class="chart" id="cmp-bw"><div class="tip"></div></div>
+  <div class="chart" id="cmp-en"><div class="tip"></div></div>
+</div></div>
+
+<h2>Scratchpad latency across the mesh</h2>
+<p class="muted">Any minion can load from any shire's 2.5 MB scratchpad. Each row is one requesting shire; each cell is the latency to one of the 32 shires' scratchpads (a 64 KB chain, so every load misses L1). Darker is slower. The diagonal cells are the local scratchpad at 47 cycles; remote ones cost 112–271 cycles, in steps of 12 or 16 cycles, which look like mesh hops.</p>
+<div class="card chart" id="heat"><div class="tip" id="heat-tip"></div></div>
+
+<h2>What the numbers say</h2>
+<ol>
+  <li><b>Kernels get only 512 B of L1 per hart.</b> Before every launch the firmware puts the L1 in scratchpad mode (PRM table 8.4), turning 3 KB of the 4 KB into the tensor unit's scratchpad. The chase's first knee sits exactly at 512 B. A user-mode kernel can switch to split mode, where hart 0 gets 2 KB, but the switch invalidates L1 lines without writing them back, so it was not tried on a shared card.</li>
+  <li><b>There is a 2 KB level between L1 and L2:</b> the L2's read buffer, an 8-entry fully associative cache per bank for clean lines. Working sets up to 2 KB hit it at 36 cycles, 11 fewer than the L2 array. That is the same 11-cycle difference the shire cache spec gives (10 vs 21 shire cycles).</li>
+  <li><b>The L2 scratchpad is the L2 without the tags.</b> It has the same 47-cycle latency and even goes through the read buffer and L1, but reading it at the same bandwidth costs 2.8 pJ/B instead of 4.3.</li>
+  <li><b>Distance on the mesh is visible.</b> A remote scratchpad load costs 186–452 ns depending on the pair of shires, in 12–16-cycle steps. Latency is also asymmetric: shire 0 → 31 is 220 cycles, 31 → 0 is 271. The L3 hides this by spreading lines over every shire, so all L3 hits pay an average trip of about 280 ns.</li>
+  <li><b>The card changes its clock under load.</b> It runs a "managed power" governor with a 65 W target. During the runs the telemetry showed the minion clock moving between 600 and 700 MHz (518–595 mV), and wall times imply up to about 850 MHz. On-chip latencies are fixed in cycles; L3 and DRAM, which cross into the mesh's 400 MHz and the DRAM's 933 MHz domains, are fixed in nanoseconds instead. That is why DRAM measured 287–368 cycles but a steadier 421–486 ns.</li>
+  <li><b>Most of the energy is being awake, not moving bytes.</b> Any kernel on all 1,024 minions adds 6–13 W over the 27 W idle, whatever it reads. So energy per byte is lowest where bandwidth is highest: 1.8 pJ/B from L1, 148 pJ/B from DRAM. Against a spin loop that touches no data, L1 reads add only 0.14 pJ/B.</li>
+</ol>
+
+<h2>How it was measured</h2>
+<ul>
+  <li><b>Latency.</b> One hart chases a random cyclic chain with one pointer per 64 B line, which no prefetcher can predict. After warm-up (two passes, capped at 2<sup>19</sup> loads), 40,000 dependent loads are timed with the minion cycle counter. Each chase's final pointer is checked against a host-side walk of the same chain, and every one of the ~230 chases passed. Chains up to 256 MB live in DRAM. Scratchpad chains are written into the target shire's scratchpad by the chasing hart.</li>
+  <li><b>Bandwidth.</b> Hart 0 of all 1,024 minions streams 1 KB TensorLoads (which bypass L1 but use L2), two in flight, over private slices sized to hit L2 (8 KB per minion, 256 KB per shire), L3 (24 MB in total) or DRAM (256 MB), or over the local or a remote scratchpad. L1 bandwidth uses 32 B vector loads by both harts of every minion over a private 256 B buffer. Throughput is bytes over wall time.</li>
+  <li><b>Energy.</b> Board power from the card's service processor, sampled about 7 times a second, averaged over each configuration's launch windows (about 4 s each) and compared with idle. The numbers are the mean of two complete runs, which agreed within 0–20% depending on the level (DRAM varied most).</li>
+  <li><b>Lab etiquette.</b> Every card run was its own process under <code>timeout 10</code>, and the card was checked for other users before each. One energy run crashed the host runtime during the DRAM stream, and the card's master firmware then refused kernel launches. A full chip reset through the management interface restored it, and the upstream hello-world test and these probes were re-verified afterwards.</li>
+</ul>
+
+<h2>Caveats</h2>
+<ul>
+  <li><b>The A100 column is not our measurement.</b> Latency and bandwidth come from several published microbenchmark studies, which agree within a few percent. The energy numbers come from a single study (SC'25). Their method is close to ours but not identical.</li>
+  <li><b>ET energy per byte is whole-card power above idle.</b> It includes the busy chip's floor, DRAM chips, regulators and PCIe, so it overstates the cost of the memory arrays themselves, most of all for DRAM.</li>
+  <li><b>The clock was not pinned.</b> The card's own governor was left in charge (it is a shared machine), so bandwidth and power are averages over whatever clock it chose. Some per-hart cycle counters in the two-hart tests also read high, probably erratum 1.23 (simultaneous PMU reads by both harts), so bandwidth uses wall time only.</li>
+  <li><b>Peak-rate microbenchmarks.</b> Real kernels mix levels, and bank conflicts, the mesh, and the DRAM controller's page policy will change the picture.</li>
+</ul>
+
+<h2>Reproduce</h2>
+<pre><code># on a Mac with the nekko workspace, build on the lab machine
+scripts/deploy-lab.sh aifoundry2 workloads/memhier
+
+# latency (each command holds the card for a few seconds)
+ssh aifoundry2 'cd ~/nekko/build/memhier && timeout 10 host/memhier_host --test chase'
+ssh aifoundry2 'cd ~/nekko/build/memhier && timeout 10 host/memhier_host --test chase --where scp --scp-shire all --sizes 64K'
+
+# bandwidth and energy (quit et-powertop first; every configuration runs under timeout 10)
+ssh aifoundry2 'cd ~/nekko && python3 workloads/memhier/run_energy.py --host-bin build/memhier/host/memhier_host --out build/memhier-energy'
+
+# numbers and chart data for this page
+python3 workloads/memhier/analyze.py docs/reports/data/2026-09-18-memhier-aifoundry2 --embed docs/reports/2026-09-18-et-soc1-memory-hierarchy.html</code></pre>
+
+<h2>Sources</h2>
+<ul class="small">
+  <li>ET-SoC-1: ET Programmer's Reference Manual (aifoundry-org/et-man): table 8.4 (L1 modes) and §15.3 (scratchpad addressing); CORE-ET Shire Cache Specification (openhwfoundation/core-et, erbium): latency table and read buffer; et-platform <code>353f20e</code> firmware (<code>init_l1</code>, <code>system/layout.h</code>).</li>
+  <li><a href="https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf">NVIDIA A100 Tensor Core GPU architecture whitepaper</a> and <a href="https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/a100/pdf/nvidia-a100-datasheet-us-nvidia-1758950-r4-web.pdf">datasheet</a>.</li>
+  <li>Abdelkhalik et al., <a href="https://arxiv.org/abs/2208.11174">Demystifying the Nvidia Ampere Architecture through Microbenchmarking</a>, 2022.</li>
+  <li>Luo et al., <a href="https://arxiv.org/abs/2501.12084">Dissecting the NVIDIA Hopper Architecture through Microbenchmarking and Multiple Level Analysis</a>, 2025 (includes A100 near and far L2).</li>
+  <li>Chips and Cheese, <a href="https://jsmemtest.chipsandcheese.com/latencydata">A100 SXM4 and PCIe latency data</a>, and <a href="https://chipsandcheese.com/p/nvidias-h100-funny-l2-and-tons-of-bandwidth">Nvidia's H100: Funny L2, and Tons of Bandwidth</a>.</li>
+  <li>Antepara et al., <a href="https://escholarship.org/uc/item/6189368s">Benchmark-driven Models for Energy Analysis and Attribution of GPU-Accelerated Supercomputing</a>, SC'25, table 3 (A100 per-level energy).</li>
+  <li>BabelStream <a href="https://github.com/UoB-HPC/BabelStream/issues/137">A100-SXM4-80GB results</a>; O'Connor et al., Fine-Grained DRAM, MICRO 2017 (HBM2 ≈ 3.9 pJ/bit); SK hynix, IEDM 2023 (HBM2e ≈ 4.3 pJ/bit).</li>
+</ul>
+
+</main>
+<script type="application/json" id="memhier-data">{"ghz":0.6,"curves":{"shire 0":[[256,5.25,8.8],[512,5.26,8.8],[768,36.0,60.0],[1024,36.0,60.0],[2048,36.0,60.0],[4096,47.0,78.3],[8192,47.0,78.3],[16384,47.0,78.3],[32768,47.0,78.3],[65536,47.0,78.3],[131072,47.0,78.3],[262144,47.0,78.3],[393216,47.0,78.3],[524288,47.02,78.4],[786432,168.99,281.6],[1048576,168.98,281.6],[2097152,168.88,285.2],[4194304,168.92,283.5],[8388608,169.04,283.0],[16777216,184.59,277.0],[25165824,199.92,252.0],[33554432,200.37,253.4],[50331648,339.55,367.2],[67108864,351.73,398.6],[134217728,362.9,435.6],[268435456,368.01,451.5]],"shire 24":[[256,5.25,8.8],[512,5.26,8.8],[768,36.0,60.0],[1024,36.0,60.0],[2048,36.0,60.0],[4096,47.0,78.3],[8192,47.0,78.3],[16384,47.0,78.3],[32768,47.0,78.3],[65536,47.0,78.3],[131072,47.0,78.3],[262144,47.0,78.3],[393216,47.0,78.3],[524288,47.03,78.4],[786432,188.35,313.9],[1048576,188.34,313.9],[2097152,188.24,313.7],[4194304,188.25,237.3],[8388608,188.43,236.6],[16777216,188.32,235.9],[25165824,188.39,236.0],[33554432,188.7,238.9],[50331648,328.37,353.0],[67108864,340.71,384.2],[134217728,352.2,421.4],[268435456,356.6,437.2]],"local scratchpad, shire 0":[[256,5.25,8.7],[512,5.26,8.8],[768,36.0,60.0],[1024,36.0,60.0],[2048,36.0,60.0],[4096,47.0,78.3],[8192,47.0,78.3],[16384,47.0,78.3],[65536,47.0,78.3],[262144,47.0,78.3],[1048576,47.0,78.3],[2097152,47.0,78.3]]},"plateaus":{"L1":{"median":5.255,"min":5.25,"max":5.26,"n":4},"L2 read buffer":{"median":36.0,"min":36.0,"max":36.0,"n":6},"L2 / local scratchpad":{"median":47.0,"min":47.0,"max":47.03,"n":18},"L3":{"median":168.98250000000002,"min":159.296,"max":188.432,"n":26,"ns_measured_clock":{"median":283.9705570853632,"min":236.64213090446938,"max":285.2107337780473,"n":21}},"DRAM":{"median":362.3295,"min":287.266,"max":368.011,"n":18,"ns_measured_clock":{"median":439.61674513255474,"min":421.41601451740956,"max":486.27651128501753,"n":18}}},"scp_matrix":{"0":[47.0,135.8,147.8,123.8,135.8,183.8,195.8,207.8,111.8,123.8,159.8,159.8,147.8,147.8,159.8,195.8,123.8,147.8,171.8,171.8,159.8,159.8,171.8,207.8,111.8,135.8,183.8,183.8,171.9,171.8,183.8,219.8],"7":[207.9,171.9,159.9,183.9,171.9,124.0,111.9,47.0,195.9,183.9,147.9,171.9,159.9,159.9,147.9,111.9,183.9,159.9,135.9,159.9,147.9,147.9,135.9,123.9,195.9,171.9,123.9,147.9,136.0,135.9,123.9,111.9],"24":[111.9,123.9,135.9,135.9,123.9,171.9,183.9,195.9,123.9,111.9,147.9,147.9,135.9,135.9,147.9,183.9,111.9,135.9,165.2,175.9,161.9,161.9,175.9,238.2,47.0,143.1,207.1,207.1,191.2,191.1,207.1,255.1],"31":[271.2,223.1,207.1,239.1,223.1,159.1,143.1,127.1,255.2,239.1,191.1,191.2,207.1,207.1,191.1,143.1,239.1,207.1,175.2,175.1,191.1,191.1,175.1,127.1,255.1,223.1,159.1,159.1,175.2,175.2,159.1,47.0]},"dram_samples":[287.3,288.4,293.0,296.4,296.9,297.2,352.2,356.6,362.1,362.5,362.7,362.8,362.9,362.9,362.9,363.0,367.1,368.0],"energy":{"runs":2,"idle_w":[27.1,26.95],"levels":{"spin":{"what":"no data: busy cores only","gb_per_s":{"mean":0.0,"min":0.0,"max":0.0},"mean_w":{"mean":39.21964285714286,"min":38.92,"max":39.519285714285715},"above_idle_w":{"mean":12.194642857142858,"min":11.82,"max":12.569285714285716},"pj_per_byte":null,"pj_per_byte_vs_spin":null},"l1":{"what":"L1 hits: 256 B per hart, 2048 harts","gb_per_s":{"mean":7552.289485410787,"min":7541.0599342247415,"max":7563.519036596834},"mean_w":{"mean":40.308499999999995,"min":39.662,"max":40.955},"above_idle_w":{"mean":13.283499999999998,"min":12.561999999999998,"max":14.004999999999999},"pj_per_byte":{"mean":1.7590165472069388,"min":1.6608671095051815,"max":1.8571659849086963},"pj_per_byte_vs_spin":{"mean":0.14424437751285918,"min":0.09810248330304414,"max":0.19038627172267422}},"l2":{"what":"256 KB per shire (L2 is 512 KB)","gb_per_s":{"mean":2801.4781594877904,"min":2744.425324645434,"max":2858.5309943301463},"mean_w":{"mean":39.02881609195403,"min":38.21896551724138,"max":39.83866666666667},"above_idle_w":{"mean":12.003816091954024,"min":11.118965517241378,"max":12.88866666666667},"pj_per_byte":{"mean":4.280157935934252,"min":4.051473150823622,"max":4.508842721044882},"pj_per_byte_vs_spin":null},"l3":{"what":"768 KB per shire > L2, 24 MB in total < 32 MB of L3","gb_per_s":{"mean":1025.6728856000277,"min":1009.510849786263,"max":1041.8349214137927},"mean_w":{"mean":38.1134375,"min":38.0521875,"max":38.1746875},"above_idle_w":{"mean":11.0884375,"min":10.9521875,"max":11.224687499999998},"pj_per_byte":{"mean":10.81148199558425,"min":10.773959740923113,"max":10.849004250245388},"pj_per_byte_vs_spin":null},"dram":{"what":"256 MB in total","gb_per_s":{"mean":75.99171446909924,"min":75.95084056869011,"max":76.03258836950837},"mean_w":{"mean":38.307068965517246,"min":37.2248275862069,"max":39.389310344827585},"above_idle_w":{"mean":11.282068965517242,"min":10.124827586206898,"max":12.439310344827586},"pj_per_byte":{"mean":148.45631341668883,"min":133.30764360731442,"max":163.6049832260632},"pj_per_byte_vs_spin":null},"scp-local":{"what":"2 MB of the shire's own L2 scratchpad","gb_per_s":{"mean":2568.703820430763,"min":2523.361908247006,"max":2614.0457326145192},"mean_w":{"mean":34.30420467185762,"min":33.53806451612903,"max":35.070344827586204},"above_idle_w":{"mean":7.279204671857618,"min":6.438064516129032,"max":8.120344827586205},"pj_per_byte":{"mean":2.8289058590675946,"min":2.5513837294158064,"max":3.1064279887193824},"pj_per_byte_vs_spin":null},"scp-remote":{"what":"2 MB of the scratchpad 16 shires away","gb_per_s":{"mean":976.8760610955673,"min":972.8283346616734,"max":980.9237875294612},"mean_w":{"mean":33.131118951612905,"min":33.030625,"max":33.23161290322581},"above_idle_w":{"mean":6.106118951612904,"min":6.080625000000001,"max":6.1316129032258075},"pj_per_byte":{"mean":6.250657985281617,"min":6.250460418707581,"max":6.250855551855653},"pj_per_byte_vs_spin":null}}}}</script>
+<script>
+(function () {
+  "use strict";
+  var D = JSON.parse(document.getElementById("memhier-data").textContent);
+  var NS = "http://www.w3.org/2000/svg";
+  function el(name, attrs, parent) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, s, cls, anchor) {
+    var t = el("text", { x: x, y: y, "class": cls || "tick", "text-anchor": anchor || "start" }, parent);
+    t.textContent = s;
+    return t;
+  }
+  function size(b) {
+    return b >= 1 << 20 ? (b / (1 << 20)) + " MB" : b >= 1024 ? (b / 1024) + " KB" : b + " B";
+  }
+  function showTip(tip, host, html, x, y) {
+    tip.innerHTML = html;
+    tip.style.display = "block";
+    var left = x + 14;
+    if (left + tip.offsetWidth > host.clientWidth - 6) left = x - tip.offsetWidth - 14;
+    tip.style.left = Math.max(6, left) + "px";
+    tip.style.top = Math.max(6, y - tip.offsetHeight - 8) + "px";
+  }
+
+  // ---------- latency vs working set ----------
+  var A100 = [
+    { from: 256, to: 128 * 1024, ns: 23, label: "L1 23 ns" },
+    { from: 256 * 1024, to: 16 << 20, ns: 148, label: "L2 near 148 ns" },
+    { from: 28 << 20, to: 38 << 20, ns: 253, label: "L2 far 253–313 ns" },
+    { from: 64 << 20, to: 256 << 20, ns: 405, label: "HBM 405 ns" }
+  ];
+  function renderLatency() {
+    var host = document.getElementById("lat"), tip = document.getElementById("lat-tip");
+    var old = host.querySelector("svg"); if (old) old.remove();
+    var W = Math.max(200, host.clientWidth - 32), H = 330, m = { l: 42, r: 12, t: 22, b: 38 };
+    var x0 = Math.log2(256), x1 = Math.log2(256 << 20), y0 = Math.log10(4), y1 = Math.log10(1000);
+    var x = function (b) { return m.l + (Math.log2(b) - x0) / (x1 - x0) * (W - m.l - m.r); };
+    var y = function (ns) { return H - m.b - (Math.log10(ns) - y0) / (y1 - y0) * (H - m.t - m.b); };
+    var svg = el("svg", { width: W, height: H, role: "img", "aria-label": "Load latency against working-set size for ET-SoC-1 and the A100; the table below the chart has the values." });
+    host.insertBefore(svg, tip);  // attached first, so label widths can be measured
+    [5, 10, 20, 50, 100, 200, 500, 1000].forEach(function (v) {
+      el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), "class": "grid-line" }, svg);
+      txt(svg, m.l - 6, y(v) + 4, String(v), "tick", "end");
+    });
+    var ticks = W < 560 ? [256, 4096, 65536, 1 << 20, 16 << 20, 256 << 20] : [256, 1024, 4096, 16384, 65536, 262144, 1 << 20, 4 << 20, 16 << 20, 64 << 20, 256 << 20];
+    ticks.forEach(function (b, i) { txt(svg, x(b), H - m.b + 17, size(b), "tick", i === ticks.length - 1 ? "end" : "middle"); });
+    el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b, "class": "axis-line" }, svg);
+    txt(svg, (m.l + W - m.r) / 2, H - 4, "working set", "tick", "middle");
+    txt(svg, 0, 12, "ns per load (log)", "tick");
+    A100.forEach(function (s) {
+      el("line", { x1: x(s.from), x2: x(s.to), y1: y(s.ns), y2: y(s.ns), "class": "s-ref" }, svg);
+    });
+    var pts = [];
+    [["shire 24", "et2"], ["shire 0", "et"]].forEach(function (sr) {
+      var c = D.curves[sr[0]]; if (!c) return;
+      el("path", { d: c.map(function (p, i) { return (i ? "L" : "M") + x(p[0]).toFixed(1) + " " + y(p[2]).toFixed(1); }).join(""), "class": "s-" + sr[1] }, svg);
+      c.forEach(function (p) {
+        el("circle", { cx: x(p[0]), cy: y(p[2]), r: 3.5, "class": "d-" + sr[1] }, svg);
+        pts.push({ x: x(p[0]), y: y(p[2]), html: "<b>ET-SoC-1, " + sr[0] + "</b><br>" + size(p[0]) + ": " + p[2] + " ns (" + p[1] + " cycles)" });
+      });
+    });
+    A100.forEach(function (s) { pts.push({ x: (x(s.from) + x(s.to)) / 2, y: y(s.ns), html: "<b>A100</b><br>" + s.label + " (" + size(s.from) + "–" + size(s.to) + ")" }); });
+    var narrow = W < 520;
+    var labels = [[narrow ? "L1" : "L1 8.8 ns", 256, 8.8, 18], [narrow ? "RB" : "read buffer 60", 1400, 60, -10],
+                  [narrow ? "L2" : "L2 78 ns", 40000, 78, -10], [narrow ? "L3" : "L3 ~280 ns", 2.5 * (1 << 20), 282, -12],
+                  [narrow ? "DRAM" : "DRAM ~440 ns", 160 << 20, 452, -12]];
+    labels.forEach(function (l) {
+      var t = txt(svg, x(l[1]), y(l[2]) + l[3], l[0], "lab-strong", "middle");
+      var w = t.getComputedTextLength ? t.getComputedTextLength() : 0;
+      var cx = Math.min(Math.max(x(l[1]), m.l + w / 2 + 2), W - m.r - w / 2 - 2);
+      t.setAttribute("x", cx);
+    });
+    var hit = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: "transparent" }, svg);
+    function move(ev) {
+      var r = svg.getBoundingClientRect(), px = ev.clientX - r.left, py = ev.clientY - r.top, best = null, bd = 1e9;
+      pts.forEach(function (p) { var d = Math.hypot(p.x - px, p.y - py); if (d < bd) { bd = d; best = p; } });
+      if (best && bd < 40) showTip(tip, host, best.html, best.x + 16, best.y + 16); else tip.style.display = "none";
+    }
+    hit.addEventListener("pointermove", move);
+    hit.addEventListener("pointerdown", move);
+    hit.addEventListener("pointerleave", function () { tip.style.display = "none"; });
+  }
+
+  // ---------- ET vs A100 dumbbells ----------
+  var CMP = {
+    "cmp-lat": { title: "Load latency", unit: "ns", lo: 2, hi: 1000, ticks: [3, 10, 30, 100, 300, 1000], rows: [
+      ["L1", 8.8, 23, "5.25 cycles at 600 MHz", "33 cycles at 1.41 GHz"],
+      ["L2 (near L2)", 78, 148, "47 cycles", "208 cycles"],
+      ["Scratchpad / shared", 78, 21, "local, 47 cycles", "shared memory, 29 cycles"],
+      ["L3 / far L2", 282, 253, "169 cycles; 240–285 ns", "357 cycles; 253–313 ns"],
+      ["DRAM", 440, 405, "421–486 ns", "HBM, 570 cycles"] ] },
+    "cmp-bw": { title: "Bandwidth, whole chip", unit: "TB/s", lo: 0.05, hi: 30, ticks: [0.1, 0.3, 1, 3, 10, 30], rows: [
+      ["L1", 7.55, 14.8, "32 B vector loads, 2048 harts", "measured; 19.5 peak"],
+      ["L2", 2.80, 4.4, "TensorLoads, 256 KB per shire", "measured; 7.2 peak"],
+      ["Scratchpad / shared", 2.57, 19.5, "local scratchpad", "shared memory, 128 B/clk/SM"],
+      ["L3 / far L2", 1.03, null, "24 MB working set", ""],
+      ["DRAM", 0.076, 1.77, "LPDDR4X, 256 MB", "HBM2e 80 GB, BabelStream"] ] },
+    "cmp-en": { title: "Energy per byte (whole chip, above idle)", unit: "pJ/B", lo: 1, hi: 300, ticks: [1, 3, 10, 30, 100, 300], rows: [
+      ["L1", 1.76, 12.7, "card power above idle", "SC'25: 1.6 pJ/bit"],
+      ["L2", 4.28, 37.7, "", "SC'25: 4.7 pJ/bit"],
+      ["Scratchpad / shared", 2.83, null, "local scratchpad", ""],
+      ["L3 / far L2", 10.8, null, "", ""],
+      ["DRAM", 148, 105, "133–164 over two runs", "SC'25: 13.1 pJ/bit"] ] }
+  };
+  function renderDumbbell(id) {
+    var spec = CMP[id], host = document.getElementById(id), tip = host.querySelector(".tip");
+    var old = host.querySelector("svg"); if (old) old.remove();
+    var title = host.querySelector(".chart-title");
+    if (!title) { title = document.createElement("div"); title.className = "chart-title"; host.insertBefore(title, host.firstChild); }
+    title.textContent = spec.title + " (" + spec.unit + ", log scale)";
+    var W = Math.max(200, host.clientWidth), stacked = W < 460;
+    var rowH = stacked ? 44 : 34, m = { l: stacked ? 6 : 150, r: 10, t: 6, b: 26 };
+    var H = m.t + m.b + rowH * spec.rows.length;
+    var l0 = Math.log10(spec.lo), l1 = Math.log10(spec.hi);
+    var x = function (v) { return m.l + (Math.log10(v) - l0) / (l1 - l0) * (W - m.l - m.r); };
+    var svg = el("svg", { width: W, height: H, role: "img", "aria-label": spec.title + ": ET-SoC-1 against the A100, values in the tables above." });
+    host.insertBefore(svg, tip);
+    var lastTick = -1e9;
+    spec.ticks.forEach(function (t) {
+      el("line", { x1: x(t), x2: x(t), y1: m.t, y2: H - m.b, "class": "grid-line" }, svg);
+      if (x(t) - lastTick >= 34) {
+        var tt = txt(svg, x(t), H - m.b + 16, String(t), "tick", "middle");
+        if (x(t) + tt.getComputedTextLength() / 2 > W) tt.setAttribute("text-anchor", "end");
+        lastTick = x(t);
+      }
+    });
+    var fmt = function (v) { return v >= 100 ? String(Math.round(v)) : v >= 10 ? v.toFixed(0) : v >= 1 ? v.toFixed(1) : v.toFixed(2); };
+    // Puts a value label beside a dot, on the preferred side unless it would leave the chart.
+    function label(v, cx, cy, cls, preferRight) {
+      var t = txt(svg, cx, cy + 4, fmt(v), cls, "start");
+      var w = t.getComputedTextLength();
+      var right = preferRight ? cx + 10 + w <= W : cx - 10 - w < m.l;
+      t.setAttribute("x", right ? cx + 10 : cx - 10 - w);
+    }
+    spec.rows.forEach(function (r, i) {
+      var top = m.t + rowH * i, cy = stacked ? top + 30 : top + rowH / 2;
+      txt(svg, stacked ? 0 : 0, stacked ? top + 13 : cy + 4, r[0], "lab");
+      if (r[2] != null) el("line", { x1: x(r[1]), x2: x(r[2]), y1: cy, y2: cy, "class": "conn" }, svg);
+      var etRight = r[2] == null || r[1] >= r[2];
+      if (r[2] != null) {
+        el("circle", { cx: x(r[2]), cy: cy, r: 6, "class": "d-ref" }, svg);
+        label(r[2], x(r[2]), cy, "tick", !etRight);
+      }
+      el("circle", { cx: x(r[1]), cy: cy, r: 6, "class": "d-et" }, svg);
+      label(r[1], x(r[1]), cy, "lab-strong", etRight);
+      var hit = el("rect", { x: 0, y: top, width: W, height: rowH, fill: "transparent" }, svg);
+      var html = "<b>" + r[0] + "</b><br>ET-SoC-1: " + fmt(r[1]) + " " + spec.unit + (r[3] ? " (" + r[3] + ")" : "") +
+        "<br>A100: " + (r[2] == null ? "no equivalent / not published" : fmt(r[2]) + " " + spec.unit + (r[4] ? " (" + r[4] + ")" : ""));
+      hit.addEventListener("pointermove", function (ev) { var b = svg.getBoundingClientRect(); showTip(tip, host, html, ev.clientX - b.left, cy + 30); });
+      hit.addEventListener("pointerleave", function () { tip.style.display = "none"; });
+    });
+  }
+
+  // ---------- scratchpad heatmap ----------
+  var RAMP = ["#cde2fb", "#b7d3f6", "#9ec5f4", "#86b6ef", "#6da7ec", "#5598e7", "#3987e5", "#2a78d6", "#256abf", "#1c5cab", "#184f95", "#104281", "#0d366b"];
+  function renderHeat() {
+    var host = document.getElementById("heat"), tip = document.getElementById("heat-tip");
+    var old = host.querySelector("svg"); if (old) old.remove();
+    var srcs = Object.keys(D.scp_matrix).map(Number).sort(function (a, b) { return a - b; });
+    var all = []; srcs.forEach(function (s) { all = all.concat(D.scp_matrix[s]); });
+    var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+    var W = Math.max(200, host.clientWidth - 32), lab = W < 460 ? 58 : 78, cw = (W - lab) / 32, ch = Math.max(18, Math.min(34, cw * 1.4));
+    var H = 30 + ch * srcs.length + 62;
+    var svg = el("svg", { width: W, height: H, role: "img", "aria-label": "Scratchpad load latency from shires 0, 7, 24 and 31 to each of the 32 shires." });
+    for (var t = 0; t < 32; t += (W < 560 ? 8 : 4)) txt(svg, lab + (t + 0.5) * cw, 14, String(t), "tick", "middle");
+    if (W >= 460) txt(svg, lab - 6, 14, "to shire", "tick", "end");
+    srcs.forEach(function (s, i) {
+      var yy = 22 + i * ch;
+      txt(svg, lab - 6, yy + ch / 2 + 4, (W < 460 ? "" : "from ") + s, "lab", "end");
+      D.scp_matrix[s].forEach(function (v, t) {
+        var k = Math.round((v - lo) / (hi - lo) * (RAMP.length - 1));
+        var r = el("rect", { x: lab + t * cw, y: yy, width: cw, height: ch, fill: RAMP[k], "class": "cell" }, svg);
+        r.addEventListener("pointermove", function (ev) {
+          var b = svg.getBoundingClientRect();
+          showTip(tip, host, "<b>shire " + s + " → shire " + t + "</b><br>" + v + " cycles · " + Math.round(v / 0.6) + " ns at 600 MHz" + (t === s ? " (local)" : ""), ev.clientX - b.left, yy + 8);
+        });
+        r.addEventListener("pointerleave", function () { tip.style.display = "none"; });
+      });
+    });
+    var ly = 22 + srcs.length * ch + 14, lw = Math.max(110, Math.min(260, W - lab - 10)), stackLegend = lw < 180;
+    RAMP.forEach(function (c, i) { el("rect", { x: lab + i * lw / RAMP.length, y: ly, width: lw / RAMP.length + 0.5, height: 8, fill: c }, svg); });
+    txt(svg, lab, ly + 22, Math.round(lo) + " cycles (local)", "tick");
+    if (stackLegend) txt(svg, lab, ly + 38, "to " + Math.round(hi) + " cycles (darkest)", "tick");
+    else txt(svg, lab + lw, ly + 22, Math.round(hi) + " cycles", "tick", "end");
+    host.insertBefore(svg, tip);
+  }
+
+  function renderAll() { renderLatency(); renderHeat(); Object.keys(CMP).forEach(renderDumbbell); }
+  renderAll();
+  var lastW = document.body.clientWidth;
+  window.addEventListener("resize", function () { if (document.body.clientWidth !== lastW) { lastW = document.body.clientWidth; renderAll(); } });
+})();
+</script>
+</body>
+</html>

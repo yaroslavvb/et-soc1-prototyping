@@ -54,6 +54,33 @@ Options, cheapest first:
 4. Use **barriers**: FLB (`flb` CSR, per-shire fast local barrier) and FCC credit counters (PRM ch. 10–11).
    `gp-sdk/device/sdk/include/sync.h` and `flbLock.h` wrap these.
 
+## Memory hierarchy, measured (aifoundry2, 2026-09-18)
+
+Measured with `workloads/memhier`. The full write-up, including the A100 comparison, is
+`docs/reports/2026-09-18-et-soc1-memory-hierarchy.html`. Latencies are load-to-use, one dependent chain.
+
+| Level | Size | Latency | Chip bandwidth | Energy (card, above idle) |
+|---|---|---|---|---|
+| L1 data cache | **512 B per hart** (firmware sets scratchpad mode) | 5.25 cycles | 7.6 TB/s | 1.8 pJ/B |
+| L2 read buffer | 8 lines x 4 banks = 2 KB | 36 cycles | – | – |
+| L2 | 512 KB per shire, private | 47 cycles | 2.8 TB/s | 4.3 pJ/B |
+| L2 scratchpad | 2.5 MB per shire | 47 local; 112–271 remote | 2.6 / 1.0 TB/s | 2.8 / 6.3 pJ/B |
+| L3 | 1 MB per shire, 32 MB shared | 169 cycles, ~280 ns | 1.0 TB/s | 10.8 pJ/B |
+| DRAM | 32 GB LPDDR4X | ~440 ns (421–486) | 76 GB/s | ~150 pJ/B |
+
+What this means for kernels:
+- **Plan on 512 B of L1 per hart.** Before every launch the firmware (`init_l1`) sets D1Split and SCPEnable. That
+  gives hart 0 sets 12–13 and hart 1 sets 14–15, and sets 0–11 become the 3 KB tensor scratchpad (PRM table 8.4).
+  Hart 1 also pays +3 cycles on every L1 miss.
+- **Stage shared data in the L2 scratchpad.** It is as fast as L2 (47 cycles), it is L1-cacheable, and it costs a third
+  less energy per byte. Format 0 addressing: `0x80000000 + (shire << 23) + offset`, where shire `0x7F` means the
+  local shire. Only the master shire's scratchpad is used by the firmware.
+- **Remote shires cost 12–16 cycles per mesh hop**, and latency is not symmetric between shire pairs.
+- **Count on the clock varying.** The card runs a "managed power" DVFS governor (65 W TDP) that moves the minion clock
+  between 600 and ~850 MHz under load. On-chip latencies are fixed in cycles; L3 and DRAM latencies are fixed in ns.
+  Time with wall clock as well as `hpmcounter3`.
+- **Avoid concurrent PMU reads.** When both harts read `hpmcounter3` at once, one can get a wrong value (erratum 1.23).
+
 ## Performance ladder (FOSDEM "Zero to matmul", 512x512 fp32)
 
 | Step | Result |
