@@ -1,0 +1,102 @@
+== fma-fp32-elem: --test fma --type fp32 --pattern elem --sweep 0,0.125,0.25,0.375,0.5,0.625,0.75,0.875,0.9375,1 --shires 0x1 --per-shire 1
+   ok lines: 10, failed: 0
+== fma-fp32-col: --test fma --type fp32 --pattern col --sweep 0,0.125,0.25,0.375,0.5,0.625,0.75,0.875,0.9375,1 --shires 0x1 --per-shire 1
+   ok lines: 10, failed: 0
+== fma-fp32-row: --test fma --type fp32 --pattern row --sweep 0,0.125,0.25,0.375,0.5,0.625,0.75,0.875,0.9375,1 --shires 0x1 --per-shire 1
+   ok lines: 10, failed: 0
+== fma-fp32-elem-tenb: --test fma --type fp32 --pattern elem --sweep 0,0.125,0.25,0.375,0.5,0.625,0.75,0.875,0.9375,1 --b-stream --shires 0x1 --per-shire 1
+   ok lines: 10, failed: 0
+== fma-fp32-bsparse: --test fma --type fp32 --pattern none --sweep 0 --b-sparsity 0.5 --shires 0x1 --per-shire 1
+   ok lines: 1, failed: 0
+== fma-fp32-bsparse90: --test fma --type fp32 --pattern none --sweep 0 --b-sparsity 0.9 --shires 0x1 --per-shire 1
+   ok lines: 1, failed: 0
+== fma-fp32-rowmask-0xFFFF: --test fma --type fp32 --pattern none --sweep 0 --row-mask 0xFFFF --shires 0x1 --per-shire 1
+   ok lines: 1, failed: 0
+== fma-fp32-rowmask-0x00FF: --test fma --type fp32 --pattern none --sweep 0 --row-mask 0x00FF --shires 0x1 --per-shire 1
+   ok lines: 1, failed: 0
+== fma-fp32-rowmask-0x000F: --test fma --type fp32 --pattern none --sweep 0 --row-mask 0x000F --shires 0x1 --per-shire 1
+   ok lines: 1, failed: 0
+== fma-fp32-rowmask-0x0001: --test fma --type fp32 --pattern none --sweep 0 --row-mask 0x0001 --shires 0x1 --per-shire 1
+   ok lines: 1, failed: 0
+== fma-fp32-rowmask-0x0000: --test fma --type fp32 --pattern none --sweep 0 --row-mask 0x0000 --shires 0x1 --per-shire 1
+   ok lines: 1, failed: 0
+== fma-fp16-elem: --test fma --type fp16 --pattern elem --sweep 0,0.125,0.25,0.375,0.5,0.625,0.75,0.875,0.9375,1 --shires 0x1 --per-shire 1
+   ok lines: 10, failed: 0
+== fma-fp16-pair: --test fma --type fp16 --pattern pair --sweep 0,0.5,1 --shires 0x1 --per-shire 1
+   ok lines: 3, failed: 0
+== fma-int8-elem: --test fma --type int8 --pattern elem --sweep 0,0.125,0.25,0.375,0.5,0.625,0.75,0.875,0.9375,1 --shires 0x1 --per-shire 1
+   ok lines: 10, failed: 0
+== fma-fp32-elem-all: --test fma --type fp32 --pattern elem --sweep 0,0.5,0.875,1 --shires 0xFFFFFFFF --per-shire 32 --iters 4000
+   ok lines: 4, failed: 0
+== tload-dram-one: --test tload --where dram --masks 0xFFFF,0x7FFF,0xFF,0xF,0x3,0x1,0x0 --shires 0x1 --per-shire 1 --iters 20000
+   ok lines: 7, failed: 0
+== tload-dram-all: --test tload --where dram --masks 0xFFFF,0xFF,0xF,0x1,0x0 --shires 0xFFFFFFFF --per-shire 32 --iters 2000
+   ok lines: 5, failed: 0
+== tload-l2-one: --test tload --where l2 --masks 0xFFFF,0x7FFF,0xFF,0xF,0x3,0x1,0x0 --shires 0x1 --per-shire 1 --iters 20000
+   ok lines: 7, failed: 0
+== tload-l2-all: --test tload --where l2 --masks 0xFFFF,0xFF,0xF,0x1,0x0 --shires 0xFFFFFFFF --per-shire 32 --iters 2000
+   ok lines: 5, failed: 0
+== tload-scp-one: --test tload --where scp --masks 0xFFFF,0x7FFF,0xFF,0xF,0x3,0x1,0x0 --shires 0x1 --per-shire 1 --iters 20000
+   ok lines: 7, failed: 0
+== tload-scp-all: --test tload --where scp --masks 0xFFFF,0xFF,0xF,0x1,0x0 --shires 0xFFFFFFFF --per-shire 32 --iters 2000
+   ok lines: 5, failed: 0
+== gemv-dense: --test gemv --gemv dense --sweep 0,0.5,0.9,0.99 --shires 0xFFFFFFFF --per-shire 32 --iters 2000
+   ok lines: 4, failed: 0
+== gemv-masked: --test gemv --gemv masked --sweep 0,0.5,0.75,0.9,0.95,0.99,1 --shires 0xFFFFFFFF --per-shire 32 --iters 2000
+   ok lines: 7, failed: 0
+== gemv-skip: --test gemv --gemv skip --sweep 0,0.5,0.75,0.9,0.95,0.99,1 --shires 0xFFFFFFFF --per-shire 32 --iters 2000
+   ok lines: 7, failed: 0
+== gemv-skip-oneshire: --test gemv --gemv skip --sweep 0,0.9,0.99 --shires 0x1 --per-shire 32 --iters 2000
+   ok lines: 3, failed: 0
+== diverge-static-a0: --test diverge --variant static --alpha 0 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-refill-a0: --test diverge --variant refill --alpha 0 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-scalar-a0: --test diverge --variant scalar --alpha 0 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-static-a3: --test diverge --variant static --alpha 3 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-refill-a3: --test diverge --variant refill --alpha 3 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-scalar-a3: --test diverge --variant scalar --alpha 3 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-static-a2: --test diverge --variant static --alpha 2 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-refill-a2: --test diverge --variant refill --alpha 2 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-scalar-a2: --test diverge --variant scalar --alpha 2 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-static-a1.5: --test diverge --variant static --alpha 1.5 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-refill-a1.5: --test diverge --variant refill --alpha 1.5 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-scalar-a1.5: --test diverge --variant scalar --alpha 1.5 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-static-a1.2: --test diverge --variant static --alpha 1.2 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-refill-a1.2: --test diverge --variant refill --alpha 1.2 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+== diverge-scalar-a1.2: --test diverge --variant scalar --alpha 1.2 --mean-k 64 --kmax 16384 --items 512 --harts 2 --shires 0xFFFFFFFF --per-shire 32
+   ok lines: 1, failed: 0
+done: build/sparsity-data
+
+# 2026-09-18 22:10 rerun of the gemv group (block-max layer time; tree runs now in run_lab.sh), then tload-dram-one
+# by hand with run_lab.sh's arguments (64 MB DRAM buffer). The earlier files are in v1/.
+== gemv-dense: --test gemv --gemv dense --sweep 0,0.5,0.75,0.9,0.95,0.99,1 --shires 0xFFFFFFFF --per-shire 32 --iters 2000
+   ok lines: 7, failed: 0
+== gemv-masked: --test gemv --gemv masked --sweep 0,0.5,0.75,0.9,0.95,0.99,1 --shires 0xFFFFFFFF --per-shire 32 --iters 2000
+   ok lines: 7, failed: 0
+== gemv-skip: --test gemv --gemv skip --sweep 0,0.5,0.75,0.9,0.95,0.99,1 --shires 0xFFFFFFFF --per-shire 32 --iters 2000
+   ok lines: 7, failed: 0
+== gemv-skip-oneshire: --test gemv --gemv skip --sweep 0,0.9,0.99 --shires 0x1 --per-shire 32 --iters 2000
+   ok lines: 3, failed: 0
+== gemv-tree-dense: --test gemv --gemv dense --gemv-tree --sweep 0,0.5,0.75,0.9,0.95,0.99,1 --shires 0xFFFFFFFF --per-shire 32 --iters 2000
+   ok lines: 7, failed: 0
+== gemv-tree-masked: --test gemv --gemv masked --gemv-tree --sweep 0,0.5,0.75,0.9,0.95,0.99,1 --shires 0xFFFFFFFF --per-shire 32 --iters 2000
+   ok lines: 7, failed: 0
+== gemv-tree-skip: --test gemv --gemv skip --gemv-tree --sweep 0,0.5,0.75,0.9,0.95,0.99,1 --shires 0xFFFFFFFF --per-shire 32 --iters 2000
+   ok lines: 7, failed: 0
+== gemv-tree-oneshire: --test gemv --gemv skip --gemv-tree --sweep 0,0.9,0.99 --shires 0x1 --per-shire 32 --iters 2000
+   ok lines: 3, failed: 0
+== tload-dram-one: --test tload --where dram --masks 0xFFFF,0x7FFF,0xFF,0xF,0x3,0x1,0x0 --shires 0x1 --per-shire 1 --iters 20000
+   ok lines: 7, failed: 0

@@ -114,6 +114,29 @@ Rules for kernels that talk:
 - **Keep bulk traffic inside shires, or pull it with TensorLoad.** Messages are for small, latency-critical exchanges and
   for in-network combines.
 
+## Sparsity, measured (aifoundry3, 2026-09-18)
+
+Measured with `workloads/sparsity` at a steady 600 MHz. The full write-up is `docs/reports/2026-09-18-et-soc1-sparsity.html`.
+
+| Hook | Time | Energy |
+|---|---|---|
+| TensorFMA zero-skip (PRM 9.4) | None. 546 cycles per 16x16x16 fp32 op at 0-100% zeros in A or B, scattered, by column or by row. fp16 546, int8 318, any sparsity. | Yes, in a TensorFMA-only loop. Board power above idle scales with nonzero multiplies: 2.4 W + 14.8 W x fraction (1,024 minions). A gated slot costs ~0.5 pJ, an active one ~3.8 pJ. In the batch-1 layer below, where loads dominate, 90% zeros alone save only ~12% of power above idle. |
+| fp16 zero-skip | The PRM rule (skip unless all four operands are nonzero) is a doc bug. Silicon computes the correct sum. | |
+| `tensor_mask` on TensorFMA | None: 544-546 cycles with 0-16 rows enabled. | Masked rows are gated like zeros. |
+| `tensor_mask` on TensorLoad | From L2 or scratchpad, time scales with the rows loaded down to a ~45-cycle floor (160 -> 81 -> 45 cycles for 16/8/4 rows). From DRAM on one minion, nearly in proportion (730 -> 320 -> 144 -> 73 cycles for 16/8/4/1 rows; a lone minion issues about one line per 45 cycles). From DRAM with the whole chip streaming: no gain. | |
+
+Rules for sparse kernels:
+- **Get speed from fewer or smaller ops, not from zeros.** Skip all-zero tiles, shrink AROWS/ACOLS, and mask loads.
+  The tensor unit's gating only saves energy.
+- **Keep weights you want to skip in SRAM.** Masked loads save no time once the whole chip saturates DRAM.
+- A batch-1 1024x4096 fp32 layer with W in the scratchpads (all 1,024 minions, TensorReduce inside each shire) takes
+  7.5 us dense (7.3 us with plain loads) and 2.1 us at 99% zero activations. The gains past ~50% zeros come from skipping
+  whole 16-element slices.
+- 8-lane SIMD with lane refill keeps 46-96% of lanes busy on heavy-tailed work (a 32-lane warp: 8-35%), but a simple
+  vector-FMA loop reaches only ~1.5 lane-FMAs per cycle per minion, so divergence alone does not beat a modelled A100.
+- `sys_emu -vpurf_check` aborts on the firmware's own code; use `-vpurf_warn` and filter for the kernel's PCs.
+  A TensorStore read back by another minion's TensorLoad needs the shire's coalescing buffers drained first.
+
 ## Performance ladder (FOSDEM "Zero to matmul", 512x512 fp32)
 
 | Step | Result |

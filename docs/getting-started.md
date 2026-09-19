@@ -20,11 +20,23 @@ page and `CLAUDE.md` carry the context.
   - The report is [docs/reports/2026-09-18-et-soc1-matmul-efficiency.html](reports/2026-09-18-et-soc1-matmul-efficiency.html),
     published privately at https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency. Its raw data is in
     `docs/reports/data/2026-09-18-aifoundry2/`.
+  - The memory hierarchy on aifoundry2 (`workloads/memhier`): each level's latency, bandwidth and energy per byte.
+    Report: [docs/reports/2026-09-18-et-soc1-memory-hierarchy.html](reports/2026-09-18-et-soc1-memory-hierarchy.html).
+  - On-chip communication on aifoundry2 (`workloads/nocbench`): the 6x6 shire mesh, TensorSend/Recv, reduction trees,
+    credits and barriers. Report: [docs/reports/2026-09-18-et-soc1-on-chip-communication.html](reports/2026-09-18-et-soc1-on-chip-communication.html).
+  - Sparsity on aifoundry3 (`workloads/sparsity`): tensor-unit zero-skip saves energy but no cycles, masked TensorLoads
+    save time except when the whole chip saturates DRAM, and a batch-1 sparse layer runs in 7.5 us dense and 2.1 us at
+    99% zeros. The report also ranks scenarios where the chip could beat an A100. Report:
+    [docs/reports/2026-09-18-et-soc1-sparsity.html](reports/2026-09-18-et-soc1-sparsity.html), published privately at
+    https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute.
+  - Summaries of all three are in [et-soc1-notes.md](et-soc1-notes.md).
 - **Next:**
   - A real GEMM, tiling through the L2 scratchpad with cooperative tensor loads. FOSDEM reached 10.25 TFLOP/s this way.
   - Hart 1 prefetching with `TensorLoadL2Scp`.
   - A vector-unit fp32 baseline.
   - Posting the results on Discord.
+  - From the sparsity report: run the batch-1 layer on an A100 for a measured comparison, and try the spiking
+    microcircuit (PD14), where the chip's 2.3 us hardware allreduce could beat a GPU's per-step kernel launches.
 
 ## 1. Clone
 
@@ -200,7 +212,7 @@ GPU and A100 columns come from the sourced notes in `docs/reports/sources/`, not
 | Matmul efficiency | `kernels/mmbench`, `launchers/mmbench` | section 4 | `docs/reports/data/2026-09-18-aifoundry2` | `scripts/mmbench-report-data.py DATA --embed HTML` |
 | Memory hierarchy | `workloads/memhier` | `workloads/memhier/README.md`: the chases, then `run_energy.py` | `docs/reports/data/2026-09-18-memhier-aifoundry2` | `python3 workloads/memhier/analyze.py DATA --embed HTML` |
 | On-chip communication | `workloads/nocbench` | `run_lab.sh`, then `run_energy.py` twice, the second time with `--only` in reverse order | `docs/reports/data/2026-09-18-nocbench-aifoundry2` | `python3 workloads/nocbench/analyze.py DATA --memhier docs/reports/data/2026-09-18-memhier-aifoundry2 --search --embed HTML` |
-| Sparsity | `workloads/sparsity` | `workloads/sparsity/README.md` | `docs/reports/data/2026-09-18-sparsity-aifoundry3` | `workloads/sparsity/README.md` |
+| Sparsity | `workloads/sparsity` | `run_lab.sh`, then `run_energy.py` twice, the second time with `--only` in reverse order (`workloads/sparsity/README.md`) | `docs/reports/data/2026-09-18-sparsity-aifoundry3` | `python3 workloads/sparsity/analyze.py DATA --embed HTML` |
 
 - **Measuring.** Build on the machine with `scripts/deploy-lab.sh aifoundry2 workloads/<name>`, or
   `scripts/deploy-lab-gpsdk.sh` for `kernels/`. Follow the etiquette above, then copy the outputs back into a new
