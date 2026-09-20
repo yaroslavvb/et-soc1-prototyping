@@ -137,6 +137,30 @@ Rules for sparse kernels:
 - `sys_emu -vpurf_check` aborts on the firmware's own code; use `-vpurf_warn` and filter for the kernel's PCs.
   A TensorStore read back by another minion's TensorLoad needs the shire's coalescing buffers drained first.
 
+## One memory access, taken apart (aifoundry2, 2026-09-19)
+
+Measured with `workloads/memprobe`. The full write-up is `docs/reports/2026-09-19-et-soc1-memory-anatomy.html`.
+Cycles at 600 MHz, load-to-use, one load at a time.
+
+| Stage | Cost | How it was found |
+|---|---|---|
+| L1 hit / L2 hit | 5 / 48 cycles (37 from the bank's read buffer) | `evict_va` the line to a level, time one load |
+| L3 hit | 110 + 12 x hops(requester, home shire); home = PA[10:6] | 1,500 lines, all within ±2 cycles but 2 |
+| DRAM leg past L3 | 91 + 12 x hops(home shire, memory shire); memory shire = PA[8:6] | memory shires 0-3 sit one step off the north edge at x = 1-4, 4-7 off the south edge; syscall 10's read counters confirm PA[8:6] |
+| Row state | open-row hit saves 11 cycles (tRCD); same bank, other row: +40 cycles; rows = PA[18+], bank PA[12:10], column PA[17:13] | two back-to-back loads, one address bit flipped |
+| Refresh | every 2,325 cycles = 3.88 us; a load caught in it waits up to 210 cycles; it closes the open row | 19,000 DRAM loads at random phases |
+| Energy per 64 B load (above idle) | L1 46 pJ, L2 183, L3 local 541, +59 per hop, DRAM 5.1 nJ (67% DDR side, 18% mesh) | 1,024 minions; minion/SRAM/NoC rails from the service processor's stats trace |
+
+Things to know when measuring:
+- **`hpmcounter3` reads 128 short when its low 7 bits are 0-10.** The carry into bit 7 lands 11 cycles late. Add 128
+  (`fixcyc()` in `workloads/memprobe/kernel/memprobe.c`); the firmware's four-reads workaround does not fix it. The
+  `cycle` CSR traps in U-mode.
+- **`evict_va` is asynchronous.** Fence and wait a few hundred cycles before timing. Level codes name where the line is
+  left (1 L2, 2 L3, 3 memory; 0 does nothing). Evicts from many minions serialize in the shire cache.
+- **Rail power:** `dev_mngt_service -n 0 -t SPST:extract` gives minion, SRAM and NoC rail power (a moving average,
+  one record per 133 ms) plus board power. The ring holds ~15 minutes, and an extract returns only records since the
+  last wrap. No rail covers the memory shires or DRAM.
+
 ## Performance ladder (FOSDEM "Zero to matmul", 512x512 fp32)
 
 | Step | Result |

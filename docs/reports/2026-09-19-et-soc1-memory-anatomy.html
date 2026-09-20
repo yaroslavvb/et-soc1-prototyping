@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anatomy of a memory access</title>
+<meta name="description" content="How finely the ET-SoC-1 lets you see a memory access: single-load latency split into cache, mesh, memory-controller and DRAM stages, and energy per load split by power rail, measured on a lab card.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --code-bg: #f1f0ec;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c6: #008300; --c7: #4a3aa7;
+  --ref: #8c8b85; --empty: #eeede9;
+  --q1: #cde2fb; --q2: #9ec5f4; --q3: #6da7ec; --q4: #3987e5; --q5: #256abf; --q6: #184f95; --q7: #0d366b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c6: #008300; --c7: #9085e9;
+    --ref: #76756f; --empty: #232321;
+    --q1: #0d366b; --q2: #104281; --q3: #184f95; --q4: #1c5cab; --q5: #256abf; --q6: #3987e5; --q7: #86b6ef;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c6: #008300; --c7: #9085e9;
+  --ref: #76756f; --empty: #232321;
+  --q1: #0d366b; --q2: #104281; --q3: #184f95; --q4: #1c5cab; --q5: #256abf; --q6: #3987e5; --q7: #86b6ef;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-text-size-adjust: 100%; }
+main { max-width: 940px; margin: 0 auto; padding: 28px 16px 72px; }
+h1 { font-size: 1.75rem; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; margin: 44px 0 10px; }
+h3 { font-size: 1rem; margin: 22px 0 8px; }
+.byline { color: var(--ink-2); font-size: 0.9rem; margin: 0 0 22px; }
+.lede { font-size: 1.05rem; }
+.small { font-size: 0.85rem; color: var(--ink-2); }
+a { color: var(--c1); }
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 18px 0 8px; }
+.kpi .lab { color: var(--ink-2); font-size: 0.8rem; }
+.kpi .val { font-size: 1.6rem; font-weight: 650; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.kpi .sub { color: var(--ink-2); font-size: 0.8rem; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.82rem; color: var(--ink-2); margin: 4px 0 6px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.chart.scroll svg { min-width: 640px; }
+.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 300px; display: none; }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.axis-line { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lab { fill: var(--ink-2); font-size: 12px; }
+.lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.lvl { font-weight: 600; white-space: nowrap; }
+.wide table { min-width: 720px; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--ink-2); font-size: 0.85rem; }
+.chart-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+.panels { display: grid; gap: 18px; }
+.panels > * { min-width: 0; }
+/* explorer */
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 4px 0 10px; font-size: 0.88rem; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg button { font: inherit; font-size: 0.85rem; background: var(--surface); color: var(--ink-2); border: 0;
+  padding: 6px 11px; cursor: pointer; border-right: 1px solid var(--border); min-height: 34px; }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page); }
+select { font: inherit; font-size: 0.88rem; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--ink); min-height: 34px; }
+.explorer { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 720px) { .explorer { grid-template-columns: minmax(0, 1fr); } }
+.mesh .sh { cursor: pointer; }
+.mesh .sh rect { stroke: var(--surface); stroke-width: 2; }
+.mesh .sh.req rect { stroke: var(--ink); stroke-width: 3; }
+.mesh .sh.home rect { stroke: var(--c2); stroke-width: 3; }
+.mesh text { font-size: 11px; font-variant-numeric: tabular-nums; pointer-events: none; }
+.path { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.readout { font-size: 0.9rem; }
+.readout .big { font-size: 1.5rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.cells { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 10px; }
+.cells .card { padding: 10px 12px; }
+.cells .k { font-size: 0.78rem; color: var(--ink-2); }
+.cells .v { font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<main>
+<h1>Anatomy of a memory access on the ET-SoC-1</h1>
+<p class="byline">Measured on aifoundry2's card, 19 September 2026 · minion clock 600 MHz, NoC 400 MHz, LPDDR4X at 3733 MT/s · workload <code>workloads/memprobe</code></p>
+
+<p class="lede">How finely can this chip show you where a load's time and energy go? For time, the answer is
+<b>one cycle, for a single load</b>. You can put any one line in L1, L2, L3 or DRAM, time one load of it, and
+split the result into cache lookups, mesh hops, the memory controller and the DRAM row state. A model built from
+those parts predicts each line's DRAM latency to within ±3 cycles. For energy, the finest view is
+<b>four destinations</b>: the minion cores, the SRAM arrays, the mesh (NoC), and everything on the DDR side.
+The first three are measured rails. The DDR side is the rest of the board total. They update every 133 ms, so each
+energy number is an average over billions of identical loads.</p>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">A DRAM load, typical</div><div class="val">299 cycles</div><div class="sub">500 ns. Only ~25 cycles are DRAM timing; the rest is on-chip paths.</div></div>
+  <div class="card kpi"><div class="lab">Each mesh hop, round trip</div><div class="val">12 cycles</div><div class="sub">Paid twice on a DRAM load: to the L3 home shire, then on to the memory shire.</div></div>
+  <div class="card kpi"><div class="lab">Energy of one DRAM load</div><div class="val">5.1 nJ</div><div class="sub">67% on the DDR side, 18% mesh, 10% SRAM, 5% cores.</div></div>
+  <div class="card kpi"><div class="lab">Latency model</div><div class="val">±3 cycles</div><div class="sub">for 1,480 of 1,500 random lines, from address bits alone.</div></div>
+</div>
+
+<h2>1. What the chip lets you see</h2>
+<p>Everything here runs as an ordinary user-mode kernel through the runtime on the lab's firmware (et-platform
+<code>353f20e</code>). The table lists every instrument that turned out to work, at its finest granularity, and what
+stays out of reach.</p>
+<div class="table-wrap wide"><table>
+<thead><tr><th>What</th><th>Instrument</th><th>Finest granularity</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td class="lvl">Time</td><td><code>hpmcounter3</code>, readable in U-mode</td><td>1 cycle (1.67 ns), one load</td><td>The counter's bit-7 carry lands 11 cycles late: a value whose low 7 bits are 0–10 reads 128 short (§8). With the correction, a timed no-op reads exactly 10 cycles in 4,000 of 4,000 tries. The standard <code>cycle</code> CSR traps.</td></tr>
+<tr><td class="lvl">Where a line lives</td><td><code>evict_va</code> (CSR 0x89f), one line</td><td>Put one line in L2, L3 or DRAM</td><td>Level code 1/2/3 leaves the line in L2 / L3 / memory, and code 0 does nothing. Asynchronous: a load issued straight after can still hit (§3). Evicting a dirty line and fencing costs 150–480 cycles, the write-back.</td></tr>
+<tr><td class="lvl">Two loads in flight</td><td>two <code>ld</code>s back to back</td><td>Second load's arrival</td><td>Each minion has 2 miss handlers. This is how row conflicts show up (§6).</td></tr>
+<tr><td class="lvl">Which memory shire served a line</td><td>syscall 10 (<code>SYSCALL_PMC_MS_SAMPLE</code>)</td><td>Exact read count per memory shire</td><td>16 DRAM loads of a line add 16 (15 for 4 lines) to one shire's read counter and 0 to the other seven (one stray 1), for 64 of 64 lines (§5). Syscall 9 does the same for the shire caches' read/write counters.</td></tr>
+<tr><td class="lvl">Core events</td><td><code>hpmcounter4-8</code></td><td>Fixed events only</td><td>Retired instructions, L1 misses and I-cache events, summed over a neighbourhood of 8 minions. Choosing other events needs M-mode.</td></tr>
+<tr><td class="lvl">Board power</td><td><code>DM_CMD_GET_MODULE_POWER</code></td><td>10 mW, new value every ~130 ms</td><td>The host can ask 60 times a second, but the service processor refreshes the value once per loop pass.</td></tr>
+<tr><td class="lvl">Rail power</td><td>Service processor stats trace (<code>dev_mngt_service -t SPST:extract</code>)</td><td>3 rails: minion cores, SRAM, NoC · one record per 133 ms</td><td>A moving average that settles in ~1–2 s. The ring holds ~15 minutes, and an extract returns only records since the last wrap, so extract often. There is no DDR/DRAM rail: that is the board total minus the three rails.</td></tr>
+<tr><td class="lvl">Out of reach</td><td>—</td><td>—</td><td>DRAM activate/precharge counts, shire-cache hit/miss and occupancy counters, NoC counters, per-event energy, and faster power sampling. The first three need an M-mode syscall, a few lines in the worker firmware; the full list is in <code>docs/research/counters-and-dram.md</code>. Changing frequency or voltage (to separate clock domains, or static from dynamic power) is possible from the host but changes a shared card, so it isn't done here.</td></tr>
+</tbody></table></div>
+
+<h2>2. Trace one load</h2>
+<p>This explorer is built from the measurements below. Pick the shire that issues the load and the L3 home shire of
+the address. Physical-address bits 10:6 give the home shire, and bits 8:6 give the memory shire, so the memory shire is
+always the home shire's low three bits. The bar breaks the latency into its parts. Latency comes from the model,
+which matches measured loads to ±3 cycles. Energy is the measured average for that level; for L3 it is scaled by the
+hop count.</p>
+<div class="card">
+  <div class="controls">
+    <span>Level <span class="seg" id="lvl"></span></span>
+    <span id="dstate-wrap">DRAM row <span class="seg" id="dstate"></span></span>
+  </div>
+  <div class="controls">
+    <label>Requesting shire <select id="req"></select></label>
+    <label>L3 home shire <select id="home"></select></label>
+    <span class="small">Or click the map: <span class="seg" id="clickmode"></span></span>
+  </div>
+  <div class="explorer">
+    <div class="chart" id="mesh"></div>
+    <div>
+      <div class="readout" id="readout"></div>
+      <div class="chart" id="flame" style="margin-top:8px"></div>
+      <div class="cells" id="cells"></div>
+    </div>
+  </div>
+  <p class="small" style="margin:10px 0 0">Map: marty1885's shire layout, as in the on-chip communication report.
+  Memory shires 0–3 sit off the north edge and 4–7 off the south edge. Their positions come from the fit in §5.
+  Shire colours show L3 hit latency from the requesting shire.</p>
+</div>
+
+<h2>3. The ladder, one load at a time</h2>
+<p>For each of 64 random lines, one hart loaded the line, evicted it to a chosen level, fenced, waited 300 cycles,
+and timed one load. Values are load-to-use cycles: the timed value minus the 5 cycles of timer overhead, which puts an
+L1 hit at the 5 cycles the pointer chase measured before. The spread at L3 and DRAM is almost entirely distance on the
+mesh (§4, §5), not noise.</p>
+<div class="chart-title">Load-to-use latency by where the line was left (cycles at 600 MHz, 128 loads each)</div>
+<div class="chart scroll" id="ladder"></div>
+<div class="table-wrap"><table id="ladder-table"></table></div>
+<p>Evicts are asynchronous. With no fence, the load after an evict to memory sometimes returns in L3 time
+(minimum 214 cycles against 226 with fence and wait), and the median rises to 365 because the load queues behind
+the evict. A fence alone is not enough either. Waiting a few hundred cycles makes the placement reliable.</p>
+
+<h2>4. L3: 110 cycles plus 12 per hop</h2>
+<p>Each line's L3 home shire is picked by physical-address bits 10:6. From shire 0, 1,500 random lines were timed as
+L3 hits. Latency depends only on the home shire's Manhattan distance on the mesh: <b>110 + 12 × hops</b>, within ±2
+cycles for 1,498 of 1,500 lines. So a local L3 hit costs 110 cycles: ~48 for the L1 and L2 lookup and miss, ~62 for
+the home slice. Each hop adds 12 cycles (20 ns) for the request and the reply.</p>
+<div class="chart-title">L3 hit latency from shire 0 against distance to the home shire (one dot per home shire)</div>
+<div class="chart scroll" id="l3"></div>
+<p class="small">L2 hits in the same run come in two flavours: 37 cycles when the line is still in the bank's
+8-entry read buffer, and 48 from the array.</p>
+
+<h2>5. The memory shire leg: 91 cycles plus 12 per hop</h2>
+<p>The same 1,500 lines were also timed from DRAM (row still open, no contention), and each line's L3 time was
+subtracted. What remains is the leg from the home shire to the memory shire and back. The memory shire is picked by
+bits 8:6. The hardware counters confirm it: for all 64 lines tested, 16 DRAM loads raised the read count of the shire
+named by those bits, by 16 for 60 lines and by 15 for 4. The other seven shires' counts didn't move. Fitting one shared constant plus 12 cycles per hop puts the memory shires one step off the north
+edge (0–3) and south edge (4–7) of the mesh, at x = 1…4. The total squared error is 2 cycles² over 32 home/memory-shire
+pairs. The whole DRAM load is then</p>
+<pre><code>latency = 110 + 12·hops(requester → L3 home) + 91 + 12·hops(L3 home → memory shire)</code></pre>
+<p>and the model's error is within ±3 cycles for 1,480 of 1,500 lines. The rest are outliers from refresh and
+timer glitches.</p>
+<div class="panels">
+<div>
+<div class="chart-title">Measured DRAM latency minus model, per line (fastest of 3 loads)</div>
+<div class="chart scroll" id="modelerr"></div>
+</div>
+<div>
+<div class="chart-title">Read-counter increase on each memory shire after 16 DRAM loads of one line (first 12 of 64 lines)</div>
+<div class="table-wrap"><table id="mstable"></table></div>
+</div>
+</div>
+<p>Of the 91 cycles (152 ns), the DRAM chip itself accounts for about 14 cycles on an open-row read: read latency
+19.3 ns plus a 4.3 ns burst, from the controller's timing registers. The remaining ~77 cycles (~128 ns) are the
+memory shire: controller queue, PHY, and the crossings between the 933 MHz memory clock and the mesh. The frequency
+experiment in §9 would split this further.</p>
+
+<h2>6. Inside the DRAM: rows, banks and refresh</h2>
+<h3>Which address bits share a row</h3>
+<p>A second load B was issued one cycle behind load A, with B = A with one physical-address bit flipped. Both were
+cold in DRAM, 150 random A per bit. When B shares A's row, or sits in another bank or channel, it rides along and
+arrives with A (~300 cycles). When B is in the same bank but a different row, the controller must wait for A's row to
+finish before opening B's: <b>+40 cycles (67 ns)</b> for every bit from 18 up. That matches the controller's mapping:
+bank = PA[12:10], column = PA[17:13], row from PA[18].</p>
+<div class="chart-title">Latency of the second of two back-to-back loads, by the address bit that differs (median and 10th–90th percentile)</div>
+<div class="legend" id="bits-legend"></div>
+<div class="chart scroll" id="bits"></div>
+
+<h3>Refresh, caught in the act</h3>
+<p>Loading the same line from DRAM 19,000 times at random intervals, and folding the timestamps on a period of
+<b>2,325 cycles = 3.88 µs</b>, shows LPDDR4X refresh (tREFI = 3.9 µs):</p>
+<ul>
+<li>A load that arrives while refresh is running waits up to 210 extra cycles (350 ns). That's close to the 281 ns
+all-bank refresh time, and the wait shrinks as the load arrives later in the refresh window.</li>
+<li>Refresh also closes the open row. The next load pays an activate, 215 → 226 cycles. That's 11 cycles = 18 ns,
+exactly tRCD.</li>
+<li>With a fixed loop period of 576 cycles, a loop locks onto refresh: every fourth load is the slow one, and none
+ever lands inside the refresh itself.</li>
+</ul>
+<div class="chart-title">DRAM latency against the load's phase within the refresh period (median and slowest per bin)</div>
+<div class="chart scroll" id="refresh"></div>
+
+<h3>How long a row stays open</h3>
+<p>Open-row hits save 11 cycles. Only about two thirds of back-to-back pairs get the saving, and after 1,500–2,000
+idle cycles almost none do. That is a little faster than refresh alone would close rows, so the controller may also
+close idle rows after roughly 2 µs.</p>
+<div class="chart-title">Share of same-row second loads that were row hits, against idle time between them</div>
+<div class="chart scroll" id="pto"></div>
+
+<h2>7. Where the energy goes</h2>
+<p>Hart 0 of all 1,024 minions walked a working set sized to hit exactly one level, with no evicts. The loop was the
+same six-instruction body for every level, run for 6 s per pattern, twice each. Power above the level just before
+each run, divided by the load rate, gives energy per load. The split comes from the service processor's trace:
+<b>minion cores</b>, <b>SRAM</b> (the L2/L3/scratchpad arrays), <b>NoC</b> (the mesh), and the <b>DDR side</b> =
+board total − those three rails (memory shires, DRAM, PHY, I/O).</p>
+<div class="legend" id="energy-legend"></div>
+<div class="chart scroll" id="energy"></div>
+<div class="table-wrap wide"><table id="energy-table"></table></div>
+<ul>
+<li><b>An L2 hit is mostly SRAM:</b> 112 of 183 pJ, 1.75 pJ per byte. The core's share rises from 41 to 64 pJ
+because it spends longer stalled.</li>
+<li><b>An L3 hit costs 3× an L2 hit even locally.</b> SRAM goes to 306 pJ, for the L2 miss, the L3 read and the L2
+fill, and the NoC rail appears at 120 pJ.</li>
+<li><b>Each mesh hop costs about 59 pJ per 64-byte load</b>, 47 pJ of it on the NoC rail: going from a local to a
+far home (5.6 hops on average) adds 333 pJ. That is ~0.9 pJ per byte per hop.</li>
+<li><b>A DRAM load costs ~5.1 nJ, and two thirds of it, 3.4 nJ = 53 pJ per byte, is on the DDR side.</b> The mesh
+adds 0.9 nJ, because the request crosses the chip twice. The DRAM row itself could not be isolated: a pattern that
+conflicts on every access costs the same per load as a sequential one. With 1,024 streams interleaved, the
+sequential pattern probably re-activates rows on almost every access too.</li>
+<li>Totals from the host's board-power log are 15–20% higher than the trace's own board average, for every pattern.
+The two readings are filtered differently. The table gives both, and the split uses the trace so the parts add up.</li>
+</ul>
+
+<h2>8. A timer bug worth knowing</h2>
+<p>Before anything above was trustworthy, the cycle counter needed fixing. 8% of back-to-back read pairs differed
+by 138 or −118 cycles instead of 10. The raw values show why: a read whose low 7 bits are 0–10 is 128 too small,
+because the carry into bit 7 lands 11 cycles late. This isn't erratum RTLMIN-6496 (two harts reading counters at
+once): only one hart read here. The firmware's four-reads workaround doesn't fix it. Adding 128 to any read with low
+bits 0–10 does, for all 4,000 pairs. Any code that times short intervals with <code>hpmcounter3</code> on this card
+needs the same correction (see <code>fixcyc()</code> in <code>workloads/memprobe/kernel/memprobe.c</code>).</p>
+<div class="chart scroll" id="timer"></div>
+
+<h2>9. What would split it further</h2>
+<ul>
+<li><b>Clock domains.</b> Set the minion and NoC clocks separately (<code>DM_CMD_SET_FREQUENCY -f minion,noc</code>,
+with DVFS off) and rerun §4–5. Each stage's cycles then split into minion-clock, NoC-clock and fixed-time parts, for
+example the 77 cycles in the memory shire. It changes a shared card's state, so it waits for approval and a quiet
+card.</li>
+<li><b>Static against dynamic energy.</b> The same frequency sweep at fixed voltage gives each rail's
+C·V²·f slope.</li>
+<li><b>DRAM activate energy, and cache hit/miss counts.</b> Both need counters that only M-mode can program. A
+user-mode syscall to set event selectors would be a few lines in the worker firmware, which the lab card would need
+flashed.</li>
+</ul>
+
+<h2>10. Reproduce</h2>
+<pre><code>scripts/deploy-lab.sh aifoundry2 workloads/memprobe      # or build locally on the lab machine
+cd build/memprobe-data
+python3 ../../workloads/memprobe/gen_ops.py timer   --out .
+python3 ../../workloads/memprobe/gen_ops.py ladder  --out . --lines 64
+python3 ../../workloads/memprobe/gen_ops.py decomp  --out . --lines 1500 --reps 3 --pre-delay 1000
+python3 ../../workloads/memprobe/gen_ops.py msmap   --out . --lines 64
+python3 ../../workloads/memprobe/gen_ops.py bits    --out . --base 0x8040000000 --trials 150
+python3 ../../workloads/memprobe/gen_ops.py refresh --out . --name refresh_jit --n 19000 --jitter 3000 --start 0x1000
+python3 ../../workloads/memprobe/gen_ops.py pagetimeout --out . --row-bit 13 --trials 60
+timeout 10 ../memprobe/host/memprobe_host --program ladder.ops --program decomp.ops ...   # each run &lt; 0.1 s of card time
+for p in l1 l2 l3near l3far dram_seq dram_row; do python3 ../../workloads/memprobe/gen_ops.py table --pattern $p --out-file $p.tbl; done
+python3 workloads/memprobe/run_power.py --host-bin build/memprobe/host/memprobe_host --tables build/memprobe-data --out build/memprobe-power --seconds 6 --gap 4
+python3 workloads/memprobe/analyze_power.py build/memprobe-power --json summary.json
+python3 workloads/memprobe/analyze.py --data docs/reports/data/2026-09-19-memprobe-aifoundry2 --out summary.json</code></pre>
+<p class="small">Raw results (u32 timings with their labels, the power log, the merged rail trace) are in
+<code>docs/reports/data/2026-09-19-memprobe-aifoundry2/</code>. The runs used arena base <code>0x8040000000</code>,
+1 GB aligned, so arena offsets are physical address bits. Every card run was its own <code>timeout 10</code>
+process, and the latency probes held the card for under 0.2 s each.</p>
+</main>
+
+<script>
+const D = {"msPos":{"0":[1,-1],"1":[2,-1],"2":[3,-1],"3":[4,-1],"4":[1,6],"5":[2,6],"6":[3,6],"7":[4,6]},"energy":{"l1":{"minion":40.74009571760414,"sram":1.3326707867513186,"noc":0.5630911132351009,"rest":3.360383245074328,"sp_total":45.996240862664884,"host_total":56.47113907891722,"rate":55727897790.1087,"cpl":11.000186226988507,"watts":{"minion":2.270359890109889,"sram":0.07426694139194123,"noc":0.03137988400488423,"rest":0.18726709401709596}},"l2":{"minion":64.17979443510889,"sram":112.40885863420364,"noc":1.8759142180784725,"rest":4.9248912043340205,"sp_total":183.389458491725,"host_total":213.9800315473927,"rate":10877965565.558405,"cpl":56.38292378287195,"watts":{"minion":0.6981455938697314,"sram":1.2227796934865898,"noc":0.02040613026819904,"rest":0.05357279693486694}},"l3near":{"minion":109.80594056788864,"sram":306.23402590874787,"noc":120.40286567934658,"rest":4.692180073043993,"sp_total":541.135012229027,"host_total":642.7525760387825,"rate":2987239715.5404162,"cpl":205.10588748557706,"watts":{"minion":0.3280166666666675,"sram":0.9147944444444445,"noc":0.35967222222222217,"rest":0.014016666666664346}},"l3far":{"minion":135.64406061649572,"sram":304.3221408833156,"noc":385.3520175636692,"rest":49.15373580802209,"sp_total":874.4719548715027,"host_total":1093.8067098671206,"rate":2087149978.56277,"cpl":257.82960737375447,"watts":{"minion":0.2831094982078861,"sram":0.6351659498207884,"noc":0.8042874551971324,"rest":0.10259121863799336}},"dram_seq":{"minion":264.13528529875646,"sram":485.73190361396155,"noc":907.5523698050032,"rest":3411.0901609806283,"sp_total":5068.509719698349,"host_total":5896.465210056614,"rate":1209331951.9278674,"cpl":507.07126702896164,"watts":{"minion":0.3194272401433693,"sram":0.5874111111111109,"noc":1.0975320788530463,"rest":4.125140322580647}},"dram_row":{"minion":270.7933222355403,"sram":506.04758589628653,"noc":797.5582900626018,"rest":3292.346979660842,"sp_total":4866.746177855271,"host_total":5713.193339063184,"rate":1125325553.250646,"cpl":496.0657343036329,"watts":{"minion":0.3047306451612899,"sram":0.5694682795698924,"noc":0.8975127240143368,"rest":3.7049621863799307}}},"hopPj":59.25990091421791,"ladder":{"ladder:-1":{"n":128,"min":5,"p10":5,"med":5,"p90":5,"max":5},"ladder:0":{"n":128,"min":5,"p10":5,"med":5,"p90":5,"max":5},"ladder:1":{"n":127,"min":48,"p10":48,"med":48,"p90":49,"max":49},"ladder:2":{"n":128,"min":111,"p10":133,"med":171,"p90":207,"max":229},"ladder:3":{"n":128,"min":226,"p10":238,"med":309,"p90":350,"max":489},"nofence:3":{"n":128,"min":214,"p10":252,"med":365,"p90":427,"max":495},"nodelay:3":{"n":128,"min":213,"p10":227,"med":307,"p90":369,"max":429},"tevict_clean:3":{"n":128,"min":16,"p10":16,"med":16,"p90":16,"max":178},"tevict_dirty:3":{"n":128,"min":16,"p10":149,"med":241,"p90":313,"max":480}},"l3":{"0":{"med":109,"hops":0,"n":39},"1":{"med":146.0,"hops":3,"n":50},"2":{"med":157.0,"hops":4,"n":52},"3":{"med":134,"hops":2,"n":27},"4":{"med":145.0,"hops":3,"n":42},"5":{"med":194,"hops":7,"n":55},"6":{"med":205,"hops":8,"n":51},"7":{"med":218,"hops":9,"n":51},"8":{"med":122,"hops":1,"n":37},"9":{"med":134.0,"hops":2,"n":44},"10":{"med":169.0,"hops":5,"n":42},"11":{"med":170,"hops":5,"n":49},"12":{"med":157,"hops":4,"n":53},"13":{"med":158.0,"hops":4,"n":48},"14":{"med":169,"hops":5,"n":53},"15":{"med":206,"hops":8,"n":53},"16":{"med":133.0,"hops":2,"n":40},"17":{"med":158,"hops":4,"n":41},"18":{"med":181,"hops":6,"n":53},"19":{"med":182.0,"hops":6,"n":50},"20":{"med":169.0,"hops":5,"n":52},"21":{"med":170,"hops":5,"n":45},"22":{"med":181.0,"hops":6,"n":54},"23":{"med":218,"hops":9,"n":45},"24":{"med":121,"hops":1,"n":37},"25":{"med":146,"hops":3,"n":47},"26":{"med":193.0,"hops":7,"n":46},"27":{"med":194,"hops":7,"n":55},"28":{"med":181.0,"hops":6,"n":44},"29":{"med":182,"hops":6,"n":59},"30":{"med":193,"hops":7,"n":41},"31":{"med":230,"hops":10,"n":45}},"modelErr":[[-128,2],[-126,3],[-125,2],[-29,1],[-3,1],[-2,27],[-1,179],[0,564],[1,258],[2,188],[3,233],[4,38],[5,2],[44,1],[71,1]],"msmap":{"lines":64,"match":64,"rows":[{"pa":"0x80404502c0","ms_bits":3,"deltas":[0,0,0,15,0,0,0,0]},{"pa":"0x80412da080","ms_bits":2,"deltas":[0,0,15,0,0,0,0,0]},{"pa":"0x8042c02c80","ms_bits":2,"deltas":[0,0,16,0,0,0,0,0]},{"pa":"0x8042db7340","ms_bits":5,"deltas":[0,0,0,0,0,16,0,0]},{"pa":"0x804341cf40","ms_bits":5,"deltas":[0,0,0,0,0,16,0,0]},{"pa":"0x8043a0e3c0","ms_bits":7,"deltas":[0,0,0,0,0,0,0,16]},{"pa":"0x8043b79bc0","ms_bits":7,"deltas":[0,0,0,0,0,0,0,15]},{"pa":"0x8043ea5f40","ms_bits":5,"deltas":[0,0,0,0,0,15,0,0]},{"pa":"0x80446b5780","ms_bits":6,"deltas":[0,0,0,0,0,0,16,0]},{"pa":"0x804813e240","ms_bits":1,"deltas":[0,16,0,0,0,0,0,0]},{"pa":"0x804b115e80","ms_bits":2,"deltas":[0,0,16,0,0,0,0,0]},{"pa":"0x804c039740","ms_bits":5,"deltas":[0,0,0,0,0,16,0,0]},{"pa":"0x804ccccf00","ms_bits":4,"deltas":[0,0,0,0,16,0,0,0]},{"pa":"0x804d15c780","ms_bits":6,"deltas":[0,0,0,0,0,0,16,0]},{"pa":"0x804dd0b100","ms_bits":4,"deltas":[0,0,0,0,16,0,0,0]},{"pa":"0x804f17f5c0","ms_bits":7,"deltas":[0,0,0,0,0,0,0,16]}]},"bits":{"-1":{"b_minus_b0":-4.726666666666667,"se":4.028810080369118,"ab_p10":251,"ab_med":300,"ab_p90":349,"a_med":298},"6":{"b_minus_b0":-5.126666666666667,"se":3.3606925975566684,"ab_p10":250,"ab_med":301,"ab_p90":346,"a_med":299},"7":{"b_minus_b0":1.82,"se":2.9385666657772123,"ab_p10":238,"ab_med":298,"ab_p90":347,"a_med":299},"8":{"b_minus_b0":2.566666666666667,"se":4.24802011171091,"ab_p10":254,"ab_med":299,"ab_p90":346,"a_med":300},"9":{"b_minus_b0":5.88,"se":2.3192207284930935,"ab_p10":262,"ab_med":300,"ab_p90":347,"a_med":299},"10":{"b_minus_b0":8.8,"se":4.487078141294735,"ab_p10":250,"ab_med":299,"ab_p90":356,"a_med":299},"11":{"b_minus_b0":-1.44,"se":4.586181754711464,"ab_p10":252,"ab_med":301,"ab_p90":349,"a_med":299},"12":{"b_minus_b0":-3.06,"se":4.456413120110357,"ab_p10":252,"ab_med":301,"ab_p90":358,"a_med":299},"13":{"b_minus_b0":-13.426666666666666,"se":3.9085559411521267,"ab_p10":252,"ab_med":300,"ab_p90":387,"a_med":299},"14":{"b_minus_b0":-11.886666666666667,"se":3.70314017139619,"ab_p10":253,"ab_med":301,"ab_p90":426,"a_med":300},"15":{"b_minus_b0":-9.946666666666667,"se":4.167561818833126,"ab_p10":253,"ab_med":301,"ab_p90":379,"a_med":299},"16":{"b_minus_b0":-12.806666666666667,"se":3.615139637834754,"ab_p10":252,"ab_med":300,"ab_p90":405,"a_med":299},"17":{"b_minus_b0":-11.14,"se":3.1944166895659025,"ab_p10":253,"ab_med":301,"ab_p90":394,"a_med":299},"18":{"b_minus_b0":13.12,"se":3.629643304037104,"ab_p10":288,"ab_med":337,"ab_p90":454,"a_med":298},"19":{"b_minus_b0":8.4,"se":4.520636252263572,"ab_p10":287,"ab_med":337,"ab_p90":433,"a_med":299},"20":{"b_minus_b0":14.813333333333333,"se":3.3302946328419907,"ab_p10":287,"ab_med":345,"ab_p90":446,"a_med":299},"21":{"b_minus_b0":14.54,"se":4.3303582628419734,"ab_p10":289,"ab_med":337,"ab_p90":448,"a_med":299},"22":{"b_minus_b0":13.793333333333333,"se":4.654951386282166,"ab_p10":288,"ab_med":346,"ab_p90":467,"a_med":299},"23":{"b_minus_b0":13.7,"se":3.2393518560704844,"ab_p10":290,"ab_med":338,"ab_p90":384,"a_med":299},"24":{"b_minus_b0":18.673333333333332,"se":3.4624802203997076,"ab_p10":289,"ab_med":339,"ab_p90":383,"a_med":300},"25":{"b_minus_b0":15.96,"se":3.1888210777294814,"ab_p10":290,"ab_med":340,"ab_p90":388,"a_med":300},"26":{"b_minus_b0":11.326666666666666,"se":3.150050554143766,"ab_p10":289,"ab_med":339,"ab_p90":391,"a_med":301},"27":{"b_minus_b0":15.76,"se":3.764091257895173,"ab_p10":289,"ab_med":338,"ab_p90":385,"a_med":300},"28":{"b_minus_b0":15.14,"se":3.811662663393474,"ab_p10":287,"ab_med":346,"ab_p90":414,"a_med":300},"29":{"b_minus_b0":6.3,"se":4.3045966794470925,"ab_p10":290,"ab_med":342,"ab_p90":385,"a_med":300}},"refresh":{"curve":[{"phase":0,"med":215.0,"max":431,"p90":227},{"phase":1,"med":225.0,"max":434,"p90":386},{"phase":2,"med":373,"max":434,"p90":399},{"phase":3,"med":332,"max":378,"p90":359},{"phase":4,"med":284,"max":330,"p90":311},{"phase":5,"med":239,"max":286,"p90":268},{"phase":6,"med":226.0,"max":237,"p90":227},{"phase":7,"med":226.0,"max":227,"p90":227},{"phase":8,"med":226.0,"max":227,"p90":227},{"phase":9,"med":226.0,"max":227,"p90":227},{"phase":10,"med":226,"max":227,"p90":227},{"phase":11,"med":226.0,"max":227,"p90":227},{"phase":12,"med":226.0,"max":227,"p90":227},{"phase":13,"med":226.0,"max":227,"p90":227},{"phase":14,"med":226.0,"max":227,"p90":227},{"phase":15,"med":226,"max":227,"p90":227},{"phase":16,"med":226,"max":227,"p90":227},{"phase":17,"med":226,"max":227,"p90":227},{"phase":18,"med":226,"max":227,"p90":227},{"phase":19,"med":226,"max":227,"p90":227},{"phase":20,"med":226,"max":227,"p90":227},{"phase":21,"med":226.0,"max":227,"p90":227},{"phase":22,"med":226,"max":227,"p90":227},{"phase":23,"med":225.0,"max":227,"p90":227},{"phase":24,"med":225.0,"max":227,"p90":227},{"phase":25,"med":225.0,"max":227,"p90":227},{"phase":26,"med":226,"max":227,"p90":227},{"phase":27,"med":225.0,"max":227,"p90":227},{"phase":28,"med":225.0,"max":227,"p90":227},{"phase":29,"med":225,"max":227,"p90":227},{"phase":30,"med":225,"max":227,"p90":227},{"phase":31,"med":225,"max":355,"p90":227},{"phase":32,"med":225.0,"max":227,"p90":227},{"phase":33,"med":225.0,"max":227,"p90":227},{"phase":34,"med":225,"max":227,"p90":227},{"phase":35,"med":225,"max":227,"p90":227},{"phase":36,"med":225,"max":227,"p90":227},{"phase":37,"med":225.0,"max":227,"p90":227},{"phase":38,"med":225.0,"max":227,"p90":227},{"phase":39,"med":225,"max":227,"p90":227},{"phase":40,"med":225,"max":227,"p90":227},{"phase":41,"med":225,"max":227,"p90":227},{"phase":42,"med":225,"max":227,"p90":227},{"phase":43,"med":225.0,"max":227,"p90":227},{"phase":44,"med":224.0,"max":227,"p90":227},{"phase":45,"med":225.0,"max":227,"p90":227},{"phase":46,"med":224,"max":227,"p90":227},{"phase":47,"med":220.0,"max":227,"p90":227},{"phase":48,"med":215.0,"max":227,"p90":227},{"phase":49,"med":216.0,"max":227,"p90":226}],"period_cycles":2325.4},"pto":[{"delay":0,"hit":0.6666666666666666,"median_saving":11.0,"refresh_model":0.8709677419354839},{"delay":100,"hit":0.7666666666666667,"median_saving":12.0,"refresh_model":0.8279569892473118},{"delay":200,"hit":0.5254237288135594,"median_saving":10,"refresh_model":0.7849462365591398},{"delay":400,"hit":0.711864406779661,"median_saving":11,"refresh_model":0.6989247311827957},{"delay":700,"hit":0.35,"median_saving":11.0,"refresh_model":0.5698924731182795},{"delay":1000,"hit":0.23333333333333334,"median_saving":1.0,"refresh_model":0.4408602150537635},{"delay":1500,"hit":0.05,"median_saving":-0.0,"refresh_model":0.22580645161290325},{"delay":2000,"hit":0.016666666666666666,"median_saving":-0.0,"refresh_model":0.010752688172043001},{"delay":3000,"hit":0.016666666666666666,"median_saving":-0.0,"refresh_model":0},{"delay":5000,"hit":0.0,"median_saving":1.0,"refresh_model":0},{"delay":8000,"hit":0.0,"median_saving":1.0,"refresh_model":0},{"delay":12000,"hit":0.0,"median_saving":-0.0,"refresh_model":0},{"delay":20000,"hit":0.0,"median_saving":-0.0,"refresh_model":0}],"timer":{"pairs":4000,"raw":{"10":3366,"138":320,"-118":314},"fixed":{"10":4000}}};
+const CYC_NS = 1000 / 600;
+const MESH = {0:[0,0],24:[1,0],9:[2,0],25:[3,0],2:[4,0],11:[5,0],8:[0,1],16:[1,1],1:[2,1],17:[3,1],10:[4,1],19:[5,1],
+  3:[0,2],4:[1,2],13:[2,2],14:[3,2],18:[4,2],27:[5,2],12:[1,3],21:[2,3],22:[3,3],26:[4,3],
+  20:[1,4],29:[2,4],30:[3,4],15:[4,4],23:[5,4],28:[1,5],5:[2,5],6:[3,5],7:[4,5],31:[5,5]};
+const MSPOS = D.msPos;
+const hops = (a, b) => Math.abs(a[0]-b[0]) + Math.abs(a[1]-b[1]);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function lum(hex) {  // relative luminance of #rrggbb, to pick a readable label colour
+  const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function txt(parent, x, y, s, cls, anchor) {
+  const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
+  t.textContent = s; return t;
+}
+function svgIn(id, w, h) {
+  const host = document.getElementById(id); host.innerHTML = '';
+  const svg = el('svg', {viewBox: `0 0 ${w} ${h}`, role: 'img'}, host);
+  const tip = document.createElement('div'); tip.className = 'tip'; host.appendChild(tip);
+  return {svg, tip, host};
+}
+function hover(target, tip, host, html) {
+  const show = ev => {
+    tip.innerHTML = html(); tip.style.display = 'block';
+    const r = host.getBoundingClientRect();
+    const p = ev.touches ? ev.touches[0] : ev;
+    let x = p.clientX - r.left + 12, y = p.clientY - r.top + 12;
+    if (x + 260 > r.width) x = Math.max(0, p.clientX - r.left - 270);
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  };
+  target.addEventListener('mousemove', show);
+  target.addEventListener('touchstart', show, {passive: true});
+  target.addEventListener('mouseleave', () => tip.style.display = 'none');
+}
+function linear(d0, d1, r0, r1) { return v => r0 + (v - d0) / (d1 - d0) * (r1 - r0); }
+function axisY(svg, y, ticks, x0, x1, fmt) {
+  for (const t of ticks) {
+    el('line', {x1: x0, x2: x1, y1: y(t), y2: y(t), class: 'grid-line'}, svg);
+    txt(svg, x0 - 6, y(t) + 4, fmt ? fmt(t) : t, 'tick', 'end');
+  }
+}
+const fmt = (v, d=0) => Number(v).toLocaleString('en-US', {maximumFractionDigits: d, minimumFractionDigits: d});
+
+/* ---------- explorer ---------- */
+const LEVELS = [['L1','L1'],['L2','L2'],['L3','L3'],['DRAM','DRAM']];
+const DSTATES = [['open','open'],['closed','closed'],['conflict','conflict'],['refresh','in refresh']];
+const st = {lvl: 'DRAM', dstate: 'open', req: 0, home: 31, click: 'req'};
+function segs(id, opts, key, after) {
+  const box = document.getElementById(id); box.innerHTML = '';
+  for (const [v, label] of opts) {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = label;
+    b.setAttribute('aria-pressed', st[key] === v);
+    b.onclick = () => { st[key] = v; segs(id, opts, key, after); after(); };
+    box.appendChild(b);
+  }
+}
+function parts() {
+  const h1 = hops(MESH[st.req], MESH[st.home]);
+  const ms = st.home & 7, h2 = hops(MESH[st.home], MSPOS[ms]);
+  const P = [];
+  if (st.lvl === 'L1') { P.push(['L1 hit', 5, 'c1']); return {P, h1, h2, ms}; }
+  P.push(['L1 miss + L2 lookup', 48, 'c1']);
+  if (st.lvl === 'L2') return {P, h1, h2, ms};
+  P.push(['L3 home slice', 62, 'c2']);
+  if (h1) P.push([`mesh, ${h1} hop${h1>1?'s':''} ×12`, 12*h1, 'c3']);
+  if (st.lvl === 'L3') return {P, h1, h2, ms};
+  if (h2) P.push([`mesh to memory shire, ${h2} hop${h2>1?'s':''} ×12`, 12*h2, 'c3']);
+  P.push(['memory shire: queue, PHY, clock crossing', 77, 'c4']);
+  P.push(['DRAM read (open row)', 14, 'c5']);
+  if (st.dstate === 'closed' || st.dstate === 'refresh') P.push(['activate (tRCD)', 11, 'c6']);
+  if (st.dstate === 'conflict') P.push(['wait for other row + precharge + activate', 40, 'c6']);
+  if (st.dstate === 'refresh') P.push(['wait for refresh (worst case)', 210, 'c7']);
+  return {P, h1, h2, ms};
+}
+function energy(h1) {
+  const E = D.energy;
+  if (st.lvl === 'L1') return E.l1.sp_total;
+  if (st.lvl === 'L2') return E.l2.sp_total;
+  if (st.lvl === 'L3') return E.l3near.sp_total + D.hopPj * h1;
+  return E.dram_seq.sp_total;
+}
+function drawMesh() {
+  const {svg, tip, host} = svgIn('mesh', 330, 420);
+  const cw = 50, x0 = 15, y0 = 12;
+  const pos = (x, y) => [x0 + x*cw + (x < 0 ? 0 : 0), y0 + (y+1)*cw];
+  const lat = s => 110 + 12*hops(MESH[st.req], MESH[s]);
+  const ramp = ['--q1','--q2','--q3','--q4','--q5','--q6','--q7'];
+  const {h1, h2, ms} = parts();
+  const cellsL = el('g', {}, svg), pathL = el('g', {}, svg), textL = el('g', {}, svg);
+  for (let x = 0; x < 6; x++) for (let y = 0; y < 6; y++) {
+    const s = Object.keys(MESH).find(k => MESH[k][0] === x && MESH[k][1] === y);
+    const [px, py] = pos(x, y);
+    const g = el('g', {class: s === undefined ? '' : 'sh' + (+s === st.req ? ' req' : '') + (+s === st.home ? ' home' : '')}, cellsL);
+    if (s === undefined) { el('rect', {x: px+2, y: py+2, width: cw-4, height: cw-4, rx: 6, fill: 'var(--empty)'}, g); continue; }
+    const l = lat(+s), k = Math.min(6, Math.round((l - 110) / 20));
+    el('rect', {x: px+2, y: py+2, width: cw-4, height: cw-4, rx: 6, fill: `var(${ramp[k]})`}, g);
+    const t = txt(textL, px + cw/2, py + cw/2 + 4, s, 'lab-strong', 'middle');
+    t.style.fill = lum(css(ramp[k])) < 0.35 ? '#ffffff' : '#0b0b0b';
+    g.addEventListener('click', () => { st[st.click] = +s; sync(); });
+    hover(g, tip, host, () => `Shire ${s}<br>L3 hit from shire ${st.req}: <b>${lat(+s)} cycles</b> (${hops(MESH[st.req], MESH[+s])} hops)`);
+  }
+  for (let m = 0; m < 8; m++) {
+    const [mx, my] = MSPOS[m], [px, py] = pos(mx, my);
+    const on = st.lvl === 'DRAM' && m === ms;
+    el('rect', {x: px+2, y: py+8, width: cw-4, height: cw-16, rx: 6, fill: on ? 'var(--c4)' : 'var(--empty)',
+      stroke: 'var(--axis)', 'stroke-width': 1}, cellsL);
+    txt(textL, px + cw/2, py + cw/2 + 4, 'M' + m, on ? 'lab-strong' : 'lab', 'middle');
+  }
+  const ctr = p => { const [px, py] = pos(p[0], p[1]); return [px + cw/2, py + cw/2]; };
+  const lpath = (a, b) => { const [ax, ay] = ctr(a), [bx, by] = ctr(b); return `M${ax},${ay} L${bx},${ay} L${bx},${by}`; };
+  if (st.lvl === 'L3' || st.lvl === 'DRAM') el('path', {d: lpath(MESH[st.req], MESH[st.home]), class: 'path', stroke: 'var(--c3)', opacity: 0.85}, pathL);
+  if (st.lvl === 'DRAM') el('path', {d: lpath(MESH[st.home], MSPOS[ms]), class: 'path', stroke: 'var(--c4)', 'stroke-dasharray': '6 4', opacity: 0.9}, pathL);
+}
+function drawFlame() {
+  const {P, h1, h2, ms} = parts();
+  const total = P.reduce((a, p) => a + p[1], 0);
+  const {svg, tip, host} = svgIn('flame', 600, 110);
+  const x = linear(0, Math.max(total, 60), 0, 600);
+  el('rect', {x: 0, y: 4, width: x(total) - 2, height: 30, rx: 4, fill: 'var(--ink)'}, svg);
+  txt(svg, 8, 24, `${st.lvl} load: ${total} cycles`, 'lab-strong').style.fill = 'var(--page)';
+  let acc = 0;
+  for (const [name, c, col] of P) {
+    const g = el('g', {}, svg);
+    const w = Math.max(2, x(c) - 2);
+    el('rect', {x: x(acc), y: 38, width: w, height: 30, rx: 4, fill: `var(--${col})`}, g);
+    if (w > 34) { const t = txt(g, x(acc) + 5, 58, c, 'lab-strong'); t.style.fill = '#0b0b0b'; }
+    hover(g, tip, host, () => `<b>${name}</b><br>${c} cycles = ${fmt(c*CYC_NS)} ns (${fmt(100*c/total)}%)`);
+    acc += c;
+  }
+  let lx = 0;
+  const leg = el('g', {}, svg);
+  txt(leg, 0, 90, 'Hover a segment for its name. Cycles at 600 MHz; 1 cycle = 1.67 ns.', 'tick');
+  const E = energy(h1);
+  document.getElementById('readout').innerHTML =
+    `<span class="big">${total} cycles</span> · ${fmt(total*CYC_NS)} ns · ` +
+    `<span class="big">${fmt(E/1000, E >= 1000 ? 1 : 2)} nJ</span> per load` +
+    (st.lvl === 'DRAM' ? ` <span class="small">(measured average over all paths)</span>` : '');
+  const cells = [];
+  cells.push(['Requesting shire', `${st.req}`]);
+  if (st.lvl === 'L3' || st.lvl === 'DRAM') cells.push(['L3 home shire', `${st.home} · ${h1} hops`]);
+  if (st.lvl === 'DRAM') cells.push(['Memory shire', `M${ms} · ${h2} hops from home`]);
+  const en = st.lvl === 'L1' ? D.energy.l1 : st.lvl === 'L2' ? D.energy.l2 : st.lvl === 'L3' ? D.energy.l3near : D.energy.dram_seq;
+  cells.push(['Cores / SRAM / NoC / DDR side', `${fmt(en.minion)} / ${fmt(en.sram)} / ${fmt(en.noc)} / ${fmt(en.rest)} pJ`]);
+  if (st.lvl === 'L3') cells.push(['Mesh energy', `+${fmt(D.hopPj)} pJ per hop`]);
+  document.getElementById('cells').innerHTML = cells.map(([k, v]) => `<div class="card"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+}
+function sync() {
+  document.getElementById('req').value = st.req; document.getElementById('home').value = st.home;
+  document.getElementById('dstate-wrap').style.display = st.lvl === 'DRAM' ? '' : 'none';
+  drawMesh(); drawFlame();
+}
+(function initExplorer() {
+  const ids = Object.keys(MESH).map(Number).sort((a, b) => a - b);
+  for (const id of ['req', 'home']) {
+    const s = document.getElementById(id);
+    s.innerHTML = ids.map(i => `<option value="${i}">shire ${i}</option>`).join('');
+    s.onchange = () => { st[id] = +s.value; sync(); };
+  }
+  segs('lvl', LEVELS, 'lvl', sync);
+  segs('dstate', DSTATES, 'dstate', sync);
+  segs('clickmode', [['req','sets requester'],['home','sets home']], 'click', () => {});
+  sync();
+})();
+
+/* ---------- ladder ---------- */
+(function () {
+  const rows = [['in L1', 'ladder:-1'], ['evicted to L2', 'ladder:1'], ['evicted to L3', 'ladder:2'], ['evicted to memory', 'ladder:3'],
+    ['to memory, fence, no wait', 'nodelay:3'], ['to memory, no fence', 'nofence:3']];
+  const W = 900, H = 40 + rows.length * 42, L = 190, R = 30;
+  const {svg, tip, host} = svgIn('ladder', W, H);
+  const x = linear(0, 520, L, W - R);
+  for (const t of [0, 100, 200, 300, 400, 500]) {
+    el('line', {x1: x(t), x2: x(t), y1: 10, y2: H - 24, class: 'grid-line'}, svg);
+    txt(svg, x(t), H - 6, t, 'tick', 'middle');
+  }
+  rows.forEach(([name, k], i) => {
+    const v = D.ladder[k], y = 26 + i * 42;
+    txt(svg, L - 10, y + 4, name, 'lab', 'end');
+    const g = el('g', {}, svg);
+    el('line', {x1: x(v.p10), x2: x(v.p90), y1: y, y2: y, stroke: 'var(--c1)', 'stroke-width': 6, 'stroke-linecap': 'round', opacity: 0.35}, g);
+    el('line', {x1: x(v.min), x2: x(v.max), y1: y, y2: y, stroke: 'var(--c1)', 'stroke-width': 2, opacity: 0.6}, g);
+    el('circle', {cx: x(v.med), cy: y, r: 6, fill: 'var(--c1)', stroke: 'var(--surface)', 'stroke-width': 2}, g);
+    txt(g, x(v.max) + 8, y + 4, `${v.med}`, 'lab-strong');
+    el('rect', {x: L, y: y - 16, width: W - L - R, height: 32, fill: 'transparent'}, g);
+    hover(g, tip, host, () => `<b>${name}</b><br>median ${v.med} · 10–90%: ${v.p10}–${v.p90} · range ${v.min}–${v.max} cycles`);
+  });
+  const t = document.getElementById('ladder-table');
+  t.innerHTML = '<thead><tr><th>Line left in</th><th class="num">min</th><th class="num">median</th><th class="num">90%</th><th class="num">max</th><th class="num">median ns</th></tr></thead><tbody>' +
+    rows.map(([n, k]) => { const v = D.ladder[k]; return `<tr><td>${n}</td><td class="num">${v.min}</td><td class="num">${v.med}</td><td class="num">${v.p90}</td><td class="num">${v.max}</td><td class="num">${fmt(v.med*CYC_NS)}</td></tr>`; }).join('') +
+    `<tr><td>dirty line: evict + fence</td><td class="num">${D.ladder['tevict_dirty:3'].p10}</td><td class="num">${D.ladder['tevict_dirty:3'].med}</td><td class="num">${D.ladder['tevict_dirty:3'].p90}</td><td class="num">${D.ladder['tevict_dirty:3'].max}</td><td class="num">${fmt(D.ladder['tevict_dirty:3'].med*CYC_NS)}</td></tr></tbody>`;
+})();
+
+/* ---------- L3 vs hops ---------- */
+(function () {
+  const W = 900, H = 300, L = 56, R = 20, T = 14, B = 40;
+  const {svg, tip, host} = svgIn('l3', W, H);
+  const x = linear(0, 10, L + 10, W - R - 10), y = linear(100, 240, H - B, T);
+  axisY(svg, y, [100, 140, 180, 220], L, W - R);
+  for (let h = 0; h <= 10; h++) txt(svg, x(h), H - B + 18, h, 'tick', 'middle');
+  txt(svg, (L + W) / 2, H - 4, 'hops from shire 0 to the home shire', 'lab', 'middle');
+  el('line', {x1: x(0), y1: y(110), x2: x(10), y2: y(230), stroke: 'var(--ref)', 'stroke-width': 2, 'stroke-dasharray': '5 4'}, svg);
+  txt(svg, x(8.2), y(110 + 12*8.2) - 10, '110 + 12 × hops', 'lab', 'middle');
+  const byH = {};
+  for (const [s, v] of Object.entries(D.l3)) (byH[v.hops] = byH[v.hops] || []).push([+s, v]);
+  for (const [h, arr] of Object.entries(byH)) arr.forEach(([s, v], i) => {
+    const g = el('g', {}, svg);
+    const cx = x(+h) + (i - (arr.length - 1) / 2) * 11;
+    el('circle', {cx, cy: y(v.med), r: 5, fill: 'var(--c1)', stroke: 'var(--surface)', 'stroke-width': 2}, g);
+    el('circle', {cx, cy: y(v.med), r: 12, fill: 'transparent'}, g);
+    hover(g, tip, host, () => `Home shire <b>${s}</b>, ${h} hops<br>median ${v.med} cycles over ${v.n} lines<br>model ${110 + 12*h}`);
+  });
+})();
+
+/* ---------- model error ---------- */
+(function () {
+  const data = D.modelErr.filter(([e]) => e >= -6 && e <= 6);
+  const W = 900, H = 200, L = 56, R = 20, T = 12, B = 36;
+  const {svg, tip, host} = svgIn('modelerr', W, H);
+  const maxN = Math.max(...data.map(d => d[1]));
+  const x = linear(-6.5, 6.5, L, W - R), y = linear(0, maxN, H - B, T);
+  axisY(svg, y, [0, 200, 400, 600].filter(v => v <= maxN * 1.05), L, W - R);
+  for (let e = -6; e <= 6; e++) txt(svg, x(e), H - B + 18, e > 0 ? '+' + e : e, 'tick', 'middle');
+  txt(svg, (L + W) / 2, H - 2, 'cycles (measured − model)', 'lab', 'middle');
+  const bw = (x(1) - x(0)) - 4;
+  for (const [e, n] of data) {
+    const g = el('g', {}, svg);
+    el('rect', {x: x(e) - bw / 2, y: y(n), width: bw, height: y(0) - y(n), rx: 3, fill: 'var(--c1)'}, g);
+    hover(g, tip, host, () => `${e > 0 ? '+' : ''}${e} cycles: <b>${n}</b> lines`);
+  }
+  const out = D.modelErr.filter(([e]) => e < -6 || e > 6).reduce((a, d) => a + d[1], 0);
+  txt(svg, W - R, T + 10, `${out} lines outside ±6 (timer glitches, refresh)`, 'lab', 'end');
+})();
+
+/* ---------- memory shire counters table ---------- */
+(function () {
+  const t = document.getElementById('mstable');
+  t.innerHTML = '<thead><tr><th>Physical address</th><th class="num">PA[8:6]</th>' +
+    [0,1,2,3,4,5,6,7].map(m => `<th class="num">M${m}</th>`).join('') + '</tr></thead><tbody>' +
+    D.msmap.rows.slice(0, 12).map(r => `<tr><td><code>${r.pa}</code></td><td class="num">${r.ms_bits}</td>` +
+      r.deltas.map((d, m) => `<td class="num"${m === r.ms_bits ? ' style="font-weight:700"' : ''}>${d}</td>`).join('') + '</tr>').join('') +
+    `</tbody><caption class="small" style="caption-side:bottom;text-align:left;padding-top:6px">${D.msmap.match} of ${D.msmap.lines} lines: the counter that rose is the one named by PA[8:6]. The 15s are loads that still hit L3 because their evict hadn't finished.</caption>`;
+})();
+
+/* ---------- bit sweep ---------- */
+(function () {
+  const role = b => b < 0 ? ['same line', 'ref'] : b <= 8 ? ['memory shire / L3 home', 'c1'] : b === 9 ? ['channel', 'c1'] :
+    b <= 12 ? ['bank', 'c1'] : b <= 17 ? ['column (same row)', 'c3'] : ['row', 'c2'];
+  const lg = document.getElementById('bits-legend');
+  lg.innerHTML = [['address bits 6–12: memory shire, channel, bank', 'c1'], ['bits 13–17: column, same row', 'c3'], ['bits 18+: row, same bank', 'c2']]
+    .map(([n, c]) => `<span><i style="background:var(--${c})"></i>${n}</span>`).join('');
+  const bits = Object.keys(D.bits).map(Number).filter(b => b >= 6).sort((a, b) => a - b);
+  const W = 900, H = 290, L = 56, R = 16, T = 14, B = 40;
+  const {svg, tip, host} = svgIn('bits', W, H);
+  const x = linear(5.5, 29.5, L, W - R), y = linear(220, 480, H - B, T);
+  axisY(svg, y, [240, 300, 360, 420, 480], L, W - R);
+  for (const b of bits) txt(svg, x(b), H - B + 18, b, 'tick', 'middle');
+  txt(svg, (L + W) / 2, H - 2, 'physical-address bit where B differs from A', 'lab', 'middle');
+  const bw = (x(1) - x(0)) * 0.5;
+  for (const b of bits) {
+    const v = D.bits[b], [name, col] = role(b);
+    const g = el('g', {}, svg);
+    el('line', {x1: x(b), x2: x(b), y1: y(v.ab_p10), y2: y(v.ab_p90), stroke: `var(--${col})`, 'stroke-width': 2, opacity: 0.55}, g);
+    el('rect', {x: x(b) - bw / 2, y: y(v.ab_med) - 3, width: bw, height: 6, rx: 3, fill: `var(--${col})`}, g);
+    el('rect', {x: x(b) - bw, y: T, width: 2 * bw, height: H - B - T, fill: 'transparent'}, g);
+    hover(g, tip, host, () => `Bit <b>${b}</b> (${name})<br>second load: median ${v.ab_med}, 10–90% ${v.ab_p10}–${v.ab_p90} cycles<br>alone after A (not back to back): ${v.b_minus_b0 >= 0 ? '+' : ''}${fmt(v.b_minus_b0, 1)} ± ${fmt(v.se, 1)} vs baseline`);
+  }
+  txt(svg, x(23.5), y(345) - 12, '+40 cycles: row conflict', 'lab', 'middle');
+})();
+
+/* ---------- refresh ---------- */
+(function () {
+  const c = D.refresh.curve, P = D.refresh.period_cycles;
+  const W = 900, H = 260, L = 56, R = 16, T = 14, B = 40;
+  const {svg, tip, host} = svgIn('refresh', W, H);
+  const x = linear(0, 50, L, W - R), y = linear(200, 450, H - B, T);
+  axisY(svg, y, [200, 250, 300, 350, 400, 450], L, W - R);
+  for (const f of [0, 10, 20, 30, 40, 50]) txt(svg, x(f), H - B + 18, fmt(f / 50 * P / 600, 2) + ' µs', 'tick', 'middle');
+  txt(svg, (L + W) / 2, H - 2, `time since the refresh started (period ${fmt(P)} cycles = ${fmt(P / 600, 2)} µs)`, 'lab', 'middle');
+  const line = k => c.map((p, i) => `${i ? 'L' : 'M'}${x(p.phase + 0.5)},${y(p[k])}`).join(' ');
+  el('path', {d: line('max'), fill: 'none', stroke: 'var(--c2)', 'stroke-width': 2}, svg);
+  el('path', {d: line('med'), fill: 'none', stroke: 'var(--c1)', 'stroke-width': 2}, svg);
+  txt(svg, x(6), y(425), 'slowest load in the bin', 'lab');
+  txt(svg, x(4), y(372), 'median', 'lab');
+  txt(svg, x(14), y(262), 'median 226: refresh closed the row', 'lab');
+  txt(svg, x(49.5), y(240), 'open row: 215', 'lab', 'end');
+  const cross = el('line', {y1: T, y2: H - B, class: 'axis-line', opacity: 0}, svg);
+  const hit = el('rect', {x: L, y: T, width: W - L - R, height: H - B - T, fill: 'transparent'}, svg);
+  hover(hit, tip, host, () => '');
+  hit.addEventListener('mousemove', ev => {
+    const r = svg.getBoundingClientRect(), vx = (ev.clientX - r.left) / r.width * W;
+    const i = Math.max(0, Math.min(49, Math.floor((vx - L) / (W - L - R) * 50)));
+    cross.setAttribute('x1', x(i + 0.5)); cross.setAttribute('x2', x(i + 0.5)); cross.setAttribute('opacity', 1);
+    const tp = host.querySelector('.tip');
+    tp.innerHTML = `${fmt(i / 50 * P / 600, 2)}–${fmt((i + 1) / 50 * P / 600, 2)} µs after refresh start<br>median <b>${c[i].med}</b> · slowest <b>${c[i].max}</b> cycles`;
+  });
+  hit.addEventListener('mouseleave', () => cross.setAttribute('opacity', 0));
+})();
+
+/* ---------- page timeout ---------- */
+(function () {
+  const d = D.pto;
+  const W = 900, H = 240, L = 56, R = 16, T = 14, B = 40;
+  const {svg, tip, host} = svgIn('pto', W, H);
+  const lx = v => Math.log10(v + 50);
+  const x = linear(lx(0), lx(20000), L + 8, W - R), y = linear(0, 1, H - B, T);
+  axisY(svg, y, [0, 0.25, 0.5, 0.75, 1], L, W - R, v => (v * 100) + '%');
+  for (const v of [0, 100, 400, 1000, 2000, 5000, 20000]) txt(svg, x(lx(v)), H - B + 18, fmt(v), 'tick', 'middle');
+  txt(svg, (L + W) / 2, H - 2, 'idle cycles between the two loads (log scale)', 'lab', 'middle');
+  const path = k => d.map((p, i) => `${i ? 'L' : 'M'}${x(lx(p.delay))},${y(p[k])}`).join(' ');
+  el('path', {d: path('refresh_model'), fill: 'none', stroke: 'var(--ref)', 'stroke-width': 2, 'stroke-dasharray': '5 4'}, svg);
+  el('path', {d: path('hit'), fill: 'none', stroke: 'var(--c1)', 'stroke-width': 2}, svg);
+  for (const p of d) {
+    const g = el('g', {}, svg);
+    el('circle', {cx: x(lx(p.delay)), cy: y(p.hit), r: 5, fill: 'var(--c1)', stroke: 'var(--surface)', 'stroke-width': 2}, g);
+    el('circle', {cx: x(lx(p.delay)), cy: y(p.hit), r: 12, fill: 'transparent'}, g);
+    hover(g, tip, host, () => `${fmt(p.delay)} idle cycles<br>row hits: <b>${fmt(100 * p.hit)}%</b><br>if only refresh closed rows: ${fmt(100 * p.refresh_model)}%`);
+  }
+  txt(svg, x(lx(1500)) + 10, y(0.42), 'if only refresh closed rows', 'lab');
+  txt(svg, x(lx(60)), y(0.62) + 26, 'measured', 'lab-strong');
+})();
+
+/* ---------- energy ---------- */
+(function () {
+  const pats = [['l1', 'L1 hit'], ['l2', 'L2 hit'], ['l3near', 'L3 hit, own shire'], ['l3far', 'L3 hit, ~5.6 hops'], ['dram_seq', 'DRAM, sequential'], ['dram_row', 'DRAM, row conflicts']];
+  const parts = [['minion', 'minion cores', 'c1'], ['sram', 'SRAM (L2/L3)', 'c2'], ['noc', 'NoC (mesh)', 'c3'], ['rest', 'DDR side (board − rails)', 'c4']];
+  document.getElementById('energy-legend').innerHTML = parts.map(([, n, c]) => `<span><i style="background:var(--${c})"></i>${n}</span>`).join('');
+  const W = 900, rowH = 40, T = 10, L = 150, R = 70, H = T + pats.length * rowH + 34;
+  const {svg, tip, host} = svgIn('energy', W, H + 14);
+  const lx = v => Math.log10(v);
+  const x = linear(0, 5200, L, W - R);
+  for (const t of [0, 1000, 2000, 3000, 4000, 5000]) {
+    el('line', {x1: x(t), x2: x(t), y1: T, y2: H - 30, class: 'grid-line'}, svg);
+    txt(svg, x(t), H - 12, fmt(t), 'tick', 'middle');
+  }
+  txt(svg, (L + W - R) / 2, H + 2, 'pJ per 64-byte load', 'lab', 'middle');
+  pats.forEach(([k, name], i) => {
+    const e = D.energy[k], y = T + i * rowH + 6;
+    txt(svg, L - 10, y + 18, name, 'lab', 'end');
+    let acc = 0;
+    for (const [pk, pn, col] of parts) {
+      const v = Math.max(0, e[pk]); if (!v) continue;
+      const g = el('g', {}, svg);
+      const w = Math.max(1.5, x(acc + v) - x(acc) - 2);
+      el('rect', {x: x(acc), y, width: w, height: 26, rx: 3, fill: `var(--${col})`}, g);
+      el('rect', {x: x(acc), y: y - 4, width: Math.max(w, 8), height: 34, fill: 'transparent'}, g);
+      hover(g, tip, host, () => `<b>${name}</b> · ${pn}<br>${fmt(v)} pJ per load (${fmt(100 * v / e.sp_total)}%)<br>${fmt(e.watts[pk] ?? 0, 2)} W above idle`);
+      acc += v;
+    }
+    txt(svg, x(acc) + 6, y + 18, fmt(e.sp_total) + ' pJ', 'lab-strong');
+  });
+  const t = document.getElementById('energy-table');
+  t.innerHTML = '<thead><tr><th>Pattern (1,024 minions)</th><th class="num">cycles/load</th><th class="num">loads/s</th><th class="num">cores</th><th class="num">SRAM</th><th class="num">NoC</th><th class="num">DDR side</th><th class="num">total (trace)</th><th class="num">total (host log)</th><th class="num">pJ/B</th></tr></thead><tbody>' +
+    pats.map(([k, n]) => { const e = D.energy[k]; return `<tr><td>${n}</td><td class="num">${fmt(e.cpl, 1)}</td><td class="num">${(e.rate / 1e9).toFixed(2)} G</td><td class="num">${fmt(e.minion)}</td><td class="num">${fmt(e.sram)}</td><td class="num">${fmt(e.noc)}</td><td class="num">${fmt(e.rest)}</td><td class="num"><b>${fmt(e.sp_total)}</b></td><td class="num">${fmt(e.host_total)}</td><td class="num">${fmt(e.sp_total / 64, 1)}</td></tr>`; }).join('') +
+    '</tbody><caption class="small" style="caption-side:bottom;text-align:left;padding-top:6px">pJ per 64-byte load above idle, mean of two 6 s runs. The load and stall energy of the cores is included, so these are what a load costs a real program.</caption>';
+})();
+
+/* ---------- timer ---------- */
+(function () {
+  const raw = D.timer.raw, W = 900, H = 150, L = 190, R = 30;
+  const {svg, tip, host} = svgIn('timer', W, H);
+  const rows = [['raw read pairs', raw], ['with fixcyc()', D.timer.fixed]];
+  const x = linear(-130, 150, L, W - R);
+  for (const t of [-118, 10, 138]) { el('line', {x1: x(t), x2: x(t), y1: 8, y2: H - 26, class: 'grid-line'}, svg); txt(svg, x(t), H - 8, t, 'tick', 'middle'); }
+  rows.forEach(([name, h], i) => {
+    const y = 34 + i * 48;
+    txt(svg, L - 10, y + 4, name, 'lab', 'end');
+    for (const [k, n] of Object.entries(h)) {
+      const g = el('g', {}, svg);
+      const r = 4 + 16 * Math.sqrt(n / 4000);
+      el('circle', {cx: x(+k), cy: y, r, fill: 'var(--c1)', stroke: 'var(--surface)', 'stroke-width': 2}, g);
+      txt(g, x(+k) + r + 6, y + 4, `${n}`, 'lab');
+      hover(g, tip, host, () => `${name}: <b>${n}</b> of 4,000 pairs read ${k} cycles apart`);
+    }
+  });
+})();
+</script>
+</body>
+</html>

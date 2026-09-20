@@ -29,7 +29,10 @@ page and `CLAUDE.md` carry the context.
     99% zeros. The report also ranks scenarios where the chip could beat an A100. Report:
     [docs/reports/2026-09-18-et-soc1-sparsity.html](reports/2026-09-18-et-soc1-sparsity.html), published privately at
     https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute.
-  - Summaries of all three are in [et-soc1-notes.md](et-soc1-notes.md).
+  - One memory access taken apart on aifoundry2 (`workloads/memprobe`): L3 = 110 + 12/hop, DRAM adds 91 + 12/hop to the
+    memory shire, rows/banks/refresh, and energy per load by rail. Report:
+    [docs/reports/2026-09-19-et-soc1-memory-anatomy.html](reports/2026-09-19-et-soc1-memory-anatomy.html).
+  - Summaries of all of these are in [et-soc1-notes.md](et-soc1-notes.md).
 - **Next:**
   - A real GEMM, tiling through the L2 scratchpad with cooperative tensor loads. FOSDEM reached 10.25 TFLOP/s this way.
   - Hart 1 prefetching with `TensorLoadL2Scp`.
