@@ -34,6 +34,12 @@ page and `CLAUDE.md` carry the context.
     [docs/reports/2026-09-19-et-soc1-memory-anatomy.html](reports/2026-09-19-et-soc1-memory-anatomy.html).
   - The observability survey: what the card, the simulator and the RTL each let you see, and the firmware-signing caveat on
     making more visible. Report: [docs/reports/2026-09-20-et-soc1-limits-of-observability.html](reports/2026-09-20-et-soc1-limits-of-observability.html).
+  - Tooling from the survey (2026-09-20): device flame graphs (`workloads/traceprof`, `scripts/trace-flamegraph.py`); the
+    `hpmcounter3` late carry root-caused in the original RTL under Verilator (`rtl-sim/pmu_carry`; Verilator 5.042 is built in
+    `~/.local/verilator` on aifoundry2, with `libfl-dev` and `help2man` unpacked under `~/.local/debs`); and a counter-configure
+    syscall for the minion firmware, verified in `sys_emu` (`patches/0003`, `scripts/build-minion-fw.sh`, `workloads/pmcsel`).
+    No firmware was flashed: the boot chain checks signatures and the open tree has no signing key, so that waits for a
+    signed build or word from the lab on how the card is provisioned.
   - Summaries of all of these are in [et-soc1-notes.md](et-soc1-notes.md).
 - **Next:**
   - A real GEMM, tiling through the L2 scratchpad with cooperative tensor loads. FOSDEM reached 10.25 TFLOP/s this way.

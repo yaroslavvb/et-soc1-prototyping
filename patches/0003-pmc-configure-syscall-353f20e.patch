@@ -1,0 +1,112 @@
+diff -ruN a/device-minion-runtime/src/MachineMinion/src/syscall.c b/device-minion-runtime/src/MachineMinion/src/syscall.c
+--- a/device-minion-runtime/src/MachineMinion/src/syscall.c	2025-12-30 04:00:51.000000000 -0800
++++ b/device-minion-runtime/src/MachineMinion/src/syscall.c	2026-09-20 14:00:26.116498080 -0700
+@@ -62,6 +62,56 @@
+     uint64_t scp_enabled, uint64_t cacheop_reprate, uint64_t cacheop_max);
+ static int64_t set_l1_cache_control(uint64_t d1_split, uint64_t scp_en);
+ 
++/* Lets a kernel choose what the performance counters count (SYSCALL_PMC_CONFIGURE).
++   mhpmevent3 is refused: hpmcounter3 must keep counting cycles, the firmware's time stamp. */
++static int64_t configure_pmc(uint64_t target, uint64_t value)
++{
++    const uint64_t kind = target >> 56;
++    const uint64_t reg = target & 0xFF;
++
++    if (kind == PMC_CFG_KIND_CORE)
++    {
++        const uint64_t evt_reg = target & 0xFFF;
++        if (evt_reg < PMU_MHPMEVENT4 || evt_reg > PMU_MHPMEVENT8)
++        {
++            return -1;
++        }
++        /* counter CSR = event CSR + 0x7E0 (0x324 -> 0xB04) */
++        (void)pmu_core_counter_write(evt_reg + (PMU_MHPMCOUNTER3 - PMU_MHPMEVENT3), 0);
++        return pmu_core_event_configure(evt_reg, value);
++    }
++    if (kind == PMC_CFG_KIND_SC)
++    {
++        const uint64_t shire = (target >> 16) & 0xFF;
++        const uint64_t bank = (target >> 8) & 0xFF;
++        if (shire > 32 || bank > 3 || reg > 2)
++        {
++            return -1;
++        }
++        if (reg == 2)
++        {
++            pmu_shire_cache_counter_set(shire, bank, value);
++            return 0;
++        }
++        return pmu_shire_cache_event_configure(shire, bank, reg, value);
++    }
++    if (kind == PMC_CFG_KIND_MS)
++    {
++        const uint64_t ms = (target >> 8) & 0xFF;
++        if (ms > 7 || reg > 4)
++        {
++            return -1;
++        }
++        if (reg == 4)
++        {
++            pmu_memshire_event_set(ms, value);
++            return 0;
++        }
++        return pmu_memshire_event_configure(ms, reg, value);
++    }
++    return -1;
++}
++
+ int64_t syscall_handler(uint64_t number, uint64_t arg1, uint64_t arg2, uint64_t arg3)
+ {
+     int64_t ret = SYSCALL_INTERNAL_SUCCESS;
+@@ -133,6 +183,9 @@
+         case SYSCALL_PMC_MS_SAMPLE_INT:
+             ret = (int64_t)sample_ms_pmcs(arg1, arg2);
+             break;
++        case SYSCALL_PMC_CONFIGURE_INT:
++            ret = configure_pmc(arg1, arg2);
++            break;
+         case SYSCALL_PMC_SC_SAMPLE_ALL_INT:
+             ret = sample_sc_pmcs_all(arg1, arg2, (shire_pmc_cnt_t *)arg3);
+             break;
+diff -ruN a/device-minion-runtime/src/shared/minion_rt_helpers/include/syscall_internal.h b/device-minion-runtime/src/shared/minion_rt_helpers/include/syscall_internal.h
+--- a/device-minion-runtime/src/shared/minion_rt_helpers/include/syscall_internal.h	2025-12-30 04:00:51.000000000 -0800
++++ b/device-minion-runtime/src/shared/minion_rt_helpers/include/syscall_internal.h	2026-09-20 14:00:26.108401958 -0700
+@@ -25,6 +25,7 @@
+ #define SYSCALL_ENABLE_NEIGH                    22
+ #define SYSCALL_PMC_SC_SAMPLE_ALL_INT           23
+ #define SYSCALL_PMC_MS_SAMPLE_ALL_INT           24
++#define SYSCALL_PMC_CONFIGURE_INT               25
+ 
+ /* SYSCALL error codes */
+ #define SYSCALL_INTERNAL_SUCCESS    0
+diff -ruN a/device-minion-runtime/src/WorkerMinion/src/syscall.c b/device-minion-runtime/src/WorkerMinion/src/syscall.c
+--- a/device-minion-runtime/src/WorkerMinion/src/syscall.c	2025-12-30 04:00:51.000000000 -0800
++++ b/device-minion-runtime/src/WorkerMinion/src/syscall.c	2026-09-20 14:00:26.108457635 -0700
+@@ -72,6 +72,9 @@
+         case SYSCALL_PMC_MS_SAMPLE:
+             ret = syscall(SYSCALL_PMC_MS_SAMPLE_INT, arg1, arg2, arg3);
+             break;
++        case SYSCALL_PMC_CONFIGURE:
++            ret = syscall(SYSCALL_PMC_CONFIGURE_INT, arg1, arg2, arg3);
++            break;
+         default:
+             ret = SYSCALL_INVALID_ID;
+             break;
+diff -ruN a/et-common-libs/include/etsoc/isa/syscall.h b/et-common-libs/include/etsoc/isa/syscall.h
+--- a/et-common-libs/include/etsoc/isa/syscall.h	2025-12-30 04:00:51.000000000 -0800
++++ b/et-common-libs/include/etsoc/isa/syscall.h	2026-09-20 14:00:26.108320168 -0700
+@@ -25,6 +25,14 @@
+ #define SYSCALL_PMC_SC_SAMPLE               (SYSCALL_UMODE_THRESHOLD + 9)
+ #define SYSCALL_PMC_MS_SAMPLE               (SYSCALL_UMODE_THRESHOLD + 10)
+ #define SYSCALL_CACHE_OPS_EVICT_WHOLE_L1_L2 (SYSCALL_UMODE_THRESHOLD + 11)
++/* Choose what the performance counters count: syscall(SYSCALL_PMC_CONFIGURE, target, value, 0).
++   target = kind << 56 | fields (see PMC_CFG_* below). Returns 0, or -1 for a bad target. */
++#define SYSCALL_PMC_CONFIGURE (SYSCALL_UMODE_THRESHOLD + 12)
++
++#define PMC_CFG_KIND_CORE 0ULL /* fields: mhpmevent CSR 0x324-0x328 of the calling hart; value: event id */
++#define PMC_CFG_KIND_SC   1ULL /* fields: shire << 16 | bank << 8 | reg (0 P0 qual, 1 P1 qual, 2 ctl_status) */
++#define PMC_CFG_KIND_MS   2ULL /* fields: memshire << 8 | reg (0 P0 qual, 1 P1 qual, 2 P0 qual2, 3 P1 qual2, 4 ctl_status) */
++#define PMC_CFG_TARGET(kind, fields) (((kind) << 56) | (fields))
+ #define SYSCALL_UMODE_THRESHOLD_LIMIT       127
+ 
+ /* SYSCALL IDs for syscalls from U-Mode */

@@ -1,13 +1,13 @@
 <h1>Limits of Observability</h1>
-<p class="byline">ET-SoC-1 on aifoundry2's card, et-platform <code>353f20e</code> firmware, core-et <code>b38a1a3</code> RTL · 20 September 2026 · a survey of what can be seen, at every granularity, from board power down to a flip-flop</p>
+<p class="byline">ET-SoC-1 on aifoundry2's card, et-platform <code>353f20e</code> firmware, core-et <code>b38a1a3</code> RTL · 20 September 2026, updated the same day with the first tooling results · a survey of what can be seen, at every granularity, from board power down to a flip-flop</p>
 
 <p class="lede">This chip ships with its manuals, errata, firmware source, functional simulator and the RTL of its core. The
 question was: how far down can you see, and can you watch individual bits flip? The short answer has three parts.
 <b>On the card, from a user account, the floor is one clock cycle for time and one 64-bit register of a halted
 hart for state</b>; no counter, trace or sensor returns the value of an arbitrary flop or SRAM bit, and the only
 bit-level detectors, the ECC checkers, are wired but not switched on. <b>In the functional simulator, every
-architectural bit every instruction</b>, with no timing. <b>In RTL simulation, every flop every cycle</b>, for
-one neighbourhood of eight minions, once a broken Verilator flow is repaired. Below silicon, this is far more than a
+architectural bit every instruction</b>, with no timing. <b>In RTL simulation, every flop every cycle</b>: single modules of the original RTL already run here under Verilator
+(one of them explains a counter bug measured on the card, §2), and the whole eight-minion bench needs more repair. Below silicon, this is far more than a
 GPU offers. On silicon, it is roughly a GPU's depth with weaker ECC coverage, and much of the extra reach sits behind
 firmware that the card's boot chain signature-checks.</p>
 
@@ -55,6 +55,12 @@ configures it, and the SP gates its clock at boot.</li>
 <li><b>Physically:</b> scan chains exist (a one-shot, stopped-clock flop dump with tooling that is not open), and laser or e-beam probing is a
 different project. Not for a shared PCIe card.</li>
 </ul>
+<p><b>A first result from the RTL.</b> On the card, <code>hpmcounter3</code> reads 128 short whenever its low 7 bits
+are 0–10. Simulating the original <code>neigh_pmu.v</code> under Verilator (<code>rtl-sim/pmu_carry</code>) shows why: each
+counter is a 7-bit pre-counter plus a 57-bit post-counter, twelve counters share one adder that folds pre-counter
+overflows into the post-counters in round-robin order, and a read ignores the pending overflow bit. So after every wrap
+the value is 128 short until the adder comes round again: 12 cycles in the simulation, 11 on the card. That is a silicon
+measurement explained by a flip-flop-level view of the design, which is the point of having the RTL.</p>
 <p><b>In simulation: yes, twice over.</b> <code>sys_emu -l</code> prints every executed instruction on any selected hart with each architectural write it
 makes: integer registers, all 8 lanes of a vector register, mask registers, every memory read and write up to 512 bits, CSR writes, traps. XOR
 successive values and you have the bits that changed. It is functional, not cycle-accurate, and it models no cache contents. The RTL bench goes

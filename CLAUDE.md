@@ -47,4 +47,5 @@ is per-machine, so keep that page up to date when the state of the work changes.
 - Validate FP/vector code with `SIM_PARAMS="-vpurf_check -mem_check"`. A0 silicon has the VPU register-file
   hazard (errata 1.29), and this GCC does not insert workarounds.
 - `sys_emu` is functional only, so there are no performance numbers from it. Test on a small `--shire_mask` first because it is slow.
-- Only hart 0 of a minion may issue tensor ops, except `TensorLoadL2Scp`/`TensorWait`. There is no hardware fdiv/fsqrt.
+- Only hart 0 of a minion may issue tensor ops, except `TensorLoadL2Scp`/`TensorWait`. There is no hardware fdiv/fsqrt, and no 64-bit
+  integer-to-float conversion (`fcvt.s.lu` traps with cause 30): use 32-bit counters in floating-point loops.

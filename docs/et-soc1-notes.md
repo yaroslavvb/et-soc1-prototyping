@@ -152,7 +152,9 @@ Cycles at 600 MHz, load-to-use, one load at a time.
 | Energy per 64 B load (above idle) | L1 46 pJ, L2 183, L3 local 541, +59 per hop, DRAM 5.1 nJ (67% DDR side, 18% mesh) | 1,024 minions; minion/SRAM/NoC rails from the service processor's stats trace |
 
 Things to know when measuring:
-- **`hpmcounter3` reads 128 short when its low 7 bits are 0-10.** The carry into bit 7 lands 11 cycles late. Add 128
+- **`hpmcounter3` reads 128 short when its low 7 bits are 0-10.** The carry into bit 7 lands 11 cycles late: the PMU's 12
+  counters share one adder that folds 7-bit pre-counter overflows into the post-counters round-robin, and reads ignore the
+  pending overflow (`rtl-sim/pmu_carry` reproduces it from the original RTL). Add 128
   (`fixcyc()` in `workloads/memprobe/kernel/memprobe.c`); the firmware's four-reads workaround does not fix it. The
   `cycle` CSR traps in U-mode.
 - **`evict_va` is asynchronous.** Fence and wait a few hundred cycles before timing. Level codes name where the line is
