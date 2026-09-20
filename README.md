@@ -32,6 +32,10 @@ section 9 lists the pinned upstream versions.
   by power rail (minion cores, SRAM, NoC, DDR side). It uses `workloads/memprobe`; `docs/research/` holds the survey of
   counters, DRAM mapping and power telemetry it builds on. Private space https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy,
   uuid `2bf74fd1-fd7f-4e19-8e35-6168ae42657c`.
+- `docs/reports/2026-09-20-et-soc1-limits-of-observability.html` is the ladder of what can be observed on the chip, from board
+  power down to a flip-flop per cycle in the RTL, with what each step would take. Its sources (a seven-layer survey of the manuals,
+  firmware, RTL and tools, with two-reviewer verification of the key claims) are in `docs/reports/sources/2026-09-20-limits-of-observability/`;
+  `scripts/build-observability-report.py` assembles the page. Private space https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability, uuid `2ea37420-67b9-484e-9d4c-581e8a9f0323`.
 - `docs/lab-access.md` covers logging in to the lab machines (`aifoundry1`-`3`) and creating accounts for new people.
 - `workloads/` holds standalone workloads that run on both the simulator and the lab cards. The first one is `workloads/sgemm`:
   fp32 matmul, verified on aifoundry3's card at 127 GFLOP/s with scalar code. `scripts/deploy-lab.sh` builds a workload on a lab machine.

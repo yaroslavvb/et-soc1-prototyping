@@ -32,6 +32,8 @@ page and `CLAUDE.md` carry the context.
   - One memory access taken apart on aifoundry2 (`workloads/memprobe`): L3 = 110 + 12/hop, DRAM adds 91 + 12/hop to the
     memory shire, rows/banks/refresh, and energy per load by rail. Report:
     [docs/reports/2026-09-19-et-soc1-memory-anatomy.html](reports/2026-09-19-et-soc1-memory-anatomy.html).
+  - The observability survey: what the card, the simulator and the RTL each let you see, and the firmware-signing caveat on
+    making more visible. Report: [docs/reports/2026-09-20-et-soc1-limits-of-observability.html](reports/2026-09-20-et-soc1-limits-of-observability.html).
   - Summaries of all of these are in [et-soc1-notes.md](et-soc1-notes.md).
 - **Next:**
   - A real GEMM, tiling through the L2 scratchpad with cooperative tensor loads. FOSDEM reached 10.25 TFLOP/s this way.

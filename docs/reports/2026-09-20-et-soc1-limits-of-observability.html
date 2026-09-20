@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Limits of Observability</title>
+<meta name="description" content="What can be observed on the ET-SoC-1 at every granularity, from board power every 130 ms down to a single flip-flop per cycle in the open RTL, what could be made observable, and what stays hidden on silicon.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --code-bg: #f1f0ec;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c7: #4a3aa7; --ref: #8c8b85;
+  --ok: #008300; --warn: #eda100; --bad: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+    --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+  --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-text-size-adjust: 100%; }
+main { max-width: 940px; margin: 0 auto; padding: 28px 16px 72px; }
+h1 { font-size: 1.75rem; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; margin: 44px 0 10px; }
+h3 { font-size: 1rem; margin: 22px 0 8px; }
+.byline { color: var(--ink-2); font-size: 0.9rem; margin: 0 0 22px; }
+.lede { font-size: 1.05rem; }
+.small { font-size: 0.85rem; color: var(--ink-2); }
+a { color: var(--c1); }
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 18px 0 8px; }
+.kpi .lab { color: var(--ink-2); font-size: 0.8rem; }
+.kpi .val { font-size: 1.5rem; font-weight: 650; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.kpi .sub { color: var(--ink-2); font-size: 0.8rem; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.chart.scroll svg { min-width: 640px; }
+.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 320px; display: none; }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lab { fill: var(--ink-2); font-size: 12px; }
+.lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; }
+td.lvl { font-weight: 600; white-space: nowrap; }
+.wide table { min-width: 760px; }
+.chip { display: inline-block; font-size: 0.74rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid transparent; }
+.chip.works_now { color: var(--ok); border-color: var(--ok); }
+.chip.needs_fw_change { color: var(--c1); border-color: var(--c1); }
+.chip.needs_tooling { color: var(--warn); border-color: var(--warn); }
+.chip.research_only { color: var(--muted); border-color: var(--muted); }
+.chip.impossible_on_silicon { color: var(--bad); border-color: var(--bad); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.82rem; color: var(--ink-2); margin: 6px 0 8px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 6px; }
+.controls button { font: inherit; font-size: 0.82rem; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 12px; cursor: pointer; min-height: 30px; }
+.controls button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.verif { font-size: 0.74rem; color: var(--muted); white-space: nowrap; }
+.verif.confirmed::before { content: "✓ "; color: var(--ok); }
+.verif.disputed::before { content: "± "; color: var(--warn); }
+.verif.unverified::before { content: "· "; }
+ol li, ul li { margin: 5px 0; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--ink-2); font-size: 0.9rem; }
+.chart-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Limits of Observability</h1>
+<p class="byline">ET-SoC-1 on aifoundry2's card, et-platform <code>353f20e</code> firmware, core-et <code>b38a1a3</code> RTL · 20 September 2026 · a survey of what can be seen, at every granularity, from board power down to a flip-flop</p>
+
+<p class="lede">This chip ships with its manuals, errata, firmware source, functional simulator and the RTL of its core. The
+question was: how far down can you see, and can you watch individual bits flip? The short answer has three parts.
+<b>On the card, from a user account, the floor is one clock cycle for time and one 64-bit register of a halted
+hart for state</b>; no counter, trace or sensor returns the value of an arbitrary flop or SRAM bit, and the only
+bit-level detectors, the ECC checkers, are wired but not switched on. <b>In the functional simulator, every
+architectural bit every instruction</b>, with no timing. <b>In RTL simulation, every flop every cycle</b>, for
+one neighbourhood of eight minions, once a broken Verilator flow is repaired. Below silicon, this is far more than a
+GPU offers. On silicon, it is roughly a GPU's depth with weaker ECC coverage, and much of the extra reach sits behind
+firmware that the card's boot chain signature-checks.</p>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">Finest time on the card</div><div class="val">1 cycle</div><div class="sub">hpmcounter3 from a kernel, after correcting a late carry into bit 7</div></div>
+  <div class="card kpi"><div class="lab">Finest state on the card</div><div class="val">64 bits</div><div class="sub">one GPR, CSR or memory word of a halted hart, per management round trip</div></div>
+  <div class="card kpi"><div class="lab">Finest energy</div><div class="val">133 µJ</div><div class="sub">1 mW × 133 ms on a rail; a bit flip is ~10⁻¹⁶ J</div></div>
+  <div class="card kpi"><div class="lab">Every bit, every cycle</div><div class="val">RTL only</div><div class="sub">8 minions, ~10³–10⁴ cycles/s, after tooling</div></div>
+</div>
+
+<h2>1. The ladder</h2>
+<p>Every instrument, coarsest to finest. <b>Status</b> says what it takes on this card: <span class="chip works_now">works now</span> from a user account;
+<span class="chip needs_tooling">tooling</span> means the hardware and firmware are there but a client, a build or an external box must be written or installed;
+<span class="chip needs_fw_change">firmware</span> means a small source change plus a reflash of a signed image (§3);
+<span class="chip research_only">research</span> means possible in principle with things not in the open drop; <span class="chip impossible_on_silicon">not on silicon</span> is the hard wall.
+The check column shows whether two independent reviewers confirmed the row's citations (✓), corrected them (±), or did not get to it (·).</p>
+<div class="chart-title">Time resolution of each instrument</div>
+<div class="chart scroll" id="gran"></div>
+<div class="controls" id="filters"></div>
+<div class="table-wrap wide"><table id="ladder"></table></div>
+
+<h2>2. Can we track individual bits flipping?</h2>
+<p><b>On the card: no, and not with any firmware change.</b> Nothing on the die counts toggles. The PMU counts
+operations (up to 8 per cycle per neighbourhood), the shire-cache and memory-controller monitors count requests, and the
+power path resolves 1 mW over 133 ms, twelve orders of magnitude above one node toggle. The closest things to a bit
+read are the ECC machinery and the debug module, and both stop at architectural state:</p>
+<ul>
+<li><b>ECC covers the L2/L3/scratchpad SRAM and the instruction cache only.</b> The L1 data cache, the tensor
+scratchpad carved from it, the integer register file and the 256-bit vector register file have no ECC and no parity, so
+a flip there is invisible to hardware. DRAM ECC is compiled off (<code>ddr_mode.ecc=false</code>). The SRAM error logger
+records which 64-bit doubleword of a line failed, not which bit. And at this firmware the service processor never enables the interrupt
+sources that carry SRAM errors, so <code>SramCeEvent</code> and <code>DM_CMD_GET_MODULE_SRAM_ECC_UECC</code> read 0 forever. (We read them: 0.)</li>
+<li><b>The Minion Debug Interface reads state, not flips.</b> The service processor can halt a neighbourhood, inject
+two-instruction pairs into a hart, and hand back any GPR, the PC, seven CSRs and 8-byte memory words. That is one
+architectural snapshot per millisecond-scale round trip. It is compiled into the shipped firmware and the management node is world-writable,
+but no installed tool sends the commands, halting mid-kernel wedges the kernel, single-step is a stub, and the boot code clock-gates the
+debug logic, so the first MDI command on this card is itself an experiment.</li>
+<li><b>Raw SRAM rows with their check bits</b> can be read and written through the shire cache's M-mode index-cacheop state machine
+(<code>Dbg_Read</code>/<code>Dbg_Write</code>, PRM Table 15-81). That is a literal bit read of a stored line, and a fault injector, but it needs
+a syscall the firmware does not have.</li>
+<li><b>The UltraSoC debug fabric is on the die but unreachable.</b> The RTL wires a per-minion instruction-trace encoder
+(retired instruction and PC every cycle), per-neighbourhood status monitors (200 filter, 64 match, 128 data signals, 3 counters) and a
+memory-shire monitor over 200 controller signals. The IP, its message-engine protocol and the Data Book are not open, no firmware line
+configures it, and the SP gates its clock at boot.</li>
+<li><b>Physically:</b> scan chains exist (a one-shot, stopped-clock flop dump with tooling that is not open), and laser or e-beam probing is a
+different project. Not for a shared PCIe card.</li>
+</ul>
+<p><b>In simulation: yes, twice over.</b> <code>sys_emu -l</code> prints every executed instruction on any selected hart with each architectural write it
+makes: integer registers, all 8 lanes of a vector register, mask registers, every memory read and write up to 512 bits, CSR writes, traps. XOR
+successive values and you have the bits that changed. It is functional, not cycle-accurate, and it models no cache contents. The RTL bench goes
+further: <code>+dump=1</code> writes every net, flop and behavioural SRAM bit of the CPU subsystem to an FST waveform each cycle, and the design
+verification monitors emit a cycle-stamped event per retired instruction that is checked in lockstep against the same emulator. Toggle counts per
+signal are a coverage flag. What you cannot get from the drop is joules: there is no cell library, netlist or power flow, so toggles stay counts.</p>
+
+<h2>3. What could be made observable</h2>
+<p>Ranked by what each step unlocks against its cost. The first two need no firmware; the rest do, and the firmware caveat at the end applies to all of them.</p>
+<div class="table-wrap wide"><table id="steps"></table></div>
+<p><b>The firmware caveat.</b> Every "few lines of firmware" row above ends with a reflash. The minion runtime and the service processor
+bootloader are signed executable images; BL1 and BL2 verify a certificate and signature against a public-key hash in OTP unless a chicken bit
+is set, and neither the signing tool nor a test key is in the open tree. Whether this card accepts a rebuilt image is unknown until someone
+tries, and a bad image can brick the boot path, so it is a lab-admin decision. This is the one place where "everything is open" has a gap: the
+source is open, the right to run modified source on this particular card is not yet established.</p>
+
+<h2>4. Against a GPU</h2>
+<p>For an A100/H100-class part. Sources are NVIDIA's own documentation and the microbenchmark literature; the ET side is this survey.</p>
+<div class="table-wrap wide"><table id="contrast"></table></div>
+<p>The pattern: the GPU is at least as observable <i>on silicon</i> (ECC counts, a debugger, SASS-level instrumentation, a mJ energy counter the ET card lacks),
+and entirely opaque below it. The ET-SoC-1 is thinner on silicon (no L1 or register ECC, DRAM ECC off, power at 133 ms) and open all the way down: the
+firmware that decides what you can see is source, the reference model the RTL was verified against is the installed simulator, and the RTL of the core dumps
+every bit.</p>
+
+<h2>5. Method and caveats</h2>
+<ul>
+<li>Seven scouts each surveyed one layer of the manuals (<code>external/et-man</code>), firmware at the card's commit (<code>external/et-platform</code> at <code>353f20e</code>, checked against HEAD), the RTL and DV trees (<code>external/core-et</code>), the installed tools in <code>/opt/et</code>, and the earlier reports. Each key claim was then handed to two independent reviewers told to refute it, one checking citations and one checking whether it would work from a user account on this card. The ladder folds in their corrections; rows they did not reach are marked ·. The raw findings and verdicts are in <code>docs/reports/sources/2026-09-20-limits-of-observability/</code>.</li>
+<li>Nothing here changed the card. The only measurements taken were reads of the ECC counters and sysfs error statistics, and the earlier reports' timing and power runs.</li>
+<li>The RTL is the Erbium branch: the same Minion core lineage as the ET-SoC-1, but a later MCU-class configuration (one neighbourhood, no shire cache), with known deviations. The PRM and errata stay authoritative for the A0 silicon. The same repository's <code>main</code> branch holds a clean-room, Verilator-first re-implementation including a shire cache, with toggle coverage in CI; it is a re-implementation, not the taped-out RTL.</li>
+<li>Several rows rest on a single reading of the sources and were not exercised: MDI on this card, the debug clock gate, the memory-shire perfmon type codes, the per-shire LVDPLL (which an erratum calls unstable on A0). They are labelled accordingly.</li>
+</ul>
+</main>
+
+<script>
+const D = {"ladder":[{"level":"Board power","what":"12 V input power of the whole card","gran":"10 mW; a new value every 133 ms","sec":0.133,"instrument":"DM_CMD_GET_MODULE_POWER, or the SP stats trace","access":"host, management node","status":"works_now","check":"confirmed","note":"The host can poll 60\u00d7/s but the service processor refreshes once per loop pass. The PMIC (a closed ATSAMD20 firmware) does the averaging."},{"level":"Rail power","what":"Minion cores, SRAM (L2/L3/scratchpad arrays), NoC","gran":"1 mW, moving average, per 133 ms record","sec":0.133,"instrument":"SP stats trace (dev_mngt_service -t SPST:extract)","access":"host, management node","status":"works_now","check":"confirmed","note":"No rail for DDR, PCIe, Maxion or IO. The 133 ms is a firmware artifact: the SP's I2C driver busy-waits 1 ms after every one of ~96 transactions per pass."},{"level":"Energy per event","what":"pJ per L1/L2/L3/DRAM load, per FMA slot","gran":"\u2265 10\u2079 identical events/s for seconds; 133 \u00b5J per LSB-record","sec":2,"instrument":"regression of rail power against counted events","access":"host + kernel","status":"works_now","check":"confirmed","note":"Demonstrated: 46 pJ per L1 load, 5.1 nJ per DRAM load. A single event is 10\u00b9\u00b2 times below the floor."},{"level":"Device-wide bandwidth","what":"DDR, L2/L3, PCIe DMA bandwidth and core utilisation","gran":"1 ms samples, chip-wide","sec":0.001,"instrument":"MMST trace (master minion statw worker)","access":"host, management node","status":"works_now","check":"confirmed","note":"The same sampler stops and restarts every shire-cache and memory-shire counter every 1 ms."},{"level":"Temperature and voltage","what":"35 temperature sensors, 125 voltage sense points (3 per minion shire)","gran":"hardware 0.06 \u00b0C / 89 \u00b5V; host sees 34-shire avg/low/high at 1 \u00b0C / 1 mV","sec":0.133,"instrument":"Moortec PVT controllers (SP-only); DM_CMD_GET_MODULE_CURRENT_TEMPERATURE","access":"service processor","status":"needs_tooling","check":"disputed","note":"Per-shire voltages leak out today as DEBUG log strings through DM_CMD_SET_DM_TRACE_CONFIG; a per-shire map otherwise needs a new DM command. No sensor measures current."},{"level":"ECC errors","what":"Correctable/uncorrectable errors in shire-cache SRAM and I-cache; DRAM and PCIe counters","gran":"per event; which 64-bit doubleword of a line, not which bit","sec":0.133,"instrument":"sysfs err_stats, DM_CMD_GET_MODULE_*_ECC_UECC","access":"host (sysfs is world-readable)","status":"needs_fw_change","check":"disputed","note":"Wired but dark: DRAM ECC is compiled off, and the SP never enables the PLIC sources for SRAM/I-cache errors, so those counts stay 0. L1D, tensor scratchpad and register files have no ECC or parity at all."},{"level":"Fixed core counters","what":"Retired instructions per thread, L1D misses, I-cache requests/misses","gran":"per launch, summed over a neighbourhood of 8 minions","sec":1.67e-09,"instrument":"hpmcounter4-8 from U-mode","access":"kernel","status":"works_now","check":"confirmed","note":"Events are fixed at boot; mhpmevent is M-mode. 32 minion and 25 neighbourhood events exist in the RTL, bit-exact with the PRM table."},{"level":"Cycle counter","what":"Minion clock cycles, free-running","gran":"1 cycle (1.67 ns at 600 MHz)","sec":1.67e-09,"instrument":"hpmcounter3 from U-mode","access":"kernel","status":"works_now","check":"confirmed","note":"Two counters per neighbourhood (even and odd harts), not synchronised across neighbourhoods. On this card the carry into bit 7 lands 11 cycles late; fixcyc() repairs it. cycle/time/instret trap."},{"level":"Timed single access","what":"Load-to-use latency of one load after placing its line in L1/L2/L3/DRAM","gran":"1 cycle, one load","sec":1.67e-09,"instrument":"evict_va + hpmcounter3 (workloads/memprobe)","access":"kernel","status":"works_now","check":"confirmed","note":"This is how the memory-anatomy report split a DRAM load into cache, mesh, controller and row-state parts to \u00b13 cycles."},{"level":"Kernel trace buffer","what":"Software events with a cycle stamp: strings, values, PMC snapshots, profile regions","gran":"1-cycle stamp; ~20-40 cycles per entry (estimate)","sec":1.67e-09,"instrument":"et_trace_* API, KernelLaunchOptions::setUserTracing","access":"kernel + host","status":"works_now","check":"disputed","note":"A sink, not a new resolution. profiler_converter in /opt/et is for host-side easy_profiler files; a device flame graph needs a ~150-line converter of USER_PROFILE_EVENT entries."},{"level":"Shire-cache and memory-shire counters","what":"Per-bank reads/writes/cycles; per-memshire NoC reads/writes at 933 MHz","gran":"one 40-bit counter per syscall (hundreds of cycles); chip-wide","sec":1.07e-09,"instrument":"syscalls 9 and 10 from U-mode","access":"kernel","status":"works_now","check":"confirmed","note":"Only the boot-time qualifiers. The memory-shire monitor can count DRAM activates, precharges and refreshes per bank, and the shire cache can measure queue occupancy (mean miss latency by Little's law), but selecting those needs M-mode."},{"level":"Chosen counter events","what":"L1 access/miss per thread, L2 miss rejections, tensor waits; L2/L3 hit/miss and occupancy; DRAM command counts","gran":"same counters, any event","sec":1.67e-09,"instrument":"a new U-mode syscall writing mhpmevent / sc_perfmon / ddrc_perfmon","access":"M-mode firmware","status":"needs_fw_change","check":"confirmed","note":"~20-25 lines across four files in device-minion-runtime and et-common-libs. Alternatively MDI WRITE_CSR can set mhpmevent on a halted hart before a launch, with no firmware change."},{"level":"Halted-hart state","what":"GPRs, PC, seven CSRs, 8-byte memory words of a halted hart; hardware PC breakpoint","gran":"64 bits per management round trip (ms); halt unit = one neighbourhood (16 harts)","sec":0.001,"instrument":"Minion Debug Interface, DM commands 128-144","access":"host, management node","status":"needs_tooling","check":"disputed","note":"In every shipped BL2 variant and the node is 0666, but dev_mngt_service refuses the commands: a ~100-line libDM client is needed. Hazards: a halted worker wedges its kernel, RESET_HART is a stub, the debug clock is gated at boot. Rehearse on sys_emu first."},{"level":"Single-stepping on silicon","what":"One instruction per resume of a halted hart","gran":"1 instruction per ms-scale round trip","sec":0.001,"instrument":"MDI WRITE_CSR(dcsr.step) + RESUME","access":"host, management node","status":"needs_tooling","check":"disputed","note":"The ENABLE_SINGLE_STEP command is a stub, but dcsr is writable by raw address. Erratum 1.18: safe only for harts 0/1 of a neighbourhood. Untested here."},{"level":"Instruction-pattern trap","what":"Trap on any instruction matching a mask, log state, resume","gran":"1 instruction, hundreds of cycles of perturbation","sec":1.67e-09,"instrument":"minstmask/minstmatch CSRs (M-mode) + a handler","access":"M-mode firmware","status":"needs_fw_change","check":"unverified","note":"A software single-step or a tensor-op logger without the debugger. PRM \u00a714.1's 0x1C cause is a typo for 30."},{"level":"Raw SRAM row + ECC bits","what":"Read or write one 128-bit quadword of L2/L3/scratchpad with its check bits","gran":"one quadword per M-mode transaction","sec":1e-06,"instrument":"sc_idx_cop_sm Dbg_Read / Dbg_Write (PRM Table 15-81)","access":"M-mode firmware","status":"needs_fw_change","check":"confirmed","note":"The closest thing to reading a stored bit on silicon, and a deliberate bit-flip injector (write with wrong ECC, read through the normal path)."},{"level":"Per-shire frequency","what":"Run one shire at a different clock to attribute the minion rail's power to it","gran":"per shire, 25 MHz steps; ~0.3 W resolvable against a 1 mW LSB","sec":0.133,"instrument":"per-shire LVDPLL and clock mux ESRs via SP firmware","access":"SP firmware","status":"research_only","check":"disputed","note":"The mux and PLL exist per shire, but the shipped firmware puts every shire on the chip-wide step clock, and erratum 7.3 calls the LVDPLL unstable on A0."},{"level":"Faster power sampling","what":"Instantaneous rather than averaged rail power, 10-50\u00d7 faster loop","gran":"tens to a few hundred Hz","sec":0.01,"instrument":"SP firmware: drop the 84-read PMB snapshot, fix the 1 ms I2C busy-wait","access":"SP firmware","status":"needs_fw_change","check":"confirmed","note":"The values are already read and discarded each pass. External: a scope on the LTC4218 IMON pin gives board total at ~kHz."},{"level":"Architectural trace, every hart","what":"Every instruction with every register, lane, mask, memory and CSR write","gran":"per instruction; no cycles, no cache contents","sec":null,"instrument":"sys_emu -l / -lm / -lt / -log_at_pc; -gdb stub with vector registers","access":"offline","status":"works_now","check":"disputed","note":"The same emulator is the golden model the RTL was verified against. The README's 'Fetched instruction' line is stale; the real line is I(prv): pc (bits) disasm."},{"level":"Signal-level debug fabric","what":"Instruction trace per cycle, 128 selected signals per neighbourhood, 200 memory-controller signals","gran":"per cycle, selected signals","sec":1.67e-09,"instrument":"UltraSoC status monitors and trace encoders over JTAG/USB","access":"external debugger","status":"research_only","check":"confirmed","note":"Real logic on the die; the IP, protocol and Data Book are not open, nothing configures it, and boot clock-gates it."},{"level":"Every flop, one snapshot","what":"Full flop state of a shire via scan chains","gran":"one dump, clock stopped, state destroyed","sec":null,"instrument":"DFT scan / JTAG TDRs","access":"tester","status":"research_only","check":"unverified","note":"Designed in, with errata on the chain routers; no ATPG patterns or chain descriptions are open."},{"level":"Every flop, every cycle","what":"Every net, flop and SRAM bit of one neighbourhood (8 minions, VPUs, L1, I-cache) per clock","gran":"1 simulated cycle; ~10\u00b3-10\u2074 cycles/s (estimate); toggle counts per signal","sec":0.001,"instrument":"core-et standalone bench, +dump=1 \u2192 trace.fst; Verilator --coverage","access":"offline","status":"needs_tooling","check":"disputed","note":"The bench includes dv/standalone/common/verilator.mk, which no commit contains; a ~50-line replacement plus Verilator 5 is a day or two. No shire cache, NoC or DRAM in this branch; no cell library, so no joules. Full-chip VCS builds and a ZeBu flow existed at Esperanto and are not shipped."},{"level":"Individual bit toggling on the fabricated chip","what":"Watching one node switch in real time","gran":"\u2014","sec":null,"instrument":"laser/e-beam probing, EM side channels","access":"none","status":"impossible_on_silicon","check":"confirmed","note":"The honest boundary. Everything above it is the answer."}],"steps":[{"what":"A libDM client for the Minion Debug Interface","unlocks":"Register and memory snapshots of halted harts, hardware breakpoints, and mhpmevent writes before a launch (chosen PMU events without firmware). Rehearse on sys_emu, which models the debug module.","effort":"~100 lines of C++ against /opt/et/lib/libDM; the in-tree gtests are complete examples","needs":"A quiet card and a reset plan agreed with the lab admin: a halted worker hart cannot be recovered by the firmware abort."},{"what":"Repair the Verilator flow for core-et","unlocks":"Every flop every cycle of one neighbourhood, per-signal toggle counts, and the cycle-stamped retire stream checked against the emulator. Root-cause the hpmcounter3 carry bug in neigh_pmu.v.","effort":"Write verilator.mk (~50 lines), install Verilator 5, build libcosim against et-platform HEAD's sw-sysemu; a day or two","needs":"Nothing from the lab. The main branch's Verilator-first re-implementation may be the faster start."},{"what":"A device flame-graph converter","unlocks":"Per-hart flame graphs in cycles from USER_PROFILE_EVENT trace entries, with addr2line on the kernel ELF.","effort":"~150 lines of Python over the trace layout","needs":"Nothing."},{"what":"A U-mode syscall to choose counter events","unlocks":"L1 hit/miss per thread, L2/L3 hit/miss and mean miss latency per bank, DRAM activates/precharges/refreshes per bank.","effort":"~20-25 lines in four firmware files, then flash","needs":"The firmware caveat."},{"what":"Enable the SRAM ECC interrupt sources (and DRAM ECC)","unlocks":"Live correctable-error counts for L2/L3/scratchpad and I-cache; DRAM ECC at the cost of capacity.","effort":"A few lines in SP BL2; DRAM ECC is one boolean","needs":"The firmware caveat, plus a decision on DRAM capacity."},{"what":"Faster, instantaneous power in the SP trace","unlocks":"Rail power at tens to hundreds of Hz without the 1-2 s moving-average smear; kernel boundaries become visible.","effort":"Remove the 1 ms I2C busy-wait, skip the 84-read snapshot, copy the instantaneous values already read","needs":"The firmware caveat; the PMIC's own refresh rate is the next unknown."}],"contrast":[{"topic":"Instruction set","et":"Every instruction's 32-bit encoding is in the PRM; objdump names the custom CSRs; kernels are plain ELF.","gpu":"PTX is documented; SASS is opcode names only. Encodings and control bits were reverse-engineered by third parties.","src":"PRM \u00a72.4; NVIDIA CUDA Binary Utilities; Jia et al. 2018"},{"topic":"Microarchitecture","et":"13 design documents (541 pages) plus the RTL: pipeline stages, miss handlers, VPU latencies, PMU implementation.","gpu":"Whitepapers and tuning guides; latencies and cache geometry come from microbenchmark papers.","src":"core-et/docs; NVIDIA whitepapers; Luo et al. 2024"},{"topic":"Cycle timer","et":"hpmcounter3 per neighbourhood, 1 cycle, with a documented (here) carry bug.","gpu":"clock64() per SM, 1 cycle; %globaltimer steps by 32 ns.","src":"this report; CUDA Programming Guide"},{"topic":"Counters","et":"Fixed neighbourhood events in U-mode; per-bank cache and per-memshire counters by syscall; events selectable with a firmware change.","gpu":"Nsight/CUPTI per-SM, per-L2-slice, per-FBPA aggregates; PC sampling; no per-bank/row or per-request data.","src":"Nsight Compute Profiling Guide"},{"topic":"Address mapping","et":"PA bits \u2192 L3 home shire, memory shire, bank, row, column, from the PRM and firmware, confirmed by counters.","gpu":"L2 hash and DRAM bank/row mapping undocumented; recovered by timing (GPUHammer 2025).","src":"memory-anatomy report; Lin et al. 2025"},{"topic":"Power","et":"Board plus three rails, 133 ms moving average; no energy counter.","gpu":"One board number: a 25 ms average every 100 ms on A100/H100; a mJ energy counter; no rails.","src":"power-telemetry notes; Yang et al. SC'24; NVML docs"},{"topic":"ECC","et":"L2/L3/I-cache SECDED with error logs (dark at this firmware); no L1D or register ECC; DRAM ECC off.","gpu":"ECC on register file, L1, L2, HBM; counts per location, no syndrome or bit position.","src":"PRM Tables 15-77/81; NVIDIA Memory Error Management r575"},{"topic":"Debugger","et":"MDI: halt, breakpoint, GPR/CSR/memory of a hart, via the service processor; no gdb server for silicon (sys_emu has one).","gpu":"cuda-gdb: breakpoints, warp single-step, register reads; no watchpoints.","src":"et-platform minion_debug.c; CUDA-GDB manual"},{"topic":"Firmware","et":"Service processor and minion runtime are source; images are signed, key not open.","gpu":"GSP firmware is a signed binary; user-mode driver closed.","src":"et-platform; open-gpu-kernel-modules README"},{"topic":"Below silicon","et":"Functional emulator with per-instruction state; RTL of the core with waveform dumps and lockstep cosim.","gpu":"None. Accel-Sim is a tuned performance model driven by SASS traces.","src":"sw-sysemu; core-et; Khairy et al. 2020"}]};
+const STATUS = {works_now: 'works now', needs_tooling: 'tooling', needs_fw_change: 'firmware', research_only: 'research', impossible_on_silicon: 'not on silicon'};
+const CHECK = {confirmed: 'confirmed by two reviewers', disputed: 'reviewers corrected details; the row reflects them', unverified: 'not reviewed', refuted: 'refuted'};
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function txt(parent, x, y, s, cls, anchor) { const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent); t.textContent = s; return t; }
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+const chip = s => `<span class="chip ${s}">${STATUS[s]}</span>`;
+const verif = c => `<span class="verif ${c}" title="${CHECK[c]}">${c === 'confirmed' ? '✓' : c === 'disputed' ? '±' : '·'}</span>`;
+
+/* ---------- granularity figure ---------- */
+(function () {
+  const rows = D.ladder.filter(r => r.sec);
+  const W = 900, H = 60 + rows.length * 19, L = 250, R = 20, T = 28;
+  const host = document.getElementById('gran'); host.innerHTML = '';
+  const svg = el('svg', {viewBox: `0 0 ${W} ${H}`, role: 'img'}, host);
+  const tip = document.createElement('div'); tip.className = 'tip'; host.appendChild(tip);
+  const lx = v => Math.log10(v);
+  const x = v => L + (lx(v) - lx(1e-9)) / (lx(10) - lx(1e-9)) * (W - L - R);
+  const ticks = [[1e-9, '1 ns'], [1e-8, '10 ns'], [1e-7, '100 ns'], [1e-6, '1 µs'], [1e-5, '10 µs'], [1e-4, '100 µs'], [1e-3, '1 ms'], [1e-2, '10 ms'], [1e-1, '100 ms'], [1, '1 s'], [10, '10 s']];
+  for (const [v, s] of ticks) { el('line', {x1: x(v), x2: x(v), y1: T - 6, y2: H - 22, class: 'grid-line'}, svg); txt(svg, x(v), H - 6, s, 'tick', 'middle'); }
+  txt(svg, x(1.67e-9) + 4, T - 12, '1 cycle at 600 MHz', 'lab');
+  el('line', {x1: x(1.67e-9), x2: x(1.67e-9), y1: T - 8, y2: H - 22, stroke: 'var(--axis)', 'stroke-width': 1, 'stroke-dasharray': '3 3'}, svg);
+  rows.forEach((r, i) => {
+    const y = T + 8 + i * 19;
+    const g = el('g', {}, svg);
+    txt(g, L - 8, y + 4, r.level, 'lab', 'end');
+    el('line', {x1: L, x2: W - R, y1: y, y2: y, class: 'grid-line', opacity: 0.5}, g);
+    const col = {works_now: 'var(--ok)', needs_tooling: 'var(--warn)', needs_fw_change: 'var(--c1)', research_only: 'var(--muted)', impossible_on_silicon: 'var(--bad)'}[r.status];
+    el('circle', {cx: x(r.sec), cy: y, r: 6, fill: col, stroke: 'var(--surface)', 'stroke-width': 2}, g);
+    el('rect', {x: 0, y: y - 9, width: W, height: 18, fill: 'transparent'}, g);
+    const show = ev => { tip.innerHTML = `<b>${esc(r.level)}</b><br>${esc(r.gran)}<br>${chip(r.status)}`; tip.style.display = 'block';
+      const b = host.getBoundingClientRect(); const p = ev.touches ? ev.touches[0] : ev;
+      tip.style.left = Math.min(p.clientX - b.left + 12, b.width - 300) + 'px'; tip.style.top = (p.clientY - b.top + 12) + 'px'; };
+    g.addEventListener('mousemove', show); g.addEventListener('touchstart', show, {passive: true});
+    g.addEventListener('mouseleave', () => tip.style.display = 'none');
+  });
+  const leg = document.createElement('div'); leg.className = 'legend';
+  leg.innerHTML = Object.keys(STATUS).map(k => chip(k)).join(' ') + ' <span class="small">· rows without a time scale (whole-program traces, one-shot dumps) are in the table only</span>';
+  host.appendChild(leg);
+})();
+
+/* ---------- ladder table with filter ---------- */
+(function () {
+  let filter = 'all';
+  const fbox = document.getElementById('filters');
+  const opts = [['all', 'all rows'], ['works_now', 'works now'], ['needs_tooling', 'needs tooling'], ['needs_fw_change', 'needs firmware'], ['research_only', 'research'], ['impossible_on_silicon', 'not on silicon']];
+  const t = document.getElementById('ladder');
+  function render() {
+    fbox.innerHTML = opts.map(([k, n]) => `<button type="button" aria-pressed="${filter === k}" data-k="${k}">${n}</button>`).join('');
+    fbox.querySelectorAll('button').forEach(b => b.onclick = () => { filter = b.dataset.k; render(); });
+    const rows = D.ladder.filter(r => filter === 'all' || r.status === filter);
+    t.innerHTML = '<thead><tr><th>Instrument</th><th>What it shows</th><th>Finest granularity</th><th>How</th><th>Who</th><th>Status</th><th>Check</th></tr></thead><tbody>' +
+      rows.map(r => `<tr><td class="lvl">${esc(r.level)}</td><td>${esc(r.what)}${r.note ? `<div class="small">${esc(r.note)}</div>` : ''}</td><td>${esc(r.gran)}</td><td>${esc(r.instrument)}</td><td>${esc(r.access)}</td><td>${chip(r.status)}</td><td>${verif(r.check)}</td></tr>`).join('') +
+      '</tbody>';
+  }
+  render();
+})();
+
+/* ---------- next steps ---------- */
+document.getElementById('steps').innerHTML = '<thead><tr><th>Step</th><th>What it unlocks</th><th>Effort</th><th>Needs</th></tr></thead><tbody>' +
+  D.steps.map((s, i) => `<tr><td class="lvl">${i + 1}. ${esc(s.what)}</td><td>${esc(s.unlocks)}</td><td>${esc(s.effort)}</td><td>${esc(s.needs)}</td></tr>`).join('') + '</tbody>';
+
+/* ---------- contrast ---------- */
+document.getElementById('contrast').innerHTML = '<thead><tr><th>Topic</th><th>ET-SoC-1</th><th>A100/H100</th><th>Sources</th></tr></thead><tbody>' +
+  D.contrast.map(c => `<tr><td class="lvl">${esc(c.topic)}</td><td>${esc(c.et)}</td><td>${esc(c.gpu)}</td><td class="small">${esc(c.src)}</td></tr>`).join('') + '</tbody>';
+
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<h1>Limits of Observability</h1>
+<p class="byline">ET-SoC-1 on aifoundry2's card, et-platform <code>353f20e</code> firmware, core-et <code>b38a1a3</code> RTL · 20 September 2026 · a survey of what can be seen, at every granularity, from board power down to a flip-flop</p>
+
+<p class="lede">This chip ships with its manuals, errata, firmware source, functional simulator and the RTL of its core. The
+question was: how far down can you see, and can you watch individual bits flip? The short answer has three parts.
+<b>On the card, from a user account, the floor is one clock cycle for time and one 64-bit register of a halted
+hart for state</b>; no counter, trace or sensor returns the value of an arbitrary flop or SRAM bit, and the only
+bit-level detectors, the ECC checkers, are wired but not switched on. <b>In the functional simulator, every
+architectural bit every instruction</b>, with no timing. <b>In RTL simulation, every flop every cycle</b>, for
+one neighbourhood of eight minions, once a broken Verilator flow is repaired. Below silicon, this is far more than a
+GPU offers. On silicon, it is roughly a GPU's depth with weaker ECC coverage, and much of the extra reach sits behind
+firmware that the card's boot chain signature-checks.</p>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">Finest time on the card</div><div class="val">1 cycle</div><div class="sub">hpmcounter3 from a kernel, after correcting a late carry into bit 7</div></div>
+  <div class="card kpi"><div class="lab">Finest state on the card</div><div class="val">64 bits</div><div class="sub">one GPR, CSR or memory word of a halted hart, per management round trip</div></div>
+  <div class="card kpi"><div class="lab">Finest energy</div><div class="val">133 µJ</div><div class="sub">1 mW × 133 ms on a rail; a bit flip is ~10⁻¹⁶ J</div></div>
+  <div class="card kpi"><div class="lab">Every bit, every cycle</div><div class="val">RTL only</div><div class="sub">8 minions, ~10³–10⁴ cycles/s, after tooling</div></div>
+</div>
+
+<h2>1. The ladder</h2>
+<p>Every instrument, coarsest to finest. <b>Status</b> says what it takes on this card: <span class="chip works_now">works now</span> from a user account;
+<span class="chip needs_tooling">tooling</span> means the hardware and firmware are there but a client, a build or an external box must be written or installed;
+<span class="chip needs_fw_change">firmware</span> means a small source change plus a reflash of a signed image (§3);
+<span class="chip research_only">research</span> means possible in principle with things not in the open drop; <span class="chip impossible_on_silicon">not on silicon</span> is the hard wall.
+The check column shows whether two independent reviewers confirmed the row's citations (✓), corrected them (±), or did not get to it (·).</p>
+<div class="chart-title">Time resolution of each instrument</div>
+<div class="chart scroll" id="gran"></div>
+<div class="controls" id="filters"></div>
+<div class="table-wrap wide"><table id="ladder"></table></div>
+
+<h2>2. Can we track individual bits flipping?</h2>
+<p><b>On the card: no, and not with any firmware change.</b> Nothing on the die counts toggles. The PMU counts
+operations (up to 8 per cycle per neighbourhood), the shire-cache and memory-controller monitors count requests, and the
+power path resolves 1 mW over 133 ms, twelve orders of magnitude above one node toggle. The closest things to a bit
+read are the ECC machinery and the debug module, and both stop at architectural state:</p>
+<ul>
+<li><b>ECC covers the L2/L3/scratchpad SRAM and the instruction cache only.</b> The L1 data cache, the tensor
+scratchpad carved from it, the integer register file and the 256-bit vector register file have no ECC and no parity, so
+a flip there is invisible to hardware. DRAM ECC is compiled off (<code>ddr_mode.ecc=false</code>). The SRAM error logger
+records which 64-bit doubleword of a line failed, not which bit. And at this firmware the service processor never enables the interrupt
+sources that carry SRAM errors, so <code>SramCeEvent</code> and <code>DM_CMD_GET_MODULE_SRAM_ECC_UECC</code> read 0 forever. (We read them: 0.)</li>
+<li><b>The Minion Debug Interface reads state, not flips.</b> The service processor can halt a neighbourhood, inject
+two-instruction pairs into a hart, and hand back any GPR, the PC, seven CSRs and 8-byte memory words. That is one
+architectural snapshot per millisecond-scale round trip. It is compiled into the shipped firmware and the management node is world-writable,
+but no installed tool sends the commands, halting mid-kernel wedges the kernel, single-step is a stub, and the boot code clock-gates the
+debug logic, so the first MDI command on this card is itself an experiment.</li>
+<li><b>Raw SRAM rows with their check bits</b> can be read and written through the shire cache's M-mode index-cacheop state machine
+(<code>Dbg_Read</code>/<code>Dbg_Write</code>, PRM Table 15-81). That is a literal bit read of a stored line, and a fault injector, but it needs
+a syscall the firmware does not have.</li>
+<li><b>The UltraSoC debug fabric is on the die but unreachable.</b> The RTL wires a per-minion instruction-trace encoder
+(retired instruction and PC every cycle), per-neighbourhood status monitors (200 filter, 64 match, 128 data signals, 3 counters) and a
+memory-shire monitor over 200 controller signals. The IP, its message-engine protocol and the Data Book are not open, no firmware line
+configures it, and the SP gates its clock at boot.</li>
+<li><b>Physically:</b> scan chains exist (a one-shot, stopped-clock flop dump with tooling that is not open), and laser or e-beam probing is a
+different project. Not for a shared PCIe card.</li>
+</ul>
+<p><b>In simulation: yes, twice over.</b> <code>sys_emu -l</code> prints every executed instruction on any selected hart with each architectural write it
+makes: integer registers, all 8 lanes of a vector register, mask registers, every memory read and write up to 512 bits, CSR writes, traps. XOR
+successive values and you have the bits that changed. It is functional, not cycle-accurate, and it models no cache contents. The RTL bench goes
+further: <code>+dump=1</code> writes every net, flop and behavioural SRAM bit of the CPU subsystem to an FST waveform each cycle, and the design
+verification monitors emit a cycle-stamped event per retired instruction that is checked in lockstep against the same emulator. Toggle counts per
+signal are a coverage flag. What you cannot get from the drop is joules: there is no cell library, netlist or power flow, so toggles stay counts.</p>
+
+<h2>3. What could be made observable</h2>
+<p>Ranked by what each step unlocks against its cost. The first two need no firmware; the rest do, and the firmware caveat at the end applies to all of them.</p>
+<div class="table-wrap wide"><table id="steps"></table></div>
+<p><b>The firmware caveat.</b> Every "few lines of firmware" row above ends with a reflash. The minion runtime and the service processor
+bootloader are signed executable images; BL1 and BL2 verify a certificate and signature against a public-key hash in OTP unless a chicken bit
+is set, and neither the signing tool nor a test key is in the open tree. Whether this card accepts a rebuilt image is unknown until someone
+tries, and a bad image can brick the boot path, so it is a lab-admin decision. This is the one place where "everything is open" has a gap: the
+source is open, the right to run modified source on this particular card is not yet established.</p>
+
+<h2>4. Against a GPU</h2>
+<p>For an A100/H100-class part. Sources are NVIDIA's own documentation and the microbenchmark literature; the ET side is this survey.</p>
+<div class="table-wrap wide"><table id="contrast"></table></div>
+<p>The pattern: the GPU is at least as observable <i>on silicon</i> (ECC counts, a debugger, SASS-level instrumentation, a mJ energy counter the ET card lacks),
+and entirely opaque below it. The ET-SoC-1 is thinner on silicon (no L1 or register ECC, DRAM ECC off, power at 133 ms) and open all the way down: the
+firmware that decides what you can see is source, the reference model the RTL was verified against is the installed simulator, and the RTL of the core dumps
+every bit.</p>
+
+<h2>5. Method and caveats</h2>
+<ul>
+<li>Seven scouts each surveyed one layer of the manuals (<code>external/et-man</code>), firmware at the card's commit (<code>external/et-platform</code> at <code>353f20e</code>, checked against HEAD), the RTL and DV trees (<code>external/core-et</code>), the installed tools in <code>/opt/et</code>, and the earlier reports. Each key claim was then handed to two independent reviewers told to refute it, one checking citations and one checking whether it would work from a user account on this card. The ladder folds in their corrections; rows they did not reach are marked ·. The raw findings and verdicts are in <code>docs/reports/sources/2026-09-20-limits-of-observability/</code>.</li>
+<li>Nothing here changed the card. The only measurements taken were reads of the ECC counters and sysfs error statistics, and the earlier reports' timing and power runs.</li>
+<li>The RTL is the Erbium branch: the same Minion core lineage as the ET-SoC-1, but a later MCU-class configuration (one neighbourhood, no shire cache), with known deviations. The PRM and errata stay authoritative for the A0 silicon. The same repository's <code>main</code> branch holds a clean-room, Verilator-first re-implementation including a shire cache, with toggle coverage in CI; it is a re-implementation, not the taped-out RTL.</li>
+<li>Several rows rest on a single reading of the sources and were not exercised: MDI on this card, the debug clock gate, the memory-shire perfmon type codes, the per-shire LVDPLL (which an erratum calls unstable on A0). They are labelled accordingly.</li>
+</ul>
+</main>
