@@ -1,31 +1,48 @@
 #!/usr/bin/env bash
-# Everything after run_horace_strict.sh and run_horace_cold.sh: activity counts, analyses, GIFs, report data, report.
-#   tools/ettelem/finish_horace.sh <strict-run-dir> <cold-run-dir>... 
-# Writes docs/reports/data/2026-09-21-horace-aifoundry2/ and docs/reports/2026-09-20-horace-experiment.html.
+# Rebuilds the Horace-experiment and why-low-power reports from the data kept in the repo.
+#   tools/ettelem/finish_horace.sh            (analyses, model, GIFs, report data, both reports)
+# To bring in fresh sessions first, copy them into the data directory the way the README there describes
+# (runs.jsonl, starts.jsonl, ends.jsonl, tiles, and telemetry through compact_telemetry.py).
 set -eu
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
-strict=${1:?strict run dir}; shift
 D=docs/reports/data/2026-09-21-horace-aifoundry2
 PATS=zeros,ones,pi,sparse50,uniform,randn,signs,pow2,mant,a_randn_b_ones,a_ones_b_randn,ternary,sparse75,checker
-mkdir -p "$D/strict/tiles"
-cp "$strict"/runs.jsonl "$strict"/starts.jsonl "$D/strict/"
-cp "$strict"/tiles/*.bin "$D/strict/tiles/"
-python3 tools/ettelem/compact_telemetry.py "$strict/telemetry.jsonl" "$D/strict/telemetry.jsonl.gz"
+KINDS=hadamard,hadamard_orth,dct,fft_cos,butterfly,kaleidoscope,identity,permutation,diagonal,tridiagonal,block_diag,upper,lowrank,circulant,quant4,relu,negzero
+
+# switching activity from the RTL bench (slow: skipped when the JSON is already there)
 [ -e "$D/toggles.json" ] || nice python3 rtl-sim/fma_toggle/toggles.py --tiles-dir "$D/strict/tiles" --patterns "$PATS" --out "$D/toggles.json"
-python3 tools/ettelem/analyze_horace_strict.py "$D/strict" --toggles "$D/toggles.json" --out "$D/horace3.json" \
-  ${PRED:+--predictions "$PRED"} | tee "$D/horace3.txt"
-colds=()
-n=1
-for c in "$@"; do
-  mkdir -p "$D/cold$n"
-  cp "$c"/runs.jsonl "$c"/starts.jsonl "$D/cold$n/"
-  python3 tools/ettelem/compact_telemetry.py "$c/telemetry.jsonl" "$D/cold$n/telemetry.jsonl.gz"
-  python3 tools/ettelem/analyze_horace_cold.py "$D/cold$n" --out "$D/cold$n.json" | tee "$D/cold$n.txt"
-  colds+=("$D/cold$n.json"); n=$(( n + 1 ))
-done
-python3 tools/ettelem/build_horace_report_data.py --strict "$D/horace3.json" --toggles "$D/toggles.json" --cold "${colds[@]}" \
-  ${PRED:+--before "$PRED"} --out "$D/report.json"
+[ -e "$D/structured_toggles.json" ] || nice python3 rtl-sim/fma_toggle/toggles.py --tiles-dir "$D/structured_tiles" --patterns "$KINDS" --out "$D/structured_toggles.json"
+python3 - "$D" <<'PY'
+import json, sys
+d = sys.argv[1]
+a = json.load(open(f"{d}/toggles.json")); a.update(json.load(open(f"{d}/structured_toggles.json")))
+json.dump(a, open(f"{d}/toggles_all.json", "w"))
+PY
+
+# the strict 7 s session, the cool starts, the long runs, the ablations
+python3 tools/ettelem/analyze_horace_strict.py "$D/strict" --toggles "$D/toggles.json" --predictions "$D/predictions_before.json" --out "$D/horace3.json" > "$D/horace3.txt"
+python3 tools/ettelem/analyze_horace_cold.py "$D/cold1" --out "$D/cold1.json" > "$D/cold1.txt"
+python3 tools/ettelem/analyze_horace_cold.py "$D/cold2" --out "$D/cold2.json" > "$D/cold2.txt"
+python3 tools/ettelem/analyze_horace_long.py "$D/long" --out "$D/long.json" > "$D/long.txt"
+python3 tools/ettelem/analyze_ablation.py "$D/ablation" --out "$D/ablation.json" > "$D/ablation.txt"
+[ -d "$D/long2" ] && python3 tools/ettelem/analyze_horace_long.py "$D/long2" --out "$D/long2.json" > "$D/long2.txt"
+
+# the flips-to-temperature model: long session up to the cooling change at 13,950 s, the strict session, idle data from the cool starts,
+# and the overnight idle equilibrium (62 C at 26.7 W) as the anchor of the slowest stage
+python3 tools/ettelem/flip_thermal_model.py "$D/long@13950" "$D/strict" --leak-only "$D/cold1" "$D/cold2" --anchor 62:26.7 \
+  --toggles "$D/toggles_all.json" --out "$D/model.json" > "$D/model.txt"
+
+[ -d "$D/long2" ] && python3 tools/ettelem/flip_thermal_model.py "$D/long2" --evaluate "$D/model.json" --toggles "$D/toggles_all.json" --out "$D/model2.json" > "$D/model2.txt"
+
+python3 tools/ettelem/build_horace_report_data.py --strict "$D/horace3.json" --toggles "$D/toggles.json" --cold "$D/cold1.json" "$D/cold2.json" \
+  --before "$D/predictions_before.json" --long "$D/long.json" --model "$D/model.json" \
+  --structured-before "$D/structured_predictions_before.json" --ablation "$D/ablation.json" --long2 "$D/long2.json" --model2 "$D/model2.json" --out "$D/report.json"
+python3 tools/ettelem/build_lowpower_report_data.py --ablation "$D/ablation.json" --model "$D/model.json" --toggles "$D/toggles.json" --vf "$D/vf.json" --out "$D/lowpower-report.json"
+
 python3 tools/ettelem/make_heating_gif.py "$D/horace3.json" docs/reports/horace-heating.gif --poster docs/reports/horace-heating.png --steps
-python3 tools/ettelem/make_heating_gif.py "$D/horace3.json" docs/reports/horace-heating-6.gif --steps --patterns zeros,ones,pi,sparse50,uniform,randn \
-  --title "Six kinds of matrix, one matmul, same FLOPs"
+python3 tools/ettelem/make_heating_gif.py "$D/horace3.json" docs/reports/horace-heating-6.gif --poster docs/reports/horace-heating-6.png --steps \
+  --patterns zeros,ones,pi,sparse50,uniform,randn --title "Six kinds of matrix, one matmul, same FLOPs"
+python3 tools/ettelem/make_long_gif.py "$D/long.json" docs/reports/horace-long.gif --poster docs/reports/horace-long.png --groups zeros:32,ones:32,randn:32,randn:12
+
 python3 scripts/build-report.py horace-experiment "$D/report.json" docs/reports/2026-09-20-horace-experiment.html
+python3 scripts/build-report.py why-low-power "$D/lowpower-report.json" docs/reports/2026-09-21-why-low-power.html

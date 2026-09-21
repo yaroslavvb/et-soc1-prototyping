@@ -23,6 +23,12 @@ def main():
     ap.add_argument("--strict", required=True)
     ap.add_argument("--toggles", required=True)
     ap.add_argument("--cold", required=True, nargs="+")
+    ap.add_argument("--long", help="analyze_horace_long.py output")
+    ap.add_argument("--model", help="flip_thermal_model.py output")
+    ap.add_argument("--long2", help="analyze_horace_long.py output of the structured long runs")
+    ap.add_argument("--model2", help="flip_thermal_model.py --evaluate output for them")
+    ap.add_argument("--structured-before", help="structured_predictions_before.json")
+    ap.add_argument("--ablation", help="analyze_ablation.py output holding the m_<kind> configurations")
     ap.add_argument("--before")
     ap.add_argument("--earlier")
     ap.add_argument("--out", required=True)
@@ -42,6 +48,35 @@ def main():
         "cold": [{k: r[k] for k in ("run", "values", "dur", "tflops", "start_temp", "end_temp", "p_mean", "p_max", "s_at_800", "launches")}
                  | {"trace": r["trace"][::2]} for r in cold["runs"]],
     }
+    if a.long:
+        lg = json.load(open(a.long))
+        out["long"] = [{k: r[k] for k in ("run", "values", "minions", "per_shire", "dur", "reason", "approach_s", "tflops", "p_before",
+                                         "t_before", "p_mean", "P_at", "T_at", "t_max")}
+                       | {"sec": r["sec"][10::2], "T": r["curve_T"][10::2], "P": r["curve_P"][10::2]} for r in lg["runs"]]
+    if a.model:
+        m = json.load(open(a.model))
+        tr = m["sessions"][0]["trace"]
+        out["model"] = {k: m[k] for k in ("taus", "R", "R_total", "thermal_rms", "power", "loop_gain_at_80", "step_open", "step_closed",
+                                          "closed_loop", "per_run", "per_run_summary") if k in m}
+        out["model"]["T_amb"] = m["sessions"][0]["T_amb"]
+        out["model"]["trace"] = [{"t": p["t"], "T": p["T"], "fit": p["fit"]} for p in tr[::4]]
+        for r in out["model"]["per_run"]:
+            r["curve_pred"] = r.get("curve_pred", [])[::2]   # 0.5 Hz, like the measured long curves
+    if a.structured_before and a.ablation:
+        ab = json.load(open(a.ablation))["configs"]
+        out["structured"] = {"before": json.load(open(a.structured_before)),
+                             "measured": {k[2:]: {x: v[x] for x in ("p80", "p80_sd", "n", "rise", "dyn")} for k, v in ab.items() if k.startswith("m_")}}
+        for v in out["structured"]["before"]["patterns"].values():
+            v.pop("watts_by_class", None)
+    if a.long2 and a.model2:
+        l2, m2 = json.load(open(a.long2)), json.load(open(a.model2))
+        rows = []
+        for r in l2["runs"]:
+            pr = next((q for q in m2["per_run"] if q["values"] == r["values"] and abs(q["dur"] - r["dur"]) < 2), None)
+            rows.append({"values": r["values"], "dur": r["dur"], "reason": r["reason"], "t_end": r["T_at"].get("300", r["t_max"]),
+                         "p_flips": pr["p_dyn_flips"] if pr else None, "t_cap_pred": pr["t_cap_pred"] if pr else None,
+                         "T_end_pred": pr["T_end_pred"] if pr else None, "T_end_meas": pr["T_end_meas"] if pr else None})
+        out["structured_long"] = {"rows": rows, "summary": m2["per_run_summary"], "thermal_rms": m2["thermal_rms"]}
     if a.before:
         out["before"] = json.load(open(a.before))
     if a.earlier:

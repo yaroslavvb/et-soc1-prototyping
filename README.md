@@ -48,16 +48,26 @@ section 9 lists the pinned upstream versions.
   lag by 2 s, and a 34-shire on-die voltage map. It uses `tools/ettelem`, a telemetry client on the management library
   (`tools/ettelem/run_thermal.sh`). Private space https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature, uuid `acee5c6d-56c0-45e7-aa97-ce11af37bdd8`.
 - `docs/reports/2026-09-20-horace-experiment.html` reproduces Horace He's "predictable data" matmul result on this chip and takes
-  it apart (third version, 21 September). Same clock and FLOPs for every operand pattern, but 38 W on zeros, 47 W on ones and
+  it apart (fourth version, 21 September). Same clock and FLOPs for every operand pattern, but 38 W on zeros, 47 W on ones and
   63 W on random values, with every run launched from the same die temperature (`tools/ettelem/run_horace_strict.sh`); heating per
-  FLOP; a power model from RTL switching activity of the multiply-add unit (`rtl-sim/fma_toggle`, 0.5 W out of sample over 14
-  patterns); a thermal network from watts to degrees; and the speed effect, which appears from a cool die because the firmware's
-  clock governor is thermal first (`tools/ettelem/run_horace_cold.sh`). `docs/reports/horace-heating.gif` is the animated summary
-  (`tools/ettelem/make_heating_gif.py`); `tools/ettelem/finish_horace.sh` rebuilds data, GIFs and report. Public space (the user's
-  choice) https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment, uuid `da445a93-7be3-42c2-b9be-4992fa4a3b62`; it is deployed
-  as a folder (`index.html` plus the GIFs), so the GIF has its own public address,
-  https://da445a93-7be3-42c2-b9be-4992fa4a3b62.spacesheep.app/horace-heating.gif. The folder deploy left the space private; it was
-  put back with `spacesheep share <uuid> --visibility public`. Check `spacesheep list` after every deploy.
+  FLOP; a power model from RTL switching activity of the multiply-add unit (`rtl-sim/fma_toggle`, 0.5 W out of sample); the speed
+  effect from a cool die (`run_horace_cold.sh`); ten-minute runs with a 90 °C cap (`run_horace_long.sh`: random data gets from 80 to
+  90 °C in 19 to 26 s, ones in about two minutes, zeros never); a three-line model from flip rates to temperature
+  (`tools/ettelem/flip_thermal_model.py`: leakage 23 W at 80 °C, thermal stages out to 2,500 s, time to 90 °C predicted to 12%);
+  and structured matrices (Hadamard, DCT, butterfly, kaleidoscope, ...: `tools/ettelem/make_tiles.py`) whose power was predicted to
+  0.9 W before they ran. `tools/ettelem/predict_heat.py --model .../model.json --tiles my.bin` prices a custom workload: flips,
+  watts, heating curve, time to a cap, sustainable duty cycle. GIFs: `docs/reports/horace-heating.gif`, `horace-heating-6.gif`,
+  `horace-long.gif`. `tools/ettelem/finish_horace.sh` rebuilds everything from `docs/reports/data/2026-09-21-horace-aifoundry2/`.
+  Public space (the user's choice) https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment, uuid
+  `da445a93-7be3-42c2-b9be-4992fa4a3b62`, deployed as a folder (`index.html` plus the GIFs), so the GIFs have public addresses such as
+  https://da445a93-7be3-42c2-b9be-4992fa4a3b62.spacesheep.app/horace-heating.gif. A folder deploy can leave the space private;
+  put it back with `spacesheep share <uuid> --visibility public` and check `spacesheep list` after every deploy.
+- `docs/reports/2026-09-21-why-low-power.html` asks why the chip draws so little next to an A100, using Esperanto's own equation
+  (power = C V² f + leakage) and ablations on the card (`tools/ettelem/run_ablation.sh`, `ablation.cfg`, `analyze_ablation.py`):
+  an integer loop on all cores costs 1.5 W, int8 multiply-adds 0.32 pJ against 6.0 pJ for fp32, power is linear in active cores,
+  the 0.62 V / 800 MHz point costs 2× the switching power of 0.52 V / 600 MHz, leakage is 23 W at 80 °C, and per FLOP of dense
+  matmul an A100 is five times better. Notes and sources in `docs/research/why-low-power.md`. Private space
+  https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power, uuid `baede20c-57d9-4e01-8157-2014670dd8cf`.
   Both are assembled by `scripts/build-report.py` from `docs/reports/sources/`. After any `spacesheep deploy` of the other spaces,
   re-check that the space is still private: deploys have reset visibility to public more than once.
 - `docs/lab-access.md` covers logging in to the lab machines (`aifoundry1`-`3`) and creating accounts for new people.

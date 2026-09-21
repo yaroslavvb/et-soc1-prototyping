@@ -107,6 +107,7 @@ struct Options {
   std::string pattern = "elem";
   std::string values = "small";  // fp32 operand values for --test fma; see fillValues()
   std::string dumpTiles;         // --test fma: write the A and B tiles (2 x 1024 bytes) here
+  std::string stopFile;          // --seconds loops end early once this file exists (a runner's temperature cap)
   std::string sweep = "0";
   double bSparsity = 0;
   bool bStream = false;
@@ -392,10 +393,55 @@ Tiles makeTiles(uint64_t type, const std::string& pattern, double s, double bs, 
 //   sparse75 sparse50         randn with 75% / 50% of the elements zeroed
 //   signs pow2 mant           one field of the word random: +-1 / 2^-8..2^8 / [1, 2)
 //   a_randn_b_ones, a_ones_b_randn   one operand random, the other constant
+//   file:<path>               custom tiles: raw A then raw B, 1,024 bytes each (tools/ettelem/make_tiles.py)
 // --dump-tiles <file> writes the A and B tiles, so that rtl-sim/fma_toggle can replay the exact operands.
-void fillValues(Tiles& t, const std::string& mode, std::mt19937_64& rng) {
+// IEEE half from a float that is zero or within half's normal range (|f| in [6.2e-5, 65504]); smaller values flush to zero.
+uint16_t halfFromFloat(float f) {
+  uint32_t b;
+  std::memcpy(&b, &f, 4);
+  const uint32_t sign = (b >> 16) & 0x8000u;
+  const int32_t exp = int32_t((b >> 23) & 0xFF) - 127 + 15;
+  const uint32_t man = (b >> 13) & 0x3FFu;
+  if (exp <= 0) return uint16_t(sign);
+  if (exp >= 31) return uint16_t(sign | 0x7BFFu);
+  return uint16_t(sign | (uint32_t(exp) << 10) | man);
+}
+
+void fillValues(Tiles& t, uint64_t type, const std::string& mode, std::mt19937_64& rng) {
   std::normal_distribution<float> n(0.f, 1.f);
   std::uniform_real_distribution<float> u(0.f, 1.f);
+  if (mode.rfind("file:", 0) == 0) {
+    // Custom operands: the raw A tile then the raw B tile, 1,024 bytes each, in the layout of the chosen type
+    // (fp32: 16 lines of 16 floats; tools/ettelem/make_tiles.py writes them).
+    std::ifstream f(mode.substr(5), std::ios::binary);
+    f.read(reinterpret_cast<char*>(t.a.data()), std::streamsize(t.a.size()));
+    f.read(reinterpret_cast<char*>(t.b.data()), std::streamsize(t.b.size()));
+    if (!f) throw std::runtime_error("cannot read 2 x 1024 bytes of tiles from " + mode.substr(5));
+    return;
+  }
+  if (type != SP_FP32) {
+    // fp16 and int8 tiles (the precision comparison): every element slot of A and B gets the pattern.
+    // int8 "randn" is uniform over -128..127; "uniform" over 0..127.
+    const size_t size = type == SP_FP16 ? 2 : 1;
+    for (auto* buf : {&t.a, &t.b}) {
+      for (size_t off = 0; off + size <= buf->size(); off += size) {
+        float f;
+        int q;
+        if (mode == "zeros") { f = 0.f; q = 0; }
+        else if (mode == "ones") { f = 1.f; q = 1; }
+        else if (mode == "uniform") { f = u(rng); q = int(rng() % 128); }
+        else if (mode == "randn") { f = n(rng); q = int(rng() % 256) - 128; }
+        else throw std::runtime_error("--values " + mode + " is fp32 only; fp16 and int8 take zeros, ones, uniform, randn");
+        if (type == SP_FP16) {
+          const uint16_t h = halfFromFloat(f);
+          std::memcpy(&(*buf)[off], &h, 2);
+        } else {
+          (*buf)[off] = uint8_t(int8_t(q));
+        }
+      }
+    }
+    return;
+  }
   size_t idx = 0;
   auto value = [&](bool isB) -> float {
     ++idx;
@@ -513,6 +559,10 @@ void repeatFor(const Options& o, Session& dev, uint64_t iters, F one) {
       std::fprintf(stderr, "stopping: device-time budget of %.1f s used\n", o.budget);
       break;
     }
+    if (!o.stopFile.empty() && fs::exists(o.stopFile)) {
+      std::fprintf(stderr, "stopping: %s exists\n", o.stopFile.c_str());
+      break;
+    }
     spent += one(iters, n);
   }
 }
@@ -526,8 +576,7 @@ int testFma(const Options& o, Session& dev) {
     Tiles t = makeTiles(type, o.pattern, s, o.bSparsity, rng);
     const bool rawValues = o.values != "small";
     if (rawValues) {
-      if (type != SP_FP32) throw std::runtime_error("--values needs --type fp32");
-      fillValues(t, o.values, rng);
+      fillValues(t, type, o.values, rng);
     }
     if (!o.dumpTiles.empty()) {
       std::ofstream f(o.dumpTiles, std::ios::binary);
@@ -915,6 +964,7 @@ int main(int argc, char** argv) {
     else if (a == "--pattern") o.pattern = next();
     else if (a == "--values") o.values = next();
     else if (a == "--dump-tiles") o.dumpTiles = next();
+    else if (a == "--stop-file") o.stopFile = next();
     else if (a == "--sweep") o.sweep = next();
     else if (a == "--b-sparsity") o.bSparsity = std::atof(next().c_str());
     else if (a == "--b-stream") o.bStream = true;

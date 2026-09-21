@@ -1,0 +1,31 @@
+# name          sparsity_host arguments (run_ablation.sh adds --seconds and --seed; @SEED@ becomes block + 1)
+spin            --test spin --shires 0xffffffff --per-shire 32
+spin_8          --test spin --shires 0xffffffff --per-shire 8
+fp32_zeros      --test fma --type fp32 --pattern none --values zeros --shires 0xffffffff --per-shire 32
+fp32_ones       --test fma --type fp32 --pattern none --values ones --shires 0xffffffff --per-shire 32
+fp32_randn      --test fma --type fp32 --pattern none --values randn --shires 0xffffffff --per-shire 32
+fp16_zeros      --test fma --type fp16 --pattern none --values zeros --shires 0xffffffff --per-shire 32
+fp16_ones       --test fma --type fp16 --pattern none --values ones --shires 0xffffffff --per-shire 32
+fp16_randn      --test fma --type fp16 --pattern none --values randn --shires 0xffffffff --per-shire 32
+int8_zeros      --test fma --type int8 --pattern none --values zeros --shires 0xffffffff --per-shire 32
+int8_ones       --test fma --type int8 --pattern none --values ones --shires 0xffffffff --per-shire 32
+int8_randn      --test fma --type int8 --pattern none --values randn --shires 0xffffffff --per-shire 32
+fp32_randn_8    --test fma --type fp32 --pattern none --values randn --shires 0xffffffff --per-shire 8
+fp32_randn_16   --test fma --type fp32 --pattern none --values randn --shires 0xffffffff --per-shire 16
+fp32_randn_24   --test fma --type fp32 --pattern none --values randn --shires 0xffffffff --per-shire 24
+tload_dram      --test tload --where dram --masks 0xFFFF --shires 0xffffffff --per-shire 32
+tload_l2        --test tload --where l2 --masks 0xFFFF --shires 0xffffffff --per-shire 32
+m_hadamard      --test fma --type fp32 --pattern none --values file:build/structured_tiles/hadamard.@SEED@.bin --shires 0xffffffff --per-shire 32
+m_dct           --test fma --type fp32 --pattern none --values file:build/structured_tiles/dct.@SEED@.bin --shires 0xffffffff --per-shire 32
+m_fft_cos       --test fma --type fp32 --pattern none --values file:build/structured_tiles/fft_cos.@SEED@.bin --shires 0xffffffff --per-shire 32
+m_butterfly     --test fma --type fp32 --pattern none --values file:build/structured_tiles/butterfly.@SEED@.bin --shires 0xffffffff --per-shire 32
+m_kaleidoscope  --test fma --type fp32 --pattern none --values file:build/structured_tiles/kaleidoscope.@SEED@.bin --shires 0xffffffff --per-shire 32
+m_identity      --test fma --type fp32 --pattern none --values file:build/structured_tiles/identity.@SEED@.bin --shires 0xffffffff --per-shire 32
+m_tridiagonal   --test fma --type fp32 --pattern none --values file:build/structured_tiles/tridiagonal.@SEED@.bin --shires 0xffffffff --per-shire 32
+m_block_diag    --test fma --type fp32 --pattern none --values file:build/structured_tiles/block_diag.@SEED@.bin --shires 0xffffffff --per-shire 32
+m_upper         --test fma --type fp32 --pattern none --values file:build/structured_tiles/upper.@SEED@.bin --shires 0xffffffff --per-shire 32
+m_lowrank       --test fma --type fp32 --pattern none --values file:build/structured_tiles/lowrank.@SEED@.bin --shires 0xffffffff --per-shire 32
+m_circulant     --test fma --type fp32 --pattern none --values file:build/structured_tiles/circulant.@SEED@.bin --shires 0xffffffff --per-shire 32
+m_quant4        --test fma --type fp32 --pattern none --values file:build/structured_tiles/quant4.@SEED@.bin --shires 0xffffffff --per-shire 32
+m_relu          --test fma --type fp32 --pattern none --values file:build/structured_tiles/relu.@SEED@.bin --shires 0xffffffff --per-shire 32
+m_negzero       --test fma --type fp32 --pattern none --values file:build/structured_tiles/negzero.@SEED@.bin --shires 0xffffffff --per-shire 32

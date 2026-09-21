@@ -179,6 +179,18 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
   tree, but the energy is mostly in the rest of the unit (0.8 fJ per toggle against 0.03 fJ in the tree). That model predicts the
   board power of 14 patterns to 0.5 W out of sample. Thermal step response of the sensor to board power: 0.06 °C/W after 1 s,
   0.12 after 3 s, 0.16 after 7 s (stages of 1.5 s and 10 s), more beyond a minute.
+- **Leakage dominates an idle card:** idle board power is 12.6 W + 23.3 W x exp((T - 80)/36) from 64 to 88 °C (26.7 W at 62 °C,
+  36.3 W at 80 °C). The thermal network from board power to the sensor has stages at 1.5 s (0.11 °C/W), 4 s (0.05), 60 s (0.23),
+  150 s (0.14), 400 s (0.86) and 2,500 s (0.08): 1.47 °C/W in all on this card in its desktop chassis, so the leakage loop gain
+  is 0.95 at 80 °C and passes one at 82 °C. From an 80 °C start random fp32 data reaches 90 °C in 19 to 26 s, ones in 107 to 167 s,
+  random data on 256 of 1,024 cores in about 5 minutes; zeros cool. `tools/ettelem/flip_thermal_model.py` fits all of this and
+  `tools/ettelem/predict_heat.py` applies it to custom operand tiles (time to 90 °C within 12% in the median).
+- **Zero gating looks at the bit pattern:** -0.0 is not gated (46.7 W, like ones, against 38.2 W for +0.0). Mask with a select,
+  not by multiplying by zero. Dense structured matrices (DCT, kaleidoscope products, circulant, rank 1) cost what random data
+  costs; sparse structure (butterfly factors, bands, blocks) costs by its surviving products; a Hadamard matrix costs 50 W.
+- **Per work unit, over idle, at 0.52 V and 600 MHz:** 8 pJ per integer instruction, 0.32 pJ per int8 multiply-add, 2.7 pJ per
+  fp16, 6.0 pJ per fp32 (random data), 0.3 pJ per bit streamed from L2 SRAM, 18 pJ per bit from LPDDR4x. Power is linear in
+  active minions (26 mW each on random fp32). The 0.62 V / 800 MHz operating point switches 2.0x the power (V²f says 1.9x).
 - **The temperature sensor reads whole degrees.** Use step times, not levels: fit the heating power that reproduces a run's
   readings through the thermal network (`analyze_horace_strict.py`). It agrees with the electrical power to about 1 W.
 - **Rail figures are ~2 s moving averages;** board power is near-instantaneous. Skip 2-3 s after a step before averaging.

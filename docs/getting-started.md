@@ -43,9 +43,16 @@ page and `CLAUDE.md` carry the context.
   - Power and temperature (2026-09-20, `tools/ettelem`): the card leaks about 0.8 W per °C under load and idles 5 W higher after a
     load than before it, so baselines must be taken at the same die temperature. Reports:
     [power and temperature](reports/2026-09-20-et-soc1-power-temperature.html) and the
-    [Horace experiment](reports/2026-09-20-horace-experiment.html) (third version, 2026-09-21: data-dependent matmul power with every
+    [Horace experiment](reports/2026-09-20-horace-experiment.html) (fourth version, 2026-09-21: data-dependent matmul power with every
     run launched from the same die temperature, zeros 38 W, ones 47 W, random 63 W; heating per FLOP; a power model from RTL toggle
-    counts, `rtl-sim/fma_toggle`, good to 0.5 W out of sample; a thermal network; and the speed effect from a cool die).
+    counts, `rtl-sim/fma_toggle`; ten-minute runs; a model from flip rates to die temperature, `tools/ettelem/flip_thermal_model.py`;
+    structured matrices priced before they ran; `tools/ettelem/predict_heat.py` for custom workloads) and
+    [why the chip is low power](reports/2026-09-21-why-low-power.html) (C V² f + leakage measured term by term, against an A100).
+  - On this card in this chassis, nothing but zeros can run at full load for long: from 80 °C, random fp32 data reaches 90 °C in
+    about 20 s and ones in about two minutes, because leakage (23 W at 80 °C, +0.65 W per °C) feeds back through 1.5 °C per W of
+    thermal resistance. Sustained switching power above about 3 W has no equilibrium. Runs longer than a few seconds need a
+    temperature cap: `tools/ettelem/run_horace_long.sh` stops a run at 90 °C through the host's `--stop-file`. Never edit a runner
+    script while it is running; bash reads it as it goes.
   - The clock governor is thermal first: above 65 °C the card sits at 600 MHz and 0.52 V whatever the power, below it a busy card
     goes to 800 MHz and 0.62 V. A card that has idled overnight (62 °C, 27 W) therefore behaves differently from one in use (72 to
     80 °C, 31 to 36 W). Check `mhz` in `ettelem sample` before comparing anything.
