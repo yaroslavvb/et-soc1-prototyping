@@ -53,7 +53,8 @@ section 9 lists the pinned upstream versions.
   FLOP; a power model from RTL switching activity of the multiply-add unit (`rtl-sim/fma_toggle`, 0.5 W out of sample); the speed
   effect from a cool die (`run_horace_cold.sh`); ten-minute runs with a 90 °C cap (`run_horace_long.sh`: random data gets from 80 to
   90 °C in 19 to 26 s, ones in about two minutes, zeros never); a three-line model from flip rates to temperature
-  (`tools/ettelem/flip_thermal_model.py`: leakage 23 W at 80 °C, thermal stages out to 2,500 s, time to 90 °C predicted to 12%);
+  (`tools/ettelem/flip_thermal_model.py`: leakage 23 W at 80 °C, thermal stages out to 2,500 s; on held-out runs the time to 90 °C is predicted to 9% in the median and 23% at worst,
+  and ten-minute end temperatures come out 3 to 5 °C hot: `tools/ettelem/validate_flip_model.py`);
   and structured matrices (Hadamard, DCT, butterfly, kaleidoscope, ...: `tools/ettelem/make_tiles.py`) whose power was predicted to
   0.9 W before they ran. `tools/ettelem/predict_heat.py --model .../model.json --tiles my.bin` prices a custom workload: flips,
   watts, heating curve, time to a cap, sustainable duty cycle. GIFs: `docs/reports/horace-heating.gif`, `horace-heating-6.gif`,

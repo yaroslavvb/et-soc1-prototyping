@@ -125,7 +125,8 @@ document.getElementById('coldtbl').innerHTML='<thead><tr><th>Operands</th><th cl
   ['From a cool die',`${f1(mean(cz.map(r=>r.tflops)))} vs ${f1(mean(cr.map(r=>r.tflops)))}`,'TFLOPS, zeros against random: the governor holds 800 MHz only for the cool pattern']];
  if(D.long&&D.model){const cap=v=>D.long.filter(r=>r.values===v&&r.per_shire===32&&r.reason==='cap').map(r=>r.dur);const rn=cap('randn'),on=cap('ones');
   cards.push(['Seconds from 80 to 90 °C',`${Math.min(...rn).toFixed(0)}–${Math.max(...rn).toFixed(0)} · ${Math.min(...on).toFixed(0)}–${Math.max(...on).toFixed(0)} · never`,'random normal · ones · zeros, in runs of up to ten minutes']);
-  cards.push(['Flips → temperature',`±${D.model.per_run_summary.median_abs_pct.toFixed(0)}%`,`median error of the predicted time to 90 °C over ${D.model.per_run_summary.n_capped} long runs, from flip counts and the launch state alone`]);}
+  if(D.validation){const v=D.validation.timesplit.summary;cards.push(['Flips → temperature, held-out runs',`±${v.median_abs_pct.toFixed(0)}%`,`median error of the predicted time to 90 °C on ${v.capped} runs the model was not fitted to (worst ${v.worst_pct.toFixed(0)}%). At ten minutes it runs hot: ${v.uncapped_end_T_rms.toFixed(1)} °C rms`]);}
+  else cards.push(['Flips → temperature',`±${D.model.per_run_summary.median_abs_pct.toFixed(0)}%`,`median error of the fitted time to 90 °C over ${D.model.per_run_summary.n_capped} long runs`]);}
  if(D.structured){const ks=Object.keys(D.structured.measured);const rms=Math.sqrt(ks.reduce((a,k)=>a+(D.structured.before.patterns[k].p_board_at_launch-D.structured.measured[k].p80)**2,0)/ks.length);
   cards.push(['Structured matrices, priced first',`±${f1(rms)} W`,`${ks.length} matrices from Hadamard to kaleidoscope, predicted from their tiles before they ran`]);}
  document.getElementById('kpis').innerHTML=cards.map(c=>`<div class="card kpi"><div class="lab">${c[0]}</div><div class="val">${c[1]}</div><div class="sub">${c[2]}</div></div>`).join('');
@@ -164,6 +165,7 @@ document.getElementById('coldtbl').innerHTML='<thead><tr><th>Operands</th><th cl
   hover(g,tip,h,()=>`<b>${NAMES[p]||p}</b>: ${f1(D.patterns[p].p80)} W measured, ${f1(base+acc)} W modelled<br>constant ${f1(base)} W`+parts.map(q=>`<br>${PART[q[0]][0]}: ${q[1].toFixed(1)} W`).join(''));});})();
 
 /* ================= long runs and the flips-to-temperature model ================= */
+const SNAME={hadamard:'Hadamard, ±1',kaleidoscope:'kaleidoscope (butterfly products)',relu:'weights × ReLU activations',negzero:'all −0.0',fft_cos:'DFT, cos and sin parts',block_diag:'random 4×4 blocks'};
 if (D.long && D.model) (function(){
  const M=D.model,PW=M.power;const LCOL=r=>r.per_shire<32?(r.values==='randn'?'var(--c7)':'var(--c3)'):(COL[r.values]||'var(--ref)');
  const LNAME=r=>(NAMES[r.values]||r.values)+(r.per_shire<32?`, ${r.minions} of 1,024 cores`:'');
@@ -186,15 +188,25 @@ if (D.long && D.model) (function(){
   draw();})();
  /* table of long runs with the model's prediction */
  (function(){const pr=M.per_run.filter(p=>p.session.indexOf('long')>=0);
-  document.getElementById('long-tbl').innerHTML='<thead><tr><th>Operands</th><th class="num">active cores</th><th class="num">switching power from flip counts, W</th><th class="num">ran, s</th><th>ended</th><th class="num">model: 90 °C after, s</th><th class="num">end °C measured</th><th class="num">end °C from flips</th></tr></thead><tbody>'+
+  document.getElementById('long-tbl').innerHTML='<thead><tr><th>Operands</th><th class="num">active cores</th><th class="num">switching power from flip counts, W</th><th class="num">ran, s</th><th>ended</th><th class="num">fitted model: 90 °C after, s</th><th class="num">end °C measured</th><th class="num">end °C, fitted model</th></tr></thead><tbody>'+
    D.long.map(r=>{const p=pr.reduce((b,q)=>Math.abs(q.dur-r.dur)<2&&q.values===r.values&&q.active===r.minions?q:b,null);
     return `<tr><td>${NAMES[r.values]||r.values}</td><td class="num">${r.minions.toLocaleString()}</td><td class="num">${p?f1(p.p_dyn_flips):'–'}</td><td class="num"><b>${r.dur.toFixed(0)}</b></td><td>${r.reason==='cap'?'at 90 °C':'time limit'}</td><td class="num">${p&&p.t_cap_pred?p.t_cap_pred.toFixed(0):(p?'never':'–')}</td><td class="num">${p?f1(p.T_end_meas):'–'}</td><td class="num">${p&&p.T_end_pred?f1(p.T_end_pred):'–'}</td></tr>`;}).join('')+'</tbody>';})();
- /* predicted against measured time to the cap */
+ /* predicted against measured time to the cap: fitted runs (dots) and held-out runs (rings) */
  (function(){const pr=M.per_run.filter(p=>p.capped&&p.t_cap_pred);const W=440,H=400,L=54,R=16,T=16,B=40;const {svg,tip,h}=host('cap-sc',W,H);
   const lo=Math.log10(10),hi=Math.log10(700),x=v=>L+(Math.log10(v)-lo)/(hi-lo)*(W-L-R),y=v=>H-B-(Math.log10(v)-lo)/(hi-lo)*(H-B-T);const tk=[10,20,50,100,200,500];
   axes(svg,{W,H,L,R,T,B,x,y,yt:tk,xt:tk,xl:'measured seconds to 90 °C',yl:'predicted from flip counts, s'});el('line',{x1:x(10),y1:y(10),x2:x(700),y2:y(700),stroke:'var(--axis)','stroke-dasharray':'4 4'},svg);
-  for(const p of pr){const g=el('g',{},svg);el('circle',{cx:x(p.dur),cy:y(p.t_cap_pred),r:6,fill:p.active<1024?'var(--c7)':(COL[p.values]||'var(--ref)'),opacity:0.9,stroke:'var(--surface)','stroke-width':1.5},g);
-   hover(g,tip,h,()=>`<b>${NAMES[p.values]||p.values}</b>, ${p.active} cores<br>flips: ${f1(p.p_dyn_flips)} W of switching<br>measured ${p.dur.toFixed(0)} s, predicted ${p.t_cap_pred.toFixed(0)} s`);}})();
+  const colr=p=>p.active<1024?'var(--c7)':(COL[p.values]||'var(--ref)');
+  for(const p of pr){const g=el('g',{},svg);el('circle',{cx:x(p.dur),cy:y(p.t_cap_pred),r:4.5,fill:colr(p),opacity:0.55},g);
+   hover(g,tip,h,()=>`<b>${NAMES[p.values]||p.values}</b>, ${p.active} cores, fitted<br>flips: ${f1(p.p_dyn_flips)} W of switching<br>measured ${p.dur.toFixed(0)} s, model ${p.t_cap_pred.toFixed(0)} s`);}
+  if(D.validation)for(const [set,lab] of [[D.validation.timesplit.rows,'held out in time'],[D.validation.afternoon.rows,'afternoon session, new matrices']])for(const p of set){if(!p.capped||!p.t_cap_pred)continue;const g=el('g',{},svg);
+   el('circle',{cx:x(p.dur),cy:y(p.t_cap_pred),r:7,fill:'none',stroke:'var(--ink)','stroke-width':2},g);el('circle',{cx:x(p.dur),cy:y(p.t_cap_pred),r:9,fill:'transparent'},g);
+   hover(g,tip,h,()=>`<b>${SNAME[p.values]||NAMES[p.values]||p.values}</b>, ${p.active} cores, ${lab}<br>flips: ${f1(p.p_flips)} W of switching<br>measured ${p.dur.toFixed(0)} s, predicted ${p.t_cap_pred.toFixed(0)} s`);}
+ })();
+ /* held-out runs: second half of the long session, model fitted on the first half */
+ (function(){if(!D.validation)return;const rows=D.validation.timesplit.rows;
+  document.getElementById('val-tbl').innerHTML='<thead><tr><th>Held-out run</th><th class="num">active cores</th><th class="num">switching power from flips, W</th><th class="num">measured</th><th class="num">predicted</th><th class="num">error</th></tr></thead><tbody>'+
+   rows.map(r=>{const pc=r.capped&&r.t_cap_pred?(r.t_cap_pred/r.dur-1)*100:null;
+    return `<tr><td>${NAMES[r.values]||r.values}</td><td class="num">${r.active.toLocaleString()}</td><td class="num">${f1(r.p_flips)}</td><td class="num">${r.capped?'90 °C after <b>'+r.dur.toFixed(0)+' s</b>':f1(r.T_end_meas)+' °C after '+r.dur.toFixed(0)+' s'}</td><td class="num">${r.capped?(r.t_cap_pred?r.t_cap_pred.toFixed(0)+' s':'never'):f1(r.T_end_pred)+' °C'+(r.t_cap_pred&&r.t_cap_pred<r.dur?' (90 °C at '+r.t_cap_pred.toFixed(0)+' s)':'')}</td><td class="num">${pc!==null?(pc>=0?'+':'')+pc.toFixed(0)+'%':(r.T_end_pred-r.T_end_meas>=0?'+':'')+f1(r.T_end_pred-r.T_end_meas)+' °C'}</td></tr>`;}).join('')+'</tbody>';})();
  /* leakage: idle power against temperature */
  (function(){const pts=PW.idle_curve.filter(p=>p.n>=30);const W=440,H=400,L=50,R=16,T=16,B=40;const {svg,tip,h}=host('leak',W,H);
   const x=v=>L+(v-60)/(92-60)*(W-L-R),y=v=>H-B-(v-20)/(46-20)*(H-B-T);
@@ -252,8 +264,8 @@ if (D.structured) (function(){
   `<tr><td><i>rms error over ${rows.length} matrices</i></td><td></td><td></td><td></td><td></td><td></td><td class="num"><i>${f2(rms)} W</i></td><td></td></tr></tbody>`;
 })();
 
-/* ---------- structured matrices: long runs against the frozen model ---------- */
-if (D.structured_long) (function(){const SN={hadamard:'Hadamard, ±1',kaleidoscope:'kaleidoscope (butterfly products)',relu:'weights × ReLU activations',negzero:'all −0.0',fft_cos:'DFT, cos and sin parts',block_diag:'random 4×4 blocks',randn:'random normal (reference)',ones:'ones (reference)'};
+/* ---------- structured matrices: long runs against the frozen model, nothing fitted on that session ---------- */
+if (D.validation) (function(){const SN=Object.assign({randn:'random normal (reference)',ones:'ones (reference)'},SNAME);
  document.getElementById('struct-long').innerHTML='<thead><tr><th>Matrix</th><th class="num">switching power from its flips, W</th><th class="num">measured: 90 °C after, s</th><th class="num">predicted, s</th><th class="num">error</th></tr></thead><tbody>'+
-  D.structured_long.rows.filter(r=>r.p_flips!==null).map(r=>{const capped=r.reason==='cap';
-   return `<tr><td>${SN[r.values]||r.values}</td><td class="num">${f1(r.p_flips)}</td><td class="num">${capped?'<b>'+r.dur.toFixed(0)+'</b>':'not in '+r.dur.toFixed(0)+' s: '+f1(r.T_end_meas)+' °C'}</td><td class="num">${capped?(r.t_cap_pred?r.t_cap_pred.toFixed(0):'never'):f1(r.T_end_pred)+' °C'}</td><td class="num">${capped&&r.t_cap_pred?(Math.abs((r.t_cap_pred/r.dur-1)*100)<0.5?'0%':((r.t_cap_pred/r.dur-1)*100>=0?'+':'')+((r.t_cap_pred/r.dur-1)*100).toFixed(0)+'%'):(r.T_end_pred-r.T_end_meas>=0?'+':'')+f1(r.T_end_pred-r.T_end_meas)+' °C'}</td></tr>`;}).join('')+'</tbody>';})();
+  D.validation.afternoon.rows.map(r=>{const pc=r.capped&&r.t_cap_pred?(r.t_cap_pred/r.dur-1)*100:null;
+   return `<tr><td>${SN[r.values]||r.values}</td><td class="num">${f1(r.p_flips)}</td><td class="num">${r.capped?'<b>'+r.dur.toFixed(0)+'</b>':'not in '+r.dur.toFixed(0)+' s: '+f1(r.T_end_meas)+' °C'}</td><td class="num">${r.capped?(r.t_cap_pred?r.t_cap_pred.toFixed(0):'never'):f1(r.T_end_pred)+' °C'}</td><td class="num">${pc!==null?(Math.abs(pc)<0.5?'0%':(pc>=0?'+':'')+pc.toFixed(0)+'%'):(r.T_end_pred-r.T_end_meas>=0?'+':'')+f1(r.T_end_pred-r.T_end_meas)+' °C'}</td></tr>`;}).join('')+'</tbody>';})();

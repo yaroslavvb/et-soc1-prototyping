@@ -27,6 +27,8 @@ def main():
     ap.add_argument("--model", help="flip_thermal_model.py output")
     ap.add_argument("--long2", help="analyze_horace_long.py output of the structured long runs")
     ap.add_argument("--model2", help="flip_thermal_model.py --evaluate output for them")
+    ap.add_argument("--validation", nargs=3, metavar=("TIMESPLIT", "AFTERNOON", "FIRSTHALF_MODEL"),
+                    help="validate_flip_model.py outputs (time split, afternoon session) and the first-half model they used")
     ap.add_argument("--structured-before", help="structured_predictions_before.json")
     ap.add_argument("--ablation", help="analyze_ablation.py output holding the m_<kind> configurations")
     ap.add_argument("--before")
@@ -77,6 +79,13 @@ def main():
                          "p_flips": pr["p_dyn_flips"] if pr else None, "t_cap_pred": pr["t_cap_pred"] if pr else None,
                          "T_end_pred": pr["T_end_pred"] if pr else None, "T_end_meas": pr["T_end_meas"] if pr else None})
         out["structured_long"] = {"rows": rows, "summary": m2["per_run_summary"], "thermal_rms": m2["thermal_rms"]}
+    if a.validation:
+        ts, af, fh = (json.load(open(x)) for x in a.validation)
+        keep = ("values", "active", "dur", "p_flips", "capped", "t_cap_pred", "T_end_meas", "T_end_pred", "T_launch_est")
+        out["validation"] = {"timesplit": {"rows": [{k: r[k] for k in keep} for r in ts["rows"]], "summary": ts["summary"], "after": ts["after"]},
+                             "afternoon": {"rows": [{k: r[k] for k in keep} for r in af["rows"]], "summary": af["summary"]},
+                             "firsthalf": {"R": fh["R"], "taus": fh["taus"], "R_total": fh["R_total"],
+                                           "power": {k: v for k, v in fh["power"].items() if k != "idle_curve"}}}
     if a.before:
         out["before"] = json.load(open(a.before))
     if a.earlier:

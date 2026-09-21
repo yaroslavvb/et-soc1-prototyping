@@ -32,11 +32,22 @@ python3 tools/ettelem/analyze_ablation.py "$D/ablation" --out "$D/ablation.json"
 python3 tools/ettelem/flip_thermal_model.py "$D/long@13950" "$D/strict" --leak-only "$D/cold1" "$D/cold2" --anchor 62:26.7 \
   --toggles "$D/toggles_all.json" --out "$D/model.json" > "$D/model.txt"
 
+# out-of-sample tests: every parameter from the first 7,400 s of the long session (plus the strict session), then frozen;
+# thermal state at each launch from telemetry before it only (validate_flip_model.py fits nothing)
+python3 tools/ettelem/flip_thermal_model.py "$D/long@7400" "$D/strict" --leak-only "$D/cold1" "$D/cold2" --anchor 62:26.7 \
+  --toggles "$D/toggles_all.json" --out "$D/model_firsthalf.json" > "$D/model_firsthalf.txt"
+python3 tools/ettelem/validate_flip_model.py "$D/long@13950" --model "$D/model_firsthalf.json" --toggles "$D/toggles_all.json" --after 7400 \
+  --out "$D/validation_timesplit.json" > "$D/validation_timesplit.txt"
+python3 tools/ettelem/validate_flip_model.py "$D/long2" --model "$D/model_firsthalf.json" --toggles "$D/toggles_all.json" \
+  --out "$D/validation_afternoon_firsthalf.json" > "$D/validation_afternoon_firsthalf.txt"
+python3 tools/ettelem/validate_flip_model.py "$D/long2" --model "$D/model.json" --toggles "$D/toggles_all.json" \
+  --out "$D/validation_afternoon.json" > "$D/validation_afternoon.txt"
 [ -d "$D/long2" ] && python3 tools/ettelem/flip_thermal_model.py "$D/long2" --evaluate "$D/model.json" --toggles "$D/toggles_all.json" --out "$D/model2.json" > "$D/model2.txt"
 
 python3 tools/ettelem/build_horace_report_data.py --strict "$D/horace3.json" --toggles "$D/toggles.json" --cold "$D/cold1.json" "$D/cold2.json" \
   --before "$D/predictions_before.json" --long "$D/long.json" --model "$D/model.json" \
-  --structured-before "$D/structured_predictions_before.json" --ablation "$D/ablation.json" --long2 "$D/long2.json" --model2 "$D/model2.json" --out "$D/report.json"
+  --structured-before "$D/structured_predictions_before.json" --ablation "$D/ablation.json" --long2 "$D/long2.json" --model2 "$D/model2.json" \
+  --validation "$D/validation_timesplit.json" "$D/validation_afternoon.json" "$D/model_firsthalf.json" --out "$D/report.json"
 python3 tools/ettelem/build_lowpower_report_data.py --ablation "$D/ablation.json" --model "$D/model.json" --toggles "$D/toggles.json" --vf "$D/vf.json" --out "$D/lowpower-report.json"
 
 python3 tools/ettelem/make_heating_gif.py "$D/horace3.json" docs/reports/horace-heating.gif --poster docs/reports/horace-heating.png --steps

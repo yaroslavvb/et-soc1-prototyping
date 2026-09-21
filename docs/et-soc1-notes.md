@@ -184,7 +184,8 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
   150 s (0.14), 400 s (0.86) and 2,500 s (0.08): 1.47 °C/W in all on this card in its desktop chassis, so the leakage loop gain
   is 0.95 at 80 °C and passes one at 82 °C. From an 80 °C start random fp32 data reaches 90 °C in 19 to 26 s, ones in 107 to 167 s,
   random data on 256 of 1,024 cores in about 5 minutes; zeros cool. `tools/ettelem/flip_thermal_model.py` fits all of this and
-  `tools/ettelem/predict_heat.py` applies it to custom operand tiles (time to 90 °C within 12% in the median).
+  `tools/ettelem/predict_heat.py` applies it to custom operand tiles. Held-out runs (`validate_flip_model.py`): time to 90 °C within
+  9% in the median, 23% at worst; ten-minute end temperatures 3 to 5 °C hot, because the stages beyond a minute are poorly pinned down.
 - **Zero gating looks at the bit pattern:** -0.0 is not gated (46.7 W, like ones, against 38.2 W for +0.0). Mask with a select,
   not by multiplying by zero. Dense structured matrices (DCT, kaleidoscope products, circulant, rank 1) cost what random data
   costs; sparse structure (butterfly factors, bands, blocks) costs by its surviving products; a Hadamard matrix costs 50 W.

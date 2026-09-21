@@ -1,4 +1,4 @@
-<style>#act td:first-child,#tbl td:first-child,#long-tbl td,#struct-long td,#struct-tbl td:first-child,#perflip td:first-child,#pre td:first-child,#coef td:first-child,#coldtbl td:first-child{white-space:nowrap}</style>
+<style>#act td:first-child,#tbl td:first-child,#long-tbl td,#val-tbl td,#struct-long td,#struct-tbl td:first-child,#perflip td:first-child,#pre td:first-child,#coef td:first-child,#coldtbl td:first-child{white-space:nowrap}</style>
 <h1>The Horace experiment on the ET-SoC-1</h1>
 <p class="byline">aifoundry2's card, 20–21 September 2026 · fp32 TensorFMA on all 1,024 minions · <code>workloads/sparsity --values</code>, <code>tools/ettelem</code>, <code>rtl-sim/fma_toggle</code> · fourth version: strict temperature control, heating per FLOP, a power model from RTL switching activity, the speed effect, and now ten-minute runs, a model from flips to temperature, and structured matrices priced before they ran</p>
 
@@ -15,7 +15,8 @@ sensor. And from a cool die Horace's speed effect appears too: zeros run at <b>1
 <b>9.3</b>, because the firmware's governor lets only the cool pattern keep the fast clock. <b>Run for minutes instead of seconds,
 nothing but zeros lasts:</b> random data takes the die from 80 to 90 °C in 19 to 26 s, ones in about two minutes. A
 three-line model (flip rates to watts, leakage that grows with temperature, a thermal network) predicts those times from the
-flip counts to 12%, and priced 14 structured matrices, from Hadamard to kaleidoscope, to 0.9 W before they ran.</p>
+flip counts. On runs it was not fitted to, the median error is 9% and the worst 23%; at ten minutes it runs 3 to 5 °C hot.
+It priced 14 structured matrices, from Hadamard to kaleidoscope, to 0.9 W before they ran.</p>
 
 <div class="kpis" id="kpis"></div>
 
@@ -240,7 +241,7 @@ to 80 °C. Some runs used fewer minions per shire, which scales the flip rate wi
 <figcaption class="small">Zeros, ones and random normal at full load, and random normal on 384 of the 1,024 cores, on a log time axis. To repost:
 <a href="horace-long.gif">horace-long.gif</a> (0.3 MB).</figcaption>
 </figure>
-<div class="chart-title">The long runs: die temperature against time since launch, log scale. Solid: the sensor. Dashed: predicted from the run's flip counts (section 8). Choose which runs to show.</div>
+<div class="chart-title">The long runs: die temperature against time since launch, log scale. Solid: the sensor. Dashed: the fitted model's curve from the run's flip counts (section 8). Choose which runs to show.</div>
 <div class="controls" id="long-leg"></div>
 <div class="chart scroll" id="long-curves"></div>
 <div class="table-wrap wide"><table id="long-tbl"></table></div>
@@ -290,18 +291,36 @@ sensitive to flips here. Each degree adds 0.65 W, and each watt, given ten minut
 itself, that loop has a gain of 0.95 at 80 °C: a watt of switching held for ten minutes raises the die by 3.1 °C, not 1.2, and
 the gain passes one at 82 °C. The table turns that into degrees per kind of flip for the random fp32 matmul.</p>
 <div class="table-wrap wide"><table id="perflip"></table></div>
-<p><b>Test: every long run, from its flips alone.</b> For each run the network is started in the state the measured
-history had left it in at launch, and then driven by the power line above, with the run's flip rates and its own simulated
-temperature; nothing measured during the run goes in. The dashed lines in the chart of section 7 are these predictions. For
-the 19 runs that reached 90 °C the predicted time is off by 12% in the median (23 s predicted for 26 s measured, 122 for
-119, 326 for 315); the worst is the half-zero random matrix, 157 s for 107 s. For the seven ten-minute runs the predicted end
-temperature is off by 2.5 °C rms. What does not work is letting the model run free for the whole four hours: with a loop
-gain of 0.95, a 1% error in leakage grows into degrees, and the simulated die drifts away within the hour. The model
-predicts minutes ahead from a known state, which is what heat management needs.</p>
+<p><b>How well it fits.</b> For each long run the network is started in the state the measured history had left it in at
+launch, and then driven by the power line above, with the run's flip rates and its own simulated temperature; nothing
+measured during the run goes in. The dashed lines in the chart of section 7 are these curves. For the 19 runs that reached
+90 °C the time is off by 12% in the median (23 s for 26 s measured, 122 for 119, 326 for 315); the worst is the half-zero
+random matrix, 157 s for 107 s. For the seven ten-minute runs the end temperature is off by 2.5 °C rms. These are fit
+numbers: the network and the leakage were estimated from the same session.</p>
+<p><b>How well it predicts.</b> So every parameter was fitted again on the first 7,400 s of the long session (15 runs, plus
+the 7-second session of section 2) and frozen, and the 12 later runs were predicted. Nothing is fitted on the held-out part:
+the thermal state at each launch comes from an observer that has seen the telemetry up to that launch only
+(<code>tools/ettelem/validate_flip_model.py</code>). The held-out runs include four patterns and two core counts that the
+thermal fit had never seen.</p>
+<div class="table-wrap wide"><table id="val-tbl"></table></div>
+<ul>
+<li><b>Up to a few minutes it predicts as well as it fits:</b> for the seven held-out runs that reached 90 °C the median
+error is 9% and the worst 23% (ones, 199 s for 162 s); six of the seven are within 20%.</li>
+<li><b>At ten minutes it runs hot,</b> by 3 to 5 °C on the low-power runs (3.8 °C rms against 2.5 °C in the fit), and it
+wrongly has two of the five ten-minute runs reaching 90 °C, at 437 and 469 s, when they ended at 87 and 88 °C.</li>
+<li><b>The slow stages are not pinned down.</b> Between the half fit and the full fit the fast stages and the leakage barely
+move (0.10 and 0.05 °C/W at 1.5 and 4 s in both; 24.4 against 23.3 W of leakage at 80 °C), but the 400 s stage goes from
+0.60 to 0.86 °C/W and the 1,000 s stage from 0.38 to nothing, and the operand-word energy from 20 to 15.5 fJ. The telemetry
+is 140,000 samples but only 27 runs; that is the number that counts for the slow stages. The overnight idle point that
+anchors them is a single measurement, assumed to share this session's ambient.</li>
+<li>What does not work at all is letting the model run free for the whole four hours: with a loop gain of 0.95, a 1% error
+in leakage grows into degrees, and the simulated die drifts away within the hour. The model predicts minutes ahead from a
+known state.</li>
+</ul>
 <div class="chart-title">The long session: sensor reading (blue) and the thermal network driven by the measured board power (orange)</div>
 <div class="chart scroll" id="session"></div>
 <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:14px">
-  <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Seconds to 90 °C, run by run: predicted from flip counts against measured</div><div class="chart" id="cap-sc"></div></div>
+  <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Seconds to 90 °C, run by run, from flip counts against measured. Dots: runs the model was fitted on. Rings: held-out runs (the second half of the session, and section 9's new matrices)</div><div class="chart" id="cap-sc"></div></div>
   <div style="flex:1 1 380px;max-width:460px"><p style="margin-top:2.2em"><b>A predictor for custom workloads.</b> <code>tools/ettelem/predict_heat.py</code> wraps the three lines: give
 it the A and B tiles of a workload (or a pattern name), the number of active minions and a start temperature, and it replays
 the tiles through the RTL, counts the flips, and prints the switching watts by kind of flip, the board power, the temperature
@@ -343,14 +362,16 @@ multiplying by zero, because x · 0 is −0.0 for every negative x.</li>
 <li><b>The worst miss</b> is the DFT pair, 2.8 W low. Its products cancel almost exactly, which works the normaliser harder
 than any pattern the energies were fitted on; one energy for every toggle outside the multiplier tree is too coarse there.</li>
 </ul>
-<p><b>And the heat, not just the watts.</b> Five of the structured matrices then ran as long runs (section 7's protocol), with
-the model frozen as fitted before they existed on the card; only the afternoon session's baseline and starting state were
-taken from its own telemetry. The frozen thermal network followed that session to 0.33 °C.</p>
+<p><b>And the heat, not just the watts.</b> Five of the structured matrices then ran as long runs in a separate afternoon
+session (section 7's protocol), with the model frozen as fitted that morning, before they existed on the card. Nothing was
+fitted on that session: the thermal state at each launch comes from the observer of section 8, from telemetry before the
+launch only.</p>
 <div class="table-wrap"><table id="struct-long"></table></div>
-<p>Four of the six times to 90 °C are within 12%, and the five-minute run's end temperature is off by 0.1 °C. The DFT pair is
-wrong by half, for the same reason as its watts: 2.8 W missing out of 13 W of switching is 37 s on a die this close to
-runaway. The ReLU pair is 25% slow for a 1.2 W miss. Near the card's flip budget, the time to a cap is a sensitive function of
-power, so a watt of model error matters; at full random load it does not (19.1 s predicted, 19.1 s measured).</p>
+<p>Four of the six times to 90 °C are within 3%, and the five-minute run's end temperature is off by 0.2 °C. The DFT pair is
+wrong by two thirds, for the same reason as its watts: 2.8 W missing out of 13 W of switching costs 47 s on a die this close to
+runaway. The ReLU pair is a third slow for a 1.2 W miss. Near the card's flip budget the time to a cap is a sensitive function
+of power, so a watt of model error matters; at full random load it does not (19.5 s predicted, 19.1 s measured). With the
+first-half model of section 8 instead, the same six come out at 7% in the median and 65% for the DFT pair.</p>
 <pre><code>$ python3 tools/ettelem/make_tiles.py kaleidoscope k.bin
 $ python3 tools/ettelem/predict_heat.py --model docs/reports/data/2026-09-21-horace-aifoundry2/model.json --tiles k.bin
 flips per op and minion: 4096 of 4,096 multiply-adds valid; 2.47 M register bits clocked; 74.3 M tree toggles; 13.27 M other toggles; 140 k operand-word toggles
@@ -379,7 +400,8 @@ anyone else has the card open.</li>
 <li>Flips-to-temperature model: <code>tools/ettelem/flip_thermal_model.py</code>, fitted to the long session up to the cooling
 change, the strict session and the idle samples of the cool starts, with the overnight idle point (62 °C, 26.7 W) as the anchor
 for the slowest stage. Per-run predictions start from the network state that the measured power history leaves at launch.
-<code>--evaluate model.json</code> tests a frozen model on a new session.</li>
+<code>tools/ettelem/validate_flip_model.py</code> tests a frozen model on sessions or parts of sessions it was not fitted to,
+fitting nothing: it estimates the state at each launch causally and reports predicted against measured.</li>
 <li>Results are not checked for these patterns (random sums are not exact); the same kernel is checked exactly in its integer mode,
 and the RTL bench checks every multiply-add against software.</li>
 </ul>
