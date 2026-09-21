@@ -170,15 +170,27 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
 - **Power depends on temperature:** +0.78 W per °C on the board at constant work (0.38 on the minion rail). The die idles at
   72 °C and 31 W; 40 s after a 60 s full-chip load it still idles at 81 °C and 36.5 W. Take baselines at the same temperature,
   interleave runs, or fit a temperature term.
-- **Power depends on the data:** fp32 TensorFMA at the same 546 cycles per op draws 38 W with zero operands, 48 W with any
-  constant (ones, twos, pi, a single set bit) and 67 W with random values, every run started at 80 °C (`tools/ettelem/run_horace.sh`
-  waits for the die to cool to a target before each run). Changing bits cost energy, set bits do not. All of it
-  is on the minion rail: about 6 pJ per multiply-add between random and zeros.
+- **Power depends on the data:** fp32 TensorFMA at the same 546 cycles per op draws 38.3 W with zero operands, 46.7 W with ones
+  (π the same), 61.3 W with random uniform and 63.4 W with random normal values, every run launched as the die cools through
+  81→80 °C (`tools/ettelem/run_horace_strict.sh`; run-to-run spread under 0.1 W). Heating follows power over idle (36.3 W there):
+  1, 27 and 76 m°C per 10¹² FLOPs for zeros, ones and random normal. The cause is in the RTL (`rtl-sim/fma_toggle`): a lane whose
+  A or B operand word is zero gets no valid, so its pipeline registers are not clocked; a constant clocks 2.47 M register bits per
+  op and toggles nothing (3 fJ per clocked bit); random data also flips 87 M counted nets per op, 85% of them in the multiplier
+  tree, but the energy is mostly in the rest of the unit (0.8 fJ per toggle against 0.03 fJ in the tree). That model predicts the
+  board power of 14 patterns to 0.5 W out of sample. Thermal step response of the sensor to board power: 0.06 °C/W after 1 s,
+  0.12 after 3 s, 0.16 after 7 s (stages of 1.5 s and 10 s), more beyond a minute.
+- **The temperature sensor reads whole degrees.** Use step times, not levels: fit the heating power that reproduces a run's
+  readings through the thermal network (`analyze_horace_strict.py`). It agrees with the electrical power to about 1 W.
 - **Rail figures are ~2 s moving averages;** board power is near-instantaneous. Skip 2-3 s after a step before averaging.
 - **Board minus the three rails** (DDR, PCIe, Maxions, IO, regulator loss; no sensors) is 15 W idle, ~21 W under matmul or DRAM load.
 - `tools/ettelem` reads the per-rail snapshot the stock CLI refuses (`DM_CMD_GET_SP_STATS`), samples the full telemetry set 45
   times a second, and reads the per-shire on-die voltage map (`loglevel debug` + `sptrace`; restore with `loglevel info`).
-- The governor never moved the 600 MHz clock, even at 70 W board power and 90 °C with a 65 W TDP setting.
+- **The clock governor is thermal first.** Above its 65 °C software threshold the service processor holds the lowest
+  operating point (600 MHz, 0.52 V), whatever the power: that is why every hot run sat at 600 MHz even at 70 W. Below 65 °C
+  a busy card is stepped up to 800 MHz at 0.62 V (700 MHz at 0.57 V in between) while the board's average power is under the
+  65 W TDP level, and stepped back down as the die passes 65 °C. From a 63 °C start, zeros hold 800 MHz for a whole 7 s run
+  (11.6 TFLOPS), random data is back at 600 MHz within a second (9.3 TFLOPS). For like-for-like power numbers start runs
+  well above 65 °C (`tools/ettelem/run_horace_strict.sh`) and check `mhz` in the telemetry.
 
 ## Performance ladder (FOSDEM "Zero to matmul", 512x512 fp32)
 

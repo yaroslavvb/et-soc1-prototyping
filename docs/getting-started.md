@@ -43,7 +43,12 @@ page and `CLAUDE.md` carry the context.
   - Power and temperature (2026-09-20, `tools/ettelem`): the card leaks about 0.8 W per °C under load and idles 5 W higher after a
     load than before it, so baselines must be taken at the same die temperature. Reports:
     [power and temperature](reports/2026-09-20-et-soc1-power-temperature.html) and the
-    [Horace experiment](reports/2026-09-20-horace-experiment.html) (data-dependent matmul power: zeros 38 W, constants 48 W, random 67 W, each run started at 80 °C).
+    [Horace experiment](reports/2026-09-20-horace-experiment.html) (third version, 2026-09-21: data-dependent matmul power with every
+    run launched from the same die temperature, zeros 38 W, ones 47 W, random 63 W; heating per FLOP; a power model from RTL toggle
+    counts, `rtl-sim/fma_toggle`, good to 0.5 W out of sample; a thermal network; and the speed effect from a cool die).
+  - The clock governor is thermal first: above 65 °C the card sits at 600 MHz and 0.52 V whatever the power, below it a busy card
+    goes to 800 MHz and 0.62 V. A card that has idled overnight (62 °C, 27 W) therefore behaves differently from one in use (72 to
+    80 °C, 31 to 36 W). Check `mhz` in `ettelem sample` before comparing anything.
   - Summaries of all of these are in [et-soc1-notes.md](et-soc1-notes.md).
 - **Next:**
   - A real GEMM, tiling through the L2 scratchpad with cooperative tensor loads. FOSDEM reached 10.25 TFLOP/s this way.
@@ -88,7 +93,7 @@ invite Roman sent. On the new machine:
 | Machine | Cards | Notes |
 |---|---|---|
 | `aifoundry1` | 2 (`/dev/et0_*`, `/dev/et1_*`) | |
-| `aifoundry2` | 1 | This session's benchmark. Minion clock 600 MHz, 32 GB LPDDR4X, idle board power about 31 W. |
+| `aifoundry2` | 1 | This session's benchmark. Minion clock 600 MHz when the die is above 65 °C (up to 800 MHz below), 32 GB LPDDR4X, idle board power 27 W cold, 31 to 36 W after load. |
 | `aifoundry3` | 1 | `workloads/sgemm` |
 
 All three are x86_64 Ubuntu 24.04. Their `/opt/et` is et-platform `353f20e` from Dec 2025: runtime 0.19.0,

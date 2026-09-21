@@ -39,17 +39,27 @@ section 9 lists the pinned upstream versions.
 - Observability tooling that came out of that survey, none of which changes a card:
   - `workloads/traceprof` + `scripts/trace-flamegraph.py`: a device flame graph in minion cycles from a kernel's profile regions.
   - `rtl-sim/pmu_carry`: the original PMU RTL under Verilator; it reproduces and explains the late bit-7 carry of `hpmcounter3`.
+  - `rtl-sim/fma_toggle`: eight copies of the fused multiply-add RTL replaying a TensorFMA32 on the card's own operands; counts
+    register bits clocked and nets toggled per data pattern (the Horace experiment's power model).
   - `patches/0003-pmc-configure-syscall-353f20e.patch`, `scripts/build-minion-fw.sh`, `workloads/pmcsel`: a firmware syscall
     that lets a kernel choose counter events, built and verified in `sys_emu`. A card would need a signed image to run it.
 - `docs/reports/2026-09-20-et-soc1-power-temperature.html` lists every way to measure power, energy and temperature on the card,
   and shows a load step through all of them: leakage of 0.8 W per °C, idle power that depends on recent load, rail averages that
   lag by 2 s, and a 34-shire on-die voltage map. It uses `tools/ettelem`, a telemetry client on the management library
   (`tools/ettelem/run_thermal.sh`). Private space https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature, uuid `acee5c6d-56c0-45e7-aa97-ce11af37bdd8`.
-- `docs/reports/2026-09-20-horace-experiment.html` reproduces Horace He's "predictable data" matmul result on this chip: the same
-  speed for every operand pattern, but 38 W for zeros, 48 W for any constant and 67 W for random values, each run started at 80 °C (`workloads/sparsity --values`,
-  `tools/ettelem/run_horace.sh`). Private space https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment, uuid `da445a93-7be3-42c2-b9be-4992fa4a3b62`.
-  Both are assembled by `scripts/build-report.py` from `docs/reports/sources/`. After any `spacesheep deploy`, re-check that the space is
-  still private: deploys have reset visibility to public more than once.
+- `docs/reports/2026-09-20-horace-experiment.html` reproduces Horace He's "predictable data" matmul result on this chip and takes
+  it apart (third version, 21 September). Same clock and FLOPs for every operand pattern, but 38 W on zeros, 47 W on ones and
+  63 W on random values, with every run launched from the same die temperature (`tools/ettelem/run_horace_strict.sh`); heating per
+  FLOP; a power model from RTL switching activity of the multiply-add unit (`rtl-sim/fma_toggle`, 0.5 W out of sample over 14
+  patterns); a thermal network from watts to degrees; and the speed effect, which appears from a cool die because the firmware's
+  clock governor is thermal first (`tools/ettelem/run_horace_cold.sh`). `docs/reports/horace-heating.gif` is the animated summary
+  (`tools/ettelem/make_heating_gif.py`); `tools/ettelem/finish_horace.sh` rebuilds data, GIFs and report. Public space (the user's
+  choice) https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment, uuid `da445a93-7be3-42c2-b9be-4992fa4a3b62`; it is deployed
+  as a folder (`index.html` plus the GIFs), so the GIF has its own public address,
+  https://da445a93-7be3-42c2-b9be-4992fa4a3b62.spacesheep.app/horace-heating.gif. The folder deploy left the space private; it was
+  put back with `spacesheep share <uuid> --visibility public`. Check `spacesheep list` after every deploy.
+  Both are assembled by `scripts/build-report.py` from `docs/reports/sources/`. After any `spacesheep deploy` of the other spaces,
+  re-check that the space is still private: deploys have reset visibility to public more than once.
 - `docs/lab-access.md` covers logging in to the lab machines (`aifoundry1`-`3`) and creating accounts for new people.
 - `workloads/` holds standalone workloads that run on both the simulator and the lab cards. The first one is `workloads/sgemm`:
   fp32 matmul, verified on aifoundry3's card at 127 GFLOP/s with scalar code. `scripts/deploy-lab.sh` builds a workload on a lab machine.

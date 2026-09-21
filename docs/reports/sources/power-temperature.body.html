@@ -47,8 +47,12 @@ memory-anatomy report: its 6 s windows were short against the settling time.</li
 <li><b>Voltage barely droops at the die.</b> The minion rail's on-die monitor reads 518 mV idle and 517 mV with 18 W more load
 (about 35 A more at 0.52 V): the regulator senses at the die. The DDR domain reads 768 mV on die against an 800 mV set-point,
 and sags 3 mV more under DRAM load.</li>
-<li><b>The clock never moved.</b> The power-management governor is on with a 65 W limit, the board touched 65 W here and 70 W
-in the Horace run at 90 °C, and the minion clock stayed at 600 MHz throughout.</li>
+<li><b>The clock stayed at 600 MHz because the die was hot.</b> The power-management governor is on, with a 65 W power
+limit and a 65 °C software temperature threshold. The thermal branch wins: above 65 °C it holds the lowest operating point,
+600 MHz at 0.52 V, and every run in this report had the die above 70 °C. That is why the clock did not move even at 65 W here
+and 70 W in the first Horace run. From a cool die (62 °C after a night idle) the same kernel starts at 800 MHz and 0.62 V
+and is stepped down as it passes 65 °C: the Horace experiment's last section measures that. (Corrected 21 September; this
+bullet first said the governor never acts.)</li>
 </ul>
 
 <h2>3. The per-shire voltage map</h2>

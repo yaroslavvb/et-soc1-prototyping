@@ -1,0 +1,36 @@
+46 runs, 14 patterns, thermal rms 0.28 C, delay 0.0 s, R [0.1029 0.     0.1218 0.     0.     0.     0.     0.    ]
+pattern          n   W(1-3s)  sd    rise_end  slope C/s   TFLOPS  mhz
+zeros            5    38.29  0.03    0.04   -0.000       9.18  [600, 600]
+checker          2    40.96  0.02    0.04   -0.000       9.18  [600, 600]
+sparse75         2    41.20  0.13    0.44   -0.000       9.18  [600, 600]
+ternary          2    46.35  0.34    1.54    0.407       9.18  [600, 600]
+sparse50         5    46.92  0.33    2.04    0.358       9.18  [600, 600]
+ones             5    47.56  0.07    2.04    0.302       9.18  [600, 600]
+pi               5    47.79  0.02    2.04    0.286       9.18  [600, 600]
+signs            2    52.69  0.14    3.04    0.506       9.18  [600, 600]
+pow2             2    53.98  0.00    3.04    0.482       9.18  [600, 600]
+a_randn_b_ones   2    55.80  0.09    3.24    0.458       9.18  [600, 600]
+a_ones_b_randn   2    59.78  0.24    4.04    0.663       9.18  [600, 600]
+mant             2    62.54  0.28    4.54    0.740       9.18  [600, 600]
+uniform          5    63.56  0.04    5.04    0.702       9.18  [600, 600]
+randn            5    65.80  0.08    5.20    0.906       9.18  [600, 600]
+ffclk+nets coef [39.48   4.144  0.143] rms 2.06 loo 2.51
+ffclk+mult+rest coef [3.9351e+01 2.9730e+00 3.3000e-02 1.0610e+00] rms 0.5 loo 0.66
+ffclk+mult+rest+bus coef [3.8597e+01 3.3310e+00 3.5000e-02 8.8300e-01 1.4102e+01] rms 0.32 loo 0.5
+model temperature at launch {'mean': 80.96312598955365, 'sd': 0.11344213576066894}
+primary ffclk+mult+rest+bus leak 0.807 W/C; chain rms {'flips_to_rise': 0.33424081717468723, 'power_to_rise': 0.2970352191439581}
+inferred vs electrical {'slope': 0.9747652027040032, 'rms': 1.721240512005234}
+  zeros            P pred  39.21 meas  38.29 | W over idle: flips   3.2 electrical   2.0 thermal   0.6 | rise pred  0.52 fit  0.08 raw  0.04
+  checker          P pred  40.66 meas  40.94 | W over idle: flips   4.7 electrical   4.7 thermal   0.4 | rise pred  0.76 fit  0.04 raw  0.04
+  sparse75         P pred  41.62 meas  41.04 | W over idle: flips   5.9 electrical   5.0 thermal   1.9 | rise pred  0.92 fit  0.26 raw  0.44
+  ternary          P pred  44.87 meas  45.70 | W over idle: flips   9.4 electrical  10.3 thermal   8.6 | rise pred  1.55 fit  1.40 raw  1.54
+  sparse50         P pred  45.60 meas  46.13 | W over idle: flips  10.2 electrical  10.9 thermal  10.6 | rise pred  1.69 fit  1.73 raw  2.04
+  ones             P pred  46.92 meas  46.73 | W over idle: flips  11.7 electrical  11.6 thermal  11.1 | rise pred  1.93 fit  1.81 raw  2.04
+  pi               P pred  46.80 meas  46.96 | W over idle: flips  11.6 electrical  11.8 thermal  11.2 | rise pred  1.92 fit  1.83 raw  2.04
+  signs            P pred  51.30 meas  51.41 | W over idle: flips  16.5 electrical  16.8 thermal  17.0 | rise pred  2.75 fit  2.80 raw  3.04
+  pow2             P pred  53.48 meas  52.60 | W over idle: flips  18.9 electrical  18.1 thermal  17.7 | rise pred  3.10 fit  2.88 raw  3.04
+  a_randn_b_ones   P pred  54.16 meas  54.29 | W over idle: flips  19.7 electrical  20.1 thermal  18.1 | rise pred  3.17 fit  2.87 raw  3.04
+  a_ones_b_randn   P pred  57.65 meas  57.93 | W over idle: flips  23.4 electrical  24.0 thermal  23.0 | rise pred  3.80 fit  3.69 raw  4.04
+  mant             P pred  60.62 meas  60.41 | W over idle: flips  26.7 electrical  26.7 thermal  25.5 | rise pred  4.33 fit  4.08 raw  4.54
+  uniform          P pred  61.63 meas  61.29 | W over idle: flips  27.9 electrical  28.0 thermal  29.1 | rise pred  4.59 fit  4.74 raw  5.04
+  randn            P pred  62.99 meas  63.40 | W over idle: flips  29.4 electrical  30.4 thermal  31.2 | rise pred  4.90 fit  5.15 raw  5.04

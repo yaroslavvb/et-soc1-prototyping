@@ -106,6 +106,7 @@ struct Options {
   std::string type = "fp32";
   std::string pattern = "elem";
   std::string values = "small";  // fp32 operand values for --test fma; see fillValues()
+  std::string dumpTiles;         // --test fma: write the A and B tiles (2 x 1024 bytes) here
   std::string sweep = "0";
   double bSparsity = 0;
   bool bStream = false;
@@ -388,12 +389,15 @@ Tiles makeTiles(uint64_t type, const std::string& pattern, double s, double bs, 
 //   ternary                   -1, 0, 1 at random
 //   onebit                    the smallest normal float (bit pattern 0x00800000: a single set bit)
 //   uniform randn             random in [0, 1) / standard normal: every mantissa bit is busy
-//   sparse75                  randn with 75% of the elements zeroed
+//   sparse75 sparse50         randn with 75% / 50% of the elements zeroed
+//   signs pow2 mant           one field of the word random: +-1 / 2^-8..2^8 / [1, 2)
+//   a_randn_b_ones, a_ones_b_randn   one operand random, the other constant
+// --dump-tiles <file> writes the A and B tiles, so that rtl-sim/fma_toggle can replay the exact operands.
 void fillValues(Tiles& t, const std::string& mode, std::mt19937_64& rng) {
   std::normal_distribution<float> n(0.f, 1.f);
   std::uniform_real_distribution<float> u(0.f, 1.f);
   size_t idx = 0;
-  auto value = [&]() -> float {
+  auto value = [&](bool isB) -> float {
     ++idx;
     if (mode == "zeros") return 0.f;
     if (mode == "ones") return 1.f;
@@ -405,11 +409,19 @@ void fillValues(Tiles& t, const std::string& mode, std::mt19937_64& rng) {
     if (mode == "uniform") return u(rng);
     if (mode == "randn") return n(rng);
     if (mode == "sparse75") return (rng() % 4) ? 0.f : n(rng);
+    if (mode == "sparse50") return (rng() % 2) ? 0.f : n(rng);
+    // One field of the fp32 word random, the others fixed: sign only, exponent only, mantissa only.
+    if (mode == "signs") return (rng() % 2) ? 1.f : -1.f;
+    if (mode == "pow2") return std::ldexp(1.f, int(rng() % 17) - 8);
+    if (mode == "mant") return 1.f + u(rng);
+    // One operand random, the other constant.
+    if (mode == "a_randn_b_ones") return isB ? 1.f : n(rng);
+    if (mode == "a_ones_b_randn") return isB ? n(rng) : 1.f;
     throw std::runtime_error("unknown --values " + mode);
   };
   for (auto* buf : {&t.a, &t.b}) {
     for (size_t off = 0; off + 4 <= buf->size(); off += 4) {
-      const float f = value();
+      const float f = value(buf == &t.b);
       std::memcpy(&(*buf)[off], &f, 4);
     }
   }
@@ -516,6 +528,11 @@ int testFma(const Options& o, Session& dev) {
     if (rawValues) {
       if (type != SP_FP32) throw std::runtime_error("--values needs --type fp32");
       fillValues(t, o.values, rng);
+    }
+    if (!o.dumpTiles.empty()) {
+      std::ofstream f(o.dumpTiles, std::ios::binary);
+      f.write(reinterpret_cast<const char*>(t.a.data()), std::streamsize(t.a.size()));
+      f.write(reinterpret_cast<const char*>(t.b.data()), std::streamsize(t.b.size()));
     }
     SpArgs a{};
     a.mode = SP_FMA;
@@ -897,6 +914,7 @@ int main(int argc, char** argv) {
     else if (a == "--type") o.type = next();
     else if (a == "--pattern") o.pattern = next();
     else if (a == "--values") o.values = next();
+    else if (a == "--dump-tiles") o.dumpTiles = next();
     else if (a == "--sweep") o.sweep = next();
     else if (a == "--b-sparsity") o.bSparsity = std::atof(next().c_str());
     else if (a == "--b-stream") o.bStream = true;
