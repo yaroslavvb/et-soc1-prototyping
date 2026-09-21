@@ -7,18 +7,18 @@
 explanation: predictable data flips fewer transistors, draws less power, and a power-limited GPU can then clock higher. (The
 post's direction is that predictable data uses <i>less</i> power, not random data.) On this chip the same physics shows up
 much more directly. The clock is fixed and the card has power headroom, so <b>speed does not move at all: 546 cycles per
-operation for every pattern. Power does: 39 W for zeros, 48 W for any constant, 65 W for random values.</b> All of the
+operation for every pattern. Power does: 38 W for zeros, 48 W for any constant, 67 W for random values</b>, with every run started at the same 80 °C die temperature. All of the
 difference is on the minion-core rail.</p>
 
 <div class="kpis">
-  <div class="card kpi"><div class="lab">Zeros</div><div class="val">39.3 W</div><div class="sub">board, at 82 °C</div></div>
-  <div class="card kpi"><div class="lab">Any constant (1, 2, π, one set bit)</div><div class="val">47.7 W</div><div class="sub">within 0.5 W of each other</div></div>
-  <div class="card kpi"><div class="lab">Random normal</div><div class="val">64.8 W</div><div class="sub">+25.5 W over zeros, same speed</div></div>
-  <div class="card kpi"><div class="lab">Energy of the data</div><div class="val">5.5 pJ</div><div class="sub">per multiply-add, random against zeros</div></div>
+  <div class="card kpi"><div class="lab">Zeros</div><div class="val">38.0 W</div><div class="sub">board; die stays at 80–81 °C</div></div>
+  <div class="card kpi"><div class="lab">Any constant (1, 2, π, one set bit)</div><div class="val">47.7 W</div><div class="sub">four constants within 0.4 W of each other</div></div>
+  <div class="card kpi"><div class="lab">Random normal</div><div class="val">67.3 W</div><div class="sub">+29 W over zeros at the same speed; heats itself to 85.5 °C in 6 s</div></div>
+  <div class="card kpi"><div class="lab">Energy of the data</div><div class="val">6 pJ</div><div class="sub">per multiply-add, random against zeros</div></div>
 </div>
 
 <h2>1. Result</h2>
-<div class="chart-title">Board power by operand pattern, corrected to 82 °C (split: minion-core rail, everything else)</div>
+<div class="chart-title">Board power by operand pattern, every run started at 80 °C (mean of two rounds; split: minion-core rail, everything else)</div>
 <div class="legend" id="leg"></div>
 <div class="chart scroll" id="bars"></div>
 <div class="table-wrap wide"><table id="tbl"></table></div>
@@ -26,12 +26,13 @@ difference is on the minion-core rail.</p>
 <li><b>Zeros are cheapest</b>, as on the GPU. The tensor unit gates a multiply whose operand is zero (the sparsity report
 measured that), so this is clock gating more than quiet wires.</li>
 <li><b>Every constant costs the same.</b> Ones, twos, π (a dense mantissa) and a float with a single set bit all land within
-0.5 W. So it is not how many bits are set that costs energy. What costs is bits that <i>change</i> from one operand to the
+0.4 W. So it is not how many bits are set that costs energy. What costs is bits that <i>change</i> from one operand to the
 next: with a constant, the multiplier inputs stay the same every cycle and only the accumulator moves.</li>
-<li><b>Random values cost the most:</b> +17 W over a constant, +25.5 W over zeros. Uniform [0,1) is 1.9 W below random
-normal: no sign flips and a narrower exponent range.</li>
+<li><b>Random values cost the most:</b> +20 W over a constant, +29 W over zeros. Uniform [0,1) is 2.8 W below random
+normal: no sign flips and a narrower exponent range. About 1.5 W of the random figure is its own heating: within 6 s it
+takes the die from 80 to 85.5 °C, and the first seconds of the run read 65.8 W.</li>
 <li><b>Half zeros is not half way.</b> The checkerboard (every other element zero) and the 75%-zeros random matrix sit at
-41.5 and 41.9 W, close to zeros. A product is gated when either operand is zero, so with both A and B half zero only a quarter
+40.9 and 41.3 W, close to zeros. A product is gated when either operand is zero, so with both A and B half zero only a quarter
 of the products run; with 25% dense random in both, about 6%.</li>
 <li><b>Only the core rail moves.</b> SRAM and mesh power are the same to 0.1 W for every pattern: the data travels the same
 wires either way, and the arithmetic is where the switching is.</li>
@@ -39,30 +40,37 @@ wires either way, and the arithmetic is where the switching is.</li>
 
 <h2>2. Why no speed-up here</h2>
 <p>The A100 result needs a power-limited part: lower power lets the GPU hold higher clocks. This card ran all patterns at
-a fixed 600 MHz, and the clock stayed put even as random data took it to 69 W against a 65 W TDP setting and 90 °C. So the ET-SoC-1 shows the cause (data-dependent switching
+a fixed 600 MHz, and the clock stayed put even as random data took it to 67 W against a 65 W TDP setting (and to 70 W at 90 °C in the earlier back-to-back run). So the ET-SoC-1 shows the cause (data-dependent switching
 power) without the GPU's effect (data-dependent speed). At iso-power the conclusion flips into Horace's: a DVFS governor
 pinned at a power limit would clock the zeros case higher.</p>
 
-<h2>3. Temperature is a confound, and a finding</h2>
-<p>Power rises with die temperature at the same work: <b>0.78 W per °C on the board, 0.38 W per °C on the minion rail</b>
-(leakage). Over the five-minute run the die went from 79 to 90 °C, which alone is worth 8 W. The patterns were therefore run
-in three rounds in rotated order, and the numbers above come from a least-squares fit of pattern plus a temperature
-term (residual 0.25 W rms over 22 runs; the third round was cut short, so eight patterns have two runs and <code>ones</code> and <code>onebit</code> have three). Any power comparison on this card needs the same care.</p>
-<div class="chart-title">Every run: board power against die temperature, coloured by pattern group</div>
-<div class="chart scroll" id="scatter"></div>
+<h2>3. Controlling temperature</h2>
+<p>Power on this card rises with die temperature at the same work, about <b>0.78 W per °C on the board</b> (0.38 on the
+minion rail), so heat left over from one run contaminates the next. In this run every pattern starts from the same state:
+after a warm-up with random data, each run waits until the mean of the 34 minion-shire sensors has cooled to 80 °C, and only
+then launches. All 20 runs started at exactly 80 °C. Waits were 1–10 s after the cool patterns and 60–90 s after the random ones.
+The two rounds, in different orders, agree to within 1.1 W for every pattern and within 0.25 W for five of them, with no correction applied.</p>
+<div class="chart-title">Die temperature over the run: each run launches when the die has cooled to the 80 °C line</div>
+<div class="chart scroll" id="trace"></div>
+<p>What cannot be held constant is the heating a pattern causes during its own 6 s: zeros stay at 80–81 °C, constants reach 82 °C
+and random data 85.5 °C. The table gives both the first seconds of each run (closest to a common temperature) and the last
+three. An earlier, uncontrolled run (three rounds back to back, the die drifting from 79 to 90 °C) needed a fitted temperature term; corrected to 82 °C it gave the
+same ordering and values within 1.5 W of these (zeros 39.3, constants 47.4–47.9, random normal 64.8).</p>
 
 <h2>4. Method</h2>
 <ul>
 <li>Kernel: hart 0 of each of 1,024 minions runs back-to-back <code>TensorFMA</code> ops on one 16×16×16 fp32 tile pair held in
 the L1 scratchpad, 6 s per pattern (each process under 10 s of card time). The host fills both A and B with the pattern.</li>
-<li>Power: <code>tools/ettelem</code> samples board power and the service processor's rail averages at 10 Hz; each run uses the
-mean over its last 3 s, because the rail averages lag by about 2 s.</li>
+<li>Power: <code>tools/ettelem</code> samples board power and the service processor's rail averages at 10 Hz. Each run uses the
+mean over its last 3 s, because the rail averages lag by about 2 s; board power, which does not lag, is also given for seconds 1–3.</li>
+<li>Temperature control: <code>run_horace.sh &lt;out&gt; 80 2</code> waits for the die to cool to the target before each run. The target has to sit
+above the idle equilibrium (72 °C) by enough that the wait is short: from 81 °C the die loses only about a degree a minute.</li>
 <li>Energy per multiply-add: 1,024 minions × 600 MHz / 546 cycles × 4,096 multiply-adds per op = 4.6 × 10¹² per second;
-25.5 W / that = 5.5 pJ between random and zeros, and 1.8 pJ between a constant and zeros.</li>
+27.7 W (seconds 1–3) / that = 6 pJ between random and zeros, and 2 pJ between a constant and zeros.</li>
 <li>Results are not checked for these patterns (random sums are not exact); the same kernel is checked exactly in its integer mode.</li>
 </ul>
 <pre><code>cmake -S workloads/sparsity -B build/sparsity -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev && cmake --build build/sparsity -j4
 cmake -S tools/ettelem -B build/ettelem -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev && cmake --build build/ettelem
-tools/ettelem/run_horace.sh build/horace1        # about 5 minutes; quit et-powertop first</code></pre>
-<p class="small">Raw data: <code>docs/reports/data/2026-09-20-power-aifoundry2/</code> (<code>horace-*.json*</code>).</p>
+tools/ettelem/run_horace.sh build/horace2 80 2   # target 80 °C, 2 rounds, about 11 minutes; quit et-powertop first</code></pre>
+<p class="small">Raw data: <code>docs/reports/data/2026-09-20-power-aifoundry2/</code> (<code>horace2-*</code> for this run, <code>horace-*</code> for the earlier uncontrolled one).</p>
 </main>

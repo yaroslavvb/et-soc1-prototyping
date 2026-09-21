@@ -43,7 +43,7 @@ page and `CLAUDE.md` carry the context.
   - Power and temperature (2026-09-20, `tools/ettelem`): the card leaks about 0.8 W per °C under load and idles 5 W higher after a
     load than before it, so baselines must be taken at the same die temperature. Reports:
     [power and temperature](reports/2026-09-20-et-soc1-power-temperature.html) and the
-    [Horace experiment](reports/2026-09-20-horace-experiment.html) (data-dependent matmul power: zeros 39 W, constants 48 W, random 65 W).
+    [Horace experiment](reports/2026-09-20-horace-experiment.html) (data-dependent matmul power: zeros 38 W, constants 48 W, random 67 W, each run started at 80 °C).
   - Summaries of all of these are in [et-soc1-notes.md](et-soc1-notes.md).
 - **Next:**
   - A real GEMM, tiling through the L2 scratchpad with cooperative tensor loads. FOSDEM reached 10.25 TFLOP/s this way.

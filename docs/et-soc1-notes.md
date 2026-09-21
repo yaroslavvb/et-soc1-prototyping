@@ -170,9 +170,10 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
 - **Power depends on temperature:** +0.78 W per °C on the board at constant work (0.38 on the minion rail). The die idles at
   72 °C and 31 W; 40 s after a 60 s full-chip load it still idles at 81 °C and 36.5 W. Take baselines at the same temperature,
   interleave runs, or fit a temperature term.
-- **Power depends on the data:** fp32 TensorFMA at the same 546 cycles per op draws 39 W with zero operands, 48 W with any
-  constant (ones, twos, pi, a single set bit) and 65 W with random values. Changing bits cost energy, set bits do not. All of it
-  is on the minion rail: about 5.5 pJ per multiply-add between random and zeros.
+- **Power depends on the data:** fp32 TensorFMA at the same 546 cycles per op draws 38 W with zero operands, 48 W with any
+  constant (ones, twos, pi, a single set bit) and 67 W with random values, every run started at 80 °C (`tools/ettelem/run_horace.sh`
+  waits for the die to cool to a target before each run). Changing bits cost energy, set bits do not. All of it
+  is on the minion rail: about 6 pJ per multiply-add between random and zeros.
 - **Rail figures are ~2 s moving averages;** board power is near-instantaneous. Skip 2-3 s after a step before averaging.
 - **Board minus the three rails** (DDR, PCIe, Maxions, IO, regulator loss; no sensors) is 15 W idle, ~21 W under matmul or DRAM load.
 - `tools/ettelem` reads the per-rail snapshot the stock CLI refuses (`DM_CMD_GET_SP_STATS`), samples the full telemetry set 45

@@ -46,7 +46,7 @@ section 9 lists the pinned upstream versions.
   lag by 2 s, and a 34-shire on-die voltage map. It uses `tools/ettelem`, a telemetry client on the management library
   (`tools/ettelem/run_thermal.sh`). Private space https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature, uuid `acee5c6d-56c0-45e7-aa97-ce11af37bdd8`.
 - `docs/reports/2026-09-20-horace-experiment.html` reproduces Horace He's "predictable data" matmul result on this chip: the same
-  speed for every operand pattern, but 39 W for zeros, 48 W for any constant and 65 W for random values (`workloads/sparsity --values`,
+  speed for every operand pattern, but 38 W for zeros, 48 W for any constant and 67 W for random values, each run started at 80 °C (`workloads/sparsity --values`,
   `tools/ettelem/run_horace.sh`). Private space https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment, uuid `da445a93-7be3-42c2-b9be-4992fa4a3b62`.
   Both are assembled by `scripts/build-report.py` from `docs/reports/sources/`. After any `spacesheep deploy`, re-check that the space is
   still private: deploys have reset visibility to public more than once.
