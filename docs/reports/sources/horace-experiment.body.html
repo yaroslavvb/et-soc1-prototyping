@@ -1,0 +1,68 @@
+<h1>The Horace experiment on the ET-SoC-1</h1>
+<p class="byline">aifoundry2's card, 20 September 2026 · fp32 TensorFMA on all 1,024 minions at a fixed 600 MHz · <code>workloads/sparsity --values</code>, <code>tools/ettelem</code></p>
+
+<p class="lede">Horace He's post
+<a href="https://www.thonking.ai/p/strangely-matrix-multiplications">"Strangely, Matrix Multiplications on GPUs Run Faster When Given 'Predictable' Data!"</a>
+(April 2024) found that an A100 multiplies matrices of zeros about 15% faster than random ones (295 against 257 TFLOPS). His
+explanation: predictable data flips fewer transistors, draws less power, and a power-limited GPU can then clock higher. (The
+post's direction is that predictable data uses <i>less</i> power, not random data.) On this chip the same physics shows up
+much more directly. The clock is fixed and the card has power headroom, so <b>speed does not move at all: 546 cycles per
+operation for every pattern. Power does: 39 W for zeros, 48 W for any constant, 65 W for random values.</b> All of the
+difference is on the minion-core rail.</p>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">Zeros</div><div class="val">39.3 W</div><div class="sub">board, at 82 °C</div></div>
+  <div class="card kpi"><div class="lab">Any constant (1, 2, π, one set bit)</div><div class="val">47.7 W</div><div class="sub">within 0.5 W of each other</div></div>
+  <div class="card kpi"><div class="lab">Random normal</div><div class="val">64.8 W</div><div class="sub">+25.5 W over zeros, same speed</div></div>
+  <div class="card kpi"><div class="lab">Energy of the data</div><div class="val">5.5 pJ</div><div class="sub">per multiply-add, random against zeros</div></div>
+</div>
+
+<h2>1. Result</h2>
+<div class="chart-title">Board power by operand pattern, corrected to 82 °C (split: minion-core rail, everything else)</div>
+<div class="legend" id="leg"></div>
+<div class="chart scroll" id="bars"></div>
+<div class="table-wrap wide"><table id="tbl"></table></div>
+<ul>
+<li><b>Zeros are cheapest</b>, as on the GPU. The tensor unit gates a multiply whose operand is zero (the sparsity report
+measured that), so this is clock gating more than quiet wires.</li>
+<li><b>Every constant costs the same.</b> Ones, twos, π (a dense mantissa) and a float with a single set bit all land within
+0.5 W. So it is not how many bits are set that costs energy. What costs is bits that <i>change</i> from one operand to the
+next: with a constant, the multiplier inputs stay the same every cycle and only the accumulator moves.</li>
+<li><b>Random values cost the most:</b> +17 W over a constant, +25.5 W over zeros. Uniform [0,1) is 1.9 W below random
+normal: no sign flips and a narrower exponent range.</li>
+<li><b>Half zeros is not half way.</b> The checkerboard (every other element zero) and the 75%-zeros random matrix sit at
+41.5 and 41.9 W, close to zeros. A product is gated when either operand is zero, so with both A and B half zero only a quarter
+of the products run; with 25% dense random in both, about 6%.</li>
+<li><b>Only the core rail moves.</b> SRAM and mesh power are the same to 0.1 W for every pattern: the data travels the same
+wires either way, and the arithmetic is where the switching is.</li>
+</ul>
+
+<h2>2. Why no speed-up here</h2>
+<p>The A100 result needs a power-limited part: lower power lets the GPU hold higher clocks. This card ran all patterns at
+a fixed 600 MHz, and the clock stayed put even as random data took it to 69 W against a 65 W TDP setting and 90 °C. So the ET-SoC-1 shows the cause (data-dependent switching
+power) without the GPU's effect (data-dependent speed). At iso-power the conclusion flips into Horace's: a DVFS governor
+pinned at a power limit would clock the zeros case higher.</p>
+
+<h2>3. Temperature is a confound, and a finding</h2>
+<p>Power rises with die temperature at the same work: <b>0.78 W per °C on the board, 0.38 W per °C on the minion rail</b>
+(leakage). Over the five-minute run the die went from 79 to 90 °C, which alone is worth 8 W. The patterns were therefore run
+in three rounds in rotated order, and the numbers above come from a least-squares fit of pattern plus a temperature
+term (residual 0.25 W rms over 22 runs; the third round was cut short, so eight patterns have two runs and <code>ones</code> and <code>onebit</code> have three). Any power comparison on this card needs the same care.</p>
+<div class="chart-title">Every run: board power against die temperature, coloured by pattern group</div>
+<div class="chart scroll" id="scatter"></div>
+
+<h2>4. Method</h2>
+<ul>
+<li>Kernel: hart 0 of each of 1,024 minions runs back-to-back <code>TensorFMA</code> ops on one 16×16×16 fp32 tile pair held in
+the L1 scratchpad, 6 s per pattern (each process under 10 s of card time). The host fills both A and B with the pattern.</li>
+<li>Power: <code>tools/ettelem</code> samples board power and the service processor's rail averages at 10 Hz; each run uses the
+mean over its last 3 s, because the rail averages lag by about 2 s.</li>
+<li>Energy per multiply-add: 1,024 minions × 600 MHz / 546 cycles × 4,096 multiply-adds per op = 4.6 × 10¹² per second;
+25.5 W / that = 5.5 pJ between random and zeros, and 1.8 pJ between a constant and zeros.</li>
+<li>Results are not checked for these patterns (random sums are not exact); the same kernel is checked exactly in its integer mode.</li>
+</ul>
+<pre><code>cmake -S workloads/sparsity -B build/sparsity -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev && cmake --build build/sparsity -j4
+cmake -S tools/ettelem -B build/ettelem -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev && cmake --build build/ettelem
+tools/ettelem/run_horace.sh build/horace1        # about 5 minutes; quit et-powertop first</code></pre>
+<p class="small">Raw data: <code>docs/reports/data/2026-09-20-power-aifoundry2/</code> (<code>horace-*.json*</code>).</p>
+</main>

@@ -41,6 +41,15 @@ section 9 lists the pinned upstream versions.
   - `rtl-sim/pmu_carry`: the original PMU RTL under Verilator; it reproduces and explains the late bit-7 carry of `hpmcounter3`.
   - `patches/0003-pmc-configure-syscall-353f20e.patch`, `scripts/build-minion-fw.sh`, `workloads/pmcsel`: a firmware syscall
     that lets a kernel choose counter events, built and verified in `sys_emu`. A card would need a signed image to run it.
+- `docs/reports/2026-09-20-et-soc1-power-temperature.html` lists every way to measure power, energy and temperature on the card,
+  and shows a load step through all of them: leakage of 0.8 W per °C, idle power that depends on recent load, rail averages that
+  lag by 2 s, and a 34-shire on-die voltage map. It uses `tools/ettelem`, a telemetry client on the management library
+  (`tools/ettelem/run_thermal.sh`). Private space https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature, uuid `acee5c6d-56c0-45e7-aa97-ce11af37bdd8`.
+- `docs/reports/2026-09-20-horace-experiment.html` reproduces Horace He's "predictable data" matmul result on this chip: the same
+  speed for every operand pattern, but 39 W for zeros, 48 W for any constant and 65 W for random values (`workloads/sparsity --values`,
+  `tools/ettelem/run_horace.sh`). Private space https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment, uuid `da445a93-7be3-42c2-b9be-4992fa4a3b62`.
+  Both are assembled by `scripts/build-report.py` from `docs/reports/sources/`. After any `spacesheep deploy`, re-check that the space is
+  still private: deploys have reset visibility to public more than once.
 - `docs/lab-access.md` covers logging in to the lab machines (`aifoundry1`-`3`) and creating accounts for new people.
 - `workloads/` holds standalone workloads that run on both the simulator and the lab cards. The first one is `workloads/sgemm`:
   fp32 matmul, verified on aifoundry3's card at 127 GFLOP/s with scalar code. `scripts/deploy-lab.sh` builds a workload on a lab machine.

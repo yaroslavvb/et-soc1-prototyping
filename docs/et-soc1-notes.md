@@ -163,6 +163,22 @@ Things to know when measuring:
   one record per 133 ms) plus board power. The ring holds ~15 minutes, and an extract returns only records since the
   last wrap. No rail covers the memory shires or DRAM.
 
+## Power and temperature, measured (aifoundry2, 2026-09-20)
+
+Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/reports/2026-09-20-horace-experiment.html`.
+
+- **Power depends on temperature:** +0.78 W per °C on the board at constant work (0.38 on the minion rail). The die idles at
+  72 °C and 31 W; 40 s after a 60 s full-chip load it still idles at 81 °C and 36.5 W. Take baselines at the same temperature,
+  interleave runs, or fit a temperature term.
+- **Power depends on the data:** fp32 TensorFMA at the same 546 cycles per op draws 39 W with zero operands, 48 W with any
+  constant (ones, twos, pi, a single set bit) and 65 W with random values. Changing bits cost energy, set bits do not. All of it
+  is on the minion rail: about 5.5 pJ per multiply-add between random and zeros.
+- **Rail figures are ~2 s moving averages;** board power is near-instantaneous. Skip 2-3 s after a step before averaging.
+- **Board minus the three rails** (DDR, PCIe, Maxions, IO, regulator loss; no sensors) is 15 W idle, ~21 W under matmul or DRAM load.
+- `tools/ettelem` reads the per-rail snapshot the stock CLI refuses (`DM_CMD_GET_SP_STATS`), samples the full telemetry set 45
+  times a second, and reads the per-shire on-die voltage map (`loglevel debug` + `sptrace`; restore with `loglevel info`).
+- The governor never moved the 600 MHz clock, even at 70 W board power and 90 °C with a 65 W TDP setting.
+
 ## Performance ladder (FOSDEM "Zero to matmul", 512x512 fp32)
 
 | Step | Result |

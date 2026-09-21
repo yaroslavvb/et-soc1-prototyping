@@ -1,0 +1,84 @@
+<h1>Power and temperature on the ET-SoC-1 card</h1>
+<p class="byline">aifoundry2's card, 20 September 2026 · et-platform <code>353f20e</code> firmware · <code>tools/ettelem</code>, a telemetry client on the management library</p>
+
+<p class="lede">The card has one power sensor path: a PMIC that reports 12 V board power and three of its rails (minion
+cores, SRAM, mesh), polled by the service processor every 133 ms. Everything else is voltage or temperature. This report
+lists every way to read them, what each resolves, and what a small client on the management library adds over the stock
+tool: the <b>per-rail snapshot the CLI refuses, 45 samples a second, and a 34-shire on-die voltage map</b>. Then what the
+numbers show. The main surprise is temperature: <b>the same work costs 0.8 W more per °C</b>, the die idles at 72 °C, and
+idle power after a load is 5 W higher than before it, so every energy comparison on this card has to control for heat.</p>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">Idle</div><div class="val">31.2 W</div><div class="sub">at 72 °C die; 16 W on the three measured rails, 15 W elsewhere</div></div>
+  <div class="card kpi"><div class="lab">Leakage slope</div><div class="val">0.8 W/°C</div><div class="sub">board, under load; 0.55 at idle; half of it on the minion rail</div></div>
+  <div class="card kpi"><div class="lab">Finest power record</div><div class="val">1 mW · 133 ms</div><div class="sub">rail moving averages that lag a step by about 2 s</div></div>
+  <div class="card kpi"><div class="lab">Finest voltage map</div><div class="val">34 shires</div><div class="sub">3 rails each, 1 mV, with hardware low/high, from a user account</div></div>
+</div>
+
+<h2>1. Every way to measure, by granularity</h2>
+<p>Space, time and resolution for each instrument. <span class="chip works_now">works now</span> means from a user account
+with the tools in this repo; <span class="chip needs_fw_change">firmware</span> means a service-processor change and a signed
+image; <span class="chip needs_tooling">hardware</span> means physical access.</p>
+<div class="table-wrap wide"><table id="methods"></table></div>
+
+<h2>2. A load step, seen through every sensor</h2>
+<p>Twenty seconds idle, 58 s of fp32 matmul on all 1,024 minions, 40 s idle, 34 s of DRAM-bound loads, idle. Sampled at
+10 Hz with <code>ettelem</code>; every load process held the card for under 10 s.</p>
+<div class="chart-title">Power (W): board total and the three measured rails</div>
+<div class="legend" id="leg1"></div>
+<div class="chart scroll" id="power"></div>
+<div class="chart-title">Die temperature (°C, mean of the 34 minion-shire sensors)</div>
+<div class="chart scroll" id="temp"></div>
+<ul>
+<li><b>Power climbs while the work stays constant.</b> The matmul starts at 57 W and ends at 65 W 56 s later, with the die
+going from 74 to 87 °C. Same kernel, same clock, same rate: the extra 8 W is leakage. The Horace experiment's fit over 22
+runs gives 0.78 W/°C on the board and 0.38 W/°C on the minion rail.</li>
+<li><b>Idle is not one number.</b> Before the load: 31.2 W at 72 °C. Forty seconds after it: 36.5 W at 81 °C. The die sheds
+heat slowly (6 °C in 40 s), so a baseline taken before a run understates the idle power during and after it. Energy
+measurements here should take their baseline at the same temperature, or fit a temperature term.</li>
+<li><b>The three rails are not the whole card.</b> Board minus rails is 15.0 W at idle, 20–22 W under matmul and 21 W under
+DRAM load. That remainder is the DDR and PCIe rails, the Maxions, the IO shire, and regulator losses, none of which has a
+sensor. A DRAM-bound load moves it by 5 W and the minion rail by 0.3 W; a matmul moves the minion rail by 16–20 W.</li>
+<li><b>Why the remainder sometimes looks too small, or the rails seem to exceed the step.</b> The rail figures are the PMIC's
+moving averages and lag a step by about 2 s; board power is near-instantaneous. For 2 s after a load starts the remainder
+reads 36 W (rails have not caught up), and for 2 s after it stops it reads 14 W, below idle. In steady state the two
+board readings agree to about 0.5 W. This also explains the 15–20% gap between the host log and the trace average in the
+memory-anatomy report: its 6 s windows were short against the settling time.</li>
+<li><b>Voltage barely droops at the die.</b> The minion rail's on-die monitor reads 518 mV idle and 517 mV with 18 W more load
+(about 35 A more at 0.52 V): the regulator senses at the die. The DDR domain reads 768 mV on die against an 800 mV set-point,
+and sags 3 mV more under DRAM load.</li>
+<li><b>The clock never moved.</b> The power-management governor is on with a 65 W limit, the board touched 65 W here and 70 W
+in the Horace run at 90 °C, and the minion clock stayed at 600 MHz throughout.</li>
+</ul>
+
+<h2>3. The per-shire voltage map</h2>
+<p>With its log level raised to DEBUG, the service processor writes one line per shire per pass with the on-die voltage of
+each rail and the hardware's low/high capture. <code>ettelem loglevel debug</code> then <code>ettelem sptrace</code> reads
+them; the level is restored afterwards. This is the finest spatial view of the power system the card gives: below is the
+minion-rail voltage at idle on the shire mesh, with each shire's lowest captured value.</p>
+<div class="chart" id="vmap" style="max-width:520px"></div>
+<p class="small">Current values span 517–521 mV across the die; the lowest captured minimum is 513 mV (shires 0–2 and 18). The
+low/high registers hold extremes since the last stats reset, so they catch droops that the 133 ms polling misses.
+Per-shire <i>temperature</i> is sampled by the same controllers but never logged; that needs firmware.</p>
+
+<h2>4. What a debug-interface client would and would not add</h2>
+<p>The Minion Debug Interface reaches minion state only: registers, CSRs, memory of a halted hart. It cannot read the PMIC,
+the on-die sensors or anything in the service processor's address space, so it adds <b>no power or temperature sensor</b>.
+Its value for energy work is indirect: it can write the counter event selectors without a reflash, and chosen event counts
+(L1 misses, tensor ops, cache hits per level) are what turn rail power into energy per event by regression. The telemetry
+side of the management library, which this report uses, was the larger gap, and it needs no halting.</p>
+
+<h2>5. What would unlock more</h2>
+<div class="table-wrap wide"><table id="unlock"></table></div>
+
+<h2>6. Reproduce</h2>
+<pre><code>cmake -S tools/ettelem -B build/ettelem -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev && cmake --build build/ettelem
+export LD_LIBRARY_PATH=/opt/et/lib
+build/ettelem/ettelem sample --seconds 10 --every-ms 100      # JSON lines; quit et-powertop first (one opener)
+tools/ettelem/run_thermal.sh build/thermal1                   # the load step, about 3 minutes
+build/ettelem/ettelem loglevel debug; build/ettelem/ettelem sptrace sp.bin; build/ettelem/ettelem loglevel info
+strings -n 8 sp.bin | grep 'Voltage'</code></pre>
+<p class="small">Raw data: <code>docs/reports/data/2026-09-20-power-aifoundry2/</code>. Companion: the Horace experiment
+(<code>2026-09-20-horace-experiment.html</code>) uses the same client to show data-dependent power. Sources for the sensor
+and firmware details: <code>docs/research/power-telemetry.md</code>.</p>
+</main>

@@ -105,6 +105,7 @@ struct Options {
   std::string test;
   std::string type = "fp32";
   std::string pattern = "elem";
+  std::string values = "small";  // fp32 operand values for --test fma; see fillValues()
   std::string sweep = "0";
   double bSparsity = 0;
   bool bStream = false;
@@ -380,6 +381,40 @@ Tiles makeTiles(uint64_t type, const std::string& pattern, double s, double bs, 
   return t;
 }
 
+// Overwrites the fp32 A and B tiles with a value pattern, for the data-dependent power experiment
+// (docs/reports: horace-experiment). Results are not checked for these: only time and power matter.
+//   zeros ones twos pi        every element the same constant
+//   checker                   1, 0, 1, 0, ...
+//   ternary                   -1, 0, 1 at random
+//   onebit                    the smallest normal float (bit pattern 0x00800000: a single set bit)
+//   uniform randn             random in [0, 1) / standard normal: every mantissa bit is busy
+//   sparse75                  randn with 75% of the elements zeroed
+void fillValues(Tiles& t, const std::string& mode, std::mt19937_64& rng) {
+  std::normal_distribution<float> n(0.f, 1.f);
+  std::uniform_real_distribution<float> u(0.f, 1.f);
+  size_t idx = 0;
+  auto value = [&]() -> float {
+    ++idx;
+    if (mode == "zeros") return 0.f;
+    if (mode == "ones") return 1.f;
+    if (mode == "twos") return 2.f;
+    if (mode == "pi") return 3.14159274f;
+    if (mode == "checker") return float(idx & 1);
+    if (mode == "ternary") return float(int(rng() % 3) - 1);
+    if (mode == "onebit") { const uint32_t b = 0x00800000u; float f; std::memcpy(&f, &b, 4); return f; }
+    if (mode == "uniform") return u(rng);
+    if (mode == "randn") return n(rng);
+    if (mode == "sparse75") return (rng() % 4) ? 0.f : n(rng);
+    throw std::runtime_error("unknown --values " + mode);
+  };
+  for (auto* buf : {&t.a, &t.b}) {
+    for (size_t off = 0; off + 4 <= buf->size(); off += 4) {
+      const float f = value();
+      std::memcpy(&(*buf)[off], &f, 4);
+    }
+  }
+}
+
 // C[i][j] after `iters` ops; `literal` applies the fp16 pseudo-code as written in PRM 9.4 (the 2-term update
 // happens only when all four of a1, a2, b1, b2 are nonzero), except on the first op (MUL), which always multiplies.
 int64_t expectC(const Tiles& t, uint64_t type, uint64_t iters, int i, int j, bool literal, uint32_t rowMask) {
@@ -476,7 +511,12 @@ int testFma(const Options& o, Session& dev) {
   std::mt19937_64 rng(o.seed);
   int bad = 0;
   for (double s : parseDoubles(o.sweep)) {
-    const Tiles t = makeTiles(type, o.pattern, s, o.bSparsity, rng);
+    Tiles t = makeTiles(type, o.pattern, s, o.bSparsity, rng);
+    const bool rawValues = o.values != "small";
+    if (rawValues) {
+      if (type != SP_FP32) throw std::runtime_error("--values needs --type fp32");
+      fillValues(t, o.values, rng);
+    }
     SpArgs a{};
     a.mode = SP_FMA;
     a.shire_mask = o.shireMask;
@@ -492,15 +532,17 @@ int testFma(const Options& o, Session& dev) {
       a.iters = iters;
       const auto L = dev.launch(a);
       const Summary sm = summarize(L, harts);
-      const std::string check = L.ok ? checkC(dev, t, type, iters, harts, uint32_t(a.mask)) : "no-result";
+      const std::string check =
+        !L.ok ? "no-result" : rawValues ? "unchecked" : checkC(dev, t, type, iters, harts, uint32_t(a.mask));
       const bool ok = L.ok && sm.bad == 0 && sm.tensorErrors == 0 && check != "wrong";
       bad += !ok;
-      std::printf("SPARSITY {\"test\":\"fma\",\"type\":\"%s\",\"pattern\":\"%s\",\"sparsity\":%.4f,\"b_sparsity\":%.4f,"
+      std::printf("SPARSITY {\"test\":\"fma\",\"type\":\"%s\",\"pattern\":\"%s\",\"values\":\"%s\",\"sparsity\":%.4f,\"b_sparsity\":%.4f,"
                   "\"b_stream\":%d,\"row_mask\":\"0x%04llx\",\"nnz_a\":%llu,\"a_elems\":%d,\"fp16_one_sided_pairs\":%llu,"
                   "\"minions\":%zu,\"shire_mask\":\"0x%llx\",\"iters\":%llu,\"launch\":%d,\"cycles_max\":%llu,"
                   "\"cycles_mean\":%.1f,\"cycles_per_op\":%.3f,\"wall_s\":%.6f,\"t_start_ms\":%lld,\"t_end_ms\":%lld,"
                   "\"ghz\":%.4f,\"tensor_errors\":%llu,\"result\":\"%s\",\"ok\":%s}\n",
-                  o.type.c_str(), o.pattern.c_str(), s, o.bSparsity, int(o.bStream), (unsigned long long)a.mask,
+                  o.type.c_str(), o.pattern.c_str(), o.values.c_str(), s, o.bSparsity, int(o.bStream),
+                  (unsigned long long)a.mask,
                   (unsigned long long)t.nnzA, 16 * t.K, (unsigned long long)t.zeroPairsOneSided, harts.size(),
                   (unsigned long long)o.shireMask, (unsigned long long)iters, launchNo, (unsigned long long)sm.cmax,
                   sm.cmean, sm.cmean / double(iters), L.wallS, L.t0Ms, L.t1Ms, L.ghz,
@@ -854,6 +896,7 @@ int main(int argc, char** argv) {
     else if (a == "--test") o.test = next();
     else if (a == "--type") o.type = next();
     else if (a == "--pattern") o.pattern = next();
+    else if (a == "--values") o.values = next();
     else if (a == "--sweep") o.sweep = next();
     else if (a == "--b-sparsity") o.bSparsity = std::atof(next().c_str());
     else if (a == "--b-stream") o.bStream = true;
