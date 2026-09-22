@@ -380,6 +380,60 @@ that `l3_yield_priority` does **not** fix the same-address case, and are both ma
 erratum says it would not help here. Ivan's own code was not run, so why his number was 6% rather than either
 of ours is not established; the reading offered is that his shire 0 also did something local.
 
+## E24 — Can one shire read what another wrote into its scratchpad? (2026-09-22, 15:10)
+
+**Question (Q25):** the relay in E25 depends on a shire writing a compute result where another shire can read
+it. Does that work, and by which write path?
+**Method:** `workloads/onchip --test probe`. Every minion writes a 1 KB pattern that encodes its shire and
+minion number into its own shire's L2 scratchpad, either with a tensor store (which bypasses the L1 and L2
+caches) or with plain vector stores (which go through the L1). A second launch has every minion read and
+check the block the shire one place away wrote.
+**Raw data:** `docs/reports/data/2026-09-22-onchip-aifoundry2/sweep.jsonl`, group `probe`.
+**Result:** both paths work. 1,024 minions wrote, 1,024 read a different shire's block, **zero wrong words**
+either way. Tensor store is the one E25 uses, because it bypasses the caches and so cannot leave a stale line
+for the reader within a single launch.
+**Also established, the hard way:** **offset 0 of a shire's scratchpad faults.** The buffers start 256 KB in.
+And `amoaddg` to a scratchpad address through the self ID `0x7F` raises a kernel bus error (E22).
+**Caveats:** the two launches are separated by a kernel boundary, at which the firmware evicts the L1 and L2,
+so this shows the data lands — not that a plain-store write is visible across a barrier inside one launch.
+E25 relies on tensor stores for exactly that reason.
+
+## E25 — A multi-stage relay: DRAM against the shire next door (2026-09-22, 15:30–16:40)
+
+**Question (Q25, Q26):** is there a computation where shire-to-shire communication beats writing the
+intermediate to main memory?
+**Method:** `workloads/onchip --test relay`. A slab of fp32 per shire; a stage reads every element, adds 1.0
+and writes it out; the next stage reads what the last wrote; a chip-wide barrier between stages. The same
+kernel, the same barriers and the same arithmetic run three ways, differing only in where a stage's output
+goes: `dram` (write to DRAM, read back), `scp` (the shire's own L2 scratchpad), `hop` (where the next shire
+in the ring will read it). Inputs are plain vector loads, outputs are tensor stores. Sweeps over arithmetic
+per element, working-set size, stages, shires and hop distance; power from
+`tools/ettelem/run_onchip_power.sh`, one twelve-second burst per medium.
+```
+workloads/onchip/run_onchip.sh DATA                 # 88 configurations
+tools/ettelem/run_onchip_power.sh DATA 12
+python3 workloads/onchip/analyze_onchip.py DATA/sweep.jsonl --power DATA --out onchip.json
+```
+**Raw data:** `docs/reports/data/2026-09-22-onchip-aifoundry2/` (`sweep.jsonl`, `telemetry.jsonl`,
+`runs.jsonl`, `marks.jsonl`, `onchip.json`) and `docs/reports/data/2026-09-22-onchip-aifoundry3/sweep.jsonl`.
+**Result:** at 1 MB per shire per stage, eight stages, 512 MB of traffic: DRAM **48.4 GB/s**, the next shire's
+scratchpad **592.9 GB/s (12.3×)**, the shire's own **1,483.7 GB/s (30.7×)**. Energy per byte moved: 104.8,
+8.9 and 4.3 pJ — and all three draw within a watt of each other over idle, so the on-chip routes get 12× and
+30× more done for the same power. aifoundry3 gives 12.4× and 31.2×.
+**The boundary:** the advantage is against DRAM, not against the hierarchy. Below the 32 MB L3 the DRAM route
+runs at 280–410 GB/s and the hand-off buys 1.0–1.4×; at 32 MB per buffer it falls to 47.9 GB/s and stays
+there out to 256 MB. **Arithmetic:** the lead halves for every quadrupling of work, from 12.3× at one add per
+element to 1.5× at 256. **Distance:** handing the slab 16 shires away is no slower than next door
+(593 to 734 GB/s), so placement is free.
+**How the hop is proved:** each shire starts its slab filled with its own number, and every element of every
+run is checked against the value the slab must hold — for `hop`, the number of the shire `stages` places back
+round the ring. Shire 0 ends holding 32 (= 24 + 8) rather than 8. A run whose data had not moved would fail.
+**Caveats:** the arithmetic is one vector add, chosen to make the measurement about movement. A working set
+larger than the 80 MB of scratchpad was not tried, which is the case where the hand-off would be the only
+option rather than the faster one. The per-stage chip barrier is the simplest synchronisation, not the
+cheapest. The `shires` sweep is confounded: fewer shires also means a smaller working set, which puts it back
+inside the L3.
+
 ## A note on E10, re-analysed for Q20
 
 The governor transitions in [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) are **not** a new experiment.

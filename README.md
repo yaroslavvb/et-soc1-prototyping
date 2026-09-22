@@ -106,6 +106,16 @@ section 9 lists the pinned upstream versions.
   `workloads/nocbench --test hotline` plus `run_hotline.sh`/`analyze_hotline.py`; power from
   `tools/ettelem/run_hotline_power.sh`. Reproduced to the individual operation on aifoundry3. Private space
   https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line, uuid `ac439287-4503-42c7-88e7-b5d3e3b64b06`.
+- `docs/reports/2026-09-22-on-chip-relay.html` answers whether on-chip communication can beat main memory for a
+  real computation. A chain of stages that hands each stage's output to a neighbouring shire's scratchpad
+  instead of writing it to DRAM runs **12.3x faster and uses 12x less energy per byte, on the same watts**;
+  keeping it in the shire's own scratchpad is 30.7x. Both reproduce on aifoundry3. The boundary is sharp:
+  below the 32 MB L3 the DRAM route runs at 280-410 GB/s and the hand-off buys nothing, and at 32 MB per
+  buffer DRAM falls to 48 GB/s and stays there out to 256 MB. The lead halves for every quadrupling of
+  arithmetic, so it is worth it below roughly ten flops per byte. Hop distance across the mesh costs nothing
+  measurable. New workload `workloads/onchip` (`--test probe` and `--test relay`) with `run_onchip.sh`,
+  `analyze_onchip.py` and `tools/ettelem/run_onchip_power.sh`. Private space
+  https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay, uuid `8678d49d-3f0c-49be-b08a-5528de8ece3c`.
 - `docs/lab-access.md` covers logging in to the lab machines (`aifoundry1`-`3`) and creating accounts for new people.
 - `workloads/` holds standalone workloads that run on both the simulator and the lab cards. The first one is `workloads/sgemm`:
   fp32 matmul, verified on aifoundry3's card at 127 GFLOP/s with scalar code. `scripts/deploy-lab.sh` builds a workload on a lab machine.

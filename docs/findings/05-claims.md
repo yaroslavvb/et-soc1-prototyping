@@ -213,6 +213,26 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
 | The arbitration rule and its erratum | `l3_yield_priority` does not fix the same-address case | X | R1 | ET-SoC Errata 4.1 `RTLMIN-6207`, 4.2 `RTLMIN-6214`, both Postponed |
 | Ivan's 6% | **not reproduced**; his code was not run | X | R11 | [17-hot-line.md](17-hot-line.md) |
 
+## On-chip relay: shire-to-shire against main memory (E24, E25)
+
+`DATAO` means `docs/reports/data/2026-09-22-onchip-aifoundry2/`.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| Multi-stage relay, intermediate in DRAM | **48.4 GB/s** | M | E25 | `DATAO/onchip.json`, `headline` |
+| …in the next shire's scratchpad | **592.9 GB/s**, 12.3× | M | E25 | same |
+| …in the shire's own scratchpad | **1,483.7 GB/s**, 30.7× | M | E25 | same |
+| Same on aifoundry3 | 12.4× and 31.2× | M | E25 | `docs/reports/data/2026-09-22-onchip-aifoundry3/sweep.jsonl` |
+| Energy per byte moved | **104.8 / 8.9 / 4.3 pJ** for DRAM / next shire / own | M | E25 | `DATAO/onchip.json`, `power` |
+| Power over idle, all three media | 4.34 / 4.42 / 5.30 W — within a watt | M | E25 | same |
+| DRAM floor past the L3 | 47.9 GB/s at 32 MB per buffer, 53.4 at 256 MB | M | E25 | `DATAO/onchip.json`, `bigsize` |
+| The same relay below the L3 | DRAM 281–411 GB/s; hand-off buys 1.0–1.4× | M | E25 | `DATAO/onchip.json`, `size` |
+| Where the advantage runs out | 1.5× at 256 adds per element, about 32 flops/byte | M | E25 | `DATAO/onchip.json`, `intensity` |
+| Cost of hop distance across the mesh | **none measurable**: 593 GB/s next door, 734 at 16 shires | M | E25 | `DATAO/onchip.json`, `distance` |
+| A shire reading what another wrote to its scratchpad | works by tensor store and by vector stores; 0 wrong words of 1,024 blocks | M | E24 | `DATAO/sweep.jsonl`, group `probe` |
+| Offset 0 of a shire's scratchpad | **faults** | M | E24 | reproduce with `--stage-bytes` and `scp_a = 0` |
+| A 2D systolic array of TensorSend cells | hangs a hart permanently; not attempted | X | R12, `docs/et-soc1-notes.md` | one ready flag per minion, not per partner |
+
 ## External numbers (not measured here)
 
 | Claim | Value | Kind | Source |
@@ -244,6 +264,8 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
   `g_pmic_power_reg.module_tdp_level` and no further.
 - **Whether the 8% switching-power gap between the two cards is silicon, package or board regulator.**
   Separating those needs a third working card, which aifoundry1 is not.
+- **A relay whose working set exceeds the 80 MB of scratchpad.** That is where on-chip hand-off would be the
+  only option rather than the faster one; the flow control for it was not built.
 - **Why Ivan's 6% differs from both of our numbers.** His code was not run.
 - **Whether a hot line makes its shire measurably hotter.** The thermal telemetry is one chip-wide mean.
 - **aifoundry3's thermal network.** Its heatsink is visibly faster than aifoundry2's, and no heat-then-cool

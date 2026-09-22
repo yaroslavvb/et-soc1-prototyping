@@ -44,7 +44,11 @@ can you predict it before running?**
    as the hammering lasts. It takes 24 remote requesters, under one shire's worth, and the vendor's errata
    describe it and say the configuration bit that looks like the fix does not work.
    → [17-hot-line.md](17-hot-line.md)
-9. **The caveat that matters most.** The temperature half of the model was only held out properly after the
+9. **The biggest win available.** A chain of stages that hands its intermediate to a neighbouring shire's
+   scratchpad instead of DRAM runs **12.3× faster at a twelfth of the energy per byte, on the same watts**;
+   keeping it in the shire's own scratchpad is 30.7×. The catch is a sharp one: below the 32 MB L3 the cache
+   already does the job and you gain nothing. → [18-on-chip-relay.md](18-on-chip-relay.md)
+10. **The caveat that matters most.** The temperature half of the model was only held out properly after the
    fact, when the fit was challenged. On runs it was not fitted to, the time-to-90 °C error is 9% in the
    median and 23% at worst out to a few minutes, and it runs 3–5 °C hot at ten minutes. → [11-thermal-model.md](11-thermal-model.md), section "How well it predicts"
 
@@ -59,6 +63,7 @@ can you predict it before running?**
 | Argue about efficiency against a GPU | [13-why-low-power.md](13-why-low-power.md), and read its caveats first |
 | Know what the card's instruments can and cannot see | [15-earlier-findings.md](15-earlier-findings.md) |
 | Share a counter, lock or flag between shires | [17-hot-line.md](17-hot-line.md) — one hot line stops the shire that hosts it |
+| Make a multi-pass computation faster than main memory | [18-on-chip-relay.md](18-on-chip-relay.md) — hand each stage to a neighbouring shire |
 | Pick a machine, or compare two cards | [14-card-behaviour.md](14-card-behaviour.md) — the three machines side by side, and why aifoundry3 is slow |
 | Understand the clock/voltage governor, or why the card leaks so much | [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
 | Re-run an experiment | [03-experiments.md](03-experiments.md) — command, protocol, raw data path, caveats |
@@ -72,10 +77,10 @@ Four kinds of thing have IDs, and every claim cites them:
 
 | Prefix | Meaning | File |
 |---|---|---|
-| **R1–R10** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
-| **Q1–Q23** | Requests from the repo owner, in order, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E21** | Experiments: what ran, when, on what, with which command, producing which raw files | [03-experiments.md](03-experiments.md) |
-| **A1–A12** | Artifacts published: reports, spaces, GIFs, tools, commits | [04-artifacts.md](04-artifacts.md) |
+| **R1–R12** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
+| **Q1–Q26** | Requests from the repo owner, in order, and what each produced | [02-requests.md](02-requests.md) |
+| **E1–E25** | Experiments: what ran, when, on what, with which command, producing which raw files | [03-experiments.md](03-experiments.md) |
+| **A1–A14** | Artifacts published: reports, spaces, GIFs, tools, commits | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":
 

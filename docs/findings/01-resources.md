@@ -2,7 +2,7 @@
 
 Every finding in this directory rests either on one of these resources or on an experiment in
 [03-experiments.md](03-experiments.md). Each entry says what the resource is authoritative for and, as
-importantly, what it is **not** authoritative for. Cite them as **R1**...**R11**.
+importantly, what it is **not** authoritative for. Cite them as **R1**...**R12**.
 
 ---
 
@@ -163,3 +163,19 @@ about 60 million atomics a second in aggregate, the 31 non-owning shires splitti
   **own** memory path, completely (E23). See [17-hot-line.md](17-hot-line.md).
 - **Treated as:** a hypothesis to test, never as evidence. Where the two disagree, this work reports its own
   measurement and says plainly that Ivan's code was not run.
+
+## R12 — The L2-mainline-starvation brief (a sibling analysis, external to this line of work)
+
+<https://spacesheep.dev/@yaroslavvb/2026-09-22-et-soc1-l2-mainline-starvation>, written the same day from the
+same repository state (`b36acd6`) and from R11.
+
+- **Authoritative for:** nothing measured. It is an argument, not an experiment, and it says so.
+- **Useful for:** two things this work took from it and checked. First, that the register-to-register path
+  (`TensorSend`/`TensorRecv`) never touches the shire cache, so it is immune to the contention in
+  [17-hot-line.md](17-hot-line.md). Second, the warning that a two-dimensional systolic array — every cell
+  receiving from two partners — hangs a hart permanently, because the hardware keeps one ready flag per
+  minion and not one per partner (`docs/et-soc1-notes.md`). That warning is why
+  [18-on-chip-relay.md](18-on-chip-relay.md) is built at shire granularity on the scratchpad rather than as a
+  mesh of TensorSend cells.
+- **Where this work disagrees with it:** it repeats R11's 6% figure as measured fact and builds on it. E22
+  did not reproduce that figure; see [17-hot-line.md](17-hot-line.md).

@@ -1,0 +1,124 @@
+<h1>Hand it to the next shire</h1>
+<p class="byline">Two ET-SoC-1 cards, 22 September 2026 · <code>workloads/onchip --test relay</code>, a new probe · asking whether on-chip communication can beat main memory for a real computation</p>
+
+<p class="lede">A shire's own scratchpad runs at 2.5 TB/s and the shire next door at about 1 TB/s, while DRAM
+manages 76 GB/s for the whole chip. Those are bandwidths, not results. The question is whether a computation
+can be rearranged to collect them. <b>It can. A chain of stages that hands each stage's output to a
+neighbouring shire, instead of writing it to DRAM and reading it back, runs 12.3 times faster and uses 12
+times less energy per byte — and the same power.</b> Keeping the output in the shire's own scratchpad is
+30.7 times faster. Both numbers reproduce on a second card to within 1%, and both come with a boundary:
+below the 32 MB L3 there is almost nothing to win.</p>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">Passing each stage to the next shire</div><div class="val" id="k1"></div><div class="sub">against writing it to DRAM and reading it back</div></div>
+  <div class="card kpi"><div class="lab">Keeping it in the shire's own scratchpad</div><div class="val" id="k2"></div><div class="sub">no data crosses a shire at all</div></div>
+  <div class="card kpi"><div class="lab">Energy per byte, next shire vs DRAM</div><div class="val" id="k3"></div><div class="sub">at the same watts over idle</div></div>
+  <div class="card kpi"><div class="lab">Where the advantage appears</div><div class="val" id="k4"></div><div class="sub">the working set has to outgrow the L3</div></div>
+</div>
+
+<h2>1. One kernel, three places to put the answer</h2>
+<p>The computation is a relay. A slab of floats belongs to each shire; a stage reads every element, adds one
+to it, and writes it out; the next stage reads what the last one wrote. Thirty-two shires, 1,024 minions,
+eight stages, 1 MB per shire per stage, half a gigabyte of traffic. The same code, the same barriers and the
+same arithmetic run three ways, and the only thing that differs is where a stage's output goes:</p>
+
+<div class="table-wrap"><table id="media"></table></div>
+
+<p><b>How we know the data really crossed a shire.</b> Each shire starts its slab filled with its own number.
+After eight stages of adding one, a shire that kept its own data holds 8. In the hand-off run, shire 0 holds
+<b>32</b> — which is 24 plus 8, and 24 is the shire eight places back round the ring. Every element is
+checked against that expectation, on every run in this report; a run that did not really move its data would
+fail.</p>
+
+<div class="chart-title">Rate at which the chip moves its own intermediate data</div>
+<div class="chart scroll" id="head"></div>
+<p class="small" id="headcap"></p>
+
+<h2>2. The same watts, a thirtieth of the work</h2>
+<p>Power was measured separately, with each medium launched back to back for twelve seconds so the card
+reaches a steady state. The striking part is not that DRAM costs more energy per byte. It is that all three
+draw <em>the same power</em>, and one of them gets thirty times as much done with it:</p>
+
+<div class="table-wrap"><table id="power"></table></div>
+
+<p class="small" id="powernote"></p>
+
+<h2>3. Where the advantage comes from, and where there isn't one</h2>
+<p>The win is against DRAM, not against the memory hierarchy. Shrink the working set and the L3 quietly does
+the same job for free:</p>
+
+<div class="chart-title">The same eight-stage relay at different working-set sizes</div>
+<div class="chart scroll" id="size"></div>
+<p class="small" id="sizecap"></p>
+
+<p id="sizetext"></p>
+
+<h2>4. How much arithmetic it takes to stop mattering</h2>
+<p>All of this is a statement about moving data, so it fades as the arithmetic grows. Repeating the add
+<code>w</code> times per element walks the workload up the roofline:</p>
+
+<div class="chart-title">Advantage over DRAM against arithmetic per element</div>
+<div class="chart scroll" id="intensity"></div>
+<p class="small" id="intcap"></p>
+
+<p id="inttext"></p>
+
+<h2>5. Distance across the mesh costs nothing</h2>
+<p>The obvious worry about handing data to another shire is the network in between. At this granularity there
+is none to speak of. Handing the slab sixteen shires away, across the width of the mesh, is not slower than
+handing it next door:</p>
+
+<div class="table-wrap"><table id="dist"></table></div>
+
+<p>Transfers here are 32 KB per minion and deeply pipelined, so the per-hop latency of 12 cycles never
+appears; what is left is the bandwidth of a scratchpad that is not this shire's own, and that is the same
+wherever it is. The practical consequence is that placement is free: a stage can be given to whichever shire
+suits, not only to a neighbour.</p>
+
+<h2>6. What this is good for</h2>
+<ul>
+<li><b>Any chain of passes over data that outgrows the L3.</b> Multi-stage filters, iterated stencils, a deep
+and narrow network, a stream that several kernels touch in turn. The standard shape writes the intermediate
+to memory between stages, which on this chip costs 48 GB/s. The intermediate does not have to go there.</li>
+<li><b>The unit that matters is the shire, not the minion.</b> Its scratchpad is 2.5 MB, addressable by every
+other shire, and written by a tensor store that bypasses both caches, so what one shire writes another reads
+with no coherence problem at all. That is the mechanism this whole report rests on.</li>
+<li><b>Budget one barrier per stage.</b> A chip-wide barrier costs about 5,000 cycles. At 1 MB per shire a
+DRAM stage is 830,000 cycles and an on-chip stage 27,000, so the barrier is under a fifth of even the fastest
+case, and the measured advantage is flat from one stage to thirty-two.</li>
+<li><b>Do not reach for a two-dimensional systolic array to get this.</b> The register-to-register path
+(<code>TensorSend</code>/<code>TensorRecv</code>) is immune to shire-cache contention and is the right tool
+inside a shire, but a cell receiving from two partners at once hangs a hart permanently, because the hardware
+keeps one ready flag per minion rather than one per partner. The relay here is the same idea at shire
+granularity, and it uses a path that cannot hang.</li>
+</ul>
+
+<h2>7. Method, and what is not established</h2>
+<ul>
+<li>The probe is <code>workloads/onchip</code>, new for this. A stage's output is written with a tensor store,
+which bypasses the L1 and L2 caches, so a neighbouring shire cannot read a stale line. Inputs are read with
+plain vector loads from addresses the reading minion has never written; two buffers alternate, and a minion's
+32 KB chunk is sixty-four times its 512 B of L1, so nothing it touched two stages ago survives. Every run
+verifies its own output element by element, which is what makes that argument checkable rather than
+asserted.</li>
+<li>Rates come from the on-device cycle counter at the 600 MHz this card is pinned to, not the wall clock: a
+kernel launch costs a few hundred microseconds and an on-chip stage costs twenty-seven thousand cycles, so
+wall time would measure the host.</li>
+<li>Scratchpad addressing is the PRM's format 0, shire in bits [29:23]. <b>Offset 0 of a shire's scratchpad
+faults</b>; the buffers start 256 KB in, which also leaves room for two of them inside the 2.5 MB.</li>
+<li>Everything was run on aifoundry2 and repeated on aifoundry3: <span id="cards"></span>.</li>
+<li><b>Not established:</b> whether a working set larger than the 80 MB of scratchpad can be streamed through
+the same relay, which is the case where on-chip hand-off would be the only option rather than the faster one;
+we did not build the flow control that needs. The arithmetic here is one vector add, chosen to make the
+measurement about data movement — a real pipeline would have real stages, and section 4 says what that costs.
+The chip-wide barrier per stage is the simplest synchronisation and not the cheapest; a credit between
+neighbouring shires would do, and would help the on-chip media most. And the comparison is against this
+chip's DRAM at 48 GB/s, which is what the card has, not against a memory system in general.</li>
+</ul>
+
+<pre><code>workloads/onchip/run_onchip.sh DATA                 # 88 configurations, milliseconds of card time each
+tools/ettelem/run_onchip_power.sh DATA 12           # board power, one burst per medium
+python3 workloads/onchip/analyze_onchip.py DATA/sweep.jsonl --power DATA --out onchip.json</code></pre>
+<p class="small">Companion: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">one hot line stops a shire</a>,
+which is what happens if the structure several shires share is a single line rather than a slab. Findings index
+and claim provenance: <code>docs/findings/</code>.</p>
