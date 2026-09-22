@@ -2,7 +2,7 @@
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and
 where it ran, the command that produced it, where the **raw** data lives in this repository, and what it
-cannot tell you. Cite as **E1**...**E17**.
+cannot tell you. Cite as **E1**...**E19**.
 
 All card work is on **aifoundry2**, one ET-SoC-1 PCIe card, firmware at et-platform `353f20e`. Unless an entry
 says otherwise, the minion clock was a steady **600 MHz** at **516–518 mV** on the die, verified in every
@@ -239,3 +239,45 @@ measured board power. `--anchor 62:26.7` pins the slowest stage with the one ove
   telemetry up to that launch only; from launch on, nothing measured enters the simulation.
 
 **Findings and numbers:** [11-thermal-model.md](11-thermal-model.md).
+
+## E18 — Wake-up probe: is any cache array power-gated when idle? (2026-09-22, 11:39)
+
+**Question (Q20):** R9 says cache data arrays sit behind leakage-suppression transistors and pay a small
+wake-up latency on first access. Does this card show one?
+**Tool:** `workloads/memprobe`, new experiment `gen_ops.py wakeup`.
+**Method:** place one line at a chosen level with `evict_va`, spin the minion on its cycle counter for a swept
+idle interval (0 to 16.7 M cycles, i.e. up to 27 ms) without touching that line, then time a single load of it.
+**One line per (repeat, level)**, so only the idle time varies; 20 repeats; one hart.
+**Command:**
+```
+python3 workloads/memprobe/gen_ops.py wakeup --out W --reps 20 --seed 11 \
+    --delays 0,1000,10000,100000,1000000,4000000,8000000,16000000
+build/memprobe/host/memprobe_host --program W/wakeup.ops --out-dir W --budget 40
+```
+**Raw data:** `docs/reports/data/2026-09-22-dvfs-aifoundry2/wakeup/` (`wakeup.ops`, `wakeup.json` labels,
+`wakeup.u32` results). Card held 4.9 s.
+**Result:** paired difference between the longest and shortest idle is 0 cycles for L1 and L3, −11 for L2
+(noise), +10 for DRAM (row closure). No wake-up anywhere.
+**Caveats:** cannot detect a penalty below about ten cycles, and cannot test idle intervals beyond 27 ms, which
+is the widest the delay op encodes. The minion keeps executing throughout, so only the array under test is
+idle.
+
+## E19 — Idle power after 20 hours, as an out-of-sample check (2026-09-22, 11:44)
+
+**Question (Q20):** how much does an entirely idle card leak, is there a deep idle state, and does the leakage
+curve fitted on 21 September still hold on a different day?
+**Method:** the card had been untouched for 20.4 h. Sampled `ettelem sample --seconds 60 --every-ms 200`, with
+no workload at any point.
+**Raw data:** `docs/reports/data/2026-09-22-dvfs-aifoundry2/idle_20h.jsonl.gz` (300 samples).
+**Result:** 31.79 ± 0.04 W at 73.0 °C, 600 MHz, 518 mV; minion rail 11.05 W, SRAM 2.00 W, mesh 3.64 W,
+15.10 W on no rail sensor. The model of E17 predicts 31.78 W — error **+0.01 W**. No sign of a deep idle
+state.
+**Why it counts as a test:** the model was fitted on 21 September in a cooler room, on sessions whose idle
+stretches were minutes, not hours. Nothing about today's measurement was in the fit.
+
+## A note on E10, re-analysed for Q20
+
+The governor transitions in [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) are **not** a new experiment.
+They are E10's telemetry re-read by `tools/ettelem/analyze_dvfs.py`, which classifies each of the 36 clock
+changes against the firmware's two thresholds and the kernel boundaries. Nothing is fitted.
+

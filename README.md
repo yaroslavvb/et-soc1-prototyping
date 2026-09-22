@@ -76,6 +76,13 @@ section 9 lists the pinned upstream versions.
   https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power, uuid `baede20c-57d9-4e01-8157-2014670dd8cf`.
   Both are assembled by `scripts/build-report.py` from `docs/reports/sources/`. After any `spacesheep deploy` of the other spaces,
   re-check that the space is still private: deploys have reset visibility to public more than once.
+- `docs/reports/2026-09-22-dvfs-leakage.html` checks six claims by David Kanter (MLPerf) about DVFS loops and
+  leakage suppression against this chip: the governor reads a measured PMIC wattage rather than estimating power
+  from activity counters, its ±5% guardband macros are dead code so it hunts (36 transitions analysed,
+  `tools/ettelem/analyze_dvfs.py`), the per-minion sleep transistors in the RTL are tied off and no firmware
+  drives them, a wake-up probe finds no array power gating (`gen_ops.py wakeup`), and leakage is 36% of a busy
+  card against his 5-30%. Private space https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage, uuid
+  `171dcd4a-5b6d-49d3-aca0-db4980fabfa5`.
 - `docs/lab-access.md` covers logging in to the lab machines (`aifoundry1`-`3`) and creating accounts for new people.
 - `workloads/` holds standalone workloads that run on both the simulator and the lab cards. The first one is `workloads/sgemm`:
   fp32 matmul, verified on aifoundry3's card at 127 GFLOP/s with scalar code. `scripts/deploy-lab.sh` builds a workload on a lab machine.

@@ -141,6 +141,34 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
 | Peak board power at 800 MHz on random data | 87.8 W, for an instant before the governor stepped down | M | E10 |
 | The resulting speed gap, zeros vs random | **about 25%** | M | E10 |
 
+## The DVFS loop and leakage suppression
+
+`DATA2` means `docs/reports/data/2026-09-22-dvfs-aifoundry2/`; `DATA2/dvfs.json` holds the computed tables.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| Governor thresholds | 65 °C software, 65 W TDP, checked every 10 ms | X | R3 | `thermal_pwr_mgmt.h`, `mgmt_build_config.h` (`DM_TASK_DELAY_MS`) |
+| The loop's power input is a **measurement**, not an activity estimate | `pmic_read_average_soc_power()` over I2C | X | R3 | `services/thermal_pwr_mgmt.c`, `update_module_soc_power()` |
+| The loop has **no hysteresis** | both guardband macros defined and never used | X | R3 | `thermal_pwr_mgmt.c` lines 212–223; no other reference in the tree |
+| Thermal branch has priority over the power branch | plain `if`, power branch unreachable above 65 °C | X | R3 | `check_power_throttle_conditions()` |
+| Clock returns to the boot point when the master minion idles | — | X | R3 | `go_to_idle_state_and_update_pwr_status()` |
+| Operating points | 600 MHz / 0.517 V, 700 / 0.568, 800 / 0.618 | M | E10 | `DATA/cold1/telemetry.jsonl.gz`, `mhz.minion` with `die_mv.minion` |
+| Clock transitions observed | **36** (18 up, 18 down) in 7 cool-start runs | M | E10 | `DATA2/dvfs.json`, `transitions` |
+| Down-steps by cause | 7 thermal-only, 4 thermal+power, 7 kernel-boundary, **0 power-only** | M | E10 | same, field `why` |
+| Voltage moved with frequency in every transition | true | M | E10 | same, `mv0`/`mv1` |
+| First clock change after a launch | 0.39–0.99 s | M | E10 | same, `transition_summary.first_change_s` |
+| Limit-cycle period on constant data | about 2 s | M | E10 | `DATA2/dvfs.json`, `traces` |
+| Per-minion sleep and isolation exist in the RTL | `pwr_ctrl_min_nsleepin` / `nsleepout` / `isolate` | X | R2 | `rtl/shire/neigh/neigh_top.v`, `neigh_top_pwrstub.v` |
+| …and are tied off in the open configuration | `nsleepin='1`, `isolate='0` | X | R2 | `rtl/cpu_subsystem/cpu_subsystem_top.v`, with the comment "this ifce is not used" |
+| …and no firmware line drives them | none | X | R3 | whole-tree search; only `PWR_CTRL` hits are eMMC bus voltage |
+| **No array wake-up latency** after up to 27 ms idle | L1 0, L2 −11, L3 0, DRAM +10 cycles | M | E18 | `DATA2/wakeup/`, and `DATA2/dvfs.json` → `wakeup` |
+| Idle board power after 20.4 h | **31.79 ± 0.04 W at 73.0 °C** | M | E19 | `DATA2/idle_20h.jsonl.gz` |
+| …predicted by the model fitted a day earlier | 31.78 W, error **+0.01 W** | P | E17 → E19 | `DATA2/dvfs.json` → `idle_check` |
+| Idle rails | minion 11.05 W, SRAM 2.00 W, mesh 3.64 W, 15.10 W on no sensor | M | E19 | same |
+| Leakage share of an idle card at 80 °C | **64%** | F | E17 | `DATA2/dvfs.json` → `leak_fraction` |
+| Leakage share of a random-data matmul at 80 °C | **36%** | F | E17 | same |
+| Kanter's reference range for leakage | 5–30%, ~20% common | X | R9 | the brief at R9 |
+
 ## External numbers (not measured here)
 
 | Claim | Value | Kind | Source |
@@ -165,3 +193,7 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
   UltraSoC debug fabric. See Q7 in [02-requests.md](02-requests.md).
 - **The thermal network in any other chassis.** 1.47 °C/W is this card in this desktop box, which idles at
   62–80 °C.
+- **Whether the taped-out ET-SoC-1 ever drives its sleep transistors.** The chip-level netlist is not in the
+  open drop; the tie-off is a fact about the Erbium configuration, and the card only shows that nothing
+  observable uses them.
+- **Whether the governor's power branch behaves as written.** It never fired alone in any observed run.

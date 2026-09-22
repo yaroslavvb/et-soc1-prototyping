@@ -319,6 +319,35 @@ def table(args):
     print(f"{args.out_file}: {len(bases)} minions; run with --level {level} --stride {stride} --lines {n}")
 
 
+def wakeup(args):
+    """Latency of one load after the line has sat untouched for a swept idle interval.
+
+    Tests David Kanter's description of leakage suppression: if a cache data array sits behind
+    leakage-suppression (power-gating) transistors and is suppressed once it goes idle, the first access
+    afterwards pays a wake-up latency. The minion keeps executing (the delay is a spin on the cycle counter),
+    so only the array under test is idle. Flat latency against idle time means the array is not being
+    power-gated on this timescale, or the wake-up is below the one-cycle resolution.
+
+    Confounds to keep in mind: for MEM the DRAM row closes and refresh lands at 3.88 us, so its curve is
+    expected to rise a little and then flatten; the L1 line may also be evicted by the delay loop's own
+    instruction fetches, which is why L1 is included as a control.
+    """
+    rng = random.Random(args.seed)
+    p = Prog()
+    for i in range(64):  # timer overhead, same as ladder
+        p.stamp(("stamp", i))
+        p.tnop(("tnop", i))
+    for rep in range(args.reps):
+        for level in (None, L1, L2, L3, MEM):
+            a = rng.randrange(0, (1 << 28) // 64) * 64  # one line per (rep, level): only the idle time varies
+            for d in args.delays:
+                place(p, a, level)
+                if d:
+                    p.delay(d)
+                p.tload(a, ("wake", -1 if level is None else level, d, rep))
+    p.write(args.out, args.name or "wakeup", {"delays": args.delays, "reps": args.reps})
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("experiment")
@@ -344,7 +373,7 @@ def main():
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
     {"timer": timer, "ladder": ladder, "bits": bits, "decomp": decomp, "l3map": l3map, "refresh": refresh, "pagetimeout": pagetimeout, "msmap": msmap,
-     "table": table}[args.experiment](args)
+     "table": table, "wakeup": wakeup}[args.experiment](args)
 
 
 if __name__ == "__main__":

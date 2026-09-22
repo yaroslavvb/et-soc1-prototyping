@@ -2,7 +2,7 @@
 
 The work in this directory was driven by a sequence of requests from the repo owner, in one long session on
 aifoundry2 between 19 and 22 September 2026. Each is recorded here because scope decisions explain why some
-questions were answered thoroughly and others were left open. Cite as **Q1**...**Q19**.
+questions were answered thoroughly and others were left open. Cite as **Q1**...**Q20**.
 
 | ID | Date | Request (condensed) | Produced |
 |---|---|---|---|
@@ -25,6 +25,7 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
 | Q17 | 09-22 | Fix the report and commit | commit `75bb061` |
 | Q18 | 09-22 | Summarise all findings as self-contained MD files with pointers on where to start; commit | This directory |
 | Q19 | 09-22 | *(mid-task)* Add provenance: modularise experiments and artifacts so findings can be traced; structure the files around resources, requests, experiments and artifacts | This directory's structure |
+| Q20 | 09-22 | Using David Kanter's notes, research the ET-SoC-1's DVFS loop and the leakage-suppressor transistors; validate experimentally if needed; turn into a brief | R9, E18, E19 → A11, [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
 
 ## Scope decisions worth remembering
 

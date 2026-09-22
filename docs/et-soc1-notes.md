@@ -186,6 +186,15 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
   random data on 256 of 1,024 cores in about 5 minutes; zeros cool. `tools/ettelem/flip_thermal_model.py` fits all of this and
   `tools/ettelem/predict_heat.py` applies it to custom operand tiles. Held-out runs (`validate_flip_model.py`): time to 90 °C within
   9% in the median, 23% at worst; ten-minute end temperatures 3 to 5 °C hot, because the stages beyond a minute are poorly pinned down.
+- **The clock governor reads a power meter, not activity counters,** and has no hysteresis: the ±5% guardband
+  macros in `thermal_pwr_mgmt.c` are defined and never used, so from a cool die it hunts (clock changed 7 times
+  in one 7 s run). The temperature test runs before the power test, so above 65 °C the card is pinned at
+  600 MHz whatever the power. An idle master minion resets the clock to the boot point, so back-to-back short
+  kernels never hold a raised clock. Full write-up: `docs/findings/16-dvfs-and-leakage.md`.
+- **Per-minion sleep transistors exist but are switched off.** `pwr_ctrl_min_nsleepin` / `isolate` are wired
+  through the neighbourhood RTL, tied off in the open configuration, and driven by no firmware line. A wake-up
+  probe (`gen_ops.py wakeup`) finds no first-access penalty at L1, L2, L3 or DRAM after up to 27 ms of idle.
+  Only clock gating is doing anything, which is why an idle core costs almost no dynamic power and still leaks.
 - **Zero gating looks at the bit pattern:** -0.0 is not gated (46.7 W, like ones, against 38.2 W for +0.0). Mask with a select,
   not by multiplying by zero. Dense structured matrices (DCT, kaleidoscope products, circulant, rank 1) cost what random data
   costs; sparse structure (butterfly factors, bands, blocks) costs by its surviving products; a Hadamard matrix costs 50 W.

@@ -22,10 +22,14 @@ can you predict it before running?**
    closes a feedback loop with gain 0.95. Sustained switching above **about 3 W** has no equilibrium on this
    card: random data drives the die from 80 to 90 °C in **20 seconds**, ones in **two minutes**, zeros never.
    → [12-heat-management.md](12-heat-management.md)
-4. **The comparison.** Against an A100 this chip switches a similar capacitance per cycle, but at a third of
+4. **The governor.** The firmware's DVFS loop reads a power *sensor* rather than estimating power from
+   activity counters, and its ±5% guardband macros are defined but never used — so it hunts, changing clock
+   seven times in a 7-second run. Its leakage-suppression transistors exist in the RTL and are tied off.
+   → [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md)
+5. **The comparison.** Against an A100 this chip switches a similar capacitance per cycle, but at a third of
    the V² and 43% of the clock, and gates everything idle. It is **not** more efficient per FLOP at dense
    matmul: 7.0 pJ against 1.28. → [13-why-low-power.md](13-why-low-power.md)
-5. **The caveat that matters most.** The temperature half of the model was only held out properly after the
+6. **The caveat that matters most.** The temperature half of the model was only held out properly after the
    fact, when the fit was challenged. On runs it was not fitted to, the time-to-90 °C error is 9% in the
    median and 23% at worst out to a few minutes, and it runs 3–5 °C hot at ten minutes. → [11-thermal-model.md](11-thermal-model.md), section "How well it predicts"
 
@@ -39,6 +43,7 @@ can you predict it before running?**
 | Understand the model or improve it | [11-thermal-model.md](11-thermal-model.md) |
 | Argue about efficiency against a GPU | [13-why-low-power.md](13-why-low-power.md), and read its caveats first |
 | Know what the card's instruments can and cannot see | [15-earlier-findings.md](15-earlier-findings.md) |
+| Understand the clock/voltage governor, or why the card leaks so much | [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
 | Re-run an experiment | [03-experiments.md](03-experiments.md) — command, protocol, raw data path, caveats |
 | Find the published version | [04-artifacts.md](04-artifacts.md) — reports, spaces, GIFs, commits |
 | Know why a question was or was not answered | [02-requests.md](02-requests.md) |
@@ -50,10 +55,10 @@ Four kinds of thing have IDs, and every claim cites them:
 
 | Prefix | Meaning | File |
 |---|---|---|
-| **R1–R8** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers | [01-resources.md](01-resources.md) |
-| **Q1–Q19** | Requests from the repo owner, in order, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E17** | Experiments: what ran, when, on what, with which command, producing which raw files | [03-experiments.md](03-experiments.md) |
-| **A1–A10** | Artifacts published: reports, spaces, GIFs, tools, commits | [04-artifacts.md](04-artifacts.md) |
+| **R1–R9** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers and expert accounts | [01-resources.md](01-resources.md) |
+| **Q1–Q20** | Requests from the repo owner, in order, and what each produced | [02-requests.md](02-requests.md) |
+| **E1–E19** | Experiments: what ran, when, on what, with which command, producing which raw files | [03-experiments.md](03-experiments.md) |
+| **A1–A11** | Artifacts published: reports, spaces, GIFs, tools, commits | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":
 

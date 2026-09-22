@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The ET-SoC-1's DVFS loop, and the leakage it never switches off</title>
+<meta name="description" content="David Kanter described how a mature chip regulates its own power: an activity-based estimator inside a DVFS loop, and cache arrays behind leakage-suppression transistors. Checked against the ET-SoC-1's firmware, its open RTL and the card itself: the loop measures power rather than estimating it, has no hysteresis and hunts; the sleep transistors exist but nothing drives them; and leakage is 36% of a busy card, not his 5-30%.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --code-bg: #f1f0ec;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c7: #4a3aa7; --ref: #8c8b85;
+  --ok: #008300; --warn: #eda100; --bad: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+    --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+  --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-text-size-adjust: 100%; }
+main { max-width: 940px; margin: 0 auto; padding: 28px 16px 72px; }
+h1 { font-size: 1.75rem; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; margin: 44px 0 10px; }
+h3 { font-size: 1rem; margin: 22px 0 8px; }
+.byline { color: var(--ink-2); font-size: 0.9rem; margin: 0 0 22px; }
+.lede { font-size: 1.05rem; }
+.small { font-size: 0.85rem; color: var(--ink-2); }
+a { color: var(--c1); }
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 18px 0 8px; }
+.kpi .lab { color: var(--ink-2); font-size: 0.8rem; }
+.kpi .val { font-size: 1.5rem; font-weight: 650; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.kpi .sub { color: var(--ink-2); font-size: 0.8rem; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.chart.scroll svg { min-width: 640px; }
+.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 320px; display: none; }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lab { fill: var(--ink-2); font-size: 12px; }
+.lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; }
+td.lvl { font-weight: 600; white-space: nowrap; }
+.wide table { min-width: 760px; }
+.chip { display: inline-block; font-size: 0.74rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid transparent; }
+.chip.works_now { color: var(--ok); border-color: var(--ok); }
+.chip.needs_fw_change { color: var(--c1); border-color: var(--c1); }
+.chip.needs_tooling { color: var(--warn); border-color: var(--warn); }
+.chip.research_only { color: var(--muted); border-color: var(--muted); }
+.chip.impossible_on_silicon { color: var(--bad); border-color: var(--bad); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.82rem; color: var(--ink-2); margin: 6px 0 8px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 6px; }
+.controls button { font: inherit; font-size: 0.82rem; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 12px; cursor: pointer; min-height: 30px; }
+.controls button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.verif { font-size: 0.74rem; color: var(--muted); white-space: nowrap; }
+.verif.confirmed::before { content: "✓ "; color: var(--ok); }
+.verif.disputed::before { content: "± "; color: var(--warn); }
+.verif.unverified::before { content: "· "; }
+ol li, ul li { margin: 5px 0; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--ink-2); font-size: 0.9rem; }
+.chart-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.s1 { stroke: var(--c1); } .s2 { stroke: var(--c2); } .s3 { stroke: var(--c3); } .s4 { stroke: var(--c4); } .s5 { stroke: var(--c5); }
+.ln { fill: none; stroke-width: 2; stroke-linejoin: round; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+</style>
+</head>
+<body>
+<main>
+<h1>The ET-SoC-1's DVFS loop, and the leakage it never switches off</h1>
+<p class="byline">aifoundry2's card, 21–22 September 2026 · firmware <code>353f20e</code>, open RTL <code>b38a1a3</code> · checking six claims from a conversation with David Kanter (MLPerf / MLCommons) against the source, the RTL and the silicon</p>
+
+<p class="lede">David Kanter described how a mature chip manages its own power: a DVFS loop that knows
+<i>P = C<sub>switching</sub> × V² × f</i>, computes its own power estimate from activity counters because
+voltage and frequency are already known, folds in thermal sensors because leakage depends on temperature, and
+puts cache data arrays behind leakage-suppression transistors so that only the ~10% of an array in use is
+awake. He added a hedge: <q>maybe not on Esperanto's part, but on anything from a more mature company.</q>
+The hedge was right. <b>This chip's loop measures power with a sensor instead of estimating it, runs with no
+hysteresis and therefore hunts, and its per-minion sleep transistors are real but tied off. What is left is
+leakage: 36% of a busy card and 64% of an idle one, against the 5–30% he called typical.</b></p>
+
+<div class="table-wrap wide"><table id="verdict"></table></div>
+
+<h2>1. The loop as built</h2>
+<p>The whole governor is one function, <code>check_power_throttle_conditions()</code> in
+<code>ServiceProcessorBL2/services/thermal_pwr_mgmt.c</code>, called once per pass of the device-management
+task. Reduced to its logic:</p>
+<pre><code>every DM_TASK_DELAY_MS = 10 ms:
+    T   = pvt_get_minion_avg_temperature()          // on-die thermal sensor
+    P   = pmic_read_average_soc_power()             // MEASURED board power, from the PMIC over I2C
+    if  active_power_management and master minion is BUSY:
+        if   T &gt; 65 °C       and f &gt; f_min:  step DOWN one VMIN-LUT point
+        elif P &gt; 65 W        and f &gt; f_min:  step DOWN one VMIN-LUT point
+        elif P &lt; 65 W        and f &lt; f_max:  step UP   one VMIN-LUT point
+    on master minion going IDLE:                     // between kernels
+        set frequency back to the boot point</code></pre>
+<p>Four things follow, and all four show up in the measurements below.</p>
+<ul>
+<li><b>The input is a measurement, not an estimate.</b> <code>pmic_read_average_soc_power()</code> is a read of
+the power-management IC's own averaged wattage. Nothing in the loop counts bus bits, instructions or activity
+factors. Kanter's <i>P = C × V² × f</i> is not evaluated anywhere in this firmware, because the chip does not
+need to infer the left-hand side — it has a meter.</li>
+<li><b>Thermal has priority.</b> The temperature test comes first, and it is a plain <code>if</code>, so when
+the die is above 65 °C the power branch is never reached. A card that has been busy idles above 65 °C and is
+therefore pinned at its lowest operating point regardless of how little power it draws.</li>
+<li><b>There is no hysteresis.</b> The file defines <code>UPPER_POWER_THRESHOLD_GUARDBAND</code> and
+<code>LOWER_POWER_THRESHOLD_GUARDBAND</code>, a ±5% band around the TDP level — and then never uses them. Both
+macros are dead code at this commit. The loop compares against the raw threshold in both directions.</li>
+<li><b>The clock resets at every kernel boundary.</b> When the master minion reports idle the service processor
+calls <code>go_to_idle_state_and_update_pwr_status()</code>, which sets the boot frequency. A stream of short
+kernels therefore never holds a raised clock.</li>
+</ul>
+
+<h2>2. The loop as measured</h2>
+<p>The governor only moves when the die starts below 65 °C, which on this card means after a night of idling.
+Seven such runs exist, from the cool-start session of 21 September, sampled at 10 Hz. They contain
+<b>36 clock transitions</b>. Voltage moved with frequency in every one of them: 600 MHz at 0.517 V, 700 at
+0.568, 800 at 0.618. This is real DVFS, not frequency scaling alone.</p>
+
+<div class="chart-title">One run of constant data from a 64 °C die: the governor hunts. Blue: minion clock. Orange: board power.</div>
+<div class="chart scroll" id="cycle"></div>
+
+<p><b>It is a limit cycle, and the dead guardband explains it.</b> The loop sees an averaged power number that
+lags by about two seconds, has no hysteresis band, and steps one operating point at a time. So it climbs until
+it trips a threshold, drops, sees the threshold clear, climbs again — with a period of roughly two seconds,
+which is the lag. Over a 7-second run of constant data the clock changed seven times and the workload spent
+most of it at neither the top nor the bottom point.</p>
+
+<div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:14px">
+  <div style="flex:1 1 380px;max-width:460px">
+    <div class="chart-title">Every down-step, placed against the two thresholds it could have tripped</div>
+    <div class="legend" id="attrib-leg"></div>
+    <div class="chart" id="attrib"></div>
+  </div>
+  <div style="flex:1 1 380px;max-width:460px">
+    <div class="chart-title">Wake-up probe: load latency after the line sat untouched, minus its own shortest-idle value</div>
+    <div class="chart" id="wake"></div>
+  </div>
+</div>
+
+<p><b>Every down-step is accounted for, and none of them is the power branch acting alone.</b> Of the 18:
+seven were thermal only (the die above 65 °C while the board drew 45–56 W, well under the limit), four were
+both at once (random data at 800 MHz draws up to 88 W and heats fast), and seven were not throttling at all —
+they are the boot-frequency reset, landing within 12 to 186 ms of a kernel boundary at 64–65 °C and 33–39 W.
+The power branch never fired on its own, because on this card the only way to exceed 65 W is to be at
+800 MHz, and by the time you get there the die is already through 65 °C.</p>
+<div class="table-wrap wide"><table id="trans"></table></div>
+<p>The loop is also slow to start: the first clock change came 0.39 to 0.99 s after the kernel launched, never
+in milliseconds, even though the task itself runs every 10 ms. Once moving, it stepped at intervals at or
+below our 100 ms sampling period.</p>
+
+<h2>3. The leakage-suppression transistors</h2>
+<p>Kanter's description was specific: cache data arrays sit behind leakage-suppression transistors, a lookup
+checks the tags first and un-suppresses only the part of the array it needs, and the cost is a small wake-up
+latency. The same trick at the granularity of whole cores and execution units.</p>
+<p><b>The hardware is there.</b> The open RTL of the neighbourhood carries the full interface: a per-minion
+sleep control and its acknowledge (<code>pwr_ctrl_min_nsleepin</code> / <code>nsleepout</code>, one bit per
+minion), a global pair, and per-minion isolation (<code>pwr_ctrl_min_isolate</code>) with level shifters and a
+power stub that forces the outputs safe while a domain is down. That is a textbook power-gating structure,
+sized for the granularity he described.</p>
+<p><b>Nothing drives it.</b> In the open configuration the whole interface is tied off, with a comment saying
+so:</p>
+<pre><code>// Power Ctrl - power control handled outside cpu subsystem and this ifce is not used
+.pwr_ctrl_glb_nsleepin ('1),   // '1 = never asleep
+.pwr_ctrl_min_nsleepin ('1),
+.pwr_ctrl_min_isolate  ('0),</code></pre>
+<p>And the service-processor firmware, searched at the card's own commit, contains no power-gating control of
+any kind: the only <code>PWR_CTRL</code> hits in the whole tree are an eMMC controller's bus voltage. Whatever
+drives those pins on the taped-out part, it is not this firmware, and the chip-level netlist is not in the open
+drop.</p>
+<p><b>And the silicon shows no sign of it.</b> If an array were suppressed once idle, the first access
+afterwards would pay the wake-up. The probe: put one line at a chosen level, let the minion spin on its cycle
+counter for a swept interval from 1.7 µs to 27 ms without touching that line, then time a single load of it —
+same line, same address, only the idle time varying, 20 repeats.</p>
+<ul>
+<li><b>L1 and L3: zero.</b> The paired difference between the longest and shortest idle is 0 cycles.</li>
+<li><b>L2: −11 cycles</b>, i.e. very slightly <i>faster</i> after idling — noise, not a wake-up.</li>
+<li><b>DRAM: +10 cycles</b>, and that one has a known cause. It is the row closing, worth about 40 cycles when
+it happens, which this experiment's earlier measurements already characterised.</li>
+</ul>
+<p>So on this card, in this firmware, the leakage-suppression transistors are a capability that ships switched
+off. The only gating actually working is clock gating, which the same RTL does use aggressively — per lane, per
+functional unit, with a seven-cycle tail — and which is why an idle-but-powered core costs so little
+<i>dynamic</i> power and still leaks.</p>
+
+<h2>4. What that costs</h2>
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+  <div style="flex:1 1 380px;max-width:460px">
+    <div class="chart-title">Leakage as a share of board power, from the fitted model, against Kanter's typical range</div>
+    <div class="chart" id="leakfrac"></div>
+  </div>
+  <div style="flex:1 1 380px;max-width:460px">
+    <p style="margin-top:2.2em"><b>A free out-of-sample check.</b> The leakage curve in this chart,
+    <code>12.6 W + 23.3 W · e^((T−80)/36)</code>, was fitted on 21 September. This brief opened by sampling the
+    card cold on 22 September, after it had been idle for 20.4 hours in a warmer room: <b>31.79 ± 0.04 W at
+    73.0 °C</b>. The curve predicts <b>31.78 W</b>. A different day, a different ambient, a temperature the fit
+    had barely seen — and the error is 0.01 W.</p>
+    <p>Of those 31.8 idle watts, 11.1 W sits on the minion rail alone: a thousand cores doing nothing for
+    twenty hours. 2.0 W is the SRAM rail, 3.6 W the mesh, and 15.1 W is on no rail sensor at all (DDR, PCIe,
+    regulator conversion).</p>
+  </div>
+</div>
+<p>Kanter put leakage at 5–30% of a design's power, with 20% common, and noted that parts which clock lower
+and use slower transistors leak less. This card is outside that range in both directions of use: <b>36% of a
+63 W random-data matmul, 64% of an idle card at 80 °C.</b> Three things make it so, and only one is the chip's
+fault — it runs at 0.52 V rather than the 0.4 V Esperanto designed for, in a desktop chassis that idles it at
+73–80 °C rather than in server airflow, with 160 MB of on-die SRAM and no array power gating in play.</p>
+
+<h2>5. What this means for the equation, and for measuring power</h2>
+<ul>
+<li><b>The equation is right; it is just not what the loop uses.</b> Its activity term is strongly confirmed on
+this card: power over idle is linear in active minions, 25.6 mW per minion at 256, 512 and 768 active and
+27.0 at 1,024, and a model that counts four classes of switching event inside the multiply-add unit predicts
+board power across fourteen operand patterns to 0.5 W out of sample. The V²f term is only weakly testable here,
+because the governor will not hold the high operating point long enough on a heavy workload: for constant data
+it predicts a 1.91× switching-power ratio between the two points and the measurement is consistent but noisy.
+A clean test needs a die below 65 °C and a runner that pins the work rate.</li>
+<li><b>Kanter's "measurement is expensive" argument does not apply to this card.</b> His reason MLPerf cannot
+mandate measured power is that most submitters will not pay the time and energy to instrument a system. This
+chip is already instrumented, as a load-bearing part of its own safety loop: a PMIC that averages board power,
+a service processor that reads it every 10 ms, and a management interface that hands the number to the host.
+The cost of reporting measured power here is one query.</li>
+<li><b>But the loop's hunting is exactly the kind of thing a provisioned-power metric cannot see.</b> A
+normalisation by provisioned kilowatts scores a card by its nameplate. On this card a badly damped governor
+moves real throughput by tens of percent within a single 7-second run, invisibly.</li>
+<li><b>The one-line fix is already written in the source.</b> Two guardband macros, defined and unused. Using
+them would give the loop the ±5% dead band it was evidently designed to have.</li>
+</ul>
+
+<h2>6. Method, and what is not established</h2>
+<ul>
+<li>Firmware claims are read from <code>external/et-platform</code> at <code>353f20e</code>, the commit
+matching the card's firmware: <code>services/thermal_pwr_mgmt.c</code>, <code>rtos_task/dm_task.c</code>,
+<code>include/thermal_pwr_mgmt.h</code>, <code>include/bl2_pmic_controller.h</code>,
+<code>config/mgmt_build_config.h</code>.</li>
+<li>RTL claims are read from <code>external/core-et</code> at <code>b38a1a3</code>:
+<code>rtl/shire/neigh/neigh_top.v</code>, <code>neigh_top_pwrstub.v</code>,
+<code>rtl/cpu_subsystem/cpu_subsystem_top.v</code>. This is the Erbium branch, a later MCU-class
+configuration of the same core lineage, <b>not</b> the taped-out ET-SoC-1 chip top — which is why "nothing
+drives the sleep pins" is a statement about the open drop and this firmware, corroborated by the card, not a
+statement about the silicon's chip-level netlist.</li>
+<li>The 36 transitions come from the cool-start runs of 21 September, in
+<code>docs/reports/data/2026-09-21-horace-aifoundry2/cold1</code> and <code>cold2</code>. The classification
+into thermal, power and kernel-boundary is mechanical, in <code>tools/ettelem/analyze_dvfs.py</code>; nothing
+is fitted. Our 10 Hz sampling and the sensor's whole-degree steps mean a transition recorded at 66 °C may have
+been decided at 65 °C, so the attribution is sound but the exact crossing instants are not.</li>
+<li>The wake-up probe is <code>gen_ops.py wakeup</code> in <code>workloads/memprobe</code>, one hart, 20
+repeats, raw results in <code>docs/reports/data/2026-09-22-dvfs-aifoundry2/wakeup/</code>. It can only detect a
+wake-up longer than about ten cycles, and only for arrays idled up to 27 ms, which is the widest the delay op
+encodes. A gating policy that waits longer than that would not show up.</li>
+<li><b>Not established:</b> whether the taped-out ET-SoC-1 drives its sleep transistors under some other
+firmware or in some other power state; what the boot frequency is set to in flash; and whether the power
+branch of the loop behaves as written, since it never fired alone in any run observed.</li>
+</ul>
+<pre><code>python3 workloads/memprobe/gen_ops.py wakeup --out W --reps 20 --seed 11 \
+    --delays 0,1000,10000,100000,1000000,4000000,8000000,16000000
+build/memprobe/host/memprobe_host --program W/wakeup.ops --out-dir W --budget 40
+python3 tools/ettelem/analyze_dvfs.py --cold DATA/cold1 DATA/cold2 --wakeup W \
+    --idle idle.jsonl.gz --model DATA/model.json --ablation DATA/ablation.json --out dvfs.json</code></pre>
+<p class="small">Companions: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power">why the
+ET-SoC-1 is low power</a> for the term-by-term comparison with an A100, and
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment</a> for the
+flip-counting model and the thermal network this brief reuses. Findings index and claim provenance:
+<code>docs/findings/</code>.</p>
+</main>
+
+<script>
+const D = {"thresholds":{"tdp_w":65.0,"temp_c":65,"task_period_ms":10,"hw_catastrophic_c":75,"hw_catastrophic_w":75},"operating_points":[{"mhz":600,"volts":0.517},{"mhz":700,"volts":0.568},{"mhz":800,"volts":0.618}],"transitions":[{"session":"cold1","values":"zeros","t":0.94,"dir":"up","f0":600,"f1":800,"mv0":519,"mv1":618,"T":63,"P":28.7,"gap_to_boundary_ms":44,"why":null},{"session":"cold1","values":"zeros","t":5.95,"dir":"down","f0":800,"f1":600,"mv0":618,"mv1":518,"T":64,"P":39.0,"gap_to_boundary_ms":171,"why":"kernel boundary"},{"session":"cold1","values":"zeros","t":6.95,"dir":"up","f0":600,"f1":700,"mv0":519,"mv1":541,"T":64,"P":29.3,"gap_to_boundary_ms":185,"why":null},{"session":"cold1","values":"zeros","t":7.05,"dir":"up","f0":700,"f1":800,"mv0":541,"mv1":618,"T":64,"P":29.3,"gap_to_boundary_ms":85,"why":null},{"session":"cold1","values":"randn","t":0.49,"dir":"up","f0":600,"f1":800,"mv0":517,"mv1":616,"T":65,"P":53.4,"gap_to_boundary_ms":7,"why":null},{"session":"cold1","values":"randn","t":0.79,"dir":"down","f0":800,"f1":600,"mv0":616,"mv1":552,"T":66,"P":87.5,"gap_to_boundary_ms":101,"why":"thermal+power"},{"session":"cold1","values":"ones","t":0.51,"dir":"up","f0":600,"f1":700,"mv0":518,"mv1":542,"T":64,"P":37.5,"gap_to_boundary_ms":3,"why":null},{"session":"cold1","values":"ones","t":0.61,"dir":"up","f0":700,"f1":800,"mv0":542,"mv1":618,"T":65,"P":37.5,"gap_to_boundary_ms":103,"why":null},{"session":"cold1","values":"ones","t":1.11,"dir":"down","f0":800,"f1":700,"mv0":617,"mv1":579,"T":66,"P":55.9,"gap_to_boundary_ms":161,"why":"thermal"},{"session":"cold1","values":"ones","t":1.61,"dir":"down","f0":700,"f1":600,"mv0":568,"mv1":546,"T":66,"P":45.6,"gap_to_boundary_ms":91,"why":"thermal"},{"session":"cold1","values":"ones","t":2.21,"dir":"up","f0":600,"f1":800,"mv0":518,"mv1":615,"T":66,"P":38.0,"gap_to_boundary_ms":20,"why":null},{"session":"cold1","values":"ones","t":2.51,"dir":"down","f0":800,"f1":700,"mv0":617,"mv1":569,"T":66,"P":56.0,"gap_to_boundary_ms":64,"why":"thermal"},{"session":"cold1","values":"ones","t":2.91,"dir":"down","f0":700,"f1":600,"mv0":568,"mv1":544,"T":66,"P":45.7,"gap_to_boundary_ms":85,"why":"thermal"},{"session":"cold1","values":"randn","t":0.99,"dir":"up","f0":600,"f1":800,"mv0":517,"mv1":616,"T":66,"P":53.7,"gap_to_boundary_ms":4,"why":null},{"session":"cold1","values":"randn","t":1.09,"dir":"down","f0":800,"f1":700,"mv0":616,"mv1":581,"T":67,"P":53.7,"gap_to_boundary_ms":95,"why":"thermal"},{"session":"cold1","values":"randn","t":1.59,"dir":"down","f0":700,"f1":600,"mv0":566,"mv1":528,"T":67,"P":68.9,"gap_to_boundary_ms":186,"why":"thermal+power"},{"session":"cold1","values":"zeros","t":0.39,"dir":"up","f0":600,"f1":800,"mv0":519,"mv1":618,"T":64,"P":29.1,"gap_to_boundary_ms":98,"why":null},{"session":"cold1","values":"zeros","t":5.5,"dir":"down","f0":800,"f1":700,"mv0":618,"mv1":580,"T":65,"P":39.4,"gap_to_boundary_ms":186,"why":"kernel boundary"},{"session":"cold1","values":"zeros","t":6.0,"dir":"down","f0":700,"f1":600,"mv0":568,"mv1":530,"T":65,"P":33.7,"gap_to_boundary_ms":122,"why":"kernel boundary"},{"session":"cold1","values":"zeros","t":6.1,"dir":"up","f0":600,"f1":800,"mv0":530,"mv1":618,"T":65,"P":29.9,"gap_to_boundary_ms":21,"why":null},{"session":"cold1","values":"zeros","t":6.9,"dir":"down","f0":800,"f1":700,"mv0":618,"mv1":568,"T":65,"P":39.4,"gap_to_boundary_ms":31,"why":"kernel boundary"},{"session":"cold1","values":"zeros","t":7.3,"dir":"down","f0":700,"f1":600,"mv0":568,"mv1":547,"T":65,"P":33.8,"gap_to_boundary_ms":12,"why":"kernel boundary"},{"session":"cold1","values":"zeros","t":7.4,"dir":"up","f0":600,"f1":700,"mv0":547,"mv1":595,"T":65,"P":27.8,"gap_to_boundary_ms":113,"why":null},{"session":"cold1","values":"zeros","t":7.5,"dir":"up","f0":700,"f1":800,"mv0":595,"mv1":619,"T":65,"P":27.8,"gap_to_boundary_ms":219,"why":null},{"session":"cold1","values":"ones","t":0.82,"dir":"up","f0":600,"f1":700,"mv0":518,"mv1":541,"T":64,"P":37.5,"gap_to_boundary_ms":155,"why":null},{"session":"cold1","values":"ones","t":0.92,"dir":"up","f0":700,"f1":800,"mv0":541,"mv1":618,"T":65,"P":37.5,"gap_to_boundary_ms":55,"why":null},{"session":"cold1","values":"ones","t":1.32,"dir":"down","f0":800,"f1":700,"mv0":617,"mv1":579,"T":65,"P":55.6,"gap_to_boundary_ms":25,"why":"kernel boundary"},{"session":"cold1","values":"ones","t":1.82,"dir":"down","f0":700,"f1":600,"mv0":568,"mv1":522,"T":65,"P":45.4,"gap_to_boundary_ms":54,"why":"kernel boundary"},{"session":"cold1","values":"ones","t":2.82,"dir":"up","f0":600,"f1":700,"mv0":518,"mv1":591,"T":65,"P":37.9,"gap_to_boundary_ms":78,"why":null},{"session":"cold1","values":"ones","t":2.92,"dir":"up","f0":700,"f1":800,"mv0":591,"mv1":618,"T":66,"P":37.9,"gap_to_boundary_ms":178,"why":null},{"session":"cold1","values":"ones","t":3.12,"dir":"down","f0":800,"f1":700,"mv0":617,"mv1":579,"T":66,"P":55.9,"gap_to_boundary_ms":21,"why":"thermal"},{"session":"cold1","values":"ones","t":3.62,"dir":"down","f0":700,"f1":600,"mv0":568,"mv1":529,"T":66,"P":45.7,"gap_to_boundary_ms":59,"why":"thermal"},{"session":"cold1","values":"ones","t":7.72,"dir":"up","f0":600,"f1":800,"mv0":519,"mv1":619,"T":65,"P":28.1,"gap_to_boundary_ms":245,"why":null},{"session":"cold2","values":"randn","t":0.75,"dir":"up","f0":600,"f1":800,"mv0":517,"mv1":616,"T":66,"P":53.6,"gap_to_boundary_ms":182,"why":null},{"session":"cold2","values":"randn","t":0.95,"dir":"down","f0":800,"f1":700,"mv0":616,"mv1":578,"T":67,"P":87.8,"gap_to_boundary_ms":17,"why":"thermal+power"},{"session":"cold2","values":"randn","t":1.05,"dir":"down","f0":700,"f1":600,"mv0":578,"mv1":544,"T":67,"P":87.8,"gap_to_boundary_ms":117,"why":"thermal+power"}],"transition_summary":{"total":36,"up":18,"down":18,"by_cause":{"kernel boundary":7,"thermal+power":4,"thermal":7},"first_change_s":[0.94,0.49,0.51,0.99,0.39,0.82,0.75],"voltage_tracks_frequency":true},"oscillation":[{"session":"cold1","values":"zeros","first_change_s":0.94,"n_changes":4,"span_s":6.11},{"session":"cold1","values":"randn","first_change_s":0.49,"n_changes":2,"span_s":0.3},{"session":"cold1","values":"ones","first_change_s":0.51,"n_changes":7,"span_s":2.4},{"session":"cold1","values":"randn","first_change_s":0.99,"n_changes":3,"span_s":0.6},{"session":"cold1","values":"zeros","first_change_s":0.39,"n_changes":8,"span_s":7.11},{"session":"cold1","values":"ones","first_change_s":0.82,"n_changes":9,"span_s":6.91},{"session":"cold2","values":"randn","first_change_s":0.75,"n_changes":3,"span_s":0.3}],"traces":[{"session":"cold1","values":"zeros","dur":7.13,"t":[-0.46,-0.36,-0.26,-0.16,-0.06,0.04,0.14,0.24,0.35,0.44,0.54,0.64,0.74,0.85,0.94,1.04,1.14,1.25,1.35,1.45,1.55,1.65,1.75,1.85,1.95,2.05,2.15,2.25,2.35,2.45,2.55,2.65,2.75,2.85,2.95,3.05,3.15,3.25,3.35,3.45,3.55,3.65,3.75,3.85,3.95,4.05,4.15,4.25,4.35,4.45,4.55,4.65,4.75,4.85,4.95,5.05,5.15,5.25,5.35,5.45,5.55,5.65,5.75,5.85,5.95,6.05,6.15,6.25,6.35,6.45,6.55,6.65,6.75,6.85,6.95,7.05,7.15,7.25,7.35,7.45,7.55,7.65,7.75,7.85,7.95,8.05],"mhz":[600,600,600,600,600,600,600,600,600,600,600,600,600,600,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,600,600,600,600,600,600,600,600,600,600,700,800,800,800,800,800,800,800,800,600,600,600],"T":[62.0,62.0,62.0,62.0,62.0,62.0,62.0,62.0,62.0,62.0,62.0,62.0,62.0,62.0,63.0,63.0,63.0,63.0,63.0,63.0,63.0,63.0,63.0,63.0,63.0,63.0,63.0,63.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0],"P":[26.7,26.7,26.7,26.7,26.7,26.7,28.6,28.6,28.7,28.8,28.8,28.9,28.8,28.8,28.7,28.7,28.7,38.0,38.1,38.1,38.3,38.3,38.3,38.3,38.3,38.3,38.2,38.2,38.4,38.4,38.4,38.5,38.4,38.4,38.5,38.5,38.5,38.5,38.5,38.6,38.6,38.6,38.6,38.6,38.6,38.6,38.6,38.6,38.6,38.6,38.7,38.7,38.7,38.8,38.8,38.8,38.7,38.8,38.8,38.8,38.9,38.9,38.8,38.8,39.0,39.0,29.5,29.5,29.4,29.4,29.4,29.3,29.3,29.3,29.3,29.3,29.3,34.5,34.7,34.7,34.8,34.8,34.7,34.7,34.7,34.7]},{"session":"cold1","values":"randn","dur":7.24,"t":[-0.41,-0.31,-0.21,-0.11,-0.01,0.09,0.19,0.29,0.39,0.49,0.6,0.69,0.79,0.89,0.99,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0,3.1,3.2,3.3,3.4,3.5,3.6,3.7,3.8,3.9,4.0,4.1,4.2,4.3,4.4,4.5,4.6,4.7,4.8,4.9,5.0,5.1,5.2,5.3,5.4,5.5,5.6,5.7,5.8,5.9,6.0,6.1,6.2,6.3,6.4,6.5,6.6,6.7,6.8,6.9,7.0,7.1,7.2,7.3,7.4,7.5,7.6,7.7,7.8,7.9,8.0,8.1,8.2],"mhz":[600,600,600,600,600,600,600,600,600,800,800,800,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600],"T":[63.0,63.0,63.0,63.0,63.0,64.0,64.0,65.0,65.0,65.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,68.0,67.0,67.0,67.0,67.0,67.0,67.0,67.0,66.0],"P":[27.1,27.0,27.0,27.2,27.2,27.2,53.1,53.0,53.0,53.4,53.4,53.4,87.5,87.5,54.2,54.2,53.9,54.1,54.1,54.2,54.2,54.1,54.1,54.1,54.5,54.2,54.2,54.2,54.4,54.4,54.4,54.4,54.4,54.4,54.4,54.5,54.5,54.5,54.5,54.6,54.6,54.6,54.5,54.5,54.7,54.7,54.6,54.6,54.6,54.9,54.8,54.8,54.7,55.0,55.0,54.8,55.0,55.0,55.1,55.1,54.9,54.9,54.9,55.2,55.1,55.1,55.0,55.2,55.2,55.1,55.1,55.1,55.1,55.1,55.1,55.1,55.1,55.1,29.1,29.1,29.0,28.9,28.9,28.8,28.8,28.7,28.6]},{"session":"cold1","values":"ones","dur":7.39,"t":[-0.49,-0.39,-0.29,-0.19,-0.09,0.01,0.11,0.21,0.31,0.41,0.51,0.61,0.71,0.81,0.91,1.01,1.11,1.21,1.31,1.41,1.51,1.61,1.71,1.81,1.91,2.01,2.11,2.21,2.31,2.41,2.51,2.61,2.71,2.81,2.91,3.01,3.11,3.21,3.31,3.41,3.51,3.61,3.71,3.81,3.91,4.01,4.11,4.21,4.31,4.41,4.51,4.61,4.72,4.82,4.92,5.02,5.12,5.22,5.32,5.42,5.52,5.62,5.72,5.82,5.92,6.02,6.12,6.22,6.32,6.42,6.52,6.62,6.72,6.82,6.92,7.02,7.12,7.22,7.32,7.42,7.52,7.62,7.72,7.82,7.92,8.02,8.12,8.22,8.32],"mhz":[600,600,600,600,600,600,600,600,600,600,700,800,800,800,800,800,700,700,700,700,700,600,600,600,600,600,600,800,800,800,700,700,700,700,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600],"T":[64.0,64.0,63.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,64.0,65.0,65.0,65.0,65.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,65.0,65.0,65.0,65.0,65.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,66.0,65.0,65.0,65.0,65.0,65.0,65.0],"P":[27.3,27.3,27.3,27.4,27.3,27.3,37.3,37.4,37.4,37.5,37.5,37.5,37.5,55.5,55.5,55.6,55.9,55.9,55.9,45.5,45.6,45.6,38.0,38.0,38.0,38.0,38.0,38.0,38.0,38.0,56.0,56.0,45.7,45.7,45.7,45.7,38.4,38.3,38.3,38.2,38.3,38.3,38.2,38.2,38.1,33.8,33.8,38.2,38.1,38.1,38.3,38.3,38.3,38.1,38.3,38.3,38.3,38.3,38.3,38.3,38.3,38.2,38.2,38.2,38.4,38.3,38.3,38.3,38.3,38.2,38.3,38.3,38.3,38.3,38.3,38.2,38.3,38.3,38.3,28.1,28.1,28.1,28.1,28.1,28.0,28.0,28.0,28.0,28.0]}],"leak_model":{"P_fix":12.634918235027182,"A_at_80":23.25676120777849,"T_L":36.0},"busy_randn_80c":63.932750000000006,"idle_80c":36.31647058823529,"wakeup":{"idle_cycles":[0,1000,10000,100000,1000000,4000000,8000000,16000000],"idle_ms":[0.0,0.002,0.017,0.167,1.667,6.667,13.333,26.667],"levels":[{"level":"L1 (no evict)","median_cycles":[17.0,17.0,17.0,17.0,17.0,17.0,17.0,17.0],"paired_delta_cycles":0.0,"paired_n":20,"paired_iqr":0.0},{"level":"L1","median_cycles":[17.0,17.0,17.0,17.0,17.0,17.0,17.0,17.0],"paired_delta_cycles":0.0,"paired_n":20,"paired_iqr":0.0},{"level":"L2","median_cycles":[61.0,49.5,49.5,49.5,49.5,49.5,49.5,49.5],"paired_delta_cycles":-11.0,"paired_n":20,"paired_iqr":1.0},{"level":"L3","median_cycles":[182.0,182.0,181.0,181.0,181.0,181.0,181.0,182.0],"paired_delta_cycles":0.0,"paired_n":20,"paired_iqr":2.0},{"level":"DRAM","median_cycles":[311.0,312.5,312.0,311.0,311.5,312.0,311.0,313.0],"paired_delta_cycles":10.5,"paired_n":20,"paired_iqr":10.2}]},"idle_check":{"hours_idle":20.4,"samples":300,"board_w":31.78976666666667,"board_sd":0.03862139591239839,"die_c":73.0,"rails":{"minion":11.049853333333333,"sram":1.9958833333333332,"noc":3.6436666666666664},"board_minus_rails":15.100363333333338,"model_pred_w":31.78202171637912,"error_w":0.007744950287548846,"temp_dependent_w":19.147103481351937,"temp_dependent_frac":0.6023039955630984},"leak_fraction":{"idle_80c":0.6403915587356803,"busy_randn_80c":0.3637691356586176,"kanter_range":[0.05,0.3]},"activity_term":{"mw_per_minion":{"fp32_randn_8":25.579503676470633,"fp32_randn_16":25.59596162683825,"fp32_randn_24":26.19224877450982,"fp32_randn":26.97763959099265},"minions":{"fp32_randn_8":256,"fp32_randn_16":512,"fp32_randn_24":768,"fp32_randn":1024}}};
+const NS='http://www.w3.org/2000/svg';
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
+function txt(p,x,y,s,c,an){const t=el('text',{x,y,class:c||'tick','text-anchor':an||'start'},p);t.textContent=s;return t;}
+function host(id,W,H){const h=document.getElementById(id);h.innerHTML='';const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'},h);const tip=document.createElement('div');tip.className='tip';h.appendChild(tip);return {svg,tip,h};}
+function hover(g,tip,h,html){const s=ev=>{tip.innerHTML=html();tip.style.display='block';const b=h.getBoundingClientRect();tip.style.left=Math.max(0,Math.min(ev.clientX-b.left+12,b.width-290))+'px';tip.style.top=(ev.clientY-b.top+12)+'px';};g.addEventListener('mousemove',s);g.addEventListener('mouseleave',()=>tip.style.display='none');}
+function path(pts,x,y){return pts.map((p,i)=>`${i?'L':'M'}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join(' ');}
+function axes(svg,o){const {W,H,L,R,T,B,x,y}=o;
+ for(const t of o.yt){el('line',{x1:L,x2:W-R,y1:y(t),y2:y(t),class:'grid-line'},svg);txt(svg,L-6,y(t)+4,o.yf?o.yf(t):t,'tick','end');}
+ for(const t of o.xt){txt(svg,x(t),H-B+16,o.xf?o.xf(t):t,'tick','middle');}
+ if(o.xl)txt(svg,(L+W-R)/2,H-4,o.xl,'lab','middle');if(o.yl)txt(svg,4,T-8,o.yl,'lab');}
+const f1=v=>v.toFixed(1),f2=v=>v.toFixed(2);
+const TH=D.thresholds;
+
+/* ---------- the limit cycle ---------- */
+(function(){const tr=D.traces.find(t=>t.values==='ones')||D.traces[0];
+ const W=900,H=330,L=48,R=54,T=14,B=36;const {svg,tip,h}=host('cycle',W,H);
+ const tmax=Math.max(...tr.t);const x=v=>L+(v+0.5)/(tmax+0.5)*(W-L-R);
+ const yf=v=>H-B-(v-560)/(860-560)*(H-B-T)*0.55-((H-B-T)*0.45);   // clock in the top 55%
+ const yp=v=>H-B-(v-25)/(95-25)*(H-B-T)*0.42;                      // power in the bottom 42%
+ for(const v of [600,700,800]){el('line',{x1:L,x2:W-R,y1:yf(v),y2:yf(v),class:'grid-line'},svg);txt(svg,L-6,yf(v)+4,v,'tick','end');}
+ for(const v of [30,50,70,90]){txt(svg,W-R+6,yp(v)+4,v+' W','tick');}
+ for(let s=0;s<=Math.floor(tmax);s++)txt(svg,x(s),H-B+16,s,'tick','middle');
+ txt(svg,(L+W-R)/2,H-4,'seconds since the kernel launched','lab','middle');
+ txt(svg,4,T-2,'minion clock, MHz','lab');txt(svg,W-R+6,T-2,'board W','lab');
+ el('line',{x1:L,x2:W-R,y1:yp(TH.tdp_w),y2:yp(TH.tdp_w),stroke:'var(--bad)','stroke-width':1.2,'stroke-dasharray':'5 4'},svg);
+ txt(svg,W-R-4,yp(TH.tdp_w)-5,'TDP '+TH.tdp_w+' W','lab','end');
+ // clock as a staircase
+ const st=[];for(let i=0;i<tr.t.length;i++){if(i&&tr.mhz[i]!==tr.mhz[i-1])st.push([tr.t[i],tr.mhz[i-1]]);st.push([tr.t[i],tr.mhz[i]]);}
+ el('path',{d:path(st,x,yf),fill:'none',stroke:'var(--c1)','stroke-width':2.6},svg);
+ el('path',{d:path(tr.t.map((v,i)=>[v,tr.P[i]]),x,yp),fill:'none',stroke:'var(--c2)','stroke-width':1.8},svg);
+ // temperature crossing the threshold
+ const cross=tr.t.find((v,i)=>tr.T[i]>TH.temp_c);
+ if(cross!==undefined){el('line',{x1:x(cross),x2:x(cross),y1:T,y2:H-B,stroke:'var(--c7)','stroke-width':1.2,'stroke-dasharray':'3 3'},svg);
+  txt(svg,x(cross)+5,T+12,'die passes '+TH.temp_c+' °C','lab');}
+ el('rect',{x:L,y:T,width:W-L-R,height:H-B-T,fill:'transparent'},svg);
+ hover(svg,tip,h,()=>`<b>ones, all 1,024 minions, from a 64 °C die</b><br>blue: minion clock · orange: board power<br>the governor has no hysteresis, so it hunts`);})();
+
+/* ---------- what caused each down-step ---------- */
+(function(){const rows=D.transitions.filter(r=>r.dir==='down');
+ const W=440,H=380,L=52,R=16,T=16,B=42;const {svg,tip,h}=host('attrib',W,H);
+ const x=v=>L+(v-60)/(72-60)*(W-L-R),y=v=>H-B-(v-25)/(95-25)*(H-B-T);
+ axes(svg,{W,H,L,R,T,B,x,y,yt:[30,45,60,75,90],xt:[60,63,66,69,72],xl:'die temperature at the step, °C',yl:'board power at the step, W'});
+ el('line',{x1:x(TH.temp_c),x2:x(TH.temp_c),y1:T,y2:H-B,stroke:'var(--bad)','stroke-width':1.3,'stroke-dasharray':'5 4'},svg);
+ el('line',{x1:L,x2:W-R,y1:y(TH.tdp_w),y2:y(TH.tdp_w),stroke:'var(--bad)','stroke-width':1.3,'stroke-dasharray':'5 4'},svg);
+ txt(svg,x(TH.temp_c)+4,T+12,TH.temp_c+' °C',' lab');txt(svg,L+4,y(TH.tdp_w)-5,TH.tdp_w+' W','lab');
+ const COL={'thermal':'var(--c2)','thermal+power':'var(--bad)','power':'var(--c4)','kernel boundary':'var(--c1)','unexplained':'var(--ink)'};
+ for(const r of rows){const g=el('g',{},svg);
+  el('circle',{cx:x(r.T),cy:y(r.P),r:6,fill:COL[r.why]||'var(--ref)',opacity:0.85,stroke:'var(--surface)','stroke-width':1.4},g);
+  hover(g,tip,h,()=>`<b>${r.values}</b> ${r.f0}→${r.f1} MHz, ${r.mv0}→${r.mv1} mV<br>die ${r.T} °C, board ${r.P} W<br>${r.gap_to_boundary_ms} ms from a kernel boundary<br><b>${r.why}</b>`);}
+ document.getElementById('attrib-leg').innerHTML=Object.entries(COL).filter(([k])=>rows.some(r=>r.why===k))
+   .map(([k,v])=>`<span><i style="background:${v}"></i>${k}</span>`).join('');})();
+
+/* ---------- wake-up probe ---------- */
+(function(){const w=D.wakeup;const W=440,H=380,L=56,R=16,T=16,B=42;const {svg,tip,h}=host('wake',W,H);
+ const lx=v=>Math.log10(Math.max(v,0.001));
+ const x=v=>L+(lx(v)-lx(0.001))/(lx(30)-lx(0.001))*(W-L-R),y=v=>H-B-(v+30)/(90)*(H-B-T);
+ axes(svg,{W,H,L,R,T,B,x,y,yt:[-20,0,20,40,60],xt:[0.001,0.01,0.1,1,10],xf:v=>v<1?(v*1000)+' µs':v+' ms',
+   xl:'how long the line sat untouched',yl:'load latency minus its own shortest-idle value, cycles'});
+ el('line',{x1:L,x2:W-R,y1:y(0),y2:y(0),stroke:'var(--axis)'},svg);
+ const COL=['var(--c1)','var(--c3)','var(--c4)','var(--c7)','var(--bad)'];const labs=[];
+ w.levels.forEach((lev,k)=>{const base=lev.median_cycles[0];
+  const pts=w.idle_ms.map((d,i)=>[Math.max(d,0.001),lev.median_cycles[i]-base]);
+  el('path',{d:path(pts,x,y),fill:'none',stroke:COL[k%5],'stroke-width':2.2},svg);
+  const g=el('g',{},svg);pts.forEach(q=>el('circle',{cx:x(q[0]),cy:y(q[1]),r:3.5,fill:COL[k%5]},g));
+  labs.push([y(pts[pts.length-1][1]),lev.level,COL[k%5]]);
+  hover(g,tip,h,()=>`<b>${lev.level}</b><br>same line, longest idle minus shortest: <b>${lev.paired_delta_cycles>=0?'+':''}${lev.paired_delta_cycles} cycles</b> (median of ${lev.paired_n} repeats, IQR ${lev.paired_iqr})`);});
+ labs.sort((a,b)=>a[0]-b[0]);for(let i=1;i<labs.length;i++)if(labs[i][0]-labs[i-1][0]<14)labs[i][0]=labs[i-1][0]+14;
+ for(const [yy,name,c] of labs)txt(svg,W-R-2,yy+4,name,'lab','end').setAttribute('style','fill:'+c);})();
+
+/* ---------- leakage fraction against temperature ---------- */
+(function(){const m=D.leak_model;const W=440,H=380,L=52,R=16,T=16,B=42;const {svg,tip,h}=host('leakfrac',W,H);
+ const x=v=>L+(v-55)/(95-55)*(W-L-R),y=v=>H-B-v/0.8*(H-B-T);
+ axes(svg,{W,H,L,R,T,B,x,y,yt:[0,0.2,0.4,0.6,0.8],yf:v=>Math.round(v*100)+'%',xt:[55,65,75,85,95],
+   xl:'die temperature, °C',yl:'leakage as a share of board power'});
+ const band=D.leak_fraction.kanter_range;
+ el('rect',{x:L,y:y(band[1]),width:W-L-R,height:y(band[0])-y(band[1]),fill:'var(--c3)',opacity:0.16},svg);
+ txt(svg,L+6,y(band[1])-6,'Kanter: "typically 5–30%"','lab');
+ const leak=t=>m.A_at_80*Math.exp((t-80)/m.T_L);
+ const idle=[],busy=[];
+ for(let t=55;t<=95;t+=0.5){idle.push([t,leak(t)/(m.P_fix+leak(t))]);busy.push([t,leak(t)/(m.P_fix+leak(t)+(D.busy_randn_80c-D.idle_80c))]);}
+ el('path',{d:path(idle,x,y),fill:'none',stroke:'var(--c1)','stroke-width':2.4},svg);
+ el('path',{d:path(busy,x,y),fill:'none',stroke:'var(--bad)','stroke-width':2.4},svg);
+ txt(svg,x(58),y(idle[8][1])+16,'idle card','lab').setAttribute('style','fill:var(--c1)');
+ txt(svg,x(58),y(busy[8][1])+16,'random-data matmul','lab').setAttribute('style','fill:var(--bad)');
+ const ic=D.idle_check;const g=el('g',{},svg);
+ el('circle',{cx:x(ic.die_c),cy:y(ic.temp_dependent_frac),r:6,fill:'var(--c1)',stroke:'var(--surface)','stroke-width':1.5},g);
+ hover(g,tip,h,()=>`measured today after ${ic.hours_idle} h idle:<br>${f2(ic.board_w)} W at ${f1(ic.die_c)} °C, ${Math.round(100*ic.temp_dependent_frac)}% temperature-dependent`);})();
+
+/* ---------- tables ---------- */
+document.getElementById('trans').innerHTML='<thead><tr><th>Pattern</th><th class="num">t</th><th class="num">MHz</th><th class="num">mV</th><th class="num">die °C</th><th class="num">board W</th><th class="num">ms from a kernel boundary</th><th>Cause</th></tr></thead><tbody>'+
+ D.transitions.filter(r=>r.dir==='down').map(r=>`<tr><td>${r.values}</td><td class="num">${f1(r.t)} s</td><td class="num">${r.f0}→${r.f1}</td><td class="num">${r.mv0}→${r.mv1}</td><td class="num">${r.T}</td><td class="num">${f1(r.P)}</td><td class="num">${r.gap_to_boundary_ms}</td><td>${r.why}</td></tr>`).join('')+'</tbody>';
+(function(){const s=D.transition_summary,w=D.wakeup,ic=D.idle_check;
+ const V=[['“Any mature design runs a DVFS loop that steps voltage and frequency to stay inside a power and thermal envelope.”','confirmed',
+   `Three operating points, ${D.operating_points.map(o=>o.mhz+' MHz at '+f2(o.volts)+' V').join(', ')}. Voltage moved with frequency in all ${s.total} observed transitions.`],
+  ['“The chip counts bus bits and execution-unit activity factors and computes its own power estimate on millisecond timescales.”','not on this chip',
+   'The loop reads a measured PMIC power number and a PVT temperature over I2C. There is no activity counter anywhere in it. He hedged that Esperanto might not have it; that hedge was right.'],
+  ['“Thermal sensors are part of the same loop, because leakage depends on temperature.”','confirmed, and thermal has priority',
+   `The temperature branch is tested before the power branch, and ${s.by_cause['thermal']||0} of ${s.down} down-steps were thermal-only.`],
+  ['“Cache data arrays sit behind leakage-suppression transistors… un-suppress only what you need, at a small wake-up latency.”','built, not used',
+   `The silicon has per-minion sleep and isolation control; the open configuration ties it off and no firmware line drives it. After 27 ms of idle no level shows a wake-up: paired shifts are ${w.levels.map(l=>l.level+' '+(l.paired_delta_cycles>=0?'+':'')+l.paired_delta_cycles).join(', ')} cycles, and the only positive one is DRAM row closure.`],
+  ['“Leakage is typically 5–30% of a design’s power, about 20% common.”','this card is worse',
+   `${Math.round(100*D.leak_fraction.busy_randn_80c)}% of a random-data matmul and ${Math.round(100*D.leak_fraction.idle_80c)}% of an idle card at 80 °C.`],
+  ['“Leakage costs power, not correctness.”','confirmed',
+   `Nothing anywhere in this work produced a wrong result; ${ic.hours_idle} h of idling cost ${f1(ic.board_w)} W and no errors.`]];
+ document.getElementById('verdict').innerHTML='<thead><tr><th>What David Kanter said</th><th>Verdict on the ET-SoC-1</th><th>Evidence</th></tr></thead><tbody>'+
+  V.map(v=>`<tr><td>${v[0]}</td><td class="lvl">${v[1]}</td><td class="small">${v[2]}</td></tr>`).join('')+'</tbody>';})();
+
+</script>
+</body>
+</html>

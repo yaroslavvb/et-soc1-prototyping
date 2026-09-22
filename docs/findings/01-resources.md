@@ -2,7 +2,7 @@
 
 Every finding in this directory rests either on one of these resources or on an experiment in
 [03-experiments.md](03-experiments.md). Each entry says what the resource is authoritative for and, as
-importantly, what it is **not** authoritative for. Cite them as **R1**...**R8**.
+importantly, what it is **not** authoritative for. Cite them as **R1**...**R9**.
 
 ---
 
@@ -113,3 +113,21 @@ shires), 32 GB LPDDR4X, in a desktop chassis. Reached over Tailscale SSH.
   mechanism sentence, "A small amount of power is consumed whenever a transistor *switches states*."
 - **Note on direction:** the post's finding is that **predictable data uses less power**. An earlier draft of
   our report had this reversed; it was corrected before publication.
+
+## R9 — David Kanter's account of chip power management (external, a conversation)
+
+Notes from a ~25-minute conversation with David Kanter, founder of MLPerf / MLCommons, on 20 September 2026,
+written up as a research brief: <https://spacesheep.dev/@yaroslavvb/david-kanter-power-brief>.
+
+- **Authoritative for:** how a mature design is *expected* to manage power, and as the reference class for
+  "normal": a DVFS loop driven by an internal activity-based power estimator on millisecond timescales
+  (`P = C_switching × V² × f`, with V and f known and C the unknown), thermal sensors inside the same loop,
+  cache data arrays behind leakage-suppression transistors un-suppressed ~10% at a time at a small wake-up
+  latency, and leakage as "typically 5–30%, ~20% common". Also the MLPerf context: inference is being
+  normalised by **provisioned** power, not measured, because measurement is expensive in time and energy.
+- **Not authoritative for:** this chip. He said so himself — "maybe not on Esperanto's part, but on anything
+  from a more mature company". [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) checks each claim against the
+  firmware, the RTL and the card.
+- **Note:** the notes are a paraphrase of a conversation, not a written source. Where they matter they are
+  treated as a hypothesis to test, never as evidence.
+
