@@ -10,6 +10,7 @@ started from is the one belonging to the shire `stages` places back round the ri
 """
 import argparse
 import collections
+import gzip
 import json
 import os
 
@@ -45,9 +46,12 @@ def by_medium(rows, group, key, host=None):
 
 def power(dirname):
     tp = os.path.join(dirname, "telemetry.jsonl")
-    if not os.path.exists(tp):
+    if os.path.exists(tp + ".gz"):
+        tel = [json.loads(l) for l in gzip.open(tp + ".gz", "rt") if l.startswith("{")]
+    elif os.path.exists(tp):
+        tel = [json.loads(l) for l in open(tp) if l.startswith("{")]
+    else:
         return None
-    tel = [json.loads(l) for l in open(tp) if l.startswith("{")]
     runs = [json.loads(l) for l in open(os.path.join(dirname, "runs.jsonl"))]
     t = np.array([s["t_ms"] for s in tel]) / 1000.0
     f = {k: np.array([s[p][k] if p else s[k] for s in tel])
