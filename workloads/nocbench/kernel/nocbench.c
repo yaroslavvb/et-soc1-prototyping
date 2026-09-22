@@ -23,6 +23,8 @@
  *  NB_BARRIER    FLB + FCC barrier in each shire, optionally chip-wide through
  *                one global atomic per shire.
  *  NB_SPIN       integer loop on the same harts: power baseline.
+ *  NB_HOTLINE    every scheduled minion hammers one global atomic word, homed
+ *                in a chosen shire: many-to-one contention on a single L3 line.
  *
  * The hardware keeps one "ready" flag per minion for TensorSend/Recv, not one
  * per partner (core-et dcache_reduce.v). A minion that could get readies from
@@ -288,11 +290,12 @@ static inline void tree(uint64_t top, uint64_t count, uint64_t funct)
 struct Rec {
     uint64_t cycles;
     uint32_t value0, value1;
+    uint64_t done;  // NB_HOTLINE: atomics this minion actually completed in the timed window
 };
 
 static struct Rec run_round(const struct NbArgs* a, uint64_t round, uint64_t me, uint32_t e)
 {
-    struct Rec r = { 0, 0, 0 };
+    struct Rec r = { 0, 0, 0, 0 };
     const uint64_t p = NB_PARTNER(e);
     const bool first = NB_FIRST(e) != 0;
     const uint64_t n = a->warmup + a->iters;
@@ -374,6 +377,101 @@ static struct Rec run_round(const struct NbArgs* a, uint64_t round, uint64_t me,
         break;
     }
 
+    /* Every participating minion hammers the same global atomic word, so the question is not how fast one
+       atomic is but who the shire cache serves. The line lives in the L3 slice of shire PA[10:6], so requests
+       from that shire arrive at its bank as local L2 requests and requests from the other 31 arrive as
+       L3-slave requests over the mesh. The SCspec ranks those two classes; this measures the ranking.
+       All participants meet at a chip-wide barrier first, so a fixed window is the same window for everyone. */
+    case NB_HOTLINE: {
+        const uint64_t shire = me >> 5;
+        const uint64_t home = a->scope < 32 ? a->scope : shire;
+        /* hot_scp 2: the owner's minions address their own scratchpad through the self ID 0x7F, so the
+           request stays on the neighbourhood path instead of going out to the mesh and back. That is the
+           pairing Errata 4.1 (RTLMIN-6207) says can be squashed indefinitely by l3_slave traffic. */
+        const uint64_t scp_id = (a->hot_scp == 2 && shire == home) ? 0x7F : home;
+        const bool hot_in_scp = a->hot_scp && a->hot_scp != 4 && a->hot_scp != 6;
+        volatile uint32_t* const hot = hot_in_scp
+                                           ? (volatile uint32_t*)NB_SCP_ADDR(scp_id, NB_SCP_HOT_OFFSET)
+                                           : (volatile uint32_t*)(a->hot_base + home * 64);
+        /* Mode 3: the owner shire does not take part in the atomic at all. Its minions stream ordinary
+           64 B-strided loads over their own scratchpad through the self ID, which is a neighbourhood
+           request to the same shire cache the other 31 shires are hammering over the mesh. Each minion
+           owns a disjoint slice of the span so they do not fight each other. */
+        const bool local = a->hot_scp >= 3 && shire == home;
+        const bool stream_dram = a->hot_scp >= 5;
+        volatile uint64_t* const span =
+            stream_dram ? (volatile uint64_t*)a->hot_stream
+                        : (volatile uint64_t*)NB_SCP_ADDR(0x7F, NB_SCP_HOT_OFFSET + NB_SCP_SPAN);
+        const uint64_t span_bytes = stream_dram ? NB_STREAM_SPAN : NB_SCP_SPAN;
+        const uint64_t lines = span_bytes / 64 / 32, first_line = (me & 31) * lines;
+        uint64_t walk = first_line;  // wraps by comparison: a 64-bit modulo in the loop costs more than the load
+        if (hot_in_scp && shire == home && (me & 31) == 0) {
+            *hot = 0;  // the owner clears the word locally; nothing else has written it
+        }
+        if (local) {
+            for (uint64_t i = 0; i < lines; ++i) {
+                span[(first_line + i) * 8] = i;  // write the slice once, so no load reads untouched SRAM
+            }
+        }
+        if (!barrier(a, shire, NB_SCOPE_CHIP, 0)) {
+            r.value1 = NB_TIMEOUT;
+            break;
+        }
+        for (uint64_t i = 0; i < a->warmup; ++i) {
+            if (local) {
+                r.value1 = (uint32_t)span[walk * 8];
+                walk = walk + 1 < first_line + lines ? walk + 1 : first_line;
+            } else {
+                amoadd_g(hot, 1);
+            }
+        }
+        if (!barrier(a, shire, NB_SCOPE_CHIP, 1)) {
+            r.value1 = NB_TIMEOUT;
+            break;
+        }
+        t0 = cycles();
+        if (!a->hot_window) {  // fixed count: the last value each gets back is its place in the global order
+            for (uint64_t i = 0; i < a->iters; ++i) {
+                uint32_t old;
+                if (local) {
+                    old = (uint32_t)span[walk * 8];
+                    walk = walk + 1 < first_line + lines ? walk + 1 : first_line;
+                } else {
+                    old = amoadd_g(hot, 1);
+                }
+                if (!i) {
+                    r.value0 = old;
+                }
+                r.value1 = old;
+            }
+            r.done = a->iters;
+            r.cycles = cycles() - t0;
+        } else {  // fixed window: how many each minion completed in the same interval
+            const uint64_t deadline = t0 + a->hot_window;
+            do {
+                uint32_t old;
+                if (local) {
+                    old = (uint32_t)span[walk * 8];
+                    walk = walk + 1 < first_line + lines ? walk + 1 : first_line;
+                } else {
+                    old = amoadd_g(hot, 1);
+                }
+                if (!local && a->hot_pace) {
+                    const uint64_t until = cycles() + a->hot_pace;
+                    while (cycles() < until) {
+                    }
+                }
+                if (!r.done) {
+                    r.value0 = old;
+                }
+                r.value1 = old;
+                ++r.done;
+            } while (cycles() < deadline);
+            r.cycles = cycles() - t0;
+        }
+        break;
+    }
+
     case NB_SPIN:
         t0 = cycles();
         for (uint64_t i = 0; i < a->iters; ++i) {
@@ -393,7 +491,7 @@ static void put(volatile struct NbResult* slot, const struct Rec* r, uint64_t it
                 uint64_t me, uint64_t round)
 {
     slot->cycles = r->cycles;
-    slot->iters = iters;
+    slot->iters = r->done ? r->done : iters;
     slot->value0 = r->value0;
     slot->value1 = r->value1;
     slot->partner = partner;
@@ -423,7 +521,7 @@ int64_t entry_point(const struct NbArgs* args)
         }
         // Minion m receives at levels below ctz(m) and sends at ctz(m); the root (m = 0) receives at every level.
         const uint64_t top = local ? (uint64_t)__builtin_ctzll(local) : levels - 1;
-        struct Rec r = { 0, 0, 0 };
+        struct Rec r = { 0, 0, 0, 0 };
         fill((uint32_t)local + 1);
         tree(top, args->count, NB_IADD);  // checked: every minion ends with the sum over all
         t_wait();

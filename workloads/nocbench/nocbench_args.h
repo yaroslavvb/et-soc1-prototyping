@@ -13,6 +13,19 @@
 #define NB_FLAG 6       // scheduled pairs: flag ping-pong through global atomics in DRAM (the GPU way)
 #define NB_BARRIER 7    // every scheduled minion runs `iters` barriers (per shire, or chip-wide)
 #define NB_SPIN 8       // every scheduled minion runs an integer loop: power baseline
+#define NB_HOTLINE 9    // every scheduled minion hammers ONE global atomic word, to measure who gets served.
+                        // `hot_base` is a 2 KB-aligned DRAM region, so the line at offset s*64 is homed in
+                        // shire s (PA[10:6]). `scope` picks the home: 0..31 that shire for everyone, 32 each
+                        // minion's own shire (the uncontended baseline). `hot_window` non-zero runs every
+                        // minion for that many cycles and records how many atomics each completed (the fair-
+                        // share question); zero runs `iters` atomics each and records who finishes last.
+
+// Scratchpad addressing (PRM 15.3, format 0): shire ID in bits [29:23], offset in [22:0]; 0x7F means self.
+#define NB_SCP_ADDR(shire, offset) (0x80000000ull + ((uint64_t)((shire) & 0x7F) << 23) + (uint64_t)(offset))
+#define NB_SCP_HOT_OFFSET 0x100000ull  // 1 MB into the scratchpad, clear of anything a kernel stages at its base
+#define NB_STREAM_SPAN 0x400000ull  // 4 MB of DRAM walked by the host shire in modes 5 and 6
+#define NB_SCP_SPAN 0x10000ull         // 64 KB walked by the owner's local loads: far past the 512 B of L1 per
+                                       // hart, so every one of them reaches the shire cache
 
 #define NB_MAGIC 0x4E4F4342u  // "NOCB"
 #define NB_MINIONS 1024       // 32 compute shires x 32 minions; schedule rows are this wide
@@ -63,6 +76,20 @@ struct NbArgs {
   uint64_t scope;          // NB_BARRIER: NB_SCOPE_SHIRE or NB_SCOPE_CHIP
   uint64_t poll;           // 1: wait for credits by polling FCCNB and give up after poll_limit reads, instead of
   uint64_t poll_limit;     //    the blocking FCC CSR (a credit that never comes then fails the run, not the card)
+  uint64_t hot_base;       // NB_HOTLINE: 2 KB-aligned DRAM region, 32 lines of 64 B (host zeroes it)
+  uint64_t hot_window;     // NB_HOTLINE: cycles of the timed window; 0 means run `iters` atomics instead
+  uint64_t hot_pace;       // NB_HOTLINE: cycles a remote waits between atomics (the errata's workaround)
+  uint64_t hot_stream;     // NB_HOTLINE modes 5 and 6: DRAM buffer the host shire streams (host zeroes it)
+  uint64_t hot_scp;        // NB_HOTLINE: 0 DRAM; 1 the home shire's L2 scratchpad, addressed by its explicit
+                           //   shire ID by everyone; 2 the same word, but the home shire's own minions reach it
+                           //   through the self ID 0x7F (a bus error for a global atomic: that path does not
+                           //   take one); 3 the home shire's minions instead stream ordinary loads over their
+                           //   own scratchpad through 0x7F while the rest hammer the atomic, which is the
+                           //   neighbourhood-against-mesh pairing of Errata 4.1 (RTLMIN-6207); 4 the same
+                           //   but the hammered word is a DRAM line homed in that shire instead, so the two
+                           //   sides share the shire cache without sharing an address; 5 and 6 are 3 and 4
+                           //   with the host shire streaming ordinary DRAM instead of its scratchpad, which
+                           //   is what a shire that is computing actually does
 };
 
 // One 64 B line per record, so the non-coherent L1s never share a line.
@@ -71,8 +98,10 @@ struct NbResult {
   uint64_t t_entry;  // hpmcounter3 at kernel entry and exit, for the clock estimate
   uint64_t t_exit;
   uint64_t iters;
-  uint32_t value0;   // f0 lane 0 after the warm-up (NB_ALLREDUCE: after the checked allreduce)
-  uint32_t value1;   // f0 lane 0 at the end (NB_SHIFT: f16 lane 0); NB_TIMEOUT if a credit wait gave up
+  uint32_t value0;   // f0 lane 0 after the warm-up (NB_ALLREDUCE: after the checked allreduce;
+                     //   NB_HOTLINE: the counter value this minion's FIRST timed atomic returned)
+  uint32_t value1;   // f0 lane 0 at the end (NB_SHIFT: f16 lane 0); NB_TIMEOUT if a credit wait gave up;
+                     //   NB_HOTLINE: the value its LAST timed atomic returned, i.e. its finishing position
   uint32_t partner;
   uint32_t minion;
   uint32_t round;
@@ -81,7 +110,7 @@ struct NbResult {
 };
 
 #ifdef __cplusplus
-static_assert(sizeof(NbArgs) == 20 * 8, "NbArgs layout must match on host and device");
+static_assert(sizeof(NbArgs) == 25 * 8, "NbArgs layout must match on host and device");
 static_assert(sizeof(NbResult) == 64, "NbResult must be one cache line");
 #endif
 

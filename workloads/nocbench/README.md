@@ -24,6 +24,7 @@ builds against the lab machines' older `/opt/et`.
 | `--test shift --rings pair\|neigh\|shire\|xshire:K` | Every minion sends to the next one in its ring and receives from the previous one, all at once | Aggregate bandwidth, and energy per byte by distance (`run_energy.py`) |
 | `--test allreduce --levels 1,...,10` | TensorReduce up the hardware tree, then TensorBroadcast down, over 2 to 1024 minions | Allreduce latency against the number of cores |
 | `--test barrier --scope shire\|chip` | Fast-local-barrier counters plus credits, and a chip-wide version with one global atomic per shire | Barrier latency |
+| `--test hotline --home S\|own\|scp:S\|scplocal:S\|dramlocal:S\|scpstream:S\|dramstream:S` | Many-to-one contention on one global atomic word, homed in a chosen shire. Reports each shire's share of a common, barrier-aligned window. `scplocal`/`dramlocal`/`scpstream`/`dramstream` make the host shire do ordinary local memory work instead of joining, which is what actually starves. `--pace` slows the remote side | Who the shire cache serves |
 | `--test spin` | Hart 0 of every minion runs an integer loop | Power of busy cores that move no data |
 
 Things this relies on (PRM chapters 7, 9.4, 10 and 11, checked in `sw-sysemu/insns/tensors.cpp`):

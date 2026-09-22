@@ -95,6 +95,17 @@ section 9 lists the pinned upstream versions.
   https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage, uuid `171dcd4a-5b6d-49d3-aca0-db4980fabfa5`.
   Read a card's governor inputs with `tools/etcfg` (driver ioctl) and `build/ettelem/ettelem config`
   (service processor); both are read-only.
+- `docs/reports/2026-09-22-hot-line.html` follows up a Discord claim that the shire hosting a contended global
+  atomic gets 6% of its fair share. It does not: the atomic is shared to within one part in a thousand. What that
+  shire loses is its **own** memory path, which stops dead - 384 operations and then nothing, identical at 5, 10,
+  40 and 100 ms windows, while the mesh retires six million atomics. The threshold is a cliff at 24 remote
+  requesters, under one shire's worth, and it is exactly where the shire cache reaches its 10-cycles-per-atomic
+  floor. ET-SoC Errata 4.1 (RTLMIN-6207) and 4.2 (RTLMIN-6214) describe it, rate the impact "Low", say
+  `l3_yield_priority` does not fix the same-address case, and are both Postponed. Pacing the remotes to one
+  atomic per 10,000 cycles gives the host shire back half its bandwidth for 4% of theirs. New probe
+  `workloads/nocbench --test hotline` plus `run_hotline.sh`/`analyze_hotline.py`; power from
+  `tools/ettelem/run_hotline_power.sh`. Reproduced to the individual operation on aifoundry3. Private space
+  https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line, uuid `ac439287-4503-42c7-88e7-b5d3e3b64b06`.
 - `docs/lab-access.md` covers logging in to the lab machines (`aifoundry1`-`3`) and creating accounts for new people.
 - `workloads/` holds standalone workloads that run on both the simulator and the lab cards. The first one is `workloads/sgemm`:
   fp32 matmul, verified on aifoundry3's card at 127 GFLOP/s with scalar code. `scripts/deploy-lab.sh` builds a workload on a lab machine.

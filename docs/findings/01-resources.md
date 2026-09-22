@@ -2,7 +2,7 @@
 
 Every finding in this directory rests either on one of these resources or on an experiment in
 [03-experiments.md](03-experiments.md). Each entry says what the resource is authoritative for and, as
-importantly, what it is **not** authoritative for. Cite them as **R1**...**R10**.
+importantly, what it is **not** authoritative for. Cite them as **R1**...**R11**.
 
 ---
 
@@ -146,3 +146,20 @@ addresses instead.
   Absolute watts from the two cards are not comparable; switching power over idle is.
 - **Used by:** E20, E21. R4's sparsity work also ran on aifoundry3, which is why its absolute watts must not
   be mixed with aifoundry2's.
+
+## R11 — Ivan's benchmark result (external, a Discord message)
+
+A result reported in Discord: one global atomic counter in shire 0's scratchpad, all 32 shires hammering it,
+about 60 million atomics a second in aggregate, the 31 non-owning shires splitting the work evenly, and
+**shire 0 getting 6% of its fair share and finishing only after the other 31**.
+
+- **Authoritative for:** nothing about this card by itself. It is one person's measurement of their own code,
+  reported informally, and we do not have that code.
+- **Useful for:** the question. It is the only claim anyone had made about many-to-one contention on a shire
+  cache here, and it pointed at a line in `docs/research/counters-and-dram.md` that was an unverified reading
+  of the SCspec with no experiment behind it.
+- **What checking it produced:** the aggregate rate reproduces exactly (E22). The 6% does not: the atomic is
+  shared to within one part in a thousand, including with the host shire. What is starved is the host shire's
+  **own** memory path, completely (E23). See [17-hot-line.md](17-hot-line.md).
+- **Treated as:** a hypothesis to test, never as evidence. Where the two disagree, this work reports its own
+  measurement and says plainly that Ivan's code was not run.

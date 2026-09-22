@@ -330,6 +330,56 @@ machine's kernel driver.
 **Caveats:** why aifoundry3's flashed TDP is zero, and whether it was ever different, is not established.
 Whether the 0 W is in flash or set at boot was not traced further than `g_pmic_power_reg.module_tdp_level`.
 
+## E22 — Many-to-one contention on one global atomic line (2026-09-22, 13:05–13:50)
+
+**Question (Q24):** does the shire that homes a contended atomic get less of it than the others?
+**Method:** a new probe, `NB_HOTLINE` in `workloads/nocbench`. Every participating minion hammers one 4-byte
+word with `amoaddg.w`; all of them meet at a chip-wide barrier first, then loop until a cycle deadline,
+counting completions. A share is a shire's count over an even split. The home shire of a DRAM line is
+`PA[10:6]`, so the probe allocates a 2 KB-aligned region and uses the line at offset *s*×64; scratchpad lines
+use the PRM's format 0 (shire ID in bits [29:23]). Run on aifoundry2 and repeated on aifoundry3.
+```
+workloads/nocbench/run_hotline.sh DATA 6000000     # 42 configurations, each well under a second of card time
+python3 workloads/nocbench/analyze_hotline.py DATA/sweep.jsonl --power DATA/power.json --out hotline.json
+```
+**Raw data:** `docs/reports/data/2026-09-22-hotline-aifoundry2/{sweep.jsonl,power.json,hotline.json}` and
+`docs/reports/data/2026-09-22-hotline-aifoundry3/sweep.jsonl`.
+**Result:** the atomic is **fair**. With 1,024 minions the host shire's share is 1.004 and the whole chip lies
+within 0.998–1.004, standard deviation 0.001, on both cards and with the line homed in shire 0, 7, 15 or 31.
+One contended line retires an atomic every **10.00 cycles** (about 60 M/s, matching the aggregate R11 quoted);
+32 lines, one per shire, retire one every 0.31 cycles — 32× the work for the same instructions.
+**Caveats:** with one minion per shire the bank is not saturated and shares spread 0.85–1.20, with the host
+shire *highest*; that is latency, not arbitration. A global atomic addressed through the self ID `0x7F`
+raises a kernel bus error, so the host shire's atomic cannot take the local path at all — which is why this
+comes out fair.
+
+## E23 — What a hot line costs the shire that hosts it (2026-09-22, 13:50–14:20)
+
+**Question (Q24):** if the atomic is fair, what did Ivan measure?
+**Method:** the same probe, with the host shire's 32 minions doing ordinary 64 B-strided loads over a private
+slice of memory instead of joining the atomic, while the other shires hammer a line that lives in that shire
+cache. Four combinations: the host reading its own scratchpad or DRAM, the hot line in that shire's scratchpad
+or its L3 slice. The baseline is the identical loop with no other shire launched. Then two sweeps: how many
+remote minions it takes, and how far they must be paced back. Power from
+`tools/ettelem/run_hotline_power.sh` (three back-to-back launches per case, because the per-rail numbers are
+~2 s moving averages).
+**Raw data:** as E22, plus `docs/reports/data/2026-09-22-hotline-aifoundry2/{telemetry.jsonl,runs.jsonl,marks.jsonl}`.
+**Result:** the host shire completes **192–384 operations and then nothing**. The count is identical for
+windows of 5, 10, 40 and 100 ms while the mesh retires six million atomics, so this is a stop, not a
+slow-down: 0.01–0.05% of the uncontended rate. It does not matter whether the host is reading scratchpad or
+DRAM, nor where the hot line lives. **The threshold is bank saturation and it is a cliff:** 20 remote
+requesters leave the host at 98.9%, 24 take it to 0.02%, and 24 is where the measured cost reaches the
+bank's 10.0 cycles per atomic. One other shire is enough. Pacing the remotes to one atomic per 10,000 cycles
+returns the host to 54% and costs the hammering shires 4%. Energy: 23.6 nJ per contended atomic against
+1.4 nJ spread over 32 lines, a factor of **17**, while 1,024 stalled minions cost only 1.4 W over idle.
+aifoundry3 reproduces every number to the individual operation.
+**Mechanism, from the vendor:** Errata 4.1 (`RTLMIN-6207`) and 4.2 (`RTLMIN-6214`) in R1 describe exactly
+this, rate the impact "Low" because "it would have to be a pretty consistent and repeating pattern", state
+that `l3_yield_priority` does **not** fix the same-address case, and are both marked Postponed.
+**Caveats:** `l3_yield` was **not** set — it is a shire-cache configuration register on a shared card and the
+erratum says it would not help here. Ivan's own code was not run, so why his number was 6% rather than either
+of ours is not established; the reading offered is that his shire 0 also did something local.
+
 ## A note on E10, re-analysed for Q20
 
 The governor transitions in [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) are **not** a new experiment.

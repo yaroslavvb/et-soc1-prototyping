@@ -29,6 +29,7 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
 | Q21 | 09-22 | Try the other two cards: SSH into AI Foundry 1 and AI Foundry 3 | R10, E20, E21 |
 | Q22 | 09-22 | Run the experiments on all three machines; integrate them into the public report and keep it public | E20, E21 → A4, A11, [14-card-behaviour.md](14-card-behaviour.md), [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
 | Q23 | 09-22 | For formulas like the switching-power equation, use high-quality math (MathJax) instead of HTML | A12, all four report sources |
+| Q24 | 09-22 | Clarify Ivan's Discord comment, "shire 0 got 6% of its fair share and finished only after the other 31"; deploy as another spacesheep artifact | R11, E22, E23 → A13, [17-hot-line.md](17-hot-line.md) |
 
 ## Scope decisions worth remembering
 

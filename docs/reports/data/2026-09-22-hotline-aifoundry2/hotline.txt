@@ -1,0 +1,81 @@
+FAIRNESS: does the shire that homes the line get its share of the atomic?
+  aifoundry2  home 0       32/shire  host share 1.0040  spread 0.998-1.004  sd 0.0012
+  aifoundry2  home 7       32/shire  host share 1.0010  spread 0.999-1.003  sd 0.0009
+  aifoundry2  home 15      32/shire  host share 1.0002  spread 0.999-1.003  sd 0.0009
+  aifoundry2  home 31      32/shire  host share 0.9998  spread 0.999-1.003  sd 0.0009
+  aifoundry2  home 0        1/shire  host share 1.1969  spread 0.848-1.197  sd 0.0864
+  aifoundry3  home 0       32/shire  host share 1.0037  spread 0.999-1.004  sd 0.0011
+  aifoundry3  home 7       32/shire  host share 1.0007  spread 0.999-1.003  sd 0.0008
+  aifoundry3  home 15      32/shire  host share 1.0002  spread 0.999-1.003  sd 0.0008
+  aifoundry3  home 31      32/shire  host share 0.9998  spread 0.999-1.003  sd 0.0009
+  aifoundry3  home 0        1/shire  host share 1.1967  spread 0.848-1.197  sd 0.0864
+
+PLACEMENT: throughput of one contended line against 32 separate lines
+  aifoundry2  home 0            601213 ops   10.00 cycles/op
+  aifoundry2  home scp:0        601203 ops   10.00 cycles/op
+  aifoundry2  home own        19198522 ops    0.31 cycles/op
+  aifoundry2  home scp:own    19198514 ops    0.31 cycles/op
+  aifoundry3  home 0            601206 ops   10.00 cycles/op
+  aifoundry3  home scp:0        601204 ops   10.00 cycles/op
+  aifoundry3  home own        19198552 ops    0.31 cycles/op
+  aifoundry3  home scp:own    19198519 ops    0.31 cycles/op
+
+LOCAL: the host shire's own memory path while its shire cache is hammered
+  aifoundry2  scplocal:0   alone:   1688306 local ops (52760 per minion)
+  aifoundry2  scplocal:0   with  992 remote minions:    384 = 0.023% of alone
+  aifoundry2  dramlocal:0  alone:   1688300 local ops (52759 per minion)
+  aifoundry2  dramlocal:0  with  992 remote minions:    208 = 0.012% of alone
+  aifoundry2  scpstream:0  alone:    821182 local ops (25662 per minion)
+  aifoundry2  scpstream:0  with  992 remote minions:    384 = 0.047% of alone
+  aifoundry2  dramstream:0 alone:    822066 local ops (25690 per minion)
+  aifoundry2  dramstream:0 with  992 remote minions:    192 = 0.023% of alone
+  aifoundry3  scplocal:0   alone:   1688298 local ops (52759 per minion)
+  aifoundry3  scplocal:0   with  992 remote minions:    384 = 0.023% of alone
+  aifoundry3  dramlocal:0  alone:   1674057 local ops (52314 per minion)
+  aifoundry3  dramlocal:0  with  992 remote minions:    240 = 0.014% of alone
+  aifoundry3  scpstream:0  alone:    822053 local ops (25689 per minion)
+  aifoundry3  scpstream:0  with  992 remote minions:    384 = 0.047% of alone
+  aifoundry3  dramstream:0 alone:    820907 local ops (25653 per minion)
+  aifoundry3  dramstream:0 with  992 remote minions:    192 = 0.023% of alone
+
+REQUESTERS: one other shire, N of its minions hammering
+  aifoundry2    1 remote minions  remote  216.2 cycles/op  host  110.70% of alone
+  aifoundry2    2 remote minions  remote  108.1 cycles/op  host   99.94% of alone
+  aifoundry2    4 remote minions  remote   54.1 cycles/op  host   99.16% of alone
+  aifoundry2    8 remote minions  remote   27.0 cycles/op  host   99.02% of alone
+  aifoundry2   12 remote minions  remote   18.0 cycles/op  host   98.99% of alone
+  aifoundry2   16 remote minions  remote   13.4 cycles/op  host   99.60% of alone
+  aifoundry2   20 remote minions  remote   10.7 cycles/op  host   98.91% of alone
+  aifoundry2   24 remote minions  remote   10.0 cycles/op  host    0.02% of alone
+  aifoundry2   32 remote minions  remote   10.0 cycles/op  host    0.02% of alone
+  aifoundry3    1 remote minions  remote  216.3 cycles/op  host  110.70% of alone
+  aifoundry3    2 remote minions  remote  108.2 cycles/op  host   99.95% of alone
+  aifoundry3    4 remote minions  remote   54.1 cycles/op  host   99.32% of alone
+  aifoundry3    8 remote minions  remote   27.0 cycles/op  host   98.96% of alone
+  aifoundry3   12 remote minions  remote   18.0 cycles/op  host   98.96% of alone
+  aifoundry3   16 remote minions  remote   13.4 cycles/op  host   99.65% of alone
+  aifoundry3   20 remote minions  remote   10.7 cycles/op  host   98.91% of alone
+  aifoundry3   24 remote minions  remote   10.0 cycles/op  host    0.02% of alone
+  aifoundry3   32 remote minions  remote   10.0 cycles/op  host    0.02% of alone
+
+PACE: cycles a remote waits between atomics
+  aifoundry2  pace      0  host   0.023% of alone  remotes    19391/shire
+  aifoundry2  pace   1000  host   0.023% of alone  remotes    19388/shire
+  aifoundry2  pace   4000  host   0.023% of alone  remotes    19378/shire
+  aifoundry2  pace   8000  host   0.023% of alone  remotes    19364/shire
+  aifoundry2  pace  10000  host  54.209% of alone  remotes    18600/shire
+  aifoundry2  pace  12000  host  85.497% of alone  remotes    15602/shire
+  aifoundry2  pace  16000  host  94.842% of alone  remotes    11782/shire
+  aifoundry2  pace  20000  host  96.892% of alone  remotes     9464/shire
+  aifoundry2  pace  40000  host  97.823% of alone  remotes     4769/shire
+  aifoundry2  pace 100000  host  98.433% of alone  remotes     1920/shire
+  aifoundry3  pace      0  host   0.023% of alone  remotes    19391/shire
+  aifoundry3  pace   1000  host   0.023% of alone  remotes    19388/shire
+  aifoundry3  pace   4000  host   0.023% of alone  remotes    19378/shire
+  aifoundry3  pace   8000  host   0.023% of alone  remotes    19365/shire
+  aifoundry3  pace  10000  host  55.163% of alone  remotes    18601/shire
+  aifoundry3  pace  12000  host  86.622% of alone  remotes    15602/shire
+  aifoundry3  pace  16000  host  95.298% of alone  remotes    11782/shire
+  aifoundry3  pace  20000  host  97.228% of alone  remotes     9464/shire
+  aifoundry3  pace  40000  host  97.606% of alone  remotes     4769/shire
+  aifoundry3  pace 100000  host  98.346% of alone  remotes     1920/shire

@@ -9,6 +9,8 @@
 //   nocbench_host [--sysemu] --test allreduce [--levels 1,2,3,4,5] [--shires MASK] [--count C] [--iters N]
 //   nocbench_host [--sysemu] --test barrier --scope shire|chip [--per-shire N] [--shires MASK]
 //   nocbench_host [--sysemu] --test spin [--per-shire N] [--shires MASK] [--seconds T]
+//   nocbench_host [--sysemu] --test hotline [--home S|own|scp:S|scplocal:S|dramlocal:S|scpstream:S|dramstream:S] [--pace CYCLES] [--per-shire N] [--shires MASK]
+//                            [--window CYCLES | --iters N] [--warmup W]
 //
 // Minions are named by global ID (shire * 32 + minion) or as shire.minion. A pair a-b makes a the
 // initiator: it sends first and its cycle count is the one reported.
@@ -116,6 +118,7 @@ std::string modeName(uint64_t mode) {
   case NB_FLAG: return "flag";
   case NB_BARRIER: return "barrier";
   case NB_SPIN: return "spin";
+  case NB_HOTLINE: return "hotline";
   default: return "?";
   }
 }
@@ -131,6 +134,9 @@ struct Options {
   std::string rings = "shire";
   std::string levels = "1,2,3,4,5";
   std::string scope = "shire";
+  std::string home = "0";   // --test hotline: home shire of the contended line, or "own"
+  uint64_t window = 600000; // --test hotline: cycles of the timed window when --iters is 0
+  uint64_t pace = 0;        // --test hotline: cycles a remote waits between atomics
   uint64_t count = 1;
   uint64_t iters = 0;  // 0: a default that suits the test
   uint64_t warmup = 20;
@@ -153,6 +159,10 @@ struct Plan {
   bool roundBarrier = false;
   uint64_t count = 1, funct = NB_MOVE, iters = 1, warmup = 0, levels = 0, scope = 0;
   uint64_t shireMask = 1;  // NB_ALLREDUCE: shires that each run a tree
+  bool hotline = false;    // NB_HOTLINE: allocate the 2 KB-aligned region of 32 atomic lines
+  uint64_t hotWindow = 0;  // NB_HOTLINE: cycles of the timed window (0: run `iters` atomics each)
+  uint64_t hotPace = 0;    // NB_HOTLINE: cycles a remote waits between atomics
+  uint64_t hotScp = 0;     // NB_HOTLINE: 0 DRAM, 1 scratchpad, 2 scratchpad with the owner self-addressing
   bool poll = false;
 
   std::vector<uint32_t>& addRound() {
@@ -250,7 +260,7 @@ void checkPlan(const Plan& p, bool sysemu) {
   for (size_t r = 0; r < p.rounds.size(); ++r) {
     const auto& e = p.rounds[r];
     for (uint64_t m = 0; m < NB_MINIONS; ++m) {
-      if (e[m] == NB_IDLE || p.mode == NB_BARRIER || p.mode == NB_SPIN) {
+      if (e[m] == NB_IDLE || p.mode == NB_BARRIER || p.mode == NB_SPIN || p.mode == NB_HOTLINE) {
         continue;
       }
       const uint64_t q = NB_PARTNER(e[m]);
@@ -367,6 +377,18 @@ public:
       std::vector<uint8_t> flagZeros(p.rounds.size() * NB_MINIONS * 64, 0);
       a.flags = put("flags", flagZeros.data(), flagZeros.size());
     }
+    if (p.hotline) {
+      // 2 KB aligned, so the line at offset s*64 has PA[10:6] == s and is homed in shire s.
+      const std::vector<uint8_t> hotZeros(2048, 0);
+      a.hot_base = putAligned("hot", hotZeros.data(), hotZeros.size(), 2048);
+      if (p.hotScp >= 5) {  // 4 MB of DRAM for the host shire to stream, written once so nothing reads untouched memory
+        const std::vector<uint8_t> streamZeros(NB_STREAM_SPAN, 0);
+        a.hot_stream = put("hot_stream", streamZeros.data(), streamZeros.size());
+      }
+      if (a.hot_base & 2047u) {
+        throw std::runtime_error("hot-line region is not 2 KB aligned; home shires would be wrong");
+      }
+    }
     a.iters = p.iters;
     a.warmup = p.warmup;
     a.count = p.count;
@@ -375,6 +397,9 @@ public:
     a.scope = p.scope;
     a.poll = p.poll;
     a.poll_limit = o_.pollLimit;
+    a.hot_window = p.hotWindow;
+    a.hot_scp = p.hotScp;
+    a.hot_pace = p.hotPace;
 
     rt::KernelLaunchOptions opts;
     opts.setShireMask(shireMask);
@@ -410,6 +435,20 @@ public:
 
 private:
   // Device buffers are kept by name and grown as needed, so repeated launches reuse them.
+  uint64_t putAligned(const std::string& name, const void* src, size_t bytes, uint32_t alignment) {
+    auto& [have, ptr] = buffers_[name];
+    if (have < bytes) {
+      if (ptr) {
+        rt_->freeDevice(dev_, ptr);
+      }
+      ptr = rt_->mallocDevice(dev_, bytes, alignment);
+      have = bytes;
+    }
+    rt_->memcpyHostToDevice(stream_, reinterpret_cast<const std::byte*>(src), ptr, bytes);
+    rt_->waitForStream(stream_);
+    return reinterpret_cast<uint64_t>(ptr);
+  }
+
   uint64_t put(const std::string& name, const void* src, size_t bytes) {
     auto& [have, ptr] = buffers_[name];
     if (have < bytes) {
@@ -806,6 +845,110 @@ int testSpin(const Options& o, Session& dev) {
   return throughputLoop(o, dev, p, "spin", 0, {}) ? 1 : 0;
 }
 
+// Many-to-one contention on one global atomic word. The line is homed in shire --home (PA[10:6] of its
+// address), so requests from that shire reach its shire cache as local L2 requests and requests from every
+// other shire arrive as L3-slave requests over the mesh. Reports each shire's share of the work done in one
+// common window, which is what "fair share" means, plus the order in which shires finished a fixed count.
+int testHotline(const Options& o, Session& dev) {
+  // --home S | own | scp:S | scp:own. "scp" puts the word in that shire's L2 scratchpad, which is the case
+  // Errata 4.1 (RTLMIN-6207) describes: the shire cache ranks l3_slave requests above its own neighbourhoods'.
+  std::string spec = o.home;
+  uint64_t scp = 0;
+  if (spec.rfind("scpstream:", 0) == 0) {
+    scp = 5;
+    spec = spec.substr(10);
+  } else if (spec.rfind("dramstream:", 0) == 0) {
+    scp = 6;
+    spec = spec.substr(11);
+  } else if (spec.rfind("dramlocal:", 0) == 0) {
+    scp = 4;
+    spec = spec.substr(10);
+  } else if (spec.rfind("scplocal:", 0) == 0) {
+    scp = 3;
+    spec = spec.substr(9);
+  } else if (spec.rfind("scpself:", 0) == 0) {
+    scp = 2;
+    spec = spec.substr(8);
+  } else if (spec.rfind("scp:", 0) == 0) {
+    scp = 1;
+    spec = spec.substr(4);
+  }
+  const bool own = spec == "own";
+  const uint64_t home = own ? 32 : std::strtoull(spec.c_str(), nullptr, 0);
+  if (!own && home > 31) {
+    throw std::runtime_error("--home wants a shire 0..31, \"own\", or those with an scp: or scpself: prefix");
+  }
+  Plan p;
+  p.mode = NB_HOTLINE;
+  p.hotline = true;
+  p.hotScp = scp;
+  p.hotPace = o.pace;
+  p.scope = home;
+  p.warmup = o.warmup;
+  p.hotWindow = o.iters ? 0 : o.window;   // --iters switches to the fixed-count race
+  p.iters = o.iters ? o.iters : 1;        // checkPlan wants a non-zero count; unused in window mode
+  auto& round = p.addRound();
+  for (uint64_t m : participants(o)) {
+    round[m] = NB_ENTRY(0, 0, false);
+  }
+  setPoll(p, o);
+  const auto out = dev.run(p);
+
+  std::vector<uint64_t> perShire(32, 0), minionsOf(32, 0), lastOf(32, 0), firstOf(32, 0), cyclesOf(32, 0);
+  uint64_t total = 0, reported = 0, timeouts = 0, cmax = 0;
+  for (const auto& r : out.records) {
+    if (r.magic != NB_MAGIC) {
+      continue;
+    }
+    ++reported;
+    timeouts += r.value1 == NB_TIMEOUT;
+    const uint64_t s = r.minion / 32;
+    perShire[s] += r.iters;
+    ++minionsOf[s];
+    cyclesOf[s] += r.cycles;
+    lastOf[s] = std::max<uint64_t>(lastOf[s], r.value1);
+    firstOf[s] = firstOf[s] ? std::min<uint64_t>(firstOf[s], r.value0) : r.value0;
+    total += r.iters;
+    cmax = std::max<uint64_t>(cmax, r.cycles);
+  }
+  uint64_t activeShires = 0;
+  for (uint64_t s = 0; s < 32; ++s) {
+    activeShires += minionsOf[s] != 0;
+  }
+  // A shire's fair share is the total divided by the number of shires taking part, weighted by how many
+  // minions each contributed, so an uneven --per-shire does not look like unfairness.
+  const double perMinion = reported ? double(total) / double(reported) : 0;
+  std::printf("NOCBENCH {\"test\":\"hotline\",\"kind\":\"hotline\",\"home\":\"%s\",\"per_shire\":%llu,"
+              "\"shire_mask\":\"0x%llx\",\"participants\":%llu,\"shires\":%llu,\"window_cycles\":%llu,"
+              "\"iters_each\":%llu,\"pace\":%llu,\"total_ops\":%llu,\"cycles_max\":%llu,\"wall_s\":%.6f,\"ghz\":%.4f,"
+              "\"ops_per_s\":%.0f,\"cycles_per_op\":%.2f,\"t_start_ms\":%lld,\"t_end_ms\":%lld,"
+              "\"timeouts\":%llu,\"ok\":%s,\"shire\":[",
+              o.home.c_str(), (unsigned long long)std::min<uint64_t>(o.perShire, 32),
+              (unsigned long long)out.layout.shireMask, (unsigned long long)reported,
+              (unsigned long long)activeShires, (unsigned long long)p.hotWindow,
+              (unsigned long long)(p.hotWindow ? 0 : p.iters), (unsigned long long)p.hotPace,
+              (unsigned long long)total,
+              (unsigned long long)cmax, out.wallS, out.ghz,
+              cmax && out.ghz > 0 ? double(total) * out.ghz * 1e9 / double(cmax) : 0.0,
+              total ? double(cmax) / double(total) : 0.0,  // the bank serialises: aggregate cycles per atomic
+              out.t0Ms, out.t1Ms, (unsigned long long)timeouts,
+              (out.ok && timeouts == 0) ? "true" : "false");
+  for (uint64_t s = 0, printed = 0; s < 32; ++s) {
+    if (!minionsOf[s]) {
+      continue;
+    }
+    const double share = perMinion > 0 ? double(perShire[s]) / (perMinion * double(minionsOf[s])) : 0;
+    std::printf("%s{\"s\":%llu,\"minions\":%llu,\"ops\":%llu,\"share\":%.4f,\"first\":%llu,\"last\":%llu,"
+                "\"cycles_mean\":%.0f}",
+                printed++ ? "," : "", (unsigned long long)s, (unsigned long long)minionsOf[s],
+                (unsigned long long)perShire[s], share, (unsigned long long)firstOf[s],
+                (unsigned long long)lastOf[s], double(cyclesOf[s]) / double(minionsOf[s]));
+  }
+  std::printf("]}\n");
+  std::fflush(stdout);
+  return (out.ok && timeouts == 0) ? 0 : 1;
+}
+
 int testAllreduce(const Options& o, Session& dev) {
   int bad = 0;
   for (uint64_t levels : parseList(o.levels)) {
@@ -915,6 +1058,9 @@ int main(int argc, char** argv) {
     else if (a == "--rings") o.rings = next();
     else if (a == "--levels") o.levels = next();
     else if (a == "--scope") o.scope = next();
+    else if (a == "--home") o.home = next();
+    else if (a == "--window") o.window = std::strtoull(next().c_str(), nullptr, 0);
+    else if (a == "--pace") o.pace = std::strtoull(next().c_str(), nullptr, 0);
     else if (a == "--iters") o.iters = std::strtoull(next().c_str(), nullptr, 0);
     else if (a == "--warmup") o.warmup = std::strtoull(next().c_str(), nullptr, 0);
     else if (a == "--concurrent") o.concurrent = true;
@@ -948,8 +1094,8 @@ int main(int argc, char** argv) {
   try {
     // Plans are checked again before every launch (Session::run).
     if (o.test != "pairs" && o.test != "matrix" && o.test != "intra" && o.test != "shift" &&
-        o.test != "allreduce" && o.test != "barrier" && o.test != "spin") {
-      std::fprintf(stderr, "--test must be pairs, matrix, intra, shift, allreduce, barrier or spin\n");
+        o.test != "allreduce" && o.test != "barrier" && o.test != "spin" && o.test != "hotline") {
+      std::fprintf(stderr, "--test must be pairs, matrix, intra, shift, allreduce, barrier, spin or hotline\n");
       return 2;
     }
     if (o.test == "shift") {
@@ -962,6 +1108,7 @@ int main(int argc, char** argv) {
     if (o.test == "shift") return testShift(o, dev);
     if (o.test == "allreduce") return testAllreduce(o, dev);
     if (o.test == "barrier") return testBarrier(o, dev);
+    if (o.test == "hotline") return testHotline(o, dev);
     return testSpin(o, dev);
   } catch (const std::exception& e) {
     std::fprintf(stderr, "FAIL: %s\n", e.what());

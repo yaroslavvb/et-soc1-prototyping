@@ -191,6 +191,28 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
 | Die voltage, aifoundry3 vs aifoundry2 | 523 mV vs 518 mV at the same 600 MHz, so \(V^2f\) predicts 2% **more**, not 8% less | M | E20, E21 | `DATAC/config.json`, `DATA3/telemetry.jsonl.gz` |
 | aifoundry2's idle law extrapolated onto aifoundry3, 25 °C below its fitted range | **+0.73 W** mean error out of 25 W, over 50–57 °C | P | E17 → E20 | `DATA3/leakage_crosscard.json` |
 
+## One contended global atomic (E22, E23)
+
+`DATAH` means `docs/reports/data/2026-09-22-hotline-aifoundry2/`.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| Host shire's share of a contended atomic | **1.004** of an even split; whole chip within 0.998–1.004 | M | E22 | `DATAH/hotline.json`, `fairness` |
+| Same, line homed in shire 7, 15 or 31 | 1.001, 1.000, 1.000 | M | E22 | same |
+| Cost of one contended atomic | **10.00 cycles**, about 60 M/s for the whole chip | M | E22 | `DATAH/hotline.json`, `placement` |
+| Same work on 32 lines, one per shire | 0.31 cycles, 1,919 M/s — **32×** | M | E22 | same |
+| Uncontended remote global-atomic round trip | 216 cycles | M | E22 | `DATAH/sweep.jsonl`, the one-remote-minion row |
+| Host shire's own memory operations while hammered | **192–384 total**, 0.01–0.05% of its uncontended rate | M | E23 | `DATAH/hotline.json`, `local` |
+| …and it does not grow with time | identical at 5, 10, 40 and 100 ms windows | M | E23 | `DATAH/hotline.json`, `context.window_independence` |
+| Remote requesters needed to flip it | **24** (20 leaves the host at 98.9%) | M | E23 | `DATAH/hotline.json`, `requesters` |
+| Pacing that restores the host | 10,000 cycles → host 54%, hammering shires 96% | M | E23 | `DATAH/hotline.json`, `pace` |
+| Energy, contended vs spread | **23.6 vs 1.4 nJ per atomic**, 17× | M | E23 | `DATAH/power.json` |
+| 1,024 minions stalled on a contended line | 1.41 W over idle | M | E23 | same |
+| Chip-wide barrier | 4,997 cycles | M | E23, R4 | `nocbench --test barrier --scope chip` |
+| A global atomic through the scratchpad self ID `0x7F` | kernel bus error | M | E22 | reproduce with `--home scpself:0` |
+| The arbitration rule and its erratum | `l3_yield_priority` does not fix the same-address case | X | R1 | ET-SoC Errata 4.1 `RTLMIN-6207`, 4.2 `RTLMIN-6214`, both Postponed |
+| Ivan's 6% | **not reproduced**; his code was not run | X | R11 | [17-hot-line.md](17-hot-line.md) |
+
 ## External numbers (not measured here)
 
 | Claim | Value | Kind | Source |
@@ -222,6 +244,8 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
   `g_pmic_power_reg.module_tdp_level` and no further.
 - **Whether the 8% switching-power gap between the two cards is silicon, package or board regulator.**
   Separating those needs a third working card, which aifoundry1 is not.
+- **Why Ivan's 6% differs from both of our numbers.** His code was not run.
+- **Whether a hot line makes its shire measurably hotter.** The thermal telemetry is one chip-wide mean.
 - **aifoundry3's thermal network.** Its heatsink is visibly faster than aifoundry2's, and no heat-then-cool
   characterisation was run on it. Do not apply aifoundry2's 1.47 °C/W to it.
 - ~~**Whether the governor's power branch behaves as written.**~~ **Established on 2026-09-22 (E21):** it

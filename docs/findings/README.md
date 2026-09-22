@@ -39,7 +39,12 @@ can you predict it before running?**
    governor's step-up test unreachable and pins the card at 600 MHz for life. The driver reports the nameplate
    65 W on every machine, so nothing on the host notices. aifoundry1's two cards cannot be opened at all.
    → [14-card-behaviour.md](14-card-behaviour.md)
-8. **The caveat that matters most.** The temperature half of the model was only held out properly after the
+8. **The sharpest edge on the chip.** One contended global atomic is shared out perfectly fairly, and takes
+   the entire memory path of the shire that hosts it to **zero** — 384 operations, then nothing, for as long
+   as the hammering lasts. It takes 24 remote requesters, under one shire's worth, and the vendor's errata
+   describe it and say the configuration bit that looks like the fix does not work.
+   → [17-hot-line.md](17-hot-line.md)
+9. **The caveat that matters most.** The temperature half of the model was only held out properly after the
    fact, when the fit was challenged. On runs it was not fitted to, the time-to-90 °C error is 9% in the
    median and 23% at worst out to a few minutes, and it runs 3–5 °C hot at ten minutes. → [11-thermal-model.md](11-thermal-model.md), section "How well it predicts"
 
@@ -53,6 +58,7 @@ can you predict it before running?**
 | Understand the model or improve it | [11-thermal-model.md](11-thermal-model.md) |
 | Argue about efficiency against a GPU | [13-why-low-power.md](13-why-low-power.md), and read its caveats first |
 | Know what the card's instruments can and cannot see | [15-earlier-findings.md](15-earlier-findings.md) |
+| Share a counter, lock or flag between shires | [17-hot-line.md](17-hot-line.md) — one hot line stops the shire that hosts it |
 | Pick a machine, or compare two cards | [14-card-behaviour.md](14-card-behaviour.md) — the three machines side by side, and why aifoundry3 is slow |
 | Understand the clock/voltage governor, or why the card leaks so much | [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
 | Re-run an experiment | [03-experiments.md](03-experiments.md) — command, protocol, raw data path, caveats |

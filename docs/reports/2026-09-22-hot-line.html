@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One hot line stops a shire</title>
+<meta name="description" content="A single contended global atomic on the ET-SoC-1 is served perfectly fairly - and takes the whole memory path of the shire that hosts it to zero for as long as the hammering lasts. Measured on two cards, with the threshold, the price of the workaround, and the energy cost.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --code-bg: #f1f0ec;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c7: #4a3aa7; --ref: #8c8b85;
+  --ok: #008300; --warn: #eda100; --bad: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+    --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+  --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-text-size-adjust: 100%; }
+main { max-width: 940px; margin: 0 auto; padding: 28px 16px 72px; }
+h1 { font-size: 1.75rem; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; margin: 44px 0 10px; }
+h3 { font-size: 1rem; margin: 22px 0 8px; }
+.byline { color: var(--ink-2); font-size: 0.9rem; margin: 0 0 22px; }
+.lede { font-size: 1.05rem; }
+.small { font-size: 0.85rem; color: var(--ink-2); }
+a { color: var(--c1); }
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 18px 0 8px; }
+.kpi .lab { color: var(--ink-2); font-size: 0.8rem; }
+.kpi .val { font-size: 1.5rem; font-weight: 650; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.kpi .sub { color: var(--ink-2); font-size: 0.8rem; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.chart.scroll svg { min-width: 640px; }
+.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 320px; display: none; }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lab { fill: var(--ink-2); font-size: 12px; }
+.lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; }
+td.lvl { font-weight: 600; white-space: nowrap; }
+.wide table { min-width: 760px; }
+.chip { display: inline-block; font-size: 0.74rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid transparent; }
+.chip.works_now { color: var(--ok); border-color: var(--ok); }
+.chip.needs_fw_change { color: var(--c1); border-color: var(--c1); }
+.chip.needs_tooling { color: var(--warn); border-color: var(--warn); }
+.chip.research_only { color: var(--muted); border-color: var(--muted); }
+.chip.impossible_on_silicon { color: var(--bad); border-color: var(--bad); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.82rem; color: var(--ink-2); margin: 6px 0 8px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 6px; }
+.controls button { font: inherit; font-size: 0.82rem; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 12px; cursor: pointer; min-height: 30px; }
+.controls button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.verif { font-size: 0.74rem; color: var(--muted); white-space: nowrap; }
+.verif.confirmed::before { content: "✓ "; color: var(--ok); }
+.verif.disputed::before { content: "± "; color: var(--warn); }
+.verif.unverified::before { content: "· "; }
+ol li, ul li { margin: 5px 0; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--ink-2); font-size: 0.9rem; }
+.chart-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.s1 { stroke: var(--c1); } .s2 { stroke: var(--c2); } .s3 { stroke: var(--c3); } .s4 { stroke: var(--c4); } .s5 { stroke: var(--c5); }
+.ln { fill: none; stroke-width: 2; stroke-linejoin: round; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.math-display { display: block; overflow-x: auto; overflow-y: hidden; max-width: 100%; margin: 16px 0 18px;
+  padding: 2px 0; text-align: center; color: var(--ink); }
+.math-display svg { max-width: none; }
+.math-inline { color: var(--ink); }
+.math-inline svg, .math-display svg { vertical-align: middle; }
+</style>
+</head>
+<body>
+<main>
+<h1>One hot line stops a shire</h1>
+<p class="byline">Two ET-SoC-1 cards, 22 September 2026 · <code>workloads/nocbench --test hotline</code>, a new many-to-one probe · following up a benchmark result Ivan reported in Discord</p>
+
+<p class="lede">Ivan put one global atomic counter in shire 0's scratchpad, had all 32 shires hammer it, and
+found that <q>shire 0 got 6% of its fair share and finished only after the other 31</q>. The obvious reading is
+that the shire cache short-changes whoever owns the line. <b>It does not. The atomic is shared out to within
+one part in a thousand, including with the shire that hosts it. What that shire loses is something else
+entirely: its own memory path, which stops — not slows, stops — for as long as the hammering lasts.</b> The
+switch is sharp, it takes fewer than one shire's worth of attackers to flip, and it is identical on both
+cards we have.</p>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">Share of the atomic the host shire gets</div><div class="val" id="k1"></div><div class="sub">against a fair share of 1.000; spread across all 32 shires below</div></div>
+  <div class="card kpi"><div class="lab">Its own memory operations, contended</div><div class="val" id="k2"></div><div class="sub">of what the same 32 minions do with nobody hammering</div></div>
+  <div class="card kpi"><div class="lab">Remote requesters needed to flip it</div><div class="val" id="k3"></div><div class="sub">under one shire's 32 minions</div></div>
+  <div class="card kpi"><div class="lab">Energy per atomic, contended vs spread</div><div class="val" id="k4"></div><div class="sub">same instructions, 32× less work done</div></div>
+</div>
+
+<h2>1. The atomic itself is fair</h2>
+<p>Every minion in the launch hammers one 4-byte word with <code>amoaddg.w</code>. All of them meet at a
+chip-wide barrier first, so the window is the same window for everyone, and each one reports how many atomics
+it completed inside it. A shire's share is its count divided by what an even split would give.</p>
+
+<div class="chart-title">Per-shire share of one contended atomic, 1,024 minions, line homed in shire 0</div>
+<div class="chart scroll" id="fair"></div>
+<p class="small" id="faircap"></p>
+
+<p>Moving the line's home to shire 7, 15 or 31 changes nothing, so shire 0 is not special. The one case where
+shares do spread out is the opposite of starvation: with a single minion per shire the bank is not saturated,
+latency decides, and <b>the host shire comes first</b> because its request has no mesh to cross.</p>
+
+<div class="table-wrap"><table id="fairtab"></table></div>
+
+<h2>2. What contention costs, and what it does not</h2>
+<p>One line is worth 32 in nothing but placement. The same 1,024 minions running the same instruction against
+32 lines, one per shire, do 32 times the work:</p>
+
+<div class="table-wrap"><table id="placetab"></table></div>
+
+<p>Ten cycles per atomic is the shire cache retiring one request at a time; the repository's own note that a
+sub-bank accepts a request every two cycles puts a global atomic at about five sub-bank slots. The aggregate
+of about 60 million atomics a second matches the figure Ivan quoted, which settles that it was an aggregate
+and not a per-shire number.</p>
+
+<h2>3. The thing that actually starves</h2>
+<p>So we changed what the host shire does. Instead of joining the atomic, its 32 minions stream their own
+memory — 64-byte-strided loads over a private slice, either of their shire's scratchpad or of DRAM — while the
+other 31 shires hammer a line that lives in that same shire cache. The baseline is the identical loop with
+nobody else launched.</p>
+
+<div class="table-wrap"><table id="localtab"></table></div>
+
+<p><b>These are not slow-downs, they are stops.</b> The host shire's count is the same number whether the
+window is 5 milliseconds or 100:</p>
+
+<div class="table-wrap"><table id="wintab"></table></div>
+
+<p>Twelve loads per minion get through while the mesh traffic ramps up, and then nothing — through six million
+remote atomics. The 32 minions of that shire, a full thirty-second of the chip, are stalled in a load
+instruction that does not return. Nothing reports an error; the kernel finishes when the hammering stops.</p>
+
+<h2>4. The threshold is the bank going saturated</h2>
+<p>It takes one other shire. Holding everything else fixed and varying how many of that one shire's minions
+join in:</p>
+
+<div class="chart-title">Host shire's own memory throughput against the rate of remote atomics</div>
+<div class="chart scroll" id="req"></div>
+<p class="small" id="reqcap"></p>
+
+<p>There is no gradual degradation. Up to twenty remote requesters the host shire is within a percent of
+untouched, because each remote atomic takes about 216 cycles to make its round trip and twenty of them in
+flight still ask for less than the bank can retire. At twenty-four the measured cost reaches 10.0 cycles per
+atomic — the bank's floor, the queue full — and the host shire's own requests stop getting resources.</p>
+
+<span class="math-display"><svg style="vertical-align: -2.202ex;" xmlns="http://www.w3.org/2000/svg" width="58.333ex" height="5.276ex" role="img" focusable="false" viewBox="0 -1359 25783.1 2332.2" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-1-TEX-I-1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path><path id="MJX-1-TEX-N-72" d="M36 46H50Q89 46 97 60V68Q97 77 97 91T98 122T98 161T98 203Q98 234 98 269T98 328L97 351Q94 370 83 376T38 385H20V408Q20 431 22 431L32 432Q42 433 60 434T96 436Q112 437 131 438T160 441T171 442H174V373Q213 441 271 441H277Q322 441 343 419T364 373Q364 352 351 337T313 322Q288 322 276 338T263 372Q263 381 265 388T270 400T273 405Q271 407 250 401Q234 393 226 386Q179 341 179 207V154Q179 141 179 127T179 101T180 81T180 66V61Q181 59 183 57T188 54T193 51T200 49T207 48T216 47T225 47T235 46T245 46H276V0H267Q249 3 140 3Q37 3 28 0H20V46H36Z"></path><path id="MJX-1-TEX-N-65" d="M28 218Q28 273 48 318T98 391T163 433T229 448Q282 448 320 430T378 380T406 316T415 245Q415 238 408 231H126V216Q126 68 226 36Q246 30 270 30Q312 30 342 62Q359 79 369 104L379 128Q382 131 395 131H398Q415 131 415 121Q415 117 412 108Q393 53 349 21T250 -11Q155 -11 92 58T28 218ZM333 275Q322 403 238 411H236Q228 411 220 410T195 402T166 381T143 340T127 274V267H333V275Z"></path><path id="MJX-1-TEX-N-6D" d="M41 46H55Q94 46 102 60V68Q102 77 102 91T102 122T103 161T103 203Q103 234 103 269T102 328V351Q99 370 88 376T43 385H25V408Q25 431 27 431L37 432Q47 433 65 434T102 436Q119 437 138 438T167 441T178 442H181V402Q181 364 182 364T187 369T199 384T218 402T247 421T285 437Q305 442 336 442Q351 442 364 440T387 434T406 426T421 417T432 406T441 395T448 384T452 374T455 366L457 361L460 365Q463 369 466 373T475 384T488 397T503 410T523 422T546 432T572 439T603 442Q729 442 740 329Q741 322 741 190V104Q741 66 743 59T754 49Q775 46 803 46H819V0H811L788 1Q764 2 737 2T699 3Q596 3 587 0H579V46H595Q656 46 656 62Q657 64 657 200Q656 335 655 343Q649 371 635 385T611 402T585 404Q540 404 506 370Q479 343 472 315T464 232V168V108Q464 78 465 68T468 55T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z"></path><path id="MJX-1-TEX-N-6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z"></path><path id="MJX-1-TEX-N-74" d="M27 422Q80 426 109 478T141 600V615H181V431H316V385H181V241Q182 116 182 100T189 68Q203 29 238 29Q282 29 292 100Q293 108 293 146V181H333V146V134Q333 57 291 17Q264 -10 221 -10Q187 -10 162 2T124 33T105 68T98 100Q97 107 97 248V385H18V422H27Z"></path><path id="MJX-1-TEX-I-1D461" d="M26 385Q19 392 19 395Q19 399 22 411T27 425Q29 430 36 430T87 431H140L159 511Q162 522 166 540T173 566T179 586T187 603T197 615T211 624T229 626Q247 625 254 615T261 596Q261 589 252 549T232 470L222 433Q222 431 272 431H323Q330 424 330 420Q330 398 317 385H210L174 240Q135 80 135 68Q135 26 162 26Q197 26 230 60T283 144Q285 150 288 151T303 153H307Q322 153 322 145Q322 142 319 133Q314 117 301 95T267 48T216 6T155 -11Q125 -11 98 4T59 56Q57 64 57 83V101L92 241Q127 382 128 383Q128 385 77 385H26Z"></path><path id="MJX-1-TEX-N-75" d="M383 58Q327 -10 256 -10H249Q124 -10 105 89Q104 96 103 226Q102 335 102 348T96 369Q86 385 36 385H25V408Q25 431 27 431L38 432Q48 433 67 434T105 436Q122 437 142 438T172 441T184 442H187V261Q188 77 190 64Q193 49 204 40Q224 26 264 26Q290 26 311 35T343 58T363 90T375 120T379 144Q379 145 379 161T380 201T380 248V315Q380 361 370 372T320 385H302V431Q304 431 378 436T457 442H464V264Q464 84 465 81Q468 61 479 55T524 46H542V0Q540 0 467 -5T390 -11H383V58Z"></path><path id="MJX-1-TEX-N-6E" d="M41 46H55Q94 46 102 60V68Q102 77 102 91T102 122T103 161T103 203Q103 234 103 269T102 328V351Q99 370 88 376T43 385H25V408Q25 431 27 431L37 432Q47 433 65 434T102 436Q119 437 138 438T167 441T178 442H181V402Q181 364 182 364T187 369T199 384T218 402T247 421T285 437Q305 442 336 442Q450 438 463 329Q464 322 464 190V104Q464 66 466 59T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z"></path><path id="MJX-1-TEX-N-64" d="M376 495Q376 511 376 535T377 568Q377 613 367 624T316 637H298V660Q298 683 300 683L310 684Q320 685 339 686T376 688Q393 689 413 690T443 693T454 694H457V390Q457 84 458 81Q461 61 472 55T517 46H535V0Q533 0 459 -5T380 -11H373V44L365 37Q307 -11 235 -11Q158 -11 96 50T34 215Q34 315 97 378T244 442Q319 442 376 393V495ZM373 342Q328 405 260 405Q211 405 173 369Q146 341 139 305T131 211Q131 155 138 120T173 59Q203 26 251 26Q322 26 373 103V342Z"></path><path id="MJX-1-TEX-N-20" d=""></path><path id="MJX-1-TEX-N-69" d="M69 609Q69 637 87 653T131 669Q154 667 171 652T188 609Q188 579 171 564T129 549Q104 549 87 564T69 609ZM247 0Q232 3 143 3Q132 3 106 3T56 1L34 0H26V46H42Q70 46 91 49Q100 53 102 60T104 102V205V293Q104 345 102 359T88 378Q74 385 41 385H30V408Q30 431 32 431L42 432Q52 433 70 434T106 436Q123 437 142 438T171 441T182 442H185V62Q190 52 197 50T232 46H255V0H247Z"></path><path id="MJX-1-TEX-N-70" d="M36 -148H50Q89 -148 97 -134V-126Q97 -119 97 -107T97 -77T98 -38T98 6T98 55T98 106Q98 140 98 177T98 243T98 296T97 335T97 351Q94 370 83 376T38 385H20V408Q20 431 22 431L32 432Q42 433 61 434T98 436Q115 437 135 438T165 441T176 442H179V416L180 390L188 397Q247 441 326 441Q407 441 464 377T522 216Q522 115 457 52T310 -11Q242 -11 190 33L182 40V-45V-101Q182 -128 184 -134T195 -145Q216 -148 244 -148H260V-194H252L228 -193Q205 -192 178 -192T140 -191Q37 -191 28 -194H20V-148H36ZM424 218Q424 292 390 347T305 402Q234 402 182 337V98Q222 26 294 26Q345 26 384 80T424 218Z"></path><path id="MJX-1-TEX-N-3C" d="M694 -11T694 -19T688 -33T678 -40Q671 -40 524 29T234 166L90 235Q83 240 83 250Q83 261 91 266Q664 540 678 540Q681 540 687 534T694 519T687 505Q686 504 417 376L151 250L417 124Q686 -4 687 -5Q694 -11 694 -19Z"></path><path id="MJX-1-TEX-N-31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path id="MJX-1-TEX-N-30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path><path id="MJX-1-TEX-N-A0" d=""></path><path id="MJX-1-TEX-N-63" d="M370 305T349 305T313 320T297 358Q297 381 312 396Q317 401 317 402T307 404Q281 408 258 408Q209 408 178 376Q131 329 131 219Q131 137 162 90Q203 29 272 29Q313 29 338 55T374 117Q376 125 379 127T395 129H409Q415 123 415 120Q415 116 411 104T395 71T366 33T318 2T249 -11Q163 -11 99 53T34 214Q34 318 99 383T250 448T370 421T404 357Q404 334 387 320Z"></path><path id="MJX-1-TEX-N-79" d="M69 -66Q91 -66 104 -80T118 -116Q118 -134 109 -145T91 -160Q84 -163 97 -166Q104 -168 111 -168Q131 -168 148 -159T175 -138T197 -106T213 -75T225 -43L242 0L170 183Q150 233 125 297Q101 358 96 368T80 381Q79 382 78 382Q66 385 34 385H19V431H26L46 430Q65 430 88 429T122 428Q129 428 142 428T171 429T200 430T224 430L233 431H241V385H232Q183 385 185 366L286 112Q286 113 332 227L376 341V350Q376 365 366 373T348 383T334 385H331V431H337H344Q351 431 361 431T382 430T405 429T422 429Q477 429 503 431H508V385H497Q441 380 422 345Q420 343 378 235T289 9T227 -131Q180 -204 113 -204Q69 -204 44 -177T19 -116Q19 -89 35 -78T69 -66Z"></path><path id="MJX-1-TEX-N-6C" d="M42 46H56Q95 46 103 60V68Q103 77 103 91T103 124T104 167T104 217T104 272T104 329Q104 366 104 407T104 482T104 542T103 586T103 603Q100 622 89 628T44 637H26V660Q26 683 28 683L38 684Q48 685 67 686T104 688Q121 689 141 690T171 693T182 694H185V379Q185 62 186 60Q190 52 198 49Q219 46 247 46H263V0H255L232 1Q209 2 183 2T145 3T107 3T57 1L34 0H26V46H42Z"></path><path id="MJX-1-TEX-N-73" d="M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z"></path><path id="MJX-1-TEX-N-27F9" d="M1218 514Q1218 525 1234 525Q1239 525 1242 525T1247 525T1251 524T1253 523T1255 520T1257 517T1260 512Q1297 438 1358 381T1469 300T1565 263Q1582 258 1582 250T1573 239T1536 228T1478 204Q1334 134 1260 -12Q1256 -21 1253 -22T1238 -24Q1218 -24 1218 -17Q1218 -13 1223 0Q1258 69 1309 123L1319 133H70Q56 140 56 153Q56 168 72 173H1363L1373 181Q1412 211 1490 250Q1489 251 1472 259T1427 283T1373 319L1363 327H710L707 328L390 327H72Q56 332 56 347Q56 360 70 367H1319L1309 377Q1276 412 1247 458T1218 514Z"></path><path id="MJX-1-TEX-N-68" d="M41 46H55Q94 46 102 60V68Q102 77 102 91T102 124T102 167T103 217T103 272T103 329Q103 366 103 407T103 482T102 542T102 586T102 603Q99 622 88 628T43 637H25V660Q25 683 27 683L37 684Q47 685 66 686T103 688Q120 689 140 690T170 693T181 694H184V367Q244 442 328 442Q451 442 463 329Q464 322 464 190V104Q464 66 466 59T477 49Q498 46 526 46H542V0H534L510 1Q487 2 460 2T422 3Q319 3 310 0H302V46H318Q379 46 379 62Q380 64 380 200Q379 335 378 343Q372 371 358 385T334 402T308 404Q263 404 229 370Q202 343 195 315T187 232V168V108Q187 78 188 68T191 55T200 49Q221 46 249 46H265V0H257L234 1Q210 2 183 2T145 3Q42 3 33 0H25V46H41Z"></path><path id="MJX-1-TEX-N-61" d="M137 305T115 305T78 320T63 359Q63 394 97 421T218 448Q291 448 336 416T396 340Q401 326 401 309T402 194V124Q402 76 407 58T428 40Q443 40 448 56T453 109V145H493V106Q492 66 490 59Q481 29 455 12T400 -6T353 12T329 54V58L327 55Q325 52 322 49T314 40T302 29T287 17T269 6T247 -2T221 -8T190 -11Q130 -11 82 20T34 107Q34 128 41 147T68 188T116 225T194 253T304 268H318V290Q318 324 312 340Q290 411 215 411Q197 411 181 410T156 406T148 403Q170 388 170 359Q170 334 154 320ZM126 106Q126 75 150 51T209 26Q247 26 276 49T315 109Q317 116 318 175Q318 233 317 233Q309 233 296 232T251 223T193 203T147 166T126 106Z"></path><path id="MJX-1-TEX-N-66" d="M273 0Q255 3 146 3Q43 3 34 0H26V46H42Q70 46 91 49Q99 52 103 60Q104 62 104 224V385H33V431H104V497L105 564L107 574Q126 639 171 668T266 704Q267 704 275 704T289 705Q330 702 351 679T372 627Q372 604 358 590T321 576T284 590T270 627Q270 647 288 667H284Q280 668 273 668Q245 668 223 647T189 592Q183 572 182 497V431H293V385H185V225Q185 63 186 61T189 57T194 54T199 51T206 49T213 48T222 47T231 47T241 46T251 46H282V0H273Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mfrac"><g data-mml-node="msub" transform="translate(502.1,676)"><g data-mml-node="mi"><use data-c="1D441" xlink:href="#MJX-1-TEX-I-1D441"></use></g><g data-mml-node="mtext" transform="translate(836,-150) scale(0.707)"><use data-c="72" xlink:href="#MJX-1-TEX-N-72"></use><use data-c="65" xlink:href="#MJX-1-TEX-N-65" transform="translate(392,0)"></use><use data-c="6D" xlink:href="#MJX-1-TEX-N-6D" transform="translate(836,0)"></use><use data-c="6F" xlink:href="#MJX-1-TEX-N-6F" transform="translate(1669,0)"></use><use data-c="74" xlink:href="#MJX-1-TEX-N-74" transform="translate(2169,0)"></use><use data-c="65" xlink:href="#MJX-1-TEX-N-65" transform="translate(2558,0)"></use></g></g><g data-mml-node="msub" transform="translate(220,-686)"><g data-mml-node="mi"><use data-c="1D461" xlink:href="#MJX-1-TEX-I-1D461"></use></g><g data-mml-node="mtext" transform="translate(394,-150) scale(0.707)"><use data-c="72" xlink:href="#MJX-1-TEX-N-72"></use><use data-c="6F" xlink:href="#MJX-1-TEX-N-6F" transform="translate(392,0)"></use><use data-c="75" xlink:href="#MJX-1-TEX-N-75" transform="translate(892,0)"></use><use data-c="6E" xlink:href="#MJX-1-TEX-N-6E" transform="translate(1448,0)"></use><use data-c="64" xlink:href="#MJX-1-TEX-N-64" transform="translate(2004,0)"></use><use data-c="20" xlink:href="#MJX-1-TEX-N-20" transform="translate(2560,0)"></use><use data-c="74" xlink:href="#MJX-1-TEX-N-74" transform="translate(2810,0)"></use><use data-c="72" xlink:href="#MJX-1-TEX-N-72" transform="translate(3199,0)"></use><use data-c="69" xlink:href="#MJX-1-TEX-N-69" transform="translate(3591,0)"></use><use data-c="70" xlink:href="#MJX-1-TEX-N-70" transform="translate(3869,0)"></use></g></g><rect width="3772.9" height="60" x="120" y="220"></rect></g><g data-mml-node="mstyle" transform="translate(4012.9,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="mo" transform="translate(4568.7,0)"><use data-c="3C" xlink:href="#MJX-1-TEX-N-3C"></use></g><g data-mml-node="mstyle" transform="translate(5346.7,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="mfrac" transform="translate(5902.5,0)"><g data-mml-node="mn" transform="translate(1861,676)"><use data-c="31" xlink:href="#MJX-1-TEX-N-31"></use></g><g data-mml-node="mrow" transform="translate(220,-686)"><g data-mml-node="mn"><use data-c="31" xlink:href="#MJX-1-TEX-N-31"></use><use data-c="30" xlink:href="#MJX-1-TEX-N-30" transform="translate(500,0)"></use></g><g data-mml-node="mtext" transform="translate(1000,0)"><use data-c="A0" xlink:href="#MJX-1-TEX-N-A0"></use></g><g data-mml-node="mtext" transform="translate(1250,0)"><use data-c="63" xlink:href="#MJX-1-TEX-N-63"></use><use data-c="79" xlink:href="#MJX-1-TEX-N-79" transform="translate(444,0)"></use><use data-c="63" xlink:href="#MJX-1-TEX-N-63" transform="translate(972,0)"></use><use data-c="6C" xlink:href="#MJX-1-TEX-N-6C" transform="translate(1416,0)"></use><use data-c="65" xlink:href="#MJX-1-TEX-N-65" transform="translate(1694,0)"></use><use data-c="73" xlink:href="#MJX-1-TEX-N-73" transform="translate(2138,0)"></use></g></g><rect width="3982" height="60" x="120" y="220"></rect></g><g data-mml-node="mstyle" transform="translate(10124.5,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="mo" transform="translate(11402.3,0)"><use data-c="27F9" xlink:href="#MJX-1-TEX-N-27F9"></use></g><g data-mml-node="mstyle" transform="translate(13040.3,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="mtext" transform="translate(14318.1,0)"><use data-c="74" xlink:href="#MJX-1-TEX-N-74"></use><use data-c="68" xlink:href="#MJX-1-TEX-N-68" transform="translate(389,0)"></use><use data-c="65" xlink:href="#MJX-1-TEX-N-65" transform="translate(945,0)"></use><use data-c="20" xlink:href="#MJX-1-TEX-N-20" transform="translate(1389,0)"></use><use data-c="68" xlink:href="#MJX-1-TEX-N-68" transform="translate(1639,0)"></use><use data-c="6F" xlink:href="#MJX-1-TEX-N-6F" transform="translate(2195,0)"></use><use data-c="73" xlink:href="#MJX-1-TEX-N-73" transform="translate(2695,0)"></use><use data-c="74" xlink:href="#MJX-1-TEX-N-74" transform="translate(3089,0)"></use><use data-c="20" xlink:href="#MJX-1-TEX-N-20" transform="translate(3478,0)"></use><use data-c="73" xlink:href="#MJX-1-TEX-N-73" transform="translate(3728,0)"></use><use data-c="68" xlink:href="#MJX-1-TEX-N-68" transform="translate(4122,0)"></use><use data-c="69" xlink:href="#MJX-1-TEX-N-69" transform="translate(4678,0)"></use><use data-c="72" xlink:href="#MJX-1-TEX-N-72" transform="translate(4956,0)"></use><use data-c="65" xlink:href="#MJX-1-TEX-N-65" transform="translate(5348,0)"></use><use data-c="20" xlink:href="#MJX-1-TEX-N-20" transform="translate(5792,0)"></use><use data-c="69" xlink:href="#MJX-1-TEX-N-69" transform="translate(6042,0)"></use><use data-c="73" xlink:href="#MJX-1-TEX-N-73" transform="translate(6320,0)"></use><use data-c="20" xlink:href="#MJX-1-TEX-N-20" transform="translate(6714,0)"></use><use data-c="75" xlink:href="#MJX-1-TEX-N-75" transform="translate(6964,0)"></use><use data-c="6E" xlink:href="#MJX-1-TEX-N-6E" transform="translate(7520,0)"></use><use data-c="61" xlink:href="#MJX-1-TEX-N-61" transform="translate(8076,0)"></use><use data-c="66" xlink:href="#MJX-1-TEX-N-66" transform="translate(8576,0)"></use><use data-c="66" xlink:href="#MJX-1-TEX-N-66" transform="translate(8882,0)"></use><use data-c="65" xlink:href="#MJX-1-TEX-N-65" transform="translate(9188,0)"></use><use data-c="63" xlink:href="#MJX-1-TEX-N-63" transform="translate(9632,0)"></use><use data-c="74" xlink:href="#MJX-1-TEX-N-74" transform="translate(10076,0)"></use><use data-c="65" xlink:href="#MJX-1-TEX-N-65" transform="translate(10465,0)"></use><use data-c="64" xlink:href="#MJX-1-TEX-N-64" transform="translate(10909,0)"></use></g></g></g></svg></span>
+
+<h2>5. Esperanto knew, and wrote down why the fix does not work</h2>
+<p>This is not a discovery so much as a demonstration. Two errata describe it, and both are marked
+<i>Postponed</i>:</p>
+
+<div id="errata"></div>
+
+<p>That answers both of the questions worth sending back. <b>Does setting <code>l3_yield</code> restore the
+host's share?</b> The erratum says in as many words that it does not, for exactly this case — same address,
+neighbourhood against mesh — and the second erratum adds that the yield has no sub-bank granularity even when
+the addresses differ. <b>Does it hold when the line is DRAM-backed rather than in scratchpad?</b> Yes, and
+slightly worse: 192 operations instead of 384. The erratum's title says <q>same SCP address</q>, but the
+behaviour is not specific to the scratchpad. Any address whose home is that shire cache will do it.</p>
+
+<p>Worth noting what Esperanto rated the impact: <q>Low. It would have to be a pretty consistent and repeating
+pattern.</q> A shared counter, a lock, a flag or a queue head is a pretty consistent and repeating pattern.</p>
+
+<h2>6. The workaround, priced</h2>
+<p>The erratum's advice is to slow the other shires down. It works, and near the knee it is nearly free —
+the bank was already saturated, so the first thing pacing takes away is queueing, not throughput:</p>
+
+<div class="chart-title">Pacing the 992 remote minions: what each side gets</div>
+<div class="chart scroll" id="pace"></div>
+<p class="small" id="pacecap"></p>
+
+<h2>7. What it costs in energy</h2>
+<p>Contention is not just slow, it is expensive per unit of work. Board power over idle, measured at 10 Hz
+across three back-to-back launches of each case:</p>
+
+<div class="table-wrap"><table id="pwrtab"></table></div>
+
+<p>A thousand minions stalled on a saturated line cost the card about a watt and a half over idle, which is
+the clearest possible statement that waiting is cheap and the loss is throughput, not power. Per operation the
+contended line costs <span id="enfac"></span> times the energy of the same atomic spread over 32 lines.</p>
+
+<h2>8. What to do instead</h2>
+<ul>
+<li><b>One global atomic per shire, never per minion.</b> At 32 participants the serialisation is 320 cycles
+against a chip-wide barrier we measure at 4,997 cycles — six percent, invisible. At 1,024 it is 10,240 cycles,
+twice the whole barrier, and it takes the hosting shire down with it.</li>
+<li><b>Keep hot shared lines out of shires that compute.</b> The cost is not paid by the code touching the
+line. It is paid by whatever else lives in that shire, and it is total.</li>
+<li><b>If you must, pace it.</b> Ten thousand cycles between atomics, about 17 microseconds, gives the host
+shire back half its memory path and costs the hammering shires four percent.</li>
+<li><b>Spread instead of sharing when you can.</b> One line per shire is the same instruction at 32 times the
+rate and a seventeenth of the energy per operation.</li>
+</ul>
+
+<h2>9. Method, and what is not established</h2>
+<ul>
+<li>The probe is <code>NB_HOTLINE</code> in <code>workloads/nocbench</code>, new for this. Every participant
+warms up, meets at a chip-wide barrier, then loops until a cycle deadline, counting completed operations.
+Counting completions inside a common window is what makes "share" mean anything; a fixed-count race would
+confound share with finishing order.</li>
+<li>The home shire of a DRAM line is <code>PA[10:6]</code>, so the probe allocates a 2 KB-aligned region and
+uses the line at offset <i>s</i>×64. Scratchpad lines use the PRM's format 0, shire ID in bits [29:23]. The
+region is verified aligned at launch, and the 32-fold speed-up of one line per shire is the check that the
+address really does select the bank.</li>
+<li><b>A global atomic cannot take the local path at all.</b> Addressed through the self ID <code>0x7F</code>,
+<code>amoaddg</code> raises a kernel bus error. That is why section 1 comes out fair: from the host shire the
+atomic leaves through the same L3-slave port as everyone else's, so the arbitration that ranks the two classes
+never applies to it. The starvation in section 3 needs an ordinary load or store, which is what a computing
+shire issues.</li>
+<li>Everything is measured on aifoundry2 and repeated on aifoundry3. The two cards agree to the individual
+operation: 384 and 384, 0.02% and 0.02%, 10.0 and 10.0 cycles. Raw data in
+<code>docs/reports/data/2026-09-22-hotline-aifoundry2/</code> and <code>-aifoundry3/</code>, one JSON line per
+configuration.</li>
+<li><b>Not established:</b> why Ivan's number was 6% rather than either of ours. Our reading is that his
+shire 0 did something local as well as the atomic — a poll, a flag read, the "am I last?" check a barrier
+makes — and that the local part is what was starved; but we did not run his code. We also did not set
+<code>l3_yield</code>: it is a shire-cache configuration register on a shared lab card, and the erratum says
+it would not help here anyway. And the card's thermal telemetry is one chip-wide mean, so the spatial question
+— whether a hot line makes its shire measurably hotter — cannot be answered with this instrument.</li>
+</ul>
+
+<pre><code>workloads/nocbench/run_hotline.sh DATA 6000000           # 42 configurations, each well under a second
+python3 workloads/nocbench/analyze_hotline.py DATA/sweep.jsonl --power DATA/power.json --out hotline.json
+tools/ettelem/run_hotline_power.sh DATA                  # board power and rails, three launches per case</code></pre>
+
+<script>
+const D = {"cards":["aifoundry2","aifoundry3"],"fairness":[{"card":"aifoundry2","home":"0","per_shire":32,"shires":32,"total_ops":601188,"cycles_per_op":10.0,"pace":0,"host_share":1.004,"min_share":0.9984,"max_share":1.004,"sd_share":0.0011720708169730973},{"card":"aifoundry2","home":"7","per_shire":32,"shires":32,"total_ops":601118,"cycles_per_op":10.0,"pace":0,"host_share":1.001,"min_share":0.9988,"max_share":1.0027,"sd_share":0.0008542117620209685},{"card":"aifoundry2","home":"15","per_shire":32,"shires":32,"total_ops":601142,"cycles_per_op":10.0,"pace":0,"host_share":1.0002,"min_share":0.9989,"max_share":1.0029,"sd_share":0.0008696038968978732},{"card":"aifoundry2","home":"31","per_shire":32,"shires":32,"total_ops":601120,"cycles_per_op":10.0,"pace":0,"host_share":0.9998,"min_share":0.9988,"max_share":1.0029,"sd_share":0.0009243029468199153},{"card":"aifoundry2","home":"0","per_shire":1,"shires":32,"total_ops":600061,"cycles_per_op":10.0,"pace":0,"host_share":1.1969,"min_share":0.8476,"max_share":1.1969,"sd_share":0.08642468519432106},{"card":"aifoundry3","home":"0","per_shire":32,"shires":32,"total_ops":601197,"cycles_per_op":10.0,"pace":0,"host_share":1.0037,"min_share":0.9985,"max_share":1.0037,"sd_share":0.0011206818167414814},{"card":"aifoundry3","home":"7","per_shire":32,"shires":32,"total_ops":601157,"cycles_per_op":10.0,"pace":0,"host_share":1.0007,"min_share":0.999,"max_share":1.0028,"sd_share":0.0008477682097719802},{"card":"aifoundry3","home":"15","per_shire":32,"shires":32,"total_ops":601156,"cycles_per_op":10.0,"pace":0,"host_share":1.0002,"min_share":0.999,"max_share":1.0029,"sd_share":0.0008427945979744999},{"card":"aifoundry3","home":"31","per_shire":32,"shires":32,"total_ops":601125,"cycles_per_op":10.0,"pace":0,"host_share":0.9998,"min_share":0.9988,"max_share":1.0028,"sd_share":0.0009113863066779048},{"card":"aifoundry3","home":"0","per_shire":1,"shires":32,"total_ops":600060,"cycles_per_op":10.0,"pace":0,"host_share":1.1967,"min_share":0.8479,"max_share":1.1967,"sd_share":0.08639671031199263}],"placement":[{"card":"aifoundry2","home":"0","per_shire":32,"shires":32,"total_ops":601213,"cycles_per_op":10.0,"pace":0},{"card":"aifoundry2","home":"scp:0","per_shire":32,"shires":32,"total_ops":601203,"cycles_per_op":10.0,"pace":0},{"card":"aifoundry2","home":"own","per_shire":32,"shires":32,"total_ops":19198522,"cycles_per_op":0.31,"pace":0},{"card":"aifoundry2","home":"scp:own","per_shire":32,"shires":32,"total_ops":19198514,"cycles_per_op":0.31,"pace":0},{"card":"aifoundry3","home":"0","per_shire":32,"shires":32,"total_ops":601206,"cycles_per_op":10.0,"pace":0},{"card":"aifoundry3","home":"scp:0","per_shire":32,"shires":32,"total_ops":601204,"cycles_per_op":10.0,"pace":0},{"card":"aifoundry3","home":"own","per_shire":32,"shires":32,"total_ops":19198552,"cycles_per_op":0.31,"pace":0},{"card":"aifoundry3","home":"scp:own","per_shire":32,"shires":32,"total_ops":19198519,"cycles_per_op":0.31,"pace":0}],"local":[{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":1,"total_ops":1688306,"cycles_per_op":3.55,"pace":0,"host_ops":1688306,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":1.0,"remote_minions":0,"remote_ops_per_shire":0.0,"remote_min":0,"remote_max":0},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":601505,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.00022744692016731565,"remote_minions":992,"remote_ops_per_shire":19391.0,"remote_min":19362,"remote_max":19466},{"card":"aifoundry2","home":"dramlocal:0","per_shire":32,"shires":1,"total_ops":1688300,"cycles_per_op":3.55,"pace":0,"host_ops":1688300,"host_minions":32,"host_alone_ops_per_minion":52759.375,"frac_of_alone":1.0,"remote_minions":0,"remote_ops_per_shire":0.0,"remote_min":0,"remote_max":0},{"card":"aifoundry2","home":"dramlocal:0","per_shire":32,"shires":32,"total_ops":601355,"cycles_per_op":10.0,"pace":0,"host_ops":208,"host_minions":32,"host_alone_ops_per_minion":52759.375,"frac_of_alone":0.00012320085292898182,"remote_minions":992,"remote_ops_per_shire":19391.83870967742,"remote_min":19364,"remote_max":19474},{"card":"aifoundry2","home":"scpstream:0","per_shire":32,"shires":1,"total_ops":821182,"cycles_per_op":7.31,"pace":0,"host_ops":821182,"host_minions":32,"host_alone_ops_per_minion":25661.9375,"frac_of_alone":1.0,"remote_minions":0,"remote_ops_per_shire":0.0,"remote_min":0,"remote_max":0},{"card":"aifoundry2","home":"scpstream:0","per_shire":32,"shires":32,"total_ops":601503,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":25661.9375,"frac_of_alone":0.00046761862778287884,"remote_minions":992,"remote_ops_per_shire":19390.935483870966,"remote_min":19364,"remote_max":19467},{"card":"aifoundry2","home":"dramstream:0","per_shire":32,"shires":1,"total_ops":822066,"cycles_per_op":7.3,"pace":0,"host_ops":822066,"host_minions":32,"host_alone_ops_per_minion":25689.5625,"frac_of_alone":1.0,"remote_minions":0,"remote_ops_per_shire":0.0,"remote_min":0,"remote_max":0},{"card":"aifoundry2","home":"dramstream:0","per_shire":32,"shires":32,"total_ops":601361,"cycles_per_op":10.0,"pace":0,"host_ops":192,"host_minions":32,"host_alone_ops_per_minion":25689.5625,"frac_of_alone":0.0002335578895125209,"remote_minions":992,"remote_ops_per_shire":19392.548387096773,"remote_min":19365,"remote_max":19473},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":1,"total_ops":1688298,"cycles_per_op":3.55,"pace":0,"host_ops":1688298,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":1.0,"remote_minions":0,"remote_ops_per_shire":0.0,"remote_min":0,"remote_max":0},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":601505,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.000227447997924537,"remote_minions":992,"remote_ops_per_shire":19391.0,"remote_min":19361,"remote_max":19468},{"card":"aifoundry3","home":"dramlocal:0","per_shire":32,"shires":1,"total_ops":1674057,"cycles_per_op":3.58,"pace":0,"host_ops":1674057,"host_minions":32,"host_alone_ops_per_minion":52314.28125,"frac_of_alone":1.0,"remote_minions":0,"remote_ops_per_shire":0.0,"remote_min":0,"remote_max":0},{"card":"aifoundry3","home":"dramlocal:0","per_shire":32,"shires":32,"total_ops":601369,"cycles_per_op":10.0,"pace":0,"host_ops":240,"host_minions":32,"host_alone_ops_per_minion":52314.28125,"frac_of_alone":0.0001433642940473353,"remote_minions":992,"remote_ops_per_shire":19391.25806451613,"remote_min":19360,"remote_max":19476},{"card":"aifoundry3","home":"scpstream:0","per_shire":32,"shires":1,"total_ops":822053,"cycles_per_op":7.3,"pace":0,"host_ops":822053,"host_minions":32,"host_alone_ops_per_minion":25689.15625,"frac_of_alone":1.0,"remote_minions":0,"remote_ops_per_shire":0.0,"remote_min":0,"remote_max":0},{"card":"aifoundry3","home":"scpstream:0","per_shire":32,"shires":32,"total_ops":601501,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":25689.15625,"frac_of_alone":0.00046712316602457506,"remote_minions":992,"remote_ops_per_shire":19390.870967741936,"remote_min":19362,"remote_max":19465},{"card":"aifoundry3","home":"dramstream:0","per_shire":32,"shires":1,"total_ops":820907,"cycles_per_op":7.31,"pace":0,"host_ops":820907,"host_minions":32,"host_alone_ops_per_minion":25653.34375,"frac_of_alone":1.0,"remote_minions":0,"remote_ops_per_shire":0.0,"remote_min":0,"remote_max":0},{"card":"aifoundry3","home":"dramstream:0","per_shire":32,"shires":32,"total_ops":601357,"cycles_per_op":10.0,"pace":0,"host_ops":192,"host_minions":32,"host_alone_ops_per_minion":25653.34375,"frac_of_alone":0.00023388763891646678,"remote_minions":992,"remote_ops_per_shire":19392.41935483871,"remote_min":19365,"remote_max":19475}],"requesters":[{"card":"aifoundry2","home":"scplocal:0","per_shire":1,"shires":2,"total_ops":86162,"cycles_per_op":69.64,"pace":0,"host_ops":58407,"host_minions":1,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":1.107041022184367,"remote_minions":1,"remote_ops_per_shire":27755.0,"remote_min":27755,"remote_max":27755},{"card":"aifoundry2","home":"scplocal:0","per_shire":2,"shires":2,"total_ops":160967,"cycles_per_op":37.28,"pace":0,"host_ops":105459,"host_minions":2,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.9994301980802058,"remote_minions":2,"remote_ops_per_shire":55508.0,"remote_min":55508,"remote_max":55508},{"card":"aifoundry2","home":"scplocal:0","per_shire":4,"shires":2,"total_ops":320273,"cycles_per_op":18.73,"pace":0,"host_ops":209265,"host_minions":4,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.9915974947669439,"remote_minions":4,"remote_ops_per_shire":111008.0,"remote_min":111008,"remote_max":111008},{"card":"aifoundry2","home":"scplocal:0","per_shire":8,"shires":2,"total_ops":639973,"cycles_per_op":9.38,"pace":0,"host_ops":417949,"host_minions":8,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.9902209670521813,"remote_minions":8,"remote_ops_per_shire":222024.0,"remote_min":222024,"remote_max":222024},{"card":"aifoundry2","home":"scplocal:0","per_shire":12,"shires":2,"total_ops":959681,"cycles_per_op":6.25,"pace":0,"host_ops":626730,"host_minions":12,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.9899153352532065,"remote_minions":12,"remote_ops_per_shire":332951.0,"remote_min":332951,"remote_max":332951},{"card":"aifoundry2","home":"scplocal:0","per_shire":16,"shires":2,"total_ops":1288556,"cycles_per_op":4.66,"pace":0,"host_ops":840787,"host_minions":16,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.9960125711808168,"remote_minions":16,"remote_ops_per_shire":447769.0,"remote_min":447769,"remote_max":447769},{"card":"aifoundry2","home":"scplocal:0","per_shire":20,"shires":2,"total_ops":1602763,"cycles_per_op":3.74,"pace":0,"host_ops":1043640,"host_minions":20,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.9890529323475721,"remote_minions":20,"remote_ops_per_shire":559123.0,"remote_min":559123,"remote_max":559123},{"card":"aifoundry2","home":"scplocal:0","per_shire":24,"shires":2,"total_ops":600239,"cycles_per_op":10.0,"pace":0,"host_ops":295,"host_minions":24,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.00023297514392138234,"remote_minions":24,"remote_ops_per_shire":599944.0,"remote_min":599944,"remote_max":599944},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":2,"total_ops":600337,"cycles_per_op":10.0,"pace":0,"host_ops":391,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.00023159308798286567,"remote_minions":32,"remote_ops_per_shire":599946.0,"remote_min":599946,"remote_max":599946},{"card":"aifoundry3","home":"scplocal:0","per_shire":1,"shires":2,"total_ops":86141,"cycles_per_op":69.66,"pace":0,"host_ops":58407,"host_minions":1,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":1.1070462678982027,"remote_minions":1,"remote_ops_per_shire":27734.0,"remote_min":27734,"remote_max":27734},{"card":"aifoundry3","home":"scplocal:0","per_shire":2,"shires":2,"total_ops":160919,"cycles_per_op":37.29,"pace":0,"host_ops":105469,"host_minions":2,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.9995297038792914,"remote_minions":2,"remote_ops_per_shire":55450.0,"remote_min":55450,"remote_max":55450},{"card":"aifoundry3","home":"scplocal:0","per_shire":4,"shires":2,"total_ops":320539,"cycles_per_op":18.72,"pace":0,"host_ops":209599,"host_minions":4,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.9931848524371882,"remote_minions":4,"remote_ops_per_shire":110940.0,"remote_min":110940,"remote_max":110940},{"card":"aifoundry3","home":"scplocal:0","per_shire":8,"shires":2,"total_ops":639564,"cycles_per_op":9.38,"pace":0,"host_ops":417683,"host_minions":8,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.9895954387199416,"remote_minions":8,"remote_ops_per_shire":221881.0,"remote_min":221881,"remote_max":221881},{"card":"aifoundry3","home":"scplocal:0","per_shire":12,"shires":2,"total_ops":959361,"cycles_per_op":6.25,"pace":0,"host_ops":626518,"host_minions":12,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.9895851719700354,"remote_minions":12,"remote_ops_per_shire":332843.0,"remote_min":332843,"remote_max":332843},{"card":"aifoundry3","home":"scplocal:0","per_shire":16,"shires":2,"total_ops":1288951,"cycles_per_op":4.66,"pace":0,"host_ops":841234,"host_minions":16,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.9965468181565103,"remote_minions":16,"remote_ops_per_shire":447717.0,"remote_min":447717,"remote_max":447717},{"card":"aifoundry3","home":"scplocal:0","per_shire":20,"shires":2,"total_ops":1602846,"cycles_per_op":3.74,"pace":0,"host_ops":1043706,"host_minions":20,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.9891201671742785,"remote_minions":20,"remote_ops_per_shire":559140.0,"remote_min":559140,"remote_max":559140},{"card":"aifoundry3","home":"scplocal:0","per_shire":24,"shires":2,"total_ops":600239,"cycles_per_op":10.0,"pace":0,"host_ops":295,"host_minions":24,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.00023297624787409172,"remote_minions":24,"remote_ops_per_shire":599944.0,"remote_min":599944,"remote_max":599944},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":2,"total_ops":600342,"cycles_per_op":10.0,"pace":0,"host_ops":390,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.0002310018728921079,"remote_minions":32,"remote_ops_per_shire":599952.0,"remote_min":599952,"remote_max":599952}],"shires":[{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":2,"total_ops":600343,"cycles_per_op":10.0,"pace":0,"host_ops":390,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.00023100077829492995,"remote_minions":32,"remote_ops_per_shire":599953.0,"remote_min":599953,"remote_max":599953},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":3,"total_ops":600377,"cycles_per_op":10.0,"pace":0,"host_ops":388,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.0002298161589190585,"remote_minions":64,"remote_ops_per_shire":299994.5,"remote_min":299986,"remote_max":300003},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":5,"total_ops":600443,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.00022744692016731565,"remote_minions":128,"remote_ops_per_shire":150014.75,"remote_min":149996,"remote_max":150039},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":9,"total_ops":600601,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.00022744692016731565,"remote_minions":256,"remote_ops_per_shire":75027.125,"remote_min":74991,"remote_max":75074},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":17,"total_ops":600916,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.00022744692016731565,"remote_minions":512,"remote_ops_per_shire":37533.25,"remote_min":37508,"remote_max":37592},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":601498,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.00022744692016731565,"remote_minions":992,"remote_ops_per_shire":19390.774193548386,"remote_min":19359,"remote_max":19469},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":2,"total_ops":600342,"cycles_per_op":10.0,"pace":0,"host_ops":391,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.00023159418538670306,"remote_minions":32,"remote_ops_per_shire":599951.0,"remote_min":599951,"remote_max":599951},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":3,"total_ops":600378,"cycles_per_op":10.0,"pace":0,"host_ops":388,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.00022981724790291762,"remote_minions":64,"remote_ops_per_shire":299995.0,"remote_min":299988,"remote_max":300002},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":5,"total_ops":600451,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.000227447997924537,"remote_minions":128,"remote_ops_per_shire":150016.75,"remote_min":149999,"remote_max":150039},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":9,"total_ops":600603,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.000227447997924537,"remote_minions":256,"remote_ops_per_shire":75027.375,"remote_min":74990,"remote_max":75074},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":17,"total_ops":600916,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.000227447997924537,"remote_minions":512,"remote_ops_per_shire":37533.25,"remote_min":37505,"remote_max":37591},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":601503,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.000227447997924537,"remote_minions":992,"remote_ops_per_shire":19390.935483870966,"remote_min":19363,"remote_max":19467}],"pace":[{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":601510,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.00022744692016731565,"remote_minions":992,"remote_ops_per_shire":19391.16129032258,"remote_min":19364,"remote_max":19467},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":601398,"cycles_per_op":10.0,"pace":1000,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.00022744692016731565,"remote_minions":992,"remote_ops_per_shire":19387.548387096773,"remote_min":19360,"remote_max":19432},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":601098,"cycles_per_op":10.0,"pace":4000,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.00022744692016731565,"remote_minions":992,"remote_ops_per_shire":19377.870967741936,"remote_min":19360,"remote_max":19400},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":600689,"cycles_per_op":10.01,"pace":8000,"host_ops":390,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.00023100077829492995,"remote_minions":992,"remote_ops_per_shire":19364.483870967742,"remote_min":17726,"remote_max":22192},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":1491822,"cycles_per_op":4.03,"pace":10000,"host_ops":915208,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.5420865648762724,"remote_minions":992,"remote_ops_per_shire":18600.451612903227,"remote_min":18500,"remote_max":18688},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":1927109,"cycles_per_op":3.12,"pace":12000,"host_ops":1443452,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.8549706036701877,"remote_minions":992,"remote_ops_per_shire":15601.838709677419,"remote_min":15523,"remote_max":15661},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":1966452,"cycles_per_op":3.06,"pace":16000,"host_ops":1601217,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.9484163415873663,"remote_minions":992,"remote_ops_per_shire":11781.774193548386,"remote_min":11744,"remote_max":11811},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":1929233,"cycles_per_op":3.12,"pace":20000,"host_ops":1635841,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.9689244722224526,"remote_minions":992,"remote_ops_per_shire":9464.258064516129,"remote_min":9440,"remote_max":9504},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":1799375,"cycles_per_op":3.36,"pace":40000,"host_ops":1651551,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.9782296574199227,"remote_minions":992,"remote_ops_per_shire":4768.5161290322585,"remote_min":4768,"remote_max":4781},{"card":"aifoundry2","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":1721374,"cycles_per_op":3.5,"pace":100000,"host_ops":1661854,"host_minions":32,"host_alone_ops_per_minion":52759.5625,"frac_of_alone":0.9843322241347244,"remote_minions":992,"remote_ops_per_shire":1920.0,"remote_min":1920,"remote_max":1920},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":601512,"cycles_per_op":10.0,"pace":0,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.000227447997924537,"remote_minions":992,"remote_ops_per_shire":19391.225806451614,"remote_min":19364,"remote_max":19467},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":601405,"cycles_per_op":10.0,"pace":1000,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.000227447997924537,"remote_minions":992,"remote_ops_per_shire":19387.774193548386,"remote_min":19359,"remote_max":19431},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":601096,"cycles_per_op":10.0,"pace":4000,"host_ops":384,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.000227447997924537,"remote_minions":992,"remote_ops_per_shire":19377.8064516129,"remote_min":19362,"remote_max":19398},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":600711,"cycles_per_op":10.01,"pace":8000,"host_ops":387,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.00022922493540832245,"remote_minions":992,"remote_ops_per_shire":19365.290322580644,"remote_min":17741,"remote_max":22195},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":1507960,"cycles_per_op":3.99,"pace":10000,"host_ops":931320,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.5516324724663537,"remote_minions":992,"remote_ops_per_shire":18601.290322580644,"remote_min":18499,"remote_max":18688},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":1946099,"cycles_per_op":3.09,"pace":12000,"host_ops":1462438,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.8662202999707398,"remote_minions":992,"remote_ops_per_shire":15601.967741935483,"remote_min":15520,"remote_max":15668},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":1974165,"cycles_per_op":3.05,"pace":16000,"host_ops":1608914,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.9529798649290587,"remote_minions":992,"remote_ops_per_shire":11782.290322580646,"remote_min":11744,"remote_max":11808},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":1934883,"cycles_per_op":3.11,"pace":20000,"host_ops":1641491,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.9722756290654849,"remote_minions":992,"remote_ops_per_shire":9464.258064516129,"remote_min":9440,"remote_max":9504},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":1795710,"cycles_per_op":3.36,"pace":40000,"host_ops":1647881,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.9760605059059478,"remote_minions":992,"remote_ops_per_shire":4768.677419354839,"remote_min":4768,"remote_max":4784},{"card":"aifoundry3","home":"scplocal:0","per_shire":32,"shires":32,"total_ops":1719895,"cycles_per_op":3.51,"pace":100000,"host_ops":1660375,"host_minions":32,"host_alone_ops_per_minion":52759.3125,"frac_of_alone":0.9834608582134197,"remote_minions":992,"remote_ops_per_shire":1920.0,"remote_min":1920,"remote_max":1920}],"shares_home0":[{"s":0,"share":1.004,"kind":"full"},{"s":1,"share":1.0028,"kind":"full"},{"s":2,"share":1.002,"kind":"full"},{"s":3,"share":1.0014,"kind":"full"},{"s":4,"share":1.001,"kind":"full"},{"s":5,"share":1.0006,"kind":"full"},{"s":6,"share":0.9992,"kind":"full"},{"s":7,"share":0.9991,"kind":"full"},{"s":8,"share":1.0009,"kind":"full"},{"s":9,"share":1.0003,"kind":"full"},{"s":10,"share":1.0002,"kind":"full"},{"s":11,"share":0.9996,"kind":"full"},{"s":12,"share":1.0001,"kind":"full"},{"s":13,"share":1.0002,"kind":"full"},{"s":14,"share":1.0,"kind":"full"},{"s":15,"share":0.9996,"kind":"full"},{"s":16,"share":1.0002,"kind":"full"},{"s":17,"share":0.9996,"kind":"full"},{"s":18,"share":0.9995,"kind":"full"},{"s":19,"share":0.9993,"kind":"full"},{"s":20,"share":0.9994,"kind":"full"},{"s":21,"share":0.9995,"kind":"full"},{"s":22,"share":0.9991,"kind":"full"},{"s":23,"share":0.9984,"kind":"full"},{"s":24,"share":0.9998,"kind":"full"},{"s":25,"share":0.9994,"kind":"full"},{"s":26,"share":0.9989,"kind":"full"},{"s":27,"share":0.9992,"kind":"full"},{"s":28,"share":0.9993,"kind":"full"},{"s":29,"share":0.9994,"kind":"full"},{"s":30,"share":0.9991,"kind":"full"},{"s":31,"share":0.9989,"kind":"full"},{"s":0,"share":1.1969,"kind":"one"},{"s":1,"share":1.0655,"kind":"one"},{"s":2,"share":1.0279,"kind":"one"},{"s":3,"share":1.1078,"kind":"one"},{"s":4,"share":1.0654,"kind":"one"},{"s":5,"share":0.9286,"kind":"one"},{"s":6,"share":0.901,"kind":"one"},{"s":7,"share":0.8726,"kind":"one"},{"s":8,"share":1.1504,"kind":"one"},{"s":9,"share":1.1077,"kind":"one"},{"s":10,"share":0.9927,"kind":"one"},{"s":11,"share":0.9927,"kind":"one"},{"s":12,"share":1.0281,"kind":"one"},{"s":13,"share":1.0281,"kind":"one"},{"s":14,"share":0.9928,"kind":"one"},{"s":15,"share":0.9009,"kind":"one"},{"s":16,"share":1.1077,"kind":"one"},{"s":17,"share":1.0281,"kind":"one"},{"s":18,"share":0.9596,"kind":"one"},{"s":19,"share":0.9595,"kind":"one"},{"s":20,"share":0.9928,"kind":"one"},{"s":21,"share":0.9928,"kind":"one"},{"s":22,"share":0.9595,"kind":"one"},{"s":23,"share":0.8725,"kind":"one"},{"s":24,"share":1.1504,"kind":"one"},{"s":25,"share":1.0654,"kind":"one"},{"s":26,"share":0.9285,"kind":"one"},{"s":27,"share":0.9285,"kind":"one"},{"s":28,"share":0.9596,"kind":"one"},{"s":29,"share":0.9596,"kind":"one"},{"s":30,"share":0.9286,"kind":"one"},{"s":31,"share":0.8476,"kind":"one"}],"power":{"idle":{"board_w":31.272745454545458,"minion_w":24.550095757575754,"sram_w":3.630365454545454,"noc_w":5.454240606060606,"die_c":72.38545454545455,"n":550},"runs":[{"label":"contended","home":"0","ops_per_s":59980952.40792768,"cycles_per_op":10.0,"over_idle_w":1.4134809605488883,"nj_per_op":23.56549710874662,"die_c":72.84905660377359,"n":53,"board_w":32.686226415094346,"minion_w":24.798496855345906,"sram_w":3.6335157232704405,"noc_w":5.507226415094339},{"label":"spread","home":"own","ops_per_s":1919418208.6858027,"cycles_per_op":0.31,"over_idle_w":2.6307730639730593,"nj_per_op":1.3706096212217924,"die_c":73.0,"n":54,"board_w":33.90351851851852,"minion_w":24.908049382716044,"sram_w":3.770407407407407,"noc_w":5.5562098765432095},{"label":"contended_scp","home":"scp:0","ops_per_s":59980377.733830266,"cycles_per_op":10.0,"over_idle_w":1.4640469982847222,"nj_per_op":24.40876589309919,"die_c":73.0,"n":53,"board_w":32.73679245283018,"minion_w":24.81000628930817,"sram_w":3.636603773584906,"noc_w":5.511981132075471},{"label":"starved","home":"scplocal:0","ops_per_s":59982161.72031774,"cycles_per_op":10.0,"over_idle_w":1.4532922813035967,"nj_per_op":24.228741339465984,"die_c":73.0,"n":53,"board_w":32.726037735849054,"minion_w":24.806477987421385,"sram_w":3.63611320754717,"noc_w":5.509930817610062},{"label":"local_only","home":"scplocal:0","ops_per_s":179507299.88669688,"cycles_per_op":3.34,"over_idle_w":0.0723488850771794,"nj_per_op":0.4030414647362267,"die_c":72.05660377358491,"n":53,"board_w":31.345094339622637,"minion_w":24.553345911949684,"sram_w":3.6345786163522007,"noc_w":5.449761006289308}]},"context":{"barrier_cycles_chip":4997,"remote_atomic_latency_cycles":216.2,"bank_service_cycles":10.0,"window_independence":[{"window":3000000,"host_ops":384,"remote_ops":301512},{"window":6000000,"host_ops":384,"remote_ops":601503},{"window":24000000,"host_ops":384,"remote_ops":2401504},{"window":60000000,"host_ops":384,"remote_ops":6001507}],"errata":[{"id":"RTLMIN-6207","num":"4.1","title":"Neigh request hangs if shire cache full of l3_slave requests to same SCP address","quote":"The shire cache prioritizes l3_slave requests over neighborhood requests. If there are too many l3 requests there may be no resources for neighborhood requests. l3_yield_priority allows priority and resources to be given to neighborhood requests. However, if the neighborhood and the mesh are both accessing the same SCP request it is possible for the neighborhood request to continually be squashed and the request could still not progress even with l3_yield_priority set to non-zero.","impact":"Low. It would have to be a pretty consistent and repeating pattern for the neighborhood to continually be squashed and re-queued.","workaround":"Slow down the polling rate from other shires that are waiting for the local neighborhood to complete whatever task it is trying to complete.","fix":"Postponed."},{"id":"RTLMIN-6214","num":"4.2","title":"L3_yield priority does not have sub-bank granularity","quote":"It is possible for l3_slave requests to over use one of the sub-banks and then that sub-bank is busy when it is the neighborhood's turn to make a request due to l3_yield_priority. As a result a request to the over used sub-bank from a neighborhood may not make progress despite l3_yield_priority being non-zero.","impact":"Low.","workaround":"","fix":"Postponed."}]}};
+const NS='http://www.w3.org/2000/svg';
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
+function txt(p,x,y,s,c,an){const t=el('text',{x,y,class:c||'tick','text-anchor':an||'start'},p);t.textContent=s;return t;}
+function host(id,W,H){const h=document.getElementById(id);h.innerHTML='';const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'},h);const tip=document.createElement('div');tip.className='tip';h.appendChild(tip);return {svg,tip,h};}
+function hover(g,tip,h,html){const s=ev=>{tip.innerHTML=html();tip.style.display='block';const b=h.getBoundingClientRect();tip.style.left=Math.max(0,Math.min(ev.clientX-b.left+12,b.width-290))+'px';tip.style.top=(ev.clientY-b.top+12)+'px';};g.addEventListener('mousemove',s);g.addEventListener('mouseleave',()=>tip.style.display='none');}
+function path(pts,x,y){return pts.map((p,i)=>`${i?'L':'M'}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join(' ');}
+function axes(svg,o){const {W,H,L,R,T,B,x,y}=o;
+ for(const t of o.yt){el('line',{x1:L,x2:W-R,y1:y(t),y2:y(t),class:'grid-line'},svg);txt(svg,L-6,y(t)+4,o.yf?o.yf(t):t,'tick','end');}
+ for(const t of o.xt){txt(svg,x(t),H-B+16,o.xf?o.xf(t):t,'tick','middle');}
+ if(o.xl)txt(svg,(L+W-R)/2,H-4,o.xl,'lab','middle');if(o.yl)txt(svg,4,T-8,o.yl,'lab');}
+const f1=v=>v.toFixed(1),f2=v=>v.toFixed(2);
+const f3=v=>v.toFixed(3);
+const pick=(g,f)=>D[g].filter(f), A2=r=>r.card==='aifoundry2';
+
+/* ---------- KPIs ---------- */
+(function(){
+ const fair=pick('fairness',r=>A2(r)&&r.home==='0'&&r.per_shire===32)[0];
+ const loc=pick('local',r=>A2(r)&&r.home==='scplocal:0'&&r.shires>1)[0];
+ const req=pick('requesters',r=>A2(r)).sort((a,b)=>a.remote_minions-b.remote_minions).find(r=>r.frac_of_alone<0.5);
+ const pw=D.power.runs, c=pw.find(r=>r.label==='contended'), s=pw.find(r=>r.label==='spread');
+ document.getElementById('k1').textContent=f3(fair.host_share);
+ document.getElementById('k2').textContent=(100*loc.frac_of_alone).toFixed(2)+'%';
+ document.getElementById('k3').textContent=req?req.remote_minions:'—';
+ document.getElementById('k4').textContent=(c.nj_per_op/s.nj_per_op).toFixed(0)+'×';
+ document.getElementById('enfac').textContent=(c.nj_per_op/s.nj_per_op).toFixed(0);
+})();
+
+/* ---------- section 1: per-shire shares ---------- */
+(function(){
+ const rows=D.fairness.filter(r=>A2(r)&&r.home==='0'&&r.per_shire===32);
+ const raw=D.raw_shares||null;
+ const W=700,H=300,L=52,R=16,T=26,B=46,{svg,tip,h}=host('fair',W,H);
+ const sh=D.shares_home0||[];
+ const y=v=>H-B-(H-B-T)*(v-0.9)/0.35, x=i=>L+(W-L-R)*(i+0.5)/32;
+ axes(svg,{W,H,L,R,T,B,x,y,yt:[0.9,1.0,1.1,1.2],yf:v=>v.toFixed(2),xt:[],yl:'share of an even split'});
+ el('line',{x1:L,x2:W-R,y1:y(1),y2:y(1),stroke:'var(--ref)','stroke-width':1.5,'stroke-dasharray':'5 4'},svg);
+ [['1,024 minions: 32 per shire','var(--c1)','full'],['32 minions: 1 per shire','var(--c2)','one']].forEach((s2,i)=>{
+   el('rect',{x:W-R-190,y:T-14+i*18,width:11,height:11,fill:s2[1]},svg);txt(svg,W-R-174,T-4+i*18,s2[0],'lab');});
+ for(const key of ['full','one']){
+   const arr=sh.filter(r=>r.kind===key), col=key==='full'?'var(--c1)':'var(--c2)';
+   arr.forEach(r=>{const g=el('g',{},svg);
+     el('circle',{cx:x(r.s),cy:y(r.share),r:key==='full'?3.2:3.2,fill:col,'fill-opacity':0.85},g);
+     hover(g,tip,h,()=>`shire ${r.s}<br>${key==='full'?'32':'1'} minion${key==='full'?'s':''} per shire<br>share ${f3(r.share)}`);});
+ }
+ txt(svg,L,H-B+16,'shire 0',' tick');txt(svg,W-R,H-B+16,'shire 31','tick','end');
+ document.getElementById('faircap').textContent=
+  `Dashed line is an even split. With every minion taking part the whole chip lands within ${f3(Math.min(...sh.filter(r=>r.kind==='full').map(r=>r.share)))}–${f3(Math.max(...sh.filter(r=>r.kind==='full').map(r=>r.share)))}; `+
+  `the host shire is at ${f3(rows[0].host_share)}. With one minion per shire the bank is not saturated and the host shire leads.`;
+})();
+
+/* ---------- section 1 table: home sweep, both cards ---------- */
+document.getElementById('fairtab').innerHTML='<thead><tr><th>Card</th><th>Line homed in</th><th class="num">Minions per shire</th><th class="num">Host shire’s share</th><th class="num">Spread across 32 shires</th></tr></thead><tbody>'+
+ D.fairness.map(r=>`<tr><td>${r.card}</td><td>shire ${r.home}</td><td class="num">${r.per_shire}</td><td class="num">${f3(r.host_share)}</td><td class="num">${f3(r.min_share)}–${f3(r.max_share)}</td></tr>`).join('')+'</tbody>';
+
+/* ---------- section 2: placement ---------- */
+document.getElementById('placetab').innerHTML='<thead><tr><th>Card</th><th>Where the atomic lives</th><th class="num">Atomics in a 10 ms window</th><th class="num">Cycles per atomic</th><th class="num">Rate</th></tr></thead><tbody>'+
+ D.placement.map(r=>{const name={'0':'one DRAM line, homed in shire 0','scp:0':'one scratchpad word in shire 0',
+   'own':'32 DRAM lines, one per shire','scp:own':'32 scratchpad words, one per shire'}[r.home]||r.home;
+  return `<tr><td>${r.card}</td><td>${name}</td><td class="num">${r.total_ops.toLocaleString()}</td><td class="num">${f2(r.cycles_per_op)}</td><td class="num">${(r.total_ops/0.01/1e6).toFixed(0)} M/s</td></tr>`;}).join('')+'</tbody>';
+
+/* ---------- section 3: the host shire's own traffic ---------- */
+(function(){
+ const alone={},with_={};
+ D.local.forEach(r=>{const k=r.card+'|'+r.home;(r.shires===1?alone:with_)[k]=r;});
+ const names={'scplocal':'its own scratchpad','dramlocal':'its own scratchpad','scpstream':'DRAM','dramstream':'DRAM'};
+ const hotin={'scplocal':'scratchpad of the same shire','dramlocal':'L3 slice of the same shire',
+              'scpstream':'scratchpad of the same shire','dramstream':'L3 slice of the same shire'};
+ document.getElementById('localtab').innerHTML='<thead><tr><th>Card</th><th>Host shire is reading</th><th>Hot line is in the</th><th class="num">Alone</th><th class="num">While hammered</th><th class="num">Fraction</th></tr></thead><tbody>'+
+  Object.keys(with_).map(k=>{const r=with_[k],a=alone[k],base=k.split('|')[1].split(':')[0];
+   return `<tr><td>${r.card}</td><td>${names[base]}</td><td>${hotin[base]}</td><td class="num">${a.host_ops.toLocaleString()}</td><td class="num">${r.host_ops}</td><td class="num">${(100*r.frac_of_alone).toFixed(3)}%</td></tr>`;}).join('')+'</tbody>';
+ document.getElementById('wintab').innerHTML='<thead><tr><th class="num">Window</th><th class="num">Host shire’s loads</th><th class="num">Remote atomics in the same window</th></tr></thead><tbody>'+
+  D.context.window_independence.map(r=>`<tr><td class="num">${(r.window/600e3).toFixed(0)} ms</td><td class="num">${r.host_ops}</td><td class="num">${r.remote_ops.toLocaleString()}</td></tr>`).join('')+'</tbody>';
+})();
+
+/* ---------- section 4: requesters ---------- */
+(function(){
+ const rows=D.requesters.filter(A2).sort((a,b)=>a.remote_minions-b.remote_minions);
+ const W=700,H=330,L=58,R=58,T=26,B=52,{svg,tip,h}=host('req',W,H);
+ const xs=rows.map(r=>r.remote_minions),mx=Math.max(...xs);
+ const x=v=>L+(W-L-R)*(v-1)/(mx-1), y=v=>H-B-(H-B-T)*v/1.2, y2=v=>H-B-(H-B-T)*(250-v)/250;
+ axes(svg,{W,H,L,R,T,B,x,y,yt:[0,0.25,0.5,0.75,1.0],yf:v=>Math.round(100*v)+'%',xt:[1,8,16,24,32],
+   xl:'minions of one other shire hammering the line',yl:'host shire’s own memory throughput'});
+ for(const t of [10,50,100,200]) txt(svg,W-R+6,y2(t)+4,t,'tick');
+ txt(svg,W-R-4,T-8,'cycles per remote atomic','lab','end');
+ el('path',{d:path(rows.map(r=>[r.remote_minions,Math.min(250,6e6/Math.max(r.remote_ops_per_shire,1))]),x,y2),
+            class:'ln s2','stroke-dasharray':'5 4'},svg);
+ el('path',{d:path(rows.map(r=>[r.remote_minions,r.frac_of_alone]),x,y),class:'ln s1'},svg);
+ rows.forEach(r=>{const g=el('g',{},svg);
+  el('circle',{cx:x(r.remote_minions),cy:y(r.frac_of_alone),r:4,fill:'var(--c1)'},g);
+  hover(g,tip,h,()=>`${r.remote_minions} remote minions<br>host at ${(100*r.frac_of_alone).toFixed(2)}% of alone<br>remote atomic every ${f1(6e6/r.remote_ops_per_shire)} cycles`);});
+ document.getElementById('reqcap').textContent=
+  'Solid: the host shire’s own loads, as a fraction of the same loop with nobody hammering. Dashed, right axis: '+
+  'how often the remote shire completes an atomic. The cliff is where that reaches 10 cycles, the rate one shire cache can retire.';
+})();
+
+/* ---------- section 5: errata ---------- */
+document.getElementById('errata').innerHTML=D.context.errata.map(e=>
+ `<div class="card" style="margin:12px 0"><div><b>Erratum ${e.num} — ${e.title}</b> <span class="small">(${e.id})</span></div>`+
+ `<p class="small" style="margin:8px 0 6px">${e.quote}</p>`+
+ `<p class="small" style="margin:0"><b>Impact:</b> ${e.impact} ${e.workaround?'<b>Workaround:</b> '+e.workaround:''} <b>Fix status:</b> ${e.fix}</p></div>`).join('');
+
+/* ---------- section 6: pacing ---------- */
+(function(){
+ const rows=D.pace.filter(A2).sort((a,b)=>a.pace-b.pace), sat=rows[0].remote_ops_per_shire;
+ const W=700,H=320,L=58,R=16,T=26,B=52,{svg,tip,h}=host('pace',W,H);
+ const x=v=>L+(W-L-R)*Math.log10(Math.max(v,500)/500)/Math.log10(100000/500), y=v=>H-B-(H-B-T)*v/1.05;
+ axes(svg,{W,H,L,R,T,B,x,y,yt:[0,0.25,0.5,0.75,1.0],yf:v=>Math.round(100*v)+'%',xt:[1000,4000,10000,40000,100000],
+   xf:v=>v>=1000?(v/1000)+'k':v,xl:'cycles a remote minion waits between atomics',yl:'fraction of what each side gets unpaced'});
+ el('path',{d:path(rows.map(r=>[r.pace,r.frac_of_alone]),x,y),class:'ln s1'},svg);
+ el('path',{d:path(rows.map(r=>[r.pace,r.remote_ops_per_shire/sat]),x,y),class:'ln s3'},svg);
+ rows.forEach(r=>{const g=el('g',{},svg);
+  el('circle',{cx:x(r.pace),cy:y(r.frac_of_alone),r:3.5,fill:'var(--c1)'},g);
+  el('circle',{cx:x(r.pace),cy:y(r.remote_ops_per_shire/sat),r:3.5,fill:'var(--c3)'},g);
+  hover(g,tip,h,()=>`pace ${r.pace.toLocaleString()} cycles<br>host shire ${(100*r.frac_of_alone).toFixed(1)}% of its own baseline<br>hammering shires ${(100*r.remote_ops_per_shire/sat).toFixed(0)}% of their unpaced rate`);});
+ [['host shire’s own memory','var(--c1)'],['the 31 hammering shires','var(--c3)']].forEach((s2,i)=>{
+  el('rect',{x:L+12,y:T-14+i*18,width:11,height:11,fill:s2[1]},svg);txt(svg,L+28,T-4+i*18,s2[0],'lab');});
+ const knee=rows.find(r=>r.frac_of_alone>0.4);
+ document.getElementById('pacecap').textContent=
+  `At ${knee.pace.toLocaleString()} cycles between atomics the host shire is back to ${(100*knee.frac_of_alone).toFixed(0)}% `+
+  `while the hammering shires keep ${(100*knee.remote_ops_per_shire/sat).toFixed(0)}% of their rate. Nothing below 10,000 cycles helps at all.`;
+})();
+
+/* ---------- section 7: power ---------- */
+(function(){
+ const p=D.power, names={contended:'one DRAM line, 1,024 minions',spread:'32 DRAM lines, 1,024 minions',
+  contended_scp:'one scratchpad word, 1,024 minions',starved:'one scratchpad word, host shire reading instead',
+  local_only:'host shire reading, nobody hammering'};
+ document.getElementById('pwrtab').innerHTML='<thead><tr><th>Case</th><th class="num">Operations per second</th><th class="num">Board W</th><th class="num">Over idle</th><th class="num">nJ per operation</th></tr></thead><tbody>'+
+  p.runs.map(r=>`<tr><td>${names[r.label]||r.label}</td><td class="num">${(r.ops_per_s/1e6).toFixed(0)} M</td><td class="num">${f2(r.board_w)}</td><td class="num">${f2(r.over_idle_w)}</td><td class="num">${f1(r.nj_per_op)}</td></tr>`).join('')+
+  `<tr><td>idle card</td><td class="num">0</td><td class="num">${f2(p.idle.board_w)}</td><td class="num">—</td><td class="num">—</td></tr></tbody>`;
+})();
+
+</script>
+</body>
+</html>
