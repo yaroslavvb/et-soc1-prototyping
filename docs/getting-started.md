@@ -1,5 +1,9 @@
 # Getting started on a new machine
 
+> For the **results** rather than the machinery, read [findings/](findings/README.md): the findings from
+> 19-22 September 2026, with a claim index that traces every number back to the experiment and the raw file
+> it came from.
+
 This page covers everything needed to pick the work up somewhere else: clone, connect to the lab, rebuild,
 rerun, and republish. Claude Code's memory for this project lives outside the repo, on each machine, so this
 page and `CLAUDE.md` carry the context.

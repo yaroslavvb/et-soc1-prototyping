@@ -4,6 +4,11 @@ A workspace for prototyping on AINekko / AI Foundry's **ET platform**, the open-
 **ET-SoC-1**: 1088 RISC-V minion cores with custom vector and tensor units. Work runs on the
 `sys_emu` simulator first, then on real cards in the AI Foundry lab.
 
+**Looking for results rather than code? Start with [docs/findings/](docs/findings/README.md).** It is a
+self-contained write-up of everything measured on the card: what a workload's data does to power and
+temperature, the model that predicts it, why the chip is low power against an A100, and — for every number —
+which experiment produced it and which raw file holds the evidence.
+
 **New machine? Start with [docs/getting-started.md](docs/getting-started.md).** It covers the current status,
 cloning, connecting to the lab machines over Tailscale, the hello worlds, rerunning the benchmark, and
 republishing the reports. Its section 8 shows how to regenerate every report from the raw data committed here, and
