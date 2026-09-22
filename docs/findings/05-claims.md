@@ -7,8 +7,9 @@ the file and field that hold the evidence.
 **Kind:** `M` measured on the card · `S` simulated from RTL · `F` fitted to measurements · `P` predicted by a
 model before it was measured · `X` external source · `A` assumption.
 
-Paths are relative to the repository root. `DATA` means
-`docs/reports/data/2026-09-21-horace-aifoundry2/`.
+Paths are relative to the repository root. `DATA` means `docs/reports/data/2026-09-21-horace-aifoundry2/`,
+`DATA2` means `docs/reports/data/2026-09-22-dvfs-aifoundry2/`, `DATA3` means
+`docs/reports/data/2026-09-22-horace-aifoundry3/` and `DATAC` means `docs/reports/data/2026-09-22-cards/`.
 
 ---
 
@@ -169,6 +170,27 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
 | Leakage share of a random-data matmul at 80 °C | **36%** | F | E17 | same |
 | Kanter's reference range for leakage | 5–30%, ~20% common | X | R9 | the brief at R9 |
 
+## The three machines (E20, E21)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| Static TDP the **service processor** reports | **65 W on aifoundry2, 0 W on aifoundry3** | M | E21 | `DATAC/config.json`; reproduce with `ettelem config` |
+| Static TDP the **driver** reports | 65 W on all three machines | M | E21 | `DATAC/driver_config.json`; reproduce with `tools/etcfg` |
+| Consequence in the firmware | at a TDP of 0 the step-down test `avg > tdp` is always true and the step-up test `avg < tdp` never is | X | R3 | `ServiceProcessorBL2/services/thermal_pwr_mgmt.c`, `check_power_throttle_conditions()` |
+| aifoundry3's governor log, one 8 KB window | **26 throttle-down events, 0 throttle-up**, each printing `tdp level: 0` | M | E21 | `DATAC/sptrace-aifoundry3.bin`, readable with `strings` |
+| Power state the firmware reports | `max_power` on aifoundry3 at 23 W, `managed_power` on aifoundry2 | M | E21 | `DATAC/config.json`; `get_power_state()` returns `MAX_POWER` iff power > TDP |
+| Minion clock ever seen above 600 MHz | aifoundry2 yes (700, 800); **aifoundry3 no** | M | E10, E20, E21 | `DATA/cold1/telemetry.jsonl.gz`; `DATA3/telemetry.jsonl.gz`, `mhz.minion` constant at 600 |
+| aifoundry1's kernel module `srcversion` | `1383B256EB24A0A53F04CC7` against `47D26A305A0428B29FB7FC4` | M | E21 | `/sys/module/et_soc1/srcversion` on each machine |
+| aifoundry1's cards | 2, both on the bus, **neither usable**: `Error unable to evaluate compatibility!` | M | E21 | reproduce with `lspci` and any `libDM.so` client |
+| aifoundry3 launch temperature, strict session | **55.77 ± 0.18 °C** | M | E20 | `DATA3/horace3.json`, `thermal.model_T_at_launch` |
+| aifoundry3 idle board power under those runs | 25.1 W | M | E20 | `DATA3/horace3.json`, `patterns.*.p_before` |
+| Switching power, zeros / random normal, aifoundry3 | **1.89 W / 24.86 W** over idle (aifoundry2: 1.96 / 27.11) | M | E20 | `DATA3/cards.json`, `rows[*]` |
+| aifoundry2 model applied to aifoundry3 unchanged | 1.38 W rms, 2.32 W worst, a consistent 8% overestimate | P | E17 → E20 | `DATA3/cards.json`, `model_error` |
+| …after one scale factor | scale **0.924**, residual **0.20 W rms** over 1.9–25 W | F | E20 | `DATAC/cards-report.json`, `scale`, `rms_scaled` |
+| …calibrating that factor on one run, predicting the other seven | 0.36 W rms median, 1.53 W worst; 0.27 W if calibrated on random data | P | E20 | `DATA3/transfer.json` |
+| Die voltage, aifoundry3 vs aifoundry2 | 523 mV vs 518 mV at the same 600 MHz, so \(V^2f\) predicts 2% **more**, not 8% less | M | E20, E21 | `DATAC/config.json`, `DATA3/telemetry.jsonl.gz` |
+| aifoundry2's idle law extrapolated onto aifoundry3, 25 °C below its fitted range | **+0.73 W** mean error out of 25 W, over 50–57 °C | P | E17 → E20 | `DATA3/leakage_crosscard.json` |
+
 ## External numbers (not measured here)
 
 | Claim | Value | Kind | Source |
@@ -196,4 +218,11 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
 - **Whether the taped-out ET-SoC-1 ever drives its sleep transistors.** The chip-level netlist is not in the
   open drop; the tie-off is a fact about the Erbium configuration, and the card only shows that nothing
   observable uses them.
-- **Whether the governor's power branch behaves as written.** It never fired alone in any observed run.
+- **Why aifoundry3's flashed TDP is 0 W**, and whether it was ever something else. The value was traced to
+  `g_pmic_power_reg.module_tdp_level` and no further.
+- **Whether the 8% switching-power gap between the two cards is silicon, package or board regulator.**
+  Separating those needs a third working card, which aifoundry1 is not.
+- **aifoundry3's thermal network.** Its heatsink is visibly faster than aifoundry2's, and no heat-then-cool
+  characterisation was run on it. Do not apply aifoundry2's 1.47 °C/W to it.
+- ~~**Whether the governor's power branch behaves as written.**~~ **Established on 2026-09-22 (E21):** it
+  fires exactly as written, continuously, on aifoundry3, on a die 15 °C below the thermal threshold.

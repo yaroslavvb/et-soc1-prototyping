@@ -26,6 +26,9 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
 | Q18 | 09-22 | Summarise all findings as self-contained MD files with pointers on where to start; commit | This directory |
 | Q19 | 09-22 | *(mid-task)* Add provenance: modularise experiments and artifacts so findings can be traced; structure the files around resources, requests, experiments and artifacts | This directory's structure |
 | Q20 | 09-22 | Using David Kanter's notes, research the ET-SoC-1's DVFS loop and the leakage-suppressor transistors; validate experimentally if needed; turn into a brief | R9, E18, E19 → A11, [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
+| Q21 | 09-22 | Try the other two cards: SSH into AI Foundry 1 and AI Foundry 3 | R10, E20, E21 |
+| Q22 | 09-22 | Run the experiments on all three machines; integrate them into the public report and keep it public | E20, E21 → A4, A11, [14-card-behaviour.md](14-card-behaviour.md), [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
+| Q23 | 09-22 | For formulas like the switching-power equation, use high-quality math (MathJax) instead of HTML | A12, all four report sources |
 
 ## Scope decisions worth remembering
 
@@ -39,5 +42,9 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
 - **The debug-interface (MDI) client was not built.** Work on it was stopped and not resumed.
 - **The 10-second hold limit was waived only for Q13's long runs.** Every other session on the card kept
   individual processes under 10 seconds.
+- **aifoundry1's driver was not reinstalled, and aifoundry3's TDP was not changed (Q21, Q22).** Both are
+  configuration changes to shared lab hardware that would silently alter other people's results: one replaces a
+  kernel module, the other lifts a card's clock ceiling mid-experiment for everyone. Both are documented in
+  [14-card-behaviour.md](14-card-behaviour.md) with everything the lab admin needs, and neither was applied.
 - **No GPU was measured.** Every A100 number in this work is from R7 or R8. This was never in scope for the
   card time available, and it is the single largest caveat in [13-why-low-power.md](13-why-low-power.md).

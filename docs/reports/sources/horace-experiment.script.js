@@ -269,3 +269,38 @@ if (D.validation) (function(){const SN=Object.assign({randn:'random normal (refe
  document.getElementById('struct-long').innerHTML='<thead><tr><th>Matrix</th><th class="num">switching power from its flips, W</th><th class="num">measured: 90 °C after, s</th><th class="num">predicted, s</th><th class="num">error</th></tr></thead><tbody>'+
   D.validation.afternoon.rows.map(r=>{const pc=r.capped&&r.t_cap_pred?(r.t_cap_pred/r.dur-1)*100:null;
    return `<tr><td>${SN[r.values]||r.values}</td><td class="num">${f1(r.p_flips)}</td><td class="num">${r.capped?'<b>'+r.dur.toFixed(0)+'</b>':'not in '+r.dur.toFixed(0)+' s: '+f1(r.T_end_meas)+' °C'}</td><td class="num">${r.capped?(r.t_cap_pred?r.t_cap_pred.toFixed(0):'never'):f1(r.T_end_pred)+' °C'}</td><td class="num">${pc!==null?(Math.abs(pc)<0.5?'0%':(pc>=0?'+':'')+pc.toFixed(0)+'%'):(r.T_end_pred-r.T_end_meas>=0?'+':'')+f1(r.T_end_pred-r.T_end_meas)+' °C'}</td></tr>`;}).join('')+'</tbody>';})();
+
+/* ---------- section 10: the second card ---------- */
+(function(){const C=D.cards;if(!C)return;
+ const P=C.patterns,W=700,H=348,L=52,R2=150,T=26,B=52;
+ const {svg,tip,h}=host('cardsw',W,H);
+ const mx=Math.max(...P.map(p=>Math.max(p.a2,p.a3,p.model)))*1.08;
+ const bw=(W-L-R2)/P.length, y=v=>H-B-(H-B-T)*v/mx, x=i=>L+bw*i;
+ axes(svg,{W,H,L,R:R2,T,B,x:i=>x(i),y,yt:[0,5,10,15,20,25],xt:[],yl:'switching power over idle, W'});
+ P.forEach((p,i)=>{const g=el('g',{},svg),w=bw*0.26;
+  el('rect',{x:x(i)+bw*0.10,y:y(p.a2),width:w,height:H-B-y(p.a2),fill:'var(--c1)'},g);
+  el('rect',{x:x(i)+bw*0.38,y:y(p.a3),width:w,height:H-B-y(p.a3),fill:'var(--c2)'},g);
+  el('line',{x1:x(i)+bw*0.06,x2:x(i)+bw*0.70,y1:y(p.model),y2:y(p.model),stroke:'var(--ink)','stroke-width':2,'stroke-dasharray':'4 3'},g);
+  txt(g,x(i)+bw*0.38,H-B+16,p.values,'tick','middle');
+  hover(g,tip,h,()=>`<b>${p.values}</b><br>aifoundry2 ${p.a2.toFixed(2)} W<br>aifoundry3 ${p.a3.toFixed(2)} W<br>model fitted on aifoundry2 ${p.model.toFixed(2)} W<br>ratio ${(p.a3/p.a2).toFixed(2)}`);});
+ [['aifoundry2 at 81 °C','var(--c1)'],['aifoundry3 at 56 °C','var(--c2)'],['model (aifoundry2 fit)','var(--ink)']]
+  .forEach((l,i)=>{el('rect',{x:W-R2+8,y:T+6+i*20,width:11,height:11,fill:l[1]},svg);txt(svg,W-R2+25,T+16+i*20,l[0],'lab');});
+ const f=(v,n)=>v.toFixed(n===undefined?2:n);
+ document.getElementById('cardswcap').textContent=
+  `Each card at its own launch temperature, ${f(C.launch.aifoundry2.T)} °C and ${f(C.launch.aifoundry3.T)} °C, both at 600 MHz. `+
+  `Idle power under those runs was ${f(C.idle.aifoundry2,1)} W and ${f(C.idle.aifoundry3,1)} W, and is subtracted. `+
+  `The dashed rule on each pair is this report's model, fitted on aifoundry2 and applied to both without change.`;
+ document.getElementById('scaletext').innerHTML=
+  `The ordering is identical and so are the ratios between patterns. Applied to aifoundry3 unchanged, the model is off by `+
+  `<b>${f(C.rms_raw)} W rms</b>, worst case ${f(C.max_raw)} W — and the error is not scatter, it is a consistent `+
+  `${Math.round(100*(1-C.scale))}% overestimate. Multiply every flip energy by one number, <b>${f(C.scale)}</b>, and the `+
+  `residual falls to <b>${f(C.rms_scaled)} W rms</b> over a 1.9 to 25 W range, which is as good as the in-sample fit on the `+
+  `card the coefficients came from. Calibrating that number on a single aifoundry3 run and predicting the other seven gives `+
+  `${f(C.loo.median_rms)} W rms in the median and ${f(C.loo.worst)} W at worst; calibrate it on a random-data run and it is `+
+  `${f(C.loo.per_pattern.randn)} W.`;
+ const lk=C.leakage;
+ document.getElementById('leakoff').textContent=(lk.mean_offset_W>=0?'+':'')+f(lk.mean_offset_W)+' W';
+ document.getElementById('leaktab').innerHTML='<thead><tr><th class="num">aifoundry3 die °C</th><th class="num">measured idle W</th><th class="num">aifoundry2 law W</th><th class="num">difference</th><th class="num">samples</th></tr></thead><tbody>'+
+  lk.idle_curve.map(r=>`<tr><td class="num">${r.T}</td><td class="num">${f(r.W)}</td><td class="num">${f(r.card2_law_W)}</td><td class="num">${(r.W-r.card2_law_W>=0?'+':'')}${f(r.W-r.card2_law_W)}</td><td class="num">${r.n}</td></tr>`).join('')+
+  `<tr><td class="num"><b>mean</b></td><td class="num"></td><td class="num"></td><td class="num"><b>${(lk.mean_offset_W>=0?'+':'')}${f(lk.mean_offset_W)}</b></td><td class="num"></td></tr></tbody>`;
+})();

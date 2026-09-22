@@ -102,6 +102,31 @@ gives **3.1 °C**, and the loop gain passes 1 at 82 °C:
 The practical consequence — a hard ceiling of about 3 W of sustained switching — is in
 [12-heat-management.md](12-heat-management.md).
 
+## Does it transfer to another card? Yes, up to one number
+
+The strongest test available was re-running the strict protocol on aifoundry3 (E20): different silicon,
+different heatsink, a launch temperature of 55.8 °C instead of 81.0 °C, and coefficients fitted entirely on
+aifoundry2.
+
+- **Applied unchanged, the model is off by 1.38 W rms** over eight operand patterns spanning 1.9 to 25 W.
+- **The error is not scatter.** It is a consistent 8% overestimate, pattern by pattern: the ratios between
+  patterns are right, only the overall size is wrong.
+- **One scale factor of 0.924 fixes it**, leaving 0.20 W rms — as good as the in-sample fit on the card the
+  coefficients came from.
+- **Calibrating that factor on a single run** and predicting the other seven gives 0.36 W rms in the median
+  and 0.27 W if the calibration run is random data. One matmul calibrates a new card.
+- **The operating point does not explain the 8%**, and points the other way: aifoundry3 runs at 523 mV against
+  518 mV at the same clock, so \(CV^2f\) predicts 2% *more* switching power, not 8% less. The gap is a
+  property of the card — silicon, package or board regulator — and separating those needs a third working card.
+- **The leakage law transfers too, further than it should.** Fitted on aifoundry2 between 62 and 90 °C and
+  extrapolated 25 °C below that range onto the other card, it predicts aifoundry3's idle power to **+0.73 W**
+  out of 25 W.
+- **The thermal network does not transfer.** It never claimed to: 1.47 °C/W is one card in one chassis, and
+  aifoundry3 sheds heat visibly faster. Nothing in this section uses it.
+
+So: the *shape* of the data-dependence belongs to the design, and the *scale* and the *idle offset* belong to
+the card.
+
 ## Reproducing
 
 ```

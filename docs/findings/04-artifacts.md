@@ -2,7 +2,7 @@
 
 Three kinds of artifact came out of this work: **published reports** (HTML, deployed to spacesheep.dev),
 **repostable images**, and **tools** that can be re-run. Commits are listed at the end so any artifact can be
-tied to the state of the tree that produced it. Cite as **A1**...**A11**.
+tied to the state of the tree that produced it. Cite as **A1**...**A12**.
 
 Every report is assembled by `scripts/build-report.py <name> <data.json> <out.html>` from three sources in
 `docs/reports/sources/`: `<name>.meta.json` (title, description), `<name>.body.html` (the prose) and
@@ -18,18 +18,18 @@ is always wrong** — it is regenerated.
 | A1 | `docs/reports/2026-09-19-et-soc1-memory-anatomy.html` — one memory access by stage and rail | E1, E2 | [et-soc1-memory-anatomy](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy) `2bf74fd1-fd7f-4e19-8e35-6168ae42657c` | private |
 | A2 | `docs/reports/2026-09-20-et-soc1-limits-of-observability.html` — what can be seen, from board power to a flip-flop | R1, R2, R3, E2 | [et-soc1-limits-of-observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) `2ea37420-67b9-484e-9d4c-581e8a9f0323` | private |
 | A3 | `docs/reports/2026-09-20-et-soc1-power-temperature.html` — every way to measure power and energy, and a load step through all of them | E5, E6 | [et-soc1-power-temperature](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature) `acee5c6d-56c0-45e7-aa97-ce11af37bdd8` | public |
-| A4 | `docs/reports/2026-09-20-horace-experiment.html` — the data-dependent power experiment, the flip model, the long runs, the structured matrices (**five versions**, see below) | E7–E17 | [et-soc1-horace-experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) `da445a93-7be3-42c2-b9be-4992fa4a3b62` | public |
+| A4 | `docs/reports/2026-09-20-horace-experiment.html` — the data-dependent power experiment, the flip model, the long runs, the structured matrices, the second card (**six versions**, see below) | E7–E17, E20 | [et-soc1-horace-experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) `da445a93-7be3-42c2-b9be-4992fa4a3b62` | public |
 | A5 | `docs/reports/2026-09-21-why-low-power.html` — Esperanto's equation measured term by term against an A100 | E15, E10, R6, R7, R8 | [et-soc1-why-low-power](https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power) `baede20c-57d9-4e01-8157-2014670dd8cf` | public |
 
-| A11 | `docs/reports/2026-09-22-dvfs-leakage.html` — six of David Kanter's claims about DVFS loops and leakage suppression, checked against the firmware, the RTL and the card | R9, R3, R2, E10, E18, E19 | [et-soc1-dvfs-leakage](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) `171dcd4a-5b6d-49d3-aca0-db4980fabfa5` | private |
+| A11 | `docs/reports/2026-09-22-dvfs-leakage.html` — six of David Kanter's claims about DVFS loops and leakage suppression, checked against the firmware, the RTL and the card | R9, R3, R2, E10, E18, E19, E20, E21 | [et-soc1-dvfs-leakage](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) `171dcd4a-5b6d-49d3-aca0-db4980fabfa5` | **public** (the repo owner made it public on 2026-09-22 and asked that it stay so) |
 
 Earlier reports in the same repository, from before this line of work (R4): matmul efficiency, memory
 hierarchy (`4b6e0a37-808d-4fc9-8001-555125733c46`), on-chip communication
 (`ab8e1b2b-de17-44f4-8645-006fa960e349`), sparsity (`5abf6014-8de0-4e82-8744-5676bac6453e`).
 
-### A4's five versions
+### A4's six versions
 
-A4 was rewritten five times as the question got sharper. The file name never changed, so **only the latest is
+A4 was rewritten six times as the question got sharper. The file name never changed, so **only the latest is
 on disk**; the earlier ones survive in git history and in the space's version list.
 
 | Version | Commit | What changed |
@@ -39,6 +39,19 @@ on disk**; the earlier ones survive in git history and in the space's version li
 | 3 | `f2b8776` | E9–E11: strict control, heating per FLOP, the RTL activity model, the cool-die speed effect, the first GIFs |
 | 4 | `07f7d04` | E12–E16: ten-minute runs, the flips-to-temperature model, structured matrices priced before they ran |
 | 5 | `75bb061` | E17: fit and prediction separated, held-out validation |
+| 6 | *(this commit)* | E20: the same experiment on aifoundry3; the model transfers up to one scale factor; equations rendered as SVG |
+
+## A12 — Math rendered at build time
+
+`scripts/tex2svg.js` turns the TeX in a report body into standalone SVG, called from
+`scripts/build-report.py`: display math between `$$`, inline math between `\(` and `\)`, anything inside
+`<pre>` or `<code>` left alone. It needs `npm install --no-save mathjax-full` once.
+
+**Why not the usual runtime MathJax:** the first attempt loaded MathJax from `cdn.jsdelivr.net`, and the
+publishing host blocks external scripts in viewers with a content-security policy — the deploy says so. Every
+equation would have shown as raw TeX to every reader. Pre-rendering also means the files stay self-contained
+and the math is identical in every browser. MathJax colours its SVG with `currentColor`, so dark mode works
+with no extra rule.
 
 ## Repostable images
 
@@ -55,7 +68,10 @@ Each has a `.png` poster beside it. They are generated by `tools/ettelem/make_he
 
 | Tool | What it does |
 |---|---|
-| `ettelem` (C++, `tools/ettelem/ettelem.cpp`) | Telemetry client on `libDM.so`. `sample` emits JSON lines at up to 45 Hz: board power, the service processor's per-rail averages and voltages, die and PMIC temperatures, clocks. Also `loglevel` and `sptrace`. **Holds the management node open**, which is single-opener |
+| `ettelem` (C++, `tools/ettelem/ettelem.cpp`) | Telemetry client on `libDM.so`. `sample` emits JSON lines at up to 45 Hz: board power, the service processor's per-rail averages and voltages, die and PMIC temperatures, clocks. `config` reads the governor's static inputs: the flashed TDP, the software temperature threshold and the power state (E21). Also `loglevel` and `sptrace`. **Holds the management node open**, which is single-opener |
+| `etcfg` (C, `tools/etcfg/etcfg.c`) | The driver's `ETSOC1_IOCTL_GET_DEVICE_CONFIGURATION` as JSON: TDP, boot clock, shire mask, cache sizes. Read-only, no management node, so it works on a machine whose `libDM.so` refuses the card (E21) |
+| `compare_cards.py` | Two cards' strict sessions side by side, with the model's predicted switching power for each pattern. Fits nothing (E20) |
+| `build_cards_data.py` | Assembles the three-machine block and merges it into both reports' data (E20, E21) |
 | `run_horace_strict.sh` | The strict-start protocol, shuffled blocks, 7 s runs (E9) |
 | `run_horace_cold.sh` | Runs from a cool die, for the governor (E10) |
 | `run_horace_long.sh` | Long runs with a temperature cap and a watchdog (E12, E16) |

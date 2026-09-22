@@ -3,8 +3,8 @@
 <p class="byline">aifoundry2's card, 21 September 2026 · et-platform <code>353f20e</code> firmware · measurements with <code>tools/ettelem</code>, <code>workloads/sparsity</code> and <code>rtl-sim/fma_toggle</code>; A100 figures from NVIDIA's datasheet and Horace He's matmul measurements; Esperanto's design argument from Hot Chips 33 and IEEE Micro</p>
 
 <p class="lede">An A100 draws 330 to 400 W under a matrix multiply. This card draws 38 to 64 W, and Esperanto advertised
-the chip at under 20 W. Both chips are TSMC 7 nm. Esperanto's own explanation is one line, <i>power = C<sub>dynamic</sub> ×
-V² × f + leakage</i>, with every term pushed down. This report measures each term on a real card and takes them away one at
+the chip at under 20 W. Both chips are TSMC 7 nm. Esperanto's own explanation is one line,
+\(P = C_\mathrm{dynamic}\,V^{2}f + P_\mathrm{leakage}\), with every term pushed down. This report measures each term on a real card and takes them away one at
 a time. The short answer: <b>the ET-SoC-1 is low power mostly because it runs at 0.52 V and 600 MHz where a GPU runs near
 0.85 V and 1,400 MHz (a factor of 6 in switching power for the same capacitance), because whatever is not computing is
 gated off (an integer loop on all 1,024 cores costs 1.5 W), and because it does 28 times fewer FLOPs per second.</b> It is
@@ -86,7 +86,7 @@ that curve: it interpolates to about 49 W at 0.52 V, and the board measures 47 W
 
 <h3>Leakage and temperature</h3>
 <ul>
-<li>Idle board power follows 12.6 W + 23.3 W × e<sup>(T−80)/36</sup> from 64 to 88 °C, to 0.2 W. At 80 °C that is 23 W of
+<li>Idle board power follows \(12.6\,\mathrm{W} + 23.3\,\mathrm{W}\,e^{(T-80\,^\circ\mathrm{C})/36\,^\circ\mathrm{C}}\) from 64 to 88 °C, to 0.2 W. At 80 °C that is 23 W of
 leakage in a 36 W idle; at 62 °C, where the card settles after a night idle, 14 W in 27 W.</li>
 <li>This is the term that keeps the measured card from Esperanto's headline. The minion, SRAM and mesh rails alone read
 22 W with every multiply-add gated, at 80 °C. A cooler die and the 0.4 V operating point would both cut it: leakage falls

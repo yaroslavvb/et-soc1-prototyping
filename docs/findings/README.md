@@ -1,6 +1,7 @@
 # ET-SoC-1 findings: start here
 
-Everything measured on AI Foundry's ET-SoC-1 card (`aifoundry2`) between 19 and 22 September 2026, written so
+Everything measured on AI Foundry's ET-SoC-1 cards (`aifoundry2`, and `aifoundry3` for the cross-card work)
+between 19 and 22 September 2026, written so
 that **you never have to open the HTML reports or the raw data to get an answer** — though every number says
 where to find both.
 
@@ -29,7 +30,16 @@ can you predict it before running?**
 5. **The comparison.** Against an A100 this chip switches a similar capacitance per cycle, but at a third of
    the V² and 43% of the clock, and gates everything idle. It is **not** more efficient per FLOP at dense
    matmul: 7.0 pJ against 1.28. → [13-why-low-power.md](13-why-low-power.md)
-6. **The caveat that matters most.** The temperature half of the model was only held out properly after the
+6. **It transfers to another card.** Re-run on aifoundry3 — different silicon, a launch temperature 25 °C
+   lower — the model applied unchanged is off by 1.4 W, and the error is a flat 8%, not scatter. **One scale
+   factor of 0.92 brings it to 0.2 W rms**, and calibrating that factor on a single random-data run predicts
+   the other seven patterns to 0.27 W. The leakage law extrapolated 25 °C below its fitted range lands within
+   0.73 W. → [11-thermal-model.md](11-thermal-model.md), "Does it transfer to another card?"
+7. **The gotcha if you use these machines.** aifoundry3's firmware reports a TDP of **0 W**, which makes the
+   governor's step-up test unreachable and pins the card at 600 MHz for life. The driver reports the nameplate
+   65 W on every machine, so nothing on the host notices. aifoundry1's two cards cannot be opened at all.
+   → [14-card-behaviour.md](14-card-behaviour.md)
+8. **The caveat that matters most.** The temperature half of the model was only held out properly after the
    fact, when the fit was challenged. On runs it was not fitted to, the time-to-90 °C error is 9% in the
    median and 23% at worst out to a few minutes, and it runs 3–5 °C hot at ten minutes. → [11-thermal-model.md](11-thermal-model.md), section "How well it predicts"
 
@@ -43,6 +53,7 @@ can you predict it before running?**
 | Understand the model or improve it | [11-thermal-model.md](11-thermal-model.md) |
 | Argue about efficiency against a GPU | [13-why-low-power.md](13-why-low-power.md), and read its caveats first |
 | Know what the card's instruments can and cannot see | [15-earlier-findings.md](15-earlier-findings.md) |
+| Pick a machine, or compare two cards | [14-card-behaviour.md](14-card-behaviour.md) — the three machines side by side, and why aifoundry3 is slow |
 | Understand the clock/voltage governor, or why the card leaks so much | [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
 | Re-run an experiment | [03-experiments.md](03-experiments.md) — command, protocol, raw data path, caveats |
 | Find the published version | [04-artifacts.md](04-artifacts.md) — reports, spaces, GIFs, commits |
@@ -55,10 +66,10 @@ Four kinds of thing have IDs, and every claim cites them:
 
 | Prefix | Meaning | File |
 |---|---|---|
-| **R1–R9** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers and expert accounts | [01-resources.md](01-resources.md) |
-| **Q1–Q20** | Requests from the repo owner, in order, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E19** | Experiments: what ran, when, on what, with which command, producing which raw files | [03-experiments.md](03-experiments.md) |
-| **A1–A11** | Artifacts published: reports, spaces, GIFs, tools, commits | [04-artifacts.md](04-artifacts.md) |
+| **R1–R10** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
+| **Q1–Q23** | Requests from the repo owner, in order, and what each produced | [02-requests.md](02-requests.md) |
+| **E1–E21** | Experiments: what ran, when, on what, with which command, producing which raw files | [03-experiments.md](03-experiments.md) |
+| **A1–A12** | Artifacts published: reports, spaces, GIFs, tools, commits | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":
 
@@ -96,5 +107,7 @@ Stated in full in [05-claims.md](05-claims.md), last section. The big ones:
 - **Nothing that needs modified firmware** was done: the images are signed and no key is available, so
   per-event PMU counters on silicon, SRAM ECC counts and the debug fabric remain untested.
 - **The thermal resistance is this card in this desktop chassis**, not a property of the chip.
+- **aifoundry1 contributed no measurements**, and aifoundry3 contributed only the cross-card session: its
+  thermal network was never characterised, so do not apply aifoundry2's 1.47 °C/W to it.
 - **The model's slow thermal stages are not identified.** They move a lot between fits; do not quote them as
   physics.

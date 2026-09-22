@@ -68,21 +68,33 @@ section 9 lists the pinned upstream versions.
   `da445a93-7be3-42c2-b9be-4992fa4a3b62`, deployed as a folder (`index.html` plus the GIFs), so the GIFs have public addresses such as
   https://da445a93-7be3-42c2-b9be-4992fa4a3b62.spacesheep.app/horace-heating.gif. A folder deploy can leave the space private;
   put it back with `spacesheep share <uuid> --visibility public` and check `spacesheep list` after every deploy.
+  Section 10 repeats the whole experiment on aifoundry3's card: the flip model fitted here, applied to that card
+  unchanged, is off by a flat 8%, and one scale factor of 0.92 brings it to 0.20 W rms over a 1.9-25 W range
+  (`tools/ettelem/compare_cards.py`, `build_cards_data.py`; raw data
+  `docs/reports/data/2026-09-22-horace-aifoundry3/`).
 - `docs/reports/2026-09-21-why-low-power.html` asks why the chip draws so little next to an A100, using Esperanto's own equation
   (power = C V² f + leakage) and ablations on the card (`tools/ettelem/run_ablation.sh`, `ablation.cfg`, `analyze_ablation.py`):
   an integer loop on all cores costs 1.5 W, int8 multiply-adds 0.32 pJ against 6.0 pJ for fp32, power is linear in active cores,
   the 0.62 V / 800 MHz point costs 2× the switching power of 0.52 V / 600 MHz, leakage is 23 W at 80 °C, and per FLOP of dense
   matmul an A100 is five times better. Notes and sources in `docs/research/why-low-power.md`. Private space
   https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power, uuid `baede20c-57d9-4e01-8157-2014670dd8cf`.
-  Both are assembled by `scripts/build-report.py` from `docs/reports/sources/`. After any `spacesheep deploy` of the other spaces,
+  Both are assembled by `scripts/build-report.py` from `docs/reports/sources/`. TeX between `$$` or `\( \)` in a
+  report body is rendered to standalone SVG at build time by `scripts/tex2svg.js` (`npm install --no-save
+  mathjax-full` once): the publishing host blocks external scripts, so a runtime MathJax from a CDN leaves every
+  equation as raw TeX. After any `spacesheep deploy` of the other spaces,
   re-check that the space is still private: deploys have reset visibility to public more than once.
 - `docs/reports/2026-09-22-dvfs-leakage.html` checks six claims by David Kanter (MLPerf) about DVFS loops and
   leakage suppression against this chip: the governor reads a measured PMIC wattage rather than estimating power
   from activity counters, its ±5% guardband macros are dead code so it hunts (36 transitions analysed,
   `tools/ettelem/analyze_dvfs.py`), the per-minion sleep transistors in the RTL are tied off and no firmware
   drives them, a wake-up probe finds no array power gating (`gen_ops.py wakeup`), and leakage is 36% of a busy
-  card against his 5-30%. Private space https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage, uuid
-  `171dcd4a-5b6d-49d3-aca0-db4980fabfa5`.
+  card against his 5-30%. It now also covers the three lab machines: aifoundry3's service processor reports a
+  static TDP of **0 W** (the driver reports 65 W on every machine), which makes the governor's step-up test
+  unreachable and pins that card at 600 MHz for life, and aifoundry1's two cards cannot be opened because its
+  kernel module's `srcversion` does not match its `libDM.so`. Public space (the user's choice)
+  https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage, uuid `171dcd4a-5b6d-49d3-aca0-db4980fabfa5`.
+  Read a card's governor inputs with `tools/etcfg` (driver ioctl) and `build/ettelem/ettelem config`
+  (service processor); both are read-only.
 - `docs/lab-access.md` covers logging in to the lab machines (`aifoundry1`-`3`) and creating accounts for new people.
 - `workloads/` holds standalone workloads that run on both the simulator and the lab cards. The first one is `workloads/sgemm`:
   fp32 matmul, verified on aifoundry3's card at 127 GFLOP/s with scalar code. `scripts/deploy-lab.sh` builds a workload on a lab machine.

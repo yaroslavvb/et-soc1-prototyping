@@ -90,6 +90,51 @@ agree to 0.03–0.08 W for most patterns.
 Approach times were 12–120 s (median 63 s) for 7-second runs, and up to six minutes after a run that reached
 90 °C. **Budget three to eight times more wall-clock than card time.**
 
+## The three lab machines are not interchangeable
+
+Before using a card for anything comparative, read its governor configuration. Two read-only commands:
+
+```
+tools/etcfg                                  # the driver's view: TDP, boot clock, shire mask, cache sizes
+LD_LIBRARY_PATH=/opt/et/lib build/ettelem/ettelem config   # the firmware's view: TDP, threshold, power state
+```
+
+| | aifoundry2 | aifoundry3 | aifoundry1 |
+|---|---|---|---|
+| Cards | 1 | 1 | 2, **neither usable** |
+| Firmware / PMIC | 1.3.1 / 1.5.0 | 1.3.1 / 1.5.0 | not readable |
+| TDP the driver reports | 65 W | 65 W | 65 W |
+| **TDP the firmware reports** | **65 W** | **0 W** | — |
+| Clock ever above 600 MHz | yes, 700 and 800 | **no, ever** | — |
+| Idle | 31–36 W at 73–80 °C | 23.6 W at 51 °C | — |
+
+**aifoundry3 is pinned at 600 MHz, and the reason is a flashed zero.** The governor's step-down test is
+`measured power > TDP` and its step-up test is `<`. At a TDP of zero the first is always true and the second
+never is, so the loop throttles down every 10 ms and nothing can lift it. The card's own log says so:
+`Power throttle down event, current pwr 35380  tdp level: 0`, 26 times in one 8 KB window, with no step-up
+event at all. A second reading agrees: `get_power_state()` classifies a card as `MAX_POWER` exactly when power
+exceeds the TDP, and aifoundry3 reports `max_power` while drawing 23 W.
+
+**The driver will not warn you.** Its `ETSOC1_IOCTL_GET_DEVICE_CONFIGURATION` reports the nameplate 65 W on
+all three machines, including aifoundry3. Any host-side check passes. The card works; it is simply capped for
+life at the bottom of its VMIN table.
+
+**aifoundry1's two cards cannot be opened.** Its kernel module is built from different sources than the other
+two (`srcversion 1383B256EB24A0A53F04CC7` against `47D26A305A0428B29FB7FC4`) while carrying the same
+`libDM.so`, and the library's compatibility check refuses: `Error unable to evaluate compatibility!`. Its
+`dev_mngt_service` is inactive. **This was not fixed** — replacing a kernel driver on a shared machine is a
+lab-admin decision — and `tools/etcfg` still works there, because it talks to the driver and not the library.
+
+Neither aifoundry3's TDP nor aifoundry1's driver was changed. Both would alter what other people's runs
+measure, silently, in the middle of their experiments.
+
+## Comparing cards: use switching power, not watts
+
+aifoundry3 idles 11 W below aifoundry2 and at a different temperature, so absolute board power tells you
+nothing across cards. What compares cleanly is **switching power**: board power during a run minus the idle
+power measured just before it, which cancels that card's leakage at that temperature. On that basis the two
+cards agree to 8%, and one scale factor removes even that. See [11-thermal-model.md](11-thermal-model.md).
+
 ## Traps that cost time here
 
 - **`sparsity_host --budget` defaults to 8 seconds** on silicon and silently stops a longer run. Raise it for

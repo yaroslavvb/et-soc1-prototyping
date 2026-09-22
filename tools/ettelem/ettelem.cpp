@@ -2,6 +2,8 @@
 //
 //   ettelem sample [--seconds T] [--every-ms M]     JSON lines: board power, SP stats (rails), temperatures,
 //                                                   regulator set-points, on-die voltages, clock frequencies
+//   ettelem config                                 static governor inputs: flashed TDP (W), SW temperature
+//                                                   threshold (C), power state, current minion clock and voltage
 //   ettelem loglevel debug|info                     SP log level (DM_CMD_SET_DM_TRACE_CONFIG). At debug the SP logs one
 //                                                   line per shire per pass with its on-die voltages (current/low/high).
 //   ettelem sptrace <out.bin>                       raw SP trace buffer (the log strings)
@@ -54,6 +56,29 @@ struct Dm {
 };
 
 int bin2mv(int reg, int base, int mul, int div) { return base + reg * mul / div; }
+
+// The static configuration the service processor's governor compares against: the flashed TDP in watts, the
+// software temperature threshold, and the current power state. check_power_throttle_conditions() in
+// ServiceProcessorBL2/services/thermal_pwr_mgmt.c throttles down whenever measured SoC power exceeds the TDP
+// and steps up only when it is below, so these three numbers decide whether a card can ever leave its boot
+// clock. All three are reads.
+int config(Dm& d) {
+  struct U8 { uint8_t v; uint8_t pad[7]; } tdp{}, thr{}, st{};
+  asic_frequencies_t f{};
+  asic_voltage_t av{};
+  const bool okD = d.get(DM_CMD_GET_MODULE_STATIC_TDP_LEVEL, tdp),
+             okT = d.get(DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS, thr),
+             okS = d.get(DM_CMD_GET_MODULE_POWER_STATE, st), okF = d.get(DM_CMD_GET_ASIC_FREQUENCIES, f),
+             okV = d.get(DM_CMD_GET_ASIC_VOLTAGE, av);
+  static const char* names[] = {"max_power", "managed_power", "safe_power", "low_power", "invalid"};
+  std::printf("{\"tdp_w\":%s,\"temp_threshold_c\":%s,\"power_state\":%s,\"power_state_name\":\"%s\"",
+              okD ? std::to_string(tdp.v).c_str() : "null", okT ? std::to_string(thr.v).c_str() : "null",
+              okS ? std::to_string(st.v).c_str() : "null", okS && st.v < 5 ? names[st.v] : "?");
+  if (okF) std::printf(",\"minion_mhz\":%u", (unsigned)f.minion_shire_mhz);
+  if (okV) std::printf(",\"minion_mv\":%u", (unsigned)av.minion);
+  std::printf("}\n");
+  return (okD && okT && okS) ? 0 : 1;
+}
 
 int sample(Dm& d, double seconds, int everyMs) {
   const auto t0 = Clock::now();
@@ -123,6 +148,7 @@ int main(int argc, char** argv) {
       }
       return sample(d, seconds, everyMs);
     }
+    if (cmd == "config") return config(d);
     if (cmd == "loglevel" && argc == 3) {
       const uint32_t level = !std::strcmp(argv[2], "debug") ? 4 : 3;  // trace_string_event: INFO 3, DEBUG 4
       const uint32_t in[2] = {1u /* TRACE_EVENT_STRING */, level};

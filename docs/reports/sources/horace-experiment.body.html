@@ -1,6 +1,6 @@
 <style>#act td:first-child,#tbl td:first-child,#long-tbl td,#val-tbl td,#struct-long td,#struct-tbl td:first-child,#perflip td:first-child,#pre td:first-child,#coef td:first-child,#coldtbl td:first-child{white-space:nowrap}</style>
 <h1>The Horace experiment on the ET-SoC-1</h1>
-<p class="byline">aifoundry2's card, 20–21 September 2026 · fp32 TensorFMA on all 1,024 minions · <code>workloads/sparsity --values</code>, <code>tools/ettelem</code>, <code>rtl-sim/fma_toggle</code> · fourth version: strict temperature control, heating per FLOP, a power model from RTL switching activity, the speed effect, and now ten-minute runs, a model from flips to temperature, and structured matrices priced before they ran</p>
+<p class="byline">aifoundry2's and aifoundry3's cards, 20–22 September 2026 · fp32 TensorFMA on all 1,024 minions · <code>workloads/sparsity --values</code>, <code>tools/ettelem</code>, <code>rtl-sim/fma_toggle</code> · fourth version: strict temperature control, heating per FLOP, a power model from RTL switching activity, the speed effect, and now ten-minute runs, a model from flips to temperature, and structured matrices priced before they ran, then repeated on a second card</p>
 
 <p class="lede">Horace He's post
 <a href="https://www.thonking.ai/p/strangely-matrix-multiplications">"Strangely, Matrix Multiplications on GPUs Run Faster When Given 'Predictable' Data!"</a>
@@ -266,16 +266,22 @@ not in the fits.</li>
 <h2>8. A model from flips to temperature</h2>
 <p>With the long runs the chain of sections 3 and 4 closes into one model that needs only the flip schedule. It has
 three lines:</p>
-<pre><code>flips   F_j(t) = N_j(pattern) × 1.10×10⁶ ops/s × active minions        (four kinds j, from the RTL)
-power   P(t)   = 12.6 W + 23.3 W · e^((T−80)/36) + 1.85 W · active/1024 + Σ_j e_j · F_j(t)
-heat    T(t)   = 22.8 °C + Σ_k x_k(t),    τ_k · dx_k/dt = R_k · P(t) − x_k
-
-e_j   3.18 fJ   per register bit clocked
-      0.025 fJ  per net toggle in the multiplier tree
-      0.80 fJ   per other net toggle in the unit
-      15.5 fJ   per operand-word bit toggled outside the unit
-R_k   0.106 °C/W at 1.5 s · 0.050 at 4 s · 0.234 at 60 s · 0.136 at 150 s
-      0.860 at 400 s · 0.081 at 2,500 s                       (sum 1.47 °C/W)</code></pre>
+$$\textbf{flips}\qquad F_j(t) \;=\; N_j(\text{pattern})\;\times\;1.10\times10^{6}\ \text{ops/s}\;\times\;\text{active minions}$$
+$$\textbf{power}\qquad P(t) \;=\; \underbrace{12.6\,\mathrm{W}}_{\text{fixed}} \;+\; \underbrace{23.3\,\mathrm{W}\,e^{(T-80\,^\circ\mathrm{C})/36\,^\circ\mathrm{C}}}_{\text{leakage}} \;+\; \underbrace{1.85\,\mathrm{W}\cdot\tfrac{\text{active}}{1024}}_{\text{state machines}} \;+\; \underbrace{\sum_j e_j\,F_j(t)}_{\text{switching}}$$
+$$\textbf{heat}\qquad T(t) \;=\; 22.8\,^\circ\mathrm{C} \;+\; \sum_k x_k(t), \qquad \tau_k\,\frac{\mathrm{d}x_k}{\mathrm{d}t} \;=\; R_k\,P(t) \;-\; x_k$$
+<p>Four kinds of flip \(j\), counted in the RTL, each with its own energy \(e_j\); six thermal stages \(k\), each a
+resistance \(R_k\) and a time constant \(\tau_k\).</p>
+<div class="table-wrap"><table>
+<thead><tr><th>\(e_j\)</th><th class="num">value</th><th>per</th><th>\(R_k\)</th><th class="num">°C/W</th><th class="num">\(\tau_k\)</th></tr></thead>
+<tbody>
+<tr><td>register clocking</td><td class="num">3.18 fJ</td><td class="small">register bit clocked</td><td></td><td class="num">0.106</td><td class="num">1.5 s</td></tr>
+<tr><td>multiplier tree</td><td class="num">0.025 fJ</td><td class="small">net toggle in the tree</td><td></td><td class="num">0.050</td><td class="num">4 s</td></tr>
+<tr><td>rest of the unit</td><td class="num">0.80 fJ</td><td class="small">other net toggle</td><td></td><td class="num">0.234</td><td class="num">60 s</td></tr>
+<tr><td>operand words</td><td class="num">15.5 fJ</td><td class="small">operand-word bit toggled outside the unit</td><td></td><td class="num">0.136</td><td class="num">150 s</td></tr>
+<tr><td></td><td class="num"></td><td></td><td></td><td class="num">0.860</td><td class="num">400 s</td></tr>
+<tr><td></td><td class="num"></td><td></td><td></td><td class="num">0.081</td><td class="num">2,500 s</td></tr>
+<tr><td></td><td class="num"></td><td></td><td><b>sum</b></td><td class="num"><b>1.47</b></td><td class="num"></td></tr>
+</tbody></table></div>
 <p>The power line has a fixed part, leakage that grows exponentially with die temperature, the tensor state machines of the
 active minions, and an energy for each kind of flip. It was fitted to every 10 Hz sample of five hours of sessions: the
 leakage to the idle samples (rms error 0.20 W from 64 to 88 °C), then the flip energies to the busy samples (0.49 W). The flip
@@ -380,7 +386,40 @@ board power at 80 C: 63.1 W (idle 35.9 W)
 die temperature from an idle die at 80 C: 10 s: 86.5 C; reaches 90 C after 27 s
 to hold 80 C indefinitely the card can shed 3.1 W of switching: run this workload 11% of the time</code></pre>
 
-<h2>10. Method</h2>
+<h2>10. A second card, and what transfers</h2>
+<p>Everything to this point is one card. AI Foundry has three machines; aifoundry1's two cards could not be
+opened at all, because its kernel module is built from different sources than the other two while carrying the
+same management library, and the library's compatibility check refuses them. aifoundry3's card works, and it
+is a useful one: it idles 25 °C cooler and its firmware keeps it pinned at 600 MHz for a reason worth its own
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">brief</a>. Running the same strict protocol
+on it is the first real out-of-sample test of the model — different silicon, different heatsink, a launch
+temperature of 55.8 °C instead of 81.0 °C, and coefficients fitted entirely on the other card.</p>
+
+<div class="chart-title">Switching power over idle, eight operand patterns, two cards</div>
+<div class="chart scroll" id="cardsw"></div>
+<p class="small" id="cardswcap"></p>
+
+<p id="scaletext"></p>
+
+<p>The operating point does not explain the gap, and points the other way: aifoundry3 runs its minions at
+523 mV against aifoundry2's 518 mV at the same 600 MHz, which by \(P = C_\mathrm{sw}V^{2}f\) predicts about 2%
+<em>more</em> switching power, not 8% less. Whatever the 8% is — silicon, package, or the board regulator's
+efficiency at that load — it belongs to the card, and one number captures it.</p>
+
+<p>The leakage half transfers as well, and further than it has any right to. The idle law fitted here between
+62 and 90 °C, extrapolated 25 °C below its fitted range onto the other card, predicts that card's idle power
+to <span id="leakoff"></span> out of 25 W.</p>
+
+<div class="table-wrap"><table id="leaktab"></table></div>
+
+<p><b>What this means if you have more than one of these cards.</b> The shape of the data-dependence — which
+operand patterns cost what, relative to each other — is a property of the design and moves between cards
+unchanged. The absolute scale and the idle offset are per-card constants, worth about 8% and a watt. A single
+random-data matmul on a new card calibrates both, after which the heat predictions in section 9 apply to it.
+What does <em>not</em> transfer is the thermal network: that is this card in this chassis, and aifoundry3
+sheds heat visibly faster.</p>
+
+<h2>11. Method</h2>
 <ul>
 <li>Kernel: hart 0 of each of 1,024 minions repeats <code>TensorFMA32</code> on one 16×16×16 tile pair held in the L1
 scratchpad (4,096 multiply-adds per op, 546 cycles per op for every pattern). FLOPs count one multiply and one add per

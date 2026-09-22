@@ -104,3 +104,47 @@ document.getElementById('trans').innerHTML='<thead><tr><th>Pattern</th><th class
    `Nothing anywhere in this work produced a wrong result; ${ic.hours_idle} h of idling cost ${f1(ic.board_w)} W and no errors.`]];
  document.getElementById('verdict').innerHTML='<thead><tr><th>What David Kanter said</th><th>Verdict on the ET-SoC-1</th><th>Evidence</th></tr></thead><tbody>'+
   V.map(v=>`<tr><td>${v[0]}</td><td class="lvl">${v[1]}</td><td class="small">${v[2]}</td></tr>`).join('')+'</tbody>';})();
+
+/* ---------- section 6-7: the three machines ---------- */
+(function(){const C=D.cards,cf=C.config,sp=C.sptrace_aifoundry3;
+ const R=[['Firmware release / PMIC','1.3.1 / 1.5.0','1.3.1 / 1.5.0','not readable'],
+  ['TDP the <i>driver</i> reports','65 W','65 W','65 W'],
+  ['TDP the <i>service processor</i> reports',cf.aifoundry2.tdp_w+' W','<b>'+cf.aifoundry3.tdp_w+' W</b>','—'],
+  ['Software temperature threshold',cf.aifoundry2.temp_threshold_c+' °C',cf.aifoundry3.temp_threshold_c+' °C','—'],
+  ['Power state the firmware reports',cf.aifoundry2.power_state_name,'<b>'+cf.aifoundry3.power_state_name+'</b>','—'],
+  ['Minion clock ever observed above 600 MHz','yes, 700 and 800','<b>no</b>','—'],
+  ['Usable for these measurements','yes','yes','<b>no</b>']];
+ document.getElementById('cardcfg').innerHTML='<thead><tr><th>&nbsp;</th><th>aifoundry2</th><th>aifoundry3</th><th>aifoundry1 (2 cards)</th></tr></thead><tbody>'+
+  R.map(r=>`<tr><td class="small">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')+'</tbody>';
+ if(sp) document.getElementById('spcount').innerHTML=`That 8 KB window of the card's trace buffer holds <b>${sp.down_events} throttle-down events and ${sp.up_events} throttle-up events</b>, every one of them printing <code>tdp level: ${sp.tdp_levels.join(', ')}</code>.`;
+
+ const P=C.patterns,W=700,H=348,L=52,R2=150,T=26,B=52;
+ const {svg,tip,h}=host('cardsw',W,H);
+ const mx=Math.max(...P.map(p=>Math.max(p.a2,p.a3,p.model)))*1.08;
+ const bw=(W-L-R2)/P.length, y=v=>H-B-(H-B-T)*v/mx, x=i=>L+bw*i;
+ axes(svg,{W,H,L,R:R2,T,B,x:i=>x(i),y,yt:[0,5,10,15,20,25],xt:[],yl:'switching power over idle, W'});
+ P.forEach((p,i)=>{const g=el('g',{},svg),w=bw*0.26;
+  el('rect',{x:x(i)+bw*0.10,y:y(p.a2),width:w,height:H-B-y(p.a2),fill:'var(--c1)'},g);
+  el('rect',{x:x(i)+bw*0.38,y:y(p.a3),width:w,height:H-B-y(p.a3),fill:'var(--c2)'},g);
+  el('line',{x1:x(i)+bw*0.06,x2:x(i)+bw*0.70,y1:y(p.model),y2:y(p.model),stroke:'var(--ink)','stroke-width':2,'stroke-dasharray':'4 3'},g);
+  txt(g,x(i)+bw*0.38,H-B+16,p.values,'tick','middle');
+  hover(g,tip,h,()=>`<b>${p.values}</b><br>aifoundry2 ${f2(p.a2)} W<br>aifoundry3 ${f2(p.a3)} W<br>model fitted on aifoundry2 ${f2(p.model)} W<br>ratio ${f2(p.a3/p.a2)}`);});
+ [['aifoundry2 at 81 °C','var(--c1)'],['aifoundry3 at 56 °C','var(--c2)'],['model (aifoundry2 fit)','var(--ink)']]
+  .forEach((l,i)=>{el('rect',{x:W-R2+8,y:T+6+i*20,width:11,height:11,fill:l[1]},svg);txt(svg,W-R2+25,T+16+i*20,l[0],'lab');});
+ document.getElementById('cardswcap').textContent=
+  `Each card at its own launch temperature, ${f2(C.launch.aifoundry2.T)} °C and ${f2(C.launch.aifoundry3.T)} °C, both at 600 MHz. `+
+  `Idle power under those runs was ${f1(C.idle.aifoundry2)} W and ${f1(C.idle.aifoundry3)} W, and is subtracted.`;
+ document.getElementById('scaletext').innerHTML=
+  `The ordering is identical and so are the ratios between patterns. Applied to aifoundry3 with no change at all, `+
+  `the aifoundry2 model is off by <b>${f2(C.rms_raw)} W rms</b>, worst case ${f2(C.max_raw)} W — and the error is not scatter, `+
+  `it is a consistent ${Math.round(100*(1-C.scale))}% overestimate. Multiply every flip energy by one number, `+
+  `<b>${f2(C.scale)}</b>, and the residual falls to <b>${f2(C.rms_scaled)} W rms</b> across a 1.9 to 25 W range, `+
+  `which is as good as the model's own in-sample fit on the card it came from. Calibrating that one number on a single `+
+  `aifoundry3 run and predicting the other seven gives ${f2(C.loo.median_rms)} W rms in the median and `+
+  `${f2(C.loo.worst)} W at worst; calibrate on a random-data run and it is ${f2(C.loo.per_pattern.randn)} W.`;
+
+ const lk=C.leakage;
+ document.getElementById('leaktab').innerHTML='<thead><tr><th class="num">aifoundry3 die °C</th><th class="num">measured idle W</th><th class="num">aifoundry2 law W</th><th class="num">difference</th><th class="num">samples</th></tr></thead><tbody>'+
+  lk.idle_curve.map(r=>`<tr><td class="num">${r.T}</td><td class="num">${f2(r.W)}</td><td class="num">${f2(r.card2_law_W)}</td><td class="num">${(r.W-r.card2_law_W>=0?'+':'')}${f2(r.W-r.card2_law_W)}</td><td class="num">${r.n}</td></tr>`).join('')+
+  `<tr><td class="num"><b>mean</b></td><td class="num"></td><td class="num"></td><td class="num"><b>${(lk.mean_offset_W>=0?'+':'')}${f2(lk.mean_offset_W)}</b></td><td class="num"></td></tr></tbody>`;
+})();

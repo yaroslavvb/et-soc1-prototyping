@@ -2,7 +2,7 @@
 
 Every finding in this directory rests either on one of these resources or on an experiment in
 [03-experiments.md](03-experiments.md). Each entry says what the resource is authoritative for and, as
-importantly, what it is **not** authoritative for. Cite them as **R1**...**R9**.
+importantly, what it is **not** authoritative for. Cite them as **R1**...**R10**.
 
 ---
 
@@ -131,3 +131,18 @@ written up as a research brief: <https://spacesheep.dev/@yaroslavvb/david-kanter
 - **Note:** the notes are a paraphrase of a conversation, not a written source. Where they matter they are
   treated as a hypothesis to test, never as evidence.
 
+## R10 — The other two lab machines
+
+`aifoundry1` (two ET-SoC-1 cards) and `aifoundry3` (one), reached over Tailscale SSH the same way as R5. Note
+that `/etc/hosts` on aifoundry2 carries stale LAN addresses for both; `~/.ssh/config` pins the Tailscale
+addresses instead.
+
+- **Authoritative for:** that these cards exist, their firmware and PMIC revisions, and — for aifoundry3 —
+  everything measured in E20 and E21.
+- **Not authoritative for:** anything about aifoundry1's silicon. Its cards cannot be opened (E21), so no
+  measurement of any kind was taken from them.
+- **Caveat that matters:** aifoundry3 is **not** a drop-in replacement for aifoundry2. It idles 25 °C cooler,
+  its heatsink sheds heat faster, and its firmware pins it at 600 MHz because its flashed TDP is 0 W (E21).
+  Absolute watts from the two cards are not comparable; switching power over idle is.
+- **Used by:** E20, E21. R4's sparsity work also ran on aifoundry3, which is why its absolute watts must not
+  be mixed with aifoundry2's.

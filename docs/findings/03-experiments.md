@@ -275,6 +275,61 @@ state.
 **Why it counts as a test:** the model was fitted on 21 September in a cooler room, on sessions whose idle
 stretches were minutes, not hours. Nothing about today's measurement was in the fit.
 
+## E20 — The strict protocol on a second card (aifoundry3, 2026-09-22, 12:12–12:25)
+
+**Question (Q21, Q22):** does the data-dependent power effect reproduce on a different card, and does the
+flip model fitted on aifoundry2 predict it without refitting?
+**Method:** `run_horace_strict.sh` exactly as in E9, with the launch temperature set to 55 °C instead of 80 °C
+because that card idles at 51 °C and cannot be held at 80 °C between runs. 2 burn-in runs, 3 blocks of the six
+main patterns plus one block of the two extras, shuffled, 7 s each, each launched when the sensor first reads
+55 °C after a pre-heat to 60 °C. 20 recorded runs, launch temperature 55.77 ± 0.18 °C.
+```
+ssh aifoundry3 'cd ~/nekko && tools/ettelem/run_horace_strict.sh build/strict3 55 60 2 3 1 7 \
+    "zeros ones pi sparse50 uniform randn" "signs mant"'
+python3 tools/ettelem/analyze_horace_strict.py DATA/2026-09-22-horace-aifoundry3 \
+    --toggles DATA/2026-09-21-horace-aifoundry2/toggles.json --out .../horace3.json
+python3 tools/ettelem/compare_cards.py --card aifoundry2=... --card aifoundry3=... \
+    --model DATA/2026-09-21-horace-aifoundry2/model.json --toggles ... --out .../cards.json
+```
+**Raw data:** `docs/reports/data/2026-09-22-horace-aifoundry3/` (`runs.jsonl`, `starts.jsonl`,
+`telemetry.jsonl.gz`, `tiles/`, and the derived `horace3.json`, `cards.json`, `transfer.json`,
+`leakage_crosscard.json`).
+**Result:** the same ordering and nearly the same magnitudes as E9 — zeros 1.89 W over idle against 1.96,
+random normal 24.86 against 27.11. The aifoundry2 model applied unchanged is off by 1.38 W rms; after one
+scale factor of **0.924** the residual is **0.20 W rms** over a 1.9–25 W range. Calibrating that factor on a
+single run and predicting the other seven gives 0.36 W rms in the median, 0.27 W if the calibration run is
+random data. The aifoundry2 idle law extrapolated 25 °C below its fitted range predicts this card's idle power
+to **+0.73 W** out of 25 W.
+**Caveats:** the two sessions are at different launch temperatures, so only *switching* power (board power
+minus the idle power measured just before each run) is comparable, not absolute watts. The thermal network is
+not comparable at all: aifoundry3 sheds heat visibly faster. The scale factor is one number fitted on this
+card; the claim is that one number suffices, not that it was predicted.
+
+## E21 — The governor's inputs on all three machines (2026-09-22, 12:42–12:47)
+
+**Question (Q21, Q22):** aifoundry3 never leaves 600 MHz while aifoundry2 reaches 800. Why?
+**Method:** two read-only queries, added for this. `tools/etcfg` issues the driver's
+`ETSOC1_IOCTL_GET_DEVICE_CONFIGURATION`; `ettelem config` asks the service processor for
+`DM_CMD_GET_MODULE_STATIC_TDP_LEVEL`, `..._TEMPERATURE_THRESHOLDS` and `..._POWER_STATE`. The card's own log
+buffer was then read with `ettelem sptrace`. Neither tool writes anything to a card.
+**Raw data:** `docs/reports/data/2026-09-22-cards/` (`config.json`, `driver_config.json`,
+`sptrace-aifoundry2.bin`, `sptrace-aifoundry3.bin`, `cards-report.json`, `cool2.log`).
+**Result:** the service processor reports a static TDP of **65 W on aifoundry2 and 0 W on aifoundry3**, with
+identical firmware. In `check_power_throttle_conditions()` (R3) the step-down test is
+`avg_soc_pwr_mW > tdp_level_mW` and the step-up test is `<`, so at a TDP of zero the loop can only ever
+throttle down. aifoundry3's own trace buffer holds 26 throttle-down events and 0 throttle-up events in one
+8 KB window, each printing `tdp level: 0`. A second, independent path agrees: `get_power_state()` returns
+`MAX_POWER` whenever power exceeds the TDP level, and aifoundry3 reports `max_power` at 23 W while aifoundry2
+reports `managed_power`. **The driver's ioctl reports 65 W on all three machines**, so the host-visible TDP is
+not the number the governor uses.
+**Also established:** aifoundry1 holds two cards, both on the PCIe bus (`1e0a:eb01` at 01:00.0 and 02:00.0)
+with device nodes present, but its kernel module's `srcversion` is `1383B256EB24A0A53F04CC7` against
+`47D26A305A0428B29FB7FC4` on the other two, with the same `libDM.so`; the library refuses the card with
+`Error unable to evaluate compatibility!` and `dev_mngt_service` is inactive. Not fixed: it is a shared
+machine's kernel driver.
+**Caveats:** why aifoundry3's flashed TDP is zero, and whether it was ever different, is not established.
+Whether the 0 W is in flash or set at boot was not traced further than `g_pmic_power_reg.module_tdp_level`.
+
 ## A note on E10, re-analysed for Q20
 
 The governor transitions in [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) are **not** a new experiment.

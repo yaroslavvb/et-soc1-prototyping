@@ -143,12 +143,32 @@ on-die SRAM and no array power gating in play.
   single 7-second run.
 - **The fix is already in the source**: two guardband macros, defined and unused.
 
+## The second card answers the open question, and raises a new one
+
+aifoundry3 runs the same firmware and never leaves 600 MHz, on a die 15 °C below the thermal threshold. Its
+service processor reports a **static TDP of 0 W** where aifoundry2 reports 65 W (E21). In
+`check_power_throttle_conditions()` the step-down test is `measured power > TDP` and the step-up test is `<`,
+so at zero the first is a tautology and the second is unreachable. The card's own trace buffer holds 26
+throttle-down events and no step-up events in one 8 KB window, each printing `tdp level: 0`.
+
+**This establishes what this brief could not.** The power branch had never fired alone on aifoundry2, because
+a card that has been busy idles above 65 °C and the thermal test comes first, so the brief listed it as
+unverified. On aifoundry3 it is the only branch that ever fires, and it behaves exactly as written.
+
+**And it shows the loop has no floor check.** The governor never asks whether its threshold is sane. A TDP of
+zero is not rejected at init, not logged as a warning, and not visible to the host: the driver's
+`ETSOC1_IOCTL_GET_DEVICE_CONFIGURATION` reports 65 W on all three machines. The card runs, forever, at the
+bottom of its VMIN table, and the only symptom is that it is slow. The same guardband macros that would give
+the loop hysteresis would also have given it a place to notice this.
+
 ## Not established
 
 - Whether the taped-out ET-SoC-1 drives its sleep transistors under some other firmware or in some other power
   state. The chip-level netlist is not in the open drop; the RTL statement covers the Erbium configuration, and
   the card corroborates it only in the sense that nothing observable uses it.
 - What the boot frequency is set to in flash.
-- Whether the power branch behaves as written, since it never fired alone in any observed run.
+- Why aifoundry3's flashed TDP is 0 W, and whether it was ever different. Traced to
+  `g_pmic_power_reg.module_tdp_level`, no further.
+- Whether the 8% switching-power difference between the two cards is silicon, package or board regulator.
 - The wake-up probe can only detect a penalty larger than about ten cycles, for arrays idled up to 27 ms (the
   widest the delay op encodes). A gating policy with a longer timer would not show up.
