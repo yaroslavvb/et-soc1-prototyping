@@ -258,6 +258,30 @@ and leakage-corrected power, both bracketing idles and the die temperature.
 | Dense fp32 matmul at 80 °C, predicted from the tables | 63.5 W vs 63.9 measured; 57% static | P | A15 §7 | `docs/energy-manual/07-composition.md` |
 | The relay, predicted from the byte tables | DRAM 90–137 vs 104.8 measured; scratchpad 3.2–6.1 vs 4.25 | P | A15 §7, E25 | same |
 
+## The comprehensive catalogue and the fine grain (E27, E28)
+
+`DATAK` means `docs/reports/data/2026-09-23-energy-manual/catalogue.json`; every configuration is a key of
+`cards.<host>.summary` with mean, sd, se, min, max and n over passes, and every burst is in `bursts.<host>`.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| Instructions that execute in U-mode | 161; 13 trap (divide, square root, sine, reciprocal square root, 64-bit float conversion, the cycle CSR) | M | E27 | `workloads/enercat/enercat_modes.json`; the trap list in `docs/energy-manual/03a-every-instruction.md` |
+| Pass-to-pass standard error | median 1.9%, 90th percentile 6.1% (aifoundry2) | M | E27 | `DATAK`, `se` of every entry |
+| Cross-card ratio over 386 configurations | median **0.950**, 10–90% 0.906–0.987 | M | E27 | `DATAK`, `cross_card` |
+| Cheapest and dearest instruction | `fence` 4.6 pJ; `amoaddg.d` 1486 pJ | M | E27 | `DATAK` |
+| Energy of one mesh hop per byte | **0.750 pJ/B on zeros, 1.812 on random data** | F (straight line through 7 measured points) | E27 | `DATAK`, `cards.aifoundry2.wire` |
+| Toggling energy of the wires | 133 fJ per bit per hop | F | E27 | difference of the two slopes |
+| Mesh rail alone, per hop | 1.29 pJ/B | F | E27 | `04a-fine-grain.md`, "the mesh rail alone" |
+| Filling a 64 B line from scratchpad into the L1 | 110 pJ zeros, 211 pJ random | M (difference of strides) | E27 | `DATAK`, `l1fill/*` |
+| DRAM row hit vs row miss | no difference within ±5 pJ/B | M | E28 | `DATAK`, `dramrow2/*` |
+| L3 read by tensor load through the mesh | 7.9 / 19.7 pJ/B zeros / random at 1072 GB/s | M | E27 (mislabelled row experiment) | `DATAK`, `dramrow/stride8K/*` |
+| Rail split, scalar and vector arithmetic | 79–82% minion rail, ~18% unmetered | M | E27 | `DATAK`, `rails_over_w` |
+| Rail split, scratchpad six hops away | 49% mesh, 25% SRAM, 8% minions | M | E27 | same |
+| Rail split, DRAM read | 70% on no metered rail | M | E27, E28 | same |
+| SRAM rail at idle | 1.60 W at 67 °C, 2.63 W at 82 °C (aifoundry2); 1.90 W at 51 °C (aifoundry3) | M | E27 | `DATAK`, `sram_leakage.curve` |
+| The rails' response to a step | first-order, τ ≈ 1 s; min and max are since reset | M | E27 | `telemetry.jsonl.gz` around any burst |
+| Neighbourhoods reading the shire's scratchpad | 3.8–4.2 pJ/B | M | E27 | `DATAK`, `neigh/*` |
+
 ## External numbers (not measured here)
 
 | Claim | Value | Kind | Source |
@@ -290,7 +314,8 @@ and leakage-corrected power, both bracketing idles and the die temperature.
 - **Whether the 8% switching-power gap between the two cards is silicon, package or board regulator.**
   Separating those needs a third working card, which aifoundry1 is not.
 - **Per-flip energies outside the tensor unit**, and the split of the unsensed 15 W of idle. See the manual's
-  section 9.
+  section 9. The rail split of E27 resolves dynamic power into minion / SRAM / mesh / unmetered, not further.
+- **Whether the DRAM controller closes pages** or the row activation is merely small; E28 cannot tell.
 - **Any table at 700 or 800 MHz.** The V²f ratios say what to expect; nothing was re-measured there.
 - **A relay whose working set exceeds the 80 MB of scratchpad.** That is where on-chip hand-off would be the
   only option rather than the faster one; the flow control for it was not built.

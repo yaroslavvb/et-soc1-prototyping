@@ -33,6 +33,9 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
 | Q25 | 09-22 | Look at the paths around cache-line starvation; find a systolic-array application that beats main memory | R12, E24, E25 → A14, [18-on-chip-relay.md](18-on-chip-relay.md) |
 | Q26 | 09-22 | *(mid-task)* Maybe systolic is a bad idea — find any computation where shire-to-shire communication beats the standard approach | The same; the relay is that computation |
 | Q27 | 09-23 | Create an energy manual: a catalogue of the energy cost of operations with a proper hierarchy, fully broken down across components (memory levels, transistor flips, ...); use all three machines for sanity checking | E26 → A15, `docs/energy-manual/` |
+| Q28 | 09-23 | A comprehensive energy evaluation of all instructions the processor supports, verified on various cards, with enough testing to remove as much variance as possible within five hours of experimenting | E27, E28 → A15 second edition |
+| Q29 | 09-23 | *(mid-task)* Deploy it into the same spacesheep space as the previous one and make it public | A15 made public, updated in place |
+| Q30 | 09-23 | *(mid-task)* A finer-grain breakdown: the energy dissipated by wires; for memory accesses, isolate activating cache lines, leakage, and current through the wires | E27 (wire, line, row, neighbourhood, rail and SRAM-leakage probes), E28 |
 
 ## Scope decisions worth remembering
 

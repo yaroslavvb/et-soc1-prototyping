@@ -28,6 +28,13 @@
 #define EC_TLOAD 19      // tensor load streaming over a per-hart slice (DRAM or scratchpad): bypasses L1
 #define EC_FSQRT_PS 20   // 8-lane fsqrt.ps
 #define EC_FDIV_PS 21    // 8-lane fdiv.ps
+// Fine-grained memory patterns: `access_bytes` per access, `stride` apart, wrapping every `region` bytes of
+// the hart's slice, the slice in DRAM (scp 0), the shire's own scratchpad (1) or the scratchpad of the shire
+// `targets[shire]` (2). EC_TLOAD_PAT uses tensor loads (bypass the L1); EC_FLW_PAT 32 B vector loads
+// through the L1, so a stride of 64 touches every line once and uses half of it.
+#define EC_TLOAD_PAT 22
+#define EC_FLW_PAT 23
+// Generated instruction cases start at 100 (enercat_modes.h).
 
 #define EC_MAGIC 0x454E4552u  // "ENER"
 #define EC_MAX_HARTS 2048
@@ -44,7 +51,15 @@ struct EcArgs {
   uint64_t slice;       // EC_ST_STREAM / EC_TSTORE / EC_TLOAD: per-hart slice base in DRAM
   uint64_t slice_bytes; // bytes per hart in that slice
   uint64_t scp;         // EC_TSTORE / EC_TLOAD: 1 = the slice is instead this shire's scratchpad, per-minion
-  uint64_t scp_off;     //   at this offset plus minion * slice_bytes
+  uint64_t scp_off;     //   at this offset plus minion * slice_bytes; 2 = the scratchpad of targets[shire]
+  uint64_t targets;     // uint32_t[32] in DRAM: the shire each shire reads from when scp == 2
+  uint64_t minion_mask; // bit m: minion m of every shire takes part (0 means all 32)
+  uint64_t stride;      // EC_TLOAD_PAT / EC_FLW_PAT: bytes between consecutive accesses
+  uint64_t access_bytes;// EC_TLOAD_PAT: 64 (one line) or 1024 (16 lines) per tensor load
+  uint64_t region;      // EC_TLOAD_PAT / EC_FLW_PAT: bytes per hart to wrap within
+  uint64_t jump_every;  // EC_TLOAD_PAT: after this many accesses, add jump_bytes to the pointer (0: never).
+  uint64_t jump_bytes;  //   With stride 1 KB, jump_every 8 and jump_bytes 248 KB, every DRAM bank sees a new
+                        //   row on every visit; without the jump it sees 32 columns of one row.
 };
 
 // One cache line per hart.
@@ -58,6 +73,6 @@ struct EcResult {
 };
 
 #ifdef __cplusplus
-static_assert(sizeof(EcArgs) == 10 * 8, "EcArgs layout must match on host and device");
+static_assert(sizeof(EcArgs) == 17 * 8, "EcArgs layout must match on host and device");
 static_assert(sizeof(EcResult) == 64, "EcResult must be one cache line");
 #endif

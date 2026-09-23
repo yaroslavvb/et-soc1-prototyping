@@ -17,6 +17,36 @@
 4. **Energy per event is power over idle times the burst's wall time, divided by the events completed in
    it.** The gaps between launches inside a burst draw idle power and cancel.
 
+## The comprehensive catalogue: how the variance was driven down
+
+The 23 September catalogue (`workloads/enercat/run_catalogue.py`) measured 386 configurations — every instruction
+on zeros and random data, the write and read paths, the wire, line, row and neighbourhood probes — **three times
+each, in a different random order every pass**, on both working cards at the same time: 9,264 launches per card,
+three and a half hours of card time each. Shuffling the order means the slow drift of die temperature over the
+session (74 to 87 °C on aifoundry2) lands on different configurations in each pass and averages out instead of
+biasing a class. The result per configuration is the mean over the three passes with its standard error:
+
+| | aifoundry2 | aifoundry3 |
+|---|---|---|
+| Pass-to-pass standard error, median | 1.9% | 1.2% |
+| Pass-to-pass standard error, 90th percentile | 6.1% | 3.6% |
+| Samples at 600 MHz | all | all |
+| Launches that failed | 0 | 0 |
+
+Across the two cards the ratio is 0.950 in the median with a 10th–90th percentile range of
+0.906–0.987 over 386 configurations: the residual card-to-card scatter after the common
+scale is about ±4%, the same size as the pass-to-pass error, which is what one expects if the scale factor is
+real and the rest is measurement.
+
+**The rails.** The service processor's minion, SRAM and mesh figures are `[average, minimum, maximum]` triples.
+The minimum and maximum are since the last reset; the average is a first-order filtered reading with a time
+constant of about one second (a step on the minion rail reaches 61% after 1 s and 88% after 2 s while board
+power steps at once). The rail split of a burst is therefore read from its last 0.6 s and divided by the 0.94 of
+the step reached there, against an idle read 3 s or more after the previous burst. `ettelem sample --reset-ms`
+can reset the statistics on a schedule if a window mean is wanted instead. An earlier analysis averaged the
+three numbers of the triple together, which is why the hot-line and relay reports said the rails barely moved;
+those reports' board-power figures are unaffected.
+
 ## What "per instruction" means
 
 The cost of that instruction retired on every hart of every minion at once, above idle, including the

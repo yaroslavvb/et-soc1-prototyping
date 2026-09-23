@@ -54,7 +54,7 @@ def power(dirname):
         return None
     runs = [json.loads(l) for l in open(os.path.join(dirname, "runs.jsonl"))]
     t = np.array([s["t_ms"] for s in tel]) / 1000.0
-    f = {k: np.array([s[p][k] if p else s[k] for s in tel])
+    f = {k: np.array([(s[p][k][0] if p else s[k]) for s in tel])   # rails are [avg, min, max]
          for k, p in (("board_w", None), ("minion_w", "sp"), ("sram_w", "sp"), ("noc_w", "sp"))}
     # A single relay launch lasts a few milliseconds, less than one telemetry sample, so the window for a
     # medium is the whole burst of back-to-back launches carrying its label.

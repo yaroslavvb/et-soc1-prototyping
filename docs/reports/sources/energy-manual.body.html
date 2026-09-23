@@ -38,6 +38,17 @@ does not answer to anything a kernel does. The leakage part answers to temperatu
 <div class="table-wrap"><table id="instrtab"></table></div>
 <p id="instrtext"></p>
 
+<h3>3.1 Every instruction the core executes</h3>
+<p>The full catalogue: every instruction the assembler accepts and the silicon executes in U-mode, measured
+three times in shuffled order on each of two cards, on zeros and on random operands. Bars are the random-data
+figure on aifoundry2, sorted; hover for the zeros figure, the pass-to-pass spread, the issue rate and the
+second card. Instructions that trap and so have no energy: <span id="trapped"></span>.</p>
+<div class="chart-title">Energy per instruction, random operands, both harts of 1,024 minions</div>
+<div class="chart scroll" id="allinstr"></div>
+<p class="small" id="allcap"></p>
+<details><summary>The table, by execution unit</summary><div class="table-wrap"><table id="alltab"></table></div></details>
+<p id="alltext"></p>
+
 <h3>3.2 The tensor unit, per multiply-add</h3>
 <div class="table-wrap"><table id="tensor"></table></div>
 <p>The tensor unit is the one place on the chip resolved below the instruction, by simulating its RTL on the
@@ -54,6 +65,25 @@ before they ran, to 0.9 W rms.</p>
 <p id="memtext"></p>
 <details><summary>Reads by level from the 18 September memory-hierarchy session (clock not pinned)</summary>
 <div class="table-wrap"><table id="memold"></table></div></details>
+
+<h3>4.3 Finer grain: wires, lines, rows, and the leakage of the arrays</h3>
+<p>What a byte costs is not one number. These are the parts of it the card's instruments can separate.</p>
+<div class="chart-title">Wires: energy per byte against distance on the mesh</div>
+<div class="chart scroll" id="wire"></div>
+<p class="small" id="wirecap"></p>
+<p id="wiretext"></p>
+<div class="table-wrap"><table id="linetab"></table></div>
+<p id="linetext"></p>
+<div class="table-wrap"><table id="rowtab"></table></div>
+<p id="rowtext"></p>
+<div class="chart-title">Where the current flows: each class of operation split across the metered rails</div>
+<div class="chart scroll" id="railsplit"></div>
+<p class="small" id="railscap"></p>
+<p id="railstext"></p>
+<div class="chart-title">Leakage of the arrays: the SRAM rail during every idle stretch, against die temperature</div>
+<div class="chart scroll" id="sram"></div>
+<p class="small" id="sramcap"></p>
+<div class="table-wrap"><table id="neightab"></table></div>
 
 <h2>5. Bytes between cores and shires</h2>
 <div class="table-wrap"><table id="comm"></table></div>

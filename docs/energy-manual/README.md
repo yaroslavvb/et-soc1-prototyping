@@ -10,7 +10,9 @@ up from parts, with every number traceable to the measurement that produced it.
 | 1 | [The card at rest](01-at-rest.md) | 12.6 W fixed plus 23.3 W of leakage at 80 °C, e-folding every 36 °C |
 | 2 | [A core that is awake](02-awake.md) | 2 mW per minion awake; a stalled one costs the same |
 | 3 | [Instructions](03-instructions.md) | integer add 7 pJ, float add 23 pJ, 8-lane FMA 28 pJ on zeros and 59 pJ on random data; a tensor multiply-add 0.4 pJ on zeros, 6 pJ on random |
+| 3.1 | [Every instruction](03a-every-instruction.md) | all 161 instructions the silicon executes in U-mode, three shuffled passes on two cards: cheapest `fence` at 4.6 pJ, dearest `amoaddg.d` at 1486 pJ; pass-to-pass standard error 1.9% in the median; the second card at 0.950× over all 386 configurations |
 | 4 | [Bytes through memory](04-bytes-memory.md) | L1 hit 0.5 pJ/B, own scratchpad 2–8 pJ/B, DRAM 90–140 pJ/B; writes through the L1 to DRAM 250–350 pJ/B |
+| 4.3 | [Finer grain: wires, lines, rows, leakage](04a-fine-grain.md) | one mesh hop costs 1.81 pJ/B on random data and 0.75 on zeros, so toggling a bit across one hop is 133 fJ; filling a 64 B line into the L1 is 110–210 pJ; the DRAM row pattern does not change the energy; the SRAM leaks 1.6 W at 67 °C and 2.6 W at 82 °C; where each class's current flows, by rail |
 | 5 | [Bytes between cores](05-bytes-between-cores.md) | under 1 pJ/B in a neighbourhood, 2.3 in a shire, 15 across the mesh; 9 pJ/B to hand a slab to the next shire |
 | 6 | [Synchronisation](06-synchronisation.md) | a contended atomic 24 nJ; a spread one 1.4 nJ; a chip barrier is 5,000 cycles of leakage |
 | 7 | [Composition](07-composition.md) | a dense matmul at 80 °C is 57% static energy; the relay is predicted from §4 within 10% |

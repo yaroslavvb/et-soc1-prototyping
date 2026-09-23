@@ -1,7 +1,11 @@
 // ettelem: power, temperature and voltage telemetry from an ET-SoC-1 card, through the management library.
 //
-//   ettelem sample [--seconds T] [--every-ms M]     JSON lines: board power, SP stats (rails), temperatures,
-//                                                   regulator set-points, on-die voltages, clock frequencies
+//   ettelem sample [--seconds T] [--every-ms M] [--reset-ms R]
+//                                                   JSON lines: board power, SP stats (rails), temperatures,
+//                                                   regulator set-points, on-die voltages, clock frequencies.
+//                                                   The SP's rail figures are [avg, min, max] SINCE THEIR LAST
+//                                                   RESET; with --reset-ms R they are reset every R ms and each
+//                                                   sample says how long its window has been open.
 //   ettelem config                                 static governor inputs: flashed TDP (W), SW temperature
 //                                                   threshold (C), power state, current minion clock and voltage
 //   ettelem loglevel debug|info                     SP log level (DM_CMD_SET_DM_TRACE_CONFIG). At debug the SP logs one
@@ -47,6 +51,16 @@ struct Dm {
     dl = dev::IDeviceLayer::createPcieDeviceLayer(false, true);  // management node only
     dm = &get(dl.get());
   }
+  // The service processor's per-rail figures are averages, minima and maxima SINCE THEIR LAST RESET, not
+  // instantaneous power. Reset them and the average from then on is the mean over the window that follows.
+  bool resetStats() {
+    const uint32_t in[2] = {1u /* SP stats */, 2u /* STATS_CONTROL_RESET_COUNTER */};
+    char out[8] = {0};
+    uint32_t hl = 0;
+    uint64_t dlat = 0;
+    return dm->serviceRequest(0, DM_CMD_SET_STATS_RUN_CONTROL, reinterpret_cast<const char*>(in), sizeof(in), out, 1,
+                              &hl, &dlat, 2000) == 0;
+  }
   template <class T> bool get(uint32_t cmd, T& out) {
     uint32_t hl = 0;
     uint64_t dlat = 0;
@@ -80,8 +94,10 @@ int config(Dm& d) {
   return (okD && okT && okS) ? 0 : 1;
 }
 
-int sample(Dm& d, double seconds, int everyMs) {
+int sample(Dm& d, double seconds, int everyMs, int resetMs) {
   const auto t0 = Clock::now();
+  auto lastReset = Clock::now();
+  if (resetMs > 0) d.resetStats();
   while (std::chrono::duration<double>(Clock::now() - t0).count() < seconds) {
     const auto tick = Clock::now();
     module_power_t p;
@@ -91,11 +107,22 @@ int sample(Dm& d, double seconds, int everyMs) {
     module_voltage_t mv;
     asic_frequencies_t f;
     const long long ms = epochMs();
+    // With --reset-ms, the rail averages in this sample cover the window since the last reset; the sample
+    // carries that window's length so the reader can pick the one that closes each window.
+    long long sinceResetMs = -1;
+    if (resetMs > 0) {
+      sinceResetMs = std::chrono::duration_cast<std::chrono::milliseconds>(tick - lastReset).count();
+    }
     const bool okP = d.get(DM_CMD_GET_MODULE_POWER, p), okS = d.get(DM_CMD_GET_SP_STATS, s),
                okT = d.get(DM_CMD_GET_MODULE_CURRENT_TEMPERATURE, t), okA = d.get(DM_CMD_GET_ASIC_VOLTAGE, av),
                okM = d.get(DM_CMD_GET_MODULE_VOLTAGE, mv), okF = d.get(DM_CMD_GET_ASIC_FREQUENCIES, f);
-    std::printf("{\"t_ms\":%lld,\"took_ms\":%lld", ms, epochMs() - ms);
+    std::printf("{\"t_ms\":%lld,\"took_ms\":%lld,\"since_reset_ms\":%lld", ms, epochMs() - ms, sinceResetMs);
     if (okP) std::printf(",\"board_w\":%.2f", p.power / 100.0);
+    // Reset after reading, so this sample closed the window and the next one opens a fresh one.
+    if (resetMs > 0 && sinceResetMs >= resetMs) {
+      d.resetStats();
+      lastReset = Clock::now();
+    }
     if (okS)
       std::printf(",\"sp\":{\"board_avg_w\":%.2f,\"board_min_w\":%.2f,\"board_max_w\":%.2f,"
                   "\"minion_w\":[%.3f,%.3f,%.3f],\"sram_w\":[%.3f,%.3f,%.3f],\"noc_w\":[%.3f,%.3f,%.3f],"
@@ -141,12 +168,13 @@ int main(int argc, char** argv) {
     Dm d;
     if (cmd == "sample") {
       double seconds = 10;
-      int everyMs = 0;
+      int everyMs = 100, resetMs = 0;
       for (int i = 2; i + 1 < argc; i += 2) {
         if (!std::strcmp(argv[i], "--seconds")) seconds = std::atof(argv[i + 1]);
         if (!std::strcmp(argv[i], "--every-ms")) everyMs = std::atoi(argv[i + 1]);
+        if (!std::strcmp(argv[i], "--reset-ms")) resetMs = std::atoi(argv[i + 1]);
       }
-      return sample(d, seconds, everyMs);
+      return sample(d, seconds, everyMs, resetMs);
     }
     if (cmd == "config") return config(d);
     if (cmd == "loglevel" && argc == 3) {

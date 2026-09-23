@@ -469,6 +469,62 @@ costs a read, and the L1 write-back path 2.5× that; DRAM is data-dependent too 
 `fsqrt.ps` trap and are absent. Everything is at 600 MHz. The memory-hierarchy reads of 18 September, which
 the manual also uses, were taken with the governor free to move the clock.
 
+## E27 — The comprehensive instruction and memory catalogue, three passes on two cards (2026-09-23, 08:36–11:18)
+
+**Question (Q28, Q30):** what does every instruction cost, how repeatable is it, how much of it is the card, and
+what parts of a memory access can be separated — wire, line, row, leakage, rail?
+**Method:** `workloads/enercat` generated from an instruction table (`gen_ops.py`: 174 mnemonics the assembler
+accepts, 161 that execute; 13 trap in U-mode). `run_catalogue.py` runs 386 configurations — every instruction on
+zeros and random operands, a constant on a subset, the awake core on one and two harts, the write and read paths
+with the operand pattern filled into the slices, 1 KB scratchpad reads from a shire exactly 1–8 hops away, 64 B
+scratchpad reads at three strides, L1 fills at three strides, four neighbourhoods reading, and DRAM row
+patterns — **three times each in a different random order per pass**, 3 s bursts bracketed by 4.5 s of idle,
+telemetry at 10 Hz. The same script ran on aifoundry2 and aifoundry3 at the same time: 9,264 launches per card,
+2.7 hours each. `analyze_catalogue.py` gives each configuration the mean and standard error over passes, with the
+leakage correction of E26; a straight-line fit of energy per byte against hop distance; the rail split of each
+burst read from its last 0.6 s and corrected for the rails' one-second filter; and the SRAM rail's idle value
+against die temperature.
+```
+python3 workloads/enercat/run_catalogue.py DATA --passes 3 --burst 3 --gap 4.5
+python3 workloads/enercat/analyze_catalogue.py DATA_A2 DATA_A3 DATA_A2_ROWS --out catalogue.json
+```
+**Raw data:** `docs/reports/data/2026-09-23-catalogue-aifoundry2/` and `-aifoundry3/` (`runs.jsonl`, one line per
+launch with pass and configuration; `telemetry.jsonl.gz`), reduced to
+`docs/reports/data/2026-09-23-energy-manual/catalogue.json` (per-burst detail and per-configuration statistics).
+**Result:** all 386 configurations at 600 MHz on every sample, no failed launches. Pass-to-pass standard error
+**1.9% in the median, 6.1% at the 90th percentile** on aifoundry2 (1.2% and 3.6% on
+aifoundry3). Cross-card ratio **0.950** in the median, 10th–90th percentile 0.906–0.987, over
+all 386 configurations. Cheapest instruction `fence` at 4.6 pJ, dearest `amoaddg.d` at
+1486 pJ. **Wires:** energy per byte against hop distance is a straight line, 3.05 pJ/B +
+0.750 pJ/B per hop on zeros and 7.90 + 1.812 on random data
+(rms 0.39 and 1.09 pJ/B over 7 points); the difference of the slopes, 1.06 pJ/B per hop, is the toggling
+of the wires: **133 fJ per bit per hop**; the mesh rail on its own gives 1.29 pJ/B per hop. **Lines:** a 64 B fill from the
+scratchpad into the L1 is 110 pJ on zeros and 211 on random data (1.7 and 3.3 pJ/B, agreeing with the tensor-load
+rate for the same bytes). **Rails:** scalar and vector arithmetic put 79–82% of their power on the minion rail and
+about 18% on no metered rail (regulation); an own-scratchpad read 67% on the SRAM rail; a read six hops away 49% on
+the mesh rail; a DRAM read 70% on no metered rail. **SRAM leakage:** the SRAM rail at idle rises from 1.60 W at
+67 °C to 2.63 W at 82 °C on aifoundry2 (78 mW/°C at 80 °C, 22 mW/MB), 1.90 W at 51 °C on aifoundry3.
+**Neighbourhoods:** the four quarters of a shire read its scratchpad at 3.8–4.2 pJ/B.
+**Caveats:** the die drifted from 74 to 87 °C over the aifoundry2 session and the shuffled order is what keeps that
+out of the tables; the leakage correction is the E26 one. The rail split assumes the rails' filter is first-order
+with τ ≈ 1 s, measured on one step. The first-pass DRAM row configurations touched too little to leave the L3 and
+measured the L3 instead (kept, labelled); E28 does the rows properly.
+
+## E28 — DRAM row hits against row misses, done with the L3 defeated (2026-09-23, 11:25)
+
+**Question (Q30):** does opening a DRAM row cost energy a programmer can see?
+**Method:** 1 KB tensor loads from DRAM by 32 harts (minion 0 of every shire), each over its own 64 MB so the
+touched set exceeds the 32 MB L3 whatever the pattern: sequential (each bank sees 32 columns of a row), row hit
+(stride 8 KB: same bank and row, next column), row miss (a 248 KB jump after every 8 KB: a new row on every visit
+to a bank). Three passes, zeros and random, as E27.
+**Raw data:** `docs/reports/data/2026-09-23-catalogue-aifoundry2-rows/`, pooled into `catalogue.json` as `dramrow2/*`.
+**Result:** 147 ± 8, 156 ± 5 and 153 ± 5 pJ/B on random data for sequential, row hit and row
+miss; 115, 118 and 114 on zeros. **No difference within error.** Either the controller closes pages after each
+access, so every access already includes an activation, or the activation is small next to the transfer; the
+instruments cannot tell which. Rails: 68–70% of a DRAM read is on no metered rail (the DDR PHY and the chips).
+**Caveats:** 32 harts give 14–17 GB/s, latency-bound, so the signal is 2–2.6 W over idle and the per-pass error
+±4–8 pJ/B; a 20 pJ/B activation would have shown, a 5 pJ/B one would not.
+
 ## A note on E10, re-analysed for Q20
 
 The governor transitions in [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) are **not** a new experiment.

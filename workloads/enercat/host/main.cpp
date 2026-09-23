@@ -23,6 +23,7 @@
 #include <fstream>
 #include <limits>
 #include <map>
+#include <cmath>
 #include <random>
 #include <sstream>
 #include <string>
@@ -30,6 +31,7 @@
 
 #include "Constants.h"
 #include "enercat_args.h"
+#include "enercat_modes.h"
 
 namespace fs = std::filesystem;
 using Clock = std::chrono::steady_clock;
@@ -82,6 +84,8 @@ struct Options {
   std::string simArgs, pattern = "spin", operands = "random";
   uint64_t harts = 2, shireMask = 0xffffffff, window = 240000000, sliceBytes = 256 * 1024, seed = 1;
   bool scp = false;
+  uint64_t minionMask = 0, stride = 64, accessBytes = 64, region = 0, hopDistance = 0, jumpEvery = 0, jumpBytes = 0;
+  std::string targets;   // "shift:K" or an explicit 32-entry list "t0,t1,...": the shire each shire reads from
   double seconds = 4.0, budget = 9.5;
   std::string kernel = KERNEL_ELF;
 };
@@ -146,7 +150,7 @@ public:
     rt_->memcpyHostToDevice(stream_, reinterpret_cast<const std::byte*>(res.data()), results_,
                             res.size() * sizeof(EcResult));
     rt_->waitForStream(stream_);
-    a.shire_mask = o_.shireMask;
+    if (!a.shire_mask) a.shire_mask = o_.shireMask;
     a.results = reinterpret_cast<uint64_t>(results_);
     rt::KernelLaunchOptions opts;
     opts.setShireMask(o_.shireMask);
@@ -200,20 +204,73 @@ std::vector<uint32_t> sources(const std::string& kind, uint64_t seed) {
   return v;
 }
 
+Pat lookup(const std::string& name) {
+  const auto it = PATTERNS.find(name);
+  if (it != PATTERNS.end()) return it->second;
+  for (const auto& g : EC_GEN_MODES) {
+    if (name == g.name) return Pat{g.mode, g.ops_per_iter, g.unit, g.hart0};
+  }
+  if (name == "tload_pat") return Pat{EC_TLOAD_PAT, 8, "tensor_load", true};
+  if (name == "flw_pat") return Pat{EC_FLW_PAT, 8, "flw.ps", false};
+  throw std::runtime_error("unknown --pattern " + name);
+}
+
+// The mesh, as workloads/memprobe/gen_ops.py has it: shire -> (x, y). Hop distance is Manhattan.
+const std::map<int, std::pair<int,int>> MESH = {
+  {0,{0,0}},{24,{1,0}},{9,{2,0}},{25,{3,0}},{2,{4,0}},{11,{5,0}},
+  {8,{0,1}},{16,{1,1}},{1,{2,1}},{17,{3,1}},{10,{4,1}},{19,{5,1}},
+  {3,{0,2}},{4,{1,2}},{13,{2,2}},{14,{3,2}},{18,{4,2}},{27,{5,2}},
+  {12,{1,3}},{21,{2,3}},{22,{3,3}},{26,{4,3}},
+  {20,{1,4}},{29,{2,4}},{30,{3,4}},{15,{4,4}},{23,{5,4}},
+  {28,{1,5}},{5,{2,5}},{6,{3,5}},{7,{4,5}},{31,{5,5}}};
+int hops(int a, int b) { auto pa = MESH.at(a), pb = MESH.at(b); return std::abs(pa.first - pb.first) + std::abs(pa.second - pb.second); }
+
+// For --hop-distance d: give every shire a target exactly d hops away, at most two readers per target so
+// no scratchpad is swamped. Shires with no such target sit out (returned mask says which run).
+std::pair<std::vector<uint32_t>, uint64_t> targetsAtDistance(int d, uint64_t shireMask) {
+  std::vector<uint32_t> t(32, 0);
+  std::vector<int> load(32, 0);
+  uint64_t mask = 0;
+  for (int s = 0; s < 32; ++s) {
+    if (!((shireMask >> s) & 1)) continue;
+    int best = -1;
+    for (int c = 0; c < 32; ++c) {
+      if (c == s || hops(s, c) != d || load[c] >= 2) continue;
+      if (best < 0 || load[c] < load[best]) best = c;
+    }
+    if (best >= 0) { t[s] = best; ++load[best]; mask |= 1ull << s; }
+  }
+  return {t, mask};
+}
+
 int run(const Options& o, Session& dev) {
-  const auto it = PATTERNS.find(o.pattern);
-  if (it == PATTERNS.end()) throw std::runtime_error("unknown --pattern " + o.pattern);
-  const Pat& p = it->second;
+  const Pat p = lookup(o.pattern);
   const uint64_t harts = p.hart0 ? 1 : o.harts;
   const auto src = sources(o.operands, o.seed);
   std::byte* sbuf = dev.alloc(src.size() * 4);
   dev.put(src.data(), sbuf, src.size() * 4);
   std::byte* slice = nullptr;
-  const bool stream = p.mode == EC_ST_STREAM || p.mode == EC_TSTORE || p.mode == EC_TLOAD;
-  if (stream && !o.scp) {
-    slice = dev.alloc(EC_MAX_HARTS * o.sliceBytes);   // never initialised for stores; for loads it is what it is
+  const bool stream = p.mode == EC_ST_STREAM || p.mode == EC_TSTORE || p.mode == EC_TLOAD ||
+                      p.mode == EC_TLOAD_PAT || p.mode == EC_FLW_PAT || p.mode >= EC_GEN_FIRST;
+  uint64_t sliceStride = o.sliceBytes;
+  if (stream && !o.scp && o.hopDistance == 0 && o.targets.empty()) {
+    const bool pat = p.mode == EC_TLOAD_PAT || p.mode == EC_FLW_PAT;
+    if (pat) sliceStride += 8192;   // room for the kernel's bank spread
+    // One slice per participant when a minion mask is given (the kernel indexes by rank), else per hart.
+    uint64_t nslices = EC_MAX_HARTS;
+    if (p.mode == EC_TLOAD_PAT && o.minionMask) {
+      nslices = (uint64_t)__builtin_popcountll(o.shireMask) * (uint64_t)__builtin_popcountll(o.minionMask & 0xFFFFFFFFull);
+    }
+    slice = dev.alloc(nslices * sliceStride);
+    // Loads read what is there, so fill the slices with the operand pattern: the bytes on the wire are then
+    // zeros, one constant or random, the same as the arithmetic patterns see.
+    if (p.mode == EC_TLOAD || p.mode == EC_TLOAD_PAT || p.mode == EC_FLW_PAT) {
+      std::vector<uint32_t> fill(nslices * sliceStride / 4);
+      for (size_t i = 0; i < fill.size(); ++i) fill[i] = src[i % src.size()];
+      dev.put(fill.data(), slice, fill.size() * 4);
+    }
   }
-  if (o.scp && 256 * 1024 + 32 * o.sliceBytes > 0x280000ull) {
+  if ((o.scp || o.hopDistance || !o.targets.empty()) && 256 * 1024 + 32 * o.sliceBytes > 0x280000ull) {
     throw std::runtime_error("--scp: 256 KB + 32 x --slice-bytes must fit the 2.5 MB scratchpad");
   }
   EcArgs a{};
@@ -222,9 +279,37 @@ int run(const Options& o, Session& dev) {
   a.harts = harts;
   a.sources = reinterpret_cast<uint64_t>(sbuf);
   a.slice = reinterpret_cast<uint64_t>(slice);
-  a.slice_bytes = o.sliceBytes;
+  a.slice_bytes = sliceStride;
   a.scp = o.scp ? 1 : 0;
   a.scp_off = 256 * 1024;
+  a.minion_mask = o.minionMask;
+  a.stride = o.stride;
+  a.access_bytes = o.accessBytes;
+  a.region = o.region ? o.region : o.sliceBytes;
+  a.jump_every = o.jumpEvery;
+  a.jump_bytes = o.jumpBytes;
+  uint64_t shireMaskUsed = o.shireMask;
+  double meanHops = 0;
+  if (o.hopDistance || !o.targets.empty()) {
+    std::vector<uint32_t> t(32, 0);
+    if (o.hopDistance) {
+      auto r = targetsAtDistance((int)o.hopDistance, o.shireMask);
+      t = r.first; shireMaskUsed = r.second;
+    } else if (o.targets.rfind("shift:", 0) == 0) {
+      const int k = std::stoi(o.targets.substr(6));
+      for (int s = 0; s < 32; ++s) t[s] = (uint32_t)((s + k) % 32);
+    } else {
+      std::stringstream ss(o.targets); std::string item; int i = 0;
+      while (std::getline(ss, item, ',') && i < 32) t[i++] = (uint32_t)std::stoul(item);
+    }
+    int n = 0; for (int s = 0; s < 32; ++s) if ((shireMaskUsed >> s) & 1) { meanHops += hops(s, (int)t[s]); ++n; }
+    meanHops = n ? meanHops / n : 0;
+    std::byte* tb = dev.alloc(32 * 4);
+    dev.put(t.data(), tb, 32 * 4);
+    a.targets = reinterpret_cast<uint64_t>(tb);
+    a.scp = 2;
+  }
+  a.shire_mask = shireMaskUsed;
 
   const auto tStart = Clock::now();
   int bad = 0;
@@ -241,15 +326,21 @@ int run(const Options& o, Session& dev) {
     const double ops = double(iters) * double(p.opsPerIter);
     const double secs = cmax / 0.6e9;   // device seconds at the 600 MHz the card is pinned to
     std::printf("ENERCAT {\"pattern\":\"%s\",\"unit\":\"%s\",\"operands\":\"%s\",\"harts\":%llu,\"shires\":%d,"
-                "\"participants\":%llu,\"ops\":%.0f,\"bytes\":%llu,\"cycles_max\":%llu,\"cycles_mean\":%.0f,"
+                "\"participants\":%llu,\"shire_mask_used\":\"0x%llx\",\"ops\":%.0f,\"bytes\":%llu,\"cycles_max\":%llu,\"cycles_mean\":%.0f,"
                 "\"ops_per_s\":%.4e,\"bytes_per_s\":%.4e,\"ops_per_cycle_per_hart\":%.4f,\"wall_s\":%.4f,"
-                "\"scp\":%s,\"slice_bytes\":%llu,\"t_start_ms\":%lld,\"t_end_ms\":%lld,\"ok\":%s}\n",
+                "\"scp\":%s,\"slice_bytes\":%llu,\"minion_mask\":\"0x%llx\",\"stride\":%llu,\"access_bytes\":%llu,"
+                "\"region\":%llu,\"jump_every\":%llu,\"jump_bytes\":%llu,\"hop_distance\":%llu,\"mean_hops\":%.3f,\"targets\":\"%s\","
+                "\"t_start_ms\":%lld,\"t_end_ms\":%lld,\"ok\":%s}\n",
                 o.pattern.c_str(), p.unit, o.operands.c_str(), (unsigned long long)harts,
-                __builtin_popcountll(o.shireMask), (unsigned long long)n, ops, (unsigned long long)bytes,
+                __builtin_popcountll(shireMaskUsed), (unsigned long long)n, (unsigned long long)shireMaskUsed, ops,
+                (unsigned long long)bytes,
                 (unsigned long long)cmax, n ? csum / double(n) : 0.0, secs > 0 ? ops / secs : 0.0,
                 secs > 0 ? double(bytes) / secs : 0.0, (cmax && n) ? ops / double(cmax) / double(n) : 0.0,
-                wallS, o.scp ? "true" : "false", (unsigned long long)o.sliceBytes, dev.t0Ms, dev.t1Ms,
-                (ok && n) ? "true" : "false");
+                wallS, (o.scp || a.scp) ? "true" : "false", (unsigned long long)o.sliceBytes,
+                (unsigned long long)o.minionMask, (unsigned long long)o.stride, (unsigned long long)o.accessBytes,
+                (unsigned long long)a.region, (unsigned long long)o.jumpEvery, (unsigned long long)o.jumpBytes,
+                (unsigned long long)o.hopDistance, meanHops, o.targets.c_str(),
+                dev.t0Ms, dev.t1Ms, (ok && n) ? "true" : "false");
     std::fflush(stdout);
     if (!ok || !n) { ++bad; break; }
   }
@@ -278,6 +369,15 @@ int main(int argc, char** argv) {
     else if (a == "--seconds") o.seconds = std::strtod(next().c_str(), nullptr);
     else if (a == "--budget") o.budget = std::strtod(next().c_str(), nullptr);
     else if (a == "--seed") o.seed = std::strtoull(next().c_str(), nullptr, 0);
+    else if (a == "--minions") o.minionMask = std::strtoull(next().c_str(), nullptr, 0);
+    else if (a == "--stride") o.stride = parseSize(next());
+    else if (a == "--access-bytes") o.accessBytes = parseSize(next());
+    else if (a == "--region") o.region = parseSize(next());
+    else if (a == "--hop-distance") o.hopDistance = std::strtoull(next().c_str(), nullptr, 0);
+    else if (a == "--targets") o.targets = next();
+    else if (a == "--jump-every") o.jumpEvery = std::strtoull(next().c_str(), nullptr, 0);
+    else if (a == "--jump-bytes") o.jumpBytes = parseSize(next());
+    else if (a == "--list") { for (const auto& g : EC_GEN_MODES) std::printf("%s\t%s\n", g.name, g.note); return 0; }
     else if (a == "--kernel") o.kernel = next();
     else { std::fprintf(stderr, "unknown option %s\n", a.c_str()); return 2; }
   }

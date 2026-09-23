@@ -49,7 +49,7 @@ def analyze(tel, runs):
     t = np.array([s["t_ms"] for s in tel]) / 1000.0
     w = np.array([s["board_w"] for s in tel])
     T = np.array([s["temp_c"]["minshire"][0] for s in tel])
-    rails = {k: np.array([s["sp"][k] for s in tel]) for k in ("minion_w", "sram_w", "noc_w")}
+    rails = {k: np.array([s["sp"][k][0] for s in tel]) for k in ("minion_w", "sram_w", "noc_w")}   # [avg, min, max]: the average
     groups = collections.OrderedDict()
     for r in runs:
         groups.setdefault(key(r), []).append(r)

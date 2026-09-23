@@ -25,6 +25,7 @@ HOT = f"{D}/2026-09-22-hotline-aifoundry2/hotline.json"
 RELAY = f"{D}/2026-09-22-onchip-aifoundry2/onchip.json"
 CARDS = f"{D}/2026-09-22-cards/cards-report.json"
 ENER = f"{D}/2026-09-23-energy-manual/enercat.json"
+CAT = f"{D}/2026-09-23-energy-manual/catalogue.json"
 CONFIG = f"{D}/2026-09-22-cards/config.json"
 
 
@@ -123,6 +124,12 @@ def main():
     if os.path.exists(ENER):
         out["enercat"] = j(ENER)
         out["enercat"]["source"] = ENER
+
+    # --- 3.1 / 4.3: the comprehensive catalogue and the fine grain, from three shuffled passes on two cards --
+    if os.path.exists(CAT):
+        c = j(CAT)
+        c.pop("bursts", None)   # per-burst detail stays in catalogue.json; the page needs the summaries
+        out["catalogue"] = c | {"source": CAT}
 
     # --- 8. cards ---------------------------------------------------------------------------------------------
     try:

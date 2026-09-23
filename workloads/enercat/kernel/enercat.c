@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include "etsoc/isa/hart.h"
 #include "enercat_args.h"
+#include "../enercat_modes.h"
 
 int64_t entry_point(const struct EcArgs* args);
 
@@ -89,11 +90,13 @@ static inline void load_vsrc(uint64_t buf)
                          op " f12, f4\n" op " f13, f5\n" op " f14, f6\n" op " f15, f7\n"                   \
                          : : : VSINK)
 
-#define RUN(BLOCK)                                                                                        \
+// Variadic, because the generated blocks carry commas of their own.
+#define RUN(...)                                                                                          \
     do {                                                                                                  \
         const uint64_t t0 = cycles(), deadline = t0 + a->window;                                          \
         do {                                                                                              \
-            BLOCK; BLOCK; BLOCK; BLOCK; BLOCK; BLOCK; BLOCK; BLOCK;                                       \
+            __VA_ARGS__; __VA_ARGS__; __VA_ARGS__; __VA_ARGS__;                                           \
+            __VA_ARGS__; __VA_ARGS__; __VA_ARGS__; __VA_ARGS__;                                           \
             ++iters;                                                                                      \
         } while (cycles() < deadline);                                                                    \
         cyc = cycles() - t0;                                                                              \
@@ -129,8 +132,11 @@ int64_t entry_point(const struct EcArgs* a)
     const uint64_t thread = hart & 1;
     const uint64_t minion_in_shire = (hart >> 1) & 31;
     const uint64_t mode = a->mode;
-    const bool tensor = mode == EC_TSTORE || mode == EC_TLOAD;
+    const bool tensor = mode == EC_TSTORE || mode == EC_TLOAD || mode == EC_TLOAD_PAT;
     if (thread && (a->harts < 2 || tensor)) {
+        return 0;
+    }
+    if (a->minion_mask && !((a->minion_mask >> minion_in_shire) & 1)) {
         return 0;
     }
     const uint64_t src = a->sources + hart * 256;
@@ -139,8 +145,79 @@ int64_t entry_point(const struct EcArgs* a)
     const volatile float* sf = (const volatile float*)src;
     const float g0 = sf[0], g1 = sf[8], g2 = sf[16], g3 = sf[24], g4 = sf[32], g5 = sf[40], g6 = sf[48], g7 = sf[56];
     uint64_t iters = 0, cyc = 0, bytes = 0;
+    // Base of this hart's slice for the memory patterns: DRAM, own scratchpad, or a target shire's scratchpad.
+    uint64_t slice_base = a->slice + hart * a->slice_bytes;
+    if (a->scp == 0 && mode == EC_TLOAD_PAT && a->minion_mask) {
+        // With a minion mask the host allocates one slice per PARTICIPANT, so index by rank among them:
+        // shires below mine in the mask times minions per shire in the mask, plus minions below mine.
+        const uint64_t per_shire = (uint64_t)__builtin_popcountll(a->minion_mask & 0xFFFFFFFFull);
+        const uint64_t shires_below = (uint64_t)__builtin_popcountll(a->shire_mask & ((1ull << shire) - 1));
+        const uint64_t minions_below = (uint64_t)__builtin_popcountll(a->minion_mask & ((1ull << minion_in_shire) - 1));
+        slice_base = a->slice + (shires_below * per_shire + minions_below) * a->slice_bytes;
+    }
+    if (a->scp == 0 && (mode == EC_TLOAD_PAT || mode == EC_FLW_PAT)) {
+        // Spread minions over the eight DRAM banks (PA[12:10]) so a per-hart stride that stays in one bank
+        // does not put every hart in the same one. The host allocates 8 KB of slack per hart for this.
+        slice_base += ((hart >> 1) & 7) * 1024;
+    }
+    if (a->scp == 1) {
+        slice_base = EC_SCP_ADDR(EC_SCP_LOCAL, a->scp_off + minion_in_shire * a->slice_bytes);
+    } else if (a->scp == 2) {
+        const uint64_t tgt = ((const volatile uint32_t*)a->targets)[shire];
+        slice_base = EC_SCP_ADDR(tgt, a->scp_off + minion_in_shire * a->slice_bytes);
+    }
 
     switch (mode) {
+#include "enercat_ops.inc"
+
+    case EC_TLOAD_PAT: {
+        // `access_bytes` per tensor load (1 or 16 lines), `stride` apart, wrapping every `region` bytes.
+        const uint64_t lines = a->access_bytes / 64;
+        const uint64_t period = a->jump_every ? a->jump_every * a->stride + a->jump_bytes : a->stride;
+        const uint64_t n = a->jump_every ? a->region / period * a->jump_every : a->region / a->stride;
+        uint64_t p = slice_base, k = 0, q = 0;
+        const uint64_t t0 = cycles(), deadline = t0 + a->window;
+        do {
+            for (int b = 0; b < 8; ++b, ++q) {
+                const uint64_t id = q & 1;
+                if (q >= 2) {
+                    t_wait(id);
+                }
+                t_load(id * 16, p, lines, id);
+                p += a->stride;
+                if (a->jump_every && (k + 1) % a->jump_every == 0) {
+                    p += a->jump_bytes;
+                }
+                if (++k == n) { k = 0; p = slice_base; }
+            }
+            ++iters;
+        } while (cycles() < deadline);
+        t_wait(0);
+        t_wait(1);
+        cyc = cycles() - t0;
+        bytes = iters * 8 * a->access_bytes;
+        break;
+    }
+
+    case EC_FLW_PAT: {
+        // 32 B vector loads through the L1, `stride` apart: a stride of 64 misses on every line and uses
+        // half of it, which is how the per-line fill cost is separated from the per-byte cost.
+        __asm__ __volatile__("mov.m.x m0, zero, 0xff" : : : "memory");
+        const uint64_t n = a->region / a->stride;
+        uint64_t p = slice_base, k = 0;
+        const uint64_t t0 = cycles(), deadline = t0 + a->window;
+        do {
+            for (int b = 0; b < 8; ++b) {
+                __asm__ __volatile__("flw.ps f8, 0(%0)" : : "r"(p) : "memory", "f8");
+                p += a->stride;
+                if (++k == n) { k = 0; p = slice_base; }
+            }
+            ++iters;
+        } while (cycles() < deadline);
+        cyc = cycles() - t0;
+        bytes = iters * 8 * 32;
+        break;
+    }
     case EC_SPIN:
         RUN(__asm__ __volatile__("addi t0, t0, 1\n addi t1, t1, 1\n addi t2, t2, 1\n addi t3, t3, 1\n"
                                  "addi t4, t4, 1\n addi t5, t5, 1\n addi t6, t6, 1\n addi t0, t0, 1\n"
@@ -205,8 +282,7 @@ int64_t entry_point(const struct EcArgs* a)
         __asm__ __volatile__("fadd.ps f8, f0, f0\n fadd.ps f9, f1, f1\n fadd.ps f10, f2, f2\n fadd.ps f11, f3, f3\n"
                              "fadd.ps f12, f4, f4\n fadd.ps f13, f5, f5\n fadd.ps f14, f6, f6\n fadd.ps f15, f7, f7\n"
                              : : : VSINK);
-        const uint64_t base = a->scp ? EC_SCP_ADDR(EC_SCP_LOCAL, a->scp_off + minion_in_shire * a->slice_bytes)
-                                     : a->slice + hart * a->slice_bytes;
+        const uint64_t base = slice_base;
         const uint64_t n = a->slice_bytes / 512;
         uint64_t p = base, k = 0;
         const uint64_t t0 = cycles(), deadline = t0 + a->window;
@@ -226,8 +302,7 @@ int64_t entry_point(const struct EcArgs* a)
 
     case EC_TLOAD: {
         // 1 KB tensor loads into the L1 scratchpad, two in flight, marching through the slice.
-        const uint64_t base = a->scp ? EC_SCP_ADDR(EC_SCP_LOCAL, a->scp_off + minion_in_shire * a->slice_bytes)
-                                     : a->slice + hart * a->slice_bytes;
+        const uint64_t base = slice_base;
         const uint64_t n = a->slice_bytes / 1024;
         uint64_t p = base, k = 0, q = 0;
         const uint64_t t0 = cycles(), deadline = t0 + a->window;

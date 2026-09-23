@@ -123,8 +123,14 @@ section 9 lists the pinned upstream versions.
   the L1 write-back path to DRAM 250-350), bytes between shires, synchronisation, worked compositions, and the
   second card at 0.95x the first over 56 entries. Measured by the new `workloads/enercat` (`run_enercat.sh`,
   `analyze_enercat.py`); every table is assembled from its data file by `tools/ettelem/build_energy_manual.py`
-  and the pages rendered by `render_energy_manual.py`, so no number is typed by hand. Published at
-  https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual (private), uuid `cc3cb1d6-51cf-420b-a165-7d8629904d97`.
+  and the pages rendered by `render_energy_manual.py`, so no number is typed by hand. The second edition
+  (`workloads/enercat/run_catalogue.py`) measures every one of the 161 instructions the silicon executes in U-mode
+  three times in shuffled order on both working cards (pass-to-pass error 1.8% median, second card 0.950x over 386
+  configurations), and separates a memory access into its parts: one mesh hop is 0.75 pJ/B on zeros and 1.81 on
+  random data (133 fJ per bit per hop of toggling), a 64 B line fill into the L1 is 110-211 pJ, the DRAM row
+  pattern makes no difference, the SRAM rail leaks 1.6 W at 67 C rising to 2.6 W at 82 C, and each class of
+  operation is split across the minion, SRAM and mesh rails. Published, public, at
+  https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual, uuid `cc3cb1d6-51cf-420b-a165-7d8629904d97`.
 - `docs/lab-access.md` covers logging in to the lab machines (`aifoundry1`-`3`) and creating accounts for new people.
 - `workloads/` holds standalone workloads that run on both the simulator and the lab cards. The first one is `workloads/sgemm`:
   fp32 matmul, verified on aifoundry3's card at 127 GFLOP/s with scalar code. `scripts/deploy-lab.sh` builds a workload on a lab machine.

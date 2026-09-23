@@ -25,7 +25,7 @@ def main():
     tel = [json.loads(l) for l in op(tp + ".gz" if os.path.exists(tp + ".gz") else tp, "rt") if l.startswith("{")]
     runs = [json.loads(l) for l in open(os.path.join(a.dir, "runs.jsonl"))]
     t = np.array([s["t_ms"] for s in tel]) / 1000.0
-    f = {k: np.array([s[p][k] if p else s[k] for s in tel])
+    f = {k: np.array([(s[p][k][0] if p else s[k]) for s in tel])   # rails are [avg, min, max]
          for k, p in (("board_w", None), ("minion_w", "sp"), ("sram_w", "sp"), ("noc_w", "sp"))}
     die = np.array([s["temp_c"]["minshire"][0] for s in tel])
     busy = np.zeros(len(t), bool)
