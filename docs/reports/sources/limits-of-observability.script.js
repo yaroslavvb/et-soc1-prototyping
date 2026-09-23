@@ -49,7 +49,7 @@ const verif = c => `<span class="verif ${c}" title="${CHECK[c]}">${c === 'confir
     fbox.innerHTML = opts.map(([k, n]) => `<button type="button" aria-pressed="${filter === k}" data-k="${k}">${n}</button>`).join('');
     fbox.querySelectorAll('button').forEach(b => b.onclick = () => { filter = b.dataset.k; render(); });
     const rows = D.ladder.filter(r => filter === 'all' || r.status === filter);
-    t.innerHTML = '<thead><tr><th style="width:12%">Instrument</th><th style="width:36%">What it shows</th><th style="width:16%">Finest granularity</th><th style="width:16%">How</th><th style="width:9%">Who</th><th style="width:7%">Status</th><th style="width:4%">Check</th></tr></thead><tbody>' +
+    t.innerHTML = '<thead><tr><th style="width:12%">Instrument</th><th style="width:33%">What it shows</th><th style="width:16%">Finest granularity</th><th style="width:16%">How</th><th style="width:9%">Who</th><th style="width:10%">Status</th><th style="width:4%">Check</th></tr></thead><tbody>' +
       rows.map(r => `<tr><td class="lvl">${esc(r.level)}</td><td>${esc(r.what)}${r.note ? `<div class="small">${esc(r.note)}</div>` : ''}</td><td>${esc(r.gran)}</td><td>${esc(r.instrument)}</td><td>${esc(r.access)}</td><td>${chip(r.status)}</td><td>${verif(r.check)}</td></tr>`).join('') +
       '</tbody>';
   }
@@ -110,7 +110,7 @@ document.getElementById('reportstab').innerHTML = '<thead><tr><th style="width:1
     fbox.querySelectorAll('button').forEach(b => b.onclick = () => { filter = b.dataset.k; render(); });
     const rows = D.improvements.filter(r => filter === 'all' || (filter === 'done' ? r.done : r.status === filter));
     let group = null;
-    t.innerHTML = '<thead><tr><th style="width:24%">Rung</th><th style="width:30%">What it adds</th><th style="width:15%">Cost</th><th style="width:24%">What changes in the numbers</th><th style="width:7%">Status</th></tr></thead><tbody>' +
+    t.innerHTML = '<thead><tr><th style="width:23%">Rung</th><th style="width:28%">What it adds</th><th style="width:15%">Cost</th><th style="width:24%">What changes in the numbers</th><th style="width:10%">Status</th></tr></thead><tbody>' +
       rows.map(r => { const g = r.group !== group ? `<tr><td colspan="5"><b>${esc(r.group)}</b></td></tr>` : ''; group = r.group;
         return g + `<tr><td class="lvl">${r.rung}. ${esc(r.what)}${r.done ? ' <span class="verif confirmed">done</span>' : ''}</td><td>${esc(r.adds)}</td><td class="small">${esc(r.cost)}</td><td>${esc(r.effect)}</td><td>${chip(r.status)}</td></tr>`; }).join('') + '</tbody>';
   }
