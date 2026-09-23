@@ -81,7 +81,7 @@ function ebar(svg,x,y1,y2,col){const g2=el('g',{},svg); el('line',{x1:x,x2:x,y1,
  const q=(n,o)=>cb(`${n}/${o}/h2`), rate=n=>S2[`${n}/random/h2`]?S2[`${n}/random/h2`].ops_per_cycle_per_hart.mean:null;
  if(!q('add','random')){return;}
  const W=700,H=360,L=58,R2=150,T=26,B=70,{svg,tip,h}=host('instr',W,H);
- const mx=Math.max(...list.map(l=>q(l[0],'random').hi))*1.05;
+ const mx=Math.max(...list.map(l=>q(l[0],'random').hi))*1.12;
  const bw=(W-L-R2)/list.length, x=i=>L+bw*i, y=v=>H-B-(H-B-T)*v/mx;
  axes(svg,{W,H,L,R:R2,T,B,x:i=>x(i),y,yt:[0,40,80,120,160],xt:[],yl:'pJ per instruction, above idle'});
  const cols={zeros:'var(--c3)',const:'var(--c4)',random:'var(--c2)'};
@@ -247,13 +247,14 @@ function ebar(svg,x,y1,y2,col){const g2=el('g',{},svg); el('line',{x1:x,x2:x,y1,
  all.sort((a,b)=>a.r.pj_per_op.mean-b.r.pj_per_op.mean);
  if(!all.length){return;}
  const W=Math.max(700,all.length*9+80),H=360,L=58,R2=16,T=26,B=96,{svg,tip,h}=host('allinstr',W,H);
- const mx=Math.max(...all.map(a=>a.r.pj_per_op.mean)); const bw=(W-L-R2)/all.length;
- const y=v=>H-B-(H-B-T)*Math.log10(Math.max(v,1)/1)/Math.log10(mx*1.1/1);
- axes(svg,{W,H,L,R:R2,T,B,x:v=>v,y,yt:[1,10,100,1000].filter(v=>v<=mx*1.1),yf:v=>v+'',xt:[],yl:'pJ per instruction, random data (log)'});
+ const mx=Math.max(...all.map(a=>{const c=CB[`${a.n}/random/h2`]; return c?c.hi:a.r.pj_per_op.mean;}))*1.3; const bw=(W-L-R2)/all.length;
+ const y=v=>H-B-(H-B-T)*Math.log10(Math.max(v,1)/1)/Math.log10(mx/1);
+ axes(svg,{W,H,L,R:R2,T,B,x:v=>v,y,yt:[1,10,100,1000].filter(v=>v<=mx),yf:v=>v+'',xt:[],yl:'pJ per instruction, random data (log)'});
  const COL=['var(--c1)','var(--c7)','var(--c2)','var(--c5)','var(--c3)','var(--c4)','var(--bad)','var(--muted)','var(--ok)','var(--warn)','var(--ink-2)','var(--ref)','var(--axis)','var(--ink)'];
  all.forEach((a,i)=>{const gg=el('g',{},svg); const x=L+bw*i; const c=CB[`${a.n}/random/h2`];
    el('rect',{x:x+1,y:y(a.r.pj_per_op.mean),width:Math.max(1,bw-2),height:H-B-y(a.r.pj_per_op.mean),fill:COL[a.ci%COL.length]},gg);
-   if(c){el('line',{x1:x+bw/2,x2:x+bw/2,y1:y(c.hi),y2:y(c.lo),stroke:'var(--ink)','stroke-width':1.2},gg);}
+   if(c){const cx=x+bw/2; el('line',{x1:cx,x2:cx,y1:y(c.hi),y2:y(c.lo),stroke:'var(--ink)','stroke-width':1.2},gg);
+     el('line',{x1:cx-2.5,x2:cx+2.5,y1:y(c.hi),y2:y(c.hi),stroke:'var(--ink)','stroke-width':1.2},gg); el('line',{x1:cx-2.5,x2:cx+2.5,y1:y(c.lo),y2:y(c.lo),stroke:'var(--ink)','stroke-width':1.2},gg);}
    el('line',{x1:x+1,x2:x+bw-1,y1:y(a.z.pj_per_op.mean),y2:y(a.z.pj_per_op.mean),stroke:'var(--ink)'},gg);
    if(i%2===0){const t=txt(svg,x+bw/2,H-B+10,a.n,'tick','end'); t.setAttribute('font-size','9'); t.setAttribute('transform',`rotate(-60 ${x+bw/2} ${H-B+10})`);}
    hover(gg,tip,h,()=>`<b>${a.n}</b> — ${CLASSES[a.ci][0]}<br>random ${a.r.pj_per_op.mean.toFixed(1)} ± ${a.r.pj_per_op.se.toFixed(2)} pJ on ${cards[0]}${LANES.has(a.n)?' ('+(a.r.pj_per_op.mean/8).toFixed(1)+' per lane)':''}<br>${c?'both cards: '+c.mean.toFixed(1)+' ['+c.lo.toFixed(1)+'–'+c.hi.toFixed(1)+'], n = '+c.n+'<br>':''}zeros ${a.z.pj_per_op.mean.toFixed(1)} pJ<br>${a.r.ops_per_cycle_per_hart.mean.toFixed(3)} per hart per cycle<br>${a.r2?cards[1]+': '+a.r2.pj_per_op.mean.toFixed(1)+' ± '+a.r2.pj_per_op.se.toFixed(2)+' pJ, ratio '+(a.r2.pj_per_op.mean/a.r.pj_per_op.mean).toFixed(3):''}`);});

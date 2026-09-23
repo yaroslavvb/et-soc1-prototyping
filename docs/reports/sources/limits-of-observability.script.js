@@ -49,7 +49,7 @@ const verif = c => `<span class="verif ${c}" title="${CHECK[c]}">${c === 'confir
     fbox.innerHTML = opts.map(([k, n]) => `<button type="button" aria-pressed="${filter === k}" data-k="${k}">${n}</button>`).join('');
     fbox.querySelectorAll('button').forEach(b => b.onclick = () => { filter = b.dataset.k; render(); });
     const rows = D.ladder.filter(r => filter === 'all' || r.status === filter);
-    t.innerHTML = '<thead><tr><th>Instrument</th><th>What it shows</th><th>Finest granularity</th><th>How</th><th>Who</th><th>Status</th><th>Check</th></tr></thead><tbody>' +
+    t.innerHTML = '<thead><tr><th style="width:12%">Instrument</th><th style="width:36%">What it shows</th><th style="width:16%">Finest granularity</th><th style="width:16%">How</th><th style="width:9%">Who</th><th style="width:7%">Status</th><th style="width:4%">Check</th></tr></thead><tbody>' +
       rows.map(r => `<tr><td class="lvl">${esc(r.level)}</td><td>${esc(r.what)}${r.note ? `<div class="small">${esc(r.note)}</div>` : ''}</td><td>${esc(r.gran)}</td><td>${esc(r.instrument)}</td><td>${esc(r.access)}</td><td>${chip(r.status)}</td><td>${verif(r.check)}</td></tr>`).join('') +
       '</tbody>';
   }
@@ -67,7 +67,7 @@ document.getElementById('contrast').innerHTML = '<thead><tr><th>Topic</th><th>ET
 })();
 
 /* ---------- the reports hub ---------- */
-document.getElementById('reportstab').innerHTML = '<thead><tr><th>Report</th><th>When</th><th>What it established</th><th>Instruments</th></tr></thead><tbody>' +
+document.getElementById('reportstab').innerHTML = '<thead><tr><th style="width:18%">Report</th><th style="width:8%">When</th><th style="width:50%">What it established</th><th style="width:24%">Instruments</th></tr></thead><tbody>' +
   D.reports.map(r => `<tr><td class="lvl"><a href="${r.url}">${esc(r.title)}</a></td><td class="small">${esc(r.date)}</td><td>${esc(r.what)}</td><td class="small">${esc(r.instruments)}</td></tr>`).join('') + '</tbody>';
 
 /* ---------- power: the chain, the remainder, the sensors ---------- */
@@ -110,9 +110,14 @@ document.getElementById('reportstab').innerHTML = '<thead><tr><th>Report</th><th
     fbox.querySelectorAll('button').forEach(b => b.onclick = () => { filter = b.dataset.k; render(); });
     const rows = D.improvements.filter(r => filter === 'all' || (filter === 'done' ? r.done : r.status === filter));
     let group = null;
-    t.innerHTML = '<thead><tr><th>Rung</th><th>What it adds</th><th>Cost</th><th>What changes in the numbers</th><th>Status</th></tr></thead><tbody>' +
+    t.innerHTML = '<thead><tr><th style="width:24%">Rung</th><th style="width:30%">What it adds</th><th style="width:15%">Cost</th><th style="width:24%">What changes in the numbers</th><th style="width:7%">Status</th></tr></thead><tbody>' +
       rows.map(r => { const g = r.group !== group ? `<tr><td colspan="5"><b>${esc(r.group)}</b></td></tr>` : ''; group = r.group;
         return g + `<tr><td class="lvl">${r.rung}. ${esc(r.what)}${r.done ? ' <span class="verif confirmed">done</span>' : ''}</td><td>${esc(r.adds)}</td><td class="small">${esc(r.cost)}</td><td>${esc(r.effect)}</td><td>${chip(r.status)}</td></tr>`; }).join('') + '</tbody>';
   }
   render();
 })();
+
+/* ---------- the power and temperature sessions ---------- */
+document.getElementById('sessionstab').innerHTML = '<thead><tr><th style="width:7%">Session</th><th style="width:9%">When</th><th style="width:8%">Card</th><th style="width:32%">What it measured</th><th style="width:15%">Instruments</th><th style="width:17%">Raw data</th><th style="width:12%">Report</th></tr></thead><tbody>' +
+  D.sessions.map(r => `<tr><td class="lvl">${esc(r.id)}</td><td class="small">${esc(r.when)}</td><td class="small">${esc(r.card)}</td><td>${esc(r.what)}</td><td class="small">${esc(r.instruments)}</td><td class="small"><code>${esc(r.data)}</code></td><td class="small"><a href="${r.url}">${esc(r.report)}</a></td></tr>`).join('') + '</tbody>';
+document.getElementById('relatedlist').innerHTML = D.related.map(r => `<li><a href="${r.url}">${esc(r.title)}</a> — ${esc(r.what)}</li>`).join('');

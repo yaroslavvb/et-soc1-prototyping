@@ -876,5 +876,179 @@
    "cost": "board rework: not for a shared card",
    "effect": "The last 12–15 W of idle, and the DRAM term's split, stay inferred."
   }
+ ],
+ "sessions": [
+  {
+   "id": "E5",
+   "when": "20 Sep, 21:09",
+   "card": "aifoundry2",
+   "what": "A load step through every power instrument at once: board power, the three rails, die and board temperature, the clock",
+   "instruments": "ettelem at 10 Hz, SP stats trace",
+   "data": "docs/reports/data/2026-09-20-power-aifoundry2/",
+   "report": "Power and temperature",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature"
+  },
+  {
+   "id": "E6",
+   "when": "20 Sep",
+   "card": "aifoundry2",
+   "what": "Per-shire on-die voltage at idle from the SP's DEBUG trace: the 6×6 IR-drop map (513–521 mV)",
+   "instruments": "Moortec voltage monitors via DM_CMD_SET_DM_TRACE_CONFIG",
+   "data": "docs/reports/data/2026-09-20-power-aifoundry2/per-shire-voltage-idle.json",
+   "report": "Spatial temperature brief",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief"
+  },
+  {
+   "id": "E7–E9",
+   "when": "20–21 Sep",
+   "card": "aifoundry2",
+   "what": "The Horace experiment: the same matmul on 14 operand patterns, every run launched at 80 °C; zeros 38 W, ones 47 W, random 63 W",
+   "instruments": "board power, die temperature, strict-start protocol",
+   "data": "docs/reports/data/2026-09-21-horace-aifoundry2/strict/",
+   "report": "The Horace experiment",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment"
+  },
+  {
+   "id": "E10",
+   "when": "21 Sep, 06:45",
+   "card": "aifoundry2",
+   "what": "Cool-start runs: the governor moving the clock between 600 and 850 MHz, re-read for the DVFS report",
+   "instruments": "telemetry mhz/mv fields",
+   "data": "docs/reports/data/2026-09-21-horace-aifoundry2/cold1/, cold2/",
+   "report": "DVFS and leakage",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage"
+  },
+  {
+   "id": "E12, E16",
+   "when": "21 Sep, 08:56–15:08",
+   "card": "aifoundry2",
+   "what": "Ten-minute runs: heating to 90 °C in 20 s on random data, two minutes on ones, never on zeros; the thermal time constants",
+   "instruments": "board power, die temperature, a 90 °C stop file",
+   "data": "docs/reports/data/2026-09-21-horace-aifoundry2/long/, long2/",
+   "report": "The Horace experiment",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment"
+  },
+  {
+   "id": "E15",
+   "when": "21 Sep, 13:08",
+   "card": "aifoundry2",
+   "what": "Ablations at 80 °C: what each part of the card draws when it is the only thing running; fourteen structured matrices priced before they ran",
+   "instruments": "board power, rails, strict starts",
+   "data": "docs/reports/data/2026-09-21-horace-aifoundry2/ablation/",
+   "report": "Why low power",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power"
+  },
+  {
+   "id": "E18, E19",
+   "when": "22 Sep, 11:39",
+   "card": "aifoundry2",
+   "what": "No cache array is power-gated at idle (wake-up probe); the idle law checked against 20 hours of nothing (+0.01 W)",
+   "instruments": "cycle counter; board power",
+   "data": "docs/reports/data/2026-09-22-dvfs-aifoundry2/",
+   "report": "DVFS and leakage",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage"
+  },
+  {
+   "id": "E20, E21",
+   "when": "22 Sep, 12:12",
+   "card": "aifoundry3, all three",
+   "what": "The strict protocol on the second card (one scale factor of 0.92); the governor's inputs on every machine: aifoundry3's TDP of 0 W, aifoundry1's cards unopenable",
+   "instruments": "board power, die temperature, DM config reads, SP trace",
+   "data": "docs/reports/data/2026-09-22-horace-aifoundry3/, 2026-09-22-cards/",
+   "report": "The Horace experiment; DVFS and leakage",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage"
+  },
+  {
+   "id": "E22, E23",
+   "when": "22 Sep, 13:05",
+   "card": "both",
+   "what": "One contended global atomic: fair to its requesters, fatal to the host shire's memory path; its energy per operation",
+   "instruments": "cycle counter, completion counts, board power, rails",
+   "data": "docs/reports/data/2026-09-22-hotline-aifoundry2/, -aifoundry3/",
+   "report": "One hot line stops a shire",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line"
+  },
+  {
+   "id": "E25",
+   "when": "22 Sep, 15:30",
+   "card": "both",
+   "what": "The multi-stage relay through DRAM, the own scratchpad and the next shire's: bandwidth and pJ/B by medium",
+   "instruments": "cycle counter, board power, rails",
+   "data": "docs/reports/data/2026-09-22-onchip-aifoundry2/, -aifoundry3/",
+   "report": "Hand it to the next shire",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay"
+  },
+  {
+   "id": "E26–E28",
+   "when": "23 Sep, 08:36–11:40",
+   "card": "both",
+   "what": "The catalogue: 386 configurations — every instruction on zeros and random data, the byte paths, wires, lines, rows, neighbourhoods — three shuffled passes per card; DRAM rows with the L3 defeated",
+   "instruments": "board power bracketed by idle, rails, die temperature, cycle counter",
+   "data": "docs/reports/data/2026-09-23-catalogue-aifoundry2/, -aifoundry3/, -aifoundry2-rows/",
+   "report": "The energy manual",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual"
+  },
+  {
+   "id": "E29",
+   "when": "23 Sep, 12:51–13:47",
+   "card": "both",
+   "what": "The reruns for the bars: relay, hot line, rings and levels, three warm passes per card; the governor and the starved-meter traps found",
+   "instruments": "as above; the sampler's own latency",
+   "data": "docs/reports/data/2026-09-23-reruns-aifoundry2-warm/, -aifoundry3/",
+   "report": "The energy manual (third edition)",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual"
+  },
+  {
+   "id": "E30",
+   "when": "23 Sep",
+   "card": "—",
+   "what": "Analysis only: the unmetered remainder attributed; the DDR-rail droop calibrated as a DRAM meter",
+   "instruments": "the catalogue's telemetry; the firmware's PMIC and PVT drivers",
+   "data": "docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json",
+   "report": "This page, §4",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability"
+  }
+ ],
+ "related": [
+  {
+   "title": "Power and temperature on the ET-SoC-1",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature",
+   "what": "every way to measure power and energy on the card, and a load step through all of them (20 Sep)"
+  },
+  {
+   "title": "The DVFS loop, and the leakage",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage",
+   "what": "the governor, the operating points, the idle law, the rails at idle, the three machines (22 Sep)"
+  },
+  {
+   "title": "Spatial temperature: a brief",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief",
+   "what": "the 35 sensors on the mesh, what the firmware collapses, the IR-drop map, what a heat map needs (22 Sep)"
+  },
+  {
+   "title": "The Horace experiment",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment",
+   "what": "data-dependent power, the flip model, the thermal model, the long runs, the second card (20–22 Sep)"
+  },
+  {
+   "title": "Why is the ET-SoC-1 low power?",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power",
+   "what": "C·V²·f and leakage measured term by term, against an A100 (21 Sep)"
+  },
+  {
+   "title": "The ET-SoC-1 energy manual",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual",
+   "what": "every per-event cost with bars; the idle law; wires, lines, rows, leakage, rails (23 Sep)"
+  },
+  {
+   "title": "David Kanter's power brief",
+   "url": "https://spacesheep.dev/@yaroslavvb/david-kanter-power-brief",
+   "what": "the claims about DVFS loops and leakage that the DVFS report checked"
+  },
+  {
+   "title": "docs/findings/ in the repository",
+   "url": "https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/findings",
+   "what": "every session (E1–E30), every claim with its file and field, every artifact and commit"
+  }
  ]
 }

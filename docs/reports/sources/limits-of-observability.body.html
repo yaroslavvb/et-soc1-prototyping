@@ -1,3 +1,4 @@
+<style>main{max-width:1320px}table{font-size:0.84rem;table-layout:fixed}th,td{padding:6px 8px;overflow-wrap:anywhere}td.lvl{white-space:normal}.verif{white-space:nowrap}</style>
 <h1>Limits of Observability</h1>
 <p class="byline">ET-SoC-1, the AI Foundry cards on aifoundry2 and aifoundry3, et-platform <code>353f20e</code> firmware, core-et <code>b38a1a3</code> RTL · first edition 20 September 2026; second edition 23 September, with the power meters, the unmetered remainder, the improvement ladder and the index of measurement reports · the hub for everything about measuring this card</p>
 
@@ -23,7 +24,7 @@ which the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">ene
 
 <h2 id="reports">1. The measurement reports</h2>
 <p>Everything measured on these cards so far, newest first after this page. Each report says what it established and which of the instruments in §2 it leaned on. This page is the index and the place where the instruments themselves are described; when one of them changes, its row in §2 and its rung in §5 change here.</p>
-<div class="table-wrap wide"><table id="reportstab"></table></div>
+<div class="table-wrap"><table id="reportstab"></table></div>
 
 <h2 id="ladder">2. The ladder</h2>
 <p>Every instrument, coarsest to finest. <b>Status</b> says what it takes on this card: <span class="chip works_now">works now</span> from a user account;
@@ -34,7 +35,7 @@ The check column shows whether two independent reviewers confirmed the row's cit
 <div class="chart-title">Time resolution of each instrument</div>
 <div class="chart scroll" id="gran"></div>
 <div class="controls" id="filters"></div>
-<div class="table-wrap wide"><table id="laddertab"></table></div>
+<div class="table-wrap"><table id="laddertab"></table></div>
 
 <h2 id="bits">3. Can we track individual bits flipping?</h2>
 <p><b>On the card: no, and not with any firmware change.</b> Nothing on the die counts toggles. The PMU counts
@@ -112,7 +113,7 @@ Thirty-five temperature sensors are live (one per minion shire and one in the IO
 <h2 id="improve">5. The improvement ladder</h2>
 <p>Every way found to see more, ordered by what it costs: first what the card already gives and only software is missing, then hardware the lab can add without touching the card's firmware, then firmware, then research. Each rung says what it adds and what it would change in the numbers. Rungs marked done are in the energy manual or on this page. The firmware caveat at the end of the section applies to every rung in its group.</p>
 <div class="controls" id="impfilters"></div>
-<div class="table-wrap wide"><table id="imptab"></table></div>
+<div class="table-wrap"><table id="imptab"></table></div>
 <p><b>What each rung does to the unmetered watts.</b> Today: 15 W of a 32 W idle and 4–7 W of a DRAM workload are on no sensor, and the regression names them to 0.35 W (rungs 2 and 3, done). The riser (rung 8) does not meter them either, but it makes every bracketed burst sharper and shows the input side of every regulator's transient. The camera (rung 9) says which package the watts warm. Forwarding the PMIC's input-side readings (rung 11) measures the delivery losses and leaves only the rails with no meter — DDR, VDDQ, PCIe, IO, Maxion — as a remainder, about 12 W at idle. Below that is the board, and the board is shared.</p>
 <p><b>The firmware caveat.</b> Every "firmware" row above ends with a reflash. The minion runtime and the service processor
 bootloader are signed executable images; BL1 and BL2 verify a certificate and signature against a public-key hash in OTP unless a chicken bit
@@ -122,13 +123,19 @@ source is open, the right to run modified source on this particular card is not 
 
 <h2 id="gpu">6. Against a GPU</h2>
 <p>For an A100/H100-class part. Sources are NVIDIA's own documentation and the microbenchmark literature; the ET side is this survey.</p>
-<div class="table-wrap wide"><table id="contrast"></table></div>
+<div class="table-wrap"><table id="contrast"></table></div>
 <p>The pattern: the GPU is at least as observable <i>on silicon</i> (ECC counts, a debugger, SASS-level instrumentation, a mJ energy counter the ET card lacks),
 and entirely opaque below it. The ET-SoC-1 is thinner on silicon (no L1 or register ECC, DRAM ECC off, power at 133 ms) and open all the way down: the
 firmware that decides what you can see is source, the reference model the RTL was verified against is the installed simulator, and the RTL of the core dumps
 every bit.</p>
 
-<h2 id="method">7. Method and caveats</h2>
+<h2 id="sessions">7. The power and temperature sessions</h2>
+<p>Every session on the cards that measured power or temperature, in order, with what it established, the instruments it used, where its raw data is in the repository (<code>yaroslavvb/et-soc1-prototyping</code>, under <code>docs/reports/data/</code>) and the report it fed. The session IDs are those of <code>docs/findings/03-experiments.md</code>, which gives each one's command, protocol and caveats.</p>
+<div class="table-wrap"><table id="sessionstab"></table></div>
+<h3>Related documents</h3>
+<ul id="relatedlist"></ul>
+
+<h2 id="method">8. Method and caveats</h2>
 <ul>
 <li>Seven scouts each surveyed one layer of the manuals (<code>external/et-man</code>), firmware at the card's commit (<code>external/et-platform</code> at <code>353f20e</code>, checked against HEAD), the RTL and DV trees (<code>external/core-et</code>), the installed tools in <code>/opt/et</code>, and the earlier reports. Each key claim was then handed to two independent reviewers told to refute it, one checking citations and one checking whether it would work from a user account on this card. The ladder folds in their corrections; rows they did not reach are marked ·. The raw findings and verdicts are in <code>docs/reports/sources/2026-09-20-limits-of-observability/</code>.</li>
 <li>The second edition's power section reads the PMIC and PVT drivers of the same firmware (<code>ServiceProcessorBL2/driver/pmic_controller.c</code>, <code>pvt_controller.c</code>, <code>services/thermal_pwr_mgmt.c</code>) and fits the energy manual's catalogue (<code>docs/reports/data/2026-09-23-catalogue-aifoundry2/</code>, <code>-aifoundry3/</code>); the fit and the droop calibration are in <code>docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json</code>. Those rows have not had the two-reviewer pass.</li>

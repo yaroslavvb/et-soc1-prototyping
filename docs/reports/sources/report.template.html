@@ -95,6 +95,9 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 .math-display svg { max-width: none; }
 .math-inline { color: var(--ink); }
 .math-inline svg, .math-display svg { vertical-align: middle; }
+h2, h3 { scroll-margin-top: 12px; }
+.hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 </style>
 </head>
 <body>
@@ -103,6 +106,27 @@ __BODY__
 <script>
 const D = __DATA__;
 __SCRIPT__
+</script>
+<script>
+/* Section anchors. Every h2/h3 gets an id (its own, or one made from its text) and a # link; clicking a heading
+   or a table-of-contents link puts #id in the URL. When the page is framed by spacesheep.dev the fragment is
+   mirrored into the outer, shareable URL (postMessage ss-hash), and an outer #fragment is forwarded in on load. */
+(function () {
+  const slug = t => t.toLowerCase().replace(/^\d+(\.\d+)*\.?\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const post = h => { if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h}, '*'); } catch (_) {} } };
+  const go = id => { try { history.replaceState(null, '', location.pathname + location.search + '#' + id); } catch (_) {}
+    const el = document.getElementById(id); if (el) el.scrollIntoView({block: 'start'}); post('#' + id); };
+  const seen = new Set();
+  document.querySelectorAll('main h2, main h3').forEach(h => {
+    if (!h.id) { let id = slug(h.textContent) || 'section', n = 2; while (seen.has(id) || document.getElementById(id)) id = slug(h.textContent) + '-' + n++; h.id = id; }
+    seen.add(h.id);
+    const a = document.createElement('a'); a.href = '#' + h.id; a.className = 'hlink'; a.textContent = '#'; a.title = 'link to this section'; h.appendChild(a);
+    h.style.cursor = 'pointer';
+    h.addEventListener('click', ev => { if (ev.target.tagName === 'A' && ev.target !== a) return; ev.preventDefault(); go(h.id); });
+  });
+  window.addEventListener('hashchange', () => post(location.hash));
+  if (location.hash) { post(location.hash); const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => el.scrollIntoView({block: 'start'}), 50); }
+})();
 </script>
 </main>
 </body>

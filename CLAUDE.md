@@ -4,7 +4,13 @@ This workspace is for prototyping workloads on AINekko/AI Foundry's ET platform 
 1088 RV64 "minion" cores with vector and tensor extensions). They run first on the `sys_emu` simulator,
 then on real cards in the AI Foundry lab. Read `docs/et-soc1-notes.md` before writing kernels.
 `docs/getting-started.md` has the current status, next steps, and how to resume on a new machine. Claude Code's memory
-is per-machine, so keep that page up to date when the state of the work changes.
+is per-machine, so keep that page up to date when the state of the work changes. **This repository is the knowledge base
+and the tool collection**: every result, the experiment behind it, its raw data and the tool that produced it are here,
+and `docs/findings/README.md` is the index (claims → experiment → file). Before measuring anything, read
+`docs/findings/README.md`, `docs/findings/14-card-behaviour.md` (the cards and the traps) and
+`docs/findings/19-observability-and-the-unmetered.md` (what the meters can and cannot see); record new work in
+`docs/findings/02-requests.md`, `03-experiments.md`, `04-artifacts.md` and `05-claims.md`, and commit the data under
+`docs/reports/data/<date>-<name>-<host>/`.
 
 ## Environment
 - The host is macOS/arm64. All ET tooling runs in the Lima VM `et` (Ubuntu 24.04 arm64). The repo is mounted
