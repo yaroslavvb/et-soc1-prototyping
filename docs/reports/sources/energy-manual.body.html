@@ -143,9 +143,17 @@ tools/ettelem/run_reruns_warm.sh RERUNS 3 76                    # relay, hot lin
 python3 tools/ettelem/analyze_reruns.py RERUNS_A2 RERUNS_A3 --out reruns.json
 python3 tools/ettelem/build_energy_manual.py --out manual.json
 python3 tools/ettelem/render_energy_manual.py manual.json docs/energy-manual/</code></pre>
-<p class="small">Companions: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">the limits
-of observability</a> (the hub for everything about measuring this card), <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace
-experiment</a> (the tensor unit and the flip model), <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">the
-DVFS loop and leakage</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">one hot line stops a
-shire</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">hand it to the next shire</a>.
-Findings index and claim provenance: <code>docs/findings/</code>.</p>
+<h2>10. Related reports</h2>
+<p>The manual is the table of costs; these are the reports that measured the parts of it, and the one that says how far the instruments can be trusted.</p>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a> — the hub for everything about measuring this card: every instrument from board power to a flip-flop, the power meter chain and what it does not meter, the unmetered remainder attributed, the improvement ladder, and the index of every measurement session. Read it for what the bars here can and cannot hold.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop, and the leakage</a> — where section 1 comes from: the governor's states and thresholds, the three operating points, the idle law P = 12.6 W + 23.3 W·e^((T−80)/36), the rail split of idle, and why a warm card sits at 600 MHz.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">The Horace experiment</a> — where section 3.2 comes from: the same matmul on fourteen operand patterns launched from the same die temperature, the tensor unit's energy resolved to four kinds of RTL event, the thermal model, and structured matrices priced before they ran.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power">Why is the ET-SoC-1 low power?</a> — an ablation of the dense matmul, term by term of C·V²·f plus leakage, against an A100; the source of the awake-core and activity-term rows of section 2.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a> — the contended atomic of section 6: fair to its requesters, fatal to the host shire's own memory path, with the errata that describe it.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a> — the relay of section 5: a multi-stage computation whose intermediate lives in the next shire's scratchpad instead of DRAM, 12× the bandwidth at a twelfth of the energy, and where that stops paying.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature: a brief</a> — the 35 Moortec temperature sensors on the 6×6 mesh, how the firmware collapses them to one number, and the per-shire IR-drop map behind section 4.3's droop meter.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature">Power and temperature on the ET-SoC-1</a> — the first power and thermal measurements: what the PMIC and the service processor report, the 133 ms cadence, the card's thermal time constants.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy">Anatomy of a memory access</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the September 18–19 reports that mapped the mesh, the L3 homes and the DRAM banks, and first measured the levels and the rings that sections 4.2 and 5 now carry with bars.</li>
+<li><code>docs/findings/</code> in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">yaroslavvb/et-soc1-prototyping</a> — every claim traced to its experiment and its file; <code>docs/energy-manual/</code> is this manual as markdown.</li>
+</ul>
