@@ -179,3 +179,21 @@ same repository state (`b36acd6`) and from R11.
   mesh of TensorSend cells.
 - **Where this work disagrees with it:** it repeats R11's 6% figure as measured fact and builds on it. E22
   did not reproduce that figure; see [17-hot-line.md](17-hot-line.md).
+
+## R13 — The service processor's PMIC and PVT drivers (firmware source, read for E30)
+
+`external/et-platform/device-bootloaders/src/ServiceProcessorBL2/driver/pmic_controller.c`,
+`driver/pvt_controller.c`, `include/bl2_pvt_controller.h`, `include/pmic_hal.h`, `services/thermal_pwr_mgmt.c`
+at commit `353f20e`.
+
+- **Authoritative for:** what the meters are. The PMIC exposes PMBus statistics for three regulators (minion,
+  NoC, SRAM) — v_out, a_out, w_out, v_in, a_in, w_in, deg_c, each as current/min/max/average, 84 reads a pass —
+  and set-point registers only for DDR, VDDQ, VDDQLP, PCIe logic, PCIe, Maxion and the L2/SRAM rail. The SP
+  forwards w_out (filtered) and the input power. The Moortec PVT subsystem: 5 controllers × (8 temperature
+  sensors, 2 × 16-channel voltage monitors, 8 process detectors); 35 temperature sensors live; 125 voltage
+  points (3 per minion shire, 2 per memory shire, 3 IO shire, 2 PCIe shire, 2 external analog); the host gets
+  averages, the DEBUG trace gets per-shire voltages, per-shire temperature is not exported, the process
+  detectors are configured with measurement disabled and never read, the external analog inputs have a stub reader.
+- **Useful for:** E30 and the observability report's §4 and improvement ladder.
+- **Treated as:** the truth about this firmware; not exercised beyond the reads ettelem already makes.
+

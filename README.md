@@ -40,7 +40,10 @@ section 9 lists the pinned upstream versions.
 - `docs/reports/2026-09-20-et-soc1-limits-of-observability.html` is the ladder of what can be observed on the chip, from board
   power down to a flip-flop per cycle in the RTL, with what each step would take. Its sources (a seven-layer survey of the manuals,
   firmware, RTL and tools, with two-reviewer verification of the key claims) are in `docs/reports/sources/2026-09-20-limits-of-observability/`;
-  `scripts/build-observability-report.py` assembles the page. Private space https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability, uuid `2ea37420-67b9-484e-9d4c-581e8a9f0323`.
+  `scripts/build-report.py limits-of-observability docs/reports/sources/limits-of-observability.data.json <out>` assembles the page.
+  **Second edition (2026-09-23): the hub for every measurement report**, with the power meter chain, the unmetered remainder
+  attributed by regression, the Moortec PVT sensors and the DDR-rail droop meter, and a 19-rung improvement ladder.
+  Public space https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability, uuid `2ea37420-67b9-484e-9d4c-581e8a9f0323`.
 - Observability tooling that came out of that survey, none of which changes a card:
   - `workloads/traceprof` + `scripts/trace-flamegraph.py`: a device flame graph in minion cycles from a kernel's profile regions.
   - `rtl-sim/pmu_carry`: the original PMU RTL under Verilator; it reproduces and explains the late bit-7 carry of `hpmcounter3`.
@@ -129,8 +132,14 @@ section 9 lists the pinned upstream versions.
   configurations), and separates a memory access into its parts: one mesh hop is 0.75 pJ/B on zeros and 1.81 on
   random data (133 fJ per bit per hop of toggling), a 64 B line fill into the L1 is 110-211 pJ, the DRAM row
   pattern makes no difference, the SRAM rail leaks 1.6 W at 67 C rising to 2.6 W at 82 C, and each class of
-  operation is split across the minion, SRAM and mesh rails. Published, public, at
-  https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual, uuid `cc3cb1d6-51cf-420b-a165-7d8629904d97`.
+  operation is split across the minion, SRAM and mesh rails. The third edition puts a confidence bar on every
+  entry - mean [lo-hi] over the three passes on two cards, and three warm reruns per card of the relay, the hot
+  line, the rings and the levels (`tools/ettelem/run_reruns_warm.sh`, `run_rings_levels_power.sh`,
+  `analyze_reruns.py`; bursts in which aifoundry2's governor moved the clock, or in which the workload starved the
+  service processor that reads the meter, are dropped) - and attributes the power on no rail sensor: 18-20%
+  delivery loss on the minion rail, 5% on SRAM, 26-29% on the mesh, about 70 pJ per DRAM byte off-rail, plus a
+  DRAM-activity meter from the memory shires' Moortec voltage monitor (0.84 mV per off-rail DRAM watt).
+  Published, public, at https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual, uuid `cc3cb1d6-51cf-420b-a165-7d8629904d97`.
 - `docs/lab-access.md` covers logging in to the lab machines (`aifoundry1`-`3`) and creating accounts for new people.
 - `workloads/` holds standalone workloads that run on both the simulator and the lab cards. The first one is `workloads/sgemm`:
   fp32 matmul, verified on aifoundry3's card at 127 GFLOP/s with scalar code. `scripts/deploy-lab.sh` builds a workload on a lab machine.

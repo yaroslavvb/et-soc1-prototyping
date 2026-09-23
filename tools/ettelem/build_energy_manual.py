@@ -27,6 +27,8 @@ CARDS = f"{D}/2026-09-22-cards/cards-report.json"
 ENER = f"{D}/2026-09-23-energy-manual/enercat.json"
 CAT = f"{D}/2026-09-23-energy-manual/catalogue.json"
 CONFIG = f"{D}/2026-09-22-cards/config.json"
+RERUNS = f"{D}/2026-09-23-energy-manual/reruns.json"
+UNMET = f"{D}/2026-09-23-energy-manual/unmetered_fit.json"
 
 
 def j(p):
@@ -80,6 +82,29 @@ def main():
         "structured": [abl_row(k, k.replace("m_", "TensorFMA fp32, ")) for k in sorted(abl) if k.startswith("m_")],
         "source": {"rows": ABL, "flips": MODEL},
     }
+    # Confidence bars for the tensor rows: the ablation ran each configuration twice (p80_sd), and the card
+    # transfer of 22 September ran the fp32 patterns on both cards (W over idle, with run-to-run sd).
+    try:
+        cr = j(CARDS)
+        tw = {p["values"]: p for p in cr["patterns"]}
+    except Exception:
+        tw = {}
+    bars = {}
+    for t in out["tensor"]["rows"]:
+        c = abl[t["config"]]
+        vals = {"aifoundry2": [c["dyn"] / c["per_s"] * 1e12]}
+        rng = [(c["dyn"] - c["p80_sd"]) / c["per_s"] * 1e12, (c["dyn"] + c["p80_sd"]) / c["per_s"] * 1e12]
+        kind, v = t["config"].split("_")
+        if kind == "fp32" and v in tw:   # the transfer measured the same pattern on both cards
+            vals["aifoundry2"].append(tw[v]["a2"] / c["per_s"] * 1e12)
+            vals["aifoundry3"] = [tw[v]["a3"] / c["per_s"] * 1e12]
+            rng += [tw[v]["a2"] / c["per_s"] * 1e12, (tw[v]["a3"] - tw[v]["a3_sd"]) / c["per_s"] * 1e12,
+                    (tw[v]["a3"] + tw[v]["a3_sd"]) / c["per_s"] * 1e12]
+        allv = [x for vs in vals.values() for x in vs]
+        bars[t["config"]] = {"mean": statistics.mean(allv), "lo": min(rng), "hi": max(rng), "n": len(allv) + 1,
+                             "cards": len(vals), "per_card": {h: {"mean": statistics.mean(vs), "n": len(vs)} for h, vs in vals.items()},
+                             "unit": "pJ/MAC", "note": "aifoundry2: ablation (2 runs) and the 22 September transfer; aifoundry3: the transfer"}
+    out["tensor"]["bars"] = bars
     out["awake"] = {
         "spin_hart0_1024": abl_row("spin", "8 addi per iteration, hart 0 of 1,024 minions"),
         "spin_hart0_256": abl_row("spin_8", "the same on 256 minions"),
@@ -130,6 +155,14 @@ def main():
         c = j(CAT)
         c.pop("bursts", None)   # per-burst detail stays in catalogue.json; the page needs the summaries
         out["catalogue"] = c | {"source": CAT}
+
+    # --- 5, 6, 4.2: the reruns of the relay, the hot line, the rings and the levels, pooled over passes and cards --
+    if os.path.exists(RERUNS):
+        out["reruns"] = j(RERUNS) | {"source": RERUNS}
+
+    # --- 4.3: the unmetered remainder attributed, and the DDR rail's droop as a DRAM-power proxy ----------------
+    if os.path.exists(UNMET):
+        out["unmetered"] = j(UNMET) | {"source": UNMET}
 
     # --- 8. cards ---------------------------------------------------------------------------------------------
     try:

@@ -47,6 +47,40 @@ can reset the statistics on a schedule if a window mean is wanted instead. An ea
 three numbers of the triple together, which is why the hot-line and relay reports said the rails barely moved;
 those reports' board-power figures are unaffected.
 
+## Confidence bars (third edition)
+
+Every entry carries **mean** [lo–hi]: the mean over every pass on every card, and in brackets the full range those
+passes spanned; a per-card column gives each card's own mean ± its pass-to-pass standard error. The range is used
+rather than a standard error of the pooled sample because with n = 6 the bar is dominated by the systematic
+difference between the cards (about 5%), which a standard error would understate.
+
+| Table | Passes behind each bar | Bar, typical |
+|---|---|---|
+| §2, §3.1, §3a, §4.1, §4a, §8 | the catalogue: 3 shuffled passes × 2 cards, n = 6 (3 for the constant set) | ±6% median, ±12% at the 90th percentile; pass-to-pass on one card 1–2% |
+| §3.2 fp32 | the ablation's 2 runs + the card transfer on both cards, n = 4 | ±5% |
+| §3.2 fp16, int8 | the ablation's 2 runs on aifoundry2 | under 1% (one card) |
+| §4.2 levels | 3 passes per card with the manual's sampler, n = 6 | ±5–15% |
+| §5 rings | 3 passes per card, n = 6 (s ↔ s+16: aifoundry3 only, see below) | ±5–15% |
+| §5 relay | 22 September + 3 warm passes on aifoundry2 + 4 on aifoundry3, n = 8 | ±5% (DRAM), ±4% (scratchpad), ±8% (hop) |
+| §6 hot line | 22 September + 3 warm passes per card, n = 7 | ±17%: a 1.4 W signal |
+| §1 idle law | one fit; a 20-hour check; the other card | ±0.2 W; +0.7 W on the other card |
+
+Two lessons from the reruns, both now built into the runners and the analysis (`tools/ettelem/run_reruns_warm.sh`,
+`run_rings_levels_power.sh`, `analyze_reruns.py`):
+
+- **The die must be warm on aifoundry2.** Its first rerun session (12:51–13:10) ran at 65 °C, the governor's
+  threshold, and the minion clock went to 700–800 MHz inside a fifth of the samples of most bursts — a 20 W
+  swing in a 2 W measurement. Every pass since is preceded by heating the die past 76 °C, and the analysis drops
+  any burst whose samples show the clock off 600 MHz. aifoundry3, pinned by its firmware, needs neither.
+- **Some traffic starves the instrument.** Rings between shires s and s+16 slow the service processor's own
+  management path: the sampler's command latency goes from 22 ms to 150 ms and the board reading is held for
+  seconds at a time, on aifoundry2 in every pass. Those bursts are dropped by the sampler's own latency, and the
+  observability report lists this among the meter's limits.
+
+The rings and levels of 18 September, polled by `run_energy.py` without the die temperature, are no longer
+pooled: on a cooling card the uncorrected method reads 10–50% high on 2 W signals. Their values agree with the
+new passes to within 10% where the die was steady.
+
 ## What "per instruction" means
 
 The cost of that instruction retired on every hart of every minion at once, above idle, including the
@@ -67,17 +101,9 @@ random columns are the only window on their data dependence.
 
 ## Uncertainty, table by table
 
-| Table | Typical uncertainty | Why |
-|---|---|---|
-| §1 idle law | ±0.2 W from 64 to 88 °C; +0.7 W extrapolated to 50 °C on the other card | rms of the fit; E20 |
-| §2, §3.1 instructions | ±3% | idle bracketing; two cards agree to 5% with a common scale |
-| §3.2 tensor unit | ±2% at 80 °C | 46 strict runs, ±0.1 °C launch temperature |
-| §4.1 bytes, 23 Sep | ±3–5% | the DRAM rows are the smallest signals over the biggest idle |
-| §4.2 bytes, 18 Sep | ±10%, and **the clock was not pinned**: `implied_ghz` per row | the governor moved between 600 and 850 MHz that day |
-| §5 rings | ± half the spread of two runs, shown | two independent sessions |
-| §6 atomics | ±5% | one session, three launches per case |
-| §7 predictions | within about 10% | the relay check |
-| §8 card scale | 0.95 ± 0.03 | 56 entries |
+Superseded by the bars in every table (see "Confidence bars" above); kept as the first edition's estimates,
+which the bars confirm for the catalogue (±3% claimed, ±6% measured over two cards) and correct for the small-signal
+rows (the hot line ±5% claimed, ±17% measured).
 
 ## What is not in this manual
 
@@ -87,4 +113,4 @@ random columns are the only window on their data dependence.
 - **Divide and square root**: they trap.
 - **Per-flip energies outside the tensor unit.** See above.
 - **Anything at the 0.4 V operating point Esperanto designed for.** This card's firmware does not offer it.
-- **The unsensed 15 W.** It is the largest single component of idle and no instrument here can split it.
+- **The unsensed 15 W, split by sensor.** It is the largest single component of idle and no instrument here can split it; §4a attributes it by regression (delivery losses per rail plus a DRAM term) and the observability report's improvement ladder says what would meter it.

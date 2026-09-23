@@ -1,0 +1,27 @@
+spin: 10 launches, 0.0 GB/s
+pair: 14 launches, 2992.7 GB/s
+neigh: 10 launches, 1120.6 GB/s
+shire: 11 launches, 1120.5 GB/s
+xshire1: 10 launches, 123.7 GB/s
+xshire16: 13 launches, 155.0 GB/s
+xshire8: 10 launches, 149.7 GB/s
+xshire2: 10 launches, 87.5 GB/s
+xshire4: 10 launches, 91.2 GB/s
+xshire6: 10 launches, 89.3 GB/s
+shire-c4: 13 launches, 549.5 GB/s
+xshire1-c4: 10 launches, 112.5 GB/s
+
+idle 24.41 W (median of 109 samples)
+config           GB/s   MHz       W     +W     pJ/B   local  vs spin  what
+spin              0.0   600   27.01   2.60      nan     nan      nan  no messages: hart 0 of every minion in an integer loop
+pair           2992.7   600   26.61   2.20     0.73    0.71    -0.14  1 KB messages between the two minions of each pair, inside a neighbourhood
+neigh          1120.6   600   26.81   2.40     2.14    2.08    -0.18  1 KB messages around rings of 8 (a neighbourhood)
+shire          1120.5   600   26.82   2.41     2.15    2.12    -0.18  1 KB messages around rings of 32 (a shire)
+xshire1         123.7   600   26.09   1.68    13.61   13.36    -7.45  1 KB messages from each minion to the same minion of the next shire ID
+xshire16        155.0   600   26.62   2.21    14.25   14.25    -2.55  1 KB messages between shires s and s+16
+xshire8         149.7   600   26.21   1.80    12.00   12.00    -5.39  1 KB messages around rings of 4 shires, 8 IDs apart
+xshire2          87.5   600   25.82   1.41    16.06   16.06   -13.71  1 KB messages around rings of 16 shires, 2 IDs apart
+xshire4          91.2   600   25.84   1.43    15.70   15.92   -12.86  1 KB messages around rings of 8 shires, 4 IDs apart
+xshire6          89.3   600   25.92   1.51    16.90   17.13   -12.25  1 KB messages around rings of 16 shires, 6 IDs apart
+shire-c4        549.5   600   26.31   1.90     3.46    3.51    -1.28  128 B messages around rings of 32 (a shire)
+xshire1-c4      112.5   600   26.58   2.17    19.32   19.59    -3.84  128 B messages from each minion to the same minion of the next shire ID

@@ -9,29 +9,29 @@
    "access": "host, management node",
    "status": "works_now",
    "check": "confirmed",
-   "note": "The host can poll 60×/s but the service processor refreshes once per loop pass. The PMIC (a closed ATSAMD20 firmware) does the averaging."
+   "note": "The host can poll 60×/s but the service processor refreshes once per loop pass. The PMIC (a closed ATSAMD20 firmware) does the averaging. The meter can be starved by the workload: rings between shires s and s+16 (nocbench xshire:16) slow the SP's management path from 22 ms to 150 ms per command and hold the board reading for seconds at a time on aifoundry2; the energy manual's analysis drops such bursts by the sampler's own latency."
   },
   {
    "level": "Rail power",
    "what": "Minion cores, SRAM (L2/L3/scratchpad arrays), NoC",
-   "gran": "1 mW, moving average, per 133 ms record",
+   "gran": "1 mW; the service processor's first-order filter (τ ≈ 1 s) of the PMIC's output-side power, per 133 ms record; min and max since the last reset",
    "sec": 0.133,
    "instrument": "SP stats trace (dev_mngt_service -t SPST:extract)",
    "access": "host, management node",
    "status": "works_now",
    "check": "confirmed",
-   "note": "No rail for DDR, PCIe, Maxion or IO. The 133 ms is a firmware artifact: the SP's I2C driver busy-waits 1 ms after every one of ~96 transactions per pass."
+   "note": "Three PMBus regulators only: minion, SRAM, NoC, and their output side (w_out). DDR, VDDQ, PCIe, IO shire and Maxion have set-point registers and no telemetry. The PMIC also holds v_in, a_in, w_in and a_out for the three, which the SP reads (84 values a pass) and does not forward. The 133 ms is a firmware artifact: the SP's I2C driver busy-waits 1 ms after every transaction. ettelem --reset-ms reads the min/max over a chosen window."
   },
   {
    "level": "Energy per event",
    "what": "pJ per L1/L2/L3/DRAM load, per FMA slot",
-   "gran": "≥ 10⁹ identical events/s for seconds; 133 µJ per LSB-record",
+   "gran": "≥ 10⁹ identical events/s for 3 s bursts bracketed by idle; bars ±6% (median) over passes and cards",
    "sec": 2,
    "instrument": "regression of rail power against counted events",
    "access": "host + kernel",
    "status": "works_now",
    "check": "confirmed",
-   "note": "Demonstrated: 46 pJ per L1 load, 5.1 nJ per DRAM load. A single event is 10¹² times below the floor."
+   "note": "The energy manual: 386 configurations, three shuffled passes on each of two cards, idle from the brackets, a leakage correction for the burst's own warming, bursts with the clock off 600 MHz discarded. A single event is 10¹² times below the floor."
   },
   {
    "level": "Device-wide bandwidth",
@@ -46,14 +46,47 @@
   },
   {
    "level": "Temperature and voltage",
-   "what": "35 temperature sensors, 125 voltage sense points (3 per minion shire)",
-   "gran": "hardware 0.06 °C / 89 µV; host sees 34-shire avg/low/high at 1 °C / 1 mV",
+   "what": "35 temperature sensors, 125 voltage sense points (3 per minion shire, 2 per memory shire, IO and PCIe shires), 40 process detectors",
+   "gran": "hardware 0.06 °C (12-bit) / 75 µV (14-bit); host sees 34-shire avg/low/high at 1 °C / 1 mV every 133 ms",
    "sec": 0.133,
    "instrument": "Moortec PVT controllers (SP-only); DM_CMD_GET_MODULE_CURRENT_TEMPERATURE",
    "access": "service processor",
    "status": "needs_tooling",
    "check": "disputed",
-   "note": "Per-shire voltages leak out today as DEBUG log strings through DM_CMD_SET_DM_TRACE_CONFIG; a per-shire map otherwise needs a new DM command. No sensor measures current."
+   "note": "Moortec PVT: 5 controllers, each 8 temperature sensors, 2 voltage monitors of 16 channels, 8 process detectors. Per-shire voltages leak out today as DEBUG log strings through DM_CMD_SET_DM_TRACE_CONFIG (the spatial brief's IR-drop map); per-shire temperature needs a firmware change; the process detectors are configured with measurement disabled and never read; two external analog VM inputs have a stub reader and no caller. No sensor measures current."
+  },
+  {
+   "level": "DDR-rail droop",
+   "what": "The 0.8 V memory-shire supply as the Moortec monitors in the 8 memory shires see it, 1 mV, every 133 ms",
+   "gran": "0.84 mV per watt of off-rail DRAM power, fitted over 386 bursts (rms 0.36 mV): 1 mV ≈ 1.2 W",
+   "sec": 0.133,
+   "instrument": "DM_CMD_GET_ASIC_VOLTAGE (ettelem's die_mv.ddr)",
+   "access": "host, management node",
+   "status": "works_now",
+   "check": "unverified",
+   "note": "A voltage that droops with current is a current meter once its load line is known; this one is calibrated against the regression of §4, so it is not independent of the board meter, but it moves with DRAM traffic alone and at 10 Hz. Other rails leak in at 0.03 mV per board watt."
+  },
+  {
+   "level": "Unmetered power, attributed",
+   "what": "The part of board power on no rail sensor, split into delivery losses of the metered rails and a per-byte DRAM cost",
+   "gran": "rms 0.35 W per burst over 392 bursts; coefficients ±2–8%",
+   "sec": 3,
+   "instrument": "regression of (board − rails) against rail powers and DRAM bytes (§4)",
+   "access": "host",
+   "status": "works_now",
+   "check": "unverified",
+   "note": "Not a sensor: an attribution. It cannot say how the DRAM term splits between the DDR PHY, the I/O rail and the DRAM chips, nor how the idle 12–15 W splits between DDR, PCIe, the IO shire and the regulators' own draw."
+  },
+  {
+   "level": "Regulator input power per rail",
+   "what": "v_in, a_in, w_in and a_out of the minion, SRAM and NoC regulators",
+   "gran": "1 mW class, per 133 ms record, already read by the SP",
+   "sec": 0.133,
+   "instrument": "PMIC PMBus statistics (pmic_get_pmb_stats) forwarded by a new SP stats field",
+   "access": "service processor",
+   "status": "needs_fw_change",
+   "check": "unverified",
+   "note": "Would turn the fitted 18–20% delivery loss of §4 into a measurement per rail and per load, and shrink the unmetered remainder to the rails that truly have no meter."
   },
   {
    "level": "ECC errors",
@@ -352,6 +385,496 @@
    "et": "Functional emulator with per-instruction state; RTL of the core with waveform dumps and lockstep cosim.",
    "gpu": "None. Accel-Sim is a tuned performance model driven by SASS traces.",
    "src": "sw-sysemu; core-et; Khairy et al. 2020"
+  }
+ ],
+ "reports": [
+  {
+   "title": "Limits of observability (this page)",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability",
+   "date": "20–23 Sep",
+   "what": "The hub: every instrument on the card, what it resolves, what it cannot see, and the ladder of improvements.",
+   "instruments": "all of them"
+  },
+  {
+   "title": "The ET-SoC-1 energy manual",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual",
+   "date": "23 Sep",
+   "what": "Energy per instruction, per byte at every level, per message, per atomic, with confidence bars from three passes on two cards; the idle law; wires, lines, rows, leakage of the arrays, rails.",
+   "instruments": "board power, rails, die temperature, cycle counter; the leakage law"
+  },
+  {
+   "title": "The DVFS loop, and the leakage",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage",
+   "date": "22 Sep",
+   "what": "The governor's states and thresholds, the three operating points, the idle law P = 12.6 W + 23.3 W·e^((T−80)/36), the rail split of idle, the activity term.",
+   "instruments": "board power, rails, SP trace, DM_CMD config reads, driver ioctl"
+  },
+  {
+   "title": "Spatial temperature: a brief",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief",
+   "date": "22 Sep",
+   "what": "The 35 Moortec sensors on the 6×6 mesh, the firmware reduction to one average, the per-shire IR-drop map from the DEBUG trace, what a spatial heat map would need.",
+   "instruments": "PVT controllers, SP DEBUG trace, the thermal model"
+  },
+  {
+   "title": "Power and temperature",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature",
+   "date": "20 Sep",
+   "what": "The first power and thermal measurements: what the PMIC and SP report, the 133 ms cadence, the card's thermal time constants.",
+   "instruments": "board power, SP stats trace"
+  },
+  {
+   "title": "The Horace experiment",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment",
+   "date": "21 Sep",
+   "what": "The tensor unit's energy resolved to four kinds of RTL event by simulating its operands; the thermal model; fourteen structured matrices priced before they ran.",
+   "instruments": "board power, die temperature, RTL simulation of the FMA"
+  },
+  {
+   "title": "Why is the ET-SoC-1 low power?",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power",
+   "date": "21 Sep",
+   "what": "An ablation of the dense matmul: what each part of the card draws when it is the only thing running.",
+   "instruments": "board power, rails, preheated strict starts"
+  },
+  {
+   "title": "One hot line stops a shire",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line",
+   "date": "22 Sep",
+   "what": "A contended global atomic serialises at one per 10 cycles and the home shire's own memory path stops; the energy of a contended atomic.",
+   "instruments": "cycle counter, per-minion completion counts, board power"
+  },
+  {
+   "title": "L2 mainline starvation",
+   "url": "https://spacesheep.dev/@yaroslavvb/2026-09-22-et-soc1-l2-mainline-starvation",
+   "date": "22 Sep",
+   "what": "The starvation of a shire's own scratchpad path by remote atomics, against the errata.",
+   "instruments": "cycle counter, completion counts"
+  },
+  {
+   "title": "Hand it to the next shire",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay",
+   "date": "22 Sep",
+   "what": "A multi-stage relay through DRAM, the shire's own scratchpad, or the next shire's: 12× the bandwidth and a twelfth of the energy of DRAM; hop distance is free.",
+   "instruments": "cycle counter, board power, rails"
+  },
+  {
+   "title": "Anatomy of a memory access",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy",
+   "date": "19 Sep",
+   "what": "Which shire homes which line, which bank and row a physical address maps to, the 6×6 mesh's coordinates, timed single accesses.",
+   "instruments": "evict + cycle counter, address probing"
+  },
+  {
+   "title": "Memory hierarchy",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy",
+   "date": "18 Sep",
+   "what": "Latency and bandwidth of L1, L2, L3, DRAM and the scratchpads; the first energy per byte by level.",
+   "instruments": "cycle counter, board power polled through dev_mngt_service"
+  },
+  {
+   "title": "On-chip communication",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
+   "date": "18 Sep",
+   "what": "TensorSend/Recv, credits, barriers, reductions and rings: cycles per message and pJ per byte.",
+   "instruments": "cycle counter, board power"
+  },
+  {
+   "title": "Matmul efficiency",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency",
+   "date": "18 Sep",
+   "what": "sgemm on the card: utilisation of the tensor unit, power under load.",
+   "instruments": "cycle counter, board power"
+  },
+  {
+   "title": "Sparse compute",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute",
+   "date": "18 Sep",
+   "what": "The tensor unit's power against operand sparsity: the data dependence that the Horace experiment later resolved to flips.",
+   "instruments": "board power"
+  },
+  {
+   "title": "Test drive",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-testdrive",
+   "date": "17 Sep",
+   "what": "First contact: the runtime, launching a kernel, the tools in /opt/et.",
+   "instruments": "—"
+  }
+ ],
+ "power": {
+  "idle_73c": {
+   "board_w": 31.78976666666667,
+   "board_sd": 0.03862139591239839,
+   "minion_w": 11.049853333333333,
+   "sram_w": 1.9958833333333332,
+   "noc_w": 3.6436666666666664,
+   "unsensed_w": 15.100363333333338,
+   "die_c": 73.0,
+   "hours": 20.4
+  },
+  "fit": {
+   "aifoundry2": {
+    "coef": {
+     "minion": 0.19562583087656812,
+     "sram": 0.04980937139810787,
+     "noc": 0.28597221164468717,
+     "dram_pj_per_byte": 72.90610243259549
+    },
+    "se": {
+     "minion": 0.002759682498999288,
+     "sram": 0.016614156607839745,
+     "noc": 0.021358930435194542,
+     "dram_pj_per_byte": 1.5880472491163695
+    },
+    "rms_w": 0.3458910441731848,
+    "n": 392
+   },
+   "aifoundry3": {
+    "coef": {
+     "minion": 0.17720668334776304,
+     "sram": 0.06392388877135205,
+     "noc": 0.2639629940884879,
+     "dram_pj_per_byte": 68.1042269201646
+    },
+    "se": {
+     "minion": 0.002396230207661384,
+     "sram": 0.014282827933122424,
+     "noc": 0.01864264962554915,
+     "dram_pj_per_byte": 1.3781230357906105
+    },
+    "rms_w": 0.29526683216114163,
+    "n": 386
+   }
+  },
+  "droop": {
+   "mv_per_dram_offrail_w": 0.8409319868746111,
+   "mv_per_board_w_common": 0.024981127003574636,
+   "rms_mv": 0.35513393203063753,
+   "n": 386,
+   "idle_die_mv": {
+    "ddr": 766.8527313362273,
+    "sram": 703.9507564361542,
+    "maxion": 585.8599626079856,
+    "minion": 517.8991919886535,
+    "pshire": 751.9018244724288,
+    "noc": 484.02080199424074,
+    "ioshire": 753.0407229122792
+   },
+   "minion_ir_drop_mv_per_w": 0.06839490473881052,
+   "examples": [
+    {
+     "cfg": "add/zeros/h2",
+     "over_idle_w": 2.677577212554811,
+     "dram_offrail_w": 0.0,
+     "droop_ddr_mv": 0.0,
+     "droop_minion_mv": -0.022222222222239907
+    },
+    {
+     "cfg": "fmadd.ps/random/h2",
+     "over_idle_w": 26.04645569708485,
+     "dram_offrail_w": 0.0,
+     "droop_ddr_mv": 0.533333333333303,
+     "droop_minion_mv": 1.6509259259258897
+    },
+    {
+     "cfg": "st_stream/dram/random",
+     "over_idle_w": 9.217456100494893,
+     "dram_offrail_w": 4.680915509344286,
+     "droop_ddr_mv": 4.274999999999977,
+     "droop_minion_mv": -0.022222222222239907
+    },
+    {
+     "cfg": "tload/dram/random",
+     "over_idle_w": 9.83971085047944,
+     "dram_offrail_w": 6.285474643678046,
+     "droop_ddr_mv": 5.6444444444445026,
+     "droop_minion_mv": 0.0
+    },
+    {
+     "cfg": "tload/dram/zeros",
+     "over_idle_w": 7.085166696667861,
+     "dram_offrail_w": 4.829351718190185,
+     "droop_ddr_mv": 3.9265536723164587,
+     "droop_minion_mv": 0.0
+    },
+    {
+     "cfg": "tload/scp/random",
+     "over_idle_w": 10.512276685239035,
+     "dram_offrail_w": 0.0,
+     "droop_ddr_mv": 1.7351851851851734,
+     "droop_minion_mv": 0.0
+    },
+    {
+     "cfg": "tstore/dram/random",
+     "over_idle_w": 10.674198905789433,
+     "dram_offrail_w": 6.1583817180970595,
+     "droop_ddr_mv": 5.949999999999932,
+     "droop_minion_mv": -0.022222222222239907
+    },
+    {
+     "cfg": "wire/hop6/random",
+     "over_idle_w": 16.509972477166034,
+     "dram_offrail_w": 0.0,
+     "droop_ddr_mv": 1.0472222222222172,
+     "droop_minion_mv": 0.0
+    }
+   ],
+   "source": "docs/reports/data/2026-09-23-catalogue-aifoundry2/telemetry.jsonl.gz (die_mv from DM_CMD_GET_ASIC_VOLTAGE: the Moortec voltage monitors averaged over the 8 memory shires for ddr, the 34 minion shires for minion/sram/noc)"
+  },
+  "rails_no_telemetry": [
+   "DDR core 0.8 V",
+   "VDDQ 1.1 V",
+   "VDDQLP 0.64 V",
+   "PCIe logic 0.775 V",
+   "PCIe/PShire 0.75 V",
+   "IO shire 0.75 V",
+   "Maxion 0.6 V"
+  ],
+  "pmbus_modules": [
+   "minion",
+   "NoC",
+   "SRAM"
+  ],
+  "pmbus_values": [
+   "v_out",
+   "a_out",
+   "w_out",
+   "v_in",
+   "a_in",
+   "w_in",
+   "deg_c"
+  ],
+  "pmbus_readings": [
+   "current",
+   "min",
+   "max",
+   "average"
+  ],
+  "pvt": {
+   "controllers": 5,
+   "ts_per_controller": 8,
+   "vm_per_controller": 2,
+   "vm_channels": 16,
+   "pd_per_controller": 8,
+   "ts_active": 35,
+   "ts_resolution_c": 0.061,
+   "vm_bits": 14,
+   "vm_lsb_uv": 74.505615234375,
+   "vm_points": {
+    "minion shires (VDD_MNN, VDD_SRAM, VDD_NOC × 34)": 102,
+    "memory shires (VDD_MS, VDD_NOC × 8)": 16,
+    "IO shire (VDD_NOC, VDD_0P75, VDD_MXN)": 3,
+    "PCIe shire (VDD_PSHR, VDD_NOC)": 2,
+    "external analog inputs": 2
+   },
+   "host_sees": {
+    "temperature": "minion-shire average, low and high (integer °C); IO shire; PMIC",
+    "voltage": "minion-shire average of VDD_MNN, VDD_SRAM, VDD_NOC; memory-shire average of VDD_MS (as 'ddr'); IO shire VDD_MXN and VDD_0P75; PShire VDD_PSHR; the PMIC set points (integer mV)",
+    "debug_trace": "per-shire VDD_MNN/SRAM/NOC lines and per-memory-shire VDD_MS/NOC lines every loop pass at LOG_LEVEL_DEBUG",
+    "not_exported": "per-shire temperature, process detectors, external analog VM inputs"
+   }
+  }
+ },
+ "improvements": [
+  {
+   "rung": 1,
+   "group": "software, on the data the card already gives",
+   "status": "works_now",
+   "what": "Bracketed bursts with a leakage correction and a clock-excursion filter",
+   "done": true,
+   "adds": "Idle from the stretches either side of each burst; the burst's own warming taken out with the idle law's slope; bursts in which the governor left 600 MHz discarded.",
+   "cost": "done (energy manual, 23 Sep)",
+   "effect": "Confidence bars of ±6% (median) on 386 entries; the first cool-card reruns, 20% contaminated by 700–800 MHz excursions, were caught by the filter."
+  },
+  {
+   "rung": 2,
+   "group": "software, on the data the card already gives",
+   "status": "works_now",
+   "what": "Attribute the unmetered remainder by regression",
+   "done": true,
+   "adds": "board − rails fitted over every burst as a loss per watt on each metered rail plus a cost per DRAM byte (§4).",
+   "cost": "done (this page)",
+   "effect": "Unmetered power gets a name per burst to rms 0.35 W: 20% delivery loss on the minion rail, 73 pJ per DRAM byte off-rail. What stays unattributed is the residual, and the idle 12–15 W."
+  },
+  {
+   "rung": 3,
+   "group": "software, on the data the card already gives",
+   "status": "works_now",
+   "what": "Read the DDR rail's droop as a DRAM-power proxy",
+   "done": true,
+   "adds": "die_mv.ddr (the memory shires' Moortec monitors) droops 0.84 mV per off-rail DRAM watt; the monitor is already in every ettelem sample.",
+   "cost": "done (this page); calibration is the regression of rung 2",
+   "effect": "DRAM activity at 10 Hz and 1 mV ≈ 1.2 W, independent of the board meter's drift; a second witness for the DRAM term."
+  },
+  {
+   "rung": 4,
+   "group": "software, on the data the card already gives",
+   "status": "needs_tooling",
+   "what": "Deconvolve the rails' one-second filter",
+   "done": false,
+   "adds": "The SP's rail averages are first-order filtered (61% at 1 s, 88% at 2 s). Inverting that filter sample by sample recovers the rails at the PMIC's cadence.",
+   "cost": "~50 lines in the analyzers; a calibration burst to pin τ",
+   "effect": "Rail split of bursts shorter than 3 s; per-launch rail energy; the minion/SRAM/NoC split of transients."
+  },
+  {
+   "rung": 5,
+   "group": "software, on the data the card already gives",
+   "status": "needs_tooling",
+   "what": "Per-shire current maps from the DEBUG trace's IR drop",
+   "done": false,
+   "adds": "The SP prints every minion shire's VDD_MNN/SRAM/NOC voltage each loop pass at LOG_LEVEL_DEBUG (the spatial brief's map). Calibrate each shire's drop against the rail meter with single-shire loads, and the map becomes current.",
+   "cost": "a day: single-shire calibration bursts, a trace parser (sptrace exists)",
+   "effect": "Where the metered watts go on the die, per shire, to about 10%; the spatial power map that the temperature sensors cannot give from the host."
+  },
+  {
+   "rung": 6,
+   "group": "software, on the data the card already gives",
+   "status": "works_now",
+   "what": "Sub-degree temperature by step timing; min/max windows for peaks",
+   "done": true,
+   "adds": "The integer die reading steps at sharp moments when polled at 10–45 Hz; fitting the heating that reproduces the steps gives ±0.03 °C (the Horace experiment). ettelem --reset-ms reads the PMIC's min/max over a window.",
+   "cost": "done",
+   "effect": "Thermal responses without a firmware change; peak power over any window."
+  },
+  {
+   "rung": 7,
+   "group": "software, on the data the card already gives",
+   "status": "works_now",
+   "what": "Watch the meter's own latency",
+   "done": true,
+   "adds": "Every ettelem sample records how long the management command took (took_ms). Bursts during which the service processor is starved — the s ↔ s+16 rings raise it from 22 ms to 150 ms and freeze the board reading — are dropped.",
+   "cost": "done (23 Sep)",
+   "effect": "One ring configuration on aifoundry2 was found to be unmeasurable this way; without the check its energy read 45% low."
+  },
+  {
+   "rung": 8,
+   "group": "lab hardware, no firmware",
+   "status": "needs_tooling",
+   "what": "A PCIe riser with shunts on 12 V and 3.3 V, read at a kilohertz",
+   "done": false,
+   "adds": "An external meter of the card's input, 1 mW at 1 ms, that owes nothing to the PMIC's closed firmware and its 133 ms.",
+   "cost": "a riser or interposer with sense resistors and an INA-class ADC, or a bench DAQ; a day; a slot in an open chassis",
+   "effect": "The launch transients that widen the small-signal bars become visible and separable; 0.5 s bursts become measurable; the bars on the awake core, the hot line and the DRAM relay go from ±20–30% to a few percent; the PMIC's own input-power reading gets an independent check."
+  },
+  {
+   "rung": 9,
+   "group": "lab hardware, no firmware",
+   "status": "needs_tooling",
+   "what": "An infrared camera over the open card",
+   "done": false,
+   "adds": "Which packages warm under which load: the DRAM chips, the DDR PHY side of the die, each regulator, the PCIe switch.",
+   "cost": "a thermal camera and an open chassis; an afternoon",
+   "effect": "The unmetered watts placed on the board: the split of the DRAM term between the PHY, the I/O rail and the chips, and of the idle 12–15 W between DDR, PCIe and the regulators, at least in proportion."
+  },
+  {
+   "rung": 10,
+   "group": "lab hardware, no firmware",
+   "status": "works_now",
+   "what": "A second card",
+   "done": true,
+   "adds": "aifoundry3 repeats every table.",
+   "cost": "done",
+   "effect": "The card factor: 0.95 with a 10–90% spread of 0.91–0.99; bars that are mostly the card, not the day."
+  },
+  {
+   "rung": 11,
+   "group": "firmware (a signed build; see the firmware caveat)",
+   "status": "needs_fw_change",
+   "what": "Forward the PMIC's input-side readings for the three metered rails",
+   "done": false,
+   "adds": "v_in, a_in, w_in and a_out per regulator are already read by the SP every pass and dropped.",
+   "cost": "a few lines in the SP stats structure, and a firmware image",
+   "effect": "The delivery loss measured per rail and per load instead of fitted; the unmetered remainder shrinks to the rails that have no meter at all."
+  },
+  {
+   "rung": 12,
+   "group": "firmware (a signed build; see the firmware caveat)",
+   "status": "needs_fw_change",
+   "what": "Export the 35 temperature sensors per shire",
+   "done": false,
+   "adds": "The spatial brief's three options: a trace field, a DM command, or a DEBUG log line like the voltage one.",
+   "cost": "a few lines; a firmware image",
+   "effect": "Heat maps at 0.06 °C on the 6×6 mesh; heat flow between shires; per-shire leakage from the idle law."
+  },
+  {
+   "rung": 13,
+   "group": "firmware (a signed build; see the firmware caveat)",
+   "status": "needs_fw_change",
+   "what": "Enable the process detectors and the two external analog monitor inputs",
+   "done": false,
+   "adds": "40 ring-oscillator process detectors are configured with measurement disabled and never read; two external analog channels of the voltage monitors have a stub reader and no caller.",
+   "cost": "driver already written; a firmware image; for the external inputs, finding what the board wires to them",
+   "effect": "Per-shire silicon speed and a leakage proxy that separates the card factor into process and voltage; possibly two board-level sense points."
+  },
+  {
+   "rung": 14,
+   "group": "firmware (a signed build; see the firmware caveat)",
+   "status": "needs_fw_change",
+   "what": "Faster, unfiltered power in the SP trace",
+   "done": false,
+   "adds": "Drop the 84-read PMB snapshot and the 1 ms I2C busy-wait; record the PMIC's instantaneous power rather than its average.",
+   "cost": "a firmware image; the PMIC's own refresh rate is the next unknown",
+   "effect": "Board and rail power at the PMIC's cadence, tens of milliseconds, without the one-second filter."
+  },
+  {
+   "rung": 15,
+   "group": "firmware (a signed build; see the firmware caveat)",
+   "status": "needs_fw_change",
+   "what": "Enable the SRAM ECC interrupt sources (and DRAM ECC)",
+   "done": false,
+   "adds": "The counters are wired and read as zero because the SP never enables their sources; DRAM ECC is compiled off.",
+   "cost": "a firmware image, and a decision on DRAM capacity",
+   "effect": "Bit errors become observable at the doubleword; the only bit-level detectors the silicon has."
+  },
+  {
+   "rung": 16,
+   "group": "firmware (a signed build; see the firmware caveat)",
+   "status": "needs_fw_change",
+   "what": "A U-mode syscall to choose counter events",
+   "done": false,
+   "adds": "mhpmevent, shire-cache and memory-shire perfmon selection from a kernel.",
+   "cost": "a syscall in the minion runtime; a firmware image",
+   "effect": "Per-shire and per-neighbourhood event counts under a workload, instead of the fixed five."
+  },
+  {
+   "rung": 17,
+   "group": "tooling against existing interfaces",
+   "status": "needs_tooling",
+   "what": "A libDM client for the Minion Debug Interface",
+   "done": false,
+   "adds": "Register and memory snapshots of halted harts, hardware breakpoints, and mhpmevent writes before a launch. Rehearse on sys_emu, which models the debug module.",
+   "cost": "~100 lines of C++ against /opt/et/lib/libDM; the in-tree gtests are complete examples; a quiet card and a reset plan agreed with the lab admin",
+   "effect": "Architectural state of a hart on silicon."
+  },
+  {
+   "rung": 18,
+   "group": "tooling against existing interfaces",
+   "status": "needs_tooling",
+   "what": "Verilator flow for the core-et bench; a device flame-graph converter",
+   "done": false,
+   "adds": "Every flop every cycle of eight minions in the open RTL (one module already runs and explained the counter carry bug); the kernel trace buffer as a flame graph.",
+   "cost": "days of build repair; a script",
+   "effect": "Below-silicon views of anything the card measures."
+  },
+  {
+   "rung": 19,
+   "group": "research",
+   "status": "research_only",
+   "what": "A cell library and netlist for the RTL",
+   "done": false,
+   "adds": "Toggle counts from the RTL bench become joules only with a library the drop does not contain.",
+   "cost": "not in the open tree",
+   "effect": "Energy per flip from simulation rather than from fits to board power."
+  },
+  {
+   "rung": 20,
+   "group": "research",
+   "status": "impossible_on_silicon",
+   "what": "Current sensing below the regulators",
+   "done": false,
+   "adds": "Nothing on the die or the board measures the current of the DDR, VDDQ, PCIe, IO or Maxion rails; splitting them means shunts on the board.",
+   "cost": "board rework: not for a shared card",
+   "effect": "The last 12–15 W of idle, and the DRAM term's split, stay inferred."
   }
  ]
 }

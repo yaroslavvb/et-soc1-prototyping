@@ -36,6 +36,9 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
 | Q28 | 09-23 | A comprehensive energy evaluation of all instructions the processor supports, verified on various cards, with enough testing to remove as much variance as possible within five hours of experimenting | E27, E28 → A15 second edition |
 | Q29 | 09-23 | *(mid-task)* Deploy it into the same spacesheep space as the previous one and make it public | A15 made public, updated in place |
 | Q30 | 09-23 | *(mid-task)* A finer-grain breakdown: the energy dissipated by wires; for memory accesses, isolate activating cache lines, leakage, and current through the wires | E27 (wire, line, row, neighbourhood, rail and SRAM-leakage probes), E28 |
+| Q31 | 09-23 | Add confidence bars to all the entries, from re-running the workload and from different cards | E29 → A15 third edition; the `combined` block of E27's analysis; 09-method.md "Confidence bars" |
+| Q32 | 09-23 | *(mid-task)* For the unmetered parts of memory access, find what could reduce the unmetered share; the Moortec PVT integration may give extra instrumentation. Add it to the observability report, cross-link the two reports, add an improvement ladder (cf. the spatial temperature brief), make the observability report the top level for all measurement matters, with a table of contents | E30, R13 → A2 second edition, A15 §4a |
+| Q33 | 09-23 | *(mid-task)* After this, update the GitHub repo with all the relevant materials: it is the source of truth for everything found and every experiment run | the commit of 2026-09-23 (04-artifacts.md, "Commits"); `docs/getting-started.md` "Where things stand (2026-09-23)" |
 
 ## Scope decisions worth remembering
 

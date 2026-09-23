@@ -525,6 +525,65 @@ instruments cannot tell which. Rails: 68–70% of a DRAM read is on no metered r
 **Caveats:** 32 harts give 14–17 GB/s, latency-bound, so the signal is 2–2.6 W over idle and the per-pass error
 ±4–8 pJ/B; a 20 pJ/B activation would have shown, a 5 pJ/B one would not.
 
+## E29 — Confidence bars: the reruns of the relay, the hot line, the rings and the levels (2026-09-23, 12:51–13:47)
+
+**Question (Q31):** how much does every entry move when the workload is re-run, and when the card is changed?
+**Method:** the catalogue already had three shuffled passes on two cards, so its entries got a `combined`
+block (`workloads/enercat/analyze_catalogue.py`): mean over every pass on every card, the range those passes
+spanned, and each card's mean ± pass-to-pass standard error. The four tables that rested on one session were
+re-run: the relay by medium (`tools/ettelem/run_onchip_power.sh`), the hot-line atomics
+(`run_hotline_power.sh`), and the nocbench rings with the memhier levels sampled by ettelem the manual's way
+(`run_rings_levels_power.sh`, new), three passes each on both cards; on aifoundry2 every pass was preceded by
+heating the die past 76 °C (`run_reruns_warm.sh`, `run_rl_warm_a2.sh`). Each pass is reduced on its own with
+bracketing idle and the leakage correction and pooled by `tools/ettelem/analyze_reruns.py`, which drops a burst
+if the minion clock left 600 MHz in it or if the sampler's own median latency exceeded 60 ms.
+**Raw data:** `docs/reports/data/2026-09-23-reruns-aifoundry2-warm/`, `-aifoundry3/`; the discarded cool-card
+attempt `-aifoundry2/`; pooled into `docs/reports/data/2026-09-23-energy-manual/reruns.json`.
+**Result:** catalogue bars ±5.6% in the median and ±11.5% at the 90th
+percentile (half the range), mostly the 5% between the cards. Relay: DRAM **105.7** [99.5–111.0] pJ/B (n = 8; a2 102.1 ± 1.3, a3 109.3 ± 1.5),
+hop **8.6** [7.8–9.2] pJ/B (n = 8; a2 9.1 ± 0.1, a3 8.1 ± 0.1), own scratchpad **3.99** [3.90–4.25] pJ/B (n = 8; a2 4.02 ± 0.08, a3 3.97 ± 0.01).
+Hot line: contended **19.8** [16.9–23.6] nJ (n = 7; a2 20.8 ± 1.0, a3 18.6 ± 1.1), spread **1.16** [1.01–1.37] nJ (n = 7; a2 1.21 ± 0.08, a3 1.09 ± 0.05).
+Levels: L1 **0.77** [0.66–0.88] pJ/B (n = 6; a2 0.86 ± 0.01, a3 0.68 ± 0.01), L2 **2.51** [2.36–2.64] (n = 6; a2 2.61 ± 0.02, a3 2.40 ± 0.02), L3 **10.5** [9.6–11.4] (n = 6; a2 10.7 ± 0.3, a3 10.3 ± 0.6),
+DRAM **122** [117–129] (n = 6; a2 123 ± 4, a3 121 ± 2), own scratchpad **2.52** [2.39–2.64] (n = 6; a2 2.40 ± 0.00, a3 2.63 ± 0.01), remote scratchpad **6.65** [5.31–7.48] (n = 6; a2 6.17 ± 0.43, a3 7.14 ± 0.27).
+Rings: pair **0.67** [0.61–0.73] (n = 6; a2 0.63 ± 0.02, a3 0.70 ± 0.02), shire **2.08** [1.93–2.16] (n = 6; a2 2.05 ± 0.06, a3 2.12 ± 0.03), xshire1 **14.9** [14.2–15.4] (n = 6; a2 15.4 ± 0.0, a3 14.4 ± 0.1).
+**Three things the reruns taught:** (1) the first attempt (12:51–13:10, aifoundry2 at 65 °C) had the governor at
+700–800 MHz inside 5–25% of the samples of most bursts and was discarded — bars must not hold a change of
+operating point; (2) `run_energy.py`'s polling without the die temperature reads 10–50% high on 2 W signals on
+a cooling card, so the rings and levels were re-sampled by ettelem and the 18 September runs are no longer
+pooled; (3) rings between shires s and s+16 starve the service processor's own management path (command
+latency 22 → 150 ms, the board reading held for seconds) on aifoundry2, so that row is aifoundry3 only.
+**Caveats:** the sampler failed to start in about one pass in three before the runners learnt to retry;
+aifoundry3's hot-line pass 3 was cut short when the driver script was overwritten while running. Only
+complete passes with telemetry are pooled.
+
+## E30 — The unmetered remainder attributed, and the DDR rail's droop as a DRAM-power meter (2026-09-23, analysis of E27)
+
+**Question (Q32):** can anything reduce the share of power that is on no rail sensor?
+**Method:** no new card time. The firmware's PMIC and PVT drivers were read for what the meters are
+(`ServiceProcessorBL2/driver/pmic_controller.c`, `pvt_controller.c`, `services/thermal_pwr_mgmt.c`): the PMIC
+holds PMBus statistics for three regulators only (minion, NoC, SRAM: v/a/w in and out, temperature; current,
+min, max, average), the SP forwards the output-side power of each, and the other rails have set points and no
+telemetry. Then E27's bursts were fitted: unmetered W = a·minion + b·SRAM + c·NoC + d·(DRAM bytes/s), no
+intercept, per card; and `die_mv.ddr` (the memory shires' Moortec voltage monitor of the 0.8 V DDR rail, in
+every ettelem sample) was regressed on the DRAM term.
+**Raw data:** `docs/reports/data/2026-09-23-catalogue-aifoundry2/telemetry.jsonl.gz` and `catalogue.json`;
+result in `docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json`.
+**Result:** aifoundry2: 0.196 ± 0.003 per minion-rail W, 0.050 ± 0.017 per SRAM W,
+0.286 ± 0.021 per NoC W, 72.9 ± 1.6 pJ per DRAM byte, rms 0.35 W over 392 bursts;
+aifoundry3: 0.177, 0.064, 0.264, 68.1 pJ/B, rms 0.30 W over 386. So an instruction's unmetered
+energy is the minion regulator's delivery loss (18–20%), a DRAM byte's is about 70 pJ in the PHY, the I/O rail
+and the chips (twice that per useful byte through the L1 write-back path, which reads the line first), and the
+NoC coefficient is too large for a regulator alone: the memory shires' logic, on an unmetered rail, works when
+the mesh moves bytes to them. **The DDR rail droops 0.84 mV per off-rail DRAM watt** (0.025 mV per
+watt of anything else, rms 0.36 mV over 386 bursts; 767 mV at idle against an 800 mV set point): 1 mV ≈ 1.2 W of
+DRAM at 10 Hz, a meter for the largest unmetered consumer that was in every telemetry file all along. The
+minion rail sags 0.068 mV per watt the cores draw.
+**What it does not do:** none of the Moortec sensors measures current, so none meters the DDR, VDDQ, PCIe, IO
+or Maxion rails; the droop is a calibrated proxy, not independent of the board meter; the idle 12–15 W stays
+unsplit. The observability report's improvement ladder (A2, second edition) ranks what would meter more.
+**Caveats:** the fit's SRAM and NoC coefficients are collinear with the minion one on many bursts (their
+standard errors say so); the droop of other rails leaks into the DDR monitor at 0.025 mV per board watt.
+
 ## A note on E10, re-analysed for Q20
 
 The governor transitions in [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) are **not** a new experiment.

@@ -282,6 +282,25 @@ and leakage-corrected power, both bracketing idles and the die temperature.
 | The rails' response to a step | first-order, τ ≈ 1 s; min and max are since reset | M | E27 | `telemetry.jsonl.gz` around any burst |
 | Neighbourhoods reading the shire's scratchpad | 3.8–4.2 pJ/B | M | E27 | `DATAK`, `neigh/*` |
 
+## Confidence bars, the reruns and the unmetered remainder (E29, E30)
+
+`RERUNS` is `docs/reports/data/2026-09-23-energy-manual/reruns.json`; `UNMET` is `unmetered_fit.json` beside it.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| Catalogue bars, half the range over 3 passes × 2 cards | median ±5.6%, 90th percentile ±11.5% | M | E29 | `DATAK`, `combined` |
+| Relay through DRAM / next shire / own scratchpad | 105.7 [99.5–111.0] / 8.6 [7.8–9.2] / 3.99 pJ/B, n = 8 | M | E29 | `RERUNS`, `relay_pj_per_byte` |
+| Contended hot line | 19.8 nJ [16.9–23.6], n = 7 | M | E29 | `RERUNS`, `hotline_nj_per_op` |
+| Levels at 600 MHz: L1 / L2 / L3 / DRAM | 0.77 / 2.51 / 10.5 / 122 pJ/B, both cards, n = 6 | M | E29 | `RERUNS`, `levels_pj_per_byte` |
+| Rings at 600 MHz: pair / shire / xshire1 | 0.67 / 2.08 / 14.9 pJ/B, n = 6 | M | E29 | `RERUNS`, `rings_pj_per_byte` |
+| Cool-card reruns contaminated by the governor | 700–800 MHz in 5–25% of samples; all but two bursts dropped | M | E29 | `docs/reports/data/2026-09-23-reruns-aifoundry2/`, `mhz.minion` |
+| s ↔ s+16 rings starve the service processor | sampler latency 22 → 150 ms; board reading held; energy read 45% low | M | E29 | `-aifoundry2-warm/rl-pass*/telemetry.jsonl.gz`, `took_ms` |
+| Unmetered W = delivery loss + DRAM term | 0.196·minion + 0.050·SRAM + 0.286·NoC W + 73 pJ/B; rms 0.35 W (a2); 0.177, 0.064, 0.264, 68 (a3) | F (4 coefficients, 392+386 bursts) | E30 | `UNMET` |
+| DDR rail droop per off-rail DRAM watt | 0.84 mV/W, rms 0.36 mV; idle 767 mV | F | E30 | `UNMET`, `ddr_droop` |
+| Minion rail IR drop per watt | 0.068 mV/W | F | E30 | `UNMET`, `ddr_droop.minion_ir_drop_mv_per_w` |
+| The PMIC meters three regulators; seven rails have no telemetry | minion, NoC, SRAM (w_out forwarded; v/a/w in and a_out read and dropped) | R | R13 | `pmic_controller.c`, `bl2_pmic_controller.h` |
+| Moortec PVT: 35 temperature sensors, 125 voltage points, 40 process detectors | host sees averages; per-shire voltage in the DEBUG trace; PDs disabled | R | R13 | `bl2_pvt_controller.h`, `pvt_controller.c` |
+
 ## External numbers (not measured here)
 
 | Claim | Value | Kind | Source |
@@ -313,8 +332,9 @@ and leakage-corrected power, both bracketing idles and the die temperature.
   `g_pmic_power_reg.module_tdp_level` and no further.
 - **Whether the 8% switching-power gap between the two cards is silicon, package or board regulator.**
   Separating those needs a third working card, which aifoundry1 is not.
-- **Per-flip energies outside the tensor unit**, and the split of the unsensed 15 W of idle. See the manual's
-  section 9. The rail split of E27 resolves dynamic power into minion / SRAM / mesh / unmetered, not further.
+- **Per-flip energies outside the tensor unit**, and the split of the unsensed 15 W of idle. E30 attributes the
+  unmetered part of a *burst* (delivery losses plus a DRAM term) and meters DRAM by droop; the idle 12–15 W
+  and the DRAM term's split below its regulator stay inferred.
 - **Whether the DRAM controller closes pages** or the row activation is merely small; E28 cannot tell.
 - **Any table at 700 or 800 MHz.** The V²f ratios say what to expect; nothing was re-measured there.
 - **A relay whose working set exceeds the 80 MB of scratchpad.** That is where on-chip hand-off would be the

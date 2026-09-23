@@ -8,7 +8,43 @@ This page covers everything needed to pick the work up somewhere else: clone, co
 rerun, and republish. Claude Code's memory for this project lives outside the repo, on each machine, so this
 page and `CLAUDE.md` carry the context.
 
-## Where things stand (2026-09-18)
+## Where things stand (2026-09-23)
+
+The repository is the source of truth: every result, the experiment that produced it and the raw data are here,
+and `docs/findings/` traces each claim to its file. If a session is lost, resume from this page.
+
+- **Reports (all public on spacesheep.dev; the hub is the observability report):**
+  [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (second edition:
+  the meter chain, the unmetered remainder attributed, the improvement ladder, the index of every measurement
+  report) · [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (third edition: every
+  entry with a confidence bar from repeated passes on two cards) · [DVFS and leakage](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage)
+  · [Spatial temperature brief](https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief) · [Horace](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment)
+  · [Why low power](https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power) · [Hot line](https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line)
+  · [On-chip relay](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay) · and the 18–20 September reports below.
+  Space uuids are in `docs/findings/04-artifacts.md`; deploy with `npx --yes spacesheep deploy <dir> --space <uuid>`
+  from a private directory holding `index.html`, and delete `.spacesheep.json` afterwards (see `04-artifacts.md`).
+- **The energy manual** (`docs/energy-manual/*.md`, page `docs/reports/2026-09-23-energy-manual.html`) is built
+  by `tools/ettelem/build_energy_manual.py` → `manual.json` → `render_energy_manual.py` (sections 1–8),
+  `render_catalogue.py` (3a, 4a) and `scripts/build-report.py energy-manual`. Its data: the catalogue
+  (`workloads/enercat/run_catalogue.py`, 386 configurations × 3 shuffled passes on aifoundry2 and aifoundry3,
+  `docs/reports/data/2026-09-23-catalogue-*`, reduced by `workloads/enercat/analyze_catalogue.py`), the reruns of
+  the relay, hot line, rings and levels (`tools/ettelem/run_reruns_warm.sh`, `run_rings_levels_power.sh`,
+  `docs/reports/data/2026-09-23-reruns-*`, pooled by `tools/ettelem/analyze_reruns.py`), and the unmetered-power
+  attribution (`docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json`, computed inline; the fit is
+  described in `docs/energy-manual/04a-fine-grain.md`).
+- **What the bars taught us:** pass-to-pass scatter on one card is 1–2%; the two cards differ by 5% with one
+  scale; small signals (the awake core, the hot line, the DRAM relay) carry ±20–30% because a 1–5 W signal rides
+  on a 30 W idle that drifts. On aifoundry2 every power burst needs a die above 68 °C or the governor moves the
+  clock mid-burst; the cool-card reruns of 23 September were discarded for that reason.
+- **The unmetered power** (board minus the three metered rails: 15 W of 32 W idle) fits as 18–20% delivery loss on
+  the minion rail, 5% on SRAM, 26–29% on the mesh and 68–73 pJ per DRAM byte off-rail, rms 0.3 W over 390
+  bursts; the memory shires' Moortec voltage monitor (`die_mv.ddr`) droops 0.84 mV per off-rail DRAM watt and
+  serves as a DRAM-activity meter. What would meter more is the observability report's improvement ladder.
+- **Next:** the ladder's first undone rungs — deconvolving the rails' 1 s filter, calibrating the per-shire
+  IR-drop map from the SP DEBUG trace into a spatial current map, and a PCIe riser with shunts for millisecond
+  board power. The earlier "next" items below (a real GEMM, prefetching, Discord) still stand.
+
+## Where things stood on 2026-09-18
 
 - **Goal.** Roman Shaposhnik (AI Foundry / AINekko) invited us to prototype a workload on the ET-SoC-1, first
   on the `sys_emu` simulator and then on the real cards in their lab. He would like the experience shared on the
@@ -243,6 +279,9 @@ GPU and A100 columns come from the sourced notes in `docs/reports/sources/`, not
 | Matmul efficiency | `kernels/mmbench`, `launchers/mmbench` | section 4 | `docs/reports/data/2026-09-18-aifoundry2` | `scripts/mmbench-report-data.py DATA --embed HTML` |
 | Memory hierarchy | `workloads/memhier` | `workloads/memhier/README.md`: the chases, then `run_energy.py` | `docs/reports/data/2026-09-18-memhier-aifoundry2` | `python3 workloads/memhier/analyze.py DATA --embed HTML` |
 | On-chip communication | `workloads/nocbench` | `run_lab.sh`, then `run_energy.py` twice, the second time with `--only` in reverse order | `docs/reports/data/2026-09-18-nocbench-aifoundry2` | `python3 workloads/nocbench/analyze.py DATA --memhier docs/reports/data/2026-09-18-memhier-aifoundry2 --search --embed HTML` |
+| Energy manual, catalogue | `workloads/enercat` | `run_catalogue.py DATA --passes 3` on each card (1.5 h each; keep the die warm on aifoundry2) | `docs/reports/data/2026-09-23-catalogue-aifoundry2`, `-aifoundry3`, `-aifoundry2-rows` | `analyze_catalogue.py A2 A3 --out catalogue.json`, then `tools/ettelem/build_energy_manual.py`, `render_energy_manual.py`, `render_catalogue.py`, `scripts/build-report.py energy-manual manual.json HTML` |
+| Energy manual, reruns | `tools/ettelem/run_reruns_warm.sh`, `run_rings_levels_power.sh` | 3 passes each of relay, hot line, rings, levels per card; preheat aifoundry2 | `docs/reports/data/2026-09-23-reruns-aifoundry2-warm`, `-aifoundry3` | `tools/ettelem/analyze_reruns.py DIRS --out reruns.json` (bursts off 600 MHz dropped) |
+| Limits of observability | `docs/reports/sources/limits-of-observability.*` | reads the firmware and the catalogue; no card time | `docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json` | `scripts/build-report.py limits-of-observability docs/reports/sources/limits-of-observability.data.json HTML` |
 | Sparsity | `workloads/sparsity` | `run_lab.sh`, then `run_energy.py` twice, the second time with `--only` in reverse order (`workloads/sparsity/README.md`) | `docs/reports/data/2026-09-18-sparsity-aifoundry3` | `python3 workloads/sparsity/analyze.py DATA --embed HTML` |
 
 - **Measuring.** Build on the machine with `scripts/deploy-lab.sh aifoundry2 workloads/<name>`, or

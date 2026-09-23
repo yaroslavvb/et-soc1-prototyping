@@ -181,7 +181,44 @@ def main():
         result["cards"][host] = {"summary": s,
                                  "wire": {o: wire_fit(s, o) for o in ("zeros", "random")},
                                  "sram_leakage": sram_leakage(bursts)}
+    # Confidence bars: for every configuration measured on more than one card and more than once, pool every
+    # burst from every card. The bar is the range those bursts span (every rerun on every card fell inside
+    # it); the mean is over all of them; each card's own mean and pass-to-pass standard error are kept; and a
+    # 95% interval for the pooled mean comes from the within-card scatter with (bursts - cards) degrees of
+    # freedom, which is what the reruns alone say before the card-to-card difference is added.
+    T95 = {1: 12.71, 2: 4.30, 3: 3.18, 4: 2.78, 5: 2.57, 6: 2.45, 7: 2.36, 8: 2.31, 9: 2.26, 10: 2.23}
     cards = list(result["cards"])
+    combined = {}
+    all_cfgs = set()
+    for h in cards:
+        all_cfgs |= set(result["cards"][h]["summary"])
+    for cfg in sorted(all_cfgs):
+        per_card, vals, within = {}, [], []
+        for h in cards:
+            bs = [b for b in result["bursts"][h] if b["cfg"] == cfg]
+            if not bs:
+                continue
+            key = "pj_per_byte" if bs[0]["bytes"] else "pj_per_op"
+            v = np.array([b[key] for b in bs if b.get(key) is not None], float)
+            if not len(v):
+                continue
+            per_card[h] = {"mean": float(v.mean()), "sd": float(v.std(ddof=1)) if len(v) > 1 else 0.0,
+                           "se": float(v.std(ddof=1) / math.sqrt(len(v))) if len(v) > 1 else 0.0, "n": int(len(v)),
+                           "unit": "pJ/B" if key == "pj_per_byte" else "pJ/op"}
+            vals += list(v)
+            within += list(v - v.mean())
+        if not vals:
+            continue
+        vals = np.array(vals)
+        dfree = len(vals) - len(per_card)
+        sd_within = float(np.sqrt(np.sum(np.square(within)) / dfree)) if dfree > 0 else 0.0
+        combined[cfg] = {"mean": float(vals.mean()), "lo": float(vals.min()), "hi": float(vals.max()), "n": int(len(vals)),
+                         "cards": len(per_card), "per_card": per_card, "sd_within": sd_within,
+                         "ci95_half": T95.get(dfree, 1.96) * sd_within / math.sqrt(len(vals)) if dfree > 0 else None,
+                         "card_diff": (max(c["mean"] for c in per_card.values()) - min(c["mean"] for c in per_card.values()))
+                                      if len(per_card) > 1 else 0.0,
+                         "unit": next(iter(per_card.values()))["unit"]}
+    result["combined"] = combined
     if len(cards) >= 2:
         a2, a3 = result["cards"][cards[0]]["summary"], result["cards"][cards[1]]["summary"]
         ratios = {}
@@ -211,6 +248,10 @@ def main():
     if "cross_card" in result:
         cc = result["cross_card"]
         print(f"\ncross-card {cc['pair']}: median {cc['median']:.3f}, 10-90% {cc['p10']:.3f}-{cc['p90']:.3f}, n={cc['n']}")
+    hw = [(c["hi"] - c["lo"]) / 2 / c["mean"] for c in combined.values() if c["mean"] > 0 and c["cards"] > 1]
+    if hw:
+        print(f"confidence bars (half the range over all reruns on all cards): median {100*np.median(hw):.1f}% of the value, "
+              f"90th percentile {100*np.percentile(hw, 90):.1f}%, over {len(hw)} entries")
 
 
 if __name__ == "__main__":

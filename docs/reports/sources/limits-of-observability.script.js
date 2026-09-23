@@ -44,7 +44,7 @@ const verif = c => `<span class="verif ${c}" title="${CHECK[c]}">${c === 'confir
   let filter = 'all';
   const fbox = document.getElementById('filters');
   const opts = [['all', 'all rows'], ['works_now', 'works now'], ['needs_tooling', 'needs tooling'], ['needs_fw_change', 'needs firmware'], ['research_only', 'research'], ['impossible_on_silicon', 'not on silicon']];
-  const t = document.getElementById('ladder');
+  const t = document.getElementById('laddertab');
   function render() {
     fbox.innerHTML = opts.map(([k, n]) => `<button type="button" aria-pressed="${filter === k}" data-k="${k}">${n}</button>`).join('');
     fbox.querySelectorAll('button').forEach(b => b.onclick = () => { filter = b.dataset.k; render(); });
@@ -56,10 +56,63 @@ const verif = c => `<span class="verif ${c}" title="${CHECK[c]}">${c === 'confir
   render();
 })();
 
-/* ---------- next steps ---------- */
-document.getElementById('steps').innerHTML = '<thead><tr><th>Step</th><th>What it unlocks</th><th>Effort</th><th>Needs</th></tr></thead><tbody>' +
-  D.steps.map((s, i) => `<tr><td class="lvl">${i + 1}. ${esc(s.what)}</td><td>${esc(s.unlocks)}</td><td>${esc(s.effort)}</td><td>${esc(s.needs)}</td></tr>`).join('') + '</tbody>';
-
 /* ---------- contrast ---------- */
 document.getElementById('contrast').innerHTML = '<thead><tr><th>Topic</th><th>ET-SoC-1</th><th>A100/H100</th><th>Sources</th></tr></thead><tbody>' +
   D.contrast.map(c => `<tr><td class="lvl">${esc(c.topic)}</td><td>${esc(c.et)}</td><td>${esc(c.gpu)}</td><td class="small">${esc(c.src)}</td></tr>`).join('') + '</tbody>';
+
+/* ---------- table of contents ---------- */
+(function () {
+  const ol = document.getElementById('toclist');
+  ol.innerHTML = [...document.querySelectorAll('h2[id]')].map(h => `<li><a href="#${h.id}">${esc(h.textContent.replace(/^\d+\.\s*/, ''))}</a></li>`).join('');
+})();
+
+/* ---------- the reports hub ---------- */
+document.getElementById('reportstab').innerHTML = '<thead><tr><th>Report</th><th>When</th><th>What it established</th><th>Instruments</th></tr></thead><tbody>' +
+  D.reports.map(r => `<tr><td class="lvl"><a href="${r.url}">${esc(r.title)}</a></td><td class="small">${esc(r.date)}</td><td>${esc(r.what)}</td><td class="small">${esc(r.instruments)}</td></tr>`).join('') + '</tbody>';
+
+/* ---------- power: the chain, the remainder, the sensors ---------- */
+(function () {
+  const P = D.power, f = (v, n) => Number(v).toFixed(n == null ? 2 : n);
+  document.getElementById('k-unmet').textContent = f(P.idle_73c.unsensed_w, 1) + ' W of ' + f(P.idle_73c.board_w, 1);
+  document.getElementById('norails').textContent = P.rails_no_telemetry.join(', ');
+  const I = P.idle_73c, rows = [['Minion cores (regulator output)', I.minion_w], ['SRAM: L2, L3, scratchpads', I.sram_w], ['Mesh', I.noc_w], ['On no sensor: the other rails and every regulator\u2019s loss', I.unsensed_w]];
+  document.getElementById('idletab').innerHTML = `<thead><tr><th>Idle at ${I.die_c} °C, ${I.hours} h, 300 samples</th><th class="num">W</th><th class="num">share</th></tr></thead><tbody>` +
+    rows.map(r => `<tr><td>${r[0]}</td><td class="num">${f(r[1])}</td><td class="num">${Math.round(100 * r[1] / I.board_w)}%</td></tr>`).join('') +
+    `<tr><td><b>Board (12 V input)</b></td><td class="num"><b>${f(I.board_w)}</b> ± ${f(I.board_sd)}</td><td></td></tr></tbody>`;
+  const F = P.fit, hosts = Object.keys(F);
+  document.getElementById('fittab').innerHTML = '<thead><tr><th>unmetered W of a burst =</th>' + hosts.map(h => `<th class="num">${h}</th>`).join('') + '</tr></thead><tbody>' +
+    [['× minion-rail W', 'minion', 3, ''], ['× SRAM-rail W', 'sram', 3, ''], ['× NoC-rail W', 'noc', 3, ''], ['pJ per DRAM byte', 'dram_pj_per_byte', 1, ' pJ/B']].map(r =>
+      `<tr><td>${r[0]}</td>` + hosts.map(h => `<td class="num">${f(F[h].coef[r[1]], r[2])} ± ${f(F[h].se[r[1]], r[2])}${r[3]}</td>`).join('') + '</tr>').join('') +
+    '<tr><td class="small">residual rms, bursts</td>' + hosts.map(h => `<td class="num small">${f(F[h].rms_w)} W, n = ${F[h].n}</td>`).join('') + '</tr></tbody>';
+  const a2 = F.aifoundry2.coef, a3 = F.aifoundry3 ? F.aifoundry3.coef : null;
+  document.getElementById('fittext').innerHTML = `Four coefficients, no intercept, fitted to ${F.aifoundry2.n} bursts on one card and ${F.aifoundry3 ? F.aifoundry3.n : 0} on the other, leave a residual of a third of a watt on bursts of 1 to 40 W. The two cards agree on every coefficient to within their spread, and the minion coefficient is pinned to 2%.`;
+  const V = P.pvt, pts = V.vm_points;
+  document.getElementById('pvttab').innerHTML = '<thead><tr><th>Moortec PVT on the die</th><th>Count</th><th>Resolution</th><th>What the host gets</th></tr></thead><tbody>' +
+    `<tr><td>Temperature sensors</td><td>${V.ts_active} live (${V.controllers} controllers × ${V.ts_per_controller})</td><td>${V.ts_resolution_c} °C (12-bit)</td><td>${esc(V.host_sees.temperature)}</td></tr>` +
+    `<tr><td>Voltage monitor points</td><td>${Object.values(pts).reduce((a, b) => a + b, 0)}: ${Object.keys(pts).map(k => k + ' ' + pts[k]).join('; ')}</td><td>${Math.round(V.vm_lsb_uv)} µV (${V.vm_bits}-bit); 1 mV as forwarded</td><td>${esc(V.host_sees.voltage)}<div class="small">In the SP\u2019s DEBUG trace: ${esc(V.host_sees.debug_trace)}</div></td></tr>` +
+    `<tr><td>Process detectors</td><td>${V.controllers * V.pd_per_controller}</td><td>ring-oscillator counts</td><td>nothing: configured with measurement disabled, never read</td></tr>` +
+    `<tr><td>External analog inputs</td><td>2</td><td>as the monitors</td><td>nothing: the reader is a stub with no caller; what the board wires to them is unknown</td></tr></tbody>`;
+  const Dp = P.droop;
+  document.getElementById('droopidle').textContent = f(Dp.idle_die_mv.ddr, 0);
+  document.getElementById('drooptab').innerHTML = '<thead><tr><th>Burst (aifoundry2)</th><th class="num">W over idle</th><th class="num">DRAM W off-rail (fit)</th><th class="num">DDR-rail droop, mV</th><th class="num">minion-rail droop, mV</th></tr></thead><tbody>' +
+    Dp.examples.map(e => `<tr><td><code>${esc(e.cfg)}</code></td><td class="num">${f(e.over_idle_w)}</td><td class="num">${e.dram_offrail_w ? f(e.dram_offrail_w) : '—'}</td><td class="num">${f(e.droop_ddr_mv)}</td><td class="num">${f(e.droop_minion_mv)}</td></tr>`).join('') + '</tbody>';
+  document.getElementById('drooptext').innerHTML = `Over all ${Dp.n} bursts, the DDR rail droops <b>${f(Dp.mv_per_dram_offrail_w)} mV per watt of off-rail DRAM power</b>, plus ${f(Dp.mv_per_board_w_common, 3)} mV per watt of anything else, with an rms of ${f(Dp.rms_mv)} mV — a fifth of the effect of the smallest DRAM burst in the catalogue.`;
+  document.getElementById('irdrop').textContent = f(Dp.minion_ir_drop_mv_per_w, 3);
+})();
+
+/* ---------- the improvement ladder ---------- */
+(function () {
+  let filter = 'all';
+  const fbox = document.getElementById('impfilters'), t = document.getElementById('imptab');
+  const opts = [['all', 'all rungs'], ['done', 'done'], ['works_now', 'works now'], ['needs_tooling', 'tooling or lab hardware'], ['needs_fw_change', 'firmware'], ['research_only', 'research'], ['impossible_on_silicon', 'not on silicon']];
+  function render() {
+    fbox.innerHTML = opts.map(([k, n]) => `<button type="button" aria-pressed="${filter === k}" data-k="${k}">${n}</button>`).join('');
+    fbox.querySelectorAll('button').forEach(b => b.onclick = () => { filter = b.dataset.k; render(); });
+    const rows = D.improvements.filter(r => filter === 'all' || (filter === 'done' ? r.done : r.status === filter));
+    let group = null;
+    t.innerHTML = '<thead><tr><th>Rung</th><th>What it adds</th><th>Cost</th><th>What changes in the numbers</th><th>Status</th></tr></thead><tbody>' +
+      rows.map(r => { const g = r.group !== group ? `<tr><td colspan="5"><b>${esc(r.group)}</b></td></tr>` : ''; group = r.group;
+        return g + `<tr><td class="lvl">${r.rung}. ${esc(r.what)}${r.done ? ' <span class="verif confirmed">done</span>' : ''}</td><td>${esc(r.adds)}</td><td class="small">${esc(r.cost)}</td><td>${esc(r.effect)}</td><td>${chip(r.status)}</td></tr>`; }).join('') + '</tbody>';
+  }
+  render();
+})();

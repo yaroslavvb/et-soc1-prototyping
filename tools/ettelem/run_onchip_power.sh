@@ -8,8 +8,19 @@ set -u
 out=${1:?out dir}; secs=${2:-6}
 mkdir -p "$out"; cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 export LD_LIBRARY_PATH=/opt/et/lib
-build/ettelem/ettelem sample --seconds 200 --every-ms 100 2>/dev/null | grep --line-buffered '^{' > "$out/telemetry.jsonl" &
-S=$!; trap 'kill $S 2>/dev/null' EXIT
+# The sampler sometimes fails to start when the previous run's instance is still letting go of the device
+# (about one start in three came up empty): start it, wait for its first line, and retry until it is up.
+start_sampler() {  # telemetry path, seconds
+  for attempt in 1 2 3 4 5 6; do
+    build/ettelem/ettelem sample --seconds "$2" --every-ms 100 2>/dev/null | grep --line-buffered '^{' > "$1" &
+    S=$!
+    for i in $(seq 1 40); do sleep 0.25; [ -s "$1" ] && return 0; done
+    kill $S 2>/dev/null; pkill -P $$ -x ettelem 2>/dev/null; sleep 2
+  done
+  echo "sampler failed to start" >&2; exit 1
+}
+S=; trap 'kill $S 2>/dev/null' EXIT
+start_sampler "$out/telemetry.jsonl" 200
 sleep 8
 # Stages are chosen per medium so that one launch is about a second of device time whichever medium it is.
 # Otherwise the on-chip media finish in a millisecond and the burst is mostly host launch overhead, which

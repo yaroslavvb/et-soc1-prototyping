@@ -1,7 +1,7 @@
 # ET-SoC-1 findings: start here
 
 Everything measured on AI Foundry's ET-SoC-1 cards (`aifoundry2`, and `aifoundry3` for the cross-card work)
-between 19 and 22 September 2026, written so
+between 19 and 23 September 2026, written so
 that **you never have to open the HTML reports or the raw data to get an answer** — though every number says
 where to find both.
 
@@ -48,7 +48,17 @@ can you predict it before running?**
    scratchpad instead of DRAM runs **12.3× faster at a twelfth of the energy per byte, on the same watts**;
    keeping it in the shire's own scratchpad is 30.7×. The catch is a sharp one: below the 32 MB L3 the cache
    already does the job and you gain nothing. → [18-on-chip-relay.md](18-on-chip-relay.md)
-10. **The caveat that matters most.** The temperature half of the model was only held out properly after the
+10. **What the bars say.** Re-running every table and repeating it on the second card puts a bar on every
+   entry: ±6% in the median for the catalogue, mostly the 5% between the cards; ±17% on the hot line and
+   ±5% on the DRAM relay, where a 1–5 W signal rides on a drifting 30 W idle. Two traps found on the way:
+   aifoundry2's governor lifts the clock mid-burst below 68 °C, and rings between shires s and s+16 starve the
+   service processor that reads the meter. → [../energy-manual/09-method.md](../energy-manual/09-method.md)
+11. **What the meters miss.** Half of idle and a fifth of any workload is on no rail sensor. Fitted over 390
+   bursts, that remainder is 18–20% delivery loss on the minion rail, 5% on SRAM, 26–29% on the mesh and
+   about 70 pJ per DRAM byte off-rail, to 0.3 W; and the memory shires' Moortec voltage monitor droops
+   0.84 mV per off-rail DRAM watt, a DRAM meter that was in every telemetry file all along.
+   → [19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md)
+12. **The caveat that matters most.** The temperature half of the model was only held out properly after the
    fact, when the fit was challenged. On runs it was not fitted to, the time-to-90 °C error is 9% in the
    median and 23% at worst out to a few minutes, and it runs 3–5 °C hot at ten minutes. → [11-thermal-model.md](11-thermal-model.md), section "How well it predicts"
 
@@ -64,7 +74,8 @@ can you predict it before running?**
 | Know what the card's instruments can and cannot see | [15-earlier-findings.md](15-earlier-findings.md) |
 | Share a counter, lock or flag between shires | [17-hot-line.md](17-hot-line.md) — one hot line stops the shire that hosts it |
 | Make a multi-pass computation faster than main memory | [18-on-chip-relay.md](18-on-chip-relay.md) — hand each stage to a neighbouring shire |
-| **Look up what anything costs in joules** | [../energy-manual/](../energy-manual/README.md) — the energy manual: at rest, awake, every instruction, per byte, wires, lines, rows, leakage, rails, between shires, synchronisation, composition |
+| **Look up what anything costs in joules** | [../energy-manual/](../energy-manual/README.md) — the energy manual: at rest, awake, every instruction, per byte, wires, lines, rows, leakage, rails, between shires, synchronisation, composition; every entry with a confidence bar from repeated passes on two cards |
+| Know what the meters miss, and what would let them see more | [19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md) — the power meter chain, the unmetered remainder attributed, the DDR-rail droop meter, the meter starved by s ↔ s+16 rings, the improvement ladder |
 | Pick a machine, or compare two cards | [14-card-behaviour.md](14-card-behaviour.md) — the three machines side by side, and why aifoundry3 is slow |
 | Understand the clock/voltage governor, or why the card leaks so much | [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
 | Re-run an experiment | [03-experiments.md](03-experiments.md) — command, protocol, raw data path, caveats |

@@ -1,0 +1,17 @@
+spin: 9 launches, 0.0 GB/s
+l1: 10 launches, 6164.6 GB/s
+l2: 9 launches, 2456.1 GB/s
+l3: 9 launches, 984.8 GB/s
+dram: 8 launches, 75.9 GB/s
+scp-local: 9 launches, 2456.2 GB/s
+scp-remote: 9 launches, 960.1 GB/s
+
+idle 24.53 W (median of 75 samples)
+config           GB/s   MHz   mV       W     +W     pJ/B  working set
+spin              0.0   600  522   26.95   2.42      nan  no data: busy cores only
+l1             6164.6   600  522   28.69   4.16     0.68  L1 hits: 256 B per hart, 2048 harts  (0.28 pJ/B above spin)
+l2             2456.1   600  523   30.50   5.97     2.43  256 KB per shire (L2 is 512 KB)
+l3              984.8   600  522   34.82  10.29    10.45  768 KB per shire > L2, 24 MB in total < 32 MB of L3
+dram             75.9   600  523   34.00   9.47   124.83  256 MB in total
+scp-local      2456.2   600  522   31.34   6.81     2.77  2 MB of the shire's own L2 scratchpad
+scp-remote      960.1   600  522   32.52   7.99     8.32  2 MB of the scratchpad 16 shires away
