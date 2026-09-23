@@ -434,6 +434,41 @@ option rather than the faster one. The per-stage chip barrier is the simplest sy
 cheapest. The `shires` sweep is confounded: fewer shires also means a smaller working set, which puts it back
 inside the L3.
 
+## E26 — The instruction and byte energy catalogue (2026-09-23, 09:40–10:05, both cards at once)
+
+**Question (Q27):** what does each kind of instruction cost, and each byte written, at every level — the
+two things no earlier session measured.
+**Method:** `workloads/enercat`. Every hart of every minion runs one pattern flat out until a cycle deadline
+and reports its count; 56 configurations (13 instructions × zeros / constant / random operands, the awake
+core on one and two harts, L1 hits, tensor loads and stores to DRAM and to the shire's own scratchpad, the
+L1 write-back path), each a 5 s burst of 0.4 s launches bracketed by 6 s of idle. Board power at 10 Hz
+throughout. Energy per event = (burst power − mean of the two bracketing idles − the extra leakage of the
+warmer burst) × burst time / events. The same script ran on aifoundry2 and aifoundry3 within the same hour.
+```
+workloads/enercat/run_enercat.sh DATA 5
+python3 workloads/enercat/analyze_enercat.py DATA_A2 DATA_A3 --out enercat.json
+python3 tools/ettelem/build_energy_manual.py --out manual.json     # assembles every table from its file
+python3 tools/ettelem/render_energy_manual.py manual.json docs/energy-manual/
+```
+**Raw data:** `docs/reports/data/2026-09-23-enercat-aifoundry2/` and `-aifoundry3/` (`runs.jsonl`, one
+line per launch; `telemetry.jsonl.gz`), reduced to `docs/reports/data/2026-09-23-energy-manual/enercat.json`;
+every other table of the manual is assembled in `manual.json` from the files E26's builder names.
+**Result (aifoundry2, 600 MHz, both harts, pJ per instruction above idle, zeros / constant / random):**
+add 6.6 / 6.9 / 9.6; fadd.s 23.2 / 23.5 / 26.1; fmadd.s 27.4 / 27.2 / 31.3; fadd.ps 24.0 / 23.9 / 43.3;
+fmadd.ps 27.8 / 28.3 / **59.4** (7.4 per lane); fadd.pi 13.0 / 13.3 / 20.5; fexp.ps 105 / 104 / 167. An
+awake minion is 2.0 mW on one hart, 3.2 on two. **Bytes (pJ/B, zeros / random):** L1 load 0.36 / 0.54, L1
+store 0.47 / 0.78, own-scratchpad tensor load 2.0 / 4.2, tensor store 4.4 / 8.0, DRAM tensor load 94 / 134,
+tensor store 87 / 140, `fsw.ps` through the L1 to DRAM 247 / 345. **Cross-card:** 56 entries, aifoundry3 /
+aifoundry2 median 0.949, range 0.87–1.01.
+**What it establishes:** an 8-lane vector op on zeros costs what a scalar one does (idle lanes are free); a
+random-data `fmadd.ps` lane costs 6.5 pJ over the awake core, against 6.0 pJ per multiply-add in the tensor
+unit, so the two datapaths cost the same and the tensor unit saves only issue; a DRAM write by tensor store
+costs a read, and the L1 write-back path 2.5× that; DRAM is data-dependent too (94 → 134 pJ/B).
+**Caveats:** the die drifted from 74 to 87 °C over the aifoundry2 session; the leakage correction was
+0.7 W in the median and 1.8 W at most, and the sensor's whole-degree steps make it ±0.3 W. `fdiv.ps` and
+`fsqrt.ps` trap and are absent. Everything is at 600 MHz. The memory-hierarchy reads of 18 September, which
+the manual also uses, were taken with the governor free to move the clock.
+
 ## A note on E10, re-analysed for Q20
 
 The governor transitions in [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) are **not** a new experiment.

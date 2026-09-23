@@ -233,6 +233,31 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
 | Offset 0 of a shire's scratchpad | **faults** | M | E24 | reproduce with `--stage-bytes` and `scp_a = 0` |
 | A 2D systolic array of TensorSend cells | hangs a hart permanently; not attempted | X | R12, `docs/et-soc1-notes.md` | one ready flag per minion, not per partner |
 
+## The energy catalogue (E26)
+
+`DATAE` means `docs/reports/data/2026-09-23-energy-manual/`. Every entry below has a `pj_per_op` or
+`pj_per_byte` field in `DATAE/enercat.json` under `cards.aifoundry2` and `cards.aifoundry3`, with its raw
+and leakage-corrected power, both bracketing idles and the die temperature.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| An awake minion, one hart, `addi` loop | **2.0 mW**; both harts 3.2 mW | M | E26 | `DATAE/enercat.json`, pattern `spin` |
+| Scalar `add`, zeros / constant / random | 6.6 / 6.9 / 9.6 pJ | M | E26 | pattern `iadd` |
+| Scalar `fadd.s` | 23.2 / 23.5 / 26.1 pJ | M | E26 | pattern `fadd_s` |
+| 8-lane `fmadd.ps` | 27.8 / 28.3 / **59.4** pJ | M | E26 | pattern `fmadd_ps` |
+| 8-lane `fadd.pi` | 13.0 / 13.3 / 20.5 pJ | M | E26 | pattern `iadd_pi` |
+| 8-lane `fexp.ps` | 105 / 104 / 167 pJ, at ¼ the issue rate | M | E26 | pattern `fexp_ps` |
+| `fdiv.ps`, `fsqrt.ps` | trap | M | E26 | run `--pattern fdiv_ps` |
+| A vector multiply-add lane vs a tensor multiply-add, random data | 6.5 pJ over the awake core vs 6.0 pJ | M | E26, E15 | `pj_per_op_vs_spin` of `fmadd_ps`; `ablation.json` |
+| L1 hit, `flw.ps` / `fsw.ps`, zeros / random | 0.36 / 0.54 and 0.47 / 0.78 pJ/B | M | E26 | patterns `ld_l1`, `st_l1` |
+| Own scratchpad, tensor load / store | 2.0 / 4.2 and 4.4 / 8.0 pJ/B | M | E26 | patterns `tload`, `tstore` with `scp` |
+| DRAM, tensor load / store | **94 / 134** and **87 / 140** pJ/B | M | E26 | patterns `tload`, `tstore` |
+| DRAM through the L1 write-back path, `fsw.ps` | 247 / 345 pJ/B at 26.6 GB/s | M | E26 | pattern `st_stream` |
+| Leakage correction applied to the bursts | median 0.7 W, max 1.8 W | F | E26, E17 | `leak_correction_w` per entry |
+| aifoundry3 / aifoundry2 over 56 entries | median **0.949**, range 0.87–1.01 | M | E26 | both card blocks |
+| Dense fp32 matmul at 80 °C, predicted from the tables | 63.5 W vs 63.9 measured; 57% static | P | A15 §7 | `docs/energy-manual/07-composition.md` |
+| The relay, predicted from the byte tables | DRAM 90–137 vs 104.8 measured; scratchpad 3.2–6.1 vs 4.25 | P | A15 §7, E25 | same |
+
 ## External numbers (not measured here)
 
 | Claim | Value | Kind | Source |
@@ -264,6 +289,9 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
   `g_pmic_power_reg.module_tdp_level` and no further.
 - **Whether the 8% switching-power gap between the two cards is silicon, package or board regulator.**
   Separating those needs a third working card, which aifoundry1 is not.
+- **Per-flip energies outside the tensor unit**, and the split of the unsensed 15 W of idle. See the manual's
+  section 9.
+- **Any table at 700 or 800 MHz.** The V²f ratios say what to expect; nothing was re-measured there.
 - **A relay whose working set exceeds the 80 MB of scratchpad.** That is where on-chip hand-off would be the
   only option rather than the faster one; the flow control for it was not built.
 - **Why Ivan's 6% differs from both of our numbers.** His code was not run.

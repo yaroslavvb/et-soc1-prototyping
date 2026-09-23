@@ -64,6 +64,7 @@ can you predict it before running?**
 | Know what the card's instruments can and cannot see | [15-earlier-findings.md](15-earlier-findings.md) |
 | Share a counter, lock or flag between shires | [17-hot-line.md](17-hot-line.md) — one hot line stops the shire that hosts it |
 | Make a multi-pass computation faster than main memory | [18-on-chip-relay.md](18-on-chip-relay.md) — hand each stage to a neighbouring shire |
+| **Look up what anything costs in joules** | [../energy-manual/](../energy-manual/README.md) — the energy manual: at rest, awake, per instruction, per byte, between shires, synchronisation, composition |
 | Pick a machine, or compare two cards | [14-card-behaviour.md](14-card-behaviour.md) — the three machines side by side, and why aifoundry3 is slow |
 | Understand the clock/voltage governor, or why the card leaks so much | [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
 | Re-run an experiment | [03-experiments.md](03-experiments.md) — command, protocol, raw data path, caveats |
@@ -78,9 +79,9 @@ Four kinds of thing have IDs, and every claim cites them:
 | Prefix | Meaning | File |
 |---|---|---|
 | **R1–R12** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
-| **Q1–Q26** | Requests from the repo owner, in order, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E25** | Experiments: what ran, when, on what, with which command, producing which raw files | [03-experiments.md](03-experiments.md) |
-| **A1–A14** | Artifacts published: reports, spaces, GIFs, tools, commits | [04-artifacts.md](04-artifacts.md) |
+| **Q1–Q27** | Requests from the repo owner, in order, and what each produced | [02-requests.md](02-requests.md) |
+| **E1–E26** | Experiments: what ran, when, on what, with which command, producing which raw files | [03-experiments.md](03-experiments.md) |
+| **A1–A15** | Artifacts published: reports, spaces, GIFs, tools, commits | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":
 

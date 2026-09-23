@@ -1,0 +1,104 @@
+<h1>The ET-SoC-1 energy manual</h1>
+<p class="byline">Two ET-SoC-1 cards, 18–23 September 2026 · every number from a measurement on the card, every table traceable to its data file · <code>docs/energy-manual/</code> is the same manual as markdown</p>
+
+<p class="lede">A workload's energy on this card is the time it takes, times what the card draws doing nothing
+at the temperature the workload leaves it at, plus a sum over everything it does of a per-event cost. This
+page is the table of per-event costs, and the two things it needs alongside them. <b>The card at rest is
+12.6 W plus leakage that doubles every 25 °C. An awake minion is 2 mW. An integer add is 7 pJ, a float add
+23, an eight-lane multiply-add 28 on zeros and 59 on random data. A byte from the shire's own scratchpad is
+2–8 pJ; from DRAM, 90–140; written back through the L1 to DRAM, 250–350.</b> A second card gives the same
+numbers to 5%.</p>
+
+$$E(\text{workload}) \;=\; \int_0^{t} P_\text{idle}\bigl(T(\tau)\bigr)\,\mathrm{d}\tau \;+\; \sum_i N_i\, e_i$$
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">Idle at 80 °C, and how much of it leaks</div><div class="val" id="k1"></div><div class="sub">12.6 W fixed, the rest leakage e-folding every 36 °C</div></div>
+  <div class="card kpi"><div class="lab">One 8-lane multiply-add, random data</div><div class="val" id="k2"></div><div class="sub">against 28 pJ on zeros: the data decides</div></div>
+  <div class="card kpi"><div class="lab">DRAM against the shire's own scratchpad</div><div class="val" id="k3"></div><div class="sub">per byte read, random data</div></div>
+  <div class="card kpi"><div class="lab">Second card, 56 entries</div><div class="val" id="k4"></div><div class="sub">median ratio aifoundry3 / aifoundry2</div></div>
+</div>
+
+<h2>1. The card at rest</h2>
+<p>Everything below is <em>above</em> this. The fixed part — PCIe, the DDR PHY, the IO shire, regulators —
+does not answer to anything a kernel does. The leakage part answers to temperature, which the kernel sets.</p>
+<div class="chart-title">Idle board power against die temperature: the fitted law and every measured idle bin</div>
+<div class="chart scroll" id="idle"></div>
+<p class="small" id="idlecap"></p>
+<div class="table-wrap"><table id="rails"></table></div>
+
+<h2>2. A core that is awake</h2>
+<div class="table-wrap"><table id="awake"></table></div>
+
+<h2>3. Instructions</h2>
+<p>Energy per instruction retired, above idle, both harts of all 1,024 minions running it flat out, at
+600 MHz and 0.517 V. Three operand sets: zeros, one constant everywhere, random values in [0.5, 2).</p>
+<div class="chart-title">Scalar and vector units, per instruction</div>
+<div class="chart scroll" id="instr"></div>
+<p class="small" id="instrcap"></p>
+<div class="table-wrap"><table id="instrtab"></table></div>
+<p id="instrtext"></p>
+
+<h3>3.2 The tensor unit, per multiply-add</h3>
+<div class="table-wrap"><table id="tensor"></table></div>
+<p>The tensor unit is the one place on the chip resolved below the instruction, by simulating its RTL on the
+operands the card ran: four kinds of event, four fitted energies —
+<span id="flips"></span> — and 1.8 mW per minion of state machines whatever the data. A random-data tile priced
+this way comes to 27.2 W on 1,024 minions; the card measures 27.6. Fourteen structured matrices were priced
+before they ran, to 0.9 W rms.</p>
+
+<h2>4. Bytes through the memory hierarchy</h2>
+<div class="chart-title">Energy per byte by path, zeros and random data (log scale)</div>
+<div class="chart scroll" id="mem"></div>
+<p class="small" id="memcap"></p>
+<div class="table-wrap"><table id="memtab"></table></div>
+<p id="memtext"></p>
+<details><summary>Reads by level from the 18 September memory-hierarchy session (clock not pinned)</summary>
+<div class="table-wrap"><table id="memold"></table></div></details>
+
+<h2>5. Bytes between cores and shires</h2>
+<div class="table-wrap"><table id="comm"></table></div>
+<p id="commtext"></p>
+
+<h2>6. Synchronisation</h2>
+<div class="table-wrap"><table id="sync"></table></div>
+
+<h2>7. Composition: where a workload's joules go</h2>
+<div class="chart-title">A dense fp32 matmul at 80 °C, 7 seconds, by component</div>
+<div class="chart scroll" id="comp"></div>
+<p class="small" id="compcap"></p>
+<p id="comptext"></p>
+<div class="table-wrap"><table id="relaycheck"></table></div>
+<p class="small">The relay of 22 September was not used to build any table; its prediction is the mean of the
+read and write rows of section 4, bracketed by the zeros and random columns because its data is one constant
+per slab.</p>
+
+<h2>8. Two cards</h2>
+<div class="chart-title">Every catalogue entry on aifoundry3 against the same entry on aifoundry2</div>
+<div class="chart scroll" id="cards"></div>
+<p class="small" id="cardscap"></p>
+
+<h2>9. Method, and what the manual cannot tell you</h2>
+<ul>
+<li>Board power is the PMIC's reading, 10 mW resolution, refreshed every 133 ms, sampled at 10 Hz. Each
+measurement is a burst of back-to-back launches with six seconds of idle either side; its idle is the mean of
+the two bracketing stretches, and the extra leakage of a burst that runs slightly warmer than its brackets is
+taken out with the section 1 slope — a correction of <span id="corr"></span>. Rates come from the device's
+cycle counter, not the wall clock.</li>
+<li>"Per instruction" includes the awake core that issued it (about 7 pJ per slot with both harts). Only the
+tensor unit is resolved below the instruction, and a "flip" there is an event in a simulation of the design,
+not a transistor.</li>
+<li>Everything is at 600 MHz and 0.517 V. The 18 September read-by-level table was taken with the governor
+free to move the clock, and says so per row. <code>fdiv.ps</code> and <code>fsqrt.ps</code> trap.</li>
+<li>The unsensed 15 W — the largest single component of idle — cannot be split with any instrument here.</li>
+<li>Uncertainty: ±3% for instructions and scratchpad bytes, ±5% for DRAM bytes, ±2% for the tensor unit at
+80 °C, and the two cards agree to 5% with one common scale factor.</li>
+</ul>
+<pre><code>workloads/enercat/run_enercat.sh DATA 5            # 56 configurations, about 12 minutes of card time
+python3 workloads/enercat/analyze_enercat.py DATA_A2 DATA_A3 --out enercat.json
+python3 tools/ettelem/build_energy_manual.py --out manual.json
+python3 tools/ettelem/render_energy_manual.py manual.json docs/energy-manual/</code></pre>
+<p class="small">Companions: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace
+experiment</a> (the tensor unit and the flip model), <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">the
+DVFS loop and leakage</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">one hot line stops a
+shire</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">hand it to the next shire</a>.
+Findings index and claim provenance: <code>docs/findings/</code>.</p>

@@ -32,6 +32,7 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
 | Q24 | 09-22 | Clarify Ivan's Discord comment, "shire 0 got 6% of its fair share and finished only after the other 31"; deploy as another spacesheep artifact | R11, E22, E23 → A13, [17-hot-line.md](17-hot-line.md) |
 | Q25 | 09-22 | Look at the paths around cache-line starvation; find a systolic-array application that beats main memory | R12, E24, E25 → A14, [18-on-chip-relay.md](18-on-chip-relay.md) |
 | Q26 | 09-22 | *(mid-task)* Maybe systolic is a bad idea — find any computation where shire-to-shire communication beats the standard approach | The same; the relay is that computation |
+| Q27 | 09-23 | Create an energy manual: a catalogue of the energy cost of operations with a proper hierarchy, fully broken down across components (memory levels, transistor flips, ...); use all three machines for sanity checking | E26 → A15, `docs/energy-manual/` |
 
 ## Scope decisions worth remembering
 

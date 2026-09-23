@@ -116,6 +116,15 @@ section 9 lists the pinned upstream versions.
   measurable. New workload `workloads/onchip` (`--test probe` and `--test relay`) with `run_onchip.sh`,
   `analyze_onchip.py` and `tools/ettelem/run_onchip_power.sh`. Private space
   https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay, uuid `8678d49d-3f0c-49be-b08a-5528de8ece3c`.
+- `docs/energy-manual/` is **the energy manual**: what every kind of operation on the card costs in joules, arranged
+  so a workload's energy can be built from parts - the card at rest (12.6 W fixed plus leakage e-folding every
+  36 C), an awake minion (2 mW), every instruction on zeros/constant/random data (integer add 7 pJ, float add 23,
+  8-lane FMA 28 on zeros and 59 on random), bytes at every level (L1 0.5 pJ/B, own scratchpad 2-8, DRAM 90-140,
+  the L1 write-back path to DRAM 250-350), bytes between shires, synchronisation, worked compositions, and the
+  second card at 0.95x the first over 56 entries. Measured by the new `workloads/enercat` (`run_enercat.sh`,
+  `analyze_enercat.py`); every table is assembled from its data file by `tools/ettelem/build_energy_manual.py`
+  and the pages rendered by `render_energy_manual.py`, so no number is typed by hand. Published at
+  https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual (private), uuid `cc3cb1d6-51cf-420b-a165-7d8629904d97`.
 - `docs/lab-access.md` covers logging in to the lab machines (`aifoundry1`-`3`) and creating accounts for new people.
 - `workloads/` holds standalone workloads that run on both the simulator and the lab cards. The first one is `workloads/sgemm`:
   fp32 matmul, verified on aifoundry3's card at 127 GFLOP/s with scalar code. `scripts/deploy-lab.sh` builds a workload on a lab machine.
