@@ -1,7 +1,7 @@
 # ET-SoC-1 findings: start here
 
 Everything measured on AI Foundry's ET-SoC-1 cards (`aifoundry2`, and `aifoundry3` for the cross-card work)
-between 19 and 23 September 2026, written so
+between 19 and 24 September 2026, written so
 that **you never have to open the HTML reports or the raw data to get an answer** — though every number says
 where to find both.
 
@@ -58,7 +58,11 @@ can you predict it before running?**
    about 70 pJ per DRAM byte off-rail, to 0.3 W; and the memory shires' Moortec voltage monitor droops
    0.84 mV per off-rail DRAM watt, a DRAM meter that was in every telemetry file all along.
    → [19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md)
-12. **The caveat that matters most.** The temperature half of the model was only held out properly after the
+12. **What a millimetre of mesh costs.** At the mesh's 0.485 V a random bit costs 36 fJ per mm on the mesh rail with
+   free links (25 of it data-dependent) and 50 on a loaded mesh; board power says 47 and 73. Ones carried cost
+   energy, not just bits that change between flits, and sharing a link adds 40–45%. Scaled to 0.9 V the data part is
+   85–105 fJ, bracketing Dally's "~100 fJ/b-mm". → [20-heat-per-mm.md](20-heat-per-mm.md)
+13. **The caveat that matters most.** The temperature half of the model was only held out properly after the
    fact, when the fit was challenged. On runs it was not fitted to, the time-to-90 °C error is 9% in the
    median and 23% at worst out to a few minutes, and it runs 3–5 °C hot at ten minutes. → [11-thermal-model.md](11-thermal-model.md), section "How well it predicts"
 
@@ -75,6 +79,7 @@ can you predict it before running?**
 | Share a counter, lock or flag between shires | [17-hot-line.md](17-hot-line.md) — one hot line stops the shire that hosts it |
 | Make a multi-pass computation faster than main memory | [18-on-chip-relay.md](18-on-chip-relay.md) — hand each stage to a neighbouring shire |
 | **Look up what anything costs in joules** | [../energy-manual/](../energy-manual/README.md) — the energy manual: at rest, awake, every instruction, per byte, wires, lines, rows, leakage, rails, between shires, synchronisation, composition; every entry with a confidence bar from repeated passes on two cards |
+| Know what moving data across the chip costs per millimetre, or compare with Dally's rule of thumb | [20-heat-per-mm.md](20-heat-per-mm.md) — per bit per mm, per flip against per one, free against shared links |
 | Know what the meters miss, and what would let them see more | [19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md) — the power meter chain, the unmetered remainder attributed, the DDR-rail droop meter, the meter starved by s ↔ s+16 rings, the improvement ladder |
 | Pick a machine, or compare two cards | [14-card-behaviour.md](14-card-behaviour.md) — the three machines side by side, and why aifoundry3 is slow |
 | Understand the clock/voltage governor, or why the card leaks so much | [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
@@ -89,10 +94,10 @@ Four kinds of thing have IDs, and every claim cites them:
 
 | Prefix | Meaning | File |
 |---|---|---|
-| **R1–R12** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
-| **Q1–Q30** | Requests from the repo owner, in order, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E28** | Experiments: what ran, when, on what, with which command, producing which raw files | [03-experiments.md](03-experiments.md) |
-| **A1–A15** | Artifacts published: reports, spaces, GIFs, tools, commits | [04-artifacts.md](04-artifacts.md) |
+| **R1–R14** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
+| **Q1–Q42** | Requests from the repo owner, in order, and what each produced | [02-requests.md](02-requests.md) |
+| **E1–E32** | Experiments: what ran, when, on what, with which command, producing which raw files | [03-experiments.md](03-experiments.md) |
+| **A1–A18** | Artifacts published: reports, spaces, GIFs, tools, commits | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":
 

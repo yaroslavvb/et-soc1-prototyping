@@ -1,0 +1,167 @@
+<style>main{max-width:1100px}</style>
+<h1>Heat per millimetre</h1>
+<p class="byline">What it costs to move a bit one millimetre across the ET-SoC-1's mesh, measured on two cards · 24 September 2026 · data, tools and every source in <code>yaroslavvb/et-soc1-prototyping</code> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">measurement reports</a></p>
+
+<p class="lede">Bill Dally's rule of thumb for on-chip communication is <b>"~100 fJ/b-mm"</b>: the heat of carrying one bit
+one millimetre across a chip. We measured it on the ET-SoC-1's 8 × 6 mesh by reading data from a scratchpad 0 to 6
+hops away, with the bits on the wires chosen, three passes on each of two cards, and two meters: board power and the
+mesh's own supply rail. One hop is <b id="l-hop"></b> of silicon. At the mesh's 0.485 V, with no other traffic on its
+links, a random bit costs <b id="l-unc"></b> per millimetre on the mesh rail, <b id="l-uncd"></b> of it depending on
+the data; board power, which also carries the regulator's loss, says <b id="l-uncb"></b>. On a busy mesh, where flows
+share links, the same bit costs <b id="l-load"></b>: <b id="l-cont"></b>.</p>
+<p class="lede"><b>What costs is surprising</b>: not only
+bits that differ between consecutive flits, but the <em>ones</em> carried. A stream of all ones, which never changes from
+one flit to the next, costs as much per hop as random data (<span id="l-ones"></span> more), though at one hop it costs
+<span id="l-ones1"></span> less in all.</p>
+<p class="lede">Dally states no voltage. Scaled to 0.9 V — the voltage of Keckler 2011's 40 nm
+wire figure, from which his number most likely descends (an inference; no source says so) — the mesh rail's
+data-dependent cost is <b id="l-09"></b>, so the rule of thumb holds, to within its own vagueness. Read instead at the
+"~0.5V" his 2023 talk sets beside it, the figure is <span id="l-05"></span> what this mesh spends on the data.</p>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">One mesh hop</div><div class="val" id="k-hop"></div><div class="sub">tile pitch from the die plot and the 570 mm² die; x and y within 1%</div></div>
+  <div class="card kpi"><div class="lab">A random bit, 1 mm, mesh rail, free links</div><div class="val" id="k-noc"></div><div class="sub" id="k-noc-sub">data-dependent + fixed, at 0.485 V</div></div>
+  <div class="card kpi"><div class="lab">Per one-bit vs per flit-to-flit difference, per mm</div><div class="val" id="k-one"></div><div class="sub">mesh rail, loaded mesh: fitted coefficients, not a physical ranking (§5)</div></div>
+  <div class="card kpi"><div class="lab">Data-dependent, scaled to 0.9 V</div><div class="val" id="k-09"></div><div class="sub">per random bit·mm, mesh rail, free links to loaded; Dally ~100, Keckler 121</div></div>
+</div>
+
+<nav class="card"><b>Contents</b><ol id="toclist"></ol></nav>
+
+<h2 id="question">1. The number, and what it hides</h2>
+<p>Dally's keynote to the Stanford AHA retreat (2023) splits the energy of computing, E = ½CV², into three kinds of
+capacitance: "Communication (~100fJ/b-mm on-chip) · Memory (~50fJ/b for small RAM) · Operations (~1fJ/b for add)".
+The same 100 fJ/bit-mm appears in his CACM 2020 paper with Turakhia and Han. <b>Neither gives a voltage or a data
+activity.</b> CACM 2020 states it in a paragraph about 14 nm on-chip memory, and the 2023 talk's conclusion slide sets it
+beside "Reduce V until it gets too slow (~0.5V)" without saying it applies there. A wire's energy goes as CV², so the
+voltage alone moves the number by 3.4× between 0.9 V and 0.485 V, and "per bit" can mean per bit sent (random data flips
+half its bits) or per transition. The likeliest lineage — an inference; no source states it — runs through Keckler,
+Dally and colleagues (IEEE Micro 2011): 310 pJ for 256 random bits over 10 mm at 40 nm and 0.9 V, 121 fJ per bit·mm.
+Dally's own later numbers are 68 fJ at a projected 10 nm and 0.7 V, and 20–40 fJ/bit-mm "in present day chips" (VLSI
+Symposium 2018, a paper set in 16 nm). The sources and quotes are in <code>docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md</code>.</p>
+
+<h2 id="die">2. How long is a hop?</h2>
+<div class="chart-title">The ET-SoC-1 die, to scale</div>
+<div class="chart scroll" id="mesh"></div>
+<p class="small" id="meshcap"></p>
+<p>Esperanto publishes the die area (570 mm²) and a die plot, but not the dimensions. We measured the plot's tile
+period in pixels — the shire outlines and an autocorrelation of the image agree — and scaled it to the published area:
+the minion-shire tiles are <b>3.73 mm</b> east–west and <b>3.70 mm</b> north–south, square to within 1%, so a hop in
+either direction is about <b>3.72 mm</b> (<span id="l-hoprange"></span> depending on whether the 570 mm² includes the drawn frame). The
+shire grid spans 86% of the die's width; the rest is the memory shires and their DRAM PHYs down each side. A pair of
+shires <i>d</i> hops apart on the logical map crosses <i>d</i> links each way: round-trip latency is exactly linear in
+Manhattan distance over all 496 pairs (the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication</a> report).
+"Per mm" below means per mm of mesh travel, one router and one link per 3.72 mm — per mm of displacement; the metal
+actually routed can only be longer, so per mm of wire the cost would be lower.</p>
+
+<h2 id="method">3. The experiment</h2>
+<ul>
+<li><b>Traffic.</b> Hart 0 of every minion streams 1 KB tensor loads, two in flight, from the scratchpad of a shire
+exactly <i>d</i> hops away (<i>d</i> = 1, 2, 3, 4, 6), at most two readers per target; <i>d</i> = 0 reads the shire's own
+scratchpad and never touches the mesh. The energy per payload byte is fitted against <i>d</i>; <b>the slope is the
+cost of one hop</b>, and everything that happens once per byte — the SRAM read, the L1 write, the request, leaving and
+entering a shire — stays in the intercept.</li>
+<li><b>The bits on the wires are chosen.</b> Before each configuration every scratchpad is filled with a known image
+(checked byte for byte on the card): bits independently 1 with probability <i>P</i> (so two consecutive data flits differ
+in a bit with probability 2<i>P</i>(1−<i>P</i>): a difference rate between flits, not necessarily the transition rate on
+the wires), blocks of N bytes alternately all-zero and all-one, and one random 64 B line frozen everywhere (half ones, no
+two flits differ). The second run makes every line on the chip unique and <i>P</i> and 1−<i>P</i> exact bitwise
+complements, and adds reader–target pairs chosen so that no two flows share a link.</li>
+<li><b>Two meters.</b> Board power (the PMIC's 12 V input, 10 mW, 133 ms) and the service processor's reading of the mesh
+(NoC) rail, which feeds the routers and links at 0.485 V and 400 MHz. For board power each 3 s burst is measured against
+idle on both sides and corrected for the extra leakage of a burst that ran warmer. The mesh rail is read over the burst's
+last 0.6 s against the idle before it, without a leakage correction (about 2%, roughly cancelling a 2.5% under-correction
+of the meter's 1 s filter). A burst is dropped if the clock left 600 MHz or the meter itself was starved (§10).</li>
+<li><b>Replication.</b> Every configuration three times in shuffled order on each of two cards (aifoundry2, aifoundry3):
+the bars are the range over those six passes. First run: 82 configurations, 492 bursts; second run: 44 configurations,
+264 bursts; <span id="l-drop"></span> dropped.</li>
+</ul>
+
+<h2 id="distance">4. Energy grows nearly linearly with distance</h2>
+<div class="controls" id="distbtn"></div>
+<div class="chart-title">Energy per payload byte against hop distance, by density of ones</div>
+<div class="chart scroll" id="dist"></div>
+<p id="disttext"></p>
+
+<h2 id="ones">5. Ones cost energy, not just flips</h2>
+<div class="controls" id="modelbtn"></div>
+<div class="chart-title">Cost of one hop against the density of ones in the data</div>
+<div class="chart scroll" id="model"></div>
+<p id="onestext"></p>
+$$E_\text{hop} \;=\; s_0 \;+\; a\cdot\underbrace{2P(1-P)}_{\text{bits that differ from the previous flit}} \;+\; b\cdot\underbrace{P}_{\text{ones per bit}}$$
+<div class="table-wrap"><table id="modeltab"></table></div>
+<p id="modeltext"></p>
+<p id="modeltext2"></p>
+
+<h2 id="contention">6. Sharing a link costs energy</h2>
+<div class="controls" id="contbtn"></div>
+<div class="chart-title">Energy per payload byte against distance: every flow on its own links, against a loaded mesh</div>
+<div class="chart scroll" id="cont"></div>
+<p id="conttext"></p>
+<p id="conttext2"></p>
+
+<h2 id="lanes">7. Lanes and flits</h2>
+<div class="chart-title">Blocks of N bytes alternately all-zero and all-one: cost per hop</div>
+<div class="chart scroll" id="alt"></div>
+<p>Every block pattern has half its bits ones, so the ones term is the same for all of them; any difference is
+transitions. Blocks of 16 to 128 bytes cost the same, and 256-byte blocks cost more. That is what the shire's four
+mesh lanes predict: a line goes to lane PA[7:6], so on one lane consecutive lines are <i>i</i> and <i>i</i>+4 — 256 bytes
+apart. With 16–128-byte blocks lines <i>i</i> and <i>i</i>+4 hold the same value and nothing flips; with 256-byte blocks they
+are opposite and every bit flips. It also says a flit carries at least a 64-byte line at a time: with 32-byte flits the
+32-byte pattern would flip on every flit, and with 16-byte flits the 16- and 32-byte patterns would too, on every or every
+other flit; neither costs more.</p>
+<p id="alttext"></p>
+
+<h2 id="compare">8. Against the rule of thumb</h2>
+<div class="chart-title">Energy per random bit per millimetre: measured, scaled, and quoted</div>
+<div class="chart scroll" id="comparechart"></div>
+<p id="comparetext"></p>
+<p id="comparetext2"></p>
+
+<h2 id="meaning">9. What it means in practice</h2>
+<p id="practice"></p>
+
+<h2 id="limits">10. What this cannot tell, and what else it found</h2>
+<ul>
+<li><b>Router against wire.</b> Every hop is one router plus one pitch of link, and the x and y pitches are equal to
+within 1% on the die plot, so the experiment cannot split a hop's energy between the router's flops and crossbar and the
+wire itself. <span id="axistext"></span> "Per mm" here is per mm of mesh travel. A plain repeated 7 nm wire at 0.485 V
+would be about 12–24 fJ per random bit·mm from first principles (§8).</li>
+<li><b>Board against rail.</b> Board power is 12 V input power: it includes the regulator's loss (about 18–20% on the
+minion rail by the regression in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#power">observability report</a>,
+more on the mesh) and anything else that moves with the traffic. The mesh rail is the die's own supply but its meter's
+gain has not been checked independently. The truth is between the two. <span id="senstext"></span></li>
+<li><b>Fixed per-hop cost.</b> The part that does not depend on the data (clocking, headers, the request travelling the
+other way) is measured, but it is confounded with time: bandwidth per reader falls with distance, so part of it may be
+cost per second rather than per hop. Even if all of the one-hop zeros energy were cost per second, it would explain at
+most a quarter of the link-disjoint fixed part and a fifth of the loaded one. The data-dependent part is immune to
+per-second costs that do not depend on the data (<i>P</i> = ½ and <i>P</i> = 0 run at the same bandwidth); a per-cycle cost
+of ones held in the mesh would still look per-hop.</li>
+<li><b>The meter can be starved.</b> <span id="starvetext"></span> Rings between shires <i>s</i> and <i>s</i>+16, measured
+for the energy manual and not part of this run, also starve it: about 150 ms per reading, with the board reading frozen
+for seconds.</li>
+<li><b>The meter can be stopped.</b> Between the two runs a sampler killed in the middle of a request left its reply in
+the service processor's management queue; every later opener crashed on it, so the second run's first start got no
+telemetry on either card. One <code>dev_mngt_service</code> call drains the queue, and the sampler now exits cleanly on a
+plain kill (the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#power">observability report</a>, §4.1).</li>
+<li><b>A stray write is invisible.</b> While the store mode that fills the scratchpads was being tested, a bug in the
+test tool sent about a second of tensor stores from shire 0 to physical address 0. No error counter, telemetry field or
+clock moved. The tool now refuses a memory pattern with no buffer; no measurement here comes from those launches.</li>
+<li><b>Voltage scaling</b> assumes full-swing CMOS at constant capacitance; whether the links are low-swing is not known.
+Gate capacitance is somewhat lower near threshold, so constant-C scaling slightly understates the 0.9 V figure for
+full-swing links; low-swing links would make it overstate.</li>
+</ul>
+
+<h2 id="data">11. Data, tools and related reports</h2>
+<ul>
+<li><code>workloads/enercat/run_wire.py</code> (both runs), <code>analyze_wire.py</code>, <code>tools/ettelem/build_wire_report.py</code>;
+the fill modes <code>tstore_raw</code> and <code>tstore_uniq</code> and the patterns <code>bern:P</code>, <code>alt:N</code>, <code>uq:P</code>, <code>frz</code> in <code>workloads/enercat/host/main.cpp</code>.</li>
+<li>Raw data: <code>docs/reports/data/2026-09-24-wire-aifoundry2/</code>, <code>-aifoundry3/</code> (first run), <code>2026-09-24-wire2-aifoundry2/</code>, <code>-aifoundry3/</code> (second run);
+the analysis <code>2026-09-24-wire-energy/wire.json</code>; the research (die geometry, NoC, literature, critique) in <code>2026-09-24-wire-energy/research/</code>.</li>
+<li>Before publication an adversarial review — two independent re-analyses of the raw data and three skeptics, on artifacts,
+physics and arithmetic — checked every number and claim. The measurements reproduced; its corrections to the
+interpretation are applied on this page, and its report is <code>2026-09-24-wire-energy/review/VERDICT.md</code>.</li>
+<li>Related: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#finer-grain-wires-lines-rows-and-the-leakage-of-the-arrays">the energy manual, §4.3</a> (the first wire measurement),
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">hand it to the next shire</a> (why hops are cheap next to DRAM),
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">limits of observability</a> (the meters and their limits).</li>
+</ul>
+</main>

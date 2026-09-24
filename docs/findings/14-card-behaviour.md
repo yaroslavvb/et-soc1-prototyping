@@ -155,3 +155,20 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
   catch it.
 - **The environment is not stationary.** Mid-session the lab's airflow changed and the die fell 12 °C under
   constant power. Record enough telemetry to notice.
+- **A sampler killed mid-request poisons the management queue** (both cards, 2026-09-24). The reply to its
+  last command stays queued. The next process to open `/dev/et0_mgmt` dies of `std::bad_function_call` on
+  that reply and leaves its own behind, so retrying never recovers. Drain it once with
+  `/opt/et/bin/dev_mngt_service -m DM_CMD_GET_MODULE_POWER -n 0 -u 5000`, which crashes on the stale reply and
+  clears it. `ettelem sample` now finishes its request and exits on SIGTERM, and the runners drain the queue
+  when a start fails (`start_sampler` in `workloads/enercat/run_wire.py` and the `tools/ettelem/run_*_power.sh`
+  scripts). Stop a sampler with a plain `kill`, never `kill -9`. The driver's error counters did not move.
+- **The workload can starve the meter.** Rings between shires s and s+16 (E29) push the service processor's
+  management command from 22 ms to 150 ms. On aifoundry2, tensor loads between shires in the same column
+  three hops apart (E31) push it to about 1 s, and 1.6 s at worst, so a burst gets a handful of stale samples.
+  aifoundry3 ran the same pairs at 22 ms. Every ettelem sample carries `took_ms`: check it, and drop the burst.
+- **A memory pattern launched without a buffer writes to physical address 0**, the start of the PU region's
+  Maxion window. On 2026-09-24 a new enercat store mode that was missing from the host's list of memory modes
+  sent tensor stores from shire 0 there, in two test launches of about half a second each. Nothing reported
+  it: no error counter moved, telemetry stayed normal, and the card held 600 MHz and ran a normal burst
+  straight after. `enercat_host` now refuses to launch a memory pattern with no slice. Add every new mode to
+  that list before running it on a card.

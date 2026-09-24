@@ -30,10 +30,19 @@
 #define EC_FDIV_PS 21    // 8-lane fdiv.ps
 // Fine-grained memory patterns: `access_bytes` per access, `stride` apart, wrapping every `region` bytes of
 // the hart's slice, the slice in DRAM (scp 0), the shire's own scratchpad (1) or the scratchpad of the shire
-// `targets[shire]` (2). EC_TLOAD_PAT uses tensor loads (bypass the L1); EC_FLW_PAT 32 B vector loads
+// `targets[shire]` (2); with scp = 2 the target entry's bits 31:16 pick the region r (see EC_TSTORE_UNIQ). EC_TLOAD_PAT uses tensor loads (bypass the L1); EC_FLW_PAT 32 B vector loads
 // through the L1, so a stride of 64 touches every line once and uses half of it.
 #define EC_TLOAD_PAT 22
 #define EC_FLW_PAT 23
+// Tensor store of f0..f15 loaded straight from 512 B of sources (this hart's 256 B block and the next hart's),
+// so the image stored is exactly the host's bytes. EC_TSTORE stores f0..f7 and their doubles, which is fine
+// for "zeros / const / random" but not for controlled bit patterns on the wires.
+#define EC_TSTORE_RAW 24
+// Unique fill: every 512 B block of a minion's scratchpad region is loaded from its own 512 B of a big DRAM buffer
+// (`sources` points at it: minion g, region r, block k at sources + ((g*2 + r)*slice_bytes) + k*512), and two
+// regions are filled per minion (r = 0, 1), so the two readers of a target can read different bytes. With scp = 0
+// it fills DRAM slices instead (slice + (g*2 + r)*slice_bytes), which the host can read back to check the image.
+#define EC_TSTORE_UNIQ 25
 // Generated instruction cases start at 100 (enercat_modes.h).
 
 #define EC_MAGIC 0x454E4552u  // "ENER"

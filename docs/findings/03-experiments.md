@@ -2,10 +2,10 @@
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and
 where it ran, the command that produced it, where the **raw** data lives in this repository, and what it
-cannot tell you. Cite as **E1**...**E19**.
+cannot tell you. Cite as **E1**...**E32**.
 
-All card work is on **aifoundry2**, one ET-SoC-1 PCIe card, firmware at et-platform `353f20e`. Unless an entry
-says otherwise, the minion clock was a steady **600 MHz** at **516–518 mV** on the die, verified in every
+Card work up to E19 is on **aifoundry2**, one ET-SoC-1 PCIe card, firmware at et-platform `353f20e`; from E20 each
+entry names its card (aifoundry2, aifoundry3 or both). Unless an entry says otherwise, the minion clock was a steady **600 MHz** at **516–518 mV** on the die, verified in every
 telemetry sample of the session.
 
 Rebuild every analysis, model, GIF and report from the raw data with a single script:
@@ -583,6 +583,64 @@ or Maxion rails; the droop is a calibrated proxy, not independent of the board m
 unsplit. The observability report's improvement ladder (A2, second edition) ranks what would meter more.
 **Caveats:** the fit's SRAM and NoC coefficients are collinear with the minion one on many bursts (their
 standard errors say so); the droop of other rails leaks into the DDR monitor at 0.025 mV per board watt.
+
+## E31 — Heat per millimetre, first run: hop distance against the bits on the links (2026-09-24, 13:23–14:16, both cards at once)
+
+**Question (Q41):** what does moving a bit one millimetre across the mesh cost, and does it depend on transitions
+or on the bits themselves?
+**Method:** `workloads/enercat/run_wire.py <out> --set v1 --passes 3` on each card, 82 configurations × 3 passes in
+a different shuffled order each pass, 3 s bursts bracketed by idle, `ettelem` at 10 Hz. Hart 0 of every minion
+streams 1 KB tensor loads (two in flight) from the scratchpad of a shire exactly *d* hops away (*d* = 0, 1, 2, 3, 4,
+6; at most two readers per target). Before each configuration every scratchpad is filled by
+`--pattern tstore_raw`, which stores the host's bytes exactly (checked with `--dump-slice`): `bern:P` (each bit 1
+with probability *P* ∈ {0, 0.1, 0.25, 0.5, 0.75, 0.9, 1}), `alt:N` (N-byte blocks alternately 0x00 and 0xFF, N = 16
+to 256, at *d* = 0, 1, 3, 6), single-axis pairs (`--hop-axis x|y`, *d* = 1–4, *P* = 0 and ½) and E27's 'random'
+image. Prefill and heater windows are logged in `marks.jsonl` and kept out of the idle brackets; on aifoundry2 a
+heater was ready for a die below 69 °C and never ran. Reduced by `workloads/enercat/analyze_wire.py`: board power
+over bracketing idle with the leakage correction, the mesh rail over the burst's last 0.6 s; bursts dropped if the
+clock left 600 MHz or the sampler's median latency exceeded 60 ms; slopes per pass and card against *d*; the model
+slope = s0 + a·2P(1−P) + b·P.
+**Raw data:** `docs/reports/data/2026-09-24-wire-aifoundry2/`, `-aifoundry3/` (`telemetry.jsonl.gz`,
+`runs.jsonl.gz` with every launch's reader>target map, `marks.jsonl`, `run.log`, the driver's error counters
+before the run); analysis `docs/reports/data/2026-09-24-wire-energy/wire.json` (`model.v1`, `patterns`, `axes`,
+`checks`).
+**Result:** on the mesh rail a = 95 fJ per bit that differs from the previous flit per hop and b = 131 per one
+carried, s0 = 74 (board 139, 197, 103); random data costs 113 fJ per bit per hop on the rail. Blocks of 16–128 B
+cost the same and 256 B blocks 0.41 pJ/B per hop more on the rail (0.76 on board), consistent with four lanes
+chosen by PA[7:6] and a flit of at least a 64 B line. x-only and y-only pairs agree to about 10%.
+**Caveats:** the image repeats every 512 B and two readers of a target read the same bytes, so consecutive flits can
+be exact copies and the difference rate is below 2P(1−P) by an unknown factor (E32 removes this); link sharing grows
+with *d* (0% at one hop, 72% at six). On aifoundry2 the y-only pairs three hops apart starved the service
+processor (telemetry reads of 0.8–1.6 s instead of 22 ms): all six such bursts are dropped, and the only y-only
+three-hop point is aifoundry3's. The driver's error counters were the same before and after on both cards.
+
+## E32 — Heat per millimetre, second run: unique lines and link-disjoint flows (2026-09-24, 14:30–14:59)
+
+**Question (Q41):** the same, with the confounds of E31 removed, and what sharing a link costs.
+**Method:** `run_wire.py --set v2`, chained after E31 by `tools/ettelem/chain_wire_v2.sh`, 44 configurations × 3
+passes. `--pattern tstore_uniq` fills every 512 B block from its own random bytes (`uq:P`, *P* ∈ {0, ¼, ½, ¾, 1},
+¾ the exact complement of ¼), and the two readers of a target read different regions (`--uniq-regions`);
+`wsep/p{0,0.5}/hop{1..5}`: straight pairs chosen so that no two flows share a directed link and every target has
+one reader (`--pairs`); `wfrz/hop{0,1,3,6}`: one random 64 B line everywhere (244 of 512 bits ones, no two flits
+differ). Reduced as E31; the free-link numbers are fitted over *d* = 1–4, the same distances as the loaded set.
+**Raw data:** `docs/reports/data/2026-09-24-wire2-aifoundry2/`, `-aifoundry3/`; analysis in the same `wire.json`
+(`model.v2`, `disjoint_flows`, `complement_test`, `checks`, `sensitivity`), assembled with the literature and die
+geometry by `tools/ettelem/build_wire_report.py` into `report.json`.
+**Result:** a = 98 [92–103] and b = 129 [127–133] fJ per hop on the mesh rail, 151 and 192 on board power, rms 0.008
+and 0.038 pJ/B per hop; the complement test gives 132 [125–138] fJ per one; the frozen line sits on the model. Per mm
+(3.72 mm per hop): free links 24.6 + 11.7 = **36.2 fJ per random bit·mm** on the mesh rail and 32.7 + 14.0 = 46.7 on
+board power; loaded mesh 30.6 + 19.8 = **50.4** and 46.1 + 26.8 = 72.9. Over the same one to four hops the loaded
+mesh costs 119 against 91 fJ per bit per hop (data) and 76 against 43 (the rest) on the rail, with per-reader
+bandwidth within 6%. Without the leakage correction the board coefficients are 4–9% higher; the rail's do not move.
+**What went wrong first:** the first start failed on both cards. E31's samplers had been killed mid-request, and the
+reply left in the management queue crashed every later opener with `std::bad_function_call`. One
+`dev_mngt_service -m DM_CMD_GET_MODULE_POWER` call drained it; `ettelem sample` now exits cleanly on SIGTERM, and
+the runners drain and retry on a failed start and restart a sampler that stalls. The restarted run completed 132
+bursts per card with no sampler restart.
+**Review:** before publication a workflow re-derived every number (two independent reductions and three skeptics,
+`docs/reports/data/2026-09-24-wire-energy/review/`). The measurements reproduced within 1–3% on the rail and about 7%
+on board power; its corrections to the interpretation are in the report and in
+[20-heat-per-mm.md](20-heat-per-mm.md).
 
 ## A note on E10, re-analysed for Q20
 

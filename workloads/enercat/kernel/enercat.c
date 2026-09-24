@@ -132,7 +132,7 @@ int64_t entry_point(const struct EcArgs* a)
     const uint64_t thread = hart & 1;
     const uint64_t minion_in_shire = (hart >> 1) & 31;
     const uint64_t mode = a->mode;
-    const bool tensor = mode == EC_TSTORE || mode == EC_TLOAD || mode == EC_TLOAD_PAT;
+    const bool tensor = mode == EC_TSTORE || mode == EC_TSTORE_RAW || mode == EC_TSTORE_UNIQ || mode == EC_TLOAD || mode == EC_TLOAD_PAT;
     if (thread && (a->harts < 2 || tensor)) {
         return 0;
     }
@@ -163,8 +163,9 @@ int64_t entry_point(const struct EcArgs* a)
     if (a->scp == 1) {
         slice_base = EC_SCP_ADDR(EC_SCP_LOCAL, a->scp_off + minion_in_shire * a->slice_bytes);
     } else if (a->scp == 2) {
-        const uint64_t tgt = ((const volatile uint32_t*)a->targets)[shire];
-        slice_base = EC_SCP_ADDR(tgt, a->scp_off + minion_in_shire * a->slice_bytes);
+        const uint32_t tv = ((const volatile uint32_t*)a->targets)[shire];
+        const uint64_t tgt = tv & 0xFFFFu, region = tv >> 16;   // region 1: the second reader's copy (EC_TSTORE_UNIQ)
+        slice_base = EC_SCP_ADDR(tgt, a->scp_off + (region * 32 + minion_in_shire) * a->slice_bytes);
     }
 
     switch (mode) {
@@ -297,6 +298,56 @@ int64_t entry_point(const struct EcArgs* a)
         } while (cycles() < deadline);
         cyc = cycles() - t0;
         bytes = iters * 8 * 512;
+        break;
+    }
+
+    case EC_TSTORE_RAW: {
+        // The same store loop as EC_TSTORE, but f8..f15 come from the next 256 B of sources instead of being
+        // doubles of f0..f7: the 512 B written per tensor store is the host's image, byte for byte.
+        load_vsrc(src);
+        __asm__ __volatile__("flw.ps f8, 0(%0)\n flw.ps f9, 32(%0)\n flw.ps f10, 64(%0)\n flw.ps f11, 96(%0)\n"
+                             "flw.ps f12, 128(%0)\n flw.ps f13, 160(%0)\n flw.ps f14, 192(%0)\n flw.ps f15, 224(%0)\n"
+                             : : "r"(src + 256) : "memory", VSINK);
+        const uint64_t base = slice_base;
+        const uint64_t n = a->slice_bytes / 512;
+        uint64_t p = base, k = 0;
+        const uint64_t t0 = cycles(), deadline = t0 + a->window;
+        do {
+            for (int b = 0; b < 8; ++b) {
+                t_store(0, 16, p, 32);
+                p += 512;
+                if (++k == n) { k = 0; p = base; }
+            }
+            t_wait(8);
+            ++iters;
+        } while (cycles() < deadline);
+        cyc = cycles() - t0;
+        bytes = iters * 8 * 512;
+        break;
+    }
+
+    case EC_TSTORE_UNIQ: {
+        // Fill both regions of this minion block by block, each block from its own 512 B of the DRAM buffer; wait for
+        // every store before reloading its registers, since a tensor store reads f0..f15 after it is issued.
+        const uint64_t g = shire * 32 + minion_in_shire;
+        const uint64_t blocks = a->slice_bytes / 512;
+        const uint64_t t0 = cycles();
+        for (uint64_t r = 0; r < 2; ++r) {
+            const uint64_t dst = a->scp ? EC_SCP_ADDR(EC_SCP_LOCAL, a->scp_off + (r * 32 + minion_in_shire) * a->slice_bytes)
+                                        : a->slice + (g * 2 + r) * a->slice_bytes;
+            const uint64_t srcb = a->sources + (g * 2 + r) * a->slice_bytes;
+            for (uint64_t k = 0; k < blocks; ++k) {
+                load_vsrc(srcb + k * 512);
+                __asm__ __volatile__("flw.ps f8, 0(%0)\n flw.ps f9, 32(%0)\n flw.ps f10, 64(%0)\n flw.ps f11, 96(%0)\n"
+                                     "flw.ps f12, 128(%0)\n flw.ps f13, 160(%0)\n flw.ps f14, 192(%0)\n flw.ps f15, 224(%0)\n"
+                                     : : "r"(srcb + k * 512 + 256) : "memory", VSINK);
+                t_store(0, 16, dst + k * 512, 32);
+                t_wait(8);
+            }
+        }
+        cyc = cycles() - t0;
+        iters = 1;
+        bytes = 2 * a->slice_bytes;
         break;
     }
 

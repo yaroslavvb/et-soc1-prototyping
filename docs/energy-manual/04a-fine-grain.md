@@ -13,7 +13,7 @@ What a byte costs is not one number. Below, the parts of it that can be separate
 | random | aifoundry2 | 4.29 | 7.90 | **1.812** | 1.09 |
 | random | aifoundry3 | 4.12 | 7.52 | **1.675** | 0.99 |
 
-**One hop costs 0.70 pJ/B on zeros [0.64–0.75 across the cards] and 1.74 pJ/B on random data [1.67–1.81].** The difference between the two, 1.05 pJ/B per hop [1.03–1.06], is the switching energy of the wires themselves — **131 fJ per bit per hop of toggling** [129–133]. The rest, what a hop costs whether or not the bits change, is clocking, arbitration and buffering.
+**One hop costs 0.70 pJ/B on zeros [0.64–0.75 across the cards] and 1.74 pJ/B on random data [1.67–1.81].** The difference between the two, 1.05 pJ/B per hop [1.03–1.06], is the data-dependent energy of the links and routers — **131 fJ per random bit per hop** [129–133]. Part of it is bits that differ from one flit to the next and part is the ones carried, which cost even when they do not change; [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) separates the two with chosen bit patterns and converts them to fJ per bit·mm. The rest, what a hop costs on all-zero data, is clocking, arbitration and buffering.
 
 | hops | zeros pJ/B [range over both cards, 6 runs] | random pJ/B [range] | shires reading |
 |---|---|---|---|

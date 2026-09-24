@@ -62,11 +62,25 @@ Two instrument limits found on the way, both now handled by `tools/ettelem/analy
 - **The meter starved by the workload.** Rings between shires s and s+16 slow the service processor's own
   management path (command latency 22 → 150 ms) and freeze the board reading for seconds; the burst reads
   45% low. Bursts are dropped by the sampler's own latency (`took_ms`), and that row is aifoundry3 only.
+  The heat-per-mm runs (E31, 2026-09-24) found a second case: on aifoundry2, tensor loads between shires in
+  the same column three hops apart push the command to about 1 s (1.6 s at worst). All six such bursts were
+  dropped; aifoundry3 ran the same pairs at 22 ms.
+
+Two more limits found on 2026-09-24, while making the heat-per-mm measurement (E31, E32):
+
+- **The meter's queue can be poisoned.** A sampler killed in the middle of a request leaves its reply in the
+  management queue; every later opener dies of `std::bad_function_call` on it and leaves its own, so a
+  runner that simply retries never gets telemetry again. It stopped the first start of E32 on both cards.
+  One `dev_mngt_service` call drains it, `ettelem sample` now exits cleanly on SIGTERM, and the runners
+  drain and retry on a failed start ([14-card-behaviour.md](14-card-behaviour.md), "Traps").
+- **A stray write is invisible.** Tensor stores from shire 0 to physical address 0 (the PU region's Maxion
+  window), about a second in all, moved no error counter, no telemetry field and no clock. Nothing on the host
+  would have noticed; the kernel's author did, from the code. The guard is in the tool, not the card.
 
 ## The improvement ladder
 
 Nineteen rungs in the observability report, ordered by cost: software on the data the card already gives
-(bracketed bursts, the attribution, the droop meter, the latency check — done; deconvolving the rails' filter,
+(bracketed bursts, the attribution, the droop meter, the latency and queue checks — done; deconvolving the rails' filter,
 calibrating the per-shire IR-drop map into a current map — not yet), lab hardware without firmware (a PCIe
 riser with shunts read at a kilohertz; an infrared camera over the open card; the second card — done),
 firmware (forwarding the PMIC's input-side readings; exporting the 35 temperature sensors; enabling the process

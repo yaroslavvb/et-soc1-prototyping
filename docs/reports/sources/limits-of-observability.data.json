@@ -391,9 +391,16 @@
   {
    "title": "Limits of observability (this page)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability",
-   "date": "20–23 Sep",
+   "date": "20–24 Sep",
    "what": "The hub: every instrument on the card, what it resolves, what it cannot see, and the ladder of improvements.",
    "instruments": "all of them"
+  },
+  {
+   "title": "Heat per millimetre",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm",
+   "date": "24 Sep",
+   "what": "The energy of moving one bit one millimetre across the mesh, with the data on the links chosen: per transition, per one, and the part no data changes, with contended and uncontended links, against Dally's ~100 fJ/bit·mm.",
+   "instruments": "board power, NoC rail, die temperature, the sampler's latency; the die plot for millimetres per hop"
   },
   {
    "title": "The ET-SoC-1 energy manual",
@@ -740,11 +747,11 @@
    "rung": 7,
    "group": "software, on the data the card already gives",
    "status": "works_now",
-   "what": "Watch the meter's own latency",
+   "what": "Watch the meter itself: its latency, and its queue",
    "done": true,
-   "adds": "Every ettelem sample records how long the management command took (took_ms). Bursts during which the service processor is starved — the s ↔ s+16 rings raise it from 22 ms to 150 ms and freeze the board reading — are dropped.",
-   "cost": "done (23 Sep)",
-   "effect": "One ring configuration on aifoundry2 was found to be unmeasurable this way; without the check its energy read 45% low."
+   "adds": "Every ettelem sample records how long the management command took (took_ms). Bursts during which the service processor is starved — the s ↔ s+16 rings raise it from 22 ms to 150 ms and freeze the board reading; on aifoundry2, tensor loads between shires in the same column three hops apart raise it to about 1 s — are dropped. A sampler killed mid-request leaves its reply in the management queue and every later opener crashes on it: ettelem now exits cleanly on SIGTERM, and the runners drain the queue with one dev_mngt_service call and retry.",
+   "cost": "done (23–24 Sep)",
+   "effect": "One ring configuration and one column configuration on aifoundry2 were found to be unmeasurable this way; without the check the ring's energy read 45% low. The poisoned queue stopped the first start of the second heat-per-mm run on both cards; after the drain it ran 132 bursts per card with no sampler restart."
   },
   {
    "rung": 8,
@@ -1007,6 +1014,26 @@
    "data": "docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json",
    "report": "This page, §4",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability"
+  },
+  {
+   "id": "E31",
+   "when": "24 Sep, 13:23–14:16",
+   "card": "both",
+   "what": "Heat per mm, first set: 1 KB tensor loads from a scratchpad d = 0–6 hops away with the bits on the links chosen (bit density P, alternating blocks, single-axis pairs), 82 configurations × 3 passes; a second starved-meter case found",
+   "instruments": "board power, NoC rail, die temperature, the sampler's latency",
+   "data": "docs/reports/data/2026-09-24-wire-aifoundry2/, -aifoundry3/",
+   "report": "Heat per millimetre",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm"
+  },
+  {
+   "id": "E32",
+   "when": "24 Sep, 14:30–14:59",
+   "card": "both",
+   "what": "Heat per mm, second set: every line on the chip unique, link-disjoint pairs, a frozen line, 44 configurations × 3 passes; the poisoned management queue found and drained",
+   "instruments": "as E31",
+   "data": "docs/reports/data/2026-09-24-wire2-aifoundry2/, -aifoundry3/",
+   "report": "Heat per millimetre",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm"
   }
  ],
  "related": [
@@ -1014,6 +1041,11 @@
    "title": "The ET-SoC-1 energy manual",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual",
    "what": "the table of costs this page's instruments produced: at rest, awake, every instruction, per byte at every level, wires, lines, rows, leakage, rails, between shires, synchronisation, composition, with a confidence bar on every entry from repeated passes on two cards"
+  },
+  {
+   "title": "Heat per millimetre",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm",
+   "what": "the mesh's wire energy measured the way this page says it can be: bursts bracketed by idle, the governor and the starved meter filtered out, the bits on the links chosen; what a bit costs per millimetre, and why a one costs more than a flip"
   },
   {
    "title": "Power and temperature on the ET-SoC-1",
@@ -1063,7 +1095,7 @@
   {
    "title": "docs/findings/ in the repository",
    "url": "https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/findings",
-   "what": "every session (E1–E30), every claim with its file and field, every artifact and commit; the knowledge base the reports are rendered from"
+   "what": "every session (E1–E32), every claim with its file and field, every artifact and commit; the knowledge base the reports are rendered from"
   }
  ]
 }

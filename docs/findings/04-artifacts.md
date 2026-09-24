@@ -2,7 +2,7 @@
 
 Three kinds of artifact came out of this work: **published reports** (HTML, deployed to spacesheep.dev),
 **repostable images**, and **tools** that can be re-run. Commits are listed at the end so any artifact can be
-tied to the state of the tree that produced it. Cite as **A1**...**A15**.
+tied to the state of the tree that produced it. Cite as **A1**...**A18**.
 
 Every report is assembled by `scripts/build-report.py <name> <data.json> <out.html>` from three sources in
 `docs/reports/sources/`: `<name>.meta.json` (title, description), `<name>.body.html` (the prose) and
@@ -13,21 +13,18 @@ is always wrong** — it is regenerated.
 
 ## Published reports
 
-| ID | Report | Built from | Space | Visibility (2026-09-22) |
+| ID | Report | Built from | Space | Visibility (2026-09-24) |
 |---|---|---|---|---|
-| A1 | `docs/reports/2026-09-19-et-soc1-memory-anatomy.html` — one memory access by stage and rail | E1, E2 | [et-soc1-memory-anatomy](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy) `2bf74fd1-fd7f-4e19-8e35-6168ae42657c` | private |
-| A2 | `docs/reports/2026-09-20-et-soc1-limits-of-observability.html` — what can be seen, from board power to a flip-flop. **Second edition (2026-09-23):** the hub for all measurement matters, with a table of contents, the index of every measurement report, the power meter chain, the unmetered remainder attributed, the Moortec sensors, the DDR-rail droop meter, the meter starved by s ↔ s+16 rings, and the improvement ladder (19 rungs) | R1, R2, R3, R13, E2, E30 | [et-soc1-limits-of-observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) `2ea37420-67b9-484e-9d4c-581e8a9f0323` | private |
+| A1 | `docs/reports/2026-09-19-et-soc1-memory-anatomy.html` — one memory access by stage and rail | E1, E2 | [et-soc1-memory-anatomy](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy) `2bf74fd1-fd7f-4e19-8e35-6168ae42657c` | public (Q40) |
+| A2 | `docs/reports/2026-09-20-et-soc1-limits-of-observability.html` — what can be seen, from board power to a flip-flop. **Second edition (2026-09-23):** the hub for all measurement matters, with a table of contents, the index of every measurement report, the power meter chain, the unmetered remainder attributed, the Moortec sensors, the DDR-rail droop meter, the meter starved by s ↔ s+16 rings, and the improvement ladder (19 rungs). **Update (2026-09-24):** A17 in the index, E31–E32 in the sessions, the poisoned management queue and the stray write in §4.1 and rung 7; tables scroll inside their frames on phones | R1, R2, R3, R13, E2, E30 | [et-soc1-limits-of-observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) `2ea37420-67b9-484e-9d4c-581e8a9f0323` | public (Q40) |
 | A3 | `docs/reports/2026-09-20-et-soc1-power-temperature.html` — every way to measure power and energy, and a load step through all of them | E5, E6 | [et-soc1-power-temperature](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature) `acee5c6d-56c0-45e7-aa97-ce11af37bdd8` | public |
 | A4 | `docs/reports/2026-09-20-horace-experiment.html` — the data-dependent power experiment, the flip model, the long runs, the structured matrices, the second card (**six versions**, see below) | E7–E17, E20 | [et-soc1-horace-experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) `da445a93-7be3-42c2-b9be-4992fa4a3b62` | public |
 | A5 | `docs/reports/2026-09-21-why-low-power.html` — Esperanto's equation measured term by term against an A100 | E15, E10, R6, R7, R8 | [et-soc1-why-low-power](https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power) `baede20c-57d9-4e01-8157-2014670dd8cf` | public |
-
 | A11 | `docs/reports/2026-09-22-dvfs-leakage.html` — six of David Kanter's claims about DVFS loops and leakage suppression, checked against the firmware, the RTL and the card | R9, R3, R2, E10, E18, E19, E20, E21 | [et-soc1-dvfs-leakage](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) `171dcd4a-5b6d-49d3-aca0-db4980fabfa5` | **public** (the repo owner made it public on 2026-09-22 and asked that it stay so) |
-
-| A13 | `docs/reports/2026-09-22-hot-line.html` — one contended global atomic: fair to the shire that hosts it, and fatal to that shire's own memory path | R11, R1, E22, E23 | [et-soc1-hot-line](https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line) `ac439287-4503-42c7-88e7-b5d3e3b64b06` | private (default; it quotes a Discord message) |
-
-| A14 | `docs/reports/2026-09-22-on-chip-relay.html` — handing a stage's output to a neighbouring shire instead of DRAM: 12× faster at a twelfth of the energy | R12, E24, E25 | [et-soc1-on-chip-relay](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay) `8678d49d-3f0c-49be-b08a-5528de8ece3c` | private (default) |
-
-| A15 | `docs/reports/2026-09-23-energy-manual.html` and `docs/energy-manual/*.md` — the energy manual: at rest, awake, per instruction, per byte, between shires, synchronisation, composition, two cards, method. **Second edition** adds every instruction (3.1) and the fine grain: wires, lines, rows, the rail split and the SRAM leakage (4.3). **Third edition (2026-09-23):** every entry with a confidence bar (mean [lo–hi] over passes and cards, per-card mean ± se), the levels and rings re-measured on both cards at 600 MHz, the unmetered remainder attributed and the DDR droop meter (4a) | E26–E30 and every earlier E through its builder | [et-soc1-energy-manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) `cc3cb1d6-51cf-420b-a165-7d8629904d97` | **public** (the repo owner asked for it on 2026-09-23) |
+| A13 | `docs/reports/2026-09-22-hot-line.html` — one contended global atomic: fair to the shire that hosts it, and fatal to that shire's own memory path | R11, R1, E22, E23 | [et-soc1-hot-line](https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line) `ac439287-4503-42c7-88e7-b5d3e3b64b06` | public (Q40; it quotes a Discord message) |
+| A14 | `docs/reports/2026-09-22-on-chip-relay.html` — handing a stage's output to a neighbouring shire instead of DRAM: 12× faster at a twelfth of the energy | R12, E24, E25 | [et-soc1-on-chip-relay](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay) `8678d49d-3f0c-49be-b08a-5528de8ece3c` | public (Q40) |
+| A15 | `docs/reports/2026-09-23-energy-manual.html` and `docs/energy-manual/*.md` — the energy manual: at rest, awake, per instruction, per byte, between shires, synchronisation, composition, two cards, method. **Second edition** adds every instruction (3.1) and the fine grain: wires, lines, rows, the rail split and the SRAM leakage (4.3). **Third edition (2026-09-23):** every entry with a confidence bar (mean [lo–hi] over passes and cards, per-card mean ± se), the levels and rings re-measured on both cards at 600 MHz, the unmetered remainder attributed and the DDR droop meter (4a). **Update (2026-09-24):** 4.3's wire difference is described as flips plus ones carried, with a link to A17 | E26–E30 and every earlier E through its builder | [et-soc1-energy-manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) `cc3cb1d6-51cf-420b-a165-7d8629904d97` | **public** (the repo owner asked for it on 2026-09-23) |
+| A17 | `docs/reports/2026-09-24-heat-per-mm.html` — heat per millimetre: what moving a bit a millimetre across the mesh costs, split into bits that differ between flits, ones carried and a fixed part; free against shared links; against Dally's ~100 fJ/b-mm. Published after an adversarial review (`docs/reports/data/2026-09-24-wire-energy/review/`) | R14, E31, E32 | [et-soc1-heat-per-mm](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) `5602ff62-878f-4db6-b703-02061000d9ce` | public |
 
 Earlier reports in the same repository, from before this line of work (R4): matmul efficiency, memory
 hierarchy (`4b6e0a37-808d-4fc9-8001-555125733c46`), on-chip communication
@@ -120,6 +117,28 @@ Each has a `.png` poster beside it. They are generated by `tools/ettelem/make_he
 - `docs/reports/sources/limits-of-observability.{body.html,data.json,script.js,meta.json}`: the report now builds
   with the shared `scripts/build-report.py` like every other; `scripts/build-observability-report.py` is superseded.
 
+## A18 — The wire tools (2026-09-24)
+
+- `workloads/enercat/run_wire.py`: both runs of the heat-per-mm experiment (E31 `--set v1`, E32 `--set v2`): the
+  fills, shuffled passes bracketed by idle, `marks.jsonl` for the prefill and heater windows, and a sampler that is
+  retried, drained with `dev_mngt_service` on a failed start, and restarted if it stalls.
+- `workloads/enercat/analyze_wire.py`: the per-burst reduction (board power with the leakage correction, the mesh
+  rail), per-pass slopes against distance, the model s0 + a·2P(1−P) + b·P, the complement test, the link-disjoint
+  flows, the axes, per mm; and the report's checks (link sharing from the recorded reader>target maps under XY and
+  YX routing, readers, per-reader bandwidth, the four-hop point off the line, the exit step, the 256 B excess) and
+  the model refitted without the leakage correction (`--no-leak-correction` for the whole reduction).
+- `tools/ettelem/build_wire_report.py`: joins `wire.json` with the sourced inputs (die, pitch, NoC, literature, first
+  principles) into `report.json`; `tools/ettelem/chain_wire_v2.sh` starts the second run when the first is done.
+- `workloads/enercat` host and kernel: `--pattern tstore_raw` (stores the host's bytes exactly) and `tstore_uniq`
+  (every 512 B block unique, two regions per target), operand kinds `bern:P`, `alt:N`, `uq:P`, `frz`, options
+  `--hop-axis`, `--pairs`, `--uniq-regions`, `--dump-slice`, the target map in every run record, and the guard that
+  refuses a memory pattern with no slice.
+- `tools/ettelem/ettelem.cpp`: `sample` finishes its request and exits on SIGTERM or SIGINT, so stopping it no longer
+  poisons the management queue; `run_onchip_power.sh`, `run_hotline_power.sh` and `run_rings_levels_power.sh` drain
+  the queue on a failed start.
+- `docs/reports/sources/heat-per-mm.{body.html,script.js,meta.json}`: the report; every number in its sentences is
+  computed from `report.json`.
+
 ## Commits
 
 | Commit | Subject |
@@ -141,6 +160,9 @@ Each has a `.png` poster beside it. They are generated by `tools/ettelem/make_he
 | `6377ce4` | The ET-SoC-1 energy manual, first edition |
 | `4845a60` | Energy manual, second edition: every instruction on two cards, and the fine grain |
 | `8084699` | Energy manual, third edition: confidence bars; observability, second edition: the unmetered remainder |
+| `d0e12d9` | Observability: sessions section, related documents, wider tables, shareable anchors; manual chart headroom |
+| `1006df4` | Observability: no horizontal overflow in the tables at any width |
+| `e7951c3` | Related reports: a described section in both reports instead of a footnote |
 
 ## Publishing notes, learned the hard way
 

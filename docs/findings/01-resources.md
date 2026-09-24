@@ -2,7 +2,7 @@
 
 Every finding in this directory rests either on one of these resources or on an experiment in
 [03-experiments.md](03-experiments.md). Each entry says what the resource is authoritative for and, as
-importantly, what it is **not** authoritative for. Cite them as **R1**...**R12**.
+importantly, what it is **not** authoritative for. Cite them as **R1**...**R14**.
 
 ---
 
@@ -197,3 +197,26 @@ at commit `353f20e`.
 - **Useful for:** E30 and the observability report's §4 and improvement ladder.
 - **Treated as:** the truth about this firmware; not exercised beyond the reads ettelem already makes.
 
+
+## R14 — Wire-energy literature and the die's geometry (external, public; read for Q41)
+
+Collected by a research workflow on 2026-09-24; `docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md`
+quotes every source with its URL and page.
+
+- **Dally's figure:** "Communication (~100fJ/b-mm on-chip)", AHA retreat keynote 2023, slide 8; the same
+  100 fJ/bit-mm in Dally, Turakhia and Han, CACM 2020. Neither states a node, a voltage or a data activity.
+- **Figures with conditions:** Keckler, Dally et al., IEEE Micro 2011, Table 1 (40 nm, 0.9 V: 310 pJ for 256
+  bits over 10 mm, 121 fJ/bit·mm on random data); Dally's 10 nm projection (174 pJ per 256 bits over 10 mm,
+  68 fJ/bit·mm); Dally et al., VLSI Symposium 2018 (20–40 fJ/bit-mm, 16 nm, about 200 fF/mm); Ho's 2003
+  thesis (measured, 0.18 µm, 1.8 V).
+- **The die:** 570 mm² (Hot Chips 33 slide 20; IEEE Micro 42(3), 2022, p. 37); the tile pitch measured in
+  pixels on the published die plot (IEEE Micro 2022, Fig. 7) scaled to that area: 3.73 mm in x, 3.70 mm in y,
+  3.72 mm per hop (3.64–3.76 over three readings of what the area covers). The mesh is 8 × 6 stops (ET
+  Preliminary Datasheet Rev 1.0, ch. 4).
+- **The link:** 512 bits per beat at the mesh master port (`core-et` `axi_defines.vh:43`), four lanes chosen
+  by PA[7:6] (`shirecache_mesh_master.sv`); the NoC at 400 MHz and 0.485 V from telemetry.
+- **Authoritative for:** what the literature's per-mm numbers mean and the millimetres per hop.
+- **Not authoritative for:** the wire's own capacitance on this chip (no layout is public), or how many
+  millimetres of metal a hop really crosses; the pitch is centre to centre.
+- **Treated as:** external inputs of kind `X`; the pitch is an estimate (kind `A`) with its range carried into
+  every per-mm bar.

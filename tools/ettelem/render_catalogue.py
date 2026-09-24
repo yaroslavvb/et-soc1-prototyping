@@ -109,8 +109,10 @@ def main():
         tz, tr = (sr[0] - sz[0]), (sr[1] - sz[1])
         t.append(f"\n**One hop costs {f(sum(sz)/2, 2)} pJ/B on zeros [{f(min(sz), 2)}–{f(max(sz), 2)} across the cards] and {f(sum(sr)/2, 2)} pJ/B on random data "
                  f"[{f(min(sr), 2)}–{f(max(sr), 2)}].** The difference between the two, {f((tz + tr)/2, 2)} pJ/B per hop [{f(min(tz, tr), 2)}–{f(max(tz, tr), 2)}], "
-                 f"is the switching energy of the wires themselves — **{f((tz + tr)/2*1000/8, 0)} fJ per bit per hop of toggling** [{f(min(tz, tr)*1000/8, 0)}–{f(max(tz, tr)*1000/8, 0)}]. "
-                 f"The rest, what a hop costs whether or not the bits change, is clocking, arbitration and buffering.\n")
+                 f"is the data-dependent energy of the links and routers — **{f((tz + tr)/2*1000/8, 0)} fJ per random bit per hop** [{f(min(tz, tr)*1000/8, 0)}–{f(max(tz, tr)*1000/8, 0)}]. "
+                 f"Part of it is bits that differ from one flit to the next and part is the ones carried, which cost even when they do not change; "
+                 f"[Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) separates the two with chosen bit patterns and converts them to fJ per bit·mm. "
+                 f"The rest, what a hop costs on all-zero data, is clocking, arbitration and buffering.\n")
         t += ["| hops | zeros pJ/B [range over both cards, 6 runs] | random pJ/B [range] | shires reading |", "|---|---|---|---|"]
         for p_ in W["random"]["points"]:
             dd = p_["hops"]

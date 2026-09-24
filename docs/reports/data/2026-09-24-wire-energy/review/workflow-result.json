@@ -1,0 +1,1042 @@
+{
+ "synthesis": "# Heat per millimetre: required corrections\n\nThis list combines these sources:\n- two independent re-analyses:\n  - **[A]** a tail-window reduction (`verify-hpm/indep/`);\n  - **[B]** an explicit filter model with Theil\u2013Sen fits (`verify-hpm/methodB/`);\n- three skeptics:\n  - **[Art]** measurement artifacts;\n  - **[Phys]** physics and interpretation;\n  - **[Ari]** arithmetic, units and sources;\n- my own cross-checks of `wire.json`, `report.json` and the local source texts: **[own]**, `verify-hpm/combine/checks.py`, `newhead.py` and `slowreads.py`.\n\nNothing was run on the cards.\n\n**Verdict: publish after these corrections.** The measurements reproduce. Every number the page prints follows from `wire.json` with correct unit conversions. Three independent reductions agree with the pipeline to within 1\u20133% on the mesh-rail numbers and to within about 7% on board power; the board spread comes from the leakage treatment.\n\nWhat fails is a set of sentences built on the numbers:\n- **The 0.9 V comparison with Dally.** An inference is stated as fact, one \"brackets\" is false, and board power is scaled as if it were die capacitance.\n- **The contention wording.** \"A third\" and \"72% at five or six\" are wrong, and the two sets are compared over different distance ranges.\n- **\"A one costs more than a flip\".** This is a property of the fit, not an established fact.\n- **\"Where 40 nm wires were\" and \"the rest is the routers\".**\n- **The DRAM ratio and the fadd comparison.** Both mix meters.\n- **\"Linear\" and \"one extra hop\".** Both are stated more generally than the data allow.\n- **The explanation of the 256 B shortfall.**\n- **\"x and y within 2%\".**\n\n## Required corrections, most important first\n\n### 1. Dally's number: its conditions and the 0.9 V comparison (lede, \u00a71, KPI 4, \u00a78 text and chart)\n\n**Claims.**\n- Lede: \"Scaled to 0.9 V, the voltage behind the lineage of Dally's number, the measured data-dependent cost is 84\u2013159 fJ per bit\u00b7mm, so the rule of thumb holds\".\n- \u00a71: \"Neither says at what voltage, in which process, or for what data \u2026 The lineage is traceable \u2026 20\u201340 fJ in a \"typical 16 nm\"\".\n- \u00a78: \"105\u2013159 fJ for the data-dependent part, which brackets Dally's 100 and Keckler's 121\".\n\n**What is wrong.**\n- **The lineage is an inference.** SYNTHESIS.md \u00a70, \u00a72d and \u00a74 say: \"That is an inference; no source says so.\"\n- **The same 2023 talk puts ~0.5 V beside the figure.** Slide 45 reads \"V \u2013 Reduce V until it gets too slow (~0.5V)\" / \"C \u2013 Communication (100fJ/b-mm)\", and slide 7 reads \"~0.5V today\". The page never mentions this reading. At ~0.5 V the mesh's data-dependent cost is 26\u201349 fJ, a quarter to a half of 100, which is in line with Dally's own later 20\u201340.\n- **CACM 2020 does name a process.** \"This communication costs 100fJ/bit-mm\" is in the paragraph that begins \"Accessing a small (8KByte) local memory in 14nm costs 50fJ/bit\".\n- **VLSI 2018 is misquoted.** The 20\u201340 sentence says \"In present day chips\". \"Typical 16 nm\" comes from another paragraph.\n- **\u00a78's \"105\u2013159 \u2026 brackets Dally's 100\" is false**, since 105 > 100. The lede's 84\u2013159 brackets 100 only by pairing the free-link mesh rail with the loaded board figure.\n- **Board power should not be V\u00b2-scaled for a comparison with die-level wire figures.** It includes the regulator's loss: board watts are 1.2\u20131.4\u00d7 mesh-rail watts, and the ratio rises with load.\n- **On the mesh rail alone the 0.9 V data part is 84\u2013105 fJ** (free links to loaded). That brackets 100 and is 0.7\u20130.9 of Keckler's 121.\n\n**Evidence.**\n- [Phys], [Ari].\n- [own], checked against the local copies of the talks and papers:\n  - `wire-research/lit/dally_aha2023.txt`, l.122 and l.712\u2013715;\n  - `dally_cacm2020.txt`, l.544\u2013553;\n  - `dally_vlsi2018.txt`, l.62\u201364.\n- `report.json` \u00d7 3.4435:\n  - free-link mesh rail: 83.6 (84.6 with item 2's d = 1\u20134);\n  - loaded mesh rail: 105.3;\n  - loaded board: 158.8.\n\n**Replace.**\n\n(a) The lede's last sentence:\n```text\nDally states no voltage. Scaled to 0.9 V \u2014 the voltage of Keckler 2011's 40 nm wire figure, from which his number most likely descends (an inference; no source says so) \u2014 the mesh rail's data-dependent cost is <b id=\"l-09\"></b>, so the rule of thumb holds, to within its own vagueness. Read instead at the \"~0.5V\" his 2023 talk sets beside it, the figure is two to four times what this mesh spends on the data.\n```\nIn `script.js`, set `l-09` to `${f0(UN.random_bit_data.mean*s09)}\u2013${f0(HN.random_bit_data.mean*s09)} fJ per bit\u00b7mm`. It renders \"85\u2013105\", or \"84\u2013105\" without item 2.\n\n(b) KPI 4: give `k-09` the same expression. Sub-label: `per random bit\u00b7mm, mesh rail, free links to loaded; Dally ~100, Keckler 121`.\n\n(c) \u00a71, from \"Neither says\u2026\" to \"(VLSI Symposium 2018).\":\n```text\nNeither gives a voltage or a data activity. CACM 2020 states it in a paragraph about 14 nm on-chip memory, and the 2023 talk's conclusion slide sets it beside \"Reduce V until it gets too slow (~0.5V)\" without saying it applies there. A wire's energy goes as CV\u00b2, so the voltage alone moves the number by 3.4\u00d7 between 0.9 V and 0.485 V, and \"per bit\" can mean per bit sent (random data flips half its bits) or per transition. The likeliest lineage \u2014 an inference; no source states it \u2014 runs through Keckler, Dally and colleagues (IEEE Micro 2011): 310 pJ for 256 random bits over 10 mm at 40 nm and 0.9 V, 121 fJ per bit\u00b7mm. Dally's own later numbers are 68 fJ at a projected 10 nm and 0.7 V, and 20\u201340 fJ/bit-mm \"in present day chips\" (VLSI Symposium 2018, a paper set in 16 nm).\n```\n\n(d) The first two sentences of \u00a78 `comparetext`. These numbers assume item 2, and the template needs `UN` and `UB` added.\n```text\nAt the voltage it runs at, the ET-SoC-1's mesh moves a random bit a millimetre for 25\u201333 fJ of data-dependent heat and 36\u201347 fJ in all on free links, and 31\u201346 and 50\u201373 fJ on the loaded mesh (mesh rail to board): in all, a third to three quarters of Dally's 100 taken literally. But 0.485 V is low: the same capacitance at 0.9 V would cost 3.44\u00d7 more, 85\u2013105 fJ per random bit\u00b7mm for the mesh rail's data-dependent part (free links to loaded), which brackets Dally's 100 and is 0.7\u20130.9 of Keckler's 121 (40 nm, 0.9 V). Board power would say up to 159, but it carries the regulator's loss, which is not switched capacitance on the die.\n```\n\n(e) \u00a78 chart: drop the row \"ET-SoC-1 board power data, scaled to 0.9 V\", or relabel it `board power data \u00d7 3.44 (includes regulator loss; not a die figure)`.\n\n### 2. Contention: wrong numbers and mismatched distance ranges (lede, \u00a76, model table, \u00a76 chart legend, build_wire_report.py)\n\n**Claims.**\n- Lede: \"contention costs as much as a third more distance\".\n- \u00a76: \"(none at one hop, up to 72% of link-hops at five or six)\"; \"At one hop, where neither set shares, the two agree\"; \"flits held in router buffers and arbitrated rather than passing straight through\".\n- Free-link board figures: 44 fJ/mm; 107 and 55 fJ per bit per hop.\n\n**What is wrong.**\n- **\"A third\" matches no number on the page.** Loaded over free is 50/36 = 1.39 on the mesh rail and 73/44 = 1.67 on board power. The like-for-like per-hop totals over d = 1\u20134 give 1.45 and 1.66.\n- **The sharing figures are wrong.** From the recorded target maps with XY routing, link sharing is 0/22/32/55/72% at d = 1/2/3/4/6 (78% at d = 6 with YX). The all-pairs set has no d = 5, and within the compared d = 1\u20134 the maximum is 55%.\n- **At d = 1 the two sets do not fully agree on the mesh rail.** The data-dependent parts agree (+1.7%), but the loaded totals are +2.9% (random) and +5.3% (zeros). The pass-to-pass scatter is about 0.5%. The all-pairs one-hop map puts two readers on some targets. Board power agrees within 0\u20132%.\n- **The distance ranges differ.** The free-link headline fits wsep over d = 1\u20135, but the loaded set is fitted over d = 1\u20134.\n  - `analyze_wire.py` says the comparison is \"over the same distances 1-4\" and computes `wsep_d1_4`, but `build_wire_report.py` uses `wsep`.\n  - On the mesh rail the difference is small: data 90.4 \u2192 91.4, zeros 43.1 \u2192 43.4.\n  - On board power it matters: data 107 \u2192 122, zeros 55 \u2192 52, free-link total 43.8 \u2192 46.7 fJ/mm. wsep's readers fall from 31 to 14 shires, and board power per rail watt rises with load, which is what depresses its d = 5 board point.\n- **The mechanism is overstated.** Per-reader bandwidth is within 1\u20136% between the sets at each d = 1\u20134 (45.7/46.7, 41.4/41.9, 37.3/38.0, 32.8/34.8 GB/s), so flits are not held long. The link-disjoint set also has only straight paths, one reader per target and fewer readers.\n- **The board contrast is inflated by about 10%.** Board watts per mesh-rail watt rise with load: 1.22\u20131.27 at wu d = 1\u20132 against 1.36\u20131.37 at d = 4\u20136.\n\n**Evidence.**\n- Sharing: all five analyses agree.\n- d = 1: [A], [B], [Art], [own].\n- Distance ranges: [Art], [Ari], [Phys], [own] (`combine/newhead.py`).\n- Bandwidth: [Art], [Phys], [own].\n- Board/rail ratio: [Art].\n\n**Replace.**\n\n(a) In `build_wire_report.py`, use `dj[key][\"wsep_d1_4\"]` for the uncontended headline and fix the comment \"(wsep, d = 1-5)\". In `script.js`, change the \u00a76 legend's `dj.wsep` to `dj.wsep_d1_4`.\n\nExpected results:\n- mesh rail: 24.6 + 11.7 = 36.2 fJ/mm (91 and 43 fJ per bit per hop);\n- board: 32.7 + 14.0 = 46.7 (122 and 52);\n- the lede then renders \"36 fJ \u2026 25 of it \u2026 says 47 fJ\", and KPI 2 renders \"25 + 12 fJ\".\n\nIf d = 1\u20135 is kept instead, state on the page: \"free-link board figure 107 fJ per bit per hop over 1\u20135 hops, 122 over 1\u20134\".\n\n(b) Lede:\n```text\nOn a busy mesh, where flows share links, the same bit costs <b id=\"l-load\"></b>: <b>contention adds about 40% per millimetre on the mesh rail, and 55\u201365% on board power.</b>\n```\n\n(c) \u00a76 `conttext`:\n```text\nIn the all-pairs traffic of sections 4 and 5, flows share links more as the distance grows (none at one hop, 22\u201332% of link-hops at two and three, 55% at four, 72% at six). The second run added pairs chosen so that no two flows share a link and every scratchpad has one reader. At one hop, where neither set shares a link, the data-dependent parts agree within 2%, and the totals within 3% for random data and 5% for zeros on the mesh rail (the all-pairs one-hop map puts two readers on some targets). Beyond one hop the loaded mesh climbs faster: over the same one to four hops, 119 against 91 fJ per bit per hop for the data-dependent part and 76 against 43 for the rest, on the mesh rail. That is energy the loaded mesh spends beyond carrying the bits, most likely buffer writes and arbitration where flows meet; flits are not held long, since each reader's bandwidth is within 6% of what it gets on free links. It raises the data-independent part proportionally more (+76% against +30%). The link-disjoint set also has only straight paths, one reader per target and fewer readers at long distances (31 shires at one hop, 14 at five), but straight x-only flows that do share links (v1, one to three hops: 122\u2013127 and 72 fJ) cost about as much as the loaded mesh, which points to sharing rather than turns. On board power the contrast is larger (122 against 186, 52 against 103) but noisier (96\u2013146 over passes for the free-link data part), and about 10% of it is the regulator's loss growing with load.\n```\n\n### 3. \"A one costs more than a flip\" is a property of the fit, not an established fact (\u00a75 title, KPI 3, lede, \u00a73, \u00a75)\n\n**Claims.**\n- Title: \"A one costs more than a flip\".\n- KPI 3: \"a carried 1 costs more than a transition\".\n- Lede: \"A stream of all ones, which never flips, costs as much as random data.\"\n- \u00a75: \"the frozen line \u2014 half ones, no transitions at all\".\n\n**What is wrong.**\n- **The coefficients are solid; the ranking is not.** a = 98 and b = 129 fJ per hop on the mesh rail reproduce, but they do not show that a one costs more than a flip.\n- **Ordinary logic gives this exact model.** Static logic whose output rests at 0 when no flit is present (a crossbar output with no grant, or data gated by valid) produces a = f\u00b7E_t and b = 2(1\u2212f)\u00b7E_t, where f is the fraction of flits followed directly by another.\n- **Under that reading, b > a is an artifact of the parameterization.**\n  - The measured b/a gives f \u2248 0.6 (0.58\u20130.61 on both meters and both sets) and E_t \u2248 163 fJ per transition per hop. That is about 370 fF/mm, ordinary wire capacitance.\n  - Each one is simply two ordinary transitions at the ends of a train, so b > a does not make a one costlier than a flip.\n  - An all-ones stream's wires do flip, at the ends of each train.\n- **The mechanism is open.** Precharged buffer read lines are the other candidate; dynamic logic is unlikely in a synthesized NetSpeed NoC. The data cannot pick between them.\n- **\"As much as random\" holds per hop, not in total.** All-ones costs 5\u20139% more per hop than random data. At one hop it costs a third less in total (mesh rail 1.54 against 2.40 pJ/B, board 5.66 against 9.03), because it pays almost no exit step (item 6).\n\n**Evidence.** [Phys] refutes the interpretation; its parity term comes out at \u22120.4 fJ with the rms unchanged. [own] computed f = 0.603, E_t = 163 fJ and the one-hop totals.\n\n**Replace.**\n- \u00a75 title: `5. Ones cost energy, not just flips`.\n- KPI 3 label: `Per one-bit vs per flit-to-flit difference, per mm`. Sub-label: `mesh rail, loaded mesh: fitted coefficients, not a physical ranking (\u00a75)`.\n- Lede, the two sentences that begin \"And what costs is surprising\":\n```text\nAnd <b>what costs is surprising</b>: not only bits that differ between consecutive flits, but the <em>ones</em> carried. A stream of all ones, which never changes from one flit to the next, costs as much per hop as random data (5\u20139% more), though at one hop it costs a third less in all.\n```\n- \u00a73: replace \"(so two consecutive flits differ in a bit with probability 2P(1\u2212P), whichever flows interleave)\" with `(so two consecutive data flits differ in a bit with probability 2P(1\u2212P): a difference rate between flits, not necessarily the transition rate on the wires)`.\n- \u00a75: replace \"no transitions at all\" with `no differences between flits at all`.\n- \u00a75, the sentence `script.js` injects: `On the mesh rail, on the loaded mesh, the fit gives <b>26 fJ per mm</b> per flit-to-flit difference and <b>35</b> per one carried, the same within a few percent on both cards (\u2026).`\n- \u00a75 mechanism, from \"A cost per one-bit that does not need the bit to change\" to \"ones are not.\":\n```text\nA cost per one-bit that does not need the bit to differ from the previous flit needs wires or nodes that rest at 0. The simplest case is ordinary logic whose output goes to 0 when no flit is present \u2014 a crossbar output with no grant, or data gated by valid. Then each one rises and falls at the ends of a train of flits, and a and b are the same energy per transition, split by how often flits come back to back: the fitted b/a puts that at about 60%, and a transition near 160 fJ per hop (370 fF/mm), ordinary wire capacitance. Precharged structures, such as buffer arrays with precharged read lines, would also do it. Either way it matters for anyone encoding data for this mesh: <b>zeros are cheap to move, ones are not</b>.\n```\n- Keep \"The fit cannot say which circuit it is; \u2026\", and add after that clause: `slowing the flows at a fixed distance would.`\n- The bus-inversion sentence is item 11.\n\n### 4. \u00a78 interpretation: \"where 40 nm wires were\" and \"the rest is the routers\"\n\n**Claims.**\n- \"In capacitance per millimetre of mesh travel, routers included, this 7 nm chip is where 40 nm wires were; its advantage is almost all V\u00b2.\"\n- \"A bare 7 nm wire \u2026 12\u201324 fJ \u2026 a third to a half of what the mesh measures: the rest is the routers' flops, buffers and crossbar, and the extra paid for ones.\"\n\n**What is wrong.**\n- **The mesh is not at Keckler's level.** At equal voltage the mesh rail's data part is 0.70 (free links) to 0.87 (loaded) of Keckler's figure, which is 35.1 fJ at 0.485 V.\n- **Parity would be expected, not a finding.** Wire capacitance per mm hardly changes between nodes: Keckler 2011 says so, and Dally 2018 writes \"about 200fF/mm and independent of scaling\".\n- **The page's own references disagree by 2\u00d7.** Its first-principles wire at 0.9 V is 41\u201381 fJ (`report.json` `first_principles.at_09`), half of Keckler's 121.\n- **\"A third to a half\" fits only the loaded board number.** The 12\u201324 fJ bare wire is half to all of the free-link mesh-rail data cost (24.6). With that cost at the top of the bare-wire range, \"the rest is the routers\" does not follow.\n\n**Evidence.** [Phys], [Ari], [own].\n\n**Replace** both sentences with:\n```text\nAt equal voltage the mesh rail's data-dependent cost per random bit\u00b7mm, routers included, is 0.7\u20130.9 of Keckler's 40 nm repeated-wire figure (35 fJ at 0.485 V). Wire capacitance per mm barely changes between process nodes (Dally 2018: \"about 200fF/mm and independent of scaling\"), so that is roughly what one would expect, and the mesh's advantage over the 0.9 V literature is mostly V\u00b2. A plain repeated wire estimated from a predictive 7 nm kit (ASAP7) with Ho's repeater factors would cost 12\u201324 fJ per random bit\u00b7mm at 0.485 V (41\u201381 at 0.9 V, half of Keckler's figure, which therefore holds more than an ideal wire or counts differently). The free-link mesh-rail data cost, 25, is at the top of that range; these data cannot say how much the routers add.\n```\n\n### 5. \u00a79: the DRAM and fadd comparisons mix meters\n\n**Claims.**\n- \"the farthest on-chip hand-off is still 6\u20138\u00d7 cheaper than going to DRAM\";\n- \"each hop adds a third to a half of what reading the byte from the shire's own scratchpad costs\";\n- \"a 32-bit operand crossing one hop costs 6.0\u20138.7 pJ, about one lane of \u2026 fadd.ps (5.3 pJ) \u2026 a floating-point add is worth roughly a hop\".\n\n**What is wrong.**\n- **The reference costs are board power.** The DRAM (122 pJ/B), own-scratchpad (4.21 pJ/B) and fadd.ps (42.2 pJ) figures are leakage-corrected board power from the energy manual. The 8\u00d7 end, the \"a third\" end and the 6.0 pJ end of each claim use the mesh rail.\n- **The DRAM ratio, board to board:**\n  - the ten hops alone are 7.81/1.39 = 5.6\u00d7 cheaper;\n  - the whole hand-off, including the far scratchpad read and leaving the shire, is 4.3\u00d7 cheaper. The board line for wu at P = \u00bd gives 6.79 + 10 \u00d7 2.18 = 28.6 pJ/B, or 1.83 nJ per line.\n- **The fadd comparison, board to board.** One hop for a 32-bit operand is 8.7 pJ, which is 1.65 fadd.ps lanes. An add is therefore worth about 0.6 hop, or 2.3 mm.\n- **The ten hops are an extrapolation.** The data stop at d = 6, and on the loaded mesh the per-hop cost rises at d = 4.\n\n**Evidence.** [Ari], [Phys], [Art], [own].\n\n**Replace** from \"A 64-byte line carried across the whole die\" to the end of the paragraph with:\n```text\nA 64-byte line carried across the whole die \u2014 10 hops, about 37 mm corner to corner, extrapolated from the 1\u20136 hops measured \u2014 costs 1.0\u20131.4 nJ in hops alone, against 7.8 nJ to read the same line from DRAM and 0.27 nJ from the shire's own scratchpad (the energy manual, board power). On the same meter the ten hops are 5.6\u00d7 cheaper than the DRAM read, and the whole hand-off \u2014 the far scratchpad read and leaving the shire included, about 1.8 nJ per line \u2014 is about 4\u00d7 cheaper. Each hop adds about half of what reading the byte from the shire's own scratchpad costs (2.17 against 4.21 pJ, board power). In Dally's currency \u2014 \"an add is worth 10 \u00b5m of movement\" \u2014 a 32-bit operand crossing one hop costs 8.7 pJ of board power (6.0 on the mesh rail alone), about 1.6 lanes of an eight-lane fadd.ps on random data (5.3 pJ, with its share of instruction issue), so on this chip a floating-point add is worth a little over half a hop \u2014 about 2 mm \u2014 of movement.\n```\n\n### 6. \u00a74: \"linear\", \"the same amount with every hop\", \"about one hop more\", \"all-ones near random\"\n\n**What is wrong.**\n- **The d = 4 point sits above the line.** In the loaded sweep, d = 4 lies above the line through d = 1, 2, 3 and 6. v1 behaves the same way.\n\n  | Pattern | Mesh rail | Board power |\n  |---|---|---|\n  | Random | +5.6% | +4.7% |\n  | Zeros | +6.8% | +2.6% |\n  | All ones | +14.8% | +12.0% |\n\n  This coincides with shared link-hops rising from 32% to 55%. The link-disjoint set wsep is linear to 1\u20132%.\n- **The exit step depends on meter and pattern.** Measured as line intercept minus the d = 0 value, in hops:\n  - board, random: 1.1;\n  - mesh rail, random: 0.55\u20130.7; random minus zeros: 0.7; zeros: 0.3\u20130.7, depending on the fit range;\n  - wsep, mesh rail: about 1.1;\n  - all ones: \u22120.1 to +0.1 on both meters.\n- **All ones is not near random at short distance.** It is 36% below random at one hop. On the mesh rail it meets the random line by d = 4; on board power it is still 15% below at d = 6.\n\n**Evidence.** [A], [B], [Art], [Phys], [Ari], [own] (`combine/checks.py`).\n\n**Replace.** Heading: `4. Energy grows nearly linearly with distance`. Paragraph:\n```text\nOn the mesh rail the data-dependent energy is zero at d = 0 (under 2% of its one-hop value: the shire's own scratchpad does not use the mesh) and grows by nearly the same amount with every hop out to 6. On this loaded mesh the step from three to four hops is larger \u2014 the four-hop point sits 3\u20137% above the straight line for random data and zeros, 12\u201315% for all ones \u2014 where the share of link-hops on shared links jumps from 32% to 55%; with link-disjoint flows (section 6) the growth is linear to 2%. Leaving the shire adds a step of its own (the mesh-stop crossings) whose size depends on the data and the meter: about one hop's worth for random data on board power, half to three quarters of a hop on the mesh rail in this sweep (about one with link-disjoint flows), and almost nothing for all-ones data. The lines fan out with the density of ones; the all-ones line (P = 1) starts a third below the random one at one hop and climbs 5\u20139% faster.\n```\n\n### 7. \u00a77: the explanation for the 256-byte shortfall is contradicted\n\n**Claim.** \"about 60% do, which is what lines from the other in-flight load and from other flows slipping in between on the same lane would do\".\n\n**What is wrong.**\n- **The fraction is the same at every distance.** On the mesh rail it is 0.52, 0.48 and 0.53 of the per-distance full-flip prediction at d = 1, 3 and 6, and 0.54 per hop. On board power it is 0.69 per hop. That holds at d = 1, where no link is shared, and at d = 6, where 72% of link-hops are.\n- **Other flows would not give a constant fraction.** Their share rises from none to 72% over that range.\n- **The other in-flight load is also unlikely.** In v1 its lines are identical to the first load's, so interleaving line by line would halve v1's random-data transition coefficient. Instead v1 and v2 agree: 95 against 98 fJ.\n- **\"About 60%\" depends on the reference.** It is measured against the v1 board model line (0.58). Against the measured 16\u2013128 B level it is 0.69 on board power and 0.54 on the mesh rail.\n- **Most of the excess is paid on leaving the shire.** On the mesh rail it is 1.26 pJ/B at one hop, against 0.41 for each further hop.\n\n**Evidence.** [Phys] (`perd_v1.py`), [Ari], [Art], [own].\n\n**Replace** the last sentence of \u00a77 with:\n```text\nThe 256-byte pattern costs less than the model predicts if every bit flipped on every flit (dashed): its extra cost per hop is about two thirds of that on board power and about half on the mesh rail, the same at one hop, where no link is shared, as at six, where 72% are \u2014 so it is not other flows slipping in, and the other in-flight load is unlikely too (in v1 its lines are identical to the first load's, yet v1's transition cost equals v2's). Why is open; one possibility is that when all wires flip the same way together, the capacitance between neighbours is not charged. Most of the excess is paid on leaving the shire (1.26 pJ/B at one hop on the mesh rail, 0.41 per further hop).\n```\n\n### 8. \u00a710: \"x-only and y-only paths cost the same within 2%\"\n\n**What is wrong.**\n- **The y value rests on one card.** The y value (128) comes from aifoundry3 alone, because all six aifoundry2 y-only 3-hop bursts were dropped.\n- **Neither comparison is within 2%.**\n  - The pooled difference is 2.4% (124.6 against 127.6).\n  - The same-card difference on aifoundry3 is 4.4% (122.2 against 127.6), and 4.1% on board power.\n- **aifoundry3's y-only 3-hop point is suspect.** Those bursts had occasional slow meter readings, up to 0.55 s. Their zeros point is high: 2.23 pJ/B, against 2.00 for x. Dropping these bursts gives y = 112, 10% below x.\n- **Over one and two hops, y is below x on both cards.** x is 135 and 134, y is 121 and 118: 10\u201312% lower.\n- **The axis sets also differ in load.** They have different reader counts and link sharing: x 56\u201369%, y 41\u201376% at d = 2\u20133.\n- **The equal pitches rest on the geometry, not on these energies.**\n\n**Evidence.** [A], [Art], [Phys], [Ari], [own].\n\n**Replace** the first sentence of the \"Router against wire\" bullet with:\n```text\nEvery hop is one router plus one pitch of link, and the x and y pitches are equal to within 1% on the die plot, so the experiment cannot split a hop's energy between the router's flops and crossbar and the wire itself. (The x-only and y-only sets agree only to about 10% \u2014 y is 10\u201312% below x over one and two hops on both cards, and 4% above over one to three hops on aifoundry3, the only card with a usable three-hop y point \u2014 and they differ in link sharing, so they do not test this.)\n```\n\n### 9. The board-power coefficients depend on the leakage treatment (\u00a75 table, \u00a76, \u00a710)\n\n**What is wrong.** The bars show the range over passes and cards, not the sensitivity to method.\n- **The leakage correction moves the board coefficients.** Without it:\n  - v2 board a is about 161 fJ ([A] 162, [B] 162, [Art] 160) against the reported 151;\n  - v2 board b is 198\u2013200 against 192;\n  - on aifoundry2 alone, a is 171\u2013172 and b 204\u2013209;\n  - v1 board a ranges from 137 to 162 across the reductions.\n- **The pipeline's leak model over-corrects aifoundry3.** It uses 0.33 W/\u00b0C where idle regressions give 0.22\u20130.24. That changes the coefficients by 1% or less.\n- **The mesh-rail coefficients are robust.** They agree within 3% across all three reductions.\n\n**Replace.** Append to the \u00a710 bullet \"Board against rail\":\n```text\nBoard-power numbers also depend on the leakage correction \u2014 without it the board coefficients come out 4\u20137% higher in v2 (a 161 fJ against 151) and up to 16% for v1's a \u2014 and board power per mesh-rail watt rises with load (about 1.22 at light to 1.37 at heavy mesh load), so contrasts between light and heavy traffic are about 10% larger on board power than on the die. The mesh-rail coefficients agree within 3% across three independent reductions.\n```\n\n### 10. \u00a710: \"The meter can be starved\"\n\n**What is wrong.**\n- **The ring numbers are wrong.** These data contain no ring bursts between shires s and s+16. The energy manual measured them at a median of 75\u2013146 ms per reading, and the observability report gives \"150 ms instead of 22\", not 0.8\u20131.6 s.\n- **0.8\u20131.6 s belongs only to aifoundry2's y-only 3-hop set.** Each burst had 2\u20133 readings, with medians of 0.80\u20131.59 s and a maximum of 1.62 s.\n- **aifoundry3 also slowed, and its bursts were kept.** On the same traffic it had a normal median of 21\u201322 ms but occasional readings of 0.23\u20130.55 s. Those bursts carry item 8's y value.\n- **Queue poisoning is not claimed on the page.** \"A sampler killed mid-request poisons the queue\" appears nowhere on the page and cannot be tested from these data, so no change is needed.\n\n**Evidence.** [Art], [Ari], [Phys], [own] (`combine/slowreads.py`); `manual.json` `reruns.dropped`.\n\n**Replace** the bullet with:\n```text\n<b>The meter can be starved.</b> On aifoundry2 the set of y-only pairs 3 hops apart slowed the service processor's management path so much (0.8\u20131.6 s per reading instead of 22 ms) that each burst had two or three readings; those six bursts are dropped. On aifoundry3 the same traffic delayed occasional readings to 0.2\u20130.55 s; those bursts were kept, and they give the only y-only three-hop point. Rings between shires s and s+16, measured for the energy manual and not part of this run, also starve it: about 150 ms per reading, with the board reading frozen for seconds.\n```\n\n### 11. \u00a75: \"an all-ones stream would travel almost free\"\n\n**What is wrong.**\n- **Complementing all ones gives all zeros, which is not free.** All zeros still pays the data-independent part: 74 of 203 fJ per bit per hop on the loaded mesh rail, or 36%.\n- **For random data the saving is about 1%.** Per-flit inversion of 512 bits moves the density of ones only from 0.50 to about 0.48.\n- **Only software can choose the representation here.** The mesh is fixed hardware.\n\n**Evidence.** [Phys], [own].\n\n**Replace** the bus-inversion sentence with:\n```text\nStoring or sending ones-dense data complemented would make it cost what its complement costs: all-ones data would then cost what zeros cost, about a third of its present per-hop cost, since the data-independent part remains. For random data a per-flit inversion code would save about 1%. On this chip the mesh is fixed, so only software can choose the representation.\n```\n\n## Minor corrections\n\n1. **\u00a73.** \"Each burst \u2026 bracketed by idle on both sides, corrected for the extra leakage\" is true of board power only. Add: `The mesh rail is read over the burst's last 0.6 s against the idle before it, without a leakage correction (about 2%, roughly cancelling a 2.5% under-correction of the meter's 1 s filter).` Sources: [Art], [B].\n2. **\u00a72.** After \"per mm of mesh travel, one router and one link per 3.72 mm\", add: `\u2014 per mm of displacement; the metal actually routed can only be longer, so per mm of wire the cost would be lower.` Source: [Phys].\n3. **\u00a75.** Replace \"to a few hundredths of a pJ/B\" with `to 0.01 pJ/B per hop on the mesh rail and 0.04 on board power`. Source: [Ari].\n4. **Hop range.** \"3.64\u20133.76 mm\" does not follow from the three readings in `pitch.json`, which give 3.637\u20133.735. Use `3.64\u20133.74` in `INPUTS.hop_mm.range`, \u00a72, SYNTHESIS.md and the research README. The effect on the per-mm numbers is 0.3% or less. Source: [Ari].\n5. **\u00a77, the flit-width sentence.** Replace \"if it were 32 or 16 bytes, the 16- and 32-byte patterns would flip\u2026\" with `with 32-byte flits the 32-byte pattern would flip on every flit, and with 16-byte flits the 16- and 32-byte patterns would too, on every or every other flit; neither costs more.` Source: [Phys].\n6. **\u00a710, \"Fixed per-hop cost\".** Replace \"The data-dependent part is immune to this.\" with `Even if all of the one-hop zeros energy were cost per second, it would explain at most a quarter of the link-disjoint fixed part and a fifth of the loaded one. The data-dependent part is immune to per-second costs that do not depend on the data (P = \u00bd and P = 0 run at the same bandwidth); a per-cycle cost of ones held in the mesh would still look per-hop.` Sources: [Art], [Phys].\n7. **\u00a710, \"Voltage scaling\".** Add: `gate capacitance is somewhat lower near threshold, so constant-C scaling slightly understates the 0.9 V figure for full-swing links; low-swing links would make it overstate.` Source: [Phys].\n8. **KPI 2 sub-label and model table.** Say that the loaded figures come from the ones/transition model fitted over 1\u20136 hops. The like-for-like wu d = 1\u20134 figure used in \u00a76 is 32 + 21 = 53 fJ/mm on the mesh rail. Source: [A].\n9. **No page change needed: card-to-card agreement is not an independent check on order effects.** Both cards ran the same shuffled order (seeds 11\u201313) at the same time, so only the three passes are independent. Per-burst residuals do not depend on the previous burst (|r| \u2264 0.18). Source: [Art].\n\n## Repository and pipeline fixes (not page text)\n\n1. **`research/lit/first-principles-estimate.md` is the wrong file.** It is OpenROAD's \"Parasitics estimation\" manual (`set_wire_rc`), but `research/README.md` describes it as the estimate. Replace it with the arithmetic of SYNTHESIS \u00a71f, or delete it and point to `lit/wire_calc.py`. Source: [Phys], confirmed by [own].\n2. **SYNTHESIS.md carries superseded numbers.** Its \u00a70 and \u00a72 give the E27 values: d = 8, q = 0.445, 35/26 fJ, \"101\u2013137 fJ at 0.9 V\" and \"the capacitance per mm of a repeated wire from 2003\u20132011\". The page cites the file for its sources. Add a first line saying its measured numbers are superseded by the 24 September `wire.json` and `report.json`. Source: [Phys], confirmed by [own].\n3. **`analyze_wire.py` mislabels the starved bursts.** It logs the six aifoundry2 bursts as \"too few samples\" because the sample-count check runs before the `took_ms` check. Check `took_ms` first, or label them \"service processor starved\". Sources: [B], [Art], [own].\n4. **`analyze_wire.py`'s \"over the same distances 1-4\" comment conflicts with the headline's use of `wsep` (1\u20135).** Item 2(a) resolves this.\n5. **`build_wire_report.py`'s \"V^2 scaling of the mesh-rail numbers\" comment conflicts with the page,** which also scales board power. Item 1 resolves this.\n\n## Confirmed\n\n- **The d = 0 null.** The mesh-rail data-dependent part is 0.01\u20130.03 pJ/B at d = 0, against 1.53\u20131.59 at d = 1: under 2%.\n- **The mesh-rail model (C2).**\n  - Coefficients: v2 a 97\u201399 and b 128\u2013131 fJ; v1 95\u201398 and 129\u2013131.\n  - Fit rms: 0.005\u20130.009 pJ/B/hop on the mesh rail, 0.02\u20130.04 on board power.\n  - Complement tests: 128\u2013133 fJ for \u00be against \u00bc, and 128\u2013129 for all ones against all zeros.\n  - P and 1\u2212P differ, and all ones costs 5\u20139% more per hop than random.\n  - The frozen line sits on the model. Its residual is \u22120.01, and the wu-only fit predicts 1.097 against 1.089 measured. Its 244/512 ones were checked with a reimplementation of mt19937_64 (seed 1).\n  - There is no parity or header term.\n  - With the pipeline's leakage model, the board coefficients reproduce exactly (151/192).\n- **The ones effect belongs to the mesh.**\n  - It is on the mesh rail, grows with hops and is absent at d = 0.\n  - Bandwidth is the same for every P at each d.\n  - The SRAM rail is flat in d (6 fJ/bit/hop).\n  - Prefill ends more than 5 s before each burst and never raises the mesh rail.\n- **Contention on the mesh rail (C3).**\n  - Data-dependent part: wsep 90.6/90.1 (91\u201392 by [B]) against wu 119 (119\u2013122). Zeros: 43 (43\u201346) against 76 (75\u201377).\n  - The gap survives a mesh-rail leakage correction (116\u2013119 against 89).\n  - Per-reader bandwidth and the number of readers do not explain it. A global per-time cost would steepen wsep instead.\n- **Geometry.**\n  - Pitches are 3.73 \u00d7 3.70 mm, and \u221a(3.73 \u00d7 3.70) = 3.715.\n  - The tiles are square within 1%: the pitch ratio is 1.008 in all three copies of the plot.\n  - The shire grid spans 86% of the die width.\n- **The \u00a78 and KPI arithmetic.**\n  - Every per-mm conversion checks, and (0.9/0.485)\u00b2 = 3.4435.\n  - The literature numbers check:\n    - Keckler: 310 pJ/(256 b \u00d7 10 mm) = 121 fJ;\n    - Yale Patt 75: 68 fJ;\n    - CACM 2022: ~30;\n    - VLSI 2018: 20\u201340.\n  - The AHA 2023 slide 8 and CACM 2020 \"100fJ/bit-mm\" quotes are verbatim.\n  - The first-principles wire is 11.8\u201323.5 fJ at 0.485 V.\n- **Lanes (C6).**\n  - Blocks of 16\u2013128 B cost the same: 1.06\u20131.09 pJ/B/hop on the mesh rail and 1.46\u20131.54 on board power.\n  - 256 B blocks cost +0.76 pJ/B/hop on board power (both cards) and +0.41 on the mesh rail.\n  - The lane is chosen by PA[7:6] in the clean-room `shirecache_mesh_master.sv`.\n  - `etsoc_shire_other_esr.h` lists 4 to_l3 masters and 4 L3 slaves per shire.\n  - Bandwidth and readers are identical for every block size.\n- **The \u00a79 arithmetic.**\n  - 1.50\u20132.17 pJ/B per hop;\n  - 0.96\u20131.39 nJ for a line over 10 hops;\n  - DRAM 7.81 nJ;\n  - one fadd.ps lane 5.27 pJ;\n  - a 32-bit operand over one hop 6.0\u20138.7 pJ;\n  - 10 hops is the Manhattan diameter of the minion grid.\n- **Starvation.** The aifoundry2 y-only 3-hop starvation is real. Every reduction drops those six bursts; [A]'s stricter rule also drops four aifoundry3 bursts (item 8).\n- **Measurement hygiene.**\n  - The clock was at 600 MHz (minion) and 400 MHz (NoC) in all 756 burst windows.\n  - No heater ran.\n  - Every burst lasted 3.21 s.\n  - Independent mesh-rail reductions are within 2.5% of the pipeline, uniformly across hops.\n  - There is no d-dependent bias from prefill, idle drift or the clock.\n\nFiles:\n- my checks: `/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/combine/checks.py`, `newhead.py` and `slowreads.py`;\n- upstream analyses in the same folder: `indep/`, `methodB/`, `artifacts/`, `physics/`, `arith/`.",
+ "reanalyses": [
+  {
+   "method": "Independent re-derivation (did not import or copy analyze_wire.py; I read it only afterwards to compare). Scripts are in /tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/indep/.\n\nMethod A, per (cfg, pass) burst, in bursts.py:\n- t0 = first launch start, t1 = last launch end, wall = t1 - t0, bytes = sum of the launches' bytes.\n- Board: mean board_w over [t0+0.5 s, t1] minus the mean of the idle samples in [t0-3.2 s, t0) and (t1, t1+3.2 s]. Samples inside any marks.jsonl window (padded 0.2 s before and 0.6 s after) are excluded.\n- NoC rail: (mean sp.noc_w[0] over [t1-0.6 s, t1] minus its mean over [t0-2.5 s, t0)) / 0.94.\n- pJ/B = dW x wall / bytes.\n- A burst is dropped if any sample within 3.2 s of it has took_ms > 300 or a gap > 400 ms. That drops 6 bursts on aifoundry2 (every waxis/y/hop3 burst, reads of 1.15-1.62 s, the same 6 the pipeline drops) and 4 on aifoundry3 (waxis/y/hop3, reads of 0.40-0.55 s, which the pipeline keeps). No leakage correction.\n\nFits, in fits.py:\n- Straight line of pJ/B against d, using all 3 passes pooled per card: d = 1,2,3,4,6 for wbern and wu, 1,3,6 for wfrz, mean_hops 1-5 for wsep.\n- slope(P) = s0 + a*2P(1-P) + b*P over wu P in {0, 1/4, 1/2, 3/4, 1} plus wfrz (P = 244/512, t = 0). v1 uses wbern over 7 P values. Conversion: fJ per bit per hop = pJ/B/hop x 125.\n- Contention: slope(random) - slope(zeros) for wsep over mean_hops 1-5, and for wu over d = 1-4.\n\nPer-pass replicates for spreads are in perpass.py.\n\nTo size the leakage correction, I ran the fits again after subtracting the pipeline's leak model per burst (A = 23.257 W, T_L = 36 C, minshire temperature, burst vs idle). On average the correction is 0.53 W on aifoundry2 and 0.28 W on aifoundry3, against 10-11 W over idle: 2.7-5.1% of the over-idle power, up to 15% in one burst. It touches only board power, where it lowers a by about 5-7%, b by about 4%, s0 by about 4%, and the contention numbers by about 2-6%.\n\nLink sharing (sharing.py): I computed it from each config's target_map, using XY and YX routing on the runner's logical MESH coordinates.\n\nUnits: \"per hop\" is per payload bit per hop unless marked pJ/B. \"avg\" means the fit on card-averaged slopes, which is the same as the mean of the per-pass fits.",
+   "results": [
+    {
+     "quantity": "C1 NoC data-dependent part (P=0.5 minus zeros) at d=0, v2 wu",
+     "card": "aifoundry2",
+     "meter": "noc",
+     "value": 0.03,
+     "report_value": "~0",
+     "agrees": true,
+     "note": "pJ/B; about 2% of the 1.57 pJ/B at d=1"
+    },
+    {
+     "quantity": "C1 NoC data-dependent part (P=0.5 minus zeros) at d=0, v2 wu",
+     "card": "aifoundry3",
+     "meter": "noc",
+     "value": 0.017,
+     "report_value": "~0",
+     "agrees": true,
+     "note": "pJ/B; d=1 value is 1.53 pJ/B"
+    },
+    {
+     "quantity": "C1 NoC data-dependent per-hop slope (P=0.5 minus zeros), wu d=1-6",
+     "card": "aifoundry2",
+     "meter": "noc",
+     "value": 0.915,
+     "report_value": "constant per hop",
+     "agrees": true,
+     "spread": "hop-to-hop steps 0.89, 0.92, 1.06, 0.83 pJ/B/hop",
+     "note": "pJ/B/hop (114 fJ/bit/hop). Constant within about +-12%"
+    },
+    {
+     "quantity": "C1 NoC data-dependent per-hop slope (P=0.5 minus zeros), wu d=1-6",
+     "card": "aifoundry3",
+     "meter": "noc",
+     "value": 0.887,
+     "report_value": "constant per hop",
+     "agrees": true,
+     "spread": "steps 0.88, 0.89, 1.11, 0.74 pJ/B/hop",
+     "note": "pJ/B/hop"
+    },
+    {
+     "quantity": "C1 extra hops for leaving the shire, data-dependent part: (line intercept - hop0)/slope",
+     "card": "aifoundry2",
+     "meter": "noc",
+     "value": 0.69,
+     "report_value": "about 1 hop",
+     "agrees": false,
+     "note": "On P=0.5 total energy it is 0.53-0.56 hop, on zeros 0.29, and on all-ones (P=1) -0.09, i.e. no extra hop at all"
+    },
+    {
+     "quantity": "C1 extra hops for leaving the shire, data-dependent part",
+     "card": "aifoundry3",
+     "meter": "noc",
+     "value": 0.74,
+     "report_value": "about 1 hop",
+     "agrees": false,
+     "note": "P=0.5 total 0.56 hop, zeros 0.29, P=1 -0.09"
+    },
+    {
+     "quantity": "C1 extra hops for leaving the shire, data-dependent part",
+     "card": "aifoundry2",
+     "meter": "board",
+     "value": 1.16,
+     "report_value": "about 1 hop",
+     "agrees": true,
+     "note": "P=0.5 total 1.05, zeros 0.87, P=1 only 0.11"
+    },
+    {
+     "quantity": "C1 extra hops for leaving the shire, data-dependent part",
+     "card": "aifoundry3",
+     "meter": "board",
+     "value": 1.07,
+     "report_value": "about 1 hop",
+     "agrees": true,
+     "note": "P=0.5 total 1.06, zeros 1.03, P=1 only 0.03"
+    },
+    {
+     "quantity": "C1 linearity: d=4 point above the line through d=1,2,3,6, P=0.5 (v1 and v2, both cards)",
+     "card": "both",
+     "meter": "noc",
+     "value": 5.5,
+     "report_value": "linear",
+     "agrees": true,
+     "spread": "5-6%",
+     "note": "Percent above the line. The d=4 kink is where shared link-hops jump from 30-32% (d=3) to 55%"
+    },
+    {
+     "quantity": "C1 linearity: d=4 point above the line through d=1,2,3,6, P=1 (all-ones)",
+     "card": "both",
+     "meter": "noc",
+     "value": 12.5,
+     "report_value": "linear for every pattern",
+     "agrees": false,
+     "spread": "12-13% NoC, 10-11% board",
+     "note": "The all-ones line bends at d=4 on both cards and in both sets"
+    },
+    {
+     "quantity": "C2 v2 model a (per bit-transition per hop)",
+     "card": "aifoundry2",
+     "meter": "noc",
+     "value": 99.2,
+     "report_value": "98",
+     "agrees": true,
+     "spread": "per pass 94.4-103.2",
+     "note": "fJ"
+    },
+    {
+     "quantity": "C2 v2 model a",
+     "card": "aifoundry3",
+     "meter": "noc",
+     "value": 96.7,
+     "report_value": "98",
+     "agrees": true,
+     "spread": "91.6-101.5",
+     "note": "fJ"
+    },
+    {
+     "quantity": "C2 v2 model a",
+     "card": "avg",
+     "meter": "noc",
+     "value": 98,
+     "report_value": "98",
+     "agrees": true,
+     "note": "fJ"
+    },
+    {
+     "quantity": "C2 v2 model b (per one-bit per hop)",
+     "card": "aifoundry2",
+     "meter": "noc",
+     "value": 130.6,
+     "report_value": "129",
+     "agrees": true,
+     "spread": "127.4-132.5",
+     "note": "fJ"
+    },
+    {
+     "quantity": "C2 v2 model b",
+     "card": "aifoundry3",
+     "meter": "noc",
+     "value": 128.1,
+     "report_value": "129",
+     "agrees": true,
+     "spread": "126.9-129.8",
+     "note": "fJ"
+    },
+    {
+     "quantity": "C2 v2 model b",
+     "card": "avg",
+     "meter": "noc",
+     "value": 129.4,
+     "report_value": "129",
+     "agrees": true,
+     "note": "fJ"
+    },
+    {
+     "quantity": "C2 v2 model a, no leakage correction",
+     "card": "aifoundry2",
+     "meter": "board",
+     "value": 171.4,
+     "report_value": "151",
+     "agrees": false,
+     "spread": "162.5-183.9",
+     "note": "fJ; +13.5%. With the pipeline's leak model 161.6. Pipeline's own per-card value is 157.5"
+    },
+    {
+     "quantity": "C2 v2 model a, no leakage correction",
+     "card": "aifoundry3",
+     "meter": "board",
+     "value": 152.1,
+     "report_value": "151",
+     "agrees": true,
+     "spread": "150.7-154.7",
+     "note": "fJ; 145.0 with the leak model"
+    },
+    {
+     "quantity": "C2 v2 model a, no leakage correction",
+     "card": "avg",
+     "meter": "board",
+     "value": 161.8,
+     "report_value": "151",
+     "agrees": false,
+     "note": "fJ; +7.1%. With the leak model 153.3 (+1.5%, agrees), so the gap is the skipped leakage correction"
+    },
+    {
+     "quantity": "C2 v2 model b, no leakage correction",
+     "card": "aifoundry2",
+     "meter": "board",
+     "value": 204.2,
+     "report_value": "192",
+     "agrees": false,
+     "spread": "190.6-221.1",
+     "note": "fJ; +6.4%. With the leak model 194.0"
+    },
+    {
+     "quantity": "C2 v2 model b, no leakage correction",
+     "card": "aifoundry3",
+     "meter": "board",
+     "value": 194.7,
+     "report_value": "192",
+     "agrees": true,
+     "note": "fJ; 190.4 with the leak model"
+    },
+    {
+     "quantity": "C2 v2 model b, no leakage correction",
+     "card": "avg",
+     "meter": "board",
+     "value": 199.5,
+     "report_value": "192",
+     "agrees": true,
+     "note": "fJ; +3.9%. 192.2 with the leak model"
+    },
+    {
+     "quantity": "C2 v1 model a",
+     "card": "avg",
+     "meter": "noc",
+     "value": 95.3,
+     "report_value": "95",
+     "agrees": true,
+     "spread": "af2 94.8, af3 95.9",
+     "note": "fJ"
+    },
+    {
+     "quantity": "C2 v1 model b",
+     "card": "avg",
+     "meter": "noc",
+     "value": 131.3,
+     "report_value": "131",
+     "agrees": true,
+     "spread": "af2 133.5, af3 129.2",
+     "note": "fJ"
+    },
+    {
+     "quantity": "C2 v1 model a, no leakage correction",
+     "card": "avg",
+     "meter": "board",
+     "value": 149,
+     "report_value": "139",
+     "agrees": false,
+     "spread": "af2 155.5, af3 142.5",
+     "note": "fJ; +7.2%. With the leak model 137.4 (agrees)"
+    },
+    {
+     "quantity": "C2 v1 model b, no leakage correction",
+     "card": "avg",
+     "meter": "board",
+     "value": 203.1,
+     "report_value": "197",
+     "agrees": true,
+     "spread": "af2 213.6 (+8.4%), af3 192.6",
+     "note": "fJ; 194.7 with the leak model"
+    },
+    {
+     "quantity": "C2 model rms, v2, mean of per-pass fits",
+     "card": "avg",
+     "meter": "noc",
+     "value": 0.0085,
+     "report_value": "0.008",
+     "agrees": true,
+     "spread": "af2 0.008, af3 0.009; a single fit on pooled slopes gives 0.0064/0.0078",
+     "note": "pJ/B/hop. The frozen line's residual is -0.010/-0.015"
+    },
+    {
+     "quantity": "C2 model rms, v2, mean of per-pass fits",
+     "card": "avg",
+     "meter": "board",
+     "value": 0.037,
+     "report_value": "~0.04",
+     "agrees": true,
+     "spread": "af2 0.041, af3 0.033 (v1: 0.069/0.038)",
+     "note": "pJ/B/hop"
+    },
+    {
+     "quantity": "C2 complement test: slope(3/4)-slope(1/4), per one per hop",
+     "card": "aifoundry2",
+     "meter": "noc",
+     "value": 133,
+     "report_value": "132",
+     "agrees": true,
+     "spread": "127.2-137.8",
+     "note": "fJ"
+    },
+    {
+     "quantity": "C2 complement test: slope(3/4)-slope(1/4)",
+     "card": "aifoundry3",
+     "meter": "noc",
+     "value": 130,
+     "report_value": "132",
+     "agrees": true,
+     "spread": "124.7-133.4",
+     "note": "fJ; card average 131.5"
+    },
+    {
+     "quantity": "C2 slope(1)-slope(0), per one per hop",
+     "card": "avg",
+     "meter": "noc",
+     "value": 128.8,
+     "report_value": "129",
+     "agrees": true,
+     "spread": "af2 130.0, af3 127.5",
+     "note": "fJ. On board: 3/4 minus 1/4 gives 207.7 and 1 minus 0 gives 197.2 (202/189 with the leak model)"
+    },
+    {
+     "quantity": "C2 all-ones vs random per-hop slope (P=1 / P=0.5)",
+     "card": "both",
+     "meter": "noc",
+     "value": 1.085,
+     "report_value": "about as much",
+     "agrees": true,
+     "spread": "af2 1.646/1.521, af3 1.613/1.479 pJ/B/hop; board 2.47/2.36, 2.34/2.19",
+     "note": "All-ones costs 5-9% more per hop than random"
+    },
+    {
+     "quantity": "C3 wsep (link-disjoint) data-dependent part, random minus zeros",
+     "card": "aifoundry2",
+     "meter": "noc",
+     "value": 90.6,
+     "report_value": "90.6",
+     "agrees": true,
+     "spread": "87.5-94.6",
+     "note": "fJ/bit/hop, mean_hops 1-5"
+    },
+    {
+     "quantity": "C3 wsep data-dependent part",
+     "card": "aifoundry3",
+     "meter": "noc",
+     "value": 90.1,
+     "report_value": "90.1",
+     "agrees": true,
+     "spread": "88.7-91.4",
+     "note": "fJ/bit/hop"
+    },
+    {
+     "quantity": "C3 wu (loaded) data-dependent part, d=1-4",
+     "card": "avg",
+     "meter": "noc",
+     "value": 119.2,
+     "report_value": "119",
+     "agrees": true,
+     "spread": "af2 119.2, af3 119.2 (per pass 117.3-120.7)",
+     "note": "fJ/bit/hop"
+    },
+    {
+     "quantity": "C3 wsep zeros per hop",
+     "card": "avg",
+     "meter": "noc",
+     "value": 43.1,
+     "report_value": "43",
+     "agrees": true,
+     "spread": "af2 43.3, af3 43.0",
+     "note": "fJ/bit/hop"
+    },
+    {
+     "quantity": "C3 wu zeros per hop, d=1-4",
+     "card": "avg",
+     "meter": "noc",
+     "value": 76.4,
+     "report_value": "76",
+     "agrees": true,
+     "spread": "af2 77.3, af3 75.6",
+     "note": "fJ/bit/hop"
+    },
+    {
+     "quantity": "C3 wsep data-dependent part, no leakage correction",
+     "card": "avg",
+     "meter": "board",
+     "value": 109.8,
+     "report_value": "107",
+     "agrees": true,
+     "spread": "af2 106.7, af3 113.0 (per pass 94.5-121.7)",
+     "note": "fJ/bit/hop; +2.6%. 105.6 with the leak model"
+    },
+    {
+     "quantity": "C3 wu data-dependent part, d=1-4, no leakage correction",
+     "card": "avg",
+     "meter": "board",
+     "value": 181.1,
+     "report_value": "186",
+     "agrees": true,
+     "spread": "af2 193.5, af3 168.8 (per pass 153-204)",
+     "note": "fJ/bit/hop; -2.6%. 176.3 with the leak model (-5.2%). The af3 card value is 7% below the pipeline's af3 (181.7), so the board contention numbers depend on the idle-window choice"
+    },
+    {
+     "quantity": "C3 wsep zeros per hop",
+     "card": "avg",
+     "meter": "board",
+     "value": 55.1,
+     "report_value": "56",
+     "agrees": true,
+     "spread": "af2 57.3, af3 52.9",
+     "note": "fJ/bit/hop; 53.9 with the leak model"
+    },
+    {
+     "quantity": "C3 wu zeros per hop, d=1-4",
+     "card": "avg",
+     "meter": "board",
+     "value": 107.1,
+     "report_value": "103",
+     "agrees": true,
+     "spread": "af2 110.2, af3 103.9",
+     "note": "fJ/bit/hop; +4.0%. 100.8 with the leak model"
+    },
+    {
+     "quantity": "C3 d=1 agreement: wu over wsep, P=0.5",
+     "card": "both",
+     "meter": "noc",
+     "value": 2.9,
+     "report_value": "agree at d=1",
+     "agrees": true,
+     "spread": "af2 2.436 vs 2.367, af3 2.367 vs 2.299 pJ/B",
+     "note": "Percent excess of wu. It is systematic, much larger than the ~0.5% pass-to-pass scatter"
+    },
+    {
+     "quantity": "C3 d=1 agreement: wu over wsep, zeros",
+     "card": "both",
+     "meter": "noc",
+     "value": 5.3,
+     "report_value": "agree at d=1",
+     "agrees": false,
+     "spread": "af2 0.864 vs 0.824 (4.8%), af3 0.841 vs 0.795 (5.8%)",
+     "note": "Board agrees within 0.1-3.4%. At d=1 the wu target maps put 2 readers on some targets, while wsep has 1 reader per target"
+    },
+    {
+     "quantity": "C3 share of link-hops on a shared directed link, wu/wbern target maps",
+     "card": "both",
+     "meter": "n/a",
+     "value": 55,
+     "report_value": "up to 72% (for d=1-4)",
+     "agrees": false,
+     "spread": "d=1 0%, d=2 22%, d=3 30-32%, d=4 55%, d=6 72% (XY) / 78% (YX)",
+     "note": "72% occurs only at d=6, outside the d=1-4 range used in C3"
+    },
+    {
+     "quantity": "C4 x-only random minus zeros, d=1-3",
+     "card": "avg",
+     "meter": "noc",
+     "value": 124.7,
+     "report_value": "125",
+     "agrees": true,
+     "spread": "af2 127.1, af3 122.2",
+     "note": "fJ/bit/hop"
+    },
+    {
+     "quantity": "C4 y-only random minus zeros, d=1-3",
+     "card": "aifoundry3",
+     "meter": "noc",
+     "value": 127.6,
+     "report_value": "128",
+     "agrees": true,
+     "note": "fJ/bit/hop. This rests on aifoundry3 alone, because aifoundry2's y/hop3 is dropped. It also only holds when 4 af3 y/hop3 bursts with 0.40-0.55 s telemetry reads are kept; with them dropped, y (d=1-3) is 111.6, 10% below x"
+    },
+    {
+     "quantity": "C5 uncontended per mm at 3.72 mm/hop: data + fixed",
+     "card": "avg",
+     "meter": "noc",
+     "value": 35.9,
+     "report_value": "24+12=36",
+     "agrees": true,
+     "note": "24.3 + 11.6 fJ/bit/mm"
+    },
+    {
+     "quantity": "C5 uncontended per mm: data + fixed",
+     "card": "avg",
+     "meter": "board",
+     "value": 44.3,
+     "report_value": "29+15=44",
+     "agrees": true,
+     "note": "29.5 + 14.8 fJ/bit/mm, no leakage correction"
+    },
+    {
+     "quantity": "C5 loaded per mm (model 0.5a+0.5b plus s0, /3.715 mm)",
+     "card": "avg",
+     "meter": "noc",
+     "value": 50.5,
+     "report_value": "31+20=50",
+     "agrees": true,
+     "note": "30.6 + 19.9 fJ/bit/mm"
+    },
+    {
+     "quantity": "C5 loaded per mm (model), with the leak model",
+     "card": "avg",
+     "meter": "board",
+     "value": 72.5,
+     "report_value": "46+27=73",
+     "agrees": true,
+     "note": "46.5 + 26.0 fJ/bit/mm; 75.6 without the correction"
+    },
+    {
+     "quantity": "C6 256 B blocks: extra slope over 16-128 B blocks",
+     "card": "aifoundry2",
+     "meter": "board",
+     "value": 0.83,
+     "report_value": "~0.8",
+     "agrees": true,
+     "note": "pJ/B/hop (0.75 with the leak model). NoC rail 0.42. That is 65-70% of the full-flip prediction a*8 on board and about 55% on NoC"
+    },
+    {
+     "quantity": "C6 256 B blocks: extra slope over 16-128 B blocks",
+     "card": "aifoundry3",
+     "meter": "board",
+     "value": 0.74,
+     "report_value": "~0.8",
+     "agrees": true,
+     "note": "pJ/B/hop (0.72 with the leak model); NoC rail 0.41"
+    },
+    {
+     "quantity": "C7 random byte per hop, loaded (s0 + 0.5a + 0.5b)",
+     "card": "avg",
+     "meter": "noc",
+     "value": 1.5,
+     "report_value": "1.5",
+     "agrees": true,
+     "note": "pJ/B/hop. Board 2.15 with the leak model, 2.25 without (report 2.2)"
+    }
+   ],
+   "discrepancies": [
+    "C2/C3 board numbers need the leakage correction. Without it, board a comes out at 162 fJ (v2) and 149 fJ (v1), 7% above the report's 151 and 139. With the pipeline's leak model it is 153 and 137, which agrees. Per card, aifoundry2 is 10-13% above aifoundry3 for a on board power. The NoC-rail numbers do not depend on this and match to within about 1%.",
+    "C1 'leaving the shire costs about one extra hop' holds on board power for random data (1.05-1.18 hops). On the NoC rail it is 0.5-0.7 hop, and for all-ones (P=1) there is no extra hop on either meter (-0.09 to 0.11 hop).",
+    "C1 'linear for every data pattern': in both v1 and v2 the d=4 point sits above the line through d=1,2,3,6, by 5-6% for random and 10-13% for all-ones. This coincides with shared link-hops jumping from 30-32% at d=3 to 55% at d=4, so it looks like contention.",
+    "C3 wording: within the d=1-4 range used for the loaded (wu) fit, at most 55% of link-hops are shared (at d=4). The 72% figure is at d=6 (78% with YX routing). The body says 'at five or six', but wu has no d=5.",
+    "C3 'at d=1 they agree': on the NoC rail wu is systematically 3% (random) and 5-6% (zeros) above wsep at d=1, far outside the ~0.5% pass scatter. Board agrees within 0-3%. A likely cause is that the wu d=1 maps give some targets 2 readers, while wsep has 1.",
+    "C3 board per-card values depend on the idle-window choice: aifoundry3 wu data is 169 here against 182 in the pipeline. Only the card averages (181 vs 186, 110 vs 107) fall within 5%.",
+    "C4 y-axis value (128) comes from aifoundry3 only. It also depends on keeping 4 af3 waxis/y/hop3 bursts in which the service processor's reads took 0.40-0.55 s. With those dropped, y is 112 against x 125. This also means aifoundry3 showed milder management-path starvation on the same traffic, while C8 says only aifoundry2.",
+    "Minor: the 'loaded' headline in C5 (model over d=1-6: 31+20=50 fJ/bit/mm on NoC) and C3's loaded numbers (wu d=1-4: 119/76 fJ/bit/hop = 32+20.5 = 52.6 fJ/bit/mm) are two different estimators of the same thing.",
+    "Minor: in C7 the DRAM ratio at the board end is 7.8/1.39 = 5.6x, which the report rounds to 6."
+   ],
+   "files": [
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/indep/bursts.py",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/indep/fits.py",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/indep/perpass.py",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/indep/sharing.py",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/indep/bursts.json",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/indep/fits.txt",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/indep/fits_leak.txt"
+   ]
+  },
+  {
+   "method": "Method B, written from scratch without importing analyze_wire.py and without touching the cards. (1) Units: each (cfg, pass) burst is taken from its 8 launches in runs.jsonl. Device time is the sum of cycles_max / 600 MHz. The duty cycle (device time over wall time) is 0.995-0.997 because launches are only 1-2 ms apart. (2) Board power: take the median of board_w over [lo+lat, hi+lat], with lat measured at 0.14 s (aifoundry2) and 0.18 s (aifoundry3). Subtract the median of board_w in the 3 s before lo, leaving out marks.jsonl windows. Multiply the difference by device time and divide by bytes. That raw figure has no leakage correction. A second variant ('board_tc') subtracts k*dT, where k (W/C) is the card's own slope of pre-burst idle power against die temperature over all bursts: 0.55 on aifoundry2, 0.22 on aifoundry3. (3) NoC rail: model the service processor's filtered average explicitly. Each 10 Hz sample is given the time its held value first appeared. The model is y(t) = base + step*LPF(launch indicator) + A*LPF(preceding fill mark), with a first-order low-pass filter (LPF) whose tau and delay come from a grid search that minimises total SSE over all bursts. Results: tau 1.06 s and delay 0.175 s on aifoundry2, tau 1.02 s and delay 0.30 s on aifoundry3, residual rms about 44 mW. The step is fitted by least squares per burst over [lo-3 s, hi+3.8 s], and energy is step*device_time/bytes. Sensitivity: changing tau by \u00b15% moves the NoC results by about \u00b12%, and changing the delay by \u00b150 ms moves them by under 1%. (4) Drop rules: under 15 busy samples, median took_ms above 60, or the clock leaving 600 MHz. This drops the same 6 bursts as the pipeline, leaving 750. (5) Per-hop slope per pattern and card: Theil-Sen over all passes pooled. Spread: Theil-Sen per pass. Data-dependent parts: Theil-Sen slope of the paired per-(hop, pass) differences e(P=0.5)-e(0). (6) Ones/transition model: least squares of slope = s0 + a*2P(1-P) + b*P on the Theil-Sen slopes, using v2 wu P in {0, 1/4, 1/2, 3/4, 1} plus wfrz (t=0, P=244/512, a figure I checked by reimplementing mt19937_64 with seed 1), and v1 wbern for the v1 check. The wfrz slope is also predicted from a fit to wu alone. (7) Complements: (s(3/4)-s(1/4))/0.5 and s(1)-s(0), both from pooled slopes and from paired differences. (8) Contention: wsep over d=1-5 against wu over d=1-4, plus link sharing counted from each run's target_map using XY and YX routing on the MESH map in run_wire.py. Units: fJ per payload bit per hop = pJ/B/hop * 125. The 'value' fields are means of the two cards. In 'meter', board means raw Method B and board_tc means Method B with its own leakage correction.",
+   "results": [
+    {
+     "quantity": "C1: NoC data-dependent part at d=0, D(0)=e(P=.5)-e(0), as a fraction of the per-hop slope",
+     "value": 0.015,
+     "agrees": true,
+     "meter": "noc",
+     "card": "both",
+     "spread": "0.010-0.019 (v1 and v2, both cards); D(0)=0.009-0.017 pJ/B against D(1)=1.54-1.59 pJ/B",
+     "report_value": "~0",
+     "note": "Also about 0 for P=1 minus zeros (0.002-0.011 pJ/B)."
+    },
+    {
+     "quantity": "C1: cost of leaving the shire in hops, NoC rail, link-disjoint flows (wsep), data part (intercept - D(0))/slope",
+     "value": 1.1,
+     "agrees": true,
+     "meter": "noc",
+     "card": "both",
+     "spread": "1.10/1.10; zeros 1.22/1.23; random 1.13/1.15",
+     "report_value": "about one extra hop"
+    },
+    {
+     "quantity": "C1: cost of leaving the shire in hops, NoC rail, loaded all-pairs set (wu/wbern), random minus zeros",
+     "value": 0.71,
+     "agrees": false,
+     "meter": "noc",
+     "card": "both",
+     "spread": "0.70-0.74",
+     "report_value": "about one extra hop",
+     "note": "Depends on the pattern: P=.25-.5 totals 0.53-0.64, zeros 0.25-0.32, and P=0.9, P=1, walt and wfrz -0.14 to +0.11. The pipeline's own intercepts agree (bern:1 NoC intercept -0.14 against a slope of 1.64)."
+    },
+    {
+     "quantity": "C1: rms residual about the Theil-Sen line as a fraction of the mean, NoC rail, all-pairs patterns (wbern, wu, walt, wlegacy, wfrz)",
+     "value": 0.05,
+     "agrees": true,
+     "meter": "noc",
+     "card": "both",
+     "spread": "1.0%-8.0% (worst P=0.9 and P=1); wsep 0.4-1.3%",
+     "report_value": "linear for every pattern",
+     "note": "A linear fit is a fair approximation (waxis at d=4 excluded; the pipeline fits those on d=1-3 only)."
+    },
+    {
+     "quantity": "C1: curvature, NoC Theil-Sen slope over d=3-6 divided by d=1-3, wu zeros (loaded mesh)",
+     "value": 1.27,
+     "agrees": false,
+     "meter": "noc",
+     "card": "both",
+     "spread": "random 1.06-1.10, all-ones 1.14-1.16, zeros 1.26-1.28; wsep random 1.00-1.02, wsep zeros 1.04-1.07",
+     "report_value": "constant per hop",
+     "note": "The per-hop increment on the loaded mesh grows with d, with d=4 above the line. It follows link sharing (0/22/32/55/72% at d=1/2/3/4/6). Link-disjoint flows are linear."
+    },
+    {
+     "quantity": "C2 v2: a, NoC rail (fJ per bit-transition per hop)",
+     "value": 98.9,
+     "agrees": true,
+     "meter": "noc",
+     "card": "99.9 / 97.8",
+     "spread": "per pass 95-102",
+     "report_value": "98"
+    },
+    {
+     "quantity": "C2 v2: b, NoC rail (fJ per one-bit per hop)",
+     "value": 128,
+     "agrees": true,
+     "meter": "noc",
+     "card": "129.2 / 126.8",
+     "spread": "per pass 126-130",
+     "report_value": "129"
+    },
+    {
+     "quantity": "C2 v2: a, board",
+     "value": 161.6,
+     "agrees": true,
+     "meter": "board",
+     "card": "172.1 / 151.2",
+     "spread": "per pass 147-173; board_tc 148.9 (154.4/143.4)",
+     "report_value": "151",
+     "note": "+7% raw, -1% with leakage correction"
+    },
+    {
+     "quantity": "C2 v2: b, board",
+     "value": 197.6,
+     "agrees": true,
+     "meter": "board",
+     "card": "209.0 / 186.2",
+     "spread": "per pass 186-216; board_tc 191.3",
+     "report_value": "192"
+    },
+    {
+     "quantity": "C2 v1: a, NoC rail",
+     "value": 98,
+     "agrees": true,
+     "meter": "noc",
+     "card": "97.2 / 98.8",
+     "spread": "per pass 93-105",
+     "report_value": "95"
+    },
+    {
+     "quantity": "C2 v1: b, NoC rail",
+     "value": 129,
+     "agrees": true,
+     "meter": "noc",
+     "card": "130.7 / 127.4",
+     "spread": "per pass 127-133",
+     "report_value": "131"
+    },
+    {
+     "quantity": "C2 v1: a, board (raw Method B)",
+     "value": 161.5,
+     "agrees": false,
+     "meter": "board",
+     "card": "172.8 / 150.2",
+     "spread": "per pass 148-198",
+     "report_value": "139",
+     "note": "+16% raw. With Method B's own leakage correction it is 147.8 (+6%, per pass 140-168). Board a is the least robust number in the set."
+    },
+    {
+     "quantity": "C2 v1: b, board",
+     "value": 199.8,
+     "agrees": true,
+     "meter": "board",
+     "card": "210.1 / 189.5",
+     "spread": "board_tc 189.5",
+     "report_value": "197"
+    },
+    {
+     "quantity": "C2: model rms, NoC rail (pJ/B/hop)",
+     "value": 0.0054,
+     "agrees": true,
+     "meter": "noc",
+     "spread": "v2 0.0054, v1 0.0068",
+     "report_value": "0.008"
+    },
+    {
+     "quantity": "C2: model rms, board (pJ/B/hop)",
+     "value": 0.023,
+     "agrees": true,
+     "meter": "board",
+     "spread": "v2 0.023, v1 0.027, board_tc 0.027-0.032",
+     "report_value": "~0.04"
+    },
+    {
+     "quantity": "C2 v2 complement test: (slope(3/4)-slope(1/4))/0.5, NoC (fJ per one per hop)",
+     "value": 127.8,
+     "agrees": true,
+     "meter": "noc",
+     "spread": "paired-difference estimator 128.9",
+     "report_value": "132",
+     "note": "-3%. The same test on board power gives 211, above the board b of 192-198."
+    },
+    {
+     "quantity": "C2 v2 complement test: slope(1)-slope(0), NoC (fJ per one per hop)",
+     "value": 128,
+     "agrees": true,
+     "meter": "noc",
+     "spread": "paired 128.1",
+     "report_value": "129"
+    },
+    {
+     "quantity": "C2: slope(P=1)/slope(P=0.5), all-ones against random",
+     "value": 1.08,
+     "agrees": true,
+     "meter": "noc",
+     "spread": "board 1.05 (v1 and v2)",
+     "report_value": "all-ones costs about as much per hop as random"
+    },
+    {
+     "quantity": "C2: wfrz measured slope against prediction from the wu-only model (pJ/B/hop, NoC)",
+     "value": 1.089,
+     "agrees": true,
+     "meter": "noc",
+     "spread": "predicted 1.097; board 1.577 against 1.592",
+     "report_value": "frozen line fits",
+     "note": "Ones fraction 244/512 checked independently with an mt19937_64 reimplementation (seed 1)."
+    },
+    {
+     "quantity": "C3: wsep d=1-5, NoC data-dependent part (random minus zeros), fJ/bit/hop",
+     "value": 91.5,
+     "agrees": true,
+     "meter": "noc",
+     "card": "91.8 / 91.1",
+     "spread": "per pass 91-95",
+     "report_value": "90 (90.6/90.1)"
+    },
+    {
+     "quantity": "C3: wu d=1-4, NoC data-dependent part, fJ/bit/hop",
+     "value": 121.6,
+     "agrees": true,
+     "meter": "noc",
+     "card": "121.6 / 121.6",
+     "spread": "per pass 117-123",
+     "report_value": "119"
+    },
+    {
+     "quantity": "C3: wsep zeros per-hop, NoC, fJ/bit/hop",
+     "value": 45.6,
+     "agrees": true,
+     "meter": "noc",
+     "card": "46.0 / 45.1",
+     "report_value": "43",
+     "note": "+6%"
+    },
+    {
+     "quantity": "C3: wu d=1-4 zeros per-hop, NoC, fJ/bit/hop",
+     "value": 74.6,
+     "agrees": true,
+     "meter": "noc",
+     "card": "75.4 / 73.8",
+     "report_value": "76"
+    },
+    {
+     "quantity": "C3: d=1 agreement, NoC data part per byte, wsep against wu (pJ/B)",
+     "value": 1.556,
+     "agrees": true,
+     "meter": "noc",
+     "spread": "wu 1.567 (0.7% apart); zeros 0.832 against 0.877 (5%); board data 5.68 against 5.72, board zeros 3.77 against 3.79",
+     "report_value": "agree at d=1"
+    },
+    {
+     "quantity": "C3: wsep d=1-5 data part, board, fJ/bit/hop",
+     "value": 114.7,
+     "agrees": true,
+     "meter": "board",
+     "card": "116.7 / 112.8",
+     "spread": "per pass 110-128; board_tc 110.4",
+     "report_value": "107",
+     "note": "+7% raw, +3% corrected"
+    },
+    {
+     "quantity": "C3: wu d=1-4 data part, board, fJ/bit/hop",
+     "value": 188.6,
+     "agrees": true,
+     "meter": "board",
+     "card": "195.5 / 181.7",
+     "spread": "per pass 175-208; board_tc 185.2",
+     "report_value": "186"
+    },
+    {
+     "quantity": "C3: zeros per-hop, board, wsep / wu (fJ/bit/hop)",
+     "value": 53.2,
+     "agrees": true,
+     "meter": "board",
+     "spread": "wu 108.6 (board_tc 53.9 / 106.6)",
+     "report_value": "56 / 103"
+    },
+    {
+     "quantity": "C3: largest share of link-hops shared in wu over d=1-4 (from target_map, XY routing)",
+     "value": 0.55,
+     "agrees": false,
+     "spread": "d=1/2/3/4/6: 0/22/32/55/72% (YX: 0/22/30/55/78%)",
+     "report_value": "up to 72% (d=1-4)",
+     "note": "72% occurs only at d=6, which is outside the d=1-4 comparison. The excess energy of wu over wsep tracks shared link-hops (NoC data excess 0.21/0.35/0.76 pJ/B at d=2/3/4 against 0.44/0.96/2.2 shared link-hops per flow)."
+    },
+    {
+     "quantity": "Meter check: Method B NoC per-burst energy divided by the pipeline's (tail/0.94), median over config-card cells",
+     "value": 1.025,
+     "agrees": true,
+     "meter": "noc",
+     "spread": "p10-p90 1.018-1.032, the same at every hop",
+     "note": "The /0.94 factor under-corrects the ~1.04 s filter by about 2.5%. It is a uniform scale and changes no conclusion."
+    },
+    {
+     "quantity": "Meter check: Method B board per-burst energy divided by the pipeline's, median",
+     "value": 1.052,
+     "agrees": true,
+     "meter": "board",
+     "spread": "aifoundry2 1.069, aifoundry3 1.037; board_tc 1.011",
+     "note": "The difference is the leakage correction plus before-only idle. Own dP/dT: 0.55 W/C on aifoundry2 (pipeline model 0.56) and 0.22 W/C on aifoundry3 (pipeline model 0.33 at 56 C)."
+    }
+   ],
+   "discrepancies": [
+    "C1 'leaving the shire costs about one extra hop' holds only for link-disjoint flows (wsep, NoC: 1.10 hops for the data part, 1.13-1.23 for random and zeros). In the loaded all-pairs sweep that section 4 plots, the NoC exit cost is 0.70-0.74 hop for random minus zeros and depends on the pattern: about 0.3 for zeros, 0.55-0.64 for P=0.25-0.5, and -0.14 to +0.11 for P=0.9, P=1, walt and wfrz. The pipeline's own wire.json intercepts show the same (bern:1 NoC intercept -0.14 against a slope of 1.64). Suggested wording: 'about one hop for uncontended random data'.",
+    "C1 'grows linearly ... by a constant per hop' is an approximation on the loaded mesh. In wbern, wu, walt and wfrz the NoC per-hop increment rises with d: the Theil-Sen slope over d=3-6 is 6-10% above the d=1-3 slope for random data, 14-16% for all-ones and 26-28% for zeros. d=4 sits above the line; the 3->4 step of (P=1 minus zeros) is 1.8 pJ/B against about 1.0 for the other steps. This follows link sharing of 0/22/32/55/72% at d=1/2/3/4/6. Only the link-disjoint wsep set is linear, to 0.4-1.3% rms. Residuals about the straight line are 1-8% rms for the all-pairs patterns, so the headline slopes stand, but 'constant per hop' is true only without contention. That agrees with C3. The waxis sets are strongly nonlinear at d=4; the pipeline already restricts them to d=1-3.",
+    "C2 board-power a for v1 is 161.5 fJ in raw Method B, 16% above the reported 139. With Method B's own leakage correction it is 147.8 (+6%). Board a is the least robust number: per-pass estimates run 140-198 and it moves with the leakage treatment. Under Method B, v1 and v2 board a agree closely (161.5/161.6 raw, 147.8/148.9 corrected), more closely than the pipeline's 139/151. v2 board a is +7% raw and -1% corrected, so within 10%. All NoC-rail C2 numbers reproduce within 3%.",
+    "C3's parenthetical '(wu, d = 1-4, up to 72% of link-hops shared)' is wrong for d=1-4. From the recorded target maps with XY routing, sharing in wu is 0/22/32/55% at d=1/2/3/4. The 72% figure (78% with YX routing) occurs only at d=6, which is outside the d=1-4 comparison. The body's 'up to 72% of link-hops at five or six' also names d=5, which the wu set does not have.",
+    "NoC-rail meter: fitting an explicit first-order filter (tau 1.02-1.06 s, delay 0.18-0.30 s, on held-value timing) gives per-burst NoC energies 2.5% higher (p10-p90 1.8-3.2%) than the pipeline's tail-mean/0.94, uniformly across hops. The /0.94 factor slightly under-corrects. That is within tolerance, but NoC per-mm figures would be about 2.5% higher.",
+    "Board-power leakage model: regressing idle power on die temperature gives 0.22 W/C on aifoundry3 at 55-58 C, against 0.33 W/C from the pipeline's exponential model. aifoundry2 matches (0.55 against 0.56). Without the correction, Method B's board energies are 5% above the pipeline's (aifoundry2 +7%, aifoundry3 +4%); with its own correction they are 1% above. Board numbers therefore carry roughly \u00b15% uncertainty from the leakage treatment.",
+    "C8 and C4 side note: the only dropped bursts in the four data sets are the 6 aifoundry2 v1 waxis/y/hop3 bursts (p0 and p0.5, all three passes: 2-5 samples, took_ms 800-1600). The pipeline records them as 'too few samples', not 'service processor starved', because its sample-count check runs before its took_ms check. None of these data sets contains s<->s+16 ring bursts. As a result, the y-only figure in C4 (128 fJ) comes from aifoundry3 alone: aifoundry2 has no y/hop3 point and the d=1-3 fit needs three distances."
+   ],
+   "files": [
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/methodB/load.py",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/methodB/calib.py",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/methodB/methodb.py",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/methodB/summarize.py",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/methodB/keys.py",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/methodB/links.py",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/methodB/mt64.py",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/methodB/resid.py",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/methodB/bursts_b_1.0_0.0.json",
+    "/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/methodB/summary_b_1.0_0.0.json"
+   ]
+  }
+ ],
+ "verdicts": [
+  {
+   "lens": "Measurement artifacts: idle-bracket drift, leakage correction (board and the uncorrected NoC rail), the rail filter, telemetry gaps and starvation, clocks, configuration order, prefill contamination, participants and bandwidth varying with d, per-time costs showing up as per-hop, regulator and meter nonlinearity, and card-to-card differences. I wrote my own per-burst extractor with diagnostics (/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/artifacts/extract.py -> bursts.json; fits in fitlib.py). It reproduces the pipeline's numbers exactly: NoC a 99.5/96.7, b 130.8/128.1; board a 151.0, b 192.0; wsep 90.6/90.1; wu 119.2. From there I tested each artifact against the raw telemetry, runs and marks. I did not touch the cards.",
+   "verdicts": [
+    {
+     "claim": "C1. Energy per byte is linear in d for every pattern; the NoC data-dependent part is ~0 at d=0 and grows by a constant per hop; leaving the shire costs about one extra hop.",
+     "verdict": "holds_with_changes",
+     "evidence": "The d=0 null is real: at d=0 the NoC rail barely moves (zeros 0.01-0.02 pJ/B, about 0.05 W), and its data part is 0.02-0.03 pJ/B against 1.53-1.57 at d=1.\n\nPer-time confound checked: bandwidth per reader falls with d (46.8 to 26.7 GB/s per shire from d=1 to 6, because it is latency-bound). It is identical across P at each d (within 0.3%), so data-dependent differences cancel any per-time cost.\n\nLinearity:\n- wsep is linear.\n- wu data-part steps are 0.89, 0.92, 1.06 and 0.83 pJ/B/hop.\n- The zeros and all-ones lines sit above the line through d=1,2,3,6 at d=4, by 6-7% and 14-16%.\n- This excess is not thermal. With my NoC-rail leakage correction it is still 6% and 14-16%.\n- It coincides with shared link-hops going from 32% to 55%.\n\nClock: 600/400 MHz in every window. Telemetry reads: 21-22 ms at every d.\n\nExit cost (intercept minus d=0, over slope) depends on meter and pattern:\n- Board: random 1.05-1.19 hops, data part 1.23-1.32.\n- NoC, loaded (wu): data 0.69-0.74, random 0.53-0.56, zeros 0.29.\n- NoC, wsep data: 1.04-1.10.\n- All-ones: -0.09 on NoC and 0.07-0.12 on board.",
+     "required_change": "Section 4:\n- Replace 'grows by the same amount with every hop out to 6' with 'grows nearly linearly; on the loaded mesh the d=4 point sits 5-7% (random, zeros) to 15% (all-ones) above the line, where shared link-hops jump from 32% to 55%. With link-disjoint flows it is linear.'\n- Replace 'Leaving the shire costs about one hop more' with 'On board power, leaving the shire costs about one extra hop for random data. On the mesh rail it is about 0.7 hop on the loaded mesh (1.1 with link-disjoint flows), and for all-ones data there is no extra step.'"
+    },
+    {
+     "claim": "C2. Per-hop energy depends on the density of ones: all-ones costs about as much as random, P and 1-P differ, the frozen line fits; slope = s0 + a*2P(1-P) + b*P with NoC a=98, b=129 and board a=151, b=192 fJ; v1 agrees; complements 132/129.",
+     "verdict": "holds_with_changes",
+     "evidence": "Could anything other than the mesh make all-ones cost per hop? I checked:\n- Bandwidth is identical for every P at each d, so a per-time cost cannot create a P difference.\n- The SRAM rail carries a large data-dependent cost at the target (1.46 pJ/B random, 0.77 all-ones at d=0), but it is flat in d: its per-hop ones slope is 6 fJ/bit/hop against 128-131 on NoC. The minion rail gives 6-9 fJ, which follows its temperature coefficient (0.30 W/C on af2, 0.13 on af3), so it is probably leakage.\n- The NoC rail is idle at d=0.\n- The prefill never raises the NoC rail. Fills end 5.14-5.28 s before the first launch.\n\nThe NoC rail has no leakage correction. Its idle power rises 103-107 mW/C (af2) and 51 mW/C (af3). Correcting it moves a to 96.4/94.7 and b to 128.2/127.3 (1-3%).\n\nOver d=1-3, where 0-32% of link-hops are shared, the NoC slopes are ones-minus-zeros 117-120 and random-minus-zeros 108-113 fJ/bit/hop. So all-ones is about as costly as random even without heavy contention.\n\nWhat cannot be separated: latency is linear in d, so a per-time cost of holding ones in NoC-rail circuits looks exactly like a per-hop cost. Either way it is the mesh's own.\n\nBoard a and b reproduce exactly, but depend on the meter treatment:\n- Without leakage correction they are 160/200 (v2) and 151/205 (v1).\n- The af3 leak model is about 40% too strong (idle regression 0.23-0.24 W/C against the model's 0.33). This effect is 1% or less.",
+     "required_change": "Keep the NoC numbers.\n\nFor the board numbers, add: 'Board a and b depend on the leakage correction: 160/200 fJ (v2) without it, so about \u00b16%. They also include regulator loss, which grows with load.'\n\nNote that the all-ones line grows faster under link sharing (+15% at d=4). The equality with random data holds from d=1 to 3."
+    },
+    {
+     "claim": "C3. Contention costs energy: with link-disjoint flows (wsep, d=1-5) the NoC data part is 90 fJ/bit/hop against 119 for wu (d=1-4, up to 72% of link-hops shared); zeros 43 against 76; they agree at d=1; board 107 against 186 and 56 against 103.",
+     "verdict": "holds_with_changes",
+     "evidence": "Fewer readers or lower bandwidth cannot explain the NoC gap.\n\nPer-reader bandwidth at equal d is nearly the same in both sets (GB/s per shire):\n- d=1: wsep 46.7, wu 45.7\n- d=2: 41.9 vs 41.4\n- d=3: 38.0 vs 37.3\n- d=4: 34.8 vs 32.8\n\nSo per-reader time costs hit both sets alike. wsep's reader count falls from 31 to 14 shires (total 1448 to 449 GB/s), so any global per-time cost would steepen wsep, the opposite direction. The data parts compare P=0.5 and P=0 at identical bandwidth.\n\nBound on the fixed part: even if all of the d=1 zeros energy were per-reader time, it would give at most 11.6 fJ of wsep's 43 and 14 fJ of wu's 77 fJ/bit/hop.\n\nRail leakage: die heating rises with d in wu (1.16 to 1.81 C) and falls in wsep (1.29 to 0.42 C). After correction, wu data is 116-119 and wsep 89, so the gap stays.\n\nTurns are not the cause. Straight but shared v1 waxis/x (56-69% shared at d=2-3) costs 122-127 data and 72 zeros over d=1-3, against wsep's straight, unshared 89-92 and 43.\n\nWording problems:\n- Link sharing in wu is 0/22/32/55/72% at d=1/2/3/4/6, so it peaks at 55% within d=1-4, not 72%.\n- At d=1 the NoC rail shows wu 2.5% (random) and 5% (zeros) above wsep, against 0.5-1% scatter. wu's d=1 map has 2 readers on some targets.\n\nBoard problems:\n- The pipeline's own wsep_d1_4 gives 121.8 (data) and 52.0 (zeros). The headline 107 uses d=1-5, while wu uses d=1-4.\n- Board power per NoC-rail watt grows with load: 1.22-1.27 at wu d=1-2 against 1.36-1.37 at wu d=4-6 (per-family regressions); a quadratic term fits better. This exaggerates the board contrast by about 10%.",
+     "required_change": "- Change 'up to 72% of link-hops at five or six' to 'up to 55% at d=4 within the compared range (72% at d=6)'.\n- Change 'At one hop ... the two agree' to 'At one hop they agree within 3% (random) and 5% (zeros) on the mesh rail. wu's one-hop map puts two readers on some targets.'\n- Board: compare over the same d=1-4, giving 122 against 186 (data) and 52 against 103 (zeros). Add that the board contrast is inflated by regulator loss rising with load.\n- The NoC numbers (90/119, 43/76) can stay."
+    },
+    {
+     "claim": "C4. One hop = 3.72 mm (3.64-3.76) from the die plot; x-only and y-only paths cost the same within 2% on the NoC rail over d=1-3 (125 and 128).",
+     "verdict": "holds_with_changes",
+     "evidence": "Geometry: the arithmetic is consistent, sqrt(3.73*3.70)=3.715, and the range comes from the frame readings in SYNTHESIS.md. It is an estimate from a die plot, and I cannot re-measure the pixels.\n\nThe energy check is fragile. The y value of 128 comes from aifoundry3 alone:\n- All 6 aifoundry2 waxis/y/hop3 bursts are dropped (telemetry reads of 811-1620 ms).\n- aifoundry3's 6 y/hop3 bursts were kept, although their telemetry reads reached 232-549 ms and the 0.6 s tail window held only 4-6 samples.\n- That point is high: zeros 2.23 pJ/B against x/hop3 2.00, and a data step of 1.10 against 0.88.\n\nOn the clean distances d=1-2, both cards: x is 134-135 and y 118-121 fJ/bit/hop, so y is about 11% below x.\n\nThe axis sets also differ in load: readers are 32/32/28 (x) against 32/29/28 (y), and shared link-hops at d=2-3 are 56-69% (x) against 41-76% (y). Direction is confounded with contention.",
+     "required_change": "Change 'x-only and y-only paths cost the same within 2% over 1-3 hops' to 'x-only and y-only paths agree within about \u00b110% (y is 11% below x over 1-2 hops on both cards; the 1-3 hop comparison rests on aifoundry3 alone, whose y/hop3 bursts had delayed telemetry). The sets also differ in link sharing.'\n\nLet the equal-pitch statement rest on the die-plot geometry, not on the energy data."
+    },
+    {
+     "claim": "C5. Per random bit per mm at 0.485 V: uncontended 24+12=36 (NoC), 29+15=44 (board); loaded 31+20=50 (NoC), 46+27=73 (board); scaled to 0.9 V the data part is ~84-159, bracketing Dally's ~100 and Keckler's 121; a bare 7 nm wire would be 12-24.",
+     "verdict": "holds_with_changes",
+     "evidence": "The figures reproduce:\n- Uncontended NoC 24.3 + 11.6 = 35.9; board 28.9 + 14.9 = 43.8.\n- Loaded 30.6 + 19.8 = 50.4 (NoC) and 46.1 + 26.8 = 72.9 (board).\n- The 0.9 V scale factor is 3.443: 24.3 becomes 83.7 and 46.1 becomes 158.8.\n- A wire of 0.5*(200-400 fF)*0.485^2/2 gives 11.8-23.5.\n\nProblems:\n- Range mismatch: uncontended board uses wsep d=1-5. Matched to d=1-4 it is 32.8 + 14.0 = 46.8.\n- Board power includes regulator and other-rail losses: 1.2-1.4x the NoC rail per watt, and more at high load. So the 159 upper end is not die energy.\n- On the die's own mesh rail, the 0.9 V data part is 84 (uncontended) to 105 (loaded). That brackets 100 but not 121.\n- The fixed part (12-20 fJ/mm) is partly confounded with per-time costs, since latency grows with d. A per-reader time cost can account for at most about 27% (wsep) and 18% (wu) of it.",
+     "required_change": "- Give the board uncontended number over d=1-4 (about 47 fJ, 33 of it data), or state the d-range.\n- Say that on the mesh rail the 0.9 V data part is 84-105 fJ, which brackets Dally's 100. Keckler's 121 is reached only by the board-power figure, which carries regulator loss.\n- Keep the 'where 40 nm wires were' interpretation, framed as roughly 0.7-0.9x Keckler's figure on the mesh rail."
+    },
+    {
+     "claim": "C6. 16-128 B blocks cost the same per hop, 256 B blocks ~0.8 pJ/B/hop more on board; explained by 4 lanes via PA[7:6] and a flit of at least 64 B; the 256 B case is ~60% of the full-flip prediction.",
+     "verdict": "holds",
+     "evidence": "The 256 B excess over the mean of the 16-128 B blocks, per pass:\n- Board: af2 0.76/0.80/0.73, af3 0.70/0.84/0.75 (mean 0.76).\n- NoC: 0.40-0.42.\n\nThe 16-128 B slopes agree within 2.5-4% on NoC (af2 1.098/1.089/1.088/1.070). Board is noisier (af3 n128 pass range 1.18-1.47).\n\nNo artifact separates the block sizes: bandwidth, readers and hop set (d=1,3,6) are identical for every N (1497/1195/828 GB/s).\n\nFraction of the full-flip prediction: board 0.76/(138.5*8/1000) = 69%; NoC 0.41/(95.3*8/1000) = 54%. The report's 60% sits between them. The lane mechanism comes from RTL and is outside this lens.",
+     "required_change": "Optional: write '55% (mesh rail) to 70% (board) of the full-flip prediction' instead of 'about 60%'."
+    },
+    {
+     "claim": "C7. A random byte costs 1.5-2.2 pJ per hop; a 64 B line across 10 hops costs 1.0-1.4 nJ against 7.8 nJ from DRAM, so 6-8x cheaper; a 32-bit operand crossing one hop costs ~6-9 pJ, about one lane of an 8-lane fadd.ps (5.3 pJ).",
+     "verdict": "holds_with_changes",
+     "evidence": "Arithmetic:\n- Per hop: 50.4*8*3.72/1000 = 1.50 and 72.9 gives 2.17 pJ/B.\n- A 64 B line over 10 hops: 0.96-1.39 nJ. DRAM: 64*121.96 = 7.81 nJ.\n- A 32-bit operand over one hop: 6.0-8.7 pJ. One fadd.ps lane: 42.2/8 = 5.3 pJ.\n\nMeter mismatch: the energy manual's DRAM figure is board power, leakage-corrected. Measured board to board, the ratio is 7.81/1.39 = 5.6x. The 8x end divides a board-power DRAM cost by a mesh-rail hop cost.\n\nThe 10-hop line extrapolates beyond the measured d=6. On the loaded mesh the per-hop cost rises with sharing (the d=4 kink), so 10 hops may cost more than the linear figure.\n\nThe 'all parts' total includes the fixed part, which may be partly per-time.",
+     "required_change": "Write 'about 5.6x cheaper than DRAM measured board to board (up to 8x if the hop is taken from the mesh rail)'. Note that 10 hops is an extrapolation from d \u2264 6 on a loaded mesh whose per-hop cost grows with sharing."
+    },
+    {
+     "claim": "C8. Some traffic (s<->s+16 rings; on aifoundry2 the y-only pairs 3 hops apart) starves the service processor so telemetry reads take 0.8-1.6 s and those bursts are dropped; a sampler killed mid-request poisons the management queue.",
+     "verdict": "holds_with_changes",
+     "evidence": "In these data:\n- The only starved bursts on aifoundry2 are all 6 waxis/y/hop3 bursts, with median reads of 811-1014 ms, maximum 1620, and 1-2 samples in the busy window. They are dropped, although the pipeline logs the reason as 'too few samples'.\n- aifoundry3 shows milder starvation on the same set: maximum reads of 232-549 ms. Those bursts are kept and they set C4's y value.\n- Everywhere else the median read is 21-22 ms at every d.\n\nNot verifiable from these data:\n- These data contain no s<->s+16 ring bursts.\n- run.log shows no sampler restarts, so queue poisoning did not occur in these runs. It is documented in the lab notes from other sessions.",
+     "required_change": "Add that aifoundry3 was also slowed by the y/hop3 set (reads up to 0.55 s). Those bursts were kept, and the x/y comparison depends on them. Say that the ring and queue-poisoning observations come from other runs."
+    }
+   ],
+   "other_issues": [
+    "Configuration order: both cards ran the same shuffled order (seeds 11-13) at the same time. Agreement between the cards is therefore not an independent check on order or thermal-history effects; only the three passes are. Per-burst residuals do not depend on the previous burst's power (|r| \u2264 0.18). On aifoundry2, NoC-rail residuals correlate with the die temperature before the burst (r = 0.50-0.74), but the residual rms is only 0.7-1%.",
+    "The NoC rail gets no leakage correction. Its idle power rises 103-107 mW/C on aifoundry2 and 51 mW/C on aifoundry3. Bursts heat the die 0.4-1.8 C, so leakage is about 2% of the rail's over-idle reading (median; p90 5%). Correcting it lowers a, b and the contention numbers by 1-3%, which roughly cancels the +2.5% filter under-correction Method B found.",
+    "The board leakage model over-corrects aifoundry3: regressing idle power on temperature gives 0.23-0.24 W/C, against the model's 0.33 at 56 C. On aifoundry2 the two match (0.55-0.56). The effect on board a and b is 1% or less; the leakage correction as a whole moves board a by 6-9%.",
+    "The board meter is load-dependent. Per NoC-rail watt, board power rises 1.22-1.27x at wu d=1-2 and 1.36-1.37x at wu d=4-6, and a quadratic regulator-loss term improves the fit (rms 0.22 to 0.20 W on af2, 0.19 to 0.16 W on af3). Board per-byte energies at high mesh load are inflated relative to low-load configurations such as wsep at large d.",
+    "In analyze_wire.py, the disjoint-flows comment says the comparison is 'over the same distances 1-4', but build_wire_report.py's uncontended headline uses wsep over d=1-5. On NoC this changes nothing (90.4 vs 91.4); on board it does (107.4 vs 121.8).",
+    "Checks that found nothing:\n- Clock: mhz.minion was 600 and mhz.noc 400 in every window of all 756 bursts.\n- Heater: none ran (marks.jsonl holds only fills), despite --warm-c on aifoundry2.\n- Burst length: 3.210-3.215 s for every burst, so the NoC /0.94 filter factor is a uniform scale.\n- Prefill: the NoC rail never rises during a fill, and fills end 5.14-5.28 s before the first launch. Pre-burst idle is still drifting down 0.02-0.03 W/s from the previous burst, which adds noise in random order but no bias by d.",
+    "The wu target maps put 2 readers on some targets at d=1, 2, 3 and 6 (for example '0>8/...' with /r region suffixes). A check that counts the raw strings sees 1, because the suffixes make the same target look different. wfrz uses maps with the same sharing as wu at d=1, 3 and 6 (0/32/72%).",
+    "Files: /tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/artifacts/extract.py (per-burst extraction with diagnostics), /tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/artifacts/fitlib.py (slopes, model, contention fits), /tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/artifacts/bursts.json"
+   ]
+  },
+  {
+   "lens": "Physics and interpretation. I read the report body and script, SYNTHESIS.md, the clean-room shirecache_mesh_master.sv and shirecache_pkg.sv, the Shire Cache spec and the NoC bridge list in etsoc_shire_other_esr.h. I did not run anything on the cards. I redid the per-distance analysis from the independent per-burst energies (indep/bursts.json). My scripts are in /tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/physics/:\n- perd.py and perd_v1.py fit the ones/transition model separately at each distance and compare walt against it.\n- parity.py tests for a parity or header term.\n- share_ab.py, contention.py and load.py relate the extra energy to link sharing and to per-reader bandwidth.\n\nNumbers are fJ per payload bit (per hop where stated). The meter is the mesh (NoC) rail unless board power is named. All reported numbers are reproduced; what does not hold up is several of the physical explanations built on them.",
+   "verdicts": [
+    {
+     "claim": "C1. Energy per payload byte grows linearly with hop distance for every data pattern. On the mesh rail the data-dependent part is ~0 at d=0 and grows by a constant per hop. Leaving the shire costs about one extra hop.",
+     "verdict": "holds_with_changes",
+     "evidence": "d=0 checks out. The per-distance fit (perd.py) gives a transition coefficient of 3-6 fJ/bit and a ones coefficient of 1-2 at d=0, against 299-304 and 84-90 at d=1: about 1-2%. Both independent analyses agree (0.009-0.03 pJ/B).\n\nLinearity is only approximate on the loaded mesh. The d=4 point sits 5-6% above the line for random data and 10-13% for all-ones, where link sharing jumps from 32% to 55%. The link-disjoint set is linear to 0.4-1.3%.\n\nThe exit cost is a different kind of cost from a hop, which is why 'about one hop' changes with the pattern:\n- Per-distance coefficients for v2 wu, NoC rail, d=1/2/3/4/6: transition term A = 299-304 / 397-406 / 498-505 / 558-570 / 776-795; ones term B = 84-90 / 206-207 / 321-329 / 547-551 / 697-716.\n- From d=1 to 3 each hop adds about 98-101 to A and 115-122 to B.\n- d=1 already holds about 2 hops' worth of transition energy but less than one hop's worth of ones energy. A straight-line fit gives A = 202-211 + 95\u00b7d and B = -50 to -58 + 140\u00b7d.\n- So the shire crossing charges only for bits that differ from the previous line. All-ones data pay no exit cost: at d=1 all-ones costs 36% less than random (NoC 1.54 vs 2.40 pJ/B, board 5.60 vs 8.95).\n- Exit cost in hops is about 0.3 for zeros and 0.5-0.7 for random on the NoC rail, about 1 for random on board power, and about 2 for the 256 B alternating pattern. That pattern's excess is 1.26 pJ/B at d=1 against 0.41 per further hop.",
+     "required_change": "Section 4 should say: 'On the mesh rail the data-dependent energy is zero at d = 0 (under 2% of the one-hop value) and grows by nearly the same amount with each hop. On the loaded mesh the step from 3 to 4 hops is 5-13% larger, where link sharing jumps from 32% to 55%. Leaving the shire costs extra only for bits that differ from the previous line: about one hop for random data on board power, 0.5-0.7 hop on the mesh rail, and nothing for all-ones data.' Replace 'for every data pattern ... the same amount with every hop out to 6' with 'nearly linear'."
+    },
+    {
+     "claim": "C2. Per-hop energy depends on the density of ones: all-ones costs about as much as random; P and 1-P differ; the frozen line fits; slope = s0 + a*2P(1-P) + b*P with a = 98 and b = 129 on the NoC rail (board 151/192; v1 95/131 and 139/197); complement test 132 and 129.",
+     "verdict": "holds_with_changes",
+     "evidence": "The numbers are reproduced by both independent analyses. NoC-rail a is 97-99 and b is 128-131. The board values agree only with the leakage correction (without it board a is 162).\n\nChecks on the model's assumptions:\n- No parity or header toggles on the data wires. Adding a term for 0<P<1 (parity bits toggle about half the time at any density strictly between 0 and 1) to the v1 fit over 7 densities gives -0.4 to -0.5 fJ/bit/hop, and the rms does not change (parity.py).\n- 2P(1-P) is the right difference rate between consecutive data flits. In v2 every line is unique. In v1, the flits that follow each other on one lane (lines i and i+4) are always different image lines. v1 and v2 agree: A(d=1) is 297-301 against 299-304, and a is 95 against 98. In v1 the two in-flight loads carry identical lines, so they do not interleave on a lane.\n- 'All ones never flips' and 'a one costs more than a flip' are not established. Nothing says the wires hold their value between flit trains. At d=1 each lane carries about 11.7 of an assumed 25.6 GB/s (64 B at 400 MHz), about 46% busy.\n- If idle cycles put 0 on the data path (a crossbar output with no grant, or data gated by valid), ordinary static wires give exactly this model. Then a = f*E_t and b = 2(1-f)*E_t, where f is the fraction of flits followed directly by another. The measured b/a gives f = 0.59-0.61 on both meters and both sets. E_t would be about 163 fJ per bit-transition per hop, about 370 fF/mm: ordinary repeated-wire capacitance. Every one would then be two transitions, and b > a would not mean a one costs more than a transition.\n- One constraint goes the other way. The frozen line sits on the model (-0.01 pJ/B/hop). If coupled wires dropped to zero between trains, and coupling also explained the 256 B shortfall (C6), the frozen line should sit about 0.11 pJ/B/hop above the model (estimate). So the data cannot pick the mechanism.\n- Contention at d=4 adds mostly to the ones term: B rises by 222 from d=3 to 4, against 115-122 per step before. The idle-zero reading predicts the opposite, because busier links have fewer train ends.\n- Precharged dynamic logic is unlikely in a synthesized NetSpeed NoC. The realistic precharged elements are buffer arrays with precharged read lines.",
+     "required_change": "1. Retitle section 5 from 'A one costs more than a flip' to 'Ones cost energy, not just flips'. Relabel the KPI 'A one against a flip' as 'fitted cost per one-bit vs per flit-to-flit difference, loaded mesh', and add that these are fit coefficients, not a physical ranking.\n2. Replace the mechanism paragraph with: 'A cost per one-bit that does not need the bit to differ from the previous flit needs wires or nodes that rest at 0. The simplest case is ordinary logic whose output goes to 0 when no flit is present, such as a crossbar with no grant or data gated by valid. Then each one rises and falls at the ends of a train of flits, and a and b are the same energy per transition, split by how often flits come back to back: about 60% here, which would put a transition near 160 fJ per hop, ordinary wire capacitance. Precharged structures, such as buffer arrays with precharged read lines, would also do it. The fit cannot tell these apart; slowing the flows at a fixed distance would.'\n3. In the lede, write 'A stream of all ones, which never differs from one flit to the next, costs as much per hop as random data (5-9% more), though at one hop it costs about a third less in total.'\n4. In section 3, say that 2P(1-P) is the difference rate between consecutive data flits, not necessarily the transition rate on the wires."
+    },
+    {
+     "claim": "C3. Contention costs energy. With link-disjoint flows the NoC-rail data part is 90 fJ/bit/hop against 119 on the loaded set (up to 72% of link-hops shared), zeros 43 against 76; the two agree at d=1; board 107/186 and 56/103. The report says the extra is flits held in router buffers and arbitrated.",
+     "verdict": "holds_with_changes",
+     "evidence": "The numbers are reproduced by both independent analyses.\n\nSharing from the recorded target maps (XY routing) is 0/22/32/55% at d=1/2/3/4, and 72% only at d=6. wu has no d=5, and the body says 'at five or six'.\n\nPer-reader bandwidth is almost the same in the two sets. wu against wsep at d=1-4: 45.7/46.7, 41.4/41.9, 37.3/38.0 and 32.8/34.8 GB/s, within 1-6%. Bandwidth falls with distance even on disjoint links, so it is latency-bound, and flits in wu are not held long. For unique random lines, interleaving flows cannot raise the difference rate between flits, so the extra data cost must be extra work per flit.\n\nSharing, not turns, looks like the driver at d=2-3. The straight x-only and y-only v1 flows, which share 0.8-2.1 link-hops per flow, cost +14-20% in the data part over wsep, similar to wu.\n\nBut sharing alone does not explain it:\n- x-only at d=4 shares 56% of link-hops with the same mean link traffic as wu d=4 (about 55 GB/s), yet costs only +4% against wu's +19%. waxis at d=4 is anomalous in general.\n- Within wu, regressing A and B on d plus shared link-hops per flow gives a sharing coefficient near 0, though d and sharing are collinear.\n- wsep also differs in other ways: straight paths only (66-100% of wu flows turn), one reader per target (wu has up to 2), and 14-31 readers instead of 32.\n\nAt d=1 the sets agree within 3% for random data but differ by 5% for zeros on the NoC rail.",
+     "required_change": "1. Replace 'up to 72% of link-hops at five or six' with '22-32% at two or three hops, 55% at four, 72% at six'.\n2. Replace the mechanism sentence with: 'The difference is energy the loaded mesh spends beyond carrying the bits, most likely buffer writes and arbitration where flows meet. Per-reader bandwidth is within 6% of the link-disjoint set, so flits are not held long. The disjoint set also differs in having only straight paths, one reader per target and fewer readers.'\n3. At d=1, say 'agree within 3% (5% for zeros on the mesh rail)'.\n4. In the lede, replace 'as much as a third more distance' with '39% more on the mesh rail, 66% more on board power'."
+    },
+    {
+     "claim": "C4. One hop = 3.72 mm (3.64-3.76), with x and y pitches 3.73/3.70 mm; x-only and y-only paths cost the same within 2% (125 and 128 fJ per random bit per hop).",
+     "verdict": "holds_with_changes",
+     "evidence": "pitch.json gives x/y pitches of 254.7 and 252.7 px, a ratio of 1.008 that is the same in all three copies of the die plot. Equal pitches predict equal x and y cost, so the test is a consistency check. It cannot split router from wire energy, which the report says.\n\nA hop is one tile pitch of displacement for identical tiles. The routed wire can only be longer, so 'per mm' is an upper bound per mm of wire.\n\nThe y value rests on aifoundry3 alone, because aifoundry2's y/hop3 bursts are all dropped. It also needs 4 aifoundry3 bursts whose meter reads took 0.40-0.55 s. With those dropped, y is 112 against x 125, a 10% gap.",
+     "required_change": "Write: 'x-only and y-only paths cost the same within 2% over 1-3 hops on aifoundry3. y cannot be fitted on aifoundry2, and they are 10% apart if bursts with slow meter readings are dropped.' Add: 'per mm means per mm of displacement; the routed wire can only be longer.'"
+    },
+    {
+     "claim": "C5. Headline per random bit per mm at 0.485 V: 24+12 = 36 fJ uncontended on the NoC rail, 29+15 = 44 on board, loaded 31+20 = 50 and 46+27 = 73. Scaled by 3.44 to 0.9 V, the data part is 84-159, bracketing Dally's 100 and Keckler's 121. 'In capacitance per mm of mesh travel, routers included, the chip is where 40 nm wires were; its advantage is almost all V\u00b2.' A bare 7 nm wire would be 12-24 fJ, 'a third to a half of what the mesh measures: the rest is the routers' flops, buffers and crossbar, and the extra paid for ones'.",
+     "verdict": "holds_with_changes",
+     "evidence": "The arithmetic reproduces: 24.3+11.6, 28.9+14.9, 30.6+19.8, 46.1+26.8, and (0.9/0.485)\u00b2 = 3.4435. The interpretations overreach:\n\n1. Board power should not be V\u00b2-scaled. It includes regulator loss, which is not switched capacitance on the die and shrinks as a fraction at higher output voltage. Scaling the NoC rail alone gives 84-105, which brackets 100 and sits below 121.\n2. 'The voltage behind the lineage' is an inference; SYNTHESIS says no source states Dally's voltage. His 2023 slide puts about 0.5 V next to the figure. His own later figures, 20-40 fJ/b-mm (VLSI 2018) and about 30 (CACM 2022), match the unscaled 24-46.\n3. Scaling the literature down is equivalent and cleaner. Keckler's 121 at 0.9 V becomes 35 fJ at 0.485 V, so the mesh (routers included) costs 0.69 of it uncontended and 0.87 loaded on the NoC rail.\n4. 'Where 40 nm wires were' is expected, not a finding. Keckler assumes, and Dally 2018 states ('about 200fF/mm and independent of scaling'), that wire capacitance per mm hardly changes with process node.\n5. The report's own estimates disagree with each other. The first-principles wire model at 0.9 V gives 41-81 (report.json first_principles.at_09), half of Keckler's 121. So 'where 40 nm wires were' and 'a bare 7 nm wire is 1/3-1/2 of the mesh' use references a factor of 2 apart.\n6. The uncontended NoC data part (24) sits at the top of the bare-wire range (12-24). Loaded it is 31, 1.3-2.6x the range; board is 1.2-3.9x. So the 'rest is routers' conclusion does not follow. Rough estimate: a router's per-bit data path (a few flops, a 5-8-input mux, maybe a buffer write) is tens of fF, against about 1 pF for 3.7 mm of wire. A large router share is physically unlikely unless flits are written to SRAM buffers.\n7. The per-random-bit capacitance assumes 0.5 transitions per bit per hop. In the idle-zero reading of C2, random data make about 0.7, and the capacitance per transition is about 370 fF/mm (loaded NoC rail) instead of 520.",
+     "required_change": "1. Lede: 'Scaled to 0.9 V, the voltage of Keckler 2011's 40 nm figure from which Dally's number most likely descends (no source states Dally's voltage), the mesh-rail data-dependent cost is 84-105 fJ per bit\u00b7mm.' Scale only the mesh rail, and change KPI k-09 accordingly.\n2. Section 8: 'At equal voltage, the mesh's data-dependent energy per random bit per mm of travel, routers included, is 0.7-0.9 of Keckler's 40 nm repeated-wire figure (35 fJ at 0.485 V) on the mesh rail. Wire capacitance per mm barely changes between nodes, so this is what one expects if most of a hop's data-dependent energy is its 3.7 mm of wire. The mesh is cheaper than the 0.9 V literature because it runs at 0.485 V. Dally's own 16 nm figure of 20-40 fJ/b\u00b7mm matches it without any scaling.'\n3. Replace the first-principles sentence with: 'A plain repeated wire, estimated from a predictive 7 nm kit (ASAP7) with Ho's repeater factors, would cost about 12-24 fJ per random bit\u00b7mm at 0.485 V (41-81 at 0.9 V, half of Keckler's figure). The uncontended mesh-rail data cost, 24, is at the top of that range; the data do not show how much the routers add.'\n4. Delete 'this 7 nm chip is where 40 nm wires were; its advantage is almost all V\u00b2' and 'the rest is the routers' flops, buffers and crossbar'."
+    },
+    {
+     "claim": "C6. Blocks of 16-128 B cost the same per hop and 256 B blocks about 0.8 pJ/B/hop more on board power. This is explained by 4 mesh lanes chosen by PA[7:6] (on one lane consecutive lines are i and i+4) and by a flit of at least 64 B. The 256 B case is about 60% of the full-flip prediction because other loads and flows slip in between.",
+     "verdict": "holds_with_changes",
+     "evidence": "The lane mechanism is supported by the sources:\n- In the clean-room shirecache_mesh_master.sv, the port for a remote scratchpad access is scp_bank_id = address[BankLsb=6 +: 2], i.e. PA[7:6].\n- The spec routes SCP requests to banks by PA[7:6] and gives 4 to_l3 mesh ports.\n- etsoc_shire_other_esr.h lists 4 to_l3 master and 4 L3 slave NoC bridges per shire (l2tol3/b/c/d and l3/b/c/d), with 9 routers per stop.\n- That each lane is its own physical channel end to end is plausible but not shown.\n\nThe lane model predicts no excess for N \u2264 128 and full flips for N = 256, which matches the pattern. Measured values: 1.195-1.209 pJ/B at d=1 for N \u2264 128, and the model's t=0 prediction is within 1% at d=1, 3 and 6.\n\nThe shortfall explanation is contradicted (perd_v1.py):\n- On the NoC rail the 256 B excess is 0.52/0.48/0.53 of the per-distance full-flip prediction at d=1/3/6, and 0.54 per hop. That includes d=1, where no link is shared. Board gives about 0.66.\n- Other flows cannot explain a constant fraction at d=1.\n- The other in-flight load is ruled out by v1: its two in-flight loads carry identical lines, yet its transition coefficient equals v2's (A(1) 297-301 vs 299-304).\n- A physical candidate is that when every wire flips the same way at once, the coupling capacitance between neighbours is not charged, so a full flip costs about C_ground/(C_ground+2C_coupling) of a random-data transition. Packing of lines into wider flits is another. The data do not settle it.\n\nMost of the 256 B excess is at the shire crossing: 1.26 pJ/B at d=1 against 0.41 per further hop.\n\nThe flit-width argument is slightly loose. With 32 B flits the 16 B pattern gives two identical halves; only the 32 B pattern would flip.",
+     "required_change": "Replace the last two sentences of section 7 with: 'The 256-byte pattern costs about half (mesh rail) to two thirds (board) of what the model predicts if every bit flipped on every flit, at every distance including one hop, where no link is shared. So it is not other flows slipping in, and v1's identical in-flight loads show it is not the other load either. One possible cause: when all wires flip the same way together, the capacitance between neighbours is not charged. Most of the excess is paid at the shire crossing.' Also write: 'if flits were 32 B the 32 B pattern would flip; if 16 B, the 16 B pattern.'"
+    },
+    {
+     "claim": "C7. A random byte costs 1.5-2.2 pJ per hop. A 64 B line across 10 hops costs 1.0-1.4 nJ against 7.8 nJ from DRAM, so it is 6-8x cheaper. A 32-bit operand crossing one hop costs about 6-9 pJ, about one lane of fadd.ps (5.3 pJ).",
+     "verdict": "holds_with_changes",
+     "evidence": "The arithmetic holds:\n- 187.6 and 274 fJ/bit/hop give 1.50 and 2.19 pJ/B.\n- 64 \u00d7 15.0 to 22.0 pJ/B gives 0.97 to 1.41 nJ.\n- DRAM is 122 pJ/B \u00d7 64 = 7.8 nJ.\n- 32 \u00d7 50.4 \u00d7 3.72 = 6.0 pJ and 32 \u00d7 72.9 \u00d7 3.72 = 8.7 pJ; 42.2 / 8 = 5.3 pJ.\n\nThe DRAM comparison is not like for like. The DRAM figure is board power for a whole load, endpoints included. The hand-off figure counts hops only, and at one end uses the mesh rail. A straight-line fit to v2 wu random on board power (leakage-corrected) gives an intercept of 6.61 and a slope of 2.17 pJ/B. At 10 hops that is 28.3 pJ/B = 1.81 nJ per line, 4.3x cheaper than DRAM. The mesh-rail 1.0 nJ should not be compared with a board-level DRAM figure.\n\nComparing board to board, one hop costs 8.7/5.3 = 1.6 fp32 adds, so 'roughly a hop' holds to within 2x.",
+     "required_change": "Write: 'Including the reads, writes and shire crossings at either end, a random 64-byte line handed 10 hops away costs about 1.8 nJ of board power, 4-5x less than reading it from DRAM (7.8 nJ). The hops alone cost 1.4 nJ.' Say the fadd comparison is board to board: one hop costs about 1-1.6 lanes of fadd.ps."
+    },
+    {
+     "claim": "C8. Some traffic (s to s+16 rings; on aifoundry2 the y-only pairs 3 hops apart) starves the service processor's management path, so reads take 0.8-1.6 s and the bursts are dropped; a sampler killed mid-request poisons the management queue.",
+     "verdict": "holds_with_changes",
+     "evidence": "The aifoundry2 part is in the data. wire.json drops the 6 aifoundry2 waxis/y/hop3 bursts, and the independent analyses find reads of 0.8-1.62 s there. The pipeline records the reason as 'too few samples'.\n\naifoundry3 showed milder slowing on the same traffic (0.40-0.55 s) and those bursts were kept, and they carry the C4 y value.\n\nNo s to s+16 ring bursts, and no evidence of management-queue poisoning, are in these four data sets or in wire.json, so those parts cannot be checked here. That the slowdown comes through the service processor's management path over the mesh is an inference, not measured.",
+     "required_change": "Write: 'on aifoundry2 the y-only pairs 3 hops apart (0.8-1.6 s per reading; those bursts are dropped; aifoundry3 slowed to 0.4-0.55 s on the same traffic and was kept)'. Either cite the report or run where the rings and queue poisoning were seen, or drop them from this report."
+    },
+    {
+     "claim": "Interpretation: a per-one cost is the signature of return-to-zero or precharged (dynamic) circuits, and 'a carried 1 costs more than a transition' (KPI k-one, section 5 title).",
+     "verdict": "refuted",
+     "evidence": "The ones term needs something that rests at 0. The simplest candidate, static logic that outputs 0 when idle, makes a and b the same per-transition energy split by occupancy: f = 2a/(2a+b) = 0.59-0.61, E_t about 163 fJ per hop, about 370 fF/mm. In that case 'a one costs more than a flip' is a feature of how the fit is written, not of the circuit.\n\nDynamic logic is implausible in a synthesized NetSpeed NoC. Precharged buffer read lines are possible.\n\nThe frozen line fitting while the 256 B pattern reaches only half the predicted flip cost argues against 'coupled wires drop to zero between trains' as the whole story. So the mechanism is open; the report's hedge 'the fit cannot say which circuit' is right, but the headline wording is not.",
+     "required_change": "Keep 'the fit cannot say which circuit it is'. Name the ordinary idle-to-zero mechanism first, with what it implies for a and b. Remove every statement that a one physically costs more than a transition (section 5 title, KPI sub-label, the lede's 'every one carried')."
+    },
+    {
+     "claim": "Interpretation: the bus-inversion suggestion (send the complement plus a flag when more than half the bits are ones; an all-ones stream would travel almost free).",
+     "verdict": "holds_with_changes",
+     "evidence": "The model is symmetric in transitions and asymmetric in P, so ones-minimising inversion does lower the ones term for dense data. But:\n- All-ones becomes all-zeros, which still pays the data-independent part: 73.8 of 203 fJ/bit/hop on the loaded NoC rail, 36% of its current cost. That is not 'almost free'.\n- For random data, per-flit inversion of 512 bits lowers the ones density only from 0.5 to 0.482, saving about 2.3 of 188 fJ/bit/hop (1.2%).\n- Per-byte inversion reaches a density of 0.363 but adds a flag wire for every 8 data wires, leaving a net saving of a few percent.\n- The NoC here is fixed hardware. The only option on this chip is choosing a representation in software, such as storing ones-dense data complemented.\n- If the ones term is idle-to-zero, holding the last value on idle cycles would remove it entirely, which is a better lesson for designers.",
+     "required_change": "Write: 'For data dense in ones, storing or sending the complement would make it cost what its complement costs. All-ones data would then cost what zeros cost, still the data-independent ~40% of a random bit's per-hop cost. For random data the saving is about 1%. On this chip only software can choose the representation.' Drop 'would travel almost free'."
+    },
+    {
+     "claim": "Interpretation: 'per mm of mesh travel' is comparable with Dally's per-mm figure.",
+     "verdict": "holds",
+     "evidence": "Dally uses 100 fJ/b-mm for distances travelled between blocks (the 2023 slide on a 48 mm GPU-die round trip; CACM 2020 'communication between blocks on chip'). So per mm of mesh travel, routers included, matches how he uses it. Keckler's 310 pJ for 256 bits over 10 mm is a bare repeated wire, so the mesh figure is an upper bound when compared with it. The report already says 'a bare wire costs less'.",
+     "required_change": "Say explicitly in section 8 that Keckler's figure is a bare repeated wire, so the mesh figure is an upper bound against it, and that per mm means per mm of displacement."
+    }
+   ],
+   "other_issues": [
+    "docs/reports/data/2026-09-24-wire-energy/research/lit/first-principles-estimate.md is not the estimate. It is OpenROAD's parasitics-estimation manual (set_wire_rc and similar). The actual arithmetic is only in lit/wire_calc.py and SYNTHESIS.md section 1f. Fix or remove the file before the report points readers at the research folder.",
+    "SYNTHESIS.md's bottom line and conversion tables use the older E27 data: d=8, q=0.445, 35/26 fJ, 101-137 fJ at 0.9 V. They differ from this report's numbers. Because the report cites SYNTHESIS for sources, add a note that its measured numbers are superseded by this experiment.",
+    "The report's own reference points disagree by 2x. The first-principles repeated wire at 0.9 V (41-81 fJ per random bit\u00b7mm, report.json first_principles.at_09) is half of Keckler's 121. So Keckler's figure contains more than an ideal repeated wire, or uses a different transition convention. Say so wherever both are used.",
+    "A test that would separate the explanations for the 256 B shortfall: alternate 256 B blocks of 0x55 and 0xAA instead of 0x00 and 0xFF. Every wire still flips, but neighbours flip in opposite directions, so the coupling capacitance is charged at double weight. If coupling explains the shortfall, 0x55/0xAA should cost well above the random-data prediction; if packing or ordering does, both patterns should cost the same. Throttling the flows at a fixed distance would separate the idle-to-zero and precharge readings of the ones term.",
+    "The loaded-mesh fixed and data parts rest on bandwidth that falls with distance equally on disjoint links (46.7 down to 32.1 GB/s per reader for wsep at d=1-5). So the 'per second rather than per hop' caveat applies to the uncontended numbers too, not only the loaded ones.",
+    "Section 5 and the KPI mix loaded and uncontended numbers without saying so. The per-one and per-transition values (35 and 26 fJ/mm) come only from the loaded all-pairs set; wsep ran only P = 0 and 0.5, so those terms cannot be separated without contention. Label them 'loaded mesh'.",
+    "At near-threshold 0.485 V, FinFET gate capacitance is somewhat lower than at 0.9 V. So even for full-swing links, V\u00b2 scaling at constant capacitance slightly understates the 0.9 V figure. If the links are low-swing, it overstates it (energy goes as Vdd\u00d7Vswing). Keep the existing caveat and note both directions."
+   ]
+  },
+  {
+   "lens": "ARITHMETIC, UNITS AND SOURCES. I built the page with scripts/build-report.py into verify-hpm/arith/page.html. A node DOM shim (verify-hpm/arith/render.js) ran the page's own script and printed every number the text shows. verify-hpm/arith/check.py then recomputed each conversion from report.json and wire.json: pJ/B/hop x125 = fJ/bit/hop, divided by 3.72 = fJ/bit/mm, the 0.5a+0.5b random bit, the pitch folding, the V^2 factor, and the C7 ratios. I checked the literature numbers against the local copies of the original PDFs in scratchpad/wire-research/lit (Keckler 2011 Table 1, Dally AHA 2023, CACM 2020, CACM 2022, VLSI 2018, Yale Patt 75, Ho 2003), and the geometry against research/geometry/pitch.json. Every printed number follows from wire.json with the correct unit conversions. What fails are several sentences whose wording does not match the numbers next to them: a false \"brackets\", \"a third more\", \"72% at five or six\", \"within 2%\", and a DRAM ratio that mixes meters.",
+   "verdicts": [
+    {
+     "claim": "C1. Energy per byte grows linearly with d for every pattern; on the NoC rail the data part is ~0 at d=0 and grows by a constant per hop; leaving the shire costs about one extra hop.",
+     "verdict": "holds_with_changes",
+     "evidence": "Data part at d=0, from wire.json configs (wu, NoC): p0.5 hop0 0.035 minus p0 hop0 0.012 = 0.023 pJ/B, against 1.55 at d=1. So ~0 holds. Per-hop steps of the data part (random minus zeros) are 0.89, 0.90, 1.09 and 0.79 pJ/B/hop, roughly constant (+-13%). The exit cost, (line intercept - d0)/slope with the line fitted over d=1-6: board, wu P=0.5: 1.12 hops. NoC rail, wu: P=0.5 0.55, zeros 0.29, P=1 -0.09 hops. Link-disjoint wsep on NoC: random 1.15, zeros 1.32. Section 4 puts 'Leaving the shire costs about one hop more' straight after 'On the mesh rail ...' and under a chart of the loaded wu sweep. On that meter and that sweep the exit cost is 0.55 hop for random data and zero for all-ones. Both independent re-analyses agree (0.53-0.74 NoC loaded, 1.05-1.18 board).",
+     "required_change": "Section 4: replace 'Leaving the shire costs about one hop more (the mesh-stop crossings)' with: 'Leaving the shire costs about one more hop on board power, and for link-disjoint flows on the mesh rail; in this loaded sweep the mesh rail shows about half a hop for random data and none for all-ones.' Also soften 'grows by the same amount with every hop' to 'by about the same amount (within ~15%)'."
+    },
+    {
+     "claim": "C2. Per-hop energy depends on the density of ones; model s0 + a*2P(1-P) + b*P; v2 NoC a=98, b=129, board 151/192; v1 NoC 95/131, board 139/197; rms 0.008 (NoC) and ~0.04 (board); complement tests 132 and 129.",
+     "verdict": "holds",
+     "evidence": "The wire.json model gives: v2 NoC a 98.1, b 129.4; v2 board 151.0/192.0; v1 NoC 95.3/131.3; v1 board 138.5/196.6 fJ. rms 0.0084 and 0.0382 (v2), 0.0084 and 0.0397 (v1) pJ/B/hop. complement_test gives 131.8 (3/4 vs 1/4) and 128.8 (1 vs 0) fJ. The conversion is right: the coefficient in pJ/B/hop per unit t or P is divided by 8 and multiplied by 1000, which gives fJ per bit-transition (or per one-bit) per hop. The random bit is 0.5a+0.5b = 113.8 NoC and 171.5 board. The per-mm table values (26.4, 34.8, 30.6, 19.8, total 50.4 NoC; 40.6, 51.6, 46.1, 26.8, total 72.9 board) are these divided by 3.72. Their brackets are lo/3.76 and hi/3.64, as the caption says. Both independent re-analyses reproduce the NoC numbers within 1-3%. The board a moves by 7-16% with the leakage treatment (independent methods), but that is outside this lens. All-ones costs 5-9% more per hop than random (NoC P=1 1.629 against P=0.5 1.500 pJ/B/hop), so 'about as much' is fair.",
+     "required_change": "None needed. Optional: section 5 says 'to a few hundredths of a pJ/B'. The unit should be pJ/B per hop."
+    },
+    {
+     "claim": "C3. Contention costs energy: wsep (d=1-5) NoC data 90 (90.6/90.1) against wu (d=1-4, up to 72% of link-hops shared) 119; zeros 43 against 76; board 107 against 186, and 56 against 103; at d=1 they agree.",
+     "verdict": "holds_with_changes",
+     "evidence": "The numbers match wire.json disjoint_flows. NoC: wsep 90.4 (90.6/90.1), zeros 43.1; wu 119.2 and 76.4. Board: wsep 107.4 and 55.5; wu 186.0 and 103.0. Three problems. (1) Link sharing: in the all-pairs target maps it is 0/22/32/55/72% at d=1/2/3/4/6 (both independent re-analyses; SYNTHESIS's E27 table agrees). So within d=1-4 the maximum is 55%. The all-pairs sweep has no d=5 (configs hop0,1,2,3,4,6), so the body's 'up to 72% of link-hops at five or six' is wrong on both counts. (2) Distance ranges: analyze_wire.py's own comment says wu is compared 'over the same distances 1-4', and it computes wsep_d1_4. The headline instead uses wsep over d=1-5. On NoC this does not matter (91.4/43.4 against 90.4/43.1). On board it does: wsep d1-4 is 121.8 data and 52.0 zeros, against 107.4 and 55.5. The free-link board per-mm data figure therefore moves from 28.9 to 32.7. (3) The lede says 'contention costs as much as a third more distance'. The numbers beside it are 36 to 50 fJ/mm (+41%) and 44 to 73 (+67%). The like-for-like C3 totals are wu/wsep 1.47 (NoC) and 1.77 (board). None of these is 'a third'.",
+     "required_change": "Section 6: replace '(none at one hop, up to 72% of link-hops at five or six)' with '(none at one hop, 22-32% at two and three, 55% at four, 72% at six)'. Anywhere C3 is summarised, say 'up to 55% of link-hops shared' for d=1-4. Lede: replace 'contention costs as much as a third more distance' with 'contention adds 40% (mesh rail) to two thirds (board) per millimetre'. Either compare wsep over d=1-4 (board 122/52), as the code comment intends, or state that the board free-link figure is 107 over d=1-5 and 122 over d=1-4."
+    },
+    {
+     "claim": "C4. One hop = 3.72 mm (3.64-3.76), x/y pitches 3.73/3.70 mm from the die plot scaled to 570 mm^2; x-only and y-only paths cost the same within 2% on the NoC rail over d=1-3 (125 and 128 fJ).",
+     "verdict": "holds_with_changes",
+     "evidence": "pitch.json gives three cases. A: px 3.750, py 3.721, geomean 3.735. B, the one the verifier prefers: 3.725, 3.696, 3.711. C: 3.637. The quoted 3.73/3.70 are case B rounded, and their geomean is 3.715. The value 3.72 sits between A and B. The upper end 3.76 does not follow from any case (A is 3.735). The effect on per-mm numbers is 0.3% at most. The '86% of the width' figure matches the SYNTHESIS outline span. Axis numbers from wire.json axes (NoC, d=1-3): x 124.6 (aifoundry2 127.1, aifoundry3 122.2), y 127.6. The y value comes from aifoundry3 alone, because the aifoundry2 y/hop3 bursts were dropped. The pooled difference is 2.4%, not within 2%. The same-card difference on aifoundry3 is 4.5% on NoC (122.2 against 127.6) and 4.1% on board (185.9 against 193.6). The independent re-analysis finds that y falls to 112 if aifoundry3's slow-read y/hop3 bursts (0.1-0.55 s reads) are dropped.",
+     "required_change": "Section 10: replace 'cost the same within 2% over 1-3 hops' with 'cost the same within about 5% over 1-3 hops (aifoundry3, the only card with a y-only 3-hop point: 122 against 128 fJ per random bit per hop)'. Optionally, state the hop range as 3.64-3.74 mm (or 3.62-3.75 allowing for rounding of the 570 mm^2)."
+    },
+    {
+     "claim": "C5. Headline per random bit per mm at 0.485 V: free links 24+12=36 (NoC), 29+15=44 (board); loaded 31+20=50, 46+27=73; scaled by 3.44 to 0.9 V the data part is ~84-159, bracketing Dally ~100 and Keckler 121; the chip's capacitance per mm is where 40 nm wires were; a bare 7 nm wire would be 12-24 fJ.",
+     "verdict": "holds_with_changes",
+     "evidence": "The arithmetic is exact. Free-link NoC: 24.29+11.58 = 35.87. Board: 28.88+14.91 = 43.79. Loaded: 30.58+19.84 = 50.42 and 46.11+26.81 = 72.92. (0.9/0.485)^2 = 3.4435. Scaled: free NoC 83.6, free board 99.4, loaded NoC 105.3, loaded board 158.8. The source check also passes: Keckler Table 1 says 310 pJ for 256 bits over 10 mm at 40 nm and 0.9 V, 'random data with a 50 percent transition probability', which is 121.1 fJ. Yale Patt 75 gives 174 pJ at 10 nm and 0.7 V = 68.0. CACM 2022 gives 77 pJ for 64 b over 40 mm = 30.1. VLSI 2018 gives '20-40 fJ/bit-mm'. The AHA 2023 slide 8 and CACM 2020 quotes are verbatim. The page has these errors: (a) Section 8's comparetext says '105-159 fJ ... which brackets Dally's 100'. 105 > 100, so it does not; the lede and KPI range 84-159 does. (b) The KPI sub-label 'mesh rail to board' hides that 84 is free links and 159 is loaded. (c) On the mesh rail alone (no regulator loss) the scaled range is 84-105. That does not reach Keckler's 121; only board power, which includes 18-29% delivery loss, does. (d) 'the voltage behind the lineage' and 'The lineage is traceable' state as fact what SYNTHESIS 2d and 4 call an inference ('no source says so'). The AHA 2023 conclusion slide pairs the 100 fJ/b-mm with '~0.5V'. (e) The capacitance statement holds only per random bit. C_eff = 4E/V^2 is 0.41-0.78 pF/mm, against Keckler's 0.60. Per transition (a) the chip costs 91 (NoC) to 140 (board) fJ per transition-mm at 0.9 V, against Keckler's 240. That is C = 0.22-0.35 pF/mm, which is a bare 7 nm wire (0.2-0.4). The parity with 40 nm comes from the ones term. (f) 'a third to a half of what the mesh measures': the bare wire at 12-24 fJ (central 18) is half to all of the free-link rail's 24 data figure, and a third to a half only of the loaded 31-46. (g) First principles: the stated basis (0.166 fF/um x 1.34 up to 0.2 x 1.87) gives 222-374 fF/mm and 13-22 fJ; the report rounds outward to 200-400 and 12-24.",
+     "required_change": "Section 8: change '105-159 fJ for the data-dependent part, which brackets Dally's 100 and Keckler's 121' to '84-159 fJ (free links on the mesh rail to the loaded mesh on board power), which brackets Dally's 100 and Keckler's 121; the mesh rail alone gives 84-105'. KPI sub-label: 'free-link mesh rail to loaded board power'. Lede and section 1: 'the voltage of Keckler 2011's 40 nm figures, the likely (not stated) source of Dally's number' in place of 'the voltage behind the lineage' and 'The lineage is traceable'. Capacitance sentence: add 'per random bit; per transition alone the mesh costs 91-140 fJ/mm at 0.9 V against Keckler's 240, a bare 7 nm wire's capacitance, so the 40 nm-level cost comes from the ones it carries'. Change 'a third to a half of what the mesh measures' to 'half to two thirds of the free-link figure and a third to a half of the loaded one'."
+    },
+    {
+     "claim": "C6. Blocks of 16-128 B cost the same per hop; 256 B blocks ~0.8 pJ/B/hop more on board; explained by 4 lanes chosen by PA[7:6] (lines i and i+4, 256 B apart) and a flit of at least 64 B; the 256 B case is ~60% of the full-flip prediction.",
+     "verdict": "holds",
+     "evidence": "wire.json patterns alt:N board slopes: 1.536, 1.506, 1.481, 1.457 (16-128 B, within +-3%) and 2.258 (256 B). NoC: 1.056-1.091 and 1.489. The extra slope is 0.763 on board (aifoundry2 0.764, aifoundry3 0.763), so ~0.8 holds; it is 0.41 on NoC. Against the dashed v1 board model the page draws (s0+0.5b = 1.613 for no flips, +a = 1.108 for full flip), (2.258-1.613)/1.108 = 0.58, which matches '~60%'. Against the measured small-block level it is 0.69; on NoC 0.48-0.54. The lane arithmetic is right: PA[7:6] with 64 B lines puts lines i and i+4 on one lane, 256 B apart. For N <= 128, 256 is a multiple of 2N, so the value is the same; for N = 256 it is the opposite, so every bit flips.",
+     "required_change": "None. Optionally, say that the ~60% is measured against the model line; against the measured 16-128 B level it is ~70% on board and ~55% on the mesh rail."
+    },
+    {
+     "claim": "C7. A random byte costs 1.5-2.2 pJ/hop; a 64 B line across 10 hops (~37 mm) costs 1.0-1.4 nJ against 7.8 nJ from DRAM, so the farthest on-chip hand-off is 6-8x cheaper; a 32-bit operand crossing one hop costs ~6-9 pJ, about one lane of fadd.ps (5.3 pJ); an fp add is worth roughly a hop.",
+     "verdict": "holds_with_changes",
+     "evidence": "The printed arithmetic is correct. Per hop 50.42x8x3.72/1000 = 1.50 and 72.92x... = 2.17 pJ/B. Ten hops, 64 B: 0.96-1.39 nJ. DRAM 64x121.96 = 7.81 nJ (manual.json reruns.levels dram). The ratios are 5.62-8.13, printed as 6-8. 10 x 3.72 = 37.2 mm, and 10 is the Manhattan diameter of the 6x6 minion grid, the same convention as Dally's '40mm corner to corner'. fadd.ps: 42.20/8 = 5.27 pJ; 32 bits x one hop = 6.00-8.68 pJ. Problems: (1) The 8x end divides a board-power DRAM figure by a mesh-rail-only hop cost. Board against board, it is 5.6x. (2) The DRAM figure is a whole read. The observability report says it includes 50-60 pJ/B of mesh, SRAM and delivery. The hop figure leaves out the far scratchpad read and the exit. Counting them, from the wu P=0.5 board line (intercept 6.79 + 10x2.18 = 28.6 pJ/B; d=0 is 4.34), gives 4.3x. (3) The operand and add comparisons also mix meters. Board against board, one hop is 1.65 fadd lanes, so a lane is worth about 0.6 hop (~2.3 mm). Dally's CACM 2022 accounting counts both 32-bit operands (1.9 pJ per mm for two words), which would halve it again. (4) 'a third to a half' of the 4.21 pJ own-scratchpad read uses the rail number for the low end; board against board it is 0.52. (5) The 10 hops are extrapolated beyond the measured d <= 6, and on the loaded mesh the per-hop increment grows with d.",
+     "required_change": "Section 9: 'So the farthest on-chip hand-off is still about 4-6x cheaper than going to DRAM on the same meter (board power: 5.6x for the ten hops alone, 4.3x counting the far scratchpad read and leaving the shire)'. For the operand comparison, use board power on both sides: 'a 32-bit operand crossing one hop costs 8.7 pJ, about 1.6 lanes of fadd.ps (5.3 pJ), so an fp add is worth about half a hop (~2 mm)'. Alternatively, keep the rail number and say that it is the rail only. Change 'a third to a half' to 'about half (board power)'."
+    },
+    {
+     "claim": "C8. Some traffic (s<->s+16 rings; on aifoundry2 the y-only pairs 3 hops apart) starves the SP's management path, so telemetry reads take 0.8-1.6 s and those bursts are dropped; a sampler killed mid-request poisons the management queue.",
+     "verdict": "holds_with_changes",
+     "evidence": "From telemetry.jsonl: on aifoundry2 v1, every waxis/y/hop3 burst (6 of them) has 2-3 samples with took_ms 803-1620 (one read 420). The median took_ms over all four data sets is 22 ms. wire.json drops exactly these 6, although it labels them 'too few samples', not 'service processor starved'. The s<->s+16 rings are not in any of these four data sets. The energy manual (reruns.dropped: sampler median 75-146 ms) and the observability report ('each command takes 150 ms instead of 22') put their slowdown at ~150 ms, not 0.8-1.6 s. On aifoundry3 the same y/hop3 traffic produced occasional 96-549 ms reads (median 22), and those bursts were kept. The 'sampler killed mid-request poisons the queue' statement is not in the report text; it appears only in a code comment (run_wire.py:175), and no data here tests it.",
+     "required_change": "Section 10: 'rings between shires s and s+16 (energy manual: ~150 ms per reading instead of 22 ms, the board reading frozen for seconds) and, on aifoundry2, the y-only pairs 3 hops apart (0.8-1.6 s per reading, two or three readings per burst) ... those bursts are dropped; on aifoundry3 the same y-only traffic slowed a few readings to 0.1-0.55 s, and those bursts were kept.' No change is needed for the queue-poisoning point, since the report does not state it; it cannot be checked from these data."
+    }
+   ],
+   "other_issues": [
+    "Section 1 says of AHA 2023 and CACM 2020: 'Neither says at what voltage, in which process, or for what data.' In CACM 2020 (p.56) the sentence 'This communication costs 100fJ/bit-mm' sits in the same bullet as 'Accessing a small (8KByte) local memory in 14nm costs 50fJ/bit'. Suggested: 'neither gives a voltage or data activity; CACM 2020 states it in a paragraph about 14 nm'.",
+    "Section 1 quotes '20-40 fJ in a \"typical 16 nm\" (VLSI Symposium 2018)'. The 20-40 sentence in that paper says 'In present day chips'. 'In a typical 16 nm technology' comes from another paragraph, and the paper also says 'In 16nm logic, operating at 0.6V'. Suggested: '20-40 fJ \"in present day chips\" (VLSI 2018, a paper set in 16 nm)'.",
+    "Section 8 opening: '31-46 fJ of data-dependent heat and 50-73 fJ in all ... half to three quarters of Dally's 100'. The 'half to three quarters' fits only the totals; the data part is a third to a half. This paragraph also switches to the loaded numbers, while the lede leads with free-link ones (24/36/44). Label which one is meant.",
+    "The mesh figure's tooltip gives the memory-shire strip as '\u22481.61 mm wide'. That is (25.6 - 6 x 3.73)/2. SYNTHESIS and pitch.json measure 1.74-1.80 mm (1.755 in case B), because the drawn tile outlines span 22.1-22.2 mm, not 6 pitches.",
+    "Method B (independent) finds that the NoC-rail factor /0.94 (tail mean over 0.6 s) under-corrects the SP's ~1.04 s filter by about 2.5%, uniformly. All NoC per-mm numbers would be about 2.5% higher (24 -> 25). No conclusion changes.",
+    "The per-mm range of random_bit_total sums the lowest data and lowest fixed values across passes (and the highest with the highest), so it is slightly wider than a range over passes. The caption calls it 'the range over passes and cards'.",
+    "C2 board a/b and C3 board numbers depend on the leakage correction by 5-16% (both independent re-analyses). The NoC-rail numbers are robust. The text treats the two meters as equally firm.",
+    "Scratch files: /tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/verify-hpm/arith/check.py (every recomputation above), render.js (runs the page script under a DOM shim and prints the rendered text), page.html (the built page)."
+   ]
+  }
+ ]
+}

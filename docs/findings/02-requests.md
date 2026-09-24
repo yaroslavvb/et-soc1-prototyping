@@ -1,8 +1,8 @@
 # Requests: what was asked, and what each one produced
 
 The work in this directory was driven by a sequence of requests from the repo owner, in one long session on
-aifoundry2 between 19 and 22 September 2026. Each is recorded here because scope decisions explain why some
-questions were answered thoroughly and others were left open. Cite as **Q1**...**Q20**.
+aifoundry2 between 18 and 24 September 2026. Each is recorded here because scope decisions explain why some
+questions were answered thoroughly and others were left open. Cite as **Q1**...**Q42**.
 
 | ID | Date | Request (condensed) | Produced |
 |---|---|---|---|
@@ -39,6 +39,15 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
 | Q31 | 09-23 | Add confidence bars to all the entries, from re-running the workload and from different cards | E29 → A15 third edition; the `combined` block of E27's analysis; 09-method.md "Confidence bars" |
 | Q32 | 09-23 | *(mid-task)* For the unmetered parts of memory access, find what could reduce the unmetered share; the Moortec PVT integration may give extra instrumentation. Add it to the observability report, cross-link the two reports, add an improvement ladder (cf. the spatial temperature brief), make the observability report the top level for all measurement matters, with a table of contents | E30, R13 → A2 second edition, A15 §4a |
 | Q33 | 09-23 | *(mid-task)* After this, update the GitHub repo with all the relevant materials: it is the source of truth for everything found and every experiment run | the commit of 2026-09-23 (04-artifacts.md, "Commits"); `docs/getting-started.md` "Where things stand (2026-09-23)" |
+| Q34 | 09-23 | In the observability report, list the sessions that measured power and temperature, add related documents, and make the section 5 table fit without scrolling sideways | A2: §7 sessions (E5–E30), related documents, a 1320 px layout; commit `d0e12d9` |
+| Q35 | 09-23 | *(mid-task)* The energy manual's §3.1 error bars are cut off at the top | A15: headroom above the tallest whisker; commit `d0e12d9` |
+| Q36 | 09-23 | *(mid-task)* Section headings should be anchors that can be sent as links | The shared report template gives every h2/h3 an id and a # link; commit `d0e12d9` |
+| Q37 | 09-23 | *(mid-task)* Make sure every tool the reports link is committed, with everything relevant: the repo is the tool collection and the knowledge base for starting future agents | `CLAUDE.md` points at `docs/findings/README.md`; the tool tables in [04-artifacts.md](04-artifacts.md); commit `d0e12d9` |
+| Q38 | 09-23 | Section 5 still scrolls sideways a little | commit `1006df4` |
+| Q39 | 09-23 | Move the companions footnote into a "Related Reports" section with a line on each | commit `e7951c3` |
+| Q40 | 09-23 | Make every spacesheep link in the observability report public | Every linked space made public (no commit); the visibility column of [04-artifacts.md](04-artifacts.md) |
+| Q41 | 09-24 | Verify the energy of moving bits along wires against Dally's "~100 fJ/b-mm on-chip": look up this chip's numbers, run experiments, determine J per bit per metre, and publish it as a "heat per mm" report in the repo and on spacesheep | R14, E31, E32 → A17, [20-heat-per-mm.md](20-heat-per-mm.md) |
+| Q42 | 09-24 | Install spacesheep's session hooks on aifoundry2; report the sessions board's missing links and mismatched titles to its author | Outside this repo: the hooks in `~/.claude/settings.json` and two bug reports on spacesheep. No card time |
 
 ## Scope decisions worth remembering
 

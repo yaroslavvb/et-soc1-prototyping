@@ -16,6 +16,9 @@ start_sampler() {  # telemetry path, seconds
     S=$!
     for i in $(seq 1 40); do sleep 0.25; [ -s "$1" ] && return 0; done
     kill $S 2>/dev/null; pkill -P $$ -x ettelem 2>/dev/null; sleep 2
+    # a reply left in the management queue by a sampler killed mid-request crashes every newcomer (and each crash
+    # leaves another); the vendor tool consumes it once (tools/ettelem/ettelem.cpp explains)
+    [ "$attempt" = 2 ] && timeout 20 /opt/et/bin/dev_mngt_service -m DM_CMD_GET_MODULE_POWER -n 0 -u 5000 > /dev/null 2>&1
   done
   echo "sampler failed to start" >&2; exit 1
 }

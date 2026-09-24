@@ -301,6 +301,32 @@ and leakage-corrected power, both bracketing idles and the die temperature.
 | The PMIC meters three regulators; seven rails have no telemetry | minion, NoC, SRAM (w_out forwarded; v/a/w in and a_out read and dropped) | R | R13 | `pmic_controller.c`, `bl2_pmic_controller.h` |
 | Moortec PVT: 35 temperature sensors, 125 voltage points, 40 process detectors | host sees averages; per-shire voltage in the DEBUG trace; PDs disabled | R | R13 | `bl2_pvt_controller.h`, `pvt_controller.c` |
 
+## Heat per millimetre (E31, E32)
+
+`WIRE` is `docs/reports/data/2026-09-24-wire-energy/wire.json`; `WREP` is `report.json` beside it. Loaded-mesh
+coefficients are the second run's model (`model.v2`) over 1–6 hops; free-link numbers are `disjoint_flows.*.wsep_d1_4`.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| One mesh hop | **3.72 mm** (3.64–3.74); x 3.73, y 3.70 | A (estimate from the die plot) | R14 | `WREP`, `inputs.hop_mm`; `research/geometry/pitch.json` |
+| A random bit per mm, free links, 0.485 V | **36.2 fJ** on the mesh rail (24.6 data + 11.7 fixed); 46.7 on board power (32.7 + 14.0) | M, F (slopes) | E32 | `WREP`, `headline["uncontended/noc_rail"]`, `["uncontended/board"]` |
+| A random bit per mm, loaded mesh | **50.4 fJ** mesh rail (30.6 + 19.8); 72.9 board (46.1 + 26.8) | F (3-term model) | E32 | `WREP`, `headline["v2/noc_rail"]`, `["v2/board"]` |
+| Per bit differing from the previous flit, per hop (*a*) | 98 [92–103] fJ mesh rail; 151 [139–162] board | F | E32 | `WIRE`, `model.v2.*.toggle_fj_per_bit_transition_hop` |
+| Per one carried, per hop (*b*) | 129 [127–133] fJ mesh rail; 192 [180–205] board | F | E32 | `WIRE`, `model.v2.*.ones_fj_per_one_bit_hop` |
+| The same from the first run's repeated image | *a* 95, *b* 131 fJ on the mesh rail | F | E31 | `WIRE`, `model.v1.noc_rail` |
+| Ones from complements (¾ against ¼) | 132 [125–138] fJ per one per hop, mesh rail | M | E32 | `WIRE`, `complement_test.noc_pj_per_byte` |
+| Contention over 1–4 hops, mesh rail | data 119 against 91 fJ per bit per hop; the rest 76 against 43 | M | E32 | `WIRE`, `disjoint_flows.noc_pj_per_byte.wu`, `.wsep_d1_4` |
+| Link sharing in the all-pairs set | 0 / 22 / 32 / 55 / 72% of link-hops at 1 / 2 / 3 / 4 / 6 hops (XY routing) | M (from the recorded maps) | E32 | `WIRE`, `checks.link_sharing` |
+| All ones against random, per hop | 7–9% more (both meters); 36–37% less in total at one hop | M | E32 | `WIRE`, `configs["wu/p1/hop*"]` against `["wu/p0.5/hop*"]` |
+| 256 B blocks against 16–128 B | +0.41 pJ/B per hop (mesh rail), +0.76 (board): 54% and 69% of every bit flipping | M | E31 | `WIRE`, `checks.alt256` |
+| Board coefficients without the leakage correction | 4–9% higher; mesh rail unchanged | M | E31, E32 | `WIRE`, `sensitivity.no_leak_correction` |
+| Mesh rail data cost scaled to 0.9 V | 85–105 fJ per random bit·mm (× 3.44, constant C, full swing) | F, A (the scaling) | E32 | `WREP`, `scaled["0.9"]` |
+| y-only three-hop pairs starve the meter on aifoundry2 | telemetry reads 0.8–1.6 s instead of 22 ms; 6 bursts dropped | M | E31 | `WIRE`, `dropped.aifoundry2` |
+| A killed sampler poisons the management queue | every later opener crashes with `std::bad_function_call` until one `dev_mngt_service` call drains it | M | E32 | [14-card-behaviour.md](14-card-behaviour.md), "Traps" |
+| Dally's figure | "~100fJ/b-mm on-chip": no voltage, process or data activity; CACM 2020 in a 14 nm paragraph; AHA 2023 beside "~0.5V" | X | R14 | `research/SYNTHESIS.md` §1d |
+| Keckler et al. 2011, 40 nm, 0.9 V | 121 fJ per random bit·mm (310 pJ / 256 b / 10 mm) | X | R14 | same, §1e |
+| A plain repeated 7 nm wire, 0.485 V | 12–24 fJ per random bit·mm (200–400 fF/mm) | A (first principles) | R14 | `research/lit/first-principles-estimate.md` |
+
 ## External numbers (not measured here)
 
 | Claim | Value | Kind | Source |
@@ -335,6 +361,9 @@ and leakage-corrected power, both bracketing idles and the die temperature.
 - **Per-flip energies outside the tensor unit**, and the split of the unsensed 15 W of idle. E30 attributes the
   unmetered part of a *burst* (delivery losses plus a DRAM term) and meters DRAM by droop; the idle 12–15 W
   and the DRAM term's split below its regulator stay inferred.
+- **Whether the heat-per-mm "ones" cost is resting-at-zero logic or precharged structures**, and how a hop's
+  energy splits between router and wire (E31, E32). The mesh rail's meter gain has not been checked independently,
+  and whether the links are low-swing, which the V² scaling assumes they are not, is unknown.
 - **Whether the DRAM controller closes pages** or the row activation is merely small; E28 cannot tell.
 - **Any table at 700 or 800 MHz.** The V²f ratios say what to expect; nothing was re-measured there.
 - **A relay whose working set exceeds the 80 MB of scratchpad.** That is where on-chip hand-off would be the

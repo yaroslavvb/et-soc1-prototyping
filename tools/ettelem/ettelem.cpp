@@ -14,6 +14,7 @@
 //
 // Everything here is a read, except loglevel, which only changes what the SP writes into its own log buffer.
 // The management node allows one opener: quit et-powertop and scripts/et-power-log.sh first.
+#include <csignal>
 #include <device-layer/IDeviceLayer.h>
 #include <deviceManagement/DeviceManagement.h>
 #include <esperanto/device-apis/management-api/device_mgmt_api_rpc_types.h>
@@ -94,11 +95,25 @@ int config(Dm& d) {
   return (okD && okT && okS) ? 0 : 1;
 }
 
+// A sampler killed in the middle of a request leaves that request's reply in the management queue, and the next
+// process to open the node receives it with no handler registered and dies of std::bad_function_call; so does every
+// retry, each leaving its own reply behind (24 Sep 2026: both cards). So SIGTERM and SIGINT only ask the loop to
+// stop, and the sample in flight completes. A queue already poisoned is drained by one call of the vendor tool:
+//   dev_mngt_service -m DM_CMD_GET_MODULE_POWER -n 0 -u 5000   (it crashes on the stale reply and clears it)
+static volatile std::sig_atomic_t g_stop = 0;
+static void onStop(int) { g_stop = 1; }
+
 int sample(Dm& d, double seconds, int everyMs, int resetMs) {
+  struct sigaction sa {};
+  sa.sa_handler = onStop;
+  sa.sa_flags = SA_RESTART;   // the device layer's blocking calls resume instead of failing with EINTR
+  sigemptyset(&sa.sa_mask);
+  sigaction(SIGTERM, &sa, nullptr);
+  sigaction(SIGINT, &sa, nullptr);
   const auto t0 = Clock::now();
   auto lastReset = Clock::now();
   if (resetMs > 0) d.resetStats();
-  while (std::chrono::duration<double>(Clock::now() - t0).count() < seconds) {
+  while (!g_stop && std::chrono::duration<double>(Clock::now() - t0).count() < seconds) {
     const auto tick = Clock::now();
     module_power_t p;
     get_sp_stats_t s;

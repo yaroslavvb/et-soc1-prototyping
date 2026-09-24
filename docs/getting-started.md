@@ -8,7 +8,7 @@ This page covers everything needed to pick the work up somewhere else: clone, co
 rerun, and republish. Claude Code's memory for this project lives outside the repo, on each machine, so this
 page and `CLAUDE.md` carry the context.
 
-## Where things stand (2026-09-23)
+## Where things stand (2026-09-24)
 
 The repository is the source of truth: every result, the experiment that produced it and the raw data are here,
 and `docs/findings/` traces each claim to its file. If a session is lost, resume from this page.
@@ -20,7 +20,8 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   entry with a confidence bar from repeated passes on two cards) · [DVFS and leakage](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage)
   · [Spatial temperature brief](https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief) · [Horace](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment)
   · [Why low power](https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power) · [Hot line](https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line)
-  · [On-chip relay](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay) · and the 18–20 September reports below.
+  · [On-chip relay](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay) · [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm)
+  (the mesh's wire energy per bit·mm against Dally's ~100 fJ/b-mm) · and the 18–20 September reports below.
   Space uuids are in `docs/findings/04-artifacts.md`; deploy with `npx --yes spacesheep deploy <dir> --space <uuid>`
   from a private directory holding `index.html`, and delete `.spacesheep.json` afterwards (see `04-artifacts.md`).
 - **The energy manual** (`docs/energy-manual/*.md`, page `docs/reports/2026-09-23-energy-manual.html`) is built
@@ -40,6 +41,16 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   the minion rail, 5% on SRAM, 26–29% on the mesh and 68–73 pJ per DRAM byte off-rail, rms 0.3 W over 390
   bursts; the memory shires' Moortec voltage monitor (`die_mv.ddr`) droops 0.84 mV per off-rail DRAM watt and
   serves as a DRAM-activity meter. What would meter more is the observability report's improvement ladder.
+- **Heat per millimetre** (`docs/findings/20-heat-per-mm.md`, page `docs/reports/2026-09-24-heat-per-mm.html`):
+  `workloads/enercat/run_wire.py` (two runs, E31 and E32, both cards, `docs/reports/data/2026-09-24-wire*-aifoundry*`)
+  → `workloads/enercat/analyze_wire.py` → `wire.json` → `tools/ettelem/build_wire_report.py` → `report.json` →
+  `scripts/build-report.py heat-per-mm`. A random bit costs 36 fJ per mm on the mesh rail with free links, 50 on a
+  loaded mesh (47 and 73 on board power); ones carried cost energy, not just bit changes. An adversarial review
+  checked it before publication (`docs/reports/data/2026-09-24-wire-energy/review/`).
+- **New traps (24 September):** a sampler killed mid-request poisons the management queue until one
+  `dev_mngt_service` call drains it; loads between shires in the same column three hops apart starve the meter on
+  aifoundry2; a memory pattern with no buffer writes to physical address 0 and nothing reports it. All three are in
+  `docs/findings/14-card-behaviour.md`, "Traps".
 - **Next:** the ladder's first undone rungs — deconvolving the rails' 1 s filter, calibrating the per-shire
   IR-drop map from the SP DEBUG trace into a spatial current map, and a PCIe riser with shunts for millisecond
   board power. The earlier "next" items below (a real GEMM, prefetching, Discord) still stand.
