@@ -327,6 +327,30 @@ coefficients are the second run's model (`model.v2`) over 1–6 hops; free-link 
 | Keckler et al. 2011, 40 nm, 0.9 V | 121 fJ per random bit·mm (310 pJ / 256 b / 10 mm) | X | R14 | same, §1e |
 | A plain repeated 7 nm wire, 0.485 V | 12–24 fJ per random bit·mm (200–400 fF/mm) | A (first principles) | R14 | `research/lit/first-principles-estimate.md` |
 
+## Ridge points (derived; no card time)
+
+Peak compute divided by each level's measured bandwidth, at 600 MHz on 1,024 minions. Kind `D`: arithmetic on
+measured numbers, not a new measurement. The inputs are the 2026-09-18 reports; recompute every row with
+`python3 scripts/ridge-points.py`. Values are FLOP (int8: OP) per byte fetched, fp32 / fp16 / int8.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| Tensor peak per minion-cycle | **16 / 32 / 128** ops (9.83 TFLOP/s, 19.7 TFLOP/s, 78.6 TOP/s on 1,024 minions at 600 MHz) | X | Minion VPU Specification §2; matmul report | `scripts/ridge-points.py`, `PEAK` |
+| Ridge, own shire (L2 or L2 scratchpad) | **4 / 8 / 32** at 4.0 B per minion-cycle (2.46 TB/s); 2 / 4 / 16 at the banks' 256 B per shire-cycle | D | memory-hierarchy streaming probes | `docs/reports/data/2026-09-18-memhier-aifoundry2/energy*/runs.jsonl`, configs `l2`, `scp-local` |
+| Ridge, L3 or another shire's scratchpad | **10 / 20 / 80** at 0.96–0.98 TB/s | D | same, configs `l3`, `scp-remote`, 600 MHz launches only | same file, `implied_ghz` 0.59–0.61 |
+| Ridge, DRAM | **130 / 259 / 1,036** at 76 GB/s | D | same, config `dram`; 72 GB/s on aifoundry3 | same file; `docs/reports/data/2026-09-18-sparsity-aifoundry3/tload-dram-all.jsonl` |
+| Ridge, host over PCIe Gen4 x8 | **624 / 1,248 / 4,993** at 15.75 GB/s | A | datasheet §1; never measured | — |
+| Intensity of one full-size TensorFMA | **4 / 8 / 16** per byte (2 KB of A and B per op) | D | PRM ch. 9 | `scripts/ridge-points.py`, `OP_BYTES` |
+| Smallest DRAM-resident C block that is compute-bound | about **520 × 520** (fp32, fp16), **1,040 × 1,040** (int8) | D | H/s ≥ ridge, H the harmonic mean of the block's sides | the report's "What it takes to reach them" |
+
+Two corrections to earlier reports came out of this, both verified in the raw data:
+
+- The memory-hierarchy report's bandwidth column averages launches taken at 600–800 MHz. At 600 MHz the cycle
+  counters give **2.45 TB/s** for L2 and **128 B per shire-cycle**, not the 2.80 TB/s and "about 144 B/cycle" printed
+  there.
+- The **128,000 MB/s** DRAM figure the runtime reports is a placeholder constant in the service-processor firmware
+  (`device-bootloaders/src/ServiceProcessorBL2/include/mem_controller.h`), not a measurement or a configured rate.
+
 ## External numbers (not measured here)
 
 | Claim | Value | Kind | Source |

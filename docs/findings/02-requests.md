@@ -48,6 +48,7 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
 | Q40 | 09-23 | Make every spacesheep link in the observability report public | Every linked space made public (no commit); the visibility column of [04-artifacts.md](04-artifacts.md) |
 | Q41 | 09-24 | Verify the energy of moving bits along wires against Dally's "~100 fJ/b-mm on-chip": look up this chip's numbers, run experiments, determine J per bit per metre, and publish it as a "heat per mm" report in the repo and on spacesheep | R14, E31, E32 → A17, [20-heat-per-mm.md](20-heat-per-mm.md) |
 | Q42 | 09-24 | Install spacesheep's session hooks on aifoundry2; report the sessions board's missing links and mismatched titles to its author | Outside this repo: the hooks in `~/.claude/settings.json` and two bug reports on spacesheep. No card time |
+| Q43 | 09-18 | Compute the chip's ridge points from what is already known — how many FLOPs per byte are needed to saturate each level of the hierarchy — and write them up (published 09-24) | A19, no card time |
 
 ## Scope decisions worth remembering
 

@@ -213,6 +213,28 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
   65 W TDP level, and stepped back down as the die passes 65 °C. From a 63 °C start, zeros hold 800 MHz for a whole 7 s run
   (11.6 TFLOPS), random data is back at 600 MHz within a second (9.3 TFLOPS). For like-for-like power numbers start runs
   well above 65 °C (`tools/ettelem/run_horace_strict.sh`) and check `mhz` in the telemetry.
+## Ridge points (derived from the measurements above, 2026-09-18)
+
+`scripts/ridge-points.py` divides peak compute by each level's bandwidth. The full write-up is
+`docs/reports/2026-09-18-et-soc1-ridge-points.html`. Tensor peaks per minion-cycle: 16 fp32 FLOP, 32 fp16 FLOP, 128 int8 OP
+(9.83 / 19.7 / 78.6 T/s on 1,024 minions at 600 MHz). Ridge points are FLOP (int8: OP) per byte fetched, at 600 MHz.
+
+| Data comes from | Bandwidth, measured (spec) | Ridge fp32 / fp16 / int8, measured (spec) |
+|---|---|---|
+| Own shire: L2 or L2 scratchpad | 4.0 B/minion-cycle = 2.46 TB/s (8 B, 4.9 TB/s) | 4 / 8 / 32 (2 / 4 / 16) |
+| L3 or another shire's scratchpad | 0.96-0.98 TB/s | 10 / 20 / 80 |
+| DRAM | 76 GB/s (119 at 3733 MT/s; 136.5 max) | 130 / 259 / 1,036 (82 / 165 / 658) |
+| Host over PCIe Gen4 x8 | not measured (15.75 GB/s) | (624 / 1,248 / 4,993) |
+
+- One full TensorFMA loads 2 KB (A + B) for 8,192 fp32 FLOP: 4 FLOP/B, exactly the own-shire ridge for fp32 and fp16 and
+  half of it for int8. The matmul benchmark's 97% / 91% used one shared 32 KB tile pool, so private tiles are unproven.
+- A C block held while K streams has intensity H/s (H = harmonic mean of its sides, s = element bytes). A shire's 32
+  register tiles (64x128, H = 85) clear the L3 ridge; from DRAM a block needs H of about 520 (fp32, fp16) or 1,040
+  (int8), and the chip's 1,024 register tiles (512x512) fall just short.
+- Own-shire ridges hold at any clock (the shire cache runs on the minion clock). L3 and remote ridges grow partly with
+  the minion clock (NoC fixed at 400 MHz), DRAM and PCIe ridges in proportion.
+- Weight-streaming inference is compute-bound from batch 16 (fp32, fp16) in the own shire, where int8 never is at
+  private streaming rates; from L3 about 20 (int8 40), from DRAM 259 (int8 518).
 
 ## Performance ladder (FOSDEM "Zero to matmul", 512x512 fp32)
 

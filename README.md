@@ -140,6 +140,10 @@ section 9 lists the pinned upstream versions.
   delivery loss on the minion rail, 5% on SRAM, 26-29% on the mesh, about 70 pJ per DRAM byte off-rail, plus a
   DRAM-activity meter from the memory shires' Moortec voltage monitor (0.84 mV per off-rail DRAM watt).
   Published, public, at https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual, uuid `cc3cb1d6-51cf-420b-a165-7d8629904d97`.
+- `docs/reports/2026-09-18-et-soc1-ridge-points.html` ("Ridge Points") works out, from the chip's specs and the
+  measurements above, how many FLOPs per byte a kernel needs from each level of memory before compute rather than
+  bandwidth sets its speed. `scripts/ridge-points.py` regenerates its numbers from the reports' raw data; no card runs.
+  It is published at https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points, uuid `dd341b0b-a52e-4e23-b8b3-101a83119133`.
 - `docs/lab-access.md` covers logging in to the lab machines (`aifoundry1`-`3`) and creating accounts for new people.
 - `workloads/` holds standalone workloads that run on both the simulator and the lab cards. The first one is `workloads/sgemm`:
   fp32 matmul, verified on aifoundry3's card at 127 GFLOP/s with scalar code. `scripts/deploy-lab.sh` builds a workload on a lab machine.

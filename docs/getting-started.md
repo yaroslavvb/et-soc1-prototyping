@@ -107,6 +107,10 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   - The clock governor is thermal first: above 65 °C the card sits at 600 MHz and 0.52 V whatever the power, below it a busy card
     goes to 800 MHz and 0.62 V. A card that has idled overnight (62 °C, 27 W) therefore behaves differently from one in use (72 to
     80 °C, 31 to 36 W). Check `mhz` in `ettelem sample` before comparing anything.
+  - Ridge points, derived from the above with no new runs: the FLOPs per byte a kernel needs from each memory level
+    to be compute-bound (fp32 on the tensor unit: 4 from its own shire, 10 from L3 or another shire, 130 from DRAM).
+    Report: [docs/reports/2026-09-18-et-soc1-ridge-points.html](reports/2026-09-18-et-soc1-ridge-points.html),
+    published at https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points.
   - Summaries of all of these are in [et-soc1-notes.md](et-soc1-notes.md).
 - **Next:**
   - A real GEMM, tiling through the L2 scratchpad with cooperative tensor loads. FOSDEM reached 10.25 TFLOP/s this way.
@@ -294,6 +298,7 @@ GPU and A100 columns come from the sourced notes in `docs/reports/sources/`, not
 | Energy manual, reruns | `tools/ettelem/run_reruns_warm.sh`, `run_rings_levels_power.sh` | 3 passes each of relay, hot line, rings, levels per card; preheat aifoundry2 | `docs/reports/data/2026-09-23-reruns-aifoundry2-warm`, `-aifoundry3` | `tools/ettelem/analyze_reruns.py DIRS --out reruns.json` (bursts off 600 MHz dropped) |
 | Limits of observability | `docs/reports/sources/limits-of-observability.*` | reads the firmware and the catalogue; no card time | `docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json` | `scripts/build-report.py limits-of-observability docs/reports/sources/limits-of-observability.data.json HTML` |
 | Sparsity | `workloads/sparsity` | `run_lab.sh`, then `run_energy.py` twice, the second time with `--only` in reverse order (`workloads/sparsity/README.md`) | `docs/reports/data/2026-09-18-sparsity-aifoundry3` | `python3 workloads/sparsity/analyze.py DATA --embed HTML` |
+| Ridge points | `scripts/ridge-points.py` | nothing: derived from the four 2026-09-18 reports | their four data directories | `python3 scripts/ridge-points.py --embed HTML` |
 
 - **Measuring.** Build on the machine with `scripts/deploy-lab.sh aifoundry2 workloads/<name>`, or
   `scripts/deploy-lab-gpsdk.sh` for `kernels/`. Follow the etiquette above, then copy the outputs back into a new
