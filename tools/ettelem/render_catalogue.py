@@ -4,6 +4,7 @@
     render_catalogue.py docs/reports/data/2026-09-23-energy-manual/catalogue.json docs/energy-manual/
 """
 import json
+import math
 import os
 import sys
 
@@ -68,8 +69,8 @@ def main():
          "per-card columns give each card's own mean with its pass-to-pass standard error. Operands: zeros, and random "
          "values in [0.5, 2) (random 32-bit words for integer ops).\n",
          f"Over the whole catalogue the bar is ±{100*np.median(hw):.1f}% of the value in the median and ±{100*np.percentile(hw, 90):.1f}% at "
-         f"the 90th percentile; most of it is the difference between the two cards, which runs {d['cross_card']['median']:.3f}× in the median.\n",
-         f"Instructions that **trap** in U-mode on this silicon and so have no energy: `" + "`, `".join(TRAPPED) + "`.\n"]
+         f"the 90th percentile; about half of it is the difference between the two cards: {cards[1]} runs {d['cross_card']['median']:.3f}× {cards[0]} in the median, each at its own die temperature.\n",
+         f"Thirteen instructions **trapped** in U-mode in a one-off check while the catalogue was written, and so have no energy (the card and the log of that check were not kept): `" + "`, `".join(TRAPPED) + "`.\n"]
     for title, names in CLASSES:
         rows = []
         for n in names:
@@ -157,10 +158,14 @@ def main():
         fr = 2 * (r64["mean"] - r32["mean"])
         per = ", ".join(f"{h} {f(2 * (r64['per_card'][h]['mean'] - r32['per_card'][h]['mean']), 0)}" for h in sorted(r64["per_card"]))
         tlz, tlr = C["tload/scp/zeros"]["mean"], C["tload/scp/random"]["mean"]
+        # the fill against a tensor load per byte, per card and operand set (version 3: the pooled 75% hides 71-86%)
+        frs = [2 * (b64["per_card"][h]["mean"] - b32["per_card"][h]["mean"]) / 64 / C[tl]["per_card"][h]["mean"]
+               for b32, b64, tl in ((z32, z64, "tload/scp/zeros"), (r32, r64, "tload/scp/random")) for h in sorted(b64["per_card"])]
+        fr5 = (5 * round(20 * min(frs)), 5 * round(20 * max(frs)))
         t.append(f"\nTwice the difference between the stride-64 and stride-32 rows is the fill of one 64 B line from the scratchpad "
                  f"into the L1: **{f(fz, 0)} pJ on zeros, {f(fr, 0)} pJ on random data** ({per} on random data) — {f(fz / 64, 1)} and {f(fr / 64, 1)} pJ per byte of line, "
-                 f"about {5 * round(100 * (fz + fr) / 64 / (tlz + tlr) / 5):.0f}% of the {f(tlz, 1)} and {f(tlr, 1)} pJ/B "
-                 f"a tensor load pays for the same bytes from the same scratchpad. What random data adds over zeros is about {f(fr - fz, 0)} pJ for the line's 512 bits, "
+                 f"roughly {fr5[0]:.0f}–{fr5[1]:.0f}% of the {f(tlz, 1)} and {f(tlr, 1)} pJ/B "
+                 f"a tensor load pays for the same bytes from the same scratchpad on the two cards (on {cards[0]} not separable from equal). What random data adds over zeros is about {f(fr - fz, 0)} pJ for the line's 512 bits, "
                  f"{f((fr - fz) * 1000 / 512, 0)} fJ per bit on the path from the shire cache into the L1. "
                  f"What is left in a 32 B load once its share of the fill is taken out — about {f(2 * z32['mean'] - z64['mean'], 0)} pJ on zeros — is the "
                  f"L1 hit itself plus the awake core issuing it.\n")
@@ -172,6 +177,11 @@ def main():
         if z and r:
             cz, cr = C.get(f"scpline/stride{st}/zeros"), C.get(f"scpline/stride{st}/random")
             t.append(f"| {st} B | {f(cz['mean'] * 64, 1)} [{f(cz['lo'] * 64, 1)}–{f(cz['hi'] * 64, 1)}] | {f(cr['mean'] * 64, 1)} [{f(cr['lo'] * 64, 1)}–{f(cr['hi'] * 64, 1)}] | {r['bytes_per_s']['mean'] / 1e9:,.0f} |")
+    bw = {st: [S_[f"scpline/stride{st}/random"]["bytes_per_s"]["mean"] / 1e9 for S_ in (A, B) if f"scpline/stride{st}/random" in S_] for st in ("64", "256")}
+    if bw["64"] and bw["256"]:
+        t.append(f"\nComing back to the same bank every time halves the bandwidth ({bw['256'][0]:,.0f} against {bw['64'][0]:,.0f} GB/s, "
+                 f"{'the same on both cards' if len(bw['256']) == 2 and round(bw['256'][0]) == round(bw['256'][1]) else 'on ' + cards[0]}), "
+                 "but what it does to the energy per byte cannot be told apart from the other strides'.")
     t += ["\n## Rows: does the DRAM row pattern matter?\n",
           "1 KB tensor loads from DRAM by 32 harts (minion 0 of every shire), each over its own 64 MB, so the "
           "touched set beats the 32 MB L3 whatever the pattern. Sequential: consecutive kilobytes go to consecutive "
@@ -195,20 +205,22 @@ def main():
         r100 = lambda v: f"{round(v / 100) * 100:,.0f}"
         # 3.87 µs and 2,325 cycles: the refresh interval the memory-anatomy report reads from the controller (PLAN2 D21)
         t.append("\n**The row pattern does not change the energy per byte.** Row hits, row misses and the streaming case agree "
-                 "within their pass-to-pass error on both operand sets. The controller runs an open-page policy: a row stays open "
+                 "within their pass-to-pass error on both operand sets. On aifoundry2 the controller runs an open-page policy: a row stays open "
                  "until a refresh (every 3.87 µs) or an access to another row of its bank closes it ([Anatomy of a memory access]"
                  "(https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#how-long-a-row-stays-open)). "
                  f"Each hart here comes back to its row only every {r100(min(cyc))}–{r100(max(cyc))} cycles or so (32 harts at "
                  f"{min(gbs) / 1e9:.0f}–{max(gbs) / 1e9:.0f} GB/s), with 31 other streams in between, and a refresh falls every 2,325 cycles. "
-                 "So either every pattern paid an activation, or an activation is small next to the transfer (one of 20 pJ/B would "
-                 "have shown); for a programmer it makes no difference. "
+                 "So either every pattern paid an activation, or an activation is small next to the transfer (one of about 30 pJ/B on zeros, "
+                 "or 50 on random data, would have shown); for a programmer it makes no difference. "
                  f"These 32-hart loads cost {min(prem['random']):.0f}–{max(prem['random']):.0f}% more per byte than [4.1](04-bytes-memory.md)'s tensor loads at "
                  f"{A['tload/dram/random']['bytes_per_s']['mean'] / 1e9:.0f} GB/s ({min(prem['zeros']):.0f}–{max(prem['zeros']):.0f}% more on zeros): "
                  "use them to compare patterns, and 4.1 to price DRAM.\n")
     if l3[0] and l3[1]:
+        l3b = B.get("dramrow/stride8K/random"), B.get("dramrow/stride8K/zeros")
         t.append(f"An earlier version of this experiment with all 1,024 minions and 32 KB touched per hart fitted in the L3 and "
-                 f"measured that instead: **{f(l3[1]['pj_per_byte']['mean'], 1)} pJ/B on zeros, {f(l3[0]['pj_per_byte']['mean'], 1)} on random "
-                 f"data at {f(l3[0]['bytes_per_s']['mean'] / 1e9, 0)} GB/s** — the L3, read by tensor loads through the mesh, which the "
+                 f"measured that instead: **{f(l3[1]['pj_per_byte']['mean'], 1)} pJ/B on zeros and {f(l3[0]['pj_per_byte']['mean'], 1)} on random "
+                 f"data on {cards[0]}" + (f", {f(l3b[1]['pj_per_byte']['mean'], 1)} and {f(l3b[0]['pj_per_byte']['mean'], 1)} on {cards[1]}" if l3b[0] and l3b[1] else "")
+                 + f", at {f(l3[0]['bytes_per_s']['mean'] / 1e9, 0)} GB/s** — the L3, read by tensor loads through the mesh, which the "
                  f"18 September table put at 10.8 pJ/B at a higher clock.\n")
     t += ["## Placement inside a shire: which neighbourhood reads\n",
           "The shire's own scratchpad read by only one of its four neighbourhoods at a time (8 minions each), random data.\n",
@@ -232,9 +244,12 @@ def main():
               ("- **The negative constant says the rail rises faster than that shape**, so the fitted leakage term is not the arrays' leakage. " if fit["P_fix_w"] < 0 else "- ")
               + (f"The whole rail at 80 °C is {f(c80['sram_w'], 2)} W, **{f(mb, 1)} mW per MB**, an upper bound on the arrays' leakage including the cache logic on the same rail; " if c80 else "")
               + f"it rises {f(fit['slope_80_mw_per_c'], 0)} mW per °C at 80 °C for the whole 128 MB. Measured: " + ", ".join(f"{c['sram_w']:.2f} W at {c['T']} °C" for c in sl["curve"][::max(1, len(sl["curve"]) // 3)]) + ".",
-              f"- This is what the memory costs for existing, per second, whatever runs: at about {f(mb, 0)} mW per MB a byte held in scratchpad for one second leaks at most about {f(nj, 0)} nJ at 80 °C, "
+              f"- This is what the memory costs for existing, per second, at a given die temperature: at about {f(mb, 0)} mW per MB a byte held in scratchpad for one second leaks at most about {f(nj, 0)} nJ at 80 °C on {cards[0]}, "
               f"as much as reading it {round(nj * 1000 / rd, -2):,.0f} times ({f(rd, 1)} pJ per read)." if rd else "",
-              (f"- The same rail on {cards[1]}, which idles 20 °C cooler: " + ", ".join(f"{c['sram_w']:.2f} W at {c['T']} °C" for c in sl2["curve"][::max(1, len(sl2['curve']) // 3)]) + "." if sl2 and sl2.get("curve") else ""),
+              (f"- The same rail on {cards[1]}, which idles 20 °C cooler: " + ", ".join(f"{c['sram_w']:.2f} W at {c['T']} °C" for c in sl2["curve"][::max(1, len(sl2['curve']) // 3)])
+               + (lambda c_: f"; at {c_['T']} °C, its most-sampled bin, that is {f(c_['sram_w'] - (fit['P_fix_w'] + fit['A_leak_80_w'] * math.exp((c_['T'] - 80) / 36)), 2)} W above the {cards[0]} fit extrapolated there. "
+                  f"The {cards[0]} fit does not describe {cards[1]}, and whether that is the card or the fit's shape outside its range is not known.")(max(sl2["curve"], key=lambda c_: c_["n"]))
+               if sl2 and sl2.get("curve") else ""),
               "", "| Die °C | SRAM rail W, " + cards[0] + " | idle stretches |" + (" SRAM rail W, " + cards[1] + " | idle stretches |" if sl2 else ""), "|---|---|---|" + ("---|---|" if sl2 else "")]
         c2 = {c["T"]: c for c in sl2["curve"]} if sl2 else {}
         for T_ in sorted(set(c["T"] for c in sl["curve"]) | set(c2)):
@@ -243,7 +258,9 @@ def main():
             t.append(f"| {T_} | {f(a_['sram_w'], 3) if a_ else '—'} | {a_['n'] if a_ else '—'} |" + (f" {f(b_['sram_w'], 3) if b_ else '—'} | {b_['n'] if b_ else '—'} |" if sl2 else ""))
     # ---- where the current flows: the rail split, by class
     taus = [v["tau_s"] for v in (d.get("rail_filter") or {}).values()]   # the PMIC's running average, measured (catalogue.json rail_filter)
-    tau_txt = f"time constant {min(taus):.1f}–{max(taus):.1f} s on the two cards" if taus else "time constant about 1 s"
+    rf = d.get("rail_filter") or {}
+    tau_txt = (f"time constant {rf['aifoundry2']['tau_s']:.2f} s on aifoundry2 and {rf['aifoundry3']['tau_s']:.2f} s on aifoundry3" if "aifoundry2" in rf and "aifoundry3" in rf
+               else f"time constant {min(taus):.1f}–{max(taus):.1f} s on the two cards" if taus else "time constant about 1 s")
     t += ["\n## Where the current flows: each class of operation by rail\n",
           "The PMIC meters three rails — the minions, the on-chip SRAM, and the mesh — and the service processor reports "
           "them; board power covers everything including the regulators' own losses. The split of a burst's power over idle across "
@@ -360,7 +377,7 @@ def main():
                        for h in hosts if uf[h].get('l1_line_read_refit')) + "; that refit is `l1_line_read_refit` in `unmetered_fit.json`."
                       if any(uf[h].get('l1_line_read_refit') for h in hosts) else "")
                    if share and st_r and tp_hi and tp_lo and max(tp_hi) > 0 > min(tp_lo) else "")
-        t += ["", f"- **An instruction's unmetered energy is the regulator's**: {100*a2['minion']:.0f}% of what the minion rail delivers is lost between the 12 V input and the core, and nothing else moves; that is as far as the rails' meters can be trusted, since each 1% of error in their scale moves it by about {f(1 + a2['minion'], 1)} points. The 18% \"unmetered\" share of the arithmetic classes above is this.",
+        t += ["", f"- **An instruction's unmetered energy is consistent with the regulators' delivery loss**: {100*a2['minion']:.0f}% of what the minion rail delivers on aifoundry2 and {100*uf['aifoundry3']['coef']['minion']:.0f}% on aifoundry3 goes missing between the 12 V input and the core, and nothing else moves; that is as far as the rails' meters can be trusted, since each 1% of error in their scale moves it by about {f(1 + a2['minion'], 1)} points. The 18% \"unmetered\" share of the arithmetic classes above is this.",
               f"- **A DRAM byte's unmetered energy is the memory's**: {f(min(dco), 0)}–{f(max(dco), 0)} pJ per byte on average (the fitted coefficient on the two cards) in the DDR PHY, the I/O rail and the DRAM chips "
               f"({f(min(lo_o), 0)}–{f(max(lo_o), 0)} on zeros and constants, {f(min(hi_o), 0)}–{f(max(hi_o), 0)} on random data), on top of the {f(min(rest), 0)}–{f(max(rest), 0)} pJ the mesh, the SRAM and the delivery losses take on the way: "
               f"together the {f(C['tload/dram/zeros']['mean'], 0)}–{f(C['tload/dram/random']['mean'], 0)} pJ per byte of [4.1](04-bytes-memory.md)'s tensor loads from DRAM. "
@@ -378,8 +395,8 @@ def main():
             l3d = [q["droop_ddr_mv"] for q in nod if q["cfg"].startswith("dramrow/stride8K")]
             oth = [q["droop_ddr_mv"] for q in nod if not q["cfg"].startswith("dramrow/stride8K")]
             ph = [(q["droop_ddr_mv"] - cm * q["over_idle_w"]) / c0 for q in nod]   # read as DRAM watts, after the common term
-            t += [f"**A droop meter for DRAM.** The memory shires' Moortec voltage monitors report the 0.8 V DDR rail every 133 ms (`die_mv.ddr` in every telemetry file; {f(dd['idle_die_mv']['ddr'], 0)} mV at idle against an 800 mV set point). "
-                  f"Across the {dd['n']} configuration means it droops **{f(dd['mv_per_dram_offrail_w'], 2)} mV per watt of off-rail DRAM power** (plus {f(dd['mv_per_board_w_common'], 3)} mV per watt of anything else; rms {f(dd['rms_mv'], 2)} mV): 1 mV ≈ {f(1 / dd['mv_per_dram_offrail_w'], 1)} W of DRAM, refreshed every 133 ms, from a sensor that was always there. "
+            t += [f"**A droop meter for DRAM.** The memory shires' Moortec voltage monitors report the 0.8 V DDR rail once per service-processor pass (about every 150 ms on aifoundry2 under the 10 Hz sampler, 255 ms on aifoundry3; `die_mv.ddr` in every telemetry file; {f(dd['idle_die_mv']['ddr'], 0)} mV at idle against an 800 mV set point). "
+                  f"Across the {dd['n']} configuration means it droops **{f(dd['mv_per_dram_offrail_w'], 2)} mV per watt of off-rail DRAM power** (plus {f(dd['mv_per_board_w_common'], 3)} mV per watt of anything else; rms {f(dd['rms_mv'], 2)} mV): 1 mV ≈ {f(1 / dd['mv_per_dram_offrail_w'], 1)} W of DRAM, refreshed every pass, from a sensor that was always there. "
                   f"It is a proxy calibrated against the fit above, not a meter, and not independent of the board meter. It responds mostly to DRAM traffic, but not only: heavy mesh and scratchpad traffic with no DRAM access droops it too"
                   + (f", by up to {f(max(oth), 1)} mV, and {f(max(l3d), 1)} mV for L3 reads through the mesh" if oth and l3d else "")
                   + " (" + " and ".join(f"`{e['cfg']}` {f(e['droop_ddr_mv'], 2)} mV" for e in dd["examples"] if not e["dram_offrail_w"] and e["droop_ddr_mv"] > 0.9) + " in the table below), "

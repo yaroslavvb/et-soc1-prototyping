@@ -1,7 +1,8 @@
 # 7. Composition: building a workload's energy from the tables
 
-The equation from the structure page, applied. Three examples, each set against a direct measurement. Only
-the relay is an out-of-sample check; the other two are decompositions, and say so. The published page
+The equation from the structure page, applied. Three examples, each set against a direct measurement. The
+relay is a consistency check whose pricing rows were chosen after it was measured; the other two are
+decompositions, and say so. The published page
 (section 7.1, "Build a workload's energy") prices any mix of up to three rows at any die temperature, with the
 same rows and the same idle law, and starts from the first example below.
 
@@ -14,24 +15,27 @@ prediction: the measurement (E15's ablation, on aifoundry2) is one of the runs b
 
 | Component | Source | W | J in 7 s | Share |
 |---|---|---|---|---|
-| Fixed (the idle law's constant) | §1, $P_\text{fix}$ | 12.6 | 88 | 20% |
-| Leakage at 80 °C | §1, $P_\text{leak}(80)$ | 23.3 | 163 | 37% |
+| Fixed (the idle law's constant at its best fit; 7–16 W over the e-foldings that fit as well) | §1, $P_\text{fix}$ | 12.6 | 88 | 20% |
+| Leakage at 80 °C (best fit; 20–29 W over the same e-foldings) | §1, $P_\text{leak}(80)$ | 23.3 | 163 | 37% |
 | Multiply-adds: 5.78 pJ [5.24–6.03] × 4.59 × 10¹² per second | §3.2 | 26.5 [24.1–27.7] | 186 | 43% |
 | **Board power from the tables** | | **62.4** | 437 | |
-| Measured (E15 ablation, fp32 random, at the 80 °C launch) | | 63.9 | 448 | |
+| Measured (E15 ablation on aifoundry2, fp32 random, at the 80 °C launch) | | 63.9 | 448 | |
 
-Priced instead with the flip model of §3.2 (27.2 W for the tile, 1.9 W of it the tensor state machines), the
+The idle law is aifoundry2's, and only its total is pinned down (35.9 W at 80 °C); how it splits into fixed and
+leakage depends on the law's shape (§1), which moves the first two rows but not their sum. Priced instead with
+the flip model of §3.2, fitted on aifoundry2 (27.2 W for the tile, 1.9 W of it the tensor state machines), the
 board comes to 63.1 W. Per flop, the measurement is **7.0 pJ loaded** (63.9 W over 9.18 TFLOP/s) and **2.89 pJ
 marginal** [2.62–3.01 over runs and cards]: 57% of the priced energy of the most arithmetic-dense thing this chip
 does is spent keeping the card on and leaking, and at 80 °C the static 36 W exceeds the dynamic power of every
 kernel measured in this manual, this one's 27.6 W included. The same matmul on zeros draws 1.9 W over idle
-instead of 27.6, and its measured loaded cost per flop becomes 4.2 pJ, almost all of it static. **On this card the
-data decides the dynamic energy, and the temperature decides the rest.**
+instead of 27.6, and its measured loaded cost per flop becomes 4.2 pJ, almost all of it static. **On aifoundry2,
+where the temperature law was measured, the data decides the dynamic energy, and the temperature decides the
+rest.**
 
 ## 7.2 The relay (E25), priced from §4
 
-The multi-stage relay was measured on 22 September, and no row of §4 was derived from it, so this is an
-out-of-sample check. It is a consistency check, not a prediction made before the measurement.
+The multi-stage relay was measured on 22 September, and no row of §4 was derived from it, but the rows that
+price it were chosen after it was measured, so this is a consistency check with wide brackets, not a prediction.
 
 The relay reads with 32 B vector loads through the L1 and writes with tensor stores. Its "next shire" is shire
 s − 1 by ID, which on the mesh is 3.5 hops away on average (1 to 10). Each byte is read once and written once,
@@ -45,10 +49,12 @@ data is one constant per slab:
 | Medium | Priced pJ per byte moved (zeros … random) | Measured (E29: 22 September + reruns, n = 8) | Against the bracket |
 |---|---|---|---|
 | DRAM round trip | 90 … 133 | 105.7 [99.5–111.0] | inside |
-| Own scratchpad | 4.3 … 7.1 | 3.99 [3.90–4.25] | 8% below |
+| Own scratchpad | 4.3 … 7.1 | 3.99 [3.90–4.25] | at its low edge (8% below it, within the noise on both cards) |
 | Next shire's scratchpad | 5.1 … 11.2 | 8.59 [7.78–9.21] | inside |
 
-The relay also runs a vector add per element and a chip barrier per stage, and neither is in §4.
+The relay also runs a vector add per element and a chip barrier per stage, and neither is in §4. The brackets
+are wide: priced instead with the constant-operand rows of §4.1, closer to the relay's data, DRAM comes to
+102.6 pJ/B on aifoundry2 against 102.1 measured, but 94.4 on aifoundry3 against 109.3, 16% more.
 
 ## 7.3 A hot line (E23): a consistency check
 
@@ -64,5 +70,5 @@ the leakage of the time it takes.
 2. Static energy is that time times $P_\text{idle}(T)$ from §1, at the temperature the card will actually be at —
    which the workload sets (docs/findings/12-heat-management.md).
 3. Add $N_i e_i$ for each row it touches, choosing the zeros / constant / random column by what its data looks like.
-4. Expect the answer to be about as good as the bars of the rows it uses, and expect aifoundry3 to read about 5%
-   lower (§8).
+4. Expect the answer to be about as good as the bars of the rows it uses, and expect aifoundry3, at its own cooler
+   die temperature, to read about 5% lower (§8).

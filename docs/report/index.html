@@ -625,7 +625,7 @@ window.CK = (function () {
   <li data-ss-id="what-i-did-li-3"><strong>A first workload on silicon.</strong> I wrote a small SGEMM in the style of
     <a href="https://github.com/marty1885/et-testdrive">marty1885/et-testdrive</a>, using just the runtime API and <code>et-common-libs</code>.
     That mattered because the lab machine's <code>/opt/et</code> is older and has no gp-sdk.
-    (gp-sdk was later built on the lab machines, outside <code>/opt/et</code>, with <code>scripts/deploy-lab-gpsdk.sh</code>; <code>/opt/et</code> itself still has none.)
+    (gp-sdk was later built on aifoundry2, outside <code>/opt/et</code>, with <code>scripts/deploy-lab-gpsdk.sh</code>; <code>/opt/et</code> itself still has none.)
     I verified it on the simulator on the laptop. Then I copied the sources to <code>aifoundry3</code> (4.5 MB),
     built them there against its own toolchain, and ran them on the card with a hard 10 s cap.</li>
 </ol>
@@ -828,8 +828,8 @@ ssh aifoundry3 'cd ~/nekko/build/sgemm &amp;&amp; for a in "-n 64 --shires 0x1" 
   <a href="https://github.com/aifoundry-org/et-man">et-man</a> (PRM, errata) ·
   <a href="https://github.com/openhwfoundation/core-et/tree/erbium">core-et (erbium)</a> ·
   <a href="https://github.com/marty1885/et-testdrive">et-testdrive</a> (marty1885).</p>
-  <p>All runs were on 18 September 2026. The laptop used et-platform <code>836a4ab</code>. aifoundry3 used its <code>/opt/et</code>: et-platform <code>353f20e</code> (December 2025), runtime 0.19.0, GCC 15.1; that card runs its minions at 600 MHz.</p>
-  <p>Versions: published 18 September 2026; revised 24 and 25 September 2026.</p>
+  <p>All runs were on 18 September 2026. The laptop used et-platform <code>836a4ab</code>. aifoundry3 used its <code>/opt/et</code>: et-platform <code>353f20e</code> (December 2025), runtime 0.19.0, GCC 15.1; that card holds its minions at 600 MHz (aifoundry2's governor also uses 700 and 800 MHz).</p>
+  <p>Versions: published 18 September 2026; revised 24 and 25 September 2026; 25 September (version 3): the clock and the gp-sdk build name their card (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>).</p>
 </footer>
 <script type="application/json" id="ladder-data">{"fosdem":{"clock_mhz":650,"n":512,"rungs":[{"step":"Naive scalar, 1 hart","gflops":0.007,"name":"1 hart"},{"step":"Parallelise over mhartid, 512 harts. Fix the output race with L stores.","gflops":3.4,"name":"512 harts"},{"step":"Use all 2048 harts","gflops":13.1,"name":"2,048 harts"},{"step":"8-lane SIMD (fbc.ps broadcast A, flw.ps load B, fmadd.ps)","gflops":104.0,"name":"8-lane SIMD"},{"step":"Put A and B in L2 scratchpad instead of DRAM","gflops":312.0,"name":"operands in the L2 scratchpad"},{"step":"Register-block 2x16 outputs per hart. FMA share goes from 14% to 32%.","gflops":1640.0,"name":"2×16 register blocks"},{"step":"Register-block 4x32. FMA share is 63%.","gflops":2940.0,"name":"4×32 register blocks"},{"step":"Tensor unit: tensor_load A into L1Scp and B streamed, then tensor_fma (16x16 fp32), tensor_store. Hart 0 only.","gflops":7050.0,"name":"tensor unit"},{"step":"Software-pipeline: overlap the next A-load with the current FMA, double-buffering L1Scp","gflops":10250.0,"name":"software-pipelined tensor unit"}],"transcription":"docs/et-soc1-notes.md"},"tensor":{"gflops":9510.8,"clock_mhz":600,"source":"docs/reports/data/2026-09-18-aifoundry2/results.json (fp32-tensor-L2)"},"peak":{"gflops":9830.4,"clock_mhz":600,"minions":1024,"flop_per_minion_cycle":16}}</script>
 <script>

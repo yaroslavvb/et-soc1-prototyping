@@ -6,18 +6,21 @@ What the card draws when nothing is running. Every joule in the rest of the manu
 
 $$P_\text{idle}(T) = 12.6\,\mathrm{W} + 23.3\,\mathrm{W}\; e^{(T-80\,^\circ\mathrm{C})/36\,^\circ\mathrm{C}}$$
 
-- **The fixed part is the law's constant, 12.6 W.** The blocks with no rail sensor (PCIe, the DDR PHY, the IO shire, the regulators) draw about 15 W at idle and barely move with temperature: 0.03 W per °C over 71–83 °C in the catalogue's idle gaps. The three metered rails carry the leakage, 0.55 W per °C between them at about 75 °C. The split into 12.6 W and leakage is a fit with the 36 °C shape imposed, not a block-by-block account. What the unsensed blocks spend when a kernel uses them (DRAM traffic through the DDR PHY, the regulators' delivery loss) is counted in the per-event costs of the later sections; [4.3](04a-fine-grain.md) attributes it.
-- **The rest is leakage**, 23.3 W at 80 °C, e-folding every 36 °C, so its slope at 80 °C is 0.65 W per °C. This is the term a workload controls, by setting the temperature.
-- **Confidence.** Fitted on 21 September to every idle sample of five hours of sessions on aifoundry2, rms 0.20 W from 64 to 88 °C. Checked two ways: it predicted the idle 20.6 hours after the last workload (apart from a 4.9 s single-hart probe a few minutes before), the next day, to +0.01 W (300 samples over a minute, sd 0.04 W); extrapolated 7–14 °C below its fitted range onto aifoundry3 it was +0.73 W off (rms 0.74 W over 3,596 samples at 50–57 °C), which is the card-to-card bar on the law: about 3% of the idle power. Source: `docs/reports/data/2026-09-21-horace-aifoundry2/model.json`.
+- **What the idle measurements pin down is the slope.** On aifoundry2 the idle card draws 35.9 W at 80 °C and 0.65 W more for each degree there (0.64–0.65 W per °C for every e-folding that fits). This is the term a workload controls, by setting the temperature.
+- **How much of it is leakage they do not.** The idle bins fit equally well with the leakage e-folding anywhere from 30 to 45 °C (doubling every 21–31 °C), which puts the leakage at 80 °C at 20–29 W and the fixed part at 7–16 W. The law above is the best fit, 12.6 W fixed and 23.3 W of leakage at 80 °C e-folding every 36 °C: a fit, not a block-by-block account.
+- **The blocks with no rail sensor** (PCIe, the DDR PHY, the IO shire, the regulators) draw about 15 W at idle on aifoundry2 (66–82 °C) and 13 W on aifoundry3 (51–56 °C), and barely move with temperature: 0.03 W per °C over 71–83 °C in the catalogue's idle gaps. The three metered rails carry the leakage, 0.55 W per °C between them at about 75 °C. What the unsensed blocks spend when a kernel uses them (DRAM traffic through the DDR PHY, the regulators' delivery loss) is counted in the per-event costs of the later sections; [4.3](04a-fine-grain.md) attributes it.
+- **Confidence.** Fitted on 21 September to every idle sample of five hours of sessions on aifoundry2, rms 0.20 W from 64 to 88 °C. Checked two ways: it predicted the idle 20.6 hours after the last workload (apart from a 4.9 s single-hart probe a few minutes before), the next day, to +0.01 W (300 samples over a minute, sd 0.04 W); extrapolated 7–14 °C below its fitted range onto aifoundry3 it was +0.73 W off (rms 0.74 W over 3,596 samples at 50–57 °C). In the idle stretches of the 23 September catalogue, three passes on each card, aifoundry3 sat +0.61 W from the law at 51–56 °C and aifoundry2 −0.23 W at 66–82 °C: the law holds on aifoundry2 to a few tenths of a watt and reads about 3% low on aifoundry3. Source: `docs/reports/data/2026-09-21-horace-aifoundry2/model.json`.
 
-| Die °C | Idle W | Leakage share |
-|---|---|---|
-| 40 | 20.3 | 38% |
-| 50 | 22.7 | 44% |
-| 60 | 26.0 | 51% |
-| 70 | 30.3 | 58% |
-| 80 | 35.9 | 65% |
-| 90 | 43.3 | 71% |
+| Die °C | Idle W, best fit | Leakage share, best fit | Leakage share, e-folding 30–45 °C |
+|---|---|---|---|
+| 40 | 20.3 | 38% | 24–62% |
+| 50 | 22.7 | 44% | 31–67% |
+| 60 | 26.0 | 51% | 38–72% |
+| 70 | 30.3 | 58% | 46–76% |
+| 80 | 35.9 | 65% | 55–80% |
+| 90 | 43.3 | 71% | 63–83% |
+
+The fitted bins run from 64 to 88 °C; the other rows are the law extrapolated, where the e-foldings that fit differ by up to 2.4 W in the idle itself.
 
 ## Where idle goes, by rail (73 °C, 20.6 hours after the last workload)
 
@@ -29,7 +32,7 @@ $$P_\text{idle}(T) = 12.6\,\mathrm{W} + 23.3\,\mathrm{W}\; e^{(T-80\,^\circ\math
 | **No rail sensor** (PCIe, DDR, IO shire, regulators) | **15.10** | 48% |
 | Board | 31.79 ± 0.04 | |
 
-The three sensed rails are the PMIC's own running averages (roughly first-order, time constant 1.1–1.2 s on the two cards), which the service processor reports; the unsensed remainder is board power minus their sum. The sample is aifoundry2 on 22 September, 20.6 hours after the last workload apart from a 4.9 s single-hart probe a few minutes before; the board figure's ± is the sd of its 300 samples, taken over one minute; the rails' sd is 0.01 W or less. Source: `docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json`. The SRAM rail's own temperature law, on both cards, is in [4.3](04a-fine-grain.md).
+The three sensed rails are the PMIC's own running averages (roughly first-order, time constant 1.15 s on aifoundry2 and 1.22 s on aifoundry3), which the service processor reports; the unsensed remainder is board power minus their sum. The sample is aifoundry2 on 22 September, 20.6 hours after the last workload apart from a 4.9 s single-hart probe a few minutes before; the board figure's ± is the sd of its 300 samples, taken over one minute; the rails' sd is 0.01 W or less. Source: `docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json`. The SRAM rail's own temperature law, on both cards, is in [4.3](04a-fine-grain.md).
 
 ## Operating points
 

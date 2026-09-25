@@ -22,13 +22,14 @@ pre.rule span.on2 { border-left-style: dashed; border-left-color: var(--ink-2); 
   #verdict.stack td:first-child::before { content: "Kanter said (paraphrased)"; display: block; font-size: 0.75rem;
     color: var(--muted); font-weight: 400; }
   #trans th:nth-child(3), #trans td:nth-child(3) { display: none; }
-  #trans th, #trans td, #leaktab th, #leaktab td { padding: 6px 5px; }
+  #trans th, #trans td, #leaktab th, #leaktab td, #sesstab th, #sesstab td { padding: 6px 5px; }
+  #sesstab th:nth-child(3), #sesstab td:nth-child(3) { display: none; }
   #cardcfg.stack td[data-label]::before { display: inline; content: attr(data-label) ": "; font-size: 0.8rem; }
   #cardcfg.stack td:first-child::before { content: none; }
 }
 </style>
 <h1>The ET-SoC-1's DVFS loop, and the leakage it never switches off</h1>
-<p class="byline">21–22 September 2026 · aifoundry2 and aifoundry3 (aifoundry1 unavailable) · firmware source read at
+<p class="byline">21–24 September 2026 · aifoundry2 and aifoundry3 (aifoundry1 unavailable) · firmware source read at
 et-platform <code>353f20e</code> (the cards' own log strings show an older build; see
 <a href="#method-and-what-is-not-established">§8</a>), open RTL core-et <code>b38a1a3</code> (Erbium branch) ·
 checks six claims from a conversation with David Kanter (MLCommons) on 20 September 2026, in private notes ·
@@ -36,10 +37,12 @@ part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observ
 
 <p class="lede"><b>The ET-SoC-1 manages its power more simply than a mature chip, and leakage is where it pays.</b>
 Its governor reads a power meter instead of estimating power, and its 65 °C threshold has no dead band, so near it
-the clock hunts. Its open RTL has per-minion sleep controls that are tied off, and the card shows no sign of array
-power gating. What is left is leakage: <b>36% of a busy card and 65% of an idle one at 80 °C</b>, above the
-5–30% David Kanter called typical. And a second card's firmware holds a power limit of 0 W, which pins it at
-600 MHz while the driver still reports 65 W.</p>
+aifoundry2's clock hunts. Its open RTL has per-minion sleep controls that are tied off, and the card shows no sign of array
+power gating. What is left is leakage. On aifoundry2, idle power climbs <b><span data-v="slope80"></span> W for every
+degree</b> at 80 °C, and the leakage behind that slope is <b><span data-v="leakR"></span> W, <span data-v="idleShR"></span>
+of an idle card</b>, well above the 5–30% David Kanter called typical, and <span data-v="busyShR"></span> of a card running
+a random-data matmul, at or above its top. And the second card, aifoundry3, has a firmware power limit of 0 W (aifoundry2's
+is 65 W), which pins it at 600 MHz while the driver still reports 65 W.</p>
 
 <p>The yardstick is how Kanter described a mature chip managing its own power. It runs a DVFS loop (dynamic
 voltage and frequency scaling) that knows
@@ -69,7 +72,7 @@ Horace experiment</a>'s model of power from the bits the multiply-add unit clock
 <code>check_power_throttle_conditions()</code> in <code>ServiceProcessorBL2/services/thermal_pwr_mgmt.c</code>, called
 once per pass of the device-management task. (The cards' own log lines show that they run an older build of this
 governor; <a href="#method-and-what-is-not-established">§8</a> says what differs.) Reduced to its logic:</p>
-<pre><code>once per device-management pass, about every 133 ms
+<pre><code>once per device-management pass, about every 133 ms on aifoundry2 (about 250 ms on aifoundry3)
 (each I2C sensor read waits 1 ms, then the pass sleeps DM_TASK_DELAY_MS = 10 ms):
     T   = pvt_get_minion_avg_temperature()          // on-die thermal sensor, whole degrees
     P   = pmic_read_average_soc_power()             // MEASURED board power, from the PMIC over I2C
@@ -80,7 +83,8 @@ governor; <a href="#method-and-what-is-not-established">§8</a> says what differ
         elif P &lt; 65 W and f &lt; f_max:  step UP   one VMIN-LUT point
     on master minion going IDLE:
         set frequency back to the boot point</code></pre>
-<p>Four things follow, and all four show up in the measurements below.</p>
+<p>Four things follow, and all four show up in aifoundry2's measurements below (aifoundry3's clock cannot move,
+<a href="#the-same-firmware-on-three-cards">§3</a>), the last one with a delay.</p>
 <ul>
 <li><b>The input is a measurement, not an estimate.</b> <code>pmic_read_average_soc_power()</code> is a read of
 the power-management controller's own averaged wattage. Nothing in the loop counts bus bits, instructions or
@@ -88,10 +92,11 @@ activity factors, in this source or in the older one. Kanter's \(P = C_\mathrm{s
 anywhere in this firmware, because the chip does not need to infer the left-hand side: it has a meter.</li>
 <li><b>Thermal has priority.</b> The temperature test comes first, and the frequency check sits inside it, so when
 the die reads above 65 °C the power tests are never reached, not even at the lowest operating point, where the
-thermal test itself does nothing. This card often rests above 65 °C (73 °C on 22 September, even after about
-<span data-v="hours"></span> hours with no work), so a kernel launched on it starts above the threshold and runs at the
-lowest operating point however little power it draws: every launch of the strict protocol, at 80 °C, ran at
-600 MHz.</li>
+thermal test itself does nothing. aifoundry2 often rests above 65 °C (73 °C on 22 September, about
+<span data-v="hours"></span> hours after our last recorded workload, and 73–74 °C after a night of no recorded work
+on each of the next two days; aifoundry3 rests at 50–55 °C), so a kernel launched on aifoundry2 starts above the
+threshold and runs at the lowest operating point however little power it draws: every launch of the strict protocol,
+at 80 °C, ran at 600 MHz.</li>
 <li><b>There is no hysteresis.</b> The 353f20e source defines <code>UPPER_POWER_THRESHOLD_GUARDBAND</code> and
 <code>LOWER_POWER_THRESHOLD_GUARDBAND</code>, a ±5% band around the TDP level, and then never uses them. Both tests
 compare against the raw thresholds, and the temperature test has no band of any kind: it fires at a whole-degree
@@ -99,20 +104,25 @@ reading of 66 °C and stops firing at 65 °C. The older governor the cards' logs
 power guardbands, but neither would damp hunting at the thermal threshold (§2); that needs a temperature dead
 band.</li>
 <li><b>The clock returns to the boot point when the master minion reports idle.</b> The service processor then sets
-the boot frequency (<code>go_to_idle_state_and_update_pwr_status()</code>). Back-to-back launches rarely trigger it:
-the zeros runs held 800 MHz across twelve or more consecutive launches of about 0.37 s, 1–2 ms apart.</li>
+the boot frequency (<code>go_to_idle_state_and_update_pwr_status()</code>). On aifoundry2 that came about
+<span data-v="resetMed"></span> s after the host saw the last launch end (<span data-v="resetR"></span> s, at the
+<span data-v="resetN"></span> of <span data-v="resetEnds"></span> block ends on 21 and 23 September that found the clock
+above 600 MHz), and at <span data-v="resetUp"></span> of those the loop first stepped the clock up.
+Back-to-back launches rarely trigger it, and a short pause between launches more often: <span data-v="bnd"></span>.</li>
 </ul>
 
 <h2 id="the-loop-as-measured">2. The loop as measured</h2>
-<p>The governor only raises the clock while the die reads 65 °C or less (our 10 Hz samples caught up-steps at
-readings of <span data-v="upT"></span> °C), which in these sessions meant the first runs after a night of idling.
-Seven such runs exist, from the cool-start session on the morning of 21 September
+<p>Only aifoundry2's clock can move (aifoundry3's firmware holds it at 600 MHz, <a href="#the-same-firmware-on-three-cards">§3</a>),
+so this section is aifoundry2's alone. The rule raises the clock only while the die reads 65 °C or less, which on
+21 September meant the first runs after a night of idling. Our 10 Hz samples caught up-steps at readings of
+<span data-v="upT"></span> °C that morning; <span data-v="up66"></span>.
+Seven such runs, from the cool-start session on the morning of 21 September
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#the-speed-effect-appears-on-a-cool-die">Horace
-experiment §6</a>), sampled at 10 Hz. They contain <b><span data-v="ntrans"></span> clock transitions</b>. Voltage moved
+experiment §6</a>), were sampled at 10 Hz and are charted below. They contain <b><span data-v="ntrans"></span> clock transitions</b>. Voltage moved
 with frequency in every one of them: <span data-v="ops"></span>. This is real DVFS, not frequency scaling alone.</p>
 
 <div id="gov-fig">
-<div class="chart-title">Watch the governor decide: the seven cool-start runs, one 10 Hz sample at a time</div>
+<div class="chart-title">Watch the governor decide: the seven cool-start runs on aifoundry2, 21 September, one 10 Hz sample at a time</div>
 <p class="small">Pick a run, then play it or drag through it. On the time slider, the arrow keys move one 100 ms
 sample and Page Up / Page Down jump between clock changes. The panel applies the §1 rule to the sampled die
 temperature, board power and clock; at a clock change it reads the last sample before the step, and shows the sample
@@ -127,8 +137,9 @@ after it with a dashed mark.</p>
 <p class="small" id="gov-sum"></p>
 </div>
 
-<p><b>It hunts, and the missing hysteresis explains it.</b> Run 3 (all ones, from a 64 °C die; the chart opens on it)
-never brought the board near 65 W (it peaked at 56 W); what the loop kept crossing was the 65 °C line. At a reading of
+<p><b>It hunts, and the missing hysteresis explains it.</b> On aifoundry2 the clock hunted on both days it started cool
+(<span data-v="hunt"></span>). One run shows how: run 3 of 21 September (all ones, from a 64 °C die; the chart opens on
+it) never brought the board near 65 W (it peaked at 56 W); what the loop kept crossing was the 65 °C line. At a reading of
 66 °C the clock steps down; once the whole-degree reading is back at 65 °C the thermal test no longer fires, the power
 test sees 38 W &lt; 65 W, and the clock steps back up. The clock changed seven times in 2.4 s, reaching 800 MHz twice,
 1.6 s apart. Then, with the die settled at 66 °C, it stayed at 600 MHz for the last 4.5 s. Over the whole 7.4 s run it
@@ -148,36 +159,41 @@ spent 5.6 s at the bottom point, 1.0 s at 700 MHz and 0.8 s at 800 MHz.</p>
 while the board drew 45–56 W, well under the limit) and four read above both thresholds on the sample after the step
 (random data draws up to 88 W at 800 MHz and 69 W at 700, and heats fast). The other seven cannot be attributed from
 our telemetry: the die read 65 °C (once 64) and the board 34–56 W, so neither test fired on the values we sampled. One
-of them (run 1, zeros, at 5.95 s: 800→600 MHz in a single step, 171 ms after a launch boundary) looks like the
+of them, a single event (run 1, zeros, at 5.95 s: 800→600 MHz in one step, 171 ms after a launch boundary), looks like the
 boot-point reset. (Launches run back to back every 0.37–0.49 s, so nearness to a boundary alone explains nothing.) The
 other six are single-point steps in pairs 0.4–0.5 s apart, which looks like the stepping loop, most likely thermal
 steps on passes where the service processor read 66 °C between our 10 Hz samples. Read on the last sample before each
 step instead, the split is <span data-v="prevsplit"></span>: <span data-v="prevwhy"></span>. The power branch never
-fired on its own, because on this card only random data at
-700–800 MHz exceeds 65 W, and it takes the die through 65 °C within half a second.</p>
+fired on its own, because on a cool die only random data at 700–800 MHz exceeds 65 W (at 600 MHz it does too, but only
+on a die above about 82 °C, where the thermal test already holds the floor), and random data takes the die through
+65 °C within half a second.</p>
 <details><summary>All <span data-v="ndown"></span> down-steps as a table</summary>
 <div class="table-wrap"><table id="trans"></table></div>
 <p class="small">Die °C and board W are the first sample that shows the new clock. The board meter lags the clock by
-0.1–0.3 s, so a 700→600 MHz step can still show an 800 MHz burst. "Unattributed" means neither test fired on the
+<span data-v="meterLag"></span>, so a 700→600 MHz step can still show an 800 MHz burst. "Unattributed" means neither test fired on the
 values we sampled (the die read 65 °C or less and the board under 65 W).</p>
 </details>
-<p>The loop is also slow to start: the first clock change came <span data-v="first"></span> s after the kernel
-launched, three to seven passes of the ~133 ms loop. Once moving, it stepped on successive passes; eight up-steps go
-straight from 600 to 800 MHz between two 100 ms samples, faster than one table point per pass. The 353f20e source does
-not explain that; the older governor the cards' logs point to (<a href="#method-and-what-is-not-established">§8</a>)
+<p>The loop is also slow to start: the first clock change came a median <span data-v="firstMed"></span> s after a block
+of launches began (<span data-v="firstR"></span> s over <span data-v="firstN"></span> starts on 21 and 23 September;
+<span data-v="first"></span> s in the seven runs charted), about <span data-v="firstPasses"></span> passes of the
+~133 ms loop. Once moving, it changed the clock a median <span data-v="gapMed"></span> s after the previous change
+(<span data-v="gapR"></span> s for the middle 80%), about <span data-v="gapPasses"></span> passes; <span data-v="direct10"></span>
+up-steps charted (<span data-v="direct"></span>) go straight from 600 to 800 MHz between two 100 ms samples, faster than
+one table point per pass. The 353f20e source does not explain that; the older governor the cards' logs point to (<a href="#method-and-what-is-not-established">§8</a>)
 climbs to the top point in one go.</p>
 
 <h2 id="the-same-firmware-on-three-cards">3. The same firmware on three cards</h2>
-<p>Everything so far is one card. AI Foundry has three machines, and the loop's behaviour turned out to depend on a
+<p>So far the loop has been measured on one card. AI Foundry has three machines, and the loop's behaviour turned out to depend on a
 single byte that differs between them.</p>
 
-<p><b>aifoundry1 could not be measured.</b> It holds two ET-SoC-1 cards, both enumerated on the PCIe bus, with
+<p><b>aifoundry1 could not be measured</b> when we checked it, once, on 22 September. It holds two ET-SoC-1 cards, both enumerated on the PCIe bus, with
 their device nodes present. Its kernel module is built from different sources than the other two machines
 (<code>srcversion 1383B256EB24A0A53F04CC7</code> against <code>47D26A305A0428B29FB7FC4</code>) while carrying
 the same <code>libDM.so</code>, and the library's compatibility check refuses to open the card:
 <code>Error unable to evaluate compatibility!</code>. Its management service is not running. Reinstalling a
 kernel driver on a shared lab machine is not ours to do, so those two cards are reported here as unavailable
-and the lab admin has what they need to fix it.</p>
+and the lab admin has what they need to fix it. (Only the driver's configuration readout is stored; the rest was read
+by hand.)</p>
 
 <p><b>aifoundry2 and aifoundry3 look identical and are not.</b> Same firmware release, same PMIC firmware, same
 static device configuration over the driver's ioctl: 65 W TDP, 600 MHz boot clock, 32 compute shires, 32 MB of
@@ -215,8 +231,8 @@ which is only consistent with a TDP level below 23 W; aifoundry2, drawing more, 
 <p><b>The host cannot see this.</b> The driver's <code>ETSOC1_IOCTL_GET_DEVICE_CONFIGURATION</code> reports a
 65 W TDP on all three machines, including aifoundry3. Anything that checks a card's configuration from the host
 side gets the nameplate number, not the one the governor is using. The card works. It is simply held at 600 MHz
-for as long as its flashed TDP stays at zero, which on a workload that would otherwise run at 800 MHz gives up a
-quarter of the throughput (800 MHz is a third faster than 600), and nothing reports an error.</p>
+for as long as its flashed TDP stays at zero, which on a compute-bound workload that would otherwise run at 800 MHz
+gives up a quarter of the throughput (800 MHz is a third faster than 600), and nothing reports an error.</p>
 
 <p><b>The contrast is not that aifoundry2 is always faster.</b> Launched warm, it too runs at 600 MHz: the thermal
 branch holds it at the floor, and every one of the strict protocol's launches at 80 °C ran at 600 MHz (§1). The
@@ -250,7 +266,9 @@ the taped-out part, it is not this firmware, and the chip-level netlist is not i
 <p><b>And the card shows no sign of it.</b> If an array were suppressed once idle, the first access afterwards
 would pay the wake-up. The probe: put one line at a chosen level, let the minion spin on its cycle counter for a
 swept interval from zero to 27 ms (0, 1.7 µs, 17 µs … 27 ms) without touching that line, then time a single load
-of it: same line, same address, only the idle time varying, 20 repeats.</p>
+of it: same line, same address, only the idle time varying, 20 repeats. (The probe counts the idle in cycles; the times
+assume 600 MHz. The clock during the probe was not recorded; aifoundry2 was resting at about 73 °C that morning, and in
+26 sessions on five days it never ran above 600 MHz at a die reading of 68 °C or more.)</p>
 
 <div class="chart-block" id="wake-fig">
   <div class="chart-title">Every repeat of the wake-up probe: each line is one repeat's load latency after the idle,
@@ -274,19 +292,27 @@ misfire). No wake-up.</li>
 <li><b>DRAM: +10.5 cycles</b>, and that one has a known cause: the line's DRAM row has closed, so the next load
 pays an activate, 11 cycles (tRCD, the activate-to-read delay).
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#inside-the-dram-rows-banks-and-refresh">Anatomy
-of a memory access</a> measured that cost (§5), and found that an idle row stays open until a refresh closes it
-(every 3.87 µs), as the memory controller's open-page policy implies; the +40 cycles in that report are for a load
+of a memory access</a> measured that cost on aifoundry2 (§5), and found there that an idle row stays open until a
+refresh closes it (every 3.87 µs), as the memory controller's open-page policy implies; the +40 cycles in that report are for a load
 issued right behind another to a different row of the same bank, a different case. Here
 <span data-v="wakecount"></span>. The shift is there in full after the shortest idle, 1.7 µs, and does not grow out
 to 27 ms, which is not how a wake-up would behave.</li>
 </ul>
 <p>So on this card, in this firmware, no leakage suppression is in use. The open design has the ports and ties them
 off, no firmware line drives them, and the card shows no wake-up. Whether the taped-out chip could gate its arrays is
-not established (§8). The gating that demonstrably works is clock gating, which the open RTL uses aggressively (per
-lane, per functional unit, with a seven-cycle tail). That is why an idle-but-powered core costs so little
-<i>dynamic</i> power and still leaks.</p>
+not established (§8). The gating the open RTL does use is clock gating, and aggressively (per lane, per functional
+unit, with a seven-cycle tail). That is the likely reason a powered core that is not computing costs little
+<i>dynamic</i> power (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power#ablations">Why is the ET-SoC-1
+low power?, section 4</a>) and still leaks.</p>
 
 <h2 id="what-that-costs">5. What that costs</h2>
+<p><b>What the idle readings fix is the slope.</b> On aifoundry2, idle power climbs <span data-v="slope80"></span> W for
+every degree of die temperature at 80 °C. The law below, fitted to its idle readings, splits idle power into a fixed part
+and a leakage part that grows exponentially with temperature. Its total and its slope are well determined; the split is
+not. Leakage temperature scales (the 36 °C in the exponent) anywhere from <span data-v="tlR"></span> °C fit the readings
+about as well, and put <span data-v="leakR"></span> W of the 80 °C idle in leakage and <span data-v="fixR"></span> W in the
+fixed part, with the slope at <span data-v="slopeR"></span> W/°C throughout. The equation and the chart's shading are
+the central fit; the chart's share strip carries the range.</p>
 $$P_\text{idle}(T)\;=\;\underbrace{12.6\,\mathrm{W}}_{\text{fixed}}\;+\;\underbrace{23.3\,\mathrm{W}\;e^{(T-80\,^\circ\mathrm{C})/36\,^\circ\mathrm{C}}}_{\text{leakage}}$$
 $$\left.\frac{\partial P_\text{idle}}{\partial T}\right|_{80\,^\circ\mathrm{C}}=0.65\ \mathrm{W/^\circ C}$$
 
@@ -300,43 +326,51 @@ $$\left.\frac{\partial P_\text{idle}}{\partial T}\right|_{80\,^\circ\mathrm{C}}=
   <p class="ck-readout" id="law-read"></p>
 </div>
 
-<p><b>Three checks the fit never saw.</b> The idle law above was fitted on 21 September to idle readings at
+<p><b>Checks the fit never saw.</b> The idle law above was fitted on aifoundry2 on 21 September to idle readings at
 <span data-v="fitT"></span> °C (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">the
 Horace experiment, §8</a>; tabulated in
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">the energy manual, §1</a>). It
-predicts <span data-v="checks"></span>. Nearly half of that 22 September idle, <span data-v="unsensed"></span> W, is on
-no rail sensor (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">energy manual,
+predicts <span data-v="checks"></span>. In that one 22 September session, nearly half of the idle,
+<span data-v="unsensed"></span> W, is on no rail sensor (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">energy manual,
 §1</a>).</p>
 
 <p><b>Leakage transfers too, and further than it should.</b> <span data-v="a3law"></span></p>
-<details><summary>aifoundry3's idle, bin by bin, against the aifoundry2 law</summary>
+<details><summary>aifoundry3's first session bin by bin, and every session the law was not fitted on, against the aifoundry2 law</summary>
 <div class="table-wrap"><table id="leaktab"></table></div>
+<div class="table-wrap"><table id="sesstab"></table></div>
+<p class="small">Each session's idle samples are the 600 MHz samples outside [launch start − 1 s, launch end + 6 s],
+binned by whole degree (bins of 20 samples or more); the session's figure is measured minus law over those samples.
+The 22 September idle has no launches, so all of it counts.</p>
 </details>
 
 <p>Kanter put leakage at 5–30% of a design's power, with 20% common, and noted that parts which clock lower and use
-slower transistors leak less. This card is above that range whether busy or idle: <b>36% of a 64 W random-data
-matmul, <span data-v="idle65"></span> of an idle card at 80 °C</b> (<span data-v="idle65of"></span>). Three things make
-it so, and only the third is the chip's own: (1) it runs at 0.52 V rather than the 0.4 V Esperanto designed for;
-(2) its desktop chassis rests it at 62–73 °C, and these shares are quoted at 80 °C, where every strict run launched;
-server airflow would keep it cooler; (3) it carries 128 MB of shire SRAM (Esperanto quotes over 160 MB on die, at
-Hot Chips 33) with no array power gating in play.</p>
+slower transistors leak less. On aifoundry2 at 80 °C, where every strict run launched, leakage is
+<b><span data-v="idleShR"></span> of an idle card</b>, above that range whatever the split, and
+<b><span data-v="busyShR"></span> of a <span data-v="busyW"></span> W random-data matmul</b>, at or above its top.
+Three things plausibly make it so, and only the third is the chip's own: (1) it runs at 0.52 V rather than the 0.4 V
+Esperanto designed for; (2) aifoundry2's desktop chassis rests it at 62–74 °C, and these shares are quoted at 80 °C;
+server airflow would keep it cooler, and at <span data-v="T3"></span> °C, where aifoundry3 ran in another machine, the
+same law puts leakage at <span data-v="busy3R"></span> of a busy card; (3) it carries 128 MB of shire SRAM (Esperanto
+quotes over 160 MB on die, at Hot Chips 33) with no array power gating in play. Only (2) has data behind it here;
+(1) and (3) are reasoning, since no run varies the voltage at a fixed temperature or gates the SRAM.</p>
 
 <h2 id="what-the-second-card-says-about-the-model">6. What the second card says about the model</h2>
 <p id="card2"></p>
 
 <h2 id="what-this-means-for-the-equation-and-for-measuring-power">7. What this means for the equation, and for measuring power</h2>
 <ul>
-<li><b>The equation is right; it is just not what the loop uses.</b> Its activity term is strongly confirmed on
-this card. Power over idle is close to linear in active minions: 25.6 mW per minion at 256 and 512 active, 26.2 at
-768 and 27.0 at 1,024; a line through zero fits 26.5 mW per minion. And
+<li><b>The equation is right; it is just not what the loop uses.</b> Its activity term holds well on aifoundry2.
+Power over idle is close to linear in active minions: 25.6 mW per minion at 256 and 512 active, 26.2 at
+768 and 27.0 at 1,024; a line through zero fits 26.5 mW per minion (one session, two runs per count). And
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#from-flips-to-watts">a model that counts four
-classes of switching event</a> inside the multiply-add unit predicts board power across fourteen operand patterns
-to 0.5 W rms, each pattern predicted by a fit that left it out. The \(V^{2}f\) term is only weakly testable here,
+classes of switching event</a> inside the multiply-add unit predicts aifoundry2's board power across fourteen operand
+patterns to 0.5 W rms, each pattern predicted by a fit that left it out, and carries to aifoundry3 with one scale factor
+(§6). The \(V^{2}f\) term is only weakly testable, and only on aifoundry2 (aifoundry3 cannot leave 600 MHz),
 because the governor will not hold the high operating point long on a heavy workload. For constant data it predicts
 \(\bigl(0.618/0.517\bigr)^{2}\times(800/600)=1.91\) for the switching-power ratio between the two points; the
 cool-start runs give about 2.1 for ones, a loose check: the idle levels it subtracts are uncertain by about 5% (the
 600 MHz idle alone moves about <span data-v="idleslope"></span> W per degree at <span data-v="idleslopeT"></span> °C),
-the runs are seven short, uncontrolled ones, and zeros are too small to test it at all
+the runs are seven short, uncontrolled ones on one morning, and zeros are too small to test it at all
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power#voltage-and-clock">Why is the ET-SoC-1 low power?,
 Voltage and clock</a>). A clean test needs a die below 65 °C and a runner that pins the work rate.</li>
 <li><b>Kanter's argument that measured power is too expensive to mandate is weaker for this card, though it does
@@ -345,15 +379,20 @@ energy to instrument a system. This chip is already instrumented, as a load-bear
 PMIC that meters board power, a service processor that reads it on every pass of its management loop, and a
 management interface that hands the number to the host. The cost of reporting the card's own power here is one
 query. But MLPerf's measured power is the whole system (host, power supply, cooling), which this meter does not
-see, and the meter gives one new board reading per ~133 ms pass, with the rail readings behind the PMIC's own
-running average (a time constant of about one second).</li>
+see, and the meter gives one new board reading per ~133 ms pass on aifoundry2 (about 250 ms on aifoundry3), with the
+rail readings behind the PMIC's own running average (a time constant of about one second).</li>
 <li><b>But the loop's hunting is exactly the kind of thing a provisioned-power metric cannot see.</b> A
-normalisation by provisioned kilowatts scores a card by its nameplate. On this card a governor with no dead band
+normalisation by provisioned kilowatts scores a card by its nameplate. On aifoundry2 a governor with no dead band
 moves the clock, and so the throughput, by up to a third within a single 7-second run, invisibly.</li>
 </ul>
 
 <h2 id="method-and-what-is-not-established">8. Method, and what is not established</h2>
 <ul>
+<li><b>Which card.</b> A result stated with no card named holds on both aifoundry2 and aifoundry3 (at least three
+independent repeats on each, or a readout identical on both). aifoundry3's firmware holds its clock at 600 MHz (§3), so
+everything about the clock moving (§1's measurements, all of §2, §7's \(V^{2}f\) check) is aifoundry2's by necessity;
+§4's wake-up probe (one launch) and §5's idle law are aifoundry2's too. Where fewer than three runs or sessions stand behind a number,
+the text says how many.</li>
 <li>Firmware claims are read from the et-platform source at <code>353f20e</code>:
 <code>services/thermal_pwr_mgmt.c</code>, <code>rtos_task/dm_task.c</code>, <code>include/thermal_pwr_mgmt.h</code>,
 <code>include/bl2_pmic_controller.h</code>, <code>config/mgmt_build_config.h</code>.</li>
@@ -368,14 +407,18 @@ explanations drawn from the source in §1 and §7 may not.</li>
 lineage in a later MCU-class configuration, <b>not</b> the taped-out ET-SoC-1, which is why "nothing drives the
 sleep pins" is a statement about the open release and this firmware, corroborated by the card, not a statement
 about the silicon's chip-level netlist.</li>
-<li>The 36 transitions come from the cool-start runs of 21 September, in
-<code>docs/reports/data/2026-09-21-horace-aifoundry2/cold1</code> and <code>cold2</code>. The classification into
+<li>The 36 transitions come from aifoundry2's cool-start runs of 21 September, in
+<code>docs/reports/data/2026-09-21-horace-aifoundry2/cold1</code> and <code>cold2</code>. The timings quoted over two
+days add the six cool passes of 23 September (the first, discarded attempt at E29's reruns, in
+<code>docs/reports/data/2026-09-23-reruns-aifoundry2/</code>: <code>hotline-pass2</code>–<code>4</code>,
+<code>relay-pass1</code>, <code>2</code> and <code>4</code>); a block of launches is a run of launches less than 2 s
+apart. The classification into
 thermal, thermal+power, power and unattributed is mechanical, in <code>tools/ettelem/analyze_dvfs.py</code>;
 nothing is fitted. Our 10 Hz sampling and the sensor's whole-degree steps mean that a step recorded at 66 °C may
 have been decided at 65 °C, and one recorded at 65 °C may have been decided on a 66 °C reading between our samples.
 That is the likeliest reading of the seven unattributed steps, and it is why the exact crossing instants are not
 known. The split also depends on which sample is read: <span data-v="prevnote"></span>, because the board meter lags
-the clock by 0.1–0.3 s. Either way the power branch never fired alone.</li>
+the clock by <span data-v="meterLag"></span>. Either way the power branch never fired alone on aifoundry2.</li>
 <li>The wake-up probe is <code>gen_ops.py wakeup</code> in <code>workloads/memprobe</code>, one hart, 20
 repeats, raw results in <code>docs/reports/data/2026-09-22-dvfs-aifoundry2/wakeup/</code>. It can only detect a
 wake-up longer than about ten cycles, and only for arrays idled up to 27 ms, which is the widest the delay op
@@ -386,9 +429,16 @@ differences); the <span data-v="misfires"></span> loads on which that correction
 and the paired medians the chart draws are the same whether those loads are kept, corrected or dropped.</li>
 <li>The long-idle sample is <code>docs/reports/data/2026-09-22-dvfs-aifoundry2/idle_20h.jsonl.gz</code>: 300
 samples over 60 s. The idle time is computed from timestamps, from the end of the last launch of the previous
-day's long runs to the first sample. The overnight point is the 3.2 s before the first launch of the cool-start
+day's long runs to the first sample: it is the time since our last recorded workload. Use of the card in between by
+anyone else, or by runs that were not committed, cannot be excluded, and the wake-up probe's start time is only in the
+lab log. The overnight point is the 3.2 s before the first launch of the cool-start
 session (<code>cold1</code>); the idle-law fit leaves out the first 20 s of every session and ±4.5 s around every
-launch, so neither point was in it.</li>
+launch, so neither point was in it. The session-by-session check in §5 uses every committed session with idle
+stretches that the law was not fitted on, on both cards (the fit used <code>cold1</code>, <code>cold2</code>,
+<code>long</code> and <code>strict</code>). The split's range refits the fixed part and the leakage on the law's own
+idle readings with the leakage temperature scale held at each end of <span data-v="tlR"></span> °C; those fits leave an
+rms error of <span data-v="splitRms"></span> W against the central fit's <span data-v="splitRms0"></span> W, all well
+inside what whole-degree readings allow.</li>
 <li>The three-machine comparison uses two read-only tools written for it. <code>tools/etcfg</code> issues
 <code>ETSOC1_IOCTL_GET_DEVICE_CONFIGURATION</code> to the driver; <code>ettelem config</code> asks the service
 processor for <code>DM_CMD_GET_MODULE_STATIC_TDP_LEVEL</code>, <code>..._TEMPERATURE_THRESHOLDS</code> and
@@ -402,8 +452,14 @@ data.</li>
 <li><b>Not established:</b> whether the taped-out ET-SoC-1 drives its sleep transistors under some other firmware
 or in some other power state; exactly which governor build the cards run, beyond the log-format evidence above;
 what the boot frequency is set to in flash; <b>why</b> aifoundry3's flashed TDP is zero, and whether it was ever
-different; and whether the 8% switching-power gap between the two cards is silicon, package or board regulator,
-which would need a third working card to separate.</li>
+different; whether the 8% switching-power gap between the two cards is silicon, package or board regulator,
+which would need a third working card to separate; whether the unattributed down-steps of §2 are thermal steps
+decided on readings between our samples, which is the likeliest reading but untested (sampling at 25 ms on a cool die
+would settle it); how the idle law's power divides between fixed and leakage beyond the range of §5; and why two relay
+launches on aifoundry2 returned wrong elements (1,118 and 1,000) on 23 September, in one pass of the discarded first
+attempt at a cool-card rerun. Both ran while the governor dropped the clock from 800 to 600 MHz inside the launch, and
+the relay's other launches on both cards were correct. An error at the clock transition and a race in the relay's own
+completion flags when the clock ratio changes would both fit; one pass on one card cannot tell them apart.</li>
 </ul>
 <p>To rebuild this report's data and page from the raw files (the wake-up probe itself needs a card):</p>
 <pre><code>python3 workloads/memprobe/gen_ops.py wakeup --out W --reps 20 --seed 11 \
@@ -411,9 +467,12 @@ which would need a third working card to separate.</li>
 build/memprobe/host/memprobe_host --program W/wakeup.ops --out-dir W --budget 40
 
 D=docs/reports/data; H=$D/2026-09-21-horace-aifoundry2; A3=$D/2026-09-22-horace-aifoundry3; C=$D/2026-09-22-cards
+R2=$D/2026-09-23-reruns-aifoundry2
 python3 tools/ettelem/analyze_dvfs.py --cold $H/cold1 $H/cold2 --wakeup $D/2026-09-22-dvfs-aifoundry2/wakeup \
     --idle $D/2026-09-22-dvfs-aifoundry2/idle_20h.jsonl.gz --since $H/long2/runs.jsonl.gz \
     --model $H/model.json --ablation $H/ablation.json --sptrace $C/sptrace-aifoundry3.bin \
+    --cool-passes $R2/hotline-pass2 $R2/hotline-pass3 $R2/hotline-pass4 $R2/relay-pass1 $R2/relay-pass2 $R2/relay-pass4 \
+    --idle-sessions $H $D/2026-09-2[234]-* \
     --out $D/2026-09-22-dvfs-aifoundry2/dvfs.json
 python3 tools/ettelem/build_cards_data.py --cards $A3/cards.json --transfer $A3/transfer.json \
     --leak $A3/leakage_crosscard.json --config $C/config.json --driver $C/driver_config.json \
@@ -429,7 +488,13 @@ boundaries (now unattributed) and the idle duration (recomputed from timestamps)
 caveat; revised 25 September 2026 after a second review: the rule's frequency check nested inside the thermal test as
 in the source, the DRAM wake-up counts (the analysis had corrected the cycle counter a second time), the operating-point
 voltages computed from the telemetry, the sections reordered, the second card cut to one paragraph (the Horace
-experiment, §10, has it in full), and interactive charts.</p>
+experiment, §10, has it in full), and interactive charts. 25 September (version 3): every claim checked for which card
+and how many runs stand behind it. The leakage shares are now ranges led by the slope (the split between fixed and
+leakage power is not pinned down); the governor's timings are given over two days on aifoundry2, the only card whose
+clock moves; the idle law is checked session by session on both cards (aifoundry3's offset is +0.6 W over sixteen
+sessions, not one session's +0.7 W); "every result checked was correct" is withdrawn (two relay launches failed during a
+clock drop); record:
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>.</p>
 
 <h2 id="related-reports">Related reports</h2>
 <ul>

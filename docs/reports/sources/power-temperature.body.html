@@ -15,30 +15,35 @@ details.terms p { margin: 6px 0 0; }
 .vm-leg-lab { margin: 0 4px; }
 </style>
 <h1>Power and temperature on the ET-SoC-1: a load step through every sensor, and the per-shire voltage map</h1>
-<p class="byline">20 September 2026 · aifoundry2's card · firmware source read at et-platform <code>353f20e</code> (the cards' own log strings point to an older build; see Reproduce) · <code>tools/ettelem</code>, a telemetry client on the management library · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="byline">20 September 2026 · measured on aifoundry2, in one session for the load step and one for the voltage map; the text says where a result also holds on the second card, aifoundry3, or differs there · firmware source read at et-platform <code>353f20e</code> (the cards' own log strings point to an older build; see Reproduce) · <code>tools/ettelem</code>, a telemetry client on the management library · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">The card has one power sensor path: a PMIC that reports 12 V board power and three of its rails (minion
-cores, SRAM, mesh), polled by the service processor every 133 ms. Everything else is voltage or temperature. This report
+cores, SRAM, mesh), polled by the service processor once per pass: while <code>ettelem</code> samples at 10 Hz, a new
+value about every 156 ms on aifoundry2 and 263 ms on aifoundry3. Everything else is voltage or temperature. This report
 lists every way to read them, what each resolves, and what a small client on the management library adds over the stock
-tool: the <b>per-rail snapshot the CLI refuses, every 133 ms refresh instead of et-powertop's one poll a second, and a
+tool: the <b>per-rail snapshot the CLI refuses, every refresh instead of et-powertop's one poll a second, and a
 34-shire on-die voltage map</b>. Then what the numbers show. The main surprise is temperature: <b>under load near 80 °C, the
-same work costs about 0.8 W more for every °C the die warms</b>, the die idled at 72 °C here (62–73 °C on other days), and idle
+same work costs about 0.8 W more for every °C the die warms</b>, the die idled at 72 °C here (62–73 °C on other days; aifoundry3
+idles near 50–56 °C), and idle
 power after a load is 5 W higher than before it, so every energy comparison on this card has to control for heat.</p>
 
-<div class="card" style="margin:18px 0 8px"><b>Later measurements.</b> Idle power is now a fitted law,
-P<sub>idle</sub> = <span id="law-fix"></span> W + <span id="law-a"></span> W·e<sup>(T−80)/<span id="law-tl"></span></sup>
-with T the die temperature in °C. Its slope is <span id="law-slope80"></span> W/°C at 80 °C
+<div class="card" style="margin:18px 0 8px"><b>Later measurements.</b> Idle power on aifoundry2 now follows a fitted
+law that rises <span id="law-slope80"></span> W for every °C at 80 °C
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a>;
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">the energy manual, §1</a>); §2
-compares this page's readings with it. What a workload adds to §2's unmetered remainder is now attributed to delivery
-losses and DRAM traffic; the <span id="box-idle-rest"></span> W at idle is still not split
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">the energy manual, §1</a>). Written
+out, P<sub>idle</sub> = <span id="law-fix"></span> W + <span id="law-a"></span> W·e<sup>(T−80)/<span id="law-tl"></span></sup>
+with T the die temperature in °C. The idle readings it was fitted to, at <span id="law-trange"></span> °C, pin its
+slope and level there but not how much of the power is leakage: e-folding temperatures from 30 to 45 °C fit as well,
+and put leakage at 20–29 W of the <span id="law-80"></span> W at 80 °C. §2 compares this page's readings
+with the law. What a workload adds to §2's unmetered remainder is now attributed to delivery losses and DRAM traffic;
+the <span id="box-idle-rest"></span> W at idle on this card (12–13 W on aifoundry3) is still not split
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits
 of observability, §4.2</a>).</div>
 
 <div class="kpis">
-  <div class="card kpi"><div class="lab">Idle</div><div class="val">31.2 W</div><div class="sub">at 72 °C die; 16 W on the three measured rails, 15 W elsewhere</div></div>
+  <div class="card kpi"><div class="lab">Idle</div><div class="val">31.2 W</div><div class="sub">aifoundry2 at 72 °C die; 16 W on the three measured rails, 15 W elsewhere (12–13 W on aifoundry3, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits §4.2</a>)</div></div>
   <div class="card kpi"><div class="lab">Power slope under load</div><div class="val">0.8 W/°C</div><div class="sub">board, 75–87 °C, half of it on the minion rail; an idle card: 0.65 W/°C at 80 °C</div></div>
-  <div class="card kpi"><div class="lab">Finest power record</div><div class="val">10 mW · 133 ms</div><div class="sub">board power, fresh each service-processor pass; the rails read to 1 mW but are the PMIC's running average (τ ≈ <span id="kpi-tau"></span> s)</div></div>
+  <div class="card kpi"><div class="lab">Finest power record</div><div class="val">10 mW · 156 ms</div><div class="sub">board power, fresh each service-processor pass: 156 ms apart on aifoundry2 and 263 ms on aifoundry3 while <code>ettelem</code> samples at 10 Hz; the rails read to 1 mW but are the PMIC's running average (τ ≈ <span id="kpi-tau"></span>)</div></div>
   <div class="card kpi"><div class="lab">Finest voltage map</div><div class="val">34 shires</div><div class="sub">3 rails each, 1 mV, with hardware low/high, from a user account</div></div>
 </div>
 
@@ -92,8 +97,7 @@ launcher (the short dips in the chart are the gaps between them), draws 56 W two
 end, 56 s later, while the die warms from about 75 to 87 °C. It is the same kernel on the same 600 MHz clock at a steady
 rate: every run did the same work, <span id="mm-work"></span> (<code>raw/thermal-loads.log</code>), and the runs took
 <span id="mm-spans"></span> from dip to dip, the late ones no longer than the early ones. The idle law accounts for
-<span id="law-part"></span> W of the extra <span id="extra-w"></span> W as leakage; the rest is why busy power climbs a
-little faster per degree than an idle card. A straight line through board power against die temperature, from
+<span id="law-part"></span> W of the extra <span id="extra-w"></span> W as leakage. A straight line through board power against die temperature, from
 <span id="fit-from"></span> to the end, has a slope of <b id="slope-board"></b> W/°C,
 <span id="slope-minion"></span> W/°C of it on the minion rail. The idle law's slope over the same temperatures is
 <span id="slope-law"></span> W/°C. The strict 7 s runs of
@@ -104,15 +108,20 @@ the idle law measured later (31.3 and 36.5 W at those temperatures). The die she
 baseline taken before a run understates the idle power during and after it. Energy measurements here should take their
 baseline at the same temperature, or fit a temperature term.</li>
 <li><b>The three rails are not the whole card.</b> Board minus rails is <span id="rest-idle0"></span> W at idle at
-<span id="rest-idle0-t"></span> °C (<span id="rest-cool"></span> W at <span id="rest-cool-t"></span> °C),
+<span id="rest-idle0-t"></span> °C (<span id="rest-cool"></span> W in the idle window at <span id="rest-cool-t"></span> °C;
+two windows are too few to show a trend with temperature),
 <span id="rest-mm"></span> W under matmul and <span id="rest-dram"></span> W under DRAM load. That remainder is the DDR
 and PCIe rails, the Maxions, the IO shire, and regulator losses, none of which has a sensor. A DRAM-bound load moves it
 by <span id="dram-rest"></span> W and the minion rail by only <span id="dram-mnn"></span> W (with the die
-<span id="dram-dt"></span> °C warmer); a matmul moves the minion rail by <span id="mm-mnn"></span> W.</li>
+<span id="dram-dt"></span> °C warmer); a matmul moves the minion rail by <span id="mm-mnn"></span> W. Both cards
+show the same for DRAM traffic: in the energy catalogue, 76 GB/s DRAM streams move the remainder by about 5 W and the
+minion rail by under 0.2 W on each
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits
+of observability, §4.2</a>).</li>
 <li><b>Why the remainder sometimes looks too small, or the rails seem to exceed the step.</b> Board power is a fresh
-reading every 133 ms. The rail figures are the PMIC's own running averages, which the service processor copies each
-pass, roughly first-order with τ ≈ <span id="rf-tau"></span> s: a step reaches <span id="rf-1s"></span> after 1 s and
-<span id="rf-2s"></span> after 2 s (medians over <span id="rf-n"></span>;
+reading at every service-processor pass (about every 156 ms here). The rail figures are the PMIC's own running averages,
+which the service processor copies each pass, roughly first-order with τ ≈ <span id="rf-tau"></span>: a step reaches
+<span id="rf-12s"></span> (medians over <span id="rf-n"></span>;
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">Limits of observability, §4.1</a>). So board minus rails swings at every load edge until the rails catch up.
 <div class="chart-title" style="margin-top:10px">The unmetered remainder at the load edges</div>
 <div class="ck-controls"><div id="edge-tau"></div></div>
@@ -123,22 +132,26 @@ pass, roughly first-order with τ ≈ <span id="rf-tau"></span> s: a step reache
 <div><div class="pt-panel-title">The matmul stops (73–95 s)</div><div class="chart" id="edge-b"></div><div id="edge-b-out"></div></div>
 </div>
 <p class="small" id="edge-cap"></p>
-In steady state the board reading and the PMIC's own board average agree to about 0.5 W. The same averaging is behind
-the gap between the service-processor trace and the host log in
+At a steady idle the board reading and the PMIC's own board average agree within 0.03 W, on both cards; after a load
+step the average trails the reading just as the rails do. The same averaging is behind the gap between the
+service-processor trace and the host log in
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes">the memory-anatomy
-report</a>.</li>
+report</a>, where the host log's totals came out 14–25% higher in each of its twelve runs on aifoundry2.</li>
 <li><b>Voltage barely droops at the die.</b> The minion rail's on-die monitor reads 518 mV idle and 517 mV with 18 W more
 load (about 35 A more at 0.52 V), consistent with a regulator that senses at the die. The hub puts the sag at
-<span id="ir-drop"></span> mV per watt. <span id="ddr-idle"></span> <span id="ddr-load"></span> That droop
-under DRAM traffic is now used as a meter for DRAM power
+about <span id="ir-drop"></span> mV per watt on aifoundry2 and 0.14 on aifoundry3. <span id="ddr-idle"></span> <span id="ddr-load"></span> That droop
+under DRAM traffic, which the energy catalogue finds on both cards (about 4 mV at 76 GB/s of DRAM streaming, none under
+compute), is now used as a meter for DRAM power
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#what-the-moortec-sensors-can-and-cannot-do-for-power">Limits
 of observability, §4.3</a>).</li>
-<li><b>The clock stayed at 600 MHz because the die was hot.</b> The governor steps down whenever the whole-degree die
-reading is above 65 °C or board power is above 65 W. Every run here had the die above 70 °C, so it held the lowest
-operating point (600 MHz at 0.52 V) even at 65 W. From a cool die it lifts the same kernel to 800 MHz within a second
-(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#the-speed-effect-appears-on-a-cool-die">the Horace
+<li><b>The clock stayed at 600 MHz because the die was hot.</b> On aifoundry2 the governor steps down whenever the
+whole-degree die reading is above 65 °C or board power is above 65 W. Every run in this session had the die above 70 °C,
+so it held the lowest operating point (600 MHz at 0.52 V) even at 65 W. From a cool die it lifts a matmul to 800 MHz
+within about a second (seven cool-start runs on one morning, a demonstration:
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#the-speed-effect-appears-on-a-cool-die">the Horace
 experiment, §6</a>; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">the DVFS report</a> reads the
-governor and classifies every clock change).</li>
+governor and classifies every clock change). The second card, aifoundry3, never leaves 600 MHz: its firmware reports a
+power limit of 0 W, so its governor only ever steps down.</li>
 </ul>
 
 <h2 id="the-per-shire-voltage-map">3. The per-shire voltage map</h2>
@@ -147,8 +160,9 @@ each rail and the hardware's low/high capture. <code>ettelem loglevel debug</cod
 them; the level is restored afterwards. This is the finest spatial view of the power system the card gives: below is one
 pass over all 34 minion shires at idle, for each rail its current reading and the lowest and highest the monitor captured.
 The 32 compute shires sit where marty1885's logical shire map
-(<a href="https://github.com/marty1885/etTopoScan">etTopoScan</a>) puts them on the mesh, as in
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">the on-chip communication report</a>. The four
+(<a href="https://github.com/marty1885/etTopoScan">etTopoScan</a>) puts them on the mesh, the layout
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">the on-chip communication report</a> found
+on aifoundry2 by latency. The four
 dashed cells hold the master, spare, I/O and PCIe shires in an order not measured here (labelled as the spatial brief
 infers them), so shires 32 (the master) and 33 (the spare) are drawn below the grid.</p>
 <div class="ck-controls"><div id="vmap-rail"></div><div id="vmap-field"></div></div>
@@ -158,9 +172,10 @@ infers them), so shires 32 (the master) and 33 (the spare) are drawn below the g
 <p class="small">Current values span 517–521 mV across the die; the lowest captured minimum is 513 mV (shires 0–2 and 18).
 The current readings differ by at most 4 mV, with no gradient across the grid (a plane fitted to them explains
 <span id="vmap-r2"></span> of the spread, no more than chance would). Idle currents of about
-<span id="vmap-shire-w"></span> W per shire are far too small to cause that, so they are most likely each monitor's own
-offset: a baseline to subtract from a map taken under load (the hub's
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">rung 5</a>). The readings repeat:
+<span id="vmap-shire-w"></span> W per shire look too small to cause that, so each monitor may carry its own offset, a
+baseline to subtract from a map taken under load (the hub's
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">rung 5</a>). That is a hypothesis
+from one idle capture: maps taken minutes apart, a map under load and a map from aifoundry3 would test it. The readings repeat:
 <span id="vmap-repeat"></span> The lows are not idle values. They hold the deepest droop since the last stats reset, a
 window that included loads that evening, so they catch droops that the 133 ms polling misses. Per-shire
 <i>temperature</i> is sampled by the same controllers but never logged; that needs firmware
@@ -201,7 +216,7 @@ the committed <code>per-shire-voltage-idle.json</code> from it byte for byte) an
 of the <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/03-experiments.md">experiment
 register</a>, and the voltage map session E6. Every sensor and management command, with firmware line references:
 <code>docs/research/power-telemetry.md</code>.</p>
-<p class="small"><b>Firmware.</b> The service-processor code this page describes (the 133 ms pass, what each management
+<p class="small"><b>Firmware.</b> The service-processor code this page describes (the pass loop, what each management
 command returns, the governor) was read at et-platform <code>353f20e</code>. The cards' own trace strings match an older
 build, from before et-platform commit <code>60b40c10f</code> (24 September 2024), which rewrote the governor, so the
 governor details may differ on the card (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">the
@@ -213,7 +228,13 @@ first said the governor never acts). 24 September: the rail averaging described 
 to the hub's fuller versions (Reproduce is now §4); the summary rebuilt by a committed reducer and the map by a committed
 parser, from the recovered raw records; the rail filter's step figures replaced by the measured ones; how much of the matmul's rise is leakage, the idle remainder's temperature and the droop's DRAM caveat
 stated; three interactive charts added; the busy drift compared with the second card's, and the DDR reading under the
-matmul set against its temperature.</p>
+matmul set against its temperature. 25 September (version 3), after a check of every claim against both cards
+(<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">the
+record</a>): the byline names the card and sessions; the refresh period given per card (156 ms on aifoundry2, 263 ms on
+aifoundry3 under <code>ettelem</code>) instead of 133 ms; the rail filter per card; the idle law led by its slope, with
+the leakage split as a range; the cool-die clock result labelled a demonstration; where a result holds on both cards,
+or differs, said so; and the clause that busy power climbs faster per degree than idle removed, since it is within the
+noise.</p>
 
 <h2>Related reports</h2>
 <ul>

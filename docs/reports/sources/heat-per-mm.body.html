@@ -37,7 +37,7 @@ the data; board power, which also carries the regulator's loss, says <b id="l-un
 share links, the same bit costs <b id="l-load"></b>: <b id="l-cont"></b>.</p>
 <p class="lede"><b>What costs energy is surprising</b>: not only
 bits that differ between consecutive flits, but the <em>ones</em> carried. A stream of all ones, which never changes from
-one flit to the next, costs as much per hop as random data (<span id="l-ones"></span> more), though at one hop it costs
+one flit to the next, costs as much per hop as random data (<span id="l-ones"></span>), though at one hop it costs
 <span id="l-ones1"></span> less in all.</p>
 <p class="lede">Dally states no voltage. Scaled to 0.9 V (the voltage of Keckler 2011's 40 nm wire figure, his
 likeliest source; <a href="#question">§1</a>), the mesh rail's
@@ -87,8 +87,9 @@ either direction is about <b>3.72 mm</b> (<span id="l-hoprange"></span> dependin
 shire grid spans 86% of the die's width; the rest is the memory shires and their DRAM PHYs down each side. A pair of
 shires <i>d</i> hops apart on the logical map (<a href="https://github.com/marty1885/etTopoScan">marty1885</a>'s shire
 coordinates, which the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication</a>
-report confirmed from latency) crosses <i>d</i> links each way: round-trip latency is linear in Manhattan distance, to
-within 1.1 cycles, over all 496 pairs.
+report confirmed from latency on aifoundry2, in one run) crosses <i>d</i> links each way: on that card round-trip latency
+is linear in Manhattan distance, to within 1.1 cycles, over all 496 pairs. Latency was not measured on aifoundry3; there
+the map rests on the energies below, which follow its hop count as they do on aifoundry2.
 "Per mm" below means per mm of mesh travel, one router and one link per 3.72 mm — per mm of displacement; the metal
 actually routed can only be longer, so per mm of wire the cost would be lower.</p>
 
@@ -105,18 +106,21 @@ in a bit with probability 2<i>P</i>(1−<i>P</i>): a difference rate between fli
 the wires), blocks of N bytes alternately all-zero and all-one, and one random 64 B line frozen everywhere (half ones, no
 two flits differ). The second run makes every line on the chip unique and <i>P</i> and 1−<i>P</i> exact bitwise
 complements, and adds reader–target pairs chosen so that no two flows share a link.</li>
-<li><b>Two meters.</b> Board power (10 mW steps, a new reading about every 133 ms on aifoundry2 and every 250 ms on
-aifoundry3) and the mesh rail, which feeds the routers and links at 0.485 V and 400 MHz. For board power each 3 s burst is measured against
+<li><b>Two meters.</b> Board power (10 mW steps; under the 10 Hz sampler used here its value changes about every 150 ms
+on aifoundry2 and every 255 ms on aifoundry3, as the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">observability
+report</a> measured) and the mesh rail, which feeds the routers and links at 0.485 V and 400 MHz. For board power each 3 s burst is measured against
 idle on both sides and corrected for the extra leakage of a burst that ran warmer. The mesh rail is read over the burst's
 last 0.6 s against the idle before it, without a leakage correction (about 2%, roughly cancelling a 2.5% under-correction
 of the meter's 1 s running average). A burst is dropped if the clock left 600 MHz or the meter itself was starved
 (<a href="#limits">§10</a>).</li>
 <li><b>Replication.</b> Every configuration three times in shuffled order on each of two cards (aifoundry2, aifoundry3):
 the bars are the range over those six passes. First run: 82 configurations, 492 bursts; second run: 44 configurations,
-264 bursts; <span id="l-drop"></span> dropped.</li>
+264 bursts; <span id="l-drop"></span> dropped. A figure given without a card is resolved on both cards, with at
+least three passes on each; where only one card resolves it, or the cards differ, the text names the card, and what
+these runs leave open is listed in <a href="#limits">§10</a>.</li>
 </ul>
 
-<h2 id="distance">4. Energy grows nearly linearly with distance</h2>
+<h2 id="distance">4. Energy grows with every hop</h2>
 <div class="chart-title">Energy per payload byte against hop distance, by density of ones</div>
 <div class="hv-controls"><div id="distbtn"></div></div>
 <div id="dist-leg"></div>
@@ -211,9 +215,10 @@ other flit; neither costs more.</p>
 <li><b>Router against wire.</b> Every hop is one router plus one pitch of link, and the x and y pitches are equal to
 within 1% on the die plot, so the experiment cannot split a hop's energy between the router's flops and crossbar and the
 wire itself. <span id="axistext"></span></li>
-<li><b>Board against rail.</b> Board power is 12 V input power: it includes the regulator's loss (about 18–20% on the
-minion rail by the regression in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">observability report, §4.2</a>,
-as far as the rails' own meters can be trusted; more on the mesh) and anything else that moves with the traffic. The
+<li><b>Board against rail.</b> Board power is 12 V input power: it includes the regulator's loss and anything else that
+moves with the traffic. The regression in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">observability report (§4.2)</a>
+finds 20% of what the minion rail delivers lost between the 12 V input and the core on aifoundry2 and 18% on aifoundry3,
+consistent with a regulator's loss, as far as the rails' own meters can be trusted. The
 mesh rail is the die's own supply but its meter's gain has not been checked independently. The truth is between the
 two. <span id="senstext"></span></li>
 <li><b>Fixed per-hop cost.</b> The part that does not depend on the data (clocking, headers, the request travelling the
@@ -225,6 +230,7 @@ of ones held in the mesh would still look per-hop.</li>
 crash that stopped it between the two runs, and a stray write the card never reported (no measurement here comes from
 those launches) are in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">observability
 report (§4.1; the stray write in §3)</a>.</li>
+<li><b>Not resolved by these runs.</b> <span id="opentext"></span></li>
 <li><b>Voltage scaling</b> assumes full-swing CMOS at constant capacitance; whether the links are low-swing is not known.
 Gate capacitance is somewhat lower near threshold, so constant-C scaling slightly understates the 0.9 V figure for
 full-swing links; low-swing links would make it overstate.</li>
@@ -257,7 +263,12 @@ reordered: Against the rule of thumb is now §7, What it means in practice §8, 
 this cannot tell", and the other workloads that starve the meter, the stopped meter and the stray write moved to the
 observability report (§4.1 and §3). Charts: a
 voltage explorer replaces the comparison chart (§7), and a bit-pattern plane (§5) and a link-sharing map (§6) are
-new.</p>
+new. 25 September (version 3): every claim checked against the passes of both cards (record:
+<code>docs/reports/data/2026-09-25-claims-v3/</code>). Differences the passes do not resolve are no longer stated as
+findings, and what stays open is listed in §10: board power's split of the free-link cost, whether link sharing causes
+the four-hop step, and the 256 B pattern on board power. The 16–128 B blocks' shortfall is dropped (it came from
+comparing different hops); the all-ones excess and the 256 B pattern are given per card; the regulator's loss is no
+longer said to grow with load; the latency map is marked as aifoundry2's.</p>
 
 <h2 id="related">12. Related reports</h2>
 <ul>

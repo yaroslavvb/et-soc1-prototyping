@@ -11,7 +11,7 @@ Every entry is **mean** [lo–hi]: the mean over every pass on every card, and t
 | The second hart's share | 14.4 pJ per extra instruction | | 1.32 | 1.29 mW | |
 | Ablation of 21 Sep: four adds and a branch per iteration, hart 0, 80 °C, 2 runs | 8.1 pJ | a2 only, run-to-run sd 0.02 W | 1.46 | 1.43 mW | 1.80 × 10¹¹/s |
 | 1,024 minions stalled on one contended atomic (the hot line, E23; each waits about 10,000 cycles for its turn) | — | a2: 1.25 ± 0.06 · a3: 1.11 ± 0.06 W; both **1.19** [1.01–1.41] | 1.25 | 1.22 mW | — |
-| For scale: every minion running a random-data fp32 matmul (the activity term, E15; 25.6 mW per minion with 256 or 512 active, 26.2 with 768) | — | a2 only | 27.63 | 27.0 mW | tensor state machines plus everything else that wakes |
+| For scale: every minion running a random-data fp32 matmul (the activity term, E15; 25.6 mW per minion with 256 or 512 active, 26.2 with 768) | — | a2 only, two runs per point | 27.63 | 27.0 mW | tensor state machines plus everything else that wakes |
 
 **The addi loop is not the floor.** It increments seven registers, so its operands change on every instruction. With both harts a `nop` costs 5.3 pJ [4.7–5.9] and a `fence` 4.5 [4.3–4.8] per instruction ([3.1](03a-every-instruction.md)), so the awake core is about 4.5–5.3 pJ per issue slot. The ablation's loop issued at half the one-hart `addi` loop's rate, on hart 0 only; it is the loop behind the figures in [Why is the ET-SoC-1 low power?](https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power), 1.4 mW per minion and 8 pJ per instruction.
 

@@ -19,6 +19,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gen_ops as g  # noqa: E402
 
 LEVELS = ("l1", "l2", "l3", "dram")
+CARDS = ("aifoundry2", "aifoundry3")
+# two-sided 99% points of Student's t, by degrees of freedom (rounded down)
+T995 = {1: 63.657, 2: 9.925, 3: 5.841, 4: 4.604, 5: 4.032, 6: 3.707, 7: 3.499, 8: 3.355, 9: 3.250, 10: 3.169}
+
+
+def cards_differ(a, b):
+    """Welch test of two cards' pass means ({mean, se, n}): True if the 99% interval of the difference excludes 0."""
+    va, vb = a["se"] ** 2, b["se"] ** 2
+    df = (va + vb) ** 2 / (va ** 2 / (a["n"] - 1) + vb ** 2 / (b["n"] - 1))
+    return abs(a["mean"] - b["mean"]) / (va + vb) ** 0.5 > T995[max(1, min(10, int(df)))]
 
 
 def rnd(x):
@@ -58,6 +68,10 @@ def main():
     lv = man["reruns"]["levels_pj_per_byte"]
     cat = man["catalogue"]["combined"]  # 1 KB tensor loads from DRAM with the data known (catalogue keys "op/level/data")
     manual = {k: {x: lv[k][x] for x in ("mean", "lo", "hi", "n")} for k in LEVELS}
+    for k in LEVELS:  # each card's mean, and whether the cards differ (a 99% Welch test on the two cards' passes)
+        pc = lv[k]["per_card"]
+        manual[k]["per_card"] = {c: pc[c]["mean"] for c in CARDS}
+        manual[k]["cards_differ"] = cards_differ(*(pc[c] for c in CARDS))
     manual["dram_zeros"], manual["dram_random"] = cat["tload/dram/zeros"]["mean"], cat["tload/dram/random"]["mean"]
     data = {
         "msPos": {int(k): v for k, v in dec["ms_pos"].items()},
@@ -108,8 +122,15 @@ def main():
     T["bits_row"] = num(st.median(b[str(k)]["b_minus_b0_med"] for k in range(18, 30)))
     T["bits_col"] = num(-st.median(b[str(k)]["b_minus_b0_med"] for k in range(13, 18)))
     lm = s["ladder_by_ms"]
-    far_ms = [lm["nodelay:3"][str(m)]["resid_med"] for m in (3, 5, 7)]
-    T["nd_slow"] = span(min(far_ms), max(far_ms))
+    # fence, no wait: how often each memory shire's load still found its row open, and how slow the others were
+    nd = lm["nodelay:3"]
+    share = {m: nd[str(m)]["fast"] / nd[str(m)]["n"] for m in range(8)}
+    common, rare = (0, 1, 2, 4), (3, 5, 6, 7)  # the grouping the prose names; stop if the data no longer split so
+    if min(share[m] for m in common) <= max(share[m] for m in rare):
+        raise SystemExit(f"open-row shares no longer split into {common} and {rare}: {share}")
+    for key, grp in (("nd_open_common", common), ("nd_open_rare", rare)):
+        T[key] = f"{sum(nd[str(m)]['fast'] for m in grp)} of {sum(nd[str(m)]['n'] for m in grp)}"
+    T["nd_slow_med"] = num(s["ladder_slow"]["nodelay:3"]["resid_med"])
     T["nf_m0"] = num(lm["nofence:3"]["0"]["resid_med"])
     T["nf_far"] = span(lm["nofence:3"]["3"]["resid_med"], lm["nofence:3"]["7"]["resid_med"])
     ml = dec["model_err_loads"]
@@ -127,6 +148,20 @@ def main():
     T["man_dram_line_nj"] = num(md["mean"] * 64 / 1000, 1)
     T["man_zeros"], T["man_random"] = num(manual["dram_zeros"]), num(manual["dram_random"])
     T["hop_pjb"] = num(data["hopPj"] / 64, 1)
+    # the host log's total over the rail trace's, run by run (two runs per pattern)
+    exc = [(r["board_run"] - r["board_base"]) / (r["system_run"] - r["system_base"]) - 1
+           for v in s["power"].values() for r in v["reps"]]
+    T["host_excess"] = span(100 * min(exc), 100 * max(exc)) + "%"
+    T["power_runs"] = num(len(exc))
+    # the energy manual's DRAM tensor load (random data): share of its power over idle on no metered rail, per card
+    off = []
+    for c in CARDS:
+        r = man["catalogue"]["cards"][c]["summary"]["tload/dram/random"]
+        off.append(1 - sum(r["rails_over_w"][k]["mean"] for k in ("minion_w", "sram_w", "noc_w")) / r["over_idle_w"]["mean"])
+    T["man_offrail"] = span(100 * min(off), 100 * max(off)) + "%"
+    T["man_offrail_kpi"] = f"~{5 * rnd(20 * st.mean(off))}%"  # the KPI's round figure, to the nearest 5%
+    T["idle_slope"] = num(man["rest"]["lambda_80_w_per_c"], 2)  # the idle law's slope at 80 C (aifoundry2)
+    T["idle_leak80"] = span(*man["rest"]["profile"]["A_leak_80_w"])  # its leakage at 80 C over the e-foldings that fit
     legs = [12 * (abs(g.MESH[h][0] - p[0]) + abs(g.MESH[h][1] - p[1])) for h in range(32) for p in [dec["ms_pos"][str(h & 7)]]]
     T["ms_leg"] = span(min(legs), max(legs))
     dev = max(abs(v["fast_med"] - v["model"]) for v in dec["mem_by_home"].values())

@@ -5,20 +5,21 @@
 at the temperature the workload holds it at, plus a sum over everything it does of a per-event cost. This
 page is the table of per-event costs, with the two things it needs alongside them: the idle power at a given
 temperature (section 1) and the cost of an awake core (section 2).</p>
-<p class="lede"><b>The card at rest is 12.6 W plus leakage that doubles every 25 °C. An awake minion is 2 mW.
+<p class="lede"><b><span id="restlede">At rest the card draws 35.9 W at 80 °C and 0.65 W more per degree (aifoundry2), 20–29 W of it leakage.</span> An awake minion is 2 mW.
 On zeros an integer add is 6 pJ, a float add 23 and an eight-lane multiply-add 27; on random data 9, 25 and 56.
 A byte from the shire's own scratchpad is 2–8 pJ; from DRAM, 90–140; written back through the L1 to DRAM,
-240–330.</b> A second card reads about 5% lower (median 0.95; 80% of entries 1–9% lower).</p>
-<p class="small">Brackets are the range over every pass on both cards; section 9 says how each bar was made, and
-rows measured once or derived say so.</p>
+240–330.</b> <span id="cardlede">aifoundry3 reads about 5% lower than aifoundry2 (median 0.95; 80% of entries 1–9% lower), each card at its own die temperature, aifoundry3's about 25 °C cooler; whether the difference is the card or the temperature is not yet known.</span></p>
+<p class="small">Brackets are the range over every pass on both cards. A figure with no card named held on both
+cards (three passes or more on each, or the same value on both); where one rests on one card, on fewer runs, or
+differs between the cards, the text says so. Section 9 says how each bar was made.</p>
 
 $$E(\text{workload}) \;=\; \int_0^{t} P_\text{idle}\bigl(T(\tau)\bigr)\,\mathrm{d}\tau \;+\; \sum_i N_i\, e_i$$
 
 <div class="kpis">
-  <div class="card kpi"><div class="lab">Idle at 80 °C, and how much of it leaks</div><div class="val" id="k1"></div><div class="sub">12.6 W fixed, the rest leakage e-folding every 36 °C</div></div>
+  <div class="card kpi"><div class="lab">What one degree adds to the idle card at 80 °C (aifoundry2)</div><div class="val" id="k1"></div><div class="sub" id="k1sub">on 35.9 W, of which 20–29 W is leakage (the data do not pin the split closer)</div></div>
   <div class="card kpi"><div class="lab">One 8-lane multiply-add, random data</div><div class="val" id="k2"></div><div class="sub">against 27 pJ on zeros: the data decides</div></div>
   <div class="card kpi"><div class="lab">DRAM against the shire's own scratchpad</div><div class="val" id="k3"></div><div class="sub">per byte read, random data</div></div>
-  <div class="card kpi"><div class="lab">Second card, 386 catalogue entries</div><div class="val" id="k4"></div><div class="sub" id="k4sub">median ratio aifoundry3 / aifoundry2</div></div>
+  <div class="card kpi"><div class="lab">Second card, 386 catalogue entries</div><div class="val" id="k4"></div><div class="sub" id="k4sub">median ratio aifoundry3 / aifoundry2, each at its own die temperature</div></div>
 </div>
 
 <nav class="card"><b>Contents</b><ol id="toclist"></ol></nav>
@@ -70,7 +71,8 @@ those passes spanned; the per-card column is each card's own mean ± its pass-to
 where kernels run), measured three times in shuffled order on each of two cards, on zeros and on random
 operands. Each dot is one instruction on random data, one row per class; focus or hover a dot for its zeros
 figure, its bar, its issue rate and the second card, or find one by name. Every figure is also in the table
-below the chart, by class. Instructions that trap and so have no energy: <span id="trapped"></span>.</p>
+below the chart, by class. Thirteen instructions trapped in U-mode in a one-off check while the catalogue was
+written, and so have no energy (the card and the log of that check were not kept): <span id="trapped"></span>.</p>
 <div class="chart-title">Every instruction, class by class: energy per instruction on random operands, both harts of 1,024 minions</div>
 <div class="ck-controls" id="allctl"><span id="all-unit"></span><span id="all-card"></span><span id="all-zeros"></span>
 <span class="ck-range"><label for="all-find">find an instruction</label><input id="all-find" type="search" list="all-names" size="12" autocomplete="off" spellcheck="false"><datalist id="all-names"></datalist></span></div>
@@ -84,11 +86,11 @@ below the chart, by class. Instructions that trap and so have no energy: <span i
 <div class="table-wrap wide"><table id="tensor"></table></div>
 <p class="small" id="tensornote"></p>
 <p>The tensor unit is the one place on the chip resolved below the instruction, by simulating its RTL on the
-operands the card ran (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#from-flips-to-watts">The
-Horace experiment</a>): four kinds of event, four fitted energies —
+operands aifoundry2 ran (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#from-flips-to-watts">The
+Horace experiment</a>): four kinds of event, four energies fitted on that card —
 <span id="flips"></span> — and 1.8 mW per minion of state machines whatever the data. A random-data tile priced
-this way comes to 27.2 W on 1,024 minions; the card measures 27.6. Fourteen structured matrices were priced
-before they ran, to 0.9 W rms.</p>
+this way comes to 27.2 W on 1,024 minions; aifoundry2 measures 27.6. Fourteen structured matrices were priced
+before they ran on the same card, to 0.9 W rms (one session, two runs each).</p>
 
 <h2 id="bytes-through-the-memory-hierarchy">4. Bytes through the memory hierarchy</h2>
 <p>Where should a workload's bytes live? The map puts every path of sections 4 and 5 at the energy per byte it
@@ -135,7 +137,8 @@ costs and the aggregate bandwidth the card reached on it; the diagonals are cons
 <p>Register file to register file over the tensor network (TensorSend and TensorRecv), hart 0 of every minion
 sending and receiving around rings. Shire IDs do not follow the mesh, so each ring between shires is labelled by
 how many IDs apart its shires are and by how many mesh hops that is on average, on the shire map of
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a>.</p>
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> (checked
+against latency on aifoundry2).</p>
 <style>@media (max-width: 480px) { #comm .what { display: none; } }</style>
 <div class="table-wrap wide"><table id="comm"></table></div>
 <div class="small" id="commnote"></div>
@@ -188,49 +191,54 @@ caption.stack-cap { display: none; }
 <div id="cards-legend"></div>
 <div class="chart" id="cards"></div>
 <p class="small" id="cardscap"></p>
-<div class="small" id="cards-extremes"></div>
 
 <h2 id="method-and-what-the-manual-cannot-tell-you">9. Method, and what the manual cannot tell you</h2>
 <ul>
-<li>Board power is the PMIC's reading, 10 mW resolution, refreshed every 133 ms, sampled at 10 Hz. Each
+<li>Board power is the PMIC's reading, 10 mW resolution, sampled at 10 Hz; under that sampling it takes a new value
+about every 150 ms on aifoundry2 (the service processor's own pass is 133 ms with no sampler running) and about every
+255 ms on aifoundry3. Each
 measurement is a burst of back-to-back launches with 4.5 s of idle either side (the catalogue; the reruns of the
 rings and the levels leave 10 s); its idle is the mean of the two bracketing stretches, and the extra leakage of a
 burst that runs slightly warmer than its brackets is taken out with the section 1 slope — a correction of
 <span id="corr"></span>. Rates come from the device's cycle counter, not the wall clock. On aifoundry2 some DRAM-read
-bursts slowed the sampler itself, to a median of up to 206 ms per sample against the usual 22 ms; the catalogue keeps
-them (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">Limits of observability, §4.1</a>).</li>
+bursts slowed the sampler itself, to a median of up to 206 ms per sample against the usual 22 ms (aifoundry3's stayed
+at 22 ms); the catalogue keeps them (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">Limits of observability, §4.1</a>).</li>
 <li>"Per instruction" includes the awake core that issued it (4.5–5.3 pJ per slot with both harts, what a fence
 or a nop costs). Only the tensor unit is resolved below the instruction, and a "flip" there is an event in a
 simulation of the design, not a transistor.</li>
 <li>Everything is at 600 MHz; the minion rail reads 0.518 V on aifoundry2 and 0.523 V on aifoundry3. Thirteen
-instructions trap in U-mode (listed in 3.1), among them every float and vector divide and square root.</li>
-<li>The unsensed 15 W — the largest single component of idle — cannot be split with any instrument here. What
+instructions trapped in U-mode in a one-off check while the catalogue was written (listed in 3.1; the card and the
+log were not kept), among them every float and vector divide and square root.</li>
+<li><span id="unsensed">The unsensed remainder, about 15 W on aifoundry2 and 13 W on aifoundry3, the largest single component of idle on both cards,</span> cannot be split with any instrument here. What
 could be done about that, and every other limit of the card's instruments, is the subject of <a
 href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">the limits of observability</a>.</li>
 <li><b>Confidence bars.</b> The catalogue (sections 2, 3, 4.1, 4.3, 4.4, 8) is three passes in shuffled order on
 each of two cards, n = 6; the relay and the hot line (5, 6) are their 22 September measurement plus three passes
-on aifoundry2 with the die held above 76 °C and three or four on aifoundry3; the rings and the levels (4.2, 5)
+on aifoundry2 preheated past 76 °C (the bursts ran at 69–73 °C, all at 600 MHz) and three or four on aifoundry3; the rings and the levels (4.2, 5)
 are three new passes on each card; the tensor rows (3.2) are the ablation's two runs and the card transfer's
-runs on both cards. The range is used rather than a standard error because with n = 6 the bar is dominated by
+runs on both cards. The range is used rather than a standard error because with n = 6 about half of the bar is
 the systematic difference between the two cards, about 5%, which a standard error of the pooled sample would
-understate; pass-to-pass scatter on one card is 1–2% for most entries. Two things the bars do not hold: a change
-of operating point (bursts in which the governor lifted the clock off 600 MHz are excluded, as the first
-cool-card attempt at the reruns was in its entirety), and the idle law's own ±0.2 W, which every "over idle"
-figure inherits and which is why the smallest signal, the hot line (about 1.2 W over idle), carries the widest bar,
-±17%; the awake core (±5–7%) and the DRAM relay (±5.5%) are about as wide as a typical catalogue entry (the median instruction's range is ±5.9%, section 3.1).</li>
+understate; pass-to-pass scatter on one card is 1–2% for most entries. The bars leave out a change of operating
+point: bursts in which the governor lifted the clock off 600 MHz, which happens only on aifoundry2, are excluded,
+as the first cool-card attempt at the reruns on aifoundry2 was in its entirety. They do carry the drift of the idle
+between the two stretches that bracket each burst, which every "over idle" figure inherits; the idle law enters
+only through the leakage correction. The smallest signal, the hot line (about 1.2 W over idle), carries one of the
+widest bars, ±17%, mostly because its first session (aifoundry2, 22 September) read 1.4 W against 1.0–1.2 W in
+every pass since, and because on so small a signal the leakage correction, a few tenths of a watt, moves each pass
+by 10–25%; the awake core (±5–7%) and the DRAM relay (±5.5%) are about as wide as a typical catalogue entry (the median instruction's range is ±5.9%, section 3.1).</li>
 </ul>
 <p class="small">Every table is rebuilt from the committed data by the commands in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/energy-manual#regenerating">docs/energy-manual/README.md</a>; the measurement runs are docs/findings/03-experiments.md, E26–E30.</p>
-<p class="small">Versions: three editions on 23 September (the first; every instruction on two cards and section 4.3; confidence bars and the reruns); corrected 24 September after a review; revised 25 September after a second review (DRAM rows, the stalled minion and the chip barrier, the unmetered attribution moved to the hub, and the maps and the calculator of sections 3.1, 4 and 7.1).</p>
+<p class="small">Versions: three editions on 23 September (the first; every instruction on two cards and section 4.3; confidence bars and the reruns); corrected 24 September after a review; revised 25 September after a second review (DRAM rows, the stalled minion and the chip barrier, the unmetered attribution moved to the hub, and the maps and the calculator of sections 3.1, 4 and 7.1). 25 September (version 3): every claim checked for proof on both cards; the idle law is led by its measured slope, with its split into fixed and leakage given as a range; figures that rest on one card, on fewer than three runs, or that differ between the cards now say so; rankings and differences within the noise removed (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3/</a>).</p>
 
 <h2 id="related-reports">10. Related reports</h2>
 <p>The manual is the table of costs; these are the reports that measured its parts, by the section they feed,
 and the hub that says how far the instruments can be trusted.</p>
 <ul>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a> — the hub: what each instrument can and cannot see, the unmetered remainder attributed, and the glossary.</li>
-<li>Section 1: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a> — the governor's states and thresholds, the three operating points, the rail split of idle, and why a warm card sits at 600 MHz; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature">Power and temperature</a> — the first power and thermal measurements: what the PMIC and the service processor report, the 133 ms cadence, and the 34-shire voltage map.</li>
+<li>Section 1: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a> — aifoundry2's governor, its states and thresholds and its three operating points (aifoundry3 never leaves 600 MHz), the rail split of idle, and why a warm card sits at 600 MHz; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature">Power and temperature</a> — the first power and thermal measurements: what the PMIC and the service processor report and how often, and the 34-shire voltage map.</li>
 <li>Sections 2 and 3.2: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">The Horace experiment</a> — the same matmul on fourteen operand patterns launched from the same die temperature, the tensor unit's energy resolved to four kinds of RTL event, the thermal model, and structured matrices priced before they ran; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power">Why is the ET-SoC-1 low power?</a> — an ablation of the dense matmul, term by term of C·V²·f plus leakage, against an A100; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">Matmul efficiency</a> and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">Sparse compute</a> — the 18 September tensor-unit rates and the first zero-skip power measurements, which section 3.2 re-measures under temperature control.</li>
 <li>Section 4: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> — section 4.3's wires measured on their own: the bits on the links chosen, a hop's energy split into bits that differ between flits, ones carried and a fixed part, free against shared links, and the result per bit·mm set against Dally's ~100 fJ/b-mm; use its figures for the mesh; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy">Anatomy of a memory access</a> and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — the 18–19 September reports that mapped the L3 homes and the DRAM banks and first measured the levels that section 4.2 now carries with bars; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a> — the reuse each memory level demands, with energy balance points built from sections 3.2, 4.2 and 5.</li>
-<li>Section 5: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the 18 September report that checked the shire map against latency and first measured the rings; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a> — the relay of sections 5 and 7.2: a multi-stage computation whose intermediate lives in another shire's scratchpad instead of DRAM, 12× the bandwidth at a twelfth of the energy, and where that stops paying.</li>
+<li>Section 5: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the 18 September report that checked the shire map against latency and first measured the rings; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a> — the relay of sections 5 and 7.2: a multi-stage computation whose intermediate lives in another shire's scratchpad instead of DRAM, 12× the bandwidth at about a twelfth of the energy (11.3× less on aifoundry2, 13.5× on aifoundry3), and where that stops paying.</li>
 <li>Section 6: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a> — the contended atomic: fair to its requesters, fatal to the host shire's own loads, with the errata that describe it.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature: a brief</a> — where the 35 temperature sensors sit and why the card reports one number.</li>
 <li><a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/findings"><code>docs/findings/</code></a> in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">yaroslavvb/et-soc1-prototyping</a> — every claim traced to its experiment and its file; <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/energy-manual"><code>docs/energy-manual/</code></a> is this manual as markdown.</li>

@@ -543,7 +543,7 @@ window.CK = (function () {
 <main>
 
 <h1>Spatial temperature on the ET-SoC-1: 35 sensors on the die, one average at the host</h1>
-<div class="byline">Technical brief · 22 September 2026 · firmware source et-platform 353f20e, open RTL core-et b38a1a3 · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></div>
+<div class="byline">Technical brief · 22 September 2026 · firmware source et-platform 353f20e, open RTL core-et b38a1a3 · a measured result holds on both lab cards unless the text names one · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></div>
 
 <div class="lede">
 Can the ET-SoC-1 measure how heat moves across its 1,088-core die?
@@ -598,7 +598,7 @@ Can the ET-SoC-1 measure how heat moves across its 1,088-core die?
 </ul>
 
 <h3 id="mesh">The 6×6 shire mesh, as the latency measurements place it</h3>
-<p>The 32 compute shires are placed on the 6×6 grid by TensorSend latency (<a href="https://github.com/marty1885/etTopoScan">marty1885’s map</a>, checked in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a>). Each cell in this grid is one tile, about 3.7 mm on a side: the tile pitch measured on Esperanto’s die plot and scaled to the 570 mm² die (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die">Heat per millimetre §2</a>).</p>
+<p>The 32 compute shires are placed on the 6×6 grid by TensorSend latency (<a href="https://github.com/marty1885/etTopoScan">marty1885’s map</a>, checked on aifoundry2 in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a>). Each cell in this grid is one tile, about 3.7 mm on a side: the tile pitch measured on Esperanto’s die plot and scaled to the 570 mm² die (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die">Heat per millimetre §2</a>).</p>
 
 <div class="ck-controls" id="grid-view"></div>
 <div id="grid-leg"></div>
@@ -690,13 +690,13 @@ int get_module_current_temperature(struct current_temperature_t *temperature) {
     temperature-&gt;pmic_sys = pmic_temperature;
 }</code></pre>
 
-<p>The field named <code>pmic_sys</code> is not a board sensor either: the firmware fills it with the same 34-shire average (<span id="pmic-agree"></span>), and the SP does not forward the PMIC’s own regulator temperatures. The service processor’s stats packet has a system-temperature slot meant for the PMIC, but the firmware writes 0 into it (a TODO in <code>thermal_pwr_mgmt.c</code>), and it read 0 in all <span id="sys-zero"></span> samples.</p>
+<p>The field named <code>pmic_sys</code> is not a board sensor either: the firmware fills it with the same 34-shire average (<span id="pmic-agree"></span>), and the SP does not forward the PMIC’s own regulator temperatures. The service processor’s stats packet has a system-temperature slot meant for the PMIC, but the firmware writes 0 into it (a TODO in <code>thermal_pwr_mgmt.c</code>), and it read 0 in all <span id="sys-zero"></span> samples of 20 September and in every committed sample from both cards.</p>
 
 <p>So the host never sees the current spread between shires: the low and high are peak-hold values. The firmware resets them together with the service processor’s own statistics, so both cover the same window. In aifoundry2’s telemetry of 20 September the low read <span id="sp-low"></span> °C in all <span id="sp-n"></span> samples, 1 °C under the service processor’s minimum of the average (<span id="sp-spmin"></span> °C), while the average ran from <span id="sp-mean-range"></span> °C. The high only ratchets, but it leaks one number. Every rise followed a new record of the average and settled exactly <span id="sp-excess"></span> °C above the service processor’s maximum of the average (written below as maximum/high): <span id="sp-first"></span> when the load step began, then <span id="sp-step-pairs"></span> during it (each <span id="sp-step-lag"></span> after the record), and <span id="sp-horace-pairs"></span> in the uncontrolled Horace session (the <span id="sp-slow-high"></span> came <span id="sp-slow-lag"></span> s after its record). So at those peaks the hottest shire’s sensor read about <span id="sp-excess2"></span> °C above the 34-shire mean, in the firmware’s whole degrees. The high is a single hardware sample, so sensor noise can add to it. Which shire it was, the host cannot tell.</p>
 
 <p id="both-cards"></p>
 
-<div class="chart-title">What the host’s temperature fields did on 20 September</div>
+<div class="chart-title">What the host’s temperature fields did on aifoundry2 on 20 September</div>
 <div class="ck-controls"><div id="ht-session"></div></div>
 <div class="ck-controls"><div id="ht-time"></div></div>
 <div id="ht-out"></div>
@@ -707,7 +707,7 @@ int get_module_current_temperature(struct current_temperature_t *temperature) {
 <div class="card">
   <div style="font-weight:700;margin-bottom:6px">Why voltage reaches the host shire by shire, and temperature does not</div>
   <p class="small" style="margin:0">
-  The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#the-per-shire-voltage-map">Power and temperature</a> report (20 Sep, §3 The per-shire voltage map) reads per-shire voltages this way: with the SP’s log level at DEBUG, the firmware prints one line per shire per pass (<code>MS %2d Voltage [mV]: VDD_MNN: %d [%d, %d] …</code>). At idle the minion rail read 517–521 mV across the 34 shires, in whole millivolts; the monitors’ low/high captures span 513–522 mV. That line is printed because it sits inside the <code>GET_MINION_VM</code> macro, which the per-pass power update calls. For temperature the firmware already has the matching DEBUG line (<code>MS %2d Temp [C]: %d [%d, %d]</code>, in <code>pvt_print_min_shire_temperature_sampled_values()</code>), but it is reached only through <code>pvt_print_all()</code>, which nothing calls, so the host is left with the chip-wide aggregate.
+  The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#the-per-shire-voltage-map">Power and temperature</a> report (20 Sep, §3 The per-shire voltage map) reads per-shire voltages this way: with the SP’s log level at DEBUG, the firmware prints one line per shire per pass (<code>MS %2d Voltage [mV]: VDD_MNN: %d [%d, %d] …</code>). In one idle capture on aifoundry2 the minion rail read 517–521 mV across the 34 shires, in whole millivolts; the monitors’ low/high captures span 513–522 mV. That line is printed because it sits inside the <code>GET_MINION_VM</code> macro, which the per-pass power update calls. For temperature the firmware already has the matching DEBUG line (<code>MS %2d Temp [C]: %d [%d, %d]</code>, in <code>pvt_print_min_shire_temperature_sampled_values()</code>), but it is reached only through <code>pvt_print_all()</code>, which nothing calls, so the host is left with the chip-wide aggregate.
   </p>
 </div>
 
@@ -752,7 +752,7 @@ int get_module_current_temperature(struct current_temperature_t *temperature) {
     <tr>
       <td><strong>5. 2D heat-diffusion reconstruction</strong></td>
       <td><span class="chip action">Not yet fitted</span></td>
-      <td>The fitted thermal model is lumped: six RC stages, 1.47 °C/W in total, one card in one chassis, driven by the chip-wide average. A 2D model (∂<i>T</i>/∂<i>t</i> = α∇²<i>T</i> + <i>P</i>(<i>x</i>,&nbsp;<i>y</i>)/<i>C</i> − (<i>T</i> − <i>T</i><sub>amb</sub>)/τ) needs lateral conductances and per-cell capacitances that only per-shire readings could fit.</td>
+      <td>The fitted thermal model is lumped: six RC stages, 1.47 °C/W in total, fitted to one day’s runs on one card (aifoundry2) in its chassis, driven by the chip-wide average. A 2D model (∂<i>T</i>/∂<i>t</i> = α∇²<i>T</i> + <i>P</i>(<i>x</i>,&nbsp;<i>y</i>)/<i>C</i> − (<i>T</i> − <i>T</i><sub>amb</sub>)/τ) needs lateral conductances and per-cell capacitances that only per-shire readings could fit.</td>
     </tr>
   </tbody>
 </table>
@@ -782,7 +782,7 @@ int get_module_current_temperature(struct current_temperature_t *temperature) {
 
 <ol>
   <li><strong>Sub-degree de-quantization</strong>: the moments when the whole-degree average steps are sharp at 10 Hz, and fitting the heating power that reproduces them recovers the temperature below a degree (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#strict-temperature-control">the Horace experiment, §2</a>).</li>
-  <li><strong>Flip-to-heat modelling from the RTL</strong>: counting the toggles the operands cause in the open RTL of the multiply-add datapath predicts the board power, and from it the die temperature (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">the Horace experiment, §8</a>).</li>
+  <li><strong>Flip-to-heat modelling from the RTL</strong>: counting the toggles the operands cause in the open RTL of the multiply-add datapath predicts the board power, and from it the die temperature, with models fitted on aifoundry2 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">the Horace experiment, §8</a>).</li>
 </ol>
 <p>Both sharpen the chip-wide average; neither says where on the die the heat is.</p>
 
@@ -794,7 +794,7 @@ int get_module_current_temperature(struct current_temperature_t *temperature) {
   <li>Mesh map: <code>workloads/nocbench/analyze.py</code> (marty1885’s layout and the four empty cells).</li>
   <li>Telemetry: the three <code>*-telemetry.jsonl</code> files in <code>docs/reports/data/2026-09-20-power-aifoundry2/</code> (<code>thermal</code>, <code>horace</code> and <code>horace2</code>: 3,681 samples, 20 Sep) and <code>per-shire-voltage-idle.json</code> in the same directory. The chart’s change points, the check on both cards (every committed ettelem log, on either card, that records these fields) and the grid’s voltages are the two constants that <code>tools/ettelem/host_temp_fields.py</code> prints (<code>--check</code> confirms this page embeds them unchanged).</li>
   <li>Thermal model: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/11-thermal-model.md"><code>docs/findings/11-thermal-model.md</code></a>.</li>
-  <li>Versions: first published 22 September 2026; corrected 24 September 2026 (the tile size, where the firmware truncates to whole degrees, the <code>pmic_sys</code> field, the peak-hold minimum and maximum, the existing temperature print, the firmware-signing status, the labels of the four non-compute cells, and the figures in §4); revised 25 September 2026 (what the peak-hold high reveals, checked on both cards, with a chart of the host’s temperature fields; the stats packet’s system-temperature slot; the sensor grid’s voltage view; the register details moved to Implementation notes; §4 cut to the two reconstruction methods).</li>
+  <li>Versions: first published 22 September 2026; corrected 24 September 2026 (the tile size, where the firmware truncates to whole degrees, the <code>pmic_sys</code> field, the peak-hold minimum and maximum, the existing temperature print, the firmware-signing status, the labels of the four non-compute cells, and the figures in §4); revised 25 September 2026 (what the peak-hold high reveals, checked on both cards, with a chart of the host’s temperature fields; the stats packet’s system-temperature slot; the sensor grid’s voltage view; the register details moved to Implementation notes; §4 cut to the two reconstruction methods); 25 September 2026 (version 3), after a check of every claim against both cards (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>): the byline says a measured result holds on both cards unless a card is named, and the results that rest on one card now name it (the mesh map, the idle voltage capture, the host-field chart, and the thermal and flip-to-heat models, all aifoundry2’s), and the <code>pmic_sys</code> field and the zeroed system slot are checked in every committed log from both cards.</li>
 </ul>
 
 <h2 id="related">Related reports</h2>
@@ -842,7 +842,8 @@ const SHIRE_MV = {"7":{"mnn":[519,518,520],"sram":[703,702,704],"noc":[485,484,4
     const ex = excess.length === 1 ? num(excess[0], 0) : CK.fmt.range(excess[0], excess[excess.length - 1], 0);
     ['sp-excess', 'sp-excess2'].forEach(id => put(id, ex));
     const eq = SES.reduce((a, s) => a + s.pmic_eq_mean, 0), dmax = Math.max(...SES.map(s => s.pmic_diff_max));
-    put('pmic-agree', eq === nTot ? `all ${num(nTot)} samples agreed` : `${num(eq)} of ${num(nTot)} samples agreed; the other ${word(nTot - eq)} differed by ${num(dmax)} °C`);
+    put('pmic-agree', 'on aifoundry2 on 20 September, ' + (eq === nTot ? `all ${num(nTot)} samples agreed` : `${num(eq)} of ${num(nTot)} samples agreed and the other ${word(nTot - eq)} differed by ${num(dmax)} °C`) +
+      '; every committed log from both cards agrees too, never differing by more than 1 °C');
     put('sys-zero', num(SES.reduce((a, s) => a + s.system_c_zero, 0)));
     const lows = uniq(allRows.map(r => r[LOW])), spmin = uniq(allRows.map(r => r[SPMIN])), means = allRows.map(r => r[MEAN]);
     put('sp-low', lows.length === 1 ? num(lows[0]) : CK.fmt.range(lows[0], lows[lows.length - 1], 0));
@@ -995,7 +996,7 @@ const SHIRE_MV = {"7":{"mnn":[519,518,520],"sram":[703,702,704],"noc":[485,484,4
     }
     const off = Object.keys(SHIRE_MV).filter(s => !cells.some(k => k.s === s));
     $('grid-leg').innerHTML = view === 'volt'
-      ? `<span>Minion-rail voltage, idle, 20 Sep (mV):</span> ${uniq(vs).map(v => `<span class="gl-sw" style="background:${CK.ramp(P(v))};color:${CK.rampInk(P(v))}">${v}</span>`).join('')}` +
+      ? `<span>Minion-rail voltage, one idle capture on aifoundry2, 20 Sep (mV):</span> ${uniq(vs).map(v => `<span class="gl-sw" style="background:${CK.ramp(P(v))};color:${CK.rampInk(P(v))}">${v}</span>`).join('')}` +
         ` <span>1 mV steps. Shires ${list(off)} read ${list(off.map(s => mv(s) + ' mV'))}; which dashed cells they occupy is not measured. The voltage reaches the host shire by shire; the temperature does not.</span>`
       : '<span>TS<i>n</i> is the temperature-sensor channel of compute shire <i>n</i>.</span>';
   }

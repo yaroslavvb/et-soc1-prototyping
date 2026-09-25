@@ -22,19 +22,19 @@ Every entry is **mean** [lo–hi]: the mean over every pass on every card, and t
 | `fexp.ps (8 lanes)` | **99.4** [98.0–102.8] | **99.2** [95.4–102.7] | **158.7** [154.8–164.0] (19.8/lane) | 1.60× | 0.09 | a2: 162.4 ± 0.9 · a3: 155.1 ± 0.1 | transcendental unit, ¼ the rate |
 | `frcp.ps (8 lanes)` | **73.0** [69.2–75.8] | — | **115.4** [110.7–119.1] (14.4/lane) | 1.58× | 0.15 | a2: 118.5 ± 0.4 · a3: 112.2 ± 0.8 | transcendental unit |
 
-Thirteen instructions trap in U-mode (listed in [3.1](03a-every-instruction.md)), among them every float and vector divide and square root: there is no hardware divide or square root for them on this silicon.
+Thirteen instructions trapped in U-mode in a one-off check while the catalogue was written (listed in [3.1](03a-every-instruction.md); the card and the log of that check were not kept), among them every float and vector divide and square root, as expected: this silicon has no hardware divide or square root for them.
 
 **What the table says.**
-- **An integer add costs 5.7 pJ on zeros** [5.2–6.4], barely more than a `nop` (5.3) or a `fence` (4.5): on zeros it is almost all the awake core (section 2). Random operands add 3.6 pJ.
+- **An integer add on zeros, 5.7 pJ [5.2–6.4], is within noise of a `nop` (5.3 pJ) on both cards**: on zeros it cannot be told apart from the awake core that issues it (section 2). Random operands add 3.6 pJ.
 - **A scalar float add costs 4.1× an integer add** even on zeros. The FPU does not gate on zero the way the tensor unit does.
 - **An 8-lane vector op on zeros costs the same as the scalar op** (23.2 against 23.3 pJ, bars overlapping): lanes computing on zeros add nothing. On random data the eight lanes cost 1.8× — this is the data dependence of docs/findings/10-data-dependent-power.md, in the vector unit.
-- **Per lane on random data, `fmadd.ps` is 7.0 pJ per multiply-add** [6.7–7.3]. The tensor unit below does the same multiply-add for 5.8 pJ [5.2–6.0]. Take out the vector instruction's issue — 4.5–5.3 pJ, what a fence or a nop costs (section 2) — and the lane is 6.3–6.4 pJ, about 10% above the tensor unit: **of the 1.2 pJ per multiply-add the tensor unit saves, about half is instruction issue and half datapath** (the operands differ as well: uniform in [0.5, 2) here, normal for the tensor unit).
+- **Per lane on random data, `fmadd.ps` is 7.0 pJ per multiply-add** [6.7–7.3]. The tensor unit below does the same multiply-add for 5.8 pJ [5.2–6.0]. Take out the vector instruction's issue — 4.5–5.3 pJ, what a fence or a nop costs (section 2) — and the lane is 6.3–6.4 pJ, about 10% above the tensor unit. Read that way, **of the 1.2 pJ per multiply-add the tensor unit saves, roughly half is instruction issue and the rest datapath** (50–58% issue on aifoundry2, 38–47% on aifoundry3, with the fence or the nop as the issue cost); that is arithmetic on rows whose operands differ (uniform in [0.5, 2) here, normal for the tensor unit), not a measured decomposition.
 - **Integer vector adds are half the price of float ones** (13.3 vs 23.2 pJ on zeros); integer vector multiplies are not.
-- **Transcendentals are the dearest arithmetic**: `fexp.ps` at 159 pJ and `flog.ps` at 219 pJ for eight lanes, at a quarter of the rate; `fexp.ps` is 2.8× a vector multiply-add. Only loads and stores that bypass the L1 (290–392 pJ) and atomics (344–1,393 pJ) cost more ([3.1](03a-every-instruction.md)).
+- **The transcendentals rank with the 64-bit divides as the dearest arithmetic**: `flog.ps` at 219 pJ and `fexp.ps` at 159 pJ for eight lanes, at a quarter of the rate, against 142–149 pJ for the 64-bit divides and remainders; `frcp.ps` (115) is cheaper, and `fexp.ps` is 2.8× a vector multiply-add. Only loads and stores that bypass the L1 (290–392 pJ) and atomics (344–1,393 pJ) cost more ([3.1](03a-every-instruction.md)).
 
 ## 3.2 The tensor unit
 
-`TensorFMA` on a tile per instruction: fp32 16×16×16 = 4,096 multiply-adds, fp16 8,192, int8 16,384; 546 cycles per instruction for every pattern (318 for int8), all 1,024 minions, launched at 80 °C. **Marginal** is board power above idle per multiply-add; **loaded** is total board power, idle included, per multiply-add, which is what a multiply-add costs when it is the only thing running.
+`TensorFMA` on a tile per instruction: fp32 16×16×16 = 4,096 multiply-adds, fp16 8,192, int8 16,384; 546 cycles per instruction for every pattern (318 for int8), all 1,024 minions, launched at 80 °C on aifoundry2 and 56 °C on aifoundry3 (so the per-card fp32 values compare a warm card with a cool one). **Marginal** is board power above idle per multiply-add; **loaded** is total board power, idle included, per multiply-add, which is what a multiply-add costs when it is the only thing running.
 
 The bar on each fp32 row is the envelope of ±1 sd around the ablation's two runs on aifoundry2 and the 22 September transfer's runs on both cards (n = 4); fp16 and int8 were run twice on aifoundry2 only, and their bar is ±1 sd of those two runs: under 1% on random data, 1.5% on int8 zeros, 5–6% on the ones patterns.
 
@@ -52,7 +52,7 @@ The bar on each fp32 row is the envelope of ±1 sd around the ablation's two run
 
 ### Where the tensor unit's energy goes: per flip
 
-The tensor unit is the one place on the chip where the energy has been resolved below the instruction, by simulating its RTL on the operands the card actually ran (docs/findings/11-thermal-model.md). Four kinds of event, four fitted energies:
+The tensor unit is the one place on the chip where the energy has been resolved below the instruction, by simulating its RTL on the operands aifoundry2 actually ran (docs/findings/11-thermal-model.md). Four kinds of event, four energies fitted on that card:
 
 | Event | fJ each | What it is |
 |---|---|---|
@@ -62,6 +62,6 @@ The tensor unit is the one place on the chip where the energy has been resolved 
 | bus | 15.539 | operand-word bit toggled outside the unit |
 | tensor state machines | 1.81 mW per active minion | per minion, whatever the data |
 
-A random-data 16×16×16 tile clocks 2.5 million register bits, toggles 74 million multiplier-tree nets and 13 million other nets, and toggles 140 thousand operand-word bits: at the energies above that is 27.2 W on 1,024 minions, and the card measures 27.6. Zeros clock nothing (the lane clock is withheld when an operand word is zero) and cost 1.9 W. Structured matrices — Hadamard, DCT, butterfly, kaleidoscope and ten others — were priced this way to 0.9 W rms **before** they ran. The four energies are one fit on one card; their confidence is that 0.9 W rms over fourteen held-out patterns, and the 8% by which aifoundry3 runs below the fit on every pattern (section 8).
+A random-data 16×16×16 tile clocks 2.5 million register bits, toggles 74 million multiplier-tree nets and 13 million other nets, and toggles 140 thousand operand-word bits: at the energies above that is 27.2 W on 1,024 minions, and aifoundry2 measures 27.6. Zeros clock nothing (the lane clock is withheld when an operand word is zero) and cost 1.9 W. Structured matrices — Hadamard, DCT, butterfly, kaleidoscope and ten others — were priced this way to 0.9 W rms **before** they ran on aifoundry2 (one session, two runs each). The four energies are one fit on aifoundry2; their confidence is that 0.9 W rms over fourteen held-out patterns, and the 8% by which aifoundry3 runs below the fit on every pattern (section 8).
 
 Sources: `docs/reports/data/2026-09-23-catalogue-aifoundry2/`, `-aifoundry3/` (3.1), `docs/reports/data/2026-09-21-horace-aifoundry2/ablation.json` and `docs/reports/data/2026-09-22-cards/cards-report.json` (3.2), `docs/reports/data/2026-09-21-horace-aifoundry2/model.json` (flips).

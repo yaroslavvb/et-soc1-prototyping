@@ -47,10 +47,12 @@ function bands(ff,x,t0,t1,n,T,B,html,dots,tr){const nodes=[];
 })();
 
 /* ---------- heating per FLOP ---------- */
-/* The three coolest patterns move the whole-degree reading by at most one degree in a run, so their rise is only
-   bounded (below about 0.5 °C, section 4). They are shown as that bound, not as the fitted value. */
+/* The three coolest patterns move the whole-degree reading by at most one degree in a run (launched on a step down), so
+   their rise is only bounded (below about 1 °C, section 4). They are shown as that bound, not as a fitted value, and
+   labelled with what the thermal network driven by the measured power puts them at. */
 const UNRES=new Set(['zeros','checker','sparse75']);
-const bound=p=>Math.ceil(0.5e3/(D.patterns[p].tflops*D.patterns[p].dur));   /* m°C per 10¹² FLOPs for a 0.5 °C rise */
+const bound=p=>Math.ceil(1e3/(D.patterns[p].tflops*D.patterns[p].dur));   /* m°C per 10¹² FLOPs for a 1 °C rise */
+const netRise=p=>D.chain&&D.chain[p]&&D.chain[p].rise_thermal!=null?D.chain[p].rise_thermal:null;
 (function(){const rows=ORDER;
  CK.frame('perflop',{height:W=>8+rows.length*(W<600?44:30)+(W<600?50:34),label:'Heating per FLOP for each operand pattern',draw:ff=>{
   /* wide: the row label sits in a left margin; narrow: above the bar */
@@ -64,10 +66,10 @@ const bound=p=>Math.ceil(0.5e3/(D.patterns[p].tflops*D.patterns[p].dur));   /* m
    CK.el('rect',{x:0,y:y0,width:W,height:rh,class:'ck-hit'},g);
    CK.txt(g,nar?L:L-10,nar?y0+14:by+15,NAMES[p]||p,'lab',nar?'start':'end');
    if(un){CK.el('rect',{x:x(0),y:by+0.75,width:x(bound(p))-x(0),height:bh-1.5,rx:3,style:`fill:none;stroke:${col(p)}`,'stroke-width':1.5,'stroke-dasharray':'3 2'},g);
-    CK.txt(g,x(bound(p))+6,by+bh-5,`< ${bound(p)}  (rise below the sensor's resolution)`,'lab');}
+    CK.txt(g,x(bound(p))+6,by+bh-5,netRise(p)!=null?`not resolved (network: ${f1(netRise(p))} °C)`:'not resolved by the sensor','lab');}
    else{CK.el('rect',{x:x(0),y:by,width:Math.max(1,x(v.mC_per_tflop_fit)-x(0)),height:bh,rx:3,style:'fill:'+col(p)},g);
     CK.txt(g,x(v.mC_per_tflop_fit)+6,by+bh-5,`${v.mC_per_tflop_fit.toFixed(0)}  (${v.rise_fit>=0?'+':''}${f1(v.rise_fit)} °C)`,'lab-strong');}
-   CK.tip(ff,g,()=>`<b>${NAMES[p]||p}</b><br>${f1(v.p80)} W at the start temperature · ${f2(v.tflops)} TFLOPS<br>`+(un?`the reading moved by at most one whole degree, so the rise is only bounded: below about 0.5 °C, under ${bound(p)} m°C per 10¹² FLOPs (fitted ${f2(v.rise_fit)} °C, sd ${f2(v.rise_fit_sd)} over ${v.n} runs)`:`rise after ${f1(v.dur)} s: ${f2(v.rise_fit)} °C (sd ${f2(v.rise_fit_sd)} over ${v.n} runs)`)+`<br>as read, whole degrees: ${f2(v.rise_end)} °C · onset ${f2(v.slope)} °C/s`);nodes.push(g);});
+   CK.tip(ff,g,()=>`<b>${NAMES[p]||p}</b><br>${f1(v.p80)} W at the start temperature · ${f2(v.tflops)} TFLOPS<br>`+(un?`the reading moved by at most one whole degree, so the rise is not resolved: below about 1 °C, under ${bound(p)} m°C per 10¹² FLOPs (de-quantised fit ${f2(v.rise_fit)} °C, sd ${f2(v.rise_fit_sd)} over ${v.n} runs${netRise(p)!=null?`; the thermal network driven by the measured power: ${f2(netRise(p))} °C`:''})`:`rise after ${f1(v.dur)} s: ${f2(v.rise_fit)} °C (sd ${f2(v.rise_fit_sd)} over ${v.n} runs)`)+`<br>as read, whole degrees: ${f2(v.rise_end)} °C · onset ${f2(v.slope)} °C/s`);nodes.push(g);});
   CK.keynav(ff,nodes);}});})();
 document.getElementById('tbl').innerHTML='<thead><tr><th>Operands (A and B)</th><th class="num">runs</th><th class="num">board W at 80 °C</th><th class="num">± sd</th><th class="num">rise as read, °C (whole degrees)</th><th class="num">pJ per FLOP, run average</th><th class="num">pJ per FLOP over idle, run average</th></tr></thead><tbody>'+
  ORDER.map(p=>{const v=D.patterns[p];return `<tr><td>${NAMES[p]||p}</td><td class="num">${v.n}</td><td class="num"><b>${f1(v.p80)}</b></td><td class="num">${f2(v.p80_sd)}</td><td class="num">${v.rise_end>=0?'+':''}${f2(v.rise_end)}</td><td class="num">${f2(v.pj_per_flop)}</td><td class="num">${f2(v.pj_per_flop_over_idle)}</td></tr>`;}).join('')+'</tbody>';
@@ -159,15 +161,17 @@ document.getElementById('coldtbl').innerHTML='<thead><tr><th>Operands</th><th cl
 
 /* ---------- headline cards and the model's coefficients ---------- */
 (function(){const P=D.patterns,PM=D.power_model,prim=PM.models[PM.primary];const sg=v=>(v>=0?'+':'')+v.toFixed(1);
- const cz=D.cold.filter(r=>r.values==='zeros'),cr=D.cold.filter(r=>r.values==='randn');const mean=a=>a.reduce((s,v)=>s+v,0)/a.length;
- const cards=[['Zeros',f1(P.zeros.p80)+' W',`< 0.5 °C in 7 s: below the sensor's resolution`],
-  ['Ones',f1(P.ones.p80)+' W',`${sg(P.ones.rise_fit)} °C in 7 s · ${P.ones.mC_per_tflop_fit.toFixed(0)} m°C per 10¹² FLOPs`],
-  ['Random normal',f1(P.randn.p80)+' W',`${sg(P.randn.rise_fit)} °C in 7 s · ${P.randn.mC_per_tflop_fit.toFixed(0)} m°C per 10¹² FLOPs`],
-  ['RTL activity → power',f1(prim.loo_rms)+' W rms',`leave-one-out error over ${Object.keys(prim.loo).length} patterns spanning ${f1(P.zeros.p80)}–${f1(P.randn.p80)} W`],
-  ['From a cool die',`${f1(mean(cz.map(r=>r.tflops)))} vs ${f1(mean(cr.map(r=>r.tflops)))}`,'TFLOPS, zeros against random: the governor holds 800 MHz only for the cool pattern']];
+ /* aifoundry3's board power for the same pattern (section 10): its idle under those runs plus its switching over idle */
+ const CD=D.cards,a3=(v,long)=>{const q=CD&&CD.patterns.find(p=>p.values===v);if(!q)return '';const w=f1(CD.idle.aifoundry3+q.a3)+' W';
+  return long?`aifoundry2 at ${CD.launch.aifoundry2.T.toFixed(0)} °C; aifoundry3 at ${CD.launch.aifoundry3.T.toFixed(0)} °C: ${w}`:`aifoundry3: ${w}`;};
+ const cards=[['Zeros',f1(P.zeros.p80)+' W',`rise < 1 °C in 7 s, not resolved by the sensor · ${a3('zeros',true)}`],
+  ['Ones',f1(P.ones.p80)+' W',`${sg(P.ones.rise_fit)} °C in 7 s · ${P.ones.mC_per_tflop_fit.toFixed(0)} m°C per 10¹² FLOPs · ${a3('ones')}`],
+  ['Random normal',f1(P.randn.p80)+' W',`${sg(P.randn.rise_fit)} °C in 7 s · ${P.randn.mC_per_tflop_fit.toFixed(0)} m°C per 10¹² FLOPs · ${a3('randn')}`],
+  ['RTL activity → power',f1(prim.loo_rms)+' W rms',`leave-one-out error over ${Object.keys(prim.loo).length} patterns spanning ${f1(P.zeros.p80)}–${f1(P.randn.p80)} W`]];
  if(D.long&&D.model){const cap=v=>D.long.filter(r=>r.values===v&&r.per_shire===32&&r.reason==='cap').map(r=>r.dur);const rn=cap('randn'),on=cap('ones');
-  cards.push(['Seconds from 80 to 90 °C',`${Math.min(...rn).toFixed(0)}–${Math.max(...rn).toFixed(0)} · ${Math.min(...on).toFixed(0)}–${Math.max(...on).toFixed(0)} · never`,'random normal · ones · zeros, in runs of up to ten minutes']);
-  if(D.validation){const v=D.validation.timesplit.summary;cards.push(['Flips → temperature, held-out runs',`${v.median_abs_pct.toFixed(0)}% median`,`median error of the predicted time to 90 °C on ${v.capped} runs the model was not fitted to (worst ${v.worst_pct.toFixed(0)}%). At ten minutes it runs hot: ${v.uncapped_end_T_rms.toFixed(1)} °C rms`]);}
+  const zn=D.long.filter(r=>r.values==='zeros'&&r.per_shire===32).length,W3=['no','one','two','three','four','five','six'],nw=n=>W3[n]||String(n);
+  cards.push(['Seconds from 80 to 90 °C',`${Math.min(...rn).toFixed(0)}–${Math.max(...rn).toFixed(0)} · ${Math.min(...on).toFixed(0)}–${Math.max(...on).toFixed(0)} · never`,`random normal (${nw(rn.length)} runs) · ones (${nw(on.length)}) · zeros (${nw(zn)}), in runs of up to ten minutes: aifoundry2, one session`]);
+  if(D.validation){const v=D.validation.timesplit.summary;cards.push(['Flips → temperature, held-out runs',`${v.median_abs_pct.toFixed(0)}% median`,`aifoundry2, one session: median error of the predicted time to 90 °C on ${v.capped} runs the model was not fitted to (worst ${v.worst_pct.toFixed(0)}%). At ten minutes it runs hot: ${v.uncapped_end_T_rms.toFixed(1)} °C rms`]);}
   else cards.push(['Flips → temperature',`${D.model.per_run_summary.median_abs_pct.toFixed(0)}% median`,`median error of the fitted time to 90 °C over ${D.model.per_run_summary.n_capped} long runs`]);}
  if(D.structured){const ks=Object.keys(D.structured.measured);const rms=Math.sqrt(ks.reduce((a,k)=>a+(D.structured.before.patterns[k].p_board_at_launch-D.structured.measured[k].p80)**2,0)/ks.length);
   cards.push(['Structured matrices, priced first',`${f1(rms)} W rms`,`${ks.length} matrices from Hadamard to kaleidoscope, predicted from their tiles before they ran`]);}
@@ -380,7 +384,7 @@ if (D.long && D.model) (function(){
    CK.el('path',{d:ln(pts.filter(q=>q[1]>=best[1])),style:'fill:none;stroke:var(--bad)','stroke-width':2,'stroke-dasharray':'6 4'},ff.svg);
    CK.el('line',{x1:x(best[0]),x2:x(best[0]),y1:T,y2:H-B,style:'stroke:var(--axis)','stroke-dasharray':'3 3'},ff.svg);
    CK.txt(ff.svg,x(best[0])+6,y(51.5),`+${best[0].toFixed(1)} W`,'lab-strong');
-   ro.set(`In a <b>${Ta.toFixed(1)} °C</b> room (model ambient) the die can hold <b>+${best[0].toFixed(1)} W</b> of switching, settling at ${best[1].toFixed(0)} °C; beyond that there is no equilibrium, only a time to 90 °C.`);
+   ro.set(`In a <b>${Ta.toFixed(1)} °C</b> room (model ambient) aifoundry2's die, in its desktop chassis, can hold <b>+${best[0].toFixed(1)} W</b> of switching, settling at ${best[1].toFixed(0)} °C; beyond that there is no equilibrium, only a time to 90 °C.`);
    const nodes=[];
    const top=CK.el('circle',{cx:x(best[0]),cy:y(best[1]),r:6,style:'fill:var(--surface);stroke:var(--ink)','stroke-width':2},ff.svg);
    CK.tip(ff,top,`<b>The flip budget in a ${Ta.toFixed(1)} °C room</b> (model ambient)<br>+${best[0].toFixed(2)} W of switching, with the die at ${best[1].toFixed(0)} °C: beyond it there is no equilibrium, only a time to 90 °C`);nodes.push(top);
@@ -431,15 +435,21 @@ if (D.validation) (function(){const SN=Object.assign({randn:'random normal (refe
  const rms=a=>Math.sqrt(a.reduce((q,v)=>q+v*v,0)/a.length);
  const LOO=C.loo.per_pattern,worstCal=Object.keys(LOO).reduce((a,k)=>LOO[k]>LOO[a]?k:a);
  const nm=v=>NAMES[v]||v,ratios=P.map(p=>p.a3/p.model);
+ const r32=P.filter(p=>p.values!=='signs'&&p.values!=='mant').map(p=>p.a3/p.a2);   /* the six patterns with three runs or more on each card */
  /* the text: every number from D.cards */
  document.getElementById('cardswcap').textContent=
   `Each card at its own launch temperature, ${f(C.launch.aifoundry2.T)} °C and ${f(C.launch.aifoundry3.T)} °C, both at 600 MHz. `+
+  `aifoundry3's values are one 13-minute session: three runs per pattern, one of random sign and one of random mantissa. `+
   `Idle power under those runs was ${f(C.idle.aifoundry2,1)} W and ${f(C.idle.aifoundry3,1)} W, and is subtracted. `+
   `The dashed rule on each pair is this report's model, fitted on aifoundry2, times the scale set below (1 = unchanged).`;
  document.getElementById('scaletext').innerHTML=
-  `The ordering is identical and so are the ratios between patterns. Applied to aifoundry3 unchanged, the model is off by `+
-  `<b>${f(C.rms_raw)} W rms</b>, worst case ${f(C.max_raw)} W, and it overestimates every pattern, by `+
-  `${Math.round(100*(1-Math.max(...ratios)))} to ${Math.round(100*(1-Math.min(...ratios)))}%. Multiply every flip energy by one `+
+  `The ordering is the same on both cards wherever the difference exceeds the noise, and the ratios between patterns agree `+
+  `within it (aifoundry3 over aifoundry2, ${f(Math.min(...r32))} to ${f(Math.max(...r32))} for the six patterns with three runs on each card). `+
+  `Applied to aifoundry3 unchanged, the model is off by `+
+  `<b>${f(C.rms_raw)} W rms</b>, worst case ${f(C.max_raw)} W, and it overestimates every pattern, by about ${Math.round(100*(1-C.scale))}% `+
+  `(${Math.round(100*(1-Math.max(...ratios)))} to ${Math.round(100*(1-Math.min(...ratios)))}% per pattern; the differences between patterns are within the noise). `+
+  `The two cards also ran ${f(C.launch.aifoundry2.T-C.launch.aifoundry3.T,0)} °C apart, so this does not yet separate the card from its temperature. `+
+  `Multiply the model's switching power by one `+
   `number, <b>${f(C.scale)}</b>, and the residual falls to <b>${f(C.rms_scaled)} W rms</b> over a `+
   `${f(Math.min(...P.map(p=>p.a3)),1)} to ${f(Math.max(...P.map(p=>p.a3)),0)} W range, which is as good as the in-sample fit on the `+
   `card the coefficients came from. Calibrating that number on one pattern's runs and predicting the other seven patterns gives `+
@@ -491,7 +501,7 @@ if (D.validation) (function(){const SN=Object.assign({randn:'random normal (refe
   t+=`; largest single error ${f(Math.abs(e[iw]))} W (${nm(P[iw].values)}).`;
   out.set(t);fr.redraw();}
  const ctl=document.getElementById('cardsw-ctl');
- const rg=CK.range(ctl.appendChild(document.createElement('div')),{label:'scale on every flip energy',min:0.85,max:1.05,step:0.001,value:1,fmt:v=>v.toFixed(3),onInput:v=>{scale=v;cal=null;mark();update();}});
+ const rg=CK.range(ctl.appendChild(document.createElement('div')),{label:'scale on the model’s switching power',min:0.85,max:1.05,step:0.001,value:1,fmt:v=>v.toFixed(3),onInput:v=>{scale=v;cal=null;mark();update();}});
  const bx=ctl.appendChild(document.createElement('div'));bx.className='controls';bx.setAttribute('role','group');bx.setAttribute('aria-label','calibrate the scale on');
  const lab=bx.appendChild(document.createElement('span'));lab.className='small';lab.textContent='calibrate on:';lab.style.alignSelf='center';
  const btns=[...P.map(p=>[p.values,SHORT[p.values]||p.values,p.a3/p.model]),['ls','least squares',C.scale]].map(([k,t,v])=>{

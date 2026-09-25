@@ -5,7 +5,7 @@
 manages 76 GB/s for the whole chip. Those are bandwidths, not results. The question is whether a computation
 can be rearranged to collect them. <b>It can. A chain of stages that hands each stage's output to another
 shire, instead of writing it to DRAM and reading it back, runs 12.3 times faster and uses a twelfth of the
-energy per byte, at the same power.</b> The shire that receives it is the next one in ID order, which on the
+energy per byte.</b> The shire that receives it is the next one in ID order, which on the
 mesh is 1 to 10 hops away (3.5 on average). Over the five ring offsets tried, which shire it is moved the
 bandwidth by up to a quarter (<span id="l-gbr"></span>), against the twelvefold gain over DRAM; the ring in ID
 order, used for the headline, was the slowest of the five. Keeping the output in the shire's own scratchpad is
@@ -25,7 +25,7 @@ between neighbouring mesh stops, 3.72 mm. More in the
 <div class="kpis">
   <div class="card kpi"><div class="lab">Passing each stage to the next shire</div><div class="val" id="k1"></div><div class="sub">against writing it to DRAM and reading it back</div></div>
   <div class="card kpi"><div class="lab">Keeping it in the shire's own scratchpad</div><div class="val" id="k2"></div><div class="sub">no data crosses a shire at all</div></div>
-  <div class="card kpi"><div class="lab">Energy per byte, next shire vs DRAM</div><div class="val" id="k3"></div><div class="sub">at the same watts over idle</div></div>
+  <div class="card kpi"><div class="lab">Energy per byte, next shire vs DRAM</div><div class="val" id="k3"></div><div class="sub">with the watts over idle within about 1 W of each other</div></div>
   <div class="card kpi"><div class="lab">Where the advantage appears</div><div class="val" id="k4"></div><div class="sub">of live intermediate data: it has to outgrow the 32 MB L3</div></div>
 </div>
 
@@ -43,14 +43,17 @@ After eight stages of adding one, a shire that kept its own data holds 8. In the
 checked against that expectation, on every run in this report; a run that did not really move its data would
 fail.</p>
 
-<div class="chart-title">Same watts, different work: power, rate and energy per byte for the three places, side by side</div>
+<div class="chart-title">Within about a watt, work up to thirty times apart: power, rate and energy per byte for the three places, side by side</div>
 <div class="chart" id="samew"></div>
 <p class="small" id="samewcap"></p>
 
-<h2 id="the-same-watts-a-thirtieth-of-the-work">2. The same watts, a thirtieth of the work</h2>
-<p>Power was measured separately, with each medium launched back to back for twelve seconds so the card
-reaches a steady state. The striking part is not that DRAM costs more energy per byte. It is that all three
-draw <em>the same power</em>, and one of them gets thirty times as much done with it:</p>
+<h2 id="the-same-watts-a-thirtieth-of-the-work">2. Power within a watt, a thirtieth of the work</h2>
+<p>Power was measured separately, in one session on aifoundry2, with each medium launched back to back for
+twelve seconds so the card reaches a steady state; the table's last column adds the 23 September passes on both
+cards. The striking part is not that DRAM costs more energy per byte. It is that the three draw <em>within
+about a watt of each other</em>, and one of them gets thirty times as much done with it. Across the passes of
+both cards the own scratchpad draws about 0.5–0.8 W more than DRAM while the kernel runs, and the next shire and
+DRAM could not be told apart:</p>
 
 <div class="table-wrap"><table id="power"></table></div>
 
@@ -110,12 +113,14 @@ thirty-two the advantage is flat (12.0–12.5×); with one or two stages it is l
 DRAM route reaches only 38 and 44 GB/s. Build the barrier with one atomic per shire and a credit release, so
 that nobody spins on a shared counter: the first version of this relay had every shire's leader poll one
 counter, which is <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">the hot line</a> of the
-companion report, and the barrier hung.</li>
+companion report, and the barrier hung in the one development run we made (card not recorded).</li>
 <li><b>Inside a shire, use the register path, one partner at a time.</b> <code>TensorSend</code>/<code>TensorRecv</code>
 is immune to shire-cache contention, but a minion that takes readies from two partners at once can hang until the
-chip is reset (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#a-trap-one-ready-flag-per-minion">on-chip
+chip is reset, as read from the RTL and seen once, on aifoundry2
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#a-trap-one-ready-flag-per-minion">on-chip
 communication</a>): give each link its own minion, or take the directions in barrier-separated phases. The relay is
-the same idea at shire granularity, through the scratchpads, a path that cannot hang.</li>
+the same idea at shire granularity, through the scratchpads: a path with no ready-flag handshake, since each slab
+has one reader, and none of the runs reported here hung.</li>
 </ul>
 
 <h2 id="method-and-what-is-not-established">7. Method, and what is not established</h2>
@@ -125,15 +130,21 @@ which bypasses the L1 and L2 caches, so the shire that reads it next cannot read
 with plain vector loads from addresses the reading minion has never written; two buffers alternate, and a
 minion's 32 KB chunk is sixty-four times its 512 B of L1, so nothing it touched two stages ago survives. Every
 run verifies its own output element by element, which is what makes that argument checkable rather than
-asserted.</li>
+asserted. Every run reported here passed. The check has failed, in one discarded attempt on aifoundry2 on
+23 September: of the 16 DRAM-route runs in which the governor changed the minion clock mid-run, two returned
+1,000 and 1,118 wrong elements; none of the 16 that stayed at 600 MHz did. One session does not establish that
+the clock change caused it, and aifoundry3, whose clock is fixed, cannot test it.</li>
 <li>Rates come from the on-device cycle counter, converted at 600 MHz (the minion clock stayed there through
-every power burst), not from the wall clock: a kernel launch costs a few hundred microseconds and an on-chip
-stage costs 27,000–68,000 cycles, so wall time would measure the host.</li>
+every power burst), not from the wall clock: a kernel launch costs a few hundred microseconds to a millisecond
+(about 10 ms with the largest buffers) and an on-chip stage costs 27,000–68,000 cycles, so wall time would
+measure the host.</li>
 <li>Scratchpad addressing is the Programmer's Reference Manual's (PRM) format 0, shire in bits [29:23].
-<b>Offset 0 of a shire's scratchpad faults</b>; the buffers start 256 KB in, which also leaves room for two of
-them inside the 2.5 MB.</li>
+<b>Offset 0 of a shire's scratchpad faulted</b> during development (card not recorded); the buffers start
+256 KB in, which also leaves room for two of them inside the 2.5 MB.</li>
 <li>All 88 configurations were run on aifoundry2 and repeated on aifoundry3 (the power session of §2 ran on
-aifoundry2 only): <span id="cards"></span>.</li>
+aifoundry2 only): <span id="cards"></span>. A result that names no card held on both, in three or more
+independent runs or as the same deterministic value on each; where one rests on one card, one session or fewer
+runs, the text says so.</li>
 <li><b>Not established:</b>
 <ul>
 <li>Whether a working set larger than the 80 MB of scratchpad can be streamed through the same relay. That is
@@ -166,7 +177,10 @@ next by ID rather than a mesh neighbour, to add the mesh distances and the 23 Se
 and to correct the flops-per-byte unit in section 4; revised 25 September 2026: the ring offset moves the
 bandwidth by up to a quarter, following the longest hand-off (it had said distance made no measurable
 difference), the pooled energies in the table of section 2, both cards in section 5, and charts that fit a
-phone.</p>
+phone; 25 September (version 3): “the same power” replaced by what the passes show (within about a watt, the own
+scratchpad drawing more than DRAM), the session's reduction named, the own-scratchpad read energy per card, the
+element check's two failures in a discarded aifoundry2 attempt, and one-off observations labelled; record in
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>.</p>
 
 <h2 id="related-reports">8. Related reports</h2>
 <ul>

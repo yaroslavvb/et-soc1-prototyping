@@ -3,18 +3,18 @@
   {
    "level": "Board power",
    "what": "12 V input power of the whole card",
-   "gran": "10 mW; a new value every 133 ms (aifoundry2; about every 250 ms on aifoundry3)",
+   "gran": "10 mW; a new value about every 150 ms on aifoundry2 while ettelem samples (133 ms in the SP's own trace without it, one session) and about every 255 ms on aifoundry3",
    "sec": 0.133,
    "instrument": "DM_CMD_GET_MODULE_POWER, or the SP stats trace",
    "access": "host, management node",
    "status": "works_now",
    "check": "changed",
-   "note": "The host can poll much faster than the value changes (ettelem's six-command sample takes 22 ms), but the service processor refreshes once per loop pass. The PMIC (a closed ATSAMD20 firmware) does the averaging. Some workloads starve the SP and freeze the reading (§4.1)."
+   "note": "The host can poll much faster than the value changes (ettelem's six-command sample takes 22 ms), but the service processor refreshes once per loop pass. The PMIC (a closed ATSAMD20 firmware) does the averaging. Some workloads starve aifoundry2's SP and freeze the reading; aifoundry3's sampler kept its pace in the same bursts (§4.1)."
   },
   {
    "level": "Rail power",
    "what": "Minion cores, SRAM (L2/L3/scratchpad arrays), NoC",
-   "gran": "1 mW; the PMIC's running average (τ ≈ {{rf_tau}} s) of each regulator's output power, copied by the SP every 133 ms (aifoundry2; about every 250 ms on aifoundry3); min and max since the last reset",
+   "gran": "1 mW; the PMIC's running average (τ ≈ {{rf_tau}} s) of each regulator's output power, copied by the SP every pass (about 150 ms on aifoundry2 while ettelem samples, 255 ms on aifoundry3); min and max since the last reset",
    "sec": 1,
    "instrument": "SP stats trace (dev_mngt_service -t SPST:extract)",
    "access": "host, management node",
@@ -31,7 +31,7 @@
    "access": "host + kernel",
    "status": "works_now",
    "check": "changed",
-   "note": "Bursts bracketed by idle, with the burst's own warming corrected and bursts off 600 MHz discarded, three passes on each of two cards (rung 1); the chart at the end of this section shows which events this method can price, against one reading's 133 µJ step."
+   "note": "Bursts bracketed by idle, with the burst's own warming corrected and bursts off 600 MHz discarded, three passes on each of two cards (rung 1); the chart at the end of this section shows which events this method can price, against one reading's step of about 150 µJ on a rail (aifoundry2)."
   },
   {
    "level": "Device-wide bandwidth",
@@ -47,7 +47,7 @@
   {
    "level": "Temperature and voltage",
    "what": "35 temperature sensors, 125 voltage sense points (3 per minion shire, 2 per memory shire, IO and PCIe shires), 35 process detectors",
-   "gran": "hardware 0.06 °C (12-bit) / 75 µV (14-bit); host sees 34-shire avg/low/high at 1 °C / 1 mV every SP pass (133 ms on aifoundry2)",
+   "gran": "hardware 0.06 °C (12-bit) / 75 µV (14-bit); host sees 34-shire avg/low/high at 1 °C / 1 mV every SP pass (about 150 ms on aifoundry2 while ettelem samples, 255 ms on aifoundry3)",
    "sec": 0.133,
    "instrument": "Moortec PVT controllers (SP-only); DM_CMD_GET_MODULE_CURRENT_TEMPERATURE",
    "access": "service processor",
@@ -57,8 +57,8 @@
   },
   {
    "level": "DDR-rail droop",
-   "what": "The 0.8 V memory-shire supply as the Moortec monitors in the 8 memory shires see it, 1 mV, every 133 ms (aifoundry2)",
-   "gran": "{{droop_slope}} mV per watt of off-rail DRAM power, fitted over {{droop_n}} configuration means (rms {{droop_rms}} mV): 1 mV ≈ {{droop_mvw}} W",
+   "what": "The 0.8 V memory-shire supply as the Moortec monitors in the 8 memory shires see it, 1 mV, every SP pass",
+   "gran": "{{droop_slope}} mV per watt of off-rail DRAM power on aifoundry2 and {{droop_slope_a3}} on aifoundry3, each fitted over {{droop_n}} configuration means (rms {{droop_rms}} and {{droop_rms_a3}} mV): 1 mV ≈ {{droop_mvw}} W",
    "sec": 0.133,
    "instrument": "DM_CMD_GET_ASIC_VOLTAGE (ettelem's die_mv.ddr)",
    "access": "host, management node",
@@ -69,7 +69,7 @@
   {
    "level": "Unmetered power, attributed",
    "what": "The part of board power on no rail sensor, split into delivery losses of the metered rails and a per-byte DRAM cost",
-   "gran": "rms {{fit_rms_a2}} W over {{fit_n_a2}} configuration means ({{fit_rmsd_a2}} W on the {{fit_nd_a2}} DRAM ones); coefficients ±{{se_minion}} (minion), ±{{se_dram}} (DRAM), ±{{se_noc_sram}} (NoC, SRAM)",
+   "gran": "rms {{fit_rms_a2}} W over {{fit_n_a2}} configuration means on aifoundry2 and {{fit_rms_a3}} W over {{fit_n_a3}} on aifoundry3 ({{fit_rmsd}} W on the DRAM ones); coefficients ±{{se_minion}} (minion), ±{{se_dram}} (DRAM), ±{{se_noc_sram}} (NoC, SRAM)",
    "sec": 3,
    "instrument": "regression of (board − rails) against rail powers and DRAM bytes (§4)",
    "access": "host",
@@ -80,7 +80,7 @@
   {
    "level": "Regulator input power per rail",
    "what": "v_in, a_in, w_in and a_out of the minion, SRAM and NoC regulators",
-   "gran": "1 mW class, per SP record (every 133 ms on aifoundry2), already read by the SP",
+   "gran": "1 mW class, per SP record (every pass), already read by the SP",
    "sec": 0.133,
    "instrument": "PMIC PMBus statistics (pmic_get_pmb_stats) forwarded by a new SP stats field",
    "access": "service processor",
@@ -119,7 +119,7 @@
    "access": "kernel",
    "status": "works_now",
    "check": "changed",
-   "note": "Two counters per neighbourhood, not synchronised across neighbourhoods; a read whose low 7 bits are 0–10 is 128 short (§3; fixcyc() in Anatomy of a memory access §7). The standard cycle, time and instret CSRs trap."
+   "note": "Two counters per neighbourhood, not synchronised across neighbourhoods; reads whose low 7 bits are 0 to about 10 come back 128 short (aifoundry2; the window moved by one cycle between two launches; §3, and fixcyc() in Anatomy of a memory access §7). The standard cycle, time and instret CSRs trap."
   },
   {
    "level": "Timed single access",
@@ -130,7 +130,7 @@
    "access": "kernel",
    "status": "works_now",
    "check": "confirmed",
-   "note": "This is how the memory-anatomy report split a DRAM load into cache, mesh, controller and row-state parts to ±3 cycles for 97% of lines."
+   "note": "This is how the memory-anatomy report split a DRAM load into cache, mesh, controller and row-state parts to ±3 cycles for 97% of lines, on aifoundry2."
   },
   {
    "level": "Kernel trace buffer",
@@ -141,7 +141,7 @@
    "access": "kernel + host",
    "status": "works_now",
    "check": "disputed",
-   "note": "A sink, not a new resolution. scripts/trace-flamegraph.py now turns profile events into per-hart flame graphs in cycles (workloads/traceprof: 512 events from 32 harts in 2.6 ms of kernel time, 1.57 M cycles). Stamps come from the neighbourhood's even- or odd-hart hpmcounter3, each reset separately at boot, so they compare only between harts sharing a counter."
+   "note": "A sink, not a new resolution. scripts/trace-flamegraph.py now turns profile events into per-hart flame graphs in cycles (workloads/traceprof, one run on aifoundry2 on 20 September: 512 events from 32 harts in 2.6 ms of kernel time, 1.57 M cycles). Stamps come from the neighbourhood's even- or odd-hart hpmcounter3, each reset separately at boot, so they compare only between harts sharing a counter."
   },
   {
    "level": "Shire-cache and memory-shire counters",
@@ -320,7 +320,7 @@
   },
   {
    "topic": "Power",
-   "et": "Board power every 133 ms at 10 mW (aifoundry2; about every 250 ms on aifoundry3), plus three rails as the PMIC's ~1 s running average at 1 mW; no energy counter.",
+   "et": "Board power at 10 mW, a new value about every 150 ms on aifoundry2 while sampled (133 ms in the SP's own trace) and about every 255 ms on aifoundry3, plus three rails as the PMIC's ~1 s running average at 1 mW; no energy counter.",
    "gpu": "One board number: a 25 ms average every 100 ms on A100/H100; a mJ energy counter; no rails.",
    "src": "NVML docs; Yang et al. SC'24; this project's power-telemetry notes"
   },
@@ -384,7 +384,7 @@
    "title": "The DVFS loop and its leakage",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage",
    "date": "21–22 Sep",
-   "what": "The governor's states and thresholds, the three operating points, the idle law P<sub>idle</sub> = 12.6 W + 23.3 W·e<sup>(T−80)/36</sup> (aifoundry2), the rail split of idle, the activity term; aifoundry3's firmware reports a TDP of 0 W and that card never leaves 600 MHz; the open RTL's per-minion sleep controls are tied off and the card shows no array power gating.",
+   "what": "The governor's states and thresholds and the three operating points (aifoundry2; aifoundry3's firmware reports a TDP of 0 W and that card never leaves 600 MHz); the idle law on aifoundry2: idle power rises about 0.65 W per °C near 80 °C, and 20–29 W of the 36 W idle at 80 °C is leakage (a fixed part plus an exponential fits equally for e-folding lengths of 30 to 45 °C, so the split is a range); the rail split of idle, the activity term; the open RTL's per-minion sleep controls are tied off, and one wake-up probe on aifoundry2 showed no array power gating.",
    "instruments": "board power, rails, SP trace, DM_CMD config reads, driver ioctl",
    "short": "DVFS and leakage",
    "pub": "2026-09-22"
@@ -394,7 +394,7 @@
    "title": "The Horace experiment",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment",
    "date": "20–22 Sep",
-   "what": "Same matmul, same FLOPs: 38 W on zeros, 47 on ones, 63 on random data; RTL flip counts predict the power to 0.5 W rms (leave-one-out); a flips-to-temperature model; from a cool die zeros run 25% faster; 14 structured matrices priced before they ran; the model carries to a second card with one scale factor.",
+   "what": "Same matmul, same FLOPs: 38 W on zeros, 47 on ones, 63 on random data (aifoundry2; the same order on aifoundry3); on aifoundry2, RTL flip counts predict the power of 14 patterns to 0.5 W rms (leave-one-out) and priced 14 structured matrices before they ran; a flips-to-temperature model; the power model carries to a second card with one scale factor (0.92). A demonstration, one morning on aifoundry2 (seven runs): from a cool die, zeros ran 25% faster than random data.",
    "instruments": "board power, die temperature, RTL simulation of the multiply-add unit",
    "short": "Horace",
    "pub": "2026-09-20"
@@ -404,7 +404,7 @@
    "title": "Why is the ET-SoC-1 low power?",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power",
    "date": "21 Sep",
-   "what": "Esperanto's P = C·V²·f + leakage measured term by term through ablations at 80 °C and set against an A100: voltage and clock give 5–6× less switching power, 1,024 cores in an integer loop add 1.5 W, leakage is 23 W of the 36 W idle, and per FLOP the card still spends more energy than the A100's bf16 tensor cores.",
+   "what": "Esperanto's P = C·V²·f + leakage measured term by term through ablations at 80 °C on aifoundry2 and set against an A100: voltage and clock give 5–6× less switching power; 1,024 cores in an integer loop add 1.5 W (two runs; the energy manual's catalogue gives 2.0–2.2 W for an addi loop on both cards); about 20–29 W of the 36 W idle at 80 °C is leakage; and per FLOP the card still spends more energy than the A100's bf16 tensor cores.",
    "instruments": "board power, rails, preheated strict starts",
    "short": "Why low power",
    "pub": "2026-09-21"
@@ -414,7 +414,7 @@
    "title": "Power and temperature telemetry",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature",
    "date": "20 Sep",
-   "what": "The first look at the meters: every way to read power, voltage and temperature and what each resolves; board power every 133 ms (aifoundry2) and three rails behind the PMIC's ~1 s average; idle power that rises with die temperature; the 34-shire voltage map from the SP's DEBUG trace.",
+   "what": "The first look at the meters: every way to read power, voltage and temperature and what each resolves; board power refreshed about every 150 ms on aifoundry2 while ettelem samples (133 ms in the SP's own trace) and about every 255 ms on aifoundry3, three rails behind the PMIC's ~1 s average; idle power that rises with die temperature; the 34-shire voltage map from the SP's DEBUG trace (aifoundry2, one idle capture).",
    "instruments": "board power, rails, die temperature, SP stats and DEBUG traces",
    "short": "Power and temp.",
    "pub": "2026-09-20"
@@ -424,7 +424,7 @@
    "title": "Hand it to the next shire",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay",
    "date": "22 Sep",
-   "what": "A multi-stage relay: handing each stage's output to the next shire runs 12× faster than a round trip through DRAM, at a twelfth of the energy per byte, and keeping it in the shire's own scratchpad about 31× faster; which shire receives the slab changed bandwidth by up to a quarter over the offsets tried (the next shire by ID is 1–10 mesh hops away, 3.5 on average; what each hop costs in energy is in Heat per millimetre).",
+   "what": "A multi-stage relay: handing each stage's output to the next shire runs 12× faster than a round trip through DRAM, at about a twelfth of the energy per byte, and keeping it in the shire's own scratchpad about 31× faster; which shire receives the slab changed bandwidth by up to a quarter over the offsets tried (one launch per offset; the next shire by ID is 1–10 mesh hops away, 3.5 on average; what each hop costs in energy is in Heat per millimetre).",
    "instruments": "cycle counter, board power, rails",
    "short": "Relay",
    "pub": "2026-09-22"
@@ -444,7 +444,7 @@
    "title": "Anatomy of a memory access",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy",
    "date": "19 Sep",
-   "what": "One load taken apart to ±3 cycles for 97% of lines: the L3 home shire from PA[10:6], the memory shire from PA[8:6], DRAM banks, rows and refresh, and where the eight memory shires sit around the mesh; energy per load split by rail (since re-measured in the energy manual); the cycle counter's late-carry bug and its fix.",
+   "what": "On aifoundry2: one load taken apart to ±3 cycles for 97% of lines: the L3 home shire from PA[10:6], the memory shire from PA[8:6], DRAM banks, rows and refresh, and where the eight memory shires sit around the mesh; energy per load split by rail (since re-measured in the energy manual); the cycle counter's late-carry bug and its fix.",
    "instruments": "evict_va + cycle counter, memory-shire read counters (syscall 10), board power, SP rail trace",
    "short": "Memory anatomy",
    "pub": "2026-09-19"
@@ -454,7 +454,7 @@
    "title": "Memory hierarchy",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy",
    "date": "18 Sep",
-   "what": "Latency, bandwidth and capacity of every level, next to the A100: L1 8.8 ns, L2 78 ns, L3 ~280 ns and DRAM ~490 ns at 600 MHz, 76 GB/s streaming. Its energy per byte now comes from the <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy\">energy manual §4</a> (L2 2.51, L3 10.5, DRAM 122 pJ/B), which superseded the page's own 18 September figures.",
+   "what": "Latency, bandwidth and capacity of every level on aifoundry2, next to the A100: L1 8.8 ns, L2 78 ns, L3 ~280 ns and DRAM ~490 ns at 600 MHz, 76 GB/s streaming. Its energy per byte now comes from the <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy\">energy manual §4</a> (L2 2.61 pJ/B on aifoundry2 and 2.40 on aifoundry3; L3 10.5 and DRAM 122 pJ/B on both), which superseded the page's own 18 September figures.",
    "instruments": "cycle counter, board power polled through dev_mngt_service",
    "short": "Memory hierarchy",
    "pub": "2026-09-18"
@@ -464,7 +464,7 @@
    "title": "On-chip communication",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
    "date": "18 Sep",
-   "what": "Where the 32 shires sit on the 6×6 mesh (a round trip costs 150 cycles plus 12 per mesh hop, and a hop takes 20 ns at any clock); TensorSend/Recv, credits, barriers, reduction trees and rings: cycles per message, a 2.3 µs chip-wide allreduce, 7–34× less bandwidth between shires than inside one, and pJ per byte (re-measured in the <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires\">energy manual §5</a>).",
+   "what": "Measured on aifoundry2: where the 32 shires sit on the 6×6 mesh (a round trip costs 150 cycles plus 12 per mesh hop, and a hop takes 20 ns at any clock); TensorSend/Recv, credits, barriers, reduction trees and rings: cycles per message, a 2.3 µs chip-wide allreduce, 7–34× less bandwidth between shires than inside one, and pJ per byte (re-measured in the <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires\">energy manual §5</a>).",
    "instruments": "cycle counter, board power",
    "short": "On-chip comm.",
    "pub": "2026-09-18"
@@ -474,7 +474,7 @@
    "title": "Matmul efficiency",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency",
    "date": "18 Sep",
-   "what": "A tensor-unit matmul loop on cached tiles, all 1,024 minions: 9.5 TFLOP/s fp32, 19.0 fp16 and 71.8 TOP/s int8 (91–97% of peak), board power under load and a spec-sheet comparison with the A100; also the first hello world on a card. Its operands are ±1 and ±2; the Horace experiment later showed that random data draws more power. (The scalar SGEMM is in Test drive.)",
+   "what": "A tensor-unit matmul loop on cached tiles, all 1,024 minions, one session on aifoundry2: 9.5 TFLOP/s fp32, 19.0 fp16 and 71.8 TOP/s int8 (91–97% of peak), board power under load and a spec-sheet comparison with the A100; also the first hello world on a card. Its operands are ±1 and ±2; the Horace experiment later showed that random data draws more power. (The scalar SGEMM is in Test drive.)",
    "instruments": "cycle counter, board power",
    "short": "Matmul",
    "pub": "2026-09-18"
@@ -484,7 +484,7 @@
    "title": "Sparse compute",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute",
    "date": "18 Sep",
-   "what": "What the tensor unit does with zeros: zero-skip saves power (86% in a TensorFMA loop on small integers) but never a cycle; masked loads and skipped empty slices take a batch-1 1024×4096 fp32 layer held in SRAM from 7.5 to 2.1 µs at 99% zeros; narrow lanes against divergence; six scenarios where the chip could beat an A100. Its power result is the one the Horace experiment later resolved into flips.",
+   "what": "What the tensor unit does with zeros, on aifoundry3: zero-skip saves power (86% in a TensorFMA loop on small integers, two runs) but never a cycle; masked loads and skipped empty slices take a batch-1 1024×4096 fp32 layer held in SRAM from 7.5 to 2.1 µs at 99% zeros (one run); narrow lanes against divergence; six scenarios where the chip could beat an A100. Its power result is the one the Horace experiment later resolved into flips.",
    "instruments": "cycle counter, board power polled through dev_mngt_service",
    "short": "Sparse compute",
    "pub": "2026-09-18"
@@ -504,7 +504,7 @@
    "title": "Test drive",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-testdrive",
    "date": "18 Sep",
-   "what": "First contact: the toolchain built on a Mac, hello worlds on the sys_emu simulator, a scalar fp32 SGEMM on aifoundry3's card (127 GFLOP/s on 2,048 harts, no SIMD or tensor unit), and three upstream issues found on the way.",
+   "what": "First contact: the toolchain built on a Mac, hello worlds on the sys_emu simulator, a scalar fp32 SGEMM on aifoundry3's card (127 GFLOP/s on 2,048 harts in one session, no SIMD or tensor unit), and three upstream issues found on the way.",
    "instruments": "host wall clock (kernelLaunch → waitForStream)",
    "short": "Test drive",
    "pub": "2026-09-18"
@@ -514,7 +514,7 @@
    "title": "Spatial temperature: a brief",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief",
    "date": "22 Sep",
-   "what": "The 35 Moortec temperature sensors on the 6×6 grid of minion, I/O and PCIe shires, the firmware's reduction to one whole-degree average, and the firmware changes a spatial heat map would need; the peak-hold high shows how far the hottest shire ran above the average each time it rose (about 3 °C on both cards), never which shire.",
+   "what": "The 35 Moortec temperature sensors on the 6×6 grid of minion, I/O and PCIe shires, the firmware's reduction to one whole-degree average, and the firmware changes a spatial heat map would need; the peak-hold high shows how far the hottest shire ran above the average each time it rose (2–4 °C, mostly 3, at the peaks recorded: one evening on aifoundry2, one session on aifoundry3), never which shire.",
    "instruments": "firmware (353f20e) and RTL (b38a1a3) source reading; the committed ettelem logs of both cards",
    "short": "Spatial brief",
    "pub": "2026-09-22"
@@ -1955,14 +1955,133 @@
   "idle_unsensed": {
    "aifoundry2": {
     "w": [14.37, 15.999],
+    "board_w": [28.312, 37.343],
     "die_c": [66.0, 82.405],
     "bursts": 1176
    },
    "aifoundry3": {
     "w": [12.044, 13.414],
+    "board_w": [23.568, 25.106],
     "die_c": [50.704, 55.5],
     "bursts": 1158
    }
+  },
+  "checks": {
+   "fit": {
+    "aifoundry2": {
+     "se_hc3": {
+      "minion": 0.0022503094991569153,
+      "sram": 0.014791883054886596,
+      "noc": 0.02151997578880314,
+      "dram_pj_per_byte": 5.3890916153722515
+     },
+     "pass_coef": {
+      "minion": [0.195, 0.197, 0.193],
+      "sram": [0.061, 0.032, 0.062],
+      "noc": [0.271, 0.285, 0.286],
+      "dram_pj_per_byte": [70.581, 74.51, 73.889]
+     },
+     "pass_ci99": {
+      "minion": [0.186, 0.204],
+      "sram": [-0.045, 0.148],
+      "noc": [0.231, 0.331],
+      "dram_pj_per_byte": [60.889, 85.097]
+     }
+    },
+    "aifoundry3": {
+     "se_hc3": {
+      "minion": 0.0018913276674450297,
+      "sram": 0.011723334129013559,
+      "noc": 0.017669241668402766,
+      "dram_pj_per_byte": 4.914575484596414
+     },
+     "pass_coef": {
+      "minion": [0.179, 0.177, 0.173],
+      "sram": [0.065, 0.068, 0.06],
+      "noc": [0.261, 0.258, 0.264],
+      "dram_pj_per_byte": [66.5, 69.375, 68.596]
+     },
+     "pass_ci99": {
+      "minion": [0.158, 0.195],
+      "sram": [0.043, 0.086],
+      "noc": [0.244, 0.278],
+      "dram_pj_per_byte": [59.638, 76.677]
+     }
+    }
+   },
+   "droop": {
+    "aifoundry2": {
+     "slope": 0.865,
+     "common": 0.029,
+     "rms_mv": 0.375,
+     "n": 386,
+     "idle_ddr_mv": 766.989,
+     "ir": 0.07,
+     "passes": {
+      "slope": [0.9262, 0.8202, 0.8387],
+      "common": [0.0355, 0.0217, 0.0288],
+      "ir": [0.0712, 0.0694, 0.0703]
+     },
+     "pass_ci99": {
+      "slope": [0.537, 1.186],
+      "common": [-0.011, 0.068],
+      "ir": [0.065, 0.075]
+     },
+     "max_nondram_excess_mv": [1.71, "tstore/scp/random"],
+     "named": {
+      "tstore/scp/random": {
+       "mean": 2.0,
+       "passes": [2.0, 2.0, 2.0]
+      },
+      "wire/hop2/random": {
+       "mean": 1.973,
+       "passes": [1.957, 1.963, 2.0]
+      },
+      "dramrow/stride8K/random": {
+       "mean": 2.24,
+       "passes": [2.721, 2.0, 2.0]
+      }
+     }
+    },
+    "aifoundry3": {
+     "slope": 0.835,
+     "common": 0.013,
+     "rms_mv": 0.316,
+     "n": 386,
+     "idle_ddr_mv": 767.0,
+     "ir": 0.137,
+     "passes": {
+      "slope": [0.8519, 0.8208, 0.8289],
+      "common": [0.0123, 0.0127, 0.0131],
+      "ir": [0.1363, 0.1367, 0.1362]
+     },
+     "pass_ci99": {
+      "slope": [0.741, 0.926],
+      "common": [0.011, 0.015],
+      "ir": [0.135, 0.138]
+     },
+     "max_nondram_excess_mv": [1.804, "tstore/scp/random"],
+     "named": {
+      "tstore/scp/random": {
+       "mean": 1.927,
+       "passes": [1.926, 1.963, 1.893]
+      },
+      "wire/hop2/random": {
+       "mean": 1.049,
+       "passes": [1.0, 1.037, 1.111]
+      },
+      "dramrow/stride8K/random": {
+       "mean": 1.889,
+       "passes": [2.0, 1.704, 1.963]
+      }
+     }
+    },
+    "named": {
+     "mesh": ["tstore/scp/random", "wire/hop2/random"],
+     "l3": "dramrow/stride8K/random"
+    }
+   },
+   "source": "tools/ettelem/sync_hub_data.py checks(), with fit_unmetered.py's config_means, _fit and droop on catalogue.json and each card's catalogue telemetry"
   }
  },
  "improvements": [
@@ -1974,7 +2093,7 @@
    "done": true,
    "adds": "",
    "cost": "done (energy manual, 23 Sep)",
-   "effect": "Confidence bars of ±6% (median) on 386 entries; the first cool-card reruns, whose bursts spent 5–25% of their samples at 700–800 MHz, were caught by the filter and discarded.",
+   "effect": "Confidence bars of ±6% (median) on 386 entries; the first reruns on aifoundry2, started from a cool die, whose bursts spent 5–25% of their samples at 700–800 MHz, were caught by the filter and discarded (aifoundry3 never leaves 600 MHz).",
    "row": "Energy per event"
   },
   {
@@ -1985,7 +2104,7 @@
    "done": true,
    "adds": "Method and fit in §4.2.",
    "cost": "done (this page)",
-   "effect": "Unmetered power above idle named per configuration: {{minion_pct}} delivery loss on the minion rail, {{dram_pj}} pJ per DRAM byte off-rail (§4.2). The idle {{idle15}} W stays unattributed.",
+   "effect": "Unmetered power above idle named per configuration: {{minion_pct}} delivery loss on the minion rail, {{dram_pj}} pJ per DRAM byte off-rail (§4.2). The idle {{idle_unsensed}} stays unattributed.",
    "row": "Unmetered power, attributed"
   },
   {
@@ -1996,7 +2115,7 @@
    "done": true,
    "adds": "Calibration in §4.3.",
    "cost": "done (this page); calibration is the regression of rung 2",
-   "effect": "DRAM activity every 133 ms (aifoundry2) at 1 mV ≈ {{droop_mvw}} W, confounded by heavy mesh, scratchpad and L3 traffic; a second witness for the DRAM term.",
+   "effect": "DRAM activity every SP pass at 1 mV ≈ {{droop_mvw}} W on both cards, confounded by heavy mesh, scratchpad and L3 traffic; a second witness for the DRAM term.",
    "row": "DDR-rail droop"
   },
   {
@@ -2005,7 +2124,7 @@
    "status": "needs_tooling",
    "what": "Undo the rails' one-second average",
    "done": false,
-   "adds": "The PMIC's rail averages, as the SP forwards them, are roughly first-order ({{rf_1s}} of a step at 1 s, {{rf_2s}} at 2 s; τ ≈ {{rf_tau}} s, measured on the catalogue's bursts). Inverting that filter sample by sample recovers rail power every 133 ms (aifoundry2).",
+   "adds": "The PMIC's rail averages, as the SP forwards them, are roughly first-order ({{rf_1s}} of a step at 1 s, {{rf_2s}} at 2 s; τ ≈ {{rf_tau}} s, measured on the catalogue's bursts). Inverting that filter sample by sample recovers rail power every refresh (133–150 ms on aifoundry2, about 255 ms on aifoundry3).",
    "cost": "~50 lines in the analysis scripts; a calibration burst to pin τ",
    "effect": "Rail split of bursts shorter than 3 s; per-launch rail energy; the minion/SRAM/NoC split of transients."
   },
@@ -2025,7 +2144,7 @@
    "status": "works_now",
    "what": "Sub-degree temperature by step timing; min/max windows for peaks",
    "done": true,
-   "adds": "The integer die reading steps at sharp moments when polled at 10–45 Hz; fitting the heating that reproduces the steps gives rises that repeat to ±0.03 °C for a pattern heating the die by a degree or more (the Horace experiment); below half a degree it only bounds the rise. ettelem --reset-ms reads the PMIC's min/max over a window.",
+   "adds": "The integer die reading steps at sharp moments when polled at 10–45 Hz; fitting the heating that reproduces the steps gives rises that repeat to ±0.03 °C on aifoundry2 and about 0.2 °C on aifoundry3 for a pattern heating the die by a degree or more (the Horace experiment); below half a degree it only bounds the rise. ettelem --reset-ms reads the PMIC's min/max over a window.",
    "cost": "done",
    "effect": "Thermal responses without a firmware change; peak power over any window."
   },
@@ -2037,7 +2156,7 @@
    "done": true,
    "adds": "Every ettelem sample records how long its six management commands took (took_ms); bursts during which the SP is starved (a median over 60 ms) are dropped from the reruns and the heat-per-millimetre runs (§4.1). ettelem exits cleanly on SIGTERM, and the runners drain a poisoned management queue and retry.",
    "cost": "done (23–24 Sep)",
-   "effect": "One ring configuration (s ↔ s+16) and one column placement on aifoundry2 are unmeasurable this way (the ring read 33–45% low without the check); DRAM reads on aifoundry2 slow the sampler too (§4.1). After the drain, the second heat-per-mm run completed 132 bursts per card with no sampler restart."
+   "effect": "One ring configuration (s ↔ s+16) and one column placement on aifoundry2 are unmeasurable this way (the ring read 33–45% low without the check); DRAM reads on aifoundry2 slow the sampler too (§4.1). After the drain, the second heat-per-mm run (one run per card, 24 September) completed 132 bursts per card with no sampler restart."
   },
   {
    "rung": 8,
@@ -2045,7 +2164,7 @@
    "status": "needs_tooling",
    "what": "A PCIe riser with shunts on 12 V and 3.3 V, read at a kilohertz",
    "done": false,
-   "adds": "An external meter of the card's input, 1 mW at 1 ms, that owes nothing to the PMIC's closed firmware and its 133 ms.",
+   "adds": "An external meter of the card's input, 1 mW at 1 ms, that owes nothing to the PMIC's closed firmware and its refresh of a few times a second.",
    "cost": "a riser or interposer with sense resistors and an INA-class ADC, or a bench DAQ; a day; a slot in an open chassis",
    "effect": "The launch transients that widen the small-signal bars become visible and separable; 0.5 s bursts become measurable; the widest bars (the hot line's −15/+19%, the remote scratchpad's −20/+12%) narrow toward the 1–2% pass-to-pass scatter; the awake core and the DRAM relay are already at ±5–7%; the PMIC's own input-power reading gets an independent check."
   },
@@ -2067,7 +2186,7 @@
    "done": true,
    "adds": "aifoundry3 repeats the catalogue, the reruns and the Horace protocol (not the DRAM-row runs).",
    "cost": "done",
-   "effect": "The card factor: 0.95 over the catalogue (10–90%: 0.91–0.99); on the tensor unit's flip energies alone, 0.92 (the Horace experiment); bars that are mostly the card, not the day."
+   "effect": "The card factor, aifoundry3 over aifoundry2: 0.95 over the catalogue (10–90%: 0.91–0.99); on the tensor unit's flip energies alone, 0.92 (the Horace experiment); bars that are mostly the card, not the day."
   },
   {
    "rung": 11,
@@ -2221,7 +2340,7 @@
    "id": "E1",
    "when": "19 Sep",
    "card": "aifoundry2",
-   "what": "One memory access by stage and by rail: 46 pJ per L1 load to 5.1 nJ per DRAM load, from the SP's rail trace (re-measured in the energy manual)",
+   "what": "One memory access by stage and by rail: 46 pJ per L1 load to 5.1 nJ per DRAM load, from the SP's rail trace, two runs (superseded: re-measured on both cards in the energy manual)",
    "instruments": "cycle counter, SP stats trace",
    "data": [
     {
@@ -2260,7 +2379,7 @@
    "id": "E6",
    "when": "20 Sep",
    "card": "aifoundry2",
-   "what": "Per-shire on-die voltage at idle from the SP's DEBUG trace: a map of the 34 minion shires (517–521 mV; low captures down to 513 mV)",
+   "what": "Per-shire on-die voltage at idle from the SP's DEBUG trace, one idle capture: a map of the 34 minion shires (517–521 mV; low captures down to 513 mV)",
    "instruments": "Moortec voltage monitors via DM_CMD_SET_DM_TRACE_CONFIG",
    "data": [
     {
@@ -2278,7 +2397,7 @@
    "id": "E7–E9",
    "when": "20–21 Sep",
    "card": "aifoundry2",
-   "what": "The Horace experiment in three versions: E7 uncontrolled (79–90 °C), E8 every run started at 80 °C, E9 strict (14 patterns, 46 runs); zeros 38 W, ones 47 W, random 63 W",
+   "what": "The Horace experiment in three versions: E7 uncontrolled (79–90 °C), E8 every run started at 80 °C, E9 strict (14 patterns, 46 launches); zeros 38 W, ones 47 W, random 63 W",
    "instruments": "board power, die temperature, strict-start protocol",
    "data": [
     {
@@ -2301,7 +2420,7 @@
    "id": "E10",
    "when": "21 Sep, 06:45",
    "card": "aifoundry2",
-   "what": "Cool-start runs: the governor stepping the clock among 600, 700 and 800 MHz (0.52, 0.57 and 0.62 V), re-read for the DVFS report",
+   "what": "Cool-start runs: the governor stepping the clock among 600, 700 and 800 MHz (0.52, 0.57 and 0.62 V), re-read for the DVFS report (aifoundry3 never leaves 600 MHz)",
    "instruments": "telemetry mhz/mv fields",
    "data": [
     {
@@ -2322,7 +2441,7 @@
    "id": "E12, E16",
    "when": "21 Sep, 08:56–15:08",
    "card": "aifoundry2",
-   "what": "Runs of up to ten minutes: heating to 90 °C in 20 s on random data, two minutes on ones, never on zeros; the thermal time constants",
+   "what": "Runs of up to ten minutes, one session (3–4 runs per pattern): heating from 80 to 90 °C in 19–26 s on random data, about two minutes on ones, never on zeros; the thermal time constants",
    "instruments": "board power, die temperature, a 90 °C stop file",
    "data": [
     {
@@ -2367,7 +2486,7 @@
    "id": "E18, E19",
    "when": "22 Sep, 11:39",
    "card": "aifoundry2",
-   "what": "No cache array is power-gated at idle (wake-up probe); the idle law checked against about 20.6 hours with no workload (+0.01 W)",
+   "what": "No cache array showed a power-gating wake-up at idle (one wake-up probe launch); the idle law checked against one minute of idle after about 20.6 hours with no workload (+0.01 W)",
    "instruments": "cycle counter; board power",
    "data": [
     {
@@ -2386,7 +2505,7 @@
    "id": "E20, E21",
    "when": "22 Sep, 12:12",
    "card": "aifoundry3, all three",
-   "what": "The strict protocol on the second card (one scale factor of 0.92); the governor's inputs on every machine: aifoundry3's TDP of 0 W, aifoundry1's cards unopenable",
+   "what": "The strict protocol on the second card (one scale factor, 0.92 of aifoundry2's model); the governor's inputs on every machine: aifoundry3's TDP of 0 W (65 W on aifoundry2), aifoundry1's cards unopenable",
    "instruments": "board power, die temperature, DM config reads, SP trace",
    "data": [
     {
@@ -3448,7 +3567,9 @@
   "meter": {
    "board_lsb_w": 0.01,
    "rail_lsb_w": 0.001,
-   "pass_s": 0.133,
+   "pass_s": 0.15,
+   "pass_s_a3": 0.255,
+   "sp_pass_s_quiet_a2": 0.133,
    "idle_law_rms_w": 0.205
   },
   "rate_rule": "the one at which the measurement ran it on all 1,024 minions at 600 MHz: the median launch rate of the energy manual's rerun passes (bytes by level, messages, relay, atomics), the catalogue's aifoundry2 runs (instructions, byte paths), the tensor rows, the Horace experiment's flip counts, and the heat runs' most bit·mm per second (wires)",

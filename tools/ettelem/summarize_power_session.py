@@ -30,10 +30,11 @@ existing --out file whose other sections (horace, horace2) are kept as they are:
   mesh            marty1885's shire layout and the four cells without a compute shire, imported from
                   workloads/nocbench/analyze.py (MARTY, EMPTY), so the page never retypes coordinates.
   context         the later measurements the page compares with, copied with their sources: the idle law
-                  (dvfs.json leak_model), the rail filter (catalogue.json rail_filter), the minion rail's IR drop
-                  (unmetered_fit.json ddr_droop) and the busy drift of the Horace strict runs (report.json), and
-                  that drift on each card with its run count, spread and temperatures (busy_drift_cards, recomputed
-                  run by run from each card's horace3.json and checked against its leak_w_per_c).
+                  (dvfs.json leak_model, with fit_T, the whole-degree readings of its idle fit), the rail filter
+                  (catalogue.json rail_filter), the minion rail's IR drop (unmetered_fit.json ddr_droop) and the busy
+                  drift of the Horace strict runs (report.json), and that drift on each card with its run count,
+                  spread and temperatures (busy_drift_cards, recomputed run by run from each card's horace3.json and
+                  checked against its leak_w_per_c).
 
 The output is json.dumps with default separators and no final newline, as committed, with the top-level keys in a
 fixed order.
@@ -49,8 +50,11 @@ ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 LAST_BIN = 175
 FAST_WINDOWS = [(15.0, 35.0), (73.0, 95.0)]
 CONTEXT = {  # later measurements the page sets beside this session's, and where they come from
-    "idle_law": ("docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json", lambda d: {
-        k: d["leak_model"][k] for k in ("P_fix", "A_at_80", "T_L")}),
+    # the law's constants, and the whole-degree die readings its idle fit used (idle_curve T), so the page can say
+    # over which temperatures the data pin it
+    "idle_law": ("docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json", lambda d: dict(
+        {k: d["leak_model"][k] for k in ("P_fix", "A_at_80", "T_L")},
+        fit_T=[b["T"] for b in d["leak_model"]["idle_curve"]])),
     "rail_filter": ("docs/reports/data/2026-09-23-energy-manual/catalogue.json", lambda d: {
         card: {k: v[k] for k in ("frac_1s", "frac_2s", "tau_s", "n")} for card, v in d["rail_filter"].items()}),
     "minion_ir_drop_mv_per_w": ("docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json",

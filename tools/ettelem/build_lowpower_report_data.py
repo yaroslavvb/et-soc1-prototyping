@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Data for docs/reports: why-low-power.  build_lowpower_report_data.py --ablation a.json --model model.json --toggles t.json --out r.json"""
+"""Data for docs/reports: why-low-power.
+    build_lowpower_report_data.py --ablation a.json --model model.json --toggles t.json [--vf vf.json] [--second-card horace3.json] --out r.json"""
 import argparse
 import json
 
@@ -12,6 +13,7 @@ def main():
     ap.add_argument("--model", required=True)
     ap.add_argument("--toggles", required=True)
     ap.add_argument("--vf")
+    ap.add_argument("--second-card", help="the second card's analyze_horace_strict.py output (horace3.json): its values beside this card's")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     ab = json.load(open(a.ablation))
@@ -32,6 +34,17 @@ def main():
                             "idle62": 26.7, "idle80": c["fp32_randn"]["idle"], "volts": 0.52, "mhz": 600, "mem_gbs": 137}}}
     if a.vf:
         out["vf"] = json.load(open(a.vf))
+    if a.second_card:
+        # aifoundry3's strict session (the Horace experiment's section 10): the fp32 matmul on zeros, ones and random
+        # normal at its own launch temperature, so the page can set that card's values beside this one's
+        s2 = json.load(open(a.second_card))
+        pat = {}
+        for p in ("zeros", "ones", "randn"):
+            v = s2["patterns"][p]
+            pat[p] = {"n": v["n"], "p80": round(v["p80"], 3), "idle": round(v["p_before"], 3), "dyn": round(v["p80"] - v["p_before"], 3),
+                      "tflops": round(v["tflops"], 4), "mv": round(v["mv"], 1), "p_late": round(v["p_late"], 3),
+                      "rails_late": round(sum(v["rails_late"].values()), 3)}
+        out["second_card"] = {"card": "aifoundry3", "launch_T": round(s2["thermal"]["model_T_at_launch"]["mean"], 2), "patterns": pat}
     json.dump(out, open(a.out, "w"), separators=(",", ":"))
     print("wrote", a.out)
 

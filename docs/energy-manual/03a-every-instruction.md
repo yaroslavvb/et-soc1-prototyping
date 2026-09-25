@@ -2,9 +2,9 @@
 
 Energy per instruction retired, above idle, at 600 MHz and 0.52 V, with both harts of all 1,024 minions issuing it back to back. **Every figure is the mean over six measurements — three passes in shuffled order on each of two cards — and the bracket after it is the confidence bar: the range those six spanned.** The per-card columns give each card's own mean with its pass-to-pass standard error. Operands: zeros, and random values in [0.5, 2) (random 32-bit words for integer ops).
 
-Over the whole catalogue the bar is ±5.6% of the value in the median and ±11.5% at the 90th percentile; most of it is the difference between the two cards, which runs 0.950× in the median.
+Over the whole catalogue the bar is ±5.6% of the value in the median and ±11.5% at the 90th percentile; about half of it is the difference between the two cards: aifoundry3 runs 0.950× aifoundry2 in the median, each at its own die temperature.
 
-Instructions that **trap** in U-mode on this silicon and so have no energy: `fdiv.s`, `fsqrt.s`, `fdiv.ps`, `fsqrt.ps`, `frsq.ps`, `fsin.ps`, `fdiv.pi`, `fdivu.pi`, `frem.pi`, `fremu.pi`, `fcvt.l.s`, `fcvt.s.l`, `csrr cycle`.
+Thirteen instructions **trapped** in U-mode in a one-off check while the catalogue was written, and so have no energy (the card and the log of that check were not kept): `fdiv.s`, `fsqrt.s`, `fdiv.ps`, `fsqrt.ps`, `frsq.ps`, `fsin.ps`, `fdiv.pi`, `fdivu.pi`, `frem.pi`, `fremu.pi`, `fcvt.l.s`, `fcvt.s.l`, `csrr cycle`.
 
 
 ## Scalar integer, one cycle

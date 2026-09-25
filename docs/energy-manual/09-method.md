@@ -2,9 +2,11 @@
 
 ## How a number in this manual was made
 
-1. **Board power** is the PMIC's reading through the management interface, 10 mW resolution, refreshed every
-   133 ms, sampled at 10 Hz by `tools/ettelem`. The three rail figures (minions, SRAM, mesh) are the PMIC's own
-   running averages (roughly first-order, time constant 1.1–1.2 s), which the service processor reports; together
+1. **Board power** is the PMIC's reading through the management interface, 10 mW resolution, sampled at 10 Hz by
+   `tools/ettelem`; under that sampling it takes a new value about every 150 ms on aifoundry2 (the service processor's
+   own pass is 133 ms with no sampler running) and about every 255 ms on aifoundry3. The three rail
+   figures (minions, SRAM, mesh) are the PMIC's own running averages (roughly first-order, time constant 1.15 s on
+   aifoundry2 and 1.22 s on aifoundry3), which the service processor reports; together
    they account for about half of board power, and the rest — PCIe, the DDR PHY, the IO shire, the regulators'
    own losses — has no sensor.
 2. **Idle is subtracted locally.** Each measurement is a burst of a few seconds of back-to-back launches with
@@ -39,7 +41,8 @@ biasing a class. The result per configuration is the mean over the three passes 
 Across the two cards the ratio is 0.950 in the median with a 10th–90th percentile range of
 0.906–0.987 over 386 configurations: the residual card-to-card scatter after the common
 scale is about ±4%, the same size as the pass-to-pass error, which is what one expects if the scale factor is
-real and the rest is measurement.
+real and the rest is measurement. Each card ran at its own die temperature (aifoundry3 about 25 °C cooler), so
+whether the scale is the card or the temperature is not yet known (§8).
 
 **The rails.** The service processor's minion, SRAM and mesh figures are `[average, minimum, maximum]` triples.
 The minimum and maximum are since the last reset; the average is the PMIC's own running average, roughly
@@ -59,7 +62,7 @@ those reports' board-power figures are unaffected.
 
 Every repeated entry carries **mean** [lo–hi]: the mean over every pass on every card, and in brackets the full
 range those passes spanned; a per-card column gives each card's own mean ± its pass-to-pass standard error. The
-range is used rather than a standard error of the pooled sample because with n = 6 the bar is dominated by the
+range is used rather than a standard error of the pooled sample because with n = 6 about half of the bar is the
 systematic difference between the cards (about 5%), which a standard error would understate. The bars confirm
 the first edition's estimate for the catalogue (±3% claimed, ±6% measured over two cards) and correct it for the
 hot line (±5% claimed, ±17% measured). Rows measured once, or derived, say so where they appear.
@@ -69,32 +72,35 @@ hot line (±5% claimed, ±17% measured). Rows measured once, or derived, say so 
 | §2, §3, §3.1, §4.1, §4.3, §8 | the catalogue: 3 shuffled passes × 2 cards, n = 6 (3 for the constant set) | ±6% median, ±12% at the 90th percentile; pass-to-pass on one card 1–2% |
 | §3.2 fp32 | the ablation's 2 runs + the card transfer on both cards, n = 4 | the envelope of ±1 sd: ±2–7% |
 | §3.2 fp16, int8 | the ablation's 2 runs on aifoundry2 | ±1 sd of the two runs: under 1% on random data, 1.5% on int8 zeros, 5–6% on the ones patterns (one card) |
-| §4.2 levels | 3 passes per card with the manual's sampler, n = 6 | ±5–16% |
+| §4.2 levels | 3 passes per card with the manual's sampler, n = 6 | ±5–16%; on L1, L2 and the own scratchpad mostly the difference between the cards |
 | §5 rings | 3 passes per card, n = 6 (s ↔ s+16: aifoundry3 only, see below) | ±4–17% |
-| §5 relay | 22 September + 3 warm passes on aifoundry2 + 4 on aifoundry3, n = 8 | ±5% (DRAM), ±4% (scratchpad), ±8% (hop) |
-| §6 hot line | 22 September + 3 warm passes on aifoundry2 + 3 on aifoundry3, n = 7 | ±17%: a 1.2 W signal |
-| §1 idle law | one fit; a check 20.6 hours after the last workload; the other card | ±0.2 W; +0.7 W on the other card |
+| §5 relay | 22 September + 3 warm passes on aifoundry2 + 4 on aifoundry3, n = 8 | ±5% (DRAM), ±4% (scratchpad), ±8% (hop, mostly the difference between the cards) |
+| §6 hot line | 22 September + 3 warm passes on aifoundry2 + 3 on aifoundry3, n = 7 | ±17%: a 1.2 W signal, widened mostly by the first session (1.4 W against 1.0–1.2 W since) |
+| §1 idle law | one fit on aifoundry2; a check 20.6 hours after the last workload; the 23 September catalogue on both cards | ±0.2 W on aifoundry2 and +0.6–0.7 W on aifoundry3; the leakage within it 20–29 W at 80 °C, depending on the law's shape |
 
 Two lessons from the reruns, both now built into the runners and the analysis (`tools/ettelem/run_reruns_warm.sh`,
 `run_rings_levels_power.sh`, `analyze_reruns.py`):
 
 - **The die must be warm on aifoundry2.** Its first rerun session (12:51–13:10) ran at 65 °C, the governor's
   threshold, and the minion clock went to 700–800 MHz inside a fifth of the samples of most bursts — a 20 W
-  swing in a 2 W measurement. Every pass since is preceded by heating the die past 76 °C, and the analysis drops
-  any burst whose samples show the clock off 600 MHz. aifoundry3, pinned by its firmware, needs neither.
+  swing in a 2 W measurement. Every pass since is preceded by heating the die past 76 °C (the bursts then ran at
+  69–73 °C, all at 600 MHz), and the analysis drops any burst whose samples show the clock off 600 MHz.
+  aifoundry3, pinned by its firmware, needs neither.
 - **Some traffic starves the instrument.** Rings between shires s and s+16 slow the service processor's own
   management path: the sampler's command latency goes from 22 ms to 76–146 ms and the board reading takes a
-  new value about twice a second instead of six times, on aifoundry2 in every pass. Those bursts are dropped by the sampler's own latency, and the
+  new value about twice a second instead of six times, on aifoundry2 in every pass (aifoundry3's sampler stays at
+  22 ms in the same ring). Those bursts are dropped by the sampler's own latency, and the
   observability report lists this among the meter's limits.
 
 The catalogue, by contrast, keeps its slow-sampler bursts. On aifoundry2 three DRAM-read bursts (`tload/dram/random`
 and `dramrow/stride1K` on zeros and on random data) slowed the sampler to a median of 144–206 ms per sample against
-the usual 22 ms; they stay in the means (`sampler_median_ms` per burst in `catalogue.json`;
+the usual 22 ms (aifoundry3's stayed at 22 ms); they stay in the means (`sampler_median_ms` per burst in `catalogue.json`;
 [Limits of observability, §4.1](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain)).
 
-The rings and levels of 18 September, polled by `run_energy.py` without the die temperature, are no longer
-pooled: on a cooling card the uncorrected method reads 10–50% high on 2 W signals. The ring values On-chip
-communication publishes from them read 2–20% higher than the new passes in every configuration (median 10%).
+The rings and levels of 18 September, one pair of runs on aifoundry2 polled by `run_energy.py` without the die
+temperature, are no longer pooled: on a cooling card the uncorrected method reads 10–50% high on 2 W signals. The
+ring values On-chip communication publishes from them read −1% to +22% against aifoundry2's own new passes
+(median +10%).
 
 ## What "per instruction" means
 
@@ -121,13 +127,14 @@ random columns are the only window on their data dependence.
   0.523 V on aifoundry3 (0.517 V in the DVFS table). The V²f ratios in §1 say what to expect at 700 and 800 MHz
   (1.41× and 1.91× switching power) and one cool-start session agreed to within
   its noise, but no table was re-measured there.
-- **Divide and square root**: thirteen instructions trap in U-mode (listed in [3.1](03a-every-instruction.md)), among them every float and
+- **Divide and square root**: thirteen instructions trapped in U-mode in a one-off check while the catalogue was
+  written (listed in [3.1](03a-every-instruction.md); the card and the log of that check were not kept), among them every float and
   vector divide and square root.
 - **Per-flip energies outside the tensor unit.** See above.
 - **Anything at the 0.4 V operating point Esperanto designed for.** This card's firmware does not offer it.
-- **The unsensed 15 W, split by sensor.** It is the largest single component of idle and no instrument here can
-  split it. [§4.3](04a-fine-grain.md) attributes what a workload adds above idle by regression (delivery losses per rail plus a DRAM
-  term), but not the idle 15 W; the improvement ladder in
+- **The unsensed remainder, split by sensor** (about 15 W on aifoundry2 and 13 W on aifoundry3). It is the
+  largest single component of idle on both cards and no instrument here can split it. [§4.3](04a-fine-grain.md) attributes what a
+  workload adds above idle by regression (delivery losses per rail plus a DRAM term), but not the idle remainder; the improvement ladder in
   [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) says what would
   meter it. That regression and the DDR droop meter are in `docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json`,
   written by `tools/ettelem/fit_unmetered.py`; their canonical account is

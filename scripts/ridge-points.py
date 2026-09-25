@@ -432,11 +432,71 @@ def main():
     # share of it that the awake-core floor makes up: most or all, so its balance points fall by more than the levels above.
     ts_w = [rings[k]["mean"] * noc[k]["gb_per_s"] * 1e-3 for k in ["pair", "shire"] + xs_keys]
     ts_share = [min(floor_w) / max(ts_w), max(floor_w) / min(ts_w)]
+    # ---- per card (claims check, version 3, 25 Sep) -------------------------------------------------------------------
+    # The page states a figure plainly only when it holds on both cards. Per-card FLOP energies (tensor.bars per_card:
+    # fp32 on both cards, int8 on aifoundry2 only, two runs).
+    CARDS = ("aifoundry2", "aifoundry3")
+    for k, cfg in (("fp32", "fp32_randn"), ("fp32_ones", "fp32_ones"), ("fp32_zeros", "fp32_zeros"), ("int8", "int8_randn")):
+        e_flop[k]["per_card"] = {c: v["mean"] / 2 for c, v in bars[cfg]["per_card"].items()}
+    ef_c = e_flop["fp32"]["per_card"]
+    ei_card = "aifoundry2"  # the only card with an int8 energy: the int8 balance points are that card's
+    # Byte energies the energy manual gives per card because the two cards differ beyond noise (its section 4.2: the
+    # L1 probe, L2 and the own scratchpad; L2 and the own scratchpad in opposite directions, so their pooled values look
+    # equal). The page gives both cards' values for these rows, each balance point against its own card's FLOP energy.
+    CARD_DIFFERENT = {"scp-local", "l2", "l1"}
+    e_byte_cfg = {"L2 scratchpad, own shire": "scp-local", "L2 cache": "l2", "L2 scratchpad, other shire": "scp-remote",
+                  "L3": "l3", "DRAM": "dram"}
+    e_l1["probe_pj_by_card"] = {c: lev["l1"]["per_card"][c]["mean"] for c in CARDS}
+
+    def e_row(n, v):
+        pc = v["per_card"]
+        return {"name": n, "pj": v["mean"], "lo": v["lo"], "hi": v["hi"], "balance_fp32": v["mean"] / ef,
+                "balance_int8": pc[ei_card]["mean"] / ei, "differ": e_byte_cfg.get(n) in CARD_DIFFERENT,
+                "per_card": {c: {"pj": pc[c]["mean"], "balance_fp32": pc[c]["mean"] / ef_c[c]} for c in CARDS}}
+
+    # Energy against time, card by card: a balance point lies on one side of its time ridge only if it does on each
+    # card. Per card, the byte energy's 99% interval over that card's passes (t with n - 1 df on the passes' se) is
+    # divided by the card's FLOP energy widened to the pooled range over all the runs (aifoundry3 has one fp32 run of
+    # each operand set, so its FLOP side has no interval of its own). Verdict: "arith" when both cards' intervals lie
+    # below the ridge (the arithmetic costs more), "data" when both lie above, otherwise "overlap" (no verdict).
+    # Bytes as the page's chart uses them: the own scratchpad and DRAM on the same operands (section 4.1), the other
+    # levels on unset buffers (sections 4.2 and 5); TensorSend between shires over its patterns.
+    T995 = {1: 63.657, 2: 9.925, 3: 5.841, 4: 4.604, 5: 4.032}  # two-sided 99% t by degrees of freedom
+    OPS_FL = {"random": ("fp32_randn", "random"), "ones": ("fp32_ones", "const"), "zeros": ("fp32_zeros", "zeros")}
+    by_key = {lv["key"]: lv for lv in L}
+
+    def card_iv(entries, cfg, card):
+        b = bars[cfg]
+        f_c, f_lo, f_hi = b["per_card"][card]["mean"] / 2, b["lo"] / 2, b["hi"] / 2
+        pcs = [e["per_card"][card] for e in entries if card in e["per_card"]]
+        lo = min(p["mean"] - T995[p["n"] - 1] * p["se"] for p in pcs) / max(f_hi, f_c)
+        hi = max(p["mean"] + T995[p["n"] - 1] * p["se"] for p in pcs) / min(f_lo, f_c)
+        return {"point": [min(p["mean"] for p in pcs) / f_c, max(p["mean"] for p in pcs) / f_c], "ci99": [lo, hi]}
+
+    check = {}
+    for op, (cfg, o) in OPS_FL.items():
+        src = {"scp": [cat[f"tload/scp/{o}"]], "l2": [lev["l2"]], "scp_remote": [lev["scp-remote"]], "l3": [lev["l3"]],
+               "dram": [cat[f"tload/dram/{o}"]], "fln": [rings["pair"]], "xbar": [rings["shire"]],
+               "xmesh": [rings[k] for k in xs_keys]}
+        for basis in ("measured", "spec"):
+            for key, entries in src.items():
+                r = (by_key[key]["ridge"].get(basis) or {}).get("fp32")
+                cards = {c: card_iv(entries, cfg, c) for c in CARDS}
+                if r is None:
+                    v = "none"
+                else:
+                    r0, r1 = (r if isinstance(r, list) else [r, r])
+                    v = ("arith" if all(x["ci99"][1] < r0 for x in cards.values()) else
+                         "data" if all(x["ci99"][0] > r1 for x in cards.values()) else "overlap")
+                check.setdefault(op, {}).setdefault(basis, {})[key] = {"cards": cards, "verdict": v}
+
+    xs_card = [rings[k]["per_card"][ei_card]["mean"] for k in xs_keys if ei_card in rings[k]["per_card"]]
     energy = {"e_flop": e_flop,
-              "e_byte": [e_l1] + [{"name": n, "pj": v["mean"], "lo": v["lo"], "hi": v["hi"], "balance_fp32": v["mean"] / ef,
-                                   "balance_int8": v["mean"] / ei} for n, v in e_byte],
+              "e_byte": [e_l1] + [e_row(n, v) for n, v in e_byte],
               "xshire": {"pj": xs_pj, "patterns": xs_keys, "hops": [min(hops), max(hops)],
-                         "balance_fp32": [x / ef for x in xs_pj], "balance_int8": [x / ei for x in xs_pj]},
+                         "balance_fp32": [x / ef for x in xs_pj], "balance_int8": [min(xs_card) / ei, max(xs_card) / ei]},
+              "int8_card": ei_card,
+              "check": check,
               "random_tload": {w: {"pj": v, "balance_fp32": v / ef} for w, v in rnd.items()},
               "tload_by_operand": tload, "tload_by_operand_range": tload_rng,
               "awake_floor": {"w": floor_w, "tensor_flop_per_s": flops, "balance_drop": [min(drops), max(drops)],
@@ -494,11 +554,22 @@ def main():
         if e.get("vs"):
             print(f"  {e['name']:34s} {e['pj']:7.2f} pJ/B -> balance against {e['vs']} {e['balance_fp32']:6.2f} FLOP/B")
             continue
-        print(f"  {e['name']:34s} {e['pj']:7.2f} pJ/B -> balance fp32 {e['balance_fp32']:6.2f} FLOP/B, int8 {e['balance_int8']:6.1f} OP/B")
+        pc = "; per card " + ", ".join(f"{c} {v['pj']:.2f} pJ/B -> {v['balance_fp32']:.2f}" for c, v in e["per_card"].items())
+        print(f"  {e['name']:34s} {e['pj']:7.2f} pJ/B -> balance fp32 {e['balance_fp32']:6.2f} FLOP/B, int8 "
+              f"{e['balance_int8']:6.1f} OP/B ({energy['int8_card']})" + (pc + " (the cards differ)" if e["differ"] else ""))
     xs = energy["xshire"]
     print(f"  {'TensorSend between shires':34s} {xs['pj'][0]:.2f}-{xs['pj'][1]:.2f} pJ/B -> balance fp32 "
           f"{xs['balance_fp32'][0]:.2f}-{xs['balance_fp32'][1]:.2f}, int8 {xs['balance_int8'][0]:.1f}-{xs['balance_int8'][1]:.1f} "
-          f"({len(xs['patterns'])} patterns, {xs['hops'][0]:.2f}-{xs['hops'][1]:.2f} hops mean)")
+          f"({energy['int8_card']}) ({len(xs['patterns'])} patterns, {xs['hops'][0]:.2f}-{xs['hops'][1]:.2f} hops mean)")
+    print("  Energy against time, per card (99% interval of the balance point; verdict only when both cards agree):")
+    for op, bases in energy["check"].items():
+        for basis, rows in bases.items():
+            for key, r in rows.items():
+                if r["verdict"] == "none":
+                    continue
+                print(f"    {op:6s} {basis:8s} {key:10s} {r['verdict']:7s} " + " | ".join(
+                    f"{c} {v['point'][0]:.2f}" + (f"-{v['point'][1]:.2f}" if v['point'][1] != v['point'][0] else "")
+                    + f" [{v['ci99'][0]:.2f}, {v['ci99'][1]:.2f}]" for c, v in r["cards"].items()))
     for w, v in energy["random_tload"].items():
         print(f"  TensorLoad from {w} on random data: {v['pj']:.2f} pJ/B -> balance fp32 {v['balance_fp32']:.2f} FLOP/B")
     for w, t in tload.items():

@@ -172,17 +172,23 @@ def main():
         f_fast = 0.6 * b31 / b0
         t_hop = b0 / 0.6
         t0 = (a31 - a0) / (f_fast - 0.6)
-        scp_model = {"c": round(a0 - t0 * 0.6, 2), "t0": round(t0, 2), "hop": round(t_hop, 2)}
-        near = n = 0
+        # fit_rows: the rows the four numbers come from; the other rows are the out-of-sample test of the model.
+        scp_model = {"c": round(a0 - t0 * 0.6, 2), "t0": round(t0, 2), "hop": round(t_hop, 2), "fit_rows": [0, 31]}
+        near = n = near_out = n_out = 0
         for src, vals in raw.items():
             for t, v in enumerate(vals):
                 if t == src:
                     continue
-                n += 1
                 pred = [scp_model["c"] + (scp_model["t0"] + scp_model["hop"] * hops(src, t)) * g for g in (0.6, 0.7, 0.8)]
-                near += min(abs(v - q) for q in pred) <= 1
+                ok = min(abs(v - q) for q in pred) <= 1
+                n += 1
+                near += ok
+                if src not in scp_model["fit_rows"]:
+                    n_out += 1
+                    near_out += ok
         print(f"remote scratchpad load = {scp_model['c']:.2f} minion cycles + ({scp_model['t0']:.2f} ns + "
-              f"{scp_model['hop']:.2f} ns x hops); {near} of {n} loads within 1 cycle of it at the nearest operating point")
+              f"{scp_model['hop']:.2f} ns x hops), fitted to rows 0 and 31; {near} of {n} loads within 1 cycle of it at the "
+              f"nearest operating point, {near_out} of {n_out} in the rows it was not fitted to")
 
     # L3: shire 24 is the one requester measured at both clocks, so its chases give c cycles + t ns; t is the fixed
     # part (mesh at 400 MHz, slice), and 20 ns of it per hop of the mean trip from the requester to the 32 slices.

@@ -5,9 +5,9 @@
 found that <q>shire 0 got 6% of its fair share and finished only after the other 31</q>. The obvious reading is
 that the shire cache short-changes whoever owns the line. <b>It does not. The atomic is shared out to within
 half a percent (every shire between 0.998 and 1.004 of an even split), including with the shire that hosts it.
-What that shire loses is something else entirely: its own memory path, which stops — not slows, stops — for as
-long as the hammering lasts.</b> The switch is sharp: about 24 requesters in one other shire flip it, fewer than
-the 32 minions a shire has. It reproduces on both cards we could run it on (aifoundry2 and aifoundry3).</p>
+What that shire loses is something else entirely: with the clock steady at 600 MHz, its own memory path stops
+— not slows, stops — for as long as the hammering lasts.</b> The switch is sharp: about 24 requesters in one
+other shire flip it, fewer than the 32 minions a shire has. It reproduces on both cards we could run it on (aifoundry2 and aifoundry3).</p>
 
 <details class="terms"><summary>Terms used on this page</summary>
 <p class="small">Minions are the chip's small in-order RISC-V cores, 32 to a shire, and each shire's 4 MB of SRAM,
@@ -62,9 +62,19 @@ window is 5 milliseconds or 100:</p>
 
 <div class="table-wrap"><table id="wintab"></table></div>
 
-<p>Twelve loads per minion get through while the mesh traffic ramps up, and then nothing — through six million
-remote atomics. The 32 minions of that shire, a full thirty-second of the chip, are stalled in a load
-instruction that does not return. Nothing reports an error; the kernel finishes when the hammering stops.</p>
+<p>About seventeen loads per minion get through, five warm-up loads before the window opens and twelve inside
+it, and then nothing: none through the 120 million remote atomics of a 2-second window, in all 21 such runs of
+the 23 September passes on the two cards. The 32 minions of that shire, a full thirty-second of the chip, are
+stalled in a load instruction that does not return. Nothing reports an error; the kernel finishes when the hammering stops.</p>
+
+<p>The stop was measured with the minion clock steady at 600 MHz. In one session on aifoundry2, whose governor
+can move the clock (aifoundry3's firmware holds it at 600 MHz), the ten 2-second runs in which the clock moved
+between 600, 700 and 800 MHz let the host's loads through at 1–7% of their rate with nobody hammering, while
+the two that stayed at 600 MHz stopped
+at 384. One session does not establish that the clock is the cause, nor whether its level or its change would
+be. That session, the
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-23-reruns-aifoundry2">first
+rerun attempt of 23 September</a>, was discarded for the energy figures because its clock moved.</p>
 
 <h2 id="the-threshold-is-the-bank-going-saturated">3. The threshold is the bank going saturated</h2>
 <p>It takes one other shire. Two shires run, the host and one other, each with the same number of minions
@@ -102,7 +112,8 @@ yield has no sub-bank granularity, so a host request to the sub-bank the hot lin
 skipped indefinitely, and each host minion's stream reaches that sub-bank sooner or later. It was not tested.
 <b>Does it hold when the line is DRAM-backed rather than in scratchpad?</b> Yes, and slightly worse: 192–240 of
 the host's loads get through instead of 384 (section 2). The erratum's title says <q>same SCP address</q>, but
-the behaviour is not specific to the scratchpad. Any address whose home is that shire cache will do it.</p>
+the behaviour is not specific to the scratchpad: both kinds of address tested, a scratchpad word and a DRAM
+line homed in that shire, do it.</p>
 
 <p>Worth noting what Esperanto rated the impact: <q>Low. It would have to be a pretty consistent and repeating
 pattern …</q> A shared counter, a lock, a flag or a queue head is a pretty consistent and repeating pattern.</p>
@@ -129,8 +140,9 @@ atomics a second matches the figure Ivan quoted, which settles that it was an ag
 number.</p>
 
 <h3 id="what-it-costs-in-energy">What it costs in energy</h3>
-<p>Contention is not just slow, it is expensive per unit of work. Board power over idle on aifoundry2, measured
-at 10 Hz across three back-to-back launches of each case, with the die at 72–73 °C:</p>
+<p>Contention is not just slow, it is expensive per unit of work. Board power over idle on aifoundry2, in one
+session, measured at 10 Hz across three back-to-back launches of each case, with the die at 72–73 °C; the last
+column adds the 23 September passes on both cards:</p>
 
 <div class="table-wrap"><table id="pwrtab"></table></div>
 <p class="small" id="pwrnote">The rates in this table are timed by the power runs themselves, so they differ
@@ -149,12 +161,12 @@ barrier's arrivals serialise in 320 cycles, against a
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">chip-wide
 barrier of about 5,000 cycles</a> (<span id="bar1"></span> with one minion per shire): six percent. But 31 shires
 polling one line are already past the edge in section 3, so wait on a per-shire flag or a credit instead. The
-relay's first barrier, with every shire's leader polling one counter, hung
-(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a>). At 1,024
+relay's first barrier, with every shire's leader polling one counter, hung in the one development run we made,
+on a card not recorded (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a>). At 1,024
 participants the arrivals alone take 10,240 cycles, twice the whole barrier, with the hosting shire stopped
 throughout.</li>
 <li><b>Keep hot shared lines out of shires that compute.</b> The cost is not paid by the code touching the
-line. It is paid by whatever else lives in that shire, and it is total. Make the owner a shire that does no
+line. It is paid by whatever else lives in that shire, and at a steady 600 MHz it is total. Make the owner a shire that does no
 compute: one of 32 is 3.1% of the chip. Not the master shire, whose scratchpad the firmware uses.</li>
 <li><b>If you must, pace it:</b> <span id="pacerule"></span></li>
 <li><b>Spread instead of sharing when you can.</b> One line per shire is the same instruction at 32 times the
@@ -181,7 +193,9 @@ atomic leaves through the same L3-slave port as everyone else's, so the arbitrat
 never applies to it. The starvation in section 2 needs an ordinary load or store, which is what a computing
 shire issues.</li>
 <li>Every sweep ran on aifoundry2 and was repeated on aifoundry3; the energy table in section 6 is aifoundry2
-only (both cards are in the 23 September reruns). In the 40 configurations that have a host shire, its count
+only (both cards are in the 23 September reruns). A result that names no card held on both, in three or more
+independent runs or as the same deterministic count on each; where one rests on one card, one session or fewer
+runs, the text says so. In the 40 configurations that have a host shire, its count
 matches exactly in 15 and agrees within 2% in all but one: the host reading scratchpad under a DRAM-homed hot
 line, 208 against 240. Raw data in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-hotline-aifoundry2"><code>docs/reports/data/2026-09-22-hotline-aifoundry2/</code></a>
 and <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-hotline-aifoundry3"><code>docs/reports/data/2026-09-22-hotline-aifoundry3/</code></a>,
@@ -220,7 +234,10 @@ published 22 September 2026; revised 24 September 2026 after a review (terms, th
 rerun energies, the threshold as a range, links); revised 25 September 2026 (the bank rule is necessary, not
 sufficient; the chip barrier read from its raw file, 4,995 cycles rather than 4,997; the pooled energies in the
 table; the fairness chart by mesh distance and the threshold chart by offered load; the cost of contention moved
-next to its energy).</p>
+next to its energy); 25 September (version 3): the stop stated for a steady 600 MHz clock, with the aifoundry2
+session in which a moving clock let loads through; the loads that get through counted with their warm-up; the
+first energy session's reduction named instead of its place in the ranges; one-off observations labelled; record
+in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3/</code></a>.</p>
 
 <h2 id="related-reports">Related reports</h2>
 <ul>
@@ -229,7 +246,8 @@ companion: share data between shires through a slab of scratchpad instead of one
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#synchronisation">The ET-SoC-1 energy
 manual, section 6</a> — these energies re-measured on both cards, with ranges.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">On-chip
-communication</a> — the chip-wide barrier (8.3 µs from global atomics and credits, 2.3 µs on the hardware tree)
+communication</a> — the chip-wide barrier on aifoundry2 (8.3 µs from global atomics and credits, 2.3 µs on the
+hardware tree)
 and the reduction trees that can replace one global counter.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#l3-110-cycles-plus-12-per-hop">Anatomy of
 a memory access</a> — how physical-address bits 10:6 pick a line's home shire, and what an L3 hit costs per mesh

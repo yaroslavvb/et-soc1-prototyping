@@ -77,6 +77,40 @@ def main():
         out["rest"]["cards"] = cfg
     except Exception:
         pass
+    # How well the idle bins pin the law down. The fit's idle samples cover 64-67 and 81-88 C and fit equally well
+    # (rms within 0.007 W) with the leakage e-folding anywhere from 30 to 45 C (the version-3 check,
+    # docs/reports/data/2026-09-25-claims-v3/: horace-lowpower-084/087, dvfs-05; decision D3), so the split into
+    # fixed and leakage is given as the range over that window, and the slope at 80 C, which barely moves, is the
+    # measured number. Each fit here is the law refitted to model.json's whole-degree idle bins, weighted by their
+    # sample counts, with T_L held; at T_L = 36 C it reproduces the published law to 0.05 W.
+    tl_window = (30, 45)
+    bins = m["idle_curve"]
+    wsum = sum(b["n"] for b in bins)
+    fits = []
+    for tl in range(tl_window[0], tl_window[1] + 1):
+        xs = [math.exp((b["T"] - 80) / tl) for b in bins]
+        mx = sum(b["n"] * x for b, x in zip(bins, xs)) / wsum
+        my = sum(b["n"] * b["P"] for b in bins) / wsum
+        A = (sum(b["n"] * (x - mx) * (b["P"] - my) for b, x in zip(bins, xs)) /
+             sum(b["n"] * (x - mx) ** 2 for b, x in zip(bins, xs)))
+        fits.append({"T_L_c": tl, "P_fix_w": my - A * mx, "A_leak_80_w": A, "lambda_80_w_per_c": A / tl})
+    span = lambda k: [min(f_[k] for f_ in fits), max(f_[k] for f_ in fits)]
+    def share(f_, t):
+        lk = f_["A_leak_80_w"] * math.exp((t - 80) / f_["T_L_c"])
+        return lk / (f_["P_fix_w"] + lk)
+    def idle(f_, t):
+        return f_["P_fix_w"] + f_["A_leak_80_w"] * math.exp((t - 80) / f_["T_L_c"])
+    out["rest"]["profile"] = {
+        "T_L_window_c": list(tl_window), "P_fix_w": span("P_fix_w"), "A_leak_80_w": span("A_leak_80_w"),
+        "lambda_80_w_per_c": span("lambda_80_w_per_c"),
+        "doubling_c": [tl_window[0] * math.log(2), tl_window[1] * math.log(2)],
+        "leak_frac": {str(t): [min(share(f_, t) for f_ in fits), max(share(f_, t) for f_ in fits)] for t in T},
+        # how far the idle total itself moves between those fits, 45-95 C (the calculator's range)
+        "idle_spread_w_45_95": max(max(idle(f_, t) for f_ in fits) - min(idle(f_, t) for f_ in fits) for t in range(45, 96)),
+        "fits": fits,
+        "rule": "P = P_fix + A_leak_80 * exp((T - 80) / T_L) refitted with T_L held, weighted least squares on model.json idle_curve (weights n)",
+        "source": MODEL,
+    }
 
     # --- 3. instructions: the tensor unit, from the ablation (80 C, 600 MHz) ---------------------------
     def abl_row(k, label):
@@ -183,6 +217,23 @@ def main():
         # the leakage correction each burst received (section 9): its median and largest size, per card
         lc = {h: sorted(abs(b["leak_correction_w"]) for b in bs) for h, bs in bursts.items()}
         c["leak_correction"] = {h: {"median_w": statistics.median(v), "max_w": v[-1], "bursts": len(v)} for h, v in lc.items() if v}
+        # Per card, from the idle stretches that bracket every burst (sections 1 and 8): the unsensed remainder
+        # (board idle less the three rails' idle), the idle's residual against the section 1 law at the same die
+        # temperature, and the die temperature the bursts ran at. Pass means, so the unit is the pass.
+        law = lambda t: m["P_fix"] + m["A_leak_at_80"] * math.exp((t - 80) / m["T_L"])
+        def per_pass(bs, fn):
+            by = {}
+            for b in bs:
+                by.setdefault(b["pass"], []).append(fn(b))
+            pm = [statistics.fmean(v) for _, v in sorted(by.items())]
+            return {"mean": statistics.fmean(pm), "passes": pm}
+        c["idle_unsensed"] = {h: per_pass(bs, lambda b: b["p_idle_w"] - b["minion_idle_w"] - b["sram_idle_w"] - b["noc_idle_w"])
+                              | {"die_c": [min(b["die_c_idle"] for b in bs), max(b["die_c_idle"] for b in bs)]}
+                              for h, bs in bursts.items() if bs}
+        c["idle_law_residual"] = {h: per_pass(bs, lambda b: b["p_idle_w"] - law(b["die_c_idle"]))
+                                  | {"die_c": [min(b["die_c_idle"] for b in bs), max(b["die_c_idle"] for b in bs)]}
+                                  for h, bs in bursts.items() if bs}
+        c["die_c_busy_median"] = {h: statistics.median(b["die_c_busy"] for b in bs) for h, bs in bursts.items() if bs}
         # the sampler's latency per configuration is a record of the meter, not an energy: it stays in catalogue.json
         for card in c["cards"].values():
             for row in card["summary"].values():

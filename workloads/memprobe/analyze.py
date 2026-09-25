@@ -55,10 +55,8 @@ def ladder(data):
             for k, v in g_.items()}
 
 
-def ladder_by_ms(data, dec):
-    """The DRAM rows of the ladder by memory shire, against the closed-row model of decomp(): n, median, and the
-    median of (measured - model). Shows whether a load issued behind an evict found its row open (below the model)
-    or still waited for the evict at the memory shire (above it)."""
+def ladder_residuals(data, dec):
+    """The DRAM rows of the ladder as {condition: {memory shire: [(measured, measured - closed-row model)]}}."""
     _, labels, r = load(data, "ladder")
     const, pos = dec["ms_const"], dec["ms_pos"]
     g_ = collections.defaultdict(lambda: collections.defaultdict(list))
@@ -67,8 +65,28 @@ def ladder_by_ms(data, dec):
             pa = ARENA_BASE + lab[1]
             s, ms = (pa >> 6) & 31, (pa >> 6) & 7
             g_[f"{lab[0]}:3"][ms].append((v, v - (110 + 12 * g.hops(0, s) + const + 12 * dist(s, pos[ms]))))
+    return g_
+
+
+def ladder_by_ms(data, dec):
+    """The DRAM rows of the ladder by memory shire, against the closed-row model of decomp(): n, median, and the
+    median of (measured - model). Shows whether a load issued behind an evict found its row open (below the model)
+    or still waited for the evict at the memory shire (above it)."""
+    g_ = ladder_residuals(data, dec)
     return {k: {ms: {"n": len(v), "med": st.median(x for x, _ in v), "resid_med": st.median(e for _, e in v),
                      "fast": sum(1 for _, e in v if e <= -6)} for ms, v in sorted(x.items())} for k, x in g_.items()}
+
+
+def ladder_slow(data, dec):
+    """Per condition, the loads that did not find their row open (measured - model > -6), pooled over the memory
+    shires: n and the median of (measured - model). A per-shire median mixes these with the fast, open-row loads,
+    whose share differs by memory shire; this separates the two."""
+    g_ = ladder_residuals(data, dec)
+    out = {}
+    for k, x in g_.items():
+        e = [e for v in x.values() for _, e in v if e > -6]
+        out[k] = {"n": len(e), "resid_med": st.median(e), "above6": sum(1 for d in e if d > 6)}
+    return out
 
 
 def decomp(data):
@@ -257,7 +275,7 @@ def main():
            "pagetimeout": pagetimeout(args.data, ref),
            "power": json.load(open(os.path.join(args.data, "power", "summary.json")))["summary"],
            "far_hops": [g.hops(s, h) for s, h in sorted(g.far_homes().items())],
-           "ladder_by_ms": ladder_by_ms(args.data, dec)}
+           "ladder_by_ms": ladder_by_ms(args.data, dec), "ladder_slow": ladder_slow(args.data, dec)}
     json.dump(out, open(args.out, "w"), indent=1, default=str)
     d = out["decomp"]
     print(f"L3 model off by >4 cycles: {d['l3_model_off']}; memory shire constant {d['ms_const']}, "

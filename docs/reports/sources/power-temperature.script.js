@@ -44,17 +44,24 @@ const hideTip = f => { f.tip.style.display = 'none'; };
 
 /* ---------- numbers in the prose ---------- */
 put('law-fix', num(LAW.P_fix, 1)); put('law-a', num(LAW.A_at_80, 1)); put('law-tl', num(LAW.T_L, 0));
-put('law-slope80', num(lawSlope(80), 2));
+put('law-slope80', num(lawSlope(80), 2)); put('law-80', num(law(80), 0));
+{ // the whole-degree readings the idle fit used, as runs of consecutive degrees ("64–67 and 81–88")
+  const T = [...LAW.fit_T].sort((a, b) => a - b), runs = [];
+  for (const t of T) { const r = runs[runs.length - 1]; if (r && t === r[1] + 1) r[1] = t; else runs.push([t, t]); }
+  const txt = runs.map(([a, b]) => (a === b ? num(a, 0) : num(a, 0) + '–' + num(b, 0)));
+  put('law-trange', txt.length < 2 ? txt.join('') : txt.slice(0, -1).join(', ') + ' and ' + txt[txt.length - 1]);
+}
 const IDLE0 = S.filter(p => p.t + 1 <= T_MM), COOL = S.filter(p => p.t >= T_DR - 5 && p.t + 1 <= T_DR);
 put('box-idle-rest', num(mean(IDLE0.map(rest)), 0));
-const RF = CX.rail_filter.value, RFC = Object.values(RF);
-const span = (vals, dp, unit) => CK.fmt.range(Math.min(...vals), Math.max(...vals), dp, unit);
-// the rails' filter over the two cards (catalogue.json rail_filter: median fall after the board's step-down, per card)
-put('kpi-tau', span(RFC.map(c => c.tau_s), 2)); put('rf-tau', span(RFC.map(c => c.tau_s), 2));
+const RF = CX.rail_filter.value;
+// the rails' filter on each card (catalogue.json rail_filter: median fall after the board's step-down, per card)
+const pct = v => num(100 * v, 0) + '%';
+const tauCards = `${num(RF.aifoundry2.tau_s, 2)} s on aifoundry2, ${num(RF.aifoundry3.tau_s, 2)} s on aifoundry3`;
+put('kpi-tau', tauCards); put('rf-tau', tauCards);
 put('rf-n', `${num(RF.aifoundry2.n, 0)} load bursts on aifoundry2 and ${num(RF.aifoundry3.n, 0)} on aifoundry3`);
-put('rf-1s', CK.fmt.range(100 * Math.min(...RFC.map(c => c.frac_1s)), 100 * Math.max(...RFC.map(c => c.frac_1s)), 0) + '%');
-put('rf-2s', CK.fmt.range(100 * Math.min(...RFC.map(c => c.frac_2s)), 100 * Math.max(...RFC.map(c => c.frac_2s)), 0) + '%');
-put('ir-drop', num(CX.minion_ir_drop_mv_per_w.value, 3));
+put('rf-12s', `${pct(RF.aifoundry2.frac_1s)} after 1 s and ${pct(RF.aifoundry2.frac_2s)} after 2 s on aifoundry2, ` +
+  `${pct(RF.aifoundry3.frac_1s)} and ${pct(RF.aifoundry3.frac_2s)} on aifoundry3`);
+put('ir-drop', num(CX.minion_ir_drop_mv_per_w.value, 2));
 { // the busy drift of the strict Horace runs on each card, with how well its runs pin it down
   const BD = CX.busy_drift_cards, a2 = BD.aifoundry2, a3 = BD.aifoundry3;
   const rng = c => wholeRange(c.temp_c[0], c.temp_c[1]);
@@ -102,21 +109,22 @@ put('rest-cool', num(mean(COOL.map(rest)), 1)); put('rest-cool-t', num(mean(COOL
 
 /* ---------- §1: the instruments ---------- */
 const chip = (s, t) => `<span class="chip ${s}">${t}</span>`;
-const tauTxt = span(RFC.map(c => c.tau_s), 2), f2Txt = CK.fmt.range(100 * Math.min(...RFC.map(c => c.frac_2s)), 100 * Math.max(...RFC.map(c => c.frac_2s)), 0) + '%';
+const railTxt = `τ ≈ ${num(RF.aifoundry2.tau_s, 2)} s and ${pct(RF.aifoundry2.frac_2s)} of a step after 2 s on aifoundry2, ` +
+  `${num(RF.aifoundry3.tau_s, 2)} s and ${pct(RF.aifoundry3.frac_2s)} on aifoundry3`;
 const M = [
- ['Board power, now', 'whole card · new value per 133 ms · 10 mW', 'DM_CMD_GET_MODULE_POWER (ettelem: up to 45 samples/s; the SP refreshes it once per pass)', 'works_now', 'works now'],
+ ['Board power, now', 'whole card · a new value each SP pass: about every 156 ms on aifoundry2, 263 ms on aifoundry3, while ettelem samples at 10 Hz · 10 mW', 'DM_CMD_GET_MODULE_POWER (ettelem: up to 45 samples/s; the SP refreshes it once per pass)', 'works_now', 'works now'],
  ['Board power, PMIC average / min / max', 'whole card · the PMIC\'s running average, like the rails; min and max since the last stats reset', 'DM_CMD_GET_SP_STATS via ettelem (the stock CLI calls it unsupported), or the SPST trace', 'works_now', 'works now'],
- ['Rail power: minion cores, SRAM, mesh', `3 rails · 1 mW · the PMIC's running average (τ ≈ ${tauTxt} s; ${f2Txt} of a step after 2 s), one record per 133 ms, plus min/max`, 'same snapshot; the SPST trace keeps ~15 min of records with µs stamps', 'works_now', 'works now'],
+ ['Rail power: minion cores, SRAM, mesh', `3 rails · 1 mW · the PMIC's running average (${railTxt}), one record per SP pass, plus min/max`, 'same snapshot; the SPST trace keeps ~15 min of records with µs stamps', 'works_now', 'works now'],
  ['Rail voltage and clock', '3 rails · 1 mV · avg/min/max; minion and mesh MHz', 'same snapshot', 'works_now', 'works now'],
  ['On-die voltage per domain', '7 domains (DDR, SRAM, Maxion, minion, PCIe shire, mesh, IO shire) · 1 mV', 'DM_CMD_GET_ASIC_VOLTAGE; compare with the regulator set-points from DM_CMD_GET_MODULE_VOLTAGE for the drop to the die', 'works_now', 'works now'],
  ['On-die voltage per shire', '34 minion shires × 3 rails + 8 memory shires × 2 · 1 mV · current, and hardware low/high between polls', 'SP log at DEBUG level: ettelem loglevel debug + sptrace (4 KB buffer, wraps about once per pass)', 'works_now', 'works now'],
- ['Temperature', 'IO shire, and mean, low and high of the 34 minion-shire sensors · 1 °C · per 133 ms; "low/high" are extremes since reset, not the current spread', 'DM_CMD_GET_MODULE_CURRENT_TEMPERATURE (its field labelled PMIC holds the minion mean again)', 'works_now', 'works now'],
+ ['Temperature', 'IO shire, and mean, low and high of the 34 minion-shire sensors · 1 °C · per SP pass; "low/high" are extremes since reset, not the current spread', 'DM_CMD_GET_MODULE_CURRENT_TEMPERATURE (its field labelled PMIC holds the minion mean again)', 'works_now', 'works now'],
  ['Power state, throttle residency, thresholds', 'card-wide · µs residency counters', 'DM_CMD_GET_MODULE_POWER_STATE, _RESIDENCY_*, _TEMPERATURE_THRESHOLDS, _STATIC_TDP_LEVEL', 'works_now', 'works now'],
  ['Device-wide bandwidth and utilisation', 'DDR, L2/L3, PCIe · 1 ms samples', 'MMST trace; a proxy for where memory energy goes', 'works_now', 'works now'],
  ['Energy per event', 'pJ per load, per multiply-add, per mesh hop · needs ≥10⁹ identical events/s for seconds', 'rail power above a same-temperature baseline ÷ event rate (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes">memory anatomy</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment</a>; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">the energy manual</a> does it for every instruction and byte)', 'works_now', 'works now'],
  ['Static against dynamic power', 'per rail', 'frequency sweep at fixed voltage: DM_CMD_SET_FREQUENCY with power management off. Changes the card for everyone; not run here', 'works_now', 'works now, with care'],
  ['Instantaneous rail power', '3 rails · 1 mW · per pass', 'the SP already reads it each pass and discards it; a few assignments in thermal_pwr_mgmt.c', 'needs_fw_change', 'firmware'],
- ['Faster sampling', 'tens to hundreds of Hz', 'the 133 ms pass is ~96 I2C transactions each followed by a hard-coded 1 ms wait; skip the 84-read snapshot and fix the wait', 'needs_fw_change', 'firmware'],
+ ['Faster sampling', 'tens to hundreds of Hz', 'in the firmware source each pass makes ~96 I2C transactions, each followed by a hard-coded 1 ms wait, a floor of about 100 ms; the measured pass is longer (about 135 ms on aifoundry2 with a light poller in one session, 156 ms while ettelem samples at 10 Hz, and about 1.7× as long on aifoundry3, for reasons not established). Skip the 84-read snapshot and fix the wait', 'needs_fw_change', 'firmware'],
  ['Per-shire temperature; process detectors', '34 shires · 0.06 °C in hardware; ring-oscillator counts in µs windows', 'sampled continuously by the PVT controllers, never exported', 'needs_fw_change', 'firmware'],
  ['DDR, PCIe, Maxion, IO rails', '—', 'regulators with set-points but no current sense: only "board minus three rails"', 'impossible_on_silicon', 'no sensor'],
  ['Board power at kHz', 'whole card · ~1 ms', 'scope on the hot-swap controller\'s current-monitor pin, or a PCIe riser with a shunt', 'needs_tooling', 'hardware'],

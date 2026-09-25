@@ -49,7 +49,6 @@ python3 tools/ettelem/build_horace_report_data.py --strict "$D/horace3.json" --t
   --validation "$D/validation_timesplit.json" "$D/validation_afternoon.json" "$D/model_firsthalf.json" --out "$D/report.json"
 # the 600 against 800 MHz operating points of the cool starts (why-low-power's Voltage and clock)
 python3 tools/ettelem/build_vf.py --cold "$D/cold1" "$D/cold2" --ablation "$D/ablation.json" --out "$D/vf.json"
-python3 tools/ettelem/build_lowpower_report_data.py --ablation "$D/ablation.json" --model "$D/model.json" --toggles "$D/toggles.json" --vf "$D/vf.json" --out "$D/lowpower-report.json"
 
 python3 tools/ettelem/make_heating_gif.py "$D/horace3.json" docs/reports/horace-heating.gif --poster docs/reports/horace-heating.png --steps
 python3 tools/ettelem/make_heating_gif.py "$D/horace3.json" docs/reports/horace-heating-6.gif --poster docs/reports/horace-heating-6.png --steps \
@@ -71,6 +70,10 @@ python3 tools/ettelem/build_cards_data.py --cards "$A3/cards.json" \
   --config docs/reports/data/2026-09-22-cards/config.json --driver docs/reports/data/2026-09-22-cards/driver_config.json \
   --sptrace docs/reports/data/2026-09-22-cards/sptrace-aifoundry3.bin --out docs/reports/data/2026-09-22-cards/cards-report.json \
   --merge docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json "$D/report.json"
+
+# why-low-power's data, after the second card's strict session so its values can stand beside aifoundry2's
+python3 tools/ettelem/build_lowpower_report_data.py --ablation "$D/ablation.json" --model "$D/model.json" --toggles "$D/toggles.json" --vf "$D/vf.json" \
+  --second-card "$A3/horace3.json" --out "$D/lowpower-report.json"
 
 python3 scripts/build-report.py horace-experiment "$D/report.json" docs/reports/2026-09-20-horace-experiment.html
 python3 scripts/build-report.py why-low-power "$D/lowpower-report.json" docs/reports/2026-09-21-why-low-power.html

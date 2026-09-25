@@ -27,7 +27,8 @@ const POOLED={
  relay:{dram:{mean:105.7441,lo:99.4722,hi:111.0366,n:8,per_card:{aifoundry2:{mean:102.1385,n:4},aifoundry3:{mean:109.3497,n:4}}},
   scp:{mean:3.9935,lo:3.9038,hi:4.2497,n:8,per_card:{aifoundry2:{mean:4.0178,n:4},aifoundry3:{mean:3.9691,n:4}}},
   hop:{mean:8.5934,lo:7.775,hi:9.2058,n:8,per_card:{aifoundry2:{mean:9.078,n:4},aifoundry3:{mean:8.1087,n:4}}}},
- read:{dram:{mean:121.9633,lo:116.7837,hi:129.0313,n:6},'scp-local':{mean:2.5152,lo:2.3927,hi:2.6439,n:6},
+ read:{dram:{mean:121.9633,lo:116.7837,hi:129.0313,n:6},'scp-local':{mean:2.5152,lo:2.3927,hi:2.6439,n:6,
+   per_card:{aifoundry2:{mean:2.3980,n:3},aifoundry3:{mean:2.6325,n:3}}},
   'scp-remote':{mean:6.6546,lo:5.3096,hi:7.478,n:6}}
 };
 
@@ -107,7 +108,7 @@ CK.stackTable('media');
   }});
  const w=p.media.map(m=>m.over_idle_w), dr=med('dram'), q=POOLED.relay;
  $('samewcap').textContent=
-  `Watts and GB/s are the power session on ${A2}: board power over an idle of ${f2(p.idle.board_w)} W, and the rate while the kernel runs, `+
+  `Watts and GB/s are from one power session on ${A2}: board power over an idle of ${f2(p.idle.board_w)} W, and the rate while the kernel runs, `+
   `from the cycle counter, during those bursts (the headline runs in the table above ran at ${MED.map(m=>g1(H[m[0]].gb_s)).join(', ')} GB/s). `+
   `Energy per byte pools ${q.dram.n} passes, ${word(q.dram.per_card[A2].n)} per card with this session among them: the bar is the mean, the whisker the range, `+
   `the filled dot ${A2}'s mean, the ring ${A3}'s, the tick this session. The power moves by ${f1(Math.max(...w)-Math.min(...w))} W while the work grows `+
@@ -125,7 +126,9 @@ CK.stackTable('media');
  CK.stackTable('power');
  const duty=p.media.map(m=>m.duty);
  $('powernote').textContent=
-  `One session on ${A2}, board power. Idle was ${f2(p.idle.board_w)} W at a die temperature of ${f0(p.idle.die_c)} °C, and the `+
+  `One session on ${A2}, board power, reduced against one idle for the whole session with no leakage correction (the 23 September `+
+  `passes pooled in the last column were reduced against the idle just before and after each burst and corrected for leakage). `+
+  `Idle was ${f2(p.idle.board_w)} W at a die temperature of ${f0(p.idle.die_c)} °C, and the `+
   `minion clock stayed at 600 MHz throughout. The GB/s column is the rate while the kernel runs, from the cycle counter, and the kernel ran only `+
   `${f0(100*Math.min(...duty))}–${f0(100*Math.max(...duty))}% of each burst; `+
   `the watts are averaged over the whole burst, launch gaps included, so pJ per byte is watts over idle ÷ `+
@@ -136,7 +139,8 @@ CK.stackTable('media');
   `${pc[A2].n===pc[A3].n?word(pc[A2].n)+' per card':word(pc[A2].n)+' on '+A2+', '+word(pc[A3].n)+' on '+A3}; `+
   `<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">§5</a>): `+
   `${f0(q.dram.mean/q.hop.mean)}× and ${f0(q.dram.mean/q.scp.mean)}× less than DRAM. Reading a byte costs ${f0(r.dram.mean)} `+
-  `[${f0(r.dram.lo)}–${f0(r.dram.hi)}] pJ from DRAM, ${f2(r['scp-local'].mean)} from the shire's own scratchpad and `+
+  `[${f0(r.dram.lo)}–${f0(r.dram.hi)}] pJ from DRAM, ${f2(r['scp-local'].per_card[A2].mean)} on ${A2} and `+
+  `${f2(r['scp-local'].per_card[A3].mean)} on ${A3} from the shire's own scratchpad, and `+
   `${f2(r['scp-remote'].mean)} from another shire's (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">the energy manual, §4</a>).`;
 })();
 
@@ -191,7 +195,7 @@ CK.stackTable('media');
   `${small.hop_over_dram.toFixed(2)}×, which is nothing, and keeping it in the shire's own scratchpad `+
   `${small.scp_over_dram.toFixed(1)}×. Up to ${mb(lastfit)} MB per buffer, while both buffers fit in the L3, the hand-off `+
   `wins at most ${hopMax.toFixed(1)}×. At ${mb(last)} MB per buffer, a ${2*mb(last)} MB footprint, the DRAM route falls to `+
-  `<b>${g1(last.dram.gb_s)} GB/s</b> and stays there: ${and(big.map(r=>g1(r.gb_s)))} GB/s at `+
+  `<b>${g1(last.dram.gb_s)} GB/s</b> and stays below ${f0(Math.ceil(Math.max(...big.map(r=>r.gb_s))))} GB/s: ${and(big.map(r=>g1(r.gb_s)))} GB/s at `+
   `${and(big.map(r=>String(mb(r))))} MB per buffer. `+
   `<b>The advantage is not a property of the computation. It is the L3 capacity.</b> Below it the cache is already doing most of the job; `+
   `above it, nothing is, unless you place the data yourself.`;
@@ -256,8 +260,8 @@ CK.stackTable('media');
   `the mesh: on the shire map of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip `+
   `communication report</a>, the next shire in the ring is on average ${f1(k(1).mean)} mesh hops away `+
   `(${rngH(k(1))}), two places on ${f1(k(2).mean)}, and sixteen places on only ${f1(k(16).mean)} (${rngH(k(16))}). `+
-  `Across the ${word(d.length)} offsets the bandwidth runs from ${n0(Math.min(...gb2))} to ${n0(Math.max(...gb2))} GB/s. It does not follow `+
-  `the mean distance (${f1(Math.min(...mh))} to ${f1(Math.max(...mh))} hops). It falls with the longest hand-off in the ring: `+
+  `Across the ${word(d.length)} offsets the bandwidth runs from ${n0(Math.min(...gb2))} to ${n0(Math.max(...gb2))} GB/s. Over these `+
+  `${word(d.length)} offsets no relation to the mean distance (${f1(Math.min(...mh))} to ${f1(Math.max(...mh))} hops) could be seen. It falls with the longest hand-off in the ring: `+
   `${and(byL.map(String))} hops give ${and(byL.map(rngOf))} GB/s${same?', in the same order on both cards':''}. That is what one would expect `+
   `when every stage waits at a barrier for its slowest shire, but ${word(d.length)} offsets are a correlation, not a controlled test.`;
  const W_='style="white-space:normal"';
@@ -378,6 +382,6 @@ CK.stackTable('media');
   `The map colours each shire by how many mesh hops the slab it reads at this offset has to travel (the stronger the blue, the farther); the arrows mark `+
   `the longest hand-offs, drawn straight from source to destination because the route the data takes on the mesh was not measured. `+
   `The scatter puts the relay's bandwidth against the longest hand-off (or, toggled, the mean): r = ${rng(D.cards.map(c=>R.longest[c].r),v=>num(v,2))} `+
-  `against the longest on the two cards, ${D.cards.map(c=>num(R.mean[c].r,2)).join(' and ')} against the mean. Filled ${A2}, rings ${A3}. `+
+  `against the longest on the two cards, ${D.cards.map(c=>num(R.mean[c].r,2)).join(' and ')} against the mean, which ${word(d.length)} points cannot tell from none. Filled ${A2}, rings ${A3}. `+
   `Consistent with the slowest pair setting the pace at each barrier; ${word(d.length)} offsets, not a controlled test.`;
 })();

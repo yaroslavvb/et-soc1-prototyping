@@ -118,6 +118,8 @@ def main():
               and sum(s_["minions"] for s_ in r["shire"] if s_["s"] != host_shire(r)) == 1)
     rem1 = [s_["ops"] for s_ in r1["shire"] if s_["s"] != host_shire(r1)]
     ctx["remote_atomic_latency_cycles"] = round(r1["window_cycles"] / float(np.mean(rem1)), 1)
+    # the shire that one requester ran in: the round trip above is from there, with the bank idle
+    ctx["remote_atomic_latency_shire"] = next(s_["s"] for s_ in r1["shire"] if s_["s"] != host_shire(r1) and s_["minions"])
     single = [r["cycles_per_op"] for r in rows if r["group"] == "placement" and not r["home"].endswith("own")]
     ctx["bank_service_cycles"] = float(np.median(single))
     if a.context:

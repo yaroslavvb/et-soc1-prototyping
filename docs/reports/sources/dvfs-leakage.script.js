@@ -17,6 +17,44 @@ const short = w => (w && w.startsWith('unattributed') ? 'unattributed' : w);
 const CAUSE = {thermal: {c: 'var(--c7)', m: 'dot'}, 'thermal+power': {c: 'var(--bad)', m: 'box'},
   power: {c: 'var(--c4)', m: 'dot'}, unattributed: {c: 'var(--ref)', m: 'ring'}};
 const UPC = 'var(--c3)';
+// days as prose: ['2026-09-21', '2026-09-23'] -> '21 and 23 September'; three or more in a row -> '22–24 September'
+const dayList = ds => {
+  const d = [...new Set(ds)].sort().map(x => +x.slice(8, 10)), run = d.every((v, k) => !k || v === d[k - 1] + 1);
+  return (d.length === 1 ? d[0] : run && d.length > 2 ? d[0] + '–' + d[d.length - 1]
+    : d.slice(0, -1).join(', ') + ' and ' + d[d.length - 1]) + ' September';
+};
+const G = D.governor_days;                                         // the governor on aifoundry2, two days
+const IS = D.idle_sessions.summary, S2 = IS.aifoundry2, S3 = IS.aifoundry3;   // the idle law, session by session
+
+/* The idle law and its split. The law's total and slope are well determined; its split into fixed and leakage
+   power is not: D.leak_split refits the split at the two ends of the leakage temperature scales that fit the
+   idle readings about as well as the central fit, so every share is quoted as the range between those ends. */
+const LAW = (() => {
+  const busy = D.busy_randn_80c;
+  const mk = (P_fix, A, T_L) => {
+    const leak = T => A * Math.exp((T - 80) / T_L), law = T => P_fix + leak(T);
+    return {P_fix, A, T_L, leak, law, slope: T => leak(T) / T_L, SW: busy - law(80)};   // SW: the matmul's switching watts at 80 °C
+  };
+  const c = mk(D.leak_model.P_fix, D.leak_model.A_at_80, D.leak_model.T_L);
+  const ends = D.leak_split.ends.map(e => mk(e.P_fix, e.A_at_80, e.T_L));
+  const idleSh = (f, T) => f.leak(T) / f.law(T), busySh = (f, T) => f.leak(T) / (f.law(T) + f.SW);
+  const span = g => { const v = ends.map(g); return [Math.min(...v), Math.max(...v)]; };
+  return {c, ends, idleSh, busySh, span, busy};
+})();
+const pctR = ([a, b]) => range(100 * a, 100 * b, 0) + '%';
+const T3 = Math.round(D.cards.launch.aifoundry3.T);               // aifoundry3's launch temperature, whole degrees
+Object.assign(V, {
+  slope80: f2(LAW.c.slope(80)),
+  slopeR: range(...LAW.span(f => f.slope(80)), 2),
+  leakR: range(...LAW.span(f => f.A), 0),
+  fixR: range(...LAW.span(f => f.P_fix), 0),
+  tlR: range(...D.leak_split.T_L, 0, ' to '),
+  idleShR: pctR(LAW.span(f => LAW.idleSh(f, 80))),
+  busyShR: pctR(LAW.span(f => LAW.busySh(f, 80))),
+  busy3R: pctR(LAW.span(f => LAW.busySh(f, T3))),
+  T3: f0(T3),
+  busyW: f0(LAW.busy),
+});
 
 /* ---------- the seven cool-start runs and their 36 clock changes ---------- */
 const RUNS = [...D.traces].sort((a, b) => a.session.localeCompare(b.session) || a.proc - b.proc);
@@ -308,18 +346,21 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
 /* ---------- the verdict table ---------- */
 (function () {
   const s = D.transition_summary, w = D.wakeup, ic = D.idle_check, m = D.leak_model;
-  const R = [['Any mature design runs a DVFS loop that steps voltage and frequency to stay inside a power and thermal envelope.', 'confirmed',
-    `Three operating points, ${OPS.map(o => o.mhz + ' MHz at ' + f2(o.volts) + ' V').join(', ')}. Voltage moved with frequency in all ${TR.length} observed transitions.`],
+  const vAll = G.voltage_tracks_strictly === G.changes ? `, and in all ${f0(G.changes)} clock changes of eight sessions on ${dayList(G.days)}` : '';
+  const R = [['Any mature design runs a DVFS loop that steps voltage and frequency to stay inside a power and thermal envelope.', 'confirmed on aifoundry2',
+    `On aifoundry2, three operating points, ${OPS.map(o => o.mhz + ' MHz at ' + f2(o.volts) + ' V').join(', ')}. Voltage moved with frequency in all ${TR.length} transitions of the cool-start runs${vAll}. aifoundry3’s firmware holds it at the first point (<a href="#the-same-firmware-on-three-cards">§3</a>).`],
   ['The chip counts bus bits and execution-unit activity factors and computes its own power estimate on millisecond timescales.', 'not on this chip',
     'The loop reads the PMIC’s measured board power over I2C and the on-die PVT temperature. There is no activity counter anywhere in it, in the 353f20e source or in the older governor.'],
   ['Thermal sensors are part of the same loop, because leakage depends on temperature.', 'confirmed, and thermal has priority',
-    `The temperature test comes before the power tests; ${nOf(byAfter, 'thermal')} of ${DOWN.length} down-steps were thermal only on the sample after the step (${nOf(byBefore, 'thermal')} on the sample before), and none was the power test alone.`],
+    `The temperature test comes before the power tests. On aifoundry2, ${nOf(byAfter, 'thermal')} of the ${DOWN.length} down-steps in the seven cool-start runs were thermal only on the sample after the step (${nOf(byBefore, 'thermal')} on the sample before), and none was the power test alone.`],
   ['Cache data arrays sit behind leakage-suppression transistors; a lookup un-suppresses only the part it needs, at a small wake-up latency.', 'tied off in the open RTL',
     `The open RTL (Erbium, a later configuration of the same core, not the ET-SoC-1 chip) has per-minion sleep and isolation ports, tied off; no firmware line drives any power gating; and after 27 ms of idle no cache level shows a wake-up. Paired shifts: ${w.levels.map(l => l.level + ' ' + sgn(l.paired_delta_cycles)).join(', ')} cycles. The L2 shift comes from a slow no-idle baseline, and the DRAM one is a row closing.`],
-  ['Leakage is typically 5–30% of a design’s power, about 20% common.', 'this card is worse',
-    `${pct(D.leak_fraction.busy_randn_80c)} of a ${f0(D.busy_randn_80c)} W random-data matmul and ${pct(D.leak_fraction.idle_80c_law)} of an idle card at 80 °C (the idle law, <a href="#what-that-costs">§5</a>).`],
+  ['Leakage is typically 5–30% of a design’s power, about 20% common.', 'worse at idle; at or above the top under load',
+    `On aifoundry2 at 80 °C, leakage is ${V.leakR} W: ${V.idleShR} of an idle card and ${V.busyShR} of a ${V.busyW} W random-data matmul. ` +
+    `The idle readings fix its slope, ${V.slope80} W/°C, but not its split from the fixed power, hence the ranges (the idle law, <a href="#what-that-costs">§5</a>). ` +
+    `At ${V.T3} °C, where aifoundry3 ran, the same law puts it at ${V.busy3R} of a busy card.`],
   ['Leakage costs power, not correctness.', 'consistent, weakly tested',
-    `Every result checked in this work was correct: the matmul benchmark checks its outputs bit-exact against a host reference, and the relay checks every element. The power sessions’ launches were not compared with a reference (none raised the tensor unit’s error flag). The idle of about ${f1(ic.hours_idle)} hours cannot show errors either way: nothing computed, DRAM ECC is compiled off and the SRAM ECC interrupt sources are never enabled.`]];
+    `The matmul benchmark checks its outputs bit-exact against a host reference, and the relay checks every element. Every checked result was correct except two relay launches on aifoundry2 on 23 September, in one pass of the discarded first attempt at a cool-card rerun: both ran on a 65–66 °C die while the governor dropped the clock from 800 to 600 MHz inside the launch, and the relay’s launches on a hotter die (71–73 °C, four sessions), where leakage is higher, were all correct. Why the two failed is not established (<a href="#method-and-what-is-not-established">§8</a>). The power sessions’ launches were not compared with a reference (none raised the tensor unit’s error flag). The long idle before the 22 September sample (about ${f1(ic.hours_idle)} hours since our last recorded workload) cannot show errors either way: no checked result spans it, DRAM ECC is compiled off and the SRAM ECC interrupt sources are never enabled.`]];
   const t = document.getElementById('verdict');
   t.innerHTML = '<thead><tr><th>What David Kanter said (paraphrased)</th><th>Verdict on the ET-SoC-1</th><th>Evidence</th></tr></thead><tbody>' +
     R.map(v => `<tr><td>${v[0]}</td><td class="lvl">${v[1]}</td><td class="small">${v[2]}</td></tr>`).join('') + '</tbody>';
@@ -454,24 +495,24 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
 /* ---------- V2: one law, three checks ---------- */
 (function () {
   const m = D.leak_model, ic = D.idle_check, on = D.overnight_idle, lk = D.cards.leakage;
-  const leak = T => m.A_at_80 * Math.exp((T - 80) / m.T_L), law = T => m.P_fix + leak(T), slope = T => leak(T) / m.T_L;
-  const SW = D.busy_randn_80c - law(80);                         // switching watts of the random-data matmul at 80 °C
-  const K = D.leak_fraction.kanter_range, OFF = lk.mean_offset_W;
+  const leak = LAW.c.leak, law = LAW.c.law, slope = LAW.c.slope;   // the central fit: model.json's own
+  const SW = LAW.c.SW;                                           // switching watts of the random-data matmul at 80 °C
+  const K = D.leak_fraction.kanter_range, OFF = S3.mean_W;       // aifoundry3's offset: the mean over its sessions
   const fitT = m.idle_curve.map(b => b.T);
   const st = {T: 80, busy: false, shift: false};
   const read = CK.readout('law-read');
   CK.range('law-T', {label: 'Die temperature', min: 45, max: 95, step: 1, value: st.T, fmt: v => f0(v) + ' °C', onInput: v => { st.T = v; frame.redraw(); }});
   const toggle = (id, key) => { const b = document.getElementById(id); b.addEventListener('click', () => { st[key] = !st[key]; b.setAttribute('aria-pressed', String(st[key])); frame.redraw(); }); };
   toggle('law-busy', 'busy'); toggle('law-shift', 'shift');
-  document.getElementById('law-shift').textContent = `Shift the law by aifoundry3's offset (${sgn(OFF, 2)} W, mean of the four bins)`;
-  legendHTML('law-leg', [{mark: 'shade', color: 'var(--ref)', op: 0.3, label: `fixed, ${f1(m.P_fix)} W`}, {mark: 'shade', color: 'var(--c1)', op: 0.3, label: 'leakage'},
-    {mark: 'line', color: 'var(--ink)', label: 'the idle law'}, {mark: 'ring', color: 'var(--c1)', label: 'fit readings (size: samples)'},
-    {mark: 'dot', color: 'var(--c3)', label: 'checks on the same card'}, {mark: 'box', color: 'var(--c7)', label: 'a different card (aifoundry3)'}]);
+  document.getElementById('law-shift').textContent = `Shift the law by aifoundry3's offset (${sgn(OFF, 2)} W, mean of ${S3.sessions} sessions)`;
+  legendHTML('law-leg', [{mark: 'shade', color: 'var(--ref)', op: 0.3, label: `fixed (central fit, ${f1(m.P_fix)} W)`}, {mark: 'shade', color: 'var(--c1)', op: 0.3, label: 'leakage (central fit)'},
+    {mark: 'line', color: 'var(--ink)', label: 'the idle law (aifoundry2)'}, {mark: 'ring', color: 'var(--c1)', label: 'fit readings (size: samples)'},
+    {mark: 'dot', color: 'var(--c3)', label: 'single checks on the same card'}, {mark: 'box', color: 'var(--c7)', label: 'aifoundry3, first session (22 Sep)'}]);
   const pts = [
     ...m.idle_curve.map(b => ({T: b.T, P: b.P, kind: 'fit', html: `<b>${f0(b.T)} °C, aifoundry2, a fit reading</b><br>measured ${f2(b.P)} W, law ${f2(law(b.T))} W (${sgn(b.P - law(b.T), 2)} W)<br>${num(b.n, 0)} samples`, n: b.n})),
-    {T: on.die_c, P: on.board_w, kind: 'chk', lab: 'overnight rest, 21 Sep', html: `<b>Overnight rest, 21 September</b> (before the first cool-start launch)<br>measured ${f2(on.board_w)} ± ${f2(on.board_sd)} W at ${f0(on.die_c)} °C<br>law ${f2(on.law_w)} W (${sgn(on.board_w - on.law_w, 2)} W); ${on.samples} samples`},
-    {T: ic.die_c, P: ic.board_w, kind: 'chk', lab: `22 Sep, ${f1(ic.hours_idle)} h idle`, html: `<b>22 September, after about ${f1(ic.hours_idle)} h idle</b><br>measured ${f2(ic.board_w)} ± ${f2(ic.board_sd)} W at ${f1(ic.die_c)} °C<br>law ${f2(ic.model_pred_w)} W (${sgn(ic.board_w - ic.model_pred_w, 2)} W); ${ic.samples} samples`},
-    ...lk.idle_curve.map(b => ({T: b.T, P: b.W, kind: 'a3', html: `<b>${f0(b.T)} °C, aifoundry3</b><br>measured ${f2(b.W)} W, aifoundry2's law ${f2(b.card2_law_W)} W (${sgn(b.W - b.card2_law_W, 2)} W)<br>${num(b.n, 0)} samples`}))
+    {T: on.die_c, P: on.board_w, kind: 'chk', lab: 'overnight rest, 21 Sep', html: `<b>Overnight rest, 21 September</b> (one ${f1(on.seconds)} s reading before the first cool-start launch)<br>measured ${f2(on.board_w)} ± ${f2(on.board_sd)} W at ${f0(on.die_c)} °C<br>law ${f2(on.law_w)} W (${sgn(on.board_w - on.law_w, 2)} W); ${on.samples} samples`},
+    {T: ic.die_c, P: ic.board_w, kind: 'chk', lab: `22 Sep, ${f1(ic.hours_idle)} h idle`, html: `<b>22 September, about ${f1(ic.hours_idle)} h after our last recorded workload</b> (one session)<br>measured ${f2(ic.board_w)} ± ${f2(ic.board_sd)} W at ${f1(ic.die_c)} °C<br>law ${f2(ic.model_pred_w)} W (${sgn(ic.board_w - ic.model_pred_w, 2)} W); ${ic.samples} samples`},
+    ...lk.idle_curve.map(b => ({T: b.T, P: b.W, kind: 'a3', html: `<b>${f0(b.T)} °C, aifoundry3, 22 September</b> (its first session)<br>measured ${f2(b.W)} W, aifoundry2's law ${f2(b.card2_law_W)} W (${sgn(b.W - b.card2_law_W, 2)} W)<br>${num(b.n, 0)} samples`}))
   ].sort((a, b) => a.T - b.T);
   const nmax = Math.max(...m.idle_curve.map(b => b.n));
   function draw(f) {
@@ -511,54 +552,67 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
     for (const p of pts.filter(q => q.lab))                          // direct labels for the two same-card checks, below the curve
       CK.txt(svg, x(p.T) + 8, y(p.P) + 18, p.lab, 'lab-strong');
     CK.keynav(f, nodes);
-    // the share strip: leakage as a share of idle and of a random-data matmul, against Kanter's typical range
+    // the share strip: leakage as a share of idle and of a random-data matmul, against Kanter's typical range;
+    // each share is a bar across the split's range (D.leak_split) with the central fit marked on it
     const s0 = mainB + 40, sx = CK.lin(0, 1, L, W - R), sy = s0 + SH / 2;
-    const idleS = leak(st.T) / law(st.T), busyS = leak(st.T) / (law(st.T) + SW);
+    const idleS = LAW.idleSh(LAW.c, st.T), busyS = LAW.busySh(LAW.c, st.T);
+    const idleR = LAW.span(f => LAW.idleSh(f, st.T)), busyR = LAW.span(f => LAW.busySh(f, st.T)), leakW = LAW.span(f => f.leak(st.T));
     const kr = range(100 * K[0], 100 * K[1], 0) + '%';
-    CK.txt(svg, 2, s0 - 2, `leakage share at ${f0(st.T)} °C; shaded: Kanter's typical ${kr}`, 'lab');
+    CK.txt(svg, 2, s0 - 2, `leakage share at ${f0(st.T)} °C (bar: range); shaded: Kanter's ${kr}`, 'lab');
     CK.el('rect', {x: sx(K[0]), y: sy - 9, width: sx(K[1]) - sx(K[0]), height: 18, fill: 'var(--c3)', opacity: 0.22}, svg);
     CK.txt(svg, (sx(K[0]) + sx(K[1])) / 2, sy + 24, kr, 'tick', 'middle');
     CK.el('line', {x1: L, x2: W - R, y1: sy, y2: sy, stroke: 'var(--axis)'}, svg);
     for (const v of [0, 0.5, 1]) CK.txt(svg, sx(v), sy + 24, pct(v), 'tick', v ? (v < 1 ? 'middle' : 'end') : 'start');
-    const mark = (v, c, box, lab, below) => {
+    const mark = (v, r, c, box, lab) => {
+      CK.el('rect', {x: sx(r[0]), y: sy - 3.5, width: Math.max(2, sx(r[1]) - sx(r[0])), height: 7, rx: 3.5, fill: c, opacity: 0.45}, svg);
       if (box) CK.el('rect', {x: sx(v) - 5, y: sy - 5, width: 10, height: 10, rx: 1.5, fill: c, stroke: 'var(--surface)', 'stroke-width': 1.5}, svg);
       else CK.el('circle', {cx: sx(v), cy: sy, r: 5.5, fill: c, stroke: 'var(--surface)', 'stroke-width': 1.5}, svg);
-      CK.txt(svg, sx(v), below ? sy + 24 : sy - 11, lab, 'lab-strong', 'middle');
+      CK.txt(svg, sx(v), sy - 11, lab, 'lab-strong', 'middle');
     };
-    mark(busyS, 'var(--c2)', true, `matmul ${pct(busyS)}`);
-    mark(idleS, 'var(--c1)', false, `idle ${pct(idleS)}`);
+    mark(busyS, busyR, 'var(--c2)', true, 'matmul');
+    mark(idleS, idleR, 'var(--c1)', false, 'idle');
     const out = st.T < Math.min(...fitT) || st.T > Math.max(...fitT);
-    read.set(`At ${f0(st.T)} °C: idle ${f1(law(st.T))} W = ${f1(m.P_fix)} W fixed + ${f1(leak(st.T))} W leakage → leakage is ` +
-      `<b>${pct(idleS)} of idle</b> and <b>${pct(busyS)} of a random-data matmul</b>; slope ${f2(slope(st.T))} W/°C` +
+    read.set(`At ${f0(st.T)} °C: idle ${f1(law(st.T))} W, rising ${f2(slope(st.T))} W/°C; leakage ${range(leakW[0], leakW[1], 0)} W of it ` +
+      `(${f1(leak(st.T))} W in the central fit drawn) → leakage is <b>${pctR(idleR)} of idle</b> and <b>${pctR(busyR)} of a random-data matmul</b>` +
       (out ? ` (extrapolated: the fit's idle readings span ${f0(Math.min(...fitT))}–${f0(Math.max(...fitT))} °C)` : '') +
       (st.busy ? `. The matmul's switching watts are held at their 80 °C value, ${f1(SW)} W.` : ''));
   }
   const frame = CK.frame('leaklaw', {height: W => (W < 600 ? 400 : 410), minW: 280, maxW: 640,
     label: 'Idle board power against die temperature: the fitted law, its fit readings and three out-of-sample checks', draw});
-  // aifoundry3's bins as a table (the numbers without the chart)
+  // aifoundry3's first session, bin by bin (the squares on the chart), and every session the law was not fitted on
   document.getElementById('leaktab').innerHTML = '<thead><tr><th class="num">aifoundry3 die °C</th><th class="num">measured idle W</th>' +
     '<th class="num">aifoundry2 law W</th><th class="num">difference</th><th class="num">samples</th></tr></thead><tbody>' +
     lk.idle_curve.map(r => `<tr><td class="num">${f0(r.T)}</td><td class="num">${f2(r.W)}</td><td class="num">${f2(r.card2_law_W)}</td>` +
       `<td class="num">${sgn(r.W - r.card2_law_W, 2)}</td><td class="num">${num(r.n, 0)}</td></tr>`).join('') +
-    `<tr><td colspan="3"><b>mean of the four bins</b></td><td class="num"><b>${sgn(OFF, 2)}</b></td><td class="num"></td></tr>` +
+    `<tr><td colspan="3"><b>mean of the four bins</b></td><td class="num"><b>${sgn(lk.mean_offset_W, 2)}</b></td><td class="num"></td></tr>` +
     `<tr><td colspan="3">mean by sample</td><td class="num">${sgn(lk.mean_offset_W_by_sample, 2)}</td><td class="num">${num(lk.idle_curve.reduce((a, r) => a + r.n, 0), 0)}</td></tr></tbody>`;
+  const SES = [...D.idle_sessions.sessions].sort((a, b) => a.card.localeCompare(b.card) || a.session.localeCompare(b.session));
+  const sname = r => r.session.replace(/\.jsonl(\.gz)?$/, '').replace(/^\d{4}-\d{2}-\d{2}-/, '');
+  document.getElementById('sesstab').innerHTML = '<thead><tr><th>Session (the card is in its name)</th><th class="num">die °C</th>' +
+    '<th class="num">idle samples</th><th class="num">measured − law, W</th></tr></thead><tbody>' +
+    SES.map(r => `<tr><td class="small">${+r.day.slice(8, 10)} Sep · ${sname(r)}</td><td class="num">${range(r.T[0], r.T[1], 0)}</td>` +
+      `<td class="num">${num(r.n, 0)}</td><td class="num">${sgn(r.offset_W, 2)}</td></tr>`).join('') +
+    ['aifoundry2', 'aifoundry3'].map(c => `<tr><td colspan="3"><b>${c}: mean of ${IS[c].sessions} sessions</b> ` +
+      `(range ${sgn(IS[c].min_W, 2)} to ${sgn(IS[c].max_W, 2)})</td><td class="num"><b>${sgn(IS[c].mean_W, 2)}</b></td></tr>`).join('') + '</tbody>';
   // the prose around the chart
   const groups = []; for (const t of fitT) { const g = groups[groups.length - 1]; if (g && t === g[1] + 1) g[1] = t; else groups.push([t, t]); }
   V.fitT = groups.map(g => range(g[0], g[1], 0)).join(' and ');
-  const hw = T => f1(slope(T) / 2);
-  V.checks = `the card's rest after a cool night, <b>${f2(on.board_w)} W at ${f0(on.die_c)} °C</b> on 21 September, against <b>${f2(on.law_w)} W</b>; ` +
-    `and its idle on 22 September, after about ${f1(ic.hours_idle)} hours with no workload (apart from the ${V.probe} wake-up probe of §4, ` +
-    `five minutes before) in a warmer room, <b>${f2(ic.board_w)} ± ${f2(ic.board_sd)} W at ${f1(ic.die_c)} °C</b>, in the gap between the fit's ` +
+  const hw = T => f1(slope(T) / 2), lo = Math.min(...fitT);
+  V.checks = `the idle of every aifoundry2 session it was not fitted on to within ${f1(Math.ceil(S2.max_abs_W * 10) / 10)} W ` +
+    `(<b>${S2.sessions} sessions, ${dayList(S2.days)}</b>; on average the law reads ${f1(-S2.mean_W)} W high). Two single ` +
+    `readings test it where the fit has no data: the card's rest after a cool night, <b>${f2(on.board_w)} W at ${f0(on.die_c)} °C</b> ` +
+    `on 21 September (one ${f1(on.seconds)} s reading, ${word(lo - Math.round(on.die_c))} degrees below the fit's lowest bin), against <b>${f2(on.law_w)} W</b>; ` +
+    `and its idle on 22 September, about ${f1(ic.hours_idle)} hours after our last recorded workload (the lab log puts the ${V.probe} ` +
+    `wake-up probe of §4 five minutes before), on a die that rested ${f0(ic.die_c - on.die_c)} °C warmer than on 21 September (the room itself was not measured), ` +
+    `<b>${f2(ic.board_w)} ± ${f2(ic.board_sd)} W at ${f1(ic.die_c)} °C</b>, in the gap between the fit's ` +
     `readings, against <b>${f2(ic.model_pred_w)} W</b>. Both agree within what the sensor's whole-degree readings allow ` +
     `(±${hw(on.die_c)} W at ${f0(on.die_c)} °C, ±${hw(ic.die_c)} W at ${f0(ic.die_c)} °C)`;
   V.unsensed = f1(ic.board_minus_rails);
-  const a3T = lk.idle_curve.map(r => r.T), dif = lk.idle_curve.map(r => r.W - r.card2_law_W), lo = Math.min(...fitT);
-  V.a3law = `The idle law, extrapolated ${lo - Math.max(...a3T)} to ${lo - Math.min(...a3T)} °C below its fit range onto aifoundry3, which idled ` +
-    `at ${f0(Math.min(...a3T))} to ${f0(Math.max(...a3T))} °C, predicts that card's idle to within a watt: aifoundry3 reads ` +
-    `${range(Math.min(...dif), Math.max(...dif), 1)} W above it, ${sgn(OFF, 2)} W on the mean of the four temperature bins ` +
-    `(${sgn(lk.mean_offset_W_by_sample, 2)} W weighted by sample). The chart's second button shifts the law by that offset.`;
-  V.idle65 = pct(D.leak_fraction.idle_80c_law);
-  V.idle65of = `${f1(m.A_at_80)} of the idle law's ${f1(m.P_fix + m.A_at_80)} W`;
+  V.a3law = `Across ${word(S3.sessions)} aifoundry3 sessions (${dayList(S3.days)}), idling at ${f0(S3.T[0])} to ${f0(S3.T[1])} °C, ` +
+    `${lo - S3.T[1]} to ${lo - S3.T[0]} °C below the law's fit range, the law predicts that card's idle to within a watt: aifoundry3 reads ` +
+    `<b>${sgn(S3.mean_W, 1)} W</b> above it on average (${sgn(S3.min_W, 1)} to ${sgn(S3.max_W, 1)} W session by session), where aifoundry2's ` +
+    `own sessions read ${sgn(S2.mean_W, 1)} W. Within a watt holds on both cards in every session; the offset is each card's own. ` +
+    `The chart's second button shifts the law by aifoundry3's offset; its squares are that card's first session, 22 September.`;
   const c64 = m.idle_curve.find(b => b.T === 64), c66 = m.idle_curve.find(b => b.T === 66);
   V.idleslope = f1((c66.P - c64.P) / 2); V.idleslopeT = '64–66';
 })();
@@ -567,7 +621,7 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
 (function () {
   const C = D.cards, rr = C.patterns.map(p => p.a3 / p.model), a3 = C.patterns.map(p => p.a3);
   document.getElementById('card2').innerHTML =
-    `aifoundry3, held at 600 MHz, ran the same strict protocol at a ${f1(C.launch.aifoundry3.T)} °C launch. The flip-counting ` +
+    `aifoundry3, held at 600 MHz, ran the same strict protocol in one session on 22 September, at a ${f1(C.launch.aifoundry3.T)} °C launch. The flip-counting ` +
     `model fitted on aifoundry2 carries over with one per-card scale factor. Unchanged, it overestimates aifoundry3's switching ` +
     `power by ${pct(1 - C.scale)} (least squares; ${f0(100 * (1 - Math.max(...rr)))}–${pct(1 - Math.min(...rr))} pattern by pattern), ` +
     `${f2(C.rms_raw)} W rms. Multiplied by <b>${f2(C.scale)}</b>, it is within <b>${f2(C.rms_scaled)} W rms</b> over ` +
@@ -603,6 +657,31 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
       `${nOf(byBefore, 'thermal+power')} thermal+power and ${nOf(byBefore, 'unattributed')} unattributed (against ${nOf(byAfter, 'thermal')}, ` +
       `${nOf(byAfter, 'thermal+power')} and ${nOf(byAfter, 'unattributed')})`,
     first: range(Math.min(...first), Math.max(...first), 2, ' to '),
+    direct10: `${word(UP.filter(r => r.f0 === FMIN && r.f1 === FMAX).length)} of the ${UP.length}`,
+  });
+  // the governor on aifoundry2 over two days (D.governor_days): every cool-start session of 21 and 23 September
+  const upAll = Object.values(G.up_T), nUp = upAll.reduce((a, u) => a + u.n, 0), fc = G.first_change_s, gp = G.change_gap_s;
+  const rs = G.reset, ml = G.meter_lag_s, bd = Object.entries(G.boundaries);
+  const PASS = 0.133;                                             // aifoundry2's ~133 ms pass (§1)
+  const bText = ([k, v], i) => { const [day, cls] = k.split(' ');
+    const gap = cls === '<=10ms' ? '1–2 ms' : cls === '100-300ms' ? 'about 0.2 s' : cls === '10-100ms' ? '10–100 ms' : 'over 0.3 s';
+    const where = (v.sessions < 3 ? `in ${word(v.sessions)} session${v.sessions === 1 ? '' : 's'} ` : '') +   // n in words below three
+      `on ${dayList([day])}, with ${gap} between launches, `;
+    return where + (i === 0 ? `${v.drop_800_600} of the ${v.n} launch boundaries crossed with the clock above ${FMIN} MHz dropped it to the boot point`
+      : `${v.drop_800_600} of ${v.n} did`); };
+  Object.assign(V, {
+    up66: `of ${f0(nUp)} up-steps on ${dayList(G.days)}, ${word(upAll.reduce((a, u) => a + u.above_65_both, 0))} read ` +
+      `${Math.max(...upAll.map(u => u.max))} °C on both neighbouring samples, and none read higher`,
+    hunt: `${word(G.sessions.length)} sessions on ${dayList(G.days)}, ${f0(G.changes)} clock changes`,
+    firstMed: f1(fc.median), firstR: range(fc.min, fc.max, 2, ' to '), firstN: f0(fc.n), firstPasses: word(Math.round(fc.median / PASS)),
+    gapMed: f1(gp.median), gapR: range(gp.p10, gp.p90, 1, ' to '), gapPasses: word(Math.round(gp.median / PASS)),
+    direct: `${f0(G.sessions.reduce((a, x) => a + x.direct_600_800, 0))} of ${f0(nUp)} over both days`,
+    resetMed: f1(rs.settle_s.median), resetR: range(rs.settle_s.min, rs.settle_s.max, 1, ' to '), resetN: word(rs.settle_s.n),
+    resetUp: word(rs.up_after_end), resetEnds: f0(rs.block_ends),
+    bnd: bd.map(bText).join('; '),
+    splitRms: range(...LAW.span(f => D.leak_split.ends.find(e => e.T_L === f.T_L).rms_W), 2),
+    splitRms0: f2(D.leak_split.central_refit.rms_W),
+    meterLag: `about ${f1(ml.median)} s (${range(ml.min, ml.max, 1, ' to ')} s at ${f0(ml.n)} up-steps on ${dayList(G.days)})`,
   });
   document.querySelectorAll('[data-v]').forEach(e => {
     const k = e.getAttribute('data-v');

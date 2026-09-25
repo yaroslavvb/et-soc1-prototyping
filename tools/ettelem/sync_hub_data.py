@@ -23,7 +23,10 @@ the page without anyone copying numbers.
   power.sampler       catalogue.json bursts: the sampler's own latency per burst (sampler_median_ms, sampler_max_ms),
                       summarised for the DRAM-read bursts that slow it on aifoundry2; and, as .ring, reruns.json dropped[]:
                       the median latency in each rerun pass dropped because the sampler was starved (the s <-> s+16 ring)
-  power.idle_unsensed catalogue.json bursts: board idle less the three rails' idle, per card, with the die range
+  power.idle_unsensed catalogue.json bursts: board idle less the three rails' idle, per card, with the board's idle
+                      and the die range
+  power.checks        the fit's robust errors and per-pass coefficients, and the DDR-droop calibration on each card's
+                      own telemetry, per pass (checks(): the version-3 claims check asks for them per card)
   energy_events       every event the reports priced, with its energy [range] and the rate at which the measurement
                       ran it, for the chart "How many identical events before the meter sees one?"
 
@@ -47,9 +50,15 @@ HORACE = os.path.join(D, "2026-09-21-horace-aifoundry2")
 CARDS = ("aifoundry2", "aifoundry3")
 PAGES = "https://spacesheep.dev/@yaroslavvb/"
 
-# The meter's own constants, from the firmware as the ladder rows 'Board power' and 'Rail power' quote them: the
-# board reading in 10 mW steps and the rails in 1 mW, a new value per service-processor pass (133 ms on aifoundry2).
-METER = {"board_lsb_w": 0.010, "rail_lsb_w": 0.001, "pass_s": 0.133}
+# The meter's own constants, as the ladder rows 'Board power' and 'Rail power' quote them: the board reading in 10 mW
+# steps and the rails in 1 mW, a new value per service-processor pass. The pass is what ettelem sees on aifoundry2
+# while it samples at 10 Hz, as every power page did: about 150 ms (148-164 ms over 29 sessions); aifoundry3's about
+# 255 ms (251-260 ms over 16); the SP's own trace on aifoundry2 without the sampler, 133 ms (one session, 19 Sep).
+# Source: the version-3 claims record, docs/reports/data/2026-09-25-claims-v3/ (inventory/hub.verified.json.gz, hub-034).
+METER = {"board_lsb_w": 0.010, "rail_lsb_w": 0.001, "pass_s": 0.150, "pass_s_a3": 0.255, "sp_pass_s_quiet_a2": 0.133}
+
+# Two-sided 99% t quantiles by degrees of freedom, for intervals over passes (three passes: df 2).
+T99 = {1: 63.657, 2: 9.925, 3: 5.841, 4: 4.604, 5: 4.032}
 
 
 def load(p):
@@ -111,8 +120,77 @@ def power_blocks(fit, cat, dvfs, reruns):
         bs = cat["bursts"][c]
         u = [b["p_idle_w"] - b["minion_idle_w"] - b["sram_idle_w"] - b["noc_idle_w"] for b in bs]
         T = [b["die_c_idle"] for b in bs]
-        iu[c] = {"w": rng(min(u), max(u)), "die_c": rng(min(T), max(T)), "bursts": len(bs)}
+        P = [b["p_idle_w"] for b in bs]
+        iu[c] = {"w": rng(min(u), max(u)), "board_w": rng(min(P), max(P)), "die_c": rng(min(T), max(T)), "bursts": len(bs)}
     out["idle_unsensed"] = iu
+    out["checks"] = checks(cat, fit)
+    return out
+
+
+# ---------------------------------------------------------------- per-card and per-pass checks (version 3)
+def ci99(v):
+    """Mean and two-sided 99% t interval of a few pass-level values."""
+    m = statistics.mean(v)
+    h = T99[len(v) - 1] * statistics.stdev(v) / len(v) ** 0.5
+    return [r3(m - h), r3(m + h)]
+
+
+def checks(cat, fit):
+    """What the page needs to state the fit and the droop per card and per pass, computed with fit_unmetered.py's own
+    functions (the same rows, windows and fits as unmetered_fit.json):
+
+      fit[card]    se_hc3: heteroscedasticity-robust (HC3) standard errors of the published coefficients, since the
+                   DRAM configurations that fix the DRAM term carry 3-4x the pooled residual; pass_coef: the same fit
+                   on each catalogue pass alone, with its 99% t interval over the passes (pass_ci99)
+      droop[card]  the DDR-droop calibration on each card's own catalogue telemetry (aifoundry2's reproduces
+                   unmetered_fit.json ddr_droop): slope, the common term for the rest of the board, rms, n, the idle
+                   reading, the minion rail's IR drop; each per pass with its 99% interval; the largest excess of a
+                   burst with no DRAM traffic; and, per pass, the configurations the page names (the two largest
+                   non-DRAM droops outside the L3 row walks, and the largest L3 row walk, all chosen on aifoundry2)
+    """
+    import numpy as np
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import fit_unmetered as fu
+    names = ["minion", "sram", "noc", "dram_pj_per_byte"]
+    out = {"fit": {}, "droop": {}}
+    for c in CARDS:
+        bs = cat["bursts"][c]
+        rows = fu.config_means(bs)
+        X, coef, res, _ = fu._fit(rows, list(rows))
+        XtXi = np.linalg.inv(X.T @ X)
+        h = np.einsum("ij,jk,ik->i", X, XtXi, X)
+        W = X * (res / (1 - h))[:, None]
+        se = np.sqrt(np.diag(XtXi @ (W.T @ W) @ XtXi))
+        passes = sorted({b["pass"] for b in bs})
+        pc = []
+        for p in passes:
+            rp = fu.config_means([b for b in bs if b["pass"] == p])
+            pc.append(fu._fit(rp, list(rp))[1])
+        out["fit"][c] = {"se_hc3": {k: float(v) for k, v in zip(names, se)},
+                         "pass_coef": {k: [r3(x[i]) for x in pc] for i, k in enumerate(names)},
+                         "pass_ci99": {k: ci99([float(x[i]) for x in pc]) for i, k in enumerate(names)}}
+    tel = {c: os.path.join(D, f"2026-09-23-catalogue-{c}", "telemetry.jsonl.gz") for c in CARDS}
+    whole = {c: fu.droop(cat["bursts"][c], fit[c], tel[c]) for c in CARDS}
+    a2 = {r[0]: r for r in whole[CARDS[0]]["per_config"]}
+    nd = [k for k in a2 if not fu.moves_dram(k)]
+    top = sorted((k for k in nd if not k.startswith("dramrow/stride8K")), key=lambda k: -a2[k][1])[:2]
+    l3 = max((k for k in nd if k.startswith("dramrow/stride8K")), key=lambda k: a2[k][1])
+    for c in CARDS:
+        w = whole[c]
+        a, b = w["mv_per_dram_offrail_w"], w["mv_per_board_w_common"]
+        ex = max(((r[1] - (a * r[2] + b * (r[3] - r[2])), r[0]) for r in w["per_config"] if not fu.moves_dram(r[0])))
+        per = [fu.droop([x for x in cat["bursts"][c] if x["pass"] == p], fit[c], tel[c]) for p in sorted({x["pass"] for x in cat["bursts"][c]})]
+        pcfg = [{r[0]: r[1] for r in d["per_config"]} for d in per]
+        k3 = {"mv_per_dram_offrail_w": "slope", "mv_per_board_w_common": "common", "minion_ir_drop_mv_per_w": "ir"}
+        out["droop"][c] = {"slope": r3(a), "common": r3(b), "rms_mv": r3(w["rms_mv"]), "n": w["n"],
+                           "idle_ddr_mv": r3(w["idle_die_mv"]["ddr"]), "ir": r3(w["minion_ir_drop_mv_per_w"]),
+                           "passes": {v: [round(d[k], 4) for d in per] for k, v in k3.items()},
+                           "pass_ci99": {v: ci99([d[k] for d in per]) for k, v in k3.items()},
+                           "max_nondram_excess_mv": [r3(ex[0]), ex[1]],
+                           "named": {k: {"mean": r3({r[0]: r[1] for r in w["per_config"]}[k]), "passes": [r3(q[k]) for q in pcfg]}
+                                     for k in top + [l3]}}
+    out["droop"]["named"] = {"mesh": top, "l3": l3}
+    out["source"] = "tools/ettelem/sync_hub_data.py checks(), with fit_unmetered.py's config_means, _fit and droop on catalogue.json and each card's catalogue telemetry"
     return out
 
 

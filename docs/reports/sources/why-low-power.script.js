@@ -37,6 +37,7 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
 
 /* ---------- tables ---------- */
 (function(){const A=D.facts.a100,E=D.facts.et;const row=(n,a,e,note)=>`<tr><td>${n}</td><td class="num">${a}</td><td class="num">${e}</td><td class="small">${note||''}</td></tr>`;
+ const S2=D.second_card,r2=S2&&S2.patterns.randn;   /* aifoundry3's fp32 random matmul, at its own launch temperature */
  const h16=C.fp16_randn,tf16=2*h16.per_s/1e12;                       /* fp16 random: FLOPs are 2 per multiply-add */
  const pjA=A.watts/A.tflops,pj32=E.watts/E.tflops,pj16=h16.p80/tf16;  /* pJ per FLOP at the board */
  const mhzLo=Math.round(A.tflops/312*A.mhz/10)*10;                    /* 257 of the 312 bf16 peak TFLOPS needs at least this clock */
@@ -44,9 +45,10 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
  const mhz=m=>m.toLocaleString('en-US');
  document.getElementById('cmp').innerHTML='<thead><tr><th></th><th class="num">A100 (SXM4)</th><th class="num">ET-SoC-1 card</th><th>Note</th></tr></thead><tbody>'+
   row('Process, transistors, die',`TSMC 7 nm · ${A.transistors_b} B · ${A.die_mm2} mm²`,`TSMC 7 nm · &gt;${E.transistors_b} B · ${E.die_mm2} mm²`,'same process generation; Esperanto gives "over 24 billion" transistors')+
-  row('Dense matmul, measured',`${A.tflops} TFLOPS bf16 at ${A.watts} W`,`${f2(E.tflops)} TFLOPS fp32 at ${f1(E.watts)} W<br>${f1(tf16)} TFLOPS fp16 at ${f1(h16.p80)} W`,'A100: Horace He’s 8192³ bf16 run on random data at a 330 W limit. ET: TensorFMA on random data, board power at 80 °C; fp16 and bf16 are different formats')+
-  row('Energy per FLOP, board',`${pjA.toFixed(2)} pJ (bf16)`,`${pj32.toFixed(1)} pJ fp32<br>${pj16.toFixed(1)} pJ fp16`,'A100 bf16 tensor cores against fp32 and fp16 here; the fp32 CUDA-core comparison follows the table')+
-  row('Idle',`${A.idle} W`,`${f1(E.idle62)} W at 62 °C<br>${f1(E.idle80)} W at 80 °C`,'ET: die temperature')+
+  row('Dense matmul, measured',`${A.tflops} TFLOPS bf16 at ${A.watts} W`,`${f2(E.tflops)} TFLOPS fp32 at ${f1(E.watts)} W<br>${f1(tf16)} TFLOPS fp16 at ${f1(h16.p80)} W`,'A100: Horace He’s 8192³ bf16 run on random data at a 330 W limit. ET: aifoundry2, TensorFMA on random data, board power at 80 °C; fp16 and bf16 are different formats'+
+   (r2?`. aifoundry3, launched at ${f1(S2.launch_T)} °C: fp32 at ${f1(r2.p80)} W; fp16 was measured on aifoundry2 only`:''))+
+  row('Energy per FLOP, board',`${pjA.toFixed(2)} pJ (bf16)`,`${pj32.toFixed(1)} pJ fp32<br>${pj16.toFixed(1)} pJ fp16`,'A100 bf16 tensor cores against fp32 and fp16 here'+(r2?` (aifoundry3: ${(r2.p80/r2.tflops).toFixed(1)} pJ fp32)`:'')+'; the fp32 CUDA-core comparison follows the table')+
+  row('Idle',`${A.idle} W`,`${f1(E.idle62)} W at 62 °C<br>${f1(E.idle80)} W at 80 °C`,'ET: die temperature; the 62 °C figure is one reading after a night idle'+(r2?`. aifoundry3: ${f1(r2.idle)} W at ${f1(S2.launch_T)} °C`:''))+
   row('Power per transistor under load',`${(A.watts/A.transistors_b).toFixed(1)} nW`,`${(E.watts/E.transistors_b).toFixed(1)} nW`,'the ET figure counts 24 billion transistors')+
   row('Power density under load',`${(A.watts/A.die_mm2).toFixed(2)} W/mm²`,`${(E.watts/E.die_mm2).toFixed(2)} W/mm²`,'board power over die area; both include memory and regulators')+
   row('Core voltage and clock',`about ${A.volts} V · ${mhz(mhzLo)}–${mhz(A.mhz)} MHz`,`${E.volts} V · ${E.mhz} MHz`,`Neither is published. ${mhz(A.mhz)} MHz is the maximum boost. Under He’s 330 W cap on random data the clock is lower: 257 of the 312 peak TFLOPS needs at least ${mhz(mhzLo)} MHz, and if his zero-data run (295 TFLOPS) held ${mhz(A.mhz)} MHz, the random run was near 1,230. 0.75 V is nominal for 7 nm.`)+
@@ -56,8 +58,15 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
  const rate=c=>!c.per_s?'':c.unit==='byte'?(c.per_s>=1e12?(c.per_s/1e12).toFixed(2)+' TB':(c.per_s/1e9).toFixed(1)+' GB'):(c.per_s/1e12).toFixed(c.per_s<1e12?2:1)+'×10¹² '+c.unit+'s';
  const LIST=[['spin','integer loop on every minion (4 adds and a branch)'],['fp32_zeros','fp32 TensorFMA, zeros: every multiply-add gated'],['fp32_ones','fp32 TensorFMA, ones: registers clocked, no data toggles'],['fp32_randn','fp32 TensorFMA, random data'],['fp16_randn','fp16 TensorFMA, random data'],['int8_randn','int8 TensorFMA, random data'],['tload_l2','TensorLoad streaming from the shire’s L2 cache'],['tload_dram','TensorLoad streaming from LPDDR4x (DRAM)']].filter(q=>C[q[0]]);
  document.getElementById('cdyn').innerHTML='<thead><tr><th>Workload on all 1,024 minions</th><th class="num">board W at 80 °C</th><th class="num">over idle</th><th class="num">mW per minion, over idle</th><th class="num">C<sub>dynamic</sub> per minion, nF</th><th class="num">work per second</th><th class="num">pJ per unit of work, over idle</th></tr></thead><tbody>'+
-  LIST.map(q=>{const c=C[q[0]];return `<tr><td>${q[1]}</td><td class="num">${f1(c.p80)}</td><td class="num">+${f1(c.dyn)}</td><td class="num">${f1(c.mw_per_minion)}</td><td class="num">${cd(c.dyn).toFixed(3)}</td><td class="num">${rate(c)}</td><td class="num">${c.pj_per_unit_dyn?c.pj_per_unit_dyn.toFixed(c.pj_per_unit_dyn<1?2:c.pj_per_unit_dyn<100?1:0):''}</td></tr>`;}).join('')+
+  LIST.map(q=>{const c=C[q[0]];return `<tr><td>${q[1]}</td><td class="num">${f1(c.p80)}</td><td class="num">+${f1(c.dyn)}</td><td class="num">${f1(c.mw_per_minion)}</td><td class="num">${cd(c.dyn).toFixed(3)}</td><td class="num">${rate(c)}</td><td class="num">${c.unit==='byte'?'–':c.pj_per_unit_dyn?c.pj_per_unit_dyn.toFixed(c.pj_per_unit_dyn<1?2:c.pj_per_unit_dyn<100?1:0):''}</td></tr>`;}).join('')+
   `<tr><td><i>Esperanto’s design target (Hot Chips 33)</i></td><td></td><td></td><td class="num"><i>10 (total)</i></td><td class="num"><i>0.040</i></td><td class="num"><i>at 1 GHz, 0.425 V</i></td><td></td></tr></tbody>`;
+ /* the note under the table: which card, aifoundry3's fp32 rows beside these, and where the per-byte energies live */
+ const n3=document.getElementById('cdyn-a3');
+ if(n3){const P3=S2&&S2.patterns,one=p=>{const q=P3[p],V3=q.mv/1000;return {mw:1000*q.dyn/1024,nf:q.dyn/1024/(V3*V3*F)*1e9,pj:q.dyn/(q.tflops*1e12/2)*1e12};};
+  const t=P3?['zeros','ones','randn'].map(one):null,and=a=>a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+  n3.textContent='These rows are aifoundry2’s. '+(t?`On aifoundry3 (three runs each, launched at ${f1(S2.launch_T)} °C) the fp32 matmul on zeros, ones and random data switches `+
+   `${and(t.map(q=>f1(q.mw)))} mW per minion over idle (${and(t.map(q=>q.nf.toFixed(3)))} nF; ${and(t.map(q=>q.pj.toFixed(2)))} pJ per multiply-add). `:'')+
+   'The TensorLoad rows leave out an energy per byte: use the energy manual’s two-card values (Memory, in section 4).';}
 })();
 
 /* ---------- Esperanto's published voltage curve and this card: 600 MHz points filled, 800 MHz points as rings ---------- */
@@ -148,7 +157,7 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
  const WL=[['idle','idle',null],['spin','integer loop','spin'],['fp32_zeros','fp32 zeros','fp32_zeros'],['fp32_ones','fp32 ones','fp32_ones'],['fp32_randn','fp32 random','fp32_randn'],
   ['fp16_randn','fp16 random','fp16_randn'],['int8_randn','int8 random','int8_randn']].filter(q=>!q[2]||C[q[2]]);
  const SPLIT={fp32_zeros:'zeros',fp32_ones:'ones',fp32_randn:'randn'};
- const PART=[['fix','fixed: the idle law’s constant (a fit, not a block split)','var(--ref)'],['leak','leakage (the idle law)','var(--c2)'],['xtra','extra idle at this voltage','var(--c5)'],
+ const PART=[['fix','fixed: the idle law’s constant (a fit, not a block split)','var(--ref)'],['leak','leakage (the idle law’s best-fit split)','var(--c2)'],['xtra','extra idle at this voltage','var(--c5)'],
   ['sm','tensor state machines','var(--c3)'],['clk','clocking the multiply-add registers','var(--c4)'],['data','data toggles','var(--bad)'],['sw','switching (not split)','var(--c7)']];
  const st={w:'fp32_randn',v:V,f:600,t:80,act:1024,xtra:true};
  function calc(){const c=st.w==='idle'?null:C[st.w],k=(st.v/V)**2*(st.f*1e6/F)*(c?st.act/c.minions:0),inR=st.v>=V-1e-6&&st.v<=V8+1e-6;
@@ -206,20 +215,20 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
   CK.axes(ff,{x,y,L,R,T,B,xt:[50,60,70,80,90],yt:[10,20,30,40],xl:'die temperature, °C',yl:'idle board power, W'});
   const cv=[];for(let t=48;t<=92;t+=0.5)cv.push([t,law(t)]);
   CK.el('path',{d:CK.path(cv,x,y),style:'fill:none;stroke:var(--c2)','stroke-width':2},ff.svg);
-  CK.el('line',{x1:L,x2:W-R,y1:y(PW.P_fix),y2:y(PW.P_fix),style:'stroke:var(--axis)','stroke-dasharray':'4 4'},ff.svg);CK.txt(ff.svg,L+4,y(PW.P_fix)-5,`not leakage: ${f1(PW.P_fix)} W`,'lab');
+  CK.el('line',{x1:L,x2:W-R,y1:y(PW.P_fix),y2:y(PW.P_fix),style:'stroke:var(--axis)','stroke-dasharray':'4 4'},ff.svg);CK.txt(ff.svg,L+4,y(PW.P_fix)-5,`fixed part, best fit: ${f1(PW.P_fix)} W`,'lab');
   for(const p of PW.idle_curve.filter(p=>p.n>=30)){const c=CK.el('circle',{cx:x(p.T),cy:y(p.P),r:4,style:'fill:var(--c1)'},ff.svg);
    CK.tip(ff,c,`${p.T} °C: ${f2(p.P)} W idle (${p.n.toLocaleString('en-GB')} samples at 0.52 V, 600 MHz)`);nodes.push(c);}
   if(vf){const c=CK.el('circle',{cx:x(T8),cy:y(vf.idle800),r:5,style:'fill:var(--surface);stroke:var(--c5)','stroke-width':2.5},ff.svg);
    CK.tip(ff,c,`idle at ${V8} V, 800 MHz: ${f1(vf.idle800)} W at ${vf.die_c.idle800.join('–')} °C, ${f1(EXTRA)} W above the 0.52 V law`);nodes.push(c);}
   CK.el('line',{x1:x(st.t),x2:x(st.t),y1:T,y2:H-B,style:'stroke:var(--ink)','stroke-dasharray':'3 3'},ff.svg);
   const d=CK.el('circle',{cx:x(st.t),cy:y(law(st.t)),r:5.5,style:'fill:var(--c2);stroke:var(--surface)','stroke-width':1.5},ff.svg);
-  CK.tip(ff,d,`the law at ${st.t.toFixed(1)} °C: ${f1(law(st.t))} W idle, ${f1(leak(st.t))} W of it leakage`);nodes.push(d);
+  CK.tip(ff,d,`the law at ${st.t.toFixed(1)} °C: ${f1(law(st.t))} W idle, ${f1(leak(st.t))} W of it leakage in the best-fit split`);nodes.push(d);
   nodes.sort((a,b)=>+a.getAttribute('cx')-+b.getAttribute('cx'));CK.keynav(ff,nodes);}});
  function upd(){Z=calc();fb.redraw();fl2.redraw();const c=Z.c,sw=Z.swt,k=(st.v/V)**2*st.f*1e6/F;
   const permin=st.act&&c?`${f1(1000*sw/st.act)} mW per active minion (Esperanto’s budget: 10 mW per minion, leakage included)`:'';
   const pj=c&&c.per_s&&st.act?sw/(c.per_s*(st.f*1e6/F)*(st.act/c.minions))*1e12:null;
   const unit=pj!=null?`${pj.toFixed(pj<1?2:1)} pJ per ${c.unit==='MAC'?'multiply-add':c.unit} over idle`:'';
-  const head=Z.inR?`<b>${Z.board.toFixed(1)} W</b> at the board: ${f1(Z.w.fix)} fixed + ${f1(Z.w.leak)} leakage`+(Z.w.xtra>0.05?` + ${f1(Z.w.xtra)} extra idle at this voltage`:'')+` + ${f1(sw)} switching`
+  const head=Z.inR?`<b>${Z.board.toFixed(1)} W</b> at the board: ${f1(Z.w.fix)} fixed + ${f1(Z.w.leak)} leakage (the idle law’s best-fit split)`+(Z.w.xtra>0.05?` + ${f1(Z.w.xtra)} extra idle at this voltage`:'')+` + ${f1(sw)} switching`
    :`<b>${f1(sw)} W</b> switching (leakage not measured here)`;
   out.set(`${head}. Switching scales by ${k.toFixed(3)}× from 0.517 V and 600 MHz`+[permin,unit].filter(Boolean).map(t=>'; '+t).join('')+'.');}
  upd();
@@ -241,7 +250,8 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
   put('vf-i8',f1(vf.idle800));put('vf-i6',f1(vf.idle600));put('vf-iT',`${Math.min(...it)}–${Math.max(...it)}`);}
  if(M.step_open){put('lg-lam',f2(M.power.lambda_at_80));put('lg-R',f2(M.R_total));put('lg-10m',f1(M.step_open[600]));put('lg-gain',`${f2(M.power.lambda_at_80)} × ${f2(M.R_total)} = ${f2(M.loop_gain_at_80)}`);}
  const d=C.tload_dram,l=C.tload_l2;
- if(d){put('mem-dg',f1(d.per_s/1e9));put('mem-dpct',Math.round(100*d.per_s/119e9)+'%');put('mem-dw',f1(d.dyn));put('mem-dpj',d.pj_per_unit_dyn.toFixed(0));}   /* 119 GB/s: these cards' 933 MHz DDR clock */
- if(l){put('mem-lt',f2(l.per_s/1e12));put('mem-lw',f1(l.dyn));put('mem-lpj',f1(l.pj_per_unit_dyn));}
+ /* this session's own pJ per byte is left out (one aifoundry2 session); the prose quotes the energy manual's two-card values */
+ if(d){put('mem-dg',f1(d.per_s/1e9));put('mem-dpct',Math.round(100*d.per_s/119e9)+'%');put('mem-dw',f1(d.dyn));}   /* 119 GB/s: these cards' 933 MHz DDR clock */
+ if(l){put('mem-lt',f2(l.per_s/1e12));put('mem-lw',f1(l.dyn));}
  put('m-rn',f1(C.fp32_randn.p80));
 })();

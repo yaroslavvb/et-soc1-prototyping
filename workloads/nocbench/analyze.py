@@ -10,7 +10,9 @@ and board power sampled during those runs) and energy-*/results.json (run_energy
     scratchpad TensorLoad (the reference row of the energy chart).
 --search: 12 simulated-annealing restarts from random layouts (about 30 s); records each restart.
 --reruns: the energy manual's pooled re-runs of these rings (default docs/reports/data/2026-09-23-energy-manual/
-    reruns.json), embedded with their fit against the mean hop count.
+    reruns.json), embedded with their fit against the mean hop count (pooled, and per card over the rings both cards
+    kept) and, per card, the range of watts over idle of the ring bursts behind them (re-reduced from the rerun
+    directories the file names, with tools/ettelem/analyze_reruns.py).
 
 The shire layout: marty1885 inferred where each logical shire sits on the physical 6x6 mesh from
 shire-to-shire bandwidth (clehaxze.tw, "Investigating the ET-SoC-1 NoC", 2026-04-27). This script checks it
@@ -43,6 +45,14 @@ MARTY = {
     28: (1, 5), 5: (2, 5), 6: (3, 5), 7: (4, 5), 31: (5, 5),
 }
 EMPTY = [(0, 3), (0, 4), (0, 5), (5, 3)]
+
+
+def _load_module(path, name):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(name, path)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
 
 
 def hops(a, b, layout=MARTY):
@@ -434,6 +444,31 @@ def main():
         print(f"re-run on two cards (23 September): 1 KB messages over the mesh {a:.2f} + {b:.2f} pJ/B per mean hop "
               f"(r2 {r2:.3f}, {len(mesh)} rings); inside a shire " + ", ".join(
                   f"{k} {rings[k]['mean']:.2f}" for k in ("pair", "neigh", "shire", "shire-c4") if k in rings))
+        # The cards differ in the mesh slope, so fit each card's own ring means, over the 1 KB mesh rings both cards
+        # kept (aifoundry2's s <-> s+16 passes were dropped: that ring starves its service processor).
+        pc = {k: v.get("per_card", {}) for k, v in rr["rings_pj_per_byte"].items()
+              if k.startswith("xshire") and not k.endswith("-c4") and k in energy["configs"]}
+        cards = sorted({h for v in pc.values() for h in v})
+        common = [k for k, v in pc.items() if all(h in v for h in cards)]
+        data["reruns"]["mesh_fit_per_card"] = {}
+        for h in cards:
+            a_, b_, r2_, _ = fit_line([energy["configs"][k]["mean_hops"] for k in common], [pc[k][h]["mean"] for k in common])
+            data["reruns"]["mesh_fit_per_card"][h] = {"a": a_, "b": b_, "r2": r2_, "n": len(common)}
+            print(f"  {h}: {a_:.2f} + {b_:.2f} pJ/B per mean hop (r2 {r2_:.3f}, the {len(common)} rings both cards kept)")
+        # Watts over idle of the same ring bursts, per card: each pass reduced and filtered as the energy manual does
+        # (tools/ettelem/analyze_reruns.py), so the range covers exactly the bursts behind the pJ/B above.
+        ar = _load_module(os.path.join(ROOT, "tools", "ettelem", "analyze_reruns.py"), "analyze_reruns")
+        watts = {}
+        for rd in rr.get("dirs", []):
+            for pd in sorted(glob.glob(os.path.join(ROOT, rd, "rl-pass*[0-9]"))):
+                if not ar.complete(pd):
+                    continue
+                for lab, b in ar.reduce_dir(pd).items():
+                    if lab in rings and b["clock_moved_frac"] <= 0.02 and b["sampler_median_ms"] <= 60:
+                        watts.setdefault(ar.host_of(rd), []).append(b["over_idle_w"])
+        data["reruns"]["over_idle_w_per_card"] = {h: {"lo": min(v), "hi": max(v), "n": len(v)} for h, v in sorted(watts.items())}
+        print("  over idle, every ring burst kept: " + ", ".join(
+            f"{h} {min(v):.2f}-{max(v):.2f} W ({len(v)})" for h, v in sorted(watts.items())))
 
     # Bulk data between shires for comparison: every minion streaming 1 KB TensorLoads from the scratchpad 16 shire
     # IDs away (the memory-hierarchy probe), median GB/s of its launches at 600 MHz (as scripts/ridge-points.py).

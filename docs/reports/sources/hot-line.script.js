@@ -133,12 +133,16 @@ const POOLED={
  const one=byc[CARDS[0]].filter(r=>r.kind==='one'), far=Math.max(...one.map(r=>hopsOf(r.s)));
  const at=h=>one.filter(r=>hopsOf(r.s)===h).map(r=>r.share);
  const host=D.fairness.find(r=>A2(r)&&r.home==='0'&&r.per_shire===32).host_share;
+ /* section 3's round trip: one requester, the bank idle, from this shire */
+ const rtS=CTX.remote_atomic_latency_shire, rtH=rtS!=null&&LAY[rtS]?hopsOf(rtS):null;
+ const rtNote=RT&&rtH!=null?`; section 3's ${n0(RT)} cycles is the uncontended round trip of a single requester in shire ${rtS}, ${rtH} hop${rtH===1?'':'s'} away`:'';
  $('faircap').textContent=
   `The map colours each shire by its share (towards blue above an even split, towards orange below; shire 0, outlined, holds the line). `+
   `The scatter plots the same shares against mesh hops from shire 0; dots are ${CARDS[0]}, rings ${CARD3}. `+
   `With one minion per shire the dashed curve is ${num(F.harmonic_mean_cycles,0)}/(${num(F.round_trip_cycles_0_hops,0)} + ${num(F.cycles_per_hop,1)} × hops): `+
   `a request's round trip, ${num(F.round_trip_cycles_0_hops,0)} cycles plus ${num(F.cycles_per_hop,1)} per hop, sets how often a shire gets its turn, and the curve fits every shire `+
   `within ${F.max_share_error} (${fit[CARD3].max_share_error} on ${CARD3}), from ${f3(Math.max(...at(0)))} at 0 hops to ${f3(Math.min(...at(far)))} at ${far}. `+
+  `That round trip is taken under the saturated bank, so it includes the queueing${rtNote}. `+
   `With every minion taking part the whole chip lands within ${f3(Math.min(...full))}–${f3(Math.max(...full))} on both cards and the host shire is at ${f3(host)}: the map goes flat. `+
   `A hovered or focused shire is joined to shire 0 by a straight line, not by its route (the mesh's routing order was not measured). `+
   `The same holds for Ivan's exact case, a scratchpad word in shire 0: host share 1.004, every shire 0.998–1.004.`;
@@ -354,14 +358,11 @@ if(CTX.errata) $('errata').innerHTML=CTX.errata.map(e=>
   `<tr><td>idle card, die at ${p.idle.die_c.toFixed(0)} °C</td><td class="num">0</td><td class="num">(idle ${f2(p.idle.board_w)} W)</td><td class="num">—</td><td class="num">—</td></tr></tbody>`;
  CK.stackTable('pwrtab');
  $('pooln').textContent=`n = ${nP}, ${word(pc[CARDS[0]].n)} on ${CARDS[0]} including this one, ${word(pc[CARD3].n)} on ${CARD3}`;
- /* where this session falls in each pooled range: the top, except where it does not */
- const lo_=p.runs.find(r=>r.label==='local_only'), short={local_only:'reading-only'};
- const notTop=p.runs.filter(r=>POOLED.nj[r.label]&&Math.abs(r.nj_per_op-POOLED.nj[r.label].hi)>1e-3).map(r=>short[r.label]||names[r.label]);
- const why=lo_?`${f2(lo_.over_idle_w)} W is inside the idle baseline's ±0.2 W, so its energy is an order of magnitude, not a measurement.`:'';
- $('pooltop').textContent=notTop.length===1&&notTop[0]==='reading-only'&&lo_
-  ?`This session is the top of each range except the reading-only row's, whose ${why}`
-  :(notTop.length?`This session is the top of each range except the ${notTop.join(' and ')} rows'. `:'This session is the top of each range. ')+
-   (lo_?`The reading-only row's ${why}`:'');
+ /* the two reductions the pool mixes (power.json: analyze_hotline_power.py; the passes: analyze_reruns.py), and the reading-only row */
+ const lo_=p.runs.find(r=>r.label==='local_only');
+ $('pooltop').textContent=`This session was reduced against one idle for the whole session, with no leakage correction; `+
+  `the 23 September passes against the idle just before and after each burst, corrected for leakage. The pool mixes the two. `+
+  (lo_?`The reading-only row's ${f2(lo_.over_idle_w)} W is inside the idle baseline's ±0.2 W, so its energy is an order of magnitude, not a measurement.`:'');
  const w=POOLED.w_contended, c=p.runs.find(r=>r.label==='contended'), s=p.runs.find(r=>r.label==='spread');
  $('hlw').textContent=`about ${f1(w.mean)} W over idle (${f2(w.mean)} W on the mean of ${word(w.n)} passes, ${f1(w.lo)}–${f1(w.hi)} W; this session read ${f1(c.over_idle_w)} W)`;
  $('enfac').textContent=(POOLED.nj.contended.mean/POOLED.nj.spread.mean).toFixed(0);
