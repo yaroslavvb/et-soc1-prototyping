@@ -465,6 +465,7 @@ one review of the set's structure, and wrote the plan (`PLAN2.md`); page owners 
 | `49dd0c8` | Review every report the observability hub links: claims, consistency, cross-links, readability |
 | `7d8505f` | Keep the record of the report review: plan, verified findings, fix results and the check tools |
 | `08076ae` | Record the review commits in the artifacts index |
+| `de26273` | Second validation of the report set: reproduce, cut redundancy, add interactive charts |
 
 ## Publishing notes, learned the hard way
 
