@@ -86,7 +86,7 @@ ol li, ul li { margin: 5px 0; }
 <main>
 
 <h1>The ET-SoC-1 memory hierarchy, measured on silicon, next to the A100</h1>
-<p class="byline">Measured 18 Sep 2026 on <code>aifoundry2</code> in the AI Foundry lab: one ET-SoC-1 PCIe card, 32 GB LPDDR4X, 1,024 compute minions. A100 values are from published microbenchmarks and energy studies (sources at the end). Code: <code>workloads/memhier</code> in the <code>nekko</code> workspace.</p>
+<p class="byline">Measured 18 Sep 2026 on <code>aifoundry2</code> in the AI Foundry lab: one ET-SoC-1 PCIe card, 32 GB LPDDR4X, 1,024 compute minions. A100 values are from published microbenchmarks and energy studies (sources at the end). Code: <code>workloads/memhier</code> in the <code>nekko</code> workspace. Part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a>.</p>
 
 <p class="lede">Pointer-chase and streaming probes give the card's memory hierarchy as a spec sheet. <b>ET-SoC-1's on-chip memories are fast and cheap per byte:</b> a load hits L1 in 8.8 ns and the shire's L2 in 78 ns, against 23 ns and 148 ns on an A100, at 7–9× less energy per byte. <b>They are also tiny per core:</b> the firmware leaves each hart only 512 B of L1 data cache. <b>Off chip the picture flips.</b> DRAM latency is about equal to the A100's HBM (~440 vs 405 ns), but the card streams 76 GB/s, about a twentieth of an A100, at roughly 1.4× the energy per byte.</p>
 
