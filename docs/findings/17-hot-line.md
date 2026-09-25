@@ -1,13 +1,19 @@
 # One hot line stops a shire
 
+[← Findings index](README.md) · published as [One hot line stops a shire](https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line) (A13) · numbers and
+sources: [05-claims.md](05-claims.md)
+
 **Question (Q24):** Ivan reported in Discord that with all 32 shires hammering one global atomic counter in
 shire 0's scratchpad, *"shire 0 got 6% of its fair share and finished only after the other 31"*. Is the shire
 cache short-changing whoever owns the line?
 
-**Answer:** no. The atomic is shared to within one part in a thousand, including with the host shire. But the
-host shire loses its **own** memory path completely, for as long as the hammering lasts.
+**Answer:** no. The atomic is shared to within half a percent (every shire between 0.998 and 1.004 of an even
+split), including with the host shire. But the host shire loses its **own** memory path completely, for as long as
+the hammering lasts.
 
-Evidence: [E22, E23](03-experiments.md). Published as [A13](04-artifacts.md).
+Evidence: [E22, E23](03-experiments.md). Published as [A13](04-artifacts.md). A [shire](README.md#terms) is 32
+minions and their shared 4 MB of SRAM; a global atomic (`amoaddg`) is performed at the shire cache that homes the
+line, which is also where that shire's own loads and stores are served.
 
 ---
 
@@ -21,8 +27,10 @@ Evidence: [E22, E23](03-experiments.md). Published as [A13](04-artifacts.md).
 | shire 0 finished after the other 31 | **Not reproduced** for the atomic; but see below, which is worse |
 
 Moving the line's home to shire 7, 15 or 31 changes nothing, so shire 0 is not special. The only case where
-shares spread out is the opposite of starvation: with one minion per shire the bank is not saturated, latency
-decides, and the host shire comes **first** (1.20 against 0.85 for the farthest).
+shares spread out is the opposite of starvation: with one minion per shire the bank is still saturated (600,061
+atomics in 6,000,000 cycles, 10.0 cycles each), but each shire has only one request queued, so the mesh round trip
+decides. Shares fall step by step with hop distance, and the host shire, which crosses no mesh links, comes
+**first** (1.20 against 0.85 for the farthest, ten hops away).
 
 **Why the atomic cannot be unfair.** A global atomic addressed through the scratchpad self ID `0x7F` raises a
 kernel bus error — the local path does not carry one. From the host shire an `amoaddg` therefore leaves
@@ -76,14 +84,17 @@ Two errata in the ET-SoC errata document (R1), both marked **Postponed**:
 - **4.2, `RTLMIN-6214`, "L3_yield priority does not have sub-bank granularity."** The yield can be satisfied by
   a neighbourhood request to a different sub-bank while the one it needs stays busy.
 
-So the two questions worth sending back are already answered. **Does setting `l3_yield` restore the host's
-share?** The erratum says it does not, for exactly this case, and the second adds that it has no sub-bank
-granularity. **Does it hold for a DRAM-backed line rather than scratchpad?** Yes, and slightly worse: 192
+That bears on both questions worth sending back. **Would setting `l3_yield` restore the host?** Not certainly.
+Erratum 4.1 says it does not when the host and the mesh want the same address. The case measured here is different
+addresses, which is what the yield was built for. But erratum 4.2 says the yield has no sub-bank granularity, so a
+host request to the sub-bank the hot line saturates can still be skipped indefinitely, and each host minion's stream
+reaches that sub-bank sooner or later. It was not tested. **Does it hold for a DRAM-backed line rather than
+scratchpad?** Yes, and slightly worse: 192
 operations instead of 384. The erratum's title says "SCP address" but the behaviour is not specific to the
 scratchpad.
 
-`l3_yield` was **not** set here: it is a shire-cache configuration register on a shared lab card, and the
-erratum says it would not help.
+`l3_yield` was **not** set here: it is a shire-cache configuration register on a shared lab card, and the errata
+suggest it would not fully help.
 
 ## The workaround, priced
 
@@ -91,9 +102,9 @@ erratum says it would not help.
 |---|---|---|
 | 0 to 8,000 | 0.03% | 100% |
 | 10,000 | 54% | 96% |
-| 12,000 | 86% | 80% |
-| 16,000 | 96% | 61% |
-| 100,000 | 99% | 10% |
+| 12,000 | 85% | 80% |
+| 16,000 | 95% | 61% |
+| 100,000 | 98% | 10% |
 
 Nothing below 10,000 cycles helps at all, because below that the bank is still saturated. At the knee the
 trade is cheap: the first thing pacing removes is queueing, not throughput.
@@ -106,7 +117,12 @@ trade is cheap: the first thing pacing removes is queueing, not throughput.
 | 32 DRAM lines, 1,024 minions | 1,919 M/s | 2.63 | 1.4 |
 | host shire reading, nobody hammering | 180 M/s | 0.07 | 0.4 |
 
-A contended line costs **17× the energy per operation**. A thousand minions stalled on it cost about 1.4 W
+The table is the first run (22 September, aifoundry2). Re-run for the energy manual (E29), three passes per card
+with the die held warm: contended 19.8 [16.9–23.6] nJ, spread 1.16 [1.01–1.37] nJ, n = 7 — still 17×, and about
+1.2 W over idle for the stalled chip. Quote those. The reading-only row's 0.07 W is inside the idle baseline's
+±0.2 W, so its 0.4 nJ is an order of magnitude, not a measurement.
+
+A contended line costs **17× the energy per operation**. A thousand minions stalled on it cost about 1.2–1.4 W
 over idle, which says plainly that waiting is cheap and what contention destroys is throughput, not power.
 
 ## Rules this gives you
@@ -128,3 +144,11 @@ over idle, which says plainly that waiting is cheap and what contention destroys
 - **Whether `l3_yield` would help a case the errata do not cover.** Not tested; not our register to set.
 - **Whether a hot line makes its shire measurably hotter.** The card's thermal telemetry is one chip-wide
   mean, so this instrument cannot answer it. See [14-card-behaviour.md](14-card-behaviour.md).
+
+## Related
+
+- [19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md): the E29 bars on this page's
+  energies, and the meter traps found on the way.
+- [18-on-chip-relay.md](18-on-chip-relay.md): the barrier that hung on exactly this effect, and how the relay avoids it.
+- [01-resources.md](01-resources.md): R11 (Ivan's result) and R12 (the brief that first analysed it, now corrected in
+  place).

@@ -1,25 +1,31 @@
 # Finding: the same matmul costs 38 to 63 W depending on the operand values
 
+[← Findings index](README.md) · published as [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4) · numbers and
+sources: [05-claims.md](05-claims.md)
+
 **Sources:** E9 (the measurement), E11 and E13 (the RTL explanation), E15 (validation on new matrices),
-R8 (the GPU result this reproduces). Published as A4.
+R8 (the GPU result this reproduces).
 
 ---
 
 ## The result
 
-Every run below does **identical arithmetic**: hart 0 of each of 1,024 minions repeats one 16×16×16 fp32
-`TensorFMA` on a tile pair held in the L1 scratchpad, at 546.001 cycles per op, 600 MHz, 9.18 TFLOPS. The
+Every run below does **identical arithmetic**: [hart](README.md#terms) 0 of each of 1,024
+[minions](README.md#terms) repeats one 16×16×16 fp32 [`TensorFMA`](README.md#terms) on a tile pair held in the
+[L1 scratchpad](README.md#terms), at 546.001 cycles per op, 600 MHz, 9.18 TFLOPS. The
 clock and the core voltage never move. Only the numbers in A and B differ.
 
 Board power is quoted at the launch temperature (80 °C), corrected for the leakage the run's own heating adds
 during seconds 1–3. "Rise" is the de-quantised temperature gain over a 7.3 s run (see
-[14-card-behaviour.md](14-card-behaviour.md) for why the raw sensor cannot give this directly).
+[14-card-behaviour.md](14-card-behaviour.md) for why the raw sensor cannot give this directly). The three coolest
+patterns move the whole-degree reading by at most one degree, so their rise is only bounded (below about 0.5 °C,
+under 8 m°C per 10¹² FLOPs), as in the published report.
 
-| Operands (A and B) | Runs | Board W at 80 °C | ± sd | Rise in 7 s | m°C per 10¹² FLOPs | pJ/FLOP | pJ/FLOP over idle |
+| Operands (A and B) | Runs | Board W at 80 °C | ± sd | Rise in 7 s | m°C per 10¹² FLOPs | pJ/FLOP, run average | pJ/FLOP over idle, run average |
 |---|---|---|---|---|---|---|---|
-| zeros | 5 | **38.29** | 0.03 | +0.08 °C | 1.3 | 4.17 | 0.22 |
-| checkerboard 1,0,1,0 | 2 | 40.94 | 0.04 | +0.04 | 0.6 | 4.47 | 0.51 |
-| random normal, 75% zeroed | 2 | 41.04 | 0.05 | +0.26 | 3.9 | 4.49 | 0.55 |
+| zeros | 5 | **38.29** | 0.03 | < 0.5 °C | < 8 | 4.17 | 0.22 |
+| checkerboard 1,0,1,0 | 2 | 40.94 | 0.04 | < 0.5 | < 8 | 4.47 | 0.51 |
+| random normal, 75% zeroed | 2 | 41.04 | 0.05 | < 0.5 | < 8 | 4.49 | 0.55 |
 | ternary −1, 0, 1 | 2 | 45.70 | 0.22 | +1.40 | 20.6 | 5.07 | 1.12 |
 | random normal, 50% zeroed | 5 | 46.13 | 0.32 | +1.73 | 25.6 | 5.13 | 1.18 |
 | **ones** | 5 | **46.73** | 0.07 | +1.81 | 26.8 | 5.21 | 1.26 |
@@ -34,20 +40,28 @@ during seconds 1–3. "Rise" is the de-quantised temperature gain over a 7.3 s r
 
 The idle card just before each launch drew 36.29 W ± 0.06.
 
+The pJ/FLOP columns divide each run's mean power over all 7.3 s (`horace3.json` `p_mean`), which includes the leakage
+the run's own heating adds; the W column is the launch-temperature value. At 80 °C random normal is 6.9 pJ per FLOP
+(2.95 over idle), and the 7.0 pJ in [13-why-low-power.md](13-why-low-power.md) is the 63.9 W E15 ablation run on the
+same basis.
+
 ### What to take from it
 
 - **The runs cluster by kind, tightly.** Random normal repeats to 0.08 W across five *different* random
   matrices; zeros to 0.03 W. The run-to-run spread is far smaller than the gap between kinds.
-- **Heating follows power over idle, not total power.** Zeros add 2.0 W to an idle card and the die gains
-  under a tenth of a degree. Random normal adds 27 W and gains 5.2 °C. Hence 1 against 76 m°C per trillion
-  FLOPs, while total energy per FLOP only moves from 4.2 to 7.3 pJ.
-- **Over the idle card the data decides a factor of 15** in energy per FLOP (0.22 against 3.31 pJ).
+- **Heating follows power over idle, not total power.** Zeros add 2.0 W to an idle card and the die's
+  rise stays below what the sensor resolves (the thermal network driven by the measured power puts it at 0.3 °C).
+  Random normal adds 27 W and gains 5.2 °C. Hence about 5 against 76 m°C per trillion FLOPs, while total energy per FLOP only moves from 4.2 to 7.3 pJ.
+- **Over the idle card the data decides a factor of 14–15** in energy per FLOP (0.22 against 2.95 pJ at 80 °C,
+  3.31 on the run average).
 - **Which bits are random matters.** Random signs alone cost 51.4 W, random exponents alone 52.6 W, random
   mantissas alone 60.4 W, all three 63.4 W.
 - **Order matters.** One random operand with the other pinned at 1: 54.3 W when A is random, 57.9 W when B is.
-- **Only the core rail moves.** Late in the run, random normal is 29.6 W above zeros at the board; the minion
-  rail accounts for 21.5 W, SRAM and mesh for 1.0 W between them, and about 7 W never reaches the die at all
-  (regulator loss, which grows with current).
+- **The minion rail carries almost all of it.** Late in the run, random normal is 29.6 W above zeros at the
+  board; the minion rail accounts for 21.5 W, SRAM and mesh for 1.0 W between them, and about 7 W is on no rail
+  sensor: by the later attribution ([19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md),
+  E30) about 4.4 W of it is regulator delivery loss: 4.2 W on the minion regulator (19.6% of the 21.5 W it
+  delivered) and 0.2 W on the SRAM and mesh regulators. The remaining ~2.6 W is not attributed.
 
 ## Why: three mechanisms, all visible in the RTL
 
@@ -80,7 +94,7 @@ multiplying by zero, because `x · 0` is −0.0 for every negative x.
 ## Structured matrices: predicted before they ran
 
 17 kinds of structured operand pair were generated (E13), their power predicted from the tiles alone and
-**written to disk at 13:08:33**, and 14 of them run on the card starting at 13:16 (E14, E15).
+**written to disk at 13:08:33**, and 14 of them run on the card starting at 13:09 (E14, E15).
 
 | Matrix (A and B) | Multiply-adds not gated | Net toggles | Predicted W | Measured W | Error |
 |---|---|---|---|---|---|
@@ -99,7 +113,7 @@ multiplying by zero, because `x · 0` is −0.0 for every negative x.
 | kaleidoscope (butterfly products) | 4,096 | 87.7 M | 63.68 | 63.86 | −0.18 |
 | DCT-II | 4,096 | 81.9 M | 63.41 | 63.95 | −0.54 |
 
-**0.92 W rms over a 25 W range**, and 11 of the 14 within 0.6 W.
+**0.92 W rms over a 25 W range**, and 10 of the 14 within 0.6 W (11 within 0.75 W).
 
 - **Structure in the values buys nothing.** Kaleidoscope products (the family that generalises the FFT), the
   DCT, circulant and rank-1 matrices are dense, and they cost exactly what random normal costs: their mantissa
@@ -120,3 +134,10 @@ On this card the *cause* is the same and much larger — 25 W of data-dependent 
 the *effect* is different, because a hot die is pinned at 600 MHz by the firmware. Speed only moves when the
 die starts cool; then zeros run at 11.4–11.8 TFLOPS and random data at 9.3, a 25% gap
 ([14-card-behaviour.md](14-card-behaviour.md)).
+
+## Related
+
+- [11-thermal-model.md](11-thermal-model.md): the model that turns these flips into watts and degrees.
+- [12-heat-management.md](12-heat-management.md): what the same effect means for runs of minutes.
+- [13-why-low-power.md](13-why-low-power.md): the card against an A100, term by term.
+- [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md): the governor that pins a hot die at 600 MHz.

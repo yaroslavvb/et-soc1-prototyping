@@ -18,6 +18,13 @@ Runs on the lab machine, next to the card:
    --settle seconds are skipped while power ramps up. Then prints throughput,
    watts, GFLOP/s per W (board), and GFLOP/s per W above idle.
 
+Two idles are recorded. idle_w is the median of the baseline before the first workload.
+idle_before_w is each workload's own idle: the mean board power from 3.5 to 1.8 s before
+its first timed launch, a window that ends before the calibration launch. The die warms over a
+session and leaks more, so that idle rises from one workload to the next: 30.6, 32.5,
+33.8 and 35.2 W in the 2026-09-18 run on aifoundry2. gflops_per_w_above_idle_before
+subtracts it; gflops_per_w_above_idle (the first baseline) is kept for older readers.
+
 The launcher only opens the ops node. The power logger needs the mgmt node, so
 et-powertop must not be running.
 """
@@ -34,6 +41,10 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 DMS = os.path.join(os.environ.get("ET", "/opt/et"), "bin", "dev_mngt_service")
 
+# Window for a workload's own idle, in seconds before its first timed launch. The calibration launch runs
+# in the last ~0.5 s before it, and the previous workload ends --gap seconds (default 5) earlier.
+IDLE_BEFORE_S = (3.5, 1.8)
+
 # name, mode, ntiles, private pools, calibration iters
 WORKLOADS = [
     ("fp32-tensor-L2", "fp32", 16, False, 2000),
@@ -48,6 +59,16 @@ def dm_query(cmd):
     lines = [l.split("]: ", 1)[-1].strip() for l in (out.stdout + out.stderr).splitlines()
              if "verifyService" in l]
     return lines
+
+
+def idle_before(samples, t_first_ms, t_prev_end_ms=None):
+    """Mean board power from IDLE_BEFORE_S[0] to IDLE_BEFORE_S[1] s before a workload's first timed launch.
+    Samples less than 1 s after the previous workload ended are left out, in case --gap is short."""
+    lo = t_first_ms - IDLE_BEFORE_S[0] * 1000
+    if t_prev_end_ms is not None:
+        lo = max(lo, t_prev_end_ms + 1000)
+    w = [x for t, x in samples if lo <= t <= t_first_ms - IDLE_BEFORE_S[1] * 1000]
+    return statistics.mean(w) if w else float("nan")
 
 
 def run_launcher(args, mode, ntiles, private, iters, repeat):
@@ -125,10 +146,13 @@ def main():
     idle_w = statistics.median(idle) if idle else float("nan")
 
     results = []
+    prev_end = None
     for name, mode, ntiles, private, _ in workloads:
         runs = [r for r in all_runs if r["workload"] == name]
         if not runs:
             continue
+        idle_b = idle_before(samples, runs[0]["t_start_ms"], prev_end)
+        prev_end = runs[-1]["t_end_ms"]
         first = runs[0]["t_start_ms"] + args.settle * 1000
         watts = [w for t, w in samples
                  if t >= first and any(r["t_start_ms"] <= t <= r["t_end_ms"] for r in runs)]
@@ -146,6 +170,8 @@ def main():
             "min_w": min(watts) if watts else None, "max_w": max(watts) if watts else None,
             "gflops_per_w": tflops * 1000 / mean_w,
             "gflops_per_w_above_idle": tflops * 1000 / (mean_w - idle_w) if mean_w > idle_w else None,
+            "idle_before_w": idle_b,
+            "gflops_per_w_above_idle_before": tflops * 1000 / (mean_w - idle_b) if mean_w > idle_b else None,
         })
 
     summary = {"idle_w": idle_w, "idle_samples": len(idle), "info": info, "results": results,
@@ -154,12 +180,14 @@ def main():
         json.dump(summary, f, indent=2)
 
     print(f"\nidle board power: {idle_w:.2f} W (median of {len(idle)} samples)")
-    print("| workload | TFLOP/s (TOP/s int8) | flop/minion/cycle | board W | GFLOP/s per W | per W above idle | check |")
-    print("|---|---|---|---|---|---|---|")
+    print("| workload | TFLOP/s (TOP/s int8) | flop/minion/cycle | board W | GFLOP/s per W | idle before, W "
+          "| per W above that idle | check |")
+    print("|---|---|---|---|---|---|---|---|")
     for r in results:
-        above = f"{r['gflops_per_w_above_idle']:.0f}" if r["gflops_per_w_above_idle"] else "n/a"
+        above = f"{r['gflops_per_w_above_idle_before']:.0f}" if r["gflops_per_w_above_idle_before"] else "n/a"
         print(f"| {r['workload']} | {r['tflops']:.3f} | {r['flop_per_minion_cycle']:.2f} | {r['mean_w']:.1f} "
-              f"({r['min_w']:.1f}-{r['max_w']:.1f}) | {r['gflops_per_w']:.0f} | {above} | {','.join(r['check'])} |")
+              f"({r['min_w']:.1f}-{r['max_w']:.1f}) | {r['gflops_per_w']:.0f} | {r['idle_before_w']:.2f} | {above} "
+              f"| {','.join(r['check'])} |")
 
 
 if __name__ == "__main__":

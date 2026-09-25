@@ -16,7 +16,10 @@ import os
 import re
 import statistics
 
-GHZ = 0.6  # minion clock reported by DM_CMD_GET_ASIC_FREQUENCIES; device cycles vs wall time agree
+GHZ = 0.6  # minion base clock reported by DM_CMD_GET_ASIC_FREQUENCIES
+# The governor's operating points on these cards are 600, 700 and 800 MHz (DVFS report); nothing runs outside them.
+GHZ_MIN, GHZ_MAX = 0.6, 0.8
+MIN_WALL_S = 0.01  # chases shorter than this are dominated by launch overhead
 
 # Working-set ranges (bytes) that sit on each plateau of the latency curve.
 LEVELS = [
@@ -31,12 +34,15 @@ LEVELS = [
 def point_ghz(r):
     """Clock during one chase: its cycles over its wall time, when the run is long enough to tell.
 
-    Short runs are dominated by launch overhead, so they fall back to the 600 MHz base clock. That is also
-    the right conversion for on-chip levels, whose latency in cycles does not change with the clock."""
-    if r["wall_s"] >= 0.03:
+    The wall time includes the warm-up steps, which are most of the chase, so the estimate is approximate: it reads
+    up to 5% off on most L3 and DRAM chases and 10-16% high on the 48 and 64 MB chains, and a chase whose clock
+    changed during its warm-up gets a value in between. It is therefore kept inside the 600-800 MHz operating range.
+    Runs shorter than MIN_WALL_S fall back to the 600 MHz base clock. That is also the right conversion for on-chip
+    levels, whose latency in cycles does not change with the clock."""
+    if r["wall_s"] >= MIN_WALL_S:
         ghz = r["cycles_per_load"] * (r["warm_steps"] + r["steps"]) / r["wall_s"] / 1e9
         if 0.55 <= ghz <= 0.95:
-            return ghz
+            return min(max(ghz, GHZ_MIN), GHZ_MAX)
     return GHZ
 
 
@@ -122,17 +128,16 @@ def main():
                   + (f"{pj['mean']:7.2f} pJ/B ({pj['min']:.2f}-{pj['max']:.2f})" if pj else "")
                   + (f"  vs spin {lv['pj_per_byte_vs_spin']['mean']:.2f} pJ/B" if lv["pj_per_byte_vs_spin"] else ""))
 
-    # L3 / DRAM in ns: the DVFS governor moves the minion clock (600-850 MHz), so convert each chase with
+    # L3 / DRAM in ns: the DVFS governor moves the minion clock (600-800 MHz), so convert each chase with
     # its own clock, inferred from its cycles and wall time (warm-up + timed loads, all at the same level).
     ns = {"L3": [], "DRAM": []}
     for rs in rows.values():
         for r in rs:
-            if r["where"] != "dram" or r["thread"] != 0 or r["wall_s"] <= 0.03:
+            if r["where"] != "dram" or r["thread"] != 0 or r["wall_s"] < MIN_WALL_S:
                 continue
             level = "L3" if (768 << 10) <= r["size"] <= (8 << 20) else "DRAM" if r["size"] >= (128 << 20) else None
             if level:
-                ghz = r["cycles_per_load"] * (r["warm_steps"] + r["steps"]) / r["wall_s"] / 1e9
-                ns[level].append(r["cycles_per_load"] / ghz)
+                ns[level].append(r["cycles_per_load"] / point_ghz(r))
     for level, vals in ns.items():
         if vals:
             plateaus[level]["ns_measured_clock"] = {"median": statistics.median(vals), "min": min(vals),

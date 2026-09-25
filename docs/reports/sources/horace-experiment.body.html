@@ -1,22 +1,32 @@
 <style>#act td:first-child,#tbl td:first-child,#long-tbl td,#val-tbl td,#struct-long td,#struct-tbl td:first-child,#perflip td:first-child,#pre td:first-child,#coef td:first-child,#coldtbl td:first-child{white-space:nowrap}</style>
-<h1>The Horace experiment on the ET-SoC-1</h1>
-<p class="byline">aifoundry2's and aifoundry3's cards, 20–22 September 2026 · fp32 TensorFMA on all 1,024 minions · <code>workloads/sparsity --values</code>, <code>tools/ettelem</code>, <code>rtl-sim/fma_toggle</code> · fourth version: strict temperature control, heating per FLOP, a power model from RTL switching activity, the speed effect, and now ten-minute runs, a model from flips to temperature, and structured matrices priced before they ran, then repeated on a second card · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">measurement reports</a></p>
+<h1>The Horace experiment: the same matmul draws 38 to 63 W depending on the data</h1>
+<p class="byline">20–22 September 2026 · aifoundry2 and aifoundry3 · fp32 TensorFMA on all 1,024 minions · <code>workloads/sparsity</code>, <code>tools/ettelem</code>, <code>rtl-sim/fma_toggle</code> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">Horace He's post
 <a href="https://www.thonking.ai/p/strangely-matrix-multiplications">"Strangely, Matrix Multiplications on GPUs Run Faster When Given 'Predictable' Data!"</a>
 (April 2024) found that an A100 multiplies matrices of zeros about 15% faster than random ones (295 against 257 TFLOPS):
 predictable data flips fewer transistors, draws less power, and a power-limited GPU then clocks higher. On this chip the
-whole chain can be taken apart, because the RTL of its multiply-add unit is open. At the same clock and the same 9.2 TFLOPS, a matmul draws <b>38 W on zeros, 47 W on ones and 63 W on random
-values</b>, and heats the die in proportion: <b>1, 27 and 76 thousandths of a degree per trillion FLOPs</b>. Simulating the
-chip's own multiply-add RTL on the operands the card ran explains the watts: register bits clocked and nets toggled predict
-the board power of 14 patterns to <b>±0.5 W</b>, including six patterns whose power was written down before they had ever
-run. A two-stage thermal network then turns watts into the temperature curve to about <b>0.3 °C</b>, the resolution of the
-sensor. And from a cool die Horace's speed effect appears too: zeros run at <b>11.6 TFLOPS</b> and random values at
-<b>9.3</b>, because the firmware's governor lets only the cool pattern keep the fast clock. <b>Run for minutes instead of seconds,
-nothing but zeros lasts:</b> random data takes the die from 80 to 90 °C in 19 to 26 s, ones in about two minutes. A
-three-line model (flip rates to watts, leakage that grows with temperature, a thermal network) predicts those times from the
-flip counts. On runs it was not fitted to, the median error is 9% and the worst 23%; at ten minutes it runs 3 to 5 °C hot.
-It priced 14 structured matrices, from Hadamard to kaleidoscope, to 0.9 W before they ran.</p>
+whole chain can be taken apart, because the RTL (the Verilog source) of its core family's multiply-add unit is open. At the
+same clock and the same 9.2 TFLOPS, a matmul draws <b>38 W on zeros, 47 W on ones and 63 W on random values</b>, and heats
+the die in proportion to the watts above idle (12 and 30 W): <b>27 and 76 thousandths of a degree per trillion FLOPs</b> on
+ones and random values, while on zeros (2 W above idle) the rise stays below what the whole-degree sensor resolves (about 5
+thousandths by the thermal network). It follows the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparse compute
+report</a>, which found that zeros save most of the tensor unit's power but no cycles.</p>
+
+<p class="lede">Simulating that RTL (core-et's Erbium branch: the same Minion core lineage in a later configuration, not the
+taped-out netlist) on the operands the card ran explains the watts: register bits clocked and nets toggled predict the board
+power of 14 patterns to <b>0.5 W rms</b>, each predicted by a fit that left it out; six of them had been predicted from the
+previous day's data before they first ran, to 1.3 W rms. A two-stage thermal network then turns watts into the temperature
+curve to about <b>0.3 °C</b> rms, which is what the sensor's rounding to whole degrees alone would leave. And from a cool die
+Horace's speed effect appears too: zeros run at <b>11.6 TFLOPS</b> and random values at <b>9.3</b>, because the firmware's
+governor lets only the cool pattern keep the fast clock.</p>
+
+<p class="lede"><b>Run for minutes instead of seconds, only zeros hold a steady temperature at full load:</b> random data
+takes the die from 80 to 90 °C in 19 to 26 s, ones in about two minutes. A three-line model (flip rates to watts, leakage
+that grows with temperature, a thermal network) predicts those times from the flip counts. On runs it was not fitted to, the
+median error is 9% and the worst 23%; at ten minutes it runs 3 to 5 °C hot. It priced 14 structured matrices, from Hadamard
+to kaleidoscope, to 0.9 W rms before they ran. On a second card the power model is off by a single factor, 0.92, which one
+calibration run recovers; the thermal network does not transfer.</p>
 
 <div class="kpis" id="kpis"></div>
 
@@ -24,15 +34,25 @@ It priced 14 structured matrices, from Hadamard to kaleidoscope, to 0.9 W before
 <img src="horace-heating.gif" alt="Animated chart: die temperature over 7 seconds for matmuls on zeros, ones and random data, several runs each. Random runs rise fastest and cluster together." style="width:100%;height:auto;border-radius:12px;border:1px solid var(--border)">
 <figcaption class="small">Five runs each of zeros, ones and random normal matrices, every run launched as the die cooled through the
 same temperature. The thin staircases are the sensor's whole-degree readings; the smooth lines are the temperature recovered
-from the step times (section 2). The random runs use five different random matrices and still land on top of each other.
+from the step times (<a href="#strict-temperature-control">section 2</a>). The random runs use five different random matrices and still land on top of each other.
 To repost: <a href="horace-heating.gif">horace-heating.gif</a> (three kinds, 0.5 MB) or
 <a href="horace-heating-6.gif">horace-heating-6.gif</a> (six kinds, 0.9 MB).</figcaption>
 </figure>
 
-<h2>1. Same FLOPs, different heat</h2>
-<p>All 1,024 minions repeat one 16×16×16 fp32 <code>TensorFMA</code>. Every pattern takes 546.0 cycles per op at
-600 MHz, so every run does the same 9.18 × 10¹² FLOPs per second, 6.7 × 10¹³ in its 7.3 s. Only the values in A and B differ.
-Six patterns ran five times each; eight more ran twice each for the model in section 3.</p>
+<p class="small"><b>Terms.</b> The ET-SoC-1 is Esperanto's RISC-V accelerator, now open-sourced by AI Foundry. Its compute
+cores are <i>minions</i>, each with two hardware threads (<i>harts</i>) and a tensor unit whose matrix multiply-add instruction
+is <i>TensorFMA</i> (one fp32 op multiplies 16×16×16 tiles: 4,096 multiply-adds); 32 minions form a <i>shire</i>. The
+<i>service processor</i> is the on-die management core whose firmware reads the sensors and runs the clock governor (600, 700
+or 800 MHz). aifoundry2 and aifoundry3 are the lab machines that hold the two cards measured. More in the hub's
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">glossary</a>.</p>
+
+<h2 id="same-flops-different-heat">1. Same FLOPs, different heat</h2>
+<p>All 1,024 minions (the chip's compute cores, 32 to a shire; the chip has 1,088 in 34 shires, and the two not used here
+are the master and spare shires) each run one 16×16×16 fp32 <code>TensorFMA</code> (the tensor unit's matrix multiply-add)
+over and over, on operands held in the L1 scratchpad (3 KB of each minion's 4 KB data cache). Every pattern takes 546.0
+cycles per op at 600 MHz, so every run does the same 9.18 × 10¹² FLOPs per second, 6.7 × 10¹³ in its 7.3 s. Only the values
+in A and B differ. Six patterns ran five times each; eight more ran twice each for the model in
+<a href="#from-flips-to-watts">section 3</a>.</p>
 <div class="chart-title">Every run of the six main patterns. Top: die temperature; thin staircases are the sensor's whole-degree readings, one per run, and bold lines the mean recovered temperature. Bottom: board power, one thin line per run. Click a pattern to hide it.</div>
 <div class="controls" id="cl-leg"></div>
 <div class="chart scroll" id="cl-temp"></div>
@@ -40,30 +60,40 @@ Six patterns ran five times each; eight more ran twice each for the model in sec
 <div class="chart-title" style="margin-top:18px">Heating per FLOP: temperature gained over a 7 s run, divided by the FLOPs done in it</div>
 <div class="chart scroll" id="perflop"></div>
 <div class="table-wrap wide"><table id="tbl"></table></div>
+<p class="small">Rises below about 0.5 °C (the three coolest patterns) are not resolved by the whole-degree sensor; see
+<a href="#from-watts-to-degrees">section 4</a>. The pJ columns divide each run's mean power over the whole 7 s by the FLOP
+rate; the W column is the launch-temperature value.</p>
 <ul>
 <li><b>The runs cluster by kind, tightly.</b> Random normal draws 63.40 W with a run-to-run spread of 0.08 W over five
 different random matrices; zeros 38.29 ± 0.03 W; ones 46.73 ± 0.07 W. The rises of those three repeat to 0.03 °C. Random
 uniform sits with random normal (61.3 W, +4.7 °C). Ones, π and the half-zero random matrix sit together (46 to 47 W, +1.7
 to +1.8 °C). Zeros sit alone at the idle level.</li>
 <li><b>Heating per FLOP follows power over idle, not total power.</b> Just before each launch the idle card draws 36.3 W
-and the die is in balance. Zeros add 2.0 W to that and the die gains under 0.1 °C: 1 m°C per 10¹² FLOPs. Ones add 11.6 W:
-27 m°C. Random normal adds 30.4 W (the run's average, including the leakage its own heating adds): 76 m°C. The ratio of the
-last two, 2.8, is the ratio of the added watts, 2.6, within the sensor's resolution.</li>
-<li><b>In energy,</b> a FLOP costs 4.2 pJ of board energy on zeros, 5.2 pJ on ones and 7.3 pJ on random normal. Over the
-idle card those are 0.2, 1.3 and 3.3 pJ: the data decides a factor of 15.</li>
+and the die is in balance. Averaged over the run, including the leakage its own heating adds, zeros add 2.0 W to that; the
+reading never rises above 81 °C, so the rise is only bounded (below about 0.5 °C; the thermal network driven by the measured
+power puts it at 0.3 °C, about 5 m°C per 10¹² FLOPs). Ones add 11.6 W: 27 m°C. Random normal adds 30.4 W: 76 m°C. (At the
+launch temperature the three add 2.0, 10.5 and 27.1 W.) The ratio of the last two, 2.8, is close to the ratio of the added
+watts, 2.6; <a href="#from-watts-to-degrees">section 4</a> compares the two run by run.</li>
+<li><b>In energy,</b> averaged over the 7 s run, a FLOP costs 4.2 pJ of board energy on zeros, 5.2 pJ on ones and 7.3 pJ
+on random normal. Over the idle card those are 0.2, 1.3 and 3.3 pJ: the data decides a factor of 15. The run average includes
+the leakage the run's own heating adds (66.7 W mean for random normal); at the launch temperature random normal is
+63.4 W ÷ 9.18 TFLOPS = 6.9 pJ per FLOP.</li>
 <li><b>Which bits are random matters.</b> Random signs alone (±1) cost 51.4 W, random exponents alone 52.6 W, random
 mantissas alone 60.4 W, and all three together 63.4 W. One random operand with the other held at 1 costs 54.3 W when A is
-the random one and 57.9 W when B is. Section 3 shows why.</li>
+the random one and 57.9 W when B is. <a href="#from-flips-to-watts">Section 3</a> shows why.</li>
 <li><b>The rails agree on where it goes.</b> Late in the run random normal is 29.6 W above zeros on the board. The
-minion-core rail's own sensor accounts for 21.5 W of that and the SRAM and mesh rails for 1.0 W between them (they run
-hotter). The remaining 7 W is on no rail sensor: mostly conversion loss in the regulators, which grows with the current.</li>
+minion-core rail's own sensor accounts for 21.5 W of that and the SRAM and mesh rails for 1.0 W between them, about what
+a die 5 °C hotter adds to their leakage. The remaining 7 W is on no rail sensor: mostly conversion loss in the regulators, which grows with the current.</li>
 </ul>
 
-<h2>2. Strict temperature control</h2>
-<p>Two things make temperature a confound on this card. Power at the same work rises with die temperature, about 0.8 W
-per °C on the board (leakage). And the firmware's clock governor has a 65 °C threshold: below it a busy card is clocked up
-to 800 MHz at 0.62 V, above it the card is held at 600 MHz and 0.52 V (section 6). So every run starts from the same thermal
-state, well above that threshold:</p>
+<h2 id="strict-temperature-control">2. Strict temperature control</h2>
+<p>Two things make temperature a confound on this card. Power at the same work rises with die temperature through leakage:
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature">about 0.8 W per °C</a> on the board while a hot
+pattern runs, measured from the drift of power within the hot 7 s runs (80–86 °C); the idle law's slope is 0.65 W/°C at
+80 °C (<a href="#a-model-from-flips-to-temperature">section 8</a>). And the firmware's clock governor has a 65 °C threshold:
+below it a busy card is clocked up to 800 MHz at 0.62 V, above it the card is held at 600 MHz and 0.52 V
+(<a href="#the-speed-effect-appears-on-a-cool-die">section 6</a>). So every run starts from the same thermal state, well above
+that threshold:</p>
 <ol>
 <li><b>Heat.</b> If the die is below 84 °C, 2 s bursts of random-data matmul bring it there.</li>
 <li><b>Cool along the same curve.</b> The card idles until the mean of the 34 minion-shire sensors first reads 80 °C.
@@ -75,7 +105,7 @@ one run of each per block, and the random patterns get new random tiles in every
 Three checks that the control worked:</p>
 <ul>
 <li><b>Clock and voltage.</b> Every sample of every run reads 600 MHz and 516 to 518 mV on the die.</li>
-<li><b>Start state.</b> The thermal network of section 4 puts the die at 80.96 °C (in the sensor's units) at the 46 launch
+<li><b>Start state.</b> The thermal network of <a href="#from-watts-to-degrees">section 4</a> puts the die at 80.96 °C (in the sensor's units) at the 46 launch
 instants, with a spread of 0.11 °C. Idle power in the two seconds before launch was 36.29 W with a spread of 0.06 W.
 Heating and cooling to the launch point took 12 to 120 s (median 63 s), depending on what had run before.</li>
 <li><b>No drift over the hour.</b> By block, random normal read 63.38, 63.42, 63.46, 63.25 and 63.49 W and rose 5.16, 5.16,
@@ -83,12 +113,13 @@ Heating and cooling to the launch point took 12 to 120 s (median 63 s), dependin
 </ul>
 <p>The limit that remains is the sensor: it reports whole degrees. A run's rise read off the sensor is good to about half a
 degree, so the rises in this report are de-quantised: for each run, one number (the heating power) is fitted so that the
-thermal network of section 4, started from the launch state and rounded like the sensor, reproduces the run's readings. The
+thermal network of <a href="#from-watts-to-degrees">section 4</a>, started from the launch state and rounded like the sensor, reproduces the run's readings. The
 times at which the reading steps from one degree to the next carry the information. Power needs none of this: it reads in 10 mW steps.</p>
 
-<h2>3. From flips to watts</h2>
+<h2 id="from-flips-to-watts">3. From flips to watts</h2>
 <p>The power differences come from one place: the fused multiply-add units, eight per minion, one per vector lane. The
-open RTL of this core family (<code>core-et</code>) includes that unit (<code>txfma_top</code>, seven pipeline stages) and
+open RTL of this core family (<code>core-et</code>, Erbium branch at b38a1a3, a later configuration of the same Minion core
+lineage) includes that unit (<code>txfma_top</code>, seven pipeline stages) and
 the control around it. <code>rtl-sim/fma_toggle</code> runs eight copies under Verilator on the exact operand tiles the card
 ran (the host dumps them), in the order the tensor state machine issues them: for each row of B, for each row of A, two
 micro-ops of eight <code>c = a·b + c</code>; 512 micro-ops per op. Every result is checked: all 8,192 multiply-adds of two
@@ -113,6 +144,8 @@ the unit + e₄ · operand-word toggles outside the unit</i></p>
 <div class="chart-title">Board power of every run at the start temperature (dots), and what the activity model says for that pattern when fitted without it (black tick)</div>
 <div class="chart scroll" id="strip"></div>
 <div class="table-wrap"><table id="coef"></table></div>
+<p class="small"><a href="#a-model-from-flips-to-temperature">Section 8</a> refits these energies on five hours of data; use
+its values for prediction.</p>
 <div class="chart-title" style="margin-top:18px">Where the model puts each pattern's watts, above the constant part. Black line: measured.</div>
 <div class="legend" id="stack-leg"></div>
 <div class="chart scroll" id="stack"></div>
@@ -126,7 +159,7 @@ separately, a toggle in the tree costs 0.03 fJ and one in the rest of the unit 0
 tree is thousands of one-bit compressor cells whose short local nets are each counted at two or three levels of the
 hierarchy; the rest of the unit is wide buses, shifters and pipeline registers driving long wires. At 0.52 V, 0.8 fJ per
 toggle is about 6 fF of switched capacitance.</li>
-<li><b>Clocking is the cost of a constant.</b> 2.47 million register bits clocked per op at 3.0 fJ each is 8.1 W; ones
+<li><b>Clocking is the cost of a constant.</b> 2.47 million register bits clocked per op at 2.96 fJ each is 8.2 W; ones
 measure 8.4 W over zeros. The figure includes the clock network behind the registers and the write-back of each result,
 which scale with it.</li>
 <li><b>It explains the odd orderings.</b> A random with B = 1 flips 38 million tree nets per op, and A = 1 with B random only
@@ -137,14 +170,17 @@ still costs as much as ones, because the quarter that runs is fully random.</li>
 </ul>
 <div class="chart-title" style="margin-top:18px">Power predicted before the pattern had ever run, W (error against the measured seconds 1–3), by model form. Every form also has the clocked-bits term.</div>
 <div class="table-wrap wide"><table id="pre"></table></div>
-<p>The test that matters most is above. Six of the patterns were invented for this version, and their power was written
-down before any of them had run under the power sampler (<code>predictions_before.json</code>, 06:50 on 21 September; the
-first of them ran at 06:59). The predictions came from models fitted to the 20 September data, nine patterns with no single
+<p>A first test before the fact is above. Six of the patterns were invented for this session, and their power was written
+down before any of them had run under the power sampler
+(<code>docs/reports/data/2026-09-21-horace-aifoundry2/predictions_before.json</code>, 06:50 on 21 September; the first of
+them ran at 06:59). The predictions came from models fitted to the 20 September data, nine patterns with no single
 random field and no single random operand among them, and from tiles drawn in software. The two model forms that split the
 toggles were right to 1.3 W rms. The two that do not were wrong by 2.7 and 4.2 W, and by 7.3 W on the pattern that separates
-them best.</p>
+them best. This comparison was then used to choose the model form, so it is not a clean test of the final model;
+<a href="#custom-workloads-structured-matrices">section 9</a>'s structured matrices, priced with the final form before they
+ran, are.</p>
 
-<h2>4. From watts to degrees</h2>
+<h2 id="from-watts-to-degrees">4. From watts to degrees</h2>
 <p>The die's temperature follows power through a thermal network. A Foster chain (RC stages in series) with time constants
 fixed on a grid from 1.5 s to 1,000 s was fitted to the whole hour: board power in, sensor reading out, resistances held
 non-negative. Two stages carry everything this session can see.</p>
@@ -174,16 +210,17 @@ but the instants at which it steps are sharp. So for each run one number was fit
 network from the launch state and rounded like the sensor, reproduces that run's readings. For the eleven patterns that heat
 the die by more than a degree, this thermal estimate agrees with the electrical one to 1.0 W rms, with a slope of 0.97
 between them: <b>the temperature rise is proportional to the power, and the power follows the counted flips.</b> For the
-three coolest patterns (2 to 5 W over idle) the reading never leaves 81 °C during a run. That only bounds their rise to below
-about half a degree; the network predicts 0.3 to 0.8 °C.</p>
+three coolest patterns (2 to 5 W over idle) the reading moves by at most one whole degree during a run (one 75%-zero run read
+82 °C in its last half second). That only bounds their rise to below about half a degree; the network predicts 0.3 to
+0.8 °C.</p>
 
-<h2>5. Where the model is off, and why</h2>
+<h2 id="where-the-model-is-off-and-why">5. Where the model is off, and why</h2>
 <ol>
 <li><b>Most of the power is not flips of this computation.</b> Of random normal's 63.4 W, 38.6 W is the model's constant:
 what the card draws at 80 °C with every multiply-add gated. Idle is 36.3 W of it: leakage (the same idle card draws 26.7 W
 at 62 °C), always-on clocks, DDR, PCIe and regulator losses. The other 2 W is 1,024 tensor state machines stepping through
-gated micro-ops. Temperature rises with power over the idle level, so heating per FLOP runs from 1 to 76 m°C while energy
-per FLOP only runs from 4.2 to 7.3 pJ.</li>
+gated micro-ops. Temperature rises with power over the idle level, so heating per FLOP runs from less than the sensor can
+resolve on zeros to 76 m°C on random normal, while energy per FLOP (run averages) only runs from 4.2 to 7.3 pJ.</li>
 <li><b>Register clocking is switching that the data does not control,</b> except by being zero. A constant costs 8.4 W over
 zeros with almost no net toggles. "Proportional to flips" holds only once clock edges delivered to registers count as flips.</li>
 <li><b>A counted toggle is not a fixed charge.</b> The fitted energies differ 25-fold between the multiplier tree and the
@@ -197,19 +234,22 @@ degree. Without that term it would under-predict the hot patterns' rise by about
 The launch temperature is known to a few tenths of a degree in absolute terms, the same for every run, which matters only
 for the three coolest patterns. The hot spots are the multiply-add units, not the sensors, so the junctions that leak are
 hotter than the reading.</li>
-<li><b>Board power is not die power.</b> About 7 of random normal's 30 W over zeros never reach the die; they are lost in
-the regulators. The network was fitted to board power and absorbs that as fewer °C per W. It would not transfer to a
-workload that loads a different rail.</li>
+<li><b>Board power is not die power.</b> About 7 of random normal's 30 W over zeros are on no rail sensor. By the later
+attribution (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits
+of observability, §4.2</a>) about 4.4 W of that is regulator delivery loss, which never reaches the die, and the rest is
+not attributed. The network was fitted to board power, so it absorbs whatever does not heat the die as fewer °C per W. It
+would not transfer to a workload that loads a different rail.</li>
 <li><b>What is left.</b> Power: 0.5 W rms out of sample, 0.9 W at worst. Rise: 0.33 °C rms from the RTL alone against
 0.30 °C from the measured power. So almost all of the temperature error belongs to the thermal step and the sensor, not to
 the flips.</li>
 </ol>
 
-<h2>6. The speed effect appears on a cool die</h2>
-<p>Earlier versions of this report said the clock never moves on this card. That was wrong, and the reason is the
-point of this section. The service processor runs a governor (<code>thermal_pwr_mgmt.c</code>): while a kernel is running it
-steps the minion operating point down if the die is above a software threshold (65 °C) or the board's average power is above
-the TDP level (65 W), and up otherwise. This card's operating points are 600 MHz at 0.52 V, 700 MHz at 0.57 V and 800 MHz at
+<h2 id="the-speed-effect-appears-on-a-cool-die">6. The speed effect appears on a cool die</h2>
+<p>The service processor (the chip's on-die management core, which runs the power-management firmware) runs a governor
+(<code>thermal_pwr_mgmt.c</code>, read in the et-platform source at 353f20e; the cards' own trace strings match an older build,
+from before et-platform commit 60b40c10f of 24 September 2024): while a kernel is running it steps the minion operating point
+down if the die is above a software threshold (65 °C) or the board's average power is above the TDP level (the firmware's
+board power limit, 65 W), and up otherwise. This card's operating points are 600 MHz at 0.52 V, 700 MHz at 0.57 V and 800 MHz at
 0.62 V. Every run on 20 September started above 72 °C, so the thermal branch held 600 MHz throughout, even at 70 W. After a
 night idle the die sits at 62 °C, and the same kernels behave differently:</p>
 <div class="chart-title">Minion clock during 7 s runs started from a cool die (62–64 °C)</div>
@@ -220,93 +260,119 @@ night idle the die sits at 62 °C, and the same kernels behave differently:</p>
 39 W, with the die at 64 to 66 °C after 7 s. The governor only starts stepping down in the last second. 11.4 and 11.8 TFLOPS.</li>
 <li><b>Random normal loses it within a second.</b> At 800 MHz and 0.62 V it draws up to 88 W for an instant, the die passes
 65 °C in half a second, and the governor steps down to 700 and then 600 MHz. 9.3 TFLOPS in all three runs, at 55 W: the die
-is 15 °C cooler than in section 1, which is worth 10 W of leakage.</li>
+is 15 °C cooler than in <a href="#same-flops-different-heat">section 1</a>, which is worth 10 W of leakage.</li>
 <li><b>Ones hover at the threshold:</b> up to 800 MHz, down at 66 °C, up again as the die falls back to 65 °C. 9.7 TFLOPS.</li>
 </ul>
 <p>So on this card predictable data does run faster: 25% for zeros against random values, where Horace measured 15% on an
 A100. The reason is the one he gave: fewer flips, less power, and a governor that then allows a higher clock. Here the limit
 that bites first is thermal rather than electrical, and it only applies to a die that starts below 65 °C. A card that has
-been busy idles above that (72 °C on 20 September, 80 °C in section 1), runs everything at 600 MHz, and shows the effect
+been busy idles above that (72 °C on 20 September, 80 °C in <a href="#same-flops-different-heat">section 1</a>), runs everything at 600 MHz, and shows the effect
 as heat instead of speed. These seven runs are a demonstration, not a controlled experiment: their start temperatures differ
-by up to 2 °C, and a die that has just run does not return to 62 °C for many minutes.</p>
+by up to 2 °C, and a die that has just run does not return to 62 °C for hours. The second card of
+<a href="#a-second-card-and-what-transfers">section 10</a> cannot show the effect at all: its firmware reports a TDP of 0 W, so
+the governor only ever steps down and the clock never leaves 600 MHz
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">the DVFS report</a>).</p>
 
-<h2>7. Minutes instead of seconds</h2>
+<h2 id="minutes-instead-of-seconds">7. Minutes instead of seconds</h2>
 <p>Seven seconds show the first two stages of the heating. To see the rest, the same patterns ran as single processes for
 up to ten minutes each (the lab's 10-second rule was waived for this), from the same start: heat to 84 °C if below, idle
 until the sensor first reads 80 °C, launch. A run ends early when the die reads 90 °C, which keeps it inside what this card
-had already seen (93 °C, 70 W). 29 runs took four hours, because after a hot run the die needs up to six minutes to get back
+had already seen (93 °C, 70 W). 29 runs took four hours, because after a hot run the die needs up to seven minutes to get back
 to 80 °C. Some runs used fewer minions per shire, which scales the flip rate without changing the flips themselves.</p>
 <figure style="margin:18px 0 8px">
 <img src="horace-long.gif" alt="Animated chart on a log time axis: die temperature of long matmul runs. Random data reaches 90 degrees in about 20 seconds, ones in two minutes, zeros never." style="width:100%;height:auto;border-radius:12px;border:1px solid var(--border)">
-<figcaption class="small">Zeros, ones and random normal at full load, and random normal on 384 of the 1,024 cores, on a log time axis. To repost:
+<figcaption class="small">Zeros, ones and random normal at full load, and random normal on 384 of the 1,024 minions, on a log time axis. To repost:
 <a href="horace-long.gif">horace-long.gif</a> (0.3 MB).</figcaption>
 </figure>
-<div class="chart-title">The long runs: die temperature against time since launch, log scale. Solid: the sensor. Dashed: the fitted model's curve from the run's flip counts (section 8). Choose which runs to show.</div>
+<div class="chart-title">The long runs: die temperature against time since launch, log scale. Solid: the sensor. Dashed: the fitted model's curve from the run's flip counts (<a href="#a-model-from-flips-to-temperature">section 8</a>). Choose which runs to show.</div>
 <div class="controls" id="long-leg"></div>
 <div class="chart scroll" id="long-curves"></div>
 <div class="table-wrap wide"><table id="long-tbl"></table></div>
+<p class="small">The first run (zeros, at the start of the session, with no telemetry before it to set the model's state)
+and the last two (after the cooling changed) are not in the fit. For runs stopped at the cap, the measured end is the
+90 °C reading that stopped them; for ten-minute runs it is the mean reading over the last few seconds.</p>
 <ul>
-<li><b>Nothing but zeros can run for long at full load.</b> Random normal reaches 90 °C in 19 to 26 s (four runs), random
+<li><b>At full load only zeros hold a steady temperature.</b> Random normal reaches 90 °C in 19 to 26 s (four runs), random
 uniform in 22 s, random mantissas in 24 s, random signs in 53 s. Ones take 107 to 167 s, π 104 s, and the half-zero random
 matrix 107 s. Zeros cool the die to 76 to 78 °C over ten minutes, because the heatsink is still shedding the heat of the run
 before. The checkerboard and the 75%-zero random matrix last the ten minutes but are at 87 °C and rising.</li>
-<li><b>Fewer cores buy time in proportion to the flips removed.</b> Random normal on 768 cores lasts 35 s, on 512 cores 84 s,
-on 384 cores 119 s, on 256 cores 276 and 315 s, and on 128 cores it sits at 81 to 82 °C for the whole ten minutes.</li>
-<li><b>Equal flip power, equal curve.</b> By the flip counts of section 3, ones on all 1,024 cores switch 10.7 W and random
-normal on 384 cores 10.2 W. The first is all register clocking, the second mostly data toggles, and they heat the die the
+<li><b>Fewer minions buy time, far more than in proportion.</b> Removing a quarter of the flips (768 minions) stretches
+random normal from 19–26 s to 35 s; removing half (512 minions) to 84 s; three quarters (256 minions) to 276 and 315 s, more than
+ten times as long; on 128 minions it sits at 81 to 82 °C for the whole ten minutes. Near the flip budget of
+<a href="#a-model-from-flips-to-temperature">section 8</a>, each watt removed buys more time than the last.</li>
+<li><b>Equal flip power, equal curve.</b> By the flip counts of <a href="#from-flips-to-watts">section 3</a>, ones on all
+1,024 minions switch 10.7 W and random normal on 384 minions 10.2 W. The first is all register clocking, the second mostly data toggles, and they heat the die the
 same: 107 to 167 s against 119 s, with curves that lie on top of each other in the animation.</li>
 <li><b>The same pattern does not always take the same time.</b> Ones needed 107 s after a hot predecessor and 162 to 167 s
 after a ten-minute zeros run. Every run starts at the same die reading, but the heatsink behind it does not start in the
 same state, and over minutes that matters. The model below carries that state.</li>
-<li>During the 28th run the card's cooling changed abruptly: under a constant 42 W the die fell from 84 to 72 °C in four
-minutes, presumably someone or something changed the airflow in the lab. That run and the one after it are in the chart but
+<li>During the 28th run the card's cooling changed abruptly: under an unchanged workload (42.7 W at 84 °C, falling to
+35.6 W as it cooled) the die fell from 84 to 72 °C in four minutes; presumably something changed the airflow in the lab. That run and the one after it are in the chart but
 not in the fits.</li>
 </ul>
 
-<h2>8. A model from flips to temperature</h2>
-<p>With the long runs the chain of sections 3 and 4 closes into one model that needs only the flip schedule. It has
+<h2 id="a-model-from-flips-to-temperature">8. A model from flips to temperature</h2>
+<p>With the long runs the chain of <a href="#from-flips-to-watts">sections 3</a> and <a href="#from-watts-to-degrees">4</a> closes into one model that needs only the flip schedule. It has
 three lines:</p>
 $$\textbf{flips}\qquad F_j(t) \;=\; N_j(\text{pattern})\;\times\;1.10\times10^{6}\ \text{ops/s}\;\times\;\text{active minions}$$
 $$\textbf{power}\qquad P(t) \;=\; \underbrace{12.6\,\mathrm{W}}_{\text{fixed}} \;+\; \underbrace{23.3\,\mathrm{W}\,e^{(T-80\,^\circ\mathrm{C})/36\,^\circ\mathrm{C}}}_{\text{leakage}} \;+\; \underbrace{1.85\,\mathrm{W}\cdot\tfrac{\text{active}}{1024}}_{\text{state machines}} \;+\; \underbrace{\sum_j e_j\,F_j(t)}_{\text{switching}}$$
 $$\textbf{heat}\qquad T(t) \;=\; 22.8\,^\circ\mathrm{C} \;+\; \sum_k x_k(t), \qquad \tau_k\,\frac{\mathrm{d}x_k}{\mathrm{d}t} \;=\; R_k\,P(t) \;-\; x_k$$
 <p>Four kinds of flip \(j\), counted in the RTL, each with its own energy \(e_j\); six thermal stages \(k\), each a
 resistance \(R_k\) and a time constant \(\tau_k\).</p>
-<div class="table-wrap"><table>
-<thead><tr><th>\(e_j\)</th><th class="num">value</th><th>per</th><th>\(R_k\)</th><th class="num">°C/W</th><th class="num">\(\tau_k\)</th></tr></thead>
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
+<div class="table-wrap" style="flex:1 1 380px"><table>
+<caption class="small" style="caption-side:top;text-align:left;padding-bottom:4px"><b>Flip energies</b> \(e_j\)</caption>
+<thead><tr><th>kind of flip</th><th class="num">value</th><th>per</th></tr></thead>
 <tbody>
-<tr><td>register clocking</td><td class="num">3.18 fJ</td><td class="small">register bit clocked</td><td></td><td class="num">0.106</td><td class="num">1.5 s</td></tr>
-<tr><td>multiplier tree</td><td class="num">0.025 fJ</td><td class="small">net toggle in the tree</td><td></td><td class="num">0.050</td><td class="num">4 s</td></tr>
-<tr><td>rest of the unit</td><td class="num">0.80 fJ</td><td class="small">other net toggle</td><td></td><td class="num">0.234</td><td class="num">60 s</td></tr>
-<tr><td>operand words</td><td class="num">15.5 fJ</td><td class="small">operand-word bit toggled outside the unit</td><td></td><td class="num">0.136</td><td class="num">150 s</td></tr>
-<tr><td></td><td class="num"></td><td></td><td></td><td class="num">0.860</td><td class="num">400 s</td></tr>
-<tr><td></td><td class="num"></td><td></td><td></td><td class="num">0.081</td><td class="num">2,500 s</td></tr>
-<tr><td></td><td class="num"></td><td></td><td><b>sum</b></td><td class="num"><b>1.47</b></td><td class="num"></td></tr>
+<tr><td>register clocking</td><td class="num">3.18 fJ</td><td class="small">register bit clocked</td></tr>
+<tr><td>multiplier tree</td><td class="num">0.025 fJ</td><td class="small">net toggle in the tree</td></tr>
+<tr><td>rest of the unit</td><td class="num">0.80 fJ</td><td class="small">other net toggle</td></tr>
+<tr><td>operand words</td><td class="num">15.5 fJ</td><td class="small">operand-word bit toggled outside the unit</td></tr>
 </tbody></table></div>
+<div class="table-wrap" style="flex:1 1 260px"><table>
+<caption class="small" style="caption-side:top;text-align:left;padding-bottom:4px"><b>Thermal stages</b> \(\tau_k,\ R_k\)</caption>
+<thead><tr><th class="num">time constant \(\tau_k\)</th><th class="num">\(R_k\), °C/W</th></tr></thead>
+<tbody>
+<tr><td class="num">1.5 s</td><td class="num">0.106</td></tr>
+<tr><td class="num">4 s</td><td class="num">0.050</td></tr>
+<tr><td class="num">60 s</td><td class="num">0.234</td></tr>
+<tr><td class="num">150 s</td><td class="num">0.136</td></tr>
+<tr><td class="num">400 s</td><td class="num">0.860</td></tr>
+<tr><td class="num">2,500 s</td><td class="num">0.081</td></tr>
+<tr><td class="num"><b>sum</b></td><td class="num"><b>1.47</b></td></tr>
+</tbody></table></div>
+</div>
 <p>The power line has a fixed part, leakage that grows exponentially with die temperature, the tensor state machines of the
 active minions, and an energy for each kind of flip. It was fitted to every 10 Hz sample of five hours of sessions: the
 leakage to the idle samples (rms error 0.20 W from 64 to 88 °C), then the flip energies to the busy samples (0.49 W). The flip
-energies agree with section 3, which used only seconds 1 to 3 of 46 short runs. The heat line is the thermal network of
-section 4 with its slow stages now visible; one more number pins the slowest of them, the 62 °C at 26.7 W where this card had
+energies are close to <a href="#from-flips-to-watts">section 3</a>'s, which used only seconds 1 to 3 of 46 short runs: 3.18
+against 2.96 fJ per register bit and 0.80 against 0.78 fJ per other toggle; the operand-word energy is the loosest (15.5
+against 12.5 fJ). These are the values the predictor and the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">energy manual</a> use.
+The heat line is the thermal network of <a href="#from-watts-to-degrees">section 4</a> with its slow stages now visible; one more number pins the slowest of them, the 62 °C at 26.7 W where this card had
 settled after a night idle. Driven by the measured power it follows the sensor to 0.63 °C rms over the five hours.</p>
 <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:14px">
   <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Leakage: idle board power against die temperature, all sessions, with the fitted exponential</div><div class="chart" id="leak"></div></div>
   <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Heat: degrees per watt after a step of switching power</div><div class="chart" id="step"></div></div>
 </div>
 <p><b>Leakage is two thirds of an idle card's power at 80 °C</b> (23 of 36 W) and it is what makes temperature so
-sensitive to flips here. Each degree adds 0.65 W, and each watt, given ten minutes, adds 1.2 °C through the network. Closed on
+sensitive to flips here. Each degree adds 0.65 W at 80 °C, and each watt, given ten minutes, adds 1.2 °C through the
+network. (0.65 W/°C is the slope of the idle law. <a href="#strict-temperature-control">Sections 2</a> and
+<a href="#from-watts-to-degrees">4</a> use 0.81 W per degree, the drift of busy power inside the hot 7 s runs: a different
+measurement, a quarter higher.) Closed on
 itself, that loop has a gain of 0.95 at 80 °C: a watt of switching held for ten minutes raises the die by 3.1 °C, not 1.2, and
 the gain passes one at 82 °C. The table turns that into degrees per kind of flip for the random fp32 matmul.</p>
 <div class="table-wrap wide"><table id="perflip"></table></div>
 <p><b>How well it fits.</b> For each long run the network is started in the state the measured history had left it in at
 launch, and then driven by the power line above, with the run's flip rates and its own simulated temperature; nothing
-measured during the run goes in. The dashed lines in the chart of section 7 are these curves. For the 19 runs that reached
+measured during the run goes in. The dashed lines in the chart of <a href="#minutes-instead-of-seconds">section 7</a> are these curves. For the 19 runs that reached
 90 °C the time is off by 12% in the median (23 s for 26 s measured, 122 for 119, 326 for 315); the worst is the half-zero
 random matrix, 157 s for 107 s. For the seven ten-minute runs the end temperature is off by 2.5 °C rms. These are fit
 numbers: the network and the leakage were estimated from the same session.</p>
 <p><b>How well it predicts.</b> So every parameter was fitted again on the first 7,400 s of the long session (15 runs, plus
-the 7-second session of section 2) and frozen, and the 12 later runs were predicted. Nothing is fitted on the held-out part:
+the 7-second session of <a href="#strict-temperature-control">section 2</a>) and frozen, and the 12 later runs were predicted. Nothing is fitted on the held-out part:
 the thermal state at each launch comes from an observer that has seen the telemetry up to that launch only
-(<code>tools/ettelem/validate_flip_model.py</code>). The held-out runs include four patterns and two core counts that the
+(<code>tools/ettelem/validate_flip_model.py</code>). The held-out runs include four patterns and two minion counts that the
 thermal fit had never seen.</p>
 <div class="table-wrap wide"><table id="val-tbl"></table></div>
 <ul>
@@ -315,8 +381,9 @@ error is 9% and the worst 23% (ones, 199 s for 162 s); six of the seven are with
 <li><b>At ten minutes it runs hot,</b> by 3 to 5 °C on the low-power runs (3.8 °C rms against 2.5 °C in the fit), and it
 wrongly has two of the five ten-minute runs reaching 90 °C, at 437 and 469 s, when they ended at 87 and 88 °C.</li>
 <li><b>The slow stages are not pinned down.</b> Between the half fit and the full fit the fast stages and the leakage barely
-move (0.10 and 0.05 °C/W at 1.5 and 4 s in both; 24.4 against 23.3 W of leakage at 80 °C), but the 400 s stage goes from
-0.60 to 0.86 °C/W and the 1,000 s stage from 0.38 to nothing, and the operand-word energy from 20 to 15.5 fJ. The telemetry
+move (0.10 and 0.05 °C/W at 1.5 and 4 s in both; 24.4 against 23.3 W of leakage at 80 °C), but the slow resistance moves
+between stages: 0.60 → 0.86 °C/W at 400 s, 0.38 → 0 at 1,000 s and 0 → 0.08 at 2,500 s (the table lists only the stages the
+full fit kept); the operand-word energy goes from 20 to 15.5 fJ. The telemetry
 is 140,000 samples but only 27 runs; that is the number that counts for the slow stages. The overnight idle point that
 anchors them is a single measurement, assumed to share this session's ambient.</li>
 <li>What does not work at all is letting the model run free for the whole four hours: with a loop gain of 0.95, a 1% error
@@ -326,58 +393,70 @@ known state.</li>
 <div class="chart-title">The long session: sensor reading (blue) and the thermal network driven by the measured board power (orange)</div>
 <div class="chart scroll" id="session"></div>
 <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:14px">
-  <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Seconds to 90 °C, run by run, from flip counts against measured. Dots: runs the model was fitted on. Rings: held-out runs (the second half of the session, and section 9's new matrices)</div><div class="chart" id="cap-sc"></div></div>
+  <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Seconds to 90 °C, run by run, from flip counts against measured. Dots: runs the model was fitted on. Rings: held-out runs (the second half of the session, and <a href="#custom-workloads-structured-matrices">section 9</a>'s new matrices)</div><div class="chart" id="cap-sc"></div></div>
   <div style="flex:1 1 380px;max-width:460px"><p style="margin-top:2.2em"><b>A predictor for custom workloads.</b> <code>tools/ettelem/predict_heat.py</code> wraps the three lines: give
 it the A and B tiles of a workload (or a pattern name), the number of active minions and a start temperature, and it replays
 the tiles through the RTL, counts the flips, and prints the switching watts by kind of flip, the board power, the temperature
-after 10 s, 1 min and 10 min, the time to a cap, and the duty cycle that would hold the start temperature. Section 9 tests
-it on matrices it had never seen.</p></div>
+after 10 s, 1 min and 10 min, the time to a cap, and the duty cycle that would hold the start temperature.
+<a href="#custom-workloads-structured-matrices">Section 9</a> tests it on matrices it had never seen.</p></div>
 </div>
 <div class="chart-title" style="margin-top:18px">Where the die settles if a switching power is held for hours, on this card's cooling</div>
 <div class="chart scroll" id="budget"></div>
 <p><b>The flip budget of this card.</b> Setting the heat line to its steady state gives the curve above: for each
 switching power, the temperature at which the die would settle (solid) and the temperature above which it runs away (dashed).
 The two meet at <b>+3.1 W</b> of switching, with the die at 82 °C: beyond that there is no equilibrium on this card's cooling,
-only a time to 90 °C. The long runs agree: 2.7 W (ones on 256 cores) cooled, 3.4 W (random on 128 cores) sat at 81 to 82 °C
-for ten minutes, 4.2 W (the checkerboard) crept to 87 °C. In flips, 3.1 W is about 10¹⁵ clocked register bits per second, or
-a full-load random matmul 11% of the time. The thermal resistance behind this, 1.47 °C per W, belongs to this card in this
-desktop chassis, which idles at 62 °C; the flip energies and the leakage belong to the chip.</p>
+only a time to 90 °C. The long runs agree: 2.7 W (ones on 256 minions) cooled, 3.4 W (random on 128 minions) sat at 81 to
+82 °C for ten minutes, 4.2 W (the checkerboard) crept to 87 °C. In flips, 3.1 W is about 10¹⁵ clocked register bits per
+second, or a full-load random matmul 11% of the time.</p>
+<p>The budget belongs to this card, this desktop chassis and that day's room. The model's ambient is 22.8 °C, and every
+degree warmer takes 0.68 W off the budget. On 22 September the same card, after about 20.6 hours idle (apart from one
+5-second probe), sat at 73 °C instead of 62 °C. By these equations that is a room about 3.5 °C warmer, or airflow worse by
+the same measure, and a budget of 0.3 to 0.7 W. The flip energies and the leakage belong to the chip design, up to the
+per-card scale of <a href="#a-second-card-and-what-transfers">section 10</a>.</p>
 
-<h2>9. Custom workloads: structured matrices</h2>
+<h2 id="custom-workloads-structured-matrices">9. Custom workloads: structured matrices</h2>
 <p>The point of the model is to price a workload before running it. <code>tools/ettelem/make_tiles.py</code> generates
 structured 16×16 operand pairs: Hadamard and DCT matrices, the cosine and sine halves of a DFT, butterfly factors and their
 dense kaleidoscope products (the family that generalises the fast Fourier transform), identity, banded, block-diagonal,
 triangular, rank-1, circulant and 4-bit quantised matrices, a weights-times-ReLU pair, and a matrix of negative zeros. Their
-tiles went through the RTL bench and the three lines of section 8, and the predictions were written down at 13:08 on
-21 September (<code>structured_predictions_before.json</code>), before any of them had run. Fourteen then ran twice each under
-the strict protocol of section 2.</p>
+tiles went through the RTL bench and the three lines of <a href="#a-model-from-flips-to-temperature">section 8</a>, and the
+predictions were written down at 13:08 on 21 September
+(<code>docs/reports/data/2026-09-21-horace-aifoundry2/structured_predictions_before.json</code>), before any of them had run.
+Fourteen then ran twice each under the strict protocol of <a href="#strict-temperature-control">section 2</a>.</p>
 <div class="chart-title">Board power at the launch temperature: predicted from the tiles alone, before the first run, against measured</div>
 <div class="chart scroll" id="struct"></div>
 <div class="table-wrap wide"><table id="struct-tbl"></table></div>
+<p class="small">The last column is the raw whole-degree reading at the end of the run minus the launch temperature, not
+de-quantised like <a href="#same-flops-different-heat">section 1</a>'s rises; differences under a degree are not
+resolved.</p>
 <ul>
-<li><b>Predicted to 0.9 W rms</b> over a 25 W range, and eleven of the fourteen to within 0.6 W, from the tiles alone.</li>
+<li><b>Predicted to 0.9 W rms</b> over a 25 W range, and ten of the fourteen to within 0.6 W (eleven within 0.75 W), from the
+tiles alone.</li>
 <li><b>Structure in the values buys nothing.</b> Kaleidoscope products, the DCT, circulant and rank-1 matrices are dense, and
 they cost what random normal costs (63 to 64 W): their mantissa bits are just as busy. The Hadamard matrix costs 50 W, like
 random signs: only the sign and the adder move.</li>
 <li><b>Structure in the zeros buys a lot.</b> A pair of butterfly factors (two nonzeros per row, so 64 of 4,096 products
 survive the gating) costs 39.3 W, the identity 38.5 W, tridiagonal 40.2 W, 4×4 blocks 41.1 W, upper-triangular 44.4 W. The
-ReLU pair, random weights times half-zero activations, gates half its products and saves 11 of random data's 27.6 W.</li>
+ReLU pair, random weights times half-zero activations, gates half its products and saves 11 of random data's 27.6 W over
+idle (random normal was rerun in the same 7 s session as the structured matrices).</li>
 <li><b>Negative zero is not zero.</b> The gating looks for the all-zero bit pattern, so a matrix of −0.0 clocks every
-register: 46.7 W, the same as ones, against 38.2 W for +0.0. The model said 47.2 W. In practice: mask with a select, not by
+register: 46.7 W, the same as ones, against 38.2 W for +0.0 (also rerun in that session). The model said 47.2 W. In practice: mask with a select, not by
 multiplying by zero, because x · 0 is −0.0 for every negative x.</li>
 <li><b>The worst miss</b> is the DFT pair, 2.8 W low. Its products cancel almost exactly, which works the normaliser harder
 than any pattern the energies were fitted on; one energy for every toggle outside the multiplier tree is too coarse there.</li>
 </ul>
-<p><b>And the heat, not just the watts.</b> Five of the structured matrices then ran as long runs in a separate afternoon
-session (section 7's protocol), with the model frozen as fitted that morning, before they existed on the card. Nothing was
-fitted on that session: the thermal state at each launch comes from the observer of section 8, from telemetry before the
-launch only.</p>
+<p><b>And the heat, not just the watts.</b> Six of the structured matrices, with ones and random normal as references, then
+ran as long runs in a separate afternoon session (<a href="#minutes-instead-of-seconds">section 7</a>'s protocol), with the
+model frozen as fitted that morning, before they existed on the card. Nothing was fitted on that session: the thermal state at
+each launch comes from the observer of <a href="#a-model-from-flips-to-temperature">section 8</a>, from telemetry before the
+launch only. (The ones run opened the session, so the observer had fewer than three minutes of telemetry before it; it is not
+in the table.)</p>
 <div class="table-wrap"><table id="struct-long"></table></div>
 <p>Four of the six times to 90 °C are within 3%, and the five-minute run's end temperature is off by 0.2 °C. The DFT pair is
 wrong by two thirds, for the same reason as its watts: 2.8 W missing out of 13 W of switching costs 47 s on a die this close to
 runaway. The ReLU pair is a third slow for a 1.2 W miss. Near the card's flip budget the time to a cap is a sensitive function
 of power, so a watt of model error matters; at full random load it does not (19.5 s predicted, 19.1 s measured). With the
-first-half model of section 8 instead, the same six come out at 7% in the median and 65% for the DFT pair.</p>
+first-half model of <a href="#a-model-from-flips-to-temperature">section 8</a> instead, the same six come out at 7% in the median and 65% for the DFT pair.</p>
 <pre><code>$ python3 tools/ettelem/make_tiles.py kaleidoscope k.bin
 $ python3 tools/ettelem/predict_heat.py --model docs/reports/data/2026-09-21-horace-aifoundry2/model.json --tiles k.bin
 flips per op and minion: 4096 of 4,096 multiply-adds valid; 2.47 M register bits clocked; 74.3 M tree toggles; 13.27 M other toggles; 140 k operand-word toggles
@@ -385,15 +464,22 @@ switching power: register clocking 8.8 W, multiplier tree 2.1 W, rest of the uni
 board power at 80 C: 63.1 W (idle 35.9 W)
 die temperature from an idle die at 80 C: 10 s: 86.5 C; reaches 90 C after 27 s
 to hold 80 C indefinitely the card can shed 3.1 W of switching: run this workload 11% of the time</code></pre>
+<p class="small">The tool starts from a die at exactly 80.0 °C with a generic idle history. The protocol's runs launch at
+about 80.9 °C in the sensor's units, just after a pre-heat. Started at 80.9 °C the tool says 22 s, the launch-state
+prediction in the table above says 20 s, and the run took 19 s. Its 63.1 W is at 80 °C; the structured table's 63.7 W is at
+the 81 °C launch temperature.</p>
 
-<h2>10. A second card, and what transfers</h2>
+<h2 id="a-second-card-and-what-transfers">10. A second card, and what transfers</h2>
 <p>Everything to this point is one card. AI Foundry has three machines; aifoundry1's two cards could not be
 opened at all, because its kernel module is built from different sources than the other two while carrying the
 same management library, and the library's compatibility check refuses them. aifoundry3's card works, and it
-is a useful one: it idles 25 °C cooler and its firmware keeps it pinned at 600 MHz for a reason worth its own
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">brief</a>. Running the same strict protocol
-on it is the first real out-of-sample test of the model — different silicon, different heatsink, a launch
-temperature of 55.8 °C instead of 81.0 °C, and coefficients fitted entirely on the other card.</p>
+is a useful one: it idles at 51 °C (aifoundry2: 62 °C after a cool night, 73 °C after 20.6 hours idle on 22 September),
+too cool to hold at 80 °C between runs, so its runs launch at 55 °C; and it stays pinned at 600 MHz, because its
+firmware reports a TDP of 0 W, so the governor can only step down
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">The ET-SoC-1's DVFS
+loop, and the leakage</a>). Running the same strict protocol on it is the strongest out-of-sample test of the power model:
+different silicon, different heatsink, a launch temperature of 55.8 °C instead of 81.0 °C, and coefficients fitted entirely
+on the other card.</p>
 
 <div class="chart-title">Switching power over idle, eight operand patterns, two cards</div>
 <div class="chart scroll" id="cardsw"></div>
@@ -406,22 +492,24 @@ temperature of 55.8 °C instead of 81.0 °C, and coefficients fitted entirely on
 <em>more</em> switching power, not 8% less. Whatever the 8% is — silicon, package, or the board regulator's
 efficiency at that load — it belongs to the card, and one number captures it.</p>
 
-<p>The leakage half transfers as well, and further than it has any right to. The idle law fitted here between
-62 and 90 °C, extrapolated 25 °C below its fitted range onto the other card, predicts that card's idle power
-to <span id="leakoff"></span> out of 25 W.</p>
+<p>The leakage half transfers as well, and further than it has any right to. The idle law, fitted here to idle
+readings from 64 to 88 °C (it also passes through the 62 °C overnight point) and extrapolated 7 to 14 °C below that
+onto the other card, which idled at 50 to 57 °C, predicts that card's idle power to <span id="leakoff"></span> out of
+25 W.</p>
 
 <div class="table-wrap"><table id="leaktab"></table></div>
 
 <p><b>What this means if you have more than one of these cards.</b> The shape of the data-dependence — which
 operand patterns cost what, relative to each other — is a property of the design and moves between cards
-unchanged. The absolute scale and the idle offset are per-card constants, worth about 8% and a watt. A single
-random-data matmul on a new card calibrates both, after which the heat predictions in section 9 apply to it.
-What does <em>not</em> transfer is the thermal network: that is this card in this chassis, and aifoundry3
-sheds heat visibly faster.</p>
+unchanged. The absolute scale and the idle offset are per-card constants, worth about 8% and 0.7 W. A single
+random-data matmul on a new card calibrates both, after which the power predictions of
+<a href="#from-flips-to-watts">sections 3</a> and <a href="#custom-workloads-structured-matrices">9</a> apply to it. The heat
+predictions also need that card's own thermal network, fitted from long runs on it: aifoundry2's does not transfer, since it
+is one card in one chassis, and aifoundry3 sheds heat visibly faster.</p>
 
-<h2>11. Method</h2>
+<h2 id="method">11. Method</h2>
 <ul>
-<li>Kernel: hart 0 of each of 1,024 minions repeats <code>TensorFMA32</code> on one 16×16×16 tile pair held in the L1
+<li>Kernel: hart 0 (the first of each minion's two hardware threads) of each of 1,024 minions repeats <code>TensorFMA32</code> on one 16×16×16 tile pair held in the L1
 scratchpad (4,096 multiply-adds per op, 546 cycles per op for every pattern). FLOPs count one multiply and one add per
 multiply-add; the rate includes the gaps between launches.</li>
 <li>Telemetry: <code>tools/ettelem</code> samples board power (10 mW steps, refreshed every 133 ms), the rail averages, the
@@ -447,7 +535,7 @@ and the RTL bench checks every multiply-add against software.</li>
 <pre><code>cmake -S workloads/sparsity -B build/sparsity -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev && cmake --build build/sparsity -j4
 cmake -S tools/ettelem -B build/ettelem -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev && cmake --build build/ettelem
 tools/ettelem/run_horace_strict.sh build/horace3 80 84 4 5 2 7 "zeros ones pi sparse50 uniform randn" \
-    "signs pow2 mant a_randn_b_ones a_ones_b_randn ternary sparse75 checker"        # about 70 minutes
+    "signs pow2 mant a_randn_b_ones a_ones_b_randn ternary sparse75 checker"        # about an hour
 make -C rtl-sim/fma_toggle && python3 rtl-sim/fma_toggle/toggles.py --tiles-dir build/horace3/tiles --out toggles.json \
     --patterns zeros,ones,pi,sparse50,uniform,randn,signs,pow2,mant,a_randn_b_ones,a_ones_b_randn,ternary,sparse75,checker
 python3 tools/ettelem/analyze_horace_strict.py build/horace3 --toggles toggles.json --out horace3.json
@@ -457,9 +545,40 @@ tools/ettelem/run_horace_long.sh build/horace_long tools/ettelem/horace_long.sch
 python3 tools/ettelem/make_tiles.py --all build/structured_tiles                                   # structured operand pairs
 tools/ettelem/run_ablation.sh build/ablation1 tools/ettelem/ablation.cfg 2 7                       # strict 7 s runs of any configuration
 tools/ettelem/finish_horace.sh                                                                     # analyses, model, GIFs, both reports
-python3 tools/ettelem/predict_heat.py --model docs/reports/data/2026-09-21-horace-aifoundry2/model.json --tiles my.bin</code></pre>
+python3 tools/ettelem/predict_heat.py --model docs/reports/data/2026-09-21-horace-aifoundry2/model.json --tiles my.bin
+# section 10, on aifoundry3: the same protocol launched at 55 °C after a pre-heat to 60 °C
+tools/ettelem/run_horace_strict.sh build/strict3 55 60 2 3 1 7 "zeros ones pi sparse50 uniform randn" "signs mant"
+python3 tools/ettelem/analyze_horace_strict.py docs/reports/data/2026-09-22-horace-aifoundry3 \
+    --toggles docs/reports/data/2026-09-21-horace-aifoundry2/toggles.json --out docs/reports/data/2026-09-22-horace-aifoundry3/horace3.json
+python3 tools/ettelem/compare_cards.py --card aifoundry2=docs/reports/data/2026-09-21-horace-aifoundry2/horace3.json \
+    --card aifoundry3=docs/reports/data/2026-09-22-horace-aifoundry3/horace3.json \
+    --model docs/reports/data/2026-09-21-horace-aifoundry2/model.json \
+    --toggles docs/reports/data/2026-09-21-horace-aifoundry2/toggles.json --out cards.json</code></pre>
 <p class="small">Raw data: <code>docs/reports/data/2026-09-21-horace-aifoundry2/</code> (runs, start records, compacted 10 Hz
 telemetry, the operand tiles, activity counts, analyses, the model, its predictions made before the runs). The two earlier versions of this experiment (20 September: an
-uncontrolled run, then runs started at or below 80 °C) are in <code>docs/reports/data/2026-09-20-power-aifoundry2/</code>;
-their powers agree with these to within 1.5 W, and their statement that the clock is fixed is corrected in section 6.</p>
+uncontrolled run, then runs each started at 80 °C) are in <code>docs/reports/data/2026-09-20-power-aifoundry2/</code>;
+their powers agree with these to within 1.5 W, and their statement that the clock is fixed is corrected in
+<a href="#the-speed-effect-appears-on-a-cool-die">section 6</a>. <a href="#a-second-card-and-what-transfers">Section 10</a>:
+<code>docs/reports/data/2026-09-22-horace-aifoundry3/</code> (runs, starts, telemetry, tiles; <code>cards.json</code>,
+<code>transfer.json</code>, <code>leakage_crosscard.json</code>).</p>
+<p class="small">Versions: 20 September: uncontrolled and 80 °C-start runs, which said the clock never moves (corrected in
+<a href="#the-speed-effect-appears-on-a-cool-die">section 6</a>). 21 September: strict protocol, RTL model, cool starts, long
+runs, structured matrices. 22 September: second card.</p>
+
+<h2 id="related">12. Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power#ablations">Why is the ET-SoC-1 low power?</a> — uses
+this model to split the card's watts term by term, and compares the energy per FLOP with an A100's.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">Sparsity on the ET-SoC-1</a> — the first sign, on
+18 September on aifoundry3: power above idle falling from 17.3 to 2.4&nbsp;W as A goes to zeros, with no cycles saved.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">The ET-SoC-1 energy
+manual</a> — the flip energies of <a href="#a-model-from-flips-to-temperature">section 8</a> (its §3.2) and the idle law
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">§1</a>) as tables, beside every other
+event energy.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a> — the governor behind <a href="#the-speed-effect-appears-on-a-cool-die">section 6</a>, and why aifoundry3
+never leaves 600 MHz.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature">Power and temperature on the ET-SoC-1 card</a> —
+the telemetry client used here, and the first thermal measurements.</li>
+</ul>
+<p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
 </main>

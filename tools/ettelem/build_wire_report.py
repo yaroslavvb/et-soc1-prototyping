@@ -75,6 +75,7 @@ def main():
                           "tload_dram_random_pj_per_byte": cb["tload/dram/random"]["mean"],
                           "own_scratchpad_pj_per_byte": cb["tload/scp/random"]["mean"],
                           "fadd_ps_random_pj": cb["fadd.ps/random/h2"]["mean"], "fmadd_ps_random_pj": cb["fmadd.ps/random/h2"]["mean"],
+                          "fadd_s_random_pj": cb["fadd.s/random/h2"]["mean"],
                           "add_random_pj": cb["add/random/h2"]["mean"],
                           "source": "docs/reports/data/2026-09-23-energy-manual/manual.json (catalogue.combined, reruns.levels_pj_per_byte)"}
     except Exception as e:

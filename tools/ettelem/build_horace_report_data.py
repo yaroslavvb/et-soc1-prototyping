@@ -6,6 +6,8 @@
 """
 import argparse
 import json
+import os
+import statistics
 
 
 def rnd(x, n=3):
@@ -16,6 +18,30 @@ def rnd(x, n=3):
     if isinstance(x, dict):
         return {k: rnd(v, n) for k, v in x.items()}
     return x
+
+
+def number_long_runs(per_run, long_runs):
+    """Give each model record of the long session the number ("run") of the long run it models.
+
+    Pattern, core count and duration do not identify a run: three zeros runs lasted the full ten minutes, and
+    several random runs took 19-20 s. Time does. A record's t0 counts from the session's first telemetry sample
+    and a long run's t0_ms is wall-clock, so the two differ by one offset for the whole session. The offset is
+    taken from the records that have a single candidate, then every record gets the candidate that sits at it.
+    Records with no run within 5 s of the offset keep no number (the report then shows no model values)."""
+    recs = [q for q in per_run if os.path.basename(q["session"].rstrip("/")) == "long"]
+
+    def cands(q):
+        return [r for r in long_runs if r["values"] == q["values"] and r["minions"] == q["active"] and abs(r["dur"] - q["dur"]) < 2]
+    single = [r["t0_ms"] / 1000.0 - q["t0"] for q in recs for c in [cands(q)] if len(c) == 1 for r in c]
+    if not single:
+        return
+    off = statistics.median(single)
+    for q in recs:
+        best = min(cands(q), key=lambda r: abs(r["t0_ms"] / 1000.0 - q["t0"] - off), default=None)
+        if best is not None and abs(best["t0_ms"] / 1000.0 - q["t0"] - off) < 5.0:
+            q["run"] = best["run"]
+    runs = [q["run"] for q in recs if "run" in q]
+    assert len(runs) == len(set(runs)), "two model records matched the same long run"
 
 
 def main():
@@ -64,6 +90,8 @@ def main():
         out["model"]["trace"] = [{"t": p["t"], "T": p["T"], "fit": p["fit"]} for p in tr[::4]]
         for r in out["model"]["per_run"]:
             r["curve_pred"] = r.get("curve_pred", [])[::2]   # 0.5 Hz, like the measured long curves
+        if a.long:
+            number_long_runs(out["model"]["per_run"], lg["runs"])
     if a.structured_before and a.ablation:
         ab = json.load(open(a.ablation))["configs"]
         out["structured"] = {"before": json.load(open(a.structured_before)),

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Anatomy of a memory access</title>
+<title>Anatomy of a memory access · ET-SoC-1</title>
 <meta name="description" content="How finely the ET-SoC-1 lets you see a memory access: single-load latency split into cache, mesh, memory-controller and DRAM stages, and energy per load split by power rail, measured on a lab card.">
 <style>
 :root {
@@ -100,53 +100,82 @@ select { font: inherit; font-size: 0.88rem; padding: 5px 8px; border-radius: 8px
 .readout .big { font-size: 1.5rem; font-weight: 650; font-variant-numeric: tabular-nums; }
 .cells { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 10px; }
 .cells .card { padding: 10px 12px; }
+.cells .card.full { grid-column: 1 / -1; }
 .cells .k { font-size: 0.78rem; color: var(--ink-2); }
 .cells .v { font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.terms { margin: 14px 0; }
+.terms p { margin: 0; }
+.fn { font-size: 0.8rem; color: var(--ink-2); margin: 4px 0 0; }
+/* section anchors and contents list (as in docs/reports/sources/report.template.html) */
+ol li, ul li { margin: 5px 0; }
+h2, h3 { scroll-margin-top: 12px; }
+.hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 </style>
 </head>
 <body>
 <main>
 <h1>Anatomy of a memory access on the ET-SoC-1</h1>
-<p class="byline">Measured on aifoundry2's card, 19 September 2026 · minion clock 600 MHz, NoC 400 MHz, LPDDR4X at 3733 MT/s · workload <code>workloads/memprobe</code></p>
+<p class="byline">19 September 2026 · aifoundry2's card · minion clock 600 MHz, NoC 400 MHz, LPDDR4X at 3,733 MT/s · workload <code>workloads/memprobe</code> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">How finely can this chip show you where a load's time and energy go? For time, the answer is
 <b>one cycle, for a single load</b>. You can put any one line in L1, L2, L3 or DRAM, time one load of it, and
 split the result into cache lookups, mesh hops, the memory controller and the DRAM row state. A model built from
-those parts predicts each line's DRAM latency to within ±3 cycles. For energy, the finest view is
-<b>four destinations</b>: the minion cores, the SRAM arrays, the mesh (NoC), and everything on the DDR side.
-The first three are measured rails. The DDR side is the rest of the board total. They update every 133 ms, so each
-energy number is an average over billions of identical loads.</p>
+those parts predicts each line's DRAM latency to within ±3 cycles for 97% of lines. Of a typical DRAM load's
+~300 cycles, only about 25 are the DRAM chip's own timing; the rest is paths on the chip. For energy, the finest
+view is <b>four destinations</b>: the minion cores, the SRAM arrays, the mesh (NoC), and the rest of the board,
+which is mostly the DDR side. The first three are metered rails; the rest is the board total minus those three.
+The meters give a new value every 133 ms, so each energy number is an average over billions of identical loads.</p>
+
+<p class="small card"><b>Later measurements.</b> The energies in §7 are superseded by later measurements on two
+cards, with zeros and with random data: the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual</a>
+(§4) and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a>. The manual puts a
+DRAM read at 122 pJ per byte against 79 here, and on random data both put a mesh hop at about twice this page's
+0.9 pJ per byte. The last note in §7 compares the numbers. The latencies are not affected.</p>
 
 <div class="kpis">
-  <div class="card kpi"><div class="lab">A DRAM load, typical</div><div class="val">299 cycles</div><div class="sub">500 ns. Only ~25 cycles are DRAM timing; the rest is on-chip paths.</div></div>
+  <div class="card kpi"><div class="lab">A DRAM load, typical</div><div class="val">299 cycles</div><div class="sub">500 ns at 600 MHz: median of 4,500 loads from shire 0 to random lines. Only ~25 cycles are DRAM timing; the rest is on-chip paths.</div></div>
   <div class="card kpi"><div class="lab">Each mesh hop, round trip</div><div class="val">12 cycles</div><div class="sub">Paid twice on a DRAM load: to the L3 home shire, then on to the memory shire.</div></div>
-  <div class="card kpi"><div class="lab">Energy of one DRAM load</div><div class="val">5.1 nJ</div><div class="sub">67% on the DDR side, 18% mesh, 10% SRAM, 5% cores.</div></div>
-  <div class="card kpi"><div class="lab">Latency model</div><div class="val">±3 cycles</div><div class="sub">for 1,480 of 1,500 random lines, from address bits alone.</div></div>
+  <div class="card kpi"><div class="lab">Energy of one DRAM load</div><div class="val">5.1 nJ</div><div class="sub">67% off the metered rails (mostly DDR), 18% mesh, 10% SRAM, 5% cores.</div></div>
+  <div class="card kpi"><div class="lab">Latency model</div><div class="val">±3 cycles</div><div class="sub">for 1,450 of 1,500 random lines (±5 for 1,490), from address bits alone.</div></div>
 </div>
 
-<h2>1. What the chip lets you see</h2>
-<p>Everything here runs as an ordinary user-mode kernel through the runtime on the lab's firmware (et-platform
-<code>353f20e</code>). The table lists every instrument that turned out to work, at its finest granularity, and what
-stays out of reach.</p>
+<div class="card small terms"><p><b>Terms.</b> The ET-SoC-1's compute cores are <i>minions</i>: small in-order
+RISC-V cores, each with two hardware threads (<i>harts</i>) and its own L1 cache. Thirty-two minions form a
+<i>shire</i>, and each shire's 4 MB of SRAM is split into a 512 KB L2 cache, a 1 MB slice of the chip-wide 32 MB L3
+and a 2.5 MB scratchpad (software-managed memory that any shire can address). The 32 compute shires, with the master, spare, I/O and PCIe shires, form a 6×6 grid on a
+mesh network-on-chip (the NoC, 400 MHz); eight <i>memory shires</i>, which hold the LPDDR4X controllers, sit outside
+the grid on two sides. Every cache line has one <i>L3 home shire</i>, chosen by its address bits, whose L3 slice
+holds it. Kernels run in user mode (U-mode) and firmware in machine mode (M-mode); the service processor (SP) is the
+on-die management core that reads the power sensors. More in the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p></div>
+
+<h2 id="what-the-chip-lets-you-see">1. What the chip lets you see</h2>
+<p>Everything here runs as an ordinary user-mode kernel through the runtime, on the card's installed firmware. The
+firmware source read for this work is et-platform <code>353f20e</code>; the cards' own trace strings match an older
+build, from before et-platform commit <code>60b40c10f</code> (24 September 2024). The table lists every instrument
+that turned out to work, at its finest granularity, and what stays out of reach.</p>
 <div class="table-wrap wide"><table>
 <thead><tr><th>What</th><th>Instrument</th><th>Finest granularity</th><th>Notes</th></tr></thead>
 <tbody>
-<tr><td class="lvl">Time</td><td><code>hpmcounter3</code>, readable in U-mode</td><td>1 cycle (1.67 ns), one load</td><td>The counter's bit-7 carry lands 11 cycles late: a value whose low 7 bits are 0–10 reads 128 short (§8). With the correction, a timed no-op reads exactly 10 cycles in 4,000 of 4,000 tries. The standard <code>cycle</code> CSR traps.</td></tr>
-<tr><td class="lvl">Where a line lives</td><td><code>evict_va</code> (CSR 0x89f), one line</td><td>Put one line in L2, L3 or DRAM</td><td>Level code 1/2/3 leaves the line in L2 / L3 / memory, and code 0 does nothing. Asynchronous: a load issued straight after can still hit (§3). Evicting a dirty line and fencing costs 150–480 cycles, the write-back.</td></tr>
+<tr><td class="lvl">Time</td><td><code>hpmcounter3</code>, readable in U-mode</td><td>1 cycle (1.67 ns), one load</td><td>The counter's bit-7 carry lands 11 cycles late: a value whose low 7 bits are 0–10 reads 128 short (§8). Correcting the 4,000 raw read pairs afterwards makes every pair read exactly 10. Applied on the card, inside timed code, the correction still misses about 1 interval in 70 (57 of 4,000 corrected timed no-ops read 138 or −118), so reject results that are ±128 off, or take the median of repeated loads rather than the fastest. The standard <code>cycle</code> CSR traps.</td></tr>
+<tr><td class="lvl">Where a line lives</td><td><code>evict_va</code> (CSR 0x89f), one line</td><td>Put one line in L2, L3 or DRAM</td><td>Level code 1/2/3 leaves the line in L2 / L3 / memory, and code 0 does nothing. Asynchronous: a load issued straight after queues behind it, and may find its DRAM row still open (§3). Evicting a dirty line and fencing costs 112–480 cycles (median 241), the write-back.</td></tr>
 <tr><td class="lvl">Two loads in flight</td><td>two <code>ld</code>s back to back</td><td>Second load's arrival</td><td>Each minion has 2 miss handlers. This is how row conflicts show up (§6).</td></tr>
 <tr><td class="lvl">Which memory shire served a line</td><td>syscall 10 (<code>SYSCALL_PMC_MS_SAMPLE</code>)</td><td>Exact read count per memory shire</td><td>16 DRAM loads of a line add 16 (15 for 4 lines) to one shire's read counter and 0 to the other seven (one stray 1), for 64 of 64 lines (§5). Syscall 9 does the same for the shire caches' read/write counters.</td></tr>
 <tr><td class="lvl">Core events</td><td><code>hpmcounter4-8</code></td><td>Fixed events only</td><td>Retired instructions, L1 misses and I-cache events, summed over a neighbourhood of 8 minions. Choosing other events needs M-mode.</td></tr>
-<tr><td class="lvl">Board power</td><td><code>DM_CMD_GET_MODULE_POWER</code></td><td>10 mW, new value every ~130 ms</td><td>The host can ask 60 times a second, but the service processor refreshes the value once per loop pass.</td></tr>
-<tr><td class="lvl">Rail power</td><td>Service processor stats trace (<code>dev_mngt_service -t SPST:extract</code>)</td><td>3 rails: minion cores, SRAM, NoC · one record per 133 ms</td><td>A moving average that settles in ~1–2 s. The ring holds ~15 minutes, and an extract returns only records since the last wrap, so extract often. There is no DDR/DRAM rail: that is the board total minus the three rails.</td></tr>
-<tr><td class="lvl">Out of reach</td><td>—</td><td>—</td><td>DRAM activate/precharge counts, shire-cache hit/miss and occupancy counters, NoC counters, per-event energy, and faster power sampling. The first three need an M-mode syscall, a few lines in the worker firmware; the full list is in <code>docs/research/counters-and-dram.md</code>. Changing frequency or voltage (to separate clock domains, or static from dynamic power) is possible from the host but changes a shared card, so it isn't done here.</td></tr>
+<tr><td class="lvl">Board power</td><td><code>DM_CMD_GET_MODULE_POWER</code></td><td>10 mW, new value every 133 ms</td><td>The host can ask 60 times a second, but the service processor refreshes the value once per loop pass.</td></tr>
+<tr><td class="lvl">Rail power</td><td>Service processor stats trace (<code>dev_mngt_service -t SPST:extract</code>)</td><td>3 rails: minion cores, SRAM, NoC · one record per 133 ms</td><td>Each rail value is a running average kept by the board's power-management controller (PMIC), roughly first-order with a time constant of about 1 s (a step reaches 61% after 1 s and 88% after 2 s); the service processor copies it once per pass. The ring holds ~15 minutes, and an extract returns only records since the last wrap, so extract often. There is no DDR/DRAM rail: that is the board total minus the three rails.</td></tr>
+<tr><td class="lvl">Out of reach</td><td>—</td><td>—</td><td>DRAM activate/precharge counts, shire-cache hit/miss and occupancy counters, NoC counters, per-event energy, and faster power sampling. The first three need an M-mode syscall to choose events. One has since been written (about 60 lines) and works in the simulator, but it has not run on silicon: the firmware images are signed, neither the signing tool nor a test key is available, and whether this card would boot a rebuilt image is untested (the hub's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">firmware caveat</a>). The full list is in <code>docs/research/counters-and-dram.md</code>. Changing frequency or voltage (to separate clock domains, or static from dynamic power) is possible from the host but changes a shared card, so it isn't done here.</td></tr>
 </tbody></table></div>
 
-<h2>2. Trace one load</h2>
+<h2 id="trace-one-load">2. Trace one load</h2>
 <p>This explorer is built from the measurements below. Pick the shire that issues the load and the L3 home shire of
 the address. Physical-address bits 10:6 give the home shire, and bits 8:6 give the memory shire, so the memory shire is
 always the home shire's low three bits. The bar breaks the latency into its parts. Latency comes from the model,
-which matches measured loads to ±3 cycles. Energy is the measured average for that level; for L3 it is scaled by the
-hop count.</p>
+which matches 97% of measured loads to ±3 cycles. Energy is the measured average for that level; for L3 it is scaled
+by the hop count. All loads were timed from shire 0; other requesting shires use the same 12 cycles per hop, which the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication report</a>
+measured between every pair of shires.</p>
 <div class="card">
   <div class="controls">
     <span>Level <span class="seg" id="lvl"></span></span>
@@ -158,50 +187,76 @@ hop count.</p>
     <span class="small">Or click the map: <span class="seg" id="clickmode"></span></span>
   </div>
   <div class="explorer">
-    <div class="chart" id="mesh"></div>
+    <div>
+      <div class="chart" id="mesh"></div>
+      <div class="legend" id="mesh-legend"></div>
+    </div>
     <div>
       <div class="readout" id="readout"></div>
       <div class="chart" id="flame" style="margin-top:8px"></div>
+      <div class="legend" id="flame-legend"></div>
       <div class="cells" id="cells"></div>
     </div>
   </div>
-  <p class="small" style="margin:10px 0 0">Map: marty1885's shire layout, as in the on-chip communication report.
-  Memory shires 0–3 sit off the north edge and 4–7 off the south edge. Their positions come from the fit in §5.
-  Shire colours show L3 hit latency from the requesting shire.</p>
+  <p class="small" style="margin:10px 0 0">Map: <a href="https://github.com/marty1885/etTopoScan">marty1885</a>'s
+  logical shire layout, as in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip
+  communication report</a>. The unlabelled grey cells are not compute shires (the master and spare shires and the PCIe and I/O
+  shires). In this map memory shires 0–3 sit above the grid and 4–7 below it; their positions come from the fit in
+  §5. The map appears to be the die turned a quarter (more exactly, with rows and columns swapped): on the die
+  (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die">Heat per millimetre</a>) and in the
+  firmware's naming (0–3 west, 4–7 east) the memory shires are the two side columns. Shire colours show L3 hit
+  latency from the requesting shire; each shade is 20 cycles of L3 latency.</p>
 </div>
 
-<h2>3. The ladder, one load at a time</h2>
+<h2 id="the-ladder-one-load-at-a-time">3. The ladder, one load at a time</h2>
 <p>For each of 64 random lines, one hart loaded the line, evicted it to a chosen level, fenced, waited 300 cycles,
-and timed one load. Values are load-to-use cycles: the timed value minus the 5 cycles of timer overhead, which puts an
-L1 hit at the 5 cycles the pointer chase measured before. The spread at L3 and DRAM is almost entirely distance on the
-mesh (§4, §5), not noise.</p>
+and timed one load. Values are load-to-use cycles: the raw reading minus 5, an offset chosen so an L1 hit reads the
+5 cycles the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy report</a>'s
+pointer chase measured. (A timed no-op and a timed L1 hit both read 10 raw; the offset moves every absolute number
+but none of the differences between levels.) The spread at L3 and DRAM is almost entirely distance on the mesh
+(§4, §5), not noise.</p>
 <div class="chart-title">Load-to-use latency by where the line was left (cycles at 600 MHz, 128 loads each)</div>
 <div class="chart scroll" id="ladder"></div>
 <div class="table-wrap"><table id="ladder-table"></table></div>
-<p>Evicts are asynchronous. With no fence, the load after an evict to memory sometimes returns in L3 time
-(minimum 214 cycles against 226 with fence and wait), and the median rises to 365 because the load queues behind
-the evict. A fence alone is not enough either. Waiting a few hundred cycles makes the placement reliable.</p>
+<p class="fn">* One of 128 dirty evicts took 16 cycles, as fast as a clean one (no write-back); the rest took 112–480.</p>
+<p>Evicts keep working after the instruction retires, but none of the 256 loads timed straight after an evict to
+memory came back in L3 time: every one went to DRAM. What changes is the timing. With no fence, the load queues
+behind the evict (median 365, about 58 cycles above the §5 model). With a fence but no wait, a third of the loads
+find the row that the previous load of the same line opened still open, and read 11 cycles fast (minimum 213, on a
+line whose closed-row time is 225). With the fence and the 300-cycle wait, none read fast: 115 of 128 land within
+±6 cycles of the §5 model, which is the closed-row time, and the rest are slower.</p>
+<p>The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy report</a>'s pointer
+chase, run the day before with the clock not pinned, agrees: its DRAM chases took 287–297 cycles (480–495 ns) when the
+minions ran at 600 MHz, and 352–368 cycles (440–460 ns) when the governor had raised them to 800 MHz. Every load on
+this page ran at a steady 600 MHz (the refresh period in §6 matches the DRAM's refresh interval only at that clock).</p>
 
-<h2>4. L3: 110 cycles plus 12 per hop</h2>
+<h2 id="l3-110-cycles-plus-12-per-hop">4. L3: 110 cycles plus 12 per hop</h2>
 <p>Each line's L3 home shire is picked by physical-address bits 10:6. From shire 0, 1,500 random lines were timed as
-L3 hits. Latency depends only on the home shire's Manhattan distance on the mesh: <b>110 + 12 × hops</b>, within ±2
-cycles for 1,498 of 1,500 lines. So a local L3 hit costs 110 cycles: ~48 for the L1 and L2 lookup and miss, ~62 for
+L3 hits. Latency depends only on the home shire's
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">Manhattan distance on the mesh</a>:
+<b>110 + 12 × hops</b>, within ±4 cycles for 1,498 of 1,500 lines (the median of three loads per line; 1,309 are
+within ±2). So a local L3 hit costs 110 cycles: ~48 for the L1 and L2 lookup and miss, ~62 for
 the home slice. Each hop adds 12 cycles (20 ns) for the request and the reply.</p>
 <div class="chart-title">L3 hit latency from shire 0 against distance to the home shire (one dot per home shire)</div>
 <div class="chart scroll" id="l3"></div>
 <p class="small">L2 hits in the same run come in two flavours: 37 cycles when the line is still in the bank's
 8-entry read buffer, and 48 from the array.</p>
 
-<h2>5. The memory shire leg: 91 cycles plus 12 per hop</h2>
-<p>The same 1,500 lines were also timed from DRAM (row still open, no contention), and each line's L3 time was
+<h2 id="the-memory-shire-leg-91-cycles-plus-12-per-hop">5. The memory shire leg: 91 cycles plus 12 per hop</h2>
+<p>The same 1,500 lines were also timed from DRAM (each load at least 1,000 idle cycles after the row was last
+used, so the row had closed and every load paid an activate; no contention), and each line's L3 time was
 subtracted. What remains is the leg from the home shire to the memory shire and back. The memory shire is picked by
 bits 8:6. The hardware counters confirm it: for all 64 lines tested, 16 DRAM loads raised the read count of the shire
-named by those bits, by 16 for 60 lines and by 15 for 4. The other seven shires' counts didn't move. Fitting one shared constant plus 12 cycles per hop puts the memory shires one step off the north
-edge (0–3) and south edge (4–7) of the mesh, at x = 1…4. The total squared error is 2 cycles² over 32 home/memory-shire
-pairs. The whole DRAM load is then</p>
+named by those bits, by 16 for 60 lines and by 15 for 4. The other seven shires' counts didn't move (one stray count
+of 1 in 448).</p>
+<p>The fit uses one shared constant plus 12 cycles per hop. Assuming each memory shire hangs one hop
+outside the grid (the only positions the fit tried; moving all eight one hop further out fits equally well with a
+constant of 79), the best fit puts memory shires 0–3 above the grid and 4–7 below it, at x = 1…4. The total squared
+error is 2 cycles² over 32 home/memory-shire pairs. The whole DRAM load is then</p>
 <pre><code>latency = 110 + 12·hops(requester → L3 home) + 91 + 12·hops(L3 home → memory shire)</code></pre>
-<p>and the model's error is within ±3 cycles for 1,480 of 1,500 lines. The rest are outliers from refresh and
-timer glitches.</p>
+<p>and the model's error is within ±3 cycles for 1,450 of 1,500 lines and within ±5 for 1,490. The other ten are
+outliers: seven read about 128 cycles short (counter glitches the correction missed, §8), two are 44 and 71 cycles
+slow (probably refresh), and one is 29 cycles fast.</p>
 <div class="panels">
 <div>
 <div class="chart-title">Measured DRAM latency minus model, per line (fastest of 3 loads)</div>
@@ -212,13 +267,13 @@ timer glitches.</p>
 <div class="table-wrap"><table id="mstable"></table></div>
 </div>
 </div>
-<p>Of the 91 cycles (152 ns), the DRAM chip itself accounts for about 14 cycles on an open-row read: read latency
-19.3 ns plus a 4.3 ns burst, from the controller's timing registers. The remaining ~77 cycles (~128 ns) are the
-memory shire: controller queue, PHY, and the crossings between the 933 MHz memory clock and the mesh. The frequency
-experiment in §9 would split this further.</p>
+<p>Of the 91 cycles (152 ns), the DRAM chip itself accounts for about 25: an activate (the activate-to-read delay tRCD,
+11 cycles = 18 ns, §6) plus the 19.3 ns read latency and a 4.3 ns burst (14 cycles), from the controller's timing registers. The
+remaining ~66 cycles (~110 ns) are the memory shire: controller queue, PHY, and the crossings between the 933 MHz
+DDR clock and the mesh. The frequency experiment in §9 would split this further.</p>
 
-<h2>6. Inside the DRAM: rows, banks and refresh</h2>
-<h3>Which address bits share a row</h3>
+<h2 id="inside-the-dram-rows-banks-and-refresh">6. Inside the DRAM: rows, banks and refresh</h2>
+<h3 id="which-address-bits-share-a-row">Which address bits share a row</h3>
 <p>A second load B was issued one cycle behind load A, with B = A with one physical-address bit flipped. Both were
 cold in DRAM, 150 random A per bit. When B shares A's row, or sits in another bank or channel, it rides along and
 arrives with A (~300 cycles). When B is in the same bank but a different row, the controller must wait for A's row to
@@ -228,33 +283,38 @@ bank = PA[12:10], column = PA[17:13], row from PA[18].</p>
 <div class="legend" id="bits-legend"></div>
 <div class="chart scroll" id="bits"></div>
 
-<h3>Refresh, caught in the act</h3>
+<h3 id="refresh-caught-in-the-act">Refresh, caught in the act</h3>
 <p>Loading the same line from DRAM 19,000 times at random intervals, and folding the timestamps on a period of
-<b>2,325 cycles = 3.88 µs</b>, shows LPDDR4X refresh (tREFI = 3.9 µs):</p>
+<b>2,325 cycles = 3.88 µs</b>, shows LPDDR4X refresh (tREFI, the refresh interval, is 3.9 µs):</p>
 <ul>
 <li>A load that arrives while refresh is running waits up to 210 extra cycles (350 ns). That's close to the 281 ns
 all-bank refresh time, and the wait shrinks as the load arrives later in the refresh window.</li>
 <li>Refresh also closes the open row. The next load pays an activate, 215 → 226 cycles. That's 11 cycles = 18 ns,
-exactly tRCD.</li>
+exactly tRCD, the activate-to-read delay.</li>
 <li>With a fixed loop period of 576 cycles, a loop locks onto refresh: every fourth load is the slow one, and none
 ever lands inside the refresh itself.</li>
 </ul>
 <div class="chart-title">DRAM latency against the load's phase within the refresh period (median and slowest per bin)</div>
 <div class="chart scroll" id="refresh"></div>
 
-<h3>How long a row stays open</h3>
+<h3 id="how-long-a-row-stays-open">How long a row stays open</h3>
 <p>Open-row hits save 11 cycles. Only about two thirds of back-to-back pairs get the saving, and after 1,500–2,000
-idle cycles almost none do. That is a little faster than refresh alone would close rows, so the controller may also
-close idle rows after roughly 2 µs.</p>
+idle cycles almost none do. That is about twice as fast as refresh alone would close rows (after 1,000 idle
+cycles, 23% hits against 44%). The controller's registers set an open-page policy with no idle-close timer
+(<code>docs/research/counters-and-dram.md</code>), so something else closes rows; this experiment cannot say
+what.</p>
 <div class="chart-title">Share of same-row second loads that were row hits, against idle time between them</div>
 <div class="chart scroll" id="pto"></div>
 
-<h2>7. Where the energy goes</h2>
+<h2 id="where-the-energy-goes">7. Where the energy goes</h2>
 <p>Hart 0 of all 1,024 minions walked a working set sized to hit exactly one level, with no evicts. The loop was the
 same six-instruction body for every level, run for 6 s per pattern, twice each. Power above the level just before
 each run, divided by the load rate, gives energy per load. The split comes from the service processor's trace:
-<b>minion cores</b>, <b>SRAM</b> (the L2/L3/scratchpad arrays), <b>NoC</b> (the mesh), and the <b>DDR side</b> =
-board total − those three rails (memory shires, DRAM, PHY, I/O).</p>
+<b>minion cores</b>, <b>SRAM</b> (the L2/L3/scratchpad arrays), <b>NoC</b> (the mesh), and the <b>rest</b> =
+board total − those three rails. The rest is mostly the memory shires, DRAM, PHY and I/O. It also holds the
+regulators' delivery losses on the three metered rails: later work puts them at about 18–20% of the minion rail's
+power, 5–6% of the SRAM rail's, and part of the 26–29% it attributes to the mesh rail (see the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">hub's §4.2</a>).</p>
 <div class="legend" id="energy-legend"></div>
 <div class="chart scroll" id="energy"></div>
 <div class="table-wrap wide"><table id="energy-table"></table></div>
@@ -263,57 +323,186 @@ board total − those three rails (memory shires, DRAM, PHY, I/O).</p>
 because it spends longer stalled.</li>
 <li><b>An L3 hit costs 3× an L2 hit even locally.</b> SRAM goes to 306 pJ, for the L2 miss, the L3 read and the L2
 fill, and the NoC rail appears at 120 pJ.</li>
-<li><b>Each mesh hop costs about 59 pJ per 64-byte load</b>, 47 pJ of it on the NoC rail: going from a local to a
-far home (5.6 hops on average) adds 333 pJ. That is ~0.9 pJ per byte per hop.</li>
-<li><b>A DRAM load costs ~5.1 nJ, and two thirds of it, 3.4 nJ = 53 pJ per byte, is on the DDR side.</b> The mesh
+<li><b>Each mesh hop costs about 59 pJ per load (per 64-byte line moved)</b>, 47 pJ of it on the NoC rail: going
+from a local to a far home (5.6 hops on average) adds 333 pJ. That is ~0.9 pJ per byte per hop.</li>
+<li><b>A DRAM load costs ~5.1 nJ, and two thirds of it, 3.4 nJ = 53 pJ per byte, is off the metered rails, mostly
+on the DDR side.</b> The mesh
 adds 0.9 nJ, because the request crosses the chip twice. The DRAM row itself could not be isolated: a pattern that
 conflicts on every access costs the same per load as a sequential one. With 1,024 streams interleaved, the
 sequential pattern probably re-activates rows on almost every access too.</li>
-<li>Totals from the host's board-power log are 15–20% higher than the trace's own board average, for every pattern.
-The two readings are filtered differently. The table gives both, and the split uses the trace so the parts add up.</li>
+<li>Totals from the host's board-power log are 16–25% higher than the trace's own board average for every pattern
+(16–19% for L2, own-shire L3 and both DRAM patterns; 23% for L1 and 25% for far L3). Mid-run the two agree to
+within 0.3 W; the gap comes from the edges of each window. The trace's values are the power-management controller's
+running averages (τ ≈ 1 s; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#a-load-step-seen-through-every-sensor">Power and
+temperature</a>, §2), and as lined up with the host log the trace starts to rise about 0.7 s before each load process
+starts and to fall before the run ends. So its baseline reads high and its run average low. The table gives both; the
+split uses the trace so the parts add up, but the host log's totals are the cleaner measure of the whole.</li>
+<li><b>Later measurements put DRAM higher.</b> The
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual (§4)</a>,
+measured on 23 September on both cards at a pinned 600 MHz with the host's board power, gives 122 pJ/B [117–129]
+for DRAM read by 1 KB tensor loads over memory whose contents were not set, and, with the data known, 91 pJ/B on
+zeros against 129 on random data. This page's 79 pJ/B was measured differently: its loads are 8-byte
+<code>ld</code>s that each bring a 64-byte line through the caches; it uses the service processor's trace, whose rise
+above idle is 14–20% smaller than the host log's (with the host log it is 92 pJ/B); and its arena was never
+initialised, so the bit pattern of the loaded data is unknown. Per mesh hop the manual's
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#finer-grain-wires-lines-rows-and-the-leakage-of-the-arrays">1–8-hop
+fit (§4.3)</a> gives 0.64–0.75 pJ/B on zeros and 1.67–1.81 on random data across the two cards (2.1–2.3 on random data
+over 1–6 hops), against ~0.9 here; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per
+millimetre</a> measures 1.5–2.2 pJ/B per hop on random data and splits it into flips and ones carried.</li>
 </ul>
 
-<h2>8. A timer bug worth knowing</h2>
-<p>Before anything above was trustworthy, the cycle counter needed fixing. 8% of back-to-back read pairs differed
-by 138 or −118 cycles instead of 10. The raw values show why: a read whose low 7 bits are 0–10 is 128 too small,
-because the carry into bit 7 lands 11 cycles late. This isn't erratum RTLMIN-6496 (two harts reading counters at
-once): only one hart read here. The firmware's four-reads workaround doesn't fix it. Adding 128 to any read with low
-bits 0–10 does, for all 4,000 pairs. Any code that times short intervals with <code>hpmcounter3</code> on this card
+<h2 id="a-timer-bug-worth-knowing">8. A timer bug worth knowing</h2>
+<p>Before anything above was trustworthy, the cycle counter needed fixing. 16% of back-to-back read pairs (320 by
++138 and 314 by −118, of 4,000) differed from the expected 10 cycles. The raw values show what happens: a read whose low 7
+bits are 0–10 is 128 too small, because the carry into bit 7 lands 11 cycles late. A simulation of the open RTL shows why: twelve
+counters share one adder that folds overflows in round-robin, and a read ignores the pending overflow
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#bits">hub §3</a>). This isn't erratum
+1.23 (RTLMIN-6496, two harts reading counters at once): only one hart read here.</p>
+<p>The firmware's four-reads workaround doesn't fix it. Adding 128 to any read with low bits 0–10 does, for all 4,000 pairs. Inside a running kernel it
+catches most but not all of them (see §1); the seven lines about 128 cycles fast in §5 are such misses, picked out by
+taking the fastest of three loads. Any code that times short intervals with <code>hpmcounter3</code> on this card
 needs the same correction (see <code>fixcyc()</code> in <code>workloads/memprobe/kernel/memprobe.c</code>).</p>
+<div class="chart-title">Cycles between two back-to-back counter reads, 4,000 pairs (dot size = count)</div>
 <div class="chart scroll" id="timer"></div>
 
-<h2>9. What would split it further</h2>
+<h2 id="what-would-split-it-further">9. What would split it further</h2>
 <ul>
 <li><b>Clock domains.</b> Set the minion and NoC clocks separately (<code>DM_CMD_SET_FREQUENCY -f minion,noc</code>,
 with DVFS off) and rerun §4–5. Each stage's cycles then split into minion-clock, NoC-clock and fixed-time parts, for
-example the 77 cycles in the memory shire. It changes a shared card's state, so it waits for approval and a quiet
-card.</li>
+example the 66 cycles in the memory shire. The hop cost is already known to be on the mesh clock: 20 ns per hop at
+600, 700 and 800 MHz (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip
+communication report</a>), so only the 110- and 91-cycle constants remain to split. It changes a shared card's
+state, so it waits for approval and a quiet card.</li>
 <li><b>Static against dynamic energy.</b> The same frequency sweep at fixed voltage gives each rail's
-C·V²·f slope.</li>
+C·V²·f slope. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">DVFS report</a> has since
+separated static from dynamic power another way, as a leakage law in temperature (23.3 W at 80&nbsp;°C).</li>
 <li><b>DRAM activate energy, and cache hit/miss counts.</b> Both need counters that only M-mode can program. A
-user-mode syscall to set event selectors would be a few lines in the worker firmware, which the lab card would need
-flashed.</li>
+user-mode syscall that sets them has been written and works in the simulator (sys_emu); running it on the card needs
+a signed firmware image, which is not available.</li>
 </ul>
 
-<h2>10. Reproduce</h2>
+<h2 id="reproduce">10. Reproduce</h2>
 <pre><code>scripts/deploy-lab.sh aifoundry2 workloads/memprobe      # or build locally on the lab machine
-cd build/memprobe-data
+mkdir -p build/memprobe-data && cd build/memprobe-data
 python3 ../../workloads/memprobe/gen_ops.py timer   --out .
 python3 ../../workloads/memprobe/gen_ops.py ladder  --out . --lines 64
 python3 ../../workloads/memprobe/gen_ops.py decomp  --out . --lines 1500 --reps 3 --pre-delay 1000
 python3 ../../workloads/memprobe/gen_ops.py msmap   --out . --lines 64
 python3 ../../workloads/memprobe/gen_ops.py bits    --out . --base 0x8040000000 --trials 150
 python3 ../../workloads/memprobe/gen_ops.py refresh --out . --name refresh_jit --n 19000 --jitter 3000 --start 0x1000
+python3 ../../workloads/memprobe/gen_ops.py refresh --out . --n 24000 --start 0x1000
 python3 ../../workloads/memprobe/gen_ops.py pagetimeout --out . --row-bit 13 --trials 60
-timeout 10 ../memprobe/host/memprobe_host --program ladder.ops --program decomp.ops ...   # each run &lt; 0.1 s of card time
+for p in t_raw t_glitch ladder decomp msmap bits refresh refresh_jit pagetimeout; do timeout 10 ../memprobe/host/memprobe_host --program $p.ops; done   # each run &lt; 0.2 s of card time
 for p in l1 l2 l3near l3far dram_seq dram_row; do python3 ../../workloads/memprobe/gen_ops.py table --pattern $p --out-file $p.tbl; done
+cd ../..   # back to the repo root
 python3 workloads/memprobe/run_power.py --host-bin build/memprobe/host/memprobe_host --tables build/memprobe-data --out build/memprobe-power --seconds 6 --gap 4
-python3 workloads/memprobe/analyze_power.py build/memprobe-power --json summary.json
-python3 workloads/memprobe/analyze.py --data docs/reports/data/2026-09-19-memprobe-aifoundry2 --out summary.json</code></pre>
+mkdir -p build/memprobe-data/power && python3 workloads/memprobe/analyze_power.py build/memprobe-power --json build/memprobe-data/power/summary.json
+python3 workloads/memprobe/analyze.py --data build/memprobe-data --out build/memprobe-data/summary.json
+python3 workloads/memprobe/build_report.py build/memprobe-data/summary.json docs/reports/2026-09-19-et-soc1-memory-anatomy.html
+
+# To rebuild this page from the committed data instead:
+python3 workloads/memprobe/build_report.py docs/reports/data/2026-09-19-memprobe-aifoundry2/summary.json docs/reports/2026-09-19-et-soc1-memory-anatomy.html</code></pre>
 <p class="small">Raw results (u32 timings with their labels, the power log, the merged rail trace) are in
 <code>docs/reports/data/2026-09-19-memprobe-aifoundry2/</code>. The runs used arena base <code>0x8040000000</code>,
 1 GB aligned, so arena offsets are physical address bits. Every card run was its own <code>timeout 10</code>
 process, and the latency probes held the card for under 0.2 s each.</p>
+<p class="small">Versions: published 19 September 2026. Revised 24 September 2026 after a review: the split of a DRAM
+load in §5 (the loads found their rows closed, so the activate belongs to the DRAM chip's share), the model's error
+counts, the reading of the evict ladder in §3, why the two board readings in §7 differ, and links to the later
+energy measurements.</p>
+
+<h2 id="related">Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a>, the
+hub — every instrument used here, what the power meters can and cannot see, and what would extend them.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — the pointer chase
+and the bandwidth of every level, measured the day before this page.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the shire
+map used here, and 20 ns per mesh hop measured between every pair of shires.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">The energy
+manual, §4</a> — energy per byte at every level of the hierarchy, with ranges over repeated runs on two cards; it
+supersedes the energies in §7.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> — the energy of one
+mesh hop, split into bits that flip and ones carried.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a> — uses the
+<code>PA[10:6]</code> home-shire mapping found here to home a contended DRAM line in a chosen shire.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature">Power and temperature</a> — the power
+meters used in §7: what each one reports, how often, and how it averages.</li>
+</ul>
+<p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
+
+<script>
+/* Section anchors (copied from docs/reports/sources/report.template.html). Every h2/h3 gets an id (its own, or one
+   made from its text) and a # link; clicking a heading or a table-of-contents link puts #id in the URL. When the page
+   is framed by spacesheep.dev the fragment is mirrored into the outer, shareable URL (postMessage ss-hash), and an
+   outer #fragment is forwarded in on load. */
+(function () {
+  const slug = t => t.toLowerCase().replace(/^\d+(\.\d+)*\.?\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const post = h => { if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h}, '*'); } catch (_) {} } };
+  const go = id => { try { history.replaceState(null, '', location.pathname + location.search + '#' + id); } catch (_) {}
+    const el = document.getElementById(id); if (el) el.scrollIntoView({block: 'start'}); post('#' + id); };
+  const seen = new Set();
+  document.querySelectorAll('main h2, main h3').forEach(h => {
+    if (!h.id) { let id = slug(h.textContent) || 'section', n = 2; while (seen.has(id) || document.getElementById(id)) id = slug(h.textContent) + '-' + n++; h.id = id; }
+    seen.add(h.id);
+    const a = document.createElement('a'); a.href = '#' + h.id; a.className = 'hlink'; a.textContent = '#'; a.title = 'link to this section'; h.appendChild(a);
+    h.style.cursor = 'pointer';
+    h.addEventListener('click', ev => { if (ev.target.tagName === 'A' && ev.target !== a) return; ev.preventDefault(); go(h.id); });
+  });
+  window.addEventListener('hashchange', () => post(location.hash));
+  if (location.hash) { post(location.hash); const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => el.scrollIntoView({block: 'start'}), 50); }
+})();
+</script>
+<script>
+/* Contents list, link back to the reports hub, and repository paths as links (copied from
+   docs/reports/sources/report.template.html). Runs after the section-anchor script above, whose h2 ids the contents
+   list links to.
+   - Contents: a page with 6 or more h2s and no #toclist of its own gets a numbered list before its first h2.
+   - Footer: every page but the hub ends with a link to the hub's list of reports, unless it already has one.
+   - Paths: an inline <code> whose whole text is a repository path (docs/…, workloads/…, tools/…, scripts/…,
+     kernels/…, rtl-sim/…) becomes a GitHub link. Code blocks, code already in a link and globs stay as they are. */
+(function () {
+  const main = document.querySelector('main'); if (!main) return;
+  const HUB = 'https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability';
+  const BACK = '← All ET-SoC-1 measurement reports';
+  const REPO = 'https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/';
+  const text = el => { const c = el.cloneNode(true); c.querySelectorAll('.hlink').forEach(a => a.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+  const NUM = /^(?:§\s*\d+(?:\.\d+)*\.?|\d+(?:\.\d+)*\.|\d+(?:\.\d+)+)\s+/;  /* "3. ", "4.2 ", "§5 "; not "600 MHz" */
+
+  const h2s = [...main.querySelectorAll('h2')];
+  if (h2s.length >= 6 && !document.getElementById('toclist')) {
+    const nav = document.createElement('nav'); nav.className = 'card';
+    const b = document.createElement('b'); b.textContent = 'Contents';
+    const ol = document.createElement('ol'); ol.id = 'toclist';
+    h2s.forEach(h => {
+      if (!h.id) return;
+      const t = text(h), m = t.match(/^§?\s*(\d+)[.\s]/), li = document.createElement('li'), a = document.createElement('a');
+      if (m && NUM.test(t)) li.value = +m[1];
+      a.href = '#' + h.id; a.textContent = t.replace(NUM, '') || t;
+      li.appendChild(a); ol.appendChild(li);
+    });
+    nav.append(b, ol);
+    h2s[0].parentNode.insertBefore(nav, h2s[0]);
+  }
+
+  const h1 = main.querySelector('h1');
+  const isHub = !!h1 && /^limits of observability/i.test(text(h1));
+  const hasBack = [...document.querySelectorAll('a')].some(a => a.textContent.replace(/\s+/g, ' ').trim() === BACK);
+  if (!isHub && !hasBack) {
+    const p = document.createElement('p'); p.className = 'small';
+    const a = document.createElement('a'); a.href = HUB + '#reports'; a.textContent = BACK;
+    p.appendChild(a); main.appendChild(p);
+  }
+
+  const PATH = /^(docs|workloads|tools|scripts|kernels|rtl-sim)\/[\w./-]+$/;
+  main.querySelectorAll('code').forEach(c => {
+    if (c.closest('pre, a')) return;
+    const t = c.textContent.trim(); if (!PATH.test(t)) return;
+    const a = document.createElement('a'); a.href = REPO + t;
+    c.parentNode.insertBefore(a, c); a.appendChild(c);
+  });
+})();
+</script>
 </main>
 
 <script>
@@ -371,7 +560,7 @@ const fmt = (v, d=0) => Number(v).toLocaleString('en-US', {maximumFractionDigits
 /* ---------- explorer ---------- */
 const LEVELS = [['L1','L1'],['L2','L2'],['L3','L3'],['DRAM','DRAM']];
 const DSTATES = [['open','open'],['closed','closed'],['conflict','conflict'],['refresh','in refresh']];
-const st = {lvl: 'DRAM', dstate: 'open', req: 0, home: 31, click: 'req'};
+const st = {lvl: 'DRAM', dstate: 'closed', req: 0, home: 31, click: 'req'};
 function segs(id, opts, key, after) {
   const box = document.getElementById(id); box.innerHTML = '';
   for (const [v, label] of opts) {
@@ -392,10 +581,11 @@ function parts() {
   if (h1) P.push([`mesh, ${h1} hop${h1>1?'s':''} ×12`, 12*h1, 'c3']);
   if (st.lvl === 'L3') return {P, h1, h2, ms};
   if (h2) P.push([`mesh to memory shire, ${h2} hop${h2>1?'s':''} ×12`, 12*h2, 'c3']);
-  P.push(['memory shire: queue, PHY, clock crossing', 77, 'c4']);
-  P.push(['DRAM read (open row)', 14, 'c5']);
-  if (st.dstate === 'closed' || st.dstate === 'refresh') P.push(['activate (tRCD)', 11, 'c6']);
-  if (st.dstate === 'conflict') P.push(['wait for other row + precharge + activate', 40, 'c6']);
+  // The §5 fit (91 cycles) was made on closed rows: 66 in the memory shire + 11 activate + 14 read and burst.
+  P.push(['memory shire: queue, PHY, clock crossing', 66, 'c4']);
+  if (st.dstate !== 'open') P.push(['activate (tRCD)', 11, 'c6']);
+  P.push(['DRAM read + burst', 14, 'c5']);
+  if (st.dstate === 'conflict') P.push(['wait for the other row + precharge', 40, 'c7']);
   if (st.dstate === 'refresh') P.push(['wait for refresh (worst case)', 210, 'c7']);
   return {P, h1, h2, ms};
 }
@@ -437,6 +627,8 @@ function drawMesh() {
   const lpath = (a, b) => { const [ax, ay] = ctr(a), [bx, by] = ctr(b); return `M${ax},${ay} L${bx},${ay} L${bx},${by}`; };
   if (st.lvl === 'L3' || st.lvl === 'DRAM') el('path', {d: lpath(MESH[st.req], MESH[st.home]), class: 'path', stroke: 'var(--c3)', opacity: 0.85}, pathL);
   if (st.lvl === 'DRAM') el('path', {d: lpath(MESH[st.home], MSPOS[ms]), class: 'path', stroke: 'var(--c4)', 'stroke-dasharray': '6 4', opacity: 0.9}, pathL);
+  document.getElementById('mesh-legend').innerHTML = '<span>L3 hit, cycles:</span>' +
+    ramp.map((v, k) => `<span><i style="background:var(${v})"></i>${110 + 20 * k}${k === 6 ? '+' : ''}</span>`).join('');
 }
 function drawFlame() {
   const {P, h1, h2, ms} = parts();
@@ -454,9 +646,9 @@ function drawFlame() {
     hover(g, tip, host, () => `<b>${name}</b><br>${c} cycles = ${fmt(c*CYC_NS)} ns (${fmt(100*c/total)}%)`);
     acc += c;
   }
-  let lx = 0;
-  const leg = el('g', {}, svg);
-  txt(leg, 0, 90, 'Hover a segment for its name. Cycles at 600 MHz; 1 cycle = 1.67 ns.', 'tick');
+  txt(svg, 0, 90, 'Cycles at 600 MHz; 1 cycle = 1.67 ns.', 'tick');
+  document.getElementById('flame-legend').innerHTML = P.map(([name, c, col]) =>
+    `<span><i style="background:var(--${col})"></i>${name}: ${c}</span>`).join('');
   const E = energy(h1);
   document.getElementById('readout').innerHTML =
     `<span class="big">${total} cycles</span> · ${fmt(total*CYC_NS)} ns · ` +
@@ -466,10 +658,15 @@ function drawFlame() {
   cells.push(['Requesting shire', `${st.req}`]);
   if (st.lvl === 'L3' || st.lvl === 'DRAM') cells.push(['L3 home shire', `${st.home} · ${h1} hops`]);
   if (st.lvl === 'DRAM') cells.push(['Memory shire', `M${ms} · ${h2} hops from home`]);
-  const en = st.lvl === 'L1' ? D.energy.l1 : st.lvl === 'L2' ? D.energy.l2 : st.lvl === 'L3' ? D.energy.l3near : D.energy.dram_seq;
-  cells.push(['Cores / SRAM / NoC / DDR side', `${fmt(en.minion)} / ${fmt(en.sram)} / ${fmt(en.noc)} / ${fmt(en.rest)} pJ`]);
-  if (st.lvl === 'L3') cells.push(['Mesh energy', `+${fmt(D.hopPj)} pJ per hop`]);
-  document.getElementById('cells').innerHTML = cells.map(([k, v]) => `<div class="card"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  const E0 = D.energy, RAILS = ['minion', 'sram', 'noc', 'rest'];
+  // Mean hop count of the far-home pattern, and each rail's energy per hop (the far-home increase over it).
+  const farHops = (E0.l3far.sp_total - E0.l3near.sp_total) / D.hopPj;
+  const perHop = k => (E0.l3far[k] - E0.l3near[k]) / farHops;
+  let en = st.lvl === 'L1' ? E0.l1 : st.lvl === 'L2' ? E0.l2 : st.lvl === 'L3' ? E0.l3near : E0.dram_seq;
+  if (st.lvl === 'L3') en = Object.fromEntries(RAILS.map(k => [k, E0.l3near[k] + perHop(k) * h1]));
+  cells.push(['Energy per load by rail: cores / SRAM / NoC / rest', RAILS.map(k => fmt(en[k])).join(' / ') + ' pJ', 'full']);
+  if (st.lvl === 'L3') cells.push(['Mesh energy', `+${fmt(D.hopPj)} pJ per hop, ${fmt(perHop('noc'))} of it NoC`]);
+  document.getElementById('cells').innerHTML = cells.map(([k, v, cls]) => `<div class="card${cls ? ' ' + cls : ''}"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
 }
 function sync() {
   document.getElementById('req').value = st.req; document.getElementById('home').value = st.home;
@@ -514,7 +711,7 @@ function sync() {
   const t = document.getElementById('ladder-table');
   t.innerHTML = '<thead><tr><th>Line left in</th><th class="num">min</th><th class="num">median</th><th class="num">90%</th><th class="num">max</th><th class="num">median ns</th></tr></thead><tbody>' +
     rows.map(([n, k]) => { const v = D.ladder[k]; return `<tr><td>${n}</td><td class="num">${v.min}</td><td class="num">${v.med}</td><td class="num">${v.p90}</td><td class="num">${v.max}</td><td class="num">${fmt(v.med*CYC_NS)}</td></tr>`; }).join('') +
-    `<tr><td>dirty line: evict + fence</td><td class="num">${D.ladder['tevict_dirty:3'].p10}</td><td class="num">${D.ladder['tevict_dirty:3'].med}</td><td class="num">${D.ladder['tevict_dirty:3'].p90}</td><td class="num">${D.ladder['tevict_dirty:3'].max}</td><td class="num">${fmt(D.ladder['tevict_dirty:3'].med*CYC_NS)}</td></tr></tbody>`;
+    `<tr><td>cost of evicting a dirty line + fence (not a load)</td><td class="num">${D.ladder['tevict_dirty:3'].min}*</td><td class="num">${D.ladder['tevict_dirty:3'].med}</td><td class="num">${D.ladder['tevict_dirty:3'].p90}</td><td class="num">${D.ladder['tevict_dirty:3'].max}</td><td class="num">${fmt(D.ladder['tevict_dirty:3'].med*CYC_NS)}</td></tr></tbody>`;
 })();
 
 /* ---------- L3 vs hops ---------- */
@@ -565,7 +762,7 @@ function sync() {
     [0,1,2,3,4,5,6,7].map(m => `<th class="num">M${m}</th>`).join('') + '</tr></thead><tbody>' +
     D.msmap.rows.slice(0, 12).map(r => `<tr><td><code>${r.pa}</code></td><td class="num">${r.ms_bits}</td>` +
       r.deltas.map((d, m) => `<td class="num"${m === r.ms_bits ? ' style="font-weight:700"' : ''}>${d}</td>`).join('') + '</tr>').join('') +
-    `</tbody><caption class="small" style="caption-side:bottom;text-align:left;padding-top:6px">${D.msmap.match} of ${D.msmap.lines} lines: the counter that rose is the one named by PA[8:6]. The 15s are loads that still hit L3 because their evict hadn't finished.</caption>`;
+    `</tbody><caption class="small" style="caption-side:bottom;text-align:left;padding-top:6px">${D.msmap.match} of ${D.msmap.lines} lines: the counter that rose is the one named by PA[8:6]. For 4 lines it rose by 15: one of their 16 loads was not counted, and this run does not show why.</caption>`;
 })();
 
 /* ---------- bit sweep ---------- */
@@ -601,7 +798,7 @@ function sync() {
   const {svg, tip, host} = svgIn('refresh', W, H);
   const x = linear(0, 50, L, W - R), y = linear(200, 450, H - B, T);
   axisY(svg, y, [200, 250, 300, 350, 400, 450], L, W - R);
-  for (const f of [0, 10, 20, 30, 40, 50]) txt(svg, x(f), H - B + 18, fmt(f / 50 * P / 600, 2) + ' µs', 'tick', 'middle');
+  for (const f of [0, 10, 20, 30, 40, 50]) txt(svg, x(f), H - B + 18, fmt(f / 50 * P / 600, 2) + ' µs', 'tick', f === 50 ? 'end' : 'middle');
   txt(svg, (L + W) / 2, H - 2, `time since the refresh started (period ${fmt(P)} cycles = ${fmt(P / 600, 2)} µs)`, 'lab', 'middle');
   const line = k => c.map((p, i) => `${i ? 'L' : 'M'}${x(p.phase + 0.5)},${y(p[k])}`).join(' ');
   el('path', {d: line('max'), fill: 'none', stroke: 'var(--c2)', 'stroke-width': 2}, svg);
@@ -631,7 +828,7 @@ function sync() {
   const lx = v => Math.log10(v + 50);
   const x = linear(lx(0), lx(20000), L + 8, W - R), y = linear(0, 1, H - B, T);
   axisY(svg, y, [0, 0.25, 0.5, 0.75, 1], L, W - R, v => (v * 100) + '%');
-  for (const v of [0, 100, 400, 1000, 2000, 5000, 20000]) txt(svg, x(lx(v)), H - B + 18, fmt(v), 'tick', 'middle');
+  for (const v of [0, 100, 400, 1000, 2000, 5000, 20000]) txt(svg, x(lx(v)), H - B + 18, fmt(v), 'tick', v === 20000 ? 'end' : 'middle');
   txt(svg, (L + W) / 2, H - 2, 'idle cycles between the two loads (log scale)', 'lab', 'middle');
   const path = k => d.map((p, i) => `${i ? 'L' : 'M'}${x(lx(p.delay))},${y(p[k])}`).join(' ');
   el('path', {d: path('refresh_model'), fill: 'none', stroke: 'var(--ref)', 'stroke-width': 2, 'stroke-dasharray': '5 4'}, svg);
@@ -649,7 +846,7 @@ function sync() {
 /* ---------- energy ---------- */
 (function () {
   const pats = [['l1', 'L1 hit'], ['l2', 'L2 hit'], ['l3near', 'L3 hit, own shire'], ['l3far', 'L3 hit, ~5.6 hops'], ['dram_seq', 'DRAM, sequential'], ['dram_row', 'DRAM, row conflicts']];
-  const parts = [['minion', 'minion cores', 'c1'], ['sram', 'SRAM (L2/L3)', 'c2'], ['noc', 'NoC (mesh)', 'c3'], ['rest', 'DDR side (board − rails)', 'c4']];
+  const parts = [['minion', 'minion cores', 'c1'], ['sram', 'SRAM (L2/L3)', 'c2'], ['noc', 'NoC (mesh)', 'c3'], ['rest', 'rest (board − rails; mostly DDR)', 'c4']];
   document.getElementById('energy-legend').innerHTML = parts.map(([, n, c]) => `<span><i style="background:var(--${c})"></i>${n}</span>`).join('');
   const W = 900, rowH = 40, T = 10, L = 150, R = 70, H = T + pats.length * rowH + 34;
   const {svg, tip, host} = svgIn('energy', W, H + 14);
@@ -659,7 +856,7 @@ function sync() {
     el('line', {x1: x(t), x2: x(t), y1: T, y2: H - 30, class: 'grid-line'}, svg);
     txt(svg, x(t), H - 12, fmt(t), 'tick', 'middle');
   }
-  txt(svg, (L + W - R) / 2, H + 2, 'pJ per 64-byte load', 'lab', 'middle');
+  txt(svg, (L + W - R) / 2, H + 2, 'pJ per load (one 8-byte ld; below L1 each brings a 64-byte line)', 'lab', 'middle');
   pats.forEach(([k, name], i) => {
     const e = D.energy[k], y = T + i * rowH + 6;
     txt(svg, L - 10, y + 18, name, 'lab', 'end');
@@ -676,18 +873,18 @@ function sync() {
     txt(svg, x(acc) + 6, y + 18, fmt(e.sp_total) + ' pJ', 'lab-strong');
   });
   const t = document.getElementById('energy-table');
-  t.innerHTML = '<thead><tr><th>Pattern (1,024 minions)</th><th class="num">cycles/load</th><th class="num">loads/s</th><th class="num">cores</th><th class="num">SRAM</th><th class="num">NoC</th><th class="num">DDR side</th><th class="num">total (trace)</th><th class="num">total (host log)</th><th class="num">pJ/B</th></tr></thead><tbody>' +
-    pats.map(([k, n]) => { const e = D.energy[k]; return `<tr><td>${n}</td><td class="num">${fmt(e.cpl, 1)}</td><td class="num">${(e.rate / 1e9).toFixed(2)} G</td><td class="num">${fmt(e.minion)}</td><td class="num">${fmt(e.sram)}</td><td class="num">${fmt(e.noc)}</td><td class="num">${fmt(e.rest)}</td><td class="num"><b>${fmt(e.sp_total)}</b></td><td class="num">${fmt(e.host_total)}</td><td class="num">${fmt(e.sp_total / 64, 1)}</td></tr>`; }).join('') +
-    '</tbody><caption class="small" style="caption-side:bottom;text-align:left;padding-top:6px">pJ per 64-byte load above idle, mean of two 6 s runs. The load and stall energy of the cores is included, so these are what a load costs a real program.</caption>';
+  t.innerHTML = '<thead><tr><th>Pattern (1,024 minions)</th><th class="num">cycles/load</th><th class="num">loads/s</th><th class="num">cores</th><th class="num">SRAM</th><th class="num">NoC</th><th class="num">rest</th><th class="num">total (trace)</th><th class="num">total (host log)</th><th class="num">pJ per byte of line</th></tr></thead><tbody>' +
+    pats.map(([k, n]) => { const e = D.energy[k]; return `<tr><td>${n}</td><td class="num">${fmt(e.cpl, 1)}</td><td class="num">${(e.rate / 1e9).toFixed(2)} G</td><td class="num">${fmt(e.minion)}</td><td class="num">${fmt(e.sram)}</td><td class="num">${fmt(e.noc)}</td><td class="num">${fmt(e.rest)}</td><td class="num"><b>${fmt(e.sp_total)}</b></td><td class="num">${fmt(e.host_total)}</td><td class="num">${k === 'l1' ? '—' : fmt(e.sp_total / 64, 1)}</td></tr>`; }).join('') +
+    '</tbody><caption class="small" style="caption-side:bottom;text-align:left;padding-top:6px">pJ per load (one 8-byte ld, which below L1 moves a 64-byte line) above idle, mean of two 6 s runs. The load and stall energy of the cores is included, so these are what a load costs a real program. "Rest" is the board total minus the three rails, mostly the DDR side. An L1 hit moves no line; per byte the ld returns it costs 46/8 ≈ 5.7 pJ.</caption>';
 })();
 
 /* ---------- timer ---------- */
 (function () {
   const raw = D.timer.raw, W = 900, H = 150, L = 190, R = 30;
   const {svg, tip, host} = svgIn('timer', W, H);
-  const rows = [['raw read pairs', raw], ['with fixcyc()', D.timer.fixed]];
+  const rows = [['raw read pairs', raw], ['same pairs, corrected', D.timer.fixed]];
   const x = linear(-130, 150, L, W - R);
-  for (const t of [-118, 10, 138]) { el('line', {x1: x(t), x2: x(t), y1: 8, y2: H - 26, class: 'grid-line'}, svg); txt(svg, x(t), H - 8, t, 'tick', 'middle'); }
+  for (const t of [-118, 10, 138]) { el('line', {x1: x(t), x2: x(t), y1: 8, y2: H - 26, class: 'grid-line'}, svg); txt(svg, x(t), H - 8, t < 0 ? '−' + (-t) : t, 'tick', 'middle'); }
   rows.forEach(([name, h], i) => {
     const y = 34 + i * 48;
     txt(svg, L - 10, y + 4, name, 'lab', 'end');
@@ -695,8 +892,8 @@ function sync() {
       const g = el('g', {}, svg);
       const r = 4 + 16 * Math.sqrt(n / 4000);
       el('circle', {cx: x(+k), cy: y, r, fill: 'var(--c1)', stroke: 'var(--surface)', 'stroke-width': 2}, g);
-      txt(g, x(+k) + r + 6, y + 4, `${n}`, 'lab');
-      hover(g, tip, host, () => `${name}: <b>${n}</b> of 4,000 pairs read ${k} cycles apart`);
+      txt(g, x(+k) + r + 6, y + 4, fmt(n), 'lab');
+      hover(g, tip, host, () => `${name}: <b>${fmt(n)}</b> of 4,000 pairs read ${k} cycles apart`);
     }
   });
 })();

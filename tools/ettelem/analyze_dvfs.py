@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
-"""Data for the DVFS / leakage brief: governor transitions, the wake-up probe, and today's idle check.
+"""Data for the DVFS / leakage report: governor transitions, the wake-up probe, and the long-idle check.
 
     analyze_dvfs.py --cold <cold1-dir> <cold2-dir> --wakeup <dir> --idle <idle.jsonl[.gz]> \
+                    --since <runs.jsonl[.gz] of the last workload before the idle sample> \
                     --model model.json --ablation ablation.json --out dvfs.json
 
-Fits nothing. Every number is either read from telemetry or computed from it.
+Fits nothing. Every number is either read from telemetry or computed from it. The three-machine block
+("cards") is merged in afterwards by build_cards_data.py --merge dvfs.json.
+
+A down-step is attributed to the thermal test if the die reading was above 65 °C, to the power test if board
+power was above 65 W, to both if both; any other down-step is "unattributed": neither test fired on the values
+we sampled at 10 Hz. (Launches run back to back every 0.37–0.49 s, so every instant is within 0.25 s of a
+kernel boundary; distance to a boundary is kept in the data but explains nothing.)
 """
 import argparse
 import collections
 import gzip
 import json
 import os
+import re
 import statistics as st
 import struct
 
@@ -19,6 +27,7 @@ import numpy as np
 TDP_W = 65.0        # POWER_THRESHOLD_SW_MANAGED, thermal_pwr_mgmt.h
 T_THRESHOLD_C = 65  # TEMP_THRESHOLD_SW_MANAGED
 VOLTS = {600: 0.517, 700: 0.568, 800: 0.618}   # measured on-die, die_mv.minion
+UNATTRIBUTED = "unattributed (reading ≤65 °C)"
 
 
 def jsonl(path):
@@ -61,7 +70,7 @@ def transitions(cold_dirs):
                 why = ("thermal+power" if (TT[i] > T_THRESHOLD_C and PP[i] > TDP_W) else
                        "thermal" if TT[i] > T_THRESHOLD_C else
                        "power" if PP[i] > TDP_W else
-                       "kernel boundary" if near < 0.25 else "unexplained")
+                       UNATTRIBUTED)
                 rows.append({"session": os.path.basename(d), "values": proc[0]["values"], "t": round(tt[i] - t0, 2),
                              "dir": "up" if up else "down", "f0": int(ff[i - 1]), "f1": int(ff[i]),
                              "mv0": int(vv[i - 1]), "mv1": int(vv[i]), "T": int(TT[i]), "P": round(float(PP[i]), 1),
@@ -113,14 +122,18 @@ def wakeup(d):
         if l and l[0] == "wake":
             by[(l[1], l[2])].append(fix(x))
             per[(l[1], l[3])][l[2]] = fix(x)
-    names = {-1: "L1 (no evict)", 0: "L1", 1: "L2", 2: "L3", 3: "DRAM"}
+    names = {-1: "L1 (line left in place)", 0: "L1", 1: "L2", 2: "L3", 3: "DRAM"}
     delays = sorted({k[1] for k in by})
     out = []
     for lev in sorted({k[0] for k in by}):
         med = [st.median(by[(lev, d_)]) for d_ in delays]
         paired = [per[k][delays[-1]] - per[k][delays[0]] for k in per
                   if k[0] == lev and delays[-1] in per[k] and delays[0] in per[k]]
-        out.append({"level": names.get(lev, str(lev)), "median_cycles": med,
+        # Each repeat uses its own line (its own address, so its own distance), so compare each repeat with
+        # itself: the median over repeats of (latency after idle d) - (latency with no idle), for every d.
+        by_idle = [st.median([per[k][d_] - per[k][delays[0]] for k in per
+                              if k[0] == lev and d_ in per[k] and delays[0] in per[k]]) for d_ in delays]
+        out.append({"level": names.get(lev, str(lev)), "median_cycles": med, "paired_median_by_idle": by_idle,
                     "paired_delta_cycles": st.median(paired), "paired_n": len(paired),
                     "paired_iqr": round(float(np.percentile(paired, 75) - np.percentile(paired, 25)), 1)})
     return {"idle_cycles": delays, "idle_ms": [round(d_ / 600e3, 3) for d_ in delays], "levels": out}
@@ -131,8 +144,12 @@ def main():
     ap.add_argument("--cold", nargs="+", required=True)
     ap.add_argument("--wakeup", required=True)
     ap.add_argument("--idle", required=True)
+    ap.add_argument("--since", required=True,
+                    help="runs.jsonl[.gz] of the last workload before the idle sample; its last launch end starts the idle")
     ap.add_argument("--model", required=True)
     ap.add_argument("--ablation", required=True)
+    ap.add_argument("--sptrace", help="aifoundry3's service-processor trace buffer (sptrace-aifoundry3.bin), "
+                                      "to count the governor's log events")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
 
@@ -145,9 +162,15 @@ def main():
     leak = pw["A_leak_at_80"] * float(np.exp((T.mean() - 80) / pw["T_L"]))
     pred = pw["P_fix"] + leak
     ab = json.load(open(a.ablation))["configs"]
+    # How long the card had been idle: from the end of the last launch before the sample to the first sample.
+    last_end_ms = max(r["t_end_ms"] for r in jsonl(a.since) if "t_end_ms" in r)
+    idle_start_ms = min(r["t_ms"] for r in idle)
+    hours_idle = round((idle_start_ms - last_end_ms) / 3.6e6, 1)
 
     out = {
-        "thresholds": {"tdp_w": TDP_W, "temp_c": T_THRESHOLD_C, "task_period_ms": 10,
+        # dm_task_delay_ms is only the sleep at the end of each device-management pass; the pass itself,
+        # and so the governor, runs about every 133 ms.
+        "thresholds": {"tdp_w": TDP_W, "temp_c": T_THRESHOLD_C, "dm_task_delay_ms": 10,
                        "hw_catastrophic_c": 75, "hw_catastrophic_w": 75},
         "operating_points": [{"mhz": f, "volts": v} for f, v in sorted(VOLTS.items())],
         "transitions": rows,
@@ -164,7 +187,8 @@ def main():
         "busy_randn_80c": ab["fp32_randn"]["p80"], "idle_80c": ab["fp32_zeros"]["idle"],
         "wakeup": wakeup(a.wakeup),
         "idle_check": {
-            "hours_idle": 20.4, "samples": len(idle), "board_w": float(P.mean()), "board_sd": float(P.std()),
+            "hours_idle": hours_idle, "last_workload_end_ms": last_end_ms, "sample_start_ms": idle_start_ms,
+            "samples": len(idle), "board_w": float(P.mean()), "board_sd": float(P.std()),
             "die_c": float(T.mean()), "rails": rails, "board_minus_rails": float(P.mean() - sum(rails.values())),
             "model_pred_w": pred, "error_w": float(P.mean() - pred),
             "temp_dependent_w": leak, "temp_dependent_frac": leak / float(P.mean()),
@@ -179,12 +203,26 @@ def main():
             "minions": {k: ab[k]["minions"] for k in ("fp32_randn_8", "fp32_randn_16", "fp32_randn_24", "fp32_randn")},
         },
     }
+    if a.sptrace:
+        # The governor's own log lines, in buffer order. Their format ("Power idle state event, current pwr N
+        # tdp level N") exists only in et-platform before commit 60b40c10f, so it also dates the firmware.
+        buf = open(a.sptrace, "rb").read().decode("latin-1")
+        ev = [("idle" if m.group(1) else "down" if m.group(2) else "up")
+              for m in re.finditer(r"Power (idle state event, current pwr)|Power (throttle down event)|"
+                                   r"Power throttle up event", buf)]
+        out["sptrace_events"] = {
+            "idle": ev.count("idle"), "down": ev.count("down"), "up": ev.count("up"),
+            "consecutive_idle_pairs": sum(1 for x, y in zip(ev, ev[1:]) if x == y == "idle"),
+            "consecutive_down_pairs": sum(1 for x, y in zip(ev, ev[1:]) if x == y == "down"),
+        }
     json.dump(out, open(a.out, "w"), indent=1)
     s = out["transition_summary"]
     print(f"{s['total']} clock transitions ({s['up']} up, {s['down']} down); causes of down-steps: {s['by_cause']}")
     print(f"first change after launch: {sorted(s['first_change_s'])}")
-    print(f"wake-up paired deltas: " + ", ".join(f"{l['level']} {l['paired_delta_cycles']:+.0f}" for l in out["wakeup"]["levels"]))
+    print(f"wake-up paired deltas: " + ", ".join(f"{l['level']} {l['paired_delta_cycles']:+g}" for l in out["wakeup"]["levels"]))
     ic = out["idle_check"]
+    if "sptrace_events" in out:
+        print(f"aifoundry3 governor log: {out['sptrace_events']}")
     print(f"idle after {ic['hours_idle']} h: {ic['board_w']:.2f} W at {ic['die_c']:.1f} C, model {ic['model_pred_w']:.2f} W, error {ic['error_w']:+.2f} W")
 
 

@@ -10,13 +10,14 @@ DRAM for the whole chip. This workload asks whether a computation can be arrange
 
 Knobs for `relay`: `--stage-bytes` per shire per stage (256 KB + two buffers must fit the 2.5 MB scratchpad,
 so at most 1 MB), `--stages`, `--work` (vector adds per element: the arithmetic-intensity knob), `--shires`,
-`--hop-distance` (how many shires round the ring a slab moves per stage).
+`--hop-distance` (how many shire IDs back round the ring a stage reads from; shire IDs do not follow the mesh, so
+this is not a count of mesh hops, and `onchip.json` records the mesh hops each offset spans).
 
 ```bash
 scripts/deploy-lab.sh aifoundry2 workloads/onchip
 workloads/onchip/run_onchip.sh DATA                 # 88 configurations, milliseconds of card time each
 tools/ettelem/run_onchip_power.sh DATA 12           # board power, one burst per medium
-python3 workloads/onchip/analyze_onchip.py DATA/sweep.jsonl --power DATA --out onchip.json
+python3 workloads/onchip/analyze_onchip.py DATA/sweep.jsonl DATA3/sweep.jsonl --power DATA --out onchip.json   # DATA3: the second card's sweep
 ```
 
 Results and the full argument: `docs/findings/18-on-chip-relay.md` and

@@ -55,5 +55,14 @@ python3 tools/ettelem/make_heating_gif.py "$D/horace3.json" docs/reports/horace-
   --patterns zeros,ones,pi,sparse50,uniform,randn --title "Six kinds of matrix, one matmul, same FLOPs"
 python3 tools/ettelem/make_long_gif.py "$D/long.json" docs/reports/horace-long.gif --poster docs/reports/horace-long.png --groups zeros:32,ones:32,randn:32,randn:12
 
+# section 10's second card (and the DVFS report's three-machine block): without this merge the Horace page loses
+# section 10's chart, because its script starts with `const C=D.cards;if(!C)return`
+python3 tools/ettelem/build_cards_data.py --cards docs/reports/data/2026-09-22-horace-aifoundry3/cards.json \
+  --transfer docs/reports/data/2026-09-22-horace-aifoundry3/transfer.json \
+  --leak docs/reports/data/2026-09-22-horace-aifoundry3/leakage_crosscard.json \
+  --config docs/reports/data/2026-09-22-cards/config.json --driver docs/reports/data/2026-09-22-cards/driver_config.json \
+  --sptrace docs/reports/data/2026-09-22-cards/sptrace-aifoundry3.bin --out docs/reports/data/2026-09-22-cards/cards-report.json \
+  --merge docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json "$D/report.json"
+
 python3 scripts/build-report.py horace-experiment "$D/report.json" docs/reports/2026-09-20-horace-experiment.html
 python3 scripts/build-report.py why-low-power "$D/lowpower-report.json" docs/reports/2026-09-21-why-low-power.html

@@ -22,7 +22,7 @@ the lab machines' older `/opt/et`.
 
 | Experiment (`gen_ops.py …`) | What it measures |
 |---|---|
-| `timer` | The cycle counter: raw read pairs, and corrected timed no-ops (always 10 cycles) |
+| `timer` | The cycle counter: raw read pairs, and corrected timed no-ops (10 cycles in 3,943 of 4,000) |
 | `ladder` | One load after placing the line in L1 / L2 / L3 / memory; evict cost, clean and dirty |
 | `decomp` | L2, L3 and DRAM latency of the same 1,500 lines: slice distance and memory shire leg |
 | `msmap` | Which memory shire served a line, from its read counter |
@@ -34,10 +34,12 @@ the lab machines' older `/opt/et`.
 ## Things this relies on
 
 - `hpmcounter3` on this card reads 128 short when its low 7 bits are 0–10 (the bit-7 carry lands 11 cycles late).
-  `fixcyc()` in the kernel corrects it. A timed load carries 5 cycles of overhead on top of the load-to-use latency.
+  `fixcyc()` in the kernel corrects it. A timed no-op and a timed L1 hit both read 10 cycles raw; the analysis
+  subtracts 5, an offset chosen so an L1 hit reads the 5 cycles the memory-hierarchy pointer chase measured. The
+  offset moves every absolute latency but none of the differences between levels.
 - `evict_va` level codes name where the line is left: 1 = L2, 2 = L3, 3 = memory; 0 does nothing. It is
   asynchronous, so the programs fence and wait a few hundred cycles before timing.
-- At full-chip scale, evicts serialize in each shire's cache (~3,800 cycles per load + evict per minion). That is why
+- At full-chip scale, evicts serialise in each shire's cache (~3,800 cycles per load + evict per minion). That is why
   the power loops size their working sets instead of evicting.
 - The service processor's stats trace is a 1 MB ring (~15 min). An extract returns only records since the last wrap,
   so `run_power.py` extracts after every pattern and the analysis merges the files. The extract does not reset stats.

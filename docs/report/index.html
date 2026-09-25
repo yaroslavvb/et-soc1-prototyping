@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ET-SoC-1 test drive</title>
+<title>Test drive · ET-SoC-1</title>
 <meta name="description" content="First contact with the AI Foundry ET platform: toolchain on a Mac, hello world on the simulator, and a first SGEMM on a real ET-SoC-1 card.">
 <style>
 :root {
@@ -56,7 +56,6 @@ body {
   font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 main { max-width: 880px; margin: 0 auto; padding: 40px 16px 64px; }
-header .eyebrow { color: var(--text-muted); font-size: 13px; letter-spacing: .02em; margin: 0 0 8px; }
 h1 { font-size: clamp(28px, 5vw, 38px); line-height: 1.15; margin: 0 0 12px; letter-spacing: -0.01em; }
 .lede { color: var(--text-secondary); font-size: 18px; margin: 0 0 28px; max-width: 70ch; }
 h2 { font-size: 22px; margin: 44px 0 12px; padding-top: 20px; border-top: 1px solid var(--hairline); }
@@ -99,25 +98,36 @@ details { margin: 8px 0 4px; }
 summary { cursor: pointer; color: var(--accent); font-size: 14px; }
 ol.steps > li { margin: 6px 0; }
 footer { margin-top: 48px; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--hairline); padding-top: 16px; }
+footer p { margin: 0 0 8px; max-width: none; }
+.byline { color: var(--text-secondary); font-size: 14px; margin: 0 0 18px; }
+.small { font-size: 13px; color: var(--text-secondary); }
+.card { background: var(--surface-raised); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+nav.card { margin: 24px 0 0; }
+nav.card ol { margin: 6px 0 0; padding-left: 22px; }
+h2, h3 { scroll-margin-top: 12px; }
+.hlink { margin-left: 8px; color: var(--text-muted); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 </style>
 </head>
 <body>
 <main>
 <header data-ss-section="intro">
-  <p data-ss-id="intro-p-1" class="eyebrow">2026-09-18 · @yaroslavvb · AI Foundry ET platform</p>
   <h1 data-ss-id="h1-et-soc-1-test-drive-from-a-laptop-simulator-to-s">ET-SoC-1 test drive: from a laptop simulator to silicon</h1>
+  <p data-ss-id="intro-p-1" class="byline">18 September 2026 · the simulator on a Mac, the first workload on aifoundry3's card · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
   <p data-ss-id="intro-p-2" class="lede">I built the ET toolchain and platform on a Mac and ran the hello worlds on the <code>sys_emu</code> simulator.
   Then I ran a first real workload, a scalar fp32 matrix multiply, on an ET-SoC-1 card in the AI Foundry lab.
-  Below are the numbers, what broke on the way, and what's next.</p>
-  <p data-ss-id="intro-p-hub" style="color: var(--text-muted); font-size: 13px; margin: 10px 0 0;">Part of the
-  <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a>.</p>
+  Below are the numbers, what broke on the way, and what came next.</p>
+  <p data-ss-id="intro-p-terms" class="secondary"><b>Terms.</b> The ET-SoC-1 is Esperanto's 1,088-core RISC-V accelerator, now open-sourced by AI Foundry.
+  Kernels run on 32 compute <i>shires</i> of 32 <i>minion</i> cores; each minion runs two hardware threads (<i>harts</i>), so a full launch is 2,048 harts.
+  <code>sys_emu</code> is the chip's functional simulator, part of et-platform: it checks results, not speed.
+  More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
 </header>
 
 <section aria-label="Headline numbers" class="kpis" data-ss-section="headline-numbers">
   <div data-ss-id="headline-numbers-div-1" class="tile hero">
     <p class="label">Scalar fp32 SGEMM on one card, n = 1024</p>
     <p class="value">127 GFLOP/s</p>
-    <p class="note">2048 harts on 32 shires, plain <code>fmadd.s</code> (no SIMD, no tensor unit yet)</p>
+    <p class="note">2,048 harts on 32 shires, plain <code>fmadd.s</code> (no SIMD, no tensor unit yet)</p>
   </div>
   <div data-ss-id="headline-numbers-div-2" class="tile">
     <p class="label">Speedup, 1 → 32 shires</p>
@@ -160,6 +170,7 @@ footer { margin-top: 48px; color: var(--text-muted); font-size: 13px; border-top
   <li data-ss-id="what-i-did-li-3"><strong>A first workload on silicon.</strong> I wrote a small SGEMM in the style of
     <a href="https://github.com/marty1885/et-testdrive">marty1885/et-testdrive</a>, using just the runtime API and <code>et-common-libs</code>.
     That mattered because the lab machine's <code>/opt/et</code> is older and has no gp-sdk.
+    (gp-sdk was later built on the lab machines, outside <code>/opt/et</code>, with <code>scripts/deploy-lab-gpsdk.sh</code>; <code>/opt/et</code> itself still has none.)
     I verified it on the simulator on the laptop. Then I copied the sources to <code>aifoundry3</code> (4.5 MB),
     built them there against its own toolchain, and ran them on the card with a hard 10 s cap.</li>
 </ol>
@@ -182,19 +193,21 @@ so giving each hart whole lines is what makes the parallel result correct.</li>
     <tr><td class="num">512</td><td class="num">32</td><td class="num">2,048</td><td class="num">2.37 ms</td><td class="num">113</td><td class="num">0 / 262,144</td></tr>
     <tr><td class="num">1024</td><td class="num">32</td><td class="num">2,048</td><td class="num">16.8 ms</td><td class="num">127</td><td class="num">0 / 1,048,576</td></tr>
   </tbody>
-  <caption>aifoundry3, one ET-SoC-1 card, 2026-09-18. Time is host-measured <code>kernelLaunch</code> → <code>waitForStream</code>, so launch overhead is included. The n ≥ 512 rows were launched 2–3× each; the spread was under 2%.</caption>
+  <caption>aifoundry3, one ET-SoC-1 card, 18 September 2026. Time is host-measured <code>kernelLaunch</code> → <code>waitForStream</code>, so launch overhead is included. The n ≥ 512 rows were launched 2–3× each; the spread was under 2%.</caption>
 </table>
 </div>
 <p data-ss-id="sgemm-on-the-card-p-2" class="secondary">For scale: the FOSDEM 2026 talk
 <a href="https://archive.fosdem.org/2026/events/attachments/T3PSFN-zero_to_matmul_with_the_et-soc-1/slides/267107/zerotomat_asnyquu.pdf">“Zero to matmul with the ET-SoC-1”</a>
-went from 13 GFLOP/s (naive scalar) to 10.25 TFLOP/s using SIMD, L2 scratchpad, and the tensor unit. That ladder is the roadmap from here.</p>
+went from 13 GFLOP/s (naive scalar) to 10.25 TFLOP/s using SIMD, L2 scratchpad, and the tensor unit. That ladder is the roadmap from here.
+Its last rung was reached the same day: the tensor unit at 9.5 TFLOP/s in fp32 on aifoundry2, in
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">Matmul efficiency</a>.</p>
 </section>
 
 <section data-ss-section="things-worth-fixing-upstream">
 <h2 data-ss-id="h2-things-worth-fixing-upstream">Things worth fixing upstream</h2>
 
 <div data-ss-id="things-worth-fixing-upstream-div-1" class="finding">
-  <h3 data-ss-id="h3-1-fresh-et-platform-builds-fail-since-2026-08-05">1. Fresh et-platform builds fail since 2026-08-05 <span class="tag">build</span></h3>
+  <h3 data-ss-id="h3-1-fresh-et-platform-builds-fail-since-2026-08-05" id="fresh-et-platform-builds-fail-since-2026-08-05">1. Fresh et-platform builds fail since 2026-08-05 <span class="tag">build</span></h3>
   <ul data-ss-id="things-worth-fixing-upstream-ul-1">
     <li><code>ThirdParty()</code> pins easy_profiler to the <code>git describe</code> ref <code>v2.1.0-66-gcc0e154</code> but clones with <code>GIT_SHALLOW TRUE</code>.</li>
     <li>Upstream easy_profiler got new commits on 2026-08-05, so a depth-1 clone no longer contains <code>cc0e154</code>.</li>
@@ -218,11 +231,11 @@ index b237797..7f34554 100644
 </div>
 
 <div data-ss-id="things-worth-fixing-upstream-div-2" class="finding">
-  <h3 data-ss-id="h3-2-gp-sdk-launchers-can-t-boot-the-simulator-gp-s">2. gp-sdk launchers can’t boot the simulator <span class="tag">gp-sdk</span></h3>
+  <h3 data-ss-id="h3-2-gp-sdk-launchers-can-t-boot-the-simulator-gp-s" id="gp-sdk-launchers-can-t-boot-the-simulator">2. gp-sdk launchers can’t boot the simulator <span class="tag">gp-sdk</span></h3>
   <ul data-ss-id="things-worth-fixing-upstream-ul-2">
     <li><code>GenericLauncher</code> never tells <code>sys_emu</code> which firmware to preload: SP BL2 and the master/machine/worker minion images.</li>
     <li>With <code>--device_type=sysemu</code>, every gp-sdk launcher (<code>hello_world_launcher</code>, <code>saxpy_launcher</code>, …) boots the Service Processor on empty memory.</li>
-    <li>It then loops on “Trapping to the same address” and writes about a GB of log in 10 minutes.</li>
+    <li>It then loops on “Trapping to the same address” and writes gigabytes of log within minutes.</li>
     <li>The runtime’s own tests avoid this because <code>TestUtils.h</code> sets the paths.</li>
   </ul>
   <p data-ss-id="things-worth-fixing-upstream-p-2">Fix: set them the same way, from the installed CMake packages.</p>
@@ -299,7 +312,7 @@ index 988aecb..2390811 100644
 </div>
 
 <div data-ss-id="things-worth-fixing-upstream-div-3" class="finding">
-  <h3 data-ss-id="h3-3-a0-errata-1-29-and-the-compiler-question">3. A0 errata 1.29 and the compiler <span class="tag">question</span></h3>
+  <h3 data-ss-id="h3-3-a0-errata-1-29-and-the-compiler-question" id="a0-errata-1-29-and-the-compiler">3. A0 errata 1.29 and the compiler <span class="tag">question</span></h3>
   <p data-ss-id="things-worth-fixing-upstream-p-3">Errata 1.29 (“VPURF timing path”): reading a VPU register one cycle after it was written can return stale data.
   The workaround is a guard instruction, e.g. <code>fmv.x.w x0, fN</code> after loads. The FOSDEM matmul loop has one for this reason.</p>
   <ul data-ss-id="things-worth-fixing-upstream-ul-3">
@@ -315,25 +328,15 @@ index 988aecb..2390811 100644
 <ul data-ss-id="things-worth-fixing-upstream-ul-4">
   <li>Esperanto’s trace decoder <code>dt2json</code>, referenced in the gp-sdk docs, isn’t open source.
   A 60-line decoder on top of the header-only <code>et-trace</code> is enough to read kernel <code>et_printf</code> output.</li>
-  <li><code>GenericLauncher::loadKernel()</code> leaves <code>std::cout</code> in hex mode. My first “800/800 harts” result was really 2048/2048.</li>
+  <li><code>GenericLauncher::loadKernel()</code> leaves <code>std::cout</code> in hex mode. My first “800/800 harts” result was really 2048/2048: 800 is 2,048 in hex.</li>
   <li>When the runtime starts <code>sys_emu</code>, it turns on the coherency, scratchpad, FLB, and tensor-store checkers by default. The errata checker is opt-in: <code>-vpurf_warn</code>.</li>
   <li>On the card, runtime init takes about 0.19 s. Peak host RSS is about 2 GB for the duration of a run, which comes from the runtime’s mapped buffers.</li>
 </ul>
 </section>
 
-<section data-ss-section="next">
-<h2 data-ss-id="h2-next">Next</h2>
-<ol data-ss-id="next-ol-1" class="steps">
-  <li data-ss-id="next-li-1">8-wide <code>.ps</code> SIMD in the same kernel (<code>fbc.ps</code> / <code>flw.ps</code> / <code>fmadd.ps</code>), with register blocking.</li>
-  <li data-ss-id="next-li-2">Stage A and B in the L2 scratchpad instead of DRAM.</li>
-  <li data-ss-id="next-li-3">Tensor unit: <code>tensor_load</code> / <code>tensor_fma</code> / <code>tensor_store</code>, then overlap loads with FMAs.</li>
-  <li data-ss-id="next-li-4">Pick the real workload to prototype, once the matmul building blocks are in place.</li>
-</ol>
-</section>
-
 <section data-ss-section="reproduce">
 <h2 data-ss-id="h2-reproduce">Reproduce</h2>
-<p data-ss-id="reproduce-p-1" class="secondary">All commands run from the workspace repo. Commands in the first two blocks run on the Mac; the last runs on a lab machine.</p>
+<p data-ss-id="reproduce-p-1" class="secondary">All commands run from a checkout of the <a href="https://github.com/yaroslavvb/et-soc1-prototyping">project repository</a>. Commands in the first two blocks run on the Mac; the last runs on a lab machine.</p>
 <pre data-ss-id="reproduce-pre-1"><code># one-time: Lima VM + toolchain + et-platform (~15 min)
 scripts/create-vm.sh
 
@@ -346,13 +349,108 @@ scripts/deploy-lab.sh aifoundry3 workloads/sgemm
 ssh aifoundry3 'cd ~/nekko/build/sgemm &amp;&amp; timeout 10 host/sgemm_host -n 1024'</code></pre>
 </section>
 
+<section data-ss-section="next">
+<h2 data-ss-id="h2-next" id="next">Next (as planned on 18 September)</h2>
+<ol data-ss-id="next-ol-1" class="steps">
+  <li data-ss-id="next-li-1">8-wide <code>.ps</code> SIMD in the same kernel (<code>fbc.ps</code> / <code>flw.ps</code> / <code>fmadd.ps</code>), with register blocking.</li>
+  <li data-ss-id="next-li-2">Stage A and B in the L2 scratchpad instead of DRAM.</li>
+  <li data-ss-id="next-li-3">Tensor unit: <code>tensor_load</code> / <code>tensor_fma</code> / <code>tensor_store</code>, then overlap loads with FMAs.</li>
+  <li data-ss-id="next-li-4">Pick the real workload to prototype, once the matmul building blocks are in place.</li>
+</ol>
+</section>
+
+<section data-ss-section="related">
+<h2 data-ss-id="h2-related" id="related">Related reports</h2>
+<p data-ss-id="related-p-1" class="secondary">What came next, starting the same day:</p>
+<ul data-ss-id="related-ul-1">
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">Matmul efficiency</a> — the tensor-unit step above, done the same day on aifoundry2: the tensor unit on all 1,024 minions at 9.5 TFLOP/s in fp32 (97% of the fp32 peak at 600 MHz), 19.0 TFLOP/s in fp16 and 71.8 TOP/s in int8, and its energy against the A100.</li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — the latency and bandwidth of every level from L1 to DRAM, next to the A100: what the next kernels have to live with.</li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — where the 32 shires sit on the mesh, and what it costs to move data between minions and shires.</li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a> — the scratchpads used as a pipeline: once the data outgrows the 32 MB L3, handing each stage's output to another shire instead of going through DRAM runs 12.3× faster.</li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a> — how much reuse each level of memory demands before compute, not memory, sets a kernel's speed.</li>
+</ul>
+<p data-ss-id="related-p-back" class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
+</section>
+
 <footer data-ss-id="footer-sources">
-  Sources: <a href="https://github.com/aifoundry-org/et-platform">et-platform</a> ·
+  <p>Sources: <a href="https://github.com/aifoundry-org/et-platform">et-platform</a> ·
   <a href="https://github.com/aifoundry-org/et-man">et-man</a> (PRM, errata) ·
   <a href="https://github.com/openhwfoundation/core-et/tree/erbium">core-et (erbium)</a> ·
-  <a href="https://github.com/marty1885/et-testdrive">et-testdrive</a>.
-  All runs were on 2026-09-18. The laptop used et-platform <code>836a4ab</code>; aifoundry3 used its own, older install.
+  <a href="https://github.com/marty1885/et-testdrive">et-testdrive</a> (marty1885).</p>
+  <p>All runs were on 18 September 2026. The laptop used et-platform <code>836a4ab</code>. aifoundry3 used its <code>/opt/et</code>: et-platform <code>353f20e</code> (December 2025), runtime 0.19.0, GCC 15.1; that card runs its minions at 600 MHz.</p>
+  <p>Versions: published 18 September 2026. Revised 24 September 2026: terms defined, the lab install named, and links to the reports that followed.</p>
 </footer>
+<script>
+/* Section anchors (copied from docs/reports/sources/report.template.html). Every h2/h3 gets an id (its own, or one made from its text) and a # link; clicking a heading
+   or a table-of-contents link puts #id in the URL. When the page is framed by spacesheep.dev the fragment is
+   mirrored into the outer, shareable URL (postMessage ss-hash), and an outer #fragment is forwarded in on load. */
+(function () {
+  const slug = t => t.toLowerCase().replace(/^\d+(\.\d+)*\.?\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const post = h => { if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h}, '*'); } catch (_) {} } };
+  const go = id => { try { history.replaceState(null, '', location.pathname + location.search + '#' + id); } catch (_) {}
+    const el = document.getElementById(id); if (el) el.scrollIntoView({block: 'start'}); post('#' + id); };
+  const seen = new Set();
+  document.querySelectorAll('main h2, main h3').forEach(h => {
+    if (!h.id) { let id = slug(h.textContent) || 'section', n = 2; while (seen.has(id) || document.getElementById(id)) id = slug(h.textContent) + '-' + n++; h.id = id; }
+    seen.add(h.id);
+    const a = document.createElement('a'); a.href = '#' + h.id; a.className = 'hlink'; a.textContent = '#'; a.title = 'link to this section'; h.appendChild(a);
+    h.style.cursor = 'pointer';
+    h.addEventListener('click', ev => { if (ev.target.tagName === 'A' && ev.target !== a) return; ev.preventDefault(); go(h.id); });
+  });
+  window.addEventListener('hashchange', () => post(location.hash));
+  if (location.hash) { post(location.hash); const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => el.scrollIntoView({block: 'start'}), 50); }
+})();
+</script>
+<script>
+/* Contents list, link back to the reports hub, and repository paths as links. Runs after the section-anchor
+   script above, whose h2 ids the contents list links to. Pages not built from this template paste both blocks
+   before </main>.
+   - Contents: a page with 6 or more h2s and no #toclist of its own gets a numbered list before its first h2.
+   - Footer: every page but the hub ends with a link to the hub's list of reports, unless it already has one.
+   - Paths: an inline <code> whose whole text is a repository path (docs/…, workloads/…, tools/…, scripts/…,
+     kernels/…, rtl-sim/…) becomes a GitHub link. Code blocks, code already in a link and globs stay as they are. */
+(function () {
+  const main = document.querySelector('main'); if (!main) return;
+  const HUB = 'https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability';
+  const BACK = '← All ET-SoC-1 measurement reports';
+  const REPO = 'https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/';
+  const text = el => { const c = el.cloneNode(true); c.querySelectorAll('.hlink').forEach(a => a.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+  const NUM = /^(?:§\s*\d+(?:\.\d+)*\.?|\d+(?:\.\d+)*\.|\d+(?:\.\d+)+)\s+/;  /* "3. ", "4.2 ", "§5 "; not "600 MHz" */
+
+  const h2s = [...main.querySelectorAll('h2')];
+  if (h2s.length >= 6 && !document.getElementById('toclist')) {
+    const nav = document.createElement('nav'); nav.className = 'card';
+    const b = document.createElement('b'); b.textContent = 'Contents';
+    const ol = document.createElement('ol'); ol.id = 'toclist';
+    h2s.forEach(h => {
+      if (!h.id) return;
+      const t = text(h), m = t.match(/^§?\s*(\d+)[.\s]/), li = document.createElement('li'), a = document.createElement('a');
+      if (m && NUM.test(t)) li.value = +m[1];
+      a.href = '#' + h.id; a.textContent = t.replace(NUM, '') || t;
+      li.appendChild(a); ol.appendChild(li);
+    });
+    nav.append(b, ol);
+    h2s[0].parentNode.insertBefore(nav, h2s[0]);
+  }
+
+  const h1 = main.querySelector('h1');
+  const isHub = !!h1 && /^limits of observability/i.test(text(h1));
+  const hasBack = [...document.querySelectorAll('a')].some(a => a.textContent.replace(/\s+/g, ' ').trim() === BACK);
+  if (!isHub && !hasBack) {
+    const p = document.createElement('p'); p.className = 'small';
+    const a = document.createElement('a'); a.href = HUB + '#reports'; a.textContent = BACK;
+    p.appendChild(a); main.appendChild(p);
+  }
+
+  const PATH = /^(docs|workloads|tools|scripts|kernels|rtl-sim)\/[\w./-]+$/;
+  main.querySelectorAll('code').forEach(c => {
+    if (c.closest('pre, a')) return;
+    const t = c.textContent.trim(); if (!PATH.test(t)) return;
+    const a = document.createElement('a'); a.href = REPO + t;
+    c.parentNode.insertBefore(a, c); a.appendChild(c);
+  });
+})();
+</script>
 </main>
 </body>
 </html>

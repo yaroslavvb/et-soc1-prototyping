@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ET-SoC-1 matmul efficiency</title>
-<meta name="description" content="Hello world and a tensor-unit matmul energy benchmark on an ET-SoC-1 card in the AI Foundry lab, compared with the NVIDIA A100.">
+<title>Matmul efficiency · ET-SoC-1</title>
+<meta name="description" content="A tensor-unit matmul on all 1,024 minions of an ET-SoC-1 card: 91–97% of peak in fp32, fp16 and int8, its board power, and its energy per FLOP against the NVIDIA A100.">
 <style>
 :root {
   color-scheme: light;
@@ -42,7 +42,7 @@ a { color: var(--accent); }
 code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86em; }
 code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
 pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
-pre code { background: none; padding: 0; }
+pre code { padding: 0; background: none; border-radius: 0; font-size: inherit; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
 /* KPI row */
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 18px 0 8px; }
@@ -52,8 +52,6 @@ pre code { background: none; padding: 0; }
 .kpi .sub { font-size: 0.85rem; color: var(--ink-2); }
 /* efficiency small multiples */
 .panels { display: grid; gap: 14px; }
-.panel h3 { margin: 0 0 10px; }
-.panel h3 .unit { font-weight: 400; color: var(--ink-2); font-size: 0.85rem; }
 .row { padding: 5px 0; border-radius: 6px; outline: none; cursor: default; }
 .row:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
 .row-label { font-size: 0.85rem; color: var(--ink-2); margin-bottom: 3px; }
@@ -91,30 +89,49 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 tr.et td { font-weight: 600; }
 ol li, ul li { margin: 5px 0; }
 .note { border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; color: var(--ink-2); }
+.later p { margin: 0 0 8px; }
+.later p:last-child { margin-bottom: 0; }
+.later { margin: 18px 0 8px; }
+.panel .ptitle { font-size: 1rem; font-weight: 600; margin: 0 0 10px; }
+.panel .ptitle .unit { font-weight: 400; color: var(--ink-2); font-size: 0.85rem; }
+table.a100 td:first-child { min-width: 150px; }
+nav.card { margin: 18px 0 0; }
+nav.card ol { margin: 6px 0 0; }
+h2, h3 { scroll-margin-top: 12px; }
+.hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 </style>
 </head>
 <body>
 <main>
 
-<h1>ET-SoC-1 on real silicon: hello world, then matmul speed and energy efficiency vs the A100</h1>
-<p class="byline">Measured 18 Sep 2026 on <code>aifoundry2</code> in the AI Foundry lab: one ET-SoC-1 PCIe card, 32 GB LPDDR4X, minion clock 600 MHz. Code in the <code>nekko</code> workspace (<code>kernels/mmbench</code>). Part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a>.</p>
+<h1>ET-SoC-1 matmul on silicon: 91–97% of the tensor unit's peak, and its energy against the A100</h1>
+<p class="byline">18 September 2026 · <code>aifoundry2</code>: one ET-SoC-1 PCIe card, 32 GB LPDDR4X, minions at 600 MHz · code: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/kernels/mmbench"><code>kernels/mmbench</code></a> in the <a href="https://github.com/yaroslavvb/et-soc1-prototyping">project repository</a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
-<p class="lede">A tensor-unit matmul kernel on all 1,024 compute minions sustains <b>9.5 TFLOP/s in fp32</b>, <b>19.0 TFLOP/s with fp16 inputs</b> and <b>71.8 TOP/s in int8</b>. That is 91–97% of the tensor unit's peak at this clock, and every result is checked bit-exact against a host reference. The card draws 57–62 W doing it, against 30.6 W at idle. Compared with the A100's spec sheet (peak ÷ TDP), ET-SoC-1 is <b>3.4× more energy-efficient at full fp32 precision</b>. At fp16 and int8 the A100's tensor cores win on efficiency (2.4× and 1.3×) and by a much wider margin on raw speed (16× and 8.7×).</p>
+<p class="lede">A tensor-unit matmul kernel on all 1,024 compute minions sustains <b>9.5 TFLOP/s in fp32</b>, <b>19.0 TFLOP/s with fp16 inputs</b> and <b>71.8 TOP/s in int8</b>. That is 91–97% of the tensor unit's peak at this clock, and every result is checked bit-exact against a host reference. The card draws 57–62 W doing it, against 30.6 W at idle with the die at 71&nbsp;°C. Compared with the A100's spec sheet (peak ÷ TDP), the ET-SoC-1 is <b>3.4× more energy-efficient at full fp32 precision on these ±1/&#8288;±2 operands</b> (about 2.9× in a later random-data measurement of the tensor unit at 80&nbsp;°C). At fp16 and int8 the A100's tensor cores win on efficiency (2.4× and 1.3×) and by a much wider margin on raw speed (16× and 8.7×).</p>
+
+<div class="card small later">
+<p><b>Later measurements.</b> These operands favour low power. Every input is ±1 or ±2, whose mantissa bits are all zero, and the die was at 71–77&nbsp;°C. <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">The Horace experiment</a> later showed how much the data matters: with the tensor unit busy on all 1,024 minions at 80&nbsp;°C, the card draws 38 W on zeros, 47 W on ones, 51–53 W when only the signs or only the exponents are random, and 63 W on random-normal values. Random mantissas are the costliest bits.</p>
+<p>In a variant of this loop with both operands in the L1 scratchpad (546 cycles per op rather than 529), random-normal fp32 at 80&nbsp;°C ran at 9.18 TFLOP/s and 63.9 W. That is 144 GFLOP/s per W, about 2.9× the A100 SXM4's fp32 spec ratio rather than 3.4×; fp16 gave 301 GFLOP/s per W (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">energy manual §3.2</a>).</p>
+<p><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power">Why is the ET-SoC-1 low power?</a> sets this card against the A100's bf16 tensor cores instead, as measured by Horace He, and finds the A100 5.4× more efficient per FLOP than this card's fp32 and 2.6× more than its fp16. The 3.4× here is fp32 against the A100's fp32 CUDA-core datasheet figure; against its tensor cores the A100 table below gives 0.41–0.75×.</p>
+</div>
 
 <div class="kpis">
   <div class="card kpi"><div class="label">fp32 on the tensor unit</div><div class="value">168 <span class="unit">GFLOP/s per W</span></div><div class="sub">9.51 TFLOP/s at 56.6 W board power</div></div>
   <div class="card kpi"><div class="label">fp16 in, fp32 accumulate</div><div class="value">321 <span class="unit">GFLOP/s per W</span></div><div class="sub">19.02 TFLOP/s at 59.3 W</div></div>
   <div class="card kpi"><div class="label">int8 in, int32 accumulate</div><div class="value">1,162 <span class="unit">GOP/s per W</span></div><div class="sub">71.8 TOP/s at 61.7 W</div></div>
-  <div class="card kpi"><div class="label">Idle board power</div><div class="value">30.6 <span class="unit">W</span></div><div class="sub">more than half of the load power</div></div>
+  <div class="card kpi"><div class="label">Idle board power</div><div class="value">30.6 <span class="unit">W</span></div><div class="sub">about half of the load power, mostly die leakage at 71&nbsp;°C</div></div>
 </div>
 
+<p class="small"><b>Terms.</b> The ET-SoC-1's compute cores are <i>minions</i>: small in-order RISC-V cores, 32 to a <i>shire</i>; the 32 shires that run kernels hold 1,024 of them. Each minion has two hardware threads (<i>harts</i>) and a tensor unit whose matrix multiply-accumulate instruction, <i>TensorFMA</i>, is what this benchmark times. Each shire's 4 MB of SRAM includes a 512 KB L2 cache, where the compute-bound runs keep their tiles, and each minion sets aside 3 KB of its 4 KB L1 data cache as an <i>L1 scratchpad</i> for tensor operands. More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
+
 <h2>Energy efficiency against the A100</h2>
-<p class="muted">Blue is measured on the ET-SoC-1 card, using the card's own board-power telemetry. Gray is the A100 datasheet peak (dense, no sparsity) divided by its TDP, which flatters the A100: real GEMMs run below peak while drawing close to TDP. Each panel has its own scale.</p>
+<p class="muted">Blue is measured on the ET-SoC-1 card with this benchmark's ±1/&#8288;±2 operands, using the card's own board-power telemetry. Grey is the A100 datasheet peak (dense, no sparsity) divided by its TDP. One measured A100 run lands on the same ratio: Horace He's 8192³ bf16 matmul on random data ran at 257 TFLOPS under a 330 W power limit, 779 GFLOP/s per W against the spec sheet's 780. Each panel has its own scale.</p>
 <div class="legend"><span><i style="background:var(--accent)"></i>ET-SoC-1, measured</span><span><i style="background:var(--ref)"></i>A100, spec sheet ÷ TDP (not measured)</span></div>
 <div class="card chart" id="eff"><div class="panels" id="eff-panels"></div><div class="tip" id="eff-tip"></div></div>
 
 <h2>Board power during the benchmark</h2>
-<p class="muted">Card power read from the service processor about 7 times a second. Shaded spans are the benchmark launches, about 12 s per workload, with idle gaps between them; the thin spikes just before each span are short calibration launches. Power creeps up within each span as the die warms (minion shires went from 71 °C to 77 °C, peaking at 85 °C).</p>
+<p class="muted">Card power read from the service processor about 7 times a second. Shaded spans are the benchmark launches, about 12 s per workload, with idle gaps between them; the thin spikes just before each span are short calibration launches. Power creeps up within each span as the die warms: minion-shire temperature (the sensors' average) went from 71&nbsp;°C to 77&nbsp;°C, and the hottest sensor's high-water mark read 85&nbsp;°C afterwards. For the same reason the idle in each gap sits higher than the one before.</p>
 <div class="card chart" id="trace"><div class="tip" id="trace-tip"></div></div>
 
 <h2>Results</h2>
@@ -122,54 +139,38 @@ ol li, ul li { margin: 5px 0; }
 <thead><tr><th>Workload</th><th class="num">Throughput</th><th class="num">% of peak</th><th class="num">Board power</th><th class="num">Per W (board)</th><th class="num">Per W above idle</th><th>Check</th></tr></thead>
 <tbody>
 <tr class="et"><td>fp32 tensor, tiles in L2</td><td class="num">9.51 TFLOP/s</td><td class="num">96.7%</td><td class="num">56.6 W (54.7–57.9)</td><td class="num">168</td><td class="num">366</td><td>exact</td></tr>
-<tr class="et"><td>fp16→fp32 tensor, tiles in L2</td><td class="num">19.02 TFLOP/s</td><td class="num">96.7%</td><td class="num">59.3 W (57.6–60.5)</td><td class="num">321</td><td class="num">664</td><td>exact</td></tr>
-<tr class="et"><td>int8→int32 tensor, tiles in L2</td><td class="num">71.78 TOP/s</td><td class="num">91.3%</td><td class="num">61.7 W (60.0–63.0)</td><td class="num">1,162</td><td class="num">2,305</td><td>exact</td></tr>
-<tr><td>fp32 tensor, every tile from DRAM</td><td class="num">0.31 TFLOP/s</td><td class="num">3.2%</td><td class="num">43.4 W (42.5–44.4)</td><td class="num">7</td><td class="num">24</td><td>exact</td></tr>
-<tr><td>Idle (8 s before the first workload)</td><td class="num">–</td><td class="num">–</td><td class="num">30.6 W</td><td class="num">–</td><td class="num">–</td><td>–</td></tr>
+<tr class="et"><td>fp16→fp32 tensor, tiles in L2</td><td class="num">19.02 TFLOP/s</td><td class="num">96.7%</td><td class="num">59.3 W (57.6–60.5)</td><td class="num">321</td><td class="num">711</td><td>exact</td></tr>
+<tr class="et"><td>int8→int32 tensor, tiles in L2</td><td class="num">71.78 TOP/s</td><td class="num">91.3%</td><td class="num">61.7 W (60.0–63.0)</td><td class="num">1,162</td><td class="num">2,571</td><td>exact</td></tr>
+<tr><td>fp32 tensor, every tile from DRAM</td><td class="num">0.31 TFLOP/s</td><td class="num">3.2%</td><td class="num">43.4 W (42.5–44.4)</td><td class="num">7</td><td class="num">38</td><td>exact</td></tr>
+<tr><td>Idle (8 s before the first workload, die at 71&nbsp;°C)</td><td class="num">–</td><td class="num">–</td><td class="num">30.6 W</td><td class="num">–</td><td class="num">–</td><td>–</td></tr>
 </tbody></table></div>
-<p class="small">"Per W" is GFLOP/s (GOP/s for int8) per watt. Peak at 600 MHz on 1,024 minions: 9.83 TFLOP/s fp32 (16 flop/cycle/minion), 19.66 fp16 (32), 78.6 TOP/s int8 (128). Measured op costs: 529 cycles per 16×16×16 fp32 or 16×16×32 fp16 op (512 ideal), and 280 cycles per 16×16×64 int8 op (256 ideal). Throughput is total work over the host-measured launch time. The minions' cycle counters agree with it to within 0.1% (implied clock 0.600 GHz). Launch-to-launch spread was below 0.03%.</p>
+<p class="small">"Per W" is GFLOP/s (GOP/s for int8) per watt. Above idle subtracts the idle measured just before each workload (30.6, 32.5, 33.8 and 35.2 W, the mean from 3.5 to 1.8 s before its first timed launch): the die warmed from 71 to 77&nbsp;°C over the session, and its leakage with it. Peak at 600 MHz on 1,024 minions: 9.83 TFLOP/s fp32 (16 flop/cycle/minion), 19.66 fp16 (32), 78.6 TOP/s int8 (128). Measured op costs: 529 cycles per 16×16×16 fp32 or 16×16×32 fp16 op (512 ideal), and 280 cycles per 16×16×64 int8 op (256 ideal). Throughput is total work over the host-measured launch time. The minions' cycle counters agree with it to within 0.1% (implied clock 0.600 GHz). Launch-to-launch spread was below 0.03%.</p>
 
 <h3>A100 reference (NVIDIA A100 datasheet, dense)</h3>
-<div class="table-wrap"><table>
-<thead><tr><th>Precision</th><th class="num">A100 peak</th><th class="num">÷ 400 W (SXM4)</th><th class="num">÷ 250 W (PCIe 40 GB)</th><th class="num">ET-SoC-1 measured</th><th class="num">ET ÷ A100 SXM4 efficiency</th><th class="num">A100 SXM4 ÷ ET speed</th></tr></thead>
+<div class="table-wrap"><table class="a100">
+<thead><tr><th>Precision</th><th class="num">A100 peak</th><th class="num">A100 per W (SXM4)</th><th class="num">ET per W</th><th class="num">ET ÷ A100 efficiency</th><th class="num">A100 ÷ ET speed</th></tr></thead>
 <tbody>
-<tr><td>fp32 (A100 CUDA cores)</td><td class="num">19.5 TFLOP/s</td><td class="num">48.8</td><td class="num">78</td><td class="num">168</td><td class="num">3.45×</td><td class="num">2.05×</td></tr>
-<tr><td>tf32 tensor (10-bit mantissa)</td><td class="num">156 TFLOP/s</td><td class="num">390</td><td class="num">624</td><td class="num">168 (fp32)</td><td class="num">0.43×</td><td class="num">16.4×</td></tr>
-<tr><td>fp16 / bf16 tensor</td><td class="num">312 TFLOP/s</td><td class="num">780</td><td class="num">1,248</td><td class="num">321</td><td class="num">0.41×</td><td class="num">16.4×</td></tr>
-<tr><td>int8 tensor</td><td class="num">624 TOP/s</td><td class="num">1,560</td><td class="num">2,496</td><td class="num">1,162</td><td class="num">0.75×</td><td class="num">8.7×</td></tr>
+<tr><td>fp32 (A100 CUDA cores)</td><td class="num">19.5 TFLOP/s</td><td class="num">48.8</td><td class="num">168</td><td class="num">3.45×</td><td class="num">2.05×</td></tr>
+<tr><td>tf32 tensor (10-bit mantissa)</td><td class="num">156 TFLOP/s</td><td class="num">390</td><td class="num">168 (fp32)</td><td class="num">0.43×</td><td class="num">16.4×</td></tr>
+<tr><td>fp16 / bf16 tensor</td><td class="num">312 TFLOP/s</td><td class="num">780</td><td class="num">321</td><td class="num">0.41×</td><td class="num">16.4×</td></tr>
+<tr><td>int8 tensor</td><td class="num">624 TOP/s</td><td class="num">1,560</td><td class="num">1,162</td><td class="num">0.75×</td><td class="num">8.7×</td></tr>
 </tbody></table></div>
-<p class="small">Both chips are 7 nm-class designs. The A100 also has 1.6–2.0 TB/s of HBM, about 20× the ET card's LPDDR4X. That gap is what the DRAM-streaming row above measures.</p>
-
-<h2>What I did</h2>
-<ol>
-  <li><b>Access.</b> I logged in over Tailscale SSH as a personal non-root account. It had to be created on <code>aifoundry2</code> first: Tailscale SSH rejects a user that doesn't exist on the machine with the same "tailnet policy does not permit" message it gives for a made-up name. The machine runs x86-64 Ubuntu 24.04 with one card (<code>/dev/et0_ops</code>, <code>/dev/et0_mgmt</code>): PCIe Gen4, 32 GB, minion shires at 600 MHz and NoC at 400 MHz. Firmware is BL 0.20 and minion 0.23.</li>
-  <li><b>Toolchain was already there.</b> <code>/opt/et</code> is et-platform built from commit <code>353f20e</code> (30 Dec 2025): RISC-V GCC 15.1, <code>sys_emu</code>, runtime, firmware and the upstream test binaries. It is not on <code>PATH</code> by default.</li>
-  <li><b>Hello world as defined in et-platform's README</b> (<code>it_test_code_loading</code>): 3/3 tests pass on the simulator in 110 s, about 34 s per test, almost all of it simulated firmware boot. The same binary with <code>--mode=pcie</code> passes 3/3 on the card in 0.6 s.</li>
-  <li><b>et-testdrive</b> (marty1885's minimal host+kernel project) builds unmodified against <code>/opt/et</code>. On the card all 64 harts of shire 0 print "Hello World from hart N", decoded in-process from the trace buffer. One catch: it opens the management node, which only one process may hold, so it fails with "Device or resource busy" while <code>et-powertop</code> is running. The upstream tests open only the ops node.</li>
-  <li><b>Writing my own kernels with gp-sdk needed four fixes against this older install.</b> All four are local to my copy of gp-sdk on aifoundry2:
-    <ul>
-      <li>Current gp-sdk requires et-common-libs' Erbium components, which the Dec 2025 install doesn't have. I pinned gp-sdk to <code>06605ab</code> (24 Mar 2026, the last version before the Erbium changes) and made dnnLibrary and FFTW optional. Only the pre-generated matmul and the FFT example use them.</li>
-      <li>gp-sdk's <code>GenericLauncher</code> started <code>sys_emu</code> without firmware ELF paths. The simulated service processor then trapped at address 0 in a loop and wrote a 15 GB log in 10 minutes before I stopped it and deleted the log. The workspace's <code>patches/et-platform-0002</code> (preload the firmware) fixes it.</li>
-      <li>Every gp-sdk kernel, including gp-sdk's own <code>print.elf</code>, died on launch with a U-mode instruction access fault at PC <code>0x40</code>. Kernels are linked at address 0 and relocated by the runtime, but this gp-sdk links without <code>-Wl,--emit-relocs</code>, so the entry-point table kept its link-time address. Upstream restored the flag in <code>7e3b4c2</code> (2 May 2026), and I added it locally.</li>
-      <li>The old <code>riscv_helpers.cmake</code> uses CMake's plain <code>target_link_libraries</code> signature, which clashes with the workspace's keyword form. I switched it to the keyword form, as upstream later did.</li>
-    </ul></li>
-  <li><b>Wrote the benchmark</b>: <code>kernels/mmbench</code> (device), <code>launchers/mmbench</code> (host, checks every result), <code>scripts/et-power-log.sh</code> (board-power sampler) and <code>scripts/mmbench-power.py</code> (runs everything and averages power over the launch windows). It passed exact checks on the simulator on one shire in all modes, then on the card on all 32 shires, before the timed runs.</li>
-</ol>
+<p class="small">Per W is the A100 SXM4's datasheet peak divided by its 400 W TDP. On the 250 W PCIe 40 GB card the A100's per-watt figures are 1.6× higher: 78, 624, 1,248 and 2,496. ET per W is this benchmark's, on ±1/&#8288;±2 operands. Both chips are 7 nm-class designs. The A100 sustains 1.4–1.8 TB/s from HBM (40 and 80 GB cards; 1.6–2.0 TB/s peak), about 20× the 76 GB/s this card streams from LPDDR4X (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory hierarchy</a>). That gap is what the DRAM-streaming row above measures.</p>
 
 <h2>How the benchmark works</h2>
 <ul>
-  <li><b>The loop.</b> On each of the 1,024 compute minions, hart 0 runs the loop; only hart 0 may issue tensor ops, so hart 1 idles. Each op issues a <code>tensor_load</code> of a 16×K A tile into one of two L1-scratchpad buffers, a <code>tensor_load</code> of the B tile through TenB, a <code>tensor_wait</code>, and a <code>tensor_fma</code> that accumulates a 16×16 C tile in the vector registers. The next op's loads overlap the running FMA. This is the inner loop of gp-sdk's auto-generated matmul and of the pipelined kernel in the FOSDEM 2026 "Zero to matmul" talk (10.25 TFLOP/s at 650 MHz).</li>
+  <li><b>The loop.</b> On each of the 1,024 compute minions, hart 0 (the first of the minion's two hardware threads) runs the loop. Only hart 0 may issue TensorFMA and TensorLoads into the L1 scratchpad, so hart 1 idles. Each op issues a <code>tensor_load</code> of a 16×K A tile into one of two L1-scratchpad buffers, a <code>tensor_load</code> of the B tile through TenB (the tensor unit's path that streams the B operand from memory), a <code>tensor_wait</code>, and a <code>tensor_fma</code> that accumulates a 16×16 C tile in the vector registers. The next op's loads overlap the running FMA. This is the inner loop of gp-sdk's auto-generated matmul and of the pipelined kernel in the FOSDEM 2026 "Zero to matmul" talk (10.25 TFLOP/s at 650 MHz).</li>
   <li><b>Op size.</b> One op is 16×16×K multiply-adds, with K = 16 (fp32), 32 (fp16) or 64 (int8). Operand layouts come from <code>sw-sysemu</code>'s tensor emulation, which serves as the spec.</li>
   <li><b>Working set.</b> In the compute-bound runs all minions share 16 A/B tile pairs (32 KB), so the data stays in each shire's L2 cache. In the DRAM run each minion has its own 64 tile pairs (128 MB in total), so every load goes to memory. Effective read bandwidth there was about 78 GB/s.</li>
-  <li><b>Inputs and checking.</b> Inputs are random values from {−2, −1, 1, 2}. They are never zero, so no multiply can be skipped, and they are exact in fp16 and fp32. The host checks each minion's C tile for exact equality with iters × Σ A·B, capping iteration counts so fp32 accumulation stays exact. Every launch passed with zero bad minions.</li>
-  <li><b>Power.</b> Board power comes from the card's own telemetry (<code>DM_CMD_GET_MODULE_POWER</code> through <code>dev_mngt_service</code>, about 7 samples/s). It is averaged over the launch windows after skipping the first second. Idle is the median over 8 s before the first workload.</li>
+  <li><b>Inputs and checking.</b> Inputs are random values from {−2, −1, 1, 2}. They are never zero, so no multiply can be skipped, and they are exact in fp16 and fp32. The host checks each minion's C tile for exact equality with iters × Σ A·B, capping iteration counts so fp32 accumulation stays exact. Every launch passed with zero bad minions. Small powers of two keep the multipliers' mantissa bits at zero, so these operands draw less power than random data would.</li>
+  <li><b>Power.</b> Board power comes from the card's own telemetry (<code>DM_CMD_GET_MODULE_POWER</code> through <code>dev_mngt_service</code>, about 7 samples/s). It is averaged over the launch windows after skipping the first second. The idle row is the median over the 8 s before the first workload; the above-idle column uses the idle just before each workload instead.</li>
 </ul>
 
 <h2>Caveats</h2>
 <ul>
-  <li><b>The A100 figures are spec-sheet numbers, not measurements.</b> Large GEMMs on an A100 typically reach 80–90% of peak while running near the power limit, so its delivered efficiency is lower than these ratios. The ratios here are a best case for the A100.</li>
-  <li><b>Board power includes the whole card:</b> 32 GB LPDDR4X, voltage regulators and PCIe. The 30.6 W idle floor is over half the load power. The above-idle column (366 / 664 / 2,305) shows the cost of the compute alone.</li>
-  <li><b>One clock point.</b> The lab card runs its minions at 600 MHz, and other clock and voltage points will change both speed and efficiency. Power rose about 3 W within each 12 s run as the chip warmed, so longer runs would read slightly worse.</li>
+  <li><b>The A100 figures are spec-sheet numbers, not measurements.</b> The one measured A100 matmul these reports use (Horace He: bf16, random data, 257 TFLOPS under a 330 W limit) matches peak ÷ TDP. For the tensor cores these ratios are therefore a fair estimate, not a best case; no A100 fp32 CUDA-core GEMM was measured. Like for like on random data, this card's fp16 TensorFMA costs 3.3 pJ per FLOP at the board (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">energy manual §3.2</a>, 80&nbsp;°C) against the A100's 1.3 pJ in bf16, 2.6×, close to the 2.4× above.</li>
+  <li><b>Board power includes the whole card.</b> Of the 30.6 W idle, about 12.6 W is fixed (DRAM, PCIe, I/O, regulators) and the rest is die leakage, which grows with temperature. The idle law in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a> predicts 30.8 W at the 71&nbsp;°C this run started at and 34.0 W at 77&nbsp;°C. The above-idle column still carries the leakage added as the die warms within each run, so it is not the compute alone.</li>
+  <li><b>One clock point.</b> This run stayed at 600 MHz (0.52 V) because the die started at 71&nbsp;°C: aifoundry2's governor steps the clock down whenever the die reads above 65&nbsp;°C, and raises it to 700 or 800 MHz (0.57 or 0.62 V) only while the die reads 65&nbsp;°C or less (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-measured">The DVFS loop and its leakage</a>). Other operating points change both speed and efficiency. Power rose about 3 W within each 12 s run as the chip warmed, so longer runs would read slightly worse.</li>
   <li><b>Precision differs.</b> ET's fp32 tensor op is a full IEEE fp32 multiply-add, whose A100 equivalent is fp32 on CUDA cores; tf32 keeps only a 10-bit mantissa. ET's fp16 op accumulates in fp32 with round-toward-zero.</li>
   <li><b>Peak-rate microbenchmark.</b> This measures the matmul engine on cached tiles. A full GEMM also pays for moving data, and the DRAM row (0.31 TFLOP/s) is the no-reuse floor.</li>
 </ul>
@@ -178,22 +179,126 @@ ol li, ul li { margin: 5px 0; }
 <ul>
   <li>A real GEMM (for example 4096³) with L2-scratchpad tiling and cooperative tensor loads, measured the same way.</li>
   <li>Put hart 1 to work prefetching into the L2 scratchpad (<code>TensorLoadL2Scp</code> is allowed on hart 1).</li>
-  <li>A vector-unit-only fp32 baseline, and a clock/voltage sweep if the lab allows it.</li>
-  <li>For AI Foundry: the lab's <code>/opt/et</code> predates the gp-sdk that current documentation points to. Upgrading it, or shipping a matching gp-sdk, would spare new users the fixes above.</li>
+  <li>A vector-unit fp32 baseline. Its energy per lane is now in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#every-instruction-the-core-executes">energy manual §3.1</a> (7.0 pJ per multiply-add on random data); its speed is FOSDEM's 2.94 TFLOP/s at 650 MHz. The clock and voltage points were measured later in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a>.</li>
+  <li>For AI Foundry: the lab's <code>/opt/et</code> predates the gp-sdk that current documentation points to. Upgrading it, or shipping a matching gp-sdk, would spare new users the fixes in the setup notes below.</li>
 </ul>
+
+<h2>Setup notes (for running it yourself)</h2>
+<p>These notes are for running the benchmark on a lab machine, whose <code>/opt/et</code> is older than the gp-sdk that upstream documents. The laptop setup and the first scalar SGEMM, from the same day, are in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-testdrive">Test drive</a>.</p>
+<ol>
+  <li><b>Access.</b> I logged in over Tailscale SSH as a personal non-root account. It had to be created on <code>aifoundry2</code> first: Tailscale SSH rejects a user that doesn't exist on the machine with the same "tailnet policy does not permit" message it gives for a made-up name. The machine runs x86-64 Ubuntu 24.04 with one card (<code>/dev/et0_ops</code>, <code>/dev/et0_mgmt</code>): PCIe Gen4, 32 GB, minion shires at 600 MHz and NoC at 400 MHz. Firmware is BL 0.20 and minion 0.23.</li>
+  <li><b>Toolchain was already there.</b> <code>/opt/et</code> is et-platform built from commit <code>353f20e</code> (30 Dec 2025): RISC-V GCC 15.1, <code>sys_emu</code>, runtime, firmware and the upstream test binaries. It is not on <code>PATH</code> by default.</li>
+  <li><b>Hello world as defined in et-platform's README</b> (<code>it_test_code_loading</code>): 3/3 tests pass on the simulator in 110 s, about 34 s per test, almost all of it simulated firmware boot. The same binary with <code>--mode=pcie</code> passes 3/3 on the card in 0.6 s.</li>
+  <li><b>et-testdrive</b> (<a href="https://github.com/marty1885/et-testdrive">marty1885's minimal host+kernel project</a>) builds unmodified against <code>/opt/et</code>. On the card all 64 harts of shire 0 print "Hello World from hart N", decoded in-process from the trace buffer. One catch: it opens the management node, which only one process may hold, so it fails with "Device or resource busy" while <code>et-powertop</code> is running. The upstream tests open only the ops node.</li>
+  <li><b>Writing my own kernels with gp-sdk needed four fixes against this older install.</b> All four are now in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/patches/lab-gp-sdk-06605ab.patch"><code>patches/lab-gp-sdk-06605ab.patch</code></a>, which <code>scripts/deploy-lab-gpsdk.sh</code> applies:
+    <ul>
+      <li>Current gp-sdk requires et-common-libs' Erbium components, which the Dec 2025 install doesn't have. I pinned gp-sdk to <code>06605ab</code> (24 Mar 2026, the last version before the Erbium changes) and made dnnLibrary and FFTW optional. Only the pre-generated matmul and the FFT example use them.</li>
+      <li>gp-sdk's <code>GenericLauncher</code> started <code>sys_emu</code> without firmware ELF paths. The simulated service processor then trapped at address 0 in a loop and wrote gigabytes of log within minutes (15 GB in 10 minutes on aifoundry2) before I stopped it and deleted the log. The repository's <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/patches/et-platform-0002-gpsdk-sysemu-preload-firmware.patch"><code>patches/et-platform-0002</code></a> (preload the firmware) fixes it.</li>
+      <li>Every gp-sdk kernel, including gp-sdk's own <code>print.elf</code>, died on launch with a U-mode instruction access fault at PC <code>0x40</code>. Kernels are linked at address 0 and relocated by the runtime, but this gp-sdk links without <code>-Wl,--emit-relocs</code>, so the entry-point table kept its link-time address. Upstream restored the flag in <code>7e3b4c2</code> (2 May 2026), and I added it locally.</li>
+      <li>The old <code>riscv_helpers.cmake</code> uses CMake's plain <code>target_link_libraries</code> signature, which clashes with the keyword form this repository's <code>kernels/CMakeLists.txt</code> uses. I switched it to the keyword form, as upstream later did.</li>
+    </ul></li>
+  <li><b>Wrote the benchmark</b>: <code>kernels/mmbench</code> (device), <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/launchers/mmbench"><code>launchers/mmbench</code></a> (host, checks every result), <code>scripts/et-power-log.sh</code> (board-power sampler) and <code>scripts/mmbench-power.py</code> (runs everything and averages power over the launch windows). It passed exact checks on the simulator on one shire in all modes, then on the card on all 32 shires, before the timed runs.</li>
+</ol>
 
 <h2>Reproduce</h2>
 <pre><code># hello world from et-platform's README
 /opt/et/bin/it_test_code_loading               # simulator
 /opt/et/bin/it_test_code_loading --mode=pcie   # the card
 
-# benchmark (nekko workspace on aifoundry2; quit et-powertop first)
-nice make kernels launchers JOBS=4
-python3 scripts/mmbench-power.py --launcher build/launchers/mmbench_launcher \
-    --kernel build/kernels/nekko/mmbench.elf --out build/mmbench-power</code></pre>
-<p class="small">The lab cards are shared, and the lab rule is to hold a device for at most 10 s. The run above kept the card busy for about 12 s per workload, before that rule reached this workspace. The script now runs every launcher under <code>timeout 10</code> and defaults to about 6 s per workload, which still leaves roughly 35 power samples per workload after the settle time.</p>
-<p class="small">Sources: <a href="https://github.com/aifoundry-org/et-platform">aifoundry-org/et-platform</a>, <a href="https://github.com/aifoundry-org/et-man">et-man</a> (programmer's reference and errata), <a href="https://github.com/marty1885/et-testdrive">marty1885/et-testdrive</a>, <a href="https://archive.fosdem.org/2026/events/attachments/T3PSFN-zero_to_matmul_with_the_et-soc-1/slides/267107/zerotomat_asnyquu.pdf">FOSDEM 2026, "Zero to matmul with the ET-SoC-1"</a>, and the NVIDIA A100 Tensor Core GPU datasheet.</p>
+# benchmark: from a checkout of this repository, copy it to the lab machine
+# and build gp-sdk (pinned and patched) and mmbench there
+scripts/deploy-lab-gpsdk.sh aifoundry2
+# then on aifoundry2, in the copy the script made at ~/nekko
+# (quit et-powertop first: the power logger needs the management node)
+cd ~/nekko &amp;&amp; nice make mmbench-check bench-power DEVICE=silicon JOBS=4</code></pre>
+<p class="small">The lab cards are shared, and the lab rule is to hold a device for at most 10 s. The run above kept the card busy for about 12 s per workload, before the project adopted that rule. <code>scripts/mmbench-power.py</code> now runs every launcher under <code>timeout 10</code> and defaults to about 6 s per workload, which still leaves roughly 35 power samples per workload after the settle time.</p>
+<p class="small">Raw data: <code>docs/reports/data/2026-09-18-aifoundry2</code> (board-power samples, one record per launch and the per-workload summary). <code>scripts/mmbench-report-data.py</code> turns it into this page's throughput, efficiency, idle before each workload (the same window as <code>idle_before()</code> in <code>scripts/mmbench-power.py</code>) and power chart; the tables are written by hand from its output.</p>
+<p class="small">Sources: <a href="https://github.com/aifoundry-org/et-platform">aifoundry-org/et-platform</a>, <a href="https://github.com/aifoundry-org/et-man">et-man</a> (programmer's reference and errata), <a href="https://github.com/marty1885/et-testdrive">marty1885/et-testdrive</a>, <a href="https://archive.fosdem.org/2026/events/attachments/T3PSFN-zero_to_matmul_with_the_et-soc-1/slides/267107/zerotomat_asnyquu.pdf">FOSDEM 2026, "Zero to matmul with the ET-SoC-1"</a>, the NVIDIA A100 Tensor Core GPU datasheet, and Horace He's <a href="https://www.thonking.ai/p/strangely-matrix-multiplications">"Strangely, Matrix Multiplications on GPUs Run Faster When Given 'Predictable' Data!"</a> for the measured A100 run.</p>
+<p class="small">Versions: published 18 September 2026. Revised 24 September 2026 after a review: the above-idle column now subtracts the idle just before each workload; the operands and die temperature are set against the later random-data measurements and the other A100 comparison; the A100 caveats, the temperature reading and the clock point are corrected; the setup notes moved after the method; and the page links the reports that followed.</p>
 
+<h2 id="related">Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">The Horace experiment</a> — the same TensorFMA's power on 14 operand patterns at 80&nbsp;°C: 38 W on zeros, 63 W on random values.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power">Why is the ET-SoC-1 low power?</a> — energy per FLOP against a measured A100 on its bf16 tensor cores, and where this card's watts go.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">The energy manual, §3.2</a> — the tensor unit's energy per multiply-add in fp32, fp16 and int8, on zeros, ones and random data, with ranges over repeated runs.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a> — why idle power depends on temperature, and when the governor leaves 600 MHz.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a> — the reuse each memory level demands to keep this loop fed.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">Sparse compute</a> — what the tensor unit does with zeros: it saves power but never a cycle.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-testdrive">Test drive</a> — the first scalar SGEMM, the laptop setup and the upstream fixes, the same day.</li>
+</ul>
+<p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
+
+<script>
+/* Section anchors (copied from docs/reports/sources/report.template.html). Every h2/h3 gets an id (its own, or one made from its text) and a # link; clicking a heading
+   or a table-of-contents link puts #id in the URL. When the page is framed by spacesheep.dev the fragment is
+   mirrored into the outer, shareable URL (postMessage ss-hash), and an outer #fragment is forwarded in on load. */
+(function () {
+  const slug = t => t.toLowerCase().replace(/^\d+(\.\d+)*\.?\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const post = h => { if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h}, '*'); } catch (_) {} } };
+  const go = id => { try { history.replaceState(null, '', location.pathname + location.search + '#' + id); } catch (_) {}
+    const el = document.getElementById(id); if (el) el.scrollIntoView({block: 'start'}); post('#' + id); };
+  const seen = new Set();
+  document.querySelectorAll('main h2, main h3').forEach(h => {
+    if (!h.id) { let id = slug(h.textContent) || 'section', n = 2; while (seen.has(id) || document.getElementById(id)) id = slug(h.textContent) + '-' + n++; h.id = id; }
+    seen.add(h.id);
+    const a = document.createElement('a'); a.href = '#' + h.id; a.className = 'hlink'; a.textContent = '#'; a.title = 'link to this section'; h.appendChild(a);
+    h.style.cursor = 'pointer';
+    h.addEventListener('click', ev => { if (ev.target.tagName === 'A' && ev.target !== a) return; ev.preventDefault(); go(h.id); });
+  });
+  window.addEventListener('hashchange', () => post(location.hash));
+  if (location.hash) { post(location.hash); const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => el.scrollIntoView({block: 'start'}), 50); }
+})();
+</script>
+<script>
+/* Contents list, link back to the reports hub, and repository paths as links. Runs after the section-anchor
+   script above, whose h2 ids the contents list links to. Pages not built from this template paste both blocks
+   before </main>.
+   - Contents: a page with 6 or more h2s and no #toclist of its own gets a numbered list before its first h2.
+   - Footer: every page but the hub ends with a link to the hub's list of reports, unless it already has one.
+   - Paths: an inline <code> whose whole text is a repository path (docs/…, workloads/…, tools/…, scripts/…,
+     kernels/…, rtl-sim/…) becomes a GitHub link. Code blocks, code already in a link and globs stay as they are. */
+(function () {
+  const main = document.querySelector('main'); if (!main) return;
+  const HUB = 'https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability';
+  const BACK = '← All ET-SoC-1 measurement reports';
+  const REPO = 'https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/';
+  const text = el => { const c = el.cloneNode(true); c.querySelectorAll('.hlink').forEach(a => a.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+  const NUM = /^(?:§\s*\d+(?:\.\d+)*\.?|\d+(?:\.\d+)*\.|\d+(?:\.\d+)+)\s+/;  /* "3. ", "4.2 ", "§5 "; not "600 MHz" */
+
+  const h2s = [...main.querySelectorAll('h2')];
+  if (h2s.length >= 6 && !document.getElementById('toclist')) {
+    const nav = document.createElement('nav'); nav.className = 'card';
+    const b = document.createElement('b'); b.textContent = 'Contents';
+    const ol = document.createElement('ol'); ol.id = 'toclist';
+    h2s.forEach(h => {
+      if (!h.id) return;
+      const t = text(h), m = t.match(/^§?\s*(\d+)[.\s]/), li = document.createElement('li'), a = document.createElement('a');
+      if (m && NUM.test(t)) li.value = +m[1];
+      a.href = '#' + h.id; a.textContent = t.replace(NUM, '') || t;
+      li.appendChild(a); ol.appendChild(li);
+    });
+    nav.append(b, ol);
+    h2s[0].parentNode.insertBefore(nav, h2s[0]);
+  }
+
+  const h1 = main.querySelector('h1');
+  const isHub = !!h1 && /^limits of observability/i.test(text(h1));
+  const hasBack = [...document.querySelectorAll('a')].some(a => a.textContent.replace(/\s+/g, ' ').trim() === BACK);
+  if (!isHub && !hasBack) {
+    const p = document.createElement('p'); p.className = 'small';
+    const a = document.createElement('a'); a.href = HUB + '#reports'; a.textContent = BACK;
+    p.appendChild(a); main.appendChild(p);
+  }
+
+  const PATH = /^(docs|workloads|tools|scripts|kernels|rtl-sim)\/[\w./-]+$/;
+  main.querySelectorAll('code').forEach(c => {
+    if (c.closest('pre, a')) return;
+    const t = c.textContent.trim(); if (!PATH.test(t)) return;
+    const a = document.createElement('a'); a.href = REPO + t;
+    c.parentNode.insertBefore(a, c); a.appendChild(c);
+  });
+})();
+</script>
 </main>
 <script type="application/json" id="trace-data">{"trace":[[0.0,30.6],[0.13,30.63],[0.26,30.65],[0.38,30.62],[0.52,30.68],[0.66,30.57],[0.79,30.58],[0.93,30.64],[1.05,30.57],[1.19,30.61],[1.32,30.51],[1.46,30.67],[1.58,30.6],[1.72,30.61],[1.85,30.6],[1.98,30.63],[2.12,30.61],[2.25,30.63],[2.38,30.55],[2.51,30.6],[2.65,30.67],[2.78,30.67],[2.91,30.63],[3.04,30.56],[3.18,30.66],[3.31,30.57],[3.44,30.6],[3.56,30.7],[3.7,30.68],[3.84,30.54],[3.98,30.56],[4.11,30.61],[4.25,30.62],[4.38,30.68],[4.52,30.61],[4.66,30.54],[4.79,30.61],[4.92,30.57],[5.05,30.64],[5.18,30.57],[5.31,30.61],[5.45,30.61],[5.58,30.57],[5.71,30.59],[5.84,30.6],[5.97,30.61],[6.1,30.6],[6.23,30.63],[6.37,30.64],[6.51,30.63],[6.63,30.6],[6.76,30.68],[6.9,30.6],[7.03,30.54],[7.16,30.57],[7.3,30.6],[7.43,30.62],[7.57,30.64],[7.71,30.51],[7.83,30.58],[7.96,30.69],[8.1,30.62],[8.21,30.66],[8.33,30.66],[8.45,54.26],[8.56,54.26],[8.68,54.11],[8.8,54.17],[8.91,54.44],[9.03,54.5],[9.14,54.78],[9.26,54.92],[9.38,54.92],[9.49,54.86],[9.61,54.67],[9.72,55.16],[9.84,55.01],[9.95,55.16],[10.07,55.16],[10.19,55.36],[10.3,55.36],[10.42,55.52],[10.53,55.53],[10.65,55.59],[10.76,55.67],[10.88,55.41],[11.0,55.49],[11.11,55.49],[11.23,55.49],[11.34,55.76],[11.46,55.74],[11.57,55.8],[11.69,55.92],[11.81,56.06],[11.92,56.05],[12.04,56.05],[12.15,55.9],[12.27,56.04],[12.38,56.0],[12.5,56.06],[12.62,56.32],[12.73,56.25],[12.85,56.25],[12.96,56.3],[13.08,56.38],[13.2,56.11],[13.31,56.25],[13.43,56.32],[13.54,56.2],[13.66,56.2],[13.77,56.44],[13.89,56.41],[14.0,56.57],[14.12,56.68],[14.24,56.41],[14.35,56.48],[14.47,56.41],[14.58,56.41],[14.7,56.61],[14.81,56.68],[14.93,56.81],[15.04,56.84],[15.16,55.92],[15.28,56.88],[15.39,56.88],[15.51,56.71],[15.62,56.79],[15.74,56.81],[15.85,56.91],[15.97,57.02],[16.09,56.95],[16.2,57.01],[16.32,57.01],[16.43,57.26],[16.55,56.9],[16.66,56.86],[16.78,56.84],[16.89,56.99],[17.01,57.21],[17.13,57.21],[17.24,57.29],[17.36,57.1],[17.47,56.59],[17.59,57.19],[17.71,57.11],[17.82,57.25],[17.94,57.25],[18.05,57.19],[18.17,57.27],[18.28,57.52],[18.4,57.46],[18.52,57.49],[18.63,57.69],[18.75,57.35],[18.86,57.35],[18.98,57.36],[19.09,57.38],[19.21,57.52],[19.32,57.55],[19.44,57.88],[19.56,57.67],[19.67,57.67],[19.79,57.39],[19.91,57.55],[20.02,57.38],[20.14,57.55],[20.25,57.29],[20.37,57.56],[20.48,57.71],[20.6,57.71],[20.71,57.76],[20.83,57.88],[20.95,33.84],[21.09,33.63],[21.21,33.46],[21.35,33.4],[21.48,33.3],[21.61,33.22],[21.74,33.07],[21.88,33.0],[22.0,32.96],[22.14,32.87],[22.28,32.9],[22.41,32.74],[22.54,32.74],[22.67,32.74],[22.8,32.68],[22.93,32.64],[23.06,32.51],[23.2,32.63],[23.32,32.58],[23.46,32.68],[23.6,32.54],[23.73,32.56],[23.86,32.37],[23.99,32.45],[24.12,32.46],[24.25,32.41],[24.38,32.33],[24.51,32.46],[24.65,32.32],[24.78,32.33],[24.91,32.23],[25.05,32.36],[25.19,32.3],[25.32,32.28],[25.46,32.33],[25.59,32.17],[25.72,32.3],[25.86,32.18],[25.97,55.58],[26.09,55.58],[26.21,32.31],[26.32,57.06],[26.44,56.99],[26.55,57.25],[26.67,57.24],[26.79,57.42],[26.9,57.66],[27.02,57.66],[27.13,56.8],[27.25,57.64],[27.36,57.69],[27.48,57.82],[27.6,57.95],[27.71,58.12],[27.83,58.12],[27.94,58.06],[28.06,58.28],[28.18,57.69],[28.29,58.36],[28.41,58.44],[28.52,58.28],[28.64,58.28],[28.75,58.59],[28.87,58.56],[28.99,58.5],[29.1,58.45],[29.22,58.41],[29.33,58.59],[29.45,58.71],[29.57,58.71],[29.68,57.86],[29.8,58.59],[29.91,58.66],[30.03,58.71],[30.14,58.8],[30.26,58.92],[30.38,58.92],[30.49,58.88],[30.61,59.03],[30.72,58.8],[30.84,59.14],[30.95,59.03],[31.07,59.04],[31.19,59.35],[31.3,59.35],[31.42,59.14],[31.53,59.04],[31.65,59.17],[31.77,59.18],[31.88,59.21],[32.0,59.32],[32.11,59.32],[32.23,58.54],[32.34,59.31],[32.46,59.32],[32.58,59.37],[32.69,59.42],[32.81,59.63],[32.92,59.6],[33.04,59.6],[33.16,59.42],[33.27,59.34],[33.39,59.63],[33.5,59.56],[33.62,59.49],[33.73,59.73],[33.85,59.73],[33.97,59.76],[34.08,59.59],[34.2,59.65],[34.31,59.69],[34.43,59.79],[34.55,60.0],[34.66,59.03],[34.78,59.03],[34.89,59.76],[35.01,59.79],[35.12,59.77],[35.24,60.0],[35.35,60.06],[35.47,59.98],[35.59,59.98],[35.7,59.93],[35.82,59.79],[35.94,60.04],[36.05,59.92],[36.17,60.13],[36.28,60.25],[36.4,60.25],[36.51,60.09],[36.63,60.08],[36.75,60.02],[36.86,60.08],[36.98,60.36],[37.09,60.52],[37.21,59.64],[37.33,59.64],[37.44,60.28],[37.56,60.25],[37.67,60.29],[37.79,60.39],[37.9,60.46],[38.02,60.5],[38.13,35.23],[38.26,35.03],[38.4,34.89],[38.53,34.7],[38.67,34.7],[38.8,34.57],[38.93,34.37],[39.06,34.35],[39.2,34.35],[39.33,34.26],[39.45,34.24],[39.58,34.19],[39.72,34.17],[39.85,34.04],[39.99,34.08],[40.12,33.99],[40.25,33.91],[40.38,33.93],[40.52,33.9],[40.64,33.85],[40.78,33.85],[40.91,33.81],[41.05,33.75],[41.19,33.72],[41.32,33.73],[41.45,33.72],[41.58,33.6],[41.71,33.57],[41.84,33.58],[41.98,33.58],[42.12,33.55],[42.24,33.55],[42.38,33.57],[42.51,33.46],[42.64,33.46],[42.78,33.36],[42.91,33.4],[43.05,33.5],[43.18,33.36],[43.29,33.42],[43.41,33.47],[43.53,59.06],[43.64,59.27],[43.76,59.41],[43.87,59.41],[43.99,59.54],[44.1,59.67],[44.22,59.89],[44.34,59.84],[44.45,60.0],[44.57,60.12],[44.68,60.12],[44.8,60.15],[44.91,60.13],[45.03,60.37],[45.15,60.36],[45.26,60.43],[45.38,60.51],[45.49,60.51],[45.61,60.44],[45.73,60.6],[45.84,60.6],[45.96,60.84],[46.07,60.86],[46.19,60.86],[46.3,60.98],[46.42,60.98],[46.54,60.92],[46.65,60.98],[46.77,61.14],[46.88,61.09],[47.0,61.14],[47.12,61.12],[47.23,61.12],[47.35,61.13],[47.46,61.23],[47.58,61.23],[47.69,61.15],[47.81,61.35],[47.92,61.43],[48.04,61.42],[48.16,61.42],[48.27,61.44],[48.39,61.59],[48.5,61.51],[48.62,61.59],[48.73,61.56],[48.85,61.59],[48.97,61.59],[49.08,61.69],[49.2,61.61],[49.31,61.65],[49.43,61.65],[49.55,61.69],[49.66,61.76],[49.78,61.76],[49.89,61.76],[50.01,61.86],[50.12,61.82],[50.24,61.99],[50.35,61.96],[50.47,61.9],[50.59,61.9],[50.7,61.9],[50.82,62.25],[50.93,62.1],[51.05,62.16],[51.16,62.11],[51.28,62.02],[51.4,62.19],[51.51,62.33],[51.63,62.33],[51.74,62.31],[51.86,62.29],[51.97,62.29],[52.09,62.35],[52.21,62.28],[52.32,62.36],[52.44,62.36],[52.55,62.33],[52.67,62.44],[52.78,62.46],[52.9,62.45],[53.02,62.44],[53.13,62.63],[53.25,62.63],[53.36,62.51],[53.48,62.65],[53.59,62.55],[53.71,62.53],[53.83,62.69],[53.94,62.67],[54.06,62.71],[54.17,62.71],[54.29,62.81],[54.4,62.88],[54.52,62.86],[54.63,62.75],[54.75,62.88],[54.87,62.77],[54.98,62.77],[55.1,62.82],[55.21,62.98],[55.33,62.81],[55.44,63.02],[55.56,37.19],[55.68,36.75],[55.81,36.68],[55.94,36.44],[56.07,36.36],[56.2,36.29],[56.33,36.1],[56.46,36.1],[56.6,36.03],[56.74,35.74],[56.87,35.86],[57.0,35.76],[57.14,35.75],[57.27,35.66],[57.41,35.55],[57.55,35.56],[57.69,35.56],[57.82,35.48],[57.96,35.38],[58.09,35.46],[58.23,35.35],[58.37,35.26],[58.48,35.32],[58.61,35.23],[58.75,35.12],[58.88,35.12],[59.01,35.12],[59.14,35.05],[59.27,35.07],[59.39,35.07],[59.52,35.03],[59.66,34.94],[59.79,34.94],[59.92,35.05],[60.05,34.97],[60.19,34.96],[60.32,34.84],[60.46,34.77],[60.59,34.77],[60.71,34.79],[60.83,34.95],[60.94,34.75],[61.06,42.47],[61.17,34.55],[61.29,34.7],[61.41,34.65],[61.52,34.65],[61.64,34.84],[61.75,43.24],[61.87,43.39],[61.98,43.22],[62.1,43.44],[62.22,43.37],[62.33,43.37],[62.45,43.43],[62.56,43.3],[62.68,43.3],[62.79,43.23],[62.91,43.33],[63.03,43.43],[63.14,43.42],[63.26,43.42],[63.37,43.37],[63.49,43.39],[63.6,43.22],[63.72,43.16],[63.84,43.3],[63.95,43.39],[64.07,43.39],[64.19,43.25],[64.3,43.3],[64.42,43.35],[64.53,43.3],[64.65,43.31],[64.76,43.28],[64.88,43.28],[65.0,43.3],[65.11,43.31],[65.23,43.38],[65.34,43.28],[65.46,43.25],[65.57,43.27],[65.69,43.43],[65.8,43.43],[65.92,43.39],[66.03,43.26],[66.15,42.5],[66.27,43.27],[66.38,43.47],[66.5,43.07],[66.61,43.07],[66.73,43.49],[66.85,43.31],[66.96,43.44],[67.08,43.23],[67.19,43.34],[67.31,43.39],[67.43,43.39],[67.54,43.37],[67.66,43.37],[67.77,43.43],[67.89,43.45],[68.0,43.45],[68.12,43.35],[68.24,43.33],[68.35,43.33],[68.47,43.08],[68.58,43.4],[68.7,43.35],[68.81,43.51],[68.93,43.31],[69.05,43.43],[69.16,43.43],[69.28,43.33],[69.39,43.43],[69.51,43.3],[69.62,43.33],[69.74,43.39],[69.86,43.47],[69.97,43.47],[70.09,43.5],[70.2,43.38],[70.32,43.43],[70.43,43.38],[70.55,43.3],[70.67,44.42],[70.78,43.26],[70.9,43.26],[71.01,43.37],[71.13,43.43],[71.24,43.38],[71.36,43.4],[71.47,43.37],[71.59,43.47],[71.71,43.47],[71.82,43.33],[71.94,43.43],[72.05,43.3],[72.17,43.3],[72.28,43.28],[72.4,43.43],[72.52,43.5],[72.63,43.5],[72.75,43.39],[72.86,43.33],[72.98,43.12],[73.09,42.28],[73.21,34.71],[73.35,34.67],[73.48,34.54],[73.62,34.57],[73.75,34.52],[73.88,34.48],[74.01,34.47],[74.15,34.5],[74.27,34.72],[74.4,34.44],[74.54,34.44],[74.66,34.44],[74.79,34.34],[74.92,34.36],[75.06,34.36],[75.19,34.33],[75.32,34.44],[75.46,34.43],[75.59,34.35],[75.72,34.29],[75.86,34.29],[75.98,34.41],[76.11,34.32],[76.24,34.33],[76.38,34.33],[76.5,34.21],[76.63,34.26],[76.77,34.29],[76.9,34.26],[77.04,34.3],[77.17,34.27],[77.29,34.2],[77.42,34.24],[77.56,34.23],[77.69,34.14],[77.83,34.17],[77.96,34.17],[78.08,34.21]],"windows":[{"workload":"fp32-tensor-L2","start":8.36,"end":20.77,"launches":11},{"workload":"fp16-tensor-L2","start":26.18,"end":38.04,"launches":14},{"workload":"int8-tensor-L2","start":43.44,"end":55.48,"launches":5},{"workload":"fp32-tensor-DRAM","start":61.57,"end":73.06,"launches":5}],"idle_w":30.61}</script>
 <script>
@@ -227,7 +332,8 @@ python3 scripts/mmbench-power.py --launcher build/launchers/mmbench_launcher \
     var max = Math.max.apply(null, p.rows.map(function (r) { return r.v; }));
     var panel = document.createElement("div");
     panel.className = "panel";
-    var h = document.createElement("h3");
+    var h = document.createElement("div");
+    h.className = "ptitle";
     h.innerHTML = p.title + ' <span class="unit">· ' + p.unit + "</span>";
     panel.appendChild(h);
     p.rows.forEach(function (r) {

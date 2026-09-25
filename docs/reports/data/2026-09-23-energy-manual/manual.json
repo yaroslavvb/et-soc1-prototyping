@@ -140,7 +140,10 @@
    "noc": 3.6436666666666664,
    "board": 31.78976666666667,
    "unsensed": 15.100363333333338,
-   "die_c": 73.0
+   "die_c": 73.0,
+   "hours_idle": 20.6,
+   "samples": 300,
+   "board_sd": 0.03862139591239839
   },
   "operating_points": [
    {
@@ -647,7 +650,7 @@
  "awake": {
   "spin_hart0_1024": {
    "config": "spin",
-   "label": "8 addi per iteration, hart 0 of 1,024 minions",
+   "label": "four addi and a branch per iteration, hart 0 of 1,024 minions",
    "unit": "instruction",
    "per_s": 180047013802.0365,
    "over_idle_w": 1.4601911764705875,
@@ -733,7 +736,7 @@
   "recheck_600mhz": {
    "tload_scp_local": {
     "config": "tload_l2",
-    "label": "tensor load, local scratchpad",
+    "label": "tensor load, L2 cache",
     "unit": "byte",
     "per_s": 2447392548830.907,
     "over_idle_w": 6.2416617647058885,
@@ -769,7 +772,8 @@
     "gb_s": 2991.7108981394235,
     "over_idle_w": 2.4079591836734693,
     "pj_per_byte": 0.8048767315142038,
-    "pj_spread": 0.04147063697407288
+    "pj_spread": 0.04147063697407288,
+    "pj_per_byte_local": 0.7706156381320972
    },
    {
     "ring": "neigh",
@@ -777,7 +781,8 @@
     "gb_s": 1120.2587575782877,
     "over_idle_w": 2.5824693627450976,
     "pj_per_byte": 2.305235386907192,
-    "pj_spread": 0.13540370290767778
+    "pj_spread": 0.13540370290767778,
+    "pj_per_byte_local": 2.2070492194104245
    },
    {
     "ring": "shire",
@@ -785,7 +790,8 @@
     "gb_s": 1120.1652844078415,
     "over_idle_w": 2.618762499999999,
     "pj_per_byte": 2.3378349903384086,
-    "pj_spread": 0.06189121020954391
+    "pj_spread": 0.06189121020954391,
+    "pj_per_byte_local": 2.261954203668969
    },
    {
     "ring": "xshire1",
@@ -793,7 +799,8 @@
     "gb_s": 123.62366114327673,
     "over_idle_w": 1.958235294117646,
     "pj_per_byte": 15.840322772727808,
-    "pj_spread": 0.8062749004178631
+    "pj_spread": 0.8062749004178631,
+    "pj_per_byte_local": 15.233624855123182
    },
    {
     "ring": "xshire16",
@@ -801,7 +808,8 @@
     "gb_s": 156.04841222648665,
     "over_idle_w": 2.2858552631578988,
     "pj_per_byte": 14.646775614983305,
-    "pj_spread": 1.089438495084413
+    "pj_spread": 1.089438495084413,
+    "pj_per_byte_local": 14.262466584950388
    },
    {
     "ring": "xshire8",
@@ -809,7 +817,8 @@
     "gb_s": 149.65678626035947,
     "over_idle_w": 2.074665866346539,
     "pj_per_byte": 13.86282848203625,
-    "pj_spread": 0.11204070083429496
+    "pj_spread": 0.11204070083429496,
+    "pj_per_byte_local": 13.428502349927053
    },
    {
     "ring": "xshire2",
@@ -817,7 +826,8 @@
     "gb_s": 87.4562774218626,
     "over_idle_w": 1.6543039215686264,
     "pj_per_byte": 18.91577948461169,
-    "pj_spread": 0.05261386079188668
+    "pj_spread": 0.05261386079188668,
+    "pj_per_byte_local": 18.4012595595633
    },
    {
     "ring": "xshire4",
@@ -825,7 +835,8 @@
     "gb_s": 91.15314772541973,
     "over_idle_w": 1.6013901960784338,
     "pj_per_byte": 17.568137958797898,
-    "pj_spread": 0.3251414391367966
+    "pj_spread": 0.3251414391367966,
+    "pj_per_byte_local": 17.07443889996135
    },
    {
     "ring": "xshire6",
@@ -833,7 +844,8 @@
     "gb_s": 89.33824785656051,
     "over_idle_w": 1.818380392156861,
     "pj_per_byte": 20.3539013621196,
-    "pj_spread": 1.271619776943849
+    "pj_spread": 1.271619776943849,
+    "pj_per_byte_local": 19.794211540546115
    },
    {
     "ring": "shire-c4",
@@ -841,7 +853,8 @@
     "gb_s": 552.6636592540461,
     "over_idle_w": 2.2090625000000017,
     "pj_per_byte": 3.995584387849296,
-    "pj_spread": 0.3094604114280681
+    "pj_spread": 0.3094604114280681,
+    "pj_per_byte_local": 3.8972754024576313
    },
    {
     "ring": "xshire1-c4",
@@ -849,9 +862,68 @@
     "gb_s": 112.40059471199262,
     "over_idle_w": 2.440739215686275,
     "pj_per_byte": 21.71458004740657,
-    "pj_spread": 1.1138100404729538
+    "pj_spread": 1.1138100404729538,
+    "pj_per_byte_local": 21.358784704610887
    }
   ],
+  "mesh_hops": {
+   "pair": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "neigh": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "shire": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "xshire1": {
+    "mean": 3.5,
+    "min": 1,
+    "max": 10
+   },
+   "xshire16": {
+    "mean": 2.125,
+    "min": 1,
+    "max": 6
+   },
+   "xshire8": {
+    "mean": 1.625,
+    "min": 1,
+    "max": 7
+   },
+   "xshire2": {
+    "mean": 4.5,
+    "min": 2,
+    "max": 7
+   },
+   "xshire4": {
+    "mean": 3.6875,
+    "min": 1,
+    "max": 8
+   },
+   "xshire6": {
+    "mean": 4.6875,
+    "min": 3,
+    "max": 8
+   },
+   "shire-c4": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "xshire1-c4": {
+    "mean": 3.5,
+    "min": 1,
+    "max": 10
+   }
+  },
+  "hop_map": "marty1885's shire map (workloads/nocbench/analyze.py MARTY), Manhattan distance",
   "clock": "600 MHz, 518 mV in every sample of both runs",
   "source": [
    "docs/reports/data/2026-09-18-nocbench-aifoundry2/energy-a/results.json",
@@ -862,9 +934,10 @@
   "power": {
    "idle": {
     "board_w": 30.614248704663208,
-    "minion_w": 24.436964594127804,
-    "sram_w": 3.623879965457686,
-    "noc_w": 5.424468048359239,
+    "minion_w": 10.428893782383419,
+    "sram_w": 1.9176398963730572,
+    "noc_w": 3.49240414507772,
+    "die_c": 71.2720207253886,
     "n": 386
    },
    "media": [
@@ -880,9 +953,10 @@
      "pj_per_byte": 104.7718732209115,
      "n": 102,
      "board_w": 34.956274509803926,
-     "minion_w": 24.50883333333333,
-     "sram_w": 3.7790098039215683,
-     "noc_w": 5.713274509803921
+     "minion_w": 10.644500000000003,
+     "sram_w": 2.383029411764706,
+     "noc_w": 4.358823529411763,
+     "die_c": 71.0
     },
     {
      "medium": "scp",
@@ -896,9 +970,10 @@
      "pj_per_byte": 4.2496901939750416,
      "n": 110,
      "board_w": 35.91581818181818,
-     "minion_w": 24.981081818181817,
-     "sram_w": 4.5895939393939384,
-     "noc_w": 5.4314484848484845
+     "minion_w": 12.061245454545453,
+     "sram_w": 4.814781818181819,
+     "noc_w": 3.513345454545454,
+     "die_c": 71.94545454545455
     },
     {
      "medium": "hop",
@@ -912,9 +987,10 @@
      "pj_per_byte": 8.889231504221394,
      "n": 104,
      "board_w": 35.03769230769231,
-     "minion_w": 24.812923076923077,
-     "sram_w": 4.106371794871794,
-     "noc_w": 5.826275641025641
+     "minion_w": 11.55676923076923,
+     "sram_w": 3.3651153846153843,
+     "noc_w": 4.6978269230769225,
+     "die_c": 72.0
     }
    ]
   },
@@ -95012,6 +95088,18 @@
    "p10": 0.90569132502038,
    "p90": 0.9868866658877511,
    "n": 386
+  },
+  "leak_correction": {
+   "aifoundry2": {
+    "median_w": 0.39645720032922505,
+    "max_w": 1.7996937859390059,
+    "bursts": 1176
+   },
+   "aifoundry3": {
+    "median_w": 0.16137077727591986,
+    "max_w": 0.7833045983873994,
+    "bursts": 1158
+   }
   },
   "source": "docs/reports/data/2026-09-23-energy-manual/catalogue.json"
  },

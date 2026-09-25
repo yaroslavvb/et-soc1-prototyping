@@ -1,29 +1,48 @@
-<style>#cmp td:first-child,#cdyn td:first-child{white-space:nowrap}</style>
+<style>#cmp{min-width:900px}#cmp td:first-child{white-space:nowrap}#cdyn td:first-child{min-width:190px}#cdyn th{white-space:normal}</style>
 <h1>Why is the ET-SoC-1 low power?</h1>
-<p class="byline">aifoundry2's card, 21 September 2026 · et-platform <code>353f20e</code> firmware · measurements with <code>tools/ettelem</code>, <code>workloads/sparsity</code> and <code>rtl-sim/fma_toggle</code>; A100 figures from NVIDIA's datasheet and Horace He's matmul measurements; Esperanto's design argument from Hot Chips 33 and IEEE Micro · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">measurement reports</a></p>
+<p class="byline">21 September 2026 · aifoundry2's card · A100 figures from NVIDIA's datasheet and Horace He's matmul measurements; Esperanto's design argument from Hot Chips 33 and IEEE Micro · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">An A100 draws 330 to 400 W under a matrix multiply. This card draws 38 to 64 W, and Esperanto advertised
 the chip at under 20 W. Both chips are TSMC 7 nm. Esperanto's own explanation is one line,
-\(P = C_\mathrm{dynamic}\,V^{2}f + P_\mathrm{leakage}\), with every term pushed down. This report measures each term on a real card and takes them away one at
-a time. The short answer: <b>the ET-SoC-1 is low power mostly because it runs at 0.52 V and 600 MHz where a GPU runs near
-0.85 V and 1,400 MHz (a factor of 6 in switching power for the same capacitance), because whatever is not computing is
-gated off (an integer loop on all 1,024 cores costs 1.5 W), and because it does 28 times fewer FLOPs per second.</b> It is
-not more efficient per FLOP at dense matmul: the A100 spends 1.3 pJ per FLOP at the board, this card 7.0 pJ. And the term
-Esperanto's slide leaves without a number, leakage, is the largest single item on this card: 23 W at 80 °C.</p>
+\(P = C_\mathrm{dynamic}\,V^{2}f + P_\mathrm{leakage}\), with every term pushed down. This report measures each term on a
+real card and takes them away one at a time.</p>
+<p class="lede">The short answer: <b>the ET-SoC-1 is low power mostly because it runs at 0.52 V and 600 MHz where an A100 runs
+near 0.85 V and 1,160–1,410 MHz (a factor of 5 to 6 in switching power for the same capacitance), because whatever is not
+computing is clock-gated (an integer loop on all 1,024 cores, which Esperanto calls minions, costs 1.5 W), and because it
+does 14 to 28 times fewer FLOPs per second (fp16 or fp32 here, against the A100's bf16).</b> It is not more efficient per
+FLOP at dense matmul: the A100 spends 1.3 pJ per bf16 FLOP at the board, this card 3.3 pJ in fp16 and 7.0 pJ in fp32. And
+the term Esperanto's slide leaves without a number, leakage, is the largest single item on this card: 23 W at 80 °C.
+Clock gating stops idle circuits switching, but no power gating was found on this card, so they still leak.</p>
 
 <div class="kpis">
-  <div class="card kpi"><div class="lab">Switching power, same capacitance</div><div class="val">6.3× less</div><div class="sub">0.52 V and 600 MHz against about 0.85 V and 1,410 MHz: V² gives 2.7×, the clock 2.35×</div></div>
-  <div class="card kpi"><div class="lab">An idle-looping core</div><div class="val">1.4 mW</div><div class="sub">1,024 minions in an integer loop add 1.5 W; a gated tensor op 1.9 W; random fp32 27.6 W</div></div>
-  <div class="card kpi"><div class="lab">Leakage at 80 °C</div><div class="val">23 W</div><div class="sub">of 36 W idle; 14 W at 62 °C. It grows 0.65 W per °C</div></div>
+  <div class="card kpi"><div class="lab">Switching power, same capacitance</div><div class="val">5–6× less</div><div class="sub">0.52 V and 600 MHz against about 0.85 V and 1,160–1,410 MHz: V² gives 2.7×, the clock 1.9–2.35×</div></div>
+  <div class="card kpi"><div class="lab">A core spinning in an integer loop</div><div class="val">1.4 mW</div><div class="sub">1,024 minions add 1.5 W (the energy manual's faster addi loop, at twice the instruction rate, costs 2.1 mW per minion); a tensor op on zeros 1.9 W; random fp32 27.6 W</div></div>
+  <div class="card kpi"><div class="lab">Leakage at 80 °C</div><div class="val">23 W</div><div class="sub">of 36 W idle; 14 W at 62 °C. It grows 0.65 W per °C at 80 °C</div></div>
   <div class="card kpi"><div class="lab">Energy per multiply-add, over idle</div><div class="val">0.32 · 2.7 · 6.0 pJ</div><div class="sub">int8 · fp16 · fp32 on random data. The chip was built for the first</div></div>
-  <div class="card kpi"><div class="lab">Dense matmul, per FLOP at the board</div><div class="val">7.0 vs 1.3 pJ</div><div class="sub">this card against an A100 with tensor cores: low power is not low energy per FLOP</div></div>
+  <div class="card kpi"><div class="lab">Dense matmul, per FLOP at the board</div><div class="val">3.3–7.0 vs 1.3 pJ</div><div class="sub">fp16–fp32 here against the A100's bf16 tensor cores: low power is not low energy per FLOP</div></div>
 </div>
+
+<p class="small"><b>Terms.</b> The ET-SoC-1's compute cores are <i>minions</i>: small in-order RISC-V cores, 32 to a
+<i>shire</i>, each shire with 4 MB of SRAM that these cards split into a 512 KB L2 cache, a 1 MB slice of the chip-wide L3
+and a 2.5 MB scratchpad. A minion's tensor unit multiplies tiles with <i>TensorFMA</i>, a matrix multiply-accumulate
+instruction (one fp32 op is 4,096 multiply-adds), fed by <i>TensorLoad</i>, a bulk load of operands into the minion's L1
+scratchpad. The service processor's firmware runs a <i>governor</i> that sets the clock and voltage (600, 700 or 800 MHz),
+and the board's power-management controller (PMIC) meters the 12 V input and three <i>rails</i>: minion, SRAM and NoC, the
+on-chip mesh network. <i>The Horace experiment</i> is this project's repeat, on this card, of Horace He's test of matrix
+multiplies on predictable against random data; its power and thermal models are used here. More in the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
 
 <h2>1. The comparison</h2>
 <div class="table-wrap wide"><table id="cmp"></table></div>
 <p>Same process, 44% of the transistors, 69% of the die, and a fifth of the power. But also a twenty-eighth of the matmul
-throughput, so per FLOP the GPU wins by five. Per transistor and per square millimetre the ET-SoC-1 really is cooler, by 2.3
-and 3.6 times. The rest of this report asks where that comes from.</p>
+throughput in fp32 (a fourteenth in fp16), so per FLOP the A100's bf16 tensor cores win by 5.4× against fp32 and 2.6×
+against fp16.</p>
+<p>Against the A100's fp32 CUDA-core datasheet figure instead (19.5 TFLOPS at 400 W, 20.5 pJ per FLOP, no tensor cores),
+this card's 7.0 pJ is about 2.9× better; the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">matmul efficiency report</a>, whose faster kernel
+ran ±1 and ±2 operands at 57 W, puts it at 3.4×. The verdict depends on which precision the GPU is allowed. Per transistor
+and per square millimetre the ET-SoC-1 really is cooler, by 2.3 and 3.6 times. The rest of this report asks where that
+comes from.</p>
 
 <h2>2. Esperanto's equation, measured</h2>
 <p>At Hot Chips 33 Esperanto set the target as six chips on a 120 W card: under 20 W per chip, half of it for the thousand
@@ -32,38 +51,54 @@ capacitance) with the minion they needed (0.01 W, 1 GHz, 0.425 V, 0.04 nF): a re
 V² ("hard": circuits and SRAM) and 58× in capacitance ("very hard": architecture). The card lets each term be read off.
 Dividing a workload's power over idle by 1,024 minions, V² and f gives its effective switched capacitance per minion:</p>
 <div class="table-wrap wide"><table id="cdyn"></table></div>
+<p class="small">Esperanto's target row: by P/(V²f), 10 mW at 0.425 V and 1 GHz is 0.055 nF, so the slide's 0.040 nF would
+leave about 3 mW for the leakage its equation includes. The measured rows are power over idle, which leaves leakage out.</p>
 <ul>
 <li><b>Capacitance: the architecture term holds.</b> An integer loop switches 0.009 nF per minion, a fully gated tensor op
 0.012 nF, int8 multiply-adds on random data 0.061 nF. The slide's 0.04 nF sits in the middle of the chip's intended
 workloads. Only floating-point multiply-adds on random data, which the chip was not designed around, reach 0.15 to 0.17 nF.</li>
-<li><b>10 mW per core: about right for int8,</b> even at this card's higher voltage: 4 mW on constant data and 10 mW on
-random data. fp32 on random data costs 27 mW per core.</li>
-<li><b>Voltage and clock: this card is not at the advertised point.</b> Its lowest operating point is 0.52 V at 600 MHz,
-and below 65 °C the firmware raises it to 0.62 V at 800 MHz. Esperanto's "about 0.4 V, 20 W" is a different operating
-point from anything this card's firmware uses.</li>
+<li><b>10 mW per core: the switching part fits for int8,</b> even at this card's higher voltage: 4 mW over idle on constant
+data and 10 mW on random data. But Esperanto's 10 mW was the whole budget, leakage included, and this card's minion rail
+alone reads 22 W under int8 random data at the end of a 7 s run (about 82 °C), 21.7 mW per minion. fp32 on random data
+switches 27 mW per core.</li>
+<li><b>Voltage and clock: this card is not at the advertised point.</b> Its lowest operating point is 0.52 V at 600 MHz.
+While the die reads 65 °C or less (whole degrees) and board power is under 65 W, the firmware steps it up through 0.57 V at 700 MHz to 0.62 V at 800 MHz
+(see <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-measured">the DVFS loop, and the
+leakage</a>). Esperanto's "about 0.4 V, 20 W" is a different operating point from anything this card's firmware uses.</li>
 </ul>
 
-<h2>3. Ablations</h2>
+<h2 id="ablations">3. Taking the terms away one at a time</h2>
 <h3>Activity: what is not computing costs almost nothing</h3>
-<div class="chart-title">Where the board's watts go in five states, by the model fitted in the Horace experiment (fixed part, leakage, state machines, register clocking, data toggles)</div>
+<div class="chart-title">Where the board's watts go in five states, by the model fitted in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#from-flips-to-watts">the Horace experiment</a> (fixed part, leakage, state machines, register clocking, data toggles)</div>
 <div class="legend" id="stack-leg"></div>
 <div class="chart scroll" id="stack"></div>
+<p class="small">Bars are the fitted model's split, so they differ from the measured table above by under 1 W (random
+fp32: 63.1 W modelled, 63.9 W measured).</p>
 <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:14px">
   <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Power over idle against the number of active minions</div><div class="chart" id="cores"></div></div>
   <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Energy per multiply-add by precision and data</div><div class="chart" id="prec"></div></div>
 </div>
 <ul>
 <li><b>The general-purpose side is nearly free.</b> 1,024 minions spinning in an integer loop add 1.46 W to the idle card:
-1.4 mW per core, 8 pJ per instruction. Esperanto's claim that RISC-V compatibility costs little is borne out. During a
-tensor instruction the integer pipeline sleeps; a fully gated TensorFMA (zeros) costs 1.9 W for all cores.</li>
-<li><b>Power is linear in active cores:</b> 25.6 mW per minion at 256, 512 and 768 active, 27.0 at 1,024. Idle cores cost
-nothing measurable; there is no cliff and no floor beyond the card's idle.</li>
+1.4 mW per core, 8 pJ per instruction. That loop, four adds and a branch, issues about 0.3 instructions per cycle on
+hart 0; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#a-core-that-is-awake">energy manual's</a>
+tighter addi loop draws 2.1 mW per minion on one hart and 3.4 mW on both, and a nop or a fence costs 4.5–5.3 pJ per issue
+slot. Esperanto's claim that RISC-V compatibility costs little is
+borne out. During a tensor instruction the integer pipeline sleeps; a fully gated TensorFMA (zeros) costs 1.9 W for all
+cores.</li>
+<li><b>Power is close to linear in active cores:</b> 25.6 mW per minion at 256 and 512 active, 26.2 at 768 and 27.0 at
+1,024; a line through zero fits 26.5 mW per minion. Idle cores cost nothing measurable; there is no cliff and no floor
+beyond the card's idle.</li>
 <li><b>Gating follows the data.</b> At the same FLOPs the fp32 matmul adds 1.9 W on zeros, 10.6 W on ones and 27.6 W on
 random values. A multiply-add whose operand is zero gets no valid bit and clocks no register; a constant clocks registers
-but toggles no data (the Horace experiment's sections 3 and 9 predict these from the RTL to under a watt).</li>
+but toggles no data. The Horace experiment predicts these from the RTL to 0.5 W rms
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#from-flips-to-watts">section 3</a>), and 14
+structured matrices priced before they ran to 0.9 W rms
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#custom-workloads-structured-matrices">section
+9</a>).</li>
 <li><b>Precision is the biggest lever inside the chip.</b> On random data an int8 multiply-add costs 0.32 pJ over idle, fp16
-2.7 pJ and fp32 6.0 pJ: a factor of 19 between the type the chip was built for and the one a GPU benchmark uses. The int8
-unit also runs 6.9 times more multiply-adds per second (51 per cycle per minion against 7.5).</li>
+2.7 pJ and fp32 6.0 pJ: a factor of 19 between int8, the type the chip was built for, and fp32. The int8 unit also runs
+6.9 times more multiply-adds per second (51 per cycle per minion against 7.5).</li>
 </ul>
 
 <h3>Voltage and clock</h3>
@@ -72,87 +107,148 @@ unit also runs 6.9 times more multiply-adds per second (51 per cycle per minion 
   <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Leakage: idle board power against die temperature, with the fitted exponential</div><div class="chart" id="leak"></div></div>
 </div>
 <ul>
-<li><b>The card has two operating points, and they differ as CV²f says.</b> From a cool die the governor runs kernels at
-800 MHz and 0.62 V; past 65 °C it drops to 600 MHz and 0.52 V. The same kernels at nearly the same temperature (64 to
-68 °C) draw, over idle: zeros 3.9 against 1.9 W, ones 20.6 against 10.2 W, random fp32 about 52 against 26 W. That is 2.0×
-the switching power for 1.33× the clock; V²f predicts 1.90×. Energy per operation rises 1.5× for 33% more speed.</li>
+<li><b>The card has three operating points (600, 700 and 800 MHz); the two ends differ as CV²f says.</b> From a cool die
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-measured">the firmware's clock governor runs
+kernels at 800 MHz</a> and 0.62 V; past 65 °C, or 65 W at the board, it steps back down to 600 MHz and 0.52 V. The same
+kernels at nearly the same temperature (64 to 68 °C) draw, over idle: zeros 3.9 against 1.9 W, ones 20.6 against 10.3 W,
+random fp32 about 53 against 27 W. The 800 MHz figures are the highest readings before the governor stepped down; random
+data held 800 MHz for at most 0.3 s. That is about 2.0× the switching power for 1.33× the clock; V²f predicts 1.90×.
+Energy per operation rises 1.5× for 33% more speed.</li>
 <li><b>Idle pays for voltage too:</b> 35.0 W at 0.62 V against 28.1 W at 0.52 V, both at 65 °C, a quarter more for a tenth
 of a volt, from leakage and the always-running clocks.</li>
 <li><b>Extrapolated to a GPU's operating point,</b> the same silicon is a GPU-class part. Random fp32 switches 27.6 W here;
 at 0.85 V and 1,410 MHz the same capacitance would switch 175 W, before leakage, which also grows with voltage.
-Esperanto's own model says the same: 164 W at 0.75 V, 275 W at the highest voltage. This card's measured points sit on
-that curve: it interpolates to about 49 W at 0.52 V, and the board measures 47 W on ones and 64 W on random fp32.</li>
+Esperanto's own model is in the same range: about 230 W at 0.85 V, 164 W at 0.75 V. This card's measured board power at
+0.52 V, 47 W on ones and 64 W on random fp32, brackets the 44 to 49 W the curve gives there (depending on how its published
+points are interpolated), although the curve is chip power at its own clock and workload.</li>
 </ul>
 
 <h3>Leakage and temperature</h3>
 <ul>
-<li>Idle board power follows \(12.6\,\mathrm{W} + 23.3\,\mathrm{W}\,e^{(T-80\,^\circ\mathrm{C})/36\,^\circ\mathrm{C}}\) from 64 to 88 °C, to 0.2 W. At 80 °C that is 23 W of
-leakage in a 36 W idle; at 62 °C, where the card settles after a night idle, 14 W in 27 W.</li>
-<li>This is the term that keeps the measured card from Esperanto's headline. The minion, SRAM and mesh rails alone read
+<li>Idle board power follows \(12.6\,\mathrm{W} + 23.3\,\mathrm{W}\,e^{(T-80\,^\circ\mathrm{C})/36\,^\circ\mathrm{C}}\) from 64 to 88 °C, to 0.2 W rms (the
+idle law). At 80 °C that is 23 W of leakage in a 36 W idle; at 62 °C, where the card settled after the night of 20–21
+September, 14 W in 27 W. After about 20.6 hours without a workload (apart from a 5 s probe five minutes before), on a
+warmer 22 September, it sat at 73 °C and 31.8 W, which this law predicts to within 0.01 W.</li>
+<li>This is the term that keeps the measured card from Esperanto's headline. The minion, SRAM and NoC rails alone read
 22 W with every multiply-add gated, at 80 °C. A cooler die and the 0.4 V operating point would both cut it: leakage falls
 exponentially with temperature and steeply with voltage.</li>
-<li>It also makes the card thermally fragile: each degree adds 0.65 W, and on this card's cooling each sustained watt adds
-about 1.5 °C, a loop gain near one at 80 °C. The Horace experiment's section 8 turns that into a budget: about 3 W of
-sustained switching before the die runs away to 90 °C.</li>
+<li>It also makes the card thermally fragile: each degree adds 0.65 W at 80 °C, and on this card's cooling each sustained
+watt adds about 1.5 °C, a loop gain near one (0.95) at 80 °C. The Horace experiment's
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">section 8</a>
+turns that into a budget: about 3 W of sustained switching before the die runs away to 90 °C in 21 September's room, and
+0.3 to 0.7 W under 22 September's warmer conditions.</li>
 </ul>
 
 <h3>Memory</h3>
 <ul>
-<li>Streaming tensors from LPDDR4x at 75 GB/s, more than half of the chip's 137 GB/s, adds 10.7 W: 18 pJ per bit end to end
-(DRAM, PHY, controller, mesh and cache fills). Streaming from the shire's own L2 SRAM at 2.4 TB/s adds 6.2 W: 0.3 pJ per bit.</li>
-<li>An A100's HBM2e moves 1,555 GB/s, eleven times more. Esperanto's choice trades bandwidth per chip for power, cost and
-capacity, and gets bandwidth back by using six chips per card.</li>
+<li>Streaming tensors from LPDDR4x at 75.5 GB/s, more than half of the datasheet's 137 GB/s (63% of the 119 GB/s that
+these cards' DDR clock allows), adds 10.7 W: 142 pJ per byte (18 pJ per bit) end to end (DRAM, PHY, controller, mesh and
+cache fills), on a buffer whose contents were never set. The energy manual's later measurements put a DRAM byte at 122 pJ
+for 1 KB tensor loads over a buffer likewise never written (its per-level probe,
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-by-level">section 4.2</a>), and at 91 (zeros) to 129 (random) pJ for tensor loads of known
+data: 11–16 pJ per bit.</li>
+<li>Streaming from the shire's own L2 cache at 2.45 TB/s adds 6.2 W: 2.6 pJ per byte (0.3 pJ per bit), as the energy
+manual's L2 row (2.5 pJ per byte) confirms.</li>
+<li>The figures in this section come from two 7 s strict-start runs per configuration at 80 °C;
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">the energy manual,
+section 4</a>, has the later measurements, with bars from repeated passes on two cards.</li>
+<li>An A100 moves 1,555 to 2,039 GB/s, eleven to fifteen times more. Esperanto's choice trades bandwidth per chip for
+power, cost and capacity, and gets bandwidth back by using six chips per card.</li>
 </ul>
 
 <h2>4. Putting the terms together</h2>
 <p>Take the switching power of each chip under its matmul and split it with the equation. The A100 measured by Horace He
-draws 330 W under load and 88 W idle, so about 242 W switches, at about 0.85 V and 1,410 MHz: 237 nF of effective
-capacitance. This card's fp32 matmul switches 27.6 W at 0.52 V and 600 MHz: 172 nF.</p>
+draws 330 W under load and 88 W idle, so about 242 W switches, at about 0.85 V and 1,160–1,410 MHz: 237–288 nF of
+effective capacitance. This card's fp32 matmul switches 27.6 W at 0.52 V and 600 MHz: 172 nF.</p>
 <div class="table-wrap"><table>
-<thead><tr><th>Term</th><th class="num">A100</th><th class="num">ET-SoC-1</th><th class="num">ratio</th><th>How it was established here</th></tr></thead>
+<thead><tr><th>Term</th><th class="num">A100</th><th class="num">ET-SoC-1 (fp32)</th><th class="num">ratio</th><th>How it was established here</th></tr></thead>
 <tbody>
-<tr><td>Switched capacitance</td><td class="num">237 nF</td><td class="num">172 nF</td><td class="num">1.4×</td><td class="small">power over idle ÷ V²f; linear in active cores; 9 to 172 nF for the whole chip, depending on workload, data and precision</td></tr>
+<tr><td>Switched capacitance</td><td class="num">237–288 nF</td><td class="num">172 nF</td><td class="num">1.4–1.7×</td><td class="small">power over idle ÷ V²f; linear in active cores; 9 to 172 nF for the whole chip, depending on workload, data and precision</td></tr>
 <tr><td>V²</td><td class="num">0.72 V²</td><td class="num">0.27 V²</td><td class="num">2.7×</td><td class="small">on-die voltage telemetry; the 0.62 V point costs 1.5× per op, as V² predicts. The A100's voltage is an assumption: 0.75 to 0.95 V gives 2.1 to 3.3×</td></tr>
-<tr><td>Clock</td><td class="num">1,410 MHz</td><td class="num">600 MHz</td><td class="num">2.35×</td><td class="small">cycle counter against wall clock; 546 cycles per op for every data pattern</td></tr>
-<tr><td><b>Switching power</b></td><td class="num"><b>242 W</b></td><td class="num"><b>27.6 W</b></td><td class="num"><b>8.8×</b></td><td class="small">1.4 × 2.7 × 2.35</td></tr>
+<tr><td>Clock</td><td class="num">1,160–1,410 MHz</td><td class="num">600 MHz</td><td class="num">1.9–2.35×</td><td class="small">cycle counter against wall clock here, 546 cycles per op for every data pattern; for the A100, 1,410 MHz is the maximum boost and the capped random-data run is at least 1,160 MHz (257/312 of peak), probably near 1,230 (257/295 of the zero-data run); the per-FLOP rows below do not depend on the clock</td></tr>
+<tr><td><b>Switching power</b></td><td class="num"><b>242 W</b></td><td class="num"><b>27.6 W</b></td><td class="num"><b>8.8×</b></td><td class="small">1.4 × 2.7 × 2.35 at 1,410 MHz; 1.7 × 2.7 × 1.9 at 1,160 MHz</td></tr>
 <tr><td>Idle floor</td><td class="num">88 W</td><td class="num">36 W</td><td class="num">2.4×</td><td class="small">of the ET's, 23 W is leakage at 80 °C</td></tr>
-<tr><td>FLOPs per second</td><td class="num">257 × 10¹²</td><td class="num">9.2 × 10¹²</td><td class="num">28×</td><td class="small">bf16 tensor cores against fp32 on general vector units</td></tr>
-<tr><td>Capacitance switched per FLOP</td><td class="num">1.3 pF</td><td class="num">11 pF</td><td class="num">0.12×</td><td class="small">the GPU's matmul engines do 8.6 times more arithmetic per unit of switched capacitance</td></tr>
+<tr><td>FLOPs per second</td><td class="num">257 × 10¹²</td><td class="num">9.2 × 10¹²</td><td class="num">28×</td><td class="small">bf16 tensor cores against fp32 on general vector units; in fp16 this card does 18.4 × 10¹², 14×</td></tr>
+<tr><td>Capacitance switched per FLOP</td><td class="num">1.3 pF</td><td class="num">11 pF</td><td class="num">0.12×</td><td class="small">the GPU's matmul engines do 8.6 times more arithmetic per unit of switched capacitance (3.9 times against fp16, 5.0 pF)</td></tr>
 <tr><td>Switching energy per FLOP</td><td class="num">0.94 pJ</td><td class="num">3.0 pJ</td><td class="num">0.31×</td><td class="small">the voltage wins back 2.7× of that 8.6×</td></tr>
-<tr><td>Board energy per FLOP</td><td class="num">1.3 pJ</td><td class="num">7.0 pJ</td><td class="num">0.18×</td><td class="small">the idle floor is 57% of this card's power under load, 27% of the GPU's</td></tr>
+<tr><td>Board energy per FLOP</td><td class="num">1.3 pJ</td><td class="num">7.0 pJ</td><td class="num">0.18×</td><td class="small">the idle floor is 57% of this card's power under load, 27% of the GPU's; in fp16 this card spends 3.3 pJ, 0.39×</td></tr>
 </tbody></table></div>
-<p>So the ET-SoC-1's low power is three parts operating point and one part doing less. Against the A100 it switches a
-comparable amount of capacitance every cycle. It does so at a third of the V² and at 43% of the clock, which is the 6.3×
-of the headline, and everything idle is gated to nearly nothing. What it does not have is efficiency per FLOP on dense
-floating-point matmul: its general-purpose vector units switch nine times more capacitance per FLOP than tensor cores do,
-and at 9 TFLOPS its idle floor is spread over very little work. On the workload it was designed for, int8 with sparse memory
-access, the arithmetic is 19 times cheaper and the comparison would be much closer; that was not measured against a GPU here.</p>
+<p>So of the 8.8× lower switching power, most is the operating point: 6.3× at the A100's maximum clock (2.7× from V²,
+2.35× from the clock), about 5.2–5.5× at the 1,160–1,230 MHz its capped random-data run implies. The rest, 1.4–1.7×, is
+switching less capacitance per cycle.</p>
+<p>Against the A100 it switches a comparable amount of capacitance every cycle. It does so at a third of the V² and at
+43–52% of the clock, which is the 5–6× of the headline, and everything idle is clock-gated to nearly no switching power.
+What it does not have is efficiency per FLOP on dense floating-point matmul: its fp32 multiply-adds switch nine times more
+capacitance per FLOP than the A100's bf16 tensor cores do (four times in fp16), and at 9 TFLOPS its idle floor is spread
+over very little work. On the workload it was designed for, int8 with sparse memory access, the arithmetic is 19 times
+cheaper than fp32 and the comparison would be much closer; that was not measured against a GPU here.</p>
 
 <h2>5. Caveats</h2>
 <ul>
 <li>No A100 was measured here. Its numbers are the datasheet's and Horace He's (one GPU, bf16 8192³ matmul, a 330 W
-limit). Its core voltage is not published; 0.85 V is an assumption, and the table gives the range.</li>
-<li>Everything is board power, which includes LPDDR4x, regulators (about 7 W of the 28 W under random data never reaches
-the die) and PCIe. Esperanto's 20 W is a chip figure at an operating point this card's firmware does not offer.</li>
-<li>The 800 MHz figures come from seven short runs in which the governor changed the clock within seconds, read with
-telemetry whose fields are sampled a few milliseconds apart. They agree with V²f to 5%, and deserve a dedicated run from a
-cool die (<code>tools/ettelem/run_vf_cold.sh</code> is written for it; the die needs hours idle to get below 65 °C).</li>
-<li>The card sits in a desktop chassis and idles at 62 to 80 °C. In a server airflow it would run cooler and leak less.</li>
+limit). Its core voltage is not published; 0.85 V is an assumption, and the table gives the range. Nor is its clock under
+the 330 W cap: 1,410 MHz is an upper bound.</li>
+<li>Everything is board power, which includes LPDDR4x, regulators and PCIe. Late in a run random data draws 29.5 W more
+than zeros, and about 7 W of that is on no rail sensor; by the later fit in
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits of
+observability, section 4.2</a>, about 4.4 W of that is regulator delivery loss, and the rest is not attributed. Esperanto's
+20 W is a chip figure at an operating point this card's firmware does not offer.</li>
+<li>The 800 MHz figures come from seven short runs in which the governor changed the clock within seconds. Board power
+updates about every 133 ms, and one telemetry sample reads its fields over about 22 ms. They agree with V²f to 5%, and
+deserve a dedicated run from a cool die (<code>tools/ettelem/run_vf_cold.sh</code> is written for it). The die gets below
+65 °C only after hours idle in a cool room: after 20.6 hours on a warmer day it was still at 73 °C.</li>
+<li>The card sits in a desktop chassis: left alone it settled at 62 °C one night and at 73 °C on a warmer day, and every
+run here launched at 80 °C. In a server airflow it would run cooler and leak less.</li>
+<li>One card. The second working card, aifoundry3, switches about 8% less power for the same work
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-the-second-card-says-about-the-model">the DVFS report, section 7</a>;
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-second-card-and-what-transfers">the Horace
+experiment, section 10</a>), so the capacitances here are this card's.</li>
 </ul>
 
 <h2>6. Method and sources</h2>
 <ul>
-<li>Every configuration ran twice for 7 s under the strict start of the Horace experiment (heat to 84 °C if below, idle to
-the 81→80 °C step, launch), in shuffled order, with 10 Hz telemetry. Power is the mean over seconds 1 to 3 moved to the launch
-temperature with the measured leakage slope. Repeats agree to 0.05 W for most configurations.</li>
-<li><code>tools/ettelem/run_ablation.sh build/ablation1 tools/ettelem/ablation.cfg 2 7</code>, then
-<code>analyze_ablation.py</code>. Data: <code>docs/reports/data/2026-09-21-horace-aifoundry2/ablation*</code>,
-<code>vf.json</code>, <code>model.json</code>. Notes and quotes: <code>docs/research/why-low-power.md</code>.</li>
+<li>Every configuration ran twice for 7 s under the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#strict-temperature-control">strict start of the
+Horace experiment</a> (heat to 84 °C if below, idle to the 81→80 °C step, launch), in shuffled order, with 10 Hz
+telemetry. Power is the mean over seconds 1 to 3 moved to the launch temperature with the measured leakage slope. Repeats
+agree to 0.05 W for most configurations.</li>
+<li>Commands: <code>tools/ettelem/run_ablation.sh build/ablation1 tools/ettelem/ablation.cfg 2 7</code>, then
+<code>tools/ettelem/analyze_ablation.py</code>. <code>tools/ettelem/finish_horace.sh</code> rebuilds this page and the
+Horace experiment from the data kept in the repository. Measurements used
+<code>tools/ettelem</code>, <code>workloads/sparsity</code> and the RTL flip counts of <code>rtl-sim/fma_toggle</code>.</li>
+<li>Data, all in <code>docs/reports/data/2026-09-21-horace-aifoundry2/</code>: <code>ablation.json</code> and
+<code>ablation.txt</code> (every configuration's runs), <code>vf.json</code> (the 600 against 800 MHz runs) and
+<code>model.json</code> (the idle law and the flip model). Notes and quotes: <code>docs/research/why-low-power.md</code>,
+written on 20–21 September; where its measured numbers differ, this page supersedes them.</li>
+<li>Firmware: the governor's source was read at et-platform <code>353f20e</code>; the card's own trace strings match an
+older build (before et-platform commit <code>60b40c10f</code>, 24 September 2024). The three operating points show in this
+card's telemetry.</li>
 <li>D. Ditzel et al., "Accelerating ML Recommendation with over a Thousand RISC-V/Tensor Processors on Esperanto's ET-SoC-1
 Chip", <a href="https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf">Hot Chips 33 slides</a>, 2021,
 and <a href="https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf">IEEE Micro 42(3)</a>, 2022.</li>
 <li><a href="https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/a100/pdf/nvidia-a100-datasheet.pdf">NVIDIA A100 datasheet</a>.
 H. He, <a href="https://www.thonking.ai/p/strangely-matrix-multiplications">"Strangely, Matrix Multiplications on GPUs Run Faster When Given 'Predictable' Data!"</a>, 2024.</li>
-<li>Companion: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment on the ET-SoC-1</a>, for the data-dependent power, the RTL flip model and the thermal model used above.</li>
+<li>Versions: 21 September 2026, first published. 24 September 2026, corrected after review: the card's three operating
+points, the A100's clock under its power cap, the fp16 comparison and the matmul efficiency report's fp32 figure, the
+memory energies set against the energy manual, and the thermal budget's dependence on the day's conditions.</li>
+</ul>
+
+<h2>7. Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">The Horace experiment</a> — the flip model
+and the thermal model used here, and the strict start every run followed.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a> — the three
+operating points and when the governor moves between them, the idle law re-checked after 20 hours, and a second card that
+switches 8% less for the same work.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The energy manual</a> — per-event costs with bars
+from repeated passes on two cards, including the awake core and the bytes read from each memory level.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">Matmul efficiency</a> — the same tensor unit
+in a faster matmul loop, set against the A100's fp32 datasheet figure rather than its tensor cores.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#power">Limits of observability,
+section 4</a> — what the three rails do not meter, and where the unmetered watts go.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature">Power and temperature</a> — how often each
+power and temperature reading updates, and how idle power rises with die temperature.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — latency and bandwidth of
+each memory level on this card (its energy per byte is superseded by the energy manual).</li>
 </ul>
 </main>

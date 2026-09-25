@@ -20,8 +20,8 @@ function setText(id,html){const e=document.getElementById(id);if(e)e.innerHTML=h
 /* ---------- KPIs ---------- */
 (function(){
  setText('k-hop',`${f2(IN.hop_mm.value)} mm`);
- setText('k-noc',`${f0(UN.random_bit_data.mean)} + ${f0(UN.fixed_per_bit.mean)} fJ`);
- setText('k-noc-sub',`data-dependent + fixed, 0.485 V, fitted over 1–4 hops; loaded mesh ${f0(HN.random_bit_data.mean)} + ${f0(HN.fixed_per_bit.mean)} (the model, 1–6 hops)`);
+ setText('k-noc',`${f1(UN.random_bit_data.mean)} + ${f1(UN.fixed_per_bit.mean)} fJ`);
+ setText('k-noc-sub',`data-dependent + fixed, 0.485 V, fitted over 1–4 hops; loaded mesh ${f1(HN.random_bit_data.mean)} + ${f1(HN.fixed_per_bit.mean)} (the model, 1–6 hops)`);
  setText('k-one',`${f0(HN.per_one.mean)} vs ${f0(HN.per_transition.mean)} fJ`);
  const s09=D.scaled['0.9'];
  setText('k-09',`${f0(UN.random_bit_data.mean*s09)}–${f0(HN.random_bit_data.mean*s09)} fJ`);
@@ -49,7 +49,7 @@ function setText(id,html){const e=document.getElementById(id);if(e)e.innerHTML=h
  for(let r=1;r<5;r++){const yy=Y(gy0+r*py+py/2); el('line',{x1:X(mw/2)+3,x2:X(gx0+px/2)-3,y1:yy,y2:yy,stroke:'var(--ink-2)','stroke-width':1},svg); el('line',{x1:X(dw-mw/2)-3,x2:X(gx0+5*px+px/2)+3,y1:yy,y2:yy,stroke:'var(--ink-2)','stroke-width':1},svg);}
  const yb=Y(dh)+16; el('line',{x1:X(gx0),x2:X(gx0+px),y1:yb,y2:yb,stroke:'var(--c2)','stroke-width':2},svg); txt(svg,X(gx0+px/2),yb+14,`one hop ≈ ${f2(IN.hop_mm.value)} mm`,'lab-strong','middle');
  txt(svg,X(dw/2),Y(0)-8,`≈ ${f1(dw)} × ${f1(dh)} mm, ${IN.die_mm2.value} mm²`,'lab','middle');
- document.getElementById('meshcap').textContent=`Drawn to scale from the pitch measured on Esperanto's published die plot. 8 × 6 mesh stops: 34 minion shires (blue), the PCIe and I/O shires (pink, top row), four memory shires with their LPDDR4x PHYs down each side (amber); the corners are empty. Dots are mesh stops, lines the links between neighbours. Hover a tile.`;
+ document.getElementById('meshcap').textContent=`Drawn to scale from the pitch measured on Esperanto's published die plot. 8 × 6 mesh stops: 34 minion shires (blue) — the 32 compute shires (1,024 minions) that the other reports count, plus the master shire, which runs the firmware, and a spare — the PCIe and I/O shires (pink, top row), and four memory shires with their LPDDR4x PHYs down each side (amber); the corners are empty. The 6 × 6 grid of the other reports is the inner six columns. Dots are mesh stops, lines the links between neighbours. Hover a tile.`;
 })();
 
 /* ---------- 2. energy against distance ---------- */
@@ -112,7 +112,7 @@ function setText(id,html){const e=document.getElementById(id);if(e)e.innerHTML=h
 
 /* ---------- the model table ---------- */
 (function(){
- const rows=[['per flit-to-flit difference (a bit that differs from the same bit of the previous flit)','per_transition'],['per one-bit carried (a 1, whether it changed or not)','per_one'],['per random payload bit, data-dependent part (½ a + ½ b)','random_bit_data'],['per payload bit, independent of the data (clocking, headers, requests)','fixed_per_bit']];
+ const rows=[['<i>a</i>: per flit-to-flit difference (a bit that differs from the same bit of the previous flit)','per_transition'],['<i>b</i>: per one-bit carried (a 1, whether it changed or not)','per_one'],['per random payload bit, data-dependent part (½<i>a</i> + ½<i>b</i>)','random_bit_data'],['per payload bit, independent of the data (clocking, headers, requests)','fixed_per_bit']];
  const t=document.getElementById('modeltab'); if(!t)return;
  t.innerHTML='<thead><tr><th>At 0.485 V, 400 MHz; the model on the loaded mesh</th><th class="num">mesh rail, fJ per hop</th><th class="num">fJ per mm</th><th class="num">board power, fJ per hop</th><th class="num">fJ per mm</th></tr></thead><tbody>'+
   rows.map(r=>`<tr><td>${r[0]}</td><td class="num">${bar(HN.per_hop[r[1]],f0)}</td><td class="num">${bar(HN[r[1]],f1)}</td><td class="num">${bar(HB.per_hop[r[1]],f0)}</td><td class="num">${bar(HB[r[1]],f1)}</td></tr>`).join('')+
@@ -152,7 +152,7 @@ function setText(id,html){const e=document.getElementById(id);if(e)e.innerHTML=h
   ['ET-SoC-1 board power, everything, loaded mesh',HB.random_bit_total,'var(--c1)','measured: all pairs'],
   ['ET-SoC-1 mesh rail data, free links, at 0.9 V (× '+f2(s09)+')',{mean:UN.random_bit_data.mean*s09,lo:UN.random_bit_data.lo*s09,hi:UN.random_bit_data.hi*s09},'var(--c7)','scaled'],
   ['ET-SoC-1 mesh rail data, loaded, at 0.9 V',{mean:HN.random_bit_data.mean*s09,lo:HN.random_bit_data.lo*s09,hi:HN.random_bit_data.hi*s09},'var(--c7)','scaled'],
-  ['ET-SoC-1 mesh rail everything, scaled to 0.9 V',{mean:HN.random_bit_total.mean*s09,lo:HN.random_bit_total.lo*s09,hi:HN.random_bit_total.hi*s09},'var(--c7)','scaled; assumes the fixed part is also C·V²'],
+  ['ET-SoC-1 mesh rail, everything, loaded mesh, at 0.9 V',{mean:HN.random_bit_total.mean*s09,lo:HN.random_bit_total.lo*s09,hi:HN.random_bit_total.hi*s09},'var(--c7)','scaled; assumes the fixed part is also C·V²'],
   ...D.literature.filter(l=>l.fj_bit_mm<300).map(l=>[`${l.who}${l.v?' ('+l.v+' V)':''}`,{mean:l.fj_bit_mm,lo:(l.range||[l.fj_bit_mm])[0],hi:(l.range||[0,l.fj_bit_mm])[1]||l.fj_bit_mm},'var(--c2)',l.conditions]),
   ['plain 7 nm repeated wire, first principles, 0.485 V',{mean:D.first_principles.at_0485.per_random_bit_fj_mm[1],lo:D.first_principles.at_0485.per_random_bit_fj_mm[0],hi:D.first_principles.at_0485.per_random_bit_fj_mm[2]},'var(--c3)','200–400 fF/mm, ½CV² per transition, half the bits flip'],
   ['plain 7 nm repeated wire, first principles, 0.9 V',{mean:D.first_principles.at_09.per_random_bit_fj_mm[1],lo:D.first_principles.at_09.per_random_bit_fj_mm[0],hi:D.first_principles.at_09.per_random_bit_fj_mm[2]},'var(--c3)','same, at 0.9 V']];
@@ -226,7 +226,7 @@ function setText(id,html){const e=document.getElementById(id);if(e)e.innerHTML=h
  setText('onestext',
   `If the mesh's wires held their value between flits and only transitions cost energy, the per-hop cost would follow 2<i>P</i>(1−<i>P</i>): zero for all-zeros and for all-ones, highest at <i>P</i> = ½, symmetric about it (dashed). `+
   `It does not: all-ones costs about as much per hop as random data (${pcs(onesMore)} more), <i>P</i> = ¾ more than <i>P</i> = ¼, and the frozen line — half ones, no differences between flits at all — sits halfway up. `+
-  `Two terms fit every pattern, on both cards and both meters, to ${f2(HN.rms_pj_per_byte_hop)} pJ/B per hop on the mesh rail and ${f2(HB.rms_pj_per_byte_hop)} on board power:`);
+  `Two terms fit every pattern — <i>a</i>, an energy per bit that differs from the previous flit, and <i>b</i>, an energy per one carried — on both cards and both meters, to ${f2(HN.rms_pj_per_byte_hop)} pJ/B per hop on the mesh rail and ${f2(HB.rms_pj_per_byte_hop)} on board power:`);
  const M=W_.model[SET].noc_rail, aN=M.toggle_fj_per_bit_transition_hop.mean, bN=M.ones_fj_per_one_bit_hop.mean, s0N=M.s0_pj_per_byte_hop.mean*1000/8;
  const fb=2*aN/(2*aN+bN), Et=aN/fb, Cmm=2*(Et/L)/(IN.noc_v.value*IN.noc_v.value);
  const onesToZeros=s0N/(s0N+bN);
@@ -234,7 +234,7 @@ function setText(id,html){const e=document.getElementById(id);if(e)e.innerHTML=h
  setText('modeltext',
   `On the mesh rail, on the loaded mesh, the fit gives <b>${f0(HN.per_transition.mean)} fJ per mm</b> per flit-to-flit difference and <b>${f0(HN.per_one.mean)}</b> per one carried, the same within a few percent on both cards (per one: ${cards(HN.per_one,f0)}). `+
   `A cost per one-bit that does not need the bit to differ from the previous flit needs wires or nodes that rest at 0. The simplest case is ordinary logic whose output goes to 0 when no flit is present — a crossbar output with no grant, or data gated by valid. `+
-  `Then each one rises and falls at the ends of a train of flits, and <i>a</i> and <i>b</i> are the same energy per transition, split by how often flits come back to back: the fitted <i>b</i>/<i>a</i> puts that at about ${pc(fb)}, and a transition near ${f0(Et)} fJ per hop (${f0(Cmm)} fF/mm), ordinary wire capacitance. `+
+  `Then each one rises and falls at the ends of a train of flits, and <i>a</i> and <i>b</i> are the same energy per transition, <i>E</i><sub>t</sub>, split by how often flits come back to back: if a fraction <i>f</i> of flits is followed directly by another, <i>a</i> = <i>f</i>·<i>E</i><sub>t</sub> and <i>b</i> = 2(1−<i>f</i>)·<i>E</i><sub>t</sub>, and the fitted <i>b</i>/<i>a</i> = ${f2(bN/aN)} gives <i>f</i> ≈ ${f1(fb)}. A transition then costs about ${f0(Et)} fJ per hop: ½<i>CV</i>² at ${IN.noc_v.value} V with <i>C</i> = ${f0(Cmm)} fF/mm, ordinary wire capacitance. `+
   `Precharged structures, such as buffer arrays with precharged read lines, would also do it. The fit cannot say which circuit it is — slowing the flows at a fixed distance would; it can say that the effect is the mesh's own: it is on the mesh rail, it grows with every hop, and it is absent at <i>d</i> = 0.`);
  setText('modeltext2',
   `Either way it matters for anyone encoding data for this mesh: <b>zeros are cheap to move, ones are not</b>. `+
@@ -283,17 +283,23 @@ function setText(id,html){const e=document.getElementById(id);if(e)e.innerHTML=h
   `A plain repeated wire estimated from a predictive 7 nm kit (ASAP7) with Ho's repeater factors would cost ${f0(w485[0])}–${f0(w485[2])} fJ per random bit·mm at 0.485 V (${f0(w09[0])}–${f0(w09[2])} at 0.9 V, ${f1(w09[0]/KEK)}–${f1(w09[2]/KEK)} of Keckler's figure, which therefore holds more than an ideal wire or counts differently). The free-link mesh-rail data cost, ${f0(UN.random_bit_data.mean)}, is ${UN.random_bit_data.mean>w485[2]?'just above':'at'} the top of that range; these data cannot say how much the routers add.`);
 
  /* 9. in practice: every comparison on board power, the energy manual's meter */
- if(X.dram_read_pj_per_byte){
+ if(X.tload_dram_random_pj_per_byte){
   const perN=HN.random_bit_total.mean*8*L/1000, perB=HB.random_bit_total.mean*8*L/1000;   // pJ per byte per hop, loaded mesh
   const diag=10, ln=64, lb=line(D6,D6.map(d=>v(`wu/p0.5/hop${d}`,BK)));
   const hand=lb.intercept+diag*lb.slope;   // pJ per byte: the far scratchpad read, leaving the shire, ten hops
+  const DR=X.tload_dram_random_pj_per_byte;   // like for like with the own-scratchpad figure: both are random-data tensor loads
+  const FADDS=X.fadd_s_random_pj;   // scalar fadd.s on random data (energy manual §3.1), carried in report.json context
   const opB=32*HB.random_bit_total.mean*L/1000, opN=32*HN.random_bit_total.mean*L/1000, lane=X.fadd_ps_random_pj/8, lanes=opB/lane;
+  const addMm=L/lanes, dallyX=Math.round(addMm/0.010/10)*10;   // Dally's 10 µm per add
+  const EM='https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual';
   setText('practice',
    `<b>Per hop, a random byte costs ${f2(perN)}–${f2(perB)} pJ</b> on the loaded mesh (mesh rail to board, data-dependent and fixed together). `+
-   `A 64-byte line carried across the whole die — ${diag} hops, about ${f0(diag*L)} mm corner to corner, extrapolated from the 1–6 hops measured — costs ${f1(ln*perN*diag/1000)}–${f1(ln*perB*diag/1000)} nJ in hops alone, against ${f1(ln*X.dram_read_pj_per_byte/1000)} nJ to read the same line from DRAM and ${f2(ln*X.own_scratchpad_pj_per_byte/1000)} nJ from the shire's own scratchpad (the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">energy manual</a>, board power). `+
-   `On the same meter the ten hops are ${f1(X.dram_read_pj_per_byte/(diag*perB))}× cheaper than the DRAM read, and the whole hand-off — the far scratchpad read and leaving the shire included, about ${f1(ln*hand/1000)} nJ per line — is about ${f0(X.dram_read_pj_per_byte/hand)}× cheaper. `+
+   `A 64-byte line carried between the two farthest shires — ${diag} hops, about ${f0(diag*L)} mm of mesh travel, extrapolated from the 1–6 hops measured — costs ${f1(ln*perN*diag/1000)}–${f1(ln*perB*diag/1000)} nJ in hops alone, against ${f1(ln*DR/1000)} nJ to read the same line from DRAM and ${f2(ln*X.own_scratchpad_pj_per_byte/1000)} nJ from the shire's own scratchpad (the <a href="${EM}#bytes-through-the-memory-hierarchy">energy manual</a>, board power, random-data tensor loads). `+
+   `On the same meter the ten hops are ${f1(DR/(diag*perB))}× cheaper than the DRAM read, and the whole hand-off — the far scratchpad read and leaving the shire included, about ${f1(ln*hand/1000)} nJ per line — is about ${f1(DR/hand)}× cheaper. `+
    `Each hop adds about ${pc(perB/X.own_scratchpad_pj_per_byte)} of what reading the byte from the shire's own scratchpad costs (${f2(perB)} against ${f2(X.own_scratchpad_pj_per_byte)} pJ, board power). `+
-   `In Dally's currency — "an add is worth 10 µm of movement" — a 32-bit operand crossing one hop costs ${f1(opB)} pJ of board power (${f1(opN)} on the mesh rail alone), about ${f1(lanes)} lanes of an eight-lane <code>fadd.ps</code> on random data (${f1(lane)} pJ, with its share of instruction issue), so on this chip a floating-point add is worth ${f1(1/lanes)} of a hop — about ${f1(L/lanes)} mm — of movement.`);
+   `In Dally's currency — "an add is worth 10 µm of movement" — a 32-bit operand crossing one hop costs ${f1(opB)} pJ of board power (${f1(opN)} on the mesh rail alone), about ${f1(lanes)} lanes of an eight-lane <code>fadd.ps</code> on random data (${f1(lane)} pJ, with its share of instruction issue). `+
+   `So on this chip one lane of a vector float add is worth ${f1(1/lanes)} of a hop — about ${f1(addMm)} mm — of movement, ${dallyX} times Dally's 10 µm, because an instruction here costs far more than the adder's own 1 fJ per bit`+
+   (FADDS?`; a scalar <code>fadd.s</code> (${f1(FADDS)} pJ, <a href="${EM}#every-instruction-the-core-executes">energy manual, §3.1</a>) is worth about ${f0(FADDS/opB)} hops`:'')+'.');
  }
 
  /* 10. limits */

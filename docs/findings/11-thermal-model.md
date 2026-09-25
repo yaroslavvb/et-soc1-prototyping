@@ -1,7 +1,10 @@
 # Finding: a three-line model from transistor flips to die temperature
 
+[← Findings index](README.md) · published as [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment), section 8 (A4) ·
+numbers and sources: [05-claims.md](05-claims.md)
+
 **Sources:** E17 (the fit and the validation), E11 and E13 (the flip counts), E9 and E12 (the measurements
-fitted), E15 and E16 (data it was tested on). Published as A4 §8.
+fitted), E15 and E16 (data it was tested on).
 
 The model answers: *given a workload's operand values and how many cores run it, what will the card draw and
 how hot will the die get?*
@@ -27,8 +30,11 @@ heat    T(t)   = 22.8 °C + Σ_k x_k(t),    τ_k · dx_k/dt = R_k · P(t) − x_
 |---|---|---|---|---|---|---|---|
 | R_k (°C/W) | 0.106 | 0.050 | 0.234 | 0.136 | **0.860** | 0.081 | **1.47** |
 
+22.8 °C is the fitted intercept of the main session, not the room temperature; each session has its own (the
+afternoon's is 28.0 °C).
+
 The power line has a fixed part, leakage that grows exponentially with die temperature, the tensor state
-machines of the active minions, and one energy per kind of flip. The heat line is a Foster chain: RC stages in
+machines of the active [minions](README.md#terms), and one energy per kind of flip. The heat line is a Foster chain: RC stages in
 series, fitted on a fixed grid of time constants with every resistance held non-negative.
 
 ## How it was fitted, and what that does about overfitting
@@ -58,7 +64,7 @@ Controls on overfitting:
 
 ## How well it predicts — held out, fitting nothing
 
-The first published version of this report quoted a **12% median error** for the time to 90 °C without saying
+Version 4 of the Horace report (A4, commit `07f7d04`) quoted a **12% median error** for the time to 90 °C without saying
 that the thermal network and the leakage had been fitted on the very runs it was "predicting". That was a fit
 number. The honest test (E17) refits **every** parameter on the first 7,400 s of the long session plus E9,
 freezes the model, and predicts the 12 later runs. The thermal state at each launch comes from an observer
@@ -79,7 +85,7 @@ The held-out runs include four patterns and two core counts the thermal fit had 
   the DFT pair's power is 2.8 W low, and near this card's flip budget a watt of error is tens of seconds.
 - **At ten minutes it runs hot,** by 3 to 5 °C on low-power runs.
 - **The slow stages are not pinned down.** Between the half fit and the full fit the fast stages and the
-  leakage barely move (0.106 and 0.050 °C/W at 1.5 and 4 s in both; 24.4 against 23.3 W of leakage at 80 °C),
+  leakage barely move (0.10 and 0.05 °C/W at 1.5 and 4 s in both fits; 24.4 against 23.3 W of leakage at 80 °C),
   but the 400 s stage goes from 0.60 to 0.86 °C/W, the 1,000 s stage from 0.38 to nothing, and the
   operand-word energy from 20 to 15.5 fJ. **Do not quote the slow resistances as physics.**
 - **It cannot run free for hours.** With a loop gain of 0.95, a 1% error in leakage grows into degrees and the
@@ -99,7 +105,8 @@ gives **3.1 °C**, and the loop gain passes 1 at 82 °C:
 | network alone | 0.07 °C | 0.22 | 0.47 | 1.21 |
 | with leakage feedback at 80 °C | 0.07 | **0.25** | **0.62** | **3.12** |
 
-The practical consequence — a hard ceiling of about 3 W of sustained switching — is in
+The practical consequence — a hard ceiling of about 3 W of sustained switching in 21 September's room, less on a
+warmer day — is in
 [12-heat-management.md](12-heat-management.md).
 
 ## Does it transfer to another card? Yes, up to one number
@@ -118,9 +125,9 @@ aifoundry2.
 - **The operating point does not explain the 8%**, and points the other way: aifoundry3 runs at 523 mV against
   518 mV at the same clock, so \(CV^2f\) predicts 2% *more* switching power, not 8% less. The gap is a
   property of the card — silicon, package or board regulator — and separating those needs a third working card.
-- **The leakage law transfers too, further than it should.** Fitted on aifoundry2 between 62 and 90 °C and
-  extrapolated 25 °C below that range onto the other card, it predicts aifoundry3's idle power to **+0.73 W**
-  out of 25 W.
+- **The leakage law transfers too, further than it should.** Fitted on aifoundry2's idle samples between 64 and
+  88 °C (plus the 62 °C overnight anchor) and extrapolated 7–14 °C below that range onto aifoundry3, which idled at
+  50–57 °C, it predicts aifoundry3's idle power to **+0.73 W** out of 25 W.
 - **The thermal network does not transfer.** It never claimed to: 1.47 °C/W is one card in one chassis, and
   aifoundry3 sheds heat visibly faster. Nothing in this section uses it.
 
@@ -141,3 +148,11 @@ python3 tools/ettelem/validate_flip_model.py DATA/long2 --model DATA/model.json 
 ```
 
 `DATA` is `docs/reports/data/2026-09-21-horace-aifoundry2/`. `tools/ettelem/finish_horace.sh` runs all of it.
+
+## Related
+
+- [10-data-dependent-power.md](10-data-dependent-power.md): the measurements and the RTL flip counts behind the model.
+- [12-heat-management.md](12-heat-management.md): the flip budget and what to do with it.
+- [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md): the leakage law re-checked after a day's idle, and why nothing
+  switches the leakage off.
+- [14-card-behaviour.md](14-card-behaviour.md): the sensor, the protocol and the second card's differences.

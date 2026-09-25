@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hand it to the next shire</title>
-<meta name="description" content="A multi-stage computation that passes each stage's output to a neighbouring shire's scratchpad instead of writing it to DRAM runs 12 times faster and uses 12 times less energy per byte. Measured on two ET-SoC-1 cards, with the boundary where the advantage appears and the one where it runs out.">
+<title>Hand it to the next shire: on-chip relay vs DRAM · ET-SoC-1</title>
+<meta name="description" content="A multi-stage computation that passes each stage's output to another shire's scratchpad instead of writing it to DRAM runs 12 times faster and uses a twelfth of the energy per byte. Measured on two ET-SoC-1 cards, with the boundary where the advantage appears and the one where it runs out.">
 <style>
 :root {
   color-scheme: light;
@@ -42,6 +42,7 @@ h3 { font-size: 1rem; margin: 22px 0 8px; }
 a { color: var(--c1); }
 code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86em; }
 code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre code { padding: 0; background: none; border-radius: 0; font-size: inherit; }
 pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 18px 0 8px; }
@@ -95,26 +96,38 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 .math-display svg { max-width: none; }
 .math-inline { color: var(--ink); }
 .math-inline svg, .math-display svg { vertical-align: middle; }
+h2, h3 { scroll-margin-top: 12px; }
+.hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 </style>
 </head>
 <body>
 <main>
 <h1>Hand it to the next shire</h1>
-<p class="byline">Two ET-SoC-1 cards, 22 September 2026 · <code>workloads/onchip --test relay</code>, a new probe · asking whether on-chip communication can beat main memory for a real computation · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">measurement reports</a></p>
+<p class="byline">22 September 2026 · two ET-SoC-1 cards, aifoundry2 and aifoundry3 · a new probe, <code>workloads/onchip</code> (<code>--test relay</code>) · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
-<p class="lede">A shire's own scratchpad runs at 2.5 TB/s and the shire next door at about 1 TB/s, while DRAM
+<p class="lede">A shire's own scratchpad runs at 2.5 TB/s and another shire's at about 1 TB/s, while DRAM
 manages 76 GB/s for the whole chip. Those are bandwidths, not results. The question is whether a computation
-can be rearranged to collect them. <b>It can. A chain of stages that hands each stage's output to a
-neighbouring shire, instead of writing it to DRAM and reading it back, runs 12.3 times faster and uses 12
-times less energy per byte — and the same power.</b> Keeping the output in the shire's own scratchpad is
-30.7 times faster. Both numbers reproduce on a second card to within 1%, and both come with a boundary:
-below the 32 MB L3 there is almost nothing to win.</p>
+can be rearranged to collect them. <b>It can. A chain of stages that hands each stage's output to another
+shire, instead of writing it to DRAM and reading it back, runs 12.3 times faster and uses a twelfth of the
+energy per byte, at the same power.</b> The shire that receives it is the next one in ID order, which on the
+mesh is 1 to 10 hops away (3.5 on average), and which shire it is makes no measurable difference to the
+bandwidth. Keeping the output in the shire's own scratchpad is 30.7 times faster. Both numbers reproduce on a
+second card to within 2%. Both also need the data to outgrow the 32 MB L3: below that, the hand-off wins at
+most 1.4× and the shire's own scratchpad 1.3–3.3×.</p>
+
+<p class="small"><b>Terms.</b> The ET-SoC-1's cores are <i>minions</i>, 32 to a <i>shire</i>; each shire
+has 4 MB of SRAM, split on these cards into 0.5 MB of L2 cache, a 1 MB slice of the chip-wide 32 MB L3 and a
+2.5 MB <i>scratchpad</i> that any shire can address. A <i>hart</i> is one of a minion's two hardware threads.
+A <i>tensor store</i> writes a block from a minion's registers straight to memory, past its caches. The
+shires sit on a mesh network-on-chip, and a <i>hop</i> is one step between neighbouring mesh stops, 3.72 mm.
+More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">Passing each stage to the next shire</div><div class="val" id="k1"></div><div class="sub">against writing it to DRAM and reading it back</div></div>
   <div class="card kpi"><div class="lab">Keeping it in the shire's own scratchpad</div><div class="val" id="k2"></div><div class="sub">no data crosses a shire at all</div></div>
   <div class="card kpi"><div class="lab">Energy per byte, next shire vs DRAM</div><div class="val" id="k3"></div><div class="sub">at the same watts over idle</div></div>
-  <div class="card kpi"><div class="lab">Where the advantage appears</div><div class="val" id="k4"></div><div class="sub">the working set has to outgrow the L3</div></div>
+  <div class="card kpi"><div class="lab">Where the advantage appears</div><div class="val" id="k4"></div><div class="sub">of live intermediate data: it has to outgrow the 32 MB L3</div></div>
 </div>
 
 <h2>1. One kernel, three places to put the answer</h2>
@@ -144,9 +157,19 @@ draw <em>the same power</em>, and one of them gets thirty times as much done wit
 
 <p class="small" id="powernote"></p>
 
+<p class="small"><b>Re-measured.</b> On 23 September the three media were run again, three warm passes on
+aifoundry2 and four on aifoundry3, each corrected for the die's leakage, and pooled with the session above
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">the energy
+manual, §5</a>). Mean and [range] over the eight passes, per byte moved: DRAM 105.7 [99.5–111.0] pJ, next
+shire 8.6 [7.8–9.2] pJ, own scratchpad 3.99 [3.90–4.25] pJ — 12× and 26× less than DRAM. For comparison, the
+manual's energy per byte read at 600 MHz is 122 [117–129] pJ from DRAM, 2.52 pJ from the shire's own
+scratchpad and 6.65 pJ from another shire's. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy
+report</a> now quotes these values too; its own 18 September figures (148, 2.8 and 6.3 pJ, taken with the clock
+left free) are superseded.</p>
+
 <h2>3. Where the advantage comes from, and where there isn't one</h2>
 <p>The win is against DRAM, not against the memory hierarchy. Shrink the working set and the L3 quietly does
-the same job for free:</p>
+most of the same job for free:</p>
 
 <div class="chart-title">The same eight-stage relay at different working-set sizes</div>
 <div class="chart scroll" id="size"></div>
@@ -164,68 +187,106 @@ the same job for free:</p>
 
 <p id="inttext"></p>
 
-<h2>5. Distance across the mesh costs nothing</h2>
-<p>The obvious worry about handing data to another shire is the network in between. At this granularity there
-is none to speak of. Handing the slab sixteen shires away, across the width of the mesh, is not slower than
-handing it next door:</p>
+<h2>5. How far the slab moves does not change the bandwidth</h2>
+<p id="distintro"></p>
 
 <div class="table-wrap"><table id="dist"></table></div>
 
-<p>Transfers here are 32 KB per minion and deeply pipelined, so the per-hop latency of 12 cycles never
-appears; what is left is the bandwidth of a scratchpad that is not this shire's own, and that is the same
-wherever it is. The practical consequence is that placement is free: a stage can be given to whichever shire
-suits, not only to a neighbour.</p>
+<p>Transfers here are 32 KB per minion and deeply pipelined, so the 12-cycle round trip per hop never
+appears; what is left is the bandwidth of a scratchpad that is not this shire's own, and it does not depend on
+where that shire is. The practical consequence is that placement is free in bandwidth: a stage can be given to
+whichever shire suits. It is not free in energy. On a loaded mesh each hop costs 1.5–2.2 pJ per byte of
+random data (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#meaning">Heat per millimetre,
+§9</a>), about half of what a tensor load of that byte from the shire's own scratchpad costs. Every byte the
+hand-off reads has crossed 3.5 hops on average, so a stage placed on a physical neighbour should cost less than
+the energy in §2; that was not measured. This relay's slabs each hold a single value repeated, and such data costs less to carry than
+random data.</p>
 
 <h2>6. What this is good for</h2>
 <ul>
 <li><b>Any chain of passes over data that outgrows the L3.</b> Multi-stage filters, iterated stencils, a deep
 and narrow network, a stream that several kernels touch in turn. The standard shape writes the intermediate
-to memory between stages, which on this chip costs 48 GB/s. The intermediate does not have to go there.</li>
+to memory between stages, which on this chip runs at 48 GB/s of reads and writes. The intermediate does not
+have to go there.</li>
 <li><b>The unit that matters is the shire, not the minion.</b> Its scratchpad is 2.5 MB, addressable by every
 other shire, and written by a tensor store that bypasses both caches, so what one shire writes another reads
 with no coherence problem at all. That is the mechanism this whole report rests on.</li>
-<li><b>Budget one barrier per stage.</b> A chip-wide barrier costs about 5,000 cycles. At 1 MB per shire a
-DRAM stage is 830,000 cycles and an on-chip stage 27,000, so the barrier is under a fifth of even the fastest
-case, and the measured advantage is flat from one stage to thirty-two.</li>
-<li><b>Do not reach for a two-dimensional systolic array to get this.</b> The register-to-register path
-(<code>TensorSend</code>/<code>TensorRecv</code>) is immune to shire-cache contention and is the right tool
-inside a shire, but a cell receiving from two partners at once hangs a hart permanently, because the hardware
-keeps one ready flag per minion rather than one per partner. The relay here is the same idea at shire
-granularity, and it uses a path that cannot hang.</li>
+<li><b>Budget one barrier per stage.</b> A chip-wide barrier costs about 5,000 cycles (8.3 µs at 600 MHz; see
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">on-chip
+communication</a>). At 1 MB per shire a DRAM stage is 830,000 cycles, a hand-off stage 68,000 and an
+own-scratchpad stage 27,000, so the barrier is under a fifth of even the fastest case. From four stages to
+thirty-two the advantage is flat (12.0–12.5×); with one or two stages it is larger (15.3×, 13.4×), where the
+DRAM route reaches only 38 and 44 GB/s. Build the barrier with one atomic per shire and a credit release, so
+that nobody spins on a shared counter: the first version of this relay had every shire's leader poll one
+counter, which is <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">the hot line</a> of the
+companion report, and the barrier hung.</li>
+<li><b>In a two-dimensional systolic array, give each neighbour link its own minion.</b> The register-to-register
+path (<code>TensorSend</code>/<code>TensorRecv</code>) is immune to shire-cache contention and is the right tool
+inside a shire. But the hardware keeps one ready flag per minion rather than one per partner, so a minion
+that exchanges with two partners at once, as a cell of a classic 2D array does with its north and west
+neighbours, can lose a ready and hang until the chip is reset (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#a-trap-one-ready-flag-per-minion">on-chip
+communication, “A trap: one ready flag per minion”</a>). A shire has 32 minions, so each link can have its
+own; a minion that must serve two neighbours has to take them in separate phases with a barrier between. The
+relay here is the same idea at shire granularity, through the scratchpads, a path that cannot hang.</li>
 </ul>
 
 <h2>7. Method, and what is not established</h2>
 <ul>
 <li>The probe is <code>workloads/onchip</code>, new for this. A stage's output is written with a tensor store,
-which bypasses the L1 and L2 caches, so a neighbouring shire cannot read a stale line. Inputs are read with
-plain vector loads from addresses the reading minion has never written; two buffers alternate, and a minion's
-32 KB chunk is sixty-four times its 512 B of L1, so nothing it touched two stages ago survives. Every run
-verifies its own output element by element, which is what makes that argument checkable rather than
+which bypasses the L1 and L2 caches, so the shire that reads it next cannot read a stale line. Inputs are read
+with plain vector loads from addresses the reading minion has never written; two buffers alternate, and a
+minion's 32 KB chunk is sixty-four times its 512 B of L1, so nothing it touched two stages ago survives. Every
+run verifies its own output element by element, which is what makes that argument checkable rather than
 asserted.</li>
-<li>Rates come from the on-device cycle counter at the 600 MHz this card is pinned to, not the wall clock: a
-kernel launch costs a few hundred microseconds and an on-chip stage costs twenty-seven thousand cycles, so
-wall time would measure the host.</li>
-<li>Scratchpad addressing is the PRM's format 0, shire in bits [29:23]. <b>Offset 0 of a shire's scratchpad
-faults</b>; the buffers start 256 KB in, which also leaves room for two of them inside the 2.5 MB.</li>
-<li>Everything was run on aifoundry2 and repeated on aifoundry3: <span id="cards"></span>.</li>
-<li><b>Not established:</b> whether a working set larger than the 80 MB of scratchpad can be streamed through
-the same relay, which is the case where on-chip hand-off would be the only option rather than the faster one;
-we did not build the flow control that needs. The arithmetic here is one vector add, chosen to make the
-measurement about data movement — a real pipeline would have real stages, and section 4 says what that costs.
-The chip-wide barrier per stage is the simplest synchronisation and not the cheapest; a credit between
-neighbouring shires would do, and would help the on-chip media most. And the comparison is against this
-chip's DRAM at 48 GB/s, which is what the card has, not against a memory system in general.</li>
+<li>Rates come from the on-device cycle counter, converted at 600 MHz (the minion clock stayed there through
+every power burst), not from the wall clock: a kernel launch costs a few hundred microseconds and an on-chip
+stage costs 27,000–68,000 cycles, so wall time would measure the host.</li>
+<li>Scratchpad addressing is the Programmer's Reference Manual's (PRM) format 0, shire in bits [29:23].
+<b>Offset 0 of a shire's scratchpad faults</b>; the buffers start 256 KB in, which also leaves room for two of
+them inside the 2.5 MB.</li>
+<li>All 88 configurations were run on aifoundry2 and repeated on aifoundry3 (the power session of §2 ran on
+aifoundry2 only): <span id="cards"></span>.</li>
+<li><b>Not established:</b>
+<ul>
+<li>Whether a working set larger than the 80 MB of scratchpad can be streamed through the same relay. That is
+the case where on-chip hand-off would be the only option rather than the faster one, and we did not build the
+flow control it needs.</li>
+<li>Whether handing to a physical neighbour lowers the hand-off's energy per byte. Every offset measured here
+mixes near and far shires.</li>
+<li>A real pipeline. The arithmetic here is one vector add, chosen to make the measurement about data
+movement; a real pipeline would have real stages, and section 4 says what that costs.</li>
+<li>A cheaper barrier. The chip-wide barrier per stage is the simplest synchronisation, not the cheapest; a
+credit from each shire to the one that reads its output would do, and would help the on-chip media most.</li>
+<li>Other memory systems. The comparison is against this chip's DRAM, which streams 76 GB/s of plain reads
+and carries this relay's reads and writes at 48 GB/s, not against a memory system in general.</li>
+</ul></li>
 </ul>
 
 <pre><code>workloads/onchip/run_onchip.sh DATA                 # 88 configurations, milliseconds of card time each
 tools/ettelem/run_onchip_power.sh DATA 12           # board power, one burst per medium
-python3 workloads/onchip/analyze_onchip.py DATA/sweep.jsonl --power DATA --out onchip.json</code></pre>
-<p class="small">Companion: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">one hot line stops a shire</a>,
-which is what happens if the structure several shires share is a single line rather than a slab. Findings index
-and claim provenance: <code>docs/findings/</code>.</p>
+python3 workloads/onchip/analyze_onchip.py DATA/sweep.jsonl DATA3/sweep.jsonl --power DATA --out onchip.json
+                                                    # DATA3: the same sweep from the second card</code></pre>
+<p class="small">Raw data and the analysis output:
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry2">docs/reports/data/2026-09-22-onchip-aifoundry2</a>
+and <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry3">…-aifoundry3</a>.
+Versions: first published 22 September 2026; revised 24 September 2026 to say that the “next shire” is the
+next by ID rather than a mesh neighbour, to add the mesh distances and the 23 September energy re-measurement,
+and to correct the flops-per-byte unit in section 4.</p>
+
+<h2>8. Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">The energy manual, §5</a> — this relay's energy re-measured, with bars from both cards.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> — what each mesh hop costs in energy, measured with chosen bit patterns.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — the 2.5 TB/s, 1 TB/s and 76 GB/s of the lede.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the shire map, 12 cycles per hop, the chip-wide barrier and the one-ready-flag trap.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a> — the roofline that section 4 climbs, for every level of memory.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a> — the companion: what happens when the structure several shires share is a single line rather than a slab.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/2026-09-22-et-soc1-l2-mainline-starvation#landmine">L2 mainline starvation, “The landmine”</a> — the brief's last section: why a 2D systolic array hangs a hart until the chip is reset.</li>
+<li><a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/findings">docs/findings/</a> — the findings index: where every claim here comes from, and the experiment register.</li>
+</ul>
 
 <script>
-const D = {"cards":["aifoundry2","aifoundry3"],"headline":{"aifoundry2":{"dram":{"group":"headline","host":"aifoundry2","test":"relay","medium":"dram","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":6660113,"cycles_mean":6657537,"wall_s":0.012525,"bytes_per_cycle":80.61,"gb_s":48.37,"flop_per_byte":0.125,"gflop_s":6.05,"shire0_final":8.0,"wrong_elements":0,"ok":true},"scp":{"group":"headline","host":"aifoundry2","test":"relay","medium":"scp","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":217110,"cycles_mean":216607,"wall_s":0.001292,"bytes_per_cycle":2472.806,"gb_s":1483.68,"flop_per_byte":0.125,"gflop_s":185.46,"shire0_final":8.0,"wrong_elements":0,"ok":true},"hop":{"group":"headline","host":"aifoundry2","test":"relay","medium":"hop","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":543337,"cycles_mean":539296,"wall_s":0.001872,"bytes_per_cycle":988.099,"gb_s":592.86,"flop_per_byte":0.125,"gflop_s":74.11,"shire0_final":32.0,"wrong_elements":0,"ok":true}},"aifoundry3":{"dram":{"group":"headline","host":"aifoundry3","test":"relay","medium":"dram","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":6735924,"cycles_mean":6735088,"wall_s":0.01256,"bytes_per_cycle":79.703,"gb_s":47.82,"flop_per_byte":0.125,"gflop_s":5.98,"shire0_final":8.0,"wrong_elements":0,"t_start_ms":1790117953219,"t_end_ms":1790117953232,"ok":true},"scp":{"group":"headline","host":"aifoundry3","test":"relay","medium":"scp","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":215670,"cycles_mean":215380,"wall_s":0.001144,"bytes_per_cycle":2489.317,"gb_s":1493.59,"flop_per_byte":0.125,"gflop_s":186.7,"shire0_final":8.0,"wrong_elements":0,"t_start_ms":1790117953458,"t_end_ms":1790117953460,"ok":true},"hop":{"group":"headline","host":"aifoundry3","test":"relay","medium":"hop","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":543378,"cycles_mean":539564,"wall_s":0.001645,"bytes_per_cycle":988.025,"gb_s":592.81,"flop_per_byte":0.125,"gflop_s":74.1,"shire0_final":32.0,"wrong_elements":0,"t_start_ms":1790117953687,"t_end_ms":1790117953689,"ok":true}}},"intensity":[{"work":1,"ok":true,"dram":{"gb_s":48.54,"cycles":6636598,"bytes":536870912},"scp":{"gb_s":1490.91,"cycles":216058,"bytes":536870912},"hop":{"gb_s":592.69,"cycles":543494,"bytes":536870912},"scp_over_dram":30.715080346106305,"hop_over_dram":12.210341985990937},{"work":2,"ok":true,"dram":{"gb_s":47.85,"cycles":6732532,"bytes":536870912},"scp":{"gb_s":1377.08,"cycles":233917,"bytes":536870912},"hop":{"gb_s":573.36,"cycles":561817,"bytes":536870912},"scp_over_dram":28.7791013584117,"hop_over_dram":11.982445141065831},{"work":4,"ok":true,"dram":{"gb_s":47.33,"cycles":6805313,"bytes":536870912},"scp":{"gb_s":1215.51,"cycles":265011,"bytes":536870912},"hop":{"gb_s":540.31,"cycles":596177,"bytes":536870912},"scp_over_dram":25.681597295584197,"hop_over_dram":11.415803929854214},{"work":8,"ok":true,"dram":{"gb_s":48.03,"cycles":6706933,"bytes":536870912},"scp":{"gb_s":982.29,"cycles":327930,"bytes":536870912},"hop":{"gb_s":481.6,"cycles":668854,"bytes":536870912},"scp_over_dram":20.45159275452842,"hop_over_dram":10.02706641682282},{"work":16,"ok":true,"dram":{"gb_s":47.21,"cycles":6822920,"bytes":536870912},"scp":{"gb_s":685.65,"cycles":469806,"bytes":536870912},"hop":{"gb_s":395.64,"cycles":814179,"bytes":536870912},"scp_over_dram":14.52340605803855,"hop_over_dram":8.380427875450117},{"work":32,"ok":true,"dram":{"gb_s":47.08,"cycles":6841746,"bytes":536870912},"scp":{"gb_s":425.96,"cycles":756232,"bytes":536870912},"hop":{"gb_s":291.69,"cycles":1104347,"bytes":536870912},"scp_over_dram":9.047578589634664,"hop_over_dram":6.195624468988955},{"work":64,"ok":true,"dram":{"gb_s":46.63,"cycles":6908486,"bytes":536870912},"scp":{"gb_s":242.2,"cycles":1329983,"bytes":536870912},"hop":{"gb_s":191.44,"cycles":1682589,"bytes":536870912},"scp_over_dram":5.194081063692901,"hop_over_dram":4.10551147330045},{"work":128,"ok":true,"dram":{"gb_s":47.17,"cycles":6829324,"bytes":536870912},"scp":{"gb_s":129.1,"cycles":2495119,"bytes":536870912},"hop":{"gb_s":113.7,"cycles":2833118,"bytes":536870912},"scp_over_dram":2.7369090523637905,"hop_over_dram":2.4104303582785667},{"work":256,"ok":true,"dram":{"gb_s":41.84,"cycles":7699278,"bytes":536870912},"scp":{"gb_s":66.59,"cycles":4837413,"bytes":536870912},"hop":{"gb_s":62.75,"cycles":5133356,"bytes":536870912},"scp_over_dram":1.5915391969407264,"hop_over_dram":1.4997609942638621}],"size":[{"stage_bytes":65536,"ok":true,"dram":{"gb_s":281.42,"cycles":71540,"bytes":33554432},"scp":{"gb_s":372.08,"cycles":54109,"bytes":33554432},"hop":{"gb_s":274.28,"cycles":73401,"bytes":33554432},"scp_over_dram":1.3221519437140217,"hop_over_dram":0.9746286688934687},{"stage_bytes":131072,"ok":true,"dram":{"gb_s":411.65,"cycles":97815,"bytes":67108864},"scp":{"gb_s":627.41,"cycles":64177,"bytes":67108864},"hop":{"gb_s":401.34,"cycles":100327,"bytes":67108864},"scp_over_dram":1.5241345803473825,"hop_over_dram":0.9749544515972306},{"stage_bytes":262144,"ok":true,"dram":{"gb_s":409.09,"cycles":196852,"bytes":134217728},"scp":{"gb_s":948.98,"cycles":84860,"bytes":134217728},"hop":{"gb_s":517.4,"cycles":155645,"bytes":134217728},"scp_over_dram":2.319734043853431,"hop_over_dram":1.2647583661297026},{"stage_bytes":524288,"ok":true,"dram":{"gb_s":379.15,"cycles":424800,"bytes":268435456},"scp":{"gb_s":1262.59,"cycles":127564,"bytes":268435456},"hop":{"gb_s":544.57,"cycles":295757,"bytes":268435456},"scp_over_dram":3.330054068310695,"hop_over_dram":1.436291705129896},{"stage_bytes":1048576,"ok":true,"dram":{"gb_s":47.87,"cycles":6729080,"bytes":536870912},"scp":{"gb_s":1506.14,"cycles":213873,"bytes":536870912},"hop":{"gb_s":592.65,"cycles":543530,"bytes":536870912},"scp_over_dram":31.463129308543976,"hop_over_dram":12.380405264257364}],"stages":[{"stages":1,"ok":true,"dram":{"gb_s":38.03,"cycles":1058911,"bytes":67108864},"scp":{"gb_s":1390.81,"cycles":28951,"bytes":67108864},"hop":{"gb_s":582.47,"cycles":69128,"bytes":67108864},"scp_over_dram":36.571391007099656,"hop_over_dram":15.316066263476204},{"stages":2,"ok":true,"dram":{"gb_s":44.02,"cycles":1829490,"bytes":134217728},"scp":{"gb_s":1453.28,"cycles":55413,"bytes":134217728},"hop":{"gb_s":588.42,"cycles":136859,"bytes":134217728},"scp_over_dram":33.01408450704225,"hop_over_dram":13.367105860972284},{"stages":4,"ok":true,"dram":{"gb_s":47.4,"cycles":3397731,"bytes":268435456},"scp":{"gb_s":1466.13,"cycles":109855,"bytes":268435456},"hop":{"gb_s":591.15,"cycles":272452,"bytes":268435456},"scp_over_dram":30.93101265822785,"hop_over_dram":12.471518987341772},{"stages":8,"ok":true,"dram":{"gb_s":49.47,"cycles":6511078,"bytes":536870912},"scp":{"gb_s":1486.04,"cycles":216766,"bytes":536870912},"hop":{"gb_s":592.61,"cycles":543568,"bytes":536870912},"scp_over_dram":30.03921568627451,"hop_over_dram":11.979179300586214},{"stages":16,"ok":true,"dram":{"gb_s":49.61,"cycles":12986597,"bytes":1073741824},"scp":{"gb_s":1501.75,"cycles":428997,"bytes":1073741824},"hop":{"gb_s":593.32,"cycles":1085834,"bytes":1073741824},"scp_over_dram":30.27111469461802,"hop_over_dram":11.959685547268696},{"stages":32,"ok":true,"dram":{"gb_s":49.36,"cycles":26103250,"bytes":2147483648},"scp":{"gb_s":1499.44,"cycles":859316,"bytes":2147483648},"hop":{"gb_s":593.78,"cycles":2169990,"bytes":2147483648},"scp_over_dram":30.377633711507293,"hop_over_dram":12.029578606158832}],"shires":[{"shires":2,"ok":true,"dram":{"gb_s":46.68,"cycles":431336,"bytes":33554432},"scp":{"gb_s":108.35,"cycles":185814,"bytes":33554432},"hop":{"gb_s":58.24,"cycles":345697,"bytes":33554432},"scp_over_dram":2.3211225364181662,"hop_over_dram":1.24764353041988},{"shires":4,"ok":true,"dram":{"gb_s":93.34,"cycles":431390,"bytes":67108864},"scp":{"gb_s":214.7,"cycles":187543,"bytes":67108864},"hop":{"gb_s":95.61,"cycles":421157,"bytes":67108864},"scp_over_dram":2.3001928433683307,"hop_over_dram":1.0243196914506105},{"shires":8,"ok":true,"dram":{"gb_s":179.93,"cycles":447564,"bytes":134217728},"scp":{"gb_s":418.2,"cycles":192567,"bytes":134217728},"hop":{"gb_s":161.41,"cycles":498906,"bytes":134217728},"scp_over_dram":2.324237203356861,"hop_over_dram":0.8970710831990217},{"shires":16,"ok":true,"dram":{"gb_s":292.22,"cycles":551171,"bytes":268435456},"scp":{"gb_s":812.49,"cycles":198232,"bytes":268435456},"hop":{"gb_s":338.75,"cycles":475464,"bytes":268435456},"scp_over_dram":2.780405174183834,"hop_over_dram":1.1592293477516937},{"shires":32,"ok":true,"dram":{"gb_s":46.81,"cycles":6881830,"bytes":536870912},"scp":{"gb_s":1484.11,"cycles":217047,"bytes":536870912},"hop":{"gb_s":592.77,"cycles":543419,"bytes":536870912},"scp_over_dram":31.704977568895533,"hop_over_dram":12.663319803460798}],"distance":[{"hop_distance":1,"gb_s":592.69,"ok":true},{"hop_distance":2,"gb_s":703.19,"ok":true},{"hop_distance":4,"gb_s":652.37,"ok":true},{"hop_distance":8,"gb_s":686.19,"ok":true},{"hop_distance":16,"gb_s":733.46,"ok":true}],"bigsize":[{"stage_bytes":65536,"gb_s":281.42},{"stage_bytes":131072,"gb_s":411.65},{"stage_bytes":262144,"gb_s":409.09},{"stage_bytes":524288,"gb_s":379.15},{"stage_bytes":1048576,"gb_s":47.87},{"stage_bytes":2097152,"gb_s":47.87},{"stage_bytes":4194304,"gb_s":50.98},{"stage_bytes":8388608,"gb_s":53.4}],"probe":[{"method_name":"tensor_store","remote_words_wrong":0,"ok":true,"host":"aifoundry2"},{"method_name":"vector_stores","remote_words_wrong":0,"ok":true,"host":"aifoundry2"},{"method_name":"tensor_store","remote_words_wrong":0,"ok":true,"host":"aifoundry3"},{"method_name":"vector_stores","remote_words_wrong":0,"ok":true,"host":"aifoundry3"}],"power":{"idle":{"board_w":30.614248704663208,"minion_w":24.436964594127804,"sram_w":3.623879965457686,"noc_w":5.424468048359239,"n":386},"media":[{"medium":"dram","runs":11,"bytes":472446402560.0,"device_s":9.513084063333332,"wall_s":11.400000095367432,"duty":0.8344810512062296,"bytes_per_s":49662801191.98877,"over_idle_w":4.342025805140718,"pj_per_byte":104.7718732209115,"n":102,"board_w":34.956274509803926,"minion_w":24.50883333333333,"sram_w":3.7790098039215683,"noc_w":5.713274509803921},{"medium":"scp","runs":12,"bytes":15300820992000.0,"device_s":10.183322776666667,"wall_s":12.264999866485596,"duty":0.8302750010208185,"bytes_per_s":1502537170584.3596,"over_idle_w":5.301569477154974,"pj_per_byte":4.2496901939750416,"n":110,"board_w":35.91581818181818,"minion_w":24.981081818181817,"sram_w":4.5895939393939384,"noc_w":5.4314484848484845},{"medium":"hop","runs":11,"bytes":5757940531200.0,"device_s":9.692281258333333,"wall_s":11.571000099182129,"duty":0.8376355695492916,"bytes_per_s":594074849638.6624,"over_idle_w":4.423443603029103,"pj_per_byte":8.889231504221394,"n":104,"board_w":35.03769230769231,"minion_w":24.812923076923077,"sram_w":4.106371794871794,"noc_w":5.826275641025641}]}};
+const D = {"cards":["aifoundry2","aifoundry3"],"headline":{"aifoundry2":{"dram":{"group":"headline","host":"aifoundry2","test":"relay","medium":"dram","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":6660113,"cycles_mean":6657537,"wall_s":0.012525,"bytes_per_cycle":80.61,"gb_s":48.37,"flop_per_byte":0.125,"gflop_s":6.05,"shire0_final":8.0,"wrong_elements":0,"ok":true},"scp":{"group":"headline","host":"aifoundry2","test":"relay","medium":"scp","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":217110,"cycles_mean":216607,"wall_s":0.001292,"bytes_per_cycle":2472.806,"gb_s":1483.68,"flop_per_byte":0.125,"gflop_s":185.46,"shire0_final":8.0,"wrong_elements":0,"ok":true},"hop":{"group":"headline","host":"aifoundry2","test":"relay","medium":"hop","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":543337,"cycles_mean":539296,"wall_s":0.001872,"bytes_per_cycle":988.099,"gb_s":592.86,"flop_per_byte":0.125,"gflop_s":74.11,"shire0_final":32.0,"wrong_elements":0,"ok":true}},"aifoundry3":{"dram":{"group":"headline","host":"aifoundry3","test":"relay","medium":"dram","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":6735924,"cycles_mean":6735088,"wall_s":0.01256,"bytes_per_cycle":79.703,"gb_s":47.82,"flop_per_byte":0.125,"gflop_s":5.98,"shire0_final":8.0,"wrong_elements":0,"t_start_ms":1790117953219,"t_end_ms":1790117953232,"ok":true},"scp":{"group":"headline","host":"aifoundry3","test":"relay","medium":"scp","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":215670,"cycles_mean":215380,"wall_s":0.001144,"bytes_per_cycle":2489.317,"gb_s":1493.59,"flop_per_byte":0.125,"gflop_s":186.7,"shire0_final":8.0,"wrong_elements":0,"t_start_ms":1790117953458,"t_end_ms":1790117953460,"ok":true},"hop":{"group":"headline","host":"aifoundry3","test":"relay","medium":"hop","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":543378,"cycles_mean":539564,"wall_s":0.001645,"bytes_per_cycle":988.025,"gb_s":592.81,"flop_per_byte":0.125,"gflop_s":74.1,"shire0_final":32.0,"wrong_elements":0,"t_start_ms":1790117953687,"t_end_ms":1790117953689,"ok":true}}},"intensity":[{"work":1,"ok":true,"dram":{"gb_s":48.54,"cycles":6636598,"bytes":536870912},"scp":{"gb_s":1490.91,"cycles":216058,"bytes":536870912},"hop":{"gb_s":592.69,"cycles":543494,"bytes":536870912},"scp_over_dram":30.715080346106305,"hop_over_dram":12.210341985990937},{"work":2,"ok":true,"dram":{"gb_s":47.85,"cycles":6732532,"bytes":536870912},"scp":{"gb_s":1377.08,"cycles":233917,"bytes":536870912},"hop":{"gb_s":573.36,"cycles":561817,"bytes":536870912},"scp_over_dram":28.7791013584117,"hop_over_dram":11.982445141065831},{"work":4,"ok":true,"dram":{"gb_s":47.33,"cycles":6805313,"bytes":536870912},"scp":{"gb_s":1215.51,"cycles":265011,"bytes":536870912},"hop":{"gb_s":540.31,"cycles":596177,"bytes":536870912},"scp_over_dram":25.681597295584197,"hop_over_dram":11.415803929854214},{"work":8,"ok":true,"dram":{"gb_s":48.03,"cycles":6706933,"bytes":536870912},"scp":{"gb_s":982.29,"cycles":327930,"bytes":536870912},"hop":{"gb_s":481.6,"cycles":668854,"bytes":536870912},"scp_over_dram":20.45159275452842,"hop_over_dram":10.02706641682282},{"work":16,"ok":true,"dram":{"gb_s":47.21,"cycles":6822920,"bytes":536870912},"scp":{"gb_s":685.65,"cycles":469806,"bytes":536870912},"hop":{"gb_s":395.64,"cycles":814179,"bytes":536870912},"scp_over_dram":14.52340605803855,"hop_over_dram":8.380427875450117},{"work":32,"ok":true,"dram":{"gb_s":47.08,"cycles":6841746,"bytes":536870912},"scp":{"gb_s":425.96,"cycles":756232,"bytes":536870912},"hop":{"gb_s":291.69,"cycles":1104347,"bytes":536870912},"scp_over_dram":9.047578589634664,"hop_over_dram":6.195624468988955},{"work":64,"ok":true,"dram":{"gb_s":46.63,"cycles":6908486,"bytes":536870912},"scp":{"gb_s":242.2,"cycles":1329983,"bytes":536870912},"hop":{"gb_s":191.44,"cycles":1682589,"bytes":536870912},"scp_over_dram":5.194081063692901,"hop_over_dram":4.10551147330045},{"work":128,"ok":true,"dram":{"gb_s":47.17,"cycles":6829324,"bytes":536870912},"scp":{"gb_s":129.1,"cycles":2495119,"bytes":536870912},"hop":{"gb_s":113.7,"cycles":2833118,"bytes":536870912},"scp_over_dram":2.7369090523637905,"hop_over_dram":2.4104303582785667},{"work":256,"ok":true,"dram":{"gb_s":41.84,"cycles":7699278,"bytes":536870912},"scp":{"gb_s":66.59,"cycles":4837413,"bytes":536870912},"hop":{"gb_s":62.75,"cycles":5133356,"bytes":536870912},"scp_over_dram":1.5915391969407264,"hop_over_dram":1.4997609942638621}],"size":[{"stage_bytes":65536,"ok":true,"dram":{"gb_s":281.42,"cycles":71540,"bytes":33554432},"scp":{"gb_s":372.08,"cycles":54109,"bytes":33554432},"hop":{"gb_s":274.28,"cycles":73401,"bytes":33554432},"scp_over_dram":1.3221519437140217,"hop_over_dram":0.9746286688934687},{"stage_bytes":131072,"ok":true,"dram":{"gb_s":411.65,"cycles":97815,"bytes":67108864},"scp":{"gb_s":627.41,"cycles":64177,"bytes":67108864},"hop":{"gb_s":401.34,"cycles":100327,"bytes":67108864},"scp_over_dram":1.5241345803473825,"hop_over_dram":0.9749544515972306},{"stage_bytes":262144,"ok":true,"dram":{"gb_s":409.09,"cycles":196852,"bytes":134217728},"scp":{"gb_s":948.98,"cycles":84860,"bytes":134217728},"hop":{"gb_s":517.4,"cycles":155645,"bytes":134217728},"scp_over_dram":2.319734043853431,"hop_over_dram":1.2647583661297026},{"stage_bytes":524288,"ok":true,"dram":{"gb_s":379.15,"cycles":424800,"bytes":268435456},"scp":{"gb_s":1262.59,"cycles":127564,"bytes":268435456},"hop":{"gb_s":544.57,"cycles":295757,"bytes":268435456},"scp_over_dram":3.330054068310695,"hop_over_dram":1.436291705129896},{"stage_bytes":1048576,"ok":true,"dram":{"gb_s":47.87,"cycles":6729080,"bytes":536870912},"scp":{"gb_s":1506.14,"cycles":213873,"bytes":536870912},"hop":{"gb_s":592.65,"cycles":543530,"bytes":536870912},"scp_over_dram":31.463129308543976,"hop_over_dram":12.380405264257364}],"stages":[{"stages":1,"ok":true,"dram":{"gb_s":38.03,"cycles":1058911,"bytes":67108864},"scp":{"gb_s":1390.81,"cycles":28951,"bytes":67108864},"hop":{"gb_s":582.47,"cycles":69128,"bytes":67108864},"scp_over_dram":36.571391007099656,"hop_over_dram":15.316066263476204},{"stages":2,"ok":true,"dram":{"gb_s":44.02,"cycles":1829490,"bytes":134217728},"scp":{"gb_s":1453.28,"cycles":55413,"bytes":134217728},"hop":{"gb_s":588.42,"cycles":136859,"bytes":134217728},"scp_over_dram":33.01408450704225,"hop_over_dram":13.367105860972284},{"stages":4,"ok":true,"dram":{"gb_s":47.4,"cycles":3397731,"bytes":268435456},"scp":{"gb_s":1466.13,"cycles":109855,"bytes":268435456},"hop":{"gb_s":591.15,"cycles":272452,"bytes":268435456},"scp_over_dram":30.93101265822785,"hop_over_dram":12.471518987341772},{"stages":8,"ok":true,"dram":{"gb_s":49.47,"cycles":6511078,"bytes":536870912},"scp":{"gb_s":1486.04,"cycles":216766,"bytes":536870912},"hop":{"gb_s":592.61,"cycles":543568,"bytes":536870912},"scp_over_dram":30.03921568627451,"hop_over_dram":11.979179300586214},{"stages":16,"ok":true,"dram":{"gb_s":49.61,"cycles":12986597,"bytes":1073741824},"scp":{"gb_s":1501.75,"cycles":428997,"bytes":1073741824},"hop":{"gb_s":593.32,"cycles":1085834,"bytes":1073741824},"scp_over_dram":30.27111469461802,"hop_over_dram":11.959685547268696},{"stages":32,"ok":true,"dram":{"gb_s":49.36,"cycles":26103250,"bytes":2147483648},"scp":{"gb_s":1499.44,"cycles":859316,"bytes":2147483648},"hop":{"gb_s":593.78,"cycles":2169990,"bytes":2147483648},"scp_over_dram":30.377633711507293,"hop_over_dram":12.029578606158832}],"shires":[{"shires":2,"ok":true,"dram":{"gb_s":46.68,"cycles":431336,"bytes":33554432},"scp":{"gb_s":108.35,"cycles":185814,"bytes":33554432},"hop":{"gb_s":58.24,"cycles":345697,"bytes":33554432},"scp_over_dram":2.3211225364181662,"hop_over_dram":1.24764353041988},{"shires":4,"ok":true,"dram":{"gb_s":93.34,"cycles":431390,"bytes":67108864},"scp":{"gb_s":214.7,"cycles":187543,"bytes":67108864},"hop":{"gb_s":95.61,"cycles":421157,"bytes":67108864},"scp_over_dram":2.3001928433683307,"hop_over_dram":1.0243196914506105},{"shires":8,"ok":true,"dram":{"gb_s":179.93,"cycles":447564,"bytes":134217728},"scp":{"gb_s":418.2,"cycles":192567,"bytes":134217728},"hop":{"gb_s":161.41,"cycles":498906,"bytes":134217728},"scp_over_dram":2.324237203356861,"hop_over_dram":0.8970710831990217},{"shires":16,"ok":true,"dram":{"gb_s":292.22,"cycles":551171,"bytes":268435456},"scp":{"gb_s":812.49,"cycles":198232,"bytes":268435456},"hop":{"gb_s":338.75,"cycles":475464,"bytes":268435456},"scp_over_dram":2.780405174183834,"hop_over_dram":1.1592293477516937},{"shires":32,"ok":true,"dram":{"gb_s":46.81,"cycles":6881830,"bytes":536870912},"scp":{"gb_s":1484.11,"cycles":217047,"bytes":536870912},"hop":{"gb_s":592.77,"cycles":543419,"bytes":536870912},"scp_over_dram":31.704977568895533,"hop_over_dram":12.663319803460798}],"distance":[{"hop_distance":1,"gb_s":592.69,"ok":true,"mesh_hops":{"mean":3.5,"min":1,"max":10}},{"hop_distance":2,"gb_s":703.19,"ok":true,"mesh_hops":{"mean":4.5,"min":2,"max":7}},{"hop_distance":4,"gb_s":652.37,"ok":true,"mesh_hops":{"mean":3.6875,"min":1,"max":8}},{"hop_distance":8,"gb_s":686.19,"ok":true,"mesh_hops":{"mean":1.625,"min":1,"max":7}},{"hop_distance":16,"gb_s":733.46,"ok":true,"mesh_hops":{"mean":2.125,"min":1,"max":6}}],"bigsize":[{"stage_bytes":65536,"gb_s":281.42},{"stage_bytes":131072,"gb_s":411.65},{"stage_bytes":262144,"gb_s":409.09},{"stage_bytes":524288,"gb_s":379.15},{"stage_bytes":1048576,"gb_s":47.87},{"stage_bytes":2097152,"gb_s":47.87},{"stage_bytes":4194304,"gb_s":50.98},{"stage_bytes":8388608,"gb_s":53.4}],"probe":[{"method_name":"tensor_store","remote_words_wrong":0,"ok":true,"host":"aifoundry2"},{"method_name":"vector_stores","remote_words_wrong":0,"ok":true,"host":"aifoundry2"},{"method_name":"tensor_store","remote_words_wrong":0,"ok":true,"host":"aifoundry3"},{"method_name":"vector_stores","remote_words_wrong":0,"ok":true,"host":"aifoundry3"}],"power":{"idle":{"board_w":30.614248704663208,"minion_w":10.428893782383419,"sram_w":1.9176398963730572,"noc_w":3.49240414507772,"die_c":71.2720207253886,"n":386},"media":[{"medium":"dram","runs":11,"bytes":472446402560.0,"device_s":9.513084063333332,"wall_s":11.400000095367432,"duty":0.8344810512062296,"bytes_per_s":49662801191.98877,"over_idle_w":4.342025805140718,"pj_per_byte":104.7718732209115,"n":102,"board_w":34.956274509803926,"minion_w":10.644500000000003,"sram_w":2.383029411764706,"noc_w":4.358823529411763,"die_c":71.0},{"medium":"scp","runs":12,"bytes":15300820992000.0,"device_s":10.183322776666667,"wall_s":12.264999866485596,"duty":0.8302750010208185,"bytes_per_s":1502537170584.3596,"over_idle_w":5.301569477154974,"pj_per_byte":4.2496901939750416,"n":110,"board_w":35.91581818181818,"minion_w":12.061245454545453,"sram_w":4.814781818181819,"noc_w":3.513345454545454,"die_c":71.94545454545455},{"medium":"hop","runs":11,"bytes":5757940531200.0,"device_s":9.692281258333333,"wall_s":11.571000099182129,"duty":0.8376355695492916,"bytes_per_s":594074849638.6624,"over_idle_w":4.423443603029103,"pj_per_byte":8.889231504221394,"n":104,"board_w":35.03769230769231,"minion_w":11.55676923076923,"sram_w":3.3651153846153843,"noc_w":4.6978269230769225,"die_c":72.0}]}};
 const NS='http://www.w3.org/2000/svg';
 function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
 function txt(p,x,y,s,c,an){const t=el('text',{x,y,class:c||'tick','text-anchor':an||'start'},p);t.textContent=s;return t;}
@@ -236,8 +297,10 @@ function axes(svg,o){const {W,H,L,R,T,B,x,y}=o;
  for(const t of o.yt){el('line',{x1:L,x2:W-R,y1:y(t),y2:y(t),class:'grid-line'},svg);txt(svg,L-6,y(t)+4,o.yf?o.yf(t):t,'tick','end');}
  for(const t of o.xt){txt(svg,x(t),H-B+16,o.xf?o.xf(t):t,'tick','middle');}
  if(o.xl)txt(svg,(L+W-R)/2,H-4,o.xl,'lab','middle');if(o.yl)txt(svg,4,T-8,o.yl,'lab');}
-const f1=v=>v.toFixed(1),f2=v=>v.toFixed(2);
-const f3=v=>v.toFixed(3);
+const f0=v=>v.toFixed(0),f1=v=>v.toFixed(1),f2=v=>v.toFixed(2);
+/* GB/s and other figures in the thousands get separators; cycle counts are integers */
+const g1=v=>v.toLocaleString('en-GB',{minimumFractionDigits:1,maximumFractionDigits:1});
+const gi=v=>Math.round(v).toLocaleString('en-GB');
 const MED=[['dram','write it to DRAM, read it back next stage','var(--c2)'],
            ['hop','write it where the next shire will read it','var(--c1)'],
            ['scp',"keep it in this shire's own scratchpad",'var(--c3)']];
@@ -249,7 +312,6 @@ const A2=D.cards[0], H=D.headline[A2];
  document.getElementById('k2').textContent=(H.scp.gb_s/H.dram.gb_s).toFixed(1)+'× faster';
  const p=D.power&&D.power.media, dr=p&&p.find(m=>m.medium==='dram'), hp=p&&p.find(m=>m.medium==='hop');
  document.getElementById('k3').textContent=(dr&&hp)?(dr.pj_per_byte/hp.pj_per_byte).toFixed(0)+'× less':'—';
- const knee=D.size.find(r=>r.hop_over_dram>3)||D.size[D.size.length-1];
  document.getElementById('k4').textContent='>32 MB';
  document.getElementById('cards').textContent=D.cards.map(c=>{
    const h=D.headline[c];return `${c} ${(h.hop.gb_s/h.dram.gb_s).toFixed(1)}×`;}).join(', ')+
@@ -259,18 +321,18 @@ const A2=D.cards[0], H=D.headline[A2];
 
 /* ---------- section 1: the three media ---------- */
 document.getElementById('media').innerHTML='<thead><tr><th>Where a stage’s output goes</th><th class="num">GB/s</th><th class="num">Cycles for the whole relay</th><th class="num">Against DRAM</th><th class="num">Shire 0 ends holding</th></tr></thead><tbody>'+
- MED.map(([m,label])=>`<tr><td>${label}</td><td class="num">${f1(H[m].gb_s)}</td><td class="num">${H[m].cycles_max.toLocaleString()}</td><td class="num">${m==='dram'?'—':(H[m].gb_s/H.dram.gb_s).toFixed(1)+'×'}</td><td class="num">${H[m].shire0_final.toFixed(0)}</td></tr>`).join('')+'</tbody>';
+ MED.map(([m,label])=>`<tr><td>${label}</td><td class="num">${g1(H[m].gb_s)}</td><td class="num">${gi(H[m].cycles_max)}</td><td class="num">${m==='dram'?'—':(H[m].gb_s/H.dram.gb_s).toFixed(1)+'×'}</td><td class="num">${H[m].shire0_final.toFixed(0)}</td></tr>`).join('')+'</tbody>';
 
 (function(){
  const W=700,H2=210,L=150,R=80,T=20,B=40,{svg,tip,h}=host('head',W,H2);
  const mx=Math.max(...MED.map(m=>H[m[0]].gb_s))*1.12;
  const x=v=>L+(W-L-R)*v/mx, y=i=>T+22+i*52;
- axes(svg,{W,H:H2,L,R,T,B,x,y:v=>v,yt:[],xt:[0,500,1000,1500],xl:'GB/s of intermediate data, at 600 MHz'});
+ axes(svg,{W,H:H2,L,R,T,B,x,y:v=>v,yt:[],xt:[0,500,1000,1500],xf:gi,xl:'GB/s of intermediate data, at 600 MHz'});
  MED.forEach((m,i)=>{const r=H[m[0]],g=el('g',{},svg);
   el('rect',{x:L,y:y(i)-15,width:Math.max(2,x(r.gb_s)-L),height:26,fill:m[2],rx:3},g);
   txt(svg,L-8,y(i)+4,m[0]==='dram'?'DRAM':m[0]==='hop'?'next shire':'own shire','lab','end');
-  txt(svg,x(r.gb_s)+7,y(i)+4,f1(r.gb_s)+(m[0]==='dram'?' GB/s':' GB/s  '+(r.gb_s/H.dram.gb_s).toFixed(1)+'×'),'lab-strong');
-  hover(g,tip,h,()=>`${m[1]}<br>${f1(r.gb_s)} GB/s<br>${r.cycles_max.toLocaleString()} cycles<br>every element verified`);});
+  txt(svg,x(r.gb_s)+7,y(i)+4,g1(r.gb_s)+(m[0]==='dram'?' GB/s':' GB/s  '+(r.gb_s/H.dram.gb_s).toFixed(1)+'×'),'lab-strong');
+  hover(g,tip,h,()=>`${m[1]}<br>${g1(r.gb_s)} GB/s<br>${gi(r.cycles_max)} cycles<br>every element verified`);});
  document.getElementById('headcap').textContent=
   'Eight stages, 1 MB per shire per stage, 1,024 minions, 512 MB of reads and writes. Identical kernel, '+
   'identical barriers; only the destination of each stage differs.';
@@ -282,14 +344,18 @@ document.getElementById('media').innerHTML='<thead><tr><th>Where a stage’s out
  const name={dram:'DRAM',scp:"own shire's scratchpad",hop:"next shire's scratchpad"};
  document.getElementById('power').innerHTML='<thead><tr><th>Where the intermediate goes</th><th class="num">GB/s on the card</th><th class="num">Watts over idle</th><th class="num">pJ per byte moved</th></tr></thead><tbody>'+
   ['dram','hop','scp'].map(m=>{const r=p.media.find(x=>x.medium===m);
-   return `<tr><td>${name[m]}</td><td class="num">${f1(r.bytes_per_s/1e9)}</td><td class="num">${f2(r.over_idle_w)}</td><td class="num">${f2(r.pj_per_byte)}</td></tr>`;}).join('')+
-  `<tr><td>idle card</td><td class="num">0</td><td class="num">—</td><td class="num">—</td></tr></tbody>`;
+   return `<tr><td>${name[m]}</td><td class="num">${g1(r.bytes_per_s/1e9)}</td><td class="num">${f2(r.over_idle_w)}</td><td class="num">${f1(r.pj_per_byte)}</td></tr>`;}).join('')+
+  `</tbody>`;
  const dr=p.media.find(m=>m.medium==='dram'),hp=p.media.find(m=>m.medium==='hop'),sc=p.media.find(m=>m.medium==='scp');
  document.getElementById('powernote').textContent=
-  `Idle was ${f2(p.idle.board_w)} W. All three sit within a watt of each other while moving between `+
-  `${f1(dr.bytes_per_s/1e9)} and ${f1(sc.bytes_per_s/1e9)} GB/s, so the energy per byte differs by `+
+  `One session on aifoundry2, board power. Idle was ${f2(p.idle.board_w)} W at a die temperature of ${f0(p.idle.die_c)} °C, and the `+
+  `minion clock stayed at 600 MHz throughout. All three sit within a watt of each other while moving between `+
+  `${g1(dr.bytes_per_s/1e9)} and ${g1(sc.bytes_per_s/1e9)} GB/s, so the energy per byte differs by about `+
   `${(dr.pj_per_byte/sc.pj_per_byte).toFixed(0)}× for the shire-local case and ${(dr.pj_per_byte/hp.pj_per_byte).toFixed(0)}× for the hand-off. `+
-  `Measured independently in the memory-hierarchy work: 133 pJ/B for DRAM, 2.6 local scratchpad, 6.3 remote.`;
+  `The GB/s column is the rate while the kernel runs, from the cycle counter, and the kernel ran only `+
+  `${f0(100*Math.min(...p.media.map(m=>m.duty)))}–${f0(100*Math.max(...p.media.map(m=>m.duty)))}% of each burst; `+
+  `the watts are averaged over the whole burst, launch gaps included, so pJ per byte is watts over idle ÷ `+
+  `(GB/s × ${Math.min(...p.media.map(m=>m.duty)).toFixed(2)}–${Math.max(...p.media.map(m=>m.duty)).toFixed(2)}).`;
 })();
 
 /* ---------- section 3: working-set size ---------- */
@@ -297,26 +363,33 @@ document.getElementById('media').innerHTML='<thead><tr><th>Where a stage’s out
  const rows=D.size, W=700,H2=330,L=62,R=130,T=26,B=52,{svg,tip,h}=host('size',W,H2);
  const xs=rows.map(r=>r.stage_bytes*32/1048576);
  const x=v=>L+(W-L-R)*Math.log2(v/2)/Math.log2(32/2), y=v=>H2-B-(H2-B-T)*Math.log10(Math.max(v,20)/20)/Math.log10(2000/20);
- axes(svg,{W,H:H2,L,R,T,B,x,y,yt:[20,100,500,2000],yf:v=>v+'',xt:[2,4,8,16,32],xf:v=>v+' MB',
+ axes(svg,{W,H:H2,L,R,T,B,x,y,yt:[20,100,500,2000],yf:gi,xt:[2,4,8,16,32],xf:v=>v+' MB',
    xl:'working set, one buffer across the whole chip',yl:'GB/s'});
- el('line',{x1:x(32),x2:x(32),y1:T,y2:H2-B,stroke:'var(--ref)','stroke-width':1.5,'stroke-dasharray':'5 4'},svg);
- txt(svg,x(32)-6,T+12,'32 MB of L3','lab','end');
+ el('line',{x1:x(16),x2:x(16),y1:T,y2:H2-B,stroke:'var(--ref)','stroke-width':1.5,'stroke-dasharray':'5 4'},svg);
+ txt(svg,x(16)-6,T+12,'footprint = 32 MB of L3','lab','end');
  MED.forEach(m=>{
   el('path',{d:path(rows.map(r=>[r.stage_bytes*32/1048576,r[m[0]].gb_s]),x,y),class:'ln',stroke:m[2]},svg);
   rows.forEach(r=>{const g=el('g',{},svg);
    el('circle',{cx:x(r.stage_bytes*32/1048576),cy:y(r[m[0]].gb_s),r:4,fill:m[2]},g);
-   hover(g,tip,h,()=>`${(r.stage_bytes*32/1048576)} MB per buffer<br>${m[1]}<br>${f1(r[m[0]].gb_s)} GB/s`);});});
+   hover(g,tip,h,()=>`${(r.stage_bytes*32/1048576)} MB per buffer<br>${m[1]}<br>${g1(r[m[0]].gb_s)} GB/s`);});});
  MED.forEach((m,i)=>{el('rect',{x:W-R+6,y:T+6+i*20,width:11,height:11,fill:m[2]},svg);
   txt(svg,W-R+23,T+16+i*20,m[0]==='dram'?'DRAM':m[0]==='hop'?'next shire':'own shire','lab');});
- const small=rows[0], big=rows[rows.length-1];
+ const mb=r=>r.stage_bytes*32/1048576, small=rows[0], big=rows[rows.length-1];
+ const and=a=>a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+ const fit=rows.filter(r=>2*mb(r)<=32), lastfit=fit[fit.length-1];
+ const hopMax=Math.max(...fit.map(r=>r.hop_over_dram));
  document.getElementById('sizecap').textContent=
-  `Log axes. Two buffers are live at once, so the chip footprint is twice the figure on the x axis.`;
+  `Log axes. Two buffers are live at once, so the chip footprint is twice the figure on the x axis; the dashed line `+
+  `marks where that footprint equals the 32 MB L3.`;
  document.getElementById('sizetext').innerHTML=
-  `At ${(small.stage_bytes*32/1048576)} MB per buffer the DRAM route runs at <b>${f1(small.dram.gb_s)} GB/s</b>, because it is not `+
-  `going to DRAM at all — the 32 MB L3 is holding the whole thing, and putting the data in a scratchpad by hand buys `+
-  `${small.hop_over_dram.toFixed(1)}×. At ${(big.stage_bytes*32/1048576)} MB it falls to <b>${f1(big.dram.gb_s)} GB/s</b> and stays there: `+
-  `${D.bigsize.slice(-3).map(r=>f1(r.gb_s)).join(', ')} GB/s at ${D.bigsize.slice(-3).map(r=>(r.stage_bytes*32/1048576)+' MB').join(', ')}. `+
-  `<b>The advantage is not a property of the computation. It is the L3 capacity.</b> Below it the cache is already doing the job; `+
+  `At ${mb(small)} MB per buffer the DRAM route runs at <b>${g1(small.dram.gb_s)} GB/s</b>, because it is not `+
+  `going to DRAM at all: the 32 MB L3 holds the whole thing. Handing the data to the next shire then buys `+
+  `${small.hop_over_dram.toFixed(2)}×, which is nothing, and keeping it in the shire's own scratchpad `+
+  `${small.scp_over_dram.toFixed(1)}×. Up to ${mb(lastfit)} MB per buffer, while both buffers fit in the L3, the hand-off `+
+  `wins at most ${hopMax.toFixed(1)}×. At ${mb(big)} MB per buffer, a ${2*mb(big)} MB footprint, the DRAM route falls to `+
+  `<b>${g1(big.dram.gb_s)} GB/s</b> and stays there: ${and(D.bigsize.slice(-3).map(r=>g1(r.gb_s)))} GB/s at `+
+  `${and(D.bigsize.slice(-3).map(r=>String(mb(r))))} MB per buffer. `+
+  `<b>The advantage is not a property of the computation. It is the L3 capacity.</b> Below it the cache is already doing most of the job; `+
   `above it, nothing is, unless you place the data yourself.`;
 })();
 
@@ -332,23 +405,114 @@ document.getElementById('media').innerHTML='<thead><tr><th>Where a stage’s out
    el('path',{d:path(rows.map(r=>[r.work,r[s2[0]]]),x,y),class:'ln',stroke:s2[2]},svg);
    rows.forEach(r=>{const g=el('g',{},svg);
     el('circle',{cx:x(r.work),cy:y(r[s2[0]]),r:4,fill:s2[2]},g);
-    hover(g,tip,h,()=>`${r.work} add${r.work>1?'s':''} per element<br>${s2[1]}: ${r[s2[0]].toFixed(1)}× DRAM<br>${f1(r[s2[0]==='scp_over_dram'?'scp':'hop'].gb_s)} GB/s`);});
+    hover(g,tip,h,()=>`${r.work} add${r.work>1?'s':''} per element (${r.work/8} flop per byte moved)<br>${s2[1]}: ${r[s2[0]].toFixed(1)}× DRAM<br>${g1(r[s2[0]==='scp_over_dram'?'scp':'hop'].gb_s)} GB/s`);});
    el('rect',{x:W-R+6,y:T+6+i*20,width:11,height:11,fill:s2[2]},svg);
-   txt(svg,W-R+23,T+16+i*20,s2[1],'lab');});
- const last=rows[rows.length-1];
- document.getElementById('intcap').textContent='Log axes. The dashed line is parity with DRAM.';
+   txt(svg,W-R+23,T+16+i*20,s2[1].replace("'s scratchpad",''),'lab');});   /* legend: 'own shire', 'next shire' */
+ const last=rows[rows.length-1], at=w=>rows.find(r=>r.work===w).hop_over_dram.toFixed(1);
+ document.getElementById('intcap').textContent='Log axes. The dashed line is parity with DRAM. Each element is 4 bytes read '+
+  'and 4 bytes written, so w adds per element are w/8 flops per byte moved.';
  document.getElementById('inttext').innerHTML=
-  `One add per element is pure data movement and the hand-off is ${rows[0].hop_over_dram.toFixed(1)}× ahead. `+
-  `Every quadrupling of the arithmetic roughly halves the lead, and by ${last.work} adds per element — `+
-  `${(last.work/8).toFixed(0)} flops per byte read — it is down to ${last.hop_over_dram.toFixed(1)}×. `+
-  `The rule this gives: <b>on-chip placement is worth it below roughly ten flops per byte</b>, and above that the `+
-  `arithmetic is the wall and it does not matter where the operands came from.`;
+  `One add per element is pure data movement, and the hand-off is ${at(1)}× ahead (this sweep's own run; the `+
+  `headline run in §1 gives ${(H.hop.gb_s/H.dram.gb_s).toFixed(1)}×). The lead holds to about four adds per element `+
+  `(${at(4)}×) and then falls faster with each quadrupling: ${at(16)}× at 16, ${at(64)}× at 64, ${at(128)}× at 128 and `+
+  `${at(last.work)}× at ${last.work} adds — ${last.work/8} flops per byte moved, counting the byte read and the byte `+
+  `written (${last.work/4} per byte read). <b>For this vector-add kernel, on-chip placement pays several-fold up to `+
+  `about ${64/8} flops per byte moved (${at(64)}×) and is still ${at(last.work)}× at ${last.work/8}.</b> The tensor unit `+
+  `does twice the <code>fadd.ps</code> rate; for it the `+
+  `<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">ridge points</a> report puts the DRAM crossover `+
+  `near 130 FLOP per byte read.`;
 })();
 
 /* ---------- section 5: distance ---------- */
-document.getElementById('dist').innerHTML='<thead><tr><th class="num">Shires the slab moves per stage</th><th class="num">GB/s</th><th class="num">Against handing it next door</th></tr></thead><tbody>'+
- D.distance.map(r=>`<tr><td class="num">${r.hop_distance}</td><td class="num">${f1(r.gb_s)}</td><td class="num">${(r.gb_s/D.distance[0].gb_s).toFixed(2)}×</td></tr>`).join('')+'</tbody>';
+(function(){
+ const d=D.distance, k=n=>d.find(r=>r.hop_distance===n).mesh_hops, gb=d.map(r=>r.gb_s), mh=d.map(r=>r.mesh_hops.mean);
+ const rng=m=>`${m.min} to ${m.max}`;
+ document.getElementById('distintro').innerHTML=
+  `The obvious worry about handing data to another shire is the network in between. Shire numbers do not follow `+
+  `the mesh: on the shire map of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip `+
+  `communication report</a>, the next shire in the ring is on average ${f1(k(1).mean)} mesh hops away `+
+  `(${rng(k(1))}), two places on ${f1(k(2).mean)}, and sixteen places on only ${f1(k(16).mean)} (${rng(k(16))}). `+
+  `Across offsets whose mean distance runs from ${f1(Math.min(...mh))} to ${f1(Math.max(...mh))} hops the bandwidth `+
+  `stays between ${f0(Math.min(...gb))} and ${f0(Math.max(...gb))} GB/s and does not follow the distance:`;
+ const W='style="white-space:normal"';
+ document.getElementById('dist').innerHTML=`<thead><tr><th class="num" ${W}>Shire IDs back round the ring</th>`+
+  `<th class="num" ${W}>Mesh hops, mean (range)</th><th class="num">GB/s</th>`+
+  `<th class="num" ${W}>Against the next shire in ID order</th></tr></thead><tbody>`+
+  d.map(r=>`<tr><td class="num">${r.hop_distance}</td><td class="num">${f1(r.mesh_hops.mean)} (${r.mesh_hops.min}–${r.mesh_hops.max})</td>`+
+   `<td class="num">${g1(r.gb_s)}</td><td class="num">${(r.gb_s/d[0].gb_s).toFixed(2)}×</td></tr>`).join('')+'</tbody>';
+})();
 
+</script>
+<script>
+/* Section anchors. Every h2/h3 gets an id (its own, or one made from its text) and a # link; clicking a heading
+   or a table-of-contents link puts #id in the URL. When the page is framed by spacesheep.dev the fragment is
+   mirrored into the outer, shareable URL (postMessage ss-hash), and an outer #fragment is forwarded in on load. */
+(function () {
+  const slug = t => t.toLowerCase().replace(/^\d+(\.\d+)*\.?\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const post = h => { if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h}, '*'); } catch (_) {} } };
+  const go = id => { try { history.replaceState(null, '', location.pathname + location.search + '#' + id); } catch (_) {}
+    const el = document.getElementById(id); if (el) el.scrollIntoView({block: 'start'}); post('#' + id); };
+  const seen = new Set();
+  document.querySelectorAll('main h2, main h3').forEach(h => {
+    if (!h.id) { let id = slug(h.textContent) || 'section', n = 2; while (seen.has(id) || document.getElementById(id)) id = slug(h.textContent) + '-' + n++; h.id = id; }
+    seen.add(h.id);
+    const a = document.createElement('a'); a.href = '#' + h.id; a.className = 'hlink'; a.textContent = '#'; a.title = 'link to this section'; h.appendChild(a);
+    h.style.cursor = 'pointer';
+    h.addEventListener('click', ev => { if (ev.target.tagName === 'A' && ev.target !== a) return; ev.preventDefault(); go(h.id); });
+  });
+  window.addEventListener('hashchange', () => post(location.hash));
+  if (location.hash) { post(location.hash); const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => el.scrollIntoView({block: 'start'}), 50); }
+})();
+</script>
+<script>
+/* Contents list, link back to the reports hub, and repository paths as links. Runs after the section-anchor
+   script above, whose h2 ids the contents list links to. Pages not built from this template paste both blocks
+   before </main>.
+   - Contents: a page with 6 or more h2s and no #toclist of its own gets a numbered list before its first h2.
+   - Footer: every page but the hub ends with a link to the hub's list of reports, unless it already has one.
+   - Paths: an inline <code> whose whole text is a repository path (docs/…, workloads/…, tools/…, scripts/…,
+     kernels/…, rtl-sim/…) becomes a GitHub link. Code blocks, code already in a link and globs stay as they are. */
+(function () {
+  const main = document.querySelector('main'); if (!main) return;
+  const HUB = 'https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability';
+  const BACK = '← All ET-SoC-1 measurement reports';
+  const REPO = 'https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/';
+  const text = el => { const c = el.cloneNode(true); c.querySelectorAll('.hlink').forEach(a => a.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+  const NUM = /^(?:§\s*\d+(?:\.\d+)*\.?|\d+(?:\.\d+)*\.|\d+(?:\.\d+)+)\s+/;  /* "3. ", "4.2 ", "§5 "; not "600 MHz" */
+
+  const h2s = [...main.querySelectorAll('h2')];
+  if (h2s.length >= 6 && !document.getElementById('toclist')) {
+    const nav = document.createElement('nav'); nav.className = 'card';
+    const b = document.createElement('b'); b.textContent = 'Contents';
+    const ol = document.createElement('ol'); ol.id = 'toclist';
+    h2s.forEach(h => {
+      if (!h.id) return;
+      const t = text(h), m = t.match(/^§?\s*(\d+)[.\s]/), li = document.createElement('li'), a = document.createElement('a');
+      if (m && NUM.test(t)) li.value = +m[1];
+      a.href = '#' + h.id; a.textContent = t.replace(NUM, '') || t;
+      li.appendChild(a); ol.appendChild(li);
+    });
+    nav.append(b, ol);
+    h2s[0].parentNode.insertBefore(nav, h2s[0]);
+  }
+
+  const h1 = main.querySelector('h1');
+  const isHub = !!h1 && /^limits of observability/i.test(text(h1));
+  const hasBack = [...document.querySelectorAll('a')].some(a => a.textContent.replace(/\s+/g, ' ').trim() === BACK);
+  if (!isHub && !hasBack) {
+    const p = document.createElement('p'); p.className = 'small';
+    const a = document.createElement('a'); a.href = HUB + '#reports'; a.textContent = BACK;
+    p.appendChild(a); main.appendChild(p);
+  }
+
+  const PATH = /^(docs|workloads|tools|scripts|kernels|rtl-sim)\/[\w./-]+$/;
+  main.querySelectorAll('code').forEach(c => {
+    if (c.closest('pre, a')) return;
+    const t = c.textContent.trim(); if (!PATH.test(t)) return;
+    const a = document.createElement('a'); a.href = REPO + t;
+    c.parentNode.insertBefore(a, c); a.appendChild(c);
+  });
+})();
 </script>
 </body>
 </html>

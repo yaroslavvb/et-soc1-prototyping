@@ -4,7 +4,7 @@ What a byte costs is not one number. Below, the parts of it that can be separate
 
 ## Wires: energy against distance on the mesh
 
-1 KB tensor loads from the scratchpad of a shire exactly *d* hops away on the mesh, every shire reading, at most two readers per target. A straight line through the points gives the energy of the array access and the local path (the intercept) and the energy of one hop of mesh, router and wire per byte (the slope).
+1 KB tensor loads from the scratchpad of a shire exactly *d* hops away on the mesh, all 32 shires reading up to 5 hops (31 at 6 hops and 16 at 8, so the 8-hop point has half the traffic), at most two readers per target. A straight line through the points gives the energy of the array access and the local path (the intercept) and the energy of one hop of mesh, router and wire per byte (the slope), fitted over 1–8 hops.
 
 | Operands | Card | own scratchpad pJ/B | intercept pJ/B | **slope pJ/B per hop** | rms of the fit |
 |---|---|---|---|---|---|
@@ -13,7 +13,9 @@ What a byte costs is not one number. Below, the parts of it that can be separate
 | random | aifoundry2 | 4.29 | 7.90 | **1.812** | 1.09 |
 | random | aifoundry3 | 4.12 | 7.52 | **1.675** | 0.99 |
 
-**One hop costs 0.70 pJ/B on zeros [0.64–0.75 across the cards] and 1.74 pJ/B on random data [1.67–1.81].** The difference between the two, 1.05 pJ/B per hop [1.03–1.06], is the data-dependent energy of the links and routers — **131 fJ per random bit per hop** [129–133]. Part of it is bits that differ from one flit to the next and part is the ones carried, which cost even when they do not change; [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) separates the two with chosen bit patterns and converts them to fJ per bit·mm. The rest, what a hop costs on all-zero data, is clocking, arbitration and buffering.
+**Fitted over 1–8 hops, one hop costs 0.70 pJ/B on zeros [0.64–0.75 across the cards] and 1.74 pJ/B on random data [1.67–1.81].** The difference between the two, 1.05 pJ/B per hop [1.03–1.06], is what random data adds over zeros, the data-dependent energy of the links and routers — **131 fJ per random bit per hop** [129–133]: part of it is bits that differ from one flit (the unit the mesh moves as a whole) to the next and part is the ones carried, which cost even when they do not change; [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) separates the two with chosen bit patterns and converts them to fJ per bit·mm. The rest, what a hop costs on all-zero data, is clocking, arbitration and buffering.
+
+**Over 1–6 hops**, leaving out d = 8, where only 16 shires have a partner and the point sits nearly level with d = 6, the same data give 2.29 and 2.09 pJ/B per hop on random data (aifoundry2, aifoundry3) and 174 and 155 fJ per random bit per hop, which is what [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) measures (2.17 pJ/B per hop on board power, loaded mesh): use its figures for wires.
 
 | hops | zeros pJ/B [range over both cards, 6 runs] | random pJ/B [range] | shires reading |
 |---|---|---|---|
@@ -29,20 +31,20 @@ What a byte costs is not one number. Below, the parts of it that can be separate
 
 32 B vector loads through the L1 from the shire's own scratchpad, striding so that every line is filled once and all, half or a quarter of it is used. Energy per *load* rises as the fill is shared by fewer loads; the difference is the cost of the fill itself.
 
-| Stride | Fills per 32 B load | zeros pJ per load (card 2) | random pJ per load (card 2) | zeros pJ/B delivered [range, both cards] | random pJ/B delivered [range] |
+| Stride | Fills per 32 B load | zeros pJ per load [range, both cards] | random pJ per load [range] | zeros pJ/B delivered | random pJ/B delivered |
 |---|---|---|---|---|---|
-| 32 B | 0.5 | 131.5 | 197.3 | **4.08** [3.93–4.31] | **6.03** [5.67–6.33] |
-| 64 B | 1 | 186.7 | 303.0 | **5.66** [5.37–5.95] | **9.24** [8.96–9.68] |
-| 128 B | 1 | 178.1 | 305.3 | **5.60** [5.28–5.75] | **9.24** [8.89–9.71] |
+| 32 B | 0.5 | **130.7** [125.8–138.0] | **193.1** [181.4–202.4] | 4.08 | 6.03 |
+| 64 B | 1 | **181.0** [171.9–190.4] | **295.6** [286.6–309.7] | 5.66 | 9.24 |
+| 128 B | 1 | **179.1** [169.0–184.0] | **295.6** [284.4–310.8] | 5.60 | 9.24 |
 
-Twice the difference between the stride-64 and stride-32 rows is the fill of one 64 B line from the scratchpad into the L1: **110 pJ on zeros, 211 pJ on random data** — 1.7 and 3.3 pJ per byte of line, which agrees with the 2.0 and 4.3 pJ/B a tensor load pays for the same bytes from the same scratchpad. The 101 pJ difference is the toggling of the line's 512 bits, 197 fJ per bit on the path from the shire cache into the L1. What is left in a 32 B load once its share of the fill is taken out — about 76 pJ on zeros — is the L1 hit itself plus the awake core issuing it.
+Twice the difference between the stride-64 and stride-32 rows is the fill of one 64 B line from the scratchpad into the L1: **101 pJ on zeros, 205 pJ on random data** (aifoundry2 211, aifoundry3 199 on random data) — 1.6 and 3.2 pJ per byte of line, about 75% of the 2.0 and 4.2 pJ/B a tensor load pays for the same bytes from the same scratchpad. What random data adds over zeros is about 104 pJ for the line's 512 bits, 204 fJ per bit on the path from the shire cache into the L1. What is left in a 32 B load once its share of the fill is taken out — about 80 pJ on zeros — is the L1 hit itself plus the awake core issuing it.
 
 The same scratchpad read with 64 B tensor loads at strides that cycle the shire cache's banks, alternate two of them, or return to the same one (banks are address bits [7:6], sub-banks [9:8]):
 
 | Stride | zeros pJ per 64 B [range] | random pJ per 64 B [range] | GB/s |
 |---|---|---|---|
-| 64 B | 248.3 [231.7–258.2] | 382.1 [373.1–391.9] | 1126 |
-| 128 B | 235.5 [220.4–261.5] | 380.6 [367.2–400.0] | 1121 |
+| 64 B | 248.3 [231.7–258.2] | 382.1 [373.1–391.9] | 1,126 |
+| 128 B | 235.5 [220.4–261.5] | 380.6 [367.2–400.0] | 1,121 |
 | 256 B | 276.8 [243.0–307.4] | 422.3 [397.7–461.8] | 614 |
 
 ## Rows: does the DRAM row pattern matter?
@@ -72,13 +74,13 @@ The shire's own scratchpad read by only one of its four neighbourhoods at a time
 
 ## Leakage of the arrays: the SRAM rail against temperature
 
-The service processor's SRAM rail during every idle stretch of the session, against die temperature. The rail feeds the 128 MB of on-chip SRAM (16 MB of L2, 32 MB of L3, 80 MB of scratchpad). Fitted with the same shape as the idle law:
+The SRAM rail during every idle stretch of the session on aifoundry2, against die temperature. The rail feeds the 128 MB of on-chip SRAM (16 MB of L2, 32 MB of L3, 80 MB of scratchpad). Fitted with the idle law's 36 °C e-folding imposed, not fitted:
 
 $$P_\text{SRAM}(T) = -0.32\,\mathrm{W} + 2.81\,\mathrm{W}\; e^{(T-80\,^\circ\mathrm{C})/36\,^\circ\mathrm{C}}$$
 
-- **21.9 mW per MB of SRAM at 80 °C**, 2.6 nW per bit including the cache logic on the same rail, rising 78 mW per °C for the whole 128 MB. Measured: 1.60 W at 67 °C, 1.92 W at 72 °C, 2.26 W at 77 °C, 2.63 W at 82 °C.
-- This is what the memory costs for existing, per second, whatever runs; a byte that sits in scratchpad for a second costs 20929.8 pJ of leakage at 80 °C, against the 4.3 pJ it costs to read it once.
-- The same rail on aifoundry3, which idles 20 °C cooler: 1.90 W at 51 °C, 1.98 W at 52 °C, 2.01 W at 53 °C, 2.06 W at 54 °C, 2.10 W at 55 °C; fitted with the same shape it gives 27.4 mW/MB at 80 °C, so across the two cards the figure is **25 mW/MB [22–27] at 80 °C**, with the caveat that each card's range of temperatures is narrow and the second's is an extrapolation.
+- **The negative constant says the rail rises faster than that shape**, so the fitted leakage term is not the arrays' leakage. The whole rail at 80 °C is 2.48 W, **19.4 mW per MB**, an upper bound on the arrays' leakage including the cache logic on the same rail; it rises 78 mW per °C at 80 °C for the whole 128 MB. Measured: 1.60 W at 67 °C, 1.92 W at 72 °C, 2.26 W at 77 °C, 2.63 W at 82 °C.
+- This is what the memory costs for existing, per second, whatever runs: at about 19 mW per MB a byte held in scratchpad for one second leaks about 19 nJ at 80 °C, as much as reading it 4,400 times (4.2 pJ per read).
+- The same rail on aifoundry3, which idles 20 °C cooler: 1.90 W at 51 °C, 1.98 W at 52 °C, 2.01 W at 53 °C, 2.06 W at 54 °C, 2.10 W at 55 °C; fitted the same way it gives 27 mW/MB at 80 °C, an extrapolation from 51–55 °C.
 
 | Die °C | SRAM rail W, aifoundry2 | idle stretches | SRAM rail W, aifoundry3 | idle stretches |
 |---|---|---|---|---|
@@ -106,12 +108,12 @@ $$P_\text{SRAM}(T) = -0.32\,\mathrm{W} + 2.81\,\mathrm{W}\; e^{(T-80\,^\circ\mat
 
 ## Where the current flows: each class of operation by rail
 
-The service processor meters three rails — the minions, the on-chip SRAM, and the mesh — and board power covers everything including the regulators' own losses. The split of a burst's power over idle across those rails, read from the last second of each burst (the rail figures lag by about two seconds), averaged over the instructions in each class on random data. What is not on a metered rail is the regulators and whatever else has no sensor.
+The PMIC meters three rails — the minions, the on-chip SRAM, and the mesh — and the service processor reports them; board power covers everything including the regulators' own losses. The split of a burst's power over idle across those rails, read from the last 0.6 s of each burst and divided by the 0.94 of the step that the PMIC's running average (time constant about 1 s) has reached there, averaged over the instructions in each class on random data, on aifoundry2 (three passes). What is not on a metered rail is the regulators and whatever else has no sensor.
 
 | Class | W over idle | minions | SRAM | mesh | unmetered |
 |---|---|---|---|---|---|
 | Scalar integer | 4.12 | 79% | 1% | 0% | 19% |
-| Scalar multiply | 2.37 | 72% | 2% | -0% | 26% |
+| Scalar multiply | 2.37 | 72% | 2% | 0% | 26% |
 | Scalar float | 13.29 | 82% | 2% | 1% | 15% |
 | Vector float | 22.70 | 81% | 1% | 1% | 17% |
 | Vector integer | 12.22 | 81% | 2% | 1% | 16% |
@@ -143,24 +145,25 @@ The service processor meters three rails — the minions, the on-chip SRAM, and 
 
 ## What is on no metered rail: attributed, and a droop meter for DRAM
 
-The remainder — board power minus the three rails — cannot be metered with anything on the card, but over the whole catalogue it can be attributed: each burst's unmetered watts fitted as a fraction of each rail's watts plus a cost per DRAM byte, no intercept.
+The remainder — board power minus the three rails — cannot be metered with anything on the card, but over the whole catalogue what a workload adds above idle can be attributed: each configuration's mean unmetered watts fitted as a fraction of each rail's watts plus a cost per DRAM byte, no intercept. `tools/ettelem/fit_unmetered.py` reproduces this fit exactly from `catalogue.json`.
 
-| unmetered W of a burst = | aifoundry2 | aifoundry3 |
+| unmetered W of a configuration = | aifoundry2 | aifoundry3 |
 |---|---|---|
 | × minion-rail W | 0.196 ± 0.003 | 0.177 ± 0.002 |
 | × SRAM-rail W | 0.050 ± 0.017 | 0.064 ± 0.014 |
 | × mesh-rail W | 0.286 ± 0.021 | 0.264 ± 0.019 |
 | per DRAM byte | 72.9 ± 1.6 pJ/B | 68.1 ± 1.4 pJ/B |
-| residual rms, bursts | 0.35 W, n = 392 | 0.30 W, n = 386 |
+| residual rms, configuration means | 0.35 W, n = 392 | 0.30 W, n = 386 |
+| residual rms, the configurations that move DRAM | 1.10 W, n = 17 | 1.29 W, n = 11 |
 
 - **An instruction's unmetered energy is the regulator's**: 20% of what the minion rail delivers is lost between the 12 V input and the core, and nothing else moves. The 18% "unmetered" share of the arithmetic classes above is this.
 - **A DRAM byte's unmetered energy is the memory's**: 73 pJ per byte in the DDR PHY, the I/O rail and the DRAM chips, on top of the 50–60 pJ the mesh, the SRAM and the delivery losses take on the way. A byte written through the L1 costs twice that off-rail, because the line is read from DRAM before it is written.
 - **The mesh coefficient is not all regulator**: 29% is too much for a delivery loss; the memory shires' own logic, on an unmetered rail, works whenever the mesh moves bytes to them.
-- What the fit cannot say: how the idle 12–15 W splits between DDR, PCIe, the IO shire, Maxion and the regulators' own draw, or how the DRAM term splits below its regulator. That is the subject of the observability report's improvement ladder.
+- What the fit cannot say: how the idle 12–15 W splits between DDR, PCIe, the IO shire, Maxion and the regulators' own draw, or how the DRAM term splits below its regulator. That is the subject of the improvement ladder in [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability).
 
-**A droop meter for DRAM.** The memory shires' Moortec voltage monitors report the 0.8 V DDR rail every 133 ms (`die_mv.ddr` in every telemetry file; 767 mV at idle against an 800 mV set point). Across the 386 bursts it droops **0.84 mV per watt of off-rail DRAM power** (plus 0.025 mV per watt of anything else; rms 0.36 mV): 1 mV ≈ 1.2 W of DRAM at 10 Hz, from a sensor that was always there. It is calibrated against the fit above, so it is not independent of the board meter, but it responds to DRAM traffic alone and does not drift with the die temperature. The minion rail sags 0.068 mV per watt the cores draw, the IR drop the spatial temperature brief mapped shire by shire.
+**A droop meter for DRAM.** The memory shires' Moortec voltage monitors report the 0.8 V DDR rail every 133 ms (`die_mv.ddr` in every telemetry file; 767 mV at idle against an 800 mV set point). Across the 386 configuration means it droops **0.84 mV per watt of off-rail DRAM power** (plus 0.025 mV per watt of anything else; rms 0.36 mV; `tools/ettelem/fit_unmetered.py` reproduces the coefficient to within 3%, 0.87 against 0.84 mV/W): 1 mV ≈ 1.2 W of DRAM, refreshed every 133 ms, from a sensor that was always there. It is a proxy calibrated against the fit above, not a meter, and not independent of the board meter. It responds mostly to DRAM traffic, but not only: heavy mesh and scratchpad traffic with no DRAM access droops it too (`tload/scp/random` 1.74 mV, `wire/hop6/random` 1.05 mV in the table below), which it would read as roughly 0.8–1.8 W of DRAM; and its idle reading moves by about 1 mV between 71 and 77 °C. The minion rail sags 0.068 mV per watt the cores draw; the [Power and temperature](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature) report (§3) maps each shire's rails at idle.
 
-| Burst (aifoundry2) | W over idle | DRAM W off-rail | DDR-rail droop, mV | minion-rail droop, mV |
+| Configuration (aifoundry2, mean of three passes) | W over idle | unmetered W less the fitted rail losses | DDR-rail droop, mV | minion-rail droop, mV |
 |---|---|---|---|---|
 | `add/zeros/h2` | 2.68 | — | 0.00 | -0.02 |
 | `fmadd.ps/random/h2` | 26.05 | — | 0.53 | 1.65 |
@@ -172,5 +175,5 @@ The remainder — board power minus the three rails — cannot be metered with a
 | `wire/hop6/random` | 16.51 | — | 1.05 | 0.00 |
 
 
-Sources: `docs/reports/data/2026-09-23-catalogue-aifoundry2/` and `-aifoundry3/`, reduced by `workloads/enercat/analyze_catalogue.py` into `docs/reports/data/2026-09-23-energy-manual/catalogue.json`; the attribution and the droop in `unmetered_fit.json` beside it.
+Sources: `docs/reports/data/2026-09-23-catalogue-aifoundry2/` and `-aifoundry3/`, reduced by `workloads/enercat/analyze_catalogue.py` into `docs/reports/data/2026-09-23-energy-manual/catalogue.json`; the attribution and the droop in `unmetered_fit.json` beside it (first computed inline and kept as computed; `tools/ettelem/fit_unmetered.py` reproduces the attribution exactly and the droop coefficient to within 3%, 0.87 against 0.84 mV/W).
 

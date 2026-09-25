@@ -1,7 +1,10 @@
 # Why is the ET-SoC-1 low power? Sources and numbers
 
-Notes behind `docs/reports/2026-09-21-why-low-power.html`. Measurements are from aifoundry2's card; the rest is
-from the sources listed at the end.
+Notes behind `docs/reports/2026-09-21-why-low-power.html` ([published](https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power)).
+Measurements are from aifoundry2's card; the rest is from the sources listed at the end. The numbers under "What this
+card measures" were first taken from the 20 September draft and are updated here to the report's values (the
+21 September ablation, E15); the report and [docs/findings/13-why-low-power.md](../findings/13-why-low-power.md) are
+the reference.
 
 ## Esperanto's own argument (Hot Chips 33, August 2021; IEEE Micro, May/June 2022)
 
@@ -34,14 +37,18 @@ from the sources listed at the end.
 - Horace He's measurement (the post this repo's Horace experiment reproduces): 8192^3 matmul, 257 TFLOPS on
   random data and 295 on zeros, with a 330 W power limit on his A100; 88 W idle.
 - Core voltage is not published. Esperanto calls 0.75 V nominal for 7 nm; GPUs run above nominal at their
-  top clock (1,410 MHz maximum graphics clock on an A100).
+  top clock (1,410 MHz maximum graphics clock on an A100). Horace He's random-data run was capped at 330 W, so its
+  clock was lower: 257 of the 312 peak TFLOPS needs at least 1,160 MHz, probably about 1,230.
+- Horace He's run is bf16 on the tensor cores: 1.28 pJ per FLOP at the board.
 
 ## What this card measures (2026-09-20/21, 0.52 V, 600 MHz, 80 C unless said)
 
-- Idle 36.3 W at 80 C, 26.7 W at 62 C. Fitted: 11.5 W fixed + 24.5 W x exp((T - 80)/38) of leakage.
-- fp32 TensorFMA on 1,024 minions, 9.18 TFLOPS: 38.3 W on zeros, 46.7 W on ones, 63.4 W on random normal.
-- Per minion, above idle: 2 mW (zeros), 10 mW (ones), 26 mW (random fp32). Cdynamic = P/(V^2 f): 0.012, 0.064
-  and 0.16 nF against the slide's 0.04 nF target.
+- Idle 36.3 W at 80 C, 26.7 W at 62 C. Fitted: 12.6 W fixed + 23.3 W x exp((T - 80)/36) of leakage (the
+  20 September draft's fit was 11.5 W + 24.5 W x exp((T - 80)/38)).
+- fp32 TensorFMA on 1,024 minions, 9.18 TFLOPS, in the ablation: 38.2 W on zeros, 46.9 W on ones, 63.9 W on random
+  normal (the strict session earlier that day, E9, gives 38.3, 46.7 and 63.4 W).
+- Per minion, above idle: 1.9 mW (zeros), 10.3 mW (ones), 27.0 mW (random fp32). Cdynamic = P/(V^2 f): 0.012, 0.064
+  and 0.168 nF against the slide's 0.04 nF target (its 10 mW per core is the whole budget, leakage included).
 - The 0.62 V / 800 MHz operating point (the governor's choice below 65 C): idle 35.0 W against 28.1 W at the
   same 65 C.
 

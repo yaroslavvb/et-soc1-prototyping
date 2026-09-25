@@ -15,7 +15,7 @@ $$E(\text{workload}) \;=\; \int_0^{t} P_\text{static}(T(\tau))\,\mathrm{d}\tau \
   term does not depend on activity at all.
 
 The time $t$ is not free: it is set by whichever resource the workload saturates, so predicting energy means
-predicting time too. Section 7 shows the roofline in joules.
+predicting time too.
 
 ## Hierarchy
 
@@ -27,16 +27,17 @@ predicting time too. Section 7 shows the roofline in joules.
 | 4 | **Bytes through the memory hierarchy** | L1, L2, L2 scratchpad (own and remote), L3, DRAM; read and write; tensor load and store | reads measured (memhier E-2026-09-18); **writes measured here** |
 | 5 | **Bytes between cores and shires** | TensorSend/Recv by distance, reduce and broadcast trees, scratchpad hand-off | measured (nocbench 2026-09-18, E25) |
 | 6 | **Synchronisation** | barrier, credit, fast local barrier, global atomic (uncontended, contended) | measured (E22, E23), extended here |
-| 7 | **Composition** | worked examples: dense matmul, the multi-stage relay, a hot line; predicted from the tables against measured | assembled here |
+| 7 | **Composition** | worked examples: dense matmul, the multi-stage relay, a hot line; built from the tables and checked against measurements | assembled here |
 | 8 | **Card-to-card variation** | every table on aifoundry2 and aifoundry3; aifoundry1 is unavailable | measured here |
-| 9 | **Method and limits** | telemetry resolution, idle subtraction and thermal drift, what a "flip" is and is not, uncertainty per table | written here |
+| 9 | **Method and limits** | telemetry resolution, idle subtraction and thermal drift, what a "flip" is and is not, the confidence bars | written here |
 
 ## Units and conventions
 
 - Energies are **above idle**: $e_i = (P - P_\text{idle}(T)) / \text{rate}$, with $P_\text{idle}$ taken from
   idle windows bracketing each measurement, at the same die temperature. Section 9 says how good that is.
 - Per *event*, never per second: pJ per instruction, pJ per byte, fJ per register bit clocked, nJ per barrier.
-- The operating point is stated for every table. Unless said otherwise it is **600 MHz at 0.517 V**, the point
-  the governor pins a warm card to (docs/findings/16-dvfs-and-leakage.md).
+- The operating point is stated for every table. Unless said otherwise it is **600 MHz** (0.517 V in the DVFS
+  table; the minion rail reads 0.518 V on aifoundry2 and 0.523 V on aifoundry3), the point the governor pins a
+  warm card to (docs/findings/16-dvfs-and-leakage.md).
 - Where a number is data-dependent it is given three ways — zeros, constant, random — because on this chip the
   difference is large (docs/findings/10-data-dependent-power.md).

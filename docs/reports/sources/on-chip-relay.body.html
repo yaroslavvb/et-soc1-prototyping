@@ -1,19 +1,28 @@
 <h1>Hand it to the next shire</h1>
-<p class="byline">Two ET-SoC-1 cards, 22 September 2026 · <code>workloads/onchip --test relay</code>, a new probe · asking whether on-chip communication can beat main memory for a real computation · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">measurement reports</a></p>
+<p class="byline">22 September 2026 · two ET-SoC-1 cards, aifoundry2 and aifoundry3 · a new probe, <code>workloads/onchip</code> (<code>--test relay</code>) · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
-<p class="lede">A shire's own scratchpad runs at 2.5 TB/s and the shire next door at about 1 TB/s, while DRAM
+<p class="lede">A shire's own scratchpad runs at 2.5 TB/s and another shire's at about 1 TB/s, while DRAM
 manages 76 GB/s for the whole chip. Those are bandwidths, not results. The question is whether a computation
-can be rearranged to collect them. <b>It can. A chain of stages that hands each stage's output to a
-neighbouring shire, instead of writing it to DRAM and reading it back, runs 12.3 times faster and uses 12
-times less energy per byte — and the same power.</b> Keeping the output in the shire's own scratchpad is
-30.7 times faster. Both numbers reproduce on a second card to within 1%, and both come with a boundary:
-below the 32 MB L3 there is almost nothing to win.</p>
+can be rearranged to collect them. <b>It can. A chain of stages that hands each stage's output to another
+shire, instead of writing it to DRAM and reading it back, runs 12.3 times faster and uses a twelfth of the
+energy per byte, at the same power.</b> The shire that receives it is the next one in ID order, which on the
+mesh is 1 to 10 hops away (3.5 on average), and which shire it is makes no measurable difference to the
+bandwidth. Keeping the output in the shire's own scratchpad is 30.7 times faster. Both numbers reproduce on a
+second card to within 2%. Both also need the data to outgrow the 32 MB L3: below that, the hand-off wins at
+most 1.4× and the shire's own scratchpad 1.3–3.3×.</p>
+
+<p class="small"><b>Terms.</b> The ET-SoC-1's cores are <i>minions</i>, 32 to a <i>shire</i>; each shire
+has 4 MB of SRAM, split on these cards into 0.5 MB of L2 cache, a 1 MB slice of the chip-wide 32 MB L3 and a
+2.5 MB <i>scratchpad</i> that any shire can address. A <i>hart</i> is one of a minion's two hardware threads.
+A <i>tensor store</i> writes a block from a minion's registers straight to memory, past its caches. The
+shires sit on a mesh network-on-chip, and a <i>hop</i> is one step between neighbouring mesh stops, 3.72 mm.
+More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">Passing each stage to the next shire</div><div class="val" id="k1"></div><div class="sub">against writing it to DRAM and reading it back</div></div>
   <div class="card kpi"><div class="lab">Keeping it in the shire's own scratchpad</div><div class="val" id="k2"></div><div class="sub">no data crosses a shire at all</div></div>
   <div class="card kpi"><div class="lab">Energy per byte, next shire vs DRAM</div><div class="val" id="k3"></div><div class="sub">at the same watts over idle</div></div>
-  <div class="card kpi"><div class="lab">Where the advantage appears</div><div class="val" id="k4"></div><div class="sub">the working set has to outgrow the L3</div></div>
+  <div class="card kpi"><div class="lab">Where the advantage appears</div><div class="val" id="k4"></div><div class="sub">of live intermediate data: it has to outgrow the 32 MB L3</div></div>
 </div>
 
 <h2>1. One kernel, three places to put the answer</h2>
@@ -43,9 +52,19 @@ draw <em>the same power</em>, and one of them gets thirty times as much done wit
 
 <p class="small" id="powernote"></p>
 
+<p class="small"><b>Re-measured.</b> On 23 September the three media were run again, three warm passes on
+aifoundry2 and four on aifoundry3, each corrected for the die's leakage, and pooled with the session above
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">the energy
+manual, §5</a>). Mean and [range] over the eight passes, per byte moved: DRAM 105.7 [99.5–111.0] pJ, next
+shire 8.6 [7.8–9.2] pJ, own scratchpad 3.99 [3.90–4.25] pJ — 12× and 26× less than DRAM. For comparison, the
+manual's energy per byte read at 600 MHz is 122 [117–129] pJ from DRAM, 2.52 pJ from the shire's own
+scratchpad and 6.65 pJ from another shire's. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy
+report</a> now quotes these values too; its own 18 September figures (148, 2.8 and 6.3 pJ, taken with the clock
+left free) are superseded.</p>
+
 <h2>3. Where the advantage comes from, and where there isn't one</h2>
 <p>The win is against DRAM, not against the memory hierarchy. Shrink the working set and the L3 quietly does
-the same job for free:</p>
+most of the same job for free:</p>
 
 <div class="chart-title">The same eight-stage relay at different working-set sizes</div>
 <div class="chart scroll" id="size"></div>
@@ -63,62 +82,100 @@ the same job for free:</p>
 
 <p id="inttext"></p>
 
-<h2>5. Distance across the mesh costs nothing</h2>
-<p>The obvious worry about handing data to another shire is the network in between. At this granularity there
-is none to speak of. Handing the slab sixteen shires away, across the width of the mesh, is not slower than
-handing it next door:</p>
+<h2>5. How far the slab moves does not change the bandwidth</h2>
+<p id="distintro"></p>
 
 <div class="table-wrap"><table id="dist"></table></div>
 
-<p>Transfers here are 32 KB per minion and deeply pipelined, so the per-hop latency of 12 cycles never
-appears; what is left is the bandwidth of a scratchpad that is not this shire's own, and that is the same
-wherever it is. The practical consequence is that placement is free: a stage can be given to whichever shire
-suits, not only to a neighbour.</p>
+<p>Transfers here are 32 KB per minion and deeply pipelined, so the 12-cycle round trip per hop never
+appears; what is left is the bandwidth of a scratchpad that is not this shire's own, and it does not depend on
+where that shire is. The practical consequence is that placement is free in bandwidth: a stage can be given to
+whichever shire suits. It is not free in energy. On a loaded mesh each hop costs 1.5–2.2 pJ per byte of
+random data (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#meaning">Heat per millimetre,
+§9</a>), about half of what a tensor load of that byte from the shire's own scratchpad costs. Every byte the
+hand-off reads has crossed 3.5 hops on average, so a stage placed on a physical neighbour should cost less than
+the energy in §2; that was not measured. This relay's slabs each hold a single value repeated, and such data costs less to carry than
+random data.</p>
 
 <h2>6. What this is good for</h2>
 <ul>
 <li><b>Any chain of passes over data that outgrows the L3.</b> Multi-stage filters, iterated stencils, a deep
 and narrow network, a stream that several kernels touch in turn. The standard shape writes the intermediate
-to memory between stages, which on this chip costs 48 GB/s. The intermediate does not have to go there.</li>
+to memory between stages, which on this chip runs at 48 GB/s of reads and writes. The intermediate does not
+have to go there.</li>
 <li><b>The unit that matters is the shire, not the minion.</b> Its scratchpad is 2.5 MB, addressable by every
 other shire, and written by a tensor store that bypasses both caches, so what one shire writes another reads
 with no coherence problem at all. That is the mechanism this whole report rests on.</li>
-<li><b>Budget one barrier per stage.</b> A chip-wide barrier costs about 5,000 cycles. At 1 MB per shire a
-DRAM stage is 830,000 cycles and an on-chip stage 27,000, so the barrier is under a fifth of even the fastest
-case, and the measured advantage is flat from one stage to thirty-two.</li>
-<li><b>Do not reach for a two-dimensional systolic array to get this.</b> The register-to-register path
-(<code>TensorSend</code>/<code>TensorRecv</code>) is immune to shire-cache contention and is the right tool
-inside a shire, but a cell receiving from two partners at once hangs a hart permanently, because the hardware
-keeps one ready flag per minion rather than one per partner. The relay here is the same idea at shire
-granularity, and it uses a path that cannot hang.</li>
+<li><b>Budget one barrier per stage.</b> A chip-wide barrier costs about 5,000 cycles (8.3 µs at 600 MHz; see
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">on-chip
+communication</a>). At 1 MB per shire a DRAM stage is 830,000 cycles, a hand-off stage 68,000 and an
+own-scratchpad stage 27,000, so the barrier is under a fifth of even the fastest case. From four stages to
+thirty-two the advantage is flat (12.0–12.5×); with one or two stages it is larger (15.3×, 13.4×), where the
+DRAM route reaches only 38 and 44 GB/s. Build the barrier with one atomic per shire and a credit release, so
+that nobody spins on a shared counter: the first version of this relay had every shire's leader poll one
+counter, which is <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">the hot line</a> of the
+companion report, and the barrier hung.</li>
+<li><b>In a two-dimensional systolic array, give each neighbour link its own minion.</b> The register-to-register
+path (<code>TensorSend</code>/<code>TensorRecv</code>) is immune to shire-cache contention and is the right tool
+inside a shire. But the hardware keeps one ready flag per minion rather than one per partner, so a minion
+that exchanges with two partners at once, as a cell of a classic 2D array does with its north and west
+neighbours, can lose a ready and hang until the chip is reset (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#a-trap-one-ready-flag-per-minion">on-chip
+communication, “A trap: one ready flag per minion”</a>). A shire has 32 minions, so each link can have its
+own; a minion that must serve two neighbours has to take them in separate phases with a barrier between. The
+relay here is the same idea at shire granularity, through the scratchpads, a path that cannot hang.</li>
 </ul>
 
 <h2>7. Method, and what is not established</h2>
 <ul>
 <li>The probe is <code>workloads/onchip</code>, new for this. A stage's output is written with a tensor store,
-which bypasses the L1 and L2 caches, so a neighbouring shire cannot read a stale line. Inputs are read with
-plain vector loads from addresses the reading minion has never written; two buffers alternate, and a minion's
-32 KB chunk is sixty-four times its 512 B of L1, so nothing it touched two stages ago survives. Every run
-verifies its own output element by element, which is what makes that argument checkable rather than
+which bypasses the L1 and L2 caches, so the shire that reads it next cannot read a stale line. Inputs are read
+with plain vector loads from addresses the reading minion has never written; two buffers alternate, and a
+minion's 32 KB chunk is sixty-four times its 512 B of L1, so nothing it touched two stages ago survives. Every
+run verifies its own output element by element, which is what makes that argument checkable rather than
 asserted.</li>
-<li>Rates come from the on-device cycle counter at the 600 MHz this card is pinned to, not the wall clock: a
-kernel launch costs a few hundred microseconds and an on-chip stage costs twenty-seven thousand cycles, so
-wall time would measure the host.</li>
-<li>Scratchpad addressing is the PRM's format 0, shire in bits [29:23]. <b>Offset 0 of a shire's scratchpad
-faults</b>; the buffers start 256 KB in, which also leaves room for two of them inside the 2.5 MB.</li>
-<li>Everything was run on aifoundry2 and repeated on aifoundry3: <span id="cards"></span>.</li>
-<li><b>Not established:</b> whether a working set larger than the 80 MB of scratchpad can be streamed through
-the same relay, which is the case where on-chip hand-off would be the only option rather than the faster one;
-we did not build the flow control that needs. The arithmetic here is one vector add, chosen to make the
-measurement about data movement — a real pipeline would have real stages, and section 4 says what that costs.
-The chip-wide barrier per stage is the simplest synchronisation and not the cheapest; a credit between
-neighbouring shires would do, and would help the on-chip media most. And the comparison is against this
-chip's DRAM at 48 GB/s, which is what the card has, not against a memory system in general.</li>
+<li>Rates come from the on-device cycle counter, converted at 600 MHz (the minion clock stayed there through
+every power burst), not from the wall clock: a kernel launch costs a few hundred microseconds and an on-chip
+stage costs 27,000–68,000 cycles, so wall time would measure the host.</li>
+<li>Scratchpad addressing is the Programmer's Reference Manual's (PRM) format 0, shire in bits [29:23].
+<b>Offset 0 of a shire's scratchpad faults</b>; the buffers start 256 KB in, which also leaves room for two of
+them inside the 2.5 MB.</li>
+<li>All 88 configurations were run on aifoundry2 and repeated on aifoundry3 (the power session of §2 ran on
+aifoundry2 only): <span id="cards"></span>.</li>
+<li><b>Not established:</b>
+<ul>
+<li>Whether a working set larger than the 80 MB of scratchpad can be streamed through the same relay. That is
+the case where on-chip hand-off would be the only option rather than the faster one, and we did not build the
+flow control it needs.</li>
+<li>Whether handing to a physical neighbour lowers the hand-off's energy per byte. Every offset measured here
+mixes near and far shires.</li>
+<li>A real pipeline. The arithmetic here is one vector add, chosen to make the measurement about data
+movement; a real pipeline would have real stages, and section 4 says what that costs.</li>
+<li>A cheaper barrier. The chip-wide barrier per stage is the simplest synchronisation, not the cheapest; a
+credit from each shire to the one that reads its output would do, and would help the on-chip media most.</li>
+<li>Other memory systems. The comparison is against this chip's DRAM, which streams 76 GB/s of plain reads
+and carries this relay's reads and writes at 48 GB/s, not against a memory system in general.</li>
+</ul></li>
 </ul>
 
 <pre><code>workloads/onchip/run_onchip.sh DATA                 # 88 configurations, milliseconds of card time each
 tools/ettelem/run_onchip_power.sh DATA 12           # board power, one burst per medium
-python3 workloads/onchip/analyze_onchip.py DATA/sweep.jsonl --power DATA --out onchip.json</code></pre>
-<p class="small">Companion: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">one hot line stops a shire</a>,
-which is what happens if the structure several shires share is a single line rather than a slab. Findings index
-and claim provenance: <code>docs/findings/</code>.</p>
+python3 workloads/onchip/analyze_onchip.py DATA/sweep.jsonl DATA3/sweep.jsonl --power DATA --out onchip.json
+                                                    # DATA3: the same sweep from the second card</code></pre>
+<p class="small">Raw data and the analysis output:
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry2">docs/reports/data/2026-09-22-onchip-aifoundry2</a>
+and <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry3">…-aifoundry3</a>.
+Versions: first published 22 September 2026; revised 24 September 2026 to say that the “next shire” is the
+next by ID rather than a mesh neighbour, to add the mesh distances and the 23 September energy re-measurement,
+and to correct the flops-per-byte unit in section 4.</p>
+
+<h2>8. Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">The energy manual, §5</a> — this relay's energy re-measured, with bars from both cards.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> — what each mesh hop costs in energy, measured with chosen bit patterns.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — the 2.5 TB/s, 1 TB/s and 76 GB/s of the lede.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the shire map, 12 cycles per hop, the chip-wide barrier and the one-ready-flag trap.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a> — the roofline that section 4 climbs, for every level of memory.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a> — the companion: what happens when the structure several shires share is a single line rather than a slab.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/2026-09-22-et-soc1-l2-mainline-starvation#landmine">L2 mainline starvation, “The landmine”</a> — the brief's last section: why a 2D systolic array hangs a hart until the chip is reset.</li>
+<li><a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/findings">docs/findings/</a> — the findings index: where every claim here comes from, and the experiment register.</li>
+</ul>

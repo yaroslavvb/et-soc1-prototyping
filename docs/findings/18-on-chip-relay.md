@@ -1,12 +1,15 @@
 # Hand it to the next shire
 
+[← Findings index](README.md) · published as [Hand it to the next shire](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay) (A14) · numbers
+and sources: [05-claims.md](05-claims.md)
+
 **Question (Q25, Q26):** is there a computation where shire-to-shire communication beats the standard
 approach of putting the intermediate in main memory?
 
-**Answer:** yes, and by a lot. A chain of stages that hands each stage's output to a neighbouring shire's
-scratchpad instead of writing it to DRAM runs **12.3× faster** and uses **12× less energy per byte**, at the
-same watts. Keeping the output in the shire's own scratchpad is **30.7×**. The advantage appears only once
-the working set outgrows the 32 MB L3.
+**Answer:** yes, and by a lot. A chain of stages that hands each stage's output to the next shire's
+[scratchpad](README.md#terms) (the next shire in ID order, 3.5 mesh hops away on average) instead of writing it to
+DRAM runs **12.3× faster** and uses **12× less energy per byte**, at the same watts. Keeping the output in the
+shire's own scratchpad is **30.7×**. The advantage appears only once the working set outgrows the 32 MB L3.
 
 Evidence: [E24, E25](03-experiments.md). Published as [A14](04-artifacts.md).
 
@@ -25,8 +28,11 @@ run three ways, and only the destination of a stage's output differs.
 | This shire's own scratchpad | 1,483.7 | **30.7×** | 4.3 | 5.30 |
 
 1 MB per shire per stage, eight stages, 1,024 minions, 512 MB of reads and writes. aifoundry3 gives 12.4× and
-31.2×. The energy figures line up with the independent memory-hierarchy measurements (133 pJ/B for DRAM, 2.6
-local scratchpad, 6.3 remote).
+31.2×. The table is the first run; re-measured three times per card with the die held warm (E29), the energies are
+105.7 [99.5–111.0] pJ/B through DRAM, 8.6 [7.8–9.2] to the next shire and 3.99 [3.90–4.25] in the own scratchpad —
+12× and 26×. They are in line with the energy manual's levels, re-measured at 600 MHz on both cards (E29):
+122 [117–129] pJ/B from DRAM, 2.5 from the own scratchpad, 6.7 from another shire's. The 18 September
+memory-hierarchy report printed 148 / 2.8 / 6.3, a mean of two runs taken at mixed clocks.
 
 **All three draw the same power.** Within a watt of each other, while moving 49.7, 594 and 1,503 GB/s. That is
 the cleanest way to say it: DRAM costs the same watts to move a thirtieth of the data.
@@ -57,8 +63,8 @@ It is the L3 capacity.**
 
 ## How much arithmetic it takes to stop mattering
 
-Repeating the add `w` times per element walks the workload up the roofline. The lead roughly halves for every
-quadrupling of the work:
+Repeating the add `w` times per element walks the workload up the roofline. The lead holds to about four adds
+per element and then falls faster with each quadrupling:
 
 | Adds per element | Own shire | Next shire |
 |---|---|---|
@@ -68,18 +74,31 @@ quadrupling of the work:
 | 128 | 2.7× | 2.4× |
 | 256 | 1.6× | 1.5× |
 
-Rule of thumb: **on-chip placement is worth it below roughly ten flops per byte.** Above that the arithmetic
-is the wall and it does not matter where the operands came from.
+Counting bytes moved (each element is read and written, so one add per element is 0.125 flops per byte moved),
+256 adds per element is 32 flops per byte moved, or 64 per byte read. Rule of thumb for this vector-add kernel:
+**on-chip placement pays several-fold up to a few flops per byte moved and is still 1.5× at 32 flops per byte
+moved.** For the tensor unit, which does twice the `fadd.ps` rate, the ridge-points report puts the DRAM crossover
+near 130 flops per byte read.
 
-## Distance across the mesh is free
+## How far the slab moves does not change the bandwidth
 
-| Shires the slab moves per stage | 1 | 2 | 4 | 8 | 16 |
+The ring runs in shire-ID order, and shire IDs do not follow the mesh: on the shire map of the on-chip communication
+report, the next shire by ID is 1–10 mesh hops away (3.5 on average), and 2, 4, 8 and 16 IDs away average 4.5, 3.7,
+1.6 and 2.1 hops.
+
+| Shire IDs back round the ring | 1 | 2 | 4 | 8 | 16 |
 |---|---|---|---|---|---|
-| GB/s | 593 | 703 | 652 | 686 | 734 |
+| Mesh hops, mean (range) | 3.5 (1–10) | 4.5 (2–7) | 3.7 (1–8) | 1.6 (1–7) | 2.1 (1–6) |
+| GB/s | 593 | 703 | 652 | 686 | 733 |
 
-Handing a slab sixteen shires away, across the width of the mesh, is not slower than handing it next door.
-Transfers are 32 KB per minion and deeply pipelined, so the 12-cycle-per-hop latency never appears. The
-practical consequence: **a stage can be given to whichever shire suits, not only to a neighbour.**
+Across offsets whose mean distance runs from 1.6 to 4.5 hops the bandwidth stays between 593 and 733 GB/s and does
+not follow the distance. Transfers are 32 KB per minion and deeply pipelined, so the 12-cycle round trip per hop
+never appears. The practical consequence: **for bandwidth, a stage can be given to whichever shire suits.**
+
+It does cost energy: on a loaded mesh each hop adds about 1.5–2.2 pJ per byte of random data
+([20-heat-per-mm.md](20-heat-per-mm.md)), about half of a tensor load of that byte from the shire's own scratchpad
+(4.2 pJ/B), which this bandwidth sweep does not see. The 8.6 pJ/B hand-off averages 3.5 hops, so a
+stage placed on a physical neighbour should cost less; that was not measured.
 
 ## The mechanism, and why it is not a systolic array
 
@@ -109,10 +128,17 @@ but the relay at shire granularity gets the same benefit over a path that cannot
 ## Not established
 
 - **A working set larger than the 80 MB of scratchpad.** That is the case where the hand-off would be the
-  *only* option rather than the faster one, and it needs flow control between neighbouring shires that we did
-  not build.
+  *only* option rather than the faster one, and it needs flow control between shires that we did not build.
 - **A real pipeline.** The arithmetic here is one vector add, chosen to make the measurement about movement.
 - **A cheaper barrier.** A credit between neighbouring shires would do instead of a chip-wide barrier, and
   would help the on-chip media most, so the figures above understate them slightly.
-- **The `shires` sweep is confounded**: fewer shires also means a smaller working set, which puts it back
-  inside the L3. Do not read it as a scaling curve.
+- **Scaling with the number of shires is not measured.** A sweep that used fewer shires also shrank the working
+  set back inside the L3, so it cannot be read as a scaling curve.
+- **Whether handing to a physical neighbour lowers the 8.6 pJ/B.** Every hand-off here went to the next shire ID.
+
+## Related
+
+- [20-heat-per-mm.md](20-heat-per-mm.md): what each hop of the hand-off costs, per bit and per millimetre.
+- [17-hot-line.md](17-hot-line.md): the contention that hung the relay's first barrier.
+- [19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md): the E29 bars on this page's
+  energies.

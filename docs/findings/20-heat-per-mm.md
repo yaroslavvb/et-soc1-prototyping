@@ -1,12 +1,15 @@
 # Heat per millimetre
 
+[← Findings index](README.md) · published as [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) (A17) · numbers and
+sources: [05-claims.md](05-claims.md)
+
 **Question (Q41):** Dally's rule of thumb says on-chip communication costs "~100 fJ/b-mm". What does moving a bit
 one millimetre cost on the ET-SoC-1's mesh, measured, and does the rule hold?
 
 **Answer:** at the mesh's own 0.485 V, with no other traffic on its links, a random bit costs **36 fJ per mm on the
 mesh rail** (25 of it depending on the data, 12 not) and **47 fJ on board power**, which also carries the
 regulator's loss. On a loaded mesh, where flows share links, it is **50 and 73 fJ**: contention adds 40–45% on the
-mesh rail and 55–65% on board power. What costs is not only bits that change between consecutive flits but **the
+mesh rail and 55–65% on board power. What costs energy is not only bits that change between consecutive flits but **the
 ones carried**: an all-ones stream, which never changes from flit to flit, costs 7–9% more per hop than random data.
 Dally's figure states no voltage. Scaled to 0.9 V, the voltage of the 40 nm figure it most likely descends from
 (an inference; no source says so), the mesh rail's data-dependent cost is 85–105 fJ per bit·mm, so the rule holds to
@@ -14,8 +17,10 @@ within its own vagueness; read at the "~0.5V" his 2023 talk sets beside it, the 
 spends on the data.
 
 Evidence: [E31, E32](03-experiments.md); the literature and die geometry are [R14](01-resources.md). Published as
-[A17](04-artifacts.md), after an adversarial review whose corrections are applied
-(`docs/reports/data/2026-09-24-wire-energy/review/`).
+[A17](04-artifacts.md), after an adversarial review by a workflow of six AI agents whose corrections are applied
+(`docs/reports/data/2026-09-24-wire-energy/review/`). A *hop* is one step between neighbouring stops of the mesh
+network-on-chip; a *flit* is the unit the mesh moves as a whole, here at least one 64-byte line
+([terms](README.md#terms)).
 
 ---
 
@@ -96,11 +101,14 @@ over the 0.9 V literature is mostly V². Only mesh-rail numbers are V²-scaled: 
 ## In practice
 
 - A random byte costs **1.50–2.17 pJ per hop** on the loaded mesh (mesh rail to board, everything included).
-- A 64-byte line across the die (10 hops, about 37 mm, extrapolated from 1–6) costs 1.0–1.4 nJ in hops, against
-  7.8 nJ to read it from DRAM: the whole hand-off, far scratchpad read and exit included, is about 4× cheaper than
-  DRAM on the same meter. Each hop adds about half of what reading the byte from the shire's own scratchpad costs.
+- A 64-byte line carried between the two farthest shires (10 hops, about 37 mm of mesh travel, extrapolated from
+  1–6) costs 1.0–1.4 nJ in hops, against 8.3 nJ to read it from DRAM by random-data tensor load (129 pJ/B, like for
+  like with the 4.21 pJ/B own-scratchpad read): the whole hand-off, far scratchpad read and exit included, about
+  1.8 nJ, is about 4.5× cheaper than DRAM on the same meter. Each hop adds about half of what reading the byte from
+  the shire's own scratchpad costs (2.17 against 4.21 pJ/B, board power).
 - In Dally's currency, a 32-bit operand crossing one hop costs 8.7 pJ of board power, about 1.6 lanes of `fadd.ps`
-  on random data: a floating-point add is worth about 0.6 of a hop, some 2.3 mm, of movement.
+  on random data: one lane of a vector float add is worth about 0.6 of a hop, some 2.3 mm (230 times Dally's
+  10 µm); a scalar `fadd.s` (25.5 pJ) is worth about three hops.
 
 ## Lanes and flits
 
@@ -133,3 +141,11 @@ as more links are shared; why it falls short is open.
   quarter of the free-link fixed part could be per second; the data-dependent part is immune.
 - **Voltage scaling** assumes full-swing links at constant capacitance; whether the links are low-swing is not known.
 - **Ten hops is an extrapolation** from one to six.
+
+## Related
+
+- [18-on-chip-relay.md](18-on-chip-relay.md): the relay whose hand-off this prices per hop.
+- [19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md): the meter chain, and the first
+  starved-meter case.
+- [03-experiments.md](03-experiments.md), E27: the energy manual's first wire fit, which the 8-hop point pulls low.
+- [14-card-behaviour.md](14-card-behaviour.md): the traps found during these runs.

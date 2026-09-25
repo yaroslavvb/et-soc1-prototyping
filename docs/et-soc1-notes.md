@@ -5,14 +5,19 @@ Condensed from the manuals in `external/et-man`, the micro-architecture docs in
 FOSDEM 2026 talk "Zero to matmul with the ET-SoC-1". Section numbers like "PRM ch. 9"
 point to the full details in `external/et-man/ET Programmer's Reference Manual.pdf`.
 
+These notes were written as the work went, starting on 18 September. Where a later measurement replaced a number,
+the section says so; the current values, each traced to its experiment, are in
+[docs/findings/05-claims.md](findings/05-claims.md), and the per-event energies in the energy manual
+([docs/energy-manual/](energy-manual/README.md)).
+
 ## The chip in one screen
 
 | Level | Contents |
 |---|---|
 | **Minion** (core) | In-order RV64IMFC with Zicsr/Zifencei, **2 harts**. The 8-lane x 32-bit VPU widens `f0..f31` to 256 bits. It has one FMA, two integer multiply-accumulate (IMA), one integer and one transcendental unit. The **4 KB L1D$** is 16 sets x 4 ways x 64 B lines, shared/split per hart, or partly an L1 scratchpad. The L1D$ is **not coherent**. |
-| **Neighborhood** | 8 minions sharing a 32 KB L1 I$, plus an L0 micro-I$ per 4 minions. Cooperative tensor loads coalesce identical requests. |
-| **Shire** | 4 neighborhoods = **32 minions / 64 harts**. **4 MB SRAM**, split between L2 cache, L3 slice, and L2 scratchpad (L2Scp). The typical split is 512 KB L2, 1 MB L3, 2.5 MB scratchpad. There is also an uncacheable block with fast local barriers (FLB), fast credit counters (FCC), IPIs, and global atomics. |
-| **Chip** | 34 minion shires (32 compute + master + spare) = 1088 minions. There are 4 out-of-order Maxions, 1 service processor (SP), and a mesh NoC. DRAM is 16 x 16-bit LPDDR4X channels (~133 GB/s peak, up to 32 GB; the V3 dev card has 32 GB), and the host link is PCIe Gen4 x8. |
+| **Neighbourhood** | 8 minions sharing a 32 KB L1 I$, plus an L0 micro-I$ per 4 minions. Cooperative tensor loads coalesce identical requests. |
+| **Shire** | 4 neighbourhoods = **32 minions / 64 harts**. **4 MB SRAM**, split between L2 cache, L3 slice, and L2 scratchpad (L2Scp). The typical split is 512 KB L2, 1 MB L3, 2.5 MB scratchpad. There is also an uncacheable block with fast local barriers (FLB), fast credit counters (FCC), IPIs, and global atomics. |
+| **Chip** | 34 minion shires (32 compute + master + spare) = 1088 minions. There are 4 out-of-order Maxions, 1 service processor (SP), and a mesh NoC. DRAM is 16 x 16-bit LPDDR4X channels (136.5 GB/s at the datasheet's 4,266 MT/s; these cards' 933 MHz DDR clock gives 119 GB/s, and 76 GB/s is measured; up to 32 GB, and the V3 dev card has 32 GB), and the host link is PCIe Gen4 x8. |
 
 Software sees **2048 harts** on the 32 compute shires (`hartid = shire*64 + minion*2 + thread`).
 The FOSDEM talk measured about 10.25 TFLOP/s fp32 on 1024 minions at 650 MHz. The theoretical peak there is 1024 x 8 lanes x 2 flop x 0.65 GHz = 10.6 TFLOP/s.
@@ -40,7 +45,7 @@ The FOSDEM talk measured about 10.25 TFLOP/s fp32 on 1024 minions at 650 MHz. Th
 
 The chip has up to about 2465 caches and **no coherency between them**. L1D$ lines are 64 B and get written back
 whole, so two harts on different minions that write to the same line will clobber each other. On FOSDEM slide 14,
-parallelizing the inner matmul loop gives wrong results for exactly this reason.
+parallelising the inner matmul loop gives wrong results for exactly this reason.
 
 Options, cheapest first:
 1. **Give each hart whole 64 B lines** of any output. The saxpy example rounds work per hart up to 16 floats,
@@ -57,27 +62,35 @@ Options, cheapest first:
 ## Memory hierarchy, measured (aifoundry2, 2026-09-18)
 
 Measured with `workloads/memhier`. The full write-up, including the A100 comparison, is
-`docs/reports/2026-09-18-et-soc1-memory-hierarchy.html`. Latencies are load-to-use, one dependent chain.
+`docs/reports/2026-09-18-et-soc1-memory-hierarchy.html`. Latencies are load-to-use, one dependent chain, at 600 MHz.
+Bandwidths are from the launches that ran at 600 MHz; energies are the energy manual's (§4: 23 September, a pinned
+600 MHz, both cards).
 
-| Level | Size | Latency | Chip bandwidth | Energy (card, above idle) |
+| Level | Size | Latency | Chip bandwidth at 600 MHz | Energy (card, above idle) |
 |---|---|---|---|---|
-| L1 data cache | **512 B per hart** (firmware sets scratchpad mode) | 5.25 cycles | 7.6 TB/s | 1.8 pJ/B |
+| L1 data cache | **512 B per hart** (firmware sets scratchpad mode) | 5.25 cycles | 6.2 TB/s | 0.77 pJ/B |
 | L2 read buffer | 8 lines x 4 banks = 2 KB | 36 cycles | – | – |
-| L2 | 512 KB per shire, private | 47 cycles | 2.8 TB/s | 4.3 pJ/B |
-| L2 scratchpad | 2.5 MB per shire | 47 local; 112–271 remote | 2.6 / 1.0 TB/s | 2.8 / 6.3 pJ/B |
-| L3 | 1 MB per shire, 32 MB shared | 169 cycles, ~280 ns | 1.0 TB/s | 10.8 pJ/B |
-| DRAM | 32 GB LPDDR4X | ~440 ns (421–486) | 76 GB/s | ~150 pJ/B |
+| L2 | 512 KB per shire, private | 47 cycles | 2.45 TB/s | 2.51 pJ/B |
+| L2 scratchpad, own / another shire's | 2.5 MB per shire | 47 local; 112–220 remote | 2.46 / 0.96 TB/s | 2.52 / 6.65 pJ/B |
+| L3 | 1 MB per shire, 32 MB shared | 159–169 cycles (265–282 ns) | 0.98 TB/s | 10.5 pJ/B |
+| DRAM | 32 GB LPDDR4X | 287–297 cycles, about 490 ns | 76 GB/s | 122 pJ/B [117–129] |
+
+**Superseded.** The 18 September report first printed bandwidths averaged over launches at 600–800 MHz (L1 7.6,
+L2 2.8, own scratchpad 2.6, L3 1.0, another shire's scratchpad 1.0 TB/s) and energies measured with the clock free
+(L1 1.8, L2 4.3, scratchpads 2.8 / 6.3, L3 10.8, DRAM 148 pJ/B). The L2 bandwidth at 600 MHz is 128 B per
+shire-cycle. DRAM chases the governor ran at 800 MHz take 440–460 ns.
 
 What this means for kernels:
 - **Plan on 512 B of L1 per hart.** Before every launch the firmware (`init_l1`) sets D1Split and SCPEnable. That
   gives hart 0 sets 12–13 and hart 1 sets 14–15, and sets 0–11 become the 3 KB tensor scratchpad (PRM table 8.4).
   Hart 1 also pays +3 cycles on every L1 miss.
-- **Stage shared data in the L2 scratchpad.** It is as fast as L2 (47 cycles), it is L1-cacheable, and it costs a third
-  less energy per byte. Format 0 addressing: `0x80000000 + (shire << 23) + offset`, where shire `0x7F` means the
+- **Stage shared data in the L2 scratchpad.** It is as fast as L2 (47 cycles), it is L1-cacheable, and at a pinned
+  600 MHz it costs the same energy per byte (2.52 against 2.51 pJ/B; the third less once measured was a clock effect). Format 0 addressing: `0x80000000 + (shire << 23) + offset`, where shire `0x7F` means the
   local shire. Only the master shire's scratchpad is used by the firmware.
-- **Remote shires cost 12–16 cycles per mesh hop**, and latency is not symmetric between shire pairs.
+- **A mesh hop costs 20 ns round trip** (12 minion cycles at 600 MHz, 16 at 800), the same in both directions; the
+  18 September scratchpad rows that looked asymmetric ran at different clocks (row 0 at 600 MHz, row 31 at 800).
 - **Count on the clock varying.** The card runs a "managed power" DVFS governor (65 W TDP) that moves the minion clock
-  between 600 and ~850 MHz under load. On-chip latencies are fixed in cycles; L3 and DRAM latencies are fixed in ns.
+  between 600 and 800 MHz (three points: 600, 700, 800) under load. On-chip latencies are fixed in cycles; L3 and DRAM latencies are fixed in ns.
   Time with wall clock as well as `hpmcounter3`.
 - **Avoid concurrent PMU reads.** When both harts read `hpmcounter3` at once, one can get a wrong value (erratum 1.23).
 
@@ -86,7 +99,11 @@ What this means for kernels:
 Measured with `workloads/nocbench` at 600 MHz. The full write-up, including the GPU comparison, is
 `docs/reports/2026-09-18-et-soc1-on-chip-communication.html`.
 
-The 32 compute shires sit on a 6x6 mesh, laid out as in marty1885's map (`MARTY` in `workloads/nocbench/analyze.py`).
+The 32 compute shires, with the master, spare, I/O and PCIe shires, sit on a 6x6 grid (8x6 mesh stops with the
+memory shires down two sides), laid out as in the map of [marty1885](https://github.com/marty1885), from his NoC
+topology scanner [etTopoScan](https://github.com/marty1885/etTopoScan) (`MARTY` in `workloads/nocbench/analyze.py`). That map is the die turned a quarter: in map orientation the memory shires sit above
+and below the grid; on the die they are west and east. Shire IDs do not follow the mesh: the next shire by ID is 1–10
+hops away, 3.5 on average.
 Between shires, every latency is a + b x (Manhattan distance on that map), and each hop costs 20 ns round trip
 (12 cycles at 600 MHz). A ring that visits all 32 shires one hop at a time:
 0 24 9 25 2 11 19 27 18 10 17 14 22 26 15 23 31 7 6 30 29 5 28 20 12 21 13 1 16 4 3 8.
@@ -100,7 +117,7 @@ Between shires, every latency is a + b x (Manhattan distance on that map), and e
 | FLB + credit barrier, 32 minions | 237 cycles | |
 | Chip barrier from global atomics + credits | ~5,000 cycles | The allreduce tree is 3.7x faster. |
 | Flag through global atomics (GPU-style) | 355-690 cycles | Depends on where the flag's L3 line lives, not on distance. |
-| Aggregate bandwidth, 1 KB messages | 3.0 TB/s on tree-edge pairs; 1.1 TB/s in shire rings; 0.09-0.16 TB/s across the mesh | TensorLoad from a remote scratchpad does 0.98 TB/s. |
+| Aggregate bandwidth, 1 KB messages | 3.0 TB/s on tree-edge pairs; 1.1 TB/s in shire rings; 0.09-0.16 TB/s across the mesh | TensorLoad from a remote scratchpad does 0.96 TB/s at 600 MHz. |
 | Energy per byte | 0.8 pJ on tree edges, 2.3 in a shire, ~10 + 1.9/hop across the mesh | Card power above local idle. |
 
 Rules for kernels that talk:
@@ -144,12 +161,12 @@ Cycles at 600 MHz, load-to-use, one load at a time.
 
 | Stage | Cost | How it was found |
 |---|---|---|
-| L1 hit / L2 hit | 5 / 48 cycles (37 from the bank's read buffer) | `evict_va` the line to a level, time one load |
-| L3 hit | 110 + 12 x hops(requester, home shire); home = PA[10:6] | 1,500 lines, all within ±2 cycles but 2 |
-| DRAM leg past L3 | 91 + 12 x hops(home shire, memory shire); memory shire = PA[8:6] | memory shires 0-3 sit one step off the north edge at x = 1-4, 4-7 off the south edge; syscall 10's read counters confirm PA[8:6] |
+| L1 hit / L2 hit | 5 / 48 cycles (37 when the line is still in the bank's 8-entry read buffer) | `evict_va` the line to a level, time one load |
+| L3 hit | 110 + 12 x hops(requester, home shire); home = PA[10:6] | 1,500 lines, all within ±4 cycles but 2 |
+| DRAM leg past L3 | 91 + 12 x hops(home shire, memory shire); memory shire = PA[8:6]. Of the 91, about 25 are the DRAM chip (activate 11 + read and burst 14; the rows had closed) and about 66 the memory shire | memory shires 0-3 sit one step off the north edge at x = 1-4, 4-7 off the south edge, in marty1885's logical map (on the die and in the firmware's naming: 0-3 west, 4-7 east); syscall 10's read counters confirm PA[8:6] |
 | Row state | open-row hit saves 11 cycles (tRCD); same bank, other row: +40 cycles; rows = PA[18+], bank PA[12:10], column PA[17:13] | two back-to-back loads, one address bit flipped |
 | Refresh | every 2,325 cycles = 3.88 us; a load caught in it waits up to 210 cycles; it closes the open row | 19,000 DRAM loads at random phases |
-| Energy per 64 B load (above idle) | L1 46 pJ, L2 183, L3 local 541, +59 per hop, DRAM 5.1 nJ (67% DDR side, 18% mesh) | 1,024 minions; minion/SRAM/NoC rails from the service processor's stats trace |
+| Energy per load (8-byte ld; a 64 B line moved below L1), above idle | L1 46 pJ, L2 183, L3 local 541, +59 per hop, DRAM 5.1 nJ (67% off the metered rails, mostly DDR; 18% mesh); superseded for DRAM by the energy manual's 122 pJ/B, 7.8 nJ per 64 B line | 1,024 minions; minion/SRAM/NoC rails from the service processor's stats trace, whose rise above idle is 14–20% smaller than the host log's |
 
 Things to know when measuring:
 - **`hpmcounter3` reads 128 short when its low 7 bits are 0-10.** The carry into bit 7 lands 11 cycles late: the PMU's 12
@@ -158,17 +175,18 @@ Things to know when measuring:
   (`fixcyc()` in `workloads/memprobe/kernel/memprobe.c`); the firmware's four-reads workaround does not fix it. The
   `cycle` CSR traps in U-mode.
 - **`evict_va` is asynchronous.** Fence and wait a few hundred cycles before timing. Level codes name where the line is
-  left (1 L2, 2 L3, 3 memory; 0 does nothing). Evicts from many minions serialize in the shire cache.
-- **Rail power:** `dev_mngt_service -n 0 -t SPST:extract` gives minion, SRAM and NoC rail power (a moving average,
-  one record per 133 ms) plus board power. The ring holds ~15 minutes, and an extract returns only records since the
+  left (1 L2, 2 L3, 3 memory; 0 does nothing). Evicts from many minions serialise in the shire cache.
+- **Rail power:** `dev_mngt_service -n 0 -t SPST:extract` gives minion, SRAM and NoC rail power (the PMIC's running
+  average, τ ≈ 1 s, one record per 133 ms) plus board power. The ring holds ~15 minutes, and an extract returns only records since the
   last wrap. No rail covers the memory shires or DRAM.
 
 ## Power and temperature, measured (aifoundry2, 2026-09-20)
 
 Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/reports/2026-09-20-horace-experiment.html`.
 
-- **Power depends on temperature:** +0.78 W per °C on the board at constant work (0.38 on the minion rail). The die idles at
-  72 °C and 31 W; 40 s after a 60 s full-chip load it still idles at 81 °C and 36.5 W. Take baselines at the same temperature,
+- **Power depends on temperature:** about +0.8 W per °C on the board at constant work (0.80 over the load step's
+  matmul from 5 s after launch, 0.40 on the minion rail; the first, uncontrolled Horace session fitted 0.78 and 0.38);
+  the fitted idle law below gives 0.65 W per °C at 80 °C. The die idles at 72 °C and 31 W; 40 s after a 60 s full-chip load it still idles at 81 °C and 36.5 W. Take baselines at the same temperature,
   interleave runs, or fit a temperature term.
 - **Power depends on the data:** fp32 TensorFMA at the same 546 cycles per op draws 38.3 W with zero operands, 46.7 W with ones
   (π the same), 61.3 W with random uniform and 63.4 W with random normal values, every run launched as the die cools through
@@ -177,7 +195,7 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
   A or B operand word is zero gets no valid, so its pipeline registers are not clocked; a constant clocks 2.47 M register bits per
   op and toggles nothing (3 fJ per clocked bit); random data also flips 87 M counted nets per op, 85% of them in the multiplier
   tree, but the energy is mostly in the rest of the unit (0.8 fJ per toggle against 0.03 fJ in the tree). That model predicts the
-  board power of 14 patterns to 0.5 W out of sample. Thermal step response of the sensor to board power: 0.06 °C/W after 1 s,
+  board power of 14 patterns to 0.50 W rms, leaving one pattern out. Thermal step response of the sensor to board power: 0.06 °C/W after 1 s,
   0.12 after 3 s, 0.16 after 7 s (stages of 1.5 s and 10 s), more beyond a minute.
 - **Leakage dominates an idle card:** idle board power is 12.6 W + 23.3 W x exp((T - 80)/36) from 64 to 88 °C (26.7 W at 62 °C,
   36.3 W at 80 °C). The thermal network from board power to the sensor has stages at 1.5 s (0.11 °C/W), 4 s (0.05), 60 s (0.23),
@@ -185,25 +203,30 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
   is 0.95 at 80 °C and passes one at 82 °C. From an 80 °C start random fp32 data reaches 90 °C in 19 to 26 s, ones in 107 to 167 s,
   random data on 256 of 1,024 cores in about 5 minutes; zeros cool. `tools/ettelem/flip_thermal_model.py` fits all of this and
   `tools/ettelem/predict_heat.py` applies it to custom operand tiles. Held-out runs (`validate_flip_model.py`): time to 90 °C within
-  9% in the median, 23% at worst; ten-minute end temperatures 3 to 5 °C hot, because the stages beyond a minute are poorly pinned down.
-- **The clock governor reads a power meter, not activity counters,** and has no hysteresis: the ±5% guardband
-  macros in `thermal_pwr_mgmt.c` are defined and never used, so from a cool die it hunts (clock changed 7 times
-  in one 7 s run). The temperature test runs before the power test, so above 65 °C the card is pinned at
-  600 MHz whatever the power. An idle master minion resets the clock to the boot point, so back-to-back short
-  kernels never hold a raised clock. Full write-up: `docs/findings/16-dvfs-and-leakage.md`.
-- **Per-minion sleep transistors exist but are switched off.** `pwr_ctrl_min_nsleepin` / `isolate` are wired
-  through the neighbourhood RTL, tied off in the open configuration, and driven by no firmware line. A wake-up
+  9% in the median, 23% at worst on later runs of the same session (7% and 65% on a different afternoon); ten-minute end temperatures 3 to 5 °C hot, because the stages beyond a minute are poorly pinned down.
+- **The clock governor reads a power meter, not activity counters,** and its temperature test has no dead band,
+  so from a cool die it hunts across the 65 °C threshold (the clock changed 7 times in 2.4 s of one run). In the
+  et-platform source at `353f20e` the ±5% power-guardband macros in `thermal_pwr_mgmt.c` are defined and never used;
+  the cards' own trace strings match an older firmware build, in which that guardband is used. The temperature
+  test runs before the power test, so above 65 °C the card is pinned at 600 MHz whatever the power. An idle master
+  minion resets the clock to the boot point, though back-to-back launches rarely trigger it. Full write-up:
+  `docs/findings/16-dvfs-and-leakage.md`.
+- **Per-minion sleep controls exist in the open RTL but are tied off.** `pwr_ctrl_min_nsleepin` / `isolate` are
+  wired through the neighbourhood RTL of core-et's Erbium configuration (not the taped-out ET-SoC-1), tied off
+  there, and driven by no firmware line. A wake-up
   probe (`gen_ops.py wakeup`) finds no first-access penalty at L1, L2, L3 or DRAM after up to 27 ms of idle.
   Only clock gating is doing anything, which is why an idle core costs almost no dynamic power and still leaks.
 - **Zero gating looks at the bit pattern:** -0.0 is not gated (46.7 W, like ones, against 38.2 W for +0.0). Mask with a select,
   not by multiplying by zero. Dense structured matrices (DCT, kaleidoscope products, circulant, rank 1) cost what random data
   costs; sparse structure (butterfly factors, bands, blocks) costs by its surviving products; a Hadamard matrix costs 50 W.
 - **Per work unit, over idle, at 0.52 V and 600 MHz:** 8 pJ per integer instruction, 0.32 pJ per int8 multiply-add, 2.7 pJ per
-  fp16, 6.0 pJ per fp32 (random data), 0.3 pJ per bit streamed from L2 SRAM, 18 pJ per bit from LPDDR4x. Power is linear in
+  fp16, 6.0 pJ per fp32 (random data), 0.3 pJ per bit streamed from L2 SRAM, 18 pJ per bit from LPDDR4x (a buffer never
+  written; the energy manual's pinned-600 MHz level is 122 pJ/B, about 15 pJ per bit). Power is linear in
   active minions (26 mW each on random fp32). The 0.62 V / 800 MHz operating point switches 2.0x the power (V²f says 1.9x).
 - **The temperature sensor reads whole degrees.** Use step times, not levels: fit the heating power that reproduces a run's
   readings through the thermal network (`analyze_horace_strict.py`). It agrees with the electrical power to about 1 W.
-- **Rail figures are ~2 s moving averages;** board power is near-instantaneous. Skip 2-3 s after a step before averaging.
+- **Rail figures are the PMIC's first-order running averages (τ ≈ 1 s: 61% of a step after 1 s, 88% after 2 s);**
+  board power is refreshed every 133 ms. Skip 2-3 s after a step before averaging.
 - **Board minus the three rails** (DDR, PCIe, Maxions, IO, regulator loss; no sensors) is 15 W idle, ~21 W under matmul or DRAM load.
 - `tools/ettelem` reads the per-rail snapshot the stock CLI refuses (`DM_CMD_GET_SP_STATS`), samples the full telemetry set 45
   times a second, and reads the per-shire on-die voltage map (`loglevel debug` + `sptrace`; restore with `loglevel info`).
@@ -211,8 +234,9 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
   operating point (600 MHz, 0.52 V), whatever the power: that is why every hot run sat at 600 MHz even at 70 W. Below 65 °C
   a busy card is stepped up to 800 MHz at 0.62 V (700 MHz at 0.57 V in between) while the board's average power is under the
   65 W TDP level, and stepped back down as the die passes 65 °C. From a 63 °C start, zeros hold 800 MHz for a whole 7 s run
-  (11.6 TFLOPS), random data is back at 600 MHz within a second (9.3 TFLOPS). For like-for-like power numbers start runs
-  well above 65 °C (`tools/ettelem/run_horace_strict.sh`) and check `mhz` in the telemetry.
+  (11.6 TFLOPS), random data is back at 600 MHz within a second (9.3 TFLOPS). For like-for-like power numbers preheat
+  to about 76 °C: the test is `> 65` on a whole-degree reading, and the clock was seen lifting mid-burst below about
+  68 °C (`tools/ettelem/run_horace_strict.sh`); check `mhz` in the telemetry.
 ## Ridge points (derived from the measurements above, 2026-09-18)
 
 `scripts/ridge-points.py` divides peak compute by each level's bandwidth. The full write-up is
@@ -228,7 +252,7 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
 
 - One full TensorFMA loads 2 KB (A + B) for 8,192 fp32 FLOP: 4 FLOP/B, exactly the own-shire ridge for fp32 and fp16 and
   half of it for int8. The matmul benchmark's 97% / 91% used one shared 32 KB tile pool, so private tiles are unproven.
-- A C block held while K streams has intensity H/s (H = harmonic mean of its sides, s = element bytes). A shire's 32
+- A C block held while K streams has intensity H/e (H = harmonic mean of its sides, e = bytes per element). A shire's 32
   register tiles (64x128, H = 85) clear the L3 ridge; from DRAM a block needs H of about 520 (fp32, fp16) or 1,040
   (int8), and the chip's 1,024 register tiles (512x512) fall just short.
 - Own-shire ridges hold at any clock (the shire cache runs on the minion clock). L3 and remote ridges grow partly with
@@ -241,7 +265,7 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
 | Step | Result |
 |---|---|
 | Naive scalar, 1 hart | 7 MFLOP/s |
-| Parallelize over `mhartid`, 512 harts. Fix the output race with `L` stores. | 3.4 GFLOP/s |
+| Parallelise over `mhartid`, 512 harts. Fix the output race with `L` stores. | 3.4 GFLOP/s |
 | Use all 2048 harts | 13.1 GFLOP/s |
 | 8-lane SIMD (`fbc.ps` broadcast A, `flw.ps` load B, `fmadd.ps`) | 104 GFLOP/s |
 | Put A and B in **L2 scratchpad** instead of DRAM | 312 GFLOP/s |
@@ -256,7 +280,7 @@ of loads. These then run asynchronously, so the core can exceed 1 IPC.
 
 Other ideas the talk left on the table:
 - Have hart 1 stream data into L2Scp with `TensorLoadL2Scp` (it is allowed on hart 1).
-- Use cooperative tensor loads across a neighborhood.
+- Use cooperative tensor loads across a neighbourhood.
 - Use fp16 (`TensorFMA16A32`) and int8 (`TensorIMA8A32`) variants for 2x and 4x the K-depth per op.
 
 ## Tensor extension in brief (PRM ch. 9)
@@ -267,7 +291,7 @@ Other ideas the talk left on the table:
 - An FMA computes `C[M][N] += A[M][K] * B[K][N]` with M,N ≤ 16 and K ≤ 64/sizeof(elem). A comes from the L1 scratchpad,
   which is carved out of the L1D$ (48 lines of 64 B). B streams through TenB. C accumulates into hart 0's vector registers.
   Element types are fp32, fp16→fp32, and int8→int32 (via TenC).
-- Tensor ops do not follow program order. You synchronize with `tensor_wait <id>`.
+- Tensor ops do not follow program order. You synchronise with `tensor_wait <id>`.
   Only hart 0 may issue tensor ops, except `TensorLoadL2Scp`, `TensorWait`, and `tensor_coop`.
 - `gp-sdk/device/tests/txfma` and `autogenMatmul`, and `dnn-library`, are the in-tree examples to crib from.
 - **Measured on aifoundry2's card, 2026-09-18** (`kernels/mmbench`, 1024 minions at 600 MHz, exact results):
@@ -352,10 +376,10 @@ Other ideas the talk left on the table:
 | Minion pipeline, VPU latencies | `core-et/docs/Minion Description.pdf`, `Minion VPU Specification.pdf`, `FE-Intpipe-Description.pdf` |
 | L1D$ modes, L1Scp | `core-et/docs/Minion DCache Description.pdf` |
 | Shire cache (L2/L3/Scp) | `core-et/docs/CORE-ET-Shire-Cache-Specification.pdf` |
-| Tensor loads across a neighborhood | `core-et/docs/Cooperative-TensorLoad-Description.pdf`, `CORE-ET-Neigborhood-MAS.pdf` |
+| Tensor loads across a neighbourhood | `core-et/docs/Cooperative-TensorLoad-Description.pdf`, `CORE-ET-Neigborhood-MAS.pdf` |
 | Board | `et-man/ET-PCIe-Dev-Card-V3.pdf`, `ET Preliminary Datasheet Rev 1.0.pdf` |
 | Example kernels | `et-platform/gp-sdk/device/tests/*`, `et-platform/dnn-library`, `aifoundry-org/llama.cpp` (ET port) |
 
-Note that core-et's `erbium` branch is the RTL for **Erbium**, a new MCU-class SoC with one 8-minion neighborhood. Its
+Note that core-et's `erbium` branch is the RTL for **Erbium**, a new MCU-class SoC with one 8-minion neighbourhood. Its
 docs describe the same Minion core and are the best micro-architecture reference. et-platform can also build
 "erbium-soc1sim" kernels (Erbium-style kernels running on ET-SoC-1) via `add_erbium_riscv_executable()` in gp-sdk.

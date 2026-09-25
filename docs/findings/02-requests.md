@@ -1,8 +1,9 @@
 # Requests: what was asked, and what each one produced
 
-The work in this directory was driven by a sequence of requests from the repo owner, in one long session on
-aifoundry2 between 18 and 24 September 2026. Each is recorded here because scope decisions explain why some
-questions were answered thoroughly and others were left open. Cite as **Q1**...**Q42**.
+The work in this directory was driven by a sequence of requests from the repo owner. Q1–Q42 come from one long
+session on aifoundry2 (18–24 September 2026); Q43 comes from a separate session and is listed in the order it was
+recorded. Each is recorded here because scope decisions explain why some questions were answered thoroughly and
+others were left open. Cite as **Q1**...**Q43**.
 
 | ID | Date | Request (condensed) | Produced |
 |---|---|---|---|
@@ -17,7 +18,7 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
 | Q9 | 09-20 | Find Horace He's blog post about random matrices using more power and reproduce it on ET-SoC-1; write it up as `horace-experiment` | E7 → A4 (first version) |
 | Q10 | 09-20 | Rerun with the chip cooled to the same temperature first, to make runs comparable | E8 → A4 (second version) |
 | Q11 | 09-21 | Rerun with strict temperature control; better visualisation with runs clustered by kind; fewer categories; **a model: transistor flips → power → temperature**, and explain the discrepancy; an animated GIF to repost | E9, E10, E11 → A4 (third version), A6, A7 |
-| Q12 | 09-21 | Do those experiments for longer, and build a model that ties temperature to transistor flips | E12, E17 → A4 (fourth version), A8 |
+| Q12 | 09-21 | Do those experiments for longer, and build a model that ties temperature to transistor flips | E12, E17 → A4, A8 |
 | Q13 | 09-21 | *(mid-task)* Forget the 10-second rule for now; runs may be up to 10 minutes, whole session under 6 hours | Made E12 possible |
 | Q14 | 09-21 | Explain why Esperanto chips are low power compared with A100s; research it, test what needs testing, publish | E15, R6, R7 → A5 |
 | Q15 | 09-21 | *(mid-task)* Find other kinds of matrices beyond fully random and fully constant, such as kaleidoscope matrices; make custom workloads and infer how much heat they produce, for heat management | `make_tiles.py`, E13, E14, E15, E16, `predict_heat.py` |
@@ -25,7 +26,7 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
 | Q17 | 09-22 | Fix the report and commit | commit `75bb061` |
 | Q18 | 09-22 | Summarise all findings as self-contained MD files with pointers on where to start; commit | This directory |
 | Q19 | 09-22 | *(mid-task)* Add provenance: modularise experiments and artifacts so findings can be traced; structure the files around resources, requests, experiments and artifacts | This directory's structure |
-| Q20 | 09-22 | Using David Kanter's notes, research the ET-SoC-1's DVFS loop and the leakage-suppressor transistors; validate experimentally if needed; turn into a brief | R9, E18, E19 → A11, [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
+| Q20 | 09-22 | Using David Kanter's notes (private, R9), research the ET-SoC-1's DVFS loop and the leakage-suppressor transistors; validate experimentally if needed; turn into a brief | R9, E18, E19 → A11, [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
 | Q21 | 09-22 | Try the other two cards: SSH into AI Foundry 1 and AI Foundry 3 | R10, E20, E21 |
 | Q22 | 09-22 | Run the experiments on all three machines; integrate them into the public report and keep it public | E20, E21 → A4, A11, [14-card-behaviour.md](14-card-behaviour.md), [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
 | Q23 | 09-22 | For formulas like the switching-power equation, use high-quality math (MathJax) instead of HTML | A12, all four report sources |
@@ -36,9 +37,9 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
 | Q28 | 09-23 | A comprehensive energy evaluation of all instructions the processor supports, verified on various cards, with enough testing to remove as much variance as possible within five hours of experimenting | E27, E28 → A15 second edition |
 | Q29 | 09-23 | *(mid-task)* Deploy it into the same spacesheep space as the previous one and make it public | A15 made public, updated in place |
 | Q30 | 09-23 | *(mid-task)* A finer-grain breakdown: the energy dissipated by wires; for memory accesses, isolate activating cache lines, leakage, and current through the wires | E27 (wire, line, row, neighbourhood, rail and SRAM-leakage probes), E28 |
-| Q31 | 09-23 | Add confidence bars to all the entries, from re-running the workload and from different cards | E29 → A15 third edition; the `combined` block of E27's analysis; 09-method.md "Confidence bars" |
-| Q32 | 09-23 | *(mid-task)* For the unmetered parts of memory access, find what could reduce the unmetered share; the Moortec PVT integration may give extra instrumentation. Add it to the observability report, cross-link the two reports, add an improvement ladder (cf. the spatial temperature brief), make the observability report the top level for all measurement matters, with a table of contents | E30, R13 → A2 second edition, A15 §4a |
-| Q33 | 09-23 | *(mid-task)* After this, update the GitHub repo with all the relevant materials: it is the source of truth for everything found and every experiment run | the commit of 2026-09-23 (04-artifacts.md, "Commits"); `docs/getting-started.md` "Where things stand (2026-09-23)" |
+| Q31 | 09-23 | Add confidence bars to all the entries, from re-running the workload and from different cards | E29 → A15 third edition, A16; the `combined` block of E27's analysis; 09-method.md "Confidence bars" |
+| Q32 | 09-23 | *(mid-task)* For the unmetered parts of memory access, find what could reduce the unmetered share; the Moortec PVT integration may give extra instrumentation. Add it to the observability report, cross-link the two reports, add an improvement ladder (cf. the spatial temperature brief), make the observability report the top level for all measurement matters, with a table of contents | E30, R13 → A2 second edition, A15 §4.3 |
+| Q33 | 09-23 | *(mid-task)* After this, update the GitHub repo with all the relevant materials: it is the source of truth for everything found and every experiment run | the commit of 2026-09-23 (04-artifacts.md, "Commits"); `docs/getting-started.md` "Where things stand" |
 | Q34 | 09-23 | In the observability report, list the sessions that measured power and temperature, add related documents, and make the section 5 table fit without scrolling sideways | A2: §7 sessions (E5–E30), related documents, a 1320 px layout; commit `d0e12d9` |
 | Q35 | 09-23 | *(mid-task)* The energy manual's §3.1 error bars are cut off at the top | A15: headroom above the tallest whisker; commit `d0e12d9` |
 | Q36 | 09-23 | *(mid-task)* Section headings should be anchors that can be sent as links | The shared report template gives every h2/h3 an id and a # link; commit `d0e12d9` |
@@ -46,9 +47,9 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
 | Q38 | 09-23 | Section 5 still scrolls sideways a little | commit `1006df4` |
 | Q39 | 09-23 | Move the companions footnote into a "Related Reports" section with a line on each | commit `e7951c3` |
 | Q40 | 09-23 | Make every spacesheep link in the observability report public | Every linked space made public (no commit); the visibility column of [04-artifacts.md](04-artifacts.md) |
-| Q41 | 09-24 | Verify the energy of moving bits along wires against Dally's "~100 fJ/b-mm on-chip": look up this chip's numbers, run experiments, determine J per bit per metre, and publish it as a "heat per mm" report in the repo and on spacesheep | R14, E31, E32 → A17, [20-heat-per-mm.md](20-heat-per-mm.md) |
+| Q41 | 09-24 | Verify the energy of moving bits along wires against Dally's "~100 fJ/b-mm on-chip": look up this chip's numbers, run experiments, determine J per bit per metre, and publish it as a "heat per mm" report in the repo and on spacesheep | R14, E31, E32 → A17, A18, [20-heat-per-mm.md](20-heat-per-mm.md) |
 | Q42 | 09-24 | Install spacesheep's session hooks on aifoundry2; report the sessions board's missing links and mismatched titles to its author | Outside this repo: the hooks in `~/.claude/settings.json` and two bug reports on spacesheep. No card time |
-| Q43 | 09-18 | Compute the chip's ridge points from what is already known — how many FLOPs per byte are needed to saturate each level of the hierarchy — and write them up (published 09-24) | A19, no card time |
+| Q43 | 09-18 | Compute the chip's ridge points from what is already known — how many FLOPs per byte are needed to saturate each level of the hierarchy — and write them up (published 09-24) | A19; the hub's index row (`6f8fba9`); every report's link back to the hub (`d04b29a`); no card time |
 
 ## Scope decisions worth remembering
 
@@ -61,10 +62,11 @@ questions were answered thoroughly and others were left open. Cite as **Q1**...*
   only (`patches/0003-pmc-configure-syscall-353f20e.patch`, `workloads/pmcsel`).
 - **The debug-interface (MDI) client was not built.** Work on it was stopped and not resumed.
 - **The 10-second hold limit was waived only for Q13's long runs.** Every other session on the card kept
-  individual processes under 10 seconds.
+  each kernel process under 10 seconds; the telemetry sampler held the management node for whole sessions.
 - **aifoundry1's driver was not reinstalled, and aifoundry3's TDP was not changed (Q21, Q22).** Both are
   configuration changes to shared lab hardware that would silently alter other people's results: one replaces a
   kernel module, the other lifts a card's clock ceiling mid-experiment for everyone. Both are documented in
   [14-card-behaviour.md](14-card-behaviour.md) with everything the lab admin needs, and neither was applied.
-- **No GPU was measured.** Every A100 number in this work is from R7 or R8. This was never in scope for the
+- **No GPU was measured.** Every A100 number in this work is from R7, R8, the Ampere whitepaper and the sourced notes
+  in `docs/reports/sources/` (`2026-09-18-a100-memory-hierarchy.md`, `2026-09-18-gpu-on-chip-communication.md`). This was never in scope for the
   card time available, and it is the single largest caveat in [13-why-low-power.md](13-why-low-power.md).

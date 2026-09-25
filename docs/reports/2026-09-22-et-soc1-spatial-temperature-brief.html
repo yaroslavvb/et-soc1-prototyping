@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spatial temperature: a brief · ET-SoC-1</title>
+<meta name="description" content="What the ET-SoC-1's 35 on-die temperature sensors can report, why the host sees only a chip-wide average in whole degrees, and what firmware change would give a per-shire heat map.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --code-bg: #f1f0ec;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c7: #4a3aa7; --ref: #8c8b85;
+  --ok: #008300; --warn: #a06c00; --bad: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+    --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+  --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-text-size-adjust: 100%; }
+main { max-width: 920px; margin: 0 auto; padding: 32px 16px 80px; }
+h1 { font-size: 1.85rem; line-height: 1.25; margin: 0 0 8px; letter-spacing: -0.015em; }
+h2 { font-size: 1.3rem; margin: 42px 0 12px; border-bottom: 1px solid var(--grid); padding-bottom: 6px; }
+h3 { font-size: 1.05rem; margin: 24px 0 8px; }
+.byline { color: var(--ink-2); font-size: 0.9rem; margin: 0 0 24px; }
+.lede { font-size: 1.1rem; line-height: 1.55; color: var(--ink); margin-bottom: 24px; }
+.small { font-size: 0.85rem; color: var(--ink-2); }
+a { color: var(--c1); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.87em; }
+code { background: var(--code-bg); padding: 2px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); padding: 14px 16px; border-radius: 8px; overflow-x: auto; line-height: 1.5; }
+pre code { background: none; padding: 0; overflow-wrap: normal; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 18px 0; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 20px 0; }
+.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.kpi .lab { color: var(--ink-2); font-size: 0.82rem; margin-bottom: 4px; }
+.kpi .val { font-size: 1.6rem; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.kpi .sub { color: var(--ink-2); font-size: 0.78rem; margin-top: 4px; }
+.terms { font-size: 0.92rem; color: var(--ink-2); margin: 0 0 18px; }
+.toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin: 18px 0 8px; font-size: 0.95rem; }
+.toc ol { margin: 6px 0 0; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; background: var(--code-bg); }
+.chip { display: inline-block; font-size: 0.74rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; border: 1px solid transparent; }
+.chip.ok { color: var(--ok); border-color: var(--ok); background: rgba(0,131,0,0.06); }
+.chip.blocked { color: var(--bad); border-color: var(--bad); background: rgba(227,73,72,0.06); }
+.chip.action { color: var(--c1); border-color: var(--c1); background: rgba(42,120,214,0.06); }
+.chip.unknown { color: var(--warn); border-color: var(--warn); background: rgba(237,161,0,0.08); }
+.mesh-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; max-width: 600px; margin: 16px auto; }
+.mesh-cell { min-width: 0; aspect-ratio: 1; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; border: 1px solid var(--border); text-align: center; padding: 2px; overflow-wrap: anywhere; line-height: 1.25; }
+.mesh-cell.compute { background: var(--surface); color: var(--ink); }
+.mesh-cell.special { background: var(--code-bg); color: var(--muted); border-style: dashed; }
+.mesh-cell .id { font-weight: 700; font-size: 0.85rem; }
+.mesh-cell.special .id { font-size: 0.72rem; font-weight: 600; color: var(--ink-2); }
+.mesh-cell .sub { font-size: 0.65rem; color: var(--ink-2); }
+.caption { max-width: 640px; margin: 4px auto 0; }
+.regs code { white-space: nowrap; overflow-wrap: normal; }
+ol, ul { padding-left: 20px; }
+li { margin: 6px 0; }
+.related li { margin: 8px 0; }
+h2, h3 { scroll-margin-top: 12px; }
+.hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
+@media (max-width: 480px) {
+  .mesh-grid { gap: 4px; }
+  .mesh-cell .id { font-size: 0.74rem; }
+  .mesh-cell.special .id { font-size: 0.6rem; }
+  .mesh-cell .sub { font-size: 0.56rem; }
+  .regs th, .regs td { padding: 7px 5px; }
+  .regs code { font-size: 0.8em; padding: 2px 3px; }
+  .stack table, .stack tbody, .stack tr, .stack td { display: block; width: 100%; }
+  .stack thead { display: none; }
+  .stack tr { border-bottom: 1px solid var(--grid); padding: 10px 0; }
+  .stack td { border: 0; padding: 3px 0; }
+}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Spatial temperature on the ET-SoC-1: 35 sensors on the die, one average at the host</h1>
+<div class="byline">Technical brief · 22 September 2026 · firmware source et-platform 353f20e, open RTL core-et b38a1a3 · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></div>
+
+<div class="lede">
+Can the ET-SoC-1 measure how heat moves across its 1,088-core die?
+<strong>In hardware, yes; with the stock firmware, no.</strong> The die carries 35 temperature sensors, one in every tile of its 6×6 grid except the PCIe shire. The host receives a 34-shire average plus two peak-hold extremes (and the I/O shire’s own reading), all in whole degrees: the firmware’s integer conversion truncates every sensor’s reading to 1 °C before it is averaged. This brief covers where the sensors are, where the firmware discards the detail, and what it would take to get a per-shire heat map.
+</div>
+
+<div class="kpis">
+  <div class="kpi">
+    <div class="lab">Temperature sensors on the die</div>
+    <div class="val">35</div>
+    <div class="sub">34 minion shires + 1 I/O shire</div>
+  </div>
+  <div class="kpi">
+    <div class="lab">Resolution in hardware</div>
+    <div class="val">12-bit (0.061 °C)</div>
+    <div class="sub">Moortec PVT IP; the firmware keeps whole °C</div>
+  </div>
+  <div class="kpi">
+    <div class="lab">Layout</div>
+    <div class="val">6×6 grid</div>
+    <div class="sub">1 sensor per tile, except the PCIe shire (~3.7 mm grid)</div>
+  </div>
+  <div class="kpi">
+    <div class="lab">What the host sees today</div>
+    <div class="val" style="color:var(--bad)">Collapsed</div>
+    <div class="sub">Current mean + since-reset extremes, truncated to 1 °C</div>
+  </div>
+</div>
+
+<p class="terms"><b>Terms.</b> A <b>shire</b> is a tile of 32 <b>minion</b> cores (small RISC-V cores with vector and tensor units) sharing 4 MB of SRAM (L2, an L3 slice and scratchpad). The 34 minion shires, the I/O and PCIe shires and 8 memory shires sit on the chip’s mesh network. The <b>service processor (SP)</b> is the on-chip management core; its second-stage firmware (<b>BL2</b>) reads the sensors and answers the host. The <b>PMIC</b> is the board’s power controller; <b>PVT</b> = process, voltage and temperature monitors. More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub’s glossary</a>.</p>
+
+<nav class="toc" aria-label="Contents"><b>Contents</b>
+<ol id="toclist">
+  <li><a href="#sensors">Sensor layout and architecture</a></li>
+  <li><a href="#bottleneck">The firmware reduction bottleneck</a></li>
+  <li><a href="#needed">What is needed to measure spatial thermal flow</a></li>
+  <li><a href="#workaround">Current best workaround: temporal reconstruction</a></li>
+  <li><a href="#sources">Sources</a></li>
+  <li><a href="#related">Related reports</a></li>
+</ol>
+</nav>
+
+<h2 id="sensors">1. Sensor layout and architecture</h2>
+
+<p>The ET-SoC-1 has an on-die process, voltage and temperature (PVT) monitoring subsystem built from Moortec IP. The Programmer’s Reference Manual (PRM §1.6) counts 36 temperature sensors; the open RTL (<code>core-et/rtl/inc/pvt_defines.vh</code>, citing RTLMIN-3619) drops the PCIe shire’s, and the firmware enables 35 channels. So there are <strong>35 temperature sensors on the die</strong>:</p>
+
+<ul>
+  <li><strong>34 minion shires (MinShire 0–33)</strong>: the 32 compute shires (1,024 minions) plus the master shire and the spare shire. Each has its own temperature sensor next to its process detector and voltage monitor.</li>
+  <li><strong>1 I/O shire</strong>: one temperature sensor, alongside the 5 PVT controllers.</li>
+</ul>
+
+<p>The host’s temperature query (<code>DM_CMD_GET_MODULE_CURRENT_TEMPERATURE</code>) also returns a field named <code>pmic_sys</code>, but it is not a board sensor: the firmware fills it from <code>pvt_get_minion_avg_temperature()</code>, the same 34-shire average (in the 20 Sep telemetry the two agreed in 3,679 of 3,681 samples and differed by 1 °C in the other two). The PMIC reads its regulators’ temperatures over PMBus, but the SP does not forward them, so this query never carries a board or regulator temperature.</p>
+
+<h3 id="mesh">The 6×6 shire mesh, as the latency measurements place it</h3>
+<p>On-chip communication benchmarks (<code>workloads/nocbench</code>) place the 32 compute shires on a 6×6 mesh (<a href="https://github.com/marty1885/etTopoScan">marty1885’s map</a>): every TensorSend round trip between two shires is 150 + 12.02 × (Manhattan distance) cycles, worst residual 1.1 cycles over all 496 pairs (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a>). Each cell in this grid is one tile, about 3.7 mm on a side: the tile pitch measured on Esperanto’s die plot and scaled to the 570 mm² die (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die">Heat per millimetre §2</a>).</p>
+
+<div class="mesh-grid" role="img" aria-label="6 by 6 grid of shires: 32 compute shires with their sensor channels, and four grey cells for the master, spare, I/O and PCIe shires">
+  <!-- Row 0 -->
+  <div class="mesh-cell compute"><div class="id">S0</div><div class="sub">(0,0) TS0</div></div>
+  <div class="mesh-cell compute"><div class="id">S24</div><div class="sub">(1,0) TS24</div></div>
+  <div class="mesh-cell compute"><div class="id">S9</div><div class="sub">(2,0) TS9</div></div>
+  <div class="mesh-cell compute"><div class="id">S25</div><div class="sub">(3,0) TS25</div></div>
+  <div class="mesh-cell compute"><div class="id">S2</div><div class="sub">(4,0) TS2</div></div>
+  <div class="mesh-cell compute"><div class="id">S11</div><div class="sub">(5,0) TS11</div></div>
+  <!-- Row 1 -->
+  <div class="mesh-cell compute"><div class="id">S8</div><div class="sub">(0,1) TS8</div></div>
+  <div class="mesh-cell compute"><div class="id">S16</div><div class="sub">(1,1) TS16</div></div>
+  <div class="mesh-cell compute"><div class="id">S1</div><div class="sub">(2,1) TS1</div></div>
+  <div class="mesh-cell compute"><div class="id">S17</div><div class="sub">(3,1) TS17</div></div>
+  <div class="mesh-cell compute"><div class="id">S10</div><div class="sub">(4,1) TS10</div></div>
+  <div class="mesh-cell compute"><div class="id">S19</div><div class="sub">(5,1) TS19</div></div>
+  <!-- Row 2 -->
+  <div class="mesh-cell compute"><div class="id">S3</div><div class="sub">(0,2) TS3</div></div>
+  <div class="mesh-cell compute"><div class="id">S4</div><div class="sub">(1,2) TS4</div></div>
+  <div class="mesh-cell compute"><div class="id">S13</div><div class="sub">(2,2) TS13</div></div>
+  <div class="mesh-cell compute"><div class="id">S14</div><div class="sub">(3,2) TS14</div></div>
+  <div class="mesh-cell compute"><div class="id">S18</div><div class="sub">(4,2) TS18</div></div>
+  <div class="mesh-cell compute"><div class="id">S27</div><div class="sub">(5,2) TS27</div></div>
+  <!-- Row 3 -->
+  <div class="mesh-cell special"><div class="id">master or spare</div><div class="sub">(0,3) inferred</div></div>
+  <div class="mesh-cell compute"><div class="id">S12</div><div class="sub">(1,3) TS12</div></div>
+  <div class="mesh-cell compute"><div class="id">S21</div><div class="sub">(2,3) TS21</div></div>
+  <div class="mesh-cell compute"><div class="id">S22</div><div class="sub">(3,3) TS22</div></div>
+  <div class="mesh-cell compute"><div class="id">S26</div><div class="sub">(4,3) TS26</div></div>
+  <div class="mesh-cell special"><div class="id">master or spare</div><div class="sub">(5,3) inferred</div></div>
+  <!-- Row 4 -->
+  <div class="mesh-cell special"><div class="id">I/O or PCIe</div><div class="sub">(0,4) inferred</div></div>
+  <div class="mesh-cell compute"><div class="id">S20</div><div class="sub">(1,4) TS20</div></div>
+  <div class="mesh-cell compute"><div class="id">S29</div><div class="sub">(2,4) TS29</div></div>
+  <div class="mesh-cell compute"><div class="id">S30</div><div class="sub">(3,4) TS30</div></div>
+  <div class="mesh-cell compute"><div class="id">S15</div><div class="sub">(4,4) TS15</div></div>
+  <div class="mesh-cell compute"><div class="id">S23</div><div class="sub">(5,4) TS23</div></div>
+  <!-- Row 5 -->
+  <div class="mesh-cell special"><div class="id">I/O or PCIe</div><div class="sub">(0,5) inferred</div></div>
+  <div class="mesh-cell compute"><div class="id">S28</div><div class="sub">(1,5) TS28</div></div>
+  <div class="mesh-cell compute"><div class="id">S5</div><div class="sub">(2,5) TS5</div></div>
+  <div class="mesh-cell compute"><div class="id">S6</div><div class="sub">(3,5) TS6</div></div>
+  <div class="mesh-cell compute"><div class="id">S7</div><div class="sub">(4,5) TS7</div></div>
+  <div class="mesh-cell compute"><div class="id">S31</div><div class="sub">(5,5) TS31</div></div>
+</div>
+<p class="small caption">The mesh as latency places it (x across, y down). S<i>n</i> is compute shire <i>n</i> and TS<i>n</i> its sensor channel. In this frame the eight memory shires sit one step beyond the top row (0–3, at x = 1–4) and the bottom row (4–7); the PRM calls those sides west and east, so this drawing is the die turned a quarter. The grey cells hold the master, spare, PCIe and I/O shires; which is which is not measured (the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die">heat-per-mm die study</a> infers I/O and PCIe at (0,4) and (0,5)). TS32 (master), TS33 (spare) and TS34 (I/O) are read like the others; the PCIe shire has no sensor.</p>
+
+<h3 id="controllers">Controller mapping and hardware registers</h3>
+<p>The 35 sensors are read through 5 PVT controllers (PVTC 0–4), mapped in the service processor’s address space at <code>0x00_5400_0000 + n·0x1_0000</code>. All five sample continuously at 12 bits (<code>RUN_1</code> mode):</p>
+
+<div class="table-wrap regs">
+<table>
+  <thead>
+    <tr><th>Controller</th><th>Base address</th><th>Sensors</th><th>Channels active</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>PVTC 0</strong></td><td><code>0x00_5400_0000</code></td><td>TS 0–7</td><td>8 / 8</td></tr>
+    <tr><td><strong>PVTC 1</strong></td><td><code>0x00_5401_0000</code></td><td>TS 8–15</td><td>8 / 8</td></tr>
+    <tr><td><strong>PVTC 2</strong></td><td><code>0x00_5402_0000</code></td><td>TS 16–23</td><td>8 / 8</td></tr>
+    <tr><td><strong>PVTC 3</strong></td><td><code>0x00_5403_0000</code></td><td>TS 24–31</td><td>8 / 8</td></tr>
+    <tr><td><strong>PVTC 4</strong></td><td><code>0x00_5404_0000</code></td><td>TS 32–34</td><td>3 / 8 (mask <code>0xF8</code>)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>Every sensor has its own hardware registers:</p>
+<ul>
+  <li><code>TS_SDIF_DATA</code>: the current conversion result.</li>
+  <li><code>TS_SMPL_HILO</code>: hardware peak capture. It holds the highest and lowest readings since it was last reset (through <code>TS_HILO_RESET</code>), with no software polling.</li>
+  <li>The sensors run in <code>RUN_1</code> mode (uncalibrated). A raw 12-bit sample (0 to 4095) converts to Celsius in steps of 0.061 °C:
+    <br><code>T(°C) = (57400 + (249400 * sample) / 4096 - 124700) / 1000</code>
+    <br>The firmware evaluates this in integer arithmetic (<code>pvt_ts_conversion</code>), so every per-shire value it holds is already whole degrees; the 0.061 °C step exists only in the raw 12-bit code in <code>TS_SDIF_DATA</code>.
+  </li>
+</ul>
+
+<h2 id="bottleneck">2. The firmware reduction bottleneck</h2>
+
+<p>The SP’s PVT driver can read each shire’s sensor on its own. In <code>ServiceProcessorBL2/driver/pvt_controller.c</code>:</p>
+<pre><code>int pvt_get_min_shire_ts_sample(PVTC_MINSHIRE_e min_id,
+                                TS_Sample *ts_sample);
+// exists, no caller:
+int pvt_get_and_print(uint8_t print_ts, uint8_t print_vm,
+                      PVT_PRINT_e print_select,  /* e.g. PVT_PRINT_MINSHIRE_ALL */
+                      uint16_t *data, uint32_t *num_bytes);</code></pre>
+
+<p>But when it answers the host’s management interface (<code>dev_mngt_service</code> / <code>libDM.so</code>), the SP’s thermal service (<code>thermal_pwr_mgmt.c</code>, line 732) reduces the data:</p>
+
+<pre><code>// ServiceProcessorBL2/services/thermal_pwr_mgmt.c (abridged)
+int get_module_current_temperature(struct current_temperature_t *temperature) {
+    pvt_get_minion_avg_temperature(&amp;pmic_temperature);
+    pvt_get_minion_avg_low_high_temperature(&amp;pvt_temperature);
+    pvt_get_ioshire_ts_sample(&amp;pvt_temperature);
+
+    // The host's packet receives only:
+    // integer mean of the 34 shires' whole-degree readings
+    temperature-&gt;minshire_avg  = pvt_temperature.current;
+    // highest value any shire's peak-hold register captured since the last reset
+    temperature-&gt;minshire_high = pvt_temperature.high;
+    // lowest value any shire's peak-hold register captured since the last reset
+    temperature-&gt;minshire_low  = pvt_temperature.low;
+    // the I/O shire's own sensor (also sent with its high and low)
+    temperature-&gt;ioshire_current = ...;
+    // the same minion-shire average, not a PMIC reading
+    temperature-&gt;pmic_sys = pmic_temperature;
+}</code></pre>
+
+<p>So the host never sees the current spread between shires: min and max are peak-hold values (in the 20 Sep telemetry the low read 62 °C in all 3,681 samples while the average ran from 72 to 90 °C).</p>
+
+<div class="card">
+  <div style="font-weight:700;margin-bottom:6px">Why voltage reaches the host shire by shire, and temperature does not</div>
+  <p class="small" style="margin:0">
+  The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#the-per-shire-voltage-map">Power and temperature</a> report (20 Sep, §3 The per-shire voltage map) reads per-shire voltages this way: with the SP’s log level at DEBUG, the firmware prints one line per shire per pass (<code>MS %2d Voltage [mV]: VDD_MNN: %d [%d, %d] …</code>). At idle the minion rail read 517–521 mV across the 34 shires, in whole millivolts; the monitors’ low/high captures span 513–522 mV. That line is printed because it sits inside the <code>GET_MINION_VM</code> macro, which the per-pass power update calls. For temperature the firmware already has the matching DEBUG line (<code>MS %2d Temp [C]: %d [%d, %d]</code>, in <code>pvt_print_min_shire_temperature_sampled_values()</code>), but it is reached only through <code>pvt_print_all()</code>, which nothing calls, so the host is left with the chip-wide aggregate.
+  </p>
+</div>
+
+<h2 id="needed">3. What is needed to measure spatial thermal flow</h2>
+
+<p>To watch heat move across the grid (say, by running multiply-add kernels on the shires in one corner and watching the heat spread to their neighbours), the following pieces are needed:</p>
+
+<div class="table-wrap stack">
+<table>
+  <thead>
+    <tr><th>Component</th><th>Status</th><th>What is needed</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1. Sensor hardware</strong></td>
+      <td><span class="chip ok">Available now</span></td>
+      <td>35 Moortec temperature sensors already run continuously on the silicon, at 12-bit resolution in hardware (the firmware then truncates to 1 °C).</td>
+    </tr>
+    <tr>
+      <td><strong>2. SP firmware telemetry patch</strong></td>
+      <td><span class="chip action">Needs code</span></td>
+      <td>
+        Change <code>ServiceProcessorBL2</code> to send the individual readings:
+        <ol style="margin:4px 0;padding-left:16px">
+          <li><strong>Option A (trace buffer)</strong>: add a 35-entry array, <code>int16_t shire_temps[35]</code>, to the <code>sp_stats</code> periodic trace buffer.</li>
+          <li><strong>Option B (new command)</strong>: add a management command, for example <code>DM_CMD_GET_SPATIAL_TEMPERATURE</code>, returning <code>All_MinShire_samples</code>.</li>
+          <li><strong>Option C (no protocol change)</strong>: call the existing <code>pvt_print_temperature_sampled_values(PVTC_MINION_SHIRE)</code> from the SP’s per-pass loop, one line, and parse the trace like the voltage map (whole degrees; see the resolution note above). It also writes a CRITICAL “MinShire Average Temp” line on every call.</li>
+        </ol>
+        Whichever option is used, export the raw 12-bit code (or millidegrees computed before the /1000), not <code>sample.current</code>, which is already truncated to 1 °C.
+      </td>
+    </tr>
+    <tr>
+      <td><strong>3. Firmware signing and flashing</strong></td>
+      <td><span class="chip unknown">Untested</span></td>
+      <td>BL1 and BL2 verify a certificate and signature against a public-key hash in OTP (<code>crypto_rot.c</code> / VaultIP) unless an OTP chicken bit is set, and neither the signing tool nor a test key is in the open tree. Whether these lab cards accept a rebuilt image is unknown until someone tries, and a bad image can brick the boot path, so reflashing is a lab-admin decision (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">the firmware caveat</a>).</td>
+    </tr>
+    <tr>
+      <td><strong>4. Host telemetry extraction</strong></td>
+      <td><span class="chip action">Ready to build</span></td>
+      <td>Extend <code>tools/ettelem</code> (which samples libDM at 10 Hz, about 45 Hz at most, and dumps the SP trace buffer on demand with <code>ettelem sptrace</code>) to unpack the 35 temperature channels into a 6×6 matrix.</td>
+    </tr>
+    <tr>
+      <td><strong>5. 2D heat-diffusion reconstruction</strong></td>
+      <td><span class="chip action">Not yet fitted</span></td>
+      <td>The fitted thermal model is lumped: six RC stages, 1.47 °C/W in total, one card in one chassis, driven by the chip-wide average. A 2D model (∂<i>T</i>/∂<i>t</i> = α∇²<i>T</i> + <i>P</i>(<i>x</i>,&nbsp;<i>y</i>)/<i>C</i> − (<i>T</i> − <i>T</i><sub>amb</sub>)/τ) needs lateral conductances and per-cell capacitances that only per-shire readings could fit.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="workaround">4. Current best workaround: temporal reconstruction</h2>
+
+<p>Until a modified SP firmware can be flashed (whether these cards require a signed image is untested), the measurements so far rely on <strong>temporal reconstruction</strong>: reading more out of the timing of the chip-wide average (see <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">the Horace experiment</a>, §8, A model from flips to temperature):</p>
+
+<ol>
+  <li><strong>Sub-degree de-quantization</strong>: the reading is in whole degrees, but the moments when the average steps from <i>T</i> to <i>T</i> + 1 °C are sharp when polled at 10 Hz. Fitting the heating power that reproduces those step times recovers the rise to about 0.03 °C on repeated runs, and the heating power to about 1 W of the electrical measurement.</li>
+  <li><strong>Flip-to-heat modelling from the RTL</strong>: counting operand-driven toggles in the open RTL of the multiply-add datapath (the Erbium branch, same Minion core lineage) predicts board power over idle to 0.5 W rms leave-one-pattern-out, and 0.92 W rms on 14 matrices predicted before they ran.</li>
+  <li><strong>Leakage loop feedback</strong>: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">die leakage</a> accounts for 23 W of the 36 W idle power at 80 °C and grows by 0.65 W/°C, closing a thermal feedback loop with gain 0.95 at 80 °C.</li>
+</ol>
+<p>All three sharpen the chip-wide average; none says where on the die the heat is.</p>
+
+<h2 id="sources">Sources</h2>
+<ul class="small">
+  <li>Firmware: <a href="https://github.com/aifoundry-org/et-platform/tree/353f20e982f4efd99019d04f8022681cc727c4f2">et-platform at 353f20e</a>, <code>device-bootloaders/src/ServiceProcessorBL2/</code>: <code>driver/pvt_controller.c</code> (<code>pvt_ts_conversion</code>, the per-shire temperature print, <code>pvt_get_and_print</code>), <code>include/bl2_pvt_controller.h</code> (the conversion constants) and <code>services/thermal_pwr_mgmt.c</code> (<code>get_module_current_temperature</code>). The cards’ own trace strings match an older build (before et-platform commit 60b40c10f, 24 Sep 2024); in that build these two PVT files differ only in their licence header, and <code>get_module_current_temperature()</code> is the same.</li>
+  <li>RTL: <a href="https://github.com/openhwfoundation/core-et/tree/b38a1a31da67efe00c61e983e64b892c58080115">core-et’s Erbium branch at b38a1a3</a>, <code>rtl/inc/pvt_defines.vh</code>: the same Minion core lineage in a later MCU-class configuration, not the taped-out ET-SoC-1.</li>
+  <li>Manuals: ET Programmer’s Reference Manual §1.6 and §15.2.3, in <a href="https://github.com/aifoundry-org/et-man">et-man</a>.</li>
+  <li>Mesh map: <code>workloads/nocbench/analyze.py</code> (marty1885’s layout and the four empty cells).</li>
+  <li>Telemetry: the three <code>*-telemetry.jsonl</code> files in <code>docs/reports/data/2026-09-20-power-aifoundry2/</code> (<code>thermal</code>, <code>horace</code> and <code>horace2</code>: 3,681 samples, 20 Sep) and <code>per-shire-voltage-idle.json</code> in the same directory.</li>
+  <li>Thermal model: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/11-thermal-model.md"><code>docs/findings/11-thermal-model.md</code></a>.</li>
+  <li>Versions: first published 22 September 2026; corrected 24 September 2026 (the tile size, where the firmware truncates to whole degrees, the <code>pmic_sys</code> field, the peak-hold minimum and maximum, the existing temperature print, the firmware-signing status, the labels of the four non-compute cells, and the figures in §4).</li>
+</ul>
+
+<h2 id="related">Related reports</h2>
+<ul class="related">
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#what-the-moortec-sensors-can-and-cannot-do-for-power">Limits of observability, §4.3</a> — what the Moortec sensors can and cannot tell about power, and the ladder step that would export them</li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#the-per-shire-voltage-map">Power and temperature, §3</a> — the per-shire voltage map read from the SP’s DEBUG trace</li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">The Horace experiment, §8</a> — the model from transistor flips to die temperature that the workaround above uses</li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-measured">The DVFS loop and its leakage</a> — the clock governor, which acts on the whole-degree average</li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — where the mesh map comes from: TensorSend round trips over all 496 shire pairs</li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die">Heat per millimetre, §2</a> — the tile pitch, 3.72 mm per hop, measured on the die plot</li>
+</ul>
+<p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
+
+<script>
+/* Section anchors. Every h2/h3 gets an id (its own, or one made from its text) and a # link; clicking a heading
+   or a table-of-contents link puts #id in the URL. When the page is framed by spacesheep.dev the fragment is
+   mirrored into the outer, shareable URL (postMessage ss-hash), and an outer #fragment is forwarded in on load. */
+(function () {
+  const slug = t => t.toLowerCase().replace(/^\d+(\.\d+)*\.?\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const post = h => { if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h}, '*'); } catch (_) {} } };
+  const go = id => { try { history.replaceState(null, '', location.pathname + location.search + '#' + id); } catch (_) {}
+    const el = document.getElementById(id); if (el) el.scrollIntoView({block: 'start'}); post('#' + id); };
+  const seen = new Set();
+  document.querySelectorAll('main h2, main h3').forEach(h => {
+    if (!h.id) { let id = slug(h.textContent) || 'section', n = 2; while (seen.has(id) || document.getElementById(id)) id = slug(h.textContent) + '-' + n++; h.id = id; }
+    seen.add(h.id);
+    const a = document.createElement('a'); a.href = '#' + h.id; a.className = 'hlink'; a.textContent = '#'; a.title = 'link to this section'; h.appendChild(a);
+    h.style.cursor = 'pointer';
+    h.addEventListener('click', ev => { if (ev.target.tagName === 'A' && ev.target !== a) return; ev.preventDefault(); go(h.id); });
+  });
+  window.addEventListener('hashchange', () => post(location.hash));
+  if (location.hash) { post(location.hash); const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => el.scrollIntoView({block: 'start'}), 50); }
+})();
+</script>
+<script>
+/* Contents list, link back to the reports hub, and repository paths as links. Runs after the section-anchor
+   script above, whose h2 ids the contents list links to. Pages not built from this template paste both blocks
+   before </main>.
+   - Contents: a page with 6 or more h2s and no #toclist of its own gets a numbered list before its first h2.
+   - Footer: every page but the hub ends with a link to the hub's list of reports, unless it already has one.
+   - Paths: an inline <code> whose whole text is a repository path (docs/…, workloads/…, tools/…, scripts/…,
+     kernels/…, rtl-sim/…) becomes a GitHub link. Code blocks, code already in a link and globs stay as they are. */
+(function () {
+  const main = document.querySelector('main'); if (!main) return;
+  const HUB = 'https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability';
+  const BACK = '← All ET-SoC-1 measurement reports';
+  const REPO = 'https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/';
+  const text = el => { const c = el.cloneNode(true); c.querySelectorAll('.hlink').forEach(a => a.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+  const NUM = /^(?:§\s*\d+(?:\.\d+)*\.?|\d+(?:\.\d+)*\.|\d+(?:\.\d+)+)\s+/;  /* "3. ", "4.2 ", "§5 "; not "600 MHz" */
+
+  const h2s = [...main.querySelectorAll('h2')];
+  if (h2s.length >= 6 && !document.getElementById('toclist')) {
+    const nav = document.createElement('nav'); nav.className = 'card';
+    const b = document.createElement('b'); b.textContent = 'Contents';
+    const ol = document.createElement('ol'); ol.id = 'toclist';
+    h2s.forEach(h => {
+      if (!h.id) return;
+      const t = text(h), m = t.match(/^§?\s*(\d+)[.\s]/), li = document.createElement('li'), a = document.createElement('a');
+      if (m && NUM.test(t)) li.value = +m[1];
+      a.href = '#' + h.id; a.textContent = t.replace(NUM, '') || t;
+      li.appendChild(a); ol.appendChild(li);
+    });
+    nav.append(b, ol);
+    h2s[0].parentNode.insertBefore(nav, h2s[0]);
+  }
+
+  const h1 = main.querySelector('h1');
+  const isHub = !!h1 && /^limits of observability/i.test(text(h1));
+  const hasBack = [...document.querySelectorAll('a')].some(a => a.textContent.replace(/\s+/g, ' ').trim() === BACK);
+  if (!isHub && !hasBack) {
+    const p = document.createElement('p'); p.className = 'small';
+    const a = document.createElement('a'); a.href = HUB + '#reports'; a.textContent = BACK;
+    p.appendChild(a); main.appendChild(p);
+  }
+
+  const PATH = /^(docs|workloads|tools|scripts|kernels|rtl-sim)\/[\w./-]+$/;
+  main.querySelectorAll('code').forEach(c => {
+    if (c.closest('pre, a')) return;
+    const t = c.textContent.trim(); if (!PATH.test(t)) return;
+    const a = document.createElement('a'); a.href = REPO + t;
+    c.parentNode.insertBefore(a, c); a.appendChild(c);
+  });
+})();
+</script>
+</main>
+</body>
+</html>

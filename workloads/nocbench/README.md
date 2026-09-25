@@ -4,11 +4,12 @@ Latency, bandwidth and energy of the ways ET-SoC-1 cores talk to each other, mea
 results, the shire layout, and the comparison with GPUs are in
 `docs/reports/2026-09-18-et-soc1-on-chip-communication.html`.
 
-GPUs connect their SMs through L2. ET-SoC-1 has direct paths. Hart 0 of any minion can send up to 32
-vector registers (1 KB) straight into another minion's registers with `TensorSend`/`TensorRecv`. The receiver
+GPUs connect their SMs through L2. ET-SoC-1 has direct paths. Hart 0 of any minion can send up to 127 × 32 B
+(about 4 KB, cycling through its 32 vector registers) straight into another minion's registers with
+`TensorSend`/`TensorRecv`. The receiver
 can add, max or min what arrives into what it holds. Hardware trees do reductions and broadcasts, and credit
-counters and barrier counters let cores wait on each other without polling memory. The 32 compute shires sit
-on a 6x6 mesh.
+counters and barrier counters let cores wait on each other without polling memory. The 32 compute shires, with
+the master, spare, I/O and PCIe shires, form a 6x6 grid on the mesh (8x6 stops with the memory shires down two sides).
 
 The structure is the same as `workloads/memhier`: the runtime API plus a minimal kernel, with no gp-sdk. It
 builds against the lab machines' older `/opt/et`.
@@ -62,7 +63,7 @@ scripts/deploy-lab.sh aifoundry2 workloads/nocbench
 
 `run_lab.sh` runs the latency, size, collective and barrier probes. Each is its own `timeout 10` process
 with `--budget 8`. Before each one the script waits until no other process holds the card. It also logs the
-minion clock and board power, because the DVFS governor moves the clock between 600 and 850 MHz, and time
+minion clock and board power, because the DVFS governor moves the clock between 600 and 800 MHz (three points: 600, 700, 800), and time
 spent on the mesh is fixed in ns rather than in cycles.
 
 ```bash

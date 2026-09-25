@@ -6,8 +6,10 @@ from each level of the memory hierarchy before the level stops being the bottlen
 
 ridge = peak compute / bandwidth of the level. No new measurements: compute peaks come from the Minion VPU
 Specification and the PRM, measured bandwidths from the raw data of the earlier reports (docs/reports/data/),
-spec bandwidths from the manuals and micro-architecture docs, energy from the reports' embedded JSON. Every
-constant below names its source. With --embed the script replaces the JSON inside the report's
+checked against the 23 September reruns of the same probe on both cards, spec bandwidths from the manuals and
+micro-architecture docs, and energy per FLOP and per byte from the energy manual's data
+(docs/reports/data/2026-09-23-energy-manual/manual.json: sections 3.2, 4 and 5). Every constant below names its
+source. With --embed the script replaces the JSON inside the report's
 <script type="application/json" id="ridge-data"> tag.
 """
 import argparse
@@ -20,6 +22,8 @@ import statistics
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "docs", "reports", "data")
 REPORTS = os.path.join(ROOT, "docs", "reports")
+MANUAL = os.path.join(DATA, "2026-09-23-energy-manual", "manual.json")  # the energy manual's data (23 Sep)
+RERUN_DIRS = ("2026-09-23-reruns-aifoundry2-warm", "2026-09-23-reruns-aifoundry3")  # levels-pass*/runs.jsonl
 MINIONS = 1024  # compute minions that run user kernels (32 shires x 32); the die has 1,088
 CLOCK_MHZ = 600  # minion clock on both lab cards during every measured run (telemetry)
 DESIGN_MHZ = 1000  # design clock of the minion shires (CORE-ET Minion Shire Description, Table 2)
@@ -124,6 +128,29 @@ def memhier_levels():
     return out
 
 
+def rerun_levels():
+    """The same streaming probes re-run on 23 September at a pinned 600 MHz, 3 passes on aifoundry2 and 2 on
+    aifoundry3 (the energy manual's section 4.2 runs). Per level: the range over passes of the median GB/s of the
+    600 MHz launches, the median bytes per minion-cycle, and the passes per card."""
+    out = {}
+    for d in RERUN_DIRS:
+        card = "aifoundry3" if d.endswith("aifoundry3") else "aifoundry2"
+        for p in sorted(os.listdir(os.path.join(DATA, d))):
+            path = os.path.join(DATA, d, p, "runs.jsonl")
+            if not (p.startswith("levels-pass") and os.path.exists(path)):
+                continue
+            runs = [r for r in jsonl(path) if r.get("launch", -1) >= 0 and r["bytes"] > 0
+                    and 0.59 <= r["implied_ghz"] <= 0.61]
+            for cfg in sorted({r["config"] for r in runs}):
+                rs = [r for r in runs if r["config"] == cfg]
+                o = out.setdefault(cfg, {"gbps": [], "bpc": [], "passes": {}})
+                o["gbps"].append(statistics.median([r["bytes"] / r["wall_s"] / 1e9 for r in rs]))
+                o["bpc"] += [r["bytes"] / r["minions"] / r["cycles_max"] for r in rs]
+                o["passes"][card] = o["passes"].get(card, 0) + 1
+    return {cfg: {"gbps": [min(o["gbps"]), max(o["gbps"])], "bpc_minion": statistics.median(o["bpc"]),
+                  "passes": o["passes"]} for cfg, o in out.items()}
+
+
 def sparsity_tload(where):
     """16-line TensorLoads from all 1,024 minions on aifoundry3 (a steady 600 MHz)."""
     rows = jsonl(os.path.join(DATA, "2026-09-18-sparsity-aifoundry3", f"tload-{where}-all.jsonl"), "SPARSITY ")
@@ -208,7 +235,8 @@ def main():
     level("dram", "DRAM (LPDDR4X)", "chip", "32 GB", "dram",
           {"bpc": mh["dram"]["bpc_minion"], "gbps": mh["dram"]["gbps_600"],
            "gbps_card2": sparsity_tload("dram") * MINIONS * ghz,
-           "src": "memory-hierarchy probe: 1 KB TensorLoads, 256 MB working set; 72 GB/s on the second card"},
+           "src": "memory-hierarchy probe: 1 KB TensorLoads, 256 MB working set; the 23 Sep reruns give 76 GB/s on "
+                  "both cards (gbps_card2 is the sparsity report's shorter probe on aifoundry3)"},
           {"bpc": to_bpc(SPEC["dram_cfg"][0]), "gbps": SPEC["dram_cfg"][0], "src": SPEC["dram_cfg"][2],
            "max_gbps": SPEC["dram_max"][0], "max_src": SPEC["dram_max"][2]}, "")
     level("pcie", "Host memory over PCIe", "chip", "host RAM", "pcie", None,
@@ -224,10 +252,20 @@ def main():
           {"bpc": to_bpc(noc["shire"]["gb_per_s"]), "gbps": noc["shire"]["gb_per_s"],
            "src": "on-chip communication report: rings of 32, 1 KB messages"},
           {"bpc": SPEC["xbar_msg"][0], "src": SPEC["xbar_msg"][2]}, "")
-    level("xmesh", "TensorSend between shires", "network", "1-10 mesh hops (1.6-4.7 mean per pattern)", "noc",
+    level("xmesh", "TensorSend between shires", "network", "1–10 mesh hops (1.6–4.7 mean per pattern)", "noc",
           {"bpc": to_bpc(max(xs)), "bpc_low": to_bpc(min(xs)), "gbps": max(xs), "gbps_low": min(xs),
            "src": "on-chip communication report: every minion sends to a shire 1-16 IDs away, 1 KB messages"},
           None, "Limited per message (packets in flight), not by the mesh links.")
+
+    # ---- the 23 September reruns of the memory probes (pinned 600 MHz, both cards) against the values above -----
+    rr = rerun_levels()
+    rerun_dev = 0.0
+    for lv in L:
+        cfg = {"l1d": "l1", "l2": "l2", "scp": "scp-local", "l3": "l3", "scp_remote": "scp-remote", "dram": "dram"}.get(lv["key"])
+        if cfg and cfg in rr and lv.get("measured"):
+            lv["measured"]["rerun"] = rr[cfg]
+            g = lv["measured"]["gbps"]
+            rerun_dev = max(rerun_dev, max(abs(x / g - 1) for x in rr[cfg]["gbps"]))
 
     # ---- ridge points -------------------------------------------------------------------------------------------
     for lv in L:
@@ -263,15 +301,15 @@ def main():
               if r.get("launch", -1) >= 0 and "cycles_max" in r and r.get("wall_s")] if os.path.exists(
         os.path.join(DATA, "2026-09-18-aifoundry2", "runs.jsonl")) else []
     scp_all = all_minion_tload("scp")
-    dram_card2 = sparsity_tload("dram") * MINIONS * ghz
     limits = {
         "one_minion_l2_bpc": 1024 / one_l2[16], "one_minion_dram_bpc": 1024 / one_dram[16],
         "one_minion_4line_bpc": 256 / one_l2[4],
         "tload_floor_cycles": one_l2[0], "tload_all_small_cycles": scp_all[4][0],
         "tload_all_4line_bpc": scp_all[4][1], "tload_all_1line_bpc": scp_all[1][1],
-        # Little's law with a lone minion's rate, so a lower bound; aifoundry2's 76 GB/s and aifoundry3's own 72 GB/s
+        # Little's law with a lone minion's rate, so a lower bound. The chip's 76 GB/s holds on both cards (23 Sep
+        # reruns); the sparsity report's shorter probe read 72 GB/s on aifoundry3.
         "minions_to_saturate_dram": mh["dram"]["gbps_600"] / (1024 / one_dram[16] * ghz),
-        "minions_to_saturate_dram_card2": dram_card2 / (1024 / one_dram[16] * ghz), "dram_gbps_card2": dram_card2,
+        "rerun_max_deviation": rerun_dev,
         "launch_overhead_ms_median": statistics.median(launch) * 1e3 if launch else None,
         "launch_overhead_ms_range": [min(launch) * 1e3, max(launch) * 1e3] if launch else None,
     }
@@ -296,23 +334,41 @@ def main():
         {"name": "batch-1 fp32 layer, weights in scratchpad (partial sums added by the host)", "ai": 0.5, "t": gemv_tf, "prec": "fp32", "vs": "scratchpad"},
     ]
 
-    # ---- energy balance points (both sides are card power above idle) -------------------------------------------
-    mhe = embedded("2026-09-18-et-soc1-memory-hierarchy.html", "memhier-data")["energy"]["levels"]
-    spe = embedded("2026-09-18-et-soc1-sparsity.html", "sparsity-data")["energy"]["configs"]
-    e_flop = {"fp32_compute": spe["fma-dense"]["pj_slot"]["mean"] / 2,
-              "fp32_matmul": 1000 / mm["fp32-tensor-L2"]["gflops_per_w_above_idle"],
-              "fp16_matmul": 1000 / mm["fp16-tensor-L2"]["gflops_per_w_above_idle"],
-              "int8_matmul": 1000 / mm["int8-tensor-L2"]["gflops_per_w_above_idle"]}
-    e_byte = [("L1 data cache", mhe["l1"]["pj_per_byte"]["mean"]), ("L2 scratchpad, own shire", mhe["scp-local"]["pj_per_byte"]["mean"]),
-              ("L2 cache", mhe["l2"]["pj_per_byte"]["mean"]), ("L2 scratchpad, other shire", mhe["scp-remote"]["pj_per_byte"]["mean"]),
-              ("L3", mhe["l3"]["pj_per_byte"]["mean"]), ("DRAM", mhe["dram"]["pj_per_byte"]["mean"]),
-              ("TensorSend, fast local network", noc["pair"]["pj_per_byte"]), ("TensorSend inside a shire", noc["shire"]["pj_per_byte"])]
-    fit = dict(embedded("2026-09-18-et-soc1-on-chip-communication.html", "nocbench-data")["energy"]["mesh_fit"])
+    # ---- energy balance points (both sides are card power above idle), from the energy manual's data -------------
+    # Energy per operation: manual section 3.2, TensorFMA with A and B in the L1 scratchpad at 600 MHz, pooled over
+    # the Horace ablation and the 22 Sep card transfer (tensor.bars: fp32 on both cards, int8 on aifoundry2 only).
+    # Not tensor.rows, which hold aifoundry2's values alone. A multiply-add counts as 2 operations.
+    man = json.load(open(MANUAL))
+    bars = man["tensor"]["bars"]
+
+    def per_op(cfg):
+        b = bars[cfg]
+        return {"pj": b["mean"] / 2, "lo": b["lo"] / 2, "hi": b["hi"] / 2, "cards": b["cards"], "n": b["n"]}
+
+    e_flop = {"fp32": per_op("fp32_randn"), "fp32_ones": per_op("fp32_ones"), "fp32_zeros": per_op("fp32_zeros"),
+              "int8": per_op("int8_randn")}
+    ef, ei = e_flop["fp32"]["pj"], e_flop["int8"]["pj"]
+    # Energy per byte: section 4.2 (the memory probes above, re-run at a pinned 600 MHz on both cards over buffers
+    # that were never written) and section 5 (TensorSend, 1 KB messages, both cards).
+    lev, rings = man["reruns"]["levels_pj_per_byte"], man["reruns"]["rings_pj_per_byte"]
+    e_byte = [("L1 data cache", lev["l1"]), ("L2 scratchpad, own shire", lev["scp-local"]), ("L2 cache", lev["l2"]),
+              ("L2 scratchpad, other shire", lev["scp-remote"]), ("L3", lev["l3"]), ("DRAM", lev["dram"]),
+              ("TensorSend, fast local network", rings["pair"]), ("TensorSend inside a shire", rings["shire"])]
+    xs_keys = sorted(k for k in rings if k.startswith("xshire") and not k.endswith("-c4"))
+    xs_pj = [min(rings[k]["mean"] for k in xs_keys), max(rings[k]["mean"] for k in xs_keys)]
     hops = [noc[k]["mean_hops"] for k in noc if k.startswith("xshire") and not k.endswith("-c4")]
-    fit["hops"] = [min(hops), max(hops)]  # the fit is evaluated only over the measured patterns' mean hop counts
-    energy = {"e_flop": e_flop, "e_byte": [{"name": n, "pj": v, "balance_fp32": v / e_flop["fp32_compute"],
-                                            "balance_int8_max": v / e_flop["int8_matmul"]} for n, v in e_byte],
-              "mesh_fit": fit}
+    # The same TensorLoads on random data (section 4.1, both cards): the shire's own scratchpad and DRAM; and for L1
+    # the catalogue's 32 B vector load (flw.ps) hitting L1 on random data, per byte.
+    cat = man["catalogue"]["combined"]
+    rnd = {w: cat[f"tload/{w}/random"]["mean"] for w in ("scp", "dram")}
+    rnd["l1"] = cat["flw.ps/random/h2"]["mean"] / 32
+    energy = {"e_flop": e_flop,
+              "e_byte": [{"name": n, "pj": v["mean"], "lo": v["lo"], "hi": v["hi"], "balance_fp32": v["mean"] / ef,
+                          "balance_int8": v["mean"] / ei} for n, v in e_byte],
+              "xshire": {"pj": xs_pj, "patterns": xs_keys, "hops": [min(hops), max(hops)],
+                         "balance_fp32": [x / ef for x in xs_pj], "balance_int8": [x / ei for x in xs_pj]},
+              "random_tload": {w: {"pj": v, "balance_fp32": v / ef} for w, v in rnd.items()},
+              "source": "docs/reports/data/2026-09-23-energy-manual/manual.json: tensor.bars, reruns, catalogue.combined"}
 
     a100 = {"peaks": A100["peaks_tflops"],
             "levels": [{"name": n, "tbs": s, "tbs_peak": pk, "ridge": {k: v / s for k, v in A100["peaks_tflops"].items()}}
@@ -350,10 +406,22 @@ def main():
             print(f"    at {DESIGN_MHZ} MHz  {vals}")
     print("\nLimits:", {k: (round(v, 3) if isinstance(v, float) else v) for k, v in limits.items()})
     print("Kernels:", [(k["name"], k["ai"], round(k["t"], 3)) for k in kernels])
-    print("Energy per FLOP above idle (pJ):", {k: round(v, 3) for k, v in e_flop.items()})
+    print("Memory probes re-run 23 Sep (GB/s range over passes; B/minion-cycle):",
+          {cfg: ([round(x, 1) for x in v["gbps"]], round(v["bpc_minion"], 3), v["passes"]) for cfg, v in rr.items()})
+    print(f"  largest difference from the bandwidths used above: {100 * rerun_dev:.2f}%")
+    print("Energy per operation above idle (pJ; fp32 per FLOP, int8 per OP):",
+          {k: f"{v['pj']:.3f} [{v['lo']:.3f}-{v['hi']:.3f}], {v['cards']} card(s)" for k, v in e_flop.items()})
+    print(f"  fp32 on random data costs {ef / e_flop['fp32_zeros']['pj']:.1f}x its zeros figure and "
+          f"{ef / e_flop['fp32_ones']['pj']:.1f}x its all-ones figure")
     for e in energy["e_byte"]:
-        print(f"  {e['name']:34s} {e['pj']:7.2f} pJ/B -> balance fp32 {e['balance_fp32']:6.2f} FLOP/B, int8 >= {e['balance_int8_max']:6.1f} OP/B")
-    print("  mesh fit:", fit)
+        print(f"  {e['name']:34s} {e['pj']:7.2f} pJ/B -> balance fp32 {e['balance_fp32']:6.2f} FLOP/B, int8 {e['balance_int8']:6.1f} OP/B")
+    xs = energy["xshire"]
+    print(f"  {'TensorSend between shires':34s} {xs['pj'][0]:.2f}-{xs['pj'][1]:.2f} pJ/B -> balance fp32 "
+          f"{xs['balance_fp32'][0]:.2f}-{xs['balance_fp32'][1]:.2f}, int8 {xs['balance_int8'][0]:.1f}-{xs['balance_int8'][1]:.1f} "
+          f"({len(xs['patterns'])} patterns, {xs['hops'][0]:.2f}-{xs['hops'][1]:.2f} hops mean)")
+    for w, v in energy["random_tload"].items():
+        what = "flw.ps L1 hit" if w == "l1" else "TensorLoad from " + w
+        print(f"  {what} on random data: {v['pj']:.2f} pJ/B -> balance fp32 {v['balance_fp32']:.2f} FLOP/B")
     print("A100 ridges (sustained):", [(l["name"], {k: round(v, 1) for k, v in l["ridge"].items()}) for l in a100["levels"]])
 
     if args.embed:

@@ -11,6 +11,13 @@ to the A100 spec sheet (dense peak / TDP). Those are the numbers in the report's
 prose, which are written by hand. --embed also replaces the power trace inside the report's
 <script type="application/json" id="trace-data"> tag, so the power chart can be refreshed
 without touching the rest of the page.
+
+Two per-W-above-idle figures are printed. "above first idle" subtracts results.json's idle_w,
+the baseline before the first workload. "idle before" is each workload's own idle, the mean
+board power from 3.5 to 1.8 s before its first timed launch (idle_before() in
+scripts/mmbench-power.py, which newer runs also store as idle_before_w); "above it"
+subtracts that. The die warms over a session and leaks more, so the report's "Per W above
+idle" column uses the second: 30.61, 32.53, 33.83 and 35.16 W in the 2026-09-18 run.
 """
 import argparse
 import json
@@ -21,6 +28,17 @@ import statistics
 A100_PEAK = {"fp32": 19.5, "fp16": 312.0, "int8": 624.0}  # TFLOP/s (TOP/s for int8), NVIDIA A100 datasheet, dense
 A100_TDP = {"SXM4": 400.0, "PCIe 40GB": 250.0}             # W
 PEAK_PER_MINION_CYCLE = {"fp32": 16, "fp16": 32, "int8": 128}  # measured op shapes: 512 / 512 / 256 cycles per op
+IDLE_BEFORE_S = (3.5, 1.8)  # the same window as IDLE_BEFORE_S in scripts/mmbench-power.py
+
+
+def idle_before(samples, t_first_ms, t_prev_end_ms=None):
+    """Mean board power from 3.5 to 1.8 s before a workload's first timed launch, leaving out samples less
+    than 1 s after the previous workload ended. Matches idle_before() in scripts/mmbench-power.py."""
+    lo = t_first_ms - IDLE_BEFORE_S[0] * 1000
+    if t_prev_end_ms is not None:
+        lo = max(lo, t_prev_end_ms + 1000)
+    w = [x for t, x in samples if lo <= t <= t_first_ms - IDLE_BEFORE_S[1] * 1000]
+    return statistics.mean(w) if w else float("nan")
 
 
 def main():
@@ -46,13 +64,19 @@ def main():
     minions = runs[0]["minions"]
     print(f"idle {res['idle_w']:.2f} W (median of {res['idle_samples']} samples); minion clock {ghz:.3f} GHz "
           f"(device cycles vs wall time: {measured_ghz:.4f} GHz); {minions} minions")
+    prev_end = None
     for x in res["results"]:
         mode = x["mode"]
         peak = PEAK_PER_MINION_CYCLE[mode] * minions * ghz * 1e9 / 1e12
         above = x["gflops_per_w_above_idle"]
+        rs = [r for r in runs if r["workload"] == x["workload"]]
+        idle_b = x.get("idle_before_w", idle_before(samples, rs[0]["t_start_ms"], prev_end))
+        prev_end = rs[-1]["t_end_ms"]
+        above_b = x["tflops"] * 1000 / (x["mean_w"] - idle_b) if x["mean_w"] > idle_b else None
         line = (f"{x['workload']:18s} {x['tflops']:8.3f} T/s  {100 * x['tflops'] / peak:5.1f}% of {peak:.2f}  "
                 f"{x['mean_w']:6.2f} W ({x['min_w']:.1f}-{x['max_w']:.1f}, {x['power_samples']} samples)  "
-                f"{x['gflops_per_w']:7.1f}/W  above idle {above if above is None else round(above, 1)}")
+                f"{x['gflops_per_w']:7.1f}/W  above first idle {above if above is None else round(above, 1)}  "
+                f"idle before {idle_b:.2f} W, above it {above_b if above_b is None else round(above_b, 1)}/W")
         for name, tdp in A100_TDP.items():
             line += f"  vs A100 {name} {x['gflops_per_w'] / (A100_PEAK[mode] * 1000 / tdp):.2f}x"
         print(line + f"  A100 speed {A100_PEAK[mode] / x['tflops']:.2f}x  check {','.join(x['check'])}")

@@ -5,7 +5,9 @@
 
 Every number in the manual comes through here, and every table records the file it was read from, so the
 published page and the markdown are two renderings of one JSON. Nothing is fitted in this script; it reads
-fits and measurements other tools produced (docs/findings/03-experiments.md says which).
+fits and measurements other tools produced (docs/findings/03-experiments.md says which). Two things are derived
+here rather than read: the mean mesh distance of each ring, from marty1885's shire map in
+workloads/nocbench/analyze.py, and the median and largest leakage correction over the catalogue's bursts.
 """
 import argparse
 import csv
@@ -13,6 +15,10 @@ import json
 import math
 import os
 import statistics
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "workloads", "nocbench"))
+from analyze import MARTY, hops  # noqa: E402  marty1885's shire map, the one On-chip communication uses
 
 D = "docs/reports/data"
 MODEL = f"{D}/2026-09-21-horace-aifoundry2/model.json"
@@ -56,7 +62,11 @@ def main():
         "measured_idle": m["idle_curve"],
         "rails_73c": dv["idle_check"]["rails"] | {"board": dv["idle_check"]["board_w"],
                                                    "unsensed": dv["idle_check"]["board_minus_rails"],
-                                                   "die_c": dv["idle_check"]["die_c"]},
+                                                   "die_c": dv["idle_check"]["die_c"],
+                                                   # the sample was taken after this long with no workload
+                                                   "hours_idle": dv["idle_check"].get("hours_idle"),
+                                                   "samples": dv["idle_check"].get("samples"),
+                                                   "board_sd": dv["idle_check"].get("board_sd")},
         "operating_points": dv["operating_points"],
         "leak_fraction": dv["leak_fraction"],
         "source": {"law": MODEL, "rails": DVFS, "points": DVFS},
@@ -106,7 +116,7 @@ def main():
                              "unit": "pJ/MAC", "note": "aifoundry2: ablation (2 runs) and the 22 September transfer; aifoundry3: the transfer"}
     out["tensor"]["bars"] = bars
     out["awake"] = {
-        "spin_hart0_1024": abl_row("spin", "8 addi per iteration, hart 0 of 1,024 minions"),
+        "spin_hart0_1024": abl_row("spin", "four addi and a branch per iteration, hart 0 of 1,024 minions"),
         "spin_hart0_256": abl_row("spin_8", "the same on 256 minions"),
         "source": ABL,
     }
@@ -119,7 +129,7 @@ def main():
                   "implied_ghz": v.get("implied_ghz")} for k, v in mh.items() if k != "spin"],
         "spin_over_idle_w": mh["spin"]["above_idle_w"],
         "caveat": "measured on 2026-09-18 with the governor free to move the clock; implied_ghz says where it sat",
-        "recheck_600mhz": {"tload_scp_local": abl_row("tload_l2", "tensor load, local scratchpad"),
+        "recheck_600mhz": {"tload_scp_local": abl_row("tload_l2", "tensor load, L2 cache"),
                            "tload_dram": abl_row("tload_dram", "tensor load, DRAM")},
         "source": {"rows": MEMH, "recheck": ABL},
     }
@@ -131,8 +141,18 @@ def main():
         "rows": [{"ring": k, "what": nocs[0][k]["what"], "gb_s": statistics.mean(n[k]["gb_per_s"] for n in nocs),
                   "over_idle_w": statistics.mean(n[k]["above_idle_w"] for n in nocs),
                   "pj_per_byte": statistics.mean(n[k]["pj_per_byte_vs_idle"] for n in nocs),
-                  "pj_spread": abs(nocs[0][k]["pj_per_byte_vs_idle"] - nocs[1][k]["pj_per_byte_vs_idle"]) / 2}
+                  "pj_spread": abs(nocs[0][k]["pj_per_byte_vs_idle"] - nocs[1][k]["pj_per_byte_vs_idle"]) / 2,
+                  # against the idle measured next to each configuration: the figure On-chip communication publishes
+                  "pj_per_byte_local": statistics.mean(n[k]["pj_per_byte_vs_local_idle"] for n in nocs)}
                  for k in keys],
+        # Shire IDs do not follow the mesh: the mean, least and greatest number of mesh hops between shire s and
+        # shire s + k over all 32 compute shires, on marty1885's map (k from the ring's name; 0 inside a shire).
+        "mesh_hops": {k: ({"mean": statistics.mean(hops(s_, (s_ + kk) % 32) for s_ in range(32)),
+                           "min": min(hops(s_, (s_ + kk) % 32) for s_ in range(32)),
+                           "max": max(hops(s_, (s_ + kk) % 32) for s_ in range(32))}
+                          if (kk := int(k[6:].split("-")[0]) if k.startswith("xshire") else 0) else {"mean": 0, "min": 0, "max": 0})
+                      for k in keys},
+        "hop_map": "marty1885's shire map (workloads/nocbench/analyze.py MARTY), Manhattan distance",
         "clock": "600 MHz, 518 mV in every sample of both runs",
         "source": NOC,
     }
@@ -153,7 +173,10 @@ def main():
     # --- 3.1 / 4.3: the comprehensive catalogue and the fine grain, from three shuffled passes on two cards --
     if os.path.exists(CAT):
         c = j(CAT)
-        c.pop("bursts", None)   # per-burst detail stays in catalogue.json; the page needs the summaries
+        bursts = c.pop("bursts", None) or {}   # per-burst detail stays in catalogue.json; the page needs the summaries
+        # the leakage correction each burst received (section 9): its median and largest size, per card
+        lc = {h: sorted(abs(b["leak_correction_w"]) for b in bs) for h, bs in bursts.items()}
+        c["leak_correction"] = {h: {"median_w": statistics.median(v), "max_w": v[-1], "bursts": len(v)} for h, v in lc.items() if v}
         out["catalogue"] = c | {"source": CAT}
 
     # --- 5, 6, 4.2: the reruns of the relay, the hot line, the rings and the levels, pooled over passes and cards --

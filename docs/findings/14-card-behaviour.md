@@ -1,7 +1,11 @@
 # Finding: how this card behaves, and how to measure it without fooling yourself
 
-**Sources:** E5, E6 (telemetry and rails), E9 (the protocol), E10 (the governor), E12 (long runs), R3 (the
-firmware policy). Published as A3 and A4.
+[← Findings index](README.md) · no single published page; the pieces are in
+[Power and temperature](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature) (A3), [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4)
+and [The ET-SoC-1's DVFS loop](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) (A11) · numbers and sources: [05-claims.md](05-claims.md)
+
+**Sources:** E5, E6 (telemetry and rails), E9 (the protocol), E10 (the governor), E12 (long runs), E21 (the three
+machines), E27 and E29 (the rails' filter, the meter traps), R3 (the firmware policy).
 
 Everything here was learned by getting it wrong first. If you are about to measure power or temperature on an
 ET-SoC-1, read this before designing the experiment.
@@ -10,21 +14,23 @@ ET-SoC-1, read this before designing the experiment.
 
 ## The clock governor is thermal first
 
-The service processor runs a power-management task (`thermal_pwr_mgmt.c`, R3). While a kernel is running it
-steps the minion operating point **down** if the die is above a software threshold (**65 °C**) *or* the
-board's average power is above the TDP level (**65 W**), and **up** otherwise. The thermal branch is checked
-first and wins.
+The [service processor](README.md#terms) runs a power-management task (`thermal_pwr_mgmt.c`, R3), once per
+management pass of about 133 ms. While a kernel is running it steps the minion operating point **down** if the
+die's whole-degree reading is above a software threshold (**65 °C**) *or* the board's average power is above the
+TDP level (**65 W**), and **up** otherwise. The thermal branch is checked first and wins. This is the firmware
+source at `353f20e`; the cards' own trace strings match an older build (R3), so details may differ on the card.
+[16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) has the loop in detail.
 
 This card's operating points, read from telemetry (E10):
 
 | Point | Clock | Die voltage |
 |---|---|---|
 | lowest | 600 MHz | 516–518 mV |
-| middle | 700 MHz | ~570 mV |
+| middle | 700 MHz | 568 mV |
 | highest | 800 MHz | 618–620 mV |
 
-**Consequence:** a card that has been busy idles above 65 °C (72 °C on 09-20, 80 °C in the controlled runs) and
-therefore runs *everything* at 600 MHz, whatever the power — which is why an earlier version of this work
+**Consequence:** a card that has been busy usually idles above 65 °C (72–80 °C on 20–22 September; about 65 °C on
+23 September, when the governor did intervene) and therefore runs *everything* at 600 MHz, whatever the power — which is why an earlier version of this work
 concluded, wrongly, that "the clock never moves". It moves only from a cool die.
 
 From a 62–63 °C die, after a night idle (E10):
@@ -39,8 +45,9 @@ So Horace He's speed effect (R8) does appear here — about **25%** for zeros ag
 measured 15% on an A100 — but only while the die is below 65 °C. Above it, the same physics shows up as heat
 instead of speed. Random data at 800 MHz touches 88 W for an instant before the governor pulls it back.
 
-**When comparing anything, check `mhz.minion` in every sample**, and start runs well above 65 °C so the
-governor cannot intervene.
+**When comparing anything, check `mhz.minion` in every sample**, and preheat to about 76 °C: the firmware's test
+is `> 65` on a whole-degree reading, and E29 saw the clock lift to 700–800 MHz mid-burst below about 68 °C
+([19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md)).
 
 ## The telemetry, and what each number really is
 
@@ -49,12 +56,13 @@ governor cannot intervene.
 | Field | Meaning | Gotcha |
 |---|---|---|
 | `board_w` | board power, 10 mW steps | refreshed once per 133 ms service-processor pass; near-instantaneous otherwise |
-| `sp.minion_w`, `sram_w`, `noc_w` | per-rail power | **~2 s moving averages**: they lag a step by about 2 s. Skip 2–3 s after any change before averaging |
+| `sp.minion_w`, `sram_w`, `noc_w` | per-rail power | **the PMIC's first-order running average, τ ≈ 1 s** (61% of a step after 1 s, 88% after 2 s, 95% after 3 s; E27), copied by the SP each pass; not a moving average. Skip 2–3 s after any change before averaging, or use `ettelem sample --reset-ms` window means |
 | `temp_c.minshire[0]` | die temperature | **whole degrees**, and it is the *mean of 34 shire sensors*. Hot spots are hotter |
 | `die_mv.*` | on-die voltage per rail | the minion rail droops ~1 mV under 18 W more load: the regulator senses at the die |
 | `mhz.minion`, `mhz.noc`, `mhz.ddr` | clocks | the only reliable way to catch the governor |
 
-- Six queries take about 22 ms, so 45 Hz is the practical ceiling; 10 Hz was used throughout.
+- One sample is six management commands and takes about 22 ms, so 45 Hz is the practical ceiling; 10 Hz was used
+  throughout.
 - The management node is **single-opener**. A telemetry sampler excludes other management users for the whole
   session, so start it once and leave it running.
 - The three rails do not cover the memory shires or DRAM. Board minus rails is ~15 W idle and ~21 W under load.
@@ -76,7 +84,9 @@ Power needs none of this. It reads in 10 mW steps.
 
 ## The measurement protocol that made results repeatable
 
-Power at the same work rises ~0.65–0.8 W per °C, so **heat left over from one run contaminates the next**.
+Power at the same work rises with die temperature — the idle law's slope is 0.65 W per °C at 80 °C, and power
+drifted about 0.8 W per °C within the hot 7 s runs (80–86 °C) — so **heat left over from one run contaminates the
+next**.
 The protocol (E9):
 
 1. Pre-heat with random-data bursts to 84 °C if the die is below it.
@@ -87,7 +97,7 @@ The protocol (E9):
 Achieved: launch temperature **80.96 ± 0.11 °C** and idle power **36.29 ± 0.06 W** across 46 runs; repeats
 agree to 0.03–0.08 W for most patterns.
 
-Approach times were 12–120 s (median 63 s) for 7-second runs, and up to six minutes after a run that reached
+Approach times were 12–120 s (median 63 s) for 7-second runs, and up to seven minutes after a run that reached
 90 °C. **Budget three to eight times more wall-clock than card time.**
 
 ## The three lab machines are not interchangeable
@@ -105,19 +115,20 @@ LD_LIBRARY_PATH=/opt/et/lib build/ettelem/ettelem config   # the firmware's view
 | Firmware / PMIC | 1.3.1 / 1.5.0 | 1.3.1 / 1.5.0 | not readable |
 | TDP the driver reports | 65 W | 65 W | 65 W |
 | **TDP the firmware reports** | **65 W** | **0 W** | — |
-| Clock ever above 600 MHz | yes, 700 and 800 | **no, ever** | — |
-| Idle | 31–36 W at 73–80 °C | 23.6 W at 51 °C | — |
+| Clock ever above 600 MHz | yes, 700 and 800 | **never seen** (10 Hz telemetry) | — |
+| Idle | 31–36 W at 73–80 °C | 23.6 W at 50 °C (25.1 W at 56 °C under the runs) | — |
 
 **aifoundry3 is pinned at 600 MHz, and the reason is a flashed zero.** The governor's step-down test is
 `measured power > TDP` and its step-up test is `<`. At a TDP of zero the first is always true and the second
-never is, so the loop throttles down every 10 ms and nothing can lift it. The card's own log says so:
-`Power throttle down event, current pwr 35380  tdp level: 0`, 26 times in one 8 KB window, with no step-up
-event at all. A second reading agrees: `get_power_state()` classifies a card as `MAX_POWER` exactly when power
+never is, so the loop logs a throttle-down at every kernel start, and nothing can ever step it up. The card's own
+log says so: `Power throttle down event, current pwr 35380  tdp level: 0`, 26 times in one 8 KB window, alternating
+with idle events, with no step-up event at all. A second reading agrees: `get_power_state()` classifies a card as `MAX_POWER` exactly when power
 exceeds the TDP, and aifoundry3 reports `max_power` while drawing 23 W.
 
 **The driver will not warn you.** Its `ETSOC1_IOCTL_GET_DEVICE_CONFIGURATION` reports the nameplate 65 W on
-all three machines, including aifoundry3. Any host-side check passes. The card works; it is simply capped for
-life at the bottom of its VMIN table.
+all three machines, including aifoundry3. Any host-side check passes. The card works; it is simply held at
+600 MHz, the bottom of its VMIN table (the firmware's table of operating points), for as long as its flashed TDP
+stays at zero.
 
 **aifoundry1's two cards cannot be opened.** Its kernel module is built from different sources than the other
 two (`srcversion 1383B256EB24A0A53F04CC7` against `47D26A305A0428B29FB7FC4`) while carrying the same
@@ -153,8 +164,8 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
 - **Never let a minion receive readies from two `TensorSend` partners at once** — one ready bit per minion, not
   per partner. On silicon this hangs the hart permanently and the card needs a power cycle; `sys_emu` does not
   catch it.
-- **The environment is not stationary.** Mid-session the lab's airflow changed and the die fell 12 °C under
-  constant power. Record enough telemetry to notice.
+- **The environment is not stationary.** Mid-session the lab's airflow changed and the die fell 12 °C under an
+  unchanged workload. Record enough telemetry to notice.
 - **A sampler killed mid-request poisons the management queue** (both cards, 2026-09-24). The reply to its
   last command stays queued. The next process to open `/dev/et0_mgmt` dies of `std::bad_function_call` on
   that reply and leaves its own behind, so retrying never recovers. Drain it once with
@@ -162,8 +173,8 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
   clears it. `ettelem sample` now finishes its request and exits on SIGTERM, and the runners drain the queue
   when a start fails (`start_sampler` in `workloads/enercat/run_wire.py` and the `tools/ettelem/run_*_power.sh`
   scripts). Stop a sampler with a plain `kill`, never `kill -9`. The driver's error counters did not move.
-- **The workload can starve the meter.** Rings between shires s and s+16 (E29) push the service processor's
-  management command from 22 ms to 150 ms. On aifoundry2, tensor loads between shires in the same column
+- **The workload can starve the meter.** Rings between shires s and s+16 (E29) push a telemetry sample (six
+  management commands) from 22 ms to 150 ms. On aifoundry2, tensor loads between shires in the same column
   three hops apart (E31) push it to about 1 s, and 1.6 s at worst, so a burst gets a handful of stale samples.
   aifoundry3 ran the same pairs at 22 ms. Every ettelem sample carries `took_ms`: check it, and drop the burst.
 - **A memory pattern launched without a buffer writes to physical address 0**, the start of the PU region's
@@ -172,3 +183,12 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
   it: no error counter moved, telemetry stayed normal, and the card held 600 MHz and ran a normal burst
   straight after. `enercat_host` now refuses to launch a memory pattern with no slice. Add every new mode to
   that list before running it on a card.
+
+## Related
+
+- [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md): the governor in detail, and the second card's zero TDP.
+- [19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md): what the meters miss, and the
+  improvement ladder.
+- [11-thermal-model.md](11-thermal-model.md): the thermal network and the step-time trick for the whole-degree
+  sensor.
+- [03-experiments.md](03-experiments.md): the standard protocol and every session's command.

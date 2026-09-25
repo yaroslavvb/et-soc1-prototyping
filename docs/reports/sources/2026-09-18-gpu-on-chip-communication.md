@@ -412,7 +412,8 @@ Source: [S25] Table 3 (SC'25) [measured]. These are whole-GPU dynamic energies f
   - The observed topology is a mesh with some links missing.
 - **Latency:** atomics show a baseline of about **120 cycles plus about 6 cycles per mesh hop**, i.e. about 3 cycles per direction.
 - **Clock caveat:** Chang's companion tool etTopoScan converts cycles to time assuming a 600 MHz minion clock ([TOPO] `topo_scan.cpp` line 286). Any GB/s figure computed that way scales with the real clock.
-- **Differs from docs/et-soc1-notes.md:** it gives 12–16 cycles per mesh hop for remote scratchpad loads, a different operation (a round trip, at 600–800 MHz).
+- **What it does not report:** no systolic-matmul or FlashAttention result. The post names FlashAttention and matrix multiplication on llama.cpp as the author's goal and measures only bandwidth and latency (re-read on 2026-09-24 at https://clehaxze.tw/gemlog/2026/04-27-tnvestigating-the-et-soc-1-noc.gmi).
+- **Differs from docs/et-soc1-notes.md:** it gives 20 ns (12 minion cycles at 600 MHz) per mesh hop for a round trip, a different operation.
 
 **Sources disagree**
 - On-die SRAM: over 160 MB ([HC33]; [MICRO22]) vs 140 MB ([DS] §1).

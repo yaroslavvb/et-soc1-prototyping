@@ -16,11 +16,14 @@ const pick=(g,f)=>D[g].filter(f), A2=r=>r.card==='aifoundry2';
 (function(){
  const fair=pick('fairness',r=>A2(r)&&r.home==='0'&&r.per_shire===32)[0];
  const loc=pick('local',r=>A2(r)&&r.home==='scplocal:0'&&r.shires>1)[0];
- const req=pick('requesters',r=>A2(r)).sort((a,b)=>a.remote_minions-b.remote_minions).find(r=>r.frac_of_alone<0.5);
+ const reqs=pick('requesters',r=>A2(r)).sort((a,b)=>a.remote_minions-b.remote_minions);
+ const req=reqs.find(r=>r.frac_of_alone<0.5), prev=req?reqs[reqs.indexOf(req)-1]:null;
  const pw=D.power.runs, c=pw.find(r=>r.label==='contended'), s=pw.find(r=>r.label==='spread');
  document.getElementById('k1').textContent=f3(fair.host_share);
  document.getElementById('k2').textContent=(100*loc.frac_of_alone).toFixed(2)+'%';
- document.getElementById('k3').textContent=req?req.remote_minions:'—';
+ document.getElementById('k3').textContent=req&&prev?`${prev.remote_minions+1}–${req.remote_minions}`:'—';
+ document.getElementById('k3sub').textContent=req&&prev?
+  `${prev.remote_minions} leave the host at ${(100*prev.frac_of_alone).toFixed(1)}%, ${req.remote_minions} stop it (the inequality in section 4 puts the edge at ${Math.ceil(D.context.remote_atomic_latency_cycles/D.context.bank_service_cycles)}); one shire has 32`:'';
  document.getElementById('k4').textContent=(c.nj_per_op/s.nj_per_op).toFixed(0)+'×';
  document.getElementById('enfac').textContent=(c.nj_per_op/s.nj_per_op).toFixed(0);
 })();
@@ -31,8 +34,8 @@ const pick=(g,f)=>D[g].filter(f), A2=r=>r.card==='aifoundry2';
  const raw=D.raw_shares||null;
  const W=700,H=300,L=52,R=16,T=26,B=46,{svg,tip,h}=host('fair',W,H);
  const sh=D.shares_home0||[];
- const y=v=>H-B-(H-B-T)*(v-0.9)/0.35, x=i=>L+(W-L-R)*(i+0.5)/32;
- axes(svg,{W,H,L,R,T,B,x,y,yt:[0.9,1.0,1.1,1.2],yf:v=>v.toFixed(2),xt:[],yl:'share of an even split'});
+ const y=v=>H-B-(H-B-T)*(v-0.8)/0.45, x=i=>L+(W-L-R)*(i+0.5)/32;
+ axes(svg,{W,H,L,R,T,B,x,y,yt:[0.8,0.9,1.0,1.1,1.2],yf:v=>v.toFixed(2),xt:[],yl:'share of an even split'});
  el('line',{x1:L,x2:W-R,y1:y(1),y2:y(1),stroke:'var(--ref)','stroke-width':1.5,'stroke-dasharray':'5 4'},svg);
  [['1,024 minions: 32 per shire','var(--c1)','full'],['32 minions: 1 per shire','var(--c2)','one']].forEach((s2,i)=>{
    el('rect',{x:W-R-190,y:T-14+i*18,width:11,height:11,fill:s2[1]},svg);txt(svg,W-R-174,T-4+i*18,s2[0],'lab');});
@@ -45,18 +48,19 @@ const pick=(g,f)=>D[g].filter(f), A2=r=>r.card==='aifoundry2';
  txt(svg,L,H-B+16,'shire 0',' tick');txt(svg,W-R,H-B+16,'shire 31','tick','end');
  document.getElementById('faircap').textContent=
   `Dashed line is an even split. With every minion taking part the whole chip lands within ${f3(Math.min(...sh.filter(r=>r.kind==='full').map(r=>r.share)))}–${f3(Math.max(...sh.filter(r=>r.kind==='full').map(r=>r.share)))}; `+
-  `the host shire is at ${f3(rows[0].host_share)}. With one minion per shire the bank is not saturated and the host shire leads.`;
+  `the host shire is at ${f3(rows[0].host_share)}. With one minion per shire the bank is still saturated, but each shire has one request queued, so the mesh round trip decides and the host shire leads. `+
+  `The same holds for Ivan's exact case, a scratchpad word in shire 0: host share 1.004, every shire 0.998–1.004.`;
 })();
 
 /* ---------- section 1 table: home sweep, both cards ---------- */
-document.getElementById('fairtab').innerHTML='<thead><tr><th>Card</th><th>Line homed in</th><th class="num">Minions per shire</th><th class="num">Host shire’s share</th><th class="num">Spread across 32 shires</th></tr></thead><tbody>'+
+document.getElementById('fairtab').innerHTML='<thead><tr><th>Card</th><th>DRAM line homed in</th><th class="num">Minions per shire</th><th class="num">Host shire’s share</th><th class="num">Spread across 32 shires</th></tr></thead><tbody>'+
  D.fairness.map(r=>`<tr><td>${r.card}</td><td>shire ${r.home}</td><td class="num">${r.per_shire}</td><td class="num">${f3(r.host_share)}</td><td class="num">${f3(r.min_share)}–${f3(r.max_share)}</td></tr>`).join('')+'</tbody>';
 
 /* ---------- section 2: placement ---------- */
 document.getElementById('placetab').innerHTML='<thead><tr><th>Card</th><th>Where the atomic lives</th><th class="num">Atomics in a 10 ms window</th><th class="num">Cycles per atomic</th><th class="num">Rate</th></tr></thead><tbody>'+
  D.placement.map(r=>{const name={'0':'one DRAM line, homed in shire 0','scp:0':'one scratchpad word in shire 0',
    'own':'32 DRAM lines, one per shire','scp:own':'32 scratchpad words, one per shire'}[r.home]||r.home;
-  return `<tr><td>${r.card}</td><td>${name}</td><td class="num">${r.total_ops.toLocaleString()}</td><td class="num">${f2(r.cycles_per_op)}</td><td class="num">${(r.total_ops/0.01/1e6).toFixed(0)} M/s</td></tr>`;}).join('')+'</tbody>';
+  return `<tr><td>${r.card}</td><td>${name}</td><td class="num">${r.total_ops.toLocaleString('en-US')}</td><td class="num">${f2(r.cycles_per_op)}</td><td class="num">${Math.round(r.total_ops/0.01/1e6).toLocaleString('en-US')} M/s</td></tr>`;}).join('')+'</tbody>';
 
 /* ---------- section 3: the host shire's own traffic ---------- */
 (function(){
@@ -67,9 +71,9 @@ document.getElementById('placetab').innerHTML='<thead><tr><th>Card</th><th>Where
               'scpstream':'scratchpad of the same shire','dramstream':'L3 slice of the same shire'};
  document.getElementById('localtab').innerHTML='<thead><tr><th>Card</th><th>Host shire is reading</th><th>Hot line is in the</th><th class="num">Alone</th><th class="num">While hammered</th><th class="num">Fraction</th></tr></thead><tbody>'+
   Object.keys(with_).map(k=>{const r=with_[k],a=alone[k],base=k.split('|')[1].split(':')[0];
-   return `<tr><td>${r.card}</td><td>${names[base]}</td><td>${hotin[base]}</td><td class="num">${a.host_ops.toLocaleString()}</td><td class="num">${r.host_ops}</td><td class="num">${(100*r.frac_of_alone).toFixed(3)}%</td></tr>`;}).join('')+'</tbody>';
+   return `<tr><td>${r.card}</td><td>${names[base]}</td><td>${hotin[base]}</td><td class="num">${a.host_ops.toLocaleString('en-US')}</td><td class="num">${r.host_ops}</td><td class="num">${(100*r.frac_of_alone).toFixed(3)}%</td></tr>`;}).join('')+'</tbody>';
  document.getElementById('wintab').innerHTML='<thead><tr><th class="num">Window</th><th class="num">Host shire’s loads</th><th class="num">Remote atomics in the same window</th></tr></thead><tbody>'+
-  D.context.window_independence.map(r=>`<tr><td class="num">${(r.window/600e3).toFixed(0)} ms</td><td class="num">${r.host_ops}</td><td class="num">${r.remote_ops.toLocaleString()}</td></tr>`).join('')+'</tbody>';
+  D.context.window_independence.map(r=>`<tr><td class="num">${(r.window/600e3).toFixed(0)} ms</td><td class="num">${r.host_ops}</td><td class="num">${r.remote_ops.toLocaleString('en-US')}</td></tr>`).join('')+'</tbody>';
 })();
 
 /* ---------- section 4: requesters ---------- */
@@ -90,7 +94,8 @@ document.getElementById('placetab').innerHTML='<thead><tr><th>Card</th><th>Where
   hover(g,tip,h,()=>`${r.remote_minions} remote minions<br>host at ${(100*r.frac_of_alone).toFixed(2)}% of alone<br>remote atomic every ${f1(6e6/r.remote_ops_per_shire)} cycles`);});
  document.getElementById('reqcap').textContent=
   'Solid: the host shire’s own loads, as a fraction of the same loop with nobody hammering. Dashed, right axis: '+
-  'how often the remote shire completes an atomic. The cliff is where that reaches 10 cycles, the rate one shire cache can retire.';
+  'how often the remote shire completes an atomic; the axis is inverted, so higher means more often. The cliff is where that reaches 10 cycles, the rate one shire cache can retire. '+
+  'The host runs as many minions as the remote shire.';
 })();
 
 /* ---------- section 5: errata ---------- */
@@ -112,12 +117,13 @@ document.getElementById('errata').innerHTML=D.context.errata.map(e=>
   el('circle',{cx:x(r.pace),cy:y(r.frac_of_alone),r:3.5,fill:'var(--c1)'},g);
   el('circle',{cx:x(r.pace),cy:y(r.remote_ops_per_shire/sat),r:3.5,fill:'var(--c3)'},g);
   hover(g,tip,h,()=>`pace ${r.pace.toLocaleString()} cycles<br>host shire ${(100*r.frac_of_alone).toFixed(1)}% of its own baseline<br>hammering shires ${(100*r.remote_ops_per_shire/sat).toFixed(0)}% of their unpaced rate`);});
+ const lx=x(18000), ly=y(0.72);
  [['host shire’s own memory','var(--c1)'],['the 31 hammering shires','var(--c3)']].forEach((s2,i)=>{
-  el('rect',{x:L+12,y:T-14+i*18,width:11,height:11,fill:s2[1]},svg);txt(svg,L+28,T-4+i*18,s2[0],'lab');});
+  el('rect',{x:lx,y:ly-11+i*18,width:11,height:11,fill:s2[1]},svg);txt(svg,lx+16,ly-1+i*18,s2[0],'lab');});
  const knee=rows.find(r=>r.frac_of_alone>0.4);
  document.getElementById('pacecap').textContent=
   `At ${knee.pace.toLocaleString()} cycles between atomics the host shire is back to ${(100*knee.frac_of_alone).toFixed(0)}% `+
-  `while the hammering shires keep ${(100*knee.remote_ops_per_shire/sat).toFixed(0)}% of their rate. Nothing below 10,000 cycles helps at all.`;
+  `while the hammering shires keep ${(100*knee.remote_ops_per_shire/sat).toFixed(0)}% of their rate. Nothing tested below 10,000 cycles (1,000, 4,000 or 8,000) helps at all.`;
 })();
 
 /* ---------- section 7: power ---------- */
@@ -125,7 +131,7 @@ document.getElementById('errata').innerHTML=D.context.errata.map(e=>
  const p=D.power, names={contended:'one DRAM line, 1,024 minions',spread:'32 DRAM lines, 1,024 minions',
   contended_scp:'one scratchpad word, 1,024 minions',starved:'one scratchpad word, host shire reading instead',
   local_only:'host shire reading, nobody hammering'};
- document.getElementById('pwrtab').innerHTML='<thead><tr><th>Case</th><th class="num">Operations per second</th><th class="num">Board W</th><th class="num">Over idle</th><th class="num">nJ per operation</th></tr></thead><tbody>'+
-  p.runs.map(r=>`<tr><td>${names[r.label]||r.label}</td><td class="num">${(r.ops_per_s/1e6).toFixed(0)} M</td><td class="num">${f2(r.board_w)}</td><td class="num">${f2(r.over_idle_w)}</td><td class="num">${f1(r.nj_per_op)}</td></tr>`).join('')+
-  `<tr><td>idle card</td><td class="num">0</td><td class="num">${f2(p.idle.board_w)}</td><td class="num">—</td><td class="num">—</td></tr></tbody>`;
+ document.getElementById('pwrtab').innerHTML='<thead><tr><th>Case</th><th class="num">Operations per second</th><th class="num">Board power, W</th><th class="num">Over idle, W</th><th class="num">nJ per operation</th></tr></thead><tbody>'+
+  p.runs.map(r=>`<tr><td>${names[r.label]||r.label}</td><td class="num">${Math.round(r.ops_per_s/1e6).toLocaleString('en-US')} M</td><td class="num">${f2(r.board_w)}</td><td class="num">${f2(r.over_idle_w)}</td><td class="num">${f1(r.nj_per_op)}</td></tr>`).join('')+
+  `<tr><td>idle card, die at ${p.idle.die_c.toFixed(0)} °C</td><td class="num">0</td><td class="num">${f2(p.idle.board_w)}</td><td class="num">—</td><td class="num">—</td></tr></tbody>`;
 })();

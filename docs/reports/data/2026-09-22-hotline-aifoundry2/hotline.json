@@ -1783,9 +1783,9 @@
     "id": "RTLMIN-6214",
     "num": "4.2",
     "title": "L3_yield priority does not have sub-bank granularity",
-    "quote": "It is possible for l3_slave requests to over use one of the sub-banks and then that sub-bank is busy when it is the neighborhood's turn to make a request due to l3_yield_priority. As a result a request to the over used sub-bank from a neighborhood may not make progress despite l3_yield_priority being non-zero.",
-    "impact": "Low.",
-    "workaround": "",
+    "quote": "It is possible for l3_slave requests to over use one of the sub-banks and then that sub-bank is busy when it's the neighborhood's turn to make a request due to l3_yield_priority. The neighborhood request uses a different sub-bank which satisfies l3_yield_priority. As a result a request to the over used sub-bank from a neighborhood may not make progress despite l3_yield_priority being non-zero.",
+    "impact": "Low. It would have to be a pretty consistent and repeating pattern for the neighborhood request to a particular sub-bank to be skipped over and over.",
+    "workaround": "Access patterns should be spread pretty evenly across sub-banks.",
     "fix": "Postponed."
    }
   ]

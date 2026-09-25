@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Power and temperature</title>
-<meta name="description" content="Every way power, energy and temperature can be measured on the ET-SoC-1 card, at what granularity, what a telemetry client adds, and what the measurements show: leakage of 0.8 W per °C, a 34-shire voltage map, and where the rails stop.">
+<title>Power and temperature telemetry · ET-SoC-1</title>
+<meta name="description" content="Every way power, energy and temperature can be measured on the ET-SoC-1 card, at what granularity, what a telemetry client adds, and what the measurements show: power that climbs about 0.8 W per °C of die temperature under load, a 34-shire voltage map, and where the rails stop.">
 <style>
 :root {
   color-scheme: light;
@@ -42,6 +42,7 @@ h3 { font-size: 1rem; margin: 22px 0 8px; }
 a { color: var(--c1); }
 code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86em; }
 code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre code { padding: 0; background: none; border-radius: 0; font-size: inherit; }
 pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 18px 0 8px; }
@@ -90,26 +91,68 @@ summary { cursor: pointer; color: var(--ink-2); font-size: 0.9rem; }
 .s1 { stroke: var(--c1); } .s2 { stroke: var(--c2); } .s3 { stroke: var(--c3); } .s4 { stroke: var(--c4); } .s5 { stroke: var(--c5); }
 .ln { fill: none; stroke-width: 2; stroke-linejoin: round; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.math-display { display: block; overflow-x: auto; overflow-y: hidden; max-width: 100%; margin: 16px 0 18px;
+  padding: 2px 0; text-align: center; color: var(--ink); }
+.math-display svg { max-width: none; }
+.math-inline { color: var(--ink); }
+.math-inline svg, .math-display svg { vertical-align: middle; }
+h2, h3 { scroll-margin-top: 12px; }
+.hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 </style>
 </head>
 <body>
 <main>
 <h1>Power and temperature on the ET-SoC-1 card</h1>
-<p class="byline">aifoundry2's card, 20 September 2026 · et-platform <code>353f20e</code> firmware · <code>tools/ettelem</code>, a telemetry client on the management library · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">measurement reports</a></p>
+<p class="byline">20 September 2026 · aifoundry2's card · firmware source read at et-platform <code>353f20e</code> (the cards' own log strings point to an older build; see §6) · <code>tools/ettelem</code>, a telemetry client on the management library · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">The card has one power sensor path: a PMIC that reports 12 V board power and three of its rails (minion
 cores, SRAM, mesh), polled by the service processor every 133 ms. Everything else is voltage or temperature. This report
 lists every way to read them, what each resolves, and what a small client on the management library adds over the stock
-tool: the <b>per-rail snapshot the CLI refuses, 45 samples a second, and a 34-shire on-die voltage map</b>. Then what the
-numbers show. The main surprise is temperature: <b>the same work costs 0.8 W more per °C</b>, the die idles at 72 °C, and
-idle power after a load is 5 W higher than before it, so every energy comparison on this card has to control for heat.</p>
+tool: the <b>per-rail snapshot the CLI refuses, up to 45 samples a second, and a 34-shire on-die voltage map</b>. Then what
+the numbers show. The main surprise is temperature: <b>under load, the same work costs about 0.8 W more for every °C the
+die warms</b>, the die idles at 72 °C, and idle power after a load is 5 W higher than before it, so every energy comparison
+on this card has to control for heat.</p>
+
+<div class="card" style="margin:18px 0 8px"><b>Later measurements.</b> This was the first look at the meters. Later
+reports refine three things.
+<ul>
+<li><b>Leakage.</b> Idle power is now a fitted law, P<sub>idle</sub> = 12.6 W + 23.3 W·e<sup>(T−80)/36</sup>, with T
+the die temperature in °C (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its
+leakage</a>; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">the energy manual,
+§1</a>). Its slope is 0.52 W/°C at 72 °C, 0.65 at 80 °C and 0.78 at 87 °C, and it reproduces this page's two idle
+readings to 0.1 W. Busy power climbs faster per degree of the die reading: about 0.8 W/°C in this page's matmul, and
+0.81 W/°C for the drift within the Horace experiment's hot 7 s runs (80–86 °C).</li>
+<li><b>The rail readings</b> are the PMIC's own running average, which the service processor copies every 133 ms pass. It
+behaves like a first-order filter with τ ≈ 1 s. This page first called it a 2 s moving average
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">Limits of observability,
+§4.1</a>).</li>
+<li><b>The unmetered remainder.</b> What a workload adds to the remainder in §2 is now attributed by regression: about a
+fifth of the minion rail's power is lost in delivery, plus a cost per DRAM byte. The 15 W at idle is still not split
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits
+of observability, §4.2</a>). The hub's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">improvement
+ladder</a> supersedes §5.</li>
+</ul></div>
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">Idle</div><div class="val">31.2 W</div><div class="sub">at 72 °C die; 16 W on the three measured rails, 15 W elsewhere</div></div>
-  <div class="card kpi"><div class="lab">Leakage slope</div><div class="val">0.8 W/°C</div><div class="sub">board, under load; 0.55 at idle; half of it on the minion rail</div></div>
-  <div class="card kpi"><div class="lab">Finest power record</div><div class="val">1 mW · 133 ms</div><div class="sub">rail moving averages that lag a step by about 2 s</div></div>
+  <div class="card kpi"><div class="lab">Leakage slope under load</div><div class="val">0.8 W/°C</div><div class="sub">board, 75–87 °C, half of it on the minion rail; an idle card: 0.65 W/°C at 80 °C</div></div>
+  <div class="card kpi"><div class="lab">Finest power record</div><div class="val">1 mW · 133 ms</div><div class="sub">rails: the PMIC's running average (τ ≈ 1 s; 88% of a step after 2 s)</div></div>
   <div class="card kpi"><div class="lab">Finest voltage map</div><div class="val">34 shires</div><div class="sub">3 rails each, 1 mV, with hardware low/high, from a user account</div></div>
 </div>
+
+<p class="small"><b>Terms.</b> The ET-SoC-1's compute cores are <i>minions</i>: small in-order RISC-V cores, each with
+two hardware threads (<i>harts</i>). Thirty-two minions form a <i>shire</i>, the chip's tile. Of the 34 minion shires, 32
+run kernels (1,024 minions), shire 32 is the master shire, which runs firmware, and shire 33 is a spare. <i>Memory
+shires</i> hold the DRAM controllers, and the shires talk over a mesh network-on-chip (the NoC, "mesh" on this page). The
+four <i>Maxions</i> are larger out-of-order RISC-V cores on the same die. The <i>service processor</i> (SP) is the on-die
+management core: it reads the sensors, runs the clock and voltage governor and answers the host's management commands.
+Its <i>SPST trace</i> is a log of its stats, one record per pass; the <i>MMST trace</i> is the master shire's log of
+bandwidth and utilisation. The <i>PMIC</i> is the board's power-management controller, which meters the 12 V input and
+three regulators (the minion, SRAM and mesh rails). Moortec <i>PVT</i> (process, voltage and temperature) monitors,
+read by five PVT controllers, measure temperature and voltage on the die. MDI, the Minion Debug Interface, reads the
+registers and CSRs (control and status registers) of a halted hart. More in the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
 
 <h2>1. Every way to measure, by granularity</h2>
 <p>Space, time and resolution for each instrument. <span class="chip works_now">works now</span> means from a user account
@@ -125,41 +168,63 @@ image; <span class="chip needs_tooling">hardware</span> means physical access.</
 <div class="chart scroll" id="power"></div>
 <div class="chart-title">Die temperature (°C, mean of the 34 minion-shire sensors)</div>
 <div class="chart scroll" id="temp"></div>
+<p class="small">Time in seconds from the start of the recording. Hover a chart for the readings at that moment, including
+the remainder that no rail meters.</p>
 <ul>
-<li><b>Power climbs while the work stays constant.</b> The matmul starts at 57 W and ends at 65 W 56 s later, with the die
-going from 74 to 87 °C. Same kernel, same clock, same rate: the extra 8 W is leakage. The Horace experiment's fit over 22
-runs gives 0.78 W/°C on the board and 0.38 W/°C on the minion rail.</li>
-<li><b>Idle is not one number.</b> Before the load: 31.2 W at 72 °C. Forty seconds after it: 36.5 W at 81 °C. The die sheds
-heat slowly (6 °C in 40 s), so a baseline taken before a run understates the idle power during and after it. Energy
-measurements here should take their baseline at the same temperature, or fit a temperature term.</li>
+<li><b>Power climbs while the work stays constant.</b> The matmul draws 56 W two seconds after it starts and 65 W at its
+end, 56 s later, while the die warms from about 75 to 87 °C. Same kernel, same clock, same rate: the extra 9 W is leakage.
+A straight line through board power against die temperature, from 5 s after launch to the end, has a slope of
+<b id="slope-board"></b> W/°C, <span id="slope-minion"></span> W/°C of it on the minion rail. The first, uncontrolled
+session of <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment</a> (20 September,
+22 runs at 79–90 °C, since superseded) fitted nearly the same: 0.78 W/°C on the board and 0.38 on the minion rail.</li>
+<li><b>Idle is not one number.</b> Before the load: 31.2 W at 72 °C. Forty seconds after it: 36.5 W at 81 °C. Both sit on
+the idle law measured later (31.3 and 36.5 W at those temperatures). The die sheds heat slowly (6 °C in 40 s), so a
+baseline taken before a run understates the idle power during and after it. Energy measurements here should take their
+baseline at the same temperature, or fit a temperature term.</li>
 <li><b>The three rails are not the whole card.</b> Board minus rails is 15.0 W at idle, 20–22 W under matmul and 21 W under
 DRAM load. That remainder is the DDR and PCIe rails, the Maxions, the IO shire, and regulator losses, none of which has a
 sensor. A DRAM-bound load moves it by 5 W and the minion rail by 0.3 W; a matmul moves the minion rail by 16–20 W.</li>
-<li><b>Why the remainder sometimes looks too small, or the rails seem to exceed the step.</b> The rail figures are the PMIC's
-moving averages and lag a step by about 2 s; board power is near-instantaneous. For 2 s after a load starts the remainder
-reads 36 W (rails have not caught up), and for 2 s after it stops it reads 14 W, below idle. In steady state the two
-board readings agree to about 0.5 W. This also explains the 15–20% gap between the host log and the trace average in the
-memory-anatomy report: its 6 s windows were short against the settling time.</li>
+<li><b>Why the remainder sometimes looks too small, or the rails seem to exceed the step.</b> Board power is a fresh reading
+every 133 ms. The rail figures are the PMIC's own running averages, which the service processor copies each pass (read
+later from the firmware: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">Limits of
+observability, §4.1</a>). They behave like a first-order filter with τ ≈ 1 s: a step reaches 61% after 1 s and 88% after
+2 s. So when the matmul starts, the remainder jumps to 39 W and decays to about 22 W within 2–3 s as the rails catch up.
+When it stops, the remainder goes briefly negative (−3.5 W: the rails' averages still include the load) and climbs back
+through 14 W over about 3 s. In steady state the board reading and the PMIC's own board average agree to about 0.5 W. The
+same averaging, and how the trace was lined up in time, account for a gap in
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes">the memory-anatomy report</a>:
+there the rise above idle in the service processor's trace (the PMIC's board average) is 14–20% smaller than in the host
+log. Mid-run the two agree to within 0.3 W. As aligned, the trace starts to rise about 0.7 s before each load process
+starts and to fall before the run ends, so its baseline reads high and its run average low.</li>
 <li><b>Voltage barely droops at the die.</b> The minion rail's on-die monitor reads 518 mV idle and 517 mV with 18 W more load
 (about 35 A more at 0.52 V): the regulator senses at the die. The DDR domain reads 768 mV on die against an 800 mV set-point,
 and sags 3 mV more under DRAM load.</li>
 <li><b>The clock stayed at 600 MHz because the die was hot.</b> The power-management governor is on, with a 65 W power
 limit and a 65 °C software temperature threshold. The thermal branch wins: above 65 °C it holds the lowest operating point,
 600 MHz at 0.52 V, and every run in this report had the die above 70 °C. That is why the clock did not move even at 65 W here
-and 70 W in the first Horace run. From a cool die (62 °C after a night idle) the same kernel starts at 800 MHz and 0.62 V
-and is stepped down as it passes 65 °C: the Horace experiment's last section measures that. (Corrected 21 September; this
-bullet first said the governor never acts.)</li>
+and 70 W in the first Horace session. From a cool die (62 °C after a night idle) the governor raises the same kernel from
+600 to 800 MHz and 0.62 V within 0.4–1 s of launch, and steps it down as the die passes 65 °C: see §6 of
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#the-speed-effect-appears-on-a-cool-die">the Horace
+experiment</a>, and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">the DVFS report</a>, which reads
+the governor's source and classifies every clock change.</li>
 </ul>
 
-<h2>3. The per-shire voltage map</h2>
+<h2 id="the-per-shire-voltage-map">3. The per-shire voltage map</h2>
 <p>With its log level raised to DEBUG, the service processor writes one line per shire per pass with the on-die voltage of
 each rail and the hardware's low/high capture. <code>ettelem loglevel debug</code> then <code>ettelem sptrace</code> reads
 them; the level is restored afterwards. This is the finest spatial view of the power system the card gives: below is the
-minion-rail voltage at idle on the shire mesh, with each shire's lowest captured value.</p>
+minion-rail voltage of all 34 minion shires at idle, with each shire's lowest captured value. The 32 compute shires sit
+where marty1885's logical shire map (<a href="https://github.com/marty1885/etTopoScan">etTopoScan</a>) puts them on the
+mesh, as in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">the on-chip communication
+report</a>. The four dashed cells hold the master, spare, I/O and PCIe shires in an order not measured here, so shires 32
+(the master) and 33 (the spare) are drawn below the grid.</p>
 <div class="chart" id="vmap" style="max-width:520px"></div>
-<p class="small">Current values span 517–521 mV across the die; the lowest captured minimum is 513 mV (shires 0–2 and 18). The
+<p class="small">Stronger colour = higher voltage, from 516 mV (faintest) to 521 mV. Hover a shire for its SRAM and mesh
+rails. Current values span 517–521 mV across the die; the lowest captured minimum is 513 mV (shires 0–2 and 18). The
 low/high registers hold extremes since the last stats reset, so they catch droops that the 133 ms polling misses.
-Per-shire <i>temperature</i> is sampled by the same controllers but never logged; that needs firmware.</p>
+Per-shire <i>temperature</i> is sampled by the same controllers but never logged; that needs firmware
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">the spatial temperature brief</a> sets
+out the options).</p>
 
 <h2>4. What a debug-interface client would and would not add</h2>
 <p>The Minion Debug Interface reaches minion state only: registers, CSRs, memory of a halted hart. It cannot read the PMIC,
@@ -169,6 +234,9 @@ Its value for energy work is indirect: it can write the counter event selectors 
 side of the management library, which this report uses, was the larger gap, and it needs no halting.</p>
 
 <h2>5. What would unlock more</h2>
+<p class="small">Superseded by the hub's fuller
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">improvement ladder</a>, which also
+marks what has since been done. The table stands as it was on 20 September.</p>
 <div class="table-wrap wide"><table id="unlock"></table></div>
 
 <h2>6. Reproduce</h2>
@@ -178,9 +246,40 @@ build/ettelem/ettelem sample --seconds 10 --every-ms 100      # JSON lines; quit
 tools/ettelem/run_thermal.sh build/thermal1                   # the load step, about 3 minutes
 build/ettelem/ettelem loglevel debug; build/ettelem/ettelem sptrace sp.bin; build/ettelem/ettelem loglevel info
 strings -n 8 sp.bin | grep 'Voltage'</code></pre>
-<p class="small">Raw data: <code>docs/reports/data/2026-09-20-power-aifoundry2/</code>. Companion: the Horace experiment
-(<code>2026-09-20-horace-experiment.html</code>) uses the same client to show data-dependent power. Sources for the sensor
-and firmware details: <code>docs/research/power-telemetry.md</code>.</p>
+<p class="small">Raw data: <code>docs/reports/data/2026-09-20-power-aifoundry2/</code>. The load step is session E5 of the
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/03-experiments.md">experiment
+register</a>, and the voltage map session E6. Every sensor and management command, with firmware line references:
+<code>docs/research/power-telemetry.md</code>.</p>
+<p class="small"><b>Firmware.</b> What this page says about the service processor's code (the 133 ms pass and its 1 ms
+I2C waits, what each management command returns, how the governor chooses a clock) was read from et-platform at commit
+<code>353f20e</code>. Both cards report firmware release 1.3.1, and aifoundry3's trace holds log lines that exist only in
+et-platform before commit <code>60b40c10f</code> (24 September 2024), which rewrote the governor. So aifoundry3, and very
+likely this card with the same release, runs an older build than the source read here, and details of the code may
+differ. The measurements do not depend on it.</p>
+<p class="small"><b>Versions.</b> 20 September 2026: first edition. 21 September: §2's governor bullet corrected (it
+first said the governor never acts). 24 September: the rail averaging described from the firmware, the leakage slope set
+beside the later idle law, the transients in §2 re-read from the data, shires 32 and 33 added to the map, and terms and
+links added.</p>
+
+<h2>Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">The Horace experiment</a> — what the values in
+a matrix do to power and temperature, measured with the same client. It is named after Horace He's post showing that GPU
+matrix multiplies run faster on predictable data.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a> — the governor
+that picks the clock, and the idle law that refines this page's leakage slope.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">The energy manual</a> — energy per
+instruction and per byte, measured with these meters; its §1 is the card at rest.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#power">Limits of observability, §4</a> —
+the meter chain read from the firmware, and what the unmetered remainder is made of.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes">Anatomy of a memory
+access</a> — energy per DRAM load from these meters, and the host-log and trace readings that §2 compares.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature: a brief</a> — what
+the 35 on-die temperature sensors hold, and what firmware would have to export for a per-shire temperature map like §3's
+voltage map.</li>
+<li><a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/research/power-telemetry.md">Power telemetry
+research notes</a> — every sensor, register and management command behind this page, with firmware line references.</li>
+</ul>
 </main>
 
 <script>
@@ -191,16 +290,16 @@ function txt(p,x,y,s,c,an){const t=el('text',{x,y,class:c||'tick','text-anchor':
 function host(id,W,H){const h=document.getElementById(id);h.innerHTML='';const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'},h);const tip=document.createElement('div');tip.className='tip';h.appendChild(tip);return {svg,tip,h};}
 const chip=(s,t)=>`<span class="chip ${s}">${t}</span>`;
 const M=[
- ['Board power, now','whole card · new value per 133 ms · 10 mW','DM_CMD_GET_MODULE_POWER (ettelem: 45 queries/s; the SP refreshes once per pass)','works_now','works now'],
- ['Board power, PMIC average / min / max','whole card · ~2 s moving average; min and max since the last stats reset','DM_CMD_GET_SP_STATS via ettelem (the stock CLI calls it unsupported), or the SPST trace','works_now','works now'],
- ['Rail power: minion cores, SRAM, mesh','3 rails · 1 mW · ~2 s moving average, one record per 133 ms, plus min/max','same snapshot; the SPST trace keeps ~15 min of records with µs stamps','works_now','works now'],
+ ['Board power, now','whole card · new value per 133 ms · 10 mW','DM_CMD_GET_MODULE_POWER (ettelem: up to 45 samples/s; the SP refreshes it once per pass)','works_now','works now'],
+ ['Board power, PMIC average / min / max','whole card · the PMIC\'s running average (τ ≈ 1 s; 88% of a step after 2 s); min and max since the last stats reset','DM_CMD_GET_SP_STATS via ettelem (the stock CLI calls it unsupported), or the SPST trace','works_now','works now'],
+ ['Rail power: minion cores, SRAM, mesh','3 rails · 1 mW · the PMIC\'s running average (τ ≈ 1 s; 88% of a step after 2 s), one record per 133 ms, plus min/max','same snapshot; the SPST trace keeps ~15 min of records with µs stamps','works_now','works now'],
  ['Rail voltage and clock','3 rails · 1 mV · avg/min/max; minion and mesh MHz','same snapshot','works_now','works now'],
  ['On-die voltage per domain','7 domains (DDR, SRAM, Maxion, minion, PCIe shire, mesh, IO shire) · 1 mV','DM_CMD_GET_ASIC_VOLTAGE; compare with the regulator set-points from DM_CMD_GET_MODULE_VOLTAGE for the drop to the die','works_now','works now'],
  ['On-die voltage per shire','34 minion shires × 3 rails + 8 memory shires × 2 · 1 mV · current, and hardware low/high between polls','SP log at DEBUG level: ettelem loglevel debug + sptrace (4 KB buffer, wraps about once per pass)','works_now','works now'],
- ['Temperature','PMIC, IO shire, mean of 34 minion shires · 1 °C · per 133 ms; "low/high" are extremes since reset, not the current spread','DM_CMD_GET_MODULE_CURRENT_TEMPERATURE','works_now','works now'],
+ ['Temperature','IO shire, and mean, low and high of the 34 minion-shire sensors · 1 °C · per 133 ms; "low/high" are extremes since reset, not the current spread','DM_CMD_GET_MODULE_CURRENT_TEMPERATURE (its field labelled PMIC holds the minion mean again)','works_now','works now'],
  ['Power state, throttle residency, thresholds','card-wide · µs residency counters','DM_CMD_GET_MODULE_POWER_STATE, _RESIDENCY_*, _TEMPERATURE_THRESHOLDS, _STATIC_TDP_LEVEL','works_now','works now'],
  ['Device-wide bandwidth and utilisation','DDR, L2/L3, PCIe · 1 ms samples','MMST trace; a proxy for where memory energy goes','works_now','works now'],
- ['Energy per event','pJ per load, per multiply-add, per mesh hop · needs ≥10⁹ identical events/s for seconds','rail power above a same-temperature baseline ÷ event rate (memory-anatomy and Horace reports)','works_now','works now'],
+ ['Energy per event','pJ per load, per multiply-add, per mesh hop · needs ≥10⁹ identical events/s for seconds','rail power above a same-temperature baseline ÷ event rate (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes">memory anatomy</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment</a>; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">the energy manual</a> does it for every instruction and byte)','works_now','works now'],
  ['Static against dynamic power','per rail','frequency sweep at fixed voltage: DM_CMD_SET_FREQUENCY with power management off. Changes the card for everyone; not run here','works_now','works now, with care'],
  ['Instantaneous rail power','3 rails · 1 mW · per pass','the SP already reads it each pass and discards it; a few assignments in thermal_pwr_mgmt.c','needs_fw_change','firmware'],
  ['Faster sampling','tens to hundreds of Hz','the 133 ms pass is ~96 I2C transactions each followed by a hard-coded 1 ms wait; skip the 84-read snapshot and fix the wait','needs_fw_change','firmware'],
@@ -210,10 +309,10 @@ const M=[
 ];
 document.getElementById('methods').innerHTML='<thead><tr><th>What</th><th>Granularity</th><th>How</th><th>Status</th></tr></thead><tbody>'+M.map(r=>`<tr><td class="lvl" style="white-space:normal">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${chip(r[3],r[4])}</td></tr>`).join('')+'</tbody>';
 const U=[
- ['Per-shire voltage map under load','Which shires sag under a full-chip load, and by how much (the low/high capture sees droops the polling misses).','Run the map during a load; the 4 KB log buffer wraps each pass, so poll it quickly.','Nothing: tools/ettelem does it.'],
- ['Temperature-controlled baselines','Energy per event to a few percent instead of ±0.8 W per °C of drift.','Log temperature with every sample (ettelem does) and fit it, or interleave runs as the Horace experiment did.','Nothing.'],
+ ['Per-shire voltage map under load','Which shires sag under a full-chip load, and by how much (the low/high capture sees droops the polling misses).','Run the map during a load; the 4 KB log buffer wraps each pass, so poll it quickly.','Nothing: <code>tools/ettelem</code> does it.'],
+ ['Temperature-controlled baselines','Energy per event to a few percent instead of 0.8 W of drift per °C.','Log temperature with every sample (ettelem does) and fit it, or interleave runs as the Horace experiment did.','Nothing.'],
  ['Static/dynamic split per rail','C·V²·f and leakage per rail; separates clock domains.','Sweep minion and mesh frequency at fixed voltage with power management off, restore after.','A quiet card and the lab\'s OK: it changes shared state.'],
- ['Chosen counter events','Event counts to regress rail power against: energy per L1 miss, per tensor op, per DRAM activate.','patches/0003 (verified in the simulator), or the debug interface\'s CSR write.','A signed firmware image, or an agreed debug-interface session.'],
+ ['Chosen counter events','Event counts to regress rail power against: energy per L1 miss, per tensor op, per DRAM activate.','<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/patches/0003-pmc-configure-syscall-353f20e.patch">patches/0003</a> (verified in the simulator), or the debug interface\'s CSR write.','A signed firmware image, or an agreed debug-interface session.'],
  ['Instantaneous rails and a faster loop','Kernel boundaries visible in rail power; ~10× the sample rate.','A few lines in the service-processor firmware.','A signed image.'],
  ['Per-shire temperature map','Hot spots and thermal gradients across the mesh.','A new management command exporting what the PVT controllers already sample.','A signed image.'],
  ['kHz board power','Sub-launch power transients.','A scope on the 12 V current-monitor pin.','Physical access.'],
@@ -221,6 +320,14 @@ const U=[
 document.getElementById('unlock').innerHTML='<thead><tr><th>Step</th><th>What it gives</th><th>How</th><th>Needs</th></tr></thead><tbody>'+U.map((r,i)=>`<tr><td class="lvl" style="white-space:normal">${i+1}. ${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')+'</tbody>';
 
 const S=D.thermal.series, PH=D.thermal.phases;
+/* Leakage slope under load: least-squares line of power against die temperature over the matmul, from 5 s after
+   launch (the rails have caught up) to the last whole second before it ends. */
+(function(){const t0=PH.find(p=>p.phase==='matmul').t, t1=PH.find(p=>p.phase==='cool1').t;
+ const P=S.filter(p=>p.t>=t0+5&&p.t+1<=t1);
+ const slope=k=>{const n=P.length,mx=P.reduce((a,p)=>a+p.temp,0)/n,my=P.reduce((a,p)=>a+p[k],0)/n;
+  return P.reduce((a,p)=>a+(p.temp-mx)*(p[k]-my),0)/P.reduce((a,p)=>a+(p.temp-mx)**2,0);};
+ document.getElementById('slope-board').textContent=slope('board').toFixed(2);
+ document.getElementById('slope-minion').textContent=slope('minion').toFixed(2);})();
 function lines(id,keys,ymin,ymax,ticks,unit,H){const W=900,L=50,R=20,T=14,B=34;const {svg,tip,h}=host(id,W,H);
  const x=t=>L+t/176*(W-L-R),y=v=>H-B-(v-ymin)/(ymax-ymin)*(H-B-T);
  const names={matmul:'matmul',dram:'DRAM loads'};
@@ -236,14 +343,93 @@ document.getElementById('leg1').innerHTML=[['board','c1'],['minion cores','c2'],
 lines('power',[['board','s1'],['minion','s2'],['sram','s3'],['noc','s4']],0,70,[0,10,20,30,40,50,60,70],'',300);
 lines('temp',[['temp','s2']],70,90,[70,75,80,85,90],'',170);
 
+/* The per-shire voltage map. The 32 compute shires sit where marty1885's logical layout puts them (the MARTY table in
+   workloads/nocbench/analyze.py). The four dashed cells hold the master, spare, I/O and PCIe shires in an order not
+   measured, so shires 32 (master) and 33 (spare) are drawn below the grid. Opacity encodes the minion-rail voltage. */
 (function(){const MESH={0:[0,0],24:[1,0],9:[2,0],25:[3,0],2:[4,0],11:[5,0],8:[0,1],16:[1,1],1:[2,1],17:[3,1],10:[4,1],19:[5,1],3:[0,2],4:[1,2],13:[2,2],14:[3,2],18:[4,2],27:[5,2],12:[1,3],21:[2,3],22:[3,3],26:[4,3],20:[1,4],29:[2,4],30:[3,4],15:[4,4],23:[5,4],28:[1,5],5:[2,5],6:[3,5],7:[4,5],31:[5,5]};
- const W=520,cw=80,{svg,tip,h}=host('vmap',W,500);const ramp=['--c1'];
- for(const [s,[cx,cy]] of Object.entries(MESH)){const v=D.shires[s];if(!v)continue;const g=el('g',{},svg);const o=0.25+0.75*(v.mnn[0]-516)/5;
-  el('rect',{x:10+cx*cw+2,y:10+cy*cw+2,width:cw-4,height:cw-4,rx:8,fill:'var(--c1)',opacity:o.toFixed(2)},g);
-  txt(g,10+cx*cw+cw/2,10+cy*cw+30,'shire '+s,'lab','middle');txt(g,10+cx*cw+cw/2,10+cy*cw+48,v.mnn[0]+' mV','lab-strong','middle');txt(g,10+cx*cw+cw/2,10+cy*cw+64,'low '+v.mnn[1],'lab','middle');
-  g.addEventListener('mousemove',ev=>{tip.innerHTML=`<b>Shire ${s}</b><br>minion ${v.mnn[0]} mV [${v.mnn[1]}–${v.mnn[2]}]<br>SRAM ${v.sram[0]} [${v.sram[1]}–${v.sram[2]}]<br>mesh ${v.noc[0]} [${v.noc[1]}–${v.noc[2]}]`;tip.style.display='block';const b=h.getBoundingClientRect();tip.style.left=Math.min(ev.clientX-b.left+12,b.width-200)+'px';tip.style.top=(ev.clientY-b.top+12)+'px';});g.addEventListener('mouseleave',()=>tip.style.display='none');}
+ const EMPTY=[[0,3],[0,4],[0,5],[5,3]], OFF={32:[0,'master'],33:[1,'spare']};
+ const W=520,cw=80,gy=500,H=gy+26+cw+4,{svg,tip,h}=host('vmap',W,H);
+ for(const [cx,cy] of EMPTY)el('rect',{x:10+cx*cw+2,y:10+cy*cw+2,width:cw-4,height:cw-4,rx:8,fill:'none',stroke:'var(--axis)','stroke-width':1.5,'stroke-dasharray':'5 4'},svg);
+ txt(svg,12,gy+16,'Not placed on the grid: the master shire (32) and the spare (33)','lab');
+ function tile(s,X,Y,note){const v=D.shires[s];if(!v)return;const g=el('g',{},svg);const o=Math.max(0.15,Math.min(0.75,0.15+0.6*(v.mnn[0]-516)/5));
+  el('rect',{x:X+2,y:Y+2,width:cw-4,height:cw-4,rx:8,fill:'var(--c1)',opacity:o.toFixed(2)},g);
+  txt(g,X+cw/2,Y+30,'shire '+s,'lab','middle');txt(g,X+cw/2,Y+48,v.mnn[0]+' mV','lab-strong','middle');txt(g,X+cw/2,Y+64,'low '+v.mnn[1],'lab','middle');
+  g.addEventListener('mousemove',ev=>{tip.innerHTML=`<b>Shire ${s}${note?' ('+note+')':''}</b><br>minion ${v.mnn[0]} mV [${v.mnn[1]}–${v.mnn[2]}]<br>SRAM ${v.sram[0]} [${v.sram[1]}–${v.sram[2]}]<br>mesh ${v.noc[0]} [${v.noc[1]}–${v.noc[2]}]`;tip.style.display='block';const b=h.getBoundingClientRect();tip.style.left=Math.min(ev.clientX-b.left+12,b.width-200)+'px';tip.style.top=(ev.clientY-b.top+12)+'px';});g.addEventListener('mouseleave',()=>tip.style.display='none');}
+ for(const [s,[cx,cy]] of Object.entries(MESH))tile(s,10+cx*cw,10+cy*cw);
+ for(const [s,[i,note]] of Object.entries(OFF))tile(s,10+i*cw,gy+26,note);
 })();
 
+</script>
+<script>
+/* Section anchors. Every h2/h3 gets an id (its own, or one made from its text) and a # link; clicking a heading
+   or a table-of-contents link puts #id in the URL. When the page is framed by spacesheep.dev the fragment is
+   mirrored into the outer, shareable URL (postMessage ss-hash), and an outer #fragment is forwarded in on load. */
+(function () {
+  const slug = t => t.toLowerCase().replace(/^\d+(\.\d+)*\.?\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const post = h => { if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h}, '*'); } catch (_) {} } };
+  const go = id => { try { history.replaceState(null, '', location.pathname + location.search + '#' + id); } catch (_) {}
+    const el = document.getElementById(id); if (el) el.scrollIntoView({block: 'start'}); post('#' + id); };
+  const seen = new Set();
+  document.querySelectorAll('main h2, main h3').forEach(h => {
+    if (!h.id) { let id = slug(h.textContent) || 'section', n = 2; while (seen.has(id) || document.getElementById(id)) id = slug(h.textContent) + '-' + n++; h.id = id; }
+    seen.add(h.id);
+    const a = document.createElement('a'); a.href = '#' + h.id; a.className = 'hlink'; a.textContent = '#'; a.title = 'link to this section'; h.appendChild(a);
+    h.style.cursor = 'pointer';
+    h.addEventListener('click', ev => { if (ev.target.tagName === 'A' && ev.target !== a) return; ev.preventDefault(); go(h.id); });
+  });
+  window.addEventListener('hashchange', () => post(location.hash));
+  if (location.hash) { post(location.hash); const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => el.scrollIntoView({block: 'start'}), 50); }
+})();
+</script>
+<script>
+/* Contents list, link back to the reports hub, and repository paths as links. Runs after the section-anchor
+   script above, whose h2 ids the contents list links to. Pages not built from this template paste both blocks
+   before </main>.
+   - Contents: a page with 6 or more h2s and no #toclist of its own gets a numbered list before its first h2.
+   - Footer: every page but the hub ends with a link to the hub's list of reports, unless it already has one.
+   - Paths: an inline <code> whose whole text is a repository path (docs/…, workloads/…, tools/…, scripts/…,
+     kernels/…, rtl-sim/…) becomes a GitHub link. Code blocks, code already in a link and globs stay as they are. */
+(function () {
+  const main = document.querySelector('main'); if (!main) return;
+  const HUB = 'https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability';
+  const BACK = '← All ET-SoC-1 measurement reports';
+  const REPO = 'https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/';
+  const text = el => { const c = el.cloneNode(true); c.querySelectorAll('.hlink').forEach(a => a.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+  const NUM = /^(?:§\s*\d+(?:\.\d+)*\.?|\d+(?:\.\d+)*\.|\d+(?:\.\d+)+)\s+/;  /* "3. ", "4.2 ", "§5 "; not "600 MHz" */
+
+  const h2s = [...main.querySelectorAll('h2')];
+  if (h2s.length >= 6 && !document.getElementById('toclist')) {
+    const nav = document.createElement('nav'); nav.className = 'card';
+    const b = document.createElement('b'); b.textContent = 'Contents';
+    const ol = document.createElement('ol'); ol.id = 'toclist';
+    h2s.forEach(h => {
+      if (!h.id) return;
+      const t = text(h), m = t.match(/^§?\s*(\d+)[.\s]/), li = document.createElement('li'), a = document.createElement('a');
+      if (m && NUM.test(t)) li.value = +m[1];
+      a.href = '#' + h.id; a.textContent = t.replace(NUM, '') || t;
+      li.appendChild(a); ol.appendChild(li);
+    });
+    nav.append(b, ol);
+    h2s[0].parentNode.insertBefore(nav, h2s[0]);
+  }
+
+  const h1 = main.querySelector('h1');
+  const isHub = !!h1 && /^limits of observability/i.test(text(h1));
+  const hasBack = [...document.querySelectorAll('a')].some(a => a.textContent.replace(/\s+/g, ' ').trim() === BACK);
+  if (!isHub && !hasBack) {
+    const p = document.createElement('p'); p.className = 'small';
+    const a = document.createElement('a'); a.href = HUB + '#reports'; a.textContent = BACK;
+    p.appendChild(a); main.appendChild(p);
+  }
+
+  const PATH = /^(docs|workloads|tools|scripts|kernels|rtl-sim)\/[\w./-]+$/;
+  main.querySelectorAll('code').forEach(c => {
+    if (c.closest('pre, a')) return;
+    const t = c.textContent.trim(); if (!PATH.test(t)) return;
+    const a = document.createElement('a'); a.href = REPO + t;
+    c.parentNode.insertBefore(a, c); a.appendChild(c);
+  });
+})();
 </script>
 </body>
 </html>

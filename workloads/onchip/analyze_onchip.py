@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
-"""Turn run_onchip.sh sweeps and run_onchip_power.sh telemetry into the numbers the brief quotes.
+"""Turn run_onchip.sh sweeps and run_onchip_power.sh telemetry into the numbers the relay report quotes.
 
     analyze_onchip.py <sweep.jsonl> [more...] [--power <dir>] --out onchip.json
 
-Nothing is fitted. Rates come from the on-device cycle counter at the 600 MHz the card is pinned to, because
-a launch costs a few hundred microseconds either way. Every relay run verifies its own output: each element
-must equal the value its slab started with plus one per stage, and for the hop medium the slab it must have
-started from is the one belonging to the shire `stages` places back round the ring.
+Nothing is fitted. Rates come from the on-device cycle counter, converted at 600 MHz, because a launch costs a
+few hundred microseconds either way. Every relay run verifies its own output: each element must equal the value
+its slab started with plus one per stage, and for the hop medium the slab it must have started from is the one
+belonging to the shire `stages` places back round the ring.
+
+The ring runs in shire-ID order (ring_prev in kernel/onchip.c), and shire IDs do not follow the mesh. So
+`hop_distance` is an offset in shire ID, not a number of mesh hops: each distance row also carries the mesh hops
+that offset actually spans, from marty1885's shire map in workloads/nocbench/analyze.py.
 """
 import argparse
 import collections
 import gzip
+import importlib.util
 import json
 import os
 
@@ -24,6 +29,25 @@ def load(paths):
             if line.strip():
                 rows.append(json.loads(line))
     return rows
+
+
+def shire_map():
+    """marty1885's (x, y) of each compute shire on the 6x6 mesh and the Manhattan-distance function, as
+    workloads/nocbench/analyze.py holds them (the map the on-chip communication report checks against latency)."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "nocbench", "analyze.py")
+    spec = importlib.util.spec_from_file_location("nocbench_analyze", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.MARTY, mod.hops
+
+
+def ring_hops(back):
+    """Mesh hops between each of the 32 compute shires and the shire `back` places before it in ID order, which
+    is the shire it reads from when all 32 run. Returns the mean and the range over the 32 shires."""
+    layout, hops = shire_map()
+    ids = sorted(layout)
+    h = [hops(s, ids[(i - back) % len(ids)], layout) for i, s in enumerate(ids)]
+    return {"mean": float(np.mean(h)), "min": int(min(h)), "max": int(max(h))}
 
 
 def by_medium(rows, group, key, host=None):
@@ -56,6 +80,7 @@ def power(dirname):
     t = np.array([s["t_ms"] for s in tel]) / 1000.0
     f = {k: np.array([(s[p][k][0] if p else s[k]) for s in tel])   # rails are [avg, min, max]
          for k, p in (("board_w", None), ("minion_w", "sp"), ("sram_w", "sp"), ("noc_w", "sp"))}
+    f["die_c"] = np.array([float(s["temp_c"]["minshire"][0]) for s in tel])   # whole-degree die reading
     # A single relay launch lasts a few milliseconds, less than one telemetry sample, so the window for a
     # medium is the whole burst of back-to-back launches carrying its label.
     span = {}
@@ -108,7 +133,10 @@ def main():
                                for r in rows if r.get("group") == "headline"}
             continue
         out[grp] = by_medium(rows, grp, key, out["cards"][0])
-    out["distance"] = sorted([{"hop_distance": r["hop_distance"], "gb_s": r["gb_s"], "ok": r["ok"]}
+    # hop_distance is how many shire IDs back round the ring a slab comes from; mesh_hops is how far that is
+    # on the mesh (every run in this group uses all 32 shires, so the ring is all 32 in ID order).
+    out["distance"] = sorted([{"hop_distance": r["hop_distance"], "gb_s": r["gb_s"], "ok": r["ok"],
+                               "mesh_hops": ring_hops(r["hop_distance"]) if r["shires"] == 32 else None}
                               for r in rows
                               if r.get("group") == "distance" and r["host"] == out["cards"][0]],
                              key=lambda r: r["hop_distance"])
