@@ -1,0 +1,198 @@
+### 2026-09-25 15:09:58 PDT $ zpool list -o name,size,alloc,free,cap rpool; zfs list -o name,used,avail rpool/USERDATA/home_2t5qyu rpool/USERDATA/root_2t5qyu rpool/ROOT/ubuntu_jleyxm/var/lib
+NAME    SIZE  ALLOC   FREE    CAP
+rpool   452G   438G  14.5G    96%
+NAME                               USED  AVAIL
+rpool/ROOT/ubuntu_jleyxm/var/lib  10.0G   486M
+rpool/USERDATA/home_2t5qyu         392G   486M
+rpool/USERDATA/root_2t5qyu        25.0G   486M
+
+### 2026-09-25 15:09:58 PDT $ zfs userspace -o name,used -s used rpool/USERDATA/home_2t5qyu 2>&1 | sort -k2 -h -r | head -25
+rehan        175G
+root         160G
+roman       50.4G
+ruben       3.99G
+marin       1.61G
+ubergarm    1.18G
+another-user        318M
+yaroslavvb  4.76M
+rich         300K
+cypromis     212K
+anomly        14K
+NAME         USED
+
+### 2026-09-25 15:09:58 PDT $ zfs userspace -o name,used rpool/USERDATA/root_2t5qyu 2>&1; zfs userspace -o name,used rpool/ROOT/ubuntu_jleyxm/var/lib 2>&1 | head
+NAME    USED
+roman     1K
+root   24.6G
+ruben   440M
+501     930K
+NAME                   USED
+_apt                    52K
+colord                10.5K
+dnsmasq                551K
+gdm                    621K
+geoclue                512B
+gnome-remote-desktop     3K
+nm-openvpn             512B
+roman                   28K
+root                  9.89G
+
+### 2026-09-25 15:09:58 PDT $ ls -la --time-style=+%F /home | head -40
+total 144
+drwxr-xr-x 16 root       root       16 2026-09-18 .
+drwxr-xr-x 22 root       root       27 2025-12-24 ..
+drwxr-x---  2 anomly     anomly      5 2026-07-18 anomly
+drwxr-x---  5 cypromis   cypromis    8 2026-06-27 cypromis
+drwxr-x--- 12 jason      jason      27 2026-09-25 jason
+drwxr-xr-x  3 root       root        3 2026-05-10 linuxbrew
+drwxr-x--- 11 marin      marin      16 2026-09-17 marin
+drwxr-x---  5 rehan      rehan       9 2026-04-22 newuser
+drwxrwxr-x 50 rehan      rehan      76 2026-09-12 rehan
+drwxr-x---  6 rich       rich       13 2026-07-11 rich
+drwxr-x--- 19 roman      roman      29 2025-10-21 roman
+drwxr-x--- 12 ruben      ruben      26 2025-10-05 ruben
+drwxr-xr-x 10 root       root       10 2026-03-17 saqib
+drwxr-xr-x  3 root       root        3 2025-12-17 sbn
+drwxr-x---  7 ubergarm   ubergarm   14 2026-01-05 ubergarm
+drwxr-x---  8 yaroslavvb yaroslavvb 12 2026-09-25 yaroslavvb
+
+### 2026-09-25 15:10:10 PDT $ nice du -xsh /home/* 2>/dev/null | sort -h -r
+176G	/home/rehan
+135G	/home/saqib
+66G	/home/roman
+11G	/home/sbn
+4.4G	/home/ruben
+1.7G	/home/marin
+1.2G	/home/ubergarm
+460M	/home/linuxbrew
+319M	/home/jason
+5.0M	/home/yaroslavvb
+376K	/home/rich
+277K	/home/cypromis
+213K	/home/newuser
+16K	/home/anomly
+
+### 2026-09-25 15:10:14 PDT $ for u in rehan roman ruben saqib; do echo "== /home/$u"; nice du -xh --max-depth=1 /home/$u 2>/dev/null | sort -h -r | head -8; done
+== /home/rehan
+176G	/home/rehan
+123G	/home/rehan/models
+14G	/home/rehan/et-jobs-deploy
+11G	/home/rehan/hf-hackathon-week2
+8.1G	/home/rehan/.local
+4.0G	/home/rehan/.cache
+3.5G	/home/rehan/auto
+2.7G	/home/rehan/hf-hackathon
+== /home/roman
+66G	/home/roman
+52G	/home/roman/justin
+13G	/home/roman/src
+404M	/home/roman/opt
+131M	/home/roman/snap
+1.5M	/home/roman/.cache
+162K	/home/roman/.local
+95K	/home/roman/.config
+== /home/ruben
+4.4G	/home/ruben
+2.5G	/home/ruben/.cache
+1.1G	/home/ruben/et-platformsw
+762M	/home/ruben/.vscode-server
+14M	/home/ruben/.oh-my-zsh
+297K	/home/ruben/snap
+178K	/home/ruben/.dotnet
+29K	/home/ruben/.ssh
+== /home/saqib
+135G	/home/saqib
+120G	/home/saqib/models
+9.8G	/home/saqib/hacks
+4.5G	/home/saqib/llamaCpp
+449M	/home/saqib/temp
+188M	/home/saqib/et-platform
+46M	/home/saqib/neuralizer
+9.2M	/home/saqib/dnn-library
+
+### 2026-09-25 15:10:17 PDT $ lastlog -u rehan,roman,ruben,marin,jason,ubergarm 2>/dev/null; last -n 200 -w 2>/dev/null | awk "{print \$1}" | sort | uniq -c | sort -rn | head
+     70 reboot
+     12 rehan
+      2 yaroslavvb
+      2 jason
+      1 wtmp
+      1 
+
+### 2026-09-25 15:10:32 PDT $ for d in /home/rehan/models /home/saqib/models /home/roman/justin /home/sbn /root/.cache /root/et-jobs-deploy; do echo "== $d (newest mtime: $(find $d -xdev -type f -printf "%TY-%Tm-%Td\n" 2>/dev/null | sort | tail -1))"; find $d -xdev -type f -size +1G -printf "%s\t%TY-%Tm-%Td\t%P\n" 2>/dev/null | sort -rn | head -8 | awk -F"\t" "{printf \"%6.1f GB  %s  %s\n\", \$1/1e9, \$2, \$3}"; done
+== /home/rehan/models (newest mtime: 2026-07-19)
+  26.9 GB  2026-05-12  gemma-4-26B-A4B-it-Q8_0.gguf
+  20.8 GB  2026-07-10  Qwen_Qwen3.5-35B-A3B-Q4_0.gguf
+  20.1 GB  2026-07-10  Qwen_Qwen3.5-35B-pure-Q4_0.gguf
+  16.7 GB  2026-05-18  DeepSeek-V2-Lite.Q8_0.gguf
+  15.8 GB  2026-04-28  Qwen3.6-27B-Q4_0.gguf
+   8.9 GB  2026-05-19  DeepSeek-V2-Lite.Q4_0.gguf
+   6.0 GB  2026-07-09  llama-3.1-8b-instruct-q4_0.gguf
+   4.7 GB  2026-07-10  c8ee261735abeabe3b1eca499dee946d48ec3a253fbc83260fecfca8e78d5e45
+== /home/saqib/models (newest mtime: 2026-07-21)
+  20.8 GB  2026-06-03  Qwen_Qwen3.6-35B-A3B-Q4_0.gguf
+   8.7 GB  2026-05-05  Qwen3VL-8B-Instruct-Q8_0.gguf
+   8.5 GB  2026-05-21  Llama-3.2-8B-Instruct.Q8_0.gguf
+   8.5 GB  2026-07-15  Meta-Llama-3-8B-Instruct.Q8_0.gguf?download=true
+   8.5 GB  2026-03-27  Llama-3-8B-Instruct.Q8_0.gguf
+   7.9 GB  2026-05-05  rwkv7-7.2B-g0-Q8_0.gguf
+   7.2 GB  2026-06-03  llama-7b.Q8_0.gguf
+   5.0 GB  2026-05-24  gemma-4-E2B-it-Q8_0.gguf
+== /home/roman/justin (newest mtime: 2025-10-21)
+  11.9 GB  2025-09-02  .cache/huggingface/hub/models--onnxruntime--gpt-oss-20b-onnx/blobs/cf269536c4197b477b559cdd70f7c03f07eb81f902dc4b84fdb093dd9d48bc93
+  10.5 GB  2025-10-21  workspace/onnxruntime_bundles/onnxruntime_bundles/EtGlowExecutionProvider_GLOW_graph_Extracted_from_-Extracted_from_-Extracted_from_-Extracted_from_-Extracted_from_-torch_jit-----_2509558899460781802_0_0_0_4948412521558289054.bundle
+   8.9 GB  2025-10-21  lerobot-0.1.tar
+   3.1 GB  2025-10-21  legacy-0.6.tar
+   1.3 GB  2025-10-21  workspace/ETARS/hf/hub/models--ainekko--smolvla_libero_sim_onnx/blobs/2b8ba902b269e160ca299e131e66065454184ed6d989e82955b98a361caccc86
+== /home/sbn (newest mtime: 2026-01-08)
+  10.5 GB  2026-01-08  projects/hacks/onnx/onnxruntime_bundles/onnxruntime_bundles/EtGlowExecutionProvider_GLOW_graph_Extracted_from_-Extracted_from_-Extracted_from_-Extracted_from_-Extracted_from_-torch_jit-----_2509558899460781802_0_0_0_4948412521558289054.bundle
+== /root/.cache (newest mtime: 2026-08-24)
+== /root/et-jobs-deploy (newest mtime: 2026-06-15)
+   4.8 GB  2026-06-05  local-artifacts/models/gemma3n_e2b/gemma-3n-E2B-it-Q8_0.gguf
+   1.7 GB  2026-06-05  local-artifacts/models/rwkv7_15b/rwkv7-1.5B-world-q8_0.gguf
+   1.3 GB  2026-06-05  local-artifacts/models/llama32_1b/Llama-3.2-1B-Instruct-Q8_0.gguf
+   1.2 GB  2026-06-05  local-artifacts/models/lfm25/LFM2.5-1.2B-Instruct-Q8_0.gguf
+   1.2 GB  2026-06-05  local-artifacts/models/tinyllama11b/tinyllama-1.1b-chat-v1.0.Q8_0.gguf
+
+### 2026-09-25 15:10:35 PDT $ join -t "|" <(find /home/rehan/models -xdev -type f -size +100M -printf "%f:%s|%p\n" 2>/dev/null | sort) <(find /home/saqib/models -xdev -type f -size +100M -printf "%f:%s|%p\n" 2>/dev/null | sort) | awk -F"|" "{split(\$1,a,\":\"); s+=a[2]; n++} END {printf \"%d files with the same name and size in both, %.1f GB\n\", n, s/1e9}"
+0 files with the same name and size in both, 0.0 GB
+
+### 2026-09-25 15:11:05 PDT $ docker system df 2>&1 | head -8; docker ps -a --format "{{.Names}} {{.Status}} {{.Image}}" 2>/dev/null | head -8
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          5         2         7.957GB   7.834GB (98%)
+Containers      3         0         54.4MB    54.4MB (100%)
+Local Volumes   0         0         0B        0B
+Build Cache     4         0         333B      333B
+agitated_elion Exited (255) 5 weeks ago shelley
+adoring_lamport Exited (0) 7 weeks ago hello-world
+funny_napier Exited (0) 12 months ago hello-world
+
+### 2026-09-25 15:11:05 PDT $ nice du -xh --max-depth=2 /root/.cache 2>/dev/null | sort -h -r | head -10; ls -la --time-style=+%F /root/.cache | head -20
+12G	/root/.cache
+11G	/root/.cache/huggingface
+5.4G	/root/.cache/huggingface/xet
+5.4G	/root/.cache/huggingface/hub
+548M	/root/.cache/ccache
+147M	/root/.cache/vscode-cpptools
+99M	/root/.cache/vscode-cpptools/dde01526bf56995eed77c3f3c5f04f02
+49M	/root/.cache/vscode-cpptools/ipch
+40M	/root/.cache/ccache/d
+38M	/root/.cache/ccache/e
+total 40
+drwx------  7 root root  8 2026-02-16 .
+drwx------ 20 root root 29 2026-09-25 ..
+drwxr-xr-x 20 root root 20 2026-01-27 ccache
+drwxr-xr-x 13 root root 16 2026-03-09 debuginfod_client
+drwxr-xr-x  4 root root  4 2026-01-08 huggingface
+drwxr-xr-x  3 root root  3 2026-02-16 Microsoft
+-rw-r--r--  1 root root  0 2025-09-23 motd.legal-displayed
+drwxr-xr-x  4 root root  4 2026-02-16 vscode-cpptools
+
+### 2026-09-25 15:11:20 PDT $ pgrep -af "huggingface|hf_xet|ccache|Runner.Worker" | grep -v -e pgrep -e "bash -c" | head; du -sh /root/.cache/huggingface/xet /root/.cache/ccache; rm -rf /root/.cache/huggingface/xet /root/.cache/ccache && echo "removed xet chunk cache and ccache"; sync; zpool sync rpool; zfs list -o name,avail rpool; df -h / /home | tail -2
+5.4G	/root/.cache/huggingface/xet
+548M	/root/.cache/ccache
+removed xet chunk cache and ccache
+NAME   AVAIL
+rpool  6.35G
+rpool/ROOT/ubuntu_jleyxm     21G   15G  6.4G  70% /
+rpool/USERDATA/home_2t5qyu  399G  393G  6.4G  99% /home
+

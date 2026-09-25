@@ -113,7 +113,7 @@ h2:hover .hlink,h3:hover .hlink,.hlink:focus{opacity:1}
 <section style="margin-top:0">
 <p class="eyebrow">AI Foundry lab · Fix log · 25 September 2026</p>
 <h1>aifoundry1 is fixed</h1>
-<p class="byline">25 September 2026, 15:00–15:04 PDT · done as root over Tailscale SSH at the owner's request · follows <a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting">What is broken on aifoundry1</a></p>
+<p class="byline">25 September 2026, 15:00–15:11 PDT · done as root over Tailscale SSH at the owner's request · follows <a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting">What is broken on aifoundry1</a></p>
 <p class="lede"><b>Both ET-SoC-1 cards in aifoundry1 answer again.</b> The <code>et_soc1</code> kernel module was rebuilt by DKMS from the fixed driver source that was already on the machine (et-platform <code>353f20e</code>), for all three kernels in <code>/boot</code>, and reloaded. It now reports version <code>0.20.0</code> and srcversion <code>47D26A305A0428B29FB7FC4</code>, the same as aifoundry2 and aifoundry3, and a read-only management query succeeds on both cards. The interrupted 24 September kernel update was finished as well, after freeing space on the nearly full root file system. The machine was not rebooted, and no running user work was touched.</p>
 
 <div class="card">
@@ -121,7 +121,7 @@ h2:hover .hlink,h3:hover .hlink,.hlink:focus{opacity:1}
   <dt>Cards</dt><dd>Both answer: <code>dev_mngt_service -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS</code> succeeds on card 0 and card 1; each card's management queue counted its first command.</dd>
   <dt>Driver</dt><dd><code>et_soc1</code> <code>[0.20.0] 47D26A305A0428B29FB7FC4</code> loaded now and installed for 7.0.0-30, -31 and -34; loaded at boot by <code>/etc/modules-load.d/et_soc1.conf</code>.</dd>
   <dt>Kernel update</dt><dd><code>linux-image-7.0.0-34</code> fully installed: initramfs (with ZFS) written, GRUB updated; the next boot starts 7.0.0-34, whose <code>et_soc1</code> is the fixed one.</dd>
-  <dt>Still open</dt><dd>The pool is 96% full (553 MB free for /); card et0's PCIe link still logs ~1 corrected error per second; the two cards run different firmware; the next boot is untested.</dd>
+  <dt>Still open</dt><dd>The pool is 95% full: 6.4 GB free after clearing caches, the rest is user data (<a href="#the-disk">who should delete what</a>); card et0's PCIe link still logs ~1 corrected error per second; the two cards run different firmware; the next boot is untested.</dd>
 </dl>
 </div>
 </section>
@@ -160,12 +160,30 @@ h2:hover .hlink,h3:hover .hlink,.hlink:focus{opacity:1}
 <section>
 <h2 id="still-open">3. Still open</h2>
 <ul>
-<li><b>The disk.</b> The ZFS pool <code>rpool</code> is 96% allocated (437 of 452 GB); <code>/</code> and every dataset have only about 553 MB, because ZFS keeps the last ~3% in reserve. The space is user data: <code>/home</code> 392 GB and <code>/root</code> 25 GB (12 GB of <code>/root/.cache</code>, 9.8 GB of <code>/root/et-jobs-deploy</code>, 1.7 GB of the CI runner). Someone who owns that data should decide what goes; the next kernel update will need space again.</li>
+<li><b>The disk</b>: see <a href="#the-disk">section 4</a>. After clearing caches there is 6.4 GB free; the rest of the pool is user data whose owners have to decide.</li>
 <li><b>Card et0's PCIe link</b> still logs about one corrected receive error per second at root port 00:01.0 (<a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting#4-a-separate-problem-card-et0-s-pcie-link">troubleshooting report, section 4</a>). It does not stop the card; a reseat at the next maintenance window is the fix.</li>
 <li><b>The next boot is untested.</b> It will start 7.0.0-34 with a freshly written initramfs, as aifoundry2 and aifoundry3 are set to. <code>et_soc1</code> for that kernel is the fixed build and loads from <code>modules-load.d</code>. After the reboot: <code>cat /sys/module/et_soc1/version</code> should print <code>0.20.0</code>.</li>
 <li><b>Different firmware on the two cards</b> (section 1). Whether to bring them to one release is for the lab to decide.</li>
 <li><b>An older <code>esperanto</code> DKMS driver</b> is still registered for 23 kernels (not loaded). It is harmless but can be removed (<code>dkms remove esperanto/0.20.0 --all</code>, and <code>/etc/udev/rules.d/50-esperanto.rules</code>) as a separate change.</li>
 </ul>
+</section>
+
+<section>
+<h2 id="the-disk">4. The disk: who should delete what</h2>
+<p>aifoundry1 has one ZFS pool, <code>rpool</code>, 452 GB. At 15:00 it was 96% allocated and every file system on it (<code>/</code>, <code>/home</code>, <code>/root</code>, <code>/var</code>) had only 155 MB available, because ZFS holds back the last ~3% of a pool. Only caches and logs that are re-created on demand were cleared, in two steps (15:03 and 15:11): the apt package cache (281 MB), archived journal files (118 MB), ten disabled snap revisions, root's Hugging Face download chunk cache <code>/root/.cache/huggingface/xet</code> (5.4 GB; the downloaded models in <code>hub/</code> were kept) and root's <code>ccache</code> (0.5 GB). <b>Every file system now has 6.4 GB available.</b> Nothing in a user's home directory, and no model, checkpoint, container or project directory, was touched.</p>
+<p>The remaining space is user data. From <code>zfs userspace</code> and <code>du</code> (sizes and dates only; no file was opened), 25 September 15:10 PDT:</p>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col">Where</th><th scope="col">Size</th><th scope="col">Owner (account)</th><th scope="col">What is in it</th><th scope="col">Newest file</th></tr></thead>
+<tbody>
+<tr><td><code>/home/rehan</code></td><td>176 GB</td><td>rehan</td><td><code>models/</code> 123 GB: GGUF model files (the largest gemma-4-26B Q8_0 27 GB, two Qwen3.5-35B Q4_0 20–21 GB each, DeepSeek-V2-Lite Q8_0 and Q4_0 17 + 9 GB, Qwen3.6-27B 16 GB); <code>et-jobs-deploy/</code> 14 GB; <code>hf-hackathon-week2/</code> 11 GB; <code>.local</code> 8 GB</td><td>19 Jul (models)</td></tr>
+<tr><td><code>/home/saqib</code></td><td>135 GB</td><td>root (no <code>saqib</code> account; the directory name suggests Saqib)</td><td><code>models/</code> 120 GB: GGUF files, several of them 8B Llama variants at Q8_0 (Llama-3-8B-Instruct twice, once saved with <code>?download=true</code> in its name, Llama-3.2-8B, llama-7b), Qwen3.6-35B, Qwen3VL-8B, rwkv7-7.2B; <code>hacks/</code> 10 GB; <code>llamaCpp/</code> 4.5 GB</td><td>21 Jul</td></tr>
+<tr><td><code>/home/roman</code></td><td>66 GB</td><td>roman</td><td><code>justin/</code> 52 GB (a Hugging Face cache with gpt-oss-20b ONNX, an ONNX Runtime bundle of 10.5 GB, <code>lerobot-0.1.tar</code> 8.9 GB, <code>legacy-0.6.tar</code> 3.1 GB); <code>src/</code> 13 GB</td><td>21 Oct 2025</td></tr>
+<tr><td><code>/root</code></td><td>19 GB</td><td>root (shared)</td><td><code>et-jobs-deploy/</code> 9.8 GB (GGUF test models), the Hugging Face model cache 5.4 GB, the CI runner 1.7 GB, <code>martin_experiments/</code> 0.9 GB, <code>src/</code> 0.7 GB</td><td>24 Aug (cache)</td></tr>
+<tr><td><code>/home/sbn</code></td><td>11 GB</td><td>root (no <code>sbn</code> account)</td><td>one ONNX Runtime bundle of 10.5 GB, the same file name as the one in <code>/home/roman/justin</code></td><td>8 Jan</td></tr>
+<tr><td><code>/var/lib/docker</code></td><td>8.0 GB</td><td>root</td><td>5 images, 7.8 GB of them used by no running container; 3 stopped containers (<code>shelley</code>, exited 5 weeks ago; two <code>hello-world</code>)</td><td></td></tr>
+<tr><td>everyone else</td><td>&lt; 5 GB each</td><td>ruben 4.4, marin 1.7, ubergarm 1.2, jason 0.3 GB, others less</td><td></td><td></td></tr>
+</tbody></table></div>
+<p><b>Who should delete:</b> <b>rehan</b> (123 GB of models, the only recent user among the large owners) and <b>whoever owns <code>/home/saqib</code></b> (120 GB of models; by name and size its GGUF files include Llama-3-8B-Instruct at Q8_0 twice) account for 243 GB, more than half the pool. <b>roman</b> should decide on <code>/home/roman/justin</code> (52 GB, untouched since October 2025). The lab admin should decide on <code>/home/sbn</code> (11 GB, which may duplicate a file in <code>justin/</code>), the unused Docker images (7.8 GB, <code>docker image prune -a</code> after removing the stopped containers) and the GGUF copies in <code>/root/et-jobs-deploy</code>. Deleting only the models nobody uses would leave the machine with well over 100 GB free; a shared read-only model directory (one copy per model, readable by everyone) would stop the duplication from coming back.</p>
 </section>
 
 <section>
