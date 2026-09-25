@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aifoundry1 troubleshooting</title>
+<meta name="description" content="Why aifoundry1's two ET-SoC-1 cards cannot be used: the et_soc1 kernel module that DKMS builds there has an empty version string (a stale copy of et-platform 09531e5c1 with a Makefile typo), so deviceLayer refuses every card before sending a command. Root fix, verification, evidence, a separate marginal PCIe link on card et0, and a nearly full disk with a half-finished kernel update. Read-only checks, 25 September 2026.">
+<style>
+:root{
+  color-scheme: light;
+  --page:#fafaf8; --surface:#ffffff; --sunk:#f2f1ec;
+  --ink:#1a1a1f; --ink-2:#52514a; --ink-3:#6b6a62;
+  --line:#e3e2db; --rule:#cfcec5;
+  --accent:#1f6fbf; --accent-soft:rgba(31,111,191,.12);
+  --warn:#9a6a10; --warn-soft:rgba(154,106,16,.12);
+  --good:#1f7a5a; --good-soft:rgba(31,122,90,.11);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --page:#111110; --surface:#1b1b19; --sunk:#262623;
+    --ink:#f2f1ec; --ink-2:#c3c2b7; --ink-3:#9a998f;
+    --line:#2f2f2c; --rule:#4a4a45;
+    --accent:#5a9be0; --accent-soft:rgba(90,155,224,.16);
+    --warn:#d6a040; --warn-soft:rgba(214,160,64,.14);
+    --good:#4fb38a; --good-soft:rgba(79,179,138,.13);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --page:#111110; --surface:#1b1b19; --sunk:#262623;
+  --ink:#f2f1ec; --ink-2:#c3c2b7; --ink-3:#9a998f;
+  --line:#2f2f2c; --rule:#4a4a45;
+  --accent:#5a9be0; --accent-soft:rgba(90,155,224,.16);
+  --warn:#d6a040; --warn-soft:rgba(214,160,64,.14);
+  --good:#4fb38a; --good-soft:rgba(79,179,138,.13);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);
+  font:18px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;font-synthesis-weight:none}
+main{max-width:52em;margin:0 auto;padding:40px clamp(16px,4vw,32px) 96px}
+h1,h2,h3{text-wrap:balance;letter-spacing:-.012em;margin:0}
+h1{font-size:clamp(28px,5.8vw,41px);line-height:1.16}
+h2{font-size:clamp(21px,3.6vw,26px);line-height:1.25;margin:0 0 10px}
+h3{font-size:19px;line-height:1.3;margin:30px 0 8px}
+p{margin:0 0 14px;max-width:38em}
+a{color:var(--accent);text-underline-offset:2px}
+section{margin-top:48px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 0 10px}
+.byline{color:var(--ink-2);font-size:14px;margin:10px 0 0}
+.lede{font-size:19px;line-height:1.55;margin:22px 0 0;max-width:37em}
+.small{color:var(--ink-2);font-size:14px}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+code{font-size:.86em;background:var(--sunk);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+pre{font-size:13.5px;line-height:1.5;background:var(--sunk);border:1px solid var(--line);border-radius:8px;
+  padding:12px 14px;margin:8px 0 14px;overflow-x:auto;white-space:pre;-webkit-overflow-scrolling:touch;max-width:100%}
+pre code{background:none;padding:0;font-size:inherit;overflow-wrap:normal}
+.cmd{display:flex;flex-direction:column;margin:8px 0 14px}
+.cmd pre{margin:0;border-top-right-radius:0}
+.copy{align-self:flex-end;margin:0 0 -1px;font:600 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  color:var(--ink-2);background:var(--sunk);border:1px solid var(--line);border-bottom:0;border-radius:6px 6px 0 0;padding:7px 12px;cursor:pointer;min-height:30px}
+.copy:hover{color:var(--ink)}
+.copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:22px 0 0}
+nav.card b{display:block;font-size:14px;color:var(--ink-2);margin-bottom:4px}
+nav.card ol{margin:0;padding-left:22px;font-size:16px}
+nav.card li{margin:3px 0}
+.glance{display:grid;grid-template-columns:9.5em 1fr;gap:8px 16px;margin:0;font-size:16px;line-height:1.5}
+.glance dt{color:var(--ink-3);font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding-top:2px}
+.glance dd{margin:0}
+.callout{border-left:3px solid var(--warn);background:var(--warn-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:40em;font-size:16px}
+.callout p{margin:0 0 8px}.callout p:last-child{margin:0}
+.inf{display:inline-block;font:700 11px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--warn);border:1px solid currentColor;border-radius:999px;padding:0 7px;white-space:nowrap;vertical-align:2px}
+ol.steps{list-style:none;counter-reset:step;padding:0;margin:18px 0 0}
+ol.steps>li{counter-increment:step;position:relative;padding-left:44px;margin:0 0 26px}
+ol.steps>li::before{content:counter(step);position:absolute;left:0;top:1px;width:30px;height:30px;border-radius:50%;
+  background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center}
+ol.steps>li>b:first-child{display:block;margin-bottom:4px}
+ul.plain{margin:6px 0 14px;padding-left:22px;max-width:40em}
+ul.plain li{margin:0 0 8px}
+ul.plain ul{margin:6px 0 0;padding-left:20px}
+ul.plain ul li{margin:0 0 4px}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px;line-height:1.45}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto}
+th{color:var(--ink-2);font-weight:600;border-bottom:1px solid var(--rule)}
+td.bad{background:var(--warn-soft)}
+td.bad strong{color:var(--warn)}
+tbody th{font-weight:600;color:var(--ink)}
+@media (max-width:640px){
+  table.stack thead{display:none}
+  table.stack,table.stack tbody,table.stack tr,table.stack td,table.stack tbody th{display:block;width:100%}
+  table.stack tr{border-bottom:1px solid var(--rule);padding:8px 0}
+  table.stack td,table.stack tbody th{border:0;padding:3px 6px}
+  table.stack td[data-label]::before{content:attr(data-label);display:block;font-size:12px;font-weight:600;color:var(--ink-3)}
+}
+h2,h3{scroll-margin-top:12px}
+.hlink{margin-left:8px;color:var(--ink-3);text-decoration:none;font-weight:400;opacity:0}
+h2:hover .hlink,h3:hover .hlink,.hlink:focus{opacity:1}
+@media (max-width:480px){
+  body{font-size:17px} .lede{font-size:18px}
+  ol.steps>li{padding-left:38px}
+  .glance{grid-template-columns:1fr;gap:2px}
+  .glance dd{margin-bottom:10px}
+}
+</style>
+</head>
+<body>
+<main>
+
+<section style="margin-top:0">
+<p class="eyebrow">AI Foundry lab · Troubleshooting · 25 September 2026</p>
+<h1>What is broken on aifoundry1</h1>
+<p class="byline">25 September 2026 · an answer to Roman’s question “Can someone try to see exactly what is broken on 1?” · read-only checks on aifoundry1, 2 and 3; no card was opened</p>
+<p class="lede">The cards are refused by software, not by hardware. Both ET-SoC-1 cards in aifoundry1 are on the bus, bound to the ET driver, and have their device nodes, which the driver creates only after each card’s firmware reports ready. What fails is a version check. The <code>et_soc1</code> kernel module that DKMS builds on aifoundry1 has an <strong>empty version string</strong>: <code>/sys/module/et_soc1/version</code> holds only a newline, where aifoundry2 and aifoundry3 read <code>0.20.0</code>. Every ET program (<code>dev_mngt_service</code>, <code>et-powertop</code>, programs built on the runtime, our tools) contains et-platform’s deviceLayer, which opens <code>/dev/etN_mgmt</code>, reads that version, finds no x.y.z and throws <code>Error unable to evaluate compatibility!</code> before a single command reaches the card. The version is empty because aifoundry1’s DKMS source, <code>/usr/src/et-soc1-0.20.0</code>, holds an exact copy of the driver files of et-platform commit <code>09531e5c1</code> (21 October 2025), whose Makefile has a one-character typo, <code>$(ET_MODULE_VERSION=)</code>. Upstream fixed it five days later in <code>78ed9b0d6</code>, and aifoundry2 and aifoundry3 build from the fixed tree. DKMS has rebuilt the broken module for every new kernel since, including <code>7.0.0-34</code>, installed on 24 September, so a reboot will not help, whichever kernel it boots. The fix needs root and takes a few minutes: point DKMS at the fixed source that is already on the machine (<code>/usr/src/et-platform</code>, commit <code>353f20e</code>) and reload the module. We are highly confident in this cause. Rebuilding both modules from source reproduces their version and <code>srcversion</code>, and the installed aifoundry1 and aifoundry2 modules have identical code and data: they differ only in the module-info strings, the build ID, symbol offsets and each host’s signature. What we cannot know until the fix is in is which firmware the cards run and whether they answer, because no command has reached either card this boot.</p>
+
+<div class="card">
+<dl class="glance">
+  <dt>Broken</dt><dd>The <code>et_soc1</code> module’s version string is empty, so deviceLayer refuses both cards.</dd>
+  <dt>Why</dt><dd>DKMS builds from a stale copy of <code>09531e5c1</code>, whose Makefile has the typo. The fixed source (<code>353f20e</code>) is on the machine but DKMS was never pointed at it.</dd>
+  <dt>Fix</dt><dd>Root, about 5 minutes, with nobody using the cards: replace the DKMS source, rebuild for the three kernels in <code>/boot</code>, reload <code>et_soc1</code> (<a href="#1-the-fix-needs-root-on-aifoundry1">section 1</a>).</dd>
+  <dt>Sure?</dt><dd>High for the cause. The cards’ firmware and state are unverified until the fix.</dd>
+  <dt>Also found</dt><dd>Card et0’s PCIe link logs about one corrected error per second. It does not block the cards, but it is what fills <code>/var/log/kern.log</code> (<a href="#4-a-separate-problem-card-et0-s-pcie-link">section 4</a>).</dd>
+  <dt>And</dt><dd>The root file system has about 164 MB left, and the 24 September kernel update stopped halfway: <code>7.0.0-34</code> has no initramfs and GRUB was not updated (<a href="#5-disk-and-kernel-update">section 5</a>).</dd>
+</dl>
+</div>
+
+<p class="small" style="margin-top:16px">Correction to our earlier note (“a kernel-module srcversion mismatch with libDM.so”, in <code>docs/findings/14-card-behaviour.md</code>): it was wrong on both counts. Nothing in the ET stack checks <code>srcversion</code>, and the check is not in <code>libDM.so</code>. The evidence was already in our 22 September output, where the version line on aifoundry1 printed empty.</p>
+</section>
+
+<section>
+<h2 id="1-the-fix-needs-root-on-aifoundry1">1. The fix (needs root on aifoundry1)</h2>
+<p>This rebuilds only the <code>et_soc1</code> kernel module. Leave <code>/opt/et</code> alone: <code>libDM.so</code> and <code>dev_mngt_service</code> are byte-identical to the working machines. Run everything in one root shell (<code>sudo -i</code>), because later steps use the backup directory <code>$B</code> set in step 2. Keep steps 3 to 5 together: between them no <code>et-soc1</code> module is on disk, so do not reboot in the middle.</p>
+
+<ol class="steps">
+<li><b>Check that nobody is using the cards, and pause CI.</b>
+<p>Another user has been logged in since 18 September but holds no card: the module’s reference count is 0. The GitHub Actions runner for <code>aifoundry1-et-soc1</code> runs as root; once the cards open, its jobs will be able to use them.</p>
+<div class="cmd"><pre><code>who
+fuser -v /dev/et0_* /dev/et1_*        # expect no processes
+cat /sys/module/et_soc1/refcnt        # expect 0
+pgrep -af Runner.Worker               # expect nothing: no CI job running
+df -h /                               # 164 MB left on 25 Sep; steps 3-4 need ~20 MB
+systemctl stop actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1.service</code></pre></div>
+</li>
+
+<li><b>Back up the current module files and state.</b>
+<p>The old source directory is moved into the same backup directory in step 3.</p>
+<div class="cmd"><pre><code>B=/root/et-soc1-fix-$(date +%Y%m%d-%H%M); mkdir -p $B
+dkms status &gt; $B/dkms-status.before
+modinfo et_soc1 &gt; $B/modinfo.before
+for k in 7.0.0-30-generic 7.0.0-31-generic 7.0.0-34-generic; do
+  cp -a /lib/modules/$k/updates/dkms/et-soc1.ko.zst $B/et-soc1.ko.zst.$k
+done</code></pre></div>
+</li>
+
+<li><b>Replace the DKMS source with the fixed driver that is already on the machine.</b>
+<p>The running module is not touched. <code>dkms remove</code> must come before the move, because DKMS needs the old <code>dkms.conf</code> to remove. <code>git archive</code> gives a clean tree without the January 2026 build leftovers in the checkout. root owns <code>/usr/src/et-platform</code>, so git works there for root without extra settings.</p>
+<div class="cmd"><pre><code>git -C /usr/src/et-platform rev-parse HEAD      # expect 353f20e982f4...
+dkms remove et-soc1/0.20.0 --all
+mv /usr/src/et-soc1-0.20.0 $B/et-soc1-0.20.0.09531e5c1
+mkdir /usr/src/et-soc1-0.20.0
+git -C /usr/src/et-platform archive 353f20e et-driver |
+  tar -x --strip-components=1 -C /usr/src/et-soc1-0.20.0
+sed -n 4,5p /usr/src/et-soc1-0.20.0/Makefile   # expect $(ET_MODULE_VERSION), no '=' inside
+cat /usr/src/et-soc1-0.20.0/VERSION            # expect 0.20.0</code></pre></div>
+</li>
+
+<li><b>Register it and build for every kernel in <code>/boot</code>.</b>
+<p><code>/boot</code> holds 7.0.0-30, 7.0.0-31 (running) and 7.0.0-34 (installed on 24 September, but its install stopped halfway: <a href="#5-disk-and-kernel-update">section 5</a>). Its headers are complete, so the build works. The <code>--all</code> above also drops the builds for 17 old 6.8.0 kernels that are no longer installed (no kernel image; headers remain only for 6.8.0-139); they need no rebuild. Secure Boot is off (<code>mokutil --sb-state</code>), so no key enrolment is needed.</p>
+<div class="cmd"><pre><code>dkms add et-soc1/0.20.0
+for k in 7.0.0-30-generic 7.0.0-31-generic 7.0.0-34-generic; do
+  dkms install et-soc1/0.20.0 -k $k
+done</code></pre></div>
+</li>
+
+<li><b>Check the new files before touching the running module.</b>
+<p>Every line must read <code>[0.20.0] 47D26A305A0428B29FB7FC4</code>, the same as aifoundry2 and aifoundry3. If not, stop and roll back (below).</p>
+<div class="cmd"><pre><code>for k in 7.0.0-30-generic 7.0.0-31-generic 7.0.0-34-generic; do
+  echo "$k [$(modinfo -k $k -F version et_soc1)] $(modinfo -k $k -F srcversion et_soc1)"
+done</code></pre></div>
+</li>
+
+<li><b>Reload the module.</b>
+<p><code>modprobe -r</code> refuses while any device node is open. The driver’s remove path only releases host-side resources (interrupts, memory regions, bus mastering); it does not reset the cards, so their firmware keeps running and the new module re-reads its ready status. Load it by the name <code>et_soc1</code>: an older <code>esperanto</code> driver on disk drives the same cards.</p>
+<div class="cmd"><pre><code>modprobe -r et_soc1 &amp;&amp; modprobe et_soc1 &amp;&amp; udevadm settle
+ls -l /dev/et*                                  # four nodes, crw-rw-rw-</code></pre></div>
+</li>
+
+<li><b>Load it at boot the same way as aifoundry2, and restart CI.</b>
+<p>Today nothing visible loads <code>et_soc1</code> at boot; something does so 3 min 42 s after start-up (see <a href="#6-what-we-did-not-check-or-could-not-see-without-root">section 6</a>). Please also check the runner’s workflow for steps that run <code>make dkms</code>, <code>insmod</code> or <code>modprobe</code> from another checkout, since such a step could undo this fix.</p>
+<div class="cmd"><pre><code>echo et_soc1 &gt; /etc/modules-load.d/et_soc1.conf
+systemctl start actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1.service</code></pre></div>
+</li>
+</ol>
+
+<h3>Rollback</h3>
+<p>This puts back the same broken module as today. If you are in a new shell, first set <code>B</code> to the backup directory from step 2.</p>
+<div class="cmd"><pre><code>modprobe -r et_soc1
+rm -f /etc/modules-load.d/et_soc1.conf
+dkms remove et-soc1/0.20.0 --all
+rm -rf /usr/src/et-soc1-0.20.0
+cp -a $B/et-soc1-0.20.0.09531e5c1 /usr/src/et-soc1-0.20.0
+dkms add et-soc1/0.20.0
+for k in 7.0.0-30-generic 7.0.0-31-generic 7.0.0-34-generic; do dkms install et-soc1/0.20.0 -k $k; done
+modprobe et_soc1</code></pre></div>
+
+<h3>Minimal alternative</h3>
+<p>If you would rather keep the old directory, do steps 1 and 2, then replace only its Makefile with the one from the upstream fix: between <code>09531e5c1</code> and <code>78ed9b0d6</code> the Makefile differs in exactly the two version lines. Then run steps 5 to 7, but in step 5 expect <code>[0.20.0] 1383B256EB24A0A53F04CC7</code>: the version becomes <code>0.20.0</code> (we built this variant to check), while <code>srcversion</code> stays that of the old source, which is harmless but differs from aifoundry2 and aifoundry3.</p>
+<div class="cmd"><pre><code>cp /usr/src/et-soc1-0.20.0/Makefile $B/Makefile.09531e5c1
+git -C /usr/src/et-platform show 78ed9b0d6:et-driver/Makefile &gt; /usr/src/et-soc1-0.20.0/Makefile
+for k in 7.0.0-30-generic 7.0.0-31-generic 7.0.0-34-generic; do
+  dkms build et-soc1/0.20.0 -k $k --force &amp;&amp; dkms install et-soc1/0.20.0 -k $k --force
+done</code></pre></div>
+<p class="small">Do not load the older <code>esperanto.ko</code> as a shortcut: its version string would pass, but it is an older driver that aifoundry2 and aifoundry3 do not run. Optional cleanup, as a separate change: <code>dkms remove esperanto/0.20.0 --all</code> and remove <code>/etc/udev/rules.d/50-esperanto.rules</code>. A user-level stopgap without root is possible (an <code>LD_PRELOAD</code> shim that makes deviceLayer read <code>0.20.0</code>), but we have not tried it on a card, and the root fix is quicker.</p>
+</section>
+
+<section>
+<h2 id="2-how-to-check-that-it-worked">2. How to check that it worked</h2>
+<ol class="steps">
+<li><b>The version deviceLayer reads is back.</b>
+<p>Expect <code>0.20.0</code> three times, then <code>47D26A305A0428B29FB7FC4</code>. The two PCI paths are the exact files deviceLayer reads.</p>
+<div class="cmd"><pre><code>cat /sys/module/et_soc1/version
+cat /sys/bus/pci/devices/0000:01:00.0/driver/module/version
+cat /sys/bus/pci/devices/0000:02:00.0/driver/module/version
+cat /sys/module/et_soc1/srcversion</code></pre></div>
+</li>
+<li><b>The other kernels are fixed too.</b> <code>modinfo -k 7.0.0-34-generic -F version et_soc1</code> prints <code>0.20.0</code>, and so does the same command for <code>7.0.0-30-generic</code>.</li>
+<li><b>A card answers.</b> With nobody else using the cards (any user can run this):
+<div class="cmd"><pre><code>timeout 10 /opt/et/bin/dev_mngt_service -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS -n 0 -u 5000
+timeout 10 /opt/et/bin/dev_mngt_service -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS -n 1 -u 5000</code></pre></div>
+<p>Pass: <code>Service request succeeded</code> and no <code>evaluate compatibility</code>. For comparison, aifoundry2’s card reported today: firmware release 1.3.1, BL1 and BL2 0.20.0, PMIC 1.5.0, master, worker and machine minion 0.23.0. <code>dev_mngt_service</code> opens both cards’ management nodes whatever <code>-n</code> says, so a fault on either card fails both runs.</p>
+</li>
+<li><b>Commands reached both cards.</b> <code>cat /sys/bus/pci/devices/0000:0{1,2}:00.0/mgmt_vq_stats/msg_count</code>: the SQ0 count should be at least 1 on each card. Today it is 0 on both.</li>
+<li><b>After the next reboot</b> (whichever kernel it boots; see <a href="#5-disk-and-kernel-update">section 5</a>): <code>lsmod | grep et_soc1</code> shows the module, loaded by <code>modules-load.d</code>, and checks 1 and 3 pass again.</li>
+</ol>
+<p>What would <em>not</em> prove anything, or would be a different problem:</p>
+<ul class="plain">
+<li><code>ls -l /dev/et*</code> showing 0666 and <code>lspci -k</code> showing <code>Kernel driver in use: ET</code> are already true today.</li>
+<li>Do not use <code>DM_CMD_GET_FIRMWARE_BOOT_STATUS</code> as a test. It fails with <code>Received incorrect rsp status: -16006</code> on the working aifoundry3 too.</li>
+<li><code>Error device /dev/etN_mgmt is in bad state, state: N</code> would mean the driver fix worked and the card or firmware state is the next problem (the device-state check right after the version check, <code>DevicePcie.cpp</code> line 298).</li>
+<li><code>Incompatible device-api version</code> from a runtime program would mean the card firmware does not match the runtime, which needs device-api 2.x (aifoundry2 reports 2.4.0).</li>
+</ul>
+</section>
+
+<section>
+<h2 id="3-evidence">3. Evidence</h2>
+
+<h3 id="the-error-verbatim">The error, verbatim</h3>
+<p>From our attempts on aifoundry1 on 22 September 2026, with the stack traces and log prefixes shortened. Our telemetry tool, which links deviceLayer:</p>
+<pre><code>Opening device 0
+FAIL: Exception message:Error unable to evaluate compatibility!
+StackTrace:
+	stack dump [1]  dbg::StackException::StackException(std::__cxx11::basic_string&lt;...&gt; const&amp;) + 0x46
+	...</code></pre>
+<p>The lab’s own tool, <code>/opt/et/bin/dev_mngt_service -m DM_CMD_GET_FIRMWARE_BOOT_STATUS -n 0</code>, at 12:11:51 PDT:</p>
+<pre><code>command: DM_CMD_GET_FIRMWARE_BOOT_STATUS code 16
+terminate called after throwing an instance of 'dev::Exception'
+  what():  Exception message:Error unable to evaluate compatibility!
+StackTrace:
+2026/09/22 12:11:51 157256
+***** FATAL SIGNAL RECEIVED *******</code></pre>
+<p>In the same command, <code>cat /sys/module/et_soc1/version</code> printed an empty line on aifoundry1 and <code>0.20.0</code> on aifoundry3. The same <code>dev_mngt_service</code> binary on aifoundry3 got past the check and received a reply from its card (status -16006, which this command also gets on working cards). Our raw-ioctl tool, which does not use deviceLayer, opened both aifoundry1 cards the same day and read their configuration (65 W TDP, 600 MHz boot clock, all 32 shires), identical to aifoundry3’s.</p>
+
+<h3 id="where-the-check-is">Where the check is</h3>
+<p>et-platform <code>devicelayer/src/DevicePcie.cpp</code>, function <code>openWhenReady()</code>, shortened below with our comments. This function is the same at <code>353f20e</code>, from which <code>dev_mngt_service</code> and <code>et-powertop</code> were built on all three machines; in the May 2026 local rebuild of <code>libdeviceLayer.a</code> on aifoundry1 (commit <code>acc7ed25d</code> in <code>/home/rehan/et-platform</code>, which changes other parts of this file); and at <code>836a4ab60</code>, the newest upstream commit in our clone.</p>
+<pre><code> 36  constexpr auto kMinReqDriverVersion = "0.15.0";
+     ...
+254  int openWhenReady(const std::string path, std::chrono::seconds timeout) {
+       // open(path, O_RDWR | O_NONBLOCK), then ioctl ETSOC1_IOCTL_GET_PCIBUS_DEVICE_NAME -&gt; "0000:01:00.0"
+270    auto curVersion = getDeviceAttributeByName(devName, "driver/module/version");
+         // reads /sys/bus/pci/devices/0000:01:00.0/driver/module/version  -&gt;  "\n" on aifoundry1
+274    if (std::regex rgx("(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)"); std::regex_search(curVersion, ...)) {
+         // major must be 0 and the version at least 0.15.0
+       } else {
+         // Driver does not follow semantic versioning
+294      throw Exception("Error unable to evaluate compatibility!");
+       }
+298    // device-state check ("... is in bad state ..."): never reached on aifoundry1</code></pre>
+<ul class="plain">
+<li>deviceLayer is linked statically into <code>dev_mngt_service</code>, <code>et-powertop</code> and every program built on <code>libdeviceLayer.a</code>. The strings <code>evaluate compatibility</code> and <code>driver/module/version</code> appear in those binaries on both aifoundry1 and aifoundry2, and in neither <code>libDM.so</code> nor <code>libetrt.so</code>.</li>
+<li><code>git grep srcversion</code> over the whole et-platform tree finds nothing.</li>
+<li>The empty-version branch has been there since <code>af48d9e43</code> (October 2022). The upstream fix <code>78ed9b0d6</code> (26 October 2025, “[et-driver] Fix version on dkms build”) says: “When version is empty, devicelayer fails to open the device as cannot check the compatibility of the driver.”</li>
+</ul>
+
+<h3 id="the-makefile-typo">The Makefile typo</h3>
+<pre><code>aifoundry1, /usr/src/et-soc1-0.20.0/Makefile lines 4-5 (= et-platform 09531e5c1):
+  ET_MODULE_VERSION=$(shell cat VERSION)
+  CFLAGS_MODULE+=-DET_MODULE_VERSION=\"$(ET_MODULE_VERSION=)\"     -&gt;  -DET_MODULE_VERSION=\"\"
+
+aifoundry2 and aifoundry3 (78ed9b0d6 and later):
+  ET_MODULE_VERSION := $(or $(shell cat VERSION 2&gt;/dev/null), $(shell cat $(src)/VERSION 2&gt;/dev/null), unknown)
+  CFLAGS_MODULE+=-DET_MODULE_VERSION=\"$(ET_MODULE_VERSION)\"      -&gt;  -DET_MODULE_VERSION=\"0.20.0\"</code></pre>
+<p><code>$(ET_MODULE_VERSION=)</code> names a make variable called <code>ET_MODULE_VERSION=</code>, which does not exist, so it expands to nothing. The driver then declares <code>MODULE_VERSION("")</code>, so <code>modinfo</code> shows an empty <code>version:</code> and the sysfs file holds one byte, a newline.</p>
+
+<h3 id="side-by-side">Side by side</h3>
+<p class="small">Observed on 25 September 2026, 13:01–14:05 PDT, except where marked. Shaded cells are where aifoundry1 differs in a way that matters.</p>
+<div class="table-wrap">
+<table class="stack">
+<thead><tr><th scope="col"></th><th scope="col">aifoundry1</th><th scope="col">aifoundry2</th><th scope="col">aifoundry3</th></tr></thead>
+<tbody>
+<tr><th scope="row">Kernel running / newest installed</th><td data-label="aifoundry1" class="bad"><code>7.0.0-31</code> / <code>7.0.0-34</code>, <strong>install stopped halfway</strong>: no initramfs, GRUB not updated</td><td data-label="aifoundry2"><code>7.0.0-31</code> / <code>7.0.0-34</code>, complete</td><td data-label="aifoundry3">same as aifoundry2</td></tr>
+<tr><th scope="row">Space left on <code>/</code></th><td data-label="aifoundry1" class="bad"><strong>about 164 MB</strong> (99% used)</td><td data-label="aifoundry2">229 GiB</td><td data-label="aifoundry3">342 GiB</td></tr>
+<tr><th scope="row">ET cards on PCIe</th><td data-label="aifoundry1">2: <code>01:00.0</code> (et0), <code>02:00.0</code> (et1)</td><td data-label="aifoundry2">1: <code>02:00.0</code></td><td data-label="aifoundry3">1: <code>02:00.0</code></td></tr>
+<tr><th scope="row">Driver bound, link</th><td data-label="aifoundry1">ET on both, Gen4 16 GT/s x8</td><td data-label="aifoundry2">same</td><td data-label="aifoundry3">same</td></tr>
+<tr><th scope="row">Device nodes</th><td data-label="aifoundry1"><code>et0_mgmt</code>, <code>et0_ops</code>, <code>et1_mgmt</code>, <code>et1_ops</code>; 0666; created 18 Sep 15:47:31–32</td><td data-label="aifoundry2"><code>et0_mgmt</code>, <code>et0_ops</code>; 0666</td><td data-label="aifoundry3">same as aifoundry2</td></tr>
+<tr><th scope="row"><code>/sys/module/et_soc1/version</code></th><td data-label="aifoundry1" class="bad"><strong>empty</strong> (1 byte, a newline)</td><td data-label="aifoundry2"><code>0.20.0</code></td><td data-label="aifoundry3"><code>0.20.0</code></td></tr>
+<tr><th scope="row"><code>srcversion</code> (checked by nothing)</th><td data-label="aifoundry1"><code>1383B256EB24A0A53F04CC7</code></td><td data-label="aifoundry2"><code>47D26A305A0428B29FB7FC4</code></td><td data-label="aifoundry3"><code>47D26A305A0428B29FB7FC4</code></td></tr>
+<tr><th scope="row">DKMS source <code>/usr/src/et-soc1-0.20.0</code></th><td data-label="aifoundry1" class="bad"><strong>exact copy of <code>09531e5c1</code></strong> (21 Oct 2025); files dated 24 Oct 2025</td><td data-label="aifoundry2">= <code>353f20e</code>; dated 12 Mar 2026</td><td data-label="aifoundry3">= <code>353f20e</code>; dated 25 Mar 2026</td></tr>
+<tr><th scope="row">Makefile version line</th><td data-label="aifoundry1" class="bad"><strong><code>$(ET_MODULE_VERSION=)</code></strong> (typo)</td><td data-label="aifoundry2">fixed</td><td data-label="aifoundry3">fixed</td></tr>
+<tr><th scope="row">Module built for 7.0.0-34</th><td data-label="aifoundry1" class="bad"><strong>version empty</strong></td><td data-label="aifoundry2"><code>0.20.0</code></td><td data-label="aifoundry3"><code>0.20.0</code></td></tr>
+<tr><th scope="row">Compiled driver code</th><td data-label="aifoundry1">same as aifoundry2’s: 48 of 51 ELF sections byte-identical (all code, data and relocations); only the module-info strings (version, <code>srcversion</code>), symbol offsets, build ID and the per-host signature differ</td><td data-label="aifoundry2">reference</td><td data-label="aifoundry3">same source as aifoundry2</td></tr>
+<tr><th scope="row">Fixed driver source on disk</th><td data-label="aifoundry1">yes: <code>/usr/src/et-platform</code> at <code>353f20e</code>, not used by DKMS</td><td data-label="aifoundry2">in use</td><td data-label="aifoundry3">in use</td></tr>
+<tr><th scope="row"><code>libDM.so</code>, <code>dev_mngt_service</code></th><td data-label="aifoundry1">sha256 <code>28712bc7…</code>, <code>a3d4c722…</code></td><td data-label="aifoundry2">identical</td><td data-label="aifoundry3">identical</td></tr>
+<tr><th scope="row"><code>libdeviceLayer.a</code> (holds the check)</th><td data-label="aifoundry1">rebuilt 1 May 2026 from <code>/home/rehan/et-platform</code> (commit <code>acc7ed25d</code>, which adds an <code>ET_DEVICES</code> device filter); check present</td><td data-label="aifoundry2">3 Jan 2026</td><td data-label="aifoundry3">3 Jan 2026</td></tr>
+<tr><th scope="row">What loads <code>et_soc1</code> at boot</th><td data-label="aifoundry1">not visible to a user; loaded at boot +3 min 42 s; no <code>modules-load.d</code> entry, no udev alias</td><td data-label="aifoundry2"><code>/etc/modules-load.d/et_soc1.conf</code> (boot +7 s)</td><td data-label="aifoundry3"><code>etsoc1-demo.service</code> runs <code>modprobe</code> (boot +15 s) <span class="inf">inferred</span></td></tr>
+<tr><th scope="row">Commands sent to the card this boot (mgmt SQ0)</th><td data-label="aifoundry1" class="bad"><strong>0</strong> on both cards</td><td data-label="aifoundry2">3.25 million</td><td data-label="aifoundry3">1.63 million</td></tr>
+<tr><th scope="row">Driver error counters</th><td data-label="aifoundry1">et0: one PMIC correctable event; et1: none; no uncorrectable errors</td><td data-label="aifoundry2">MinionCe 23, SpCe 5</td><td data-label="aifoundry3">SpCe 3</td></tr>
+<tr><th scope="row">Corrected PCIe errors at the card’s root port, this boot</th><td data-label="aifoundry1" class="bad">et0 (<code>00:01.0</code>): <strong>about 695,000</strong>; et1 (<code>00:01.1</code>): 0</td><td data-label="aifoundry2">3</td><td data-label="aifoundry3">0</td></tr>
+<tr><th scope="row"><code>/var/log/kern.log</code></th><td data-label="aifoundry1">about 280 MB</td><td data-label="aifoundry2">0.19 MB</td><td data-label="aifoundry3">0.08 MB</td></tr>
+<tr><th scope="row">Other ET driver on disk</th><td data-label="aifoundry1">older <code>esperanto</code> 0.20.0 DKMS package, built for 23 kernels, not loaded</td><td data-label="aifoundry2">none</td><td data-label="aifoundry3">none</td></tr>
+<tr><th scope="row">Others on the machine</th><td data-label="aifoundry1">another user, logged in since 18 Sep; root GitHub Actions runner</td><td data-label="aifoundry2">our experiment queue; another user; a root GitHub Actions runner</td><td data-label="aifoundry3">our sampler; the <code>etsoc1-demo</code> and <code>etsoc1-chatbot</code> services</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="reproduced-from-source">Reproduced from source</h3>
+<p>We built the driver three ways on aifoundry2, in a scratch directory against the 7.0.0-31 headers, and installed nothing:</p>
+<div class="table-wrap">
+<table class="stack">
+<thead><tr><th scope="col">Build</th><th scope="col">version</th><th scope="col">srcversion</th><th scope="col">Matches</th></tr></thead>
+<tbody>
+<tr><th scope="row">A: <code>09531e5c1</code> as it is</th><td data-label="version">empty</td><td data-label="srcversion"><code>1383B256…</code></td><td data-label="Matches">aifoundry1’s installed module</td></tr>
+<tr><th scope="row">B: <code>09531e5c1</code> with the Makefile from <code>78ed9b0d6</code></th><td data-label="version"><code>0.20.0</code></td><td data-label="srcversion"><code>1383B256…</code></td><td data-label="Matches">the minimal alternative in section 1</td></tr>
+<tr><th scope="row">C: <code>353f20e</code></th><td data-label="version"><code>0.20.0</code></td><td data-label="srcversion"><code>47D26A30…</code></td><td data-label="Matches">aifoundry2’s and aifoundry3’s installed module</td></tr>
+</tbody>
+</table>
+</div>
+<p>The code and data sections are identical in all three builds and in both installed modules. <code>srcversion</code> is a checksum of the driver’s <code>.c</code> and <code>.h</code> text, not of its Makefile. It differs only because commit <code>307e59c27</code> added a CentOS 9 condition, <code>&amp;&amp; (!defined(RHEL_MAJOR) || RHEL_MAJOR &lt; 9)</code>, to five <code>#if</code> lines in <code>et-soc1-pcie.c</code> and <code>et_pci_dev.h</code> (and one in the loopback variant, which is not built). <code>RHEL_MAJOR</code> is not defined on Ubuntu, so the compiled code does not change. Nothing in the ET stack reads <code>srcversion</code>; DKMS uses it to compare builds.</p>
+
+<h3 id="how-it-got-this-way">How it got this way</h3>
+<ul class="plain">
+<li><b>21 Oct 2025.</b> <code>09531e5c1</code> introduces the typo. About 1.5 hours after it was committed, <code>/usr/src/et-soc1-0.20.0</code> was created on aifoundry1 (directory dated 19:40); its files match that commit.</li>
+<li><b>24 Oct 2025, 15:34.</b> The source was registered again from the same tree <span class="inf">inferred</span> (file times fit <code>make dkms-remove; make dkms</code>). A leftover build there, for kernel 6.14.0-33, already has the empty version, as every build from this directory must.</li>
+<li><b>26 Oct 2025.</b> Upstream fix <code>78ed9b0d6</code>.</li>
+<li><b>Nov 2025 to 24 Sep 2026.</b> Unattended kernel-header upgrades made DKMS rebuild the broken module from the stale copy 20 times, most recently for 7.0.0-34 on 24 September.</li>
+<li><b>3 Jan 2026 and 21 Jul 2026.</b> The fixed driver was built by hand on aifoundry1, in <code>/usr/src/et-platform/et-driver</code> (for 6.14.0-37) and in <code>/home/rehan/et-platform/et-driver</code> (for 7.0.0-28). Both have version <code>0.20.0</code>, but neither was registered with DKMS, so each kernel upgrade left them behind. Whether they were ever loaded is not visible to us.</li>
+<li><b>Mar 2026.</b> aifoundry2 and aifoundry3 got DKMS from the fixed tree.</li>
+<li><b>18 Sep 2026, 15:43.</b> The current boot; <code>et_soc1</code> was loaded at 15:47:30, and both cards’ nodes appeared within 2 seconds.</li>
+</ul>
+</section>
+
+<section>
+<h2 id="4-a-separate-problem-card-et0-s-pcie-link">4. A separate problem: card et0’s PCIe link</h2>
+<p>This does not stop the cards from opening, and the module fix does not touch it. The root port above card et0 (<code>00:01.0</code>, the CPU’s x16 root port, leading to <code>01:00.0</code>) had counted <strong>695,018 corrected receiver errors</strong> (RxErr) and 5 bad DLLPs this boot at 13:34. They keep arriving at 1.0–1.4 per second while the card is idle, at random intervals. There are no non-fatal or fatal errors, and the link still runs at 16 GT/s x8. The errors are on the card-to-CPU direction: et0’s own counters are 0. For comparison, et1’s port (<code>00:01.1</code>) has 0, aifoundry2’s card has 3 for its whole boot under heavy load, and aifoundry3’s has 0. That is a bit error rate of at least about 10<sup>−11</sup>, roughly ten times the PCIe target: a marginal link.</p>
+<ul class="plain">
+<li><b>It is what fills the logs.</b> We sampled once a second for 97 seconds. <code>kern.log</code> never grew in a second without a new error. In 60 of the 70 seconds with errors it grew by exactly 527 bytes per error, the size of one four-line AER report; in the rest, the kernel’s rate limit (10 reports per 5 s) dropped some reports. <code>syslog</code> grows the same way. That is about 50 MB a day in each file, which is why <code>kern.log</code> is about 280 MB and the journal now reaches back only to 22 September. The root file system has about 164 MB left (<a href="#5-disk-and-kernel-update">section 5</a>).</li>
+<li><b>It varies between boots</b> <span class="inf">inferred</span>. From the compressed sizes of older logs, the stream was absent in the 30 August to 18 September boot and may have been present in a late-August boot. So one clean boot after a reseat is not proof of a fix.</li>
+<li><b>The risk</b> <span class="inf">inferred from the code</span>. If the link ever produces a fatal error, the ET driver gives et0 up: it answers the kernel’s error recovery with DISCONNECT and tears down et0’s queues, so et0 stays unusable until it is probed again, in practice at a reboot. <code>dev_mngt_service</code> and <code>et-powertop</code> open every card’s management node at start-up, starting with et0, so they would then fail for et1 too. Programs built on aifoundry1 against its locally rebuilt <code>libdeviceLayer.a</code> can be limited to one card with <code>ET_DEVICES=1</code>, a local addition that is not in upstream et-platform.</li>
+</ul>
+<p>What we suggest (root):</p>
+<div class="cmd"><pre><code># limit the log to 10 reports an hour; the error counters keep counting; reverts at reboot
+echo 3600000 &gt; /sys/bus/pci/devices/0000:00:01.0/aer/correctable_ratelimit_interval_ms
+# record the link detail only root can read (ASPM, link status, error masks, lane errors)
+lspci -vvv -s 00:01.0; lspci -vvv -s 01:00.0
+# watch the rate; the TOTAL_ERR_COR line should keep rising while kern.log stays quiet
+cat /sys/bus/pci/devices/0000:00:01.0/aer_dev_correctable</code></pre></div>
+<p>At a maintenance window: after the module fix, note each card’s serial number (<code>/dev/etN</code> follows probe order). Then power off, reseat et0 and check its power connector. If the errors persist, swap et0 and et1: errors that follow the card mean the card, errors that stay on <code>00:01.0</code> mean the slot or board. Forcing that slot to Gen3 in the BIOS is a fallback. Judge the result by the hourly rate in <code>aer_dev_correctable</code> over at least two boots, not by the size of <code>kern.log</code>.</p>
+</section>
+
+<section>
+<h2 id="5-disk-and-kernel-update">5. Also: a nearly full disk and a half-finished kernel update</h2>
+<p>Neither of these blocks the cards today, but both matter for the fix and for the next reboot.</p>
+<ul class="plain">
+<li><b>The root file system is nearly full.</b> <code>/</code> has about 164 MB left (99% used, 13:57). The pool is 96% allocated, mostly by <code>/home</code> (421 GB) and <code>/root</code> (27 GB). <code>/var/log</code> takes 268 MB on disk (170 MB of it the journal), and the AER reports from section 4 keep adding to it. aifoundry2 and aifoundry3 have hundreds of GB free.</li>
+<li><b>The 24 September kernel update stopped partway.</b> dpkg lists <code>linux-image-7.0.0-34-generic</code> as half-configured (<code>iF</code>). Its last <code>dpkg.log</code> entry, at 06:08:51, is the trigger that builds the initramfs and updates GRUB. After that:
+  <ul>
+  <li><code>/boot</code> has <code>vmlinuz-7.0.0-34-generic</code> but no <code>initrd.img-7.0.0-34-generic</code>, and the <code>/boot/initrd.img</code> link points at the missing file;</li>
+  <li><code>/boot/grub/grub.cfg</code> was last written on 5 September;</li>
+  <li><code>/var/lib/dpkg/updates</code> still holds entries from the interrupted run, and apt’s <code>history.log</code> has no end line for it.</li>
+  </ul>
+  On aifoundry2 and aifoundry3 the same update finished, with the initramfs and <code>grub.cfg</code> written at 06:08 and 06:30.</li>
+<li><b>What it means</b> <span class="inf">inferred</span>. The next boot most likely still starts 7.0.0-31 from the September <code>grub.cfg</code>. Booting 7.0.0-34 without an initramfs would not mount the ZFS root. A lack of space is a likely cause of the stop, but the installer’s output (<code>/var/log/apt/term.log</code>) is readable only by root and adm, so we could not confirm it. The module fix in section 1 already builds <code>et_soc1</code> for 7.0.0-34, so it does not depend on this.</li>
+</ul>
+<p>What we suggest (root), after freeing some space:</p>
+<div class="cmd"><pre><code>df -h /                                           # make room first
+dpkg --configure -a                               # finishes the 7.0.0-34 install: initramfs and GRUB
+ls -l /boot/initrd.img-7.0.0-34-generic           # should now exist
+dpkg -l linux-image-7.0.0-34-generic | tail -1    # should start with ii</code></pre></div>
+</section>
+
+<section>
+<h2 id="6-what-we-did-not-check-or-could-not-see-without-root">6. What we did not check or could not see without root</h2>
+<ul class="plain">
+<li><b>The cards’ firmware and state.</b> No command has reached either card this boot, so their firmware versions, their device state and the runtime’s device-API check are unknown until the fix. The device nodes exist, and the driver creates them only after the firmware reports ready, so both cards were up when the module loaded <span class="inf">inferred from the driver code</span>. The firmware images in aifoundry1’s <code>/opt/et</code> are a local build (<code>acc7ed25d-dirty</code>, 10 May 2026), and <code>/opt/etsw</code> holds another set (<code>d08fcdcb</code>); aifoundry2 and aifoundry3 have <code>353f20e</code> images. Images on disk need not match what is flashed: aifoundry2’s disk has BL 0.22.0 and minion 0.25.0 images, but its card reports BL 0.20.0 and minion 0.23.0. Which firmware aifoundry1’s cards run is unknown.</li>
+<li><b>The kernel log.</b> <code>dmesg</code> and the journal are closed to us, so we did not see the probe-time messages, the one PMIC correctable event on et0, or when the RxErr stream started. <code>/var/log/dmesg</code> (148 MB, readable by root and adm), written on 22 September by <code>journalctl --boot 0 --dmesg</code>, probably holds this boot’s kernel log up to that day, including the 18 September probe <span class="inf">inferred from its size</span>.</li>
+<li><b>What loads <code>et_soc1</code> at boot +3 min 42 s.</b> It is not <code>modules-load.d</code> or udev. The candidates are the root GitHub Actions runner, a root cron job or a person <span class="inf">inferred</span>; <code>/root</code> is not readable, so we could not read the runner’s workflow either.</li>
+<li><b>Whether the hand-built fixed modules</b> from January and July 2026 were ever loaded.</li>
+<li><b>The et0 link detail</b> (ASPM, per-lane errors, error masks): PCIe config space beyond 64 bytes is root-only. Whether the card or the slot is at fault needs a reseat or a swap.</li>
+<li><b>Runtime parity after the fix.</b> aifoundry1’s <code>libdeviceLayer.a</code> (1 May 2026) and <code>libetrt.so</code> (10 May 2026) were rebuilt from <code>/home/rehan/et-platform</code> and differ from aifoundry2’s. They are not part of this fault, but runtime programs on aifoundry1 will not run the same library binaries as on aifoundry2.</li>
+</ul>
+</section>
+
+<section>
+<h2 id="7-how-the-facts-were-gathered">7. How the facts were gathered</h2>
+<ul class="plain">
+<li><b>When.</b> Friday 25 September 2026, 13:01–14:05 PDT. All three machines have been up since 18 September, 15:43.</li>
+<li><b>Read-only.</b> As user <code>yaroslavvb</code> over SSH, with no sudo: sysfs, <code>/proc</code>, <code>modinfo</code>, <code>dkms status</code>, <code>lspci</code> as a user, file listings and checksums, git in our clone of et-platform, and read-only git queries in the two et-platform checkouts on aifoundry1. Nothing was installed, and no module was loaded or unloaded. On aifoundry1 the only writes were two temporary decompressed copies of the module in our home directory, deleted at once.</li>
+<li><b>No card was opened.</b> <code>who</code> on aifoundry1 showed another user logged in at every check, from 13:01 to 14:05, so we opened no <code>/dev/et*</code> node there. On aifoundry2 and aifoundry3 our own experiment queues hold the cards, so we read only sysfs and files.</li>
+<li><b>The error text</b> is from our attempts on 22 September 2026. They failed before any command reached a card; the management queue counters are still 0.</li>
+<li><b>The rebuilds</b> ran on aifoundry2 in a scratch directory (<code>make -C /lib/modules/7.0.0-31-generic/build M=&lt;dir&gt; modules</code>). The installed modules of aifoundry1 and aifoundry2 were compared section by section.</li>
+<li><b>Checked twice.</b> Each conclusion was checked by a second, independent pass along three lines: the driver and its interface, the hardware, and how the driver was deployed. All three confirmed the cause. The second passes corrected details, not the conclusion: the verification commands, the log-flood link and the start date of the error stream. A last pass re-ran the cheap checks against this page (13:54–14:05) and corrected the kernel-headers claim for old kernels, the <code>#if</code> count, the state of the 7.0.0-34 install and the <code>ET_DEVICES</code> filter in aifoundry1’s rebuilt deviceLayer.</li>
+</ul>
+</section>
+
+<script>
+/* Section anchors. Every h2/h3 gets an id (its own, or one made from its text) and a # link; clicking a heading
+   or a table-of-contents link puts #id in the URL. When the page is framed by spacesheep.dev the fragment is
+   mirrored into the outer, shareable URL (postMessage ss-hash), and an outer #fragment is forwarded in on load. */
+(function () {
+  const slug = t => t.toLowerCase().replace(/^\d+(\.\d+)*\.?\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const post = h => { if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h}, '*'); } catch (_) {} } };
+  const go = id => { try { history.replaceState(null, '', location.pathname + location.search + '#' + id); } catch (_) {}
+    const el = document.getElementById(id); if (el) el.scrollIntoView({block: 'start'}); post('#' + id); };
+  const seen = new Set();
+  document.querySelectorAll('main h2, main h3').forEach(h => {
+    if (!h.id) { let id = slug(h.textContent) || 'section', n = 2; while (seen.has(id) || document.getElementById(id)) id = slug(h.textContent) + '-' + n++; h.id = id; }
+    seen.add(h.id);
+    const a = document.createElement('a'); a.href = '#' + h.id; a.className = 'hlink'; a.textContent = '#'; a.title = 'link to this section'; h.appendChild(a);
+    h.style.cursor = 'pointer';
+    h.addEventListener('click', ev => { if (ev.target.tagName === 'A' && ev.target !== a) return; ev.preventDefault(); go(h.id); });
+  });
+  window.addEventListener('hashchange', () => post(location.hash));
+  if (location.hash) { post(location.hash); const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => el.scrollIntoView({block: 'start'}), 50); }
+})();
+</script>
+<script>
+/* Contents list, link back to the reports hub, and repository paths as links. Runs after the section-anchor
+   script above, whose h2 ids the contents list links to.
+   - Contents: a page with 6 or more h2s and no #toclist of its own gets a numbered list before its first h2.
+   - Footer: every page but the hub ends with a link to the hub's list of reports, unless it already has one.
+   - Paths: an inline <code> whose whole text is a repository path (docs/…, workloads/…, tools/…, scripts/…,
+     kernels/…, rtl-sim/…) becomes a GitHub link. Code blocks, code already in a link and globs stay as they are. */
+(function () {
+  const main = document.querySelector('main'); if (!main) return;
+  const HUB = 'https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability';
+  const BACK = '← All ET-SoC-1 measurement reports';
+  const REPO = 'https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/';
+  const text = el => { const c = el.cloneNode(true); c.querySelectorAll('.hlink').forEach(a => a.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+  const NUM = /^(?:§\s*\d+(?:\.\d+)*\.?|\d+(?:\.\d+)*\.|\d+(?:\.\d+)+)\s+/;  /* "3. ", "4.2 ", "§5 "; not "600 MHz" */
+
+  const h2s = [...main.querySelectorAll('h2')];
+  if (h2s.length >= 6 && !document.getElementById('toclist')) {
+    const nav = document.createElement('nav'); nav.className = 'card';
+    const b = document.createElement('b'); b.textContent = 'Contents';
+    const ol = document.createElement('ol'); ol.id = 'toclist';
+    h2s.forEach(h => {
+      if (!h.id) return;
+      const t = text(h), m = t.match(/^§?\s*(\d+)[.\s]/), li = document.createElement('li'), a = document.createElement('a');
+      if (m && NUM.test(t)) li.value = +m[1];
+      a.href = '#' + h.id; a.textContent = t.replace(NUM, '') || t;
+      li.appendChild(a); ol.appendChild(li);
+    });
+    nav.append(b, ol);
+    h2s[0].closest('section').parentNode.insertBefore(nav, h2s[0].closest('section'));
+  }
+
+  const h1 = main.querySelector('h1');
+  const isHub = !!h1 && /^limits of observability/i.test(text(h1));
+  const hasBack = [...document.querySelectorAll('a')].some(a => a.textContent.replace(/\s+/g, ' ').trim() === BACK);
+  if (!isHub && !hasBack) {
+    const p = document.createElement('p'); p.className = 'small'; p.style.marginTop = '40px';
+    const a = document.createElement('a'); a.href = HUB + '#reports'; a.textContent = BACK;
+    p.appendChild(a); main.appendChild(p);
+  }
+
+  const PATH = /^(docs|workloads|tools|scripts|kernels|rtl-sim)\/[\w./-]+$/;
+  main.querySelectorAll('code').forEach(c => {
+    if (c.closest('pre, a')) return;
+    const t = c.textContent.trim(); if (!PATH.test(t)) return;
+    const a = document.createElement('a'); a.href = REPO + t;
+    c.parentNode.insertBefore(a, c); a.appendChild(c);
+  });
+})();
+</script>
+<script>
+/* Copy buttons on command blocks. Falls back to selecting the text where the clipboard API is not allowed. */
+(function () {
+  document.querySelectorAll('.cmd').forEach(box => {
+    const pre = box.querySelector('pre'); if (!pre) return;
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'copy'; btn.textContent = 'Copy';
+    btn.setAttribute('aria-label', 'Copy these commands');
+    const done = t => { btn.textContent = t; setTimeout(() => { btn.textContent = 'Copy'; }, 1400); };
+    const select = () => { try { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); done('Selected'); } catch (_) {} };
+    btn.addEventListener('click', () => {
+      const t = pre.textContent;
+      try { navigator.clipboard.writeText(t).then(() => done('Copied'), select); } catch (_) { select(); }
+    });
+    box.insertBefore(btn, pre);
+  });
+})();
+</script>
+</main>
+</body>
+</html>

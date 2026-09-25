@@ -1,0 +1,8 @@
+Roman: what is broken is the et_soc1 kernel module, not the cards. Its version string is empty (/sys/module/et_soc1/version is blank; aifoundry2/3 read 0.20.0).
+Every ET tool, dev_mngt_service included, links deviceLayer. deviceLayer reads that version right after open(), finds no x.y.z and throws "Error unable to evaluate compatibility!", so no command ever reaches either card.
+Cause: DKMS on aifoundry1 builds from /usr/src/et-soc1-0.20.0, a stale copy of et-platform 09531e5c1 (Oct 21 2025). Its Makefile has the typo $(ET_MODULE_VERSION=), which upstream fixed in 78ed9b0d6 five days later. DKMS rebuilt the broken module for 7.0.0-34 too, so a reboot won't help. (It is not a srcversion mismatch or libDM, as our earlier note said.)
+Fix (root, about 5 min, with nobody on the cards): dkms remove et-soc1/0.20.0 --all. Refill /usr/src/et-soc1-0.20.0 from `git -C /usr/src/et-platform archive 353f20e et-driver`; that fixed source is already on the box. Then dkms add, dkms install -k for 7.0.0-30/-31/-34, modprobe -r et_soc1 && modprobe et_soc1, and add /etc/modules-load.d/et_soc1.conf.
+Unverified until then: which firmware the cards run and whether they answer. We opened no device, because another user was logged in.
+Separately, card et0's PCIe link logs about 1 corrected RxErr per second at root port 00:01.0 (about 696k this boot). That is what floods kern.log; worth a reseat at the next window.
+Also on 1: / has only about 164 MB left, and the 24 Sep kernel update stopped halfway (linux-image-7.0.0-34 half-configured, no initramfs, GRUB not updated). Free some space, then run dpkg --configure -a.
+Backups, exact commands, rollback, how to verify, and the evidence: https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting
