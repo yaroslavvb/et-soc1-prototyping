@@ -274,6 +274,8 @@ the review changed:
 | `8d17612` | Derive the ET-SoC-1's ridge points: the reuse each memory level demands |
 | `6f8fba9` | Index the ridge-points report in the observability hub |
 | `d04b29a` | Link every report back to the observability hub |
+| `49dd0c8` | Review every report the observability hub links: claims, consistency, cross-links, readability |
+| `7d8505f` | Keep the record of the report review: plan, verified findings, fix results and the check tools |
 
 ## Publishing notes, learned the hard way
 
