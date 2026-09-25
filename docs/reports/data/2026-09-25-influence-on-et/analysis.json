@@ -1,0 +1,1154 @@
+{
+ "generated": "2026-09-25",
+ "producer": "docs/reports/data/2026-09-25-influence-on-et/make_analysis.py",
+ "kinds": {
+  "M": "measured on an ET-SoC-1 lab card",
+  "D": "derived: arithmetic on measured numbers",
+  "S": "vendor spec",
+  "X": "published by others",
+  "O": "the influence-function report's owner (his measurements or cost model)",
+  "E": "estimate: an assumption of this page, never measured"
+ },
+ "model": {
+  "et": {
+   "sram_usable_B": {
+    "v": 72000000.0,
+    "k": "D",
+    "src": "32 shires × 2.25 MB: each 2.5 MB scratchpad less the first 256 KB (on-chip relay report)"
+   },
+   "sram_bw": {
+    "v": 2458000000000.0,
+    "k": "M",
+    "src": "docs/reports/data/2026-09-23-energy-manual/manual.json: catalogue tensor loads from the shire's own scratchpad, random data, both cards"
+   },
+   "sram_pj_B": {
+    "v": 4.208,
+    "lo": 4.011,
+    "hi": 4.365,
+    "k": "M",
+    "src": "energy manual §4.1, above idle, random data, 3 passes on each card"
+   },
+   "dram_B": {
+    "v": 32000000000.0,
+    "k": "S",
+    "src": "LPDDR4X, 32 GB per card"
+   },
+   "dram_bw": {
+    "v": 76010000000.0,
+    "k": "M",
+    "src": "energy manual §4.1, tensor loads from DRAM, both cards"
+   },
+   "dram_pj_B": {
+    "v": 129.1,
+    "lo": 127.5,
+    "hi": 131.5,
+    "k": "M",
+    "src": "energy manual §4.1, above idle, random data"
+   },
+   "idle_W": {
+    "lo": 25.13,
+    "hi": 36.33,
+    "k": "M",
+    "src": "board power at rest: aifoundry3 25.1 W at 56 °C, aifoundry2 36.3 W at 81 °C (energy manual, cards block)"
+   },
+   "peak": {
+    "fp32": {
+     "ops_per_s": 9511000000000.0,
+     "board_w": 56.57,
+     "pj_op": 2.73,
+     "k": "M/D"
+    },
+    "fp16": {
+     "ops_per_s": 19020000000000.0,
+     "board_w": 59.27,
+     "pj_op": 1.507,
+     "k": "M/D"
+    },
+    "int8": {
+     "ops_per_s": 71780000000000.0,
+     "board_w": 61.75,
+     "pj_op": 0.4338,
+     "k": "M/D"
+    }
+   },
+   "peak_src": "docs/reports/data/2026-09-18-aifoundry2/results.json: matmul benchmark, tiles in L2, aifoundry2, 600 MHz; pJ per op above the run's 30.6 W idle (D)",
+   "bit": {
+    "ops_per_s": 8377000000000.0,
+    "pj_op": 1.056,
+    "k": "E",
+    "src": "no popcount instruction: SWAR on the vector unit, about 14 packed-integer instructions per 256 bits (E) at the catalogue's measured 458 G instructions/s and 19.3 pJ each (M)"
+   },
+   "rows16": {
+    "k": "E",
+    "src": "a tensor op multiplies 16 rows of A; ops with fewer rows (one query per row) were measured only in fp32, at batch 1, where the pass stayed load-bound"
+   },
+   "l1_scp_B": {
+    "v": 3072,
+    "k": "S/M",
+    "src": "the L1 in scratchpad mode: sets 0–11, 3 KB per minion (memory-hierarchy report); a 4,096-coordinate int8 query (4 KB) does not fit, so every minion re-reads the query tiles for each tile of 16 codes it holds (E)"
+   },
+   "launch_ms": {
+    "lo": 0.2,
+    "hi": 0.4,
+    "k": "M",
+    "src": "host kernel launch on aifoundry3 (sparse-compute report); a persistent kernel avoids it"
+   },
+   "allreduce_us": {
+    "v": 2.3,
+    "k": "M",
+    "src": "32 B TensorReduce + TensorBroadcast over 1,024 minions, aifoundry2 (on-chip communication report)"
+   },
+   "atomics_spread": {
+    "ops_per_s": 1920000000.0,
+    "nj": 1.16,
+    "k": "M",
+    "src": "global atomics spread over 32 lines (hot-line report; energy from the energy manual's reruns)"
+   },
+   "pcie_Bps": {
+    "v": 15750000000.0,
+    "k": "S",
+    "src": "PCIe Gen4 x8, never timed on these cards"
+   },
+   "anchor": {
+    "bytes": 16777216,
+    "t_s": 7.523e-06,
+    "board_j": 0.0002505,
+    "above_idle_j": 6.824e-05,
+    "board_w": 34.01,
+    "source": "docs/reports/data/2026-09-18-sparsity-aifoundry3/energy-b/results.json (gemv-skip-0: board J per layer) and docs/reports/data/2026-09-18-sparsity-aifoundry3/gemv-tree-dense.jsonl (cycles per layer)",
+    "model_above_idle_j": 7.06e-05
+   }
+  },
+  "h100": {
+   "hbm_B": {
+    "v": 80000000000.0,
+    "k": "S",
+    "src": "H100 SXM datasheet"
+   },
+   "hbm_bw": {
+    "v": 3000000000000.0,
+    "spec": 3350000000000.0,
+    "k": "E",
+    "src": "90% of the 3.35 TB/s spec"
+   },
+   "l2_pin_B": {
+    "v": 37500000.0,
+    "k": "E",
+    "src": "at most three quarters of the 50 MB L2 kept pinned with an access-policy window (the true set-aside limit not checked)"
+   },
+   "l2_bw": {
+    "v": 4300000000000.0,
+    "k": "X",
+    "src": "an A100 SXM4's measured L2 read bandwidth, as a floor (memory-hierarchy report's A100 notes)"
+   },
+   "hbm_pj_B": {
+    "v": 105.0,
+    "path": 155.3,
+    "k": "X/E",
+    "src": "A100 study (Antepara et al., SC'25): 13.11 pJ/bit for the HBM level alone, standing in for Hopper's newer process and HBM3 (E); the A100's whole path through L2 and L1 is 19.41 pJ/bit (155 pJ/B), not used"
+   },
+   "l2_pj_B": {
+    "v": 37.7,
+    "path": 50.4,
+    "k": "X/E",
+    "src": "same study: 4.71 pJ/bit for the L2 level alone; 6.30 with L1 (50 pJ/B), not used"
+   },
+   "idle_W": {
+    "lo": 60.0,
+    "hi": 90.0,
+    "k": "E",
+    "src": "not measured here"
+   },
+   "launch_s": {
+    "v": 1.3e-06,
+    "k": "X",
+    "src": "per kernel with CUDA graphs, measured on an H100 (cited in the sparse-compute report)"
+   },
+   "peak": {
+    "int8": {
+     "ops_per_s": 1978900000000000.0,
+     "eff": 0.6,
+     "pj_op": 0.3158
+    },
+    "fp16": {
+     "ops_per_s": 989400000000000.0,
+     "eff": 0.6,
+     "pj_op": 0.6317
+    },
+    "fp32": {
+     "ops_per_s": 494700000000000.0,
+     "eff": 0.6,
+     "pj_op": 1.263
+    }
+   },
+   "bit": {
+    "ops_per_s": 66910000000000.0,
+    "eff": 0.6,
+    "pj_op": 1.751,
+    "k": "E",
+    "src": "popc 16 per clock per SM (CUDA C++ Programming Guide) × 132 SMs × 1.98 GHz × 32 bits, halved for the xor and the add; Hopper has no binary tensor cores. Energy: an xor, a popc and an add per 32 bits, each priced as one fp32 lane-operation at the TDP, (700 − 75) W ÷ (132 × 128 lanes × 1.98 GHz)"
+   },
+   "peak_src": "H100 SXM datasheet (dense int8, fp16/bf16, TF32); 60% sustained (E); energy per op above idle = (700 W TDP − 75 W) ÷ peak (E)"
+  },
+  "cpu": {
+   "bw": {
+    "v": 200000000000.0,
+    "k": "E",
+    "src": "one server socket's DDR5, or its L3 for a small shard"
+   },
+   "rate": {
+    "int8": 4000000000000.0,
+    "fp16": 2000000000000.0,
+    "fp32": 2000000000000.0,
+    "bit": 50000000000000.0,
+    "k": "E",
+    "src": "AVX-512 VNNI / FMA / VPOPCNTDQ on one socket"
+   },
+   "inc_W": {
+    "lo": 40.0,
+    "hi": 200.0,
+    "k": "E",
+    "src": "incremental socket power while it scores; the host is powered anyway"
+   }
+  },
+  "bytes_per": {
+   "bit": 0.125,
+   "int8": 1,
+   "fp16": 2,
+   "fp32": 4
+  },
+  "h_eff": 0.6
+ },
+ "owner": {
+  "q_grad_s": 0.25,
+  "ihvp_s": 1.06,
+  "query_energy_J": [
+   458.5,
+   917.0
+  ],
+  "amortized_query_h100h": 8.4,
+  "src": "influence-functions report §3.1 (the 8B price table: P = 8×10⁹, T = 2,048, H100 at 40% of 989 TFLOP/s); power 350–700 W is E",
+  "atlas": {
+   "P": 34122,
+   "N": 60000,
+   "Q": 100,
+   "C": 10,
+   "activation": "tanh",
+   "curvature_dtype": "float64",
+   "scan_s": 0.231,
+   "grad_pass_s": 0.558,
+   "lissa_500_s": 7.07,
+   "cg_20_s": 5.36,
+   "ekfac_query_s": 0.0061,
+   "gpu": "A100-SXM4-80GB",
+   "src": "MNIST influence atlas manifest (costs.rows[kfac].phases.scan.seconds; costs.measured; config.activation)"
+  },
+  "haiku_k": {
+   "v": 3000000.0,
+   "src": "secondhand: a summary of Grosse's 13 April 2026 talk (the owner's Bergson page, §9.4)"
+  }
+ },
+ "s1": {
+  "hbm_case": {
+   "n": 16000,
+   "k": 4096,
+   "prec": "int8",
+   "Q": 1,
+   "MB": 65.54,
+   "chips": 1,
+   "et_us": 28.4,
+   "et_mJ": [
+    1.01,
+    1.32
+   ],
+   "et_above_mJ": 0.293,
+   "et_bound": "memory",
+   "h100_where": "HBM",
+   "h100_us": 23.1,
+   "h100_mJ": [
+    8.31,
+    9.01
+   ],
+   "lead": [
+    6.3,
+    8.9
+   ]
+  },
+  "l2_case": {
+   "n": 9155,
+   "k": 4096,
+   "prec": "int8",
+   "Q": 1,
+   "MB": 37.5,
+   "chips": 1,
+   "et_us": 17.0,
+   "et_mJ": [
+    0.602,
+    0.792
+   ],
+   "et_above_mJ": 0.175,
+   "et_bound": "memory",
+   "h100_where": "L2",
+   "h100_us": 10.0,
+   "h100_mJ": [
+    2.04,
+    2.34
+   ],
+   "lead": [
+    2.6,
+    3.9
+   ]
+  },
+  "fp16_case": {
+   "n": 8000,
+   "k": 4096,
+   "prec": "fp16",
+   "Q": 1,
+   "MB": 65.54,
+   "chips": 1,
+   "et_us": 30.1,
+   "et_mJ": [
+    1.07,
+    1.4
+   ],
+   "et_above_mJ": 0.311,
+   "et_bound": "memory",
+   "h100_where": "HBM",
+   "h100_us": 23.1,
+   "h100_mJ": [
+    8.31,
+    9.01
+   ],
+   "lead": [
+    5.9,
+    8.4
+   ]
+  },
+  "hbm_case_rows16": {
+   "n": 16000,
+   "k": 4096,
+   "prec": "int8",
+   "Q": 1,
+   "MB": 65.54,
+   "chips": 1,
+   "et_us": 29.2,
+   "et_mJ": [
+    1.64,
+    1.97
+   ],
+   "et_above_mJ": 0.91,
+   "et_bound": "compute",
+   "h100_where": "HBM",
+   "h100_us": 23.1,
+   "h100_mJ": [
+    8.31,
+    9.01
+   ],
+   "lead": [
+    4.2,
+    5.5
+   ]
+  },
+  "capacity_codes_k4096": {
+   "bit": 140625,
+   "int8": 17578,
+   "fp16": 8789,
+   "fp32": 4394
+  },
+  "parity_int8": {
+   "table": [
+    {
+     "Q": 1,
+     "et_mJ_per_q": [
+      1.01,
+      1.32
+     ],
+     "h100_mJ_per_q": [
+      8.31,
+      9.01
+     ]
+    },
+    {
+     "Q": 2,
+     "et_mJ_per_q": [
+      0.535,
+      0.7
+     ],
+     "h100_mJ_per_q": [
+      4.17,
+      4.53
+     ]
+    },
+    {
+     "Q": 4,
+     "et_mJ_per_q": [
+      0.297,
+      0.39
+     ],
+     "h100_mJ_per_q": [
+      2.11,
+      2.28
+     ]
+    },
+    {
+     "Q": 8,
+     "et_mJ_per_q": [
+      0.184,
+      0.24
+     ],
+     "h100_mJ_per_q": [
+      1.07,
+      1.16
+     ]
+    },
+    {
+     "Q": 16,
+     "et_mJ_per_q": [
+      0.142,
+      0.179
+     ],
+     "h100_mJ_per_q": [
+      0.558,
+      0.602
+     ]
+    },
+    {
+     "Q": 24,
+     "et_mJ_per_q": [
+      0.128,
+      0.159
+     ],
+     "h100_mJ_per_q": [
+      0.386,
+      0.415
+     ]
+    },
+    {
+     "Q": 32,
+     "et_mJ_per_q": [
+      0.121,
+      0.149
+     ],
+     "h100_mJ_per_q": [
+      0.3,
+      0.322
+     ]
+    },
+    {
+     "Q": 48,
+     "et_mJ_per_q": [
+      0.114,
+      0.139
+     ],
+     "h100_mJ_per_q": [
+      0.215,
+      0.229
+     ]
+    },
+    {
+     "Q": 64,
+     "et_mJ_per_q": [
+      0.11,
+      0.134
+     ],
+     "h100_mJ_per_q": [
+      0.17,
+      0.181
+     ]
+    },
+    {
+     "Q": 96,
+     "et_mJ_per_q": [
+      0.106,
+      0.129
+     ],
+     "h100_mJ_per_q": [
+      0.127,
+      0.134
+     ]
+    },
+    {
+     "Q": 128,
+     "et_mJ_per_q": [
+      0.105,
+      0.127
+     ],
+     "h100_mJ_per_q": [
+      0.106,
+      0.112
+     ]
+    },
+    {
+     "Q": 192,
+     "et_mJ_per_q": [
+      0.103,
+      0.124
+     ],
+     "h100_mJ_per_q": [
+      0.0844,
+      0.088
+     ]
+    },
+    {
+     "Q": 256,
+     "et_mJ_per_q": [
+      0.103,
+      0.123
+     ],
+     "h100_mJ_per_q": [
+      0.0754,
+      0.0785
+     ]
+    },
+    {
+     "Q": 384,
+     "et_mJ_per_q": [
+      0.103,
+      0.123
+     ],
+     "h100_mJ_per_q": [
+      0.0661,
+      0.0695
+     ]
+    },
+    {
+     "Q": 512,
+     "et_mJ_per_q": [
+      0.103,
+      0.123
+     ],
+     "h100_mJ_per_q": [
+      0.0615,
+      0.065
+     ]
+    },
+    {
+     "Q": 1024,
+     "et_mJ_per_q": [
+      0.103,
+      0.123
+     ],
+     "h100_mJ_per_q": [
+      0.0548,
+      0.0582
+     ]
+    }
+   ],
+   "Q": [
+    96,
+    192
+   ]
+  },
+  "parity_fp16": {
+   "table": [
+    {
+     "Q": 1,
+     "et_mJ_per_q": [
+      1.07,
+      1.4
+     ],
+     "h100_mJ_per_q": [
+      8.31,
+      9.01
+     ]
+    },
+    {
+     "Q": 2,
+     "et_mJ_per_q": [
+      0.595,
+      0.78
+     ],
+     "h100_mJ_per_q": [
+      4.17,
+      4.53
+     ]
+    },
+    {
+     "Q": 4,
+     "et_mJ_per_q": [
+      0.357,
+      0.47
+     ],
+     "h100_mJ_per_q": [
+      2.11,
+      2.28
+     ]
+    },
+    {
+     "Q": 8,
+     "et_mJ_per_q": [
+      0.269,
+      0.344
+     ],
+     "h100_mJ_per_q": [
+      1.07,
+      1.16
+     ]
+    },
+    {
+     "Q": 16,
+     "et_mJ_per_q": [
+      0.226,
+      0.283
+     ],
+     "h100_mJ_per_q": [
+      0.558,
+      0.602
+     ]
+    },
+    {
+     "Q": 24,
+     "et_mJ_per_q": [
+      0.212,
+      0.263
+     ],
+     "h100_mJ_per_q": [
+      0.386,
+      0.415
+     ]
+    },
+    {
+     "Q": 32,
+     "et_mJ_per_q": [
+      0.205,
+      0.253
+     ],
+     "h100_mJ_per_q": [
+      0.3,
+      0.322
+     ]
+    },
+    {
+     "Q": 48,
+     "et_mJ_per_q": [
+      0.199,
+      0.244
+     ],
+     "h100_mJ_per_q": [
+      0.215,
+      0.229
+     ]
+    },
+    {
+     "Q": 64,
+     "et_mJ_per_q": [
+      0.195,
+      0.237
+     ],
+     "h100_mJ_per_q": [
+      0.17,
+      0.181
+     ]
+    },
+    {
+     "Q": 96,
+     "et_mJ_per_q": [
+      0.192,
+      0.233
+     ],
+     "h100_mJ_per_q": [
+      0.127,
+      0.134
+     ]
+    },
+    {
+     "Q": 128,
+     "et_mJ_per_q": [
+      0.19,
+      0.23
+     ],
+     "h100_mJ_per_q": [
+      0.106,
+      0.112
+     ]
+    },
+    {
+     "Q": 192,
+     "et_mJ_per_q": [
+      0.188,
+      0.228
+     ],
+     "h100_mJ_per_q": [
+      0.0844,
+      0.088
+     ]
+    },
+    {
+     "Q": 256,
+     "et_mJ_per_q": [
+      0.187,
+      0.227
+     ],
+     "h100_mJ_per_q": [
+      0.0754,
+      0.0785
+     ]
+    },
+    {
+     "Q": 384,
+     "et_mJ_per_q": [
+      0.186,
+      0.225
+     ],
+     "h100_mJ_per_q": [
+      0.0661,
+      0.0695
+     ]
+    },
+    {
+     "Q": 512,
+     "et_mJ_per_q": [
+      0.186,
+      0.225
+     ],
+     "h100_mJ_per_q": [
+      0.0615,
+      0.065
+     ]
+    },
+    {
+     "Q": 1024,
+     "et_mJ_per_q": [
+      0.186,
+      0.224
+     ],
+     "h100_mJ_per_q": [
+      0.0548,
+      0.0582
+     ]
+    }
+   ],
+   "Q": [
+    48,
+    64
+   ]
+  },
+  "q16_case": {
+   "n": 16000,
+   "k": 4096,
+   "prec": "int8",
+   "Q": 16,
+   "MB": 65.54,
+   "chips": 1,
+   "et_us": 54.0,
+   "et_mJ": [
+    2.27,
+    2.87
+   ],
+   "et_above_mJ": 0.91,
+   "et_bound": "memory",
+   "h100_where": "HBM",
+   "h100_us": 23.1,
+   "h100_mJ": [
+    8.93,
+    9.63
+   ],
+   "lead": [
+    3.1,
+    4.2
+   ]
+  }
+ },
+ "duty": {
+  "et_idle_per_query_J_at_1qps": [
+   25.13,
+   36.33
+  ],
+  "et_active_mJ": [
+   1.01,
+   1.32
+  ],
+  "ratio_idle_to_active": [
+   19000.0,
+   36000.0
+  ],
+  "hbm_case": {
+   "chips": 1,
+   "h100_mJ": [
+    8.31,
+    9.01
+   ],
+   "cpu_mJ": [
+    13.1,
+    65.5
+   ],
+   "vs_h100_qps": [
+    2900.0,
+    4500.0
+   ],
+   "vs_cpu_qps": [
+    390.0,
+    2800.0
+   ]
+  },
+  "l2_case": {
+   "chips": 1,
+   "h100_mJ": [
+    2.04,
+    2.34
+   ],
+   "cpu_mJ": [
+    7.5,
+    37.5
+   ],
+   "vs_h100_qps": [
+    12000.0,
+    20000.0
+   ],
+   "vs_cpu_qps": [
+    670.0,
+    5000.0
+   ]
+  },
+  "breakeven_vs_h100_qps": [
+   2900.0,
+   20000.0
+  ],
+  "breakeven_vs_cpu_qps": [
+   390.0,
+   5000.0
+  ],
+  "query_side_J": [
+   458.5,
+   917.0
+  ],
+  "step_share_of_query": [
+   9.1e-06,
+   2e-05
+  ]
+ },
+ "kills": {
+  "k1": {
+   "MB": 64.0,
+   "ms": 0.84,
+   "mJ": [
+    29.0,
+    39.0
+   ],
+   "pcie_ms": 4.1,
+   "h100_us": 21.0,
+   "x_pass": [
+    30.0,
+    140.0
+   ]
+  },
+  "k4": {
+   "MB": 25.0,
+   "ms": 0.33,
+   "mJ": [
+    11.0,
+    15.0
+   ]
+  },
+  "k5": {
+   "et_int8_pJ": [
+    15.0,
+    20.0
+   ],
+   "h100_bit_pJ": [
+    18.0,
+    19.0
+   ]
+  },
+  "k7": {
+   "chips_1e7": 569,
+   "kW_1e7": [
+    14.0,
+    21.0
+   ],
+   "hot_tier": {
+    "chips": 6,
+    "h100_mJ": [
+     51.5,
+     55.7
+    ],
+    "cpu_mJ": [
+     81.9,
+     410.0
+    ],
+    "vs_h100_qps": [
+     2800.0,
+     4400.0
+    ],
+    "vs_cpu_qps": [
+     370.0,
+     2700.0
+    ]
+   }
+  }
+ },
+ "s2": {
+  "scan_flop": 4110000000000,
+  "a100_s": 0.231,
+  "a100_tflops_nominal": 17.8,
+  "a100_J": [
+   58.0,
+   92.0
+  ],
+  "a100_W": [
+   250,
+   400
+  ],
+  "et": [
+   {
+    "prec": "fp16",
+    "eff": 1.0,
+    "s": 0.216,
+    "J": 12.8
+   },
+   {
+    "prec": "fp32",
+    "eff": 1.0,
+    "s": 0.432,
+    "J": 24.4
+   },
+   {
+    "prec": "fp32",
+    "eff": 0.3,
+    "s": 1.44,
+    "J": 81.4
+   },
+   {
+    "prec": "fp32",
+    "eff": 0.1,
+    "s": 4.32,
+    "J": 244.0
+   }
+  ],
+  "breakeven_eff_fp32": [
+   0.26,
+   0.42
+  ],
+  "breakeven_eff_fp16": [
+   0.14,
+   0.22
+  ],
+  "time_eff_needed": {
+   "fp16": 0.93,
+   "fp32": 1.9
+  },
+  "atlas_bytes": {
+   "weights_KB": 136.0,
+   "images_MB": 11.8,
+   "queries_MB": 13.6
+  },
+  "lissa_ms_per_step": 14.0,
+  "cg_ms_per_iter": 268.0
+ },
+ "dense": {
+  "slower": [
+   21.0,
+   35.0
+  ],
+  "energy": [
+   1.8,
+   2.9
+  ],
+  "src": "ET fp16 at 60–100% of its measured 19.0 TFLOP/s and 59.3 W board (M/E) against an H100 at 40% of 989 TFLOP/s and 700 W (the owner's model, O/S)"
+ },
+ "pipeline": [
+  {
+   "key": "scan",
+   "label": "Scan 10⁷ candidates by recomputing gradients",
+   "h": 702,
+   "per": "per batch of 100 queries",
+   "fit": "no",
+   "k": "O",
+   "why": "dense backprop, the bill itself; one ET card is 21–35× slower and spends 1.8–2.9× the energy",
+   "J": 1770000000.0
+  },
+  {
+   "key": "build",
+   "label": "Build a sketch index of 10⁷ gradients",
+   "h": 1150,
+   "per": "once per checkpoint",
+   "fit": "no",
+   "k": "O",
+   "why": "dense backprop plus a projection; the sparse sketches would need 16 GB per sequence over a 15.75 GB/s link",
+   "J": 2900000000.0
+  },
+  {
+   "key": "valid",
+   "label": "Validation retrains (LDS)",
+   "h": 506,
+   "per": "per method",
+   "fit": "no",
+   "k": "O",
+   "why": "training runs",
+   "J": 1280000000.0
+  },
+  {
+   "key": "rerank",
+   "label": "Exact rerank of the top 10⁴ at 70B",
+   "h": 6.0,
+   "per": "per query",
+   "fit": "no",
+   "k": "E",
+   "why": "10⁴ fresh gradients; with an EK-FAC iHVP it is over 99.9% of a query's energy",
+   "J": 15100000.0
+  },
+  {
+   "key": "stats",
+   "label": "EK-FAC curvature statistics",
+   "h": 2.07,
+   "per": "once per checkpoint",
+   "fit": "no",
+   "k": "O",
+   "why": "dense gradient passes",
+   "J": 5220000.0
+  },
+  {
+   "key": "astra",
+   "label": "Iterative iHVP (ASTRA, 300 steps)",
+   "h": 1.41,
+   "per": "per query",
+   "fit": "no",
+   "k": "O",
+   "why": "minibatch Hessian-vector products are gradients",
+   "J": 3550000.0
+  },
+  {
+   "key": "qgrad",
+   "label": "Query gradients, 100 queries",
+   "h": 0.007,
+   "per": "per batch",
+   "fit": "no",
+   "k": "O",
+   "why": "dense backprop; an 8B model in fp16 does not fit one card's 32 GB comfortably, and there is no bf16",
+   "J": 17600.0
+  },
+  {
+   "key": "eigh",
+   "label": "Eigendecompose the Kronecker factors",
+   "h": 0.002,
+   "per": "once per checkpoint",
+   "fit": "no",
+   "k": "O",
+   "why": "needs fp64 (the chip has none, and no hardware divide or square root); factors up to 14,336² (0.8 GB in fp32, 1.6 GB in fp64) exceed the 72 MB of SRAM",
+   "J": 5040.0
+  },
+  {
+   "key": "ihvp",
+   "label": "EK-FAC iHVP (1.06 s)",
+   "h": 0.000294,
+   "per": "per query",
+   "fit": "no",
+   "k": "O",
+   "why": "compute-bound matmuls against 108 GB of resident bases: 1,500 chips of SRAM to keep them on chip",
+   "J": 741.0
+  },
+  {
+   "key": "lookup",
+   "label": "Stream the whole 82 GB sketch index, 1 query",
+   "h": 6.8e-06,
+   "per": "per query",
+   "fit": "no",
+   "k": "S",
+   "why": "bandwidth-bound: the ET's DRAM gives 76 GB/s at 129 pJ/B above idle, 44× slower than HBM, and holds 32 GB",
+   "J": 17.1
+  },
+  {
+   "key": "prefilter",
+   "label": "Lexical prefilter (BM25/TF-IDF)",
+   "h": 3.53e-07,
+   "per": "per query",
+   "fit": "killed",
+   "k": "X",
+   "why": "ET-shaped (per-core document ownership, no atomics) but about 10⁻⁶ of the bill; the host CPU's inverted index does it",
+   "J": 0.89
+  },
+  {
+   "key": "scatter",
+   "label": "Scatter the gradients' sparse parts into sketches",
+   "h": 7.02,
+   "per": "per batch of 100 queries (at most 1% of the scan)",
+   "fit": "killed",
+   "k": "E",
+   "why": "the one ET-shaped step with real size, but the data is born in the GPU's backward pass (16 GB per sequence would have to cross a 15.75 GB/s link); GPUs keep the buckets in L2 or avoid the scatter; the chip's gather/scatter rate is unmeasured (S3)",
+   "J": 17700000.0
+  },
+  {
+   "key": "shard",
+   "label": "Score a static 65 MB shard, 1 query (S1)",
+   "h": 6.42e-09,
+   "per": "per query",
+   "fit": "research",
+   "k": "E",
+   "why": "the one physical edge: 4.2 pJ/B from the chip's own SRAM; no time win, and it needs a busy card",
+   "J": 0.0162
+  },
+  {
+   "key": "topk",
+   "label": "Select the top k (fused into scoring)",
+   "h": 2.78e-10,
+   "per": "per query",
+   "fit": "feature",
+   "k": "E",
+   "why": "10⁴–1.5×10⁵ heap inserts per query even at N = 10¹⁰: free in a GPU kernel's epilogue; kept only as part of S1",
+   "J": 0.000701
+  }
+ ],
+ "presets": [
+  {
+   "key": "shard",
+   "label": "S1: a static shard",
+   "n": 16000,
+   "k": 4096,
+   "prec": "int8",
+   "Q": 1,
+   "lam": 1,
+   "where": "sram"
+  },
+  {
+   "key": "busy",
+   "label": "The same, kept busy",
+   "n": 16000,
+   "k": 4096,
+   "prec": "int8",
+   "Q": 1,
+   "lam": 10000.0,
+   "where": "sram"
+  },
+  {
+   "key": "less",
+   "label": "Fine-tuning attribution",
+   "n": 270000,
+   "k": 8192,
+   "prec": "int8",
+   "Q": 100,
+   "lam": 1,
+   "where": "sram"
+  },
+  {
+   "key": "owner",
+   "label": "The author's 10⁷ index",
+   "n": 10000000.0,
+   "k": 4096,
+   "prec": "int8",
+   "Q": 1,
+   "lam": 1,
+   "where": "sram"
+  },
+  {
+   "key": "haiku",
+   "label": "3 million dimensions",
+   "n": 1000000.0,
+   "k": 3000000.0,
+   "prec": "fp16",
+   "Q": 1,
+   "lam": 1,
+   "where": "dram"
+  }
+ ],
+ "topk_inserts": {
+  "N": [
+   1000000000.0,
+   10000000000.0
+  ],
+  "k": 10000.0,
+  "inserts": [
+   130000.0,
+   150000.0
+  ]
+ }
+}

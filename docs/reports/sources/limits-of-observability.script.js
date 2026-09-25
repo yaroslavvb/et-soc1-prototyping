@@ -587,10 +587,12 @@ const rawLink = p => { const PRE = 'docs/reports/data/'; return `<a href="${REPO
 /* ---------- V2: the reports and sessions map (§1) ---------- */
 (function () {
   const GROUPS = [['This hub', 'Hub', 'var(--ref)'], ['Energy and power', 'Energy and power', 'var(--c1)'], ['Contention and moving data', 'Contention', 'var(--c3)'],
-    ['Memory and compute baselines, 18–19 September', 'Baselines', 'var(--c4)'], ['Briefs: analysis, no new measurements', 'Briefs', 'var(--c7)']];
+    ['Memory and compute baselines, 18–19 September', 'Baselines', 'var(--c4)'], ['Research and exploratory', 'Research', 'var(--c5)'],
+    ['Briefs: analysis, no new measurements', 'Briefs', 'var(--c7)']];
   const gOf = Object.fromEntries(GROUPS.map(([k, s, c], i) => [k, {s, c, i}]));
   const base = u => u.split('#')[0];
   const REP = D.reports.map((r, i) => ({...r, key: 'r' + i, kind: 'report', grp: r.group || 'This hub', day: +r.pub.slice(8, 10)}));
+  const NDAYS = Math.max(7, ...REP.map(r => r.day - 17));  // the timeline runs from 18 September to the newest report
   const repOf = u => (u.startsWith('#') ? REP[0] : REP.find(r => base(r.url) === base(u)));
   const byShort = s => REP.find(r => r.short === s);
   const parseWhen = w => {
@@ -665,8 +667,8 @@ const rawLink = p => { const PRE = 'docs/reports/data/'; return `<a href="${REPO
     const pos = {};  // key -> {x, y, w, h}
     const ses = SES.filter(showCard);
     if (!vert) {
-      const L = 112, R = 10, T = 30, x = t => L + t / 7 * (W - L - R), rowS = 19, rowR = 26;
-      for (let d = 0; d <= 7; d++) { CK.el('line', {x1: x(d), x2: x(d), y1: T - 6, y2: f.H - 8, class: 'grid-line'}, gE); if (d < 7) CK.txt(gE, x(d + 0.5), T - 12, `${18 + d} Sep`, 'tick', 'middle'); }
+      const L = 112, R = 10, T = 30, x = t => L + t / NDAYS * (W - L - R), rowS = 19, rowR = 26;
+      for (let d = 0; d <= NDAYS; d++) { CK.el('line', {x1: x(d), x2: x(d), y1: T - 6, y2: f.H - 8, class: 'grid-line'}, gE); if (d < NDAYS) CK.txt(gE, x(d + 0.5), T - 12, `${18 + d} Sep`, 'tick', 'middle'); }
       let y = T + 4;
       const lanes = [['a2', 'aifoundry2'], ['both', 'both cards'], ['a3', 'aifoundry3'], ['none', 'analysis']];
       lanes.forEach(([ln, lab]) => {
@@ -689,7 +691,7 @@ const rawLink = p => { const PRE = 'docs/reports/data/'; return `<a href="${REPO
       });
     } else {
       const T = 16, dayH = 158, xT = 40, lw = 58, xA = xT + 4, xB = xA + lw + 4, xR = xB + lw + 12, y = t => T + t * dayH;
-      for (let d = 0; d <= 7; d++) { CK.el('line', {x1: 0, x2: W, y1: y(d), y2: y(d), class: 'grid-line'}, gE); if (d < 7) { CK.txt(gE, 2, y(d) + 14, `${18 + d}`, 'lab-strong'); CK.txt(gE, 2, y(d) + 28, 'Sep', 'tick'); } }
+      for (let d = 0; d <= NDAYS; d++) { CK.el('line', {x1: 0, x2: W, y1: y(d), y2: y(d), class: 'grid-line'}, gE); if (d < NDAYS) { CK.txt(gE, 2, y(d) + 14, `${18 + d}`, 'lab-strong'); CK.txt(gE, 2, y(d) + 28, 'Sep', 'tick'); } }
       CK.txt(gE, xA + lw / 2, T - 4, 'a2', 'tick', 'middle'); CK.txt(gE, xB + lw / 2, T - 4, 'a3', 'tick', 'middle');
       const bottom = {a2: 0, a3: 0};
       ses.slice().sort((p, q) => p.t0 - q.t0).forEach(s => {
@@ -750,7 +752,7 @@ const rawLink = p => { const PRE = 'docs/reports/data/'; return `<a href="${REPO
     applySel();
   }
   const height = W => {
-    if (W < 600) return 16 + 7 * 158 + 12;
+    if (W < 600) return 16 + NDAYS * 158 + 12;
     const lanesRows = 6, repRows = 12;  // an upper bound; the frame is resized after the first draw
     return 30 + lanesRows * 19 + 40 + repRows * 26 + 40;
   };

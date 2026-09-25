@@ -481,16 +481,6 @@
   },
   {
    "group": "Memory and compute baselines, 18–19 September",
-   "title": "Sparse compute",
-   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute",
-   "date": "18 Sep",
-   "what": "What the tensor unit does with zeros, on aifoundry3: zero-skip saves power (86% in a TensorFMA loop on small integers, two runs) but never a cycle; masked loads and skipped empty slices take a batch-1 1024×4096 fp32 layer held in SRAM from 7.5 to 2.1 µs at 99% zeros (one run); narrow lanes against divergence; six scenarios where the chip could beat an A100. Its power result is the one the Horace experiment later resolved into flips.",
-   "instruments": "cycle counter, board power polled through dev_mngt_service",
-   "short": "Sparse compute",
-   "pub": "2026-09-18"
-  },
-  {
-   "group": "Memory and compute baselines, 18–19 September",
    "title": "Ridge points",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points",
    "date": "18 Sep (published 24 Sep)",
@@ -508,6 +498,26 @@
    "instruments": "host wall clock (kernelLaunch → waitForStream)",
    "short": "Test drive",
    "pub": "2026-09-18"
+  },
+  {
+   "group": "Research and exploratory",
+   "title": "Sparse compute",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute",
+   "date": "18 Sep",
+   "what": "What the tensor unit does with zeros, on aifoundry3: zero-skip saves power (86% in a TensorFMA loop on small integers, two runs) but never a cycle; masked loads and skipped empty slices take a batch-1 1024×4096 fp32 layer held in SRAM from 7.5 to 2.1 µs at 99% zeros (one run); narrow lanes against divergence; six scenarios where the chip could beat an A100. Its power result is the one the Horace experiment later resolved into flips.",
+   "instruments": "cycle counter, board power polled through dev_mngt_service",
+   "short": "Sparse compute",
+   "pub": "2026-09-18"
+  },
+  {
+   "title": "Influence functions on the ET-SoC-1",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions",
+   "date": "25 Sep",
+   "what": "Exploratory, estimates from the measured numbers: which steps of large-scale influence-function work suit the chip. None of a big lab's bill does; one narrow case survives, scoring a small fixed index held in on-chip SRAM a few queries at a time, and a first experiment would settle it.",
+   "instruments": "none: desk analysis of the set's measurements",
+   "short": "Influence functions",
+   "pub": "2026-09-25",
+   "group": "Research and exploratory"
   },
   {
    "group": "Briefs: analysis, no new measurements",

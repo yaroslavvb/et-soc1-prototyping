@@ -1,0 +1,1476 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Influence functions on the ET-SoC-1 · ET-SoC-1</title>
+<meta name="description" content="Exploratory desk analysis, estimates not measurements: which steps of large-scale influence-function work (training-data attribution) could suit the ET-SoC-1. None of the bill does; finding the most influential examples is cheap selection over expensive dense scores. Two narrow research items survive: scoring a static shard held in the chip's 72 MB of SRAM at a few queries per pass (6–9× less board energy per pass than an H100 reading HBM, no faster, and only while the card is kept busy), and an MNIST-sized pipeline run on one chip; plus a first experiment that would settle them.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --code-bg: #f1f0ec;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c7: #4a3aa7; --ref: #8c8b85;
+  --ok: #008300; --warn: #eda100; --bad: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+    --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+  --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-text-size-adjust: 100%; }
+main { max-width: 940px; margin: 0 auto; padding: 28px 16px 72px; }
+h1 { font-size: 1.75rem; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; margin: 44px 0 10px; }
+h3 { font-size: 1rem; margin: 22px 0 8px; }
+.byline { color: var(--ink-2); font-size: 0.9rem; margin: 0 0 22px; }
+.lede { font-size: 1.05rem; }
+.small { font-size: 0.85rem; color: var(--ink-2); }
+a { color: var(--c1); }
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre code { padding: 0; background: none; border-radius: 0; font-size: inherit; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 18px 0 8px; }
+.kpi .lab { color: var(--ink-2); font-size: 0.8rem; }
+.kpi .val { font-size: 1.5rem; font-weight: 650; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.kpi .sub { color: var(--ink-2); font-size: 0.8rem; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.chart.scroll svg { min-width: 640px; }
+.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 320px; display: none; }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lab { fill: var(--ink-2); font-size: 12px; }
+.lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; }
+td.lvl { font-weight: 600; white-space: nowrap; }
+.wide table { min-width: 760px; }
+.chip { display: inline-block; font-size: 0.74rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid transparent; }
+.chip.works_now { color: var(--ok); border-color: var(--ok); }
+.chip.needs_fw_change { color: var(--c1); border-color: var(--c1); }
+.chip.needs_tooling { color: var(--warn); border-color: var(--warn); }
+.chip.research_only { color: var(--muted); border-color: var(--muted); }
+.chip.impossible_on_silicon { color: var(--bad); border-color: var(--bad); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.82rem; color: var(--ink-2); margin: 6px 0 8px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 6px; }
+.controls button { font: inherit; font-size: 0.82rem; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 12px; cursor: pointer; min-height: 30px; }
+.controls button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.verif { font-size: 0.74rem; color: var(--muted); white-space: nowrap; }
+.verif.confirmed::before { content: "✓ "; color: var(--ok); }
+.verif.disputed::before { content: "± "; color: var(--warn); }
+.verif.unverified::before { content: "· "; }
+ol li, ul li { margin: 5px 0; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--ink-2); font-size: 0.9rem; }
+.chart-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.s1 { stroke: var(--c1); } .s2 { stroke: var(--c2); } .s3 { stroke: var(--c3); } .s4 { stroke: var(--c4); } .s5 { stroke: var(--c5); }
+.ln { fill: none; stroke-width: 2; stroke-linejoin: round; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.math-display { display: block; overflow-x: auto; overflow-y: hidden; max-width: 100%; margin: 16px 0 18px;
+  padding: 2px 0; text-align: center; color: var(--ink); }
+.math-display svg { max-width: none; }
+.math-inline { color: var(--ink); }
+.math-inline svg, .math-display svg { vertical-align: middle; }
+h2, h3 { scroll-margin-top: 12px; }
+.hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
+/* chartkit:css:begin (the chart toolkit's CSS; scripts/paste-chartkit.py copies this block into standalone pages) */
+.ck-frame { position: relative; width: 100%; }
+.ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ck-frame svg { display: block; max-width: none; height: auto; }
+.ck-frame svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.ck-frame .tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame .lab { fill: var(--ink-2); font-size: 12px; }
+.ck-frame .lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ck-frame .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-axis { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-hit { fill: transparent; stroke: none; }
+.ck-tip { position: absolute; z-index: 5; pointer-events: none; display: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border, var(--grid)); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: min(320px, calc(100% - 8px)); }
+.ck-frame svg [tabindex] { outline: none; }
+.ck-frame svg [tabindex]:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse)[tabindex]:not(.ck-hit):focus-visible,
+.ck-frame svg [tabindex]:focus-visible > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse).ck-active:not(.ck-hit),
+.ck-frame svg .ck-active > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 1.5px; }
+.ck-hidden { display: none !important; }
+.ck-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 8px 0 6px; }
+.ck-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 8px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-legend .ck-li { display: inline-flex; align-items: center; gap: 6px; }
+.ck-legend button.ck-li { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 3px 10px; min-height: 32px; cursor: pointer; }
+.ck-legend button.ck-li[aria-pressed="false"] { opacity: 0.55; text-decoration: line-through; }
+.ck-legend svg { flex: none; overflow: visible; }
+.ck-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.82rem; }
+.ck-seg-label { color: var(--ink-2); }
+.ck-seg-group { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ck-seg [role="radio"] { font: inherit; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-seg [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-range input[type="range"] { flex: 0 1 200px; width: 200px; min-width: 120px; min-height: 32px; margin: 0; accent-color: var(--c1); }
+.ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
+   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
+th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+th.num { white-space: normal; }
+@media (max-width: 599px) {
+  table.stack, .wide table.stack { min-width: 0; }
+  table.stack thead { display: none; }
+  table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { border-bottom: 1px solid var(--grid); padding: 6px 0; }
+  table.stack td, table.stack td.num { border: 0; padding: 2px 0; text-align: left; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+  table.stack td:first-child::before { content: none; }
+  table.stack td:first-child { font-weight: 600; }
+}
+@media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* chartkit:css:end */
+</style>
+</head>
+<body>
+<main>
+<style>
+.ev { display: inline-block; font-size: 0.66rem; font-weight: 650; line-height: 1; padding: 2px 4px 1px; margin: 0 1px 0 3px;
+  border-radius: 4px; border: 1px solid var(--border); color: var(--ink-2); vertical-align: 2px; font-variant-numeric: tabular-nums; }
+.ev.m { color: var(--ok); border-color: var(--ok); }
+.ev.e { color: var(--warn); border-color: var(--warn); }
+.marker { display: inline-block; font-weight: 650; color: var(--warn); border: 1px solid var(--warn); border-radius: 999px; padding: 0 8px; }
+.evkey { display: grid; grid-template-columns: max-content 1fr; gap: 4px 10px; margin: 8px 0 0; font-size: 0.86rem; }
+.evkey dt { margin: 0; } .evkey dd { margin: 0; color: var(--ink-2); }
+.cand { margin: 10px 0 0; }
+.cand dt { font-weight: 650; margin-top: 10px; }
+.cand dd { margin: 2px 0 0 0; }
+.explorer .ck-controls { gap: 8px 18px; }
+.explorer .kpis { margin: 10px 0 4px; }
+.explorer .kpi .val { font-size: 1.2rem; }
+.bind { font-size: 0.86rem; color: var(--ink-2); margin: 4px 0 10px; }
+#x-preset .ck-seg-label { font-size: 0.82rem; }
+#k-table td:first-child, #pipe-table td:first-child { min-width: 9em; }
+@media (max-width: 599px) {
+  .explorer .ck-range { width: 100%; }
+  .explorer .ck-range label { flex: 1 0 100%; }
+  .explorer .ck-range input[type="range"] { flex: 1 1 auto; width: auto; }
+  .explorer .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .explorer .kpi { padding: 10px; }
+  .explorer .kpi .val { font-size: 1.05rem; }
+}
+</style>
+<h1>Influence functions on the ET-SoC-1: one small step fits, none of the bill does</h1>
+<p class="byline">25 September 2026 · <span class="marker">exploratory: estimates, not measurements</span> · desk analysis built on
+numbers measured on aifoundry2 and aifoundry3; no card was run for this page · H100 and A100 figures are spec, published or
+estimated, as tagged · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+
+<p class="lede">The question, from the author of the
+<a href="https://spacesheep.dev/@yaroslavvb/influence-functions-hessians-sketching-weak-factoring">influence-functions report</a>:
+which steps of large-scale influence-function work, the training-data attribution an interpretability team at a big lab
+runs, might this chip be uniquely suited to speed up? Perhaps finding the most influential training examples?</p>
+<p class="lede"><b>No step that matters to a big lab's influence bill suits the ET-SoC-1, and finding the most influential
+examples is not one either.</b> Picking the top k is about <span data-d="topk_inserts.inserts" data-f="sci">1.3×10⁵–1.5×10⁵</span>
+heap inserts per query even over 10¹⁰ candidates, free inside a GPU's scoring kernel. The cost lies in producing the
+scores: dense gradient work, on which one ET card is <span data-d="dense.slower" data-dp="0">21–35</span>× slower than an H100
+and spends <span data-d="dense.energy" data-dp="1">1.8–2.9</span>× the energy. Two narrow items survive, as exploratory research on
+the chip's handling of sparse and irregular work rather than as accelerators. <b>S1</b>: scoring a fixed shard of sketched training gradients held in the
+chip's 72 MB of on-chip SRAM, a few queries at a time, with the top k kept in the same pass. That spends
+<span data-d="s1.hbm_case.lead" data-dp="0">6–9</span>× less board energy per pass than an H100 reading its HBM and
+<span data-d="s1.l2_case.lead" data-dp="0">3–4</span>× less than one holding the shard in its L2, and it is no faster.
+<b>S2</b>: an MNIST-sized influence pipeline run entirely on one chip, which I expect to lose to the author's measured A100.
+A third item is a measurement: the chip's gather and scatter rates, which every sparse idea here waits on.</p>
+<p><b>How sure.</b> The ET side scales one measured kernel: a 1024×4096 fp32 layer read from the scratchpads in 7.5 µs for
+250 µJ of board energy (aifoundry3, one run), which the model below reproduces to within 5% above idle. The H100 side is spec, plus energies per
+byte measured on an A100; nobody has measured what an H100 spends on a 20 µs kernel, and that one number sets S1's lead.
+The verdict on value does not hang on either. The steps that survive are under a millionth of an amortized query; the
+one ET-shaped step with real size, scattering a gradient's sparse parts into a sketch, happens where the gradient is born, on
+the GPU.
+And S1's lead needs the card busy: at one query a second, its 25–36 W at rest cost 25–36 J per query, about
+<span data-d="duty.ratio_idle_to_active" data-f="int">19,000–36,000</span> times the pass itself. It breaks even with an
+H100 that is in the server anyway only above <span data-d="duty.breakeven_vs_h100_qps" data-f="r2">2,900–20,000</span>
+queries a second, rates at which queries batch and the lead goes.</p>
+<p><b>What would settle it.</b> One new kernel on a lab card (<a href="#the-first-experiment-on-a-lab-card">section 5</a>): score a
+static 65 MB int8 shard at 1 to 64 queries per pass with a fused top-k, next to the same scoring metered on a GPU. S1 is
+dead if one query costs 3 mJ or more of board energy, or if the GPU comes within 3×.</p>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">Share of an amortized query that S1 touches</div><div class="val">about 10⁻⁹</div><div class="sub">the author's 8B model: 8.4 H100-hours per query, against about 23 µs of H100 time to score a shard</div></div>
+  <div class="card kpi"><div class="lab">Dense gradient work, one ET card against an H100</div><div class="val"><span data-d="dense.slower" data-dp="0">21–35</span>× slower</div><div class="sub"><span data-d="dense.energy" data-dp="1">1.8–2.9</span>× the energy; this work is over 99% of the bill</div></div>
+  <div class="card kpi"><div class="lab">S1, board energy per pass at one query</div><div class="val"><span data-d="s1.hbm_case.lead" data-dp="0">6–9</span>× less</div><div class="sub">than an H100 reading HBM (<span data-d="s1.l2_case.lead" data-dp="0">3–4</span>× if the shard is pinned in L2); no faster: <span data-d="s1.hbm_case.et_us" data-dp="0">28</span> µs against <span data-d="s1.hbm_case.h100_us" data-dp="0">23</span> µs</div></div>
+  <div class="card kpi"><div class="lab">Arrival rate S1 needs to pay for its idle card</div><div class="val"><span data-d="duty.breakeven_vs_h100_qps" data-f="r2">2,900–20,000</span>/s</div><div class="sub">queries a second, against an H100 already in the server; <span data-d="duty.breakeven_vs_cpu_qps" data-f="r2">390–5,000</span>/s against the host CPU</div></div>
+</div>
+
+<details class="terms small"><summary>Terms used on this page</summary>
+<p>The ET-SoC-1's compute cores are <i>minions</i>, small in-order RISC-V cores with a vector unit and a tensor unit, 32 to a
+<i>shire</i>; 1,024 of them run kernels. Each shire's SRAM holds a 2.5 MB <i>scratchpad</i>, software-managed memory any
+shire can address, of which about 2.25 MB is usable here: 72 MB on the chip. The tensor unit multiplies 16-row tiles
+(<i>TensorFMA</i> in fp32 and fp16, <i>TensorIMA8A32</i> in int8) fed by <i>TensorLoad</i>; a hardware tree
+(<i>TensorReduce</i>) sums or takes the maximum across minions. More in the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
+<p>An <i>influence function</i> scores how much a training example moved a model's output on a <i>query</i>: the query's
+gradient, multiplied by the inverse of the curvature (an <i>iHVP</i>, here usually with <i>EK-FAC</i>, a Kronecker-factored
+approximation), dotted with the training example's gradient. A <i>scan</i> recomputes that gradient for each of N
+<i>candidates</i>; a <i>sketch</i> stores each one projected to k coordinates, so a query becomes k-dimensional dot products
+against an <i>index</i>. <i>Recall then rerank</i>: take the top k′ from the sketches, then score those exactly. <i>Q</i> is the
+number of queries scored in one pass over the data.</p></details>
+
+<div class="card small" id="evidence-box"><b>How to read the numbers.</b> Every figure carries a tag.
+<dl class="evkey">
+<dt><span class="ev m">M</span></dt><dd>measured on an ET-SoC-1 lab card, in the linked reports. As in the rest of the set, a measured
+statement that names no card holds on both; a named card means that card only.</dd>
+<dt><span class="ev">D</span></dt><dd>derived: arithmetic on measured numbers, nothing new measured.</dd>
+<dt><span class="ev">S</span></dt><dd>vendor spec: datasheets and programmer's manuals.</dd>
+<dt><span class="ev">X</span></dt><dd>published by others, measured on their hardware (for the GPUs, often an A100 standing in for an H100).</dd>
+<dt><span class="ev">O</span></dt><dd>the influence-functions report's author: his measurements (the MNIST atlas, on an A100) or his 8B cost model.</dd>
+<dt><span class="ev e">E</span></dt><dd>estimate: an assumption of this page, never measured. Every conclusion below leans on at least one.</dd>
+</dl>
+<p style="margin:8px 0 0">The numbers are computed by <code>docs/reports/data/2026-09-25-influence-on-et/make_analysis.py</code>, which reads the
+measured ones from the repository's data files and states the rest with their sources.</p></div>
+
+<h2>1. Where the cost of influence functions goes</h2>
+<p>The author's report splits the work into four phases paid on different schedules: fit the curvature once per checkpoint,
+precondition each query once (the iHVP), scan the candidates once per batch of queries, and validate once per method. At
+the shape of an 8B model with 10⁷ candidates <span class="ev">O</span>, one scan costs 702 H100-hours, because an unsketched scan
+<i>is</i> gradient recomputation: the dot products with 100 queries are 1.6% of it. Amortized, one query costs 8.4
+H100-hours, 83% scan and 17% iterative iHVP. Sketching moves the scan into a one-off index build (1,150 H100-hours) and
+turns the lookup into a stream over the index; then the iHVP and, at big-lab scale, an exact rerank of the top candidates
+carry the bill.</p>
+<div class="chart-title">What survives on the ET-SoC-1 sits at the cheap end: each step's cost in H100-hours, on a log scale, coloured by whether it suits the chip</div>
+<div id="pipe-leg"></div>
+<div class="chart" id="pipe"></div>
+<p class="small">Each dot is one step, costed per the unit in which it is paid (per query, per batch, per checkpoint), so the dots
+are not additive; the scale shows orders of magnitude. The two dashed lines are one amortized 8B query (8.4 H100-hours
+<span class="ev">O</span>) and a millionth of it. Tab to a dot, then use the arrow keys, for its size, what the ET-SoC-1 would
+do with it and why. Costs are the author's 8B model <span class="ev">O</span> except the 70B rerank <span class="ev e">E</span>,
+the index stream (82 GB at the H100's 3.35 TB/s spec <span class="ev">S</span>), the prefilter (GPUSparse, 1.27 ms per query
+at batch 500 <span class="ev">X</span>), the sparse scatter (at most 1% of the scan's gradients <span class="ev e">E</span>), S1 (the explorer's
+H100 pass <span class="ev e">E</span>) and top-k (1 µs in a kernel epilogue <span class="ev e">E</span>).</p>
+<details><summary>The same steps as a table</summary>
+<div class="table-wrap"><table id="pipe-table"><thead><tr><th>Step</th><th>Paid</th><th class="num">H100-hours</th><th>On the ET-SoC-1</th></tr></thead><tbody></tbody></table></div>
+</details>
+
+<h3>Finding the most influential examples</h3>
+<p>Selecting the top k of N scores takes about k(1 + ln N/k) heap inserts: <span data-d="topk_inserts.inserts" data-f="sci">1.3×10⁵–1.5×10⁵</span>
+per query for k = 10⁴ at N = 10⁹–10¹⁰ <span class="ev">D</span>. A GPU does that in the epilogue of the scoring kernel, or with a radix
+select for large k (FAISS, AIR top-k, RadiK <span class="ev">X</span>). The chip has a nice way to do it too: every minion keeps its
+own heap, and the running k-th-best threshold is shared chip-wide through the TensorReduce tree with a maximum instead of
+a sum, 2.3 µs for all 1,024 minions <span class="ev m">M</span>. But there is nothing to win: the scores are what cost. In the
+two-stage pipeline Grosse described in April 2026 (secondhand, via the author's Bergson page <span class="ev">O</span>) and Bergson
+merged on 14 September, a sketch index gives the top k′ = 10³–10⁴, then each of those is re-scored with its exact gradient:
+at 70B that rerank is about 6 H100-hours per query <span class="ev e">E</span>, over 99.9% of a query's energy. Selection is the one
+step of "find the most influential examples" that the chip is shaped for, and it is worth nothing on its own. It survives
+only folded into S1.</p>
+
+<h3>What "sparse-friendly" buys here</h3>
+<p>Less than the phrase suggests. The silicon turns zeros into saved power, never saved time: a 16×16×16 fp32 TensorFMA takes 546
+cycles at any fraction of zeros, and a multiply-add on zeros costs 0.42 pJ against 6.0 pJ on random data on aifoundry2
+(0.41 and 5.4 on aifoundry3; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparse compute</a>, energy
+manual <span class="ev m">M</span>). Time
+is saved only when software issues less work from data already on chip: masked loads and skipped tiles took a batch-1 layer
+in the scratchpads from 7.5 µs to 2.1 µs at 99% zero activations (aifoundry3, one run <span class="ev m">M</span>). Influence
+gradients offer few such zeros. SwiGLU and GELU language models give gradients with few exact zeros; GraSS's sparsity argument
+is made for ReLU <span class="ev">X</span>; the author's MNIST atlas uses tanh <span class="ev">O</span>. The exact zeros that do exist
+(padding, embedding rows, mixture-of-experts routing, the top of the output layer's residual) are produced inside the GPU's
+backward pass and would have to cross a 15.75 GB/s host link <span class="ev">S</span> to reach the card. The sparse structure of
+influence work is elsewhere: in the scores, which are heavy-tailed (a few "loud" examples dominate), and in sparse sketches
+(CountSketch, SJLT), which are scatter-adds. The first is top-k selection, above. The second is K3 below, which waits on the
+gather/scatter measurement S3.</p>
+
+<h2>2. Explorer: an influence index against the chip</h2>
+<div class="explorer">
+<p>Set the size of a sketch index and how queries arrive. The capacity strip shows where the index fits; the chart shows the
+energy per query, board power included, on each device as the arrival rate changes. The ET card is charged its power at rest
+all the time, since it would be there only for this; the H100 and the host CPU are charged only for the pass, because they are
+in the server anyway (the H100 computes each query's gradient and iHVP, about 1.3 s of it at 8B <span class="ev">O</span>).</p>
+<div class="ck-controls" id="x-preset"></div>
+<div class="ck-controls">
+  <div id="x-n"></div><div id="x-k"></div>
+</div>
+<div class="ck-controls">
+  <div id="x-prec"></div><div id="x-where"></div>
+</div>
+<div class="ck-controls">
+  <div id="x-q"></div><div id="x-lam"></div>
+</div>
+<div class="ck-controls" id="x-rows"></div>
+<div class="kpis" id="x-kpis">
+  <div class="card kpi"><div class="lab">Index size</div><div class="val" id="x-size">65.5 MB</div><div class="sub" id="x-size-sub">16,000 codes × 4,096 × int8</div></div>
+  <div class="card kpi"><div class="lab">ET-SoC-1, per query</div><div class="val" id="x-et">25.1–36.3 J</div><div class="sub" id="x-et-sub">at 1 query/s, idle included; 1 chip</div></div>
+  <div class="card kpi"><div class="lab">H100 in the server, per query</div><div class="val" id="x-h">8.3–9 mJ</div><div class="sub" id="x-h-sub">the pass only: 23.1 µs from HBM</div></div>
+  <div class="card kpi"><div class="lab">ET cheaper than the H100 above</div><div class="val" id="x-be">2,900–4,500/s</div><div class="sub" id="x-be-sub">queries a second (host CPU: 390–2,800/s)</div></div>
+</div>
+<div class="chart-title">Where the index fits: its size against each device's memory</div>
+<div class="chart" id="cap"></div>
+<div class="chart-title">Energy per query against how often queries arrive, board power included</div>
+<div id="rate-leg"></div>
+<div class="chart" id="rate"></div>
+<div id="x-read"></div>
+<p class="small">Bands span the estimates' ranges: the ET card at rest draws 25.1–36.3 W <span class="ev m">M</span> (aifoundry3 cool,
+aifoundry2 hot); the H100 60–90 W at rest <span class="ev e">E</span> and 105 pJ per byte from HBM or 38 from L2
+(an A100's levels alone, <span class="ev">X</span>); the host CPU 40–200 W while it scores <span class="ev e">E</span>. A band stops where its device is
+full at this Q; beyond it, more chips or a larger Q are needed. The shaded column is where the ET breaks even with the H100.
+Everything here is a model (<a href="#method-and-caveats">section 6</a>); only the ET's per-byte cost and bandwidth are
+measured.</p>
+</div>
+
+<h2>3. What survived, ranked</h2>
+<p>Two candidates and a measurement survived a skeptical pass over two independent desk maps of the pipeline. None is a
+speed-up or a cut in a big lab's bill. They belong in the set's research and exploratory group, beside the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparse-compute</a> measurements they build on: S1 as a hardware characterization ("energy per SRAM byte on an influence-shaped kernel"), S2 as a demonstrator with
+its expected loss stated, and a standing line that <b>neither has value to a big lab</b>: the steps that survive are
+under 10⁻⁶ of the bill, and every step over 1% of it is dense gradient work.</p>
+
+<h3>S1. Scoring a static shard held in SRAM, a few queries at a time, top-k fused in</h3>
+<dl class="cand">
+<dt>The step</dt>
+<dd>The recall stage of recall-then-rerank, or a fixed "hot" shard: the examples that are influential for many queries at once
+(the atlas found a handful of loud digits <span class="ev">O</span>; Grosse et al. found the top 1% of sequences carry 12–52% of the
+positive influence on a 22B model <span class="ev">X</span>), or a fine-tuning set small enough to fit. Codes of k coordinates in
+int8, fp16 or 1 bit sit in the 32 scratchpads; each minion scores its slice of about 16 codes against the Q queries, whose
+tiles it loads into its 3 KB L1 scratchpad a piece at a time (a 4,096-coordinate int8 query is 4 KB, so every minion reads
+each query once more per pass, which the model charges); it keeps the scores above the current threshold for an owner minion
+per query, and the threshold is shared through the TensorReduce tree.</dd>
+<dt>Why this chip</dt>
+<dd>Its one measured physical edge on this kind of work: a byte read by a tensor load from the shire's own scratchpad costs
+<span data-d="model.et.sram_pj_B.v" data-dp="1">4.2</span> pJ above idle at <span data-d="model.et.sram_bw.v" data-s="1e-12" data-dp="2">2.46</span> TB/s
+<span class="ev m">M</span>, against 105 pJ for an A100's HBM level alone and 38 pJ for its L2 level alone (155 and 50 counting the
+path through L2 and L1) <span class="ev">X</span>; the H100 is charged the lower figures <span class="ev e">E</span>. The shard never
+leaves the chip, the maximum is combined in the tree for free, and every minion runs its own heap code.</dd>
+<dt>Where it wins (all of these)</dt>
+<dd><ul>
+<li>The shard is static. A per-query shortlist has to be fetched first: 64 MB from the card's DRAM takes
+<span data-d="kills.k1.ms" data-dp="2">0.84</span> ms and <span data-d="kills.k1.mJ" data-dp="0">29–39</span> mJ of board energy
+<span class="ev">D</span>, over PCIe <span data-d="kills.k1.pcie_ms" data-dp="1">4.1</span> ms <span class="ev">S</span>,
+<span data-d="kills.k1.x_pass" data-dp="0">30–140</span>× the <span data-d="s1.hbm_case.et_us" data-dp="0">28</span> µs scoring pass (K1).</li>
+<li>It fits 72 MB: at k = 4,096 that is <span data-d="s1.capacity_codes_k4096.int8" data-f="int">17,578</span> int8 codes,
+<span data-d="s1.capacity_codes_k4096.fp16" data-f="int">8,789</span> in fp16 or <span data-d="s1.capacity_codes_k4096.bit" data-f="int">140,625</span>
+at 1 bit <span class="ev">D</span>; at the 3 million dimensions reported for one Anthropic index (secondhand <span class="ev">O</span>)
+a chip holds a dozen fp16 codes.</li>
+<li>Few queries per pass, about 16 at most. The lead shrinks as Q grows: <span data-d="s1.q16_case.lead" data-dp="1">3.1–4.2</span>× at
+Q = 16 in int8. In this page's model, which lets the tensor unit reach its matmul-benchmark rate on fresh tiles, it is gone at
+Q ≈ <span data-d="s1.parity_int8.Q" data-f="int">96–192</span> in int8 or <span data-d="s1.parity_fp16.Q" data-f="int">48–64</span> in fp16;
+the desk maps, charging the chip its full board power at a derived 39 TOP/s, put parity at Q ≈ 33–75 <span class="ev e">E</span>.
+Neither rate is measured.</li>
+<li>Each query's heap has one owner minion, so the state is Q × k × 8 B, at most about 10 MB; a heap on every minion would multiply
+it by 1,024.</li>
+<li>The card is kept busy: at least <span data-d="duty.hbm_case.vs_h100_qps" data-f="r2">2,900–4,500</span> unbatched queries a
+second against an H100 already in the server that reads a 65 MB shard from HBM, <span data-d="duty.l2_case.vs_h100_qps" data-f="r2">12,000–20,000</span>
+against one that pins a 37.5 MB shard in L2, or <span data-d="duty.breakeven_vs_cpu_qps" data-f="r2">390–5,000</span> against the host
+CPU <span class="ev e">E</span>.</li>
+</ul></dd>
+<dt>ET-SoC-1 against an H100 <span class="ev e">E</span></dt>
+<dd>A 65.5 MB int8 shard, one query: the ET reads it in <span data-d="s1.hbm_case.et_us" data-dp="1">28.4</span> µs for
+<span data-d="s1.hbm_case.et_mJ" data-dp="2">1.01–1.32</span> mJ of board energy, idle included, bound by SRAM bandwidth; an
+H100 must read it from HBM (it exceeds the 37.5 MB this page lets it pin in L2) in <span data-d="s1.hbm_case.h100_us" data-dp="1">23.1</span> µs
+for <span data-d="s1.hbm_case.h100_mJ" data-dp="1">8.3–9.0</span> mJ. For a 37.5 MB shard the H100 keeps in L2:
+<span data-d="s1.l2_case.et_mJ" data-dp="2">0.60–0.79</span> mJ against <span data-d="s1.l2_case.h100_mJ" data-dp="1">2.0–2.3</span> mJ,
+<span data-d="s1.l2_case.lead" data-dp="1">2.6–3.9</span>× <span class="ev e">E</span>. No time win, and no capacity win: 72 MB per chip against
+50 MB of L2 and 80 GB of HBM.</dd>
+<dt>Weakest assumption</dt>
+<dd>That the card is busy. An interactive attribution tool runs at well under 10 queries a second, since each query costs about
+1.3 H100-seconds of gradient and iHVP at 8B <span class="ev">O</span>; at 1–10 queries a second the card at rest costs 2.5–36 J
+per query, and the cheapest scorer is the host CPU that is already on. The second weakest is the H100's energy for a microsecond-scale kernel,
+which sets the whole lead and has not been measured by anyone here. The third is the cost of tensor ops with fewer than 16
+rows (one per query): measured only in fp32 at batch 1, where the pass stayed load-bound. If every op costs a full 16 rows, one
+query takes <span data-d="s1.hbm_case_rows16.et_us" data-dp="1">29.2</span> µs and <span data-d="s1.hbm_case_rows16.et_mJ" data-dp="1">1.6–2.0</span> mJ,
+and the lead is <span data-d="s1.hbm_case_rows16.lead" data-dp="1">4.2–5.5</span>×.</dd>
+<dt>Value to a big lab</dt>
+<dd>None: the step is about 10⁻⁹ of an amortized query, and <span data-d="duty.step_share_of_query" data-f="sci">9.1×10⁻⁶–2×10⁻⁵</span>
+of even the query's own gradient and iHVP (<span data-d="duty.query_side_J" data-dp="0">459–917</span> J at 8B <span class="ev e">E</span>).
+Worth running as the cleanest demonstration of the chip's per-SRAM-byte advantage on a kernel shaped like influence work.</dd>
+</dl>
+
+<h3>S2. An MNIST-sized influence pipeline run entirely on one chip</h3>
+<dl class="cand">
+<dt>The step</dt>
+<dd>The author's atlas loop at research scale: per-example gradients of the 196–128–64–10 tanh MLP
+(<span data-d="owner.atlas.P" data-f="int">34,122</span> parameters) over 60,000 training digits, contracted with 100 queries × 10
+logits, top-10 per query, with K-FAC or iterative solves. Weights <span data-d="s2.atlas_bytes.weights_KB" data-dp="0">136</span> KB,
+images <span data-d="s2.atlas_bytes.images_MB" data-dp="1">11.8</span> MB in uint8 at 14×14, queries
+<span data-d="s2.atlas_bytes.queries_MB" data-dp="1">13.6</span> MB in fp32: everything fits the scratchpads, and a persistent
+kernel avoids the 0.2–0.4 ms host launch <span class="ev m">M</span>.</dd>
+<dt>ET-SoC-1 against the measured A100</dt>
+<dd>The atlas's scan was measured at <span data-d="s2.a100_s" data-dp="3">0.231</span> s on an A100 <span class="ev">O</span>:
+<span data-d="s2.scan_flop" data-f="sci">4.1×10¹²</span> nominal FLOP, <span data-d="s2.a100_tflops_nominal" data-dp="1">17.8</span> TFLOP/s.
+The ET needs 0.43 s even at 100% of its fp32 peak as measured on aifoundry2, and 1.4–4.3 s at 10–30% <span class="ev">D</span>. Only in fp16 at
+<span data-d="s2.time_eff_needed.fp16" data-f="pct">93%</span> of its peak or more would it match the A100's time. On energy it wins
+if it sustains <span data-d="s2.breakeven_eff_fp32" data-f="pct">26–42%</span> of fp32 peak or
+<span data-d="s2.breakeven_eff_fp16" data-f="pct">14–22%</span> of fp16 peak, against an A100 drawing 250–400 W
+<span class="ev e">E</span>. Nobody has measured what fraction a persistent multi-layer kernel on 10–128-wide layers gets.</dd>
+</dl>
+<div class="ck-controls" id="s2-ctl"></div>
+<div class="chart" id="s2"></div>
+<p class="small">One sub-case has headroom: a single query through a sequential solver. The atlas's LiSSA took
+<span data-d="s2.lissa_ms_per_step" data-dp="0">14</span> ms a step and CG <span data-d="s2.cg_ms_per_iter" data-dp="0">268</span> ms an
+iteration on the A100 <span class="ev">O</span>, far above the arithmetic; a persistent kernel might be 10–100× faster there
+<span class="ev e">E</span>. CUDA graphs, or batching the 100 queries per step, close most of that gap, and the author's own EK-FAC
+path answers a query in 6 ms. Weakest assumption: at least 1 TFLOP/s sustained in a persistent kernel on small tiles. The
+atlas's curvature is fp64, so fp32 factors on the chip would have to be checked against it. Value: a demonstrator, and a
+joule-per-phase answer to the author's open question on energy per attribution at MNIST scale; NVML can give the GPU side
+of that too.</p>
+
+<h3>S3 (a measurement, not a candidate). Gather, scatter and scatter-add rates</h3>
+<p>No influence use survives on its own (K3 below), but every sparse or irregular idea on this chip
+waits on one unmeasured primitive: the vector unit's gathers and scatters (<code>fgw.ps</code>, <code>fscw.ps</code> and their
+line variants) into the L1, L2 and scratchpad. Estimates from the spec span 10–300 G updates a second, a 30× spread; the
+nearest measured thing, global atomics spread over 32 lines, runs at <span data-d="model.et.atomics_spread.ops_per_s" data-s="1e-9" data-dp="2">1.92</span>
+G/s for <span data-d="model.et.atomics_spread.nj" data-dp="2">1.16</span> nJ each <span class="ev m">M</span>. Half a day of catalogue
+runs settles it.</p>
+
+<h2>4. What does not fit, and why</h2>
+<p>Everything that makes up the bill is dense arithmetic on gradients: one ET card does fp16 at 19.0 TFLOP/s for 59.3 W of
+board power (aifoundry2 <span class="ev m">M</span>), against an H100's 396 TFLOP/s at 40% of peak for 700 W <span class="ev">O</span>
+<span class="ev">S</span>, with no bf16, no fp64, no hardware divide or square root, 32 GB of DRAM at 76 GB/s and an untimed host
+link. The candidates that looked ET-shaped die for other reasons.</p>
+<div class="table-wrap"><table id="k-table"><thead><tr><th>Candidate</th><th>Why it dies</th></tr></thead><tbody>
+<tr><td><b>K1.</b> Rerank a per-query shortlist in SRAM</td><td>The shortlist differs per query, so it must be fetched first: 64 MB is <span data-d="kills.k1.ms" data-dp="2">0.84</span> ms and <span data-d="kills.k1.mJ" data-dp="0">29–39</span> mJ from the card's DRAM <span class="ev">D</span>, <span data-d="kills.k1.pcie_ms" data-dp="1">4.1</span> ms over PCIe <span class="ev">S</span>, <span data-d="kills.k1.x_pass" data-dp="0">30–140</span>× the <span data-d="s1.hbm_case.et_us" data-dp="0">28</span> µs pass. An H100 reads it from HBM in about <span data-d="kills.k1.h100_us" data-dp="0">21</span> µs. Only a static shard stays resident (S1).</td></tr>
+<tr><td><b>K2.</b> Many-query top-k with the hardware threshold, on its own</td><td>Selection is 10⁴–1.5×10⁵ inserts per query, free on a GPU; the state does not fit as first sized (1,000 queries × 10⁴ entries is 80 MB, over the 72 MB usable, and even 16 queries need 1.3 GB if every minion keeps its own heaps). Kept inside S1.</td></tr>
+<tr><td><b>K3.</b> Sparse-sketch accumulation, scatter-add recall</td><td>Under 1% of a gradient's cost, and a prefilter is about 10⁻⁶ of the bill. GPUs keep the buckets in L2, use the tensor-sketch FFT or factored projections (GPUSparse's 12.5 GB/s is for accumulators in HBM <span class="ev">X</span>). The chip's atomics run at 1.92 G/s <span class="ev m">M</span> against the 10–19 G/s a posting stream from DRAM needs <span class="ev e">E</span>, and its gather/scatter is unmeasured (S3). The recall use rests on an open bet that sparse codes keep the top k.</td></tr>
+<tr><td><b>K4.</b> Lexical or bitmap prefilter (BM25, TF-IDF)</td><td>About 10⁻⁶ of the bill, and biased toward token overlap <span class="ev">O</span>. The host CPU's inverted index does it; on the chip it is DRAM-bound at 10⁷ documents (a 20-term query reads 25 MB of bitmaps: about <span data-d="kills.k4.ms" data-dp="2">0.33</span> ms and <span data-d="kills.k4.mJ" data-dp="0">11–15</span> mJ <span class="ev e">E</span>).</td></tr>
+<tr><td><b>K5.</b> ±1 and 1-bit cascades</td><td>No lead at board level: ±1 in int8 from SRAM is <span data-d="kills.k5.et_int8_pJ" data-dp="0">15–20</span> pJ per compare, idle included, against <span data-d="kills.k5.h100_bit_pJ" data-dp="0">18–19</span> pJ per bit for an H100 reading the same 65.5 MB as packed bits from HBM (one query, this page's model <span class="ev e">E</span>). No popcount instruction (SWAR on the vector unit, about 1 pJ per bit <span class="ev e">E</span>); 1-bit codes are shown to work for data selection (QLESS <span class="ev">X</span>), not for top-k recall. Kept as a storage format to try inside S1.</td></tr>
+<tr><td><b>K6.</b> Branchy pruned search over a DRAM shard (WAND, block-max, suffix arrays)</td><td>32 GB per chip, random DRAM reads unmeasured; real indexes are terabytes on SSD and served by CPUs (OLMoTrace <span class="ev">X</span>). Worth about 10⁻⁶.</td></tr>
+<tr><td><b>K7.</b> A sharded SRAM index, "29 µs at any N"</td><td>10⁷ codes of 4,096 in int8 need <span data-d="kills.k7.chips_1e7" data-f="int">569</span> chips, <span data-d="kills.k7.kW_1e7" data-dp="0">14–21</span> kW at rest <span class="ev">D</span>. A hot tier of the top 1% is <span data-d="kills.k7.hot_tier.chips" data-f="int">6</span> chips, and like S1 it pays for its idle chips only at <span data-d="kills.k7.hot_tier.vs_h100_qps" data-f="r2">2,800–4,400</span> unbatched queries a second or more against an H100 <span class="ev e">E</span> (try it in the explorer).</td></tr>
+<tr><td><b>K8.</b> Fine-tuning-scale attribution (LESS, QLESS)</td><td>Queries come in batches: the whole 2.7×10⁵ × 8,192 score matrix at Q = 100 is 4.4×10¹⁴ operations, 0.2–0.4 s of H100 int8 <span class="ev e">E</span>. Held resident it needs 31 chips in int8 or 4 at 1 bit.</td></tr>
+<tr><td><b>K9.</b> The dense steps: the scan, curvature statistics, eigendecompositions, the EK-FAC iHVP, iterative iHVPs, the exact rerank, batched scoring, scans from DRAM or flash, graph and IVF indexes, projections, zero-skip as a speed lever, mixture-of-experts gradients, validation retrains</td><td>21–35× slower and 1.8–2.9× the energy on dense work <span class="ev">D</span>; eigendecompositions need fp64; the EK-FAC state (108 GB) would take about 1,500 chips of SRAM; streaming an index is bandwidth-bound and the chip's DRAM is 44× slower than HBM and 3–5× dearer per byte at board level; zeros save power, not time.</td></tr>
+</tbody></table></div>
+
+<h2>5. The first experiment on a lab card</h2>
+<p>One new kernel settles S1, in one to two days of work. Nothing below has been run.</p>
+<ol>
+<li><b>Prerequisite, about an hour.</b> Time the host link (host-to-device and back, 4 KB to 1 GB, with the <code>workloads/memhier</code>
+host; PCIe Gen4 x8 is 15.75 GB/s by spec and has never been timed), the round trip of a persistent kernel waiting on a
+doorbell, and the board power of that waiting kernel. Poll a flag in the scratchpad, not a global atomic: 24 requesters on one
+line stop a shire (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">one hot line</a>).</li>
+<li><b>The kernel, <code>--test score</code> in <code>workloads/sparsity</code>.</b> Start from <code>--test gemv --gemv-tree</code>,
+which already reads a 1024×4096 fp32 matrix from the 32 scratchpads and reduces on chip (the 7.5 µs, 250 µJ anchor):
+<ul>
+<li>the shard: 65.5 MB of int8 codes (16,000 × 4,096) with TensorIMA8A32, then 8,000 fp16 codes with TensorFMA16A32, starting
+256 KB into each scratchpad (offset 0 faults);</li>
+<li>queries: Q = 1, 4, 16 and 64 as A tiles in the L1 scratchpads; keep A at 5 rows or more when B streams through TenB
+(erratum 1.29), or keep B in the L1 scratchpad as the gemv does;</li>
+<li>top-k: each query's heap (k = 16–1,024) on one owner minion; every minion compares its scores with the current threshold
+(<code>fltm.pi</code> on int32 scores, <code>fltm.ps</code> on fp32) and sends the rare survivors to the owner; every T tiles, a chip-wide maximum of the thresholds through
+TensorReduce and TensorBroadcast; the host checks the final lists against its own top-k.</li>
+</ul></li>
+<li><b>Measure.</b> Microseconds and board microjoules per pass, bracketed by idle as <code>workloads/sparsity/run_energy.py</code>
+does, each Q in its own <code>timeout 10</code> process looping for about 8 s (the board meter refreshes every 150–255 ms and its
+rails average over about 1.2 s): some 3×10⁵ passes. On aifoundry3, pinned at 600 MHz, then aifoundry2 warm (68 °C or more, or
+its governor lifts the clock). From the passes and the measured idle, report energy per query at 1, 100 and 10⁴ arrivals a
+second.</li>
+<li><b>The GPU side, mandatory.</b> The same scoring on an A100 or H100, the shard in HBM and pinned in L2, timed and metered
+through NVML's energy counter over loops of 10 s or more. S1's lead is that ratio; it is the number this page cannot supply.</li>
+<li><b>Verdict.</b> Pass if one query over 65 MB takes 40 µs or less and 1.5 mJ or less of board energy, and the fused top-k adds
+at most 20%. Kill S1 if one query costs 3 mJ or more, or the GPU comes within 3× per pass.</li>
+</ol>
+<p>Then, if S1 passes: <b>S2</b> as <code>atlasscan</code>, a persistent kernel holding the atlas MLP, the digits and 100 query
+gradients; kill the speed story above 0.231 s and the energy story above the A100's metered joules, and time one LiSSA step
+against 14 ms. And <b>S3</b>, independent of both: add the gather and scatter patterns to <code>workloads/enercat</code> (rate and
+picojoules per element from L1, L2 and scratchpad, zeros and random data), then a scatter-add probe only if the rate reaches
+10 G updates a second.</p>
+
+<h2>6. Method and caveats</h2>
+<ul>
+<li><b>The ET model.</b> One pass reads B = N·k·bytes of codes and does 2QNk operations (QNk bit compares at 1 bit). Chips =
+⌈B / 72 MB⌉ in SRAM (⌈B / 32 GB⌉ in DRAM). A minion's 3 KB L1 scratchpad cannot hold a query, so every minion also reads the
+Q queries once for each tile of 16 codes it holds, from the shire's SRAM <span class="ev e">E</span>: B<sub>q</sub> =
+1,024 · chips · ⌈N / (1,024 · chips · 16)⌉ · Q·k·bytes, which is 6% of B at Q = 1 for the 65.5 MB shard and as much as B at
+Q = 16. Time = the larger of (B + B<sub>q</sub>)/chips ÷ bandwidth and operations/chips ÷ peak rate (from DRAM, the codes at
+DRAM bandwidth and the query tiles at SRAM bandwidth); energy above idle = the larger of the bytes × energy per byte and
+operations × energy per operation. Bandwidth and energy per byte are
+the energy manual's tensor loads on random data, both cards <span class="ev m">M</span> (own scratchpad
+<span data-d="model.et.sram_bw.v" data-s="1e-12" data-dp="2">2.46</span> TB/s and <span data-d="model.et.sram_pj_B.v" data-dp="2">4.21</span> pJ/B;
+DRAM <span data-d="model.et.dram_bw.v" data-s="1e-9" data-dp="0">76</span> GB/s and <span data-d="model.et.dram_pj_B.v" data-dp="0">129</span> pJ/B);
+the peak rates and their power above idle come from the matmul benchmark on aifoundry2 <span class="ev m">M</span> <span class="ev">D</span> (int8
+<span data-d="model.et.peak.int8.pj_op" data-dp="2">0.43</span> pJ per operation, fp16 <span data-d="model.et.peak.fp16.pj_op" data-dp="2">1.51</span>, fp32
+<span data-d="model.et.peak.fp32.pj_op" data-dp="2">2.73</span>); 1-bit codes use a SWAR estimate on the vector unit
+<span class="ev e">E</span>. The larger-of rule for energy, rather than the sum, is chosen because it reproduces the one measured
+pass: the batch-1 fp32 layer (aifoundry3, one run) spent <span data-d="model.et.anchor.above_idle_j" data-s="1e6" data-dp="0">68</span> µJ above idle
+<span class="ev m">M</span> where the model gives <span data-d="model.et.anchor.model_above_idle_j" data-s="1e6" data-dp="0">71</span> µJ.
+Its time, 7.5 µs for 16.8 MB, is 2.2 TB/s, 9% under the model's bandwidth. That kernel splits each row across minions, so it
+is checked on its matrix bytes alone; the query tiles are this page's layout, not measured.</li>
+<li><b>The H100 model</b> <span class="ev e">E</span>. A shard of 37.5 MB or less is read from a pinned L2 at 4.3 TB/s (an A100's
+measured L2 rate as a floor <span class="ev">X</span>); larger ones from HBM at 3.0 TB/s (90% of the 3.35 TB/s spec
+<span class="ev">S</span>); 80 GB per GPU. Compute at 60% of the dense tensor-core peak <span class="ev">S</span>, at (700 − 75) W ÷ peak
+per operation above idle; at 1 bit, popc at 16 per clock per SM <span class="ev">S</span>, with an xor, a popc and an add per
+32 bits each priced as one fp32 lane-operation at the TDP, 1.75 pJ per bit. 1.3 µs of launch per pass (CUDA graphs, measured
+on an H100 <span class="ev">X</span>). Energy = idle (60–90 W) × time + bytes × 105 pJ (HBM) or 38 pJ (L2) + operations ×
+energy per operation. The per-byte figures are an A100's for the level alone (Antepara et al., SC'25), standing in for
+Hopper's newer process and HBM3. Charged the A100's whole path through L2 and L1 instead (155 and 50 pJ), the H100 would cost
+up to 1.4× more per pass and S1's lead would reach 12×; this page does not use that.</li>
+<li><b>The host CPU</b> <span class="ev e">E</span>: one socket at 200 GB/s and a few TOP/s, drawing 40–200 W more while it
+scores.</li>
+<li><b>Duty cycle.</b> Energy per query at arrival rate λ is, for the ET, chips × P<sub>idle</sub> ÷ λ + energy above idle
+per pass ÷ Q; for the H100 and the CPU, energy per pass ÷ Q. A device is full when λ exceeds Q ÷ time per pass.</li>
+<li><b>Dense work.</b> "21–35× slower, 1.8–2.9× the energy" sets the chip's fp16 at 60–100% of its measured 19.0 TFLOP/s and
+59.3 W <span class="ev m">M</span> <span class="ev e">E</span> against an H100 at 40% of 989 TFLOP/s and 700 W, the author's
+cost model <span class="ev">O</span>.</li>
+<li><b>Not measured on the chip</b>: the host link; gathers, scatters and packed atomics; random DRAM reads; tensor ops with
+fewer than 16 rows outside fp32 batch 1; int8 scoring with fresh tiles from the scratchpad; persistent multi-layer kernels;
+a polling kernel's power. On the GPU side, nothing on this page is measured on an H100 by us.</li>
+<li><b>Corrections folded in</b> from the two desk maps this page started from: the atlas comparison is against its measured
+0.231 s scan, not the 0.558 s gradient-pass primitive (so the ET is slower, not 45–140× faster); the atlas uses tanh, so its
+hidden activations have no exact zeros, and its scan is 4.1×10¹² FLOP, not 4.2×10¹¹; the "one row costs a full 16-row op"
+figure was a measurement of masked rows, not of smaller ops; the top-k state was over-sized for the SRAM; a ±1 energy lead
+compared energy above idle with board energy; per-query shortlists are not resident; the 0.2–0.4 ms host launch was ignored
+in a latency claim; a posting-list rate was halved. The rest of their arithmetic reproduced. A later check of this page
+charged the H100 the A100's per-level energies only (the first draft's upper end used the whole path and gave a 7–13× lead),
+added the query tiles each minion re-reads, re-priced the H100's 1-bit work per instruction rather than at its full power, and
+computed K1, K4, K5 and K7 from the same model.</li>
+<li><b>Reproduce.</b> <code>python3 docs/reports/data/2026-09-25-influence-on-et/make_analysis.py</code>, then
+<code>python3 scripts/build-report.py influence-on-et docs/reports/data/2026-09-25-influence-on-et/analysis.json docs/reports/2026-09-25-influence-on-et.html</code>.</li>
+<li><b>Versions.</b> 25 September 2026: first version, desk analysis; no card was touched.</li>
+</ul>
+
+<h2>7. Sources</h2>
+<ul>
+<li>This set: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">the energy manual</a> (§4.1 bytes by level, §3 per
+instruction, idle), <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparse compute</a> (546 cycles at any zero
+fraction, the batch-1 layer, the host launch), <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">ridge points</a>,
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory hierarchy</a> (and its A100 notes),
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">matmul efficiency</a>,
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication</a> (the 2.3 µs tree),
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">on-chip relay</a> (2.25 MB usable per scratchpad),
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">one hot line</a> (atomics).</li>
+<li>Data read by the producer: <code>docs/reports/data/2026-09-23-energy-manual/manual.json</code>,
+<code>docs/reports/data/2026-09-18-aifoundry2/results.json</code>, <code>docs/reports/data/2026-09-18-sparsity-aifoundry3/</code>,
+<code>docs/reports/data/2026-09-18-nocbench-aifoundry2/</code>.</li>
+<li>The author's pages: <a href="https://spacesheep.dev/@yaroslavvb/influence-functions-hessians-sketching-weak-factoring">Influence
+functions: Hessians, cost, sketching, and weak factoring</a> (§3.1 the 8B price table, §4 sketching and retrieval); the MNIST
+influence atlas, its manifest's measured costs; the Bergson page (§9.4, the two-stage pipeline and the 3-million-dimension index,
+secondhand); the tutorial plan (chapters 11–13, the roofline and the "two machines"). The last three are private.</li>
+<li>Influence functions and attribution: Grosse et al., <a href="https://arxiv.org/abs/2308.03296">Studying Large Language Model
+Generalization with Influence Functions</a>, 2023; Chang et al., <a href="https://arxiv.org/abs/2410.17413">TrackStar</a>, ICLR 2025;
+Choe et al., <a href="https://arxiv.org/abs/2405.13954">LoGra</a>, 2024; Hu et al., <a href="https://arxiv.org/abs/2505.18976">GraSS</a>,
+NeurIPS 2025; Xia et al., <a href="https://arxiv.org/abs/2402.04333">LESS</a>, 2024, and <a href="https://arxiv.org/abs/2502.01703">QLESS</a>,
+2025; Ran et al., <a href="https://arxiv.org/abs/2604.16197">RISE</a>, 2026; Wang et al., <a href="https://arxiv.org/abs/2507.14740">ASTRA</a>,
+2025; Hu, Hu, Ma and Zhao, <a href="https://arxiv.org/abs/2602.10449">A Unified Theory of Random Projection for Influence
+Functions</a>, 2026; Quirke et al., <a href="https://arxiv.org/abs/2606.11660">Bergson</a>, 2026, and
+<a href="https://github.com/EleutherAI/bergson">its repository</a>; Liu et al., <a href="https://arxiv.org/abs/2504.07096">OLMoTrace</a>, 2025.</li>
+<li>GPU kernels: <a href="https://arxiv.org/abs/2602.06071">FlashSketch</a>, 2026; <a href="https://arxiv.org/abs/2606.26441">GPUSparse</a>,
+2026; Johnson, Douze and Jégou, <a href="https://arxiv.org/abs/1702.08734">Billion-scale similarity search with GPUs</a> (FAISS);
+<a href="https://doi.org/10.1145/3581784.3607062">AIR top-k</a>, SC'23; <a href="https://arxiv.org/abs/2501.14336">RadiK</a>, 2025.</li>
+<li>GPU hardware: <a href="https://www.nvidia.com/en-us/data-center/h100/">NVIDIA H100</a> (datasheet rates, 80 GB, 700 W);
+Antepara et al., <a href="https://escholarship.org/uc/item/6189368s">Benchmark-driven Models for Energy Analysis and Attribution of
+GPU-Accelerated Supercomputing</a>, SC'25 (A100 energy per bit by level); <a href="https://docs.nvidia.com/cuda/archive/12.4.0/pdf/CUDA_C_Programming_Guide.pdf">CUDA
+C++ Programming Guide 12.4</a> (popc throughput); Luo et al., <a href="https://arxiv.org/abs/2402.13499">Benchmarking and Dissecting
+the Nvidia Hopper GPU Architecture</a> (no binary tensor cores on Hopper).</li>
+</ul>
+
+<h2 id="related">8. Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a>, the hub: every
+report in the set, what each established, and the glossary.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">Sparse compute</a>: what the silicon skips (power, not
+cycles), the batch-1 layer S1 is scaled from, and where the chip can meet an A100.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a>: the reuse each memory level demands, which
+decides when S1 turns from load-bound to compute-bound.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a>: latency and bandwidth by level,
+and the A100 figures the H100 side leans on.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The energy manual</a>: every per-byte and per-operation
+energy used here, with bars from both cards.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/influence-functions-hessians-sketching-weak-factoring">Influence functions:
+Hessians, cost, sketching, and weak factoring</a>: the question's source, with the cost model this page prices against.</li>
+</ul>
+</main>
+
+<script>
+/* chart toolkit: docs/reports/sources/chartkit.js */
+/* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
+   Source-built pages get it from report.template.html (scripts/build-report.py inlines it before the page script);
+   standalone pages get this file, the template's chartkit CSS and token aliases from scripts/paste-chartkit.py.
+   Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
+   --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
+   API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame. Every mark with a tooltip is reachable from the keyboard. */
+window.CK = (function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
+  let uid = 0;
+  const $ = h => (typeof h === 'string' ? document.getElementById(h) : h);
+  const mm = q => (window.matchMedia ? window.matchMedia(q) : {matches: false});
+  const reduced = mm('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, str, cls, anchor) {
+    const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
+    t.textContent = str;
+    return t;
+  }
+  const path = (pts, x, y) => pts.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ');
+
+  /* ---- numbers ---- */
+  function num(v, dp) {
+    if (v == null || !isFinite(v)) return '\u2014';
+    const auto = dp == null;  // no dp: three significant digits, trailing zeros dropped
+    if (auto) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+    const s = Number(v).toLocaleString('en-GB', {minimumFractionDigits: auto ? 0 : dp, maximumFractionDigits: dp});
+    return /[1-9]/.test(s) ? s.replace('-', '\u2212') : s.replace('-', '');  // true minus; never "−0.00"
+  }
+  const fmt = {
+    num,
+    range: (a, b, dp, unit) => {
+      const s = num(a, dp), t = num(b, dp), u = unit ? '\u00a0' + unit : '';
+      return s === t ? s + u : s + (b < 0 ? ' to ' : '\u2013') + t + u;
+    },
+    pct: (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%',
+  };
+
+  /* ---- scales ---- */
+  function niceTicks(a, b, n) {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    if (!(hi > lo)) return Object.assign([lo], {step: 1});
+    const raw = (hi - lo) / Math.max(1, n || 5), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    const step = (m >= 7.5 ? 10 : m >= 3.5 ? 5 : m >= 1.5 ? 2 : 1) * p, out = [];
+    for (let i = Math.ceil(lo / step - 1e-9); i * step <= hi + step * 1e-9; i++) out.push(+(i * step).toPrecision(12));
+    out.step = step;
+    return out;
+  }
+  const tickDp = t => (t.step ? Math.max(0, -Math.floor(Math.log10(t.step) + 1e-9)) : null);
+  function lin(d0, d1, r0, r1) {
+    const s = v => r0 + (v - d0) * (r1 - r0) / (d1 - d0);
+    s.inv = p => d0 + (p - r0) * (d1 - d0) / (r1 - r0);
+    s.ticks = n => niceTicks(d0, d1, n);
+    s.domain = [d0, d1]; s.range = [r0, r1];
+    return s;
+  }
+  function log(d0, d1, r0, r1) {
+    const l0 = Math.log10(d0), l1 = Math.log10(d1);
+    const s = v => r0 + (Math.log10(v) - l0) * (r1 - r0) / (l1 - l0);
+    s.inv = p => Math.pow(10, l0 + (p - r0) * (l1 - l0) / (r1 - r0));
+    s.ticks = n => {
+      const lo = Math.min(l0, l1), hi = Math.max(l0, l1), k0 = Math.ceil(lo - 1e-9), k1 = Math.floor(hi + 1e-9);
+      const dec = k1 - k0 + 1, every = Math.max(1, Math.ceil(dec / (n || 6))), out = [];
+      const add = v => { v = +v.toPrecision(12); const lv = Math.log10(v); if (lv >= lo - 1e-9 && lv <= hi + 1e-9) out.push(v); };
+      if (dec <= 2) { for (let k = k0 - 1; k <= k1; k++) for (const m of [1, 2, 5]) add(m * Math.pow(10, k)); }
+      else for (let k = k0; k <= k1; k += every) add(Math.pow(10, k));
+      return out;
+    };
+    s.domain = [d0, d1]; s.range = [r0, r1]; s.log = true;
+    return s;
+  }
+  const logFmt = v => num(v, v >= 1 ? 0 : Math.ceil(-Math.log10(v) - 1e-9));
+
+  /* ---- frame: a responsive SVG sized to its host ---- */
+  function frame(hostId, o) {
+    const host = $(hostId);
+    if (!host) throw new Error('CK.frame: no element ' + hostId);
+    host.classList.add('ck-frame'); host.classList.remove('scroll');
+    host.textContent = '';
+    const plot = document.createElement('div'); plot.className = 'ck-plot'; host.appendChild(plot);
+    const svg = el('svg', {role: 'group', 'aria-label': o.label || null}, plot);
+    const tip = document.createElement('div'); tip.className = 'ck-tip'; tip.setAttribute('aria-hidden', 'true');
+    host.appendChild(tip);
+    const minW = o.minW == null ? 320 : o.minW, maxW = o.maxW == null ? 900 : o.maxW;
+    const f = {svg, host, tip, W: 0, H: 0, narrow: false, seriesOn: null, pinned: null, active: null, navIndex: 0};
+    const width = () => {
+      const cs = getComputedStyle(host), cw = host.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return Math.round(Math.max(minW, Math.min(maxW, cw > 0 ? cw : maxW)));
+    };
+    f.redraw = () => {
+      const W = width(), H = Math.round(typeof o.height === 'function' ? o.height(W) : (o.height || 300));
+      f.refocus = svg.contains(document.activeElement) ? f.navIndex : null;
+      hide(f, true);
+      Object.assign(f, {W, H, narrow: W < 600, navNodes: []});
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.setAttribute('height', H);
+      svg.style.width = W + 'px';
+      o.draw(f);
+      if (f.seriesOn) showSeries(f, f.seriesOn);
+    };
+    f.redraw();
+    frames.push(f);
+    if (window.ResizeObserver) {
+      let timer;
+      new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => { if (width() !== f.W) f.redraw(); }, 150); }).observe(host);
+    }
+    return f;
+  }
+
+  /* ---- axes: horizontal grid, tick labels, baseline, axis titles (y title sits above the plot) ---- */
+  function axes(f, o) {
+    const {x, y} = o, W = f.W, H = f.H;
+    const L = o.L == null ? 44 : o.L, R = o.R == null ? 12 : o.R, T = o.T == null ? 22 : o.T, B = o.B == null ? 38 : o.B;
+    const g = el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, f.svg);
+    const yt = o.yt || y.ticks(Math.max(3, Math.round((H - T - B) / 48)));
+    const xt = o.xt || x.ticks(Math.max(2, Math.round((W - L - R) / 90)));
+    const auto = (s, t) => (s.log ? logFmt : v => num(v, tickDp(t)));
+    const xf = o.xfmt || auto(x, xt), yf = o.yfmt || auto(y, yt), labs = [];
+    for (const t of yt) {
+      if (o.grid !== false) el('line', {x1: L, x2: W - R, y1: y(t), y2: y(t), class: 'grid-line'}, g);
+      labs.push(txt(g, L - 6, y(t) + 4, yf(t), 'tick', 'end'));
+    }
+    el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    for (const t of xt) labs.push(txt(g, x(t), H - B + 16, xf(t), 'tick', 'middle'));
+    if (o.xl) labs.push(txt(g, (L + W - R) / 2, H - 6, o.xl, 'lab', 'middle'));
+    if (o.yl) txt(g, 2, Math.max(12, T - 13), o.yl, 'lab');
+    inside(f, labs);
+    return g;
+  }
+  /* Keep labels inside the frame (0..f.W, 0..f.H, less pad): one that would cross the left or right edge is anchored
+     at that edge instead (text-anchor start or end, so its outer end sits pad px from the edge in any font; an end
+     tick label still covers its tick), and one that would cross the top or bottom is moved in. Labels already inside
+     are not touched. Widths are measured in the page's font; a chart drawn while hidden has no layout, so they are
+     estimated at 0.6 em a character. Vertically the glyphs are taken as 0.75 em above the baseline and 0.25 em below. */
+  function inside(f, labels, pad) {
+    pad = pad == null ? 2 : pad;
+    const m = labels.map(t => {
+      let w = 0, fs = 12;
+      try { w = t.getComputedTextLength(); fs = parseFloat(getComputedStyle(t).fontSize) || 12; } catch (_) { /* no layout */ }
+      return {w: w > 0 ? w : 0.6 * fs * t.textContent.length, fs};
+    });
+    labels.forEach((t, k) => {
+      const {w, fs} = m[k], a = t.getAttribute('text-anchor') || 'start', x = +t.getAttribute('x'), y = +t.getAttribute('y');
+      const x0 = a === 'end' ? x - w : a === 'middle' ? x - w / 2 : x;
+      if (x0 < pad) { t.setAttribute('text-anchor', 'start'); t.setAttribute('x', pad); }
+      else if (x0 + w > f.W - pad) { t.setAttribute('text-anchor', 'end'); t.setAttribute('x', +(f.W - pad).toFixed(1)); }
+      if (y - 0.75 * fs < pad) t.setAttribute('y', +(pad + 0.75 * fs).toFixed(1));
+      else if (y + 0.25 * fs > f.H - pad) t.setAttribute('y', +(f.H - pad - 0.25 * fs).toFixed(1));
+    });
+    return labels;
+  }
+
+  /* ---- tooltip: pointer, keyboard focus and touch all show the same text ---- */
+  const strip = html => new DOMParser().parseFromString(String(html).replace(/<br\s*\/?>/gi, '; '), 'text/html')
+    .body.textContent.replace(/\s+/g, ' ').trim();
+  function place(f, cx, cy) {
+    const t = f.tip; t.style.display = 'block';
+    const hw = f.host.clientWidth, hh = f.host.clientHeight, tw = t.offsetWidth, th = t.offsetHeight;
+    let top = cy + 14;
+    if (top + th > hh && cy - th - 10 >= 0) top = cy - th - 10;  // flip above the pointer
+    t.style.left = Math.max(0, Math.min(cx + 12, hw - tw)) + 'px';
+    t.style.top = top + 'px';
+  }
+  function show(f, node, html, cx, cy) {
+    if (f.active && f.active !== node) f.active.classList.remove('ck-active');
+    f.active = node; node.classList.add('ck-active');
+    f.tip.innerHTML = typeof html === 'function' ? html() : html;
+    if (cx == null) {
+      const r = node.getBoundingClientRect(), b = f.host.getBoundingClientRect();
+      cx = r.left + r.width / 2 - b.left; cy = r.top + r.height / 2 - b.top;
+    }
+    place(f, cx, cy);
+  }
+  function hide(f, force) {
+    if (f.pinned && !force) return;
+    f.pinned = null; f.tip.style.display = 'none';
+    if (f.active) f.active.classList.remove('ck-active');
+    f.active = null;
+  }
+  function tip(f, node, html, o) {
+    o = o || {};
+    if (!node.hasAttribute('data-ck-nav')) node.setAttribute('tabindex', '0');
+    node.setAttribute('role', o.role || 'img');
+    node.setAttribute('aria-label', strip(typeof html === 'function' ? html() : html));
+    node._ckTip = html;
+    const at = ev => { const b = f.host.getBoundingClientRect(); show(f, node, html, ev.clientX - b.left, ev.clientY - b.top); };
+    node.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointermove', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') hide(f); });
+    node.addEventListener('pointerdown', ev => {  // touch: a tap toggles the tooltip and pins it until the next tap
+      if (ev.pointerType !== 'touch') return;
+      f.touchT = Date.now();
+      if (f.active === node && f.tip.style.display === 'block') hide(f, true); else { hide(f, true); at(ev); f.pinned = node; }
+    });
+    node.addEventListener('focus', () => { if (Date.now() - (f.touchT || 0) > 600 && !f.pinned) show(f, node, html); });
+    node.addEventListener('blur', () => hide(f));
+    node.addEventListener('keydown', ev => { if (ev.key === 'Escape') hide(f, true); });
+    return node;
+  }
+  document.addEventListener('pointerdown', ev => {  // a tap elsewhere unpins
+    for (const f of frames) if (f.pinned && !f.pinned.contains(ev.target)) hide(f, true);
+  }, true);
+
+  /* ---- keynav: one tab stop per mark group; arrows step, Home/End jump, Enter pins, Escape hides ---- */
+  function keynav(f, nodes, o) {
+    o = o || {};
+    nodes = nodes.filter(Boolean);
+    if (!nodes.length) return;
+    const seen = n => !n.closest('.ck-hidden');
+    const next = (k, d) => { for (let j = k + d; j >= 0 && j < nodes.length; j += d) if (seen(nodes[j])) return j; return k; };
+    let cur = Math.min(f.navIndex || 0, nodes.length - 1);
+    nodes.forEach((n, k) => {
+      n.setAttribute('data-ck-nav', '');
+      n.setAttribute('tabindex', k === cur ? '0' : '-1');
+      n.addEventListener('focus', () => {
+        nodes.forEach(m => m.setAttribute('tabindex', '-1')); n.setAttribute('tabindex', '0');
+        f.navIndex = k;
+        if (o.onFocus) o.onFocus(n, k);
+      });
+      n.addEventListener('keydown', ev => {
+        const K = ev.key;
+        let j = null;
+        if (o.step) j = o.step(k, K, nodes);
+        if (j == null) {
+          if (K === 'ArrowRight' || K === 'ArrowDown') j = next(k, 1);
+          else if (K === 'ArrowLeft' || K === 'ArrowUp') j = next(k, -1);
+          else if (K === 'Home') j = next(-1, 1);
+          else if (K === 'End') j = next(nodes.length, -1);
+        }
+        if (K === 'Enter' || K === ' ') {
+          ev.preventDefault();
+          if (n._ckTip) { if (f.pinned === n) hide(f, true); else { hide(f, true); show(f, n, n._ckTip); f.pinned = n; } }
+          if (o.onEnter) o.onEnter(n, k);
+        } else if (j != null) { ev.preventDefault(); if (j !== k) { hide(f, true); nodes[j].focus(); } }
+      });
+    });
+    f.navNodes = (f.navNodes || []).concat([nodes]);
+    if (f.refocus != null && nodes[f.refocus]) { nodes[f.refocus].focus(); f.refocus = null; }
+  }
+
+  /* ---- legend (HTML, above the chart) and series toggling ---- */
+  function swatch(it) {
+    const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
+    const m = it.mark || 'box';
+    const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
+    if (m === 'dot' || m === 'box') e.style.fill = c;
+    else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
+    if (m === 'dash') e.style.strokeDasharray = '4 3';
+    return s;
+  }
+  function legend(hostEl, items, o) {
+    o = o || {};
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-legend');
+    const on = new Set(items.map(it => it.key)), btn = {};
+    for (const it of items) {
+      const b = document.createElement(o.toggle ? 'button' : 'span'); b.className = 'ck-li';
+      b.append(swatch(it), document.createTextNode(it.label));
+      if (o.toggle) {
+        b.type = 'button'; b.setAttribute('aria-pressed', 'true');
+        b.addEventListener('click', () => {
+          const was = on.has(it.key);
+          if (was && on.size === 1) return;  // keep at least one series
+          if (was) on.delete(it.key); else on.add(it.key);
+          b.setAttribute('aria-pressed', String(!was));
+          if (o.onChange) o.onChange([...on]);
+        });
+      }
+      btn[it.key] = b; h.appendChild(b);
+    }
+    return {el: h, on, set(keys) { on.clear(); keys.forEach(k => on.add(k)); for (const k in btn) if (o.toggle) btn[k].setAttribute('aria-pressed', String(on.has(k))); }};
+  }
+  function showSeries(f, keysOn) {
+    f.seriesOn = [...keysOn];
+    f.svg.querySelectorAll('[data-series]').forEach(n => n.classList.toggle('ck-hidden', !f.seriesOn.includes(n.getAttribute('data-series'))));
+    for (const group of f.navNodes || []) {  // keep one reachable tab stop per group
+      const vis = group.filter(n => !n.closest('.ck-hidden'));
+      if (vis.length && !vis.some(n => n.getAttribute('tabindex') === '0')) { group.forEach(n => n.setAttribute('tabindex', '-1')); vis[0].setAttribute('tabindex', '0'); }
+    }
+    if (f.active && f.active.closest('.ck-hidden')) hide(f, true);
+  }
+
+  /* ---- controls ---- */
+  function seg(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-seg');
+    const g = document.createElement('div'); g.setAttribute('role', 'radiogroup'); g.className = 'ck-seg-group';
+    if (o.label) {
+      const s = document.createElement('span'); s.className = 'ck-seg-label'; s.id = 'ck-l' + (++uid); s.textContent = o.label;
+      h.appendChild(s); g.setAttribute('aria-labelledby', s.id);
+    }
+    const opts = o.options, api = {el: h, value: o.value == null ? opts[0][0] : o.value};
+    const btns = opts.map(([v, t], k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.textContent = t;
+      b.addEventListener('click', () => set(v, true));
+      b.addEventListener('keydown', ev => {
+        const d = ev.key === 'ArrowRight' || ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowLeft' || ev.key === 'ArrowUp' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const j = (k + d + opts.length) % opts.length;
+        set(opts[j][0], true); btns[j].focus();
+      });
+      g.appendChild(b); return b;
+    });
+    function set(v, fire) {
+      api.value = v;
+      btns.forEach((b, k) => { const c = opts[k][0] === v; b.setAttribute('aria-checked', String(c)); b.tabIndex = c ? 0 : -1; });
+      if (fire && o.onChange) o.onChange(v);
+    }
+    h.appendChild(g); set(api.value, false);
+    api.set = v => set(v, true);
+    return api;
+  }
+  function range(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-range');
+    const id = 'ck-r' + (++uid), stops = o.stops, f1 = o.fmt || (v => num(v));
+    const lab = document.createElement('label'); lab.htmlFor = id; lab.textContent = o.label;
+    const inp = document.createElement('input'); inp.type = 'range'; inp.id = id;
+    const out = document.createElement('output'); out.setAttribute('for', id);
+    if (stops) { inp.min = 0; inp.max = stops.length - 1; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step == null ? 'any' : o.step; }
+    const val = () => (stops ? stops[+inp.value] : +inp.value);
+    const put = v => { inp.value = stops ? stops.reduce((b, s, k) => (Math.abs(s - v) < Math.abs(stops[b] - v) ? k : b), 0) : v; };
+    const upd = fire => { const v = val(), s = f1(v); out.textContent = s; inp.setAttribute('aria-valuetext', s); if (fire && o.onInput) o.onInput(v); };
+    inp.addEventListener('input', () => upd(true));
+    h.append(lab, inp, out); put(o.value == null ? (stops ? stops[0] : o.min) : o.value); upd(false);
+    return {el: h, input: inp, get value() { return val(); }, set(v) { put(v); upd(true); }};
+  }
+  function readout(hostEl) {
+    const h = $(hostEl); h.classList.add('ck-readout'); h.setAttribute('aria-live', 'polite');
+    h.set = html => { h.innerHTML = html; };
+    return h;
+  }
+  function bus(name) {
+    if (!buses[name]) { const fns = []; buses[name] = {value: undefined, on(fn) { fns.push(fn); }, emit(v, from) { this.value = v; fns.forEach(fn => fn(v, from)); }}; }
+    return buses[name];
+  }
+  /* Card layout for a table under 600 px: each cell shows its column's header (CSS table.stack). */
+  function stackTable(table) {
+    const t = $(table), heads = [], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (hr) for (const c of hr.cells) for (let k = 0; k < (c.colSpan || 1); k++) heads.push(c.textContent.replace(/\s+/g, ' ').trim());
+    for (const tb of t.tBodies) for (const r of tb.rows) { let k = 0; for (const c of r.cells) { if (heads[k]) c.setAttribute('data-label', heads[k]); k += c.colSpan || 1; } }
+    t.classList.add('stack');
+    return t;
+  }
+
+  /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
+  const SERIES = [1, 2, 3, 4, 5, 7];
+  const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
+  const clamp01 = p => Math.max(0, Math.min(1, +p || 0));
+  const ramp = p => `color-mix(in srgb, var(--c1) ${(15 + 85 * clamp01(p)).toFixed(1)}%, var(--surface))`;
+  function rgb(css) {  // resolve any CSS colour (tokens, color-mix) to linear-light luminance via a probe
+    const s = document.createElement('span'); s.style.color = css; s.style.display = 'none';
+    document.body.appendChild(s);
+    const c = getComputedStyle(s).color; s.remove();
+    const v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), unit = /^color\(/.test(c) ? 1 : 255;
+    const lin1 = x => { x /= unit; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin1(v[0]) + 0.7152 * lin1(v[1]) + 0.0722 * lin1(v[2]);
+  }
+  const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  /* Text colour for a ramp cell, chosen for the current theme: whichever of --ink and --page contrasts more. */
+  function rampInk(p) {
+    const bg = rgb(ramp(p));
+    return contrast(bg, rgb('var(--ink)')) >= contrast(bg, rgb('var(--page)')) ? 'var(--ink)' : 'var(--page)';
+  }
+  const redrawAll = () => frames.forEach(f => f.redraw());  // rampInk depends on the theme
+  if (window.MutationObserver) new MutationObserver(redrawAll).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  const dark = mm('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', redrawAll);
+
+  return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
+    stackTable, reduced, ramp, rampInk, color, hide: f => hide(f, true)};
+})();
+
+</script>
+<script>
+const D = {"generated":"2026-09-25","producer":"docs/reports/data/2026-09-25-influence-on-et/make_analysis.py","kinds":{"M":"measured on an ET-SoC-1 lab card","D":"derived: arithmetic on measured numbers","S":"vendor spec","X":"published by others","O":"the influence-function report's owner (his measurements or cost model)","E":"estimate: an assumption of this page, never measured"},"model":{"et":{"sram_usable_B":{"v":72000000.0,"k":"D","src":"32 shires \u00d7 2.25 MB: each 2.5 MB scratchpad less the first 256 KB (on-chip relay report)"},"sram_bw":{"v":2458000000000.0,"k":"M","src":"docs/reports/data/2026-09-23-energy-manual/manual.json: catalogue tensor loads from the shire's own scratchpad, random data, both cards"},"sram_pj_B":{"v":4.208,"lo":4.011,"hi":4.365,"k":"M","src":"energy manual \u00a74.1, above idle, random data, 3 passes on each card"},"dram_B":{"v":32000000000.0,"k":"S","src":"LPDDR4X, 32 GB per card"},"dram_bw":{"v":76010000000.0,"k":"M","src":"energy manual \u00a74.1, tensor loads from DRAM, both cards"},"dram_pj_B":{"v":129.1,"lo":127.5,"hi":131.5,"k":"M","src":"energy manual \u00a74.1, above idle, random data"},"idle_W":{"lo":25.13,"hi":36.33,"k":"M","src":"board power at rest: aifoundry3 25.1 W at 56 \u00b0C, aifoundry2 36.3 W at 81 \u00b0C (energy manual, cards block)"},"peak":{"fp32":{"ops_per_s":9511000000000.0,"board_w":56.57,"pj_op":2.73,"k":"M/D"},"fp16":{"ops_per_s":19020000000000.0,"board_w":59.27,"pj_op":1.507,"k":"M/D"},"int8":{"ops_per_s":71780000000000.0,"board_w":61.75,"pj_op":0.4338,"k":"M/D"}},"peak_src":"docs/reports/data/2026-09-18-aifoundry2/results.json: matmul benchmark, tiles in L2, aifoundry2, 600 MHz; pJ per op above the run's 30.6 W idle (D)","bit":{"ops_per_s":8377000000000.0,"pj_op":1.056,"k":"E","src":"no popcount instruction: SWAR on the vector unit, about 14 packed-integer instructions per 256 bits (E) at the catalogue's measured 458 G instructions/s and 19.3 pJ each (M)"},"rows16":{"k":"E","src":"a tensor op multiplies 16 rows of A; ops with fewer rows (one query per row) were measured only in fp32, at batch 1, where the pass stayed load-bound"},"l1_scp_B":{"v":3072,"k":"S/M","src":"the L1 in scratchpad mode: sets 0\u201311, 3 KB per minion (memory-hierarchy report); a 4,096-coordinate int8 query (4 KB) does not fit, so every minion re-reads the query tiles for each tile of 16 codes it holds (E)"},"launch_ms":{"lo":0.2,"hi":0.4,"k":"M","src":"host kernel launch on aifoundry3 (sparse-compute report); a persistent kernel avoids it"},"allreduce_us":{"v":2.3,"k":"M","src":"32 B TensorReduce + TensorBroadcast over 1,024 minions, aifoundry2 (on-chip communication report)"},"atomics_spread":{"ops_per_s":1920000000.0,"nj":1.16,"k":"M","src":"global atomics spread over 32 lines (hot-line report; energy from the energy manual's reruns)"},"pcie_Bps":{"v":15750000000.0,"k":"S","src":"PCIe Gen4 x8, never timed on these cards"},"anchor":{"bytes":16777216,"t_s":7.523e-06,"board_j":0.0002505,"above_idle_j":6.824e-05,"board_w":34.01,"source":"docs/reports/data/2026-09-18-sparsity-aifoundry3/energy-b/results.json (gemv-skip-0: board J per layer) and docs/reports/data/2026-09-18-sparsity-aifoundry3/gemv-tree-dense.jsonl (cycles per layer)","model_above_idle_j":7.06e-05}},"h100":{"hbm_B":{"v":80000000000.0,"k":"S","src":"H100 SXM datasheet"},"hbm_bw":{"v":3000000000000.0,"spec":3350000000000.0,"k":"E","src":"90% of the 3.35 TB/s spec"},"l2_pin_B":{"v":37500000.0,"k":"E","src":"at most three quarters of the 50 MB L2 kept pinned with an access-policy window (the true set-aside limit not checked)"},"l2_bw":{"v":4300000000000.0,"k":"X","src":"an A100 SXM4's measured L2 read bandwidth, as a floor (memory-hierarchy report's A100 notes)"},"hbm_pj_B":{"v":105.0,"path":155.3,"k":"X/E","src":"A100 study (Antepara et al., SC'25): 13.11 pJ/bit for the HBM level alone, standing in for Hopper's newer process and HBM3 (E); the A100's whole path through L2 and L1 is 19.41 pJ/bit (155 pJ/B), not used"},"l2_pj_B":{"v":37.7,"path":50.4,"k":"X/E","src":"same study: 4.71 pJ/bit for the L2 level alone; 6.30 with L1 (50 pJ/B), not used"},"idle_W":{"lo":60.0,"hi":90.0,"k":"E","src":"not measured here"},"launch_s":{"v":1.3e-06,"k":"X","src":"per kernel with CUDA graphs, measured on an H100 (cited in the sparse-compute report)"},"peak":{"int8":{"ops_per_s":1978900000000000.0,"eff":0.6,"pj_op":0.3158},"fp16":{"ops_per_s":989400000000000.0,"eff":0.6,"pj_op":0.6317},"fp32":{"ops_per_s":494700000000000.0,"eff":0.6,"pj_op":1.263}},"bit":{"ops_per_s":66910000000000.0,"eff":0.6,"pj_op":1.751,"k":"E","src":"popc 16 per clock per SM (CUDA C++ Programming Guide) \u00d7 132 SMs \u00d7 1.98 GHz \u00d7 32 bits, halved for the xor and the add; Hopper has no binary tensor cores. Energy: an xor, a popc and an add per 32 bits, each priced as one fp32 lane-operation at the TDP, (700 \u2212 75) W \u00f7 (132 \u00d7 128 lanes \u00d7 1.98 GHz)"},"peak_src":"H100 SXM datasheet (dense int8, fp16/bf16, TF32); 60% sustained (E); energy per op above idle = (700 W TDP \u2212 75 W) \u00f7 peak (E)"},"cpu":{"bw":{"v":200000000000.0,"k":"E","src":"one server socket's DDR5, or its L3 for a small shard"},"rate":{"int8":4000000000000.0,"fp16":2000000000000.0,"fp32":2000000000000.0,"bit":50000000000000.0,"k":"E","src":"AVX-512 VNNI / FMA / VPOPCNTDQ on one socket"},"inc_W":{"lo":40.0,"hi":200.0,"k":"E","src":"incremental socket power while it scores; the host is powered anyway"}},"bytes_per":{"bit":0.125,"int8":1,"fp16":2,"fp32":4},"h_eff":0.6},"owner":{"q_grad_s":0.25,"ihvp_s":1.06,"query_energy_J":[458.5,917.0],"amortized_query_h100h":8.4,"src":"influence-functions report \u00a73.1 (the 8B price table: P = 8\u00d710\u2079, T = 2,048, H100 at 40% of 989 TFLOP/s); power 350\u2013700 W is E","atlas":{"P":34122,"N":60000,"Q":100,"C":10,"activation":"tanh","curvature_dtype":"float64","scan_s":0.231,"grad_pass_s":0.558,"lissa_500_s":7.07,"cg_20_s":5.36,"ekfac_query_s":0.0061,"gpu":"A100-SXM4-80GB","src":"MNIST influence atlas manifest (costs.rows[kfac].phases.scan.seconds; costs.measured; config.activation)"},"haiku_k":{"v":3000000.0,"src":"secondhand: a summary of Grosse's 13 April 2026 talk (the owner's Bergson page, \u00a79.4)"}},"s1":{"hbm_case":{"n":16000,"k":4096,"prec":"int8","Q":1,"MB":65.54,"chips":1,"et_us":28.4,"et_mJ":[1.01,1.32],"et_above_mJ":0.293,"et_bound":"memory","h100_where":"HBM","h100_us":23.1,"h100_mJ":[8.31,9.01],"lead":[6.3,8.9]},"l2_case":{"n":9155,"k":4096,"prec":"int8","Q":1,"MB":37.5,"chips":1,"et_us":17.0,"et_mJ":[0.602,0.792],"et_above_mJ":0.175,"et_bound":"memory","h100_where":"L2","h100_us":10.0,"h100_mJ":[2.04,2.34],"lead":[2.6,3.9]},"fp16_case":{"n":8000,"k":4096,"prec":"fp16","Q":1,"MB":65.54,"chips":1,"et_us":30.1,"et_mJ":[1.07,1.4],"et_above_mJ":0.311,"et_bound":"memory","h100_where":"HBM","h100_us":23.1,"h100_mJ":[8.31,9.01],"lead":[5.9,8.4]},"hbm_case_rows16":{"n":16000,"k":4096,"prec":"int8","Q":1,"MB":65.54,"chips":1,"et_us":29.2,"et_mJ":[1.64,1.97],"et_above_mJ":0.91,"et_bound":"compute","h100_where":"HBM","h100_us":23.1,"h100_mJ":[8.31,9.01],"lead":[4.2,5.5]},"capacity_codes_k4096":{"bit":140625,"int8":17578,"fp16":8789,"fp32":4394},"parity_int8":{"table":[{"Q":1,"et_mJ_per_q":[1.01,1.32],"h100_mJ_per_q":[8.31,9.01]},{"Q":2,"et_mJ_per_q":[0.535,0.7],"h100_mJ_per_q":[4.17,4.53]},{"Q":4,"et_mJ_per_q":[0.297,0.39],"h100_mJ_per_q":[2.11,2.28]},{"Q":8,"et_mJ_per_q":[0.184,0.24],"h100_mJ_per_q":[1.07,1.16]},{"Q":16,"et_mJ_per_q":[0.142,0.179],"h100_mJ_per_q":[0.558,0.602]},{"Q":24,"et_mJ_per_q":[0.128,0.159],"h100_mJ_per_q":[0.386,0.415]},{"Q":32,"et_mJ_per_q":[0.121,0.149],"h100_mJ_per_q":[0.3,0.322]},{"Q":48,"et_mJ_per_q":[0.114,0.139],"h100_mJ_per_q":[0.215,0.229]},{"Q":64,"et_mJ_per_q":[0.11,0.134],"h100_mJ_per_q":[0.17,0.181]},{"Q":96,"et_mJ_per_q":[0.106,0.129],"h100_mJ_per_q":[0.127,0.134]},{"Q":128,"et_mJ_per_q":[0.105,0.127],"h100_mJ_per_q":[0.106,0.112]},{"Q":192,"et_mJ_per_q":[0.103,0.124],"h100_mJ_per_q":[0.0844,0.088]},{"Q":256,"et_mJ_per_q":[0.103,0.123],"h100_mJ_per_q":[0.0754,0.0785]},{"Q":384,"et_mJ_per_q":[0.103,0.123],"h100_mJ_per_q":[0.0661,0.0695]},{"Q":512,"et_mJ_per_q":[0.103,0.123],"h100_mJ_per_q":[0.0615,0.065]},{"Q":1024,"et_mJ_per_q":[0.103,0.123],"h100_mJ_per_q":[0.0548,0.0582]}],"Q":[96,192]},"parity_fp16":{"table":[{"Q":1,"et_mJ_per_q":[1.07,1.4],"h100_mJ_per_q":[8.31,9.01]},{"Q":2,"et_mJ_per_q":[0.595,0.78],"h100_mJ_per_q":[4.17,4.53]},{"Q":4,"et_mJ_per_q":[0.357,0.47],"h100_mJ_per_q":[2.11,2.28]},{"Q":8,"et_mJ_per_q":[0.269,0.344],"h100_mJ_per_q":[1.07,1.16]},{"Q":16,"et_mJ_per_q":[0.226,0.283],"h100_mJ_per_q":[0.558,0.602]},{"Q":24,"et_mJ_per_q":[0.212,0.263],"h100_mJ_per_q":[0.386,0.415]},{"Q":32,"et_mJ_per_q":[0.205,0.253],"h100_mJ_per_q":[0.3,0.322]},{"Q":48,"et_mJ_per_q":[0.199,0.244],"h100_mJ_per_q":[0.215,0.229]},{"Q":64,"et_mJ_per_q":[0.195,0.237],"h100_mJ_per_q":[0.17,0.181]},{"Q":96,"et_mJ_per_q":[0.192,0.233],"h100_mJ_per_q":[0.127,0.134]},{"Q":128,"et_mJ_per_q":[0.19,0.23],"h100_mJ_per_q":[0.106,0.112]},{"Q":192,"et_mJ_per_q":[0.188,0.228],"h100_mJ_per_q":[0.0844,0.088]},{"Q":256,"et_mJ_per_q":[0.187,0.227],"h100_mJ_per_q":[0.0754,0.0785]},{"Q":384,"et_mJ_per_q":[0.186,0.225],"h100_mJ_per_q":[0.0661,0.0695]},{"Q":512,"et_mJ_per_q":[0.186,0.225],"h100_mJ_per_q":[0.0615,0.065]},{"Q":1024,"et_mJ_per_q":[0.186,0.224],"h100_mJ_per_q":[0.0548,0.0582]}],"Q":[48,64]},"q16_case":{"n":16000,"k":4096,"prec":"int8","Q":16,"MB":65.54,"chips":1,"et_us":54.0,"et_mJ":[2.27,2.87],"et_above_mJ":0.91,"et_bound":"memory","h100_where":"HBM","h100_us":23.1,"h100_mJ":[8.93,9.63],"lead":[3.1,4.2]}},"duty":{"et_idle_per_query_J_at_1qps":[25.13,36.33],"et_active_mJ":[1.01,1.32],"ratio_idle_to_active":[19000.0,36000.0],"hbm_case":{"chips":1,"h100_mJ":[8.31,9.01],"cpu_mJ":[13.1,65.5],"vs_h100_qps":[2900.0,4500.0],"vs_cpu_qps":[390.0,2800.0]},"l2_case":{"chips":1,"h100_mJ":[2.04,2.34],"cpu_mJ":[7.5,37.5],"vs_h100_qps":[12000.0,20000.0],"vs_cpu_qps":[670.0,5000.0]},"breakeven_vs_h100_qps":[2900.0,20000.0],"breakeven_vs_cpu_qps":[390.0,5000.0],"query_side_J":[458.5,917.0],"step_share_of_query":[9.1e-06,2e-05]},"kills":{"k1":{"MB":64.0,"ms":0.84,"mJ":[29.0,39.0],"pcie_ms":4.1,"h100_us":21.0,"x_pass":[30.0,140.0]},"k4":{"MB":25.0,"ms":0.33,"mJ":[11.0,15.0]},"k5":{"et_int8_pJ":[15.0,20.0],"h100_bit_pJ":[18.0,19.0]},"k7":{"chips_1e7":569,"kW_1e7":[14.0,21.0],"hot_tier":{"chips":6,"h100_mJ":[51.5,55.7],"cpu_mJ":[81.9,410.0],"vs_h100_qps":[2800.0,4400.0],"vs_cpu_qps":[370.0,2700.0]}}},"s2":{"scan_flop":4110000000000,"a100_s":0.231,"a100_tflops_nominal":17.8,"a100_J":[58.0,92.0],"a100_W":[250,400],"et":[{"prec":"fp16","eff":1.0,"s":0.216,"J":12.8},{"prec":"fp32","eff":1.0,"s":0.432,"J":24.4},{"prec":"fp32","eff":0.3,"s":1.44,"J":81.4},{"prec":"fp32","eff":0.1,"s":4.32,"J":244.0}],"breakeven_eff_fp32":[0.26,0.42],"breakeven_eff_fp16":[0.14,0.22],"time_eff_needed":{"fp16":0.93,"fp32":1.9},"atlas_bytes":{"weights_KB":136.0,"images_MB":11.8,"queries_MB":13.6},"lissa_ms_per_step":14.0,"cg_ms_per_iter":268.0},"dense":{"slower":[21.0,35.0],"energy":[1.8,2.9],"src":"ET fp16 at 60\u2013100% of its measured 19.0 TFLOP/s and 59.3 W board (M/E) against an H100 at 40% of 989 TFLOP/s and 700 W (the owner's model, O/S)"},"pipeline":[{"key":"scan","label":"Scan 10\u2077 candidates by recomputing gradients","h":702,"per":"per batch of 100 queries","fit":"no","k":"O","why":"dense backprop, the bill itself; one ET card is 21\u201335\u00d7 slower and spends 1.8\u20132.9\u00d7 the energy","J":1770000000.0},{"key":"build","label":"Build a sketch index of 10\u2077 gradients","h":1150,"per":"once per checkpoint","fit":"no","k":"O","why":"dense backprop plus a projection; the sparse sketches would need 16 GB per sequence over a 15.75 GB/s link","J":2900000000.0},{"key":"valid","label":"Validation retrains (LDS)","h":506,"per":"per method","fit":"no","k":"O","why":"training runs","J":1280000000.0},{"key":"rerank","label":"Exact rerank of the top 10\u2074 at 70B","h":6.0,"per":"per query","fit":"no","k":"E","why":"10\u2074 fresh gradients; with an EK-FAC iHVP it is over 99.9% of a query's energy","J":15100000.0},{"key":"stats","label":"EK-FAC curvature statistics","h":2.07,"per":"once per checkpoint","fit":"no","k":"O","why":"dense gradient passes","J":5220000.0},{"key":"astra","label":"Iterative iHVP (ASTRA, 300 steps)","h":1.41,"per":"per query","fit":"no","k":"O","why":"minibatch Hessian-vector products are gradients","J":3550000.0},{"key":"qgrad","label":"Query gradients, 100 queries","h":0.007,"per":"per batch","fit":"no","k":"O","why":"dense backprop; an 8B model in fp16 does not fit one card's 32 GB comfortably, and there is no bf16","J":17600.0},{"key":"eigh","label":"Eigendecompose the Kronecker factors","h":0.002,"per":"once per checkpoint","fit":"no","k":"O","why":"needs fp64 (the chip has none, and no hardware divide or square root); factors up to 14,336\u00b2 (0.8 GB in fp32, 1.6 GB in fp64) exceed the 72 MB of SRAM","J":5040.0},{"key":"ihvp","label":"EK-FAC iHVP (1.06 s)","h":0.000294,"per":"per query","fit":"no","k":"O","why":"compute-bound matmuls against 108 GB of resident bases: 1,500 chips of SRAM to keep them on chip","J":741.0},{"key":"lookup","label":"Stream the whole 82 GB sketch index, 1 query","h":6.8e-06,"per":"per query","fit":"no","k":"S","why":"bandwidth-bound: the ET's DRAM gives 76 GB/s at 129 pJ/B above idle, 44\u00d7 slower than HBM, and holds 32 GB","J":17.1},{"key":"prefilter","label":"Lexical prefilter (BM25/TF-IDF)","h":3.53e-07,"per":"per query","fit":"killed","k":"X","why":"ET-shaped (per-core document ownership, no atomics) but about 10\u207b\u2076 of the bill; the host CPU's inverted index does it","J":0.89},{"key":"scatter","label":"Scatter the gradients' sparse parts into sketches","h":7.02,"per":"per batch of 100 queries (at most 1% of the scan)","fit":"killed","k":"E","why":"the one ET-shaped step with real size, but the data is born in the GPU's backward pass (16 GB per sequence would have to cross a 15.75 GB/s link); GPUs keep the buckets in L2 or avoid the scatter; the chip's gather/scatter rate is unmeasured (S3)","J":17700000.0},{"key":"shard","label":"Score a static 65 MB shard, 1 query (S1)","h":6.42e-09,"per":"per query","fit":"research","k":"E","why":"the one physical edge: 4.2 pJ/B from the chip's own SRAM; no time win, and it needs a busy card","J":0.0162},{"key":"topk","label":"Select the top k (fused into scoring)","h":2.78e-10,"per":"per query","fit":"feature","k":"E","why":"10\u2074\u20131.5\u00d710\u2075 heap inserts per query even at N = 10\u00b9\u2070: free in a GPU kernel's epilogue; kept only as part of S1","J":0.000701}],"presets":[{"key":"shard","label":"S1: a static shard","n":16000,"k":4096,"prec":"int8","Q":1,"lam":1,"where":"sram"},{"key":"busy","label":"The same, kept busy","n":16000,"k":4096,"prec":"int8","Q":1,"lam":10000.0,"where":"sram"},{"key":"less","label":"Fine-tuning attribution","n":270000,"k":8192,"prec":"int8","Q":100,"lam":1,"where":"sram"},{"key":"owner","label":"The author's 10\u2077 index","n":10000000.0,"k":4096,"prec":"int8","Q":1,"lam":1,"where":"sram"},{"key":"haiku","label":"3 million dimensions","n":1000000.0,"k":3000000.0,"prec":"fp16","Q":1,"lam":1,"where":"dram"}],"topk_inserts":{"N":[1000000000.0,10000000000.0],"k":10000.0,"inserts":[130000.0,150000.0]}};
+/* Influence functions on the ET-SoC-1: the page's numbers and charts, all computed from D (analysis.json,
+   written by docs/reports/data/2026-09-25-influence-on-et/make_analysis.py) with the shared toolkit CK. */
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const num = CK.fmt.num;
+  const SUP = {'-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹'};
+  const sup = n => String(n).split('').map(c => SUP[c] || c).join('');
+  const pow10 = e => '10' + sup(e);
+  /* a×10ⁿ with two significant digits for large or small numbers, plain otherwise */
+  function sci(v) {
+    if (v == null || !isFinite(v)) return '—';
+    if (v === 0) return '0';
+    const a = Math.abs(v);
+    if (a >= 1e-3 && a < 1e4) return num(v);
+    let e = Math.floor(Math.log10(a)), m = +(v / Math.pow(10, e)).toPrecision(2);
+    if (Math.abs(m) >= 10) { m /= 10; e += 1; }
+    return (m === 1 ? '' : num(m) + '×') + pow10(e);
+  }
+  const intf = v => num(Math.round(v), 0);
+  const r2 = v => (v >= 1e5 ? sci(v) : num(+(+v).toPrecision(2), 0));  /* rates: two significant digits */
+  const pct = v => num(100 * v, 0) + '%';
+  function range(a, b, f) {
+    const s = f(a), t = f(b);
+    return s === t ? s : s + '–' + t;
+  }
+  /* energy with a unit chosen by the larger end */
+  const EU = [[1e6, 'MJ'], [1e3, 'kJ'], [1, 'J'], [1e-3, 'mJ'], [1e-6, 'µJ'], [1e-9, 'nJ']];
+  function unitFor(v, units) { for (const u of units) if (Math.abs(v) >= u[0] * 0.9995) return u; return units[units.length - 1]; }
+  function sig(v) { const a = Math.abs(v); return a >= 100 ? num(v, 0) : a >= 10 ? num(v, 1).replace(/\.0$/, '') : num(+v.toPrecision(2)); }
+  function fmtJ(v) { if (v > 1e9) return sci(v) + ' J'; const u = unitFor(v, EU); return sig(v / u[0]) + ' ' + u[1]; }
+  function fmtJr(a, b) {
+    if (b > 1e9) return range(a, b, sci) + ' J';
+    const u = unitFor(b, EU), s = sig(a / u[0]), t = sig(b / u[0]);
+    return (s === t ? s : s + '–' + t) + ' ' + u[1];
+  }
+  const TU = [[1, 's'], [1e-3, 'ms'], [1e-6, 'µs'], [1e-9, 'ns']];
+  function fmtT(v) { if (v >= 3600) return sig(v / 3600) + ' h'; const u = unitFor(v, TU); return sig(v / u[0]) + ' ' + u[1]; }
+  const BU = [[1e18, 'EB'], [1e15, 'PB'], [1e12, 'TB'], [1e9, 'GB'], [1e6, 'MB'], [1e3, 'KB'], [1, 'B']];
+  function fmtB(v) { const u = unitFor(v, BU); return sig(v / u[0]) + ' ' + u[1]; }
+  const fmtBtick = v => { const u = unitFor(v, BU); return num(v / u[0], 0) + ' ' + u[1]; };
+  function fmtRate(v) { return v >= 1e4 ? pow10(Math.round(Math.log10(v))) : num(v); }
+  const perS = v => fmtRate(v) + (v === 1 ? ' query/s' : ' queries/s');
+  const r2s = v => (isFinite(v) ? (v >= 1e5 ? sci(v) : num(Math.max(1, +(+v).toPrecision(2)), 0)) : '∞');
+  function fmtCount(v) { return v >= 1e7 ? sci(v) : num(v, 0); }
+
+  /* ---------------------------------------------------------------- numbers in the text: <span data-d="path"> */
+  function get(path) { return path.split('.').reduce((o, k) => (o == null ? o : o[k]), D); }
+  document.querySelectorAll('[data-d]').forEach(el => {
+    const v = get(el.getAttribute('data-d'));
+    if (v == null) return;
+    const s = +(el.getAttribute('data-s') || 1), dp = el.getAttribute('data-dp'), f = el.getAttribute('data-f');
+    const one = x => {
+      x *= s;
+      if (f === 'sci') return sci(x);
+      if (f === 'int') return intf(x);
+      if (f === 'r2') return r2(x);
+      if (f === 'pct') return num(100 * x, 0);
+      return num(x, dp == null ? null : +dp);
+    };
+    el.textContent = (Array.isArray(v) ? range(v[0], v[1], one) : one(v)) + (f === 'pct' ? '%' : '');
+  });
+
+  /* ---------------------------------------------------------------- the model (same as make_analysis.py) */
+  const M = D.model, ET = M.et, HH = M.h100, CPU = M.cpu, BP = M.bytes_per;
+  const PREC = {bit: '1 bit', int8: 'int8', fp16: 'fp16', fp32: 'fp32'};
+  /* query tiles re-read from SRAM: a minion's 3 KB L1 scratchpad cannot hold a query, so each minion loads the
+     Q query rows once for every tile of 16 codes it holds (as make_analysis.py's query_bytes) */
+  function queryBytes(n, k, prec, Q, chips) {
+    const perMinion = Math.ceil(n / (chips * 1024));
+    return chips * 1024 * Math.ceil(perMinion / 16) * Q * k * BP[prec];
+  }
+  function etPass(n, k, prec, Q, where, rows16) {
+    const B = n * k * BP[prec];
+    const cap = where === 'sram' ? ET.sram_usable_B.v : ET.dram_B.v;
+    const chips = Math.max(1, Math.ceil(B / cap));
+    const Bq = queryBytes(n, k, prec, Q, chips);
+    const Qc = rows16 && prec !== 'bit' ? Math.ceil(Q / 16) * 16 : Q;
+    const pk = prec === 'bit' ? ET.bit : ET.peak[prec];
+    const ops = (prec === 'bit' ? 1 : 2) * Qc * n * k;
+    const sram = where === 'sram';
+    const tl = sram ? (B + Bq) / chips / ET.sram_bw.v : Math.max(B / ET.dram_bw.v, Bq / ET.sram_bw.v) / chips;
+    const eb = sram ? (B + Bq) * ET.sram_pj_B.v : B * ET.dram_pj_B.v + Bq * ET.sram_pj_B.v;
+    const tc = ops / chips / pk.ops_per_s, t = Math.max(tl, tc);
+    const ea = Math.max(eb, ops * pk.pj_op) * 1e-12;
+    const bound = tl >= tc ? (sram || B / ET.dram_bw.v >= Bq / ET.sram_bw.v ? (sram ? 'SRAM bandwidth' : 'DRAM bandwidth') : 'SRAM bandwidth (query tiles)')
+      : (prec === 'bit' ? 'the vector unit (no popcount)' : 'the tensor unit');
+    return {B, Bq, chips, t, ea, bound};
+  }
+  function hPass(n, k, prec, Q, hi) {
+    const B = n * k * BP[prec];
+    const gpus = Math.max(1, Math.ceil(B / HH.hbm_B.v)), l2 = B <= HH.l2_pin_B.v;
+    const bw = l2 ? HH.l2_bw.v : HH.hbm_bw.v, pjB = (l2 ? HH.l2_pj_B : HH.hbm_pj_B).v;
+    const pk = prec === 'bit' ? HH.bit : HH.peak[prec], ops = (prec === 'bit' ? 1 : 2) * Q * n * k;
+    const tm = B / gpus / bw, tc = ops / gpus / (pk.ops_per_s * M.h_eff), t = Math.max(tm, tc) + HH.launch_s.v;
+    const e = gpus * (hi ? HH.idle_W.hi : HH.idle_W.lo) * t + (B * pjB + ops * pk.pj_op) * 1e-12;
+    const bound = HH.launch_s.v > Math.max(tm, tc) ? 'kernel launch' : tm >= tc ? (l2 ? 'L2 bandwidth' : 'HBM bandwidth') : 'tensor cores';
+    return {B, gpus, l2, t, e, bound};
+  }
+  function cpuPass(n, k, prec, Q, hi) {
+    const B = n * k * BP[prec], ops = (prec === 'bit' ? 1 : 2) * Q * n * k;
+    const t = Math.max(B / CPU.bw.v, ops / CPU.rate[prec]);
+    return {t, e: t * (hi ? CPU.inc_W.hi : CPU.inc_W.lo)};
+  }
+  const HOST_MEM = 1e12;  // E: one host's memory; above it the host CPU is not shown as a scorer
+
+  /* ---------------------------------------------------------------- 1. the pipeline dot plot */
+  const FIT = {
+    no: {label: 'not a fit: dense work or too big', color: 'var(--ref)', mark: 'dot'},
+    killed: {label: 'ET-shaped, but killed', color: 'var(--c2)', mark: 'dot'},
+    research: {label: 'survives as research (S1)', color: 'var(--c1)', mark: 'dot'},
+    feature: {label: 'only as part of S1', color: 'var(--c1)', mark: 'ring'},
+  };
+  const KIND = D.kinds;
+  CK.legend('pipe-leg', Object.keys(FIT).map(k => ({key: k, label: FIT[k].label, color: FIT[k].color, mark: FIT[k].mark})));
+  const fmtH = h => (h >= 0.01 ? num(h) : sci(h));
+  const Q8 = D.owner.amortized_query_h100h;
+  const rows = D.pipeline;
+  function pipeTip(p) {
+    return '<b>' + p.label + '</b><br>' + fmtH(p.h) + ' H100-hours ' + p.per + ' (' + fmtJ(p.J) + ' at 700 W)'
+      + '<br>' + FIT[p.fit].label + ': ' + p.why + '<br><span style="color:var(--muted)">' + p.k + ': ' + KIND[p.k.split('/')[0]] + '</span>';
+  }
+  CK.frame('pipe', {
+    label: 'Influence-function steps by cost in H100-hours, log scale, coloured by fit to the ET-SoC-1',
+    height: W => (W < 600 ? 44 + rows.length * 40 + 40 : 36 + rows.length * 27 + 44),
+    draw(f) {
+      const W = f.W, narrow = f.narrow, T = narrow ? 30 : 30, B = 40, rh = narrow ? 40 : 27;
+      const LW = narrow ? 0 : Math.min(340, Math.round(W * 0.42));
+      const x0 = narrow ? 14 : LW + 12, x1 = W - 16;
+      const x = CK.log(1e-10, 1e4, x0, x1);
+      const yEnd = T + rows.length * rh;
+      const g = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+      const xt = [1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1, 100, 1e4];
+      const labs = [];
+      for (const t of xt) {
+        CK.el('line', {x1: x(t), x2: x(t), y1: T - 6, y2: yEnd, class: 'grid-line'}, g);
+        labs.push(CK.txt(g, x(t), yEnd + 16, t === 1 ? '1' : t === 100 ? '100' : pow10(Math.round(Math.log10(t))), 'tick', 'middle'));
+      }
+      labs.push(CK.txt(g, (x0 + x1) / 2, yEnd + 34, 'H100-hours, per the unit each step is paid in', 'lab', 'middle'));
+      for (const [v, s] of [[Q8, 'one 8B query'], [Q8 * 1e-6, 'a millionth of it']]) {
+        CK.el('line', {x1: x(v), x2: x(v), y1: T - 8, y2: yEnd, style: 'stroke:var(--ink-2);stroke-width:1.2;stroke-dasharray:4 3'}, g);
+        labs.push(CK.txt(g, x(v) - 4, T - 12, s, 'lab', 'end'));
+      }
+      CK.inside(f, labs);
+      const nodes = [];
+      rows.forEach((p, i) => {
+        const yr = T + i * rh;
+        const yl = narrow ? yr + 13 : yr + rh / 2 + 4, yd = narrow ? yr + 27 : yr + rh / 2;
+        CK.el('line', {x1: x0, x2: x1, y1: yd, y2: yd, class: 'grid-line', 'aria-hidden': 'true'}, f.svg);
+        const bg = narrow ? CK.el('rect', {x: 1, y: yl - 12, height: 16, width: 0, 'aria-hidden': 'true', style: 'fill:var(--page)'}, f.svg) : null;
+        const lab = CK.txt(f.svg, 4, yl, p.label, p.fit === 'no' ? 'lab' : 'lab-strong');
+        lab.setAttribute('aria-hidden', 'true');
+        if (bg) {  /* a plain background under the label, so the grid and the reference lines do not run through it */
+          let w = 0; try { w = lab.getComputedTextLength(); } catch (_) { /* no layout */ }
+          bg.setAttribute('width', (w > 0 ? w : 6.6 * p.label.length) + 8);
+        }
+        const c = FIT[p.fit];
+        const dot = CK.el('circle', {cx: x(p.h), cy: yd, r: 6.5}, f.svg);
+        if (c.mark === 'ring') { dot.style.fill = 'var(--surface)'; dot.style.stroke = c.color; dot.style.strokeWidth = '2.5'; }
+        else { dot.style.fill = c.color; dot.style.stroke = 'var(--surface)'; dot.style.strokeWidth = '2'; }
+        CK.tip(f, dot, pipeTip(p));
+        nodes.push(dot);
+      });
+      CK.keynav(f, nodes);
+    },
+  });
+  const ptb = $('pipe-table').tBodies[0];
+  rows.forEach(p => {
+    const tr = document.createElement('tr');
+    [p.label, p.per, fmtH(p.h), FIT[p.fit].label + ': ' + p.why].forEach((t, j) => {
+      const td = document.createElement('td'); td.textContent = t; if (j === 2) td.className = 'num'; tr.appendChild(td);
+    });
+    ptb.appendChild(tr);
+  });
+  CK.stackTable('pipe-table');
+  CK.stackTable('k-table');
+
+  /* ---------------------------------------------------------------- 2. the explorer */
+  const st = {n: 16000, k: 4096, prec: 'int8', where: 'sram', Q: 1, lam: 1, rows16: false};
+  let quiet = false;
+  const N_STOPS = [1e3, 2e3, 5e3, 1e4, 16000, 2e4, 5e4, 1e5, 270000, 5e5, 1e6, 1e7, 1e8, 1e9, 1e10];
+  const K_STOPS = [64, 256, 1024, 4096, 8192, 16384, 65536, 262144, 1e6, 3e6];
+  const Q_STOPS = [1, 2, 4, 8, 16, 32, 64, 100, 128, 256, 512, 1024];
+  const L_STOPS = [0.01, 0.1, 1, 10, 100, 1e3, 1e4, 1e5];
+  const upd = () => { if (!quiet) recompute(); };
+  const cN = CK.range('x-n', {label: 'Training examples in the index, N', stops: N_STOPS, value: st.n, fmt: fmtCount, onInput: v => { st.n = v; upd(); }});
+  const cK = CK.range('x-k', {label: 'Sketch dimension, k', stops: K_STOPS, value: st.k, fmt: fmtCount, onInput: v => { st.k = v; upd(); }});
+  const cP = CK.seg('x-prec', {label: 'Bits per coordinate', options: [['bit', '1 bit'], ['int8', 'int8'], ['fp16', 'fp16'], ['fp32', 'fp32']], value: st.prec, onChange: v => { st.prec = v; upd(); }});
+  const cW = CK.seg('x-where', {label: 'The ET holds it in', options: [['sram', 'on-chip SRAM'], ['dram', 'card DRAM']], value: st.where, onChange: v => { st.where = v; upd(); }});
+  const cQ = CK.range('x-q', {label: 'Queries per pass, Q', stops: Q_STOPS, value: st.Q, fmt: v => num(v, 0), onInput: v => { st.Q = v; upd(); }});
+  const cL = CK.range('x-lam', {label: 'Queries arriving per second', stops: L_STOPS, value: st.lam, fmt: fmtRate, onInput: v => { st.lam = v; upd(); }});
+  CK.seg('x-rows', {label: 'ET tensor ops with fewer than 16 rows', options: [['scale', 'cost in proportion (as in fp32)'], ['full', 'cost a full 16 rows']], value: 'scale', onChange: v => { st.rows16 = v === 'full'; upd(); }});
+  /* presets: momentary buttons that set every control */
+  (function () {
+    const host = $('x-preset'); host.classList.add('controls');
+    const lab = document.createElement('span'); lab.className = 'ck-seg-label'; lab.textContent = 'Try:'; host.appendChild(lab);
+    D.presets.forEach(p => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = p.label;
+      b.addEventListener('click', () => {
+        quiet = true;
+        cN.set(p.n); cK.set(p.k); cP.set(p.prec); cW.set(p.where); cQ.set(p.Q); cL.set(p.lam);
+        quiet = false; recompute();
+      });
+      host.appendChild(b);
+    });
+  })();
+  const read = CK.readout('x-read');
+  let S = null;  // the current computed state, read by the two charts
+
+  function compute() {
+    const {n, k, prec, where, Q, lam, rows16} = st;
+    const e = etPass(n, k, prec, Q, where, rows16);
+    const hl = hPass(n, k, prec, Q, false), hh = hPass(n, k, prec, Q, true);
+    const cl = cpuPass(n, k, prec, Q, false), ch = cpuPass(n, k, prec, Q, true);
+    const idle = [ET.idle_W.lo, ET.idle_W.hi];
+    const etQ = (l, j) => e.chips * idle[j] / l + e.ea / Q;
+    const h = [hl.e / Q, hh.e / Q], c = [cl.e / Q, ch.e / Q];
+    const a = e.ea / Q;
+    const be = [h[1] > a ? e.chips * idle[0] / (h[1] - a) : Infinity, h[0] > a ? e.chips * idle[1] / (h[0] - a) : Infinity];
+    const bec = [c[1] > a ? e.chips * idle[0] / (c[1] - a) : Infinity, c[0] > a ? e.chips * idle[1] / (c[0] - a) : Infinity];
+    return {e, hl, hh, cl, ch, etQ, h, c, be, bec, capE: Q / e.t, capH: Q / hl.t, capC: Q / cl.t, cpuOK: e.B <= HOST_MEM};
+  }
+
+  function recompute() {
+    S = compute();
+    const {e, hl, h, c, be, bec, capE, capH} = S, {n, k, prec, where, Q, lam} = st;
+    $('x-size').textContent = fmtB(e.B);
+    $('x-size-sub').textContent = fmtCount(n) + ' codes × ' + fmtCount(k) + ' × ' + PREC[prec];
+    const full = lam > capE;
+    $('x-et').textContent = full ? 'full' : fmtJr(S.etQ(lam, 0), S.etQ(lam, 1));
+    $('x-et-sub').textContent = full
+      ? 'serves at most ' + r2s(capE) + ' queries/s at Q = ' + Q + '; raise Q or add chips'
+      : 'at ' + perS(lam) + ', idle included; ' + fmtCount(e.chips) + (where === 'sram' ? ' chip' : ' card') + (e.chips > 1 ? 's' : '');
+    const hfull = lam > capH;
+    $('x-h').textContent = fmtJr(h[0], h[1]);
+    $('x-h-sub').textContent = 'the pass only: ' + fmtT(hl.t) + ' from ' + (hl.l2 ? 'L2' : 'HBM') + (hl.gpus > 1 ? ' on ' + intf(hl.gpus) + ' GPUs' : '')
+      + (hfull ? '; full at this rate' : '');
+    const inR = v => isFinite(v);
+    $('x-be').textContent = !inR(be[0]) ? 'never' : !inR(be[1]) ? r2s(be[0]) + '/s' : range(be[0], be[1], r2s) + '/s';
+    $('x-be-sub').textContent = !inR(be[0]) ? 'the H100 pass costs less than the ET’s own work'
+      : (be[0] > capE ? 'but the ET is full at ' + r2s(capE) + '/s at this Q' : 'queries a second (host CPU: ' + (inR(bec[0]) ? range(bec[0], bec[1], r2s) + '/s' : 'never') + ')');
+    // readout: what binds, and the scale of the step
+    const fits = where === 'sram'
+      ? (e.chips === 1 ? 'fits one chip’s 72 MB of SRAM' : 'needs ' + fmtCount(e.chips) + ' chips’ SRAM, ' + fmtWr(e.chips * ET.idle_W.lo, e.chips * ET.idle_W.hi) + ' at rest')
+      : (e.chips === 1 ? 'fits one card’s 32 GB of DRAM' : 'needs ' + fmtCount(e.chips) + ' cards’ DRAM');
+    const idleShare = S.etQ(lam, 0) > 0 ? (e.chips * ET.idle_W.lo / lam) / S.etQ(lam, 0) : 0;
+    const qs = D.owner.query_energy_J;
+    read.set('<b>ET-SoC-1</b>: the index ' + fits + '; a pass of Q = ' + Q + ' takes ' + fmtT(e.t) + ', bound by ' + e.bound + '. '
+      + '<b>H100</b>: ' + (hl.l2 ? 'pinned in L2' : hl.gpus > 1 ? 'spread over ' + intf(hl.gpus) + ' GPUs’ HBM' : 'too big to pin in L2, read from HBM')
+      + ' in ' + fmtT(hl.t) + ', bound by ' + hl.bound + '. '
+      + (full ? '' : 'At ' + perS(lam) + ' the ET card’s idle is ' + (idleShare > 0.9999 ? 'over 99.99%' : pct(idleShare)) + ' of its energy per query. ')
+      + (S.cpuOK ? 'The host CPU would spend ' + fmtJr(c[0], c[1]) + ' per query. ' : 'Too big for one host’s memory. ')
+      + 'Scoring is ' + share(h[0] / qs[1], h[1] / qs[0]) + ' the H100 energy of the query’s own gradient and iHVP at 8B (' + fmtJr(qs[0], qs[1]) + ').');
+    capFrame.redraw(); rateFrame.redraw();
+  }
+  function fmtW(w) { const u = unitFor(w, [[1e12, 'TW'], [1e9, 'GW'], [1e6, 'MW'], [1e3, 'kW'], [1, 'W']]); return sig(w / u[0]) + ' ' + u[1]; }
+  function fmtWr(a, b) {
+    const u = unitFor(b, [[1e12, 'TW'], [1e9, 'GW'], [1e6, 'MW'], [1e3, 'kW'], [1, 'W']]);
+    return range(a / u[0], b / u[0], sig) + ' ' + u[1];
+  }
+  /* a share: a×10⁻ⁿ when tiny, a percentage below one, a multiple above */
+  function share(a, b) {
+    if (b < 1e-3) return range(a, b, sci) + ' of';
+    if (b < 1) return range(100 * a, 100 * b, v => num(+v.toPrecision(2))) + '% of';
+    return range(a, b, v => num(+v.toPrecision(2))) + ' times';
+  }
+
+  /* capacity strip: the index against each memory */
+  const capFrame = CK.frame('cap', {
+    label: 'The index size on a log scale against the ET chip SRAM, ET card DRAM, H100 pinned L2 and H100 HBM',
+    height: () => 112,
+    draw(f) {
+      if (!S) return;
+      const W = f.W, x = CK.log(1e4, 1e18, 14, W - 14);
+      const yT = 16, y0 = 44, y1 = 56, yB = 88;
+      const g = CK.el('g', {'aria-hidden': 'true'}, f.svg), labs = [];
+      CK.el('rect', {x: x(1e4), y: y0, width: x(1e18) - x(1e4), height: y1 - y0, rx: 3, style: 'fill:var(--grid)'}, g);
+      for (let e10 = 4; e10 <= 18; e10 += 2) labs.push(CK.txt(g, x(Math.pow(10, e10)), 108, fmtBtick(Math.pow(10, e10)), 'tick', 'middle'));
+      const refs = [
+        [ET.sram_usable_B.v, 'ET chip SRAM 72 MB', 'var(--c1)', 'top', 'end', false],
+        [ET.dram_B.v, 'ET card DRAM 32 GB', 'var(--c1)', 'top', 'start', true],
+        [HH.l2_pin_B.v, 'H100 L2 37.5 MB', 'var(--c2)', 'bot', 'end', false],
+        [HH.hbm_B.v, 'H100 HBM 80 GB', 'var(--c2)', 'bot', 'start', true],
+      ];
+      for (const [v, s, col, where, anchor, dash] of refs) {
+        CK.el('line', {x1: x(v), x2: x(v), y1: where === 'top' ? yT + 6 : y0 - 4, y2: where === 'top' ? y1 + 4 : yB - 10,
+          style: 'stroke:' + col + ';stroke-width:2' + (dash ? ';stroke-dasharray:4 3' : '')}, g);
+        labs.push(CK.txt(g, x(v) + (anchor === 'end' ? -4 : 4), where === 'top' ? yT + 10 : yB - 8, s, 'lab', anchor));
+      }
+      CK.inside(f, labs);
+      const B = S.e.B, xm = Math.max(x(1e4), Math.min(x(1e18), x(B)));
+      const mk = CK.el('polygon', {points: [xm, y0 - 7, xm + 7, (y0 + y1) / 2, xm, y1 + 7, xm - 7, (y0 + y1) / 2].join(' '),
+        style: 'fill:var(--ink);stroke:var(--surface);stroke-width:2'}, f.svg);
+      CK.tip(f, mk, 'This index: ' + fmtB(B) + '<br>ET: ' + (st.where === 'sram' ? intf(S.e.chips) + ' chip' + (S.e.chips > 1 ? 's' : '') + '’ SRAM' : intf(S.e.chips) + ' card' + (S.e.chips > 1 ? 's' : '') + '’ DRAM')
+        + '<br>H100: ' + (S.hl.l2 ? 'fits the pinned L2' : intf(S.hl.gpus) + ' GPU' + (S.hl.gpus > 1 ? 's' : '') + '’ HBM'));
+    },
+  });
+
+  /* energy per query against the arrival rate */
+  CK.legend('rate-leg', [
+    {key: 'et', label: 'ET-SoC-1 card, idle charged', color: 'var(--c1)', mark: 'box'},
+    {key: 'h', label: 'H100 in the server, pass only', color: 'var(--c2)', mark: 'box'},
+    {key: 'c', label: 'host CPU, pass only', color: 'var(--c3)', mark: 'box'},
+    {key: 'be', label: 'ET breaks even with the H100', color: 'var(--ref)', mark: 'box'},
+  ]);
+  const LX = [1e-2, 1e5];
+  const rateFrame = CK.frame('rate', {
+    label: 'Energy per query on a log scale against queries arriving per second, for the ET-SoC-1, an H100 and the host CPU',
+    height: W => (W < 600 ? 300 : 340),
+    draw(f) {
+      if (!S) return;
+      const {e, h, c} = S, L = 58, R = 14, T = 24, B = 42;
+      const x = CK.log(LX[0], LX[1], L, f.W - R);
+      const endE = Math.min(LX[1], S.capE), endH = Math.min(LX[1], S.capH), endC = Math.min(LX[1], S.capC);
+      const vals = [h[0], h[1]];
+      if (S.cpuOK) vals.push(S.c[0], S.c[1]);
+      if (endE >= LX[0]) vals.push(S.etQ(LX[0], 1), S.etQ(endE, 0));
+      let lo = Math.min(...vals), hi = Math.max(...vals);
+      lo = Math.pow(10, Math.floor(Math.log10(lo * 0.6))); hi = Math.pow(10, Math.ceil(Math.log10(hi * 1.6)));
+      const y = CK.log(lo, hi, f.H - B, T);
+      const decades = Math.log10(hi / lo), every = Math.max(1, Math.ceil(decades / Math.max(3, Math.floor((f.H - T - B) / 34))));
+      const yt = []; for (let d = Math.log10(lo); d <= Math.log10(hi) + 1e-9; d += every) yt.push(Math.pow(10, d));
+      const xt = [1e-2, 1e-1, 1, 10, 100, 1e3, 1e4, 1e5].filter((t, i) => !f.narrow || i % 2 === 0);
+      CK.axes(f, {x, y, L, R, T, B, xt, yt, xfmt: v => (v >= 1e4 ? pow10(Math.round(Math.log10(v))) : num(v)),
+        yfmt: v => fmtJ(v).replace(' ', ' '), xl: 'queries arriving per second', yl: 'energy per query'});
+      // break-even column
+      const bx0 = Math.max(LX[0], Math.min(LX[1], S.be[0])), bx1 = Math.max(LX[0], Math.min(LX[1], isFinite(S.be[1]) ? S.be[1] : LX[1]));
+      if (isFinite(S.be[0]) && S.be[0] <= LX[1] && bx1 > bx0) {
+        const r = CK.el('rect', {x: x(bx0), y: T, width: Math.max(2, x(bx1) - x(bx0)), height: f.H - T - B, style: 'fill:var(--ref);fill-opacity:0.16'}, f.svg);
+        CK.tip(f, r, 'The ET card breaks even with the H100 at ' + range(S.be[0], S.be[1], r2s) + ' queries a second'
+          + (S.be[0] > S.capE ? ', beyond what it can serve at Q = ' + st.Q : ''));
+      }
+      const band = (x0, x1, fl, fh, col, key) => {
+        if (x1 <= x0) return null;
+        const pts = 48, xs = [];
+        for (let i = 0; i <= pts; i++) xs.push(Math.pow(10, Math.log10(x0) + (Math.log10(x1) - Math.log10(x0)) * i / pts));
+        const top = xs.map(v => [v, fh(v)]), bot = xs.map(v => [v, fl(v)]);
+        const cy = v => Math.max(T, Math.min(f.H - B, y(v)));
+        const d = top.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + cy(p[1]).toFixed(1)).join(' ')
+          + ' ' + bot.reverse().map(p => 'L' + x(p[0]).toFixed(1) + ',' + cy(p[1]).toFixed(1)).join(' ') + ' Z';
+        CK.el('path', {d, 'data-series': key, style: 'fill:' + col + ';fill-opacity:0.2;stroke:none'}, f.svg);
+        for (const fn of [fl, fh]) CK.el('path', {d: xs.map((v, i) => (i ? 'L' : 'M') + x(v).toFixed(1) + ',' + cy(fn(v)).toFixed(1)).join(' '),
+          class: 'ln', 'data-series': key, style: 'stroke:' + col + ';stroke-width:1.6'}, f.svg);
+        return true;
+      };
+      band(LX[0], endH, () => h[0], () => h[1], 'var(--c2)', 'h');
+      if (S.cpuOK) band(LX[0], endC, () => S.c[0], () => S.c[1], 'var(--c3)', 'c');
+      if (endE >= LX[0]) band(LX[0], endE, v => S.etQ(v, 0), v => S.etQ(v, 1), 'var(--c1)', 'et');
+      const labs = [];
+      if (S.capE < LX[1] && S.capE >= LX[0]) labs.push(CK.txt(f.svg, x(S.capE) + 4, y(S.etQ(S.capE, 0)) + 4, 'ET full', 'lab'));
+      // the chosen rate and a point per device
+      const lam = st.lam, xl = x(lam);
+      CK.el('line', {x1: xl, x2: xl, y1: T, y2: f.H - B, style: 'stroke:var(--ink-2);stroke-width:1.2;stroke-dasharray:3 3', 'aria-hidden': 'true'}, f.svg);
+      const nodes = [];
+      const pt = (v, col, html) => {
+        const cy = Math.max(T, Math.min(f.H - B, y(v)));
+        const d = CK.el('circle', {cx: xl, cy, r: 6}, f.svg);
+        d.style.fill = col; d.style.stroke = 'var(--surface)'; d.style.strokeWidth = '2';
+        CK.tip(f, d, html); nodes.push(d);
+      };
+      const eMid = Math.sqrt(S.etQ(lam, 0) * S.etQ(lam, 1));
+      if (lam <= S.capE) pt(eMid, 'var(--c1)', '<b>ET-SoC-1</b> at ' + perS(lam) + ': ' + fmtJr(S.etQ(lam, 0), S.etQ(lam, 1)) + ' per query<br>idle '
+        + fmtJr(e.chips * ET.idle_W.lo / lam, e.chips * ET.idle_W.hi / lam) + ', work ' + fmtJ(e.ea / st.Q) + '; pass ' + fmtT(e.t) + ', bound by ' + e.bound);
+      if (lam <= S.capH) pt(Math.sqrt(h[0] * h[1]), 'var(--c2)', '<b>H100</b>, pass only: ' + fmtJr(h[0], h[1]) + ' per query<br>pass ' + fmtT(S.hl.t) + ', bound by ' + S.hl.bound);
+      if (S.cpuOK && lam <= S.capC) pt(Math.sqrt(S.c[0] * S.c[1]), 'var(--c3)', '<b>Host CPU</b>, pass only: ' + fmtJr(S.c[0], S.c[1]) + ' per query<br>pass ' + fmtT(S.cl.t) + ' (estimate)');
+      CK.inside(f, labs);
+      CK.keynav(f, nodes);
+    },
+  });
+  recompute();
+
+  /* ---------------------------------------------------------------- 3. S2: the atlas scan */
+  const s2 = D.s2;
+  const s2rows = [{label: 'A100, measured (the author’s atlas)', s: s2.a100_s, J: s2.a100_J, gpu: true}]
+    .concat(s2.et.map(r => ({label: 'ET-SoC-1, ' + r.prec + ' at ' + pct(r.eff) + ' of its measured peak', s: r.s, J: [r.J, r.J], eff: r.eff, prec: r.prec})));
+  let s2mode = 's';
+  CK.seg('s2-ctl', {label: 'The atlas scan (100 queries × 10 logits × 60,000 digits), in', options: [['s', 'seconds'], ['J', 'joules']], value: 's',
+    onChange: v => { s2mode = v; s2f.redraw(); }});
+  const s2f = CK.frame('s2', {
+    label: 'The atlas scan on the A100 as measured, against the ET-SoC-1 at several fractions of its peak',
+    height: W => (W < 600 ? 40 + s2rows.length * 42 + 36 : 30 + s2rows.length * 30 + 40),
+    draw(f) {
+      const narrow = f.narrow, rh = narrow ? 42 : 30, T = narrow ? 14 : 10, LW = narrow ? 0 : Math.min(300, Math.round(f.W * 0.38));
+      const x0 = narrow ? 4 : LW + 10, x1 = f.W - (narrow ? 70 : 90);
+      const val = r => (s2mode === 's' ? r.s : r.J[1]);
+      const max = Math.max(...s2rows.map(val)) * 1.05;
+      const x = CK.lin(0, max, x0, x1), yEnd = T + s2rows.length * rh;
+      const g = CK.el('g', {'aria-hidden': 'true'}, f.svg), labs = [];
+      for (const t of x.ticks(narrow ? 4 : 6)) {
+        CK.el('line', {x1: x(t), x2: x(t), y1: T - 4, y2: yEnd, class: 'grid-line'}, g);
+        labs.push(CK.txt(g, x(t), yEnd + 16, num(t), 'tick', 'middle'));
+      }
+      labs.push(CK.txt(g, (x0 + x1) / 2, yEnd + 32, s2mode === 's' ? 'seconds' : 'joules of board energy', 'lab', 'middle'));
+      const ref = s2mode === 's' ? s2.a100_s : null;
+      if (ref) CK.el('line', {x1: x(ref), x2: x(ref), y1: T - 4, y2: yEnd, style: 'stroke:var(--c2);stroke-width:1.2;stroke-dasharray:4 3'}, g);
+      if (!ref) CK.el('rect', {x: x(s2.a100_J[0]), y: T - 4, width: x(s2.a100_J[1]) - x(s2.a100_J[0]), height: yEnd - T + 4, style: 'fill:var(--c2);fill-opacity:0.12'}, g);
+      CK.inside(f, labs);
+      const nodes = [];
+      s2rows.forEach((r, i) => {
+        const yr = T + i * rh, yb = narrow ? yr + 18 : yr + 6, bh = 14;
+        CK.txt(f.svg, narrow ? 4 : 4, narrow ? yr + 12 : yr + 17, r.label, r.gpu ? 'lab-strong' : 'lab').setAttribute('aria-hidden', 'true');
+        const v = val(r);
+        const bar = CK.el('rect', {x: x0, y: yb, width: Math.max(2, x(v) - x0), height: bh, rx: 3}, f.svg);
+        bar.style.fill = r.gpu ? 'var(--c2)' : 'var(--c1)';
+        let txt;
+        if (s2mode === 's') txt = fmtT(r.s);
+        else txt = r.gpu ? fmtJr(r.J[0], r.J[1]) : fmtJ(r.J[0]);
+        CK.txt(f.svg, x(v) + 6, yb + 11, txt, 'lab', 'start').setAttribute('aria-hidden', 'true');
+        const html = r.gpu
+          ? '<b>A100, measured</b>: the scan took ' + fmtT(s2.a100_s) + ' (' + num(s2.a100_tflops_nominal) + ' TFLOP/s nominal); at 250–400 W that is ' + fmtJr(s2.a100_J[0], s2.a100_J[1]) + ' (power estimated)'
+          : '<b>' + r.label + '</b>: ' + fmtT(r.s) + ' and ' + fmtJ(r.J[0]) + ' at the matmul benchmark’s board power (estimate: the fraction of peak a persistent kernel sustains is unmeasured)';
+        CK.tip(f, bar, html); nodes.push(bar);
+      });
+      CK.keynav(f, nodes);
+    },
+  });
+})();
+
+</script>
+<script>
+/* Section anchors. Every h2/h3 gets an id (its own, or one made from its text) and a # link; clicking a heading
+   or a table-of-contents link puts #id in the URL. When the page is framed by spacesheep.dev the fragment is
+   mirrored into the outer, shareable URL (postMessage ss-hash), and an outer #fragment is forwarded in on load. */
+(function () {
+  const slug = t => t.toLowerCase().replace(/^\d+(\.\d+)*\.?\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const post = h => { if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h}, '*'); } catch (_) {} } };
+  const go = id => { try { history.replaceState(null, '', location.pathname + location.search + '#' + id); } catch (_) {}
+    const el = document.getElementById(id); if (el) el.scrollIntoView({block: 'start'}); post('#' + id); };
+  const seen = new Set();
+  document.querySelectorAll('main h2, main h3').forEach(h => {
+    if (!h.id) { let id = slug(h.textContent) || 'section', n = 2; while (seen.has(id) || document.getElementById(id)) id = slug(h.textContent) + '-' + n++; h.id = id; }
+    seen.add(h.id);
+    const a = document.createElement('a'); a.href = '#' + h.id; a.className = 'hlink'; a.textContent = '#'; a.title = 'link to this section'; h.appendChild(a);
+    h.style.cursor = 'pointer';
+    h.addEventListener('click', ev => { if (ev.target.tagName === 'A' && ev.target !== a) return; ev.preventDefault(); go(h.id); });
+  });
+  window.addEventListener('hashchange', () => post(location.hash));
+  if (location.hash) { post(location.hash); const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => el.scrollIntoView({block: 'start'}), 50); }
+})();
+</script>
+<script>
+/* Contents list, link back to the reports hub, and repository paths as links. Runs after the section-anchor
+   script above, whose h2 ids the contents list links to. Pages not built from this template paste both blocks
+   before </main>.
+   - Contents: a page with 6 or more h2s and no #toclist of its own gets a numbered list before its first h2.
+   - Footer: every page but the hub ends with a link to the hub's list of reports, unless it already has one.
+   - Paths: an inline <code> whose whole text is a repository path (docs/…, workloads/…, tools/…, scripts/…,
+     kernels/…, rtl-sim/…) becomes a GitHub link. Code blocks, code already in a link and globs stay as they are. */
+(function () {
+  const main = document.querySelector('main'); if (!main) return;
+  const HUB = 'https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability';
+  const BACK = '← All ET-SoC-1 measurement reports';
+  const REPO = 'https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/';
+  const text = el => { const c = el.cloneNode(true); c.querySelectorAll('.hlink').forEach(a => a.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+  const NUM = /^(?:§\s*\d+(?:\.\d+)*\.?|\d+(?:\.\d+)*\.|\d+(?:\.\d+)+)\s+/;  /* "3. ", "4.2 ", "§5 "; not "600 MHz" */
+
+  const h2s = [...main.querySelectorAll('h2')];
+  if (h2s.length >= 6 && !document.getElementById('toclist')) {
+    const nav = document.createElement('nav'); nav.className = 'card';
+    const b = document.createElement('b'); b.textContent = 'Contents';
+    const ol = document.createElement('ol'); ol.id = 'toclist';
+    h2s.forEach(h => {
+      if (!h.id) return;
+      const t = text(h), m = t.match(/^§?\s*(\d+)[.\s]/), li = document.createElement('li'), a = document.createElement('a');
+      if (m && NUM.test(t)) li.value = +m[1];
+      a.href = '#' + h.id; a.textContent = t.replace(NUM, '') || t;
+      li.appendChild(a); ol.appendChild(li);
+    });
+    nav.append(b, ol);
+    h2s[0].parentNode.insertBefore(nav, h2s[0]);
+  }
+
+  const h1 = main.querySelector('h1');
+  const isHub = !!h1 && /^limits of observability/i.test(text(h1));
+  const hasBack = [...document.querySelectorAll('a')].some(a => a.textContent.replace(/\s+/g, ' ').trim() === BACK);
+  if (!isHub && !hasBack) {
+    const p = document.createElement('p'); p.className = 'small';
+    const a = document.createElement('a'); a.href = HUB + '#reports'; a.textContent = BACK;
+    p.appendChild(a); main.appendChild(p);
+  }
+
+  const PATH = /^(docs|workloads|tools|scripts|kernels|rtl-sim)\/[\w./-]+$/;
+  main.querySelectorAll('code').forEach(c => {
+    if (c.closest('pre, a')) return;
+    const t = c.textContent.trim(); if (!PATH.test(t)) return;
+    const a = document.createElement('a'); a.href = REPO + t;
+    c.parentNode.insertBefore(a, c); a.appendChild(c);
+  });
+})();
+</script>
+</body>
+</html>
