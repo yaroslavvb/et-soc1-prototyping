@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -99,11 +99,70 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 h2, h3 { scroll-margin-top: 12px; }
 .hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
 h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
+/* chartkit:css:begin (the chart toolkit's CSS; scripts/paste-chartkit.py copies this block into standalone pages) */
+.ck-frame { position: relative; width: 100%; }
+.ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ck-frame svg { display: block; max-width: none; height: auto; }
+.ck-frame svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.ck-frame .tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame .lab { fill: var(--ink-2); font-size: 12px; }
+.ck-frame .lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ck-frame .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-axis { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-hit { fill: transparent; stroke: none; }
+.ck-tip { position: absolute; z-index: 5; pointer-events: none; display: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border, var(--grid)); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: min(320px, calc(100% - 8px)); }
+.ck-frame svg [tabindex] { outline: none; }
+.ck-frame svg [tabindex]:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse)[tabindex]:not(.ck-hit):focus-visible,
+.ck-frame svg [tabindex]:focus-visible > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse).ck-active:not(.ck-hit),
+.ck-frame svg .ck-active > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 1.5px; }
+.ck-hidden { display: none !important; }
+.ck-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 8px 0 6px; }
+.ck-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 8px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-legend .ck-li { display: inline-flex; align-items: center; gap: 6px; }
+.ck-legend button.ck-li { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 3px 10px; min-height: 32px; cursor: pointer; }
+.ck-legend button.ck-li[aria-pressed="false"] { opacity: 0.55; text-decoration: line-through; }
+.ck-legend svg { flex: none; overflow: visible; }
+.ck-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.82rem; }
+.ck-seg-label { color: var(--ink-2); }
+.ck-seg-group { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ck-seg [role="radio"] { font: inherit; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-seg [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-range input[type="range"] { flex: 0 1 200px; width: 200px; min-width: 120px; min-height: 32px; margin: 0; accent-color: var(--c1); }
+.ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
+   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
+th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+th.num { white-space: normal; }
+@media (max-width: 599px) {
+  table.stack, .wide table.stack { min-width: 0; }
+  table.stack thead { display: none; }
+  table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { border-bottom: 1px solid var(--grid); padding: 6px 0; }
+  table.stack td, table.stack td.num { border: 0; padding: 2px 0; text-align: left; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+  table.stack td:first-child::before { content: none; }
+  table.stack td:first-child { font-weight: 600; }
+}
+@media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* chartkit:css:end */
 </style>
 </head>
 <body>
 <main>
 __BODY__
+<script>
+/* chart toolkit: docs/reports/sources/chartkit.js */
+__CHARTKIT__
+</script>
 <script>
 const D = __DATA__;
 __SCRIPT__

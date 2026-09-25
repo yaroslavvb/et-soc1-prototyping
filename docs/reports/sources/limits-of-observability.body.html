@@ -1,44 +1,111 @@
 <style>main{max-width:1320px}table{font-size:0.84rem;table-layout:fixed}th,td{padding:6px 8px;overflow-wrap:anywhere}td.lvl{white-space:normal}.verif{white-space:nowrap}td .chip{white-space:normal;line-height:1.35}@media (min-width:900px){.table-wrap{overflow-x:visible}}
-.lede-list{font-size:1.02rem;margin:4px 0 14px;padding-left:22px}.lede-list li{margin:7px 0}
-#terms{font-size:0.92rem;margin:14px 0}#terms p{margin:0 0 8px}#terms p:last-child{margin-bottom:0}
-.start{margin:12px 0}
+#fittab{max-width:680px}
 tr.grp td{background:var(--code-bg);padding-top:8px}
 .ck{font-size:0.9rem;font-weight:600}.ck.confirmed{color:var(--ok)}.ck.disputed{color:var(--warn)}.ck.unverified{color:var(--muted)}.ck.changed{color:var(--c1)}
 .caption{font-size:0.82rem;color:var(--ink-2);margin:2px 0 8px}
 ol.src li{font-size:0.88rem}
-@media (max-width:899px){#reportstab,#laddertab,#imptab,#contrast,#sessionstab,#pvttab,#drooptab{min-width:760px}}</style>
+@media (min-width:600px) and (max-width:899px){#reportstab,#laddertab,#imptab,#contrast,#sessionstab,#pvttab,#drooptab{min-width:760px}}
+/* glossary and start card */
+details#terms{font-size:0.92rem;margin:14px 0}details#terms>summary{font-size:0.95rem;color:var(--ink)}details#terms[open]>summary{margin-bottom:10px}#terms p{margin:0 0 8px}#terms p:last-child{margin-bottom:0}
+.start{margin:14px 0}.start h2.sr{position:absolute;left:-9999px}.start>b{font-size:1rem}
+.paths{margin:8px 0 0;padding-left:0;list-style:none}.paths>li{margin:10px 0 0;padding-top:10px;border-top:1px solid var(--grid)}
+.paths .q{font-weight:600}.paths details{margin:0}.paths summary{color:var(--ink);font-size:inherit}.paths .who{color:var(--ink-2);font-size:0.85rem}
+.paths ol{display:flex;flex-wrap:wrap;gap:4px 6px;margin:6px 0 0;padding:0;list-style:none;counter-reset:p}
+.paths ol li{margin:0;font-size:0.9rem;counter-increment:p}.paths ol li::before{content:counter(p) ". ";color:var(--muted);font-variant-numeric:tabular-nums}
+.paths ol li:not(:last-child)::after{content:" →";color:var(--muted)}.paths .rf{color:var(--ink-2);font-size:0.82rem}
+.paths .base{font-size:0.72rem;color:var(--ink-2);background:color-mix(in srgb,var(--warn) 14%,transparent);border:1px solid var(--warn);border-radius:999px;padding:0 6px;white-space:nowrap}
+/* ladder: notes open at 600 px and wider, collapsed below; stacked cards come from CK.stackTable */
+details.lnote{margin:4px 0 0}details.lnote>summary{font-size:0.8rem}
+@media (min-width:600px){details.lnote>summary{display:none}#notesall{display:none}}
+tr.flash td{background:color-mix(in srgb,var(--c1) 14%,var(--surface));transition:background .4s}
+.gran-row{cursor:default}
+/* charts */
+.vgrid{display:grid;gap:14px}.vgrid>*{min-width:0}.panel{font-size:0.86rem;line-height:1.5}.panel h4{margin:0 0 4px;font-size:0.95rem}.panel .small{margin:4px 0}
+.panel dl{margin:6px 0}.panel dt{color:var(--ink-2);font-size:0.78rem;margin-top:6px}.panel dd{margin:0}
+@media (min-width:1100px){.vgrid.map{grid-template-columns:minmax(0,1fr) 320px}}
+#map-frame .ck-plot{max-height:none}
+.ck-controls label.chk{display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--ink-2);min-height:32px;cursor:pointer}
+.ck-controls label.chk input{width:18px;height:18px;accent-color:var(--c1);margin:0}
+.ck-controls select{font:inherit;font-size:0.82rem;background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:8px;padding:4px 8px;min-height:32px;max-width:100%}
+.ck-controls .sel{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:0.82rem;color:var(--ink-2);max-width:100%}
+.pt-sel{stroke:var(--ink);stroke-width:2.4px}.map-sel>rect:not(.ck-hit){stroke:var(--ink);stroke-width:2.5px}
+button.linkbtn{font:inherit;font-size:0.82rem;background:none;border:1px solid var(--border);border-radius:999px;padding:1px 9px;margin:2px 3px 0 0;color:var(--c1);cursor:pointer;min-height:26px}
+.mapnode{cursor:pointer}
+/* stacked tables on phones, compact: each label runs in before its text; short cells sit side by side; the report's date under its title */
+@media (max-width:599px){table.stack td[data-label]::before{display:inline;content:attr(data-label) ": ";font-size:0.72rem;margin-right:2px}
+table.stack td{padding:2px 0}table.stack td.inl{display:inline-block;width:auto;margin-right:16px;vertical-align:middle}
+table.stack td:first-child::before,#reportstab.stack td:nth-child(2)::before{content:none}#reportstab.stack td:nth-child(2){padding-top:0}}.mapnode.dim{opacity:0.22}.mapedge.dim{opacity:0.12}.maphead{font-size:0.86rem;color:var(--ink-2);margin:4px 0}</style>
 <h1>Limits of observability on the ET-SoC-1</h1>
-<p class="byline">24 September 2026 (first published 20 September; versions in §8) · the AI Foundry cards in aifoundry2 and aifoundry3 · firmware source read at et-platform <code>353f20e</code> (the cards' own log strings point to an older build; see §8), RTL core-et <code>b38a1a3</code> · the index of every ET-SoC-1 measurement report</p>
+<p class="byline">25 September 2026 (first published 20 September; versions in §8) · the AI Foundry cards in aifoundry2 and aifoundry3 · firmware source read at et-platform <code>353f20e</code> (the cards' own log strings point to an older build; see §8), RTL core-et <code>b38a1a3</code> · the index of every ET-SoC-1 measurement report</p>
 
-<p class="lede">This chip ships with its manuals, errata, firmware source, functional simulator and the RTL of its core. The question here is how far down you can see: can you time one instruction, read one register, meter one event, watch one bit flip? The short answers:</p>
-<ul class="lede-list">
-<li><b>Time: one clock cycle.</b> The cycle counter can be read from a kernel, once a late carry into bit 7 is corrected (§3).</li>
-<li><b>State: in principle, one 64-bit register of a halted hart.</b> The debug interface is in the shipped firmware, but no client exists yet and it has not been tried on this card. No counter, trace or sensor returns the value of an arbitrary flop or SRAM bit, and the only bit-level detectors, the ECC checkers, are wired but not switched on.</li>
-<li><b>Energy: a few joules' worth of identical events</b> (at least 10⁹ a second for 3 s, repeated over passes and cards). The card reports board power at 10 mW every 133 ms and three rails, which the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">energy manual</a> turns into picojoules per instruction and per byte by repetition. Half of the idle power is on no rail sensor, and so is part of what a workload adds above idle: about a sixth for arithmetic, three fifths to three quarters for DRAM traffic. §4 says what that remainder is made of and §5 what would meter it.</li>
-<li><b>Bit flips: not on the card; yes in simulation.</b> The functional simulator shows every architectural bit every instruction, with no timing. RTL simulation shows every flop every cycle: single modules of the open core RTL (Erbium, a later chip of the same Minion core lineage; §8) already run here under Verilator, and one of them explains a counter bug measured on the card (§3). The whole eight-minion bench needs more repair.</li>
-</ul>
-<p>Below silicon, this is far more than a GPU offers. On silicon it is roughly a GPU's depth with weaker ECC coverage, and much of the extra reach sits behind firmware that the card's boot chain signature-checks (§5, §6).</p>
+<p class="lede">This chip ships with its manuals, errata, firmware source, functional simulator and the RTL of its core. This page indexes every measurement made on two of its cards and asks how far down they let you see: one cycle, one register, one event, one bit.</p>
 
 <div class="kpis">
-  <div class="card kpi"><div class="lab">Finest time on the card</div><div class="val">1 cycle</div><div class="sub">hpmcounter3 from a kernel, after correcting a late carry into bit 7</div></div>
+  <div class="card kpi"><div class="lab">Finest time on the card</div><div class="val">1 cycle</div><div class="sub">hpmcounter3 from a kernel, after correcting a late carry into bit 7 (§3)</div></div>
   <div class="card kpi"><div class="lab">Finest state on the card</div><div class="val">64 bits</div><div class="sub">one GPR, CSR or memory word of a halted hart per management round trip; in the firmware, untried (§2)</div></div>
-  <div class="card kpi"><div class="lab">Finest energy</div><div class="val">133 µJ</div><div class="sub">1 mW × 133 ms on a rail; a bit flip is ~10⁻¹⁶ J; repetition gets the median bar to ±6% per event</div></div>
-  <div class="card kpi"><div class="lab">Power on no sensor</div><div class="val" id="k-unmet"></div><div class="sub">of idle at 73 °C, not split further; above idle, a regression splits the unmetered part by source to 0.35 W rms (1.1–1.3 W rms on the DRAM configurations)</div></div>
+  <div class="card kpi"><div class="lab">One reading's energy step</div><div class="val">133 µJ</div><div class="sub">1 mW × 133 ms on a rail (aifoundry2), spread over about a second by the PMIC's average, so one event must carry about 1 mJ to move it; the manual resolves events by repeating them (≥10⁹ a second for 3 s) to a median bar of ±6%; a bit flip is ~10⁻¹⁶ J (§2)</div></div>
+  <div class="card kpi"><div class="lab">Individual bit flips</div><div class="val">simulation only</div><div class="sub">every flop every cycle in the open RTL, every architectural bit in the functional simulator; nothing on the die counts toggles (§3)</div></div>
 </div>
 
-<div class="card" id="terms">
-<p><b>The chip in brief.</b> The ET-SoC-1 is Esperanto's RISC-V accelerator, now open-sourced by AI Foundry. Its compute cores are <i>minions</i>: small in-order RISC-V cores, each with two hardware threads (<i>harts</i>), an 8-lane fp32 vector unit and a tensor unit whose matrix multiply-accumulate instruction is <i>TensorFMA</i> (one fp32 op multiplies 16×16×16 tiles: 4,096 multiply-adds). Only hart 0 issues tensor operations (hart 1 may only prefetch into the L2 scratchpad). Eight minions form a <i>neighbourhood</i> and 32 a <i>shire</i>. Each shire has 4 MB of SRAM, which these cards' firmware splits into a 512 KB L2 cache, a 1 MB slice of the chip-wide 32 MB L3 and a 2.5 MB <i>scratchpad</i>: software-managed memory that any shire can address. Each minion also sets aside 3 KB of its 4 KB L1 data cache as an L1 scratchpad for tensor operands.</p>
-<p>The chip has 34 minion shires (1,088 minions): 32 run kernels (1,024 minions), the <i>master shire</i> runs firmware and one is spare. With the I/O and PCIe shires they form a 6×6 grid on a mesh network-on-chip (<i>NoC</i>, 400 MHz); eight <i>memory shires</i> with the LPDDR4X controllers (32 GB) sit along two sides, making 8×6 mesh stops. A <i>flit</i> is the unit the mesh moves as a whole.</p>
-<p>The <i>service processor</i> (SP) is the on-die management core: its firmware reads the sensors, runs the clock and voltage governor (600, 700 or 800 MHz) and answers the host's management commands (<code>DM_CMD_*</code>). The <i>PMIC</i> is the board's power-management controller: it meters the 12 V input and, over <i>PMBus</i>, three regulators (the minion, SRAM and NoC <i>rails</i>). <i>Moortec PVT</i> monitors measure temperature and voltage on the die. Kernels run in user mode (<i>U-mode</i>) and firmware in machine mode (<i>M-mode</i>). The four <i>Maxions</i> are larger out-of-order RISC-V cores on their own 0.6 V rail.</p>
-<p>Other names on this page: <i>A0</i> is the silicon revision (stepping) that the errata describe; <i>PShire</i> is the PCIe shire; <i>VDDQ</i> is the DRAM I/O supply; <i>MDI</i> is the Minion Debug Interface that the SP exposes to the host; <i>BL1</i> and <i>BL2</i> are the SP's boot stages; <i>OTP</i> is one-time-programmable fuse memory; the <i>PRM</i> is Esperanto's Programmer's Reference Manual; <i>sys_emu</i> is the functional simulator; <i>ettelem</i> is this project's telemetry client. <i>aifoundry2</i> and <i>aifoundry3</i> (a2, a3) are the lab machines that hold the two cards measured. The <i>Horace experiment</i> is named after Horace He's post showing that GPU matrix multiplies run faster on predictable data (<a href="https://www.thonking.ai/p/strangely-matrix-multiplications">“Strangely, Matrix Multiplications on GPUs Run Faster When Given ‘Predictable’ Data!”</a>).</p>
+<div class="card start" id="start">
+<b>Start here: four reading paths</b> <span class="small" id="paths-hint"></span>
+<ol class="paths">
+<li><details class="path" open><summary><span class="q">A. Why is this chip low power, and what does a FLOP cost?</span> <span class="who">For a newcomer, about 45 minutes.</span></summary>
+<ol>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power">Why is the ET-SoC-1 low power?</a> <span class="rf">the equation measured term by term, against an A100</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">The Horace experiment</a>, §1, §3, §6 <span class="rf">why the data, not the FLOPs, sets the watts</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The energy manual</a>, §1–§3 <span class="rf">the card at rest, awake, per instruction</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a>, §1–§2, §5 <span class="rf">the governor, and what leakage costs</span></li>
+</ol></details></li>
+<li><details class="path" open><summary><span class="q">B. Writing fast kernels.</span> <span class="who">For a programmer.</span></summary>
+<ol>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-testdrive">Test drive</a> <span class="rf">the toolchain, the simulator, a first SGEMM</span> <span class="base">18 Sep baseline</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">Matmul efficiency</a> <span class="rf">the tensor unit near its peak</span> <span class="base">baseline; energies superseded</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> <span class="rf">latency and bandwidth of every level</span> <span class="base">baseline; energies superseded</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a> <span class="rf">how much work per byte each level needs</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> <span class="rf">the mesh, messages, trees, and the TensorSend trap</span> <span class="base">baseline; energies superseded</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a> <span class="rf">relaying between shires instead of DRAM</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a> <span class="rf">contended atomics, and what to do instead</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">Sparse compute</a> <span class="rf">what the tensor unit does with zeros</span> <span class="base">baseline; power superseded</span></li>
+</ol></details></li>
+<li><details class="path" open><summary><span class="q">C. What does each operation cost?</span> <span class="who">For an energy modeller.</span></summary>
+<ol>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The energy manual</a> <span class="rf">every cost, with bars from two cards</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> <span class="rf">a bit carried across the mesh, by bit pattern</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">The Horace experiment, §8</a> <span class="rf">from flips to watts to degrees</span></li>
+<li><a href="#power">This page, §4</a> <span class="rf">what the meters do not see</span></li>
+</ol></details></li>
+<li><details class="path" open><summary><span class="q">D. How far down can you see?</span> <span class="who">For tools and observability.</span></summary>
+<ol>
+<li><a href="#ladder">This page, §2–§4</a> <span class="rf">every instrument, and the meters' limits</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#a-load-step-seen-through-every-sensor">Power and temperature</a>, §2–§3 <span class="rf">a load step through every sensor; the voltage map</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy">Anatomy of a memory access</a> <span class="rf">one load taken apart to ±3 cycles</span> <span class="base">energy section superseded</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature: a brief</a> <span class="rf">35 sensors the host never sees one by one</span></li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-built">The DVFS loop, §1</a> <span class="rf">the firmware as the gate</span></li>
+</ol></details></li>
+</ol>
 </div>
-
-<p class="card start"><b>Start here.</b> <a href="#reports">§1</a> lists every report and what it found. For energy per instruction or per byte, go to the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">energy manual</a>; for what a power number can and cannot mean, read <a href="#power">§4</a> here. The chip's vocabulary is in the box above.</p>
 
 <nav class="card" id="toc"><b>Contents</b><ol id="toclist"></ol></nav>
 
+<details class="card" id="terms">
+<summary><b>The chip in brief</b>: minions, harts, shires, scratchpads, the SP, the PMIC and the other names on this page</summary>
+<p>The ET-SoC-1 is Esperanto's RISC-V accelerator, now open-sourced by AI Foundry. Its compute cores are <i>minions</i>: small in-order RISC-V cores, each with two hardware threads (<i>harts</i>), an 8-lane fp32 vector unit and a tensor unit whose matrix multiply-accumulate instruction is <i>TensorFMA</i> (one fp32 op multiplies 16×16×16 tiles: 4,096 multiply-adds). Only hart 0 issues tensor operations (hart 1 may only prefetch into the L2 scratchpad). Eight minions form a <i>neighbourhood</i> and 32 a <i>shire</i>. Each shire has 4 MB of SRAM, which these cards' firmware splits into a 512 KB L2 cache, a 1 MB slice of the chip-wide 32 MB L3 and a 2.5 MB <i>scratchpad</i>: software-managed memory that any shire can address. Each minion also sets aside 3 KB of its 4 KB L1 data cache as an L1 scratchpad for tensor operands.</p>
+<p>The chip has 34 minion shires (1,088 minions): 32 run kernels (1,024 minions), the <i>master shire</i> runs firmware and one is spare. With the I/O and PCIe shires they form a 6×6 grid on a mesh network-on-chip (<i>NoC</i>, 400 MHz); eight <i>memory shires</i> with the LPDDR4X controllers (32 GB) sit along two sides, making 8×6 mesh stops. A <i>flit</i> is the unit the mesh moves as a whole.</p>
+<p>The <i>service processor</i> (SP) is the on-die management core: its firmware reads the sensors, runs the clock and voltage governor (600, 700 or 800 MHz) and answers the host's management commands (<code>DM_CMD_*</code>). The <i>PMIC</i> is the board's power-management controller: it meters the 12 V input and, over <i>PMBus</i>, three regulators (the minion, SRAM and NoC <i>rails</i>). <i>Moortec PVT</i> monitors measure temperature and voltage on the die. Kernels run in user mode (<i>U-mode</i>) and firmware in machine mode (<i>M-mode</i>). The four <i>Maxions</i> are larger out-of-order RISC-V cores on their own 0.6 V rail.</p>
+<p>Other names on this page: <i>A0</i> is the silicon revision (stepping) that the errata describe; <i>PShire</i> is the PCIe shire; <i>VDDQ</i> is the DRAM I/O supply; <i>MDI</i> is the Minion Debug Interface that the SP exposes to the host; <i>BL1</i> and <i>BL2</i> are the SP's boot stages; <i>OTP</i> is one-time-programmable fuse memory; the <i>PRM</i> is Esperanto's Programmer's Reference Manual; <i>sys_emu</i> is the functional simulator; <i>ettelem</i> is this project's telemetry client. <i>aifoundry2</i> and <i>aifoundry3</i> (a2, a3) are the lab machines that hold the two cards measured. The <i>Horace experiment</i> is named after Horace He's post showing that GPU matrix multiplies run faster on predictable data (<a href="https://www.thonking.ai/p/strangely-matrix-multiplications">“Strangely, Matrix Multiplications on GPUs Run Faster When Given ‘Predictable’ Data!”</a>).</p>
+</details>
+
 <h2 id="reports">1. The measurement reports</h2>
-<p>Everything measured on these cards so far, grouped by subject and newest first within each group. Each row says what the report found and which of the instruments in §2 it leaned on.</p>
+<p>Everything measured on these cards so far. The map shows what was measured, when and on which card, which report each session fed, and which later page now holds a number an earlier page first gave; the table under it is the index, grouped by subject and newest first within each group, with what each report found and which of the instruments in §2 it leaned on.</p>
+<div class="chart-title">Reports and sessions, 18–24 September</div>
+<p class="caption">Each session (an E-ID of the experiment register, §7) sits in the lane of the card it ran on, and each report at the day it was first published. Grey curves run from a session to the reports it fed; dashed arrows from a number's first page to the page that now holds it. Hover, tap or tab to any mark; Enter or a click selects it and shows its details.</p>
+<div class="ck-controls" id="map-ctl"></div>
+<div class="maphead" id="map-head"></div>
+<div class="vgrid map">
+<div id="map-frame"></div>
+<div class="card panel" id="map-panel" aria-live="polite"></div>
+</div>
 <div class="table-wrap"><table id="reportstab"></table></div>
 
 <h2 id="ladder">2. The ladder</h2>
@@ -46,12 +113,20 @@ ol.src li{font-size:0.88rem}
 <span class="chip needs_tooling">tooling</span> means the hardware and firmware are there but a client, a build or an external box must be written or installed;
 <span class="chip needs_fw_change">firmware</span> means a small source change plus a reflash of a signed image (§5);
 <span class="chip research_only">research</span> means possible in principle with things not in the open drop; <span class="chip impossible_on_silicon">not on silicon</span> is the hard wall.
-The check column shows whether two reviewing AI agents confirmed the row's citations (<span class="ck confirmed">✓</span>), corrected them (<span class="ck disputed">±</span>), or did not get to it (<span class="ck unverified">·</span>); rows added after 20 September are unreviewed (<span class="ck unverified">·</span>), and rows rewritten after their review are marked <span class="ck changed">†</span>. §8 says how the review was done.</p>
+The check column shows whether two reviewing AI agents confirmed the row's citations (<span class="ck confirmed">✓</span>), corrected them (<span class="ck disputed">±</span>), or did not get to it (<span class="ck unverified">·</span>); rows added after 20 September are unreviewed (<span class="ck unverified">·</span>) by that survey (§8), and rows rewritten after their review are marked <span class="ck changed">†</span>. §8 says how the review was done.</p>
 <div class="chart-title">Time resolution of each instrument</div>
-<p class="caption">Each dot is the finest time step the instrument resolves on the card; its colour is what it takes to use it. Hover or tap a row for its granularity.</p>
-<div class="chart scroll" id="gran"></div>
+<p class="caption">Each dot is the finest time step the instrument resolves on the card; its colour is what it takes to use it. Hover, tap or tab to a row for its granularity; Enter opens its row in the table. The buttons under the chart filter the chart and the table together.</p>
+<div id="gran"></div>
+<div class="legend" id="gran-leg"></div>
 <div class="controls" id="filters"></div>
 <div class="table-wrap"><table id="laddertab"></table></div>
+
+<div class="chart-title" id="events-title">How many identical events before the meter sees one?</div>
+<p class="caption">Every event the reports priced, on one scale of joules, against what one meter reading resolves. An event becomes visible when the card can run enough of them a second to lift the power by the precision asked for above the uncertainty of the baseline: it needs a rate of σ ÷ (precision × energy). Filled dots are events the measurements ran fast enough to see at these settings; hollow ones are not: at the rate measured, a burst of them moves the power by less than σ ÷ precision. The tick on each row is the smallest energy per event that the measured rate would reveal. <span id="ev-golden"></span></p>
+<div class="ck-controls" id="ev-ctl"></div>
+<div class="ck-readout" id="ev-read"></div>
+<div id="ev"></div>
+<p class="small" id="ev-note"></p>
 
 <h2 id="bits">3. Can we track individual bits flipping?</h2>
 <p><b>On the card: no, and not with any firmware change.</b> Nothing on the die counts toggles. The PMU counts
@@ -79,6 +154,7 @@ configures it, and the SP gates its clock at boot.</li>
 <li><b>Physically:</b> scan chains exist (a one-shot, stopped-clock flop dump with tooling that is not open), and laser or e-beam probing is a
 different project. Not for a shared PCIe card.</li>
 </ul>
+<p>Nor does the card report a wild write: during the wire-energy runs a test-tool bug sent about a second of stray tensor stores to physical address 0, and no error counter, telemetry field or clock moved.</p>
 <p><b>A first result from the RTL.</b> On the card, <code>hpmcounter3</code> reads 128 short whenever its low 7 bits
 are 0–10. Simulating the open RTL's <code>neigh_pmu.v</code> under Verilator (<code>rtl-sim/pmu_carry</code>) shows why: each
 counter is a 7-bit pre-counter plus a 57-bit post-counter, twelve counters share one adder that folds pre-counter
@@ -91,45 +167,55 @@ successive values and you have the bits that changed. It is functional, not cycl
 further: <code>+dump=1</code> writes every net, flop and behavioural SRAM bit of the CPU subsystem to an FST waveform each cycle, and the design
 verification monitors emit a cycle-stamped event per retired instruction that is checked in lockstep against the same emulator. Toggle counts per
 signal are a coverage flag. What you cannot get from the drop is joules: there is no cell library, netlist or power flow, so toggles stay counts.</p>
-<p>Joules have been attached to flips in two places, both by fitting to measured power: the tensor unit, with four event energies (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment</a>; its flip counts come from <code>rtl-sim/fma_toggle</code>, the core's multiply-add RTL under Verilator), and the mesh links, where a bit that differs from the previous flit costs about 98 fJ per hop and a one carried about 129 fJ on the mesh rail (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#ones">Heat per millimetre, §5</a>).</p>
+<p>Joules have been attached to flips in two places, both by fitting to measured power: the tensor unit, with four event energies (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment</a>; its flip counts come from <code>rtl-sim/fma_toggle</code>, the core's multiply-add RTL under Verilator), and the mesh links, where a bit that differs from the previous flit costs about 98 fJ per hop and a one carried about 129 fJ on the mesh rail (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#ones">Heat per millimetre, §5</a>). The chart at the end of §2 sets both against the meter.</p>
 
 <h2 id="power">4. Power and energy: the meter chain, and what it does not meter</h2>
 <h3 id="the-chain">4.1 The chain</h3>
 <p>The card's power is read by a PMIC on the board — a microcontroller with its own closed firmware — that measures the 12 V input and, through
 PMBus, the three digital regulators that feed the minion cores, the SRAM arrays and the mesh. For each of those three it holds voltage, current and power on
 both sides of the regulator, and its temperature, each as a current value, a minimum and maximum since the last reset, and a running average: 84 numbers.</p>
-<p>The service processor reads all 84 every loop pass and forwards to the host <b>the PMIC's running average of each output-side power</b> (roughly first-order, τ ≈ 1 s: a step reaches 61% after one second and 88% after two, which is why the rails take 2–3 s to catch up with the load step in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#a-load-step-seen-through-every-sensor">Power and temperature, §2</a>), with its min and max, and the 12 V input power; <code>ettelem</code> samples them at 10 Hz. The SP's copy refreshes every 133 ms because its I2C driver waits a millisecond after each transaction; how often the PMIC itself updates is unknown. The other rails — <span id="norails"></span> — have set-point registers in the PMIC and no current or power telemetry (their on-die voltages are reported, §4.3).</p>
-<p>The chain has one more limit, found while making the manual's bars: <b>the workload can starve the meter</b>. Rings of messages between shires s and s+16 slow the service processor's own management path — a telemetry sample of six management commands takes 150 ms instead of 22, and the board reading stays frozen for seconds at a time — so a burst measured through it reads 45% low on aifoundry2. The sampler records its own latency with every sample, and bursts with that signature are dropped (rung 7). The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">heat-per-millimetre runs</a> found a second pattern that does it — on aifoundry2, tensor loads between shires in the same column three hops apart take a sample to about a second — and a way to stop the meter outright: a sampler killed in the middle of a request leaves its reply in the management queue, and every later opener crashes on that reply until one command drains it. The same runs sent about a second of stray tensor stores to physical address 0, through a bug in the test tool; no error counter, telemetry field or clock moved, so a wild write is one more thing the card does not report.</p>
-<p>So the meter chain gives one number for the whole card and three for its inside, and the difference between them is the subject of this section. At idle at 73 °C on aifoundry2, after about 20.6 hours with no workload (apart from a 4.9 s probe five minutes before the sample):</p>
-<div class="table-wrap"><table id="idletab"></table></div>
+<p>The service processor reads all 84 every loop pass and forwards to the host <b>the PMIC's running average of each output-side power</b>, with its min and max, and the 12 V input power; <code>ettelem</code> samples them at 10 Hz. The average is roughly first-order: after the board steps down at the end of a burst, the rail reading has fallen <span id="rf-1s"></span> of the way after one second and <span id="rf-2s"></span> after two (τ ≈ <span id="rf-tau"></span> s; the median over <span id="rf-n"></span>), which is why the rails take 2–3 s to catch up with the load step in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#a-load-step-seen-through-every-sensor">Power and temperature, §2</a>. On aifoundry2 the SP's copy refreshes every 133 ms, because its I2C driver waits a millisecond after each transaction; aifoundry3's readings change only about every 250 ms, and whether its SP loop or its PMIC is the slower is not established. How often the PMIC itself updates is unknown. The other rails — <span id="norails"></span> — have set-point registers in the PMIC and no current or power telemetry (their on-die voltages are reported, §4.3).</p>
+<p>The chain has one more limit, found while making the manual's bars: <b>the workload can starve the meter</b>. Rings of messages between shires s and s+16 slow the service processor's own management path — on aifoundry2 a telemetry sample of six management commands takes <span id="ring-ms"></span> instead of 22, and the board reading takes a new value only about twice a second instead of six times — so a burst measured through it reads 33–45% low in those passes against the same ring on aifoundry3, whose sampler stays at 22 ms. The sampler records its own latency with every sample, and the reruns and the heat-per-millimetre runs drop bursts with that signature (rung 7). <span id="sampler-dram"></span> The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">heat-per-millimetre runs</a> found a second pattern that starves it — on aifoundry2, tensor loads between shires in the same column three hops apart take a sample to about a second — and a way to stop the meter outright: a sampler killed in the middle of a request leaves its reply in the management queue, and every later opener crashes on that reply until one command (<code>dev_mngt_service</code>) drains it.</p>
+<p>So the meter chain gives one number for the whole card and three for its inside, and the difference between them is the subject of this section. At idle it is <span id="idle-unsensed"></span>: the first bar of the chart in §4.2.</p>
 
 <h3 id="the-unmetered-remainder-attributed">4.2 The unmetered remainder, attributed</h3>
-<p>The remainder cannot be metered with anything on the card, but it can be attributed. Over the energy manual's catalogue — 386 configurations (392 on aifoundry2), three passes,
+<p>The remainder cannot be metered with anything on the card, but it can be attributed. Over the energy manual's catalogue — <span id="fit-n"></span>, three passes,
 two cards — each configuration's power above idle is known on the board and on the three rails, and the bytes it moved through DRAM are counted. Fitting the unmetered part of
 each configuration's mean as a fraction of each rail's power plus a cost per DRAM byte gives:</p>
 <div class="table-wrap"><table id="fittab"></table></div>
 <p id="fittext"></p>
-<p>Three things follow. <b>An instruction's unmetered energy is the regulator's</b>: 18–20% of what the minion rail delivers is lost between the 12 V input and the
-core, and nothing else moves. <b>A DRAM byte's unmetered energy is the memory's</b>: about 70 pJ per byte in the DDR PHY, the I/O rail and the DRAM chips, on top of the
-50–60 pJ the mesh, the SRAM and the delivery losses take on the way; a byte written through the L1 costs twice that off-rail, because the line is read from DRAM before it is written. <b>And the NoC coefficient is not all regulator</b>: 26–29% is too much for a delivery loss, and the memory shires' own logic, on an unmetered rail, works whenever the mesh moves bytes to them.
-What the fit cannot say is how the idle 12–15 W splits between DDR refresh and PHY, PCIe, the IO shire, Maxion and the regulators' own draw, nor how the DRAM term splits below the regulator.</p>
+<div class="chart-title">Where a workload's watts go</div>
+<p class="caption" id="v1-cap"></p>
+<div class="ck-controls" id="v1-ctl"></div>
+<div id="v1-leg"></div>
+<div id="v1"></div>
+<div class="ck-readout" id="v1-read"></div>
+<p class="small" id="v1-coef"></p>
+<p id="three-things"></p>
 
 <h3 id="what-the-moortec-sensors-can-and-cannot-do-for-power">4.3 What the Moortec sensors can and cannot do for power</h3>
-<p>The die carries a Moortec PVT subsystem: five controllers, each with eight temperature sensors, two sixteen-channel voltage monitors and eight process detectors.
-Thirty-five temperature sensors are live (one per minion shire and one in the IO shire; the PCIe shire's was dropped from the RTL), at 12 bits and 0.061 °C. The voltage monitors sense 125 points at 14 bits (75 µV): three rails in every minion shire, two in every memory shire, three in the IO shire, two in the PCIe shire, and two external analog inputs. The process detectors are ring oscillators; as with the temperature sensors, 35 of the 40 are live, and none of them is read.
+<p>The die's Moortec PVT subsystem, and what of it reaches the host, is in the table below.
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">The spatial temperature brief</a> maps the sensors onto the 6×6 grid of minion, IO and PCIe shires (8×6 counting the memory shires at the sides) and traces how the firmware collapses them to one average.</p>
 <div class="table-wrap"><table id="pvttab"></table></div>
-<p><b>None of it measures current</b>, so none of it meters the unmetered rails. What the monitors do measure is voltage, and voltage droops with current. The host already receives, every 133 ms, the memory shires' reading of the 0.8 V DDR rail (<code>DM_CMD_GET_ASIC_VOLTAGE</code>, <code>ettelem</code>'s <code>die_mv.ddr</code>): across the catalogue it reads <span id="droopidle"></span> mV at idle against an 800 mV set point, and under load it droops roughly in proportion to the DRAM power the regression attributes off-rail:</p>
-<div class="table-wrap"><table id="drooptab"></table></div>
+<p><b>None of it measures current</b>, so none of it meters the unmetered rails. What the monitors do measure is voltage, and voltage droops with current. The host already receives, every SP pass (133 ms on aifoundry2), the memory shires' reading of the 0.8 V DDR rail (<code>DM_CMD_GET_ASIC_VOLTAGE</code>, <code>ettelem</code>'s <code>die_mv.ddr</code>): across the catalogue it reads <span id="droopidle"></span> mV at idle against an 800 mV set point, and under load it droops roughly in proportion to the DRAM power the regression attributes off-rail:</p>
+<div class="chart-title">Is the DDR monitor a DRAM meter?</div>
+<p class="caption">Every catalogue configuration on aifoundry2, in the colours of the chart in §4.2. Hover, tap or tab to a point for its droop, the droop the calibration predicts, and the DRAM power the excess would be read as.</p>
+<div class="ck-controls" id="dr-ctl"></div>
+<div id="dr-leg"></div>
+<div id="dr"></div>
+<div class="ck-readout" id="dr-read"></div>
 <p id="drooptext"></p>
-<p>That is a current meter for the largest unmetered consumer, calibrated once, updating every 133 ms with 1 mV ≈ 1.2 W, and it costs nothing: it has been in every telemetry file since the first session. It is not independent of the board meter — its scale comes from the fit above — and it responds mostly to DRAM traffic, but not only: heavy mesh and scratchpad traffic with no DRAM access droops it by 1–1.7 mV (<code>tload/scp/random</code> 1.74 mV and <code>wire/hop6/random</code> 1.05 mV in the table above), 0.6–1.5 mV more than the fit allows, which it would read as roughly 0.8–1.8 W of DRAM. So it separates DRAM from arithmetic in a mixed burst, but not from mesh traffic, and its idle reading moves by about 1 mV between 71 and 77 °C.</p>
+<details><summary>The eight configurations of the first table, to 0.1 mV</summary>
+<div class="table-wrap"><table id="drooptab"></table></div>
+</details>
+<p>That is a current meter for the largest unmetered consumer, calibrated once, updating every SP pass with <span id="droop-mvw"></span>, and it costs nothing: it has been in every telemetry file since the first session. It is not independent of the board meter — its scale comes from the fit above — and it responds mostly to DRAM traffic, but not only: <span id="droopmesh"></span> So it separates DRAM from arithmetic in a mixed burst, but not from mesh traffic, and its idle reading moves by about 1 mV between 71 and 77 °C.</p>
 <p>The same monitors see the minion rail sag by <span id="irdrop"></span> mV per watt the cores draw, which <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#the-per-shire-voltage-map">Power and temperature</a> (§3) mapped shire by shire at idle from the SP's debug trace; calibrated shire by shire, that map is a spatial power meter for the three metered rails (rung 5). The temperature sensors and the process detectors, exported, would add heat maps and a leakage proxy per shire; they too need a firmware change.</p>
 
 <h2 id="improve">5. The improvement ladder</h2>
-<p>Every way found to see more, grouped by what it costs: software on the data the card already gives; lab hardware that needs no firmware change; firmware changes, each ending in a signed image; tooling against interfaces that already exist (a debugger client, an RTL flow); and research. Each rung says what it adds and what it would change in the numbers. Rungs marked done are in the energy manual or on this page. The firmware caveat at the end of the section applies to every rung in its group.</p>
+<p>Every way found to see more, grouped by what it costs: software on the data the card already gives; lab hardware that needs no firmware change; firmware changes, each ending in a signed image; tooling against interfaces that already exist (a debugger client, an RTL flow); and research. Each rung says what it adds and what it would change in the numbers; where a rung is an instrument of §2, the link opens that row. Rungs marked done are in the energy manual or on this page. The firmware caveat at the end of the section applies to every rung in its group.</p>
 <div class="controls" id="impfilters"></div>
 <div class="table-wrap"><table id="imptab"></table></div>
-<p><b>What each rung does to the unmetered watts.</b> Today: 15 W of a 32 W idle and 4–7 W of a DRAM workload are on no sensor; the regression splits the part above idle by source to 0.35 W rms across the catalogue (1.1–1.3 W rms on the DRAM configurations) and leaves the idle 15 W unsplit (rungs 2 and 3, done). The riser (rung 8) does not meter them either, but it makes every bracketed burst sharper and shows the input side of every regulator's transient. The camera (rung 9) says which package the watts warm. Forwarding the PMIC's input-side readings (rung 11) measures the delivery losses and leaves only the rails with no meter — DDR, VDDQ, PCIe, IO, Maxion — as a remainder, about 12 W at idle. Below that is the board, and the board is shared.</p>
+<p><b>What each rung does to the unmetered watts.</b> Today: <span id="unmet-today"></span>; rungs 2 and 3 attribute the part above idle (§4.2, §4.3) and leave the idle <span id="idle15b"></span> W unsplit. The riser (rung 8) does not meter them either, but it makes every bracketed burst sharper and shows the input side of every regulator's transient. The camera (rung 9) says which package the watts warm. Forwarding the PMIC's input-side readings (rung 11) measures the delivery losses and leaves only the rails with no meter — DDR, VDDQ, PCIe, IO, Maxion — as a remainder, about <span id="idle-nometer"></span> W at idle. Below that is the board, and the board is shared.</p>
 <p><b>The firmware caveat.</b> Every "firmware" row above ends with a reflash. The minion runtime and the service processor
 bootloader are signed executable images; BL1 and BL2 verify a certificate and signature against a public-key hash in OTP unless a chicken bit
 is set, and neither the signing tool nor a test key is in the open tree. Whether this card accepts a rebuilt image is unknown until someone
@@ -140,7 +226,7 @@ source is open, the right to run modified source on this particular card is not 
 <p>For an A100/H100-class part. Sources are NVIDIA's own documentation and the microbenchmark literature, listed below the table; the ET side is this survey.</p>
 <div class="table-wrap"><table id="contrast"></table></div>
 <p>The pattern: the GPU is at least as observable <i>on silicon</i> (ECC counts, a debugger, SASS-level instrumentation, a mJ energy counter the ET card lacks),
-and entirely opaque below it. The ET-SoC-1 is thinner on silicon (no L1 or register ECC, DRAM ECC off, power at 133 ms) and open all the way down: the
+and entirely opaque below it. The ET-SoC-1 is thinner on silicon (no L1 or register ECC, DRAM ECC off, power every 133 ms at best) and open all the way down: the
 firmware that decides what you can see is source, the reference model the RTL was verified against is the installed simulator, and the RTL of the core dumps
 every bit.</p>
 <p class="small"><b>Sources for the GPU column</b></p>
@@ -156,23 +242,24 @@ every bit.</p>
 </ol>
 
 <h2 id="sessions">7. The power and temperature sessions</h2>
-<p>Every registered session (E1 onward) that measured power or temperature, in order, with what it established, the instruments it used, where its raw data is in the repository (paths are under <code>docs/reports/data/</code> and link to GitHub) and the reports that use it; the 18 September reports predate the register and are summarised in one row. The IDs are those of the experiment register, <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/03-experiments.md">docs/findings/03-experiments.md</a>, which gives each session's command, protocol and caveats.</p>
+<p>Every registered session (E1 onward) that measured power or temperature, in order, with what it established, the instruments it used, where its raw data is in the repository (paths are under <code>docs/reports/data/</code> and link to GitHub) and the reports that use it; the 18 September reports predate the register and are summarised in one row. The map in <a href="#reports">§1</a> shows them on a timeline, by card. The IDs are those of the experiment register, <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/03-experiments.md">docs/findings/03-experiments.md</a>, which gives each session's command, protocol and caveats.</p>
+<details id="sessions-table"><summary>All <span id="nsess"></span> sessions as a table</summary>
 <div class="table-wrap"><table id="sessionstab"></table></div>
+</details>
 
 <h2 id="method">8. Method and caveats</h2>
 <ul>
 <li><b>Who did the survey.</b> Seven AI research agents (Claude subagents run by the author) each surveyed one layer: the manuals (<code>external/et-man</code>), the firmware source (<code>external/et-platform</code> at <code>353f20e</code>, checked against HEAD), the RTL and DV trees (<code>external/core-et</code>), the installed tools in <code>/opt/et</code>, the GPU literature, the debug path, and the earlier reports. Each key claim was then given to two further AI agents told to refute it, one checking citations and one checking whether it would work from a user account on this card; 40 of the 73 verdicts corrected the claim as first stated. The ladder folds in their corrections; a person has not re-checked each row. The raw findings and verdicts are in <code>docs/reports/sources/2026-09-20-limits-of-observability/</code>.</li>
-<li>The power section reads the PMIC and PVT drivers of the same firmware (<code>ServiceProcessorBL2/driver/pmic_controller.c</code>, <code>pvt_controller.c</code>, <code>services/thermal_pwr_mgmt.c</code>) and fits the energy manual's catalogue (<code>docs/reports/data/2026-09-23-catalogue-aifoundry2/</code> and <code>docs/reports/data/2026-09-23-catalogue-aifoundry3/</code>); the fit and the droop calibration are in <code>docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json</code>. <span id="fitsource"><code>tools/ettelem/fit_unmetered.py</code> reproduces the attribution exactly and the droop coefficient to within 3% (0.87 against 0.84 mV per off-rail DRAM watt; the fit was first run inline, and its telemetry windows were not recorded).</span> Those rows have not had the two-agent review.</li>
-<li><b>Which firmware.</b> The firmware statements on this page describe the et-platform source at <code>353f20e</code>. The cards' own trace strings match an older build (before et-platform commit <code>60b40c10f</code>, 24 September 2024), and both cards report release 1.3.1; the older source has not been re-read. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#method-and-what-is-not-established">DVFS report, §8</a>, says what that changes for the governor.</li>
+<li>The power section reads the PMIC and PVT drivers of the same firmware (<code>ServiceProcessorBL2/driver/pmic_controller.c</code>, <code>pvt_controller.c</code>, <code>services/thermal_pwr_mgmt.c</code>) and fits the energy manual's catalogue (<code>docs/reports/data/2026-09-23-catalogue-aifoundry2/</code> and <code>docs/reports/data/2026-09-23-catalogue-aifoundry3/</code>); the fit and the droop calibration are in <code>docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json</code>. <span id="fitsource"><code>tools/ettelem/fit_unmetered.py</code> writes that file from the catalogue and its telemetry, and <code>tools/ettelem/sync_hub_data.py</code> copies it, the rail filter, the sampler's latency and the energies of §2's chart into this page's data (<code>--check</code> says whether the page is current).</span> Those rows were not in the 20 September two-agent review; the 24 September cross-check recomputed their numbers from the data (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-24-report-review/">its record</a>).</li>
+<li id="firmware-caveat"><b>Which firmware.</b> The firmware statements on this page describe the et-platform source at <code>353f20e</code>. The cards' own trace strings match an older build (before et-platform commit <code>60b40c10f</code>, 24 September 2024), and both cards report release 1.3.1; the older source has not been re-read. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#method-and-what-is-not-established">DVFS report, §8</a>, says what that changes for the governor.</li>
 <li>Nothing done for this survey changed the card's firmware or configuration. The only measurements taken for this page were reads of the ECC counters and sysfs error statistics, and the reports' own timing and power runs.</li>
 <li>The RTL is core-et's Erbium branch at <code>b38a1a3</code>: the same Minion core lineage in a later MCU-class configuration (one neighbourhood, no shire cache), with known deviations, not the taped-out ET-SoC-1. The PRM and errata stay authoritative for the A0 silicon. The same repository's <code>main</code> branch holds a clean-room, Verilator-first re-implementation including a shire cache, with toggle coverage in CI; it is a re-implementation, not the taped-out RTL.</li>
 <li>Several rows rest on a single reading of the sources and were not exercised: MDI on this card, the debug clock gate, the memory-shire perfmon type codes, the per-shire LVDPLL (which an erratum calls unstable on A0), the external analog monitor inputs. They are labelled accordingly.</li>
-<li><b>Versions.</b> First published 20 September 2026 (the ladder, bit flips, the GPU comparison). 23 September: the power meters, the unmetered remainder, the improvement ladder and the index of reports. 24 September: the heat-per-millimetre runs and two more limits of the meter; later that day, corrections from a cross-check of every report against its data by AI agents run by the author.</li>
+<li><b>Versions.</b> First published 20 September 2026 (the ladder, bit flips, the GPU comparison). 23 September: the power meters, the unmetered remainder, the improvement ladder and the index of reports. 24 September: the heat-per-millimetre runs and two more limits of the meter; later that day, corrections from a cross-check of every report against its data by AI agents run by the author. 25 September: a second check against regenerated data: the DDR droop's calibration now comes from its script, the rail filter from a measurement (§4.1), the 133 ms refresh is stated as aifoundry2's, and the catalogue's slow-sampler bursts are disclosed. Added: the reading paths, the map of reports and sessions, the chart of which events the meter can see, and the charts of where the watts go and of the DDR droop. The related-reports list became the index in §1.</li>
 </ul>
 
 <h2 id="related">9. Related reports</h2>
-<p>The reports this page leans on most, each with what to read it for; the full index is <a href="#reports">§1</a>.</p>
-<ul id="relatedlist"></ul>
+<p>Every report is in <a href="#reports">§1</a>, with what it established and which instruments it used.</p>
 <p class="small">The experiment register, every claim with its file and field, and every published artifact are in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/findings">docs/findings/</a>, the knowledge base these reports are written from; the code and raw data are in the <a href="https://github.com/yaroslavvb/et-soc1-prototyping">et-soc1-prototyping repository</a>.</p>
 
 </main>

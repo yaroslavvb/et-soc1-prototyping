@@ -4,6 +4,19 @@
     python3 workloads/enercat/analyze_wire.py DATA_A2 [DATA_A3 ...] --out wire.json [--pitch-x-mm X --pitch-y-mm Y]
                                               [--no-leak-correction]
 
+The committed wire.json, and the heat-per-millimetre page built from it, come from these three commands, run from the
+repository root (the first reproduces wire.json byte for byte; build-report.py needs `npm ci` once, for mathjax-full):
+
+    python3 workloads/enercat/analyze_wire.py docs/reports/data/2026-09-24-wire{,2}-aifoundry{2,3} \
+        --out docs/reports/data/2026-09-24-wire-energy/wire.json --pitch-x-mm 3.73 --pitch-y-mm 3.70
+    python3 tools/ettelem/build_wire_report.py --wire docs/reports/data/2026-09-24-wire-energy/wire.json \
+        --out docs/reports/data/2026-09-24-wire-energy/report.json
+    python3 scripts/build-report.py heat-per-mm docs/reports/data/2026-09-24-wire-energy/report.json \
+        docs/reports/2026-09-24-heat-per-mm.html
+
+The per_mm block divides by sqrt(pitch_x * pitch_y) = 3.715 mm; the report (build_wire_report.py) uses 3.72 mm, the
+mean hop of the die-geometry research, and does not read per_mm.
+
 Each (configuration, pass) burst is reduced the way the energy catalogue does it — board power over the mean of
 the idle brackets on both sides, less the extra leakage of a burst that ran warmer than its brackets — except that
 the brackets here exclude every prefill and heater window logged in marks.jsonl, and a burst is dropped if any of

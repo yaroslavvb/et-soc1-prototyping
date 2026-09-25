@@ -59,4 +59,6 @@ ssh alice@aifoundry2 'umask 077; mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys'
 3. Put the ET tools on your PATH: `echo 'export PATH=/opt/et/bin:$PATH' >> ~/.bashrc`.
 
 If Tailscale says the policy does not permit you to log in, a tailnet admin needs to add you to the SSH rules
-in the tailnet policy file.
+in the tailnet policy file. Tailscale SSH rejects a user that does not exist on the machine with the same "tailnet policy does not
+permit" message it gives for a made-up name, so a personal non-root account has to be created on the lab machine
+first (above).

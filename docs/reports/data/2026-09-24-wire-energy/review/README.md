@@ -10,7 +10,13 @@ The scripts were run from a scratch directory against the uncompressed raw files
 `../../2026-09-24-wire*-aifoundry*/{telemetry,runs}.jsonl.gz` in place and adjust the paths at the top of each.
 
 **Verdict: publish after corrections.** The measurements reproduced: three independent reductions agree with the
-pipeline within 1–3% on the mesh rail and about 7% on board power. What failed were sentences built on the numbers.
+pipeline within 1–3% on the mesh rail's coefficients (6% on the free-link fixed part: Method B 45.6 against 43.1 fJ per
+bit per hop) and about 7% on board power, like for like on the leakage correction. What failed were sentences built
+on the numbers.
+
+`indep/fits.txt` and `indep/fits_leak.txt` use `indep/bursts.py`'s health filter (bursts with a reading over 300 ms
+dropped); `fits.py --keep-bad` keeps them for comparison. (Until 25 September `fits.txt` was the `--keep-bad` output;
+it now matches the default, as `VERDICT.md` describes.)
 
 ## What was applied
 

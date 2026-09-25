@@ -107,7 +107,462 @@ nav.card ol { margin: 6px 0 0; padding-left: 22px; }
 h2, h3 { scroll-margin-top: 12px; }
 .hlink { margin-left: 8px; color: var(--text-muted); text-decoration: none; font-weight: 400; opacity: 0; }
 h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
+/* terms and the performance ladder (chart kit) */
+details.terms { margin: 0 0 16px; }
+details.terms summary { color: var(--text-secondary); }
+details.terms p { margin: 6px 0 0; }
+.chart-card { background: var(--surface-raised); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+.rung-dot.me { fill: var(--c1); stroke: var(--surface-raised); stroke-width: 2; }
+.rung-dot.fos { fill: var(--ref); stroke: var(--surface-raised); stroke-width: 2; }
+.rung-line { stroke-width: 1.5; }
+.rung-line.me { stroke: var(--c1); stroke-opacity: 0.35; }
+.rung-line.fos { stroke: var(--ref); stroke-opacity: 0.35; }
+.peak-line { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.ck-frame .tick-strong { fill: var(--ink); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame text.halo { paint-order: stroke; stroke: var(--surface-raised); stroke-width: 4px; stroke-linejoin: round; }
 </style>
+<!-- chartkit:begin -->
+<!-- pasted by scripts/paste-chartkit.py from docs/reports/sources/{chartkit.js, report.template.html}; do not edit here -->
+<style>
+/* the template tokens the chart kit uses, in this page's names */
+:root { --c1: var(--accent); --ink: var(--text-primary); --ink-2: var(--text-secondary); --muted: var(--text-muted); --grid: var(--hairline); --page: var(--surface); --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c7: #4a3aa7; --ref: #8c8b85; --axis: #c3c2b7; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f; --axis: #383835; } }
+:root[data-theme="dark"] { --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f; --axis: #383835; }
+.ck-frame { position: relative; width: 100%; }
+.ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ck-frame svg { display: block; max-width: none; height: auto; }
+.ck-frame svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.ck-frame .tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame .lab { fill: var(--ink-2); font-size: 12px; }
+.ck-frame .lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ck-frame .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-axis { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-hit { fill: transparent; stroke: none; }
+.ck-tip { position: absolute; z-index: 5; pointer-events: none; display: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border, var(--grid)); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: min(320px, calc(100% - 8px)); }
+.ck-frame svg [tabindex] { outline: none; }
+.ck-frame svg [tabindex]:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse)[tabindex]:not(.ck-hit):focus-visible,
+.ck-frame svg [tabindex]:focus-visible > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse).ck-active:not(.ck-hit),
+.ck-frame svg .ck-active > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 1.5px; }
+.ck-hidden { display: none !important; }
+.ck-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 8px 0 6px; }
+.ck-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 8px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-legend .ck-li { display: inline-flex; align-items: center; gap: 6px; }
+.ck-legend button.ck-li { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 3px 10px; min-height: 32px; cursor: pointer; }
+.ck-legend button.ck-li[aria-pressed="false"] { opacity: 0.55; text-decoration: line-through; }
+.ck-legend svg { flex: none; overflow: visible; }
+.ck-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.82rem; }
+.ck-seg-label { color: var(--ink-2); }
+.ck-seg-group { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ck-seg [role="radio"] { font: inherit; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-seg [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-range input[type="range"] { flex: 0 1 200px; width: 200px; min-width: 120px; min-height: 32px; margin: 0; accent-color: var(--c1); }
+.ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
+   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
+th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+th.num { white-space: normal; }
+@media (max-width: 599px) {
+  table.stack, .wide table.stack { min-width: 0; }
+  table.stack thead { display: none; }
+  table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { border-bottom: 1px solid var(--grid); padding: 6px 0; }
+  table.stack td, table.stack td.num { border: 0; padding: 2px 0; text-align: left; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+  table.stack td:first-child::before { content: none; }
+  table.stack td:first-child { font-weight: 600; }
+}
+@media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+</style>
+<script>
+/* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
+   Source-built pages get it from report.template.html (scripts/build-report.py inlines it before the page script);
+   standalone pages get this file, the template's chartkit CSS and token aliases from scripts/paste-chartkit.py.
+   Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
+   --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
+   API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame. Every mark with a tooltip is reachable from the keyboard. */
+window.CK = (function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
+  let uid = 0;
+  const $ = h => (typeof h === 'string' ? document.getElementById(h) : h);
+  const mm = q => (window.matchMedia ? window.matchMedia(q) : {matches: false});
+  const reduced = mm('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, str, cls, anchor) {
+    const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
+    t.textContent = str;
+    return t;
+  }
+  const path = (pts, x, y) => pts.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ');
+
+  /* ---- numbers ---- */
+  function num(v, dp) {
+    if (v == null || !isFinite(v)) return '\u2014';
+    const auto = dp == null;  // no dp: three significant digits, trailing zeros dropped
+    if (auto) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+    const s = Number(v).toLocaleString('en-GB', {minimumFractionDigits: auto ? 0 : dp, maximumFractionDigits: dp});
+    return /[1-9]/.test(s) ? s.replace('-', '\u2212') : s.replace('-', '');  // true minus; never "−0.00"
+  }
+  const fmt = {
+    num,
+    range: (a, b, dp, unit) => {
+      const s = num(a, dp), t = num(b, dp), u = unit ? '\u00a0' + unit : '';
+      return s === t ? s + u : s + (b < 0 ? ' to ' : '\u2013') + t + u;
+    },
+    pct: (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%',
+  };
+
+  /* ---- scales ---- */
+  function niceTicks(a, b, n) {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    if (!(hi > lo)) return Object.assign([lo], {step: 1});
+    const raw = (hi - lo) / Math.max(1, n || 5), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    const step = (m >= 7.5 ? 10 : m >= 3.5 ? 5 : m >= 1.5 ? 2 : 1) * p, out = [];
+    for (let i = Math.ceil(lo / step - 1e-9); i * step <= hi + step * 1e-9; i++) out.push(+(i * step).toPrecision(12));
+    out.step = step;
+    return out;
+  }
+  const tickDp = t => (t.step ? Math.max(0, -Math.floor(Math.log10(t.step) + 1e-9)) : null);
+  function lin(d0, d1, r0, r1) {
+    const s = v => r0 + (v - d0) * (r1 - r0) / (d1 - d0);
+    s.inv = p => d0 + (p - r0) * (d1 - d0) / (r1 - r0);
+    s.ticks = n => niceTicks(d0, d1, n);
+    s.domain = [d0, d1]; s.range = [r0, r1];
+    return s;
+  }
+  function log(d0, d1, r0, r1) {
+    const l0 = Math.log10(d0), l1 = Math.log10(d1);
+    const s = v => r0 + (Math.log10(v) - l0) * (r1 - r0) / (l1 - l0);
+    s.inv = p => Math.pow(10, l0 + (p - r0) * (l1 - l0) / (r1 - r0));
+    s.ticks = n => {
+      const lo = Math.min(l0, l1), hi = Math.max(l0, l1), k0 = Math.ceil(lo - 1e-9), k1 = Math.floor(hi + 1e-9);
+      const dec = k1 - k0 + 1, every = Math.max(1, Math.ceil(dec / (n || 6))), out = [];
+      const add = v => { v = +v.toPrecision(12); const lv = Math.log10(v); if (lv >= lo - 1e-9 && lv <= hi + 1e-9) out.push(v); };
+      if (dec <= 2) { for (let k = k0 - 1; k <= k1; k++) for (const m of [1, 2, 5]) add(m * Math.pow(10, k)); }
+      else for (let k = k0; k <= k1; k += every) add(Math.pow(10, k));
+      return out;
+    };
+    s.domain = [d0, d1]; s.range = [r0, r1]; s.log = true;
+    return s;
+  }
+  const logFmt = v => num(v, v >= 1 ? 0 : Math.ceil(-Math.log10(v) - 1e-9));
+
+  /* ---- frame: a responsive SVG sized to its host ---- */
+  function frame(hostId, o) {
+    const host = $(hostId);
+    if (!host) throw new Error('CK.frame: no element ' + hostId);
+    host.classList.add('ck-frame'); host.classList.remove('scroll');
+    host.textContent = '';
+    const plot = document.createElement('div'); plot.className = 'ck-plot'; host.appendChild(plot);
+    const svg = el('svg', {role: 'group', 'aria-label': o.label || null}, plot);
+    const tip = document.createElement('div'); tip.className = 'ck-tip'; tip.setAttribute('aria-hidden', 'true');
+    host.appendChild(tip);
+    const minW = o.minW == null ? 320 : o.minW, maxW = o.maxW == null ? 900 : o.maxW;
+    const f = {svg, host, tip, W: 0, H: 0, narrow: false, seriesOn: null, pinned: null, active: null, navIndex: 0};
+    const width = () => {
+      const cs = getComputedStyle(host), cw = host.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return Math.round(Math.max(minW, Math.min(maxW, cw > 0 ? cw : maxW)));
+    };
+    f.redraw = () => {
+      const W = width(), H = Math.round(typeof o.height === 'function' ? o.height(W) : (o.height || 300));
+      f.refocus = svg.contains(document.activeElement) ? f.navIndex : null;
+      hide(f, true);
+      Object.assign(f, {W, H, narrow: W < 600, navNodes: []});
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.setAttribute('height', H);
+      svg.style.width = W + 'px';
+      o.draw(f);
+      if (f.seriesOn) showSeries(f, f.seriesOn);
+    };
+    f.redraw();
+    frames.push(f);
+    if (window.ResizeObserver) {
+      let timer;
+      new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => { if (width() !== f.W) f.redraw(); }, 150); }).observe(host);
+    }
+    return f;
+  }
+
+  /* ---- axes: horizontal grid, tick labels, baseline, axis titles (y title sits above the plot) ---- */
+  function axes(f, o) {
+    const {x, y} = o, W = f.W, H = f.H;
+    const L = o.L == null ? 44 : o.L, R = o.R == null ? 12 : o.R, T = o.T == null ? 22 : o.T, B = o.B == null ? 38 : o.B;
+    const g = el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, f.svg);
+    const yt = o.yt || y.ticks(Math.max(3, Math.round((H - T - B) / 48)));
+    const xt = o.xt || x.ticks(Math.max(2, Math.round((W - L - R) / 90)));
+    const auto = (s, t) => (s.log ? logFmt : v => num(v, tickDp(t)));
+    const xf = o.xfmt || auto(x, xt), yf = o.yfmt || auto(y, yt), labs = [];
+    for (const t of yt) {
+      if (o.grid !== false) el('line', {x1: L, x2: W - R, y1: y(t), y2: y(t), class: 'grid-line'}, g);
+      labs.push(txt(g, L - 6, y(t) + 4, yf(t), 'tick', 'end'));
+    }
+    el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    for (const t of xt) labs.push(txt(g, x(t), H - B + 16, xf(t), 'tick', 'middle'));
+    if (o.xl) labs.push(txt(g, (L + W - R) / 2, H - 6, o.xl, 'lab', 'middle'));
+    if (o.yl) txt(g, 2, Math.max(12, T - 13), o.yl, 'lab');
+    inside(f, labs);
+    return g;
+  }
+  /* Keep labels inside the frame (0..f.W, 0..f.H, less pad): one that would cross the left or right edge is anchored
+     at that edge instead (text-anchor start or end, so its outer end sits pad px from the edge in any font; an end
+     tick label still covers its tick), and one that would cross the top or bottom is moved in. Labels already inside
+     are not touched. Widths are measured in the page's font; a chart drawn while hidden has no layout, so they are
+     estimated at 0.6 em a character. Vertically the glyphs are taken as 0.75 em above the baseline and 0.25 em below. */
+  function inside(f, labels, pad) {
+    pad = pad == null ? 2 : pad;
+    const m = labels.map(t => {
+      let w = 0, fs = 12;
+      try { w = t.getComputedTextLength(); fs = parseFloat(getComputedStyle(t).fontSize) || 12; } catch (_) { /* no layout */ }
+      return {w: w > 0 ? w : 0.6 * fs * t.textContent.length, fs};
+    });
+    labels.forEach((t, k) => {
+      const {w, fs} = m[k], a = t.getAttribute('text-anchor') || 'start', x = +t.getAttribute('x'), y = +t.getAttribute('y');
+      const x0 = a === 'end' ? x - w : a === 'middle' ? x - w / 2 : x;
+      if (x0 < pad) { t.setAttribute('text-anchor', 'start'); t.setAttribute('x', pad); }
+      else if (x0 + w > f.W - pad) { t.setAttribute('text-anchor', 'end'); t.setAttribute('x', +(f.W - pad).toFixed(1)); }
+      if (y - 0.75 * fs < pad) t.setAttribute('y', +(pad + 0.75 * fs).toFixed(1));
+      else if (y + 0.25 * fs > f.H - pad) t.setAttribute('y', +(f.H - pad - 0.25 * fs).toFixed(1));
+    });
+    return labels;
+  }
+
+  /* ---- tooltip: pointer, keyboard focus and touch all show the same text ---- */
+  const strip = html => new DOMParser().parseFromString(String(html).replace(/<br\s*\/?>/gi, '; '), 'text/html')
+    .body.textContent.replace(/\s+/g, ' ').trim();
+  function place(f, cx, cy) {
+    const t = f.tip; t.style.display = 'block';
+    const hw = f.host.clientWidth, hh = f.host.clientHeight, tw = t.offsetWidth, th = t.offsetHeight;
+    let top = cy + 14;
+    if (top + th > hh && cy - th - 10 >= 0) top = cy - th - 10;  // flip above the pointer
+    t.style.left = Math.max(0, Math.min(cx + 12, hw - tw)) + 'px';
+    t.style.top = top + 'px';
+  }
+  function show(f, node, html, cx, cy) {
+    if (f.active && f.active !== node) f.active.classList.remove('ck-active');
+    f.active = node; node.classList.add('ck-active');
+    f.tip.innerHTML = typeof html === 'function' ? html() : html;
+    if (cx == null) {
+      const r = node.getBoundingClientRect(), b = f.host.getBoundingClientRect();
+      cx = r.left + r.width / 2 - b.left; cy = r.top + r.height / 2 - b.top;
+    }
+    place(f, cx, cy);
+  }
+  function hide(f, force) {
+    if (f.pinned && !force) return;
+    f.pinned = null; f.tip.style.display = 'none';
+    if (f.active) f.active.classList.remove('ck-active');
+    f.active = null;
+  }
+  function tip(f, node, html, o) {
+    o = o || {};
+    if (!node.hasAttribute('data-ck-nav')) node.setAttribute('tabindex', '0');
+    node.setAttribute('role', o.role || 'img');
+    node.setAttribute('aria-label', strip(typeof html === 'function' ? html() : html));
+    node._ckTip = html;
+    const at = ev => { const b = f.host.getBoundingClientRect(); show(f, node, html, ev.clientX - b.left, ev.clientY - b.top); };
+    node.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointermove', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') hide(f); });
+    node.addEventListener('pointerdown', ev => {  // touch: a tap toggles the tooltip and pins it until the next tap
+      if (ev.pointerType !== 'touch') return;
+      f.touchT = Date.now();
+      if (f.active === node && f.tip.style.display === 'block') hide(f, true); else { hide(f, true); at(ev); f.pinned = node; }
+    });
+    node.addEventListener('focus', () => { if (Date.now() - (f.touchT || 0) > 600 && !f.pinned) show(f, node, html); });
+    node.addEventListener('blur', () => hide(f));
+    node.addEventListener('keydown', ev => { if (ev.key === 'Escape') hide(f, true); });
+    return node;
+  }
+  document.addEventListener('pointerdown', ev => {  // a tap elsewhere unpins
+    for (const f of frames) if (f.pinned && !f.pinned.contains(ev.target)) hide(f, true);
+  }, true);
+
+  /* ---- keynav: one tab stop per mark group; arrows step, Home/End jump, Enter pins, Escape hides ---- */
+  function keynav(f, nodes, o) {
+    o = o || {};
+    nodes = nodes.filter(Boolean);
+    if (!nodes.length) return;
+    const seen = n => !n.closest('.ck-hidden');
+    const next = (k, d) => { for (let j = k + d; j >= 0 && j < nodes.length; j += d) if (seen(nodes[j])) return j; return k; };
+    let cur = Math.min(f.navIndex || 0, nodes.length - 1);
+    nodes.forEach((n, k) => {
+      n.setAttribute('data-ck-nav', '');
+      n.setAttribute('tabindex', k === cur ? '0' : '-1');
+      n.addEventListener('focus', () => {
+        nodes.forEach(m => m.setAttribute('tabindex', '-1')); n.setAttribute('tabindex', '0');
+        f.navIndex = k;
+        if (o.onFocus) o.onFocus(n, k);
+      });
+      n.addEventListener('keydown', ev => {
+        const K = ev.key;
+        let j = null;
+        if (o.step) j = o.step(k, K, nodes);
+        if (j == null) {
+          if (K === 'ArrowRight' || K === 'ArrowDown') j = next(k, 1);
+          else if (K === 'ArrowLeft' || K === 'ArrowUp') j = next(k, -1);
+          else if (K === 'Home') j = next(-1, 1);
+          else if (K === 'End') j = next(nodes.length, -1);
+        }
+        if (K === 'Enter' || K === ' ') {
+          ev.preventDefault();
+          if (n._ckTip) { if (f.pinned === n) hide(f, true); else { hide(f, true); show(f, n, n._ckTip); f.pinned = n; } }
+          if (o.onEnter) o.onEnter(n, k);
+        } else if (j != null) { ev.preventDefault(); if (j !== k) { hide(f, true); nodes[j].focus(); } }
+      });
+    });
+    f.navNodes = (f.navNodes || []).concat([nodes]);
+    if (f.refocus != null && nodes[f.refocus]) { nodes[f.refocus].focus(); f.refocus = null; }
+  }
+
+  /* ---- legend (HTML, above the chart) and series toggling ---- */
+  function swatch(it) {
+    const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
+    const m = it.mark || 'box';
+    const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
+    if (m === 'dot' || m === 'box') e.style.fill = c;
+    else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
+    if (m === 'dash') e.style.strokeDasharray = '4 3';
+    return s;
+  }
+  function legend(hostEl, items, o) {
+    o = o || {};
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-legend');
+    const on = new Set(items.map(it => it.key)), btn = {};
+    for (const it of items) {
+      const b = document.createElement(o.toggle ? 'button' : 'span'); b.className = 'ck-li';
+      b.append(swatch(it), document.createTextNode(it.label));
+      if (o.toggle) {
+        b.type = 'button'; b.setAttribute('aria-pressed', 'true');
+        b.addEventListener('click', () => {
+          const was = on.has(it.key);
+          if (was && on.size === 1) return;  // keep at least one series
+          if (was) on.delete(it.key); else on.add(it.key);
+          b.setAttribute('aria-pressed', String(!was));
+          if (o.onChange) o.onChange([...on]);
+        });
+      }
+      btn[it.key] = b; h.appendChild(b);
+    }
+    return {el: h, on, set(keys) { on.clear(); keys.forEach(k => on.add(k)); for (const k in btn) if (o.toggle) btn[k].setAttribute('aria-pressed', String(on.has(k))); }};
+  }
+  function showSeries(f, keysOn) {
+    f.seriesOn = [...keysOn];
+    f.svg.querySelectorAll('[data-series]').forEach(n => n.classList.toggle('ck-hidden', !f.seriesOn.includes(n.getAttribute('data-series'))));
+    for (const group of f.navNodes || []) {  // keep one reachable tab stop per group
+      const vis = group.filter(n => !n.closest('.ck-hidden'));
+      if (vis.length && !vis.some(n => n.getAttribute('tabindex') === '0')) { group.forEach(n => n.setAttribute('tabindex', '-1')); vis[0].setAttribute('tabindex', '0'); }
+    }
+    if (f.active && f.active.closest('.ck-hidden')) hide(f, true);
+  }
+
+  /* ---- controls ---- */
+  function seg(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-seg');
+    const g = document.createElement('div'); g.setAttribute('role', 'radiogroup'); g.className = 'ck-seg-group';
+    if (o.label) {
+      const s = document.createElement('span'); s.className = 'ck-seg-label'; s.id = 'ck-l' + (++uid); s.textContent = o.label;
+      h.appendChild(s); g.setAttribute('aria-labelledby', s.id);
+    }
+    const opts = o.options, api = {el: h, value: o.value == null ? opts[0][0] : o.value};
+    const btns = opts.map(([v, t], k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.textContent = t;
+      b.addEventListener('click', () => set(v, true));
+      b.addEventListener('keydown', ev => {
+        const d = ev.key === 'ArrowRight' || ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowLeft' || ev.key === 'ArrowUp' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const j = (k + d + opts.length) % opts.length;
+        set(opts[j][0], true); btns[j].focus();
+      });
+      g.appendChild(b); return b;
+    });
+    function set(v, fire) {
+      api.value = v;
+      btns.forEach((b, k) => { const c = opts[k][0] === v; b.setAttribute('aria-checked', String(c)); b.tabIndex = c ? 0 : -1; });
+      if (fire && o.onChange) o.onChange(v);
+    }
+    h.appendChild(g); set(api.value, false);
+    api.set = v => set(v, true);
+    return api;
+  }
+  function range(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-range');
+    const id = 'ck-r' + (++uid), stops = o.stops, f1 = o.fmt || (v => num(v));
+    const lab = document.createElement('label'); lab.htmlFor = id; lab.textContent = o.label;
+    const inp = document.createElement('input'); inp.type = 'range'; inp.id = id;
+    const out = document.createElement('output'); out.setAttribute('for', id);
+    if (stops) { inp.min = 0; inp.max = stops.length - 1; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step == null ? 'any' : o.step; }
+    const val = () => (stops ? stops[+inp.value] : +inp.value);
+    const put = v => { inp.value = stops ? stops.reduce((b, s, k) => (Math.abs(s - v) < Math.abs(stops[b] - v) ? k : b), 0) : v; };
+    const upd = fire => { const v = val(), s = f1(v); out.textContent = s; inp.setAttribute('aria-valuetext', s); if (fire && o.onInput) o.onInput(v); };
+    inp.addEventListener('input', () => upd(true));
+    h.append(lab, inp, out); put(o.value == null ? (stops ? stops[0] : o.min) : o.value); upd(false);
+    return {el: h, input: inp, get value() { return val(); }, set(v) { put(v); upd(true); }};
+  }
+  function readout(hostEl) {
+    const h = $(hostEl); h.classList.add('ck-readout'); h.setAttribute('aria-live', 'polite');
+    h.set = html => { h.innerHTML = html; };
+    return h;
+  }
+  function bus(name) {
+    if (!buses[name]) { const fns = []; buses[name] = {value: undefined, on(fn) { fns.push(fn); }, emit(v, from) { this.value = v; fns.forEach(fn => fn(v, from)); }}; }
+    return buses[name];
+  }
+  /* Card layout for a table under 600 px: each cell shows its column's header (CSS table.stack). */
+  function stackTable(table) {
+    const t = $(table), heads = [], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (hr) for (const c of hr.cells) for (let k = 0; k < (c.colSpan || 1); k++) heads.push(c.textContent.replace(/\s+/g, ' ').trim());
+    for (const tb of t.tBodies) for (const r of tb.rows) { let k = 0; for (const c of r.cells) { if (heads[k]) c.setAttribute('data-label', heads[k]); k += c.colSpan || 1; } }
+    t.classList.add('stack');
+    return t;
+  }
+
+  /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
+  const SERIES = [1, 2, 3, 4, 5, 7];
+  const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
+  const clamp01 = p => Math.max(0, Math.min(1, +p || 0));
+  const ramp = p => `color-mix(in srgb, var(--c1) ${(15 + 85 * clamp01(p)).toFixed(1)}%, var(--surface))`;
+  function rgb(css) {  // resolve any CSS colour (tokens, color-mix) to linear-light luminance via a probe
+    const s = document.createElement('span'); s.style.color = css; s.style.display = 'none';
+    document.body.appendChild(s);
+    const c = getComputedStyle(s).color; s.remove();
+    const v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), unit = /^color\(/.test(c) ? 1 : 255;
+    const lin1 = x => { x /= unit; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin1(v[0]) + 0.7152 * lin1(v[1]) + 0.0722 * lin1(v[2]);
+  }
+  const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  /* Text colour for a ramp cell, chosen for the current theme: whichever of --ink and --page contrasts more. */
+  function rampInk(p) {
+    const bg = rgb(ramp(p));
+    return contrast(bg, rgb('var(--ink)')) >= contrast(bg, rgb('var(--page)')) ? 'var(--ink)' : 'var(--page)';
+  }
+  const redrawAll = () => frames.forEach(f => f.redraw());  // rampInk depends on the theme
+  if (window.MutationObserver) new MutationObserver(redrawAll).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  const dark = mm('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', redrawAll);
+
+  return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
+    stackTable, reduced, ramp, rampInk, color, hide: f => hide(f, true)};
+})();
+</script>
+<!-- chartkit:end -->
 </head>
 <body>
 <main>
@@ -117,10 +572,10 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
   <p data-ss-id="intro-p-2" class="lede">I built the ET toolchain and platform on a Mac and ran the hello worlds on the <code>sys_emu</code> simulator.
   Then I ran a first real workload, a scalar fp32 matrix multiply, on an ET-SoC-1 card in the AI Foundry lab.
   Below are the numbers, what broke on the way, and what came next.</p>
-  <p data-ss-id="intro-p-terms" class="secondary"><b>Terms.</b> The ET-SoC-1 is Esperanto's 1,088-core RISC-V accelerator, now open-sourced by AI Foundry.
+  <details data-ss-id="intro-p-terms" class="terms"><summary>Terms used on this page</summary><p class="secondary">The ET-SoC-1 is Esperanto's 1,088-core RISC-V accelerator, now open-sourced by AI Foundry.
   Kernels run on 32 compute <i>shires</i> of 32 <i>minion</i> cores; each minion runs two hardware threads (<i>harts</i>), so a full launch is 2,048 harts.
   <code>sys_emu</code> is the chip's functional simulator, part of et-platform: it checks results, not speed.
-  More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
+  More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p></details>
 </header>
 
 <section aria-label="Headline numbers" class="kpis" data-ss-section="headline-numbers">
@@ -185,7 +640,7 @@ so giving each hart whole lines is what makes the parallel result correct.</li>
   <li>The 16 accumulators stay in FP registers. The inner loop is 17 loads + 16 <code>fmadd.s</code> per step of k.</li>
 </ul>
 <div class="table-wrap">
-<table data-ss-id="sgemm-on-the-card-table-1">
+<table data-ss-id="sgemm-on-the-card-table-1" id="sgemm-table">
   <thead><tr><th class="num">n</th><th class="num">Shires</th><th class="num">Harts</th><th class="num">Time per launch</th><th class="num">GFLOP/s</th><th class="num">Mismatches</th></tr></thead>
   <tbody>
     <tr><td class="num">64</td><td class="num">1</td><td class="num">64</td><td class="num">0.31 ms</td><td class="num">1.7</td><td class="num">0 / 4,096</td></tr>
@@ -193,14 +648,18 @@ so giving each hart whole lines is what makes the parallel result correct.</li>
     <tr><td class="num">512</td><td class="num">32</td><td class="num">2,048</td><td class="num">2.37 ms</td><td class="num">113</td><td class="num">0 / 262,144</td></tr>
     <tr><td class="num">1024</td><td class="num">32</td><td class="num">2,048</td><td class="num">16.8 ms</td><td class="num">127</td><td class="num">0 / 1,048,576</td></tr>
   </tbody>
-  <caption>aifoundry3, one ET-SoC-1 card, 18 September 2026. Time is host-measured <code>kernelLaunch</code> → <code>waitForStream</code>, so launch overhead is included. The n ≥ 512 rows were launched 2–3× each; the spread was under 2%.</caption>
+  <caption>aifoundry3, one ET-SoC-1 card, 18 September 2026. Time is host-measured <code>kernelLaunch</code> → <code>waitForStream</code>, so launch overhead is included. The n ≥ 512 rows were launched 2–3× each; the spread was under 2%. The host's printout was not kept and was not found on either lab machine, so these values cannot be rechecked; a later card session will re-run them. At n = 1024, 2·n³ / 16.8 ms is 128 GFLOP/s, within the launch-to-launch spread of the 127 shown.</caption>
 </table>
 </div>
-<p data-ss-id="sgemm-on-the-card-p-2" class="secondary">For scale: the FOSDEM 2026 talk
+<h3 id="ladder">How far from the chip's peak?</h3>
+<p data-ss-id="sgemm-on-the-card-p-2" class="secondary">For scale, the FOSDEM 2026 talk
 <a href="https://archive.fosdem.org/2026/events/attachments/T3PSFN-zero_to_matmul_with_the_et-soc-1/slides/267107/zerotomat_asnyquu.pdf">“Zero to matmul with the ET-SoC-1”</a>
-went from 13 GFLOP/s (naive scalar) to 10.25 TFLOP/s using SIMD, L2 scratchpad, and the tensor unit. That ladder is the roadmap from here.
-Its last rung was reached the same day: the tensor unit at 9.5 TFLOP/s in fp32 on aifoundry2, in
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">Matmul efficiency</a>.</p>
+(512×512 fp32, 650 MHz; its rungs are transcribed in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/et-soc1-notes.md">docs/et-soc1-notes.md</a>) climbed from a naive kernel to the tensor unit. The chart puts this page's scalar kernel (16 accumulators per hart) on the same log axis.
+The tensor-unit rung was reached the same day: 9.5 TFLOP/s in fp32 on aifoundry2 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">Matmul efficiency</a>), which is FOSDEM's 10.25 scaled to 600 MHz.</p>
+<div class="ck-controls"><div id="ladder-order"></div></div>
+<div id="ladder-legend"></div>
+<div class="chart-card" id="ladder-chart"></div>
+<p class="ck-readout small" id="ladder-read">Needs JavaScript; the table above has this page's rows.</p>
 </section>
 
 <section data-ss-section="things-worth-fixing-upstream">
@@ -317,7 +776,7 @@ index 988aecb..2390811 100644
   The workaround is a guard instruction, e.g. <code>fmv.x.w x0, fN</code> after loads. The FOSDEM matmul loop has one for this reason.</p>
   <ul data-ss-id="things-worth-fixing-upstream-ul-3">
     <li><strong>GCC 15.x doesn’t insert the guard.</strong> This applies to both the lab’s 15.1 and the laptop’s 15.2.
-    <code>sys_emu -vpurf_warn</code> flags essentially every FMA in this SGEMM (524,359 “type A” warnings at n = 64), and gp-sdk’s own <code>saxpy_vector.elf</code> as well.</li>
+    <code>sys_emu -vpurf_warn</code> flags every <code>fmadd.s</code> in this SGEMM, twice (524,291 “type A” warnings on the compute shire at n = 64; the firmware adds 68 more), and gp-sdk’s own <code>saxpy_vector.elf</code> as well.</li>
     <li><strong>Silicon results were still correct</strong> for all 1.6 M outputs.</li>
   </ul>
   <p data-ss-id="things-worth-fixing-upstream-p-4">Open questions: are the lab cards A0 steppings, and is the compiler meant to handle this? For now: check new kernels with <code>-vpurf_warn</code>, and treat
@@ -336,32 +795,24 @@ index 988aecb..2390811 100644
 
 <section data-ss-section="reproduce">
 <h2 data-ss-id="h2-reproduce">Reproduce</h2>
-<p data-ss-id="reproduce-p-1" class="secondary">All commands run from a checkout of the <a href="https://github.com/yaroslavvb/et-soc1-prototyping">project repository</a>. Commands in the first two blocks run on the Mac; the last runs on a lab machine.</p>
+<p data-ss-id="reproduce-p-1" class="secondary">All commands run from a checkout of the <a href="https://github.com/yaroslavvb/et-soc1-prototyping">project repository</a>. The first two blocks use the Lima VM on the Mac (on a Linux machine with <code>/opt/et</code>, drop the <code>scripts/vm</code> prefix). The last block runs from the same checkout, on the Mac or on Linux: it copies the sources to aifoundry3, builds them there against its <code>/opt/et</code> and runs each table row as its own <code>timeout 10</code> process. The table is the host's “launch r: X ms, Y GFLOP/s” lines.</p>
 <pre data-ss-id="reproduce-pre-1"><code># one-time: Lima VM + toolchain + et-platform (~15 min)
 scripts/create-vm.sh
 
 # simulator, on the laptop
 scripts/vm make run-hello        # 2048-hart check-in
 scripts/vm make run-sgemm        # SGEMM n=128 on sys_emu
+scripts/vm make run-sgemm SGEMM_N=64 SGEMM_ARGS='--shires 0x1' SIM_PARAMS=-vpurf_warn
+grep 'type A' build/sgemm/run/sysemu.log | grep -c ' S0:'   # 524,291 (150 MB log)
 
-# real card: copy sources, build on the lab box, run with a hard cap
+# real card: copy sources, build on aifoundry3, run each table row with a hard cap
 scripts/deploy-lab.sh aifoundry3 workloads/sgemm
-ssh aifoundry3 'cd ~/nekko/build/sgemm &amp;&amp; timeout 10 host/sgemm_host -n 1024'</code></pre>
-</section>
-
-<section data-ss-section="next">
-<h2 data-ss-id="h2-next" id="next">Next (as planned on 18 September)</h2>
-<ol data-ss-id="next-ol-1" class="steps">
-  <li data-ss-id="next-li-1">8-wide <code>.ps</code> SIMD in the same kernel (<code>fbc.ps</code> / <code>flw.ps</code> / <code>fmadd.ps</code>), with register blocking.</li>
-  <li data-ss-id="next-li-2">Stage A and B in the L2 scratchpad instead of DRAM.</li>
-  <li data-ss-id="next-li-3">Tensor unit: <code>tensor_load</code> / <code>tensor_fma</code> / <code>tensor_store</code>, then overlap loads with FMAs.</li>
-  <li data-ss-id="next-li-4">Pick the real workload to prototype, once the matmul building blocks are in place.</li>
-</ol>
+ssh aifoundry3 'cd ~/nekko/build/sgemm &amp;&amp; for a in "-n 64 --shires 0x1" "-n 512 --shires 0x1" "-n 512" "-n 1024"; do timeout 10 host/sgemm_host $a --reps 3; done'</code></pre>
 </section>
 
 <section data-ss-section="related">
 <h2 data-ss-id="h2-related" id="related">Related reports</h2>
-<p data-ss-id="related-p-1" class="secondary">What came next, starting the same day:</p>
+<p data-ss-id="related-p-1" id="next" class="secondary">Of the steps planned that day (8-wide <code>.ps</code> SIMD with register blocking, A and B staged in the L2 scratchpad, then the tensor unit), the tensor unit was done the same day; SIMD and scratchpad staging were not taken further. What came next:</p>
 <ul data-ss-id="related-ul-1">
   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">Matmul efficiency</a> — the tensor-unit step above, done the same day on aifoundry2: the tensor unit on all 1,024 minions at 9.5 TFLOP/s in fp32 (97% of the fp32 peak at 600 MHz), 19.0 TFLOP/s in fp16 and 71.8 TOP/s in int8, and its energy against the A100.</li>
   <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — the latency and bandwidth of every level from L1 to DRAM, next to the A100: what the next kernels have to live with.</li>
@@ -378,8 +829,83 @@ ssh aifoundry3 'cd ~/nekko/build/sgemm &amp;&amp; timeout 10 host/sgemm_host -n 
   <a href="https://github.com/openhwfoundation/core-et/tree/erbium">core-et (erbium)</a> ·
   <a href="https://github.com/marty1885/et-testdrive">et-testdrive</a> (marty1885).</p>
   <p>All runs were on 18 September 2026. The laptop used et-platform <code>836a4ab</code>. aifoundry3 used its <code>/opt/et</code>: et-platform <code>353f20e</code> (December 2025), runtime 0.19.0, GCC 15.1; that card runs its minions at 600 MHz.</p>
-  <p>Versions: published 18 September 2026. Revised 24 September 2026: terms defined, the lab install named, and links to the reports that followed.</p>
+  <p>Versions: published 18 September 2026; revised 24 and 25 September 2026.</p>
 </footer>
+<script type="application/json" id="ladder-data">{"fosdem":{"clock_mhz":650,"n":512,"rungs":[{"step":"Naive scalar, 1 hart","gflops":0.007,"name":"1 hart"},{"step":"Parallelise over mhartid, 512 harts. Fix the output race with L stores.","gflops":3.4,"name":"512 harts"},{"step":"Use all 2048 harts","gflops":13.1,"name":"2,048 harts"},{"step":"8-lane SIMD (fbc.ps broadcast A, flw.ps load B, fmadd.ps)","gflops":104.0,"name":"8-lane SIMD"},{"step":"Put A and B in L2 scratchpad instead of DRAM","gflops":312.0,"name":"operands in the L2 scratchpad"},{"step":"Register-block 2x16 outputs per hart. FMA share goes from 14% to 32%.","gflops":1640.0,"name":"2×16 register blocks"},{"step":"Register-block 4x32. FMA share is 63%.","gflops":2940.0,"name":"4×32 register blocks"},{"step":"Tensor unit: tensor_load A into L1Scp and B streamed, then tensor_fma (16x16 fp32), tensor_store. Hart 0 only.","gflops":7050.0,"name":"tensor unit"},{"step":"Software-pipeline: overlap the next A-load with the current FMA, double-buffering L1Scp","gflops":10250.0,"name":"software-pipelined tensor unit"}],"transcription":"docs/et-soc1-notes.md"},"tensor":{"gflops":9510.8,"clock_mhz":600,"source":"docs/reports/data/2026-09-18-aifoundry2/results.json (fp32-tensor-L2)"},"peak":{"gflops":9830.4,"clock_mhz":600,"minions":1024,"flop_per_minion_cycle":16}}</script>
+<script>
+/* The performance ladder, drawn with the shared chart kit (CK, pasted into <head> by scripts/paste-chartkit.py).
+   This page's rows are read from its SGEMM table; the FOSDEM rungs, the tensor-unit rate and the fp32 peak come from
+   #ladder-data, which scripts/mmbench-report-data.py --ladder writes (FOSDEM from docs/et-soc1-notes.md). */
+(function () {
+  "use strict";
+  var LD = JSON.parse(document.getElementById("ladder-data").textContent), host = document.getElementById("ladder-chart");
+  if (!LD.fosdem || !host || !window.CK) return;
+  var num = CK.fmt.num, int = function (t) { return +String(t).replace(/[^\d.]/g, ""); };
+  var gf = function (v) { return v >= 100 ? num(v, 0) : num(v); };
+  var s3 = function (v) { return num(+v.toPrecision(3), 0); };   // 3 significant figures: 9,510 and 9,460
+  var mine = [], fos = [];
+  document.querySelectorAll("#sgemm-table tbody tr").forEach(function (tr) {
+    var c = tr.querySelectorAll("td"), n = int(c[0].textContent), sh = int(c[1].textContent), h = int(c[2].textContent);
+    mine.push({ src: "me", name: "SGEMM n = " + n + ", " + sh + (sh === 1 ? " shire" : " shires"), v: int(c[4].textContent),
+      tip: "<b>This page: scalar SGEMM, n = " + n + "</b><br>" + num(h, 0) + " harts on " + sh + (sh === 1 ? " shire" : " shires") + ", 600 MHz, aifoundry3<br>" + c[3].textContent + " per launch, " + c[4].textContent + " GFLOP/s (the table above)" });
+  });
+  mine.push({ src: "me", name: "Tensor unit, fp32 (Matmul efficiency)", v: LD.tensor.gflops, label: s3(LD.tensor.gflops),
+    tip: "<b>Tensor unit, fp32, all 1,024 minions</b><br>" + s3(LD.tensor.gflops) + " GFLOP/s at " + LD.tensor.clock_mhz + " MHz, aifoundry2, 18 September<br>Matmul efficiency (" + LD.tensor.source + ")" });
+  var F = LD.fosdem, fosClock = F.clock_mhz, last = F.rungs[F.rungs.length - 1];
+  F.rungs.forEach(function (r) {
+    fos.push({ src: "fos", name: "FOSDEM: " + r.name, v: r.gflops,
+      tip: "<b>FOSDEM 2026, " + r.name + "</b><br>" + r.step + "<br>" + gf(r.gflops) + " GFLOP/s; " + F.n + "×" + F.n + " fp32 at " + fosClock + " MHz (transcribed in " + F.transcription + ")" });
+  });
+  var scaled = last.gflops * LD.peak.clock_mhz / fosClock;   // the compute-bound last rung scales with the clock; the low rungs do not
+  fos[fos.length - 1].note = num(last.gflops, 0) + " at " + fosClock + " MHz ≈ " + s3(scaled) + " at " + LD.peak.clock_mhz + " MHz; this project measured " + s3(LD.tensor.gflops);
+  var order = "group";
+  var f = CK.frame(host, { minW: 280, maxW: 860, label: "Performance ladder: GFLOP/s on a log axis, this project's rows against the FOSDEM 2026 rungs",
+    height: function (W) { var n = mine.length + fos.length, narrow = W < 600; return 34 + n * (narrow ? 36 : 26) + (order === "group" ? 2 * 26 : 0) + (narrow ? 32 : 18) + 44; },
+    draw: function (f) {
+      var W = f.W, narrow = f.narrow, rowH = narrow ? 36 : 26, LW = narrow ? 8 : Math.min(300, Math.round(W * 0.38)), R = narrow ? 56 : 64, T = 30;
+      var x = CK.log(0.001, 20000, LW + (narrow ? 0 : 12), W - R);
+      var rows = order === "group" ? [{ head: "This project, 600 MHz" }].concat(mine, [{ head: "FOSDEM 2026, " + F.n + "×" + F.n + " fp32, " + fosClock + " MHz" }], fos)
+                                   : mine.concat(fos).sort(function (a, b) { return a.v - b.v; });
+      var y = T, pos = [];
+      rows.forEach(function (r) { var h = r.head ? 26 : rowH + (r.note ? (narrow ? 32 : 18) : 0); pos.push(y); y += h; });
+      var bottom = y + 4, ticks = [0.01, 1, 100, 10000];
+      ticks.forEach(function (t) { CK.el("line", { x1: x(t), x2: x(t), y1: T - 6, y2: bottom, "class": "grid-line" }, f.svg); });
+      CK.el("line", { x1: x(0.001), x2: W - R, y1: bottom, y2: bottom, "class": "ck-axis" }, f.svg);
+      ticks.forEach(function (t) { CK.txt(f.svg, x(t), bottom + 16, num(t), "tick", "middle"); });
+      CK.txt(f.svg, (x(0.001) + W - R) / 2, bottom + 36, "GFLOP/s, log scale", "lab", "middle");
+      var pk = LD.peak.gflops;
+      CK.el("line", { x1: x(pk), x2: x(pk), y1: T - 12, y2: bottom, "class": "peak-line" }, f.svg);
+      CK.txt(f.svg, x(pk) - 4, 14, "fp32 peak at " + LD.peak.clock_mhz + " MHz: " + num(pk, 0), "lab-strong halo", "end");
+      var nodes = [];
+      rows.forEach(function (r, k) {
+        var y0 = pos[k];
+        if (r.head) { CK.txt(f.svg, 4, y0 + 17, r.head, "lab-strong", "start"); return; }
+        var cy = narrow ? y0 + 26 : y0 + rowH / 2, g = CK.el("g", { "class": "rung" }, f.svg);
+        CK.el("rect", { x: 0, y: y0, width: W, height: rowH, "class": "ck-hit" }, g);
+        CK.el("line", { x1: x(0.001), x2: x(r.v), y1: cy, y2: cy, "class": "rung-line " + r.src }, g);
+        CK.el("circle", { cx: x(r.v), cy: cy, r: 6, "class": "rung-dot " + r.src }, g);
+        CK.txt(g, narrow ? 4 : LW, narrow ? y0 + 12 : cy + 4, r.name, r.src === "me" ? "lab-strong" : "lab", narrow ? "start" : "end");
+        CK.txt(g, x(r.v) + 10, cy + 4, r.label || gf(r.v), "tick-strong halo", "start");
+        if (r.note) (narrow ? r.note.split("; ") : [r.note]).forEach(function (line, j, all) {
+          CK.txt(g, narrow ? 4 : x(0.001), cy + 20 + 14 * j, line + (j < all.length - 1 ? ";" : ""), "tick halo", "start");
+        });
+        CK.tip(f, g, r.tip);
+        nodes.push(g);
+      });
+      CK.keynav(f, nodes);
+    } });
+  CK.seg("ladder-order", { label: "Order", value: "group", options: [["group", "By source"], ["speed", "By speed (interleaved)"]],
+    onChange: function (v) { order = v; f.redraw(); } });
+  CK.legend("ladder-legend", [{ key: "me", label: "this project, 600 MHz", mark: "dot", color: "var(--c1)" },
+    { key: "fos", label: "FOSDEM 2026, 650 MHz", mark: "dot", color: "var(--ref)" }, { key: "pk", label: "fp32 peak at 600 MHz", mark: "dash", color: "var(--ink)" }]);
+  var best = mine.filter(function (r) { return /SGEMM/.test(r.name); }).sort(function (a, b) { return b.v - a.v; })[0];
+  var at512 = mine.filter(function (r) { return /n = 512, 32/.test(r.name); })[0];
+  var below = fos.filter(function (r) { return r.v < at512.v; }).pop(), above = fos.filter(function (r) { return r.v > at512.v; })[0];
+  document.getElementById("ladder-read").innerHTML = "This scalar SGEMM's best, <b>" + gf(best.v) + " GFLOP/s</b> at n = 1024, is " + num(LD.tensor.gflops / best.v, 0) + "× below the tensor unit's " + s3(LD.tensor.gflops) + " and " + num(pk0() / best.v, 0) + "× below the fp32 peak of " + num(pk0(), 0) + " at 600 MHz. At n = 512 it gets " + gf(at512.v) + ", between FOSDEM's rungs for " + below.name.replace("FOSDEM: ", "") + " (" + gf(below.v) + ") and for " + above.name.replace("FOSDEM: ", "") + " (" + gf(above.v) + ").";
+  function pk0() { return LD.peak.gflops; }
+})();
+</script>
+
 <script>
 /* Section anchors (copied from docs/reports/sources/report.template.html). Every h2/h3 gets an id (its own, or one made from its text) and a # link; clicking a heading
    or a table-of-contents link puts #id in the URL. When the page is framed by spacesheep.dev the fragment is

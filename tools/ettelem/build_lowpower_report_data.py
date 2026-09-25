@@ -23,7 +23,10 @@ def main():
         mult = sum(v for k, v in mm["by_block"].items() if any(s in k for s in MULT))
         flips[p] = {"ffclk": mm["ff_clocked"], "mult": mult, "rest": mm["nets"] - mult, "bus": mm["bus"]}
     c = ab["configs"]
-    out = {"ablation": {"configs": c}, "model": {"power": m["power"], "R_total": m["R_total"]}, "flips": flips,
+    # the thermal network's settled (R_total) and open-loop step response and the leakage loop gain, for the page's
+    # "each watt held for hours adds 1.47 degrees (1.2 after ten minutes)" sentence
+    model = {"power": m["power"], "R_total": m["R_total"], "step_open": m["step_open"], "loop_gain_at_80": m["loop_gain_at_80"]}
+    out = {"ablation": {"configs": c}, "model": model, "flips": flips,
            "facts": {"a100": {"transistors_b": 54.2, "die_mm2": 826, "tflops": 257, "watts": 330, "idle": 88, "volts": 0.85, "mhz": 1410, "mem_gbs": 1555},
                      "et": {"transistors_b": 24, "die_mm2": 570, "tflops": c["fp32_randn"]["per_s"] * 2 / 1e12, "watts": c["fp32_randn"]["p80"],
                             "idle62": 26.7, "idle80": c["fp32_randn"]["idle"], "volts": 0.52, "mhz": 600, "mem_gbs": 137}}}

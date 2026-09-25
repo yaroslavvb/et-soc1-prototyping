@@ -37,7 +37,7 @@ CONFIGS = [
     ("fma-zero", ["--test", "fma", "--type", "fp32", "--pattern", "elem", "--sweep", "1", *ALL],
      "TensorFMA32, A all zeros"),
     ("fma-col50", ["--test", "fma", "--type", "fp32", "--pattern", "col", "--sweep", "0.5", *ALL],
-     "TensorFMA32, half of A's columns zero"),
+     "TensorFMA32, whole columns of A zero (--pattern col --sweep 0.5)"),
     ("fma-rowmask", ["--test", "fma", "--type", "fp32", "--pattern", "none", "--sweep", "0", "--row-mask", "0x00FF", *ALL],
      "TensorFMA32, dense A, tensor_mask skips 8 of 16 rows"),
     ("gemv-dense-90", ["--test", "gemv", "--gemv", "dense", "--sweep", "0.9", *ALL],
@@ -181,7 +181,8 @@ def main():
                     r["pj_per_useful_fma_above_idle"] = r["j_per_unit_above_idle"] / useful * 1e12
                 r["pj_per_fma_slot_above_idle"] = r["j_per_unit_above_idle"] / 4096 * 1e12
 
-    summary = {"idle_w": idle_w, "info": info, "results": results}
+    summary = {"idle_w": idle_w, "idle_windows_ms": [[round(a), round(b)] for a, b in idle_windows], "info": info,
+               "results": results}
     json.dump(summary, open(os.path.join(args.out, "results.json"), "w"), indent=2)
 
     print(f"\nidle {idle_w:.2f} W")

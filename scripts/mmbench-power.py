@@ -18,12 +18,14 @@ Runs on the lab machine, next to the card:
    --settle seconds are skipped while power ramps up. Then prints throughput,
    watts, GFLOP/s per W (board), and GFLOP/s per W above idle.
 
-Two idles are recorded. idle_w is the median of the baseline before the first workload.
+Two idles are recorded. idle_w is the median of the baseline before the first workload, leaving out its first
+second (the window is stored as idle_window_ms, epoch ms).
 idle_before_w is each workload's own idle: the mean board power from 3.5 to 1.8 s before
 its first timed launch, a window that ends before the calibration launch. The die warms over a
 session and leaks more, so that idle rises from one workload to the next: 30.6, 32.5,
 33.8 and 35.2 W in the 2026-09-18 run on aifoundry2. gflops_per_w_above_idle_before
-subtracts it; gflops_per_w_above_idle (the first baseline) is kept for older readers.
+subtracts it; gflops_per_w_above_idle (the first baseline) is kept for older readers. Each result also stores
+idle_before_window_ms and power_window_ms (the samples averaged into mean_w lie inside it and inside a launch).
 
 The launcher only opens the ops node. The power logger needs the mgmt node, so
 et-powertop must not be running.
@@ -61,13 +63,19 @@ def dm_query(cmd):
     return lines
 
 
-def idle_before(samples, t_first_ms, t_prev_end_ms=None):
-    """Mean board power from IDLE_BEFORE_S[0] to IDLE_BEFORE_S[1] s before a workload's first timed launch.
+def idle_before_window(t_first_ms, t_prev_end_ms=None):
+    """[lo, hi] in ms: from IDLE_BEFORE_S[0] to IDLE_BEFORE_S[1] s before a workload's first timed launch.
     Samples less than 1 s after the previous workload ended are left out, in case --gap is short."""
     lo = t_first_ms - IDLE_BEFORE_S[0] * 1000
     if t_prev_end_ms is not None:
         lo = max(lo, t_prev_end_ms + 1000)
-    w = [x for t, x in samples if lo <= t <= t_first_ms - IDLE_BEFORE_S[1] * 1000]
+    return [lo, t_first_ms - IDLE_BEFORE_S[1] * 1000]
+
+
+def idle_before(samples, t_first_ms, t_prev_end_ms=None):
+    """Mean board power over idle_before_window()."""
+    lo, hi = idle_before_window(t_first_ms, t_prev_end_ms)
+    w = [x for t, x in samples if lo <= t <= hi]
     return statistics.mean(w) if w else float("nan")
 
 
@@ -152,6 +160,7 @@ def main():
         if not runs:
             continue
         idle_b = idle_before(samples, runs[0]["t_start_ms"], prev_end)
+        idle_b_window = idle_before_window(runs[0]["t_start_ms"], prev_end)
         prev_end = runs[-1]["t_end_ms"]
         first = runs[0]["t_start_ms"] + args.settle * 1000
         watts = [w for t, w in samples
@@ -170,11 +179,13 @@ def main():
             "min_w": min(watts) if watts else None, "max_w": max(watts) if watts else None,
             "gflops_per_w": tflops * 1000 / mean_w,
             "gflops_per_w_above_idle": tflops * 1000 / (mean_w - idle_w) if mean_w > idle_w else None,
-            "idle_before_w": idle_b,
+            "idle_before_w": idle_b, "idle_before_window_ms": [round(t) for t in idle_b_window],
+            "power_window_ms": [round(first), runs[-1]["t_end_ms"]],
             "gflops_per_w_above_idle_before": tflops * 1000 / (mean_w - idle_b) if mean_w > idle_b else None,
         })
 
-    summary = {"idle_w": idle_w, "idle_samples": len(idle), "info": info, "results": results,
+    summary = {"idle_w": idle_w, "idle_samples": len(idle), "idle_window_ms": [round(t_idle0 + 1000), round(t_idle1)],
+               "info": info, "results": results,
                "shire_mask": args.shire_mask, "device": args.device}
     with open(os.path.join(args.out, "results.json"), "w") as f:
         json.dump(summary, f, indent=2)

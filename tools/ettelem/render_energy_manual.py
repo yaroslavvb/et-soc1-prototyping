@@ -87,11 +87,17 @@ def main():
     lk_t = f"{min(lk_ts)}–{max(lk_ts)} °C"
     tmin = min(x["T"] for x in r["measured_idle"])
     lk_below = f"{tmin - max(lk_ts)}–{tmin - min(lk_ts)} °C"
+    rf = m["catalogue"].get("rail_filter") or {}
+    taus = [v["tau_s"] for v in rf.values()]
+    tau_txt = f"time constant {min(taus):.1f}–{max(taus):.1f} s on the two cards" if taus else "time constant about 1 s"
     s = ["# 1. The card at rest\n",
          "What the card draws when nothing is running. Every joule in the rest of the manual is *above* this.\n",
          "## The law\n",
          f"$$P_\\text{{idle}}(T) = {f(r['P_fix_w'],1)}\\,\\mathrm{{W}} + {f(r['A_leak_80_w'],1)}\\,\\mathrm{{W}}\\; e^{{(T-80\\,^\\circ\\mathrm{{C}})/{f(r['T_L_c'],0)}\\,^\\circ\\mathrm{{C}}}}$$\n",
-         f"- **{f(r['P_fix_w'],1)} W is temperature-independent**: PCIe, the DDR PHY, the IO shire, the regulators at rest, clocks. What those blocks spend when a kernel uses them (DRAM traffic through the DDR PHY, the regulators' delivery loss) is counted in the per-event costs of the later sections; [4.3](04a-fine-grain.md) attributes it.",
+         # The two slopes are typed: aifoundry2's catalogue idle gaps (600 MHz samples at least 1.5 s before and 2.5 s after
+         # any burst, n ≈ 9,800, 71–83 °C) against the die temperature give 0.033 W/°C for board minus the rails and 0.548 W/°C
+         # for the three rails together; no committed script writes them (the energy-manual page says the same).
+         f"- **The fixed part is the law's constant, {f(r['P_fix_w'],1)} W.** The blocks with no rail sensor (PCIe, the DDR PHY, the IO shire, the regulators) draw about {f(rl['unsensed'],0)} W at idle and barely move with temperature: 0.03 W per °C over 71–83 °C in the catalogue's idle gaps. The three metered rails carry the leakage, 0.55 W per °C between them at about 75 °C. The split into {f(r['P_fix_w'],1)} W and leakage is a fit with the {f(r['T_L_c'],0)} °C shape imposed, not a block-by-block account. What the unsensed blocks spend when a kernel uses them (DRAM traffic through the DDR PHY, the regulators' delivery loss) is counted in the per-event costs of the later sections; [4.3](04a-fine-grain.md) attributes it.",
          f"- **The rest is leakage**, {f(r['A_leak_80_w'],1)} W at 80 °C, e-folding every {f(r['T_L_c'],0)} °C, so its slope at 80 °C is {f(r['lambda_80_w_per_c'],2)} W per °C. This is the term a workload controls, by setting the temperature.",
          f"- **Confidence.** Fitted on 21 September to every idle sample of five hours of sessions on aifoundry2, rms 0.20 W from {min(x['T'] for x in r['measured_idle'])} to {max(x['T'] for x in r['measured_idle'])} °C. Checked two ways: it predicted the idle {f(rl.get('hours_idle'), 1)} hours after the last workload (apart from a 4.9 s single-hart probe a few minutes before), the next day, to {rl['board'] - (r['P_fix_w'] + r['A_leak_80_w'] * math.exp((rl['die_c'] - 80) / r['T_L_c'])):+.2f} W ({rl.get('samples', 300)} samples over a minute, sd {f(rl.get('board_sd'), 2)} W); extrapolated {lk_below} below its fitted range onto aifoundry3 it was {lk['mean_offset_W']:+.2f} W off (rms {f(lk['rms_W'], 2)} W over {lk_n:,} samples at {lk_t}), which is the card-to-card bar on the law: about 3% of the idle power. Source: `" + r["source"]["law"] + "`.\n",
          "| Die °C | Idle W | Leakage share |", "|---|---|---|"]
@@ -105,7 +111,7 @@ def main():
           f"| Mesh | {f(rl['noc'])} | {100*rl['noc']/rl['board']:.0f}% |",
           f"| **No rail sensor** (PCIe, DDR, IO shire, regulators) | **{f(rl['unsensed'])}** | {100*rl['unsensed']/rl['board']:.0f}% |",
           f"| Board | {f(rl['board'])} ± {f(rl.get('board_sd'), 2)} | |",
-          f"\nThe three sensed rails are the PMIC's own running averages (roughly first-order, time constant about 1 s), which the service processor reports; the unsensed remainder is board power minus their sum. The sample is aifoundry2 on 22 September, {f(rl.get('hours_idle'),1)} hours after the last workload apart from a 4.9 s single-hart probe a few minutes before; the board figure's ± is the sd of its {rl.get('samples', 300)} samples, taken over one minute; the rails' sd is 0.01 W or less. Source: `" + r["source"]["rails"] + "`. The SRAM rail's own temperature law, on both cards, is in [4.3](04a-fine-grain.md).\n",
+          f"\nThe three sensed rails are the PMIC's own running averages (roughly first-order, {tau_txt}), which the service processor reports; the unsensed remainder is board power minus their sum. The sample is aifoundry2 on 22 September, {f(rl.get('hours_idle'),1)} hours after the last workload apart from a 4.9 s single-hart probe a few minutes before; the board figure's ± is the sd of its {rl.get('samples', 300)} samples, taken over one minute; the rails' sd is 0.01 W or less. Source: `" + r["source"]["rails"] + "`. The SRAM rail's own temperature law, on both cards, is in [4.3](04a-fine-grain.md).\n",
           "## Operating points\n", "| MHz | Minion V | Relative switching power (V²f) |", "|---|---|---|"]
     p0 = r["operating_points"][0]
     for p in r["operating_points"]:
@@ -138,11 +144,11 @@ def main():
          f"| Both harts per minion | {bar(sp2)} | {cards(sp2)} | {f(w2)} | {f(w2/1024*1e3,2)} mW | {sci(r2)}/s |",
          f"| The second hart's share | {f((w2-w1)/(r2-r1)*1e12,1)} pJ per extra instruction | | {f(w2-w1)} | {f((w2-w1)/1024*1e3,2)} mW | |",
          f"| Ablation of 21 Sep: four adds and a branch per iteration, hart 0, 80 °C, 2 runs | {f(aw['pj_marginal'],1)} pJ | a2 only, run-to-run sd 0.02 W | {f(aw['over_idle_w'])} | {f(aw['over_idle_w']/1024*1e3,2)} mW | {sci(aw['per_s'])}/s |",
-         (f"| 1,024 minions stalled on one contended atomic (the hot line, E23; each waits about {round(1024*at0['cycles_per_op'], -3):,.0f} cycles for its turn) | — | {cards(hot, 2)} W | **{f(hot['mean'])}** [{f(hot['lo'])}–{f(hot['hi'])}] | {f(hot['mean']/1024*1e3,1)} mW | — |" if hot else
+         (f"| 1,024 minions stalled on one contended atomic (the hot line, E23; each waits about {round(1024*at0['cycles_per_op'], -3):,.0f} cycles for its turn) | — | {cards(hot, 2)} W; both **{f(hot['mean'])}** [{f(hot['lo'])}–{f(hot['hi'])}] | {f(hot['per_card']['aifoundry2']['mean'])} | {f(hot['per_card']['aifoundry2']['mean']/1024*1e3,2)} mW | — |" if hot else
           f"| 1,024 minions stalled on one contended atomic (the hot line, E23; each waits about {round(1024*at0['cycles_per_op'], -3):,.0f} cycles for its turn) | — | a2 only, 22 September | {f(at0['over_idle_w'])} | {f(at0['over_idle_w']/1024*1e3,1)} mW | — |"),
          f"| For scale: every minion running a random-data fp32 matmul (the activity term, E15; {f(act['fp32_randn_8'],1)} mW per minion with 256 or 512 active, {f(act['fp32_randn_24'],1)} with 768) | — | a2 only | {f(t32['over_idle_w'])} | {f(act['fp32_randn'],1)} mW | tensor state machines plus everything else that wakes |",
          f"\n**The addi loop is not the floor.** It increments seven registers, so its operands change on every instruction. With both harts a `nop` costs {f(nop['mean'],1)} pJ [{f(nop['lo'],1)}–{f(nop['hi'],1)}] and a `fence` {f(fen['mean'],1)} [{f(fen['lo'],1)}–{f(fen['hi'],1)}] per instruction ([3.1](03a-every-instruction.md)), so the awake core is about {f(fen['mean'],1)}–{f(nop['mean'],1)} pJ per issue slot. The ablation's loop issued at half the one-hart `addi` loop's rate, on hart 0 only; it is the loop behind the figures in [Why is the ET-SoC-1 low power?](https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power), {f(aw['over_idle_w']/1024*1e3,1)} mW per minion and {f(aw['pj_marginal'],0)} pJ per instruction.\n",
-         f"**Rules.** An awake minion costs about 2 mW; a second hart adds about 1 mW; a minion stalled on a contended atomic draws less than one spinning ({f(at0['over_idle_w']/1024*1e3,1)} against {f(w1/1024*1e3,1)} mW). Keeping 1,024 minions awake for a second is {w1:.0f}–{w2:.1f} J, against 36 J for the card at 80 °C, so the awake cost is small next to leakage and next to real instructions.\n",
+         f"**Rules.** An awake minion costs about 2 mW; a second hart adds about 1 mW; a minion stalled on a contended atomic draws less than one spinning ({f((hot['mean'] if hot else at0['over_idle_w'])/1024*1e3,1)} against {f(w1/1024*1e3,1)} mW). Keeping 1,024 minions awake for a second is {w1:.0f}–{w2:.1f} J, against 36 J for the card at 80 °C, so the awake cost is small next to leakage and next to real instructions.\n",
          f"The bars here are ±{hw(sp1):.0f}–{hw(sp2):.0f}%, about the catalogue's median, although the signal is small: 2–3 W over a 28–36 W idle that drifts by a few tenths of a watt with the die temperature. The two cards differ by {100*abs(sp2['per_card']['aifoundry3']['mean']/sp2['per_card']['aifoundry2']['mean']-1):.0f}% on the two-hart loop, which is the cross-card scale of section 8.\n",
          "Sources: `docs/reports/data/2026-09-23-catalogue-aifoundry2/`, `-aifoundry3/`, `" + m["awake"]["source"] + "`.\n"]
     open(os.path.join(out, "02-awake.md"), "w").write("\n".join(s))
@@ -180,8 +186,8 @@ def main():
          "**What the table says.**",
          f"- **An integer add costs {f(ia['mean'],1)} pJ on zeros** [{f(ia['lo'],1)}–{f(ia['hi'],1)}], barely more than a `nop` ({f(nop['mean'],1)}) or a `fence` ({f(fen['mean'],1)}): on zeros it is almost all the awake core (section 2). Random operands add {f(iar['mean']-ia['mean'],1)} pJ.",
          f"- **A scalar float add costs {f(fa['mean']/ia['mean'],1)}× an integer add** even on zeros. The FPU does not gate on zero the way the tensor unit does.",
-         f"- **An 8-lane vector op on zeros costs the same as the scalar op** ({f(vz['mean'],1)} against {f(fa['mean'],1)} pJ, bars overlapping): idle lanes are free. On random data the eight lanes cost {f(vr['mean']/vz['mean'],1)}× — this is the data dependence of docs/findings/10-data-dependent-power.md, in the vector unit.",
-         f"- **Per lane on random data, `fmadd.ps` is {f(fm['mean']/8,1)} pJ per multiply-add** [{f(fm['lo']/8,1)}–{f(fm['hi']/8,1)}]. The tensor unit below does the same multiply-add for {f(tb['fp32_randn']['mean'],1)} pJ [{f(tb['fp32_randn']['lo'],1)}–{f(tb['fp32_randn']['hi'],1)}]. Take out the vector instruction's issue — {f(fen['mean'],1)}–{f(nop['mean'],1)} pJ, what a fence or a nop costs (section 2) — and the lane is {f(lane[0],1)}–{f(lane[1],1)} pJ, about {100*((lane[0]+lane[1])/2/tb['fp32_randn']['mean']-1):.0f}% above the tensor unit: **the datapath energy is close, and what the tensor unit mostly saves is instruction issue.**",
+         f"- **An 8-lane vector op on zeros costs the same as the scalar op** ({f(vz['mean'],1)} against {f(fa['mean'],1)} pJ, bars overlapping): lanes computing on zeros add nothing. On random data the eight lanes cost {f(vr['mean']/vz['mean'],1)}× — this is the data dependence of docs/findings/10-data-dependent-power.md, in the vector unit.",
+         f"- **Per lane on random data, `fmadd.ps` is {f(fm['mean']/8,1)} pJ per multiply-add** [{f(fm['lo']/8,1)}–{f(fm['hi']/8,1)}]. The tensor unit below does the same multiply-add for {f(tb['fp32_randn']['mean'],1)} pJ [{f(tb['fp32_randn']['lo'],1)}–{f(tb['fp32_randn']['hi'],1)}]. Take out the vector instruction's issue — {f(fen['mean'],1)}–{f(nop['mean'],1)} pJ, what a fence or a nop costs (section 2) — and the lane is {f(lane[0],1)}–{f(lane[1],1)} pJ, about {100*((lane[0]+lane[1])/2/tb['fp32_randn']['mean']-1):.0f}% above the tensor unit: **of the {f(fm['mean']/8-tb['fp32_randn']['mean'],1)} pJ per multiply-add the tensor unit saves, about half is instruction issue and half datapath** (the operands differ as well: uniform in [0.5, 2) here, normal for the tensor unit).",
          f"- **Integer vector adds are half the price of float ones** ({f(ipz['mean'],1)} vs {f(vz['mean'],1)} pJ on zeros); integer vector multiplies are not.",
          f"- **Transcendentals are the dearest arithmetic**: `fexp.ps` at {f(ex['mean'],0)} pJ and `flog.ps` at {f(lg['mean'],0)} pJ for eight lanes, at a quarter of the rate; `fexp.ps` is {f(ex['mean']/fm['mean'],1)}× a vector multiply-add. Only loads and stores that bypass the L1 ({f(min(byp),0)}–{f(max(byp),0)} pJ) and atomics ({f(min(amo),0)}–{f(max(amo),0)} pJ) cost more ([3.1](03a-every-instruction.md)).\n",
          "## 3.2 The tensor unit\n",
@@ -209,6 +215,8 @@ def main():
         if not (z and rn):
             return ""
         bps = stat(f"{key}/random" + (f"/h{harts}" if harts else ""), "bytes_per_s")
+        if not bps and scale < 1:   # the L1 rows: the instruction rate times the bytes per instruction
+            bps = stat(f"{key}/random" + (f"/h{harts}" if harts else ""), "ops_per_s") / scale
         nd = lambda c: 1 if c["mean"] >= 10 else 2   # two decimals below 10, one above, as on the page
         return (f"| {label} | {bar(z, nd(z))} | {bar(rn, nd(rn))} | {f(rn['mean']/z['mean'],2)}× | "
                 f"{f(bps/1e9, 0) if bps else '—'} | {cards(rn, nd(rn))} |")
@@ -219,6 +227,10 @@ def main():
     dz = cb("tload/dram/zeros")
     ssz, slz = cb("tstore/scp/zeros"), cb("tload/scp/zeros")
     l1 = cb("flw.ps/random/h2", 1 / 32)
+    def off_rail(k):   # aifoundry2: over idle less the rails and the fitted delivery losses on them, per byte (Limits of observability §4.2)
+        e, c = S["aifoundry2"][k], m["unmetered"]["aifoundry2"]["coef"]
+        R_ = e["rails_over_w"]; mm, sr, nn = R_["minion_w"]["mean"], R_["sram_w"]["mean"], R_["noc_w"]["mean"]
+        return (e["over_idle_w"]["mean"] - mm - sr - nn - (c["minion"] * mm + c["sram"] * sr + c["noc"] * nn)) / e["bytes_per_s"]["mean"] * 1e12
     dd4 = [cb(k + "/random" + h)["mean"] / cb(k + "/zeros" + h)["mean"] for k, h in
            (("flw.ps", "/h2"), ("fsw.ps", "/h2"), ("tload/scp", ""), ("tstore/scp", ""), ("tload/dram", ""), ("tstore/dram", ""), ("st_stream/dram", ""))]
     s = ["# 4. Bytes through the memory hierarchy\n",
@@ -232,7 +244,7 @@ def main():
          mrow("tstore/scp", "Tensor store into the shire's own scratchpad"),
          mrow("tload/dram", "Tensor load from DRAM"),
          mrow("tstore/dram", "Tensor store to DRAM"),
-         mrow("st_stream/dram", "`fsw.ps` streaming to DRAM through the L1 write-back path"),
+         mrow("st_stream/dram", "`fsw.ps` stores to DRAM through the L1 (the write-back path)"),
          ""]
     if lv:
         LV = [("l1", "L1 hits", "256 B per hart, 2,048 harts"), ("l2", "L2", "256 KB per shire (L2 is 512 KB)"),
@@ -241,8 +253,16 @@ def main():
               ("scp-remote", "remote scratchpad", f"2 MB of the scratchpad 16 shire IDs away ({f(m['comm']['mesh_hops']['xshire16']['mean'], 1)} mesh hops on average)")]
         gh = [x["implied_ghz"] for x in mr["rows"] if x.get("implied_ghz")]
         l1c = cb("flw.ps/random/h2", 1 / 32)
+        # The two L1 loops: memhier.c's (8 flw.ps per loop iteration; minion-cycles per load from its 18 September row, B per
+        # cycle being clock-independent in the minion's domain) and the catalogue's (enercat.c's RUN macro, 64 per iteration;
+        # both cards' issue rate, and aifoundry2's instruction rate as in 4.1).
+        mh1 = next(x for x in mr["rows"] if x["level"] == "l1")
+        cyc_mh = 32 / (mh1["gb_s"] / (mh1["implied_ghz"] * 1024))
+        cyc_cat = 1 / (2 * statistics.fmean(S[h]["flw.ps/random/h2"]["ops_per_cycle_per_hart"]["mean"] for h in S))
+        tbs_cat = stat("flw.ps/random/h2", "ops_per_s") * 32 / 1e12
         s += ["## 4.2 Reads by level (memhier, re-run at a pinned 600 MHz on 23 September)\n",
-              f"**L1**: both harts of every minion re-reading a private 256 B buffer with 32 B vector loads, in memhier's own loop over a buffer whose contents it does not set; it reads {100*(lv['l1']['mean']/l1c['mean']-1):.0f}% above the L1 row of 4.1 ({f(l1c['mean'])} pJ/B on random data), which is the figure to use. "
+              f"**L1**: both harts of every minion re-reading a private 256 B buffer with 32 B vector loads, in memhier's own loop over a buffer whose contents it does not set. "
+              f"That loop (8 loads per loop iteration) issued a load every {cyc_mh:.1f} minion-cycles where the catalogue's (64) issued one every {cyc_cat:.1f} ({tbs_cat:.1f} TB/s), and it reads {100*(lv['l1']['mean']/l1c['mean']-1):.0f}% above the L1 row of 4.1 ({f(l1c['mean'])} pJ/B on random data), which is the figure to use. "
               "**L2, L3, DRAM and the scratchpads**: hart 0 of every minion streaming 1 KB tensor loads — which skip the L1 but are cached in the L2 and L3 — over a working set sized to each level. "
               "The probe does not set the memory's contents, so these rows sit between the zeros and random columns of 4.1 and are not directly comparable to them. "
               f"{WORD[RR['passes'].get('levels', 0) // 2].capitalize()} passes on each card at a pinned 600 MHz (n = {RR['passes'].get('levels', 0)}). The first measurement of 18 September ran with the governor free (its clock averaged {min(gh):.2f}–{max(gh):.2f} GHz across the levels) and is superseded.\n",
@@ -260,7 +280,7 @@ def main():
         s += ["", "*Caveat:* " + mr["caveat"] + "."]
     s += ["", "**What the tables say.**",
           f"- **DRAM is {f(dl['mean']/sl['mean'],0)}× the energy of the shire's own scratchpad per byte read**, and {f(ds['mean']/cb('tstore/scp/random')['mean'],0)}× per byte written.",
-          f"- **A DRAM write costs about what a DRAM read costs** ({f(ds['mean'],0)} vs {f(dl['mean'],0)} pJ/B on random data) — by tensor store, which skips the L1 and the L2. **Through the L1 write-back path the same bytes cost {f(ss['mean']/ds['mean'],1)}× more** and arrive at a third of the bandwidth: every store allocates a line, and the line goes down through L2 and L3.",
+          f"- **A DRAM write costs about what a DRAM read costs** ({f(ds['mean'],0)} vs {f(dl['mean'],0)} pJ/B on random data) — by tensor store, which skips the L1 and the L2. **Through the L1 write-back path the same bytes cost {f(ss['mean']/ds['mean'],1)}× more** and arrive at a third of the bandwidth: each store allocates its line, so the line is read from DRAM before it is written back and the byte pays for a read and a write. Off-rail it costs {f(off_rail('st_stream/dram/random'),0)} pJ against a tensor store's {f(off_rail('tstore/dram/random'),0)} ([Limits of observability, §4.2](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed)), and a tensor load plus a tensor store come to {f(dl['mean']+ds['mean'],0)} of its {f(ss['mean'],0)} pJ/B.",
           f"- **Even DRAM is data-dependent**: zeros {f(dz['mean'],0)}, random {f(dl['mean'],0)} pJ/B, bars [{f(dz['lo'],0)}–{f(dz['hi'],0)}] and [{f(dl['lo'],0)}–{f(dl['hi'],0)}] well apart. The scratchpad doubles from zeros to random.",
           f"- **A scratchpad write is twice a scratchpad read** ({f(ssz['mean'])} vs {f(slz['mean'])} pJ/B on zeros).",
           f"- **An L1 hit is nearly free**: {f(l1['mean'])} pJ/B [{f(l1['lo'])}–{f(l1['hi'])}] including the instruction.\n",
@@ -282,7 +302,7 @@ def main():
          "Register file to register file over the tensor network (`TensorSend`/`TensorRecv`), 1 KB messages unless said otherwise, hart 0 of every minion sending and receiving in rings, at 600 MHz and 518 mV. "
          "Shire IDs do not follow the mesh, so each ring between shires is given with its mean distance in mesh hops, the Manhattan distance between shire s and shire s + k averaged over all 32 compute shires on the shire map of [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication).\n",
          BARS + (f" The rings were re-measured on 23 September with the manual's own sampler, {WORD[RR['passes'].get('rings', 0) // 2]} passes on each card, the die held warm on aifoundry2. The pair of 18 September runs, sampled without the die temperature and so without a leakage correction, is not pooled; the values On-chip communication publishes from it read {dev[0]:.0f}–{dev[-1]:.0f}% higher in every configuration (median {dev[len(dev) // 2]:.0f}%). "
-                 f"**The s ↔ s+16 ring starves the service processor's own management path** — the sampler's latency rises from 22 ms to {min(drop):.0f}–{max(drop):.0f} ms and the board reading is held for seconds — so its aifoundry2 passes were dropped and that row is aifoundry3 only"
+                 f"**The s ↔ s+16 ring starves the service processor's own management path** — the sampler's latency rises from 22 ms to {min(drop):.0f}–{max(drop):.0f} ms and the board reading takes a new value about twice a second instead of six times — so its aifoundry2 passes were dropped and that row is aifoundry3 only"
                  + (f" (On-chip communication gives {f(x16['pj_per_byte_local'], 1)} pJ/B for it on aifoundry2 on 18 September)." if x16 and x16.get("pj_per_byte_local") else ".") if rg else " Two independent runs averaged; ± is half their difference.") + "\n",
          "| Ring | What moves | Mesh hops, mean (range) | pJ/B | per card | GB/s aggregate |", "|---|---|---|---|---|---|"]
     small = lambda k: k.endswith("c4")
@@ -325,6 +345,8 @@ def main():
         return (bar(c, n) + " nJ", cards(c, n)) if c else (f"**{f(at[lab]['nj_per_op'], n)} nJ**", "a2 only")
     con, spr = hv("contended"), hv("spread", 2)
     conm = hn["contended"]["mean"] if "contended" in hn else at["contended"]["nj_per_op"]
+    hot6 = (RR.get("hotline_over_idle_w") or {}).get("contended")
+    stall_w = hot6["mean"] if hot6 else at["contended"]["over_idle_w"]   # 1,024 minions stalled, W over idle
     sprm = hn["spread"]["mean"] if "spread" in hn else at["spread"]["nj_per_op"]
     s = ["# 6. Synchronisation\n",
          BARS + (f" The hot line was measured on 22 September on aifoundry2 and re-run on 23 September, three warm passes on aifoundry2 and {WORD[hn['contended']['per_card']['aifoundry3']['n']]} on aifoundry3 (n = {hn['contended']['n']}); the first session alone gave {f(at['contended']['nj_per_op'], 1)} and {f(at['spread']['nj_per_op'], 2)} nJ." if hn else "") + "\n",
@@ -332,10 +354,10 @@ def main():
          f"| Global atomic, one line, 1,024 requesters | {con[0]} | {con[1]} | {at['contended']['cycles_per_op']:.0f} cycles each at the bank | the bank serialises and every requester waits its turn; the host shire's own loads stop |",
          f"| Global atomic, 32 lines, one per shire | {spr[0]} | {spr[1]} | {at['spread']['cycles_per_op']:.2f} cycles each, aggregate | the same instruction, {f(conm/sprm,0)}× cheaper |",
          f"| Uncontended remote atomic round trip | — | | {sy['remote_atomic_latency_cycles']:.0f} cycles | E22 |",
-         f"| Chip-wide barrier, 1,024 minions | ≈ {f(1024*1.4e-3*sy['barrier_cycles_chip']/0.6e9*1e6, 0)} µJ of waiting | | {sy['barrier_cycles_chip']:,} cycles | derived: 1,024 minions stalled at 1.4 mW for the barrier's length; the 32 atomics and 32 credit stores are negligible beside it |",
+         f"| Chip-wide barrier, {sy.get('barrier_participants', 1024):,} minions | ≈ {f(stall_w*sy['barrier_cycles_chip']/0.6e9*1e6, 0)} µJ of waiting | | {sy['barrier_cycles_chip']:,} cycles | derived: 1,024 minions stalled at {f(stall_w/1024*1e3, 1)} mW (§2) for the barrier's length; the 32 atomics and 32 credit stores are negligible beside it |",
          "| FLB (fast local barrier) + credit barrier, one shire | — | | 237 cycles | [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication), 18 September |",
          "| TensorReduce (the hardware reduction tree) + broadcast, 32 minions | — | | 432 cycles | [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication), 18 September |",
-         "", f"**What the table says.** A contended atomic costs {f(conm/sprm,0)}× the same atomic spread over 32 lines, and its cost is not on the requesters: the shire that hosts the line keeps its share of the atomic, but its own other loads stop ([One hot line stops a shire](https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line), docs/findings/17-hot-line.md). Waiting itself is cheap — a stalled minion draws about 1.4 mW, less than a spinning one (2.1 mW, section 2) — so a barrier's energy is small next to the leakage the card burns while it lasts.\n",
+         "", f"**What the table says.** A contended atomic costs {f(conm/sprm,0)}× the same atomic spread over 32 lines, and its cost is not on the requesters: the shire that hosts the line keeps its share of the atomic, but its own other loads stop ([One hot line stops a shire](https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line), docs/findings/17-hot-line.md). Waiting itself is cheap — a stalled minion draws about {f(stall_w/1024*1e3, 1)} mW, less than a spinning one ({f(stat('spin/zeros/h1', 'over_idle_w')/1024*1e3, 1)} mW, section 2) — so a barrier's energy is small next to the leakage the card burns while it lasts.\n",
          f"The contended row's bar is wide because the whole chip stalled draws only about {f(conm*at['contended']['ops_per_s']*1e-9, 1)} W over idle ({f(at['contended']['over_idle_w'], 1)} W in the first session), and the per-operation figure divides that small number by a rate the bank fixes at one per 10 cycles.\n",
          "Source: `" + sy["source"] + "`" + (", `" + RR["source"] + "`" if RR else "") + ".\n"]
     open(os.path.join(out, "06-synchronisation.md"), "w").write("\n".join(s))

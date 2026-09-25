@@ -13,6 +13,9 @@ JOBS       ?= $(shell nproc)
 DEVICE     ?= sysemu
 # Extra sys_emu flags for DEVICE=sysemu, e.g. SIM_PARAMS="-vpurf_check -mem_check"
 SIM_PARAMS ?=
+# run-sgemm: matrix size and extra sgemm_host flags, e.g. SGEMM_N=64 SGEMM_ARGS='--shires 0x1'
+SGEMM_N    ?= 128
+SGEMM_ARGS ?=
 
 CMAKE_PATHS := -DCMAKE_PREFIX_PATH="$(ET);$(ET)/lib/cmake" \
                -DCMAKE_MODULE_PATH="$(ET)/lib/cmake;$(ET)/lib/cmake/cmake-modules"
@@ -69,7 +72,7 @@ sgemm:
 
 run-sgemm: sgemm
 	mkdir -p $(BUILD)/sgemm/run
-	cd $(BUILD)/sgemm/run && $(BUILD)/sgemm/host/sgemm_host --sysemu -n 128 --reps 1 $(if $(SIM_PARAMS),--sim-args "$(SIM_PARAMS)")
+	cd $(BUILD)/sgemm/run && $(BUILD)/sgemm/host/sgemm_host --sysemu -n $(SGEMM_N) --reps 1 $(SGEMM_ARGS) $(if $(SIM_PARAMS),--sim-args "$(SIM_PARAMS)")
 
 # Print et_printf() output from the last run's device trace dump.
 trace:

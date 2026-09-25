@@ -50,36 +50,35 @@ pre code { padding: 0; background: none; border-radius: 0; font-size: inherit; }
 .kpi .value { font-size: 1.9rem; font-weight: 600; line-height: 1.15; margin: 4px 0 2px; }
 .kpi .value .unit { font-size: 0.95rem; font-weight: 500; color: var(--ink-2); }
 .kpi .sub { font-size: 0.85rem; color: var(--ink-2); }
-/* efficiency small multiples */
-.panels { display: grid; gap: 14px; }
-.row { padding: 5px 0; border-radius: 6px; outline: none; cursor: default; }
-.row:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
-.row-label { font-size: 0.85rem; color: var(--ink-2); margin-bottom: 3px; }
-.row-label b { color: var(--ink); font-weight: 600; }
-.row-bar { display: flex; align-items: center; gap: 8px; border-left: 1px solid var(--axis); min-height: 18px; }
-.bar { height: 16px; border-radius: 0 4px 4px 0; flex: none; }
-.bar.et { background: var(--accent); }
-.bar.ref { background: var(--ref); }
-.val { font-size: 0.85rem; font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.85rem; color: var(--ink-2); margin: 4px 0 14px; }
-.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
-.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink);
-  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; line-height: 1.4;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 280px; display: none; }
-.tip b { font-weight: 600; }
-/* power trace */
-.chart { position: relative; width: 100%; }
-svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
-.grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
-.axis-line { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
-.tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+/* efficiency explorer (chart kit) */
+#eff { padding: 12px 16px 4px; }
+.eff-row { padding: 6px 0 2px; border-bottom: 1px solid var(--grid); }
+.eff-row:last-child { border-bottom: 0; }
+.eff-head { font-size: 0.9rem; }
+.eff-head .muted { font-size: 0.82rem; }
+.eff-read { margin: 0 0 6px; font-size: 0.85rem; color: var(--ink-2); }
+.eff-read b { color: var(--ink); }
+.eff-et { fill: var(--c1); stroke: var(--surface); stroke-width: 2; }
+.eff-a100 { fill: var(--surface); stroke: var(--ref); stroke-width: 2; }
+.eff-a100.filled { fill: var(--ref); stroke: var(--surface); }
+.eff-ring { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.eff-link { stroke: var(--ink-2); stroke-width: 2; stroke-dasharray: 3 3; }
+/* power trace (chart kit) */
+#trace { padding: 8px 12px; }
 .band { fill: var(--band); }
-.band-label { fill: var(--ink-2); font-size: 12px; }
-.ref-line { stroke: var(--muted); stroke-width: 1; shape-rendering: crispEdges; }
-.ref-label { fill: var(--ink-2); font-size: 12px; }
-.trace { stroke: var(--accent); stroke-width: 2; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.trace-band.on .band { fill: none; }
+.win-idle { fill: var(--c2); fill-opacity: 0.25; }
+.win-avg { fill: var(--c1); fill-opacity: 0.14; }
+.idle-step { stroke: var(--ref); stroke-width: 7; stroke-opacity: 0.45; stroke-linecap: round; }
+#trace text.halo { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+.mean-idle { stroke: var(--c2); stroke-width: 2; stroke-dasharray: 6 4; }
+.mean-avg { stroke: var(--c1); stroke-width: 2; stroke-dasharray: 6 4; }
+.trace { stroke: var(--ink-2); stroke-width: 1.5; fill: none; stroke-linejoin: round; stroke-linecap: round; }
 .cross { stroke: var(--muted); stroke-width: 1; }
-.dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.dot { fill: var(--ink); stroke: var(--surface); stroke-width: 2; }
+details.terms { margin: 12px 0; }
+details.terms summary { cursor: pointer; color: var(--ink-2); }
+details.terms p { margin: 6px 0 0; }
 /* tables */
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
 table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
@@ -92,8 +91,6 @@ ol li, ul li { margin: 5px 0; }
 .later p { margin: 0 0 8px; }
 .later p:last-child { margin-bottom: 0; }
 .later { margin: 18px 0 8px; }
-.panel .ptitle { font-size: 1rem; font-weight: 600; margin: 0 0 10px; }
-.panel .ptitle .unit { font-weight: 400; color: var(--ink-2); font-size: 0.85rem; }
 table.a100 td:first-child { min-width: 150px; }
 nav.card { margin: 18px 0 0; }
 nav.card ol { margin: 6px 0 0; }
@@ -101,6 +98,448 @@ h2, h3 { scroll-margin-top: 12px; }
 .hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
 h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 </style>
+<!-- chartkit:begin -->
+<!-- pasted by scripts/paste-chartkit.py from docs/reports/sources/{chartkit.js, report.template.html}; do not edit here -->
+<style>
+/* the template tokens the chart kit uses, in this page's names */
+:root { --c1: var(--accent); --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c7: #4a3aa7; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; } }
+:root[data-theme="dark"] { --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; }
+.ck-frame { position: relative; width: 100%; }
+.ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ck-frame svg { display: block; max-width: none; height: auto; }
+.ck-frame svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.ck-frame .tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame .lab { fill: var(--ink-2); font-size: 12px; }
+.ck-frame .lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ck-frame .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-axis { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-hit { fill: transparent; stroke: none; }
+.ck-tip { position: absolute; z-index: 5; pointer-events: none; display: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border, var(--grid)); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: min(320px, calc(100% - 8px)); }
+.ck-frame svg [tabindex] { outline: none; }
+.ck-frame svg [tabindex]:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse)[tabindex]:not(.ck-hit):focus-visible,
+.ck-frame svg [tabindex]:focus-visible > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse).ck-active:not(.ck-hit),
+.ck-frame svg .ck-active > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 1.5px; }
+.ck-hidden { display: none !important; }
+.ck-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 8px 0 6px; }
+.ck-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 8px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-legend .ck-li { display: inline-flex; align-items: center; gap: 6px; }
+.ck-legend button.ck-li { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 3px 10px; min-height: 32px; cursor: pointer; }
+.ck-legend button.ck-li[aria-pressed="false"] { opacity: 0.55; text-decoration: line-through; }
+.ck-legend svg { flex: none; overflow: visible; }
+.ck-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.82rem; }
+.ck-seg-label { color: var(--ink-2); }
+.ck-seg-group { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ck-seg [role="radio"] { font: inherit; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-seg [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-range input[type="range"] { flex: 0 1 200px; width: 200px; min-width: 120px; min-height: 32px; margin: 0; accent-color: var(--c1); }
+.ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
+   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
+th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+th.num { white-space: normal; }
+@media (max-width: 599px) {
+  table.stack, .wide table.stack { min-width: 0; }
+  table.stack thead { display: none; }
+  table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { border-bottom: 1px solid var(--grid); padding: 6px 0; }
+  table.stack td, table.stack td.num { border: 0; padding: 2px 0; text-align: left; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+  table.stack td:first-child::before { content: none; }
+  table.stack td:first-child { font-weight: 600; }
+}
+@media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+</style>
+<script>
+/* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
+   Source-built pages get it from report.template.html (scripts/build-report.py inlines it before the page script);
+   standalone pages get this file, the template's chartkit CSS and token aliases from scripts/paste-chartkit.py.
+   Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
+   --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
+   API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame. Every mark with a tooltip is reachable from the keyboard. */
+window.CK = (function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
+  let uid = 0;
+  const $ = h => (typeof h === 'string' ? document.getElementById(h) : h);
+  const mm = q => (window.matchMedia ? window.matchMedia(q) : {matches: false});
+  const reduced = mm('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, str, cls, anchor) {
+    const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
+    t.textContent = str;
+    return t;
+  }
+  const path = (pts, x, y) => pts.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ');
+
+  /* ---- numbers ---- */
+  function num(v, dp) {
+    if (v == null || !isFinite(v)) return '\u2014';
+    const auto = dp == null;  // no dp: three significant digits, trailing zeros dropped
+    if (auto) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+    const s = Number(v).toLocaleString('en-GB', {minimumFractionDigits: auto ? 0 : dp, maximumFractionDigits: dp});
+    return /[1-9]/.test(s) ? s.replace('-', '\u2212') : s.replace('-', '');  // true minus; never "−0.00"
+  }
+  const fmt = {
+    num,
+    range: (a, b, dp, unit) => {
+      const s = num(a, dp), t = num(b, dp), u = unit ? '\u00a0' + unit : '';
+      return s === t ? s + u : s + (b < 0 ? ' to ' : '\u2013') + t + u;
+    },
+    pct: (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%',
+  };
+
+  /* ---- scales ---- */
+  function niceTicks(a, b, n) {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    if (!(hi > lo)) return Object.assign([lo], {step: 1});
+    const raw = (hi - lo) / Math.max(1, n || 5), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    const step = (m >= 7.5 ? 10 : m >= 3.5 ? 5 : m >= 1.5 ? 2 : 1) * p, out = [];
+    for (let i = Math.ceil(lo / step - 1e-9); i * step <= hi + step * 1e-9; i++) out.push(+(i * step).toPrecision(12));
+    out.step = step;
+    return out;
+  }
+  const tickDp = t => (t.step ? Math.max(0, -Math.floor(Math.log10(t.step) + 1e-9)) : null);
+  function lin(d0, d1, r0, r1) {
+    const s = v => r0 + (v - d0) * (r1 - r0) / (d1 - d0);
+    s.inv = p => d0 + (p - r0) * (d1 - d0) / (r1 - r0);
+    s.ticks = n => niceTicks(d0, d1, n);
+    s.domain = [d0, d1]; s.range = [r0, r1];
+    return s;
+  }
+  function log(d0, d1, r0, r1) {
+    const l0 = Math.log10(d0), l1 = Math.log10(d1);
+    const s = v => r0 + (Math.log10(v) - l0) * (r1 - r0) / (l1 - l0);
+    s.inv = p => Math.pow(10, l0 + (p - r0) * (l1 - l0) / (r1 - r0));
+    s.ticks = n => {
+      const lo = Math.min(l0, l1), hi = Math.max(l0, l1), k0 = Math.ceil(lo - 1e-9), k1 = Math.floor(hi + 1e-9);
+      const dec = k1 - k0 + 1, every = Math.max(1, Math.ceil(dec / (n || 6))), out = [];
+      const add = v => { v = +v.toPrecision(12); const lv = Math.log10(v); if (lv >= lo - 1e-9 && lv <= hi + 1e-9) out.push(v); };
+      if (dec <= 2) { for (let k = k0 - 1; k <= k1; k++) for (const m of [1, 2, 5]) add(m * Math.pow(10, k)); }
+      else for (let k = k0; k <= k1; k += every) add(Math.pow(10, k));
+      return out;
+    };
+    s.domain = [d0, d1]; s.range = [r0, r1]; s.log = true;
+    return s;
+  }
+  const logFmt = v => num(v, v >= 1 ? 0 : Math.ceil(-Math.log10(v) - 1e-9));
+
+  /* ---- frame: a responsive SVG sized to its host ---- */
+  function frame(hostId, o) {
+    const host = $(hostId);
+    if (!host) throw new Error('CK.frame: no element ' + hostId);
+    host.classList.add('ck-frame'); host.classList.remove('scroll');
+    host.textContent = '';
+    const plot = document.createElement('div'); plot.className = 'ck-plot'; host.appendChild(plot);
+    const svg = el('svg', {role: 'group', 'aria-label': o.label || null}, plot);
+    const tip = document.createElement('div'); tip.className = 'ck-tip'; tip.setAttribute('aria-hidden', 'true');
+    host.appendChild(tip);
+    const minW = o.minW == null ? 320 : o.minW, maxW = o.maxW == null ? 900 : o.maxW;
+    const f = {svg, host, tip, W: 0, H: 0, narrow: false, seriesOn: null, pinned: null, active: null, navIndex: 0};
+    const width = () => {
+      const cs = getComputedStyle(host), cw = host.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return Math.round(Math.max(minW, Math.min(maxW, cw > 0 ? cw : maxW)));
+    };
+    f.redraw = () => {
+      const W = width(), H = Math.round(typeof o.height === 'function' ? o.height(W) : (o.height || 300));
+      f.refocus = svg.contains(document.activeElement) ? f.navIndex : null;
+      hide(f, true);
+      Object.assign(f, {W, H, narrow: W < 600, navNodes: []});
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.setAttribute('height', H);
+      svg.style.width = W + 'px';
+      o.draw(f);
+      if (f.seriesOn) showSeries(f, f.seriesOn);
+    };
+    f.redraw();
+    frames.push(f);
+    if (window.ResizeObserver) {
+      let timer;
+      new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => { if (width() !== f.W) f.redraw(); }, 150); }).observe(host);
+    }
+    return f;
+  }
+
+  /* ---- axes: horizontal grid, tick labels, baseline, axis titles (y title sits above the plot) ---- */
+  function axes(f, o) {
+    const {x, y} = o, W = f.W, H = f.H;
+    const L = o.L == null ? 44 : o.L, R = o.R == null ? 12 : o.R, T = o.T == null ? 22 : o.T, B = o.B == null ? 38 : o.B;
+    const g = el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, f.svg);
+    const yt = o.yt || y.ticks(Math.max(3, Math.round((H - T - B) / 48)));
+    const xt = o.xt || x.ticks(Math.max(2, Math.round((W - L - R) / 90)));
+    const auto = (s, t) => (s.log ? logFmt : v => num(v, tickDp(t)));
+    const xf = o.xfmt || auto(x, xt), yf = o.yfmt || auto(y, yt), labs = [];
+    for (const t of yt) {
+      if (o.grid !== false) el('line', {x1: L, x2: W - R, y1: y(t), y2: y(t), class: 'grid-line'}, g);
+      labs.push(txt(g, L - 6, y(t) + 4, yf(t), 'tick', 'end'));
+    }
+    el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    for (const t of xt) labs.push(txt(g, x(t), H - B + 16, xf(t), 'tick', 'middle'));
+    if (o.xl) labs.push(txt(g, (L + W - R) / 2, H - 6, o.xl, 'lab', 'middle'));
+    if (o.yl) txt(g, 2, Math.max(12, T - 13), o.yl, 'lab');
+    inside(f, labs);
+    return g;
+  }
+  /* Keep labels inside the frame (0..f.W, 0..f.H, less pad): one that would cross the left or right edge is anchored
+     at that edge instead (text-anchor start or end, so its outer end sits pad px from the edge in any font; an end
+     tick label still covers its tick), and one that would cross the top or bottom is moved in. Labels already inside
+     are not touched. Widths are measured in the page's font; a chart drawn while hidden has no layout, so they are
+     estimated at 0.6 em a character. Vertically the glyphs are taken as 0.75 em above the baseline and 0.25 em below. */
+  function inside(f, labels, pad) {
+    pad = pad == null ? 2 : pad;
+    const m = labels.map(t => {
+      let w = 0, fs = 12;
+      try { w = t.getComputedTextLength(); fs = parseFloat(getComputedStyle(t).fontSize) || 12; } catch (_) { /* no layout */ }
+      return {w: w > 0 ? w : 0.6 * fs * t.textContent.length, fs};
+    });
+    labels.forEach((t, k) => {
+      const {w, fs} = m[k], a = t.getAttribute('text-anchor') || 'start', x = +t.getAttribute('x'), y = +t.getAttribute('y');
+      const x0 = a === 'end' ? x - w : a === 'middle' ? x - w / 2 : x;
+      if (x0 < pad) { t.setAttribute('text-anchor', 'start'); t.setAttribute('x', pad); }
+      else if (x0 + w > f.W - pad) { t.setAttribute('text-anchor', 'end'); t.setAttribute('x', +(f.W - pad).toFixed(1)); }
+      if (y - 0.75 * fs < pad) t.setAttribute('y', +(pad + 0.75 * fs).toFixed(1));
+      else if (y + 0.25 * fs > f.H - pad) t.setAttribute('y', +(f.H - pad - 0.25 * fs).toFixed(1));
+    });
+    return labels;
+  }
+
+  /* ---- tooltip: pointer, keyboard focus and touch all show the same text ---- */
+  const strip = html => new DOMParser().parseFromString(String(html).replace(/<br\s*\/?>/gi, '; '), 'text/html')
+    .body.textContent.replace(/\s+/g, ' ').trim();
+  function place(f, cx, cy) {
+    const t = f.tip; t.style.display = 'block';
+    const hw = f.host.clientWidth, hh = f.host.clientHeight, tw = t.offsetWidth, th = t.offsetHeight;
+    let top = cy + 14;
+    if (top + th > hh && cy - th - 10 >= 0) top = cy - th - 10;  // flip above the pointer
+    t.style.left = Math.max(0, Math.min(cx + 12, hw - tw)) + 'px';
+    t.style.top = top + 'px';
+  }
+  function show(f, node, html, cx, cy) {
+    if (f.active && f.active !== node) f.active.classList.remove('ck-active');
+    f.active = node; node.classList.add('ck-active');
+    f.tip.innerHTML = typeof html === 'function' ? html() : html;
+    if (cx == null) {
+      const r = node.getBoundingClientRect(), b = f.host.getBoundingClientRect();
+      cx = r.left + r.width / 2 - b.left; cy = r.top + r.height / 2 - b.top;
+    }
+    place(f, cx, cy);
+  }
+  function hide(f, force) {
+    if (f.pinned && !force) return;
+    f.pinned = null; f.tip.style.display = 'none';
+    if (f.active) f.active.classList.remove('ck-active');
+    f.active = null;
+  }
+  function tip(f, node, html, o) {
+    o = o || {};
+    if (!node.hasAttribute('data-ck-nav')) node.setAttribute('tabindex', '0');
+    node.setAttribute('role', o.role || 'img');
+    node.setAttribute('aria-label', strip(typeof html === 'function' ? html() : html));
+    node._ckTip = html;
+    const at = ev => { const b = f.host.getBoundingClientRect(); show(f, node, html, ev.clientX - b.left, ev.clientY - b.top); };
+    node.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointermove', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') hide(f); });
+    node.addEventListener('pointerdown', ev => {  // touch: a tap toggles the tooltip and pins it until the next tap
+      if (ev.pointerType !== 'touch') return;
+      f.touchT = Date.now();
+      if (f.active === node && f.tip.style.display === 'block') hide(f, true); else { hide(f, true); at(ev); f.pinned = node; }
+    });
+    node.addEventListener('focus', () => { if (Date.now() - (f.touchT || 0) > 600 && !f.pinned) show(f, node, html); });
+    node.addEventListener('blur', () => hide(f));
+    node.addEventListener('keydown', ev => { if (ev.key === 'Escape') hide(f, true); });
+    return node;
+  }
+  document.addEventListener('pointerdown', ev => {  // a tap elsewhere unpins
+    for (const f of frames) if (f.pinned && !f.pinned.contains(ev.target)) hide(f, true);
+  }, true);
+
+  /* ---- keynav: one tab stop per mark group; arrows step, Home/End jump, Enter pins, Escape hides ---- */
+  function keynav(f, nodes, o) {
+    o = o || {};
+    nodes = nodes.filter(Boolean);
+    if (!nodes.length) return;
+    const seen = n => !n.closest('.ck-hidden');
+    const next = (k, d) => { for (let j = k + d; j >= 0 && j < nodes.length; j += d) if (seen(nodes[j])) return j; return k; };
+    let cur = Math.min(f.navIndex || 0, nodes.length - 1);
+    nodes.forEach((n, k) => {
+      n.setAttribute('data-ck-nav', '');
+      n.setAttribute('tabindex', k === cur ? '0' : '-1');
+      n.addEventListener('focus', () => {
+        nodes.forEach(m => m.setAttribute('tabindex', '-1')); n.setAttribute('tabindex', '0');
+        f.navIndex = k;
+        if (o.onFocus) o.onFocus(n, k);
+      });
+      n.addEventListener('keydown', ev => {
+        const K = ev.key;
+        let j = null;
+        if (o.step) j = o.step(k, K, nodes);
+        if (j == null) {
+          if (K === 'ArrowRight' || K === 'ArrowDown') j = next(k, 1);
+          else if (K === 'ArrowLeft' || K === 'ArrowUp') j = next(k, -1);
+          else if (K === 'Home') j = next(-1, 1);
+          else if (K === 'End') j = next(nodes.length, -1);
+        }
+        if (K === 'Enter' || K === ' ') {
+          ev.preventDefault();
+          if (n._ckTip) { if (f.pinned === n) hide(f, true); else { hide(f, true); show(f, n, n._ckTip); f.pinned = n; } }
+          if (o.onEnter) o.onEnter(n, k);
+        } else if (j != null) { ev.preventDefault(); if (j !== k) { hide(f, true); nodes[j].focus(); } }
+      });
+    });
+    f.navNodes = (f.navNodes || []).concat([nodes]);
+    if (f.refocus != null && nodes[f.refocus]) { nodes[f.refocus].focus(); f.refocus = null; }
+  }
+
+  /* ---- legend (HTML, above the chart) and series toggling ---- */
+  function swatch(it) {
+    const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
+    const m = it.mark || 'box';
+    const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
+    if (m === 'dot' || m === 'box') e.style.fill = c;
+    else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
+    if (m === 'dash') e.style.strokeDasharray = '4 3';
+    return s;
+  }
+  function legend(hostEl, items, o) {
+    o = o || {};
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-legend');
+    const on = new Set(items.map(it => it.key)), btn = {};
+    for (const it of items) {
+      const b = document.createElement(o.toggle ? 'button' : 'span'); b.className = 'ck-li';
+      b.append(swatch(it), document.createTextNode(it.label));
+      if (o.toggle) {
+        b.type = 'button'; b.setAttribute('aria-pressed', 'true');
+        b.addEventListener('click', () => {
+          const was = on.has(it.key);
+          if (was && on.size === 1) return;  // keep at least one series
+          if (was) on.delete(it.key); else on.add(it.key);
+          b.setAttribute('aria-pressed', String(!was));
+          if (o.onChange) o.onChange([...on]);
+        });
+      }
+      btn[it.key] = b; h.appendChild(b);
+    }
+    return {el: h, on, set(keys) { on.clear(); keys.forEach(k => on.add(k)); for (const k in btn) if (o.toggle) btn[k].setAttribute('aria-pressed', String(on.has(k))); }};
+  }
+  function showSeries(f, keysOn) {
+    f.seriesOn = [...keysOn];
+    f.svg.querySelectorAll('[data-series]').forEach(n => n.classList.toggle('ck-hidden', !f.seriesOn.includes(n.getAttribute('data-series'))));
+    for (const group of f.navNodes || []) {  // keep one reachable tab stop per group
+      const vis = group.filter(n => !n.closest('.ck-hidden'));
+      if (vis.length && !vis.some(n => n.getAttribute('tabindex') === '0')) { group.forEach(n => n.setAttribute('tabindex', '-1')); vis[0].setAttribute('tabindex', '0'); }
+    }
+    if (f.active && f.active.closest('.ck-hidden')) hide(f, true);
+  }
+
+  /* ---- controls ---- */
+  function seg(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-seg');
+    const g = document.createElement('div'); g.setAttribute('role', 'radiogroup'); g.className = 'ck-seg-group';
+    if (o.label) {
+      const s = document.createElement('span'); s.className = 'ck-seg-label'; s.id = 'ck-l' + (++uid); s.textContent = o.label;
+      h.appendChild(s); g.setAttribute('aria-labelledby', s.id);
+    }
+    const opts = o.options, api = {el: h, value: o.value == null ? opts[0][0] : o.value};
+    const btns = opts.map(([v, t], k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.textContent = t;
+      b.addEventListener('click', () => set(v, true));
+      b.addEventListener('keydown', ev => {
+        const d = ev.key === 'ArrowRight' || ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowLeft' || ev.key === 'ArrowUp' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const j = (k + d + opts.length) % opts.length;
+        set(opts[j][0], true); btns[j].focus();
+      });
+      g.appendChild(b); return b;
+    });
+    function set(v, fire) {
+      api.value = v;
+      btns.forEach((b, k) => { const c = opts[k][0] === v; b.setAttribute('aria-checked', String(c)); b.tabIndex = c ? 0 : -1; });
+      if (fire && o.onChange) o.onChange(v);
+    }
+    h.appendChild(g); set(api.value, false);
+    api.set = v => set(v, true);
+    return api;
+  }
+  function range(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-range');
+    const id = 'ck-r' + (++uid), stops = o.stops, f1 = o.fmt || (v => num(v));
+    const lab = document.createElement('label'); lab.htmlFor = id; lab.textContent = o.label;
+    const inp = document.createElement('input'); inp.type = 'range'; inp.id = id;
+    const out = document.createElement('output'); out.setAttribute('for', id);
+    if (stops) { inp.min = 0; inp.max = stops.length - 1; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step == null ? 'any' : o.step; }
+    const val = () => (stops ? stops[+inp.value] : +inp.value);
+    const put = v => { inp.value = stops ? stops.reduce((b, s, k) => (Math.abs(s - v) < Math.abs(stops[b] - v) ? k : b), 0) : v; };
+    const upd = fire => { const v = val(), s = f1(v); out.textContent = s; inp.setAttribute('aria-valuetext', s); if (fire && o.onInput) o.onInput(v); };
+    inp.addEventListener('input', () => upd(true));
+    h.append(lab, inp, out); put(o.value == null ? (stops ? stops[0] : o.min) : o.value); upd(false);
+    return {el: h, input: inp, get value() { return val(); }, set(v) { put(v); upd(true); }};
+  }
+  function readout(hostEl) {
+    const h = $(hostEl); h.classList.add('ck-readout'); h.setAttribute('aria-live', 'polite');
+    h.set = html => { h.innerHTML = html; };
+    return h;
+  }
+  function bus(name) {
+    if (!buses[name]) { const fns = []; buses[name] = {value: undefined, on(fn) { fns.push(fn); }, emit(v, from) { this.value = v; fns.forEach(fn => fn(v, from)); }}; }
+    return buses[name];
+  }
+  /* Card layout for a table under 600 px: each cell shows its column's header (CSS table.stack). */
+  function stackTable(table) {
+    const t = $(table), heads = [], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (hr) for (const c of hr.cells) for (let k = 0; k < (c.colSpan || 1); k++) heads.push(c.textContent.replace(/\s+/g, ' ').trim());
+    for (const tb of t.tBodies) for (const r of tb.rows) { let k = 0; for (const c of r.cells) { if (heads[k]) c.setAttribute('data-label', heads[k]); k += c.colSpan || 1; } }
+    t.classList.add('stack');
+    return t;
+  }
+
+  /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
+  const SERIES = [1, 2, 3, 4, 5, 7];
+  const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
+  const clamp01 = p => Math.max(0, Math.min(1, +p || 0));
+  const ramp = p => `color-mix(in srgb, var(--c1) ${(15 + 85 * clamp01(p)).toFixed(1)}%, var(--surface))`;
+  function rgb(css) {  // resolve any CSS colour (tokens, color-mix) to linear-light luminance via a probe
+    const s = document.createElement('span'); s.style.color = css; s.style.display = 'none';
+    document.body.appendChild(s);
+    const c = getComputedStyle(s).color; s.remove();
+    const v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), unit = /^color\(/.test(c) ? 1 : 255;
+    const lin1 = x => { x /= unit; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin1(v[0]) + 0.7152 * lin1(v[1]) + 0.0722 * lin1(v[2]);
+  }
+  const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  /* Text colour for a ramp cell, chosen for the current theme: whichever of --ink and --page contrasts more. */
+  function rampInk(p) {
+    const bg = rgb(ramp(p));
+    return contrast(bg, rgb('var(--ink)')) >= contrast(bg, rgb('var(--page)')) ? 'var(--ink)' : 'var(--page)';
+  }
+  const redrawAll = () => frames.forEach(f => f.redraw());  // rampInk depends on the theme
+  if (window.MutationObserver) new MutationObserver(redrawAll).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  const dark = mm('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', redrawAll);
+
+  return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
+    stackTable, reduced, ramp, rampInk, color, hide: f => hide(f, true)};
+})();
+</script>
+<!-- chartkit:end -->
 </head>
 <body>
 <main>
@@ -108,12 +547,12 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 <h1>ET-SoC-1 matmul on silicon: 91–97% of the tensor unit's peak, and its energy against the A100</h1>
 <p class="byline">18 September 2026 · <code>aifoundry2</code>: one ET-SoC-1 PCIe card, 32 GB LPDDR4X, minions at 600 MHz · code: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/kernels/mmbench"><code>kernels/mmbench</code></a> in the <a href="https://github.com/yaroslavvb/et-soc1-prototyping">project repository</a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
-<p class="lede">A tensor-unit matmul kernel on all 1,024 compute minions sustains <b>9.5 TFLOP/s in fp32</b>, <b>19.0 TFLOP/s with fp16 inputs</b> and <b>71.8 TOP/s in int8</b>. That is 91–97% of the tensor unit's peak at this clock, and every result is checked bit-exact against a host reference. The card draws 57–62 W doing it, against 30.6 W at idle with the die at 71&nbsp;°C. Compared with the A100's spec sheet (peak ÷ TDP), the ET-SoC-1 is <b>3.4× more energy-efficient at full fp32 precision on these ±1/&#8288;±2 operands</b> (about 2.9× in a later random-data measurement of the tensor unit at 80&nbsp;°C). At fp16 and int8 the A100's tensor cores win on efficiency (2.4× and 1.3×) and by a much wider margin on raw speed (16× and 8.7×).</p>
+<p class="lede">A tensor-unit matmul kernel on all 1,024 compute minions sustains <b>9.5 TFLOP/s in fp32</b>, <b>19.0 TFLOP/s with fp16 inputs</b> and <b>71.8 TOP/s in int8</b>. That is 91–97% of the tensor unit's peak at this clock, and every result is checked bit-exact against a host reference. The card draws 57–62 W doing it, against 30.6 W at idle with the die at 71&nbsp;°C. Compared with the A100's spec sheet (peak ÷ TDP), the ET-SoC-1 is <b>3.4× more energy-efficient at full fp32 precision on these ±1/&#8288;±2 operands</b> (about 2.9× on random data, measured later with a variant of this loop with both operands in the L1 scratchpad, at 80&nbsp;°C). At fp16 and int8 the A100's tensor cores win on efficiency (2.4× and 1.3×) and by a much wider margin on raw speed (16× and 8.7×).</p>
 
 <div class="card small later">
-<p><b>Later measurements.</b> These operands favour low power. Every input is ±1 or ±2, whose mantissa bits are all zero, and the die was at 71–77&nbsp;°C. <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">The Horace experiment</a> later showed how much the data matters: with the tensor unit busy on all 1,024 minions at 80&nbsp;°C, the card draws 38 W on zeros, 47 W on ones, 51–53 W when only the signs or only the exponents are random, and 63 W on random-normal values. Random mantissas are the costliest bits.</p>
-<p>In a variant of this loop with both operands in the L1 scratchpad (546 cycles per op rather than 529), random-normal fp32 at 80&nbsp;°C ran at 9.18 TFLOP/s and 63.9 W. That is 144 GFLOP/s per W, about 2.9× the A100 SXM4's fp32 spec ratio rather than 3.4×; fp16 gave 301 GFLOP/s per W (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">energy manual §3.2</a>).</p>
-<p><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power">Why is the ET-SoC-1 low power?</a> sets this card against the A100's bf16 tensor cores instead, as measured by Horace He, and finds the A100 5.4× more efficient per FLOP than this card's fp32 and 2.6× more than its fp16. The 3.4× here is fp32 against the A100's fp32 CUDA-core datasheet figure; against its tensor cores the A100 table below gives 0.41–0.75×.</p>
+<p><b>Later measurements.</b> These ±1/&#8288;±2 operands have all-zero mantissas, which draw little power. On the same TensorFMA at 80&nbsp;°C the card draws 38 W on zeros, 47 W on ones, 51–53 W with only the signs or only the exponents random (these operands have both) and 63 W on random-normal values (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment</a>).</p>
+<p>A variant of this loop with both operands in the L1 scratchpad (546 cycles per op rather than 529), on random-normal data at 80&nbsp;°C, gives 144 GFLOP/s per W in fp32 and 301 in fp16 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">energy manual §3.2</a>); its idle is 36.3 W, against 30.6 W at 71&nbsp;°C here. So the A100's bf16 tensor cores (Horace He's measured 779 GFLOP/s per W) are 5.4× more efficient per FLOP than this card's fp32 and 2.6× more than its fp16 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power">Why is the ET-SoC-1 low power?</a>). Against the A100's fp32 CUDA-core datasheet figure (19.5 TFLOPS at 400 W) this card is about 2.9× better on random data and 3.4× on these operands.</p>
+<p>In int8 the energy manual's variant is more efficient than this loop even on random data: 1,360 GOP/s per W (63.1 TOP/s at 46.3 W, 80&nbsp;°C), which narrows the A100 int8 spec's lead from 1.34× to 1.15×. The difference is the kernel, not the operands. This loop streams both tiles from L2 at 280 cycles per op (7.3 B per minion-cycle, roughly 11 W at 2.5 pJ/B, an estimate), while that one keeps them in the L1 scratchpad (318 cycles per op).</p>
 </div>
 
 <div class="kpis">
@@ -123,28 +562,18 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
   <div class="card kpi"><div class="label">Idle board power</div><div class="value">30.6 <span class="unit">W</span></div><div class="sub">about half of the load power, mostly die leakage at 71&nbsp;°C</div></div>
 </div>
 
-<p class="small"><b>Terms.</b> The ET-SoC-1's compute cores are <i>minions</i>: small in-order RISC-V cores, 32 to a <i>shire</i>; the 32 shires that run kernels hold 1,024 of them. Each minion has two hardware threads (<i>harts</i>) and a tensor unit whose matrix multiply-accumulate instruction, <i>TensorFMA</i>, is what this benchmark times. Each shire's 4 MB of SRAM includes a 512 KB L2 cache, where the compute-bound runs keep their tiles, and each minion sets aside 3 KB of its 4 KB L1 data cache as an <i>L1 scratchpad</i> for tensor operands. More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
+<details class="terms small"><summary>Terms used on this page</summary><p>The ET-SoC-1's compute cores are <i>minions</i>: small in-order RISC-V cores, 32 to a <i>shire</i>; the 32 shires that run kernels hold 1,024 of them. Each minion has two hardware threads (<i>harts</i>) and a tensor unit whose matrix multiply-accumulate instruction, <i>TensorFMA</i>, is what this benchmark times. Each shire's 4 MB of SRAM includes a 512 KB L2 cache, where the compute-bound runs keep their tiles, and each minion sets aside 3 KB of its 4 KB L1 data cache as an <i>L1 scratchpad</i> for tensor operands. More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p></details>
 
 <h2>Energy efficiency against the A100</h2>
-<p class="muted">Blue is measured on the ET-SoC-1 card with this benchmark's ±1/&#8288;±2 operands, using the card's own board-power telemetry. Grey is the A100 datasheet peak (dense, no sparsity) divided by its TDP. One measured A100 run lands on the same ratio: Horace He's 8192³ bf16 matmul on random data ran at 257 TFLOPS under a 330 W power limit, 779 GFLOP/s per W against the spec sheet's 780. Each panel has its own scale.</p>
-<div class="legend"><span><i style="background:var(--accent)"></i>ET-SoC-1, measured</span><span><i style="background:var(--ref)"></i>A100, spec sheet ÷ TDP (not measured)</span></div>
-<div class="card chart" id="eff"><div class="panels" id="eff-panels"></div><div class="tip" id="eff-tip"></div></div>
-
-<h2>Board power during the benchmark</h2>
-<p class="muted">Card power read from the service processor about 7 times a second. Shaded spans are the benchmark launches, about 12 s per workload, with idle gaps between them; the thin spikes just before each span are short calibration launches. Power creeps up within each span as the die warms: minion-shire temperature (the sensors' average) went from 71&nbsp;°C to 77&nbsp;°C, and the hottest sensor's high-water mark read 85&nbsp;°C afterwards. For the same reason the idle in each gap sits higher than the one before.</p>
-<div class="card chart" id="trace"><div class="tip" id="trace-tip"></div></div>
-
-<h2>Results</h2>
-<div class="table-wrap"><table>
-<thead><tr><th>Workload</th><th class="num">Throughput</th><th class="num">% of peak</th><th class="num">Board power</th><th class="num">Per W (board)</th><th class="num">Per W above idle</th><th>Check</th></tr></thead>
-<tbody>
-<tr class="et"><td>fp32 tensor, tiles in L2</td><td class="num">9.51 TFLOP/s</td><td class="num">96.7%</td><td class="num">56.6 W (54.7–57.9)</td><td class="num">168</td><td class="num">366</td><td>exact</td></tr>
-<tr class="et"><td>fp16→fp32 tensor, tiles in L2</td><td class="num">19.02 TFLOP/s</td><td class="num">96.7%</td><td class="num">59.3 W (57.6–60.5)</td><td class="num">321</td><td class="num">711</td><td>exact</td></tr>
-<tr class="et"><td>int8→int32 tensor, tiles in L2</td><td class="num">71.78 TOP/s</td><td class="num">91.3%</td><td class="num">61.7 W (60.0–63.0)</td><td class="num">1,162</td><td class="num">2,571</td><td>exact</td></tr>
-<tr><td>fp32 tensor, every tile from DRAM</td><td class="num">0.31 TFLOP/s</td><td class="num">3.2%</td><td class="num">43.4 W (42.5–44.4)</td><td class="num">7</td><td class="num">38</td><td>exact</td></tr>
-<tr><td>Idle (8 s before the first workload, die at 71&nbsp;°C)</td><td class="num">–</td><td class="num">–</td><td class="num">30.6 W</td><td class="num">–</td><td class="num">–</td><td>–</td></tr>
-</tbody></table></div>
-<p class="small">"Per W" is GFLOP/s (GOP/s for int8) per watt. Above idle subtracts the idle measured just before each workload (30.6, 32.5, 33.8 and 35.2 W, the mean from 3.5 to 1.8 s before its first timed launch): the die warmed from 71 to 77&nbsp;°C over the session, and its leakage with it. Peak at 600 MHz on 1,024 minions: 9.83 TFLOP/s fp32 (16 flop/cycle/minion), 19.66 fp16 (32), 78.6 TOP/s int8 (128). Measured op costs: 529 cycles per 16×16×16 fp32 or 16×16×32 fp16 op (512 ideal), and 280 cycles per 16×16×64 int8 op (256 ideal). Throughput is total work over the host-measured launch time. The minions' cycle counters agree with it to within 0.1% (implied clock 0.600 GHz). Launch-to-launch spread was below 0.03%.</p>
+<p class="muted">Is this card more energy-efficient than an A100? It depends on which A100 unit it is set against, and on the data. All three rows share one log axis, so equal ratios are equal distances in every row. Blue dots are measured on this card with its own board-power telemetry; grey diamonds are the A100, open for the datasheet peak ÷ TDP (dense, not measured) and filled for the one measured A100 run (Horace He, bf16 on random data). Click an A100 marker, or focus it and press Enter, to compare against it.</p>
+<div class="ck-controls"><div id="eff-data"></div><div id="eff-board"></div></div>
+<div id="eff-legend"></div>
+<div class="card" id="eff">
+<div class="eff-row"><div class="eff-head"><b>fp32</b> <span class="muted">ET: IEEE fp32 on the tensor unit (GFLOP/s per W)</span></div><div id="eff-fp32"></div><p class="eff-read ck-readout" id="eff-fp32-read"></p></div>
+<div class="eff-row"><div class="eff-head"><b>fp16 inputs, fp32 accumulate</b> <span class="muted">ET: TensorFMA16A32 (GFLOP/s per W)</span></div><div id="eff-fp16"></div><p class="eff-read ck-readout" id="eff-fp16-read"></p></div>
+<div class="eff-row"><div class="eff-head"><b>int8 inputs, int32 accumulate</b> <span class="muted">ET: TensorIMA8A32 (GOP/s per W)</span></div><div id="eff-int8"></div><p class="eff-read ck-readout" id="eff-int8-read"></p></div>
+</div>
+<p class="small" id="eff-sum">Needs JavaScript; the table below has the same figures.</p>
 
 <h3>A100 reference (NVIDIA A100 datasheet, dense)</h3>
 <div class="table-wrap"><table class="a100">
@@ -155,22 +584,43 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 <tr><td>fp16 / bf16 tensor</td><td class="num">312 TFLOP/s</td><td class="num">780</td><td class="num">321</td><td class="num">0.41×</td><td class="num">16.4×</td></tr>
 <tr><td>int8 tensor</td><td class="num">624 TOP/s</td><td class="num">1,560</td><td class="num">1,162</td><td class="num">0.75×</td><td class="num">8.7×</td></tr>
 </tbody></table></div>
-<p class="small">Per W is the A100 SXM4's datasheet peak divided by its 400 W TDP. On the 250 W PCIe 40 GB card the A100's per-watt figures are 1.6× higher: 78, 624, 1,248 and 2,496. ET per W is this benchmark's, on ±1/&#8288;±2 operands. Both chips are 7 nm-class designs. The A100 sustains 1.4–1.8 TB/s from HBM (40 and 80 GB cards; 1.6–2.0 TB/s peak), about 20× the 76 GB/s this card streams from LPDDR4X (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory hierarchy</a>). That gap is what the DRAM-streaming row above measures.</p>
+<p class="small">Per W is the A100 SXM4's datasheet peak divided by its 400 W TDP. The 250 W PCIe 40 GB card's per-watt figures are 1.6× higher (fp32 CUDA cores 78 GFLOP/s per W, so ET's lead there is 2.2×). ET per W is this benchmark's, on ±1/&#8288;±2 operands. Both chips are 7 nm-class designs. The A100 sustains 1.4–1.8 TB/s from HBM (40 and 80 GB cards; 1.6–2.0 TB/s peak), about 20× the 76 GB/s this card streams from LPDDR4X (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory hierarchy</a>). That gap is what the DRAM-streaming row in Results below measures.</p>
+
+<h2>Results</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Workload</th><th class="num">Throughput</th><th class="num">% of peak</th><th class="num">Board power</th><th class="num">Per W (board)</th><th class="num">Per W above idle</th><th>Check</th></tr></thead>
+<tbody>
+<tr class="et"><td>fp32 tensor, tiles in L2</td><td class="num">9.51 TFLOP/s</td><td class="num">96.7%</td><td class="num">56.6 W (54.7–57.9)</td><td class="num">168</td><td class="num">366</td><td>exact</td></tr>
+<tr class="et"><td>fp16→fp32 tensor, tiles in L2</td><td class="num">19.02 TFLOP/s</td><td class="num">96.7%</td><td class="num">59.3 W (57.6–60.5)</td><td class="num">321</td><td class="num">711</td><td>exact</td></tr>
+<tr class="et"><td>int8→int32 tensor, tiles in L2</td><td class="num">71.78 TOP/s</td><td class="num">91.3%</td><td class="num">61.7 W (60.0–63.0)</td><td class="num">1,162</td><td class="num">2,571</td><td>exact</td></tr>
+<tr><td>fp32 tensor, every tile from DRAM</td><td class="num">0.31 TFLOP/s</td><td class="num">3.2%</td><td class="num">43.4 W (42.5–44.4)</td><td class="num">7</td><td class="num">38</td><td>exact</td></tr>
+<tr><td>Idle (median of the last 7 s of the 8 s before the first workload, die at 71&nbsp;°C)</td><td class="num">–</td><td class="num">–</td><td class="num">30.6 W</td><td class="num">–</td><td class="num">–</td><td>–</td></tr>
+</tbody></table></div>
+<p class="small">"Per W" is GFLOP/s (GOP/s for int8) per watt. Above idle subtracts the idle measured just before each workload (30.6, 32.5, 33.8 and 35.2 W; the idle windows are shaded on the power chart): the die warmed from 71 to 77&nbsp;°C over the session, and its leakage with it. Peak at 600 MHz on 1,024 minions: 9.83 TFLOP/s fp32 (16 flop/cycle/minion), 19.66 fp16 (32), 78.6 TOP/s int8 (128). Measured op costs: 529 cycles per 16×16×16 fp32 or 16×16×32 fp16 op (512 ideal), and 280 cycles per 16×16×64 int8 op (256 ideal). Throughput is total work over the host-measured launch time. The minions' cycle counters agree with it to within 0.1% (implied clock 0.600 GHz). Launch-to-launch spread was below 0.03% in the L2 runs and 0.34% in the DRAM run.</p>
+
+<h2>Board power during the benchmark</h2>
+<p class="muted">What does "per W above idle" subtract, and why does idle rise from one workload to the next? Board power was polled from the service processor about 8 times a second (the reading itself changes once per service-processor pass, about every 133 ms). Shaded spans are the benchmark launches, about 12 s per workload, with idle gaps between them; the thin spikes just before each span are short calibration launches. Power creeps up within each span as the die warms: minion-shire temperature (the sensors' average) went from 71&nbsp;°C to 77&nbsp;°C, and the hottest sensor's high-water mark read 85&nbsp;°C afterwards. For the same reason the idle in each gap sits higher than the one before (the grey steps).</p>
+<div class="ck-controls"><div id="trace-pick"></div></div>
+<div class="card" id="trace"></div>
+<p class="ck-readout" id="trace-read"></p>
+<p class="small">Pick a workload to shade its two windows: the idle it is measured against (3.5 to 1.8 s before its first timed launch, orange) and the span its power is averaged over (from 1 s after its first launch to its end, blue). The dashed lines are those two means.</p>
 
 <h2>How the benchmark works</h2>
 <ul>
+  <li><b>Code.</b> <code>kernels/mmbench</code> (device), <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/launchers/mmbench"><code>launchers/mmbench</code></a> (host, checks every result), <code>scripts/et-power-log.sh</code> (board-power sampler) and <code>scripts/mmbench-power.py</code> (runs everything and averages power over the launch windows). It passed exact checks on the simulator on one shire in all modes, then on the card on all 32 shires, before the timed runs.</li>
   <li><b>The loop.</b> On each of the 1,024 compute minions, hart 0 (the first of the minion's two hardware threads) runs the loop. Only hart 0 may issue TensorFMA and TensorLoads into the L1 scratchpad, so hart 1 idles. Each op issues a <code>tensor_load</code> of a 16×K A tile into one of two L1-scratchpad buffers, a <code>tensor_load</code> of the B tile through TenB (the tensor unit's path that streams the B operand from memory), a <code>tensor_wait</code>, and a <code>tensor_fma</code> that accumulates a 16×16 C tile in the vector registers. The next op's loads overlap the running FMA. This is the inner loop of gp-sdk's auto-generated matmul and of the pipelined kernel in the FOSDEM 2026 "Zero to matmul" talk (10.25 TFLOP/s at 650 MHz).</li>
   <li><b>Op size.</b> One op is 16×16×K multiply-adds, with K = 16 (fp32), 32 (fp16) or 64 (int8). Operand layouts come from <code>sw-sysemu</code>'s tensor emulation, which serves as the spec.</li>
-  <li><b>Working set.</b> In the compute-bound runs all minions share 16 A/B tile pairs (32 KB), so the data stays in each shire's L2 cache. In the DRAM run each minion has its own 64 tile pairs (128 MB in total), so every load goes to memory. Effective read bandwidth there was about 78 GB/s.</li>
-  <li><b>Inputs and checking.</b> Inputs are random values from {−2, −1, 1, 2}. They are never zero, so no multiply can be skipped, and they are exact in fp16 and fp32. The host checks each minion's C tile for exact equality with iters × Σ A·B, capping iteration counts so fp32 accumulation stays exact. Every launch passed with zero bad minions. Small powers of two keep the multipliers' mantissa bits at zero, so these operands draw less power than random data would.</li>
-  <li><b>Power.</b> Board power comes from the card's own telemetry (<code>DM_CMD_GET_MODULE_POWER</code> through <code>dev_mngt_service</code>, about 7 samples/s). It is averaged over the launch windows after skipping the first second. The idle row is the median over the 8 s before the first workload; the above-idle column uses the idle just before each workload instead.</li>
+  <li><b>Working set.</b> In the compute-bound runs all minions share 16 A/B tile pairs (32 KB), so the data stays in each shire's L2 cache. In the DRAM run each minion has its own 64 tile pairs (128 MB in total), so every load goes to memory. Effective read bandwidth there was about 78 GB/s (2 KB per op), in line with the 76 GB/s the memory-hierarchy probe streams.</li>
+  <li><b>Inputs and checking.</b> Inputs are random values from {−2, −1, 1, 2} (low-power operands; see Later measurements). They are never zero, so no multiply can be skipped, and they are exact in fp16 and fp32. The host checks each minion's C tile for exact equality with iters × Σ A·B, capping iteration counts so fp32 accumulation stays exact. Every launch passed with zero bad minions.</li>
+  <li><b>Power.</b> Board power comes from the card's own telemetry (<code>DM_CMD_GET_MODULE_POWER</code> through <code>dev_mngt_service</code>, polled about 8 times a second, a new reading about every 133 ms). It is averaged over the launch windows after skipping the first second. The idle row is the median of the last 7 s of the 8 s idle before the first workload; the above-idle column uses the idle just before each workload instead.</li>
 </ul>
+<p class="small">Versions: published 18 September 2026; revised 24 September 2026 (per-workload idle, operand and A100 context, corrections) and 25 September 2026 (efficiency explorer, idle windows, corrections).</p>
 
 <h2>Caveats</h2>
 <ul>
-  <li><b>The A100 figures are spec-sheet numbers, not measurements.</b> The one measured A100 matmul these reports use (Horace He: bf16, random data, 257 TFLOPS under a 330 W limit) matches peak ÷ TDP. For the tensor cores these ratios are therefore a fair estimate, not a best case; no A100 fp32 CUDA-core GEMM was measured. Like for like on random data, this card's fp16 TensorFMA costs 3.3 pJ per FLOP at the board (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">energy manual §3.2</a>, 80&nbsp;°C) against the A100's 1.3 pJ in bf16, 2.6×, close to the 2.4× above.</li>
-  <li><b>Board power includes the whole card.</b> Of the 30.6 W idle, about 12.6 W is fixed (DRAM, PCIe, I/O, regulators) and the rest is die leakage, which grows with temperature. The idle law in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a> predicts 30.8 W at the 71&nbsp;°C this run started at and 34.0 W at 77&nbsp;°C. The above-idle column still carries the leakage added as the die warms within each run, so it is not the compute alone.</li>
-  <li><b>One clock point.</b> This run stayed at 600 MHz (0.52 V) because the die started at 71&nbsp;°C: aifoundry2's governor steps the clock down whenever the die reads above 65&nbsp;°C, and raises it to 700 or 800 MHz (0.57 or 0.62 V) only while the die reads 65&nbsp;°C or less (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-measured">The DVFS loop and its leakage</a>). Other operating points change both speed and efficiency. Power rose about 3 W within each 12 s run as the chip warmed, so longer runs would read slightly worse.</li>
+  <li><b>The A100 figures are spec-sheet numbers, not measurements.</b> The one measured A100 matmul (Horace He: bf16 on random data, 257 TFLOPS under a 330 W limit) matches peak ÷ TDP, so the tensor-core ratios are a fair estimate; no A100 fp32 CUDA-core GEMM was measured.</li>
+  <li><b>Board power includes the whole card.</b> Of the 30.6 W idle, about 12.6 W does not change with temperature (the idle law's constant) and the rest is die leakage, which grows with temperature. The idle law in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a> predicts 30.8 W at the 71&nbsp;°C this run started at and 34.0 W at 77&nbsp;°C. The above-idle column still carries the leakage added as the die warms within each run, so it is not the compute alone.</li>
+  <li><b>One clock point.</b> This run stayed at 600 MHz (0.52 V) because the die started at 71&nbsp;°C: aifoundry2's governor steps the clock down whenever the die reads above 65&nbsp;°C or board power exceeds 65 W, and raises it to 700 or 800 MHz (0.57 or 0.62 V) only below both (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-measured">The DVFS loop and its leakage</a>). Other operating points change both speed and efficiency. Power rose about 3 W within each 12 s run as the chip warmed, so longer runs would read slightly worse.</li>
   <li><b>Precision differs.</b> ET's fp32 tensor op is a full IEEE fp32 multiply-add, whose A100 equivalent is fp32 on CUDA cores; tf32 keeps only a 10-bit mantissa. ET's fp16 op accumulates in fp32 with round-toward-zero.</li>
   <li><b>Peak-rate microbenchmark.</b> This measures the matmul engine on cached tiles. A full GEMM also pays for moving data, and the DRAM row (0.31 TFLOP/s) is the no-reuse floor.</li>
 </ul>
@@ -180,41 +630,43 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
   <li>A real GEMM (for example 4096³) with L2-scratchpad tiling and cooperative tensor loads, measured the same way.</li>
   <li>Put hart 1 to work prefetching into the L2 scratchpad (<code>TensorLoadL2Scp</code> is allowed on hart 1).</li>
   <li>A vector-unit fp32 baseline. Its energy per lane is now in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#every-instruction-the-core-executes">energy manual §3.1</a> (7.0 pJ per multiply-add on random data); its speed is FOSDEM's 2.94 TFLOP/s at 650 MHz. The clock and voltage points were measured later in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a>.</li>
-  <li>For AI Foundry: the lab's <code>/opt/et</code> predates the gp-sdk that current documentation points to. Upgrading it, or shipping a matching gp-sdk, would spare new users the fixes in the setup notes below.</li>
+  <li>For AI Foundry: the lab's <code>/opt/et</code> predates the gp-sdk that current documentation points to. Upgrading it, or shipping a matching gp-sdk, would spare new users the four gp-sdk fixes under "Running it on a lab machine" below.</li>
 </ul>
 
-<h2>Setup notes (for running it yourself)</h2>
+<h2>Reproduce</h2>
+<pre><code># regenerate this page's numbers and charts from the committed data (no card)
+python3 scripts/mmbench-report-data.py docs/reports/data/2026-09-18-aifoundry2 \
+    --manual docs/reports/data/2026-09-23-energy-manual/manual.json \
+    --embed docs/reports/2026-09-18-et-soc1-matmul-efficiency.html
+
+# exact checks of every mode on the simulator, one shire, no card (about 40 s each)
+scripts/vm make mmbench-check          # laptop VM; on a lab machine: cd ~/nekko &amp;&amp; make mmbench-check
+
+# on the card: copy the repository to the lab machine, build gp-sdk (pinned, patched) and mmbench there
+scripts/deploy-lab-gpsdk.sh aifoundry2
+# then on aifoundry2 (quit et-powertop first: the power logger needs the management node)
+cd ~/nekko &amp;&amp; nice make mmbench-check bench-power DEVICE=silicon JOBS=4
+timeout 10 /opt/et/bin/it_test_code_loading --mode=pcie   # the card hello world
+# simulator hello worlds: see Test drive
+# copy ~/nekko/build/mmbench-power/ into a new dated docs/reports/data/ directory</code></pre>
+<p class="small">The lab cards are shared, and the lab rule is to hold a device for at most 10 s. The run above kept the card busy for about 12 s per workload, before the project adopted that rule. <code>scripts/mmbench-power.py</code> now runs every launcher under <code>timeout 10</code> and defaults to about 6 s per workload, which still leaves about 40 samples (about 35 distinct readings) per workload after the settle time. It also stores the idle windows it averages.</p>
+<p class="small">Raw data: <code>docs/reports/data/2026-09-18-aifoundry2</code> (board-power samples, one record per launch and the per-workload summary). <code>scripts/mmbench-report-data.py</code> turns it into this page's throughput, efficiency, idle before each workload (the same window as <code>idle_before()</code> in <code>scripts/mmbench-power.py</code>) and both charts; with <code>--manual</code> it adds the energy manual's random-normal variant to the efficiency explorer. The tables are written by hand from its output.</p>
+<p class="small">Sources: <a href="https://github.com/aifoundry-org/et-platform">aifoundry-org/et-platform</a>, <a href="https://github.com/aifoundry-org/et-man">et-man</a> (programmer's reference and errata), <a href="https://github.com/marty1885/et-testdrive">marty1885/et-testdrive</a>, <a href="https://archive.fosdem.org/2026/events/attachments/T3PSFN-zero_to_matmul_with_the_et-soc-1/slides/267107/zerotomat_asnyquu.pdf">FOSDEM 2026, "Zero to matmul with the ET-SoC-1"</a>, the NVIDIA A100 Tensor Core GPU datasheet, and Horace He's <a href="https://www.thonking.ai/p/strangely-matrix-multiplications">"Strangely, Matrix Multiplications on GPUs Run Faster When Given 'Predictable' Data!"</a> for the measured A100 run.</p>
+<h3 id="setup-notes-for-running-it-yourself">Running it on a lab machine</h3>
 <p>These notes are for running the benchmark on a lab machine, whose <code>/opt/et</code> is older than the gp-sdk that upstream documents. The laptop setup and the first scalar SGEMM, from the same day, are in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-testdrive">Test drive</a>.</p>
 <ol>
-  <li><b>Access.</b> I logged in over Tailscale SSH as a personal non-root account. It had to be created on <code>aifoundry2</code> first: Tailscale SSH rejects a user that doesn't exist on the machine with the same "tailnet policy does not permit" message it gives for a made-up name. The machine runs x86-64 Ubuntu 24.04 with one card (<code>/dev/et0_ops</code>, <code>/dev/et0_mgmt</code>): PCIe Gen4, 32 GB, minion shires at 600 MHz and NoC at 400 MHz. Firmware is BL 0.20 and minion 0.23.</li>
-  <li><b>Toolchain was already there.</b> <code>/opt/et</code> is et-platform built from commit <code>353f20e</code> (30 Dec 2025): RISC-V GCC 15.1, <code>sys_emu</code>, runtime, firmware and the upstream test binaries. It is not on <code>PATH</code> by default.</li>
-  <li><b>Hello world as defined in et-platform's README</b> (<code>it_test_code_loading</code>): 3/3 tests pass on the simulator in 110 s, about 34 s per test, almost all of it simulated firmware boot. The same binary with <code>--mode=pcie</code> passes 3/3 on the card in 0.6 s.</li>
+  <li><b>Toolchain was already there.</b> <code>/opt/et</code> is et-platform built from commit <code>353f20e</code> (30 Dec 2025): RISC-V GCC 15.1, <code>sys_emu</code>, runtime, firmware and the upstream test binaries. It is not on <code>PATH</code> by default. aifoundry2 is x86-64 Ubuntu 24.04 with one card (PCIe Gen4, 32 GB, minion shires at 600 MHz, NoC at 400 MHz, firmware BL 0.20 / minion 0.23).</li>
+  <li><b>Hello world:</b> et-platform's <code>it_test_code_loading --mode=pcie</code> passes 3/3 on the card in 0.6 s (the simulator runs are in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-testdrive">Test drive</a>).</li>
   <li><b>et-testdrive</b> (<a href="https://github.com/marty1885/et-testdrive">marty1885's minimal host+kernel project</a>) builds unmodified against <code>/opt/et</code>. On the card all 64 harts of shire 0 print "Hello World from hart N", decoded in-process from the trace buffer. One catch: it opens the management node, which only one process may hold, so it fails with "Device or resource busy" while <code>et-powertop</code> is running. The upstream tests open only the ops node.</li>
   <li><b>Writing my own kernels with gp-sdk needed four fixes against this older install.</b> All four are now in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/patches/lab-gp-sdk-06605ab.patch"><code>patches/lab-gp-sdk-06605ab.patch</code></a>, which <code>scripts/deploy-lab-gpsdk.sh</code> applies:
     <ul>
       <li>Current gp-sdk requires et-common-libs' Erbium components, which the Dec 2025 install doesn't have. I pinned gp-sdk to <code>06605ab</code> (24 Mar 2026, the last version before the Erbium changes) and made dnnLibrary and FFTW optional. Only the pre-generated matmul and the FFT example use them.</li>
-      <li>gp-sdk's <code>GenericLauncher</code> started <code>sys_emu</code> without firmware ELF paths. The simulated service processor then trapped at address 0 in a loop and wrote gigabytes of log within minutes (15 GB in 10 minutes on aifoundry2) before I stopped it and deleted the log. The repository's <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/patches/et-platform-0002-gpsdk-sysemu-preload-firmware.patch"><code>patches/et-platform-0002</code></a> (preload the firmware) fixes it.</li>
+      <li>gp-sdk's <code>GenericLauncher</code> boots <code>sys_emu</code> without the firmware images (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-testdrive#gp-sdk-launchers-can-t-boot-the-simulator">Test drive, fix 2</a>); <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/patches/et-platform-0002-gpsdk-sysemu-preload-firmware.patch"><code>patches/et-platform-0002</code></a> preloads them.</li>
       <li>Every gp-sdk kernel, including gp-sdk's own <code>print.elf</code>, died on launch with a U-mode instruction access fault at PC <code>0x40</code>. Kernels are linked at address 0 and relocated by the runtime, but this gp-sdk links without <code>-Wl,--emit-relocs</code>, so the entry-point table kept its link-time address. Upstream restored the flag in <code>7e3b4c2</code> (2 May 2026), and I added it locally.</li>
       <li>The old <code>riscv_helpers.cmake</code> uses CMake's plain <code>target_link_libraries</code> signature, which clashes with the keyword form this repository's <code>kernels/CMakeLists.txt</code> uses. I switched it to the keyword form, as upstream later did.</li>
     </ul></li>
-  <li><b>Wrote the benchmark</b>: <code>kernels/mmbench</code> (device), <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/launchers/mmbench"><code>launchers/mmbench</code></a> (host, checks every result), <code>scripts/et-power-log.sh</code> (board-power sampler) and <code>scripts/mmbench-power.py</code> (runs everything and averages power over the launch windows). It passed exact checks on the simulator on one shire in all modes, then on the card on all 32 shires, before the timed runs.</li>
 </ol>
 
-<h2>Reproduce</h2>
-<pre><code># hello world from et-platform's README
-/opt/et/bin/it_test_code_loading               # simulator
-/opt/et/bin/it_test_code_loading --mode=pcie   # the card
-
-# benchmark: from a checkout of this repository, copy it to the lab machine
-# and build gp-sdk (pinned and patched) and mmbench there
-scripts/deploy-lab-gpsdk.sh aifoundry2
-# then on aifoundry2, in the copy the script made at ~/nekko
-# (quit et-powertop first: the power logger needs the management node)
-cd ~/nekko &amp;&amp; nice make mmbench-check bench-power DEVICE=silicon JOBS=4</code></pre>
-<p class="small">The lab cards are shared, and the lab rule is to hold a device for at most 10 s. The run above kept the card busy for about 12 s per workload, before the project adopted that rule. <code>scripts/mmbench-power.py</code> now runs every launcher under <code>timeout 10</code> and defaults to about 6 s per workload, which still leaves roughly 35 power samples per workload after the settle time.</p>
-<p class="small">Raw data: <code>docs/reports/data/2026-09-18-aifoundry2</code> (board-power samples, one record per launch and the per-workload summary). <code>scripts/mmbench-report-data.py</code> turns it into this page's throughput, efficiency, idle before each workload (the same window as <code>idle_before()</code> in <code>scripts/mmbench-power.py</code>) and power chart; the tables are written by hand from its output.</p>
-<p class="small">Sources: <a href="https://github.com/aifoundry-org/et-platform">aifoundry-org/et-platform</a>, <a href="https://github.com/aifoundry-org/et-man">et-man</a> (programmer's reference and errata), <a href="https://github.com/marty1885/et-testdrive">marty1885/et-testdrive</a>, <a href="https://archive.fosdem.org/2026/events/attachments/T3PSFN-zero_to_matmul_with_the_et-soc-1/slides/267107/zerotomat_asnyquu.pdf">FOSDEM 2026, "Zero to matmul with the ET-SoC-1"</a>, the NVIDIA A100 Tensor Core GPU datasheet, and Horace He's <a href="https://www.thonking.ai/p/strangely-matrix-multiplications">"Strangely, Matrix Multiplications on GPUs Run Faster When Given 'Predictable' Data!"</a> for the measured A100 run.</p>
-<p class="small">Versions: published 18 September 2026. Revised 24 September 2026 after a review: the above-idle column now subtracts the idle just before each workload; the operands and die temperature are set against the later random-data measurements and the other A100 comparison; the A100 caveats, the temperature reading and the clock point are corrected; the setup notes moved after the method; and the page links the reports that followed.</p>
 
 <h2 id="related">Related reports</h2>
 <ul>
@@ -300,160 +752,196 @@ cd ~/nekko &amp;&amp; nice make mmbench-check bench-power DEVICE=silicon JOBS=4<
 })();
 </script>
 </main>
-<script type="application/json" id="trace-data">{"trace":[[0.0,30.6],[0.13,30.63],[0.26,30.65],[0.38,30.62],[0.52,30.68],[0.66,30.57],[0.79,30.58],[0.93,30.64],[1.05,30.57],[1.19,30.61],[1.32,30.51],[1.46,30.67],[1.58,30.6],[1.72,30.61],[1.85,30.6],[1.98,30.63],[2.12,30.61],[2.25,30.63],[2.38,30.55],[2.51,30.6],[2.65,30.67],[2.78,30.67],[2.91,30.63],[3.04,30.56],[3.18,30.66],[3.31,30.57],[3.44,30.6],[3.56,30.7],[3.7,30.68],[3.84,30.54],[3.98,30.56],[4.11,30.61],[4.25,30.62],[4.38,30.68],[4.52,30.61],[4.66,30.54],[4.79,30.61],[4.92,30.57],[5.05,30.64],[5.18,30.57],[5.31,30.61],[5.45,30.61],[5.58,30.57],[5.71,30.59],[5.84,30.6],[5.97,30.61],[6.1,30.6],[6.23,30.63],[6.37,30.64],[6.51,30.63],[6.63,30.6],[6.76,30.68],[6.9,30.6],[7.03,30.54],[7.16,30.57],[7.3,30.6],[7.43,30.62],[7.57,30.64],[7.71,30.51],[7.83,30.58],[7.96,30.69],[8.1,30.62],[8.21,30.66],[8.33,30.66],[8.45,54.26],[8.56,54.26],[8.68,54.11],[8.8,54.17],[8.91,54.44],[9.03,54.5],[9.14,54.78],[9.26,54.92],[9.38,54.92],[9.49,54.86],[9.61,54.67],[9.72,55.16],[9.84,55.01],[9.95,55.16],[10.07,55.16],[10.19,55.36],[10.3,55.36],[10.42,55.52],[10.53,55.53],[10.65,55.59],[10.76,55.67],[10.88,55.41],[11.0,55.49],[11.11,55.49],[11.23,55.49],[11.34,55.76],[11.46,55.74],[11.57,55.8],[11.69,55.92],[11.81,56.06],[11.92,56.05],[12.04,56.05],[12.15,55.9],[12.27,56.04],[12.38,56.0],[12.5,56.06],[12.62,56.32],[12.73,56.25],[12.85,56.25],[12.96,56.3],[13.08,56.38],[13.2,56.11],[13.31,56.25],[13.43,56.32],[13.54,56.2],[13.66,56.2],[13.77,56.44],[13.89,56.41],[14.0,56.57],[14.12,56.68],[14.24,56.41],[14.35,56.48],[14.47,56.41],[14.58,56.41],[14.7,56.61],[14.81,56.68],[14.93,56.81],[15.04,56.84],[15.16,55.92],[15.28,56.88],[15.39,56.88],[15.51,56.71],[15.62,56.79],[15.74,56.81],[15.85,56.91],[15.97,57.02],[16.09,56.95],[16.2,57.01],[16.32,57.01],[16.43,57.26],[16.55,56.9],[16.66,56.86],[16.78,56.84],[16.89,56.99],[17.01,57.21],[17.13,57.21],[17.24,57.29],[17.36,57.1],[17.47,56.59],[17.59,57.19],[17.71,57.11],[17.82,57.25],[17.94,57.25],[18.05,57.19],[18.17,57.27],[18.28,57.52],[18.4,57.46],[18.52,57.49],[18.63,57.69],[18.75,57.35],[18.86,57.35],[18.98,57.36],[19.09,57.38],[19.21,57.52],[19.32,57.55],[19.44,57.88],[19.56,57.67],[19.67,57.67],[19.79,57.39],[19.91,57.55],[20.02,57.38],[20.14,57.55],[20.25,57.29],[20.37,57.56],[20.48,57.71],[20.6,57.71],[20.71,57.76],[20.83,57.88],[20.95,33.84],[21.09,33.63],[21.21,33.46],[21.35,33.4],[21.48,33.3],[21.61,33.22],[21.74,33.07],[21.88,33.0],[22.0,32.96],[22.14,32.87],[22.28,32.9],[22.41,32.74],[22.54,32.74],[22.67,32.74],[22.8,32.68],[22.93,32.64],[23.06,32.51],[23.2,32.63],[23.32,32.58],[23.46,32.68],[23.6,32.54],[23.73,32.56],[23.86,32.37],[23.99,32.45],[24.12,32.46],[24.25,32.41],[24.38,32.33],[24.51,32.46],[24.65,32.32],[24.78,32.33],[24.91,32.23],[25.05,32.36],[25.19,32.3],[25.32,32.28],[25.46,32.33],[25.59,32.17],[25.72,32.3],[25.86,32.18],[25.97,55.58],[26.09,55.58],[26.21,32.31],[26.32,57.06],[26.44,56.99],[26.55,57.25],[26.67,57.24],[26.79,57.42],[26.9,57.66],[27.02,57.66],[27.13,56.8],[27.25,57.64],[27.36,57.69],[27.48,57.82],[27.6,57.95],[27.71,58.12],[27.83,58.12],[27.94,58.06],[28.06,58.28],[28.18,57.69],[28.29,58.36],[28.41,58.44],[28.52,58.28],[28.64,58.28],[28.75,58.59],[28.87,58.56],[28.99,58.5],[29.1,58.45],[29.22,58.41],[29.33,58.59],[29.45,58.71],[29.57,58.71],[29.68,57.86],[29.8,58.59],[29.91,58.66],[30.03,58.71],[30.14,58.8],[30.26,58.92],[30.38,58.92],[30.49,58.88],[30.61,59.03],[30.72,58.8],[30.84,59.14],[30.95,59.03],[31.07,59.04],[31.19,59.35],[31.3,59.35],[31.42,59.14],[31.53,59.04],[31.65,59.17],[31.77,59.18],[31.88,59.21],[32.0,59.32],[32.11,59.32],[32.23,58.54],[32.34,59.31],[32.46,59.32],[32.58,59.37],[32.69,59.42],[32.81,59.63],[32.92,59.6],[33.04,59.6],[33.16,59.42],[33.27,59.34],[33.39,59.63],[33.5,59.56],[33.62,59.49],[33.73,59.73],[33.85,59.73],[33.97,59.76],[34.08,59.59],[34.2,59.65],[34.31,59.69],[34.43,59.79],[34.55,60.0],[34.66,59.03],[34.78,59.03],[34.89,59.76],[35.01,59.79],[35.12,59.77],[35.24,60.0],[35.35,60.06],[35.47,59.98],[35.59,59.98],[35.7,59.93],[35.82,59.79],[35.94,60.04],[36.05,59.92],[36.17,60.13],[36.28,60.25],[36.4,60.25],[36.51,60.09],[36.63,60.08],[36.75,60.02],[36.86,60.08],[36.98,60.36],[37.09,60.52],[37.21,59.64],[37.33,59.64],[37.44,60.28],[37.56,60.25],[37.67,60.29],[37.79,60.39],[37.9,60.46],[38.02,60.5],[38.13,35.23],[38.26,35.03],[38.4,34.89],[38.53,34.7],[38.67,34.7],[38.8,34.57],[38.93,34.37],[39.06,34.35],[39.2,34.35],[39.33,34.26],[39.45,34.24],[39.58,34.19],[39.72,34.17],[39.85,34.04],[39.99,34.08],[40.12,33.99],[40.25,33.91],[40.38,33.93],[40.52,33.9],[40.64,33.85],[40.78,33.85],[40.91,33.81],[41.05,33.75],[41.19,33.72],[41.32,33.73],[41.45,33.72],[41.58,33.6],[41.71,33.57],[41.84,33.58],[41.98,33.58],[42.12,33.55],[42.24,33.55],[42.38,33.57],[42.51,33.46],[42.64,33.46],[42.78,33.36],[42.91,33.4],[43.05,33.5],[43.18,33.36],[43.29,33.42],[43.41,33.47],[43.53,59.06],[43.64,59.27],[43.76,59.41],[43.87,59.41],[43.99,59.54],[44.1,59.67],[44.22,59.89],[44.34,59.84],[44.45,60.0],[44.57,60.12],[44.68,60.12],[44.8,60.15],[44.91,60.13],[45.03,60.37],[45.15,60.36],[45.26,60.43],[45.38,60.51],[45.49,60.51],[45.61,60.44],[45.73,60.6],[45.84,60.6],[45.96,60.84],[46.07,60.86],[46.19,60.86],[46.3,60.98],[46.42,60.98],[46.54,60.92],[46.65,60.98],[46.77,61.14],[46.88,61.09],[47.0,61.14],[47.12,61.12],[47.23,61.12],[47.35,61.13],[47.46,61.23],[47.58,61.23],[47.69,61.15],[47.81,61.35],[47.92,61.43],[48.04,61.42],[48.16,61.42],[48.27,61.44],[48.39,61.59],[48.5,61.51],[48.62,61.59],[48.73,61.56],[48.85,61.59],[48.97,61.59],[49.08,61.69],[49.2,61.61],[49.31,61.65],[49.43,61.65],[49.55,61.69],[49.66,61.76],[49.78,61.76],[49.89,61.76],[50.01,61.86],[50.12,61.82],[50.24,61.99],[50.35,61.96],[50.47,61.9],[50.59,61.9],[50.7,61.9],[50.82,62.25],[50.93,62.1],[51.05,62.16],[51.16,62.11],[51.28,62.02],[51.4,62.19],[51.51,62.33],[51.63,62.33],[51.74,62.31],[51.86,62.29],[51.97,62.29],[52.09,62.35],[52.21,62.28],[52.32,62.36],[52.44,62.36],[52.55,62.33],[52.67,62.44],[52.78,62.46],[52.9,62.45],[53.02,62.44],[53.13,62.63],[53.25,62.63],[53.36,62.51],[53.48,62.65],[53.59,62.55],[53.71,62.53],[53.83,62.69],[53.94,62.67],[54.06,62.71],[54.17,62.71],[54.29,62.81],[54.4,62.88],[54.52,62.86],[54.63,62.75],[54.75,62.88],[54.87,62.77],[54.98,62.77],[55.1,62.82],[55.21,62.98],[55.33,62.81],[55.44,63.02],[55.56,37.19],[55.68,36.75],[55.81,36.68],[55.94,36.44],[56.07,36.36],[56.2,36.29],[56.33,36.1],[56.46,36.1],[56.6,36.03],[56.74,35.74],[56.87,35.86],[57.0,35.76],[57.14,35.75],[57.27,35.66],[57.41,35.55],[57.55,35.56],[57.69,35.56],[57.82,35.48],[57.96,35.38],[58.09,35.46],[58.23,35.35],[58.37,35.26],[58.48,35.32],[58.61,35.23],[58.75,35.12],[58.88,35.12],[59.01,35.12],[59.14,35.05],[59.27,35.07],[59.39,35.07],[59.52,35.03],[59.66,34.94],[59.79,34.94],[59.92,35.05],[60.05,34.97],[60.19,34.96],[60.32,34.84],[60.46,34.77],[60.59,34.77],[60.71,34.79],[60.83,34.95],[60.94,34.75],[61.06,42.47],[61.17,34.55],[61.29,34.7],[61.41,34.65],[61.52,34.65],[61.64,34.84],[61.75,43.24],[61.87,43.39],[61.98,43.22],[62.1,43.44],[62.22,43.37],[62.33,43.37],[62.45,43.43],[62.56,43.3],[62.68,43.3],[62.79,43.23],[62.91,43.33],[63.03,43.43],[63.14,43.42],[63.26,43.42],[63.37,43.37],[63.49,43.39],[63.6,43.22],[63.72,43.16],[63.84,43.3],[63.95,43.39],[64.07,43.39],[64.19,43.25],[64.3,43.3],[64.42,43.35],[64.53,43.3],[64.65,43.31],[64.76,43.28],[64.88,43.28],[65.0,43.3],[65.11,43.31],[65.23,43.38],[65.34,43.28],[65.46,43.25],[65.57,43.27],[65.69,43.43],[65.8,43.43],[65.92,43.39],[66.03,43.26],[66.15,42.5],[66.27,43.27],[66.38,43.47],[66.5,43.07],[66.61,43.07],[66.73,43.49],[66.85,43.31],[66.96,43.44],[67.08,43.23],[67.19,43.34],[67.31,43.39],[67.43,43.39],[67.54,43.37],[67.66,43.37],[67.77,43.43],[67.89,43.45],[68.0,43.45],[68.12,43.35],[68.24,43.33],[68.35,43.33],[68.47,43.08],[68.58,43.4],[68.7,43.35],[68.81,43.51],[68.93,43.31],[69.05,43.43],[69.16,43.43],[69.28,43.33],[69.39,43.43],[69.51,43.3],[69.62,43.33],[69.74,43.39],[69.86,43.47],[69.97,43.47],[70.09,43.5],[70.2,43.38],[70.32,43.43],[70.43,43.38],[70.55,43.3],[70.67,44.42],[70.78,43.26],[70.9,43.26],[71.01,43.37],[71.13,43.43],[71.24,43.38],[71.36,43.4],[71.47,43.37],[71.59,43.47],[71.71,43.47],[71.82,43.33],[71.94,43.43],[72.05,43.3],[72.17,43.3],[72.28,43.28],[72.4,43.43],[72.52,43.5],[72.63,43.5],[72.75,43.39],[72.86,43.33],[72.98,43.12],[73.09,42.28],[73.21,34.71],[73.35,34.67],[73.48,34.54],[73.62,34.57],[73.75,34.52],[73.88,34.48],[74.01,34.47],[74.15,34.5],[74.27,34.72],[74.4,34.44],[74.54,34.44],[74.66,34.44],[74.79,34.34],[74.92,34.36],[75.06,34.36],[75.19,34.33],[75.32,34.44],[75.46,34.43],[75.59,34.35],[75.72,34.29],[75.86,34.29],[75.98,34.41],[76.11,34.32],[76.24,34.33],[76.38,34.33],[76.5,34.21],[76.63,34.26],[76.77,34.29],[76.9,34.26],[77.04,34.3],[77.17,34.27],[77.29,34.2],[77.42,34.24],[77.56,34.23],[77.69,34.14],[77.83,34.17],[77.96,34.17],[78.08,34.21]],"windows":[{"workload":"fp32-tensor-L2","start":8.36,"end":20.77,"launches":11},{"workload":"fp16-tensor-L2","start":26.18,"end":38.04,"launches":14},{"workload":"int8-tensor-L2","start":43.44,"end":55.48,"launches":5},{"workload":"fp32-tensor-DRAM","start":61.57,"end":73.06,"launches":5}],"idle_w":30.61}</script>
+<script type="application/json" id="trace-data">{"trace":[[0.0,30.6],[0.13,30.63],[0.26,30.65],[0.38,30.62],[0.52,30.68],[0.66,30.57],[0.79,30.58],[0.93,30.64],[1.05,30.57],[1.19,30.61],[1.32,30.51],[1.46,30.67],[1.58,30.6],[1.72,30.61],[1.85,30.6],[1.98,30.63],[2.12,30.61],[2.25,30.63],[2.38,30.55],[2.51,30.6],[2.65,30.67],[2.78,30.67],[2.91,30.63],[3.04,30.56],[3.18,30.66],[3.31,30.57],[3.44,30.6],[3.56,30.7],[3.7,30.68],[3.84,30.54],[3.98,30.56],[4.11,30.61],[4.25,30.62],[4.38,30.68],[4.52,30.61],[4.66,30.54],[4.79,30.61],[4.92,30.57],[5.05,30.64],[5.18,30.57],[5.31,30.61],[5.45,30.61],[5.58,30.57],[5.71,30.59],[5.84,30.6],[5.97,30.61],[6.1,30.6],[6.23,30.63],[6.37,30.64],[6.51,30.63],[6.63,30.6],[6.76,30.68],[6.9,30.6],[7.03,30.54],[7.16,30.57],[7.3,30.6],[7.43,30.62],[7.57,30.64],[7.71,30.51],[7.83,30.58],[7.96,30.69],[8.1,30.62],[8.21,30.66],[8.33,30.66],[8.45,54.26],[8.56,54.26],[8.68,54.11],[8.8,54.17],[8.91,54.44],[9.03,54.5],[9.14,54.78],[9.26,54.92],[9.38,54.92],[9.49,54.86],[9.61,54.67],[9.72,55.16],[9.84,55.01],[9.95,55.16],[10.07,55.16],[10.19,55.36],[10.3,55.36],[10.42,55.52],[10.53,55.53],[10.65,55.59],[10.76,55.67],[10.88,55.41],[11.0,55.49],[11.11,55.49],[11.23,55.49],[11.34,55.76],[11.46,55.74],[11.57,55.8],[11.69,55.92],[11.81,56.06],[11.92,56.05],[12.04,56.05],[12.15,55.9],[12.27,56.04],[12.38,56.0],[12.5,56.06],[12.62,56.32],[12.73,56.25],[12.85,56.25],[12.96,56.3],[13.08,56.38],[13.2,56.11],[13.31,56.25],[13.43,56.32],[13.54,56.2],[13.66,56.2],[13.77,56.44],[13.89,56.41],[14.0,56.57],[14.12,56.68],[14.24,56.41],[14.35,56.48],[14.47,56.41],[14.58,56.41],[14.7,56.61],[14.81,56.68],[14.93,56.81],[15.04,56.84],[15.16,55.92],[15.28,56.88],[15.39,56.88],[15.51,56.71],[15.62,56.79],[15.74,56.81],[15.85,56.91],[15.97,57.02],[16.09,56.95],[16.2,57.01],[16.32,57.01],[16.43,57.26],[16.55,56.9],[16.66,56.86],[16.78,56.84],[16.89,56.99],[17.01,57.21],[17.13,57.21],[17.24,57.29],[17.36,57.1],[17.47,56.59],[17.59,57.19],[17.71,57.11],[17.82,57.25],[17.94,57.25],[18.05,57.19],[18.17,57.27],[18.28,57.52],[18.4,57.46],[18.52,57.49],[18.63,57.69],[18.75,57.35],[18.86,57.35],[18.98,57.36],[19.09,57.38],[19.21,57.52],[19.32,57.55],[19.44,57.88],[19.56,57.67],[19.67,57.67],[19.79,57.39],[19.91,57.55],[20.02,57.38],[20.14,57.55],[20.25,57.29],[20.37,57.56],[20.48,57.71],[20.6,57.71],[20.71,57.76],[20.83,57.88],[20.95,33.84],[21.09,33.63],[21.21,33.46],[21.35,33.4],[21.48,33.3],[21.61,33.22],[21.74,33.07],[21.88,33.0],[22.0,32.96],[22.14,32.87],[22.28,32.9],[22.41,32.74],[22.54,32.74],[22.67,32.74],[22.8,32.68],[22.93,32.64],[23.06,32.51],[23.2,32.63],[23.32,32.58],[23.46,32.68],[23.6,32.54],[23.73,32.56],[23.86,32.37],[23.99,32.45],[24.12,32.46],[24.25,32.41],[24.38,32.33],[24.51,32.46],[24.65,32.32],[24.78,32.33],[24.91,32.23],[25.05,32.36],[25.19,32.3],[25.32,32.28],[25.46,32.33],[25.59,32.17],[25.72,32.3],[25.86,32.18],[25.97,55.58],[26.09,55.58],[26.21,32.31],[26.32,57.06],[26.44,56.99],[26.55,57.25],[26.67,57.24],[26.79,57.42],[26.9,57.66],[27.02,57.66],[27.13,56.8],[27.25,57.64],[27.36,57.69],[27.48,57.82],[27.6,57.95],[27.71,58.12],[27.83,58.12],[27.94,58.06],[28.06,58.28],[28.18,57.69],[28.29,58.36],[28.41,58.44],[28.52,58.28],[28.64,58.28],[28.75,58.59],[28.87,58.56],[28.99,58.5],[29.1,58.45],[29.22,58.41],[29.33,58.59],[29.45,58.71],[29.57,58.71],[29.68,57.86],[29.8,58.59],[29.91,58.66],[30.03,58.71],[30.14,58.8],[30.26,58.92],[30.38,58.92],[30.49,58.88],[30.61,59.03],[30.72,58.8],[30.84,59.14],[30.95,59.03],[31.07,59.04],[31.19,59.35],[31.3,59.35],[31.42,59.14],[31.53,59.04],[31.65,59.17],[31.77,59.18],[31.88,59.21],[32.0,59.32],[32.11,59.32],[32.23,58.54],[32.34,59.31],[32.46,59.32],[32.58,59.37],[32.69,59.42],[32.81,59.63],[32.92,59.6],[33.04,59.6],[33.16,59.42],[33.27,59.34],[33.39,59.63],[33.5,59.56],[33.62,59.49],[33.73,59.73],[33.85,59.73],[33.97,59.76],[34.08,59.59],[34.2,59.65],[34.31,59.69],[34.43,59.79],[34.55,60.0],[34.66,59.03],[34.78,59.03],[34.89,59.76],[35.01,59.79],[35.12,59.77],[35.24,60.0],[35.35,60.06],[35.47,59.98],[35.59,59.98],[35.7,59.93],[35.82,59.79],[35.94,60.04],[36.05,59.92],[36.17,60.13],[36.28,60.25],[36.4,60.25],[36.51,60.09],[36.63,60.08],[36.75,60.02],[36.86,60.08],[36.98,60.36],[37.09,60.52],[37.21,59.64],[37.33,59.64],[37.44,60.28],[37.56,60.25],[37.67,60.29],[37.79,60.39],[37.9,60.46],[38.02,60.5],[38.13,35.23],[38.26,35.03],[38.4,34.89],[38.53,34.7],[38.67,34.7],[38.8,34.57],[38.93,34.37],[39.06,34.35],[39.2,34.35],[39.33,34.26],[39.45,34.24],[39.58,34.19],[39.72,34.17],[39.85,34.04],[39.99,34.08],[40.12,33.99],[40.25,33.91],[40.38,33.93],[40.52,33.9],[40.64,33.85],[40.78,33.85],[40.91,33.81],[41.05,33.75],[41.19,33.72],[41.32,33.73],[41.45,33.72],[41.58,33.6],[41.71,33.57],[41.84,33.58],[41.98,33.58],[42.12,33.55],[42.24,33.55],[42.38,33.57],[42.51,33.46],[42.64,33.46],[42.78,33.36],[42.91,33.4],[43.05,33.5],[43.18,33.36],[43.29,33.42],[43.41,33.47],[43.53,59.06],[43.64,59.27],[43.76,59.41],[43.87,59.41],[43.99,59.54],[44.1,59.67],[44.22,59.89],[44.34,59.84],[44.45,60.0],[44.57,60.12],[44.68,60.12],[44.8,60.15],[44.91,60.13],[45.03,60.37],[45.15,60.36],[45.26,60.43],[45.38,60.51],[45.49,60.51],[45.61,60.44],[45.73,60.6],[45.84,60.6],[45.96,60.84],[46.07,60.86],[46.19,60.86],[46.3,60.98],[46.42,60.98],[46.54,60.92],[46.65,60.98],[46.77,61.14],[46.88,61.09],[47.0,61.14],[47.12,61.12],[47.23,61.12],[47.35,61.13],[47.46,61.23],[47.58,61.23],[47.69,61.15],[47.81,61.35],[47.92,61.43],[48.04,61.42],[48.16,61.42],[48.27,61.44],[48.39,61.59],[48.5,61.51],[48.62,61.59],[48.73,61.56],[48.85,61.59],[48.97,61.59],[49.08,61.69],[49.2,61.61],[49.31,61.65],[49.43,61.65],[49.55,61.69],[49.66,61.76],[49.78,61.76],[49.89,61.76],[50.01,61.86],[50.12,61.82],[50.24,61.99],[50.35,61.96],[50.47,61.9],[50.59,61.9],[50.7,61.9],[50.82,62.25],[50.93,62.1],[51.05,62.16],[51.16,62.11],[51.28,62.02],[51.4,62.19],[51.51,62.33],[51.63,62.33],[51.74,62.31],[51.86,62.29],[51.97,62.29],[52.09,62.35],[52.21,62.28],[52.32,62.36],[52.44,62.36],[52.55,62.33],[52.67,62.44],[52.78,62.46],[52.9,62.45],[53.02,62.44],[53.13,62.63],[53.25,62.63],[53.36,62.51],[53.48,62.65],[53.59,62.55],[53.71,62.53],[53.83,62.69],[53.94,62.67],[54.06,62.71],[54.17,62.71],[54.29,62.81],[54.4,62.88],[54.52,62.86],[54.63,62.75],[54.75,62.88],[54.87,62.77],[54.98,62.77],[55.1,62.82],[55.21,62.98],[55.33,62.81],[55.44,63.02],[55.56,37.19],[55.68,36.75],[55.81,36.68],[55.94,36.44],[56.07,36.36],[56.2,36.29],[56.33,36.1],[56.46,36.1],[56.6,36.03],[56.74,35.74],[56.87,35.86],[57.0,35.76],[57.14,35.75],[57.27,35.66],[57.41,35.55],[57.55,35.56],[57.69,35.56],[57.82,35.48],[57.96,35.38],[58.09,35.46],[58.23,35.35],[58.37,35.26],[58.48,35.32],[58.61,35.23],[58.75,35.12],[58.88,35.12],[59.01,35.12],[59.14,35.05],[59.27,35.07],[59.39,35.07],[59.52,35.03],[59.66,34.94],[59.79,34.94],[59.92,35.05],[60.05,34.97],[60.19,34.96],[60.32,34.84],[60.46,34.77],[60.59,34.77],[60.71,34.79],[60.83,34.95],[60.94,34.75],[61.06,42.47],[61.17,34.55],[61.29,34.7],[61.41,34.65],[61.52,34.65],[61.64,34.84],[61.75,43.24],[61.87,43.39],[61.98,43.22],[62.1,43.44],[62.22,43.37],[62.33,43.37],[62.45,43.43],[62.56,43.3],[62.68,43.3],[62.79,43.23],[62.91,43.33],[63.03,43.43],[63.14,43.42],[63.26,43.42],[63.37,43.37],[63.49,43.39],[63.6,43.22],[63.72,43.16],[63.84,43.3],[63.95,43.39],[64.07,43.39],[64.19,43.25],[64.3,43.3],[64.42,43.35],[64.53,43.3],[64.65,43.31],[64.76,43.28],[64.88,43.28],[65.0,43.3],[65.11,43.31],[65.23,43.38],[65.34,43.28],[65.46,43.25],[65.57,43.27],[65.69,43.43],[65.8,43.43],[65.92,43.39],[66.03,43.26],[66.15,42.5],[66.27,43.27],[66.38,43.47],[66.5,43.07],[66.61,43.07],[66.73,43.49],[66.85,43.31],[66.96,43.44],[67.08,43.23],[67.19,43.34],[67.31,43.39],[67.43,43.39],[67.54,43.37],[67.66,43.37],[67.77,43.43],[67.89,43.45],[68.0,43.45],[68.12,43.35],[68.24,43.33],[68.35,43.33],[68.47,43.08],[68.58,43.4],[68.7,43.35],[68.81,43.51],[68.93,43.31],[69.05,43.43],[69.16,43.43],[69.28,43.33],[69.39,43.43],[69.51,43.3],[69.62,43.33],[69.74,43.39],[69.86,43.47],[69.97,43.47],[70.09,43.5],[70.2,43.38],[70.32,43.43],[70.43,43.38],[70.55,43.3],[70.67,44.42],[70.78,43.26],[70.9,43.26],[71.01,43.37],[71.13,43.43],[71.24,43.38],[71.36,43.4],[71.47,43.37],[71.59,43.47],[71.71,43.47],[71.82,43.33],[71.94,43.43],[72.05,43.3],[72.17,43.3],[72.28,43.28],[72.4,43.43],[72.52,43.5],[72.63,43.5],[72.75,43.39],[72.86,43.33],[72.98,43.12],[73.09,42.28],[73.21,34.71],[73.35,34.67],[73.48,34.54],[73.62,34.57],[73.75,34.52],[73.88,34.48],[74.01,34.47],[74.15,34.5],[74.27,34.72],[74.4,34.44],[74.54,34.44],[74.66,34.44],[74.79,34.34],[74.92,34.36],[75.06,34.36],[75.19,34.33],[75.32,34.44],[75.46,34.43],[75.59,34.35],[75.72,34.29],[75.86,34.29],[75.98,34.41],[76.11,34.32],[76.24,34.33],[76.38,34.33],[76.5,34.21],[76.63,34.26],[76.77,34.29],[76.9,34.26],[77.04,34.3],[77.17,34.27],[77.29,34.2],[77.42,34.24],[77.56,34.23],[77.69,34.14],[77.83,34.17],[77.96,34.17],[78.08,34.21]],"windows":[{"workload":"fp32-tensor-L2","mode":"fp32","start":8.36,"end":20.77,"launches":11,"idle_before_w":30.61,"idle_t0":4.86,"idle_t1":6.56,"settle_end":9.36,"mean_w":56.5732,"tflops":9.511,"power_samples":99},{"workload":"fp16-tensor-L2","mode":"fp16","start":26.18,"end":38.04,"launches":14,"idle_before_w":32.53,"idle_t0":22.68,"idle_t1":24.39,"settle_end":27.18,"mean_w":59.268,"tflops":19.019,"power_samples":94},{"workload":"int8-tensor-L2","mode":"int8","start":43.44,"end":55.48,"launches":5,"idle_before_w":33.83,"idle_t0":39.94,"idle_t1":41.64,"settle_end":44.44,"mean_w":61.7498,"tflops":71.784,"power_samples":96},{"workload":"fp32-tensor-DRAM","mode":"fp32","start":61.57,"end":73.06,"launches":5,"idle_before_w":35.16,"idle_t0":58.07,"idle_t1":59.77,"settle_end":62.57,"mean_w":43.3526,"tflops":0.31,"power_samples":90}],"idle_w":30.61,"eff":{"run":{"source":"docs/reports/data/2026-09-18-aifoundry2/results.json","rows":{"fp32":{"tflops":9.5108,"board_w":56.5732,"per_w":168.11,"cycles_per_op":529.0},"fp16":{"tflops":19.019,"board_w":59.268,"per_w":320.9,"cycles_per_op":529.0},"int8":{"tflops":71.784,"board_w":61.7498,"per_w":1162.5,"cycles_per_op":280.4}}},"randn":{"source":"docs/reports/data/2026-09-23-energy-manual/manual.json tensor.rows (fp32_randn, fp16_randn, int8_randn); power at 80 C","rows":{"fp32":{"tflops":9.1828,"board_w":63.93,"per_w":143.63,"idle_w":36.31,"cycles_per_op":546},"fp16":{"tflops":18.368,"board_w":61.1,"per_w":300.64,"idle_w":36.31,"cycles_per_op":546},"int8":{"tflops":63.071,"board_w":46.29,"per_w":1362.6,"idle_w":36.31,"cycles_per_op":318}}},"a100":{"peak":{"fp32":19.5,"fp16":312.0,"int8":624.0,"tf32":156.0},"tdp":{"SXM4":400.0,"PCIe":250.0},"measured":{"tflops":257.0,"limit_w":330.0}}}}</script>
 <script>
+/* The page's two charts, drawn with the shared chart kit (CK, pasted into <head> by scripts/paste-chartkit.py).
+   Every number comes from #trace-data, which scripts/mmbench-report-data.py writes (--embed, --manual). */
 (function () {
   "use strict";
-  var fmt = function (v) { return v >= 100 ? Math.round(v).toLocaleString("en-US") : v.toFixed(1); };
-
-  // ---- efficiency small multiples ----
-  var PANELS = [
-    { title: "fp32", unit: "GFLOP/s per W", rows: [
-      { label: "ET-SoC-1", detail: "IEEE fp32 on the tensor unit", note: "Measured: 9.51 TFLOP/s at 56.6 W board power", v: 168.1, et: true },
-      { label: "A100 SXM4", detail: "fp32 on CUDA cores", note: "Spec 19.5 TFLOP/s ÷ 400 W TDP", v: 48.75 },
-      { label: "A100 PCIe 40 GB", detail: "fp32 on CUDA cores", note: "Spec 19.5 TFLOP/s ÷ 250 W TDP", v: 78 },
-      { label: "A100 SXM4", detail: "tf32 tensor cores, 10-bit mantissa", note: "Spec 156 TFLOP/s ÷ 400 W TDP; lower precision than fp32", v: 390 }
-    ] },
-    { title: "fp16 inputs, fp32 accumulate", unit: "GFLOP/s per W", rows: [
-      { label: "ET-SoC-1", detail: "TensorFMA16A32", note: "Measured: 19.02 TFLOP/s at 59.3 W board power", v: 320.9, et: true },
-      { label: "A100 SXM4", detail: "fp16 tensor cores", note: "Spec 312 TFLOP/s ÷ 400 W TDP", v: 780 },
-      { label: "A100 PCIe 40 GB", detail: "fp16 tensor cores", note: "Spec 312 TFLOP/s ÷ 250 W TDP", v: 1248 }
-    ] },
-    { title: "int8 inputs, int32 accumulate", unit: "GOP/s per W", rows: [
-      { label: "ET-SoC-1", detail: "TensorIMA8A32", note: "Measured: 71.8 TOP/s at 61.7 W board power", v: 1162.49, et: true },
-      { label: "A100 SXM4", detail: "int8 tensor cores", note: "Spec 624 TOP/s ÷ 400 W TDP", v: 1560 },
-      { label: "A100 PCIe 40 GB", detail: "int8 tensor cores", note: "Spec 624 TOP/s ÷ 250 W TDP", v: 2496 }
-    ] }
-  ];
-  var panelsEl = document.getElementById("eff-panels");
-  var effTip = document.getElementById("eff-tip");
-  var effCard = document.getElementById("eff");
-  PANELS.forEach(function (p) {
-    var max = Math.max.apply(null, p.rows.map(function (r) { return r.v; }));
-    var panel = document.createElement("div");
-    panel.className = "panel";
-    var h = document.createElement("div");
-    h.className = "ptitle";
-    h.innerHTML = p.title + ' <span class="unit">· ' + p.unit + "</span>";
-    panel.appendChild(h);
-    p.rows.forEach(function (r) {
-      var row = document.createElement("div");
-      row.className = "row";
-      row.tabIndex = 0;
-      row.setAttribute("aria-label", r.label + ", " + r.detail + ": " + fmt(r.v) + " " + p.unit + ". " + r.note);
-      var lab = document.createElement("div");
-      lab.className = "row-label";
-      lab.innerHTML = "<b>" + r.label + "</b> · " + r.detail;
-      var barRow = document.createElement("div");
-      barRow.className = "row-bar";
-      var bar = document.createElement("span");
-      bar.className = "bar " + (r.et ? "et" : "ref");
-      bar.style.width = "calc((100% - 64px) * " + (r.v / max).toFixed(4) + ")";
-      var val = document.createElement("span");
-      val.className = "val";
-      val.textContent = fmt(r.v);
-      barRow.appendChild(bar);
-      barRow.appendChild(val);
-      row.appendChild(lab);
-      row.appendChild(barRow);
-      var show = function () {
-        effTip.innerHTML = "<b>" + r.label + "</b> · " + r.detail + "<br>" + fmt(r.v) + " " + p.unit + "<br>" + r.note;
-        effTip.style.display = "block";
-        var cr = effCard.getBoundingClientRect(), br = bar.getBoundingClientRect();
-        var left = Math.min(br.right - cr.left + 10, cr.width - effTip.offsetWidth - 8);
-        effTip.style.left = Math.max(8, left) + "px";
-        effTip.style.top = (br.bottom - cr.top + 6) + "px";
-      };
-      var hide = function () { effTip.style.display = "none"; };
-      row.addEventListener("mouseenter", show);
-      row.addEventListener("mouseleave", hide);
-      row.addEventListener("focus", show);
-      row.addEventListener("blur", hide);
-      panel.appendChild(row);
-    });
-    panelsEl.appendChild(panel);
-  });
-
-  // ---- power trace ----
   var D = JSON.parse(document.getElementById("trace-data").textContent);
-  var NAMES = { "fp32-tensor-L2": ["fp32", "fp32 tensor, L2"], "fp16-tensor-L2": ["fp16", "fp16 tensor, L2"],
-                "int8-tensor-L2": ["int8", "int8 tensor, L2"], "fp32-tensor-DRAM": ["DRAM", "fp32 tensor, from DRAM"] };
-  var traceEl = document.getElementById("trace");
-  var traceTip = document.getElementById("trace-tip");
-  var NS = "http://www.w3.org/2000/svg";
-  function el(name, attrs, parent) {
-    var e = document.createElementNS(NS, name);
-    for (var k in attrs) e.setAttribute(k, attrs[k]);
-    if (parent) parent.appendChild(e);
-    return e;
-  }
-  function windowAt(t) {
-    for (var i = 0; i < D.windows.length; i++) {
-      if (t >= D.windows[i].start && t <= D.windows[i].end) return D.windows[i];
+  var num = CK.fmt.num;
+
+  /* ---- V1: efficiency explorer. One shared log axis for three precisions; ET against A100 units. ---- */
+  var E = D.eff;
+  if (E) (function () {
+    var A = E.a100, MODES = ["fp32", "fp16", "int8"];
+    var UNIT = { fp32: "GFLOP/s per W", fp16: "GFLOP/s per W", int8: "GOP/s per W" };
+    var RATE = { fp32: "TFLOP/s", fp16: "TFLOP/s", int8: "TOP/s" };
+    var SRC = { run: "this run (results.json): ±1/±2 operands, B streamed from L2, 71–77 °C",
+                randn: "variant (energy manual §3.2): random normal, both operands in the L1 scratchpad, power at 80 °C" };
+    var st = { data: "run", board: "SXM4", cmp: { fp32: "cuda", fp16: "tensor", int8: "tensor" } };
+    var measured = A.measured.tflops * 1000 / A.measured.limit_w;   // GFLOP/s per W, Horace He's bf16 run
+    function a100(mode) {           // the A100 markers of one row, for the chosen board
+      var tdp = A.tdp[st.board], b = st.board === "SXM4" ? "SXM4, 400 W" : "PCIe 40 GB, 250 W";
+      var spec = function (key, peak, name, detail) {
+        return { key: key, v: peak * 1000 / tdp, name: name, short: name,
+                 tip: "<b>A100 " + b + ", " + detail + "</b><br>" + num(peak) + " " + RATE[mode] + " datasheet peak ÷ " + num(tdp, 0) + " W TDP = " + num(peak * 1000 / tdp) + " " + UNIT[mode] + " (dense, not measured)" };
+      };
+      var meas = { key: "meas", v: measured, filled: true, name: "A100 bf16 tensor cores (measured)",
+        tip: "<b>A100 bf16 tensor cores, measured</b><br>Horace He: 8192³ bf16 matmul on random data, " + num(A.measured.tflops, 0) + " TFLOPS under a " + num(A.measured.limit_w, 0) + " W power limit = " + num(measured, 0) + " GFLOP/s per W" };
+      if (mode === "fp32") {
+        meas.short = "bf16 measured, lower precision"; meas.name = "A100 bf16 tensor cores (measured; lower precision)";
+        meas.tip = meas.tip.replace("</b>", "; lower precision than fp32</b>");
+        var c = spec("cuda", A.peak.fp32, "A100 fp32 CUDA cores", "fp32 on CUDA cores"); c.short = "CUDA fp32";
+        var t = spec("tf32", A.peak.tf32, "A100 tf32 tensor cores", "tf32 tensor cores (10-bit mantissa)"); t.short = "tf32";
+        return [c, t, meas];
+      }
+      if (mode === "fp16") {
+        var f = spec("tensor", A.peak.fp16, "A100 fp16/bf16 tensor cores (spec)", "fp16/bf16 tensor cores"); f.short = "fp16/bf16";
+        meas.short = "bf16 measured";
+        if (Math.abs(Math.log(f.v / meas.v)) < 0.02) {   // spec and measurement coincide (780 and 779): one marker, both in the tip
+          f.name = "A100 fp16/bf16 tensor cores (spec and measured)"; f.short = "fp16/bf16, spec ≈ measured"; f.both = true;
+          f.tip += "<br>" + meas.tip;
+          return [f];
+        }
+        return [f, meas];
+      }
+      var g = spec("tensor", A.peak.int8, "A100 int8 tensor cores", "int8 tensor cores"); g.short = "int8";
+      return [g];
     }
-    return null;
-  }
-  function renderTrace() {
-    var old = traceEl.querySelector("svg");
-    if (old) old.remove();
-    var W = Math.max(280, traceEl.clientWidth - 32), H = 280;
-    var m = { l: 40, r: 10, t: 26, b: 34 };
-    var tMax = D.trace[D.trace.length - 1][0], yMax = 70;
-    var x = function (t) { return m.l + (t / tMax) * (W - m.l - m.r); };
-    var y = function (w) { return H - m.b - (w / yMax) * (H - m.t - m.b); };
-    var svg = el("svg", { width: W, height: H, viewBox: "0 0 " + W + " " + H, role: "img",
-      "aria-label": "Board power over time: about 30.6 W idle, 55 to 58 W during fp32, 58 to 60 W during fp16, 60 to 63 W during int8, and about 43 W while streaming from DRAM." });
-    [0, 20, 40, 60].forEach(function (v) {
-      el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), "class": v === 0 ? "axis-line" : "grid-line" }, svg);
-      var tx = el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end", "class": "tick" }, svg);
-      tx.textContent = v + " W";
+    function et(mode) {
+      var r = E[st.data].rows[mode], other = E[st.data === "run" ? "randn" : "run"].rows[mode];
+      return { key: "et", v: r.per_w, et: true, short: "ET " + num(r.per_w, 1), name: "ET-SoC-1",
+        tip: "<b>ET-SoC-1 " + mode + ", " + (st.data === "run" ? "this run" : "random-normal variant") + "</b><br>" + num(r.tflops, 2) + " " + RATE[mode] + " at " + num(r.board_w, 1) + " W board power = " + num(r.per_w, 1) + " " + UNIT[mode] + "<br>" + num(r.cycles_per_op, 0) + " cycles per op; " + SRC[st.data] + "<br>(the other ET series: " + num(other.per_w, 1) + ")" };
+    }
+    var av = function (v) { return num(v); };   // three significant digits: 48.8, 78, 390, 1,560
+    var ratio = function (etv, m) {
+      return etv >= m.v ? "ET " + num(etv, 1) + " ÷ " + m.name + " " + av(m.v) + " = <b>" + num(etv / m.v, 2) + "×</b> in ET's favour"
+                        : m.name + " " + av(m.v) + " ÷ ET " + num(etv, 1) + " = <b>" + num(m.v / etv, 1) + "×</b> in the A100's favour";
+    };
+    var frames = {}, reads = {};
+    function drawRow(mode) {
+      return function (f) {
+        var W = f.W, H = f.H, L = 10, R = 14, yM = 30, B = 24;
+        var x = CK.log(5, 3000, L, W - R);
+        CK.axes(f, { x: x, y: CK.lin(0, 1, H - B, 4), yt: [], xt: [10, 30, 100, 300, 1000, 3000], L: L, R: R, T: 4, B: B, grid: false });
+        [10, 30, 100, 300, 1000, 3000].forEach(function (t) { CK.el("line", { x1: x(t), x2: x(t), y1: 4, y2: H - B, "class": "grid-line" }, f.svg); });
+        var ms = a100(mode), e = et(mode), all = ms.concat([e]);
+        var cmp = ms.filter(function (m) { return m.key === st.cmp[mode] || (m.both && st.cmp[mode] === "meas"); })[0] || ms[0];
+        if (!cmp || cmp.key !== st.cmp[mode]) st.cmp[mode] = cmp.key;
+        // the ratio being read: a bracket from ET to the chosen A100 marker
+        CK.el("line", { x1: x(e.v), x2: x(cmp.v), y1: yM, y2: yM, "class": "eff-link" }, f.svg);
+        var sorted = all.slice().sort(function (a, b) { return a.v - b.v; }), nodes = [], lines = [[], []];
+        sorted.forEach(function (m, k) {
+          var cx = x(m.v), g = CK.el("g", { "class": "eff-mark" + (m === cmp ? " eff-cmp" : "") }, f.svg);
+          CK.el("circle", { cx: cx, cy: yM, r: 14, "class": "ck-hit" }, g);
+          if (m.et) CK.el("circle", { cx: cx, cy: yM, r: 6, "class": "eff-et" }, g);
+          else {
+            var d = 7; CK.el("polygon", { points: [cx, yM - d, cx + d, yM, cx, yM + d, cx - d, yM].join(","), "class": m.filled ? "eff-a100 filled" : "eff-a100" }, g);
+            if (m === cmp) CK.el("circle", { cx: cx, cy: yM, r: 11, "class": "eff-ring" }, g);
+          }
+          // ET's label sits alone above the row; the A100 labels go below, on a second line where they would collide
+          var lab = CK.txt(g, cx, m.et ? yM - 14 : yM + 24, m.et ? m.short : m.short + " " + av(m.v), m.et ? "lab-strong" : "lab", "middle");
+          var bb = lab.getBBox(), x0 = Math.max(2, Math.min(bb.x, W - 2 - bb.width));
+          if (!m.et) {
+            var clash = function (line) { var p = line[line.length - 1]; return p && x0 < p.x + p.w + 6; };
+            var li = clash(lines[0]) ? 1 : 0;
+            if (li === 1 && clash(lines[1])) { var q = lines[1][lines[1].length - 1]; x0 = q.x + q.w + 6; }
+            lines[li].push({ x: x0, w: bb.width });
+            lab.setAttribute("y", yM + 24 + 14 * li);
+          }
+          lab.setAttribute("x", x0 + bb.width / 2);
+          CK.tip(f, g, m.tip + (m.et ? "" : "<br>" + ratio(e.v, m) + "<br><i>Enter or click: compare against this</i>"));
+          if (!m.et) { g.style.cursor = "pointer"; g.addEventListener("click", function () { choose(mode, m.key); }); }
+          nodes.push(g);
+        });
+        CK.keynav(f, nodes, { onEnter: function (n, k) { var m = sorted[k]; if (!m.et) choose(mode, m.key); } });
+        reads[mode].set(ratio(e.v, cmp) + " <span class='muted'>(" + (st.data === "run" ? "this run" : "random-normal variant") + ")</span>");
+      };
+    }
+    function choose(mode, key) { st.cmp[mode] = key; frames[mode].redraw(); }
+    MODES.forEach(function (mode) {
+      reads[mode] = CK.readout("eff-" + mode + "-read");
+      frames[mode] = CK.frame("eff-" + mode, { height: 96, minW: 300, maxW: 880,
+        label: mode + " efficiency, log axis from 5 to 3,000 " + UNIT[mode], draw: drawRow(mode) });
     });
-    D.windows.forEach(function (w) {
-      el("rect", { x: x(w.start), y: m.t, width: Math.max(1, x(w.end) - x(w.start)), height: y(0) - m.t, "class": "band" }, svg);
-      var lab = el("text", { x: (x(w.start) + x(w.end)) / 2, y: m.t - 8, "text-anchor": "middle", "class": "band-label" }, svg);
-      lab.textContent = NAMES[w.workload][0];
-    });
-    el("line", { x1: m.l, x2: W - m.r, y1: y(D.idle_w), y2: y(D.idle_w), "class": "ref-line" }, svg);
-    var il = el("text", { x: m.l + 6, y: y(D.idle_w) + 16, "class": "ref-label" }, svg);
-    il.textContent = "idle " + D.idle_w.toFixed(1) + " W";
-    for (var s = 0; s <= tMax; s += (W < 520 ? 20 : 10)) {
-      var t = el("text", { x: x(s), y: H - m.b + 18, "text-anchor": "middle", "class": "tick" }, svg);
-      t.textContent = s + " s";
+    var redrawAll = function () { MODES.forEach(function (m) { frames[m].redraw(); }); };
+    CK.seg("eff-data", { label: "ET data", value: "run", options: [["run", "This run: ±1/±2 operands, 71–77 °C"], ["randn", "Variant: random normal, operands in L1, 80 °C"]],
+      onChange: function (v) { st.data = v; redrawAll(); } });
+    CK.seg("eff-board", { label: "A100 board", value: "SXM4", options: [["SXM4", "SXM4, 400 W"], ["PCIe", "PCIe 40 GB, 250 W"]],
+      onChange: function (v) { st.board = v; redrawAll(); } });
+    CK.legend("eff-legend", [{ key: "et", label: "ET-SoC-1, measured", mark: "dot", color: "var(--c1)" },
+      { key: "spec", label: "A100 datasheet peak ÷ TDP (not measured)", mark: "ring", color: "var(--ref)" },
+      { key: "meas", label: "A100, measured (Horace He, bf16)", mark: "dot", color: "var(--ref)" }]);
+    // The verdicts in one sentence, computed from the same data (default board: SXM4).
+    var cuda = A.peak.fp32 * 1000 / A.tdp.SXM4, R = E.run.rows, V = E.randn.rows;
+    document.getElementById("eff-sum").innerHTML = "On this run's operands the card's fp32 is <b>" + num(R.fp32.per_w / cuda, 2) + "×</b> as efficient as the A100 SXM4's fp32 CUDA cores (" + num(R.fp32.per_w, 1) + " against " + num(cuda, 1) + " GFLOP/s per W), and <b>" + num(V.fp32.per_w / cuda, 2) + "×</b> on the random-normal variant (" + num(V.fp32.per_w, 1) + "). Against the A100's measured bf16 tensor cores (" + num(measured, 0) + ") the A100 is <b>" + num(measured / V.fp32.per_w, 1) + "×</b> more efficient than this card's fp32 and <b>" + num(measured / V.fp16.per_w, 1) + "×</b> more than its fp16 (" + num(V.fp16.per_w, 1) + ") on random data. In int8 the variant (" + num(V.int8.per_w, 1) + ") beats this run (" + num(R.int8.per_w, 1) + " GOP/s per W): the kernel differs, not only the data (Later measurements). The variant changes the operands, the kernel and the die temperature together, so its distance from this run is not the cost of random data alone.";
+  })();
+
+  /* ---- V2: board power over the session, with the windows behind "per W above idle" ---- */
+  (function () {
+    var NAMES = { "fp32-tensor-L2": "fp32", "fp16-tensor-L2": "fp16", "int8-tensor-L2": "int8", "fp32-tensor-DRAM": "DRAM" };
+    var LONG = { "fp32-tensor-L2": "fp32 tensor, tiles in L2", "fp16-tensor-L2": "fp16 tensor, tiles in L2", "int8-tensor-L2": "int8 tensor, tiles in L2", "fp32-tensor-DRAM": "fp32 tensor, every tile from DRAM" };
+    var WIN = D.windows, tMax = D.trace[D.trace.length - 1][0], sel = 0, read = CK.readout("trace-read");
+    function arithmetic(w) {
+      var u = w.mode === "int8" ? ["TOP/s", "GOP/s"] : ["TFLOP/s", "GFLOP/s"], per = w.tflops * 1000 / w.mean_w, above = w.tflops * 1000 / (w.mean_w - w.idle_before_w);
+      return "<b>" + NAMES[w.workload] + ":</b> " + num(w.tflops, 2) + " " + u[0] + " ÷ " + num(w.mean_w, 2) + " W = " + num(per, 0) + " " + u[1] + " per W on the board; ÷ (" + num(w.mean_w, 2) + " − " + num(w.idle_before_w, 2) + ") W = " + num(above, 0) + " above the idle just before it.";
     }
-    var d = D.trace.map(function (p, i) { return (i ? "L" : "M") + x(p[0]).toFixed(1) + " " + y(p[1]).toFixed(1); }).join("");
-    el("path", { d: d, "class": "trace" }, svg);
-    var cross = el("line", { y1: m.t, y2: y(0), "class": "cross", visibility: "hidden" }, svg);
-    var dot = el("circle", { r: 4.5, "class": "dot", visibility: "hidden" }, svg);
-    var hit = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: y(0) - m.t, fill: "transparent" }, svg);
-    function move(ev) {
-      var r = svg.getBoundingClientRect();
-      var tt = ((ev.clientX - r.left) - m.l) / (W - m.l - m.r) * tMax;
-      var lo = 0, hi = D.trace.length - 1;
-      while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (D.trace[mid][0] < tt) lo = mid; else hi = mid; }
-      var p = Math.abs(D.trace[lo][0] - tt) < Math.abs(D.trace[hi][0] - tt) ? D.trace[lo] : D.trace[hi];
-      cross.setAttribute("x1", x(p[0])); cross.setAttribute("x2", x(p[0])); cross.setAttribute("visibility", "visible");
-      dot.setAttribute("cx", x(p[0])); dot.setAttribute("cy", y(p[1])); dot.setAttribute("visibility", "visible");
-      var w = windowAt(p[0]);
-      traceTip.innerHTML = "<b>" + p[1].toFixed(1) + " W</b> at " + p[0].toFixed(1) + " s<br>" + (w ? NAMES[w.workload][1] : "between runs");
-      traceTip.style.display = "block";
-      var left = x(p[0]) + 16 + 12;
-      if (left + traceTip.offsetWidth > traceEl.clientWidth - 8) left = x(p[0]) + 16 - traceTip.offsetWidth - 12;
-      traceTip.style.left = left + "px";
-      traceTip.style.top = (y(p[1]) + 16 - traceTip.offsetHeight - 10) + "px";
-    }
-    function leave() {
-      cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); traceTip.style.display = "none";
-    }
-    hit.addEventListener("pointermove", move);
-    hit.addEventListener("pointerdown", move);
-    hit.addEventListener("pointerleave", leave);
-    traceEl.insertBefore(svg, traceTip);
-  }
-  renderTrace();
-  var lastW = traceEl.clientWidth;
-  window.addEventListener("resize", function () {
-    if (traceEl.clientWidth !== lastW) { lastW = traceEl.clientWidth; renderTrace(); }
-  });
+    var f = CK.frame("trace", { height: function (W) { return W < 600 ? 250 : 290; }, minW: 300, maxW: 880,
+      label: "Board power over the 78 s session, with each workload's idle and averaging windows",
+      draw: function (f) {
+        var W = f.W, H = f.H, L = 44, R = 10, T = 26, B = 36;
+        var x = CK.lin(0, tMax, L, W - R), y = CK.lin(0, 70, H - B, T);
+        var xt = []; for (var s = 0; s <= tMax; s += (W < 600 ? 20 : 10)) xt.push(s);
+        CK.axes(f, { x: x, y: y, yt: [0, 20, 40, 60], xt: xt, L: L, R: R, T: T, B: B, xfmt: function (v) { return v + " s"; }, yfmt: function (v) { return v + " W"; } });
+        var w = WIN[sel];
+        // the selected workload's windows
+        CK.el("rect", { x: x(w.idle_t0), y: T, width: Math.max(2, x(w.idle_t1) - x(w.idle_t0)), height: y(0) - T, "class": "win-idle" }, f.svg);
+        CK.el("rect", { x: x(w.settle_end), y: T, width: x(w.end) - x(w.settle_end), height: y(0) - T, "class": "win-avg" }, f.svg);
+        // every workload's launches (a light band) and its label; each band is a keyboard stop with the window's numbers
+        var nodes = [];
+        WIN.forEach(function (v, k) {
+          var g = CK.el("g", { "class": "trace-band" + (k === sel ? " on" : "") }, f.svg);
+          CK.el("rect", { x: x(v.start), y: T, width: Math.max(1, x(v.end) - x(v.start)), height: y(0) - T, "class": "band" }, g);
+          CK.txt(g, (x(v.start) + x(v.end)) / 2, T - 8, NAMES[v.workload], k === sel ? "lab-strong" : "lab", "middle");
+          CK.tip(f, g, "<b>" + LONG[v.workload] + "</b><br>" + v.launches + " launches, " + num(v.start, 1) + "–" + num(v.end, 1) + " s; mean " + num(v.mean_w, 2) + " W over " + v.power_samples + " samples after the first second<br>idle just before: " + num(v.idle_before_w, 2) + " W (" + num(v.idle_t0, 1) + "–" + num(v.idle_t1, 1) + " s)<br><i>Enter: shade its windows</i>");
+          nodes.push(g);
+        });
+        // the idle just before each workload, one short step per gap
+        WIN.forEach(function (v, k) {
+          CK.el("line", { x1: x(v.idle_t0), x2: x(v.start), y1: y(v.idle_before_w), y2: y(v.idle_before_w), "class": "idle-step" }, f.svg);
+          if (k !== sel && W >= 600) CK.txt(f.svg, (x(v.idle_t0) + x(v.idle_t1)) / 2, y(v.idle_before_w) + 17, num(v.idle_before_w, 1), "tick halo", "middle");
+        });
+        CK.el("path", { d: CK.path(D.trace, x, y), "class": "trace" }, f.svg);
+        // the two means being divided, dashed, over the selected workload
+        CK.el("line", { x1: x(w.idle_t0), x2: x(w.end), y1: y(w.idle_before_w), y2: y(w.idle_before_w), "class": "mean-idle" }, f.svg);
+        CK.el("line", { x1: x(w.settle_end), x2: x(w.end), y1: y(w.mean_w), y2: y(w.mean_w), "class": "mean-avg" }, f.svg);
+        if (!f.narrow) {   // on a phone the readout under the chart carries these two numbers
+          CK.txt(f.svg, x(w.end) - 4, y(w.mean_w) - 9, "mean " + num(w.mean_w, 1) + " W", "lab-strong halo", "end");
+          CK.txt(f.svg, x(w.idle_t0) + 2, y(w.idle_before_w) + 17, "idle " + num(w.idle_before_w, 1) + " W", "lab-strong halo", "start");
+        }
+        // pointer crosshair on the trace itself
+        var cross = CK.el("line", { y1: T, y2: y(0), "class": "cross", visibility: "hidden" }, f.svg);
+        var dot = CK.el("circle", { r: 4.5, "class": "dot", visibility: "hidden" }, f.svg);
+        var hit = CK.el("rect", { x: L, y: T, width: W - L - R, height: y(0) - T, "class": "ck-hit" }, f.svg);
+        hit.style.pointerEvents = "all";
+        function move(ev) {
+          var b = f.svg.getBoundingClientRect(), tt = x.inv(ev.clientX - b.left), lo = 0, hi = D.trace.length - 1;
+          while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (D.trace[mid][0] < tt) lo = mid; else hi = mid; }
+          var p = Math.abs(D.trace[lo][0] - tt) < Math.abs(D.trace[hi][0] - tt) ? D.trace[lo] : D.trace[hi];
+          cross.setAttribute("x1", x(p[0])); cross.setAttribute("x2", x(p[0])); cross.setAttribute("visibility", "visible");
+          dot.setAttribute("cx", x(p[0])); dot.setAttribute("cy", y(p[1])); dot.setAttribute("visibility", "visible");
+          var v = WIN.filter(function (q) { return p[0] >= q.start && p[0] <= q.end; })[0];
+          f.tip.innerHTML = "<b>" + num(p[1], 2) + " W</b> at " + num(p[0], 1) + " s<br>" + (v ? LONG[v.workload] : "between runs");
+          f.tip.style.display = "block";
+          var hb = f.host.getBoundingClientRect(), px = ev.clientX - hb.left, py = ev.clientY - hb.top;
+          f.tip.style.left = Math.max(0, Math.min(px + 12, f.host.clientWidth - f.tip.offsetWidth)) + "px";
+          f.tip.style.top = Math.max(0, py - f.tip.offsetHeight - 12) + "px";
+        }
+        function leave() { cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); CK.hide(f); }
+        hit.addEventListener("pointermove", move); hit.addEventListener("pointerleave", leave);
+        hit.addEventListener("pointerdown", function (ev) {   // a click or tap on a workload's span shades its windows
+          move(ev);
+          var t = x.inv(ev.clientX - f.svg.getBoundingClientRect().left);
+          WIN.forEach(function (q, k) { if (t >= q.start && t <= q.end) pickWorkload(k); });
+        });
+        CK.keynav(f, nodes, { onEnter: function (n, k) { pickWorkload(k); } });
+        read.set(arithmetic(w));
+      } });
+    var seg = CK.seg("trace-pick", { label: "Workload", value: 0, options: WIN.map(function (w, k) { return [k, NAMES[w.workload]]; }),
+      onChange: function (k) { sel = k; f.redraw(); } });
+    function pickWorkload(k) { if (k !== sel) seg.set(k); }
+  })();
 })();
 </script>
 </body>

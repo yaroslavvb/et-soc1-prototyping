@@ -1,3 +1,32 @@
+<style>
+details.terms > summary { font-size: 0.85rem; }
+details.terms > p { margin: 6px 0 0; }
+.gov { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 8px 18px; align-items: start; margin-top: 4px; }
+@media (max-width: 760px) { .gov { grid-template-columns: minmax(0, 1fr); } }
+.gov-read { font-size: 0.86rem; line-height: 1.45; min-height: 6.2em; margin: 0; }
+.gov-read .sub { color: var(--ink-2); display: block; }
+pre.rule { font-size: 0.75rem; margin: 8px 0 0; padding: 8px 0; overflow-x: auto; }
+pre.rule span { display: block; padding: 1px 10px 1px 7px; border-left: 3px solid transparent; white-space: pre; color: var(--ink-2); }
+pre.rule span.on { background: var(--grid); border-left-color: var(--c1); color: var(--ink); font-weight: 650; }
+pre.rule span.on2 { border-left-style: dashed; border-left-color: var(--ink-2); }
+.ck-range.wide-range { flex: 1 1 300px; }
+.ck-range.wide-range input[type="range"] { flex: 1 1 200px; width: auto; }
+.ck-btn { font: inherit; font-size: 0.82rem; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-btn[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-btn:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+#wake .ck-active .rep, #wake [data-ck-nav]:focus .rep { stroke: var(--ink); stroke-width: 2.5px; opacity: 1; }
+#cycle .ck-active > polygon, #cycle polygon:focus { stroke: var(--ink); stroke-width: 2px; }
+.chart-block { max-width: 640px; }
+@media (max-width: 599px) {
+  #verdict.stack td:first-child::before { content: "Kanter said (paraphrased)"; display: block; font-size: 0.75rem;
+    color: var(--muted); font-weight: 400; }
+  #trans th:nth-child(3), #trans td:nth-child(3) { display: none; }
+  #trans th, #trans td, #leaktab th, #leaktab td { padding: 6px 5px; }
+  #cardcfg.stack td[data-label]::before { display: inline; content: attr(data-label) ": "; font-size: 0.8rem; }
+  #cardcfg.stack td:first-child::before { content: none; }
+}
+</style>
 <h1>The ET-SoC-1's DVFS loop, and the leakage it never switches off</h1>
 <p class="byline">21–22 September 2026 · aifoundry2 and aifoundry3 (aifoundry1 unavailable) · firmware source read at
 et-platform <code>353f20e</code> (the cards' own log strings show an older build; see
@@ -21,16 +50,17 @@ hedged that this might not hold for Esperanto's part, only for anything from a m
 right. The table below checks six of his statements, paraphrased, against the firmware source, the open RTL and
 the card.</p>
 
-<p class="small"><b>Terms.</b> DVFS moves the clock and the supply voltage together, here among three operating points: 600, 700 and 800 MHz. Each operating point is one row of the
-firmware's frequency-to-voltage table, the VMIN-LUT. The compute cores are <i>minions</i>, small in-order RISC-V
-cores with two hardware threads (<i>harts</i>) each; 32 minions form a <i>shire</i>, and kernels run on 32 shires
-(1,024 minions). The <i>master minion</i>, firmware on the master shire, dispatches kernels and tells the loop
-whether the card is busy. The service processor (SP) is the on-die management core that runs the loop. The PMIC is
-the board's power-management controller, which meters power, and the PVT sensors are the on-die temperature and
-voltage monitors. TDP is the firmware's power limit, 65 W. The flip-counting model is
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#from-flips-to-watts">the Horace experiment</a>'s
-model of power from the bits the multiply-add unit clocks and toggles. More in
+<details class="terms"><summary>Terms used on this page</summary>
+<p class="small">DVFS (dynamic voltage and frequency scaling) moves the clock and the supply voltage together: here the
+service processor (SP), the on-die management core, steps among three operating points, 600, 700 and 800 MHz, each one
+row of the firmware's frequency-to-voltage table (the VMIN-LUT). It reads board power from the PMIC, the board's
+power-management controller, and die temperature from the on-die PVT sensors, and compares them with 65 °C and with TDP,
+the firmware's power limit of 65 W. The compute cores are <i>minions</i>, 32 to a <i>shire</i>, and kernels run on 32
+shires (1,024 minions); the <i>master minion</i> dispatches them and tells the loop whether the card is busy. The
+flip-counting model is <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#from-flips-to-watts">the
+Horace experiment</a>'s model of power from the bits the multiply-add unit clocks and toggles; more in
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">the hub's glossary</a>.</p>
+</details>
 
 <div class="table-wrap wide"><table id="verdict"></table></div>
 
@@ -44,9 +74,10 @@ governor; <a href="#method-and-what-is-not-established">§8</a> says what differ
     T   = pvt_get_minion_avg_temperature()          // on-die thermal sensor, whole degrees
     P   = pmic_read_average_soc_power()             // MEASURED board power, from the PMIC over I2C
     if  active_power_management and master minion is BUSY:
-        if   T &gt; 65 °C       and f &gt; f_min:  step DOWN one VMIN-LUT point
-        elif P &gt; 65 W        and f &gt; f_min:  step DOWN one VMIN-LUT point
-        elif P &lt; 65 W        and f &lt; f_max:  step UP   one VMIN-LUT point
+        if T &gt; 65 °C:
+            if f &gt; f_min:  step DOWN one VMIN-LUT point   // at the floor: hold; the power tests are not reached
+        elif P &gt; 65 W and f &gt; f_min:  step DOWN one VMIN-LUT point
+        elif P &lt; 65 W and f &lt; f_max:  step UP   one VMIN-LUT point
     on master minion going IDLE:
         set frequency back to the boot point</code></pre>
 <p>Four things follow, and all four show up in the measurements below.</p>
@@ -55,14 +86,18 @@ governor; <a href="#method-and-what-is-not-established">§8</a> says what differ
 the power-management controller's own averaged wattage. Nothing in the loop counts bus bits, instructions or
 activity factors, in this source or in the older one. Kanter's \(P = C_\mathrm{sw}V^{2}f\) is not evaluated
 anywhere in this firmware, because the chip does not need to infer the left-hand side: it has a meter.</li>
-<li><b>Thermal has priority.</b> The temperature test comes first, and it is a plain <code>if</code>, so when the
-die reads above 65 °C the power branch is never reached. This card usually idles above 65 °C (at 73 °C on
-22 September, even after about 20.6 hours with no work), and there it sits at its lowest operating point however little
-power it draws.</li>
+<li><b>Thermal has priority.</b> The temperature test comes first, and the frequency check sits inside it, so when
+the die reads above 65 °C the power tests are never reached, not even at the lowest operating point, where the
+thermal test itself does nothing. This card often rests above 65 °C (73 °C on 22 September, even after about
+<span data-v="hours"></span> hours with no work), so a kernel launched on it starts above the threshold and runs at the
+lowest operating point however little power it draws: every launch of the strict protocol, at 80 °C, ran at
+600 MHz.</li>
 <li><b>There is no hysteresis.</b> The 353f20e source defines <code>UPPER_POWER_THRESHOLD_GUARDBAND</code> and
 <code>LOWER_POWER_THRESHOLD_GUARDBAND</code>, a ±5% band around the TDP level, and then never uses them. Both tests
 compare against the raw thresholds, and the temperature test has no band of any kind: it fires at a whole-degree
-reading of 66 °C and stops firing at 65 °C.</li>
+reading of 66 °C and stops firing at 65 °C. The older governor the cards' logs point to (§8) uses one of the two
+power guardbands, but neither would damp hunting at the thermal threshold (§2); that needs a temperature dead
+band.</li>
 <li><b>The clock returns to the boot point when the master minion reports idle.</b> The service processor then sets
 the boot frequency (<code>go_to_idle_state_and_update_pwr_status()</code>). Back-to-back launches rarely trigger it:
 the zeros runs held 800 MHz across twelve or more consecutive launches of about 0.37 s, 1–2 ms apart.</li>
@@ -70,159 +105,70 @@ the zeros runs held 800 MHz across twelve or more consecutive launches of about 
 
 <h2 id="the-loop-as-measured">2. The loop as measured</h2>
 <p>The governor only raises the clock while the die reads 65 °C or less (our 10 Hz samples caught up-steps at
-readings of 63 to 66 °C), which in these sessions meant the first runs after a night of idling. Seven such runs
-exist, from the cool-start session on the morning of 21 September
+readings of <span data-v="upT"></span> °C), which in these sessions meant the first runs after a night of idling.
+Seven such runs exist, from the cool-start session on the morning of 21 September
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#the-speed-effect-appears-on-a-cool-die">Horace
-experiment §6</a>), sampled at 10 Hz. They contain <b>36 clock transitions</b>. Voltage moved with frequency in every
-one of them: 600 MHz at 0.517 V, 700 at 0.568, 800 at 0.618. This is real DVFS, not frequency scaling alone.</p>
+experiment §6</a>), sampled at 10 Hz. They contain <b><span data-v="ntrans"></span> clock transitions</b>. Voltage moved
+with frequency in every one of them: <span data-v="ops"></span>. This is real DVFS, not frequency scaling alone.</p>
 
-<div class="chart-title">Run 3, all ones, from a 64 °C die: the clock hunts across the 65 °C threshold, then
-stays at 600 MHz. Blue: minion clock. Purple: die temperature. Orange: board power.</div>
-<div class="chart scroll" id="cycle"></div>
+<div id="gov-fig">
+<div class="chart-title">Watch the governor decide: the seven cool-start runs, one 10 Hz sample at a time</div>
+<p class="small">Pick a run, then play it or drag through it. On the time slider, the arrow keys move one 100 ms
+sample and Page Up / Page Down jump between clock changes. The panel applies the §1 rule to the sampled die
+temperature, board power and clock; at a clock change it reads the last sample before the step, and shows the sample
+after it with a dashed mark.</p>
+<div class="ck-controls"><div id="gov-runs"></div><button type="button" class="ck-btn" id="gov-play">Play</button>
+<div id="gov-scrub"></div></div>
+<div id="gov-leg"></div>
+<div class="gov">
+  <div class="chart" id="cycle"></div>
+  <div><p class="gov-read" id="gov-read"></p><pre class="rule" id="gov-rule" aria-label="The governor's rule"></pre></div>
+</div>
+<p class="small" id="gov-sum"></p>
+</div>
 
-<p><b>It hunts, and the missing hysteresis explains it.</b> In this run the board never came near 65 W (it peaked
-at 56 W); what the loop kept crossing was the 65 °C line. At a reading of 66 °C the clock steps down; once the
-whole-degree reading is back at 65 °C the thermal test no longer fires, the power test sees 38 W &lt; 65 W, and the
-clock steps back up. The clock changed seven times in 2.4 s, reaching 800 MHz twice, 1.6 s apart. Then, with the
-die settled at 66 °C, it stayed at 600 MHz for the last 4.5 s. Over the whole 7.4 s run it spent 5.6 s at the
-bottom point, 1.0 s at 700 MHz and 0.8 s at 800 MHz.</p>
+<p><b>It hunts, and the missing hysteresis explains it.</b> Run 3 (all ones, from a 64 °C die; the chart opens on it)
+never brought the board near 65 W (it peaked at 56 W); what the loop kept crossing was the 65 °C line. At a reading of
+66 °C the clock steps down; once the whole-degree reading is back at 65 °C the thermal test no longer fires, the power
+test sees 38 W &lt; 65 W, and the clock steps back up. The clock changed seven times in 2.4 s, reaching 800 MHz twice,
+1.6 s apart. Then, with the die settled at 66 °C, it stayed at 600 MHz for the last 4.5 s. Over the whole 7.4 s run it
+spent 5.6 s at the bottom point, 1.0 s at 700 MHz and 0.8 s at 800 MHz.</p>
 
-<div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:14px">
-  <div style="flex:1 1 380px;max-width:460px">
-    <div class="chart-title">Every down-step, placed against the two thresholds it could have tripped</div>
-    <div class="legend" id="attrib-leg"></div>
-    <div class="chart" id="attrib"></div>
-  </div>
-  <div style="flex:1 1 380px;max-width:460px">
-    <div class="chart-title">Wake-up probe: load latency after the line sat untouched, minus its latency with no idle</div>
-    <div class="chart" id="wake"></div>
-  </div>
+<div class="chart-block" id="attrib-fig">
+  <div class="chart-title">All <span data-v="ndown"></span> down-steps, placed against the two thresholds they could
+  have tripped</div>
+  <div class="ck-controls"><div id="attrib-mode"></div></div>
+  <div id="attrib-leg"></div>
+  <div class="chart" id="attrib"></div>
+  <p class="small">Points within one whole degree are spread sideways so each is visible. Select a point (click, tap
+  or Enter) to replay its step in the chart above.</p>
 </div>
 
 <p><b>No down-step is the power branch acting alone.</b> Of the 18, seven were thermal only (the die above 65 °C
-while the board drew 45–56 W, well under the limit) and four were both at once (random data draws up to 88 W at
-800 MHz and 69 W at 700, and heats fast). The other seven cannot be attributed from our telemetry: the die read 65 °C (once 64) and the
-board 34–56 W, so neither test fired on the values we sampled. One of them (run 1, zeros, at 5.95 s:
-800→600 MHz in a single step, 171 ms after a launch boundary) looks like the boot-point reset. The other six are
-single-point steps in pairs 0.4–0.5 s apart, which looks like the stepping loop, most likely thermal steps on passes
-where the service processor read 66 °C between our 10 Hz samples. The power branch never fired on its own, because
-on this card only random data at 700–800 MHz exceeds 65 W, and it takes the die through 65 °C within half a
-second.</p>
-<div class="table-wrap wide"><table id="trans"></table></div>
-<p class="small">Launches run back to back every 0.37–0.49 s, so every step is within a quarter of a second of some
-kernel boundary; the distance to the nearest one explains nothing and is not shown.</p>
-<p>The loop is also slow to start: the first clock change came 0.39 to 0.99 s after the kernel launched, three to
-seven passes of the ~133 ms loop. Once moving, it stepped on successive passes; eight up-steps go straight from 600
-to 800 MHz between two 100 ms samples, faster than one table point per pass. The 353f20e source does not explain
-that; the older governor the cards' logs point to (<a href="#method-and-what-is-not-established">§8</a>) climbs to
-the top point in one go.</p>
+while the board drew 45–56 W, well under the limit) and four read above both thresholds on the sample after the step
+(random data draws up to 88 W at 800 MHz and 69 W at 700, and heats fast). The other seven cannot be attributed from
+our telemetry: the die read 65 °C (once 64) and the board 34–56 W, so neither test fired on the values we sampled. One
+of them (run 1, zeros, at 5.95 s: 800→600 MHz in a single step, 171 ms after a launch boundary) looks like the
+boot-point reset. (Launches run back to back every 0.37–0.49 s, so nearness to a boundary alone explains nothing.) The
+other six are single-point steps in pairs 0.4–0.5 s apart, which looks like the stepping loop, most likely thermal
+steps on passes where the service processor read 66 °C between our 10 Hz samples. Read on the last sample before each
+step instead, the split is <span data-v="prevsplit"></span>: <span data-v="prevwhy"></span>. The power branch never
+fired on its own, because on this card only random data at
+700–800 MHz exceeds 65 W, and it takes the die through 65 °C within half a second.</p>
+<details><summary>All <span data-v="ndown"></span> down-steps as a table</summary>
+<div class="table-wrap"><table id="trans"></table></div>
+<p class="small">Die °C and board W are the first sample that shows the new clock. The board meter lags the clock by
+0.1–0.3 s, so a 700→600 MHz step can still show an 800 MHz burst. "Unattributed" means neither test fired on the
+values we sampled (the die read 65 °C or less and the board under 65 W).</p>
+</details>
+<p>The loop is also slow to start: the first clock change came <span data-v="first"></span> s after the kernel
+launched, three to seven passes of the ~133 ms loop. Once moving, it stepped on successive passes; eight up-steps go
+straight from 600 to 800 MHz between two 100 ms samples, faster than one table point per pass. The 353f20e source does
+not explain that; the older governor the cards' logs point to (<a href="#method-and-what-is-not-established">§8</a>)
+climbs to the top point in one go.</p>
 
-<h2 id="the-leakage-suppression-transistors">3. The leakage-suppression transistors</h2>
-<p>Kanter's description was specific: cache data arrays sit behind leakage-suppression transistors, a lookup
-checks the tags first and un-suppresses only the part of the array it needs, and the cost is a small wake-up
-latency. The same trick applies at the granularity of whole cores and execution units.</p>
-<p><b>The design has the ports.</b> The open RTL of the neighbourhood (a group of eight minions) carries the full
-interface: a per-minion sleep control and its acknowledge (<code>pwr_ctrl_min_nsleepin</code> /
-<code>nsleepout</code>, one bit per minion), a global pair, and per-minion isolation
-(<code>pwr_ctrl_min_isolate</code>) with level shifters and a power stub that forces the outputs safe while a
-domain is down. That is a textbook power-gating structure, sized for the granularity he described.</p>
-<p>That RTL is the Erbium configuration (one neighbourhood, no shire cache), so it says nothing about the L2 and L3
-arrays; for those, the wake-up probe below is the only evidence.</p>
-<p><b>Nothing drives it.</b> In the open configuration the whole interface is tied off, with a comment saying
-so:</p>
-<pre><code>// Power Ctrl - power control handled outside cpu subsystem and this ifce is not used
-.pwr_ctrl_glb_nsleepin ('1),   // '1 = never asleep
-.pwr_ctrl_min_nsleepin ('1),
-.pwr_ctrl_min_isolate  ('0),</code></pre>
-<p>And the service-processor firmware, searched both at 353f20e and in the older governor, contains no
-power-gating control of any kind: its only <code>PWR_CTRL</code> hits are an eMMC controller's bus voltage, and
-elsewhere in the tree the name appears only in eMMC and PCIe PHY register headers. Whatever drives those pins on
-the taped-out part, it is not this firmware, and the chip-level netlist is not in the open release.</p>
-<p><b>And the card shows no sign of it.</b> If an array were suppressed once idle, the first access afterwards
-would pay the wake-up. The probe: put one line at a chosen level, let the minion spin on its cycle counter for a
-swept interval from zero to 27 ms (0, 1.7 µs, 17 µs … 27 ms) without touching that line, then time a single load
-of it: same line, same address, only the idle time varying, 20 repeats.</p>
-<ul>
-<li><b>L1 and L3: zero.</b> The paired difference between the longest idle and no idle is 0 cycles, for L1 both
-with the line placed by an evict and with it simply left in place.</li>
-<li><b>L2: −11 cycles</b>, and this comes from the baseline, not the idle. With no idle at all the load reads 61
-cycles, probably because the line was still settling after the asynchronous evict that placed it. At every idle
-from 1.7 µs to 27 ms it is a normal 49.5-cycle L2 hit. No wake-up.</li>
-<li><b>DRAM: +10.5 cycles</b>, and that one has a known cause: the line's DRAM row has closed, so the next load
-pays an activate, 11 cycles (tRCD, the activate-to-read delay).
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#inside-the-dram-rows-banks-and-refresh">Anatomy
-of a memory access</a> measured that cost (§6), and found that idle rows close within a few microseconds, faster
-than refresh (every 3.88 µs) alone would close them; the +40 cycles in that report are a row conflict, a different
-case. Here 12 of the 20 paired differences are +9 to +14 cycles, six are within 6 cycles of zero and two are
-outliers. The shift is
-there in full after the shortest idle, 1.7 µs, and does not grow out to 27 ms, which is not how a wake-up would
-behave.</li>
-</ul>
-<p>So on this card, in this firmware, leakage suppression is a capability that ships switched off. The only gating
-actually working is clock gating, which the same RTL does use aggressively (per lane, per functional unit, with a
-seven-cycle tail), and which is why an idle-but-powered core costs so little <i>dynamic</i> power and still
-leaks.</p>
-
-<h2 id="what-that-costs">4. What that costs</h2>
-<div style="display:flex;flex-wrap:wrap;gap:16px">
-  <div style="flex:1 1 380px;max-width:460px">
-    <div class="chart-title">Leakage as a share of board power, from the fitted model, against Kanter's typical range</div>
-    <div class="chart" id="leakfrac"></div>
-  </div>
-  <div style="flex:1 1 380px;max-width:460px">
-    <p style="margin-top:2.2em"><b>A free out-of-sample check.</b> The leakage curve in this chart,
-    \(P_\text{idle}(T)=12.6\,\mathrm{W}+23.3\,\mathrm{W}\,e^{(T-80)/36}\), was fitted on 21 September
-    (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">the
-    Horace experiment, §8</a>; tabulated in
-    <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">the energy manual,
-    §1</a>). This report opened by sampling the card after it had sat for about <span id="idlehours"></span> hours with no
-    workload (apart from the 4.9 s wake-up probe of §3, five minutes before), on 22 September, in a warmer room:
-    <b>31.79 ± 0.04 W at 73.0 °C</b>. The curve predicts <b>31.78 W</b>. A different day, a different ambient, a
-    temperature between the fit's idle readings, and the error is 0.01 W.</p>
-    <p>Of those 31.8 idle watts, 11.0 W sits on the minion rail alone: a thousand cores doing nothing for over
-    twenty hours. 2.0 W is the SRAM rail, 3.6 W the mesh, and 15.1 W is on no rail sensor at all (DDR, PCIe, regulator
-    conversion).</p>
-  </div>
-</div>
-$$P_\text{idle}(T)\;=\;\underbrace{12.6\,\mathrm{W}}_{\text{temperature-independent}}\;+\;\underbrace{23.3\,\mathrm{W}\;e^{(T-80\,^\circ\mathrm{C})/36\,^\circ\mathrm{C}}}_{\text{leakage}},\qquad \left.\frac{\partial P}{\partial T}\right|_{80\,^\circ\mathrm{C}}=0.65\ \mathrm{W/^\circ C}$$
-<p>Kanter put leakage at 5–30% of a design's power, with 20% common, and noted that parts which clock lower and use
-slower transistors leak less. This card is above that range whether busy or idle: <b>36% of a 64 W random-data
-matmul, 65% of an idle card at 80 °C.</b> Three things make it so, and only the third is the chip's own: (1) it runs
-at 0.52 V rather than the 0.4 V Esperanto designed for; (2) a desktop chassis idles it at 73–80 °C rather than in
-server airflow; (3) it carries 128 MB of shire SRAM (Esperanto quotes over 160 MB on die, at Hot Chips 33) with no array power
-gating in play.</p>
-
-<h2 id="what-this-means-for-the-equation-and-for-measuring-power">5. What this means for the equation, and for measuring power</h2>
-<ul>
-<li><b>The equation is right; it is just not what the loop uses.</b> Its activity term is strongly confirmed on
-this card. Power over idle is close to linear in active minions: 25.6 mW per minion at 256 and 512 active, 26.2 at
-768 and 27.0 at 1,024; a line through zero fits 26.5 mW per minion. And
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#from-flips-to-watts">a model that counts four
-classes of switching event</a> inside the multiply-add unit predicts board power across fourteen operand patterns
-to 0.5 W rms, each pattern predicted by a fit that left it out. The \(V^{2}f\) term is only weakly testable here,
-because the governor will not hold the high operating point long on a heavy workload. For constant data it predicts
-\(\bigl(0.618/0.517\bigr)^{2}\times(800/600)=1.91\) for the switching-power ratio between the two points; the
-cool-start runs give 2.0 for ones (20.6 against 10.3 W over idle) and 2.05 for zeros (3.9 against 1.9 W), 5% and 8%
-above it, from seven short, uncontrolled runs. A clean test needs a die below 65 °C and a runner that pins the work
-rate.</li>
-<li><b>Kanter's argument that measured power is too expensive to mandate is weaker for this card, though it does
-not vanish.</b> His reason MLPerf cannot require measured power is that most submitters will not pay the time and
-energy to instrument a system. This chip is already instrumented, as a load-bearing part of its own safety loop: a
-PMIC that meters board power, a service processor that reads it on every pass of its management loop, and a
-management interface that hands the number to the host. The cost of reporting the card's own power here is one
-query. But MLPerf's measured power is the whole system (host, power supply, cooling), which this meter does not
-see, and the meter gives one new board reading per ~133 ms pass, with the rail readings behind the PMIC's own
-running average (a time constant of about one second).</li>
-<li><b>But the loop's hunting is exactly the kind of thing a provisioned-power metric cannot see.</b> A
-normalisation by provisioned kilowatts scores a card by its nameplate. On this card a governor with no dead band
-moves the clock, and so the throughput, by up to a third within a single 7-second run, invisibly.</li>
-<li><b>The hunting measured here is at the thermal threshold</b>, which has no dead band in either version of the
-source. The two power-guardband macros that the 353f20e source leaves unused (the older governor uses one of them)
-would not damp it; damping it needs a temperature dead band.</li>
-</ul>
-
-<h2 id="the-same-firmware-on-three-cards">6. The same firmware on three cards</h2>
-<p>Everything above is one card. AI Foundry has three machines, and the loop's behaviour turned out to depend on a
+<h2 id="the-same-firmware-on-three-cards">3. The same firmware on three cards</h2>
+<p>Everything so far is one card. AI Foundry has three machines, and the loop's behaviour turned out to depend on a
 single byte that differs between them.</p>
 
 <p><b>aifoundry1 could not be measured.</b> It holds two ET-SoC-1 cards, both enumerated on the PCIe bus, with
@@ -243,8 +189,8 @@ answers.</p>
 <p>The governor compares measured SoC power against that TDP level. With the level at zero, the comparison in
 <code>check_power_throttle_conditions()</code> can only come out one way:</p>
 
-$$\underbrace{P_\text{measured} > P_\text{TDP}}_{\text{step down}}\;\equiv\;P_\text{measured} > 0\;\equiv\;\text{always true},\qquad
-\underbrace{P_\text{measured} < P_\text{TDP}}_{\text{step up}}\;\equiv\;P_\text{measured} < 0\;\equiv\;\text{never true}$$
+$$\underbrace{P_\text{measured} > P_\text{TDP}}_{\text{step down}}\;\equiv\;P_\text{measured} > 0\;\equiv\;\text{always true}$$
+$$\underbrace{P_\text{measured} < P_\text{TDP}}_{\text{step up}}\;\equiv\;P_\text{measured} < 0\;\equiv\;\text{never true}$$
 
 <p>So on aifoundry3 the loop is not disabled. Each kernel start logs a power throttle-down request and each return
 to idle an idle event, and the step-up request, the only way above 600 MHz, can never fire: the clock read 600 MHz
@@ -272,48 +218,139 @@ side gets the nameplate number, not the one the governor is using. The card work
 for as long as its flashed TDP stays at zero, which on a workload that would otherwise run at 800 MHz gives up a
 quarter of the throughput (800 MHz is a third faster than 600), and nothing reports an error.</p>
 
-<p><b>The contrast is not that aifoundry2 is always faster.</b> aifoundry2 usually idles above 65 °C, and the
-thermal branch comes first, so it too sits at 600 MHz most of the time: on 22 September it idled at 72–73 °C and
-read 600 MHz throughout a thirteen-minute watch. The difference is the reason and the
-remedy. aifoundry2 reaches 700 and 800 MHz when it starts cool, which is what section 2's 36 transitions are.
-aifoundry3 cannot, at any temperature, because the branch that would raise it is unreachable.</p>
+<p><b>The contrast is not that aifoundry2 is always faster.</b> Launched warm, it too runs at 600 MHz: the thermal
+branch holds it at the floor, and every one of the strict protocol's launches at 80 °C ran at 600 MHz (§1). The
+difference is the remedy. aifoundry2 reaches 700 and 800 MHz when it starts cool (§2). aifoundry3 cannot at any
+temperature, because the branch that would raise it is unreachable.</p>
 
-<p>This also settles what section 2 could not: whether the power branch works at all. It never fired on its own
+<p>This also settles what §2 could not: whether the power branch works at all. It never fired on its own
 in any aifoundry2 run. On aifoundry3 it is the <em>only</em> branch that fires, at every kernel start, on a die well
 below the thermal threshold, and it does what the comparison says it will.</p>
 
-<h2 id="what-the-second-card-says-about-the-model">7. What the second card says about the model</h2>
-<p>A card pinned at its lowest operating point is still a card, and running the same strict protocol on it is the
-strongest out-of-sample test of the flip-counting model: different silicon, different heatsink, a launch
-temperature 25 °C lower, and a model whose coefficients were fitted entirely on aifoundry2. The same comparison,
-with the transfer test in full, is §10 of
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-second-card-and-what-transfers">the Horace
-experiment</a>.</p>
+<h2 id="the-leakage-suppression-transistors">4. The leakage-suppression transistors</h2>
+<p>Kanter's mechanism is a tag check that wakes only the part of an array a lookup needs, at a small wake-up latency;
+the same trick applies to whole cores and execution units.</p>
+<p><b>The design has the ports.</b> The open RTL of the neighbourhood (a group of eight minions) carries the full
+interface: a per-minion sleep control and its acknowledge (<code>pwr_ctrl_min_nsleepin</code> /
+<code>nsleepout</code>, one bit per minion), a global pair, and per-minion isolation
+(<code>pwr_ctrl_min_isolate</code>) with level shifters and a power stub that forces the outputs safe while a
+domain is down. That is a textbook power-gating structure, sized for the granularity he described.</p>
+<p>That RTL is the Erbium configuration (one neighbourhood, no shire cache), so it says nothing about the L2 and L3
+arrays; for those, the wake-up probe below is the only evidence.</p>
+<p><b>Nothing drives it.</b> In the open configuration the whole interface is tied off, with a comment saying
+so:</p>
+<pre><code>// Power Ctrl - power control handled outside cpu subsystem and this ifce is not used
+.pwr_ctrl_glb_nsleepin ('1),   // '1 = never asleep
+.pwr_ctrl_min_nsleepin ('1),
+.pwr_ctrl_min_isolate  ('0),</code></pre>
+<p>And the service-processor firmware, searched both at 353f20e and in the older governor, contains no
+power-gating control of any kind: its only <code>PWR_CTRL</code> hits are an eMMC controller's bus voltage, and
+elsewhere in the tree the name appears only in eMMC and PCIe PHY register headers. Whatever drives those pins on
+the taped-out part, it is not this firmware, and the chip-level netlist is not in the open release.</p>
+<p><b>And the card shows no sign of it.</b> If an array were suppressed once idle, the first access afterwards
+would pay the wake-up. The probe: put one line at a chosen level, let the minion spin on its cycle counter for a
+swept interval from zero to 27 ms (0, 1.7 µs, 17 µs … 27 ms) without touching that line, then time a single load
+of it: same line, same address, only the idle time varying, 20 repeats.</p>
 
-<div class="chart-title">Switching power over idle, eight operand patterns, two cards</div>
-<div class="chart scroll" id="cardsw"></div>
-<p class="small" id="cardswcap"></p>
-<p class="small">Operand patterns: <b>zeros</b>; <b>sparse50</b>, half the entries zero and half random normal;
-<b>ones</b>; <b>pi</b>, π in every entry; <b>signs</b>, ±1 at random (only the sign bit varies); <b>mant</b>,
-1 plus a uniform random fraction (only the mantissa varies); <b>uniform</b>, random uniform on [0, 1);
-<b>randn</b>, random normal.</p>
+<div class="chart-block" id="wake-fig">
+  <div class="chart-title">Every repeat of the wake-up probe: each line is one repeat's load latency after the idle,
+  minus the same line's latency with no idle</div>
+  <div class="ck-controls"><div id="wake-level"></div><div id="wake-idle"></div></div>
+  <div id="wake-leg"></div>
+  <div class="chart" id="wake"></div>
+  <p class="ck-readout" id="wake-count"></p>
+  <p class="small" id="wake-off"></p>
+</div>
 
-<p id="scaletext"></p>
+<ul>
+<li><b>L1 and L3: zero.</b> The paired difference between the longest idle and no idle is 0 cycles, for L1 both
+with the line placed by an evict and with it simply left in place. (One L1 repeat's no-idle load read exactly 128
+cycles too long, a misfire of the kernel's cycle-counter correction, so that repeat sits at −128 at every idle; the chart
+marks it.)</li>
+<li><b>L2: −11 cycles</b>, and this comes from the baseline, not the idle. With no idle at all the load reads 60 or 61
+cycles, probably because the line was still settling after the asynchronous evict that placed it. At every idle
+from 1.7 µs to 27 ms it reads 49 or 50 cycles, a normal L2 hit (139 of those 140 loads; the other is a counter
+misfire). No wake-up.</li>
+<li><b>DRAM: +10.5 cycles</b>, and that one has a known cause: the line's DRAM row has closed, so the next load
+pays an activate, 11 cycles (tRCD, the activate-to-read delay).
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#inside-the-dram-rows-banks-and-refresh">Anatomy
+of a memory access</a> measured that cost (§5), and found that an idle row stays open until a refresh closes it
+(every 3.87 µs), as the memory controller's open-page policy implies; the +40 cycles in that report are for a load
+issued right behind another to a different row of the same bank, a different case. Here
+<span data-v="wakecount"></span>. The shift is there in full after the shortest idle, 1.7 µs, and does not grow out
+to 27 ms, which is not how a wake-up would behave.</li>
+</ul>
+<p>So on this card, in this firmware, no leakage suppression is in use. The open design has the ports and ties them
+off, no firmware line drives them, and the card shows no wake-up. Whether the taped-out chip could gate its arrays is
+not established (§8). The gating that demonstrably works is clock gating, which the open RTL uses aggressively (per
+lane, per functional unit, with a seven-cycle tail). That is why an idle-but-powered core costs so little
+<i>dynamic</i> power and still leaks.</p>
 
-<p><b>The operating point does not explain the gap.</b> aifoundry3 runs its minions at 523 mV against
-aifoundry2's 518 mV, at the same 600 MHz. By \(P=C_\mathrm{sw}V^{2}f\) that predicts about 2% <em>more</em>
-switching power on aifoundry3, not 8% less. Whatever the 8% is (silicon, package, the board's regulator
-efficiency at that load), it is a property of the card, and one number captures it.</p>
+<h2 id="what-that-costs">5. What that costs</h2>
+$$P_\text{idle}(T)\;=\;\underbrace{12.6\,\mathrm{W}}_{\text{fixed}}\;+\;\underbrace{23.3\,\mathrm{W}\;e^{(T-80\,^\circ\mathrm{C})/36\,^\circ\mathrm{C}}}_{\text{leakage}}$$
+$$\left.\frac{\partial P_\text{idle}}{\partial T}\right|_{80\,^\circ\mathrm{C}}=0.65\ \mathrm{W/^\circ C}$$
 
-<p><b>Leakage transfers too, and further than it should.</b> The idle law, fitted to aifoundry2's idle readings
-from 64 to 88 °C (it also passes through a 62 °C overnight reading) and extrapolated 7 to 14 °C below that onto the
-other card, which idled at 50 to 57 °C, predicts its idle power to within a watt:</p>
+<div class="chart-block" id="law-fig">
+  <div class="chart-title">One law, three checks: idle power against die temperature</div>
+  <div class="ck-controls"><div id="law-T"></div><button type="button" class="ck-btn" id="law-busy"
+  aria-pressed="false">Under a random-data matmul</button><button type="button" class="ck-btn" id="law-shift"
+  aria-pressed="false">Shift the law by aifoundry3's offset</button></div>
+  <div id="law-leg"></div>
+  <div class="chart" id="leaklaw"></div>
+  <p class="ck-readout" id="law-read"></p>
+</div>
 
+<p><b>Three checks the fit never saw.</b> The idle law above was fitted on 21 September to idle readings at
+<span data-v="fitT"></span> °C (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">the
+Horace experiment, §8</a>; tabulated in
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">the energy manual, §1</a>). It
+predicts <span data-v="checks"></span>. Nearly half of that 22 September idle, <span data-v="unsensed"></span> W, is on
+no rail sensor (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">energy manual,
+§1</a>).</p>
+
+<p><b>Leakage transfers too, and further than it should.</b> <span data-v="a3law"></span></p>
+<details><summary>aifoundry3's idle, bin by bin, against the aifoundry2 law</summary>
 <div class="table-wrap"><table id="leaktab"></table></div>
+</details>
 
-<p>The consequence for anyone with a shelf of these cards: the shape of the data-dependence is a property of the
-design and moves between cards unchanged, while the absolute scale and the idle offset are per-card constants, here
-8% and 0.7 W. One random-data matmul on a new card calibrates the scale, and idle readings give the offset.</p>
+<p>Kanter put leakage at 5–30% of a design's power, with 20% common, and noted that parts which clock lower and use
+slower transistors leak less. This card is above that range whether busy or idle: <b>36% of a 64 W random-data
+matmul, <span data-v="idle65"></span> of an idle card at 80 °C</b> (<span data-v="idle65of"></span>). Three things make
+it so, and only the third is the chip's own: (1) it runs at 0.52 V rather than the 0.4 V Esperanto designed for;
+(2) its desktop chassis rests it at 62–73 °C, and these shares are quoted at 80 °C, where every strict run launched;
+server airflow would keep it cooler; (3) it carries 128 MB of shire SRAM (Esperanto quotes over 160 MB on die, at
+Hot Chips 33) with no array power gating in play.</p>
+
+<h2 id="what-the-second-card-says-about-the-model">6. What the second card says about the model</h2>
+<p id="card2"></p>
+
+<h2 id="what-this-means-for-the-equation-and-for-measuring-power">7. What this means for the equation, and for measuring power</h2>
+<ul>
+<li><b>The equation is right; it is just not what the loop uses.</b> Its activity term is strongly confirmed on
+this card. Power over idle is close to linear in active minions: 25.6 mW per minion at 256 and 512 active, 26.2 at
+768 and 27.0 at 1,024; a line through zero fits 26.5 mW per minion. And
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#from-flips-to-watts">a model that counts four
+classes of switching event</a> inside the multiply-add unit predicts board power across fourteen operand patterns
+to 0.5 W rms, each pattern predicted by a fit that left it out. The \(V^{2}f\) term is only weakly testable here,
+because the governor will not hold the high operating point long on a heavy workload. For constant data it predicts
+\(\bigl(0.618/0.517\bigr)^{2}\times(800/600)=1.91\) for the switching-power ratio between the two points; the
+cool-start runs give about 2.1 for ones, a loose check: the idle levels it subtracts are uncertain by about 5% (the
+600 MHz idle alone moves about <span data-v="idleslope"></span> W per degree at <span data-v="idleslopeT"></span> °C),
+the runs are seven short, uncontrolled ones, and zeros are too small to test it at all
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power#voltage-and-clock">Why is the ET-SoC-1 low power?,
+Voltage and clock</a>). A clean test needs a die below 65 °C and a runner that pins the work rate.</li>
+<li><b>Kanter's argument that measured power is too expensive to mandate is weaker for this card, though it does
+not vanish.</b> His reason MLPerf cannot require measured power is that most submitters will not pay the time and
+energy to instrument a system. This chip is already instrumented, as a load-bearing part of its own safety loop: a
+PMIC that meters board power, a service processor that reads it on every pass of its management loop, and a
+management interface that hands the number to the host. The cost of reporting the card's own power here is one
+query. But MLPerf's measured power is the whole system (host, power supply, cooling), which this meter does not
+see, and the meter gives one new board reading per ~133 ms pass, with the rail readings behind the PMIC's own
+running average (a time constant of about one second).</li>
+<li><b>But the loop's hunting is exactly the kind of thing a provisioned-power metric cannot see.</b> A
+normalisation by provisioned kilowatts scores a card by its nameplate. On this card a governor with no dead band
+moves the clock, and so the throughput, by up to a third within a single 7-second run, invisibly.</li>
+</ul>
 
 <h2 id="method-and-what-is-not-established">8. Method, and what is not established</h2>
 <ul>
@@ -325,7 +362,7 @@ that exist only in et-platform firmware before commit <code>60b40c10f</code> (24
 this governor. In that older governor the power guardband is used, throttle events are logged once per state
 change, and a step-up climbs to the top point in one go. Both cards report release 1.3.1, so §1 describes the
 current source, not necessarily the governor on these cards. The measurements in §2–§7 stand either way; the
-explanations drawn from the source in §1 and §5 may not.</li>
+explanations drawn from the source in §1 and §7 may not.</li>
 <li>RTL claims are read from core-et's Erbium branch at <code>b38a1a3</code>: <code>rtl/shire/neigh/neigh_top.v</code>,
 <code>neigh_top_pwrstub.v</code>, <code>rtl/cpu_subsystem/cpu_subsystem_top.v</code>. That is the same Minion core
 lineage in a later MCU-class configuration, <b>not</b> the taped-out ET-SoC-1, which is why "nothing drives the
@@ -337,26 +374,31 @@ thermal, thermal+power, power and unattributed is mechanical, in <code>tools/ett
 nothing is fitted. Our 10 Hz sampling and the sensor's whole-degree steps mean that a step recorded at 66 °C may
 have been decided at 65 °C, and one recorded at 65 °C may have been decided on a 66 °C reading between our samples.
 That is the likeliest reading of the seven unattributed steps, and it is why the exact crossing instants are not
-known.</li>
+known. The split also depends on which sample is read: <span data-v="prevnote"></span>, because the board meter lags
+the clock by 0.1–0.3 s. Either way the power branch never fired alone.</li>
 <li>The wake-up probe is <code>gen_ops.py wakeup</code> in <code>workloads/memprobe</code>, one hart, 20
 repeats, raw results in <code>docs/reports/data/2026-09-22-dvfs-aifoundry2/wakeup/</code>. It can only detect a
 wake-up longer than about ten cycles, and only for arrays idled up to 27 ms, which is the widest the delay op
-encodes. A gating policy that waits longer than that would not show up.</li>
+encodes. A gating policy that waits longer than that would not show up. The kernel corrects the cycle counter's late
+carry itself (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#a-timer-bug-worth-knowing">Anatomy of
+a memory access, A timer bug worth knowing</a>), so the analysis uses the stored latencies as they are (signed 32-bit
+differences); the <span data-v="misfires"></span> loads on which that correction misfired read exactly 128 cycles off,
+and the paired medians the chart draws are the same whether those loads are kept, corrected or dropped.</li>
 <li>The long-idle sample is <code>docs/reports/data/2026-09-22-dvfs-aifoundry2/idle_20h.jsonl.gz</code>: 300
 samples over 60 s. The idle time is computed from timestamps, from the end of the last launch of the previous
-day's long runs to the first sample.</li>
+day's long runs to the first sample. The overnight point is the 3.2 s before the first launch of the cool-start
+session (<code>cold1</code>); the idle-law fit leaves out the first 20 s of every session and ±4.5 s around every
+launch, so neither point was in it.</li>
 <li>The three-machine comparison uses two read-only tools written for it. <code>tools/etcfg</code> issues
 <code>ETSOC1_IOCTL_GET_DEVICE_CONFIGURATION</code> to the driver; <code>ettelem config</code> asks the service
 processor for <code>DM_CMD_GET_MODULE_STATIC_TDP_LEVEL</code>, <code>..._TEMPERATURE_THRESHOLDS</code> and
 <code>..._POWER_STATE</code>. Neither writes anything. The firmware log excerpts are the card's own trace
 buffer, read with <code>ettelem sptrace</code> and stored verbatim in
-<code>docs/reports/data/2026-09-22-cards/</code>.</li>
-<li>aifoundry3's session is the same strict protocol as aifoundry2's, targeted at 55 °C instead of 80 °C
-because that card idles cooler: 20 recorded runs over eight operand patterns, launched at
-55.77 ± 0.18 °C. Raw data in <code>docs/reports/data/2026-09-22-horace-aifoundry3/</code>. The model
-coefficients applied to it are the aifoundry2 fit, unchanged; the only number derived from aifoundry3 is the
-single scale factor, and the leave-one-out figure shows what it costs to calibrate that on one operand
-pattern.</li>
+<code>docs/reports/data/2026-09-22-cards/</code>. The release numbers (1.3.1 / 1.5.0) and the 23 W at which
+aifoundry3 reported <code>max_power</code> were read by hand from ettelem's output and are not in the stored
+data.</li>
+<li>aifoundry3's session is the Horace experiment's strict protocol, launched at <span data-v="a3launch"></span>
+(20 runs); raw data in <code>docs/reports/data/2026-09-22-horace-aifoundry3/</code>.</li>
 <li><b>Not established:</b> whether the taped-out ET-SoC-1 drives its sleep transistors under some other firmware
 or in some other power state; exactly which governor build the cards run, beyond the log-format evidence above;
 what the boot frequency is set to in flash; <b>why</b> aifoundry3's flashed TDP is zero, and whether it was ever
@@ -380,16 +422,19 @@ python3 tools/ettelem/build_cards_data.py --cards $A3/cards.json --transfer $A3/
 python3 scripts/build-report.py dvfs-leakage $D/2026-09-22-dvfs-aifoundry2/dvfs.json \
     docs/reports/2026-09-22-dvfs-leakage.html</code></pre>
 <p class="small">Versions: first published 22 September 2026 for aifoundry2; extended the same day with the
-three-machine comparison and the second card (§6–§7); revised 24 September 2026 after a review, which corrected the
+three-machine comparison and the second card (§3 and §6); revised 24 September 2026 after a review, which corrected the
 governor's pass period (about 133 ms, not 10 ms), the hunting mechanism (the thermal threshold, not the power
 guardband), the reading of the open RTL (Erbium, not the chip), the seven down-steps once put down to kernel
 boundaries (now unattributed) and the idle duration (recomputed from timestamps), and added the firmware-version
-caveat.</p>
+caveat; revised 25 September 2026 after a second review: the rule's frequency check nested inside the thermal test as
+in the source, the DRAM wake-up counts (the analysis had corrected the cycle counter a second time), the operating-point
+voltages computed from the telemetry, the sections reordered, the second card cut to one paragraph (the Horace
+experiment, §10, has it in full), and interactive charts.</p>
 
 <h2 id="related-reports">Related reports</h2>
 <ul>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">The Horace experiment</a> — the
-flip-counting model, the thermal network and the cool-start runs this report reuses</li>
+flip-counting model, the thermal network, the cool-start runs this report reuses and the second card in full</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power">Why is the ET-SoC-1 low power?</a> — the
 \(C\,V^{2}f\) equation term by term, and the comparison with an A100</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The ET-SoC-1 energy manual</a> — builds on
@@ -399,7 +444,7 @@ and sensors the loop reads</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">Limits of
 observability, §4.1</a> — the meter chain, and why the loop's power input lags</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy">Anatomy of a memory access</a> — DRAM rows,
-refresh and the 11-cycle activate behind §3's DRAM result</li>
+refresh and the 11-cycle activate behind §4's DRAM result</li>
 <li><a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/16-dvfs-and-leakage.md">docs/findings/16-dvfs-and-leakage.md</a>
 — this report's findings, with each claim traced to its experiment and data</li>
 </ul>

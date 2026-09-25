@@ -28,6 +28,7 @@ HOR = f"{D}/2026-09-21-horace-aifoundry2/horace3.json"
 MEMH = f"{D}/2026-09-18-memhier-aifoundry2/energy/results.json"
 NOC = [f"{D}/2026-09-18-nocbench-aifoundry2/energy-a/results.json", f"{D}/2026-09-18-nocbench-aifoundry2/energy-b/results.json"]
 HOT = f"{D}/2026-09-22-hotline-aifoundry2/hotline.json"
+BARRIER = f"{D}/2026-09-18-nocbench-aifoundry2/barrier-chip32.jsonl"
 RELAY = f"{D}/2026-09-22-onchip-aifoundry2/onchip.json"
 CARDS = f"{D}/2026-09-22-cards/cards-report.json"
 ENER = f"{D}/2026-09-23-energy-manual/enercat.json"
@@ -161,7 +162,12 @@ def main():
 
     # --- 6. synchronisation --------------------------------------------------------------------------------
     hot = j(HOT)
-    out["sync"] = {"atomics": hot["power"], "barrier_cycles_chip": hot["context"]["barrier_cycles_chip"],
+    # the chip-wide barrier with all 1,024 minions taking part (nocbench, 18 September); barrier-chip1.jsonl is the
+    # same barrier with one minion per shire (4,995 cycles), which the hot-line page quotes
+    bar = json.loads(open(BARRIER).read().split(" ", 1)[1])
+    out["sync"] = {"atomics": hot["power"], "barrier_cycles_chip": int(round(bar["cycles_per_iter_mean"])),
+                   "barrier_participants": bar["participants"],
+                   "barrier_source": f"{BARRIER}: NOCBENCH cycles_per_iter_mean {bar['cycles_per_iter_mean']}",
                    "remote_atomic_latency_cycles": hot["context"]["remote_atomic_latency_cycles"],
                    "bank_service_cycles": hot["context"]["bank_service_cycles"], "source": HOT}
 
@@ -177,6 +183,11 @@ def main():
         # the leakage correction each burst received (section 9): its median and largest size, per card
         lc = {h: sorted(abs(b["leak_correction_w"]) for b in bs) for h, bs in bursts.items()}
         c["leak_correction"] = {h: {"median_w": statistics.median(v), "max_w": v[-1], "bursts": len(v)} for h, v in lc.items() if v}
+        # the sampler's latency per configuration is a record of the meter, not an energy: it stays in catalogue.json
+        for card in c["cards"].values():
+            for row in card["summary"].values():
+                row.pop("sampler_median_ms", None)
+                row.pop("sampler_max_ms", None)
         out["catalogue"] = c | {"source": CAT}
 
     # --- 5, 6, 4.2: the reruns of the relay, the hot line, the rings and the levels, pooled over passes and cards --
@@ -185,7 +196,11 @@ def main():
 
     # --- 4.3: the unmetered remainder attributed, and the DDR rail's droop as a DRAM-power proxy ----------------
     if os.path.exists(UNMET):
-        out["unmetered"] = j(UNMET) | {"source": UNMET}
+        u = j(UNMET)
+        for blk in (u.get("aifoundry2", {}), u.get("aifoundry3", {}), u.get("ddr_droop", {})):
+            blk.pop("per_config", None)          # the per-configuration rows are the hub's charts' (unmetered_fit.json)
+            blk.pop("per_config_fields", None)
+        out["unmetered"] = u | {"source": UNMET}
 
     # --- 8. cards ---------------------------------------------------------------------------------------------
     try:

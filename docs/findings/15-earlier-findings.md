@@ -57,7 +57,7 @@ How far down you can see on this card, from a user account:
 |---|---|
 | Time | **1 cycle** (`hpmcounter3`, corrected) |
 | Architectural state | **64 bits** — one register, CSR or memory word of a halted hart, per management round trip |
-| Energy | **133 µJ** (1 mW × 133 ms on a rail, behind the PMIC's ~1 s running average); one bit flip is ~10⁻¹⁶ J |
+| Energy | **133 µJ** (1 mW × 133 ms on a rail on aifoundry2, behind the PMIC's running average, τ ≈ 1.2 s; aifoundry3's readings change only every ~250 ms); one bit flip is ~10⁻¹⁶ J |
 | Every net, every cycle | **RTL simulation only** |
 
 **Can individual bit flips be tracked on silicon? No, and no firmware change would fix it.** Nothing on the
@@ -90,9 +90,10 @@ Baselines this work quotes but did not re-measure:
   [10-data-dependent-power.md](10-data-dependent-power.md). The PRM's fp16 zero-skip rule is a documentation
   bug; silicon computes the correct sum.
 - **On-chip communication:** 20 ns per mesh hop in both directions at any clock (12 cycles at 600 MHz); inside
-  a shire 68 cycles on reduction-tree edges and 114 elsewhere; a 1,024-minion allreduce in 2.3 µs; energy per byte
-  0.8 pJ on tree edges, 2.3 pJ within a shire, ~10 + 1.9 pJ per hop across the mesh, busy cores included
-  (re-measured in E29).
+  a shire 68 cycles on reduction-tree edges and 114 elsewhere; a 1,024-minion allreduce in 2.3 µs; energy per byte,
+  busy cores included, as re-measured on two cards on 23 September (E29): 0.67 pJ on pairs, 2.1 in a neighbourhood or
+  a shire ring, 9.3 + 1.7 pJ per mean hop across the mesh (r² 0.95). The 18 September values (0.8, 2.3 and
+  ~10 + 1.9) are superseded (E34).
 - **Memory hierarchy:** per-level latency, bandwidth and energy per byte against the A100. Since 24 September its
   bandwidth column uses only the launches that ran at 600 MHz (L2 2.45 TB/s, 128 B per shire-cycle) and its energy
   column the energy manual's §4 (E29). The 18 September averages (2.80 TB/s, "about 144 B/cycle", 148 pJ/B for DRAM,

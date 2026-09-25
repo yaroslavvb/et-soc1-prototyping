@@ -93,12 +93,14 @@ figure here is bf16; this card's fp16 multiply-add costs 2.70 pJ). The int8 unit
 per second.
 
 **The two outer operating points differ as CV²f says.** From a cool die the governor runs kernels at 800 MHz /
-0.62 V; past 65 °C it drops to 600 MHz / 0.52 V (700 MHz at 0.57 V lies between). The same kernels at nearly the
-same temperature (64–68 °C) draw, over idle: zeros 3.9 against 1.9 W, ones 20.6 against 10.3 W, random fp32 about
-53 against 27 W (the 87.6 W peak at 800 MHz less the 35.0 W idle there). The 800 MHz figures are the highest
-readings before the governor stepped down; random data held 800 MHz for at most 0.3 s. That is about **2.0× the
-switching power for 1.33× the clock**, where V²f predicts 1.90×. Energy per operation rises 1.5× for 33% more speed.
-Idle pays too: 35.0 W at 0.62 V against 28.1 W at 0.52 V, both at 65 °C.
+0.62 V; past 65 °C (or 65 W at the board) it drops to 600 MHz / 0.52 V (700 MHz at 0.57 V lies between). The same kernels at nearly the
+same temperature (63–68 °C) draw, over idle: zeros 4.5 against 1.9 W (the 600 MHz zeros figure is from the 80 °C
+runs, since from a cool die zeros stayed at 800 MHz), ones 21.0 against 10.0 W, random fp32 about 53 against 27 W
+(the 87.8 W peak at 800 MHz less the 35.0 W idle there). The 800 MHz figures are the highest readings before the
+governor stepped down; random data held 800 MHz for at most 0.3 s. That is **2.1× (ones) and 2.0× (random) the
+switching power for 1.33× the clock**, where V²f predicts 1.91×: within about 10%. `tools/ettelem/build_vf.py`
+writes these values (`vf.json`) from the cool-start telemetry, with each window stated. Energy per operation rises
+1.5–1.6× for 33% more speed. Idle pays too: 35.0 W at 0.62 V against 28.1 W at 0.52 V, both at 63–68 °C.
 
 **Leakage.** Idle board power follows 12.6 W + 23.3 W · e^((T−80)/36) from 64 to 88 °C, to 0.2 W. At 80 °C
 that is 23 W of leakage in a 36 W idle. It is the term that keeps the measured card far from Esperanto's

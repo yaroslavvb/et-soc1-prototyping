@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -99,6 +99,61 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 h2, h3 { scroll-margin-top: 12px; }
 .hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
 h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
+/* chartkit:css:begin (the chart toolkit's CSS; scripts/paste-chartkit.py copies this block into standalone pages) */
+.ck-frame { position: relative; width: 100%; }
+.ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ck-frame svg { display: block; max-width: none; height: auto; }
+.ck-frame svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.ck-frame .tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame .lab { fill: var(--ink-2); font-size: 12px; }
+.ck-frame .lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ck-frame .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-axis { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-hit { fill: transparent; stroke: none; }
+.ck-tip { position: absolute; z-index: 5; pointer-events: none; display: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border, var(--grid)); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: min(320px, calc(100% - 8px)); }
+.ck-frame svg [tabindex] { outline: none; }
+.ck-frame svg [tabindex]:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse)[tabindex]:not(.ck-hit):focus-visible,
+.ck-frame svg [tabindex]:focus-visible > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse).ck-active:not(.ck-hit),
+.ck-frame svg .ck-active > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 1.5px; }
+.ck-hidden { display: none !important; }
+.ck-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 8px 0 6px; }
+.ck-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 8px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-legend .ck-li { display: inline-flex; align-items: center; gap: 6px; }
+.ck-legend button.ck-li { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 3px 10px; min-height: 32px; cursor: pointer; }
+.ck-legend button.ck-li[aria-pressed="false"] { opacity: 0.55; text-decoration: line-through; }
+.ck-legend svg { flex: none; overflow: visible; }
+.ck-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.82rem; }
+.ck-seg-label { color: var(--ink-2); }
+.ck-seg-group { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ck-seg [role="radio"] { font: inherit; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-seg [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-range input[type="range"] { flex: 0 1 200px; width: 200px; min-width: 120px; min-height: 32px; margin: 0; accent-color: var(--c1); }
+.ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
+   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
+th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+th.num { white-space: normal; }
+@media (max-width: 599px) {
+  table.stack, .wide table.stack { min-width: 0; }
+  table.stack thead { display: none; }
+  table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { border-bottom: 1px solid var(--grid); padding: 6px 0; }
+  table.stack td, table.stack td.num { border: 0; padding: 2px 0; text-align: left; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+  table.stack td:first-child::before { content: none; }
+  table.stack td:first-child { font-weight: 600; }
+}
+@media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* chartkit:css:end */
 </style>
 </head>
 <body>
@@ -111,17 +166,21 @@ manages 76 GB/s for the whole chip. Those are bandwidths, not results. The quest
 can be rearranged to collect them. <b>It can. A chain of stages that hands each stage's output to another
 shire, instead of writing it to DRAM and reading it back, runs 12.3 times faster and uses a twelfth of the
 energy per byte, at the same power.</b> The shire that receives it is the next one in ID order, which on the
-mesh is 1 to 10 hops away (3.5 on average), and which shire it is makes no measurable difference to the
-bandwidth. Keeping the output in the shire's own scratchpad is 30.7 times faster. Both numbers reproduce on a
-second card to within 2%. Both also need the data to outgrow the 32 MB L3: below that, the hand-off wins at
+mesh is 1 to 10 hops away (3.5 on average). Over the five ring offsets tried, which shire it is moved the
+bandwidth by up to a quarter (<span id="l-gbr"></span>), against the twelvefold gain over DRAM; the ring in ID
+order, used for the headline, was the slowest of the five. Keeping the output in the shire's own scratchpad is
+30.7 times faster. Both hold on a second card (<span id="l-a3"></span>) and across five repeats on each card
+(<span id="l-rep"></span>). Both also need the data to outgrow the 32 MB L3: below that, the hand-off wins at
 most 1.4× and the shire's own scratchpad 1.3–3.3×.</p>
 
-<p class="small"><b>Terms.</b> The ET-SoC-1's cores are <i>minions</i>, 32 to a <i>shire</i>; each shire
-has 4 MB of SRAM, split on these cards into 0.5 MB of L2 cache, a 1 MB slice of the chip-wide 32 MB L3 and a
-2.5 MB <i>scratchpad</i> that any shire can address. A <i>hart</i> is one of a minion's two hardware threads.
-A <i>tensor store</i> writes a block from a minion's registers straight to memory, past its caches. The
-shires sit on a mesh network-on-chip, and a <i>hop</i> is one step between neighbouring mesh stops, 3.72 mm.
-More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
+<details class="terms"><summary>Terms used on this page</summary>
+<p class="small">The ET-SoC-1's cores are <i>minions</i>, 32 to a <i>shire</i>; each shire has 4 MB of SRAM,
+split on these cards into 0.5 MB of L2 cache, a 1 MB slice of the chip-wide 32 MB L3 and a 2.5 MB
+<i>scratchpad</i> that any shire can address. A <i>tensor store</i> writes a block from a minion's registers
+straight to memory, past its caches. The shires sit on a mesh network-on-chip, and a <i>hop</i> is one step
+between neighbouring mesh stops, 3.72 mm. More in the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
+</details>
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">Passing each stage to the next shire</div><div class="val" id="k1"></div><div class="sub">against writing it to DRAM and reading it back</div></div>
@@ -130,7 +189,7 @@ More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observ
   <div class="card kpi"><div class="lab">Where the advantage appears</div><div class="val" id="k4"></div><div class="sub">of live intermediate data: it has to outgrow the 32 MB L3</div></div>
 </div>
 
-<h2>1. One kernel, three places to put the answer</h2>
+<h2 id="one-kernel-three-places-to-put-the-answer">1. One kernel, three places to put the answer</h2>
 <p>The computation is a relay. A slab of floats belongs to each shire; a stage reads every element, adds one
 to it, and writes it out; the next stage reads what the last one wrote. Thirty-two shires, 1,024 minions,
 eight stages, 1 MB per shire per stage, half a gigabyte of traffic. The same code, the same barriers and the
@@ -144,11 +203,11 @@ After eight stages of adding one, a shire that kept its own data holds 8. In the
 checked against that expectation, on every run in this report; a run that did not really move its data would
 fail.</p>
 
-<div class="chart-title">Rate at which the chip moves its own intermediate data</div>
-<div class="chart scroll" id="head"></div>
-<p class="small" id="headcap"></p>
+<div class="chart-title">Same watts, different work: power, rate and energy per byte for the three places, side by side</div>
+<div class="chart" id="samew"></div>
+<p class="small" id="samewcap"></p>
 
-<h2>2. The same watts, a thirtieth of the work</h2>
+<h2 id="the-same-watts-a-thirtieth-of-the-work">2. The same watts, a thirtieth of the work</h2>
 <p>Power was measured separately, with each medium launched back to back for twelve seconds so the card
 reaches a steady state. The striking part is not that DRAM costs more energy per byte. It is that all three
 draw <em>the same power</em>, and one of them gets thirty times as much done with it:</p>
@@ -157,52 +216,44 @@ draw <em>the same power</em>, and one of them gets thirty times as much done wit
 
 <p class="small" id="powernote"></p>
 
-<p class="small"><b>Re-measured.</b> On 23 September the three media were run again, three warm passes on
-aifoundry2 and four on aifoundry3, each corrected for the die's leakage, and pooled with the session above
-(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">the energy
-manual, §5</a>). Mean and [range] over the eight passes, per byte moved: DRAM 105.7 [99.5–111.0] pJ, next
-shire 8.6 [7.8–9.2] pJ, own scratchpad 3.99 [3.90–4.25] pJ — 12× and 26× less than DRAM. For comparison, the
-manual's energy per byte read at 600 MHz is 122 [117–129] pJ from DRAM, 2.52 pJ from the shire's own
-scratchpad and 6.65 pJ from another shire's. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy
-report</a> now quotes these values too; its own 18 September figures (148, 2.8 and 6.3 pJ, taken with the clock
-left free) are superseded.</p>
+<p class="small" id="remeasured"></p>
 
-<h2>3. Where the advantage comes from, and where there isn't one</h2>
+<h2 id="where-the-advantage-comes-from-and-where-there-isn-t-one">3. Where the advantage comes from, and where there isn't one</h2>
 <p>The win is against DRAM, not against the memory hierarchy. Shrink the working set and the L3 quietly does
 most of the same job for free:</p>
 
 <div class="chart-title">The same eight-stage relay at different working-set sizes</div>
-<div class="chart scroll" id="size"></div>
+<div id="sizelegend"></div>
+<div class="chart" id="size"></div>
 <p class="small" id="sizecap"></p>
 
 <p id="sizetext"></p>
 
-<h2>4. How much arithmetic it takes to stop mattering</h2>
+<h2 id="how-much-arithmetic-it-takes-to-stop-mattering">4. How much arithmetic it takes to stop mattering</h2>
 <p>All of this is a statement about moving data, so it fades as the arithmetic grows. Repeating the add
 <code>w</code> times per element walks the workload up the roofline:</p>
 
 <div class="chart-title">Advantage over DRAM against arithmetic per element</div>
-<div class="chart scroll" id="intensity"></div>
+<div id="intlegend"></div>
+<div class="chart" id="intensity"></div>
 <p class="small" id="intcap"></p>
 
 <p id="inttext"></p>
 
-<h2>5. How far the slab moves does not change the bandwidth</h2>
+<h2 id="how-far-the-slab-moves-does-not-change-the-bandwidth">5. How far the slab moves: the farthest hand-off sets the pace</h2>
 <p id="distintro"></p>
+
+<div class="chart-title">Which shire reads from which, and what sets the bandwidth</div>
+<div class="ck-controls"><div id="ringoff"></div><div id="ringx"></div></div>
+<div id="ringout"></div>
+<div class="chart" id="ring"></div>
+<p class="small" id="ringcap"></p>
 
 <div class="table-wrap"><table id="dist"></table></div>
 
-<p>Transfers here are 32 KB per minion and deeply pipelined, so the 12-cycle round trip per hop never
-appears; what is left is the bandwidth of a scratchpad that is not this shire's own, and it does not depend on
-where that shire is. The practical consequence is that placement is free in bandwidth: a stage can be given to
-whichever shire suits. It is not free in energy. On a loaded mesh each hop costs 1.5–2.2 pJ per byte of
-random data (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#meaning">Heat per millimetre,
-§9</a>), about half of what a tensor load of that byte from the shire's own scratchpad costs. Every byte the
-hand-off reads has crossed 3.5 hops on average, so a stage placed on a physical neighbour should cost less than
-the energy in §2; that was not measured. This relay's slabs each hold a single value repeated, and such data costs less to carry than
-random data.</p>
+<p id="distafter"></p>
 
-<h2>6. What this is good for</h2>
+<h2 id="what-this-is-good-for">6. What this is good for</h2>
 <ul>
 <li><b>Any chain of passes over data that outgrows the L3.</b> Multi-stage filters, iterated stencils, a deep
 and narrow network, a stream that several kernels touch in turn. The standard shape writes the intermediate
@@ -220,17 +271,14 @@ DRAM route reaches only 38 and 44 GB/s. Build the barrier with one atomic per sh
 that nobody spins on a shared counter: the first version of this relay had every shire's leader poll one
 counter, which is <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">the hot line</a> of the
 companion report, and the barrier hung.</li>
-<li><b>In a two-dimensional systolic array, give each neighbour link its own minion.</b> The register-to-register
-path (<code>TensorSend</code>/<code>TensorRecv</code>) is immune to shire-cache contention and is the right tool
-inside a shire. But the hardware keeps one ready flag per minion rather than one per partner, so a minion
-that exchanges with two partners at once, as a cell of a classic 2D array does with its north and west
-neighbours, can lose a ready and hang until the chip is reset (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#a-trap-one-ready-flag-per-minion">on-chip
-communication, “A trap: one ready flag per minion”</a>). A shire has 32 minions, so each link can have its
-own; a minion that must serve two neighbours has to take them in separate phases with a barrier between. The
-relay here is the same idea at shire granularity, through the scratchpads, a path that cannot hang.</li>
+<li><b>Inside a shire, use the register path, one partner at a time.</b> <code>TensorSend</code>/<code>TensorRecv</code>
+is immune to shire-cache contention, but a minion that takes readies from two partners at once can hang until the
+chip is reset (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#a-trap-one-ready-flag-per-minion">on-chip
+communication</a>): give each link its own minion, or take the directions in barrier-separated phases. The relay is
+the same idea at shire granularity, through the scratchpads, a path that cannot hang.</li>
 </ul>
 
-<h2>7. Method, and what is not established</h2>
+<h2 id="method-and-what-is-not-established">7. Method, and what is not established</h2>
 <ul>
 <li>The probe is <code>workloads/onchip</code>, new for this. A stage's output is written with a tensor store,
 which bypasses the L1 and L2 caches, so the shire that reads it next cannot read a stale line. Inputs are read
@@ -251,8 +299,10 @@ aifoundry2 only): <span id="cards"></span>.</li>
 <li>Whether a working set larger than the 80 MB of scratchpad can be streamed through the same relay. That is
 the case where on-chip hand-off would be the only option rather than the faster one, and we did not build the
 flow control it needs.</li>
-<li>Whether handing to a physical neighbour lowers the hand-off's energy per byte. Every offset measured here
-mixes near and far shires.</li>
+<li>Whether a ring laid out along the mesh, with every hand-off one hop (such a ring exists on this map), is
+faster still and cheaper per byte. The trend over longest hand-offs of 6–10 hops (section 5) suggests it could
+be faster, and every offset measured here mixes near and far shires, so the energy per byte of a neighbour
+hand-off is not known either.</li>
 <li>A real pipeline. The arithmetic here is one vector add, chosen to make the measurement about data
 movement; a real pipeline would have real stages, and section 4 says what that costs.</li>
 <li>A cheaper barrier. The chip-wide barrier per stage is the simplest synchronisation, not the cheapest; a
@@ -262,18 +312,23 @@ and carries this relay's reads and writes at 48 GB/s, not against a memory syste
 </ul></li>
 </ul>
 
-<pre><code>workloads/onchip/run_onchip.sh DATA                 # 88 configurations, milliseconds of card time each
+<pre><code>workloads/onchip/run_onchip.sh DATA                 # 88 configurations on aifoundry2, milliseconds of card time each
+workloads/onchip/run_onchip.sh DATA3                # the same sweep on aifoundry3
 tools/ettelem/run_onchip_power.sh DATA 12           # board power, one burst per medium
 python3 workloads/onchip/analyze_onchip.py DATA/sweep.jsonl DATA3/sweep.jsonl --power DATA --out onchip.json
-                                                    # DATA3: the same sweep from the second card</code></pre>
+python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm \
+    docs/reports/data/2026-09-23-reruns-aifoundry3 --out reruns.json   # the passes behind §2's ranges</code></pre>
 <p class="small">Raw data and the analysis output:
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry2">docs/reports/data/2026-09-22-onchip-aifoundry2</a>
 and <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry3">…-aifoundry3</a>.
 Versions: first published 22 September 2026; revised 24 September 2026 to say that the “next shire” is the
 next by ID rather than a mesh neighbour, to add the mesh distances and the 23 September energy re-measurement,
-and to correct the flops-per-byte unit in section 4.</p>
+and to correct the flops-per-byte unit in section 4; revised 25 September 2026: the ring offset moves the
+bandwidth by up to a quarter, following the longest hand-off (it had said distance made no measurable
+difference), the pooled energies in the table of section 2, both cards in section 5, and charts that fit a
+phone.</p>
 
-<h2>8. Related reports</h2>
+<h2 id="related-reports">8. Related reports</h2>
 <ul>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">The energy manual, §5</a> — this relay's energy re-measured, with bars from both cards.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> — what each mesh hop costs in energy, measured with chosen bit patterns.</li>
@@ -281,139 +336,628 @@ and to correct the flops-per-byte unit in section 4.</p>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the shire map, 12 cycles per hop, the chip-wide barrier and the one-ready-flag trap.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a> — the roofline that section 4 climbs, for every level of memory.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a> — the companion: what happens when the structure several shires share is a single line rather than a slab.</li>
-<li><a href="https://spacesheep.dev/@yaroslavvb/2026-09-22-et-soc1-l2-mainline-starvation#landmine">L2 mainline starvation, “The landmine”</a> — the brief's last section: why a 2D systolic array hangs a hart until the chip is reset.</li>
 <li><a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/findings">docs/findings/</a> — the findings index: where every claim here comes from, and the experiment register.</li>
 </ul>
 
 <script>
-const D = {"cards":["aifoundry2","aifoundry3"],"headline":{"aifoundry2":{"dram":{"group":"headline","host":"aifoundry2","test":"relay","medium":"dram","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":6660113,"cycles_mean":6657537,"wall_s":0.012525,"bytes_per_cycle":80.61,"gb_s":48.37,"flop_per_byte":0.125,"gflop_s":6.05,"shire0_final":8.0,"wrong_elements":0,"ok":true},"scp":{"group":"headline","host":"aifoundry2","test":"relay","medium":"scp","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":217110,"cycles_mean":216607,"wall_s":0.001292,"bytes_per_cycle":2472.806,"gb_s":1483.68,"flop_per_byte":0.125,"gflop_s":185.46,"shire0_final":8.0,"wrong_elements":0,"ok":true},"hop":{"group":"headline","host":"aifoundry2","test":"relay","medium":"hop","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":543337,"cycles_mean":539296,"wall_s":0.001872,"bytes_per_cycle":988.099,"gb_s":592.86,"flop_per_byte":0.125,"gflop_s":74.11,"shire0_final":32.0,"wrong_elements":0,"ok":true}},"aifoundry3":{"dram":{"group":"headline","host":"aifoundry3","test":"relay","medium":"dram","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":6735924,"cycles_mean":6735088,"wall_s":0.01256,"bytes_per_cycle":79.703,"gb_s":47.82,"flop_per_byte":0.125,"gflop_s":5.98,"shire0_final":8.0,"wrong_elements":0,"t_start_ms":1790117953219,"t_end_ms":1790117953232,"ok":true},"scp":{"group":"headline","host":"aifoundry3","test":"relay","medium":"scp","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":215670,"cycles_mean":215380,"wall_s":0.001144,"bytes_per_cycle":2489.317,"gb_s":1493.59,"flop_per_byte":0.125,"gflop_s":186.7,"shire0_final":8.0,"wrong_elements":0,"t_start_ms":1790117953458,"t_end_ms":1790117953460,"ok":true},"hop":{"group":"headline","host":"aifoundry3","test":"relay","medium":"hop","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":543378,"cycles_mean":539564,"wall_s":0.001645,"bytes_per_cycle":988.025,"gb_s":592.81,"flop_per_byte":0.125,"gflop_s":74.1,"shire0_final":32.0,"wrong_elements":0,"t_start_ms":1790117953687,"t_end_ms":1790117953689,"ok":true}}},"intensity":[{"work":1,"ok":true,"dram":{"gb_s":48.54,"cycles":6636598,"bytes":536870912},"scp":{"gb_s":1490.91,"cycles":216058,"bytes":536870912},"hop":{"gb_s":592.69,"cycles":543494,"bytes":536870912},"scp_over_dram":30.715080346106305,"hop_over_dram":12.210341985990937},{"work":2,"ok":true,"dram":{"gb_s":47.85,"cycles":6732532,"bytes":536870912},"scp":{"gb_s":1377.08,"cycles":233917,"bytes":536870912},"hop":{"gb_s":573.36,"cycles":561817,"bytes":536870912},"scp_over_dram":28.7791013584117,"hop_over_dram":11.982445141065831},{"work":4,"ok":true,"dram":{"gb_s":47.33,"cycles":6805313,"bytes":536870912},"scp":{"gb_s":1215.51,"cycles":265011,"bytes":536870912},"hop":{"gb_s":540.31,"cycles":596177,"bytes":536870912},"scp_over_dram":25.681597295584197,"hop_over_dram":11.415803929854214},{"work":8,"ok":true,"dram":{"gb_s":48.03,"cycles":6706933,"bytes":536870912},"scp":{"gb_s":982.29,"cycles":327930,"bytes":536870912},"hop":{"gb_s":481.6,"cycles":668854,"bytes":536870912},"scp_over_dram":20.45159275452842,"hop_over_dram":10.02706641682282},{"work":16,"ok":true,"dram":{"gb_s":47.21,"cycles":6822920,"bytes":536870912},"scp":{"gb_s":685.65,"cycles":469806,"bytes":536870912},"hop":{"gb_s":395.64,"cycles":814179,"bytes":536870912},"scp_over_dram":14.52340605803855,"hop_over_dram":8.380427875450117},{"work":32,"ok":true,"dram":{"gb_s":47.08,"cycles":6841746,"bytes":536870912},"scp":{"gb_s":425.96,"cycles":756232,"bytes":536870912},"hop":{"gb_s":291.69,"cycles":1104347,"bytes":536870912},"scp_over_dram":9.047578589634664,"hop_over_dram":6.195624468988955},{"work":64,"ok":true,"dram":{"gb_s":46.63,"cycles":6908486,"bytes":536870912},"scp":{"gb_s":242.2,"cycles":1329983,"bytes":536870912},"hop":{"gb_s":191.44,"cycles":1682589,"bytes":536870912},"scp_over_dram":5.194081063692901,"hop_over_dram":4.10551147330045},{"work":128,"ok":true,"dram":{"gb_s":47.17,"cycles":6829324,"bytes":536870912},"scp":{"gb_s":129.1,"cycles":2495119,"bytes":536870912},"hop":{"gb_s":113.7,"cycles":2833118,"bytes":536870912},"scp_over_dram":2.7369090523637905,"hop_over_dram":2.4104303582785667},{"work":256,"ok":true,"dram":{"gb_s":41.84,"cycles":7699278,"bytes":536870912},"scp":{"gb_s":66.59,"cycles":4837413,"bytes":536870912},"hop":{"gb_s":62.75,"cycles":5133356,"bytes":536870912},"scp_over_dram":1.5915391969407264,"hop_over_dram":1.4997609942638621}],"size":[{"stage_bytes":65536,"ok":true,"dram":{"gb_s":281.42,"cycles":71540,"bytes":33554432},"scp":{"gb_s":372.08,"cycles":54109,"bytes":33554432},"hop":{"gb_s":274.28,"cycles":73401,"bytes":33554432},"scp_over_dram":1.3221519437140217,"hop_over_dram":0.9746286688934687},{"stage_bytes":131072,"ok":true,"dram":{"gb_s":411.65,"cycles":97815,"bytes":67108864},"scp":{"gb_s":627.41,"cycles":64177,"bytes":67108864},"hop":{"gb_s":401.34,"cycles":100327,"bytes":67108864},"scp_over_dram":1.5241345803473825,"hop_over_dram":0.9749544515972306},{"stage_bytes":262144,"ok":true,"dram":{"gb_s":409.09,"cycles":196852,"bytes":134217728},"scp":{"gb_s":948.98,"cycles":84860,"bytes":134217728},"hop":{"gb_s":517.4,"cycles":155645,"bytes":134217728},"scp_over_dram":2.319734043853431,"hop_over_dram":1.2647583661297026},{"stage_bytes":524288,"ok":true,"dram":{"gb_s":379.15,"cycles":424800,"bytes":268435456},"scp":{"gb_s":1262.59,"cycles":127564,"bytes":268435456},"hop":{"gb_s":544.57,"cycles":295757,"bytes":268435456},"scp_over_dram":3.330054068310695,"hop_over_dram":1.436291705129896},{"stage_bytes":1048576,"ok":true,"dram":{"gb_s":47.87,"cycles":6729080,"bytes":536870912},"scp":{"gb_s":1506.14,"cycles":213873,"bytes":536870912},"hop":{"gb_s":592.65,"cycles":543530,"bytes":536870912},"scp_over_dram":31.463129308543976,"hop_over_dram":12.380405264257364}],"stages":[{"stages":1,"ok":true,"dram":{"gb_s":38.03,"cycles":1058911,"bytes":67108864},"scp":{"gb_s":1390.81,"cycles":28951,"bytes":67108864},"hop":{"gb_s":582.47,"cycles":69128,"bytes":67108864},"scp_over_dram":36.571391007099656,"hop_over_dram":15.316066263476204},{"stages":2,"ok":true,"dram":{"gb_s":44.02,"cycles":1829490,"bytes":134217728},"scp":{"gb_s":1453.28,"cycles":55413,"bytes":134217728},"hop":{"gb_s":588.42,"cycles":136859,"bytes":134217728},"scp_over_dram":33.01408450704225,"hop_over_dram":13.367105860972284},{"stages":4,"ok":true,"dram":{"gb_s":47.4,"cycles":3397731,"bytes":268435456},"scp":{"gb_s":1466.13,"cycles":109855,"bytes":268435456},"hop":{"gb_s":591.15,"cycles":272452,"bytes":268435456},"scp_over_dram":30.93101265822785,"hop_over_dram":12.471518987341772},{"stages":8,"ok":true,"dram":{"gb_s":49.47,"cycles":6511078,"bytes":536870912},"scp":{"gb_s":1486.04,"cycles":216766,"bytes":536870912},"hop":{"gb_s":592.61,"cycles":543568,"bytes":536870912},"scp_over_dram":30.03921568627451,"hop_over_dram":11.979179300586214},{"stages":16,"ok":true,"dram":{"gb_s":49.61,"cycles":12986597,"bytes":1073741824},"scp":{"gb_s":1501.75,"cycles":428997,"bytes":1073741824},"hop":{"gb_s":593.32,"cycles":1085834,"bytes":1073741824},"scp_over_dram":30.27111469461802,"hop_over_dram":11.959685547268696},{"stages":32,"ok":true,"dram":{"gb_s":49.36,"cycles":26103250,"bytes":2147483648},"scp":{"gb_s":1499.44,"cycles":859316,"bytes":2147483648},"hop":{"gb_s":593.78,"cycles":2169990,"bytes":2147483648},"scp_over_dram":30.377633711507293,"hop_over_dram":12.029578606158832}],"shires":[{"shires":2,"ok":true,"dram":{"gb_s":46.68,"cycles":431336,"bytes":33554432},"scp":{"gb_s":108.35,"cycles":185814,"bytes":33554432},"hop":{"gb_s":58.24,"cycles":345697,"bytes":33554432},"scp_over_dram":2.3211225364181662,"hop_over_dram":1.24764353041988},{"shires":4,"ok":true,"dram":{"gb_s":93.34,"cycles":431390,"bytes":67108864},"scp":{"gb_s":214.7,"cycles":187543,"bytes":67108864},"hop":{"gb_s":95.61,"cycles":421157,"bytes":67108864},"scp_over_dram":2.3001928433683307,"hop_over_dram":1.0243196914506105},{"shires":8,"ok":true,"dram":{"gb_s":179.93,"cycles":447564,"bytes":134217728},"scp":{"gb_s":418.2,"cycles":192567,"bytes":134217728},"hop":{"gb_s":161.41,"cycles":498906,"bytes":134217728},"scp_over_dram":2.324237203356861,"hop_over_dram":0.8970710831990217},{"shires":16,"ok":true,"dram":{"gb_s":292.22,"cycles":551171,"bytes":268435456},"scp":{"gb_s":812.49,"cycles":198232,"bytes":268435456},"hop":{"gb_s":338.75,"cycles":475464,"bytes":268435456},"scp_over_dram":2.780405174183834,"hop_over_dram":1.1592293477516937},{"shires":32,"ok":true,"dram":{"gb_s":46.81,"cycles":6881830,"bytes":536870912},"scp":{"gb_s":1484.11,"cycles":217047,"bytes":536870912},"hop":{"gb_s":592.77,"cycles":543419,"bytes":536870912},"scp_over_dram":31.704977568895533,"hop_over_dram":12.663319803460798}],"distance":[{"hop_distance":1,"gb_s":592.69,"ok":true,"mesh_hops":{"mean":3.5,"min":1,"max":10}},{"hop_distance":2,"gb_s":703.19,"ok":true,"mesh_hops":{"mean":4.5,"min":2,"max":7}},{"hop_distance":4,"gb_s":652.37,"ok":true,"mesh_hops":{"mean":3.6875,"min":1,"max":8}},{"hop_distance":8,"gb_s":686.19,"ok":true,"mesh_hops":{"mean":1.625,"min":1,"max":7}},{"hop_distance":16,"gb_s":733.46,"ok":true,"mesh_hops":{"mean":2.125,"min":1,"max":6}}],"bigsize":[{"stage_bytes":65536,"gb_s":281.42},{"stage_bytes":131072,"gb_s":411.65},{"stage_bytes":262144,"gb_s":409.09},{"stage_bytes":524288,"gb_s":379.15},{"stage_bytes":1048576,"gb_s":47.87},{"stage_bytes":2097152,"gb_s":47.87},{"stage_bytes":4194304,"gb_s":50.98},{"stage_bytes":8388608,"gb_s":53.4}],"probe":[{"method_name":"tensor_store","remote_words_wrong":0,"ok":true,"host":"aifoundry2"},{"method_name":"vector_stores","remote_words_wrong":0,"ok":true,"host":"aifoundry2"},{"method_name":"tensor_store","remote_words_wrong":0,"ok":true,"host":"aifoundry3"},{"method_name":"vector_stores","remote_words_wrong":0,"ok":true,"host":"aifoundry3"}],"power":{"idle":{"board_w":30.614248704663208,"minion_w":10.428893782383419,"sram_w":1.9176398963730572,"noc_w":3.49240414507772,"die_c":71.2720207253886,"n":386},"media":[{"medium":"dram","runs":11,"bytes":472446402560.0,"device_s":9.513084063333332,"wall_s":11.400000095367432,"duty":0.8344810512062296,"bytes_per_s":49662801191.98877,"over_idle_w":4.342025805140718,"pj_per_byte":104.7718732209115,"n":102,"board_w":34.956274509803926,"minion_w":10.644500000000003,"sram_w":2.383029411764706,"noc_w":4.358823529411763,"die_c":71.0},{"medium":"scp","runs":12,"bytes":15300820992000.0,"device_s":10.183322776666667,"wall_s":12.264999866485596,"duty":0.8302750010208185,"bytes_per_s":1502537170584.3596,"over_idle_w":5.301569477154974,"pj_per_byte":4.2496901939750416,"n":110,"board_w":35.91581818181818,"minion_w":12.061245454545453,"sram_w":4.814781818181819,"noc_w":3.513345454545454,"die_c":71.94545454545455},{"medium":"hop","runs":11,"bytes":5757940531200.0,"device_s":9.692281258333333,"wall_s":11.571000099182129,"duty":0.8376355695492916,"bytes_per_s":594074849638.6624,"over_idle_w":4.423443603029103,"pj_per_byte":8.889231504221394,"n":104,"board_w":35.03769230769231,"minion_w":11.55676923076923,"sram_w":3.3651153846153843,"noc_w":4.6978269230769225,"die_c":72.0}]}};
-const NS='http://www.w3.org/2000/svg';
-function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
-function txt(p,x,y,s,c,an){const t=el('text',{x,y,class:c||'tick','text-anchor':an||'start'},p);t.textContent=s;return t;}
-function host(id,W,H){const h=document.getElementById(id);h.innerHTML='';const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'},h);const tip=document.createElement('div');tip.className='tip';h.appendChild(tip);return {svg,tip,h};}
-function hover(g,tip,h,html){const s=ev=>{tip.innerHTML=html();tip.style.display='block';const b=h.getBoundingClientRect();tip.style.left=Math.max(0,Math.min(ev.clientX-b.left+12,b.width-290))+'px';tip.style.top=(ev.clientY-b.top+12)+'px';};g.addEventListener('mousemove',s);g.addEventListener('mouseleave',()=>tip.style.display='none');}
-function path(pts,x,y){return pts.map((p,i)=>`${i?'L':'M'}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join(' ');}
-function axes(svg,o){const {W,H,L,R,T,B,x,y}=o;
- for(const t of o.yt){el('line',{x1:L,x2:W-R,y1:y(t),y2:y(t),class:'grid-line'},svg);txt(svg,L-6,y(t)+4,o.yf?o.yf(t):t,'tick','end');}
- for(const t of o.xt){txt(svg,x(t),H-B+16,o.xf?o.xf(t):t,'tick','middle');}
- if(o.xl)txt(svg,(L+W-R)/2,H-4,o.xl,'lab','middle');if(o.yl)txt(svg,4,T-8,o.yl,'lab');}
-const f0=v=>v.toFixed(0),f1=v=>v.toFixed(1),f2=v=>v.toFixed(2);
-/* GB/s and other figures in the thousands get separators; cycle counts are integers */
-const g1=v=>v.toLocaleString('en-GB',{minimumFractionDigits:1,maximumFractionDigits:1});
-const gi=v=>Math.round(v).toLocaleString('en-GB');
-const MED=[['dram','write it to DRAM, read it back next stage','var(--c2)'],
-           ['hop','write it where the next shire will read it','var(--c1)'],
-           ['scp',"keep it in this shire's own scratchpad",'var(--c3)']];
-const A2=D.cards[0], H=D.headline[A2];
+/* chart toolkit: docs/reports/sources/chartkit.js */
+/* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
+   Source-built pages get it from report.template.html (scripts/build-report.py inlines it before the page script);
+   standalone pages get this file, the template's chartkit CSS and token aliases from scripts/paste-chartkit.py.
+   Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
+   --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
+   API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame. Every mark with a tooltip is reachable from the keyboard. */
+window.CK = (function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
+  let uid = 0;
+  const $ = h => (typeof h === 'string' ? document.getElementById(h) : h);
+  const mm = q => (window.matchMedia ? window.matchMedia(q) : {matches: false});
+  const reduced = mm('(prefers-reduced-motion: reduce)').matches;
 
-/* ---------- KPIs ---------- */
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, str, cls, anchor) {
+    const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
+    t.textContent = str;
+    return t;
+  }
+  const path = (pts, x, y) => pts.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ');
+
+  /* ---- numbers ---- */
+  function num(v, dp) {
+    if (v == null || !isFinite(v)) return '\u2014';
+    const auto = dp == null;  // no dp: three significant digits, trailing zeros dropped
+    if (auto) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+    const s = Number(v).toLocaleString('en-GB', {minimumFractionDigits: auto ? 0 : dp, maximumFractionDigits: dp});
+    return /[1-9]/.test(s) ? s.replace('-', '\u2212') : s.replace('-', '');  // true minus; never "−0.00"
+  }
+  const fmt = {
+    num,
+    range: (a, b, dp, unit) => {
+      const s = num(a, dp), t = num(b, dp), u = unit ? '\u00a0' + unit : '';
+      return s === t ? s + u : s + (b < 0 ? ' to ' : '\u2013') + t + u;
+    },
+    pct: (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%',
+  };
+
+  /* ---- scales ---- */
+  function niceTicks(a, b, n) {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    if (!(hi > lo)) return Object.assign([lo], {step: 1});
+    const raw = (hi - lo) / Math.max(1, n || 5), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    const step = (m >= 7.5 ? 10 : m >= 3.5 ? 5 : m >= 1.5 ? 2 : 1) * p, out = [];
+    for (let i = Math.ceil(lo / step - 1e-9); i * step <= hi + step * 1e-9; i++) out.push(+(i * step).toPrecision(12));
+    out.step = step;
+    return out;
+  }
+  const tickDp = t => (t.step ? Math.max(0, -Math.floor(Math.log10(t.step) + 1e-9)) : null);
+  function lin(d0, d1, r0, r1) {
+    const s = v => r0 + (v - d0) * (r1 - r0) / (d1 - d0);
+    s.inv = p => d0 + (p - r0) * (d1 - d0) / (r1 - r0);
+    s.ticks = n => niceTicks(d0, d1, n);
+    s.domain = [d0, d1]; s.range = [r0, r1];
+    return s;
+  }
+  function log(d0, d1, r0, r1) {
+    const l0 = Math.log10(d0), l1 = Math.log10(d1);
+    const s = v => r0 + (Math.log10(v) - l0) * (r1 - r0) / (l1 - l0);
+    s.inv = p => Math.pow(10, l0 + (p - r0) * (l1 - l0) / (r1 - r0));
+    s.ticks = n => {
+      const lo = Math.min(l0, l1), hi = Math.max(l0, l1), k0 = Math.ceil(lo - 1e-9), k1 = Math.floor(hi + 1e-9);
+      const dec = k1 - k0 + 1, every = Math.max(1, Math.ceil(dec / (n || 6))), out = [];
+      const add = v => { v = +v.toPrecision(12); const lv = Math.log10(v); if (lv >= lo - 1e-9 && lv <= hi + 1e-9) out.push(v); };
+      if (dec <= 2) { for (let k = k0 - 1; k <= k1; k++) for (const m of [1, 2, 5]) add(m * Math.pow(10, k)); }
+      else for (let k = k0; k <= k1; k += every) add(Math.pow(10, k));
+      return out;
+    };
+    s.domain = [d0, d1]; s.range = [r0, r1]; s.log = true;
+    return s;
+  }
+  const logFmt = v => num(v, v >= 1 ? 0 : Math.ceil(-Math.log10(v) - 1e-9));
+
+  /* ---- frame: a responsive SVG sized to its host ---- */
+  function frame(hostId, o) {
+    const host = $(hostId);
+    if (!host) throw new Error('CK.frame: no element ' + hostId);
+    host.classList.add('ck-frame'); host.classList.remove('scroll');
+    host.textContent = '';
+    const plot = document.createElement('div'); plot.className = 'ck-plot'; host.appendChild(plot);
+    const svg = el('svg', {role: 'group', 'aria-label': o.label || null}, plot);
+    const tip = document.createElement('div'); tip.className = 'ck-tip'; tip.setAttribute('aria-hidden', 'true');
+    host.appendChild(tip);
+    const minW = o.minW == null ? 320 : o.minW, maxW = o.maxW == null ? 900 : o.maxW;
+    const f = {svg, host, tip, W: 0, H: 0, narrow: false, seriesOn: null, pinned: null, active: null, navIndex: 0};
+    const width = () => {
+      const cs = getComputedStyle(host), cw = host.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return Math.round(Math.max(minW, Math.min(maxW, cw > 0 ? cw : maxW)));
+    };
+    f.redraw = () => {
+      const W = width(), H = Math.round(typeof o.height === 'function' ? o.height(W) : (o.height || 300));
+      f.refocus = svg.contains(document.activeElement) ? f.navIndex : null;
+      hide(f, true);
+      Object.assign(f, {W, H, narrow: W < 600, navNodes: []});
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.setAttribute('height', H);
+      svg.style.width = W + 'px';
+      o.draw(f);
+      if (f.seriesOn) showSeries(f, f.seriesOn);
+    };
+    f.redraw();
+    frames.push(f);
+    if (window.ResizeObserver) {
+      let timer;
+      new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => { if (width() !== f.W) f.redraw(); }, 150); }).observe(host);
+    }
+    return f;
+  }
+
+  /* ---- axes: horizontal grid, tick labels, baseline, axis titles (y title sits above the plot) ---- */
+  function axes(f, o) {
+    const {x, y} = o, W = f.W, H = f.H;
+    const L = o.L == null ? 44 : o.L, R = o.R == null ? 12 : o.R, T = o.T == null ? 22 : o.T, B = o.B == null ? 38 : o.B;
+    const g = el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, f.svg);
+    const yt = o.yt || y.ticks(Math.max(3, Math.round((H - T - B) / 48)));
+    const xt = o.xt || x.ticks(Math.max(2, Math.round((W - L - R) / 90)));
+    const auto = (s, t) => (s.log ? logFmt : v => num(v, tickDp(t)));
+    const xf = o.xfmt || auto(x, xt), yf = o.yfmt || auto(y, yt), labs = [];
+    for (const t of yt) {
+      if (o.grid !== false) el('line', {x1: L, x2: W - R, y1: y(t), y2: y(t), class: 'grid-line'}, g);
+      labs.push(txt(g, L - 6, y(t) + 4, yf(t), 'tick', 'end'));
+    }
+    el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    for (const t of xt) labs.push(txt(g, x(t), H - B + 16, xf(t), 'tick', 'middle'));
+    if (o.xl) labs.push(txt(g, (L + W - R) / 2, H - 6, o.xl, 'lab', 'middle'));
+    if (o.yl) txt(g, 2, Math.max(12, T - 13), o.yl, 'lab');
+    inside(f, labs);
+    return g;
+  }
+  /* Keep labels inside the frame (0..f.W, 0..f.H, less pad): one that would cross the left or right edge is anchored
+     at that edge instead (text-anchor start or end, so its outer end sits pad px from the edge in any font; an end
+     tick label still covers its tick), and one that would cross the top or bottom is moved in. Labels already inside
+     are not touched. Widths are measured in the page's font; a chart drawn while hidden has no layout, so they are
+     estimated at 0.6 em a character. Vertically the glyphs are taken as 0.75 em above the baseline and 0.25 em below. */
+  function inside(f, labels, pad) {
+    pad = pad == null ? 2 : pad;
+    const m = labels.map(t => {
+      let w = 0, fs = 12;
+      try { w = t.getComputedTextLength(); fs = parseFloat(getComputedStyle(t).fontSize) || 12; } catch (_) { /* no layout */ }
+      return {w: w > 0 ? w : 0.6 * fs * t.textContent.length, fs};
+    });
+    labels.forEach((t, k) => {
+      const {w, fs} = m[k], a = t.getAttribute('text-anchor') || 'start', x = +t.getAttribute('x'), y = +t.getAttribute('y');
+      const x0 = a === 'end' ? x - w : a === 'middle' ? x - w / 2 : x;
+      if (x0 < pad) { t.setAttribute('text-anchor', 'start'); t.setAttribute('x', pad); }
+      else if (x0 + w > f.W - pad) { t.setAttribute('text-anchor', 'end'); t.setAttribute('x', +(f.W - pad).toFixed(1)); }
+      if (y - 0.75 * fs < pad) t.setAttribute('y', +(pad + 0.75 * fs).toFixed(1));
+      else if (y + 0.25 * fs > f.H - pad) t.setAttribute('y', +(f.H - pad - 0.25 * fs).toFixed(1));
+    });
+    return labels;
+  }
+
+  /* ---- tooltip: pointer, keyboard focus and touch all show the same text ---- */
+  const strip = html => new DOMParser().parseFromString(String(html).replace(/<br\s*\/?>/gi, '; '), 'text/html')
+    .body.textContent.replace(/\s+/g, ' ').trim();
+  function place(f, cx, cy) {
+    const t = f.tip; t.style.display = 'block';
+    const hw = f.host.clientWidth, hh = f.host.clientHeight, tw = t.offsetWidth, th = t.offsetHeight;
+    let top = cy + 14;
+    if (top + th > hh && cy - th - 10 >= 0) top = cy - th - 10;  // flip above the pointer
+    t.style.left = Math.max(0, Math.min(cx + 12, hw - tw)) + 'px';
+    t.style.top = top + 'px';
+  }
+  function show(f, node, html, cx, cy) {
+    if (f.active && f.active !== node) f.active.classList.remove('ck-active');
+    f.active = node; node.classList.add('ck-active');
+    f.tip.innerHTML = typeof html === 'function' ? html() : html;
+    if (cx == null) {
+      const r = node.getBoundingClientRect(), b = f.host.getBoundingClientRect();
+      cx = r.left + r.width / 2 - b.left; cy = r.top + r.height / 2 - b.top;
+    }
+    place(f, cx, cy);
+  }
+  function hide(f, force) {
+    if (f.pinned && !force) return;
+    f.pinned = null; f.tip.style.display = 'none';
+    if (f.active) f.active.classList.remove('ck-active');
+    f.active = null;
+  }
+  function tip(f, node, html, o) {
+    o = o || {};
+    if (!node.hasAttribute('data-ck-nav')) node.setAttribute('tabindex', '0');
+    node.setAttribute('role', o.role || 'img');
+    node.setAttribute('aria-label', strip(typeof html === 'function' ? html() : html));
+    node._ckTip = html;
+    const at = ev => { const b = f.host.getBoundingClientRect(); show(f, node, html, ev.clientX - b.left, ev.clientY - b.top); };
+    node.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointermove', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') hide(f); });
+    node.addEventListener('pointerdown', ev => {  // touch: a tap toggles the tooltip and pins it until the next tap
+      if (ev.pointerType !== 'touch') return;
+      f.touchT = Date.now();
+      if (f.active === node && f.tip.style.display === 'block') hide(f, true); else { hide(f, true); at(ev); f.pinned = node; }
+    });
+    node.addEventListener('focus', () => { if (Date.now() - (f.touchT || 0) > 600 && !f.pinned) show(f, node, html); });
+    node.addEventListener('blur', () => hide(f));
+    node.addEventListener('keydown', ev => { if (ev.key === 'Escape') hide(f, true); });
+    return node;
+  }
+  document.addEventListener('pointerdown', ev => {  // a tap elsewhere unpins
+    for (const f of frames) if (f.pinned && !f.pinned.contains(ev.target)) hide(f, true);
+  }, true);
+
+  /* ---- keynav: one tab stop per mark group; arrows step, Home/End jump, Enter pins, Escape hides ---- */
+  function keynav(f, nodes, o) {
+    o = o || {};
+    nodes = nodes.filter(Boolean);
+    if (!nodes.length) return;
+    const seen = n => !n.closest('.ck-hidden');
+    const next = (k, d) => { for (let j = k + d; j >= 0 && j < nodes.length; j += d) if (seen(nodes[j])) return j; return k; };
+    let cur = Math.min(f.navIndex || 0, nodes.length - 1);
+    nodes.forEach((n, k) => {
+      n.setAttribute('data-ck-nav', '');
+      n.setAttribute('tabindex', k === cur ? '0' : '-1');
+      n.addEventListener('focus', () => {
+        nodes.forEach(m => m.setAttribute('tabindex', '-1')); n.setAttribute('tabindex', '0');
+        f.navIndex = k;
+        if (o.onFocus) o.onFocus(n, k);
+      });
+      n.addEventListener('keydown', ev => {
+        const K = ev.key;
+        let j = null;
+        if (o.step) j = o.step(k, K, nodes);
+        if (j == null) {
+          if (K === 'ArrowRight' || K === 'ArrowDown') j = next(k, 1);
+          else if (K === 'ArrowLeft' || K === 'ArrowUp') j = next(k, -1);
+          else if (K === 'Home') j = next(-1, 1);
+          else if (K === 'End') j = next(nodes.length, -1);
+        }
+        if (K === 'Enter' || K === ' ') {
+          ev.preventDefault();
+          if (n._ckTip) { if (f.pinned === n) hide(f, true); else { hide(f, true); show(f, n, n._ckTip); f.pinned = n; } }
+          if (o.onEnter) o.onEnter(n, k);
+        } else if (j != null) { ev.preventDefault(); if (j !== k) { hide(f, true); nodes[j].focus(); } }
+      });
+    });
+    f.navNodes = (f.navNodes || []).concat([nodes]);
+    if (f.refocus != null && nodes[f.refocus]) { nodes[f.refocus].focus(); f.refocus = null; }
+  }
+
+  /* ---- legend (HTML, above the chart) and series toggling ---- */
+  function swatch(it) {
+    const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
+    const m = it.mark || 'box';
+    const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
+    if (m === 'dot' || m === 'box') e.style.fill = c;
+    else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
+    if (m === 'dash') e.style.strokeDasharray = '4 3';
+    return s;
+  }
+  function legend(hostEl, items, o) {
+    o = o || {};
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-legend');
+    const on = new Set(items.map(it => it.key)), btn = {};
+    for (const it of items) {
+      const b = document.createElement(o.toggle ? 'button' : 'span'); b.className = 'ck-li';
+      b.append(swatch(it), document.createTextNode(it.label));
+      if (o.toggle) {
+        b.type = 'button'; b.setAttribute('aria-pressed', 'true');
+        b.addEventListener('click', () => {
+          const was = on.has(it.key);
+          if (was && on.size === 1) return;  // keep at least one series
+          if (was) on.delete(it.key); else on.add(it.key);
+          b.setAttribute('aria-pressed', String(!was));
+          if (o.onChange) o.onChange([...on]);
+        });
+      }
+      btn[it.key] = b; h.appendChild(b);
+    }
+    return {el: h, on, set(keys) { on.clear(); keys.forEach(k => on.add(k)); for (const k in btn) if (o.toggle) btn[k].setAttribute('aria-pressed', String(on.has(k))); }};
+  }
+  function showSeries(f, keysOn) {
+    f.seriesOn = [...keysOn];
+    f.svg.querySelectorAll('[data-series]').forEach(n => n.classList.toggle('ck-hidden', !f.seriesOn.includes(n.getAttribute('data-series'))));
+    for (const group of f.navNodes || []) {  // keep one reachable tab stop per group
+      const vis = group.filter(n => !n.closest('.ck-hidden'));
+      if (vis.length && !vis.some(n => n.getAttribute('tabindex') === '0')) { group.forEach(n => n.setAttribute('tabindex', '-1')); vis[0].setAttribute('tabindex', '0'); }
+    }
+    if (f.active && f.active.closest('.ck-hidden')) hide(f, true);
+  }
+
+  /* ---- controls ---- */
+  function seg(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-seg');
+    const g = document.createElement('div'); g.setAttribute('role', 'radiogroup'); g.className = 'ck-seg-group';
+    if (o.label) {
+      const s = document.createElement('span'); s.className = 'ck-seg-label'; s.id = 'ck-l' + (++uid); s.textContent = o.label;
+      h.appendChild(s); g.setAttribute('aria-labelledby', s.id);
+    }
+    const opts = o.options, api = {el: h, value: o.value == null ? opts[0][0] : o.value};
+    const btns = opts.map(([v, t], k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.textContent = t;
+      b.addEventListener('click', () => set(v, true));
+      b.addEventListener('keydown', ev => {
+        const d = ev.key === 'ArrowRight' || ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowLeft' || ev.key === 'ArrowUp' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const j = (k + d + opts.length) % opts.length;
+        set(opts[j][0], true); btns[j].focus();
+      });
+      g.appendChild(b); return b;
+    });
+    function set(v, fire) {
+      api.value = v;
+      btns.forEach((b, k) => { const c = opts[k][0] === v; b.setAttribute('aria-checked', String(c)); b.tabIndex = c ? 0 : -1; });
+      if (fire && o.onChange) o.onChange(v);
+    }
+    h.appendChild(g); set(api.value, false);
+    api.set = v => set(v, true);
+    return api;
+  }
+  function range(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-range');
+    const id = 'ck-r' + (++uid), stops = o.stops, f1 = o.fmt || (v => num(v));
+    const lab = document.createElement('label'); lab.htmlFor = id; lab.textContent = o.label;
+    const inp = document.createElement('input'); inp.type = 'range'; inp.id = id;
+    const out = document.createElement('output'); out.setAttribute('for', id);
+    if (stops) { inp.min = 0; inp.max = stops.length - 1; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step == null ? 'any' : o.step; }
+    const val = () => (stops ? stops[+inp.value] : +inp.value);
+    const put = v => { inp.value = stops ? stops.reduce((b, s, k) => (Math.abs(s - v) < Math.abs(stops[b] - v) ? k : b), 0) : v; };
+    const upd = fire => { const v = val(), s = f1(v); out.textContent = s; inp.setAttribute('aria-valuetext', s); if (fire && o.onInput) o.onInput(v); };
+    inp.addEventListener('input', () => upd(true));
+    h.append(lab, inp, out); put(o.value == null ? (stops ? stops[0] : o.min) : o.value); upd(false);
+    return {el: h, input: inp, get value() { return val(); }, set(v) { put(v); upd(true); }};
+  }
+  function readout(hostEl) {
+    const h = $(hostEl); h.classList.add('ck-readout'); h.setAttribute('aria-live', 'polite');
+    h.set = html => { h.innerHTML = html; };
+    return h;
+  }
+  function bus(name) {
+    if (!buses[name]) { const fns = []; buses[name] = {value: undefined, on(fn) { fns.push(fn); }, emit(v, from) { this.value = v; fns.forEach(fn => fn(v, from)); }}; }
+    return buses[name];
+  }
+  /* Card layout for a table under 600 px: each cell shows its column's header (CSS table.stack). */
+  function stackTable(table) {
+    const t = $(table), heads = [], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (hr) for (const c of hr.cells) for (let k = 0; k < (c.colSpan || 1); k++) heads.push(c.textContent.replace(/\s+/g, ' ').trim());
+    for (const tb of t.tBodies) for (const r of tb.rows) { let k = 0; for (const c of r.cells) { if (heads[k]) c.setAttribute('data-label', heads[k]); k += c.colSpan || 1; } }
+    t.classList.add('stack');
+    return t;
+  }
+
+  /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
+  const SERIES = [1, 2, 3, 4, 5, 7];
+  const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
+  const clamp01 = p => Math.max(0, Math.min(1, +p || 0));
+  const ramp = p => `color-mix(in srgb, var(--c1) ${(15 + 85 * clamp01(p)).toFixed(1)}%, var(--surface))`;
+  function rgb(css) {  // resolve any CSS colour (tokens, color-mix) to linear-light luminance via a probe
+    const s = document.createElement('span'); s.style.color = css; s.style.display = 'none';
+    document.body.appendChild(s);
+    const c = getComputedStyle(s).color; s.remove();
+    const v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), unit = /^color\(/.test(c) ? 1 : 255;
+    const lin1 = x => { x /= unit; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin1(v[0]) + 0.7152 * lin1(v[1]) + 0.0722 * lin1(v[2]);
+  }
+  const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  /* Text colour for a ramp cell, chosen for the current theme: whichever of --ink and --page contrasts more. */
+  function rampInk(p) {
+    const bg = rgb(ramp(p));
+    return contrast(bg, rgb('var(--ink)')) >= contrast(bg, rgb('var(--page)')) ? 'var(--ink)' : 'var(--page)';
+  }
+  const redrawAll = () => frames.forEach(f => f.redraw());  // rampInk depends on the theme
+  if (window.MutationObserver) new MutationObserver(redrawAll).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  const dark = mm('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', redrawAll);
+
+  return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
+    stackTable, reduced, ramp, rampInk, color, hide: f => hide(f, true)};
+})();
+
+</script>
+<script>
+const D = {"cards":["aifoundry2","aifoundry3"],"headline":{"aifoundry2":{"dram":{"group":"headline","host":"aifoundry2","test":"relay","medium":"dram","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":6660113,"cycles_mean":6657537,"wall_s":0.012525,"bytes_per_cycle":80.61,"gb_s":48.37,"flop_per_byte":0.125,"gflop_s":6.05,"shire0_final":8.0,"wrong_elements":0,"ok":true},"scp":{"group":"headline","host":"aifoundry2","test":"relay","medium":"scp","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":217110,"cycles_mean":216607,"wall_s":0.001292,"bytes_per_cycle":2472.806,"gb_s":1483.68,"flop_per_byte":0.125,"gflop_s":185.46,"shire0_final":8.0,"wrong_elements":0,"ok":true},"hop":{"group":"headline","host":"aifoundry2","test":"relay","medium":"hop","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":543337,"cycles_mean":539296,"wall_s":0.001872,"bytes_per_cycle":988.099,"gb_s":592.86,"flop_per_byte":0.125,"gflop_s":74.11,"shire0_final":32.0,"wrong_elements":0,"ok":true}},"aifoundry3":{"dram":{"group":"headline","host":"aifoundry3","test":"relay","medium":"dram","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":6735924,"cycles_mean":6735088,"wall_s":0.01256,"bytes_per_cycle":79.703,"gb_s":47.82,"flop_per_byte":0.125,"gflop_s":5.98,"shire0_final":8.0,"wrong_elements":0,"t_start_ms":1790117953219,"t_end_ms":1790117953232,"ok":true},"scp":{"group":"headline","host":"aifoundry3","test":"relay","medium":"scp","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":215670,"cycles_mean":215380,"wall_s":0.001144,"bytes_per_cycle":2489.317,"gb_s":1493.59,"flop_per_byte":0.125,"gflop_s":186.7,"shire0_final":8.0,"wrong_elements":0,"t_start_ms":1790117953458,"t_end_ms":1790117953460,"ok":true},"hop":{"group":"headline","host":"aifoundry3","test":"relay","medium":"hop","hop_distance":1,"stage_bytes":1048576,"stages":8,"work":1,"shires":32,"minions":1024,"bytes":536870912,"cycles_max":543378,"cycles_mean":539564,"wall_s":0.001645,"bytes_per_cycle":988.025,"gb_s":592.81,"flop_per_byte":0.125,"gflop_s":74.1,"shire0_final":32.0,"wrong_elements":0,"t_start_ms":1790117953687,"t_end_ms":1790117953689,"ok":true}}},"intensity":[{"work":1,"ok":true,"dram":{"gb_s":48.54,"cycles":6636598,"bytes":536870912},"scp":{"gb_s":1490.91,"cycles":216058,"bytes":536870912},"hop":{"gb_s":592.69,"cycles":543494,"bytes":536870912},"scp_over_dram":30.715080346106305,"hop_over_dram":12.210341985990937},{"work":2,"ok":true,"dram":{"gb_s":47.85,"cycles":6732532,"bytes":536870912},"scp":{"gb_s":1377.08,"cycles":233917,"bytes":536870912},"hop":{"gb_s":573.36,"cycles":561817,"bytes":536870912},"scp_over_dram":28.7791013584117,"hop_over_dram":11.982445141065831},{"work":4,"ok":true,"dram":{"gb_s":47.33,"cycles":6805313,"bytes":536870912},"scp":{"gb_s":1215.51,"cycles":265011,"bytes":536870912},"hop":{"gb_s":540.31,"cycles":596177,"bytes":536870912},"scp_over_dram":25.681597295584197,"hop_over_dram":11.415803929854214},{"work":8,"ok":true,"dram":{"gb_s":48.03,"cycles":6706933,"bytes":536870912},"scp":{"gb_s":982.29,"cycles":327930,"bytes":536870912},"hop":{"gb_s":481.6,"cycles":668854,"bytes":536870912},"scp_over_dram":20.45159275452842,"hop_over_dram":10.02706641682282},{"work":16,"ok":true,"dram":{"gb_s":47.21,"cycles":6822920,"bytes":536870912},"scp":{"gb_s":685.65,"cycles":469806,"bytes":536870912},"hop":{"gb_s":395.64,"cycles":814179,"bytes":536870912},"scp_over_dram":14.52340605803855,"hop_over_dram":8.380427875450117},{"work":32,"ok":true,"dram":{"gb_s":47.08,"cycles":6841746,"bytes":536870912},"scp":{"gb_s":425.96,"cycles":756232,"bytes":536870912},"hop":{"gb_s":291.69,"cycles":1104347,"bytes":536870912},"scp_over_dram":9.047578589634664,"hop_over_dram":6.195624468988955},{"work":64,"ok":true,"dram":{"gb_s":46.63,"cycles":6908486,"bytes":536870912},"scp":{"gb_s":242.2,"cycles":1329983,"bytes":536870912},"hop":{"gb_s":191.44,"cycles":1682589,"bytes":536870912},"scp_over_dram":5.194081063692901,"hop_over_dram":4.10551147330045},{"work":128,"ok":true,"dram":{"gb_s":47.17,"cycles":6829324,"bytes":536870912},"scp":{"gb_s":129.1,"cycles":2495119,"bytes":536870912},"hop":{"gb_s":113.7,"cycles":2833118,"bytes":536870912},"scp_over_dram":2.7369090523637905,"hop_over_dram":2.4104303582785667},{"work":256,"ok":true,"dram":{"gb_s":41.84,"cycles":7699278,"bytes":536870912},"scp":{"gb_s":66.59,"cycles":4837413,"bytes":536870912},"hop":{"gb_s":62.75,"cycles":5133356,"bytes":536870912},"scp_over_dram":1.5915391969407264,"hop_over_dram":1.4997609942638621}],"size":[{"stage_bytes":65536,"ok":true,"dram":{"gb_s":281.42,"cycles":71540,"bytes":33554432},"scp":{"gb_s":372.08,"cycles":54109,"bytes":33554432},"hop":{"gb_s":274.28,"cycles":73401,"bytes":33554432},"scp_over_dram":1.3221519437140217,"hop_over_dram":0.9746286688934687},{"stage_bytes":131072,"ok":true,"dram":{"gb_s":411.65,"cycles":97815,"bytes":67108864},"scp":{"gb_s":627.41,"cycles":64177,"bytes":67108864},"hop":{"gb_s":401.34,"cycles":100327,"bytes":67108864},"scp_over_dram":1.5241345803473825,"hop_over_dram":0.9749544515972306},{"stage_bytes":262144,"ok":true,"dram":{"gb_s":409.09,"cycles":196852,"bytes":134217728},"scp":{"gb_s":948.98,"cycles":84860,"bytes":134217728},"hop":{"gb_s":517.4,"cycles":155645,"bytes":134217728},"scp_over_dram":2.319734043853431,"hop_over_dram":1.2647583661297026},{"stage_bytes":524288,"ok":true,"dram":{"gb_s":379.15,"cycles":424800,"bytes":268435456},"scp":{"gb_s":1262.59,"cycles":127564,"bytes":268435456},"hop":{"gb_s":544.57,"cycles":295757,"bytes":268435456},"scp_over_dram":3.330054068310695,"hop_over_dram":1.436291705129896},{"stage_bytes":1048576,"ok":true,"dram":{"gb_s":47.87,"cycles":6729080,"bytes":536870912},"scp":{"gb_s":1506.14,"cycles":213873,"bytes":536870912},"hop":{"gb_s":592.65,"cycles":543530,"bytes":536870912},"scp_over_dram":31.463129308543976,"hop_over_dram":12.380405264257364}],"stages":[{"stages":1,"ok":true,"dram":{"gb_s":38.03,"cycles":1058911,"bytes":67108864},"scp":{"gb_s":1390.81,"cycles":28951,"bytes":67108864},"hop":{"gb_s":582.47,"cycles":69128,"bytes":67108864},"scp_over_dram":36.571391007099656,"hop_over_dram":15.316066263476204},{"stages":2,"ok":true,"dram":{"gb_s":44.02,"cycles":1829490,"bytes":134217728},"scp":{"gb_s":1453.28,"cycles":55413,"bytes":134217728},"hop":{"gb_s":588.42,"cycles":136859,"bytes":134217728},"scp_over_dram":33.01408450704225,"hop_over_dram":13.367105860972284},{"stages":4,"ok":true,"dram":{"gb_s":47.4,"cycles":3397731,"bytes":268435456},"scp":{"gb_s":1466.13,"cycles":109855,"bytes":268435456},"hop":{"gb_s":591.15,"cycles":272452,"bytes":268435456},"scp_over_dram":30.93101265822785,"hop_over_dram":12.471518987341772},{"stages":8,"ok":true,"dram":{"gb_s":49.47,"cycles":6511078,"bytes":536870912},"scp":{"gb_s":1486.04,"cycles":216766,"bytes":536870912},"hop":{"gb_s":592.61,"cycles":543568,"bytes":536870912},"scp_over_dram":30.03921568627451,"hop_over_dram":11.979179300586214},{"stages":16,"ok":true,"dram":{"gb_s":49.61,"cycles":12986597,"bytes":1073741824},"scp":{"gb_s":1501.75,"cycles":428997,"bytes":1073741824},"hop":{"gb_s":593.32,"cycles":1085834,"bytes":1073741824},"scp_over_dram":30.27111469461802,"hop_over_dram":11.959685547268696},{"stages":32,"ok":true,"dram":{"gb_s":49.36,"cycles":26103250,"bytes":2147483648},"scp":{"gb_s":1499.44,"cycles":859316,"bytes":2147483648},"hop":{"gb_s":593.78,"cycles":2169990,"bytes":2147483648},"scp_over_dram":30.377633711507293,"hop_over_dram":12.029578606158832}],"shires":[{"shires":2,"ok":true,"dram":{"gb_s":46.68,"cycles":431336,"bytes":33554432},"scp":{"gb_s":108.35,"cycles":185814,"bytes":33554432},"hop":{"gb_s":58.24,"cycles":345697,"bytes":33554432},"scp_over_dram":2.3211225364181662,"hop_over_dram":1.24764353041988},{"shires":4,"ok":true,"dram":{"gb_s":93.34,"cycles":431390,"bytes":67108864},"scp":{"gb_s":214.7,"cycles":187543,"bytes":67108864},"hop":{"gb_s":95.61,"cycles":421157,"bytes":67108864},"scp_over_dram":2.3001928433683307,"hop_over_dram":1.0243196914506105},{"shires":8,"ok":true,"dram":{"gb_s":179.93,"cycles":447564,"bytes":134217728},"scp":{"gb_s":418.2,"cycles":192567,"bytes":134217728},"hop":{"gb_s":161.41,"cycles":498906,"bytes":134217728},"scp_over_dram":2.324237203356861,"hop_over_dram":0.8970710831990217},{"shires":16,"ok":true,"dram":{"gb_s":292.22,"cycles":551171,"bytes":268435456},"scp":{"gb_s":812.49,"cycles":198232,"bytes":268435456},"hop":{"gb_s":338.75,"cycles":475464,"bytes":268435456},"scp_over_dram":2.780405174183834,"hop_over_dram":1.1592293477516937},{"shires":32,"ok":true,"dram":{"gb_s":46.81,"cycles":6881830,"bytes":536870912},"scp":{"gb_s":1484.11,"cycles":217047,"bytes":536870912},"hop":{"gb_s":592.77,"cycles":543419,"bytes":536870912},"scp_over_dram":31.704977568895533,"hop_over_dram":12.663319803460798}],"distance":[{"hop_distance":1,"gb_s":592.69,"ok":true,"mesh_hops":{"mean":3.5,"min":1,"max":10},"by_card":{"aifoundry2":{"gb_s":592.69,"stage_cycles":67936.625},"aifoundry3":{"gb_s":592.64,"stage_cycles":67942.0}},"longest":{"hops":10,"pairs":[[31,0]]}},{"hop_distance":2,"gb_s":703.19,"ok":true,"mesh_hops":{"mean":4.5,"min":2,"max":7},"by_card":{"aifoundry2":{"gb_s":703.19,"stage_cycles":57261.125},"aifoundry3":{"gb_s":702.54,"stage_cycles":57313.75}},"longest":{"hops":7,"pairs":[[30,0],[31,1],[6,8],[7,9]]}},{"hop_distance":4,"gb_s":652.37,"ok":true,"mesh_hops":{"mean":3.6875,"min":1,"max":8},"by_card":{"aifoundry2":{"gb_s":652.37,"stage_cycles":61722.0},"aifoundry3":{"gb_s":652.34,"stage_cycles":61724.625}},"longest":{"hops":8,"pairs":[[31,3]]}},{"hop_distance":8,"gb_s":686.19,"ok":true,"mesh_hops":{"mean":1.625,"min":1,"max":7},"by_card":{"aifoundry2":{"gb_s":686.19,"stage_cycles":58679.125},"aifoundry3":{"gb_s":686.15,"stage_cycles":58683.375}},"longest":{"hops":7,"pairs":[[3,11]]}},{"hop_distance":16,"gb_s":733.46,"ok":true,"mesh_hops":{"mean":2.125,"min":1,"max":6},"by_card":{"aifoundry2":{"gb_s":733.46,"stage_cycles":54898.0},"aifoundry3":{"gb_s":726.66,"stage_cycles":55411.625}},"longest":{"hops":6,"pairs":[[19,3],[3,19]]}}],"layout":{"0":[0,0],"24":[1,0],"9":[2,0],"25":[3,0],"2":[4,0],"11":[5,0],"8":[0,1],"16":[1,1],"1":[2,1],"17":[3,1],"10":[4,1],"19":[5,1],"3":[0,2],"4":[1,2],"13":[2,2],"14":[3,2],"18":[4,2],"27":[5,2],"12":[1,3],"21":[2,3],"22":[3,3],"26":[4,3],"20":[1,4],"29":[2,4],"30":[3,4],"15":[4,4],"23":[5,4],"28":[1,5],"5":[2,5],"6":[3,5],"7":[4,5],"31":[5,5]},"empty":[[0,3],[0,4],[0,5],[5,3]],"ring":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31],"repeats":{"aifoundry2":[{"group":"headline","dram":48.37,"scp":1483.68,"hop":592.86,"hop_over_dram":12.2567707256564,"scp_over_dram":30.673557990489975},{"group":"intensity","dram":48.54,"scp":1490.91,"hop":592.69,"hop_over_dram":12.210341985990937,"scp_over_dram":30.715080346106305},{"group":"shires","dram":46.81,"scp":1484.11,"hop":592.77,"hop_over_dram":12.663319803460798,"scp_over_dram":31.704977568895533},{"group":"size","dram":47.87,"scp":1506.14,"hop":592.65,"hop_over_dram":12.380405264257364,"scp_over_dram":31.463129308543976},{"group":"stages","dram":49.47,"scp":1486.04,"hop":592.61,"hop_over_dram":11.979179300586214,"scp_over_dram":30.03921568627451}],"aifoundry3":[{"group":"headline","dram":47.82,"scp":1493.59,"hop":592.81,"hop_over_dram":12.396695943120033,"scp_over_dram":31.23358427436219},{"group":"intensity","dram":48.91,"scp":1491.58,"hop":592.65,"hop_over_dram":12.117153956246167,"scp_over_dram":30.496421999591085},{"group":"shires","dram":46.83,"scp":1486.0,"hop":592.24,"hop_over_dram":12.646594063634423,"scp_over_dram":31.731795857356396},{"group":"size","dram":48.82,"scp":1491.12,"hop":592.7,"hop_over_dram":12.140516181892668,"scp_over_dram":30.543219991806634},{"group":"stages","dram":47.35,"scp":1480.07,"hop":592.31,"hop_over_dram":12.509186906019005,"scp_over_dram":31.25807814149947}]},"bigsize":[{"stage_bytes":65536,"gb_s":281.42},{"stage_bytes":131072,"gb_s":411.65},{"stage_bytes":262144,"gb_s":409.09},{"stage_bytes":524288,"gb_s":379.15},{"stage_bytes":1048576,"gb_s":47.87},{"stage_bytes":2097152,"gb_s":47.87},{"stage_bytes":4194304,"gb_s":50.98},{"stage_bytes":8388608,"gb_s":53.4}],"probe":[{"method_name":"tensor_store","remote_words_wrong":0,"ok":true,"host":"aifoundry2"},{"method_name":"vector_stores","remote_words_wrong":0,"ok":true,"host":"aifoundry2"},{"method_name":"tensor_store","remote_words_wrong":0,"ok":true,"host":"aifoundry3"},{"method_name":"vector_stores","remote_words_wrong":0,"ok":true,"host":"aifoundry3"}],"power":{"idle":{"board_w":30.614248704663208,"minion_w":10.428893782383419,"sram_w":1.9176398963730572,"noc_w":3.49240414507772,"die_c":71.2720207253886,"n":386},"media":[{"medium":"dram","runs":11,"bytes":472446402560.0,"device_s":9.513084063333332,"wall_s":11.400000095367432,"duty":0.8344810512062296,"bytes_per_s":49662801191.98877,"over_idle_w":4.342025805140718,"pj_per_byte":104.7718732209115,"n":102,"board_w":34.956274509803926,"minion_w":10.644500000000003,"sram_w":2.383029411764706,"noc_w":4.358823529411763,"die_c":71.0},{"medium":"scp","runs":12,"bytes":15300820992000.0,"device_s":10.183322776666667,"wall_s":12.264999866485596,"duty":0.8302750010208185,"bytes_per_s":1502537170584.3596,"over_idle_w":5.301569477154974,"pj_per_byte":4.2496901939750416,"n":110,"board_w":35.91581818181818,"minion_w":12.061245454545453,"sram_w":4.814781818181819,"noc_w":3.513345454545454,"die_c":71.94545454545455},{"medium":"hop","runs":11,"bytes":5757940531200.0,"device_s":9.692281258333333,"wall_s":11.571000099182129,"duty":0.8376355695492916,"bytes_per_s":594074849638.6624,"over_idle_w":4.423443603029103,"pj_per_byte":8.889231504221394,"n":104,"board_w":35.03769230769231,"minion_w":11.55676923076923,"sram_w":3.3651153846153843,"noc_w":4.6978269230769225,"die_c":72.0}]}};
+/* Hand it to the next shire. Every number comes from D (onchip.json, built by workloads/onchip/analyze_onchip.py)
+   except the pooled rerun energies in POOLED below. Charts use the shared toolkit CK (docs/reports/sources/chartkit.js). */
+const $=id=>document.getElementById(id);
+const f0=v=>v.toFixed(0),f1=v=>v.toFixed(1),f2=v=>v.toFixed(2);
+const num=CK.fmt.num, n0=v=>num(v,0);
+const g1=v=>num(v,1);                                  // GB/s to one decimal, with separators
+const gb=v=>v<100?num(v,1):num(v,0);                   // GB/s at chart precision: 47.9, 379, 1,263
+const pj=v=>v<5?f2(v):f1(v);                           // pJ per byte: 3.99, 8.6, 105.7
+const MED=[['dram','write it to DRAM, read it back next stage','var(--c2)','DRAM'],
+           ['hop','write it where the next shire will read it','var(--c1)','next shire'],
+           ['scp',"keep it in this shire's own scratchpad",'var(--c3)','own shire']];
+const A2=D.cards[0], A3=D.cards[1], H=D.headline[A2], H3=D.headline[A3];
+const WORD=['no','one','two','three','four','five','six','seven','eight','nine'];
+const word=n=>WORD[n]||n0(n);
+const rng=(vals,fmt)=>{const a=fmt(Math.min(...vals)),b=fmt(Math.max(...vals));return a===b?a:a+'–'+b;};
+const pear=(xs,ys)=>{const n=xs.length,mx=xs.reduce((a,b)=>a+b)/n,my=ys.reduce((a,b)=>a+b)/n;
+ let sxy=0,sxx=0,syy=0;xs.forEach((x,i)=>{sxy+=(x-mx)*(ys[i]-my);sxx+=(x-mx)**2;syy+=(ys[i]-my)**2;});
+ return {r:sxy/Math.sqrt(sxx*syy),slope:sxy/sxx,icpt:my-sxy/sxx*mx};};
+
+/* Pooled energies, per byte moved (relay_pj_per_byte) and per byte read (levels_pj_per_byte), from
+   docs/reports/data/2026-09-23-energy-manual/reruns.json, written by
+     python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm \
+       docs/reports/data/2026-09-23-reruns-aifoundry3 --out reruns.json
+   Copied here (4 decimals) rather than read as data: reruns.json takes this page's onchip.json as its first pass,
+   so feeding it back into onchip.json would make a file loop (PLAN2 DP-6). Update both together if the reruns change. */
+const POOLED={
+ relay:{dram:{mean:105.7441,lo:99.4722,hi:111.0366,n:8,per_card:{aifoundry2:{mean:102.1385,n:4},aifoundry3:{mean:109.3497,n:4}}},
+  scp:{mean:3.9935,lo:3.9038,hi:4.2497,n:8,per_card:{aifoundry2:{mean:4.0178,n:4},aifoundry3:{mean:3.9691,n:4}}},
+  hop:{mean:8.5934,lo:7.775,hi:9.2058,n:8,per_card:{aifoundry2:{mean:9.078,n:4},aifoundry3:{mean:8.1087,n:4}}}},
+ read:{dram:{mean:121.9633,lo:116.7837,hi:129.0313,n:6},'scp-local':{mean:2.5152,lo:2.3927,hi:2.6439,n:6},
+  'scp-remote':{mean:6.6546,lo:5.3096,hi:7.478,n:6}}
+};
+
+/* ---------- KPIs, the lede's computed spans and the two-card line of section 7 ---------- */
 (function(){
- document.getElementById('k1').textContent=(H.hop.gb_s/H.dram.gb_s).toFixed(1)+'× faster';
- document.getElementById('k2').textContent=(H.scp.gb_s/H.dram.gb_s).toFixed(1)+'× faster';
+ $('k1').textContent=(H.hop.gb_s/H.dram.gb_s).toFixed(1)+'× faster';
+ $('k2').textContent=(H.scp.gb_s/H.dram.gb_s).toFixed(1)+'× faster';
  const p=D.power&&D.power.media, dr=p&&p.find(m=>m.medium==='dram'), hp=p&&p.find(m=>m.medium==='hop');
- document.getElementById('k3').textContent=(dr&&hp)?(dr.pj_per_byte/hp.pj_per_byte).toFixed(0)+'× less':'—';
- document.getElementById('k4').textContent='>32 MB';
- document.getElementById('cards').textContent=D.cards.map(c=>{
-   const h=D.headline[c];return `${c} ${(h.hop.gb_s/h.dram.gb_s).toFixed(1)}×`;}).join(', ')+
+ $('k3').textContent=(dr&&hp)?(dr.pj_per_byte/hp.pj_per_byte).toFixed(0)+'× less':'—';
+ $('k4').textContent='>32 MB';
+ const gbs=D.distance.map(r=>r.gb_s);
+ $('l-gbr').textContent=`${n0(Math.min(...gbs))}–${n0(Math.max(...gbs))} GB/s`;
+ $('l-a3').textContent=`${(H3.hop.gb_s/H3.dram.gb_s).toFixed(1)}× and ${(H3.scp.gb_s/H3.dram.gb_s).toFixed(1)}×`;
+ const rep=[].concat(...D.cards.map(c=>D.repeats[c]));
+ const hopR=rng(rep.map(r=>r.hop_over_dram),v=>v.toFixed(1)), scpR=rng(rep.map(r=>r.scp_over_dram),v=>v.toFixed(1));
+ $('l-rep').textContent=`${hopR}× and ${scpR}×`;
+ const groups=D.repeats[A2].map(r=>r.group);
+ $('cards').textContent=D.cards.map(c=>{const h=D.headline[c];return `${c} ${(h.hop.gb_s/h.dram.gb_s).toFixed(1)}×`;}).join(', ')+
    ' for the hand-off, '+D.cards.map(c=>{const h=D.headline[c];return (h.scp.gb_s/h.dram.gb_s).toFixed(1)+'×';}).join(' and ')+
-   ' for the shire-local case';
+   ` for the shire-local case. The same configuration ran ${word(groups.length)} times on each card (in the ${groups.slice(0,-1).join(', ')} and ${groups[groups.length-1]} sweeps), `+
+   `and the two ratios run ${hopR}× and ${scpR}×; the scatter is almost all DRAM (${rng(rep.map(r=>r.dram),f1)} GB/s), and the hand-off ran at `+
+   `${rng(rep.map(r=>r.hop),f0)} GB/s every time`;
 })();
 
 /* ---------- section 1: the three media ---------- */
-document.getElementById('media').innerHTML='<thead><tr><th>Where a stage’s output goes</th><th class="num">GB/s</th><th class="num">Cycles for the whole relay</th><th class="num">Against DRAM</th><th class="num">Shire 0 ends holding</th></tr></thead><tbody>'+
- MED.map(([m,label])=>`<tr><td>${label}</td><td class="num">${g1(H[m].gb_s)}</td><td class="num">${gi(H[m].cycles_max)}</td><td class="num">${m==='dram'?'—':(H[m].gb_s/H.dram.gb_s).toFixed(1)+'×'}</td><td class="num">${H[m].shire0_final.toFixed(0)}</td></tr>`).join('')+'</tbody>';
+$('media').innerHTML='<thead><tr><th>Where a stage’s output goes</th><th class="num">GB/s</th><th class="num">Cycles for the whole relay</th><th class="num">Against DRAM</th><th class="num">Shire 0 ends holding</th></tr></thead><tbody>'+
+ MED.map(([m,label])=>`<tr><td>${label}</td><td class="num">${g1(H[m].gb_s)}</td><td class="num">${n0(H[m].cycles_max)}</td><td class="num">${m==='dram'?'—':(H[m].gb_s/H.dram.gb_s).toFixed(1)+'×'}</td><td class="num">${H[m].shire0_final.toFixed(0)}</td></tr>`).join('')+'</tbody>';
+CK.stackTable('media');
 
+/* ---------- section 1: same watts, different work (three panels side by side) ---------- */
 (function(){
- const W=700,H2=210,L=150,R=80,T=20,B=40,{svg,tip,h}=host('head',W,H2);
- const mx=Math.max(...MED.map(m=>H[m[0]].gb_s))*1.12;
- const x=v=>L+(W-L-R)*v/mx, y=i=>T+22+i*52;
- axes(svg,{W,H:H2,L,R,T,B,x,y:v=>v,yt:[],xt:[0,500,1000,1500],xf:gi,xl:'GB/s of intermediate data, at 600 MHz'});
- MED.forEach((m,i)=>{const r=H[m[0]],g=el('g',{},svg);
-  el('rect',{x:L,y:y(i)-15,width:Math.max(2,x(r.gb_s)-L),height:26,fill:m[2],rx:3},g);
-  txt(svg,L-8,y(i)+4,m[0]==='dram'?'DRAM':m[0]==='hop'?'next shire':'own shire','lab','end');
-  txt(svg,x(r.gb_s)+7,y(i)+4,g1(r.gb_s)+(m[0]==='dram'?' GB/s':' GB/s  '+(r.gb_s/H.dram.gb_s).toFixed(1)+'×'),'lab-strong');
-  hover(g,tip,h,()=>`${m[1]}<br>${g1(r.gb_s)} GB/s<br>${gi(r.cycles_max)} cycles<br>every element verified`);});
- document.getElementById('headcap').textContent=
-  'Eight stages, 1 MB per shire per stage, 1,024 minions, 512 MB of reads and writes. Identical kernel, '+
-  'identical barriers; only the destination of each stage differs.';
+ const p=D.power; if(!p){$('samew').textContent='';return;}
+ const med=m=>p.media.find(x=>x.medium===m);
+ const PANELS=[
+  {key:'w',title:'Watts over idle',val:m=>med(m).over_idle_w,lab:v=>f2(v)+' W'},
+  {key:'gb',title:'GB/s during the power bursts',val:m=>med(m).bytes_per_s/1e9,lab:v=>g1(v)},
+  {key:'pj',title:`pJ per byte moved, ${POOLED.relay.dram.n} passes`,val:m=>POOLED.relay[m].mean,
+   lab:(v,m)=>{const q=POOLED.relay[m];return `${pj(q.mean)} [${pj(q.lo)}–${pj(q.hi)}]`;}}];
+ const tip=(key,m,label)=>{const x=med(m),q=POOLED.relay[m],pc=q.per_card;
+  if(key==='w')return `<b>${label}</b> · ${f2(x.over_idle_w)} W over idle (board power, ${A2}; idle ${f2(p.idle.board_w)} W)<br>${x.n} readings over ${f1(x.wall_s)} s; the kernel ran ${f0(100*x.duty)}% of the burst`;
+  if(key==='gb')return `<b>${label}</b> · ${g1(x.bytes_per_s/1e9)} GB/s while the kernel runs (cycle counter), over ${x.runs} launches in the power burst<br>the headline run of the table above: ${g1(H[m].gb_s)} GB/s`;
+  return `<b>${label}</b> · ${pj(q.mean)} pJ per byte moved, mean of ${q.n} passes [${pj(q.lo)}–${pj(q.hi)}]<br>`+
+   `${A2} ${pj(pc[A2].mean)} (n = ${pc[A2].n}), ${A3} ${pj(pc[A3].mean)} (n = ${pc[A3].n}); this session ${pj(x.pj_per_byte)}`;};
+ CK.frame('samew',{label:'Watts over idle, GB/s and pJ per byte for DRAM, the next shire and the own scratchpad',
+  height:W=>W<600?3*128+8:132,
+  draw(f){
+   const svg=f.svg,W=f.W,narrow=f.narrow,LW=narrow?78:92,GAP=28,RES=narrow?118:112;
+   const pw=narrow?W-LW-4:(W-LW-2*GAP-4)/3, bh=20;
+   const nodes=[];
+   PANELS.forEach((P,pi)=>{
+    const x0=narrow?LW:LW+pi*(pw+GAP), y0=narrow?pi*128:0;
+    const mx=Math.max(...MED.map(m=>P.key==='pj'?POOLED.relay[m[0]].hi:P.val(m[0])));
+    const x=CK.lin(0,mx,x0,x0+pw-RES);
+    CK.txt(svg,narrow?0:x0,y0+14,P.title,'lab-strong');
+    CK.el('line',{x1:x0,x2:x0,y1:y0+24,y2:y0+24+3*34,class:'ck-axis'},svg);
+    MED.forEach(([m,,col,label],i)=>{
+     const yc=y0+24+i*34+17, v=P.val(m), g=CK.el('g',{},svg);
+     if(narrow||pi===0) CK.txt(svg,narrow?0:LW-8,yc+4,label,'lab',narrow?'start':'end');
+     const b=CK.el('rect',{x:x0,y:yc-bh/2,width:Math.max(2,x(v)-x0),height:bh,rx:3},g); b.style.fill=col;
+     let end=x(v);
+     if(P.key==='pj'){
+      const q=POOLED.relay[m],pc=q.per_card,s=med(m).pj_per_byte;
+      const wk=CK.el('g',{'aria-hidden':'true'},g); wk.style.stroke='var(--ink)'; wk.style.strokeWidth='1.5';
+      CK.el('line',{x1:x(q.lo),x2:x(q.hi),y1:yc,y2:yc},wk);
+      CK.el('line',{x1:x(q.lo),x2:x(q.lo),y1:yc-5,y2:yc+5},wk); CK.el('line',{x1:x(q.hi),x2:x(q.hi),y1:yc-5,y2:yc+5},wk);
+      const d2=CK.el('circle',{cx:x(pc[A2].mean),cy:yc-9,r:3},g); d2.style.fill='var(--ink)';
+      const d3=CK.el('circle',{cx:x(pc[A3].mean),cy:yc+9,r:3,fill:'none'},g); d3.style.stroke='var(--ink)'; d3.style.strokeWidth='1.2';
+      const t=CK.el('line',{x1:x(s),x2:x(s),y1:yc-bh/2-3,y2:yc+bh/2+3},g); t.style.stroke='var(--ink)'; t.style.strokeWidth='2';
+      end=Math.max(end,x(q.hi));
+     }
+     CK.txt(svg,end+6,yc+4,P.key==='gb'&&m!=='dram'?`${P.lab(v,m)} (${(v/P.val('dram')).toFixed(0)}×)`:P.lab(v,m),'lab');
+     CK.tip(f,g,tip(P.key,m,label));
+     nodes.push(g);
+    });
+   });
+   CK.keynav(f,nodes);
+  }});
+ const w=p.media.map(m=>m.over_idle_w), dr=med('dram'), q=POOLED.relay;
+ $('samewcap').textContent=
+  `Watts and GB/s are the power session on ${A2}: board power over an idle of ${f2(p.idle.board_w)} W, and the rate while the kernel runs, `+
+  `from the cycle counter, during those bursts (the headline runs in the table above ran at ${MED.map(m=>g1(H[m[0]].gb_s)).join(', ')} GB/s). `+
+  `Energy per byte pools ${q.dram.n} passes, ${word(q.dram.per_card[A2].n)} per card with this session among them: the bar is the mean, the whisker the range, `+
+  `the filled dot ${A2}'s mean, the ring ${A3}'s, the tick this session. The power moves by ${f1(Math.max(...w)-Math.min(...w))} W while the work grows `+
+  `${f0(med('hop').bytes_per_s/dr.bytes_per_s)}× and ${f0(med('scp').bytes_per_s/dr.bytes_per_s)}×.`;
 })();
 
 /* ---------- section 2: power ---------- */
 (function(){
  const p=D.power; if(!p){return;}
- const name={dram:'DRAM',scp:"own shire's scratchpad",hop:"next shire's scratchpad"};
- document.getElementById('power').innerHTML='<thead><tr><th>Where the intermediate goes</th><th class="num">GB/s on the card</th><th class="num">Watts over idle</th><th class="num">pJ per byte moved</th></tr></thead><tbody>'+
+ const name={dram:'DRAM',scp:"own shire's scratchpad",hop:"next shire's scratchpad"}, q=POOLED.relay;
+ $('power').innerHTML=`<thead><tr><th>Where the intermediate goes</th><th class="num">GB/s on the card</th><th class="num">Watts over idle</th><th class="num">pJ, this session</th><th class="num">pJ per byte moved, all passes: mean [range], n = ${q.dram.n}</th></tr></thead><tbody>`+
   ['dram','hop','scp'].map(m=>{const r=p.media.find(x=>x.medium===m);
-   return `<tr><td>${name[m]}</td><td class="num">${g1(r.bytes_per_s/1e9)}</td><td class="num">${f2(r.over_idle_w)}</td><td class="num">${f1(r.pj_per_byte)}</td></tr>`;}).join('')+
+   return `<tr><td>${name[m]}</td><td class="num">${g1(r.bytes_per_s/1e9)}</td><td class="num">${f2(r.over_idle_w)}</td><td class="num">${pj(r.pj_per_byte)}</td><td class="num">${pj(q[m].mean)} [${pj(q[m].lo)}–${pj(q[m].hi)}]</td></tr>`;}).join('')+
   `</tbody>`;
- const dr=p.media.find(m=>m.medium==='dram'),hp=p.media.find(m=>m.medium==='hop'),sc=p.media.find(m=>m.medium==='scp');
- document.getElementById('powernote').textContent=
-  `One session on aifoundry2, board power. Idle was ${f2(p.idle.board_w)} W at a die temperature of ${f0(p.idle.die_c)} °C, and the `+
-  `minion clock stayed at 600 MHz throughout. All three sit within a watt of each other while moving between `+
-  `${g1(dr.bytes_per_s/1e9)} and ${g1(sc.bytes_per_s/1e9)} GB/s, so the energy per byte differs by about `+
-  `${(dr.pj_per_byte/sc.pj_per_byte).toFixed(0)}× for the shire-local case and ${(dr.pj_per_byte/hp.pj_per_byte).toFixed(0)}× for the hand-off. `+
-  `The GB/s column is the rate while the kernel runs, from the cycle counter, and the kernel ran only `+
-  `${f0(100*Math.min(...p.media.map(m=>m.duty)))}–${f0(100*Math.max(...p.media.map(m=>m.duty)))}% of each burst; `+
+ CK.stackTable('power');
+ const duty=p.media.map(m=>m.duty);
+ $('powernote').textContent=
+  `One session on ${A2}, board power. Idle was ${f2(p.idle.board_w)} W at a die temperature of ${f0(p.idle.die_c)} °C, and the `+
+  `minion clock stayed at 600 MHz throughout. The GB/s column is the rate while the kernel runs, from the cycle counter, and the kernel ran only `+
+  `${f0(100*Math.min(...duty))}–${f0(100*Math.max(...duty))}% of each burst; `+
   `the watts are averaged over the whole burst, launch gaps included, so pJ per byte is watts over idle ÷ `+
-  `(GB/s × ${Math.min(...p.media.map(m=>m.duty)).toFixed(2)}–${Math.max(...p.media.map(m=>m.duty)).toFixed(2)}).`;
+  `(GB/s × ${Math.min(...duty).toFixed(2)}–${Math.max(...duty).toFixed(2)}).`;
+ const pc=q.dram.per_card, r=POOLED.read;
+ $('remeasured').innerHTML=
+  `<b>Re-measured.</b> The last column pools this session with the energy manual's 23 September passes (n = ${q.dram.n}, `+
+  `${pc[A2].n===pc[A3].n?word(pc[A2].n)+' per card':word(pc[A2].n)+' on '+A2+', '+word(pc[A3].n)+' on '+A3}; `+
+  `<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">§5</a>): `+
+  `${f0(q.dram.mean/q.hop.mean)}× and ${f0(q.dram.mean/q.scp.mean)}× less than DRAM. Reading a byte costs ${f0(r.dram.mean)} `+
+  `[${f0(r.dram.lo)}–${f0(r.dram.hi)}] pJ from DRAM, ${f2(r['scp-local'].mean)} from the shire's own scratchpad and `+
+  `${f2(r['scp-remote'].mean)} from another shire's (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">the energy manual, §4</a>).`;
 })();
 
-/* ---------- section 3: working-set size ---------- */
+/* ---------- section 3: working-set size, to 256 MB ---------- */
 (function(){
- const rows=D.size, W=700,H2=330,L=62,R=130,T=26,B=52,{svg,tip,h}=host('size',W,H2);
- const xs=rows.map(r=>r.stage_bytes*32/1048576);
- const x=v=>L+(W-L-R)*Math.log2(v/2)/Math.log2(32/2), y=v=>H2-B-(H2-B-T)*Math.log10(Math.max(v,20)/20)/Math.log10(2000/20);
- axes(svg,{W,H:H2,L,R,T,B,x,y,yt:[20,100,500,2000],yf:gi,xt:[2,4,8,16,32],xf:v=>v+' MB',
-   xl:'working set, one buffer across the whole chip',yl:'GB/s'});
- el('line',{x1:x(16),x2:x(16),y1:T,y2:H2-B,stroke:'var(--ref)','stroke-width':1.5,'stroke-dasharray':'5 4'},svg);
- txt(svg,x(16)-6,T+12,'footprint = 32 MB of L3','lab','end');
- MED.forEach(m=>{
-  el('path',{d:path(rows.map(r=>[r.stage_bytes*32/1048576,r[m[0]].gb_s]),x,y),class:'ln',stroke:m[2]},svg);
-  rows.forEach(r=>{const g=el('g',{},svg);
-   el('circle',{cx:x(r.stage_bytes*32/1048576),cy:y(r[m[0]].gb_s),r:4,fill:m[2]},g);
-   hover(g,tip,h,()=>`${(r.stage_bytes*32/1048576)} MB per buffer<br>${m[1]}<br>${g1(r[m[0]].gb_s)} GB/s`);});});
- MED.forEach((m,i)=>{el('rect',{x:W-R+6,y:T+6+i*20,width:11,height:11,fill:m[2]},svg);
-  txt(svg,W-R+23,T+16+i*20,m[0]==='dram'?'DRAM':m[0]==='hop'?'next shire':'own shire','lab');});
- const mb=r=>r.stage_bytes*32/1048576, small=rows[0], big=rows[rows.length-1];
+ const rows=D.size, mb=r=>r.stage_bytes*32/1048576, top=Math.max(...rows.map(mb));
+ const big=D.bigsize.filter(r=>mb(r)>top);                    // DRAM-only continuation past the on-chip limit
+ CK.legend('sizelegend',MED.map(m=>({key:m[0],label:m[3],mark:'dot',color:m[2]})));
+ CK.frame('size',{label:'Relay bandwidth against working-set size for the three media, to 256 MB per buffer',height:W=>W<600?320:340,
+  draw(f){
+   const svg=f.svg,W=f.W,Hh=f.H,L=52,R=26,T=26,B=46,narrow=f.narrow;
+   const x=CK.log(2,256,L,W-R), y=CK.log(20,2000,Hh-B,T);
+   const sh=CK.el('rect',{x:x(top),y:T,width:W-R-x(top),height:Hh-B-T,'aria-hidden':'true'},svg); sh.style.fill='var(--grid)'; sh.style.opacity='0.6';
+   CK.axes(f,{x,y,L,R,T,B,xt:narrow?[2,8,32,256]:[2,4,8,16,32,64,128,256],yt:[20,100,500,2000],yfmt:n0,xfmt:v=>v+' MB',
+     xl:'working set, one buffer across the whole chip'});
+   CK.txt(svg,4,T-10,'GB/s','lab');
+   const lines=narrow?['no room on chip:','two buffers must','fit in 2.25 MB','per shire']:['no room: two buffers must fit','in the 2.25 MB left of each','shire’s scratchpad'];
+   lines.forEach((t,i)=>CK.txt(svg,x(top)+6,y(400)+i*14,t,'lab'));
+   CK.el('line',{x1:x(top/2),x2:x(top/2),y1:T,y2:Hh-B,style:'stroke:var(--ref);stroke-width:1.5;stroke-dasharray:5 4'},svg);
+   CK.txt(svg,x(top/2)-6,T+12,narrow?'footprint = L3':'footprint = 32 MB of L3','lab','end');
+   MED.forEach(m=>{
+    const pts=rows.map(r=>[mb(r),r[m[0]].gb_s]).concat(m[0]==='dram'?big.map(r=>[mb(r),r.gb_s]):[]);
+    CK.el('path',{d:CK.path(pts,x,y),fill:'none',style:`stroke:${m[2]};stroke-width:2`},svg);
+    for(const [a,b] of pts){const c=CK.el('circle',{cx:x(a),cy:y(b),r:4,'aria-hidden':'true'},svg);c.style.fill=m[2];}
+   });
+   /* one focusable column per size: the crosshair lists every medium at that size */
+   const cols=rows.map(r=>({mb:mb(r),r})).concat(big.map(r=>({mb:mb(r),big:r}))), nodes=[];
+   for(const c of cols){
+    const g=CK.el('g',{},svg), xc=x(c.mb);
+    CK.el('rect',{x:xc-14,y:T,width:28,height:Hh-B-T,class:'ck-hit'},g);
+    const ln=CK.el('line',{x1:xc,x2:xc,y1:T,y2:Hh-B,class:'xh'},g); ln.style.stroke='var(--ink-2)'; ln.style.strokeWidth='1'; ln.style.opacity='0';
+    g.addEventListener('pointerenter',()=>{ln.style.opacity='0.6';}); g.addEventListener('pointerleave',()=>{ln.style.opacity='0';});
+    g.addEventListener('focus',()=>{ln.style.opacity='0.6';}); g.addEventListener('blur',()=>{ln.style.opacity='0';});
+    const html=c.big?`<b>${c.mb} MB per buffer</b> (footprint ${2*c.mb} MB)<br>DRAM ${gb(c.big.gb_s)} GB/s; the on-chip routes have no room`
+     :`<b>${c.mb} MB per buffer</b> (footprint ${2*c.mb} MB)<br>DRAM ${gb(c.r.dram.gb_s)}, next shire ${gb(c.r.hop.gb_s)} (${f2(c.r.hop_over_dram)}×), `+
+      `own ${gb(c.r.scp.gb_s)} (${f2(c.r.scp_over_dram)}×) GB/s`;
+    CK.tip(f,g,html); nodes.push(g);
+   }
+   CK.keynav(f,nodes);
+  }});
+ const small=rows[0], last=rows[rows.length-1];
  const and=a=>a.slice(0,-1).join(', ')+' and '+a[a.length-1];
  const fit=rows.filter(r=>2*mb(r)<=32), lastfit=fit[fit.length-1];
  const hopMax=Math.max(...fit.map(r=>r.hop_over_dram));
- document.getElementById('sizecap').textContent=
-  `Log axes. Two buffers are live at once, so the chip footprint is twice the figure on the x axis; the dashed line `+
-  `marks where that footprint equals the 32 MB L3.`;
- document.getElementById('sizetext').innerHTML=
+ $('sizecap').textContent=
+  `${A2}, log axes. Two buffers are live at once, so the chip footprint is twice the figure on the x axis; the dashed line `+
+  `marks where that footprint equals the 32 MB L3. Past ${top} MB per buffer only the DRAM route can run: the buffers start 256 KB into `+
+  `each shire's 2.5 MB scratchpad, and two of them no longer fit in what is left.`;
+ $('sizetext').innerHTML=
   `At ${mb(small)} MB per buffer the DRAM route runs at <b>${g1(small.dram.gb_s)} GB/s</b>, because it is not `+
   `going to DRAM at all: the 32 MB L3 holds the whole thing. Handing the data to the next shire then buys `+
   `${small.hop_over_dram.toFixed(2)}×, which is nothing, and keeping it in the shire's own scratchpad `+
   `${small.scp_over_dram.toFixed(1)}×. Up to ${mb(lastfit)} MB per buffer, while both buffers fit in the L3, the hand-off `+
-  `wins at most ${hopMax.toFixed(1)}×. At ${mb(big)} MB per buffer, a ${2*mb(big)} MB footprint, the DRAM route falls to `+
-  `<b>${g1(big.dram.gb_s)} GB/s</b> and stays there: ${and(D.bigsize.slice(-3).map(r=>g1(r.gb_s)))} GB/s at `+
-  `${and(D.bigsize.slice(-3).map(r=>String(mb(r))))} MB per buffer. `+
+  `wins at most ${hopMax.toFixed(1)}×. At ${mb(last)} MB per buffer, a ${2*mb(last)} MB footprint, the DRAM route falls to `+
+  `<b>${g1(last.dram.gb_s)} GB/s</b> and stays there: ${and(big.map(r=>g1(r.gb_s)))} GB/s at `+
+  `${and(big.map(r=>String(mb(r))))} MB per buffer. `+
   `<b>The advantage is not a property of the computation. It is the L3 capacity.</b> Below it the cache is already doing most of the job; `+
   `above it, nothing is, unless you place the data yourself.`;
 })();
 
 /* ---------- section 4: arithmetic intensity ---------- */
 (function(){
- const rows=D.intensity, W=700,H2=330,L=58,R=130,T=26,B=52,{svg,tip,h}=host('intensity',W,H2);
- const x=v=>L+(W-L-R)*Math.log2(v)/Math.log2(256), y=v=>H2-B-(H2-B-T)*Math.log10(Math.max(v,1))/Math.log10(40);
- axes(svg,{W,H:H2,L,R,T,B,x,y,yt:[1,2,5,10,20,40],yf:v=>v+'×',xt:[1,4,16,64,256],
-   xl:'vector adds applied to every element, per stage',yl:'faster than the DRAM route'});
- el('line',{x1:L,x2:W-R,y1:y(1),y2:y(1),stroke:'var(--ref)','stroke-width':1.5,'stroke-dasharray':'5 4'},svg);
- [['scp_over_dram',"own shire's scratchpad",'var(--c3)'],['hop_over_dram',"next shire's scratchpad",'var(--c1)']]
-  .forEach((s2,i)=>{
-   el('path',{d:path(rows.map(r=>[r.work,r[s2[0]]]),x,y),class:'ln',stroke:s2[2]},svg);
-   rows.forEach(r=>{const g=el('g',{},svg);
-    el('circle',{cx:x(r.work),cy:y(r[s2[0]]),r:4,fill:s2[2]},g);
-    hover(g,tip,h,()=>`${r.work} add${r.work>1?'s':''} per element (${r.work/8} flop per byte moved)<br>${s2[1]}: ${r[s2[0]].toFixed(1)}× DRAM<br>${g1(r[s2[0]==='scp_over_dram'?'scp':'hop'].gb_s)} GB/s`);});
-   el('rect',{x:W-R+6,y:T+6+i*20,width:11,height:11,fill:s2[2]},svg);
-   txt(svg,W-R+23,T+16+i*20,s2[1].replace("'s scratchpad",''),'lab');});   /* legend: 'own shire', 'next shire' */
+ const rows=D.intensity;
+ const S=[['scp_over_dram',"own shire",'var(--c3)','scp'],['hop_over_dram',"next shire",'var(--c1)','hop']];
+ CK.legend('intlegend',S.map(s=>({key:s[0],label:s[1],mark:'dot',color:s[2]})));
+ CK.frame('intensity',{label:'Advantage over the DRAM route against vector adds per element',height:W=>W<600?320:340,
+  draw(f){
+   const svg=f.svg,W=f.W,Hh=f.H,L=48,R=14,T=48,B=46,narrow=f.narrow;
+   const x=CK.log(1,256,L,W-R), y=CK.log(1,40,Hh-B,T);
+   CK.axes(f,{x,y,L,R,T,B,xt:narrow?[1,16,256]:[1,4,16,64,256],yt:[1,2,5,10,20,40],yfmt:v=>v+'×',xfmt:v=>String(v),
+     xl:'vector adds applied to every element, per stage'});
+   CK.txt(svg,4,14,'faster than the DRAM route','lab');
+   /* top axis: flops per byte read, w/4, the unit of the ridge points */
+   CK.txt(svg,W-R,14,'flops per byte read','lab','end');
+   CK.el('line',{x1:L,x2:W-R,y1:T,y2:T,class:'ck-axis'},svg);
+   for(const w of (narrow?[1,16,256]:[1,4,16,64,256])) CK.txt(svg,x(w),T-8,num(w/4),'tick','middle');
+   CK.el('line',{x1:L,x2:W-R,y1:y(1),y2:y(1),style:'stroke:var(--ref);stroke-width:1.5;stroke-dasharray:5 4'},svg);
+   S.forEach(s=>{
+    CK.el('path',{d:CK.path(rows.map(r=>[r.work,r[s[0]]]),x,y),fill:'none',style:`stroke:${s[2]};stroke-width:2`},svg);
+    for(const r of rows){const c=CK.el('circle',{cx:x(r.work),cy:y(r[s[0]]),r:4,'aria-hidden':'true'},svg);c.style.fill=s[2];}
+   });
+   const nodes=[];
+   for(const r of rows){
+    const g=CK.el('g',{},svg), xc=x(r.work);
+    CK.el('rect',{x:xc-14,y:T,width:28,height:Hh-B-T,class:'ck-hit'},g);
+    CK.tip(f,g,`<b>${r.work} add${r.work>1?'s':''} per element</b> (${num(r.work/8)} flop per byte moved, ${num(r.work/4)} per byte read)<br>`+
+     S.map(s=>`${s[1]}: ${r[s[0]].toFixed(1)}× DRAM (${g1(r[s[3]].gb_s)} GB/s)`).join('<br>'));
+    nodes.push(g);
+   }
+   CK.keynav(f,nodes);
+  }});
  const last=rows[rows.length-1], at=w=>rows.find(r=>r.work===w).hop_over_dram.toFixed(1);
- document.getElementById('intcap').textContent='Log axes. The dashed line is parity with DRAM. Each element is 4 bytes read '+
-  'and 4 bytes written, so w adds per element are w/8 flops per byte moved.';
- document.getElementById('inttext').innerHTML=
-  `One add per element is pure data movement, and the hand-off is ${at(1)}× ahead (this sweep's own run; the `+
-  `headline run in §1 gives ${(H.hop.gb_s/H.dram.gb_s).toFixed(1)}×). The lead holds to about four adds per element `+
+ $('intcap').textContent=`${A2}, log axes. The dashed line is parity with DRAM. Each element is 4 bytes read `+
+  'and 4 bytes written, so w adds per element are w/8 flops per byte moved; the top axis counts flops per byte read (w/4), the unit of the ridge points report.';
+ $('inttext').innerHTML=
+  `One add per element is pure data movement, and the hand-off is ${at(1)}× ahead. The lead holds to about four adds per element `+
   `(${at(4)}×) and then falls faster with each quadrupling: ${at(16)}× at 16, ${at(64)}× at 64, ${at(128)}× at 128 and `+
   `${at(last.work)}× at ${last.work} adds — ${last.work/8} flops per byte moved, counting the byte read and the byte `+
   `written (${last.work/4} per byte read). <b>For this vector-add kernel, on-chip placement pays several-fold up to `+
@@ -425,21 +969,142 @@ document.getElementById('media').innerHTML='<thead><tr><th>Where a stage’s out
 
 /* ---------- section 5: distance ---------- */
 (function(){
- const d=D.distance, k=n=>d.find(r=>r.hop_distance===n).mesh_hops, gb=d.map(r=>r.gb_s), mh=d.map(r=>r.mesh_hops.mean);
- const rng=m=>`${m.min} to ${m.max}`;
- document.getElementById('distintro').innerHTML=
+ const d=D.distance, k=n=>d.find(r=>r.hop_distance===n).mesh_hops, mh=d.map(r=>r.mesh_hops.mean);
+ const gb2=d.map(r=>r.by_card[A2].gb_s), gb3=d.map(r=>r.by_card[A3].gb_s), Ls=d.map(r=>r.longest.hops);
+ const rk=a=>a.map((v,i)=>i).sort((i,j)=>a[j]-a[i]).join(','), same=rk(gb2)===rk(gb3);
+ const byL=[...new Set(Ls)].sort((a,b)=>b-a);
+ const rngOf=Lh=>rng(d.filter(r=>r.longest.hops===Lh).map(r=>r.gb_s),n0);
+ const and=a=>a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+ const rngH=m=>`${m.min} to ${m.max}`;
+ $('distintro').innerHTML=
   `The obvious worry about handing data to another shire is the network in between. Shire numbers do not follow `+
   `the mesh: on the shire map of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip `+
   `communication report</a>, the next shire in the ring is on average ${f1(k(1).mean)} mesh hops away `+
-  `(${rng(k(1))}), two places on ${f1(k(2).mean)}, and sixteen places on only ${f1(k(16).mean)} (${rng(k(16))}). `+
-  `Across offsets whose mean distance runs from ${f1(Math.min(...mh))} to ${f1(Math.max(...mh))} hops the bandwidth `+
-  `stays between ${f0(Math.min(...gb))} and ${f0(Math.max(...gb))} GB/s and does not follow the distance:`;
- const W='style="white-space:normal"';
- document.getElementById('dist').innerHTML=`<thead><tr><th class="num" ${W}>Shire IDs back round the ring</th>`+
-  `<th class="num" ${W}>Mesh hops, mean (range)</th><th class="num">GB/s</th>`+
-  `<th class="num" ${W}>Against the next shire in ID order</th></tr></thead><tbody>`+
-  d.map(r=>`<tr><td class="num">${r.hop_distance}</td><td class="num">${f1(r.mesh_hops.mean)} (${r.mesh_hops.min}–${r.mesh_hops.max})</td>`+
-   `<td class="num">${g1(r.gb_s)}</td><td class="num">${(r.gb_s/d[0].gb_s).toFixed(2)}×</td></tr>`).join('')+'</tbody>';
+  `(${rngH(k(1))}), two places on ${f1(k(2).mean)}, and sixteen places on only ${f1(k(16).mean)} (${rngH(k(16))}). `+
+  `Across the ${word(d.length)} offsets the bandwidth runs from ${n0(Math.min(...gb2))} to ${n0(Math.max(...gb2))} GB/s. It does not follow `+
+  `the mean distance (${f1(Math.min(...mh))} to ${f1(Math.max(...mh))} hops). It falls with the longest hand-off in the ring: `+
+  `${and(byL.map(String))} hops give ${and(byL.map(rngOf))} GB/s${same?', in the same order on both cards':''}. That is what one would expect `+
+  `when every stage waits at a barrier for its slowest shire, but ${word(d.length)} offsets are a correlation, not a controlled test.`;
+ const W_='style="white-space:normal"';
+ $('dist').innerHTML=`<thead><tr><th class="num" ${W_}>Shire IDs back round the ring</th>`+
+  `<th class="num" ${W_}>Mesh hops, mean</th><th class="num" ${W_}>Longest hand-off, hops</th><th class="num">GB/s, a2 / a3</th>`+
+  `<th class="num" ${W_}>Against the next shire in ID order, a2 / a3</th></tr></thead><tbody>`+
+  d.map(r=>`<tr><td class="num">${r.hop_distance}</td><td class="num">${f1(r.mesh_hops.mean)}</td><td class="num">${r.longest.hops}</td>`+
+   `<td class="num">${g1(r.by_card[A2].gb_s)} / ${g1(r.by_card[A3].gb_s)}</td>`+
+   `<td class="num">${(r.by_card[A2].gb_s/d[0].by_card[A2].gb_s).toFixed(2)}× / ${(r.by_card[A3].gb_s/d[0].by_card[A3].gb_s).toFixed(2)}×</td></tr>`).join('')+'</tbody>';
+ CK.stackTable('dist');
+ const slope=D.cards.map(c=>pear(Ls,d.map(r=>r.by_card[c].stage_cycles)).slope);
+ const best=Math.max(...gb2), worst=d[0].by_card[A2].gb_s;
+ $('distafter').innerHTML=
+  `The headline in section 1 uses offset ${d[0].hop_distance}, the slowest of these. Transfers here are 32 KB per minion and pipelined, yet `+
+  `the mesh distance still shows: the stage time grows about ${rng(slope,v=>n0(Math.round(v/100)*100))} cycles for each hop of the longest `+
+  `hand-off (a least-squares line over the ${word(d.length)} offsets, one per card). The practical consequence is to keep the longest hand-off `+
+  `short; in this sweep the ID ring's ${d[0].longest.hops}-hop pair cost ${f0(100*(1-worst/best))}% of the bandwidth of the best offset. `+
+  `Placement is not free in energy either. On a loaded mesh each hop costs 1.5–2.2 pJ per byte of random data `+
+  `(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#meaning">Heat per millimetre, §8</a>), about half of what a tensor `+
+  `load of that byte from the shire's own scratchpad costs. The hand-off's bytes cross ${f1(k(1).mean)} hops on average, so a physical `+
+  `neighbour should cost less (untested; section 7). This relay's slabs each hold a single value repeated, and such data costs less to `+
+  `carry than random data.`;
+
+ /* ---- the map and the scatter ---- */
+ const LAY=D.layout, ring=D.ring, n=ring.length;
+ const hops=(a,b)=>Math.abs(LAY[a][0]-LAY[b][0])+Math.abs(LAY[a][1]-LAY[b][1]);
+ const src=(s,o)=>ring[(ring.indexOf(s)-o+n)%n];
+ const R={longest:{},mean:{}};
+ for(const c of D.cards){const g=d.map(r=>r.by_card[c].gb_s);R.longest[c]=pear(Ls,g);R.mean[c]=pear(mh,g);}
+ let off=d[0].hop_distance, xm='longest', f=null;
+ CK.seg('ringoff',{label:'Ring offset (shire IDs back)',options:d.map(r=>[r.hop_distance,String(r.hop_distance)]),value:off,onChange:v=>{off=v;upd();}});
+ CK.seg('ringx',{label:'Scatter against',options:[['longest','longest hand-off'],['mean','mean hops']],value:xm,onChange:v=>{xm=v;upd();}});
+ const out=CK.readout('ringout');
+ function upd(){
+  const r=d.find(q=>q.hop_distance===off);
+  out.set(`<b>Offset ${off}:</b> mean ${f1(r.mesh_hops.mean)} hops, longest ${r.longest.hops} → ${f1(r.by_card[A2].gb_s)} GB/s (${A2}), ${f1(r.by_card[A3].gb_s)} (${A3}). `+
+   `Bandwidth against the ${xm==='longest'?'longest hand-off':'mean hops'}, ${word(d.length)} offsets: r = ${num(R[xm][A2].r,2)} (${A2}), ${num(R[xm][A3].r,2)} (${A3}).`);
+  if(f) f.redraw();
+ }
+ const ramp=h=>CK.ramp((h-1)/9);
+ f=CK.frame('ring',{label:'Mesh map of who reads from whom at the chosen ring offset, and relay bandwidth against hand-off distance',
+  height:W=>W<600?Math.min(44,Math.floor((W-20)/6))*6+62+300:360,
+  draw(f){
+   const svg=f.svg,W=f.W,narrow=f.narrow, r=d.find(q=>q.hop_distance===off);
+   const c=narrow?Math.min(44,Math.floor((W-20)/6)):44, mapW=6*c, mx=narrow?Math.round((W-mapW)/2):8, my=24;
+   const cx=s=>mx+LAY[s][0]*c+c/2, cy=s=>my+LAY[s][1]*c+c/2;
+   const defs=CK.el('defs',{},svg);
+   for(const [id,col] of [['rl-ah','var(--c2)'],['rl-ah2','var(--ink)']]){
+    const m=CK.el('marker',{id,viewBox:'0 0 10 10',refX:8,refY:5,markerWidth:5,markerHeight:5,orient:'auto-start-reverse'},defs);
+    CK.el('path',{d:'M0,0 L10,5 L0,10 z',style:`fill:${col}`},m);
+   }
+   CK.txt(svg,mx,14,`Who reads from whom at offset ${off}`,'lab');
+   for(const [ex,ey] of D.empty) CK.el('rect',{x:mx+ex*c+3,y:my+ey*c+3,width:c-6,height:c-6,rx:5,fill:'none',style:'stroke:var(--grid);stroke-dasharray:3 3'},svg);
+   const order=ring.slice().sort((a,b)=>LAY[a][1]-LAY[b][1]||LAY[a][0]-LAY[b][0]), cells=[];
+   const arrow=(a,b,g,col,mk,w,shift)=>{  // straight source -> destination, stopping short of the destination's centre
+    const x1=cx(a),y1=cy(a),x2=cx(b),y2=cy(b),L=Math.hypot(x2-x1,y2-y1),ux=(x2-x1)/L,uy=(y2-y1)/L,px=-uy*shift,py=ux*shift;
+    CK.el('line',{x1:x1+ux*8+px,y1:y1+uy*8+py,x2:x2-ux*12+px,y2:y2-uy*12+py,'marker-end':`url(#${mk})`,style:`stroke:${col};stroke-width:${w}`},g);};
+   const cellG=CK.el('g',{},svg), longG=CK.el('g',{'aria-hidden':'true'},svg), own=CK.el('g',{'aria-hidden':'true'},svg);
+   const labG=CK.el('g',{'aria-hidden':'true',style:'pointer-events:none'},svg);
+   for(const s of order){
+    const h=hops(s,src(s,off)), g=CK.el('g',{},cellG);
+    const rc=CK.el('rect',{x:mx+LAY[s][0]*c+2,y:my+LAY[s][1]*c+2,width:c-4,height:c-4,rx:6},g); rc.style.fill=ramp(h); rc.style.stroke='var(--grid)';
+    const lt=CK.txt(labG,cx(s),cy(s)+4,String(s),'lab-strong','middle'); lt.style.fill=CK.rampInk((h-1)/9);
+    lt.style.paintOrder='stroke'; lt.style.stroke=ramp(h); lt.style.strokeWidth='3px';
+    g.dataset.s=s; cells.push(g);
+    CK.tip(f,g,`<b>shire ${s}</b> reads from shire ${src(s,off)} · ${h} hop${h>1?'s':''}`);
+    const on=()=>{own.textContent='';arrow(src(s,off),s,own,'var(--ink)','rl-ah2',2,0);}, offf=()=>{own.textContent='';};
+    g.addEventListener('pointerenter',on); g.addEventListener('pointerleave',offf); g.addEventListener('focus',on); g.addEventListener('blur',offf);
+   }
+   for(const [a,b] of r.longest.pairs){
+    const rev=r.longest.pairs.some(([p,q])=>p===b&&q===a);
+    arrow(a,b,longG,'var(--c2)','rl-ah',2.5,rev?3:0);
+   }
+   CK.keynav(f,cells,{step:(k,K,nodes)=>{
+     if(K!=='ArrowUp'&&K!=='ArrowDown')return null;
+     const s=+nodes[k].dataset.s,[x,y]=LAY[s],dy=K==='ArrowDown'?1:-1;
+     for(let yy=y+dy;yy>=0&&yy<6;yy+=dy){const j=nodes.findIndex(q=>LAY[+q.dataset.s][0]===x&&LAY[+q.dataset.s][1]===yy);if(j>=0)return j;}
+     return k;}});
+   /* colour key */
+   const ky=my+mapW+10, kw=Math.min(mapW,200), kx=mx+(mapW-kw)/2;
+   for(let h=1;h<=10;h++){const q=CK.el('rect',{x:kx+(h-1)*kw/10,y:ky,width:kw/10-1,height:10},svg);q.style.fill=ramp(h);q.style.stroke='var(--grid)';}
+   CK.txt(svg,kx,ky+24,'1 hop','tick','start'); CK.txt(svg,kx+kw,ky+24,'10 hops','tick','end');
+   const ak=CK.el('g',{'aria-hidden':'true'},svg);
+   CK.el('line',{x1:kx,x2:kx+22,y1:ky+38,y2:ky+38,'marker-end':'url(#rl-ah)',style:'stroke:var(--c2);stroke-width:2.5'},ak);
+   CK.txt(svg,kx+28,ky+42,'longest hand-off','tick');
+   /* scatter */
+   const sx0=narrow?48:mx+mapW+70, sx1=W-14, sy0=narrow?ky+78:28, sy1=f.H-44;
+   const x=xm==='longest'?CK.lin(5.5,10.5,sx0,sx1):CK.lin(1,5,sx0,sx1), y=CK.lin(575,750,sy1,sy0);
+   CK.axes({svg,W:sx1+14,H:sy1+44},{x,y,L:sx0,R:14,T:sy0,B:44,xt:xm==='longest'?[6,7,8,9,10]:[1,2,3,4,5],yt:[600,650,700,750],
+     yfmt:n0,xl:xm==='longest'?'longest hand-off in the ring, mesh hops':'mean hand-off, mesh hops'});
+   CK.txt(svg,sx0-44,sy0-10,'GB/s, whole relay','lab');
+   const xv=q=>xm==='longest'?q.longest.hops:q.mesh_hops.mean;
+   const F=R[xm][A2];
+   /* the least-squares line, clipped to the plot (it would run past the axes at the ends) */
+   const fy=v=>F.icpt+F.slope*v, cl=[y.domain[0],y.domain[1]].map(g=>(g-F.icpt)/F.slope).sort((p,q)=>p-q);
+   const lx0=Math.max(x.domain[0],cl[0]), lx1=Math.min(x.domain[1],cl[1]);
+   CK.el('line',{x1:x(lx0),x2:x(lx1),y1:y(fy(lx0)),y2:y(fy(lx1)),'aria-hidden':'true',
+     style:'stroke:var(--ref);stroke-width:1.5;stroke-dasharray:5 4'},svg);
+   /* r is in the readout above the chart, which follows the toggle */
+   const pts=[];
+   for(const q of d.slice().sort((a,b)=>xv(a)-xv(b))){
+    const g=CK.el('g',{},svg), sel=q.hop_distance===off, X=x(xv(q));
+    const p2=CK.el('circle',{cx:X,cy:y(q.by_card[A2].gb_s),r:sel?6.5:5},g); p2.style.fill='var(--c1)';
+    const p3=CK.el('circle',{cx:X,cy:y(q.by_card[A3].gb_s),r:sel?10:8.5,fill:'none'},g); p3.style.stroke='var(--c1)'; p3.style.strokeWidth='1.5';
+    if(sel){const rr=CK.el('circle',{cx:X,cy:y(q.by_card[A2].gb_s),r:14,fill:'none','aria-hidden':'true'},g);rr.style.stroke='var(--ink)';rr.style.strokeWidth='2';}
+    const edge=X>sx1-70;
+    CK.txt(g,edge?X-8:X+12,y(q.by_card[A2].gb_s)+(edge?-14:4),`offset ${q.hop_distance}`,'tick',edge?'end':'start');
+    CK.tip(f,g,`<b>offset ${q.hop_distance}</b> · longest hand-off ${q.longest.hops} hops, mean ${f1(q.mesh_hops.mean)}<br>`+
+     `${f1(q.by_card[A2].gb_s)} GB/s (${A2}), ${f1(q.by_card[A3].gb_s)} (${A3})<br>Enter shows this offset on the map`);
+    g.dataset.o=q.hop_distance; g.addEventListener('click',()=>{off=q.hop_distance;segSet();});
+    pts.push(g);
+   }
+   CK.keynav(f,pts,{onEnter:n=>{off=+n.dataset.o;segSet();}});
+  }});
+ function segSet(){const b=[...document.querySelectorAll('#ringoff [role=radio]')].find(e=>e.textContent===String(off));if(b)b.click();}
+ upd();
+ $('ringcap').textContent=
+  `The map colours each shire by how many mesh hops the slab it reads at this offset has to travel (the stronger the blue, the farther); the arrows mark `+
+  `the longest hand-offs, drawn straight from source to destination because the route the data takes on the mesh was not measured. `+
+  `The scatter puts the relay's bandwidth against the longest hand-off (or, toggled, the mean): r = ${rng(D.cards.map(c=>R.longest[c].r),v=>num(v,2))} `+
+  `against the longest on the two cards, ${D.cards.map(c=>num(R.mean[c].r,2)).join(' and ')} against the mean. Filled ${A2}, rings ${A3}. `+
+  `Consistent with the slowest pair setting the pace at each barrier; ${word(d.length)} offsets, not a controlled test.`;
 })();
 
 </script>

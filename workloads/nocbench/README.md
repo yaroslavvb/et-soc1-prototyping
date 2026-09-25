@@ -69,6 +69,7 @@ spent on the mesh is fixed in ns rather than in cycles.
 ```bash
 ssh aifoundry2 'cd ~/nekko && bash workloads/nocbench/run_lab.sh build/nocbench/host/nocbench_host build/nocbench-data'
 ssh aifoundry2 'cd ~/nekko && python3 workloads/nocbench/run_energy.py --host-bin build/nocbench/host/nocbench_host --out build/nocbench-data/energy-a'
+ssh aifoundry2 'cd ~/nekko && python3 workloads/nocbench/run_energy.py --host-bin build/nocbench/host/nocbench_host --out build/nocbench-data/energy-b --only xshire1-c4,shire-c4,xshire6,xshire4,xshire2,xshire8,xshire16,xshire1,shire,neigh,pair,spin'
 ```
 
 Quit `et-powertop` before either one, because both read `/dev/et0_mgmt`, which allows only one opener. The report
@@ -76,8 +77,15 @@ averages two energy runs, `energy-a` and `energy-b`. The second used `--only` to
 Then copy the data back and summarize it:
 
 ```bash
-python3 workloads/nocbench/analyze.py docs/reports/data/2026-09-18-nocbench-aifoundry2 --memhier docs/reports/data/2026-09-18-memhier-aifoundry2 --search
+python3 workloads/nocbench/analyze.py docs/reports/data/2026-09-18-nocbench-aifoundry2 --memhier docs/reports/data/2026-09-18-memhier-aifoundry2 --search \
+    --embed docs/reports/2026-09-18-et-soc1-on-chip-communication.html
+python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-on-chip-communication.html
 ```
+
+`--search` records every restart of the layout search (12 of 12 find marty1885's map), and the script also embeds the
+energy manual's 23 September re-runs of these rings (`--reruns`, default
+`docs/reports/data/2026-09-23-energy-manual/reruns.json`) with their fit against the mean hop count, 9.3 + 1.7 pJ/B per
+hop; those supersede the 18 September energies. The run is E34 in `docs/findings/03-experiments.md`.
 
 In the simulator, add `--sysemu` to any `nocbench_host` command with small `--iters`. That checks that the
 schedules and the data movement are right. The simulator's timing means nothing.

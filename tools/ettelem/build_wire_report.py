@@ -5,11 +5,30 @@
                          --out docs/reports/data/2026-09-24-wire-energy/report.json
 
 Every constant below that is not measured here carries its source (docs/reports/data/2026-09-24-wire-energy/research/
-SYNTHESIS.md has the quotes and pages). Nothing is fitted in this script.
+SYNTHESIS.md has the quotes and pages). Nothing is fitted in this script. It reads the energy manual's manual.json, the
+die geometry's pitch.json, the logical mesh map of workloads/nocbench/analyze.py and the raw runs' reader>target
+maps by paths relative to the repository, so it runs from any directory, and it stops with an error if one is missing.
 """
 import argparse
+import gzip
+import importlib.util
 import json
 import math
+import os
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+MANUAL = "docs/reports/data/2026-09-23-energy-manual/manual.json"
+PITCH = "docs/reports/data/2026-09-24-wire-energy/research/geometry/pitch.json"
+RAW = ["docs/reports/data/2026-09-24-wire-aifoundry2", "docs/reports/data/2026-09-24-wire-aifoundry3",
+       "docs/reports/data/2026-09-24-wire2-aifoundry2", "docs/reports/data/2026-09-24-wire2-aifoundry3"]
+MAP_SETS = ("wu/p0.5/hop", "wsep/p0.5/hop")   # the configurations whose reader>target maps the page draws
+
+
+def need(rel, what):
+    path = os.path.join(ROOT, rel)
+    if not os.path.exists(path):
+        raise SystemExit(f"build_wire_report: cannot read {what}: {path} is missing")
+    return path
 
 V_NOC = 0.485   # the NoC rail's set point on both cards (reg_mv.noc 485, die_mv.noc 484)
 
@@ -19,7 +38,7 @@ INPUTS = {
     "die_h_mm": {"value": 22.2, "range": [22.1, 22.2], "source": "same"},
     "pitch_x_mm": {"value": 3.73, "source": "same: 254.8 px tile period, outlines and autocorrelation agree"},
     "pitch_y_mm": {"value": 3.70, "source": "same: 252.7 px"},
-    "hop_mm": {"value": 3.72, "range": [3.64, 3.74], "source": "sqrt(px*py) under three readings of what the 570 mm2 covers: 3.735, 3.711, 3.637 mm (research/SYNTHESIS.md 1a)"},
+    "hop_mm": {"value": 3.72, "range": [3.64, 3.74], "source": "about the mean of the two readings of the 570 mm2 (A 3.735, B 3.711 mm; sqrt(px*py) under each; research/SYNTHESIS.md 1a); 3.637 if the area includes the drawn frame"},
     "grid": {"value": "8 x 6 mesh stops: 34 minion shires, PCIe, I/O, 4 memory shires per side", "source": "ET Preliminary Datasheet Rev 1.0, ch. 4"},
     "noc_mhz": {"value": 400, "source": "telemetry mhz.noc; firmware main.c 'NOC frequency modes (400MHz)'"},
     "noc_v": {"value": V_NOC, "source": "telemetry reg_mv.noc 485 / die_mv.noc 484"},
@@ -64,12 +83,25 @@ def main():
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     w = json.load(open(a.wire))
+    # the memory-shire + PHY strip: reading B of pitch.json (the scale the die width and pitch use); the range is the
+    # two strips' widths measured to the tile outlines (research/SYNTHESIS.md 1a)
+    pitch = json.load(open(need(PITCH, "the die geometry")))
+    INPUTS["memshire_w_mm"] = {"value": round(pitch["scale_from_570mm2"]["B_symmetric_bottom"]["memshire_col_w_mm"], 2), "range": [1.74, 1.80],
+                               "source": "research/geometry/pitch.json scale_from_570mm2.B_symmetric_bottom.memshire_col_w_mm; "
+                                         "range: the two strips to the tile outlines, 1.74 and 1.80 mm (research/SYNTHESIS.md 1a)"}
+    # the runner's logical map of the 32 compute shires (x, y) and the four empty positions of the 6 x 6 grid, from
+    # the nocbench analysis that the on-chip reports share (the same map as run_wire.py's MESH)
+    spec = importlib.util.spec_from_file_location("nocbench_analyze", need("workloads/nocbench/analyze.py", "the mesh map"))
+    nb = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(nb)
+    INPUTS["mesh_xy"] = {"value": {str(k): list(v) for k, v in sorted(nb.MARTY.items())}, "empty": [list(e) for e in nb.EMPTY],
+                         "source": "workloads/nocbench/analyze.py MARTY and EMPTY (marty1885's shire coordinates; run_wire.py MESH is the same map)"}
     L = INPUTS["hop_mm"]["value"]
     Llo, Lhi = INPUTS["hop_mm"]["range"]
     out = {"inputs": INPUTS, "literature": LIT, "wire": w, "first_principles": {"at_0485": wire_first_principles(V_NOC), "at_09": wire_first_principles(0.9)}}
     # context from the energy manual (docs/reports/data/2026-09-23-energy-manual/manual.json), same cards and clock
     try:
-        man = json.load(open("docs/reports/data/2026-09-23-energy-manual/manual.json"))
+        man = json.load(open(need(MANUAL, "the energy manual context")))
         cb, rr = man["catalogue"]["combined"], man["reruns"]
         out["context"] = {"dram_read_pj_per_byte": rr["levels_pj_per_byte"]["dram"]["mean"],
                           "tload_dram_random_pj_per_byte": cb["tload/dram/random"]["mean"],
@@ -78,8 +110,23 @@ def main():
                           "fadd_s_random_pj": cb["fadd.s/random/h2"]["mean"],
                           "add_random_pj": cb["add/random/h2"]["mean"],
                           "source": "docs/reports/data/2026-09-23-energy-manual/manual.json (catalogue.combined, reruns.levels_pj_per_byte)"}
-    except Exception as e:
-        out["context"] = {"error": str(e)}
+    except KeyError as e:
+        raise SystemExit(f"build_wire_report: cannot read the energy manual context: {MANUAL} has no {e}")
+
+    # the reader>target map of each drawn configuration, from the raw runs (identical over passes and cards: checked)
+    maps = {}
+    for d in RAW:
+        for line in gzip.open(need(d + "/runs.jsonl.gz", "the raw runs"), "rt"):
+            if not line.startswith("{"):
+                continue
+            r = json.loads(line)
+            if r.get("cfg", "").startswith(MAP_SETS) and r.get("target_map"):
+                maps.setdefault(r["cfg"], set()).add(r["target_map"])
+    ls = w["checks"]["link_sharing"]
+    for cfg, m in sorted(maps.items()):
+        if len(m) != 1:
+            raise SystemExit(f"build_wire_report: {cfg} has {len(m)} different reader>target maps")
+        ls[cfg]["target_map"] = m.pop()
 
     # headline numbers per millimetre, per set and meter, with the pitch range folded into the bar
     head = {}

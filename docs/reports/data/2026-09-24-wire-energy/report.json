@@ -34,7 +34,7 @@
     3.64,
     3.74
    ],
-   "source": "sqrt(px*py) under three readings of what the 570 mm2 covers: 3.735, 3.711, 3.637 mm (research/SYNTHESIS.md 1a)"
+   "source": "about the mean of the two readings of the 570 mm2 (A 3.735, B 3.711 mm; sqrt(px*py) under each; research/SYNTHESIS.md 1a); 3.637 if the area includes the drawn frame"
   },
   "grid": {
    "value": "8 x 6 mesh stops: 34 minion shires, PCIe, I/O, 4 memory shires per side",
@@ -55,6 +55,165 @@
   "lanes": {
    "value": 4,
    "source": "core-et-main shirecache_mesh_master.sv: lane by PA[7:6], so lines i and i+4 share a lane"
+  },
+  "memshire_w_mm": {
+   "value": 1.76,
+   "range": [
+    1.74,
+    1.8
+   ],
+   "source": "research/geometry/pitch.json scale_from_570mm2.B_symmetric_bottom.memshire_col_w_mm; range: the two strips to the tile outlines, 1.74 and 1.80 mm (research/SYNTHESIS.md 1a)"
+  },
+  "mesh_xy": {
+   "value": {
+    "0": [
+     0,
+     0
+    ],
+    "1": [
+     2,
+     1
+    ],
+    "2": [
+     4,
+     0
+    ],
+    "3": [
+     0,
+     2
+    ],
+    "4": [
+     1,
+     2
+    ],
+    "5": [
+     2,
+     5
+    ],
+    "6": [
+     3,
+     5
+    ],
+    "7": [
+     4,
+     5
+    ],
+    "8": [
+     0,
+     1
+    ],
+    "9": [
+     2,
+     0
+    ],
+    "10": [
+     4,
+     1
+    ],
+    "11": [
+     5,
+     0
+    ],
+    "12": [
+     1,
+     3
+    ],
+    "13": [
+     2,
+     2
+    ],
+    "14": [
+     3,
+     2
+    ],
+    "15": [
+     4,
+     4
+    ],
+    "16": [
+     1,
+     1
+    ],
+    "17": [
+     3,
+     1
+    ],
+    "18": [
+     4,
+     2
+    ],
+    "19": [
+     5,
+     1
+    ],
+    "20": [
+     1,
+     4
+    ],
+    "21": [
+     2,
+     3
+    ],
+    "22": [
+     3,
+     3
+    ],
+    "23": [
+     5,
+     4
+    ],
+    "24": [
+     1,
+     0
+    ],
+    "25": [
+     3,
+     0
+    ],
+    "26": [
+     4,
+     3
+    ],
+    "27": [
+     5,
+     2
+    ],
+    "28": [
+     1,
+     5
+    ],
+    "29": [
+     2,
+     4
+    ],
+    "30": [
+     3,
+     4
+    ],
+    "31": [
+     5,
+     5
+    ]
+   },
+   "empty": [
+    [
+     0,
+     3
+    ],
+    [
+     0,
+     4
+    ],
+    [
+     0,
+     5
+    ],
+    [
+     5,
+     3
+    ]
+   ],
+   "source": "workloads/nocbench/analyze.py MARTY and EMPTY (marty1885's shire coordinates; run_wire.py MESH is the same map)"
   }
  },
  "literature": [
@@ -10945,7 +11104,8 @@
      "flows": 32,
      "reader_shires": 32,
      "targets_with_two_readers": 2,
-     "shared_link_hop_fraction_yx": 0.3020833333333333
+     "shared_link_hop_fraction_yx": 0.3020833333333333,
+     "target_map": "0>1,1>0,2>14,3>20,4>9,5>12,6>21,7>18,8>13,9>4,10>15,11>17,12>5,13>8,14>2,15>10,16>25,17>11,18>7,19>23,20>3,21>6,22>27,23>19,24>2/r1,25>16,26>29,27>22,28>30,29>26,30>28,31>5/r1"
     },
     "wu/p0.25/hop2": {
      "shared_link_hop_fraction": 0.21875,
@@ -10987,7 +11147,8 @@
      "flows": 32,
      "reader_shires": 32,
      "targets_with_two_readers": 2,
-     "shared_link_hop_fraction_yx": 0.0
+     "shared_link_hop_fraction_yx": 0.0,
+     "target_map": "0>8,1>9,2>10,3>4,4>3,5>6,6>5,7>15,8>0,9>1,10>2,11>19,12>20,13>14,14>13,15>7,16>24,17>25,18>26,19>11,20>12,21>22,22>21,23>31,24>16,25>17,26>18,27>18/r1,28>5/r1,29>30,30>29,31>23"
     },
     "wsep/p0/hop5": {
      "shared_link_hop_fraction": 0.0,
@@ -11029,7 +11190,8 @@
      "flows": 32,
      "reader_shires": 32,
      "targets_with_two_readers": 0,
-     "shared_link_hop_fraction_yx": 0.546875
+     "shared_link_hop_fraction_yx": 0.546875,
+     "target_map": "0>2,1>5,2>0,3>9,4>10,5>1,6>12,7>14,8>20,9>3,10>4,11>23,12>6,13>15,14>7,15>13,16>18,17>29,18>16,19>22,20>8,21>24,22>19,23>11,24>21,25>26,26>25,27>30,28>31,29>17,30>27,31>28"
     },
     "wu/p0/hop6": {
      "shared_link_hop_fraction": 0.7204301075268817,
@@ -11050,14 +11212,16 @@
      "flows": 32,
      "reader_shires": 32,
      "targets_with_two_readers": 4,
-     "shared_link_hop_fraction_yx": 0.21875
+     "shared_link_hop_fraction_yx": 0.21875,
+     "target_map": "0>3,1>4,2>9,3>0,4>1,5>7,6>15,7>5,8>24,9>2,10>11,11>10,12>13,13>12,14>21,15>6,16>17,17>16,18>19,19>18,20>30,21>14,22>29,23>26,24>8,25>1/r1,26>23,27>10/r1,28>6/r1,29>22,30>20,31>15/r1"
     },
     "wsep/p0.5/hop4": {
      "shared_link_hop_fraction": 0.0,
      "flows": 18,
      "reader_shires": 18,
      "targets_with_two_readers": 0,
-     "shared_link_hop_fraction_yx": 0.0
+     "shared_link_hop_fraction_yx": 0.0,
+     "target_map": "0>2,1>5,2>0,4>27,6>17,7>10,10>7,11>23,16>19,18>3,19>16,20>24,23>11,24>20,25>30,28>31,29>9,31>28"
     },
     "wu/p0.75/hop1": {
      "shared_link_hop_fraction": 0.0,
@@ -11099,7 +11263,8 @@
      "flows": 31,
      "reader_shires": 31,
      "targets_with_two_readers": 5,
-     "shared_link_hop_fraction_yx": 0.7795698924731183
+     "shared_link_hop_fraction_yx": 0.7795698924731183,
+     "target_map": "0>18,1>7,2>3,3>2,4>11,5>8,6>9,7>1,8>5,9>6,10>20,11>4,12>19,13>31,15>16,16>15,17>28,18>0,19>12,20>10,21>11/r1,22>0/r1,23>25,24>26,25>23,26>24,27>5/r1,28>17,29>2/r1,30>8/r1,31>13"
     },
     "wu/p0/hop2": {
      "shared_link_hop_fraction": 0.21875,
@@ -11127,7 +11292,8 @@
      "flows": 28,
      "reader_shires": 28,
      "targets_with_two_readers": 0,
-     "shared_link_hop_fraction_yx": 0.0
+     "shared_link_hop_fraction_yx": 0.0,
+     "target_map": "0>3,1>10,2>9,3>13,4>24,5>21,6>31,7>5,9>0,10>26,11>27,12>22,13>29,14>25,15>18,16>12,17>16,18>2,19>17,20>4,21>1,22>6,23>30,25>11,26>7,27>23,29>15,30>14"
     },
     "wsep/p0/hop1": {
      "shared_link_hop_fraction": 0.0,
@@ -11141,7 +11307,8 @@
      "flows": 14,
      "reader_shires": 14,
      "targets_with_two_readers": 0,
-     "shared_link_hop_fraction_yx": 0.0
+     "shared_link_hop_fraction_yx": 0.0,
+     "target_map": "0>11,2>7,3>27,5>9,6>25,7>2,8>19,9>5,11>0,19>8,24>28,25>6,27>3,28>24"
     },
     "wu/p0.25/hop6": {
      "shared_link_hop_fraction": 0.7204301075268817,
@@ -11155,7 +11322,8 @@
      "flows": 22,
      "reader_shires": 22,
      "targets_with_two_readers": 0,
-     "shared_link_hop_fraction_yx": 0.0
+     "shared_link_hop_fraction_yx": 0.0,
+     "target_map": "1>29,2>24,4>28,5>13,7>18,9>11,10>15,12>26,13>27,14>3,15>20,16>10,17>8,20>16,23>19,25>22,26>12,27>31,28>7,29>23,30>17,31>5"
     },
     "wsep/p0/hop3": {
      "shared_link_hop_fraction": 0.0,
@@ -11183,7 +11351,8 @@
      "flows": 31,
      "reader_shires": 31,
      "targets_with_two_readers": 0,
-     "shared_link_hop_fraction_yx": 0.0
+     "shared_link_hop_fraction_yx": 0.0,
+     "target_map": "0>24,1>17,2>11,3>8,4>3,5>29,6>7,7>6,8>16,9>25,10>2,11>19,12>21,13>1,14>22,15>26,16>4,17>14,18>10,19>27,20>12,21>13,22>30,23>31,24>0,25>9,27>18,28>20,29>5,30>15,31>23"
     },
     "wu/p1/hop4": {
      "shared_link_hop_fraction": 0.546875,

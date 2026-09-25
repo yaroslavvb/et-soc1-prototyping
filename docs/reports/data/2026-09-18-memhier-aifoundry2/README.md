@@ -13,7 +13,7 @@ workloads/memhier/run_lab.sh build/memhier/host/memhier_host OUTDIR'`. The group
 | `chase-scp-local.jsonl` | scp | Chains in the shire's own L2 scratchpad |
 | `chase-scp-map{,-from7,-from24,-from31}.jsonl` | scp | A 64 KB chain in each of the 32 shires' scratchpads, from shires 0, 7, 24 and 31 |
 | `dvfs-poll-during-spin.txt` | dvfs | Clock, minion voltage and board power every ~250 ms around a 2 s spin |
-| `energy/`, `energy2/` | energy | Two runs of `workloads/memhier/run_energy.py`: bandwidth and board power per level |
+| `energy/`, `energy2/` | energy | Two runs of an earlier version of `workloads/memhier/run_energy.py`, from before it recorded the clock and voltage: `power.csv` is `epoch_ms,watts`, and `results.json` has no `mean_mhz` or `mean_minion_mv`. Bandwidth and board power per level; the energies are superseded by the energy manual's §4 (23 September re-runs at a pinned 600 MHz) |
 
 Each line of the chase files is one `MEMHIER {json}` record with the chase's parameters, its cycles per load, its wall
 time and epoch timestamps. `ok` says whether the final pointer matched a host-side walk of the chain. Regenerate the

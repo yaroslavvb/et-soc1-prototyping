@@ -2,10 +2,15 @@
 """Summarize nocbench results into the numbers and chart data used by the report.
 
     python3 workloads/nocbench/analyze.py docs/reports/data/2026-09-18-nocbench-aifoundry2 \
-        [--memhier docs/reports/data/2026-09-18-memhier-aifoundry2] [--embed REPORT_HTML]
+        [--memhier docs/reports/data/2026-09-18-memhier-aifoundry2] [--search] [--reruns RERUNS_JSON] [--embed REPORT_HTML]
 
 The data directory holds the NOCBENCH lines of each run (*.jsonl, from run_lab.sh), clock.csv (minion clock
 and board power sampled during those runs) and energy-*/results.json (run_energy.py, one directory per run).
+--memhier: the memory-hierarchy data, for its scratchpad latency rows and the 600 MHz bandwidth of a remote
+    scratchpad TensorLoad (the reference row of the energy chart).
+--search: 12 simulated-annealing restarts from random layouts (about 30 s); records each restart.
+--reruns: the energy manual's pooled re-runs of these rings (default docs/reports/data/2026-09-23-energy-manual/
+    reruns.json), embedded with their fit against the mean hop count.
 
 The shire layout: marty1885 inferred where each logical shire sits on the physical 6x6 mesh from
 shire-to-shire bandwidth (clehaxze.tw, "Investigating the ET-SoC-1 NoC", 2026-04-27). This script checks it
@@ -23,6 +28,9 @@ import re
 import statistics
 
 import numpy as np
+
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+RERUNS = os.path.join(ROOT, "docs", "reports", "data", "2026-09-23-energy-manual", "reruns.json")
 
 # marty1885's physical (x, y) of each logical compute shire on the 6x6 mesh. The four cells without a compute
 # shire are (0,3), (0,4), (0,5) and (5,3); his bandwidth data shows (5,3) routes traffic.
@@ -105,7 +113,8 @@ def fit_line(x, y):
 
 def search_layout(shires, lat, iters=60000, restarts=12, seed=1):
     """Simulated annealing: place the shires on a 6x6 grid so that latency = a + b * Manhattan distance
-    fits best. `lat` maps (i, j) with i < j to a latency. Returns (cost, layout)."""
+    fits best. `lat` maps (i, j) with i < j to a latency. Returns (cost, layout, restarts): the best restart's
+    cost and layout, and [cost, same hop distances as marty1885's map] for every restart."""
     idx = {s: k for k, s in enumerate(shires)}
     pairs = sorted(lat)
     I = np.array([idx[i] for i, _ in pairs])
@@ -121,6 +130,7 @@ def search_layout(shires, lat, iters=60000, restarts=12, seed=1):
         return float(((y - A @ coef) ** 2).sum())
 
     best = (math.inf, None)
+    runs = []
     for _ in range(restarts):
         order = cells[:]
         rng.shuffle(order)
@@ -140,9 +150,11 @@ def search_layout(shires, lat, iters=60000, restarts=12, seed=1):
             else:
                 slots[a], slots[b] = slots[b], slots[a]
             T *= 0.9998
+        found = {s: tuple(slots[k]) for k, s in enumerate(shires)}
+        runs.append([round(cur, 1), same_distances(found, MARTY, shires)])
         if cur < best[0]:
-            best = (cur, {s: tuple(slots[k]) for k, s in enumerate(shires)})
-    return best
+            best = (cur, found)
+    return best[0], best[1], runs
 
 
 def same_distances(la, lb, shires):
@@ -175,6 +187,7 @@ def main():
     p.add_argument("--memhier", help="memhier data directory, for its scratchpad latency rows")
     p.add_argument("--embed", metavar="REPORT_HTML")
     p.add_argument("--search", action="store_true", help="also search for the layout from scratch (slow)")
+    p.add_argument("--reruns", default=RERUNS, help="the energy manual's reruns.json (pooled re-runs of these rings)")
     args = p.parse_args()
     d = args.data_dir
     runs = {os.path.basename(f)[:-6]: load(f) for f in sorted(glob.glob(os.path.join(d, "*.jsonl")))}
@@ -257,12 +270,32 @@ def main():
         print(f"  range {min(ys) / ghz:.0f}-{max(ys) / ghz:.0f} ns, median {statistics.median(ys) / ghz:.0f} ns")
         matrices[name] = {"ghz": ghz, "a": a, "b": b, "r2": r2, "worst": worst,
                           "pairs": [[i, j, v] for (i, j), v in sorted(lat.items())]}
+        if name == "matrix-pingpong-c32":
+            # 1 KB round trips: +12 cycles per hop up to a knee, steeper beyond it. Two lines, split at the knee that
+            # fits best (each side needs at least two hop counts).
+            best = None
+            for k in range(2, max(by_h) - 1):
+                near = [(h, v) for (i, j), v in lat.items() for h in [hops(i, j)] if h <= k]
+                far = [(h, v) for (i, j), v in lat.items() for h in [hops(i, j)] if h > k]
+                f1, f2 = fit_line(*zip(*near)), fit_line(*zip(*far))
+                sse = sum((v - f1[0] - f1[1] * h) ** 2 for h, v in near) + sum((v - f2[0] - f2[1] * h) ** 2 for h, v in far)
+                if best is None or sse < best[0]:
+                    best = (sse, k, f1, f2)
+            _, k, f1, f2 = best
+            med = {h: statistics.median(v) for h, v in by_h.items()}
+            matrices[name]["knee"] = {"hops": k, "near": {"a": f1[0], "b": f1[1], "r2": f1[2], "worst": f1[3]},
+                                      "far": {"a": f2[0], "b": f2[1], "r2": f2[2], "worst": f2[3]},
+                                      "median_by_hops": {str(h): med[h] for h in sorted(med)}}
+            print(f"  two lines, knee after {k} hops: {f1[0]:.1f} + {f1[1]:.2f} x hops up to {k} (worst {f1[3]:.1f}), "
+                  f"{f2[0]:.1f} + {f2[1]:.2f} x hops beyond (worst {f2[3]:.1f}); step {k}->{k + 1} hops: "
+                  f"{med[k + 1] - med[k]:.1f} cycles")
         if args.search and name == "matrix-pingpong":
             shires = sorted({s for p in lat for s in p})
-            best_cost, found = search_layout(shires, lat)
+            best_cost, found, restarts = search_layout(shires, lat)
             same = same_distances(found, MARTY, shires)
             print(f"  layout search from scratch: residual {best_cost:.1f}; same hop distances as marty1885's map: {same}")
-            matrices[name]["search"] = {"cost": best_cost, "same_as_marty": same,
+            print(f"  every restart [residual, same distances]: {restarts}")
+            matrices[name]["search"] = {"cost": best_cost, "same_as_marty": same, "restarts": restarts,
                                         "layout": {str(s): xy for s, xy in found.items()}}
     data["matrices"] = matrices
 
@@ -281,7 +314,6 @@ def main():
                              "n_fast": len(fast), "n_other": len(slow)}
         print(f"\nshire {shire}: {len(fast)} fast pairs at {intra[str(shire)]['fast_cycles']:.0f} cycles, "
               f"{len(slow)} others at {min(slow):.0f}-{max(slow):.0f}: {fast}")
-    data["intra"] = intra
 
     # Message size: round trip (pingpong) and per-message time (stream) against COUNT.
     sizes = {}
@@ -314,7 +346,6 @@ def main():
         print("\ncombine functions (round-trip cycles):")
         for f, rows in functs.items():
             print(f"  {f:5s} " + "  ".join(f"{q['pair']} c{q['count']}: {q['cycles']:.1f}" for q in rows))
-    data["functs"] = functs
 
     # Allreduce trees.
     allreduce = {}
@@ -345,7 +376,23 @@ def main():
                                      "cycles": r["cycles_per_iter_mean"], "ns": r["cycles_per_iter_mean"] / ghz, "ghz": ghz})
     for b in barriers:
         print(f"barrier {b['name']:16s} {b['participants']:5d} minions: {b['cycles']:8.1f} cycles, {b['ns']:7.1f} ns")
-    data["barriers"] = barriers
+
+    # The in-shire primitives a TensorSend layout is built from (the page's layout diagram): the round trip on a
+    # tree edge and elsewhere in the shire, the tree's edges in one neighbourhood, a 32-minion barrier with every
+    # shire doing it at once, and a 32-minion allreduce (32 B, one tree).
+    prim = {}
+    if "0" in intra:
+        prim["tree_hop"] = intra["0"]["fast_cycles"]
+        prim["other_hop"] = intra["0"]["other_cycles"]
+        prim["tree_pairs"] = [p_ for p_ in intra["0"]["fast_pairs"] if max(p_) < 8]
+    sb = [b for b in barriers if b["name"] == "barrier-shire32"]
+    if sb:
+        prim["shire_barrier"] = sb[0]["cycles"]
+    a32 = [q for q in allreduce.get("1", []) if q["minions"] == 32 and q["trees"] == 1]
+    if a32:
+        prim["allreduce32"] = a32[0]["cycles"]
+    data["primitives"] = prim
+    print(f"primitives for the layout diagram: {prim}")
 
     # Energy per byte of ring traffic, against the local idle next to each configuration, averaged over runs.
     energy_runs = [json.load(open(ef)) for ef in sorted(glob.glob(os.path.join(d, "energy-*", "results.json")))]
@@ -373,13 +420,39 @@ def main():
             print(f"  1 KB messages over the mesh: {a:.1f} + {b:.2f} pJ/B per hop (r2 {r2:.3f})")
     data["energy"] = energy
 
+    # The same rings re-run on 23 September, three passes on each of two cards, pooled by the energy manual
+    # (tools/ettelem/analyze_reruns.py): mean and pass range per ring, and the fit over the six 1 KB mesh rings
+    # against their mean hop count. The references are the manual's per-level reads at a pinned 600 MHz.
+    if args.reruns and os.path.exists(args.reruns):
+        rr = json.load(open(args.reruns))
+        rings = {k: {q: v[q] for q in ("mean", "lo", "hi", "n")} for k, v in rr["rings_pj_per_byte"].items()}
+        mesh = [(energy["configs"][k]["mean_hops"], v["mean"]) for k, v in rings.items()
+                if k.startswith("xshire") and not k.endswith("-c4") and k in energy["configs"]]
+        a, b, r2, _ = fit_line([m[0] for m in mesh], [m[1] for m in mesh])
+        levels = {k: {q: rr["levels_pj_per_byte"][k][q] for q in ("mean", "lo", "hi")} for k in ("l2", "scp-remote", "dram")}
+        data["reruns"] = {"rings": rings, "mesh_fit": {"a": a, "b": b, "r2": r2, "n": len(mesh)}, "levels": levels}
+        print(f"re-run on two cards (23 September): 1 KB messages over the mesh {a:.2f} + {b:.2f} pJ/B per mean hop "
+              f"(r2 {r2:.3f}, {len(mesh)} rings); inside a shire " + ", ".join(
+                  f"{k} {rings[k]['mean']:.2f}" for k in ("pair", "neigh", "shire", "shire-c4") if k in rings))
+
+    # Bulk data between shires for comparison: every minion streaming 1 KB TensorLoads from the scratchpad 16 shire
+    # IDs away (the memory-hierarchy probe), median GB/s of its launches at 600 MHz (as scripts/ridge-points.py).
+    if args.memhier:
+        runs_mh = [json.loads(l) for d_ in ("energy", "energy2") for l in open(os.path.join(args.memhier, d_, "runs.jsonl"))
+                   if l.strip()]
+        at600 = [r["bytes"] / r["wall_s"] / 1e9 for r in runs_mh if r.get("config") == "scp-remote"
+                 and r.get("launch", -1) >= 0 and r["bytes"] > 0 and 0.59 <= r["implied_ghz"] <= 0.61]
+        if at600:
+            data["scp_remote_gbps_600"] = statistics.median(at600)
+            print(f"TensorLoad from the scratchpad 16 shire IDs away: {statistics.median(at600):.0f} GB/s "
+                  f"({len(at600)} launches at 600 MHz)")
+
     # Latency with 16 cross-shire pairs at once, against the same pairs one at a time.
     loaded = {}
     for name in ("isolated-pairs", "loaded-pairs"):
         for r in pairs_with_launch(runs.get(name, [])):
             loaded.setdefault(name, []).append([r["a_shire"], r["b_shire"], hops(r["a_shire"], r["b_shire"]),
                                                 r["count"], r["cycles_per_iter"]])
-    data["loaded"] = loaded
     if loaded.get("isolated-pairs") and loaded.get("loaded-pairs"):
         iso = {(a, b, c): v for a, b, h, c, v in loaded["isolated-pairs"]}
         worst = max(abs(v / iso[(a, b, c)] - 1) for a, b, h, c, v in loaded["loaded-pairs"] if (a, b, c) in iso)

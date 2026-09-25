@@ -51,8 +51,6 @@ def main():
     ap.add_argument("--cold", required=True, nargs="+")
     ap.add_argument("--long", help="analyze_horace_long.py output")
     ap.add_argument("--model", help="flip_thermal_model.py output")
-    ap.add_argument("--long2", help="analyze_horace_long.py output of the structured long runs")
-    ap.add_argument("--model2", help="flip_thermal_model.py --evaluate output for them")
     ap.add_argument("--validation", nargs=3, metavar=("TIMESPLIT", "AFTERNOON", "FIRSTHALF_MODEL"),
                     help="validate_flip_model.py outputs (time split, afternoon session) and the first-half model they used")
     ap.add_argument("--structured-before", help="structured_predictions_before.json")
@@ -76,6 +74,8 @@ def main():
         "cold": [{k: r[k] for k in ("run", "values", "dur", "tflops", "start_temp", "end_temp", "p_mean", "p_max", "s_at_800", "launches")}
                  | {"trace": r["trace"][::2]} for r in cold["runs"]],
     }
+    if out["power_model"]:
+        out["power_model"].pop("before", None)   # the same predictions are kept once, as the top-level "before"
     if a.long:
         lg = json.load(open(a.long))
         out["long"] = [{k: r[k] for k in ("run", "values", "minions", "per_shire", "dur", "reason", "approach_s", "tflops", "p_before",
@@ -98,15 +98,6 @@ def main():
                              "measured": {k[2:]: {x: v[x] for x in ("p80", "p80_sd", "n", "rise", "dyn")} for k, v in ab.items() if k.startswith("m_")}}
         for v in out["structured"]["before"]["patterns"].values():
             v.pop("watts_by_class", None)
-    if a.long2 and a.model2:
-        l2, m2 = json.load(open(a.long2)), json.load(open(a.model2))
-        rows = []
-        for r in l2["runs"]:
-            pr = next((q for q in m2["per_run"] if q["values"] == r["values"] and abs(q["dur"] - r["dur"]) < 2), None)
-            rows.append({"values": r["values"], "dur": r["dur"], "reason": r["reason"], "t_end": r["T_at"].get("300", r["t_max"]),
-                         "p_flips": pr["p_dyn_flips"] if pr else None, "t_cap_pred": pr["t_cap_pred"] if pr else None,
-                         "T_end_pred": pr["T_end_pred"] if pr else None, "T_end_meas": pr["T_end_meas"] if pr else None})
-        out["structured_long"] = {"rows": rows, "summary": m2["per_run_summary"], "thermal_rms": m2["thermal_rms"]}
     if a.validation:
         ts, af, fh = (json.load(open(x)) for x in a.validation)
         keep = ("values", "active", "dur", "p_flips", "capped", "t_cap_pred", "T_end_meas", "T_end_pred", "T_launch_est")

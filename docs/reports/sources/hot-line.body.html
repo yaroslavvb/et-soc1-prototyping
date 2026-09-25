@@ -9,19 +9,17 @@ What that shire loses is something else entirely: its own memory path, which sto
 long as the hammering lasts.</b> The switch is sharp: about 24 requesters in one other shire flip it, fewer than
 the 32 minions a shire has. It reproduces on both cards we could run it on (aifoundry2 and aifoundry3).</p>
 
-<p class="small"><b>Terms.</b> The ET-SoC-1's compute cores are minions, small in-order RISC-V cores. Eight
-form a neighbourhood and 32 a shire, and 32 shires (1,024 minions) run kernels. Each shire has 4 MB of SRAM, the
-shire cache, which these cards' firmware splits into a 512 KB L2 cache, a 1 MB slice of the chip-wide L3 and a
-2.5 MB scratchpad: software-managed memory that any shire can address (SCP in the errata). Every DRAM line is
-cached in the L3 slice of one home shire, chosen by physical-address bits 10:6; a scratchpad word's home is the
-shire whose scratchpad holds it.</p>
-
-<p class="small">On this page a <i>hot line</i> is one line that many minions hammer at once, and the <i>host
-shire</i> is the shire whose cache holds it. Requests from a shire's own minions are neighbourhood requests; requests arriving
-from other shires over the mesh network-on-chip are L3-slave requests. <code>amoaddg.w</code> is a global atomic
-add, performed at the line's home. The PRM is Esperanto's
-<a href="https://github.com/aifoundry-org/et-man">Programmer's Reference Manual</a>. More in the
+<details class="terms"><summary>Terms used on this page</summary>
+<p class="small">Minions are the chip's small in-order RISC-V cores, 32 to a shire, and each shire's 4 MB of SRAM,
+the shire cache, holds a 512 KB L2 cache, a 1 MB slice of the chip-wide L3 and a 2.5 MB scratchpad that any shire
+can address (SCP in the errata). Every DRAM line is cached in the L3 slice of one home shire, chosen by
+physical-address bits 10:6, and a scratchpad word's home is the shire whose scratchpad holds it. A <i>hot line</i>
+is one line that many minions hammer at once and the <i>host shire</i> is the shire whose cache holds it; requests
+from a shire's own minions are neighbourhood requests, those arriving from other shires over the mesh are L3-slave
+requests, and <code>amoaddg.w</code> is a global atomic add, performed at the line's home. The PRM is Esperanto's
+<a href="https://github.com/aifoundry-org/et-man">Programmer's Reference Manual</a>; more in the
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
+</details>
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">Share of the atomic the host shire gets</div><div class="val" id="k1"></div><div class="sub">against a fair share of 1.000; spread across all 32 shires below</div></div>
@@ -35,31 +33,23 @@ add, performed at the line's home. The PRM is Esperanto's
 chip-wide barrier first, so the window is the same window for everyone, and each one reports how many atomics
 it completed inside it. A shire's share is its count divided by what an even split would give.</p>
 
-<div class="chart-title">Per-shire share of one contended atomic; the line is a DRAM line homed in shire 0</div>
-<div class="chart scroll" id="fair"></div>
+<div class="chart-title">Share of one contended atomic, shire by shire, against mesh distance from the line (a DRAM line homed in shire 0)</div>
+<div class="ck-controls" id="fairctl"></div>
+<div class="chart" id="fair"></div>
 <p class="small" id="faircap"></p>
 
 <p>Moving the line's home to shire 7, 15 or 31 changes nothing, so shire 0 is not special. The one case where
 shares do spread out is the opposite of starvation. With a single minion per shire the bank still retires one
 atomic every 10 cycles, but each shire has only one request in the queue, so the time a request spends crossing
 the mesh decides how often each shire gets its turn. Shares fall step by step with distance from the line, and
-<b>the host shire comes first</b> because its request crosses no mesh links at all.</p>
+<b>the host shire comes first</b> because its request crosses no mesh links at all. The map above shows the
+rings.</p>
 
 <div class="table-wrap"><table id="fairtab"></table></div>
+<p class="small">In the a2 / a3 columns of this page's tables, a single number means the two cards agree to the
+digits shown.</p>
 
-<h2 id="what-contention-costs-and-what-it-does-not">2. What contention costs, and what it does not</h2>
-<p>Spreading the same work over 32 lines, one per shire, changes everything: the same 1,024 minions running
-the same instruction do 32 times the work.</p>
-
-<div class="table-wrap"><table id="placetab"></table></div>
-
-<p>Ten cycles per atomic is the shire cache retiring one request at a time. If a sub-bank accepts a request
-every two cycles, as a reading of the shire-cache spec in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/research/counters-and-dram.md"><code>docs/research/counters-and-dram.md</code></a> has it
-(not measured here), a global atomic occupies about five sub-bank slots. The aggregate of about 60 million
-atomics a second matches the figure Ivan quoted, which settles that it was an aggregate and not a per-shire
-number.</p>
-
-<h2 id="the-thing-that-actually-starves">3. The thing that actually starves</h2>
+<h2 id="the-thing-that-actually-starves">2. The thing that actually starves</h2>
 <p>So we changed what the host shire does. Instead of joining the atomic, its 32 minions stream their own
 memory — 64-byte-strided loads over a private slice, either of their shire's scratchpad or of DRAM — while the
 other 31 shires hammer a line that lives in that same shire cache. The baseline is the identical loop with
@@ -76,28 +66,29 @@ window is 5 milliseconds or 100:</p>
 remote atomics. The 32 minions of that shire, a full thirty-second of the chip, are stalled in a load
 instruction that does not return. Nothing reports an error; the kernel finishes when the hammering stops.</p>
 
-<h2 id="the-threshold-is-the-bank-going-saturated">4. The threshold is the bank going saturated</h2>
+<h2 id="the-threshold-is-the-bank-going-saturated">3. The threshold is the bank going saturated</h2>
 <p>It takes one other shire. Two shires run, the host and one other, each with the same number of minions
 <i>n</i>. The host's <i>n</i> minions read their own scratchpad, and the other shire's <i>n</i> hammer a
 scratchpad word in the host shire. The host's rate is compared with <i>n</i> times the per-minion rate of its
-32-minion loop alone, which is why a single host minion reads 111%:</p>
-
-<div class="chart-title">Host shire's own memory throughput against the number of remote minions</div>
-<div class="chart scroll" id="req"></div>
-<p class="small" id="reqcap"></p>
+32-minion loop alone, which is why a single host minion reads 111%.</p>
 
 <p>There is no gradual degradation. From 2 to 20 remote requesters the host shire stays within about a percent
 of untouched (98.9–99.9%), because each remote atomic takes about 216 cycles to make its round trip and twenty
 of them in flight still ask for less than the bank can retire. By twenty-four, the first count tested above
 twenty, the measured cost reaches 10.0 cycles per atomic — the bank's floor, the queue full — and the host
-shire's own requests stop getting resources.</p>
+shire's own requests stop getting resources. One inequality says when:</p>
 
-$$\frac{N_\text{remote}}{t_\text{round trip}} \;<\; \frac{1}{10\ \text{cycles}} \quad\Longrightarrow\quad \text{the host shire is unaffected}$$
+<p style="text-align:center"><i>N</i> × 10 cycles &lt; <i>P</i> + <i>t</i><sub>round trip</sub> ⟹ the bank is not saturated</p>
+<p id="ineqtext"></p>
 
-<p>With the measured 216-cycle round trip, the inequality puts the edge at 22 requesters, between the 20 and
-24 that were tested.</p>
+<div class="chart-title">Will this hot line stop its shire? The host's own throughput against the load the remote minions put on its bank</div>
+<div class="ck-controls"><div id="reqN"></div><div id="reqP"></div></div>
+<div id="reqout"></div>
+<div id="reqlegend"></div>
+<div class="chart" id="req"></div>
+<p class="small" id="reqcap"></p>
 
-<h2 id="esperanto-knew-two-errata-describe-it">5. Esperanto knew: two errata describe it</h2>
+<h2 id="esperanto-knew-two-errata-describe-it">4. Esperanto knew: two errata describe it</h2>
 <p>This is not a discovery so much as a demonstration. Two entries in Esperanto's
 <a href="https://github.com/aifoundry-org/et-man">ET-SoC-1 errata</a> describe it (numbered 4.1 and 4.2 in the
 document's body, 3.1 and 3.2 in its table of contents), and both are marked <i>Postponed</i>:</p>
@@ -110,55 +101,70 @@ case measured here is different addresses, which is what the yield was built for
 yield has no sub-bank granularity, so a host request to the sub-bank the hot line saturates can still be
 skipped indefinitely, and each host minion's stream reaches that sub-bank sooner or later. It was not tested.
 <b>Does it hold when the line is DRAM-backed rather than in scratchpad?</b> Yes, and slightly worse: 192–240 of
-the host's loads get through instead of 384 (section 3). The erratum's title says <q>same SCP address</q>, but
+the host's loads get through instead of 384 (section 2). The erratum's title says <q>same SCP address</q>, but
 the behaviour is not specific to the scratchpad. Any address whose home is that shire cache will do it.</p>
 
 <p>Worth noting what Esperanto rated the impact: <q>Low. It would have to be a pretty consistent and repeating
 pattern …</q> A shared counter, a lock, a flag or a queue head is a pretty consistent and repeating pattern.</p>
 
-<h2 id="the-workaround-priced">6. The workaround, priced</h2>
+<h2 id="the-workaround-priced">5. The workaround, priced</h2>
 <p>Erratum 4.1's workaround is to slow the other shires down. It works, and near the knee it is nearly free —
 the bank was already saturated, so the first thing pacing takes away is queueing, not throughput:</p>
 
 <div class="chart-title">Pacing the 992 remote minions: what each side gets</div>
-<div class="chart scroll" id="pace"></div>
+<div id="pacelegend"></div>
+<div class="chart" id="pace"></div>
 <p class="small" id="pacecap"></p>
 
-<h2 id="what-it-costs-in-energy">7. What it costs in energy</h2>
+<h2 id="what-contention-costs-and-what-it-does-not">6. What contention costs: 32× the time and 17× the energy</h2>
+<p>Spreading the same work over 32 lines, one per shire, changes everything: the same 1,024 minions running
+the same instruction do 32 times the work.</p>
+
+<div class="table-wrap"><table id="placetab"></table></div>
+
+<p>Ten cycles per atomic is the shire cache retiring one request at a time. If a sub-bank accepts a request
+every two cycles, as a reading of the shire-cache spec in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/research/counters-and-dram.md"><code>docs/research/counters-and-dram.md</code></a> has it
+(not measured here), a global atomic occupies about five sub-bank slots. The aggregate of about 60 million
+atomics a second matches the figure Ivan quoted, which settles that it was an aggregate and not a per-shire
+number.</p>
+
+<h3 id="what-it-costs-in-energy">What it costs in energy</h3>
 <p>Contention is not just slow, it is expensive per unit of work. Board power over idle on aifoundry2, measured
 at 10 Hz across three back-to-back launches of each case, with the die at 72–73 °C:</p>
 
 <div class="table-wrap"><table id="pwrtab"></table></div>
-<p class="small">The rates in this table are timed by the power runs themselves, so they differ slightly from
-section 2's (1,919 against 1,920 million a second).</p>
+<p class="small" id="pwrnote">The rates in this table are timed by the power runs themselves, so they differ
+slightly from the placement table's above (1,919 against 1,920 million a second). The last column pools this
+session with the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#synchronisation">energy
+manual</a>'s 23 September passes: <span id="pooln"></span>. <span id="pooltop"></span></p>
 
-<p>A thousand minions stalled on a saturated line cost the card about 1.4 W over idle in this session, which is
-the clearest possible statement that waiting is cheap and the loss is throughput, not power. Per operation the
-contended line costs <span id="enfac"></span> times the energy of the same atomic spread over 32 lines.</p>
+<p>A thousand minions stalled on a saturated line cost the card <span id="hlw"></span>, which is the clearest
+possible statement that waiting is cheap and the loss is throughput, not power. Per operation the contended line
+costs <span id="enfac"></span> times the energy of the same atomic spread over 32 lines.</p>
 
-<p>Re-measured for the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#synchronisation">energy
-manual</a> on 23 September (the 22 September launches plus warm passes; n = 7, four on aifoundry2 and three on
-aifoundry3): 19.8 nJ [16.9–23.6] per contended atomic and 1.16 nJ [1.01–1.37] spread over 32 lines, still 17×,
-and about 1.2 W over idle for the stalled chip. The table above is the first measurement and sits at the top of
-both ranges. The reading-only row's 0.07 W is inside the idle baseline's ±0.2 W, so its 0.4 nJ (0.37–0.82 over
-the reruns) is an order of magnitude, not a measurement.</p>
-
-<h2 id="what-to-do-instead">8. What to do instead</h2>
+<h2 id="what-to-do-instead">7. What to do instead</h2>
 <ul>
-<li><b>One global atomic per shire, never per minion.</b> At 32 participants the serialisation is 320 cycles
-against a <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">chip-wide
-barrier we measure at 4,997 cycles</a> — six percent, invisible. At 1,024 it is 10,240 cycles, twice the whole
-barrier, and it takes the hosting shire down with it.</li>
+<li><b>One global atomic per shire, never per minion, and never spin on the line.</b> At 32 participants a
+barrier's arrivals serialise in 320 cycles, against a
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">chip-wide
+barrier of about 5,000 cycles</a> (<span id="bar1"></span> with one minion per shire): six percent. But 31 shires
+polling one line are already past the edge in section 3, so wait on a per-shire flag or a credit instead. The
+relay's first barrier, with every shire's leader polling one counter, hung
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a>). At 1,024
+participants the arrivals alone take 10,240 cycles, twice the whole barrier, with the hosting shire stopped
+throughout.</li>
 <li><b>Keep hot shared lines out of shires that compute.</b> The cost is not paid by the code touching the
-line. It is paid by whatever else lives in that shire, and it is total.</li>
-<li><b>If you must, pace it:</b> each requester should wait at least 10 cycles times the number of requesters.
-For the 992 here that is 10,000 cycles (about 17 µs), which gives the host shire back half its memory path for
-four percent of the hammering shires' rate; 12,000 gives it 85% for 20%.</li>
+line. It is paid by whatever else lives in that shire, and it is total. Make the owner a shire that does no
+compute: one of 32 is 3.1% of the chip. Not the master shire, whose scratchpad the firmware uses.</li>
+<li><b>If you must, pace it:</b> <span id="pacerule"></span></li>
 <li><b>Spread instead of sharing when you can.</b> One line per shire is the same instruction at 32 times the
 rate and a seventeenth of the energy per operation.</li>
+<li><b>Measure the victim from user mode.</b> Syscall 9, <code>SYSCALL_PMC_SC_SAMPLE</code>, reads the cache-bank
+counters of any shire, so a kernel can watch the host shire's banks without touching firmware
+(<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/research/counters-and-dram.md"><code>docs/research/counters-and-dram.md</code></a>).</li>
 </ul>
 
-<h2 id="method-and-what-is-not-established">9. Method, and what is not established</h2>
+<h2 id="method-and-what-is-not-established">8. Method, and what is not established</h2>
 <ul>
 <li>The probe is <code>NB_HOTLINE</code> in <code>workloads/nocbench</code>, new for this. Every participant
 warms up, meets at a chip-wide barrier, then loops until a cycle deadline, counting completed operations.
@@ -172,31 +178,25 @@ one line per shire is the check that the address really does select the bank.</l
 <li><b>A global atomic cannot take the local path at all.</b> Addressed through the self ID <code>0x7F</code>,
 <code>amoaddg</code> raises a kernel bus error. That is why section 1 comes out fair: from the host shire the
 atomic leaves through the same L3-slave port as everyone else's, so the arbitration that ranks the two classes
-never applies to it. The starvation in section 3 needs an ordinary load or store, which is what a computing
+never applies to it. The starvation in section 2 needs an ordinary load or store, which is what a computing
 shire issues.</li>
-<li>Every sweep ran on aifoundry2 and was repeated on aifoundry3; the energy table in section 7 is aifoundry2
-only (both cards are in the 23 September reruns). The stalled host's 384 and 192 operations and the 10.0
-cycles per atomic repeat exactly. Across all 42 configurations the host's count matches exactly in 13 and
-agrees within 2% in all but one: the host reading scratchpad under a DRAM-homed hot line, 208 against 240. Raw
-data in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-hotline-aifoundry2"><code>docs/reports/data/2026-09-22-hotline-aifoundry2/</code></a>
+<li>Every sweep ran on aifoundry2 and was repeated on aifoundry3; the energy table in section 6 is aifoundry2
+only (both cards are in the 23 September reruns). In the 40 configurations that have a host shire, its count
+matches exactly in 15 and agrees within 2% in all but one: the host reading scratchpad under a DRAM-homed hot
+line, 208 against 240. Raw data in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-hotline-aifoundry2"><code>docs/reports/data/2026-09-22-hotline-aifoundry2/</code></a>
 and <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-hotline-aifoundry3"><code>docs/reports/data/2026-09-22-hotline-aifoundry3/</code></a>,
 one JSON line per configuration.</li>
-<li><b>An earlier reading of the same result.</b> The
-<a href="https://spacesheep.dev/@yaroslavvb/2026-09-22-et-soc1-l2-mainline-starvation">L2 mainline starvation
-brief</a>, written the same day from Ivan's report and the shire-cache spec, is an argument, not a measurement.
-As first published it took his 6% as measured; the atomic here did not reproduce it (the host shire's share is
-1.004). It called <code>l3_yield</code> <q>the lever, not a workaround</q> while advising against changing it;
-section 5 here reads errata 4.1 and 4.2 as limiting what the yield could do. The brief now carries an update
-pointing here. Its practical advice, to home hot structures in a shire
-that does no compute or to replace one global counter with per-shire counters and a tree, agrees with section 8.
-Its warning about two-dimensional TensorSend arrays stands.</li>
+<li><b>Why <code>l3_yield</code> was left alone.</b> It is a shire-cache configuration register on a shared lab
+card, and the errata suggest it would not fully help. It is also out of reach from user mode:
+<code>l3_yield_priority</code> is a 5-bit field of <code>sc_reqq_ctl</code>, an M-mode register that no syscall
+writes. And the 21 queue entries reserved for L3-slave requests look like deadlock avoidance, so changing the
+priority risks back-pressure on the mesh.</li>
 <li><b>Not established:</b> why Ivan's number was 6% rather than either of ours. Our reading is that his
 shire 0 did something local as well as the atomic — a poll, a flag read, the "am I last?" check a barrier
-makes — and that the local part is what was starved; but we did not run his code. We also did not set
-<code>l3_yield</code>: it is a shire-cache configuration register on a shared lab card, and the errata suggest
-it would not fully help. And the card's thermal telemetry gives the host only a chip-wide average of the shire
-sensors (plus the extremes since reset), in whole degrees, so the spatial question — whether a hot line makes
-its shire measurably hotter — cannot be answered with this instrument. The per-shire sensors exist on the die;
+makes — and that the local part is what was starved; but we did not run his code. The card's thermal telemetry
+gives the host only a chip-wide average of the shire sensors (plus the extremes since reset), in whole degrees,
+so the spatial question — whether a hot line makes its shire measurably hotter — cannot be answered with this
+instrument. The per-shire sensors exist on the die;
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature</a> says what
 it would take to read them.</li>
 </ul>
@@ -207,15 +207,22 @@ on aifoundry3:</p>
 workloads/nocbench/run_hotline.sh DATA3 6000000          # the same sweep, on aifoundry3
 tools/ettelem/run_hotline_power.sh DATA                  # board power and rails, three launches per case
 python3 tools/ettelem/analyze_hotline_power.py DATA --out DATA/power.json
-python3 workloads/nocbench/analyze_hotline.py DATA/sweep.jsonl DATA3/sweep.jsonl --power DATA/power.json --out hotline.json</code></pre>
+python3 workloads/nocbench/analyze_hotline.py DATA/sweep.jsonl DATA3/sweep.jsonl --power DATA/power.json \
+    --context DATA/context.json --barrier docs/reports/data/2026-09-18-nocbench-aifoundry2/barrier-chip1.jsonl \
+    --out DATA/hotline.json
+python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm \
+    docs/reports/data/2026-09-23-reruns-aifoundry3 --out reruns.json   # the passes behind the ranges in section 6</code></pre>
 
-<p class="small">Two parts of the page's data file are not produced by <code>analyze_hotline.py</code>: the
-errata cards in section 5, quoted from the errata document by hand, and the window table in section 3, whose 5,
-40 and 100 ms runs are not in the raw data files. Versions: first published 22 September
-2026; revised 24 September 2026 after a review (terms, the reading of the errata, the rerun energies, the
-threshold as a range, links).</p>
+<p class="small">The errata text, quoted by hand from the errata document, and the window table, whose 5, 40
+and 100 ms runs are in no raw data file, come from <code>context.json</code>. The barrier is read from the
+18 September nocbench run. The round trip and the bank's 10 cycles are computed from the sweep. Versions: first
+published 22 September 2026; revised 24 September 2026 after a review (terms, the reading of the errata, the
+rerun energies, the threshold as a range, links); revised 25 September 2026 (the bank rule is necessary, not
+sufficient; the chip barrier read from its raw file, 4,995 cycles rather than 4,997; the pooled energies in the
+table; the fairness chart by mesh distance and the threshold chart by offered load; the cost of contention moved
+next to its energy).</p>
 
-<h2>Related reports</h2>
+<h2 id="related-reports">Related reports</h2>
 <ul>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a> — the
 companion: share data between shires through a slab of scratchpad instead of one hot line.</li>
@@ -232,6 +239,9 @@ whose 2,048 harts take their work from one global atomic counter.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature</a> — the
 per-shire temperature sensors that could tell whether a hot line heats its shire.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/2026-09-22-et-soc1-l2-mainline-starvation">L2 mainline
-starvation</a> — the same-day argument from Ivan's report; section 9 says where it and this page differ.</li>
+starvation</a> — the same-day argument from Ivan's report, written before this measurement and now a short
+pointer here. Its advice to home hot structures in a shire that does no compute, or to use per-shire counters
+and a tree, agrees with section 7, and its TensorSend warning is kept in On-chip communication; its 6% and its
+reading of <code>l3_yield</code> as the lever did not hold.</li>
 </ul>
 </main>

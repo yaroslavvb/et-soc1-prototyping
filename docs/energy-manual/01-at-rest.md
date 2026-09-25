@@ -6,7 +6,7 @@ What the card draws when nothing is running. Every joule in the rest of the manu
 
 $$P_\text{idle}(T) = 12.6\,\mathrm{W} + 23.3\,\mathrm{W}\; e^{(T-80\,^\circ\mathrm{C})/36\,^\circ\mathrm{C}}$$
 
-- **12.6 W is temperature-independent**: PCIe, the DDR PHY, the IO shire, the regulators at rest, clocks. What those blocks spend when a kernel uses them (DRAM traffic through the DDR PHY, the regulators' delivery loss) is counted in the per-event costs of the later sections; [4.3](04a-fine-grain.md) attributes it.
+- **The fixed part is the law's constant, 12.6 W.** The blocks with no rail sensor (PCIe, the DDR PHY, the IO shire, the regulators) draw about 15 W at idle and barely move with temperature: 0.03 W per °C over 71–83 °C in the catalogue's idle gaps. The three metered rails carry the leakage, 0.55 W per °C between them at about 75 °C. The split into 12.6 W and leakage is a fit with the 36 °C shape imposed, not a block-by-block account. What the unsensed blocks spend when a kernel uses them (DRAM traffic through the DDR PHY, the regulators' delivery loss) is counted in the per-event costs of the later sections; [4.3](04a-fine-grain.md) attributes it.
 - **The rest is leakage**, 23.3 W at 80 °C, e-folding every 36 °C, so its slope at 80 °C is 0.65 W per °C. This is the term a workload controls, by setting the temperature.
 - **Confidence.** Fitted on 21 September to every idle sample of five hours of sessions on aifoundry2, rms 0.20 W from 64 to 88 °C. Checked two ways: it predicted the idle 20.6 hours after the last workload (apart from a 4.9 s single-hart probe a few minutes before), the next day, to +0.01 W (300 samples over a minute, sd 0.04 W); extrapolated 7–14 °C below its fitted range onto aifoundry3 it was +0.73 W off (rms 0.74 W over 3,596 samples at 50–57 °C), which is the card-to-card bar on the law: about 3% of the idle power. Source: `docs/reports/data/2026-09-21-horace-aifoundry2/model.json`.
 
@@ -29,7 +29,7 @@ $$P_\text{idle}(T) = 12.6\,\mathrm{W} + 23.3\,\mathrm{W}\; e^{(T-80\,^\circ\math
 | **No rail sensor** (PCIe, DDR, IO shire, regulators) | **15.10** | 48% |
 | Board | 31.79 ± 0.04 | |
 
-The three sensed rails are the PMIC's own running averages (roughly first-order, time constant about 1 s), which the service processor reports; the unsensed remainder is board power minus their sum. The sample is aifoundry2 on 22 September, 20.6 hours after the last workload apart from a 4.9 s single-hart probe a few minutes before; the board figure's ± is the sd of its 300 samples, taken over one minute; the rails' sd is 0.01 W or less. Source: `docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json`. The SRAM rail's own temperature law, on both cards, is in [4.3](04a-fine-grain.md).
+The three sensed rails are the PMIC's own running averages (roughly first-order, time constant 1.1–1.2 s on the two cards), which the service processor reports; the unsensed remainder is board power minus their sum. The sample is aifoundry2 on 22 September, 20.6 hours after the last workload apart from a 4.9 s single-hart probe a few minutes before; the board figure's ± is the sd of its 300 samples, taken over one minute; the rails' sd is 0.01 W or less. Source: `docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json`. The SRAM rail's own temperature law, on both cards, is in [4.3](04a-fine-grain.md).
 
 ## Operating points
 

@@ -63,8 +63,8 @@ class PowerLogger(threading.Thread):
         self.interval, self.samples, self.stop = interval, [], threading.Event()
 
     def run(self):
-        # The card runs a DVFS governor ("managed power", 65 W TDP) that moves the minion clock between
-        # about 600 and 850 MHz, so every sample records the clock and minion voltage next to the power.
+        # The card runs a DVFS governor ("managed power", 65 W TDP) with operating points at 600, 700 and 800 MHz,
+        # so every sample records the clock and minion voltage next to the power.
         def query(cmd, pattern):
             out = subprocess.run([DMS, "-m", cmd, "-n", "0", "-u", "2000"], capture_output=True, text=True)
             m = re.search(pattern, out.stdout + out.stderr)
@@ -176,7 +176,9 @@ def main():
         if spin_w is not None and r["gb_per_s"] and name != "spin":
             r["pj_per_byte_vs_spin"] = (r["mean_w"] - spin_w) / (r["gb_per_s"] * 1e9) * 1e12
 
-    summary = {"idle_w": idle_w, "idle_samples": len(idle), "info": info, "results": results}
+    # The windows are saved so that results.json can be re-derived offline from power.csv and runs.jsonl.
+    summary = {"idle_w": idle_w, "idle_samples": len(idle), "info": info, "results": results,
+               "idle_windows_ms": idle_windows, "proc_windows_ms": proc_windows}
     json.dump(summary, open(os.path.join(args.out, "results.json"), "w"), indent=2)
     with open(os.path.join(args.out, "runs.jsonl"), "w") as f:
         for r in runs:

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -47,32 +47,10 @@ pre code { background: none; padding: 0; }
 .kpi .value { font-size: 1.9rem; font-weight: 600; line-height: 1.15; margin: 4px 0 2px; }
 .kpi .value .unit { font-size: 0.95rem; font-weight: 500; color: var(--ink-2); }
 .kpi .sub { font-size: 0.85rem; color: var(--ink-2); }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.85rem; color: var(--ink-2); margin: 4px 0 10px; }
-.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: 4px; margin-right: 6px; }
-.legend i.dash { background: none !important; border-top: 2px dashed var(--ref); height: 0; vertical-align: 3px; }
-.legend i.dot { width: 10px; height: 10px; border-radius: 50%; vertical-align: 0; }
-.legend i.bandkey { height: 10px; vertical-align: 0; background: var(--band) !important; border: 1px dashed var(--ref); }
-.chart { position: relative; width: 100%; }
-.chart-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
-.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink);
-  border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 300px; display: none; white-space: normal; }
-svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
-.grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
-.axis-line { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
-.tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
-.lab { fill: var(--ink-2); font-size: 12px; }
-.lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
-.s-et { stroke: var(--et); fill: none; stroke-width: 2; stroke-linejoin: round; }
-.s-et2 { stroke: var(--et2); fill: none; stroke-width: 2; stroke-linejoin: round; }
-.s-et3 { stroke: var(--et3); fill: none; stroke-width: 2; stroke-linejoin: round; }
-.s-ref { stroke: var(--ref); fill: none; stroke-width: 2; stroke-dasharray: 6 5; stroke-linecap: round; }
-.s-ref2 { stroke: var(--ref); fill: none; stroke-width: 1.5; stroke-dasharray: 2 4; stroke-linecap: round; }
-.d-et { fill: var(--et); stroke: var(--surface); stroke-width: 2; }
-.d-et2 { fill: var(--et2); stroke: var(--surface); stroke-width: 2; }
-.d-et3 { fill: var(--et3); stroke: var(--surface); stroke-width: 2; }
-.d-ref { fill: var(--ref); stroke: var(--surface); stroke-width: 2; }
-.band { fill: var(--band); stroke: none; }
+details.terms { padding: 10px 16px; margin: 12px 0; }
+details.terms summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+details.terms p { margin: 8px 0 2px; }
+.chart-title { font-size: 0.85rem; font-weight: 600; margin: 18px 0 4px; }
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
 table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
 table.wide { min-width: 780px; }
@@ -80,34 +58,480 @@ th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--grid
 th { color: var(--ink-2); font-weight: 600; white-space: nowrap; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 td.lvl { font-weight: 600; }
+td.lvl .small { font-weight: 400; }
 ol li, ul li { margin: 5px 0; }
-.panels { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
-.panels > div { min-width: 0; }
-@media (min-width: 760px) { .panels.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
-.note { border-left: 3px solid var(--axis); padding: 2px 0 2px 12px; color: var(--ink-2); font-size: 0.92rem; }
-.s-roof { stroke: var(--ink-2); fill: none; stroke-width: 1.5; }
-.s-roof-dash { stroke: var(--ink-2); fill: none; stroke-width: 1.5; stroke-dasharray: 5 4; }
-.k-mark { fill: none; stroke: var(--ink); stroke-width: 1.75; }
-.legend i.roof { background: var(--ink-2) !important; height: 2px; }
-.legend i.roofdash { background: none !important; border-top: 2px dashed var(--ink-2); height: 0; width: 22px; vertical-align: 3px; }
-.legend i.ring { width: 10px; height: 10px; border-radius: 50%; background: none !important; border: 1.75px solid var(--ink); vertical-align: 0; }
 tr.grp td { font-weight: 600; color: var(--ink-2); background: var(--code-bg); }
 td.subrow { padding-left: 24px; font-weight: 400; color: var(--ink-2); }
 table.ridge { min-width: 0; }
 table.ridge td.lvl { min-width: 190px; }
-table.ridge.measured td:nth-child(2) { min-width: 150px; }
+@media (max-width: 560px) { table.ridge td.lvl { min-width: 0; } }
 table.ridge th { white-space: normal; }
 table.ridge td.num span.small { white-space: normal; display: inline-block; max-width: 22em; }
 h2, h3 { scroll-margin-top: 12px; }
 .hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
 h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
+/* charts (drawn with the chart kit, CK) */
+.ck-toggle { font: inherit; font-size: 0.82rem; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-toggle[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-toggle:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame .halo { paint-order: stroke; stroke: var(--page); stroke-width: 3px; stroke-linejoin: round; }
+.ck-frame .lab-small { fill: var(--ink-2); font-size: 11px; }
+.ck-controls .ck-range input[type="range"] { flex-basis: 260px; width: 260px; }
+#c-roof text, #c-reuse text, #c-ebal text { pointer-events: none; }
+#roof-readout, #reuse-readout, #eb-readout { min-height: 3.2em; }
+@media (max-width: 480px) { th, td { padding: 6px 6px; } }
+/* stacked tables on phones: value cells two to a line */
+@media (max-width: 599px) { table.stack td:not(:first-child) { display: inline-block; width: 50%; vertical-align: top; padding-right: 8px; } }
 </style>
+<!-- chartkit:begin -->
+<!-- pasted by scripts/paste-chartkit.py from docs/reports/sources/{chartkit.js, report.template.html}; do not edit here -->
+<style>
+/* the template tokens the chart kit uses, in this page's names */
+:root { --c1: var(--et); --c2: var(--et2); --c3: var(--et3); --c4: #eda100; --c5: #e87ba4; --c7: #4a3aa7; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c4: #c98500; --c5: #d55181; --c7: #9085e9; } }
+:root[data-theme="dark"] { --c4: #c98500; --c5: #d55181; --c7: #9085e9; }
+.ck-frame { position: relative; width: 100%; }
+.ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ck-frame svg { display: block; max-width: none; height: auto; }
+.ck-frame svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.ck-frame .tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame .lab { fill: var(--ink-2); font-size: 12px; }
+.ck-frame .lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ck-frame .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-axis { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-hit { fill: transparent; stroke: none; }
+.ck-tip { position: absolute; z-index: 5; pointer-events: none; display: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border, var(--grid)); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: min(320px, calc(100% - 8px)); }
+.ck-frame svg [tabindex] { outline: none; }
+.ck-frame svg [tabindex]:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse)[tabindex]:not(.ck-hit):focus-visible,
+.ck-frame svg [tabindex]:focus-visible > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse).ck-active:not(.ck-hit),
+.ck-frame svg .ck-active > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 1.5px; }
+.ck-hidden { display: none !important; }
+.ck-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 8px 0 6px; }
+.ck-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 8px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-legend .ck-li { display: inline-flex; align-items: center; gap: 6px; }
+.ck-legend button.ck-li { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 3px 10px; min-height: 32px; cursor: pointer; }
+.ck-legend button.ck-li[aria-pressed="false"] { opacity: 0.55; text-decoration: line-through; }
+.ck-legend svg { flex: none; overflow: visible; }
+.ck-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.82rem; }
+.ck-seg-label { color: var(--ink-2); }
+.ck-seg-group { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ck-seg [role="radio"] { font: inherit; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-seg [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-range input[type="range"] { flex: 0 1 200px; width: 200px; min-width: 120px; min-height: 32px; margin: 0; accent-color: var(--c1); }
+.ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
+   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
+th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+th.num { white-space: normal; }
+@media (max-width: 599px) {
+  table.stack, .wide table.stack { min-width: 0; }
+  table.stack thead { display: none; }
+  table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { border-bottom: 1px solid var(--grid); padding: 6px 0; }
+  table.stack td, table.stack td.num { border: 0; padding: 2px 0; text-align: left; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+  table.stack td:first-child::before { content: none; }
+  table.stack td:first-child { font-weight: 600; }
+}
+@media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+</style>
+<script>
+/* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
+   Source-built pages get it from report.template.html (scripts/build-report.py inlines it before the page script);
+   standalone pages get this file, the template's chartkit CSS and token aliases from scripts/paste-chartkit.py.
+   Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
+   --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
+   API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame. Every mark with a tooltip is reachable from the keyboard. */
+window.CK = (function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
+  let uid = 0;
+  const $ = h => (typeof h === 'string' ? document.getElementById(h) : h);
+  const mm = q => (window.matchMedia ? window.matchMedia(q) : {matches: false});
+  const reduced = mm('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, str, cls, anchor) {
+    const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
+    t.textContent = str;
+    return t;
+  }
+  const path = (pts, x, y) => pts.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ');
+
+  /* ---- numbers ---- */
+  function num(v, dp) {
+    if (v == null || !isFinite(v)) return '\u2014';
+    const auto = dp == null;  // no dp: three significant digits, trailing zeros dropped
+    if (auto) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+    const s = Number(v).toLocaleString('en-GB', {minimumFractionDigits: auto ? 0 : dp, maximumFractionDigits: dp});
+    return /[1-9]/.test(s) ? s.replace('-', '\u2212') : s.replace('-', '');  // true minus; never "−0.00"
+  }
+  const fmt = {
+    num,
+    range: (a, b, dp, unit) => {
+      const s = num(a, dp), t = num(b, dp), u = unit ? '\u00a0' + unit : '';
+      return s === t ? s + u : s + (b < 0 ? ' to ' : '\u2013') + t + u;
+    },
+    pct: (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%',
+  };
+
+  /* ---- scales ---- */
+  function niceTicks(a, b, n) {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    if (!(hi > lo)) return Object.assign([lo], {step: 1});
+    const raw = (hi - lo) / Math.max(1, n || 5), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    const step = (m >= 7.5 ? 10 : m >= 3.5 ? 5 : m >= 1.5 ? 2 : 1) * p, out = [];
+    for (let i = Math.ceil(lo / step - 1e-9); i * step <= hi + step * 1e-9; i++) out.push(+(i * step).toPrecision(12));
+    out.step = step;
+    return out;
+  }
+  const tickDp = t => (t.step ? Math.max(0, -Math.floor(Math.log10(t.step) + 1e-9)) : null);
+  function lin(d0, d1, r0, r1) {
+    const s = v => r0 + (v - d0) * (r1 - r0) / (d1 - d0);
+    s.inv = p => d0 + (p - r0) * (d1 - d0) / (r1 - r0);
+    s.ticks = n => niceTicks(d0, d1, n);
+    s.domain = [d0, d1]; s.range = [r0, r1];
+    return s;
+  }
+  function log(d0, d1, r0, r1) {
+    const l0 = Math.log10(d0), l1 = Math.log10(d1);
+    const s = v => r0 + (Math.log10(v) - l0) * (r1 - r0) / (l1 - l0);
+    s.inv = p => Math.pow(10, l0 + (p - r0) * (l1 - l0) / (r1 - r0));
+    s.ticks = n => {
+      const lo = Math.min(l0, l1), hi = Math.max(l0, l1), k0 = Math.ceil(lo - 1e-9), k1 = Math.floor(hi + 1e-9);
+      const dec = k1 - k0 + 1, every = Math.max(1, Math.ceil(dec / (n || 6))), out = [];
+      const add = v => { v = +v.toPrecision(12); const lv = Math.log10(v); if (lv >= lo - 1e-9 && lv <= hi + 1e-9) out.push(v); };
+      if (dec <= 2) { for (let k = k0 - 1; k <= k1; k++) for (const m of [1, 2, 5]) add(m * Math.pow(10, k)); }
+      else for (let k = k0; k <= k1; k += every) add(Math.pow(10, k));
+      return out;
+    };
+    s.domain = [d0, d1]; s.range = [r0, r1]; s.log = true;
+    return s;
+  }
+  const logFmt = v => num(v, v >= 1 ? 0 : Math.ceil(-Math.log10(v) - 1e-9));
+
+  /* ---- frame: a responsive SVG sized to its host ---- */
+  function frame(hostId, o) {
+    const host = $(hostId);
+    if (!host) throw new Error('CK.frame: no element ' + hostId);
+    host.classList.add('ck-frame'); host.classList.remove('scroll');
+    host.textContent = '';
+    const plot = document.createElement('div'); plot.className = 'ck-plot'; host.appendChild(plot);
+    const svg = el('svg', {role: 'group', 'aria-label': o.label || null}, plot);
+    const tip = document.createElement('div'); tip.className = 'ck-tip'; tip.setAttribute('aria-hidden', 'true');
+    host.appendChild(tip);
+    const minW = o.minW == null ? 320 : o.minW, maxW = o.maxW == null ? 900 : o.maxW;
+    const f = {svg, host, tip, W: 0, H: 0, narrow: false, seriesOn: null, pinned: null, active: null, navIndex: 0};
+    const width = () => {
+      const cs = getComputedStyle(host), cw = host.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return Math.round(Math.max(minW, Math.min(maxW, cw > 0 ? cw : maxW)));
+    };
+    f.redraw = () => {
+      const W = width(), H = Math.round(typeof o.height === 'function' ? o.height(W) : (o.height || 300));
+      f.refocus = svg.contains(document.activeElement) ? f.navIndex : null;
+      hide(f, true);
+      Object.assign(f, {W, H, narrow: W < 600, navNodes: []});
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.setAttribute('height', H);
+      svg.style.width = W + 'px';
+      o.draw(f);
+      if (f.seriesOn) showSeries(f, f.seriesOn);
+    };
+    f.redraw();
+    frames.push(f);
+    if (window.ResizeObserver) {
+      let timer;
+      new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => { if (width() !== f.W) f.redraw(); }, 150); }).observe(host);
+    }
+    return f;
+  }
+
+  /* ---- axes: horizontal grid, tick labels, baseline, axis titles (y title sits above the plot) ---- */
+  function axes(f, o) {
+    const {x, y} = o, W = f.W, H = f.H;
+    const L = o.L == null ? 44 : o.L, R = o.R == null ? 12 : o.R, T = o.T == null ? 22 : o.T, B = o.B == null ? 38 : o.B;
+    const g = el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, f.svg);
+    const yt = o.yt || y.ticks(Math.max(3, Math.round((H - T - B) / 48)));
+    const xt = o.xt || x.ticks(Math.max(2, Math.round((W - L - R) / 90)));
+    const auto = (s, t) => (s.log ? logFmt : v => num(v, tickDp(t)));
+    const xf = o.xfmt || auto(x, xt), yf = o.yfmt || auto(y, yt), labs = [];
+    for (const t of yt) {
+      if (o.grid !== false) el('line', {x1: L, x2: W - R, y1: y(t), y2: y(t), class: 'grid-line'}, g);
+      labs.push(txt(g, L - 6, y(t) + 4, yf(t), 'tick', 'end'));
+    }
+    el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    for (const t of xt) labs.push(txt(g, x(t), H - B + 16, xf(t), 'tick', 'middle'));
+    if (o.xl) labs.push(txt(g, (L + W - R) / 2, H - 6, o.xl, 'lab', 'middle'));
+    if (o.yl) txt(g, 2, Math.max(12, T - 13), o.yl, 'lab');
+    inside(f, labs);
+    return g;
+  }
+  /* Keep labels inside the frame (0..f.W, 0..f.H, less pad): one that would cross the left or right edge is anchored
+     at that edge instead (text-anchor start or end, so its outer end sits pad px from the edge in any font; an end
+     tick label still covers its tick), and one that would cross the top or bottom is moved in. Labels already inside
+     are not touched. Widths are measured in the page's font; a chart drawn while hidden has no layout, so they are
+     estimated at 0.6 em a character. Vertically the glyphs are taken as 0.75 em above the baseline and 0.25 em below. */
+  function inside(f, labels, pad) {
+    pad = pad == null ? 2 : pad;
+    const m = labels.map(t => {
+      let w = 0, fs = 12;
+      try { w = t.getComputedTextLength(); fs = parseFloat(getComputedStyle(t).fontSize) || 12; } catch (_) { /* no layout */ }
+      return {w: w > 0 ? w : 0.6 * fs * t.textContent.length, fs};
+    });
+    labels.forEach((t, k) => {
+      const {w, fs} = m[k], a = t.getAttribute('text-anchor') || 'start', x = +t.getAttribute('x'), y = +t.getAttribute('y');
+      const x0 = a === 'end' ? x - w : a === 'middle' ? x - w / 2 : x;
+      if (x0 < pad) { t.setAttribute('text-anchor', 'start'); t.setAttribute('x', pad); }
+      else if (x0 + w > f.W - pad) { t.setAttribute('text-anchor', 'end'); t.setAttribute('x', +(f.W - pad).toFixed(1)); }
+      if (y - 0.75 * fs < pad) t.setAttribute('y', +(pad + 0.75 * fs).toFixed(1));
+      else if (y + 0.25 * fs > f.H - pad) t.setAttribute('y', +(f.H - pad - 0.25 * fs).toFixed(1));
+    });
+    return labels;
+  }
+
+  /* ---- tooltip: pointer, keyboard focus and touch all show the same text ---- */
+  const strip = html => new DOMParser().parseFromString(String(html).replace(/<br\s*\/?>/gi, '; '), 'text/html')
+    .body.textContent.replace(/\s+/g, ' ').trim();
+  function place(f, cx, cy) {
+    const t = f.tip; t.style.display = 'block';
+    const hw = f.host.clientWidth, hh = f.host.clientHeight, tw = t.offsetWidth, th = t.offsetHeight;
+    let top = cy + 14;
+    if (top + th > hh && cy - th - 10 >= 0) top = cy - th - 10;  // flip above the pointer
+    t.style.left = Math.max(0, Math.min(cx + 12, hw - tw)) + 'px';
+    t.style.top = top + 'px';
+  }
+  function show(f, node, html, cx, cy) {
+    if (f.active && f.active !== node) f.active.classList.remove('ck-active');
+    f.active = node; node.classList.add('ck-active');
+    f.tip.innerHTML = typeof html === 'function' ? html() : html;
+    if (cx == null) {
+      const r = node.getBoundingClientRect(), b = f.host.getBoundingClientRect();
+      cx = r.left + r.width / 2 - b.left; cy = r.top + r.height / 2 - b.top;
+    }
+    place(f, cx, cy);
+  }
+  function hide(f, force) {
+    if (f.pinned && !force) return;
+    f.pinned = null; f.tip.style.display = 'none';
+    if (f.active) f.active.classList.remove('ck-active');
+    f.active = null;
+  }
+  function tip(f, node, html, o) {
+    o = o || {};
+    if (!node.hasAttribute('data-ck-nav')) node.setAttribute('tabindex', '0');
+    node.setAttribute('role', o.role || 'img');
+    node.setAttribute('aria-label', strip(typeof html === 'function' ? html() : html));
+    node._ckTip = html;
+    const at = ev => { const b = f.host.getBoundingClientRect(); show(f, node, html, ev.clientX - b.left, ev.clientY - b.top); };
+    node.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointermove', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') hide(f); });
+    node.addEventListener('pointerdown', ev => {  // touch: a tap toggles the tooltip and pins it until the next tap
+      if (ev.pointerType !== 'touch') return;
+      f.touchT = Date.now();
+      if (f.active === node && f.tip.style.display === 'block') hide(f, true); else { hide(f, true); at(ev); f.pinned = node; }
+    });
+    node.addEventListener('focus', () => { if (Date.now() - (f.touchT || 0) > 600 && !f.pinned) show(f, node, html); });
+    node.addEventListener('blur', () => hide(f));
+    node.addEventListener('keydown', ev => { if (ev.key === 'Escape') hide(f, true); });
+    return node;
+  }
+  document.addEventListener('pointerdown', ev => {  // a tap elsewhere unpins
+    for (const f of frames) if (f.pinned && !f.pinned.contains(ev.target)) hide(f, true);
+  }, true);
+
+  /* ---- keynav: one tab stop per mark group; arrows step, Home/End jump, Enter pins, Escape hides ---- */
+  function keynav(f, nodes, o) {
+    o = o || {};
+    nodes = nodes.filter(Boolean);
+    if (!nodes.length) return;
+    const seen = n => !n.closest('.ck-hidden');
+    const next = (k, d) => { for (let j = k + d; j >= 0 && j < nodes.length; j += d) if (seen(nodes[j])) return j; return k; };
+    let cur = Math.min(f.navIndex || 0, nodes.length - 1);
+    nodes.forEach((n, k) => {
+      n.setAttribute('data-ck-nav', '');
+      n.setAttribute('tabindex', k === cur ? '0' : '-1');
+      n.addEventListener('focus', () => {
+        nodes.forEach(m => m.setAttribute('tabindex', '-1')); n.setAttribute('tabindex', '0');
+        f.navIndex = k;
+        if (o.onFocus) o.onFocus(n, k);
+      });
+      n.addEventListener('keydown', ev => {
+        const K = ev.key;
+        let j = null;
+        if (o.step) j = o.step(k, K, nodes);
+        if (j == null) {
+          if (K === 'ArrowRight' || K === 'ArrowDown') j = next(k, 1);
+          else if (K === 'ArrowLeft' || K === 'ArrowUp') j = next(k, -1);
+          else if (K === 'Home') j = next(-1, 1);
+          else if (K === 'End') j = next(nodes.length, -1);
+        }
+        if (K === 'Enter' || K === ' ') {
+          ev.preventDefault();
+          if (n._ckTip) { if (f.pinned === n) hide(f, true); else { hide(f, true); show(f, n, n._ckTip); f.pinned = n; } }
+          if (o.onEnter) o.onEnter(n, k);
+        } else if (j != null) { ev.preventDefault(); if (j !== k) { hide(f, true); nodes[j].focus(); } }
+      });
+    });
+    f.navNodes = (f.navNodes || []).concat([nodes]);
+    if (f.refocus != null && nodes[f.refocus]) { nodes[f.refocus].focus(); f.refocus = null; }
+  }
+
+  /* ---- legend (HTML, above the chart) and series toggling ---- */
+  function swatch(it) {
+    const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
+    const m = it.mark || 'box';
+    const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
+    if (m === 'dot' || m === 'box') e.style.fill = c;
+    else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
+    if (m === 'dash') e.style.strokeDasharray = '4 3';
+    return s;
+  }
+  function legend(hostEl, items, o) {
+    o = o || {};
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-legend');
+    const on = new Set(items.map(it => it.key)), btn = {};
+    for (const it of items) {
+      const b = document.createElement(o.toggle ? 'button' : 'span'); b.className = 'ck-li';
+      b.append(swatch(it), document.createTextNode(it.label));
+      if (o.toggle) {
+        b.type = 'button'; b.setAttribute('aria-pressed', 'true');
+        b.addEventListener('click', () => {
+          const was = on.has(it.key);
+          if (was && on.size === 1) return;  // keep at least one series
+          if (was) on.delete(it.key); else on.add(it.key);
+          b.setAttribute('aria-pressed', String(!was));
+          if (o.onChange) o.onChange([...on]);
+        });
+      }
+      btn[it.key] = b; h.appendChild(b);
+    }
+    return {el: h, on, set(keys) { on.clear(); keys.forEach(k => on.add(k)); for (const k in btn) if (o.toggle) btn[k].setAttribute('aria-pressed', String(on.has(k))); }};
+  }
+  function showSeries(f, keysOn) {
+    f.seriesOn = [...keysOn];
+    f.svg.querySelectorAll('[data-series]').forEach(n => n.classList.toggle('ck-hidden', !f.seriesOn.includes(n.getAttribute('data-series'))));
+    for (const group of f.navNodes || []) {  // keep one reachable tab stop per group
+      const vis = group.filter(n => !n.closest('.ck-hidden'));
+      if (vis.length && !vis.some(n => n.getAttribute('tabindex') === '0')) { group.forEach(n => n.setAttribute('tabindex', '-1')); vis[0].setAttribute('tabindex', '0'); }
+    }
+    if (f.active && f.active.closest('.ck-hidden')) hide(f, true);
+  }
+
+  /* ---- controls ---- */
+  function seg(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-seg');
+    const g = document.createElement('div'); g.setAttribute('role', 'radiogroup'); g.className = 'ck-seg-group';
+    if (o.label) {
+      const s = document.createElement('span'); s.className = 'ck-seg-label'; s.id = 'ck-l' + (++uid); s.textContent = o.label;
+      h.appendChild(s); g.setAttribute('aria-labelledby', s.id);
+    }
+    const opts = o.options, api = {el: h, value: o.value == null ? opts[0][0] : o.value};
+    const btns = opts.map(([v, t], k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.textContent = t;
+      b.addEventListener('click', () => set(v, true));
+      b.addEventListener('keydown', ev => {
+        const d = ev.key === 'ArrowRight' || ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowLeft' || ev.key === 'ArrowUp' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const j = (k + d + opts.length) % opts.length;
+        set(opts[j][0], true); btns[j].focus();
+      });
+      g.appendChild(b); return b;
+    });
+    function set(v, fire) {
+      api.value = v;
+      btns.forEach((b, k) => { const c = opts[k][0] === v; b.setAttribute('aria-checked', String(c)); b.tabIndex = c ? 0 : -1; });
+      if (fire && o.onChange) o.onChange(v);
+    }
+    h.appendChild(g); set(api.value, false);
+    api.set = v => set(v, true);
+    return api;
+  }
+  function range(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-range');
+    const id = 'ck-r' + (++uid), stops = o.stops, f1 = o.fmt || (v => num(v));
+    const lab = document.createElement('label'); lab.htmlFor = id; lab.textContent = o.label;
+    const inp = document.createElement('input'); inp.type = 'range'; inp.id = id;
+    const out = document.createElement('output'); out.setAttribute('for', id);
+    if (stops) { inp.min = 0; inp.max = stops.length - 1; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step == null ? 'any' : o.step; }
+    const val = () => (stops ? stops[+inp.value] : +inp.value);
+    const put = v => { inp.value = stops ? stops.reduce((b, s, k) => (Math.abs(s - v) < Math.abs(stops[b] - v) ? k : b), 0) : v; };
+    const upd = fire => { const v = val(), s = f1(v); out.textContent = s; inp.setAttribute('aria-valuetext', s); if (fire && o.onInput) o.onInput(v); };
+    inp.addEventListener('input', () => upd(true));
+    h.append(lab, inp, out); put(o.value == null ? (stops ? stops[0] : o.min) : o.value); upd(false);
+    return {el: h, input: inp, get value() { return val(); }, set(v) { put(v); upd(true); }};
+  }
+  function readout(hostEl) {
+    const h = $(hostEl); h.classList.add('ck-readout'); h.setAttribute('aria-live', 'polite');
+    h.set = html => { h.innerHTML = html; };
+    return h;
+  }
+  function bus(name) {
+    if (!buses[name]) { const fns = []; buses[name] = {value: undefined, on(fn) { fns.push(fn); }, emit(v, from) { this.value = v; fns.forEach(fn => fn(v, from)); }}; }
+    return buses[name];
+  }
+  /* Card layout for a table under 600 px: each cell shows its column's header (CSS table.stack). */
+  function stackTable(table) {
+    const t = $(table), heads = [], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (hr) for (const c of hr.cells) for (let k = 0; k < (c.colSpan || 1); k++) heads.push(c.textContent.replace(/\s+/g, ' ').trim());
+    for (const tb of t.tBodies) for (const r of tb.rows) { let k = 0; for (const c of r.cells) { if (heads[k]) c.setAttribute('data-label', heads[k]); k += c.colSpan || 1; } }
+    t.classList.add('stack');
+    return t;
+  }
+
+  /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
+  const SERIES = [1, 2, 3, 4, 5, 7];
+  const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
+  const clamp01 = p => Math.max(0, Math.min(1, +p || 0));
+  const ramp = p => `color-mix(in srgb, var(--c1) ${(15 + 85 * clamp01(p)).toFixed(1)}%, var(--surface))`;
+  function rgb(css) {  // resolve any CSS colour (tokens, color-mix) to linear-light luminance via a probe
+    const s = document.createElement('span'); s.style.color = css; s.style.display = 'none';
+    document.body.appendChild(s);
+    const c = getComputedStyle(s).color; s.remove();
+    const v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), unit = /^color\(/.test(c) ? 1 : 255;
+    const lin1 = x => { x /= unit; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin1(v[0]) + 0.7152 * lin1(v[1]) + 0.0722 * lin1(v[2]);
+  }
+  const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  /* Text colour for a ramp cell, chosen for the current theme: whichever of --ink and --page contrasts more. */
+  function rampInk(p) {
+    const bg = rgb(ramp(p));
+    return contrast(bg, rgb('var(--ink)')) >= contrast(bg, rgb('var(--page)')) ? 'var(--ink)' : 'var(--page)';
+  }
+  const redrawAll = () => frames.forEach(f => f.redraw());  // rampInk depends on the theme
+  if (window.MutationObserver) new MutationObserver(redrawAll).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  const dark = mm('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', redrawAll);
+
+  return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
+    stackTable, reduced, ramp, rampInk, color, hide: f => hide(f, true)};
+})();
+</script>
+<!-- chartkit:end -->
 </head>
 <body>
 <main>
 
 <h1>Ridge points: how much reuse the ET-SoC-1 needs at each level of memory</h1>
-<p class="byline">24 September 2026 · arithmetic on the 18 September measurements and the 23 September <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">energy manual</a>, no new runs · bandwidths measured on <code>aifoundry2</code> and <code>aifoundry3</code>: 1,024 compute minions, minion clock 600 MHz, NoC 400 MHz, DDR 933 MHz · compute peaks from the Minion VPU Specification, spec values from the manuals and micro-architecture docs (sources at the end) · code: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/scripts/ridge-points.py"><code>scripts/ridge-points.py</code></a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="byline">Ridge points computed 18 September 2026; energy balance points added and published 24 September 2026 · <code>aifoundry2</code> and <code>aifoundry3</code> at a 600 MHz minion clock (NoC 400 MHz, DDR 933 MHz) · arithmetic on the 18 September measurements and the 23 September <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">energy manual</a>, no new runs · code: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/scripts/ridge-points.py"><code>scripts/ridge-points.py</code></a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">A roofline ridge point is the arithmetic intensity at which a kernel stops waiting for memory: peak compute divided by the bandwidth of the level the data comes from. Below it, that level sets the speed; above it, the arithmetic units do. For the ET-SoC-1's tensor unit at 600 MHz, fp32 work needs about <b>4 FLOP per byte</b> loaded from the minion's own shire (its L2 cache or L2 scratchpad), <b>10</b> per byte from L3 or another shire's scratchpad, <b>130</b> per byte from DRAM, and about 620 per byte from host memory over PCIe. fp16 needs twice as much and int8 eight times, because the tensor unit does 2× and 8× as many fp16 and int8 operations per cycle. One full-size TensorFMA already does 4 FLOP per byte it loads in fp32 (8 in fp16), so tiles held in the shire can just keep fp32 and fp16 busy, with no margin. Beyond the shire, and above all from DRAM, every byte has to be reused many times. From DRAM that takes C blocks of about 520 × 520 in fp32 and fp16, and about 1,040 × 1,040 in int8.</p>
 
@@ -119,102 +543,127 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 </div>
 <p class="small">fp32 on the tensor unit at 600 MHz, with the bandwidth measured on the card (PCIe: spec, not measured). Second line: fp16 and int8.</p>
 
-<div class="card small" id="terms"><b>Terms.</b> The ET-SoC-1's compute cores are <i>minions</i>: small in-order RISC-V cores, each with two hardware threads (<i>harts</i>), an 8-lane fp32 vector unit and a tensor unit. Eight minions form a <i>neighbourhood</i> and 32 a <i>shire</i>; 32 shires, 1,024 minions, run kernels (the die has 1,088). Each shire has 4 MB of SRAM, which these cards' firmware splits into a 512 KB L2 cache, a 1 MB slice of the chip-wide 32 MB L3 and a 2.5 MB <i>L2 scratchpad</i>: software-managed memory that any shire can address. Shires are joined by a mesh network-on-chip (<i>NoC</i>, 400 MHz on these cards); DRAM is 32 GB of LPDDR4X on 16 channels. A <i>TensorLoad</i> copies up to 1 KB into the minion's <i>L1 scratchpad</i>, 3 KB set aside in its 4 KB L1 data cache. A <i>TensorFMA</i> multiplies an A tile of up to 16×K from there by a B tile that is either streamed through the <i>TenB</i> buffer or also held in the L1 scratchpad, accumulating a 16×16 C tile in the vector registers; int8 accumulates in a separate buffer, <i>TenC</i>. <i>TensorSend</i> moves data from one minion's registers to another's; inside a neighbourhood the <i>fast local network</i> links the minions along a tree. More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</div>
+<details class="card small terms" id="terms"><summary>Terms used on this page</summary>
+<p>The compute cores are <i>minions</i>: small in-order RISC-V cores, each with two hardware threads (<i>harts</i>), an 8-lane vector unit and a tensor unit; 8 minions form a <i>neighbourhood</i> and 32 a <i>shire</i>, and 32 shires (1,024 minions) run kernels, joined by a mesh network-on-chip (<i>NoC</i>, 400 MHz on these cards) to 32 GB of LPDDR4X DRAM on 16 channels. These cards' firmware splits each shire's 4 MB of SRAM into a 512 KB L2 cache, a 1 MB slice of the chip-wide 32 MB L3 and a 2.5 MB <i>L2 scratchpad</i> that any shire can address, and each minion sets aside 3 KB of its 4 KB L1 data cache as an <i>L1 scratchpad</i>. A <i>TensorLoad</i> copies up to 1 KB into the L1 scratchpad; a <i>TensorFMA</i> multiplies an A tile from there by a B tile streamed through the <i>TenB</i> buffer (or also held in the L1 scratchpad) into a 16×16 C tile in the vector registers (int8 accumulates in a separate buffer, <i>TenC</i>); and a <i>TensorSend</i> moves data from one minion's registers to another's, inside a neighbourhood over the tree-shaped <i>fast local network</i>. More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
+</details>
 
-<h2>The compute ceilings</h2>
+<h2 id="the-compute-ceilings">The compute ceilings</h2>
 <p>Each minion's vector unit has 8 lanes. Each lane has one FMA unit that does one fp32 or two fp16 multiply-adds per cycle, and two integer units that do four int8 multiply-adds each. A tensor instruction keeps those units busy for 512 cycles (fp32 and fp16) or 256 cycles (int8) per 16×16×K op, so a minion peaks at 16 fp32 FLOP, 32 fp16 FLOP or 128 int8 OP per cycle. The int8 rate is 8× fp32, not 4×, because the integer units are separate and there are twice as many. Only hart 0 of a minion may issue TensorFMA (hart 1 can only prefetch into the L2 scratchpad), and the vector unit's <code>fmadd.ps</code> runs on the same FMA units. So hart 1 and the vector unit add nothing to these peaks.</p>
-<div class="table-wrap"><table class="wide">
-<thead><tr><th>Compute path</th><th class="num">Per minion per cycle</th><th class="num">1,024 minions at 600 MHz</th><th class="num">At the 1 GHz design clock</th><th class="num">Best measured</th></tr></thead>
+<div class="table-wrap"><table id="tbl-peaks">
+<thead><tr><th>Compute path</th><th class="num">Per minion per cycle</th><th class="num">1,024 minions at 600 MHz</th><th class="num">At 1 GHz</th><th class="num">Best measured</th></tr></thead>
 <tbody id="t-peaks"></tbody></table></div>
 <p class="small">Measured: the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">matmul report</a>'s tensor loop with tiles in L2, 529 cycles per fp32 or fp16 op and 280 per int8 op, against 512 and 256 ideal. Vector: the best published vector-unit matmul, 2.94 TFLOP/s at 650 MHz (FOSDEM 2026). The vendor's 836 TOPS int8 for a six-chip card (139 per chip) is the same 128 OP per cycle on all 1,088 minions at 1 GHz. The lab cards run at 600 MHz, and the firmware's frequency table stops at 800 MHz.</p>
 
-<h2>Ridge points by level</h2>
-<p>Bandwidths are given per minion per minion-clock cycle, as a kernel running on all 1,024 minions sees them, and for the whole chip at 600 MHz. <i>Measured</i> is the median streaming rate of the earlier reports' probes with every minion reading its own data. Bytes per cycle come from the cycle counters, and GB/s from the 600 MHz launches only. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy report</a> now uses the same 600 MHz launches. Its first version averaged launches at 600–800 MHz (L2 2.80, local scratchpad 2.57, L3 1.03 TB/s) and gave about 144 B/cycle per shire for L2, which the cycle counters put at 128. <i>Spec</i> is what the documented port and bank widths allow. Ridge = peak per minion-cycle ÷ bytes per minion-cycle.</p>
+<h2 id="ridge-points-by-level">Ridge points by level</h2>
+<p>Bandwidths are given per minion per minion-clock cycle, as a kernel running on all 1,024 minions sees them, and for the whole chip at 600 MHz. <i>Measured</i> is the median streaming rate of the earlier reports' probes with every minion reading its own data. Bytes per cycle come from the cycle counters, and GB/s from the 600 MHz launches only. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy report</a> uses the same launches. <i>Spec</i> is what the documented port and bank widths allow. Ridge = peak per minion-cycle ÷ bytes per minion-cycle.</p>
+
+<div class="chart-title">Roofline explorer: where does the data come from, and how fast can the kernel run?</div>
+<div class="ck-controls" id="roof-ctl1"><div id="roof-prec"></div><div id="roof-clock"></div><button type="button" class="ck-toggle" id="roof-spec" aria-pressed="false">Spec lines</button></div>
+<div class="ck-controls" id="roof-ctl2"><div id="roof-level"></div></div>
+<div class="ck-controls" id="roof-ctl3"><div id="roof-int"></div></div>
+<div id="roof-legend"></div>
+<div id="c-roof"></div>
+<div id="roof-readout"></div>
+<p class="small">Pick where the data comes from, a precision and the operations the kernel does per byte it fetches; the readout gives the fastest it can run. Speed is capped by the lower of the compute ceiling (horizontal) and the bandwidth line of the level (diagonal); the dots are the ridge points, labelled for the selected precision. The clock buttons apply the model in <a href="#which-ridge-points-move-with-the-clock">which ridge points move with the clock</a>: the ceilings and the bandwidths inside a shire scale with the minion clock, DRAM and PCIe stay fixed, and L3 and another shire's scratchpad span a wedge between rising as measured and staying fixed. TensorSend between shires is drawn fixed: it is NoC-bound, not measured against clock, and spans six shire-to-shire patterns. The rings are kernels measured at 600 MHz: the matmul benchmark with tiles in L2 (fp32, fp16, int8), the same fp32 loop with every tile from DRAM, and the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparsity report</a>'s batch-1 fp32 layer with its weights in the scratchpads; the two below the ceilings sit on their bandwidth lines. The int8 matmul sits above the measured own-shire line (<span id="int8-own-t">39</span> TOP/s at 16 OP per byte; it ran at <span id="int8-ran">72</span>) because every minion read the same 32 KB of tiles; it stays under the spec line. The tables below hold every number without the chart.</p>
+
 <div class="chart-title">Measured bandwidth and ridge points</div>
 <div class="table-wrap"><table class="ridge measured">
-<thead><tr><th>Level</th><th>Size</th><th class="num">Bandwidth</th><th class="num">fp32</th><th class="num">fp16</th><th class="num">int8</th></tr></thead>
+<thead><tr><th>Level</th><th class="num">fp32</th><th class="num">fp16</th><th class="num">int8</th><th class="num">Bandwidth</th></tr></thead>
 <tbody id="t-ridge"></tbody></table></div>
 <p class="small">Ridge points in FLOP (int8: OP) per byte at 600 MHz. Bandwidth: bytes per minion per cycle · the whole chip. For TensorSend rows, "bytes" are bytes one minion sends another.</p>
-<div class="chart-title">Spec bandwidth and ridge points, and the clock</div>
-<div class="table-wrap"><table class="ridge">
-<thead><tr><th>Level</th><th class="num">Bandwidth, spec</th><th class="num">Spec ridge, fp32 · fp16 · int8</th><th>Does the ridge grow with the minion clock?</th></tr></thead>
-<tbody id="t-spec"></tbody></table></div>
-<p class="small">The same levels at what the documented port and bank widths allow, in the same units. The last column says whether a level's ridge point rises with the minion clock (see <a href="#which-ridge-points-move-with-the-clock">which ridge points move with the clock</a>).</p>
 
 <ul>
 <li><b>Inside a minion, nothing binds.</b> The tensor unit reads its A operand from the L1 scratchpad at one request of at most 32 B per cycle. With B streamed through TenB, a full-size op keeps that port 50–75% busy. (In int8 with B also in the scratchpad it reaches 88%, and the op slows from 280 to 318 cycles.) fp32 and fp16 keep C in the vector registers, whose three 32 B read ports per cycle are sized for one three-operand instruction per cycle. int8 accumulates in the separate 1 KB TenC.</li>
-<li><b>Own shire.</b> The probes stream 1 KB TensorLoads, two in flight per minion. With all 1,024 minions reading their own data, they level off at 4.0 B per cycle each (128 B per cycle per shire), from the L2 cache and the scratchpad alike, on <code>aifoundry2</code>. The 23 September reruns of the same probe at a pinned 600 MHz gave 4.00 B per cycle for both on <code>aifoundry3</code> as well; only the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparsity report</a>'s shorter L2 probe read 3.3–3.5. The shire's four cache banks can return 256 B per cycle, twice the 4.0 rate. The int8 matmul loop consumed 7.3 B per cycle per minion, but all 1,024 minions read the same 32 KB of tiles, so some lines may have come from the L2's read buffers rather than its banks. So 4 FLOP/B is what a simple streaming kernel gets, and no kernel reading private data has yet approached the banks' spec ridge of 2.</li>
+<li><b>Own shire.</b> The probes stream 1 KB TensorLoads, two in flight per minion. With all 1,024 minions reading their own data, they level off at 4.0 B per cycle each (128 B per cycle per shire), from the L2 cache and the scratchpad alike, on <code>aifoundry2</code>. The 23 September reruns of the same probe at a pinned 600 MHz gave 4.00 B per cycle for both on <code>aifoundry3</code> as well; only the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparsity report</a>'s shorter L2 probe read <span id="spar-l2">3.3</span> (slowest minion). The shire's four cache banks can return 256 B per cycle, twice the 4.0 rate. The int8 matmul loop consumed <span id="demo-bpc">7.3</span> B per cycle per minion, but all 1,024 minions read the same 32 KB of tiles, so some lines may have come from the L2's read buffers rather than its banks. So 4 FLOP/B is what a simple streaming kernel gets, and no kernel reading private data has yet approached the banks' spec ridge of 2.</li>
 <li><b>Other shires.</b> L3 lines are spread over all 32 shires, so almost every L3 hit crosses the mesh, just like a read from another shire's scratchpad. Both measured 0.96–0.98 TB/s, or 1.6 B per minion-cycle. The remote rate is for one pattern: each shire reading the shire 16 IDs away, 2.1 hops on average. If many shires read one shire's scratchpad, that shire's four mesh ports would allow only about 0.1 TB/s. At the NoC's 400 MHz, the ports of all 32 shires together would allow about 3.3 TB/s if each moved one 64 B beat per NoC cycle. No document states that rate for the shire ports; the datasheet's 32 GB/s per memory-shire NoC port is one 64 B beat per cycle at the 500 MHz design NoC clock. The mesh links, whose width is undocumented, could limit traffic spread over all shires first.</li>
-<li><b>DRAM.</b> Measured at 76 GB/s on both cards (75.8–76.0 GB/s in the 23 September reruns at a pinned 600 MHz; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparsity report</a>'s shorter probe read 72 GB/s on <code>aifoundry3</code>). For comparison, 16 channels give 119 GB/s at the 3,733 MT/s implied by the firmware's 933 MHz DDR clock, and 136.5 GB/s at the datasheet maximum of 4,266 MT/s. The datasheet prints 133 Gbytes/s, which is 136,512 MB/s divided by 1,024. The 128,000 MB/s the runtime reports is a constant in the service processor's firmware, not a measurement. A third party estimated about 88 GB/s as achievable on another card. That figure was calculated from the best rates measured against single memory shires, not measured for the whole chip.</li>
+<li><b>DRAM.</b> Measured at 76 GB/s on both cards (<span id="dram-rerun">75.8–76.0</span> GB/s in the 23 September reruns at a pinned 600 MHz; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparsity report</a>'s shorter probe read <span id="dram-card2">72</span> GB/s on <code>aifoundry3</code>). For comparison, 16 channels give 119 GB/s at the 3,733 MT/s implied by the firmware's 933 MHz DDR clock, and 136.5 GB/s at the datasheet maximum of 4,266 MT/s. The datasheet prints 133 Gbytes/s, which is 136,512 MB/s divided by 1,024. The 128,000 MB/s the runtime reports is a constant in the service processor's firmware, not a measurement. A third party's estimate of about 88 GB/s on another card was calculated from single-memory-shire rates, not measured chip-wide.</li>
 <li><b>Host memory.</b> PCIe Gen4 x8 carries 15.75 GB/s per direction before protocol overhead. Host transfers have not been timed on these cards.</li>
 <li><b>TensorSend</b> moves data between minions' registers rather than fetching it, and each rate belongs to the pattern the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication report</a> measured: pairs, rings, or shire to shire. It is not the capacity of a link. Across the mesh, a shire manages only 3–5 GB/s, limited by how many packets a sender keeps in flight.</li>
 </ul>
 
-<div class="chart-title">Roofline, 1,024 minions at 600 MHz (log–log)</div>
-<div class="legend"><span><i style="background:var(--et)"></i><span id="lg-fp32">fp32 tensor</span></span><span><i style="background:var(--et2)"></i><span id="lg-fp16">fp16 tensor</span></span><span><i style="background:var(--et3)"></i><span id="lg-int8">int8 tensor</span></span><span><i class="roof"></i>bandwidth, measured</span><span><i class="roofdash"></i>bandwidth, spec</span><span><i class="ring"></i>measured kernel</span></div>
-<div class="chart" id="c-roof"><div class="tip" id="c-roof-tip"></div></div>
-<p class="small">A kernel's speed is capped by the lower of its compute ceiling (horizontal) and the bandwidth line of the level it reads from (diagonal). Dots mark the ridge points, and the numbers under the fp32 line are the fp32 ridges. The dashed diagonals are the shire banks' spec (4.9 TB/s) and PCIe (spec). The rings are measured kernels: the matmul benchmark with tiles in L2 (fp32, fp16 and int8, near their ceilings), the same fp32 loop with every tile from DRAM, and the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparsity report</a>'s batch-1 fp32 layer with weights in the scratchpads. The two points below the ceilings sit on their bandwidth lines. The int8 matmul sits above the measured own-shire line (39 TOP/s at 16 OP per byte; it ran at 72) because all 1,024 minions read the same 32 KB of tiles. It stays under the spec line.</p>
+<div class="chart-title">Spec bandwidth and ridge points</div>
+<div class="table-wrap"><table class="ridge" id="tbl-spec">
+<thead><tr><th>Level</th><th class="num">Bandwidth, spec</th><th class="num">Spec ridge, fp32 · fp16 · int8</th></tr></thead>
+<tbody id="t-spec"></tbody></table></div>
+<p class="small">The same levels at what the documented port and bank widths allow, in the same units.</p>
+
+<h2 id="the-same-numbers-for-an-a100">The same numbers for an A100</h2>
+<div class="table-wrap"><table class="wide" id="tbl-a100">
+<thead><tr><th>Level</th><th class="num">Bandwidth, sustained</th><th class="num">fp32</th><th class="num">fp16 tensor</th><th class="num">int8 tensor</th></tr></thead>
+<tbody id="t-a100"></tbody></table></div>
+<p class="small">Ridge points against sustained bandwidth, each ET-SoC-1 level next to its closest A100 counterpart. The A100's peaks are 19.5 TFLOP/s fp32 on the CUDA cores, 312 TFLOP/s fp16 and 624 TOP/s int8 on the tensor cores (dense). Its bandwidths are the sustained values in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/sources/2026-09-18-a100-memory-hierarchy.md"><code>docs/reports/sources/2026-09-18-a100-memory-hierarchy.md</code></a> (HBM2 1.40 TB/s). The ET-SoC-1's fp32 runs on its tensor unit.</p>
+<p>The A100's tensor cores outrun its bandwidth by more, so on chip its fp16 and int8 ridge points are higher than the ET-SoC-1's. From DRAM the fp16 ridges are close (<span id="a-hbm16">223</span> against <span id="a-et16">259</span>). In int8 the ET-SoC-1 needs <span id="a-int8x">2.3</span>× more, and in IEEE fp32, which the A100 runs on its CUDA cores, about <span id="a-fp32x">9</span>× more (<span id="a-et32">130</span> against <span id="a-hbm32">14</span>). With fp32 inputs rounded to TF32 on its tensor cores (<span id="a-tf32">156</span> TFLOP/s dense), the A100's HBM ridge would be about <span id="a-hbmtf">111</span>.</p>
 
 <h2 id="which-ridge-points-move-with-the-clock">Which ridge points move with the clock</h2>
-<p>Levels inside the shire run on the minion clock, because the shire cache is clocked with the minions. On <code>aifoundry2</code>, whose governor moved the clock between 600 and about 800 MHz from launch to launch, the L2 and scratchpad bandwidths rose exactly with the clock. Their ridge points therefore hold at any clock. L3 and remote scratchpad reads go through the NoC, which the firmware keeps at 400 MHz. Over launches up to about 740 MHz, their bandwidth rose only 0.65× and 0.33× as fast as the minion clock. DRAM bandwidth did not change at all, and neither will PCIe, so their ridge points grow in proportion to the minion clock.</p>
+<p>Levels inside the shire run on the minion clock, because the shire cache is clocked with the minions. On <code>aifoundry2</code>, whose governor moved the clock between 600 and about 800 MHz from launch to launch, the L2 and scratchpad bandwidths rose exactly with the clock. Their ridge points therefore hold at any clock. L3 and remote scratchpad reads go through the NoC, which the firmware keeps at 400 MHz. Over launches up to about 740 MHz, their bandwidth rose only <span id="el-l3">0.65</span>× and <span id="el-rs">0.33</span>× as fast as the minion clock. DRAM bandwidth did not change at all, and neither will PCIe, so their ridge points grow in proportion to the minion clock.</p>
 <div class="table-wrap"><table>
-<thead><tr><th>fp32 ridge (FLOP/B), minion clock</th><th class="num">600 MHz (measured)</th><th class="num">800 MHz (top of the firmware table)</th><th class="num">1,000 MHz (shire design clock)</th></tr></thead>
+<thead><tr><th>fp32 ridge (FLOP/B)</th><th class="num">600 MHz</th><th class="num">800 MHz</th><th class="num">1,000 MHz</th></tr></thead>
 <tbody id="t-clock"></tbody></table></div>
-<p class="small">fp16 is 2× and int8 8× every entry. Only the minion clock changes. The NoC stays at the lab cards' 400 MHz and DDR at 933 MHz; at the NoC's 500 MHz design clock the L3 and remote-scratchpad ridges would be lower. For those two, the lower end assumes their bandwidth keeps rising with the clock as it did between 600 and about 740 MHz, and the upper end assumes it stays fixed.</p>
+<p class="small">fp16 is 2× and int8 8× every entry. 600 MHz is measured; 800 MHz is the top of the firmware's table; 1,000 MHz is the shire design clock. Only the minion clock changes. The NoC stays at the lab cards' 400 MHz and DDR at 933 MHz; at the NoC's 500 MHz design clock the L3 and remote-scratchpad ridges would be lower. For those two, the lower end assumes their bandwidth keeps rising with the clock as it did between 600 and about 740 MHz, and the upper end assumes it stays fixed. TensorSend inside a neighbourhood or a shire runs on the minion clock, so its ridges hold at any clock; between shires it crosses the 400 MHz NoC.</p>
 
-<h2>What it takes to reach them</h2>
-<h3>Matrix multiplication</h3>
+<h2 id="what-it-takes-to-reach-them">What it takes to reach them</h2>
+<h3 id="matrix-multiplication">Matrix multiplication</h3>
 <ul>
-<li><b>One op.</b> A 16×16×K TensorFMA reads a 1 KB A tile from the L1 scratchpad and a 1 KB B tile streamed through TenB. It does 8,192 FLOP in fp32, 16,384 in fp16 or 32,768 OP in int8. With both tiles loaded fresh each time, that is 4, 8 or 16 per byte: exactly the own-shire ridge for fp32 and fp16, and half of it for int8. The matmul benchmark ran fp32 and fp16 at 97% of peak and int8 at 91% with tiles in L2. But in all three runs every minion cycled through the same 32 KB tile pool, so those rates do not show that private tiles streamed from the banks would keep the tensor unit busy. A kernel with its own tiles in the shire sits exactly at the fp32 and fp16 ridge, with no margin.</li>
-<li><b>The shire.</b> The 32 minions of a shire can share loads. A cooperative TensorLoad reads a line once and delivers it to every minion in a group. Take a 4 × 8 grid of 16×16 C tiles, with A shared by the 8 minions of a neighbourhood and B across the 4 neighbourhoods. A minion-op then costs 384 B of bank reads instead of 2 KB, which is 21, 43 and 85 operations per byte, well past the spec ridge of 2, 4 and 16. Cooperative loads have not been measured on these cards.</li>
-<li><b>Beyond the shire.</b> A block of m × n outputs held in a shire while K streams past does 2mnK operations for every e·K·(m + n) bytes it reads, where e is the element size in bytes. Its intensity is H/e, where H = 2mn/(m + n) is the harmonic mean of m and n. The shire's 32 register-resident tiles form a 64 × 128 block with H = 85, which gives 21, 43 and 85 per byte against L3 or another shire. That beats the measured 10, 20 and 80, with little to spare in int8. It assumes each byte enters the shire once. Cooperative loads can do that for another shire's scratchpad, but they cannot read L3-homed addresses, so L3 data must be captured by the shire's L2 or copied into its scratchpad first. Likewise, the DRAM figures below assume each DRAM byte is read once for the whole chip.</li>
-<li><b>DRAM.</b> The block needs H ≥ e × ridge: about 520 in fp32 and fp16, and about 1,040 in int8. All 1,024 register tiles together form a 512 × 512 block (1 MB of C), which gives 128, 256 and 512 per byte. That is 99% of what fp32 and fp16 need and half of what int8 needs. Larger blocks have to keep C in the scratchpads and swap it through the registers. The 80 MB of scratchpad (the default partition) would hold C for a 4,500 × 4,500 fp32 block, but nobody has measured what the swapping costs. int8 is harder: its accumulator, TenC, cannot be loaded from memory, so partial sums would have to be added with vector instructions.</li>
+<li><b>One op.</b> A 16×16×K TensorFMA reads a 1 KB A tile from the L1 scratchpad and a 1 KB B tile streamed through TenB. It does 8,192 FLOP in fp32, 16,384 in fp16 or 32,768 OP in int8. With both tiles loaded fresh each time, that is 4, 8 or 16 per byte: exactly the own-shire ridge for fp32 and fp16, and half of it for int8. The matmul benchmark's <span id="mm-pct32">97</span>% and <span id="mm-pct8">91</span>% of peak came from one shared 32 KB tile pool (see <a href="#ridge-points-by-level">Own shire</a>), so they do not show that private tiles would keep the tensor unit busy. A kernel with its own tiles in the shire sits exactly at the fp32 and fp16 ridge, with no margin.</li>
+<li><b>The shire.</b> A shire's 32 register-resident C tiles form a 64 × 128 block. A block of m × n outputs held while K streams past does 2mnK operations for every e·K·(m + n) bytes it reads (e = bytes per element), an intensity of H/e with H = 2mn/(m + n), the harmonic mean of m and n. Here H = 85: 21, 43 and 85 operations per byte. That is well past the banks' spec ridge of 2, 4 and 16 if a cooperative TensorLoad reads each line once for every minion that needs it (A shared by the 8 minions of a neighbourhood, B across the 4 neighbourhoods: 384 B of bank reads per minion-op instead of 2 KB). It also beats the measured 10, 20 and 80 from L3 or another shire, with little to spare in int8, if each byte enters the shire once. Cooperative loads have not been measured on these cards, and they cannot read L3-homed addresses, so L3 data must first be captured by the shire's L2 or copied into its scratchpad.</li>
+<li><b>DRAM.</b> These figures assume each DRAM byte is read once for the whole chip. The block needs H ≥ e × ridge: about 520 in fp32 and fp16, and about 1,040 in int8. All 1,024 register tiles together form a 512 × 512 block (1 MB of C), which gives 128, 256 and 512 per byte. That is 99% of what fp32 and fp16 need and half of what int8 needs. Larger blocks have to keep C in the scratchpads and swap it through the registers. The 80 MB of scratchpad (the default partition) would hold C for a 4,500 × 4,500 fp32 block, but nobody has measured what the swapping costs. int8 is harder: its accumulator, TenC, cannot be loaded from memory, so partial sums would have to be added with vector instructions.</li>
 </ul>
-<h3>Inference that streams its weights</h3>
+
+<div class="chart-title">Reuse to speed: how the fraction of peak grows with the block or the batch</div>
+<div class="ck-controls"><div id="reuse-mode"></div><div id="reuse-prec"></div></div>
+<div class="ck-controls"><div id="reuse-x"></div></div>
+<div id="reuse-legend"></div>
+<div id="c-reuse"></div>
+<div id="reuse-readout"></div>
+<p class="small" id="reuse-cap">Fraction of the tensor unit's peak at 600 MHz that the measured bandwidth of each level allows (the roofline above, read along one diagonal). <b>Blocked matmul</b>: x is H, the harmonic mean of the C block's sides (a square block's side); the intensity is H/e per byte. L3 and another shire's scratchpad are read by one shire, whose 32 register tiles hold at most a 64 × 128 block (H = 85), so their lines stop there; DRAM assumes each byte is read once for the whole chip, with C in all 1,024 minions' registers up to H = 512 and swapped through the scratchpads (unmeasured) up to about <span id="reuse-scpmax">4,580</span>. <b>Streaming weights</b>: x is the batch N; the weights give 2N/e operations per byte, and inside the own shire each op also loads a fresh activation tile, so that line flattens at N = 16. The ticks are the smallest compute-bound blocks and batches, as in the table below.</p>
+
+<h3 id="inference-that-streams-its-weights">Inference that streams its weights</h3>
 <p>A layer that reads its weights once per batch of N inputs does 2N operations per weight, or 2N/e per byte (e = bytes per element). It is compute-bound when that reaches the ridge, so it needs N ≥ e × ridge / 2:</p>
 <div class="table-wrap"><table>
-<thead><tr><th>Weights come from</th><th class="num">fp32 weights</th><th class="num">fp16 weights</th><th class="num">int8 weights</th></tr></thead>
+<thead><tr><th>Weights come from</th><th class="num">fp32</th><th class="num">fp16</th><th class="num">int8</th></tr></thead>
 <tbody id="t-batch"></tbody></table></div>
 <p class="small">These are the smallest batches that are compute-bound at the measured bandwidth. The own-shire row also counts the activations. A minion holds one 16×16 C tile, so each op loads a fresh activation tile as well as a weight tile. Its intensity therefore tops out at 4, 8 and 16 per byte at batch 16, and int8 never reaches its 32 OP/B own-shire ridge. The other rows assume the activations stay in the shire and each weight byte reaches the shire once. On A0 silicon, fp32 and fp16 ops of 1–4 rows with B from TenB must be padded to 5 rows (errata 1.29 type D).</p>
 <p>At batch 1 a layer does 0.5 FLOP per byte in fp32, so it is memory-bound at every level. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute#layer">sparsity report</a>'s batch-1 layer, with its weights in the scratchpads and its partial sums added by the host, ran at <span id="gemv-tf">1.24</span> TFLOP/s (<span id="gemv-us">6.8</span> µs per 1,024 × 4,096 layer: the row "Every row loaded, compute only" in that report's layer table). That is the scratchpad bandwidth times 0.5, within 1%. With the on-chip reduction the layer takes <span id="gemv-tree-us">7.3</span> µs, <span id="gemv-tree-tf">1.15</span> TFLOP/s.</p>
 
-<h2>Other limits that act like ridge points</h2>
+<h2 id="other-limits-that-act-like-ridge-points">Other limits that act like ridge points</h2>
 <ul>
-<li><b>A lone minion.</b> A minion keeps at most 4 line requests in flight, shared by its two TensorLoad paths, so its rate is 4 lines per round trip. Streaming its own data alone, one minion measured <span id="lim-l2">6.4</span> B per cycle from L2 or the scratchpad and <span id="lim-dram">1.4</span> from DRAM. This is not a hard ceiling: the int8 matmul loop drew 7.3 B per cycle per minion. It takes at least <span id="lim-n">90</span> minions streaming 1 KB loads at once to reach the chip's 76 GB/s from DRAM, and more once queueing raises the latency.</li>
+<li><b>A lone minion.</b> A minion keeps at most 4 line requests in flight, shared by its two TensorLoad paths, so its rate is 4 lines per round trip. Streaming its own data alone, one minion measured <span id="lim-l2">6.4</span> B per cycle from L2 or the scratchpad and <span id="lim-dram">1.4</span> from DRAM. This is not a hard ceiling: the int8 matmul loop drew <span id="demo-bpc2">7.3</span> B per cycle per minion. It takes at least <span id="lim-n">90</span> minions streaming 1 KB loads at once to reach the chip's 76 GB/s from DRAM, and more once queueing raises the latency.</li>
 <li><b>Small loads.</b> Every TensorLoad costs at least about <span id="lim-floor">45</span> cycles, even with every line masked off, and about <span id="lim-small">65</span> for up to 4 lines when all minions load at once. So loads of fewer than 4 lines cannot reach the 4 B per cycle streaming rate: a 1-line load gets about <span id="lim-1line">1.0</span> B per cycle. 4-line loads still reach <span id="lim-4line">3.9</span>.</li>
-<li><b>Kernel launch.</b> In the matmul runs, a launch from the host took <span id="lim-launch">0.43</span> ms (median; 0.35–0.69 ms). That is as long as <span id="lim-gflop">4.2</span> GFLOP takes at the fp32 peak, so a kernel with less work than that spends more time launching than computing.</li>
-<li><b>The vector unit's limit is not pinned down.</b> A <code>flw.ps</code> loads 32 B and an <code>fmadd.ps</code> does 16 FLOP, and a minion issues at most one instruction per cycle for its two harts together. So with I FLOP per loaded byte, at most a fraction 2I/(2I + 1) of the issue slots can be FMAs. Measured code stays well below that bound. With both harts doing nothing but loading, the L1 delivered 10 B per minion-cycle, one <code>flw.ps</code> every 3.2 cycles, so below about 1.6 FLOP per byte the load rate binds first. The best published vector matmul has 63% FMAs in its instruction mix, yet reaches only 4.4 FLOP per minion-cycle, 28% of peak: it issues about 0.44 instructions per cycle. The spec ridges against the L1 cache (0.5 FLOP/B, 32 B per cycle) and the registers (0.17, 96 B per cycle) are never reached.</li>
+<li><b>Kernel launch.</b> In the matmul runs, a launch from the host took <span id="lim-launch">0.43</span> ms (median; <span id="lim-launch-range">0.35–0.69</span> ms). That is as long as <span id="lim-gflop">4.2</span> GFLOP takes at the fp32 peak, so a kernel with less work than that spends more time launching than computing.</li>
+<li><b>The vector unit's limit is not pinned down.</b> A <code>flw.ps</code> loads 32 B and an <code>fmadd.ps</code> does 16 FLOP, and a minion issues at most one instruction per cycle for its two harts together. So with I FLOP per loaded byte, at most a fraction 2I/(2I + 1) of the issue slots can be FMAs. Measured code stays well below that bound. With both harts doing nothing but loading, the energy manual's catalogue loop (64 loads per loop iteration) issued a <code>flw.ps</code> every <span id="l1-cyc">1.4</span> minion-cycles, almost as fast as it issued an integer <code>add</code>, so the L1 delivered at least <span id="l1-bpc">23</span> B per minion-cycle (<span id="l1-tbs">14.2</span> TB/s) and the load rate binds first only below about <span id="l1-ridge">0.69</span> FLOP per byte. The memory-hierarchy probe's loop (8 per iteration) issued one every <span id="l1-cyc-mh">3.2</span> cycles, <span id="l1-bpc-mh">10</span> B per minion-cycle: a limit of that loop, not of the L1. The best published vector matmul has 63% FMAs in its instruction mix, yet reaches only 4.4 FLOP per minion-cycle, 28% of peak: it issues about 0.44 instructions per cycle. The spec ridges against the L1 cache (0.5 FLOP/B, 32 B per cycle) and the registers (0.17, 96 B per cycle) are never reached.</li>
 </ul>
 
 <h2 id="energy-balance-points">Energy balance points</h2>
 <p>Time is one budget and energy is another. Divide each level's energy per byte by the tensor unit's energy per FLOP, both measured as card power above idle. The result is the intensity at which moving the data costs as much energy as the arithmetic. On random-normal operands held in the L1 scratchpad, the fp32 tensor unit costs <span id="e-flop">2.89</span> pJ per FLOP above idle [<span id="e-flop-lo">2.62</span>–<span id="e-flop-hi">3.01</span>] and int8 <span id="e-int8">0.158</span> pJ per OP (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">energy manual §3.2</a>; fp32 on both cards, int8 on <code>aifoundry2</code>, at 600 MHz). The data matters as much as the level: on all-ones operands fp32 costs <span id="e-ones">1.11</span> pJ per FLOP and on zeros <span id="e-zeros">0.21</span>, so every balance point below moves by up to <span id="e-span">14</span>× with the operands.</p>
-<div class="table-wrap"><table class="wide">
+<p>Both sides include the cost of keeping the cores awake (about <span id="e-awake">1.5–2.1</span> W for the whole chip; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#a-core-that-is-awake">energy manual §2</a>), which a kernel doing both pays once. Taking it out of both lowers the random-data balance points from the shire's own scratchpad to DRAM by about <span id="e-awake-drop">9–29</span>% (TensorSend's by more, since this cost is most of its power over idle) and changes none of the conclusions below; on zeros it is most of the tensor unit's <span id="e-zeros2">0.21</span> pJ per FLOP.</p>
+
+<div class="chart-title">Energy against time: does the arithmetic or the data movement cost more once a kernel is compute-bound?</div>
+<div class="ck-controls"><div id="eb-op"></div><div id="eb-ridge"></div></div>
+<div id="eb-legend"></div>
+<div id="c-ebal"></div>
+<div id="eb-readout"></div>
+<p class="small">One row per level, fp32 on the tensor unit. The circle is the energy balance point (byte energy ÷ FLOP energy, with the range over the measurements), the diamond the time ridge. Where the circle lies left of the diamond, a kernel that is compute-bound spends more energy on arithmetic than on moving its data; right of it, the data costs more. The operand buttons change the FLOP energy and, for the shire's own scratchpad and DRAM, the byte energy too (TensorLoads on the same operands, §4.1; filled circles). The other levels' byte energies were measured on buffers that were never written (§4.2 and §5; hollow circles), so for them only the FLOP side follows the operands. On zeros the tensor unit costs little more than keeping the cores awake, so read those rows as a direction, not a value. The L1 row, which feeds only the vector unit, is in the table.</p>
+
+<div class="table-wrap"><table class="wide" id="tbl-energy">
 <thead><tr><th>Where the bytes come from</th><th class="num">pJ/B</th><th class="num">fp32 balance</th><th class="num">int8 balance</th><th class="num">fp32 time ridge</th></tr></thead>
 <tbody id="t-energy"></tbody></table></div>
-<p class="small">Balance points and the time ridge are in FLOP (int8: OP) per byte. Energy per byte for memory is the energy manual's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-by-level">§4.2</a>: the same probes as the bandwidths above (1 KB TensorLoads; vector loads for L1), re-run at a pinned 600 MHz on both cards on 23 September. For TensorSend it is <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">§5</a>: 1 KB messages on both cards, and for the last row six shire-to-shire patterns. The 18 September figures (memory-hierarchy report, clock free, busy-core floor of about 12 W) are superseded.</p>
-<p>At the measured bandwidths every fp32 energy balance point lies below the matching time ridge point. So a kernel that is compute-bound at those rates already spends more energy on arithmetic than on moving data. At the spec rates only L3's 3.6 FLOP/B lies above its ridge of 3.0.</p>
-<p>The §4.2 probes read whatever the buffers held, not random data. On random data a TensorLoad costs <span id="e-rnd-scp">4.21</span> pJ/B from the shire's own scratchpad and <span id="e-rnd-dram">129</span> pJ/B from DRAM (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-and-writes-measured-together">§4.1</a>), which puts those balance points at <span id="e-rnd-scp-b">1.5</span> and <span id="e-rnd-dram-b">45</span> FLOP/B. That does not change the conclusion: 1.5 is below the shire banks' spec ridge of 2, and 45 below DRAM's spec ridge of 72–82. For L1 the manual's catalogue gives <span id="e-rnd-l1">0.54</span> pJ/B for 32 B vector loads on random data (§4.1), a balance point of <span id="e-rnd-l1-b">0.19</span> FLOP/B.</p>
+<p class="small">Balance points and the time ridge are in FLOP (int8: OP) per byte. Energy per byte for memory is the energy manual's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-by-level">§4.2</a>: the same probes as the bandwidths above (1 KB TensorLoads), re-run at a pinned 600 MHz on both cards on 23 September. For TensorSend it is <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">§5</a>: 1 KB messages on both cards, and for the last row six shire-to-shire patterns. The L1 row is the manual's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-and-writes-measured-together">§4.1</a> catalogue on random data: a 32 B vector load (<code>flw.ps</code>) against the vector unit's <code>fmadd.ps</code> (<span id="e-vec">3.49</span> pJ per FLOP), since the tensor unit does not read through the L1 cache. Its time ridge uses the same loop's <span id="e-l1-tbs">14.2</span> TB/s; the memory-hierarchy probe's slower loop ran at <span id="e-l1-mh-tbs">6.2</span> TB/s and cost <span id="e-l1-mh-pj">0.77</span> pJ/B (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-by-level">§4.2</a>).</p>
+<p>On random-normal operands, every fp32 energy balance point lies below the matching time ridge point at the measured bandwidths. So a compute-bound kernel on random-like data spends more energy on arithmetic than on moving data. At the spec rates only L3's <span id="e-spec-l3">3.6</span> FLOP/B lies above its ridge of <span id="e-spec-l3r">3.0</span>. The operands can change this. On all-ones operands the balance points stay below, though L3 (<span id="e-ones-l3">9.4</span> against <span id="e-l3r">10</span>) and DRAM (<span id="e-ones-dram">109</span> against <span id="e-dramr">130</span>) come close. On zeros the tensor unit adds little more power than cores that are merely awake, and every level from the shire's own scratchpad outward lies well above its time ridge, even with byte energies also measured on zeros (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-and-writes-measured-together">§4.1</a>: DRAM <span id="e-zeros-dram">434</span> against <span id="e-dramr2">130</span>, own scratchpad <span id="e-zeros-scp">9.6</span> against <span id="e-scpr">4.0</span>). For zero-heavy operands, moving the bytes costs more energy than the arithmetic even when the kernel is compute-bound. Treat the zeros figures as a direction, not a value.</p>
+<p>The §4.2 probes read whatever the buffers held, not random data. On random data a TensorLoad costs <span id="e-rnd-scp">4.21</span> pJ/B from the shire's own scratchpad and <span id="e-rnd-dram">129</span> pJ/B from DRAM (§4.1), which puts those balance points at <span id="e-rnd-scp-b">1.5</span> and <span id="e-rnd-dram-b">45</span> FLOP/B. That does not change the conclusion: <span id="e-rnd-scp-b2">1.5</span> is below the shire banks' spec ridge of <span id="e-scp-spec">2</span>, and <span id="e-rnd-dram-b2">45</span> below DRAM's spec ridge of <span id="e-dram-spec">72–82</span>.</p>
 
-<h2>The same numbers for an A100</h2>
-<div class="table-wrap"><table class="wide">
-<thead><tr><th>Level</th><th class="num">Bandwidth, sustained</th><th class="num">fp32</th><th class="num">fp16 tensor</th><th class="num">int8 tensor</th></tr></thead>
-<tbody id="t-a100"></tbody></table></div>
-<p class="small">Ridge points against sustained bandwidth, each ET-SoC-1 level next to its closest A100 counterpart. The A100's peaks are 19.5 TFLOP/s fp32 on the CUDA cores, 312 TFLOP/s fp16 and 624 TOP/s int8 on the tensor cores (dense). Its bandwidths are the sustained values in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/sources/2026-09-18-a100-memory-hierarchy.md"><code>docs/reports/sources/2026-09-18-a100-memory-hierarchy.md</code></a> (HBM2 1.40 TB/s; the memory-hierarchy report quotes 1.41). The ET-SoC-1's fp32 runs on its tensor unit.</p>
-<p>The A100 has much more bandwidth, but also far more tensor throughput, so on chip its fp16 and int8 ridge points are higher. In fp16 it needs 21 FLOP per byte from shared memory, against the ET-SoC-1's 8 from its own shire. From L2 it needs 71, against the ET-SoC-1's 20 from L3 or another shire. From DRAM the fp16 ridge points are close: 223 from HBM, against 259 from LPDDR4X. In int8, though, the ET-SoC-1 needs 2.3× more (1,036 against 446). In IEEE fp32, which the A100 runs on its CUDA cores, its ridge points stay low throughout (14 from HBM), and the ET-SoC-1's DRAM ridge point is about 9× higher. With fp32 inputs rounded to TF32 on its tensor cores (156 TFLOP/s dense), the A100's HBM ridge would be about 111.</p>
-
-<h2>Caveats</h2>
+<h2 id="caveats">Caveats</h2>
 <ul>
 <li>The measured bandwidths are what the probes reached with 1 KB TensorLoads, two in flight. The spec values are what the documented port and bank widths allow. Neither is a proven ceiling. The spec figure for the mesh assumes one 64 B beat per NoC cycle per port.</li>
-<li>These are read ridge points. Writes were measured later (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-and-writes-measured-together">energy manual §4.1</a>, both cards): tensor stores reach 1.23 TB/s into the shire's own scratchpad, half the read rate, and 76 GB/s to DRAM, the same as reads; stores through the L1 reach DRAM at only 27 GB/s. A kernel that writes as much as it reads needs more reuse than these tables show.</li>
-<li>All bandwidths are at a 600 MHz minion clock, a 400 MHz NoC and 933 MHz DDR. On <code>aifoundry2</code> the governor moved the minion clock during the memory-hierarchy runs, so the levels beyond the shire use the 600 MHz launches of the 18 September runs; the 23 September reruns at a pinned 600 MHz on both cards reproduce every level to within <span id="rerun-dev">0.2</span>%. The energies per byte come from those reruns (see <a href="#energy-balance-points">energy balance points</a>).</li>
-<li>Both cards give the same bandwidth at every level with the same probe; <code>aifoundry3</code> also supplied the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparsity report</a>'s TensorLoad-size and batch-1 measurements.</li>
+<li>These are read ridge points. Writes were measured later (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-and-writes-measured-together">energy manual §4.1</a>, both cards): tensor stores reach <span id="w-scp">1.23</span> TB/s into the shire's own scratchpad, half the read rate, and <span id="w-dram">76</span> GB/s to DRAM, the same as reads; stores through the L1 reach DRAM at only <span id="w-st">27</span> GB/s. A kernel that writes as much as it reads needs more reuse than these tables show.</li>
+<li>The levels beyond the shire use the 600 MHz launches of the 18 September runs on <code>aifoundry2</code>, whose governor moved the clock; the 23 September reruns at a pinned 600 MHz reproduce every level on both cards to within <span id="rerun-dev">0.3</span>%. <code>aifoundry3</code> also supplied the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparsity report</a>'s TensorLoad-size and batch-1 measurements.</li>
 <li>The port widths come from the documentation and RTL of core-et's Erbium branch (commit <code>b38a1a3</code>): the same Minion core lineage in a later MCU-class configuration, not the taped-out ET-SoC-1. A0 silicon may differ in details.</li>
 </ul>
 
-<h2>Reproduce</h2>
-<pre><code>python3 scripts/ridge-points.py --embed docs/reports/2026-09-18-et-soc1-ridge-points.html</code></pre>
-<p class="small">The script reads the raw data of the earlier reports (<code>docs/reports/data/</code>), the 23 September reruns of the memory probes, the on-chip communication report's embedded JSON and the energy manual's data (<code>docs/reports/data/2026-09-23-energy-manual/manual.json</code>). It prints every number used here and writes the tables' and chart's data into this page. The spec constants in the script each name their source.</p>
-<p class="small"><b>Versions.</b> The first published version (24 September) took its energy balance points from the 18 September energies and 1.88 pJ per FLOP measured on small-integer operands. The same day they were recomputed from the energy manual, which moved the DRAM balance point from 79 to 42 FLOP/B and put the L2 cache's balance point below its spec ridge; the caveats on card differences and writes were updated to the 23 September measurements.</p>
+<h2 id="reproduce">Reproduce</h2>
+<pre><code>python3 scripts/ridge-points.py --embed docs/reports/2026-09-18-et-soc1-ridge-points.html
+python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.html</code></pre>
+<p class="small">The script reads the raw data of the earlier reports (<code>docs/reports/data/</code>), the 23 September reruns of the memory probes, the on-chip communication report's embedded JSON and the energy manual's data (<code>docs/reports/data/2026-09-23-energy-manual/manual.json</code>). It prints the numbers behind the tables, the charts and the figures in the text, and writes the tables' and charts' data into this page. The spec constants in the script each name their source. Its inputs rebuild from committed data with the commands in <code>docs/findings/04-artifacts.md</code> (A19); only the raw probe and matmul runs needed a card. The second command pastes in the shared chart toolkit the charts are drawn with.</p>
+<p class="small"><b>Versions.</b> First published 24 September with energy balance points from the 18 September memory-hierarchy energies (clock free) and 1.88 pJ per FLOP on small-integer operands. Recomputed the same day from the energy manual, which moved the DRAM balance point from 79 to 42 FLOP/B and the L2 cache's below its spec ridge. Revised 25 September: the L1 row now sets a vector load against the vector unit's <code>fmadd.ps</code> (balance 0.15, was 0.27 against the tensor unit); the energy conclusion is stated for random-normal operands, with the reversal on zeros; the rerun check reads the passes the energy manual pools (0.3%, was 0.2%); the vector unit's L1 load rate is the energy manual catalogue loop's <span id="v-l1-bpc">23</span> B per minion-cycle (below about <span id="v-l1-ridge">0.69</span> FLOP per byte the load rate binds, was <span id="v-l1-ridge-mh">1.6</span> from the memory-hierarchy probe's slower loop at <span id="v-l1-bpc-mh">10</span> B); and the page gained interactive roofline, energy and reuse charts.</p>
 
 <h2 id="related">Related reports</h2>
 <ul>
@@ -227,15 +676,14 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a> — a chain of stages that hands each stage's output to another shire's scratchpad (the next in ID order, 3.5 mesh hops away on average) instead of DRAM, 12.3× faster: the remote-scratchpad ridge in practice.</li>
 </ul>
 
-<h2>Sources</h2>
+<h2 id="sources">Sources</h2>
 <ol class="small">
 <li>Minion VPU Specification (<a href="https://github.com/openhwfoundation/core-et/tree/erbium">core-et</a> docs, Erbium branch): §2 (8 lanes, one FMA unit and two int8 units per lane), §2.2.2 (register-file ports), §2.2.3.8 Table 6 (four int8 products per integer unit), §2.3.6.1 (tensor micro-op sequencing). ET Programmer's Reference Manual (<a href="https://github.com/aifoundry-org/et-man">aifoundry-org/et-man</a>): §8.3.1 (L1 scratchpad mode), §9.1–9.4 (tensor op shapes and operands).</li>
 <li>CORE-ET Shire Cache Specification: §1 (4 banks, one 64 B line per cycle each; 512-bit NoC ports), §1.4.3 (L3 lines interleaved over all shires), §2.3–2.4 (four ports to the L3 mesh). CORE-ET Neighborhood MAS: §4.3–4.7 (neighbourhood buses, fast local network), Table 6 (shire and minion clocks). Minion DCache Description: §2.3.1 (256-bit scratchpad read port to the vector unit), §3.2 (L1 ports), §3.9.6 (TensorLoad requests in flight). CORE-ET Minion Shire Description: Table 2 (1 GHz shire and 500 MHz NoC design clocks). All in <a href="https://github.com/openhwfoundation/core-et/tree/erbium">core-et</a>.</li>
 <li>ET Preliminary Datasheet Rev 1.0 (in <a href="https://github.com/aifoundry-org/et-man">aifoundry-org/et-man</a>): §1 and §7 (LPDDR4X, PCIe Gen4 x8), §2.1.1 (single issue, two harts), §7.1.1 (32 GB/s per memory-shire NoC port). Ditzel, <a href="https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf">Hot Chips 33</a> (2021), and Ditzel et al., <a href="https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf">IEEE Micro 42(3), 2022</a> (128 int8 OP per cycle per minion; 836 TOPS for six chips at 1 GHz, i.e. 139 per chip; HC33: 137 GB/s).</li>
 <li><a href="https://github.com/aifoundry-org/et-platform">et-platform</a> service-processor firmware (<code>device-bootloaders/src/ServiceProcessorBL2</code>): <code>common/main.c</code> (NoC PLL at 400 MHz), <code>driver/mem_controller.c</code> (933 MHz DDR), <code>include/mem_controller.h</code> (the reported 128,000 MB/s), <code>services/thermal_pwr_mgmt.c</code> (minion frequency table, 300–800 MHz).</li>
-<li>Companion reports: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory hierarchy</a> (bandwidth probes), <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">matmul efficiency</a> (tensor rates reached), <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication</a> (TensorSend rates), <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparse compute</a> (TensorLoad rates on the second card, the batch-1 layer), and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">the energy manual</a> (energy per FLOP and per byte, and the 23 September reruns of the memory probes).</li>
 <li>P. Cawley, <a href="https://archive.fosdem.org/2026/events/attachments/T3PSFN-zero_to_matmul_with_the_et-soc-1/slides/267107/zerotomat_asnyquu.pdf">"Zero to matmul with the ET-SoC-1"</a>, FOSDEM 2026 (vector-unit matmul, 2.94 TFLOP/s at 650 MHz). M. Chang (<a href="https://github.com/marty1885/etTopoScan">marty1885</a>), <a href="https://clehaxze.tw/gemlog/2026/04-27-tnvestigating-the-et-soc-1-noc.gmi">"Investigating the ET-SoC-1 NoC"</a>, 2026, also on the AI Foundry blog (about 88 GB/s from DRAM, calculated from the best rate against a single memory shire).</li>
-<li>A100: <a href="https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/a100/pdf/nvidia-a100-datasheet-us-nvidia-1758950-r4-web.pdf">NVIDIA A100 datasheet</a> (dense peaks); <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/sources/2026-09-18-a100-memory-hierarchy.md"><code>docs/reports/sources/2026-09-18-a100-memory-hierarchy.md</code></a> (sustained shared-memory, L2 and HBM bandwidth).</li>
+<li>A100: <a href="https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/a100/pdf/nvidia-a100-datasheet-us-nvidia-1758950-r4-web.pdf">NVIDIA A100 datasheet</a> (dense peaks, TF32 156 TFLOP/s); <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/sources/2026-09-18-a100-memory-hierarchy.md"><code>docs/reports/sources/2026-09-18-a100-memory-hierarchy.md</code></a> (sustained shared-memory, L2 and HBM bandwidth).</li>
 </ol>
 
 <p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
@@ -311,26 +759,15 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 })();
 </script>
 </main>
-<script type="application/json" id="ridge-data">{"clock_mhz":600,"design_mhz":1000,"noc_mhz":400,"minions":1024,"peaks":{"fp32":{"name":"fp32 tensor (TensorFMA32)","unit":"FLOP","per_cycle":16,"bytes":4,"chip_600":9.8304,"chip_design":16.384,"demo_per_cycle":15.486},"fp16":{"name":"fp16 in, fp32 accumulate (TensorFMA16A32)","unit":"FLOP","per_cycle":32,"bytes":2,"chip_600":19.6608,"chip_design":32.768,"demo_per_cycle":30.972},"int8":{"name":"int8 in, int32 accumulate (TensorIMA8A32)","unit":"OP","per_cycle":128,"bytes":1,"chip_600":78.6432,"chip_design":131.072,"demo_per_cycle":116.8798},"vec32":{"name":"fp32 vector (fmadd.ps)","unit":"FLOP","per_cycle":16,"bytes":4,"chip_600":9.8304,"chip_design":16.384,"demo_per_cycle":4.4170673076923075}},"op_cycles":{"fp32":528.9939300012915,"fp16":528.9939300012915,"int8":280.3564003360718},"levels":[{"key":"vrf","name":"Vector registers","group":"minion","size":"1 KB per hart (32 x 32 B)","clock":"minion","measured":null,"spec":{"bpc":96,"src":"Minion VPU Specification sec. 2.2.2: 3 read ports x 32 B per lane group"},"note":"Provisioned for one three-operand fmadd.ps per cycle. Tensor ops read only their C accumulators here.","ridge":{"spec":{"fp32":0.16666666666666666,"fp16":0.3333333333333333,"int8":1.3333333333333333,"vec32":0.16666666666666666}},"ridge_design":null},{"key":"l1d","name":"L1 data cache (flw.ps)","group":"minion","size":"512 B per hart","clock":"minion","measured":{"bpc":10.039201134682601,"gbps":6168.08517714899,"src":"memory-hierarchy probe: 32 B vector loads by both harts, about 0.3 loads per minion-cycle","gbps_600":6211.067039806486,"rerun":{"gbps":[6162.809986811844,6164.605277699008],"bpc_minion":10.039204586417652,"passes":{"aifoundry2":3,"aifoundry3":2}}},"spec":{"bpc":32,"src":"Minion DCache Description sec. 3.2: 4 LRAM blocks x 64 bits, one 256-bit row per access"},"note":"Feeds the vector unit only. Loads and FMAs share one issue slot, so there is no sharp ridge.","ridge":{"measured":{"fp32":1.5937523101040902,"fp16":3.1875046202081805,"int8":12.750018480832722,"vec32":1.5937523101040902},"spec":{"fp32":0.5,"fp16":1.0,"int8":4.0,"vec32":0.5}},"ridge_design":null,"clock_elasticity":0.97742890937645},{"key":"l2","name":"L2 cache, own shire","group":"shire","size":"512 KB per shire; 16 MB chip","clock":"minion","measured":{"bpc":3.999220720145578,"gbps":2452.3382875453176,"src":"memory-hierarchy probe: 1 KB TensorLoads, 2 in flight, private 8 KB per minion","rerun":{"gbps":[2455.319825406302,2456.2639704890403],"bpc_minion":3.9996313082622477,"passes":{"aifoundry2":3,"aifoundry3":2}}},"spec":{"bpc":8.0,"src":"CORE-ET Shire Cache Specification sec. 1: 4 banks x one 64 B line per cycle = 256 B/cycle per shire; CORE-ET Neighborhood MAS sec. 4.4: one 64 B response per cycle per neighbourhood of 8 minions"},"note":"","demonstrated":{"bpc":7.304987499999999,"gbps":4488.184319999999,"src":"int8 matmul loop: A and B tiles (2 KB) per 280-cycle op, tiles shared by all minions"},"ridge":{"measured":{"fp32":4.000779431703278,"fp16":8.001558863406556,"int8":32.006235453626225,"vec32":4.000779431703278},"demonstrated":{"fp32":2.1902843776255607,"fp16":4.380568755251121,"int8":17.522275021004486,"vec32":2.1902843776255607},"spec":{"fp32":2.0,"fp16":4.0,"int8":16.0,"vec32":2.0}},"ridge_design":null,"clock_elasticity":0.9998074533185937},{"key":"scp","name":"L2 scratchpad, own shire","group":"shire","size":"2.5 MB per shire; 80 MB chip","clock":"minion","measured":{"bpc":3.9997982777751986,"gbps":2455.609968745108,"bpc_card2":3.994756881592909,"src":"memory-hierarchy probe and sparsity probe (second card): 1 KB TensorLoads, 2 in flight","rerun":{"gbps":[2455.33138500849,2456.207612190724],"bpc_minion":3.9998072196261614,"passes":{"aifoundry2":3,"aifoundry3":2}}},"spec":{"bpc":8.0,"src":"CORE-ET Shire Cache Specification sec. 1: 4 banks x one 64 B line per cycle = 256 B/cycle per shire; CORE-ET Neighborhood MAS sec. 4.4: one 64 B response per cycle per neighbourhood of 8 minions"},"note":"","ridge":{"measured":{"fp32":4.000201732398279,"fp16":8.000403464796557,"int8":32.00161385918623,"vec32":4.000201732398279},"spec":{"fp32":2.0,"fp16":4.0,"int8":16.0,"vec32":2.0}},"ridge_design":null,"clock_elasticity":1.0001403885227707},{"key":"l3","name":"L3","group":"mesh","size":"1 MB per shire, 32 MB chip; lines spread over all shires","clock":"noc","measured":{"bpc":1.5994006725139878,"gbps":982.6717731925941,"src":"memory-hierarchy probe: 1 KB TensorLoads, 24 MB working set","rerun":{"gbps":[982.4078582794273,983.2746852007773],"bpc_minion":1.6006962864655387,"passes":{"aifoundry2":3,"aifoundry3":2}}},"spec":{"bpc":5.333333333333334,"gbps":3276.8,"src":"Shire Cache Spec sec. 2.3-2.4: 4 x 512-bit ports per shire to the L3 mesh, at the 400 MHz NoC clock, assuming one 64 B beat per NoC cycle per port","assumed":true},"note":"","ridge":{"measured":{"fp32":10.003747200412704,"fp16":20.007494400825408,"int8":80.02997760330163,"vec32":10.003747200412704},"spec":{"fp32":2.9999999999999996,"fp16":5.999999999999999,"int8":23.999999999999996,"vec32":2.9999999999999996}},"ridge_design":{"fp32":[11.966763405674538,16.67291200068784],"fp16":[23.933526811349076,33.34582400137568],"int8":[95.7341072453963,133.38329600550273],"vec32":[11.966763405674538,16.67291200068784]},"clock_elasticity":0.6492475325202423},{"key":"scp_remote","name":"L2 scratchpad, other shire","group":"mesh","size":"2.5 MB in each of 31 other shires","clock":"noc","measured":{"bpc":1.5616081918892484,"gbps":959.4520730967541,"src":"memory-hierarchy probe: every minion reads the scratchpad 16 shire IDs away (2.1 hops mean)","rerun":{"gbps":[959.7132604957077,960.5957641832217],"bpc_minion":1.5643018622729148,"passes":{"aifoundry2":3,"aifoundry3":2}}},"spec":{"bpc":5.333333333333334,"gbps":3276.8,"src":"Shire Cache Spec sec. 2.3-2.4: 4 x 512-bit ports per shire to the L3 mesh, at the 400 MHz NoC clock, assuming one 64 B beat per NoC cycle per port","assumed":true},"note":"","ridge":{"measured":{"fp32":10.245847891360668,"fp16":20.491695782721337,"int8":81.96678313088535,"vec32":10.245847891360668},"spec":{"fp32":2.9999999999999996,"fp16":5.999999999999999,"int8":23.999999999999996,"vec32":2.9999999999999996}},"ridge_design":{"fp32":[14.405776635454389,17.076413152267783],"fp16":[28.811553270908778,34.152826304535566],"int8":[115.24621308363511,136.61130521814226],"vec32":[14.405776635454389,17.076413152267783]},"clock_elasticity":0.3329294268320406},{"key":"dram","name":"DRAM (LPDDR4X)","group":"chip","size":"32 GB","clock":"dram","measured":{"bpc":0.12353226439375635,"gbps":75.8982232435239,"gbps_card2":72.12208761974983,"src":"memory-hierarchy probe: 1 KB TensorLoads, 256 MB working set; the 23 Sep reruns give 76 GB/s on both cards (gbps_card2 is the sparsity report's shorter probe on aifoundry3)","rerun":{"gbps":[75.75549973585717,75.98285566262209],"bpc_minion":0.123695640266717,"passes":{"aifoundry2":3,"aifoundry3":2}}},"spec":{"bpc":0.19442708333333333,"gbps":119.456,"src":"DDR clock 933 MHz (card telemetry; SP BL2 mem_controller.c), read as 3733 MT/s (assumes the 1066 MHz : 4266 MT/s ratio)","max_gbps":136.512,"max_src":"ET Preliminary Datasheet sec. 7.1: 16 x 16-bit LPDDR4X at up to 4266 MT/s (HC33: 137 GB/s)"},"note":"","ridge":{"measured":{"fp32":129.5208185369318,"fp16":259.0416370738636,"int8":1036.1665482954545,"vec32":129.5208185369318},"spec":{"fp32":82.29306188052504,"fp16":164.5861237610501,"int8":658.3444950442004,"vec32":82.29306188052504},"spec_max":{"fp32":72.0112517580872,"fp16":144.0225035161744,"int8":576.0900140646976,"vec32":72.0112517580872}},"ridge_design":{"fp32":215.86803089488635,"fp16":431.7360617897727,"int8":1726.9442471590908,"vec32":215.86803089488635},"clock_elasticity":0.00755925304879276},{"key":"pcie","name":"Host memory over PCIe","group":"chip","size":"host RAM","clock":"pcie","measured":null,"spec":{"bpc":0.025634765625,"gbps":15.75,"src":"ET Preliminary Datasheet sec. 1: PCIe Gen4 x8 = 16 GT/s x 8 lanes, 128b/130b encoding, before protocol overhead"},"note":"Not measured; only the per-launch overhead (0.35-0.69 ms) is known.","ridge":{"spec":{"fp32":624.152380952381,"fp16":1248.304761904762,"int8":4993.219047619048,"vec32":624.152380952381}},"ridge_design":{"fp32":1040.2539682539684,"fp16":2080.507936507937,"int8":8322.031746031747,"vec32":1040.2539682539684}},{"key":"fln","name":"TensorSend, fast local network","group":"network","size":"neighbourhood tree edges","clock":"minion","measured":{"bpc":4.869321123273801,"gbps":2991.7108981394235,"src":"on-chip communication report: all 512 pairs exchanging 1 KB messages"},"spec":{"bpc":16,"src":"CORE-ET Neighborhood MAS sec. 4.7: 256-bit messages, at most one every other cycle per sender"},"note":"","ridge":{"measured":{"fp32":3.2858789952309997,"fp16":6.571757990461999,"int8":26.287031961847998,"vec32":3.2858789952309997},"spec":{"fp32":1.0,"fp16":2.0,"int8":8.0,"vec32":1.0}},"ridge_design":null},{"key":"xbar","name":"TensorSend inside a shire","group":"network","size":"rings of 8 or 32 minions","clock":"minion","measured":{"bpc":1.8231856842575545,"gbps":1120.1652844078415,"src":"on-chip communication report: rings of 32, 1 KB messages"},"spec":{"bpc":4.0,"src":"CORE-ET Neighborhood MAS sec. 4.3: 256-bit request path, 32 B/cycle per neighbourhood of 8 minions"},"note":"","ridge":{"measured":{"fp32":8.775847758214265,"fp16":17.55169551642853,"int8":70.20678206571412,"vec32":8.775847758214265},"spec":{"fp32":4.0,"fp16":8.0,"int8":32.0,"vec32":4.0}},"ridge_design":null},{"key":"xmesh","name":"TensorSend between shires","group":"network","size":"1\u201310 mesh hops (1.6\u20134.7 mean per pattern)","clock":"noc","measured":{"bpc":0.2539850459415473,"bpc_low":0.1423442015329795,"gbps":156.04841222648665,"gbps_low":87.4562774218626,"src":"on-chip communication report: every minion sends to a shire 1-16 IDs away, 1 KB messages"},"spec":null,"note":"Limited per message (packets in flight), not by the mesh links.","ridge":{"measured":{"fp32":[62.995834816520166,112.40359514253193],"fp16":[125.99166963304033,224.80719028506385],"int8":[503.9666785321613,899.2287611402554],"vec32":[62.995834816520166,112.40359514253193]}},"ridge_design":null}],"limits":{"one_minion_l2_bpc":6.382527830065197,"one_minion_dram_bpc":1.4022479787909994,"one_minion_4line_bpc":5.707151774567505,"tload_floor_cycles":44.8,"tload_all_small_cycles":64.644,"tload_all_4line_bpc":3.928760522095441,"tload_all_1line_bpc":0.9830123183731146,"minions_to_saturate_dram":90.21017726712694,"rerun_max_deviation":0.0018804591407731719,"launch_overhead_ms_median":0.4293883333332804,"launch_overhead_ms_range":[0.3527899999999917,0.6883533333335023],"gemv_tree_tflops":1.147604724337635,"gemv_tree_us":7.309666666666667,"gemv_host_us":6.777},"kernels":[{"name":"fp32 matmul, tiles in L2","ai":4,"t":9.510784860531748,"prec":"fp32","vs":"L2"},{"name":"fp16 matmul, tiles in L2","ai":8,"t":19.019353772831504,"prec":"fp16","vs":"L2"},{"name":"int8 matmul, tiles in L2","ai":16,"t":71.78404618607185,"prec":"int8","vs":"L2"},{"name":"fp32 matmul, every tile from DRAM","ai":4,"t":0.3102562582838835,"prec":"fp32","vs":"DRAM"},{"name":"batch-1 fp32 layer, weights in scratchpad (partial sums added by the host)","ai":0.5,"t":1.2378055186660764,"prec":"fp32","vs":"scratchpad"}],"energy":{"e_flop":{"fp32":{"pj":2.8893560971318237,"lo":2.6203148587277014,"hi":3.0126348957184366,"cards":2,"n":4},"fp32_ones":{"pj":1.1144305066485138,"lo":1.0156990219672113,"hi":1.1518706553836053,"cards":2,"n":4},"fp32_zeros":{"pj":0.2089407019321503,"lo":0.2032170644015667,"hi":0.2131455391819811,"cards":2,"n":4},"int8":{"pj":0.15823902092282915,"lo":0.1571132989178436,"hi":0.1593647429278147,"cards":1,"n":2}},"e_byte":[{"name":"L1 data cache","pj":0.7690427742818106,"lo":0.6573805827136455,"hi":0.8803654382671363,"balance_fp32":0.26616406854288954,"balance_int8":4.860007157506753},{"name":"L2 scratchpad, own shire","pj":2.515232804626331,"lo":2.3927100711243545,"hi":2.643903356685528,"balance_fp32":0.8705167241667188,"balance_int8":15.895148933289805},{"name":"L2 cache","pj":2.5071160709538423,"lo":2.359637587918059,"hi":2.6417680310500518,"balance_fp32":0.8677075399057183,"balance_int8":15.84385479847304},{"name":"L2 scratchpad, other shire","pj":6.654630706077195,"lo":5.309567389596654,"hi":7.477977170985222,"balance_fp32":2.30315353399432,"balance_int8":42.054296514654},{"name":"L3","pj":10.505365642340498,"lo":9.61028699079379,"hi":11.444763574190846,"balance_fp32":3.6358847055123653,"balance_int8":66.38922296835881},{"name":"DRAM","pj":121.96326904339003,"lo":116.78373792219676,"hi":129.03127724087838,"balance_fp32":42.21122801874759,"balance_int8":770.7534357335901},{"name":"TensorSend, fast local network","pj":0.665394148843291,"lo":0.6078181777138777,"hi":0.7271620720707025,"balance_fp32":0.23029149972334928,"balance_int8":4.204994096669708},{"name":"TensorSend inside a shire","pj":2.0823362424205736,"lo":1.9318894890082396,"hi":2.1634161161809655,"balance_fp32":0.7206921446919076,"balance_int8":13.15943583495817}],"xshire":{"pj":[11.873222478010108,17.770926223514287],"patterns":["xshire1","xshire16","xshire2","xshire4","xshire6","xshire8"],"hops":[1.625,4.6875],"balance_fp32":[4.109297047115894,6.150479769923461],"balance_int8":[75.03346778036818,112.30432367362097]},"random_tload":{"scp":{"pj":4.20830016351218,"balance_fp32":1.4564837361824776},"dram":{"pj":129.11098815172943,"balance_fp32":44.68503840004145},"l1":{"pj":0.535481193892659,"balance_fp32":0.18532890231986807}},"source":"docs/reports/data/2026-09-23-energy-manual/manual.json: tensor.bars, reruns, catalogue.combined"},"a100":{"peaks":{"fp32":19.5,"fp16":312,"int8":624},"levels":[{"name":"Shared memory / L1","tbs":14.8,"tbs_peak":19.5,"ridge":{"fp32":1.3175675675675675,"fp16":21.08108108108108,"int8":42.16216216216216}},{"name":"L2","tbs":4.4,"tbs_peak":7.2,"ridge":{"fp32":4.431818181818182,"fp16":70.9090909090909,"int8":141.8181818181818}},{"name":"HBM2 (40 GB)","tbs":1.4,"tbs_peak":1.555,"ridge":{"fp32":13.928571428571429,"fp16":222.85714285714286,"int8":445.7142857142857}}]}}</script>
+<script type="application/json" id="ridge-data">{"clock_mhz":600,"design_mhz":1000,"noc_mhz":400,"minions":1024,"scp_bytes_chip":83886080.0,"peaks":{"fp32":{"name":"fp32 tensor (TensorFMA32)","unit":"FLOP","per_cycle":16,"bytes":4,"chip_600":9.8304,"chip_design":16.384,"demo_per_cycle":15.486},"fp16":{"name":"fp16 in, fp32 accumulate (TensorFMA16A32)","unit":"FLOP","per_cycle":32,"bytes":2,"chip_600":19.6608,"chip_design":32.768,"demo_per_cycle":30.972},"int8":{"name":"int8 in, int32 accumulate (TensorIMA8A32)","unit":"OP","per_cycle":128,"bytes":1,"chip_600":78.6432,"chip_design":131.072,"demo_per_cycle":116.8798},"vec32":{"name":"fp32 vector (fmadd.ps)","unit":"FLOP","per_cycle":16,"bytes":4,"chip_600":9.8304,"chip_design":16.384,"demo_per_cycle":4.4170673076923075}},"op_cycles":{"fp32":528.9939300012915,"fp16":528.9939300012915,"int8":280.3564003360718},"levels":[{"key":"vrf","name":"Vector registers","group":"minion","size":"1 KB per hart (32 x 32 B)","clock":"minion","measured":null,"spec":{"bpc":96,"src":"Minion VPU Specification sec. 2.2.2: 3 read ports x 32 B per lane group"},"note":"Provisioned for one three-operand fmadd.ps per cycle. Tensor ops read only their C accumulators here.","ridge":{"spec":{"fp32":0.16666666666666666,"fp16":0.3333333333333333,"int8":1.3333333333333333,"vec32":0.16666666666666666}},"ridge_design":null},{"key":"l1d","name":"L1 data cache (flw.ps)","group":"minion","size":"512 B per hart","clock":"minion","measured":{"bpc":10.039201134682601,"gbps":6168.08517714899,"src":"memory-hierarchy probe: 32 B vector loads by both harts, about 0.3 loads per minion-cycle","gbps_600":6211.067039806486,"rerun":{"gbps":[6163.1117301466475,6164.7872483463925],"bpc_minion":10.039204262473403,"passes":{"aifoundry2":3,"aifoundry3":3}}},"spec":{"bpc":32,"src":"Minion DCache Description sec. 3.2: 4 LRAM blocks x 64 bits, one 256-bit row per access"},"note":"Feeds the vector unit only. Loads and FMAs share one issue slot, so there is no sharp ridge.","demonstrated":{"bpc":23.099333333333334,"gbps":14192.439819624622,"gbps_by_card":{"aifoundry2":14183.987464267517,"aifoundry3":14200.89217498173},"issue_per_hart":0.36092708333333334,"add_issue_per_hart":0.37443125,"src":"energy manual catalogue (section 4.1): flw.ps/random/h2, both harts, 64 loads per loop iteration, both cards"},"ridge":{"measured":{"fp32":1.5937523101040902,"fp16":3.1875046202081805,"int8":12.750018480832722,"vec32":1.5937523101040902},"demonstrated":{"fp32":0.6926606828479899,"fp16":1.3853213656959797,"int8":5.541285462783919,"vec32":0.6926606828479899},"spec":{"fp32":0.5,"fp16":1.0,"int8":4.0,"vec32":0.5}},"ridge_design":null,"clock_elasticity":0.97742890937645},{"key":"l2","name":"L2 cache, own shire","group":"shire","size":"512 KB per shire; 16 MB chip","clock":"minion","measured":{"bpc":3.999220720145578,"gbps":2452.3382875453176,"src":"memory-hierarchy probe: 1 KB TensorLoads, 2 in flight, private 8 KB per minion","rerun":{"gbps":[2455.2185181913264,2456.0695413220396],"bpc_minion":3.999643158148399,"passes":{"aifoundry2":3,"aifoundry3":3}}},"spec":{"bpc":8.0,"src":"CORE-ET Shire Cache Specification sec. 1: 4 banks x one 64 B line per cycle = 256 B/cycle per shire; CORE-ET Neighborhood MAS sec. 4.4: one 64 B response per cycle per neighbourhood of 8 minions"},"note":"","demonstrated":{"bpc":7.304987499999999,"gbps":4488.184319999999,"src":"int8 matmul loop: A and B tiles (2 KB) per 280-cycle op, tiles shared by all minions"},"ridge":{"measured":{"fp32":4.000779431703278,"fp16":8.001558863406556,"int8":32.006235453626225,"vec32":4.000779431703278},"demonstrated":{"fp32":2.1902843776255607,"fp16":4.380568755251121,"int8":17.522275021004486,"vec32":2.1902843776255607},"spec":{"fp32":2.0,"fp16":4.0,"int8":16.0,"vec32":2.0}},"ridge_design":null,"clock_elasticity":0.9998074533185937},{"key":"scp","name":"L2 scratchpad, own shire","group":"shire","size":"2.5 MB per shire; 80 MB chip","clock":"minion","measured":{"bpc":3.9997982777751986,"gbps":2455.609968745108,"bpc_card2":3.994756881592909,"src":"memory-hierarchy probe and sparsity probe (second card): 1 KB TensorLoads, 2 in flight","rerun":{"gbps":[2455.3794338627363,2456.201912401728],"bpc_minion":3.999795742018489,"passes":{"aifoundry2":3,"aifoundry3":3}}},"spec":{"bpc":8.0,"src":"CORE-ET Shire Cache Specification sec. 1: 4 banks x one 64 B line per cycle = 256 B/cycle per shire; CORE-ET Neighborhood MAS sec. 4.4: one 64 B response per cycle per neighbourhood of 8 minions"},"note":"","ridge":{"measured":{"fp32":4.000201732398279,"fp16":8.000403464796557,"int8":32.00161385918623,"vec32":4.000201732398279},"spec":{"fp32":2.0,"fp16":4.0,"int8":16.0,"vec32":2.0}},"ridge_design":null,"clock_elasticity":1.0001403885227707},{"key":"l3","name":"L3","group":"mesh","size":"1 MB per shire, 32 MB chip; lines spread over all shires","clock":"noc","measured":{"bpc":1.5994006725139878,"gbps":982.6717731925941,"src":"memory-hierarchy probe: 1 KB TensorLoads, 24 MB working set","rerun":{"gbps":[982.6535584270787,985.1654002750704],"bpc_minion":1.6012107035921082,"passes":{"aifoundry2":3,"aifoundry3":3}}},"spec":{"bpc":5.333333333333334,"gbps":3276.8,"src":"Shire Cache Spec sec. 2.3-2.4: 4 x 512-bit ports per shire to the L3 mesh, at the 400 MHz NoC clock, assuming one 64 B beat per NoC cycle per port","assumed":true},"note":"","ridge":{"measured":{"fp32":10.003747200412704,"fp16":20.007494400825408,"int8":80.02997760330163,"vec32":10.003747200412704},"spec":{"fp32":2.9999999999999996,"fp16":5.999999999999999,"int8":23.999999999999996,"vec32":2.9999999999999996}},"ridge_design":{"fp32":[11.966763405674538,16.67291200068784],"fp16":[23.933526811349076,33.34582400137568],"int8":[95.7341072453963,133.38329600550273],"vec32":[11.966763405674538,16.67291200068784]},"clock_elasticity":0.6492475325202423},{"key":"scp_remote","name":"L2 scratchpad, other shire","group":"mesh","size":"2.5 MB in each of 31 other shires","clock":"noc","measured":{"bpc":1.5616081918892484,"gbps":959.4520730967541,"src":"memory-hierarchy probe: every minion reads the scratchpad 16 shire IDs away (2.1 hops mean)","rerun":{"gbps":[959.829221087715,960.5763658090319],"bpc_minion":1.5637138565479427,"passes":{"aifoundry2":3,"aifoundry3":3}}},"spec":{"bpc":5.333333333333334,"gbps":3276.8,"src":"Shire Cache Spec sec. 2.3-2.4: 4 x 512-bit ports per shire to the L3 mesh, at the 400 MHz NoC clock, assuming one 64 B beat per NoC cycle per port","assumed":true},"note":"","ridge":{"measured":{"fp32":10.245847891360668,"fp16":20.491695782721337,"int8":81.96678313088535,"vec32":10.245847891360668},"spec":{"fp32":2.9999999999999996,"fp16":5.999999999999999,"int8":23.999999999999996,"vec32":2.9999999999999996}},"ridge_design":{"fp32":[14.405776635454389,17.076413152267783],"fp16":[28.811553270908778,34.152826304535566],"int8":[115.24621308363511,136.61130521814226],"vec32":[14.405776635454389,17.076413152267783]},"clock_elasticity":0.3329294268320406},{"key":"dram","name":"DRAM (LPDDR4X)","group":"chip","size":"32 GB","clock":"dram","measured":{"bpc":0.12353226439375635,"gbps":75.8982232435239,"gbps_card2":72.12208761974983,"src":"memory-hierarchy probe: 1 KB TensorLoads, 256 MB working set; the 23 Sep reruns give 76 GB/s on both cards (gbps_card2 is the sparsity report's shorter probe on aifoundry3)","rerun":{"gbps":[75.8289667790934,75.96596254454155],"bpc_minion":0.12365577995112442,"passes":{"aifoundry2":3,"aifoundry3":3}}},"spec":{"bpc":0.19442708333333333,"gbps":119.456,"src":"DDR clock 933 MHz (card telemetry; SP BL2 mem_controller.c), read as 3733 MT/s (assumes the 1066 MHz : 4266 MT/s ratio)","max_gbps":136.512,"max_src":"ET Preliminary Datasheet sec. 7.1: 16 x 16-bit LPDDR4X at up to 4266 MT/s (HC33: 137 GB/s)"},"note":"","ridge":{"measured":{"fp32":129.5208185369318,"fp16":259.0416370738636,"int8":1036.1665482954545,"vec32":129.5208185369318},"spec":{"fp32":82.29306188052504,"fp16":164.5861237610501,"int8":658.3444950442004,"vec32":82.29306188052504},"spec_max":{"fp32":72.0112517580872,"fp16":144.0225035161744,"int8":576.0900140646976,"vec32":72.0112517580872}},"ridge_design":{"fp32":215.86803089488635,"fp16":431.7360617897727,"int8":1726.9442471590908,"vec32":215.86803089488635},"clock_elasticity":0.00755925304879276},{"key":"pcie","name":"Host memory over PCIe","group":"chip","size":"host RAM","clock":"pcie","measured":null,"spec":{"bpc":0.025634765625,"gbps":15.75,"src":"ET Preliminary Datasheet sec. 1: PCIe Gen4 x8 = 16 GT/s x 8 lanes, 128b/130b encoding, before protocol overhead"},"note":"Not measured; only the per-launch overhead (0.35-0.69 ms) is known.","ridge":{"spec":{"fp32":624.152380952381,"fp16":1248.304761904762,"int8":4993.219047619048,"vec32":624.152380952381}},"ridge_design":{"fp32":1040.2539682539684,"fp16":2080.507936507937,"int8":8322.031746031747,"vec32":1040.2539682539684}},{"key":"fln","name":"TensorSend, fast local network","group":"network","size":"neighbourhood tree edges","clock":"minion","measured":{"bpc":4.869321123273801,"gbps":2991.7108981394235,"src":"on-chip communication report: all 512 pairs exchanging 1 KB messages"},"spec":{"bpc":16,"src":"CORE-ET Neighborhood MAS sec. 4.7: 256-bit messages, at most one every other cycle per sender"},"note":"","ridge":{"measured":{"fp32":3.2858789952309997,"fp16":6.571757990461999,"int8":26.287031961847998,"vec32":3.2858789952309997},"spec":{"fp32":1.0,"fp16":2.0,"int8":8.0,"vec32":1.0}},"ridge_design":null},{"key":"xbar","name":"TensorSend inside a shire","group":"network","size":"rings of 8 or 32 minions","clock":"minion","measured":{"bpc":1.8231856842575545,"gbps":1120.1652844078415,"src":"on-chip communication report: rings of 32, 1 KB messages"},"spec":{"bpc":4.0,"src":"CORE-ET Neighborhood MAS sec. 4.3: 256-bit request path, 32 B/cycle per neighbourhood of 8 minions"},"note":"","ridge":{"measured":{"fp32":8.775847758214265,"fp16":17.55169551642853,"int8":70.20678206571412,"vec32":8.775847758214265},"spec":{"fp32":4.0,"fp16":8.0,"int8":32.0,"vec32":4.0}},"ridge_design":null},{"key":"xmesh","name":"TensorSend between shires","group":"network","size":"1\u201310 mesh hops (1.6\u20134.7 mean per pattern)","clock":"noc","measured":{"bpc":0.2539850459415473,"bpc_low":0.1423442015329795,"gbps":156.04841222648665,"gbps_low":87.4562774218626,"src":"on-chip communication report: every minion sends to a shire 1-16 IDs away, 1 KB messages"},"spec":null,"note":"Limited per message (packets in flight), not by the mesh links.","ridge":{"measured":{"fp32":[62.995834816520166,112.40359514253193],"fp16":[125.99166963304033,224.80719028506385],"int8":[503.9666785321613,899.2287611402554],"vec32":[62.995834816520166,112.40359514253193]}},"ridge_design":null}],"limits":{"one_minion_l2_bpc":6.382527830065197,"one_minion_dram_bpc":1.4022479787909994,"one_minion_4line_bpc":5.707151774567505,"tload_floor_cycles":44.8,"tload_all_small_cycles":64.644,"tload_all_4line_bpc":3.928760522095441,"tload_all_1line_bpc":0.9830123183731146,"minions_to_saturate_dram":90.21017726712694,"sparsity_l2_bpc":3.308615648071859,"rerun_max_deviation":0.0025375991765539396,"launch_overhead_ms_median":0.4293883333332804,"launch_overhead_ms_range":[0.3527899999999917,0.6883533333335023],"write_gbps":{"tstore_scp":{"aifoundry2":1230.5412351712325,"aifoundry3":1230.486486625181},"tstore_dram":{"aifoundry2":76.07116952046425,"aifoundry3":76.0845330567502},"st_stream_dram":{"aifoundry2":26.91369898149577,"aifoundry3":26.936951541340836}},"gemv_tree_tflops":1.147604724337635,"gemv_tree_us":7.309666666666667,"gemv_host_us":6.777},"kernels":[{"name":"fp32 matmul, tiles in L2","ai":4,"t":9.510784860531748,"prec":"fp32","vs":"L2"},{"name":"fp16 matmul, tiles in L2","ai":8,"t":19.019353772831504,"prec":"fp16","vs":"L2"},{"name":"int8 matmul, tiles in L2","ai":16,"t":71.78404618607185,"prec":"int8","vs":"L2"},{"name":"fp32 matmul, every tile from DRAM","ai":4,"t":0.3102562582838835,"prec":"fp32","vs":"DRAM"},{"name":"batch-1 fp32 layer, weights in scratchpad (partial sums added by the host)","ai":0.5,"t":1.2378055186660764,"prec":"fp32","vs":"scratchpad"}],"energy":{"e_flop":{"fp32":{"pj":2.8893560971318237,"lo":2.6203148587277014,"hi":3.0126348957184366,"cards":2,"n":4},"fp32_ones":{"pj":1.1144305066485138,"lo":1.0156990219672113,"hi":1.1518706553836053,"cards":2,"n":4},"fp32_zeros":{"pj":0.2089407019321503,"lo":0.2032170644015667,"hi":0.2131455391819811,"cards":2,"n":4},"int8":{"pj":0.15823902092282915,"lo":0.1571132989178436,"hi":0.1593647429278147,"cards":1,"n":2},"vec32":{"pj":3.4910464022899266,"lo":3.345185306671054,"hi":3.6310427444916415,"cards":2,"n":6}},"e_byte":[{"name":"L1 data cache","pj":0.535481193892659,"lo":0.5078046864560999,"hi":0.5596379654044188,"balance_fp32":0.15338701701054847,"balance_int8":null,"vs":"fmadd.ps","probe_pj":0.7690427742818106},{"name":"L2 scratchpad, own shire","pj":2.515232804626331,"lo":2.3927100711243545,"hi":2.643903356685528,"balance_fp32":0.8705167241667188,"balance_int8":15.895148933289805},{"name":"L2 cache","pj":2.5071160709538423,"lo":2.359637587918059,"hi":2.6417680310500518,"balance_fp32":0.8677075399057183,"balance_int8":15.84385479847304},{"name":"L2 scratchpad, other shire","pj":6.654630706077195,"lo":5.309567389596654,"hi":7.477977170985222,"balance_fp32":2.30315353399432,"balance_int8":42.054296514654},{"name":"L3","pj":10.505365642340498,"lo":9.61028699079379,"hi":11.444763574190846,"balance_fp32":3.6358847055123653,"balance_int8":66.38922296835881},{"name":"DRAM","pj":121.96326904339003,"lo":116.78373792219676,"hi":129.03127724087838,"balance_fp32":42.21122801874759,"balance_int8":770.7534357335901},{"name":"TensorSend, fast local network","pj":0.665394148843291,"lo":0.6078181777138777,"hi":0.7271620720707025,"balance_fp32":0.23029149972334928,"balance_int8":4.204994096669708},{"name":"TensorSend inside a shire","pj":2.0823362424205736,"lo":1.9318894890082396,"hi":2.1634161161809655,"balance_fp32":0.7206921446919076,"balance_int8":13.15943583495817}],"xshire":{"pj":[11.873222478010108,17.770926223514287],"patterns":["xshire1","xshire16","xshire2","xshire4","xshire6","xshire8"],"hops":[1.625,4.6875],"balance_fp32":[4.109297047115894,6.150479769923461],"balance_int8":[75.03346778036818,112.30432367362097]},"random_tload":{"scp":{"pj":4.20830016351218,"balance_fp32":1.4564837361824776},"dram":{"pj":129.11098815172943,"balance_fp32":44.68503840004145}},"tload_by_operand":{"scp":{"zeros":2.009622392498886,"const":2.6316608438228957,"random":4.20830016351218},"dram":{"zeros":90.68452876689156,"const":98.99797084961995,"random":129.11098815172943}},"tload_by_operand_range":{"scp":{"zeros":[1.9695836636546027,2.058870877688955],"const":[2.557569778242958,2.702012523644092],"random":[4.011211253281648,4.3648026054421765]},"dram":{"zeros":[86.4324720365236,94.21771627789519],"const":[94.85826095516308,105.42375748831937],"random":[127.47836524875898,131.4641090431256]}},"awake_floor":{"w":[1.4601911764705875,2.103022791142749],"tensor_flop_per_s":9182776505873.02,"balance_drop":[0.09144391820135056,0.2854092618021087],"tensor_zeros_w":1.9186557688231671,"tensor_send_w":[1.4192660369938097,2.332560769223798],"tensor_send_floor_share":[0.6260034875560788,1.481767854881686]},"source":"docs/reports/data/2026-09-23-energy-manual/manual.json: tensor.bars, tensor.rows, awake, reruns, catalogue.combined, catalogue.cards"},"a100":{"peaks":{"fp32":19.5,"fp16":312,"int8":624,"tf32":156},"levels":[{"name":"Shared memory / L1","tbs":14.8,"tbs_peak":19.5,"ridge":{"fp32":1.3175675675675675,"fp16":21.08108108108108,"int8":42.16216216216216,"tf32":10.54054054054054}},{"name":"L2","tbs":4.4,"tbs_peak":7.2,"ridge":{"fp32":4.431818181818182,"fp16":70.9090909090909,"int8":141.8181818181818,"tf32":35.45454545454545}},{"name":"HBM2 (40 GB)","tbs":1.4,"tbs_peak":1.555,"ridge":{"fp32":13.928571428571429,"fp16":222.85714285714286,"int8":445.7142857142857,"tf32":111.42857142857143}}]}}</script>
 <script>
+/* The page's tables, text spans and charts, all from the ridge-data JSON above (written by scripts/ridge-points.py).
+   Charts use the shared chart toolkit CK (docs/reports/sources/chartkit.js, pasted in by scripts/paste-chartkit.py). */
 (function () {
   "use strict";
   var D = JSON.parse(document.getElementById("ridge-data").textContent);
-  var NS = "http://www.w3.org/2000/svg";
   var LV = {};
   (D.levels || []).forEach(function (l) { LV[l.key] = l; });
-  function el(name, attrs, parent) {
-    var e = document.createElementNS(NS, name);
-    for (var k in attrs) e.setAttribute(k, attrs[k]);
-    if (parent) parent.appendChild(e);
-    return e;
-  }
-  function txt(parent, x, y, s, cls, anchor, rot) {
-    var t = el("text", { x: x, y: y, "class": cls || "tick", "text-anchor": anchor || "start" }, parent);
-    if (rot) t.setAttribute("transform", "rotate(" + rot + " " + x + " " + y + ")");
-    t.textContent = s;
-    return t;
-  }
   function comma(n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
   function fr(x) {
     if (x === null || x === undefined) return "–";
@@ -340,7 +777,11 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
     if (x >= 1) return x.toFixed(1);
     return x.toFixed(2);
   }
+  // A range that is narrower than 3% prints as its upper end (as the clock table does).
+  function frr(v) { return Array.isArray(v) && Math.abs(v[1] - v[0]) / v[1] < 0.03 ? fr(v[1]) : fr(v); }
   function fbw(gbps, dec) { return gbps >= 1000 ? (gbps / 1000).toFixed(2) + " TB/s" : (dec !== undefined ? gbps.toFixed(dec) : gbps >= 100 ? comma(gbps) : gbps.toFixed(1)) + " GB/s"; }
+  // A bandwidth range in one unit: "87–156 GB/s", "0.98–1.18 TB/s".
+  function fbwr(lo, hi) { return hi >= 1000 ? (lo / 1000).toFixed(2) + "–" + fbw(hi) : Math.round(lo) + "–" + fbw(hi); }
   function fbpc(b) { return b >= 10 ? b.toFixed(1) : b >= 1 ? b.toFixed(2) : b.toFixed(3); }
   function row(tb, cells, cls) {
     var tr = document.createElement("tr");
@@ -349,17 +790,23 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
     tb.appendChild(tr);
   }
   function td(s, cls) { return "<td" + (cls ? " class='" + cls + "'" : "") + ">" + s + "</td>"; }
+  function put(id, s) { var e = document.getElementById(id); if (e) e.textContent = s; }
+  // Percent of peak: "100" only within 0.05% of it, one decimal below 10%.
+  function pct(v) { return v >= 0.9995 ? "100" : v < 0.01 ? CK.fmt.num(100 * v) : v < 0.095 ? CK.fmt.num(100 * v, 1) : String(Math.min(99, Math.round(100 * v))); }
+  var PRECS = ["fp32", "fp16", "int8"];
+  var PCOL = { fp32: "var(--c1)", fp16: "var(--c2)", int8: "var(--c3)" };
+  function opu(p) { return D.peaks[p].unit; }  // FLOP or OP
 
   function renderKpis() {
     var own = LV.scp.ridge.measured, l3 = LV.l3.ridge.measured, dr = LV.dram.ridge.measured, pc = LV.pcie.ridge.spec;
     document.getElementById("kpi-own").firstChild.nodeValue = fr(own.fp32) + " ";
-    document.getElementById("kpi-own-sub").textContent = "fp16 " + fr(own.fp16) + ", int8 " + fr(own.int8) + "; spec banks: " + fr(LV.scp.ridge.spec.fp32);
+    put("kpi-own-sub", "fp16 " + fr(own.fp16) + ", int8 " + fr(own.int8) + "; spec banks: " + fr(LV.scp.ridge.spec.fp32));
     document.getElementById("kpi-mesh").firstChild.nodeValue = fr(l3.fp32) + " ";
-    document.getElementById("kpi-mesh-sub").textContent = "fp16 " + fr(l3.fp16) + ", int8 " + fr(l3.int8) + "; about " + fbw(LV.l3.measured.gbps) + " over the mesh";
+    put("kpi-mesh-sub", "fp16 " + fr(l3.fp16) + ", int8 " + fr(l3.int8) + "; about " + fbw(LV.l3.measured.gbps) + " over the mesh");
     document.getElementById("kpi-dram").firstChild.nodeValue = fr(dr.fp32) + " ";
-    document.getElementById("kpi-dram-sub").textContent = "fp16 " + fr(dr.fp16) + ", int8 " + fr(dr.int8) + "; " + fbw(LV.dram.measured.gbps) + " measured";
+    put("kpi-dram-sub", "fp16 " + fr(dr.fp16) + ", int8 " + fr(dr.int8) + "; " + fbw(LV.dram.measured.gbps) + " measured");
     document.getElementById("kpi-pcie").firstChild.nodeValue = fr(pc.fp32) + " ";
-    document.getElementById("kpi-pcie-sub").textContent = "fp16 " + fr(pc.fp16) + ", int8 " + fr(pc.int8) + "; Gen4 x8, " + fbw(LV.pcie.spec.gbps, 2);
+    put("kpi-pcie-sub", "fp16 " + fr(pc.fp16) + ", int8 " + fr(pc.int8) + "; Gen4 x8, " + fbw(LV.pcie.spec.gbps, 2));
   }
 
   function renderPeaks() {
@@ -371,9 +818,9 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
       row(tb, [td(k[1], "lvl"), td(p.per_cycle + " " + u, "num"), td(p.chip_600.toFixed(2) + " T" + u + "/s", "num"),
                td(p.chip_design.toFixed(p.chip_design >= 100 ? 0 : 1) + " T" + u + "/s", "num"), td(meas, "num")]);
     });
+    CK.stackTable("tbl-peaks");
   }
 
-  var CLOCK = { minion: "no, same clock", noc: "partly (NoC at 400 MHz)", dram: "yes (fixed DDR clock)", pcie: "yes (fixed PCIe clock)" };
   function renderRidge() {
     var tb = document.getElementById("t-ridge"), ts = document.getElementById("t-spec"); tb.innerHTML = ""; ts.innerHTML = "";
     function specRidge(l) {
@@ -389,62 +836,63 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
       var t = fbpc(s.bpc) + " B/cycle · " + fbw(g, l.key === "pcie" ? 2 : undefined);
       if (s.assumed) t += "<br><span class='small'>assumes one beat per NoC cycle</span>";
       if (l.key === "dram") t += "<br><span class='small'>assumes 3,733 MT/s from the 933 MHz DDR clock</span>";
-      if (s.max_gbps) t += "<br><span class='small'>" + fbw(s.max_gbps, 1) + " at 4,266 MT/s (datasheet prints 133 GB/s)</span>";
+      if (s.max_gbps) t += "<br><span class='small'>" + fbw(s.max_gbps, 1) + " at 4,266 MT/s</span>";
       return t;
     }
     function measBw(m) {
       if (!m) return "not measured";
-      if (m.bpc_low) return fbpc(m.bpc_low) + "–" + fbpc(m.bpc) + " B/cycle · " + Math.round(m.gbps_low) + "–" + fbw(m.gbps);
-      return fbpc(m.bpc) + " B/cycle · " + fbw(m.gbps);
+      if (m.bpc_low) return fbpc(m.bpc_low) + "–" + fbpc(m.bpc) + " B/cycle<br>" + Math.round(m.gbps_low) + "–" + fbw(m.gbps);
+      return fbpc(m.bpc) + " B/cycle<br>" + fbw(m.gbps);
     }
     var groups = [["Memory: bytes fetched by TensorLoads", ["l2", "l2demo", "scp", "l3", "scp_remote", "dram", "pcie"]],
                   ["TensorSend: bytes one minion sends another", ["fln", "xbar", "xmesh"]]];
     groups.forEach(function (g) {
-      row(tb, ["<td colspan='6'>" + g[0] + "</td>"], "grp");
-      row(ts, ["<td colspan='4'>" + g[0] + "</td>"], "grp");
+      row(tb, ["<td colspan='5'>" + g[0] + "</td>"], "grp");
+      row(ts, ["<td colspan='3'>" + g[0] + "</td>"], "grp");
       g[1].forEach(function (key) {
         if (key === "l2demo") {
           var l = LV.l2, d = l.demonstrated, r = l.ridge.demonstrated;
-          row(tb, [td("same, all minions reading one shared 32 KB tile pool (int8 matmul loop)", "subrow"), td("", ""), td(measBw(d), "num"),
-                   td(fr(r.fp32), "num"), td(fr(r.fp16), "num"), td(fr(r.int8), "num")]);
+          row(tb, [td("same, all minions reading one shared 32 KB tile pool (int8 matmul loop)", "subrow"),
+                   td(fr(r.fp32), "num"), td(fr(r.fp16), "num"), td(fr(r.int8), "num"), td(measBw(d), "num")]);
           return;
         }
         var lv = LV[key], r = lv.ridge.measured;
-        row(tb, [td(lv.name, "lvl"), td(lv.size, ""), td(measBw(lv.measured), "num"),
-                 td(r ? fr(r.fp32) : "–", "num"), td(r ? fr(r.fp16) : "–", "num"), td(r ? fr(r.int8) : "–", "num")]);
-        row(ts, [td(lv.name, "lvl"), td(specBw(lv), "num"), td(specRidge(lv), "num"), td(CLOCK[lv.clock] || "", "")]);
+        row(tb, [td(lv.name + "<br><span class='small'>" + lv.size + "</span>", "lvl"),
+                 td(r ? fr(r.fp32) : "–", "num"), td(r ? fr(r.fp16) : "–", "num"), td(r ? fr(r.int8) : "–", "num"), td(measBw(lv.measured), "num")]);
+        row(ts, [td(lv.name, "lvl"), td(specBw(lv), "num"), td(specRidge(lv), "num")]);
       });
     });
+    CK.stackTable("tbl-spec");  // on phones each level becomes a card, so the spec ridges are not scrolled out of view
   }
 
-  function clockRidge(lv, mhz) {
-    var R = (lv.ridge.measured || lv.ridge.spec).fp32, f = mhz / D.clock_mhz;
+  // Ridge of a level at a minion clock of mhz, for one precision: the model of "Which ridge points move with the clock".
+  // Minion-clock levels hold; DRAM and PCIe grow with the clock; NoC levels span [rising as measured, fixed]. TensorSend
+  // between shires is NoC-bound and was not measured against clock: treated as fixed (elasticity 0).
+  function elastic(lv) { return lv.key === "xmesh" ? 0 : Math.min(1, Math.max(0, lv.clock_elasticity || 0)); }
+  function clockRidge(lv, mhz, prec) {
+    var R = (lv.ridge.measured || lv.ridge.spec)[prec || "fp32"], f = mhz / D.clock_mhz;
     if (lv.clock === "minion") return R;
-    if (lv.clock === "noc") {
-      var e = Math.min(1, Math.max(0, lv.clock_elasticity));
-      return [R * Math.pow(f, 1 - e), R * f];
-    }
+    if (lv.clock === "noc" && lv.key !== "xmesh") { var e = elastic(lv); return [R * Math.pow(f, 1 - e), R * f]; }
+    if (Array.isArray(R)) return [R[0] * f, R[1] * f];
     return R * f;
   }
   function renderClock() {
     var tb = document.getElementById("t-clock"); tb.innerHTML = "";
     [["scp", "Own shire: L2 or scratchpad"], ["l3", "L3"], ["scp_remote", "L2 scratchpad, other shire"], ["dram", "DRAM"], ["pcie", "Host memory over PCIe (spec)"]].forEach(function (k) {
       var lv = LV[k[0]];
-      row(tb, [td(k[1], "lvl")].concat([600, 800, 1000].map(function (m) {
-        var v = clockRidge(lv, m);
-        if (Array.isArray(v) && Math.abs(v[1] - v[0]) / v[1] < 0.03) v = v[1];
-        return td(fr(v), "num");
-      })));
+      row(tb, [td(k[1], "lvl")].concat([600, 800, 1000].map(function (m) { return td(frr(clockRidge(lv, m)), "num"); })));
     });
   }
 
   // Smallest batch b that is compute-bound. Weights of s bytes each give 2b/s operations per weight byte. In the own
   // shire every op also loads a fresh activation tile (one 16x16 C tile per minion), so intensity = 32b/(s(16 + b)).
-  function minBatch(key, ridge, s) {
-    if (key !== "scp") return comma(Math.ceil(ridge * s / 2 - 0.1));
+  function minBatchN(key, ridge, s) {
+    if (key !== "scp") return Math.ceil(ridge * s / 2 - 0.1);
     var sr = s * ridge;
-    return sr < 31.9 ? comma(Math.ceil(16 * sr / (32 - sr) - 0.1)) : "never";
+    return sr < 31.9 ? Math.ceil(16 * sr / (32 - sr) - 0.1) : null;
   }
+  function minBatch(key, ridge, s) { var n = minBatchN(key, ridge, s); return n === null ? "never" : comma(n); }
+  function ownShireI(n, s) { var b = Math.min(n, 16); return 32 * b / (s * (16 + b)); }
   function renderBatch() {
     var tb = document.getElementById("t-batch"); tb.innerHTML = "";
     [["scp", "Own shire (L2 or scratchpad)"], ["l3", "L3"], ["scp_remote", "Another shire's scratchpad"], ["dram", "DRAM"]].forEach(function (k) {
@@ -454,26 +902,50 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
   }
 
   function fpj(x) { return x >= 100 ? comma(x) : x >= 10 ? x.toFixed(1) : x.toFixed(2); }
+  var EMAP = { "L1 data cache": "l1d", "L2 scratchpad, own shire": "scp", "L2 cache": "l2", "L2 scratchpad, other shire": "scp_remote", "L3": "l3",
+               "DRAM": "dram", "TensorSend, fast local network": "fln", "TensorSend inside a shire": "xbar" };
+  function eByte(key) { return D.energy.e_byte.filter(function (e) { return EMAP[e.name] === key; })[0]; }
   function renderEnergy() {
     var tb = document.getElementById("t-energy"); tb.innerHTML = "";
-    var E = D.energy, F = E.e_flop, ef = F.fp32.pj;
-    function put(id, s) { var e = document.getElementById(id); if (e) e.textContent = s; }
+    var E = D.energy, F = E.e_flop, ef = F.fp32.pj, T = E.tload_by_operand;
     put("e-flop", ef.toFixed(2)); put("e-flop-lo", F.fp32.lo.toFixed(2)); put("e-flop-hi", F.fp32.hi.toFixed(2));
     put("e-int8", F.int8.pj.toFixed(3)); put("e-ones", F.fp32_ones.pj.toFixed(2)); put("e-zeros", F.fp32_zeros.pj.toFixed(2));
-    put("e-span", Math.round(ef / F.fp32_zeros.pj));
+    put("e-zeros2", F.fp32_zeros.pj.toFixed(2)); put("e-span", Math.round(ef / F.fp32_zeros.pj)); put("e-vec", F.vec32.pj.toFixed(2));
+    // L1: the catalogue's flw.ps loop (demonstrated; its energy is the L1 row) against the memory-hierarchy probe's loop (measured)
+    var l1 = LV.l1d, l1d = l1.demonstrated, l1m = l1.measured, eL1 = D.energy.e_byte.filter(function (e) { return e.vs; })[0];
+    put("l1-cyc", (32 / l1d.bpc).toFixed(1)); put("l1-bpc", Math.round(l1d.bpc)); put("l1-tbs", (l1d.gbps / 1000).toFixed(1));
+    put("l1-ridge", fr(l1.ridge.demonstrated.vec32)); put("l1-cyc-mh", (32 / l1m.bpc).toFixed(1)); put("l1-bpc-mh", Math.round(l1m.bpc));
+    put("e-l1-tbs", (l1d.gbps / 1000).toFixed(1)); put("e-l1-mh-tbs", (l1m.gbps / 1000).toFixed(1)); put("e-l1-mh-pj", eL1.probe_pj.toFixed(2));
+    put("v-l1-bpc", Math.round(l1d.bpc)); put("v-l1-ridge", fr(l1.ridge.demonstrated.vec32)); put("v-l1-bpc-mh", Math.round(l1m.bpc)); put("v-l1-ridge-mh", fr(l1.ridge.measured.vec32));
+    var A = E.awake_floor;
+    put("e-awake", A.w[0].toFixed(1) + "–" + A.w[1].toFixed(1));
+    put("e-awake-drop", Math.round(100 * A.balance_drop[0]) + "–" + Math.round(100 * A.balance_drop[1]));
     var R = E.random_tload;
-    put("e-rnd-scp", R.scp.pj.toFixed(2)); put("e-rnd-dram", Math.round(R.dram.pj)); put("e-rnd-scp-b", fr(R.scp.balance_fp32)); put("e-rnd-dram-b", fr(R.dram.balance_fp32));
-    put("e-rnd-l1", R.l1.pj.toFixed(2)); put("e-rnd-l1-b", fr(R.l1.balance_fp32));
-    var map = { "L2 scratchpad, own shire": "scp", "L2 cache": "l2", "L2 scratchpad, other shire": "scp_remote", "L3": "l3", "DRAM": "dram",
-                "TensorSend, fast local network": "fln", "TensorSend inside a shire": "xbar" };
+    put("e-rnd-scp", R.scp.pj.toFixed(2)); put("e-rnd-dram", Math.round(R.dram.pj));
+    put("e-rnd-scp-b", fr(R.scp.balance_fp32)); put("e-rnd-dram-b", fr(R.dram.balance_fp32));
+    put("e-rnd-scp-b2", fr(R.scp.balance_fp32)); put("e-rnd-dram-b2", fr(R.dram.balance_fp32));
+    put("e-scp-spec", fr(LV.scp.ridge.spec.fp32).replace(/\.0$/, ""));
+    put("e-dram-spec", fr(LV.dram.ridge.spec_max.fp32) + "–" + fr(LV.dram.ridge.spec.fp32));
+    var l3 = eByte("l3"), dram = eByte("dram");
+    put("e-spec-l3", fr(l3.balance_fp32)); put("e-spec-l3r", fr(LV.l3.ridge.spec.fp32));
+    put("e-ones-l3", fr(l3.pj / F.fp32_ones.pj)); put("e-l3r", fr(LV.l3.ridge.measured.fp32));
+    put("e-ones-dram", fr(dram.pj / F.fp32_ones.pj)); put("e-dramr", fr(LV.dram.ridge.measured.fp32));
+    put("e-zeros-dram", fr(T.dram.zeros / F.fp32_zeros.pj)); put("e-dramr2", fr(LV.dram.ridge.measured.fp32));
+    put("e-zeros-scp", fr(T.scp.zeros / F.fp32_zeros.pj)); put("e-scpr", fr(LV.scp.ridge.measured.fp32));
     E.e_byte.forEach(function (e) {
-      var lv = LV[map[e.name]];
-      row(tb, [td(e.name === "L1 data cache" ? "L1 data cache (vector loads)" : e.name, "lvl"), td(fpj(e.pj), "num"), td(fr(e.balance_fp32), "num"), td(fr(e.balance_int8), "num"),
+      var lv = LV[EMAP[e.name]];
+      if (e.vs) {  // L1: a vector load against the vector unit's fmadd.ps
+        row(tb, [td("L1 data cache (flw.ps, random data; against the vector unit's fmadd.ps)", "lvl"), td(fpj(e.pj), "num"), td(fr(e.balance_fp32), "num"),
+                 td("–", "num"), td(fr(lv.ridge.demonstrated.vec32) + " (vector)", "num")]);
+        return;
+      }
+      row(tb, [td(e.name, "lvl"), td(fpj(e.pj), "num"), td(fr(e.balance_fp32), "num"), td(fr(e.balance_int8), "num"),
                td(lv ? fr(lv.ridge.measured.fp32) : "–", "num")]);
     });
     var X = E.xshire;
     row(tb, [td("TensorSend between shires, " + X.hops[0].toFixed(1) + "–" + X.hops[1].toFixed(1) + " hops (mean per pattern)", "lvl"), td(fpj(X.pj[0]) + "–" + fpj(X.pj[1]), "num"),
              td(fr(X.balance_fp32), "num"), td(fr(X.balance_int8), "num"), td(fr(LV.xmesh.ridge.measured.fp32), "num")]);
+    CK.stackTable("tbl-energy");
   }
 
   function renderA100() {
@@ -483,113 +955,592 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
       row(tb, [td(k[1], "lvl"), td(fbw(lv.measured.gbps), "num"), td(fr(r.fp32), "num"), td(fr(r.fp16), "num"), td(fr(r.int8), "num")]);
       row(tb, [td("A100, " + a.name, "subrow"), td(a.tbs.toFixed(2) + " TB/s", "num"), td(fr(a.ridge.fp32), "num"), td(fr(a.ridge.fp16), "num"), td(fr(a.ridge.int8), "num")]);
     });
+    CK.stackTable("tbl-a100");
+    var hbm = D.a100.levels[2].ridge, et = LV.dram.ridge.measured;
+    put("a-hbm16", fr(hbm.fp16)); put("a-et16", fr(et.fp16)); put("a-int8x", (et.int8 / hbm.int8).toFixed(1));
+    put("a-fp32x", Math.round(et.fp32 / hbm.fp32)); put("a-et32", fr(et.fp32)); put("a-hbm32", fr(hbm.fp32));
+    put("a-tf32", D.a100.peaks.tf32); put("a-hbmtf", fr(hbm.tf32));
   }
 
   function renderText() {
     var L = D.limits;
-    document.getElementById("lim-l2").textContent = L.one_minion_l2_bpc.toFixed(1);
-    document.getElementById("lim-dram").textContent = L.one_minion_dram_bpc.toFixed(1);
-    document.getElementById("lim-n").textContent = Math.round(L.minions_to_saturate_dram);
-    document.getElementById("rerun-dev").textContent = (Math.ceil(1000 * L.rerun_max_deviation) / 10).toFixed(1);
-    document.getElementById("lim-floor").textContent = Math.round(L.tload_floor_cycles);
-    document.getElementById("lim-small").textContent = Math.round(L.tload_all_small_cycles);
-    document.getElementById("lim-1line").textContent = L.tload_all_1line_bpc.toFixed(1);
-    document.getElementById("lim-4line").textContent = L.tload_all_4line_bpc.toFixed(1);
-    document.getElementById("gemv-us").textContent = L.gemv_host_us.toFixed(1);
-    document.getElementById("gemv-tree-us").textContent = L.gemv_tree_us.toFixed(1);
-    document.getElementById("gemv-tree-tf").textContent = L.gemv_tree_tflops.toFixed(2);
-    document.getElementById("lim-launch").textContent = L.launch_overhead_ms_median.toFixed(2);
-    document.getElementById("lim-gflop").textContent = (L.launch_overhead_ms_median * 1e-3 * D.peaks.fp32.chip_600 * 1000).toFixed(1).replace(/\.0$/, "");
+    put("lim-l2", L.one_minion_l2_bpc.toFixed(1));
+    put("lim-dram", L.one_minion_dram_bpc.toFixed(1));
+    put("lim-n", Math.round(L.minions_to_saturate_dram));
+    put("rerun-dev", (Math.ceil(1000 * L.rerun_max_deviation) / 10).toFixed(1));
+    put("lim-floor", Math.round(L.tload_floor_cycles));
+    put("lim-small", Math.round(L.tload_all_small_cycles));
+    put("lim-1line", L.tload_all_1line_bpc.toFixed(1));
+    put("lim-4line", L.tload_all_4line_bpc.toFixed(1));
+    put("gemv-us", L.gemv_host_us.toFixed(1));
+    put("gemv-tree-us", L.gemv_tree_us.toFixed(1));
+    put("gemv-tree-tf", L.gemv_tree_tflops.toFixed(2));
+    put("lim-launch", L.launch_overhead_ms_median.toFixed(2));
+    put("lim-launch-range", L.launch_overhead_ms_range[0].toFixed(2) + "–" + L.launch_overhead_ms_range[1].toFixed(2));
+    put("lim-gflop", (L.launch_overhead_ms_median * 1e-3 * D.peaks.fp32.chip_600 * 1000).toFixed(1).replace(/\.0$/, ""));
     var g = D.kernels.filter(function (k) { return k.ai === 0.5; })[0];
-    if (g) document.getElementById("gemv-tf").textContent = g.t.toFixed(2);
+    if (g) put("gemv-tf", g.t.toFixed(2));
+    put("spar-l2", L.sparsity_l2_bpc.toFixed(1));
+    put("demo-bpc", LV.l2.demonstrated.bpc.toFixed(1)); put("demo-bpc2", LV.l2.demonstrated.bpc.toFixed(1));
+    var rr = LV.dram.measured.rerun.gbps;
+    put("dram-rerun", rr[0].toFixed(1) + "–" + rr[1].toFixed(1));
+    put("dram-card2", Math.round(LV.dram.measured.gbps_card2));
+    put("el-l3", LV.l3.clock_elasticity.toFixed(2)); put("el-rs", LV.scp_remote.clock_elasticity.toFixed(2));
+    var mean = function (o) { var v = Object.keys(o).map(function (k) { return o[k]; }); return v.reduce(function (a, b) { return a + b; }, 0) / v.length; };
+    var Wr = L.write_gbps;
+    put("w-scp", (mean(Wr.tstore_scp) / 1000).toFixed(2)); put("w-dram", Math.round(mean(Wr.tstore_dram))); put("w-st", Math.round(mean(Wr.st_stream_dram)));
+    put("mm-pct32", Math.round(100 * D.peaks.fp32.demo_per_cycle / D.peaks.fp32.per_cycle));
+    put("mm-pct8", Math.round(100 * D.peaks.int8.demo_per_cycle / D.peaks.int8.per_cycle));
+    var k8 = D.kernels.filter(function (k) { return k.prec === "int8"; })[0];
+    put("int8-own-t", Math.round(LV.scp.measured.gbps * k8.ai / 1000)); put("int8-ran", Math.round(k8.t));
+    put("reuse-scpmax", comma(Math.round(Math.sqrt(D.scp_bytes_chip / 4) / 10) * 10));
   }
 
-  function showTip(tip, host, html, x, y) {
-    tip.innerHTML = html;
-    tip.style.display = "block";
-    var left = x + 14;
-    if (left + tip.offsetWidth > host.clientWidth - 6) left = x - tip.offsetWidth - 14;
-    tip.style.left = Math.max(6, left) + "px";
-    tip.style.top = Math.max(6, y - tip.offsetHeight - 8) + "px";
+  /* ---------- V1: roofline explorer ---------- */
+  var ROOF_LEVELS = [
+    ["scp", "Own shire", "the own shire (L2 cache or scratchpad)", "own shire"],
+    ["l3", "L3", "L3", "L3"],
+    ["scp_remote", "Other shire", "another shire's scratchpad", "other shire"],
+    ["dram", "DRAM", "DRAM", "DRAM"],
+    ["pcie", "PCIe (spec)", "host memory over PCIe (spec)", "PCIe"],
+    ["fln", "TensorSend: pairs", "TensorSend between pairs (fast local network)", "pairs"],
+    ["xbar", "TensorSend: in shire", "TensorSend inside a shire", "in shire"],
+    ["xmesh", "TensorSend: between shires", "TensorSend between shires", "between shires"]
+  ];
+  var INT_STOPS = (function () {  // 0.1 ... 10,000 in nice steps, 10 per decade
+    var s = [], m = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8];
+    for (var d = -1; d <= 3; d++) m.forEach(function (x) { s.push(+(x * Math.pow(10, d)).toPrecision(3)); });
+    s.push(10000); return s;
+  })();
+  function nearestStop(stops, v, logscale) {
+    var best = stops[0], bd = Infinity;
+    stops.forEach(function (s) { var d = logscale ? Math.abs(Math.log(s) - Math.log(v)) : Math.abs(s - v); if (d < bd) { bd = d; best = s; } });
+    return best;
   }
+  function fT(v) { return v >= 100 ? CK.fmt.num(v, 0) : v >= 10 ? CK.fmt.num(v, 1) : v >= 0.1 ? CK.fmt.num(v, 2) : CK.fmt.num(v); }
+  function fX(v) { return CK.fmt.num(v, v >= 10 ? 0 : 1); }  // a factor, as in "6.5×"
+  function fI(v) { return CK.fmt.num(v); }
 
-  function renderRoof() {
-    var host = document.getElementById("c-roof"), tip = document.getElementById("c-roof-tip");
-    var old = host.querySelector("svg"); if (old) old.remove();
-    var W = Math.max(300, host.clientWidth), H = W < 560 ? 360 : 430;
-    var m = { l: 46, r: 12, t: 12, b: 44 }, pw = W - m.l - m.r, ph = H - m.t - m.b;
-    var X0 = -1, X1 = 4, Y0 = -2, Y1 = Math.log10(300);
-    function X(v) { return m.l + (Math.log10(v) - X0) / (X1 - X0) * pw; }
-    function Y(v) { return m.t + ph - (Math.log10(v) - Y0) / (Y1 - Y0) * ph; }
-    var svg = el("svg", { width: W, height: H, viewBox: "0 0 " + W + " " + H, role: "img",
-      "aria-label": "Roofline: fp32, fp16 and int8 tensor ceilings against the bandwidth of the own shire, other shires, DRAM and PCIe" });
-    [0.01, 0.1, 1, 10, 100].forEach(function (t) {
-      el("line", { x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t), "class": "grid-line" }, svg);
-      txt(svg, m.l - 6, Y(t) + 4, t >= 1 ? String(t) : String(t), "tick", "end");
-    });
-    var narrow = W < 560, xt = [0.1, 1, 10, 100, 1000, 10000];
-    xt.forEach(function (t, i) {
-      el("line", { x1: X(t), x2: X(t), y1: m.t, y2: m.t + ph, "class": "grid-line" }, svg);
-      txt(svg, X(t), m.t + ph + 17, t >= 1000 ? (narrow ? t / 1000 + "k" : comma(t)) : String(t), "tick", i === 0 ? "start" : i === xt.length - 1 ? "end" : "middle");
-    });
-    el("line", { x1: m.l, x2: W - m.r, y1: m.t + ph, y2: m.t + ph, "class": "axis-line" }, svg);
-    txt(svg, m.l + pw / 2, H - 6, "operations per byte fetched (log)", "lab", "middle");
-    txt(svg, m.l + 4, m.t + 12, "T operations / s", "lab", "start");
-    var P = D.peaks, ceil = [["fp32", "et", "fp32"], ["fp16", "et2", "fp16"], ["int8", "et3", "int8"]];
-    var top = P.int8.chip_600, pts = [];
-    var lines = [
-      { name: "own shire, spec banks", tbs: LV.scp.spec.bpc * D.minions * D.clock_mhz / 1e6, dash: true, key: "spec" },
-      { name: "own shire", tbs: LV.scp.measured.gbps / 1000, key: "scp", label: "own shire" + (narrow ? "" : " " + fbw(LV.scp.measured.gbps)) },
-      { name: "L3 or other shire", tbs: LV.l3.measured.gbps / 1000, key: "l3", label: "L3 / other shire" + (narrow ? "" : " " + fbw(LV.l3.measured.gbps)) },
-      { name: "DRAM", tbs: LV.dram.measured.gbps / 1000, key: "dram", label: "DRAM" + (narrow ? "" : " " + fbw(LV.dram.measured.gbps)) },
-      { name: "PCIe (spec)", tbs: LV.pcie.spec.gbps / 1000, dash: true, key: "pcie", label: "PCIe" + (narrow ? "" : " " + fbw(LV.pcie.spec.gbps, 2)) + " (spec)" }
-    ];
-    var ang = -Math.atan2(ph / (Y1 - Y0), pw / (X1 - X0)) * 180 / Math.PI;
-    lines.forEach(function (ln) {
-      var xa = Math.max(Math.pow(10, X0), Math.pow(10, Y0) / ln.tbs), xb = top / ln.tbs;
-      el("line", { x1: X(xa), y1: Y(ln.tbs * xa), x2: X(xb), y2: Y(top), "class": ln.dash ? "s-roof-dash" : "s-roof" }, svg);
-      if (ln.label) {
-        // Below the line, so no label crosses the next line up; lines that enter through the bottom edge get
-        // their label further up, clear of the axis.
-        var xl = xa * (ln.tbs * Math.pow(10, X0) < Math.pow(10, Y0) ? 3.5 : 1.25), yl = ln.tbs * xl;
-        txt(svg, X(xl) + 4, Y(yl) + 17, ln.label, "lab", "start", ang.toFixed(1));
-      }
-    });
-    ceil.forEach(function (c) {
-      var v = P[c[0]].chip_600;
-      el("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), "class": "s-" + c[1] }, svg);
-      var lg = c[2] + " tensor, " + (v >= 100 ? Math.round(v) : v.toFixed(1)) + (c[0] === "int8" ? " TOP/s" : " TFLOP/s");
-      document.getElementById("lg-" + c[0]).textContent = lg;
-      if (!narrow) txt(svg, m.l + 6, Y(v) - 6, lg, "lab", "start");
-      lines.forEach(function (ln) {
-        if (ln.key === "spec") return;
-        var x = v / ln.tbs, lv = LV[ln.key];
-        var r = (lv.ridge.measured || lv.ridge.spec)[c[0]];
-        el("circle", { cx: X(x), cy: Y(v), r: 4.5, "class": "d-" + c[1] }, svg);
-        pts.push({ x: X(x), y: Y(v), html: "<b>" + ln.name + " × " + c[2] + "</b><br>ridge " + fr(r) + (c[0] === "int8" ? " OP" : " FLOP") + " per byte" });
-        if (c[0] === "fp32") txt(svg, X(x), Y(v) + 17, fr(r), "lab-strong", "middle");
-      });
-    });
-    D.kernels.forEach(function (k) {
-      el("circle", { cx: X(k.ai), cy: Y(k.t), r: 6, "class": "k-mark" }, svg);
-      pts.push({ x: X(k.ai), y: Y(k.t), html: "<b>" + k.name + "</b><br>" + k.ai + (k.prec === "int8" ? " OP" : " FLOP") + " per byte from " + k.vs + "<br>" + (k.t >= 1 ? k.t.toFixed(2) : k.t.toFixed(3)) + (k.prec === "int8" ? " TOP/s" : " TFLOP/s") + " measured" });
-    });
-    var hit = el("rect", { x: m.l, y: m.t, width: pw, height: ph, fill: "transparent" }, svg);
-    function move(ev) {
-      var b = svg.getBoundingClientRect(), px = ev.clientX - b.left, py = ev.clientY - b.top, best = null, bd = 1e9;
-      pts.forEach(function (p) { var d = Math.hypot(p.x - px, p.y - py); if (d < bd) { bd = d; best = p; } });
-      if (best && bd < 40) showTip(tip, host, best.html, best.x, best.y); else tip.style.display = "none";
+  function roofline() {
+    var st = { prec: "fp32", level: "dram", I: 20, mhz: 600, spec: false };
+    var name = {}, shortName = {};
+    ROOF_LEVELS.forEach(function (l) { name[l[0]] = l[2]; shortName[l[0]] = l[3]; });
+    function f() { return st.mhz / D.clock_mhz; }
+    function ceilT(p) { return D.peaks[p].chip_600 * f(); }          // T ops/s at the clock
+    function bw(key) {                                             // GB/s at the clock, [lo, hi]
+      var lv = LV[key], m = lv.measured, F = f();
+      var b = key === "pcie" ? [lv.spec.gbps, lv.spec.gbps] : key === "xmesh" ? [m.gbps_low, m.gbps] : [m.gbps, m.gbps];
+      if (lv.clock === "minion") return [b[0] * F, b[1] * F];
+      if (lv.clock === "noc" && key !== "xmesh") return [b[0], b[1] * Math.pow(F, elastic(lv))];
+      return b;
     }
-    hit.addEventListener("pointermove", move);
-    hit.addEventListener("pointerdown", move);
-    hit.addEventListener("pointerleave", function () { tip.style.display = "none"; });
-    host.insertBefore(svg, tip);
+    function ridgeAt(key, p) { var b = bw(key), c = ceilT(p) * 1000; return [c / b[1], c / b[0]]; }
+    function attain(key, p, I) { var b = bw(key), c = ceilT(p); return [Math.min(c, b[0] * I / 1000), Math.min(c, b[1] * I / 1000)]; }
+    function one(v) { return Math.abs(v[1] - v[0]) / v[1] < 0.03; }
+
+    var prec = CK.seg("roof-prec", { label: "Precision", options: PRECS.map(function (p) { return [p, p]; }), value: st.prec,
+      onChange: function (v) { st.prec = v; update(); } });
+    CK.seg("roof-clock", { label: "Minion clock, MHz", options: [[600, "600"], [700, "700"], [800, "800 (firmware top)"], [1000, "1,000 (design)"]], value: st.mhz,
+      onChange: function (v) { st.mhz = v; update(); } });
+    CK.seg("roof-level", { label: "Data from", options: ROOF_LEVELS.map(function (l) { return [l[0], l[1]]; }), value: st.level,
+      onChange: function (v) { st.level = v; update(); } });
+    var slider = CK.range("roof-int", { label: "Operations per byte fetched", stops: INT_STOPS, value: st.I,
+      fmt: function (v) { return fI(v) + " " + opu(st.prec) + "/B"; }, onInput: function (v) { st.I = v; update(); } });
+    var specBtn = document.getElementById("roof-spec");
+    specBtn.addEventListener("click", function () { st.spec = !st.spec; specBtn.setAttribute("aria-pressed", String(st.spec)); fr_.redraw(); });
+    var legendHost = document.getElementById("roof-legend");
+    var readout = CK.readout("roof-readout");
+    void prec;
+
+    function legend() {
+      var items = PRECS.map(function (p) {
+        return { key: p, mark: "line", color: PCOL[p], label: p + " ceiling " + fT(ceilT(p)) + " T" + opu(p) + "/s" };
+      }).concat([{ key: "bw", mark: "line", color: "var(--ink-2)", label: "bandwidth, measured" },
+                 { key: "sp", mark: "dash", color: "var(--ref)", label: "spec" },
+                 { key: "rg", mark: "dot", color: PCOL[st.prec], label: "ridge point" },
+                 { key: "k", mark: "ring", color: "var(--ink)", label: "measured kernel (600 MHz)" }]);
+      CK.legend(legendHost, items);
+    }
+
+    function say() {
+      var p = st.prec, key = st.level, I = st.I, u = opu(p), c = ceilT(p), a = attain(key, p, I), r = ridgeAt(key, p);
+      var where = key === "scp" ? "the own shire" : name[key];
+      var clk = st.mhz !== D.clock_mhz ? " at " + CK.fmt.num(st.mhz) + " MHz" : "";
+      var rtxt = one(r) ? fr(r[1]) : fr(r);
+      var s = "At " + fI(I) + " " + u + "/B from " + where + clk + ", " + p + " ";
+      if (a[0] >= c * 0.9999) {
+        var past = [I / r[1], I / r[0]];
+        s += "runs at its peak, " + fT(c) + " T" + u + "/s: compute-bound, " + (one(past) ? fX(past[0]) : fX(past[0]) + "–" + fX(past[1])) + "× past its ridge (" + rtxt + " " + u + "/B).";
+      } else {
+        var at = one(a) ? fT(a[1]) : fT(a[0]) + "–" + fT(a[1]), pc = [pct(a[0] / c), pct(a[1] / c)];  // strings
+        var need = [r[0] / I, r[1] / I];
+        s += "runs at most " + at + " T" + u + "/s, " + (pc[0] === pc[1] ? pc[0] : pc[0] + "–" + pc[1]) + "% of peak; " +
+             (a[1] >= c * 0.9999 ? "up to " + fX(need[1]) : one(need) ? fX(need[1]) : fX(need[0]) + "–" + fX(need[1])) +
+             "× more reuse needed to reach its ridge (" + rtxt + " " + u + "/B).";
+      }
+      if (key === "scp") {
+        var caps = PRECS.map(function (q) { return fr(ownShireI(16, D.peaks[q].bytes)).replace(/\.0$/, ""); }).join("/");
+        var never = PRECS.filter(function (q) { return ownShireI(16, D.peaks[q].bytes) < LV.scp.ridge.measured[q] * 0.98; });
+        s += " Own shire: private tiles top out at " + caps + " per byte at batch 16" +
+             (never.length ? "; " + never.join(" and ") + " cannot reach its ridge without cooperative loads" : "") + ".";
+      }
+      if (key === "xmesh") s += " TensorSend between shires spans six shire-to-shire patterns; NoC-bound, not measured against clock.";
+      if ((key === "l3" || key === "scp_remote") && st.mhz !== D.clock_mhz) s += " The range is the NoC wedge: bandwidth rising with the clock as measured up to about 740 MHz, or fixed.";
+      if (key === "pcie") s += " PCIe is the spec rate; host transfers have not been timed.";
+      readout.set(s);
+    }
+
+    var fr_ = CK.frame("c-roof", { height: function (W) { return W < 600 ? 360 : 430; }, minW: 300,
+      label: "Roofline: tensor ceilings against the bandwidth of each level; the selected level drawn as its roof",
+      draw: draw });
+    function draw(F) {
+      var W = F.W, H = F.H, narrow = F.narrow, g = F.svg;
+      var L = 46, R = narrow ? 12 : 24, T = 22, B = 38;
+      var x = CK.log(0.1, 10000, L, W - R), y = CK.log(0.01, 300, H - B, T);
+      var X0 = 0.1, X1 = 10000, Y0 = 0.01, Y1 = 300;
+      CK.axes(F, { x: x, y: y, L: L, R: R, T: T, B: B, xt: [0.1, 1, 10, 100, 1000, 10000], yt: [0.01, 0.1, 1, 10, 100],
+        xfmt: function (t) { return t >= 1000 ? (narrow ? t / 1000 + "k" : CK.fmt.num(t)) : String(t); },
+        yfmt: function (t) { return String(t); },
+        xl: "operations per byte fetched (log)", yl: "T operations/s (log)" });
+      [0.1, 1, 10, 100, 1000, 10000].forEach(function (t) { CK.el("line", { x1: x(t), x2: x(t), y1: T, y2: H - B, "class": "grid-line" }, g); });
+      var p = st.prec, top = ceilT(p), boxes = [];
+      // Label boxes placed so far; a label that would overlap one is skipped. Ridge numbers may sit over a kernel ring.
+      // Level names along the diagonals leave their boxes too (kind "diag"): ring labels avoid them, ridge numbers do not.
+      function box(b, overRings) { for (var i = 0; i < boxes.length; i++) { var o = boxes[i]; if (overRings && (o.ring || o.kind === "diag")) continue; if (b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0) return false; } boxes.push(b); return true; }
+      function tw(s, px) { return s.length * (px || 12) * 0.56; }
+      // A diagonal of bandwidth b (GB/s) from the plot's lower-left edge up to the ceiling c (T/s).
+      function diag(b, c) {
+        var bt = b / 1000, xa = Math.max(X0, Y0 / bt), xb = c / bt;
+        return [[xa, bt * xa], [Math.min(xb, X1), Math.min(c, bt * X1)]];
+      }
+      var layer = CK.el("g", {}, g); layer.style.pointerEvents = "none";
+      D.kernels.forEach(function (k) { boxes.push({ x0: x(k.ai) - 7, x1: x(k.ai) + 7, y0: y(k.t) - 7, y1: y(k.t) + 7, ring: true }); });
+      // ceilings
+      PRECS.forEach(function (q) {
+        var v = ceilT(q), sel = q === p;
+        var ln = CK.el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v) }, layer);
+        ln.style.stroke = PCOL[q]; ln.style.strokeWidth = sel ? "2" : "1.5"; ln.style.opacity = sel ? "1" : "0.35";
+        var lab = q + (narrow ? "" : " " + fT(v) + " T" + opu(q) + "/s");
+        CK.txt(layer, L + 6, y(v) - 5, lab, sel ? "lab-strong halo" : "lab halo", "start");
+        box({ x0: L + 4, x1: L + 8 + tw(lab), y0: y(v) - 17, y1: y(v) - 3 });
+      });
+      // spec overlay
+      var specLabs = [];
+      if (st.spec) {
+        var S = [["banks, spec", LV.scp.spec.bpc * D.minions * st.mhz / 1000], ["mesh, spec (assumed)", LV.l3.spec.gbps],
+                 ["DRAM spec " + CK.fmt.num(LV.dram.spec.gbps, 0), LV.dram.spec.gbps], ["DRAM max " + CK.fmt.num(LV.dram.spec.max_gbps, 1), LV.dram.spec.max_gbps]];
+        S.forEach(function (s, i) {
+          var d = diag(s[1], top);
+          var ln = CK.el("line", { x1: x(d[0][0]), y1: y(d[0][1]), x2: x(d[1][0]), y2: y(d[1][1]) }, layer);
+          ln.style.stroke = "var(--ref)"; ln.style.strokeWidth = "1.5"; ln.style.strokeDasharray = "5 4";
+          specLabs.push({ b: s[1], lab: s[0] });
+          void i;
+        });
+      }
+      // level lines (thin), wedges and bands; the selected level last, as its bent roof
+      var ang = Math.atan2(y(10) - y(1), x(10) - x(1)) * 180 / Math.PI;
+      var order = ROOF_LEVELS.map(function (l) { return l[0]; }).filter(function (k) { return k !== st.level; }).concat([st.level]);
+      order.forEach(function (key) {
+        var b = bw(key), sel = key === st.level, dash = key === "pcie";
+        var col = sel ? PCOL[p] : "var(--ink-2)";
+        var d0 = diag(b[0], top), d1 = diag(b[1], top);
+        if (!one(b)) {  // wedge (NoC at another clock) or band (TensorSend between shires)
+          var poly = [d0[0], d0[1], d1[1], d1[0]].map(function (q) { return x(q[0]).toFixed(1) + "," + y(q[1]).toFixed(1); }).join(" ");
+          var pg = CK.el("polygon", { points: poly }, layer);
+          pg.style.fill = sel ? PCOL[p] : "var(--ink-2)"; pg.style.opacity = sel ? "0.18" : "0.08"; pg.style.stroke = "none";
+        }
+        (one(b) ? [d1] : [d0, d1]).forEach(function (d) {
+          var pts = [d[0], d[1]];
+          if (sel && d[1][0] < X1) pts.push([X1, top]);
+          var pl = CK.el("polyline", { points: pts.map(function (q) { return x(q[0]).toFixed(1) + "," + y(q[1]).toFixed(1); }).join(" ") }, layer);
+          pl.style.fill = "none"; pl.style.stroke = col; pl.style.strokeWidth = sel ? "2.5" : "1"; pl.style.opacity = sel ? "1" : "0.55";
+          pl.style.strokeLinejoin = "round";
+          if (dash) pl.style.strokeDasharray = sel ? "7 4" : "4 4";
+        });
+      });
+      // level names along their diagonals, below the line, placed without overlap (selected level first)
+      var labOrder = [st.level].concat(["scp", "l3", "dram", "pcie", "xmesh", "fln", "xbar", "scp_remote"].filter(function (k) { return k !== st.level; }));
+      var placed = [];  // in the rotated frame: [u0, u1, v]
+      var rad = ang * Math.PI / 180, cs = Math.cos(rad), sn = Math.sin(rad);
+      var items = labOrder.map(function (key) {
+        var b = bw(key), sel = key === st.level;
+        return { b: one(b) ? b[1] : b[0], sel: sel, lab: shortName[key] + (sel && !narrow ? " " + (one(b) ? fbw(b[1]) : fbwr(b[0], b[1])) : "") };
+      });
+      items = items.slice(0, 1).concat(specLabs, items.slice(1));
+      items.forEach(function (it) {
+        var sel = it.sel, bb = it.b, lab = it.lab;
+        var d = diag(bb, top), px0 = x(d[0][0]), py0 = y(d[0][1]), px1 = x(d[1][0]), py1 = y(d[1][1]);
+        var len = Math.hypot(px1 - px0, py1 - py0), w = tw(lab, sel ? 12 : 11) + 4;
+        var v = (px0 * -sn + py0 * cs);  // perpendicular coordinate of the line
+        for (var u = 14; u + w < len - 16; u += 18) {
+          var ua = px0 * cs + py0 * sn + u, ok = true;
+          for (var i = 0; i < placed.length; i++) { var o = placed[i]; if (ua < o[1] + 14 && ua + w + 14 > o[0] && Math.abs(v - o[2]) < 13) { ok = false; break; } }
+          if (!ok) continue;
+          var tx = px0 + u * cs - 15 * sn, ty = py0 + u * sn + 15 * cs;  // baseline 15 px below the line
+          var ax = { x0: Math.min(tx, tx + w * cs) - 2, x1: Math.max(tx, tx + w * cs) + 2, y0: Math.min(ty - 11, ty + w * sn - 11), y1: Math.max(ty, ty + w * sn) };
+          var clash = boxes.some(function (o) { return ax.x0 < o.x1 && ax.x1 > o.x0 && ax.y0 < o.y1 && ax.y1 > o.y0 && o.kind !== "diag"; });
+          if (clash || ty > H - B - 2) continue;
+          var t = CK.txt(layer, tx, ty, lab, sel ? "lab-strong halo" : "lab-small halo", "start");
+          t.setAttribute("transform", "rotate(" + ang.toFixed(1) + " " + tx.toFixed(1) + " " + ty.toFixed(1) + ")");
+          placed.push([ua, ua + w, v]);
+          boxes.push({ x0: ax.x0, x1: ax.x1, y0: ax.y0, y1: ax.y1, kind: "diag" });
+          break;
+        }
+      });
+      // ridge points on the selected ceiling
+      var dots = [], rlab = [st.level].concat(["scp", "l3", "dram", "pcie"].filter(function (k) { return k !== st.level; }));
+      var ridges = ROOF_LEVELS.map(function (l) { return { key: l[0], r: ridgeAt(l[0], p) }; }).sort(function (a, b) { return a.r[0] - b.r[0]; });
+      ridges.forEach(function (o) {
+        var key = o.key, r = o.r, sel = key === st.level, gg = CK.el("g", {}, g), cy = y(top);
+        CK.el("rect", { x: x(Math.min(r[0], X1)) - 12, y: cy - 12, width: Math.max(24, x(Math.min(r[1], X1)) - x(Math.min(r[0], X1)) + 24), height: 24, "class": "ck-hit" }, gg);
+        if (!one(r)) {
+          var cap = CK.el("line", { x1: x(Math.min(r[0], X1)), x2: x(Math.min(r[1], X1)), y1: cy, y2: cy }, gg);
+          cap.style.stroke = PCOL[p]; cap.style.strokeWidth = sel ? "7" : "5"; cap.style.strokeLinecap = "round";
+        }
+        [r[0], r[1]].filter(function (v, i) { return i === 0 || !one(r); }).forEach(function (v) {
+          var c = CK.el("circle", { cx: x(Math.min(v, X1)), cy: cy, r: sel ? 5.5 : 4 }, gg);
+          c.style.fill = PCOL[p]; c.style.stroke = sel ? "var(--ink)" : "var(--surface)"; c.style.strokeWidth = sel ? "1.5" : "2";
+        });
+        var b = bw(key), u = opu(p);
+        var html = "<b>" + name[key].charAt(0).toUpperCase() + name[key].slice(1) + " × " + p + "</b><br>ridge " + (one(r) ? fr(r[1]) : fr(r)) + " " + u + " per byte at " + CK.fmt.num(st.mhz) + " MHz<br>" +
+          (one(b) ? fbw(b[1], key === "pcie" ? 2 : undefined) : fbwr(b[0], b[1])) + (key === "pcie" ? " (spec, not measured)" : st.mhz === D.clock_mhz ? " measured" : " at this clock (model)") +
+          (key === "xmesh" ? "<br>six shire-to-shire patterns; NoC-bound, not measured against clock" : "") +
+          ((key === "l3" || key === "scp_remote") && st.mhz !== D.clock_mhz ? "<br>range: bandwidth rising with the clock as measured, or fixed" : "");
+        CK.tip(F, gg, html);
+        dots.push(gg);
+        if (rlab.indexOf(key) >= 0) {
+          var s = one(r) ? fr(r[1]) : fr(r), mx = (x(Math.min(r[0], X1)) + x(Math.min(r[1], X1))) / 2, w = tw(s);
+          var bx = { x0: mx - w / 2 - 2, x1: mx + w / 2 + 2, y0: cy - 20, y1: cy - 6 };
+          if (box(bx, true)) CK.txt(g, mx, cy - 8, s, "lab-strong halo", "middle");
+        }
+      });
+      CK.keynav(F, dots);
+      // measured kernels (600 MHz)
+      var rings = [], short = ["fp32, L2", "fp16, L2", "int8, L2", "fp32, DRAM", "batch-1"];
+      D.kernels.forEach(function (k, i) {
+        var gg = CK.el("g", {}, g), kx = x(k.ai), ky = y(k.t);
+        CK.el("circle", { cx: kx, cy: ky, r: 12, "class": "ck-hit" }, gg);
+        var c = CK.el("circle", { cx: kx, cy: ky, r: 6 }, gg);
+        c.style.fill = "transparent"; c.style.stroke = "var(--ink)"; c.style.strokeWidth = "1.75";
+        var u = k.prec === "int8" ? "OP" : "FLOP";
+        CK.tip(F, gg, "<b>" + k.name + "</b><br>" + k.ai + " " + u + " per byte from " + k.vs + "<br>" + (k.t >= 1 ? k.t.toFixed(2) : k.t.toFixed(3)) + " T" + u + "/s measured at 600 MHz");
+        rings.push(gg);
+        if (W >= 560) {  // below right of the ring; if that is taken, above left, above right, below left
+          var lab = short[i] || "", lw = tw(lab, 11);
+          [[10, 17, "start"], [-10, -9, "end"], [10, -9, "start"], [-10, 17, "end"]].some(function (o) {
+            var tx = kx + o[0], ty = ky + o[1], x0 = o[2] === "end" ? tx - lw : tx;
+            if (x0 < L || ty - 11 < T || !box({ x0: x0 - 1, x1: x0 + lw + 1, y0: ty - 11, y1: ty + 2 })) return false;
+            CK.txt(g, tx, ty, lab, "lab-small halo", o[2]);
+            return true;
+          });
+        }
+      });
+      CK.keynav(F, rings);
+      // intensity cursor and the attainable speed on the selected roof
+      var a = attain(st.level, p, st.I), cx = x(st.I);
+      var cl = CK.el("line", { x1: cx, x2: cx, y1: T, y2: H - B }, g);
+      cl.style.stroke = "var(--ink)"; cl.style.strokeWidth = "1"; cl.style.opacity = "0.5"; cl.setAttribute("aria-hidden", "true");
+      (one(a) ? [a[1]] : a).forEach(function (v) {
+        var m = CK.el("circle", { cx: cx, cy: y(v), r: 4.5, "aria-hidden": "true" }, g);
+        m.style.fill = "var(--ink)"; m.style.stroke = "var(--page)"; m.style.strokeWidth = "2";
+      });
+      // click or drag on the plot moves the intensity cursor
+      var hit = CK.el("rect", { x: L, y: T, width: W - L - R, height: H - T - B, "class": "ck-hit", "aria-hidden": "true" }, g);
+      g.insertBefore(hit, layer);
+      function setFrom(ev) { var bb = g.getBoundingClientRect(); var v = nearestStop(INT_STOPS, x.inv(ev.clientX - bb.left), true); if (v !== st.I) slider.set(v); }
+      hit.addEventListener("pointerdown", function (ev) { setFrom(ev); hit.setPointerCapture && hit.setPointerCapture(ev.pointerId); });
+      hit.addEventListener("pointermove", function (ev) { if (ev.buttons) setFrom(ev); });
+    }
+    function update() { legend(); fr_.redraw(); say(); }
+    legend(); say();
   }
 
-  function renderAll() { renderKpis(); renderPeaks(); renderRidge(); renderClock(); renderBatch(); renderEnergy(); renderA100(); renderText(); renderRoof(); }
+  /* ---------- V2: energy balance against the time ridge ---------- */
+  function energyChart() {
+    var st = { op: "random", ridge: "measured" };
+    var E = D.energy, T = E.tload_by_operand, TR = E.tload_by_operand_range;
+    var OPS = { random: ["fp32", "random-normal", "random"], ones: ["fp32_ones", "all-ones", "const"], zeros: ["fp32_zeros", "zeros", "zeros"] };
+    var ROWS = [["scp", "L2 scratchpad, own shire", "own scratchpad"], ["l2", "L2 cache, own shire", "L2 cache"],
+                ["scp_remote", "L2 scratchpad, other shire", "other shire"], ["l3", "L3", "L3"], ["dram", "DRAM", "DRAM"],
+                ["fln", "TensorSend, fast local network", "TensorSend pairs"], ["xbar", "TensorSend inside a shire", "TensorSend in shire"],
+                ["xmesh", "TensorSend between shires", "TensorSend between shires"]];
+    var MEM = ["scp", "l2", "scp_remote", "l3", "dram"];
+    var MATCH = { scp: "scp", dram: "dram" };
+    CK.seg("eb-op", { label: "Operands", options: [["random", "random-normal"], ["ones", "all-ones"], ["zeros", "zeros"]], value: st.op,
+      onChange: function (v) { st.op = v; F.redraw(); say(); } });
+    CK.seg("eb-ridge", { label: "Time ridge", options: [["measured", "measured"], ["spec", "spec"]], value: st.ridge,
+      onChange: function (v) { st.ridge = v; F.redraw(); say(); } });
+    var readout = CK.readout("eb-readout");
+
+    function rowData(key) {
+      var fl = E.e_flop[OPS[st.op][0]], o = OPS[st.op][2], lv = LV[key];
+      var unset = key === "xmesh" ? { pj: E.xshire.pj[0], pj1: E.xshire.pj[1], lo: E.xshire.pj[0], hi: E.xshire.pj[1] } : eByte(key);
+      var bu = key === "xmesh" ? [unset.pj / fl.pj, unset.pj1 / fl.pj] : [unset.pj / fl.pj, unset.pj / fl.pj];
+      var bur = [unset.lo / fl.hi, unset.hi / fl.lo];
+      var bm = null, bmr = null, pjm = null;
+      if (MATCH[key]) { pjm = T[MATCH[key]][o]; bm = [pjm / fl.pj, pjm / fl.pj]; bmr = [TR[MATCH[key]][o][0] / fl.hi, TR[MATCH[key]][o][1] / fl.lo]; }
+      var rr = st.ridge === "spec" ? (lv.ridge.spec ? lv.ridge.spec.fp32 : null) : lv.ridge.measured.fp32;
+      var ridge = rr === null ? null : Array.isArray(rr) ? rr : [rr, rr];
+      var prim = bm || bu;
+      var verdict = ridge === null ? "none" : prim[0] > ridge[1] ? "data" : prim[1] < ridge[0] ? "arith" : "overlap";
+      return { key: key, fl: fl, unset: unset, bu: bu, bur: bur, bm: bm, bmr: bmr, pjm: pjm, ridge: ridge, prim: prim, verdict: verdict };
+    }
+    function v1(a) { return a[0] === a[1] ? fr(a[0]) : fr(a); }
+
+    var F = CK.frame("c-ebal", { minW: 300, label: "Energy balance point against time ridge, one row per level",
+      height: function (W) { return (W < 600 ? 22 + ROWS.length * 46 + 34 : 16 + ROWS.length * 32 + 38); }, draw: draw });
+    function draw(F) {
+      var W = F.W, narrow = F.narrow, g = F.svg;
+      var L = narrow ? 8 : 200, R = narrow ? 44 : 56, T = narrow ? 22 : 16, rh = narrow ? 46 : 32, B = narrow ? 34 : 38;
+      var H = T + ROWS.length * rh + B;
+      var x = CK.log(0.1, 1000, L, W - R);
+      CK.axes(F, { x: x, y: CK.lin(0, 1, H - B, T), L: L, R: R, T: T, B: B, yt: [], grid: false,
+        xt: [0.1, 1, 10, 100, 1000], xfmt: function (t) { return CK.fmt.num(t); }, xl: "FLOP per byte (log)" });
+      [0.1, 1, 10, 100, 1000].forEach(function (t) { CK.el("line", { x1: x(t), x2: x(t), y1: T - 6, y2: H - B, "class": "grid-line" }, g); });
+      var nodes = [];
+      ROWS.forEach(function (rw, i) {
+        var d = rowData(rw[0]), top = T + i * rh, cy = top + (narrow ? 30 : rh / 2), gg = CK.el("g", {}, g);
+        CK.el("rect", { x: 0, y: top, width: W, height: rh, "class": "ck-hit" }, gg);
+        if (narrow) CK.txt(gg, L, top + 13, rw[2], "lab", "start");
+        else CK.txt(gg, L - 10, cy + 4, rw[1], "lab", "end");
+        var cx = function (v) { return x(Math.max(0.1, Math.min(1000, v))); };
+        // whisker: the range over the measurements of the primary balance point
+        var wr = d.bm ? d.bmr : d.bur, wl = CK.el("line", { x1: cx(wr[0]), x2: cx(wr[1]), y1: cy, y2: cy }, gg);
+        wl.style.stroke = "var(--ink-2)"; wl.style.strokeWidth = "1";
+        [wr[0], wr[1]].forEach(function (v) { var t = CK.el("line", { x1: cx(v), x2: cx(v), y1: cy - 4, y2: cy + 4 }, gg); t.style.stroke = "var(--ink-2)"; t.style.strokeWidth = "1"; });
+        // bar from the balance point to the time ridge
+        if (d.ridge) {
+          var pm = Math.sqrt(d.prim[0] * d.prim[1]), rm = Math.sqrt(d.ridge[0] * d.ridge[1]);
+          var bar = CK.el("line", { x1: cx(pm), x2: cx(rm), y1: cy, y2: cy }, gg);
+          bar.style.stroke = d.verdict === "data" ? "var(--c2)" : d.verdict === "arith" ? "var(--c1)" : "var(--ref)";
+          bar.style.strokeWidth = "4"; bar.style.opacity = "0.85"; bar.style.strokeLinecap = "butt";
+          // diamond (range: two diamonds joined)
+          if (d.ridge[0] !== d.ridge[1]) { var rl = CK.el("line", { x1: cx(d.ridge[0]), x2: cx(d.ridge[1]), y1: cy, y2: cy }, gg); rl.style.stroke = "var(--ref)"; rl.style.strokeWidth = "7"; rl.style.opacity = "0.6"; }
+          (d.ridge[0] === d.ridge[1] ? [d.ridge[0]] : d.ridge).forEach(function (v) {
+            var px = cx(v), dm = CK.el("polygon", { points: [px, cy - 7, px + 7, cy, px, cy + 7, px - 7, cy].join(" ") }, gg);
+            dm.style.fill = "var(--ref)"; dm.style.stroke = "var(--surface)"; dm.style.strokeWidth = "1.5";
+          });
+        } else {
+          CK.txt(gg, W - R + 4, cy + 4, "no spec", "lab-small", "start");
+        }
+        // circles: hollow = byte energy on unset buffers (section 4.2/5), filled = on the same operands (section 4.1)
+        (d.bu[0] === d.bu[1] ? [d.bu[0]] : d.bu).forEach(function (v) {
+          var c = CK.el("circle", { cx: cx(v), cy: cy, r: 5 }, gg); c.style.fill = "var(--page)"; c.style.stroke = "var(--ink)"; c.style.strokeWidth = "1.75";
+        });
+        if (d.bu[0] !== d.bu[1]) { var cl = CK.el("line", { x1: cx(d.bu[0]) + 5, x2: cx(d.bu[1]) - 5, y1: cy, y2: cy }, gg); cl.style.stroke = "var(--ink)"; cl.style.strokeWidth = "1.75"; }
+        if (d.bm) { var cm = CK.el("circle", { cx: cx(d.bm[0]), cy: cy, r: 5.5 }, gg); cm.style.fill = "var(--ink)"; cm.style.stroke = "var(--page)"; cm.style.strokeWidth = "1.5"; }
+        if (d.verdict === "data") CK.txt(gg, W - R + 4, cy + 4, "flips", "lab-strong", "start");
+        var html = "<b>" + rw[1] + "</b>, " + OPS[st.op][1] + " operands<br>fp32 tensor " + d.fl.pj.toFixed(2) + " pJ per FLOP<br>" +
+          (d.bm ? "same operands (§4.1): " + fpj(d.pjm) + " pJ/B, balance " + fr(d.bm[0]) + "<br>" : "") +
+          (rw[0] === "xmesh" ? "" : "") + "unset buffers (§" + (rw[0].charAt(0) === "x" || rw[0] === "fln" ? "5" : "4.2") + "): " +
+          (rw[0] === "xmesh" ? fpj(d.unset.pj) + "–" + fpj(d.unset.pj1) : fpj(d.unset.pj)) + " pJ/B, balance " + v1(d.bu) +
+          "<br>time ridge (" + st.ridge + "): " + (d.ridge ? v1(d.ridge) : "none (no spec)") +
+          "<br>" + (d.verdict === "data" ? "moving the data costs more" : d.verdict === "arith" ? "the arithmetic costs more" : d.verdict === "overlap" ? "ranges overlap: no verdict" : "");
+        CK.tip(F, gg, html);
+        nodes.push(gg);
+      });
+      CK.keynav(F, nodes);
+    }
+    function say() {
+      var rows = ROWS.map(function (r) { return rowData(r[0]); }), by = {};
+      rows.forEach(function (d) { by[d.key] = d; });
+      var lbl = { scp: "own scratchpad", l2: "L2 cache", scp_remote: "another shire's scratchpad", l3: "L3", dram: "DRAM",
+                  fln: "TensorSend between pairs", xbar: "TensorSend inside a shire", xmesh: "TensorSend between shires" };
+      var ag = function (d, v) { return (v === undefined ? v1(d.prim) : fr(v)) + " against " + v1(d.ridge); };
+      var flips = rows.filter(function (d) { return d.verdict === "data"; }), memf = MEM.filter(function (k) { return by[k].verdict === "data"; });
+      var s = (st.ridge === "spec" ? "Spec ridges, " : "") + OPS[st.op][1] + ": ";
+      if (!flips.length) {
+        s += "every balance point lies below its " + (st.ridge === "spec" ? "spec" : "time") + " ridge";
+        var close = rows.filter(function (d) { return d.ridge && (d.prim[1] / d.ridge[0] >= 0.8 || d.bu[1] / d.ridge[0] >= 0.8); }).map(function (d) {
+          if (d.bm && d.bu[0] / d.ridge[0] >= 0.8 && d.bm[0] / d.ridge[0] < 0.8)
+            return lbl[d.key] + " (" + ag(d, d.bu[0]) + " with the §4.2 byte energy; " + fr(d.bm[0]) + " with the byte energy on " + OPS[st.op][1] + " data)";
+          return lbl[d.key] + " (" + ag(d) + ")";
+        });
+        if (close.length) s += "; closest are " + close.join(" and ");
+        s += ".";
+      } else {
+        var head = memf.length === MEM.length ? "every level from the shire outward flips" : flips.length === 1 ? "only " + lbl[flips[0].key] + " flips" :
+          flips.map(function (d) { return lbl[d.key]; }).join(", ").replace(/, ([^,]*)$/, " and $1") + " flip";
+        var ex = ["dram", "scp"].filter(function (k) { return by[k].verdict === "data"; });
+        if (!ex.length) ex = [flips[0].key];
+        s += head + " (" + ex.map(function (k) { return (flips.length === 1 ? "" : (k === "scp" ? "own scratchpad" : lbl[k]) + " ") + ag(by[k]); }).join(", ") + ")";
+        if (memf.length === MEM.length) {
+          var ts = ["fln", "xbar", "xmesh"].filter(function (k) { return by[k].verdict === "data"; });
+          if (ts.length) s += ", and so " + (ts.length === 1 ? "does " : "do ") + ts.map(function (k) { return lbl[k]; }).join(" and ");
+        }
+        var ov = rows.filter(function (d) { return d.verdict === "overlap"; });
+        if (ov.length) s += "; " + ov.map(function (d) { return lbl[d.key]; }).join(" and ") + " overlaps its ridge";
+        if (st.op === "zeros") s += "; the tensor unit then costs about as much as awake cores (" + E.e_flop.fp32_zeros.pj.toFixed(2) + " pJ per FLOP: " +
+          E.awake_floor.tensor_zeros_w.toFixed(1) + " W over idle, against " + E.awake_floor.w[0].toFixed(1) + "–" + E.awake_floor.w[1].toFixed(1) + " W for awake cores)";
+        s += ".";
+      }
+      readout.set(s.charAt(0).toUpperCase() + s.slice(1));
+    }
+    // legend (HTML): circle kinds, diamond, bar colours
+    var lg = document.getElementById("eb-legend"); lg.className = "ck-legend";
+    function item(svg, label) { var sp = document.createElement("span"); sp.className = "ck-li"; sp.appendChild(svg); sp.appendChild(document.createTextNode(label)); lg.appendChild(sp); }
+    function sw() { return CK.el("svg", { viewBox: "0 0 18 12", width: 18, height: 12, "aria-hidden": "true" }); }
+    var s1 = sw(), c1 = CK.el("circle", { cx: 9, cy: 6, r: 4.5 }, s1); c1.style.fill = "var(--ink)"; item(s1, "balance point, bytes on the same operands (§4.1)");
+    var s2 = sw(), c2 = CK.el("circle", { cx: 9, cy: 6, r: 4 }, s2); c2.style.fill = "none"; c2.style.stroke = "var(--ink)"; c2.style.strokeWidth = "1.75"; item(s2, "byte energy on unset buffers (§4.2, §5)");
+    var s3 = sw(), p3 = CK.el("polygon", { points: "9,0 15,6 9,12 3,6" }, s3); p3.style.fill = "var(--ref)"; item(s3, "time ridge");
+    var s4 = sw(), l4 = CK.el("line", { x1: 1, x2: 17, y1: 6, y2: 6 }, s4); l4.style.stroke = "var(--c1)"; l4.style.strokeWidth = "4"; item(s4, "arithmetic costs more");
+    var s5 = sw(), l5 = CK.el("line", { x1: 1, x2: 17, y1: 6, y2: 6 }, s5); l5.style.stroke = "var(--c2)"; l5.style.strokeWidth = "4"; item(s5, "moving the data costs more (flips)");
+    var s6 = sw(), l6 = CK.el("line", { x1: 1, x2: 17, y1: 6, y2: 6 }, s6); l6.style.stroke = "var(--ref)"; l6.style.strokeWidth = "4"; item(s6, "ranges overlap: no verdict");
+    say();
+  }
+
+  /* ---------- V3: reuse to speed ---------- */
+  function reuseChart() {
+    var st = { mode: "blocked", prec: "fp32", H: 512, N: 16 };
+    var H_STOPS = [16, 20, 24, 32, 40, 48, 64, 85, 100, 128, 160, 200, 256, 320, 400, 512, 640, 800, 1024, 1280, 1600, 2048, 2560, 3200, 4096, 4580, 5120, 6400, 8192];
+    var N_STOPS = [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 64, 80, 100, 128, 160, 200, 256, 320, 400, 512, 640, 800, 1024];
+    var SHIRE_H = 2 * 64 * 128 / (64 + 128), CHIP_H = 512, SCP_H = Math.sqrt(D.scp_bytes_chip / 4);  // shire block; all 1,024 tiles; C in scratchpads
+    var LEV = [["scp", "own shire", "var(--ink-2)"], ["l3", "L3", "var(--c4)"], ["scp_remote", "other shire", "var(--c5)"], ["dram", "DRAM", "var(--c7)"]];
+    var gemv = D.kernels.filter(function (k) { return k.ai === 0.5; })[0];
+    var readout = CK.readout("reuse-readout"), slider;
+    CK.seg("reuse-mode", { label: "Reuse from", options: [["blocked", "Blocked matmul"], ["stream", "Streaming weights"]], value: st.mode,
+      onChange: function (v) { st.mode = v; makeSlider(); F.redraw(); say(); } });
+    CK.seg("reuse-prec", { label: "Precision", options: PRECS.map(function (p) { return [p, p]; }), value: st.prec,
+      onChange: function (v) { st.prec = v; F.redraw(); say(); } });
+    function makeSlider() {
+      var b = st.mode === "blocked";
+      slider = CK.range("reuse-x", { label: b ? "Block H (harmonic mean of its sides)" : "Batch N", stops: b ? H_STOPS : N_STOPS, value: b ? st.H : st.N,
+        fmt: function (v) { return b ? "H = " + CK.fmt.num(v) : "N = " + CK.fmt.num(v); },
+        onInput: function (v) { if (st.mode === "blocked") st.H = v; else st.N = v; F.redraw(); say(); } });
+    }
+    makeSlider();
+    var lgh = document.getElementById("reuse-legend");
+    function e() { return D.peaks[st.prec].bytes; }
+    function b0() { return st.mode === "blocked"; }
+    function ridge(k) { return LV[k].ridge.measured[st.prec]; }
+    function inten(k, v) { return st.mode === "blocked" ? v / e() : k === "scp" ? ownShireI(v, e()) : 2 * v / e(); }
+    function frac(k, v) { return Math.min(1, inten(k, v) / ridge(k)); }
+    function levels() { return LEV.filter(function (l) { return st.mode === "stream" || l[0] !== "scp"; }); }
+    function xmax(k) { return st.mode === "stream" ? 1024 : k === "dram" ? SCP_H : SHIRE_H; }   // where each line stops
+    function thresh(k) {  // smallest compute-bound block or batch
+      if (st.mode === "stream") return minBatchN(k, ridge(k), e());
+      var h = Math.ceil(e() * ridge(k) - 0.1);
+      return h <= xmax(k) ? h : null;
+    }
+    function legend() {
+      CK.legend(lgh, levels().map(function (l) { return { key: l[0], mark: "line", color: l[2], label: l[0] === "scp" ? "own shire: TensorFMA tiles, fresh activation tile per op" : l[1] }; })
+        .concat(st.mode === "blocked" ? [{ key: "u", mark: "dash", color: "var(--c7)", label: "C swapped through the scratchpads (unmeasured)" }]
+                                      : st.prec === "fp32" ? [{ key: "k", mark: "ring", color: "var(--ink)", label: "measured GEMV, weights only, 0.5 FLOP/B" }] : []));
+    }
+    var F = CK.frame("c-reuse", { minW: 300, label: "Fraction of peak against block size or batch, one line per level",
+      height: function (W) { return W < 600 ? 300 : 330; }, draw: draw });
+    function draw(F) {
+      legend();
+      var W = F.W, H = F.H, narrow = F.narrow, g = F.svg, L = 44, R = 14, T = b0() ? 38 : 26, B = 38, b = st.mode === "blocked";
+      var x0 = b ? 16 : 1, x1 = b ? 8192 : 1024, x = CK.log(x0, x1, L, W - R), y = CK.lin(0, 1, H - B, T);
+      var xt = b ? [16, 64, 256, 1024, 4096] : [1, 4, 16, 64, 256, 1024];
+      CK.axes(F, { x: x, y: y, L: L, R: R, T: T, B: B, xt: xt, yt: [0, 0.25, 0.5, 0.75, 1], yfmt: function (t) { return Math.round(100 * t) + "%"; },
+        xfmt: function (t) { return CK.fmt.num(t); }, xl: b ? "block H, harmonic mean of its sides (log)" : "batch N (log)" });
+      if (b) {  // regions: C in registers / swapped through the scratchpads / does not fit
+        var band = CK.el("rect", { x: x(CHIP_H), y: T, width: x(SCP_H) - x(CHIP_H), height: H - T - B }, g); band.style.fill = "var(--band)";
+        var nf = CK.el("rect", { x: x(SCP_H), y: T, width: W - R - x(SCP_H), height: H - T - B }, g);
+        nf.style.fill = "var(--band)"; nf.style.opacity = "0.5"; band.style.pointerEvents = nf.style.pointerEvents = "none";
+        CK.txt(g, (x(CHIP_H) + x(SCP_H)) / 2, H - B - 8, narrow ? "C in scratchpads" : "C in scratchpads, swapping unmeasured", "lab-small halo", "middle");
+        if (!narrow) CK.txt(g, W - R - 3, H - B - 8, "does not fit", "lab-small halo", "end");
+        [[SHIRE_H, narrow ? "H = 85" : "one shire's 32 tiles, H = 85"], [CHIP_H, narrow ? "H = 512" : "all 1,024 tiles, H = 512"]].forEach(function (m, i) {
+          var ln = CK.el("line", { x1: x(m[0]), x2: x(m[0]), y1: 4, y2: H - B }, g); ln.style.stroke = "var(--ink-2)"; ln.style.strokeDasharray = "2 3";
+          CK.txt(g, x(m[0]) + 4, 13, m[1], "lab-small halo", "start");
+          void i;
+        });
+      }
+      var nav = [];
+      levels().forEach(function (l) {
+        var k = l[0], stop = xmax(k), gg = CK.el("g", {}, g), pts = [], ptsU = [];
+        for (var i = 0; i <= 200; i++) {
+          var v = Math.pow(10, Math.log10(x0) + i / 200 * (Math.log10(x1) - Math.log10(x0)));
+          if (b && k === "dram" && v > CHIP_H) { if (v <= stop) ptsU.push([v, frac(k, v)]); continue; }
+          if (v > stop) break;
+          pts.push([v, frac(k, v)]);
+        }
+        if (b && k === "dram") { pts.push([CHIP_H, frac(k, CHIP_H)]); ptsU.unshift([CHIP_H, frac(k, CHIP_H)]); ptsU.push([stop, frac(k, stop)]); }
+        if (b && k !== "dram") pts.push([stop, frac(k, stop)]);
+        var hitp = CK.el("path", { d: CK.path(pts.concat(ptsU), x, y) }, gg); hitp.style.fill = "none"; hitp.style.stroke = "transparent"; hitp.style.strokeWidth = "14";
+        var p = CK.el("path", { d: CK.path(pts, x, y) }, gg); p.style.fill = "none"; p.style.stroke = l[2]; p.style.strokeWidth = "2"; p.style.strokeLinejoin = "round";
+        if (ptsU.length) { var pu = CK.el("path", { d: CK.path(ptsU, x, y) }, gg); pu.style.fill = "none"; pu.style.stroke = l[2]; pu.style.strokeWidth = "2"; pu.style.strokeDasharray = "4 4"; }
+        var th = thresh(k), u = opu(st.prec), rr = ridge(k);
+        var html = "<b>" + l[1].charAt(0).toUpperCase() + l[1].slice(1) + ", " + st.prec + "</b><br>" +
+          (b ? "H/" + e() + " " + u + " per byte" : k === "scp" ? "TensorFMA tiles, fresh activation tile per op: 32·min(N,16)/(" + e() + "·(16+min(N,16))) per byte" : "2N/" + e() + " " + u + " per byte") +
+          " against a ridge of " + (rr >= 100 ? CK.fmt.num(rr, 1) : fr(rr)) + "<br>" +
+          (th === null ? (b ? "does not reach full speed within its limit (H ≤ " + CK.fmt.num(stop, 0) + ")" : "never compute-bound (tops out at " + pct(frac(k, 1024)) + "%)") :
+            "full speed from " + (b ? "H = " : "N = ") + CK.fmt.num(th));
+        CK.tip(F, gg, html);
+        nav.push(gg);
+        if (th !== null) {  // threshold tick
+          var tx = x(th), tk = CK.el("line", { x1: tx, x2: tx, y1: y(1) - 5, y2: y(1) + 5 }, g); tk.style.stroke = l[2]; tk.style.strokeWidth = "2"; tk.setAttribute("aria-hidden", "true");
+        }
+      });
+      // threshold labels just above the 100% line; thresholds closer than a label's width share one label
+      var ths = levels().map(function (l) { return thresh(l[0]); }).filter(function (v) { return v !== null; }).sort(function (a2, b2) { return a2 - b2; });
+      var groups = [];
+      ths.forEach(function (v) {
+        var last = groups[groups.length - 1];
+        if (last && x(v) - x(last[last.length - 1]) < 26) { if (last.indexOf(v) < 0) last.push(v); } else groups.push([v]);
+      });
+      groups.forEach(function (gr) {
+        var mx = (x(gr[0]) + x(gr[gr.length - 1])) / 2;
+        CK.txt(g, mx, y(1) - 7, gr.map(function (v) { return CK.fmt.num(v); }).join(", "), "lab-small halo", "middle");
+      });
+      if (!b && st.prec === "fp32" && gemv) {
+        var rg = CK.el("g", {}, g), gx = x(1), gy = y(gemv.t / D.peaks.fp32.chip_600);
+        CK.el("circle", { cx: gx, cy: gy, r: 12, "class": "ck-hit" }, rg);
+        var c = CK.el("circle", { cx: gx, cy: gy, r: 6 }, rg); c.style.fill = "transparent"; c.style.stroke = "var(--ink)"; c.style.strokeWidth = "1.75";
+        CK.tip(F, rg, "<b>Measured GEMV, weights only, 0.5 FLOP/B</b><br>the sparsity report's batch-1 fp32 layer, weights in the scratchpads: " + gemv.t.toFixed(2) + " TFLOP/s, " +
+          CK.fmt.num(100 * gemv.t / D.peaks.fp32.chip_600, 1) + "% of peak<br>(a weights-only intensity, 2N/e, not the tile line)");
+        nav.push(rg);
+        if (!narrow) {  // label in the empty upper left, with a leader to the ring
+          var ly = y(0.62), ld = CK.el("line", { x1: gx + 3, x2: gx, y1: ly + 4, y2: gy - 7, "aria-hidden": "true" }, g);
+          ld.style.stroke = "var(--ink-2)"; ld.style.strokeWidth = "1";
+          CK.txt(g, gx + 6, ly, "measured GEMV, weights only, 0.5 FLOP/B", "lab-small halo", "start");
+        }
+      }
+      CK.keynav(F, nav);
+      // cursor
+      var cv = b ? st.H : st.N, cl = CK.el("line", { x1: x(cv), x2: x(cv), y1: T, y2: H - B, "aria-hidden": "true" }, g);
+      cl.style.stroke = "var(--ink)"; cl.style.opacity = "0.5";
+      levels().forEach(function (l) {
+        if (cv > xmax(l[0]) + 1e-9) return;
+        var m = CK.el("circle", { cx: x(cv), cy: y(frac(l[0], cv)), r: 4, "aria-hidden": "true" }, g);
+        m.style.fill = l[2]; m.style.stroke = "var(--page)"; m.style.strokeWidth = "1.5";
+      });
+      var hit = CK.el("rect", { x: L, y: T, width: W - L - R, height: H - T - B, "class": "ck-hit", "aria-hidden": "true" }, g);
+      g.insertBefore(hit, g.firstChild.nextSibling);
+      function setFrom(ev) { var bb = g.getBoundingClientRect(), v = nearestStop(b ? H_STOPS : N_STOPS, x.inv(ev.clientX - bb.left), true); if (v !== cv) slider.set(v); }
+      hit.addEventListener("pointerdown", function (ev) { setFrom(ev); });
+      hit.addEventListener("pointermove", function (ev) { if (ev.buttons) setFrom(ev); });
+    }
+    function say() {
+      var b = st.mode === "blocked", v = b ? st.H : st.N, u = opu(st.prec), s;
+      if (b) {
+        var note = v === CHIP_H ? "All 1,024 tiles (H = 512)" : Math.abs(v - SHIRE_H) < 0.5 ? "One shire's 32 tiles (H = 85)" : "H = " + CK.fmt.num(v);
+        var I = v / e(), rd = ridge("dram");
+        s = note + ": " + fr(I) + " " + u + "/B";
+        if (v <= SCP_H) s += ", " + pct(frac("dram", v)) + "% of the " + st.prec + " DRAM ridge (" + CK.fmt.num(rd, 1) + ")" +
+          (frac("dram", v) < 1 ? "; from DRAM full speed needs H ≥ " + CK.fmt.num(thresh("dram")) : "; compute-bound from DRAM") +
+          (v > CHIP_H ? "; C swapped through the scratchpads (unmeasured)" + (st.prec === "int8" ? ", and int8 partial sums would have to be added with vector instructions, since TenC cannot be loaded" : "") : "") + ". ";
+        else s += "; from DRAM, C no longer fits in the scratchpads. ";
+        if (v <= SHIRE_H + 0.5) s += "From L3 " + pct(frac("l3", v)) + "%, from another shire " + pct(frac("scp_remote", v)) + "%.";
+        else s += "L3 and another shire's scratchpad: past one shire's 32 register tiles (H = 85).";
+      } else {
+        s = "Batch " + CK.fmt.num(v) + ": " + levels().map(function (l) {
+          var I = inten(l[0], v);
+          return l[1] + " " + fr(I) + " " + u + "/B, " + pct(frac(l[0], v)) + "%";
+        }).join("; ") + (v >= 16 && st.prec === "int8" ? " (own shire tiles cap int8 at " + pct(frac("scp", 16)) + "%)" : "") + ".";
+      }
+      readout.set(s);
+    }
+    say();
+  }
+
+  function renderAll() { renderKpis(); renderPeaks(); renderRidge(); renderClock(); renderBatch(); renderEnergy(); renderA100(); renderText(); }
   renderAll();
-  var lastW = document.body.clientWidth;
-  window.addEventListener("resize", function () { if (document.body.clientWidth !== lastW) { lastW = document.body.clientWidth; renderRoof(); } });
+  roofline();
+  energyChart();
+  reuseChart();
 })();
 </script>
 </body>

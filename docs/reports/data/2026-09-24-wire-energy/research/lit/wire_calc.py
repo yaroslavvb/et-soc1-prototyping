@@ -49,6 +49,7 @@ print(f"  Keckler2011: 256b*10mm*0.5*240fJ = {256*10*0.5*240/1000:.0f} pJ (table
 print(f"  SC12 28nm: 26pJ/256b = {26000/256:.0f} fJ/b (~1 mm); 256pJ/(256b*10mm) = {256000/2560:.0f}; 1nJ/(256b*20mm)={1e6/256/20:.0f}, /(256b*40mm)={1e6/256/40:.0f}")
 print(f"  FlooNoC: 0.15 pJ/B/hop = {150/8:.2f} fJ/bit/hop; hop 0.75 mm -> {150/8/0.75:.1f} fJ/b-mm; hop 1.5 mm -> {150/8/1.5:.1f}")
 
+# Superseded by wire.json (E31/E32): the rest of this file uses the E27 inputs (131 fJ and 1.29 pJ/B per hop).
 print("\nET-SoC-1 measured numbers as equivalent switched capacitance at 0.485 V (random data => CV^2/4 per bit):")
 for n,E in (("random-zero difference 131 fJ/bit/hop",131.0),("NoC rail random 1.29 pJ/B/hop = 161 fJ/bit/hop",1290/8)):
     C = E/(0.25*V2)

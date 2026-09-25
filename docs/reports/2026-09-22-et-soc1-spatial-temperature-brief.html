@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -78,11 +78,20 @@ li { margin: 6px 0; }
 h2, h3 { scroll-margin-top: 12px; }
 .hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
 h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
+details.terms { font-size: 0.92rem; color: var(--ink-2); margin: 0 0 18px; }
+details.terms p { margin: 6px 0 0; }
+.chart-title { font-size: 0.95rem; font-weight: 600; margin: 18px 0 2px; }
+.chart { position: relative; width: 100%; }
+.ck-frame .ht-band { font-size: 11px; fill: var(--ink); font-weight: 600; }
+#grid-leg { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 0.8rem; color: var(--ink-2); max-width: 600px; margin: 6px auto; }
+.gl-sw { display: inline-block; min-width: 2.6em; text-align: center; border-radius: 4px; padding: 1px 4px; font-weight: 600; font-variant-numeric: tabular-nums; }
+#grid-view { justify-content: center; max-width: 600px; margin: 8px auto 0; display: flex; }
 @media (max-width: 480px) {
   .mesh-grid { gap: 4px; }
   .mesh-cell .id { font-size: 0.74rem; }
-  .mesh-cell.special .id { font-size: 0.6rem; }
-  .mesh-cell .sub { font-size: 0.56rem; }
+  .mesh-cell.special .id { font-size: 0.69rem; line-height: 1.15; }
+  .mesh-cell .sub { font-size: 0.7rem; }
+  .mesh-cell .xy { display: none; }
   .regs th, .regs td { padding: 7px 5px; }
   .regs code { font-size: 0.8em; padding: 2px 3px; }
   .stack table, .stack tbody, .stack tr, .stack td { display: block; width: 100%; }
@@ -91,6 +100,444 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
   .stack td { border: 0; padding: 3px 0; }
 }
 </style>
+<!-- chartkit:begin -->
+<!-- pasted by scripts/paste-chartkit.py from docs/reports/sources/{chartkit.js, report.template.html}; do not edit here -->
+<style>
+.ck-frame { position: relative; width: 100%; }
+.ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ck-frame svg { display: block; max-width: none; height: auto; }
+.ck-frame svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.ck-frame .tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame .lab { fill: var(--ink-2); font-size: 12px; }
+.ck-frame .lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ck-frame .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-axis { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-hit { fill: transparent; stroke: none; }
+.ck-tip { position: absolute; z-index: 5; pointer-events: none; display: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border, var(--grid)); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: min(320px, calc(100% - 8px)); }
+.ck-frame svg [tabindex] { outline: none; }
+.ck-frame svg [tabindex]:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse)[tabindex]:not(.ck-hit):focus-visible,
+.ck-frame svg [tabindex]:focus-visible > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse).ck-active:not(.ck-hit),
+.ck-frame svg .ck-active > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 1.5px; }
+.ck-hidden { display: none !important; }
+.ck-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 8px 0 6px; }
+.ck-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 8px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-legend .ck-li { display: inline-flex; align-items: center; gap: 6px; }
+.ck-legend button.ck-li { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 3px 10px; min-height: 32px; cursor: pointer; }
+.ck-legend button.ck-li[aria-pressed="false"] { opacity: 0.55; text-decoration: line-through; }
+.ck-legend svg { flex: none; overflow: visible; }
+.ck-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.82rem; }
+.ck-seg-label { color: var(--ink-2); }
+.ck-seg-group { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ck-seg [role="radio"] { font: inherit; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-seg [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-range input[type="range"] { flex: 0 1 200px; width: 200px; min-width: 120px; min-height: 32px; margin: 0; accent-color: var(--c1); }
+.ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
+   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
+th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+th.num { white-space: normal; }
+@media (max-width: 599px) {
+  table.stack, .wide table.stack { min-width: 0; }
+  table.stack thead { display: none; }
+  table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { border-bottom: 1px solid var(--grid); padding: 6px 0; }
+  table.stack td, table.stack td.num { border: 0; padding: 2px 0; text-align: left; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+  table.stack td:first-child::before { content: none; }
+  table.stack td:first-child { font-weight: 600; }
+}
+@media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+</style>
+<script>
+/* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
+   Source-built pages get it from report.template.html (scripts/build-report.py inlines it before the page script);
+   standalone pages get this file, the template's chartkit CSS and token aliases from scripts/paste-chartkit.py.
+   Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
+   --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
+   API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame. Every mark with a tooltip is reachable from the keyboard. */
+window.CK = (function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
+  let uid = 0;
+  const $ = h => (typeof h === 'string' ? document.getElementById(h) : h);
+  const mm = q => (window.matchMedia ? window.matchMedia(q) : {matches: false});
+  const reduced = mm('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, str, cls, anchor) {
+    const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
+    t.textContent = str;
+    return t;
+  }
+  const path = (pts, x, y) => pts.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ');
+
+  /* ---- numbers ---- */
+  function num(v, dp) {
+    if (v == null || !isFinite(v)) return '\u2014';
+    const auto = dp == null;  // no dp: three significant digits, trailing zeros dropped
+    if (auto) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+    const s = Number(v).toLocaleString('en-GB', {minimumFractionDigits: auto ? 0 : dp, maximumFractionDigits: dp});
+    return /[1-9]/.test(s) ? s.replace('-', '\u2212') : s.replace('-', '');  // true minus; never "−0.00"
+  }
+  const fmt = {
+    num,
+    range: (a, b, dp, unit) => {
+      const s = num(a, dp), t = num(b, dp), u = unit ? '\u00a0' + unit : '';
+      return s === t ? s + u : s + (b < 0 ? ' to ' : '\u2013') + t + u;
+    },
+    pct: (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%',
+  };
+
+  /* ---- scales ---- */
+  function niceTicks(a, b, n) {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    if (!(hi > lo)) return Object.assign([lo], {step: 1});
+    const raw = (hi - lo) / Math.max(1, n || 5), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    const step = (m >= 7.5 ? 10 : m >= 3.5 ? 5 : m >= 1.5 ? 2 : 1) * p, out = [];
+    for (let i = Math.ceil(lo / step - 1e-9); i * step <= hi + step * 1e-9; i++) out.push(+(i * step).toPrecision(12));
+    out.step = step;
+    return out;
+  }
+  const tickDp = t => (t.step ? Math.max(0, -Math.floor(Math.log10(t.step) + 1e-9)) : null);
+  function lin(d0, d1, r0, r1) {
+    const s = v => r0 + (v - d0) * (r1 - r0) / (d1 - d0);
+    s.inv = p => d0 + (p - r0) * (d1 - d0) / (r1 - r0);
+    s.ticks = n => niceTicks(d0, d1, n);
+    s.domain = [d0, d1]; s.range = [r0, r1];
+    return s;
+  }
+  function log(d0, d1, r0, r1) {
+    const l0 = Math.log10(d0), l1 = Math.log10(d1);
+    const s = v => r0 + (Math.log10(v) - l0) * (r1 - r0) / (l1 - l0);
+    s.inv = p => Math.pow(10, l0 + (p - r0) * (l1 - l0) / (r1 - r0));
+    s.ticks = n => {
+      const lo = Math.min(l0, l1), hi = Math.max(l0, l1), k0 = Math.ceil(lo - 1e-9), k1 = Math.floor(hi + 1e-9);
+      const dec = k1 - k0 + 1, every = Math.max(1, Math.ceil(dec / (n || 6))), out = [];
+      const add = v => { v = +v.toPrecision(12); const lv = Math.log10(v); if (lv >= lo - 1e-9 && lv <= hi + 1e-9) out.push(v); };
+      if (dec <= 2) { for (let k = k0 - 1; k <= k1; k++) for (const m of [1, 2, 5]) add(m * Math.pow(10, k)); }
+      else for (let k = k0; k <= k1; k += every) add(Math.pow(10, k));
+      return out;
+    };
+    s.domain = [d0, d1]; s.range = [r0, r1]; s.log = true;
+    return s;
+  }
+  const logFmt = v => num(v, v >= 1 ? 0 : Math.ceil(-Math.log10(v) - 1e-9));
+
+  /* ---- frame: a responsive SVG sized to its host ---- */
+  function frame(hostId, o) {
+    const host = $(hostId);
+    if (!host) throw new Error('CK.frame: no element ' + hostId);
+    host.classList.add('ck-frame'); host.classList.remove('scroll');
+    host.textContent = '';
+    const plot = document.createElement('div'); plot.className = 'ck-plot'; host.appendChild(plot);
+    const svg = el('svg', {role: 'group', 'aria-label': o.label || null}, plot);
+    const tip = document.createElement('div'); tip.className = 'ck-tip'; tip.setAttribute('aria-hidden', 'true');
+    host.appendChild(tip);
+    const minW = o.minW == null ? 320 : o.minW, maxW = o.maxW == null ? 900 : o.maxW;
+    const f = {svg, host, tip, W: 0, H: 0, narrow: false, seriesOn: null, pinned: null, active: null, navIndex: 0};
+    const width = () => {
+      const cs = getComputedStyle(host), cw = host.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return Math.round(Math.max(minW, Math.min(maxW, cw > 0 ? cw : maxW)));
+    };
+    f.redraw = () => {
+      const W = width(), H = Math.round(typeof o.height === 'function' ? o.height(W) : (o.height || 300));
+      f.refocus = svg.contains(document.activeElement) ? f.navIndex : null;
+      hide(f, true);
+      Object.assign(f, {W, H, narrow: W < 600, navNodes: []});
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.setAttribute('height', H);
+      svg.style.width = W + 'px';
+      o.draw(f);
+      if (f.seriesOn) showSeries(f, f.seriesOn);
+    };
+    f.redraw();
+    frames.push(f);
+    if (window.ResizeObserver) {
+      let timer;
+      new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => { if (width() !== f.W) f.redraw(); }, 150); }).observe(host);
+    }
+    return f;
+  }
+
+  /* ---- axes: horizontal grid, tick labels, baseline, axis titles (y title sits above the plot) ---- */
+  function axes(f, o) {
+    const {x, y} = o, W = f.W, H = f.H;
+    const L = o.L == null ? 44 : o.L, R = o.R == null ? 12 : o.R, T = o.T == null ? 22 : o.T, B = o.B == null ? 38 : o.B;
+    const g = el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, f.svg);
+    const yt = o.yt || y.ticks(Math.max(3, Math.round((H - T - B) / 48)));
+    const xt = o.xt || x.ticks(Math.max(2, Math.round((W - L - R) / 90)));
+    const auto = (s, t) => (s.log ? logFmt : v => num(v, tickDp(t)));
+    const xf = o.xfmt || auto(x, xt), yf = o.yfmt || auto(y, yt), labs = [];
+    for (const t of yt) {
+      if (o.grid !== false) el('line', {x1: L, x2: W - R, y1: y(t), y2: y(t), class: 'grid-line'}, g);
+      labs.push(txt(g, L - 6, y(t) + 4, yf(t), 'tick', 'end'));
+    }
+    el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    for (const t of xt) labs.push(txt(g, x(t), H - B + 16, xf(t), 'tick', 'middle'));
+    if (o.xl) labs.push(txt(g, (L + W - R) / 2, H - 6, o.xl, 'lab', 'middle'));
+    if (o.yl) txt(g, 2, Math.max(12, T - 13), o.yl, 'lab');
+    inside(f, labs);
+    return g;
+  }
+  /* Keep labels inside the frame (0..f.W, 0..f.H, less pad): one that would cross the left or right edge is anchored
+     at that edge instead (text-anchor start or end, so its outer end sits pad px from the edge in any font; an end
+     tick label still covers its tick), and one that would cross the top or bottom is moved in. Labels already inside
+     are not touched. Widths are measured in the page's font; a chart drawn while hidden has no layout, so they are
+     estimated at 0.6 em a character. Vertically the glyphs are taken as 0.75 em above the baseline and 0.25 em below. */
+  function inside(f, labels, pad) {
+    pad = pad == null ? 2 : pad;
+    const m = labels.map(t => {
+      let w = 0, fs = 12;
+      try { w = t.getComputedTextLength(); fs = parseFloat(getComputedStyle(t).fontSize) || 12; } catch (_) { /* no layout */ }
+      return {w: w > 0 ? w : 0.6 * fs * t.textContent.length, fs};
+    });
+    labels.forEach((t, k) => {
+      const {w, fs} = m[k], a = t.getAttribute('text-anchor') || 'start', x = +t.getAttribute('x'), y = +t.getAttribute('y');
+      const x0 = a === 'end' ? x - w : a === 'middle' ? x - w / 2 : x;
+      if (x0 < pad) { t.setAttribute('text-anchor', 'start'); t.setAttribute('x', pad); }
+      else if (x0 + w > f.W - pad) { t.setAttribute('text-anchor', 'end'); t.setAttribute('x', +(f.W - pad).toFixed(1)); }
+      if (y - 0.75 * fs < pad) t.setAttribute('y', +(pad + 0.75 * fs).toFixed(1));
+      else if (y + 0.25 * fs > f.H - pad) t.setAttribute('y', +(f.H - pad - 0.25 * fs).toFixed(1));
+    });
+    return labels;
+  }
+
+  /* ---- tooltip: pointer, keyboard focus and touch all show the same text ---- */
+  const strip = html => new DOMParser().parseFromString(String(html).replace(/<br\s*\/?>/gi, '; '), 'text/html')
+    .body.textContent.replace(/\s+/g, ' ').trim();
+  function place(f, cx, cy) {
+    const t = f.tip; t.style.display = 'block';
+    const hw = f.host.clientWidth, hh = f.host.clientHeight, tw = t.offsetWidth, th = t.offsetHeight;
+    let top = cy + 14;
+    if (top + th > hh && cy - th - 10 >= 0) top = cy - th - 10;  // flip above the pointer
+    t.style.left = Math.max(0, Math.min(cx + 12, hw - tw)) + 'px';
+    t.style.top = top + 'px';
+  }
+  function show(f, node, html, cx, cy) {
+    if (f.active && f.active !== node) f.active.classList.remove('ck-active');
+    f.active = node; node.classList.add('ck-active');
+    f.tip.innerHTML = typeof html === 'function' ? html() : html;
+    if (cx == null) {
+      const r = node.getBoundingClientRect(), b = f.host.getBoundingClientRect();
+      cx = r.left + r.width / 2 - b.left; cy = r.top + r.height / 2 - b.top;
+    }
+    place(f, cx, cy);
+  }
+  function hide(f, force) {
+    if (f.pinned && !force) return;
+    f.pinned = null; f.tip.style.display = 'none';
+    if (f.active) f.active.classList.remove('ck-active');
+    f.active = null;
+  }
+  function tip(f, node, html, o) {
+    o = o || {};
+    if (!node.hasAttribute('data-ck-nav')) node.setAttribute('tabindex', '0');
+    node.setAttribute('role', o.role || 'img');
+    node.setAttribute('aria-label', strip(typeof html === 'function' ? html() : html));
+    node._ckTip = html;
+    const at = ev => { const b = f.host.getBoundingClientRect(); show(f, node, html, ev.clientX - b.left, ev.clientY - b.top); };
+    node.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointermove', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') hide(f); });
+    node.addEventListener('pointerdown', ev => {  // touch: a tap toggles the tooltip and pins it until the next tap
+      if (ev.pointerType !== 'touch') return;
+      f.touchT = Date.now();
+      if (f.active === node && f.tip.style.display === 'block') hide(f, true); else { hide(f, true); at(ev); f.pinned = node; }
+    });
+    node.addEventListener('focus', () => { if (Date.now() - (f.touchT || 0) > 600 && !f.pinned) show(f, node, html); });
+    node.addEventListener('blur', () => hide(f));
+    node.addEventListener('keydown', ev => { if (ev.key === 'Escape') hide(f, true); });
+    return node;
+  }
+  document.addEventListener('pointerdown', ev => {  // a tap elsewhere unpins
+    for (const f of frames) if (f.pinned && !f.pinned.contains(ev.target)) hide(f, true);
+  }, true);
+
+  /* ---- keynav: one tab stop per mark group; arrows step, Home/End jump, Enter pins, Escape hides ---- */
+  function keynav(f, nodes, o) {
+    o = o || {};
+    nodes = nodes.filter(Boolean);
+    if (!nodes.length) return;
+    const seen = n => !n.closest('.ck-hidden');
+    const next = (k, d) => { for (let j = k + d; j >= 0 && j < nodes.length; j += d) if (seen(nodes[j])) return j; return k; };
+    let cur = Math.min(f.navIndex || 0, nodes.length - 1);
+    nodes.forEach((n, k) => {
+      n.setAttribute('data-ck-nav', '');
+      n.setAttribute('tabindex', k === cur ? '0' : '-1');
+      n.addEventListener('focus', () => {
+        nodes.forEach(m => m.setAttribute('tabindex', '-1')); n.setAttribute('tabindex', '0');
+        f.navIndex = k;
+        if (o.onFocus) o.onFocus(n, k);
+      });
+      n.addEventListener('keydown', ev => {
+        const K = ev.key;
+        let j = null;
+        if (o.step) j = o.step(k, K, nodes);
+        if (j == null) {
+          if (K === 'ArrowRight' || K === 'ArrowDown') j = next(k, 1);
+          else if (K === 'ArrowLeft' || K === 'ArrowUp') j = next(k, -1);
+          else if (K === 'Home') j = next(-1, 1);
+          else if (K === 'End') j = next(nodes.length, -1);
+        }
+        if (K === 'Enter' || K === ' ') {
+          ev.preventDefault();
+          if (n._ckTip) { if (f.pinned === n) hide(f, true); else { hide(f, true); show(f, n, n._ckTip); f.pinned = n; } }
+          if (o.onEnter) o.onEnter(n, k);
+        } else if (j != null) { ev.preventDefault(); if (j !== k) { hide(f, true); nodes[j].focus(); } }
+      });
+    });
+    f.navNodes = (f.navNodes || []).concat([nodes]);
+    if (f.refocus != null && nodes[f.refocus]) { nodes[f.refocus].focus(); f.refocus = null; }
+  }
+
+  /* ---- legend (HTML, above the chart) and series toggling ---- */
+  function swatch(it) {
+    const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
+    const m = it.mark || 'box';
+    const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
+    if (m === 'dot' || m === 'box') e.style.fill = c;
+    else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
+    if (m === 'dash') e.style.strokeDasharray = '4 3';
+    return s;
+  }
+  function legend(hostEl, items, o) {
+    o = o || {};
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-legend');
+    const on = new Set(items.map(it => it.key)), btn = {};
+    for (const it of items) {
+      const b = document.createElement(o.toggle ? 'button' : 'span'); b.className = 'ck-li';
+      b.append(swatch(it), document.createTextNode(it.label));
+      if (o.toggle) {
+        b.type = 'button'; b.setAttribute('aria-pressed', 'true');
+        b.addEventListener('click', () => {
+          const was = on.has(it.key);
+          if (was && on.size === 1) return;  // keep at least one series
+          if (was) on.delete(it.key); else on.add(it.key);
+          b.setAttribute('aria-pressed', String(!was));
+          if (o.onChange) o.onChange([...on]);
+        });
+      }
+      btn[it.key] = b; h.appendChild(b);
+    }
+    return {el: h, on, set(keys) { on.clear(); keys.forEach(k => on.add(k)); for (const k in btn) if (o.toggle) btn[k].setAttribute('aria-pressed', String(on.has(k))); }};
+  }
+  function showSeries(f, keysOn) {
+    f.seriesOn = [...keysOn];
+    f.svg.querySelectorAll('[data-series]').forEach(n => n.classList.toggle('ck-hidden', !f.seriesOn.includes(n.getAttribute('data-series'))));
+    for (const group of f.navNodes || []) {  // keep one reachable tab stop per group
+      const vis = group.filter(n => !n.closest('.ck-hidden'));
+      if (vis.length && !vis.some(n => n.getAttribute('tabindex') === '0')) { group.forEach(n => n.setAttribute('tabindex', '-1')); vis[0].setAttribute('tabindex', '0'); }
+    }
+    if (f.active && f.active.closest('.ck-hidden')) hide(f, true);
+  }
+
+  /* ---- controls ---- */
+  function seg(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-seg');
+    const g = document.createElement('div'); g.setAttribute('role', 'radiogroup'); g.className = 'ck-seg-group';
+    if (o.label) {
+      const s = document.createElement('span'); s.className = 'ck-seg-label'; s.id = 'ck-l' + (++uid); s.textContent = o.label;
+      h.appendChild(s); g.setAttribute('aria-labelledby', s.id);
+    }
+    const opts = o.options, api = {el: h, value: o.value == null ? opts[0][0] : o.value};
+    const btns = opts.map(([v, t], k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.textContent = t;
+      b.addEventListener('click', () => set(v, true));
+      b.addEventListener('keydown', ev => {
+        const d = ev.key === 'ArrowRight' || ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowLeft' || ev.key === 'ArrowUp' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const j = (k + d + opts.length) % opts.length;
+        set(opts[j][0], true); btns[j].focus();
+      });
+      g.appendChild(b); return b;
+    });
+    function set(v, fire) {
+      api.value = v;
+      btns.forEach((b, k) => { const c = opts[k][0] === v; b.setAttribute('aria-checked', String(c)); b.tabIndex = c ? 0 : -1; });
+      if (fire && o.onChange) o.onChange(v);
+    }
+    h.appendChild(g); set(api.value, false);
+    api.set = v => set(v, true);
+    return api;
+  }
+  function range(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-range');
+    const id = 'ck-r' + (++uid), stops = o.stops, f1 = o.fmt || (v => num(v));
+    const lab = document.createElement('label'); lab.htmlFor = id; lab.textContent = o.label;
+    const inp = document.createElement('input'); inp.type = 'range'; inp.id = id;
+    const out = document.createElement('output'); out.setAttribute('for', id);
+    if (stops) { inp.min = 0; inp.max = stops.length - 1; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step == null ? 'any' : o.step; }
+    const val = () => (stops ? stops[+inp.value] : +inp.value);
+    const put = v => { inp.value = stops ? stops.reduce((b, s, k) => (Math.abs(s - v) < Math.abs(stops[b] - v) ? k : b), 0) : v; };
+    const upd = fire => { const v = val(), s = f1(v); out.textContent = s; inp.setAttribute('aria-valuetext', s); if (fire && o.onInput) o.onInput(v); };
+    inp.addEventListener('input', () => upd(true));
+    h.append(lab, inp, out); put(o.value == null ? (stops ? stops[0] : o.min) : o.value); upd(false);
+    return {el: h, input: inp, get value() { return val(); }, set(v) { put(v); upd(true); }};
+  }
+  function readout(hostEl) {
+    const h = $(hostEl); h.classList.add('ck-readout'); h.setAttribute('aria-live', 'polite');
+    h.set = html => { h.innerHTML = html; };
+    return h;
+  }
+  function bus(name) {
+    if (!buses[name]) { const fns = []; buses[name] = {value: undefined, on(fn) { fns.push(fn); }, emit(v, from) { this.value = v; fns.forEach(fn => fn(v, from)); }}; }
+    return buses[name];
+  }
+  /* Card layout for a table under 600 px: each cell shows its column's header (CSS table.stack). */
+  function stackTable(table) {
+    const t = $(table), heads = [], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (hr) for (const c of hr.cells) for (let k = 0; k < (c.colSpan || 1); k++) heads.push(c.textContent.replace(/\s+/g, ' ').trim());
+    for (const tb of t.tBodies) for (const r of tb.rows) { let k = 0; for (const c of r.cells) { if (heads[k]) c.setAttribute('data-label', heads[k]); k += c.colSpan || 1; } }
+    t.classList.add('stack');
+    return t;
+  }
+
+  /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
+  const SERIES = [1, 2, 3, 4, 5, 7];
+  const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
+  const clamp01 = p => Math.max(0, Math.min(1, +p || 0));
+  const ramp = p => `color-mix(in srgb, var(--c1) ${(15 + 85 * clamp01(p)).toFixed(1)}%, var(--surface))`;
+  function rgb(css) {  // resolve any CSS colour (tokens, color-mix) to linear-light luminance via a probe
+    const s = document.createElement('span'); s.style.color = css; s.style.display = 'none';
+    document.body.appendChild(s);
+    const c = getComputedStyle(s).color; s.remove();
+    const v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), unit = /^color\(/.test(c) ? 1 : 255;
+    const lin1 = x => { x /= unit; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin1(v[0]) + 0.7152 * lin1(v[1]) + 0.0722 * lin1(v[2]);
+  }
+  const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  /* Text colour for a ramp cell, chosen for the current theme: whichever of --ink and --page contrasts more. */
+  function rampInk(p) {
+    const bg = rgb(ramp(p));
+    return contrast(bg, rgb('var(--ink)')) >= contrast(bg, rgb('var(--page)')) ? 'var(--ink)' : 'var(--page)';
+  }
+  const redrawAll = () => frames.forEach(f => f.redraw());  // rampInk depends on the theme
+  if (window.MutationObserver) new MutationObserver(redrawAll).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  const dark = mm('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', redrawAll);
+
+  return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
+    stackTable, reduced, ramp, rampInk, color, hide: f => hide(f, true)};
+})();
+</script>
+<!-- chartkit:end -->
 </head>
 <body>
 <main>
@@ -100,7 +547,7 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 
 <div class="lede">
 Can the ET-SoC-1 measure how heat moves across its 1,088-core die?
-<strong>In hardware, yes; with the stock firmware, no.</strong> The die carries 35 temperature sensors, one in every tile of its 6×6 grid except the PCIe shire. The host receives a 34-shire average plus two peak-hold extremes (and the I/O shire’s own reading), all in whole degrees: the firmware’s integer conversion truncates every sensor’s reading to 1 °C before it is averaged. This brief covers where the sensors are, where the firmware discards the detail, and what it would take to get a per-shire heat map.
+<strong>In hardware, yes; with the stock firmware, no.</strong> The die carries 35 temperature sensors, one in every tile of its 6×6 grid except the PCIe shire. The host receives a 34-shire average plus two peak-hold extremes (and the I/O shire’s own reading), all in whole degrees: the firmware’s integer conversion truncates every sensor’s reading to 1 °C before it is averaged. The high leaks one number: each time it rose, on both cards, the hottest shire read about <span id="lede-excess"></span> °C above the average (in whole degrees), but the host never learns which shire that was. This brief covers where the sensors are, where the firmware discards the detail, and what it would take to get a per-shire heat map.
 </div>
 
 <div class="kpis">
@@ -122,11 +569,13 @@ Can the ET-SoC-1 measure how heat moves across its 1,088-core die?
   <div class="kpi">
     <div class="lab">What the host sees today</div>
     <div class="val" style="color:var(--bad)">Collapsed</div>
-    <div class="sub">Current mean + since-reset extremes, truncated to 1 °C</div>
+    <div class="sub">Current mean + since-reset extremes, whole °C; the high gives the hottest shire’s excess at a peak, not its place</div>
   </div>
 </div>
 
-<p class="terms"><b>Terms.</b> A <b>shire</b> is a tile of 32 <b>minion</b> cores (small RISC-V cores with vector and tensor units) sharing 4 MB of SRAM (L2, an L3 slice and scratchpad). The 34 minion shires, the I/O and PCIe shires and 8 memory shires sit on the chip’s mesh network. The <b>service processor (SP)</b> is the on-chip management core; its second-stage firmware (<b>BL2</b>) reads the sensors and answers the host. The <b>PMIC</b> is the board’s power controller; <b>PVT</b> = process, voltage and temperature monitors. More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub’s glossary</a>.</p>
+<details class="terms"><summary>Terms used on this page</summary>
+<p>A <b>shire</b> is a tile of 32 <b>minion</b> cores (small RISC-V cores with vector and tensor units) sharing 4 MB of SRAM (L2, an L3 slice and scratchpad); the 34 minion shires, the I/O and PCIe shires and 8 memory shires sit on the chip’s mesh network. The <b>service processor (SP)</b> is the on-chip management core; its second-stage firmware (<b>BL2</b>) reads the sensors and answers the host. The <b>PMIC</b> is the board’s power controller; <b>PVT</b> = process, voltage and temperature monitors. More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub’s glossary</a>.</p>
+</details>
 
 <nav class="toc" aria-label="Contents"><b>Contents</b>
 <ol id="toclist">
@@ -148,76 +597,59 @@ Can the ET-SoC-1 measure how heat moves across its 1,088-core die?
   <li><strong>1 I/O shire</strong>: one temperature sensor, alongside the 5 PVT controllers.</li>
 </ul>
 
-<p>The host’s temperature query (<code>DM_CMD_GET_MODULE_CURRENT_TEMPERATURE</code>) also returns a field named <code>pmic_sys</code>, but it is not a board sensor: the firmware fills it from <code>pvt_get_minion_avg_temperature()</code>, the same 34-shire average (in the 20 Sep telemetry the two agreed in 3,679 of 3,681 samples and differed by 1 °C in the other two). The PMIC reads its regulators’ temperatures over PMBus, but the SP does not forward them, so this query never carries a board or regulator temperature.</p>
-
 <h3 id="mesh">The 6×6 shire mesh, as the latency measurements place it</h3>
-<p>On-chip communication benchmarks (<code>workloads/nocbench</code>) place the 32 compute shires on a 6×6 mesh (<a href="https://github.com/marty1885/etTopoScan">marty1885’s map</a>): every TensorSend round trip between two shires is 150 + 12.02 × (Manhattan distance) cycles, worst residual 1.1 cycles over all 496 pairs (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a>). Each cell in this grid is one tile, about 3.7 mm on a side: the tile pitch measured on Esperanto’s die plot and scaled to the 570 mm² die (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die">Heat per millimetre §2</a>).</p>
+<p>The 32 compute shires are placed on the 6×6 grid by TensorSend latency (<a href="https://github.com/marty1885/etTopoScan">marty1885’s map</a>, checked in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a>). Each cell in this grid is one tile, about 3.7 mm on a side: the tile pitch measured on Esperanto’s die plot and scaled to the 570 mm² die (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die">Heat per millimetre §2</a>).</p>
 
-<div class="mesh-grid" role="img" aria-label="6 by 6 grid of shires: 32 compute shires with their sensor channels, and four grey cells for the master, spare, I/O and PCIe shires">
+<div class="ck-controls" id="grid-view"></div>
+<div id="grid-leg"></div>
+<div class="mesh-grid" id="meshgrid" role="img" aria-label="6 by 6 grid of shires: 32 compute shires with their sensor channels, and four grey cells for the master, spare, I/O and PCIe shires">
   <!-- Row 0 -->
-  <div class="mesh-cell compute"><div class="id">S0</div><div class="sub">(0,0) TS0</div></div>
-  <div class="mesh-cell compute"><div class="id">S24</div><div class="sub">(1,0) TS24</div></div>
-  <div class="mesh-cell compute"><div class="id">S9</div><div class="sub">(2,0) TS9</div></div>
-  <div class="mesh-cell compute"><div class="id">S25</div><div class="sub">(3,0) TS25</div></div>
-  <div class="mesh-cell compute"><div class="id">S2</div><div class="sub">(4,0) TS2</div></div>
-  <div class="mesh-cell compute"><div class="id">S11</div><div class="sub">(5,0) TS11</div></div>
+  <div class="mesh-cell compute"><div class="id">S0</div><div class="sub"><span class="xy">(0,0) </span>TS0</div></div>
+  <div class="mesh-cell compute"><div class="id">S24</div><div class="sub"><span class="xy">(1,0) </span>TS24</div></div>
+  <div class="mesh-cell compute"><div class="id">S9</div><div class="sub"><span class="xy">(2,0) </span>TS9</div></div>
+  <div class="mesh-cell compute"><div class="id">S25</div><div class="sub"><span class="xy">(3,0) </span>TS25</div></div>
+  <div class="mesh-cell compute"><div class="id">S2</div><div class="sub"><span class="xy">(4,0) </span>TS2</div></div>
+  <div class="mesh-cell compute"><div class="id">S11</div><div class="sub"><span class="xy">(5,0) </span>TS11</div></div>
   <!-- Row 1 -->
-  <div class="mesh-cell compute"><div class="id">S8</div><div class="sub">(0,1) TS8</div></div>
-  <div class="mesh-cell compute"><div class="id">S16</div><div class="sub">(1,1) TS16</div></div>
-  <div class="mesh-cell compute"><div class="id">S1</div><div class="sub">(2,1) TS1</div></div>
-  <div class="mesh-cell compute"><div class="id">S17</div><div class="sub">(3,1) TS17</div></div>
-  <div class="mesh-cell compute"><div class="id">S10</div><div class="sub">(4,1) TS10</div></div>
-  <div class="mesh-cell compute"><div class="id">S19</div><div class="sub">(5,1) TS19</div></div>
+  <div class="mesh-cell compute"><div class="id">S8</div><div class="sub"><span class="xy">(0,1) </span>TS8</div></div>
+  <div class="mesh-cell compute"><div class="id">S16</div><div class="sub"><span class="xy">(1,1) </span>TS16</div></div>
+  <div class="mesh-cell compute"><div class="id">S1</div><div class="sub"><span class="xy">(2,1) </span>TS1</div></div>
+  <div class="mesh-cell compute"><div class="id">S17</div><div class="sub"><span class="xy">(3,1) </span>TS17</div></div>
+  <div class="mesh-cell compute"><div class="id">S10</div><div class="sub"><span class="xy">(4,1) </span>TS10</div></div>
+  <div class="mesh-cell compute"><div class="id">S19</div><div class="sub"><span class="xy">(5,1) </span>TS19</div></div>
   <!-- Row 2 -->
-  <div class="mesh-cell compute"><div class="id">S3</div><div class="sub">(0,2) TS3</div></div>
-  <div class="mesh-cell compute"><div class="id">S4</div><div class="sub">(1,2) TS4</div></div>
-  <div class="mesh-cell compute"><div class="id">S13</div><div class="sub">(2,2) TS13</div></div>
-  <div class="mesh-cell compute"><div class="id">S14</div><div class="sub">(3,2) TS14</div></div>
-  <div class="mesh-cell compute"><div class="id">S18</div><div class="sub">(4,2) TS18</div></div>
-  <div class="mesh-cell compute"><div class="id">S27</div><div class="sub">(5,2) TS27</div></div>
+  <div class="mesh-cell compute"><div class="id">S3</div><div class="sub"><span class="xy">(0,2) </span>TS3</div></div>
+  <div class="mesh-cell compute"><div class="id">S4</div><div class="sub"><span class="xy">(1,2) </span>TS4</div></div>
+  <div class="mesh-cell compute"><div class="id">S13</div><div class="sub"><span class="xy">(2,2) </span>TS13</div></div>
+  <div class="mesh-cell compute"><div class="id">S14</div><div class="sub"><span class="xy">(3,2) </span>TS14</div></div>
+  <div class="mesh-cell compute"><div class="id">S18</div><div class="sub"><span class="xy">(4,2) </span>TS18</div></div>
+  <div class="mesh-cell compute"><div class="id">S27</div><div class="sub"><span class="xy">(5,2) </span>TS27</div></div>
   <!-- Row 3 -->
-  <div class="mesh-cell special"><div class="id">master or spare</div><div class="sub">(0,3) inferred</div></div>
-  <div class="mesh-cell compute"><div class="id">S12</div><div class="sub">(1,3) TS12</div></div>
-  <div class="mesh-cell compute"><div class="id">S21</div><div class="sub">(2,3) TS21</div></div>
-  <div class="mesh-cell compute"><div class="id">S22</div><div class="sub">(3,3) TS22</div></div>
-  <div class="mesh-cell compute"><div class="id">S26</div><div class="sub">(4,3) TS26</div></div>
-  <div class="mesh-cell special"><div class="id">master or spare</div><div class="sub">(5,3) inferred</div></div>
+  <div class="mesh-cell special"><div class="id">master or spare</div><div class="sub"><span class="xy">(0,3) </span>inferred</div></div>
+  <div class="mesh-cell compute"><div class="id">S12</div><div class="sub"><span class="xy">(1,3) </span>TS12</div></div>
+  <div class="mesh-cell compute"><div class="id">S21</div><div class="sub"><span class="xy">(2,3) </span>TS21</div></div>
+  <div class="mesh-cell compute"><div class="id">S22</div><div class="sub"><span class="xy">(3,3) </span>TS22</div></div>
+  <div class="mesh-cell compute"><div class="id">S26</div><div class="sub"><span class="xy">(4,3) </span>TS26</div></div>
+  <div class="mesh-cell special"><div class="id">master or spare</div><div class="sub"><span class="xy">(5,3) </span>inferred</div></div>
   <!-- Row 4 -->
-  <div class="mesh-cell special"><div class="id">I/O or PCIe</div><div class="sub">(0,4) inferred</div></div>
-  <div class="mesh-cell compute"><div class="id">S20</div><div class="sub">(1,4) TS20</div></div>
-  <div class="mesh-cell compute"><div class="id">S29</div><div class="sub">(2,4) TS29</div></div>
-  <div class="mesh-cell compute"><div class="id">S30</div><div class="sub">(3,4) TS30</div></div>
-  <div class="mesh-cell compute"><div class="id">S15</div><div class="sub">(4,4) TS15</div></div>
-  <div class="mesh-cell compute"><div class="id">S23</div><div class="sub">(5,4) TS23</div></div>
+  <div class="mesh-cell special"><div class="id">I/O or PCIe</div><div class="sub"><span class="xy">(0,4) </span>inferred</div></div>
+  <div class="mesh-cell compute"><div class="id">S20</div><div class="sub"><span class="xy">(1,4) </span>TS20</div></div>
+  <div class="mesh-cell compute"><div class="id">S29</div><div class="sub"><span class="xy">(2,4) </span>TS29</div></div>
+  <div class="mesh-cell compute"><div class="id">S30</div><div class="sub"><span class="xy">(3,4) </span>TS30</div></div>
+  <div class="mesh-cell compute"><div class="id">S15</div><div class="sub"><span class="xy">(4,4) </span>TS15</div></div>
+  <div class="mesh-cell compute"><div class="id">S23</div><div class="sub"><span class="xy">(5,4) </span>TS23</div></div>
   <!-- Row 5 -->
-  <div class="mesh-cell special"><div class="id">I/O or PCIe</div><div class="sub">(0,5) inferred</div></div>
-  <div class="mesh-cell compute"><div class="id">S28</div><div class="sub">(1,5) TS28</div></div>
-  <div class="mesh-cell compute"><div class="id">S5</div><div class="sub">(2,5) TS5</div></div>
-  <div class="mesh-cell compute"><div class="id">S6</div><div class="sub">(3,5) TS6</div></div>
-  <div class="mesh-cell compute"><div class="id">S7</div><div class="sub">(4,5) TS7</div></div>
-  <div class="mesh-cell compute"><div class="id">S31</div><div class="sub">(5,5) TS31</div></div>
+  <div class="mesh-cell special"><div class="id">I/O or PCIe</div><div class="sub"><span class="xy">(0,5) </span>inferred</div></div>
+  <div class="mesh-cell compute"><div class="id">S28</div><div class="sub"><span class="xy">(1,5) </span>TS28</div></div>
+  <div class="mesh-cell compute"><div class="id">S5</div><div class="sub"><span class="xy">(2,5) </span>TS5</div></div>
+  <div class="mesh-cell compute"><div class="id">S6</div><div class="sub"><span class="xy">(3,5) </span>TS6</div></div>
+  <div class="mesh-cell compute"><div class="id">S7</div><div class="sub"><span class="xy">(4,5) </span>TS7</div></div>
+  <div class="mesh-cell compute"><div class="id">S31</div><div class="sub"><span class="xy">(5,5) </span>TS31</div></div>
 </div>
 <p class="small caption">The mesh as latency places it (x across, y down). S<i>n</i> is compute shire <i>n</i> and TS<i>n</i> its sensor channel. In this frame the eight memory shires sit one step beyond the top row (0–3, at x = 1–4) and the bottom row (4–7); the PRM calls those sides west and east, so this drawing is the die turned a quarter. The grey cells hold the master, spare, PCIe and I/O shires; which is which is not measured (the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die">heat-per-mm die study</a> infers I/O and PCIe at (0,4) and (0,5)). TS32 (master), TS33 (spare) and TS34 (I/O) are read like the others; the PCIe shire has no sensor.</p>
 
-<h3 id="controllers">Controller mapping and hardware registers</h3>
-<p>The 35 sensors are read through 5 PVT controllers (PVTC 0–4), mapped in the service processor’s address space at <code>0x00_5400_0000 + n·0x1_0000</code>. All five sample continuously at 12 bits (<code>RUN_1</code> mode):</p>
-
-<div class="table-wrap regs">
-<table>
-  <thead>
-    <tr><th>Controller</th><th>Base address</th><th>Sensors</th><th>Channels active</th></tr>
-  </thead>
-  <tbody>
-    <tr><td><strong>PVTC 0</strong></td><td><code>0x00_5400_0000</code></td><td>TS 0–7</td><td>8 / 8</td></tr>
-    <tr><td><strong>PVTC 1</strong></td><td><code>0x00_5401_0000</code></td><td>TS 8–15</td><td>8 / 8</td></tr>
-    <tr><td><strong>PVTC 2</strong></td><td><code>0x00_5402_0000</code></td><td>TS 16–23</td><td>8 / 8</td></tr>
-    <tr><td><strong>PVTC 3</strong></td><td><code>0x00_5403_0000</code></td><td>TS 24–31</td><td>8 / 8</td></tr>
-    <tr><td><strong>PVTC 4</strong></td><td><code>0x00_5404_0000</code></td><td>TS 32–34</td><td>3 / 8 (mask <code>0xF8</code>)</td></tr>
-  </tbody>
-</table>
-</div>
-
-<p>Every sensor has its own hardware registers:</p>
+<h3 id="controllers">The sensors’ hardware registers</h3>
+<p>Five PVT controllers read the 35 sensors, sampling continuously at 12 bits (their addresses are under <a href="#implementation-notes">Implementation notes</a>). Every sensor has its own hardware registers:</p>
 <ul>
   <li><code>TS_SDIF_DATA</code>: the current conversion result.</li>
   <li><code>TS_SMPL_HILO</code>: hardware peak capture. It holds the highest and lowest readings since it was last reset (through <code>TS_HILO_RESET</code>), with no software polling.</li>
@@ -258,7 +690,19 @@ int get_module_current_temperature(struct current_temperature_t *temperature) {
     temperature-&gt;pmic_sys = pmic_temperature;
 }</code></pre>
 
-<p>So the host never sees the current spread between shires: min and max are peak-hold values (in the 20 Sep telemetry the low read 62 °C in all 3,681 samples while the average ran from 72 to 90 °C).</p>
+<p>The field named <code>pmic_sys</code> is not a board sensor either: the firmware fills it with the same 34-shire average (<span id="pmic-agree"></span>), and the SP does not forward the PMIC’s own regulator temperatures. The service processor’s stats packet has a system-temperature slot meant for the PMIC, but the firmware writes 0 into it (a TODO in <code>thermal_pwr_mgmt.c</code>), and it read 0 in all <span id="sys-zero"></span> samples.</p>
+
+<p>So the host never sees the current spread between shires: the low and high are peak-hold values. The firmware resets them together with the service processor’s own statistics, so both cover the same window. In aifoundry2’s telemetry of 20 September the low read <span id="sp-low"></span> °C in all <span id="sp-n"></span> samples, 1 °C under the service processor’s minimum of the average (<span id="sp-spmin"></span> °C), while the average ran from <span id="sp-mean-range"></span> °C. The high only ratchets, but it leaks one number. Every rise followed a new record of the average and settled exactly <span id="sp-excess"></span> °C above the service processor’s maximum of the average (written below as maximum/high): <span id="sp-first"></span> when the load step began, then <span id="sp-step-pairs"></span> during it (each <span id="sp-step-lag"></span> after the record), and <span id="sp-horace-pairs"></span> in the uncontrolled Horace session (the <span id="sp-slow-high"></span> came <span id="sp-slow-lag"></span> s after its record). So at those peaks the hottest shire’s sensor read about <span id="sp-excess2"></span> °C above the 34-shire mean, in the firmware’s whole degrees. The high is a single hardware sample, so sensor noise can add to it. Which shire it was, the host cannot tell.</p>
+
+<p id="both-cards"></p>
+
+<div class="chart-title">What the host’s temperature fields did on 20 September</div>
+<div class="ck-controls"><div id="ht-session"></div></div>
+<div class="ck-controls"><div id="ht-time"></div></div>
+<div id="ht-out"></div>
+<div id="ht-leg"></div>
+<div class="chart" id="hosttemp"></div>
+<p class="small">The four whole-degree fields the host received, one step line each, and the band between the service processor’s maximum of the average and the high, labelled with its width. The short ticks at the top mark each rise of the high. The load step was sampled at 10 Hz; the two Horace logs were committed thinned to 2 Hz, so their step times are good to 0.5 s. Move the time slider, or hover or tap the chart: away from a rise, the high only says what the hottest shire read at the last peak, nothing about now.</p>
 
 <div class="card">
   <div style="font-weight:700;margin-bottom:6px">Why voltage reaches the host shire by shire, and temperature does not</div>
@@ -280,7 +724,7 @@ int get_module_current_temperature(struct current_temperature_t *temperature) {
     <tr>
       <td><strong>1. Sensor hardware</strong></td>
       <td><span class="chip ok">Available now</span></td>
-      <td>35 Moortec temperature sensors already run continuously on the silicon, at 12-bit resolution in hardware (the firmware then truncates to 1 °C).</td>
+      <td>35 Moortec temperature sensors already run continuously on the silicon, at 12-bit resolution in hardware.</td>
     </tr>
     <tr>
       <td><strong>2. SP firmware telemetry patch</strong></td>
@@ -290,7 +734,7 @@ int get_module_current_temperature(struct current_temperature_t *temperature) {
         <ol style="margin:4px 0;padding-left:16px">
           <li><strong>Option A (trace buffer)</strong>: add a 35-entry array, <code>int16_t shire_temps[35]</code>, to the <code>sp_stats</code> periodic trace buffer.</li>
           <li><strong>Option B (new command)</strong>: add a management command, for example <code>DM_CMD_GET_SPATIAL_TEMPERATURE</code>, returning <code>All_MinShire_samples</code>.</li>
-          <li><strong>Option C (no protocol change)</strong>: call the existing <code>pvt_print_temperature_sampled_values(PVTC_MINION_SHIRE)</code> from the SP’s per-pass loop, one line, and parse the trace like the voltage map (whole degrees; see the resolution note above). It also writes a CRITICAL “MinShire Average Temp” line on every call.</li>
+          <li><strong>Option C (no protocol change)</strong>: call the existing <code>pvt_print_temperature_sampled_values(PVTC_MINION_SHIRE)</code> from the SP’s per-pass loop, one line, and parse the trace like the voltage map (whole degrees, since the existing print uses converted values; printing the raw code needs one more changed line). It also writes a CRITICAL “MinShire Average Temp” line on every call.</li>
         </ol>
         Whichever option is used, export the raw 12-bit code (or millidegrees computed before the /1000), not <code>sample.current</code>, which is already truncated to 1 °C.
       </td>
@@ -314,16 +758,33 @@ int get_module_current_temperature(struct current_temperature_t *temperature) {
 </table>
 </div>
 
+<h3 id="implementation-notes">Implementation notes</h3>
+<p>The five PVT controllers (PVTC 0–4) are mapped in the service processor’s address space at <code>0x00_5400_0000 + n·0x1_0000</code>, and all five sample continuously at 12 bits (<code>RUN_1</code> mode):</p>
+
+<div class="table-wrap regs">
+<table>
+  <thead>
+    <tr><th>Controller</th><th>Base address</th><th>Sensors</th><th>Channels active</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>PVTC 0</strong></td><td><code>0x00_5400_0000</code></td><td>TS 0–7</td><td>8 / 8</td></tr>
+    <tr><td><strong>PVTC 1</strong></td><td><code>0x00_5401_0000</code></td><td>TS 8–15</td><td>8 / 8</td></tr>
+    <tr><td><strong>PVTC 2</strong></td><td><code>0x00_5402_0000</code></td><td>TS 16–23</td><td>8 / 8</td></tr>
+    <tr><td><strong>PVTC 3</strong></td><td><code>0x00_5403_0000</code></td><td>TS 24–31</td><td>8 / 8</td></tr>
+    <tr><td><strong>PVTC 4</strong></td><td><code>0x00_5404_0000</code></td><td>TS 32–34</td><td>3 / 8 (mask <code>0xF8</code>)</td></tr>
+  </tbody>
+</table>
+</div>
+
 <h2 id="workaround">4. Current best workaround: temporal reconstruction</h2>
 
 <p>Until a modified SP firmware can be flashed (whether these cards require a signed image is untested), the measurements so far rely on <strong>temporal reconstruction</strong>: reading more out of the timing of the chip-wide average (see <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">the Horace experiment</a>, §8, A model from flips to temperature):</p>
 
 <ol>
-  <li><strong>Sub-degree de-quantization</strong>: the reading is in whole degrees, but the moments when the average steps from <i>T</i> to <i>T</i> + 1 °C are sharp when polled at 10 Hz. Fitting the heating power that reproduces those step times recovers the rise to about 0.03 °C on repeated runs, and the heating power to about 1 W of the electrical measurement.</li>
-  <li><strong>Flip-to-heat modelling from the RTL</strong>: counting operand-driven toggles in the open RTL of the multiply-add datapath (the Erbium branch, same Minion core lineage) predicts board power over idle to 0.5 W rms leave-one-pattern-out, and 0.92 W rms on 14 matrices predicted before they ran.</li>
-  <li><strong>Leakage loop feedback</strong>: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">die leakage</a> accounts for 23 W of the 36 W idle power at 80 °C and grows by 0.65 W/°C, closing a thermal feedback loop with gain 0.95 at 80 °C.</li>
+  <li><strong>Sub-degree de-quantization</strong>: the moments when the whole-degree average steps are sharp at 10 Hz, and fitting the heating power that reproduces them recovers the temperature below a degree (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#strict-temperature-control">the Horace experiment, §2</a>).</li>
+  <li><strong>Flip-to-heat modelling from the RTL</strong>: counting the toggles the operands cause in the open RTL of the multiply-add datapath predicts the board power, and from it the die temperature (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">the Horace experiment, §8</a>).</li>
 </ol>
-<p>All three sharpen the chip-wide average; none says where on the die the heat is.</p>
+<p>Both sharpen the chip-wide average; neither says where on the die the heat is.</p>
 
 <h2 id="sources">Sources</h2>
 <ul class="small">
@@ -331,9 +792,9 @@ int get_module_current_temperature(struct current_temperature_t *temperature) {
   <li>RTL: <a href="https://github.com/openhwfoundation/core-et/tree/b38a1a31da67efe00c61e983e64b892c58080115">core-et’s Erbium branch at b38a1a3</a>, <code>rtl/inc/pvt_defines.vh</code>: the same Minion core lineage in a later MCU-class configuration, not the taped-out ET-SoC-1.</li>
   <li>Manuals: ET Programmer’s Reference Manual §1.6 and §15.2.3, in <a href="https://github.com/aifoundry-org/et-man">et-man</a>.</li>
   <li>Mesh map: <code>workloads/nocbench/analyze.py</code> (marty1885’s layout and the four empty cells).</li>
-  <li>Telemetry: the three <code>*-telemetry.jsonl</code> files in <code>docs/reports/data/2026-09-20-power-aifoundry2/</code> (<code>thermal</code>, <code>horace</code> and <code>horace2</code>: 3,681 samples, 20 Sep) and <code>per-shire-voltage-idle.json</code> in the same directory.</li>
+  <li>Telemetry: the three <code>*-telemetry.jsonl</code> files in <code>docs/reports/data/2026-09-20-power-aifoundry2/</code> (<code>thermal</code>, <code>horace</code> and <code>horace2</code>: 3,681 samples, 20 Sep) and <code>per-shire-voltage-idle.json</code> in the same directory. The chart’s change points, the check on both cards (every committed ettelem log, on either card, that records these fields) and the grid’s voltages are the two constants that <code>tools/ettelem/host_temp_fields.py</code> prints (<code>--check</code> confirms this page embeds them unchanged).</li>
   <li>Thermal model: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/11-thermal-model.md"><code>docs/findings/11-thermal-model.md</code></a>.</li>
-  <li>Versions: first published 22 September 2026; corrected 24 September 2026 (the tile size, where the firmware truncates to whole degrees, the <code>pmic_sys</code> field, the peak-hold minimum and maximum, the existing temperature print, the firmware-signing status, the labels of the four non-compute cells, and the figures in §4).</li>
+  <li>Versions: first published 22 September 2026; corrected 24 September 2026 (the tile size, where the firmware truncates to whole degrees, the <code>pmic_sys</code> field, the peak-hold minimum and maximum, the existing temperature print, the firmware-signing status, the labels of the four non-compute cells, and the figures in §4); revised 25 September 2026 (what the peak-hold high reveals, checked on both cards, with a chart of the host’s temperature fields; the stats packet’s system-temperature slot; the sensor grid’s voltage view; the register details moved to Implementation notes; §4 cut to the two reconstruction methods).</li>
 </ul>
 
 <h2 id="related">Related reports</h2>
@@ -347,6 +808,205 @@ int get_module_current_temperature(struct current_temperature_t *temperature) {
 </ul>
 <p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
 
+<script>
+/* chart data: printed by tools/ettelem/host_temp_fields.py */
+const HOST_TEMP = {"fields":["t_s","mean","low","high","sp_max","sp_min"],"source":"docs/reports/data/2026-09-20-power-aifoundry2/{thermal,horace,horace2}-telemetry.jsonl; tools/ettelem/host_temp_fields.py","sessions":[{"id":"thermal","label":"Load step (E5)","start":"21:09","seconds":184.9,"hz":10,"n":1848,"pmic_eq_mean":1846,"pmic_diff_max":1,"system_c_zero":1848,"rows":[[0.0,72,62,87,84,63],[20.2,73,62,87,84,63],[20.5,74,62,87,84,63],[21.1,75,62,87,84,63],[22.4,76,62,87,84,63],[24.2,77,62,87,84,63],[26.9,78,62,87,84,63],[27.2,77,62,87,84,63],[27.8,78,62,87,84,63],[30.8,79,62,87,84,63],[35.7,80,62,87,84,63],[39.9,81,62,87,84,63],[41.7,80,62,87,84,63],[42.1,81,62,87,84,63],[45.3,82,62,87,84,63],[49.2,81,62,87,84,63],[49.3,82,62,87,84,63],[51.4,83,62,87,84,63],[57.6,84,62,87,84,63],[62.5,85,62,87,84,63],[62.7,85,62,87,85,63],[63.6,84,62,87,85,63],[64.2,85,62,87,85,63],[65.5,85,62,88,85,63],[68.6,86,62,88,85,63],[68.8,86,62,88,86,63],[70.3,86,62,89,86,63],[70.8,85,62,89,86,63],[71.1,86,62,89,86,63],[74.5,87,62,89,86,63],[74.7,87,62,89,87,63],[76.3,87,62,90,87,63],[78.1,86,62,90,87,63],[78.6,85,62,90,87,63],[79.8,84,62,90,87,63],[82.0,83,62,90,87,63],[86.8,82,62,90,87,63],[101.2,81,62,90,87,63],[101.3,82,62,90,87,63],[102.2,81,62,90,87,63],[102.3,82,62,90,87,63],[102.4,81,62,90,87,63],[102.6,82,62,90,87,63],[102.7,81,62,90,87,63],[120.1,82,62,90,87,63],[161.9,81,62,90,87,63],[162.0,82,62,90,87,63],[162.3,81,62,90,87,63],[162.4,82,62,90,87,63],[162.6,81,62,90,87,63],[162.9,82,62,90,87,63],[163.4,81,62,90,87,63],[164.0,82,62,90,87,63],[164.1,81,62,90,87,63],[184.9,81,62,90,87,63]]},{"id":"horace","label":"Horace, uncontrolled (E7)","start":"21:14","seconds":292.8,"hz":2,"n":586,"pmic_eq_mean":586,"pmic_diff_max":0,"system_c_zero":586,"rows":[[0.0,79,62,90,87,63],[16.5,80,62,90,87,63],[18.5,81,62,90,87,63],[23.0,80,62,90,87,63],[26.5,81,62,90,87,63],[31.0,82,62,90,87,63],[32.0,81,62,90,87,63],[33.5,80,62,90,87,63],[35.5,81,62,90,87,63],[38.0,82,62,90,87,63],[42.0,81,62,90,87,63],[44.5,80,62,90,87,63],[45.0,81,62,90,87,63],[51.6,80,62,90,87,63],[54.6,81,62,90,87,63],[57.1,82,62,90,87,63],[61.1,81,62,90,87,63],[65.1,82,62,90,87,63],[71.6,81,62,90,87,63],[83.1,82,62,90,87,63],[84.1,83,62,90,87,63],[85.1,84,62,90,87,63],[86.6,85,62,90,87,63],[89.6,84,62,90,87,63],[90.6,83,62,90,87,63],[93.1,84,62,90,87,63],[93.6,85,62,90,87,63],[95.1,86,62,90,87,63],[97.1,87,62,90,87,63],[99.1,86,62,90,87,63],[99.6,85,62,90,87,63],[101.1,84,62,90,87,63],[103.1,85,62,90,87,63],[109.1,84,62,90,87,63],[111.6,83,62,90,87,63],[112.1,84,62,90,87,63],[114.1,85,62,90,87,63],[118.6,84,62,90,87,63],[121.1,83,62,90,87,63],[121.6,85,62,90,87,63],[122.1,86,62,90,87,63],[123.1,87,62,90,87,63],[125.1,88,62,90,88,63],[125.6,88,62,91,88,63],[127.6,88,62,91,89,63],[128.1,87,62,91,89,63],[129.1,86,62,91,89,63],[130.6,85,62,91,89,63],[131.1,86,62,91,89,63],[138.6,85,62,91,89,63],[141.1,86,62,91,89,63],[148.1,85,62,91,89,63],[150.1,86,62,91,89,63],[150.6,87,62,91,89,63],[151.7,88,62,91,89,63],[153.2,89,62,91,89,63],[154.2,89,62,92,89,63],[155.7,90,62,92,89,63],[156.2,90,62,92,90,63],[156.7,89,62,93,90,63],[157.2,88,62,93,90,63],[158.2,87,62,93,90,63],[161.2,88,62,93,90,63],[166.2,87,62,93,90,63],[176.2,86,62,93,90,63],[181.7,87,62,93,90,63],[185.2,86,62,93,90,63],[197.7,85,62,93,90,63],[198.2,86,62,93,90,63],[199.2,87,62,93,90,63],[206.2,86,62,93,90,63],[207.7,87,62,93,90,63],[210.7,88,62,93,90,63],[214.2,87,62,93,90,63],[218.7,88,62,93,90,63],[224.2,87,62,93,90,63],[227.7,88,62,93,90,63],[234.7,87,62,93,90,63],[236.7,88,62,93,90,63],[241.2,89,62,93,90,63],[242.7,88,62,93,90,63],[244.7,87,62,93,90,63],[246.2,88,62,93,90,63],[248.7,89,62,93,90,63],[252.7,88,62,93,90,63],[257.3,89,62,93,90,63],[262.8,88,62,93,90,63],[265.8,89,62,93,90,63],[272.8,88,62,93,90,63],[274.8,89,62,93,90,63],[278.8,90,62,93,90,63],[281.3,89,62,93,90,63],[283.3,88,62,93,90,63],[284.3,89,62,93,90,63],[287.3,90,62,93,90,63],[290.8,89,62,93,90,63],[292.8,89,62,93,90,63]]},{"id":"horace2","label":"Horace, 80 °C starts (E8)","start":"21:34","seconds":623.8,"hz":2,"n":1247,"pmic_eq_mean":1247,"pmic_diff_max":0,"system_c_zero":1247,"rows":[[0.0,74,62,93,90,63],[3.5,76,62,93,90,63],[4.5,77,62,93,90,63],[5.5,78,62,93,90,63],[7.0,79,62,93,90,63],[9.0,80,62,93,90,63],[10.0,79,62,93,90,63],[10.5,80,62,93,90,63],[12.5,81,62,93,90,63],[16.0,82,62,93,90,63],[16.5,81,62,93,90,63],[17.0,82,62,93,90,63],[20.5,83,62,93,90,63],[25.5,84,62,93,90,63],[29.5,83,62,93,90,63],[30.0,82,62,93,90,63],[31.5,81,62,93,90,63],[33.5,80,62,93,90,63],[42.0,81,62,93,90,63],[48.0,80,62,93,90,63],[48.5,81,62,93,90,63],[53.0,82,62,93,90,63],[55.0,81,62,93,90,63],[56.0,80,62,93,90,63],[57.1,81,62,93,90,63],[59.6,82,62,93,90,63],[63.6,81,62,93,90,63],[66.6,80,62,93,90,63],[67.1,81,62,93,90,63],[74.1,80,62,93,90,63],[75.1,81,62,93,90,63],[77.1,82,62,93,90,63],[81.6,81,62,93,90,63],[85.1,80,62,93,90,63],[85.6,81,62,93,90,63],[86.6,82,62,93,90,63],[92.6,81,62,93,90,63],[99.1,80,62,93,90,63],[99.6,81,62,93,90,63],[109.1,80,62,93,90,63],[109.6,81,62,93,90,63],[110.1,82,62,93,90,63],[110.6,83,62,93,90,63],[112.1,84,62,93,90,63],[113.6,85,62,93,90,63],[116.6,84,62,93,90,63],[117.6,83,62,93,90,63],[119.6,82,62,93,90,63],[127.1,81,62,93,90,63],[168.7,80,62,93,90,63],[169.2,81,62,93,90,63],[169.7,82,62,93,90,63],[170.2,83,62,93,90,63],[171.2,84,62,93,90,63],[172.2,85,62,93,90,63],[174.2,86,62,93,90,63],[175.7,85,62,93,90,63],[176.2,84,62,93,90,63],[177.7,83,62,93,90,63],[181.2,82,62,93,90,63],[197.2,81,62,93,90,63],[197.7,82,62,93,90,63],[198.2,81,62,93,90,63],[261.8,80,62,93,90,63],[262.3,81,62,93,90,63],[263.3,82,62,93,90,63],[267.3,83,62,93,90,63],[268.8,82,62,93,90,63],[270.8,81,62,93,90,63],[292.3,80,62,93,90,63],[292.8,81,62,93,90,63],[293.8,82,62,93,90,63],[297.9,83,62,93,90,63],[299.4,82,62,93,90,63],[301.4,81,62,93,90,63],[319.4,80,62,93,90,63],[319.9,81,62,93,90,63],[320.4,80,62,93,90,63],[320.9,82,62,93,90,63],[321.4,83,62,93,90,63],[322.4,84,62,93,90,63],[323.9,85,62,93,90,63],[325.9,86,62,93,90,63],[327.4,85,62,93,90,63],[327.9,84,62,93,90,63],[329.4,83,62,93,90,63],[332.9,82,62,93,90,63],[347.9,81,62,93,90,63],[412.0,82,62,93,90,63],[415.5,83,62,93,90,63],[417.5,82,62,93,90,63],[419.5,81,62,93,90,63],[439.5,80,62,93,90,63],[440.0,81,62,93,90,63],[441.5,82,62,93,90,63],[448.5,81,62,93,90,63],[467.6,80,62,93,90,63],[468.1,81,62,93,90,63],[468.6,82,62,93,90,63],[469.1,83,62,93,90,63],[470.1,84,62,93,90,63],[472.1,85,62,93,90,63],[474.1,86,62,93,90,63],[474.6,85,62,93,90,63],[475.1,84,62,93,90,63],[476.1,83,62,93,90,63],[479.6,82,62,93,90,63],[493.1,81,62,93,90,63],[557.2,82,62,93,90,63],[560.7,83,62,93,90,63],[562.2,82,62,93,90,63],[564.2,81,62,93,90,63],[587.2,80,62,93,90,63],[587.7,81,62,93,90,63],[616.3,80,62,93,90,63],[616.8,81,62,93,90,63],[623.8,81,62,93,90,63]]}],"cards":{"aifoundry2":{"logs":25,"samples":174233,"dates":["2026-09-20","2026-09-24"],"low_pairs":[[61,60],[63,62]],"end_pairs":[[87,90],[90,93]],"rises":[{"log":"2026-09-20-power-aifoundry2","t_s":125.6,"high":91,"mean":88,"sp_max":88,"since_record_s":0.5,"until_record_s":2.0},{"log":"2026-09-20-power-aifoundry2","t_s":154.2,"high":92,"mean":89,"sp_max":89,"since_record_s":26.5,"until_record_s":2.0},{"log":"2026-09-20-power-aifoundry2","t_s":156.7,"high":93,"mean":89,"sp_max":90,"since_record_s":0.5,"until_record_s":null},{"log":"2026-09-20-power-aifoundry2","t_s":65.5,"high":88,"mean":85,"sp_max":85,"since_record_s":2.8,"until_record_s":3.3},{"log":"2026-09-20-power-aifoundry2","t_s":70.3,"high":89,"mean":86,"sp_max":86,"since_record_s":1.5,"until_record_s":4.4},{"log":"2026-09-20-power-aifoundry2","t_s":76.3,"high":90,"mean":87,"sp_max":87,"since_record_s":1.6,"until_record_s":null}],"records":[{"log":"2026-09-20-power-aifoundry2","t_s":125.1,"sp_max":88,"high":90,"high_rose_after_s":0.5,"log_left_s":167.7},{"log":"2026-09-20-power-aifoundry2","t_s":127.6,"sp_max":89,"high":91,"high_rose_after_s":26.5,"log_left_s":165.2},{"log":"2026-09-20-power-aifoundry2","t_s":156.2,"sp_max":90,"high":92,"high_rose_after_s":0.5,"log_left_s":136.6},{"log":"2026-09-20-power-aifoundry2","t_s":62.7,"sp_max":85,"high":87,"high_rose_after_s":2.8,"log_left_s":122.2},{"log":"2026-09-20-power-aifoundry2","t_s":68.8,"sp_max":86,"high":88,"high_rose_after_s":1.5,"log_left_s":116.1},{"log":"2026-09-20-power-aifoundry2","t_s":74.7,"sp_max":87,"high":89,"high_rose_after_s":1.6,"log_left_s":110.2}]},"aifoundry3":{"logs":16,"samples":172176,"dates":["2026-09-22","2026-09-24"],"low_pairs":[[49,48]],"end_pairs":[[61,63]],"rises":[{"log":"2026-09-22-horace-aifoundry3","t_s":23.6,"high":61,"mean":58,"sp_max":58,"since_record_s":null,"until_record_s":2.4},{"log":"2026-09-22-horace-aifoundry3","t_s":29.3,"high":62,"mean":59,"sp_max":59,"since_record_s":3.3,"until_record_s":2.8},{"log":"2026-09-22-horace-aifoundry3","t_s":79.0,"high":63,"mean":60,"sp_max":60,"since_record_s":46.8,"until_record_s":252.0}],"records":[{"log":"2026-09-22-horace-aifoundry3","t_s":26.0,"sp_max":59,"high":61,"high_rose_after_s":3.3,"log_left_s":749.3},{"log":"2026-09-22-horace-aifoundry3","t_s":32.1,"sp_max":60,"high":62,"high_rose_after_s":46.8,"log_left_s":743.2},{"log":"2026-09-22-horace-aifoundry3","t_s":331.0,"sp_max":61,"high":63,"high_rose_after_s":null,"log_left_s":444.3}]}}};
+const SHIRE_MV = {"7":{"mnn":[519,518,520],"sram":[703,702,704],"noc":[485,484,486]},"8":{"mnn":[518,514,519],"sram":[705,703,706],"noc":[484,483,486]},"9":{"mnn":[519,515,520],"sram":[707,705,707],"noc":[486,484,487]},"10":{"mnn":[517,515,519],"sram":[704,702,704],"noc":[483,483,486]},"11":{"mnn":[518,516,520],"sram":[704,703,704],"noc":[485,484,486]},"12":{"mnn":[518,515,519],"sram":[705,704,705],"noc":[484,483,486]},"13":{"mnn":[519,516,519],"sram":[704,703,704],"noc":[484,483,486]},"14":{"mnn":[521,520,521],"sram":[706,704,706],"noc":[486,485,487]},"15":{"mnn":[520,519,521],"sram":[704,703,705],"noc":[486,484,487]},"16":{"mnn":[517,514,519],"sram":[705,704,706],"noc":[484,483,486]},"17":{"mnn":[519,515,520],"sram":[706,705,707],"noc":[485,484,487]},"18":{"mnn":[517,513,518],"sram":[703,701,703],"noc":[483,482,485]},"19":{"mnn":[518,516,520],"sram":[704,702,704],"noc":[485,484,486]},"20":{"mnn":[519,518,520],"sram":[705,703,706],"noc":[485,484,486]},"21":{"mnn":[518,516,519],"sram":[704,702,704],"noc":[484,483,485]},"22":{"mnn":[520,518,520],"sram":[705,703,706],"noc":[485,484,487]},"23":{"mnn":[519,519,521],"sram":[704,703,704],"noc":[485,484,486]},"24":{"mnn":[519,515,520],"sram":[707,705,707],"noc":[485,484,487]},"25":{"mnn":[519,516,520],"sram":[706,704,707],"noc":[486,484,487]},"26":{"mnn":[517,514,518],"sram":[703,701,704],"noc":[483,482,485]},"27":{"mnn":[517,515,519],"sram":[703,702,704],"noc":[484,483,485]},"28":{"mnn":[518,515,519],"sram":[705,703,705],"noc":[484,483,486]},"29":{"mnn":[517,515,518],"sram":[704,702,704],"noc":[484,482,485]},"30":{"mnn":[519,516,520],"sram":[705,703,706],"noc":[485,484,486]},"31":{"mnn":[518,516,520],"sram":[703,701,704],"noc":[484,483,485]},"32":{"mnn":[518,517,520],"sram":[704,702,704],"noc":[485,484,486]},"33":{"mnn":[519,519,522],"sram":[703,702,704],"noc":[485,484,486]},"0":{"mnn":[517,513,519],"sram":[705,704,706],"noc":[484,483,486]},"1":{"mnn":[517,513,519],"sram":[705,704,706],"noc":[484,483,486]},"2":{"mnn":[517,513,518],"sram":[704,702,704],"noc":[483,482,485]},"3":{"mnn":[517,515,519],"sram":[704,702,704],"noc":[484,483,486]},"4":{"mnn":[518,518,520],"sram":[705,704,705],"noc":[484,483,486]},"5":{"mnn":[519,516,520],"sram":[704,703,705],"noc":[483,483,486]},"6":{"mnn":[520,518,521],"sram":[705,704,706],"noc":[486,485,487]}};
+/* What the host's temperature fields did on 20 September, and the sensor grid's voltage view. The two constants above
+   are printed by tools/ettelem/host_temp_fields.py (run it with --check on this page to confirm they are current);
+   every number below is computed from them. Charts use the shared toolkit CK. */
+(function () {
+  const $ = id => document.getElementById(id), put = (id, v) => { const e = $(id); if (e) e.textContent = v; };
+  const num = CK.fmt.num, SES = HOST_TEMP.sessions, byId = Object.fromEntries(SES.map(s => [s.id, s]));
+  const T = 0, MEAN = 1, LOW = 2, HIGH = 3, SPMAX = 4, SPMIN = 5;
+  const WORD = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+  const word = n => WORD[n] || num(n);
+  const list = a => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
+  const uniq = a => [...new Set(a)].sort((x, y) => x - y);
+  // Each rise of the high, with the time the service processor's maximum of the mean last rose before it.
+  function rises(s) {
+    const out = []; let rec = null;
+    s.rows.forEach((r, i) => {
+      if (!i) return;
+      const p = s.rows[i - 1];
+      if (r[SPMAX] > p[SPMAX]) rec = r[T];
+      if (r[HIGH] > p[HIGH]) out.push({t: r[T], high: r[HIGH], spmax: r[SPMAX], lag: rec == null ? null : r[T] - rec});
+    });
+    return out;
+  }
+  const RISES = Object.fromEntries(SES.map(s => [s.id, rises(s)]));
+  const allRows = SES.flatMap(s => s.rows), nTot = SES.reduce((a, s) => a + s.n, 0);
+  const pair = r => r[SPMAX] !== undefined ? `${r[SPMAX]}/${r[HIGH]}` : `${r.spmax}/${r.high}`;
+  { // the paragraph's numbers
+    const first = byId.thermal.rows[0], excess = uniq([first[HIGH] - first[SPMAX]].concat(SES.flatMap(s => RISES[s.id].map(r => r.high - r.spmax))));
+    const ex = excess.length === 1 ? num(excess[0], 0) : CK.fmt.range(excess[0], excess[excess.length - 1], 0);
+    ['sp-excess', 'sp-excess2'].forEach(id => put(id, ex));
+    const eq = SES.reduce((a, s) => a + s.pmic_eq_mean, 0), dmax = Math.max(...SES.map(s => s.pmic_diff_max));
+    put('pmic-agree', eq === nTot ? `all ${num(nTot)} samples agreed` : `${num(eq)} of ${num(nTot)} samples agreed; the other ${word(nTot - eq)} differed by ${num(dmax)} °C`);
+    put('sys-zero', num(SES.reduce((a, s) => a + s.system_c_zero, 0)));
+    const lows = uniq(allRows.map(r => r[LOW])), spmin = uniq(allRows.map(r => r[SPMIN])), means = allRows.map(r => r[MEAN]);
+    put('sp-low', lows.length === 1 ? num(lows[0]) : CK.fmt.range(lows[0], lows[lows.length - 1], 0));
+    put('sp-n', num(nTot));
+    put('sp-spmin', spmin.length === 1 ? num(spmin[0]) : CK.fmt.range(spmin[0], spmin[spmin.length - 1], 0));
+    put('sp-mean-range', num(Math.min(...means)) + ' to ' + num(Math.max(...means)));
+    put('sp-first', pair(first));
+    const st = RISES.thermal, ho = RISES.horace;
+    put('sp-step-pairs', list(st.map(pair)));
+    const lags = st.map(r => r.lag).filter(v => v != null);
+    put('sp-step-lag', CK.fmt.range(Math.min(...lags), Math.max(...lags), 1, 's'));
+    put('sp-horace-pairs', list(ho.map(pair)));
+    const slow = ho.reduce((a, r) => (r.lag > a.lag ? r : a), ho[0]);
+    put('sp-slow-high', num(slow.high)); put('sp-slow-lag', num(slow.lag, 0));
+  }
+
+  { // both cards: every committed log that carries these fields (HOST_TEMP.cards)
+    const C = HOST_TEMP.cards, names = Object.keys(C).sort(), card = k => k;
+    const lowOff = uniq(names.flatMap(k => C[k].low_pairs.map(([m, l]) => l - m)));
+    const R = names.flatMap(k => C[k].rises.map(r => Object.assign({card: k}, r)));
+    const exc = R.map(r => r.high - r.mean), counts = {};
+    exc.forEach(v => { counts[v] = (counts[v] || 0) + 1; });
+    const mode = +Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
+    const others = Object.keys(counts).filter(v => +v !== mode).map(v => `${counts[v] === 1 ? 'once' : word(counts[v]) + ' times'} ${v} °C`);
+    const settled = k => uniq(C[k].end_pairs.map(([m, h]) => h - m));
+    // each new record of the mean: did the high rise before the next one? If not, the hottest shire was then at most
+    // (high - record) above the mean.
+    const recs = k => {
+      const rs = C[k].records, missed = rs.filter(r => r.high_rose_after_s == null), st = list(settled(k).map(v => num(v)));
+      if (!missed.length) return `On ${k} each of the average’s ${word(rs.length)} new records was followed by a rise, and the high settled ` +
+        `${st} °C above the service processor’s maximum.`;
+      const m = missed[missed.length - 1];
+      return `On ${k} ${word(rs.length - missed.length)} of ${word(rs.length)} were; after the ${num(m.sp_max)} °C record the high did not move ` +
+        `in the remaining ${num(m.log_left_s, 0)} s of the log, so the hottest shire was then at most ${num(m.high - m.sp_max)} °C above the average, ` +
+        `and the high settled ${st} °C above the maximum.`;
+    };
+    const per = names.map(k => `${word(C[k].rises.length)} ${C[k].rises.length === 1 ? 'time' : 'times'} on ${k}`);
+    const dates = names.flatMap(k => C[k].dates).sort();
+    const fmtD = d => +d.slice(8, 10);
+    put('lede-excess', num(mode));
+    $('both-cards').innerHTML = `<b>On both cards.</b> Every committed log that carries these fields was checked (${num(names.reduce((a, k) => a + C[k].logs, 0))} logs, ` +
+      `${fmtD(dates[0])}–${fmtD(dates[dates.length - 1])} September: ${list(names.map(k => `${num(C[k].samples)} samples on ${k}`))}). ` +
+      (lowOff.length === 1 ? `The low sits exactly ${num(-lowOff[0])} °C under the service processor’s minimum of the average in every sample, at each minimum the cards recorded (` +
+        list(names.map(k => list(C[k].low_pairs.map(([m, l]) => `${m}/${l}`)) + ' on ' + k)) + '). ' : '') +
+      `Each time the high rose, ${list(per)}, it came to ${num(mode)} °C above the average at that sample` +
+      (others.length ? ` in ${word(counts[mode])} of the ${word(R.length)} rises (${list(others)})` : '') + '. ' +
+      names.map(recs).join(' ') +
+      ` So on both cards the high says how far the hottest shire ran above the average at a peak, about ${num(mode)} °C in whole degrees, and nothing about where that shire is or what it reads now.`;
+  }
+
+  /* ---- the chart ---- */
+  const COL = {mean: 'var(--c2)', high: 'var(--c5)', spmax: 'var(--ref)', low: 'var(--c1)'};
+  const LINES = [
+    {k: HIGH, key: 'high', label: 'peak-hold high', short: 'high', color: COL.high},
+    {k: SPMAX, key: 'spmax', label: 'the SP’s maximum of the mean', short: 'SP max', color: COL.spmax, dash: '5 3'},
+    {k: MEAN, key: 'mean', label: 'mean of the 34 shires', short: 'mean', color: COL.mean},
+    {k: LOW, key: 'low', label: 'peak-hold low', short: 'low', color: COL.low}];
+  CK.legend('ht-leg', LINES.map(l => ({key: l.key, label: l.label, color: l.color, mark: l.dash ? 'dash' : 'line'}))
+    .concat([{key: 'band', label: 'band: high above the SP’s maximum', color: 'color-mix(in srgb, var(--c5) 30%, var(--surface))', mark: 'box'}]));
+  const ST = {id: 'thermal', t: 0};
+  const rowAt = (s, t) => { let r = s.rows[0]; for (const q of s.rows) if (q[T] <= t + 1e-9) r = q; return r; };
+  const out = CK.readout('ht-out');
+  function readout() {
+    const s = byId[ST.id], r = rowAt(s, ST.t), last = RISES[ST.id].filter(q => q.t <= ST.t + 1e-9).pop();
+    let h = `<b>t ${num(ST.t, 1)} s</b> · mean ${r[MEAN]} · SP max ${r[SPMAX]} · high ${r[HIGH]} · low ${r[LOW]} °C`;
+    if (last && ST.t - last.t <= 3) h += ` <b>→ at this peak the hottest shire read about ${r[HIGH] - r[SPMAX]} °C above the mean’s record (SP max)</b>`;
+    else h += ` · high held since ${last ? `t = ${num(last.t, 1)} s` : 'before this session began'}; it says nothing about now`;
+    out.set(h);
+  }
+  let timeCtl;
+  function makeTime() {
+    const s = byId[ST.id];
+    timeCtl = CK.range('ht-time', {label: 'Time into the session', min: 0, max: s.seconds, step: 1 / s.hz, value: ST.t,
+      fmt: v => num(v, 1) + ' s', onInput: v => { ST.t = v; f.cross(); readout(); }});
+  }
+  const setT = t => { ST.t = t; timeCtl.input.value = t; timeCtl.el.querySelector('output').textContent = num(t, 1) + ' s';
+    timeCtl.input.setAttribute('aria-valuetext', num(t, 1) + ' s'); f.cross(); readout(); };
+  // half a second after the session's last rise, on the time slider's own steps (one per sample)
+  const defaultT = id => { const rs = RISES[id], hz = byId[id].hz; return rs.length ? Math.round((rs[rs.length - 1].t + 0.5) * hz) / hz : 0; };
+  CK.seg('ht-session', {label: 'Session', value: ST.id,
+    options: SES.map(s => [s.id, `${s.label}, ${s.start} (${num(s.seconds, 0)} s)`]),
+    onChange: v => { ST.id = v; ST.t = defaultT(v); makeTime(); f.redraw(); readout(); }});
+  const f = CK.frame('hosttemp', {height: W => (W < 600 ? 270 : 330), label: 'The host’s temperature fields against time', draw: f => {
+    const s = byId[ST.id], W = f.W, H = f.H, L = 34, R = f.narrow ? 46 : 60, Tp = 20, B = 30, rows = s.rows, end = s.seconds;
+    const vals = rows.flatMap(r => [r[MEAN], r[LOW], r[HIGH], r[SPMAX]]);
+    const x = CK.lin(0, end, L, W - R), y = CK.lin(Math.floor((Math.min(...vals) - 2) / 5) * 5, Math.ceil((Math.max(...vals) + 2) / 5) * 5, H - B, Tp);
+    CK.axes(f, {x, y, L, R, T: Tp, B, xfmt: v => num(v, 0) + ' s', yfmt: v => num(v, 0)});
+    CK.txt(f.svg, L + 4, 12, '°C', 'lab');
+    const step = k => { let d = `M${x(rows[0][T]).toFixed(1)},${y(rows[0][k]).toFixed(1)}`;
+      for (let i = 1; i < rows.length; i++) d += `H${x(rows[i][T]).toFixed(1)}V${y(rows[i][k]).toFixed(1)}`;
+      return d + `H${x(end).toFixed(1)}`; };
+    // the band between the SP's maximum and the high, and its width
+    let band = `M${x(rows[0][T]).toFixed(1)},${y(rows[0][HIGH]).toFixed(1)}`;
+    for (let i = 1; i < rows.length; i++) band += `H${x(rows[i][T]).toFixed(1)}V${y(rows[i][HIGH]).toFixed(1)}`;
+    band += `H${x(end).toFixed(1)}V${y(rows[rows.length - 1][SPMAX]).toFixed(1)}`;
+    for (let i = rows.length - 1; i >= 1; i--) band += `H${x(rows[i][T]).toFixed(1)}V${y(rows[i - 1][SPMAX]).toFixed(1)}`;
+    band += `H${x(rows[0][T]).toFixed(1)}Z`;
+    const b = CK.el('path', {d: band, 'aria-hidden': 'true'}, f.svg); b.style.fill = 'color-mix(in srgb, var(--c5) 30%, var(--surface))'; b.style.opacity = '0.8';
+    let seg0 = 0;
+    for (let i = 1; i <= rows.length; i++) {
+      const w = i < rows.length ? rows[i][HIGH] - rows[i][SPMAX] : null, w0 = rows[seg0][HIGH] - rows[seg0][SPMAX];
+      if (i < rows.length && w === w0) continue;
+      const t0 = rows[seg0][T], t1 = i < rows.length ? rows[i][T] : end;
+      if (x(t1) - x(t0) >= 40) { const r = rows[seg0], tx = CK.txt(f.svg, (x(t0) + x(t1)) / 2, y((r[HIGH] + r[SPMAX]) / 2) + 4, `+${w0} °C`, 'ht-band', 'middle'); tx.setAttribute('aria-hidden', 'true'); }
+      seg0 = i;
+    }
+    for (const l of LINES) { const e = CK.el('path', {d: step(l.k), fill: 'none', 'stroke-width': 2, 'stroke-linejoin': 'round'}, f.svg);
+      e.style.stroke = l.color; if (l.dash) e.style.strokeDasharray = l.dash; }
+    for (const r of RISES[ST.id]) CK.el('line', {x1: x(r.t), x2: x(r.t), y1: Tp - 8, y2: Tp, 'stroke-width': 1.5, stroke: 'var(--ink)'}, f.svg);
+    // end labels, nudged apart
+    const lastRow = rows[rows.length - 1], labs = LINES.map(l => ({l, y: y(lastRow[l.k])})).sort((a, c) => a.y - c.y);
+    for (let i = 1; i < labs.length; i++) if (labs[i].y - labs[i - 1].y < 13) labs[i].y = labs[i - 1].y + 13;
+    for (const a of labs) CK.txt(f.svg, W - R + 4, a.y + 4, a.l.short, 'lab');
+    // the moment: crosshair, pointer, keyboard
+    const cross = CK.el('line', {y1: Tp, y2: H - B, stroke: 'var(--ink-2)', 'stroke-width': 1, 'pointer-events': 'none'}, f.svg);
+    f.cross = () => { cross.setAttribute('x1', x(ST.t)); cross.setAttribute('x2', x(ST.t)); };
+    const hit = CK.el('rect', {x: L, y: Tp, width: W - L - R, height: H - B - Tp, class: 'ck-hit', tabindex: 0, role: 'img',
+      'aria-label': 'The host’s temperature fields against time. Left and right arrow keys step one sample; the readout above the chart gives the values.'}, f.svg);
+    const tip = () => { const r = rowAt(s, ST.t); return `<b>${num(ST.t, 1)} s</b><br>mean ${r[MEAN]} · SP max ${r[SPMAX]}<br>high ${r[HIGH]} · low ${r[LOW]} °C`; };
+    const place = (cx, cy) => { const t = f.tip; t.innerHTML = tip(); t.style.display = 'block';
+      t.style.left = Math.max(0, Math.min(cx + 12, f.host.clientWidth - t.offsetWidth)) + 'px'; t.style.top = Math.max(0, cy - t.offsetHeight - 10) + 'px'; };
+    const snap = t => Math.round(Math.max(0, Math.min(end, t)) * s.hz) / s.hz;
+    const at = ev => { const bb = f.svg.getBoundingClientRect(), hb = f.host.getBoundingClientRect(); setT(snap(x.inv(ev.clientX - bb.left))); place(ev.clientX - hb.left, ev.clientY - hb.top); };
+    hit.addEventListener('pointermove', at); hit.addEventListener('pointerdown', at);
+    hit.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') f.tip.style.display = 'none'; });
+    const keyTip = () => { const bb = f.svg.getBoundingClientRect(), hb = f.host.getBoundingClientRect(); place(bb.left - hb.left + x(ST.t), bb.top - hb.top + Tp + 40); };
+    hit.addEventListener('focus', keyTip); hit.addEventListener('blur', () => { f.tip.style.display = 'none'; });
+    hit.addEventListener('keydown', ev => {
+      const d = {ArrowRight: 1, ArrowLeft: -1, ArrowUp: 1, ArrowDown: -1, PageUp: 10 * s.hz, PageDown: -10 * s.hz}[ev.key];
+      if (ev.key === 'Escape') { f.tip.style.display = 'none'; return; }
+      const n = d ? ST.t + d / s.hz : ev.key === 'Home' ? 0 : ev.key === 'End' ? end : null;
+      if (n == null) return;
+      ev.preventDefault(); setT(snap(n)); keyTip();
+    });
+    f.cross();
+  }});
+  ST.t = defaultT(ST.id); makeTime(); f.cross(); readout();
+
+  /* ---- the sensor grid: channel labels, or each shire's minion-rail voltage at idle (Power and temperature, §3) ---- */
+  const cells = [...document.querySelectorAll('#meshgrid .mesh-cell.compute')].map(c => ({c, s: c.querySelector('.id').textContent.replace(/\D/g, ''),
+    sub: c.querySelector('.sub'), html: c.querySelector('.sub').innerHTML}));
+  const mv = s => SHIRE_MV[s].mnn[0], vs = Object.keys(SHIRE_MV).map(mv), lo = Math.min(...vs), hi = Math.max(...vs), span = Math.max(hi - lo, 5);
+  const P = v => (v - lo) / span;
+  let view = 'sensor';
+  function applyGrid() {
+    for (const k of cells) {
+      if (view === 'volt') { const v = mv(k.s); k.c.style.background = CK.ramp(P(v)); k.c.style.color = CK.rampInk(P(v));
+        k.sub.textContent = v + ' mV'; k.sub.style.color = 'inherit'; }
+      else { k.c.style.background = ''; k.c.style.color = ''; k.sub.innerHTML = k.html; k.sub.style.color = ''; }
+    }
+    const off = Object.keys(SHIRE_MV).filter(s => !cells.some(k => k.s === s));
+    $('grid-leg').innerHTML = view === 'volt'
+      ? `<span>Minion-rail voltage, idle, 20 Sep (mV):</span> ${uniq(vs).map(v => `<span class="gl-sw" style="background:${CK.ramp(P(v))};color:${CK.rampInk(P(v))}">${v}</span>`).join('')}` +
+        ` <span>1 mV steps. Shires ${list(off)} read ${list(off.map(s => mv(s) + ' mV'))}; which dashed cells they occupy is not measured. The voltage reaches the host shire by shire; the temperature does not.</span>`
+      : '<span>TS<i>n</i> is the temperature-sensor channel of compute shire <i>n</i>.</span>';
+  }
+  CK.seg('grid-view', {label: 'Show', value: view, options: [['sensor', 'Sensor channel'], ['volt', 'Minion-rail voltage at idle']],
+    onChange: v => { view = v; applyGrid(); }});
+  applyGrid();
+  const again = () => { if (view === 'volt') applyGrid(); };
+  if (window.MutationObserver) new MutationObserver(again).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  if (window.matchMedia) { const m = window.matchMedia('(prefers-color-scheme: dark)'); if (m.addEventListener) m.addEventListener('change', again); }
+})();
+</script>
 <script>
 /* Section anchors. Every h2/h3 gets an id (its own, or one made from its text) and a # link; clicking a heading
    or a table-of-contents link puts #id in the URL. When the page is framed by spacesheep.dev the fragment is

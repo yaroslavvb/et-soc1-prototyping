@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,21 +10,21 @@
   color-scheme: light;
   --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
   --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --code-bg: #f1f0ec;
-  --et: #2a78d6; --et2: #eb6834; --ref: #8c8b85;
+  --et: #2a78d6; --et2: #eb6834; --ref: #8c8b85; --empty: #ecebe6;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
     --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
-    --et: #3987e5; --et2: #d95926; --ref: #76756f;
+    --et: #3987e5; --et2: #d95926; --ref: #76756f; --empty: #242422;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
   --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
   --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
-  --et: #3987e5; --et2: #d95926; --ref: #76756f;
+  --et: #3987e5; --et2: #d95926; --ref: #76756f; --empty: #242422;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--page); color: var(--ink);
@@ -86,9 +86,460 @@ ol li, ul li { margin: 5px 0; }
 @media (min-width: 640px) { .toc ol { columns: 2; column-gap: 32px; } }
 .toc li { margin: 2px 0; }
 h2, h3 { scroll-margin-top: 12px; }
+details.terms, details#a100-published { margin: 14px 0; }
+details.terms summary, details#a100-published summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
+details.terms p { margin: 6px 0 0; }
+.scp-views { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 760px) { .scp-views { grid-template-columns: 1fr 1fr; } }
+.ck-frame .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.ck-frame svg .ck-linked { stroke: var(--ink) !important; stroke-width: 3px !important; }
+table.spec th:first-child, table.spec td:first-child { position: sticky; left: 0; background: var(--page); z-index: 1; }
+@media (max-width: 599px) { table.stack td, table.stack td.lvl { min-width: 0; white-space: normal; } }
 .hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
 h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 </style>
+<!-- chartkit:begin -->
+<!-- pasted by scripts/paste-chartkit.py from docs/reports/sources/{chartkit.js, report.template.html}; do not edit here -->
+<style>
+/* the template tokens the chart kit uses, in this page's names */
+:root { --c1: var(--et); --c2: var(--et2); --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c7: #4a3aa7; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; } }
+:root[data-theme="dark"] { --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; }
+.ck-frame { position: relative; width: 100%; }
+.ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ck-frame svg { display: block; max-width: none; height: auto; }
+.ck-frame svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.ck-frame .tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame .lab { fill: var(--ink-2); font-size: 12px; }
+.ck-frame .lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ck-frame .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-axis { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-hit { fill: transparent; stroke: none; }
+.ck-tip { position: absolute; z-index: 5; pointer-events: none; display: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border, var(--grid)); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: min(320px, calc(100% - 8px)); }
+.ck-frame svg [tabindex] { outline: none; }
+.ck-frame svg [tabindex]:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse)[tabindex]:not(.ck-hit):focus-visible,
+.ck-frame svg [tabindex]:focus-visible > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse).ck-active:not(.ck-hit),
+.ck-frame svg .ck-active > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 1.5px; }
+.ck-hidden { display: none !important; }
+.ck-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 8px 0 6px; }
+.ck-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 8px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-legend .ck-li { display: inline-flex; align-items: center; gap: 6px; }
+.ck-legend button.ck-li { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 3px 10px; min-height: 32px; cursor: pointer; }
+.ck-legend button.ck-li[aria-pressed="false"] { opacity: 0.55; text-decoration: line-through; }
+.ck-legend svg { flex: none; overflow: visible; }
+.ck-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.82rem; }
+.ck-seg-label { color: var(--ink-2); }
+.ck-seg-group { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ck-seg [role="radio"] { font: inherit; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-seg [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-range input[type="range"] { flex: 0 1 200px; width: 200px; min-width: 120px; min-height: 32px; margin: 0; accent-color: var(--c1); }
+.ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
+   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
+th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+th.num { white-space: normal; }
+@media (max-width: 599px) {
+  table.stack, .wide table.stack { min-width: 0; }
+  table.stack thead { display: none; }
+  table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { border-bottom: 1px solid var(--grid); padding: 6px 0; }
+  table.stack td, table.stack td.num { border: 0; padding: 2px 0; text-align: left; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+  table.stack td:first-child::before { content: none; }
+  table.stack td:first-child { font-weight: 600; }
+}
+@media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+</style>
+<script>
+/* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
+   Source-built pages get it from report.template.html (scripts/build-report.py inlines it before the page script);
+   standalone pages get this file, the template's chartkit CSS and token aliases from scripts/paste-chartkit.py.
+   Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
+   --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
+   API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame. Every mark with a tooltip is reachable from the keyboard. */
+window.CK = (function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
+  let uid = 0;
+  const $ = h => (typeof h === 'string' ? document.getElementById(h) : h);
+  const mm = q => (window.matchMedia ? window.matchMedia(q) : {matches: false});
+  const reduced = mm('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, str, cls, anchor) {
+    const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
+    t.textContent = str;
+    return t;
+  }
+  const path = (pts, x, y) => pts.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ');
+
+  /* ---- numbers ---- */
+  function num(v, dp) {
+    if (v == null || !isFinite(v)) return '\u2014';
+    const auto = dp == null;  // no dp: three significant digits, trailing zeros dropped
+    if (auto) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+    const s = Number(v).toLocaleString('en-GB', {minimumFractionDigits: auto ? 0 : dp, maximumFractionDigits: dp});
+    return /[1-9]/.test(s) ? s.replace('-', '\u2212') : s.replace('-', '');  // true minus; never "−0.00"
+  }
+  const fmt = {
+    num,
+    range: (a, b, dp, unit) => {
+      const s = num(a, dp), t = num(b, dp), u = unit ? '\u00a0' + unit : '';
+      return s === t ? s + u : s + (b < 0 ? ' to ' : '\u2013') + t + u;
+    },
+    pct: (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%',
+  };
+
+  /* ---- scales ---- */
+  function niceTicks(a, b, n) {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    if (!(hi > lo)) return Object.assign([lo], {step: 1});
+    const raw = (hi - lo) / Math.max(1, n || 5), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    const step = (m >= 7.5 ? 10 : m >= 3.5 ? 5 : m >= 1.5 ? 2 : 1) * p, out = [];
+    for (let i = Math.ceil(lo / step - 1e-9); i * step <= hi + step * 1e-9; i++) out.push(+(i * step).toPrecision(12));
+    out.step = step;
+    return out;
+  }
+  const tickDp = t => (t.step ? Math.max(0, -Math.floor(Math.log10(t.step) + 1e-9)) : null);
+  function lin(d0, d1, r0, r1) {
+    const s = v => r0 + (v - d0) * (r1 - r0) / (d1 - d0);
+    s.inv = p => d0 + (p - r0) * (d1 - d0) / (r1 - r0);
+    s.ticks = n => niceTicks(d0, d1, n);
+    s.domain = [d0, d1]; s.range = [r0, r1];
+    return s;
+  }
+  function log(d0, d1, r0, r1) {
+    const l0 = Math.log10(d0), l1 = Math.log10(d1);
+    const s = v => r0 + (Math.log10(v) - l0) * (r1 - r0) / (l1 - l0);
+    s.inv = p => Math.pow(10, l0 + (p - r0) * (l1 - l0) / (r1 - r0));
+    s.ticks = n => {
+      const lo = Math.min(l0, l1), hi = Math.max(l0, l1), k0 = Math.ceil(lo - 1e-9), k1 = Math.floor(hi + 1e-9);
+      const dec = k1 - k0 + 1, every = Math.max(1, Math.ceil(dec / (n || 6))), out = [];
+      const add = v => { v = +v.toPrecision(12); const lv = Math.log10(v); if (lv >= lo - 1e-9 && lv <= hi + 1e-9) out.push(v); };
+      if (dec <= 2) { for (let k = k0 - 1; k <= k1; k++) for (const m of [1, 2, 5]) add(m * Math.pow(10, k)); }
+      else for (let k = k0; k <= k1; k += every) add(Math.pow(10, k));
+      return out;
+    };
+    s.domain = [d0, d1]; s.range = [r0, r1]; s.log = true;
+    return s;
+  }
+  const logFmt = v => num(v, v >= 1 ? 0 : Math.ceil(-Math.log10(v) - 1e-9));
+
+  /* ---- frame: a responsive SVG sized to its host ---- */
+  function frame(hostId, o) {
+    const host = $(hostId);
+    if (!host) throw new Error('CK.frame: no element ' + hostId);
+    host.classList.add('ck-frame'); host.classList.remove('scroll');
+    host.textContent = '';
+    const plot = document.createElement('div'); plot.className = 'ck-plot'; host.appendChild(plot);
+    const svg = el('svg', {role: 'group', 'aria-label': o.label || null}, plot);
+    const tip = document.createElement('div'); tip.className = 'ck-tip'; tip.setAttribute('aria-hidden', 'true');
+    host.appendChild(tip);
+    const minW = o.minW == null ? 320 : o.minW, maxW = o.maxW == null ? 900 : o.maxW;
+    const f = {svg, host, tip, W: 0, H: 0, narrow: false, seriesOn: null, pinned: null, active: null, navIndex: 0};
+    const width = () => {
+      const cs = getComputedStyle(host), cw = host.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return Math.round(Math.max(minW, Math.min(maxW, cw > 0 ? cw : maxW)));
+    };
+    f.redraw = () => {
+      const W = width(), H = Math.round(typeof o.height === 'function' ? o.height(W) : (o.height || 300));
+      f.refocus = svg.contains(document.activeElement) ? f.navIndex : null;
+      hide(f, true);
+      Object.assign(f, {W, H, narrow: W < 600, navNodes: []});
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.setAttribute('height', H);
+      svg.style.width = W + 'px';
+      o.draw(f);
+      if (f.seriesOn) showSeries(f, f.seriesOn);
+    };
+    f.redraw();
+    frames.push(f);
+    if (window.ResizeObserver) {
+      let timer;
+      new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => { if (width() !== f.W) f.redraw(); }, 150); }).observe(host);
+    }
+    return f;
+  }
+
+  /* ---- axes: horizontal grid, tick labels, baseline, axis titles (y title sits above the plot) ---- */
+  function axes(f, o) {
+    const {x, y} = o, W = f.W, H = f.H;
+    const L = o.L == null ? 44 : o.L, R = o.R == null ? 12 : o.R, T = o.T == null ? 22 : o.T, B = o.B == null ? 38 : o.B;
+    const g = el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, f.svg);
+    const yt = o.yt || y.ticks(Math.max(3, Math.round((H - T - B) / 48)));
+    const xt = o.xt || x.ticks(Math.max(2, Math.round((W - L - R) / 90)));
+    const auto = (s, t) => (s.log ? logFmt : v => num(v, tickDp(t)));
+    const xf = o.xfmt || auto(x, xt), yf = o.yfmt || auto(y, yt), labs = [];
+    for (const t of yt) {
+      if (o.grid !== false) el('line', {x1: L, x2: W - R, y1: y(t), y2: y(t), class: 'grid-line'}, g);
+      labs.push(txt(g, L - 6, y(t) + 4, yf(t), 'tick', 'end'));
+    }
+    el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    for (const t of xt) labs.push(txt(g, x(t), H - B + 16, xf(t), 'tick', 'middle'));
+    if (o.xl) labs.push(txt(g, (L + W - R) / 2, H - 6, o.xl, 'lab', 'middle'));
+    if (o.yl) txt(g, 2, Math.max(12, T - 13), o.yl, 'lab');
+    inside(f, labs);
+    return g;
+  }
+  /* Keep labels inside the frame (0..f.W, 0..f.H, less pad): one that would cross the left or right edge is anchored
+     at that edge instead (text-anchor start or end, so its outer end sits pad px from the edge in any font; an end
+     tick label still covers its tick), and one that would cross the top or bottom is moved in. Labels already inside
+     are not touched. Widths are measured in the page's font; a chart drawn while hidden has no layout, so they are
+     estimated at 0.6 em a character. Vertically the glyphs are taken as 0.75 em above the baseline and 0.25 em below. */
+  function inside(f, labels, pad) {
+    pad = pad == null ? 2 : pad;
+    const m = labels.map(t => {
+      let w = 0, fs = 12;
+      try { w = t.getComputedTextLength(); fs = parseFloat(getComputedStyle(t).fontSize) || 12; } catch (_) { /* no layout */ }
+      return {w: w > 0 ? w : 0.6 * fs * t.textContent.length, fs};
+    });
+    labels.forEach((t, k) => {
+      const {w, fs} = m[k], a = t.getAttribute('text-anchor') || 'start', x = +t.getAttribute('x'), y = +t.getAttribute('y');
+      const x0 = a === 'end' ? x - w : a === 'middle' ? x - w / 2 : x;
+      if (x0 < pad) { t.setAttribute('text-anchor', 'start'); t.setAttribute('x', pad); }
+      else if (x0 + w > f.W - pad) { t.setAttribute('text-anchor', 'end'); t.setAttribute('x', +(f.W - pad).toFixed(1)); }
+      if (y - 0.75 * fs < pad) t.setAttribute('y', +(pad + 0.75 * fs).toFixed(1));
+      else if (y + 0.25 * fs > f.H - pad) t.setAttribute('y', +(f.H - pad - 0.25 * fs).toFixed(1));
+    });
+    return labels;
+  }
+
+  /* ---- tooltip: pointer, keyboard focus and touch all show the same text ---- */
+  const strip = html => new DOMParser().parseFromString(String(html).replace(/<br\s*\/?>/gi, '; '), 'text/html')
+    .body.textContent.replace(/\s+/g, ' ').trim();
+  function place(f, cx, cy) {
+    const t = f.tip; t.style.display = 'block';
+    const hw = f.host.clientWidth, hh = f.host.clientHeight, tw = t.offsetWidth, th = t.offsetHeight;
+    let top = cy + 14;
+    if (top + th > hh && cy - th - 10 >= 0) top = cy - th - 10;  // flip above the pointer
+    t.style.left = Math.max(0, Math.min(cx + 12, hw - tw)) + 'px';
+    t.style.top = top + 'px';
+  }
+  function show(f, node, html, cx, cy) {
+    if (f.active && f.active !== node) f.active.classList.remove('ck-active');
+    f.active = node; node.classList.add('ck-active');
+    f.tip.innerHTML = typeof html === 'function' ? html() : html;
+    if (cx == null) {
+      const r = node.getBoundingClientRect(), b = f.host.getBoundingClientRect();
+      cx = r.left + r.width / 2 - b.left; cy = r.top + r.height / 2 - b.top;
+    }
+    place(f, cx, cy);
+  }
+  function hide(f, force) {
+    if (f.pinned && !force) return;
+    f.pinned = null; f.tip.style.display = 'none';
+    if (f.active) f.active.classList.remove('ck-active');
+    f.active = null;
+  }
+  function tip(f, node, html, o) {
+    o = o || {};
+    if (!node.hasAttribute('data-ck-nav')) node.setAttribute('tabindex', '0');
+    node.setAttribute('role', o.role || 'img');
+    node.setAttribute('aria-label', strip(typeof html === 'function' ? html() : html));
+    node._ckTip = html;
+    const at = ev => { const b = f.host.getBoundingClientRect(); show(f, node, html, ev.clientX - b.left, ev.clientY - b.top); };
+    node.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointermove', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') hide(f); });
+    node.addEventListener('pointerdown', ev => {  // touch: a tap toggles the tooltip and pins it until the next tap
+      if (ev.pointerType !== 'touch') return;
+      f.touchT = Date.now();
+      if (f.active === node && f.tip.style.display === 'block') hide(f, true); else { hide(f, true); at(ev); f.pinned = node; }
+    });
+    node.addEventListener('focus', () => { if (Date.now() - (f.touchT || 0) > 600 && !f.pinned) show(f, node, html); });
+    node.addEventListener('blur', () => hide(f));
+    node.addEventListener('keydown', ev => { if (ev.key === 'Escape') hide(f, true); });
+    return node;
+  }
+  document.addEventListener('pointerdown', ev => {  // a tap elsewhere unpins
+    for (const f of frames) if (f.pinned && !f.pinned.contains(ev.target)) hide(f, true);
+  }, true);
+
+  /* ---- keynav: one tab stop per mark group; arrows step, Home/End jump, Enter pins, Escape hides ---- */
+  function keynav(f, nodes, o) {
+    o = o || {};
+    nodes = nodes.filter(Boolean);
+    if (!nodes.length) return;
+    const seen = n => !n.closest('.ck-hidden');
+    const next = (k, d) => { for (let j = k + d; j >= 0 && j < nodes.length; j += d) if (seen(nodes[j])) return j; return k; };
+    let cur = Math.min(f.navIndex || 0, nodes.length - 1);
+    nodes.forEach((n, k) => {
+      n.setAttribute('data-ck-nav', '');
+      n.setAttribute('tabindex', k === cur ? '0' : '-1');
+      n.addEventListener('focus', () => {
+        nodes.forEach(m => m.setAttribute('tabindex', '-1')); n.setAttribute('tabindex', '0');
+        f.navIndex = k;
+        if (o.onFocus) o.onFocus(n, k);
+      });
+      n.addEventListener('keydown', ev => {
+        const K = ev.key;
+        let j = null;
+        if (o.step) j = o.step(k, K, nodes);
+        if (j == null) {
+          if (K === 'ArrowRight' || K === 'ArrowDown') j = next(k, 1);
+          else if (K === 'ArrowLeft' || K === 'ArrowUp') j = next(k, -1);
+          else if (K === 'Home') j = next(-1, 1);
+          else if (K === 'End') j = next(nodes.length, -1);
+        }
+        if (K === 'Enter' || K === ' ') {
+          ev.preventDefault();
+          if (n._ckTip) { if (f.pinned === n) hide(f, true); else { hide(f, true); show(f, n, n._ckTip); f.pinned = n; } }
+          if (o.onEnter) o.onEnter(n, k);
+        } else if (j != null) { ev.preventDefault(); if (j !== k) { hide(f, true); nodes[j].focus(); } }
+      });
+    });
+    f.navNodes = (f.navNodes || []).concat([nodes]);
+    if (f.refocus != null && nodes[f.refocus]) { nodes[f.refocus].focus(); f.refocus = null; }
+  }
+
+  /* ---- legend (HTML, above the chart) and series toggling ---- */
+  function swatch(it) {
+    const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
+    const m = it.mark || 'box';
+    const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
+    if (m === 'dot' || m === 'box') e.style.fill = c;
+    else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
+    if (m === 'dash') e.style.strokeDasharray = '4 3';
+    return s;
+  }
+  function legend(hostEl, items, o) {
+    o = o || {};
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-legend');
+    const on = new Set(items.map(it => it.key)), btn = {};
+    for (const it of items) {
+      const b = document.createElement(o.toggle ? 'button' : 'span'); b.className = 'ck-li';
+      b.append(swatch(it), document.createTextNode(it.label));
+      if (o.toggle) {
+        b.type = 'button'; b.setAttribute('aria-pressed', 'true');
+        b.addEventListener('click', () => {
+          const was = on.has(it.key);
+          if (was && on.size === 1) return;  // keep at least one series
+          if (was) on.delete(it.key); else on.add(it.key);
+          b.setAttribute('aria-pressed', String(!was));
+          if (o.onChange) o.onChange([...on]);
+        });
+      }
+      btn[it.key] = b; h.appendChild(b);
+    }
+    return {el: h, on, set(keys) { on.clear(); keys.forEach(k => on.add(k)); for (const k in btn) if (o.toggle) btn[k].setAttribute('aria-pressed', String(on.has(k))); }};
+  }
+  function showSeries(f, keysOn) {
+    f.seriesOn = [...keysOn];
+    f.svg.querySelectorAll('[data-series]').forEach(n => n.classList.toggle('ck-hidden', !f.seriesOn.includes(n.getAttribute('data-series'))));
+    for (const group of f.navNodes || []) {  // keep one reachable tab stop per group
+      const vis = group.filter(n => !n.closest('.ck-hidden'));
+      if (vis.length && !vis.some(n => n.getAttribute('tabindex') === '0')) { group.forEach(n => n.setAttribute('tabindex', '-1')); vis[0].setAttribute('tabindex', '0'); }
+    }
+    if (f.active && f.active.closest('.ck-hidden')) hide(f, true);
+  }
+
+  /* ---- controls ---- */
+  function seg(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-seg');
+    const g = document.createElement('div'); g.setAttribute('role', 'radiogroup'); g.className = 'ck-seg-group';
+    if (o.label) {
+      const s = document.createElement('span'); s.className = 'ck-seg-label'; s.id = 'ck-l' + (++uid); s.textContent = o.label;
+      h.appendChild(s); g.setAttribute('aria-labelledby', s.id);
+    }
+    const opts = o.options, api = {el: h, value: o.value == null ? opts[0][0] : o.value};
+    const btns = opts.map(([v, t], k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.textContent = t;
+      b.addEventListener('click', () => set(v, true));
+      b.addEventListener('keydown', ev => {
+        const d = ev.key === 'ArrowRight' || ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowLeft' || ev.key === 'ArrowUp' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const j = (k + d + opts.length) % opts.length;
+        set(opts[j][0], true); btns[j].focus();
+      });
+      g.appendChild(b); return b;
+    });
+    function set(v, fire) {
+      api.value = v;
+      btns.forEach((b, k) => { const c = opts[k][0] === v; b.setAttribute('aria-checked', String(c)); b.tabIndex = c ? 0 : -1; });
+      if (fire && o.onChange) o.onChange(v);
+    }
+    h.appendChild(g); set(api.value, false);
+    api.set = v => set(v, true);
+    return api;
+  }
+  function range(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-range');
+    const id = 'ck-r' + (++uid), stops = o.stops, f1 = o.fmt || (v => num(v));
+    const lab = document.createElement('label'); lab.htmlFor = id; lab.textContent = o.label;
+    const inp = document.createElement('input'); inp.type = 'range'; inp.id = id;
+    const out = document.createElement('output'); out.setAttribute('for', id);
+    if (stops) { inp.min = 0; inp.max = stops.length - 1; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step == null ? 'any' : o.step; }
+    const val = () => (stops ? stops[+inp.value] : +inp.value);
+    const put = v => { inp.value = stops ? stops.reduce((b, s, k) => (Math.abs(s - v) < Math.abs(stops[b] - v) ? k : b), 0) : v; };
+    const upd = fire => { const v = val(), s = f1(v); out.textContent = s; inp.setAttribute('aria-valuetext', s); if (fire && o.onInput) o.onInput(v); };
+    inp.addEventListener('input', () => upd(true));
+    h.append(lab, inp, out); put(o.value == null ? (stops ? stops[0] : o.min) : o.value); upd(false);
+    return {el: h, input: inp, get value() { return val(); }, set(v) { put(v); upd(true); }};
+  }
+  function readout(hostEl) {
+    const h = $(hostEl); h.classList.add('ck-readout'); h.setAttribute('aria-live', 'polite');
+    h.set = html => { h.innerHTML = html; };
+    return h;
+  }
+  function bus(name) {
+    if (!buses[name]) { const fns = []; buses[name] = {value: undefined, on(fn) { fns.push(fn); }, emit(v, from) { this.value = v; fns.forEach(fn => fn(v, from)); }}; }
+    return buses[name];
+  }
+  /* Card layout for a table under 600 px: each cell shows its column's header (CSS table.stack). */
+  function stackTable(table) {
+    const t = $(table), heads = [], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (hr) for (const c of hr.cells) for (let k = 0; k < (c.colSpan || 1); k++) heads.push(c.textContent.replace(/\s+/g, ' ').trim());
+    for (const tb of t.tBodies) for (const r of tb.rows) { let k = 0; for (const c of r.cells) { if (heads[k]) c.setAttribute('data-label', heads[k]); k += c.colSpan || 1; } }
+    t.classList.add('stack');
+    return t;
+  }
+
+  /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
+  const SERIES = [1, 2, 3, 4, 5, 7];
+  const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
+  const clamp01 = p => Math.max(0, Math.min(1, +p || 0));
+  const ramp = p => `color-mix(in srgb, var(--c1) ${(15 + 85 * clamp01(p)).toFixed(1)}%, var(--surface))`;
+  function rgb(css) {  // resolve any CSS colour (tokens, color-mix) to linear-light luminance via a probe
+    const s = document.createElement('span'); s.style.color = css; s.style.display = 'none';
+    document.body.appendChild(s);
+    const c = getComputedStyle(s).color; s.remove();
+    const v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), unit = /^color\(/.test(c) ? 1 : 255;
+    const lin1 = x => { x /= unit; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin1(v[0]) + 0.7152 * lin1(v[1]) + 0.0722 * lin1(v[2]);
+  }
+  const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  /* Text colour for a ramp cell, chosen for the current theme: whichever of --ink and --page contrasts more. */
+  function rampInk(p) {
+    const bg = rgb(ramp(p));
+    return contrast(bg, rgb('var(--ink)')) >= contrast(bg, rgb('var(--page)')) ? 'var(--ink)' : 'var(--page)';
+  }
+  const redrawAll = () => frames.forEach(f => f.redraw());  // rampInk depends on the theme
+  if (window.MutationObserver) new MutationObserver(redrawAll).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  const dark = mm('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', redrawAll);
+
+  return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
+    stackTable, reduced, ramp, rampInk, color, hide: f => hide(f, true)};
+})();
+</script>
+<!-- chartkit:end -->
 </head>
 <body>
 <main>
@@ -96,11 +547,11 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 <h1>The ET-SoC-1 memory hierarchy, measured on silicon, next to the A100</h1>
 <p class="byline">18 September 2026 · <code>aifoundry2</code> in the AI Foundry lab: one ET-SoC-1 PCIe card, 32 GB LPDDR4X, 1,024 compute minions · A100 values from published microbenchmarks and energy studies (sources at the end) · code: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/workloads/memhier"><code>workloads/memhier</code></a>; raw data: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-18-memhier-aifoundry2"><code>docs/reports/data/2026-09-18-memhier-aifoundry2</code></a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
-<p class="lede">Pointer-chase and streaming probes give the card's memory hierarchy as a spec sheet. <b>ET-SoC-1's on-chip memories are fast and cheap per byte:</b> a load hits L1 in 8.8 ns and the shire's L2 in 78 ns, against 23 ns and 148 ns on an A100, at 15–17× less energy per byte (the energy manual's 600 MHz values). <b>They are also tiny per core:</b> the firmware leaves each hart only 512 B of L1 data cache. <b>Off chip the picture flips.</b> DRAM latency is about 490 ns at the 600 MHz base clock, a fifth more than the A100's HBM (405 ns), and the card streams 76 GB/s, about a twentieth of an A100, at roughly 1.2× the energy per byte.</p>
+<p class="lede">Pointer-chase and streaming probes give the card's memory hierarchy as a spec sheet. <b>ET-SoC-1's on-chip memories are fast and cheap per byte:</b> a load hits L1 in 8.8 ns and the shire's L2 in 78 ns, against 23 ns and 148 ns on an A100, at 15–24× less energy per byte (the energy manual's 600 MHz values). <b>They are also tiny per core:</b> the firmware leaves each hart only 512 B of L1 data cache. <b>Off chip the picture flips.</b> DRAM latency is about 490 ns at the 600 MHz base clock, a fifth more than the A100's HBM (405 ns), and the card streams 76 GB/s, about a twentieth of an A100, at roughly 1.2× the energy per byte.</p>
 
-<p class="small card"><b>Update, 24 September.</b> These runs left the card's power governor free, and it moved the minion clock between 600 and 800 MHz. The page now gives bandwidth from the launches that ran at 600 MHz (per cycle in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a>) and energy per byte from the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual, §4</a>, which re-ran the same probes at a pinned 600 MHz on two cards and supersedes the energies measured here: L1 0.77, L2 2.51, local scratchpad 2.52, remote scratchpad 6.65, L3 10.5 and DRAM 122 pJ/B. Two conclusions changed. At 600 MHz the L2 cache and the local scratchpad cost the same per byte, and keeping the cores awake is only a fifth to a third of what an L2, L3 or DRAM stream adds. The runtime's 128 GB/s for DRAM is a placeholder constant in the service-processor firmware, not a peak rate. The values first published are listed under <a href="#how-it-was-measured">How it was measured</a>.</p>
-
-<p class="small"><b>Terms.</b> The ET-SoC-1's compute cores are <i>minions</i>, small in-order RISC-V cores that each run two hardware threads (<i>harts</i>); eight minions form a <i>neighbourhood</i> and 32 a <i>shire</i>, and 32 shires (1,024 minions) run kernels. Each shire has 4 MB of SRAM, which these cards' firmware splits into a 512 KB L2 cache, a 1 MB slice of the chip-wide 32 MB L3 and a 2.5 MB <i>scratchpad</i>: software-managed memory that any shire can address. The shires and eight memory shires, which hold the LPDDR4X controllers, sit on a 2D mesh network-on-chip clocked at 400 MHz; a <i>mesh hop</i> is one step between neighbouring stops. The minions run at 600 MHz unless the card's power governor raises the clock. More in the hub's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">glossary</a>.</p>
+<details class="terms small"><summary>Terms used on this page</summary>
+<p>The ET-SoC-1's compute cores are <i>minions</i>, small in-order RISC-V cores that each run two hardware threads (<i>harts</i>); eight minions form a <i>neighbourhood</i>, 32 a <i>shire</i>, and 32 shires (1,024 minions) run kernels. Each shire's 4 MB of SRAM is split by these cards' firmware into a 512 KB L2 cache, a 1 MB slice of the chip-wide 32 MB L3 and a 2.5 MB <i>scratchpad</i>, software-managed memory that any shire can address. The shires and eight memory shires, which hold the LPDDR4X controllers, sit on a 2D mesh network-on-chip clocked at 400 MHz, where a <i>mesh hop</i> is one step between neighbouring stops; the minions run at 600 MHz unless the card's power governor raises the clock. More in the hub's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">glossary</a>.</p>
+</details>
 
 <div class="kpis">
   <div class="card kpi"><div class="label">L1 data cache hit</div><div class="value">8.8 <span class="unit">ns</span></div><div class="sub">5.25 cycles; 512 B per hart</div></div>
@@ -112,9 +563,9 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 <nav class="card toc"><b>Contents</b>
 <ol id="toclist">
   <li><a href="#load-latency-against-working-set-size">Load latency against working-set size</a></li>
+  <li><a href="#scratchpad-latency-across-the-mesh">Scratchpad latency across the mesh</a></li>
   <li><a href="#the-hierarchy-as-a-spec-sheet">The hierarchy as a spec sheet</a></li>
   <li><a href="#et-soc-1-against-the-a100-level-by-level">ET-SoC-1 against the A100, level by level</a></li>
-  <li><a href="#scratchpad-latency-across-the-mesh">Scratchpad latency across the mesh</a></li>
   <li><a href="#what-the-numbers-say">What the numbers say</a></li>
   <li><a href="#how-it-was-measured">How it was measured</a></li>
   <li><a href="#caveats">Caveats</a></li>
@@ -124,67 +575,78 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 </ol></nav>
 
 <h2 id="load-latency-against-working-set-size">Load latency against working-set size</h2>
-<p class="muted">One hart follows a random pointer chain over a working set of the given size, so every load waits for the one before it. Each step in the curve is a level of the hierarchy. The two ET lines are chains chased from two different shires. Grey segments are the A100's published pointer-chase plateaus. On-chip latencies are fixed in cycles and shown in ns at 600 MHz. L3 and DRAM points use the clock implied by each chase's cycle count and wall time, kept within the card's 600–800 MHz range, so a line can step within a level where the governor changed the clock. The shire-24 line's L3 points, the shire-0 line's from 24 MB and every DRAM point ran at 800 MHz. At 600 MHz, L3 is 265–282 ns and DRAM about 490 ns.</p>
-<div class="legend"><span><i style="background:var(--et)"></i>ET-SoC-1, chased from shire 0</span><span><i style="background:var(--et2)"></i>ET-SoC-1, from shire 24</span><span><i style="background:var(--ref)"></i>A100, published plateaus</span></div>
-<div class="card chart" id="lat"><div class="tip" id="lat-tip"></div></div>
+<p class="muted">What does a load at each level cost at 600, 700 and 800 MHz, and which part of it speeds up with the minion clock? One hart follows a random pointer chain, so every load waits for the one before it; each step in the curve is a level of the hierarchy. On-chip levels are fixed in cycles, but L3 and DRAM loads also spend fixed time in the 400 MHz mesh and the DDR memory, so the lines are redrawn for the selected clock from two fits (<a href="#what-the-numbers-say">What the numbers say</a>, item 5). Circles are the chases as measured, each at its own clock; filled ones ran at the selected clock (none ran at 700 MHz). From 16 to 64 MB a chain mixes L3 and DRAM hits, and a dashed line joins the measured points. Grey marks are the A100's published pointer-chase plateaus.</p>
+<div class="ck-controls"><div id="lat-clock"></div></div>
+<div id="lat-legend"></div>
+<div class="card chart" id="lat"></div>
+<p class="ck-readout" id="lat-read"></p>
+<p class="small">Where the time goes at the selected clock: the part of each load that scales with the minion clock, and the fixed part that does not (L3 as chased from shire 0).</p>
+<div id="split-legend"></div>
+<div class="card chart" id="split"></div>
+
+<h2 id="scratchpad-latency-across-the-mesh">Scratchpad latency across the mesh</h2>
+<p class="muted">How much does mesh distance cost a remote scratchpad load, and why does the L3 latency depend on the requesting shire? Chases ran from shires 0, 7, 24 and 31 to all 32 scratchpads, over a 64 KB chain so that every load misses L1. The scatter puts each load against the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#where-the-shires-are-a-6-6-mesh">mesh hops</a> between the two shires, with the model (66 minion cycles + 56 ns + 20 ns per hop) at 600, 700 and 800 MHz; each point takes the colour of the nearest line. The map shades each shire by the load's time in nanoseconds, with the requesting shire outlined. <b>L3 average trip</b> shows instead how far each of the 32 L3 slices is from the requesting shire.</p>
+<div class="ck-controls"><div id="scp-from"></div><div id="scp-mode"></div></div>
+<div id="scp-legend"></div>
+<div class="scp-views">
+  <div class="card chart" id="scp-scatter"></div>
+  <div class="card chart" id="scp-map"></div>
+</div>
+<p class="ck-readout" id="scp-read"></p>
 
 <h2 id="the-hierarchy-as-a-spec-sheet">The hierarchy as a spec sheet</h2>
 <h3 id="et-soc-1-measured">ET-SoC-1 (measured)</h3>
 <p class="small">Every ET figure is at the 600 MHz base clock.</p>
-<div class="table-wrap"><table>
-<thead><tr><th>Level</th><th>Capacity</th><th class="num">Latency</th><th class="num">Bandwidth, whole chip</th><th class="num">Energy per byte</th><th>Notes</th></tr></thead>
+<div class="table-wrap"><table id="et-table" class="spec">
+<thead><tr><th>Level</th><th class="num">Latency</th><th class="num">Bandwidth, whole chip</th><th class="num">Energy per byte</th><th>Capacity</th><th>Notes</th></tr></thead>
 <tbody>
-<tr><td class="lvl">L1 data cache</td><td>512 B per hart (2 sets × 4 ways × 64 B)</td><td class="num">5.25 cyc<br>8.8 ns</td><td class="num">6.2 TB/s</td><td class="num">0.77 pJ</td><td>The firmware puts the L1 in scratchpad mode before every launch: sets 0–11 become a 3 KB tensor scratchpad. Hart 1 is the same size but pays +3 cycles on misses. Bandwidth is about 5 B per hart-cycle.</td></tr>
-<tr><td class="lvl">L2 read buffer</td><td>8 lines per bank × 4 banks = 2 KB</td><td class="num">36 cyc<br>60 ns</td><td class="num">–</td><td class="num">–</td><td>A small clean-line cache in front of each L2 bank; spec: 10 vs 21 shire cycles.</td></tr>
-<tr><td class="lvl">L2 cache</td><td>512 KB per shire · 16 MB chip, private to each shire</td><td class="num">47 cyc<br>78 ns</td><td class="num">2.45 TB/s</td><td class="num">2.51 pJ</td><td>4.0 B per minion-cycle, or 128 B per shire-cycle by the cycle counters: half the four banks' 256 B/cycle.</td></tr>
-<tr><td class="lvl">L2 scratchpad, local</td><td>2.5 MB per shire · 80 MB chip</td><td class="num">47 cyc<br>78 ns</td><td class="num">2.46 TB/s</td><td class="num">2.52 pJ</td><td>Same SRAM, latency and bandwidth as L2; also cached in L1 and the read buffer.</td></tr>
-<tr><td class="lvl">L2 scratchpad, remote</td><td>any other shire's 2.5 MB</td><td class="num">112–220 cyc<br>186–366 ns</td><td class="num">0.96 TB/s</td><td class="num">6.65 pJ</td><td>20 ns per mesh hop (12 cycles at 600 MHz, 16 at 800 MHz), the same in both directions. Bandwidth and energy are for the scratchpad 16 shire IDs away, 2.1 mesh hops on average.</td></tr>
-<tr><td class="lvl">L3</td><td>1 MB slice per shire · 32 MB chip, shared</td><td class="num">159–169 cyc<br>265–282 ns</td><td class="num">0.98 TB/s</td><td class="num">10.5 pJ</td><td>Lines are spread over all 32 shires, so 31 of every 32 L3 hits cross the mesh. Latency depends on the requesting shire.</td></tr>
-<tr><td class="lvl">DRAM</td><td>32 GB LPDDR4X, 16 × 16-bit channels, 933 MHz DDR clock (3,733 MT/s)</td><td class="num">287–297 cyc<br>480–495 ns</td><td class="num">76 GB/s</td><td class="num">122 pJ</td><td>About 64% of the 119 GB/s that 16 × 16-bit channels carry at the 3,733 MT/s implied by the 933 MHz DDR clock. The 128,000 MB/s the runtime reports is a placeholder constant in the service-processor firmware. At 800 MHz a load takes 352–368 cycles, 440–460 ns.</td></tr>
+<tr><td class="lvl">L1 data cache</td><td class="num">5.25 cyc<br>8.8 ns</td><td class="num">6.2 TB/s</td><td class="num">0.77 pJ</td><td>512 B per hart (2 sets × 4 ways × 64 B)</td><td>The firmware puts the L1 in scratchpad mode before every launch: sets 0–11 become a 3 KB tensor scratchpad. Hart 1 is the same size but pays +3 cycles on misses. Bandwidth is about 5 B per hart-cycle.</td></tr>
+<tr><td class="lvl">L2 read buffer</td><td class="num">36 cyc<br>60 ns</td><td class="num">–</td><td class="num">–</td><td>8 lines per bank × 4 banks = 2 KB</td><td>A small clean-line cache in front of each L2 bank; spec: 10 vs 21 shire cycles.</td></tr>
+<tr><td class="lvl">L2 cache</td><td class="num">47 cyc<br>78 ns</td><td class="num">2.45 TB/s</td><td class="num">2.51 pJ</td><td>512 KB per shire · 16 MB chip, private to each shire</td><td>4.0 B per minion-cycle, or 128 B per shire-cycle by the cycle counters: half the four banks' 256 B/cycle.</td></tr>
+<tr><td class="lvl">L2 scratchpad, local</td><td class="num">47 cyc<br>78 ns</td><td class="num">2.46 TB/s</td><td class="num">2.52 pJ</td><td>2.5 MB per shire · 80 MB chip</td><td>Same SRAM, latency and bandwidth as L2; also cached in L1 and the read buffer.</td></tr>
+<tr><td class="lvl">L2 scratchpad, remote</td><td class="num">112–220 cyc<br>186–366 ns</td><td class="num">0.96 TB/s</td><td class="num">6.65 pJ</td><td>any other shire's 2.5 MB</td><td>20 ns per mesh hop (12 cycles at 600 MHz, 16 at 800 MHz), the same in both directions. Bandwidth and energy are for the scratchpad 16 shire IDs away, 2.1 mesh hops on average.</td></tr>
+<tr><td class="lvl">L3</td><td class="num">159–169 cyc<br>265–282 ns</td><td class="num">0.98 TB/s</td><td class="num">10.5 pJ</td><td>1 MB slice per shire · 32 MB chip, shared</td><td>Latency depends on the requesting shire (<a href="#what-the-numbers-say">item 4</a>).</td></tr>
+<tr><td class="lvl">DRAM</td><td class="num">287–297 cyc<br>479–495 ns</td><td class="num">76 GB/s</td><td class="num">122 pJ</td><td>32 GB LPDDR4X, 16 × 16-bit channels, 933 MHz DDR clock (3,733 MT/s)</td><td>About 64% of the 119 GB/s that 16 × 16-bit channels carry at the 3,733 MT/s implied by the 933 MHz DDR clock. The 128,000 MB/s the runtime reports is a placeholder constant in the service-processor firmware. At 800 MHz a load takes 352–368 cycles, 440–460 ns.</td></tr>
 </tbody></table></div>
-<p class="small">Bandwidth is bytes over wall time for the launches here that ran at 600 MHz. Energy per byte is from the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual, §4</a>: the same probes re-run at a pinned 600 MHz on two cards, with the range over passes there. For L1 the manual recommends its catalogue's 0.54 pJ/B on random data; the 0.77 here is this probe's own loop over a buffer it never wrote, kept so the comparison with the A100 is probe to probe. It is card power above idle, so it includes the busy cores: about 2 W of the 9 W a DRAM stream adds.</p>
-
-<h3 id="a100-published">A100 (published)</h3>
-<div class="table-wrap"><table>
-<thead><tr><th>Level</th><th>Capacity</th><th class="num">Latency</th><th class="num">Bandwidth, measured</th><th class="num">Energy per byte</th><th>Source</th></tr></thead>
-<tbody>
-<tr><td class="lvl">Registers</td><td>256 KB per SM · 27 MB</td><td class="num">4 cyc<br>2.8 ns</td><td class="num">–</td><td class="num">–</td><td>Whitepaper; Abdelkhalik et al. 2022</td></tr>
-<tr><td class="lvl">L1 / shared memory</td><td>192 KB per SM · 20.25 MB (≤164 KB shared)</td><td class="num">33 cyc<br>23 ns<br>shared: 29 cyc, 21 ns</td><td class="num">14.8 TB/s<br>19.5 peak</td><td class="num">12.7 pJ</td><td>Luo et al. 2025; SC'25 Table 3</td></tr>
-<tr><td class="lvl">L2, near half</td><td>40 MB total, 2 × 20 MB</td><td class="num">208 cyc<br>148 ns</td><td class="num">4.4 TB/s<br>7.2 peak</td><td class="num">37.7 pJ</td><td>Luo et al. 2025; Chips and Cheese; SC'25</td></tr>
-<tr><td class="lvl">L2, far half</td><td>data past ~20 MB</td><td class="num">357 cyc<br>253–313 ns</td><td class="num">–</td><td class="num">–</td><td>Luo et al. 2025; Chips and Cheese</td></tr>
-<tr><td class="lvl">HBM2 / HBM2e</td><td>40 GB / 80 GB</td><td class="num">570 cyc<br>405 ns</td><td class="num">1.41 / 1.77 TB/s</td><td class="num">105 pJ</td><td>Luo et al.; Chips and Cheese; BabelStream; SC'25</td></tr>
-</tbody></table></div>
-<p class="small">A100 cycles are at the 1,410 MHz boost clock. Its energy per byte is the SC'25 whole-GPU incremental energy (1.6, 4.7 and 13.1 pJ/bit), which includes instruction and memory-controller overhead. That makes it the counterpart to ET's card power above idle, not a circuit-level figure: the HBM2e devices themselves are about 4.3 pJ/bit (34 pJ/B).</p>
+<p class="small">Bandwidth is bytes over wall time for the launches here that ran at 600 MHz. These runs have few launches at 600 MHz (L1 2 of 21, DRAM 3 of 14); the same probes re-run at a pinned 600 MHz on 23 September (six passes, three on each of two cards, 9–11 launches per level per pass; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a>) agree within 1%. Energy per byte is from the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual, §4</a>: the same probes re-run at a pinned 600 MHz on two cards, with the range over passes there. The L1 row is this probe's own loop (8 loads per iteration, one every 3.2 cycles, over a buffer it never wrote). The manual's catalogue unrolls the same 32 B vector loads (64 per iteration, one every 1.4 cycles) and reaches 14.2 TB/s at 0.54 pJ/B on random data, the figure the manual recommends; the comparison with the A100 below uses it, since the A100's L1 figures come from tuned microbenchmarks. It is card power above idle, so it includes the busy cores: about 2 W of the 9 W a DRAM stream adds.</p>
 
 <h2 id="et-soc-1-against-the-a100-level-by-level">ET-SoC-1 against the A100, level by level</h2>
 <p class="muted">Each row puts the ET-SoC-1 value (blue) next to the A100's (grey) on a logarithmic scale. ET bandwidth and energy per byte are at 600 MHz. The ET scratchpad row is compared with the A100's shared memory, and ET's L3 with the far half of the A100's L2, the closest equivalents.</p>
-<div class="legend"><span><i class="dot" style="background:var(--et)"></i>ET-SoC-1, measured</span><span><i class="dot" style="background:var(--ref)"></i>A100, published</span></div>
+<div id="cmp-legend"></div>
 <div class="card"><div class="panels">
   <div class="chart" id="cmp-lat"><div class="tip"></div></div>
   <div class="chart" id="cmp-bw"><div class="tip"></div></div>
   <div class="chart" id="cmp-en"><div class="tip"></div></div>
 </div></div>
-
-<h2 id="scratchpad-latency-across-the-mesh">Scratchpad latency across the mesh</h2>
-<p class="muted">Any minion can load from any shire's 2.5 MB scratchpad. Each row is one requesting shire; each cell is the latency in minion cycles to one of the 32 shires' scratchpads (a 64 KB chain, so every load misses L1). Darker is slower. The diagonal is the local scratchpad at 47 cycles. The governor ran rows 0 and 7 at 600 MHz, row 31 at 800 MHz, and row 24 at 600, then 700, then 800 MHz, so compare colours within a row. Each row steps 20 ns per <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">mesh hop</a> (12 cycles at 600 MHz, 16 at 800).</p>
-<div class="card chart" id="heat"><div class="tip" id="heat-tip"></div></div>
+<details id="a100-published"><summary>A100 (published) values and sources</summary>
+<div class="table-wrap"><table id="a100-table" class="spec">
+<thead><tr><th>Level</th><th class="num">Latency</th><th class="num">Bandwidth, measured</th><th class="num">Energy per byte</th><th>Capacity</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td class="lvl">Registers</td><td class="num">4 cyc<br>2.8 ns</td><td class="num">–</td><td class="num">–</td><td>256 KB per SM · 27 MB</td><td>Whitepaper; Abdelkhalik et al. 2022</td></tr>
+<tr><td class="lvl">L1 / shared memory</td><td class="num">33 cyc<br>23 ns<br>shared: 29 cyc, 21 ns</td><td class="num">14.8 TB/s<br>19.5 peak</td><td class="num">12.7 pJ</td><td>192 KB per SM · 20.25 MB (≤164 KB shared)</td><td>Luo et al. 2025; SC'25 Table 3</td></tr>
+<tr><td class="lvl">L2, near half</td><td class="num">208 cyc<br>148 ns</td><td class="num">4.4 TB/s<br>7.2 peak</td><td class="num">37.7 pJ</td><td>40 MB total, 2 × 20 MB</td><td>Luo et al. 2025; Chips and Cheese; SC'25</td></tr>
+<tr><td class="lvl">L2, far half</td><td class="num">357 cyc<br>253–313 ns</td><td class="num">–</td><td class="num">–</td><td>data past ~20 MB</td><td>Luo et al. 2025; Chips and Cheese</td></tr>
+<tr><td class="lvl">HBM2 / HBM2e</td><td class="num">570 cyc<br>405 ns</td><td class="num">1.40 / 1.77 TB/s</td><td class="num">105 pJ</td><td>40 GB / 80 GB</td><td>Luo et al.; Chips and Cheese; BabelStream; SC'25</td></tr>
+</tbody></table></div>
+<p class="small">A100 cycles are at the 1,410 MHz boost clock. Its energy per byte is the SC'25 whole-GPU incremental energy (1.6, 4.7 and 13.1 pJ/bit), which includes instruction and memory-controller overhead. That makes it the counterpart to ET's card power above idle, not a circuit-level figure: the HBM2e devices themselves are about 4.3 pJ/bit (34 pJ/B).</p>
+</details>
 
 <h2 id="what-the-numbers-say">What the numbers say</h2>
 <ol>
   <li><b>Kernels get only 512 B of L1 per hart.</b> Before every launch the firmware puts the L1 in scratchpad mode (Programmer's Reference Manual, table 8.4), turning 3 KB of the 4 KB into the tensor unit's scratchpad. The chase's first knee sits exactly at 512 B. A user-mode kernel can switch to split mode, where hart 0 gets 2 KB, but the switch invalidates L1 lines without writing them back, so it was not tried on a shared card.</li>
   <li><b>There is a 2 KB level between L1 and L2:</b> the L2's read buffer, an 8-entry fully associative cache per bank for clean lines. Working sets up to 2 KB hit it at 36 cycles, 11 fewer than the L2 array. That is the same 11-cycle difference the shire cache spec gives (10 vs 21 shire cycles).</li>
   <li><b>The L2 scratchpad is the L2 without the tags.</b> It has the same 47-cycle latency, goes through the read buffer and L1, streams at the same 4.0 B per minion-cycle, and at a pinned 600 MHz costs the same energy per byte (2.51 against 2.52 pJ/B, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual §4</a>). The 4.3 against 2.8 pJ/B these runs showed came from the governor running the L2 runs at a higher clock.</li>
-  <li><b>Distance on the mesh is visible.</b> A remote scratchpad load costs 66 minion cycles plus 56 ns plus 20 ns per mesh hop: 186–366 ns at 600 MHz over 1–10 hops (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication</a> maps the hops). Row 31 → 0 reads 271 cycles against 220 for 0 → 31 only because the governor ran that row at 800 MHz. The L3 hides distance by spreading lines over all 32 shires, so 31 of every 32 L3 hits cross the mesh and pay the average trip from the requesting shire: 159–169 cycles (265–282 ns) at 600 MHz.</li>
-  <li><b>The card changed its clock during these runs.</b> Its power governor has three operating points, 600, 700 and 800 MHz at 0.52, 0.57 and 0.62 V, and steps up while the die reads 65 °C or less and board power is under 65 W (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">the DVFS report</a>); the die read 63 °C before the energy runs and 65 °C after them. The chases carried no clock telemetry of their own (a single poll around a separate 2 s spin saw 600 and 700 MHz at 518–595 mV), so each chase's clock is inferred from its cycle count and wall time. On-chip latencies are fixed in cycles. L3 and DRAM loads also spend time in the 400 MHz mesh and the 933 MHz memory domain, neither of which speeds up with the minion clock, so at 800 MHz they take more cycles but fewer nanoseconds. Shire 24's L3 load is 159 cycles (265 ns) at 600 MHz and 188 cycles (235 ns) at 800 MHz, which fits 72 cycles plus 145 ns. The DRAM chases fall into two groups: 287–297 cycles (480–495 ns) at 600 MHz and 352–368 cycles (440–460 ns) at 800 MHz. <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy">Anatomy of a memory access</a> takes a 600 MHz DRAM load (median 299 cycles, 500 ns) apart.</li>
-  <li><b>Being awake inflated the energy measured here.</b> At a pinned 600 MHz, keeping all 1,024 minions busy adds about 2.2 W over idle with one hart running and 3.5 W with both (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#a-core-that-is-awake">energy manual §2</a>; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication</a> runs on this card, the same day, measured 2.7 W for one hart per minion in an integer loop). In these runs the governor lifted the clock to 700–800 MHz and the minion voltage to about 0.6 V, and the die warmed against a single idle reading, so this page's two-hart spin loop added 12 W, and that floor was inside every energy per byte measured here. Re-measured at 600 MHz on two cards (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual §4</a>), a byte costs 0.77 pJ from L1, 2.5 from L2 or the local scratchpad, 10.5 from L3 and 122 from DRAM. The busy-core floor is then most of an L1 read, but only a fifth to a third of an L2, L3 or DRAM stream.</li>
+  <li><b>Distance on the mesh is visible.</b> A remote scratchpad load costs 66 minion cycles plus 56 ns plus 20 ns per mesh hop: 186–366 ns at 600 MHz over 1–10 hops (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication</a> maps the hops). Row 31 → 0 reads 271 cycles against 220 for 0 → 31 only because the governor ran that row at 800 MHz. The L3 hides distance by spreading lines over all 32 shires, so 31 of every 32 L3 hits cross the mesh and pay the average trip from the requesting shire: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#l3-110-cycles-plus-12-per-hop">Anatomy of a memory access</a>'s 110 cycles + 12 per hop, averaged over the slices (4.2–5.0 hops), predicts 160–170 cycles, and the chases measured 159–169 (265–282 ns) at 600 MHz.</li>
+  <li><b>The card changed its clock during these runs.</b> The governor holds 600 MHz (0.52 V) while the die reads above 65 °C and lifts a cooler busy card to 700 or 800 MHz (0.57 and 0.62 V) (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-measured">The DVFS loop and its leakage</a>); the die read 63 °C before the energy runs. The chases carried no clock telemetry, so each chase's clock is inferred from its cycle count and wall time. On-chip latencies are fixed in cycles. L3 and DRAM loads also spend time in the 400 MHz mesh and the 933 MHz memory domain, neither of which speeds up with the minion clock, so at 800 MHz they take more cycles but fewer nanoseconds. Shire 24's L3 load is 159 cycles (265 ns) at 600 MHz and 188 cycles (235 ns) at 800 MHz, which fits 72 cycles plus 145 ns. Of the 145 ns, 20 ns per hop is the mesh trip to the average slice (4.2 hops from shire 24, 5.0 from shire 0); 72 cycles + 61 ns + 20 ns per hop gives every requester's L3 latency here within a cycle at 600 MHz, and at 800 MHz for shire 0. The DRAM chases fit 86 cycles plus 345 ns: 287–297 cycles (479–495 ns) at 600 MHz and 352–368 cycles (440–460 ns) at 800 MHz. <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy">Anatomy of a memory access</a> takes a 600 MHz DRAM load (median 299 cycles, 500 ns) apart.</li>
+  <li><b>Being awake inflated the energy measured here.</b> At a pinned 600 MHz, keeping all 1,024 minions busy adds about 2.2 W over idle with one hart running and 3.5 W with both (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#a-core-that-is-awake">energy manual §2</a>; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication</a> runs on this card, the same day, measured 2.7 W for one hart per minion in an integer loop). In these runs the governor lifted the clock to 700–800 MHz (0.57–0.62 V at those operating points, item 5), and the die warmed against one idle baseline for the whole run, so this page's two-hart spin loop added 12 W, and that floor was inside every energy per byte measured here. At a pinned 600 MHz (the table's values) the busy-core floor is most of an L1 read, but only a fifth to a third of an L2, L3 or DRAM stream.</li>
 </ol>
 
 <h2 id="how-it-was-measured">How it was measured</h2>
 <ul>
-  <li><b>Latency.</b> One hart chases a random cyclic chain with one pointer per 64 B line, which no prefetcher can predict. After warm-up (two passes, capped at 2<sup>19</sup> loads), 40,000 dependent loads are timed with the minion cycle counter. Each chase's final pointer is checked against a host-side walk of the same chain, and every one of the 227 chases passed. Chains up to 256 MB live in DRAM. Scratchpad chains are written into the target shire's scratchpad by the chasing hart.</li>
+  <li><b>Latency.</b> One hart chases a random cyclic chain with one pointer per 64 B line, which no prefetcher can predict. After warm-up (two passes, at least 16,384 and at most 2<sup>19</sup> loads), 40,000 dependent loads are timed (20,000 in the placement and offset repeats) with the minion cycle counter. Each chase's final pointer is checked against a host-side walk of the same chain, and every one of the 227 chases passed. Chains up to 256 MB live in DRAM. Scratchpad chains are written into the target shire's scratchpad by the chasing hart.</li>
   <li><b>Bandwidth.</b> Hart 0 of all 1,024 minions streams 1 KB TensorLoads (tensor-unit loads into the L1 scratchpad, which bypass the L1 cache but go through the L2), two in flight, over private slices sized to hit L2 (8 KB per minion, 256 KB per shire), L3 (24 MB in total) or DRAM (256 MB), or over the local or a remote scratchpad. L1 bandwidth uses 32 B vector loads by both harts of every minion over a private 256 B buffer. Throughput is bytes over wall time; the tables use the launches that ran at 600 MHz.</li>
-  <li><b>Energy.</b> The energy per byte in the tables and charts is the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual's §4</a>: the same probes re-run on 23 September at a pinned 600 MHz, each pass against idle readings taken before and after and corrected for the die's warming, three passes on each of two cards. The runs here read board power from the card's service processor (the on-die management core) about 7 times a second, averaged it over each configuration's launch windows (about 4 s each) and compared it with one idle reading taken before, 27.0 W with the die at 63 °C (the idle law, 12.6 W + 23.3 W·e<sup>(T−80)/36</sup> from the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">DVFS report</a>, gives 27.1 W there). The die then warmed to 65 °C and the governor raised the clock, so those figures are superseded.</li>
-  <li><b>Lab etiquette.</b> Every card run was its own process under <code>timeout 10</code>, and the card was checked for other users before each. One energy run crashed the host runtime during the DRAM stream, and the card's master firmware then refused kernel launches. A full chip reset through the management interface restored it, and the upstream hello-world test and these probes were re-verified afterwards.</li>
+  <li><b>Energy.</b> The energy per byte in the tables and charts is the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual's §4</a>: the same probes re-run on 23 September at a pinned 600 MHz, each pass against idle readings taken before and after and corrected for the die's warming, three passes on each of two cards. The energies first measured here (board power against the median idle before and after each run, about 27.0 W, while the governor raised the clock) are superseded; the method is in <code>workloads/memhier/run_energy.py</code>.</li>
+  <li><b>Lab etiquette.</b> Every card run was its own process under <code>timeout 10</code>, on an otherwise idle card.</li>
   <li><b>Versions.</b> 18 September: first published, with bandwidth averaged over launches at 600–800 MHz (L1 7.55, L2 2.80, local scratchpad 2.57, L3 1.03, remote scratchpad 0.98 TB/s), DRAM latency of ~440 ns (421–486 ns) over chases at both clocks, and the energy per byte measured here, the mean of two runs (L1 1.8, L2 4.3, local scratchpad 2.8, remote scratchpad 6.3, L3 10.8, DRAM 148 pJ/B). 24 September: bandwidth at 600 MHz, energy per byte from the energy manual, DRAM and L3 latency given per clock, and the apparent asymmetry of the scratchpad rows traced to the clock.</li>
 </ul>
 
@@ -192,7 +654,7 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 <ul>
   <li><b>The A100 column is not our measurement.</b> Latency and bandwidth come from several published microbenchmark studies, which agree within a few percent. The energy numbers come from a single study (SC'25). Their method is close to ours but not identical.</li>
   <li><b>ET energy per byte is whole-card power above idle.</b> It includes the busy chip's floor, DRAM chips, regulators and PCIe, so it overstates the cost of the memory arrays themselves, most of all for DRAM. The probes read buffers whose contents they never set; the energy manual gives tensor loads on zeros and on random data separately.</li>
-  <li><b>The clock was not pinned.</b> The card's own governor was left in charge (it is a shared machine) and moved the clock between 600 and 800 MHz. The tables use only the launches that ran at 600 MHz. Averaged over all launches (0.62–0.74 GHz on average, depending on the level), the rates were 2–22% higher: L1 7.55, L2 2.80, local scratchpad 2.57, L3 1.03 and remote scratchpad 0.98 TB/s; DRAM was 76 GB/s either way. Some per-hart cycle counters in the two-hart tests also read high, probably erratum 1.23 (simultaneous PMU reads by both harts), so bandwidth uses wall time only.</li>
+  <li><b>The clock was not pinned.</b> The card's own governor was left in charge (it is a shared machine) and moved the clock between 600 and 800 MHz. The tables use only the launches that ran at 600 MHz. Averaged over all launches (0.62–0.74 GHz) the rates were 2–22% higher (Versions lists them); DRAM was 76 GB/s either way. Some per-hart cycle counters in the two-hart tests also read high, probably erratum 1.23 (simultaneous PMU reads by both harts), so bandwidth uses wall time only.</li>
   <li><b>Peak-rate microbenchmarks.</b> Real kernels mix levels, and bank conflicts, the mesh, and the DRAM controller's page policy will change the picture.</li>
 </ul>
 
@@ -201,16 +663,16 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 <pre><code># build on the lab machine
 scripts/deploy-lab.sh aifoundry2 workloads/memhier
 
-# latency (each command holds the card for a few seconds)
-ssh aifoundry2 'cd ~/nekko/build/memhier &amp;&amp; timeout 10 host/memhier_host --test chase'
-ssh aifoundry2 'cd ~/nekko/build/memhier &amp;&amp; timeout 10 host/memhier_host --test chase --where scp --scp-shire all --sizes 64K'
+# every latency chase, the scratchpad map, the clock poll and both energy runs (each probe is its own timeout-10 process)
+ssh aifoundry2 'cd ~/nekko &amp;&amp; bash workloads/memhier/run_lab.sh build/memhier/host/memhier_host build/memhier-data'
 
-# bandwidth and energy (quit et-powertop first; every configuration runs under timeout 10)
-ssh aifoundry2 'cd ~/nekko &amp;&amp; python3 workloads/memhier/run_energy.py --host-bin build/memhier/host/memhier_host --out build/memhier-energy'
+# latency curves, clock models and scratchpad map for this page
+python3 workloads/memhier/analyze.py docs/reports/data/2026-09-18-memhier-aifoundry2 --embed docs/reports/2026-09-18-et-soc1-memory-hierarchy.html
 
-# numbers and chart data for this page (the 600 MHz energies are the energy manual's,
-# docs/reports/data/2026-09-23-energy-manual/reruns.json, levels_pj_per_byte)
-python3 workloads/memhier/analyze.py docs/reports/data/2026-09-18-memhier-aifoundry2 --embed docs/reports/2026-09-18-et-soc1-memory-hierarchy.html</code></pre>
+# the bandwidth column (launches at 600 MHz) and bytes per cycle
+python3 scripts/ridge-points.py
+
+# energy per byte: the energy manual's re-runs, docs/reports/data/2026-09-23-energy-manual/reruns.json, levels_pj_per_byte</code></pre>
 
 <h2 id="related">Related reports</h2>
 <ul>
@@ -306,204 +768,500 @@ python3 workloads/memhier/analyze.py docs/reports/data/2026-09-18-memhier-aifoun
 })();
 </script>
 </main>
-<script type="application/json" id="memhier-data">{"ghz":0.6,"curves":{"shire 0":[[256,5.25,8.8],[512,5.26,8.8],[768,36.0,60.0],[1024,36.0,60.0],[2048,36.0,60.0],[4096,47.0,78.3],[8192,47.0,78.3],[16384,47.0,78.3],[32768,47.0,78.3],[65536,47.0,78.3],[131072,47.0,78.3],[262144,47.0,78.3],[393216,47.0,78.3],[524288,47.02,78.4],[786432,168.99,281.6],[1048576,168.98,281.6],[2097152,168.88,281.5],[4194304,168.92,281.5],[8388608,169.04,281.7],[16777216,184.59,277.0],[25165824,199.92,252.0],[33554432,200.37,253.4],[50331648,339.55,424.4],[67108864,351.73,439.7],[134217728,362.9,453.6],[268435456,368.01,460.0]],"shire 24":[[256,5.25,8.8],[512,5.26,8.8],[768,36.0,60.0],[1024,36.0,60.0],[2048,36.0,60.0],[4096,47.0,78.3],[8192,47.0,78.3],[16384,47.0,78.3],[32768,47.0,78.3],[65536,47.0,78.3],[131072,47.0,78.3],[262144,47.0,78.3],[393216,47.0,78.3],[524288,47.03,78.4],[786432,188.35,240.0],[1048576,188.34,239.1],[2097152,188.24,237.8],[4194304,188.25,237.3],[8388608,188.43,236.6],[16777216,188.32,235.9],[25165824,188.39,236.0],[33554432,188.7,238.9],[50331648,328.37,410.5],[67108864,340.71,425.9],[134217728,352.2,440.2],[268435456,356.6,445.8]],"local scratchpad, shire 0":[[256,5.25,8.7],[512,5.26,8.8],[768,36.0,60.0],[1024,36.0,60.0],[2048,36.0,60.0],[4096,47.0,78.3],[8192,47.0,78.3],[16384,47.0,78.3],[65536,47.0,78.3],[262144,47.0,78.3],[1048576,47.0,78.3],[2097152,47.0,78.3]]},"plateaus":{"L1":{"median":5.255,"min":5.25,"max":5.26,"n":4},"L2 read buffer":{"median":36.0,"min":36.0,"max":36.0,"n":6},"L2 / local scratchpad":{"median":47.0,"min":47.0,"max":47.03,"n":18},"L3":{"median":168.98250000000002,"min":159.296,"max":188.432,"n":26,"ns_measured_clock":{"median":281.4675,"min":236.64213090446938,"max":282.1466666666667,"n":26}},"DRAM":{"median":362.3295,"min":287.266,"max":368.011,"n":18,"ns_measured_clock":{"median":453.64625,"min":440.24875,"max":486.27651128501753,"n":18}}},"scp_matrix":{"0":[47.0,135.8,147.8,123.8,135.8,183.8,195.8,207.8,111.8,123.8,159.8,159.8,147.8,147.8,159.8,195.8,123.8,147.8,171.8,171.8,159.8,159.8,171.8,207.8,111.8,135.8,183.8,183.8,171.9,171.8,183.8,219.8],"7":[207.9,171.9,159.9,183.9,171.9,124.0,111.9,47.0,195.9,183.9,147.9,171.9,159.9,159.9,147.9,111.9,183.9,159.9,135.9,159.9,147.9,147.9,135.9,123.9,195.9,171.9,123.9,147.9,136.0,135.9,123.9,111.9],"24":[111.9,123.9,135.9,135.9,123.9,171.9,183.9,195.9,123.9,111.9,147.9,147.9,135.9,135.9,147.9,183.9,111.9,135.9,165.2,175.9,161.9,161.9,175.9,238.2,47.0,143.1,207.1,207.1,191.2,191.1,207.1,255.1],"31":[271.2,223.1,207.1,239.1,223.1,159.1,143.1,127.1,255.2,239.1,191.1,191.2,207.1,207.1,191.1,143.1,239.1,207.1,175.2,175.1,191.1,191.1,175.1,127.1,255.1,223.1,159.1,159.1,175.2,175.2,159.1,47.0]},"dram_samples":[287.3,288.4,293.0,296.4,296.9,297.2,352.2,356.6,362.1,362.5,362.7,362.8,362.9,362.9,362.9,363.0,367.1,368.0],"energy":{"runs":2,"idle_w":[27.1,26.95],"levels":{"spin":{"what":"no data: busy cores only","gb_per_s":{"mean":0.0,"min":0.0,"max":0.0},"mean_w":{"mean":39.21964285714286,"min":38.92,"max":39.519285714285715},"above_idle_w":{"mean":12.194642857142858,"min":11.82,"max":12.569285714285716},"pj_per_byte":null,"pj_per_byte_vs_spin":null},"l1":{"what":"L1 hits: 256 B per hart, 2048 harts","gb_per_s":{"mean":7552.289485410787,"min":7541.0599342247415,"max":7563.519036596834},"mean_w":{"mean":40.308499999999995,"min":39.662,"max":40.955},"above_idle_w":{"mean":13.283499999999998,"min":12.561999999999998,"max":14.004999999999999},"pj_per_byte":{"mean":1.7590165472069388,"min":1.6608671095051815,"max":1.8571659849086963},"pj_per_byte_vs_spin":{"mean":0.14424437751285918,"min":0.09810248330304414,"max":0.19038627172267422}},"l2":{"what":"256 KB per shire (L2 is 512 KB)","gb_per_s":{"mean":2801.4781594877904,"min":2744.425324645434,"max":2858.5309943301463},"mean_w":{"mean":39.02881609195403,"min":38.21896551724138,"max":39.83866666666667},"above_idle_w":{"mean":12.003816091954024,"min":11.118965517241378,"max":12.88866666666667},"pj_per_byte":{"mean":4.280157935934252,"min":4.051473150823622,"max":4.508842721044882},"pj_per_byte_vs_spin":null},"l3":{"what":"768 KB per shire > L2, 24 MB in total < 32 MB of L3","gb_per_s":{"mean":1025.6728856000277,"min":1009.510849786263,"max":1041.8349214137927},"mean_w":{"mean":38.1134375,"min":38.0521875,"max":38.1746875},"above_idle_w":{"mean":11.0884375,"min":10.9521875,"max":11.224687499999998},"pj_per_byte":{"mean":10.81148199558425,"min":10.773959740923113,"max":10.849004250245388},"pj_per_byte_vs_spin":null},"dram":{"what":"256 MB in total","gb_per_s":{"mean":75.99171446909924,"min":75.95084056869011,"max":76.03258836950837},"mean_w":{"mean":38.307068965517246,"min":37.2248275862069,"max":39.389310344827585},"above_idle_w":{"mean":11.282068965517242,"min":10.124827586206898,"max":12.439310344827586},"pj_per_byte":{"mean":148.45631341668883,"min":133.30764360731442,"max":163.6049832260632},"pj_per_byte_vs_spin":null},"scp-local":{"what":"2 MB of the shire's own L2 scratchpad","gb_per_s":{"mean":2568.703820430763,"min":2523.361908247006,"max":2614.0457326145192},"mean_w":{"mean":34.30420467185762,"min":33.53806451612903,"max":35.070344827586204},"above_idle_w":{"mean":7.279204671857618,"min":6.438064516129032,"max":8.120344827586205},"pj_per_byte":{"mean":2.8289058590675946,"min":2.5513837294158064,"max":3.1064279887193824},"pj_per_byte_vs_spin":null},"scp-remote":{"what":"2 MB of the scratchpad 16 shires away","gb_per_s":{"mean":976.8760610955673,"min":972.8283346616734,"max":980.9237875294612},"mean_w":{"mean":33.131118951612905,"min":33.030625,"max":33.23161290322581},"above_idle_w":{"mean":6.106118951612904,"min":6.080625000000001,"max":6.1316129032258075},"pj_per_byte":{"mean":6.250657985281617,"min":6.250460418707581,"max":6.250855551855653},"pj_per_byte_vs_spin":null}}}}</script>
+<script type="application/json" id="memhier-data">{"ghz":0.6,"curves":{"shire 0":[[256,5.25,8.8,0.6],[512,5.26,8.8,0.6],[768,36.0,60.0,0.6],[1024,36.0,60.0,0.6],[2048,36.0,60.0,0.6],[4096,47.0,78.3,0.6],[8192,47.0,78.3,0.6],[16384,47.0,78.3,0.6],[32768,47.0,78.3,0.6],[65536,47.0,78.3,0.6],[131072,47.0,78.3,0.6],[262144,47.0,78.3,0.6],[393216,47.0,78.3,0.6],[524288,47.02,78.4,0.6],[786432,168.99,281.6,0.6],[1048576,168.98,281.6,0.6],[2097152,168.88,281.5,0.6],[4194304,168.92,281.5,0.6],[8388608,169.04,281.7,0.6],[16777216,184.59,277.0,0.666],[25165824,199.92,252.0,0.793],[33554432,200.37,253.4,0.791],[50331648,339.55,424.4,0.8],[67108864,351.73,439.7,0.8],[134217728,362.9,453.6,0.8],[268435456,368.01,460.0,0.8]],"shire 24":[[256,5.25,8.8,0.6],[512,5.26,8.8,0.6],[768,36.0,60.0,0.6],[1024,36.0,60.0,0.6],[2048,36.0,60.0,0.6],[4096,47.0,78.3,0.6],[8192,47.0,78.3,0.6],[16384,47.0,78.3,0.6],[32768,47.0,78.3,0.6],[65536,47.0,78.3,0.6],[131072,47.0,78.3,0.6],[262144,47.0,78.3,0.6],[393216,47.0,78.3,0.6],[524288,47.03,78.4,0.6],[786432,188.35,240.0,0.785],[1048576,188.34,239.1,0.788],[2097152,188.24,237.8,0.791],[4194304,188.25,237.3,0.793],[8388608,188.43,236.6,0.796],[16777216,188.32,235.9,0.798],[25165824,188.39,236.0,0.798],[33554432,188.7,238.9,0.79],[50331648,328.37,410.5,0.8],[67108864,340.71,425.9,0.8],[134217728,352.2,440.2,0.8],[268435456,356.6,445.8,0.8]],"local scratchpad, shire 0":[[256,5.25,8.7,0.6],[512,5.26,8.8,0.6],[768,36.0,60.0,0.6],[1024,36.0,60.0,0.6],[2048,36.0,60.0,0.6],[4096,47.0,78.3,0.6],[8192,47.0,78.3,0.6],[16384,47.0,78.3,0.6],[65536,47.0,78.3,0.6],[262144,47.0,78.3,0.6],[1048576,47.0,78.3,0.6],[2097152,47.0,78.3,0.6]]},"plateaus":{"L1":{"median":5.255,"min":5.25,"max":5.26,"n":4},"L2 read buffer":{"median":36.0,"min":36.0,"max":36.0,"n":6},"L2 / local scratchpad":{"median":47.0,"min":47.0,"max":47.03,"n":18},"L3":{"600":{"median":168.939,"min":159.296,"max":169.288,"n":21},"800":{"median":188.34,"min":188.236,"max":188.432,"n":5}},"DRAM":{"600":{"median":294.706,"min":287.266,"max":297.158,"n":6},"800":{"median":362.8595,"min":352.199,"max":368.011,"n":12}}},"chases":[[0,786432,168.99,0.6],[0,1048576,168.98,0.6],[0,2097152,168.88,0.6],[0,4194304,168.74,0.6],[0,4194304,168.78,0.6],[0,4194304,168.79,0.6],[0,4194304,168.79,0.6],[0,4194304,168.88,0.6],[0,4194304,168.92,0.6],[0,4194304,168.94,0.6],[0,4194304,168.96,0.6],[0,4194304,168.99,0.6],[0,4194304,169.03,0.6],[0,4194304,169.18,0.6],[0,4194304,169.22,0.6],[0,4194304,169.25,0.6],[0,4194304,169.29,0.6],[0,8388608,169.04,0.6],[0,134217728,292.97,0.6],[0,134217728,362.11,0.8],[0,134217728,362.55,0.8],[0,134217728,362.74,0.8],[0,134217728,362.82,0.8],[0,134217728,362.9,0.8],[0,134217728,362.91,0.8],[0,134217728,362.92,0.8],[0,134217728,362.98,0.8],[0,268435456,296.92,0.6],[0,268435456,297.16,0.6],[0,268435456,367.09,0.8],[0,268435456,368.01,0.8],[7,4194304,160.67,0.6],[7,268435456,288.39,0.6],[24,786432,188.35,0.8],[24,1048576,188.34,0.8],[24,2097152,188.24,0.8],[24,4194304,159.3,0.6],[24,4194304,188.25,0.8],[24,8388608,188.43,0.8],[24,134217728,352.2,0.8],[24,268435456,287.27,0.6],[24,268435456,356.6,0.8],[31,4194304,168.88,0.6],[31,268435456,296.44,0.6]],"fits":{"L3":{"cycles":72.2,"ns0":61.4,"ns_per_hop":20.0,"mean_hops":{"0":5.0,"7":4.3125,"24":4.1875,"31":5.0},"fit_on":"shire 24 at 600 and 800 MHz","worst_residual":0.31,"n":26},"DRAM":{"cycles":86.3,"ns":344.8,"n":18,"worst_residual":10.0}},"scp_model":{"c":65.95,"t0":56.48,"hop":20.0},"l3_by_requester":{"0":169.0,"7":160.7,"24":159.3,"31":168.9},"anatomy_l3":{"base":110,"per_hop":12},"scp_matrix":{"0":[47.0,135.8,147.8,123.8,135.8,183.8,195.8,207.8,111.8,123.8,159.8,159.8,147.8,147.8,159.8,195.8,123.8,147.8,171.8,171.8,159.8,159.8,171.8,207.8,111.8,135.8,183.8,183.8,171.9,171.8,183.8,219.8],"7":[207.9,171.9,159.9,183.9,171.9,124.0,111.9,47.0,195.9,183.9,147.9,171.9,159.9,159.9,147.9,111.9,183.9,159.9,135.9,159.9,147.9,147.9,135.9,123.9,195.9,171.9,123.9,147.9,136.0,135.9,123.9,111.9],"24":[111.9,123.9,135.9,135.9,123.9,171.9,183.9,195.9,123.9,111.9,147.9,147.9,135.9,135.9,147.9,183.9,111.9,135.9,165.2,175.9,161.9,161.9,175.9,238.2,47.0,143.1,207.1,207.1,191.2,191.1,207.1,255.1],"31":[271.2,223.1,207.1,239.1,223.1,159.1,143.1,127.1,255.2,239.1,191.1,191.2,207.1,207.1,191.1,143.1,239.1,207.1,175.2,175.1,191.1,191.1,175.1,127.1,255.1,223.1,159.1,159.1,175.2,175.2,159.1,47.0]},"layout":{"0":[0,0],"24":[1,0],"9":[2,0],"25":[3,0],"2":[4,0],"11":[5,0],"8":[0,1],"16":[1,1],"1":[2,1],"17":[3,1],"10":[4,1],"19":[5,1],"3":[0,2],"4":[1,2],"13":[2,2],"14":[3,2],"18":[4,2],"27":[5,2],"12":[1,3],"21":[2,3],"22":[3,3],"26":[4,3],"20":[1,4],"29":[2,4],"30":[3,4],"15":[4,4],"23":[5,4],"28":[1,5],"5":[2,5],"6":[3,5],"7":[4,5],"31":[5,5]},"empty_cells":[[0,3],[0,4],[0,5],[5,3]]}</script>
 <script>
 (function () {
   "use strict";
-  var D = JSON.parse(document.getElementById("memhier-data").textContent);
-  var NS = "http://www.w3.org/2000/svg";
-  function el(name, attrs, parent) {
-    var e = document.createElementNS(NS, name);
-    for (var k in attrs) e.setAttribute(k, attrs[k]);
-    if (parent) parent.appendChild(e);
-    return e;
-  }
-  function txt(parent, x, y, s, cls, anchor) {
-    var t = el("text", { x: x, y: y, "class": cls || "tick", "text-anchor": anchor || "start" }, parent);
-    t.textContent = s;
-    return t;
-  }
-  function size(b) {
-    return b >= 1 << 20 ? (b / (1 << 20)) + " MB" : b >= 1024 ? (b / 1024) + " KB" : b + " B";
-  }
-  function showTip(tip, host, html, x, y) {
-    tip.innerHTML = html;
-    tip.style.display = "block";
-    var left = x + 14;
-    if (left + tip.offsetWidth > host.clientWidth - 6) left = x - tip.offsetWidth - 14;
-    tip.style.left = Math.max(6, left) + "px";
-    tip.style.top = Math.max(6, y - tip.offsetHeight - 8) + "px";
-  }
+  /* Charts of the memory-hierarchy report. Every number drawn or printed comes from the memhier-data block that
+     workloads/memhier/analyze.py embeds, except the A100's published values (sources at the end of the page).
+     Built with the shared chart kit (global CK; scripts/paste-chartkit.py). */
+  const D = JSON.parse(document.getElementById("memhier-data").textContent);
+  const num = CK.fmt.num;
+  const size = b => (b >= 1 << 20 ? b / (1 << 20) + " MB" : b >= 1024 ? b / 1024 + " KB" : b + " B");
+  const mhz = f => Math.round(f * 1000) + " MHz";
+  const CLOCKS = [0.6, 0.7, 0.8];                       // the governor's operating points (GHz)
+  const FL = D.fits.L3, FD = D.fits.DRAM, HOPS = FL.mean_hops;
 
-  // ---------- latency vs working set ----------
-  var A100 = [
-    { from: 256, to: 128 * 1024, ns: 23, label: "L1 23 ns" },
-    { from: 256 * 1024, to: 16 << 20, ns: 148, label: "L2 near 148 ns" },
-    { from: 28 << 20, to: 38 << 20, ns: 253, label: "L2 far 253–313 ns" },
-    { from: 64 << 20, to: 256 << 20, ns: 405, label: "HBM 405 ns" }
+  // A load's time at clock f (GHz), split into the part that scales with the minion clock and the fixed part (ns).
+  // On-chip levels are fixed in cycles; L3 and DRAM follow the two fits of analyze.py (item 5 of the page).
+  const level = b => (b <= 512 * 1024 ? "chip" : b >= 768 << 10 && b <= 8 << 20 ? "L3" : b >= 128 << 20 ? "DRAM" : "mix");
+  function split(lv, cycles, shire, f) {
+    if (lv === "chip") return [cycles / f, 0];
+    if (lv === "L3") return [FL.cycles / f, FL.ns0 + FL.ns_per_hop * HOPS[shire]];
+    if (lv === "DRAM") return [FD.cycles / f, FD.ns];
+    return null;
+  }
+  const total = sp => sp[0] + sp[1];
+  const LEVELNAME = { chip: "", L3: "L3", DRAM: "DRAM", mix: "L3 and DRAM mixed" };
+  const chipName = b => (b <= 512 ? "L1" : b <= 2048 ? "L2 read buffer" : "L2");
+
+  // ---------- 1. Load latency against working-set size, redrawn for a selected clock ----------
+  // The A100's published pointer-chase plateaus (Luo et al. 2025; Chips and Cheese; see Sources): bytes, ns.
+  const A100 = [
+    { from: 256, to: 128 * 1024, lo: 23, hi: 23, label: "A100 L1 23", long: "A100 L1: 23 ns (33 cycles at 1.41 GHz)" },
+    { from: 256 * 1024, to: 16 << 20, lo: 148, hi: 148, label: "L2 148", long: "A100 L2, near half: 148 ns (208 cycles)" },
+    { from: 28 << 20, to: 38 << 20, lo: 253, hi: 313, label: "far L2 253–313", long: "A100 L2, far half: 253–313 ns (357 cycles)" },
+    { from: 64 << 20, to: 256 << 20, lo: 405, hi: 405, label: "HBM 405", long: "A100 HBM: 405 ns (570 cycles)" }
   ];
-  function renderLatency() {
-    var host = document.getElementById("lat"), tip = document.getElementById("lat-tip");
-    var old = host.querySelector("svg"); if (old) old.remove();
-    var W = Math.max(200, host.clientWidth - 32), H = 330, m = { l: 42, r: 12, t: 22, b: 38 };
-    var x0 = Math.log2(256), x1 = Math.log2(256 << 20), y0 = Math.log10(4), y1 = Math.log10(1000);
-    var x = function (b) { return m.l + (Math.log2(b) - x0) / (x1 - x0) * (W - m.l - m.r); };
-    var y = function (ns) { return H - m.b - (Math.log10(ns) - y0) / (y1 - y0) * (H - m.t - m.b); };
-    var svg = el("svg", { width: W, height: H, role: "img", "aria-label": "Load latency against working-set size for ET-SoC-1 and the A100; the table below the chart has the values." });
-    host.insertBefore(svg, tip);  // attached first, so label widths can be measured
-    [5, 10, 20, 50, 100, 200, 500, 1000].forEach(function (v) {
-      el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), "class": "grid-line" }, svg);
-      txt(svg, m.l - 6, y(v) + 4, String(v), "tick", "end");
+  const SERIES = [
+    { key: "s0", shire: 0, curve: D.curves["shire 0"], label: "chased from shire 0" },
+    { key: "s24", shire: 24, curve: D.curves["shire 24"], label: "chased from shire 24" }
+  ];
+  SERIES.forEach((s, i) => { s.color = CK.color(i); });
+  let clk = 0.6;
+  const latRead = CK.readout("lat-read");
+  CK.legend("lat-legend", [
+    { key: "s0", label: SERIES[0].label, mark: "line", color: SERIES[0].color },
+    { key: "s24", label: SERIES[1].label, mark: "line", color: SERIES[1].color },
+    { key: "on", label: "chase at the selected clock", mark: "dot", color: "var(--ink-2)" },
+    { key: "off", label: "chase at another clock", mark: "ring", color: "var(--ink-2)" },
+    { key: "mix", label: "16–64 MB, as measured", mark: "dash", color: "var(--ink-2)" },
+    { key: "a100", label: "A100, published", mark: "line", color: "var(--ref)" }
+  ]);
+  CK.seg("lat-clock", {
+    label: "Minion clock", value: clk,
+    options: CLOCKS.map(f => [f, mhz(f) + (f === 0.7 ? " (model only)" : "")]),
+    onChange: v => { clk = v; CK.hide(latF); latF.redraw(); CK.hide(splitF); splitF.redraw(); }
+  });
+
+  // Chases of the two plotted shires by size: [cycles, operating point].
+  const chasesAt = (shire, b) => D.chases.filter(c => c[0] === shire && c[1] === b).map(c => [c[2], c[3]]);
+  function measuredText(shire, b) {
+    const cs = chasesAt(shire, b), out = [];
+    [0.6, 0.8].forEach(g => {
+      const v = cs.filter(c => c[1] === g).map(c => c[0]);
+      if (!v.length) return;
+      const lo = Math.min(...v), hi = Math.max(...v);
+      out.push(v.length + (v.length > 1 ? " chases" : " chase") + " at " + mhz(g) + ": " + CK.fmt.range(lo, hi, 1) +
+        " cycles (" + CK.fmt.range(lo / g, hi / g, 0, "ns") + ")");
     });
-    var ticks = W < 560 ? [256, 4096, 65536, 1 << 20, 256 << 20] : [256, 1024, 4096, 16384, 65536, 262144, 1 << 20, 4 << 20, 16 << 20, 64 << 20, 256 << 20];
-    ticks.forEach(function (b, i) { txt(svg, x(b), H - m.b + 17, size(b), "tick", i === ticks.length - 1 ? "end" : "middle"); });
-    el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b, "class": "axis-line" }, svg);
-    txt(svg, (m.l + W - m.r) / 2, H - 4, "working set", "tick", "middle");
-    txt(svg, 0, 12, "ns per load (log)", "tick");
-    A100.forEach(function (s) {
-      el("line", { x1: x(s.from), x2: x(s.to), y1: y(s.ns), y2: y(s.ns), "class": "s-ref" }, svg);
-    });
-    var pts = [];
-    [["shire 24", "et2"], ["shire 0", "et"]].forEach(function (sr) {
-      var c = D.curves[sr[0]]; if (!c) return;
-      el("path", { d: c.map(function (p, i) { return (i ? "L" : "M") + x(p[0]).toFixed(1) + " " + y(p[2]).toFixed(1); }).join(""), "class": "s-" + sr[1] }, svg);
-      c.forEach(function (p) {
-        el("circle", { cx: x(p[0]), cy: y(p[2]), r: 3.5, "class": "d-" + sr[1] }, svg);
-        pts.push({ x: x(p[0]), y: y(p[2]), html: "<b>ET-SoC-1, " + sr[0] + "</b><br>" + size(p[0]) + ": " + p[2] + " ns (" + p[1] + " cycles)" });
-      });
-    });
-    A100.forEach(function (s) { pts.push({ x: (x(s.from) + x(s.to)) / 2, y: y(s.ns), html: "<b>A100</b><br>" + s.label + " (" + size(s.from) + "–" + size(s.to) + ")" }); });
-    var narrow = W < 520;
-    var labels = [[narrow ? "L1" : "L1 8.8 ns", 256, 8.8, 18], [narrow ? "RB" : "read buffer 60", 1400, 60, -10],
-                  [narrow ? "L2" : "L2 78 ns", 40000, 78, -10], [narrow ? "L3" : "L3 236–282 ns", 2.5 * (1 << 20), 282, -12],
-                  [narrow ? "DRAM" : "DRAM 440–460 ns", 160 << 20, 460, -12]];
-    labels.forEach(function (l) {
-      var t = txt(svg, x(l[1]), y(l[2]) + l[3], l[0], "lab-strong", "middle");
-      var w = t.getComputedTextLength ? t.getComputedTextLength() : 0;
-      var cx = Math.min(Math.max(x(l[1]), m.l + w / 2 + 2), W - m.r - w / 2 - 2);
-      t.setAttribute("x", cx);
-    });
-    var hit = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: "transparent" }, svg);
-    function move(ev) {
-      var r = svg.getBoundingClientRect(), px = ev.clientX - r.left, py = ev.clientY - r.top, best = null, bd = 1e9;
-      pts.forEach(function (p) { var d = Math.hypot(p.x - px, p.y - py); if (d < bd) { bd = d; best = p; } });
-      if (best && bd < 40) showTip(tip, host, best.html, best.x + 16, best.y + 16); else tip.style.display = "none";
-    }
-    hit.addEventListener("pointermove", move);
-    hit.addEventListener("pointerdown", move);
-    hit.addEventListener("pointerleave", function () { tip.style.display = "none"; });
+    return out.join("<br>");
   }
 
-  // ---------- ET vs A100 dumbbells ----------
-  var CMP = {
-    "cmp-lat": { title: "Load latency", unit: "ns", lo: 2, hi: 1000, ticks: [3, 10, 30, 100, 300, 1000], rows: [
+  const latF = CK.frame("lat", {
+    label: "Load latency against working-set size for ET-SoC-1 at the selected clock, and the A100's published plateaus",
+    height: W => (W < 600 ? 330 : 360), minW: 280,
+    draw: f => {
+      const L = 44, R = 24, T = 24, B = 40, W = f.W, H = f.H;
+      const x = CK.log(256, 256 << 20, L, W - R), y = CK.log(4, 1000, H - B, T);
+      const xt = f.narrow ? [256, 4096, 65536, 1 << 20, 16 << 20, 256 << 20]
+        : [256, 1024, 4096, 16384, 65536, 262144, 1 << 20, 4 << 20, 16 << 20, 64 << 20, 256 << 20];
+      CK.axes(f, { x, y, L, R, T, B, xt, yt: [5, 10, 20, 50, 100, 200, 500, 1000], xfmt: size, yfmt: v => String(v),
+        xl: "working set (log scale)", yl: "ns per load (log scale), at " + mhz(clk) });
+      // A100 plateaus: drawn first, under the ET lines; their focus targets go in after the ET ones (tab order)
+      const a100 = [];
+      A100.forEach(s => {
+        if (s.hi > s.lo) {
+          const r = CK.el("rect", { x: x(s.from), y: y(s.hi), width: x(s.to) - x(s.from), height: y(s.lo) - y(s.hi), rx: 2, "aria-hidden": "true" }, f.svg);
+          r.style.fill = "color-mix(in srgb, var(--ref) 30%, transparent)"; r.style.stroke = "var(--ref)";
+        } else {
+          const l = CK.el("line", { x1: x(s.from), x2: x(s.to), y1: y(s.lo), y2: y(s.lo), class: "ln", "aria-hidden": "true" }, f.svg);
+          l.style.stroke = "var(--ref)";
+        }
+        const g = CK.el("g", {});
+        CK.el("rect", { x: x(s.from), y: y(s.hi) - 8, width: x(s.to) - x(s.from), height: y(s.lo) - y(s.hi) + 16, class: "ck-hit" }, g);
+        // the far-L2 band's label starts at the band, below the lines that cross it; the others end at their segment
+        if (W >= 560) CK.txt(g, s.hi > s.lo ? x(s.from) : x(s.to), y(s.lo) + (s.hi > s.lo ? 30 : 15), s.label, "tick", s.hi > s.lo ? "start" : "end");
+        CK.tip(f, g, "<b>" + s.long + "</b><br>published pointer-chase plateau, " + size(s.from) + "–" + size(s.to));
+        a100.push(g);
+      });
+      // the two ET lines at this clock
+      const labelsAt = {};
+      SERIES.slice().reverse().forEach(s => {
+        const pts = s.curve.map(p => {
+          const lv = level(p[0]), sp = lv === "mix" ? null : split(lv, p[1], s.shire, clk);
+          return { b: p[0], cycles: p[1], lv, sp, ns: sp ? total(sp) : p[2], ghzMeasured: p[3] };
+        });
+        s.pts = pts;
+        let solid = "", dash = "";
+        pts.forEach((p, i) => {
+          const X = x(p.b).toFixed(1), Y = y(p.ns).toFixed(1);
+          if (i === 0) { solid += "M" + X + "," + Y; return; }
+          const q = pts[i - 1], seg = "M" + x(q.b).toFixed(1) + "," + y(q.ns).toFixed(1) + "L" + X + "," + Y;
+          if (p.lv === "mix" || q.lv === "mix") dash += seg; else solid += seg;
+        });
+        const g = CK.el("g", { "data-series": s.key }, f.svg);
+        const ps = CK.el("path", { d: solid, class: "ln" }, g); ps.style.stroke = s.color;
+        const pd = CK.el("path", { d: dash, class: "ln" }, g); pd.style.stroke = s.color; pd.style.strokeDasharray = "5 4";
+        // measured L3 and DRAM chases, at their own clock: filled when they ran at the selected clock
+        D.chases.filter(c => c[0] === s.shire).forEach(c => {
+          const on = Math.abs(c[3] - clk) < 1e-6, m = CK.el("circle", { cx: x(c[1]), cy: y(c[2] / c[3]), r: on ? 4.5 : 3.5 }, g);
+          m.style.fill = on ? s.color : "var(--surface)"; m.style.stroke = s.color; m.style.strokeWidth = on ? "1" : "1.5";
+          m.setAttribute("pointer-events", "none");
+        });
+        // the 16-64 MB chains, as measured (not modelled)
+        pts.filter(p => p.lv === "mix").forEach(p => {
+          const m = CK.el("circle", { cx: x(p.b), cy: y(p.ns), r: 3.5, "pointer-events": "none" }, g);
+          m.style.fill = "var(--surface)"; m.style.stroke = s.color; m.style.strokeWidth = "1.5";
+        });
+        labelsAt[s.shire] = pts;
+      });
+      // focus targets, one per plotted size and line, with the model and the chases behind it
+      SERIES.forEach(s => {
+        const nodes = s.pts.map(p => {
+          const g = CK.el("g", { "data-series": s.key }, f.svg);
+          CK.el("circle", { cx: x(p.b), cy: y(p.ns), r: 9, class: "ck-hit" }, g);
+          if (!(s.shire !== 0 && p.lv === "chip")) {  // on-chip points of the two lines coincide: draw shire 0's
+            const dot = CK.el("circle", { cx: x(p.b), cy: y(p.ns), r: 2.5 }, g); dot.style.fill = s.color;
+          }
+          let html = "<b>Shire " + s.shire + ", " + size(p.b) + "</b> (" + (p.lv === "chip" ? chipName(p.b) : LEVELNAME[p.lv]) + ")<br>";
+          if (p.lv === "chip") html += num(p.cycles, 2) + " cycles: " + num(p.ns, 1) + " ns at " + mhz(clk) + " (fixed in cycles)";
+          else if (p.lv === "mix") html += "measured " + num(p.cycles, 1) + " cycles at about " + mhz(p.ghzMeasured) + " (" + num(p.ns, 0) +
+            " ns); a mix of L3 and DRAM hits, not modelled";
+          else html += "at " + mhz(clk) + (clk === 0.7 ? " (model only)" : "") + ": " + num(p.ns * clk, 1) + " cycles, " + num(p.ns, 0) + " ns = " +
+            num(p.sp[0], 0) + " ns scaling with the clock + " + num(p.sp[1], 0) + " ns fixed<br>measured: " + measuredText(s.shire, p.b);
+          CK.tip(f, g, html);
+          return g;
+        });
+        CK.keynav(f, nodes);
+      });
+      a100.forEach(g => f.svg.appendChild(g));  // tab order: the ET lines first, then the A100
+      CK.keynav(f, a100);
+      // level labels at this clock, computed from the lines
+      const p0 = labelsAt[0], p24 = labelsAt[24], at = (pts, b) => pts.find(p => p.b === b);
+      const l3 = [at(p24, 4 << 20).ns, at(p0, 4 << 20).ns], dram = at(p0, 256 << 20).ns;
+      const labels = [
+        [(f.narrow ? "L1 " : "L1 ") + num(at(p0, 256).ns, 1) + " ns", 256, at(p0, 256).ns, 16],
+        [(f.narrow ? "RB " : "read buffer ") + num(at(p0, 1024).ns, 0) + " ns", 1100, at(p0, 1024).ns, -10],
+        ["L2 " + num(at(p0, 65536).ns, 0) + " ns", 40000, at(p0, 65536).ns, -10],
+        ["L3 " + CK.fmt.range(Math.min(...l3), Math.max(...l3), 0) + " ns", 2.2 * (1 << 20), Math.max(...l3), -12],
+        ["DRAM " + num(dram, 0) + " ns", 180 << 20, dram, -12]
+      ];
+      labels.forEach(l => {
+        const t = CK.txt(f.svg, x(l[1]), y(l[2]) + l[3], l[0], "lab-strong halo", "middle");
+        const w = t.getComputedTextLength ? t.getComputedTextLength() : 0;
+        t.setAttribute("x", Math.min(Math.max(x(l[1]), L + w / 2 + 2), W - R - w / 2 - 2));
+        t.setAttribute("pointer-events", "none");
+      });
+      // readout
+      const at8 = (pts, b, g) => { const p = pts.find(q => q.b === b); return total(split(p.lv, p.cycles, pts === p0 ? 0 : 24, g)); };
+      const gain = (b, pts) => 1 - at8(pts, b, 0.8) / at8(pts, b, 0.6);
+      const on = D.chases.filter(c => (c[0] === 0 || c[0] === 24) && Math.abs(c[3] - clk) < 1e-6).length;
+      latRead.set("<b>At " + mhz(clk) + "</b>" + (clk === 0.7 ? " (the model alone: no L3 or DRAM chase ran at 700 MHz)" : "") + ": " +
+        "L1 " + num(at(p0, 256).ns, 1) + " ns, read buffer " + num(at(p0, 1024).ns, 0) + ", L2 " + num(at(p0, 65536).ns, 0) +
+        ", L3 " + CK.fmt.range(Math.min(...l3), Math.max(...l3), 0) + " (from shires 24 and 0), DRAM " + num(dram, 0) + " ns. " +
+        (on ? on + " L3 and DRAM chases from these two shires ran at this clock (filled). " : "") +
+        "From 600 to 800 MHz on-chip loads get " + CK.fmt.pct(gain(256, p0)) + " faster, L3 " +
+        CK.fmt.range(100 * gain(4 << 20, p0), 100 * gain(4 << 20, p24), 0) + "% and DRAM " + CK.fmt.pct(gain(256 << 20, p0)) +
+        " (" + num(at8(p0, 256 << 20, 0.6), 0) + ", " + num(at8(p0, 256 << 20, 0.7), 0) + " and " + num(at8(p0, 256 << 20, 0.8), 0) +
+        " ns at 600, 700 and 800 MHz).");
+    }
+  });
+
+  // ---------- 1b. Where the time goes: clock-scaled and fixed part of each level ----------
+  const PL = D.plateaus;
+  const ROWS = [
+    { name: "L1", lv: "chip", cycles: PL.L1.median },
+    { name: "read buffer", lv: "chip", cycles: PL["L2 read buffer"].median },
+    { name: "L2", lv: "chip", cycles: PL["L2 / local scratchpad"].median },
+    { name: "L3 (shire 0)", lv: "L3", fixed: "mesh (400 MHz)" },
+    { name: "DRAM", lv: "DRAM", fixed: "mesh and DDR" }
+  ];
+  const PART = [["clock", "scales with the minion clock", CK.color(0)], ["fixed", "fixed: 400 MHz mesh, DDR memory", "var(--c7)"]];
+  CK.legend("split-legend", PART.map(p => ({ key: p[0], label: p[1], mark: "box", color: p[2] })));
+  const splitF = CK.frame("split", {
+    label: "Each level's load time split into the part that scales with the minion clock and the fixed part",
+    height: W => (W < 600 ? 40 + ROWS.length * 46 : 34 + ROWS.length * 34), minW: 280,
+    draw: f => {
+      const narrow = f.narrow, L = narrow ? 4 : 110, R = 16, T = 6, B = 32, rowH = narrow ? 46 : 34;
+      const xmax = 100 * Math.ceil(total(split("DRAM", 0, 0, 0.6)) / 100);   // fixed across clocks, so bars move
+      const x = CK.lin(0, xmax, L, f.W - R - (narrow ? 0 : 70));
+      const xt = x.ticks(narrow ? 4 : 5);
+      xt.forEach(t => { CK.el("line", { x1: x(t), x2: x(t), y1: T, y2: f.H - B, class: "grid-line", "aria-hidden": "true" }, f.svg);
+        CK.txt(f.svg, x(t), f.H - B + 16, String(t), "tick", "middle"); });
+      CK.txt(f.svg, (x(0) + x(xmax)) / 2, f.H - 4, "ns per load at " + mhz(clk), "lab", "middle");
+      const nodes = ROWS.map((r, i) => {
+        const sp = split(r.lv, r.cycles, 0, clk), top = T + i * rowH, by = narrow ? top + 18 : top + 7, bh = narrow ? 18 : rowH - 14;
+        const g = CK.el("g", {}, f.svg);
+        CK.el("rect", { x: 0, y: top, width: f.W, height: rowH, class: "ck-hit" }, g);
+        CK.txt(g, narrow ? 0 : L - 8, narrow ? top + 13 : by + bh / 2 + 4, r.name, "lab", narrow ? "start" : "end");
+        const a = CK.el("rect", { x: x(0), y: by, width: Math.max(1, x(sp[0]) - x(0)), height: bh, rx: 2 }, g); a.style.fill = PART[0][2];
+        if (sp[1] > 0) {
+          const b = CK.el("rect", { x: x(sp[0]) + 2, y: by, width: Math.max(1, x(sp[0] + sp[1]) - x(sp[0]) - 2), height: bh, rx: 2 }, g);
+          b.style.fill = PART[1][2];
+          if (x(sp[0] + sp[1]) - x(sp[0]) > 96) {
+            const t = CK.txt(g, (x(sp[0]) + x(sp[0] + sp[1])) / 2, by + bh / 2 + 4, r.fixed, "tick", "middle");
+            t.style.fill = "var(--page)";
+          }
+        }
+        const lab = sp[1] > 0 ? num(sp[0], 0) + " + " + num(sp[1], 0) + " ns" : num(sp[0], sp[0] < 10 ? 1 : 0) + " ns";
+        const endX = x(total(sp)) + 6, t = CK.txt(g, endX, by + bh / 2 + 4, lab, "lab-strong");
+        if (narrow && endX + (t.getComputedTextLength ? t.getComputedTextLength() : 0) > f.W - 2) {
+          t.setAttribute("x", f.W - 2); t.setAttribute("text-anchor", "end"); t.setAttribute("y", top + 13);
+        }
+        CK.tip(f, g, "<b>" + r.name + " at " + mhz(clk) + ": " + num(total(sp), total(sp) < 10 ? 1 : 0) + " ns</b><br>" +
+          (r.lv === "chip" ? num(r.cycles, 2) + " minion cycles, all of it on the minion clock"
+            : num(sp[0], 0) + " ns on the minion clock (" + num(r.lv === "L3" ? FL.cycles : FD.cycles, 1) + " cycles) + " + num(sp[1], 0) +
+              " ns fixed (" + r.fixed + (r.lv === "L3" ? ", " + num(HOPS[0], 2) + " hops to the average slice" : "") + ")"));
+        return g;
+      });
+      CK.keynav(f, nodes);
+    }
+  });
+
+  // ---------- 2. Scratchpad latency across the mesh: scatter against hops, and the mesh map ----------
+  const M = D.scp_model, LAY = D.layout, SRC = Object.keys(D.scp_matrix).map(Number).sort((a, b) => a - b);
+  const hops = (a, b) => Math.abs(LAY[a][0] - LAY[b][0]) + Math.abs(LAY[a][1] - LAY[b][1]);
+  const pred = (h, g) => M.c + (M.t0 + M.hop * h) * g;
+  const CLKCOL = { 0.6: CK.color(0), 0.7: CK.color(1), 0.8: CK.color(2) };
+  // every remote load: its nearest operating point and its distance from that line
+  const LOADS = {};
+  let within = 0, count = 0;
+  SRC.forEach(s => {
+    LOADS[s] = D.scp_matrix[s].map((v, t) => {
+      const h = hops(s, t);
+      if (t === s) return { t, h, v, local: true, ns: v / 0.6 };
+      const g = CLOCKS.reduce((b, q) => (Math.abs(v - pred(h, q)) < Math.abs(v - pred(h, b)) ? q : b), 0.6);
+      const off = v - pred(h, g);
+      count++; if (Math.abs(off) <= 1) within++;
+      return { t, h, v, g, off, ns: v / g };
+    });
+  });
+  const remoteNs = SRC.flatMap(s => LOADS[s].filter(l => !l.local).map(l => l.ns));
+  const NS_LO = Math.min(...remoteNs), NS_HI = Math.max(...remoteNs);
+  let from = SRC[0], mode = "scp";
+  const hl = CK.bus("scp-hl");
+  const scpRead = CK.readout("scp-read");
+  function scpLegend() {
+    CK.legend("scp-legend", mode === "scp"
+      ? CLOCKS.map(g => ({ key: String(g), label: "model at " + mhz(g) + (g === 0.7 ? " (dashed)" : ""), mark: g === 0.7 ? "dash" : "line", color: CLKCOL[g] }))
+        .concat([{ key: "ramp", label: "map: stronger blue is slower (ns)", mark: "box", color: CK.ramp(0.8) }])
+      : [{ key: "bars", label: "L3 slices at each distance", mark: "box", color: CK.color(0) },
+         { key: "ramp", label: "map: stronger blue is farther", mark: "box", color: CK.ramp(0.8) }]);
+  }
+  function tipLoad(s, l) {
+    if (l.local) return "<b>shire " + s + ", its own scratchpad</b><br>" + num(l.v, 1) + " cycles (" + num(l.ns, 0) + " ns at 600 MHz)";
+    const others = CLOCKS.filter(g => g !== l.g).map(g => num(pred(l.h, g), 1) + " at " + mhz(g)).join(", ");
+    return "<b>shire " + s + " → " + l.t + ": " + l.h + (l.h === 1 ? " hop" : " hops") + ", " + num(l.v, 1) + " cycles</b><br>" +
+      "the model gives " + num(pred(l.h, l.g), 1) + " at " + mhz(l.g) + " (" + others + ")<br>" +
+      (Math.abs(l.off) <= 1 ? "on the " + mhz(l.g) + " line: " + num(l.ns, 0) + " ns"
+        : "between the lines, " + num(Math.abs(l.off), 1) + " cycles from the nearest: the clock changed during this chase");
+  }
+  function scpText() {
+    const rows = LOADS[from].filter(l => !l.local), byG = {};
+    rows.forEach(l => { byG[l.g] = (byG[l.g] || 0) + 1; });
+    const odd = rows.filter(l => Math.abs(l.off) > 1);
+    if (mode === "scp") {
+      const cyc = rows.map(l => l.v), nss = rows.map(l => l.ns);
+      scpRead.set("<b>From shire " + from + "</b>: " + rows.length + " remote loads, " + CK.fmt.range(Math.min(...cyc), Math.max(...cyc), 0) +
+        " cycles (" + CK.fmt.range(Math.min(...nss), Math.max(...nss), 0, "ns") + "); nearest line: " +
+        CLOCKS.filter(g => byG[g]).map(g => byG[g] + " at " + mhz(g)).join(", ") +
+        (odd.length ? "; " + odd.map(l => from + " → " + l.t).join(", ") + " sits between the lines" : "") +
+        ". Over the four rows, " + within + " of " + count + " loads lie within 1 cycle of the model (" + num(M.c, 1) + " cycles + " +
+        num(M.t0, 1) + " ns + " + num(M.hop, 1) + " ns per hop) at their nearest operating point.");
+    } else {
+      const hs = LOADS[from].map(l => l.h), mean = hs.reduce((a, b) => a + b, 0) / hs.length, A = D.anatomy_l3;
+      const meas = D.l3_by_requester[String(from)];
+      scpRead.set("<b>From shire " + from + "</b>: the 32 L3 slices are " + CK.fmt.range(Math.min(...hs), Math.max(...hs), 0) +
+        " hops away, " + num(mean, 2) + " on average → " + A.base + " + " + A.per_hop + " × " + num(mean, 2) + " = " +
+        num(A.base + A.per_hop * mean, 1) + " cycles predicted (Anatomy of a memory access, §3); " +
+        (meas != null ? num(meas, 1) + " measured at 600 MHz." : "no L3 chase from this shire."));
+    }
+  }
+  CK.seg("scp-from", { label: "From shire", value: from, options: SRC.map(s => [s, String(s)]),
+    onChange: v => { from = v; redrawScp(); } });
+  CK.seg("scp-mode", { label: "Show", value: mode, options: [["scp", "Remote scratchpad"], ["l3", "L3 average trip"]],
+    onChange: v => { mode = v; scpLegend(); redrawScp(); } });
+  scpLegend();
+
+  const scatF = CK.frame("scp-scatter", {
+    label: "Scratchpad load latency against mesh hops from the selected shire, with the model at 600, 700 and 800 MHz",
+    height: W => (W < 600 ? 290 : 320), minW: 280, maxW: 600,
+    draw: f => {
+      const L = 44, R = mode === "scp" ? 58 : 12, T = 24, B = 40;
+      const x = CK.lin(-0.5, 10.5, L, f.W - R);
+      f.links = [];
+      if (mode === "scp") {
+        const y = CK.lin(0, 300, f.H - B, T);
+        CK.axes(f, { x, y, L, R, T, B, xt: [0, 2, 4, 6, 8, 10], xl: "mesh hops (0 = own scratchpad)", yl: "minion cycles per load" });
+        CLOCKS.forEach(g => {
+          const l = CK.el("line", { x1: x(1), x2: x(10), y1: y(pred(1, g)), y2: y(pred(10, g)), class: "ln", "aria-hidden": "true" }, f.svg);
+          l.style.stroke = CLKCOL[g]; if (g === 0.7) l.style.strokeDasharray = "5 4";
+          CK.txt(f.svg, x(10) + 6, y(pred(10, g)) + 4, mhz(g), "tick");
+        });
+        const rows = LOADS[from].slice().sort((a, b) => a.h - b.h || a.v - b.v);
+        const nodes = rows.map(l => {
+          const g = CK.el("g", {}, f.svg);
+          CK.el("circle", { cx: x(l.h), cy: y(l.v), r: 9, class: "ck-hit" }, g);
+          const c = CK.el("circle", { cx: x(l.h), cy: y(l.v), r: 5 }, g);
+          c.style.fill = l.local ? "var(--surface)" : CLKCOL[l.g]; c.style.stroke = l.local ? "var(--ink)" : "var(--surface)";
+          c.style.strokeWidth = l.local ? "1.5" : "2";
+          if (l.local) CK.txt(g, x(l.h) + 9, y(l.v) + 4, "own", "tick");
+          CK.tip(f, g, tipLoad(from, l));
+          link(f, g, c, l.t, "scatter");
+          return g;
+        });
+        CK.keynav(f, nodes);
+      } else {
+        const hs = LOADS[from].map(l => l.h), cnt = {};
+        hs.forEach(h => { cnt[h] = (cnt[h] || 0) + 1; });
+        const ymax = Math.max(4, Math.ceil(Math.max(...Object.values(cnt)) / 2) * 2), y = CK.lin(0, ymax, f.H - B, T);
+        CK.axes(f, { x, y, L, R, T, B, xt: [0, 2, 4, 6, 8, 10], xl: "mesh hops from shire " + from + " to the slice", yl: "L3 slices" });
+        const bw = Math.min(28, (x(1) - x(0)) * 0.7), nodes = [];
+        for (let h = 0; h <= 10; h++) {
+          if (!cnt[h]) continue;
+          const g = CK.el("g", {}, f.svg), ts = LOADS[from].filter(l => l.h === h).map(l => l.t);
+          CK.el("rect", { x: x(h) - bw / 2 - 4, y: T, width: bw + 8, height: f.H - B - T, class: "ck-hit" }, g);
+          const r = CK.el("rect", { x: x(h) - bw / 2, y: y(cnt[h]), width: bw, height: y(0) - y(cnt[h]), rx: 3 }, g);
+          r.style.fill = CK.color(0);
+          CK.txt(g, x(h), y(cnt[h]) - 5, String(cnt[h]), "tick", "middle");
+          CK.tip(f, g, "<b>" + h + (h === 1 ? " hop" : " hops") + ": " + cnt[h] + (cnt[h] === 1 ? " slice" : " slices") + "</b><br>shires " + ts.join(", "));
+          link(f, g, r, "h" + h, "scatter");
+          nodes.push(g);
+        }
+        const mean = hs.reduce((a, b) => a + b, 0) / hs.length;
+        const ml = CK.el("line", { x1: x(mean), x2: x(mean), y1: T, y2: f.H - B, "aria-hidden": "true" }, f.svg);
+        ml.style.stroke = "var(--ink)"; ml.style.strokeDasharray = "4 3"; ml.style.strokeWidth = "1.5";
+        const mt = CK.txt(f.svg, x(mean) + 5, T + 10, "mean " + num(mean, 2) + " hops", "lab-strong halo");
+        if (x(mean) + 5 + (mt.getComputedTextLength ? mt.getComputedTextLength() : 0) > f.W - R) { mt.setAttribute("x", x(mean) - 5); mt.setAttribute("text-anchor", "end"); }
+        CK.keynav(f, nodes);
+      }
+    }
+  });
+
+  const mapF = CK.frame("scp-map", {
+    label: "The 6 by 6 mesh: each shire shaded by the selected shire's load time to it, or by its distance in L3 mode",
+    height: W => 22 + 6 * Math.floor((Math.min(W, 420) - 22) / 6) + 30, minW: 280, maxW: 420,
+    draw: f => {
+      const top = 22, lab = 18, cs = Math.floor((Math.min(f.W, 420) - 22) / 6), gap = 4, left = lab + Math.max(0, Math.floor((f.W - lab - 6 * cs) / 2));
+      f.links = [];
+      for (let i = 0; i < 6; i++) {
+        CK.txt(f.svg, left + (i + 0.5) * cs, 14, String(i), "tick", "middle");
+        CK.txt(f.svg, left - 9, top + (i + 0.5) * cs + 4, String(i), "tick", "middle");
+      }
+      D.empty_cells.forEach(c => {
+        const r = CK.el("rect", { x: left + c[0] * cs + gap / 2, y: top + c[1] * cs + gap / 2, width: cs - gap, height: cs - gap, rx: 6, "aria-hidden": "true" }, f.svg);
+        r.style.fill = "var(--empty)";
+      });
+      const byS = {};
+      LOADS[from].forEach(l => { byS[l.t] = l; });
+      const ids = Object.keys(LAY).map(Number).sort((a, b) => LAY[a][1] - LAY[b][1] || LAY[a][0] - LAY[b][0]);
+      const nodes = ids.map(s => {
+        const c = LAY[s], X = left + c[0] * cs, Y = top + c[1] * cs, l = byS[s], g = CK.el("g", {}, f.svg);
+        const isSrc = s === from;
+        const p = mode === "scp" ? (isSrc ? 0 : (l.ns - NS_LO) / (NS_HI - NS_LO)) : l.h / 10;
+        const r = CK.el("rect", { x: X + gap / 2, y: Y + gap / 2, width: cs - gap, height: cs - gap, rx: 6 }, g);
+        r.style.fill = isSrc ? "var(--surface)" : CK.ramp(p);
+        r.style.stroke = isSrc ? "var(--ink)" : "var(--surface)"; r.style.strokeWidth = isSrc ? "3" : "2";
+        const ink = isSrc ? "var(--ink)" : CK.rampInk(p);
+        const t1 = CK.txt(g, X + cs / 2, Y + cs / 2 + (cs >= 44 ? -3 : 4), String(s), "lab-strong", "middle"); t1.style.fill = ink;
+        if (cs >= 44) {
+          const sub = mode === "scp" ? (isSrc ? "from" : num(l.ns, 0) + " ns") : (l.h + (l.h === 1 ? " hop" : " hops"));
+          const t2 = CK.txt(g, X + cs / 2, Y + cs / 2 + 12, sub, "tick", "middle"); t2.style.fill = ink;
+        }
+        const html = mode === "scp" ? tipLoad(from, l)
+          : "<b>L3 slice in shire " + s + "</b><br>" + l.h + (l.h === 1 ? " hop" : " hops") + " from shire " + from;
+        CK.tip(f, g, html);
+        link(f, g, r, mode === "scp" ? s : "h" + l.h, "map");
+        return g;
+      });
+      // arrow keys move on the grid
+      const at = {}; ids.forEach((s, k) => { at[LAY[s][0] + "," + LAY[s][1]] = k; });
+      CK.keynav(f, nodes, { step: (k, key) => {
+        const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[key];
+        if (!d) return null;
+        let [cx, cy] = LAY[ids[k]];
+        for (let n = 0; n < 6; n++) { cx += d[0]; cy += d[1]; if (at[cx + "," + cy] != null) return at[cx + "," + cy]; }
+        return k;
+      } });
+      if (mode === "scp") {
+        CK.txt(f.svg, left, top + 6 * cs + 16, num(NS_LO, 0) + "–" + num(NS_HI, 0) + " ns, four rows, each at its own clock", "tick");
+      } else CK.txt(f.svg, left, top + 6 * cs + 16, "hops from shire " + from + " to each L3 slice", "tick");
+    }
+  });
+  // Hovering or focusing a mark outlines its counterpart in the other view (a load and its target shire, or a hop
+  // count and the slices at that distance).
+  function link(f, g, mark, key, view) {
+    f.links.push({ mark, key });
+    const on = () => hl.emit(key, view), off = () => hl.emit(null, view);
+    g.addEventListener("pointerenter", on); g.addEventListener("focus", on);
+    g.addEventListener("pointerleave", off); g.addEventListener("blur", off);
+  }
+  hl.on((key, view) => {
+    const other = view === "map" ? scatF : mapF;
+    [scatF, mapF].forEach(fr => (fr.links || []).forEach(n => n.mark.classList.remove("ck-linked")));
+    if (key != null) (other.links || []).forEach(n => { if (n.key === key) n.mark.classList.add("ck-linked"); });
+  });
+  function redrawScp() { CK.hide(scatF); CK.hide(mapF); scatF.redraw(); mapF.redraw(); scpText(); }
+  scpText();
+
+  // ---------- 3. ET-SoC-1 against the A100, level by level (dumbbells) ----------
+  // ET values: this page's tables (energy per byte: the energy manual's re-runs); A100: published (Sources).
+  // A pair [lo, hi] is a range, drawn as a bar.
+  const CMP = {
+    "cmp-lat": { title: "Load latency", short: "Load latency", unit: "ns", lo: 2, hi: 1000, ticks: [3, 10, 30, 100, 300, 1000], rows: [
       ["L1", 8.8, 23, "5.25 cycles at 600 MHz", "33 cycles at 1.41 GHz"],
       ["L2 (near L2)", 78, 148, "47 cycles", "208 cycles"],
       ["Scratchpad / shared", 78, 21, "local, 47 cycles", "shared memory, 29 cycles"],
-      ["L3 / far L2", 282, 253, "159–169 cycles at 600 MHz, 265–282 ns", "357 cycles; 253–313 ns"],
-      ["DRAM", 490, 405, "287–297 cycles at 600 MHz, 480–495 ns", "HBM, 570 cycles"] ] },
-    "cmp-bw": { title: "Bandwidth, whole chip, ET at 600 MHz", unit: "TB/s", lo: 0.05, hi: 30, ticks: [0.1, 0.3, 1, 3, 10, 30], rows: [
-      ["L1", 6.2, 14.8, "32 B vector loads, 2,048 harts", "measured; 19.5 peak"],
+      ["L3 / far L2", [265, 282], [253, 313], "159–169 cycles at 600 MHz, depending on the requesting shire", "357 cycles"],
+      ["DRAM", 490, 405, "287–297 cycles at 600 MHz, 479–495 ns", "HBM, 570 cycles"] ] },
+    "cmp-bw": { title: "Bandwidth, whole chip, ET at 600 MHz", short: "Bandwidth, whole chip", unit: "TB/s", lo: 0.05, hi: 30, ticks: [0.1, 0.3, 1, 3, 10, 30], rows: [
+      ["L1", 14.2, 14.8, "32 B vector loads, 2,048 harts, unrolled (energy manual §4.1); this probe's loop 6.2", "measured; 19.5 peak"],
       ["L2", 2.45, 4.4, "TensorLoads, 256 KB per shire", "measured; 7.2 peak"],
       ["Scratchpad / shared", 2.46, 19.5, "local scratchpad", "shared memory, 128 B/clk/SM"],
       ["L3 / far L2", 0.98, null, "24 MB working set", ""],
       ["DRAM", 0.076, 1.77, "LPDDR4X, 256 MB", "HBM2e 80 GB, BabelStream"] ] },
-    "cmp-en": { title: "Energy per byte (whole chip, above idle)", unit: "pJ/B", lo: 0.25, hi: 300, ticks: [0.3, 1, 3, 10, 30, 100, 300], rows: [
-      ["L1", 0.77, 12.7, "energy manual, 600 MHz, two cards", "SC'25: 1.6 pJ/bit"],
+    "cmp-en": { title: "Energy per byte (whole chip, above idle)", short: "Energy per byte", unit: "pJ/B", lo: 0.25, hi: 300, ticks: [0.3, 1, 3, 10, 30, 100, 300], rows: [
+      ["L1", 0.54, 12.7, "energy manual §4.1, unrolled vector loads, 600 MHz, two cards; this probe's loop 0.77", "SC'25: 1.6 pJ/bit"],
       ["L2", 2.51, 37.7, "energy manual, 600 MHz, two cards", "SC'25: 4.7 pJ/bit"],
       ["Scratchpad / shared", 2.52, null, "local scratchpad; energy manual, 600 MHz, two cards", ""],
       ["L3 / far L2", 10.5, null, "energy manual, 600 MHz, two cards", ""],
       ["DRAM", 122, 105, "energy manual, 600 MHz, two cards: 117–129 over six passes", "SC'25: 13.1 pJ/bit"] ] }
   };
-  function renderDumbbell(id) {
-    var spec = CMP[id], host = document.getElementById(id), tip = host.querySelector(".tip");
-    var old = host.querySelector("svg"); if (old) old.remove();
-    var title = host.querySelector(".chart-title");
-    if (!title) { title = document.createElement("div"); title.className = "chart-title"; host.insertBefore(title, host.firstChild); }
-    title.textContent = spec.title + " (" + spec.unit + ", log scale)";
-    var W = Math.max(200, host.clientWidth), stacked = W < 460;
-    var rowH = stacked ? 44 : 34, m = { l: stacked ? 6 : 150, r: 10, t: 6, b: 26 };
-    var H = m.t + m.b + rowH * spec.rows.length;
-    var l0 = Math.log10(spec.lo), l1 = Math.log10(spec.hi);
-    var x = function (v) { return m.l + (Math.log10(v) - l0) / (l1 - l0) * (W - m.l - m.r); };
-    var svg = el("svg", { width: W, height: H, role: "img", "aria-label": spec.title + ": ET-SoC-1 against the A100, values in the tables above." });
-    host.insertBefore(svg, tip);
-    var lastTick = -1e9;
-    spec.ticks.forEach(function (t) {
-      el("line", { x1: x(t), x2: x(t), y1: m.t, y2: H - m.b, "class": "grid-line" }, svg);
-      if (x(t) - lastTick >= 34) {
-        var tt = txt(svg, x(t), H - m.b + 16, String(t), "tick", "middle");
-        if (x(t) + tt.getComputedTextLength() / 2 > W) tt.setAttribute("text-anchor", "end");
-        lastTick = x(t);
-      }
-    });
-    var fmt = function (v) { return v >= 100 ? String(Math.round(v)) : String(+v.toPrecision(3)); };  // as printed in the tables
-    // Puts a value label beside a dot, on the preferred side unless it would leave the chart.
-    function label(v, cx, cy, cls, preferRight) {
-      var t = txt(svg, cx, cy + 4, fmt(v), cls + " halo", "start");
-      var w = t.getComputedTextLength();
-      var right = preferRight ? cx + 10 + w <= W : cx - 10 - w < m.l;
-      t.setAttribute("x", right ? cx + 10 : cx - 10 - w);
-    }
-    spec.rows.forEach(function (r, i) {
-      var top = m.t + rowH * i, cy = stacked ? top + 30 : top + rowH / 2;
-      txt(svg, stacked ? 0 : 0, stacked ? top + 13 : cy + 4, r[0], "lab");
-      if (r[2] != null) el("line", { x1: x(r[1]), x2: x(r[2]), y1: cy, y2: cy, "class": "conn" }, svg);
-      var etRight = r[2] == null || r[1] >= r[2];
-      if (r[2] != null) {
-        el("circle", { cx: x(r[2]), cy: cy, r: 6, "class": "d-ref" }, svg);
-        label(r[2], x(r[2]), cy, "tick", !etRight);
-      }
-      el("circle", { cx: x(r[1]), cy: cy, r: 6, "class": "d-et" }, svg);
-      label(r[1], x(r[1]), cy, "lab-strong", etRight);
-      var hit = el("rect", { x: 0, y: top, width: W, height: rowH, fill: "transparent" }, svg);
-      var html = "<b>" + r[0] + "</b><br>ET-SoC-1: " + fmt(r[1]) + " " + spec.unit + (r[3] ? " (" + r[3] + ")" : "") +
-        "<br>A100: " + (r[2] == null ? "no equivalent / not published" : fmt(r[2]) + " " + spec.unit + (r[4] ? " (" + r[4] + ")" : ""));
-      hit.addEventListener("pointermove", function (ev) { var b = svg.getBoundingClientRect(); showTip(tip, host, html, ev.clientX - b.left, cy + 30); });
-      hit.addEventListener("pointerleave", function () { tip.style.display = "none"; });
-    });
-  }
-
-  // ---------- scratchpad heatmap ----------
-  // The clock each row of chases ran at, inferred from wall time (see the caption); cycles are not comparable across rows.
-  var ROWCLK = { 0: "this row ran at 600 MHz", 7: "this row ran at 600 MHz", 24: "the governor raised the clock from 600 to 800 MHz along this row", 31: "this row ran at 800 MHz" };
-  var RAMP = ["#cde2fb", "#b7d3f6", "#9ec5f4", "#86b6ef", "#6da7ec", "#5598e7", "#3987e5", "#2a78d6", "#256abf", "#1c5cab", "#184f95", "#104281", "#0d366b"];
-  function renderHeat() {
-    var host = document.getElementById("heat"), tip = document.getElementById("heat-tip");
-    var old = host.querySelector("svg"); if (old) old.remove();
-    var srcs = Object.keys(D.scp_matrix).map(Number).sort(function (a, b) { return a - b; });
-    var all = []; srcs.forEach(function (s) { all = all.concat(D.scp_matrix[s]); });
-    var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
-    var W = Math.max(200, host.clientWidth - 32), lab = W < 460 ? 58 : 78, cw = (W - lab) / 32, ch = Math.max(18, Math.min(34, cw * 1.4));
-    var H = 30 + ch * srcs.length + 62;
-    var svg = el("svg", { width: W, height: H, role: "img", "aria-label": "Scratchpad load latency from shires 0, 7, 24 and 31 to each of the 32 shires." });
-    for (var t = 0; t < 32; t += (W < 560 ? 8 : 4)) txt(svg, lab + (t + 0.5) * cw, 14, String(t), "tick", "middle");
-    if (W >= 460) txt(svg, lab - 6, 14, "to shire", "tick", "end");
-    srcs.forEach(function (s, i) {
-      var yy = 22 + i * ch;
-      txt(svg, lab - 6, yy + ch / 2 + 4, (W < 460 ? "" : "from ") + s, "lab", "end");
-      D.scp_matrix[s].forEach(function (v, t) {
-        var k = Math.round((v - lo) / (hi - lo) * (RAMP.length - 1));
-        var r = el("rect", { x: lab + t * cw, y: yy, width: cw, height: ch, fill: RAMP[k], "class": "cell" }, svg);
-        r.addEventListener("pointermove", function (ev) {
-          var b = svg.getBoundingClientRect();
-          showTip(tip, host, "<b>shire " + s + " → shire " + t + "</b><br>" + v + " cycles" + (t === s ? " (local)" : "") + (ROWCLK[s] ? "<br>" + ROWCLK[s] : ""), ev.clientX - b.left, yy + 8);
+  CK.legend("cmp-legend", [{ key: "et", label: "ET-SoC-1, measured", mark: "dot", color: CK.color(0) },
+    { key: "a100", label: "A100, published", mark: "dot", color: "var(--ref)" }]);
+  const vfmt = v => (Array.isArray(v) ? v.join("–") : v >= 100 ? String(Math.round(v)) : String(+v.toPrecision(3)));
+  Object.keys(CMP).forEach(id => {
+    const spec = CMP[id];
+    CK.frame(id, {
+      label: spec.title + ": ET-SoC-1 against the A100; the values are in the tables",
+      height: W => (W < 460 ? 44 : 34) * spec.rows.length + 32 + 22, minW: 280,
+      draw: f => {
+        const stacked = f.W < 460, rowH = stacked ? 44 : 34, L = stacked ? 8 : 150, R = 12, T = 22, B = 26;
+        CK.txt(f.svg, 0, 14, (stacked ? spec.short : spec.title) + " (" + spec.unit + ", log scale)", "lab-strong");
+        const x = CK.log(spec.lo, spec.hi, L, f.W - R);
+        let last = -1e9;
+        spec.ticks.forEach(t => {
+          CK.el("line", { x1: x(t), x2: x(t), y1: T, y2: f.H - B, class: "grid-line", "aria-hidden": "true" }, f.svg);
+          if (x(t) - last >= 34) { CK.txt(f.svg, x(t), f.H - B + 16, String(t), "tick", x(t) + 18 > f.W ? "end" : "middle"); last = x(t); }
         });
-        r.addEventListener("pointerleave", function () { tip.style.display = "none"; });
-      });
+        const nodes = spec.rows.map((r, i) => {
+          const top = T + rowH * i, cy = stacked ? top + 30 : top + rowH / 2, g = CK.el("g", {}, f.svg);
+          CK.el("rect", { x: 0, y: top, width: f.W, height: rowH, class: "ck-hit" }, g);
+          CK.txt(g, 0, stacked ? top + 13 : cy + 4, r[0], "lab");
+          const lo = v => (Array.isArray(v) ? v[0] : v), hi = v => (Array.isArray(v) ? v[1] : v), mid = v => Math.sqrt(lo(v) * hi(v));
+          const ranged = Array.isArray(r[1]) || Array.isArray(r[2]);
+          if (r[2] != null && !ranged) {
+            const c = CK.el("line", { x1: x(mid(r[1])), x2: x(mid(r[2])), y1: cy, y2: cy }, g);
+            c.style.stroke = "var(--axis)"; c.style.strokeWidth = "2";
+          }
+          const mark = (v, color, dy) => {
+            let n;
+            if (Array.isArray(v)) {  // a range: a bar from lo to hi; two ranges in a row sit one above the other
+              n = CK.el("line", { x1: x(v[0]), x2: x(v[1]), y1: cy + dy, y2: cy + dy }, g);
+              n.style.stroke = color; n.style.strokeWidth = "6"; n.style.strokeLinecap = "round";
+            } else { n = CK.el("circle", { cx: x(v), cy, r: 6 }, g); n.style.fill = color; n.style.stroke = "var(--surface)"; n.style.strokeWidth = "2"; }
+            return n;
+          };
+          const etRight = r[2] == null || mid(r[1]) >= mid(r[2]);
+          const label = (v, cls, right) => {
+            const t = CK.txt(g, 0, cy + 4, vfmt(v), cls + " halo"), w = t.getComputedTextLength ? t.getComputedTextLength() : 20;
+            const ex = right ? x(hi(v)) + 10 : x(lo(v)) - 10 - w, ok = right ? ex + w <= f.W : ex >= L;
+            t.setAttribute("x", ok ? ex : right ? x(lo(v)) - 10 - w : x(hi(v)) + 10);
+          };
+          if (r[2] != null) { mark(r[2], "var(--ref)", ranged ? 4 : 0); label(r[2], "tick", !etRight); }
+          mark(r[1], CK.color(0), ranged ? -4 : 0); label(r[1], "lab-strong", etRight);
+          CK.tip(f, g, "<b>" + r[0] + "</b><br>ET-SoC-1: " + vfmt(r[1]) + " " + spec.unit + (r[3] ? " (" + r[3] + ")" : "") +
+            "<br>A100: " + (r[2] == null ? "no equivalent, or not published" : vfmt(r[2]) + " " + spec.unit + (r[4] ? " (" + r[4] + ")" : "")));
+          return g;
+        });
+        CK.keynav(f, nodes);
+      }
     });
-    var ly = 22 + srcs.length * ch + 14, lw = Math.max(110, Math.min(260, W - lab - 10)), stackLegend = lw < 180;
-    RAMP.forEach(function (c, i) { el("rect", { x: lab + i * lw / RAMP.length, y: ly, width: lw / RAMP.length + 0.5, height: 8, fill: c }, svg); });
-    txt(svg, lab, ly + 22, Math.round(lo) + " cycles (local)", "tick");
-    if (stackLegend) txt(svg, lab, ly + 38, "to " + Math.round(hi) + " cycles (darkest)", "tick");
-    else txt(svg, lab + lw, ly + 22, Math.round(hi) + " cycles", "tick", "end");
-    host.insertBefore(svg, tip);
-  }
+  });
 
-  function renderAll() { renderLatency(); renderHeat(); Object.keys(CMP).forEach(renderDumbbell); }
-  renderAll();
-  var lastW = document.body.clientWidth;
-  window.addEventListener("resize", function () { if (document.body.clientWidth !== lastW) { lastW = document.body.clientWidth; renderAll(); } });
+  // spec-sheet tables become cards on a phone
+  ["et-table", "a100-table"].forEach(id => CK.stackTable(id));
 })();
 </script>
 </body>

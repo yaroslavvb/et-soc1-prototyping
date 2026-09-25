@@ -2,7 +2,7 @@
 """Attribute the catalogue's unmetered power, and calibrate the DDR-rail droop against it.
 
     python3 tools/ettelem/fit_unmetered.py                    # fit, and compare with the committed unmetered_fit.json
-    python3 tools/ettelem/fit_unmetered.py --out FIT.json     # also write the fit (same shape as unmetered_fit.json)
+    python3 tools/ettelem/fit_unmetered.py --out docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json --overwrite
 
 Board power minus the three metered rails (minion, SRAM, NoC) is power no sensor on the card reports. For each
 card, each catalogue configuration's mean unmetered watts over idle is fitted, with no intercept, as
@@ -20,14 +20,17 @@ fitted off-rail DRAM watts (the unmetered watts less the fitted rail losses, DRA
 rest of the board's power over idle. It uses the aifoundry2 catalogue telemetry only, which does not cover the six
 dramrow2 configurations run separately, hence n = 386.
 
-Reproducibility against docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json, which was first computed
-inline: the attribution (coefficients, standard errors, rms and n on both cards) is reproduced exactly. The droop
-coefficient is reproduced to within 3% (0.865 against 0.841 mV per off-rail DRAM watt), its rms to 6% (0.375 against
-0.355 mV), the minion IR drop to 3% (0.070 against 0.068 mV/W) and the idle monitor levels to 0.2 mV; the small
-common term is 0.029 against 0.025 mV per board watt. The inline computation's busy and idle windows were not
-recorded, and the ones used here (busy: from 0.5 s after a burst starts to its end; idle: from 2.5 s to 0.2 s before
-it starts) are this script's choice. The committed file keeps the inline numbers; this script does not overwrite it
-unless asked to with --out on that path and --overwrite.
+Writes unmetered_fit.json. The droop's windows are busy from 0.5 s after a burst starts to its end, and idle from
+2.5 s to 0.2 s before it starts.
+
+Stores through the L1 (st_stream: fsw.ps through the write-back path) count only the bytes written, not the line
+each store reads from DRAM first; that is why they sit 1.3-2.7 W above the fit. Each card's block also carries the
+refit with those bytes counted twice (l1_line_read_refit), for comparison only; the published coefficients are the
+fit above.
+
+Per-configuration rows for charts: <card>.per_config = [cfg, over_idle_w, rail_minion_w, rail_sram_w, rail_noc_w,
+dram_GBps] (the fit's inputs) and ddr_droop.per_config = [cfg, droop_ddr_mv, dram_offrail_w, over_idle_w,
+droop_minion_mv, rail_minion_w], rounded to 3 decimals.
 """
 import argparse
 import collections
@@ -61,21 +64,39 @@ def config_means(bursts):
     for cfg, bs in by.items():
         m = {k: float(np.mean([x[k] for x in bs])) for k in ("rail_minion_w", "rail_sram_w", "rail_noc_w", "over_idle_w", "bytes_per_s")}
         m["unmetered_w"] = m["over_idle_w"] - m["rail_minion_w"] - m["rail_sram_w"] - m["rail_noc_w"]
+        # the bytes the configuration moves; a store through the L1 (st_stream) also reads each line first, which
+        # this does not count (the published fit; see l1_line_read_refit)
         m["dram_bytes_per_s"] = m["bytes_per_s"] if moves_dram(cfg) else 0.0
         rows[cfg] = m
     return rows
 
 
-def attribute(rows):
-    cfgs = list(rows)
-    X = np.array([[rows[c]["rail_minion_w"], rows[c]["rail_sram_w"], rows[c]["rail_noc_w"], rows[c]["dram_bytes_per_s"] * 1e-12] for c in cfgs])
+def _fit(rows, cfgs, line_read=False):
+    dram = lambda c: rows[c]["dram_bytes_per_s"] * (2 if line_read and c.startswith("st_stream/") else 1)  # noqa: E731
+    X = np.array([[rows[c]["rail_minion_w"], rows[c]["rail_sram_w"], rows[c]["rail_noc_w"], dram(c) * 1e-12] for c in cfgs])
     y = np.array([rows[c]["unmetered_w"] for c in cfgs])
     coef, *_ = np.linalg.lstsq(X, y, rcond=None)
     res = y - X @ coef
+    d = np.array([moves_dram(c) for c in cfgs])
+    return X, coef, res, d
+
+
+def attribute(rows):
+    cfgs = list(rows)
+    X, coef, res, d = _fit(rows, cfgs)
     rms = float(np.sqrt(np.mean(res ** 2)))
     se = rms * np.sqrt(np.diag(np.linalg.inv(X.T @ X)))
     names = ["minion", "sram", "noc", "dram_pj_per_byte"]
-    return {"coef": dict(zip(names, map(float, coef))), "se": dict(zip(names, map(float, se))), "rms_w": rms, "n": len(cfgs)}
+    _, c2, r2, _ = _fit(rows, cfgs, line_read=True)
+    r3 = lambda v: round(float(v), 3)  # noqa: E731
+    return {"coef": dict(zip(names, map(float, coef))), "se": dict(zip(names, map(float, se))), "rms_w": rms, "n": len(cfgs),
+            "rms_dram_w": float(np.sqrt(np.mean(res[d] ** 2))), "n_dram": int(d.sum()),
+            "l1_line_read_refit": {"coef": dict(zip(names, map(float, c2))), "rms_w": float(np.sqrt(np.mean(r2 ** 2))),
+                                   "rms_dram_w": float(np.sqrt(np.mean(r2[d] ** 2))),
+                                   "note": "st_stream bytes counted twice (the line read before each store); for comparison, not the published fit"},
+            "per_config_fields": ["cfg", "over_idle_w", "rail_minion_w", "rail_sram_w", "rail_noc_w", "dram_GBps"],
+            "per_config": [[c, r3(rows[c]["over_idle_w"]), r3(rows[c]["rail_minion_w"]), r3(rows[c]["rail_sram_w"]),
+                            r3(rows[c]["rail_noc_w"]), r3(rows[c]["dram_bytes_per_s"] * 1e-9)] for c in cfgs]}
 
 
 def droop(bursts, fit, tel_path):
@@ -113,6 +134,9 @@ def droop(bursts, fit, tel_path):
         "idle_die_mv": {k: float(np.mean(v)) for k, v in idle_levels.items()},
         "minion_ir_drop_mv_per_w": float(xm @ ym / (xm @ xm)),
         "examples": [{k: out[e][k] for k in ("cfg", "over_idle_w", "dram_offrail_w", "droop_ddr_mv", "droop_minion_mv")} for e in EXAMPLES if e in out],
+        "per_config_fields": ["cfg", "droop_ddr_mv", "dram_offrail_w", "over_idle_w", "droop_minion_mv", "rail_minion_w"],
+        "per_config": [[k] + [round(float(out[k][f]), 3) for f in ("droop_ddr_mv", "dram_offrail_w", "over_idle_w", "droop_minion_mv", "rail_minion_w")]
+                       for k in cfgs],
         "source": f"{TEL} (die_mv from DM_CMD_GET_ASIC_VOLTAGE: the Moortec voltage monitors averaged over the 8 memory shires "
                   "for ddr, the 34 minion shires for minion/sram/noc); computed by tools/ettelem/fit_unmetered.py",
     }
@@ -158,8 +182,7 @@ def main():
               f"droop block: {'reproduced exactly' if drp < 1e-9 else f'differs by up to {100 * drp:.2g}%'}")
     if a.out:
         if os.path.abspath(a.out) == os.path.abspath(COMMITTED) and not a.overwrite:
-            sys.exit(f"refusing to replace {COMMITTED}: its droop block came from an inline computation this script "
-                     "reproduces only to within 3% (droop coefficient); pass --overwrite to replace it anyway")
+            sys.exit(f"refusing to replace {COMMITTED} without --overwrite")
         with open(a.out, "w") as fh:
             json.dump(fit, fh, indent=1)
         print(f"wrote {a.out}")

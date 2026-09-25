@@ -44,7 +44,9 @@ section 9 lists the pinned upstream versions.
   power down to a flip-flop per cycle in the RTL, with what each step would take. Its sources (a survey by seven AI research agents,
   Claude subagents run by the author, each covering one layer of the manuals, firmware, RTL and tools, with each key claim then
   checked by two further AI agents) are in `docs/reports/sources/2026-09-20-limits-of-observability/`;
-  `scripts/build-report.py limits-of-observability docs/reports/sources/limits-of-observability.data.json <out>` assembles the page.
+  `tools/ettelem/sync_hub_data.py` writes the data file's computed blocks from the analyses (`--check` reports a stale
+  file), then `scripts/build-report.py limits-of-observability docs/reports/sources/limits-of-observability.data.json <out>`
+  assembles the page.
   **Second edition (2026-09-23): the hub for every measurement report**, with the power meter chain, the unmetered remainder
   attributed by regression, the Moortec PVT sensors and the DDR-rail droop meter, and a 20-rung improvement ladder.
   Public space https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability, uuid `2ea37420-67b9-484e-9d4c-581e8a9f0323`.
@@ -57,7 +59,7 @@ section 9 lists the pinned upstream versions.
     that lets a kernel choose counter events, built and verified in `sys_emu`. A card would need a signed image to run it.
 - `docs/reports/2026-09-20-et-soc1-power-temperature.html` lists every way to measure power, energy and temperature on the card,
   and shows a load step through all of them: power that rises with die temperature (about 0.8 W per °C under load; the later
-  idle law gives 0.65 W per °C at 80 °C), idle power that depends on recent load, rail readings that lag (the PMIC's running average, τ ≈ 1 s), and a 34-shire
+  idle law gives 0.65 W per °C at 80 °C), idle power that depends on recent load, rail readings that lag (the PMIC's running average, τ ≈ 1.2 s), and a 34-shire
   on-die voltage map. It uses `tools/ettelem`, a telemetry client on the management library
   (`tools/ettelem/run_thermal.sh`). Public space https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature, uuid `acee5c6d-56c0-45e7-aa97-ce11af37bdd8`.
 - `docs/reports/2026-09-20-horace-experiment.html` reproduces Horace He's "predictable data" matmul result on this chip and takes
@@ -94,8 +96,8 @@ section 9 lists the pinned upstream versions.
   `docs/research/why-low-power.md`. Public space
   https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power, uuid `baede20c-57d9-4e01-8157-2014670dd8cf`.
   Both are assembled by `scripts/build-report.py` from `docs/reports/sources/`. TeX between `$$` or `\( \)` in a
-  report body is rendered to standalone SVG at build time by `scripts/tex2svg.js` (`npm install --no-save
-  mathjax-full` once): the publishing host blocks external scripts, so a runtime MathJax from a CDN leaves every
+  report body is rendered to standalone SVG at build time by `scripts/tex2svg.js` (mathjax-full, pinned to 3.2.1 in
+  `package.json`: run `npm ci` once at the repo root): the publishing host blocks external scripts, so a runtime MathJax from a CDN leaves every
   equation as raw TeX. After any `spacesheep deploy`, re-check that the space is still public: folder deploys have
   changed visibility in both directions (`docs/findings/04-artifacts.md`, "Publishing notes").
 - `docs/reports/2026-09-22-dvfs-leakage.html` checks six claims about DVFS loops and leakage suppression, from a
@@ -129,8 +131,10 @@ section 9 lists the pinned upstream versions.
   energy per byte, on the same watts**; keeping it in the shire's own scratchpad is 30.7×. Both reproduce on aifoundry3. The boundary is sharp:
   below the 32 MB L3 the DRAM route runs at 280-410 GB/s and the hand-off buys nothing, and at 32 MB per
   buffer DRAM falls to 48 GB/s and stays there out to 256 MB. The lead holds to about four adds per element and
-  then shrinks with each quadrupling of the arithmetic: 4.1× at 8 flops per byte moved, 1.5× at 32. How far the
-  slab moves does not change the bandwidth; each hop does cost about 1.5–2.2 pJ per byte (heat per millimetre). New workload `workloads/onchip` (`--test probe` and `--test relay`) with `run_onchip.sh`,
+  then shrinks with each quadrupling of the arithmetic: 4.1× at 8 flops per byte moved, 1.5× at 32. Which shire
+  receives the slab moved the bandwidth by up to a quarter over the five ring offsets tried (593-733 GB/s), falling
+  with the longest hand-off in the ring, not the mean distance; each hop also costs about 1.5–2.2 pJ per byte (heat
+  per millimetre). New workload `workloads/onchip` (`--test probe` and `--test relay`) with `run_onchip.sh`,
   `analyze_onchip.py` and `tools/ettelem/run_onchip_power.sh`. Public space
   https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay, uuid `8678d49d-3f0c-49be-b08a-5528de8ece3c`.
 - `docs/energy-manual/` is **the energy manual**: what every kind of operation on the card costs in joules, arranged
@@ -151,10 +155,10 @@ section 9 lists the pinned upstream versions.
   entry - mean [lo-hi] over the three passes on two cards, and three warm reruns per card of the relay, the hot
   line, the rings and the levels (`tools/ettelem/run_reruns_warm.sh`, `run_rings_levels_power.sh`,
   `analyze_reruns.py`; bursts in which aifoundry2's governor moved the clock, or in which the workload starved the
-  service processor that reads the meter, are dropped) - and attributes what a workload adds on no rail sensor (`tools/ettelem/fit_unmetered.py`, which reproduces the
-  first, inline fit exactly and its droop coefficient to within 3%; the idle 15 W is not split): 18-20% delivery loss on the minion rail, 5% on SRAM, 26-29% on the mesh,
+  service processor that reads the meter, are dropped) - and attributes what a workload adds on no rail sensor (`tools/ettelem/fit_unmetered.py`,
+  which writes the fit; the idle 15 W is not split): 18-20% delivery loss on the minion rail, 5% on SRAM, 26-29% on the mesh,
   about 70 pJ per DRAM byte off-rail, plus a
-  DRAM-activity meter from the memory shires' Moortec voltage monitor (0.84 mV per off-rail DRAM watt).
+  DRAM-activity meter from the memory shires' Moortec voltage monitor (0.87 mV per off-rail DRAM watt).
   Published, public, at https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual, uuid `cc3cb1d6-51cf-420b-a165-7d8629904d97`.
 - `docs/reports/2026-09-24-heat-per-mm.html` ("Heat per millimetre") measures what moving a bit one millimetre across
   the mesh costs, against Dally's "~100 fJ/b-mm": a random bit costs 36 fJ per mm on the mesh rail with free links and
@@ -166,7 +170,8 @@ section 9 lists the pinned upstream versions.
   `docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html` (the die's 35 temperature sensors, how the firmware
   reduces them to one number, and what a spatial heat map would need; https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief)
   and `docs/reports/2026-09-22-et-soc1-l2-mainline-starvation.html` (an analysis of a contention result reported in
-  Discord, written before the hot-line report re-measured it, and corrected in place with an Update box;
+  Discord, written before the hot-line report re-measured it; since 25 September a pointer page to the hot-line
+  report and On-chip communication, with the brief as corrected on 24 September kept in git at `49dd0c8`;
   https://spacesheep.dev/@yaroslavvb/2026-09-22-et-soc1-l2-mainline-starvation). Both are public.
 - `docs/reports/2026-09-18-et-soc1-ridge-points.html` ("Ridge points") works out, from the chip's specs and the
   measurements above, how many FLOPs per byte a kernel needs from each level of memory before compute rather than
@@ -184,6 +189,8 @@ section 9 lists the pinned upstream versions.
   - `add-lab-user.sh`: creates an account on every lab machine.
   - `deploy-lab-gpsdk.sh`: builds `kernels/` and `launchers/` on a lab machine, against gp-sdk pinned and patched for its older `/opt/et`.
   - `et-power-log.sh`, `mmbench-power.py`, `mmbench-report-data.py`: board-power sampling, the benchmark runner, and the report numbers.
+  - `build-report.py`: assembles a report from `docs/reports/sources/` and its data; `paste-chartkit.py`: copies the shared
+    chart toolkit (`docs/reports/sources/chartkit.js` and its CSS) into the standalone report pages (`--check` reports drift).
 - `patches/` holds local fixes to et-platform: a broken third-party fetch, gp-sdk launchers that can't boot sysemu, and
   `lab-gp-sdk-06605ab.patch` for the lab machines. See `patches/README.md`. `external/` holds the upstream clones and is gitignored.
 

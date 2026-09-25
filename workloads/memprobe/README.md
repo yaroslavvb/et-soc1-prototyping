@@ -28,7 +28,7 @@ the lab machines' older `/opt/et`.
 | `msmap` | Which memory shire served a line, from its read counter |
 | `bits` | Second of two back-to-back loads, per flipped address bit: rows, banks, columns |
 | `refresh` (`--jitter`) | 19,000 timed DRAM loads of one line at random phases: the refresh period and stall |
-| `pagetimeout` | Same-row second load after an idle gap: how long rows stay open |
+| `pagetimeout` | Same-row second load after a set delay: whether anything but refresh closes a row |
 | `table --pattern …` | Address tables for the power loops: `l1 l2 l3near l3far dram_seq dram_row` |
 
 ## Things this relies on
@@ -53,5 +53,17 @@ python3 ../../workloads/memprobe/gen_ops.py decomp --out . --lines 1500 --reps 3
 timeout 10 ../memprobe/host/memprobe_host --program decomp.ops      # 0.04 s of card time
 ```
 
-The report's own commands are in its "Reproduce" section; `analyze.py` and `build_report.py` rebuild it from
-`docs/reports/data/2026-09-19-memprobe-aifoundry2/`.
+The report's own commands are in its "Reproduce" section. To rebuild the report from the committed data
+(`docs/reports/data/2026-09-19-memprobe-aifoundry2/`, no card needed), from the repo root:
+
+```bash
+D=docs/reports/data/2026-09-19-memprobe-aifoundry2
+python3 workloads/memprobe/analyze_power.py $D/power --json $D/power/summary.json   # reads the committed sp_stats.csv
+python3 workloads/memprobe/analyze.py --data $D --out $D/summary.json
+python3 workloads/memprobe/build_report.py $D/summary.json docs/reports/data/2026-09-23-energy-manual/manual.json \
+    docs/reports/2026-09-19-et-soc1-memory-anatomy.html
+```
+
+`build_report.py` takes the energy manual's `manual.json` as its second argument: the report's energy chart compares
+this page's 19 September energies with the manual's later ones. On a card run, `analyze_power.py … --csv
+…/power/sp_stats.csv` writes the merged rail trace that the committed folder keeps in place of the raw `.bin` files.

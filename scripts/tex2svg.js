@@ -1,8 +1,7 @@
 // Render TeX to standalone SVG at build time, so reports carry no external script.
 // stdin:  {"items":[{"tex":"...","display":true}, ...]}
 // stdout: {"svg":["<svg .../>", ...]}
-// Run through npx so the dependency is not vendored:
-//   npx --yes --package=mathjax-full node scripts/tex2svg.js
+// mathjax-full is pinned in package.json (run `npm ci` at the repo root); scripts/build-report.py calls this script.
 const {mathjax} = require('mathjax-full/js/mathjax.js');
 const {TeX} = require('mathjax-full/js/input/tex.js');
 const {SVG} = require('mathjax-full/js/output/svg.js');

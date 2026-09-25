@@ -80,7 +80,7 @@ Counting bytes moved (each element is read and written, so one add per element i
 moved.** For the tensor unit, which does twice the `fadd.ps` rate, the ridge-points report puts the DRAM crossover
 near 130 flops per byte read.
 
-## How far the slab moves does not change the bandwidth
+## How far the slab moves: the farthest hand-off sets the pace
 
 The ring runs in shire-ID order, and shire IDs do not follow the mesh: on the shire map of the on-chip communication
 report, the next shire by ID is 1–10 mesh hops away (3.5 on average), and 2, 4, 8 and 16 IDs away average 4.5, 3.7,
@@ -89,11 +89,17 @@ report, the next shire by ID is 1–10 mesh hops away (3.5 on average), and 2, 4
 | Shire IDs back round the ring | 1 | 2 | 4 | 8 | 16 |
 |---|---|---|---|---|---|
 | Mesh hops, mean (range) | 3.5 (1–10) | 4.5 (2–7) | 3.7 (1–8) | 1.6 (1–7) | 2.1 (1–6) |
-| GB/s | 593 | 703 | 652 | 686 | 733 |
+| Longest hand-off, hops | 10 | 7 | 8 | 7 | 6 |
+| GB/s, aifoundry2 / aifoundry3 | 593 / 593 | 703 / 703 | 652 / 652 | 686 / 686 | 733 / 727 |
 
-Across offsets whose mean distance runs from 1.6 to 4.5 hops the bandwidth stays between 593 and 733 GB/s and does
-not follow the distance. Transfers are 32 KB per minion and deeply pipelined, so the 12-cycle round trip per hop
-never appears. The practical consequence: **for bandwidth, a stage can be given to whichever shire suits.**
+Across the five offsets the bandwidth runs from 593 to 733 GB/s, up to a quarter (1.24×), in the same order on both
+cards. It does not follow the mean distance (1.6 to 4.5 hops; r = −0.32 and −0.30). It falls with the longest
+hand-off in the ring: 10, 8, 7 and 6 hops give 593, 652, 686–703 and 733 GB/s (r = −0.99 on both cards). That is
+what one would expect when every stage waits at a barrier for its slowest shire, but five offsets are a correlation,
+not a test. Transfers are 32 KB per minion and pipelined, yet the mesh distance still shows: the stage time grows
+about 3,200–3,300 cycles for each hop of the longest hand-off. The practical consequence is to **keep the longest
+hand-off short**: in this sweep the ID ring used for the headline, with its 10-hop pair, was the slowest, about a
+fifth below the best offset.
 
 It does cost energy: on a loaded mesh each hop adds about 1.5–2.2 pJ per byte of random data
 ([20-heat-per-mm.md](20-heat-per-mm.md)), about half of a tensor load of that byte from the shire's own scratchpad
@@ -134,7 +140,9 @@ but the relay at shire granularity gets the same benefit over a path that cannot
   would help the on-chip media most, so the figures above understate them slightly.
 - **Scaling with the number of shires is not measured.** A sweep that used fewer shires also shrank the working
   set back inside the L3, so it cannot be read as a scaling curve.
-- **Whether handing to a physical neighbour lowers the 8.6 pJ/B.** Every hand-off here went to the next shire ID.
+- **Whether handing to a physical neighbour lowers the 8.6 pJ/B, or raises the bandwidth.** Every hand-off here went
+  a fixed number of shire IDs round the ring. A ring laid out along the mesh, with every hand-off one hop (such a ring
+  exists on this map), was not run; the trend over longest hand-offs of 6–10 hops suggests it could be faster.
 
 ## Related
 

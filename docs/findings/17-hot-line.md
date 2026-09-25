@@ -65,9 +65,10 @@ return, and nothing reports an error.
 | **24** | **10.0** | **0.02%** |
 | 32 | 10.0 | 0.02% |
 
-There is no gradual degradation. A shire cache retires one global atomic every 10 cycles; while the remote
+There is no gradual degradation. A shire cache retires one global atomic every 10 cycles; while one other shire's
 demand stays under that, the host shire is untouched, and the moment it reaches it the host gets nothing. 24
-concurrent remote requesters is under one shire's worth of minions.
+concurrent remote requesters is under one shire's worth of minions. (With many shires' paced requesters, staying
+under the bank's rate is necessary but not sufficient: see the rules below.)
 
 ## The vendor wrote this down
 
@@ -100,7 +101,7 @@ suggest it would not fully help.
 
 | Cycles a remote waits between atomics | Host shire | The 31 hammering shires |
 |---|---|---|
-| 0 to 8,000 | 0.03% | 100% |
+| 0 to 8,000 | 0.02% | 100% |
 | 10,000 | 54% | 96% |
 | 12,000 | 85% | 80% |
 | 16,000 | 95% | 61% |
@@ -127,12 +128,19 @@ over idle, which says plainly that waiting is cheap and what contention destroys
 
 ## Rules this gives you
 
-- **One global atomic per shire, never per minion.** At 32 participants the serialisation is 320 cycles
-  against a chip-wide barrier measured at 4,997 cycles — 6%, invisible. At 1,024 it is 10,240 cycles, twice
-  the whole barrier, and it takes the hosting shire down with it.
+- **One global atomic per shire, never per minion, and never spin on the line.** At 32 participants a barrier's
+  arrivals serialise in 320 cycles, against a chip-wide barrier of about 5,000 cycles (4,995 with one minion per
+  shire): six percent. But 31 shires polling one line are already past the threshold above, so wait on a per-shire
+  flag or a credit instead: the relay's first barrier, with every shire's leader polling one counter, hung
+  ([18-on-chip-relay.md](18-on-chip-relay.md)). At 1,024 participants the arrivals alone take 10,240 cycles, twice
+  the whole barrier, with the hosting shire stopped throughout.
 - **Keep hot shared lines out of shires that compute.** The cost is not paid by the code touching the line.
   It is paid by whatever else lives in that shire, and it is total.
-- **Below 20 concurrent remote requesters, or pace to 10,000 cycles.** Either keeps the bank unsaturated.
+- **Keep N × 10 cycles below P + 216** (N remote requesters, each waiting P cycles between atomics; 216 cycles is the
+  uncontended round trip): with no pause, at most about 20 remote requesters; for 992, P ≥ 10,000 unsaturates the
+  bank (host 54%) and P ≈ 16,000 gives the host 95%. The rule is necessary, not sufficient: one shire's 20
+  requesters leave the host at 99% with the bank 93% busy, while 992 paced requesters leave it at 85% with the bank
+  81% busy.
 - **Spread rather than share.** One line per shire is the same instruction at 32× the rate and a seventeenth
   of the energy per operation.
 
@@ -150,5 +158,6 @@ over idle, which says plainly that waiting is cheap and what contention destroys
 - [19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md): the E29 bars on this page's
   energies, and the meter traps found on the way.
 - [18-on-chip-relay.md](18-on-chip-relay.md): the barrier that hung on exactly this effect, and how the relay avoids it.
-- [01-resources.md](01-resources.md): R11 (Ivan's result) and R12 (the brief that first analysed it, now corrected in
-  place).
+- [01-resources.md](01-resources.md): R11 (Ivan's result) and R12 (the brief that first analysed it; since
+  25 September a pointer page to the hot-line report, the brief as corrected on 24 September kept in git at
+  `49dd0c8`).

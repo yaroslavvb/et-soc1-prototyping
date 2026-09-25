@@ -116,18 +116,21 @@ different heatsink, a launch temperature of 55.8 °C instead of 81.0 °C, and co
 aifoundry2.
 
 - **Applied unchanged, the model is off by 1.38 W rms** over eight operand patterns spanning 1.9 to 25 W.
-- **The error is not scatter.** It is a consistent 8% overestimate, pattern by pattern: the ratios between
-  patterns are right, only the overall size is wrong.
+- **The error is not scatter.** The model overestimates every pattern, by 3 to 10% (8% by least squares): the
+  ratios between patterns are nearly right, and most of the error is the overall size.
 - **One scale factor of 0.924 fixes it**, leaving 0.20 W rms — as good as the in-sample fit on the card the
   coefficients came from.
-- **Calibrating that factor on a single run** and predicting the other seven gives 0.36 W rms in the median
-  and 0.27 W if the calibration run is random data. One matmul calibrates a new card.
+- **Calibrating that factor on one operand pattern's runs** and predicting the other seven patterns gives 0.36 W
+  rms in the median and 0.93 W rms at worst (calibrated on zeros, whose largest single error is 1.53 W); calibrated
+  on random normal it is 0.27 W rms. One pattern of matmul calibrates a new card, if it is not zeros.
 - **The operating point does not explain the 8%**, and points the other way: aifoundry3 runs at 523 mV against
   518 mV at the same clock, so \(CV^2f\) predicts 2% *more* switching power, not 8% less. The gap is a
   property of the card — silicon, package or board regulator — and separating those needs a third working card.
 - **The leakage law transfers too, further than it should.** Fitted on aifoundry2's idle samples between 64 and
   88 °C (plus the 62 °C overnight anchor) and extrapolated 7–14 °C below that range onto aifoundry3, which idled at
-  50–57 °C, it predicts aifoundry3's idle power to **+0.73 W** out of 25 W.
+  50–57 °C, it predicts aifoundry3's idle power to **+0.73 W** out of 25 W (the mean of the four temperature bins;
+  the 50 °C bin is 22 samples of pre-session idle; with the model's own idle rule it is +0.69 W over 55–57 °C;
+  `tools/ettelem/transfer_cards.py`).
 - **The thermal network does not transfer.** It never claimed to: 1.47 °C/W is one card in one chassis, and
   aifoundry3 sheds heat visibly faster. Nothing in this section uses it.
 

@@ -42,12 +42,13 @@ python3 tools/ettelem/validate_flip_model.py "$D/long2" --model "$D/model_firsth
   --out "$D/validation_afternoon_firsthalf.json" > "$D/validation_afternoon_firsthalf.txt"
 python3 tools/ettelem/validate_flip_model.py "$D/long2" --model "$D/model.json" --toggles "$D/toggles_all.json" \
   --out "$D/validation_afternoon.json" > "$D/validation_afternoon.txt"
-[ -d "$D/long2" ] && python3 tools/ettelem/flip_thermal_model.py "$D/long2" --evaluate "$D/model.json" --toggles "$D/toggles_all.json" --out "$D/model2.json" > "$D/model2.txt"
 
 python3 tools/ettelem/build_horace_report_data.py --strict "$D/horace3.json" --toggles "$D/toggles.json" --cold "$D/cold1.json" "$D/cold2.json" \
   --before "$D/predictions_before.json" --long "$D/long.json" --model "$D/model.json" \
-  --structured-before "$D/structured_predictions_before.json" --ablation "$D/ablation.json" --long2 "$D/long2.json" --model2 "$D/model2.json" \
+  --structured-before "$D/structured_predictions_before.json" --ablation "$D/ablation.json" \
   --validation "$D/validation_timesplit.json" "$D/validation_afternoon.json" "$D/model_firsthalf.json" --out "$D/report.json"
+# the 600 against 800 MHz operating points of the cool starts (why-low-power's Voltage and clock)
+python3 tools/ettelem/build_vf.py --cold "$D/cold1" "$D/cold2" --ablation "$D/ablation.json" --out "$D/vf.json"
 python3 tools/ettelem/build_lowpower_report_data.py --ablation "$D/ablation.json" --model "$D/model.json" --toggles "$D/toggles.json" --vf "$D/vf.json" --out "$D/lowpower-report.json"
 
 python3 tools/ettelem/make_heating_gif.py "$D/horace3.json" docs/reports/horace-heating.gif --poster docs/reports/horace-heating.png --steps
@@ -55,11 +56,18 @@ python3 tools/ettelem/make_heating_gif.py "$D/horace3.json" docs/reports/horace-
   --patterns zeros,ones,pi,sparse50,uniform,randn --title "Six kinds of matrix, one matmul, same FLOPs"
 python3 tools/ettelem/make_long_gif.py "$D/long.json" docs/reports/horace-long.gif --poster docs/reports/horace-long.png --groups zeros:32,ones:32,randn:32,randn:12
 
-# section 10's second card (and the DVFS report's three-machine block): without this merge the Horace page loses
-# section 10's chart, because its script starts with `const C=D.cards;if(!C)return`
-python3 tools/ettelem/build_cards_data.py --cards docs/reports/data/2026-09-22-horace-aifoundry3/cards.json \
-  --transfer docs/reports/data/2026-09-22-horace-aifoundry3/transfer.json \
-  --leak docs/reports/data/2026-09-22-horace-aifoundry3/leakage_crosscard.json \
+# section 10's second card (and the DVFS report's three-machine block): aifoundry3's strict session, both cards
+# against the model, how the model and the idle law transfer, then the merge. Without the merge the Horace page
+# loses section 10's chart, because its script starts with `const C=D.cards;if(!C)return`
+A3=docs/reports/data/2026-09-22-horace-aifoundry3
+python3 tools/ettelem/analyze_horace_strict.py "$A3" --toggles "$D/toggles.json" --out "$A3/horace3.json" > /dev/null
+python3 tools/ettelem/compare_cards.py --card aifoundry2="$D/horace3.json" --card aifoundry3="$A3/horace3.json" \
+  --model "$D/model.json" --toggles "$D/toggles.json" --out "$A3/cards.json" > /dev/null
+python3 tools/ettelem/transfer_cards.py --cards "$A3/cards.json" --session "$A3" --model "$D/model.json" \
+  --transfer "$A3/transfer.json" --leak "$A3/leakage_crosscard.json"
+python3 tools/ettelem/build_cards_data.py --cards "$A3/cards.json" \
+  --transfer "$A3/transfer.json" \
+  --leak "$A3/leakage_crosscard.json" \
   --config docs/reports/data/2026-09-22-cards/config.json --driver docs/reports/data/2026-09-22-cards/driver_config.json \
   --sptrace docs/reports/data/2026-09-22-cards/sptrace-aifoundry3.bin --out docs/reports/data/2026-09-22-cards/cards-report.json \
   --merge docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json "$D/report.json"

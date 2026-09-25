@@ -8,17 +8,17 @@ Every entry is **mean** [lo–hi]: the mean over every pass on every card, and t
 
 | Path | zeros pJ/B | random pJ/B | random / zeros | GB/s | per card, random |
 |---|---|---|---|---|---|
-| L1 hit, `flw.ps` 32 B (both harts) | **0.39** [0.37–0.41] | **0.54** [0.51–0.56] | 1.39× | — | a2: 0.55 ± 0.01 · a3: 0.52 ± 0.01 |
-| L1 hit, `fsw.ps` 32 B (both harts) | **0.43** [0.41–0.45] | **0.74** [0.72–0.76] | 1.72× | — | a2: 0.76 ± 0.003 · a3: 0.72 ± 0.001 |
+| L1 hit, `flw.ps` 32 B (both harts) | **0.39** [0.37–0.41] | **0.54** [0.51–0.56] | 1.39× | 14,184 | a2: 0.55 ± 0.01 · a3: 0.52 ± 0.01 |
+| L1 hit, `fsw.ps` 32 B (both harts) | **0.43** [0.41–0.45] | **0.74** [0.72–0.76] | 1.72× | 14,203 | a2: 0.76 ± 0.003 · a3: 0.72 ± 0.001 |
 | Tensor load from the shire's own scratchpad | **2.01** [1.97–2.06] | **4.21** [4.01–4.36] | 2.09× | 2,458 | a2: 4.29 ± 0.04 · a3: 4.12 ± 0.06 |
 | Tensor store into the shire's own scratchpad | **4.58** [4.42–4.75] | **8.10** [7.92–8.34] | 1.77× | 1,231 | a2: 8.27 ± 0.04 · a3: 7.92 ± 0.003 |
 | Tensor load from DRAM | **90.7** [86.4–94.2] | **129.1** [127.5–131.5] | 1.42× | 76 | a2: 130.0 ± 0.8 · a3: 128.3 ± 0.7 |
 | Tensor store to DRAM | **88.8** [81.8–94.9] | **136.2** [130.2–142.4] | 1.53× | 76 | a2: 140.9 ± 1.2 · a3: 131.5 ± 0.8 |
-| `fsw.ps` streaming to DRAM through the L1 write-back path | **237.6** [231.8–252.7] | **332.7** [315.4–352.9] | 1.40× | 27 | a2: 343.9 ± 8.1 · a3: 321.4 ± 3.2 |
+| `fsw.ps` stores to DRAM through the L1 (the write-back path) | **237.6** [231.8–252.7] | **332.7** [315.4–352.9] | 1.40× | 27 | a2: 343.9 ± 8.1 · a3: 321.4 ± 3.2 |
 
 ## 4.2 Reads by level (memhier, re-run at a pinned 600 MHz on 23 September)
 
-**L1**: both harts of every minion re-reading a private 256 B buffer with 32 B vector loads, in memhier's own loop over a buffer whose contents it does not set; it reads 44% above the L1 row of 4.1 (0.54 pJ/B on random data), which is the figure to use. **L2, L3, DRAM and the scratchpads**: hart 0 of every minion streaming 1 KB tensor loads — which skip the L1 but are cached in the L2 and L3 — over a working set sized to each level. The probe does not set the memory's contents, so these rows sit between the zeros and random columns of 4.1 and are not directly comparable to them. Three passes on each card at a pinned 600 MHz (n = 6). The first measurement of 18 September ran with the governor free (its clock averaged 0.62–0.74 GHz across the levels) and is superseded.
+**L1**: both harts of every minion re-reading a private 256 B buffer with 32 B vector loads, in memhier's own loop over a buffer whose contents it does not set. That loop (8 loads per loop iteration) issued a load every 3.2 minion-cycles where the catalogue's (64) issued one every 1.4 (14.2 TB/s), and it reads 44% above the L1 row of 4.1 (0.54 pJ/B on random data), which is the figure to use. **L2, L3, DRAM and the scratchpads**: hart 0 of every minion streaming 1 KB tensor loads — which skip the L1 but are cached in the L2 and L3 — over a working set sized to each level. The probe does not set the memory's contents, so these rows sit between the zeros and random columns of 4.1 and are not directly comparable to them. Three passes on each card at a pinned 600 MHz (n = 6). The first measurement of 18 September ran with the governor free (its clock averaged 0.62–0.74 GHz across the levels) and is superseded.
 
 | Level | Working set | pJ/B | per card |
 |---|---|---|---|
@@ -33,7 +33,7 @@ Passes: 6. Source: `docs/reports/data/2026-09-23-reruns-aifoundry2-warm/`, `-aif
 
 **What the tables say.**
 - **DRAM is 31× the energy of the shire's own scratchpad per byte read**, and 17× per byte written.
-- **A DRAM write costs about what a DRAM read costs** (136 vs 129 pJ/B on random data) — by tensor store, which skips the L1 and the L2. **Through the L1 write-back path the same bytes cost 2.4× more** and arrive at a third of the bandwidth: every store allocates a line, and the line goes down through L2 and L3.
+- **A DRAM write costs about what a DRAM read costs** (136 vs 129 pJ/B on random data) — by tensor store, which skips the L1 and the L2. **Through the L1 write-back path the same bytes cost 2.4× more** and arrive at a third of the bandwidth: each store allocates its line, so the line is read from DRAM before it is written back and the byte pays for a read and a write. Off-rail it costs 174 pJ against a tensor store's 81 ([Limits of observability, §4.2](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed)), and a tensor load plus a tensor store come to 265 of its 333 pJ/B.
 - **Even DRAM is data-dependent**: zeros 91, random 129 pJ/B, bars [86–94] and [127–131] well apart. The scratchpad doubles from zeros to random.
 - **A scratchpad write is twice a scratchpad read** (4.58 vs 2.01 pJ/B on zeros).
 - **An L1 hit is nearly free**: 0.54 pJ/B [0.51–0.56] including the instruction.

@@ -8,7 +8,7 @@ This page covers everything needed to pick the work up somewhere else: clone, co
 rerun, and republish. Claude Code's memory for this project lives outside the repo, on each machine, so this
 page and `CLAUDE.md` carry the context.
 
-## Where things stand (2026-09-24)
+## Where things stand (2026-09-25)
 
 The repository is the source of truth: every result, the experiment that produced it and the raw data are here,
 and `docs/findings/` traces each claim to its file. If a session is lost, resume from this page.
@@ -32,10 +32,10 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   `docs/reports/data/2026-09-23-catalogue-*`, reduced by `workloads/enercat/analyze_catalogue.py`), the reruns of
   the relay, hot line, rings and levels (`tools/ettelem/run_reruns_warm.sh`, `run_rings_levels_power.sh`,
   `docs/reports/data/2026-09-23-reruns-*`, pooled by `tools/ettelem/analyze_reruns.py`), and the unmetered-power
-  attribution (`docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json`, first computed inline in the session;
-  `tools/ettelem/fit_unmetered.py` recomputes it, the attribution exactly and the droop coefficient to within 3%,
-  0.87 against 0.84 mV/W; the fit is described in `docs/energy-manual/04a-fine-grain.md` and in E30 of
-  `docs/findings/03-experiments.md`).
+  attribution (`docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json`, written by
+  `tools/ettelem/fit_unmetered.py --overwrite`; until 25 September the droop block was the first, inline fit's,
+  0.84 mV/W, and it is now the script's 0.87; the fit is described in `docs/energy-manual/04a-fine-grain.md` and in
+  E30 of `docs/findings/03-experiments.md`). `docs/findings/04-artifacts.md` (A16) gives the whole rebuild in order.
 - **What the bars taught us:** pass-to-pass scatter on one card is 1–2%; the two cards differ by 5% with one
   scale; small signals carry the widest bars because a 1–5 W signal rides on a 30 W idle that drifts: ±17% on
   the hot line, ±4–16% on the levels and rings, ±5.5% on the DRAM relay. On aifoundry2 every power burst needs a
@@ -44,8 +44,8 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   23 September, at 64–66 °C, were discarded for that reason.
 - **The unmetered power** (board minus the three metered rails: 15 W of 32 W idle) fits as 18–20% delivery loss on
   the minion rail, 5% on SRAM, 26–29% on the mesh and 68–73 pJ per DRAM byte off-rail, rms 0.30–0.35 W over
-  about 390 configuration means (1.1–1.3 W on the DRAM ones); the idle 15 W is not split. The memory shires' Moortec voltage monitor (`die_mv.ddr`) droops 0.84 mV per off-rail DRAM watt and
-  serves as a DRAM-activity meter. What would meter more is the observability report's improvement ladder.
+  about 390 configuration means (1.1–1.3 W on the DRAM ones); the idle 15 W is not split. The memory shires' Moortec voltage monitor (`die_mv.ddr`) droops 0.87 mV per off-rail DRAM watt and
+  serves as a DRAM-activity meter (traffic with no DRAM access moves it too, by up to about 2 mV). What would meter more is the observability report's improvement ladder.
 - **Heat per millimetre** (`docs/findings/20-heat-per-mm.md`, page `docs/reports/2026-09-24-heat-per-mm.html`):
   `workloads/enercat/run_wire.py` (two runs, E31 and E32, both cards, `docs/reports/data/2026-09-24-wire*-aifoundry*`)
   → `workloads/enercat/analyze_wire.py` → `wire.json` → `tools/ettelem/build_wire_report.py` → `report.json` →
@@ -61,7 +61,14 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   "The 24 September review"). The notes of the conversation with David Kanter are now private and
   unlinked; the two briefs of 22 September are imported into `docs/reports/`; deploy the Horace experiment only as
   its folder with the GIFs.
-- **Next:** the ladder's first undone rungs — deconvolving the rails' 1 s filter, calibrating the per-shire
+- **The validation of 25 September:** every card-free analysis was rerun (nearly all reproduce byte for byte), every
+  number with no producer script got one, the claims were rechecked against the data, repeated explanations were cut
+  to one canonical page each, and the pages gained interactive charts built on a shared chart toolkit
+  (`docs/reports/sources/chartkit.js`). The L2 mainline-starvation brief is now a pointer page. The raw SP trace dumps
+  and load log of 20 September were recovered and committed. The page checker had missed errors thrown while a page
+  loads; it is fixed. The record is `docs/findings/04-artifacts.md`, "The 25 September validation", and
+  `docs/reports/data/2026-09-24-report-review/`.
+- **Next:** the ladder's first undone rungs — deconvolving the rails' filter (τ ≈ 1.15–1.22 s, measured), calibrating the per-shire
   IR-drop map from the SP DEBUG trace into a spatial current map, and a PCIe riser with shunts for millisecond
   board power. The earlier "next" items below (a real GEMM, prefetching, Discord) still stand.
 
@@ -238,7 +245,8 @@ make bench-power                             # about 1 min; every launcher is ca
 - **The kernel.** Hart 0 of each of the 1,024 minions runs back-to-back `tensor_fma` ops: 16×16×K tiles in fp32,
   fp16→fp32 or int8→int32. A is double-buffered in the L1 scratchpad, and B streams through TenB.
 - **Checking.** The host checks every minion's result exactly against its own computation.
-- **Power.** `scripts/et-power-log.sh` samples board power from the service processor about 7 times a second.
+- **Power.** `scripts/et-power-log.sh` samples board power from the service processor about 8 times a second (a new
+  reading about every 133 ms on aifoundry2; aifoundry3's changes only about every 250 ms).
   `scripts/mmbench-power.py` averages it over each workload's launch windows.
 - **Output.** `build/mmbench-power/`: `power.csv`, `runs.jsonl` and `results.json`.
 
@@ -251,7 +259,9 @@ functional only, so measure speed on a card.
 ```bash
 rsync -a aifoundry2:nekko/build/mmbench-power/ docs/reports/data/<date>-aifoundry2/
 scripts/mmbench-report-data.py docs/reports/data/<date>-aifoundry2 \
-    --embed docs/reports/2026-09-18-et-soc1-matmul-efficiency.html
+    --manual docs/reports/data/2026-09-23-energy-manual/manual.json \
+    --embed docs/reports/2026-09-18-et-soc1-matmul-efficiency.html --ladder docs/report/index.html
+scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-matmul-efficiency.html docs/report/index.html
 ```
 
 This prints the table numbers, % of peak and A100 ratios, and refreshes the power chart. The prose and tables
@@ -309,20 +319,31 @@ regenerated its committed page byte for byte from the committed data. Later repo
 every number from their data. The GPU and A100 columns come from the sourced notes in `docs/reports/sources/`, not
 from our measurements.
 
+**Build prerequisites.** Python 3 with numpy, and node: `scripts/build-report.py` renders TeX to SVG with
+mathjax-full, which `package.json` pins to 3.2.1; run `npm ci` once at the repo root (in a git worktree without its own
+`node_modules`, set `NODE_PATH` to a checkout's). **Charts.** Every page's charts use the shared toolkit
+`docs/reports/sources/chartkit.js` (the global `CK`). `build-report.py` inlines it into the source-built pages at
+`__CHARTKIT__`, with its CSS in `report.template.html` between `chartkit:css:begin` and `chartkit:css:end`. The
+standalone pages (the 18–19 September reports, the test drive, the spatial brief) carry a copy between
+`<!-- chartkit:begin -->` and `<!-- chartkit:end -->`: after editing `chartkit.js` or that CSS, or after an
+`--embed` run, refresh them with `scripts/paste-chartkit.py PAGE` (`--check` reports a stale copy); the memory-anatomy
+page gets it from its template. Edit a standalone page's prose in the HTML, outside those markers.
+
 | Report | Code | Measure (on a lab machine) | Raw data | Regenerate the page |
 |---|---|---|---|---|
-| Matmul efficiency | `kernels/mmbench`, `launchers/mmbench` | section 4 | `docs/reports/data/2026-09-18-aifoundry2` | `scripts/mmbench-report-data.py DATA --embed HTML` |
+| Matmul efficiency, and the test drive's ladder | `kernels/mmbench`, `launchers/mmbench` | section 4 | `docs/reports/data/2026-09-18-aifoundry2` | `python3 scripts/mmbench-report-data.py DATA --manual docs/reports/data/2026-09-23-energy-manual/manual.json --embed HTML --ladder docs/report/index.html` |
 | Memory hierarchy | `workloads/memhier` | `workloads/memhier/README.md`: the chases, then `run_energy.py` | `docs/reports/data/2026-09-18-memhier-aifoundry2` | `python3 workloads/memhier/analyze.py DATA --embed HTML` |
 | On-chip communication | `workloads/nocbench` | `run_lab.sh`, then `run_energy.py` twice, the second time with `--only` in reverse order | `docs/reports/data/2026-09-18-nocbench-aifoundry2` | `python3 workloads/nocbench/analyze.py DATA --memhier docs/reports/data/2026-09-18-memhier-aifoundry2 --search --embed HTML` |
-| Memory anatomy | `workloads/memprobe` | `gen_ops.py` programs, `run_power.py` (`workloads/memprobe/README.md`) | `docs/reports/data/2026-09-19-memprobe-aifoundry2` | `python3 workloads/memprobe/analyze.py --data DATA --out summary.json`, then `python3 workloads/memprobe/build_report.py summary.json HTML` |
+| Memory anatomy | `workloads/memprobe` | `gen_ops.py` programs, `run_power.py` (`workloads/memprobe/README.md`) | `docs/reports/data/2026-09-19-memprobe-aifoundry2` | `python3 workloads/memprobe/analyze_power.py DATA/power --json DATA/power/summary.json`, `python3 workloads/memprobe/analyze.py --data DATA --out DATA/summary.json`, then `python3 workloads/memprobe/build_report.py DATA/summary.json docs/reports/data/2026-09-23-energy-manual/manual.json HTML` (E1) |
+| Power and temperature, spatial brief | `tools/ettelem/run_thermal.sh`, `run_horace.sh` | E5–E8 in `docs/findings/03-experiments.md` | `docs/reports/data/2026-09-20-power-aifoundry2` (with `raw/`: the SP trace dumps and the load log) | `python3 tools/ettelem/summarize_power_session.py DATA --out DATA/summary.json`, then `scripts/build-report.py power-temperature DATA/summary.json HTML`; the brief's constants from `python3 tools/ettelem/host_temp_fields.py` (`--check PAGE`) |
 | Horace experiment, why low power | `tools/ettelem` (`run_horace_*.sh`, `run_ablation.sh`) | the commands of E9–E17 and E20 in `docs/findings/03-experiments.md` | `docs/reports/data/2026-09-21-horace-aifoundry2`, `2026-09-22-horace-aifoundry3` | `tools/ettelem/finish_horace.sh` |
-| DVFS and leakage | `tools/ettelem/analyze_dvfs.py` | E10, E18, E19 in `docs/findings/03-experiments.md` | `docs/reports/data/2026-09-22-dvfs-aifoundry2`, `2026-09-22-cards` | `tools/ettelem/analyze_dvfs.py` (its `--help` lists the inputs) `--out dvfs.json`, then `scripts/build-report.py dvfs-leakage dvfs.json HTML` |
-| Hot line, on-chip relay, heat per mm | `workloads/nocbench`, `workloads/onchip`, `workloads/enercat/run_wire.py` | the commands of E22–E25 and E31–E32 in `docs/findings/03-experiments.md` | `docs/reports/data/2026-09-22-hotline-*`, `-onchip-*`, `2026-09-24-wire*` | the same entries, then `scripts/build-report.py` |
-| Energy manual, catalogue | `workloads/enercat` | `run_catalogue.py DATA --passes 3` on each card (2.6 h each; keep the die warm on aifoundry2) | `docs/reports/data/2026-09-23-catalogue-aifoundry2`, `-aifoundry3`, `-aifoundry2-rows` | `analyze_catalogue.py A2 A3 A2_ROWS --out catalogue.json`, then `tools/ettelem/build_energy_manual.py`, `render_energy_manual.py`, `render_catalogue.py`, `scripts/build-report.py energy-manual manual.json HTML` |
+| DVFS and leakage | `tools/ettelem/analyze_dvfs.py` | E10, E18, E19 in `docs/findings/03-experiments.md` | `docs/reports/data/2026-09-22-dvfs-aifoundry2` (the wake-up probe, the 20-hour idle), `2026-09-21-horace-aifoundry2` (`cold1`, `cold2`, `long2`, `model.json`, `ablation.json`), `2026-09-22-horace-aifoundry3` (`cards.json`, `transfer.json`, `leakage_crosscard.json`), `2026-09-22-cards` | three steps, in order (E19 gives them in full): `analyze_dvfs.py … --out dvfs.json`; `build_cards_data.py … --merge dvfs.json`, which adds the three-machine block that sections 3 and 6 need (`analyze_dvfs.py` keeps it on a later rerun, and `build-report.py` refuses to build without it); `scripts/build-report.py dvfs-leakage dvfs.json HTML` |
+| Hot line, on-chip relay, heat per mm | `workloads/nocbench`, `workloads/onchip`, `workloads/enercat/run_wire.py` | the commands of E22–E25 and E31–E32 in `docs/findings/03-experiments.md` | `docs/reports/data/2026-09-22-hotline-*` (with the hand-kept `context.json`), `-onchip-*`, `2026-09-24-wire*` | the same entries (the hot line's `analyze_hotline.py` takes `--context` and `--barrier`), then `scripts/build-report.py` |
+| Energy manual, catalogue | `workloads/enercat` | `run_catalogue.py DATA --passes 3` on each card (2.6 h each; keep the die warm on aifoundry2) | `docs/reports/data/2026-09-23-catalogue-aifoundry2`, `-aifoundry3`, `-aifoundry2-rows` | `analyze_catalogue.py A2 A3 A2_ROWS --out catalogue.json`, `fit_unmetered.py --out unmetered_fit.json --overwrite`, then `tools/ettelem/build_energy_manual.py`, `render_energy_manual.py`, `render_catalogue.py`, `scripts/build-report.py energy-manual manual.json HTML` (`docs/findings/04-artifacts.md`, A16, gives the full order) |
 | Energy manual, reruns | `tools/ettelem/run_reruns_warm.sh`, `run_rings_levels_power.sh` | 3 passes each of relay, hot line, rings, levels per card; preheat aifoundry2 | `docs/reports/data/2026-09-23-reruns-aifoundry2-warm`, `-aifoundry3` | `tools/ettelem/analyze_reruns.py DIRS --out reruns.json` (bursts off 600 MHz dropped) |
-| Limits of observability | `docs/reports/sources/limits-of-observability.*` | reads the firmware and the catalogue; no card time | `docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json` | `scripts/build-report.py limits-of-observability docs/reports/sources/limits-of-observability.data.json HTML` |
-| Sparsity | `workloads/sparsity` | `run_lab.sh`, then `run_energy.py` twice, the second time with `--only` in reverse order (`workloads/sparsity/README.md`) | `docs/reports/data/2026-09-18-sparsity-aifoundry3` | `python3 workloads/sparsity/analyze.py DATA --embed HTML` |
-| Ridge points | `scripts/ridge-points.py` | nothing: derived from the four 2026-09-18 reports | their four data directories | `python3 scripts/ridge-points.py --embed HTML` |
+| Limits of observability | `docs/reports/sources/limits-of-observability.*` | reads the firmware and the catalogue; no card time | `docs/reports/data/2026-09-23-energy-manual/` (`unmetered_fit.json`, `catalogue.json`, `manual.json`, `reruns.json` and the rerun directories it names), `docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json`, `2026-09-24-wire-energy/report.json`, `2026-09-21-horace-aifoundry2/model.json` and `report.json` | `python3 tools/ettelem/sync_hub_data.py` (writes the data file's computed blocks; `--check` exits 1 if they are stale; rerun it after regenerating any of those files), then `scripts/build-report.py limits-of-observability docs/reports/sources/limits-of-observability.data.json HTML` |
+| Sparsity | `workloads/sparsity` | `run_lab.sh`, then `run_energy.py` twice, the second time with `--only` in reverse order (`workloads/sparsity/README.md`) | `docs/reports/data/2026-09-18-sparsity-aifoundry3` | `python3 workloads/sparsity/analyze.py DATA --later docs/reports/data/2026-09-22-horace-aifoundry3/horace3.json --embed HTML` |
+| Ridge points | `scripts/ridge-points.py` | nothing: derived from the four 2026-09-18 reports | their four data directories, and the energy manual's `manual.json` | `python3 scripts/ridge-points.py --embed HTML` (`docs/findings/04-artifacts.md`, A19, gives the input chain) |
 
 - **Measuring.** Build on the machine with `scripts/deploy-lab.sh aifoundry2 workloads/<name>`, or
   `scripts/deploy-lab-gpsdk.sh` for `kernels/`. Follow the etiquette above, then copy the outputs back into a new

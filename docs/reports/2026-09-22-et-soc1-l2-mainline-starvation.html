@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>L2 mainline starvation: a brief · ET-SoC-1</title>
-<meta name="description" content="An analysis, written before the same-day reproduction, of a contention result reported in Discord: why hot shared lines belong in a shire that does no compute, and why a 2D TensorSend systolic array hangs. Its 6% owner penalty was not reproduced; see One hot line stops a shire.">
+<meta name="description" content="Superseded. A same-day argument (22 September 2026) from a contention result reported in Discord. The reproduction on two cards found the contended atomic fair and the owner shire's own loads stopped; this page points to One hot line stops a shire and to On-chip communication, where its points now live.">
 <style>
 :root{
   color-scheme: light;
@@ -40,248 +40,46 @@ html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--page);color:var(--ink);
   font:18px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;font-synthesis-weight:none}
 main{max-width:52em;margin:0 auto;padding:40px clamp(16px,4vw,32px) 96px}
-h1,h2,h3{text-wrap:balance;letter-spacing:-.012em;margin:0}
+h1,h2{text-wrap:balance;letter-spacing:-.012em;margin:0}
 h1{font-size:clamp(28px,5.8vw,41px);line-height:1.16}
 h2{font-size:clamp(21px,3.6vw,26px);line-height:1.25;margin:0 0 6px}
-h3{font-size:17px;margin:26px 0 6px}
 p{margin:0 0 14px;max-width:38em}
 a{color:var(--accent);text-underline-offset:2px}
-section{margin-top:52px}
+section{margin-top:44px}
 .eyebrow{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 0 10px}
-.subtitle{font-size:18px;color:var(--ink-2);margin:10px 0 0}
 .byline{color:var(--ink-2);font-size:14px;margin:10px 0 0}
-.lede{font-size:20px;line-height:1.5;margin:18px 0 0;max-width:34em}
-.sub{color:var(--ink-2);font-size:15px;margin:0 0 14px;max-width:40em}
-.note{color:var(--ink-2);font-size:15px;margin:12px 0 0;max-width:40em}
+.lede{font-size:19px;line-height:1.55;margin:22px 0 0;max-width:36em}
 .small{color:var(--ink-2);font-size:14px}
-
-.update{background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 16px;margin:20px 0 0;font-size:16px;line-height:1.5;max-width:40em}
-.update b{color:var(--ink)}
-
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px;margin:26px 0 0}
-.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
-.kpi .lab{font-size:13px;color:var(--ink-2);line-height:1.35}
-.kpi .num{font-size:clamp(27px,5.6vw,35px);font-weight:650;line-height:1.05;margin:8px 0 4px;letter-spacing:-.02em}
-.kpi .num .u{font-size:15px;font-weight:550;color:var(--ink-2);letter-spacing:0}
-.kpi .foot{font-size:13px;color:var(--ink-2);line-height:1.35}
-.kpi.acc .num{color:var(--accent)}
-.kpi.warn .num{color:var(--warn)}
-
-.terms{color:var(--ink-2);font-size:15px;margin:22px 0 0;max-width:40em}
-.toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:26px 0 0;font-size:15px}
-.toc ol{margin:6px 0 0;padding-left:22px}
-.toc li{margin:3px 0}
-
-.bars{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin:18px 0 0}
-.bars .grp{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin:8px 0 2px}
-.bars .grp:first-child{margin-top:0}
-.row{padding:5px 0}
-.row .rl{font-size:14px;color:var(--ink-2);margin-bottom:3px}
-.row .rl b{color:var(--ink);font-weight:650}
-.rb{display:flex;align-items:center;gap:9px;border-left:1px solid var(--rule);min-height:18px;padding-right:6.5em}
-.bar{height:17px;border-radius:0 4px 4px 0;background:var(--rule);flex:none}
-.bar.acc{background:var(--accent)}
-.bar.warn{background:var(--warn)}
-.bar.good{background:var(--good)}
-.val{font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;font-weight:600}
-.fignote{font-size:13px;color:var(--ink-2);margin:10px 0 0}
-
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(252px,1fr));gap:12px;margin:18px 0 0}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.card p{font-size:15px;color:var(--ink-2);margin:0;line-height:1.45}
-.card .t{font-size:15px;font-weight:650;color:var(--ink);margin:0 0 5px}
-.card.flag{background:var(--warn-soft);border-color:rgba(154,106,16,.32)}
-.card.flag .t{color:var(--warn)}
-.card.ok{background:var(--good-soft);border-color:rgba(31,122,90,.28)}
-.card.ok .t{color:var(--good)}
-
-.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:18px 0 0}
-table{border-collapse:collapse;width:100%;font-size:15px;min-width:400px}
-.tw.qa table{min-width:0}
-.tw.qa td:first-child{width:9em}
-th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.4}
-tr:last-child td{border-bottom:0}
-th{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
-td:first-child{font-weight:600}
-td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-tr.hi td{background:var(--accent-soft)}
-
 code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;background:var(--sunk);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
-details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:18px 0 0}
-summary{cursor:pointer;font-size:15px;font-weight:600;min-height:28px}
-details p,details li{font-size:14px;color:var(--ink-2)}
-details ul{margin:10px 0 0;padding-left:20px}
-details li{margin:0 0 7px}
-.q{border-left:3px solid var(--accent);padding:2px 0 2px 14px;margin:16px 0;font-size:16px;color:var(--ink-2);max-width:38em}
-.q b{color:var(--ink);font-weight:600}
-.steps{list-style:none;counter-reset:s;margin:18px 0 0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.steps li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:12px;padding:14px;border-bottom:1px solid var(--line)}
-.steps li:last-child{border-bottom:0}
-.steps li::before{content:counter(s);font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent);
-  background:var(--accent-soft);border-radius:8px;width:28px;height:28px;display:grid;place-items:center;font-size:14px}
-.steps .t{font-weight:650;font-size:15.5px;display:block;margin-bottom:3px}
-.steps .d{font-size:15px;color:var(--ink-2);line-height:1.45}
 .related{margin:12px 0 0;padding-left:20px;font-size:16px}
-.related li{margin:0 0 8px;max-width:40em}
+.related li{margin:0 0 12px;max-width:40em;padding:2px 6px;border-radius:6px}
+.related li:target{background:var(--accent-soft)}
 .back{margin:28px 0 0;font-size:14px}
-h2,h3{scroll-margin-top:12px}
+h2{scroll-margin-top:12px}
+li[id]{scroll-margin-top:12px}
 .hlink{margin-left:8px;color:var(--ink-3);text-decoration:none;font-weight:400;opacity:0}
-h2:hover .hlink,h3:hover .hlink,.hlink:focus{opacity:1}
-@media (max-width:480px){ body{font-size:17px} .lede{font-size:18.5px} .steps li{grid-template-columns:28px 1fr;gap:10px} }
+h2:hover .hlink,.hlink:focus{opacity:1}
+@media (max-width:480px){ body{font-size:17px} .lede{font-size:18px} }
 </style>
 </head>
 <body>
 <main>
-
 <section data-ss-section data-ss-id="section-hero" style="margin-top:0">
-<p class="eyebrow" data-ss-id="eyebrow">ET-SoC-1 · Brief · 22 September 2026</p>
-<h1 data-ss-id="title">Don’t fix the starvation. Move the line. And don’t build a 2D systolic array.</h1>
-<p class="subtitle">L2 mainline starvation on the ET-SoC-1, and the systolic path around it</p>
-<p class="byline" data-ss-id="byline">An analysis, written on 22 Sep before the reproduction that afternoon, of a result Ivan reported in the AI Foundry Discord. At a shire’s cache, requests arriving from other shires over the mesh (“L3-slave” requests) outrank the shire’s own (“L2”) requests; the rule is stated in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/research/counters-and-dram.md">counters-and-dram.md §5</a>. Part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a>.</p>
-<p class="lede" data-ss-id="lede">The rule affects none of the measurements published before it. The one knob that weights it, <code>l3_yield</code>, is out of reach from user mode and, by the vendor’s own errata, not a reliable fix; the default is probably right anyway. The fix that works, placement, costs 3% of the chip. A systolic design built on TensorSend is immune to all of it, but has a separate hazard: a 2D array hangs a hart until the chip is reset.</p>
-
-<div class="update" id="update" data-ss-id="update-banner"><b>Update.</b> Later the same day, 22 Sep, we reproduced this on two cards (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a>). The ~60 M atomics/s aggregate and the even split among the 31 remote shires hold. The reported owner penalty does not. Shire 0 was said to get 6% of an even split, which leaves each other shire 103%, about 17 times as much; measured, the owner’s share of the atomic is 1.004 of an even split, because a global atomic cannot take the local path (through the self ID 0x7F it is a bus error), so the owner’s atomics queue at the same L3-slave port as everyone else’s. What starves is the owner shire’s <i>other</i> memory traffic: its own scratchpad and DRAM loads fall to 0.01–0.05% of normal for as long as the line is hammered. Errata 4.1 (RTLMIN-6207) and 4.2 (RTLMIN-6214) describe the mechanism. The placement advice and the systolic sections below still stand. The owner penalty and the reading of <code>l3_yield</code> as the lever do not; the sections below are corrected.</div>
-
-<div class="kpis" data-ss-id="kpi-row">
-  <div class="kpi warn" data-ss-id="kpi-1"><div class="lab">What stops when 31 shires hammer one line</div><div class="num">0.02<span class="u">%</span></div><div class="foot">the owner shire’s own loads, of normal; its share of the atomic is fair (1.004)</div></div>
-  <div class="kpi" data-ss-id="kpi-2"><div class="lab">Earlier measurements this invalidates</div><div class="num">0</div><div class="foot">all were uncontended; the contended case is now measured in One hot line stops a shire</div></div>
-  <div class="kpi acc" data-ss-id="kpi-3"><div class="lab">Cost of the recommended fix</div><div class="num">3.1<span class="u">%</span></div><div class="foot">one shire of 32, doing no compute</div></div>
-  <div class="kpi warn" data-ss-id="kpi-4"><div class="lab">Cost of switching phase in a 2D systolic array</div><div class="num">237 <span class="u">cycles</span></div><div class="foot">FLB + credit barrier, 32 minions</div></div>
-</div>
-
-<p class="terms" data-ss-id="terms"><b>Terms.</b> A <b>minion</b> is one of the chip’s small RISC-V cores, with two hardware threads (<b>harts</b>); eight minions form a <b>neighbourhood</b> and 32 a <b>shire</b>. Each shire has 4 MB of SRAM, split into an L2 cache, a slice of the chip-wide L3 and a <b>scratchpad</b> (software-managed memory any shire can address). Requests from a shire’s own minions are L2 (neighbourhood) requests; requests arriving from other shires over the mesh are <b>L3-slave</b> requests. <code>amoaddg</code> is a global atomic add, performed at the line’s home shire. <b>FLB</b> is the fast local barrier. <b>TensorSend</b> and <b>TensorRecv</b> move registers from one minion straight into another’s. Kernels run in user mode (<b>U-mode</b>), firmware in machine mode (<b>M-mode</b>). More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub’s glossary</a>.</p>
-
-<nav class="toc" aria-label="Contents"><b>Contents</b>
-<ol id="toclist">
-  <li><a href="#answers">Five questions, answered</a></li>
-  <li><a href="#reported">What Ivan reported, and what reproduced</a></li>
-  <li><a href="#when-it-bites">When it bites: one question decides it</a></li>
-  <li><a href="#fix">The fix, cheapest first</a></li>
-  <li><a href="#systolic">The systolic array: immune, and ~10× faster for messages kept inside a shire</a></li>
-  <li><a href="#landmine">The landmine: a 2D systolic array hangs a hart until the chip is reset</a></li>
-  <li><a href="#related">Related reports</a></li>
-</ol>
-</nav>
+<p class="eyebrow" data-ss-id="eyebrow">ET-SoC-1 · Brief · 22 September 2026 · superseded</p>
+<h1 data-ss-id="title">L2 mainline starvation: superseded by One hot line stops a shire</h1>
+<p class="byline" data-ss-id="byline">22 September 2026 · no card: an argument from a reported result, the shire-cache spec and the errata · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="lede" data-ss-id="lede">This brief argued from a result Ivan reported in the AI Foundry Discord (shire 0 got 6% of its fair share of a contended global atomic) and from the shire-cache spec, by which requests arriving from other shires outrank the owner shire's own, that the owner of a hot line is starved. It called the <code>l3_yield</code> priority the lever, advised homing hot structures in a shire that does no compute, and warned that a 2D TensorSend array can hang a hart. The reproduction that afternoon, on two cards, kept the aggregate (60 million atomics a second) and the even split among the other shires, but not the 6%: the owner's share of the atomic is 1.004. What stops is the owner shire's other memory traffic, to 0.01–0.05% of normal, once more than about 20 remote requesters saturate its bank (24 stopped it, 20 did not). Two errata describe the mechanism and limit what <code>l3_yield</code> could do. The placement advice holds, and so does the TensorSend warning, for cells that take two partners at once.</p>
 </section>
 
-<section data-ss-section data-ss-id="section-verdict">
-<h2 id="answers" data-ss-id="verdict-h">Five questions, answered</h2>
-<div class="tw qa" data-ss-id="verdict-table">
-<table>
-<thead><tr><th>Question</th><th>Answer</th></tr></thead>
-<tbody>
-<tr data-ss-id="vq-1"><td>What’s the practical impact?</td><td><b>Small, if nothing polls a hot line from many shires.</b> It bites when about 24 or more requesters in other shires hammer one line (20 still leave the home shire at 99%): the home shire’s own loads stop. The first relay kernel hit exactly this with 32 shire leaders spinning on one barrier counter, and hung (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a>).</td></tr>
-<tr data-ss-id="vq-2"><td>Is it fixable?</td><td><b>Not reliably by <code>l3_yield</code>.</b> The errata say it does not rescue a neighbourhood request to the same scratchpad address (RTLMIN-6207) and has no sub-bank granularity (RTLMIN-6214); whether it would help the owner’s other traffic is untested. It is also out of reach: <code>l3_yield_priority</code> is a 5-bit field of <code>sc_reqq_ctl</code>, an M-mode register that no syscall writes. Placement fixes it, and so does pacing the remote shires: at 10,000 cycles between atomics the owner gets back 54% of its memory throughput, at 16,000 about 95% (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line#the-workaround-priced">One hot line stops a shire, §6</a>).</td></tr>
-<tr data-ss-id="vq-3"><td>Should it be fixed?</td><td><b>No.</b> The default is the right global heuristic, and the 21 queue entries reserved for L3-slave requests look like deadlock avoidance. Changing it risks mesh backpressure to solve a problem placement solves for free.</td></tr>
-<tr data-ss-id="vq-4"><td>How would one fix it?</td><td><b>Home hot structures in a shire that does no compute.</b> The options are below, cheapest first; the first needs no permissions and no firmware.</td></tr>
-<tr class="hi" data-ss-id="vq-5"><td>And a systolic design?</td><td><b>Completely immune</b>: TensorSend and TensorRecv never touch the shire cache. But a 2D array hangs a hart until the chip is reset, for a different reason.</td></tr>
-</tbody>
-</table>
-</div>
-</section>
-
-<section data-ss-section data-ss-id="section-measure">
-<h2 id="reported" data-ss-id="m-h">What Ivan reported, and what reproduced</h2>
-<p class="sub" data-ss-id="m-sub">32 shires hammering one <code>amoaddg</code> counter in shire 0’s scratchpad. Each shire’s share of the atomic, as a percentage of an even split.</p>
-<div class="bars" data-ss-id="m-chart">
-  <p class="grp">As reported in Discord</p>
-  <div class="row" data-ss-id="mb-1"><div class="rl"><b>Each of the other 31 shires</b> (implied by the 6%)</div><div class="rb"><div class="bar" style="width:100%"></div><span class="val">103%</span></div></div>
-  <div class="row" data-ss-id="mb-2"><div class="rl"><b>Shire 0</b>, which owns the line</div><div class="rb"><div class="bar warn" style="width:5.8%"></div><span class="val">6%</span></div></div>
-  <p class="grp">Reproduced on two cards</p>
-  <div class="row" data-ss-id="mb-3"><div class="rl"><b>Each of the other 31 shires</b></div><div class="rb"><div class="bar acc" style="width:97.3%"></div><span class="val">99.8–100.3%</span></div></div>
-  <div class="row" data-ss-id="mb-4"><div class="rl"><b>Shire 0</b>, which owns the line</div><div class="rb"><div class="bar acc" style="width:97.5%"></div><span class="val">100.4%</span></div></div>
-  <p class="fignote">As reported in Discord, 22 Sep, 02:30 PT. If shire 0 got 6% of an even split, each of the other 31 got 103%. Reproduced the same afternoon: the aggregate and the remotes’ even split hold; the owner’s 6% does not — its share is 1.004 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line#the-atomic-itself-is-fair">One hot line stops a shire, §1</a>). Bars are scaled to the largest value.</p>
-</div>
-<div class="grid2" data-ss-id="m-cards">
-  <div class="card" data-ss-id="mc-1"><p class="t">The owner’s atomics were not last; its loads stopped</p><p>In the reproduction the owner’s atomics finish alongside everyone else’s. Its ordinary loads are what stop: 384 operations in a window where the mesh retires six million atomics (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line#the-thing-that-actually-starves">One hot line stops a shire, §3</a>).</p></div>
-  <div class="card" data-ss-id="mc-2"><p class="t">The vendor wrote it down</p><p>Errata 4.1 and 4.2 (RTLMIN-6207 and RTLMIN-6214, both Postponed; listed as 3.1 and 3.2 in the errata’s table of contents) describe the shire cache favouring L3-slave requests. They say <code>l3_yield_priority</code> does not rescue a neighbourhood request to the same scratchpad address, and has no sub-bank granularity. The workaround they give is to slow the remote polling.</p></div>
-  <div class="card" data-ss-id="mc-3"><p class="t">60 M atomics/s is the aggregate</p><p>Per shire it would mean about 1.9 G/s on one line, but a sub-bank accepts one request every 2 cycles: 300 M/s at 600 MHz, about a sixth of that. The reproduction measured 60 M/s in total.</p></div>
-  <div class="card" data-ss-id="mc-4"><p class="t">So a global atomic costs ~10 cycles of bank</p><p>60 M/s at 600 MHz = 10 cycles each, ~5 sub-bank slots per atomic rather than 1. (Measured directly that afternoon: 10.00 cycles per atomic; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a>, §2.)</p></div>
-</div>
-</section>
-
-<section data-ss-section data-ss-id="section-regimes">
-<h2 id="when-it-bites" data-ss-id="r-h">When it bites: one question decides it</h2>
-<div class="q" data-ss-id="r-test"><b>Is any single line hammered by about 24 or more minions in other shires (fewer than one shire’s worth) while its home shire is also doing work?</b> If not, ignore this entirely.</div>
-<div class="grid2" data-ss-id="r-cards">
-  <div class="card ok" data-ss-id="rc-1"><p class="t">Uniform working set → no victim</p><p>Every L2 miss homes by <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#l3-110-cycles-plus-12-per-hop">PA[10:6]</a>, so all 32 shires are requester and server at once. Everyone’s local priority loses equally. A latency reshuffle, not a loss.</p></div>
-  <div class="card flag" data-ss-id="rc-2"><p class="t">Hot structure → the owner’s other work stops, invisibly</p><p>A barrier counter, lock, queue head or reduction root hammered by about 24 or more concurrent remote requesters (20 still leave the owner at 99%) saturates its home bank; the owner shire’s own scratchpad and DRAM loads drop to 0.01–0.05% of normal and nothing reports an error.</p></div>
-</div>
-<p class="note" data-ss-id="r-note">The numbers published before 22 September all sit in the first regime and are uncontended besides: <code>memprobe</code> (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy">Anatomy of a memory access</a>) times one load at a time, and the latency test of <code>nocbench</code> (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a>) runs one pair at a time with a barrier between. <b>Nothing earlier is invalidated; the contended case is measured in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a>.</b></p>
-</section>
-
-<section data-ss-section data-ss-id="section-fix">
-<h2 id="fix" data-ss-id="f-h">The fix, cheapest first</h2>
-<ol class="steps" data-ss-id="fix-steps">
-  <li data-ss-id="fs-1"><div><span class="t">Placement — today, no permissions</span><span class="d">Run compute on 31 shires and make the 32nd the owner of every hot shared structure. An owner with no local traffic has nothing to starve, and the other 31 get fair service: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line#the-atomic-itself-is-fair">the hot-line report</a> measured this, every requester getting its fair share to within half a percent (0.998–1.004 of an even split). <b>Cost 3.1% of the chip.</b> Don’t use the master shire; the firmware uses its scratchpad.</span></div></li>
-  <li data-ss-id="fs-2"><div><span class="t">Don’t create the hot line at all</span><span class="d">Per-shire counters plus a tree reduce instead of one global counter. The on-chip measurements already say so: the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#reduction-trees">allreduce tree is <b>3.7× faster</b></a> than the global-atomic chip barrier.</span></div></li>
-  <li data-ss-id="fs-3"><div><span class="t">Measure the victim — also today</span><span class="d"><code>SYSCALL_PMC_SC_SAMPLE</code> (9) accepts <b>any shire</b>, so a U-mode kernel can read the home shire’s bank counters and quantify this without touching firmware.</span></div></li>
-  <li data-ss-id="fs-4"><div><span class="t">Pacing — also today, no permissions</span><span class="d">If the hot line must live in a computing shire, make each remote wait at least 10,000 cycles between atomics: the owner gets 54% of its throughput back at 10,000 (the hammering shires keep 96% of theirs) and about 95% at 16,000 (they keep 61%). Exposing <code>l3_yield_priority</code> through a syscall is not a reliable fix per the errata, and is untested for this case.</span></div></li>
-</ol>
-<p class="note" data-ss-id="f-note"><b>The behaviour one actually wants</b> is not inverted priority but <i>placement-controlled</i> priority: “this shire owns this structure, its accesses win.” The hardware does not offer that. Step 1 gets the same outcome by making sure the owner is never a competitor.</p>
-</section>
-
-<section data-ss-section data-ss-id="section-systolic">
-<h2 id="systolic" data-ss-id="s-h">The systolic array: immune, and ~10× faster for messages kept inside a shire</h2>
-<p class="sub" data-ss-id="s-sub">TensorSend/TensorRecv is register file → register file over the tensor network. It never touches the shire cache, so none of the above applies.</p>
-
-<div class="bars" data-ss-id="s-bw">
-  <div class="row" data-ss-id="sb-1"><div class="rl"><b>Tree-edge pairs</b> — the fast local network in a neighbourhood</div><div class="rb"><div class="bar acc" style="width:100%"></div><span class="val">3.0 TB/s</span></div></div>
-  <div class="row" data-ss-id="sb-2"><div class="rl"><b>Rings inside a shire</b> — 32 minions</div><div class="rb"><div class="bar acc" style="width:36.7%"></div><span class="val">1.1 TB/s</span></div></div>
-  <div class="row" data-ss-id="sb-3"><div class="rl"><b>TensorLoad from a remote scratchpad</b></div><div class="rb"><div class="bar" style="width:32%"></div><span class="val">0.96 TB/s</span></div></div>
-  <div class="row" data-ss-id="sb-4"><div class="rl"><b>TensorSend across the mesh</b></div><div class="rb"><div class="bar warn" style="width:5.3%"></div><span class="val">0.09–0.16 TB/s</span></div></div>
-  <p class="fignote">Aggregate bandwidth, 1 KB messages, 600 MHz, from <code>nocbench</code> (18 Sep); the TensorLoad row is another shire’s scratchpad read at 600 MHz, 959 GB/s (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a>). For register-to-register messages, staying in a shire is ~10× crossing the mesh; bulk data crosses the mesh at 0.6–1.0 TB/s by tensor load and store (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a>).</p>
-</div>
-
-<div class="tw" data-ss-id="s-table">
-<table>
-<thead><tr><th>Primitive</th><th class="n">Round trip, 32 B</th><th class="n">Energy</th></tr></thead>
-<tbody>
-<tr data-ss-id="st-1"><td>Hop on a tree edge</td><td class="n">68 cycles</td><td class="n">0.8 pJ/B</td></tr>
-<tr data-ss-id="st-2"><td>Hop elsewhere in the shire</td><td class="n">114 cycles</td><td class="n">2.3 pJ/B</td></tr>
-<tr data-ss-id="st-3"><td>Hop between shires</td><td class="n">150 + 12/hop cycles</td><td class="n">~10 + 1.9/hop pJ/B</td></tr>
-<tr class="hi" data-ss-id="st-4"><td><b>Combine on receive</b> (FADD/FMAX/IADD/IMAX)</td><td class="n"><b>+0 cycles</b></td><td class="n">—</td></tr>
-<tr data-ss-id="st-5"><td>FLB + credit barrier, 32 minions</td><td class="n">237 cycles</td><td class="n">—</td></tr>
-<tr data-ss-id="st-6"><td>TensorReduce + Broadcast, 32 minions</td><td class="n">432 cycles</td><td class="n">—</td></tr>
-</tbody>
-</table>
-</div>
-<p class="note">Latencies and energies from <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">On-chip communication</a> (18 Sep, 600 MHz). The energies were re-measured on 23 September on two cards and read lower: 0.67 pJ/B between the minions of a pair, 2.1 around a neighbourhood or shire, 12–18 across the mesh, which fits about 9.3 + 1.7 pJ/B per mean hop (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">the energy manual, §5</a>).</p>
-<p class="note" data-ss-id="s-note"><b>Free combine-on-receive is the systolic feature.</b> The accumulate happens in the channel, not in the cell. Natural unit: one shire (32 minions). Inside a neighbourhood only the tree’s pairs (0–1, 0–2, 0–4, 2–3, 4–5, 4–6, 6–7) get the 68-cycle path; a chain through all eight needs at least one 114-cycle hop.</p>
-</section>
-
-<section data-ss-section data-ss-id="section-landmine">
-<h2 id="landmine" data-ss-id="l-h">The landmine: a 2D systolic array hangs a hart until the chip is reset</h2>
-<div class="q" data-ss-id="l-quote"><b>“Never let a minion receive readies from two TensorSend partners at once.”</b><br>— <code>docs/et-soc1-notes.md</code> in the repository. One <code>partner_ready_peer</code> bit per minion, not one per partner (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#a-trap-one-ready-flag-per-minion">A trap: one ready flag per minion</a>).</div>
-<p data-ss-id="l-body">A classic 2D systolic array — every cell receiving from both north and west — <b>is exactly this case</b>. On silicon it hangs the hart: the firmware’s abort cannot recover it, and only a chip reset or a power cycle clears it. The emulator, <code>sys_emu</code>, tracks partners separately and will run such a design happily.</p>
-<div class="grid2" data-ss-id="l-shapes">
-  <div class="card ok" data-ss-id="ls-1"><p class="t">Safe: 1D rings</p><p>Each minion only ever sends to its <code>next</code>, so partners never change. Reach for this first.</p></div>
-  <div class="card ok" data-ss-id="ls-2"><p class="t">Safe: 2D in alternating phases</p><p>West-pass, barrier, north-pass, barrier. The barrier is <b>237 cycles</b> — budget that against 68–114 cycles per hop.</p></div>
-  <div class="card ok" data-ss-id="ls-3"><p class="t">Safe: hardware trees</p><p>One ready bit per level. 432 cycles for a 32-minion reduce + broadcast.</p></div>
-  <div class="card flag" data-ss-id="ls-4"><p class="t">Hangs: naive 2D mesh dataflow</p><p>Two partners per cell. Hangs, needs a reset, and looks exactly like a board fault. On a shared lab card, tell the other users before trying it.</p></div>
-</div>
-</section>
-
-<details data-ss-id="sources" data-ss-react="off">
-<summary>Sources</summary>
-<ul>
-<li>Written from the repository at <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/b36acd6">b36acd6</a>: <code>docs/research/counters-and-dram.md</code> §5 (shire-cache structure, the L3-slave priority line, <code>l3_yield</code>, <code>num_l3_reqq_entries</code>) and §2.3 (what U-mode can do); <code>docs/et-soc1-notes.md</code> (on-chip communication, memory anatomy, the TensorSend partner rule); <code>docs/findings/05-claims.md</code> (which then had no row for this rule; it now records the reproduction); <code>workloads/nocbench/README.md</code>.</li>
-<li>Ivan’s report: AI Foundry Discord, #community-lab, 22 Sep 2026, 02:30 PT.</li>
-<li>The reproduction: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a> (22 Sep afternoon, aifoundry2 and aifoundry3); raw data in <code>docs/reports/data/2026-09-22-hotline-aifoundry2</code>. The errata are ET-SoC Errata 4.1 (RTLMIN-6207) and 4.2 (RTLMIN-6214) in <a href="https://github.com/aifoundry-org/et-man">et-man</a>; <code>l3_yield_priority</code> is bits 4:0 of <code>sc_reqq_ctl</code> in et-platform’s <code>etsoc-hal/include/hwinc/shire_esr.h</code>.</li>
-<li>Arithmetic: 60 M atomics/s can only be an aggregate, since per shire it would exceed the sub-bank’s one-request-per-2-cycles ceiling by about 6×. If shire 0 got 6% of an even split, each of the other 31 got 103%.</li>
-<li>Versions: first published 22 September 2026, before the reproduction; corrected in place on 24 September 2026 (the update above, the owner’s share, the errata reading, the contention threshold and the pacing figures).</li>
-</ul>
-</details>
-
-<section data-ss-section data-ss-id="section-related">
-<h2 id="related">Related reports</h2>
+<section data-ss-section data-ss-id="section-where">
+<h2 id="where-its-points-now-live">Related reports: where its points now live</h2>
 <ul class="related">
-  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a> — the reproduction: the atomic is fair; the owner’s own loads stop</li>
-  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a> — shire-to-shire hand-off through the scratchpad, built this way because of the TensorSend hazard</li>
-  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the source of the latency, bandwidth and energy numbers above, and the one-ready-flag trap</li>
-  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy">Anatomy of a memory access</a> — which shire homes which line (PA[10:6])</li>
-  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">The energy manual, §5</a> — the messaging energies re-measured on two cards</li>
+  <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a> — the measurement: the atomic is fair, the owner shire's own loads stop, and a bank rule that predicts when. Its advice is in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line#what-to-do-instead">What to do instead</a> (section 7): make the owner a shire that does no compute, not the master shire; pace the requesters; spread instead of sharing; and read the victim's bank counters from user mode. <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line#method-and-what-is-not-established">Section 8</a> says why <code>l3_yield</code> was left alone.</li>
+  <li id="landmine"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#a-trap-one-ready-flag-per-minion">On-chip communication, “A trap: one ready flag per minion”</a> — why a 2D TensorSend array whose cells take readies from two partners at once hangs a hart until the chip is reset, and the layouts that are safe: 1D rings, 2D in barrier-separated phases, and the hardware trees.</li>
 </ul>
+<p class="small">The brief as corrected on 24 September is kept in the repository, at
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/49dd0c8/docs/reports/2026-09-22-et-soc1-l2-mainline-starvation.html">commit 49dd0c8</a>.
+Versions: first published 22 September 2026, before the reproduction; corrected in place on 24 September 2026; replaced by this pointer on 25 September 2026, after its points that no other page made moved to One hot line stops a shire.</p>
 <p class="back"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
 </section>
 

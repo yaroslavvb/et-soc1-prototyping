@@ -2,10 +2,11 @@
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and
 where it ran, the command that produced it, where the **raw** data lives in this repository, and what it
-cannot tell you. Cite as **E1**...**E32**.
+cannot tell you. Cite as **E1**...**E34**. E33 and E34 are the 18 September memory-hierarchy and on-chip
+communication sessions, registered on 25 September; they are numbered last so that no other number moves.
 
-Card work up to E19 is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card (aifoundry2,
-aifoundry3 or both). Firmware behaviour is read from the et-platform source at `353f20e`; the cards' own trace strings
+Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
+(aifoundry2, aifoundry3 or both). Firmware behaviour is read from the et-platform source at `353f20e`; the cards' own trace strings
 match an older build (before et-platform commit `60b40c10f`, 24 Sep 2024; both cards report release 1.3.1), so which
 commit the cards run is not established (R3). Unless an entry says otherwise, the minion clock was a steady
 **600 MHz** at **516–518 mV** on aifoundry2 (521–523 mV on aifoundry3), verified in every telemetry sample of the
@@ -46,12 +47,23 @@ instants, and idle power in the two seconds before launch at **36.29 W ± 0.06 W
 ## E1 — One memory access taken apart (2026-09-19)
 
 **Question (Q4):** what does a single load cost, by stage and by power rail?
-**Tool:** `workloads/memprobe` (device kernel with an op-program interpreter, host, `gen_ops.py`,
-`analyze.py`, `run_power.py`).
-**Raw data:** `docs/reports/data/2026-09-19-memprobe-aifoundry2/`.
+**Tool:** `workloads/memprobe` (device kernel with an op-program interpreter, host, `gen_ops.py`, `run_power.py`,
+`analyze_power.py`, `analyze.py`, `build_report.py`).
+**Raw data:** `docs/reports/data/2026-09-19-memprobe-aifoundry2/`. The rail trace is kept as `power/sp_stats.csv`
+(the merged trace `analyze_power.py --csv` writes), not as the service processor's `.bin` dumps.
+**Rebuild from the committed data** (no card):
+```
+D=docs/reports/data/2026-09-19-memprobe-aifoundry2
+python3 workloads/memprobe/analyze_power.py $D/power --json $D/power/summary.json   # reads power/sp_stats.csv
+python3 workloads/memprobe/analyze.py --data $D --out $D/summary.json
+python3 workloads/memprobe/build_report.py $D/summary.json docs/reports/data/2026-09-23-energy-manual/manual.json \
+    docs/reports/2026-09-19-et-soc1-memory-anatomy.html
+```
 **Method:** `evict_va` (CSR 0x89f) places a line at a chosen level, then one timed load; 1,500 addresses for
 the L3 map, 19,000 loads at random phases for refresh; energy from the service processor's per-rail stats
-trace during strided loops sized to each level.
+trace during strided loops sized to each level. `l3map.u32` holds 8,192 consecutive lines as L3 hits, a larger
+check of the L3 model (8,124 within ±4 cycles of 110 + 12·hops, 60 more 5–6 cycles above it, 8 counter glitches);
+the page does not use it.
 **Findings:** [15-earlier-findings.md](15-earlier-findings.md).
 **Caveats:** timing is load-to-use with one load in flight; the energy figures come from the rails' running
 averages, read every 133 ms, not from a per-access measurement. The energy manual re-measured the levels at a pinned
@@ -75,7 +87,15 @@ overflow bit. So after every wrap the value is 128 short until the adder comes r
 
 **Question (Q7):** can kernel time be attributed to regions on the device?
 **Tool:** `workloads/traceprof` + `scripts/trace-flamegraph.py`.
-**Raw data:** `docs/reports/data/2026-09-20-traceprof-aifoundry2/`.
+**Command** (from `build/traceprof-data`, after building `workloads/traceprof`):
+```
+timeout 10 ../traceprof/host/traceprof_host --shires 0x1 --reps 4 --out events.jsonl
+python3 ../../scripts/trace-flamegraph.py events.jsonl --svg flame.svg --folded flame.folded \
+    --title "traceprof on aifoundry2: 32 harts of shire 0, cycles"
+```
+**Raw data:** `docs/reports/data/2026-09-20-traceprof-aifoundry2/`: 512 events from 32 harts, spanning 1,572,824
+cycles (2.6 ms at 600 MHz) of kernel time. The second command, run on the committed `events.jsonl`, reproduces
+`flame.svg` and `flame.folded` byte for byte.
 **Caveat:** `fcvt.s.lu` traps (cause 0x1e) on this chip, so loop counters in floating-point code must be
 32-bit; profile-region strings resolve as ELF file offsets, not virtual addresses.
 **Report:** [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2).
@@ -94,15 +114,28 @@ untested.
 
 **Question (Q8):** how do board power, the three rail sensors and the die temperature respond to a load step?
 **Tool:** `tools/ettelem/run_thermal.sh`; 10 Hz sampling.
-**Raw data:** `docs/reports/data/2026-09-20-power-aifoundry2/thermal-telemetry.jsonl`, `thermal-phases.jsonl`,
-reduced to `summary.json` (`thermal.series`, one sample a second).
-**Findings:** the rail readings lag board power (the PMIC's running average, τ ≈ 1 s: 61% of a step after 1 s and
-88% after 2 s, as E27 later measured); idle power depends on recent load; under load, board power rose about
-**0.8 W per °C** (a least-squares line of board power against die temperature over the matmul: 0.80 W/°C from 5 s
-after launch, 0.76–0.78 from 1–3 s; 0.40 W/°C on the minion rail). That is faster than the later idle law, whose
-slope is 0.56–0.78 W/°C over the step's 75–87 °C (0.67 on average). The power-and-temperature report computes this
-slope from `summary.json` `thermal.series`, and also quotes E7's fit (0.78 W/°C board, 0.38 minion rail, 22
-uncontrolled runs at 79–90 °C, superseded). See [14-card-behaviour.md](14-card-behaviour.md).
+**Raw data:** `docs/reports/data/2026-09-20-power-aifoundry2/thermal-telemetry.jsonl`, `thermal-phases.jsonl`, and
+`raw/thermal-loads.log` (recovered on 25 September from aifoundry2's build tree: one line per load process, 8
+`MMBENCH` and 4 `MEMPROBE`, which `run_thermal.sh` cut at 200 and 160 characters, so the per-launch times are not in
+it). Reduced to `summary.json` (`thermal.series`, one sample a second; `thermal.gaps`, the dips between load
+processes, from the 10 Hz stream; `thermal.loads`) by
+```
+python3 tools/ettelem/summarize_power_session.py docs/reports/data/2026-09-20-power-aifoundry2 \
+    --out docs/reports/data/2026-09-20-power-aifoundry2/summary.json
+```
+which reproduces the committed series exactly.
+**Findings:** the rail readings lag board power (the PMIC's running average: E27's catalogue later measured a step
+at 55–57% after 1 s and 83–84% after 2 s, τ ≈ 1.15–1.22 s, `catalogue.json` `rail_filter`); idle power depends on
+recent load; under load, board power rose about **0.8 W per °C** (a least-squares line of board power against die
+temperature over the matmul: 0.76, 0.80, 0.82 and 0.89 W/°C for fits starting 1, 5, 10 and 20 s after launch; 0.77,
+0.79, 0.80 and 0.84 without the seconds that hold a launch gap; 0.40 W/°C on the minion rail). A least-squares line
+through the later idle law over the seconds of the 5 s fit gives 0.69 W/°C (the law's own slope runs from 0.56 to
+0.78 W/°C over the step's 75–87 °C). The DRAM-bound load moves the minion rail by only 0.4 W, with the die 1 °C warmer. The DDR
+domain's on-die reading falls about 0.2 mV per °C at idle (768 mV at 72 °C, 766 mV at 81 °C); the DRAM load reads
+3 mV below that trend at 82 °C, and the matmul's 765 mV at 84–87 °C is what the trend predicts. The
+power-and-temperature report computes all of these from `summary.json`, and also quotes E7's fit (0.78 W/°C board,
+0.38 minion rail, 22 run averages from 30 uncontrolled runs at 79–90 °C, superseded). See
+[14-card-behaviour.md](14-card-behaviour.md).
 **Report:** [Power and temperature](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature) (A3).
 
 ## E6 — Per-shire on-die voltage map (2026-09-20)
@@ -110,7 +143,16 @@ uncontrolled runs at 79–90 °C, superseded). See [14-card-behaviour.md](14-car
 **Question (Q8):** how far down can voltage be resolved?
 **Method:** raise the service processor's log level to DEBUG (`DM_CMD_SET_DM_TRACE_CONFIG`), extract the SP
 trace, parse one record per shire per pass.
-**Raw data:** `docs/reports/data/2026-09-20-power-aifoundry2/per-shire-voltage-idle.json`.
+**Raw data:** `docs/reports/data/2026-09-20-power-aifoundry2/per-shire-voltage-idle.json`, and the SP trace dumps it
+came from, recovered on 25 September from aifoundry2's build tree: `raw/sp1.bin`, `sp2.bin`, `sp3.bin` (checksums in
+`raw/README.md`).
+```
+python3 tools/ettelem/parse_sptrace_voltage.py docs/reports/data/2026-09-20-power-aifoundry2/raw/sp1.bin \
+    > per-shire-voltage-idle.json
+```
+reproduces the committed map byte for byte; `sp2.bin` and `sp3.bin` hold later passes, 0.3 s apart, whose current
+readings differ from it in 6 and 7 of the 102 cells, by 1 mV, with every low and high the same (`summary.json`
+`voltage_repeat`).
 **Caveat:** restore the log level afterwards (`ettelem loglevel info`).
 **Report:** [Power and temperature](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature) (A3), section 3 (the per-shire voltage map).
 
@@ -119,8 +161,12 @@ trace, parse one record per shire per pass.
 **Question (Q9):** does operand data change matmul power on this chip?
 **Raw data:** `docs/reports/data/2026-09-20-power-aifoundry2/horace-*`.
 **Caveat:** three rounds back to back with the die drifting from 79 to 90 °C, so a fitted temperature term was
-needed. **Superseded by E9.** Kept because it is the only session that reached 90 °C and 70 W under the
-governor without being stopped.
+needed. Round 2 (the third; rounds count from 0) was degenerate: `run_horace.sh` rotated the patterns with the
+multiplier 2·round + 1, which is 5 in round 2, so that round alternated onebit and ones five times each, and `summary.json` keeps 22 run averages from the
+30 runs (`run_horace.sh` now uses the multipliers 1, 3, 7, 9, all coprime to 10). The committed
+`horace-telemetry.jsonl` is thinned to 2 Hz by `compact_telemetry.py`, while the rows (30 samples each) were computed
+at 10 Hz, so they can be approximated from the repository but not reproduced exactly. **Superseded by E9.** Kept
+because it is the only session that reached 90 °C and 70 W under the governor without being stopped.
 **Report:** [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4), first version (superseded).
 
 ## E8 — Horace experiment, second version: each run started at 80 °C (2026-09-20, 21:34–21:44)
@@ -128,17 +174,26 @@ governor without being stopped.
 **Question (Q10):** same, with the die cooled to a common temperature first.
 **Raw data:** `docs/reports/data/2026-09-20-power-aifoundry2/horace2-*`.
 **Result:** 20 runs, 10 patterns, all started at exactly 80 °C; rounds agree within 1.1 W.
+**Caveat:** as in E7, the committed `horace2-telemetry.jsonl` is thinned to 2 Hz while the rows were computed at 10 Hz.
 **Superseded by E9**, which has more repeats and a de-quantised temperature.
 **Report:** [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4), second version (superseded).
 
 ## E9 — Horace experiment, third version: strict, 14 patterns (2026-09-21, 06:55–07:52)
 
 **Question (Q11):** the definitive data-dependent power measurement.
-**Command:**
+**Command** (the two builds, on the lab machine, serve every Horace session E9–E20):
 ```
+cmake -S workloads/sparsity -B build/sparsity -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev && cmake --build build/sparsity -j4
+cmake -S tools/ettelem -B build/ettelem -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev && cmake --build build/ettelem
 tools/ettelem/run_horace_strict.sh build/horace3 80 84 4 5 2 7 \
   "zeros ones pi sparse50 uniform randn" \
   "signs pow2 mant a_randn_b_ones a_ones_b_randn ternary sparse75 checker"
+```
+Then, off the card (`tools/ettelem/finish_horace.sh` runs the last two from the committed data; the RTL replay of
+E11 is skipped while `toggles.json` exists):
+```
+python3 tools/ettelem/analyze_horace_strict.py build/horace3 --toggles toggles.json --out horace3.json
+python3 tools/ettelem/make_heating_gif.py horace3.json horace-heating.gif --poster horace-heating.png --steps
 ```
 **Protocol:** the strict start above; 4 burn-in cycles, then 5 shuffled blocks of the 6 main patterns, with the
 8 extra patterns in the first 2 blocks; 7 s per run; random patterns get new random tiles each block (seed =
@@ -206,6 +261,8 @@ E7). **29 runs in 4 hours** — after a hot run the die needs up to seven minute
 sin halves of a DFT, butterfly factors and their dense kaleidoscope products, identity, permutation, diagonal,
 tridiagonal, block-diagonal, upper-triangular, rank-1, circulant, 4-bit quantised, weights × ReLU activations,
 and a matrix of −0.0), two seeds each; E11's bench then counts their activity.
+**Command:** `python3 tools/ettelem/make_tiles.py --all build/structured_tiles` (then E11's bench on those tiles;
+`finish_horace.sh` runs it when `structured_toggles.json` is missing).
 **Raw data:** `structured_tiles/*.bin`, `structured_toggles.json`.
 **Note:** `make_tiles.py` normalises negative zeros to +0.0 everywhere except the deliberate `negzero` kind,
 because `x · 0` leaves −0.0 for negative x and the chip only gates the all-zero bit pattern.
@@ -286,11 +343,14 @@ python3 workloads/memprobe/gen_ops.py wakeup --out W --reps 20 --seed 11 \
 build/memprobe/host/memprobe_host --program W/wakeup.ops --out-dir W --budget 40
 ```
 **Raw data:** `docs/reports/data/2026-09-22-dvfs-aifoundry2/wakeup/` (`wakeup.ops`, `wakeup.json` labels,
-`wakeup.u32` results). Card held 4.9 s.
+`wakeup.u32` results). Card held 4.9 s. Reduced by `tools/ettelem/analyze_dvfs.py --wakeup` (the full command is
+under E19). Since 25 September it uses the stored latencies as they are: `memprobe.c` already corrects the cycle
+counter's late carry, and the analysis had corrected 7 of the 800 loads a second time.
 **Result:** the median paired difference between the longest and shortest idle is 0 cycles for L1 and L3, −11 for
 L2 (a slow no-idle baseline, not the idle: 61 cycles with no idle, a normal 49.5-cycle hit at every idle from 1.7 µs),
-+10.5 for DRAM (row closure: an 11-cycle activate, present in full after 1.7 µs of idle and flat out to 27 ms). No
-wake-up anywhere.
++10.5 for DRAM (row closure: an 11-cycle activate, present in full after 1.7 µs of idle and flat out to 27 ms; of
+the 20 paired DRAM differences at 27 ms, 13 are +9 to +14 cycles, six are within 6 cycles of zero and one is an
+outlier, −51). No wake-up anywhere.
 **Caveats:** cannot detect a penalty below about ten cycles, and cannot test idle intervals beyond 27 ms, which
 is the widest the delay op encodes. The minion keeps executing throughout, so only the array under test is
 idle.
@@ -306,6 +366,21 @@ single-hart probe, five minutes before the sample. `analyze_dvfs.py --since` com
 timestamps (`dvfs.json` `idle_check.hours_idle`). Sampled `ettelem sample --seconds 60 --every-ms 200`, with no
 workload during the sample.
 **Raw data:** `docs/reports/data/2026-09-22-dvfs-aifoundry2/idle_20h.jsonl.gz` (300 samples).
+**Command** (the DVFS report's data and page, from the repo root; no card). The three steps go together: the second
+adds the three-machine block (`cards`) that the page's sections 3 and 6 need, `analyze_dvfs.py` keeps an existing
+`cards` block when it rewrites the file, and `build-report.py` refuses to build the page without one.
+```
+D=docs/reports/data; H=$D/2026-09-21-horace-aifoundry2; A3=$D/2026-09-22-horace-aifoundry3; C=$D/2026-09-22-cards
+python3 tools/ettelem/analyze_dvfs.py --cold $H/cold1 $H/cold2 --wakeup $D/2026-09-22-dvfs-aifoundry2/wakeup \
+    --idle $D/2026-09-22-dvfs-aifoundry2/idle_20h.jsonl.gz --since $H/long2/runs.jsonl.gz \
+    --model $H/model.json --ablation $H/ablation.json --sptrace $C/sptrace-aifoundry3.bin \
+    --out $D/2026-09-22-dvfs-aifoundry2/dvfs.json
+python3 tools/ettelem/build_cards_data.py --cards $A3/cards.json --transfer $A3/transfer.json \
+    --leak $A3/leakage_crosscard.json --config $C/config.json --driver $C/driver_config.json \
+    --sptrace $C/sptrace-aifoundry3.bin --out $C/cards-report.json \
+    --merge $D/2026-09-22-dvfs-aifoundry2/dvfs.json
+python3 scripts/build-report.py dvfs-leakage $D/2026-09-22-dvfs-aifoundry2/dvfs.json docs/reports/2026-09-22-dvfs-leakage.html
+```
 **Result:** 31.79 ± 0.04 W at 73.0 °C, 600 MHz, 518 mV; minion rail 11.05 W, SRAM 2.00 W, mesh 3.64 W,
 15.10 W on no rail sensor. The model of E17 predicts 31.78 W — error **+0.01 W**. No sign of a deep idle
 state.
@@ -324,25 +399,37 @@ main patterns plus one block of the two extras, shuffled, 7 s each, each launche
 ```
 ssh aifoundry3 'cd ~/nekko && tools/ettelem/run_horace_strict.sh build/strict3 55 60 2 3 1 7 \
     "zeros ones pi sparse50 uniform randn" "signs mant"'
-python3 tools/ettelem/analyze_horace_strict.py DATA/2026-09-22-horace-aifoundry3 \
-    --toggles DATA/2026-09-21-horace-aifoundry2/toggles.json --out .../horace3.json
-python3 tools/ettelem/compare_cards.py --card aifoundry2=... --card aifoundry3=... \
-    --model DATA/2026-09-21-horace-aifoundry2/model.json --toggles ... --out .../cards.json
 ```
+Then, from the repo root with no card (`tools/ettelem/finish_horace.sh` runs all four):
+```
+D=docs/reports/data/2026-09-21-horace-aifoundry2; A3=docs/reports/data/2026-09-22-horace-aifoundry3
+python3 tools/ettelem/analyze_horace_strict.py $A3 --toggles $D/toggles.json --out $A3/horace3.json
+python3 tools/ettelem/compare_cards.py --card aifoundry2=$D/horace3.json --card aifoundry3=$A3/horace3.json \
+    --model $D/model.json --toggles $D/toggles.json --out $A3/cards.json
+python3 tools/ettelem/transfer_cards.py --cards $A3/cards.json --session $A3 --model $D/model.json \
+    --transfer $A3/transfer.json --leak $A3/leakage_crosscard.json
+python3 tools/ettelem/build_cards_data.py ...   # the three-machine block, merged into both reports' data (E19's command)
+```
+`transfer_cards.py` (added 25 September) reproduces the committed `transfer.json` and `leakage_crosscard.json` byte for
+byte in their first-published fields, which until then no committed script produced, and adds `worst_rms`,
+`worst_single`, `mean_offset_W_by_sample` and a `model_rule` block.
 **Raw data:** `docs/reports/data/2026-09-22-horace-aifoundry3/` (`runs.jsonl`, `starts.jsonl`,
 `telemetry.jsonl.gz`, `tiles/`, and the derived `horace3.json`, `cards.json`, `transfer.json`,
 `leakage_crosscard.json`).
 **Result:** the same ordering and nearly the same magnitudes as E9 — zeros 1.89 W over idle against 1.96,
-random normal 24.86 against 27.11. The aifoundry2 model applied unchanged is off by 1.38 W rms; after one
-scale factor of **0.924** the residual is **0.20 W rms** over a 1.9–25 W range. Calibrating that factor on a
-single run and predicting the other seven gives 0.36 W rms in the median, 0.27 W if the calibration run is
-random data. The aifoundry2 idle law, fitted to idle readings from 64 to 88 °C and extrapolated 7–14 °C below that
-range onto this card (which idled at 50–57 °C), predicts its idle power to **+0.73 W** out of 25 W.
+random normal 24.86 against 27.11. The aifoundry2 model applied unchanged is off by 1.38 W rms, and it overestimates
+every pattern, by 3 to 10% (8% by least squares); after one scale factor of **0.924** the residual is **0.20 W rms**
+over a 1.9–25 W range. Calibrating that factor on one operand pattern's runs and predicting the other seven patterns
+gives 0.36 W rms in the median and 0.93 W rms at worst (calibrated on zeros; the largest single error is 1.53 W),
+and 0.27 W rms calibrated on random normal. The aifoundry2 idle law, fitted to idle readings from 64 to 88 °C and
+extrapolated 7–14 °C below that range onto this card (which idled at 50–57 °C), predicts its idle power to
+**+0.73 W** out of 25 W, the mean of the four temperature bins (the 50 °C bin is 22 samples of pre-session idle;
++0.68 W weighted by samples; with the model's own idle rule, +0.69 W over 55–57 °C).
 **Caveats:** the two sessions are at different launch temperatures, so only *switching* power (board power
 minus the idle power measured just before each run) is comparable, not absolute watts. The thermal network is
 not comparable at all: aifoundry3 sheds heat visibly faster. The scale factor is one number fitted on this
 card; the claim is that one number suffices, not that it was predicted.
-**Report:** [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4), section 10; [The ET-SoC-1's DVFS loop](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) (A11), section 7.
+**Report:** [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4), section 10; [The ET-SoC-1's DVFS loop](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) (A11), section 6.
 
 ## E21 — The governor's inputs on all three machines (2026-09-22, 12:42–12:47)
 
@@ -382,9 +469,17 @@ counting completions. A share is a shire's count over an even split. The home sh
 use the PRM's format 0 (shire ID in bits [29:23]). Run on aifoundry2 and repeated on aifoundry3.
 ```
 workloads/nocbench/run_hotline.sh DATA 6000000     # 42 configurations, each well under a second of card time
-python3 workloads/nocbench/analyze_hotline.py DATA/sweep.jsonl DATA3/sweep.jsonl --power DATA/power.json --out hotline.json   # DATA3: aifoundry3
+python3 workloads/nocbench/analyze_hotline.py DATA/sweep.jsonl DATA3/sweep.jsonl --power DATA/power.json \
+    --context DATA/context.json --barrier docs/reports/data/2026-09-18-nocbench-aifoundry2/barrier-chip1.jsonl \
+    --out DATA/hotline.json                        # DATA3: aifoundry3
+python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm \
+    docs/reports/data/2026-09-23-reruns-aifoundry3 --out reruns.json   # the pooled energies (E29)
 ```
-**Raw data:** `docs/reports/data/2026-09-22-hotline-aifoundry2/{sweep.jsonl,power.json,hotline.json}` and
+`context.json` (committed 25 September) holds only what no raw file has: the errata text, quoted by hand, and the
+window table (below). `--barrier` reads the chip barrier from the 18 September nocbench run (4,995 cycles with one
+minion per shire); the uncontended round trip (216.2 cycles) and the bank's 10.0 cycles per atomic are computed from
+the sweep. Until then `hotline.json`'s `context` block had no producer.
+**Raw data:** `docs/reports/data/2026-09-22-hotline-aifoundry2/{sweep.jsonl,power.json,context.json,hotline.json}` and
 `docs/reports/data/2026-09-22-hotline-aifoundry3/sweep.jsonl`.
 **Result:** the atomic is **fair**. With 1,024 minions the host shire's share is 1.004 and the whole chip lies
 within 0.998–1.004, standard deviation 0.001, on both cards and with the line homed in shire 0, 7, 15 or 31.
@@ -408,12 +503,12 @@ cache. Four combinations: the host reading its own scratchpad or DRAM, the hot l
 or its L3 slice. The baseline is the identical loop with no other shire launched. Then two sweeps: how many
 remote minions it takes, and how far they must be paced back. Power from
 `tools/ettelem/run_hotline_power.sh` (three back-to-back launches per case, because the per-rail numbers are the
-PMIC's running averages, τ ≈ 1 s), on aifoundry2 only, reduced by
+PMIC's running averages, τ ≈ 1.2 s), on aifoundry2 only, reduced by
 `python3 tools/ettelem/analyze_hotline_power.py DATA --out DATA/power.json` (the `--power` input of E22's command).
 **Raw data:** as E22, plus `docs/reports/data/2026-09-22-hotline-aifoundry2/{telemetry.jsonl.gz,runs.jsonl,marks.jsonl}`.
 The 5, 40 and 100 ms window runs behind "identical for windows of 5, 10, 40 and 100 ms" are not in these files (every
-sweep row has `window_cycles` 6,000,000); their counts exist only in `hotline.json` `context.window_independence`,
-which `analyze_hotline.py` does not produce.
+sweep row has `window_cycles` 6,000,000); their counts exist only in the hand-kept `context.json`, which
+`analyze_hotline.py --context` copies into `hotline.json` `context.window_independence`.
 **Result:** the host shire completes **192–384 operations and then nothing**. The count is identical for
 windows of 5, 10, 40 and 100 ms while the mesh retires six million atomics, so this is a stop, not a
 slow-down: 0.01–0.05% of the uncontended rate. It does not matter whether the host is reading scratchpad or
@@ -422,10 +517,11 @@ requesters leave the host at 98.9%, 24 take it to 0.02%, and 24 is where the mea
 bank's 10.0 cycles per atomic. One other shire is enough. Pacing the remotes to one atomic per 10,000 cycles
 returns the host to 54% and costs the hammering shires 4%. Energy: 23.6 nJ per contended atomic against
 1.4 nJ spread over 32 lines, a factor of **17**, while 1,024 stalled minions cost only 1.4 W over idle (first run;
-re-measured in E29: 19.8 [16.9–23.6] nJ against 1.16 [1.01–1.37] nJ, still 17×). aifoundry3 repeated the sweeps,
-not the power runs. The stalled host's 384 and 192 operations and the 10.0 cycles per atomic repeat exactly, and the
-host's count in the other rows agrees within 2% (exactly in 13 of the 42), except one: with the host reading its
-scratchpad and the hot line in its L3 slice it gets 240 operations through against aifoundry2's 208.
+re-measured in E29: 19.8 [16.9–23.6] nJ against 1.16 [1.01–1.37] nJ, still 17×, and about 1.2 W over idle for the
+stalled chip, 1.19 [1.01–1.41] W, `reruns.json` `hotline_over_idle_w`). aifoundry3 repeated the sweeps, not the
+power runs. The stalled host's 384 and 192 operations and the 10.0 cycles per atomic repeat exactly. In the 40
+configurations that have a host shire, its count matches exactly in 15 and agrees within 2% in all but one: with the
+host reading its scratchpad and the hot line in its L3 slice it gets 240 operations through against aifoundry2's 208.
 **Mechanism, from the vendor:** Errata 4.1 (`RTLMIN-6207`) and 4.2 (`RTLMIN-6214`) in R1 describe exactly
 this, rate the impact "Low" because "it would have to be a pretty consistent and repeating pattern", state
 that `l3_yield_priority` does **not** fix the same-address case, and are both marked Postponed.
@@ -478,6 +574,10 @@ workloads/onchip/run_onchip.sh DATA                 # 88 configurations
 tools/ettelem/run_onchip_power.sh DATA 12
 python3 workloads/onchip/analyze_onchip.py DATA/sweep.jsonl DATA3/sweep.jsonl --power DATA --out onchip.json   # DATA3: aifoundry3
 ```
+Since 25 September `analyze_onchip.py` also writes the mesh layout (`layout`, `empty`, imported from
+`workloads/nocbench/analyze.py`), the ring order (`ring`), the headline configuration as repeated in each sweep group
+on each card (`repeats`), and per ring offset each card's bandwidth and
+stage time (`distance[].by_card`) and the longest hand-off (`distance[].longest`); every earlier key is unchanged.
 **Raw data:** `docs/reports/data/2026-09-22-onchip-aifoundry2/` (`sweep.jsonl`, `telemetry.jsonl.gz`,
 `runs.jsonl`, `marks.jsonl`, `onchip.json`) and `docs/reports/data/2026-09-22-onchip-aifoundry3/sweep.jsonl`.
 **Result:** at 1 MB per shire per stage, eight stages, 512 MB of traffic: DRAM **48.4 GB/s**, the next shire's
@@ -490,9 +590,11 @@ runs at 280–410 GB/s and the hand-off buys 1.0–1.4×; at 32 MB per buffer it
 there out to 256 MB. **Arithmetic:** the lead holds to about four adds per element and then falls faster with each
 quadrupling, from 12.2× at one add per element (this sweep's own run) to 1.5× at 256, which is 32 flops per byte
 moved (read plus written). **Distance:** the ring runs in shire-ID order, and the next shire by ID is 1–10 mesh hops
-away (3.5 on average) while s+16 is only 2.1; across the offsets tried (1.6–4.5 hops on average) the bandwidth stays
-at 593–733 GB/s and does not follow the distance. Each hop still costs energy (E31–E32), which this sweep does not
-see.
+away (3.5 on average) while s+16 is only 2.1; across the five offsets tried (1.6–4.5 hops on average) the bandwidth
+runs 593–733 GB/s, not with the mean distance but with the longest hand-off in the ring (10 to 6 hops, r = −0.99 on
+both cards, against −0.32 and −0.30 for the mean): the stage time grows about 3,200–3,300 cycles per hop of the
+longest hand-off, and the ID-order ring used for the headline is the slowest. Five offsets are a correlation, not a
+controlled test. Each hop also costs energy (E31–E32), which this sweep does not see.
 **How the hop is proved:** each shire starts its slab filled with its own number, and every element of every
 run is checked against the value the slab must hold — for `hop`, the number of the shire `stages` places back
 round the ring. Shire 0 ends holding 32 (= 24 + 8) rather than 8. A run whose data had not moved would fail.
@@ -529,9 +631,11 @@ awake minion is 2.0 mW on one hart, 3.2 on two. **Bytes (pJ/B, zeros / random):*
 store 0.47 / 0.78, own-scratchpad tensor load 2.0 / 4.2, tensor store 4.4 / 8.0, DRAM tensor load 94 / 134,
 tensor store 87 / 140, `fsw.ps` through the L1 to DRAM 247 / 345. **Cross-card:** 56 entries, aifoundry3 /
 aifoundry2 median 0.949, range 0.87–1.01.
-**What it establishes:** an 8-lane vector op on zeros costs what a scalar one does (idle lanes are free); a
-random-data `fmadd.ps` lane costs 6.5 pJ over the awake core, against 6.0 pJ per multiply-add in the tensor
-unit, so the two datapaths cost the same and the tensor unit saves only issue; a DRAM write by tensor store
+**What it establishes:** an 8-lane vector op on zeros costs what a scalar one does (lanes computing on zeros add
+nothing); a random-data `fmadd.ps` lane costs 6.5 pJ over the awake core, against 6.0 pJ per multiply-add in the
+tensor unit, so the two datapaths cost nearly the same. In E27's figures, of the 1.2 pJ per multiply-add the tensor
+unit saves, about half is instruction issue and half datapath (the operands differ as well: uniform in [0.5, 2) for
+the vector unit, normal for the tensor unit); a DRAM write by tensor store
 costs a read, and the L1 write-back path 2.5× that; DRAM is data-dependent too (94 → 134 pJ/B).
 **Caveats:** the die drifted from 74 to 87 °C over the aifoundry2 session; the leakage correction was
 0.7 W in the median and 1.8 W at most, and the sensor's whole-degree steps make it ±0.3 W. `fdiv.ps` and
@@ -554,7 +658,7 @@ patterns — **three times each in a different random order per pass**, 3 s burs
 telemetry at 10 Hz. The same script ran on aifoundry2 and aifoundry3 at the same time: 9,264 launches per card,
 2.6 hours each. `analyze_catalogue.py` gives each configuration the mean and standard error over passes, with the
 leakage correction of E26; a straight-line fit of energy per byte against hop distance; the rail split of each
-burst read from its last 0.6 s and corrected for the rails' one-second filter; and the SRAM rail's idle value
+burst read from its last 0.6 s and corrected for the rails' filter (divided by 0.94, see below); and the SRAM rail's idle value
 against die temperature.
 ```
 python3 workloads/enercat/run_catalogue.py DATA --passes 3 --burst 3 --gap 4.5
@@ -580,12 +684,24 @@ aifoundry3 199 on random data; 1.6 and 3.2 pJ/B, about three quarters of the ten
 same bytes). **Rails:** scalar and vector arithmetic put 79–82% of their power on the minion rail and
 about 18% on no metered rail (regulation); an own-scratchpad read 67% on the SRAM rail; a read six hops away 49% on
 the mesh rail; a DRAM read 70% on no metered rail. **SRAM leakage:** the SRAM rail at idle rises from 1.60 W at
-67 °C to 2.63 W at 82 °C on aifoundry2 (78 mW/°C at 80 °C, 22 mW/MB), 1.90 W at 51 °C on aifoundry3.
+67 °C to 2.63 W at 82 °C on aifoundry2 (78 mW/°C at 80 °C; the whole rail 19.4 mW/MB at 80 °C), 1.90 W at 51 °C on
+aifoundry3.
 **Neighbourhoods:** the four quarters of a shire read its scratchpad at 3.8–4.2 pJ/B.
+**The rails' filter** (`catalogue.json` `rail_filter`, added 25 September): over the bursts with more than 8 W on the
+minion rail and at least 4 s of idle either side, the rail has fallen 57% of the step 1 s after the board's
+step-down and 84% after 2 s on aifoundry2 (τ 1.15 s, 242 bursts), 55% and 83% on aifoundry3 (τ 1.22 s, 229).
+**The sampler** (`sampler_median_ms`, `sampler_max_ms` per burst and per configuration, added 25 September): on
+aifoundry2 the tensor loads and row walks from DRAM slow it to a median of 23–206 ms per sample over a burst (683 ms
+for the longest single sample); every other burst, and every aifoundry3 burst, stays at 21–22 ms. The catalogue keeps those
+bursts: 3 of aifoundry2's 1,176 are over the 60 ms rule the later analyses drop by, and dropping them would move its
+DRAM term in E30 from 72.9 to 71.8 pJ/B, under one standard error.
 **Caveats:** the die drifted between 71 and 85 °C over the aifoundry2 session and the shuffled order is what keeps
-that out of the tables; the leakage correction is the E26 one. The rail split assumes the rails' filter is first-order
-with τ ≈ 1 s, measured on one step. The first-pass DRAM row configurations touched too little to leave the L3 and
-measured the L3 instead (kept, labelled); E28 does the rows properly.
+that out of the tables; the leakage correction is the E26 one. The rail split takes each rail's last 0.6 s of a
+3 s burst and divides by 0.94, the part of a step the PMIC's average is taken to have reached; the measured fall is
+0.91–0.92 at 2.6 s and 0.94 at 3.0 s, so the correction is kept as published, and each 1% of rail scale moves the
+fitted minion delivery loss of E30 by about 1.2 points. In the three slowest-sampler bursts the rail readings are
+stale (the NoC rail reads up to 0.6 W low). The first-pass DRAM row configurations touched too little to leave the L3
+and measured the L3 instead (kept, labelled); E28 does the rows properly.
 **Report:** [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15), second edition.
 
 ## E28 — DRAM row hits against row misses, done with the L3 defeated (2026-09-23, 11:18–11:21, aifoundry2)
@@ -597,11 +713,17 @@ touched set exceeds the 32 MB L3 whatever the pattern: sequential (each bank see
 to a bank). Three passes, zeros and random, as E27.
 **Raw data:** `docs/reports/data/2026-09-23-catalogue-aifoundry2-rows/`, pooled into `catalogue.json` as `dramrow2/*`.
 **Result:** 147 ± 8, 156 ± 5 and 153 ± 5 pJ/B on random data for sequential, row hit and row
-miss; 115, 118 and 114 on zeros. **No difference within error.** Either the controller closes pages after each
-access, so every access already includes an activation, or the activation is small next to the transfer; the
-instruments cannot tell which. Rails: 68–70% of a DRAM read is on no metered rail (the DDR PHY and the chips).
-**Caveats:** 32 harts give 14–17 GB/s, latency-bound, so the signal is 2–2.6 W over idle and the per-pass error
-±4–8 pJ/B; a 20 pJ/B activation would have shown, a 5 pJ/B one would not.
+miss; 115, 118 and 114 on zeros. **No difference within error.** The controller runs an open-page policy: a row
+stays open until a refresh (every 2,325 cycles at 600 MHz, 3.88 µs as measured in E1; the controller is programmed
+for 3.87 µs) or an access to another row of its bank closes it (E1, and
+[Anatomy of a memory access](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#how-long-a-row-stays-open)).
+Each hart here comes back to its row only every 1,200–1,400 cycles or so, with 31 other streams in between, and a
+refresh falls every 2,325 cycles. So either every pattern paid an activation, or an activation is small next to the
+transfer; the instruments cannot tell which, and for a programmer it makes no difference. These 32-hart loads cost
+14–21% more per byte than E27's tensor loads at 76 GB/s, the two cards' mean (26–30% more on zeros; 13–20% and 22–26%
+against aifoundry2's own tensor loads): use them to compare patterns, and E27's to price DRAM. Rails: on random data 67–71% of a DRAM row read is on no metered rail (73–75% on zeros).
+**Caveats:** 32 harts give 14–17 GB/s, latency-bound, so the signal is 2.2–2.6 W over idle on random data (1.6–1.9 W
+on zeros) and the per-pass error ±4–8 pJ/B; a 20 pJ/B activation would have shown, a 5 pJ/B one would not.
 **Report:** [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15), second edition.
 
 ## E29 — Confidence bars: the reruns of the relay, the hot line, the rings and the levels (2026-09-23, 12:51–13:47)
@@ -615,7 +737,13 @@ re-run: the relay by medium (`tools/ettelem/run_onchip_power.sh`), the hot-line 
 (`run_rings_levels_power.sh`, new), three passes each on both cards; on aifoundry2 every pass was preceded by
 heating the die past 76 °C (`run_reruns_warm.sh`, `run_rl_warm_a2.sh`). Each pass is reduced on its own with
 bracketing idle and the leakage correction and pooled by `tools/ettelem/analyze_reruns.py`, which drops a burst
-if the minion clock left 600 MHz in it or if the sampler's own median latency exceeded 60 ms.
+if the minion clock left 600 MHz in it or if the sampler's own median latency exceeded 60 ms. The first hot-line
+session enters the pool from its `power.json`; since 25 September the script also pools the hot line's watts over
+idle (`hotline_over_idle_w`: the stalled chip at 1.19 [1.01–1.41] W, n = 7).
+```
+python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm \
+    docs/reports/data/2026-09-23-reruns-aifoundry3 --out docs/reports/data/2026-09-23-energy-manual/reruns.json
+```
 **Raw data:** `docs/reports/data/2026-09-23-reruns-aifoundry2-warm/`, `-aifoundry3/`; the discarded cool-card
 attempt `-aifoundry2/`; pooled into `docs/reports/data/2026-09-23-energy-manual/reruns.json`.
 **Result:** the catalogue's bars are ±5.6% in the median and ±11.5% at the 90th percentile (half the range), mostly
@@ -645,9 +773,10 @@ the next shire ID (not necessarily a mesh neighbour).
 700–800 MHz inside 5–25% of the samples of most bursts and was discarded — bars must not hold a change of
 operating point; (2) `run_energy.py`'s polling without the die temperature reads 10–50% high on 2 W signals on
 a cooling card, so the rings and levels were re-sampled by ettelem and the 18 September runs are no longer
-pooled; (3) rings between shires s and s+16 starve the service processor's own management path (sample latency,
-six management commands, 22 → 150 ms; the board reading held for seconds) on aifoundry2, so that row is aifoundry3
-only.
+pooled; (3) rings between shires s and s+16 starve the service processor's own management path on aifoundry2 (sample
+latency, six management commands, 22 → 76–146 ms, the median in each of three passes; the board value changed
+1.4–2.4 times a second, against 5–6 in the other rings) while aifoundry3 stayed at 22 ms; on aifoundry2 that ring's
+energy read 33–45% low over three passes (39% on their mean) against aifoundry3's, so that row is aifoundry3 only.
 **Caveats:** the sampler failed to start in about one pass in three before the runners learnt to retry;
 aifoundry3's hot-line pass 3 was cut short when the driver script was overwritten while running. Only
 complete passes with telemetry are pooled.
@@ -667,34 +796,41 @@ board's power over idle.
 **Raw data:** `docs/reports/data/2026-09-23-catalogue-aifoundry2/`, `-aifoundry3/` and `-aifoundry2-rows/`
 (`telemetry.jsonl.gz`), and `catalogue.json` (392 configurations on aifoundry2 including E28's rows, 386 on
 aifoundry3); result in `docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json`.
-**Command:** the fit was first computed inline in the session, and `unmetered_fit.json` keeps those numbers. It was
-later committed as a script, which recomputes both fits from the files above and compares them with that file:
+**Command:**
 ```
-python3 tools/ettelem/fit_unmetered.py        # add --out FIT.json to write the fit
+python3 tools/ettelem/fit_unmetered.py --out docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json --overwrite
 ```
-It reproduces the attribution exactly (coefficients, standard errors, rms and n on both cards) and the droop
-coefficient to within 3% (0.87 against 0.84 mV per off-rail DRAM watt; rms 0.37 against 0.36 mV). The inline run's
-busy and idle windows for the droop were not recorded, so the script's own choice of windows accounts for the rest;
-the droop fit uses only the aifoundry2 catalogue telemetry (n = 386). The script will not replace
-`unmetered_fit.json` unless `--overwrite` is also given.
+The fit was first computed inline in the session, and until 25 September `unmetered_fit.json` kept those numbers:
+the script reproduced the attribution exactly (coefficients, standard errors, rms and n on both cards) but not the
+droop block, whose inline busy and idle windows were not recorded (0.84 against the script's 0.87 mV per off-rail
+DRAM watt). On 25 September the file was regenerated by the script, so every number below has a producer; the
+attribution is unchanged to floating-point rounding, the droop numbers are the script's, and the file gains each configuration's row
+(`<card>.per_config`, `ddr_droop.per_config`) and a comparison refit that counts the line read before each store
+through the L1 (`l1_line_read_refit`, not the published fit). The droop fit uses only the aifoundry2 catalogue
+telemetry (n = 386). The script will not replace an existing file unless `--overwrite` is given.
 **Result:** aifoundry2: 0.196 ± 0.003 per minion-rail W, 0.050 ± 0.017 per SRAM W, 0.286 ± 0.021 per NoC W, 72.9 ±
 1.6 pJ per DRAM byte, rms 0.35 W over 392 configuration means (1.1 W on the 17 DRAM configurations); aifoundry3:
 0.177, 0.064, 0.264, 68.1 pJ/B, rms 0.30 W over 386 (1.3 W on its 11 DRAM configurations). So an instruction's
 unmetered energy is the minion regulator's delivery loss (18–20%), a DRAM byte's is about 70 pJ in the PHY, the I/O
 rail and the chips (twice that per useful byte through the L1 write-back path, which reads the line first), and the
 NoC coefficient is too large for a regulator alone: the memory shires' logic, on an unmetered rail, works when the
-mesh moves bytes to them. **The DDR rail droops 0.84 mV per off-rail DRAM watt** (0.025 mV per watt of anything
-else, rms 0.36 mV over 386 configurations; 767 mV at idle against an 800 mV set point): 1 mV ≈ 1.2 W of DRAM,
-refreshed every 133 ms, a meter for the largest unmetered consumer that was in every telemetry file all along. It
-responds mostly to DRAM traffic, not only: heavy mesh and scratchpad traffic with no DRAM access droops it by 1–1.7
-mV, which it would read as 0.8–1.8 W of DRAM, and its idle reading moves by about 1 mV between 71 and 77 °C. The
-minion rail sags 0.068 mV per watt the cores draw.
+mesh moves bytes to them. The DRAM residual is about a quarter of those configurations' unmetered power, and it has a
+pattern: stores through the L1 sit 1.3–2.7 W above the fit, because their line reads are not counted as bytes;
+random data sits above, zeros and constants below. **The DDR rail droops 0.87 mV per off-rail DRAM watt** (0.029 mV
+per watt of anything else, rms 0.37 mV over 386 configurations; 767 mV at idle against an 800 mV set point):
+1 mV ≈ 1.2 W of DRAM, refreshed every 133 ms on aifoundry2, a meter for the largest unmetered consumer that was in
+every telemetry file all along. It responds mostly to DRAM traffic, not only: heavy mesh and scratchpad traffic with
+no DRAM access droops it by up to about 2 mV (2.2 mV for L3 reads through the mesh), which it would read as up to
+about 2 W of DRAM, and its idle reading moves by about 1 mV between 71 and 77 °C. The minion rail sags 0.070 mV per
+watt the cores draw.
 **What it does not do:** none of the Moortec sensors measures current, so none meters the DDR, VDDQ, PCIe, IO or
-Maxion rails; the droop is a calibrated proxy, not independent of the board meter; the idle 12–15 W stays unsplit,
-and the fit's rms says nothing about it. The observability report's improvement ladder (A2, second edition) ranks
-what would meter more.
+Maxion rails; the droop is a calibrated proxy, not independent of the board meter; the idle 12–16 W (12–13 W on
+aifoundry3 at 51–56 °C, 14–16 W on aifoundry2 at 66–82 °C) stays unsplit, and the fit's rms says nothing about it.
+The observability report's improvement ladder (A2, second edition) ranks what would meter more.
 **Caveats:** the fit's SRAM and NoC coefficients are collinear with the minion one in many configurations (their
-standard errors say so); the droop of other rails leaks into the DDR monitor at 0.025 mV per board watt.
+standard errors say so); the minion delivery loss (18–20%) holds only as far as the rails' meters can be trusted:
+it moves about 1.2 points for each 1% of rail scale, which the fit cannot pin (E27, the rails' filter); the droop of
+other rails leaks into the DDR monitor at 0.029 mV per board watt.
 **Report:** [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15), section 4.3 (`docs/energy-manual/04a-fine-grain.md`); [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2), section 4.
 
 ## E31 — Heat per millimetre, first run: hop distance against the bits on the links (2026-09-24, 13:23–14:16, both cards at once)
@@ -740,7 +876,21 @@ one reader (`--pairs`); `wfrz/hop{0,1,3,6}`: one random 64 B line everywhere (24
 differ). Reduced as E31; the free-link numbers are fitted over *d* = 1–4, the same distances as the loaded set.
 **Raw data:** `docs/reports/data/2026-09-24-wire2-aifoundry2/`, `-aifoundry3/`; analysis in the same `wire.json`
 (`model.v2`, `disjoint_flows`, `complement_test`, `checks`, `sensitivity`), assembled with the literature and die
-geometry by `tools/ettelem/build_wire_report.py` into `report.json`.
+geometry by `tools/ettelem/build_wire_report.py` into `report.json`. E31 and E32 are reduced together, from the
+repository root (the first command reproduces the committed `wire.json` byte for byte; `build-report.py` needs
+`npm ci` once, for mathjax-full):
+```
+python3 workloads/enercat/analyze_wire.py docs/reports/data/2026-09-24-wire{,2}-aifoundry{2,3} \
+    --out docs/reports/data/2026-09-24-wire-energy/wire.json --pitch-x-mm 3.73 --pitch-y-mm 3.70
+python3 tools/ettelem/build_wire_report.py --wire docs/reports/data/2026-09-24-wire-energy/wire.json \
+    --out docs/reports/data/2026-09-24-wire-energy/report.json
+python3 scripts/build-report.py heat-per-mm docs/reports/data/2026-09-24-wire-energy/report.json \
+    docs/reports/2026-09-24-heat-per-mm.html
+```
+`build_wire_report.py` also reads the energy manual's `manual.json`, the die geometry's `research/geometry/pitch.json`,
+the logical mesh map of `workloads/nocbench/analyze.py` and the raw runs' reader>target maps; since 25 September it
+resolves those paths from its own location, so it runs from any directory, and stops if one is missing (before, run
+outside the repository root, it silently dropped a section).
 **Result:** a = 98 [92–103] and b = 129 [127–133] fJ per hop on the mesh rail, 151 and 192 on board power, rms 0.008
 and 0.038 pJ/B per hop; the complement test gives 132 [125–138] fJ per one; the frozen line sits on the model. Per mm
 (3.72 mm per hop): free links 24.6 + 11.7 = **36.2 fJ per random bit·mm** on the mesh rail and 32.7 + 14.0 = 46.7 on
@@ -753,10 +903,75 @@ reply left in the management queue crashed every later opener with `std::bad_fun
 the runners drain and retry on a failed start and restart a sampler that stalls. The restarted run completed 132
 bursts per card with no sampler restart.
 **Review:** before publication a workflow of six AI agents re-derived every number (two independent reductions,
-three skeptics and a synthesis; `docs/reports/data/2026-09-24-wire-energy/review/`). The measurements reproduced within 1–3% on the rail and about 7%
-on board power; its corrections to the interpretation are in the report and in
-[20-heat-per-mm.md](20-heat-per-mm.md).
+three skeptics and a synthesis; `docs/reports/data/2026-09-24-wire-energy/review/`). The measurements reproduced
+within 1–3% on the rail's coefficients (6% on the free-link fixed part: Method B 45.6 against 43.1 fJ per bit per
+hop) and about 7% on board power; its corrections to the interpretation are in the report and in
+[20-heat-per-mm.md](20-heat-per-mm.md). The review's `indep/fits.txt` was regenerated on 25 September with the
+default health filter, as its sibling `fits_leak.txt` had been: only the four lines of its C4 axis block changed,
+because the file first committed was the `--keep-bad` output.
 **Report:** [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) (A17).
+
+## E33 — The memory hierarchy: latency, bandwidth and scratchpad distance (2026-09-18, 17:44–17:52, aifoundry2)
+
+**Question:** what does each level of the memory hierarchy cost in time, and how far away is another shire's
+scratchpad? Registered on 25 September for a session that ran before this register began (resource R4).
+**Tool:** `workloads/memhier` (a pointer chase over working sets from 256 B to 256 MB, from four shires and from hart
+1; the same chase in every shire's scratchpad; streaming TensorLoads for bandwidth; `run_energy.py` for board power).
+**Command** (on the lab machine; each probe is its own `timeout 10` process):
+```
+ssh aifoundry2 'cd ~/nekko && bash workloads/memhier/run_lab.sh build/memhier/host/memhier_host build/memhier-data'
+python3 workloads/memhier/analyze.py docs/reports/data/2026-09-18-memhier-aifoundry2 \
+    --embed docs/reports/2026-09-18-et-soc1-memory-hierarchy.html
+```
+**Raw data:** `docs/reports/data/2026-09-18-memhier-aifoundry2/` (the chase files, `dvfs-poll-during-spin.txt`, and
+`energy/`, `energy2/`: two runs of an earlier `run_energy.py` that recorded neither clock nor voltage); its README
+names the group of `run_lab.sh` behind each file.
+**Result** (the page's embedded `memhier-data`): load-to-use latency 5.25 cycles in the L1, 36 in the L2 read buffer,
+47 in the L2 and the local scratchpad; the L3 159–169 cycles and DRAM 287–297 cycles (479–495 ns) in the chases that
+ran at 600 MHz, DRAM 352–368 cycles in those the governor ran at 800 MHz (`plateaus`). DRAM fits 86.3 cycles plus
+344.8 ns, the L3 72.2 cycles plus 61.4 ns plus 20 ns per mesh hop (`fits`); another shire's scratchpad
+65.95 cycles plus 56.48 ns plus 20.00 ns per hop (`scp_model`). Bandwidth, from the launches at 600 MHz only
+(`scripts/ridge-points.py`, `memhier_levels()`): L1 6.2 TB/s, L2 2.45, own scratchpad 2.46, L3 0.98, another shire's
+scratchpad 0.96, DRAM 76 GB/s; the 23 September reruns reproduce them within 0.3% on both cards.
+**Caveats:** the governor was free to move the clock (the page splits the chases by the clock they ran at); the energies
+per byte of this session are superseded by the energy manual's §4 (E29, a pinned 600 MHz, both cards). One energy run
+crashed the host runtime during the DRAM stream, and a full chip reset restored the card.
+**Report:** [Memory hierarchy](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy).
+
+## E34 — On-chip communication: messages, reductions, barriers and their energy (2026-09-18, 19:14–19:28, aifoundry2)
+
+**Question:** what does it cost to move data between minions and shires by TensorSend, credits, reductions and
+barriers? Registered on 25 September, like E33 (resource R4).
+**Tool:** `workloads/nocbench` (round trips between minion pairs and all 496 shire pairs, combine on receive,
+credits, flags through memory, reduction trees of 2–1,024 minions, shire and chip barriers, loaded pairs;
+`run_energy.py` for rings of 1 KB messages at different distances, with board power).
+**Command** (on the lab machine):
+```
+ssh aifoundry2 'cd ~/nekko && bash workloads/nocbench/run_lab.sh build/nocbench/host/nocbench_host OUTDIR'
+python3 workloads/nocbench/run_energy.py --host-bin build/nocbench/host/nocbench_host --out OUTDIR/energy-a
+python3 workloads/nocbench/run_energy.py --host-bin build/nocbench/host/nocbench_host --out OUTDIR/energy-b \
+    --only xshire1-c4,shire-c4,xshire6,xshire4,xshire2,xshire8,xshire16,xshire1,shire,neigh,pair,spin
+python3 workloads/nocbench/analyze.py docs/reports/data/2026-09-18-nocbench-aifoundry2 \
+    --memhier docs/reports/data/2026-09-18-memhier-aifoundry2 --search \
+    --embed docs/reports/2026-09-18-et-soc1-on-chip-communication.html
+```
+`analyze.py` also embeds the energy manual's 23 September re-runs of these rings (`--reruns`, by default
+`docs/reports/data/2026-09-23-energy-manual/reruns.json`) and, with `--search`, records every restart of the layout
+search.
+**Raw data:** `docs/reports/data/2026-09-18-nocbench-aifoundry2/` (its README maps each file to its `run_lab.sh`
+group; `first-energy-run/` is an earlier version, not used).
+**Result** (the page's embedded `nocbench-data`): a TensorSend round trip is 68 cycles on a fast-network pair and 114
+elsewhere in a shire (`primitives`); between shires 150 + 12.02 cycles per mesh hop, worst residual 1.1 cycles
+(`matrices["matrix-pingpong"]`), and with 1 KB messages 12.0 cycles per hop up to 5 hops and 36.0 beyond
+(`matrices["matrix-pingpong-c32"].knee`). The layout search recovers marty1885's shire map from the latencies in 12 of
+12 restarts (`matrices["matrix-pingpong"].search.restarts`). A shire barrier is 237 cycles, a 32-minion allreduce 432,
+a 1,024-minion allreduce of 32 B 1,368 cycles (2.28 µs); the chip barrier is 4,995 cycles with one minion per shire
+and 5,018 with all 1,024 (`barrier-chip{1,32}.jsonl`). Energy: the re-measured rings of 23 September (E29) give
+0.67 pJ/B on pairs, 2.1 in a neighbourhood or a shire ring, and 9.3 + 1.7 pJ/B per mean hop across the mesh
+(r² 0.95, two cards; `reruns.mesh_fit`); the 18 September runs gave 0.8, 2.3 and 10.0 + 1.9 and are superseded.
+**Caveats:** one card, at 600 MHz throughout (`clock.csv`); the 18 September energies read 2–20% (median 10%) above
+the reruns.
+**Report:** [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication).
 
 ## A note on E10, re-analysed for Q20
 

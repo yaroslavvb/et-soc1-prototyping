@@ -12,7 +12,11 @@ holds every agent's structured return (numbers, sources, quotes, verdicts).
 | `critique/railfit.py`, `railfit.json` | The E27 wire slopes refitted per rail (board, NoC, SRAM, minion) and per card, with and without d = 8. |
 | `critique/linkload.py`, `linkload.json`, `confounds.py`, `empty_cells.py` | Link sharing, readers and bandwidth against hop distance in E27 (XY routing), and the d = 8 anomaly. |
 | `lit/wire_calc.py`, `first-principles-estimate.md` | Wire energy from capacitance per mm (ASAP7 predictive 7 nm values) at 0.485 V, and the V^2 scaling to other voltages; the markdown is the table of results. |
-| `synthesis/convert.py` | The unit conversions of the synthesis (pJ/B/hop to fJ/bit/mm, per transition, effective capacitance, V^2 scaling). |
+| `synthesis/convert.py` | The unit conversions of the synthesis (pJ/B/hop to fJ/bit/mm, per transition, effective capacitance, V^2 scaling). Superseded by `../wire.json`: it uses the E27 inputs and the provisional 3.64–3.76 mm pitch range, as does the last section of `lit/wire_calc.py`. |
+
+`critique/railfit.py` and `critique/confounds.py` read the energy catalogue (`catalogue.json`) by absolute path; edit
+the path at the top to run them from another checkout.
+`geometry/README.md` says which die-plot readings in `pitch.py` are by hand.
 
 Third-party PDFs and their text extractions were read but are not committed; every number in `SYNTHESIS.md` cites
 its URL and page.

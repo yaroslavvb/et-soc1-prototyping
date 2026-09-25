@@ -91,8 +91,8 @@ def reduce_dir(pd):
             continue
         moved = float((mhz[busy | before | after] != 600).mean())
         # The service processor itself can be starved by mesh traffic through the IO shire's row (the s <-> s+16
-        # rings): its command latency goes from 22 ms to 150 ms and the board reading is held for seconds at a
-        # time, so the burst's power is not a measurement. Flag by the sampler's own latency.
+        # rings): its command latency goes from 22 ms to 76-146 ms (per-pass medians) and the board reading takes a new
+        # value about twice a second instead of six times, so the burst's power is not a measurement. Flag by the sampler's own latency.
         starved = float(np.median(took[busy])) if busy.sum() else 0.0
         idle = float(w[before].mean()) if after.sum() < 5 else 0.5 * (float(w[before].mean()) + float(w[after].mean()))
         Tb = float(T[busy].mean())
@@ -114,7 +114,7 @@ def host_of(d):
 # repeats them the manual's way.
 FIRST = {
     "relay": ("docs/reports/data/2026-09-22-onchip-aifoundry2/onchip.json", "aifoundry2"),
-    "hotline": ("docs/reports/data/2026-09-22-hotline-aifoundry2/hotline.json", "aifoundry2"),
+    "hotline": ("docs/reports/data/2026-09-22-hotline-aifoundry2/power.json", "aifoundry2"),   # the same runs as hotline.json's power block
 }
 LEVELS = {"l1", "l2", "l3", "dram", "scp-local", "scp-remote"}
 
@@ -126,6 +126,7 @@ def main():
     ap.add_argument("--no-first", action="store_true", help="leave out the 18 and 22 September measurements")
     a = ap.parse_args()
     relay, hot, rings, levels = {}, {}, {}, {}
+    hotw = {}   # the hot line's watts over idle, per label: the stalled power the energy manual quotes
     dropped, passes = [], {"relay": 0, "hotline": 0, "rings": 0, "levels": 0}
     for d in a.dirs:
         host = host_of(d)
@@ -149,6 +150,7 @@ def main():
                     continue
                 rate = sum(r["total_ops"] for r in b["runs"]) / sum(r["wall_s"] for r in b["runs"])
                 hot.setdefault(lab, {}).setdefault(host, []).append(b["over_idle_w"] / rate * 1e9)
+                hotw.setdefault(lab, {}).setdefault(host, []).append(b["over_idle_w"])
         for pd in sorted(glob.glob(os.path.join(d, "rl-pass*[0-9]"))):   # rings and levels, ettelem-sampled
             if not complete(pd):
                 continue
@@ -167,11 +169,13 @@ def main():
         for m in json.load(open(os.path.join(ROOT, p)))["power"]["media"]:
             relay.setdefault(m["medium"], {}).setdefault(h, []).append(m["pj_per_byte"])
         p, h = FIRST["hotline"]
-        for r in json.load(open(os.path.join(ROOT, p)))["power"]["runs"]:
+        for r in json.load(open(os.path.join(ROOT, p)))["runs"]:
             hot.setdefault(r["label"], {}).setdefault(h, []).append(r["nj_per_op"])
+            hotw.setdefault(r["label"], {}).setdefault(h, []).append(r["over_idle_w"])
         passes["relay"] += 1; passes["hotline"] += 1
     out = {"relay_pj_per_byte": {m: stats(v) for m, v in relay.items()},
            "hotline_nj_per_op": {l: stats(v) for l, v in hot.items()},
+           "hotline_over_idle_w": {l: stats(v) for l, v in hotw.items()},
            "rings_pj_per_byte": {c: stats(v) for c, v in rings.items()},
            "levels_pj_per_byte": {c: stats(v) for c, v in levels.items()},
            "passes": passes, "dropped": dropped, "dirs": a.dirs,

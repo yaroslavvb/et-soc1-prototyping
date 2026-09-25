@@ -1,4 +1,30 @@
-<style>main{max-width:1100px}</style>
+<style>
+main{max-width:1100px}
+.hv-row{display:flex;flex-wrap:wrap;gap:8px 28px;align-items:flex-start}
+.hv-row>.hv-main{flex:1 1 520px;min-width:0}
+.hv-row>.hv-side{flex:1 1 330px;min-width:0}
+.hv-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:8px 0 6px}
+.hv-controls .controls{margin:0}
+.controls button:disabled{opacity:.4;cursor:default}
+.hv-readout table{font-size:.82rem;margin:4px 0 0}
+.hv-readout td,.hv-readout th{padding:4px 6px}
+.hv-bar{display:flex;height:16px;border-radius:4px;overflow:hidden;margin:6px 0 2px;background:var(--grid);position:relative}
+.hv-bar span{display:block;height:100%}
+.hv-bar span+span{border-left:2px solid var(--surface)}
+.hv-bar i{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+.hv-key{display:flex;flex-wrap:wrap;gap:2px 12px;font-size:.8rem;color:var(--ink-2)}
+.hv-key b{color:var(--ink);font-weight:600}
+.hv-key u{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;text-decoration:none}
+#volt-readout table{max-width:640px}
+@media (max-width:599px){
+ #modeltab.stack tr{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px}
+ #modeltab.stack td{width:auto}
+ #modeltab.stack td:first-child,#modeltab.stack td[colspan]{grid-column:1/-1}
+ #modeltab.stack td.small{font-weight:400}
+}
+details.terms{margin:14px 0}
+details.terms p{margin:6px 0 0}
+</style>
 <h1>Heat per millimetre</h1>
 <p class="byline">24 September 2026 · two cards, aifoundry2 and aifoundry3 · data, tools and every source in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">yaroslavvb/et-soc1-prototyping</a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
@@ -13,19 +39,21 @@ share links, the same bit costs <b id="l-load"></b>: <b id="l-cont"></b>.</p>
 bits that differ between consecutive flits, but the <em>ones</em> carried. A stream of all ones, which never changes from
 one flit to the next, costs as much per hop as random data (<span id="l-ones"></span> more), though at one hop it costs
 <span id="l-ones1"></span> less in all.</p>
-<p class="lede">Dally states no voltage. Scaled to 0.9 V — the voltage of Keckler 2011's 40 nm
-wire figure, from which his number most likely descends (an inference; no source says so) — the mesh rail's
+<p class="lede">Dally states no voltage. Scaled to 0.9 V (the voltage of Keckler 2011's 40 nm wire figure, his
+likeliest source; <a href="#question">§1</a>), the mesh rail's
 data-dependent cost is <b id="l-09"></b>, so the rule of thumb holds, to within its own vagueness. Read instead at the
 "~0.5V" his 2023 talk sets beside it, the figure is <span id="l-05"></span> what this mesh spends on the data.</p>
-<p class="small"><b>Terms.</b> The ET-SoC-1's cores are <i>minions</i> (two hardware threads, <i>harts</i>, each), 32 to a
-<i>shire</i>; part of each shire's 4 MB of SRAM is a 2.5 MB <i>scratchpad</i> that any shire can address. Shires talk over
-a mesh network-on-chip (NoC), one mesh stop per shire; a <i>hop</i> is one step between neighbouring stops, and a
-<i>flit</i> is the unit the mesh moves as a whole — here at least one 64-byte line (<a href="#lanes">§7</a>). A
-<i>tensor load</i> is a minion's bulk load of up to 1 KB. Both meters are in the board's power-management controller
-(PMIC): <i>board power</i> is its reading of the card's 12 V input, the <i>mesh rail</i> its reading of the regulator that
-feeds the mesh; the service processor (SP), the chip's on-die management core, reports them. a2 and a3 are the two cards,
-in the lab machines aifoundry2 and aifoundry3. More in the
+<details class="terms"><summary>Terms used on this page</summary>
+<p class="small">The ET-SoC-1's cores are <i>minions</i> (two hardware threads, <i>harts</i>, each), 32 to a
+<i>shire</i>; part of each shire's 4 MB of SRAM is a 2.5 MB <i>scratchpad</i> that any shire can address, and a
+<i>tensor load</i> is a minion's bulk load of up to 1 KB. Shires talk over a mesh network-on-chip (NoC), one mesh stop
+per shire; a <i>hop</i> is one step between neighbouring stops, and a <i>flit</i> is the unit the mesh moves as a whole,
+here at least one 64-byte line (<a href="#lanes">§9</a>). Both meters are in the board's power-management controller
+(PMIC): <i>board power</i> is its reading of the card's 12 V input, the <i>mesh rail</i> its reading of the regulator
+that feeds the mesh, and the service processor (SP), the chip's management core, reports them. a2 and a3 are the two
+cards, in the lab machines aifoundry2 and aifoundry3; more in the
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
+</details>
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">One mesh hop</div><div class="val" id="k-hop"></div><div class="sub">tile pitch from the die plot and the 570 mm² die; x and y within 1%</div></div>
@@ -50,7 +78,7 @@ Symposium 2018, a paper set in 16 nm). The sources and quotes are in <code>docs/
 
 <h2 id="die">2. How long is a hop?</h2>
 <div class="chart-title">The ET-SoC-1 die, to scale</div>
-<div class="chart scroll" id="mesh"></div>
+<div id="mesh"></div>
 <p class="small" id="meshcap"></p>
 <p>Esperanto publishes the die area (570 mm²) and a die plot, but not the dimensions. We measured the plot's tile
 period in pixels — the shire outlines and an autocorrelation of the image agree — and scaled it to the published area:
@@ -77,8 +105,8 @@ in a bit with probability 2<i>P</i>(1−<i>P</i>): a difference rate between fli
 the wires), blocks of N bytes alternately all-zero and all-one, and one random 64 B line frozen everywhere (half ones, no
 two flits differ). The second run makes every line on the chip unique and <i>P</i> and 1−<i>P</i> exact bitwise
 complements, and adds reader–target pairs chosen so that no two flows share a link.</li>
-<li><b>Two meters.</b> Board power (the PMIC's 12 V input, in 10 mW steps, one reading per 133 ms) and the PMIC's reading
-of the mesh (NoC) rail, as the service processor reports it; that rail feeds the routers and links at 0.485 V and 400 MHz. For board power each 3 s burst is measured against
+<li><b>Two meters.</b> Board power (10 mW steps, a new reading about every 133 ms on aifoundry2 and every 250 ms on
+aifoundry3) and the mesh rail, which feeds the routers and links at 0.485 V and 400 MHz. For board power each 3 s burst is measured against
 idle on both sides and corrected for the extra leakage of a burst that ran warmer. The mesh rail is read over the burst's
 last 0.6 s against the idle before it, without a leakage correction (about 2%, roughly cancelling a 2.5% under-correction
 of the meter's 1 s running average). A burst is dropped if the clock left 600 MHz or the meter itself was starved
@@ -89,33 +117,88 @@ the bars are the range over those six passes. First run: 82 configurations, 492 
 </ul>
 
 <h2 id="distance">4. Energy grows nearly linearly with distance</h2>
-<div class="controls" id="distbtn"></div>
 <div class="chart-title">Energy per payload byte against hop distance, by density of ones</div>
-<div class="chart scroll" id="dist"></div>
+<div class="hv-controls"><div id="distbtn"></div></div>
+<div id="dist-leg"></div>
+<div id="dist"></div>
+<p class="small">Density of ones <i>P</i> runs from the faintest line (all zeros) to the strongest (all ones); bars are
+the range over three passes on each of two cards. Hover, tap or tab to a point.</p>
 <p id="disttext"></p>
 
 <h2 id="ones">5. Ones cost energy, not just flips</h2>
-<div class="controls" id="modelbtn"></div>
 <div class="chart-title">Cost of one hop against the density of ones in the data</div>
-<div class="chart scroll" id="model"></div>
+<div class="hv-controls"><div id="modelbtn"></div></div>
+<div id="model-leg"></div>
+<div id="model"></div>
 <p id="onestext"></p>
 $$E_\text{hop} \;=\; s_0 \;+\; a\cdot\underbrace{2P(1-P)}_{\text{bits that differ from the previous flit}} \;+\; b\cdot\underbrace{P}_{\text{ones per bit}}$$
+<p class="small" id="eqcap">Here <i>a</i> is the energy per bit that differs from the same bit of the previous flit,
+<i>b</i> the energy per one-bit carried (a 1, whether it changed or not), and <i>s</i><sub>0</sub> the part that does
+not depend on the data (clocking, headers, requests).</p>
 <div class="table-wrap"><table id="modeltab"></table></div>
+
+<h3 id="what-any-bit-pattern-would-cost">What any bit pattern would cost</h3>
+<p class="small">The fitted model spans a plane of patterns: the density of ones <i>P</i> across, the fraction of bits
+that differ from the previous flit <i>t</i> up. Independent random bits sit on the dashed curve; the frozen line and
+the block patterns of <a href="#lanes">§9</a> leave it. Drag the cursor, use the sliders or pick a pattern.</p>
+<div class="hv-controls"><div id="plane-meter"></div></div>
+<div class="controls" id="plane-presets"></div>
+<div class="hv-row">
+  <div class="hv-main" style="flex-basis:340px;max-width:560px"><div id="plane-leg"></div><div id="plane"></div></div>
+  <div class="hv-side">
+    <div class="hv-controls" style="flex-direction:column;align-items:flex-start;gap:4px"><div id="plane-P"></div><div id="plane-t"></div></div>
+    <div class="controls"><button type="button" id="plane-comp">Send it complemented</button></div>
+    <div id="plane-readout" class="hv-readout"></div>
+  </div>
+</div>
+<p class="small" id="planecap"></p>
 <p id="modeltext"></p>
 <p id="modeltext2"></p>
 
 <h2 id="contention">6. Sharing a link costs energy</h2>
-<div class="controls" id="contbtn"></div>
-<div class="chart-title">Energy per payload byte against distance: every flow on its own links, against a loaded mesh</div>
-<div class="chart scroll" id="cont"></div>
+<div class="hv-controls"><div id="contbtn"></div></div>
+<div class="hv-row">
+  <div class="hv-main">
+    <div class="chart-title">Energy per payload byte against distance: every flow on its own links, against a loaded mesh</div>
+    <div id="cont-leg"></div>
+    <div id="cont"></div>
+    <p class="small" id="contcap"></p>
+  </div>
+  <div class="hv-side">
+    <div class="chart-title">Which links the flows share, at one distance</div>
+    <div class="hv-controls"><div id="map-d"></div><div id="map-set"></div><div id="map-order"></div></div>
+    <div id="map-leg"></div>
+    <div id="linkmap"></div>
+    <div id="map-readout" class="hv-readout"></div>
+  </div>
+</div>
+<p class="small" id="mapcap"></p>
 <p id="conttext"></p>
 <p id="conttext2"></p>
 
-<h2 id="lanes">7. Lanes and flits</h2>
+<h2 id="compare">7. Against the rule of thumb</h2>
+<div class="chart-title">At what supply voltage would this mesh cost Dally's 100 fJ per bit·mm?</div>
+<div class="hv-controls"><div id="volt-v"></div><div class="controls" id="volt-snap"></div></div>
+<div id="volt-leg"></div>
+<div id="volt"></div>
+<p class="small" id="volttext"></p>
+<div id="volt-readout" class="hv-readout"></div>
+<p id="comparetext"></p>
+<p id="comparetext2"></p>
+
+<h2 id="meaning">8. What it means in practice</h2>
+<p id="practice"></p>
+<p id="practice2"></p>
+
+<h2 id="lanes">9. Lanes and flits</h2>
+<p>These patterns test the model of <a href="#ones">§5</a> with data whose ones and differences do not move together.
+Every block pattern has half its bits ones, so the ones term is the same for all of them; any difference is
+transitions.</p>
 <div class="chart-title">Blocks of N bytes alternately all-zero and all-one: cost per hop</div>
-<div class="chart scroll" id="alt"></div>
-<p>Every block pattern has half its bits ones, so the ones term is the same for all of them; any difference is
-transitions. Blocks of 16 to 128 bytes cost the same, and 256-byte blocks cost more. That is what the shire's four
+<div class="hv-controls"><div id="altbtn"></div></div>
+<div id="alt-leg"></div>
+<div id="alt"></div>
+<p>Blocks of 16 to 128 bytes cost the same, and 256-byte blocks cost more. That is what the shire's four
 mesh lanes predict: a line goes to lane PA[7:6] (bits 7–6 of the physical address), so on one lane consecutive lines are <i>i</i> and <i>i</i>+4 — 256 bytes
 apart. With 16–128-byte blocks lines <i>i</i> and <i>i</i>+4 hold the same value and nothing flips; with 256-byte blocks they
 are opposite and every bit flips. It also says a flit carries at least a 64-byte line at a time: with 32-byte flits the
@@ -123,41 +206,25 @@ are opposite and every bit flips. It also says a flit carries at least a 64-byte
 other flit; neither costs more.</p>
 <p id="alttext"></p>
 
-<h2 id="compare">8. Against the rule of thumb</h2>
-<div class="chart-title">Energy per random bit per millimetre: measured, scaled, and quoted</div>
-<div class="chart scroll" id="comparechart"></div>
-<p id="comparetext"></p>
-<p id="comparetext2"></p>
-
-<h2 id="meaning">9. What it means in practice</h2>
-<p id="practice"></p>
-
-<h2 id="limits">10. What this cannot tell, and what else it found</h2>
+<h2 id="limits">10. What this cannot tell</h2>
 <ul>
 <li><b>Router against wire.</b> Every hop is one router plus one pitch of link, and the x and y pitches are equal to
 within 1% on the die plot, so the experiment cannot split a hop's energy between the router's flops and crossbar and the
-wire itself. <span id="axistext"></span> "Per mm" here is per mm of mesh travel. A plain repeated 7 nm wire at 0.485 V
-would be about 12–24 fJ per random bit·mm from first principles (<a href="#compare">§8</a>).</li>
+wire itself. <span id="axistext"></span></li>
 <li><b>Board against rail.</b> Board power is 12 V input power: it includes the regulator's loss (about 18–20% on the
 minion rail by the regression in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">observability report, §4.2</a>,
-more on the mesh) and anything else that moves with the traffic. The mesh rail is the die's own supply but its meter's
-gain has not been checked independently. The truth is between the two. <span id="senstext"></span></li>
+as far as the rails' own meters can be trusted; more on the mesh) and anything else that moves with the traffic. The
+mesh rail is the die's own supply but its meter's gain has not been checked independently. The truth is between the
+two. <span id="senstext"></span></li>
 <li><b>Fixed per-hop cost.</b> The part that does not depend on the data (clocking, headers, the request travelling the
 other way) is measured, but it is confounded with time: bandwidth per reader falls with distance, so part of it may be
-cost per second rather than per hop. Even if all of the one-hop zeros energy were cost per second, it would explain at
-most a quarter of the link-disjoint fixed part and a fifth of the loaded one. The data-dependent part is immune to
+cost per second rather than per hop. <span id="persectext"></span> The data-dependent part is immune to
 per-second costs that do not depend on the data (<i>P</i> = ½ and <i>P</i> = 0 run at the same bandwidth); a per-cycle cost
 of ones held in the mesh would still look per-hop.</li>
-<li><b>The meter can be starved.</b> <span id="starvetext"></span> Rings between shires <i>s</i> and <i>s</i>+16, measured
-for the energy manual and not part of this run, also starve it: about 150 ms per reading, with the board reading frozen
-for seconds.</li>
-<li><b>The meter can be stopped.</b> Between the two runs a sampler killed in the middle of a request left its reply in
-the service processor's management queue; every later opener crashed on it, so the second run's first start got no
-telemetry on either card. One <code>dev_mngt_service</code> call drains the queue, and the sampler now exits cleanly on a
-plain kill (the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">observability report, §4.1</a>).</li>
-<li><b>A stray write is invisible.</b> While the store mode that fills the scratchpads was being tested, a bug in the
-test tool sent about a second of tensor stores from shire 0 to physical address 0. No error counter, telemetry field or
-clock moved. The tool now refuses a memory pattern with no buffer; no measurement here comes from those launches.</li>
+<li><b>The meter can be starved.</b> <span id="starvetext"></span> Other workloads that starve the meter, a sampler
+crash that stopped it between the two runs, and a stray write the card never reported (no measurement here comes from
+those launches) are in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">observability
+report (§4.1; the stray write in §3)</a>.</li>
 <li><b>Voltage scaling</b> assumes full-swing CMOS at constant capacitance; whether the links are low-swing is not known.
 Gate capacitance is somewhat lower near threshold, so constant-C scaling slightly understates the 0.9 V figure for
 full-swing links; low-swing links would make it overstate.</li>
@@ -167,36 +234,44 @@ full-swing links; low-swing links would make it overstate.</li>
 <ul>
 <li>Runs and analysis: <code>workloads/enercat/run_wire.py</code> (both runs), <code>workloads/enercat/analyze_wire.py</code> and
 <code>tools/ettelem/build_wire_report.py</code>; the fill modes <code>tstore_raw</code> and <code>tstore_uniq</code> and the
-patterns <code>bern:P</code>, <code>alt:N</code>, <code>uq:P</code> and <code>frz</code> are in <code>workloads/enercat/host/main.cpp</code>.</li>
+patterns <code>bern:P</code>, <code>alt:N</code>, <code>uq:P</code> and <code>frz</code> are in <code>workloads/enercat/host/main.cpp</code>.
+The three commands that rebuild the analysis, this page's data and this page from the raw data are in the docstring of
+<code>workloads/enercat/analyze_wire.py</code>.</li>
 <li>Raw data: the first run in <code>docs/reports/data/2026-09-24-wire-aifoundry2/</code> and
 <code>docs/reports/data/2026-09-24-wire-aifoundry3/</code>, the second in <code>docs/reports/data/2026-09-24-wire2-aifoundry2/</code>
 and <code>docs/reports/data/2026-09-24-wire2-aifoundry3/</code>. The analysis is <code>docs/reports/data/2026-09-24-wire-energy/wire.json</code>,
 and the page draws its charts and computed figures from <code>docs/reports/data/2026-09-24-wire-energy/report.json</code>.</li>
-<li>The research behind the conversion to millimetres (die geometry, the NoC, the literature, a critique of the first
-wire measurement) was gathered by seven AI agents (Claude subagents run by the author): <code>docs/reports/data/2026-09-24-wire-energy/research/</code>,
-summarised in <code>docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md</code>.</li>
-<li>Before publication, six more such agents reviewed this page adversarially: two
-re-analysed the raw data independently, three looked for faults in the measurement, the physics and the arithmetic, and
-one combined their findings. The measurements reproduced; the review's corrections to the interpretation are applied on
-this page, and its report is <code>docs/reports/data/2026-09-24-wire-energy/review/VERDICT.md</code>.</li>
+<li>Research notes behind the conversion to millimetres (die geometry, the NoC, the literature), gathered by AI agents
+run by the author: <code>docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md</code>. An independent
+re-analysis and adversarial review of this page, also by AI agents: <code>docs/reports/data/2026-09-24-wire-energy/review/VERDICT.md</code>;
+the measurements reproduced, and its corrections are applied here.</li>
 </ul>
+<p class="small"><b>Versions.</b> First published 24 September 2026 and corrected the same day after a review. Revised
+25 September after a second review. Claims corrected: the bound on how much of the fixed per-hop cost could be cost per
+second is given for each meter, and on board power it rules little out (§10); the two-term model is said to fit the bit
+densities and the frozen line, with the block patterns coming in below it (§5, §9); the reviewers' agreement is given
+per quantity (§10); the x-only against y-only comparison drops a three-hop point that rested on bursts with delayed
+readings (§10); the cost at 0.9 V counting the fixed part is stated (§7); the board meter's refresh interval is given
+for each card (§3); the die figure gives the memory-shire strips' width as measured on the die plot (§2). Sections
+reordered: Against the rule of thumb is now §7, What it means in practice §8, Lanes and flits §9; §10 is retitled "What
+this cannot tell", and the other workloads that starve the meter, the stopped meter and the stray write moved to the
+observability report (§4.1 and §3). Charts: a
+voltage explorer replaces the comparison chart (§7), and a bit-pattern plane (§5) and a link-sharing map (§6) are
+new.</p>
 
 <h2 id="related">12. Related reports</h2>
 <ul>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#finer-grain-wires-lines-rows-and-the-leakage-of-the-arrays">The energy manual, §4.3</a>
-— the first wire measurement. Its headline 1.81 pJ/B per hop and 133 fJ per random bit per hop (a2) are lower than this
-page's because that fit runs to 8 hops, where only 16 shires have a partner and the point sits nearly level with 6 hops;
-the section also fits 1–6 hops, which gives 2.09–2.29 pJ/B and 155–174 fJ per random bit per hop, as here.</li>
+— the first wire measurement, from the energy catalogue; its fit over more hops reads lower.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">The energy manual, §5</a>
-— what messages between cores and shires cost, from a pair of minions to rings across the mesh: about 9 pJ/B to leave
-the shire plus 1.7 pJ/B per mesh hop.</li>
+— what messages between cores and shires cost, from a pair of minions to rings across the mesh.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a> — a computation
 that hands its intermediate to another shire's scratchpad instead of DRAM: 12× faster at a twelfth of the energy, with
-bandwidth independent of which shire.</li>
+bandwidth within a quarter over the ring offsets tried.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the shire
-map behind these hop counts, and the first per-hop estimate: 1.9 pJ per byte per hop, from 1 KB messages around rings.</li>
+map behind these hop counts, and the first per-hop estimate, from messages around rings.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes">Anatomy of a memory access</a>
-— an early per-hop figure from L3 loads, each moving a 64-byte line: ~0.9 pJ per byte per hop.</li>
+— an early per-hop figure, from L3 loads.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature</a> — the 35
 temperature sensors on the same grid of 3.72 mm tiles.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#power">Limits of observability</a> — the

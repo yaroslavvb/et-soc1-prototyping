@@ -34,4 +34,5 @@ while it samples board power:
 Each line of a `*.jsonl` file is one `NOCBENCH {json}` record. A `launch` record starts each kernel launch, and
 `pair`, `allreduce`, `barrier` or `throughput` records follow it. `ok` says whether the data check passed. Regenerate
 the report's numbers and chart data with
-`python3 workloads/nocbench/analyze.py docs/reports/data/2026-09-18-nocbench-aifoundry2 --memhier docs/reports/data/2026-09-18-memhier-aifoundry2 --search --embed docs/reports/2026-09-18-et-soc1-on-chip-communication.html`.
+`python3 workloads/nocbench/analyze.py docs/reports/data/2026-09-18-nocbench-aifoundry2 --memhier docs/reports/data/2026-09-18-memhier-aifoundry2 --search --embed docs/reports/2026-09-18-et-soc1-on-chip-communication.html`. `--search` records all 12 layout-search restarts; the script also embeds the energy manual's 23 September re-runs of these rings
+(`docs/reports/data/2026-09-23-energy-manual/reruns.json`) and their fit against the mean hop count.

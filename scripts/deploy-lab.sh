@@ -14,7 +14,16 @@ name=$(basename "$dir")
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 [[ -f "$dir/CMakeLists.txt" ]] || { echo "$dir has no CMakeLists.txt" >&2; exit 1; }
 
-COPYFILE_DISABLE=1 tar --no-xattrs --no-mac-metadata -czf - "$dir" |
+# macOS bsdtar would otherwise add AppleDouble files and xattr headers that GNU tar complains about.
+tar_create() {
+  if tar --version 2>/dev/null | grep -q bsdtar; then
+    COPYFILE_DISABLE=1 tar --no-xattrs --no-mac-metadata "$@"
+  else
+    tar "$@"
+  fi
+}
+
+tar_create -czf - "$dir" |
   ssh -o BatchMode=yes "$host" "set -e
     mkdir -p ~/nekko && tar xzf - -C ~/nekko
     cd ~/nekko

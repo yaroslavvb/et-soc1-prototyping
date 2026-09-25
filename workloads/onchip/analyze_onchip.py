@@ -11,6 +11,13 @@ belonging to the shire `stages` places back round the ring.
 The ring runs in shire-ID order (ring_prev in kernel/onchip.c), and shire IDs do not follow the mesh. So
 `hop_distance` is an offset in shire ID, not a number of mesh hops: each distance row also carries the mesh hops
 that offset actually spans, from marty1885's shire map in workloads/nocbench/analyze.py.
+
+The keys the relay page draws from (added 25 Sep; every earlier key is unchanged):
+  layout, empty, ring      the shire map (shire -> [x, y]), its four empty cells, and the ring's shire order
+  distance[].by_card       each card's GB/s and cycles per stage at that ring offset
+  distance[].longest       the longest hand-off in the ring (mesh hops) and the (source, destination) pairs at it
+  repeats                  per card, every run of the headline configuration (1 MB per shire per stage, 8 stages,
+                           32 shires, one add, offset 1) with all three media, one row per sweep group
 """
 import argparse
 import collections
@@ -41,6 +48,15 @@ def shire_map():
     return mod.MARTY, mod.hops
 
 
+def shire_empty():
+    """The four empty cells of the 6x6 mesh (no compute shire), from the same file."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "nocbench", "analyze.py")
+    spec = importlib.util.spec_from_file_location("nocbench_analyze", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.EMPTY
+
+
 def ring_hops(back):
     """Mesh hops between each of the 32 compute shires and the shire `back` places before it in ID order, which
     is the shire it reads from when all 32 run. Returns the mean and the range over the 32 shires."""
@@ -48,6 +64,31 @@ def ring_hops(back):
     ids = sorted(layout)
     h = [hops(s, ids[(i - back) % len(ids)], layout) for i, s in enumerate(ids)]
     return {"mean": float(np.mean(h)), "min": int(min(h)), "max": int(max(h))}
+
+
+def longest_handoff(back):
+    """The longest hand-off in the ring at this offset: its mesh hops and every (source, destination) pair at it.
+    Shire s reads from the shire `back` places before it in ID order, so the data moves source -> s."""
+    layout, hops = shire_map()
+    ids = sorted(layout)
+    pairs = [(ids[(i - back) % len(ids)], s) for i, s in enumerate(ids)]
+    h = [hops(a, b, layout) for a, b in pairs]
+    return {"hops": int(max(h)), "pairs": [[int(a), int(b)] for (a, b), x in zip(pairs, h) if x == max(h)]}
+
+
+HEADLINE_CONFIG = {"stage_bytes": 1048576, "stages": 8, "shires": 32, "work": 1}
+
+
+def repeats(rows, card):
+    """Every run of the headline configuration on one card that has all three media, one row per sweep group
+    (the distance group runs the hand-off only, so it is not here)."""
+    by = collections.defaultdict(dict)
+    for r in rows:
+        if (r.get("test") == "relay" and r["host"] == card and r.get("hop_distance", 1) == 1
+                and all(r.get(k) == v for k, v in HEADLINE_CONFIG.items())):
+            by[r["group"]][r["medium"]] = r["gb_s"]
+    return [{"group": g, **m, "hop_over_dram": m["hop"] / m["dram"], "scp_over_dram": m["scp"] / m["dram"]}
+            for g, m in sorted(by.items()) if len(m) == 3]
 
 
 def by_medium(rows, group, key, host=None):
@@ -140,6 +181,16 @@ def main():
                               for r in rows
                               if r.get("group") == "distance" and r["host"] == out["cards"][0]],
                              key=lambda r: r["hop_distance"])
+    for d in out["distance"]:
+        d["by_card"] = {r["host"]: {"gb_s": r["gb_s"], "stage_cycles": r["cycles_max"] / r["stages"]}
+                        for r in rows if r.get("group") == "distance" and r["hop_distance"] == d["hop_distance"]}
+        if d["mesh_hops"]:
+            d["longest"] = longest_handoff(d["hop_distance"])
+    layout, _ = shire_map()
+    out["layout"] = {str(k): list(v) for k, v in layout.items()}
+    out["empty"] = [list(e) for e in shire_empty()]
+    out["ring"] = sorted(layout)
+    out["repeats"] = {c: repeats(rows, c) for c in out["cards"]}
     out["bigsize"] = sorted([{"stage_bytes": r["stage_bytes"], "gb_s": r["gb_s"]}
                              for r in rows
                              if r.get("group") in ("size", "bigsize") and r.get("medium") == "dram"

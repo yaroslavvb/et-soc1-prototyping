@@ -1,36 +1,33 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Anatomy of a memory access · ET-SoC-1</title>
-<meta name="description" content="How finely the ET-SoC-1 lets you see a memory access: single-load latency split into cache, mesh, memory-controller and DRAM stages, and energy per load split by power rail, measured on a lab card.">
+<meta name="description" content="How finely the ET-SoC-1 lets you see a memory access: single-load latency split into cache, mesh, memory-controller and DRAM stages, what closes a DRAM row, and energy per load split by power rail, measured on a lab card.">
 <style>
 :root {
   color-scheme: light;
   --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
   --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --code-bg: #f1f0ec;
-  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c6: #008300; --c7: #4a3aa7;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c7: #4a3aa7;
   --ref: #8c8b85; --empty: #eeede9;
-  --q1: #cde2fb; --q2: #9ec5f4; --q3: #6da7ec; --q4: #3987e5; --q5: #256abf; --q6: #184f95; --q7: #0d366b;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
     --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
-    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c6: #008300; --c7: #9085e9;
+    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9;
     --ref: #76756f; --empty: #232321;
-    --q1: #0d366b; --q2: #104281; --q3: #184f95; --q4: #1c5cab; --q5: #256abf; --q6: #3987e5; --q7: #86b6ef;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
   --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
   --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
-  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c6: #008300; --c7: #9085e9;
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9;
   --ref: #76756f; --empty: #232321;
-  --q1: #0d366b; --q2: #104281; --q3: #184f95; --q4: #1c5cab; --q5: #256abf; --q6: #3987e5; --q7: #86b6ef;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--page); color: var(--ink);
@@ -52,15 +49,7 @@ pre code { background: none; padding: 0; }
 .kpi .lab { color: var(--ink-2); font-size: 0.8rem; }
 .kpi .val { font-size: 1.6rem; font-weight: 650; line-height: 1.2; font-variant-numeric: tabular-nums; }
 .kpi .sub { color: var(--ink-2); font-size: 0.8rem; }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.82rem; color: var(--ink-2); margin: 4px 0 6px; }
-.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
 .chart { position: relative; width: 100%; }
-.chart svg { display: block; width: 100%; height: auto; }
-.chart.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.chart.scroll svg { min-width: 640px; }
-.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink);
-  border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 300px; display: none; }
 svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
 .axis-line { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
@@ -77,25 +66,17 @@ td.lvl { font-weight: 600; white-space: nowrap; }
 details { margin: 8px 0; }
 summary { cursor: pointer; color: var(--ink-2); font-size: 0.85rem; }
 .chart-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+.takeaway { font-size: 0.9rem; margin: 2px 0 4px; }
 .panels { display: grid; gap: 18px; }
 .panels > * { min-width: 0; }
 /* explorer */
 .controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 4px 0 10px; font-size: 0.88rem; }
-.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-.seg button { font: inherit; font-size: 0.85rem; background: var(--surface); color: var(--ink-2); border: 0;
-  padding: 6px 11px; cursor: pointer; border-right: 1px solid var(--border); min-height: 34px; }
-.seg button:last-child { border-right: 0; }
-.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page); }
 select { font: inherit; font-size: 0.88rem; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--border);
   background: var(--surface); color: var(--ink); min-height: 34px; }
 .explorer { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 20px; align-items: start; }
 @media (max-width: 720px) { .explorer { grid-template-columns: minmax(0, 1fr); } }
 .mesh .sh { cursor: pointer; }
-.mesh .sh rect { stroke: var(--surface); stroke-width: 2; }
-.mesh .sh.req rect { stroke: var(--ink); stroke-width: 3; }
-.mesh .sh.home rect { stroke: var(--c2); stroke-width: 3; }
 .mesh text { font-size: 11px; font-variant-numeric: tabular-nums; pointer-events: none; }
-.path { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .readout { font-size: 0.9rem; }
 .readout .big { font-size: 1.5rem; font-weight: 650; font-variant-numeric: tabular-nums; }
 .cells { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 10px; }
@@ -104,97 +85,529 @@ select { font: inherit; font-size: 0.88rem; padding: 5px 8px; border-radius: 8px
 .cells .k { font-size: 0.78rem; color: var(--ink-2); }
 .cells .v { font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 .terms { margin: 14px 0; }
-.terms p { margin: 0; }
+.terms p { margin: 8px 0 0; }
 .fn { font-size: 0.8rem; color: var(--ink-2); margin: 4px 0 0; }
+/* the memory-shire counter table: on a phone, drop the address column (PA[8:6] carries the point) and tighten */
+#mstable td.pa code { white-space: nowrap; }
+@media (max-width: 599px) { #mstable .pa { display: none; } #mstable th, #mstable td { padding: 6px 4px; } }
 /* section anchors and contents list (as in docs/reports/sources/report.template.html) */
 ol li, ul li { margin: 5px 0; }
 h2, h3 { scroll-margin-top: 12px; }
 .hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
 h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 </style>
+<!-- chartkit:begin -->
+<!-- pasted by scripts/paste-chartkit.py from docs/reports/sources/{chartkit.js, report.template.html}; do not edit here -->
+<style>
+.ck-frame { position: relative; width: 100%; }
+.ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ck-frame svg { display: block; max-width: none; height: auto; }
+.ck-frame svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.ck-frame .tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame .lab { fill: var(--ink-2); font-size: 12px; }
+.ck-frame .lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ck-frame .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-axis { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-hit { fill: transparent; stroke: none; }
+.ck-tip { position: absolute; z-index: 5; pointer-events: none; display: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border, var(--grid)); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: min(320px, calc(100% - 8px)); }
+.ck-frame svg [tabindex] { outline: none; }
+.ck-frame svg [tabindex]:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse)[tabindex]:not(.ck-hit):focus-visible,
+.ck-frame svg [tabindex]:focus-visible > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse).ck-active:not(.ck-hit),
+.ck-frame svg .ck-active > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 1.5px; }
+.ck-hidden { display: none !important; }
+.ck-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 8px 0 6px; }
+.ck-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 8px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-legend .ck-li { display: inline-flex; align-items: center; gap: 6px; }
+.ck-legend button.ck-li { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 3px 10px; min-height: 32px; cursor: pointer; }
+.ck-legend button.ck-li[aria-pressed="false"] { opacity: 0.55; text-decoration: line-through; }
+.ck-legend svg { flex: none; overflow: visible; }
+.ck-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.82rem; }
+.ck-seg-label { color: var(--ink-2); }
+.ck-seg-group { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ck-seg [role="radio"] { font: inherit; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-seg [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-range input[type="range"] { flex: 0 1 200px; width: 200px; min-width: 120px; min-height: 32px; margin: 0; accent-color: var(--c1); }
+.ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
+   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
+th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+th.num { white-space: normal; }
+@media (max-width: 599px) {
+  table.stack, .wide table.stack { min-width: 0; }
+  table.stack thead { display: none; }
+  table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { border-bottom: 1px solid var(--grid); padding: 6px 0; }
+  table.stack td, table.stack td.num { border: 0; padding: 2px 0; text-align: left; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+  table.stack td:first-child::before { content: none; }
+  table.stack td:first-child { font-weight: 600; }
+}
+@media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+</style>
+<script>
+/* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
+   Source-built pages get it from report.template.html (scripts/build-report.py inlines it before the page script);
+   standalone pages get this file, the template's chartkit CSS and token aliases from scripts/paste-chartkit.py.
+   Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
+   --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
+   API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame. Every mark with a tooltip is reachable from the keyboard. */
+window.CK = (function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
+  let uid = 0;
+  const $ = h => (typeof h === 'string' ? document.getElementById(h) : h);
+  const mm = q => (window.matchMedia ? window.matchMedia(q) : {matches: false});
+  const reduced = mm('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, str, cls, anchor) {
+    const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
+    t.textContent = str;
+    return t;
+  }
+  const path = (pts, x, y) => pts.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ');
+
+  /* ---- numbers ---- */
+  function num(v, dp) {
+    if (v == null || !isFinite(v)) return '\u2014';
+    const auto = dp == null;  // no dp: three significant digits, trailing zeros dropped
+    if (auto) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+    const s = Number(v).toLocaleString('en-GB', {minimumFractionDigits: auto ? 0 : dp, maximumFractionDigits: dp});
+    return /[1-9]/.test(s) ? s.replace('-', '\u2212') : s.replace('-', '');  // true minus; never "−0.00"
+  }
+  const fmt = {
+    num,
+    range: (a, b, dp, unit) => {
+      const s = num(a, dp), t = num(b, dp), u = unit ? '\u00a0' + unit : '';
+      return s === t ? s + u : s + (b < 0 ? ' to ' : '\u2013') + t + u;
+    },
+    pct: (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%',
+  };
+
+  /* ---- scales ---- */
+  function niceTicks(a, b, n) {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    if (!(hi > lo)) return Object.assign([lo], {step: 1});
+    const raw = (hi - lo) / Math.max(1, n || 5), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    const step = (m >= 7.5 ? 10 : m >= 3.5 ? 5 : m >= 1.5 ? 2 : 1) * p, out = [];
+    for (let i = Math.ceil(lo / step - 1e-9); i * step <= hi + step * 1e-9; i++) out.push(+(i * step).toPrecision(12));
+    out.step = step;
+    return out;
+  }
+  const tickDp = t => (t.step ? Math.max(0, -Math.floor(Math.log10(t.step) + 1e-9)) : null);
+  function lin(d0, d1, r0, r1) {
+    const s = v => r0 + (v - d0) * (r1 - r0) / (d1 - d0);
+    s.inv = p => d0 + (p - r0) * (d1 - d0) / (r1 - r0);
+    s.ticks = n => niceTicks(d0, d1, n);
+    s.domain = [d0, d1]; s.range = [r0, r1];
+    return s;
+  }
+  function log(d0, d1, r0, r1) {
+    const l0 = Math.log10(d0), l1 = Math.log10(d1);
+    const s = v => r0 + (Math.log10(v) - l0) * (r1 - r0) / (l1 - l0);
+    s.inv = p => Math.pow(10, l0 + (p - r0) * (l1 - l0) / (r1 - r0));
+    s.ticks = n => {
+      const lo = Math.min(l0, l1), hi = Math.max(l0, l1), k0 = Math.ceil(lo - 1e-9), k1 = Math.floor(hi + 1e-9);
+      const dec = k1 - k0 + 1, every = Math.max(1, Math.ceil(dec / (n || 6))), out = [];
+      const add = v => { v = +v.toPrecision(12); const lv = Math.log10(v); if (lv >= lo - 1e-9 && lv <= hi + 1e-9) out.push(v); };
+      if (dec <= 2) { for (let k = k0 - 1; k <= k1; k++) for (const m of [1, 2, 5]) add(m * Math.pow(10, k)); }
+      else for (let k = k0; k <= k1; k += every) add(Math.pow(10, k));
+      return out;
+    };
+    s.domain = [d0, d1]; s.range = [r0, r1]; s.log = true;
+    return s;
+  }
+  const logFmt = v => num(v, v >= 1 ? 0 : Math.ceil(-Math.log10(v) - 1e-9));
+
+  /* ---- frame: a responsive SVG sized to its host ---- */
+  function frame(hostId, o) {
+    const host = $(hostId);
+    if (!host) throw new Error('CK.frame: no element ' + hostId);
+    host.classList.add('ck-frame'); host.classList.remove('scroll');
+    host.textContent = '';
+    const plot = document.createElement('div'); plot.className = 'ck-plot'; host.appendChild(plot);
+    const svg = el('svg', {role: 'group', 'aria-label': o.label || null}, plot);
+    const tip = document.createElement('div'); tip.className = 'ck-tip'; tip.setAttribute('aria-hidden', 'true');
+    host.appendChild(tip);
+    const minW = o.minW == null ? 320 : o.minW, maxW = o.maxW == null ? 900 : o.maxW;
+    const f = {svg, host, tip, W: 0, H: 0, narrow: false, seriesOn: null, pinned: null, active: null, navIndex: 0};
+    const width = () => {
+      const cs = getComputedStyle(host), cw = host.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return Math.round(Math.max(minW, Math.min(maxW, cw > 0 ? cw : maxW)));
+    };
+    f.redraw = () => {
+      const W = width(), H = Math.round(typeof o.height === 'function' ? o.height(W) : (o.height || 300));
+      f.refocus = svg.contains(document.activeElement) ? f.navIndex : null;
+      hide(f, true);
+      Object.assign(f, {W, H, narrow: W < 600, navNodes: []});
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.setAttribute('height', H);
+      svg.style.width = W + 'px';
+      o.draw(f);
+      if (f.seriesOn) showSeries(f, f.seriesOn);
+    };
+    f.redraw();
+    frames.push(f);
+    if (window.ResizeObserver) {
+      let timer;
+      new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => { if (width() !== f.W) f.redraw(); }, 150); }).observe(host);
+    }
+    return f;
+  }
+
+  /* ---- axes: horizontal grid, tick labels, baseline, axis titles (y title sits above the plot) ---- */
+  function axes(f, o) {
+    const {x, y} = o, W = f.W, H = f.H;
+    const L = o.L == null ? 44 : o.L, R = o.R == null ? 12 : o.R, T = o.T == null ? 22 : o.T, B = o.B == null ? 38 : o.B;
+    const g = el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, f.svg);
+    const yt = o.yt || y.ticks(Math.max(3, Math.round((H - T - B) / 48)));
+    const xt = o.xt || x.ticks(Math.max(2, Math.round((W - L - R) / 90)));
+    const auto = (s, t) => (s.log ? logFmt : v => num(v, tickDp(t)));
+    const xf = o.xfmt || auto(x, xt), yf = o.yfmt || auto(y, yt), labs = [];
+    for (const t of yt) {
+      if (o.grid !== false) el('line', {x1: L, x2: W - R, y1: y(t), y2: y(t), class: 'grid-line'}, g);
+      labs.push(txt(g, L - 6, y(t) + 4, yf(t), 'tick', 'end'));
+    }
+    el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    for (const t of xt) labs.push(txt(g, x(t), H - B + 16, xf(t), 'tick', 'middle'));
+    if (o.xl) labs.push(txt(g, (L + W - R) / 2, H - 6, o.xl, 'lab', 'middle'));
+    if (o.yl) txt(g, 2, Math.max(12, T - 13), o.yl, 'lab');
+    inside(f, labs);
+    return g;
+  }
+  /* Keep labels inside the frame (0..f.W, 0..f.H, less pad): one that would cross the left or right edge is anchored
+     at that edge instead (text-anchor start or end, so its outer end sits pad px from the edge in any font; an end
+     tick label still covers its tick), and one that would cross the top or bottom is moved in. Labels already inside
+     are not touched. Widths are measured in the page's font; a chart drawn while hidden has no layout, so they are
+     estimated at 0.6 em a character. Vertically the glyphs are taken as 0.75 em above the baseline and 0.25 em below. */
+  function inside(f, labels, pad) {
+    pad = pad == null ? 2 : pad;
+    const m = labels.map(t => {
+      let w = 0, fs = 12;
+      try { w = t.getComputedTextLength(); fs = parseFloat(getComputedStyle(t).fontSize) || 12; } catch (_) { /* no layout */ }
+      return {w: w > 0 ? w : 0.6 * fs * t.textContent.length, fs};
+    });
+    labels.forEach((t, k) => {
+      const {w, fs} = m[k], a = t.getAttribute('text-anchor') || 'start', x = +t.getAttribute('x'), y = +t.getAttribute('y');
+      const x0 = a === 'end' ? x - w : a === 'middle' ? x - w / 2 : x;
+      if (x0 < pad) { t.setAttribute('text-anchor', 'start'); t.setAttribute('x', pad); }
+      else if (x0 + w > f.W - pad) { t.setAttribute('text-anchor', 'end'); t.setAttribute('x', +(f.W - pad).toFixed(1)); }
+      if (y - 0.75 * fs < pad) t.setAttribute('y', +(pad + 0.75 * fs).toFixed(1));
+      else if (y + 0.25 * fs > f.H - pad) t.setAttribute('y', +(f.H - pad - 0.25 * fs).toFixed(1));
+    });
+    return labels;
+  }
+
+  /* ---- tooltip: pointer, keyboard focus and touch all show the same text ---- */
+  const strip = html => new DOMParser().parseFromString(String(html).replace(/<br\s*\/?>/gi, '; '), 'text/html')
+    .body.textContent.replace(/\s+/g, ' ').trim();
+  function place(f, cx, cy) {
+    const t = f.tip; t.style.display = 'block';
+    const hw = f.host.clientWidth, hh = f.host.clientHeight, tw = t.offsetWidth, th = t.offsetHeight;
+    let top = cy + 14;
+    if (top + th > hh && cy - th - 10 >= 0) top = cy - th - 10;  // flip above the pointer
+    t.style.left = Math.max(0, Math.min(cx + 12, hw - tw)) + 'px';
+    t.style.top = top + 'px';
+  }
+  function show(f, node, html, cx, cy) {
+    if (f.active && f.active !== node) f.active.classList.remove('ck-active');
+    f.active = node; node.classList.add('ck-active');
+    f.tip.innerHTML = typeof html === 'function' ? html() : html;
+    if (cx == null) {
+      const r = node.getBoundingClientRect(), b = f.host.getBoundingClientRect();
+      cx = r.left + r.width / 2 - b.left; cy = r.top + r.height / 2 - b.top;
+    }
+    place(f, cx, cy);
+  }
+  function hide(f, force) {
+    if (f.pinned && !force) return;
+    f.pinned = null; f.tip.style.display = 'none';
+    if (f.active) f.active.classList.remove('ck-active');
+    f.active = null;
+  }
+  function tip(f, node, html, o) {
+    o = o || {};
+    if (!node.hasAttribute('data-ck-nav')) node.setAttribute('tabindex', '0');
+    node.setAttribute('role', o.role || 'img');
+    node.setAttribute('aria-label', strip(typeof html === 'function' ? html() : html));
+    node._ckTip = html;
+    const at = ev => { const b = f.host.getBoundingClientRect(); show(f, node, html, ev.clientX - b.left, ev.clientY - b.top); };
+    node.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointermove', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') hide(f); });
+    node.addEventListener('pointerdown', ev => {  // touch: a tap toggles the tooltip and pins it until the next tap
+      if (ev.pointerType !== 'touch') return;
+      f.touchT = Date.now();
+      if (f.active === node && f.tip.style.display === 'block') hide(f, true); else { hide(f, true); at(ev); f.pinned = node; }
+    });
+    node.addEventListener('focus', () => { if (Date.now() - (f.touchT || 0) > 600 && !f.pinned) show(f, node, html); });
+    node.addEventListener('blur', () => hide(f));
+    node.addEventListener('keydown', ev => { if (ev.key === 'Escape') hide(f, true); });
+    return node;
+  }
+  document.addEventListener('pointerdown', ev => {  // a tap elsewhere unpins
+    for (const f of frames) if (f.pinned && !f.pinned.contains(ev.target)) hide(f, true);
+  }, true);
+
+  /* ---- keynav: one tab stop per mark group; arrows step, Home/End jump, Enter pins, Escape hides ---- */
+  function keynav(f, nodes, o) {
+    o = o || {};
+    nodes = nodes.filter(Boolean);
+    if (!nodes.length) return;
+    const seen = n => !n.closest('.ck-hidden');
+    const next = (k, d) => { for (let j = k + d; j >= 0 && j < nodes.length; j += d) if (seen(nodes[j])) return j; return k; };
+    let cur = Math.min(f.navIndex || 0, nodes.length - 1);
+    nodes.forEach((n, k) => {
+      n.setAttribute('data-ck-nav', '');
+      n.setAttribute('tabindex', k === cur ? '0' : '-1');
+      n.addEventListener('focus', () => {
+        nodes.forEach(m => m.setAttribute('tabindex', '-1')); n.setAttribute('tabindex', '0');
+        f.navIndex = k;
+        if (o.onFocus) o.onFocus(n, k);
+      });
+      n.addEventListener('keydown', ev => {
+        const K = ev.key;
+        let j = null;
+        if (o.step) j = o.step(k, K, nodes);
+        if (j == null) {
+          if (K === 'ArrowRight' || K === 'ArrowDown') j = next(k, 1);
+          else if (K === 'ArrowLeft' || K === 'ArrowUp') j = next(k, -1);
+          else if (K === 'Home') j = next(-1, 1);
+          else if (K === 'End') j = next(nodes.length, -1);
+        }
+        if (K === 'Enter' || K === ' ') {
+          ev.preventDefault();
+          if (n._ckTip) { if (f.pinned === n) hide(f, true); else { hide(f, true); show(f, n, n._ckTip); f.pinned = n; } }
+          if (o.onEnter) o.onEnter(n, k);
+        } else if (j != null) { ev.preventDefault(); if (j !== k) { hide(f, true); nodes[j].focus(); } }
+      });
+    });
+    f.navNodes = (f.navNodes || []).concat([nodes]);
+    if (f.refocus != null && nodes[f.refocus]) { nodes[f.refocus].focus(); f.refocus = null; }
+  }
+
+  /* ---- legend (HTML, above the chart) and series toggling ---- */
+  function swatch(it) {
+    const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
+    const m = it.mark || 'box';
+    const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
+    if (m === 'dot' || m === 'box') e.style.fill = c;
+    else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
+    if (m === 'dash') e.style.strokeDasharray = '4 3';
+    return s;
+  }
+  function legend(hostEl, items, o) {
+    o = o || {};
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-legend');
+    const on = new Set(items.map(it => it.key)), btn = {};
+    for (const it of items) {
+      const b = document.createElement(o.toggle ? 'button' : 'span'); b.className = 'ck-li';
+      b.append(swatch(it), document.createTextNode(it.label));
+      if (o.toggle) {
+        b.type = 'button'; b.setAttribute('aria-pressed', 'true');
+        b.addEventListener('click', () => {
+          const was = on.has(it.key);
+          if (was && on.size === 1) return;  // keep at least one series
+          if (was) on.delete(it.key); else on.add(it.key);
+          b.setAttribute('aria-pressed', String(!was));
+          if (o.onChange) o.onChange([...on]);
+        });
+      }
+      btn[it.key] = b; h.appendChild(b);
+    }
+    return {el: h, on, set(keys) { on.clear(); keys.forEach(k => on.add(k)); for (const k in btn) if (o.toggle) btn[k].setAttribute('aria-pressed', String(on.has(k))); }};
+  }
+  function showSeries(f, keysOn) {
+    f.seriesOn = [...keysOn];
+    f.svg.querySelectorAll('[data-series]').forEach(n => n.classList.toggle('ck-hidden', !f.seriesOn.includes(n.getAttribute('data-series'))));
+    for (const group of f.navNodes || []) {  // keep one reachable tab stop per group
+      const vis = group.filter(n => !n.closest('.ck-hidden'));
+      if (vis.length && !vis.some(n => n.getAttribute('tabindex') === '0')) { group.forEach(n => n.setAttribute('tabindex', '-1')); vis[0].setAttribute('tabindex', '0'); }
+    }
+    if (f.active && f.active.closest('.ck-hidden')) hide(f, true);
+  }
+
+  /* ---- controls ---- */
+  function seg(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-seg');
+    const g = document.createElement('div'); g.setAttribute('role', 'radiogroup'); g.className = 'ck-seg-group';
+    if (o.label) {
+      const s = document.createElement('span'); s.className = 'ck-seg-label'; s.id = 'ck-l' + (++uid); s.textContent = o.label;
+      h.appendChild(s); g.setAttribute('aria-labelledby', s.id);
+    }
+    const opts = o.options, api = {el: h, value: o.value == null ? opts[0][0] : o.value};
+    const btns = opts.map(([v, t], k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.textContent = t;
+      b.addEventListener('click', () => set(v, true));
+      b.addEventListener('keydown', ev => {
+        const d = ev.key === 'ArrowRight' || ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowLeft' || ev.key === 'ArrowUp' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const j = (k + d + opts.length) % opts.length;
+        set(opts[j][0], true); btns[j].focus();
+      });
+      g.appendChild(b); return b;
+    });
+    function set(v, fire) {
+      api.value = v;
+      btns.forEach((b, k) => { const c = opts[k][0] === v; b.setAttribute('aria-checked', String(c)); b.tabIndex = c ? 0 : -1; });
+      if (fire && o.onChange) o.onChange(v);
+    }
+    h.appendChild(g); set(api.value, false);
+    api.set = v => set(v, true);
+    return api;
+  }
+  function range(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-range');
+    const id = 'ck-r' + (++uid), stops = o.stops, f1 = o.fmt || (v => num(v));
+    const lab = document.createElement('label'); lab.htmlFor = id; lab.textContent = o.label;
+    const inp = document.createElement('input'); inp.type = 'range'; inp.id = id;
+    const out = document.createElement('output'); out.setAttribute('for', id);
+    if (stops) { inp.min = 0; inp.max = stops.length - 1; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step == null ? 'any' : o.step; }
+    const val = () => (stops ? stops[+inp.value] : +inp.value);
+    const put = v => { inp.value = stops ? stops.reduce((b, s, k) => (Math.abs(s - v) < Math.abs(stops[b] - v) ? k : b), 0) : v; };
+    const upd = fire => { const v = val(), s = f1(v); out.textContent = s; inp.setAttribute('aria-valuetext', s); if (fire && o.onInput) o.onInput(v); };
+    inp.addEventListener('input', () => upd(true));
+    h.append(lab, inp, out); put(o.value == null ? (stops ? stops[0] : o.min) : o.value); upd(false);
+    return {el: h, input: inp, get value() { return val(); }, set(v) { put(v); upd(true); }};
+  }
+  function readout(hostEl) {
+    const h = $(hostEl); h.classList.add('ck-readout'); h.setAttribute('aria-live', 'polite');
+    h.set = html => { h.innerHTML = html; };
+    return h;
+  }
+  function bus(name) {
+    if (!buses[name]) { const fns = []; buses[name] = {value: undefined, on(fn) { fns.push(fn); }, emit(v, from) { this.value = v; fns.forEach(fn => fn(v, from)); }}; }
+    return buses[name];
+  }
+  /* Card layout for a table under 600 px: each cell shows its column's header (CSS table.stack). */
+  function stackTable(table) {
+    const t = $(table), heads = [], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (hr) for (const c of hr.cells) for (let k = 0; k < (c.colSpan || 1); k++) heads.push(c.textContent.replace(/\s+/g, ' ').trim());
+    for (const tb of t.tBodies) for (const r of tb.rows) { let k = 0; for (const c of r.cells) { if (heads[k]) c.setAttribute('data-label', heads[k]); k += c.colSpan || 1; } }
+    t.classList.add('stack');
+    return t;
+  }
+
+  /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
+  const SERIES = [1, 2, 3, 4, 5, 7];
+  const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
+  const clamp01 = p => Math.max(0, Math.min(1, +p || 0));
+  const ramp = p => `color-mix(in srgb, var(--c1) ${(15 + 85 * clamp01(p)).toFixed(1)}%, var(--surface))`;
+  function rgb(css) {  // resolve any CSS colour (tokens, color-mix) to linear-light luminance via a probe
+    const s = document.createElement('span'); s.style.color = css; s.style.display = 'none';
+    document.body.appendChild(s);
+    const c = getComputedStyle(s).color; s.remove();
+    const v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), unit = /^color\(/.test(c) ? 1 : 255;
+    const lin1 = x => { x /= unit; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin1(v[0]) + 0.7152 * lin1(v[1]) + 0.0722 * lin1(v[2]);
+  }
+  const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  /* Text colour for a ramp cell, chosen for the current theme: whichever of --ink and --page contrasts more. */
+  function rampInk(p) {
+    const bg = rgb(ramp(p));
+    return contrast(bg, rgb('var(--ink)')) >= contrast(bg, rgb('var(--page)')) ? 'var(--ink)' : 'var(--page)';
+  }
+  const redrawAll = () => frames.forEach(f => f.redraw());  // rampInk depends on the theme
+  if (window.MutationObserver) new MutationObserver(redrawAll).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  const dark = mm('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', redrawAll);
+
+  return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
+    stackTable, reduced, ramp, rampInk, color, hide: f => hide(f, true)};
+})();
+</script>
+<!-- chartkit:end -->
 </head>
 <body>
 <main>
 <h1>Anatomy of a memory access on the ET-SoC-1</h1>
-<p class="byline">19 September 2026 · aifoundry2's card · minion clock 600 MHz, NoC 400 MHz, LPDDR4X at 3,733 MT/s · workload <code>workloads/memprobe</code> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="byline">19 September 2026 · aifoundry2's card · minion clock 600 MHz, NoC 400 MHz, LPDDR4X at 3,733 MT/s · workload <code>workloads/memprobe</code> · firmware source read at et-platform <code>353f20e</code>; the card's own trace strings match an older build (before et-platform commit <code>60b40c10f</code>, 24 Sep 2024) · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">How finely can this chip show you where a load's time and energy go? For time, the answer is
 <b>one cycle, for a single load</b>. You can put any one line in L1, L2, L3 or DRAM, time one load of it, and
 split the result into cache lookups, mesh hops, the memory controller and the DRAM row state. A model built from
-those parts predicts each line's DRAM latency to within ±3 cycles for 97% of lines. Of a typical DRAM load's
-~300 cycles, only about 25 are the DRAM chip's own timing; the rest is paths on the chip. For energy, the finest
-view is <b>four destinations</b>: the minion cores, the SRAM arrays, the mesh (NoC), and the rest of the board,
-which is mostly the DDR side. The first three are metered rails; the rest is the board total minus those three.
-The meters give a new value every 133 ms, so each energy number is an average over billions of identical loads.</p>
+those parts, fitted with one constant and eight memory shire positions, matches each line's DRAM latency to within
+±3 cycles for 97% of lines. Of a typical DRAM load's ~300 cycles, only about 25–28 are the DRAM chip's own timing;
+the rest is paths on the chip. A DRAM row stays open until a refresh or a load to another row of its bank closes
+it; no idle timer was seen to close it.</p>
+<p class="lede">For energy, the finest view is <b>four destinations</b>: the minion cores, the SRAM arrays, the mesh
+(NoC), and the rest of the board, which is mostly the DDR side. The first three are metered rails; the rest is the
+board total minus those three. The meters give a new value every 133 ms, so each energy number is an average over
+billions of identical loads.</p>
 
-<p class="small card"><b>Later measurements.</b> The energies in §7 are superseded by later measurements on two
+<p class="small card"><b>Later measurements.</b> The energies in §6 are superseded by later measurements on two
 cards, with zeros and with random data: the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual</a>
 (§4) and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a>. The manual puts a
-DRAM read at 122 pJ per byte against 79 here, and on random data both put a mesh hop at about twice this page's
-0.9 pJ per byte. The last note in §7 compares the numbers. The latencies are not affected.</p>
+DRAM read at @@man_dram@@ pJ per byte against @@here_pjb@@ here, and on random data both put a mesh hop at about twice this page's
+@@hop_pjb@@ pJ per byte. The latencies are not affected.</p>
 
 <div class="kpis">
-  <div class="card kpi"><div class="lab">A DRAM load, typical</div><div class="val">299 cycles</div><div class="sub">500 ns at 600 MHz: median of 4,500 loads from shire 0 to random lines. Only ~25 cycles are DRAM timing; the rest is on-chip paths.</div></div>
+  <div class="card kpi"><div class="lab">A DRAM load, typical</div><div class="val">299 cycles</div><div class="sub">500 ns at 600 MHz: median of 4,500 loads from shire 0 to random lines.</div></div>
   <div class="card kpi"><div class="lab">Each mesh hop, round trip</div><div class="val">12 cycles</div><div class="sub">Paid twice on a DRAM load: to the L3 home shire, then on to the memory shire.</div></div>
-  <div class="card kpi"><div class="lab">Energy of one DRAM load</div><div class="val">5.1 nJ</div><div class="sub">67% off the metered rails (mostly DDR), 18% mesh, 10% SRAM, 5% cores.</div></div>
-  <div class="card kpi"><div class="lab">Latency model</div><div class="val">±3 cycles</div><div class="sub">for 1,450 of 1,500 random lines (±5 for 1,490), from address bits alone.</div></div>
+  <div class="card kpi"><div class="lab">Where a DRAM load's energy goes</div><div class="val">⅔ unmetered</div><div class="sub">@@dram_rest_pct@@ off the metered rails (mostly DDR), @@dram_noc_pct@@ mesh, @@dram_sram_pct@@ SRAM, @@dram_minion_pct@@ cores. The total here, @@dram_nj@@ nJ on the rail trace (@@dram_host_nj@@ on the host log), is superseded: the energy manual measures @@man_dram@@ pJ/B, @@man_dram_line_nj@@ nJ per 64-byte line.</div></div>
+  <div class="card kpi"><div class="lab">Latency model</div><div class="val">±3 cycles</div><div class="sub">for 1,450 of 1,500 random lines (±5 for 1,490), from address bits alone, with its constants fitted to those lines.</div></div>
 </div>
 
-<div class="card small terms"><p><b>Terms.</b> The ET-SoC-1's compute cores are <i>minions</i>: small in-order
-RISC-V cores, each with two hardware threads (<i>harts</i>) and its own L1 cache. Thirty-two minions form a
-<i>shire</i>, and each shire's 4 MB of SRAM is split into a 512 KB L2 cache, a 1 MB slice of the chip-wide 32 MB L3
-and a 2.5 MB scratchpad (software-managed memory that any shire can address). The 32 compute shires, with the master, spare, I/O and PCIe shires, form a 6×6 grid on a
-mesh network-on-chip (the NoC, 400 MHz); eight <i>memory shires</i>, which hold the LPDDR4X controllers, sit outside
-the grid on two sides. Every cache line has one <i>L3 home shire</i>, chosen by its address bits, whose L3 slice
-holds it. Kernels run in user mode (U-mode) and firmware in machine mode (M-mode); the service processor (SP) is the
-on-die management core that reads the power sensors. More in the
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p></div>
+<details class="card small terms"><summary>Terms used on this page</summary>
+<p>The compute cores are <i>minions</i>: small in-order RISC-V cores, each with two hardware threads (<i>harts</i>)
+and an L1 cache; 32 minions form a <i>shire</i>, whose 4 MB of SRAM is a 512 KB L2, a 1 MB slice of the chip-wide
+32 MB L3 and a 2.5 MB scratchpad. The 32 compute shires and the master, spare, I/O and PCIe shires sit on a 6×6
+mesh (the NoC, 400 MHz), and eight <i>memory shires</i>, which hold the LPDDR4X controllers, sit outside it on two
+sides. Every cache line has one <i>L3 home shire</i>, chosen by its address bits, whose L3 slice holds it. Kernels
+run in user mode (U-mode) and firmware in machine mode (M-mode), and the service processor (SP) is the on-die core
+that reads the power sensors; more in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
+</details>
 
-<h2 id="what-the-chip-lets-you-see">1. What the chip lets you see</h2>
-<p>Everything here runs as an ordinary user-mode kernel through the runtime, on the card's installed firmware. The
-firmware source read for this work is et-platform <code>353f20e</code>; the cards' own trace strings match an older
-build, from before et-platform commit <code>60b40c10f</code> (24 September 2024). The table lists every instrument
-that turned out to work, at its finest granularity, and what stays out of reach.</p>
-<div class="table-wrap wide"><table>
-<thead><tr><th>What</th><th>Instrument</th><th>Finest granularity</th><th>Notes</th></tr></thead>
-<tbody>
-<tr><td class="lvl">Time</td><td><code>hpmcounter3</code>, readable in U-mode</td><td>1 cycle (1.67 ns), one load</td><td>The counter's bit-7 carry lands 11 cycles late: a value whose low 7 bits are 0–10 reads 128 short (§8). Correcting the 4,000 raw read pairs afterwards makes every pair read exactly 10. Applied on the card, inside timed code, the correction still misses about 1 interval in 70 (57 of 4,000 corrected timed no-ops read 138 or −118), so reject results that are ±128 off, or take the median of repeated loads rather than the fastest. The standard <code>cycle</code> CSR traps.</td></tr>
-<tr><td class="lvl">Where a line lives</td><td><code>evict_va</code> (CSR 0x89f), one line</td><td>Put one line in L2, L3 or DRAM</td><td>Level code 1/2/3 leaves the line in L2 / L3 / memory, and code 0 does nothing. Asynchronous: a load issued straight after queues behind it, and may find its DRAM row still open (§3). Evicting a dirty line and fencing costs 112–480 cycles (median 241), the write-back.</td></tr>
-<tr><td class="lvl">Two loads in flight</td><td>two <code>ld</code>s back to back</td><td>Second load's arrival</td><td>Each minion has 2 miss handlers. This is how row conflicts show up (§6).</td></tr>
-<tr><td class="lvl">Which memory shire served a line</td><td>syscall 10 (<code>SYSCALL_PMC_MS_SAMPLE</code>)</td><td>Exact read count per memory shire</td><td>16 DRAM loads of a line add 16 (15 for 4 lines) to one shire's read counter and 0 to the other seven (one stray 1), for 64 of 64 lines (§5). Syscall 9 does the same for the shire caches' read/write counters.</td></tr>
-<tr><td class="lvl">Core events</td><td><code>hpmcounter4-8</code></td><td>Fixed events only</td><td>Retired instructions, L1 misses and I-cache events, summed over a neighbourhood of 8 minions. Choosing other events needs M-mode.</td></tr>
-<tr><td class="lvl">Board power</td><td><code>DM_CMD_GET_MODULE_POWER</code></td><td>10 mW, new value every 133 ms</td><td>The host can ask 60 times a second, but the service processor refreshes the value once per loop pass.</td></tr>
-<tr><td class="lvl">Rail power</td><td>Service processor stats trace (<code>dev_mngt_service -t SPST:extract</code>)</td><td>3 rails: minion cores, SRAM, NoC · one record per 133 ms</td><td>Each rail value is a running average kept by the board's power-management controller (PMIC), roughly first-order with a time constant of about 1 s (a step reaches 61% after 1 s and 88% after 2 s); the service processor copies it once per pass. The ring holds ~15 minutes, and an extract returns only records since the last wrap, so extract often. There is no DDR/DRAM rail: that is the board total minus the three rails.</td></tr>
-<tr><td class="lvl">Out of reach</td><td>—</td><td>—</td><td>DRAM activate/precharge counts, shire-cache hit/miss and occupancy counters, NoC counters, per-event energy, and faster power sampling. The first three need an M-mode syscall to choose events. One has since been written (about 60 lines) and works in the simulator, but it has not run on silicon: the firmware images are signed, neither the signing tool nor a test key is available, and whether this card would boot a rebuilt image is untested (the hub's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">firmware caveat</a>). The full list is in <code>docs/research/counters-and-dram.md</code>. Changing frequency or voltage (to separate clock domains, or static from dynamic power) is possible from the host but changes a shared card, so it isn't done here.</td></tr>
-</tbody></table></div>
-
-<h2 id="trace-one-load">2. Trace one load</h2>
+<h2 id="trace-one-load">1. Trace one load</h2>
 <p>This explorer is built from the measurements below. Pick the shire that issues the load and the L3 home shire of
 the address. Physical-address bits 10:6 give the home shire, and bits 8:6 give the memory shire, so the memory shire is
 always the home shire's low three bits. The bar breaks the latency into its parts. Latency comes from the model,
-which matches 97% of measured loads to ±3 cycles. Energy is the measured average for that level; for L3 it is scaled
-by the hop count. All loads were timed from shire 0; other requesting shires use the same 12 cycles per hop, which the
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication report</a>
-measured between every pair of shires.</p>
+which is within ±3 cycles for 97% of lines (the fastest of three loads of each line; @@loads_within3_pct@@ of single
+loads). The strip under the bar puts the path among the loads actually measured: for every home shire the model sits
+within @@home_dev_max@@ of the measured median, as it should, since it was fitted to those loads, and the memory
+shire's position adds @@ms_leg@@ cycles. Energy is the 19 September measured average for that level (for L3, scaled
+by the hop count), since superseded (§6). All loads were timed from shire 0; other requesting shires use the same 12
+cycles per hop, which the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip
+communication report</a> measured between every pair of shires.</p>
 <div class="card">
-  <div class="controls">
-    <span>Level <span class="seg" id="lvl"></span></span>
-    <span id="dstate-wrap">DRAM row <span class="seg" id="dstate"></span></span>
+  <div class="ck-controls">
+    <span id="lvl"></span>
+    <span id="dstate"></span>
   </div>
   <div class="controls">
     <label>Requesting shire <select id="req"></select></label>
     <label>L3 home shire <select id="home"></select></label>
-    <span class="small">Or click the map: <span class="seg" id="clickmode"></span></span>
   </div>
   <div class="explorer">
     <div>
-      <div class="chart" id="mesh"></div>
-      <div class="legend" id="mesh-legend"></div>
+      <div class="ck-controls"><span id="mapcolour"></span><span id="clickmode"></span></div>
+      <div class="chart mesh" id="mesh"></div>
+      <div id="mesh-legend"></div>
     </div>
     <div>
       <div class="readout" id="readout"></div>
       <div class="chart" id="flame" style="margin-top:8px"></div>
-      <div class="legend" id="flame-legend"></div>
+      <div id="flame-legend"></div>
+      <div class="chart-title" id="strip-title" style="margin-top:10px"></div>
+      <div class="chart" id="mstrip"></div>
+      <p class="fn" id="strip-cap"></p>
       <div class="cells" id="cells"></div>
     </div>
   </div>
@@ -202,124 +615,182 @@ measured between every pair of shires.</p>
   logical shire layout, as in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip
   communication report</a>. The unlabelled grey cells are not compute shires (the master and spare shires and the PCIe and I/O
   shires). In this map memory shires 0–3 sit above the grid and 4–7 below it; their positions come from the fit in
-  §5. The map appears to be the die turned a quarter (more exactly, with rows and columns swapped): on the die
+  §4. The map appears to be the die turned a quarter: on the die
   (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die">Heat per millimetre</a>) and in the
-  firmware's naming (0–3 west, 4–7 east) the memory shires are the two side columns. Shire colours show L3 hit
-  latency from the requesting shire; each shade is 20 cycles of L3 latency.</p>
+  firmware's naming (0–3 west, 4–7 east) the memory shires are the two side columns. Shades show the model's latency
+  from the requesting shire, an L3 hit or a DRAM load, 20 cycles per step. The requester has a solid outline, the L3
+  home a dashed one, and the memory shire that serves the home is filled. No route between them is drawn: the order in
+  which the mesh routes a request was not measured. From the keyboard: Tab to the map, arrow keys move between
+  shires, Enter sets the requester or the home.</p>
 </div>
 
-<h2 id="the-ladder-one-load-at-a-time">3. The ladder, one load at a time</h2>
+<h2 id="the-ladder-one-load-at-a-time">2. The ladder, one load at a time</h2>
 <p>For each of 64 random lines, one hart loaded the line, evicted it to a chosen level, fenced, waited 300 cycles,
 and timed one load. Values are load-to-use cycles: the raw reading minus 5, an offset chosen so an L1 hit reads the
 5 cycles the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy report</a>'s
 pointer chase measured. (A timed no-op and a timed L1 hit both read 10 raw; the offset moves every absolute number
 but none of the differences between levels.) The spread at L3 and DRAM is almost entirely distance on the mesh
-(§4, §5), not noise.</p>
-<div class="chart-title">Load-to-use latency by where the line was left (cycles at 600 MHz, 128 loads each)</div>
-<div class="chart scroll" id="ladder"></div>
+(§3, §4), not noise.</p>
+<div class="chart-title">Load-to-use latency by where the line was left (cycles at 600 MHz; 128 loads each, one L2 reading dropped as a counter glitch)</div>
+<div class="chart" id="ladder"></div>
+<p class="fn">Bar: 10th–90th percentile; thin line: fastest to slowest; dot and number: median. Evicting a dirty line
+and fencing, which is not a load, took 112–480 cycles (median 241), the write-back; one of 128 took 16, as fast as a
+clean one.</p>
+<details><summary>The numbers (min, median, 90th percentile, max, median in ns)</summary>
 <div class="table-wrap"><table id="ladder-table"></table></div>
-<p class="fn">* One of 128 dirty evicts took 16 cycles, as fast as a clean one (no write-back); the rest took 112–480.</p>
+</details>
 <p>Evicts keep working after the instruction retires, but none of the 256 loads timed straight after an evict to
 memory came back in L3 time: every one went to DRAM. What changes is the timing. With no fence, the load queues
-behind the evict (median 365, about 58 cycles above the §5 model). With a fence but no wait, a third of the loads
-find the row that the previous load of the same line opened still open, and read 11 cycles fast (minimum 213, on a
-line whose closed-row time is 225). With the fence and the 300-cycle wait, none read fast: 115 of 128 land within
-±6 cycles of the §5 model, which is the closed-row time, and the rest are slower.</p>
+behind the evict (median 365, about 58 cycles above the §4 model). With a fence but no wait, 49 of the 128 loads
+find the row that the previous load of the same line opened still open, and read 6–12 cycles fast (median 10;
+minimum 213, on a line whose closed-row time is 225). For memory shires 3, 5 and 7 they instead read @@nd_slow@@ cycles slower than a
+closed row: even after the fence, the load still waits behind the evict at the memory shire. With no fence that wait
+runs from about @@nf_m0@@ cycles for memory shire 0 to @@nf_far@@ for memory shires 3 and 7. With the fence and the
+300-cycle wait, none read fast (the line's row was last opened by the first load of its sequence, some 3,000 cycles
+and at least one refresh earlier): 115 of 128 land within ±6 cycles of the §4 model, which is the closed-row time,
+and the rest are slower.</p>
 <p>The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy report</a>'s pointer
-chase, run the day before with the clock not pinned, agrees: its DRAM chases took 287–297 cycles (480–495 ns) when the
+chase, run the day before with the clock not pinned, agrees: its DRAM chases took 287–297 cycles (479–495 ns) when the
 minions ran at 600 MHz, and 352–368 cycles (440–460 ns) when the governor had raised them to 800 MHz. Every load on
-this page ran at a steady 600 MHz (the refresh period in §6 matches the DRAM's refresh interval only at that clock).</p>
+this page ran at a steady 600 MHz (the refresh period in §5 matches the DRAM's refresh interval only at that clock).</p>
 
-<h2 id="l3-110-cycles-plus-12-per-hop">4. L3: 110 cycles plus 12 per hop</h2>
+<h2 id="l3-110-cycles-plus-12-per-hop">3. L3: 110 cycles plus 12 per hop</h2>
 <p>Each line's L3 home shire is picked by physical-address bits 10:6. From shire 0, 1,500 random lines were timed as
 L3 hits. Latency depends only on the home shire's
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">Manhattan distance on the mesh</a>:
 <b>110 + 12 × hops</b>, within ±4 cycles for 1,498 of 1,500 lines (the median of three loads per line; 1,309 are
 within ±2). So a local L3 hit costs 110 cycles: ~48 for the L1 and L2 lookup and miss, ~62 for
-the home slice. Each hop adds 12 cycles (20 ns) for the request and the reply.</p>
+the home slice. Each hop adds 12 cycles (20 ns) for the request and the reply. The
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy#what-the-numbers-say">memory-hierarchy
+report</a>'s pointer chases at 600 and 800 MHz split the 110 by clock: about 72 cycles scale with the minion clock
+and about 61 ns do not (72 cycles + 61 ns = 109 cycles at 600 MHz), and a hop is 20 ns at either clock.</p>
 <div class="chart-title">L3 hit latency from shire 0 against distance to the home shire (one dot per home shire)</div>
-<div class="chart scroll" id="l3"></div>
+<div class="chart" id="l3"></div>
 <p class="small">L2 hits in the same run come in two flavours: 37 cycles when the line is still in the bank's
 8-entry read buffer, and 48 from the array.</p>
 
-<h2 id="the-memory-shire-leg-91-cycles-plus-12-per-hop">5. The memory shire leg: 91 cycles plus 12 per hop</h2>
-<p>The same 1,500 lines were also timed from DRAM (each load at least 1,000 idle cycles after the row was last
-used, so the row had closed and every load paid an activate; no contention), and each line's L3 time was
-subtracted. What remains is the leg from the home shire to the memory shire and back. The memory shire is picked by
-bits 8:6. The hardware counters confirm it: for all 64 lines tested, 16 DRAM loads raised the read count of the shire
-named by those bits, by 16 for 60 lines and by 15 for 4. The other seven shires' counts didn't move (one stray count
-of 1 in 448).</p>
+<h2 id="the-memory-shire-leg-91-cycles-plus-12-per-hop">4. The memory shire leg: 91 cycles plus 12 per hop</h2>
+<p>The same 1,500 lines were also timed from DRAM, with no contention, and each line's L3 time was subtracted.
+What remains is the leg from the home shire to the memory shire and back. Every one of these loads found its row
+closed and paid an activate. Each came about 2,600 cycles or more after the line's row was last opened (by the
+untimed load that starts the line's sequence, or by an earlier pass), longer than a refresh period; home shire 0's
+lines read 225 cycles, the refresh series' closed-row time for a line of the same home and memory shire (226), not
+its open-row time (215); and no line read 11 cycles fast. The memory shire is picked by bits 8:6. The hardware
+counters confirm it: for all 64 lines tested, 16 DRAM loads raised the read count of the shire named by those bits,
+by 16 for 60 lines and by 15 for 4. The other seven shires' counts didn't move (one stray count of 1 in 448).</p>
 <p>The fit uses one shared constant plus 12 cycles per hop. Assuming each memory shire hangs one hop
 outside the grid (the only positions the fit tried; moving all eight one hop further out fits equally well with a
 constant of 79), the best fit puts memory shires 0–3 above the grid and 4–7 below it, at x = 1…4. The total squared
 error is 2 cycles² over 32 home/memory-shire pairs. The whole DRAM load is then</p>
-<pre><code>latency = 110 + 12·hops(requester → L3 home) + 91 + 12·hops(L3 home → memory shire)</code></pre>
-<p>and the model's error is within ±3 cycles for 1,450 of 1,500 lines and within ±5 for 1,490. The other ten are
-outliers: seven read about 128 cycles short (counter glitches the correction missed, §8), two are 44 and 71 cycles
-slow (probably refresh), and one is 29 cycles fast.</p>
+<pre><code>latency = 110 + 12·hops(requester → L3 home)
+        +  91 + 12·hops(L3 home → memory shire)</code></pre>
+<p>and the model's error is within ±3 cycles for 1,450 of 1,500 lines and within ±5 for 1,490 (of all
+@@loads_n@@ single loads, @@loads_within3@@ (@@loads_within3_pct@@) are within ±3: taking each line's fastest drops refresh waits and a few
+cycles of jitter, though it keeps the timer glitches). The other ten lines are outliers: seven read about 128 cycles
+short (counter glitches the correction missed, §7), two are 44 and 71 cycles slow (probably refresh), and one is 29
+cycles fast.</p>
 <div class="panels">
 <div>
 <div class="chart-title">Measured DRAM latency minus model, per line (fastest of 3 loads)</div>
-<div class="chart scroll" id="modelerr"></div>
+<div class="chart" id="modelerr"></div>
 </div>
 <div>
 <div class="chart-title">Read-counter increase on each memory shire after 16 DRAM loads of one line (first 12 of 64 lines)</div>
 <div class="table-wrap"><table id="mstable"></table></div>
+<p class="fn" id="mstable-cap"></p>
 </div>
 </div>
-<p>Of the 91 cycles (152 ns), the DRAM chip itself accounts for about 25: an activate (the activate-to-read delay tRCD,
-11 cycles = 18 ns, §6) plus the 19.3 ns read latency and a 4.3 ns burst (14 cycles), from the controller's timing registers. The
-remaining ~66 cycles (~110 ns) are the memory shire: controller queue, PHY, and the crossings between the 933 MHz
-DDR clock and the mesh. The frequency experiment in §9 would split this further.</p>
+<p>Of the 91 cycles (152 ns), the DRAM chip itself accounts for about 25–28: an activate (the activate-to-read delay
+tRCD, 11 cycles = 18 ns, §5), the 19.3 ns read latency, and one or two 4.3 ns bursts for the 64-byte line (14–17
+cycles), from the controller's timing registers. The remaining ~63–66 cycles (~105–110 ns) are the memory shire:
+controller queue, PHY, and the crossings between the 933 MHz DDR clock and the mesh. The frequency experiment in §9
+would split this further.</p>
 
-<h2 id="inside-the-dram-rows-banks-and-refresh">6. Inside the DRAM: rows, banks and refresh</h2>
+<h2 id="inside-the-dram-rows-banks-and-refresh">5. Inside the DRAM: rows, banks and refresh</h2>
 <h3 id="which-address-bits-share-a-row">Which address bits share a row</h3>
 <p>A second load B was issued one cycle behind load A, with B = A with one physical-address bit flipped. Both were
 cold in DRAM, 150 random A per bit. When B shares A's row, or sits in another bank or channel, it rides along and
 arrives with A (~300 cycles). When B is in the same bank but a different row, the controller must wait for A's row to
 finish before opening B's: <b>+40 cycles (67 ns)</b> for every bit from 18 up. That matches the controller's mapping:
-bank = PA[12:10], column = PA[17:13], row from PA[18].</p>
-<div class="chart-title">Latency of the second of two back-to-back loads, by the address bit that differs (median and 10th–90th percentile)</div>
-<div class="legend" id="bits-legend"></div>
-<div class="chart scroll" id="bits"></div>
+bank = PA[12:10], column = PA[17:13], row from PA[18]. Issued one after the other instead, B pays about
+@@bits_row@@ cycles more (median) when it needs another row of A's bank (the precharge; tRP = 18 ns = 11 cycles),
+saves about @@bits_col@@ when it shares A's row, and costs nothing extra in another bank.</p>
+<div class="chart-title" id="bits-title"></div>
+<div class="ck-controls"><span id="bits-mode"></span></div>
+<div id="bits-legend"></div>
+<div class="chart" id="bits"></div>
 
 <h3 id="refresh-caught-in-the-act">Refresh, caught in the act</h3>
 <p>Loading the same line from DRAM 19,000 times at random intervals, and folding the timestamps on a period of
-<b>2,325 cycles = 3.88 µs</b>, shows LPDDR4X refresh (tREFI, the refresh interval, is 3.9 µs):</p>
+<b>2,325 cycles = 3.88 µs</b>, shows LPDDR4X refresh (the controller is programmed for one every 3.87 µs, tREFI;
+<code>docs/research/counters-and-dram.md</code>):</p>
 <ul>
 <li>A load that arrives while refresh is running waits up to 210 extra cycles (350 ns). That's close to the 281 ns
 all-bank refresh time, and the wait shrinks as the load arrives later in the refresh window.</li>
 <li>Refresh also closes the open row. The next load pays an activate, 215 → 226 cycles. That's 11 cycles = 18 ns,
 exactly tRCD, the activate-to-read delay.</li>
 <li>With a fixed loop period of 576 cycles, a loop locks onto refresh: every fourth load is the slow one, and none
-ever lands inside the refresh itself.</li>
+ever lands inside the refresh itself. Of those 576 cycles, about @@loop_outside@@ are the probe's own: it fetches
+each of its four ops (evict, fence, time stamp, timed load) from the scratchpad, about @@op_cycles@@ cycles apiece.
+Every comparison of two loads below counts that time.</li>
 </ul>
-<div class="chart-title">DRAM latency against the load's phase within the refresh period (median and slowest per bin)</div>
-<div class="chart scroll" id="refresh"></div>
+<div class="chart-title" id="refresh-title"></div>
+<div class="ck-controls"><span id="refresh-mode"></span></div>
+<div id="refresh-legend"></div>
+<div class="chart" id="refresh"></div>
 
-<h3 id="how-long-a-row-stays-open">How long a row stays open</h3>
-<p>Open-row hits save 11 cycles. Only about two thirds of back-to-back pairs get the saving, and after 1,500–2,000
-idle cycles almost none do. That is about twice as fast as refresh alone would close rows (after 1,000 idle
-cycles, 23% hits against 44%). The controller's registers set an open-page policy with no idle-close timer
-(<code>docs/research/counters-and-dram.md</code>), so something else closes rows; this experiment cannot say
-what.</p>
-<div class="chart-title">Share of same-row second loads that were row hits, against idle time between them</div>
-<div class="chart scroll" id="pto"></div>
+<h3 id="how-long-a-row-stays-open">How long a row stays open, and what closes it</h3>
+<p>Open-row hits save 11 cycles. A row stays open until a refresh, or a load to another row of its bank, closes it.
+That is what the controller's open-page policy with no idle-close timer implies
+(<code>docs/research/counters-and-dram.md</code>). In the refresh series, @@rows_pct@@ of loads whose previous load
+came after the last refresh were row hits (@@rows_hit@@ of @@rows_n@@, after 450–2,000 idle cycles), against
+@@rows_ref_pct@@ of those with a refresh in between (@@rows_ref_hit@@ of @@rows_ref_n@@). Pairs of loads to two lines
+of one random row agree once the probe's own time is counted. Between the two loads the program spends about
+@@probe_ovh@@ cycles fetching its next ops from the scratchpad, on top of the first load's ~300 cycles, and
+@@in_refresh_pct@@ of loads land inside a refresh. Refresh alone then predicts about @@model0@@ hits with no added
+idle time, @@model1000@@ after 1,000 cycles and @@model1500@@ after 1,500; the pairs gave @@meas0@@, @@meas1000@@ and
+@@meas1500@@ (@@pairs_n@@ pairs each).</p>
+<div class="chart-title">What closes a DRAM row: share of loads that found their row still open, against idle time</div>
+<p class="takeaway"><b>One closer: refresh (or a conflict).</b> With no refresh in between the row stays open; with
+one, it is closed; the random-row pairs fall where refresh alone puts them.</p>
+<div id="pto-legend"></div>
+<div class="chart" id="pto"></div>
+<p class="fn">Refresh series: one line (memory shire 0), each load compared with the one before it; dot area follows
+the number of loads, and loads that were themselves held up by a refresh, or glitched, are left out. The hollow point of the
+no-refresh series (1,750–2,250 idle cycles) is uncertain: that close to a whole refresh period, whether a refresh fell in between
+depends on exactly where the refresh starts. Pairs: two lines of one random row, @@pairs_n_all@@ pairs per delay, with
+95% intervals; x is the programmed delay, which comes on top of about @@probe_ovh@@ cycles of probe time and the first
+load. From @@late_from@@ to @@late_to@@ cycles, @@late_hits@@ pairs found the row open.</p>
+<details><summary>The numbers behind the chart</summary>
+<div class="table-wrap"><table id="rowlife-table"></table></div>
+<div class="table-wrap"><table id="pto-table"></table></div>
+</details>
 
-<h2 id="where-the-energy-goes">7. Where the energy goes</h2>
+<h2 id="where-the-energy-goes">6. Where the energy goes</h2>
 <p>Hart 0 of all 1,024 minions walked a working set sized to hit exactly one level, with no evicts. The loop was the
 same six-instruction body for every level, run for 6 s per pattern, twice each. Power above the level just before
 each run, divided by the load rate, gives energy per load. The split comes from the service processor's trace:
 <b>minion cores</b>, <b>SRAM</b> (the L2/L3/scratchpad arrays), <b>NoC</b> (the mesh), and the <b>rest</b> =
 board total − those three rails. The rest is mostly the memory shires, DRAM, PHY and I/O. It also holds the
-regulators' delivery losses on the three metered rails: later work puts them at about 18–20% of the minion rail's
-power, 5–6% of the SRAM rail's, and part of the 26–29% it attributes to the mesh rail (see the
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">hub's §4.2</a>).</p>
-<div class="legend" id="energy-legend"></div>
-<div class="chart scroll" id="energy"></div>
-<div class="table-wrap wide"><table id="energy-table"></table></div>
+regulators' delivery losses on the three metered rails (18–20% of the minion rail's power; <a
+href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">hub
+§4.2</a>).</p>
+<div class="chart-title" id="energy-title"></div>
+<div class="ck-controls"><span id="energy-mode"></span></div>
+<div id="energy-legend"></div>
+<div class="chart" id="energy"></div>
+<p class="fn" id="energy-cap"></p>
+<details><summary>The numbers: energy per load by rail, both board totals, cycles and loads per second</summary>
+<div class="table-wrap"><table id="energy-table"></table></div>
+<p class="fn">pJ per load (one 8-byte <code>ld</code>, which below L1 moves a 64-byte line) above idle, mean of two
+6 s runs. The load and stall energy of the cores is included, so these are what a load costs a real program. "Rest" is
+the board total minus the three rails, mostly the DDR side. An L1 hit moves no line; per byte the <code>ld</code>
+returns it costs 46/8 ≈ 5.7 pJ. Cycles per load are the mean minion's and the slowest minion's; the slowest sets the
+load rate, which is why row conflicts read fewer cycles per load than the sequential pattern but move fewer loads per
+second.</p>
+</details>
 <ul>
-<li><b>An L2 hit is mostly SRAM:</b> 112 of 183 pJ, 1.75 pJ per byte. The core's share rises from 41 to 64 pJ
+<li><b>An L2 hit is mostly SRAM:</b> 112 of 183 pJ, 1.76 pJ per byte. The core's share rises from 41 to 64 pJ
 because it spends longer stalled.</li>
 <li><b>An L3 hit costs 3× an L2 hit even locally.</b> SRAM goes to 306 pJ, for the L2 miss, the L3 read and the L2
 fill, and the NoC rail appears at 120 pJ.</li>
@@ -328,60 +799,85 @@ from a local to a far home (5.6 hops on average) adds 333 pJ. That is ~0.9 pJ pe
 <li><b>A DRAM load costs ~5.1 nJ, and two thirds of it, 3.4 nJ = 53 pJ per byte, is off the metered rails, mostly
 on the DDR side.</b> The mesh
 adds 0.9 nJ, because the request crosses the chip twice. The DRAM row itself could not be isolated: a pattern that
-conflicts on every access costs the same per load as a sequential one. With 1,024 streams interleaved, the
+conflicts on every access costs no more per load than a sequential one (4.8–4.9 nJ in its two runs, against 5.0–5.1 for the sequential
+pattern). With 1,024 streams interleaved, the
 sequential pattern probably re-activates rows on almost every access too.</li>
 <li>Totals from the host's board-power log are 16–25% higher than the trace's own board average for every pattern
 (16–19% for L2, own-shire L3 and both DRAM patterns; 23% for L1 and 25% for far L3). Mid-run the two agree to
 within 0.3 W; the gap comes from the edges of each window. The trace's values are the power-management controller's
-running averages (τ ≈ 1 s; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#a-load-step-seen-through-every-sensor">Power and
+running averages (τ ≈ 1.1 s; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#a-load-step-seen-through-every-sensor">Power and
 temperature</a>, §2), and as lined up with the host log the trace starts to rise about 0.7 s before each load process
 starts and to fall before the run ends. So its baseline reads high and its run average low. The table gives both; the
 split uses the trace so the parts add up, but the host log's totals are the cleaner measure of the whole.</li>
-<li><b>Later measurements put DRAM higher.</b> The
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual (§4)</a>,
-measured on 23 September on both cards at a pinned 600 MHz with the host's board power, gives 122 pJ/B [117–129]
-for DRAM read by 1 KB tensor loads over memory whose contents were not set, and, with the data known, 91 pJ/B on
-zeros against 129 on random data. This page's 79 pJ/B was measured differently: its loads are 8-byte
-<code>ld</code>s that each bring a 64-byte line through the caches; it uses the service processor's trace, whose rise
-above idle is 14–20% smaller than the host log's (with the host log it is 92 pJ/B); and its arena was never
-initialised, so the bit pattern of the loaded data is unknown. Per mesh hop the manual's
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#finer-grain-wires-lines-rows-and-the-leakage-of-the-arrays">1–8-hop
-fit (§4.3)</a> gives 0.64–0.75 pJ/B on zeros and 1.67–1.81 on random data across the two cards (2.1–2.3 on random data
-over 1–6 hops), against ~0.9 here; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per
-millimetre</a> measures 1.5–2.2 pJ/B per hop on random data and splits it into flips and ones carried.</li>
+<li><b>Later measurements put DRAM higher</b> (see the note at the top): @@man_dram@@ pJ/B
+[@@man_dram_lo@@–@@man_dram_hi@@] in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy
+manual</a> (§4: 1 KB tensor loads over memory whose contents were not set, on two cards; with the data known,
+@@man_zeros@@ pJ/B on zeros and @@man_random@@ on random data), against @@here_pjb@@ here on the rail trace and
+@@here_host_pjb@@ on the host log, from 8-byte <code>ld</code>s that each bring a 64-byte line through the caches, on
+one card. For a mesh hop, use <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per
+millimetre</a>, not this page's ~@@hop_pjb@@ pJ/B.</li>
 </ul>
 
-<h2 id="a-timer-bug-worth-knowing">8. A timer bug worth knowing</h2>
+<h2 id="a-timer-bug-worth-knowing">7. A timer bug worth knowing</h2>
 <p>Before anything above was trustworthy, the cycle counter needed fixing. 16% of back-to-back read pairs (320 by
 +138 and 314 by −118, of 4,000) differed from the expected 10 cycles. The raw values show what happens: a read whose low 7
-bits are 0–10 is 128 too small, because the carry into bit 7 lands 11 cycles late. A simulation of the open RTL shows why: twelve
+bits are 0–10 is 128 too small, because the carry into bit 7 lands 11 cycles late. A simulation of the open RTL
+(core-et's Erbium branch at b38a1a3: the same Minion core lineage in a later MCU-class configuration, not the
+taped-out ET-SoC-1) shows the mechanism, with a 12-cycle window where this card shows 11: twelve
 counters share one adder that folds overflows in round-robin, and a read ignores the pending overflow
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#bits">hub §3</a>). This isn't erratum
 1.23 (RTLMIN-6496, two harts reading counters at once): only one hart read here.</p>
 <p>The firmware's four-reads workaround doesn't fix it. Adding 128 to any read with low bits 0–10 does, for all 4,000 pairs. Inside a running kernel it
-catches most but not all of them (see §1); the seven lines about 128 cycles fast in §5 are such misses, picked out by
-taking the fastest of three loads. Any code that times short intervals with <code>hpmcounter3</code> on this card
-needs the same correction (see <code>fixcyc()</code> in <code>workloads/memprobe/kernel/memprobe.c</code>).</p>
+catches most but not all of them (57 of 4,000 corrected timed no-ops read 138 or −118); the seven lines about 128
+cycles fast in §4 are such misses, picked out by taking the fastest of three loads. Any code that times short
+intervals with <code>hpmcounter3</code> on this card needs the same correction (see <code>fixcyc()</code> in
+<code>workloads/memprobe/kernel/memprobe.c</code>).</p>
 <div class="chart-title">Cycles between two back-to-back counter reads, 4,000 pairs (dot size = count)</div>
-<div class="chart scroll" id="timer"></div>
+<div class="chart" id="timer"></div>
+
+<h2 id="what-the-chip-lets-you-see">8. What the chip lets you see</h2>
+<p>Everything here runs as an ordinary user-mode kernel through the runtime, on the card's installed firmware. The
+table lists every instrument that turned out to work, at its finest granularity, and what stays out of reach.</p>
+<div class="table-wrap wide"><table class="stack">
+<thead><tr><th>What</th><th>Instrument</th><th>Finest granularity</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td class="lvl">Time</td><td data-label="Instrument"><code>hpmcounter3</code>, readable in U-mode</td><td data-label="Finest granularity">1 cycle (1.67 ns), one load</td><td data-label="Notes">Reads 128 short when its low 7 bits are 0–10 (§7). Even corrected in the kernel, about 1 timed interval in 70 is still ±128 off: drop those, or take the median of repeated loads rather than the fastest. The standard <code>cycle</code> CSR traps.</td></tr>
+<tr><td class="lvl">Where a line lives</td><td data-label="Instrument"><code>evict_va</code> (CSR 0x89f), one line</td><td data-label="Finest granularity">Put one line in L2, L3 or DRAM</td><td data-label="Notes">Level code 1/2/3 leaves the line in L2 / L3 / memory, and code 0 does nothing. Asynchronous: a load issued straight after queues behind it, and may find its DRAM row still open (§2). A dirty line's evict costs a write-back (§2).</td></tr>
+<tr><td class="lvl">Two loads in flight</td><td data-label="Instrument">two <code>ld</code>s back to back</td><td data-label="Finest granularity">Second load's arrival</td><td data-label="Notes">Each minion has 2 miss handlers. This is how row conflicts show up (§5).</td></tr>
+<tr><td class="lvl">Which memory shire served a line</td><td data-label="Instrument">syscall 10 (<code>SYSCALL_PMC_MS_SAMPLE</code>)</td><td data-label="Finest granularity">Exact read count per memory shire</td><td data-label="Notes">16 DRAM loads of a line add 16 (15 for 4 lines) to one shire's read counter and 0 to the other seven (one stray 1), for 64 of 64 lines (§4). Syscall 9 does the same for the shire caches' read/write counters.</td></tr>
+<tr><td class="lvl">Core events</td><td data-label="Instrument"><code>hpmcounter4-8</code></td><td data-label="Finest granularity">Fixed events only</td><td data-label="Notes">Retired instructions, L1 misses and I-cache events, summed over a neighbourhood of 8 minions. Choosing other events needs M-mode.</td></tr>
+<tr><td class="lvl">Board power</td><td data-label="Instrument"><code>DM_CMD_GET_MODULE_POWER</code></td><td data-label="Finest granularity">10 mW, new value every 133 ms</td><td data-label="Notes">The host can ask 60 times a second, but the service processor refreshes the value once per loop pass.</td></tr>
+<tr><td class="lvl">Rail power</td><td data-label="Instrument">Service processor stats trace (<code>dev_mngt_service -t SPST:extract</code>)</td><td data-label="Finest granularity">3 rails: minion cores, SRAM, NoC · one record per 133 ms</td><td data-label="Notes">The PMIC's own running average (τ ≈ 1.1 s), copied once per 133 ms pass (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#a-load-step-seen-through-every-sensor">Power and temperature §2</a>). There is no DDR rail: the rest is the board minus the three rails.</td></tr>
+<tr><td class="lvl">Out of reach</td><td data-label="Instrument">—</td><td data-label="Finest granularity">—</td><td data-label="Notes">DRAM activate/precharge counts, shire-cache hit/miss and occupancy, NoC counters (all need an M-mode syscall to choose events), per-event energy and faster power sampling. §9 says what would reach them; the full list is in <code>docs/research/counters-and-dram.md</code>.</td></tr>
+</tbody></table></div>
 
 <h2 id="what-would-split-it-further">9. What would split it further</h2>
 <ul>
 <li><b>Clock domains.</b> Set the minion and NoC clocks separately (<code>DM_CMD_SET_FREQUENCY -f minion,noc</code>,
-with DVFS off) and rerun §4–5. Each stage's cycles then split into minion-clock, NoC-clock and fixed-time parts, for
-example the 66 cycles in the memory shire. The hop cost is already known to be on the mesh clock: 20 ns per hop at
+with DVFS off) and rerun §3–4. Each stage's cycles then split into minion-clock, NoC-clock and fixed-time parts, for
+example the ~63–66 cycles in the memory shire. The hop cost is already known to be on the mesh clock: 20 ns per hop at
 600, 700 and 800 MHz (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip
-communication report</a>), so only the 110- and 91-cycle constants remain to split. It changes a shared card's
-state, so it waits for approval and a quiet card.</li>
+communication report</a>). The 110-cycle L3 constant is split only in two so far (about 72 minion-clock cycles and
+61 ns that do not scale with the minion clock, §3), and the 91-cycle memory shire constant not at all. It changes a
+shared card's state, so it waits for approval and a quiet card.</li>
 <li><b>Static against dynamic energy.</b> The same frequency sweep at fixed voltage gives each rail's
 C·V²·f slope. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">DVFS report</a> has since
 separated static from dynamic power another way, as a leakage law in temperature (23.3 W at 80&nbsp;°C).</li>
 <li><b>DRAM activate energy, and cache hit/miss counts.</b> Both need counters that only M-mode can program. A
-user-mode syscall that sets them has been written and works in the simulator (sys_emu); running it on the card needs
-a signed firmware image, which is not available.</li>
+user-mode syscall that sets them (about 60 lines) has been written and works in the simulator (sys_emu); running it
+on the card needs a signed firmware image, and neither the signing tool nor a test key is available, so whether this
+card would boot a rebuilt image is untested (the hub's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">firmware
+caveat</a>).</li>
 </ul>
 
 <h2 id="reproduce">10. Reproduce</h2>
+<pre><code># Rebuild everything from the committed raw data (no card needed), from the repo root
+D=docs/reports/data/2026-09-19-memprobe-aifoundry2
+python3 workloads/memprobe/analyze_power.py $D/power --json $D/power/summary.json
+python3 workloads/memprobe/analyze.py --data $D --out $D/summary.json
+python3 workloads/memprobe/build_report.py $D/summary.json docs/reports/data/2026-09-23-energy-manual/manual.json \
+    docs/reports/2026-09-19-et-soc1-memory-anatomy.html</code></pre>
+<details><summary>Card runs (each under <code>timeout 10</code>)</summary>
 <pre><code>scripts/deploy-lab.sh aifoundry2 workloads/memprobe      # or build locally on the lab machine
 mkdir -p build/memprobe-data && cd build/memprobe-data
 python3 ../../workloads/memprobe/gen_ops.py timer   --out .
@@ -391,25 +887,22 @@ python3 ../../workloads/memprobe/gen_ops.py msmap   --out . --lines 64
 python3 ../../workloads/memprobe/gen_ops.py bits    --out . --base 0x8040000000 --trials 150
 python3 ../../workloads/memprobe/gen_ops.py refresh --out . --name refresh_jit --n 19000 --jitter 3000 --start 0x1000
 python3 ../../workloads/memprobe/gen_ops.py refresh --out . --n 24000 --start 0x1000
-python3 ../../workloads/memprobe/gen_ops.py pagetimeout --out . --row-bit 13 --trials 60
+python3 ../../workloads/memprobe/gen_ops.py pagetimeout --out . --row-bit 13 --trials 60 --delays 0,100,200,400,700,1000,1500,2000,3000,5000,8000,12000,20000
 for p in t_raw t_glitch ladder decomp msmap bits refresh refresh_jit pagetimeout; do timeout 10 ../memprobe/host/memprobe_host --program $p.ops; done   # each run &lt; 0.2 s of card time
 for p in l1 l2 l3near l3far dram_seq dram_row; do python3 ../../workloads/memprobe/gen_ops.py table --pattern $p --out-file $p.tbl; done
 cd ../..   # back to the repo root
 python3 workloads/memprobe/run_power.py --host-bin build/memprobe/host/memprobe_host --tables build/memprobe-data --out build/memprobe-power --seconds 6 --gap 4
-mkdir -p build/memprobe-data/power && python3 workloads/memprobe/analyze_power.py build/memprobe-power --json build/memprobe-data/power/summary.json
+mkdir -p build/memprobe-data/power && python3 workloads/memprobe/analyze_power.py build/memprobe-power --json build/memprobe-data/power/summary.json --csv build/memprobe-data/power/sp_stats.csv
 python3 workloads/memprobe/analyze.py --data build/memprobe-data --out build/memprobe-data/summary.json
-python3 workloads/memprobe/build_report.py build/memprobe-data/summary.json docs/reports/2026-09-19-et-soc1-memory-anatomy.html
-
-# To rebuild this page from the committed data instead:
-python3 workloads/memprobe/build_report.py docs/reports/data/2026-09-19-memprobe-aifoundry2/summary.json docs/reports/2026-09-19-et-soc1-memory-anatomy.html</code></pre>
+python3 workloads/memprobe/build_report.py build/memprobe-data/summary.json docs/reports/data/2026-09-23-energy-manual/manual.json docs/reports/2026-09-19-et-soc1-memory-anatomy.html</code></pre>
+</details>
 <p class="small">Raw results (u32 timings with their labels, the power log, the merged rail trace) are in
 <code>docs/reports/data/2026-09-19-memprobe-aifoundry2/</code>. The runs used arena base <code>0x8040000000</code>,
 1 GB aligned, so arena offsets are physical address bits. Every card run was its own <code>timeout 10</code>
 process, and the latency probes held the card for under 0.2 s each.</p>
-<p class="small">Versions: published 19 September 2026. Revised 24 September 2026 after a review: the split of a DRAM
-load in §5 (the loads found their rows closed, so the activate belongs to the DRAM chip's share), the model's error
-counts, the reading of the evict ladder in §3, why the two board readings in §7 differ, and links to the later
-energy measurements.</p>
+<p class="small">Versions: published 19 September 2026; revised 24 September 2026 (the DRAM split, the row and
+energy comparisons) and 25 September 2026 (what closes a DRAM row, the model against the measurements, the order
+of the sections, and the charts).</p>
 
 <h2 id="related">Related reports</h2>
 <ul>
@@ -421,13 +914,13 @@ and the bandwidth of every level, measured the day before this page.</li>
 map used here, and 20 ns per mesh hop measured between every pair of shires.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">The energy
 manual, §4</a> — energy per byte at every level of the hierarchy, with ranges over repeated runs on two cards; it
-supersedes the energies in §7.</li>
+supersedes the energies in §6.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> — the energy of one
 mesh hop, split into bits that flip and ones carried.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a> — uses the
 <code>PA[10:6]</code> home-shire mapping found here to home a contended DRAM line in a chosen shire.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature">Power and temperature</a> — the power
-meters used in §7: what each one reports, how often, and how it averages.</li>
+meters used in §6: what each one reports, how often, and how it averages.</li>
 </ul>
 <p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
 
@@ -506,70 +999,54 @@ meters used in §7: what each one reports, how often, and how it averages.</li>
 </main>
 
 <script>
+/* Charts use the shared chart kit (global CK, pasted into <head> by scripts/paste-chartkit.py): every chart is sized
+   to its host, every mark with a tooltip is reachable from the keyboard (Tab to the chart, arrow keys between marks,
+   Enter pins, Escape hides), and colours are the page's tokens only. */
 const D = __DATA__;
 const CYC_NS = 1000 / 600;
 const MESH = {0:[0,0],24:[1,0],9:[2,0],25:[3,0],2:[4,0],11:[5,0],8:[0,1],16:[1,1],1:[2,1],17:[3,1],10:[4,1],19:[5,1],
   3:[0,2],4:[1,2],13:[2,2],14:[3,2],18:[4,2],27:[5,2],12:[1,3],21:[2,3],22:[3,3],26:[4,3],
   20:[1,4],29:[2,4],30:[3,4],15:[4,4],23:[5,4],28:[1,5],5:[2,5],6:[3,5],7:[4,5],31:[5,5]};
 const MSPOS = D.msPos;
-const hops = (a, b) => Math.abs(a[0]-b[0]) + Math.abs(a[1]-b[1]);
-const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-function lum(hex) {  // relative luminance of #rrggbb, to pick a readable label colour
-  const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
-  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
-}
-const NS = 'http://www.w3.org/2000/svg';
-function el(tag, attrs, parent) {
-  const e = document.createElementNS(NS, tag);
-  for (const k in attrs) e.setAttribute(k, attrs[k]);
-  if (parent) parent.appendChild(e);
-  return e;
-}
-function txt(parent, x, y, s, cls, anchor) {
-  const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
-  t.textContent = s; return t;
-}
-function svgIn(id, w, h) {
-  const host = document.getElementById(id); host.innerHTML = '';
-  const svg = el('svg', {viewBox: `0 0 ${w} ${h}`, role: 'img'}, host);
-  const tip = document.createElement('div'); tip.className = 'tip'; host.appendChild(tip);
-  return {svg, tip, host};
-}
-function hover(target, tip, host, html) {
-  const show = ev => {
-    tip.innerHTML = html(); tip.style.display = 'block';
-    const r = host.getBoundingClientRect();
-    const p = ev.touches ? ev.touches[0] : ev;
-    let x = p.clientX - r.left + 12, y = p.clientY - r.top + 12;
-    if (x + 260 > r.width) x = Math.max(0, p.clientX - r.left - 270);
-    tip.style.left = x + 'px'; tip.style.top = y + 'px';
-  };
-  target.addEventListener('mousemove', show);
-  target.addEventListener('touchstart', show, {passive: true});
-  target.addEventListener('mouseleave', () => tip.style.display = 'none');
-}
-function linear(d0, d1, r0, r1) { return v => r0 + (v - d0) / (d1 - d0) * (r1 - r0); }
-function axisY(svg, y, ticks, x0, x1, fmt) {
-  for (const t of ticks) {
-    el('line', {x1: x0, x2: x1, y1: y(t), y2: y(t), class: 'grid-line'}, svg);
-    txt(svg, x0 - 6, y(t) + 4, fmt ? fmt(t) : t, 'tick', 'end');
-  }
-}
-const fmt = (v, d=0) => Number(v).toLocaleString('en-US', {maximumFractionDigits: d, minimumFractionDigits: d});
+const hops = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
+const {el, txt} = CK;
+const $ = id => document.getElementById(id);
+const f0 = v => CK.fmt.num(v, 0), f1 = v => CK.fmt.num(v, 1), f2 = v => CK.fmt.num(v, 2);
+const pc = v => CK.fmt.num(100 * v, 0) + '%';
+const sgn = (v, dp = 0) => (v > 0 ? '+' : '') + CK.fmt.num(v, dp);
 
-/* ---------- explorer ---------- */
-const LEVELS = [['L1','L1'],['L2','L2'],['L3','L3'],['DRAM','DRAM']];
-const DSTATES = [['open','open'],['closed','closed'],['conflict','conflict'],['refresh','in refresh']];
-const st = {lvl: 'DRAM', dstate: 'closed', req: 0, home: 31, click: 'req'};
-function segs(id, opts, key, after) {
-  const box = document.getElementById(id); box.innerHTML = '';
-  for (const [v, label] of opts) {
-    const b = document.createElement('button'); b.type = 'button'; b.textContent = label;
-    b.setAttribute('aria-pressed', st[key] === v);
-    b.onclick = () => { st[key] = v; segs(id, opts, key, after); after(); };
-    box.appendChild(b);
-  }
+/* Text on a filled mark: whichever of --ink and --page contrasts more with the fill, in the current theme. */
+const lumOf = (() => {
+  let probe;
+  return css => {
+    if (!probe) { probe = document.createElement('span'); probe.style.display = 'none'; document.body.appendChild(probe); }
+    probe.style.color = ''; probe.style.color = css;
+    const c = getComputedStyle(probe).color, v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), u = /^color\(/.test(c) ? 1 : 255;
+    const lin = x => { x /= u; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin(v[0]) + 0.7152 * lin(v[1]) + 0.0722 * lin(v[2]);
+  };
+})();
+const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+const inkOn = css => { const b = lumOf(css); return contrast(b, lumOf('var(--ink)')) >= contrast(b, lumOf('var(--page)')) ? 'var(--ink)' : 'var(--page)'; };
+/* A recessive fill for background marks (histogram bars, shaded windows), visible in both themes. */
+const soft = (c, p) => `color-mix(in srgb, ${c} ${p}%, var(--surface))`;
+/* 95% Wilson interval for k hits of n. */
+function wilson(k, n) {
+  if (!n) return [0, 1];
+  const z = 1.96, p = k / n, d = 1 + z * z / n, c = (p + z * z / (2 * n)) / d, h = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d;
+  return [Math.max(0, c - h), Math.min(1, c + h)];
 }
+/* A label that crosses a grid line: outline it in the page colour so the line stops short of the letters. */
+const halo = t => { Object.assign(t.style, {paintOrder: 'stroke', stroke: 'var(--page)', strokeWidth: '4px', strokeLinejoin: 'round'}); return t; };
+/* A keyboard/pointer hit area around a small mark. */
+const hitRect = (g, x, y, w, h) => el('rect', {x, y, width: w, height: h, class: 'ck-hit'}, g);
+
+/* ---------- 1. explorer ---------- */
+const LEVELS = [['L1', 'L1'], ['L2', 'L2'], ['L3', 'L3'], ['DRAM', 'DRAM']];
+const DSTATES = [['open', 'open'], ['closed', 'closed'], ['other', 'other row open'], ['queued', 'behind a load to another row'], ['refresh', 'in refresh']];
+const st = {lvl: 'DRAM', dstate: 'closed', req: 0, home: 31, click: 'req', colour: 'l3'};
+const l3lat = (r, s) => 110 + 12 * hops(MESH[r], MESH[s]);
+const dramLat = (r, s) => l3lat(r, s) + D.msConst + 12 * hops(MESH[s], MSPOS[s & 7]);
 function parts() {
   const h1 = hops(MESH[st.req], MESH[st.home]);
   const ms = st.home & 7, h2 = hops(MESH[st.home], MSPOS[ms]);
@@ -578,84 +1055,178 @@ function parts() {
   P.push(['L1 miss + L2 lookup', 48, 'c1']);
   if (st.lvl === 'L2') return {P, h1, h2, ms};
   P.push(['L3 home slice', 62, 'c2']);
-  if (h1) P.push([`mesh, ${h1} hop${h1>1?'s':''} ×12`, 12*h1, 'c3']);
+  if (h1) P.push([`mesh to the L3 home, ${h1} hop${h1 > 1 ? 's' : ''} × 12`, 12 * h1, 'c3']);
   if (st.lvl === 'L3') return {P, h1, h2, ms};
-  if (h2) P.push([`mesh to memory shire, ${h2} hop${h2>1?'s':''} ×12`, 12*h2, 'c3']);
-  // The §5 fit (91 cycles) was made on closed rows: 66 in the memory shire + 11 activate + 14 read and burst.
-  P.push(['memory shire: queue, PHY, clock crossing', 66, 'c4']);
-  if (st.dstate !== 'open') P.push(['activate (tRCD)', 11, 'c6']);
-  P.push(['DRAM read + burst', 14, 'c5']);
-  if (st.dstate === 'conflict') P.push(['wait for the other row + precharge', 40, 'c7']);
+  if (h2) P.push([`mesh to the memory shire, ${h2} hop${h2 > 1 ? 's' : ''} × 12`, 12 * h2, 'c3']);
+  // The §4 fit (D.msConst = 91 cycles) was made on closed rows: the memory shire, plus 11 for the activate and
+  // 14 for the read and one 4.3 ns burst, from the controller's timing registers.
+  P.push(['memory shire: queue, PHY, clock crossing', D.msConst - 25, 'c4']);
+  if (st.dstate === 'other') P.push(['DRAM: precharge the other row (tRP)', 11, 'c5']);
+  if (st.dstate !== 'open') P.push(['DRAM: activate (tRCD)', 11, 'c5']);
+  P.push(['DRAM: read + burst (one burst assumed; two would add 3)', 14, 'c5']);
+  if (st.dstate === 'queued') P.push(['wait for the other row + precharge', 40, 'c7']);
   if (st.dstate === 'refresh') P.push(['wait for refresh (worst case)', 210, 'c7']);
   return {P, h1, h2, ms};
 }
-function energy(h1) {
+function energyOf(h1) {
   const E = D.energy;
   if (st.lvl === 'L1') return E.l1.sp_total;
   if (st.lvl === 'L2') return E.l2.sp_total;
   if (st.lvl === 'L3') return E.l3near.sp_total + D.hopPj * h1;
   return E.dram_seq.sp_total;
 }
-function drawMesh() {
-  const {svg, tip, host} = svgIn('mesh', 330, 420);
-  const cw = 50, x0 = 15, y0 = 12;
-  const pos = (x, y) => [x0 + x*cw + (x < 0 ? 0 : 0), y0 + (y+1)*cw];
-  const lat = s => 110 + 12*hops(MESH[st.req], MESH[s]);
-  const ramp = ['--q1','--q2','--q3','--q4','--q5','--q6','--q7'];
-  const {h1, h2, ms} = parts();
-  const cellsL = el('g', {}, svg), pathL = el('g', {}, svg), textL = el('g', {}, svg);
-  for (let x = 0; x < 6; x++) for (let y = 0; y < 6; y++) {
-    const s = Object.keys(MESH).find(k => MESH[k][0] === x && MESH[k][1] === y);
+const readout = CK.readout('readout');
+function drawMesh(f) {
+  const cw = Math.floor(Math.min(56, (f.W - 8) / 6)), x0 = Math.round((f.W - 6 * cw) / 2), y0 = 4;
+  const pos = (x, y) => [x0 + x * cw, y0 + (y + 1) * cw];
+  const shade = s => st.colour === 'l3' ? Math.max(0, Math.min(6, Math.floor((l3lat(st.req, s) - 110) / 20))) / 6
+    : Math.max(0, Math.min(8, Math.floor((dramLat(st.req, s) - 210) / 20))) / 8;
+  const {ms} = parts();
+  const cellsL = el('g', {}, f.svg);
+  const nodes = [];
+  for (let y = 0; y < 6; y++) for (let x = 0; x < 6; x++) {
+    const s = Object.keys(MESH).map(Number).find(k => MESH[k][0] === x && MESH[k][1] === y);
     const [px, py] = pos(x, y);
-    const g = el('g', {class: s === undefined ? '' : 'sh' + (+s === st.req ? ' req' : '') + (+s === st.home ? ' home' : '')}, cellsL);
-    if (s === undefined) { el('rect', {x: px+2, y: py+2, width: cw-4, height: cw-4, rx: 6, fill: 'var(--empty)'}, g); continue; }
-    const l = lat(+s), k = Math.min(6, Math.round((l - 110) / 20));
-    el('rect', {x: px+2, y: py+2, width: cw-4, height: cw-4, rx: 6, fill: `var(${ramp[k]})`}, g);
-    const t = txt(textL, px + cw/2, py + cw/2 + 4, s, 'lab-strong', 'middle');
-    t.style.fill = lum(css(ramp[k])) < 0.35 ? '#ffffff' : '#0b0b0b';
-    g.addEventListener('click', () => { st[st.click] = +s; sync(); });
-    hover(g, tip, host, () => `Shire ${s}<br>L3 hit from shire ${st.req}: <b>${lat(+s)} cycles</b> (${hops(MESH[st.req], MESH[+s])} hops)`);
+    if (s === undefined) { el('rect', {x: px + 2, y: py + 2, width: cw - 4, height: cw - 4, rx: 6, fill: 'var(--empty)', 'aria-hidden': 'true'}, cellsL); continue; }
+    const g = el('g', {class: 'sh'}, cellsL), p = shade(s);
+    const r = el('rect', {x: px + 2, y: py + 2, width: cw - 4, height: cw - 4, rx: 6}, g);
+    r.style.fill = CK.ramp(p);
+    if (s === st.req || s === st.home) {
+      const o = el('rect', {x: px + 3.5, y: py + 3.5, width: cw - 7, height: cw - 7, rx: 5, fill: 'none', 'stroke-width': 3}, g);
+      o.style.stroke = s === st.req ? 'var(--ink)' : 'var(--c2)';
+      if (s !== st.req) o.setAttribute('stroke-dasharray', '5 3');
+      if (s === st.req && s === st.home) { const i = el('rect', {x: px + 8, y: py + 8, width: cw - 16, height: cw - 16, rx: 4, fill: 'none', 'stroke-width': 2, 'stroke-dasharray': '4 3'}, g); i.style.stroke = 'var(--c2)'; }
+    }
+    const t = txt(g, px + cw / 2, py + cw / 2 + 4, String(s), 'lab-strong', 'middle');
+    t.style.fill = CK.rampInk(p);
+    const m = D.memByHome[s], l3m = D.l3[s];
+    CK.tip(f, g, () => `<b>Shire ${s}</b><br>L3 hit from shire ${st.req}: <b>${l3lat(st.req, s)} cycles</b> (${hops(MESH[st.req], MESH[s])} hops, model)<br>` +
+      `DRAM load from shire ${st.req}: <b>${dramLat(st.req, s)} cycles</b> (model; memory shire M${s & 7}, ${hops(MESH[s], MSPOS[s & 7])} hops on)<br>` +
+      `Measured from shire 0: L3 ${f0(l3m.med)} (${l3m.n} lines), DRAM ${f0(m.fast_med)} (${m.n} lines)` +
+      `<br><span class="small">Enter or click: make it the ${st.click === 'req' ? 'requesting shire' : 'L3 home shire'}</span>`);
+    g.addEventListener('click', () => { st[st.click] = s; sync(); });
+    nodes.push({s, x, y, g});
   }
   for (let m = 0; m < 8; m++) {
-    const [mx, my] = MSPOS[m], [px, py] = pos(mx, my);
-    const on = st.lvl === 'DRAM' && m === ms;
-    el('rect', {x: px+2, y: py+8, width: cw-4, height: cw-16, rx: 6, fill: on ? 'var(--c4)' : 'var(--empty)',
-      stroke: 'var(--axis)', 'stroke-width': 1}, cellsL);
-    txt(textL, px + cw/2, py + cw/2 + 4, 'M' + m, on ? 'lab-strong' : 'lab', 'middle');
+    const [mx, my] = MSPOS[m], [px, py] = pos(mx, my), on = st.lvl === 'DRAM' && m === ms;
+    const r = el('rect', {x: px + 2, y: py + 8, width: cw - 4, height: cw - 16, rx: 6, 'stroke-width': on ? 2.5 : 1, 'aria-hidden': 'true'}, cellsL);
+    r.style.fill = on ? soft('var(--c4)', 40) : 'var(--empty)'; r.style.stroke = on ? 'var(--c4)' : 'var(--axis)';
+    txt(cellsL, px + cw / 2, py + cw / 2 + 4, 'M' + m, on ? 'lab-strong' : 'lab', 'middle').setAttribute('aria-hidden', 'true');
   }
-  const ctr = p => { const [px, py] = pos(p[0], p[1]); return [px + cw/2, py + cw/2]; };
-  const lpath = (a, b) => { const [ax, ay] = ctr(a), [bx, by] = ctr(b); return `M${ax},${ay} L${bx},${ay} L${bx},${by}`; };
-  if (st.lvl === 'L3' || st.lvl === 'DRAM') el('path', {d: lpath(MESH[st.req], MESH[st.home]), class: 'path', stroke: 'var(--c3)', opacity: 0.85}, pathL);
-  if (st.lvl === 'DRAM') el('path', {d: lpath(MESH[st.home], MSPOS[ms]), class: 'path', stroke: 'var(--c4)', 'stroke-dasharray': '6 4', opacity: 0.9}, pathL);
-  document.getElementById('mesh-legend').innerHTML = '<span>L3 hit, cycles:</span>' +
-    ramp.map((v, k) => `<span><i style="background:var(${v})"></i>${110 + 20 * k}${k === 6 ? '+' : ''}</span>`).join('');
+  CK.keynav(f, nodes.map(n => n.g), {
+    step: (k, K) => {
+      if (K !== 'ArrowUp' && K !== 'ArrowDown') return null;
+      const c = nodes[k], dy = K === 'ArrowUp' ? -1 : 1;
+      for (let y = c.y + dy; y >= 0 && y < 6; y += dy) {
+        const row = nodes.map((n, i) => [n, i]).filter(([n]) => n.y === y);
+        if (row.length) return row.reduce((b, [n, i]) => (Math.abs(n.x - c.x) < Math.abs(nodes[b].x - c.x) ? i : b), row[0][1]);
+      }
+      return k;
+    },
+    onEnter: n => { const s = nodes.find(x => x.g === n).s; st[st.click] = s; sync(); },
+  });
+  const steps = st.colour === 'l3' ? 7 : 9, base = st.colour === 'l3' ? 110 : 210;
+  const lg = CK.legend('mesh-legend', Array.from({length: steps}, (_, k) => ({key: 'k' + k, label: f0(base + 20 * k) + (k === steps - 1 ? '+' : ''), mark: 'box', color: CK.ramp(k / (steps - 1))})));
+  const cap = document.createElement('span'); cap.textContent = (st.colour === 'l3' ? 'L3 hit' : 'DRAM load') + ' from shire ' + st.req + ', cycles (model):';
+  lg.el.prepend(cap);
 }
-function drawFlame() {
-  const {P, h1, h2, ms} = parts();
-  const total = P.reduce((a, p) => a + p[1], 0);
-  const {svg, tip, host} = svgIn('flame', 600, 110);
-  const x = linear(0, Math.max(total, 60), 0, 600);
-  el('rect', {x: 0, y: 4, width: x(total) - 2, height: 30, rx: 4, fill: 'var(--ink)'}, svg);
-  txt(svg, 8, 24, `${st.lvl} load: ${total} cycles`, 'lab-strong').style.fill = 'var(--page)';
+function drawFlame(f) {
+  const {P} = parts(), total = P.reduce((a, p) => a + p[1], 0);
+  const x = CK.lin(0, Math.max(total, 60), 0, f.W);
+  el('rect', {x: 0, y: 4, width: x(total) - 2, height: 26, rx: 4, fill: 'var(--ink)', 'aria-hidden': 'true'}, f.svg);
+  const label = `${st.lvl} load: ${total} cycles`, inside = x(total) - 2 > label.length * 7 + 16;  // an L1 hit's bar is too short
+  txt(f.svg, inside ? 8 : x(total) + 6, 22, label, 'lab-strong').style.fill = inside ? 'var(--page)' : 'var(--ink)';
   let acc = 0;
-  for (const [name, c, col] of P) {
-    const g = el('g', {}, svg);
-    const w = Math.max(2, x(c) - 2);
-    el('rect', {x: x(acc), y: 38, width: w, height: 30, rx: 4, fill: `var(--${col})`}, g);
-    if (w > 34) { const t = txt(g, x(acc) + 5, 58, c, 'lab-strong'); t.style.fill = '#0b0b0b'; }
-    hover(g, tip, host, () => `<b>${name}</b><br>${c} cycles = ${fmt(c*CYC_NS)} ns (${fmt(100*c/total)}%)`);
-    acc += c;
+  const nodes = [];
+  P.forEach(([name, c, col]) => {
+    const g = el('g', {}, f.svg), w = Math.max(2, x(c) - 2);
+    el('rect', {x: x(acc), y: 36, width: w, height: 26, rx: 4, fill: `var(--${col})`}, g);
+    if (w > 26) txt(g, x(acc) + 5, 54, String(c), 'lab-strong').style.fill = inkOn(`var(--${col})`);
+    CK.tip(f, g, `<b>${name}</b><br>${c} cycles = ${f0(c * CYC_NS)} ns (${pc(c / total)} of the load)`);
+    nodes.push(g); acc += c;
+  });
+  CK.keynav(f, nodes);
+  txt(f.svg, 0, 80, 'Cycles at 600 MHz; 1 cycle = 1.67 ns.', 'tick');
+  CK.legend('flame-legend', P.map(([name, c, col], i) => ({key: 'p' + i, label: `${name}: ${c}`, mark: 'box', color: `var(--${col})`})));
+}
+function drawStrip(f) {
+  const {h1} = parts(), W = f.W, L = 10, R = 10, yb = f.H - 36, T = 34;
+  if (st.lvl === 'L1' || st.lvl === 'L2') {
+    $('strip-title').textContent = 'Where this path sits among the measured loads';
+    txt(f.svg, 0, 20, `No spread to compare for an ${st.lvl} hit: see the ladder, §2.`, 'lab');
+    return;
   }
-  txt(svg, 0, 90, 'Cycles at 600 MHz; 1 cycle = 1.67 ns.', 'tick');
-  document.getElementById('flame-legend').innerHTML = P.map(([name, c, col]) =>
-    `<span><i style="background:var(--${col})"></i>${name}: ${c}</span>`).join('');
-  const E = energy(h1);
-  document.getElementById('readout').innerHTML =
-    `<span class="big">${total} cycles</span> · ${fmt(total*CYC_NS)} ns · ` +
-    `<span class="big">${fmt(E/1000, E >= 1000 ? 1 : 2)} nJ</span> per load` +
-    (st.lvl === 'DRAM' ? ` <span class="small">(measured average over all paths)</span>` : '');
-  const cells = [];
-  cells.push(['Requesting shire', `${st.req}`]);
+  const clampX = (v, w) => Math.max(L + w / 2, Math.min(W - R - w / 2, v));
+  const top = (x0, label, row, cls) => txt(f.svg, clampX(x0, label.length * 6.6), row, label, cls || 'lab-strong', 'middle');
+  if (st.lvl === 'DRAM') {
+    const H = D.memHist, maxN = Math.max(...H.map(d => d[1]));
+    const x = CK.lin(140, 560, L, W - R), y = CK.lin(0, maxN, yb, T);
+    const bw = Math.max(1, x(146) - x(140) - 1), nodes = [];
+    for (const [v, n] of H) {
+      const g = el('g', {}, f.svg), med = v <= D.memMed && D.memMed < v + 6;
+      const r = el('rect', {x: x(v), y: y(n), width: bw, height: Math.max(1, yb - y(n))}, g);
+      r.style.fill = med ? 'var(--c1)' : soft('var(--ref)', 55);
+      hitRect(g, x(v), T, bw + 1, yb - T);
+      CK.tip(f, g, `${f0(n)} of ${f0(D.memN)} loads read ${v}–${v + 5} cycles` + (med ? ' (the median bin)' : ''));
+      nodes.push(g);
+    }
+    for (const t of [200, 300, 400, 500]) txt(f.svg, x(t), yb + 14, f0(t), 'tick', 'middle');
+    el('line', {x1: L, x2: W - R, y1: yb, y2: yb, class: 'axis-line'}, f.svg);
+    const model = dramLat(st.req, st.home), xm = x(Math.max(140, Math.min(560, model)));
+    const rule = el('g', {}, f.svg);
+    el('line', {x1: xm, x2: xm, y1: 18, y2: yb, 'stroke-width': 2}, rule).style.stroke = 'var(--ink)';
+    hitRect(rule, xm - 5, 4, 10, yb - 4);
+    CK.tip(f, rule, `This path's model: <b>${model} cycles</b> (${st.req} → home ${st.home} → M${st.home & 7}, ${st.dstate === 'closed' ? 'closed row' : 'closed-row model; the row state changes the bar above, not this rule'})`);
+    // the rule is the closed-row model whatever row state the bar above shows, so say so when they differ
+    top(xm, st.dstate === 'closed' ? `this path: ${model}` : `this path, closed row: ${model}`, 12);
+    const xmed = x(D.memMed), medLab = `median ${f0(D.memMed)}`;
+    const side = Math.abs(xmed - xm) < 90 ? (xmed < xm ? 'end' : 'start') : 'middle';
+    txt(f.svg, side === 'end' ? xmed - 6 : side === 'start' ? xmed + 6 : clampX(xmed, 70), 28, medLab, 'lab', side);
+    nodes.push(rule);
+    if (st.req === 0) {
+      const m = D.memByHome[st.home], xs = x(m.fast_med), g = el('g', {}, f.svg);
+      el('path', {d: `M${xs},${yb + 3} l-5,8 h10 z`}, g).style.fill = 'var(--c2)';
+      el('line', {x1: xs, x2: xs, y1: T, y2: yb, 'stroke-width': 2, 'stroke-dasharray': '3 2'}, g).style.stroke = 'var(--c2)';
+      hitRect(g, xs - 6, T, 12, yb - T + 14);
+      CK.tip(f, g, `Measured from shire 0 to home ${st.home}: <b>${f0(m.fast_med)} cycles</b>, the median over its ${m.n} lines of each line's fastest of three loads; the model says ${f0(m.model)}`);
+      top(xs, `measured, ${m.n} lines: ${f0(m.fast_med)}`, f.H - 4, 'lab');
+      nodes.push(g);
+    } else {
+      txt(f.svg, L, f.H - 4, 'Measured values exist only from shire 0.', 'lab');
+    }
+    CK.keynav(f, nodes);
+    $('strip-title').textContent = `Where this path sits among the ${f0(D.memN)} DRAM loads measured from shire 0`;
+    return;
+  }
+  // L3: each home shire's median L3 hit from shire 0, against this path's model
+  const x = CK.lin(100, 240, L, W - R), nodes = [];
+  for (const t of [120, 160, 200, 240]) txt(f.svg, x(t), yb + 14, f0(t), 'tick', 'middle');
+  el('line', {x1: L, x2: W - R, y1: yb, y2: yb, class: 'axis-line'}, f.svg);
+  const homes = Object.keys(D.l3).map(Number).sort((a, b) => D.l3[a].med - D.l3[b].med || a - b), seen = {};
+  for (const s of homes) {
+    const v = D.l3[s], k = (seen[v.med] = (seen[v.med] || 0) + 1) - 1, yy = yb - 8 - k * 9;
+    const g = el('g', {}, f.svg), c = el('circle', {cx: x(v.med), cy: yy, r: s === st.home ? 5 : 3.5}, g);
+    c.style.fill = s === st.home ? 'var(--surface)' : 'var(--c1)';
+    if (s === st.home) { c.style.stroke = 'var(--c2)'; c.setAttribute('stroke-width', 2.5); }
+    hitRect(g, x(v.med) - 5, yy - 5, 10, 10);
+    CK.tip(f, g, `Home shire ${s}: median L3 hit from shire 0 <b>${f0(v.med)} cycles</b> over ${v.n} lines (${v.hops} hops; model ${110 + 12 * v.hops})`);
+    nodes.push(g);
+  }
+  const model = l3lat(st.req, st.home), xm = x(model), rule = el('g', {}, f.svg);
+  el('line', {x1: xm, x2: xm, y1: 18, y2: yb, 'stroke-width': 2}, rule).style.stroke = 'var(--ink)';
+  hitRect(rule, xm - 5, 4, 10, yb - 4);
+  CK.tip(f, rule, `This path's model: <b>${model} cycles</b> (${h1} hops from shire ${st.req} to home ${st.home})`);
+  top(xm, `this path: ${model}`, 12);
+  nodes.push(rule);
+  CK.keynav(f, nodes);
+  txt(f.svg, L, f.H - 4, st.req === 0 ? `Ringed: home ${st.home}, measured ${f0(D.l3[st.home].med)}.` : 'Measured values exist only from shire 0.', 'lab');
+  $('strip-title').textContent = 'Where this path sits among the 32 home shires’ measured L3 hits from shire 0';
+}
+function drawReadout() {
+  const {P, h1, h2, ms} = parts(), total = P.reduce((a, p) => a + p[1], 0), E = energyOf(h1);
+  readout.set(`<span class="big">${total} cycles</span> · ${f0(total * CYC_NS)} ns · <span class="big">${CK.fmt.num(E / 1000, E >= 1000 ? 1 : 2)} nJ</span> per load ` +
+    `<span class="small">(19 Sep rail-trace average${st.lvl === 'DRAM' ? ' over all paths' : ''}; superseded, see §6)</span>`);
+  const cells = [['Requesting shire', `${st.req}`]];
   if (st.lvl === 'L3' || st.lvl === 'DRAM') cells.push(['L3 home shire', `${st.home} · ${h1} hops`]);
   if (st.lvl === 'DRAM') cells.push(['Memory shire', `M${ms} · ${h2} hops from home`]);
   const E0 = D.energy, RAILS = ['minion', 'sram', 'noc', 'rest'];
@@ -664,239 +1235,395 @@ function drawFlame() {
   const perHop = k => (E0.l3far[k] - E0.l3near[k]) / farHops;
   let en = st.lvl === 'L1' ? E0.l1 : st.lvl === 'L2' ? E0.l2 : st.lvl === 'L3' ? E0.l3near : E0.dram_seq;
   if (st.lvl === 'L3') en = Object.fromEntries(RAILS.map(k => [k, E0.l3near[k] + perHop(k) * h1]));
-  cells.push(['Energy per load by rail: cores / SRAM / NoC / rest', RAILS.map(k => fmt(en[k])).join(' / ') + ' pJ', 'full']);
-  if (st.lvl === 'L3') cells.push(['Mesh energy', `+${fmt(D.hopPj)} pJ per hop, ${fmt(perHop('noc'))} of it NoC`]);
-  document.getElementById('cells').innerHTML = cells.map(([k, v, cls]) => `<div class="card${cls ? ' ' + cls : ''}"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  cells.push(['Energy per load by rail (19 Sep, superseded): cores / SRAM / NoC / rest', RAILS.map(k => f0(en[k])).join(' / ') + ' pJ', 'full']);
+  if (st.lvl === 'L3') cells.push(['Mesh energy', `+${f0(D.hopPj)} pJ per hop, ${f0(perHop('noc'))} of it NoC`]);
+  $('cells').innerHTML = cells.map(([k, v, cls]) => `<div class="card${cls ? ' ' + cls : ''}"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  $('strip-cap').textContent = st.lvl === 'DRAM'
+    ? 'Model fitted to these loads (one constant and eight memory shire positions); measured values are the median over each home’s lines of the fastest of three loads.'
+    : st.lvl === 'L3' ? 'Model (110 + 12 per hop) fitted to these loads; each dot is one home shire’s median over its lines of the median of three L3 hits per line.' : '';
 }
+let meshF, flameF, stripF;
 function sync() {
-  document.getElementById('req').value = st.req; document.getElementById('home').value = st.home;
-  document.getElementById('dstate-wrap').style.display = st.lvl === 'DRAM' ? '' : 'none';
-  drawMesh(); drawFlame();
+  $('req').value = st.req; $('home').value = st.home;
+  $('dstate').style.display = st.lvl === 'DRAM' ? '' : 'none';
+  drawReadout();
+  meshF.redraw(); flameF.redraw(); stripF.redraw();
 }
 (function initExplorer() {
   const ids = Object.keys(MESH).map(Number).sort((a, b) => a - b);
   for (const id of ['req', 'home']) {
-    const s = document.getElementById(id);
+    const s = $(id);
     s.innerHTML = ids.map(i => `<option value="${i}">shire ${i}</option>`).join('');
     s.onchange = () => { st[id] = +s.value; sync(); };
   }
-  segs('lvl', LEVELS, 'lvl', sync);
-  segs('dstate', DSTATES, 'dstate', sync);
-  segs('clickmode', [['req','sets requester'],['home','sets home']], 'click', () => {});
+  CK.seg('lvl', {label: 'Level', options: LEVELS, value: st.lvl, onChange: v => { st.lvl = v; sync(); }});
+  CK.seg('dstate', {label: 'DRAM row', options: DSTATES, value: st.dstate, onChange: v => { st.dstate = v; sync(); }});
+  CK.seg('mapcolour', {label: 'Shade by', options: [['l3', 'L3 hit'], ['dram', 'DRAM load']], value: st.colour, onChange: v => { st.colour = v; meshF.redraw(); }});
+  CK.seg('clickmode', {label: 'Click or Enter sets', options: [['req', 'requester'], ['home', 'L3 home']], value: st.click, onChange: v => { st.click = v; meshF.redraw(); }});
+  meshF = CK.frame('mesh', {minW: 260, maxW: 360, label: 'Map of the compute shires and memory shires: pick the requesting shire and the L3 home shire', height: W => 8 * Math.floor(Math.min(56, (W - 8) / 6)) + 8, draw: drawMesh});
+  flameF = CK.frame('flame', {minW: 260, maxW: 900, label: 'The load’s latency, part by part', height: 86, draw: drawFlame});
+  stripF = CK.frame('mstrip', {minW: 260, maxW: 900, label: 'This path among the measured loads', height: () => (st.lvl === 'L1' || st.lvl === 'L2' ? 30 : 140), draw: drawStrip});
   sync();
 })();
 
-/* ---------- ladder ---------- */
-(function () {
-  const rows = [['in L1', 'ladder:-1'], ['evicted to L2', 'ladder:1'], ['evicted to L3', 'ladder:2'], ['evicted to memory', 'ladder:3'],
-    ['to memory, fence, no wait', 'nodelay:3'], ['to memory, no fence', 'nofence:3']];
-  const W = 900, H = 40 + rows.length * 42, L = 190, R = 30;
-  const {svg, tip, host} = svgIn('ladder', W, H);
-  const x = linear(0, 520, L, W - R);
+/* ---------- 2. ladder ---------- */
+const LADDER = [['in L1', 'ladder:-1'], ['evicted to L2', 'ladder:1'], ['evicted to L3', 'ladder:2'], ['evicted to memory', 'ladder:3'],
+  ['to memory, fence, no wait', 'nodelay:3'], ['to memory, no fence', 'nofence:3']];
+CK.frame('ladder', {label: 'Load-to-use latency by where the line was left', height: W => (W < 600 ? 54 : 42) * LADDER.length + 40, draw: f => {
+  const nar = f.narrow, rowH = nar ? 54 : 42, L = nar ? 8 : 190, R = 40, T = nar ? 30 : 20;
+  const x = CK.lin(0, 520, L, f.W - R), g0 = el('g', {'aria-hidden': 'true'}, f.svg), nodes = [];
   for (const t of [0, 100, 200, 300, 400, 500]) {
-    el('line', {x1: x(t), x2: x(t), y1: 10, y2: H - 24, class: 'grid-line'}, svg);
-    txt(svg, x(t), H - 6, t, 'tick', 'middle');
+    el('line', {x1: x(t), x2: x(t), y1: T - (nar ? 26 : 14), y2: f.H - 26, class: 'grid-line'}, g0);
+    txt(g0, x(t), f.H - 10, f0(t), 'tick', 'middle');
   }
-  rows.forEach(([name, k], i) => {
-    const v = D.ladder[k], y = 26 + i * 42;
-    txt(svg, L - 10, y + 4, name, 'lab', 'end');
-    const g = el('g', {}, svg);
+  LADDER.forEach(([name, k], i) => {
+    const v = D.ladder[k], y = T + i * rowH + (nar ? 4 : 0);
+    if (nar) txt(g0, L, y - 12, name, 'lab'); else txt(g0, L - 10, y + 4, name, 'lab', 'end');
+    const g = el('g', {}, f.svg);
     el('line', {x1: x(v.p10), x2: x(v.p90), y1: y, y2: y, stroke: 'var(--c1)', 'stroke-width': 6, 'stroke-linecap': 'round', opacity: 0.35}, g);
     el('line', {x1: x(v.min), x2: x(v.max), y1: y, y2: y, stroke: 'var(--c1)', 'stroke-width': 2, opacity: 0.6}, g);
     el('circle', {cx: x(v.med), cy: y, r: 6, fill: 'var(--c1)', stroke: 'var(--surface)', 'stroke-width': 2}, g);
-    txt(g, x(v.max) + 8, y + 4, `${v.med}`, 'lab-strong');
-    el('rect', {x: L, y: y - 16, width: W - L - R, height: 32, fill: 'transparent'}, g);
-    hover(g, tip, host, () => `<b>${name}</b><br>median ${v.med} · 10–90%: ${v.p10}–${v.p90} · range ${v.min}–${v.max} cycles`);
+    txt(g, x(v.max) + 8, y + 4, f0(v.med), 'lab-strong');
+    hitRect(g, L, y - 14, f.W - L - R, 28);
+    CK.tip(f, g, `<b>${name}</b><br>median ${f0(v.med)} cycles (${f0(v.med * CYC_NS)} ns) · 10–90%: ${f0(v.p10)}–${f0(v.p90)} · range ${f0(v.min)}–${f0(v.max)} · ${v.n} loads`);
+    nodes.push(g);
   });
-  const t = document.getElementById('ladder-table');
+  CK.keynav(f, nodes);
+}});
+(function () {
+  const t = $('ladder-table'), dirty = D.ladder['tevict_dirty:3'];
   t.innerHTML = '<thead><tr><th>Line left in</th><th class="num">min</th><th class="num">median</th><th class="num">90%</th><th class="num">max</th><th class="num">median ns</th></tr></thead><tbody>' +
-    rows.map(([n, k]) => { const v = D.ladder[k]; return `<tr><td>${n}</td><td class="num">${v.min}</td><td class="num">${v.med}</td><td class="num">${v.p90}</td><td class="num">${v.max}</td><td class="num">${fmt(v.med*CYC_NS)}</td></tr>`; }).join('') +
-    `<tr><td>cost of evicting a dirty line + fence (not a load)</td><td class="num">${D.ladder['tevict_dirty:3'].min}*</td><td class="num">${D.ladder['tevict_dirty:3'].med}</td><td class="num">${D.ladder['tevict_dirty:3'].p90}</td><td class="num">${D.ladder['tevict_dirty:3'].max}</td><td class="num">${fmt(D.ladder['tevict_dirty:3'].med*CYC_NS)}</td></tr></tbody>`;
+    LADDER.map(([n, k]) => { const v = D.ladder[k]; return `<tr><td>${n}</td><td class="num">${f0(v.min)}</td><td class="num">${f0(v.med)}</td><td class="num">${f0(v.p90)}</td><td class="num">${f0(v.max)}</td><td class="num">${f0(v.med * CYC_NS)}</td></tr>`; }).join('') +
+    `<tr><td>cost of evicting a dirty line + fence (not a load)</td><td class="num">${f0(dirty.min)}</td><td class="num">${f0(dirty.med)}</td><td class="num">${f0(dirty.p90)}</td><td class="num">${f0(dirty.max)}</td><td class="num">${f0(dirty.med * CYC_NS)}</td></tr></tbody>`;
+  CK.stackTable(t);
 })();
 
-/* ---------- L3 vs hops ---------- */
-(function () {
-  const W = 900, H = 300, L = 56, R = 20, T = 14, B = 40;
-  const {svg, tip, host} = svgIn('l3', W, H);
-  const x = linear(0, 10, L + 10, W - R - 10), y = linear(100, 240, H - B, T);
-  axisY(svg, y, [100, 140, 180, 220], L, W - R);
-  for (let h = 0; h <= 10; h++) txt(svg, x(h), H - B + 18, h, 'tick', 'middle');
-  txt(svg, (L + W) / 2, H - 4, 'hops from shire 0 to the home shire', 'lab', 'middle');
-  el('line', {x1: x(0), y1: y(110), x2: x(10), y2: y(230), stroke: 'var(--ref)', 'stroke-width': 2, 'stroke-dasharray': '5 4'}, svg);
-  txt(svg, x(8.2), y(110 + 12*8.2) - 10, '110 + 12 × hops', 'lab', 'middle');
+/* ---------- 3. L3 against hops ---------- */
+CK.frame('l3', {label: 'L3 hit latency from shire 0 against hops to the home shire', height: W => (W < 600 ? 270 : 300), draw: f => {
+  const L = 44, R = 12, T = 24, B = 38;
+  const x = CK.lin(0, 10, L + 10, f.W - R - 10), y = CK.lin(100, 240, f.H - B, T);
+  CK.axes(f, {x, y, L, R, T, B, xt: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], yt: [100, 140, 180, 220], xl: 'hops from shire 0 to the home shire', yl: 'L3 hit, cycles'});
+  const ln = el('line', {x1: x(0), y1: y(110), x2: x(10), y2: y(230), stroke: 'var(--ref)', 'stroke-width': 2, 'stroke-dasharray': '5 4', 'aria-hidden': 'true'}, f.svg);
+  txt(f.svg, x(f.narrow ? 4.2 : 7.6), y(110 + 12 * (f.narrow ? 4.2 : 7.6)) - 12, '110 + 12 × hops', 'lab', 'end');
   const byH = {};
   for (const [s, v] of Object.entries(D.l3)) (byH[v.hops] = byH[v.hops] || []).push([+s, v]);
-  for (const [h, arr] of Object.entries(byH)) arr.forEach(([s, v], i) => {
-    const g = el('g', {}, svg);
-    const cx = x(+h) + (i - (arr.length - 1) / 2) * 11;
-    el('circle', {cx, cy: y(v.med), r: 5, fill: 'var(--c1)', stroke: 'var(--surface)', 'stroke-width': 2}, g);
-    el('circle', {cx, cy: y(v.med), r: 12, fill: 'transparent'}, g);
-    hover(g, tip, host, () => `Home shire <b>${s}</b>, ${h} hops<br>median ${v.med} cycles over ${v.n} lines<br>model ${110 + 12*h}`);
+  const maxN = Math.max(...Object.values(byH).map(a => a.length)), step = Math.min(11, 0.85 * (x(1) - x(0)) / maxN), nodes = [];
+  for (const h of Object.keys(byH).map(Number).sort((a, b) => a - b)) byH[h].sort((a, b) => a[1].med - b[1].med || a[0] - b[0]).forEach(([s, v], i, arr) => {
+    const g = el('g', {}, f.svg), cx = x(h) + (i - (arr.length - 1) / 2) * step;
+    el('circle', {cx, cy: y(v.med), r: 5, fill: 'var(--c1)', stroke: 'var(--surface)', 'stroke-width': 1.5}, g);
+    hitRect(g, cx - 6, y(v.med) - 8, 12, 16);
+    CK.tip(f, g, `Home shire <b>${s}</b>, ${h} hops<br>median ${f0(v.med)} cycles over ${v.n} lines<br>model ${110 + 12 * h}`);
+    nodes.push(g);
   });
-})();
+  CK.keynav(f, nodes);
+}});
 
-/* ---------- model error ---------- */
-(function () {
-  const data = D.modelErr.filter(([e]) => e >= -6 && e <= 6);
-  const W = 900, H = 200, L = 56, R = 20, T = 12, B = 36;
-  const {svg, tip, host} = svgIn('modelerr', W, H);
+/* ---------- 4. model error, memory shire counters ---------- */
+CK.frame('modelerr', {label: 'Measured DRAM latency minus the model, per line', height: 210, draw: f => {
+  const data = D.modelErr.filter(([e]) => e >= -6 && e <= 6), L = 44, R = 12, T = 26, B = 38;
   const maxN = Math.max(...data.map(d => d[1]));
-  const x = linear(-6.5, 6.5, L, W - R), y = linear(0, maxN, H - B, T);
-  axisY(svg, y, [0, 200, 400, 600].filter(v => v <= maxN * 1.05), L, W - R);
-  for (let e = -6; e <= 6; e++) txt(svg, x(e), H - B + 18, e > 0 ? '+' + e : e, 'tick', 'middle');
-  txt(svg, (L + W) / 2, H - 2, 'cycles (measured − model)', 'lab', 'middle');
-  const bw = (x(1) - x(0)) - 4;
+  const x = CK.lin(-6.5, 6.5, L, f.W - R), y = CK.lin(0, maxN, f.H - B, T);
+  CK.axes(f, {x, y, L, R, T, B, xt: f.W < 420 ? [-6, -4, -2, 0, 2, 4, 6] : [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6],
+    yt: [0, 200, 400, 600].filter(v => v <= maxN * 1.05), xfmt: v => sgn(v), xl: 'cycles, measured − model', yl: 'lines'});
+  const bw = (x(1) - x(0)) - 4, nodes = [];
   for (const [e, n] of data) {
-    const g = el('g', {}, svg);
-    el('rect', {x: x(e) - bw / 2, y: y(n), width: bw, height: y(0) - y(n), rx: 3, fill: 'var(--c1)'}, g);
-    hover(g, tip, host, () => `${e > 0 ? '+' : ''}${e} cycles: <b>${n}</b> lines`);
+    const g = el('g', {}, f.svg);
+    el('rect', {x: x(e) - bw / 2, y: y(n), width: bw, height: Math.max(1, y(0) - y(n)), rx: 3, fill: 'var(--c1)'}, g);
+    hitRect(g, x(e) - bw / 2, T, bw, f.H - B - T);
+    CK.tip(f, g, `${sgn(e)} cycles: <b>${f0(n)}</b> lines`);
+    nodes.push(g);
   }
+  CK.keynav(f, nodes);
   const out = D.modelErr.filter(([e]) => e < -6 || e > 6).reduce((a, d) => a + d[1], 0);
-  txt(svg, W - R, T + 10, `${out} lines outside ±6 (timer glitches, refresh)`, 'lab', 'end');
+  txt(f.svg, f.W - R, T - 11, `${out} lines outside ±6 (timer glitches, refresh)`, 'lab', 'end');
+}});
+(function () {
+  const t = $('mstable');
+  t.innerHTML = '<thead><tr><th class="pa">Physical address</th><th class="num">PA[8:6]</th>' +
+    [0, 1, 2, 3, 4, 5, 6, 7].map(m => `<th class="num">M${m}</th>`).join('') + '</tr></thead><tbody>' +
+    D.msmap.rows.slice(0, 12).map(r => `<tr><td class="pa"><code>${r.pa}</code></td><td class="num">${r.ms_bits}</td>` +
+      r.deltas.map((d, m) => `<td class="num"${m === r.ms_bits ? ' style="font-weight:700"' : ''}>${d}</td>`).join('') + '</tr>').join('') + '</tbody>';
+  $('mstable-cap').textContent = `${D.msmap.match} of ${D.msmap.lines} lines: the counter that rose is the one named by PA[8:6]. For 4 lines it rose by 15: one of their 16 loads was not counted, and this run does not show why.`;
 })();
 
-/* ---------- memory shire counters table ---------- */
+/* ---------- 5a. which address bits share a row ---------- */
 (function () {
-  const t = document.getElementById('mstable');
-  t.innerHTML = '<thead><tr><th>Physical address</th><th class="num">PA[8:6]</th>' +
-    [0,1,2,3,4,5,6,7].map(m => `<th class="num">M${m}</th>`).join('') + '</tr></thead><tbody>' +
-    D.msmap.rows.slice(0, 12).map(r => `<tr><td><code>${r.pa}</code></td><td class="num">${r.ms_bits}</td>` +
-      r.deltas.map((d, m) => `<td class="num"${m === r.ms_bits ? ' style="font-weight:700"' : ''}>${d}</td>`).join('') + '</tr>').join('') +
-    `</tbody><caption class="small" style="caption-side:bottom;text-align:left;padding-top:6px">${D.msmap.match} of ${D.msmap.lines} lines: the counter that rose is the one named by PA[8:6]. For 4 lines it rose by 15: one of their 16 loads was not counted, and this run does not show why.</caption>`;
-})();
-
-/* ---------- bit sweep ---------- */
-(function () {
-  const role = b => b < 0 ? ['same line', 'ref'] : b <= 8 ? ['memory shire / L3 home', 'c1'] : b === 9 ? ['channel', 'c1'] :
-    b <= 12 ? ['bank', 'c1'] : b <= 17 ? ['column (same row)', 'c3'] : ['row', 'c2'];
-  const lg = document.getElementById('bits-legend');
-  lg.innerHTML = [['address bits 6–12: memory shire, channel, bank', 'c1'], ['bits 13–17: column, same row', 'c3'], ['bits 18+: row, same bank', 'c2']]
-    .map(([n, c]) => `<span><i style="background:var(--${c})"></i>${n}</span>`).join('');
   const bits = Object.keys(D.bits).map(Number).filter(b => b >= 6).sort((a, b) => a - b);
-  const W = 900, H = 290, L = 56, R = 16, T = 14, B = 40;
-  const {svg, tip, host} = svgIn('bits', W, H);
-  const x = linear(5.5, 29.5, L, W - R), y = linear(220, 480, H - B, T);
-  axisY(svg, y, [240, 300, 360, 420, 480], L, W - R);
-  for (const b of bits) txt(svg, x(b), H - B + 18, b, 'tick', 'middle');
-  txt(svg, (L + W) / 2, H - 2, 'physical-address bit where B differs from A', 'lab', 'middle');
-  const bw = (x(1) - x(0)) * 0.5;
-  for (const b of bits) {
-    const v = D.bits[b], [name, col] = role(b);
-    const g = el('g', {}, svg);
-    el('line', {x1: x(b), x2: x(b), y1: y(v.ab_p10), y2: y(v.ab_p90), stroke: `var(--${col})`, 'stroke-width': 2, opacity: 0.55}, g);
-    el('rect', {x: x(b) - bw / 2, y: y(v.ab_med) - 3, width: bw, height: 6, rx: 3, fill: `var(--${col})`}, g);
-    el('rect', {x: x(b) - bw, y: T, width: 2 * bw, height: H - B - T, fill: 'transparent'}, g);
-    hover(g, tip, host, () => `Bit <b>${b}</b> (${name})<br>second load: median ${v.ab_med}, 10–90% ${v.ab_p10}–${v.ab_p90} cycles<br>alone after A (not back to back): ${v.b_minus_b0 >= 0 ? '+' : ''}${fmt(v.b_minus_b0, 1)} ± ${fmt(v.se, 1)} vs baseline`);
-  }
-  txt(svg, x(23.5), y(345) - 12, '+40 cycles: row conflict', 'lab', 'middle');
+  const role = b => b <= 12 ? 'c1' : b <= 17 ? 'c3' : 'c2';
+  const band = (a, b) => { const v = bits.filter(k => k >= a && k <= b).map(k => D.bits[k].b_minus_b0_med).sort((p, q) => p - q); return v[Math.floor(v.length / 2)]; };
+  const med = a => { const v = a.slice().sort((p, q) => p - q); return v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2; };
+  const step40 = med(bits.filter(b => b >= 18).map(b => D.bits[b].ab_med)) - med(bits.filter(b => b < 18).map(b => D.bits[b].ab_med));
+  let mode = 'ab';
+  const legend = () => CK.legend('bits-legend', mode === 'ab'
+    ? [{key: 'b', label: 'bits 6–12: memory shire, channel, bank', mark: 'box', color: 'var(--c1)'}, {key: 'c', label: 'bits 13–17: column, same row', mark: 'box', color: 'var(--c3)'}, {key: 'r', label: 'bits 18+: row, same bank', mark: 'box', color: 'var(--c2)'}]
+    : [{key: 'b', label: `bits 6–12, another bank or channel: ${sgn(band(6, 12))}`, mark: 'box', color: 'var(--c1)'}, {key: 'c', label: `bits 13–17, same row: ${sgn(band(13, 17))}, the activate saved`, mark: 'box', color: 'var(--c3)'},
+       {key: 'r', label: `bits 18+, same bank, another row: ${sgn(band(18, 29))}, the precharge (tRP = 11)`, mark: 'box', color: 'var(--c2)'}]);
+  const title = () => { $('bits-title').textContent = mode === 'ab'
+    ? 'Latency of the second of two back-to-back loads, by the address bit that differs (median and 10th–90th percentile)'
+    : 'The second load issued after the first, minus the same load alone, by the address bit that differs (median and middle half)'; };
+  const F = CK.frame('bits', {label: 'Second-load latency by the address bit that differs', height: W => (W < 600 ? 270 : 300), draw: f => {
+    const L = 44, R = 12, T = 24, B = 38, ab = mode === 'ab';
+    const x = CK.lin(5.4, 29.6, L + 4, f.W - R), y = ab ? CK.lin(220, 480, f.H - B, T) : CK.lin(-30, 30, f.H - B, T);
+    CK.axes(f, {x, y, L, R, T, B, xt: f.W < 480 ? bits.filter(b => b % 2 === 0) : bits, yt: ab ? [240, 300, 360, 420, 480] : [-30, -15, 0, 15, 30],
+      yfmt: ab ? null : v => sgn(v), xl: 'physical-address bit where B differs from A', yl: ab ? 'second load, cycles' : 'B − B alone, cycles'});
+    if (!ab) el('line', {x1: L, x2: f.W - R, y1: y(0), y2: y(0), stroke: 'var(--axis)', 'stroke-width': 1.5, 'aria-hidden': 'true'}, f.svg);
+    const bw = Math.max(4, (x(1) - x(0)) * 0.55), nodes = [];
+    for (const b of bits) {
+      const v = D.bits[b], col = `var(--${role(b)})`, g = el('g', {}, f.svg);
+      const lo = ab ? v.ab_p10 : v.b_minus_b0_p25, hi = ab ? v.ab_p90 : v.b_minus_b0_p75, m = ab ? v.ab_med : v.b_minus_b0_med;
+      const cl = u => Math.max(y.domain[0], Math.min(y.domain[1], u));
+      el('line', {x1: x(b), x2: x(b), y1: y(cl(lo)), y2: y(cl(hi)), stroke: col, 'stroke-width': 2, opacity: 0.6}, g);
+      el('rect', {x: x(b) - bw / 2, y: y(cl(m)) - 3, width: bw, height: 6, rx: 3, fill: col}, g);
+      hitRect(g, x(b) - (x(1) - x(0)) / 2, T, x(1) - x(0), f.H - B - T);
+      CK.tip(f, g, `Bit <b>${b}</b> (${b <= 8 ? 'memory shire / L3 home' : b === 9 ? 'channel' : b <= 12 ? 'bank' : b <= 17 ? 'column, same row' : 'row, same bank'})<br>` +
+        `back to back: second load median ${f0(v.ab_med)}, 10–90% ${f0(v.ab_p10)}–${f0(v.ab_p90)} cycles<br>` +
+        `one after the other, minus B alone: median ${sgn(v.b_minus_b0_med)}, middle half ${sgn(v.b_minus_b0_p25)} to ${sgn(v.b_minus_b0_p75)} (mean ${sgn(v.b_minus_b0, 1)} ± ${f1(v.se)})`);
+      nodes.push(g);
+    }
+    CK.keynav(f, nodes);
+    // above the plot area, clear of the whiskers (bit 22's reaches the top); right-aligned on a phone
+    const c40 = sgn(5 * Math.round(step40 / 5));
+    if (ab) txt(f.svg, f.narrow ? f.W - R : x(23.5), T - 10, f.narrow ? `bits 18+: ${c40}, a row conflict` : `bits 18+: about ${c40} cycles, a row conflict`, 'lab', f.narrow ? 'end' : 'middle');
+  }});
+  CK.seg('bits-mode', {label: 'Show', options: [['ab', 'issued together'], ['after', 'one after the other']], value: mode, onChange: v => { mode = v; legend(); title(); F.redraw(); }});
+  legend(); title();
 })();
 
-/* ---------- refresh ---------- */
+/* ---------- 5b. refresh ---------- */
 (function () {
-  const c = D.refresh.curve, P = D.refresh.period_cycles;
-  const W = 900, H = 260, L = 56, R = 16, T = 14, B = 40;
-  const {svg, tip, host} = svgIn('refresh', W, H);
-  const x = linear(0, 50, L, W - R), y = linear(200, 450, H - B, T);
-  axisY(svg, y, [200, 250, 300, 350, 400, 450], L, W - R);
-  for (const f of [0, 10, 20, 30, 40, 50]) txt(svg, x(f), H - B + 18, fmt(f / 50 * P / 600, 2) + ' µs', 'tick', f === 50 ? 'end' : 'middle');
-  txt(svg, (L + W) / 2, H - 2, `time since the refresh started (period ${fmt(P)} cycles = ${fmt(P / 600, 2)} µs)`, 'lab', 'middle');
-  const line = k => c.map((p, i) => `${i ? 'L' : 'M'}${x(p.phase + 0.5)},${y(p[k])}`).join(' ');
-  el('path', {d: line('max'), fill: 'none', stroke: 'var(--c2)', 'stroke-width': 2}, svg);
-  el('path', {d: line('med'), fill: 'none', stroke: 'var(--c1)', 'stroke-width': 2}, svg);
-  txt(svg, x(6), y(425), 'slowest load in the bin', 'lab');
-  txt(svg, x(4), y(372), 'median', 'lab');
-  txt(svg, x(14), y(262), 'median 226: refresh closed the row', 'lab');
-  txt(svg, x(49.5), y(240), 'open row: 215', 'lab', 'end');
-  const cross = el('line', {y1: T, y2: H - B, class: 'axis-line', opacity: 0}, svg);
-  const hit = el('rect', {x: L, y: T, width: W - L - R, height: H - B - T, fill: 'transparent'}, svg);
-  hover(hit, tip, host, () => '');
-  hit.addEventListener('mousemove', ev => {
-    const r = svg.getBoundingClientRect(), vx = (ev.clientX - r.left) / r.width * W;
-    const i = Math.max(0, Math.min(49, Math.floor((vx - L) / (W - L - R) * 50)));
-    cross.setAttribute('x1', x(i + 0.5)); cross.setAttribute('x2', x(i + 0.5)); cross.setAttribute('opacity', 1);
-    const tp = host.querySelector('.tip');
-    tp.innerHTML = `${fmt(i / 50 * P / 600, 2)}–${fmt((i + 1) / 50 * P / 600, 2)} µs after refresh start<br>median <b>${c[i].med}</b> · slowest <b>${c[i].max}</b> cycles`;
-  });
-  hit.addEventListener('mouseleave', () => cross.setAttribute('opacity', 0));
+  const c = D.refresh.curve, P = D.refresh.period_cycles, HP = D.hitPhase;
+  const us = i => f2(i / 50 * P / 600);
+  let mode = 'lat';
+  const legend = () => {
+    CK.legend('refresh-legend', mode === 'lat'
+      ? [{key: 'm', label: 'median load', mark: 'line', color: 'var(--c1)'}, {key: 's', label: 'slowest load in the bin', mark: 'line', color: 'var(--c2)'}]
+      : [{key: 'h', label: 'loads that were row hits', mark: 'box', color: 'var(--c1)'},
+         {key: 'f', label: 'where most loads waited for the refresh: hits among the rest', mark: 'box', color: soft('var(--c1)', 35)},
+         {key: 'w', label: 'refresh running (90th percentile ≥ 260 cycles)', mark: 'box', color: soft('var(--ref)', 30)}]);
+    // the light bars carry an outline (their fill is close to the shaded window's), and so does their swatch
+    if (mode !== 'lat') {
+      const s = $('refresh-legend').children[1].querySelector('rect');
+      Object.entries({x: 3.5, y: 0.5, width: 11, height: 9}).forEach(([k, v]) => s.setAttribute(k, v));
+      s.style.stroke = 'var(--c1)'; s.style.strokeWidth = '1';
+    }
+  };
+  const title = () => { $('refresh-title').textContent = mode === 'lat'
+    ? 'DRAM latency against the load’s moment in the refresh period (median and slowest per bin)'
+    : 'Share of loads that found their row open, against the moment in the refresh period'; };
+  const F = CK.frame('refresh', {label: 'DRAM latency against the refresh period', height: W => (W < 600 ? 250 : 270), draw: f => {
+    const L = 44, R = 30, T = 24, B = 38, lat = mode === 'lat';
+    const x = CK.lin(0, 50, L, f.W - R), y = lat ? CK.lin(200, 450, f.H - B, T) : CK.lin(0, 1, f.H - B, T);
+    const xt = f.W < 480 ? [0, 25, 50] : [0, 10, 20, 30, 40, 50];
+    CK.axes(f, {x, y, L, R, T, B, xt, yt: lat ? [200, 250, 300, 350, 400, 450] : [0, 0.25, 0.5, 0.75, 1], xfmt: v => us(v) + ' µs', yfmt: lat ? null : v => pc(v),
+      xl: `time in the refresh period (period ${f0(P)} cycles = ${us(50)} µs)`, yl: lat ? 'cycles' : 'row hits'});
+    // the shaded refresh window: one rect per run of bins whose 90th percentile is slow (no seams between bins)
+    const slow = i => c[i].p90 >= 260;
+    if (!lat) for (let i = 0; i < 50; i++) if (slow(i) && (i === 0 || !slow(i - 1))) {
+      let j = i; while (j < 49 && slow(j + 1)) j++;
+      const r = el('rect', {x: x(i), y: T, width: x(j + 1) - x(i), height: f.H - B - T, 'aria-hidden': 'true'}, f.svg); r.style.fill = soft('var(--ref)', 30);
+    }
+    // a bin whose median load waited for the refresh: its hit share counts only the few loads that did not wait
+    const most = i => c[i].med >= 260;
+    const cross = el('line', {y1: T, y2: f.H - B, class: 'axis-line', opacity: 0, 'aria-hidden': 'true'}, f.svg);
+    if (lat) {
+      const line = k => c.map((p, i) => `${i ? 'L' : 'M'}${x(p.phase + 0.5).toFixed(1)},${y(p[k]).toFixed(1)}`).join(' ');
+      el('path', {d: line('max'), fill: 'none', stroke: 'var(--c2)', 'stroke-width': 2, 'aria-hidden': 'true'}, f.svg);
+      el('path', {d: line('med'), fill: 'none', stroke: 'var(--c1)', 'stroke-width': 2, 'aria-hidden': 'true'}, f.svg);
+      // on a phone the label is as wide as 27 bins and would cross the slowest-load spike, so it goes under the line
+      if (f.narrow) txt(f.svg, x(9), y(204), 'median 226: refresh closed the row', 'lab');
+      else txt(f.svg, x(14), y(262), 'median 226: refresh closed the row', 'lab');
+      txt(f.svg, x(49.5), y(240), 'open row: 215', 'lab', 'end');
+    } else {
+      for (let i = 0; i < 50; i++) {
+        const h = HP[i]; if (!h.n) continue;
+        const r = el('rect', {x: x(i) + 0.5, y: y(h.hit / h.n), width: Math.max(1, x(i + 1) - x(i) - 1), height: Math.max(0.5, y(0) - y(h.hit / h.n)), 'aria-hidden': 'true'}, f.svg);
+        r.style.fill = most(i) ? soft('var(--c1)', 35) : 'var(--c1)';
+        if (most(i)) { r.style.stroke = 'var(--c1)'; r.style.strokeWidth = '1'; }
+      }
+    }
+    const nodes = [];
+    for (let i = 0; i < 50; i++) {
+      const g = el('g', {}, f.svg), h = HP[i];
+      hitRect(g, x(i), T, x(i + 1) - x(i), f.H - B - T);
+      const show = () => { cross.setAttribute('x1', x(i + 0.5)); cross.setAttribute('x2', x(i + 0.5)); cross.setAttribute('opacity', 1); };
+      g.addEventListener('pointerenter', show); g.addEventListener('focus', show);
+      g.addEventListener('pointerleave', () => cross.setAttribute('opacity', 0)); g.addEventListener('blur', () => cross.setAttribute('opacity', 0));
+      CK.tip(f, g, `${us(i)}–${us(i + 1)} µs into the period<br>median <b>${f0(c[i].med)}</b> · slowest <b>${f0(c[i].max)}</b> cycles<br>` +
+        (!h.n ? 'no load in this bin was an ordinary one: all waited for the refresh'
+          : `row hits: ${f0(h.hit)} of ${f0(h.n)} loads (${pc(h.hit / h.n)})` + (most(i) ? `<br>Most loads in this bin waited for the refresh; the share counts only the ${f0(h.n)} loads that neither waited nor glitched.` : '')));
+      nodes.push(g);
+    }
+    CK.keynav(f, nodes);
+  }});
+  CK.seg('refresh-mode', {label: 'Show', options: [['lat', 'latency'], ['hits', 'row hits']], value: mode, onChange: v => { mode = v; legend(); title(); F.redraw(); }});
+  legend(); title();
 })();
 
-/* ---------- page timeout ---------- */
+/* ---------- 5c. what closes a DRAM row ---------- */
 (function () {
-  const d = D.pto;
-  const W = 900, H = 240, L = 56, R = 16, T = 14, B = 40;
-  const {svg, tip, host} = svgIn('pto', W, H);
-  const lx = v => Math.log10(v + 50);
-  const x = linear(lx(0), lx(20000), L + 8, W - R), y = linear(0, 1, H - B, T);
-  axisY(svg, y, [0, 0.25, 0.5, 0.75, 1], L, W - R, v => (v * 100) + '%');
-  for (const v of [0, 100, 400, 1000, 2000, 5000, 20000]) txt(svg, x(lx(v)), H - B + 18, fmt(v), 'tick', v === 20000 ? 'end' : 'middle');
-  txt(svg, (L + W) / 2, H - 2, 'idle cycles between the two loads (log scale)', 'lab', 'middle');
-  const path = k => d.map((p, i) => `${i ? 'L' : 'M'}${x(lx(p.delay))},${y(p[k])}`).join(' ');
-  el('path', {d: path('refresh_model'), fill: 'none', stroke: 'var(--ref)', 'stroke-width': 2, 'stroke-dasharray': '5 4'}, svg);
-  el('path', {d: path('hit'), fill: 'none', stroke: 'var(--c1)', 'stroke-width': 2}, svg);
-  for (const p of d) {
-    const g = el('g', {}, svg);
-    el('circle', {cx: x(lx(p.delay)), cy: y(p.hit), r: 5, fill: 'var(--c1)', stroke: 'var(--surface)', 'stroke-width': 2}, g);
-    el('circle', {cx: x(lx(p.delay)), cy: y(p.hit), r: 12, fill: 'transparent'}, g);
-    hover(g, tip, host, () => `${fmt(p.delay)} idle cycles<br>row hits: <b>${fmt(100 * p.hit)}%</b><br>if only refresh closed rows: ${fmt(100 * p.refresh_model)}%`);
-  }
-  txt(svg, x(lx(1500)) + 10, y(0.42), 'if only refresh closed rows', 'lab');
-  txt(svg, x(lx(60)), y(0.62) + 26, 'measured', 'lab-strong');
+  // Refresh series (one line): each load against the one before it, by idle gap (250-cycle buckets) and by whether a
+  // refresh started in between. Buckets of 1,750 cycles and more are merged: near a whole refresh period the
+  // no-refresh / refresh split depends on exactly where the refresh starts, so that point is drawn hollow.
+  const RL = D.rowlife, near = RL.filter(r => r.gap < 1750), far = RL.filter(r => r.gap >= 1750);
+  const noRef = near.map(r => ({x0: r.gap, x1: r.gap + 250, k: r.hit_no_refresh, n: r.n_no_refresh}));
+  const tail = far.reduce((a, r) => ({k: a.k + r.hit_no_refresh, n: a.n + r.n_no_refresh}), {k: 0, n: 0});
+  if (tail.n) noRef.push({x0: 1750, x1: Math.max(...far.filter(r => r.n_no_refresh).map(r => r.gap)) + 250, k: tail.k, n: tail.n, edge: true});
+  const withRef = RL.filter(r => r.n_refresh >= 20).map(r => ({x0: r.gap, x1: r.gap + 250, k: r.hit_refresh, n: r.n_refresh}));
+  const pairs = D.pto.filter(p => p.delay <= 3000), XMAX = 3500;
+  const nMax = Math.max(...noRef.concat(withRef).map(p => p.n));
+  const rad = n => 3 + 5 * Math.sqrt(n / nMax);
+  const lg = CK.legend('pto-legend', [
+    {key: 'nr', label: 'one line, no refresh in between', mark: 'dot', color: 'var(--c1)'},
+    {key: 'wr', label: 'one line, a refresh in between', mark: 'dot', color: 'var(--c2)'},
+    {key: 'pr', label: 'two lines of a random row, set delay', mark: 'ring', color: 'var(--c3)'},
+    {key: 'rm', label: 'refresh alone, for those pairs', mark: 'dash', color: 'var(--ref)'}], {toggle: true, onChange: on => CK.showSeries(F, on)});
+  const F = CK.frame('pto', {label: 'What closes a DRAM row: share of loads that found their row open, against idle time', height: W => (W < 600 ? 300 : 320), draw: f => {
+    // 0% sits a little above the axis line, so the large dots at 0% stay clear of the x tick labels
+    const L = 44, R = 22, T = 24, B = 38;
+    const x = CK.lin(0, XMAX, L + 6, f.W - R), y = CK.lin(-0.05, 1, f.H - B, T);
+    CK.axes(f, {x, y, L, R, T, B, xt: f.W < 480 ? [0, 1000, 2000, 3000] : [0, 500, 1000, 1500, 2000, 2500, 3000, 3500], yt: [0, 0.25, 0.5, 0.75, 1],
+      yfmt: v => pc(v), xl: 'idle cycles between the two loads', yl: 'loads that found the row open'});
+    const P = el('g', {'data-series': 'rm', 'aria-hidden': 'true'}, f.svg);
+    el('path', {d: CK.path(pairs.map(p => [p.delay, p.refresh_model_loop]), x, y), fill: 'none', stroke: 'var(--ref)', 'stroke-width': 2, 'stroke-dasharray': '6 4'}, P);
+    const series = (key, pts, col, what) => {
+      const g0 = el('g', {'data-series': key}, f.svg), nodes = [];
+      el('path', {d: CK.path(pts.filter(p => !p.edge).map(p => [(p.x0 + p.x1) / 2, p.k / p.n]), x, y), fill: 'none', stroke: col, 'stroke-width': 2, opacity: 0.7, 'aria-hidden': 'true'}, g0);
+      for (const p of pts) {
+        const g = el('g', {}, g0), cx = x((p.x0 + p.x1) / 2), cy = y(p.k / p.n), r = rad(p.n);
+        const c = el('circle', {cx, cy, r, 'stroke-width': 2}, g);
+        c.style.fill = p.edge ? 'var(--surface)' : col; c.style.stroke = p.edge ? col : 'var(--surface)';
+        hitRect(g, cx - Math.max(r, 7), cy - Math.max(r, 7), 2 * Math.max(r, 7), 2 * Math.max(r, 7));
+        CK.tip(f, g, `<b>${what}</b><br>${f0(p.x0)}–${f0(p.x1)} idle cycles: <b>${pc(p.k / p.n)}</b> row hits (${f0(p.k)} of ${f0(p.n)} loads)` +
+          (p.edge ? '<br>Uncertain: this close to a whole refresh period, whether one fell in between depends on exactly where the refresh starts.' : ''));
+        nodes.push(g);
+      }
+      CK.keynav(f, nodes);
+    };
+    series('wr', withRef, 'var(--c2)', 'One line, a refresh in between');
+    series('nr', noRef, 'var(--c1)', 'One line, no refresh in between');
+    const g1 = el('g', {'data-series': 'pr'}, f.svg), pn = [];
+    for (const p of pairs) {
+      const [lo, hi] = wilson(p.hits, p.n), cx = x(p.delay), g = el('g', {}, g1);
+      el('line', {x1: cx, x2: cx, y1: y(lo), y2: y(hi), stroke: 'var(--c3)', 'stroke-width': 1.5}, g);
+      for (const v of [lo, hi]) el('line', {x1: cx - 3, x2: cx + 3, y1: y(v), y2: y(v), stroke: 'var(--c3)', 'stroke-width': 1.5}, g);
+      el('circle', {cx, cy: y(p.hit), r: 4.5, fill: 'var(--surface)', stroke: 'var(--c3)', 'stroke-width': 2}, g);
+      hitRect(g, cx - 7, Math.min(y(hi), y(p.hit) - 7), 14, Math.max(y(lo), y(p.hit) + 7) - Math.min(y(hi), y(p.hit) - 7));
+      CK.tip(f, g, `<b>Two lines of one random row</b><br>set delay ${f0(p.delay)} cycles (plus about ${f0(2 * D.opCycles)} of probe time and the first load): ` +
+        `<b>${pc(p.hit)}</b> row hits (${p.hits} of ${p.n} pairs; 95% interval ${pc(lo)}–${pc(hi)})<br>refresh alone predicts ${pc(p.refresh_model_loop)}`);
+      pn.push(g);
+    }
+    CK.keynav(f, pn);
+    if (!f.narrow) {
+      txt(f.svg, x(1000), y(noRef.find(p => p.x0 === 1000).k / noRef.find(p => p.x0 === 1000).n) - 14, 'no refresh in between', 'lab', 'middle');
+      txt(f.svg, x(2375), y(0.04) - 14, 'a refresh in between', 'lab', 'middle');
+    }
+  }});
+  // the numbers, for reading without the chart
+  const t1 = $('rowlife-table');
+  t1.innerHTML = '<thead><tr><th>Idle cycles (refresh series)</th><th class="num">no refresh in between: hits / loads</th><th class="num">a refresh in between: hits / loads</th></tr></thead><tbody>' +
+    RL.map(r => `<tr><td>${f0(r.gap)}–${f0(r.gap + 249)}</td><td class="num">${r.n_no_refresh ? `${f0(r.hit_no_refresh)} / ${f0(r.n_no_refresh)} (${pc(r.hit_no_refresh / r.n_no_refresh)})` : '—'}</td>` +
+      `<td class="num">${r.n_refresh ? `${f0(r.hit_refresh)} / ${f0(r.n_refresh)} (${pc(r.hit_refresh / r.n_refresh)})` : '—'}</td></tr>`).join('') + '</tbody>';
+  const t2 = $('pto-table');
+  t2.innerHTML = '<thead><tr><th>Set delay, cycles (pairs in one random row)</th><th class="num">row hits / pairs</th><th class="num">refresh alone predicts</th></tr></thead><tbody>' +
+    D.pto.map(p => `<tr><td>${f0(p.delay)}</td><td class="num">${p.hits} / ${p.n} (${pc(p.hit)})</td><td class="num">${pc(p.refresh_model_loop)}</td></tr>`).join('') + '</tbody>';
+  CK.stackTable(t1); CK.stackTable(t2);
 })();
 
-/* ---------- energy ---------- */
+/* ---------- 6. energy ---------- */
 (function () {
-  const pats = [['l1', 'L1 hit'], ['l2', 'L2 hit'], ['l3near', 'L3 hit, own shire'], ['l3far', 'L3 hit, ~5.6 hops'], ['dram_seq', 'DRAM, sequential'], ['dram_row', 'DRAM, row conflicts']];
+  const pats = [['l1', 'L1 hit', 'l1'], ['l2', 'L2 hit', 'l2'], ['l3near', 'L3 hit, own shire', 'l3'], ['l3far', 'L3 hit, ~5.6 hops', 'l3'],
+    ['dram_seq', 'DRAM, sequential', 'dram'], ['dram_row', 'DRAM, row conflicts', 'dram']];
   const parts = [['minion', 'minion cores', 'c1'], ['sram', 'SRAM (L2/L3)', 'c2'], ['noc', 'NoC (mesh)', 'c3'], ['rest', 'rest (board − rails; mostly DDR)', 'c4']];
-  document.getElementById('energy-legend').innerHTML = parts.map(([, n, c]) => `<span><i style="background:var(--${c})"></i>${n}</span>`).join('');
-  const W = 900, rowH = 40, T = 10, L = 150, R = 70, H = T + pats.length * rowH + 34;
-  const {svg, tip, host} = svgIn('energy', W, H + 14);
-  const lx = v => Math.log10(v);
-  const x = linear(0, 5200, L, W - R);
-  for (const t of [0, 1000, 2000, 3000, 4000, 5000]) {
-    el('line', {x1: x(t), x2: x(t), y1: T, y2: H - 30, class: 'grid-line'}, svg);
-    txt(svg, x(t), H - 12, fmt(t), 'tick', 'middle');
-  }
-  txt(svg, (L + W - R) / 2, H + 2, 'pJ per load (one 8-byte ld; below L1 each brings a 64-byte line)', 'lab', 'middle');
-  pats.forEach(([k, name], i) => {
-    const e = D.energy[k], y = T + i * rowH + 6;
-    txt(svg, L - 10, y + 18, name, 'lab', 'end');
-    let acc = 0;
-    for (const [pk, pn, col] of parts) {
-      const v = Math.max(0, e[pk]); if (!v) continue;
-      const g = el('g', {}, svg);
-      const w = Math.max(1.5, x(acc + v) - x(acc) - 2);
-      el('rect', {x: x(acc), y, width: w, height: 26, rx: 3, fill: `var(--${col})`}, g);
-      el('rect', {x: x(acc), y: y - 4, width: Math.max(w, 8), height: 34, fill: 'transparent'}, g);
-      hover(g, tip, host, () => `<b>${name}</b> · ${pn}<br>${fmt(v)} pJ per load (${fmt(100 * v / e.sp_total)}%)<br>${fmt(e.watts[pk] ?? 0, 2)} W above idle`);
-      acc += v;
-    }
-    txt(svg, x(acc) + 6, y + 18, fmt(e.sp_total) + ' pJ', 'lab-strong');
-  });
-  const t = document.getElementById('energy-table');
-  t.innerHTML = '<thead><tr><th>Pattern (1,024 minions)</th><th class="num">cycles/load</th><th class="num">loads/s</th><th class="num">cores</th><th class="num">SRAM</th><th class="num">NoC</th><th class="num">rest</th><th class="num">total (trace)</th><th class="num">total (host log)</th><th class="num">pJ per byte of line</th></tr></thead><tbody>' +
-    pats.map(([k, n]) => { const e = D.energy[k]; return `<tr><td>${n}</td><td class="num">${fmt(e.cpl, 1)}</td><td class="num">${(e.rate / 1e9).toFixed(2)} G</td><td class="num">${fmt(e.minion)}</td><td class="num">${fmt(e.sram)}</td><td class="num">${fmt(e.noc)}</td><td class="num">${fmt(e.rest)}</td><td class="num"><b>${fmt(e.sp_total)}</b></td><td class="num">${fmt(e.host_total)}</td><td class="num">${k === 'l1' ? '—' : fmt(e.sp_total / 64, 1)}</td></tr>`; }).join('') +
-    '</tbody><caption class="small" style="caption-side:bottom;text-align:left;padding-top:6px">pJ per load (one 8-byte ld, which below L1 moves a 64-byte line) above idle, mean of two 6 s runs. The load and stall energy of the cores is included, so these are what a load costs a real program. "Rest" is the board total minus the three rails, mostly the DDR side. An L1 hit moves no line; per byte the ld returns it costs 46/8 ≈ 5.7 pJ.</caption>';
+  const M = D.manual;
+  let mode = 'pj';
+  const legend = () => CK.legend('energy-legend', mode === 'byte'
+    ? [{key: 'b', label: 'here, rail trace', mark: 'box', color: 'var(--c1)'}, {key: 'h', label: 'here, host log', mark: 'ring', color: 'var(--c1)'}, {key: 'm', label: 'energy manual: mean and range', mark: 'line', color: 'var(--ink)'}]
+    : parts.map(([k, n, c]) => ({key: k, label: n, mark: 'box', color: `var(--${c})`})));
+  const texts = () => {
+    $('energy-title').textContent = mode === 'pj' ? 'Energy per load, split by rail (19 September, rail trace; superseded)'
+      : mode === 'share' ? 'Where each load’s energy goes, as a share of the load' : 'Energy per byte of line moved, against the energy manual (log scale)';
+    $('energy-cap').textContent = mode === 'byte'
+      ? `Manual: 1 KB tensor loads, two cards, host board power, over memory whose contents were not set (L2 ${f2(M.l2.mean)} [${f2(M.l2.lo)}–${f2(M.l2.hi)}], L3 at mixed distances ${f1(M.l3.mean)} [${f1(M.l3.lo)}–${f1(M.l3.hi)}], DRAM ${f0(M.dram.mean)} [${f0(M.dram.lo)}–${f0(M.dram.hi)}] pJ/B). Here: an 8-byte ld per 64-byte line, one card, the rail trace (bar) and the host log (ring). An L1 hit moves no line.`
+      : mode === 'share' ? 'Each bar is one load’s energy on the rail trace, as 100%. The cores’ share falls level by level; the NoC rail appears at L3, and the unmetered rest takes two thirds of a DRAM load.'
+      : 'pJ per load above idle, one 8-byte ld; below L1 each brings a 64-byte line. The bars are the 19 September rail trace; the energy manual has since measured every level on two cards (the third view).';
+  };
+  const F = CK.frame('energy', {label: 'Energy per load by level and rail', height: W => pats.length * 56 + 54, draw: f => {
+    const L = 8, R = 12, T = 8, rowH = 56, bh = 22, W = f.W, nodes = [];
+    const axisY = T + pats.length * rowH + 6;
+    let x;
+    if (mode === 'pj') x = CK.lin(0, 5200, L, W - R);
+    else if (mode === 'share') x = CK.lin(0, 1, L, W - R);
+    else x = CK.log(1, 200, L, W - R);
+    const ticks = mode === 'pj' ? (W < 480 ? [0, 2500, 5000] : [0, 1000, 2000, 3000, 4000, 5000]) : mode === 'share' ? [0, 0.25, 0.5, 0.75, 1] : [1, 2, 5, 10, 20, 50, 100, 200];
+    const g0 = el('g', {'aria-hidden': 'true'}, f.svg);
+    for (const t of ticks) { el('line', {x1: x(t), x2: x(t), y1: T, y2: axisY, class: 'grid-line'}, g0); txt(g0, x(t), axisY + 16, mode === 'share' ? pc(t) : f0(t), 'tick', t === ticks[0] ? 'start' : t === ticks[ticks.length - 1] ? 'end' : 'middle'); }
+    txt(g0, (L + W - R) / 2, axisY + 34, mode === 'pj' ? 'pJ per load' : mode === 'share' ? 'share of the load’s energy (rail trace)' : 'pJ per byte of line moved', 'lab', 'middle');
+    pats.forEach(([k, name, lvl], i) => {
+      const e = D.energy[k], y = T + i * rowH + 20;
+      txt(f.svg, L, y - 6, name, 'lab-strong');
+      if (mode === 'byte') {
+        const right = k === 'l1' ? 'moves no line' : `here ${f1(e.sp_total / 64)} / ${f1(e.host_total / 64)} · manual ${M[lvl].mean >= 20 ? f0(M[lvl].mean) : f1(M[lvl].mean)}`;
+        halo(txt(f.svg, W - R, y - 6, right, 'lab', 'end'));
+        if (k === 'l1') return;
+        const g = el('g', {}, f.svg), b = e.sp_total / 64, h = e.host_total / 64, m = M[lvl];
+        el('rect', {x: x(1), y, width: Math.max(1, x(b) - x(1)), height: bh, rx: 3, fill: 'var(--c1)'}, g);
+        el('circle', {cx: x(h), cy: y + bh / 2, r: 5, fill: 'var(--surface)', stroke: 'var(--c1)', 'stroke-width': 2}, g);
+        const yb = y + bh + 6;
+        el('line', {x1: x(m.lo), x2: x(m.hi), y1: yb, y2: yb, stroke: 'var(--ink)', 'stroke-width': 1.5}, g);
+        for (const v of [m.lo, m.hi]) el('line', {x1: x(v), x2: x(v), y1: yb - 4, y2: yb + 4, stroke: 'var(--ink)', 'stroke-width': 1.5}, g);
+        el('line', {x1: x(m.mean), x2: x(m.mean), y1: yb - 6, y2: yb + 6, stroke: 'var(--ink)', 'stroke-width': 3}, g);
+        hitRect(g, L, y - 2, W - L - R, bh + 16);
+        CK.tip(f, g, `<b>${name}</b><br>here: ${f1(b)} pJ/B on the rail trace, ${f1(h)} on the host log (19 Sep, one card)<br>` +
+          `energy manual, ${lvl.toUpperCase()}: ${f2(m.mean)} pJ/B [${f2(m.lo)}–${f2(m.hi)}] over ${m.n} passes on two cards`);
+        nodes.push(g);
+        return;
+      }
+      let acc = 0;
+      const tot = e.sp_total;
+      if (mode === 'pj') halo(txt(f.svg, W - R, y - 6, f0(tot) + ' pJ', 'lab', 'end'));
+      for (const [pk, pn, col] of parts) {
+        const v = Math.max(0, e[pk]); if (!v) continue;
+        const a = mode === 'share' ? acc / tot : acc, b = mode === 'share' ? (acc + v) / tot : acc + v;
+        const g = el('g', {}, f.svg), w = Math.max(1.5, x(b) - x(a) - 2);
+        el('rect', {x: x(a), y, width: w, height: bh, rx: 3, fill: `var(--${col})`}, g);
+        if (mode === 'share' && w > 34) txt(g, x(a) + w / 2, y + 15, pc(v / tot), 'lab-strong', 'middle').style.fill = inkOn(`var(--${col})`);
+        hitRect(g, x(a), y - 4, Math.max(w, 10), bh + 8);
+        CK.tip(f, g, `<b>${name}</b> · ${pn}<br>${f0(v)} pJ per load (${pc(v / tot)} of ${f0(tot)})<br>${f2(e.watts[pk] ?? 0)} W above idle`);
+        nodes.push(g);
+        acc += v;
+      }
+    });
+    CK.keynav(f, nodes);
+  }});
+  CK.seg('energy-mode', {label: 'Show', options: [['pj', 'pJ per load'], ['share', 'share of each load'], ['byte', 'pJ per byte, against the energy manual']], value: mode,
+    onChange: v => { mode = v; legend(); texts(); F.redraw(); }});
+  legend(); texts();
+  const t = $('energy-table');
+  t.innerHTML = '<thead><tr><th>Pattern (1,024 minions)</th><th class="num">cycles/load (mean / slowest minion)</th><th class="num">loads/s</th><th class="num">cores</th><th class="num">SRAM</th><th class="num">NoC</th><th class="num">rest</th><th class="num">total (trace)</th><th class="num">total (host log)</th><th class="num">pJ per byte of line (trace / host)</th></tr></thead><tbody>' +
+    pats.map(([k, n]) => { const e = D.energy[k]; return `<tr><td>${n}</td><td class="num">${f1(e.cpl)} / ${f1(e.cpl_slow)}</td><td class="num">${f2(e.rate / 1e9)} G</td><td class="num">${f0(e.minion)}</td><td class="num">${f0(e.sram)}</td><td class="num">${f0(e.noc)}</td><td class="num">${f0(e.rest)}</td><td class="num"><b>${f0(e.sp_total)}</b></td><td class="num">${f0(e.host_total)}</td><td class="num">${k === 'l1' ? '—' : f1(e.sp_total / 64) + ' / ' + f1(e.host_total / 64)}</td></tr>`; }).join('') + '</tbody>';
+  CK.stackTable(t);
 })();
 
-/* ---------- timer ---------- */
-(function () {
-  const raw = D.timer.raw, W = 900, H = 150, L = 190, R = 30;
-  const {svg, tip, host} = svgIn('timer', W, H);
-  const rows = [['raw read pairs', raw], ['same pairs, corrected', D.timer.fixed]];
-  const x = linear(-130, 150, L, W - R);
-  for (const t of [-118, 10, 138]) { el('line', {x1: x(t), x2: x(t), y1: 8, y2: H - 26, class: 'grid-line'}, svg); txt(svg, x(t), H - 8, t < 0 ? '−' + (-t) : t, 'tick', 'middle'); }
+/* ---------- 7. timer ---------- */
+CK.frame('timer', {label: 'Cycles between two back-to-back counter reads', height: W => (W < 600 ? 170 : 150), draw: f => {
+  const nar = f.narrow, L = nar ? 16 : 190, R = 40;
+  const rows = [['raw read pairs', D.timer.raw], ['same pairs, corrected', D.timer.fixed]];
+  const x = CK.lin(-130, 150, L, f.W - R), g0 = el('g', {'aria-hidden': 'true'}, f.svg), nodes = [];
+  for (const t of [-118, 10, 138]) { el('line', {x1: x(t), x2: x(t), y1: 8, y2: f.H - 26, class: 'grid-line'}, g0); txt(g0, x(t), f.H - 8, CK.fmt.num(t), 'tick', 'middle'); }
   rows.forEach(([name, h], i) => {
-    const y = 34 + i * 48;
-    txt(svg, L - 10, y + 4, name, 'lab', 'end');
+    const y = nar ? 46 + i * 58 : 34 + i * 48;
+    if (nar) txt(g0, L - 8, y - 22, name, 'lab'); else txt(g0, L - 10, y + 4, name, 'lab', 'end');
     for (const [k, n] of Object.entries(h)) {
-      const g = el('g', {}, svg);
-      const r = 4 + 16 * Math.sqrt(n / 4000);
+      const g = el('g', {}, f.svg), r = 4 + 16 * Math.sqrt(n / D.timer.pairs);
       el('circle', {cx: x(+k), cy: y, r, fill: 'var(--c1)', stroke: 'var(--surface)', 'stroke-width': 2}, g);
-      txt(g, x(+k) + r + 6, y + 4, fmt(n), 'lab');
-      hover(g, tip, host, () => `${name}: <b>${fmt(n)}</b> of 4,000 pairs read ${k} cycles apart`);
+      txt(g, x(+k) + r + 6, y + 4, f0(n), 'lab');
+      hitRect(g, x(+k) - Math.max(r, 8), y - Math.max(r, 8), 2 * Math.max(r, 8), 2 * Math.max(r, 8));
+      CK.tip(f, g, `${name}: <b>${f0(n)}</b> of ${f0(D.timer.pairs)} pairs read ${CK.fmt.num(+k)} cycles apart`);
+      nodes.push(g);
     }
   });
-})();
+  CK.keynav(f, nodes);
+}});
 </script>
 </body>
 </html>

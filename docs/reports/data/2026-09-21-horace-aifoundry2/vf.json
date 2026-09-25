@@ -1,3 +1,80 @@
-{"note": "from the cool-start runs (cold1, cold2): the governor's 800 MHz / 0.62 V point against 600 MHz / 0.52 V at 64 to 68 C",
- "idle600": 28.1, "idle800": 35.0, "zeros800": 38.9, "zeros600_dyn": 1.9, "ones800": 55.6, "ones600": 38.4, "randn800_peak": 87.6, "randn600": 54.8,
- "points": [[0.618, 38.9, "zeros, 800 MHz, 64 °C", "var(--c1)"], [0.618, 55.6, "ones, 800 MHz, 65 °C", "var(--c4)"], [0.618, 87.6, "random fp32, 800 MHz, 66 °C, peak before the governor stepped down", "var(--bad)"]]}
+{
+ "note": "from the cool-start runs (cold1, cold2): the governor's 800 MHz / 0.62 V point against 600 MHz / 0.52 V at 63 to 68 C; built by tools/ettelem/build_vf.py",
+ "idle600": 28.1,
+ "idle800": 35.0,
+ "zeros800": 39.5,
+ "zeros600_dyn": 1.9,
+ "ones800": 56.0,
+ "ones600": 38.1,
+ "randn800_peak": 87.8,
+ "randn600": 54.8,
+ "points": [
+  [
+   0.618,
+   39.5,
+   "zeros, 800 MHz, 65 \u00b0C",
+   "var(--c1)"
+  ],
+  [
+   0.618,
+   56.0,
+   "ones, 800 MHz, 66 \u00b0C",
+   "var(--c4)"
+  ],
+  [
+   0.618,
+   87.8,
+   "random fp32, 800 MHz, 67 \u00b0C, peak before the governor stepped down",
+   "var(--bad)"
+  ]
+ ],
+ "peaks_at": {
+  "zeros": {
+   "w": 39.48,
+   "session": "cold1",
+   "run": 4,
+   "t_s": 5.2,
+   "die_c": 65,
+   "mhz_at_reading": 800
+  },
+  "randn": {
+   "w": 87.82,
+   "session": "cold2",
+   "run": 0,
+   "t_s": 0.95,
+   "die_c": 67,
+   "mhz_at_reading": 700
+  },
+  "ones": {
+   "w": 56.03,
+   "session": "cold1",
+   "run": 2,
+   "t_s": 2.51,
+   "die_c": 66,
+   "mhz_at_reading": 700
+  }
+ },
+ "samples": {
+  "idle600": 122,
+  "idle800": 10,
+  "ones600": 78,
+  "randn600": 149
+ },
+ "die_c": {
+  "idle600": [
+   63,
+   68
+  ],
+  "idle800": [
+   64,
+   65
+  ]
+ },
+ "rules": {
+  "X800": "highest board reading from the first 800 MHz sample of a run to 0.3 s after its last one, over every run of X",
+  "X600": "mean board reading over seconds 2-7 of the runs of X, at 600 MHz held for at least 0.3 s",
+  "idle800": "mean board reading after a zeros run's last launch while the clock stays at 800 MHz, from 0.3 s after it reached 800",
+  "idle600": "mean board reading 0.5-2.5 s after each run's last launch (before the next run), at 600 MHz held for at least 0.3 s",
+  "zeros600_dyn": "the 80 C ablation's fp32 zeros switching watts (analyze_ablation.py dyn): from a cool start zeros stayed at 800 MHz"
+ }
+}

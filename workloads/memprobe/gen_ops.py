@@ -7,11 +7,17 @@ Each experiment writes <out>/<name>.ops and <out>/<name>.json. The JSON describe
     gen_ops.py timer    --out D
     gen_ops.py ladder   --out D [--lines 64] [--seed 1]
     gen_ops.py bits     --out D --base 0x... [--trials 24] [--delay 0]
-    gen_ops.py decomp   --out D [--lines 2048] [--reps 4]
-    gen_ops.py l3map    --out D [--lines 4096]
-    gen_ops.py refresh  --out D [--n 60000]
-    gen_ops.py pagetimeout --out D --base 0x...
+    gen_ops.py decomp   --out D [--lines 64] [--reps 3] [--pre-delay 2000]
+    gen_ops.py l3map    --out D [--lines N]   (the committed run used 8192)
+    gen_ops.py msmap    --out D [--lines 64]
+    gen_ops.py refresh  --out D [--n 24000] [--jitter C] [--name N] [--start A]
+    gen_ops.py pagetimeout --out D [--row-bit 6] [--delays d1,d2,...] [--trials 24]
+    gen_ops.py wakeup   --out D [--reps 3] [--delays d1,d2,...]
     gen_ops.py table --pattern l1|l2|l3near|l3far|dram_seq|dram_row --out-file t.tbl [--shires MASK]
+
+The --delays default (0, 50, ..., 25600) is shared by pagetimeout and wakeup; the committed pagetimeout run used
+--row-bit 13 --trials 60 --delays 0,100,200,400,700,1000,1500,2000,3000,5000,8000,12000,20000 (the memory-anatomy
+report's Reproduce section has every committed command).
 """
 import argparse
 import json
@@ -229,7 +235,9 @@ def refresh(args):
 
 def pagetimeout(args):
     """Row-buffer hit after a delay: load A, wait d cycles, load A's same-row neighbour. If the controller
-    closes idle rows after a timeout, the hit turns into a miss once d passes it."""
+    closed idle rows after a timeout, the hit would turn into a miss once d passed it. Besides d, the probe spends
+    about two op dispatches between A and B (the delay op and the timed load, each fetched from the scratchpad;
+    analyze.py measures them as refresh op_cycles), and refresh closes the row whenever one falls in between."""
     rng = random.Random(args.seed)
     p = Prog()
     neighbour = 1 << args.row_bit  # a bit that stays inside the row (from the bits sweep)

@@ -48,18 +48,30 @@ and board power.
 ```bash
 ssh aifoundry3 'cd ~/nekko && bash workloads/sparsity/run_lab.sh build/sparsity/host/sparsity_host build/sparsity-data'
 ssh aifoundry3 'cd ~/nekko && python3 workloads/sparsity/run_energy.py --host-bin build/sparsity/host/sparsity_host --out build/sparsity-data/energy-a'
+ssh aifoundry3 'cd ~/nekko && python3 workloads/sparsity/run_energy.py --host-bin build/sparsity/host/sparsity_host --out build/sparsity-data/energy-b --only gemv-skip-99,gemv-skip-90,gemv-skip-0,gemv-dense-90,fma-rowmask,fma-col50,fma-zero,fma-875,fma-50,fma-dense,spin'
+scp -r aifoundry3:nekko/build/sparsity-data/. docs/reports/data/DATE-sparsity-aifoundry3/
 ```
 
-Quit `et-powertop` first, because both read `/dev/et0_mgmt`, which allows only one opener. The report averages two
-energy runs; the second (`energy-b`) used `--only` to run the configurations in reverse order. Copy the data back and
-summarize it:
+Quit `et-powertop` first, because both read `/dev/et0_mgmt`, which allows only one opener. The report averages the two
+energy runs; the second (`energy-b`) runs the configurations in reverse order. `run_energy.py` stores its idle windows
+(`idle_windows_ms`, epoch ms) in `results.json`; the 18 September runs predate that field. Summarize the data and
+refresh the report's charts:
 
 ```bash
-python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifoundry3 --embed docs/reports/2026-09-18-et-soc1-sparsity.html
+python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifoundry3 \
+    --later docs/reports/data/2026-09-22-horace-aifoundry3/horace3.json \
+    --embed docs/reports/2026-09-18-et-soc1-sparsity.html
 ```
 
-In the simulator, add `--sysemu` to any `sparsity_host` command. That checks the kernels and the data; the
-simulator's timing means nothing.
+`--later` adds the same loop's later, temperature-controlled runs on this card (zeros, ones and random normal, from the
+Horace experiment) to the power chart.
+
+Without a card, add `--sysemu` to any `sparsity_host` command. That checks the kernels and the data; the simulator's
+cycle counts mean nothing. For example, the fp16 one-zero-pair check:
+
+```bash
+build/sparsity/host/sparsity_host --sysemu --test fma --type fp16 --pattern pair --sweep 0,0.5,1 --shires 0x1 --per-shire 1
+```
 
 ## Lab etiquette
 

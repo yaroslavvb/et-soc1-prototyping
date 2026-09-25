@@ -118,7 +118,7 @@ Between shires, every latency is a + b x (Manhattan distance on that map), and e
 | Chip barrier from global atomics + credits | ~5,000 cycles | The allreduce tree is 3.7x faster. |
 | Flag through global atomics (GPU-style) | 355-690 cycles | Depends on where the flag's L3 line lives, not on distance. |
 | Aggregate bandwidth, 1 KB messages | 3.0 TB/s on tree-edge pairs; 1.1 TB/s in shire rings; 0.09-0.16 TB/s across the mesh | TensorLoad from a remote scratchpad does 0.96 TB/s at 600 MHz. |
-| Energy per byte | 0.8 pJ on tree edges, 2.3 in a shire, ~10 + 1.9/hop across the mesh | Card power above local idle. |
+| Energy per byte | 0.67 pJ on pairs, 2.1 in a neighbourhood or shire ring, 9.3 + 1.7 pJ/B per mean hop across the mesh (r² 0.95) | Card power above local idle, re-measured on two cards on 23 September (the energy manual, §5); the 18 September run gave 0.8, 2.3 and ~10 + 1.9 (superseded). |
 
 Rules for kernels that talk:
 - **Never let a minion receive readies from two TensorSend partners at once.** The hardware keeps one peer-to-peer ready
@@ -177,7 +177,7 @@ Things to know when measuring:
 - **`evict_va` is asynchronous.** Fence and wait a few hundred cycles before timing. Level codes name where the line is
   left (1 L2, 2 L3, 3 memory; 0 does nothing). Evicts from many minions serialise in the shire cache.
 - **Rail power:** `dev_mngt_service -n 0 -t SPST:extract` gives minion, SRAM and NoC rail power (the PMIC's running
-  average, τ ≈ 1 s, one record per 133 ms) plus board power. The ring holds ~15 minutes, and an extract returns only records since the
+  average, τ ≈ 1.2 s, one record per 133 ms on aifoundry2) plus board power. The ring holds ~15 minutes, and an extract returns only records since the
   last wrap. No rail covers the memory shires or DRAM.
 
 ## Power and temperature, measured (aifoundry2, 2026-09-20)
@@ -225,8 +225,9 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
   active minions (26 mW each on random fp32). The 0.62 V / 800 MHz operating point switches 2.0x the power (V²f says 1.9x).
 - **The temperature sensor reads whole degrees.** Use step times, not levels: fit the heating power that reproduces a run's
   readings through the thermal network (`analyze_horace_strict.py`). It agrees with the electrical power to about 1 W.
-- **Rail figures are the PMIC's first-order running averages (τ ≈ 1 s: 61% of a step after 1 s, 88% after 2 s);**
-  board power is refreshed every 133 ms. Skip 2-3 s after a step before averaging.
+- **Rail figures are the PMIC's roughly first-order running averages (55–57% of a step after 1 s, 83–84% after 2 s,
+  τ ≈ 1.15–1.22 s on the two cards);** board power is refreshed every 133 ms on aifoundry2 (the readings change only
+  about every 250 ms on aifoundry3). Skip 2-3 s after a step before averaging.
 - **Board minus the three rails** (DDR, PCIe, Maxions, IO, regulator loss; no sensors) is 15 W idle, ~21 W under matmul or DRAM load.
 - `tools/ettelem` reads the per-rail snapshot the stock CLI refuses (`DM_CMD_GET_SP_STATS`), samples the full telemetry set 45
   times a second, and reads the per-shire on-die voltage map (`loglevel debug` + `sptrace`; restore with `loglevel info`).

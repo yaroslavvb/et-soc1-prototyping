@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 """Summarize the sparsity runs into the numbers and chart data used by the report.
 
-    python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifoundry3 [--embed REPORT_HTML]
+    python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifoundry3 \
+        --later docs/reports/data/2026-09-22-horace-aifoundry3/horace3.json [--embed REPORT_HTML]
 
 The data directory holds the SPARSITY lines of each run (*.jsonl from run_lab.sh; diverge/ for the divergence
 sweep), clock.csv (minion clock and board power during those runs) and energy-*/ (run_energy.py). With --embed
 the script replaces the JSON inside the report's <script type="application/json" id="sparsity-data"> tag.
+
+--later HORACE3_JSON adds energy.later: the same TensorFMA loop on the same card, four days later and
+temperature-controlled (the Horace experiment's aifoundry3 run): power above the idle just before each pattern
+(p80 - p_before; the Horace analysis's p80 is the power at the run's launch temperature, about 55 C on this card,
+not 80 C), the launch temperature and the throughput, for zeros, ones and random-normal operands.
 """
 import argparse
 import glob
@@ -47,6 +53,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("data_dir")
     p.add_argument("--embed", metavar="REPORT_HTML")
+    p.add_argument("--later", metavar="HORACE3_JSON", help="later runs of the same loop on this card (energy.later)")
     args = p.parse_args()
     d = args.data_dir
     mhz, mhz_values = clock_mhz(d)
@@ -91,7 +98,7 @@ def main():
     data["tload"] = tload
     print("\nTensorLoad (16 lines max) cycles per load and GB/s on chip by lines requested:")
     for k, rows in tload.items():
-        print(f"  {k:9s} " + "  ".join(f"{l}:{c:.0f}c/{g:.1f}GB/s" for l, c, g in rows))
+        print(f"  {k:9s} " + "  ".join(f"{l}:{c:.1f}c/{g:.1f}GB/s" for l, c, g in rows))
 
     # ---- The batch-1 layer (time of each 16-row block's slowest minion, mean over the 64 blocks)
     gemv = {}
@@ -120,7 +127,9 @@ def main():
             fma_max = 8 * r["useful_lane_iters"] / r["minions"] / r["cycles_max"]
             div[v].append({"lane_eff": round(r["lane_efficiency"], 4), "fma_per_cycle_mean": round(fma_mean, 3),
                            "fma_per_cycle_makespan": round(fma_max, 3), "mean_k": r["mean_k"], "max_k": r["max_k"],
-                           "tfma_chip_mean": round(fma_mean * r["minions"] * mhz / 1e6, 3)})
+                           "tfma_chip_mean": round(fma_mean * r["minions"] * mhz / 1e6, 3),
+                           "cycles_mean": r["cycles_mean"], "cycles_max": r["cycles_max"], "items": r["items"],
+                           "harts": r["harts"], "chunk": r["chunk"]})
         div["simt8"].append(rs["static"][0]["simt8_efficiency"])
         div["simt32"].append(rs["static"][0]["simt32_efficiency"])
         div["model8"].append(round(pareto_eff(alpha, 8), 4) if alpha > 0 else 1.0)
@@ -143,6 +152,15 @@ def main():
         for name, r in e["results"].items():
             summary.setdefault(name, []).append(r)
     en = {"runs": [e["run"] for e in energy], "idle_w": [e["idle_w"] for e in energy], "configs": {}}
+    # The TensorFMA configurations' A tile as drawn (nonzero elements, size) and tensor_mask, from the host's records.
+    tile = {}
+    for rf in sorted(glob.glob(os.path.join(d, "energy-*", "runs.jsonl"))):
+        for line in open(rf):
+            r = json.loads(line)
+            if r.get("nnz_a") is not None:
+                t = (r["nnz_a"], r["a_elems"], r.get("row_mask", "0xffff"))
+                if tile.setdefault(r["config"], t) != t:
+                    raise SystemExit(f"{rf}: {r['config']} has A tiles of different sparsity: {tile[r['config']]} and {t}")
     for name, rs in summary.items():
         def col(key):
             vals = [r[key] for r in rs if r.get(key) is not None]
@@ -154,6 +172,19 @@ def main():
                                "pj_slot": col("pj_per_fma_slot_above_idle"),
                                "pj_useful": col("pj_per_useful_fma_above_idle"),
                                "cycles_per_op": col("cycles_per_op"), "cycles_per_layer": col("cycles_per_layer")}
+        if name in tile:
+            c = en["configs"][name]
+            c["nnz_a"], c["a_elems"], c["row_mask"] = tile[name]
+            c["rows_on"] = bin(int(c["row_mask"], 16)).count("1")  # of 16 rows of C
+    if args.later:
+        h = json.load(open(args.later))
+        en["later"] = {"source": args.later, "patterns": {}}
+        for k in ["zeros", "ones", "randn"]:
+            q = h["patterns"][k]
+            w = q["p80"] - q["p_before"]
+            en["later"]["patterns"][k] = {"above_idle_w": round(w, 3), "tflops": round(q["tflops"], 4),
+                                          "pj_mac": round(w / (q["tflops"] * 1e12 / 2) * 1e12, 3),
+                                          "launch_c": round(q["start_temp"], 1)}
     data["energy"] = en
     if energy:
         print(f"\nenergy: runs {en['runs']}, idle {[round(w, 2) for w in en['idle_w']]} W")
@@ -167,6 +198,12 @@ def main():
                 extra = f"  {c['j_per_unit_above_idle']['mean'] * 1e6:.3f} uJ/{c['unit']} above idle"
             print(f"  {name:14s} {c['mean_w']['mean']:6.2f} W (+{c['above_idle_w']['mean']:5.2f}, "
                   f"{c['above_idle_w']['min']:.2f}-{c['above_idle_w']['max']:.2f}){extra}")
+    if "later" in en:
+        L = en["later"]["patterns"]
+        print("later runs of the loop on this card (" + en["later"]["source"] + "): "
+              + ", ".join(f"{k} +{v['above_idle_w']:.2f} W ({v['pj_mac']:.2f} pJ per multiply-add)" for k, v in L.items())
+              + "; zero-skip saves " + ", ".join(f"{1 - L['zeros']['above_idle_w'] / L[k]['above_idle_w']:.0%} against {k}"
+                                                  for k in ["ones", "randn"]))
 
     if args.embed:
         html = open(args.embed).read()

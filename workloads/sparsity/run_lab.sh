@@ -4,7 +4,8 @@
 # Groups: fma tload gemv diverge (default: all, in that order).
 # Each command is its own `timeout 10` process with --budget 8. Before each one the script waits until no other
 # process holds the card, and it pauses between runs. A background loop logs the minion clock and board power
-# (OUTDIR/clock.csv), because the DVFS governor moves the clock between 600 and 850 MHz.
+# (OUTDIR/clock.csv), because the DVFS governor can move the clock (600, 700 or 800 MHz on aifoundry2; aifoundry3
+# stays at 600).
 set -uo pipefail
 bin=${1:?usage: $0 <sparsity_host> <outdir> [group...]}
 out=${2:?usage: $0 <sparsity_host> <outdir> [group...]}

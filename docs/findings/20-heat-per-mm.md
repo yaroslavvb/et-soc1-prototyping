@@ -137,8 +137,10 @@ as more links are shared; why it falls short is open.
   fixed distance would tell them apart.
 - **The meters.** The mesh rail's gain has not been checked independently. Board-power coefficients move 4–9% with the
   leakage correction; the mesh-rail ones do not move.
-- **The fixed part may be partly per second rather than per hop.** Bandwidth per reader falls with distance. At most a
-  quarter of the free-link fixed part could be per second; the data-dependent part is immune.
+- **The fixed part may be partly per second rather than per hop.** Bandwidth per reader falls with distance. On the
+  mesh rail at most 27% of the free-link fixed part and 18% of the loaded one could be per second. On board power,
+  whose one-hop energy also holds the scratchpad read and the cores, the same bound is 98% and 58%, so it cannot rule
+  out that most of the board's fixed part is per second. The data-dependent part is immune.
 - **Voltage scaling** assumes full-swing links at constant capacitance; whether the links are low-swing is not known.
 - **Ten hops is an extrapolation** from one to six.
 

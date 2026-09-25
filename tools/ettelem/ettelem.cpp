@@ -3,9 +3,12 @@
 //   ettelem sample [--seconds T] [--every-ms M] [--reset-ms R]
 //                                                   JSON lines: board power, SP stats (rails), temperatures,
 //                                                   regulator set-points, on-die voltages, clock frequencies.
-//                                                   The SP's rail figures are [avg, min, max] SINCE THEIR LAST
-//                                                   RESET; with --reset-ms R they are reset every R ms and each
-//                                                   sample says how long its window has been open.
+//                                                   The SP's rail figures are [avg, min, max]: avg is the PMIC's
+//                                                   own running average (roughly first-order, tau ~ 1 s); min and
+//                                                   max run since the last stats reset. --reset-ms R resets the
+//                                                   stats (and sends the PMIC its stats reset) every R ms and tags
+//                                                   each sample with its window; whether that makes avg a window
+//                                                   mean is untested.
 //   ettelem config                                 static governor inputs: flashed TDP (W), SW temperature
 //                                                   threshold (C), power state, current minion clock and voltage
 //   ettelem loglevel debug|info                     SP log level (DM_CMD_SET_DM_TRACE_CONFIG). At debug the SP logs one
@@ -52,8 +55,9 @@ struct Dm {
     dl = dev::IDeviceLayer::createPcieDeviceLayer(false, true);  // management node only
     dm = &get(dl.get());
   }
-  // The service processor's per-rail figures are averages, minima and maxima SINCE THEIR LAST RESET, not
-  // instantaneous power. Reset them and the average from then on is the mean over the window that follows.
+  // The service processor's per-rail figures are [avg, min, max]: avg is the PMIC's own running average (roughly
+  // first-order, tau ~ 1 s), min and max run since the last reset. This resets the SP's stats and sends the PMIC its
+  // stats reset (0x47); what that does to the running average is untested.
   bool resetStats() {
     const uint32_t in[2] = {1u /* SP stats */, 2u /* STATS_CONTROL_RESET_COUNTER */};
     char out[8] = {0};
@@ -122,8 +126,8 @@ int sample(Dm& d, double seconds, int everyMs, int resetMs) {
     module_voltage_t mv;
     asic_frequencies_t f;
     const long long ms = epochMs();
-    // With --reset-ms, the rail averages in this sample cover the window since the last reset; the sample
-    // carries that window's length so the reader can pick the one that closes each window.
+    // With --reset-ms, the rail minima and maxima in this sample cover the window since the last reset (whether the
+    // PMIC's running average restarts with it is untested); the sample carries that window's length.
     long long sinceResetMs = -1;
     if (resetMs > 0) {
       sinceResetMs = std::chrono::duration_cast<std::chrono::milliseconds>(tick - lastReset).count();
@@ -175,7 +179,8 @@ int sample(Dm& d, double seconds, int everyMs, int resetMs) {
 
 int main(int argc, char** argv) {
   if (argc < 2) {
-    std::fprintf(stderr, "usage: ettelem sample [--seconds T] [--every-ms M] | loglevel debug|info | sptrace <out.bin>\n");
+    std::fprintf(stderr, "usage: ettelem sample [--seconds T] [--every-ms M] [--reset-ms R] | config | loglevel debug|info"
+                         " | sptrace <out.bin>\n");
     return 2;
   }
   const std::string cmd = argv[1];

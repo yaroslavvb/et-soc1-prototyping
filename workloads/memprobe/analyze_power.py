@@ -7,7 +7,12 @@ the minion, SRAM and NoC rail power (mW) and of board power (10 mW units, "syste
 aligned to wall time by matching its board power to the host log. For each pattern, power in the last part of
 its launch window minus the power just before the process started, divided by the load rate, is energy per load.
 
-    analyze_power.py build/memprobe-power6 [--json out.json]
+    analyze_power.py build/memprobe-power [--json out.json] [--csv sp_stats.csv]
+
+The committed data (docs/reports/data/2026-09-19-memprobe-aifoundry2/power/) keep the merged rail trace as
+sp_stats.csv, which --csv writes; when a folder has no .bin or trace files, the trace is read from that CSV:
+
+    analyze_power.py docs/reports/data/2026-09-19-memprobe-aifoundry2/power --json docs/reports/data/2026-09-19-memprobe-aifoundry2/power/summary.json
 """
 import argparse
 import collections
@@ -32,7 +37,22 @@ def read_trace(folder):
                 a, _mn, _mx = struct.unpack_from("<HHH", d, off + 24 + i * 32 + 8)  # op_module.power
                 avg[name] = a / 1000.0 if name != "system" else a / 100.0  # W
             recs[cyc] = avg
+    path = os.path.join(folder, "sp_stats.csv")
+    if not recs and os.path.exists(path):  # committed data keep the merged trace as CSV (see --csv), not the .bin files
+        for r in csv.DictReader(open(path)):
+            recs[int(r["sp_us"])] = {"minion": float(r["minion_w"]), "sram": float(r["sram_w"]),
+                                     "noc": float(r["noc_w"]), "system": float(r["board_w"])}
+    if not recs:
+        raise SystemExit(f"{folder}: no dev0_sp_stats*.bin, trace/*.done or sp_stats.csv")
     return sorted(recs.items())
+
+
+def write_csv(trace, path):
+    """The merged rail trace as committed next to power.csv: SP microseconds, three rails and board power in W."""
+    with open(path, "w") as f:
+        f.write("sp_us,minion_w,sram_w,noc_w,board_w\n")
+        for cyc, v in trace:
+            f.write(f"{cyc},{v['minion']:.3f},{v['sram']:.3f},{v['noc']:.3f},{v['system']:.2f}\n")
 
 
 def align(trace, board):
@@ -63,15 +83,19 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("folder")
     ap.add_argument("--json")
+    ap.add_argument("--csv", help="also write the merged rail trace to this CSV (the committed sp_stats.csv)")
     ap.add_argument("--settle", type=float, default=2.5, help="seconds after the first launch to skip (moving average)")
     args = ap.parse_args()
     board = [(int(r["epoch_ms"]), float(r["watts"])) for r in csv.DictReader(open(os.path.join(args.folder, "power.csv")))]
     runs = [json.loads(l) for l in open(os.path.join(args.folder, "runs.jsonl"))]
     trace = read_trace(args.folder)
+    if args.csv:
+        write_csv(trace, args.csv)
     off, e2 = align(trace, board)
     rail = [(cyc / 1000.0 + off, v) for cyc, v in trace]
 
-    win = collections.defaultdict(lambda: {"p0": 1e18, "s": 1e18, "e": 0, "loads": 0, "wall": 0.0, "cpl": [], "ghz": []})
+    win = collections.defaultdict(lambda: {"p0": 1e18, "s": 1e18, "e": 0, "loads": 0, "wall": 0.0, "cpl": [], "ghz": [],
+                                           "cpl_slow": []})
     for r in runs:
         w = win[(r["pattern"], r["rep"])]
         w["p0"] = min(w["p0"], r["t_start_ms"])
@@ -82,6 +106,7 @@ def main():
         w["loads"] += r["loads"]
         w["wall"] += r["wall_s"]
         w["cpl"].append(r["cycles_mean"] * r["minions"] / r["loads"])
+        w["cpl_slow"].append(r["cycles_max"] * r["minions"] / r["loads"])  # the slowest minion sets loads/s
         w["ghz"].append(r["cycles_max"] / r["wall_s"] / 1e9)
 
     def mean(series, a, b, key=None):
@@ -89,7 +114,9 @@ def main():
         return st.mean(v) if v else float("nan")
 
     out = collections.defaultdict(list)
+    slow = collections.defaultdict(list)
     for (pat, rep), w in sorted(win.items(), key=lambda kv: kv[1]["s"]):
+        slow[pat].append(st.mean(w["cpl_slow"]))
         a, b = w["s"] + args.settle * 1000, w["e"]
         rec = {"rep": rep, "rate": w["loads"] / w["wall"], "cycles_per_load": st.mean(w["cpl"]), "ghz": st.mean(w["ghz"])}
         rec["board_base"] = mean(board, w["p0"] - 1400, w["p0"] - 400)
@@ -112,7 +139,9 @@ def main():
         cpl = st.mean(r["cycles_per_load"] for r in recs)
         pj = {k: d[k] / rate * 1e12 for k in ["board", "minion", "sram", "noc", "rest"]}
         summary[pat] = {"watts": d, "rate": rate, "cycles_per_load": cpl, "pj_per_load": pj,
-                        "reps": recs, "ghz": st.mean(r["ghz"] for r in recs)}
+                        "reps": recs, "ghz": st.mean(r["ghz"] for r in recs),
+                        # cycles_per_load is the mean minion's; the slowest minion's sets the load rate
+                        "cycles_per_load_slowest": st.mean(slow[pat])}
         print(f"{pat:10s} {cpl:7.1f} {rate:9.3e} | {d['board']:6.2f} {d['minion']:6.2f} {d['sram']:6.2f} {d['noc']:6.2f} "
               f"{d['rest']:6.2f} | {pj['board']:7.1f} {pj['minion']:7.1f} {pj['sram']:7.1f} {pj['noc']:7.1f} {pj['rest']:7.1f}")
     if args.json:

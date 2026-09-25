@@ -4,7 +4,7 @@
 
 1. **Board power** is the PMIC's reading through the management interface, 10 mW resolution, refreshed every
    133 ms, sampled at 10 Hz by `tools/ettelem`. The three rail figures (minions, SRAM, mesh) are the PMIC's own
-   running averages (roughly first-order, time constant about 1 s), which the service processor reports; together
+   running averages (roughly first-order, time constant 1.1–1.2 s), which the service processor reports; together
    they account for about half of board power, and the rest — PCIe, the DDR PHY, the IO shire, the regulators'
    own losses — has no sensor.
 2. **Idle is subtracted locally.** Each measurement is a burst of a few seconds of back-to-back launches with
@@ -31,8 +31,8 @@ biasing a class. The result per configuration is the mean over the three passes 
 
 | | aifoundry2 | aifoundry3 |
 |---|---|---|
-| Pass-to-pass standard error, median | 1.9% | 1.2% |
-| Pass-to-pass standard error, 90th percentile | 6.1% | 3.6% |
+| Pass-to-pass standard error over every configuration, median | 1.9% | 1.2% |
+| Pass-to-pass standard error over every configuration, 90th percentile | 6.1% | 3.6% |
 | Samples at 600 MHz | all | all |
 | Launches that failed | 0 | 0 |
 
@@ -42,11 +42,16 @@ scale is about ±4%, the same size as the pass-to-pass error, which is what one 
 real and the rest is measurement.
 
 **The rails.** The service processor's minion, SRAM and mesh figures are `[average, minimum, maximum]` triples.
-The minimum and maximum are since the last reset; the average is a first-order filtered reading with a time
-constant of about one second (a step on the minion rail reaches 61% after 1 s and 88% after 2 s while board
-power steps at once). The rail split of a burst is therefore read from its last 0.6 s and divided by the 0.94 of
-the step reached there, against an idle read 3 s or more after the previous burst. `ettelem sample --reset-ms`
-can reset the statistics on a schedule if a window mean is wanted instead. An earlier analysis averaged the
+The minimum and maximum are since the last reset; the average is the PMIC's own running average, roughly
+first-order. Measured on the catalogue's bursts (those with more than 8 W on the minion rail and at least 4 s of
+idle either side, `rail_filter` in `catalogue.json`), after board power steps down the minion rail has fallen
+57% of the way after 1 s and 84% after 2 s on aifoundry2 (τ ≈ 1.15 s, 242 bursts), and 55% and 83% on aifoundry3
+(τ ≈ 1.22 s, 229 bursts). The rail split of a burst is read from its last 0.6 s and divided by 0.94, the fraction
+of the step taken to be reached there, against an idle read 3 s or more after the previous burst. The 0.94 is kept
+as it was; the rails' scale rests on it, and each 1% it is off moves the attributed minion delivery loss by about
+1.2 points ([Limits of observability, §4.2](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed)).
+`ettelem sample --reset-ms` resets the statistics on a schedule; whether that makes the average a window mean is
+untested (no script or experiment here has used it). An earlier analysis averaged the
 three numbers of the triple together, which is why the hot-line and relay reports said the rails barely moved;
 those reports' board-power figures are unaffected.
 
@@ -78,9 +83,14 @@ Two lessons from the reruns, both now built into the runners and the analysis (`
   swing in a 2 W measurement. Every pass since is preceded by heating the die past 76 °C, and the analysis drops
   any burst whose samples show the clock off 600 MHz. aifoundry3, pinned by its firmware, needs neither.
 - **Some traffic starves the instrument.** Rings between shires s and s+16 slow the service processor's own
-  management path: the sampler's command latency goes from 22 ms to 76–146 ms and the board reading is held for
-  seconds at a time, on aifoundry2 in every pass. Those bursts are dropped by the sampler's own latency, and the
+  management path: the sampler's command latency goes from 22 ms to 76–146 ms and the board reading takes a
+  new value about twice a second instead of six times, on aifoundry2 in every pass. Those bursts are dropped by the sampler's own latency, and the
   observability report lists this among the meter's limits.
+
+The catalogue, by contrast, keeps its slow-sampler bursts. On aifoundry2 three DRAM-read bursts (`tload/dram/random`
+and `dramrow/stride1K` on zeros and on random data) slowed the sampler to a median of 144–206 ms per sample against
+the usual 22 ms; they stay in the means (`sampler_median_ms` per burst in `catalogue.json`;
+[Limits of observability, §4.1](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain)).
 
 The rings and levels of 18 September, polled by `run_energy.py` without the die temperature, are no longer
 pooled: on a cooling card the uncorrected method reads 10–50% high on 2 W signals. The ring values On-chip
@@ -120,5 +130,5 @@ random columns are the only window on their data dependence.
   term), but not the idle 15 W; the improvement ladder in
   [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) says what would
   meter it. That regression and the DDR droop meter are in `docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json`,
-  first computed inline and kept as computed; the committed `tools/ettelem/fit_unmetered.py` reproduces the
-  attribution exactly and the droop coefficient to within 3% (0.87 against 0.84 mV/W).
+  written by `tools/ettelem/fit_unmetered.py`; their canonical account is
+  [Limits of observability, §4.2–4.3](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed).

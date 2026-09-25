@@ -28,6 +28,7 @@ CLASSES = [
     ("Compressed against full-width, in-place forms", ["c.add", "add_norvc", "c.addi", "addi_norvc", "c.mv", "c.li"]),
 ]
 LANES = {n: 8 for c in CLASSES[4:8] for n in c[1]}
+HUB = "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability"
 TRAPPED = ["fdiv.s", "fsqrt.s", "fdiv.ps", "fsqrt.ps", "frsq.ps", "fsin.ps", "fdiv.pi", "fdivu.pi", "frem.pi", "fremu.pi", "fcvt.l.s", "fcvt.s.l", "csrr cycle"]
 
 
@@ -185,11 +186,25 @@ def main():
             cz, cr = C.get(f"dramrow2/{name}/zeros"), C.get(f"dramrow2/{name}/random")
             t.append(f"| {what} | {bar(cz, 1)} | {bar(cr, 1)} | {f(r['bytes_per_s']['mean'] / 1e9, 1)} |")
     l3 = A.get("dramrow/stride8K/random"), A.get("dramrow/stride8K/zeros")
-    t.append("\n**The row pattern does not change the energy per byte.** Row hits, row misses and the streaming case agree "
-             "within their pass-to-pass error on both operand sets. Either the controller closes pages after each access "
-             "(so every access pays an activation and the baseline already includes it) or the activation is small "
-             "next to the ~115 pJ/B the transfer costs; the card's instruments cannot tell which, and for a programmer "
-             "it makes no difference: **on this card a DRAM byte costs the same whatever order the rows are visited in.**\n")
+    pats = [p_ for p_ in ("seq", "rowhit", "rowmiss") if C.get(f"dramrow2/{p_}/random")]
+    if pats and C.get("tload/dram/random"):
+        # each of the 32 harts moves one 1 KB access per visit to its row, at the aggregate rate / 32, at 600 MHz
+        gbs = [A[f"dramrow2/{p_}/{o}"]["bytes_per_s"]["mean"] for p_ in pats for o in ("zeros", "random")]
+        cyc = [1024 * 32 / g * 600e6 for g in gbs]
+        prem = {o: [100 * (C[f"dramrow2/{p_}/{o}"]["mean"] / C[f"tload/dram/{o}"]["mean"] - 1) for p_ in pats] for o in ("zeros", "random")}
+        r100 = lambda v: f"{round(v / 100) * 100:,.0f}"
+        # 3.87 µs and 2,325 cycles: the refresh interval the memory-anatomy report reads from the controller (PLAN2 D21)
+        t.append("\n**The row pattern does not change the energy per byte.** Row hits, row misses and the streaming case agree "
+                 "within their pass-to-pass error on both operand sets. The controller runs an open-page policy: a row stays open "
+                 "until a refresh (every 3.87 µs) or an access to another row of its bank closes it ([Anatomy of a memory access]"
+                 "(https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#how-long-a-row-stays-open)). "
+                 f"Each hart here comes back to its row only every {r100(min(cyc))}–{r100(max(cyc))} cycles or so (32 harts at "
+                 f"{min(gbs) / 1e9:.0f}–{max(gbs) / 1e9:.0f} GB/s), with 31 other streams in between, and a refresh falls every 2,325 cycles. "
+                 "So either every pattern paid an activation, or an activation is small next to the transfer (one of 20 pJ/B would "
+                 "have shown); for a programmer it makes no difference. "
+                 f"These 32-hart loads cost {min(prem['random']):.0f}–{max(prem['random']):.0f}% more per byte than [4.1](04-bytes-memory.md)'s tensor loads at "
+                 f"{A['tload/dram/random']['bytes_per_s']['mean'] / 1e9:.0f} GB/s ({min(prem['zeros']):.0f}–{max(prem['zeros']):.0f}% more on zeros): "
+                 "use them to compare patterns, and 4.1 to price DRAM.\n")
     if l3[0] and l3[1]:
         t.append(f"An earlier version of this experiment with all 1,024 minions and 32 KB touched per hart fitted in the L3 and "
                  f"measured that instead: **{f(l3[1]['pj_per_byte']['mean'], 1)} pJ/B on zeros, {f(l3[0]['pj_per_byte']['mean'], 1)} on random "
@@ -217,10 +232,9 @@ def main():
               ("- **The negative constant says the rail rises faster than that shape**, so the fitted leakage term is not the arrays' leakage. " if fit["P_fix_w"] < 0 else "- ")
               + (f"The whole rail at 80 °C is {f(c80['sram_w'], 2)} W, **{f(mb, 1)} mW per MB**, an upper bound on the arrays' leakage including the cache logic on the same rail; " if c80 else "")
               + f"it rises {f(fit['slope_80_mw_per_c'], 0)} mW per °C at 80 °C for the whole 128 MB. Measured: " + ", ".join(f"{c['sram_w']:.2f} W at {c['T']} °C" for c in sl["curve"][::max(1, len(sl["curve"]) // 3)]) + ".",
-              f"- This is what the memory costs for existing, per second, whatever runs: at about {f(mb, 0)} mW per MB a byte held in scratchpad for one second leaks about {f(nj, 0)} nJ at 80 °C, "
+              f"- This is what the memory costs for existing, per second, whatever runs: at about {f(mb, 0)} mW per MB a byte held in scratchpad for one second leaks at most about {f(nj, 0)} nJ at 80 °C, "
               f"as much as reading it {round(nj * 1000 / rd, -2):,.0f} times ({f(rd, 1)} pJ per read)." if rd else "",
-              (f"- The same rail on {cards[1]}, which idles 20 °C cooler: " + ", ".join(f"{c['sram_w']:.2f} W at {c['T']} °C" for c in sl2["curve"][::max(1, len(sl2['curve']) // 3)]) +
-               f"; fitted the same way it gives {f(fit2['mw_per_mb_at_80'], 0)} mW/MB at 80 °C, an extrapolation from {sl2['curve'][0]['T']}–{sl2['curve'][-1]['T']} °C." if fit2 else ""),
+              (f"- The same rail on {cards[1]}, which idles 20 °C cooler: " + ", ".join(f"{c['sram_w']:.2f} W at {c['T']} °C" for c in sl2["curve"][::max(1, len(sl2['curve']) // 3)]) + "." if sl2 and sl2.get("curve") else ""),
               "", "| Die °C | SRAM rail W, " + cards[0] + " | idle stretches |" + (" SRAM rail W, " + cards[1] + " | idle stretches |" if sl2 else ""), "|---|---|---|" + ("---|---|" if sl2 else "")]
         c2 = {c["T"]: c for c in sl2["curve"]} if sl2 else {}
         for T_ in sorted(set(c["T"] for c in sl["curve"]) | set(c2)):
@@ -228,11 +242,13 @@ def main():
             b_ = c2.get(T_)
             t.append(f"| {T_} | {f(a_['sram_w'], 3) if a_ else '—'} | {a_['n'] if a_ else '—'} |" + (f" {f(b_['sram_w'], 3) if b_ else '—'} | {b_['n'] if b_ else '—'} |" if sl2 else ""))
     # ---- where the current flows: the rail split, by class
+    taus = [v["tau_s"] for v in (d.get("rail_filter") or {}).values()]   # the PMIC's running average, measured (catalogue.json rail_filter)
+    tau_txt = f"time constant {min(taus):.1f}–{max(taus):.1f} s on the two cards" if taus else "time constant about 1 s"
     t += ["\n## Where the current flows: each class of operation by rail\n",
           "The PMIC meters three rails — the minions, the on-chip SRAM, and the mesh — and the service processor reports "
           "them; board power covers everything including the regulators' own losses. The split of a burst's power over idle across "
           "those rails, read from the last 0.6 s of each burst and divided by the 0.94 of the step that the PMIC's running average "
-          "(time constant about 1 s) has reached there, averaged over the instructions in each class on random data, on "
+          f"({tau_txt}) has reached there, averaged over the instructions in each class on random data, on "
           f"{cards[0]} (three passes). What is not on a metered rail is the regulators and whatever else has no sensor.\n",
           "| Class | W over idle | minions | SRAM | mesh | unmetered |", "|---|---|---|---|---|---|"]
     groups = [("Scalar integer", ["add", "sub", "and", "or", "xor", "sll", "srl", "sra", "slt", "sltu", "addi", "andi", "ori", "xori", "slli", "srli"]),
@@ -258,7 +274,7 @@ def main():
     for label, cfgs in [("Own scratchpad, tensor load", ["tload/scp/random"]), ("Own scratchpad, tensor store", ["tstore/scp/random"]),
                         ("Scratchpad 1 hop away", ["wire/hop1/random"]), ("Scratchpad 3 hops away", ["wire/hop3/random"]),
                         ("Scratchpad 6 hops away", ["wire/hop6/random"]), ("DRAM, tensor load", ["tload/dram/random"]),
-                        ("DRAM, tensor store", ["tstore/dram/random"]), ("DRAM through the L1 write-back path", ["st_stream/dram/random"])]:
+                        ("DRAM, tensor store", ["tstore/dram/random"]), ("DRAM, stores through the L1", ["st_stream/dram/random"])]:
         r = rail_row(label, cfgs)
         if r:
             t.append(r)
@@ -280,7 +296,8 @@ def main():
         t += ["\n## What is on no metered rail: attributed, and a droop meter for DRAM\n",
               "The remainder — board power minus the three rails — cannot be metered with anything on the card, but over the whole catalogue what a workload adds above idle can be "
               "attributed: each configuration's mean unmetered watts fitted as a fraction of each rail's watts plus a cost per DRAM byte, no intercept. "
-              "`tools/ettelem/fit_unmetered.py` reproduces this fit exactly from `catalogue.json`.\n",
+              "`tools/ettelem/fit_unmetered.py` makes the fit from `catalogue.json` and writes it to `unmetered_fit.json`. "
+              f"The canonical account of it is [Limits of observability, §4.2–4.3]({HUB}#the-unmetered-remainder-attributed); this section keeps the full tables.\n",
               "| unmetered W of a configuration = | " + " | ".join(h for h in uf if h.startswith("aifoundry")) + " |", "|---|" + "---|" * len([h for h in uf if h.startswith("aifoundry")])]
         hosts = [h for h in uf if h.startswith("aifoundry")]
         for label, k, n, unit in (("× minion-rail W", "minion", 3, ""), ("× SRAM-rail W", "sram", 3, ""), ("× mesh-rail W", "noc", 3, ""), ("per DRAM byte", "dram_pj_per_byte", 1, " pJ/B")):
@@ -299,25 +316,83 @@ def main():
             return (float(np.sqrt(np.mean(np.square(r)))), len(r)) if r else None
         t.append("| residual rms, the configurations that move DRAM | " + " | ".join((lambda x: f"{f(x[0], 2)} W, n = {x[1]}" if x else "—")(dram_rms(h)) for h in hosts) + " |")
         a2 = uf["aifoundry2"]["coef"]
-        t += ["", f"- **An instruction's unmetered energy is the regulator's**: {100*a2['minion']:.0f}% of what the minion rail delivers is lost between the 12 V input and the core, and nothing else moves. The 18% \"unmetered\" share of the arithmetic classes above is this.",
-              f"- **A DRAM byte's unmetered energy is the memory's**: {f(a2['dram_pj_per_byte'], 0)} pJ per byte in the DDR PHY, the I/O rail and the DRAM chips, on top of the 50–60 pJ the mesh, the SRAM and the delivery losses take on the way. A byte written through the L1 costs twice that off-rail, because the line is read from DRAM before it is written.",
+        def split(h, k):   # (off-rail, rest) pJ per byte of one configuration: rest = the rails plus the fitted delivery losses
+            e, cf = d["cards"][h]["summary"][k], uf[h]["coef"]
+            R_ = e["rails_over_w"]; m_, sr_, n_ = R_["minion_w"]["mean"], R_["sram_w"]["mean"], R_["noc_w"]["mean"]
+            tot = e["over_idle_w"]["mean"] / e["bytes_per_s"]["mean"] * 1e12
+            off = (e["over_idle_w"]["mean"] - m_ - sr_ - n_ - (cf["minion"] * m_ + cf["sram"] * sr_ + cf["noc"] * n_)) / e["bytes_per_s"]["mean"] * 1e12
+            return off, tot - off
+        # the tensor loads and stores from DRAM and the 1,024-minion DRAM loads, on both cards
+        dk = [(h, f"{p_}/{o}") for h in hosts for p_ in ("tload/dram", "tstore/dram", "dramrow/stride1K") for o in ("zeros", "const", "random")
+              if f"{p_}/{o}" in d["cards"][h]["summary"]]
+        lo_o = [split(h, k)[0] for h, k in dk if not k.endswith("random")]; hi_o = [split(h, k)[0] for h, k in dk if k.endswith("random")]
+        rest = [split(h, k)[1] for h, k in dk]
+        sto = [split(h, f"st_stream/dram/{o}")[0] for h in hosts for o in ("zeros", "const", "random") if f"st_stream/dram/{o}" in d["cards"][h]["summary"]]
+        dco = [uf[h]["coef"]["dram_pj_per_byte"] for h in hosts]
+        # hub-u-25: the idle remainder (board less the three rails) over every burst's idle, per card
+        def unsensed(h):
+            b = [x for x in d["bursts"][h] if x.get("minion_idle_w") is not None]
+            u = [x["p_idle_w"] - x["minion_idle_w"] - x["sram_idle_w"] - x["noc_idle_w"] for x in b]
+            T_ = [x["die_c_idle"] for x in b]
+            return round(min(u)), round(max(u)), int(min(T_)), -int(-max(T_) // 1)
+        us = {h: unsensed(h) for h in hosts if d.get("bursts", {}).get(h)}
+        # the DRAM configurations' residual (measured unmetered W less the fit), per card: its size and its pattern
+        def dram_res(h):
+            cf, out_ = uf[h]["coef"], []
+            for k, e in d["cards"][h]["summary"].items():
+                if "dram" not in k or k.startswith("dramrow/stride8K"):
+                    continue
+                R_ = e["rails_over_w"]; m_, sr_, n_ = R_["minion_w"]["mean"], R_["sram_w"]["mean"], R_["noc_w"]["mean"]
+                un = e["over_idle_w"]["mean"] - m_ - sr_ - n_
+                out_.append((k, un - (cf["minion"] * m_ + cf["sram"] * sr_ + cf["noc"] * n_ + cf["dram_pj_per_byte"] * e["bytes_per_s"]["mean"] * 1e-12), un))
+            return out_
+        dres = {h: dram_res(h) for h in hosts}
+        share = [float(np.sqrt(np.mean([r[1] ** 2 for r in v])) / np.mean([r[2] for r in v])) for v in dres.values() if v]
+        st_r = [r[1] for v in dres.values() for r in v if r[0].startswith("st_stream/")]
+        tp = [(r[0], r[1]) for v in dres.values() for r in v if r[0].split("/")[0] in ("tload", "tstore") or r[0].startswith("dramrow/stride1K")]
+        tp_hi = [x for k, x in tp if k.endswith("/random")]; tp_lo = [x for k, x in tp if not k.endswith("/random")]
+        res_txt = (f"- **The residual on the configurations that move DRAM is {100 * min(share):.0f}–{100 * max(share):.0f}% of their unmetered power (rms over mean), and it has a pattern**: "
+                   f"stores through the L1 sit {f(min(st_r), 1)}–{f(max(st_r), 1)} W above the fit, because the line read from DRAM before each store is not in their byte count; "
+                   f"the tensor loads and stores from DRAM and the 1,024-minion DRAM loads sit above it on random data (+{f(min(tp_hi), 1)} to +{f(max(tp_hi), 1)} W) "
+                   f"and below it on zeros and constants ({f(max(tp_lo), 1).replace('-', '−')} to {f(min(tp_lo), 1).replace('-', '−')} W). The published fit is kept as it is; "
+                   + ("counting those line reads (the stores' bytes twice) would bring the DRAM residual to " + " and ".join(
+                       f"{f(uf[h]['l1_line_read_refit']['rms_dram_w'], 2)} W on {h} (DRAM term {f(uf[h]['l1_line_read_refit']['coef']['dram_pj_per_byte'], 1)} pJ/B)"
+                       for h in hosts if uf[h].get('l1_line_read_refit')) + "; that refit is `l1_line_read_refit` in `unmetered_fit.json`."
+                      if any(uf[h].get('l1_line_read_refit') for h in hosts) else "")
+                   if share and st_r and tp_hi and tp_lo and max(tp_hi) > 0 > min(tp_lo) else "")
+        t += ["", f"- **An instruction's unmetered energy is the regulator's**: {100*a2['minion']:.0f}% of what the minion rail delivers is lost between the 12 V input and the core, and nothing else moves; that is as far as the rails' meters can be trusted, since each 1% of error in their scale moves it by about {f(1 + a2['minion'], 1)} points. The 18% \"unmetered\" share of the arithmetic classes above is this.",
+              f"- **A DRAM byte's unmetered energy is the memory's**: {f(min(dco), 0)}–{f(max(dco), 0)} pJ per byte on average (the fitted coefficient on the two cards) in the DDR PHY, the I/O rail and the DRAM chips "
+              f"({f(min(lo_o), 0)}–{f(max(lo_o), 0)} on zeros and constants, {f(min(hi_o), 0)}–{f(max(hi_o), 0)} on random data), on top of the {f(min(rest), 0)}–{f(max(rest), 0)} pJ the mesh, the SRAM and the delivery losses take on the way: "
+              f"together the {f(C['tload/dram/zeros']['mean'], 0)}–{f(C['tload/dram/random']['mean'], 0)} pJ per byte of [4.1](04-bytes-memory.md)'s tensor loads from DRAM. "
+              f"A byte written through the L1 costs about twice that off-rail ({f(min(sto), 0)}–{f(max(sto), 0)} pJ), because the line is read from DRAM before it is written.",
+              res_txt,
               f"- **The mesh coefficient is not all regulator**: {100*a2['noc']:.0f}% is too much for a delivery loss; the memory shires' own logic, on an unmetered rail, works whenever the mesh moves bytes to them.",
-              "- What the fit cannot say: how the idle 12–15 W splits between DDR, PCIe, the IO shire, Maxion and the regulators' own draw, or how the DRAM term splits below its regulator. That is the subject of the improvement ladder in [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability).\n"]
+              "- What the fit cannot say: how the idle " + (f"{min(v[0] for v in us.values())}–{max(v[1] for v in us.values())} W (" + ", ".join(f"{v[0]}–{v[1]} W on {h} at {v[2]}–{v[3]} °C" for h, v in sorted(us.items(), key=lambda kv: kv[1][0])) + ")" if us else "12–16 W")
+              + " splits between DDR, PCIe, the IO shire, Maxion and the regulators' own draw, or how the DRAM term splits below its regulator. That is the subject of the improvement ladder in [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability).\n"]
         if "ddr_droop" in uf:
             dd = uf["ddr_droop"]
+            c0, cm = dd["mv_per_dram_offrail_w"], dd["mv_per_board_w_common"]
+            fl = dd.get("per_config_fields") or []
+            pc = [dict(zip(fl, row)) for row in dd.get("per_config", [])]
+            nod = [q for q in pc if not q.get("dram_offrail_w")]   # configurations that move no DRAM
+            l3d = [q["droop_ddr_mv"] for q in nod if q["cfg"].startswith("dramrow/stride8K")]
+            oth = [q["droop_ddr_mv"] for q in nod if not q["cfg"].startswith("dramrow/stride8K")]
+            ph = [(q["droop_ddr_mv"] - cm * q["over_idle_w"]) / c0 for q in nod]   # read as DRAM watts, after the common term
             t += [f"**A droop meter for DRAM.** The memory shires' Moortec voltage monitors report the 0.8 V DDR rail every 133 ms (`die_mv.ddr` in every telemetry file; {f(dd['idle_die_mv']['ddr'], 0)} mV at idle against an 800 mV set point). "
-                  f"Across the {dd['n']} configuration means it droops **{f(dd['mv_per_dram_offrail_w'], 2)} mV per watt of off-rail DRAM power** (plus {f(dd['mv_per_board_w_common'], 3)} mV per watt of anything else; rms {f(dd['rms_mv'], 2)} mV; `tools/ettelem/fit_unmetered.py` reproduces the coefficient to within 3%, 0.87 against 0.84 mV/W): 1 mV ≈ {f(1 / dd['mv_per_dram_offrail_w'], 1)} W of DRAM, refreshed every 133 ms, from a sensor that was always there. "
-                  f"It is a proxy calibrated against the fit above, not a meter, and not independent of the board meter. It responds mostly to DRAM traffic, but not only: heavy mesh and scratchpad traffic with no DRAM access droops it too "
-                  + "(" + ", ".join(f"`{e['cfg']}` {f(e['droop_ddr_mv'], 2)} mV" for e in dd["examples"] if not e["dram_offrail_w"] and e["droop_ddr_mv"] > 0.9) + " in the table below), "
-                  f"which it would read as roughly 0.8–1.8 W of DRAM; and its idle reading moves by about 1 mV between 71 and 77 °C. The minion rail sags {f(dd['minion_ir_drop_mv_per_w'], 3)} mV per watt the cores draw; the "
+                  f"Across the {dd['n']} configuration means it droops **{f(dd['mv_per_dram_offrail_w'], 2)} mV per watt of off-rail DRAM power** (plus {f(dd['mv_per_board_w_common'], 3)} mV per watt of anything else; rms {f(dd['rms_mv'], 2)} mV): 1 mV ≈ {f(1 / dd['mv_per_dram_offrail_w'], 1)} W of DRAM, refreshed every 133 ms, from a sensor that was always there. "
+                  f"It is a proxy calibrated against the fit above, not a meter, and not independent of the board meter. It responds mostly to DRAM traffic, but not only: heavy mesh and scratchpad traffic with no DRAM access droops it too"
+                  + (f", by up to {f(max(oth), 1)} mV, and {f(max(l3d), 1)} mV for L3 reads through the mesh" if oth and l3d else "")
+                  + " (" + " and ".join(f"`{e['cfg']}` {f(e['droop_ddr_mv'], 2)} mV" for e in dd["examples"] if not e["dram_offrail_w"] and e["droop_ddr_mv"] > 0.9) + " in the table below), "
+                  + (f"which it would read as up to about {f(max(ph), 1)} W of DRAM" if ph else "which it would read as DRAM power")
+                  + f"; and its idle reading moves by about 1 mV between 71 and 77 °C. The minion rail sags {f(dd['minion_ir_drop_mv_per_w'], 3)} mV per watt the cores draw; the "
                   "[Power and temperature](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature) report (§3) maps each shire's rails at idle.\n",
                   "| Configuration (aifoundry2, mean of three passes) | W over idle | unmetered W less the fitted rail losses | DDR-rail droop, mV | minion-rail droop, mV |", "|---|---|---|---|---|"]
             for e in dd["examples"]:
                 t.append(f"| `{e['cfg']}` | {f(e['over_idle_w'], 2)} | {f(e['dram_offrail_w'], 2) if e['dram_offrail_w'] else '—'} | {f(e['droop_ddr_mv'], 2)} | {f(e['droop_minion_mv'], 2)} |")
             t.append("")
     t.append("\nSources: `docs/reports/data/2026-09-23-catalogue-aifoundry2/` and `-aifoundry3/`, reduced by "
-             "`workloads/enercat/analyze_catalogue.py` into `docs/reports/data/2026-09-23-energy-manual/catalogue.json`; the attribution and the droop in `unmetered_fit.json` beside it "
-             "(first computed inline and kept as computed; `tools/ettelem/fit_unmetered.py` reproduces the attribution exactly and the droop coefficient to within 3%, 0.87 against 0.84 mV/W).\n")
+             "`workloads/enercat/analyze_catalogue.py` into `docs/reports/data/2026-09-23-energy-manual/catalogue.json`; the attribution and the droop in `unmetered_fit.json` beside it, "
+             "written by `tools/ettelem/fit_unmetered.py`.\n")
     open(os.path.join(out, "04a-fine-grain.md"), "w").write("\n".join(t) + "\n")
     print("rendered 03a and 04a")
 

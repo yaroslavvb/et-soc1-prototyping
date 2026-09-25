@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -99,6 +99,61 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 h2, h3 { scroll-margin-top: 12px; }
 .hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
 h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
+/* chartkit:css:begin (the chart toolkit's CSS; scripts/paste-chartkit.py copies this block into standalone pages) */
+.ck-frame { position: relative; width: 100%; }
+.ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ck-frame svg { display: block; max-width: none; height: auto; }
+.ck-frame svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.ck-frame .tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame .lab { fill: var(--ink-2); font-size: 12px; }
+.ck-frame .lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ck-frame .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-axis { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-hit { fill: transparent; stroke: none; }
+.ck-tip { position: absolute; z-index: 5; pointer-events: none; display: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border, var(--grid)); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: min(320px, calc(100% - 8px)); }
+.ck-frame svg [tabindex] { outline: none; }
+.ck-frame svg [tabindex]:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse)[tabindex]:not(.ck-hit):focus-visible,
+.ck-frame svg [tabindex]:focus-visible > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse).ck-active:not(.ck-hit),
+.ck-frame svg .ck-active > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 1.5px; }
+.ck-hidden { display: none !important; }
+.ck-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 8px 0 6px; }
+.ck-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 8px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-legend .ck-li { display: inline-flex; align-items: center; gap: 6px; }
+.ck-legend button.ck-li { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 3px 10px; min-height: 32px; cursor: pointer; }
+.ck-legend button.ck-li[aria-pressed="false"] { opacity: 0.55; text-decoration: line-through; }
+.ck-legend svg { flex: none; overflow: visible; }
+.ck-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.82rem; }
+.ck-seg-label { color: var(--ink-2); }
+.ck-seg-group { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ck-seg [role="radio"] { font: inherit; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-seg [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-range input[type="range"] { flex: 0 1 200px; width: 200px; min-width: 120px; min-height: 32px; margin: 0; accent-color: var(--c1); }
+.ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
+   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
+th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+th.num { white-space: normal; }
+@media (max-width: 599px) {
+  table.stack, .wide table.stack { min-width: 0; }
+  table.stack thead { display: none; }
+  table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { border-bottom: 1px solid var(--grid); padding: 6px 0; }
+  table.stack td, table.stack td.num { border: 0; padding: 2px 0; text-align: left; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+  table.stack td:first-child::before { content: none; }
+  table.stack td:first-child { font-weight: 600; }
+}
+@media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* chartkit:css:end */
 </style>
 </head>
 <body>
@@ -127,15 +182,15 @@ Clock gating stops idle circuits switching, but no power gating was found on thi
   <div class="card kpi"><div class="lab">Dense matmul, per FLOP at the board</div><div class="val">3.3–7.0 vs 1.3 pJ</div><div class="sub">fp16–fp32 here against the A100's bf16 tensor cores: low power is not low energy per FLOP</div></div>
 </div>
 
-<p class="small"><b>Terms.</b> The ET-SoC-1's compute cores are <i>minions</i>: small in-order RISC-V cores, 32 to a
-<i>shire</i>, each shire with 4 MB of SRAM that these cards split into a 512 KB L2 cache, a 1 MB slice of the chip-wide L3
-and a 2.5 MB scratchpad. A minion's tensor unit multiplies tiles with <i>TensorFMA</i>, a matrix multiply-accumulate
-instruction (one fp32 op is 4,096 multiply-adds), fed by <i>TensorLoad</i>, a bulk load of operands into the minion's L1
-scratchpad. The service processor's firmware runs a <i>governor</i> that sets the clock and voltage (600, 700 or 800 MHz),
-and the board's power-management controller (PMIC) meters the 12 V input and three <i>rails</i>: minion, SRAM and NoC, the
-on-chip mesh network. <i>The Horace experiment</i> is this project's repeat, on this card, of Horace He's test of matrix
-multiplies on predictable against random data; its power and thermal models are used here. More in the
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
+<details class="terms small"><summary>Terms used on this page</summary>
+<p>The ET-SoC-1's compute cores are <i>minions</i>, small in-order RISC-V cores, 32 to a <i>shire</i>; each shire's 4 MB of
+SRAM is split on these cards into a 512 KB L2 cache, a 1 MB slice of the chip-wide L3 and a 2.5 MB scratchpad. A minion's
+tensor unit multiplies tiles with <i>TensorFMA</i> (one fp32 op is 4,096 multiply-adds), fed by <i>TensorLoad</i>, a bulk load
+into its L1 scratchpad. The service processor's <i>governor</i> sets the clock and voltage (600, 700 or 800 MHz), and the
+board's PMIC meters the 12 V input and three <i>rails</i> (minion, SRAM and the NoC, the on-chip mesh). <i>The Horace
+experiment</i> is this project's repeat of Horace He's test of matrix multiplies on predictable against random data, and its
+power and thermal models are used here; more in the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p></details>
 
 <h2>1. The comparison</h2>
 <div class="table-wrap wide"><table id="cmp"></table></div>
@@ -149,7 +204,38 @@ ran ±1 and ±2 operands at 57 W, puts it at 3.4×. The verdict depends on which
 and per square millimetre the ET-SoC-1 really is cooler, by 2.3 and 3.6 times. The rest of this report asks where that
 comes from.</p>
 
-<h2>2. Esperanto's equation, measured</h2>
+<h2>2. Putting the terms together</h2>
+<p>Take the switching power of each chip under its matmul and split it with the equation. The A100 measured by Horace He
+draws 330 W under load and 88 W idle, so about 242 W switches, at about 0.85 V and 1,160–1,410 MHz: 237–288 nF of
+effective capacitance. This card's fp32 matmul switches 27.6 W (<a href="#ablations">section 4</a>) at 0.52 V and 600 MHz: 172 nF.</p>
+<div class="chart-title">The factors: the A100's switching watts divided, one term at a time, down to this card's. Both ends are measured; the A100's voltage and clock under its power cap are not, so move them.</div>
+<div class="ck-controls" id="fx-ctl"></div>
+<div id="fx-leg"></div>
+<div class="chart" id="fx"></div>
+<div id="fx-out"></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Term</th><th class="num">A100</th><th class="num">ET-SoC-1 (fp32)</th><th class="num">ratio</th><th>How it was established here</th></tr></thead>
+<tbody>
+<tr><td>Switched capacitance</td><td class="num">237–288 nF</td><td class="num">172 nF</td><td class="num">1.4–1.7×</td><td class="small">power over idle ÷ V²f; linear in active cores (<a href="#ablations">section 4</a>); 9 to 172 nF for the whole chip, depending on workload, data and precision</td></tr>
+<tr><td>V²</td><td class="num">0.72 V²</td><td class="num">0.27 V²</td><td class="num">2.7×</td><td class="small">on-die voltage telemetry; the 0.62 V point costs about <span id="vf-epo2"></span>× per op (<a href="#ablations">section 4</a>), close to V²'s <span id="vf-v2"></span>×. The A100's voltage is an assumption: 0.75 to 0.95 V gives 2.1 to 3.3×</td></tr>
+<tr><td>Clock</td><td class="num">1,160–1,410 MHz</td><td class="num">600 MHz</td><td class="num">1.9–2.35×</td><td class="small">cycle counter against wall clock here, 546 cycles per op for every data pattern; the A100's range is explained in section 1's table; the per-FLOP rows below do not depend on the clock</td></tr>
+<tr><td><b>Switching power</b></td><td class="num"><b>242 W</b></td><td class="num"><b>27.6 W</b></td><td class="num"><b>8.8×</b></td><td class="small">1.4 × 2.7 × 2.35 at 1,410 MHz; 1.7 × 2.7 × 1.9 at 1,160 MHz</td></tr>
+<tr><td>Idle floor</td><td class="num">88 W</td><td class="num">36 W</td><td class="num">2.4×</td><td class="small">of the ET's, 23 W is leakage at 80 °C</td></tr>
+<tr><td>FLOPs per second</td><td class="num">257 × 10¹²</td><td class="num">9.2 × 10¹²</td><td class="num">28×</td><td class="small">bf16 tensor cores against fp32 on general vector units; in fp16 this card does 18.4 × 10¹², 14×</td></tr>
+<tr><td>Capacitance switched per FLOP</td><td class="num">1.3 pF</td><td class="num">11 pF</td><td class="num">0.12×</td><td class="small">the GPU's matmul engines do 8.6 times more arithmetic per unit of switched capacitance (3.9 times against fp16, 5.0 pF)</td></tr>
+<tr><td>Switching energy per FLOP</td><td class="num">0.94 pJ</td><td class="num">3.0 pJ</td><td class="num">0.31×</td><td class="small">the voltage wins back 2.7× of that 8.6×</td></tr>
+<tr><td>Board energy per FLOP</td><td class="num">1.3 pJ</td><td class="num">7.0 pJ</td><td class="num">0.18×</td><td class="small">the idle floor is 57% of this card's power under load, 27% of the GPU's; in fp16 this card spends 3.3 pJ, 0.39×</td></tr>
+</tbody></table></div>
+<p>So of the 8.8× lower switching power, most is the operating point: 6.3× at the A100's maximum clock (2.7× from V²,
+2.35× from the clock), about 5.2–5.5× at the 1,160–1,230 MHz its capped random-data run implies. The rest, 1.4–1.7×, is
+switching less capacitance per cycle.</p>
+<p>Everything idle is clock-gated to nearly no switching power. What the card does not have is efficiency per FLOP on dense
+floating-point matmul: its fp32 multiply-adds switch nine times more
+capacitance per FLOP than the A100's bf16 tensor cores do (four times in fp16), and at 9 TFLOPS its idle floor is spread
+over very little work. On the workload it was designed for, int8 with sparse memory access, the arithmetic is 19 times
+cheaper than fp32 (<a href="#ablations">section 4</a>) and the comparison would be much closer; that was not measured against a GPU here.</p>
+
+<h2>3. Esperanto's equation, measured</h2>
 <p>At Hot Chips 33 Esperanto set the target as six chips on a 120 W card: under 20 W per chip, half of it for the thousand
 minions, "so only 10 mW per core". Their slide compares a generic x86 server core (7 W, 3 GHz, 0.85 V, 2.2 nF of switched
 capacitance) with the minion they needed (0.01 W, 1 GHz, 0.425 V, 0.04 nF): a reduction of 3× in frequency ("easy"), 4× in
@@ -164,7 +250,7 @@ leave about 3 mW for the leakage its equation includes. The measured rows are po
 workloads. Only floating-point multiply-adds on random data, which the chip was not designed around, reach 0.15 to 0.17 nF.</li>
 <li><b>10 mW per core: the switching part fits for int8,</b> even at this card's higher voltage: 4 mW over idle on constant
 data and 10 mW on random data. But Esperanto's 10 mW was the whole budget, leakage included, and this card's minion rail
-alone reads 22 W under int8 random data at the end of a 7 s run (about 82 °C), 21.7 mW per minion. fp32 on random data
+alone reads 22 W under int8 random data at the end of a 7 s run (about 83 °C), 21.7 mW per minion. fp32 on random data
 switches 27 mW per core.</li>
 <li><b>Voltage and clock: this card is not at the advertised point.</b> Its lowest operating point is 0.52 V at 600 MHz.
 While the die reads 65 °C or less (whole degrees) and board power is under 65 W, the firmware steps it up through 0.57 V at 700 MHz to 0.62 V at 800 MHz
@@ -172,13 +258,22 @@ While the die reads 65 °C or less (whole degrees) and board power is under 65 W
 leakage</a>). Esperanto's "about 0.4 V, 20 W" is a different operating point from anything this card's firmware uses.</li>
 </ul>
 
-<h2 id="ablations">3. Taking the terms away one at a time</h2>
+<h2 id="ablations">4. Taking the terms away one at a time</h2>
+<div class="chart-title">Esperanto's equation on this card: what each term contributes at a chosen voltage, clock, die temperature and number of active minions. Right: the idle law it takes leakage from, with the idle readings it was fitted to.</div>
+<div class="ck-controls" id="eq-ctl"></div>
+<div id="eq-leg"></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px 20px;align-items:flex-start">
+  <div style="flex:3 1 380px;min-width:0"><div class="chart" id="stack"></div></div>
+  <div style="flex:2 1 260px;min-width:0"><div class="chart" id="leak"></div></div>
+</div>
+<div id="eq-out"></div>
+<p class="small">Switching is <i>C</i>·<i>V</i>²·<i>f</i> with each workload's capacitance measured at 0.517 V and 600 MHz (the
+table in <a href="#esperanto-s-equation-measured">section 3</a>), scaled by the share of minions active. The fp32 matmuls are
+split in the proportions of the Horace experiment's flip model. The fixed part and the leakage come from the idle law; the
+extra idle measured at 0.62 V is added in proportion between the two measured voltages. Outside 0.517–0.618 V leakage was
+not measured, so only switching is priced there. TensorLoad streams are left out: most of their watts are in DRAM, the PHY
+and the SRAM rail, which the minion supply's <i>V</i> and <i>f</i> do not describe.</p>
 <h3>Activity: what is not computing costs almost nothing</h3>
-<div class="chart-title">Where the board's watts go in five states, by the model fitted in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#from-flips-to-watts">the Horace experiment</a> (fixed part, leakage, state machines, register clocking, data toggles)</div>
-<div class="legend" id="stack-leg"></div>
-<div class="chart scroll" id="stack"></div>
-<p class="small">Bars are the fitted model's split, so they differ from the measured table above by under 1 W (random
-fp32: 63.1 W modelled, 63.9 W measured).</p>
 <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:14px">
   <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Power over idle against the number of active minions</div><div class="chart" id="cores"></div></div>
   <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Energy per multiply-add by precision and data</div><div class="chart" id="prec"></div></div>
@@ -206,21 +301,28 @@ structured matrices priced before they ran to 0.9 W rms
 6.9 times more multiply-adds per second (51 per cycle per minion against 7.5).</li>
 </ul>
 
-<h3>Voltage and clock</h3>
-<div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:6px">
-  <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Esperanto's modelled chip power against core voltage (Hot Chips 33), and this card's measured board power</div><div class="chart" id="volt"></div></div>
-  <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Leakage: idle board power against die temperature, with the fitted exponential</div><div class="chart" id="leak"></div></div>
-</div>
+<h3 id="voltage-and-clock">Voltage and clock</h3>
+<div class="chart-title">Esperanto's modelled chip power against core voltage (Hot Chips 33), and this card's measured board power</div>
+<div id="volt-leg"></div>
+<div class="chart" id="volt"></div>
 <ul>
-<li><b>The card has three operating points (600, 700 and 800 MHz); the two ends differ as CV²f says.</b> From a cool die
+<li><b>The card has three operating points (600, 700 and 800 MHz); on random data the two ends differ about as CV²f
+says.</b> From a cool die
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-measured">the firmware's clock governor runs
-kernels at 800 MHz</a> and 0.62 V; past 65 °C, or 65 W at the board, it steps back down to 600 MHz and 0.52 V. The same
-kernels at nearly the same temperature (64 to 68 °C) draw, over idle: zeros 3.9 against 1.9 W, ones 20.6 against 10.3 W,
-random fp32 about 53 against 27 W. The 800 MHz figures are the highest readings before the governor stepped down; random
-data held 800 MHz for at most 0.3 s. That is about 2.0× the switching power for 1.33× the clock; V²f predicts 1.90×.
-Energy per operation rises 1.5× for 33% more speed.</li>
-<li><b>Idle pays for voltage too:</b> 35.0 W at 0.62 V against 28.1 W at 0.52 V, both at 65 °C, a quarter more for a tenth
-of a volt, from leakage and the always-running clocks.</li>
+kernels at 800 MHz</a> and 0.62 V; past 65 °C, or 65 W at the board, it steps back down to 600 MHz and 0.52 V. Random fp32,
+at nearly the same die temperature (<span id="vf-T"></span> °C), draws <span id="vf-r8"></span> W over idle at 800 MHz
+against <span id="vf-r6"></span> W at 600 MHz: <b><span id="vf-rr"></span>× the switching power for 1.33× the clock</b>,
+where V²f predicts <span id="vf-pred"></span>×. The 800 MHz figure is the highest board reading before the governor stepped
+down; random data held 800 MHz for at most 0.3 s, and the two of its three runs that caught a reading there agree to
+0.3 W. Ones give <span id="vf-ro"></span>× (<span id="vf-o8"></span> against <span id="vf-o6"></span> W; their two runs'
+800 MHz readings agree to 0.2 W). Both are single highest readings over idle levels that move with the die temperature (the
+600 MHz idle alone by about <span id="vf-slope"></span> W per degree at 64–66 °C), so random data's
+<span id="vf-devr"></span> and ones' <span id="vf-devo"></span> above V²f are as close as these runs can test it. Zeros cannot
+test it: their two runs switch 4.0 and 4.5 W at 800 MHz, and the 600 MHz figure, <span id="vf-z6"></span> W, comes from
+the 80 °C session, since from a cool die zeros barely left 800 MHz. Energy per operation rises about
+<span id="vf-epo"></span>× for 33% more speed.</li>
+<li><b>Idle pays for voltage too:</b> <span id="vf-i8"></span> W at 0.62 V against <span id="vf-i6"></span> W at 0.52 V,
+both at <span id="vf-iT"></span> °C, a quarter more for a tenth of a volt, from leakage and the always-running clocks.</li>
 <li><b>Extrapolated to a GPU's operating point,</b> the same silicon is a GPU-class part. Random fp32 switches 27.6 W here;
 at 0.85 V and 1,410 MHz the same capacitance would switch 175 W, before leakage, which also grows with voltage.
 Esperanto's own model is in the same range: about 230 W at 0.85 V, 164 W at 0.75 V. This card's measured board power at
@@ -231,14 +333,15 @@ points are interpolated), although the curve is chip power at its own clock and 
 <h3>Leakage and temperature</h3>
 <ul>
 <li>Idle board power follows <span class="math-inline"><svg style="vertical-align: -0.186ex;" xmlns="http://www.w3.org/2000/svg" width="29.916ex" height="2.207ex" role="img" focusable="false" viewBox="0 -893.3 13222.7 975.3" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-2-TEX-N-31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path id="MJX-2-TEX-N-32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path><path id="MJX-2-TEX-N-2E" d="M78 60Q78 84 95 102T138 120Q162 120 180 104T199 61Q199 36 182 18T139 0T96 17T78 60Z"></path><path id="MJX-2-TEX-N-36" d="M42 313Q42 476 123 571T303 666Q372 666 402 630T432 550Q432 525 418 510T379 495Q356 495 341 509T326 548Q326 592 373 601Q351 623 311 626Q240 626 194 566Q147 500 147 364L148 360Q153 366 156 373Q197 433 263 433H267Q313 433 348 414Q372 400 396 374T435 317Q456 268 456 210V192Q456 169 451 149Q440 90 387 34T253 -22Q225 -22 199 -14T143 16T92 75T56 172T42 313ZM257 397Q227 397 205 380T171 335T154 278T148 216Q148 133 160 97T198 39Q222 21 251 21Q302 21 329 59Q342 77 347 104T352 209Q352 289 347 316T329 361Q302 397 257 397Z"></path><path id="MJX-2-TEX-N-57" d="M792 683Q810 680 914 680Q991 680 1003 683H1009V637H996Q931 633 915 598Q912 591 863 438T766 135T716 -17Q711 -22 694 -22Q676 -22 673 -15Q671 -13 593 231L514 477L435 234Q416 174 391 92T358 -6T341 -22H331Q314 -21 310 -15Q309 -14 208 302T104 622Q98 632 87 633Q73 637 35 637H18V683H27Q69 681 154 681Q164 681 181 681T216 681T249 682T276 683H287H298V637H285Q213 637 213 620Q213 616 289 381L364 144L427 339Q490 535 492 546Q487 560 482 578T475 602T468 618T461 628T449 633T433 636T408 637H380V683H388Q397 680 508 680Q629 680 650 683H660V637H647Q576 637 576 619L727 146Q869 580 869 600Q869 605 863 612T839 627T794 637H783V683H792Z"></path><path id="MJX-2-TEX-N-2B" d="M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z"></path><path id="MJX-2-TEX-N-33" d="M127 463Q100 463 85 480T69 524Q69 579 117 622T233 665Q268 665 277 664Q351 652 390 611T430 522Q430 470 396 421T302 350L299 348Q299 347 308 345T337 336T375 315Q457 262 457 175Q457 96 395 37T238 -22Q158 -22 100 21T42 130Q42 158 60 175T105 193Q133 193 151 175T169 130Q169 119 166 110T159 94T148 82T136 74T126 70T118 67L114 66Q165 21 238 21Q293 21 321 74Q338 107 338 175V195Q338 290 274 322Q259 328 213 329L171 330L168 332Q166 335 166 348Q166 366 174 366Q202 366 232 371Q266 376 294 413T322 525V533Q322 590 287 612Q265 626 240 626Q208 626 181 615T143 592T132 580H135Q138 579 143 578T153 573T165 566T175 555T183 540T186 520Q186 498 172 481T127 463Z"></path><path id="MJX-2-TEX-I-1D452" d="M39 168Q39 225 58 272T107 350T174 402T244 433T307 442H310Q355 442 388 420T421 355Q421 265 310 237Q261 224 176 223Q139 223 138 221Q138 219 132 186T125 128Q125 81 146 54T209 26T302 45T394 111Q403 121 406 121Q410 121 419 112T429 98T420 82T390 55T344 24T281 -1T205 -11Q126 -11 83 42T39 168ZM373 353Q367 405 305 405Q272 405 244 391T199 357T170 316T154 280T149 261Q149 260 169 260Q282 260 327 284T373 353Z"></path><path id="MJX-2-TEX-N-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path><path id="MJX-2-TEX-I-1D447" d="M40 437Q21 437 21 445Q21 450 37 501T71 602L88 651Q93 669 101 677H569H659Q691 677 697 676T704 667Q704 661 687 553T668 444Q668 437 649 437Q640 437 637 437T631 442L629 445Q629 451 635 490T641 551Q641 586 628 604T573 629Q568 630 515 631Q469 631 457 630T439 622Q438 621 368 343T298 60Q298 48 386 46Q418 46 427 45T436 36Q436 31 433 22Q429 4 424 1L422 0Q419 0 415 0Q410 0 363 1T228 2Q99 2 64 0H49Q43 6 43 9T45 27Q49 40 55 46H83H94Q174 46 189 55Q190 56 191 56Q196 59 201 76T241 233Q258 301 269 344Q339 619 339 625Q339 630 310 630H279Q212 630 191 624Q146 614 121 583T67 467Q60 445 57 441T43 437H40Z"></path><path id="MJX-2-TEX-N-2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"></path><path id="MJX-2-TEX-N-38" d="M70 417T70 494T124 618T248 666Q319 666 374 624T429 515Q429 485 418 459T392 417T361 389T335 371T324 363L338 354Q352 344 366 334T382 323Q457 264 457 174Q457 95 399 37T249 -22Q159 -22 101 29T43 155Q43 263 172 335L154 348Q133 361 127 368Q70 417 70 494ZM286 386L292 390Q298 394 301 396T311 403T323 413T334 425T345 438T355 454T364 471T369 491T371 513Q371 556 342 586T275 624Q268 625 242 625Q201 625 165 599T128 534Q128 511 141 492T167 463T217 431Q224 426 228 424L286 386ZM250 21Q308 21 350 55T392 137Q392 154 387 169T375 194T353 216T330 234T301 253T274 270Q260 279 244 289T218 306L210 311Q204 311 181 294T133 239T107 157Q107 98 150 60T250 21Z"></path><path id="MJX-2-TEX-N-30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path><path id="MJX-2-TEX-N-2218" d="M55 251Q55 328 112 386T249 444T386 388T444 249Q444 171 388 113T250 55Q170 55 113 112T55 251ZM245 403Q188 403 142 361T96 250Q96 183 141 140T250 96Q284 96 313 109T354 135T375 160Q403 197 403 250Q403 313 360 358T245 403Z"></path><path id="MJX-2-TEX-N-43" d="M56 342Q56 428 89 500T174 615T283 681T391 705Q394 705 400 705T408 704Q499 704 569 636L582 624L612 663Q639 700 643 704Q644 704 647 704T653 705H657Q660 705 666 699V419L660 413H626Q620 419 619 430Q610 512 571 572T476 651Q457 658 426 658Q322 658 252 588Q173 509 173 342Q173 221 211 151Q232 111 263 84T328 45T384 29T428 24Q517 24 571 93T626 244Q626 251 632 257H660L666 251V236Q661 133 590 56T403 -21Q262 -21 159 83T56 342Z"></path><path id="MJX-2-TEX-N-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path><path id="MJX-2-TEX-N-2F" d="M423 750Q432 750 438 744T444 730Q444 725 271 248T92 -240Q85 -250 75 -250Q68 -250 62 -245T56 -231Q56 -221 230 257T407 740Q411 750 423 750Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mn"><use data-c="31" xlink:href="#MJX-2-TEX-N-31"></use><use data-c="32" xlink:href="#MJX-2-TEX-N-32" transform="translate(500,0)"></use><use data-c="2E" xlink:href="#MJX-2-TEX-N-2E" transform="translate(1000,0)"></use><use data-c="36" xlink:href="#MJX-2-TEX-N-36" transform="translate(1278,0)"></use></g><g data-mml-node="mstyle" transform="translate(1778,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(1945,0)"><g data-mml-node="mi"><use data-c="57" xlink:href="#MJX-2-TEX-N-57"></use></g></g><g data-mml-node="mo" transform="translate(3195.2,0)"><use data-c="2B" xlink:href="#MJX-2-TEX-N-2B"></use></g><g data-mml-node="mn" transform="translate(4195.4,0)"><use data-c="32" xlink:href="#MJX-2-TEX-N-32"></use><use data-c="33" xlink:href="#MJX-2-TEX-N-33" transform="translate(500,0)"></use><use data-c="2E" xlink:href="#MJX-2-TEX-N-2E" transform="translate(1000,0)"></use><use data-c="33" xlink:href="#MJX-2-TEX-N-33" transform="translate(1278,0)"></use></g><g data-mml-node="mstyle" transform="translate(5973.4,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(6140.4,0)"><g data-mml-node="mi"><use data-c="57" xlink:href="#MJX-2-TEX-N-57"></use></g></g><g data-mml-node="mstyle" transform="translate(7168.4,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="msup" transform="translate(7335.4,0)"><g data-mml-node="mi"><use data-c="1D452" xlink:href="#MJX-2-TEX-I-1D452"></use></g><g data-mml-node="TeXAtom" transform="translate(499,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mo"><use data-c="28" xlink:href="#MJX-2-TEX-N-28"></use></g><g data-mml-node="mi" transform="translate(389,0)"><use data-c="1D447" xlink:href="#MJX-2-TEX-I-1D447"></use></g><g data-mml-node="mo" transform="translate(1093,0)"><use data-c="2212" xlink:href="#MJX-2-TEX-N-2212"></use></g><g data-mml-node="mn" transform="translate(1871,0)"><use data-c="38" xlink:href="#MJX-2-TEX-N-38"></use><use data-c="30" xlink:href="#MJX-2-TEX-N-30" transform="translate(500,0)"></use></g><g data-mml-node="msup" transform="translate(2871,0)"><g data-mml-node="mstyle" transform="scale(1.414)"><g data-mml-node="mspace"></g></g><g data-mml-node="mo" transform="translate(269.2,363) scale(0.707)"><use data-c="2218" xlink:href="#MJX-2-TEX-N-2218"></use></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(3543.7,0)"><g data-mml-node="mi"><use data-c="43" xlink:href="#MJX-2-TEX-N-43"></use></g></g><g data-mml-node="mo" transform="translate(4265.7,0)"><use data-c="29" xlink:href="#MJX-2-TEX-N-29"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(4654.7,0)"><g data-mml-node="mo"><use data-c="2F" xlink:href="#MJX-2-TEX-N-2F"></use></g></g><g data-mml-node="mn" transform="translate(5154.7,0)"><use data-c="33" xlink:href="#MJX-2-TEX-N-33"></use><use data-c="36" xlink:href="#MJX-2-TEX-N-36" transform="translate(500,0)"></use></g><g data-mml-node="msup" transform="translate(6154.7,0)"><g data-mml-node="mstyle" transform="scale(1.414)"><g data-mml-node="mspace"></g></g><g data-mml-node="mo" transform="translate(269.2,363) scale(0.707)"><use data-c="2218" xlink:href="#MJX-2-TEX-N-2218"></use></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(6827.5,0)"><g data-mml-node="mi"><use data-c="43" xlink:href="#MJX-2-TEX-N-43"></use></g></g></g></g></g></g></svg></span> from 64 to 88 °C, to 0.2 W rms (the
-idle law). At 80 °C that is 23 W of leakage in a 36 W idle; at 62 °C, where the card settled after the night of 20–21
+idle law) (data and fit plotted in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">the Horace experiment, §8</a>). At 80 °C that is 23 W of leakage in a 36 W idle; at 62 °C, where the card settled after the night of 20–21
 September, 14 W in 27 W. After about 20.6 hours without a workload (apart from a 5 s probe five minutes before), on a
 warmer 22 September, it sat at 73 °C and 31.8 W, which this law predicts to within 0.01 W.</li>
 <li>This is the term that keeps the measured card from Esperanto's headline. The minion, SRAM and NoC rails alone read
 22 W with every multiply-add gated, at 80 °C. A cooler die and the 0.4 V operating point would both cut it: leakage falls
 exponentially with temperature and steeply with voltage.</li>
-<li>It also makes the card thermally fragile: each degree adds 0.65 W at 80 °C, and on this card's cooling each sustained
-watt adds about 1.5 °C, a loop gain near one (0.95) at 80 °C. The Horace experiment's
+<li>It also makes the card thermally fragile: each degree adds <span id="lg-lam"></span> W at 80 °C, and on this card's
+cooling each watt held for hours adds <span id="lg-R"></span> °C (<span id="lg-10m"></span> °C after ten minutes), a loop gain
+of <span id="lg-gain"></span> at 80 °C. The Horace experiment's
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">section 8</a>
 turns that into a budget: about 3 W of sustained switching before the die runs away to 90 °C in 21 September's room, and
 0.3 to 0.7 W under 22 September's warmer conditions.</li>
@@ -246,47 +349,16 @@ turns that into a budget: about 3 W of sustained switching before the die runs a
 
 <h3>Memory</h3>
 <ul>
-<li>Streaming tensors from LPDDR4x at 75.5 GB/s, more than half of the datasheet's 137 GB/s (63% of the 119 GB/s that
-these cards' DDR clock allows), adds 10.7 W: 142 pJ per byte (18 pJ per bit) end to end (DRAM, PHY, controller, mesh and
-cache fills), on a buffer whose contents were never set. The energy manual's later measurements put a DRAM byte at 122 pJ
-for 1 KB tensor loads over a buffer likewise never written (its per-level probe,
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-by-level">section 4.2</a>), and at 91 (zeros) to 129 (random) pJ for tensor loads of known
-data: 11–16 pJ per bit.</li>
-<li>Streaming from the shire's own L2 cache at 2.45 TB/s adds 6.2 W: 2.6 pJ per byte (0.3 pJ per bit), as the energy
-manual's L2 row (2.5 pJ per byte) confirms.</li>
-<li>The figures in this section come from two 7 s strict-start runs per configuration at 80 °C;
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">the energy manual,
-section 4</a>, has the later measurements, with bars from repeated passes on two cards.</li>
-<li>An A100 moves 1,555 to 2,039 GB/s, eleven to fifteen times more. Esperanto's choice trades bandwidth per chip for
+<li>Moving data costs power too: a TensorLoad stream from LPDDR4x at <span id="mem-dg"></span> GB/s (<span id="mem-dpct"></span>
+of the 119 GB/s these cards' DDR clock allows) adds <span id="mem-dw"></span> W, <span id="mem-dpj"></span> pJ per byte (end to
+end: DRAM, PHY, controller, mesh and cache fills) on a never-written buffer, and from the shire's own L2 at
+<span id="mem-lt"></span> TB/s <span id="mem-lw"></span> W, <span id="mem-lpj"></span> pJ per byte (two 7 s runs each at 80 °C).
+The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual, §4</a>
+has the per-level values with bars on two cards (DRAM 122 pJ/B at a pinned 600 MHz; 91–129 pJ/B on known data).</li>
+<li>An A100's HBM moves 1,555 to 2,039 GB/s at peak, 13 to 17 times the 119 GB/s these cards' DDR clock allows (11 to 15
+times the LPDDR4x datasheet maximum of 137 GB/s in the <a href="#the-comparison">section 1</a> table). Esperanto's choice trades bandwidth per chip for
 power, cost and capacity, and gets bandwidth back by using six chips per card.</li>
 </ul>
-
-<h2>4. Putting the terms together</h2>
-<p>Take the switching power of each chip under its matmul and split it with the equation. The A100 measured by Horace He
-draws 330 W under load and 88 W idle, so about 242 W switches, at about 0.85 V and 1,160–1,410 MHz: 237–288 nF of
-effective capacitance. This card's fp32 matmul switches 27.6 W at 0.52 V and 600 MHz: 172 nF.</p>
-<div class="table-wrap"><table>
-<thead><tr><th>Term</th><th class="num">A100</th><th class="num">ET-SoC-1 (fp32)</th><th class="num">ratio</th><th>How it was established here</th></tr></thead>
-<tbody>
-<tr><td>Switched capacitance</td><td class="num">237–288 nF</td><td class="num">172 nF</td><td class="num">1.4–1.7×</td><td class="small">power over idle ÷ V²f; linear in active cores; 9 to 172 nF for the whole chip, depending on workload, data and precision</td></tr>
-<tr><td>V²</td><td class="num">0.72 V²</td><td class="num">0.27 V²</td><td class="num">2.7×</td><td class="small">on-die voltage telemetry; the 0.62 V point costs 1.5× per op, as V² predicts. The A100's voltage is an assumption: 0.75 to 0.95 V gives 2.1 to 3.3×</td></tr>
-<tr><td>Clock</td><td class="num">1,160–1,410 MHz</td><td class="num">600 MHz</td><td class="num">1.9–2.35×</td><td class="small">cycle counter against wall clock here, 546 cycles per op for every data pattern; for the A100, 1,410 MHz is the maximum boost and the capped random-data run is at least 1,160 MHz (257/312 of peak), probably near 1,230 (257/295 of the zero-data run); the per-FLOP rows below do not depend on the clock</td></tr>
-<tr><td><b>Switching power</b></td><td class="num"><b>242 W</b></td><td class="num"><b>27.6 W</b></td><td class="num"><b>8.8×</b></td><td class="small">1.4 × 2.7 × 2.35 at 1,410 MHz; 1.7 × 2.7 × 1.9 at 1,160 MHz</td></tr>
-<tr><td>Idle floor</td><td class="num">88 W</td><td class="num">36 W</td><td class="num">2.4×</td><td class="small">of the ET's, 23 W is leakage at 80 °C</td></tr>
-<tr><td>FLOPs per second</td><td class="num">257 × 10¹²</td><td class="num">9.2 × 10¹²</td><td class="num">28×</td><td class="small">bf16 tensor cores against fp32 on general vector units; in fp16 this card does 18.4 × 10¹², 14×</td></tr>
-<tr><td>Capacitance switched per FLOP</td><td class="num">1.3 pF</td><td class="num">11 pF</td><td class="num">0.12×</td><td class="small">the GPU's matmul engines do 8.6 times more arithmetic per unit of switched capacitance (3.9 times against fp16, 5.0 pF)</td></tr>
-<tr><td>Switching energy per FLOP</td><td class="num">0.94 pJ</td><td class="num">3.0 pJ</td><td class="num">0.31×</td><td class="small">the voltage wins back 2.7× of that 8.6×</td></tr>
-<tr><td>Board energy per FLOP</td><td class="num">1.3 pJ</td><td class="num">7.0 pJ</td><td class="num">0.18×</td><td class="small">the idle floor is 57% of this card's power under load, 27% of the GPU's; in fp16 this card spends 3.3 pJ, 0.39×</td></tr>
-</tbody></table></div>
-<p>So of the 8.8× lower switching power, most is the operating point: 6.3× at the A100's maximum clock (2.7× from V²,
-2.35× from the clock), about 5.2–5.5× at the 1,160–1,230 MHz its capped random-data run implies. The rest, 1.4–1.7×, is
-switching less capacitance per cycle.</p>
-<p>Against the A100 it switches a comparable amount of capacitance every cycle. It does so at a third of the V² and at
-43–52% of the clock, which is the 5–6× of the headline, and everything idle is clock-gated to nearly no switching power.
-What it does not have is efficiency per FLOP on dense floating-point matmul: its fp32 multiply-adds switch nine times more
-capacitance per FLOP than the A100's bf16 tensor cores do (four times in fp16), and at 9 TFLOPS its idle floor is spread
-over very little work. On the workload it was designed for, int8 with sparse memory access, the arithmetic is 19 times
-cheaper than fp32 and the comparison would be much closer; that was not measured against a GPU here.</p>
 
 <h2>5. Caveats</h2>
 <ul>
@@ -299,13 +371,16 @@ than zeros, and about 7 W of that is on no rail sensor; by the later fit in
 observability, section 4.2</a>, about 4.4 W of that is regulator delivery loss, and the rest is not attributed. Esperanto's
 20 W is a chip figure at an operating point this card's firmware does not offer.</li>
 <li>The 800 MHz figures come from seven short runs in which the governor changed the clock within seconds. Board power
-updates about every 133 ms, and one telemetry sample reads its fields over about 22 ms. They agree with V²f to 5%, and
-deserve a dedicated run from a cool die (<code>tools/ettelem/run_vf_cold.sh</code> is written for it). The die gets below
-65 °C only after hours idle in a cool room: after 20.6 hours on a warmer day it was still at 73 °C.</li>
+updates about every 133 ms, and one telemetry sample reads its fields over about 22 ms. They agree with V²f to within about
+<span id="vf-dev2"></span>, and deserve a dedicated run from a cool die (<code>tools/ettelem/run_vf_cold.sh</code> is written
+for it). The die gets below 65 °C only after hours idle in a cool room: after 20.6 hours on a warmer day it was still at
+73 °C. They are also one card's: aifoundry3's governor never leaves 600 MHz (all 7,745 samples of its session;
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">the DVFS report,
+section 3</a>), so the second card cannot repeat this check.</li>
 <li>The card sits in a desktop chassis: left alone it settled at 62 °C one night and at 73 °C on a warmer day, and every
 run here launched at 80 °C. In a server airflow it would run cooler and leak less.</li>
 <li>One card. The second working card, aifoundry3, switches about 8% less power for the same work
-(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-the-second-card-says-about-the-model">the DVFS report, section 7</a>;
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-the-second-card-says-about-the-model">the DVFS report, section 6</a>;
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-second-card-and-what-transfers">the Horace
 experiment, section 10</a>), so the capacitances here are this card's.</li>
 </ul>
@@ -316,13 +391,20 @@ experiment, section 10</a>), so the capacitances here are this card's.</li>
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#strict-temperature-control">strict start of the
 Horace experiment</a> (heat to 84 °C if below, idle to the 81→80 °C step, launch), in shuffled order, with 10 Hz
 telemetry. Power is the mean over seconds 1 to 3 moved to the launch temperature with the measured leakage slope. Repeats
-agree to 0.05 W for most configurations.</li>
+agree to 0.05 W for most configurations. These are the ablation session's values (random fp32 <span id="m-rn"></span> W at
+the launch temperature); the Horace experiment's strict session the same day read 0.5 W lower (63.4 W, +27.1 W over idle),
+and the pages each quote their own session.</li>
 <li>Commands: <code>tools/ettelem/run_ablation.sh build/ablation1 tools/ettelem/ablation.cfg 2 7</code>, then
 <code>tools/ettelem/analyze_ablation.py</code>. <code>tools/ettelem/finish_horace.sh</code> rebuilds this page and the
 Horace experiment from the data kept in the repository. Measurements used
 <code>tools/ettelem</code>, <code>workloads/sparsity</code> and the RTL flip counts of <code>rtl-sim/fma_toggle</code>.</li>
 <li>Data, all in <code>docs/reports/data/2026-09-21-horace-aifoundry2/</code>: <code>ablation.json</code> and
-<code>ablation.txt</code> (every configuration's runs), <code>vf.json</code> (the 600 against 800 MHz runs) and
+<code>ablation.txt</code> (every configuration's runs), <code>vf.json</code> (the 600 against 800 MHz operating points, written by <code>tools/ettelem/build_vf.py</code> from the
+cool-start telemetry in <code>cold1/</code> and <code>cold2/</code>: an 800 MHz load is the highest board reading from a run's
+first 800 MHz sample to 0.3 s after its last, because board power lags the clock field; idle at 800 MHz is the mean after the
+zeros runs' last launch while the governor still held 800 MHz; the 600 MHz loads are means over seconds 2–7 of the runs and
+idle the mean 0.5–2.5 s after them; the 600 MHz zeros figure is from the 80 °C runs, since from a cool die zeros stayed at
+800 MHz) and
 <code>model.json</code> (the idle law and the flip model). Notes and quotes: <code>docs/research/why-low-power.md</code>,
 written on 20–21 September; where its measured numbers differ, this page supersedes them.</li>
 <li>Firmware: the governor's source was read at et-platform <code>353f20e</code>; the card's own trace strings match an
@@ -335,7 +417,11 @@ and <a href="https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro
 H. He, <a href="https://www.thonking.ai/p/strangely-matrix-multiplications">"Strangely, Matrix Multiplications on GPUs Run Faster When Given 'Predictable' Data!"</a>, 2024.</li>
 <li>Versions: 21 September 2026, first published. 24 September 2026, corrected after review: the card's three operating
 points, the A100's clock under its power cap, the fp16 comparison and the matmul efficiency report's fp32 figure, the
-memory energies set against the energy manual, and the thermal budget's dependence on the day's conditions.</li>
+memory energies set against the energy manual, and the thermal budget's dependence on the day's conditions. 25 September
+2026, second review: sections reordered so the answer comes first; the 800 MHz operating points rebuilt by
+<code>tools/ettelem/build_vf.py</code> with stated windows (every 800 MHz reading moved, by up to 0.6 W, so the ratio for ones is
+now further from V²f; the random-data peak is now the higher of the two sessions' readings), and the V²f check restated on
+random data, since zeros' two runs differ by 0.5 W on 4 W; the factor split and the equation made interactive.</li>
 </ul>
 
 <h2>7. Related reports</h2>
@@ -359,80 +445,437 @@ each memory level on this card (its energy per byte is superseded by the energy 
 </main>
 
 <script>
-const D = {"ablation":{"configs":{"spin_8":{"n":2,"minions":256,"p80":36.87275000000001,"p80_sd":0.024750000000000938,"idle":36.328529411764706,"dyn":0.5442205882353051,"unit":"instruction","per_s":45010895137.63949,"pj_per_unit_dyn":12.090863480300154,"pj_per_unit_board":819.1961054594955,"cycles_per_op":null,"mw_per_minion":2.1258616727941604,"rise":-0.9000000000000057,"rails_late":{"minion":13.60775,"sram":2.51175,"noc":4.4649},"mhz":[600,600],"mv":518.0},"spin":{"n":2,"minions":1024,"p80":37.78725,"p80_sd":0.016250000000006537,"idle":36.32705882352941,"dyn":1.4601911764705875,"unit":"instruction","per_s":180047013802.0365,"pj_per_unit_dyn":8.110054955291192,"pj_per_unit_board":209.87435004919027,"cycles_per_op":null,"mw_per_minion":1.425967945772058,"rise":0.09999999999999432,"rails_late":{"minion":14.788200000000003,"sram":2.5511999999999997,"noc":4.49555},"mhz":[600,600],"mv":518.0},"fp16_zeros":{"n":2,"minions":1024,"p80":38.2145,"p80_sd":0.015000000000000568,"idle":36.31705882352941,"dyn":1.8974411764705934,"unit":"MAC","per_s":9184370624495.48,"pj_per_unit_dyn":0.20659457833833056,"pj_per_unit_board":4.160818586532075,"cycles_per_op":546.0010000000001,"mw_per_minion":1.8529698988970638,"rise":0.09999999999999432,"rails_late":{"minion":15.072599999999998,"sram":2.6267000000000005,"noc":4.5143},"mhz":[600,600],"mv":518.0},"fp32_zeros":{"n":2,"minions":1024,"p80":38.228750000000005,"p80_sd":0.008250000000000313,"idle":36.31647058823529,"dyn":1.9122794117647146,"unit":"MAC","per_s":4592372361498.649,"pj_per_unit_dyn":0.41640338832208107,"pj_per_unit_board":8.324401200673686,"cycles_per_op":546.0010000000001,"mw_per_minion":1.867460363051479,"rise":0.09999999999999432,"rails_late":{"minion":15.06205,"sram":2.6308,"noc":4.5123},"mhz":[600,600],"mv":518.0},"m_identity":{"n":2,"minions":1024,"p80":38.496500000000005,"p80_sd":0.0005000000000023874,"idle":36.215,"dyn":2.281500000000001,"unit":"MAC","per_s":4592343270718.406,"pj_per_unit_dyn":0.4968051962812208,"pj_per_unit_board":8.382757501047559,"cycles_per_op":546.0010000000001,"mw_per_minion":2.2280273437500013,"rise":0.09999999999999432,"rails_late":{"minion":15.319099999999999,"sram":2.6303,"noc":4.52075},"mhz":[600,600],"mv":518.0},"int8_zeros":{"n":2,"minions":1024,"p80":38.89775000000001,"p80_sd":0.0382499999999979,"idle":36.323235294117644,"dyn":2.5745147058823648,"unit":"MAC","per_s":31530108636326.33,"pj_per_unit_dyn":0.08165257962087154,"pj_per_unit_board":1.233670027866168,"cycles_per_op":318.0009333333334,"mw_per_minion":2.514174517463247,"rise":0.09999999999999432,"rails_late":{"minion":15.8133,"sram":2.5633,"noc":4.52295},"mhz":[600,600],"mv":518.0},"m_butterfly":{"n":2,"minions":1024,"p80":39.273250000000004,"p80_sd":0.08825000000000216,"idle":36.45617647058823,"dyn":2.817073529411772,"unit":"MAC","per_s":4591681315651.174,"pj_per_unit_dyn":0.6135167786600333,"pj_per_unit_board":8.55313060732971,"cycles_per_op":546.0010000000001,"mw_per_minion":2.7510483685661837,"rise":-0.4000000000000057,"rails_late":{"minion":15.764149999999999,"sram":2.5591,"noc":4.4563},"mhz":[600,600],"mv":518.0},"m_tridiagonal":{"n":2,"minions":1024,"p80":40.19525,"p80_sd":0.045249999999999346,"idle":36.317058823529415,"dyn":3.8781911764705868,"unit":"MAC","per_s":4591600691124.902,"pj_per_unit_dyn":0.8446272743112737,"pj_per_unit_board":8.754082226203453,"cycles_per_op":546.0010000000001,"mw_per_minion":3.7872960707720575,"rise":0.09999999999999432,"rails_late":{"minion":16.713050000000003,"sram":2.6670499999999997,"noc":4.55935},"mhz":[600,600],"mv":518.0},"int8_ones":{"n":2,"minions":1024,"p80":40.62225,"p80_sd":0.24375000000000568,"idle":36.40529411764706,"dyn":4.216955882352941,"unit":"MAC","per_s":31533797905921.46,"pj_per_unit_dyn":0.13372813179477744,"pj_per_unit_board":1.2882130506827374,"cycles_per_op":318.0010000000001,"mw_per_minion":4.118120978860294,"rise":-0.30000000000001137,"rails_late":{"minion":17.147350000000003,"sram":2.5378,"noc":4.5226},"mhz":[600,600],"mv":518.0},"m_block_diag":{"n":2,"minions":1024,"p80":41.13175,"p80_sd":0.004249999999995424,"idle":36.319411764705876,"dyn":4.812338235294121,"unit":"MAC","per_s":4591341804440.486,"pj_per_unit_dyn":1.0481332996467174,"pj_per_unit_board":8.95854670637235,"cycles_per_op":546.0010000000001,"mw_per_minion":4.699549057904415,"rise":0.09999999999999432,"rails_late":{"minion":17.47365,"sram":2.65035,"noc":4.571700000000001},"mhz":[600,600],"mv":518.0},"tload_l2":{"n":2,"minions":1024,"p80":42.572250000000004,"p80_sd":0.03624999999999545,"idle":36.330588235294115,"dyn":6.2416617647058885,"unit":"byte","per_s":2447392548830.907,"pj_per_unit_dyn":2.5503312771330706,"pj_per_unit_board":17.39494141237633,"cycles_per_op":null,"mw_per_minion":6.095372817095594,"rise":1.0999999999999943,"rails_late":{"minion":15.881599999999999,"sram":6.0097000000000005,"noc":4.609500000000001},"mhz":[600,600],"mv":518.0},"fp32_randn_8":{"n":2,"minions":256,"p80":42.86600000000001,"p80_sd":0.015999999999998238,"idle":36.317647058823525,"dyn":6.548352941176482,"unit":"MAC","per_s":1147920568307.066,"pj_per_unit_dyn":5.704534897248059,"pj_per_unit_board":37.34230501960433,"cycles_per_op":546.0010000000001,"mw_per_minion":25.579503676470633,"rise":1.0999999999999943,"rails_late":{"minion":18.9925,"sram":2.6197500000000007,"noc":4.622},"mhz":[600,600],"mv":518.0},"m_upper":{"n":2,"minions":1024,"p80":44.418000000000006,"p80_sd":0.34349999999999525,"idle":36.31999999999999,"dyn":8.098000000000013,"unit":"MAC","per_s":4591912058526.024,"pj_per_unit_dyn":1.7635355156604242,"pj_per_unit_board":9.673094657273971,"cycles_per_op":546.0010000000001,"mw_per_minion":7.908203125000012,"rise":1.0999999999999943,"rails_late":{"minion":20.81545,"sram":2.74045,"noc":4.66655},"mhz":[600,600],"mv":517.0},"int8_randn":{"n":2,"minions":1024,"p80":46.287,"p80_sd":0.07100000000000506,"idle":36.30676470588236,"dyn":9.98023529411764,"unit":"MAC","per_s":31535316750300.344,"pj_per_unit_dyn":0.3164780418456583,"pj_per_unit_board":1.4677829421059854,"cycles_per_op":318.0009333333334,"mw_per_minion":9.74632352941176,"rise":2.0999999999999943,"rails_late":{"minion":22.250999999999998,"sram":2.66875,"noc":4.71025},"mhz":[600,600],"mv":517.0},"fp16_ones":{"n":2,"minions":1024,"p80":46.319250000000004,"p80_sd":0.5452499999999958,"idle":36.27205882352941,"dyn":10.04719117647059,"unit":"MAC","per_s":9182778455792.506,"pj_per_unit_dyn":1.0941341147278592,"pj_per_unit_board":5.044143253916985,"cycles_per_op":546.0010000000001,"mw_per_minion":9.811710133272062,"rise":2.0999999999999943,"rails_late":{"minion":22.6382,"sram":2.7391,"noc":4.7212},"mhz":[600,600],"mv":517.0},"m_negzero":{"n":2,"minions":1024,"p80":46.70725,"p80_sd":0.011750000000002814,"idle":36.300000000000004,"dyn":10.407249999999998,"unit":"MAC","per_s":4591998554124.783,"pj_per_unit_dyn":2.2663879087356507,"pj_per_unit_board":10.171442662595137,"cycles_per_op":546.0010000000001,"mw_per_minion":10.163330078124998,"rise":2.0999999999999943,"rails_late":{"minion":22.50755,"sram":2.74775,"noc":4.7187},"mhz":[600,600],"mv":517.0},"fp32_ones":{"n":2,"minions":1024,"p80":46.868500000000004,"p80_sd":0.017499999999998295,"idle":36.30676470588236,"dyn":10.561735294117646,"unit":"MAC","per_s":4592197589491.705,"pj_per_unit_dyn":2.2999304991331373,"pj_per_unit_board":10.206115718376072,"cycles_per_op":546.0010000000001,"mw_per_minion":10.314194623161764,"rise":2.0999999999999943,"rails_late":{"minion":22.612099999999998,"sram":2.7467499999999996,"noc":4.72115},"mhz":[600,600],"mv":517.0},"tload_dram":{"n":2,"minions":1024,"p80":46.985312500000006,"p80_sd":0.06018750000000139,"idle":36.27558823529412,"dyn":10.709724264705883,"unit":"byte","per_s":75527337124.69699,"pj_per_unit_dyn":141.79930965954668,"pj_per_unit_board":622.0967703710567,"cycles_per_op":null,"mw_per_minion":10.458715102251839,"rise":1.0999999999999943,"rails_late":{"minion":14.699024999999999,"sram":3.7536,"noc":6.293749999999999},"mhz":[600,600],"mv":518.0},"fp32_randn_16":{"n":2,"minions":512,"p80":49.39425,"p80_sd":0.01725000000000776,"idle":36.289117647058816,"dyn":13.105132352941183,"unit":"MAC","per_s":2295611403720.7197,"pj_per_unit_dyn":5.708776464387842,"pj_per_unit_board":21.516816792224486,"cycles_per_op":546.0010000000001,"mw_per_minion":25.59596162683825,"rise":2.0999999999999943,"rails_late":{"minion":24.716600000000003,"sram":2.7068,"noc":4.78585},"mhz":[600,600],"mv":517.7746478873239},"m_fft_cos":{"n":2,"minions":1024,"p80":49.758250000000004,"p80_sd":0.011249999999996874,"idle":36.322941176470586,"dyn":13.435308823529418,"unit":"MAC","per_s":4591632545899.65,"pj_per_unit_dyn":2.926041813935484,"pj_per_unit_board":10.836722996145316,"cycles_per_op":546.0010000000001,"mw_per_minion":13.120418772977947,"rise":2.0999999999999943,"rails_late":{"minion":25.0364,"sram":2.7964,"noc":4.8020499999999995},"mhz":[600,600],"mv":517.0},"m_hadamard":{"n":2,"minions":1024,"p80":50.0685,"p80_sd":0.0045000000000001705,"idle":36.28794117647058,"dyn":13.780558823529418,"unit":"MAC","per_s":4591497339227.833,"pj_per_unit_dyn":3.001321313157276,"pj_per_unit_board":10.904612657016193,"cycles_per_op":546.0010000000001,"mw_per_minion":13.457576976102947,"rise":2.5,"rails_late":{"minion":25.28165,"sram":2.79825,"noc":4.8035499999999995},"mhz":[600,600],"mv":517.0},"m_relu":{"n":2,"minions":1024,"p80":52.7475,"p80_sd":0.49549999999999983,"idle":36.321764705882345,"dyn":16.425735294117658,"unit":"MAC","per_s":4591314991794.18,"pj_per_unit_dyn":3.5775666281826726,"pj_per_unit_board":11.488538707161867,"cycles_per_op":546.0010000000001,"mw_per_minion":16.040757123161775,"rise":3.0999999999999943,"rails_late":{"minion":27.47335,"sram":2.8640999999999996,"noc":4.874499999999999},"mhz":[600,600],"mv":517.0},"m_quant4":{"n":2,"minions":1024,"p80":54.21025,"p80_sd":0.982249999999997,"idle":36.313529411764705,"dyn":17.896720588235297,"unit":"MAC","per_s":4591411476990.6,"pj_per_unit_dyn":3.8978690274053904,"pj_per_unit_board":11.80688123285601,"cycles_per_op":546.0010000000001,"mw_per_minion":17.477266199448533,"rise":3.5,"rails_late":{"minion":28.74935,"sram":2.88,"noc":4.91145},"mhz":[600,600],"mv":517.0},"fp32_randn_24":{"n":2,"minions":768,"p80":56.47800000000001,"p80_sd":0.050999999999991275,"idle":36.36235294117647,"dyn":20.11564705882354,"unit":"MAC","per_s":3444391695308.5107,"pj_per_unit_dyn":5.840116002550576,"pj_per_unit_board":16.397089819060582,"cycles_per_op":546.0010000000001,"mw_per_minion":26.19224877450982,"rise":3.5999999999999943,"rails_late":{"minion":30.493650000000002,"sram":2.8205999999999998,"noc":4.96005},"mhz":[600,600],"mv":517.0},"fp16_randn":{"n":2,"minions":1024,"p80":61.09575,"p80_sd":0.018749999999997158,"idle":36.31294117647059,"dyn":24.782808823529415,"unit":"MAC","per_s":9183800243203.39,"pj_per_unit_dyn":2.6985352650576546,"pj_per_unit_board":6.6525564997142475,"cycles_per_op":546.0010000000001,"mw_per_minion":24.201961741727946,"rise":5.099999999999994,"rails_late":{"minion":34.3224,"sram":2.9640499999999994,"noc":5.0929},"mhz":[600,600],"mv":516.0},"m_lowrank":{"n":2,"minions":1024,"p80":63.0845,"p80_sd":0.1454999999999984,"idle":36.22176470588235,"dyn":26.86273529411765,"unit":"MAC","per_s":4591764454318.871,"pj_per_unit_dyn":5.850198885714051,"pj_per_unit_board":13.73861848263246,"cycles_per_op":546.0010000000001,"mw_per_minion":26.233139935661764,"rise":5.099999999999994,"rails_late":{"minion":35.91380000000001,"sram":2.99585,"noc":5.1414},"mhz":[600,600],"mv":516.0},"m_circulant":{"n":2,"minions":1024,"p80":63.82350000000001,"p80_sd":0.19599999999999795,"idle":36.309411764705885,"dyn":27.514088235294125,"unit":"MAC","per_s":4591213825886.219,"pj_per_unit_dyn":5.992769946841502,"pj_per_unit_board":13.901225780456976,"cycles_per_op":546.0010000000001,"mw_per_minion":26.86922679227942,"rise":5.3999999999999915,"rails_late":{"minion":36.433499999999995,"sram":3.01355,"noc":5.15485},"mhz":[600,600],"mv":516.0},"m_kaleidoscope":{"n":2,"minions":1024,"p80":63.85975,"p80_sd":0.05775000000000574,"idle":36.30911764705883,"dyn":27.55063235294117,"unit":"MAC","per_s":4592125620606.492,"pj_per_unit_dyn":5.999538041666748,"pj_per_unit_board":13.9063595545903,"cycles_per_op":546.0010000000001,"mw_per_minion":26.904914407169112,"rise":5.099999999999994,"rails_late":{"minion":36.51819999999999,"sram":3.0013499999999995,"noc":5.15765},"mhz":[600,600],"mv":516.0},"fp32_randn":{"n":2,"minions":1024,"p80":63.932750000000006,"p80_sd":0.03925000000000267,"idle":36.307647058823534,"dyn":27.625102941176472,"unit":"MAC","per_s":4591388252936.51,"pj_per_unit_dyn":6.016721178721558,"pj_per_unit_board":13.924492218472398,"cycles_per_op":546.0010000000001,"mw_per_minion":26.97763959099265,"rise":5.099999999999994,"rails_late":{"minion":36.53135,"sram":2.99945,"noc":5.1556},"mhz":[600,600],"mv":516.0},"m_dct":{"n":2,"minions":1024,"p80":63.95,"p80_sd":0.014000000000013557,"idle":36.31058823529412,"dyn":27.639411764705883,"unit":"MAC","per_s":4591541812939.859,"pj_per_unit_dyn":6.0196362988163665,"pj_per_unit_board":13.92778343426525,"cycles_per_op":546.0010000000001,"mw_per_minion":26.99161305147059,"rise":5.299999999999997,"rails_late":{"minion":36.55815,"sram":3.0097000000000005,"noc":5.1604},"mhz":[600,600],"mv":516.0}}},"model":{"power":{"P_fix":12.634918235027182,"A_leak_at_80":23.25676120777849,"T_L":36.0,"lambda_at_80":0.6460211446605135,"p_sm_full_chip":1.8545908797737398,"e_fJ":{"ffclk":3.178587073836598,"mult":0.02503948904511476,"rest":0.8008083235978227,"bus":15.539003141447854},"rms":0.48956235330002573,"rms_idle":0.20494779671485983,"idle_curve":[{"T":64,"P":27.47282425577761,"n":868},{"T":65,"P":28.02004443486072,"n":740},{"T":66,"P":28.38715289575908,"n":813},{"T":67,"P":28.839088817250776,"n":897},{"T":81,"P":36.570243969639264,"n":35121},{"T":82,"P":37.188303621476685,"n":16984},{"T":83,"P":37.89609722862481,"n":12593},{"T":84,"P":38.62803620999396,"n":10074},{"T":85,"P":39.36293959825545,"n":6933},{"T":86,"P":40.11145267330364,"n":4936},{"T":87,"P":40.87379917299087,"n":2729},{"T":88,"P":41.566950231956916,"n":733}]},"R_total":1.4671587536399766},"flips":{"zeros":{"ffclk":24912.0,"mult":0,"rest":52.0,"bus":0.0},"ones":{"ffclk":2467776.0,"mult":1414.0,"rest":29493.0,"bus":254.0},"randn":{"ffclk":2467776.0,"mult":74066984.39999999,"rest":13306780.400000006,"bus":138300.775}},"facts":{"a100":{"transistors_b":54.2,"die_mm2":826,"tflops":257,"watts":330,"idle":88,"volts":0.85,"mhz":1410,"mem_gbs":1555},"et":{"transistors_b":24,"die_mm2":570,"tflops":9.18277650587302,"watts":63.932750000000006,"idle62":26.7,"idle80":36.307647058823534,"volts":0.52,"mhz":600,"mem_gbs":137}},"vf":{"note":"from the cool-start runs (cold1, cold2): the governor's 800 MHz / 0.62 V point against 600 MHz / 0.52 V at 64 to 68 C","idle600":28.1,"idle800":35.0,"zeros800":38.9,"zeros600_dyn":1.9,"ones800":55.6,"ones600":38.4,"randn800_peak":87.6,"randn600":54.8,"points":[[0.618,38.9,"zeros, 800 MHz, 64 \u00b0C","var(--c1)"],[0.618,55.6,"ones, 800 MHz, 65 \u00b0C","var(--c4)"],[0.618,87.6,"random fp32, 800 MHz, 66 \u00b0C, peak before the governor stepped down","var(--bad)"]]}};
-const NS='http://www.w3.org/2000/svg';
-function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
-function txt(p,x,y,s,c,an){const t=el('text',{x,y,class:c||'tick','text-anchor':an||'start'},p);t.textContent=s;return t;}
-function host(id,W,H){const h=document.getElementById(id);h.innerHTML='';const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'},h);const tip=document.createElement('div');tip.className='tip';h.appendChild(tip);return {svg,tip,h};}
-function hover(g,tip,h,html){const s=ev=>{tip.innerHTML=html();tip.style.display='block';const b=h.getBoundingClientRect();tip.style.left=Math.max(0,Math.min(ev.clientX-b.left+12,b.width-290))+'px';tip.style.top=(ev.clientY-b.top+12)+'px';};g.addEventListener('mousemove',s);g.addEventListener('mouseleave',()=>tip.style.display='none');}
-function path(pts,x,y){return pts.map((p,i)=>`${i?'L':'M'}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join(' ');}
+/* chart toolkit: docs/reports/sources/chartkit.js */
+/* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
+   Source-built pages get it from report.template.html (scripts/build-report.py inlines it before the page script);
+   standalone pages get this file, the template's chartkit CSS and token aliases from scripts/paste-chartkit.py.
+   Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
+   --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
+   API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame. Every mark with a tooltip is reachable from the keyboard. */
+window.CK = (function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
+  let uid = 0;
+  const $ = h => (typeof h === 'string' ? document.getElementById(h) : h);
+  const mm = q => (window.matchMedia ? window.matchMedia(q) : {matches: false});
+  const reduced = mm('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, str, cls, anchor) {
+    const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
+    t.textContent = str;
+    return t;
+  }
+  const path = (pts, x, y) => pts.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ');
+
+  /* ---- numbers ---- */
+  function num(v, dp) {
+    if (v == null || !isFinite(v)) return '\u2014';
+    const auto = dp == null;  // no dp: three significant digits, trailing zeros dropped
+    if (auto) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+    const s = Number(v).toLocaleString('en-GB', {minimumFractionDigits: auto ? 0 : dp, maximumFractionDigits: dp});
+    return /[1-9]/.test(s) ? s.replace('-', '\u2212') : s.replace('-', '');  // true minus; never "−0.00"
+  }
+  const fmt = {
+    num,
+    range: (a, b, dp, unit) => {
+      const s = num(a, dp), t = num(b, dp), u = unit ? '\u00a0' + unit : '';
+      return s === t ? s + u : s + (b < 0 ? ' to ' : '\u2013') + t + u;
+    },
+    pct: (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%',
+  };
+
+  /* ---- scales ---- */
+  function niceTicks(a, b, n) {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    if (!(hi > lo)) return Object.assign([lo], {step: 1});
+    const raw = (hi - lo) / Math.max(1, n || 5), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    const step = (m >= 7.5 ? 10 : m >= 3.5 ? 5 : m >= 1.5 ? 2 : 1) * p, out = [];
+    for (let i = Math.ceil(lo / step - 1e-9); i * step <= hi + step * 1e-9; i++) out.push(+(i * step).toPrecision(12));
+    out.step = step;
+    return out;
+  }
+  const tickDp = t => (t.step ? Math.max(0, -Math.floor(Math.log10(t.step) + 1e-9)) : null);
+  function lin(d0, d1, r0, r1) {
+    const s = v => r0 + (v - d0) * (r1 - r0) / (d1 - d0);
+    s.inv = p => d0 + (p - r0) * (d1 - d0) / (r1 - r0);
+    s.ticks = n => niceTicks(d0, d1, n);
+    s.domain = [d0, d1]; s.range = [r0, r1];
+    return s;
+  }
+  function log(d0, d1, r0, r1) {
+    const l0 = Math.log10(d0), l1 = Math.log10(d1);
+    const s = v => r0 + (Math.log10(v) - l0) * (r1 - r0) / (l1 - l0);
+    s.inv = p => Math.pow(10, l0 + (p - r0) * (l1 - l0) / (r1 - r0));
+    s.ticks = n => {
+      const lo = Math.min(l0, l1), hi = Math.max(l0, l1), k0 = Math.ceil(lo - 1e-9), k1 = Math.floor(hi + 1e-9);
+      const dec = k1 - k0 + 1, every = Math.max(1, Math.ceil(dec / (n || 6))), out = [];
+      const add = v => { v = +v.toPrecision(12); const lv = Math.log10(v); if (lv >= lo - 1e-9 && lv <= hi + 1e-9) out.push(v); };
+      if (dec <= 2) { for (let k = k0 - 1; k <= k1; k++) for (const m of [1, 2, 5]) add(m * Math.pow(10, k)); }
+      else for (let k = k0; k <= k1; k += every) add(Math.pow(10, k));
+      return out;
+    };
+    s.domain = [d0, d1]; s.range = [r0, r1]; s.log = true;
+    return s;
+  }
+  const logFmt = v => num(v, v >= 1 ? 0 : Math.ceil(-Math.log10(v) - 1e-9));
+
+  /* ---- frame: a responsive SVG sized to its host ---- */
+  function frame(hostId, o) {
+    const host = $(hostId);
+    if (!host) throw new Error('CK.frame: no element ' + hostId);
+    host.classList.add('ck-frame'); host.classList.remove('scroll');
+    host.textContent = '';
+    const plot = document.createElement('div'); plot.className = 'ck-plot'; host.appendChild(plot);
+    const svg = el('svg', {role: 'group', 'aria-label': o.label || null}, plot);
+    const tip = document.createElement('div'); tip.className = 'ck-tip'; tip.setAttribute('aria-hidden', 'true');
+    host.appendChild(tip);
+    const minW = o.minW == null ? 320 : o.minW, maxW = o.maxW == null ? 900 : o.maxW;
+    const f = {svg, host, tip, W: 0, H: 0, narrow: false, seriesOn: null, pinned: null, active: null, navIndex: 0};
+    const width = () => {
+      const cs = getComputedStyle(host), cw = host.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return Math.round(Math.max(minW, Math.min(maxW, cw > 0 ? cw : maxW)));
+    };
+    f.redraw = () => {
+      const W = width(), H = Math.round(typeof o.height === 'function' ? o.height(W) : (o.height || 300));
+      f.refocus = svg.contains(document.activeElement) ? f.navIndex : null;
+      hide(f, true);
+      Object.assign(f, {W, H, narrow: W < 600, navNodes: []});
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.setAttribute('height', H);
+      svg.style.width = W + 'px';
+      o.draw(f);
+      if (f.seriesOn) showSeries(f, f.seriesOn);
+    };
+    f.redraw();
+    frames.push(f);
+    if (window.ResizeObserver) {
+      let timer;
+      new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => { if (width() !== f.W) f.redraw(); }, 150); }).observe(host);
+    }
+    return f;
+  }
+
+  /* ---- axes: horizontal grid, tick labels, baseline, axis titles (y title sits above the plot) ---- */
+  function axes(f, o) {
+    const {x, y} = o, W = f.W, H = f.H;
+    const L = o.L == null ? 44 : o.L, R = o.R == null ? 12 : o.R, T = o.T == null ? 22 : o.T, B = o.B == null ? 38 : o.B;
+    const g = el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, f.svg);
+    const yt = o.yt || y.ticks(Math.max(3, Math.round((H - T - B) / 48)));
+    const xt = o.xt || x.ticks(Math.max(2, Math.round((W - L - R) / 90)));
+    const auto = (s, t) => (s.log ? logFmt : v => num(v, tickDp(t)));
+    const xf = o.xfmt || auto(x, xt), yf = o.yfmt || auto(y, yt), labs = [];
+    for (const t of yt) {
+      if (o.grid !== false) el('line', {x1: L, x2: W - R, y1: y(t), y2: y(t), class: 'grid-line'}, g);
+      labs.push(txt(g, L - 6, y(t) + 4, yf(t), 'tick', 'end'));
+    }
+    el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    for (const t of xt) labs.push(txt(g, x(t), H - B + 16, xf(t), 'tick', 'middle'));
+    if (o.xl) labs.push(txt(g, (L + W - R) / 2, H - 6, o.xl, 'lab', 'middle'));
+    if (o.yl) txt(g, 2, Math.max(12, T - 13), o.yl, 'lab');
+    inside(f, labs);
+    return g;
+  }
+  /* Keep labels inside the frame (0..f.W, 0..f.H, less pad): one that would cross the left or right edge is anchored
+     at that edge instead (text-anchor start or end, so its outer end sits pad px from the edge in any font; an end
+     tick label still covers its tick), and one that would cross the top or bottom is moved in. Labels already inside
+     are not touched. Widths are measured in the page's font; a chart drawn while hidden has no layout, so they are
+     estimated at 0.6 em a character. Vertically the glyphs are taken as 0.75 em above the baseline and 0.25 em below. */
+  function inside(f, labels, pad) {
+    pad = pad == null ? 2 : pad;
+    const m = labels.map(t => {
+      let w = 0, fs = 12;
+      try { w = t.getComputedTextLength(); fs = parseFloat(getComputedStyle(t).fontSize) || 12; } catch (_) { /* no layout */ }
+      return {w: w > 0 ? w : 0.6 * fs * t.textContent.length, fs};
+    });
+    labels.forEach((t, k) => {
+      const {w, fs} = m[k], a = t.getAttribute('text-anchor') || 'start', x = +t.getAttribute('x'), y = +t.getAttribute('y');
+      const x0 = a === 'end' ? x - w : a === 'middle' ? x - w / 2 : x;
+      if (x0 < pad) { t.setAttribute('text-anchor', 'start'); t.setAttribute('x', pad); }
+      else if (x0 + w > f.W - pad) { t.setAttribute('text-anchor', 'end'); t.setAttribute('x', +(f.W - pad).toFixed(1)); }
+      if (y - 0.75 * fs < pad) t.setAttribute('y', +(pad + 0.75 * fs).toFixed(1));
+      else if (y + 0.25 * fs > f.H - pad) t.setAttribute('y', +(f.H - pad - 0.25 * fs).toFixed(1));
+    });
+    return labels;
+  }
+
+  /* ---- tooltip: pointer, keyboard focus and touch all show the same text ---- */
+  const strip = html => new DOMParser().parseFromString(String(html).replace(/<br\s*\/?>/gi, '; '), 'text/html')
+    .body.textContent.replace(/\s+/g, ' ').trim();
+  function place(f, cx, cy) {
+    const t = f.tip; t.style.display = 'block';
+    const hw = f.host.clientWidth, hh = f.host.clientHeight, tw = t.offsetWidth, th = t.offsetHeight;
+    let top = cy + 14;
+    if (top + th > hh && cy - th - 10 >= 0) top = cy - th - 10;  // flip above the pointer
+    t.style.left = Math.max(0, Math.min(cx + 12, hw - tw)) + 'px';
+    t.style.top = top + 'px';
+  }
+  function show(f, node, html, cx, cy) {
+    if (f.active && f.active !== node) f.active.classList.remove('ck-active');
+    f.active = node; node.classList.add('ck-active');
+    f.tip.innerHTML = typeof html === 'function' ? html() : html;
+    if (cx == null) {
+      const r = node.getBoundingClientRect(), b = f.host.getBoundingClientRect();
+      cx = r.left + r.width / 2 - b.left; cy = r.top + r.height / 2 - b.top;
+    }
+    place(f, cx, cy);
+  }
+  function hide(f, force) {
+    if (f.pinned && !force) return;
+    f.pinned = null; f.tip.style.display = 'none';
+    if (f.active) f.active.classList.remove('ck-active');
+    f.active = null;
+  }
+  function tip(f, node, html, o) {
+    o = o || {};
+    if (!node.hasAttribute('data-ck-nav')) node.setAttribute('tabindex', '0');
+    node.setAttribute('role', o.role || 'img');
+    node.setAttribute('aria-label', strip(typeof html === 'function' ? html() : html));
+    node._ckTip = html;
+    const at = ev => { const b = f.host.getBoundingClientRect(); show(f, node, html, ev.clientX - b.left, ev.clientY - b.top); };
+    node.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointermove', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') hide(f); });
+    node.addEventListener('pointerdown', ev => {  // touch: a tap toggles the tooltip and pins it until the next tap
+      if (ev.pointerType !== 'touch') return;
+      f.touchT = Date.now();
+      if (f.active === node && f.tip.style.display === 'block') hide(f, true); else { hide(f, true); at(ev); f.pinned = node; }
+    });
+    node.addEventListener('focus', () => { if (Date.now() - (f.touchT || 0) > 600 && !f.pinned) show(f, node, html); });
+    node.addEventListener('blur', () => hide(f));
+    node.addEventListener('keydown', ev => { if (ev.key === 'Escape') hide(f, true); });
+    return node;
+  }
+  document.addEventListener('pointerdown', ev => {  // a tap elsewhere unpins
+    for (const f of frames) if (f.pinned && !f.pinned.contains(ev.target)) hide(f, true);
+  }, true);
+
+  /* ---- keynav: one tab stop per mark group; arrows step, Home/End jump, Enter pins, Escape hides ---- */
+  function keynav(f, nodes, o) {
+    o = o || {};
+    nodes = nodes.filter(Boolean);
+    if (!nodes.length) return;
+    const seen = n => !n.closest('.ck-hidden');
+    const next = (k, d) => { for (let j = k + d; j >= 0 && j < nodes.length; j += d) if (seen(nodes[j])) return j; return k; };
+    let cur = Math.min(f.navIndex || 0, nodes.length - 1);
+    nodes.forEach((n, k) => {
+      n.setAttribute('data-ck-nav', '');
+      n.setAttribute('tabindex', k === cur ? '0' : '-1');
+      n.addEventListener('focus', () => {
+        nodes.forEach(m => m.setAttribute('tabindex', '-1')); n.setAttribute('tabindex', '0');
+        f.navIndex = k;
+        if (o.onFocus) o.onFocus(n, k);
+      });
+      n.addEventListener('keydown', ev => {
+        const K = ev.key;
+        let j = null;
+        if (o.step) j = o.step(k, K, nodes);
+        if (j == null) {
+          if (K === 'ArrowRight' || K === 'ArrowDown') j = next(k, 1);
+          else if (K === 'ArrowLeft' || K === 'ArrowUp') j = next(k, -1);
+          else if (K === 'Home') j = next(-1, 1);
+          else if (K === 'End') j = next(nodes.length, -1);
+        }
+        if (K === 'Enter' || K === ' ') {
+          ev.preventDefault();
+          if (n._ckTip) { if (f.pinned === n) hide(f, true); else { hide(f, true); show(f, n, n._ckTip); f.pinned = n; } }
+          if (o.onEnter) o.onEnter(n, k);
+        } else if (j != null) { ev.preventDefault(); if (j !== k) { hide(f, true); nodes[j].focus(); } }
+      });
+    });
+    f.navNodes = (f.navNodes || []).concat([nodes]);
+    if (f.refocus != null && nodes[f.refocus]) { nodes[f.refocus].focus(); f.refocus = null; }
+  }
+
+  /* ---- legend (HTML, above the chart) and series toggling ---- */
+  function swatch(it) {
+    const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
+    const m = it.mark || 'box';
+    const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
+    if (m === 'dot' || m === 'box') e.style.fill = c;
+    else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
+    if (m === 'dash') e.style.strokeDasharray = '4 3';
+    return s;
+  }
+  function legend(hostEl, items, o) {
+    o = o || {};
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-legend');
+    const on = new Set(items.map(it => it.key)), btn = {};
+    for (const it of items) {
+      const b = document.createElement(o.toggle ? 'button' : 'span'); b.className = 'ck-li';
+      b.append(swatch(it), document.createTextNode(it.label));
+      if (o.toggle) {
+        b.type = 'button'; b.setAttribute('aria-pressed', 'true');
+        b.addEventListener('click', () => {
+          const was = on.has(it.key);
+          if (was && on.size === 1) return;  // keep at least one series
+          if (was) on.delete(it.key); else on.add(it.key);
+          b.setAttribute('aria-pressed', String(!was));
+          if (o.onChange) o.onChange([...on]);
+        });
+      }
+      btn[it.key] = b; h.appendChild(b);
+    }
+    return {el: h, on, set(keys) { on.clear(); keys.forEach(k => on.add(k)); for (const k in btn) if (o.toggle) btn[k].setAttribute('aria-pressed', String(on.has(k))); }};
+  }
+  function showSeries(f, keysOn) {
+    f.seriesOn = [...keysOn];
+    f.svg.querySelectorAll('[data-series]').forEach(n => n.classList.toggle('ck-hidden', !f.seriesOn.includes(n.getAttribute('data-series'))));
+    for (const group of f.navNodes || []) {  // keep one reachable tab stop per group
+      const vis = group.filter(n => !n.closest('.ck-hidden'));
+      if (vis.length && !vis.some(n => n.getAttribute('tabindex') === '0')) { group.forEach(n => n.setAttribute('tabindex', '-1')); vis[0].setAttribute('tabindex', '0'); }
+    }
+    if (f.active && f.active.closest('.ck-hidden')) hide(f, true);
+  }
+
+  /* ---- controls ---- */
+  function seg(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-seg');
+    const g = document.createElement('div'); g.setAttribute('role', 'radiogroup'); g.className = 'ck-seg-group';
+    if (o.label) {
+      const s = document.createElement('span'); s.className = 'ck-seg-label'; s.id = 'ck-l' + (++uid); s.textContent = o.label;
+      h.appendChild(s); g.setAttribute('aria-labelledby', s.id);
+    }
+    const opts = o.options, api = {el: h, value: o.value == null ? opts[0][0] : o.value};
+    const btns = opts.map(([v, t], k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.textContent = t;
+      b.addEventListener('click', () => set(v, true));
+      b.addEventListener('keydown', ev => {
+        const d = ev.key === 'ArrowRight' || ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowLeft' || ev.key === 'ArrowUp' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const j = (k + d + opts.length) % opts.length;
+        set(opts[j][0], true); btns[j].focus();
+      });
+      g.appendChild(b); return b;
+    });
+    function set(v, fire) {
+      api.value = v;
+      btns.forEach((b, k) => { const c = opts[k][0] === v; b.setAttribute('aria-checked', String(c)); b.tabIndex = c ? 0 : -1; });
+      if (fire && o.onChange) o.onChange(v);
+    }
+    h.appendChild(g); set(api.value, false);
+    api.set = v => set(v, true);
+    return api;
+  }
+  function range(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-range');
+    const id = 'ck-r' + (++uid), stops = o.stops, f1 = o.fmt || (v => num(v));
+    const lab = document.createElement('label'); lab.htmlFor = id; lab.textContent = o.label;
+    const inp = document.createElement('input'); inp.type = 'range'; inp.id = id;
+    const out = document.createElement('output'); out.setAttribute('for', id);
+    if (stops) { inp.min = 0; inp.max = stops.length - 1; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step == null ? 'any' : o.step; }
+    const val = () => (stops ? stops[+inp.value] : +inp.value);
+    const put = v => { inp.value = stops ? stops.reduce((b, s, k) => (Math.abs(s - v) < Math.abs(stops[b] - v) ? k : b), 0) : v; };
+    const upd = fire => { const v = val(), s = f1(v); out.textContent = s; inp.setAttribute('aria-valuetext', s); if (fire && o.onInput) o.onInput(v); };
+    inp.addEventListener('input', () => upd(true));
+    h.append(lab, inp, out); put(o.value == null ? (stops ? stops[0] : o.min) : o.value); upd(false);
+    return {el: h, input: inp, get value() { return val(); }, set(v) { put(v); upd(true); }};
+  }
+  function readout(hostEl) {
+    const h = $(hostEl); h.classList.add('ck-readout'); h.setAttribute('aria-live', 'polite');
+    h.set = html => { h.innerHTML = html; };
+    return h;
+  }
+  function bus(name) {
+    if (!buses[name]) { const fns = []; buses[name] = {value: undefined, on(fn) { fns.push(fn); }, emit(v, from) { this.value = v; fns.forEach(fn => fn(v, from)); }}; }
+    return buses[name];
+  }
+  /* Card layout for a table under 600 px: each cell shows its column's header (CSS table.stack). */
+  function stackTable(table) {
+    const t = $(table), heads = [], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (hr) for (const c of hr.cells) for (let k = 0; k < (c.colSpan || 1); k++) heads.push(c.textContent.replace(/\s+/g, ' ').trim());
+    for (const tb of t.tBodies) for (const r of tb.rows) { let k = 0; for (const c of r.cells) { if (heads[k]) c.setAttribute('data-label', heads[k]); k += c.colSpan || 1; } }
+    t.classList.add('stack');
+    return t;
+  }
+
+  /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
+  const SERIES = [1, 2, 3, 4, 5, 7];
+  const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
+  const clamp01 = p => Math.max(0, Math.min(1, +p || 0));
+  const ramp = p => `color-mix(in srgb, var(--c1) ${(15 + 85 * clamp01(p)).toFixed(1)}%, var(--surface))`;
+  function rgb(css) {  // resolve any CSS colour (tokens, color-mix) to linear-light luminance via a probe
+    const s = document.createElement('span'); s.style.color = css; s.style.display = 'none';
+    document.body.appendChild(s);
+    const c = getComputedStyle(s).color; s.remove();
+    const v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), unit = /^color\(/.test(c) ? 1 : 255;
+    const lin1 = x => { x /= unit; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin1(v[0]) + 0.7152 * lin1(v[1]) + 0.0722 * lin1(v[2]);
+  }
+  const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  /* Text colour for a ramp cell, chosen for the current theme: whichever of --ink and --page contrasts more. */
+  function rampInk(p) {
+    const bg = rgb(ramp(p));
+    return contrast(bg, rgb('var(--ink)')) >= contrast(bg, rgb('var(--page)')) ? 'var(--ink)' : 'var(--page)';
+  }
+  const redrawAll = () => frames.forEach(f => f.redraw());  // rampInk depends on the theme
+  if (window.MutationObserver) new MutationObserver(redrawAll).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  const dark = mm('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', redrawAll);
+
+  return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
+    stackTable, reduced, ramp, rampInk, color, hide: f => hide(f, true)};
+})();
+
+</script>
+<script>
+const D = {"ablation":{"configs":{"spin_8":{"n":2,"minions":256,"p80":36.87275000000001,"p80_sd":0.024750000000000938,"idle":36.328529411764706,"dyn":0.5442205882353051,"unit":"instruction","per_s":45010895137.63949,"pj_per_unit_dyn":12.090863480300154,"pj_per_unit_board":819.1961054594955,"cycles_per_op":null,"mw_per_minion":2.1258616727941604,"rise":-0.9000000000000057,"rails_late":{"minion":13.60775,"sram":2.51175,"noc":4.4649},"mhz":[600,600],"mv":518.0},"spin":{"n":2,"minions":1024,"p80":37.78725,"p80_sd":0.016250000000006537,"idle":36.32705882352941,"dyn":1.4601911764705875,"unit":"instruction","per_s":180047013802.0365,"pj_per_unit_dyn":8.110054955291192,"pj_per_unit_board":209.87435004919027,"cycles_per_op":null,"mw_per_minion":1.425967945772058,"rise":0.09999999999999432,"rails_late":{"minion":14.788200000000003,"sram":2.5511999999999997,"noc":4.49555},"mhz":[600,600],"mv":518.0},"fp16_zeros":{"n":2,"minions":1024,"p80":38.2145,"p80_sd":0.015000000000000568,"idle":36.31705882352941,"dyn":1.8974411764705934,"unit":"MAC","per_s":9184370624495.48,"pj_per_unit_dyn":0.20659457833833056,"pj_per_unit_board":4.160818586532075,"cycles_per_op":546.0010000000001,"mw_per_minion":1.8529698988970638,"rise":0.09999999999999432,"rails_late":{"minion":15.072599999999998,"sram":2.6267000000000005,"noc":4.5143},"mhz":[600,600],"mv":518.0},"fp32_zeros":{"n":2,"minions":1024,"p80":38.228750000000005,"p80_sd":0.008250000000000313,"idle":36.31647058823529,"dyn":1.9122794117647146,"unit":"MAC","per_s":4592372361498.649,"pj_per_unit_dyn":0.41640338832208107,"pj_per_unit_board":8.324401200673686,"cycles_per_op":546.0010000000001,"mw_per_minion":1.867460363051479,"rise":0.09999999999999432,"rails_late":{"minion":15.06205,"sram":2.6308,"noc":4.5123},"mhz":[600,600],"mv":518.0},"m_identity":{"n":2,"minions":1024,"p80":38.496500000000005,"p80_sd":0.0005000000000023874,"idle":36.215,"dyn":2.281500000000001,"unit":"MAC","per_s":4592343270718.406,"pj_per_unit_dyn":0.4968051962812208,"pj_per_unit_board":8.382757501047559,"cycles_per_op":546.0010000000001,"mw_per_minion":2.2280273437500013,"rise":0.09999999999999432,"rails_late":{"minion":15.319099999999999,"sram":2.6303,"noc":4.52075},"mhz":[600,600],"mv":518.0},"int8_zeros":{"n":2,"minions":1024,"p80":38.89775000000001,"p80_sd":0.0382499999999979,"idle":36.323235294117644,"dyn":2.5745147058823648,"unit":"MAC","per_s":31530108636326.33,"pj_per_unit_dyn":0.08165257962087154,"pj_per_unit_board":1.233670027866168,"cycles_per_op":318.0009333333334,"mw_per_minion":2.514174517463247,"rise":0.09999999999999432,"rails_late":{"minion":15.8133,"sram":2.5633,"noc":4.52295},"mhz":[600,600],"mv":518.0},"m_butterfly":{"n":2,"minions":1024,"p80":39.273250000000004,"p80_sd":0.08825000000000216,"idle":36.45617647058823,"dyn":2.817073529411772,"unit":"MAC","per_s":4591681315651.174,"pj_per_unit_dyn":0.6135167786600333,"pj_per_unit_board":8.55313060732971,"cycles_per_op":546.0010000000001,"mw_per_minion":2.7510483685661837,"rise":-0.4000000000000057,"rails_late":{"minion":15.764149999999999,"sram":2.5591,"noc":4.4563},"mhz":[600,600],"mv":518.0},"m_tridiagonal":{"n":2,"minions":1024,"p80":40.19525,"p80_sd":0.045249999999999346,"idle":36.317058823529415,"dyn":3.8781911764705868,"unit":"MAC","per_s":4591600691124.902,"pj_per_unit_dyn":0.8446272743112737,"pj_per_unit_board":8.754082226203453,"cycles_per_op":546.0010000000001,"mw_per_minion":3.7872960707720575,"rise":0.09999999999999432,"rails_late":{"minion":16.713050000000003,"sram":2.6670499999999997,"noc":4.55935},"mhz":[600,600],"mv":518.0},"int8_ones":{"n":2,"minions":1024,"p80":40.62225,"p80_sd":0.24375000000000568,"idle":36.40529411764706,"dyn":4.216955882352941,"unit":"MAC","per_s":31533797905921.46,"pj_per_unit_dyn":0.13372813179477744,"pj_per_unit_board":1.2882130506827374,"cycles_per_op":318.0010000000001,"mw_per_minion":4.118120978860294,"rise":-0.30000000000001137,"rails_late":{"minion":17.147350000000003,"sram":2.5378,"noc":4.5226},"mhz":[600,600],"mv":518.0},"m_block_diag":{"n":2,"minions":1024,"p80":41.13175,"p80_sd":0.004249999999995424,"idle":36.319411764705876,"dyn":4.812338235294121,"unit":"MAC","per_s":4591341804440.486,"pj_per_unit_dyn":1.0481332996467174,"pj_per_unit_board":8.95854670637235,"cycles_per_op":546.0010000000001,"mw_per_minion":4.699549057904415,"rise":0.09999999999999432,"rails_late":{"minion":17.47365,"sram":2.65035,"noc":4.571700000000001},"mhz":[600,600],"mv":518.0},"tload_l2":{"n":2,"minions":1024,"p80":42.572250000000004,"p80_sd":0.03624999999999545,"idle":36.330588235294115,"dyn":6.2416617647058885,"unit":"byte","per_s":2447392548830.907,"pj_per_unit_dyn":2.5503312771330706,"pj_per_unit_board":17.39494141237633,"cycles_per_op":null,"mw_per_minion":6.095372817095594,"rise":1.0999999999999943,"rails_late":{"minion":15.881599999999999,"sram":6.0097000000000005,"noc":4.609500000000001},"mhz":[600,600],"mv":518.0},"fp32_randn_8":{"n":2,"minions":256,"p80":42.86600000000001,"p80_sd":0.015999999999998238,"idle":36.317647058823525,"dyn":6.548352941176482,"unit":"MAC","per_s":1147920568307.066,"pj_per_unit_dyn":5.704534897248059,"pj_per_unit_board":37.34230501960433,"cycles_per_op":546.0010000000001,"mw_per_minion":25.579503676470633,"rise":1.0999999999999943,"rails_late":{"minion":18.9925,"sram":2.6197500000000007,"noc":4.622},"mhz":[600,600],"mv":518.0},"m_upper":{"n":2,"minions":1024,"p80":44.418000000000006,"p80_sd":0.34349999999999525,"idle":36.31999999999999,"dyn":8.098000000000013,"unit":"MAC","per_s":4591912058526.024,"pj_per_unit_dyn":1.7635355156604242,"pj_per_unit_board":9.673094657273971,"cycles_per_op":546.0010000000001,"mw_per_minion":7.908203125000012,"rise":1.0999999999999943,"rails_late":{"minion":20.81545,"sram":2.74045,"noc":4.66655},"mhz":[600,600],"mv":517.0},"int8_randn":{"n":2,"minions":1024,"p80":46.287,"p80_sd":0.07100000000000506,"idle":36.30676470588236,"dyn":9.98023529411764,"unit":"MAC","per_s":31535316750300.344,"pj_per_unit_dyn":0.3164780418456583,"pj_per_unit_board":1.4677829421059854,"cycles_per_op":318.0009333333334,"mw_per_minion":9.74632352941176,"rise":2.0999999999999943,"rails_late":{"minion":22.250999999999998,"sram":2.66875,"noc":4.71025},"mhz":[600,600],"mv":517.0},"fp16_ones":{"n":2,"minions":1024,"p80":46.319250000000004,"p80_sd":0.5452499999999958,"idle":36.27205882352941,"dyn":10.04719117647059,"unit":"MAC","per_s":9182778455792.506,"pj_per_unit_dyn":1.0941341147278592,"pj_per_unit_board":5.044143253916985,"cycles_per_op":546.0010000000001,"mw_per_minion":9.811710133272062,"rise":2.0999999999999943,"rails_late":{"minion":22.6382,"sram":2.7391,"noc":4.7212},"mhz":[600,600],"mv":517.0},"m_negzero":{"n":2,"minions":1024,"p80":46.70725,"p80_sd":0.011750000000002814,"idle":36.300000000000004,"dyn":10.407249999999998,"unit":"MAC","per_s":4591998554124.783,"pj_per_unit_dyn":2.2663879087356507,"pj_per_unit_board":10.171442662595137,"cycles_per_op":546.0010000000001,"mw_per_minion":10.163330078124998,"rise":2.0999999999999943,"rails_late":{"minion":22.50755,"sram":2.74775,"noc":4.7187},"mhz":[600,600],"mv":517.0},"fp32_ones":{"n":2,"minions":1024,"p80":46.868500000000004,"p80_sd":0.017499999999998295,"idle":36.30676470588236,"dyn":10.561735294117646,"unit":"MAC","per_s":4592197589491.705,"pj_per_unit_dyn":2.2999304991331373,"pj_per_unit_board":10.206115718376072,"cycles_per_op":546.0010000000001,"mw_per_minion":10.314194623161764,"rise":2.0999999999999943,"rails_late":{"minion":22.612099999999998,"sram":2.7467499999999996,"noc":4.72115},"mhz":[600,600],"mv":517.0},"tload_dram":{"n":2,"minions":1024,"p80":46.985312500000006,"p80_sd":0.06018750000000139,"idle":36.27558823529412,"dyn":10.709724264705883,"unit":"byte","per_s":75527337124.69699,"pj_per_unit_dyn":141.79930965954668,"pj_per_unit_board":622.0967703710567,"cycles_per_op":null,"mw_per_minion":10.458715102251839,"rise":1.0999999999999943,"rails_late":{"minion":14.699024999999999,"sram":3.7536,"noc":6.293749999999999},"mhz":[600,600],"mv":518.0},"fp32_randn_16":{"n":2,"minions":512,"p80":49.39425,"p80_sd":0.01725000000000776,"idle":36.289117647058816,"dyn":13.105132352941183,"unit":"MAC","per_s":2295611403720.7197,"pj_per_unit_dyn":5.708776464387842,"pj_per_unit_board":21.516816792224486,"cycles_per_op":546.0010000000001,"mw_per_minion":25.59596162683825,"rise":2.0999999999999943,"rails_late":{"minion":24.716600000000003,"sram":2.7068,"noc":4.78585},"mhz":[600,600],"mv":517.7746478873239},"m_fft_cos":{"n":2,"minions":1024,"p80":49.758250000000004,"p80_sd":0.011249999999996874,"idle":36.322941176470586,"dyn":13.435308823529418,"unit":"MAC","per_s":4591632545899.65,"pj_per_unit_dyn":2.926041813935484,"pj_per_unit_board":10.836722996145316,"cycles_per_op":546.0010000000001,"mw_per_minion":13.120418772977947,"rise":2.0999999999999943,"rails_late":{"minion":25.0364,"sram":2.7964,"noc":4.8020499999999995},"mhz":[600,600],"mv":517.0},"m_hadamard":{"n":2,"minions":1024,"p80":50.0685,"p80_sd":0.0045000000000001705,"idle":36.28794117647058,"dyn":13.780558823529418,"unit":"MAC","per_s":4591497339227.833,"pj_per_unit_dyn":3.001321313157276,"pj_per_unit_board":10.904612657016193,"cycles_per_op":546.0010000000001,"mw_per_minion":13.457576976102947,"rise":2.5,"rails_late":{"minion":25.28165,"sram":2.79825,"noc":4.8035499999999995},"mhz":[600,600],"mv":517.0},"m_relu":{"n":2,"minions":1024,"p80":52.7475,"p80_sd":0.49549999999999983,"idle":36.321764705882345,"dyn":16.425735294117658,"unit":"MAC","per_s":4591314991794.18,"pj_per_unit_dyn":3.5775666281826726,"pj_per_unit_board":11.488538707161867,"cycles_per_op":546.0010000000001,"mw_per_minion":16.040757123161775,"rise":3.0999999999999943,"rails_late":{"minion":27.47335,"sram":2.8640999999999996,"noc":4.874499999999999},"mhz":[600,600],"mv":517.0},"m_quant4":{"n":2,"minions":1024,"p80":54.21025,"p80_sd":0.982249999999997,"idle":36.313529411764705,"dyn":17.896720588235297,"unit":"MAC","per_s":4591411476990.6,"pj_per_unit_dyn":3.8978690274053904,"pj_per_unit_board":11.80688123285601,"cycles_per_op":546.0010000000001,"mw_per_minion":17.477266199448533,"rise":3.5,"rails_late":{"minion":28.74935,"sram":2.88,"noc":4.91145},"mhz":[600,600],"mv":517.0},"fp32_randn_24":{"n":2,"minions":768,"p80":56.47800000000001,"p80_sd":0.050999999999991275,"idle":36.36235294117647,"dyn":20.11564705882354,"unit":"MAC","per_s":3444391695308.5107,"pj_per_unit_dyn":5.840116002550576,"pj_per_unit_board":16.397089819060582,"cycles_per_op":546.0010000000001,"mw_per_minion":26.19224877450982,"rise":3.5999999999999943,"rails_late":{"minion":30.493650000000002,"sram":2.8205999999999998,"noc":4.96005},"mhz":[600,600],"mv":517.0},"fp16_randn":{"n":2,"minions":1024,"p80":61.09575,"p80_sd":0.018749999999997158,"idle":36.31294117647059,"dyn":24.782808823529415,"unit":"MAC","per_s":9183800243203.39,"pj_per_unit_dyn":2.6985352650576546,"pj_per_unit_board":6.6525564997142475,"cycles_per_op":546.0010000000001,"mw_per_minion":24.201961741727946,"rise":5.099999999999994,"rails_late":{"minion":34.3224,"sram":2.9640499999999994,"noc":5.0929},"mhz":[600,600],"mv":516.0},"m_lowrank":{"n":2,"minions":1024,"p80":63.0845,"p80_sd":0.1454999999999984,"idle":36.22176470588235,"dyn":26.86273529411765,"unit":"MAC","per_s":4591764454318.871,"pj_per_unit_dyn":5.850198885714051,"pj_per_unit_board":13.73861848263246,"cycles_per_op":546.0010000000001,"mw_per_minion":26.233139935661764,"rise":5.099999999999994,"rails_late":{"minion":35.91380000000001,"sram":2.99585,"noc":5.1414},"mhz":[600,600],"mv":516.0},"m_circulant":{"n":2,"minions":1024,"p80":63.82350000000001,"p80_sd":0.19599999999999795,"idle":36.309411764705885,"dyn":27.514088235294125,"unit":"MAC","per_s":4591213825886.219,"pj_per_unit_dyn":5.992769946841502,"pj_per_unit_board":13.901225780456976,"cycles_per_op":546.0010000000001,"mw_per_minion":26.86922679227942,"rise":5.3999999999999915,"rails_late":{"minion":36.433499999999995,"sram":3.01355,"noc":5.15485},"mhz":[600,600],"mv":516.0},"m_kaleidoscope":{"n":2,"minions":1024,"p80":63.85975,"p80_sd":0.05775000000000574,"idle":36.30911764705883,"dyn":27.55063235294117,"unit":"MAC","per_s":4592125620606.492,"pj_per_unit_dyn":5.999538041666748,"pj_per_unit_board":13.9063595545903,"cycles_per_op":546.0010000000001,"mw_per_minion":26.904914407169112,"rise":5.099999999999994,"rails_late":{"minion":36.51819999999999,"sram":3.0013499999999995,"noc":5.15765},"mhz":[600,600],"mv":516.0},"fp32_randn":{"n":2,"minions":1024,"p80":63.932750000000006,"p80_sd":0.03925000000000267,"idle":36.307647058823534,"dyn":27.625102941176472,"unit":"MAC","per_s":4591388252936.51,"pj_per_unit_dyn":6.016721178721558,"pj_per_unit_board":13.924492218472398,"cycles_per_op":546.0010000000001,"mw_per_minion":26.97763959099265,"rise":5.099999999999994,"rails_late":{"minion":36.53135,"sram":2.99945,"noc":5.1556},"mhz":[600,600],"mv":516.0},"m_dct":{"n":2,"minions":1024,"p80":63.95,"p80_sd":0.014000000000013557,"idle":36.31058823529412,"dyn":27.639411764705883,"unit":"MAC","per_s":4591541812939.859,"pj_per_unit_dyn":6.0196362988163665,"pj_per_unit_board":13.92778343426525,"cycles_per_op":546.0010000000001,"mw_per_minion":26.99161305147059,"rise":5.299999999999997,"rails_late":{"minion":36.55815,"sram":3.0097000000000005,"noc":5.1604},"mhz":[600,600],"mv":516.0}}},"model":{"power":{"P_fix":12.634918235027182,"A_leak_at_80":23.25676120777849,"T_L":36.0,"lambda_at_80":0.6460211446605135,"p_sm_full_chip":1.8545908797737398,"e_fJ":{"ffclk":3.178587073836598,"mult":0.02503948904511476,"rest":0.8008083235978227,"bus":15.539003141447854},"rms":0.48956235330002573,"rms_idle":0.20494779671485983,"idle_curve":[{"T":64,"P":27.47282425577761,"n":868},{"T":65,"P":28.02004443486072,"n":740},{"T":66,"P":28.38715289575908,"n":813},{"T":67,"P":28.839088817250776,"n":897},{"T":81,"P":36.570243969639264,"n":35121},{"T":82,"P":37.188303621476685,"n":16984},{"T":83,"P":37.89609722862481,"n":12593},{"T":84,"P":38.62803620999396,"n":10074},{"T":85,"P":39.36293959825545,"n":6933},{"T":86,"P":40.11145267330364,"n":4936},{"T":87,"P":40.87379917299087,"n":2729},{"T":88,"P":41.566950231956916,"n":733}]},"R_total":1.4671587536399766,"step_open":{"1":0.06966346183924277,"3":0.13877561320553186,"10":0.21810762491828417,"30":0.3359578370776628,"60":0.4706926792247935,"120":0.6602144121483233,"300":0.9692855545706954,"600":1.209246393156453,"1800":1.4183274923383973,"3600":1.4479358180911261},"loop_gain_at_80":0.9478155774251901},"flips":{"zeros":{"ffclk":24912.0,"mult":0,"rest":52.0,"bus":0.0},"ones":{"ffclk":2467776.0,"mult":1414.0,"rest":29493.0,"bus":254.0},"randn":{"ffclk":2467776.0,"mult":74066984.39999999,"rest":13306780.400000006,"bus":138300.775}},"facts":{"a100":{"transistors_b":54.2,"die_mm2":826,"tflops":257,"watts":330,"idle":88,"volts":0.85,"mhz":1410,"mem_gbs":1555},"et":{"transistors_b":24,"die_mm2":570,"tflops":9.18277650587302,"watts":63.932750000000006,"idle62":26.7,"idle80":36.307647058823534,"volts":0.52,"mhz":600,"mem_gbs":137}},"vf":{"note":"from the cool-start runs (cold1, cold2): the governor's 800 MHz / 0.62 V point against 600 MHz / 0.52 V at 63 to 68 C; built by tools/ettelem/build_vf.py","idle600":28.1,"idle800":35.0,"zeros800":39.5,"zeros600_dyn":1.9,"ones800":56.0,"ones600":38.1,"randn800_peak":87.8,"randn600":54.8,"points":[[0.618,39.5,"zeros, 800 MHz, 65 \u00b0C","var(--c1)"],[0.618,56.0,"ones, 800 MHz, 66 \u00b0C","var(--c4)"],[0.618,87.8,"random fp32, 800 MHz, 67 \u00b0C, peak before the governor stepped down","var(--bad)"]],"peaks_at":{"zeros":{"w":39.48,"session":"cold1","run":4,"t_s":5.2,"die_c":65,"mhz_at_reading":800},"randn":{"w":87.82,"session":"cold2","run":0,"t_s":0.95,"die_c":67,"mhz_at_reading":700},"ones":{"w":56.03,"session":"cold1","run":2,"t_s":2.51,"die_c":66,"mhz_at_reading":700}},"samples":{"idle600":122,"idle800":10,"ones600":78,"randn600":149},"die_c":{"idle600":[63,68],"idle800":[64,65]},"rules":{"X800":"highest board reading from the first 800 MHz sample of a run to 0.3 s after its last one, over every run of X","X600":"mean board reading over seconds 2-7 of the runs of X, at 600 MHz held for at least 0.3 s","idle800":"mean board reading after a zeros run's last launch while the clock stays at 800 MHz, from 0.3 s after it reached 800","idle600":"mean board reading 0.5-2.5 s after each run's last launch (before the next run), at 600 MHz held for at least 0.3 s","zeros600_dyn":"the 80 C ablation's fp32 zeros switching watts (analyze_ablation.py dyn): from a cool start zeros stayed at 800 MHz"}}};
+/* Every chart is drawn with the shared toolkit (global CK, docs/reports/sources/chartkit.js): sized to its column,
+   tooltips on hover, keyboard focus and tap, arrow keys between marks. */
 const f1=v=>v.toFixed(1),f2=v=>v.toFixed(2);
 const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
 
-/* ---------- where the watts go: the model's decomposition of five states ---------- */
-(function(){const leak=t=>PW.A_leak_at_80*Math.exp((t-80)/PW.T_L);const e=PW.e_fJ,ops=1024*F/546/1e15;const fl=D.flips;
- const dyn=p=>({clk:e.ffclk*fl[p].ffclk*ops,data:(e.mult*fl[p].mult+e.rest*fl[p].rest+e.bus*fl[p].bus)*ops});
- const rows=[['idle, 62 °C',62,null],['idle, 80 °C',80,null],['zeros, 80 °C',80,'zeros'],['ones, 80 °C',80,'ones'],['random fp32, 80 °C',80,'randn']];
- const PART=[['fixed: DDR, PCIe, always-on clocks, regulators','var(--ref)'],['leakage','var(--c2)'],['tensor state machines','var(--c3)'],['clocking the multiply-add registers','var(--c4)'],['data toggles','var(--bad)']];
- document.getElementById('stack-leg').innerHTML=PART.map(p=>`<span><i style="background:${p[1]}"></i>${p[0]}</span>`).join('');
- const W=900,rh=34,L=170,R=70,T=8,H=T+rows.length*rh+34;const {svg,tip,h}=host('stack',W,H);const x=v=>L+v/70*(W-L-R);
- for(let t=0;t<=70;t+=10){el('line',{x1:x(t),x2:x(t),y1:T,y2:H-30,class:'grid-line'},svg);txt(svg,x(t),H-12,t+' W','tick','middle');}
- rows.forEach((r,i)=>{const d=r[2]?dyn(r[2]):{clk:0,data:0};const parts=[PW.P_fix,leak(r[1]),r[2]?PW.p_sm_full_chip:0,d.clk,d.data];let acc=0;const yy=T+i*rh+5;const g=el('g',{},svg);txt(g,L-10,yy+16,r[0],'lab','end');
-  parts.forEach((w,k)=>{if(w>0.05)el('rect',{x:x(acc),y:yy,width:Math.max(0.5,x(acc+w)-x(acc)-1),height:22,rx:2,fill:PART[k][1]},g);acc+=w;});txt(g,x(acc)+6,yy+16,f1(acc)+' W','lab-strong');
-  hover(g,tip,h,()=>`<b>${r[0]}</b>: ${f1(acc)} W by the model`+parts.map((w,k)=>w>0.05?`<br>${PART[k][0]}: ${f1(w)} W`:'').join(''));});})();
-
 /* ---------- power against active cores ---------- */
 (function(){const pts=[['fp32_randn_8',256],['fp32_randn_16',512],['fp32_randn_24',768],['fp32_randn',1024]].filter(q=>C[q[0]]).map(q=>[q[1],C[q[0]].dyn,q[0]]);
- const W=440,H=360,L=50,R=16,T=16,B=40;const {svg,tip,h}=host('cores',W,H);const x=v=>L+v/1100*(W-L-R),y=v=>H-B-v/32*(H-B-T);
- for(const t of [0,10,20,30]){el('line',{x1:L,x2:W-R,y1:y(t),y2:y(t),class:'grid-line'},svg);txt(svg,L-6,y(t)+4,t,'tick','end');}
- for(const t of [0,256,512,768,1024])txt(svg,x(t),H-B+16,t.toLocaleString('en-US'),'tick','middle');txt(svg,(L+W-R)/2,H-4,'active minions (random fp32 matmul)','lab','middle');txt(svg,4,T-6,'W over idle','lab');
- const k=pts.reduce((a,p)=>a+p[0]*p[1],0)/pts.reduce((a,p)=>a+p[0]*p[0],0);el('line',{x1:x(0),y1:y(0),x2:x(1100),y2:y(1100*k),stroke:'var(--axis)','stroke-dasharray':'4 4'},svg);
- for(const p of pts){const g=el('g',{},svg);el('circle',{cx:x(p[0]),cy:y(p[1]),r:6,fill:'var(--bad)',stroke:'var(--surface)','stroke-width':1.5},g);hover(g,tip,h,()=>`${p[0]} minions: +${f1(p[1])} W, ${f1(1000*p[1]/p[0])} mW each`);}
- txt(svg,x(560),y(1100*k*0.45),`${f1(1000*k)} mW per active minion`,'lab');})();
+ const k=pts.reduce((a,p)=>a+p[0]*p[1],0)/pts.reduce((a,p)=>a+p[0]*p[0],0);   /* least squares through the origin: W per active minion */
+ CK.frame('cores',{height:W=>W<600?300:360,minW:300,maxW:460,label:'Power over idle against the number of active minions',draw:ff=>{
+  const W=ff.W,H=ff.H,L=44,R=14,T=26,B=40;const x=CK.lin(0,1100,L,W-R),y=CK.lin(0,32,H-B,T);
+  CK.axes(ff,{x,y,L,R,T,B,xt:[0,256,512,768,1024],yt:[0,10,20,30],xfmt:v=>CK.fmt.num(v,0),yfmt:String,xl:'active minions (random fp32 matmul)',yl:'W over idle'});
+  CK.el('line',{x1:x(0),y1:y(0),x2:x(1100),y2:y(1100*k),style:'stroke:var(--axis)','stroke-dasharray':'4 4'},ff.svg);
+  CK.inside(ff,[CK.txt(ff.svg,W-R,y(1100*k*0.3),`${f1(1000*k)} mW per active minion`,'lab','end')]);   /* under the line, right-aligned */
+  const nodes=pts.map(p=>{const c=CK.el('circle',{cx:x(p[0]),cy:y(p[1]),r:6,style:'fill:var(--bad);stroke:var(--surface)','stroke-width':1.5},ff.svg);
+   CK.tip(ff,c,`${CK.fmt.num(p[0],0)} minions: +${f1(p[1])} W, ${f1(1000*p[1]/p[0])} mW each`);return c;});
+  CK.keynav(ff,nodes);}});})();
 
 /* ---------- energy per multiply-add by precision and data ---------- */
 (function(){const rows=[];for(const t of ['int8','fp16','fp32'])for(const v of ['zeros','ones','randn']){const c=C[`${t}_${v}`];if(c)rows.push({t,v,c});}
- const W=440,H=360,L=50,R=16,T=16,B=58;const {svg,tip,h}=host('prec',W,H);const bw=(W-L-R)/rows.length;const ymax=7;const y=v=>H-B-v/ymax*(H-B-T);
- for(const t of [0,1,2,3,4,5,6,7]){el('line',{x1:L,x2:W-R,y1:y(t),y2:y(t),class:'grid-line'},svg);txt(svg,L-6,y(t)+4,t,'tick','end');}txt(svg,L+6,T-6,'pJ per multiply-add, over idle','lab');
- const COLV={zeros:'var(--c1)',ones:'var(--c4)',randn:'var(--bad)'};
- rows.forEach((r,i)=>{const g=el('g',{},svg);const v=r.c.pj_per_unit_dyn;el('rect',{x:L+i*bw+4,y:y(v),width:bw-8,height:Math.max(1,y(0)-y(v)),rx:2,fill:COLV[r.v]},g);
-  txt(g,L+i*bw+bw/2,y(v)-5,v.toFixed(v<1?2:1),'lab-strong','middle');txt(g,L+i*bw+bw/2,H-B+15,{zeros:'zeros',ones:'ones',randn:'random'}[r.v],'tick','middle');
-  if(r.v==='ones')txt(g,L+i*bw+bw/2,H-B+34,r.t,'lab-strong','middle');
-  hover(g,tip,h,()=>`<b>${r.t}, ${r.v}</b><br>${f1(r.c.p80)} W board, +${f1(r.c.dyn)} W over idle<br>${(r.c.per_s/1e12).toFixed(2)}×10¹² multiply-adds per second (${r.c.cycles_per_op.toFixed(0)} cycles per op)<br>${v.toFixed(3)} pJ each over idle, ${r.c.pj_per_unit_board.toFixed(2)} pJ at the board`);});})();
-
-/* ---------- leakage ---------- */
-(function(){const pts=PW.idle_curve.filter(p=>p.n>=30);const W=440,H=360,L=50,R=16,T=16,B=40;const {svg,tip,h}=host('leak',W,H);
- const x=v=>L+(v-40)/(95-40)*(W-L-R),y=v=>H-B-(v-10)/(48-10)*(H-B-T);
- for(const t of [10,20,30,40]){el('line',{x1:L,x2:W-R,y1:y(t),y2:y(t),class:'grid-line'},svg);txt(svg,L-6,y(t)+4,t,'tick','end');}for(const t of [40,50,60,70,80,90])txt(svg,x(t),H-B+16,t,'tick','middle');
- txt(svg,(L+W-R)/2,H-4,'die temperature, °C','lab','middle');txt(svg,4,T-6,'idle board power, W','lab');
- const curve=[];for(let t=40;t<=95;t+=0.5)curve.push([t,PW.P_fix+PW.A_leak_at_80*Math.exp((t-80)/PW.T_L)]);
- el('path',{d:path(curve,x,y),fill:'none',stroke:'var(--c2)','stroke-width':2},svg);el('line',{x1:L,x2:W-R,y1:y(PW.P_fix),y2:y(PW.P_fix),stroke:'var(--axis)','stroke-dasharray':'4 4'},svg);txt(svg,W-R-4,y(PW.P_fix)-5,`not leakage: ${f1(PW.P_fix)} W`,'lab','end');
- for(const p of pts){const g=el('g',{},svg);el('circle',{cx:x(p.T),cy:y(p.P),r:4.5,fill:'var(--c1)'},g);hover(g,tip,h,()=>`${p.T} °C: ${f2(p.P)} W idle`);}})();
-
-/* ---------- Esperanto's published voltage curve and this card ---------- */
-(function(){const pub=[[0.3,8.5],[0.4,20],[0.67,118],[0.75,164],[0.9,275]];const W=440,H=360,L=50,R=16,T=16,B=40;const {svg,tip,h}=host('volt',W,H);
- const x=v=>L+(v-0.25)/(0.95-0.25)*(W-L-R),y=v=>H-B-Math.log10(v/5)/Math.log10(400/5)*(H-B-T);
- for(const t of [5,10,20,50,100,200,400]){el('line',{x1:L,x2:W-R,y1:y(t),y2:y(t),class:'grid-line'},svg);txt(svg,L-6,y(t)+4,t,'tick','end');}for(const t of [0.3,0.4,0.5,0.6,0.7,0.8,0.9])txt(svg,x(t),H-B+16,t.toFixed(1),'tick','middle');
- txt(svg,(L+W-R)/2,H-4,'minion core voltage, V','lab','middle');txt(svg,L+6,T-6,'chip or board power, W (log scale)','lab');
- el('path',{d:path(pub,x,y),fill:'none',stroke:'var(--ref)','stroke-width':2,'stroke-dasharray':'5 4'},svg);
- for(const p of pub){const g=el('g',{},svg);el('circle',{cx:x(p[0]),cy:y(p[1]),r:5,fill:'var(--ref)'},g);hover(g,tip,h,()=>`Esperanto's model, Hot Chips 33: ${p[1]} W per chip at ${p[0]} V${p[0]===0.9?' (the "highest voltage"; the slide gives no number, 0.9 V read off its axis)':''}`);}
- const ours=[[0.517,C.fp32_zeros.p80,'zeros, 600 MHz','var(--c1)'],[0.517,C.fp32_ones.p80,'ones, 600 MHz','var(--c4)'],[0.517,C.fp32_randn.p80,'random fp32, 600 MHz','var(--bad)']].concat(D.vf?D.vf.points:[]);
- for(const p of ours){const g=el('g',{},svg);el('circle',{cx:x(p[0]),cy:y(p[1]),r:6,fill:p[3],stroke:'var(--surface)','stroke-width':1.5},g);hover(g,tip,h,()=>`this card, board power: ${f1(p[1])} W at ${p[0].toFixed(2)} V (${p[2]})`);}
- txt(svg,x(0.31),y(11),'Esperanto’s model of one chip','lab');txt(svg,x(0.64),y(30),'this card, measured','lab');})();
+ const COLV={zeros:'var(--c1)',ones:'var(--c4)',randn:'var(--bad)'},VN={zeros:'zeros',ones:'ones',randn:'random'},TT=['int8','fp16','fp32'];
+ /* where the bars are too narrow for a word under each, a legend above names the colours */
+ const lg=document.createElement('div');document.getElementById('prec').before(lg);
+ CK.legend(lg,['zeros','ones','randn'].map(v=>({key:v,label:VN[v],mark:'box',color:COLV[v]})));
+ CK.frame('prec',{height:W=>W<600?300:360,minW:300,maxW:460,label:'Energy per multiply-add by precision and data',draw:ff=>{
+  const W=ff.W,H=ff.H,L=44,R=14,T=26,gap=10,ymax=7,bw=(W-L-R-2*gap)/rows.length,per=bw>=38,B=per?58:40;
+  lg.style.display=per?'none':'';
+  const y=CK.lin(0,ymax,H-B,T);
+  CK.axes(ff,{x:CK.lin(0,1,L,W-R),y,L,R,T,B,xt:[],yt:[0,1,2,3,4,5,6,7],yfmt:String,yl:'pJ per multiply-add, over idle'});
+  const nodes=[];
+  rows.forEach((r,i)=>{const g=CK.el('g',{},ff.svg),v=r.c.pj_per_unit_dyn,x0=L+i*bw+TT.indexOf(r.t)*gap,cx=x0+bw/2;
+   CK.el('rect',{x:x0+4,y:y(v),width:bw-8,height:Math.max(1,y(0)-y(v)),rx:2,style:'fill:'+COLV[r.v]},g);
+   CK.txt(g,cx,y(v)-5,v.toFixed(v<1?2:1),'lab-strong','middle');
+   if(per)CK.txt(g,cx,H-B+15,VN[r.v],'tick','middle');
+   if(r.v==='ones')CK.txt(g,cx,H-B+(per?34:18),r.t,'lab-strong','middle');
+   CK.tip(ff,g,()=>`<b>${r.t}, ${r.v}</b><br>${f1(r.c.p80)} W board, +${f1(r.c.dyn)} W over idle<br>${(r.c.per_s/1e12).toFixed(2)}×10¹² multiply-adds per second (${r.c.cycles_per_op.toFixed(0)} cycles per op)<br>${v.toFixed(3)} pJ each over idle, ${r.c.pj_per_unit_board.toFixed(2)} pJ at the board`);nodes.push(g);});
+  CK.keynav(ff,nodes);}});})();
 
 /* ---------- tables ---------- */
 (function(){const A=D.facts.a100,E=D.facts.et;const row=(n,a,e,note)=>`<tr><td>${n}</td><td class="num">${a}</td><td class="num">${e}</td><td class="small">${note||''}</td></tr>`;
  const h16=C.fp16_randn,tf16=2*h16.per_s/1e12;                       /* fp16 random: FLOPs are 2 per multiply-add */
  const pjA=A.watts/A.tflops,pj32=E.watts/E.tflops,pj16=h16.p80/tf16;  /* pJ per FLOP at the board */
- const pjA32=400/19.5;                                                /* A100 datasheet: fp32 CUDA cores, 19.5 TFLOPS at 400 W */
  const mhzLo=Math.round(A.tflops/312*A.mhz/10)*10;                    /* 257 of the 312 bf16 peak TFLOPS needs at least this clock */
  const v2f=m=>((A.volts/E.volts)**2*m/E.mhz).toFixed(1);
  const mhz=m=>m.toLocaleString('en-US');
  document.getElementById('cmp').innerHTML='<thead><tr><th></th><th class="num">A100 (SXM4)</th><th class="num">ET-SoC-1 card</th><th>Note</th></tr></thead><tbody>'+
   row('Process, transistors, die',`TSMC 7 nm · ${A.transistors_b} B · ${A.die_mm2} mm²`,`TSMC 7 nm · &gt;${E.transistors_b} B · ${E.die_mm2} mm²`,'same process generation; Esperanto gives "over 24 billion" transistors')+
-  row('Dense matmul, measured',`${A.tflops} TFLOPS bf16 at ${A.watts} W`,`${f2(E.tflops)} TFLOPS fp32 at ${f1(E.watts)} W`,'A100: Horace He’s 8192³ bf16 run on random data at a 330 W limit. ET: fp32 TensorFMA on random data, board power at 80 °C')+
-  row('Dense matmul, 16-bit',`${A.tflops} TFLOPS bf16 at ${A.watts} W`,`${f1(tf16)} TFLOPS fp16 at ${f1(h16.p80)} W`,'the closest match in precision, though fp16 and bf16 are different formats')+
-  row('Energy per FLOP, board',`${pjA.toFixed(2)} pJ (bf16)`,`${pj32.toFixed(1)} pJ fp32<br>${pj16.toFixed(1)} pJ fp16`,`the A100’s bf16 tensor cores are ${(pj32/pjA).toFixed(1)}× better than fp32 here and ${(pj16/pjA).toFixed(1)}× better than fp16. Against its fp32 CUDA cores (datasheet: 19.5 TFLOPS at 400 W, ${pjA32.toFixed(1)} pJ) this card is ${(pjA32/pj32).toFixed(1)}× better`)+
+  row('Dense matmul, measured',`${A.tflops} TFLOPS bf16 at ${A.watts} W`,`${f2(E.tflops)} TFLOPS fp32 at ${f1(E.watts)} W<br>${f1(tf16)} TFLOPS fp16 at ${f1(h16.p80)} W`,'A100: Horace He’s 8192³ bf16 run on random data at a 330 W limit. ET: TensorFMA on random data, board power at 80 °C; fp16 and bf16 are different formats')+
+  row('Energy per FLOP, board',`${pjA.toFixed(2)} pJ (bf16)`,`${pj32.toFixed(1)} pJ fp32<br>${pj16.toFixed(1)} pJ fp16`,'A100 bf16 tensor cores against fp32 and fp16 here; the fp32 CUDA-core comparison follows the table')+
   row('Idle',`${A.idle} W`,`${f1(E.idle62)} W at 62 °C<br>${f1(E.idle80)} W at 80 °C`,'ET: die temperature')+
   row('Power per transistor under load',`${(A.watts/A.transistors_b).toFixed(1)} nW`,`${(E.watts/E.transistors_b).toFixed(1)} nW`,'the ET figure counts 24 billion transistors')+
   row('Power density under load',`${(A.watts/A.die_mm2).toFixed(2)} W/mm²`,`${(E.watts/E.die_mm2).toFixed(2)} W/mm²`,'board power over die area; both include memory and regulators')+
@@ -445,6 +888,192 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
  document.getElementById('cdyn').innerHTML='<thead><tr><th>Workload on all 1,024 minions</th><th class="num">board W at 80 °C</th><th class="num">over idle</th><th class="num">mW per minion, over idle</th><th class="num">C<sub>dynamic</sub> per minion, nF</th><th class="num">work per second</th><th class="num">pJ per unit of work, over idle</th></tr></thead><tbody>'+
   LIST.map(q=>{const c=C[q[0]];return `<tr><td>${q[1]}</td><td class="num">${f1(c.p80)}</td><td class="num">+${f1(c.dyn)}</td><td class="num">${f1(c.mw_per_minion)}</td><td class="num">${cd(c.dyn).toFixed(3)}</td><td class="num">${rate(c)}</td><td class="num">${c.pj_per_unit_dyn?c.pj_per_unit_dyn.toFixed(c.pj_per_unit_dyn<1?2:c.pj_per_unit_dyn<100?1:0):''}</td></tr>`;}).join('')+
   `<tr><td><i>Esperanto’s design target (Hot Chips 33)</i></td><td></td><td></td><td class="num"><i>10 (total)</i></td><td class="num"><i>0.040</i></td><td class="num"><i>at 1 GHz, 0.425 V</i></td><td></td></tr></tbody>`;
+})();
+
+/* ---------- Esperanto's published voltage curve and this card: 600 MHz points filled, 800 MHz points as rings ---------- */
+(function(){const pub=[[0.3,8.5],[0.4,20],[0.67,118],[0.75,164],[0.9,275]];   /* Hot Chips 33 slide, W per chip (0.9 V read off its axis) */
+ const vf=D.vf,COLV={zeros:'var(--c1)',ones:'var(--c4)',randn:'var(--bad)'},NM={zeros:'zeros',ones:'ones',randn:'random fp32'};
+ const ours=[['zeros','fp32_zeros'],['ones','fp32_ones'],['randn','fp32_randn']].map(([k,c])=>({k,v:V,w:C[c].p80,ring:false,lab:`${NM[k]}: ${f1(C[c].p80)} W at 0.52 V, 600 MHz, 80 °C (strict start, seconds 1–3)`}));
+ let dieR='';
+ if(vf){const pk=vf.peaks_at||{},ts=Object.values(pk).map(q=>q.die_c);dieR=ts.length?`${Math.min(...ts)}–${Math.max(...ts)} °C`:'';
+  for(const [k,key] of [['zeros','zeros800'],['ones','ones800'],['randn','randn800_peak']])if(vf[key]!=null)ours.push({k,v:vf.points[0][0],w:vf[key],ring:true,peak:k==='randn',
+   lab:`${NM[k]}: ${f1(vf[key])} W at ${vf.points[0][0].toFixed(2)} V, 800 MHz`+(pk[k]?`, ${pk[k].die_c} °C (${pk[k].session} run ${pk[k].run}, ${pk[k].t_s.toFixed(1)} s after launch)`:'')+': the highest board reading before the governor stepped down'});}
+ CK.legend('volt-leg',[{key:'z',label:'zeros',mark:'dot',color:COLV.zeros},{key:'o',label:'ones',mark:'dot',color:COLV.ones},{key:'r',label:'random fp32',mark:'dot',color:COLV.randn},
+  {key:'f',label:'filled: 0.52 V, 600 MHz, 80 °C',mark:'dot',color:'var(--ink-2)'},{key:'g',label:`ring: 0.62 V, 800 MHz, ${dieR}, highest reading before the governor stepped down`,mark:'ring',color:'var(--ink-2)'},
+  {key:'e',label:'Esperanto’s model of one chip (Hot Chips 33)',mark:'dash',color:'var(--ref)'}]);
+ CK.frame('volt',{height:W=>W<600?320:340,label:'Chip power against core voltage: Esperanto’s model and this card’s board power',draw:ff=>{
+  const W=ff.W,H=ff.H,L=44,R=14,T=26,B=40,x=CK.lin(0.25,0.95,L,W-R),y=CK.log(5,400,H-B,T);
+  CK.axes(ff,{x,y,L,R,T,B,yt:[5,10,20,50,100,200,400],xt:ff.narrow?[0.3,0.5,0.7,0.9]:[0.3,0.4,0.5,0.6,0.7,0.8,0.9],xfmt:v=>v.toFixed(1),xl:'minion core voltage, V',yl:'chip or board power, W (log scale)'});
+  CK.el('path',{d:CK.path(pub,x,y),style:'fill:none;stroke:var(--ref)','stroke-width':2,'stroke-dasharray':'5 4'},ff.svg);
+  const pn=pub.map(p=>{const c=CK.el('circle',{cx:x(p[0]),cy:y(p[1]),r:4.5,style:'fill:var(--ref)'},ff.svg);
+   CK.tip(ff,c,`Esperanto’s model, Hot Chips 33: ${p[1]} W per chip at ${p[0]} V${p[0]===0.9?' (the “highest voltage”; the slide gives no number, 0.9 V read off its axis)':''}`);return c;});
+  const on=ours.map(o=>{const c=CK.el('circle',{cx:x(o.v),cy:y(o.w),r:6,style:o.ring?`fill:var(--surface);stroke:${COLV[o.k]}`:`fill:${COLV[o.k]};stroke:var(--surface)`,'stroke-width':o.ring?2.5:1.5},ff.svg);
+   CK.tip(ff,c,`this card, board power: ${o.lab}`);
+   if(o.peak)CK.txt(ff.svg,x(o.v)+10,y(o.w)+4,'peak, ≤ 0.3 s','lab');return c;});
+  CK.keynav(ff,pn);CK.keynav(ff,on);}});
+})();
+
+/* ---------- the factors: from the A100's switching watts to this card's (both ends measured, the middle assumed) ---------- */
+(function(){const A=D.facts.a100,SW=A.watts-A.idle;
+ const MHZ_LO=Math.round(A.tflops/312*A.mhz/10)*10;     /* 257 of the A100's 312 bf16 peak TFLOPS needs at least this clock (NVIDIA datasheet) */
+ const MHZ_LIKELY=Math.round(A.tflops/295*A.mhz/10)*10; /* if He's zero-data run (295 TFLOPS) held the 1,410 MHz boost */
+ const st={va:A.volts,fa:MHZ_LIKELY,prec:'fp32'};
+ const ctl=document.getElementById('fx-ctl');
+ const mk=o=>CK.range(ctl.appendChild(document.createElement('div')),o);
+ const rV=mk({label:'A100 core voltage',min:0.75,max:0.95,step:0.01,value:st.va,fmt:v=>v.toFixed(2)+' V',onInput:v=>{st.va=v;upd();}});
+ const rF=mk({label:'A100 clock under the 330 W cap',min:MHZ_LO,max:A.mhz,step:10,value:st.fa,fmt:v=>v.toLocaleString('en-GB')+' MHz',onInput:v=>{st.fa=v;upd();}});
+ const bx=ctl.appendChild(document.createElement('div'));bx.className='controls';bx.setAttribute('role','group');bx.setAttribute('aria-label','A100 clock');
+ for(const [m,t] of [[MHZ_LO,'257/312 of peak'],[MHZ_LIKELY,'257/295: likely'],[A.mhz,'max boost']]){const b=bx.appendChild(document.createElement('button'));b.type='button';
+  b.textContent=`${m.toLocaleString('en-GB')} MHz (${t})`;b.addEventListener('click',()=>rF.set(m));}
+ CK.seg(ctl.appendChild(document.createElement('div')),{label:'this card',options:[['fp32','fp32'],['fp16','fp16']],value:'fp32',onChange:v=>{st.prec=v;upd();}});
+ CK.legend('fx-leg',[{key:'e',label:'measured switching power (under load − idle)',mark:'box',color:'var(--ink-2)'},{key:'v',label:'÷ V²',mark:'box',color:'var(--c1)'},
+  {key:'f',label:'÷ clock',mark:'box',color:'var(--c2)'},{key:'c',label:'÷ capacitance: the remainder',mark:'box',color:'var(--c3)'}]);
+ const out=CK.readout('fx-out');let Z=null;
+ function calc(){const c=C[st.prec+'_randn'],dyn=c.dyn,v2=(st.va/V)**2,fr=st.fa*1e6/F,tot=SW/dyn,cap=tot/(v2*fr);
+  const tfE=2*c.per_s/1e12;   /* FLOPs are 2 per multiply-add */
+  return {dyn,v2,fr,tot,cap,CA:SW/(st.va**2*st.fa*1e6)*1e9,CE:dyn/(V*V*F)*1e9,pjA:SW/A.tflops,pjAb:A.watts/A.tflops,pjE:dyn/tfE,pjEb:c.p80/tfE};}
+ const fr=CK.frame('fx',{height:W=>W<600?440:330,label:'Waterfall from the A100’s switching power to this card’s, and energy per FLOP',draw:ff=>{if(!Z)return;
+  const nar=ff.narrow,W=ff.W,H=ff.H,L=nar?22:250,R=nar?20:16,T=8,rh=nar?46:32,bh=16,x=CK.log(10,400,L,W-R),nodes=[];
+  const lev=[SW,SW/Z.v2,SW/Z.v2/Z.fr,Z.dyn];
+  const rows=[[`A100 switching: ${A.watts} − ${A.idle} W idle`,null,SW,'var(--ink-2)',`${CK.fmt.num(SW,0)} W`,'measured by Horace He and the datasheet'],
+   [`÷ V²: (${st.va.toFixed(2)} ÷ ${V} V)²`,lev[1],lev[0],'var(--c1)',`÷ ${Z.v2.toFixed(2)}`,'the A100’s voltage is assumed'],
+   [`÷ clock: ${st.fa.toLocaleString('en-GB')} ÷ 600 MHz`,lev[2],lev[1],'var(--c2)',`÷ ${Z.fr.toFixed(2)}`,'the A100’s clock under its cap is inferred'],
+   ['÷ capacitance (the remainder)',lev[3],lev[2],'var(--c3)',`÷ ${Z.cap.toFixed(2)}`,'whatever voltage and clock do not explain'],
+   [`this card, ${st.prec} random data`,null,Z.dyn,'var(--ink-2)',`${CK.fmt.num(Z.dyn,1)} W`,'measured: power under load − idle, 80 °C']];
+  const g0=CK.el('g',{'aria-hidden':'true'},ff.svg),yAx=T+rows.length*rh+4;
+  for(const t of [10,20,50,100,200,400]){CK.el('line',{x1:x(t),x2:x(t),y1:T,y2:yAx,class:'grid-line'},g0);CK.txt(g0,x(t),yAx+14,CK.fmt.num(t,0)+' W','tick','middle');}
+  CK.txt(g0,W-R,yAx+30,'switching power, W (log scale)','lab','end');
+  rows.forEach(([lab,a,b,c,val,why],i)=>{const y0=T+i*rh,by=nar?y0+20:y0+(rh-bh)/2,g=CK.el('g',{},ff.svg),x0=a==null?L:x(a);
+   CK.el('rect',{x:0,y:y0,width:W,height:rh,class:'ck-hit'},g);
+   CK.txt(g,nar?8:L-10,nar?y0+14:by+12,lab,'lab',nar?'start':'end');
+   CK.el('rect',{x:x0,y:by,width:Math.max(2,x(b)-x0),height:bh,rx:2,style:'fill:'+c},g);
+   if(a!=null)CK.el('line',{x1:x(b),x2:x(b),y1:by-rh+bh,y2:by+bh,style:'stroke:var(--axis)','stroke-dasharray':'2 2'},g);
+   CK.txt(g,a==null?x(b)+6:x0-6,by+12,val,'lab-strong',a==null?'start':'end');
+   CK.tip(ff,g,a==null?`<b>${lab}</b>: ${CK.fmt.num(b)} W, ${why}`:`<b>${lab}</b> = ${val.slice(2)}: ${CK.fmt.num(b)} W → ${CK.fmt.num(a)} W (${why})`);nodes.push(g);});
+  /* per FLOP: switching (ring) and board (dot) energy, each chip */
+  const y1=yAx+46,x2=CK.log(0.5,10,L,W-R),g1=CK.el('g',{'aria-hidden':'true'},ff.svg),rr=nar?40:26;
+  CK.txt(g1,8,y1,nar?'energy per FLOP, pJ (log scale)':'energy per FLOP, pJ (log scale): ring switching, dot at the board, idle floor included','lab');
+  if(nar)CK.txt(g1,8,y1+15,'ring switching, dot at the board','tick');
+  const yb0=y1+(nar?40:22);
+  for(const t of [0.5,1,2,5,10]){CK.el('line',{x1:x2(t),x2:x2(t),y1:yb0-12,y2:H-20,class:'grid-line'},g1);CK.txt(g1,x2(t),H-6,CK.fmt.num(t,t<1?1:0),'tick','middle');}
+  [['A100, bf16 tensor cores',Z.pjA,Z.pjAb],[`this card, ${st.prec}`,Z.pjE,Z.pjEb]].forEach(([lab,a,b],i)=>{const yy=yb0+i*rr,g=CK.el('g',{},ff.svg);
+   const vt=`${a.toFixed(a<2?2:1)} → ${b.toFixed(b<2?2:1)} pJ`;   /* the precision of the readout below */if(nar)CK.txt(g,8,yy-8,`${lab}: ${vt}`,'lab');else CK.txt(g,L-10,yy+4,lab,'lab','end');const ym=nar?yy+6:yy;
+   CK.el('line',{x1:x2(a),x2:x2(b),y1:ym,y2:ym,style:'stroke:var(--ink-2)','stroke-width':2},g);
+   CK.el('circle',{cx:x2(a),cy:ym,r:5,style:'fill:var(--surface);stroke:var(--ink)','stroke-width':2},g);CK.el('circle',{cx:x2(b),cy:ym,r:5,style:'fill:var(--ink)'},g);
+   if(!nar)CK.txt(g,x2(b)+9,ym+4,vt,'tick');
+   CK.tip(ff,g,`<b>${lab}</b>: switching ${a.toFixed(2)} pJ per FLOP; at the board ${b.toFixed(2)} pJ`);nodes.push(g);});
+  CK.keynav(ff,nodes);}});
+ function upd(){Z=calc();fr.redraw();
+  out.set(`V² <b>${Z.v2.toFixed(2)}×</b> · clock <b>${Z.fr.toFixed(2)}×</b> · capacitance <b>${Z.cap.toFixed(2)}×</b> (the remainder) = ${Z.tot.toFixed(2)}×, with `+
+   `${CK.fmt.num(Z.CA,0)} nF switched on the A100 against ${CK.fmt.num(Z.CE,0)} nF here. The operating point alone is ${(Z.v2*Z.fr).toFixed(1)}×. `+
+   `Per FLOP, switching ${Z.pjA.toFixed(2)} against ${Z.pjE.toFixed(Z.pjE<2?2:1)} pJ, at the board ${Z.pjAb.toFixed(2)} against ${Z.pjEb.toFixed(1)} pJ.`);}
+ upd();
+})();
+
+/* ---------- Esperanto's equation on this card: fixed + leakage(T) + extra idle at voltage + C·V²·f, per workload ---------- */
+(function(){const vf=D.vf,law=t=>PW.P_fix+PW.A_leak_at_80*Math.exp((t-80)/PW.T_L),leak=t=>PW.A_leak_at_80*Math.exp((t-80)/PW.T_L);
+ /* the extra idle measured at 0.62 V over the 0.52 V law, at the mid temperature of those readings */
+ const V8=vf?vf.points[0][0]:0.618,T8=vf?(vf.die_c.idle800[0]+vf.die_c.idle800[1])/2:65,EXTRA=vf?vf.idle800-law(T8):0;
+ const ops=1024*F/546/1e15,e=PW.e_fJ,fl=D.flips;
+ const WL=[['idle','idle',null],['spin','integer loop','spin'],['fp32_zeros','fp32 zeros','fp32_zeros'],['fp32_ones','fp32 ones','fp32_ones'],['fp32_randn','fp32 random','fp32_randn'],
+  ['fp16_randn','fp16 random','fp16_randn'],['int8_randn','int8 random','int8_randn']].filter(q=>!q[2]||C[q[2]]);
+ const SPLIT={fp32_zeros:'zeros',fp32_ones:'ones',fp32_randn:'randn'};
+ const PART=[['fix','fixed: the idle law’s constant (a fit, not a block split)','var(--ref)'],['leak','leakage (the idle law)','var(--c2)'],['xtra','extra idle at this voltage','var(--c5)'],
+  ['sm','tensor state machines','var(--c3)'],['clk','clocking the multiply-add registers','var(--c4)'],['data','data toggles','var(--bad)'],['sw','switching (not split)','var(--c7)']];
+ const st={w:'fp32_randn',v:V,f:600,t:80,act:1024,xtra:true};
+ function calc(){const c=st.w==='idle'?null:C[st.w],k=(st.v/V)**2*(st.f*1e6/F)*(c?st.act/c.minions:0),inR=st.v>=V-1e-6&&st.v<=V8+1e-6;
+  const w={fix:PW.P_fix,leak:leak(st.t),xtra:st.xtra&&inR?EXTRA*(st.v-V)/(V8-V):0,sm:0,clk:0,data:0,sw:0};
+  if(c){const q=SPLIT[st.w];
+   if(q&&fl[q]){const m={sm:PW.p_sm_full_chip,clk:e.ffclk*fl[q].ffclk*ops,data:(e.mult*fl[q].mult+e.rest*fl[q].rest+e.bus*fl[q].bus)*ops},sm=m.sm+m.clk+m.data;
+    for(const kk of ['sm','clk','data'])w[kk]=m[kk]/sm*c.dyn*k;}   /* the measured switching, split in the flip model's proportions */
+   else w.sw=c.dyn*k;}
+  const swt=w.sm+w.clk+w.data+w.sw;return {c,w,swt,inR,board:w.fix+w.leak+w.xtra+swt};}
+ /* controls */
+ const ctl=document.getElementById('eq-ctl');
+ CK.seg(ctl.appendChild(document.createElement('div')),{label:'workload',options:WL.map(q=>[q[0],q[1]]),value:st.w,onChange:v=>{st.w=v;upd();}});
+ const mk=o=>CK.range(ctl.appendChild(document.createElement('div')),o);
+ const rV=mk({label:'core voltage',min:0.40,max:0.90,step:0.001,value:st.v,fmt:v=>v.toFixed(3)+' V',onInput:v=>{st.v=v;upd();}});
+ const rF=mk({label:'clock',min:400,max:1410,step:10,value:st.f,fmt:v=>v.toLocaleString('en-GB')+' MHz',onInput:v=>{st.f=v;upd();}});
+ const rT=mk({label:'die temperature',min:50,max:90,step:0.5,value:st.t,fmt:v=>v.toFixed(1)+' °C',onInput:v=>{st.t=v;upd();}});
+ const rA=mk({label:'active minions',min:0,max:1024,step:32,value:st.act,fmt:v=>v.toLocaleString('en-GB'),onInput:v=>{st.act=v;upd();}});
+ const bx=ctl.appendChild(document.createElement('div'));bx.className='controls';bx.setAttribute('role','group');bx.setAttribute('aria-label','operating points');
+ const pre=(t,v,f,T)=>{const b=bx.appendChild(document.createElement('button'));b.type='button';b.textContent=t;b.addEventListener('click',()=>{rV.set(v);rF.set(f);if(T!=null)rT.set(T);});};
+ pre(`this card at 80 °C (${V} V, 600 MHz)`,V,600,80);pre(`800 MHz point (${V8} V, ${T8} °C)`,V8,800,T8);
+ pre('Esperanto’s target (0.425 V, 1 GHz)',0.425,1000,null);pre('a GPU’s point (0.85 V, 1,410 MHz)',0.85,1410,null);
+ const xb=bx.appendChild(document.createElement('button'));xb.type='button';xb.setAttribute('aria-pressed','true');
+ xb.textContent=vf?`add the extra idle measured at ${V8} V (${f1(vf.idle800)} W at ${vf.die_c.idle800.join('–')} °C)`:'extra idle';
+ xb.addEventListener('click',()=>{st.xtra=!st.xtra;xb.setAttribute('aria-pressed',String(st.xtra));upd();});
+ CK.legend('eq-leg',PART.map(([k,l,c])=>({key:k,label:l,mark:'box',color:c})).concat([{key:'m',label:'measured (faint: at another operating point)',mark:'line',color:'var(--ink)'}]));
+ const out=CK.readout('eq-out');let Z=null;
+ /* measured board power for the chosen workload: [V, MHz, °C, W, what] */
+ function measured(){const c=st.w==='idle'?null:C[st.w],m=[];
+  if(st.w==='idle'){m.push([V,600,80,C.fp32_randn.idle,'idle before the strict runs, 80 °C']);
+   if(vf){m.push([V,600,null,vf.idle600,`idle at 600 MHz, ${vf.die_c.idle600.join('–')} °C`]);m.push([V8,800,T8,vf.idle800,`idle at 800 MHz, ${vf.die_c.idle800.join('–')} °C`]);}}
+  else{m.push([V,600,80,c.p80,'strict start, 80 °C, seconds 1–3']);const q=SPLIT[st.w];
+   const key={zeros:'zeros800',ones:'ones800',randn:'randn800_peak'}[q];
+   if(vf&&key&&vf[key]!=null)m.push([V8,800,vf.peaks_at&&vf.peaks_at[q]?vf.peaks_at[q].die_c:null,vf[key],'800 MHz from a cool die: the highest reading before the governor stepped down']);}
+  return m;}
+ const fb=CK.frame('stack',{height:W=>W<600?150:140,label:'Board power by term for the chosen workload and operating point',draw:ff=>{if(!Z)return;
+  const W=ff.W,H=ff.H,L=12,R=16,y0=40,bh=34,m=measured(),mx=Math.max(100,Z.board*1.08,...m.map(q=>q[3]*1.08)),x=CK.lin(0,Math.ceil(mx/20)*20,L,W-R),nodes=[];
+  const defs=CK.el('defs',{},ff.svg),pat=CK.el('pattern',{id:'eq-hatch',width:7,height:7,patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'},defs);
+  CK.el('line',{x1:0,y1:0,x2:0,y2:7,style:'stroke:var(--ref)','stroke-width':2},pat);
+  for(const t of x.ticks(Math.max(3,Math.round(W/90)))){CK.el('line',{x1:x(t),x2:x(t),y1:y0-10,y2:y0+bh+10,class:'grid-line'},ff.svg);CK.txt(ff.svg,x(t),y0+bh+26,CK.fmt.num(t,0)+' W','tick','middle');}
+  const order=Z.inR?['fix','leak','xtra','sm','clk','data','sw']:['sm','clk','data','sw'];let acc=0;
+  for(const k of order){const v=Z.w[k];if(v<0.02)continue;const pp=PART.find(q=>q[0]===k);
+   const r=CK.el('rect',{x:x(acc),y:y0,width:Math.max(1,x(acc+v)-x(acc)-2),height:bh,rx:2,style:'fill:'+pp[2]},ff.svg);
+   CK.tip(ff,r,`<b>${pp[1]}</b>: ${v.toFixed(1)} W`);nodes.push(r);acc+=v;}
+  if(!Z.inR){const r=CK.el('rect',{x:x(acc),y:y0,width:Math.max(0,W-R-x(acc)),height:bh,style:'fill:url(#eq-hatch);stroke:var(--ref)','stroke-dasharray':'4 3'},ff.svg);
+   CK.txt(ff.svg,W-R,y0-10,'+ fixed and leakage: not measured at this voltage','lab','end');
+   CK.tip(ff,r,'Leakage and the idle floor were measured only at 0.517 and 0.618 V; outside that range only switching is priced');nodes.push(r);}
+  else CK.txt(ff.svg,Math.min(x(acc)+6,W-R),y0-10,`${Z.board.toFixed(1)} W at the board`,'lab-strong',x(acc)+6>W-R-130?'end':'start');
+  for(const [v,f,t,w,what] of m){const g=CK.el('g',{},ff.svg),here=Math.abs(v-st.v)<0.002&&Math.abs(f-st.f)<5&&st.act===1024;
+   CK.el('line',{x1:x(w),x2:x(w),y1:y0-4,y2:y0+bh+4,style:'stroke:var(--ink)','stroke-width':2.5,opacity:here?1:0.35},g);
+   CK.el('rect',{x:x(w)-6,y:y0-6,width:12,height:bh+12,class:'ck-hit'},g);
+   CK.tip(ff,g,`<b>measured ${f1(w)} W</b> at ${v} V, ${f} MHz: ${what}${here?'':' (a different operating point from the one set above)'}`);nodes.push(g);}
+  CK.keynav(ff,nodes);}});
+ const fl2=CK.frame('leak',{height:W=>W<600?240:220,maxW:520,label:'Idle board power against die temperature with the idle law',draw:ff=>{
+  const W=ff.W,H=ff.H,L=40,R=12,T=24,B=38,x=CK.lin(48,92,L,W-R),y=CK.lin(10,46,H-B,T),nodes=[];
+  CK.axes(ff,{x,y,L,R,T,B,xt:[50,60,70,80,90],yt:[10,20,30,40],xl:'die temperature, °C',yl:'idle board power, W'});
+  const cv=[];for(let t=48;t<=92;t+=0.5)cv.push([t,law(t)]);
+  CK.el('path',{d:CK.path(cv,x,y),style:'fill:none;stroke:var(--c2)','stroke-width':2},ff.svg);
+  CK.el('line',{x1:L,x2:W-R,y1:y(PW.P_fix),y2:y(PW.P_fix),style:'stroke:var(--axis)','stroke-dasharray':'4 4'},ff.svg);CK.txt(ff.svg,L+4,y(PW.P_fix)-5,`not leakage: ${f1(PW.P_fix)} W`,'lab');
+  for(const p of PW.idle_curve.filter(p=>p.n>=30)){const c=CK.el('circle',{cx:x(p.T),cy:y(p.P),r:4,style:'fill:var(--c1)'},ff.svg);
+   CK.tip(ff,c,`${p.T} °C: ${f2(p.P)} W idle (${p.n.toLocaleString('en-GB')} samples at 0.52 V, 600 MHz)`);nodes.push(c);}
+  if(vf){const c=CK.el('circle',{cx:x(T8),cy:y(vf.idle800),r:5,style:'fill:var(--surface);stroke:var(--c5)','stroke-width':2.5},ff.svg);
+   CK.tip(ff,c,`idle at ${V8} V, 800 MHz: ${f1(vf.idle800)} W at ${vf.die_c.idle800.join('–')} °C, ${f1(EXTRA)} W above the 0.52 V law`);nodes.push(c);}
+  CK.el('line',{x1:x(st.t),x2:x(st.t),y1:T,y2:H-B,style:'stroke:var(--ink)','stroke-dasharray':'3 3'},ff.svg);
+  const d=CK.el('circle',{cx:x(st.t),cy:y(law(st.t)),r:5.5,style:'fill:var(--c2);stroke:var(--surface)','stroke-width':1.5},ff.svg);
+  CK.tip(ff,d,`the law at ${st.t.toFixed(1)} °C: ${f1(law(st.t))} W idle, ${f1(leak(st.t))} W of it leakage`);nodes.push(d);
+  nodes.sort((a,b)=>+a.getAttribute('cx')-+b.getAttribute('cx'));CK.keynav(ff,nodes);}});
+ function upd(){Z=calc();fb.redraw();fl2.redraw();const c=Z.c,sw=Z.swt,k=(st.v/V)**2*st.f*1e6/F;
+  const permin=st.act&&c?`${f1(1000*sw/st.act)} mW per active minion (Esperanto’s budget: 10 mW per minion, leakage included)`:'';
+  const pj=c&&c.per_s&&st.act?sw/(c.per_s*(st.f*1e6/F)*(st.act/c.minions))*1e12:null;
+  const unit=pj!=null?`${pj.toFixed(pj<1?2:1)} pJ per ${c.unit==='MAC'?'multiply-add':c.unit} over idle`:'';
+  const head=Z.inR?`<b>${Z.board.toFixed(1)} W</b> at the board: ${f1(Z.w.fix)} fixed + ${f1(Z.w.leak)} leakage`+(Z.w.xtra>0.05?` + ${f1(Z.w.xtra)} extra idle at this voltage`:'')+` + ${f1(sw)} switching`
+   :`<b>${f1(sw)} W</b> switching (leakage not measured here)`;
+  out.set(`${head}. Switching scales by ${k.toFixed(3)}× from 0.517 V and 600 MHz`+[permin,unit].filter(Boolean).map(t=>'; '+t).join('')+'.');}
+ upd();
+})();
+
+/* ---------- numbers in the prose, from the data ---------- */
+(function(){const put=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;},vf=D.vf,M=D.model;
+ if(vf){const V8=vf.points[0][0],pred=(V8/V)**2*800/600,pairs={z:[vf.zeros800-vf.idle800,vf.zeros600_dyn],o:[vf.ones800-vf.idle800,vf.ones600-vf.idle600],r:[vf.randn800_peak-vf.idle800,vf.randn600-vf.idle600]};
+  const ts=[...vf.die_c.idle600,...vf.die_c.idle800,...Object.values(vf.peaks_at||{}).map(q=>q.die_c)];
+  put('vf-T',`${Math.min(...ts)} to ${Math.max(...ts)}`);put('vf-z6',f1(pairs.z[1]));put('vf-o8',f1(pairs.o[0]));put('vf-o6',f1(pairs.o[1]));
+  put('vf-r8',f1(pairs.r[0]));put('vf-r6',f1(pairs.r[1]));
+  /* the V²f check rests on random data; zeros (two runs 0.5 W apart on about 4 W over idle) do not test it */
+  const ro=pairs.o[0]/pairs.o[1],rr=pairs.r[0]/pairs.r[1],pct=v=>`${Math.round(100*(v/pred-1))}%`;
+  put('vf-rr',f2(rr));put('vf-ro',f1(ro));put('vf-pred',f2(pred));put('vf-devr',pct(rr));put('vf-devo',pct(ro));
+  put('vf-dev2',`${Math.round(100*Math.max(Math.abs(ro/pred-1),Math.abs(rr/pred-1)))}%`);
+  const ep=[ro,rr].map(v=>v/(800/600));put('vf-epo',`${f1(Math.min(...ep))}–${f1(Math.max(...ep))}`);put('vf-epo2',`${f1(Math.min(...ep))}–${f1(Math.max(...ep))}`);put('vf-v2',f2((V8/V)**2));
+  const ic=M.power.idle_curve,a=ic.find(q=>q.T===64),b=ic.find(q=>q.T===66);if(a&&b)put('vf-slope',f1((b.P-a.P)/2));
+  const it=[...vf.die_c.idle600,...vf.die_c.idle800];
+  put('vf-i8',f1(vf.idle800));put('vf-i6',f1(vf.idle600));put('vf-iT',`${Math.min(...it)}–${Math.max(...it)}`);}
+ if(M.step_open){put('lg-lam',f2(M.power.lambda_at_80));put('lg-R',f2(M.R_total));put('lg-10m',f1(M.step_open[600]));put('lg-gain',`${f2(M.power.lambda_at_80)} × ${f2(M.R_total)} = ${f2(M.loop_gain_at_80)}`);}
+ const d=C.tload_dram,l=C.tload_l2;
+ if(d){put('mem-dg',f1(d.per_s/1e9));put('mem-dpct',Math.round(100*d.per_s/119e9)+'%');put('mem-dw',f1(d.dyn));put('mem-dpj',d.pj_per_unit_dyn.toFixed(0));}   /* 119 GB/s: these cards' 933 MHz DDR clock */
+ if(l){put('mem-lt',f2(l.per_s/1e12));put('mem-lw',f1(l.dyn));put('mem-lpj',f1(l.pj_per_unit_dyn));}
+ put('m-rn',f1(C.fp32_randn.p80));
 })();
 
 </script>

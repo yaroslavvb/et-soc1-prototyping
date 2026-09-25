@@ -1,3 +1,4 @@
+# Superseded by wire.json (E31/E32): this uses the E27 inputs and the provisional 3.64–3.76 mm pitch range.
 # Conversion of E27 per-hop slopes to per-mm, per-transition, and voltage-scaled figures.
 # Inputs: railfit.json (critique), 04a-fine-grain.md, pitch (geometry + verify), toggles.json (critique).
 V = 0.485; V2 = V*V

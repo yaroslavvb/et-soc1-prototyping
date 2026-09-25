@@ -28,9 +28,12 @@ wait_cool() {
 sleep 3
 # Warm-up: random data until the die is above the target, so every measured run is approached from above.
 for i in 1 2 3 4 5 6; do t=$(temp); [ -n "$t" ] && [ "$t" -gt $(( target + 3 )) ] && break; run randn -1 6; done
+# Each round visits all ten patterns in a rotated order: the step multipliers are coprime to 10. (Until 25 Sep the
+# multiplier was 2*round+1, which is 5 in round 2: that round alternated onebit and ones, as E7's third round did.)
+mult=(1 3 7 9)
 for round in $(seq 0 $(( rounds - 1 ))); do
   for k in $(seq 0 9); do
-    v=${pats[$(( (k * (round * 2 + 1) + round * 3) % 10 ))]}
+    v=${pats[$(( (k * ${mult[round % 4]} + round * 3) % 10 ))]}
     wait_cool
     echo "{\"round\":$round,\"values\":\"$v\",\"start_temp\":$(temp),\"t_ms\":$(date +%s%3N)}" >> "$out/starts.jsonl"
     run "$v" "$round" 6

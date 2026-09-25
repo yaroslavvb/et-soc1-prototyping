@@ -41,10 +41,11 @@ Read [Terms](#terms) first.
    3.4× on the matmul benchmark's ±1/±2 operands.
    → [13-why-low-power.md](13-why-low-power.md)
 6. **It transfers to another card.** Re-run on aifoundry3 — different silicon, a launch temperature 25 °C
-   lower — the model applied unchanged is off by 1.4 W, and the error is a flat 8%, not scatter. **One scale
-   factor of 0.92 brings it to 0.2 W rms**, and calibrating that factor on a single random-data run predicts
-   the other seven patterns to 0.27 W. The leakage law extrapolated 7–14 °C below its fitted range lands within
-   0.73 W. → [11-thermal-model.md](11-thermal-model.md), "Does it transfer to another card?"
+   lower — the model applied unchanged is off by 1.4 W, and it overestimates every pattern, by 3–10% (8% by least
+   squares), not scatter. **One scale factor of 0.92 brings it to 0.2 W rms**, and calibrating that factor on the
+   random-normal runs alone predicts the other seven patterns to 0.27 W rms (0.36 in the median over the eight
+   patterns, 0.93 at worst, calibrated on zeros). The leakage law extrapolated 7–14 °C below its fitted range lands
+   within 0.73 W (the mean of four temperature bins). → [11-thermal-model.md](11-thermal-model.md), "Does it transfer to another card?"
 7. **The gotcha if you use these machines.** aifoundry3's firmware reports a TDP of **0 W**, which makes the
    governor's step-up test unreachable and holds the card at 600 MHz for as long as it stays at zero. The driver
    reports the nameplate 65 W on every machine, so nothing on the host notices. aifoundry1's two cards cannot be
@@ -68,9 +69,9 @@ Read [Terms](#terms) first.
    adds and 60–75% of what DRAM traffic adds (70% of a DRAM read). Fitted over some 390 configuration means per
    card, the part above idle is 18–20% delivery loss on the minion rail, 5% on SRAM, 26–29% on the mesh and about
    70 pJ per DRAM byte off-rail, to 0.30–0.35 W rms (1.1–1.3 W on the DRAM configurations); the idle 15 W is not
-   split (`tools/ettelem/fit_unmetered.py` reproduces the fit exactly). And the memory shires' Moortec voltage
-   monitor droops 0.84 mV per off-rail DRAM watt (the script gets 0.87, within 3%), a DRAM meter that was in every
-   telemetry file all along (heavy mesh traffic moves it too).
+   split (`tools/ettelem/fit_unmetered.py` writes the fit). And the memory shires' Moortec voltage monitor droops
+   0.87 mV per off-rail DRAM watt, a DRAM meter that was in every telemetry file all along (traffic with no DRAM
+   access moves it too, by up to about 2 mV).
    → [19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md)
 12. **What a millimetre of mesh costs.** At the mesh's 0.485 V a random bit costs 36 fJ per mm on the mesh rail with
    free links (25 of it data-dependent) and 50 on a loaded mesh; board power says 47 and 73. Ones carried cost
@@ -126,6 +127,7 @@ The same glossary is on the hub, [Limits of observability](https://spacesheep.de
 | Understand the clock/voltage governor, or why the card leaks so much | [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
 | Re-run an experiment | [03-experiments.md](03-experiments.md) — command, protocol, raw data path, caveats, and the report it fed |
 | Find the published version | [04-artifacts.md](04-artifacts.md) — reports, spaces and their visibility, GIFs, tools, commits |
+| Know what was re-checked, what reproduced and what did not | [04-artifacts.md](04-artifacts.md), "The 25 September validation", and its record in [../reports/data/2026-09-24-report-review/](../reports/data/2026-09-24-report-review/README.md) |
 | Know why a question was or was not answered | [02-requests.md](02-requests.md) |
 | Check a source | [01-resources.md](01-resources.md) — what each is authoritative for, and what it is not |
 
@@ -137,7 +139,7 @@ Four kinds of thing have IDs, and every claim cites them:
 |---|---|---|
 | **R1–R14** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
 | **Q1–Q43** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E32** | Experiments: what ran, when, on what, with which command, producing which raw files | [03-experiments.md](03-experiments.md) |
+| **E1–E34** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later) | [03-experiments.md](03-experiments.md) |
 | **A1–A19** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused) | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":

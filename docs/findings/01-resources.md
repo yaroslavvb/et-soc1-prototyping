@@ -63,7 +63,9 @@ statement below about the governor as a statement about the `353f20e` source.
 ## R4 — Earlier reports in this repository (2026-09-18, before this line of work)
 
 `docs/reports/2026-09-18-*.html`: matmul efficiency, memory hierarchy, on-chip communication, sparsity.
-Their raw data is under `docs/reports/data/2026-09-18-*/`.
+Their raw data is under `docs/reports/data/2026-09-18-*/`. The memory-hierarchy and on-chip communication sessions
+were registered on 25 September as E33 and E34 in [03-experiments.md](03-experiments.md), with their claims in
+[05-claims.md](05-claims.md).
 
 - **Authoritative for:** the throughput and efficiency baselines quoted here (fp32 9.5 TFLOP/s, fp16 19.0,
   int8 71.8 TOP/s on `kernels/mmbench`), the mesh latencies, and the original sparsity result that the tensor
@@ -205,7 +207,7 @@ at commit `353f20e`.
   NoC, SRAM) — v_out, a_out, w_out, v_in, a_in, w_in, deg_c, each as a current value, a minimum and maximum since
   reset, and a running average, 84 reads a pass — and set-point registers only for DDR, VDDQ, VDDQLP, PCIe logic,
   PCIe, Maxion and the L2/SRAM rail. The SP copies the PMIC's own running average of w_out (roughly first-order,
-  τ ≈ 1 s; the SP does no filtering) with its min and max, and forwards the input power. The Moortec PVT subsystem: 5 controllers × (8 temperature
+  τ ≈ 1.15–1.22 s as E27 measured it; the SP does no filtering) with its min and max, and forwards the input power. The Moortec PVT subsystem: 5 controllers × (8 temperature
   sensors, 2 × 16-channel voltage monitors, 8 process detectors); 35 temperature sensors live and 35 process detectors
   populated (one of each per minion shire plus one in the IO shire); 125 voltage
   points (3 per minion shire, 2 per memory shire, 3 IO shire, 2 PCIe shire, 2 external analog); the host gets

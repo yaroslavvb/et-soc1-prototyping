@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """Render all 18 finished pages and check every link: spacesheep slugs are public pages of the set, #anchors exist on
-the target page, GitHub repo paths exist in the working tree, in-page anchors resolve, nothing links the private brief."""
+the target page, GitHub repo paths exist in the working tree, in-page anchors resolve, nothing links the private brief.
+
+The rendered text and link lists go to $AUDIT_DIR/final/ (default /tmp/report-review/final/). The page list is
+$AUDIT_DIR/manifest.tsv if it exists, else the manifest.tsv committed next to this tools directory."""
 import json, os, re, subprocess, sys, urllib.parse
 A = os.environ.get("AUDIT_DIR", "/tmp/report-review")
-R = "/home/yaroslavvb/claude/et-soc1-prototyping"
+HERE = os.path.dirname(os.path.abspath(__file__))
+R = os.path.abspath(os.path.join(HERE, "..", "..", "..", "..", ".."))  # repo root
+MANIFEST = A + "/manifest.tsv" if os.path.exists(A + "/manifest.tsv") else os.path.join(HERE, "..", "manifest.tsv")
 os.chdir(R)
 pages = {}
-for line in open(A + "/manifest.tsv").read().splitlines()[1:]:
+for line in open(MANIFEST).read().splitlines()[1:]:
     slug, uuid, html = line.split("\t")[:3]
     if slug == "david-kanter-power-brief": continue
     if slug == "et-soc1-spatial-temperature-brief": html = "docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html"
@@ -15,7 +20,7 @@ for line in open(A + "/manifest.tsv").read().splitlines()[1:]:
 os.makedirs(A + "/final", exist_ok=True)
 data = {}
 for slug, html in pages.items():
-    subprocess.run([A + "/render_text.sh", html, f"{A}/final/{slug}"], check=True)
+    subprocess.run([os.path.join(HERE, "render_text.sh"), html, f"{A}/final/{slug}"], check=True)
     data[slug] = json.load(open(f"{A}/final/{slug}.json"))
 bad = []
 for slug, d in data.items():

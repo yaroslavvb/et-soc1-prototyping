@@ -1,0 +1,45 @@
+{
+ "note": "hand-kept: errata quoted from the errata document; the 5, 40 and 100 ms runs are in no raw data file",
+ "window_independence": [
+  {
+   "window": 3000000,
+   "host_ops": 384,
+   "remote_ops": 301512
+  },
+  {
+   "window": 6000000,
+   "host_ops": 384,
+   "remote_ops": 601503
+  },
+  {
+   "window": 24000000,
+   "host_ops": 384,
+   "remote_ops": 2401504
+  },
+  {
+   "window": 60000000,
+   "host_ops": 384,
+   "remote_ops": 6001507
+  }
+ ],
+ "errata": [
+  {
+   "id": "RTLMIN-6207",
+   "num": "4.1",
+   "title": "Neigh request hangs if shire cache full of l3_slave requests to same SCP address",
+   "quote": "The shire cache prioritizes l3_slave requests over neighborhood requests. If there are too many l3 requests there may be no resources for neighborhood requests. l3_yield_priority allows priority and resources to be given to neighborhood requests. However, if the neighborhood and the mesh are both accessing the same SCP request it is possible for the neighborhood request to continually be squashed and the request could still not progress even with l3_yield_priority set to non-zero.",
+   "impact": "Low. It would have to be a pretty consistent and repeating pattern for the neighborhood to continually be squashed and re-queued.",
+   "workaround": "Slow down the polling rate from other shires that are waiting for the local neighborhood to complete whatever task it is trying to complete.",
+   "fix": "Postponed."
+  },
+  {
+   "id": "RTLMIN-6214",
+   "num": "4.2",
+   "title": "L3_yield priority does not have sub-bank granularity",
+   "quote": "It is possible for l3_slave requests to over use one of the sub-banks and then that sub-bank is busy when it's the neighborhood's turn to make a request due to l3_yield_priority. The neighborhood request uses a different sub-bank which satisfies l3_yield_priority. As a result a request to the over used sub-bank from a neighborhood may not make progress despite l3_yield_priority being non-zero.",
+   "impact": "Low. It would have to be a pretty consistent and repeating pattern for the neighborhood request to a particular sub-bank to be skipped over and over.",
+   "workaround": "Access patterns should be spread pretty evenly across sub-banks.",
+   "fix": "Postponed."
+  }
+ ]
+}

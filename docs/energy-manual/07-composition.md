@@ -1,29 +1,32 @@
 # 7. Composition: building a workload's energy from the tables
 
 The equation from the structure page, applied. Three examples, each set against a direct measurement. Only
-the relay is an out-of-sample check; the other two are decompositions, and say so.
+the relay is an out-of-sample check; the other two are decompositions, and say so. The published page
+(section 7.1, "Build a workload's energy") prices any mix of up to three rows at any die temperature, with the
+same rows and the same idle law, and starts from the first example below.
 
 ## 7.1 A dense fp32 matmul: where the joules go
 
 `TensorFMA` on random fp32 data, all 1,024 minions, 7 seconds, launched at 80 °C. The multiply-adds are priced
-by the flip model of §3.2, not taken from the measurement, so the table is a decomposition checked against a
-measurement, not a prediction: the flip model was fitted (E17) to this card's runs of the same patterns in E9
-and E12, and the measurement is E15's, a later session on the same card.
+with §3.2's marginal energy per multiply-add, the mean over the ablation's runs and the card transfer's runs on
+both cards, times the measured rate, so the table is a decomposition checked against a measurement, not a
+prediction: the measurement (E15's ablation, on aifoundry2) is one of the runs behind that mean.
 
 | Component | Source | W | J in 7 s | Share |
 |---|---|---|---|---|
-| Fixed (PCIe, DDR PHY, IO, regulators at rest) | §1, $P_\text{fix}$ | 12.6 | 88 | 20% |
+| Fixed (the idle law's constant) | §1, $P_\text{fix}$ | 12.6 | 88 | 20% |
 | Leakage at 80 °C | §1, $P_\text{leak}(80)$ | 23.3 | 163 | 37% |
-| Tensor state machines, 1,024 minions | §3.2, 1.81 mW × 1,024 | 1.9 | 13 | 3% |
-| Multiply-adds: the flip model's 27.2 W less the state machines | §3.2 | 25.3 | 177 | 40% |
-| **Board power from the tables** | | **63.1** | 441 | |
-| Measured (E15 ablation, fp32 random, at the 80 °C launch) | | 63.9 | | |
+| Multiply-adds: 5.78 pJ [5.24–6.03] × 4.59 × 10¹² per second | §3.2 | 26.5 [24.1–27.7] | 186 | 43% |
+| **Board power from the tables** | | **62.4** | 437 | |
+| Measured (E15 ablation, fp32 random, at the 80 °C launch) | | 63.9 | 448 | |
 
-Per flop, that is **7.0 pJ loaded** (the measured 63.9 W over 9.18 TFLOP/s) and **2.89 pJ marginal**
-[2.62–3.01 over runs and cards]: 57% of the energy of the most arithmetic-dense thing this chip does is spent
-keeping the card on and leaking. The same matmul on zeros draws 1.9 W over idle instead of 27.6, and the loaded
-cost per flop becomes 4.1 pJ, almost all of it static. **On this card the data decides the dynamic energy, and
-the temperature decides the rest.**
+Priced instead with the flip model of §3.2 (27.2 W for the tile, 1.9 W of it the tensor state machines), the
+board comes to 63.1 W. Per flop, the measurement is **7.0 pJ loaded** (63.9 W over 9.18 TFLOP/s) and **2.89 pJ
+marginal** [2.62–3.01 over runs and cards]: 57% of the priced energy of the most arithmetic-dense thing this chip
+does is spent keeping the card on and leaking, and at 80 °C the static 36 W exceeds the dynamic power of every
+kernel measured in this manual, this one's 27.6 W included. The same matmul on zeros draws 1.9 W over idle
+instead of 27.6, and its measured loaded cost per flop becomes 4.2 pJ, almost all of it static. **On this card the
+data decides the dynamic energy, and the temperature decides the rest.**
 
 ## 7.2 The relay (E25), priced from §4
 
@@ -49,9 +52,9 @@ The relay also runs a vector add per element and a chip barrier per stage, and n
 
 ## 7.3 A hot line (E23): a consistency check
 
-1,024 minions stalled on one contended atomic draw 1.41 W over idle on aifoundry2 (22 September). §2's figure of
-1.4 mW per stalled minion is this same measurement divided by 1,024, so §2 cannot predict it; the row is here
-to show the scale. Contention is not an energy problem; it is a throughput problem, and the energy it wastes is
+1,024 minions stalled on one contended atomic draw 1.19 W over idle [1.01–1.41], pooled over seven passes on the
+two cards (the first session, on aifoundry2 on 22 September, gave 1.41 W). §2's figure of 1.2 mW per stalled
+minion is this same measurement divided by 1,024, so §2 cannot predict it; the row is here to show the scale. Contention is not an energy problem; it is a throughput problem, and the energy it wastes is
 the leakage of the time it takes.
 
 ## The rule for a new workload

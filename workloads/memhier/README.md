@@ -56,6 +56,14 @@ Each configuration runs in its own `timeout 10` process.
 ssh aifoundry2 'cd ~/nekko && python3 workloads/memhier/run_energy.py --host-bin build/memhier/host/memhier_host --out build/memhier-energy'
 ```
 
+Copy the data back and regenerate the report's numbers and charts (the session is E33 in `docs/findings/03-experiments.md`):
+
+```bash
+python3 workloads/memhier/analyze.py docs/reports/data/2026-09-18-memhier-aifoundry2 \
+    --embed docs/reports/2026-09-18-et-soc1-memory-hierarchy.html
+python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-memory-hierarchy.html
+```
+
 In the simulator, add `--sysemu --shires 0x1` to any command. That checks the kernels run correctly. The
 simulator's timing is meaningless.
 
@@ -63,3 +71,7 @@ simulator's timing is meaningless.
 
 The card is shared. Check `uptime`, `who` and `ps` first. Every command here holds the device for under 10 s
 (`--budget 8` stops launching after 8 s), and builds use `nice -j4`.
+
+On 18 September one energy run crashed the host runtime during the DRAM stream, and the card's master firmware then
+refused kernel launches. A full chip reset through the management interface restored it, and the upstream hello-world
+test and these probes were re-verified afterwards.
