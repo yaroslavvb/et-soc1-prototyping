@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aifoundry1 fixed</title>
+<meta name="description" content="What was done on 25 September 2026 to make aifoundry1's two ET-SoC-1 cards usable again: the et_soc1 driver rebuilt from the fixed source, the interrupted kernel update finished, and what is still open.">
+<style>
+:root{
+  color-scheme: light;
+  --page:#fafaf8; --surface:#ffffff; --sunk:#f2f1ec;
+  --ink:#1a1a1f; --ink-2:#52514a; --ink-3:#6b6a62;
+  --line:#e3e2db; --rule:#cfcec5;
+  --accent:#1f6fbf; --accent-soft:rgba(31,111,191,.12);
+  --warn:#9a6a10; --warn-soft:rgba(154,106,16,.12);
+  --good:#1f7a5a; --good-soft:rgba(31,122,90,.11);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --page:#111110; --surface:#1b1b19; --sunk:#262623;
+    --ink:#f2f1ec; --ink-2:#c3c2b7; --ink-3:#9a998f;
+    --line:#2f2f2c; --rule:#4a4a45;
+    --accent:#5a9be0; --accent-soft:rgba(90,155,224,.16);
+    --warn:#d6a040; --warn-soft:rgba(214,160,64,.14);
+    --good:#4fb38a; --good-soft:rgba(79,179,138,.13);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --page:#111110; --surface:#1b1b19; --sunk:#262623;
+  --ink:#f2f1ec; --ink-2:#c3c2b7; --ink-3:#9a998f;
+  --line:#2f2f2c; --rule:#4a4a45;
+  --accent:#5a9be0; --accent-soft:rgba(90,155,224,.16);
+  --warn:#d6a040; --warn-soft:rgba(214,160,64,.14);
+  --good:#4fb38a; --good-soft:rgba(79,179,138,.13);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);
+  font:18px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;font-synthesis-weight:none}
+main{max-width:52em;margin:0 auto;padding:40px clamp(16px,4vw,32px) 96px}
+h1,h2,h3{text-wrap:balance;letter-spacing:-.012em;margin:0}
+h1{font-size:clamp(28px,5.8vw,41px);line-height:1.16}
+h2{font-size:clamp(21px,3.6vw,26px);line-height:1.25;margin:0 0 10px}
+h3{font-size:19px;line-height:1.3;margin:30px 0 8px}
+p{margin:0 0 14px;max-width:38em}
+a{color:var(--accent);text-underline-offset:2px}
+section{margin-top:48px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 0 10px}
+.byline{color:var(--ink-2);font-size:14px;margin:10px 0 0}
+.lede{font-size:19px;line-height:1.55;margin:22px 0 0;max-width:37em}
+.small{color:var(--ink-2);font-size:14px}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+code{font-size:.86em;background:var(--sunk);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+pre{font-size:13.5px;line-height:1.5;background:var(--sunk);border:1px solid var(--line);border-radius:8px;
+  padding:12px 14px;margin:8px 0 14px;overflow-x:auto;white-space:pre;-webkit-overflow-scrolling:touch;max-width:100%}
+pre code{background:none;padding:0;font-size:inherit;overflow-wrap:normal}
+.cmd{display:flex;flex-direction:column;margin:8px 0 14px}
+.cmd pre{margin:0;border-top-right-radius:0}
+.copy{align-self:flex-end;margin:0 0 -1px;font:600 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  color:var(--ink-2);background:var(--sunk);border:1px solid var(--line);border-bottom:0;border-radius:6px 6px 0 0;padding:7px 12px;cursor:pointer;min-height:30px}
+.copy:hover{color:var(--ink)}
+.copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:22px 0 0}
+nav.card b{display:block;font-size:14px;color:var(--ink-2);margin-bottom:4px}
+nav.card ol{margin:0;padding-left:22px;font-size:16px}
+nav.card li{margin:3px 0}
+.glance{display:grid;grid-template-columns:9.5em 1fr;gap:8px 16px;margin:0;font-size:16px;line-height:1.5}
+.glance dt{color:var(--ink-3);font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding-top:2px}
+.glance dd{margin:0}
+.callout{border-left:3px solid var(--warn);background:var(--warn-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:40em;font-size:16px}
+.callout p{margin:0 0 8px}.callout p:last-child{margin:0}
+.inf{display:inline-block;font:700 11px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--warn);border:1px solid currentColor;border-radius:999px;padding:0 7px;white-space:nowrap;vertical-align:2px}
+ol.steps{list-style:none;counter-reset:step;padding:0;margin:18px 0 0}
+ol.steps>li{counter-increment:step;position:relative;padding-left:44px;margin:0 0 26px}
+ol.steps>li::before{content:counter(step);position:absolute;left:0;top:1px;width:30px;height:30px;border-radius:50%;
+  background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center}
+ol.steps>li>b:first-child{display:block;margin-bottom:4px}
+ul.plain{margin:6px 0 14px;padding-left:22px;max-width:40em}
+ul.plain li{margin:0 0 8px}
+ul.plain ul{margin:6px 0 0;padding-left:20px}
+ul.plain ul li{margin:0 0 4px}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px 0 16px}
+table{border-collapse:collapse;width:100%;font-size:15px;line-height:1.45}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto}
+th{color:var(--ink-2);font-weight:600;border-bottom:1px solid var(--rule)}
+td.bad{background:var(--warn-soft)}
+td.bad strong{color:var(--warn)}
+tbody th{font-weight:600;color:var(--ink)}
+@media (max-width:640px){
+  table.stack thead{display:none}
+  table.stack,table.stack tbody,table.stack tr,table.stack td,table.stack tbody th{display:block;width:100%}
+  table.stack tr{border-bottom:1px solid var(--rule);padding:8px 0}
+  table.stack td,table.stack tbody th{border:0;padding:3px 6px}
+  table.stack td[data-label]::before{content:attr(data-label);display:block;font-size:12px;font-weight:600;color:var(--ink-3)}
+}
+h2,h3{scroll-margin-top:12px}
+.hlink{margin-left:8px;color:var(--ink-3);text-decoration:none;font-weight:400;opacity:0}
+h2:hover .hlink,h3:hover .hlink,.hlink:focus{opacity:1}
+@media (max-width:480px){
+  body{font-size:17px} .lede{font-size:18px}
+  ol.steps>li{padding-left:38px}
+  .glance{grid-template-columns:1fr;gap:2px}
+  .glance dd{margin-bottom:10px}
+}
+</style>
+</head>
+<body>
+<main>
+
+<section style="margin-top:0">
+<p class="eyebrow">AI Foundry lab · Fix log · 25 September 2026</p>
+<h1>aifoundry1 is fixed</h1>
+<p class="byline">25 September 2026, 15:00–15:04 PDT · done as root over Tailscale SSH at the owner's request · follows <a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting">What is broken on aifoundry1</a></p>
+<p class="lede"><b>Both ET-SoC-1 cards in aifoundry1 answer again.</b> The <code>et_soc1</code> kernel module was rebuilt by DKMS from the fixed driver source that was already on the machine (et-platform <code>353f20e</code>), for all three kernels in <code>/boot</code>, and reloaded. It now reports version <code>0.20.0</code> and srcversion <code>47D26A305A0428B29FB7FC4</code>, the same as aifoundry2 and aifoundry3, and a read-only management query succeeds on both cards. The interrupted 24 September kernel update was finished as well, after freeing space on the nearly full root file system. The machine was not rebooted, and no running user work was touched.</p>
+
+<div class="card">
+<dl class="glance">
+  <dt>Cards</dt><dd>Both answer: <code>dev_mngt_service -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS</code> succeeds on card 0 and card 1; each card's management queue counted its first command.</dd>
+  <dt>Driver</dt><dd><code>et_soc1</code> <code>[0.20.0] 47D26A305A0428B29FB7FC4</code> loaded now and installed for 7.0.0-30, -31 and -34; loaded at boot by <code>/etc/modules-load.d/et_soc1.conf</code>.</dd>
+  <dt>Kernel update</dt><dd><code>linux-image-7.0.0-34</code> fully installed: initramfs (with ZFS) written, GRUB updated; the next boot starts 7.0.0-34, whose <code>et_soc1</code> is the fixed one.</dd>
+  <dt>Still open</dt><dd>The pool is 96% full (553 MB free for /); card et0's PCIe link still logs ~1 corrected error per second; the two cards run different firmware; the next boot is untested.</dd>
+</dl>
+</div>
+</section>
+
+<section>
+<h2 id="the-cards-now">1. The cards now</h2>
+<p>A read-only management query per card, run as an ordinary user with nobody else on the cards (15:02 PDT):</p>
+<div class="table-wrap"><table>
+<thead><tr><th scope="col"></th><th scope="col">aifoundry1 card 0 (01:00.0)</th><th scope="col">aifoundry1 card 1 (02:00.0)</th><th scope="col">aifoundry2, aifoundry3</th></tr></thead>
+<tbody>
+<tr><th scope="row">Firmware release</th><td>1.4.1</td><td>1.2.0</td><td>1.3.1</td></tr>
+<tr><th scope="row">BL1 / BL2</th><td>0.21.2</td><td>0.18.0</td><td>0.20.0</td></tr>
+<tr><th scope="row">PMIC firmware</th><td>1.6.1</td><td>1.3.0</td><td>1.5.0</td></tr>
+<tr><th scope="row">Master / worker / machine minion</th><td>0.24.0</td><td>0.22.0</td><td>0.23.0</td></tr>
+</tbody></table></div>
+<p><b>The two cards in aifoundry1 run different firmware</b>, and neither matches the lab's other two cards: card 0 is one release newer than aifoundry2/3, card 1 one older. Anything measured on these cards should record which card and firmware it ran on. Only the management path has been exercised; no kernel has been launched on either card yet.</p>
+</section>
+
+<section>
+<h2 id="what-was-done">2. What was done, in order</h2>
+<p>The procedure is section 1 of <a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting#1-the-fix-needs-root-on-aifoundry1">the troubleshooting report</a>; every command and its output is in the transcript (<code>docs/reports/data/2026-09-25-aifoundry1/fix-transcript.txt</code> in the repository). Backups are in <code>/root/et-soc1-fix-20260925/</code> on aifoundry1.</p>
+<ol class="steps">
+<li><b>Checks (15:00).</b> No process held any <code>/dev/et*</code> node (<code>fuser</code>), the module's reference count was 0, no CI job was running, 154 MB free on <code>/</code>, Secure Boot off. Another user was logged in but held no card.</li>
+<li><b>CI paused, backups taken (15:01).</b> The GitHub Actions runner <code>actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1</code> was stopped. <code>dkms status</code>, <code>modinfo</code>, the three installed <code>et-soc1.ko.zst</code> files and <code>/etc/modules-load.d</code> were copied to the backup directory.</li>
+<li><b>DKMS source replaced (15:01).</b> <code>dkms remove et-soc1/0.20.0 --all</code>; the old source (et-platform <code>09531e5c1</code>, with the Makefile typo <code>$(ET_MODULE_VERSION=)</code>) moved to the backup directory; <code>/usr/src/et-soc1-0.20.0</code> refilled from <code>git -C /usr/src/et-platform archive 353f20e et-driver</code> (its Makefile reads <code>$(ET_MODULE_VERSION)</code>, <code>VERSION</code> 0.20.0).</li>
+<li><b>Built for every kernel (15:01).</b> <code>dkms add</code>, then <code>dkms install</code> for 7.0.0-30, 7.0.0-31 (running) and 7.0.0-34. Each reads <code>[0.20.0] 47D26A305A0428B29FB7FC4</code>, byte for byte the value on aifoundry2.</li>
+<li><b>Module reloaded (15:01).</b> <code>modprobe -r et_soc1 &amp;&amp; modprobe et_soc1</code>: the four device nodes came back (0666), both cards registered with the driver, <code>/sys/module/et_soc1/version</code> reads <code>0.20.0</code>. The driver's remove path does not reset the cards; their firmware kept running.</li>
+<li><b>Verified (15:02).</b> The version files deviceLayer reads (<code>/sys/bus/pci/devices/0000:0{1,2}:00.0/driver/module/version</code>) both read <code>0.20.0</code>; the management query succeeded on both cards (section 1).</li>
+<li><b>Boot and CI (15:02).</b> <code>/etc/modules-load.d/et_soc1.conf</code> added so the module loads at boot, as on aifoundry2; the runner restarted and active. None of its three workflows (<code>benchmark.yml</code>, <code>benchmark-board.yml</code>, <code>sync-huggingface.yml</code>) builds or reloads the driver.</li>
+<li><b>Space freed (15:03).</b> Only system data that is re-created on demand: <code>apt-get clean</code> (281 MB of package cache), <code>journalctl --vacuum-size=50M</code> (118 MB of archived journal), and ten disabled snap revisions (old copies kept for rollback). <code>/</code> went from 155 MB to 553 MB free. No user data was touched.</li>
+<li><b>Kernel update finished (15:03).</b> <code>dpkg --configure -a</code> (exit 0): DKMS autoinstall for 7.0.0-34, <code>update-initramfs</code> wrote <code>/boot/initrd.img-7.0.0-34-generic</code> (it contains the ZFS modules), and <code>update-grub</code> rewrote <code>grub.cfg</code>, whose default entry is now 7.0.0-34. <code>linux-image-7.0.0-34</code> and <code>linux-modules-7.0.0-34</code> read <code>ii</code>, <code>/var/lib/dpkg/updates</code> is empty, <code>apt-get check</code> is clean.</li>
+</ol>
+<p class="small">Rollback of the driver (puts back the broken module): the commands in <a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting#1-the-fix-needs-root-on-aifoundry1">the troubleshooting report's section 1</a>, with <code>B=/root/et-soc1-fix-20260925</code>.</p>
+</section>
+
+<section>
+<h2 id="still-open">3. Still open</h2>
+<ul>
+<li><b>The disk.</b> The ZFS pool <code>rpool</code> is 96% allocated (437 of 452 GB); <code>/</code> and every dataset have only about 553 MB, because ZFS keeps the last ~3% in reserve. The space is user data: <code>/home</code> 392 GB and <code>/root</code> 25 GB (12 GB of <code>/root/.cache</code>, 9.8 GB of <code>/root/et-jobs-deploy</code>, 1.7 GB of the CI runner). Someone who owns that data should decide what goes; the next kernel update will need space again.</li>
+<li><b>Card et0's PCIe link</b> still logs about one corrected receive error per second at root port 00:01.0 (<a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting#4-a-separate-problem-card-et0-s-pcie-link">troubleshooting report, section 4</a>). It does not stop the card; a reseat at the next maintenance window is the fix.</li>
+<li><b>The next boot is untested.</b> It will start 7.0.0-34 with a freshly written initramfs, as aifoundry2 and aifoundry3 are set to. <code>et_soc1</code> for that kernel is the fixed build and loads from <code>modules-load.d</code>. After the reboot: <code>cat /sys/module/et_soc1/version</code> should print <code>0.20.0</code>.</li>
+<li><b>Different firmware on the two cards</b> (section 1). Whether to bring them to one release is for the lab to decide.</li>
+<li><b>An older <code>esperanto</code> DKMS driver</b> is still registered for 23 kernels (not loaded). It is harmless but can be removed (<code>dkms remove esperanto/0.20.0 --all</code>, and <code>/etc/udev/rules.d/50-esperanto.rules</code>) as a separate change.</li>
+</ul>
+</section>
+
+<section>
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting">What is broken on aifoundry1</a>: the diagnosis, evidence and procedure.</li>
+<li>The transcript and backups: <code>docs/reports/data/2026-09-25-aifoundry1/</code> in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-aifoundry1">the repository</a>; <code>/root/et-soc1-fix-20260925/</code> on aifoundry1.</li>
+</ul>
+</section>
+</main>
+</body>
+</html>

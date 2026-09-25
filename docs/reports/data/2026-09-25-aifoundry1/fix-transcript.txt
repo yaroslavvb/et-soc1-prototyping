@@ -1,0 +1,374 @@
+### 2026-09-25 15:00:52 PDT $ who
+another-user    pts/3        2026-09-18 17:24 (tmux(31014).%1)
+another-user    pts/2        2026-09-18 17:23 (tmux(31014).%0)
+yaroslavvb pts/5        2026-09-23 15:32 (tmux(492884).%1)
+yaroslavvb pts/4        2026-09-23 15:32 (tmux(492884).%0)
+
+### 2026-09-25 15:00:52 PDT $ fuser -v /dev/et0_* /dev/et1_* 2>&1; echo "fuser rc=$?"
+fuser rc=1
+
+### 2026-09-25 15:00:53 PDT $ cat /sys/module/et_soc1/refcnt; cat /sys/module/et_soc1/version | od -c | head -2
+0
+0000000  \n
+0000001
+
+### 2026-09-25 15:00:53 PDT $ pgrep -af Runner.Worker; echo "worker rc=$?"; systemctl is-active actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1.service; systemctl list-units --type=service --all | grep -i -e runner -e et-soc -e esperanto
+999882 /usr/sbin/tailscaled be-child ssh --login-shell=/bin/bash --uid=0 --gid=0 --groups=0 --local-user=root --home-dir=/root --remote-user=tag:sf --remote-ip=100.88.142.128 --has-tty=false --tty-name= --force-v1-behavior --cmd=pgrep -af Runner.Worker; echo "worker rc=$?"; systemctl is-active actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1.service; systemctl list-units --type=service --all | grep -i -e runner -e et-soc -e esperanto
+999890 /bin/bash -c pgrep -af Runner.Worker; echo "worker rc=$?"; systemctl is-active actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1.service; systemctl list-units --type=service --all | grep -i -e runner -e et-soc -e esperanto
+worker rc=0
+active
+  actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1.service loaded    active     running       GitHub Actions Runner (nekkoai-hf-hackathon.aifoundry1-et-soc1)
+
+### 2026-09-25 15:00:53 PDT $ df -h / /boot 2>/dev/null; mokutil --sb-state 2>&1; git -C /usr/src/et-platform rev-parse HEAD; dkms status
+Filesystem                Size  Used Avail Use% Mounted on
+rpool/ROOT/ubuntu_jleyxm   15G   15G  154M  99% /
+bpool/BOOT/ubuntu_jleyxm  1.8G  236M  1.6G  14% /boot
+SecureBoot disabled
+Platform is in Setup Mode
+353f20e982f4efd99019d04f8022681cc727c4f2
+esperanto/0.20.0, 6.14.0-33-generic, x86_64: installed (WARNING! Diff between built and installed module!)
+esperanto/0.20.0, 6.8.0-100-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-101-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-106-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-107-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-110-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-111-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-117-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-124-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-134-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-136-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-137-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-138-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-139-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-85-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-86-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-87-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-88-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-90-generic, x86_64: installed
+esperanto/0.20.0, 6.8.0-94-generic, x86_64: installed
+esperanto/0.20.0, 7.0.0-30-generic, x86_64: installed
+esperanto/0.20.0, 7.0.0-31-generic, x86_64: installed
+esperanto/0.20.0, 7.0.0-34-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-100-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-101-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-106-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-107-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-110-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-111-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-117-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-124-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-134-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-136-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-137-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-138-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-139-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-87-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-88-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-90-generic, x86_64: installed
+et-soc1/0.20.0, 6.8.0-94-generic, x86_64: installed
+et-soc1/0.20.0, 7.0.0-30-generic, x86_64: installed
+et-soc1/0.20.0, 7.0.0-31-generic, x86_64: installed
+et-soc1/0.20.0, 7.0.0-34-generic, x86_64: installed
+
+### 2026-09-25 15:01:05 PDT $ ps -eo pid,etime,args | grep -i "Runner.Worker" | grep -v -e grep -e "pgrep" -e "bash -c"; systemctl stop actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1.service; systemctl is-active actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1.service
+inactive
+
+### 2026-09-25 15:01:06 PDT $ B=/root/et-soc1-fix-20260925; mkdir -p $B && echo $B; dkms status > $B/dkms-status.before; modinfo et_soc1 > $B/modinfo.before; for k in 7.0.0-30-generic 7.0.0-31-generic 7.0.0-34-generic; do cp -a /lib/modules/$k/updates/dkms/et-soc1.ko.zst $B/et-soc1.ko.zst.$k && echo "backed up $k"; done; cp -a /etc/modules-load.d $B/modules-load.d.before; ls -la $B; du -sh $B
+/root/et-soc1-fix-20260925
+backed up 7.0.0-30-generic
+backed up 7.0.0-31-generic
+backed up 7.0.0-34-generic
+total 20
+drwxr-xr-x  3 root root     8 Sep 25 15:01 .
+drwx------ 20 root root    29 Sep 25 15:01 ..
+-rw-r--r--  1 root root  2361 Sep 25 15:01 dkms-status.before
+-rw-r--r--  1 root root 53702 Aug 21 06:10 et-soc1.ko.zst.7.0.0-30-generic
+-rw-r--r--  1 root root 53734 Sep  5 06:49 et-soc1.ko.zst.7.0.0-31-generic
+-rw-r--r--  1 root root 53741 Sep 24 06:08 et-soc1.ko.zst.7.0.0-34-generic
+-rw-r--r--  1 root root  1460 Sep 25 15:01 modinfo.before
+drwxr-xr-x  2 root root     4 Aug 11 06:31 modules-load.d.before
+13K	/root/et-soc1-fix-20260925
+
+### 2026-09-25 15:01:17 PDT $ B=/root/et-soc1-fix-20260925; sed -n 4,5p /usr/src/et-soc1-0.20.0/Makefile; dkms remove et-soc1/0.20.0 --all 2>&1 | tail -5; mv /usr/src/et-soc1-0.20.0 $B/et-soc1-0.20.0.09531e5c1 && mkdir /usr/src/et-soc1-0.20.0 && git -C /usr/src/et-platform archive 353f20e et-driver | tar -x --strip-components=1 -C /usr/src/et-soc1-0.20.0; echo "--- new source:"; sed -n 4,5p /usr/src/et-soc1-0.20.0/Makefile; cat /usr/src/et-soc1-0.20.0/VERSION 2>/dev/null; grep -n "PACKAGE_VERSION\|BUILT_MODULE_NAME\|PACKAGE_NAME" /usr/src/et-soc1-0.20.0/dkms.conf; lsmod | grep et_soc1; df -h / | tail -1
+ET_MODULE_VERSION=$(shell cat VERSION)
+CFLAGS_MODULE+=-DET_MODULE_VERSION=\"$(ET_MODULE_VERSION=)\"
+ - Original module
+   - No original module was found for this module on this kernel.
+   - Use the dkms install command to reinstall any previous module version.
+depmod...
+Deleting module et-soc1-0.20.0 completely from the DKMS tree.
+--- new source:
+ET_MODULE_VERSION := $(or $(shell cat VERSION 2>/dev/null), $(shell cat $(src)/VERSION 2>/dev/null), unknown)
+CFLAGS_MODULE+=-DET_MODULE_VERSION=\"$(ET_MODULE_VERSION)\"
+0.20.0
+1:PACKAGE_NAME="et-soc1"
+2:PACKAGE_VERSION="0.20.0"
+3:BUILT_MODULE_NAME="et-soc1"
+et_soc1               143360  0
+rpool/ROOT/ubuntu_jleyxm   15G   15G  155M  99% /
+
+### 2026-09-25 15:01:34 PDT $ dkms add et-soc1/0.20.0 2>&1 | tail -2; for k in 7.0.0-30-generic 7.0.0-31-generic 7.0.0-34-generic; do echo "== $k"; nice dkms install et-soc1/0.20.0 -k $k 2>&1 | tail -4; done; df -h / | tail -1
+Creating symlink /var/lib/dkms/et-soc1/0.20.0/source -> /usr/src/et-soc1-0.20.0
+== 7.0.0-30-generic
+   - Installing to /lib/modules/7.0.0-30-generic/updates/dkms/
+
+Running the post_install script:
+depmod...
+== 7.0.0-31-generic
+   - Installing to /lib/modules/7.0.0-31-generic/updates/dkms/
+
+Running the post_install script:
+depmod...
+== 7.0.0-34-generic
+   - Installing to /lib/modules/7.0.0-34-generic/updates/dkms/
+
+Running the post_install script:
+depmod...
+rpool/ROOT/ubuntu_jleyxm   15G   15G  154M  99% /
+
+### 2026-09-25 15:01:50 PDT $ for k in 7.0.0-30-generic 7.0.0-31-generic 7.0.0-34-generic; do echo "$k [$(modinfo -k $k -F version et_soc1)] $(modinfo -k $k -F srcversion et_soc1) $(modinfo -k $k -F filename et_soc1)"; done
+7.0.0-30-generic [0.20.0] 47D26A305A0428B29FB7FC4 /lib/modules/7.0.0-30-generic/updates/dkms/et-soc1.ko.zst
+7.0.0-31-generic [0.20.0] 47D26A305A0428B29FB7FC4 /lib/modules/7.0.0-31-generic/updates/dkms/et-soc1.ko.zst
+7.0.0-34-generic [0.20.0] 47D26A305A0428B29FB7FC4 /lib/modules/7.0.0-34-generic/updates/dkms/et-soc1.ko.zst
+
+### 2026-09-25 15:01:59 PDT $ fuser -v /dev/et0_* /dev/et1_* 2>&1; echo "fuser rc=$? (1 = nobody)"; cat /sys/module/et_soc1/refcnt; T0=$(date +%s); modprobe -r et_soc1 && echo "removed" && modprobe et_soc1 && echo "loaded" && udevadm settle; sleep 3; ls -l /dev/et*; printf "version: [%s]\n" "$(cat /sys/module/et_soc1/version)"; cat /sys/module/et_soc1/srcversion; journalctl -k --since "@$T0" --no-pager 2>/dev/null | grep -v -i "AER\|pcieport\|RxErr\|corrected\|device \[\|error status\|error mask\|\[ 0\]" | tail -30
+fuser rc=1 (1 = nobody)
+0
+removed
+loaded
+crw-rw-rw- 1 root root 10, 263 Sep 25 15:01 /dev/et0_mgmt
+crw-rw-rw- 1 root root 10, 264 Sep 25 15:01 /dev/et0_ops
+crw-rw-rw- 1 root root 10, 265 Sep 25 15:01 /dev/et1_mgmt
+crw-rw-rw- 1 root root 10, 266 Sep 25 15:02 /dev/et1_ops
+version: [0.20.0]
+47D26A305A0428B29FB7FC4
+Sep 25 15:01:59 aifoundry1 kernel: ET 0000:01:00.0: added peer-to-peer DMA memory 0x6801800000-0x6ffbdfffff
+Sep 25 15:02:00 aifoundry1 kernel: ET 0000:02:00.0: added peer-to-peer DMA memory 0x6001800000-0x63fbdfffff
+Sep 25 15:02:00 aifoundry1 kernel: ET 0000:02:00.0: peer-to-peer DMA not supported with 0000:01:00.0
+
+### 2026-09-25 15:02:17 PDT (as yaroslavvb) $ cat /sys/module/et_soc1/version /sys/bus/pci/devices/0000:01:00.0/driver/module/version /sys/bus/pci/devices/0000:02:00.0/driver/module/version /sys/module/et_soc1/srcversion; modinfo -k 7.0.0-34-generic -F version et_soc1; modinfo -k 7.0.0-30-generic -F version et_soc1
+0.20.0
+0.20.0
+0.20.0
+47D26A305A0428B29FB7FC4
+0.20.0
+0.20.0
+
+### 2026-09-25 15:02:17 PDT (as yaroslavvb) $ cd /tmp && for n in 0 1; do echo "== card $n"; timeout 10 /opt/et/bin/dev_mngt_service -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS -n $n -u 5000 2>&1 | grep -E "verifyService|succeeded|failed|compatib|bad state|Exception|FATAL" | sed "s/.*verifyService:[0-9]*\]//; s/.*runService:[0-9]*\]//"; done; rm -f /tmp/dev0_traces.txt; cat /sys/bus/pci/devices/0000:0{1,2}:00.0/mgmt_vq_stats/msg_count 2>&1
+== card 0
+	ET [DEV_MNGT_SERVICE][TH:128705922125440]: Service request succeeded
+	ET [DEV_MNGT_SERVICE][TH:128705922125440]: Firmware release revision: Major: 1 Minor: 4 Revision: 1
+	ET [DEV_MNGT_SERVICE][TH:128705922125440]: BL1 Firmware versions: Major: 0 Minor: 21 Revision: 2
+	ET [DEV_MNGT_SERVICE][TH:128705922125440]: BL2 Firmware versions: Major: 0 Minor: 21 Revision: 2
+	ET [DEV_MNGT_SERVICE][TH:128705922125440]: PMIC Firmware versions: Major: 1 Minor: 6 Revision: 1
+	ET [DEV_MNGT_SERVICE][TH:128705922125440]: Master Minion Firmware versions: Major: 0 Minor: 24 Revision: 0
+	ET [DEV_MNGT_SERVICE][TH:128705922125440]: Worker Minion versions: Major: 0 Minor: 24 Revision: 0
+	ET [DEV_MNGT_SERVICE][TH:128705922125440]: Machine Minion versions: Major: 0 Minor: 24 Revision: 0
+== card 1
+	ET [DEV_MNGT_SERVICE][TH:131663993114240]: Service request succeeded
+	ET [DEV_MNGT_SERVICE][TH:131663993114240]: Firmware release revision: Major: 1 Minor: 2 Revision: 0
+	ET [DEV_MNGT_SERVICE][TH:131663993114240]: BL1 Firmware versions: Major: 0 Minor: 18 Revision: 0
+	ET [DEV_MNGT_SERVICE][TH:131663993114240]: BL2 Firmware versions: Major: 0 Minor: 18 Revision: 0
+	ET [DEV_MNGT_SERVICE][TH:131663993114240]: PMIC Firmware versions: Major: 1 Minor: 3 Revision: 0
+	ET [DEV_MNGT_SERVICE][TH:131663993114240]: Master Minion Firmware versions: Major: 0 Minor: 22 Revision: 0
+	ET [DEV_MNGT_SERVICE][TH:131663993114240]: Worker Minion versions: Major: 0 Minor: 22 Revision: 0
+	ET [DEV_MNGT_SERVICE][TH:131663993114240]: Machine Minion versions: Major: 0 Minor: 22 Revision: 0
+SQ0:                    1 msg(s)
+CQ0:                    1 msg(s)
+SQ0:                    1 msg(s)
+CQ0:                    1 msg(s)
+
+### 2026-09-25 15:02:34 PDT $ systemctl cat actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1.service 2>/dev/null | grep -E "ExecStart|WorkingDirectory|User="; D=$(systemctl show -p WorkingDirectory --value actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1.service); echo "workdir=$D"; ls $D/_work 2>/dev/null | head; grep -rIl -E "dkms|insmod|modprobe|rmmod|et-driver|et_soc1" $D/_work --include=*.yml --include=*.yaml --include=*.sh --include=Makefile 2>/dev/null | head -10
+ExecStart=/root/actions-runner-hf-hackathon/runsvc.sh
+User=
+WorkingDirectory=/root/actions-runner-hf-hackathon
+workdir=/root/actions-runner-hf-hackathon
+_actions
+hf-hackathon
+_PipelineMapping
+_temp
+_tool
+_update
+_update.sh
+
+### 2026-09-25 15:02:41 PDT $ D=/root/actions-runner-hf-hackathon/_work; ls $D/hf-hackathon; find $D/hf-hackathon -maxdepth 4 -path "*/.github/workflows/*" | head; grep -rIn -E "dkms|insmod|modprobe|rmmod|et-driver" $D/hf-hackathon --include=*.yml --include=*.yaml 2>/dev/null | head -10; echo "grep rc=$?"
+hf-hackathon
+/root/actions-runner-hf-hackathon/_work/hf-hackathon/hf-hackathon/.github/workflows/benchmark-board.yml
+/root/actions-runner-hf-hackathon/_work/hf-hackathon/hf-hackathon/.github/workflows/sync-huggingface.yml
+/root/actions-runner-hf-hackathon/_work/hf-hackathon/hf-hackathon/.github/workflows/benchmark.yml
+grep rc=0
+
+### 2026-09-25 15:02:41 PDT $ echo et_soc1 > /etc/modules-load.d/et_soc1.conf && cat /etc/modules-load.d/et_soc1.conf; systemctl start actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1.service; sleep 3; systemctl is-active actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1.service
+et_soc1
+active
+
+### 2026-09-25 15:02:52 PDT $ zpool list 2>&1; zfs list -o name,used,avail,refer,mountpoint 2>&1 | head -30
+NAME    SIZE  ALLOC   FREE  CKPOINT  EXPANDSZ   FRAG    CAP  DEDUP    HEALTH  ALTROOT
+bpool  1.88G   237M  1.64G        -         -     9%    12%  1.00x    ONLINE  -
+rpool   452G   438G  14.1G        -         -    67%    96%  1.00x    ONLINE  -
+NAME                                               USED  AVAIL  REFER  MOUNTPOINT
+bpool                                              236M  1.52G    96K  /boot
+bpool/BOOT                                         235M  1.52G   104K  none
+bpool/BOOT/ubuntu_jleyxm                           235M  1.52G   235M  /boot
+rpool                                              442G   155M    96K  /
+rpool/ROOT                                        24.7G   155M    96K  none
+rpool/ROOT/ubuntu_jleyxm                          24.7G   155M  14.5G  /
+rpool/ROOT/ubuntu_jleyxm/srv                        96K   155M    96K  /srv
+rpool/ROOT/ubuntu_jleyxm/usr                      2.61M   155M    96K  /usr
+rpool/ROOT/ubuntu_jleyxm/usr/local                2.51M   155M  2.51M  /usr/local
+rpool/ROOT/ubuntu_jleyxm/var                      10.3G   155M    96K  /var
+rpool/ROOT/ubuntu_jleyxm/var/games                  96K   155M    96K  /var/games
+rpool/ROOT/ubuntu_jleyxm/var/lib                  10.0G   155M  9.90G  /var/lib
+rpool/ROOT/ubuntu_jleyxm/var/lib/AccountsService    96K   155M    96K  /var/lib/AccountsService
+rpool/ROOT/ubuntu_jleyxm/var/lib/NetworkManager    172K   155M   172K  /var/lib/NetworkManager
+rpool/ROOT/ubuntu_jleyxm/var/lib/apt              93.3M   155M  93.3M  /var/lib/apt
+rpool/ROOT/ubuntu_jleyxm/var/lib/dpkg             45.3M   155M  45.3M  /var/lib/dpkg
+rpool/ROOT/ubuntu_jleyxm/var/log                   258M   155M   258M  /var/log
+rpool/ROOT/ubuntu_jleyxm/var/mail                   96K   155M    96K  /var/mail
+rpool/ROOT/ubuntu_jleyxm/var/snap                 2.46M   155M  2.46M  /var/snap
+rpool/ROOT/ubuntu_jleyxm/var/spool                 140K   155M   140K  /var/spool
+rpool/ROOT/ubuntu_jleyxm/var/www                    96K   155M    96K  /var/www
+rpool/USERDATA                                     417G   155M    96K  none
+rpool/USERDATA/home_2t5qyu                         392G   155M   392G  /home
+rpool/USERDATA/root_2t5qyu                        25.0G   155M  25.0G  /root
+
+### 2026-09-25 15:02:52 PDT $ journalctl --disk-usage; du -sh /var/log /var/cache/apt /var/lib/snapd /var/tmp /tmp /var/lib/docker /opt 2>/dev/null; du -xsh /root/* /root/.[a-z]* 2>/dev/null | sort -h | tail -12; tail -30 /var/log/apt/term.log | grep -i -E "no space|error|fail|E:" | head
+Archived and active journals take up 164.9M in the file system.
+259M	/var/log
+281M	/var/cache/apt
+5.9G	/var/lib/snapd
+49K	/var/tmp
+5.6M	/tmp
+4.2G	/var/lib/docker
+2.1G	/opt
+805K	/root/snap
+936K	/root/.local
+987K	/root/driver_old
+6.1M	/root/et-soc1-fix-20260925
+72M	/root/.warp
+149M	/root/saqib_experiments
+570M	/root/.vscode-server
+672M	/root/src
+898M	/root/martin_experiments
+1.7G	/root/actions-runner-hf-hackathon
+9.8G	/root/et-jobs-deploy
+12G	/root/.cache
+
+### 2026-09-25 15:03:10 PDT $ apt-get clean && echo "apt cache cleaned"; journalctl --vacuum-size=50M 2>&1 | tail -2; df -h / | tail -1; echo "--- disabled snap revisions:"; snap list --all 2>/dev/null | awk "/disabled/{print \$1, \$3}"
+apt cache cleaned
+Deleted archived journal /var/log/journal/ce1dc3a99c6a471bb3632d06762df12a/system@196f27d199f345e7bffc354f3677a92c-0000000000ec1df7-00065c3ffff9431a.journal (4.4M).
+Vacuuming done, freed 118.4M of archived journals from /var/log/journal/ce1dc3a99c6a471bb3632d06762df12a.
+rpool/ROOT/ubuntu_jleyxm   15G   15G  155M  99% /
+--- disabled snap revisions:
+core22 2437
+core24 1643
+firefox 8863
+firmware-updater 224
+gnome-42-2204 247
+gnome-46-2404 153
+mesa-2404 1165
+snap-store 1419
+snapd 27710
+snapd-desktop-integration 387
+
+### 2026-09-25 15:03:19 PDT $ sync; zpool sync rpool 2>/dev/null; zfs list -o name,used,avail rpool rpool/ROOT/ubuntu_jleyxm/var/log; zpool list -o name,size,alloc,free rpool; echo "--- snapshots:"; zfs list -t snapshot -o name,used,creation -s creation 2>/dev/null | tail -12; zfs list -t snapshot -H -o used 2>/dev/null | wc -l
+NAME                               USED  AVAIL
+rpool                              442G   553M
+rpool/ROOT/ubuntu_jleyxm/var/log   140M   553M
+NAME    SIZE  ALLOC   FREE
+rpool   452G   437G  14.5G
+--- snapshots:
+0
+
+### 2026-09-25 15:03:27 PDT $ snap list --all | awk "/disabled/{print \$1, \$3}" | while read n rev; do snap remove "$n" --revision="$rev" 2>&1 | tail -1; done; sync; zpool sync rpool; zfs list -o name,avail rpool
+core22 (revision 2437) removed
+core24 (revision 1643) removed
+firefox (revision 8863) removed
+firmware-updater (revision 224) removed
+gnome-42-2204 (revision 247) removed
+gnome-46-2404 (revision 153) removed
+mesa-2404 (revision 1165) removed
+snap-store (revision 1419) removed
+snapd (revision 27710) removed
+snapd-desktop-integration (revision 387) removed
+NAME   AVAIL
+rpool   554M
+
+### 2026-09-25 15:03:40 PDT $ dpkg -l | awk "\$1 !~ /^ii/ && NR>5" | head; ls /var/lib/dpkg/updates | head; ls -l /boot/initrd.img* /boot/vmlinuz* 2>&1
+rc  linux-image-6.14.0-29-generic                 6.14.0-29.29~24.04.1                     amd64        Signed kernel image generic
+rc  linux-image-6.14.0-32-generic                 6.14.0-32.32~24.04.1                     amd64        Signed kernel image generic
+rc  linux-image-6.14.0-33-generic                 6.14.0-33.33~24.04.1                     amd64        Signed kernel image generic
+rc  linux-image-6.14.0-34-generic                 6.14.0-34.34~24.04.1                     amd64        Signed kernel image generic
+rc  linux-image-6.14.0-35-generic                 6.14.0-35.35~24.04.1                     amd64        Signed kernel image generic
+rc  linux-image-6.14.0-36-generic                 6.14.0-36.36~24.04.1                     amd64        Signed kernel image generic
+rc  linux-image-6.14.0-37-generic                 6.14.0-37.37~24.04.1                     amd64        Signed kernel image generic
+rc  linux-image-6.17.0-14-generic                 6.17.0-14.14~24.04.1                     amd64        Signed kernel image generic
+rc  linux-image-6.17.0-19-generic                 6.17.0-19.19~24.04.2                     amd64        Signed kernel image generic
+rc  linux-image-6.17.0-20-generic                 6.17.0-20.20~24.04.1                     amd64        Signed kernel image generic
+0000
+0001
+0002
+0003
+0004
+0005
+0006
+0007
+0008
+0009
+lrwxrwxrwx 1 root root       27 Sep 24 06:08 /boot/initrd.img -> initrd.img-7.0.0-34-generic
+-rw-r--r-- 1 root root 89733454 Sep  1 06:06 /boot/initrd.img-7.0.0-30-generic
+-rw-r--r-- 1 root root 89768337 Sep  5 06:49 /boot/initrd.img-7.0.0-31-generic
+lrwxrwxrwx 1 root root       27 Sep 24 06:08 /boot/initrd.img.old -> initrd.img-7.0.0-31-generic
+lrwxrwxrwx 1 root root       24 Sep 24 06:08 /boot/vmlinuz -> vmlinuz-7.0.0-34-generic
+-rw------- 1 root root 17000840 Aug  7 04:52 /boot/vmlinuz-7.0.0-30-generic
+-rw------- 1 root root 16992648 Aug 10 01:08 /boot/vmlinuz-7.0.0-31-generic
+-rw------- 1 root root 17009032 Sep  4 07:36 /boot/vmlinuz-7.0.0-34-generic
+lrwxrwxrwx 1 root root       24 Sep 24 06:08 /boot/vmlinuz.old -> vmlinuz-7.0.0-31-generic
+
+### 2026-09-25 15:03:40 PDT $ DEBIAN_FRONTEND=noninteractive dpkg --configure -a > /root/et-soc1-fix-20260925/dpkg-configure.log 2>&1; echo "dpkg rc=$?"; tail -25 /root/et-soc1-fix-20260925/dpkg-configure.log
+dpkg rc=0
+Processing triggers for linux-image-7.0.0-34-generic (7.0.0-34.34~24.04.1) ...
+/etc/kernel/postinst.d/dkms:
+ * dkms: running auto installation service for kernel 7.0.0-34-generic
+ * dkms: autoinstall for kernel 7.0.0-34-generic
+   ...done.
+/etc/kernel/postinst.d/initramfs-tools:
+update-initramfs: Generating /boot/initrd.img-7.0.0-34-generic
+I: The initramfs will attempt to resume from /dev/nvme0n1p3
+I: (UUID=0cd7071e-7f2f-4acc-9819-9cd2c1180750)
+I: Set the RESUME variable to override this.
+/etc/kernel/postinst.d/zz-update-grub:
+Sourcing file `/etc/default/grub'
+Generating grub configuration file ...
+Found linux image: vmlinuz-7.0.0-34-generic in rpool/ROOT/ubuntu_jleyxm
+Found initrd image: initrd.img-7.0.0-34-generic in rpool/ROOT/ubuntu_jleyxm
+Found linux image: vmlinuz-7.0.0-31-generic in rpool/ROOT/ubuntu_jleyxm
+Found initrd image: initrd.img-7.0.0-31-generic in rpool/ROOT/ubuntu_jleyxm
+Found linux image: vmlinuz-7.0.0-30-generic in rpool/ROOT/ubuntu_jleyxm
+Found initrd image: initrd.img-7.0.0-30-generic in rpool/ROOT/ubuntu_jleyxm
+Found memtest86+ 64bit EFI image: /BOOT/ubuntu_jleyxm@/memtest86+x64.efi
+Warning: os-prober will not be executed to detect other bootable partitions.
+Systems on them will not be added to the GRUB boot configuration.
+Check GRUB_DISABLE_OS_PROBER documentation entry.
+Adding boot menu entry for UEFI Firmware Settings ...
+done
+
+### 2026-09-25 15:03:58 PDT $ dpkg -l linux-image-7.0.0-34-generic linux-modules-7.0.0-34-generic 2>/dev/null | tail -2 | cut -c1-80; ls /var/lib/dpkg/updates | wc -l; ls -l /boot/initrd.img-7.0.0-34-generic; lsinitramfs /boot/initrd.img-7.0.0-34-generic | grep -c -E "zfs.ko|/zfs$|zpool"; grep -m3 "menuentry .Ubuntu\|linux.*vmlinuz" /boot/grub/grub.cfg | cut -c1-120; ls -la --time-style=+%F\ %T /boot/grub/grub.cfg; echo "et_soc1 for 7.0.0-34: [$(modinfo -k 7.0.0-34-generic -F version et_soc1)] $(modinfo -k 7.0.0-34-generic -F srcversion et_soc1)"; apt-get check 2>&1 | tail -2; zfs list -o name,avail rpool; dkms status et-soc1
+ii  linux-image-7.0.0-34-generic   7.0.0-34.34~24.04.1 amd64        Signed kerne
+ii  linux-modules-7.0.0-34-generic 7.0.0-34.34~24.04.1 amd64        Linux kernel
+0
+-rw-r--r-- 1 root root 89800778 Sep 25 15:03 /boot/initrd.img-7.0.0-34-generic
+53
+menuentry 'Ubuntu 24.04.3 LTS' --class ubuntu --class gnu-linux --class gnu --class os ${menuentry_id_option} 'gnulinux-
+	linux	"/BOOT/ubuntu_jleyxm@/vmlinuz-7.0.0-34-generic" root=ZFS="rpool/ROOT/ubuntu_jleyxm" ro quiet splash ${vt_handoff}
+	menuentry 'Ubuntu 24.04.3 LTS, with Linux 7.0.0-34-generic' --class ubuntu --class gnu-linux --class gnu --class os ${m
+-rw------- 1 root root 12730 2026-09-25 15:03:49 /boot/grub/grub.cfg
+et_soc1 for 7.0.0-34: [0.20.0] 47D26A305A0428B29FB7FC4
+Building dependency tree...
+Reading state information...
+NAME   AVAIL
+rpool   553M
+et-soc1/0.20.0, 7.0.0-30-generic, x86_64: installed
+et-soc1/0.20.0, 7.0.0-31-generic, x86_64: installed
+et-soc1/0.20.0, 7.0.0-34-generic, x86_64: installed
+
