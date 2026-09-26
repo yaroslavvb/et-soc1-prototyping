@@ -266,7 +266,12 @@ numbers in 05, the request in 02, and any published artifact in 04 and MIRROR.md
    data JSON for the source-built pages; the prose in the HTML for the standalone pages. Every page's source and
    final build command are in [MIRROR.md](docs/reports/MIRROR.md#how-each-page-is-built).
 2. **Build** with `python3 scripts/build-report.py <name> <data.json> <page.html>` (needs `npm ci` once for the
-   build-time math), or the page's `--embed` script and then `python3 scripts/paste-chartkit.py PAGE`.
+   build-time math), or the page's `--embed` script and then `python3 scripts/paste-chartkit.py PAGE`. Charts use
+   the toolkit's card registry (`CK.card`, `CK.cardsIn`, `CK.cardSeg`, `CK.pick`): take the cards from the data,
+   never hard-code two, so a new card appears when its data does. `CK.sortTable` makes a table sortable.
+   Changing many pages at once (26 September's visualization pass): work in a `git worktree` on a branch, so main
+   keeps matching the live pages, then merge, deploy every changed page and run `check-mirror.py` together; with
+   several agents in one worktree, commit named files only (`commit -a` sweeps up the others' half-done edits).
 3. **Check** with `docs/reports/data/2026-09-24-report-review/tools/check_page.sh PAGE` (JS errors, empty fields,
    sideways overflow, anchors; at 1280 and 390 px; `DARK=1` and `DARK=os` for the dark themes). It looks for
    Playwright's `chromium_headless_shell-1243` under `~/.cache/ms-playwright`; on another machine set
