@@ -30,7 +30,7 @@ What was built (commits `be72084`–`7f0e7d2` on the `pages-v3` branch, merged i
   11. Memory anatomy: a physical-address decoder.
   12. Memory hierarchy: energy per byte by level, per card (`analyze.py --embed` adds `energy_levels`).
 - Also: the hot line's energy per operation charted, busy drift per card on the power page, and sortable tables on
-  the long data tables of eleven pages.
+  the long data tables of nine pages.
 
 **Checks.** Every page passes `docs/reports/data/2026-09-24-report-review/tools/check_page.sh` at 1280 and 390 px in
 light and dark (no JS errors, no text under 11 px, no low-contrast text, every chart keyboard-reachable), and a

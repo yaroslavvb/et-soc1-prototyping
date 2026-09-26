@@ -104,7 +104,7 @@ None has an A-number yet.
 
 ## The visualization pass (26 September)
 
-Charts and controls added to 16 pages, with the toolkit's card registry and sortable tables; every new chart takes
+Charts and controls added to 13 pages (and a link on the L2 brief), with the toolkit's card registry and sortable tables; every new chart takes
 its cards from the data, ready for the version-3 campaign's third card. What was built, how it was checked, and one
 error caught in review: [`docs/reports/data/2026-09-26-visualization-pass/`](../reports/data/2026-09-26-visualization-pass/README.md).
 No number on any page changed. Build commands are unchanged: `workloads/memhier/analyze.py --embed` now also embeds
