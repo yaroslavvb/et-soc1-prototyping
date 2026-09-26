@@ -138,6 +138,18 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 .ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
 .ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-sortable th[aria-sort] { padding: 0; }
+.ck-sortable th .ck-sort { font: inherit; font-weight: inherit; color: inherit; text-align: inherit; background: none; border: 0;
+  width: 100%; min-height: 32px; padding: inherit; padding: 6px 8px; cursor: pointer; }
+.ck-sortable th .ck-sort::after { content: ' \2195'; color: var(--muted); font-weight: 400; }
+.ck-sortable th[aria-sort="ascending"] .ck-sort::after { content: ' \2191'; color: var(--ink); }
+.ck-sortable th[aria-sort="descending"] .ck-sort::after { content: ' \2193'; color: var(--ink); }
+.ck-sortable th .ck-sort:focus-visible { outline: 2px solid var(--c1); outline-offset: -2px; }
+.ck-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 8px 0 6px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-filter input { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 8px; padding: 4px 8px; min-height: 32px; width: min(260px, 100%); }
+.ck-filter input:focus-visible { outline: 2px solid var(--c1); outline-offset: 1px; }
+.ck-filter-n { color: var(--muted); font-variant-numeric: tabular-nums; }
 /* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
    letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
 th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
