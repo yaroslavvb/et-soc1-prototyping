@@ -55,6 +55,16 @@ memory — 64-byte-strided loads over a private slice, either of their shire's s
 other 31 shires hammer a line that lives in that same shire cache. The baseline is the identical loop with
 nobody else launched.</p>
 
+<div id="inside-the-host-shire">
+<p>Inside the host shire, in three steps. Each step sets the <i>N</i> and <i>P</i> of section 3's sliders, and
+moving those sliders sets this drawing.</p>
+<div class="chart-title">Inside the host shire: its own loads and the remote atomics meet at one bank</div>
+<div class="ck-controls"><div id="starvestep"></div><div id="starvemotion"></div></div>
+<div class="chart" id="starve"></div>
+<div id="starveout"></div>
+<p class="small" id="starvecap"></p>
+</div>
+
 <div class="table-wrap"><table id="localtab"></table></div>
 
 <p><b>These are not slow-downs, they are stops.</b> The host shire's count is the same number whether the
@@ -149,6 +159,11 @@ column adds the 23 September passes on both cards:</p>
 slightly from the placement table's above (1,919 against 1,920 million a second). The last column pools this
 session with the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#synchronisation">energy
 manual</a>'s 23 September passes: <span id="pooln"></span>. <span id="pooltop"></span></p>
+
+<div class="chart-title">The last column drawn: energy per operation over every pass, one contended line against the same atomic spread over 32</div>
+<div id="nrglegend"></div>
+<div class="chart" id="nrg"></div>
+<p class="small" id="nrgcap"></p>
 
 <p>A thousand minions stalled on a saturated line cost the card <span id="hlw"></span>, which is the clearest
 possible statement that waiting is cheap and the loss is throughput, not power. Per operation the contended line

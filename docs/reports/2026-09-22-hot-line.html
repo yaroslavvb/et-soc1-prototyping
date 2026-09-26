@@ -138,6 +138,18 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 .ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
 .ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-sortable th[aria-sort] { padding: 0; }
+.ck-sortable th .ck-sort { font: inherit; font-weight: inherit; color: inherit; text-align: inherit; background: none; border: 0;
+  width: 100%; min-height: 32px; padding: inherit; padding: 6px 8px; cursor: pointer; }
+.ck-sortable th .ck-sort::after { content: ' \2195'; color: var(--muted); font-weight: 400; }
+.ck-sortable th[aria-sort="ascending"] .ck-sort::after { content: ' \2191'; color: var(--ink); }
+.ck-sortable th[aria-sort="descending"] .ck-sort::after { content: ' \2193'; color: var(--ink); }
+.ck-sortable th .ck-sort:focus-visible { outline: 2px solid var(--c1); outline-offset: -2px; }
+.ck-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 8px 0 6px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-filter input { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 8px; padding: 4px 8px; min-height: 32px; width: min(260px, 100%); }
+.ck-filter input:focus-visible { outline: 2px solid var(--c1); outline-offset: 1px; }
+.ck-filter-n { color: var(--muted); font-variant-numeric: tabular-nums; }
 /* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
    letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
 th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
@@ -214,6 +226,16 @@ digits shown.</p>
 memory — 64-byte-strided loads over a private slice, either of their shire's scratchpad or of DRAM — while the
 other 31 shires hammer a line that lives in that same shire cache. The baseline is the identical loop with
 nobody else launched.</p>
+
+<div id="inside-the-host-shire">
+<p>Inside the host shire, in three steps. Each step sets the <i>N</i> and <i>P</i> of section 3's sliders, and
+moving those sliders sets this drawing.</p>
+<div class="chart-title">Inside the host shire: its own loads and the remote atomics meet at one bank</div>
+<div class="ck-controls"><div id="starvestep"></div><div id="starvemotion"></div></div>
+<div class="chart" id="starve"></div>
+<div id="starveout"></div>
+<p class="small" id="starvecap"></p>
+</div>
 
 <div class="table-wrap"><table id="localtab"></table></div>
 
@@ -309,6 +331,11 @@ column adds the 23 September passes on both cards:</p>
 slightly from the placement table's above (1,919 against 1,920 million a second). The last column pools this
 session with the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#synchronisation">energy
 manual</a>'s 23 September passes: <span id="pooln"></span>. <span id="pooltop"></span></p>
+
+<div class="chart-title">The last column drawn: energy per operation over every pass, one contended line against the same atomic spread over 32</div>
+<div id="nrglegend"></div>
+<div class="chart" id="nrg"></div>
+<p class="small" id="nrgcap"></p>
 
 <p>A thousand minions stalled on a saturated line cost the card <span id="hlw"></span>, which is the clearest
 possible statement that waiting is cheap and the loss is throughput, not power. Per operation the contended line
@@ -432,7 +459,9 @@ reading of <code>l3_yield</code> as the lever did not hold.</li>
    Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
    --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
    API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
-   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame. Every mark with a tooltip is reachable from the keyboard. */
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame.
+   Added 26 Sep 2026: sortTable (sortable, filterable tables) and the card registry (cards, card, cardsIn, cardSeg,
+   pick, cardMark, cardLegend): aifoundry2 --c1 dot, aifoundry3 --c2 ring, aifoundry1-c1 --c3 diamond, all cards --ink. Every mark with a tooltip is reachable from the keyboard. */
 window.CK = (function () {
   'use strict';
   const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
@@ -678,10 +707,11 @@ window.CK = (function () {
     const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
     const m = it.mark || 'box';
     const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'diamond' ? el('polygon', {points: '9,0 14,5 9,10 4,5'}, s)
       : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
-    if (m === 'dot' || m === 'box') e.style.fill = c;
+    if (m === 'dot' || m === 'box' || m === 'diamond') e.style.fill = c;
     else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
-    if (m === 'dash') e.style.strokeDasharray = '4 3';
+    if (it.dash) e.style.strokeDasharray = it.dash; else if (m === 'dash') e.style.strokeDasharray = '4 3';
     return s;
   }
   function legend(hostEl, items, o) {
@@ -743,6 +773,7 @@ window.CK = (function () {
     }
     h.appendChild(g); set(api.value, false);
     api.set = v => set(v, true);
+    api.quiet = v => set(v, false);  // show v as selected without calling onChange
     return api;
   }
   function range(hostEl, o) {
@@ -777,6 +808,124 @@ window.CK = (function () {
     return t;
   }
 
+  /* ---- cards: one registry for every page (fixed colour, mark and label per card), a shared card selector and a picker
+     for values shaped {mean, se, n, per_card: {<card>: {mean, se, n}}}. aifoundry1-c0 is kept for old data only: it is
+     excluded from the version-3 campaign (amendment A4) and never offered by cardSeg unless a page passes it. ---- */
+  const CARDS = [
+    {id: 'aifoundry2', short: 'a2', label: 'aifoundry2', color: 'var(--c1)', mark: 'dot'},
+    {id: 'aifoundry3', short: 'a3', label: 'aifoundry3', color: 'var(--c2)', mark: 'ring'},
+    {id: 'aifoundry1-c1', short: 'a1c1', label: 'aifoundry1 card 1', color: 'var(--c3)', mark: 'diamond'},
+    {id: 'aifoundry1-c0', short: 'a1c0', label: 'aifoundry1 card 0', color: 'var(--ref)', mark: 'box'},
+  ];
+  const POOLED = {id: 'pooled', short: 'all', label: 'all cards', color: 'var(--ink)', mark: 'dot'};
+  const cardIndex = {};
+  CARDS.forEach(c => { cardIndex[c.id] = c; cardIndex[c.short] = c; });
+  /* The registry entry for a card id or short name; an unknown card gets --ref and its own name. */
+  function card(id) {
+    if (id === 'pooled' || id === 'all') return POOLED;
+    return cardIndex[id] || {id, short: id, label: id, color: 'var(--ref)', mark: 'box'};
+  }
+  /* The cards present in an object's keys (or a list), in registry order, then any others in their order. */
+  function cardsIn(keysOrObj) {
+    const ks = Array.isArray(keysOrObj) ? keysOrObj : Object.keys(keysOrObj || {});
+    const norm = ks.map(k => (cardIndex[k] ? cardIndex[k].id : k));
+    return CARDS.map(c => c.id).filter(id => norm.includes(id)).concat(norm.filter(k => !cardIndex[k]));
+  }
+  /* A card selector on bus('card'): options are o.cards (default: every registered card but aifoundry1-c0), with
+     "all cards" first when o.pooled. Every cardSeg on a page follows the others. */
+  function cardSeg(hostEl, o) {
+    o = o || {};
+    const ids = (o.cards || CARDS.filter(c => c.id !== 'aifoundry1-c0').map(c => c.id)).map(k => card(k).id);
+    const opts = (o.pooled ? [['pooled', o.pooledLabel || POOLED.label]] : []).concat(ids.map(id => [id, card(id).label]));
+    const b = bus(o.bus || 'card');
+    const start = b.value != null && opts.some(x => x[0] === b.value) ? b.value : (o.value || opts[0][0]);
+    const api = seg(hostEl, {label: o.label == null ? 'Card' : o.label, options: opts, value: start,
+      onChange: v => { b.emit(v, api); if (o.onChange) o.onChange(v); }});
+    b.on((v, from) => { if (from !== api && opts.some(x => x[0] === v) && api.value !== v) { api.quiet(v); if (o.onChange) o.onChange(v); } });
+    return api;
+  }
+  /* {mean, se, n, card} of v for a card ('pooled' = v itself), or null when the card has no value (never a zero). */
+  function pick(v, id) {
+    if (v == null) return null;
+    if (typeof v === 'number') return {mean: v, se: null, n: null, card: 'pooled'};
+    const c = id == null || id === 'pooled' || id === 'all' ? null : card(id).id;
+    const src = c == null ? v : (v.per_card || {})[c];
+    if (src == null) return null;
+    const m = typeof src === 'number' ? src : src.mean;
+    if (m == null || !isFinite(m)) return null;
+    return {mean: m, se: typeof src === 'number' ? null : (src.se == null ? null : src.se), n: typeof src === 'number' ? null : (src.n == null ? null : src.n), card: c || 'pooled'};
+  }
+  /* A card's mark at (x, y) in an SVG group: dot, ring, diamond or box, in the card's colour (or colour, if given). */
+  function cardMark(g, id, x, y, r, colour) {
+    const c = Object.assign({}, card(id)), R = r || 4;
+    if (colour) c.color = colour;
+    let e;
+    if (c.mark === 'diamond') e = el('polygon', {points: `${x},${y - R * 1.25} ${x + R * 1.25},${y} ${x},${y + R * 1.25} ${x - R * 1.25},${y}`}, g);
+    else if (c.mark === 'box') e = el('rect', {x: x - R, y: y - R, width: 2 * R, height: 2 * R}, g);
+    else e = el('circle', {cx: x, cy: y, r: c.mark === 'ring' ? R - 0.5 : R}, g);
+    if (c.mark === 'ring') { e.style.fill = 'var(--surface)'; e.style.stroke = c.color; e.style.strokeWidth = '2'; }
+    else e.style.fill = c.color;
+    return e;
+  }
+  /* Legend items for a list of cards (for legend()). */
+  const cardLegend = ids => ids.map(id => { const c = card(id); return {key: c.id, label: c.label, color: c.color, mark: c.mark}; });
+
+  /* ---- a sortable, filterable table: click a header to sort (aria-sort), numbers parsed with the true minus, thin
+     spaces and thousands commas; o.filter adds a text box that hides rows not containing it. Rows keep their DOM
+     nodes, so any listeners on them survive. A header with data-nosort is left alone. ---- */
+  function cellValue(td) {
+    const raw = (td.getAttribute('data-sort') != null ? td.getAttribute('data-sort') : td.textContent).trim();
+    const t = raw.replace(/−/g, '-').replace(/[   ,]/g, '').replace(/^[~≈<>≤≥]\s*/, '');
+    const m = t.match(/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?/i);
+    return m && (t.length === m[0].length || /^[\s%×x°a-zA-Zµ/()]/.test(t.slice(m[0].length))) ? {n: parseFloat(m[0])} : {s: raw.toLowerCase()};
+  }
+  function sortTable(table, o) {
+    o = o || {};
+    const t = $(table), tb = t.tBodies[0], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (!tb || !hr) return null;
+    const orig = [...tb.rows];
+    let col = -1, dir = 0;
+    const heads = [...hr.cells];
+    let k = 0;
+    const colOf = heads.map(h => { const c = k; k += h.colSpan || 1; return c; });
+    heads.forEach((h, i) => {
+      if (h.hasAttribute('data-nosort') || (h.colSpan || 1) > 1) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ck-sort';
+      while (h.firstChild) b.appendChild(h.firstChild);
+      h.appendChild(b); h.setAttribute('aria-sort', 'none');
+      b.addEventListener('click', () => {
+        dir = col === colOf[i] ? (dir === 1 ? -1 : dir === -1 ? 0 : 1) : 1; col = colOf[i];
+        heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none'));
+        if (dir) h.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
+        const rows = dir ? [...orig].sort((a, b2) => {
+          const ca = a.cells[col], cb = b2.cells[col];
+          if (!ca || !cb) return 0;
+          const va = cellValue(ca), vb = cellValue(cb);
+          if (va.n != null && vb.n != null) return dir * (va.n - vb.n);
+          if (va.n != null) return -1;
+          if (vb.n != null) return 1;
+          return dir * va.s.localeCompare(vb.s);
+        }) : orig;
+        rows.forEach(r => tb.appendChild(r));
+      });
+    });
+    if (o.filter) {
+      const w = document.createElement('div'); w.className = 'ck-filter';
+      const id = 'ck-f' + (++uid), lab = document.createElement('label'), inp = document.createElement('input');
+      lab.htmlFor = id; lab.textContent = o.filterLabel || 'Filter rows'; inp.id = id; inp.type = 'search';
+      const cnt = document.createElement('span'); cnt.className = 'ck-filter-n'; cnt.setAttribute('aria-live', 'polite');
+      inp.addEventListener('input', () => {
+        const q = inp.value.trim().toLowerCase(); let n = 0;
+        orig.forEach(r => { const on = !q || r.textContent.toLowerCase().includes(q); r.classList.toggle('ck-hidden', !on); if (on) n++; });
+        cnt.textContent = q ? `${n} of ${orig.length} rows` : '';
+      });
+      w.append(lab, inp, cnt);
+      const ref = t.closest('.wide, .scroll, .ck-table-wrap') || t; ref.parentNode.insertBefore(w, ref);
+    }
+    t.classList.add('ck-sortable');
+    return {table: t, reset() { col = -1; dir = 0; heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none')); orig.forEach(r => tb.appendChild(r)); }};
+  }
+
   /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
   const SERIES = [1, 2, 3, 4, 5, 7];
   const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
@@ -802,7 +951,8 @@ window.CK = (function () {
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
-    stackTable, reduced, ramp, rampInk, color, hide: f => hide(f, true)};
+    stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
 })();
 
 </script>
@@ -1042,8 +1192,12 @@ const RUNS=[...D.requesters.map(r=>({...r,ser:'req'})),...D.pace.map(r=>({...r,s
    `(predicted). ${verdict(x)}${hitTxt}`);
   if(f) f.redraw();
  };
- CK.range('reqN',{label:'Remote minions, N',stops:[1,2,4,8,12,16,20,24,32,64,256,NP],value:N,fmt:n0,onInput:v=>{N=v;upd();}});
- CK.range('reqP',{label:'Pause between atomics, P (cycles)',stops:[0,1000,4000,8000,10000,12000,16000,20000,40000,100000],value:P,fmt:n0,onInput:v=>{P=v;upd();}});
+ /* N and P are shared with section 2's diagram over bus('hotNP'): a slider tells it, and its steps move the sliders */
+ const busNP=CK.bus('hotNP'); let fromBus=false;
+ const tell=()=>{if(!fromBus)busNP.emit({N,P},'req');};
+ const rN=CK.range('reqN',{label:'Remote minions, N',stops:[1,2,4,8,12,16,20,24,32,64,256,NP],value:N,fmt:n0,onInput:v=>{N=v;upd();tell();}});
+ const rP=CK.range('reqP',{label:'Pause between atomics, P (cycles)',stops:[0,1000,4000,8000,10000,12000,16000,20000,40000,100000],value:P,fmt:n0,onInput:v=>{P=v;upd();tell();}});
+ busNP.on((v,from)=>{if(from==='req'||!(v.N>0))return;fromBus=true;rN.set(v.N);rP.set(v.P);fromBus=false;});   // N = 0 (nobody hammering) is not on the slider
  let f=null;
  f=CK.frame('req',{label:'Host throughput against predicted bank load, both sweeps, both cards',height:W=>W<600?340:380,
   draw(f){
@@ -1088,6 +1242,177 @@ const RUNS=[...D.requesters.map(r=>({...r,ser:'req'})),...D.pace.map(r=>({...r,s
   `shire's N minions with no pause, while the host runs N minions (this section's sweep). Squares: ${n0(NP)} minions of 31 shires, paced, `+
   `while the host runs ${p12[0].host_minions} (section 5's sweep). Filled ${CARDS[0]}, hollow ${CARD3}. The dotted line and the ringed `+
   `point follow the sliders${RUNS.some(r=>r.x>50)?'; loads above 50 are drawn at 50':''}.`;
+})();
+
+/* ---------- section 2: inside the host shire, step by step ----------
+   One shire drawn schematically: its minions and their own loads (blue), the remote atomics arriving over the mesh
+   (green), the queues in front of the bank, and the bank. Three steps: nobody else running, remote atomics below the
+   bank's capacity, and above it. The queue slots and moving tokens are schematic (queue depth was not measured);
+   every number drawn or printed comes from D: the bank's cycles and the round trip (context), the host's counts
+   (local, shires, requesters, pace). N and P are shared with section 3's sliders over bus('hotNP'). No motion under
+   prefers-reduced-motion, and a Motion switch stops it; the steps work the same either way. */
+(function(){
+ if(!$('starve'))return;
+ if(!RT||!BANK){$('inside-the-host-shire').hidden=true;return;}
+ const busNP=CK.bus('hotNP'), ms=WIN/(CLOCK_MHZ*1e3);
+ const oneEach=rows=>CK.cardsIn(rows.map(r=>r.card)).map(c=>rows.find(r=>r.card===c));   // one row per card, registry order
+ const alone=oneEach(D.local.filter(r=>r.home==='scplocal:0'&&r.shires===1));
+ const SHIRE=alone[0].host_minions;                                                     // the host's minions, all streaming alone
+ const shR=D.shires.filter(r=>r.home==='scplocal:0');                                   // 1 to 31 other shires, every minion hammering
+ const NP=Math.max(...D.pace.map(r=>r.remote_minions));
+ const paces=[...new Set(D.pace.map(r=>r.pace))].sort((a,b)=>a-b);
+ const PB=paces.find(p=>p>0&&D.pace.filter(r=>r.pace===p).every(r=>r.frac_of_alone>=0.9));  // the first pause that gives the host 90% back on every card
+ const PRE={alone:{N:0,P:0},below:{N:NP,P:PB},sat:{N:NP,P:0}};
+ const STEPS=[['alone','1 · alone'],['below','2 · below the knee'],['sat','3 · saturated']];
+ const stateOf=(n,p)=>n===0?'alone':LOAD(n,p)<1?'below':'sat';
+ let N=0,P=0,st='alone',motion=!CK.reduced,f=null;
+ const hits=()=>st==='alone'?alone:oneEach(RUNS.filter(r=>r.remote_minions===N&&r.pace===P));
+ /* a value per card, printed once when every card agrees (this page's convention for a2 / a3) */
+ const vals=(rows,fmt)=>{const v=rows.map(fmt);if(v.every(x=>x===v[0]))return v[0];
+  const p=rows.map((r,i)=>`${v[i]} (${r.card})`);return p.slice(0,-1).join(', ')+' and '+p[p.length-1];};
+ const span=a=>{const lo=Math.min(...a),hi=Math.max(...a);return lo===hi?n0(lo):n0(lo)+'–'+n0(hi);};
+ const where=run=>run?(run.shires>2?`${n0(N)} minions in ${run.shires-1} other shires`:`${n0(N)} minion${N>1?'s':''} of one other shire`):`${n0(N)} remote minions`;
+ const satRuns=RUNS.filter(r=>r.x>=1);                                                  // every run on section 3's chart at a load of 1 or more
+ function say(){
+  const h=hits(), run=h[0]||null, x=LOAD(N,P);
+  if(st==='alone') return `<b>1 · Alone.</b> Nobody else is running. The host shire's ${SHIRE} minions stream their own scratchpad: `+
+   `${vals(h,r=>n0(r.host_ops))} loads in the ${n0(ms)} ms window, one every ${vals(h,r=>f2(r.cycles_per_op))} cycles across the shire.`;
+  const ask=`${n0(N)} × ${n0(BANK)} ÷ (${n0(P)} + ${n0(RT)}) = ${lf(x)}`, pause=P?`and then waiting ${n0(P)} cycles`:'with no pause';
+  const meas=run?` <b>Measured:</b> the host shire, running ${run.host_minions} minions, kept ${vals(h,r=>pct(r.frac_of_alone,r.frac_of_alone<0.01?2:1))} `+
+    `of its rate alone, ${vals(h,r=>n0(r.host_ops))} loads in the window.`:' <b>This setting was not run;</b> the load is a prediction.';
+  if(st==='below'){
+   const short=!run||Math.min(...h.map(r=>r.frac_of_alone))<0.9;
+   return `<b>2 · Below the knee.</b> ${where(run)}, each sending an atomic ${pause}, with the ${n0(RT)}-cycle round trip ask for `+
+    `${ask} of the bank's cycles, less than it can retire, so the queue can drain between arrivals and the host's loads get the gaps.${meas}`+
+    (short?' Staying below 1 is necessary, not sufficient (section 3).':'');
+  }
+  const lo=Math.min(...satRuns.map(r=>r.frac_of_alone)), hi=Math.max(...satRuns.map(r=>r.frac_of_alone));
+  return `<b>3 · Saturated.</b> ${where(run)}, each sending an atomic ${pause}, ask for ${ask} times the bank's cycles: the remote queue `+
+   `does not empty, and remote requests outrank the host's own.${meas}`+
+   (run?'':` Every run on section 3's chart at a load of 1 or more left the host at ${pct(lo,2)}${pct(hi,2)===pct(lo,2)?'':'–'+pct(hi,2)} of its rate.`)+
+   ` With ${span(shR.map(r=>r.shires-1))} other shires hammering, all of their minions taking part, the host's ${shR[0].host_minions} minions complete `+
+   `${span(shR.map(r=>r.host_ops))} loads in the window (${CK.cardsIn(shR.map(r=>r.card)).join(', ')}), stalled in a load that does not return.`;
+ }
+ const out=CK.readout('starveout');
+ const seg=CK.seg('starvestep',{label:'Step',options:STEPS,value:st,onChange:v=>{st=v; ({N,P}=PRE[v]); busNP.emit({N,P},'diagram'); upd();}});
+ if(!CK.reduced) CK.seg('starvemotion',{label:'Motion',options:[['on','moving'],['off','still']],value:'on',onChange:v=>{motion=v==='on';upd();}});
+ busNP.on((v,from)=>{if(from==='diagram')return; N=v.N; P=v.P; st=stateOf(N,P); seg.quiet(st); upd();});
+ function upd(){out.set(say()); if(f)f.redraw();}
+
+ const HOST='var(--c1)', REM='var(--c3)';
+ f=CK.frame('starve',{label:'Inside the host shire: its minions’ own loads and the remote atomics queue for one bank; remote requests go first',
+  height:W=>W<600?570:300,
+  draw(f){
+   const svg=f.svg,W=f.W,nar=f.narrow,h=hits(),run=h[0]||null,x=LOAD(N,P),sat=st==='sat',idle=st==='alone';
+   const hostOn=idle?SHIRE:(run?run.host_minions:SHIRE);
+   const others=idle?0:(run?run.shires-1:Math.ceil(N/SHIRE)), per=others?Math.min(SHIRE,Math.round(N/others)):0;
+   const move=motion&&!CK.reduced, labs=[];
+   const T=(px,py,s,cls,a)=>{const t=CK.txt(svg,px,py,s,cls||'lab',a);labs.push(t);return t;};
+   /* ---- layout: wide runs left to right (minions, bank, mesh), narrow top to bottom (mesh, bank, minions) ---- */
+   const S=14,GP=4,gw=8*S+7*GP,gh=4*S+3*GP, SL=12,SP=17, bw=72,bh=54;
+   let L;
+   if(!nar){
+    const x1=W-246, cy=128, gx=22, bx=gx+gw+(x1-gx-gw)*0.45;
+    L={box:[8,28,x1,222],title:[18,46,'start'],grid:[gx,cy-gh/2+6],gridLab:[gx,cy+gh/2+26,'start'],
+     bank:[bx-bw/2,cy-bh/2],A:[gx+gw+10,cy],B:[bx-bw/2-6,cy],C:[x1,cy],D:[bx+bw/2+6,cy],
+     nH:Math.max(2,Math.floor((bx-bw/2-6-gx-gw-24)/SP)),nR:Math.max(2,Math.floor((x1-bx-bw/2-24)/SP)),
+     hLab:[(gx+gw+bx-bw/2)/2,cy-16,'middle'],rLab:[(x1+bx+bw/2)/2,cy-16,'middle'],bankNote:[bx,cy+bh/2+18,'middle'],
+     first:[bx,cy-bh/2-8,'middle'],blk:[W-200,cy-40],E:[W-208,cy],oLab:[W-200,cy-56,'start'],
+     oTxt:[[W-200,cy+58],[W-200,cy+74],[W-200,cy+90]],gauge:[8,262,W-16,12],gLab:[8,254],gEnd:[W-8,290]};
+   } else {
+    const lx=82, bY=246;
+    L={box:[4,122,W-4,496],title:[W-12,142,'end'],grid:[lx-gw/2+4,bY+bh+14+4*SP+14],gridLab:[lx-gw/2+4,bY+bh+14+4*SP+14+gh+18,'start'],
+     bank:[lx-bw/2,bY],A:[lx,bY+bh+14+4*SP+6],B:[lx,bY+bh+6],C:[lx,122],D:[lx,bY-6],nH:4,nR:Math.max(2,Math.floor((bY-6-122-10)/SP)),
+     hLab:[lx+16,bY+bh+14+2*SP,'start'],rLab:[lx+16,(122+bY)/2+4,'start'],bankNote:[lx+bw/2+8,bY+bh/2+22,'start'],
+     first:[lx+bw/2+8,bY+bh/2-6,'start'],blk:[lx-65,34],E:[lx,101],oLab:[8,14,'start'],
+     oTxt:[[158,48],[158,66],[158,84]],gauge:[8,532,W-16,12],gLab:[8,524],gEnd:[W-8,560]};
+   }
+   const lerp=(p,q,t)=>[p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t];
+   const slotAt=(p,q,n,k)=>{const len=Math.hypot(q[0]-p[0],q[1]-p[1]);return lerp(q,p,(SL/2+2+k*SP)/len);};  // k = 0 is the queue's head, next to the bank
+   /* ---- the host shire ---- */
+   const [bx0,by0,bx1,by1]=L.box;
+   const box=CK.el('rect',{x:bx0,y:by0,width:bx1-bx0,height:by1-by0,rx:12,'aria-hidden':'true'},svg);
+   box.style.fill='none'; box.style.stroke='var(--axis)'; box.style.strokeWidth='1.5';
+   T(L.title[0],L.title[1],'host shire (holds the hot line)','lab-strong',L.title[2]);
+   /* lanes */
+   const lane=(p,q,col,dash)=>{const e=CK.el('line',{x1:p[0],y1:p[1],x2:q[0],y2:q[1],'aria-hidden':'true'},svg);e.style.stroke=col;e.style.strokeWidth='2';if(dash)e.style.strokeDasharray='4 4';return e;};
+   lane(L.A,L.B,HOST,false); lane(L.C,L.D,idle?'var(--grid)':REM,idle); lane(L.E,L.C,idle?'var(--grid)':REM,idle);
+   const tok=(g,p,col,hollow)=>{const c=CK.el('circle',{cx:p[0],cy:p[1],r:5,'aria-hidden':'true'},g);
+    if(hollow){c.style.fill='var(--surface)';c.style.stroke=col;c.style.strokeWidth='1.5';}else c.style.fill=col;return c;};
+   const slots=(p,q,n)=>{for(let k=0;k<n;k++){const [sx,sy]=slotAt(p,q,n,k);
+    const r=CK.el('rect',{x:sx-SL/2-2,y:sy-SL/2-2,width:SL+4,height:SL+4,rx:3,'aria-hidden':'true'},svg);r.style.fill='var(--surface)';r.style.stroke='var(--axis)';}};
+   slots(L.A,L.B,L.nH); slots(L.C,L.D,L.nR);
+   /* tokens in flight along a path: moving, or (still) spread along it */
+   const fly=(pts,col,n,dur)=>{const g=CK.el('g',{'aria-hidden':'true'},svg);
+    const segs=pts.slice(1).map((q,i)=>Math.hypot(q[0]-pts[i][0],q[1]-pts[i][1])), tot=segs.reduce((a,b)=>a+b,0);
+    const at=t=>{let d=t*tot;for(let i=0;i<segs.length;i++){if(d<=segs[i])return lerp(pts[i],pts[i+1],d/segs[i]);d-=segs[i];}return pts[pts.length-1];};
+    for(let k=0;k<n;k++){
+     if(move){const c=tok(g,[0,0],col);const a=CK.el('animateMotion',{dur:dur+'s',repeatCount:'indefinite',begin:(-k*dur/n).toFixed(2)+'s',
+       path:'M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L')},c);a.setAttribute('calcMode','linear');}
+     else tok(g,at((k+0.5)/n),col);
+    }};
+   const q=(p,qq,n,col,hollow)=>{for(let k=0;k<n;k++)tok(svg,slotAt(p,qq,n,k),col,hollow);};
+   if(!sat){
+    fly([L.A,L.B],HOST,3,1.6);
+    if(!idle) fly([L.E,L.C,L.D],REM,2,x>0.5?2.4:3.6);
+   } else {
+    q(L.A,L.B,L.nH,HOST,false); q(L.C,L.D,L.nR,REM,false);
+    fly([slotAt(L.C,L.D,L.nR,0),L.D],REM,1,0.5);      // the head of the remote queue goes in, again and again
+    const [sx,sy]=L.B, v=nar?[[sx-10,sy],[sx+10,sy]]:[[sx,sy-10],[sx,sy+10]];   // a bar across the host's lane: its loads wait
+    const bar=CK.el('line',{x1:v[0][0],y1:v[0][1],x2:v[1][0],y2:v[1][1],'aria-hidden':'true'},svg); bar.style.stroke='var(--ink)'; bar.style.strokeWidth='3';
+   }
+   T(L.hLab[0],L.hLab[1],sat?'own loads: waiting':'own loads','lab',L.hLab[2]);
+   T(L.rLab[0],L.rLab[1],idle?'no remote atomics':sat?'remote atomics: queue full':'remote atomics: queue drains','lab',L.rLab[2]);
+   /* the host's minions */
+   const gHost=CK.el('g',{},svg);
+   for(let k=0;k<SHIRE;k++){const cx=L.grid[0]+(k%8)*(S+GP),cy2=L.grid[1]+Math.floor(k/8)*(S+GP),on=k<hostOn;
+    const r=CK.el('rect',{x:cx,y:cy2,width:S,height:S,rx:2},gHost);
+    if(!on){r.style.fill='none';r.style.stroke='var(--grid)';}
+    else if(sat){r.style.fill='var(--surface)';r.style.stroke=HOST;r.style.strokeWidth='1.5';}
+    else r.style.fill=HOST;}
+   T(L.gridLab[0],L.gridLab[1],`${hostOn}${hostOn<SHIRE?' of '+SHIRE:''} minions ${sat?'stalled in a load':'streaming'}`,'lab',L.gridLab[2]);
+   CK.tip(f,gHost,()=>`<b>The host shire's minions</b> · ${hostOn} of ${SHIRE} running, ${sat?'each stalled in a load that does not return':'streaming 64-byte-strided loads over their own scratchpad'}`+
+    (run?`<br>measured: ${vals(h,r=>n0(r.host_ops))} loads in the ${n0(ms)} ms window`:'<br>this setting was not run'));
+   /* the bank */
+   const gBank=CK.el('g',{},svg), [kx,ky]=L.bank;
+   /* the bank's cycles, split: the share the remote atomics ask for (green, capped at all of them) and what is left (blue) */
+   const rs=idle?0:Math.min(1,x), tint=c=>`color-mix(in srgb, ${c} 30%, var(--surface))`;
+   const bb=CK.el('rect',{x:kx,y:ky,width:bw,height:bh,rx:8},gBank); bb.style.fill=tint(HOST);
+   if(rs>0){const rr=CK.el('rect',{x:kx+bw*(1-rs),y:ky,width:bw*rs,height:bh,rx:rs>0.9?8:0,'aria-hidden':'true'},gBank); rr.style.fill=tint(REM);}
+   const bk=CK.el('rect',{x:kx,y:ky,width:bw,height:bh,rx:8,'aria-hidden':'true'},gBank);
+   bk.style.fill='none'; bk.style.stroke='var(--ink)'; bk.style.strokeWidth='1.5';
+   CK.txt(gBank,kx+bw/2,ky+bh/2+4,'bank','lab-strong','middle');
+   T(L.bankNote[0],L.bankNote[1],`${n0(BANK)} cycles per atomic`,'lab',L.bankNote[2]);
+   if(sat) T(L.first[0],L.first[1],'remote requests go first','lab-strong',L.first[2]);
+   CK.tip(f,gBank,()=>`<b>The bank</b> of the host's shire cache that holds the hot line<br>a global atomic takes ${n0(BANK)} cycles of it (the measured floor, section 3)`+
+    `<br>${idle?'no remote atomics: all of it is the host’s':`remote atomics ask for ${lf(x)} of its cycles (predicted; green in the box, capped at all of them)`}`);
+   /* the other shires */
+   const gRem=CK.el('g',{},svg), [ox,oy]=L.blk, c2=12, g2=3, ow=8*(c2+g2)+5, oh=4*(c2+g2)+5;
+   if(others>1) for(const d of [8,4]){const sh=CK.el('rect',{x:ox+d,y:oy-d,width:ow,height:oh,rx:6},gRem);sh.style.fill='var(--surface)';sh.style.stroke='var(--axis)';}
+   const ob=CK.el('rect',{x:ox,y:oy,width:ow,height:oh,rx:6},gRem); ob.style.fill='var(--surface)'; ob.style.stroke=idle?'var(--grid)':'var(--axis)';
+   for(let k=0;k<SHIRE;k++){const r=CK.el('rect',{x:ox+4+(k%8)*(c2+g2),y:oy+4+Math.floor(k/8)*(c2+g2),width:c2,height:c2,rx:2},gRem);
+    if(k<per)r.style.fill=REM;else{r.style.fill='none';r.style.stroke='var(--grid)';}}
+   T(L.oLab[0],L.oLab[1],idle?'other shires: idle':!run?'other shires':others>1?`other shires (${others})`:'another shire','lab-strong',L.oLab[2]);
+   const lines=idle?['nobody hammering']:[`N = ${n0(N)} minions`,`P = ${n0(P)} cycles' pause`,`round trip ${n0(RT)} cycles`];
+   lines.forEach((s,i)=>T(L.oTxt[i][0],L.oTxt[i][1],s,'lab','start'));
+   CK.tip(f,gRem,()=>idle?'<b>The other shires</b> · not running':`<b>${where(run)}</b> · each sends an <code>amoaddg.w</code> to the hot line, waits for it, then pauses ${n0(P)} cycles`+
+    `<br>an atomic's round trip: ${n0(RT)} cycles (one requester, bank idle, from shire ${CTX.remote_atomic_latency_shire})`);
+   /* the bank's cycles the remote atomics ask for (predicted, the x axis of section 3) */
+   const gG=CK.el('g',{},svg), [gx0,gy0,gw0,gh0]=L.gauge;
+   const bg=CK.el('rect',{x:gx0,y:gy0,width:gw0,height:gh0,rx:3},gG); bg.style.fill='var(--grid)';
+   if(x>0){const fl=CK.el('rect',{x:gx0,y:gy0,width:gw0*Math.min(1,x),height:gh0,rx:3},gG); fl.style.fill=REM;}
+   T(L.gLab[0],L.gLab[1],idle?'bank cycles asked for by remote atomics: none':`bank cycles asked for: ${n0(N)} × ${n0(BANK)} ÷ (${n0(P)} + ${n0(RT)}) = ${lf(x)}`,'lab','start');
+   T(L.gEnd[0],L.gEnd[1],x>=1?`all of them, ${num(x,1)} times over`:'1 = all of its cycles','tick','end');
+   CK.tip(f,gG,()=>`<b>Bank load ${idle?'0':lf(x)}</b> (predicted: N × ${n0(BANK)} ÷ (P + ${n0(RT)}))<br>${x>=1?'more than the bank can retire: the remote queue stays full':'less than the bank can retire: the queue drains'}`);
+   CK.keynav(f,[gRem,gBank,gHost,gG]);
+   CK.inside(f,labs);
+  }});
+ upd();
+ $('starvecap').textContent=
+  `Blue is the host shire's own loads, green the remote atomics. The queue slots and tokens are schematic: how deep the queues are was not measured. `+
+  `The numbers are this page's: ${n0(BANK)} cycles of bank per atomic and the ${n0(RT)}-cycle round trip from the sweeps (section 3), the host's counts `+
+  `from the table below and from section 3's runs. Step 2 is ${n0(NP)} remote minions paced at ${n0(PB)} cycles, the first pause in section 5 that gives `+
+  `the host 90% back on every card; step 3 is the same minions with no pause. ${CK.reduced?'Motion is off because this browser asks for reduced motion.':'The Motion switch stops the tokens.'}`;
 })();
 
 /* ---------- section 4: errata ---------- */
@@ -1176,6 +1501,50 @@ if(CTX.errata) $('errata').innerHTML=CTX.errata.map(e=>
  const w=POOLED.w_contended, c=p.runs.find(r=>r.label==='contended'), s=p.runs.find(r=>r.label==='spread');
  $('hlw').textContent=`about ${f1(w.mean)} W over idle (${f2(w.mean)} W on the mean of ${word(w.n)} passes, ${f1(w.lo)}–${f1(w.hi)} W; this session read ${f1(c.over_idle_w)} W)`;
  $('enfac').textContent=(POOLED.nj.contended.mean/POOLED.nj.spread.mean).toFixed(0);
+
+ /* the table's last column drawn: each case's range over the pooled passes, their mean, and each card's mean (CK's
+    card registry: every card in per_card, with its colour and mark). The reading-only row is grey: see pooltop. */
+ const rows=p.runs.filter(r=>POOLED.nj[r.label]).map(r=>({label:r.label,name:names[r.label]||r.label,q:POOLED.nj[r.label],s:r.nj_per_op}));
+ const ecards=CK.cardsIn([...new Set([].concat(...rows.map(r=>Object.keys(r.q.per_card||{}))))]);
+ const rough=r=>r.label==='local_only';
+ const C=POOLED.nj.contended, Sp=POOLED.nj.spread;
+ CK.legend('nrglegend',[{key:'rng',label:`range of the ${word(nP)} passes`,mark:'line',color:'var(--ink-2)'},{key:'mean',label:'their mean (tick)',mark:'box',color:'var(--ink)'}]
+  .concat(CK.cardLegend(ecards).map(it=>({...it,label:it.label+' mean'}))));
+ const tipE=r=>{const q=r.q,pc=q.per_card||{};
+  return `<b>${r.name}</b><br>${f(q.mean)} nJ per operation, mean of ${q.n} passes [${f(q.lo)}–${f(q.hi)}]<br>`+
+   ecards.filter(c=>pc[c]).map(c=>`${CK.card(c).label} ${f(pc[c].mean)} (n = ${pc[c].n})`).join(', ')+
+   `<br>first session (${CARDS[0]}): ${f(r.s)}`+(rough(r)?'<br>an order of magnitude only: its power is inside the idle baseline\u2019s noise':'');};
+ CK.frame('nrg',{label:'Energy per operation for each hot-line case: range over the pooled passes, mean, and each card\u2019s mean, log scale',
+  height:()=>rows.length*50+54,
+  draw(fr){
+   const svg=fr.svg,W=fr.W,L=8,R=12,T=8,RH=50,B=46,H=fr.H;
+   const lo=Math.min(...rows.map(r=>r.q.lo)), hi=Math.max(...rows.map(r=>r.q.hi));
+   const x=CK.log(lo/1.5,hi*1.6,L+6,W-R);
+   CK.axes(fr,{x,y:CK.lin(0,1,H-B,T),L,R,T,B,yt:[],xt:[0.5,1,2,5,10,20].filter(v=>v>lo/1.5&&v<hi*1.6),xfmt:v=>num(v),
+    xl:'nJ per operation (log scale)'});
+   for(const t of [0.5,1,2,5,10,20].filter(v=>v>lo/1.5&&v<hi*1.6)) CK.el('line',{x1:x(t),x2:x(t),y1:T,y2:H-B,class:'grid-line','aria-hidden':'true'},svg);
+   const nodes=[], labs=[];
+   rows.forEach((r,i)=>{
+    const y0=T+i*RH, yc=y0+32, q=r.q, g=CK.el('g',{},svg), col=rough(r)?'var(--ref)':'var(--ink-2)';
+    CK.el('rect',{x:L,y:y0,width:W-L-R,height:RH,class:'ck-hit'},g);
+    labs.push(CK.txt(g,L,y0+14,r.name+(rough(r)?' · order of magnitude':''),'lab'));
+    const wk=CK.el('g',{'aria-hidden':'true'},g); wk.style.stroke=col; wk.style.strokeWidth='1.5';
+    if(rough(r)) wk.style.strokeDasharray='4 3';
+    CK.el('line',{x1:x(q.lo),x2:x(q.hi),y1:yc,y2:yc},wk);
+    for(const v of [q.lo,q.hi]) CK.el('line',{x1:x(v),x2:x(v),y1:yc-6,y2:yc+6,style:'stroke-dasharray:none'},wk);
+    const m=CK.el('rect',{x:x(q.mean)-1.5,y:yc-10,width:3,height:20,'aria-hidden':'true'},g); m.style.fill=rough(r)?'var(--ref)':'var(--ink)';
+    const pc=q.per_card||{}, cs=ecards.filter(c=>pc[c]);
+    cs.forEach((c,ci)=>CK.cardMark(g,c,x(pc[c].mean),yc+(ci-(cs.length-1)/2)*9,3.5).setAttribute('aria-hidden','true'));
+    if(r.label==='spread') labs.push(CK.txt(g,x(q.hi)+10,yc+4,`${(C.mean/Sp.mean).toFixed(0)}× less than one contended line`,'lab'));
+    CK.tip(fr,g,tipE(r)); nodes.push(g);
+   });
+   CK.keynav(fr,nodes);
+   CK.inside(fr,labs);
+  }});
+ $('nrgcap').textContent=`Log scale. Each line is a case's range over the ${word(nP)} pooled passes of the table's last column, the tick their mean, and the marks `+
+  `each card's own mean (${ecards.map(c=>`${CK.card(c).label} ${CK.card(c).mark==='dot'?'filled':CK.card(c).mark}`).join(', ')}). The contended line costs `+
+  `${f(C.mean)} nJ per atomic [${f(C.lo)}–${f(C.hi)}] and the spread one ${f(Sp.mean)} [${f(Sp.lo)}–${f(Sp.hi)}]: the ranges are far apart. `+
+  `The reading-only row is grey and dashed because its power is inside the idle baseline's noise (the note above).`;
 })();
 
 /* ---------- section 7: the barrier ---------- */

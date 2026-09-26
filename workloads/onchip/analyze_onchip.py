@@ -18,6 +18,9 @@ The keys the relay page draws from (added 25 Sep; every earlier key is unchanged
   distance[].longest       the longest hand-off in the ring (mesh hops) and the (source, destination) pairs at it
   repeats                  per card, every run of the headline configuration (1 MB per shire per stage, 8 stages,
                            32 shires, one add, offset 1) with all three media, one row per sweep group
+Added 26 Sep (every earlier key and value is unchanged; the rows' own fields stay the first card's):
+  intensity/size/stages/shires[].by_card   each card's row at the same setting, {card: {ok, dram, scp, hop,
+                           scp_over_dram, hop_over_dram}}, for every card with all three media there
 """
 import argparse
 import collections
@@ -174,6 +177,10 @@ def main():
                                for r in rows if r.get("group") == "headline"}
             continue
         out[grp] = by_medium(rows, grp, key, out["cards"][0])
+        per = {c: {r[key]: {k: v for k, v in r.items() if k != key} for r in by_medium(rows, grp, key, c)}
+               for c in out["cards"]}
+        for r in out[grp]:
+            r["by_card"] = {c: per[c][r[key]] for c in out["cards"] if r[key] in per[c]}
     # hop_distance is how many shire IDs back round the ring a slab comes from; mesh_hops is how far that is
     # on the mesh (every run in this group uses all 32 shires, so the ring is all 32 in ID order).
     out["distance"] = sorted([{"hop_distance": r["hop_distance"], "gb_s": r["gb_s"], "ok": r["ok"],

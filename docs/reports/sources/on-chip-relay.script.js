@@ -201,6 +201,93 @@ CK.stackTable('media');
   `above it, nothing is, unless you place the data yourself.`;
 })();
 
+/* ---------- section 3: stages and shires, one setting changed at a time from the headline run ----------
+   Two panels on one y scale. Colour is the medium, as everywhere on this page; the mark's shape is the card
+   (CK's registry: filled, ring, diamond), for every card in the rows' by_card (analyze_onchip.py, 26 Sep). Data
+   without by_card draws the first card from the row itself. The headline setting is in both sweeps: hovering or
+   focusing it in one panel marks it in the other too. */
+(function(){
+ const HC=H.dram, MB=HC.stage_bytes/1048576;                 // the headline run: 1 MB per shire per stage, 8 stages, 32 shires
+ const rowOf=(r,c)=>r.by_card?r.by_card[c]||null:(c===A2?r:null);
+ const PAN=[{key:'stages',rows:D.stages,head:HC.stages,xt:[1,2,4,8,16,32],
+             title:`against pipeline stages (${HC.shires} shires)`,at:n=>`${n} stage${n>1?'s':''} on ${HC.shires} shires`},
+            {key:'shires',rows:D.shires,head:HC.shires,xt:[2,4,8,16,32],
+             title:`against shires taking part (${HC.stages} stages)`,at:n=>`${n} shires, ${HC.stages} stages, ${n*MB} MB per buffer`}];
+ const cards=CK.cardsIn([...new Set([].concat(...PAN.map(P=>[].concat(...P.rows.map(r=>r.by_card?Object.keys(r.by_card):[A2])))))]);
+ const L3=32, fitMax=L3/(2*MB);                              // shires at which both buffers exactly fill the 32 MB L3
+ /* the card's mark (shape from the registry) in the medium's colour */
+ const mark=(g,c,x,y,col)=>{const k=CK.card(c).mark,e=CK.cardMark(g,c,x,y,k==='ring'?6.5:k==='dot'?3.5:4,col);
+  if(k==='ring'){e.style.fill='none';e.style.strokeWidth='1.5';}   // a ring round a dot: both cards stay visible
+  e.setAttribute('aria-hidden','true');return e;};
+ const lg=CK.legend('stshlegend',MED.map(m=>({key:m[0],label:m[3],mark:'line',color:m[2]})),{toggle:true,onChange:keys=>CK.showSeries(f,keys)});
+ for(const c of cards){  // the card key: the mark's shape, in ink
+  const s=document.createElement('span'); s.className='ck-li';
+  const v=CK.el('svg',{viewBox:'0 0 18 12',width:18,height:12,'aria-hidden':'true'}); mark(v,c,9,6,'var(--ink-2)');
+  s.append(v,document.createTextNode(CK.card(c).label)); lg.el.appendChild(s);
+ }
+ const tipHtml=(P,r)=>`<b>${P.at(r[P.key])}</b>${r[P.key]===P.head?' · the headline setting':''}<br>`+
+  cards.map(c=>{const q=rowOf(r,c);if(!q)return `${CK.card(c).label}: not run`;
+   return `${CK.card(c).label}: DRAM ${gb(q.dram.gb_s)}, next shire ${gb(q.hop.gb_s)} (${f2(q.hop_over_dram)}×), own ${gb(q.scp.gb_s)} (${f1(q.scp_over_dram)}×) GB/s`;}).join('<br>');
+ const f=CK.frame('stsh',{label:'Relay bandwidth of DRAM, the next shire and the own scratchpad against pipeline stages and against shires taking part',
+  height:W=>W<600?2*262+18:292,
+  draw(f){
+   const svg=f.svg,W=f.W,narrow=f.narrow,GAP=24,ph=narrow?262:f.H, pw=narrow?W:(W-GAP)/2;
+   const heads=[];
+   PAN.forEach((P,pi)=>{
+    const ox=narrow?0:pi*(pw+GAP), oy=narrow?pi*(ph+18):0, L=ox+46, R=10, T=oy+40, B=44, x1=ox+pw-R, y1=oy+ph-B;
+    const x=CK.log(P.xt[0],P.xt[P.xt.length-1],L+8,x1-8), y=CK.log(20,2000,y1,T);
+    CK.txt(svg,ox+4,oy+14,P.title,'lab-strong');
+    CK.txt(svg,ox+4,T-10,'GB/s','lab');
+    if(P.key==='shires'){  // where both buffers fit in the L3, the DRAM route is not reaching DRAM
+     const xf=x(fitMax), sh=CK.el('rect',{x:L,y:T,width:xf-L,height:y1-T,'aria-hidden':'true'},svg); sh.style.fill='var(--grid)'; sh.style.opacity='0.6';
+     CK.el('line',{x1:xf,x2:xf,y1:T,y2:y1,'aria-hidden':'true',style:'stroke:var(--ref);stroke-width:1.5;stroke-dasharray:5 4'},svg);
+     CK.txt(svg,L+4,y(1500),'both buffers fit in the L3','lab');
+    }
+    CK.axes({svg,W:ox+pw,H:oy+ph},{x,y,L,R,T,B,xt:P.xt,yt:[20,100,500,2000],yfmt:n0,xfmt:String,
+     xl:P.key==='stages'?'stages in the relay':'shires taking part'});
+    for(const [m,,col] of MED) cards.forEach((c,ci)=>{
+     const pts=P.rows.map(r=>[r[P.key],rowOf(r,c)]).filter(p=>p[1]).map(p=>[p[0],p[1][m].gb_s]);
+     const g=CK.el('g',{'data-series':m,'aria-hidden':'true'},svg);
+     const ln=CK.el('path',{d:CK.path(pts,x,y),fill:'none'},g); ln.style.stroke=col; ln.style.strokeWidth=ci?'1.25':'2';
+     if(ci) ln.style.strokeDasharray='4 3';
+     for(const [a,b] of pts) mark(g,c,x(a),y(b),col);
+    });
+    /* one focusable column per setting; its tooltip lists every medium on every card */
+    const nodes=[];
+    for(const r of P.rows){
+     const g=CK.el('g',{},svg), xc=x(r[P.key]);
+     CK.el('rect',{x:xc-13,y:T,width:26,height:y1-T,class:'ck-hit'},g);
+     const xh=CK.el('line',{x1:xc,x2:xc,y1:T,y2:y1,'aria-hidden':'true'},g); xh.style.stroke='var(--ink-2)'; xh.style.opacity='0';
+     if(r[P.key]===P.head){  // a capsule round the headline setting's column, from its highest point to its lowest
+      const qs=cards.map(c=>rowOf(r,c)).filter(Boolean), top=y(Math.max(...qs.map(q=>q.scp.gb_s)))-12, bot=y(Math.min(...qs.map(q=>q.dram.gb_s)))+12;
+      const rr=CK.el('rect',{x:xc-9,y:top,width:18,height:bot-top,rx:9,fill:'none','aria-hidden':'true'},g);
+      rr.style.stroke='var(--ink)'; rr.style.strokeWidth='1.25';
+      heads.push(xh);
+     }
+     const on=()=>{xh.style.opacity='0.6'; if(r[P.key]===P.head) heads.forEach(h=>{h.style.opacity='0.6';});};
+     const off=()=>{xh.style.opacity='0'; if(r[P.key]===P.head) heads.forEach(h=>{h.style.opacity='0';});};
+     g.addEventListener('pointerenter',on); g.addEventListener('pointerleave',off); g.addEventListener('focus',on); g.addEventListener('blur',off);
+     CK.tip(f,g,tipHtml(P,r)); nodes.push(g);
+    }
+    CK.keynav(f,nodes);
+   });
+  }});
+ /* the lead-in and the caption, every number from the rows */
+ const ratio=(rows,sel,k)=>[].concat(...rows.filter(sel).map(r=>cards.map(c=>rowOf(r,c)).filter(Boolean).map(q=>q[k])));
+ const st=D.stages, sh=D.shires, few=r=>r.shires<=fitMax, all=r=>r.shires===HC.shires;
+ const deep=r=>r.stages>=4, shallow=r=>r.stages<4;
+ const dr32=ratio(sh,all,'dram').map(q=>q.gb_s);
+ $('stshlead').textContent=`Two more sweeps change one setting at a time from the headline run (${num(MB)} MB per shire per stage, `+
+  `${word(HC.stages)} stages, ${HC.shires} shires): the number of stages in the chain, and the number of shires taking part.`;
+ $('stshcap').textContent=
+  `Log axes, one y scale for both panels. Colour is where a stage's output goes; the mark is the card (${cards.map(c=>`${CK.card(c).label} ${CK.card(c).mark==='dot'?'filled':CK.card(c).mark==='ring'?'ring':CK.card(c).mark}`).join(', ')}). `+
+  `Left: from ${word(Math.min(...st.map(r=>r.stages)))} stage to ${Math.max(...st.map(r=>r.stages))}, the next shire runs ${rng(ratio(st,deep,'hop_over_dram'),f1)}× DRAM at four stages or more `+
+  `and ${rng(ratio(st,shallow,'hop_over_dram'),f1)}× with one or two, where the DRAM route reaches only ${rng(ratio(st,shallow,'dram').map(q=>q.gb_s),f0)} GB/s. `+
+  `Right: every shire keeps ${num(MB)} MB per stage, so fewer shires also means less data. Up to ${fitMax} shires both buffers fit in the ${L3} MB L3 (shaded), `+
+  `and the hand-off runs at ${rng(ratio(sh,few,'hop_over_dram'),f2)}× the DRAM route's rate; at ${HC.shires} the DRAM route falls to ${rng(dr32,f1)} GB/s and the hand-off is `+
+  `${rng(ratio(sh,all,'hop_over_dram'),f1)}×. The ringed column is the headline setting, the same configuration in both panels, measured in different sweeps.`;
+})();
+
 /* ---------- section 4: arithmetic intensity ---------- */
 (function(){
  const rows=D.intensity;
