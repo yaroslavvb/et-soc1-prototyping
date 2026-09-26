@@ -15,7 +15,7 @@ others_present && exit 3
 HERE=$V3_ROOT/tools/claims-v3/ablb
 # Launch temperatures follow the governor (as abla): governor-free cards 80 / 84 C, the pinned card 55 / 57 C.
 if [ -n "$GOV_FREE" ]; then TARGET=80; PREHEAT=84; LAUNCH=80.9; export ABL_CAP_S=2100
-else                        TARGET=55; PREHEAT=57; LAUNCH=55.8; export ABL_CAP_S=1500; fi
+else                        TARGET=57; PREHEAT=59; LAUNCH=55.8; export ABL_CAP_S=1500; fi   # A5: 57/59 (was 55/57)
 # Leakage slope per card; aifoundry1's cards take aifoundry2's (their own are unmeasured; see ../abla/README.md).
 case $CARD in
   aifoundry3) LEAK=0.55 ;;

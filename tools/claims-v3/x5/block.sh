@@ -15,7 +15,7 @@ others_present && exit 3
 
 HERE=$V3_ROOT/tools/claims-v3/x5
 if [ -n "$GOV_FREE" ]; then HOT=83; HOT_PRE=86; COOL=76; COOL_PRE=79; HOT_CAP=1200; COOL_CAP=1200
-else                        HOT=65; HOT_PRE=68; COOL=55; COOL_PRE=60; HOT_CAP=1500; COOL_CAP=900; fi
+else                        HOT=65; HOT_PRE=68; COOL=57; COOL_PRE=62; HOT_CAP=1500; COOL_CAP=900; fi   # A5: cool 57/62 (was 55/60)
 # Leakage slope per card; aifoundry1's cards take aifoundry2's (their own are unmeasured; see README).
 case $CARD in
   aifoundry3) LEAK=0.55 ;;

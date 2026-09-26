@@ -847,3 +847,13 @@ about 71 C under the same smokes, and aifoundry2 stays near 90 C in hours of wor
 heat sink or airflow), which its low-power idle at 300 MHz normally hides; a full block would run it far hotter, and the
 firmware's throttling would take its clock off 600 MHz. The campaign therefore runs on aifoundry1-c1, aifoundry2 and
 aifoundry3. Card 0's smoke data are kept as a record of the fault. `all_cards` outcomes are over those three cards.
+
+## A5 (25 Sep 2026, 19:45, after a failed aifoundry3 block and before any usable aifoundry3 ablation data of the campaign)
+
+After the host changes of 25 September (among them the host CPU's performance power profile) aifoundry3's card idles
+at 55-57 C instead of 53-54 C, so the ablation experiments' approach to a 55 C launch took 225-364 s per run instead of
+80-100 s and the first campaign block hit its time cap after 7 of 23 runs (no outcome was computed from it). On
+aifoundry3 only, the launch targets become: V3-ABL-A 57 C (preheat 62, was 55 / 60), V3-ABL-B 57 C (preheat 59, was
+55 / 57), V3-X5's cool arm 57 C (preheat 62, was 55 / 60); the hot arm is unchanged. The registered correction of each run
+to the launch temperature (55.8 C, the leakage slope 0.55 W/C) is unchanged, so the reduction is the same; the failed
+block is re-run at the end of aifoundry3's schedule.

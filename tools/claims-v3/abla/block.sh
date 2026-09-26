@@ -16,7 +16,7 @@ HERE=$V3_ROOT/tools/claims-v3/abla
 # Launch temperatures follow the governor: a governor-free card (TDP 65 W, 65 C threshold) launches at 80 C after
 # heating to 84 C, above the window where its governor lifts the clock off 600 MHz; the pinned card at 55 / 60 C.
 if [ -n "$GOV_FREE" ]; then TARGET=80; PREHEAT=84; LAUNCH=80.9; export ABL_CAP_S=2700
-else                        TARGET=55; PREHEAT=60; LAUNCH=55.8; export ABL_CAP_S=1800; fi
+else                        TARGET=57; PREHEAT=62; LAUNCH=55.8; export ABL_CAP_S=1800; fi   # A5: 57/62 (was 55/60)
 # Leakage slope of the reduction, per card (measured on aifoundry2 and aifoundry3; aifoundry1's cards take
 # aifoundry2's: their own slopes are unmeasured; the slope multiplies only the few degrees the die rises by seconds 1-3).
 case $CARD in
