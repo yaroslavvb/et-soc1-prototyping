@@ -304,10 +304,17 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
 - **aifoundry3's host programs crash about 1.08 s after they start** (2026-09-25). About one launch in 100 dies
   with SIGSEGV (rc 139, or −11 from Python), always 1,078–1,080 ms after it began, during device setup and before
   any result: seen in `sparsity_host`, `enercat_host`, `nocbench_host` and `onchip_host`, never on aifoundry2 in the
-  same runs. The fault is in a runtime helper thread (`_Rb_tree_insert_and_rebalance`), and the prime suspect is
-  aifoundry3's patched `-O3` `libetrt.so` (the host table above); replacing it with the stock build has not been
-  done. Treat such a launch as failed and repeat it, and do not read it as a workload bug. Cores are kept now:
-  `coredumpctl list`, `coredumpctl gdb <pid>`.
+  same runs. **Cause** (four core dumps): libetrt's thread-pool workers log at the custom g3log levels
+  `VERBOSE_HIGH/MID/LOW` (`ThreadPool::workerFunc`, `common-sw/src/threadPool/src/ThreadPool.cpp:81`), which only
+  `logging::LoggerDefault` registers (`common-sw/src/logging/include/hostUtils/logging/Logger.h:57-59`). A host
+  program that never constructs it leaves them unregistered, so the first `LOG(VLOG_MID)` from several new workers
+  inserts the level into g3log's `std::map` of levels from all of them at once, while `IRuntime::create` is still
+  starting threads, and the map is corrupted. aifoundry3's `-O3` `libetrt.so` hits the window; aifoundry2's build
+  has not been seen to. `tools/g3log-race/` reproduces the race without a card (6–7 % of trials corrupt the map;
+  none once the level is registered first). **Fix:** every `workloads/*/host/main.cpp` now calls
+  `registerRuntimeLogLevels()` first in `main`; a new host program must do the same (or construct
+  `logging::LoggerDefault`). Binaries built before that change, the version-3 campaign's among them, can still
+  crash: treat such a launch as failed and repeat it. Cores are kept: `coredumpctl list`, `coredumpctl gdb <pid>`.
 - **`ettelem sample` sometimes fails to start** right after a previous instance was stopped (about one start in
   three). The runners retry until the telemetry file has a line (`start_sampler` in `tools/claims-v3/lib.sh` and
   the `tools/ettelem/run_*_power.sh` scripts).

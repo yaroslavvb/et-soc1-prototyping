@@ -60,6 +60,7 @@ tools/
   claims-v3/            the measurement framework: lib.sh, queue.sh, schedules, one directory per experiment
   ettelem/              the telemetry client (C++) and the analysis and page-data scripts of the power work
   etcfg/                a read-only driver query: TDP, boot clock, shire mask, cache sizes
+  g3log-race/           a card-free reproduction of the runtime's log-level race (aifoundry3's host crashes)
 scripts/                VM setup, lab deploys, page building (build-report.py, paste-chartkit.py), check-mirror.py
 rtl-sim/                Verilator benches on the original RTL: fma_toggle (switching activity), pmu_carry (a counter bug)
 patches/                local fixes to et-platform and to the lab's gp-sdk (README.md explains each)
@@ -125,7 +126,7 @@ builds the same `/opt/et` natively (the README's setup section). **Never run `pr
 | Card | Firmware | Clock policy | Notes |
 |---|---|---|---|
 | aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C | the main card; the git checkout is `~/claude/et-soc1-prototyping` here |
-| aifoundry3 | 1.3.1 | **pinned at 600 MHz**: a boot service sets a 0 W TDP at every boot | compare switching power over idle, never absolute watts; about 1 host launch in 100 crashes at 1.08 s (repeat it) |
+| aifoundry3 | 1.3.1 | **pinned at 600 MHz**: a boot service sets a 0 W TDP at every boot | compare switching power over idle, never absolute watts; about 1 host launch in 100 crashes at 1.08 s unless the program registers libetrt's log levels first (`registerRuntimeLogLevels()`, 14-card-behaviour.md) |
 | aifoundry1 card 0 | 1.4.1 | DVFS; idles at 300 MHz | **overheats (115–117 °C): no sustained work on it**; excluded from the campaign |
 | aifoundry1 card 1 | 1.2.0 | DVFS; idles at 600 MHz | fine; select a card on this host with `ET_DEVICES=<n>` |
 
@@ -184,7 +185,7 @@ Each links to the full entry in [14-card-behaviour.md](docs/findings/14-card-beh
   non-coherent L1, tensor ops on hart 0 only, and one TensorSend ready bit per minion
   ([traps](docs/findings/14-card-behaviour.md#traps-that-cost-time-here)).
 - **Tools and hosts**: the poisoned management queue, `ettelem sample` failing to start one time in three, aifoundry3's
-  1.08 s host crash, misleading health checks, the 8 s `sparsity_host --budget`, a memory pattern with no buffer
+  1.08 s host crash (a g3log race in libetrt; call `registerRuntimeLogLevels()` first in every new host `main`), misleading health checks, the 8 s `sparsity_host --budget`, a memory pattern with no buffer
   writing to address 0, identical code from the three toolchains (compare `.text` hashes), and never editing or
   `scp`-ing over a running script (same section).
 

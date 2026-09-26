@@ -973,6 +973,20 @@ and 5,018 with all 1,024 (`barrier-chip{1,32}.jsonl`). Energy: the re-measured r
 the reruns.
 **Report:** [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication).
 
+## E49 — The runtime's log-level race, reproduced without a card (2026-09-25, 23:12, aifoundry2's CPU)
+
+**Question:** is aifoundry3's host crash about 1.08 s into 1 launch in 100 (14-card-behaviour.md, "Traps") the
+g3log level-map race that four core dumps point to, and does registering the levels first remove it?
+**Method:** `tools/g3log-race/race.cpp` against the lab's `/opt/et/lib/libg3log.so`: per trial, reset g3log's
+levels, then release 4 waiting threads that each make the first `g3::logLevel()` call for `VERBOSE_MID`, as
+libetrt's thread-pool workers do; count the trials after which the map does not hold exactly one more level.
+Three runs of 20,000 trials without registration, three with the level registered first; no card is opened.
+**Result:** 1,087, 1,358 and 1,412 of 20,000 trials corrupted the map without registration; 0 of 60,000 with it.
+Every `workloads/*/host/main.cpp` now calls `registerRuntimeLogLevels()` first in `main`.
+**Caveats:** the test shows the mechanism and the fix, not the crash rate on aifoundry3, which depends on its
+`-O3` runtime's timing. Binaries built before the fix, the version-3 campaign's among them, keep the crash; the
+gather/scatter host (E48) is the first card program built with it.
+
 ## A note on E10, re-analysed for Q20
 
 The governor transitions in [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) are **not** a new experiment.

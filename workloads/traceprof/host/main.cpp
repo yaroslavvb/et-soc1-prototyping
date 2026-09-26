@@ -2,6 +2,7 @@
 //   traceprof_host [--sysemu] [--shires MASK] [--reps N] [--out events.jsonl] [--raw trace.bin]
 // Each line: {"hart","cycle","insts","region","start","line","func","name"}. scripts/trace-flamegraph.py
 // turns them into folded stacks and an SVG flame graph.
+#include <g3log/loglevels.hpp>
 #include <runtime/IRuntime.h>
 #include <runtime/Types.h>
 #include <device-layer/IDeviceLayer.h>
@@ -27,6 +28,17 @@
 
 #include "Constants.h"
 #include "traceprof_args.h"
+
+// libetrt's thread-pool workers log at the custom levels VERBOSE_HIGH/MID/LOW, which only logging::LoggerDefault
+// registers with g3log. Left unregistered, the first log call from several new workers inserts the level into g3log's
+// level map from all of them at once and can corrupt it: aifoundry3's host crash about 1.08 s into 1 launch in 100
+// (docs/findings/14-card-behaviour.md, "Traps"). Registering them, disabled as the map's default would leave them,
+// before the runtime starts any thread removes the race.
+static void registerRuntimeLogLevels() {
+  const LEVELS levels[] = {LEVELS(g3::kDebugValue - 100, "VERBOSE_HIGH"), LEVELS(g3::kDebugValue - 99, "VERBOSE_MID"),
+                           LEVELS(g3::kDebugValue - 98, "VERBOSE_LOW")};
+  for (const auto& l : levels) g3::only_change_at_initialization::addLogLevel(l, false);
+}
 
 namespace fs = std::filesystem;
 using Clock = std::chrono::steady_clock;
@@ -64,6 +76,7 @@ std::string jsonEscape(const std::string& s) {
 }  // namespace
 
 int main(int argc, char** argv) {
+  registerRuntimeLogLevels();  // first, before any library starts a thread
   bool sysemu = false;
   uint64_t shireMask = 0x1, reps = 4;
   std::string out = "events.jsonl", raw, kernelPath = KERNEL_ELF;

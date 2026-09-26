@@ -212,7 +212,7 @@ invite Roman sent. On the new machine:
 |---|---|---|
 | `aifoundry1` | 2 (`/dev/et0_*`, `/dev/et1_*`) | Working since 2026-09-25 15:02 (the driver's empty version string was fixed). Card 0 (firmware 1.4.1) **overheats: do not run sustained work on it**; it idles at 300 MHz. Card 1 (firmware 1.2.0) is fine and idles at 600 MHz, 33–35 W. Select a card with `ET_DEVICES=<n>` (this host only; `V3_DEVICE=<n>` in `tools/claims-v3`). Its `/opt/et` is a fork build; the disk is nearly full. |
 | `aifoundry2` | 1 | The main card for this work, and the git checkout (`~/claude/et-soc1-prototyping`). Firmware 1.3.1. Minion clock 600 MHz when the die is above 65 °C (up to 800 MHz below), 32 GB LPDDR4X, idle board power 27 W cold, 31 to 36 W after load. |
-| `aifoundry3` | 1 | Firmware 1.3.1, held at 600 MHz by a 0 W TDP that a boot service sets at every boot (not flashed). The die idles at 55–57 °C since the host changes of 25 Sep (51–54 °C before). Compare switching power over idle, not absolute watts. Its `libetrt.so` is a patched `-O3` build, and about one host launch in 100 crashes at 1.08 s: repeat it. |
+| `aifoundry3` | 1 | Firmware 1.3.1, held at 600 MHz by a 0 W TDP that a boot service sets at every boot (not flashed). The die idles at 55–57 °C since the host changes of 25 Sep (51–54 °C before). Compare switching power over idle, not absolute watts. Its `libetrt.so` is a patched `-O3` build, and about one host launch in 100 built before 25 Sep's `registerRuntimeLogLevels()` fix crashes at 1.08 s (a g3log race in the runtime): repeat it. |
 
 See [findings/14-card-behaviour.md](findings/14-card-behaviour.md) for how the four cards and three hosts differ.
 
