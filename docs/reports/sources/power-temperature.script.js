@@ -56,18 +56,25 @@ put('box-idle-rest', num(mean(IDLE0.map(rest)), 0));
 const RF = CX.rail_filter.value;
 // the rails' filter on each card (catalogue.json rail_filter: median fall after the board's step-down, per card)
 const pct = v => num(100 * v, 0) + '%';
-const tauCards = `${num(RF.aifoundry2.tau_s, 2)} s on aifoundry2, ${num(RF.aifoundry3.tau_s, 2)} s on aifoundry3`;
+const RFC = CK.cardsIn(RF);                    // every card the catalogue measured, in the registry's order
+const andList = a => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
+const tauCards = andList(RFC.map(c => `${num(RF[c].tau_s, 2)} s on ${c}`));
 put('kpi-tau', tauCards); put('rf-tau', tauCards);
-put('rf-n', `${num(RF.aifoundry2.n, 0)} load bursts on aifoundry2 and ${num(RF.aifoundry3.n, 0)} on aifoundry3`);
-put('rf-12s', `${pct(RF.aifoundry2.frac_1s)} after 1 s and ${pct(RF.aifoundry2.frac_2s)} after 2 s on aifoundry2, ` +
-  `${pct(RF.aifoundry3.frac_1s)} and ${pct(RF.aifoundry3.frac_2s)} on aifoundry3`);
-put('ir-drop', num(CX.minion_ir_drop_mv_per_w.value, 2));
+put('rf-n', andList(RFC.map((c, i) => `${num(RF[c].n, 0)}${i ? '' : ' load bursts'} on ${c}`)));
+put('rf-12s', andList(RFC.map((c, i) => (i ? `${pct(RF[c].frac_1s)} and ${pct(RF[c].frac_2s)} on ${c}`
+  : `${pct(RF[c].frac_1s)} after 1 s and ${pct(RF[c].frac_2s)} after 2 s on ${c}`))));
 { // the busy drift of the strict Horace runs on each card, with how well its runs pin it down
   const BD = CX.busy_drift_cards, a2 = BD.aifoundry2, a3 = BD.aifoundry3;
   const rng = c => wholeRange(c.temp_c[0], c.temp_c[1]);
-  put('busy-drift', `${num(a2.w_per_c, 2)} W/°C at ${rng(a2)} °C (${word(a2.runs)} runs, standard error ${num(a2.se, 2)} W/°C)`);
-  put('busy-drift-a3', `On the second card, aifoundry3, the same runs at ${rng(a3)} °C gave ${num(a3.w_per_c, 2)} W/°C` +
-    (a3.se > 0.1 * a3.w_per_c ? `, but its ${word(a3.runs)} runs scatter so widely (standard error ${num(a3.se, 2)} W/°C) that the drift there is not pinned down.`
+  put('busy-drift', `${num(a2.w_per_c, 2)} W/°C at ${rng(a2)} °C (the ${word(a2.runs)} runs that heated the die by at least 3 °C, standard error ${num(a2.se, 2)} W/°C)`);
+  // a card's runs one by one: when the largest is more than twice the next, name it apart from the rest
+  const each = c => { const e = [...(c.each || [])].sort((x, y) => x - y), n = e.length;
+    if (n < 3) return '';
+    return e[n - 1] > 2 * e[n - 2] ? `: ${word(n - 1)} gave ${CK.fmt.range(e[0], e[n - 2], 2, 'W/°C')} (median ${num(median(e.slice(0, -1)), 2)}) and one ${num(e[n - 1], 2)}`
+      : `: from ${num(e[0], 2)} to ${num(e[n - 1], 2)} W/°C`; };
+  put('busy-drift-a3', `On the second card, aifoundry3, the same runs at ${rng(a3)} °C, where the idle law's own slope is about ` +
+    `${num(lawSlope((a3.temp_c[0] + a3.temp_c[1]) / 2), 2)} W/°C, gave ${num(a3.w_per_c, 2)} W/°C on average` +
+    (a3.se > 0.1 * a3.w_per_c ? `, but its ${word(a3.runs)} runs scatter widely (standard error ${num(a3.se, 2)} W/°C)${each(a3)}.`
       : ` (${word(a3.runs)} runs, standard error ${num(a3.se, 2)} W/°C).`));
 }
 put('rest-idle0', num(mean(IDLE0.map(rest)), 1)); put('rest-idle0-t', num(mean(IDLE0.map(p => p.temp)), 0));
@@ -89,7 +96,7 @@ put('rest-cool', num(mean(COOL.map(rest)), 1)); put('rest-cool-t', num(mean(COOL
   const dI = ddr(IDLE0), tI = tmp(IDLE0), dC = ddr(COOL), tC = tmp(COOL), k = (dC - dI) / (tC - tI), trend = T => dC + k * (T - tC);
   const DR = S.filter(p => p.t >= T_DR + 3 && p.t + 1 <= T_C2), MM = S.filter(p => p.t >= T_C1 - 18 && p.t + 1 <= T_C1);
   const below = P => trend(tmp(P)) - ddr(P), mmT = MM.map(p => p.temp);
-  put('ddr-idle', `The DDR domain reads ${num(dI, 0)} mV on die at ${num(tI, 0)} °C idle and ${num(dC, 0)} mV at ${num(tC, 0)} °C, ` +
+  put('ddr-idle', `In this session the DDR domain reads ${num(dI, 0)} mV on die at ${num(tI, 0)} °C idle and ${num(dC, 0)} mV at ${num(tC, 0)} °C, ` +
     `against an 800 mV set-point: at idle it falls about ${num(-k, 1)} mV per °C.`);
   put('ddr-load', `Under the DRAM-bound load, at ${num(tmp(DR), 0)} °C, it reads ${num(ddr(DR), 0)} mV, ${num(below(DR), 0)} mV below that trend. ` +
     `Under the matmul, with little DRAM traffic, it reads ${num(ddr(MM), 0)} mV at ${wholeRange(Math.min(...mmT), Math.max(...mmT))} °C, ` +
@@ -109,22 +116,21 @@ put('rest-cool', num(mean(COOL.map(rest)), 1)); put('rest-cool-t', num(mean(COOL
 
 /* ---------- §1: the instruments ---------- */
 const chip = (s, t) => `<span class="chip ${s}">${t}</span>`;
-const railTxt = `τ ≈ ${num(RF.aifoundry2.tau_s, 2)} s and ${pct(RF.aifoundry2.frac_2s)} of a step after 2 s on aifoundry2, ` +
-  `${num(RF.aifoundry3.tau_s, 2)} s and ${pct(RF.aifoundry3.frac_2s)} on aifoundry3`;
+const railTxt = 'τ ≈ ' + andList(RFC.map((c, i) => `${num(RF[c].tau_s, 2)} s and ${pct(RF[c].frac_2s)}${i ? '' : ' of a step after 2 s'} on ${c}`));
 const M = [
- ['Board power, now', 'whole card · a new value each SP pass: about every 156 ms on aifoundry2, 263 ms on aifoundry3, while ettelem samples at 10 Hz · 10 mW', 'DM_CMD_GET_MODULE_POWER (ettelem: up to 45 samples/s; the SP refreshes it once per pass)', 'works_now', 'works now'],
+ ['Board power, now', 'whole card · a new value each SP pass: about every 156 ms on aifoundry2, 158 ms on aifoundry1-c1 and 263 ms on aifoundry3 while ettelem samples at 10 Hz (126–135, 134–139 and 223–224 ms with a one-command poller at 10 Hz; three passes per card) · 10 mW', 'DM_CMD_GET_MODULE_POWER (ettelem: up to 45 samples/s; the SP refreshes it once per pass)', 'works_now', 'works now'],
  ['Board power, PMIC average / min / max', 'whole card · the PMIC\'s running average, like the rails; min and max since the last stats reset', 'DM_CMD_GET_SP_STATS via ettelem (the stock CLI calls it unsupported), or the SPST trace', 'works_now', 'works now'],
- ['Rail power: minion cores, SRAM, mesh', `3 rails · 1 mW · the PMIC's running average (${railTxt}), one record per SP pass, plus min/max`, 'same snapshot; the SPST trace keeps ~15 min of records with µs stamps', 'works_now', 'works now'],
+ ['Rail power: minion cores, SRAM, mesh', `3 rails · 1 mW · the PMIC's running average (${railTxt}), one record per SP pass, plus min/max`, 'same snapshot; the SPST trace keeps the last 6,500–6,700 records, one per pass, with µs stamps: about 17 min on aifoundry2, 16 min on aifoundry1-c1 and 29 min on aifoundry3 (the longest extracts of the three-card check)', 'works_now', 'works now'],
  ['Rail voltage and clock', '3 rails · 1 mV · avg/min/max; minion and mesh MHz', 'same snapshot', 'works_now', 'works now'],
  ['On-die voltage per domain', '7 domains (DDR, SRAM, Maxion, minion, PCIe shire, mesh, IO shire) · 1 mV', 'DM_CMD_GET_ASIC_VOLTAGE; compare with the regulator set-points from DM_CMD_GET_MODULE_VOLTAGE for the drop to the die', 'works_now', 'works now'],
- ['On-die voltage per shire', '34 minion shires × 3 rails + 8 memory shires × 2 · 1 mV · current, and hardware low/high between polls', 'SP log at DEBUG level: ettelem loglevel debug + sptrace (4 KB buffer, wraps about once per pass)', 'works_now', 'works now'],
+ ['On-die voltage per shire', '34 minion shires × 3 rails · 1 mV · current, and hardware low/high between polls; the 8 memory shires × 2 are printed only right after a telemetry query, so idle dumps hold the 34 minion shires', 'SP log at DEBUG level: ettelem loglevel debug + sptrace (4 KB buffer, wraps about once per pass: 22 of 27 dumps on three cards held a whole pass)', 'works_now', 'works now'],
  ['Temperature', 'IO shire, and mean, low and high of the 34 minion-shire sensors · 1 °C · per SP pass; "low/high" are extremes since reset, not the current spread', 'DM_CMD_GET_MODULE_CURRENT_TEMPERATURE (its field labelled PMIC holds the minion mean again)', 'works_now', 'works now'],
  ['Power state, throttle residency, thresholds', 'card-wide · µs residency counters', 'DM_CMD_GET_MODULE_POWER_STATE, _RESIDENCY_*, _TEMPERATURE_THRESHOLDS, _STATIC_TDP_LEVEL', 'works_now', 'works now'],
  ['Device-wide bandwidth and utilisation', 'DDR, L2/L3, PCIe · 1 ms samples', 'MMST trace; a proxy for where memory energy goes', 'works_now', 'works now'],
  ['Energy per event', 'pJ per load, per multiply-add, per mesh hop · needs ≥10⁹ identical events/s for seconds', 'rail power above a same-temperature baseline ÷ event rate (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes">memory anatomy</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment</a>; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">the energy manual</a> does it for every instruction and byte)', 'works_now', 'works now'],
  ['Static against dynamic power', 'per rail', 'frequency sweep at fixed voltage: DM_CMD_SET_FREQUENCY with power management off. Changes the card for everyone; not run here', 'works_now', 'works now, with care'],
  ['Instantaneous rail power', '3 rails · 1 mW · per pass', 'the SP already reads it each pass and discards it; a few assignments in thermal_pwr_mgmt.c', 'needs_fw_change', 'firmware'],
- ['Faster sampling', 'tens to hundreds of Hz', 'in the firmware source each pass makes ~96 I2C transactions, each followed by a hard-coded 1 ms wait, a floor of about 100 ms; the measured pass is longer (about 135 ms on aifoundry2 with a light poller in one session, 156 ms while ettelem samples at 10 Hz, and about 1.7× as long on aifoundry3, for reasons not established). Skip the 84-read snapshot and fix the wait', 'needs_fw_change', 'firmware'],
+ ['Faster sampling', 'tens to hundreds of Hz', 'in the firmware source each pass makes ~96 I2C transactions, each followed by a hard-coded 1 ms wait, a floor of about 100 ms; the measured pass is longer. In the SP\'s own trace (three passes per card) it is 133 ms on aifoundry2 and 135 ms on aifoundry1-c1 with no telemetry client, 160 and 162 ms while ettelem samples at 10 Hz; on aifoundry3 224 and 266 ms, 1.7× as long, for reasons not established. Skip the 84-read snapshot and fix the wait', 'needs_fw_change', 'firmware'],
  ['Per-shire temperature; process detectors', '34 shires · 0.06 °C in hardware; ring-oscillator counts in µs windows', 'sampled continuously by the PVT controllers, never exported', 'needs_fw_change', 'firmware'],
  ['DDR, PCIe, Maxion, IO rails', '—', 'regulators with set-points but no current sense: only "board minus three rails"', 'impossible_on_silicon', 'no sensor'],
  ['Board power at kHz', 'whole card · ~1 ms', 'scope on the hot-swap controller\'s current-monitor pin, or a PCIe riser with a shunt', 'needs_tooling', 'hardware'],
@@ -255,11 +261,11 @@ const pvtRead = CK.readout('pvt-out');
 function pvtOut() {
   const F = fitOf(PV.from, PV.dropGaps), G = fitOf(PV.from, !PV.dropGaps), nGap = F.P.length - fitOf(PV.from, true).P.length;
   put('slope-board', num(F.board.b, 2)); put('slope-minion', num(F.minion, 2)); put('slope-law', num(F.law, 2)); put('fit-from', `${PV.from} s after launch` + (PV.dropGaps ? ', leaving out the launch-gap seconds,' : ''));
-  let h = `Fit from ${PV.from} s after launch: board <b>${num(F.board.b, 2)} W/°C</b> (minion ${num(F.minion, 2)}) over ${F.P.length} bins at ` +
+  let h = `This session, fit from ${PV.from} s after launch: board <b>${num(F.board.b, 2)} W/°C</b> (minion ${num(F.minion, 2)}) over ${F.P.length} bins at ` +
     `${CK.fmt.range(F.t0, F.t1, 1, '°C')}; the idle law's own slope there: ${num(F.law, 2)} W/°C.`;
   h += PV.dropGaps ? ` With the ${word(fitOf(PV.from, false).P.length - F.P.length)} launch-gap bins: ${num(G.board.b, 2)} W/°C.`
     : ` Without the ${word(nGap)} launch-gap bins: ${num(G.board.b, 2)} W/°C.`;
-  if (PV.view === 'above') h += ` Median above the law, leaving out each phase's first 3 s and the gap bins: ` +
+  if (PV.view === 'above') h += ` Median above the law in this session, leaving out each phase's first 3 s and the gap bins: ` +
     ['idle', 'dram', 'matmul'].filter(g => MED[g]).map(g => `${GNAME[g]} ${sign(MED[g].m)} W`).join(', ') + '.';
   pvtRead.set(h);
   if (fDrift) { fDrift.redraw(); driftOut(); }
@@ -315,9 +321,17 @@ pvtOut();
 // context.busy_drift_cards: per card, the mean slope over its strict Horace runs (w_per_c), the runs' sd, the standard
 // error of the mean, the run count and the die temperatures. Cards come from the data's keys, in the registry's order,
 // with the registry's colour and mark, so a card added to the data appears with no change here.
-const BD = CX.busy_drift_cards || {};
-const DCARDS = CK.cardsIn(BD).filter(c => BD[c] && isFinite(BD[c].w_per_c));
-const two = c => 2 * (BD[c].se || 0);
+const BD = CX.busy_drift_cards || {}, BV3 = CX.busy_drift_loadstep_v3 || {};
+// Two groups of rows: the strict Horace runs (busy_drift_cards) and the version-3 check's repeats of this page's load step
+// (busy_drift_loadstep_v3, MMB-T/P1: four 58 s matmuls per card, with each repeat's slope in `each`).
+const GROUPS = [
+  {key: 'strict', title: 'Strict 7 s Horace runs, 21–22 September', short: 'Strict Horace runs, 21–22 Sep', unit: 'runs', data: BD},
+  {key: 'v3', title: 'This load step, repeated four times per card, 26 September', short: 'This load step, 4 repeats, 26 Sep', unit: 'load steps', data: BV3}]
+  .map(g => Object.assign(g, {cards: CK.cardsIn(g.data).filter(c => g.data[c] && isFinite(g.data[c].w_per_c))}))
+  .filter(g => g.cards.length);
+const DROWS = GROUPS.flatMap(g => g.cards.map(c => ({g, c, v: g.data[c]})));
+const DCARDS = CK.cardsIn([...new Set(DROWS.map(r => r.c))]);
+const two = r => 2 * (r.v.se || 0);
 const halo = t => { Object.assign(t.style, {paintOrder: 'stroke', stroke: 'var(--page)', strokeWidth: '4px', strokeLinejoin: 'round'}); return t; };
 const driftRefs = () => {
   const fit = fitOf(PV.from, PV.dropGaps).board.b, lw = lawSlope(80);
@@ -325,49 +339,67 @@ const driftRefs = () => {
     {key: 'fit', v: fit, text: `this session's matmul fit: ${num(fit, 2)}`, color: 'var(--ink-2)', dash: null, row: 1}];
 };
 CK.legend('drift-leg', CK.cardLegend(DCARDS).concat([
+  {key: 'rep', label: 'one load step (lower rows)', mark: 'ring', color: 'var(--ink-2)'},
   {key: 'fit', label: 'matmul fit, this session (aifoundry2)', mark: 'line', color: 'var(--ink-2)'},
   {key: 'law', label: 'idle law’s slope at 80 °C (aifoundry2)', mark: 'dash', color: 'var(--ink)'}]));
 const driftRead = CK.readout('drift-out');
 function driftOut() {
   const r = driftRefs();
-  driftRead.set(DCARDS.map(c => `${CK.card(c).label}: <b>${num(BD[c].w_per_c, 2)} W/°C</b> ` +
-    `(±${num(two(c), 2)} at 2 se; ${num(BD[c].runs, 0)} runs at ${wholeRange(BD[c].temp_c[0], BD[c].temp_c[1])} °C)`).join(' · ') +
-    ` · for reference: the matmul fit ${num(r[1].v, 2)}, the idle law at 80 °C ${num(r[0].v, 2)} W/°C.`);
+  driftRead.set(GROUPS.map(g => `<b>${g.title}:</b> ` + g.cards.map(c => { const v = g.data[c];
+    return `${CK.card(c).label} <b>${num(v.w_per_c, 2)} W/°C</b> (±${num(2 * (v.se || 0), 2)} at 2 se; ${num(v.runs, 0)} ${g.unit} at ${wholeRange(v.temp_c[0], v.temp_c[1])} °C)`; }).join(' · ')).join('<br>') +
+    `<br>For reference: the matmul fit ${num(r[1].v, 2)}, the idle law at 80 °C ${num(r[0].v, 2)} W/°C.`);
 }
-fDrift = CK.frame('drift', {label: 'Busy drift per card: the mean slope with ±2 standard errors, against the matmul fit and the idle law',
-  height: W => (W < 600 ? 56 : 38) * Math.max(1, DCARDS.length) + 44 + 38, draw: f => {
+const GH = 24;  // a group's title line
+const driftH = W => { const rowH = W < 600 ? 56 : 38; return 44 + GROUPS.length * GH + rowH * Math.max(1, DROWS.length) + 38; };
+fDrift = CK.frame('drift', {label: 'Busy drift per card, in the strict runs and in the load step’s repeats: the mean slope with ±2 standard errors, against the matmul fit and the idle law',
+  height: driftH, draw: f => {
     const nar = f.narrow, rowH = nar ? 56 : 38, L = nar ? 12 : 250, R = 52, T = 44, B = 38, yb = f.H - B;
     const refs = driftRefs();
-    const vals = DCARDS.flatMap(c => [BD[c].w_per_c - two(c), BD[c].w_per_c + two(c)]).concat(refs.map(r => r.v));
+    const vals = DROWS.flatMap(r => [r.v.w_per_c - two(r), r.v.w_per_c + two(r)].concat(r.v.each && r.g.key === 'v3' ? r.v.each : [])).concat(refs.map(q => q.v));
     const lo = Math.min(0, Math.floor(Math.min(...vals) / 0.2) * 0.2), hi = Math.ceil(Math.max(...vals) * 1.05 / 0.2) * 0.2;
     const x = CK.lin(lo, hi, L, f.W - R), xt = x.ticks(nar ? 4 : 6);
     const g0 = CK.el('g', {'aria-hidden': 'true'}, f.svg);
     for (const t of xt) CK.el('line', {x1: x(t), x2: x(t), y1: T - 6, y2: yb, class: 'grid-line'}, g0);
     CK.axes(f, {x, y: CK.lin(0, 1, yb, T), L, R, T, B, xt, yt: [], grid: false, xfmt: v => num(v, 1), xl: 'W per °C of die temperature (board power, the same work)'});
     const labs = [];
-    for (const r of refs) {
-      const e = CK.el('line', {x1: x(r.v), x2: x(r.v), y1: T - 6, y2: yb, 'stroke-width': 1.5}, g0);
-      e.style.stroke = r.color; if (r.dash) e.style.strokeDasharray = r.dash;
-      labs.push(CK.txt(g0, x(r.v), 13 + 16 * r.row, r.text, 'lab', 'middle'));
+    for (const q of refs) {
+      const e = CK.el('line', {x1: x(q.v), x2: x(q.v), y1: T - 6, y2: yb, 'stroke-width': 1.5}, g0);
+      e.style.stroke = q.color; if (q.dash) e.style.strokeDasharray = q.dash;
+      labs.push(CK.txt(g0, x(q.v), 13 + 16 * q.row, q.text, 'lab', 'middle'));
     }
     CK.inside(f, labs);
     const nodes = [];
-    DCARDS.forEach((c, i) => {
-      const v = BD[c], cd = CK.card(c), y = T + rowH * i + (nar ? 34 : rowH / 2), w = v.w_per_c, e2 = two(c);
-      const name = `${cd.label} · ${wholeRange(v.temp_c[0], v.temp_c[1])} °C · ${num(v.runs, 0)} runs`;
-      // on a phone the name sits above its row, where the reference lines cross it: a page-coloured outline stops them short
-      halo(nar ? CK.txt(g0, L, y - 16, name, 'lab') : CK.txt(g0, L - 12, y + 4, name, 'lab', 'end'));
-      const g = CK.el('g', {}, f.svg);
-      if (e2 > 0) {
-        const wl = CK.el('line', {x1: x(w - e2), x2: x(w + e2), y1: y, y2: y, 'stroke-width': 2}, g); wl.style.stroke = cd.color;
-        for (const u of [w - e2, w + e2]) { const cap = CK.el('line', {x1: x(u), x2: x(u), y1: y - 5, y2: y + 5, 'stroke-width': 2}, g); cap.style.stroke = cd.color; }
-      }
-      CK.cardMark(g, c, x(w), y, 5.5);
-      halo(CK.txt(g, x(w + e2) + 8, y + 4, num(w, 2), 'lab-strong'));
-      CK.el('rect', {x: L, y: y - (nar ? 26 : rowH / 2), width: f.W - L - R, height: nar ? 40 : rowH, class: 'ck-hit'}, g);
-      CK.tip(f, g, `<b>${cd.label}</b>: ${num(w, 2)} W/°C, the mean over ${num(v.runs, 0)} strict runs at ${wholeRange(v.temp_c[0], v.temp_c[1])} °C` +
-        `<br>run-to-run sd ${num(v.sd, 2)}, standard error ${num(v.se, 2)}; ±2 standard errors: ${num(w - e2, 2)} to ${num(w + e2, 2)} W/°C`);
-      nodes.push(g);
+    let y0 = T;
+    GROUPS.forEach((g, gi) => {
+      if (gi) CK.el('line', {x1: nar ? L : 8, x2: f.W - R, y1: y0 + 2, y2: y0 + 2, class: 'grid-line'}, g0);
+      halo(CK.txt(g0, nar ? L : 8, y0 + 17, nar ? g.short : g.title, 'lab-strong'));
+      y0 += GH;
+      g.cards.forEach(c => {
+        const v = g.data[c], cd = CK.card(c), y = y0 + (nar ? 34 : rowH / 2), w = v.w_per_c, e2 = 2 * (v.se || 0);
+        const name = `${cd.label} · ${wholeRange(v.temp_c[0], v.temp_c[1])} °C · ${num(v.runs, 0)} ${g.unit}`;
+        // on a phone the name sits above its row, where the reference lines cross it: a page-coloured outline stops them short
+        halo(nar ? CK.txt(g0, L, y - 16, name, 'lab') : CK.txt(g0, L - 12, y + 4, name, 'lab', 'end'));
+        const gr = CK.el('g', {}, f.svg);
+        if (e2 > 0) {
+          const wl = CK.el('line', {x1: x(w - e2), x2: x(w + e2), y1: y, y2: y, 'stroke-width': 2}, gr); wl.style.stroke = cd.color;
+          for (const u of [w - e2, w + e2]) { const cap = CK.el('line', {x1: x(u), x2: x(u), y1: y - 5, y2: y + 5, 'stroke-width': 2}, gr); cap.style.stroke = cd.color; }
+        }
+        if (g.key === 'v3') for (const e of v.each || []) {   // each load step, as a small ring on the row
+          const ring = CK.el('circle', {cx: x(e), cy: y, r: 3.5, fill: 'none', 'stroke-width': 1.3}, gr); ring.style.stroke = 'var(--ink-2)';
+        }
+        CK.cardMark(gr, c, x(w), y, 5.5);
+        halo(CK.txt(gr, Math.max(...[w + e2].concat(g.key === 'v3' ? v.each || [] : []).map(x)) + 8, y + 4, num(w, 2), 'lab-strong'));
+        CK.el('rect', {x: L, y: y - (nar ? 26 : rowH / 2), width: f.W - L - R, height: nar ? 40 : rowH, class: 'ck-hit'}, gr);
+        const tip = g.key === 'v3'
+          ? `<b>${cd.label}</b>: ${num(w, 2)} W/°C, the mean over this page's load step repeated ${num(v.runs, 0)} times (26 September)` +
+            `<br>each: ${v.each.map((e, k) => `${num(e, 2)} at ${wholeRange(v.each_temp_c[k][0], v.each_temp_c[k][1])} °C`).join('; ')}` +
+            `<br>standard error ${num(v.se, 2)}; 99% interval ${num(v.ci99[0], 2)} to ${num(v.ci99[1], 2)} W/°C${v.tested ? '' : ' (reported, not tested against a band)'}`
+          : `<b>${cd.label}</b>: ${num(w, 2)} W/°C, the mean over ${num(v.runs, 0)} strict runs at ${wholeRange(v.temp_c[0], v.temp_c[1])} °C` +
+            `<br>run-to-run sd ${num(v.sd, 2)}, standard error ${num(v.se, 2)}; ±2 standard errors: ${num(w - e2, 2)} to ${num(w + e2, 2)} W/°C`;
+        CK.tip(f, gr, tip);
+        nodes.push(gr);
+        y0 += rowH;
+      });
     });
     CK.keynav(f, nodes);
   }});
@@ -507,7 +539,7 @@ const chance = p => (p >= 0.05 ? `no more than random scatter would give (p = ${
   put('vmap-r2', num(100 * pl.r2, 0) + '%');
   put('vmap-shire-w', num(mean(IDLE0.map(p => p.minion)) / Object.keys(D.shires).length, 1));
   const rep = D.voltage_repeat || [];
-  put('vmap-repeat', rep.length ? `${word(rep.length)} more trace dumps, taken moments later, hold later passes, and their readings differ from this map's in ` +
+  put('vmap-repeat', rep.length ? `${word(rep.length)} more trace dumps, taken about 0.3 s later, hold later passes, and their readings differ from this map's in ` +
     `${rep.map(r => num(r.differing, 0)).join(' and ')} of its ${num(rep[0].cells, 0)} cells, by at most ${num(Math.max(...rep.map(r => r.max_abs_mv)), 0)} mV, ` +
     `${rep.every(r => r.low_high_identical) ? 'always in the current reading; every low and high is the same.' : 'including some lows and highs.'}` : '');
 }
@@ -554,7 +586,7 @@ const fMap = CK.frame('vmap', {height: W => { const cw = (W - 16) / 6; return Ma
     const pl = plane(VM.rail, VM.field);
     vmLive.innerHTML = `${RAIL[VM.rail]}, ${FIELD[VM.field]}: ${CK.fmt.range(lo, hi, 0, 'mV')} over the ${vals.length} shires. A plane across the ${pl.n} grid ` +
       `shires explains R² = ${num(pl.r2, 2)} of the spread, ${chance(pl.p)}.` +
-      (VM.field === 'low' || VM.field === 'swing' || VM.field === 'high' ? ' These are extremes since the last stats reset, a window that included loads that evening, not idle values.' : '');
+      (VM.field === 'low' || VM.field === 'swing' || VM.field === 'high' ? ' These are extremes since the last stats reset (when that was is not recorded for this capture), not idle values.' : '');
   }});
 
 TB.emit(60.5, 'init');  // start every linked view at one minute in, mid-matmul

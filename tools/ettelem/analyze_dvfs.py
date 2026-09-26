@@ -4,7 +4,8 @@
     analyze_dvfs.py --cold <cold1-dir> <cold2-dir> --wakeup <dir> --idle <idle.jsonl[.gz]> \
                     --since <runs.jsonl[.gz] of the last workload before the idle sample> \
                     --model model.json --ablation ablation.json [--sptrace sptrace-aifoundry3.bin] \
-                    [--cool-passes <dir>...] [--idle-sessions <root>...] [--tl-range 30 45] --out dvfs.json
+                    [--cool-passes <dir>...] [--idle-sessions <root>...] [--tl-range 30 45] \
+                    [--v3 docs/reports/data/2026-09-25-claims-v3] --out dvfs.json
 
 The page's data, from the repo root:
 
@@ -14,13 +15,17 @@ The page's data, from the repo root:
         --since $H/long2/runs.jsonl.gz --model $H/model.json \
         --ablation $H/ablation.json --sptrace $D/2026-09-22-cards/sptrace-aifoundry3.bin \
         --cool-passes $R2/hotline-pass2 $R2/hotline-pass3 $R2/hotline-pass4 $R2/relay-pass1 $R2/relay-pass2 $R2/relay-pass4 \
-        --idle-sessions $H $D/2026-09-2[234]-* \
+        --idle-sessions $H $D/2026-09-2[234]-* --v3 $D/2026-09-25-claims-v3 \
         --out $D/2026-09-22-dvfs-aifoundry2/dvfs.json
 
 --cool-passes adds the governor's timing on a second day (governor_days); --idle-sessions tests the idle law on
 every session under those directories that it was not fitted on, on both cards (idle_sessions); leak_split gives
 the law's split into fixed and leakage power at the two ends of --tl-range (added 25 September 2026, version 3 of
-the claims check, docs/reports/data/2026-09-25-claims-v3).
+the claims check, docs/reports/data/2026-09-25-claims-v3). --v3 (added 26 September 2026) reads that check's
+results for the three cards (aifoundry2, aifoundry3, aifoundry1-c1) into a block of its own (v3: the governor
+readouts, the SP pass and board refresh per card, the wake-up probes, the idle items' numbers, the spin and
+active-minion runs, the clock of every sample), and adds its idle cooling cycles to idle_sessions as sessions marked
+campaign "v3" (summary_v3); without --v3 the output is what it was before.
 
 then build_cards_data.py ... --merge $D/2026-09-22-dvfs-aifoundry2/dvfs.json (tools/ettelem/finish_horace.sh runs it).
 
@@ -326,6 +331,47 @@ def find_sessions(roots, exclude):
     return sorted(out)
 
 
+def session_offset(name, card, samples, R, pw):
+    """One session against the aifoundry2 idle law (idle_sessions' rule, below): its bins and its offset."""
+    import bisect
+    L = lambda T: pw["P_fix"] + pw["A_leak_at_80"] * float(np.exp((T - 80) / pw["T_L"]))
+    win = []                                   # the launch windows, merged
+    for a, b in sorted((r["t_start_ms"] - 1000, r["t_end_ms"] + 6000) for r in R):
+        if win and a <= win[-1][1]:
+            win[-1][1] = max(win[-1][1], b)
+        else:
+            win.append([a, b])
+    starts = [w[0] for w in win]
+    bins = collections.defaultdict(list)
+    for s in samples:
+        if int(s["mhz"]["minion"]) != 600:
+            continue
+        k = bisect.bisect_right(starts, s["t_ms"]) - 1
+        if k >= 0 and s["t_ms"] <= win[k][1]:
+            continue
+        bins[int(s["temp_c"]["minshire"][0])].append(float(s["board_w"]))
+    rows = [{"T": k, "W": float(np.mean(v)), "law_W": L(k), "n": len(v)} for k, v in sorted(bins.items()) if len(v) >= 20]
+    if not rows:
+        return None
+    n = sum(r["n"] for r in rows)
+    return {"session": name, "card": card, "day": day_of(name),
+            "T": [rows[0]["T"], rows[-1]["T"]], "n": n,
+            "offset_W": sum((r["W"] - r["law_W"]) * r["n"] for r in rows) / n,
+            "offset_W_bins": float(np.mean([r["W"] - r["law_W"] for r in rows])), "bins": rows}
+
+
+def idle_summary(out):
+    """Per card, over sessions: the offsets' mean, sd, range, temperatures and days."""
+    summ = {}
+    for card in sorted({r["card"] for r in out}):
+        o = [r["offset_W"] for r in out if r["card"] == card]
+        summ[card] = {"sessions": len(o), "mean_W": float(np.mean(o)), "sd_W": float(np.std(o, ddof=1)) if len(o) > 1 else None,
+                      "min_W": min(o), "max_W": max(o), "max_abs_W": max(abs(x) for x in o),
+                      "T": [min(r["T"][0] for r in out if r["card"] == card), max(r["T"][1] for r in out if r["card"] == card)],
+                      "days": sorted({r["day"] for r in out if r["card"] == card})}
+    return summ
+
+
 def idle_sessions(dirs, pw, idle_sample=None):
     """The aifoundry2 idle law against every session it was not fitted on, on both cards. Per session, with
     transfer_cards.py's published idle rule (10 Hz samples at 600 MHz outside [launch start - 1 s, launch end +
@@ -333,33 +379,7 @@ def idle_sessions(dirs, pw, idle_sample=None):
     the session's offset from the law, measured minus law, over its idle samples (the bins weighted by samples).
     The 20.6-hour idle sample (--idle, no launches) is one more aifoundry2 session, every sample idle. The card
     comes from the directory name. The session is the unit: the summary is over sessions, per card."""
-    L = lambda T: pw["P_fix"] + pw["A_leak_at_80"] * float(np.exp((T - 80) / pw["T_L"]))
-
-    def one(name, card, samples, R):
-        import bisect
-        win = []                                   # the launch windows, merged
-        for a, b in sorted((r["t_start_ms"] - 1000, r["t_end_ms"] + 6000) for r in R):
-            if win and a <= win[-1][1]:
-                win[-1][1] = max(win[-1][1], b)
-            else:
-                win.append([a, b])
-        starts = [w[0] for w in win]
-        bins = collections.defaultdict(list)
-        for s in samples:
-            if int(s["mhz"]["minion"]) != 600:
-                continue
-            k = bisect.bisect_right(starts, s["t_ms"]) - 1
-            if k >= 0 and s["t_ms"] <= win[k][1]:
-                continue
-            bins[int(s["temp_c"]["minshire"][0])].append(float(s["board_w"]))
-        rows = [{"T": k, "W": float(np.mean(v)), "law_W": L(k), "n": len(v)} for k, v in sorted(bins.items()) if len(v) >= 20]
-        if not rows:
-            return None
-        n = sum(r["n"] for r in rows)
-        return {"session": name, "card": card, "day": day_of(name),
-                "T": [rows[0]["T"], rows[-1]["T"]], "n": n,
-                "offset_W": sum((r["W"] - r["law_W"]) * r["n"] for r in rows) / n,
-                "offset_W_bins": float(np.mean([r["W"] - r["law_W"] for r in rows])), "bins": rows}
+    one = lambda name, card, samples, R: session_offset(name, card, samples, R, pw)
     out = []
     for d in dirs:
         rel = rel_data(d)
@@ -371,15 +391,8 @@ def idle_sessions(dirs, pw, idle_sample=None):
         r = one(rel_data(idle_sample), "aifoundry2", jsonl(idle_sample), [])
         if r:
             out.append(r)
-    summ = {}
-    for card in sorted({r["card"] for r in out}):
-        o = [r["offset_W"] for r in out if r["card"] == card]
-        summ[card] = {"sessions": len(o), "mean_W": float(np.mean(o)), "sd_W": float(np.std(o, ddof=1)) if len(o) > 1 else None,
-                      "min_W": min(o), "max_W": max(o), "max_abs_W": max(abs(x) for x in o),
-                      "T": [min(r["T"][0] for r in out if r["card"] == card), max(r["T"][1] for r in out if r["card"] == card)],
-                      "days": sorted({r["day"] for r in out if r["card"] == card})}
     return {"rule": "600 MHz samples outside [launch start - 1 s, launch end + 6 s], whole-degree bins with n >= 20; "
-                    "offset_W = measured - law over the session's binned idle samples", "sessions": out, "summary": summ}
+                    "offset_W = measured - law over the session's binned idle samples", "sessions": out, "summary": idle_summary(out)}
 
 
 def leak_split(pw, tl_range, busy80):
@@ -407,7 +420,8 @@ def leak_split(pw, tl_range, busy80):
 
 
 def wakeup(d):
-    wj = json.load(open(os.path.join(d, "wakeup.json")))
+    p = os.path.join(d, "wakeup.json")          # the version-3 probes store their labels gzipped
+    wj = json.load(open(p) if os.path.exists(p) else gzip.open(p + ".gz", "rt"))
     labels = wj["labels"]
     raw = open(os.path.join(d, "wakeup.u32"), "rb").read()
     # memprobe.c stores (uint32_t)(fixcyc(t1) - fixcyc(t0)), a signed difference cut to 32 bits: read it back as
@@ -444,6 +458,155 @@ def wakeup(d):
             "reps": meta.get("reps"), "probe_idle_s": round(probe_s, 2) if probe_s is not None else None}
 
 
+V3_CARDS = ["aifoundry2", "aifoundry3", "aifoundry1-c1"]
+
+
+def v3_block(root, pw):
+    """The version-3 claims check of 25-26 September 2026 (docs/reports/data/2026-09-25-claims-v3), read for this
+    page. Nothing is decided here: every outcome is the check's own (results/<exp>.json); this reads the numbers the
+    page quotes from those results, and recomputes from the raw passes only what the results do not hold:
+
+    - idle_cycles: each kept V3-IDLE cooling cycle (results/idle.json cycles_used) as one more idle session, with
+      idle_sessions' rule restricted to the check's rule-A window (cool_start to cool_start + 900 s, capped at
+      cool_end; tools/claims-v3/idle/README.md), so its bins are the check's own; offset_W_bins over bins 51..Tmax
+      reproduces IDLE-a's per-cycle offsets;
+    - wakeup: each card's kept wake-up probes (results/mem.json MEM-W kept_probes) through wakeup() above;
+    - clock_mhz: the minion clock of every ettelem sample in the raw passes, per card;
+    - abl_minions: mean switching per run at 256, 512 and 1,024 active minions (results/abla.runs.json, the busy rule)."""
+    import datetime
+    import glob
+    res = lambda n: json.load(open(os.path.join(root, "results", n + ".json")))
+    raw = os.path.join(root, "raw")
+    item = lambda rows, k: next(r for r in rows if r["item"] == k)
+    tel, idle, mem, abla = res("tel"), res("idle"), res("mem"), res("abla")
+    telI = {r["item"]: r for r in tel["items"]}
+    idleI = {r["item"]: r for r in idle["items"]}
+    out = {"source": "docs/reports/data/2026-09-25-claims-v3", "cards": V3_CARDS,
+           "outcomes": {}}
+    for k, r in list(telI.items()) + list(idleI.items()) + [(r["item"], r) for r in mem + abla]:
+        ac = r.get("all_cards")
+        out["outcomes"][k] = {"registered": r.get("outcome"),
+                              "all_cards": ac.get("outcome") if isinstance(ac, dict) else ac}
+
+    # the governor readouts (TEL-G), the SP pass (TEL-P1, P3, P5) and the board refresh seen per poller (TEL-S)
+    gov = {}
+    for c, v in telI["TEL-G"]["per_card"].items():
+        ps = v.get("passes", [])
+        uniq = lambda key: [json.loads(x) for x in sorted({json.dumps(p[key], sort_keys=True) for p in ps})]
+        ghz = [g for p in ps for g in p["launch_ghz"]]
+        gov[c] = {"passes": len(ps), "config": uniq("config"), "driver": uniq("driver"), "fw": uniq("fw"),
+                  "launch_ghz": [min(ghz), max(ghz)], "launches": len(ghz),
+                  "governor_lines": sum(p["down_lines"] + p["idle_lines_old_format"] + p["idle_lines_353f20e_format"]
+                                        + p["up_lines"] for p in ps),
+                  "status": v.get("status")}
+    out["governor"] = gov
+    sp = {c: {} for c in V3_CARDS}
+    for k, fld, key in (("TEL-P1", "Q_ms", "quiet_ms"), ("TEL-P3", "E10_ms", "e10_ms"),
+                        ("TEL-P5", "Q_ms", "quiet_ms"), ("TEL-P5", "E10_ms", "e10_ms")):
+        for c, v in telI[k]["per_card"].items():
+            if v.get("passes"):
+                sp[c][key] = [p[fld] for p in v["passes"]]
+    out["sp_pass_ms"] = sp
+    out["refresh_ms"] = {c: {"P_L": [p["P_L"] for p in v["passes"]], "P_H": [p["P_H"] for p in v["passes"]],
+                             "interval": v.get("interval")}
+                         for c, v in telI["TEL-S"]["per_card"].items()}
+
+    # the idle cooling cycles, as sessions
+    cyc = []
+    for c in V3_CARDS:
+        for n in idle["cycles_used"].get(c, []):
+            d = os.path.join(raw, c, "idle", "p%d" % n)
+            marks = {}
+            for m in jsonl(os.path.join(d, "marks.jsonl")):
+                marks.setdefault(m.get("ev"), m)
+            t0 = marks["cool_start"]["t_ms"]
+            t1 = min(marks["cool_end"]["t_ms"], t0 + 900 * 1000)
+            S = [s for s in session_tel(d) if t0 <= s["t_ms"] <= t1]
+            R = [r for r in jsonl(os.path.join(d, "launches.jsonl")) if "t_start_ms" in r and "t_end_ms" in r]
+            r = session_offset(rel_data(d), c, S, R, pw)
+            if r:
+                blk = json.load(open(os.path.join(d, "block.json")))
+                r["day"] = datetime.datetime.fromtimestamp(blk["t0_ms"] / 1000, datetime.timezone.utc).strftime("%Y-%m-%d")
+                r["campaign"], r["pass"] = "v3", n
+                tmax_bins = [b for b in r["bins"] if 51 <= b["T"]]
+                r["offset_W_bins_51"] = float(np.mean([b["W"] - b["law_W"] for b in tmax_bins]))
+                cyc.append(r)
+    out["idle_cycles"] = cyc
+    out["idle_cycles_summary"] = idle_summary(cyc)
+    # the per-card numbers of the idle items the page quotes
+    ia, ib, idd, ik = (idleI[k]["per_card"] for k in ("IDLE-a", "IDLE-b", "IDLE-d", "IDLE-k"))
+    out["idle"] = {
+        "a": {c: {"offset_W": v["offset_W"], "resid_slope_W_per_C": v["resid_slope_W_per_C"],
+                  "resid_by_bin": [x["resid_by_bin"] for x in v["cycles"]]} for c, v in ia.items() if v.get("n")},
+        "b": {c: {"bins": {T: b for T, b in v["bins"].items() if b.get("testable")},
+                  "cycle_offset_W": v["info_cycle_offset_W"], "T_range": v["cycles_T_range"]} for c, v in ib.items() if v.get("n")},
+        "d": {c: {"cycles": v["passes_with_73C_bin"], "components_W": {k: {"mean": x["mean"], "ci99": x["ci99"]} for k, x in v["components_W"].items()},
+                  "board_W": v["info_board_W"]} for c, v in idd.items() if v.get("n")},
+        # per cycle, over the leakage scales that fit it about as well as its best (T_L_in_range): the busy share
+        # (share_range, the check's) and the idle share at 80 C, A80 / (P_fix + A80), from the same profile rows
+        "k": {c: {"cycles": [dict({kk: x[kk] for kk in ("pass", "T_span", "best_T_L", "T_L_range", "share_range", "resid_70_85")},
+                                  idle_share_range=[min(r["A80"] / (r["P_fix"] + r["A80"]) for r in x["profile"] if r["T_L"] in x["T_L_in_range"]),
+                                                    max(r["A80"] / (r["P_fix"] + r["A80"]) for r in x["profile"] if r["T_L"] in x["T_L_in_range"])])
+                             for x in v["per_cycle"]], "law_resid_70_85_W": v["law_resid_70_85_W"],
+                  "decision": v["decision_busy_leakage_above_Kanter_30pct"]} for c, v in ik.items() if v.get("n")},
+        "idle_mv": {c: v["minion_mv_median_at_used"] for c, v in idle["idle_clocks"].items()},
+        "tmax": {c: [x["tmax"] for x in v if x.get("kept")] for c, v in idle["passes"].items()},
+    }
+
+    # the wake-up probe on every card
+    w = item(mem, "MEM-W")["per_card"]
+    out["wakeup"] = {}
+    for c in V3_CARDS:
+        v = w.get(c, {})
+        probes = []
+        for p in v.get("kept_probes", []):
+            r = wakeup(os.path.join(raw, c, "mem", p, "wake"))
+            probes.append({"probe": p, "idle_cycles": r["idle_cycles"],
+                           "levels": [{kk: l[kk] for kk in ("level", "paired_delta_cycles", "paired_median_by_idle", "paired_by_repeat")}
+                                      for l in r["levels"]],
+                           "clock": v["passes"][p]["P6_clock"], "P5": v["passes"][p]["P5"]})
+        out["wakeup"][c] = {"probes": probes, "decision": v.get("decision"), "same_class": v.get("P4_same_class_pooled"),
+                            "clock_basis": v.get("P6_basis")}
+
+    # the minion clock of every sample the check recorded
+    clk = {}
+    for c in V3_CARDS:
+        h = collections.Counter()
+        for f in sorted(glob.glob(os.path.join(raw, c, "**", "*.jsonl*"), recursive=True)):
+            try:
+                with (gzip.open(f, "rt") if f.endswith(".gz") else open(f)) as fh:
+                    for line in fh:
+                        if '"mhz"' not in line:
+                            continue
+                        try:
+                            m = json.loads(line).get("mhz", {})
+                        except ValueError:
+                            continue
+                        if isinstance(m, dict) and "minion" in m:
+                            h[str(int(m["minion"]))] += 1
+            except (OSError, EOFError):
+                continue
+        clk[c] = dict(sorted(h.items()))
+    out["clock_mhz"] = clk
+
+    # the spin loop and the active-minion line (ABL-T6, ABL-T7), with the mean switching per minion count
+    t6, t7 = item(abla, "ABL-T6")["per_card"], item(abla, "ABL-T7")["per_card"]
+    sub = lambda v: (v.get("subtests") or v.get("vs_aifoundry2_values", {}).get("subtests") or [])
+    out["abl"] = {c: {"spin_over_idle": {kk: sub(t6[c])[0]["ci"][kk] for kk in ("mean", "lo", "hi", "n")},
+                      "spin_outcome": t6[c].get("outcome"),
+                      "ratio_1024_256": {kk: sub(t7[c])[0]["ci"][kk] for kk in ("point", "lo", "hi")},
+                      "line": {kk: sub(t7[c])[1]["fit"][kk] for kk in ("intercept", "intercept_lo", "intercept_hi", "slope", "slope_lo", "slope_hi")},
+                      "minions_outcome": t7[c].get("outcome")} for c in V3_CARDS}
+    runs = json.load(open(os.path.join(root, "results", "abla.runs.json")))["runs"]
+    for c in V3_CARDS:
+        per = {}
+        for cfg in ("fp32_randn_8", "fp32_randn_16", "fp32_randn"):
+            rs = [r for r in runs[c] if r["config"] == cfg and r["kept_busy"]]
+            per[str(rs[0]["minions"])] = {"runs": len(rs), "switching_W": float(np.mean([r["switching"] for r in rs]))}
+        out["abl"][c]["switching_by_minions"] = per
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cold", nargs="+", required=True)
@@ -465,6 +628,8 @@ def main():
     ap.add_argument("--tl-range", nargs=2, type=float, default=[30.0, 45.0],
                     help="leakage temperature scales that fit the law's idle readings about as well as the best "
                          "(leak_split; default 30 45, PLAN3 D3)")
+    ap.add_argument("--v3", help="the version-3 claims check's directory (docs/reports/data/2026-09-25-claims-v3): "
+                                  "adds its per-card readouts (v3) and its idle cooling cycles to idle_sessions")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
 
@@ -531,6 +696,15 @@ def main():
         fitted = list(a.cold) + [os.path.join(DATA, "..", "..", "..", m["dir"]) for m in json.load(open(a.model)).get("sessions", [])]
         out["idle_sessions"] = idle_sessions(find_sessions(a.idle_sessions, fitted), pw, a.idle)
     out["leak_split"] = leak_split(pw, a.tl_range, ab["fp32_randn"]["p80"])
+    if a.v3:
+        # the version-3 check (26 September 2026): its readouts in their own block, and its idle cooling cycles as
+        # more idle sessions, marked campaign "v3" and summarised apart (summary_v3), so the 21-24 September
+        # sessions and their summary stay as they were
+        out["v3"] = v3_block(a.v3, pw)
+        if "idle_sessions" in out:
+            out["idle_sessions"]["sessions"] += out["v3"]["idle_cycles"]
+            out["idle_sessions"]["summary_v3"] = out["v3"].pop("idle_cycles_summary")
+            del out["v3"]["idle_cycles"]
     if a.sptrace:
         # The governor's own log lines, in buffer order. Their format ("Power idle state event, current pwr N
         # tdp level N") exists only in et-platform before commit 60b40c10f, so it also dates the firmware.
@@ -570,6 +744,16 @@ def main():
               f"{g['reset']['above_600']} of {g['reset']['block_ends']} block ends, up after end {g['reset']['up_after_end']}; "
               f"meter lag median {g['meter_lag_s']['median']:.2f} s ({g['meter_lag_s']['min']}-{g['meter_lag_s']['max']}, n={g['meter_lag_s']['n']}); "
               f"boundaries {g['boundaries']}; up-step readings {g['up_T']}")
+    if "v3" in out:
+        for c, v in out["idle_sessions"].get("summary_v3", {}).items():
+            print(f"version-3 cooling cycles on {c}: {v['sessions']} {v['days']}, offset mean {v['mean_W']:+.2f} W "
+                  f"({v['min_W']:+.2f} to {v['max_W']:+.2f} W), die {v['T'][0]}-{v['T'][1]} C")
+        print("version-3 cycles, mean over bins 51..Tmax: " + ", ".join(
+            f"{r['card']} p{r['pass']} {r['offset_W_bins_51']:+.4f} W" for r in out["idle_sessions"]["sessions"] if r.get("campaign") == "v3"))
+        print("version-3 clocks: " + "; ".join(f"{c} {h}" for c, h in out["v3"]["clock_mhz"].items()))
+        print("version-3 wake-up paired deltas at the longest idle: " + "; ".join(
+            f"{c} {p['probe']}: " + ", ".join(f"{l['level']} {l['paired_delta_cycles']:+g}" for l in p["levels"])
+            for c, w in out["v3"]["wakeup"].items() for p in w["probes"]))
     if "idle_sessions" in out:
         for c, v in out["idle_sessions"]["summary"].items():
             print(f"idle law on {c}: {v['sessions']} sessions {v['days']}, offset mean {v['mean_W']:+.2f} W (sd {v['sd_W']:.2f}), "

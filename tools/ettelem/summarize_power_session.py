@@ -34,7 +34,10 @@ existing --out file whose other sections (horace, horace2) are kept as they are:
                   (catalogue.json rail_filter), the minion rail's IR drop (unmetered_fit.json ddr_droop) and the busy
                   drift of the Horace strict runs (report.json), and that drift on each card with its run count,
                   spread and temperatures (busy_drift_cards, recomputed run by run from each card's horace3.json and
-                  checked against its leak_w_per_c).
+                  checked against its leak_w_per_c; each: the per-run slopes), and the same load step's busy slope on
+                  every card of the version-3 claims check (busy_drift_loadstep_v3: V3-MMB item MMB-T/P1, four repeats
+                  of this session's load step per card on 26 September 2026, fitted from 5 s after launch by
+                  tools/claims-v3/mmb/x1_reduce.py; read from LOADSTEP_V3 when that file exists).
 
 The output is json.dumps with default separators and no final newline, as committed, with the top-level keys in a
 fixed order.
@@ -65,6 +68,9 @@ CONTEXT = {  # later measurements the page sets beside this session's, and where
 # run count and spread, so the page can say how well each card pins it down.
 DRIFT_SESSIONS = {"aifoundry2": "docs/reports/data/2026-09-21-horace-aifoundry2/horace3.json",
                   "aifoundry3": "docs/reports/data/2026-09-22-horace-aifoundry3/horace3.json"}
+# The version-3 claims check (docs/reports/data/2026-09-25-claims-v3) repeated this session's load step four times on
+# each of three cards; its reduced results give each repeat's busy slope (MMB-T/P1). Added 26 September 2026.
+LOADSTEP_V3 = "docs/reports/data/2026-09-25-claims-v3/results/mmb.json"
 KEY_ORDER = ["thermal", "horace", "shires", "horace2", "context", "voltage_repeat", "mesh"]
 
 
@@ -196,7 +202,25 @@ def busy_drift(rel):
     mean, sd = statistics.mean(lam), statistics.stdev(lam)
     assert abs(mean - d["leak_w_per_c"]) < 1e-6, (rel, mean, d["leak_w_per_c"])
     return {"w_per_c": round(mean, 4), "runs": len(lam), "sd": round(sd, 4), "se": round(sd / len(lam) ** 0.5, 4),
-            "temp_c": [min(lo), max(hi)], "source": rel}
+            "temp_c": [min(lo), max(hi)], "each": [round(x, 4) for x in lam], "source": rel}
+
+
+def loadstep_v3(rel):
+    """The load step's busy slope per card in the version-3 claims check: MMB-T/P1's per-repeat board slopes (W/C,
+    least squares from 5 s after the matmul's launch, x1_reduce.py) and each repeat's die range, with the same summary
+    fields as busy_drift (mean, sd, standard error of the mean, run count, temperatures) and the item's 99% interval.
+    tested: whether the card's slope was tested against a registered band (aifoundry2, aifoundry3) or only reported."""
+    d = json.load(open(os.path.join(ROOT, rel)))
+    it = next(i for i in d["items"] if i["item"] == "MMB-T/P1")
+    out = {}
+    for card, v in it["per_card"].items():
+        xs, T = v["values"], v["busy_T_range"]
+        mean, sd = statistics.mean(xs), statistics.stdev(xs)
+        assert abs(mean - v["mean"]) < 1e-3 and abs(sd - v["sd"]) < 1e-3, (card, mean, v["mean"], sd, v["sd"])
+        out[card] = {"w_per_c": round(mean, 4), "runs": len(xs), "sd": round(sd, 4), "se": round(sd / len(xs) ** 0.5, 4),
+                     "temp_c": [min(t[0] for t in T), max(t[1] for t in T)], "each": xs, "each_temp_c": T,
+                     "ci99": v["ci99"], "tested": v.get("holds") is not None, "source": rel + " MMB-T/P1"}
+    return out
 
 
 def context():
@@ -204,6 +228,8 @@ def context():
     for key, (rel, get) in CONTEXT.items():
         out[key] = {"value": get(json.load(open(os.path.join(ROOT, rel)))), "source": rel}
     out["busy_drift_cards"] = {card: busy_drift(rel) for card, rel in DRIFT_SESSIONS.items()}
+    if os.path.exists(os.path.join(ROOT, LOADSTEP_V3)):
+        out["busy_drift_loadstep_v3"] = loadstep_v3(LOADSTEP_V3)
     return out
 
 
