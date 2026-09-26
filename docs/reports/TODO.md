@@ -21,9 +21,8 @@ finding checked against the page text or the data before it was listed (the requ
 
 - [ ] **PWR-01 (high, a rule).** CLAUDE.md and AGENT.md §10 forbid other people's accounts or files in this public
   repository, but:
-  - "aifoundry1 is fixed" §4 (`2026-09-25-aifoundry1-fix.html:172–186`) tabulates lab users' home directories
-    (`/home/roman`, `/home/saqib`, `/home/sbn`, `/home/rehan` and others), with sizes and contents, and says who
-    should delete what.
+  - "aifoundry1 is fixed" §4 (`2026-09-25-aifoundry1-fix.html:172–186`) tabulates named lab users' home directories,
+    with sizes and contents, and says who should delete what.
   - "What is broken on aifoundry1" names one user's home directory four times in its HTML.
   - `data/2026-09-25-aifoundry1/disk-transcript.txt` lists every account's home directory, although that
     directory's README says outputs listing other users were not committed.
