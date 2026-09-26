@@ -70,10 +70,20 @@ python3 tools/ettelem/build_cards_data.py --cards "$A3/cards.json" \
   --config docs/reports/data/2026-09-22-cards/config.json --driver docs/reports/data/2026-09-22-cards/driver_config.json \
   --sptrace docs/reports/data/2026-09-22-cards/sptrace-aifoundry3.bin --out docs/reports/data/2026-09-22-cards/cards-report.json \
   --merge docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json "$D/report.json"
+# section 10 and the pricer on the version-3 check's three cards (26 September), the block above kept as its history;
+# merged into report.json only, so the DVFS page and cards-report.json keep the 22 September block
+python3 tools/ettelem/build_cards_data.py --cards "$A3/cards.json" \
+  --transfer "$A3/transfer.json" \
+  --leak "$A3/leakage_crosscard.json" \
+  --config docs/reports/data/2026-09-22-cards/config.json --driver docs/reports/data/2026-09-22-cards/driver_config.json \
+  --sptrace docs/reports/data/2026-09-22-cards/sptrace-aifoundry3.bin \
+  --v3 docs/reports/data/2026-09-25-claims-v3/results --model "$D/model.json" --toggles-all "$D/toggles_all.json" \
+  --out "$D/cards-v3.json" --merge "$D/report.json"
 
-# why-low-power's data, after the second card's strict session so its values can stand beside aifoundry2's
+# why-low-power's data, after the second card's strict session so its values can stand beside aifoundry2's, and the
+# version-3 check's three cards (--v3)
 python3 tools/ettelem/build_lowpower_report_data.py --ablation "$D/ablation.json" --model "$D/model.json" --toggles "$D/toggles.json" --vf "$D/vf.json" \
-  --second-card "$A3/horace3.json" --out "$D/lowpower-report.json"
+  --second-card "$A3/horace3.json" --v3 docs/reports/data/2026-09-25-claims-v3/results --out "$D/lowpower-report.json"
 
 python3 scripts/build-report.py horace-experiment "$D/report.json" docs/reports/2026-09-20-horace-experiment.html
 python3 scripts/build-report.py why-low-power "$D/lowpower-report.json" docs/reports/2026-09-21-why-low-power.html

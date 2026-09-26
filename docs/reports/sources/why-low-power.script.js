@@ -3,16 +3,26 @@
 const f1=v=>v.toFixed(1),f2=v=>v.toFixed(2);
 const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
 
-/* ---------- power against active cores ---------- */
+/* ---------- power against active cores ----------
+   This session's points (aifoundry2, 21 September, two runs each) and the three-card check's (D.v3, 26 September:
+   256, 512 and 1,024 active minions on each card, four runs each, in the card registry's marks and colours, each
+   card's points joined by a thin line and set a few pixels apart so they do not hide one another). */
 (function(){const pts=[['fp32_randn_8',256],['fp32_randn_16',512],['fp32_randn_24',768],['fp32_randn',1024]].filter(q=>C[q[0]]).map(q=>[q[1],C[q[0]].dyn,q[0]]);
  const k=pts.reduce((a,p)=>a+p[0]*p[1],0)/pts.reduce((a,p)=>a+p[0]*p[0],0);   /* least squares through the origin: W per active minion */
+ const V3=D.v3,ids=V3?CK.cardsIn(V3.cards):[],MIN=[['fp32_randn_8',256],['fp32_randn_16',512],['fp32_randn',1024]];
+ if(ids.length){const lg=document.createElement('div');document.getElementById('cores').before(lg);
+  CK.legend(lg,[{key:'s',label:'aifoundry2, 21 September',mark:'dot',color:'var(--bad)'}].concat(CK.cardLegend(ids).map(x=>Object.assign(x,{label:x.label+', 26 September'}))));}
  CK.frame('cores',{height:W=>W<600?300:360,minW:300,maxW:460,label:'Power over idle against the number of active minions',draw:ff=>{
   const W=ff.W,H=ff.H,L=44,R=14,T=26,B=40;const x=CK.lin(0,1100,L,W-R),y=CK.lin(0,32,H-B,T);
   CK.axes(ff,{x,y,L,R,T,B,xt:[0,256,512,768,1024],yt:[0,10,20,30],xfmt:v=>CK.fmt.num(v,0),yfmt:String,xl:'active minions (random fp32 matmul)',yl:'W over idle'});
   CK.el('line',{x1:x(0),y1:y(0),x2:x(1100),y2:y(1100*k),style:'stroke:var(--axis)','stroke-dasharray':'4 4'},ff.svg);
   CK.inside(ff,[CK.txt(ff.svg,W-R,y(1100*k*0.3),`${f1(1000*k)} mW per active minion`,'lab','end')]);   /* under the line, right-aligned */
   const nodes=pts.map(p=>{const c=CK.el('circle',{cx:x(p[0]),cy:y(p[1]),r:6,style:'fill:var(--bad);stroke:var(--surface)','stroke-width':1.5},ff.svg);
-   CK.tip(ff,c,`${CK.fmt.num(p[0],0)} minions: +${f1(p[1])} W, ${f1(1000*p[1]/p[0])} mW each`);return c;});
+   CK.tip(ff,c,`aifoundry2, 21 September: ${CK.fmt.num(p[0],0)} minions: +${f1(p[1])} W, ${f1(1000*p[1]/p[0])} mW each`);return c;});
+  ids.forEach((id,j)=>{const cf=V3.cards[id].configs,q=MIN.filter(m=>cf[m[0]]).map(m=>[m[1],cf[m[0]].dyn]),dx=10*(j+1),lb=CK.card(id).label;
+   CK.el('polyline',{points:q.map(r=>`${x(r[0])+dx},${y(r[1])}`).join(' '),style:`fill:none;stroke:${CK.card(id).color}`,'stroke-width':1,opacity:0.6},ff.svg);
+   q.forEach(r=>{const g=CK.el('g',{},ff.svg),e=CK.cardMark(g,id,x(r[0])+dx,y(r[1]),4.5);if(CK.card(id).mark!=='ring'){e.style.stroke='var(--surface)';e.style.strokeWidth='1';}
+    CK.tip(ff,g,`${lb}, 26 September (four runs): ${CK.fmt.num(r[0],0)} minions: +${f1(r[1])} W, ${f1(1000*r[1]/r[0])} mW each`);nodes.push(g);});});
   CK.keynav(ff,nodes);}});})();
 
 /* ---------- energy per multiply-add by precision and data ---------- */
@@ -21,6 +31,10 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
  /* where the bars are too narrow for a word under each, a legend above names the colours */
  const lg=document.createElement('div');document.getElementById('prec').before(lg);
  CK.legend(lg,['zeros','ones','randn'].map(v=>({key:v,label:VN[v],mark:'box',color:COLV[v]})));
+ /* the three-card check (D.v3, 26 September, four runs each): each card's value as its registry mark on the bar */
+ const V3=D.v3,ids=V3?CK.cardsIn(V3.cards):[],v3=(id,k)=>{const c=V3.cards[id].configs[k];return c?c.pj_per_unit_dyn:null;};
+ if(ids.length){const l2=document.createElement('div');document.getElementById('prec').before(l2);
+  CK.legend(l2,CK.cardLegend(ids).map(x=>Object.assign(x,{label:x.label+', 26 September'})));}
  CK.frame('prec',{height:W=>W<600?300:360,minW:300,maxW:460,label:'Energy per multiply-add by precision and data',draw:ff=>{
   const W=ff.W,H=ff.H,L=44,R=14,T=26,gap=10,ymax=7,bw=(W-L-R-2*gap)/rows.length,per=bw>=38,B=per?58:40;
   lg.style.display=per?'none':'';
@@ -29,15 +43,21 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
   const nodes=[];
   rows.forEach((r,i)=>{const g=CK.el('g',{},ff.svg),v=r.c.pj_per_unit_dyn,x0=L+i*bw+TT.indexOf(r.t)*gap,cx=x0+bw/2;
    CK.el('rect',{x:x0+4,y:y(v),width:bw-8,height:Math.max(1,y(0)-y(v)),rx:2,style:'fill:'+COLV[r.v]},g);
-   CK.txt(g,cx,y(v)-5,v.toFixed(v<1?2:1),'lab-strong','middle');
+   const k3=`${r.t}_${r.v}`,m3=ids.map(id=>[id,v3(id,k3)]).filter(q=>q[1]!=null),top=Math.min(y(v),...m3.map(q=>y(q[1])));
+   m3.forEach(([id,w],j)=>{const e=CK.cardMark(g,id,x0+4+(bw-8)*(j+1)/(m3.length+1),y(w),Math.min(4,bw/8));if(CK.card(id).mark!=='ring'){e.style.stroke='var(--surface)';e.style.strokeWidth='1';}});
+   CK.txt(g,cx,top-7,v.toFixed(v<1?2:1),'lab-strong','middle');
    if(per)CK.txt(g,cx,H-B+15,VN[r.v],'tick','middle');
    if(r.v==='ones')CK.txt(g,cx,H-B+(per?34:18),r.t,'lab-strong','middle');
-   CK.tip(ff,g,()=>`<b>${r.t}, ${r.v}</b><br>${f1(r.c.p80)} W board, +${f1(r.c.dyn)} W over idle<br>${(r.c.per_s/1e12).toFixed(2)}×10¹² multiply-adds per second (${r.c.cycles_per_op.toFixed(0)} cycles per op)<br>${v.toFixed(3)} pJ each over idle, ${r.c.pj_per_unit_board.toFixed(2)} pJ at the board`);nodes.push(g);});
+   CK.tip(ff,g,()=>`<b>${r.t}, ${r.v}</b><br>${f1(r.c.p80)} W board, +${f1(r.c.dyn)} W over idle<br>${(r.c.per_s/1e12).toFixed(2)}×10¹² multiply-adds per second (${r.c.cycles_per_op.toFixed(0)} cycles per op)<br>${v.toFixed(3)} pJ each over idle, ${r.c.pj_per_unit_board.toFixed(2)} pJ at the board (aifoundry2, 21 September)`+
+    (m3.length?'<br>26 September, over idle: '+m3.map(([id,w])=>`${CK.card(id).label} ${w.toFixed(3)} pJ`).join(' · '):''));nodes.push(g);});
   CK.keynav(ff,nodes);}});})();
 
 /* ---------- tables ---------- */
 (function(){const A=D.facts.a100,E=D.facts.et;const row=(n,a,e,note)=>`<tr><td>${n}</td><td class="num">${a}</td><td class="num">${e}</td><td class="small">${note||''}</td></tr>`;
  const S2=D.second_card,r2=S2&&S2.patterns.randn;   /* aifoundry3's fp32 random matmul, at its own launch temperature */
+ /* the three-card check (D.v3, 26 September, four runs each), when present, takes the second card's place in the notes */
+ const V3=D.v3,v3ids=V3?CK.cardsIn(V3.cards):[],v3c=(id,k)=>V3.cards[id].configs[k],v3T=id=>f1(V3.cards[id].T_reduced),lbl=id=>CK.card(id).label;
+ const v3list=fn=>v3ids.map(fn).join('; ');
  const h16=C.fp16_randn,tf16=2*h16.per_s/1e12;                       /* fp16 random: FLOPs are 2 per multiply-add */
  const pjA=A.watts/A.tflops,pj32=E.watts/E.tflops,pj16=h16.p80/tf16;  /* pJ per FLOP at the board */
  const mhzLo=Math.round(A.tflops/312*A.mhz/10)*10;                    /* 257 of the 312 bf16 peak TFLOPS needs at least this clock */
@@ -45,10 +65,11 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
  const mhz=m=>m.toLocaleString('en-US');
  document.getElementById('cmp').innerHTML='<thead><tr><th></th><th class="num">A100 (SXM4)</th><th class="num">ET-SoC-1 card</th><th>Note</th></tr></thead><tbody>'+
   row('Process, transistors, die',`TSMC 7 nm · ${A.transistors_b} B · ${A.die_mm2} mm²`,`TSMC 7 nm · &gt;${E.transistors_b} B · ${E.die_mm2} mm²`,'same process generation; Esperanto gives "over 24 billion" transistors')+
-  row('Dense matmul, measured',`${A.tflops} TFLOPS bf16 at ${A.watts} W`,`${f2(E.tflops)} TFLOPS fp32 at ${f1(E.watts)} W<br>${f1(tf16)} TFLOPS fp16 at ${f1(h16.p80)} W`,'A100: Horace He’s 8192³ bf16 run on random data at a 330 W limit. ET: aifoundry2, TensorFMA on random data, board power at 80 °C; fp16 and bf16 are different formats'+
-   (r2?`. aifoundry3, launched at ${f1(S2.launch_T)} °C: fp32 at ${f1(r2.p80)} W; fp16 was measured on aifoundry2 only`:''))+
-  row('Energy per FLOP, board',`${pjA.toFixed(2)} pJ (bf16)`,`${pj32.toFixed(1)} pJ fp32<br>${pj16.toFixed(1)} pJ fp16`,'A100 bf16 tensor cores against fp32 and fp16 here'+(r2?` (aifoundry3: ${(r2.p80/r2.tflops).toFixed(1)} pJ fp32)`:'')+'; the fp32 CUDA-core comparison follows the table')+
-  row('Idle',`${A.idle} W`,`${f1(E.idle62)} W at 62 °C<br>${f1(E.idle80)} W at 80 °C`,'ET: die temperature; the 62 °C figure is one reading after a night idle'+(r2?`. aifoundry3: ${f1(r2.idle)} W at ${f1(S2.launch_T)} °C`:''))+
+  row('Dense matmul, measured',`${A.tflops} TFLOPS bf16 at ${A.watts} W`,`${f2(E.tflops)} TFLOPS fp32 at ${f1(E.watts)} W<br>${f1(tf16)} TFLOPS fp16 at ${f1(h16.p80)} W`,'A100: Horace He’s 8192³ bf16 run on random data at a 330 W limit. ET: aifoundry2, TensorFMA on random data, board power at 80 °C (21 September); fp16 and bf16 are different formats'+
+   (v3ids.length?`. The three-card check, 26 September (four runs each, board power at the temperature each card is reduced at): `+v3list(id=>`${lbl(id)} fp32 ${f1(v3c(id,'fp32_randn').p80)} W, fp16 ${f1(v3c(id,'fp16_randn').p80)} W at ${v3T(id)} °C`):
+    r2?`. aifoundry3, launched at ${f1(S2.launch_T)} °C: fp32 at ${f1(r2.p80)} W; fp16 was measured on aifoundry2 only`:''))+
+  row('Energy per FLOP, board',`${pjA.toFixed(2)} pJ (bf16)`,`${pj32.toFixed(1)} pJ fp32<br>${pj16.toFixed(1)} pJ fp16`,'A100 bf16 tensor cores against fp32 and fp16 here'+(v3ids.length?` (26 September: `+v3list(id=>`${lbl(id)} ${(v3c(id,'fp32_randn').pj_per_unit_board/2).toFixed(1)} pJ fp32, ${(v3c(id,'fp16_randn').pj_per_unit_board/2).toFixed(1)} pJ fp16`)+')':r2?` (aifoundry3: ${(r2.p80/r2.tflops).toFixed(1)} pJ fp32)`:'')+'; the fp32 CUDA-core comparison follows the table')+
+  row('Idle',`${A.idle} W`,`${f1(E.idle62)} W at 62 °C<br>${f1(E.idle80)} W at 80 °C`,'ET: die temperature; the 62 °C figure is one reading after a night idle'+(v3ids.length?`. Under the check's runs of 26 September: `+v3list(id=>`${lbl(id)} ${f1(v3c(id,'fp32_randn').idle)} W at ${f1(V3.cards[id].launch_reading)} °C`):r2?`. aifoundry3: ${f1(r2.idle)} W at ${f1(S2.launch_T)} °C`:''))+
   row('Power per transistor under load',`${(A.watts/A.transistors_b).toFixed(1)} nW`,`${(E.watts/E.transistors_b).toFixed(1)} nW`,'the ET figure counts 24 billion transistors')+
   row('Power density under load',`${(A.watts/A.die_mm2).toFixed(2)} W/mm²`,`${(E.watts/E.die_mm2).toFixed(2)} W/mm²`,'board power over die area; both include memory and regulators')+
   row('Core voltage and clock',`about ${A.volts} V · ${mhz(mhzLo)}–${mhz(A.mhz)} MHz`,`${E.volts} V · ${E.mhz} MHz`,`Neither is published. ${mhz(A.mhz)} MHz is the maximum boost. Under He’s 330 W cap on random data the clock is lower: 257 of the 312 peak TFLOPS needs at least ${mhz(mhzLo)} MHz, and if his zero-data run (295 TFLOPS) held ${mhz(A.mhz)} MHz, the random run was near 1,230. 0.75 V is nominal for 7 nm.`)+
@@ -64,9 +85,16 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
  const n3=document.getElementById('cdyn-a3');
  if(n3){const P3=S2&&S2.patterns,one=p=>{const q=P3[p],V3=q.mv/1000;return {mw:1000*q.dyn/1024,nf:q.dyn/1024/(V3*V3*F)*1e9,pj:q.dyn/(q.tflops*1e12/2)*1e12};};
   const t=P3?['zeros','ones','randn'].map(one):null,and=a=>a.slice(0,-1).join(', ')+' and '+a[a.length-1];
-  n3.textContent='These rows are aifoundry2’s. '+(t?`On aifoundry3 (three runs each, launched at ${f1(S2.launch_T)} °C) the fp32 matmul on zeros, ones and random data switches `+
+  n3.textContent='These rows are aifoundry2’s (21 September, two runs each). '+(v3ids.length?'The table below gives the same workloads on each of three cards from the claims check of 26 September. ':
+   t?`On aifoundry3 (three runs each, launched at ${f1(S2.launch_T)} °C) the fp32 matmul on zeros, ones and random data switches `+
    `${and(t.map(q=>f1(q.mw)))} mW per minion over idle (${and(t.map(q=>q.nf.toFixed(3)))} nF; ${and(t.map(q=>q.pj.toFixed(2)))} pJ per multiply-add). `:'')+
    'The TensorLoad rows leave out an energy per byte: use the energy manual’s two-card values (Memory, in section 4).';}
+ /* the same rows on three cards (D.v3): each card's own voltage under load in the capacitance */
+ const t3=document.getElementById('cdyn3');
+ if(t3&&v3ids.length){const L3=LIST.filter(q=>v3ids.every(id=>v3c(id,q[0])));
+  t3.innerHTML='<thead><tr><th>Workload on all 1,024 minions</th><th>card</th><th class="num">board W</th><th class="num">over idle</th><th class="num">mW per minion, over idle</th><th class="num">C<sub>dynamic</sub> per minion, nF</th><th class="num">pJ per unit of work, over idle</th></tr></thead><tbody>'+
+   L3.map(q=>v3ids.map(id=>{const c=v3c(id,q[0]);return `<tr><td>${q[1]}</td><td>${lbl(id)} (${V3.cards[id].busy_mv.toFixed(0)} mV, ${v3T(id)} °C)</td><td class="num">${f1(c.p80)}</td><td class="num">${c.dyn>=0?'+':'−'}${f1(Math.abs(c.dyn))}</td><td class="num">${f1(c.mw_per_minion)}</td><td class="num">${c.nf_per_minion.toFixed(3)}</td><td class="num">${c.pj_per_unit_dyn.toFixed(c.pj_per_unit_dyn<1?2:1)}</td></tr>`;}).join('')).join('')+'</tbody>';
+  CK.sortTable('cdyn3',{filter:true});}
 })();
 
 /* ---------- §1 as a ratio chart: A100 ÷ ET-SoC-1 for every metric the facts give on both chips ----------
