@@ -2,6 +2,10 @@
 """Render the comprehensive instruction catalogue and the fine-grained memory pages from catalogue.json.
 
     render_catalogue.py docs/reports/data/2026-09-23-energy-manual/catalogue.json docs/energy-manual/
+
+Since 26 September 2026 catalogue.json is the version-3 full catalogue on three cards (aifoundry2, aifoundry3 and
+aifoundry1's card 1); the cards are taken in the pages' registry order, aifoundry2 first, whatever their order in the
+file. The version-3 check's own per-card tests (manual.json v3, beside catalogue.json) are quoted where they exist.
 """
 import json
 import math
@@ -42,17 +46,42 @@ def bar(c, n=1):
     return "—" if not c else f"**{f(c['mean'], n)}** [{f(c['lo'], n)}–{f(c['hi'], n)}]"
 
 
+ORDER = ["aifoundry2", "aifoundry3", "aifoundry1-c1", "aifoundry1-c0"]     # the pages' card registry order
+SHORT = {"aifoundry2": "a2", "aifoundry3": "a3", "aifoundry1-c1": "a1c1", "aifoundry1-c0": "a1c0"}
+NAME = {"aifoundry1-c1": "aifoundry1 card 1", "aifoundry1-c0": "aifoundry1 card 0"}
+WORD = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"]
+
+
+def order(cards):
+    return sorted(cards, key=lambda c: ORDER.index(c) if c in ORDER else len(ORDER))
+
+
+def name(c):
+    return NAME.get(c, c)
+
+
+def and_list(xs):
+    xs = list(xs)
+    return "".join(xs) if len(xs) < 2 else ", ".join(xs[:-1]) + " and " + xs[-1]
+
+
 def cards_of(c, n=1):
-    return " · ".join(f"{h.replace('aifoundry', 'card ')} {f(v['mean'], n)} ± {f(v['se'], n)}" for h, v in c["per_card"].items()) if c else "—"
+    return " · ".join(f"{SHORT.get(h, h)} {f(c['per_card'][h]['mean'], n)} ± {f(c['per_card'][h]['se'], n)}" for h in order(c["per_card"])) if c else "—"
 
 
 def main():
     d = json.load(open(sys.argv[1]))
     out = sys.argv[2]
-    cards = list(d["cards"])
+    cards = order(d["cards"])
     A = d["cards"][cards[0]]["summary"]
     B = d["cards"][cards[1]]["summary"] if len(cards) > 1 else {}
     C = d.get("combined", {})
+    NC = WORD[len(cards)]
+    npc = max(c["n"] for c in C.values()) // len(cards) if C else 3      # passes per card
+    mp = os.path.join(os.path.dirname(sys.argv[1]), "manual.json")
+    man = json.load(open(mp)) if os.path.exists(mp) else {}
+    V3 = man.get("v3", {})
+    XC = man.get("catalogue", {}).get("cross_cards", {})
 
     def g(name, o, h=2):
         return A.get(f"{name}/{o}/h{h}")
@@ -64,12 +93,12 @@ def main():
     import numpy as np
     s = ["# 3.1 Every instruction\n",
          "Energy per instruction retired, above idle, at 600 MHz and 0.52 V, with both harts of all 1,024 minions "
-         "issuing it back to back. **Every figure is the mean over six measurements — three passes in shuffled order "
-         "on each of two cards — and the bracket after it is the confidence bar: the range those six spanned.** The "
+         "issuing it back to back. **Every figure is the mean over " + WORD[npc * len(cards)] + " measurements — " + WORD[npc] + " passes in shuffled order "
+         "on each of " + NC + " cards (26 September) — and the bracket after it is the confidence bar: the range those " + WORD[npc * len(cards)] + " spanned.** The "
          "per-card columns give each card's own mean with its pass-to-pass standard error. Operands: zeros, and random "
          "values in [0.5, 2) (random 32-bit words for integer ops).\n",
          f"Over the whole catalogue the bar is ±{100*np.median(hw):.1f}% of the value in the median and ±{100*np.percentile(hw, 90):.1f}% at "
-         f"the 90th percentile; about half of it is the difference between the two cards: {cards[1]} runs {d['cross_card']['median']:.3f}× {cards[0]} in the median, each at its own die temperature.\n",
+         f"the 90th percentile; about half of it is the difference between the cards: " + (and_list(f"{name(h)} runs {XC[h]['median']:.3f}×" for h in order(XC)) if XC else f"{cards[1]} runs {d['cross_card']['median']:.3f}×") + f" {cards[0]} in the median, each at its own die temperature ([8](08-cards.md)).\n",
          f"Thirteen instructions **trapped** in U-mode in a one-off check while the catalogue was written, and so have no energy (the card and the log of that check were not kept): `" + "`, `".join(TRAPPED) + "`.\n"]
     for title, names in CLASSES:
         rows = []
@@ -89,6 +118,7 @@ def main():
     # ---------------- fine grain
     W = d["cards"][cards[0]]["wire"]
     W2 = d["cards"][cards[1]]["wire"] if len(cards) > 1 else {}
+    WA = [(h, d["cards"][h]["wire"]) for h in cards if d["cards"][h].get("wire", {}).get("zeros") and d["cards"][h]["wire"].get("random")]
 
     def shr(dd):
         return next((p_["shires"] for p_ in W["random"]["points"] if p_["hops"] == dd), "—")
@@ -102,8 +132,8 @@ def main():
     t = ["# 4.3 Finer grain: wires, lines, rows, and the leakage of the arrays\n",
          "What a byte costs is not one number. Below, the parts of it that can be separated with the card's own "
          "instruments: the distance the byte travels, the line it is part of, the DRAM row it comes from, and the "
-         "leakage of the memory it sat in. **Every figure is the mean over three passes on each of two cards, and a "
-         "bracket is the range those six measurements spanned.** Fits are made per card and both are shown.\n",
+         "leakage of the memory it sat in. **Every figure is the mean over " + WORD[npc] + " passes on each of " + NC + " cards (26 September), and a "
+         "bracket is the range those " + WORD[npc * len(cards)] + " measurements spanned.** Fits are made per card and all are shown.\n",
          "## Wires: energy against distance on the mesh\n",
          "1 KB tensor loads from the scratchpad of a shire exactly *d* hops away on the mesh, all 32 shires reading up to "
          f"{max(p_['hops'] for p_ in W['random']['points'] if p_['shires'] == 32)} hops ({shr(6)} at 6 hops and {shr(8)} at 8, so the 8-hop point has half the traffic), at "
@@ -111,25 +141,25 @@ def main():
          "the local path (the intercept) and the energy of one hop of mesh, router and wire per byte (the slope), fitted over 1–8 hops.\n",
          "| Operands | Card | own scratchpad pJ/B | intercept pJ/B | **slope pJ/B per hop** | rms of the fit |", "|---|---|---|---|---|---|"]
     for o in ("zeros", "random"):
-        for h, wf in ((cards[0], W.get(o)), (cards[1] if len(cards) > 1 else None, W2.get(o))):
+        for h, wf in ((h_, d["cards"][h_]["wire"].get(o)) for h_ in cards):
             if wf and h:
-                t.append(f"| {o} | {h} | {f(wf['local_pj_per_byte'], 2)} | {f(wf['intercept_pj_per_byte'], 2)} | **{f(wf['slope_pj_per_byte_per_hop'], 3)}** | {f(wf['rms_pj_per_byte'], 2)} |")
-    if W.get("zeros") and W.get("random") and W2.get("zeros") and W2.get("random"):
-        sz = [W["zeros"]["slope_pj_per_byte_per_hop"], W2["zeros"]["slope_pj_per_byte_per_hop"]]
-        sr = [W["random"]["slope_pj_per_byte_per_hop"], W2["random"]["slope_pj_per_byte_per_hop"]]
-        tz, tr = (sr[0] - sz[0]), (sr[1] - sz[1])
-        t.append(f"\n**Fitted over 1–8 hops, one hop costs {f(sum(sz)/2, 2)} pJ/B on zeros [{f(min(sz), 2)}–{f(max(sz), 2)} across the cards] and {f(sum(sr)/2, 2)} pJ/B on random data "
-                 f"[{f(min(sr), 2)}–{f(max(sr), 2)}].** The difference between the two, {f((tz + tr)/2, 2)} pJ/B per hop [{f(min(tz, tr), 2)}–{f(max(tz, tr), 2)}], "
-                 f"is what random data adds over zeros, the data-dependent energy of the links and routers — **{f((tz + tr)/2*1000/8, 0)} fJ per random bit per hop** [{f(min(tz, tr)*1000/8, 0)}–{f(max(tz, tr)*1000/8, 0)}]: "
+                t.append(f"| {o} | {name(h)} | {f(wf['local_pj_per_byte'], 2)} | {f(wf['intercept_pj_per_byte'], 2)} | **{f(wf['slope_pj_per_byte_per_hop'], 3)}** | {f(wf['rms_pj_per_byte'], 2)} |")
+    if len(WA) > 1:
+        sz = [w["zeros"]["slope_pj_per_byte_per_hop"] for _, w in WA]
+        sr = [w["random"]["slope_pj_per_byte_per_hop"] for _, w in WA]
+        td = [b_ - a_ for a_, b_ in zip(sz, sr)]
+        t.append(f"\n**Fitted over 1–8 hops, one hop costs {f(sum(sz)/len(sz), 2)} pJ/B on zeros [{f(min(sz), 2)}–{f(max(sz), 2)} across the cards] and {f(sum(sr)/len(sr), 2)} pJ/B on random data "
+                 f"[{f(min(sr), 2)}–{f(max(sr), 2)}].** The difference between the two, {f(sum(td)/len(td), 2)} pJ/B per hop [{f(min(td), 2)}–{f(max(td), 2)}], "
+                 f"is what random data adds over zeros, the data-dependent energy of the links and routers — **{f(sum(td)/len(td)*1000/8, 0)} fJ per random bit per hop** [{f(min(td)*1000/8, 0)}–{f(max(td)*1000/8, 0)}]: "
                  f"part of it is bits that differ from one flit (the unit the mesh moves as a whole) to the next and part is the ones carried, which cost even when they do not change; "
                  f"[Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) separates the two with chosen bit patterns and converts them to fJ per bit·mm. "
                  f"The rest, what a hop costs on all-zero data, is clocking, arbitration and buffering.\n")
-        r6 = [slope6(W["random"]), slope6(W2["random"])]
-        z6 = [slope6(W["zeros"]), slope6(W2["zeros"])]
+        r6 = [slope6(w["random"]) for _, w in WA]
+        z6 = [slope6(w["zeros"]) for _, w in WA]
         t.append(f"**Over 1–6 hops**, leaving out d = 8, where only {shr(8)} shires have a partner and the point sits nearly level with d = 6, the same data give "
-                 f"{f(r6[0], 2)} and {f(r6[1], 2)} pJ/B per hop on random data ({cards[0]}, {cards[1]}) and {f((r6[0] - z6[0]) * 1000 / 8, 0)} and {f((r6[1] - z6[1]) * 1000 / 8, 0)} fJ per random bit per hop, "
+                 f"{and_list(f(x, 2) for x in r6)} pJ/B per hop on random data ({and_list(name(h) for h, _ in WA)}) and {and_list(f((a_ - b_) * 1000 / 8, 0) for a_, b_ in zip(r6, z6))} fJ per random bit per hop, "
                  f"which is what [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) measures (2.17 pJ/B per hop on board power, loaded mesh): use its figures for wires.\n")
-        t += ["| hops | zeros pJ/B [range over both cards, 6 runs] | random pJ/B [range] | shires reading |", "|---|---|---|---|"]
+        t += [f"| hops | zeros pJ/B [range over {NC} cards, {npc * len(cards)} runs] | random pJ/B [range] | shires reading |", "|---|---|---|---|"]
         for p_ in W["random"]["points"]:
             dd = p_["hops"]
             cz, cr = C.get(f"wire/hop{dd}/zeros"), C.get(f"wire/hop{dd}/random")
@@ -142,7 +172,7 @@ def main():
           "32 B vector loads through the L1 from the shire's own scratchpad, striding so that every line is filled once "
           "and all, half or a quarter of it is used. Energy per *load* rises as the fill is shared by fewer loads; the "
           "difference is the cost of the fill itself.\n",
-          "| Stride | Fills per 32 B load | zeros pJ per load [range, both cards] | random pJ per load [range] | zeros pJ/B delivered | random pJ/B delivered |", "|---|---|---|---|---|---|"]
+          f"| Stride | Fills per 32 B load | zeros pJ per load [range, {NC} cards] | random pJ per load [range] | zeros pJ/B delivered | random pJ/B delivered |", "|---|---|---|---|---|---|"]
     def c32(k):   # the catalogue stores these per byte delivered; a 32 B load is 32 of them
         c = C.get(k)
         return c and {"mean": 32 * c["mean"], "lo": 32 * c["lo"], "hi": 32 * c["hi"], "per_card": {h: {"mean": 32 * v["mean"]} for h, v in c["per_card"].items()}}
@@ -156,7 +186,13 @@ def main():
     if z32 and z64 and r32 and r64:
         fz = 2 * (z64["mean"] - z32["mean"])
         fr = 2 * (r64["mean"] - r32["mean"])
-        per = ", ".join(f"{h} {f(2 * (r64['per_card'][h]['mean'] - r32['per_card'][h]['mean']), 0)}" for h in sorted(r64["per_card"]))
+        per = ", ".join(f"{name(h)} {f(2 * (r64['per_card'][h]['mean'] - r32['per_card'][h]['mean']), 0)}" for h in order(r64["per_card"]))
+        FV = V3.get("catalogue", {}).get("fill_vs_tload", {})
+        fvy = [h for h in order(FV) if FV[h]["decision"] == "holds"]
+        fvn = [h for h in order(FV) if FV[h]["decision"] != "holds"]
+        fv_txt = ((f"; the version-3 check, a separate run, resolved the fill below the tensor load on random data on {and_list(name(h) + ' (' + f(FV[h]['ratio'], 2) + ' [' + f(FV[h]['ci99'][0], 2) + ', ' + f(FV[h]['ci99'][1], 2) + '])' for h in fvy)}"
+                   + (f" but not on {and_list(name(h) + ' (' + f(FV[h]['ratio'], 2) + ' [' + f(FV[h]['ci99'][0], 2) + ', ' + f(FV[h]['ci99'][1], 2) + '])' for h in fvn)}, where it is not separable from equal" if fvn else ""))
+                  if FV else f" (on {cards[0]} not separable from equal)")
         tlz, tlr = C["tload/scp/zeros"]["mean"], C["tload/scp/random"]["mean"]
         # the fill against a tensor load per byte, per card and operand set (version 3: the pooled 75% hides 71-86%)
         frs = [2 * (b64["per_card"][h]["mean"] - b32["per_card"][h]["mean"]) / 64 / C[tl]["per_card"][h]["mean"]
@@ -165,7 +201,7 @@ def main():
         t.append(f"\nTwice the difference between the stride-64 and stride-32 rows is the fill of one 64 B line from the scratchpad "
                  f"into the L1: **{f(fz, 0)} pJ on zeros, {f(fr, 0)} pJ on random data** ({per} on random data) — {f(fz / 64, 1)} and {f(fr / 64, 1)} pJ per byte of line, "
                  f"roughly {fr5[0]:.0f}–{fr5[1]:.0f}% of the {f(tlz, 1)} and {f(tlr, 1)} pJ/B "
-                 f"a tensor load pays for the same bytes from the same scratchpad on the two cards (on {cards[0]} not separable from equal). What random data adds over zeros is about {f(fr - fz, 0)} pJ for the line's 512 bits, "
+                 f"a tensor load pays for the same bytes from the same scratchpad on the {NC} cards{fv_txt}. What random data adds over zeros is about {f(fr - fz, 0)} pJ for the line's 512 bits, "
                  f"{f((fr - fz) * 1000 / 512, 0)} fJ per bit on the path from the shire cache into the L1. "
                  f"What is left in a 32 B load once its share of the fill is taken out — about {f(2 * z32['mean'] - z64['mean'], 0)} pJ on zeros — is the "
                  f"L1 hit itself plus the awake core issuing it.\n")
@@ -177,10 +213,10 @@ def main():
         if z and r:
             cz, cr = C.get(f"scpline/stride{st}/zeros"), C.get(f"scpline/stride{st}/random")
             t.append(f"| {st} B | {f(cz['mean'] * 64, 1)} [{f(cz['lo'] * 64, 1)}–{f(cz['hi'] * 64, 1)}] | {f(cr['mean'] * 64, 1)} [{f(cr['lo'] * 64, 1)}–{f(cr['hi'] * 64, 1)}] | {r['bytes_per_s']['mean'] / 1e9:,.0f} |")
-    bw = {st: [S_[f"scpline/stride{st}/random"]["bytes_per_s"]["mean"] / 1e9 for S_ in (A, B) if f"scpline/stride{st}/random" in S_] for st in ("64", "256")}
+    bw = {st: [d["cards"][h]["summary"][f"scpline/stride{st}/random"]["bytes_per_s"]["mean"] / 1e9 for h in cards if f"scpline/stride{st}/random" in d["cards"][h]["summary"]] for st in ("64", "256")}
     if bw["64"] and bw["256"]:
-        t.append(f"\nComing back to the same bank every time halves the bandwidth ({bw['256'][0]:,.0f} against {bw['64'][0]:,.0f} GB/s, "
-                 f"{'the same on both cards' if len(bw['256']) == 2 and round(bw['256'][0]) == round(bw['256'][1]) else 'on ' + cards[0]}), "
+        t.append(f"\nComing back to the same bank every time cuts the bandwidth by {100 * (1 - bw['256'][0] / bw['64'][0]):.0f}% ({bw['256'][0]:,.0f} against {bw['64'][0]:,.0f} GB/s, "
+                 f"{'the same on every card' if len(bw['256']) == len(cards) and len({round(x) for x in bw['256']}) == 1 else 'on ' + cards[0]}), "
                  "but what it does to the energy per byte cannot be told apart from the other strides'.")
     t += ["\n## Rows: does the DRAM row pattern matter?\n",
           "1 KB tensor loads from DRAM by 32 harts (minion 0 of every shire), each over its own 64 MB, so the "
@@ -188,12 +224,12 @@ def main():
           "banks and each bank sees 32 columns of a row before moving on. Row hit: stride 8 KB, so every access is the "
           "next column of the same bank and row. Row miss: after every 8 KB a jump to the next row, so every bank "
           "sees a new row on every visit. Thirty-two awake minions are 0.06 W, not worth correcting for.\n",
-          "| Pattern | zeros pJ/B [range over 3 passes, one card] | random pJ/B [range] | GB/s |", "|---|---|---|---|"]
-    for name, what in (("seq", "sequential: next bank, 32 columns per row visit"), ("rowhit", "same bank and row, next column, every access"),
-                       ("rowmiss", "new row on every visit to a bank")):
-        z, r = A.get(f"dramrow2/{name}/zeros"), A.get(f"dramrow2/{name}/random")
+          f"| Pattern | zeros pJ/B [range over {npc} passes on each of {NC} cards] | random pJ/B [range] | GB/s ({cards[0]}) |", "|---|---|---|---|"]
+    for pat, what in (("seq", "sequential: next bank, 32 columns per row visit"), ("rowhit", "same bank and row, next column, every access"),
+                      ("rowmiss", "new row on every visit to a bank")):
+        z, r = A.get(f"dramrow2/{pat}/zeros"), A.get(f"dramrow2/{pat}/random")
         if z and r:
-            cz, cr = C.get(f"dramrow2/{name}/zeros"), C.get(f"dramrow2/{name}/random")
+            cz, cr = C.get(f"dramrow2/{pat}/zeros"), C.get(f"dramrow2/{pat}/random")
             t.append(f"| {what} | {bar(cz, 1)} | {bar(cr, 1)} | {f(r['bytes_per_s']['mean'] / 1e9, 1)} |")
     l3 = A.get("dramrow/stride8K/random"), A.get("dramrow/stride8K/zeros")
     pats = [p_ for p_ in ("seq", "rowhit", "rowmiss") if C.get(f"dramrow2/{p_}/random")]
@@ -204,8 +240,13 @@ def main():
         prem = {o: [100 * (C[f"dramrow2/{p_}/{o}"]["mean"] / C[f"tload/dram/{o}"]["mean"] - 1) for p_ in pats] for o in ("zeros", "random")}
         r100 = lambda v: f"{round(v / 100) * 100:,.0f}"
         # 3.87 µs and 2,325 cycles: the refresh interval the memory-anatomy report reads from the controller (PLAN2 D21)
+        DR = V3.get("catalogue", {}).get("dram_rows", {})
+        ex_r = [h for h in order(DR) if DR[h]["random"]["rows_minus_tload"]["lo"] > 0]
+        ex_n = [h for h in order(DR) if not DR[h]["random"]["rows_minus_tload"]["lo"] > 0]
         t.append("\n**The row pattern does not change the energy per byte.** Row hits, row misses and the streaming case agree "
-                 "within their pass-to-pass error on both operand sets. On aifoundry2 the controller runs an open-page policy: a row stays open "
+                 "within their pass-to-pass error on both operand sets"
+                 + (f", on every card (the version-3 check: no pattern differs at 99% on {and_list(name(h) for h in order(DR))})" if DR and all(DR[h][o]["anova_p"] > 0.01 for h in DR for o in ("zeros", "random")) else "")
+                 + ". On aifoundry2 the controller runs an open-page policy: a row stays open "
                  "until a refresh (every 3.87 µs) or an access to another row of its bank closes it ([Anatomy of a memory access]"
                  "(https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#how-long-a-row-stays-open)). "
                  f"Each hart here comes back to its row only every {r100(min(cyc))}–{r100(max(cyc))} cycles or so (32 harts at "
@@ -213,18 +254,19 @@ def main():
                  "So either every pattern paid an activation, or an activation is small next to the transfer (one of about 30 pJ/B on zeros, "
                  "or 50 on random data, would have shown); for a programmer it makes no difference. "
                  f"These 32-hart loads cost {min(prem['random']):.0f}–{max(prem['random']):.0f}% more per byte than [4.1](04-bytes-memory.md)'s tensor loads at "
-                 f"{A['tload/dram/random']['bytes_per_s']['mean'] / 1e9:.0f} GB/s ({min(prem['zeros']):.0f}–{max(prem['zeros']):.0f}% more on zeros): "
-                 "use them to compare patterns, and 4.1 to price DRAM.\n")
+                 f"{A['tload/dram/random']['bytes_per_s']['mean'] / 1e9:.0f} GB/s ({min(prem['zeros']):.0f}–{max(prem['zeros']):.0f}% more on zeros)"
+                 + (f"; the version-3 check resolved the premium on random data on {and_list(name(h) for h in ex_r)}" + (f" but not on {and_list(name(h) for h in ex_n)}" if ex_n else "") if DR else "")
+                 + ": use them to compare patterns, and 4.1 to price DRAM.\n")
     if l3[0] and l3[1]:
-        l3b = B.get("dramrow/stride8K/random"), B.get("dramrow/stride8K/zeros")
+        l3o = [(h, d["cards"][h]["summary"].get("dramrow/stride8K/random"), d["cards"][h]["summary"].get("dramrow/stride8K/zeros")) for h in cards[1:]]
         t.append(f"An earlier version of this experiment with all 1,024 minions and 32 KB touched per hart fitted in the L3 and "
                  f"measured that instead: **{f(l3[1]['pj_per_byte']['mean'], 1)} pJ/B on zeros and {f(l3[0]['pj_per_byte']['mean'], 1)} on random "
-                 f"data on {cards[0]}" + (f", {f(l3b[1]['pj_per_byte']['mean'], 1)} and {f(l3b[0]['pj_per_byte']['mean'], 1)} on {cards[1]}" if l3b[0] and l3b[1] else "")
+                 f"data on {cards[0]}" + "".join(f", {f(b_['pj_per_byte']['mean'], 1)} and {f(a_['pj_per_byte']['mean'], 1)} on {name(h)}" for h, a_, b_ in l3o if a_ and b_)
                  + f", at {f(l3[0]['bytes_per_s']['mean'] / 1e9, 0)} GB/s** — the L3, read by tensor loads through the mesh, which the "
                  f"18 September table put at 10.8 pJ/B at a higher clock.\n")
     t += ["## Placement inside a shire: which neighbourhood reads\n",
           "The shire's own scratchpad read by only one of its four neighbourhoods at a time (8 minions each), random data.\n",
-          "| Neighbourhood | pJ/B [range, both cards] | GB/s |", "|---|---|---|"]
+          f"| Neighbourhood | pJ/B [range, {NC} cards] | GB/s |", "|---|---|---|"]
     for k in range(4):
         v = A.get(f"neigh/{k}/random")
         if v:
@@ -246,21 +288,21 @@ def main():
               + f"it rises {f(fit['slope_80_mw_per_c'], 0)} mW per °C at 80 °C for the whole 128 MB. Measured: " + ", ".join(f"{c['sram_w']:.2f} W at {c['T']} °C" for c in sl["curve"][::max(1, len(sl["curve"]) // 3)]) + ".",
               f"- This is what the memory costs for existing, per second, at a given die temperature: at about {f(mb, 0)} mW per MB a byte held in scratchpad for one second leaks at most about {f(nj, 0)} nJ at 80 °C on {cards[0]}, "
               f"as much as reading it {round(nj * 1000 / rd, -2):,.0f} times ({f(rd, 1)} pJ per read)." if rd else "",
-              (f"- The same rail on {cards[1]}, which idles 20 °C cooler: " + ", ".join(f"{c['sram_w']:.2f} W at {c['T']} °C" for c in sl2["curve"][::max(1, len(sl2['curve']) // 3)])
-               + (lambda c_: f"; at {c_['T']} °C, its most-sampled bin, that is {f(c_['sram_w'] - (fit['P_fix_w'] + fit['A_leak_80_w'] * math.exp((c_['T'] - 80) / 36)), 2)} W above the {cards[0]} fit extrapolated there. "
-                  f"The {cards[0]} fit does not describe {cards[1]}, and whether that is the card or the fit's shape outside its range is not known.")(max(sl2["curve"], key=lambda c_: c_["n"]))
-               if sl2 and sl2.get("curve") else ""),
-              "", "| Die °C | SRAM rail W, " + cards[0] + " | idle stretches |" + (" SRAM rail W, " + cards[1] + " | idle stretches |" if sl2 else ""), "|---|---|---|" + ("---|---|" if sl2 else "")]
-        c2 = {c["T"]: c for c in sl2["curve"]} if sl2 else {}
-        for T_ in sorted(set(c["T"] for c in sl["curve"]) | set(c2)):
-            a_ = next((c for c in sl["curve"] if c["T"] == T_), None)
-            b_ = c2.get(T_)
-            t.append(f"| {T_} | {f(a_['sram_w'], 3) if a_ else '—'} | {a_['n'] if a_ else '—'} |" + (f" {f(b_['sram_w'], 3) if b_ else '—'} | {b_['n'] if b_ else '—'} |" if sl2 else ""))
+              "".join(f"- The same rail on {name(h)} in its idle stretches: " + ", ".join(f"{c['sram_w']:.2f} W at {c['T']} °C" for c in d["cards"][h]["sram_leakage"]["curve"][::max(1, len(d['cards'][h]['sram_leakage']['curve']) // 3)])
+                      + (lambda c_: f"; at {c_['T']} °C, its most-sampled bin, that is {f(c_['sram_w'] - (fit['P_fix_w'] + fit['A_leak_80_w'] * math.exp((c_['T'] - 80) / 36)), 2)} W above the {cards[0]} fit extrapolated there.\n")(max(d["cards"][h]["sram_leakage"]["curve"], key=lambda c_: c_["n"]))
+                      for h in cards[1:] if d["cards"][h].get("sram_leakage", {}).get("curve")),
+              (lambda SS: (f"- The {cards[0]} fit does not describe the other cards: in the version-3 idle cycles, heated from about 55 °C into the fit's range, "
+                           + and_list(f"{name(h)}'s rail sat {f(SS[h]['excess_over_a2_law'][0], 2)}–{f(SS[h]['excess_over_a2_law'][1], 2)} W above it at {SS[h]['T'][0]}–{SS[h]['T'][1]} °C, rising {f(SS[h]['mean'], 3)} W per °C" for h in order(SS))
+                           + " (against the aifoundry2 law as registered, −0.32 + 2.81 W, from the 23 September catalogue, `catalogue-23sep.json`), so the difference is the card, not the fit's shape outside its range.") if SS else "")(V3.get("idle", {}).get("sram_slope", {})),
+              "", "| Die °C | " + " | ".join(f"SRAM rail W, {name(h)} | idle stretches" for h in cards if d["cards"][h].get("sram_leakage", {}).get("curve")) + " |",
+              "|---|" + "---|---|" * sum(1 for h in cards if d["cards"][h].get("sram_leakage", {}).get("curve"))]
+        CV = {h: {c["T"]: c for c in d["cards"][h]["sram_leakage"]["curve"]} for h in cards if d["cards"][h].get("sram_leakage", {}).get("curve")}
+        for T_ in sorted(set().union(*[set(v) for v in CV.values()])):
+            t.append(f"| {T_} | " + " | ".join((f"{f(CV[h][T_]['sram_w'], 3)} | {CV[h][T_]['n']}" if T_ in CV[h] else "— | —") for h in CV) + " |")
     # ---- where the current flows: the rail split, by class
     taus = [v["tau_s"] for v in (d.get("rail_filter") or {}).values()]   # the PMIC's running average, measured (catalogue.json rail_filter)
     rf = d.get("rail_filter") or {}
-    tau_txt = (f"time constant {rf['aifoundry2']['tau_s']:.2f} s on aifoundry2 and {rf['aifoundry3']['tau_s']:.2f} s on aifoundry3" if "aifoundry2" in rf and "aifoundry3" in rf
-               else f"time constant {min(taus):.1f}–{max(taus):.1f} s on the two cards" if taus else "time constant about 1 s")
+    tau_txt = ("time constant " + and_list(f"{rf[h]['tau_s']:.2f} s on {name(h)}" for h in order(rf) if rf[h])) if taus else "time constant about 1 s"
     t += ["\n## Where the current flows: each class of operation by rail\n",
           "The PMIC meters three rails — the minions, the on-chip SRAM, and the mesh — and the service processor reports "
           "them; board power covers everything including the regulators' own losses. The split of a burst's power over idle across "
@@ -315,8 +357,8 @@ def main():
               "attributed: each configuration's mean unmetered watts fitted as a fraction of each rail's watts plus a cost per DRAM byte, no intercept. "
               "`tools/ettelem/fit_unmetered.py` makes the fit from `catalogue.json` and writes it to `unmetered_fit.json`. "
               f"The canonical account of it is [Limits of observability, §4.2–4.3]({HUB}#the-unmetered-remainder-attributed); this section keeps the full tables.\n",
-              "| unmetered W of a configuration = | " + " | ".join(h for h in uf if h.startswith("aifoundry")) + " |", "|---|" + "---|" * len([h for h in uf if h.startswith("aifoundry")])]
-        hosts = [h for h in uf if h.startswith("aifoundry")]
+              "| unmetered W of a configuration = | " + " | ".join(name(h) for h in order(h for h in uf if h.startswith("aifoundry"))) + " |", "|---|" + "---|" * len([h for h in uf if h.startswith("aifoundry")])]
+        hosts = order(h for h in uf if h.startswith("aifoundry"))
         for label, k, n, unit in (("× minion-rail W", "minion", 3, ""), ("× SRAM-rail W", "sram", 3, ""), ("× mesh-rail W", "noc", 3, ""), ("per DRAM byte", "dram_pj_per_byte", 1, " pJ/B")):
             t.append(f"| {label} | " + " | ".join(f"{f(uf[h]['coef'][k], n)} ± {f(uf[h]['se'][k], n)}{unit}" for h in hosts) + " |")
         t.append("| residual rms, configuration means | " + " | ".join(f"{f(uf[h]['rms_w'], 2)} W, n = {uf[h]['n']}" for h in hosts) + " |")
@@ -377,14 +419,18 @@ def main():
                        for h in hosts if uf[h].get('l1_line_read_refit')) + "; that refit is `l1_line_read_refit` in `unmetered_fit.json`."
                       if any(uf[h].get('l1_line_read_refit') for h in hosts) else "")
                    if share and st_r and tp_hi and tp_lo and max(tp_hi) > 0 > min(tp_lo) else "")
-        t += ["", f"- **An instruction's unmetered energy is consistent with the regulators' delivery loss**: {100*a2['minion']:.0f}% of what the minion rail delivers on aifoundry2 and {100*uf['aifoundry3']['coef']['minion']:.0f}% on aifoundry3 goes missing between the 12 V input and the core, and nothing else moves; that is as far as the rails' meters can be trusted, since each 1% of error in their scale moves it by about {f(1 + a2['minion'], 1)} points. The 18% \"unmetered\" share of the arithmetic classes above is this.",
-              f"- **A DRAM byte's unmetered energy is the memory's**: {f(min(dco), 0)}–{f(max(dco), 0)} pJ per byte on average (the fitted coefficient on the two cards) in the DDR PHY, the I/O rail and the DRAM chips "
+        si = [A[f"{n}/random/h2"] for n in ("add", "sub", "and", "or", "xor", "sll", "srl", "sra", "slt", "sltu", "addi", "andi", "ori", "xori", "slli", "srli") if f"{n}/random/h2" in A]
+        si_u = (sum(r["over_idle_w"]["mean"] - r["rails_over_w"]["minion_w"]["mean"] - r["rails_over_w"]["sram_w"]["mean"] - r["rails_over_w"]["noc_w"]["mean"] for r in si)
+                / sum(r["over_idle_w"]["mean"] for r in si)) if si else None
+        t += ["", f"- **An instruction's unmetered energy is consistent with the regulators' delivery loss**: {and_list(f'{100*uf[h]['coef']['minion']:.0f}%' for h in hosts)} of what the minion rail delivers on {and_list(name(h) for h in hosts)} goes missing between the 12 V input and the core, and nothing else moves; that is as far as the rails' meters can be trusted, since each 1% of error in their scale moves it by about {f(1 + a2['minion'], 1)} points."
+              + (f" The {100 * si_u:.0f}% \"unmetered\" share of the scalar integer class above is this." if si_u is not None else ""),
+              f"- **A DRAM byte's unmetered energy is the memory's**: {f(min(dco), 0)}–{f(max(dco), 0)} pJ per byte on average (the fitted coefficient on the {NC} cards) in the DDR PHY, the I/O rail and the DRAM chips "
               f"({f(min(lo_o), 0)}–{f(max(lo_o), 0)} on zeros and constants, {f(min(hi_o), 0)}–{f(max(hi_o), 0)} on random data), on top of the {f(min(rest), 0)}–{f(max(rest), 0)} pJ the mesh, the SRAM and the delivery losses take on the way: "
               f"together the {f(C['tload/dram/zeros']['mean'], 0)}–{f(C['tload/dram/random']['mean'], 0)} pJ per byte of [4.1](04-bytes-memory.md)'s tensor loads from DRAM. "
               f"A byte written through the L1 costs about twice that off-rail ({f(min(sto), 0)}–{f(max(sto), 0)} pJ), because the line is read from DRAM before it is written.",
               res_txt,
               f"- **The mesh coefficient is not all regulator**: {100*a2['noc']:.0f}% is too much for a delivery loss; the memory shires' own logic, on an unmetered rail, works whenever the mesh moves bytes to them.",
-              "- What the fit cannot say: how the idle " + (f"{min(v[0] for v in us.values())}–{max(v[1] for v in us.values())} W (" + ", ".join(f"{v[0]}–{v[1]} W on {h} at {v[2]}–{v[3]} °C" for h, v in sorted(us.items(), key=lambda kv: kv[1][0])) + ")" if us else "12–16 W")
+              "- What the fit cannot say: how the idle " + (f"{min(v[0] for v in us.values())}–{max(v[1] for v in us.values())} W (" + ", ".join(f"{v[0]}–{v[1]} W on {name(h)} at {v[2]}–{v[3]} °C" for h, v in sorted(us.items(), key=lambda kv: kv[1][0])) + ")" if us else "12–16 W")
               + " splits between DDR, PCIe, the IO shire, Maxion and the regulators' own draw, or how the DRAM term splits below its regulator. That is the subject of the improvement ladder in [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability).\n"]
         if "ddr_droop" in uf:
             dd = uf["ddr_droop"]
@@ -395,7 +441,9 @@ def main():
             l3d = [q["droop_ddr_mv"] for q in nod if q["cfg"].startswith("dramrow/stride8K")]
             oth = [q["droop_ddr_mv"] for q in nod if not q["cfg"].startswith("dramrow/stride8K")]
             ph = [(q["droop_ddr_mv"] - cm * q["over_idle_w"]) / c0 for q in nod]   # read as DRAM watts, after the common term
-            t += [f"**A droop meter for DRAM.** The memory shires' Moortec voltage monitors report the 0.8 V DDR rail once per service-processor pass (about every 150 ms on aifoundry2 under the 10 Hz sampler, 255 ms on aifoundry3; `die_mv.ddr` in every telemetry file; {f(dd['idle_die_mv']['ddr'], 0)} mV at idle against an 800 mV set point). "
+            RFm = V3.get("refresh_ms", {})
+            rf_txt = ("about every " + and_list(f"{RFm[h]['sampler_10hz']:.0f} ms on {name(h)}" for h in order(RFm)) + " under the 10 Hz sampler") if RFm else "about every 150 ms on aifoundry2 under the 10 Hz sampler, 255 ms on aifoundry3"
+            t += [f"**A droop meter for DRAM.** The memory shires' Moortec voltage monitors report the 0.8 V DDR rail once per service-processor pass ({rf_txt}; `die_mv.ddr` in every telemetry file; {f(dd['idle_die_mv']['ddr'], 0)} mV at idle against an 800 mV set point). "
                   f"Across the {dd['n']} configuration means it droops **{f(dd['mv_per_dram_offrail_w'], 2)} mV per watt of off-rail DRAM power** (plus {f(dd['mv_per_board_w_common'], 3)} mV per watt of anything else; rms {f(dd['rms_mv'], 2)} mV): 1 mV ≈ {f(1 / dd['mv_per_dram_offrail_w'], 1)} W of DRAM, refreshed every pass, from a sensor that was always there. "
                   f"It is a proxy calibrated against the fit above, not a meter, and not independent of the board meter. It responds mostly to DRAM traffic, but not only: heavy mesh and scratchpad traffic with no DRAM access droops it too"
                   + (f", by up to {f(max(oth), 1)} mV, and {f(max(l3d), 1)} mV for L3 reads through the mesh" if oth and l3d else "")
@@ -407,9 +455,10 @@ def main():
             for e in dd["examples"]:
                 t.append(f"| `{e['cfg']}` | {f(e['over_idle_w'], 2)} | {f(e['dram_offrail_w'], 2) if e['dram_offrail_w'] else '—'} | {f(e['droop_ddr_mv'], 2)} | {f(e['droop_minion_mv'], 2)} |")
             t.append("")
-    t.append("\nSources: `docs/reports/data/2026-09-23-catalogue-aifoundry2/` and `-aifoundry3/`, reduced by "
-             "`workloads/enercat/analyze_catalogue.py` into `docs/reports/data/2026-09-23-energy-manual/catalogue.json`; the attribution and the droop in `unmetered_fit.json` beside it, "
-             "written by `tools/ettelem/fit_unmetered.py`.\n")
+    t.append("\nSources: `docs/reports/data/2026-09-25-claims-v3/raw/<card>/catfull/` (the version-3 full catalogue, 26 September), reduced by "
+             "`tools/claims-v3/catfull/reduce.py` (which cuts the bursts with `workloads/enercat/analyze_catalogue.py`'s own code) into `docs/reports/data/2026-09-23-energy-manual/catalogue.json`; "
+             "the attribution and the droop in `unmetered_fit.json` beside it, written by `tools/ettelem/fit_unmetered.py`; the version-3 check's per-card tests from `manual.json` (v3). "
+             "The 23 September catalogue it replaces is `catalogue-23sep.json` in the same directory.\n")
     open(os.path.join(out, "04a-fine-grain.md"), "w").write("\n".join(t) + "\n")
     print("rendered 03a and 04a")
 

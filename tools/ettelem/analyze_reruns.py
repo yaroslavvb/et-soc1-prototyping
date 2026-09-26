@@ -11,6 +11,20 @@ the range every pass on every card spanned, each card's mean with its pass-to-pa
 
 A burst is dropped when the minion clock left 600 MHz inside it (aifoundry2's governor does that below 65 C),
 because the bars are meant to hold measurement scatter, not a change of operating point.
+
+    analyze_reruns.py <rerun-dir> [...] --v3-rl docs/reports/data/2026-09-25-claims-v3/raw --out reruns.json
+
+--v3-rl (26 September 2026) takes the relay, the rings and the levels from the version-3 check's V3-RL passes instead:
+<dir>/<card>/rl/p<K>/ for every card directory present (aifoundry2, aifoundry3, aifoundry1-c1), a pass used when its
+block.json says ok (never a p<K>.attempt-* directory, never a dry run), each of its three halves (A: rings, B: levels,
+relay) reduced by reduce_dir() on its own, with the same burst rule; the card is the directory's name. Its two ABBA bursts
+per level (l2-1 and l2-2, scp-local-1 and scp-local-2) give the level the mean of the kept ones, one value per pass, as
+tools/claims-v3/rl/reduce.py does. Each V3-RL pass prefills the own scratchpad with zeros (odd passes) or random data (even
+passes) before the scp-local bursts (pass.json "contents"), so levels_by_contents_pj_per_byte repeats the levels split by
+that pass's contents. The rerun directories then supply the hot line only (and the 22 September hot line joins as before);
+their relay and rl passes, and the 22 September relay, are not used, except that a ring or a level with no kept V3-RL burst
+on any card keeps its rerun passes (on aifoundry2, aifoundry3 and aifoundry1-c1 the s <-> s+16 ring starved the sampler in
+every V3-RL pass, 63-141 ms, so that ring keeps aifoundry3's 23 September passes).
 """
 import argparse
 import glob
@@ -117,6 +131,31 @@ FIRST = {
     "hotline": ("docs/reports/data/2026-09-22-hotline-aifoundry2/power.json", "aifoundry2"),   # the same runs as hotline.json's power block
 }
 LEVELS = {"l1", "l2", "l3", "dram", "scp-local", "scp-remote"}
+# V3-RL's ABBA labels, merged into their level (the mean of the kept bursts of a pass, as tools/claims-v3/rl/reduce.py)
+V3_LABEL = {"l2-1": "l2", "l2-2": "l2", "scp-local-1": "scp-local", "scp-local-2": "scp-local"}
+
+
+def v3_rl_passes(root):
+    """(card, pass, contents, pass dir) for every used V3-RL pass under root/<card>/rl/p<K>/ (block.json ok)."""
+    out = []
+    for card in sorted(os.listdir(root)):
+        base = os.path.join(root, card, "rl")
+        if not os.path.isdir(base):
+            continue
+        for name in os.listdir(base):
+            m = re.fullmatch(r"p(\d+)", name)
+            if not m:
+                continue                       # p<K>.attempt-*: set aside by the queue, never used
+            pd = os.path.join(base, name)
+            try:
+                bj = json.load(open(os.path.join(pd, "block.json")))
+                pj = json.load(open(os.path.join(pd, "pass.json")))
+            except (OSError, ValueError):
+                continue
+            if bj.get("status") != "ok" or pj.get("dry"):
+                continue
+            out.append((card, int(m.group(1)), pj.get("contents"), pd))
+    return sorted(out)
 
 
 def main():
@@ -124,13 +163,39 @@ def main():
     ap.add_argument("dirs", nargs="+")
     ap.add_argument("--out", required=True)
     ap.add_argument("--no-first", action="store_true", help="leave out the 18 and 22 September measurements")
+    ap.add_argument("--v3-rl", help="the version-3 raw directory: relay, rings and levels from its V3-RL passes")
     a = ap.parse_args()
     relay, hot, rings, levels = {}, {}, {}, {}
+    by_contents = {}                   # V3-RL only: contents -> level -> card -> [pass values]
+    per_card_passes = {}               # V3-RL only: section -> card -> passes used
     hotw = {}   # the hot line's watts over idle, per label: the stalled power the energy manual quotes
     dropped, passes = [], {"relay": 0, "hotline": 0, "rings": 0, "levels": 0}
+    fb_rings, fb_levels = {}, {}       # the rerun directories' rings and levels, kept only where V3-RL has none
+    if a.v3_rl:
+        for card, k, contents, pd in v3_rl_passes(a.v3_rl):
+            for half, sec in (("relay", "relay"), ("A", "rings"), ("B", "levels")):
+                hd = os.path.join(pd, half)
+                vals = {}
+                for lab, b in reduce_dir(hd).items():
+                    if b["clock_moved_frac"] > 0.02 or b["sampler_median_ms"] > 60:
+                        dropped.append({"pass": hd, "burst": lab, "clock_moved_frac": b["clock_moved_frac"],
+                                        "sampler_median_ms": b["sampler_median_ms"]})
+                        continue
+                    total = sum(r["bytes"] for r in b["runs"])
+                    if not total:
+                        continue                      # the spin brackets move no bytes
+                    key = V3_LABEL.get(lab, lab)
+                    vals.setdefault(key, []).append(b["over_idle_w"] * b["wall_s"] / total * 1e12)
+                passes[sec] += 1
+                per_card_passes.setdefault(sec, {}).setdefault(card, []).append(k)
+                store = {"relay": relay, "rings": rings, "levels": levels}[sec]
+                for key, v in vals.items():
+                    store.setdefault(key, {}).setdefault(card, []).append(float(np.mean(v)))
+                    if sec == "levels" and contents:
+                        by_contents.setdefault(contents, {}).setdefault(key, {}).setdefault(card, []).append(float(np.mean(v)))
     for d in a.dirs:
         host = host_of(d)
-        for pd in sorted(glob.glob(os.path.join(d, "relay-pass*[0-9]"))):
+        for pd in ([] if a.v3_rl else sorted(glob.glob(os.path.join(d, "relay-pass*[0-9]")))):
             if not complete(pd):
                 continue
             passes["relay"] += 1
@@ -154,7 +219,8 @@ def main():
         for pd in sorted(glob.glob(os.path.join(d, "rl-pass*[0-9]"))):   # rings and levels, ettelem-sampled
             if not complete(pd):
                 continue
-            passes["rings"] += 1; passes["levels"] += 1
+            if not a.v3_rl:
+                passes["rings"] += 1; passes["levels"] += 1
             for lab, b in reduce_dir(pd).items():
                 if b["clock_moved_frac"] > 0.02 or b["sampler_median_ms"] > 60:
                     dropped.append({"pass": pd, "burst": lab, "clock_moved_frac": b["clock_moved_frac"], "sampler_median_ms": b["sampler_median_ms"]})
@@ -162,17 +228,28 @@ def main():
                 total = sum(r["bytes"] for r in b["runs"])
                 if not total:
                     continue
-                store = levels if lab in LEVELS else rings
+                store = (fb_levels if lab in LEVELS else fb_rings) if a.v3_rl else (levels if lab in LEVELS else rings)
                 store.setdefault(lab, {}).setdefault(host, []).append(b["over_idle_w"] * b["wall_s"] / total * 1e12)
+    fallback = {}
+    if a.v3_rl:   # a ring or level with no kept V3-RL burst on any card keeps its rerun passes
+        for store, fb, sec in ((rings, fb_rings, "rings"), (levels, fb_levels, "levels")):
+            for lab, v in fb.items():
+                if not store.get(lab):
+                    store[lab] = v
+                    fallback[lab] = {"section": sec, "cards": sorted(v), "from": "the rerun directories (23 September)",
+                                     "why": "no kept V3-RL burst on any card"}
     if not a.no_first:
-        p, h = FIRST["relay"]
-        for m in json.load(open(os.path.join(ROOT, p)))["power"]["media"]:
-            relay.setdefault(m["medium"], {}).setdefault(h, []).append(m["pj_per_byte"])
+        if not a.v3_rl:
+            p, h = FIRST["relay"]
+            for m in json.load(open(os.path.join(ROOT, p)))["power"]["media"]:
+                relay.setdefault(m["medium"], {}).setdefault(h, []).append(m["pj_per_byte"])
         p, h = FIRST["hotline"]
         for r in json.load(open(os.path.join(ROOT, p)))["runs"]:
             hot.setdefault(r["label"], {}).setdefault(h, []).append(r["nj_per_op"])
             hotw.setdefault(r["label"], {}).setdefault(h, []).append(r["over_idle_w"])
-        passes["relay"] += 1; passes["hotline"] += 1
+        passes["hotline"] += 1
+        if not a.v3_rl:
+            passes["relay"] += 1
     out = {"relay_pj_per_byte": {m: stats(v) for m, v in relay.items()},
            "hotline_nj_per_op": {l: stats(v) for l, v in hot.items()},
            "hotline_over_idle_w": {l: stats(v) for l, v in hotw.items()},
@@ -180,6 +257,10 @@ def main():
            "levels_pj_per_byte": {c: stats(v) for c, v in levels.items()},
            "passes": passes, "dropped": dropped, "dirs": a.dirs,
            "first_included": not a.no_first,
+           **({"v3_rl": a.v3_rl,
+               "levels_by_contents_pj_per_byte": {c: {k: stats(v) for k, v in lv.items()} for c, lv in sorted(by_contents.items())},
+               "passes_per_card": {sec: {c: sorted(ks) for c, ks in d.items()} for sec, d in per_card_passes.items()},
+               "fallback_23sep": fallback} if a.v3_rl else {}),
            "method": "each pass reduced on its own (bracketing idle, leakage-corrected); bursts with the minion clock off 600 MHz, or with the service processor starved (sampler median latency > 60 ms), dropped; pooled over passes and cards"}
     json.dump(out, open(a.out, "w"), indent=1)
     for sec, unit in (("relay_pj_per_byte", "pJ/B"), ("hotline_nj_per_op", "nJ"), ("rings_pj_per_byte", "pJ/B"), ("levels_pj_per_byte", "pJ/B")):

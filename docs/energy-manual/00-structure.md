@@ -28,7 +28,7 @@ predicting time too.
 | 5 | **Bytes between cores and shires** | TensorSend/Recv by distance, reduce and broadcast trees, scratchpad hand-off | measured (nocbench 2026-09-18, E25) |
 | 6 | **Synchronisation** | barrier, credit, fast local barrier, global atomic (uncontended, contended) | measured (E22, E23), extended here |
 | 7 | **Composition** | worked examples: dense matmul, the multi-stage relay, a hot line; built from the tables and checked against measurements | assembled here |
-| 8 | **Card-to-card variation** | every table on aifoundry2 and aifoundry3; aifoundry1 is unavailable | measured here |
+| 8 | **Card-to-card variation** | every table on aifoundry2, aifoundry3 and aifoundry1 card 1; aifoundry1's card 0 overheats and is left out | measured here (the version-3 check, 26 September 2026) |
 | 9 | **Method and limits** | telemetry resolution, idle subtraction and thermal drift, what a "flip" is and is not, the confidence bars | written here |
 
 ## Units and conventions
@@ -37,7 +37,7 @@ predicting time too.
   idle windows bracketing each measurement, at the same die temperature. Section 9 says how good that is.
 - Per *event*, never per second: pJ per instruction, pJ per byte, fJ per register bit clocked, nJ per barrier.
 - The operating point is stated for every table. Unless said otherwise it is **600 MHz** (0.517 V in the DVFS
-  table; the minion rail reads 0.518 V on aifoundry2 and 0.523 V on aifoundry3), the point the governor pins a
+  table; the minion rail reads 0.518 V on aifoundry2, 0.523 V on aifoundry3 and 0.499 V on aifoundry1 card 1), the point the governor pins a
   warm card to (docs/findings/16-dvfs-and-leakage.md).
 - Where a number is data-dependent it is given three ways — zeros, constant, random — because on this chip the
   difference is large (docs/findings/10-data-dependent-power.md).

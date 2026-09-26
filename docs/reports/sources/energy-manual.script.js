@@ -14,6 +14,28 @@ const R=D.rest, P80=R.P_fix_w+R.A_leak_80_w;
    those passes spanned, per_card each card's mean and pass-to-pass standard error. cb() scales a per-instruction
    figure to per byte where needed; bt() renders "mean [lo-hi]"; pcs() the per-card column; ebar() draws a bar. */
 const CB=(D.catalogue&&D.catalogue.combined)||{}, RR=D.reruns||{};
+/* V3: the version-3 check's per-card results (build_energy_manual.py v3_block, from docs/reports/data/2026-09-25-claims-v3/results) */
+const V3=D.v3||{}, VI=V3.idle||{};
+/* AMENDMENTS.md C2: every card's V3-ABL-A switching carries a launch-temperature offset, leak x (t_launch - reference) per
+   run (tensor.launch_offset); the registered values stay in the tables, and the text that compares cards states the offsets
+   and gives the values at each run's actual launch (at_launch_w) */
+/* C2 as revised: the launch temperatures are whole-degree readings, the references thermal-model temperatures at launches
+   on a downward step of the reading; at_launch_step_w takes each launch to be on such a step (die = reading + step_c),
+   at_launch_w takes the reading as the die temperature. The text gives each value as the range over the two. */
+const LO=D.tensor.launch_offset||{};
+const atL=(h,cfg)=>LO[h]&&LO[h].at_launch_w?LO[h].at_launch_w[cfg]:null;
+const atLs=(h,cfg)=>LO[h]&&LO[h].at_launch_step_w?LO[h].at_launch_step_w[cfg]:null;
+const rng2=(a,b,fn)=>{if(a==null||b==null)return fn(a==null?b:a); const lo=fn(Math.min(a,b)),hi=fn(Math.max(a,b)); return lo===hi?lo:`${lo}–${hi}`;};
+const loOff=h=>{const a=LO[h].mean_w,b=LO[h].mean_w_step; if(b==null)return `${Math.abs(a).toFixed(2)} W ${a<0?'lower':'higher'}`;
+ const lo=Math.min(a,b),hi=Math.max(a,b); return lo>=0?`${lo.toFixed(2)}–${hi.toFixed(2)} W higher`:hi<=0?`${(-hi).toFixed(2)}–${(-lo).toFixed(2)} W lower`:`between ${(-lo).toFixed(2)} W lower and ${hi.toFixed(2)} W higher`;};
+const loNote=()=>{const hs=CK.cardsIn(LO); if(!hs.length)return ''; const by={}; hs.forEach(h=>{const r=LO[h].ref_c.toFixed(1); (by[r]=by[r]||[]).push(h);}); const st=LO[hs[0]].step_c;
+ return `the registered switching values carry a launch-temperature offset (note C2 of the record's AMENDMENTS.md): they are referenced to ${andList(Object.keys(by).map(r=>`${r} °C (${andList(by[r].map(h=>CK.card(h).label))})`))} while the runs launched at whole-degree readings of ${andList(hs.map(h=>LO[h].launch_c.toFixed(1)))} °C in that order`+
+  (st!=null?`; the references were taken at launches on a downward step of the reading, so the die at these launches was at the reading or up to ${st.toFixed(2)} °C above it, which the reading cannot tell apart,`:',')+` so at the die temperature of each launch ${andList(hs.map(h=>`${CK.card(h).label}'s are ${loOff(h)}`))}`;};
+const cap1=t=>t?t[0].toUpperCase()+t.slice(1):t;
+/* each card's launch temperature for the tensor rows (tensor.launch_c), as "80 °C (57 °C on aifoundry3)" */
+function launchTxt(){const LC=D.tensor.launch_c||{}, hs=CK.cardsIn(LC), by={}; hs.forEach(h=>{const t=f0(LC[h]); (by[t]=by[t]||[]).push(h);});
+ const ts=Object.keys(by).sort((a,b)=>by[b].length-by[a].length); if(!ts.length)return '80 °C';
+ return `${ts[0]} °C`+(ts.length>1?` (${ts.slice(1).map(t=>`${t} °C on ${andList(by[t].map(h=>CK.card(h).label))}`).join('; ')})`:'');}
 const cb=(k,sc)=>{const c=CB[k]; if(!c)return null; sc=sc||1; const pc={}; for(const h in c.per_card)pc[h]={mean:c.per_card[h].mean*sc,se:(c.per_card[h].se||0)*sc,n:c.per_card[h].n};
   return {mean:c.mean*sc,lo:c.lo*sc,hi:c.hi*sc,n:c.n,per_card:pc};};
 const pick=(fn,v)=>fn===fs?(Math.abs(v)>=10?f1:f2):fn;   /* fs: one precision for a whole bar, set by its mean */
@@ -46,6 +68,10 @@ const ALLC=CARDLIST.length===2?'both cards':`all ${WORD[CARDLIST.length]||CARDLI
 const cshort=h=>CK.card(h).short, cname=h=>h==null||h==='pooled'?ALLC:CK.card(h).label;
 const andList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
 const SUMM=h=>(D.catalogue.cards[h]||{}).summary||{};
+/* the median ratio of card h to the reference card over the catalogue's entries per instruction (byte false) or per byte */
+const kindMed=(h,byte)=>{const R0=SUMM(CARDS[0]), Rh=SUMM(h), v=[]; for(const k in R0){const a=R0[k], b=Rh[k]; if(!b)continue; const isB=a.bytes_per_s.mean>0; if(isB!==byte)continue;
+  const fld=isB?'pj_per_byte':'pj_per_op'; if(a[fld].mean>0&&b[fld].mean>0)v.push(b[fld].mean/a[fld].mean);}
+ v.sort((x,y)=>x-y); return v.length?(v.length%2?v[v.length>>1]:(v[v.length/2-1]+v[v.length/2])/2):null;};
 /* the card a single-card source was measured on, read from its data path (…-aifoundry2/…) */
 const srcCard=p=>{const m=String((Array.isArray(p)?p[0]:p)||'').match(/aifoundry\d(?:-c\d)?/); return m?CK.card(m[0]).id:null;};
 const LAWCARD=srcCard(R.source&&R.source.law)||CARDS[0];     /* the card the idle law of section 1 was fitted on */
@@ -120,94 +146,158 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
    bx.push(b); const t=CK.txt(parent,it.x+dx,it.y+dy,it.text,cls||'lab',an); t.classList.add('halo'); if(it.series)t.setAttribute('data-series',it.series); return;}});}
 
 /* ---------- KPIs ---------- */
+/* a value with its 99% interval, {mean, ci99}: "0.10 [0.06–0.15]" */
+const wci=(x,fn)=>x&&x.ci99&&x.ci99[0]!=null?`${fn(x.mean)} [${fn(x.ci99[0])}–${fn(x.ci99[1])}]`:x?fn(x.mean):'—';
+const sgw=v=>(v<0?'−':'+')+f2(Math.abs(v));
+const mf2=v=>(v<0?'−':'')+f2(Math.abs(v));   /* a signed value with a true minus sign */
+const sg1=v=>(v<0?'−':'+')+f1(Math.abs(v));
+/* a list joined with semicolons, the last with "and": for items that carry commas of their own */
+const semiList=a=>a.length<2?a.join(''):a.slice(0,-1).join('; ')+'; and '+a[a.length-1];
 (function(){
  /* D3 (version 3): the idle law is led by its measured slope; its split into fixed and leakage is the range over the
     e-foldings that fit the idle bins equally well (R.profile, build_energy_manual.py) */
  const PF=R.profile, lkr=PF?`${f0(PF.A_leak_80_w[0])}–${f0(PF.A_leak_80_w[1])} W`:'';
+ /* the other cards' idle against the law, over their version-3 idle cycles (v3.idle.law_residual) */
+ const LRv=VI.law_residual||{}, oth=CK.cardsIn(LRv).filter(h=>h!==LAWCARD);
  $('k1').textContent=`+${f2(R.lambda_80_w_per_c)} W/°C`;
  if(PF){$('k1sub').textContent=`on ${f1(P80)} W, of which ${lkr} is leakage (the data do not pin the split closer)`;
-  $('restlede').textContent=`At rest the card draws ${f1(P80)} W at 80 °C and ${f2(R.lambda_80_w_per_c)} W more per degree (aifoundry2), ${lkr} of it leakage.`;}
- const fm=cb('fmadd.ps/random/h2'); $('k2').textContent=fm?`${f0(fm.mean)} pJ [${f0(fm.lo)}–${f0(fm.hi)}]`:f0(g('fmadd_ps','random',2).pj_per_op)+' pJ';
+  $('restlede').textContent=`At rest ${LAWCARD} draws ${f1(P80)} W at 80 °C and ${f2(R.lambda_80_w_per_c)} W more per degree, ${lkr} of it leakage`+
+   (oth.length?`; the other cards idle above that law, ${andList(oth.map(h=>`${cname(h)} by ${f1(LRv[h].mean)} W`))}.`:'.');}
+ const fm=cb('fmadd.ps/random/h2'), fz=cb('fmadd.ps/zeros/h2'); if(fz)$('k2sub').textContent=`against ${f0(fz.mean)} pJ on zeros: the data decides`; $('k2').textContent=fm?`${f0(fm.mean)} pJ [${f0(fm.lo)}–${f0(fm.hi)}]`:f0(g('fmadd_ps','random',2).pj_per_op)+' pJ';
  const dl=cb('tload/dram/random'),sl=cb('tload/scp/random'); $('k3').textContent=dl&&sl?`${f0(dl.mean/sl.mean)}× [${f0(dl.lo/sl.hi)}–${f0(dl.hi/sl.lo)}]`:f0(g('tload','random',1,false).pj_per_byte/g('tload','random',1,true).pj_per_byte)+'×';
- const cc=D.catalogue&&D.catalogue.cross_card, DB=D.catalogue&&D.catalogue.die_c_busy_median;
- if(cc){$('k4').textContent=f3(cc.median); $('k4sub').textContent=`median ratio aifoundry3 / aifoundry2, each at its own die temperature (10–90%: ${f3(cc.p10)}–${f3(cc.p90)})`;
-  if(DB&&DB.aifoundry2&&DB.aifoundry3)$('cardlede').textContent=`aifoundry3 reads about ${f0(100*(1-cc.median))}% lower than aifoundry2 (median ${f2(cc.median)}; 80% of entries ${f0(100*(1-cc.p90))}–${f0(100*(1-cc.p10))}% lower), each card at its own die temperature, aifoundry3's about ${f0(Math.round((DB.aifoundry2-DB.aifoundry3)/5)*5)} °C cooler; whether the difference is the card or the temperature is not yet known.`;}
- /* section 9: the unsensed remainder at idle, per card (catalogue idle stretches, build_energy_manual.py) */
- const IU=D.catalogue&&D.catalogue.idle_unsensed;
- if(IU&&IU.aifoundry2&&IU.aifoundry3)$('unsensed').textContent=`The unsensed remainder, about ${f0(IU.aifoundry2.mean)} W on aifoundry2 and ${f0(IU.aifoundry3.mean)} W on aifoundry3, the largest single component of idle on both cards,`;
+ /* every other card against the first (catalogue.cross_cards: analyze_catalogue.py's cross_card rule per card) */
+ const XC=(D.catalogue&&D.catalogue.cross_cards)||{}, xo=CK.cardsIn(XC), DB=D.catalogue&&D.catalogue.die_c_busy_median, TP=(V3.catalogue||{}).temperature||{};
+ const pc=v=>f0(Math.abs(100*(1-v))), lower=v=>v<=1?'lower':'higher';
+ if(xo.length){$('k4lab').textContent=`${andList(xo.map(cname))} against ${CARDS[0]}, ${XC[xo[0]].n} catalogue entries`;
+  $('k4').textContent=xo.map(h=>f3(XC[h].median)).join(' · ');
+  $('k4sub').textContent=`median ratios, in that order, each card at its own die temperature (10–90%: ${xo.map(h=>`${f3(XC[h].p10)}–${f3(XC[h].p90)}`).join(' and ')})`;
+  const tb=CK.cardsIn(TP).filter(h=>TP[h].decision==='temperature'), RM=(D.catalogue&&D.catalogue.rail_mv)||{}, r0=RM[CARDS[0]];
+  /* a card whose median per byte departs from its median per instruction by more than 5% is described by kind */
+  const split=h=>{const i=kindMed(h,false), b=kindMed(h,true); return i!=null&&b!=null&&Math.abs(b/i-1)>0.05?[i,b]:null;};
+  const one=xo.filter(h=>!split(h)), two=xo.filter(h=>split(h));
+  const mvd=(h,k)=>r0&&RM[h]?RM[h][k]-r0[k]:null, mvTxt=h=>{const a=mvd(h,'minion'), b=mvd(h,'sram'); return a==null?'':`, in line with its rails: its minion rail runs ${f0(Math.abs(a))} mV ${a<0?'lower':'higher'} than ${CARDS[0]}'s and its SRAM rail ${f0(Math.abs(b))} mV ${b<0?'lower':'higher'}`;};
+  $('cardlede').textContent=(one.length?`Across the catalogue ${andList(one.map((h,i)=>`${cname(h)} reads ${pc(XC[h].median)}% ${lower(XC[h].median)}${i?'':` than ${CARDS[0]}`} (median ${f3(XC[h].median)})`))}, each card at its own die temperature`+
+    (DB?` (under load, in the median: ${andList([CARDS[0]].concat(one).filter(h=>DB[h]!=null).map(h=>`${cname(h)} ${f0(DB[h])} °C`))})`:'')+
+    (tb.length?`; the energy per operation rises with die temperature, ${andList(tb.map(h=>`${f2(TP[h].beta_pct_per_c.beta)}% per °C on ${cname(h)}`))} (the version-3 check), enough to account for a gap of this size, so that the two cards themselves differ is not established`:'')+'. ':'')+
+   two.map(h=>{const [i,b]=split(h); return `${cname(h)} reads ${pc(i)}% ${lower(i)} per instruction (median ${f3(i)}) but ${pc(b)}% ${lower(b)} per byte (${f3(b)})${mvTxt(h)}.`;}).join(' ');}
+ /* section 9: the unsensed remainder at idle, per card (catalogue idle stretches, build_energy_manual.py); the largest
+    component of idle on a card when it exceeds each metered rail there (catalogue.idle_split) */
+ const IU=D.catalogue&&D.catalogue.idle_unsensed, IS=(D.catalogue&&D.catalogue.idle_split)||{};
+ const big=CK.cardsIn(IS).every(h=>['minion','sram','noc'].every(k=>IS[h].unsensed>IS[h][k]));
+ if(IU)$('unsensed').textContent=`The unsensed remainder, about ${andList(CK.cardsIn(IU).map(h=>`${f0(IU[h].mean)} W on ${cname(h)}`))}${big?`, the largest single component of idle on ${CK.cardsIn(IS).length===CARDLIST.length?'every card':andList(CK.cardsIn(IS).map(cname))},`:','}`;
  /* the correction each burst of the three-pass catalogue received, per card (build_energy_manual.py) */
  const LC=D.catalogue&&D.catalogue.leak_correction;
- if(LC&&LC.aifoundry2){const a=LC.aifoundry2,b=LC.aifoundry3;
-  $('corr').textContent=`${f2(a.median_w)} W in the median and ${f2(a.max_w)} W at most over aifoundry2's ${nf(a.bursts)} bursts`+(b?` (${f2(b.median_w)} and ${f2(b.max_w)} W over aifoundry3's ${nf(b.bursts)})`:'');}
+ if(LC){const lh=CK.cardsIn(LC), a=LC[lh[0]];
+  $('corr').textContent=`${f2(a.median_w)} W in the median and ${f2(a.max_w)} W at most over ${lh[0]}'s ${nf(a.bursts)} bursts`+(lh.length>1?` (${lh.slice(1).map(h=>`${f2(LC[h].median_w)} and ${f2(LC[h].max_w)} W over ${cname(h)}'s ${nf(LC[h].bursts)}`).join('; ')})`:'');}
+ /* the board refresh per card (TEL-S): under the 10 Hz sampler, and the service processor's own pass read by a lighter poller */
+ const RF=V3.refresh_ms;
+ if(RF){const rh=CK.cardsIn(RF), rng=v=>v[0]===v[1]?f0(v[0]):`${f0(v[0])}–${f0(v[1])}`, len=rh.filter(h=>RF[h].lengthens==='positive');
+  $('refresh').textContent=`under that sampling it takes a new value about every ${andList(rh.map(h=>`${f0(RF[h].sampler_10hz)} ms on ${cname(h)}`))} (three passes each, 26 September); the service processor's own pass, read with a lighter poller, is ${andList(rh.map(h=>`${rng(RF[h].light_poller)} ms`))} in that order, and the 10 Hz sampler lengthens it measurably ${len.length?`only on ${andList(len.map(cname))}`:'on no card'}`;}
+ /* the sampler's own latency over the catalogue's bursts, per card (catalogue.sampler) */
+ const SM=D.catalogue&&D.catalogue.sampler;
+ if(SM){const sh=CK.cardsIn(SM), slow=sh.filter(h=>SM[h].over_60ms>0), none=sh.filter(h=>!SM[h].over_60ms);
+  $('slowsampler').textContent=`Some DRAM-read bursts (tensor loads from DRAM and the 1 KB row walks) slowed the sampler itself, to a median of up to ${f0(Math.max(...sh.map(h=>SM[h].max_ms)))} ms per sample against the usual ${f0(SM[sh[0]].median_ms)} ms: ${andList(slow.map(h=>`${WORD[SM[h].over_60ms]||SM[h].over_60ms} of ${nf(SM[h].bursts)} bursts on ${cname(h)}`))} ran over 60 ms${none.length?`, none on ${andList(none.map(cname))}`:''}`;}
+ /* the minion rail's voltage at 600 MHz and each card's firmware (v3.idle.clocks) */
+ const CL=VI.clocks;
+ if(CL){const ch=CK.cardsIn(CL), fw=[...new Set(ch.map(h=>CL[h].firmware))];
+  $('railmv').textContent=`the minion rail reads ${andList(ch.map(h=>`${(CL[h].mv/1000).toFixed(3)} V on ${cname(h)}`))} (firmware ${andList(ch.map(h=>CL[h].firmware))}, in that order)`;}
+ /* section 10: the relay against the DRAM round trip, per card (reruns.relay_pj_per_byte) */
+ const rr=RR.relay_pj_per_byte||{};
+ if(rr.dram&&rr.hop){const rh=CK.cardsIn(rr.dram.per_card).filter(h=>rr.hop.per_card[h]);
+  $('relayrel').textContent=`about a ${Math.round(rr.dram.mean/rr.hop.mean)===13?'thirteenth':Math.round(rr.dram.mean/rr.hop.mean)===12?'twelfth':'1/'+f0(rr.dram.mean/rr.hop.mean)} of the energy (${rh.map((h,i)=>`${f1(rr.dram.per_card[h].mean/rr.hop.per_card[h].mean)}× less on ${cname(h)}`).join(', ')})`;}
+ /* the lede's round numbers, from the catalogue's pooled means: the awake core, three instructions, three byte paths */
+ const cm=k=>(cb(k)||{}).mean, sp1=S2['spin/zeros/h1'], rngB=ks=>{const v=ks.map(cm).filter(x=>x!=null); return [Math.min(...v),Math.max(...v)];};
+ const r5=(v,up)=>Math.round(v/5)*5, sc=rngB(['tload/scp/zeros','tload/scp/random','tstore/scp/zeros','tstore/scp/random']), dr=rngB(['tload/dram/zeros','tload/dram/random','tstore/dram/zeros','tstore/dram/random']), ws=rngB(['st_stream/dram/zeros','st_stream/dram/random']);
+ if(sp1&&cm('add/zeros/h2')!=null)$('ledenums').textContent=`An awake minion is ${f0(sp1.over_idle_w.mean/1024*1e3)} mW. On zeros an integer add is ${f0(cm('add/zeros/h2'))} pJ, a float add ${f0(cm('fadd.s/zeros/h2'))} and an eight-lane multiply-add ${f0(cm('fmadd.ps/zeros/h2'))}; on random data ${f0(cm('add/random/h2'))}, ${f0(cm('fadd.s/random/h2'))} and ${f0(cm('fmadd.ps/random/h2'))}. A byte from the shire's own scratchpad is ${f0(Math.floor(sc[0]))}–${f0(Math.ceil(sc[1]))} pJ; from DRAM, ${r5(dr[0])}–${r5(dr[1])}; written back through the L1 to DRAM, ${Math.round(ws[0]/10)*10}–${Math.round(ws[1]/10)*10}.`;
+ const t32=D.tensor.rows.find(r=>r.config==='fp32_randn');
+ if(t32)$('flipsnow').textContent=` (${f1(t32.over_idle_w)} W in the four runs of 26 September)`;
 })();
 
 /* ---------- 1. the card at rest ---------- */
 (function(){
  const rl=R.rails_73c;
- /* The two slopes are typed: the idle gaps of the aifoundry2 catalogue (every 600 MHz sample at least 1.5 s before
-    and 2.5 s after any burst, n ≈ 9,800, 71–83 °C) fitted against the die temperature give 0.033 W/°C for board
-    minus the three rails and 0.548 W/°C for the rails together; no committed script writes them. */
+ /* The unsensed blocks' and the metered rails' slopes come from the version-3 idle cycles (v3.idle: IDLE-c, 26 September;
+    three heat-and-cool cycles per card, every sample at 600 MHz); until 25 September the page typed 0.033 and 0.548 W/°C
+    from aifoundry2's 23 September catalogue idle gaps (no committed script wrote them). */
  const PF=R.profile, IU=D.catalogue&&D.catalogue.idle_unsensed, rg0=v=>`${f0(v[0])}–${f0(v[1])}`;
  const split=PF?`How much of the ${f1(P80)} W is leakage they do not: the idle bins fit equally well with the leakage e-folding anywhere from ${PF.T_L_window_c[0]} to ${PF.T_L_window_c[1]} °C (doubling every ${rg0(PF.doubling_c)} °C), which puts the leakage at 80 °C at ${rg0(PF.A_leak_80_w)} W and the fixed part at ${rg0(PF.P_fix_w)} W. `:'';
- const uns=IU&&IU.aifoundry2&&IU.aifoundry3?`draw about ${f0(IU.aifoundry2.mean)} W at idle on aifoundry2 (${rg0(IU.aifoundry2.die_c)} °C) and ${f0(IU.aifoundry3.mean)} W on aifoundry3 (${rg0(IU.aifoundry3.die_c)} °C), and`:`draw about ${f0(rl.unsensed)} W at idle and`;
- $('resttext').innerHTML=`Everything below is <em>above</em> this. On aifoundry2 the idle card draws ${f1(P80)} W at 80 °C and ${f2(R.lambda_80_w_per_c)} W more for each degree there, and that slope is what the idle measurements pin down${PF?` (${f2(PF.lambda_80_w_per_c[0])}–${f2(PF.lambda_80_w_per_c[1])} W per °C for every e-folding that fits)`:''}. ${split}The law drawn below is the best fit, ${f1(R.P_fix_w)} W fixed and ${f1(R.A_leak_80_w)} W of leakage at 80 °C e-folding every ${f0(R.T_L_c)} °C: a fit, not a block-by-block account. The blocks with no rail sensor (PCIe, the DDR PHY, the IO shire, the regulators) ${uns} barely move with temperature: 0.03 W per °C over 71–83 °C in the catalogue's idle gaps. The three metered rails carry the leakage, 0.55 W per °C between them at about 75 °C. What the unsensed blocks spend when a kernel uses them (DRAM traffic through the DDR PHY, the regulators' delivery loss) is counted in the per-event costs below, and <a href="${HUB}#the-unmetered-remainder-attributed">Limits of observability, §4.2</a> attributes it. The leakage answers to temperature, which the kernel sets.`;
- const LK=D.cards&&D.cards.leakage, ic3=(LK&&LK.idle_curve)||[];
- /* the idle bins, one series per card in its registry colour and mark: the law's own card (R.measured_idle) and the other
-    card of the cards report (D.cards.leakage.idle_curve); the law itself is drawn in ink */
- const OTH=CK.cardsIn((D.cards&&D.cards.idle)||{}).filter(h=>h!==LAWCARD)[0]||CARDS.find(h=>h!==LAWCARD);
- const IB=[{card:LAWCARD,pts:R.measured_idle.map(p=>({T:p.T,W:p.P,n:p.n}))}].concat(ic3.length&&OTH?[{card:OTH,pts:ic3}]:[]);
- const idleItems=[{key:'law',label:`the law, fitted on ${cname(LAWCARD)}`,mark:'line',color:'var(--ink)'},{key:'fix',label:'its constant, at the best fit',mark:'dash',color:'var(--ref)'}]
-   .concat(IB.map(s=>cardItem(s.card,`${cname(s.card)} idle bins`)));
+ const uns=IU?`draw about ${andList(CK.cardsIn(IU).map(h=>`${f0(IU[h].mean)} W on ${cname(h)} (${rg0(IU[h].die_c)} °C)`))} at idle in the catalogue's idle stretches, and`:`draw about ${f0(rl.unsensed)} W at idle and`;
+ const US=VI.unsensed_slope_74_88||{}, RS=VI.rails_slope_75_80||{}, a3u=VI.unsensed_slope_a3_cycles, uo=CK.cardsIn(US).filter(h=>h!==LAWCARD), ro=CK.cardsIn(RS).filter(h=>h!==LAWCARD);
+ const slope=US[LAWCARD]?` move little with temperature: ${wci(US[LAWCARD],f2)} W per °C over 74–88 °C on ${LAWCARD} in the version-3 idle cycles (26 September, three per card; the 99% interval)`+
+   ((a3u&&a3u.length)||uo.length?`, ${andList([].concat(a3u&&a3u.length?[`${f2(a3u.reduce((x,y)=>x+y,0)/a3u.length)} on aifoundry3`]:[],uo.map(h=>`${wci(US[h],f2)} on ${cname(h)}`)))}`:'')+
+   `. The three metered rails carry the leakage, ${wci(RS[LAWCARD],f2)} W per °C between them at 75–80 °C on ${LAWCARD}${ro.length?` (${andList(ro.map(h=>`${wci(RS[h],f2)} on ${cname(h)}`))})`:''}.`
+   :` barely move with temperature.`;
+ $('resttext').innerHTML=`Everything below is <em>above</em> this. On ${LAWCARD} the idle card draws ${f1(P80)} W at 80 °C and ${f2(R.lambda_80_w_per_c)} W more for each degree there, and that slope is what the idle measurements pin down${PF?` (${f2(PF.lambda_80_w_per_c[0])}–${f2(PF.lambda_80_w_per_c[1])} W per °C for every e-folding that fits)`:''}. ${split}The law drawn below is the best fit, ${f1(R.P_fix_w)} W fixed and ${f1(R.A_leak_80_w)} W of leakage at 80 °C e-folding every ${f0(R.T_L_c)} °C: a fit, not a block-by-block account. The other cards idle above it (the chart). The blocks with no rail sensor (PCIe, the DDR PHY, the IO shire, the regulators) ${uns}${slope} What the unsensed blocks spend when a kernel uses them (DRAM traffic through the DDR PHY, the regulators' delivery loss) is counted in the per-event costs below, and <a href="${HUB}#the-unmetered-remainder-attributed">Limits of observability, §4.2</a> attributes it. The leakage answers to temperature, which the kernel sets.`;
+ /* The dots: the whole-degree idle bins the law was fitted to (aifoundry2, 21 September), in ink; then every card's idle bins
+    in the version-3 idle cycles (v3.idle.bins, 26 September), each in its registry colour and mark. The law is drawn in ink. */
+ const VB=VI.bins||{}, FIT=R.measured_idle.map(p=>({T:p.T,W:p.P,n:p.n}));
+ const IB=CK.cardsIn(VB).map(h=>({card:h,pts:VB[h].bins.map(b=>({T:b.T,W:b.W,n:b.cycles,r:b.resid}))}));
+ const idleItems=[{key:'law',label:`the law, fitted on ${cname(LAWCARD)}`,mark:'line',color:'var(--ink)'},{key:'fix',label:'its constant, at the best fit',mark:'dash',color:'var(--ref)'},
+   {key:'fitbins',label:`${cname(LAWCARD)}, 21 September: the bins it was fitted to`,mark:'dot',color:'var(--ink-2)'}]
+   .concat(IB.map(s=>cardItem(s.card,`${cname(s.card)}, 26 September`)));
  CK.legend('idle-legend',idleItems); legendMarks('idle-legend',idleItems);
- CK.frame('idle',{height:W=>W<600?260:320,label:'Idle board power against die temperature: the law and the measured idle bins',draw:f=>{
-  const L=40,Rr=12,T=24,B=40, x=CK.lin(40,95,L,f.W-Rr), y=CK.lin(10,50,f.H-B,T);
-  CK.axes(f,{x,y,L,R:Rr,T,B,xt:[40,50,60,70,80,90],yt:[10,20,30,40,50],xl:'die temperature, °C',yl:'idle board power, W'});
+ const ymax=Math.max(50,...IB.flatMap(s=>s.pts.map(p=>p.W)))+2;
+ CK.frame('idle',{height:W=>W<600?270:330,label:'Idle board power against die temperature: the law, the bins it was fitted to, and every card\'s idle in the version-3 cycles',draw:f=>{
+  const L=40,Rr=12,T=24,B=40, x=CK.lin(40,95,L,f.W-Rr), y=CK.lin(10,Math.ceil(ymax/10)*10,f.H-B,T);
+  CK.axes(f,{x,y,L,R:Rr,T,B,xt:[40,50,60,70,80,90],yt:[10,20,30,40,50,60].filter(v=>v<=Math.ceil(ymax/10)*10),xl:'die temperature, °C',yl:'idle board power, W'});
   const law=[]; for(let t=40;t<=95;t++) law.push([t,lawAt(t)]);
   CK.el('path',{d:CK.path(law,x,y),class:'ln',stroke:'var(--ink)'},f.svg);
   CK.el('line',{x1:L,x2:f.W-Rr,y1:y(R.P_fix_w),y2:y(R.P_fix_w),stroke:'var(--ref)','stroke-width':1.5,'stroke-dasharray':'5 4'},f.svg);
   CK.txt(f.svg,f.W-Rr-4,y(R.P_fix_w)-6,'best-fit constant '+f1(R.P_fix_w)+' W','lab','end');
-  IB.forEach((s,j)=>{const nm=cname(s.card);
-   CK.keynav(f,s.pts.map(p=>cmark(f,f.svg,s.card,x(p.T),y(p.W),j?4.5:3.5,8,`${nm} idle at ${p.T} °C: <b>${f2(p.W)} W</b> (${nf(p.n)} samples)<br>the ${s.card===LAWCARD?'':cname(LAWCARD)+' '}law: ${f2(lawAt(p.T))} W`)));
-   if(j&&s.pts.length){const p0=s.pts.reduce((a,b)=>a.T<b.T?a:b); CK.txt(f.svg,x(p0.T)-9,y(p0.W)+4,nm,'lab','end');}});
+  CK.keynav(f,FIT.map(p=>mark(f,f.svg,'circle',{cx:x(p.T),cy:y(p.W),r:2.6,fill:'var(--ink-2)'},7,`${cname(LAWCARD)}, 21 September, ${p.T} °C: <b>${f2(p.W)} W</b> (${nf(p.n)} samples), one of the bins the law was fitted to<br>the law: ${f2(lawAt(p.T))} W`)));
+  IB.forEach(s=>{const nm=cname(s.card);
+   CK.keynav(f,s.pts.map(p=>cmark(f,f.svg,s.card,x(p.T),y(p.W),s.card===LAWCARD?3.5:4,8,`${nm}, 26 September, ${p.T} °C: <b>${f2(p.W)} W</b> (the mean of ${WORD[p.n]||p.n} cycle${p.n>1?'s':''})<br>the ${s.card===LAWCARD?'':cname(LAWCARD)+' '}law: ${f2(lawAt(p.T))} W (${sgw(p.r)} W)`)));});
  }});
- const tmin=Math.min(...R.measured_idle.map(p=>p.T)), tmax=Math.max(...R.measured_idle.map(p=>p.T));
- const sg=v=>(v<0?'−':'+')+f2(Math.abs(v)), LR=D.catalogue&&D.catalogue.idle_law_residual;
- const r3=ic3.length?` Rings: aifoundry3's idle at ${Math.min(...ic3.map(p=>p.T))}–${Math.max(...ic3.map(p=>p.T))} °C (22 September), ${tmin-Math.max(...ic3.map(p=>p.T))}–${tmin-Math.min(...ic3.map(p=>p.T))} °C below the coolest fitted bin: ${LK.mean_offset_W>=0?'+':''}${f1(LK.mean_offset_W)} W from the law (the mean of its ${WORD[ic3.length]} temperature bins).`+
-  (LR&&LR.aifoundry2&&LR.aifoundry3?` In the idle stretches of the 23 September catalogue aifoundry3 sat ${sg(LR.aifoundry3.mean)} W from the law at ${f0(LR.aifoundry3.die_c[0])}–${f0(LR.aifoundry3.die_c[1])} °C and aifoundry2 ${sg(LR.aifoundry2.mean)} W at ${f0(LR.aifoundry2.die_c[0])}–${f0(LR.aifoundry2.die_c[1])} °C (three passes each).`:''):'';
+ /* the fitted bins as contiguous runs of whole degrees (64–67 and 81–88 °C) */
+ const runs=[]; FIT.map(p=>p.T).sort((a,b)=>a-b).forEach(t=>{const r=runs[runs.length-1]; if(r&&t===r[1]+1)r[1]=t; else runs.push([t,t]);});
+ const LRv=VI.law_residual||{}, L2=VI.law_residual_a2;
+ const v3cap=(L2||CK.cardsIn(LRv).length)?` Coloured: each card's idle bins in the version-3 check's three heat-and-cool cycles (26 September, every sample at 600 MHz): `+
+   semiList([].concat(L2?[`${LAWCARD} ${sgw(L2.mean)} W [${sgw(L2.ci99[0])}, ${sgw(L2.ci99[1])}] from the law at ${L2.T[0]}–${L2.T[1]} °C`]:[],
+    CK.cardsIn(LRv).filter(h=>h!==LAWCARD).map(h=>`${cname(h)} ${sgw(LRv[h].mean)} W [${sgw(LRv[h].ci99[0])}, ${sgw(LRv[h].ci99[1])}] at ${LRv[h].T[0]}–${LRv[h].T[1]} °C, the gap growing ${LRv[h].slope_w_per_c.mean<0.1?f3(LRv[h].slope_w_per_c.mean):f2(LRv[h].slope_w_per_c.mean)} W per °C`)))+
+   ` (the mean over the cycles and its 99% interval). The law holds on ${LAWCARD} to a tenth of a watt; the others idle above it, which section 7.1 prices with each card's own law.`:'';
  const lf=t=>PF.leak_frac[String(t)].map(v=>Math.round(100*v)).join('–')+'%';
- const share=PF?` Leakage share on aifoundry2 over those e-foldings: ${lf(60)} at 60 °C, ${lf(80)} at 80 °C, ${lf(90)} at 90 °C (${Math.round(100*R.curve.find(c=>c.T===60).leak_frac)}%, ${Math.round(100*R.curve.find(c=>c.T===80).leak_frac)}% and ${Math.round(100*R.curve.find(c=>c.T===90).leak_frac)}% at the best fit).`:
+ const share=PF?` Leakage share on ${LAWCARD} over those e-foldings: ${lf(60)} at 60 °C, ${lf(80)} at 80 °C, ${lf(90)} at 90 °C (${Math.round(100*R.curve.find(c=>c.T===60).leak_frac)}%, ${Math.round(100*R.curve.find(c=>c.T===80).leak_frac)}% and ${Math.round(100*R.curve.find(c=>c.T===90).leak_frac)}% at the best fit).`:
   ` Leakage share: ${Math.round(100*R.curve.find(c=>c.T===60).leak_frac)}% at 60 °C, ${Math.round(100*R.curve.find(c=>c.T===80).leak_frac)}% at 80 °C, ${Math.round(100*R.curve.find(c=>c.T===90).leak_frac)}% at 90 °C.`;
- $('idlecap').textContent=`Line: the law fitted on 21 September, P = ${f1(R.P_fix_w)} W + ${f1(R.A_leak_80_w)} W·e^((T−80)/${f0(R.T_L_c)}), whose slope at 80 °C is ${f2(R.lambda_80_w_per_c)} W per °C${PF?`; with the e-folding anywhere from ${PF.T_L_window_c[0]} to ${PF.T_L_window_c[1]} °C the law passes the dots as well, at ${f2(PF.lambda_80_w_per_c[0])}–${f2(PF.lambda_80_w_per_c[1])} W per °C`:''}. Dots: every whole-degree idle bin of that session on aifoundry2, ${tmin}–${tmax} °C.${r3}${share}`;
- $('rails').innerHTML='<thead><tr><th>Idle at 73 °C, by rail</th><th class="num">W</th><th class="num">Share</th></tr></thead><tbody>'+
-  [['Minions',rl.minion],['SRAM: L2, L3, scratchpad',rl.sram],['Mesh',rl.noc],['No rail sensor: PCIe, DDR PHY, IO shire, regulators',rl.unsensed]].map(r=>`<tr><td>${r[0]}</td><td class="num">${f2(r[1])}</td><td class="num">${Math.round(100*r[1]/rl.board)}%</td></tr>`).join('')+
-  `<tr><td><b>Board</b> <span class="small">(aifoundry2 on 22 September at ${f0(rl.die_c)} °C, ${rl.hours_idle!=null?f1(rl.hours_idle):'about 20'} hours after the last workload, apart from a 4.9 s single-hart probe a few minutes before: ${rl.samples||300} samples over a minute, sd ${f2(rl.board_sd!=null?rl.board_sd:0.04)} W; the rails' sd 0.01 W or less)</span></td><td class="num"><b>${f2(rl.board)}</b></td><td></td></tr></tbody>`;
+ $('idlecap').textContent=`Line: the law fitted on 21 September, P = ${f1(R.P_fix_w)} W + ${f1(R.A_leak_80_w)} W·e^((T−80)/${f0(R.T_L_c)}), whose slope at 80 °C is ${f2(R.lambda_80_w_per_c)} W per °C${PF?`; with the e-folding anywhere from ${PF.T_L_window_c[0]} to ${PF.T_L_window_c[1]} °C the law passes the fitted bins as well, at ${f2(PF.lambda_80_w_per_c[0])}–${f2(PF.lambda_80_w_per_c[1])} W per °C`:''}. Grey dots: the whole-degree idle bins of that session on ${LAWCARD} the law was fitted to, ${andList(runs.map(r=>r[0]===r[1]?`${r[0]}`:`${r[0]}–${r[1]}`))} °C.${v3cap}${share}`;
+ /* the rail split at 73 °C: aifoundry2 on 22 September, and each card's 73 °C bin in the version-3 idle cycles (v3.idle.split_73c) */
+ const SP=VI.split_73c||{}, sc=CK.cardsIn(SP), OUT=VI.outcomes||{};
+ const rows=[['Minions','minion'],['SRAM: L2, L3, scratchpad','sram'],['Mesh','noc'],['No rail sensor: PCIe, DDR PHY, IO shire, regulators','unsensed']];
+ const cyc=h=>SP[h].minion.n;
+ $('rails').innerHTML=`<thead><tr><th>Idle at 73 °C, by rail</th><th class="num">W, ${cshort(LAWCARD)}, 22 Sep</th><th class="num">Share</th>`+sc.map(h=>`<th class="num">${cshort(h)}, 26 Sep (${WORD[cyc(h)]||cyc(h)} cycle${cyc(h)>1?'s':''})</th>`).join('')+'</tr></thead><tbody>'+
+  rows.map(r=>`<tr><td>${r[0]}</td><td class="num">${f2(rl[r[1]])}</td><td class="num">${Math.round(100*rl[r[1]]/rl.board)}%</td>`+sc.map(h=>`<td class="num">${f2(SP[h][r[1]].mean)}</td>`).join('')+'</tr>').join('')+
+  `<tr><td><b>Board</b> <span class="small">(${LAWCARD} on 22 September at ${f0(rl.die_c)} °C, ${rl.hours_idle!=null?f1(rl.hours_idle):'about 20'} hours after the last workload, apart from a 4.9 s single-hart probe a few minutes before: ${rl.samples||300} samples over a minute, sd ${f2(rl.board_sd!=null?rl.board_sd:0.04)} W; the rails' sd 0.01 W or less.`+
+  (sc.length?` The 26 September columns are the 73 °C bin of the version-3 idle cycles, which ${andList(sc.map(h=>cyc(h)===3?`all three of ${cname(h)}'s`:`${WORD[cyc(h)]||cyc(h)} of ${cname(h)}'s three`))} reached; ${SP[LAWCARD]&&cyc(LAWCARD)<3?`${LAWCARD}'s agree with 22 September to within ${f2(Math.max(...rows.map(r=>Math.abs(SP[LAWCARD][r[1]].mean-rl[r[1]]))))} W, one cycle short of the three the check needed, so the split is not confirmed there`:''}${sc.filter(h=>h!==LAWCARD).length?`; ${andList(sc.filter(h=>h!==LAWCARD).map(h=>`${cname(h)} draws ${f1(SP[h].board.mean-rl.board)} W more`))}, on every rail`:''}.`:'')+
+  `)</span></td><td class="num"><b>${f2(rl.board)}</b></td><td></td>`+sc.map(h=>`<td class="num"><b>${f2(SP[h].board.mean)}</b></td>`).join('')+'</tr></tbody>';
 })();
 
 /* ---------- 1.1 the SRAM arrays at rest ---------- */
 (function(){
  const C=D.catalogue, sl=C.cards[CARDS[0]].sram_leakage; if(!(sl&&sl.fit&&sl.curve.length>2))return;
- const sl2=CARDS[1]&&C.cards[CARDS[1]].sram_leakage, fit=sl.fit, lawS=t=>fit.P_fix_w+fit.A_leak_80_w*Math.exp((t-80)/36);
- const xs=sl.curve.map(c=>c.T), ys=sl.curve.map(c=>c.sram_w), inRange=cv=>cv.filter(c=>c.T>=Math.min(...xs)-1&&c.T<=Math.max(...xs)+1);
- /* every other card's idle bins inside the fitted range, in its registry colour and mark (the fit in ink) */
- const OS=CARDS.slice(1).map(h=>{const s=C.cards[h].sram_leakage; return {h,inr:s&&s.curve?inRange(s.curve):[]};}).filter(o=>o.inr.length);
- const inr=(OS.find(o=>o.h===CARDS[1])||{inr:[]}).inr, ys2=ys.concat(...OS.map(o=>o.inr.map(c=>c.sram_w)));
- const sramItems=[{key:'fit',label:'fit, 36 °C e-folding imposed',mark:'line',color:'var(--ink)'},cardItem(CARDS[0],CARDS[0]+' idle bins')].concat(OS.map(o=>cardItem(o.h,cname(o.h)+' idle bins')));
+ const fit=sl.fit, lawS=t=>fit.P_fix_w+fit.A_leak_80_w*Math.exp((t-80)/36);
+ const xs=sl.curve.map(c=>c.T), ys=sl.curve.map(c=>c.sram_w);
+ /* every other card's idle bins, in its registry colour and mark; the fit in ink over its own range, dashed where extrapolated */
+ const OS=CARDS.slice(1).map(h=>{const s=C.cards[h].sram_leakage; return {h,inr:s&&s.curve?s.curve:[]};}).filter(o=>o.inr.length);
+ const allT=xs.concat(...OS.map(o=>o.inr.map(c=>c.T))), ys2=ys.concat(...OS.map(o=>o.inr.map(c=>c.sram_w)));
+ const t0=Math.min(...allT)-1, t1=Math.max(...allT)+1, f0x=Math.min(...xs), f1x=Math.max(...xs);
+ const sramItems=[{key:'fit',label:`fit on ${CARDS[0]}, 36 °C e-folding imposed (dashed: extrapolated)`,mark:'line',color:'var(--ink)'},cardItem(CARDS[0],cname(CARDS[0])+' idle bins')].concat(OS.map(o=>cardItem(o.h,cname(o.h)+' idle bins')));
  CK.legend('sram-legend',sramItems); legendMarks('sram-legend',sramItems);
- CK.frame('sram',{height:W=>W<600?240:280,label:'The SRAM rail at idle against die temperature',draw:f=>{
-  const L=44,Rr=12,T=24,B=40, x=CK.lin(Math.min(...xs)-1,Math.max(...xs)+1,L,f.W-Rr), y=CK.lin(Math.min(...ys2)*0.9,Math.max(...ys2)*1.05,f.H-B,T);
+ CK.frame('sram',{height:W=>W<600?240:280,label:'The SRAM rail at idle against die temperature, every card',draw:f=>{
+  const L=44,Rr=12,T=24,B=40, x=CK.lin(t0,t1,L,f.W-Rr), y=CK.lin(Math.min(...ys2,lawS(t0))*0.9,Math.max(...ys2)*1.05,f.H-B,T);
   CK.axes(f,{x,y,L,R:Rr,T,B,xl:'die temperature, °C',yl:'SRAM rail at idle, W',yfmt:v=>f1(v)});
-  const law=[]; for(let t=Math.min(...xs)-1;t<=Math.max(...xs)+1;t+=0.5) law.push([t,lawS(t)]);
-  CK.el('path',{d:CK.path(law,x,y),class:'ln',stroke:'var(--ink)'},f.svg);
-  CK.keynav(f,sl.curve.map(c=>cmark(f,f.svg,CARDS[0],x(c.T),y(c.sram_w),3.5,8,`${CARDS[0]}, ${c.T} °C: <b>${f3(c.sram_w)} W</b> on the SRAM rail (${nf(c.n)} idle samples)`)));
-  OS.forEach(o=>CK.keynav(f,o.inr.map(c=>cmark(f,f.svg,o.h,x(c.T),y(c.sram_w),4.5,8,`${cname(o.h)}, ${c.T} °C: <b>${f3(c.sram_w)} W</b> on the SRAM rail (${nf(c.n)} idle samples)`))));
+  const seg=(a,b,dash)=>{const pts=[]; for(let t=a;t<=b+1e-9;t+=0.5)pts.push([t,lawS(t)]); CK.el('path',Object.assign({d:CK.path(pts,x,y),class:'ln',stroke:'var(--ink)'},dash?{'stroke-dasharray':'5 4'}:{}),f.svg);};
+  if(t0<f0x-1)seg(t0,f0x-1,true); seg(Math.max(t0,f0x-1),Math.min(t1,f1x+1),false); if(t1>f1x+1)seg(f1x+1,t1,true);
+  CK.keynav(f,sl.curve.map(c=>cmark(f,f.svg,CARDS[0],x(c.T),y(c.sram_w),3.5,8,`${cname(CARDS[0])}, ${c.T} °C: <b>${f3(c.sram_w)} W</b> on the SRAM rail (${nf(c.n)} idle samples)<br>the fit: ${f3(lawS(c.T))} W`)));
+  OS.forEach(o=>CK.keynav(f,o.inr.map(c=>cmark(f,f.svg,o.h,x(c.T),y(c.sram_w),4.5,8,`${cname(o.h)}, ${c.T} °C: <b>${f3(c.sram_w)} W</b> on the SRAM rail (${nf(c.n)} idle samples)<br>the ${CARDS[0]} fit${c.T<f0x?', extrapolated':''}: ${f3(lawS(c.T))} W`))));
  }});
- let sl2note='';
- /* the other card at its most-sampled idle bin: the aifoundry2 fit does not describe it, and card and shape are confounded */
- if(sl2&&sl2.curve&&sl2.curve.length){const lo2=sl2.curve.reduce((a,b)=>b.n>a.n?b:a); sl2note=` On ${CARDS[1]}, which idles cooler, the rail reads ${f2(lo2.sram_w)} W at ${lo2.T} °C (its most-sampled bin), where the ${CARDS[0]} fit, extrapolated, says ${f2(lawS(lo2.T))} W: the ${CARDS[0]} fit does not describe ${CARDS[1]}, and whether that is the card or the fit's shape outside its range is not known${inr.length?'; its points inside the fitted range are the hollow ones':''}.`;}
+ /* the other cards against the aifoundry2 fit, heated across its range in the version-3 idle cycles (v3.idle.sram_slope, IDLE-e;
+    the excess is over the aifoundry2 law as registered, −0.32 + 2.81 W, from the 23 September catalogue) */
+ const SS=VI.sram_slope||{}, so=CK.cardsIn(SS), top=VI.heater_top_c||{};
+ const sl2note=so.length?` The ${CARDS[0]} fit does not describe the other cards: in the version-3 idle cycles, heated from about 55 °C into the fit's own range, ${semiList(so.map(h=>`${cname(h)}'s rail sat ${f2(SS[h].excess_over_a2_law[0])}–${f2(SS[h].excess_over_a2_law[1])} W above it at ${SS[h].T[0]}–${SS[h].T[1]} °C, rising ${f3(SS[h].mean)} W per °C`))}, so the difference is the card, not the fit's shape outside its range.`+
+   (top.aifoundry3?` aifoundry3 idles cooler (${f0(C.idle_unsensed.aifoundry3.die_c[0])}–${f0(C.idle_unsensed.aifoundry3.die_c[1])} °C in the catalogue's idle stretches) but is not held cool: the heater took it to ${andList([...new Set(top.aifoundry3)].map(v=>v+' °C'))} in each of its three cycles.`:''):'';
  const c80=sl.curve.find(c=>c.T===80), rd=cb('tload/scp/random');
  const mb=c80?1000*c80.sram_w/128:fit.mw_per_mb_at_80, nj=mb/1048576*1e6;
- $('sramcap').textContent=`The rail feeding 128 MB of on-chip SRAM, at idle, on ${CARDS[0]}. Fitted with the idle law's 36 °C e-folding imposed: ${f2(fit.P_fix_w).replace('-','−')} W + ${f2(fit.A_leak_80_w)} W·e^((T−80)/36); ${fit.P_fix_w<0?'the negative constant says the rail rises faster than that shape. ':''}`+
-  (c80?`The whole rail at 80 °C is ${f2(c80.sram_w)} W, ${f1(mb)} mW per MB, an upper bound on the arrays' leakage including the cache logic. `:'')+
+ $('sramcap').textContent=`The rail feeding 128 MB of on-chip SRAM, at idle, in the catalogue's idle stretches (26 September). Fitted on ${CARDS[0]} (${f0x}–${f1x} °C) with the idle law's 36 °C e-folding imposed: ${f2(fit.P_fix_w).replace('-','−')} W + ${f2(fit.A_leak_80_w)} W·e^((T−80)/36); ${fit.P_fix_w<0?'the negative constant says the rail rises faster than that shape. ':''}`+
+  (c80?`On ${CARDS[0]} the whole rail at 80 °C is ${f2(c80.sram_w)} W, ${f1(mb)} mW per MB, an upper bound on the arrays' leakage including the cache logic. `:'')+
   `At about ${f0(mb)} mW per MB, a byte held in scratchpad for one second at 80 °C leaks at most about ${f0(nj)} nJ on ${CARDS[0]} — as much as reading it ${rd?nf(Math.round(nj*1000/rd.mean/100)*100):'—'} times (${rd?f1(rd.mean):'—'} pJ per read).`+sl2note;
 })();
 
@@ -216,18 +306,29 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  const s1=g('spin','zeros',1),s2=g('spin','zeros',2), c1=cb('spin/zeros/h1'), c2=cb('spin/zeros/h2');
  const w1=S2['spin/zeros/h1']?S2['spin/zeros/h1'].over_idle_w.mean:s1.over_idle_w, w2=S2['spin/zeros/h2']?S2['spin/zeros/h2'].over_idle_w.mean:s2.over_idle_w;
  const hw=at.contended.over_idle_w, h2w=HOT&&HOT.per_card.aifoundry2?HOT.per_card.aifoundry2.mean:hw;
- const ab=D.awake.spin_hart0_1024, t=D.tensor.rows.find(r=>r.config==='fp32_randn'), AT=D.tensor.activity_term_mw_per_minion||{};
+ const ab=D.awake.spin_hart0_1024, SV=D.awake.spin_v3_w, t=D.tensor.rows.find(r=>r.config==='fp32_randn'), AV=D.tensor.activity_v3_mw_per_minion||{}, AT=D.tensor.activity_term_mw_per_minion||{};
+ const lt=launchTxt();
  const WL='https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power';
  const two=(a,b)=>`${a}<br><span class="small">${b}</span>`;
+ const avh=CK.cardsIn(AV), mw=(h,n)=>AV[h]&&AV[h][n]!=null?f1(AV[h][n]):'—';
  $('awake').innerHTML='<thead><tr><th>Minions awake, doing the least they can</th><th class="num">pJ per instruction</th><th class="num">per card</th><th class="num">W over idle, 1,024 minions (a2)</th><th class="num">per minion (a2)</th></tr></thead><tbody>'+
   `<tr><td>One hart per minion, an addi loop</td><td class="num">${c1?bt(c1,f1):f1(s1.pj_per_op)}</td><td class="num small">${pcs(c1,f1)}</td><td class="num">${f2(w1)}</td><td class="num">${f2(w1/1024*1e3)} mW</td></tr>`+
   `<tr><td>Both harts</td><td class="num">${c2?bt(c2,f1):f1(s2.pj_per_op)}</td><td class="num small">${pcs(c2,f1)}</td><td class="num">${f2(w2)}</td><td class="num">${f2(w2/1024*1e3)} mW</td></tr>`+
-  `<tr><td>${two("The 21 September ablation's integer loop, hart 0",`four adds and a branch, about half the one-hart addi loop's issue rate, 80 °C; <a href="${WL}">Why is the ET-SoC-1 low power?</a>`)}</td><td class="num">${f1(ab.pj_marginal)}</td><td class="num small">a2 only, two runs</td><td class="num">${f2(ab.over_idle_w)}</td><td class="num">${f2(ab.over_idle_w/1024*1e3)} mW</td></tr>`+
+  `<tr><td>${two("The ablation's integer loop, hart 0",`four adds and a branch, about half the one-hart addi loop's issue rate; four 7 s runs on each card, launched at ${lt}; <a href="${WL}">Why is the ET-SoC-1 low power?</a>`)}</td><td class="num">${f1(ab.pj_marginal)} <span class="small">(a2)</span></td><td class="num small">${SV?CK.cardsIn(SV.per_card).map(h=>`${cshort(h)} ${f2(SV.per_card[h].mean)} ± ${f2(SV.per_card[h].se)} W`).join('<br>'):'a2 only, two runs'}</td><td class="num">${f2(ab.over_idle_w)}</td><td class="num">${f2(ab.over_idle_w/1024*1e3)} mW</td></tr>`+
   `<tr><td>${two('1,024 minions stalled on one contended atomic (less than a spinning minion)',`the hot line: each waits about ${nf(Math.round(1024*at.contended.cycles_per_op/1000)*1000)} cycles for its turn`)}</td><td class="num">—</td><td class="num small">${HOT?pcs(HOT,f2)+'<br>both '+bt(HOT,f2):'a2 only, 22 September'}</td><td class="num">${f2(h2w)}</td><td class="num">${f2(h2w/1024*1e3)} mW</td></tr>`+
-  `<tr><td>${two('For scale: every minion running a random-data fp32 matmul',`the activity term, section 3.2${AT.fp32_randn_8?`; ${f1(AT.fp32_randn_8)} mW per minion with 256 or 512 active, ${f1(AT.fp32_randn_24)} with 768`:''}`)}</td><td class="num">—</td><td class="num small">a2 only, two runs per point</td><td class="num">${f1(t.over_idle_w)}</td><td class="num">${f1(AT.fp32_randn||t.over_idle_w/1024*1e3)} mW</td></tr></tbody>`;
- const nop=cb('nop/zeros/h2'), fen=cb('fence/zeros/h2');
+  `<tr><td>${two('For scale: every minion running a random-data fp32 matmul',`the activity term, section 3.2; per minion with 256, 512 and 1,024 active: ${avh.length?avh.map(h=>`${cshort(h)} ${mw(h,'256')}, ${mw(h,'512')}, ${mw(h,'1024')}`).join('; ')+' mW (four runs each)':''}${AT.fp32_randn_24?`; ${f1(AT.fp32_randn_24)} with 768 (a2, 21 September)`:''}`)}</td><td class="num">—</td><td class="num small">${avh.length?avh.map(h=>`${cshort(h)} ${mw(h,'1024')} mW`).join('<br>'):'a2 only, two runs per point'}</td><td class="num">${f1(t.over_idle_w)}</td><td class="num">${AV[LAWCARD]?mw(LAWCARD,'1024'):f1(AT.fp32_randn||t.over_idle_w/1024*1e3)} mW</td></tr></tbody>`;
+ const nop=cb('nop/zeros/h2'), fen=cb('fence/zeros/h2'), T6=(V3.tensor||{}).spin_w||{}, T7=(V3.tensor||{}).active_minions||{};
+ const t6r=CK.cardsIn(T6).filter(h=>T6[h].lo>0), t6n=CK.cardsIn(T6).filter(h=>!(T6[h].lo>0));
+ const ci3=x=>`${mf2(x.mean)} W [${mf2(x.lo)}, ${mf2(x.hi)}]`;
+ const t7f=CK.cardsIn(T7).filter(h=>T7[h].ratio_1024_256>=0.98&&T7[h].ratio_1024_256<=1.10), t7u=CK.cardsIn(T7).filter(h=>!t7f.includes(h));
  if(nop&&fen) $('awaketext').innerHTML=
-  `The addi loop is not the floor: it increments seven registers, so its operands change on every instruction. With both harts a <code>nop</code> costs ${f1(nop.mean)} pJ [${f1(nop.lo)}–${f1(nop.hi)}] and a <code>fence</code> ${f1(fen.mean)} [${f1(fen.lo)}–${f1(fen.hi)}] per instruction (section 3.1), so the awake core is about ${f1(fen.mean)}–${f1(nop.mean)} pJ per issue slot.`;
+  `The addi loop is not the floor: it increments seven registers, so its operands change on every instruction. With both harts a <code>nop</code> costs ${f1(nop.mean)} pJ [${f1(nop.lo)}–${f1(nop.hi)}] and a <code>fence</code> ${f1(fen.mean)} [${f1(fen.lo)}–${f1(fen.hi)}] per instruction (section 3.1), so the awake core is about ${f1(fen.mean)}–${f1(nop.mean)} pJ per issue slot.`+
+  (t6r.length?` The ablation's integer loop is resolved from idle on ${andList(t6r.map(h=>`${cname(h)} (${ci3(T6[h])})`))}${t6n.length?` but not on ${andList(t6n.map(h=>`${cname(h)} (${ci3(T6[h])})`))}`:''}: the version-3 check's 99% intervals over four runs.`+
+   (CK.cardsIn(LO).length&&atL(LAWCARD,'spin')!=null?` But ${loNote()}, on some cards as large as the loop itself: at that temperature it draws ${andList(CK.cardsIn(LO).map(h=>`${rng2(atL(h,'spin'),atLs(h,'spin'),f2)} W on ${cname(h)}`))}.`:''):'')+
+  (t7u.length?(()=>{const hs=CK.cardsIn(LO).filter(h=>atL(h,'fp32_randn')!=null&&atL(h,'fp32_randn_8')!=null), rt=h=>(atL(h,'fp32_randn')/1024)/(atL(h,'fp32_randn_8')/256),
+     rtS=h=>atLs(h,'fp32_randn')!=null&&atLs(h,'fp32_randn_8')!=null?(atLs(h,'fp32_randn')/1024)/(atLs(h,'fp32_randn_8')/256):null, rts=hs.map(rt).concat(hs.map(rtS).filter(v=>v!=null));
+    return ` Per minion, the matmul's power at 1,024 active minions against 256 is ${andList(CK.cardsIn(T7).map(h=>`${f2(T7[h].ratio_1024_256)} on ${cname(h)}`))} as registered, flat within the check's band (0.98–1.10) only on ${andList(t7f.map(cname))}`+
+     (hs.length?`; at the die temperature of each launch, where the offset moves the smaller 256-minion runs most, it is ${andList(hs.map(h=>rng2(rt(h),rtS(h),f2)))} in that order, so which card is flat is not settled, and a per-minion figure measured on part of the chip can underprice the whole chip by up to ${f0(100*(Math.max(...rts,...CK.cardsIn(T7).map(h=>T7[h].ratio_1024_256))-1))}%.`:'.');})():'');
 })();
 
 /* ---------- 3. instructions ---------- */
@@ -264,24 +365,35 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  const lane=[(fm.mean-nop.mean)/8,(fm.mean-fen.mean)/8], tref=tb?tb.mean:tz.pj_marginal;
  /* the issue share of the tensor unit's saving, per card: (issue / 8) / (fmadd.ps per lane - tensor unit), with the
     fence or the nop on zeros as the issue cost (the pooled bars mix two cards that differ) */
- const issueShare=tb&&tb.per_card?['aifoundry2','aifoundry3'].filter(h=>tb.per_card[h]&&fm.per_card[h]&&nop.per_card[h]&&fen.per_card[h]).map(h=>{
-   const sv=fm.per_card[h].mean/8-tb.per_card[h].mean, sh=[fen,nop].map(c=>100*c.per_card[h].mean/8/sv); return `${f0(Math.min(...sh))}–${f0(Math.max(...sh))}%`;}):[];
+ const issueShare=tb&&tb.per_card?CK.cardsIn(tb.per_card).filter(h=>tb.per_card[h]&&fm.per_card[h]&&nop.per_card[h]&&fen.per_card[h]).map(h=>{
+   const sv=fm.per_card[h].mean/8-tb.per_card[h].mean, sh=[fen,nop].map(c=>100*c.per_card[h].mean/8/sv); return `${f0(Math.min(...sh))}–${f0(Math.max(...sh))}% issue on ${CK.card(h).label}`;}):[];
+ /* an integer add on zeros against a nop, per card: the difference of the card means */
+ const iz=q('add','zeros'), dd=CK.cardsIn(iz.per_card).filter(h=>nop.per_card[h]).map(h=>iz.per_card[h].mean-nop.per_card[h].mean);
  const dvs=['div','divu','rem','remu'].map(n=>q(n,'random')).filter(Boolean).map(c=>c.mean), rc=q('frcp.ps','random');
  $('instrtext').innerHTML=
-  `<b>An integer add on zeros, ${f1(ia.mean)} pJ [${f1(ia.lo)}–${f1(ia.hi)}], is within noise of a <code>nop</code> (${f1(nop.mean)} pJ) on both cards</b>: on zeros it cannot be told apart from the awake core that issues it. `+
+  `<b>An integer add on zeros, ${f1(ia.mean)} pJ [${f1(ia.lo)}–${f1(ia.hi)}], costs little more than a <code>nop</code></b> (${f1(nop.mean)} pJ; ${f1(Math.min(...dd))}–${f1(Math.max(...dd))} pJ more on each card): on zeros it is mostly the awake core that issues it. `+
   `<b>A scalar float add costs ${f1(fa.mean/ia.mean)}× an integer add</b> even on zeros; the FPU does not gate on zero. `+
   `<b>An eight-lane vector op on zeros costs the same as the scalar one</b> (${f1(vz.mean)} against ${f1(fa.mean)} pJ, bars overlapping): lanes computing on zeros add nothing, and on random data the lanes cost ${f1(vr.mean/vz.mean)}× — the data dependence of the tensor unit, in the vector unit. `+
   `<b>Per lane, a random-data <code>fmadd.ps</code> is ${f1(fm.mean/8)} pJ [${f1(fm.lo/8)}–${f1(fm.hi/8)}]; the tensor unit does the same multiply-add for ${tb?f1(tb.mean)+' ['+f1(tb.lo)+'–'+f1(tb.hi)+']':f2(tz.pj_marginal)}.</b> `+
   `Take out the vector instruction's issue — ${f1(fen.mean)}–${f1(nop.mean)} pJ, what a fence or a nop costs (section 2) — and the lane is ${f1(Math.min(...lane))}–${f1(Math.max(...lane))} pJ, about ${f0(100*(Math.min(...lane)+Math.max(...lane))/2/tref-100)}% above the tensor unit. Read that way, of the ${f1(fm.mean/8-tref)} pJ per multiply-add the tensor unit saves, roughly half is instruction issue and the rest datapath`+
-  (issueShare.length===2?` (${issueShare[0]} issue on aifoundry2, ${issueShare[1]} on aifoundry3, with the fence or the nop as the issue cost)`:'')+
+  (issueShare.length>1?` (${andList(issueShare)}, with the fence or the nop as the issue cost)`:'')+
   `; that is arithmetic on rows whose operands differ (uniform in [0.5, 2) here, normal for the tensor unit), not a measured decomposition. `+
   `<b>The transcendentals rank with the 64-bit divides as the dearest arithmetic</b>: <code>flog.ps</code> is ${f0(lg.mean)} pJ and <code>fexp.ps</code> ${f0(ex.mean)} for eight lanes, at a quarter of the rate, against ${f0(Math.min(...dvs))}–${f0(Math.max(...dvs))} pJ for the 64-bit divides and remainders; <code>frcp.ps</code> (${f0(rc.mean)}) is cheaper. Only loads and stores that bypass the L1 (${f0(Math.min(...byp))}–${f0(Math.max(...byp))} pJ) and atomics (${nf(Math.min(...amo))}–${nf(Math.max(...amo))} pJ) cost more.`;
  $('tensor').innerHTML='<thead><tr><th>Tensor unit, 1,024 minions</th><th class="num">pJ per MAC, marginal</th><th class="num" data-nosort>per card</th><th class="num">pJ per MAC, loaded (a2)</th><th class="num">W over idle (a2)</th><th class="num">MACs per second</th></tr></thead><tbody>'+
   D.tensor.rows.map(t=>{const b=TB[t.config], bc=b?CK.cardsIn(b.per_card):[]; return `<tr><td>${t.label}</td><td class="num">${b?bt(b,f3):'<b>'+f3(t.pj_marginal)+'</b>'}</td><td class="num small">${b?bc.map(h=>`${cshort(h)} ${f3(b.per_card[h].mean)}`).join('<br>')+(b.cards>1?'':`<br>(${cshort(bc[0])} only)`):''}</td><td class="num">${f2(t.pj_loaded)}</td><td class="num">${f2(t.over_idle_w)}</td><td class="num" data-sort="${t.per_s}">${sci(t.per_s)}</td></tr>`;}).join('')+
   '</tbody>';
- $('tensornote').innerHTML='One instruction per tile: fp32 16×16×16 = 4,096 multiply-adds (MACs), fp16 8,192, int8 16,384, on all 1,024 minions, launched at 80 °C on aifoundry2'+(D.cards&&D.cards.launch&&D.cards.launch.aifoundry3?' and '+f0(D.cards.launch.aifoundry3.T)+' °C on aifoundry3 (so the per-card fp32 values compare a warm card with a cool one)':'')+'. <b>Marginal</b>: board power above idle per MAC. <b>Loaded</b>: total board power, idle included, per MAC — what a MAC costs when it is the only thing running. Bars on the fp32 rows: the envelope of ±1 sd around the ablation’s two runs on aifoundry2 and the 22 September transfer’s runs on both cards; fp16 and int8 were run twice on aifoundry2, and their bar is ±1 sd of those two runs: '+
-  (()=>{const hw=k=>TB[k]?100*(TB[k].hi-TB[k].lo)/2/TB[k].mean:null; const rn=['fp16_randn','int8_randn'].map(hw), z=hw('int8_zeros'), on=['fp16_ones','int8_ones'].map(hw);
-     return `under ${f0(Math.ceil(Math.max(...rn)))}% on random data, ${f1(z)}% on int8 zeros, ${f0(Math.min(...on))}–${f0(Math.max(...on))}% on the ones patterns.`;})();
+ /* the tensor rows: the version-3 ablation, four runs on each card (tensor.bars; tensor.rows are aifoundry2's means) */
+ const nr=D.tensor.runs_per_card||{}, rcs=CK.cardsIn(nr), CY=(V3.tensor||{}).cycles_per_op||{};
+ const hw=k=>TB[k]?100*(TB[k].hi-TB[k].lo)/2/TB[k].mean:null, rw=['fp32_randn','fp16_randn','int8_randn'].map(hw), zw=['fp32_zeros','fp16_zeros','int8_zeros'].map(hw);
+ const nrs=[...new Set(rcs.map(h=>nr[h]))], runsTxt=!rcs.length?'its runs':nrs.length===1?`${WORD[nrs[0]]||nrs[0]} runs on ${rcs.length>1?`each of ${WORD[rcs.length]} cards`:cname(rcs[0])}`:andList(rcs.map(h=>`${WORD[nr[h]]||nr[h]} on ${cname(h)}`))+' runs';
+ const cyOK=CK.cardsIn(CY).length&&CK.cardsIn(CY).every(h=>CY[h]&&CY[h].fp32&&CY[h].fp32.length===1&&CY[h].int8&&CY[h].int8.length===1);
+ $('tensornote').innerHTML=`One instruction per tile: fp32 16×16×16 = 4,096 multiply-adds (MACs), fp16 8,192, int8 16,384, on all 1,024 minions, each run 7 s, launched at ${launchTxt()}: ${CK.card('aifoundry3').label}'s values compare a cool card with warm ones. <b>Marginal</b>: board power above the idle before the launch, per MAC. <b>Loaded</b>: total board power, idle included, per MAC — what a MAC costs when it is the only thing running (${cname(LAWCARD)}'s idle; aifoundry3's is lower and aifoundry1 card 1's higher, section 1). `+
+  `The version-3 check's ablation, ${runsTxt} (26 September): the bars are the range over every run on every card, ±${f0(Math.min(...rw))}–${f0(Math.max(...rw))}% on random data and ±${f0(Math.min(...zw))}–${f0(Math.max(...zw))}% on zeros, most of it the difference between the cards.`+
+  (cyOK?` The rates are the same on every card: ${f0(CY[CK.cardsIn(CY)[0]].fp32[0])} cycles per instruction (${f0(CY[CK.cardsIn(CY)[0]].int8[0])} for int8) in every timed launch.`:'')+
+  (CK.cardsIn(LO).length>1?(()=>{const hs=CK.cardsIn(LO), ps=k=>D.tensor.rows.find(r=>r.config===k).per_s, pj=(h,k)=>f2(atL(h,k)/ps(k)*1e12);
+    const a3=LO.aifoundry3||{mean_w:0}, a2=LO.aifoundry2||{mean_w:0}, pjS=(h,k)=>atLs(h,k)!=null?atLs(h,k)/ps(k)*1e12:null, pjR=(h,k)=>rng2(atL(h,k)/ps(k)*1e12,pjS(h,k),f2);
+    return ` ${cap1(loNote())}: about ${rng2(Math.abs(a3.mean_w-a2.mean_w),a3.mean_w_step!=null&&a2.mean_w_step!=null?Math.abs(a3.mean_w_step-a2.mean_w_step):null,f1)} W of any difference between aifoundry3 and aifoundry2 comes from the reduction, which is most of the spread on the zeros rows. At the die temperature of each launch the fp32 rows read ${andList(hs.map(h=>pjR(h,'fp32_zeros')))} pJ per MAC on zeros and ${andList(hs.map(h=>pjR(h,'fp32_randn')))} on random data (${andList(hs.map(cname))}).`;})():'')+
+  ` Until 25 September these rows were two runs on aifoundry2 and, for fp32, the 22 September card transfer.`;
  const fl=D.tensor.flips;
  $('flips').textContent=Object.keys(fl.e_fJ).map(c=>`${f3(fl.e_fJ[c])} fJ per ${fl.classes[c]}`).join(', ');
 })();
@@ -376,15 +488,15 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
     (MORE.length?rN.map(r2=>`<td class="num">${r2?r2.pj_per_op.mean.toFixed(1)+' ± '+r2.pj_per_op.se.toFixed(2):'—'}</td>`).join('')+rN.map(r2=>`<td class="num">${r2?(r2.pj_per_op.mean/r.pj_per_op.mean).toFixed(3):'—'}</td>`).join(''):'<td class="num">—</td><td class="num">—</td>')+'</tr>';}).join('')).join('')+'</tbody>';
  /* cheapest and dearest by the pooled mean over both cards, the page's convention */
  const pool=all.map(a=>({n:a.n,m:CB[`${a.n}/random/h2`].mean})).sort((a,b)=>a.m-b.m), cheapest=pool[0], dearest=pool[pool.length-1];
- const cc=D.catalogue.cross_card;
+ const XC=D.catalogue.cross_cards||{}, xo=CK.cardsIn(XC);
  const span=(ns,o)=>{const v=ns.map(n=>CB[`${n}/${o}/h2`]).filter(Boolean).map(c=>c.mean); return [Math.min(...v),Math.max(...v),v.length];};
  const one=CLASSES[0][1], z1=span(one,'zeros'), r1=span(one,'random');
  const rat=(a,b)=>CB[`${a}/random/h2`]&&CB[`${b}/random/h2`]?CB[`${a}/random/h2`].mean/CB[`${b}/random/h2`].mean:null;
  const dv=rat('divu','mulw'), ag=['amoaddg.w','amoaddg.d'].flatMap(a=>['amoaddl.w','amoaddl.d'].map(l=>rat(a,l))).filter(v=>v);
  /* the two cheapest (fence, nop) and the two dearest (the global atomics) are each a pair whose order is not resolved */
  const two=pool.slice(0,2), top=pool.slice(-2), topm=(top[0].m+top[1].m)/2;
- $('alltext').innerHTML=`The cheapest are <code>${two[0].n}</code> and <code>${two[1].n}</code> (${f1(two[0].m)}–${f1(two[1].m)} pJ on random data) and the dearest the global atomics <code>${top[0].n}</code> and <code>${top[1].n}</code> (about ${nf(Math.round(topm/10)*10)} pJ), a span of about ${f0(Math.round(topm/two[0].m/10)*10)}× (pooled over both cards); within each pair the order is not resolved. `+
-  (cc?`Across ${cc.n} configurations ${CARDS[1]} is ${f3(cc.median)}× ${CARDS[0]} (10th to 90th percentile ${f3(cc.p10)} to ${f3(cc.p90)}), each at its own die temperature (section 8). `:'')+
+ $('alltext').innerHTML=`The cheapest are <code>${two[0].n}</code> and <code>${two[1].n}</code> (${f1(two[0].m)}–${f1(two[1].m)} pJ on random data) and the dearest the global atomics <code>${top[0].n}</code> and <code>${top[1].n}</code> (about ${nf(Math.round(topm/10)*10)} pJ), a span of about ${f0(Math.round(topm/two[0].m/10)*10)}× (pooled over ${ALLC}); within each pair the order is not resolved. `+
+  (xo.length?`Across ${XC[xo[0]].n} configurations, in the median, ${andList(xo.map(h=>`${cname(h)} is ${f3(XC[h].median)}× ${CARDS[0]} (10th to 90th percentile ${f3(XC[h].p10)} to ${f3(XC[h].p90)})`))}, each at its own die temperature; the energy per operation rises with the die's temperature on each card, which is enough to account for those ratios (section 8). `:'')+
   `Instructions that share a unit and a latency cost about the same on zeros — the ${z1[2]} one-cycle integer ops span ${f1(z1[0])}–${f1(z1[1])} pJ — but data and latency spread every class: on random data the same ${r1[2]} span ${f1(r1[0])}–${f1(r1[1])} pJ, a 64-bit divide costs ${f0(dv)}× a <code>mulw</code>, and a global <code>amoaddg</code> ${f0(Math.min(...ag))}× a local <code>amoaddl</code>.`;
 })();
 
@@ -480,32 +592,44 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
    return `<tr><td>${p[3]} <span class="small">(${p[4]})</span></td><td class="num">${bt(z,fs)}</td><td class="num">${bt(r,fs)}</td><td class="num">${f2(r.mean/z.mean)}×</td><td class="num">${bps?nf(bps/1e9):'—'}</td><td class="num small">${pcs(r,fs)}</td></tr>`;}).join('')+'</tbody>';
  const dl=cb('tload/dram/random'),sl=cb('tload/scp/random'),ds=cb('tstore/dram/random'),ss=cb('st_stream/dram/random'),dz=cb('tload/dram/zeros');
  const oS=offRail('st_stream/dram/random'), oT=offRail('tstore/dram/random');
- /* the DRAM write against the read, per card (the pooled 136 against 129 mixes two cards that differ) */
- const wr=['aifoundry2','aifoundry3'].filter(h=>ds.per_card[h]&&dl.per_card[h]).map(h=>f1(100*(ds.per_card[h].mean/dl.per_card[h].mean-1)));
+ /* the DRAM write against the read, per card; and the version-3 check's own test of it (V3-CAT, CAT-e: its 99% interval) */
+ const wrh=CK.cardsIn(ds.per_card).filter(h=>dl.per_card[h]), wr=wrh.map(h=>100*(ds.per_card[h].mean/dl.per_card[h].mean-1));
+ const WR=(V3.catalogue||{}).dram_write_read||{}, wrc=CK.cardsIn(WR), wr0=wrc.filter(h=>WR[h].lo<=0&&WR[h].hi>=0);
  $('memtext').innerHTML=
-  `<b>DRAM is ${f0(dl.mean/sl.mean)}× the shire's own scratchpad per byte read.</b> A DRAM write by tensor store costs about what a read costs, within 15% (${f0(ds.mean)} against ${f0(dl.mean)} pJ/B${wr.length===2?`; ${wr[0]}% more on aifoundry2, ${wr[1]}% on aifoundry3`:''}); `+
+  `<b>DRAM is ${f0(dl.mean/sl.mean)}× the shire's own scratchpad per byte read.</b> A DRAM write by tensor store costs about what a read costs (${f0(ds.mean)} against ${f0(dl.mean)} pJ/B${wr.length?`; ${andList(wrh.map((h,i)=>`${f0(wr[i])}% more on ${cname(h)}`))}`:''})${wrc.length?`, and the version-3 check, a separate run of these rows, did not resolve the difference from zero on ${wr0.length===wrc.length?'any card':andList(wr0.map(cname))} (${semiList(wrc.map(h=>`${cname(h)} ${sg1(WR[h].diff)} pJ/B [${sg1(WR[h].lo)}, ${sg1(WR[h].hi)}]`))}, 99% intervals)`:''}; `+
   `<b>the same bytes written through the L1 cost ${f1(ss.mean/ds.mean)}× more</b> and arrive at a third of the bandwidth, consistent with each store allocating its line, so that the line is read from DRAM before it is written back and the byte pays for a read and a write. `+
   (oS&&oT?`Off-rail it costs ${f0(oS)} pJ against a tensor store's ${f0(oT)} (<a href="${HUB}#the-unmetered-remainder-attributed">Limits of observability, §4.2</a>), and a tensor load plus a tensor store come to ${f0(dl.mean+ds.mean)} of its ${f0(ss.mean)} pJ/B. `:'')+
   `<b>Even DRAM is data-dependent</b>: zeros ${f0(dz.mean)} [${f0(dz.lo)}–${f0(dz.hi)}], random ${f0(dl.mean)} [${f0(dl.lo)}–${f0(dl.hi)}] pJ/B; the scratchpad doubles. A scratchpad write is twice a scratchpad read.`;
- const lv=RR.levels_pj_per_byte;
+ const lv=RR.levels_pj_per_byte, LB=RR.levels_by_contents_pj_per_byte||{};
  if(lv&&lv.dram){
   const LV=[['l1','L1 hits','256 B per hart, 2,048 harts'],['l2','L2','256 KB per shire (L2 is 512 KB)'],['l3','L3','768 KB per shire, 24 MB in all (L3 is 32 MB)'],['dram','DRAM','256 MB in all'],['scp-local','own scratchpad','2 MB of the shire’s own L2 scratchpad'],['scp-remote','remote scratchpad',`2 MB of the scratchpad 16 shire IDs away (${MH.xshire16?f1(MH.xshire16.mean):'about 2'} mesh hops on average)`]];
+  /* the scratchpad levels are prefilled in the version-3 passes (zeros on odd passes, random data on even ones): one row per contents */
+  const BYC=new Set(['scp-local','scp-remote']), CT=[['zeros','zeros'],['random','random data']];
   const l1c=cb('flw.ps/random/h2',1/32), gh=D.memory_reads.rows.map(r=>r.implied_ghz).filter(v=>v!=null);
-  /* the level's L1 loop against the catalogue's L1 row, per card: the two cards differ (+56% and +31%) */
-  const l1pc=l1c&&lv.l1?['aifoundry2','aifoundry3'].filter(h=>lv.l1.per_card[h]&&l1c.per_card[h]).map(h=>[f0(100*(lv.l1.per_card[h].mean/l1c.per_card[h].mean-1)),f2(l1c.per_card[h].mean)]):[];
+  /* the level's L1 loop against the catalogue's L1 row, per card */
+  const l1pc=l1c&&lv.l1?CK.cardsIn(lv.l1.per_card).filter(h=>l1c.per_card[h]).map(h=>[h,f0(100*(lv.l1.per_card[h].mean/l1c.per_card[h].mean-1)),f2(l1c.per_card[h].mean)]):[];
   /* The two L1 loops: memhier.c's (8 flw.ps per loop iteration; minion-cycles per load from its 18 September row, B per cycle being
      clock-independent in the minion's domain, and the 23 September reruns reproduce it) and the catalogue's (enercat.c's RUN
-     macro, 64 per iteration; both cards' issue rate). */
+     macro, 64 per iteration; every card's issue rate). */
   const mh1=D.memory_reads.rows.find(r=>r.level==='l1'), cycMH=mh1&&mh1.implied_ghz?32/(mh1.gb_s/(mh1.implied_ghz*1024)):null,
-   fl2=[SA,SB].map(S=>S['flw.ps/random/h2']).filter(Boolean), cycCat=fl2.length?1/(2*fl2.reduce((a,e)=>a+e.ops_per_cycle_per_hart.mean,0)/fl2.length):null,
+   fl2=CARDS.map(h=>SUMM(h)['flw.ps/random/h2']).filter(Boolean), cycCat=fl2.length?1/(2*fl2.reduce((a,e)=>a+e.ops_per_cycle_per_hart.mean,0)/fl2.length):null,
    tbsCat=SA['flw.ps/random/h2']?SA['flw.ps/random/h2'].ops_per_s.mean*32/1e12:null;
   $('memold').innerHTML='<thead><tr><th>Level</th><th>Working set</th><th class="num">pJ/B</th><th class="num">per card</th></tr></thead><tbody>'+
-   LV.map(r=>lv[r[0]]?`<tr><td>${r[1]}</td><td class="small">${r[2]}</td><td class="num">${bt(lv[r[0]],fs)}</td><td class="num small">${pcs(lv[r[0]],fs)}</td></tr>`:'').join('')+'</tbody>';
+   LV.map(r=>{if(!lv[r[0]])return ''; if(BYC.has(r[0])&&CT.every(([o])=>LB[o]&&LB[o][r[0]]))
+     return CT.map(([o,ol])=>`<tr><td>${r[1]}, ${ol}</td><td class="small">${r[2]}, prefilled with ${ol}</td><td class="num">${bt(LB[o][r[0]],fs)}</td><td class="num small">${pcs(LB[o][r[0]],fs)}</td></tr>`).join('');
+    return `<tr><td>${r[1]}</td><td class="small">${r[2]}</td><td class="num">${bt(lv[r[0]],fs)}</td><td class="num small">${pcs(lv[r[0]],fs)}</td></tr>`;}).join('')+'</tbody>';
+  const PP=(RR.passes_per_card||{}).levels||{}, pph=CK.cardsIn(PP), npp=[...new Set(pph.map(h=>PP[h].length))];
+  const RLo=(V3.rl||{}), SBC=RLo.scp_by_contents||{};
+  const band=(h,o)=>SBC[h]&&SBC[h][o]?SBC[h][o].mean:null, inb=h=>band(h,'zeros')>=1.7&&band(h,'zeros')<=2.3&&band(h,'random')>=3.7&&band(h,'random')<=4.7;
+  const sin=CK.cardsIn(SBC).filter(inb), sout=CK.cardsIn(SBC).filter(h=>!inb(h));
+  const l2=lv.l2, l3=lv.l3, rspan=c=>c?`${fs(c.lo)}–${fs(c.hi)}`:'—';
   $('memoldnote').innerHTML=`L1: both harts of every minion re-reading a private 256 B buffer with 32 B vector loads, in the memory-hierarchy probe's own loop over a buffer whose contents it does not set. `+
-   `That loop (8 loads per loop iteration) issued a load every ${cycMH?f1(cycMH):'3'} minion-cycles where the catalogue's (64) issued one every ${cycCat?f1(cycCat):'1.4'}${tbsCat?` (${f1(tbsCat)} TB/s)`:''}, and it reads ${l1pc.length===2?`${l1pc[0][0]}% above the catalogue's L1 row of section 4.1 on aifoundry2 and ${l1pc[1][0]}% on aifoundry3 (${l1pc[0][1]} and ${l1pc[1][1]} pJ/B on random data)`:`${l1c&&lv.l1?f0(100*(lv.l1.mean/l1c.mean-1))+'%':'well'} above the catalogue's L1 row in section 4.1 (${l1c?f2(l1c.mean):'—'} pJ/B on random data)`}, which is the figure to use. `+
-   `L2, L3, DRAM and the scratchpads: hart 0 of every minion streaming 1 KB tensor loads — which skip the L1 but are cached in the L2 and L3 — over a working set sized to each level. The probe does not set the memory's contents, so these rows are not directly comparable to the zeros and random columns of section 4.1: the own scratchpad sits between them, and the DRAM level is within noise of the random-data row. `+
-   `On L1, L2 and the own scratchpad the two cards differ beyond their pass-to-pass error (aifoundry3 is lower on L1 and L2, higher on its own scratchpad), and on L1 and the own scratchpad not by the 0.95 of section 8, so for those rows use the per-card column; contents left in the unset buffers, which can differ by card, are as likely a cause as the card. `+
-   `${(w=>w[0].toUpperCase()+w.slice(1))(String(WORD[RR.passes.levels/2]||RR.passes.levels/2))} passes on each card at 600 MHz, pinned there on aifoundry3 and held there on aifoundry2 by a warm die (n = ${RR.passes.levels}). The 18 September run of the same experiment (one run on aifoundry2, in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a>) had the governor free and its clock averaged ${gh.length?f2(Math.min(...gh))+'–'+f2(Math.max(...gh)):'0.6–0.7'} GHz across the levels; it is superseded.`;
+   `That loop (8 loads per loop iteration) issued a load every ${cycMH?f1(cycMH):'3'} minion-cycles where the catalogue's (64) issued one every ${cycCat?f1(cycCat):'1.4'}${tbsCat?` (${f1(tbsCat)} TB/s)`:''}, and it reads ${l1pc.length?`${andList(l1pc.map(x=>x[1]+'%'))} above the catalogue's L1 row of section 4.1 on ${andList(l1pc.map(x=>cname(x[0])))} (${andList(l1pc.map(x=>x[2]))} pJ/B on random data)`:`${l1c&&lv.l1?f0(100*(lv.l1.mean/l1c.mean-1))+'%':'well'} above the catalogue's L1 row in section 4.1 (${l1c?f2(l1c.mean):'—'} pJ/B on random data)`}, which is the figure to use. `+
+   `L2, L3, DRAM and the scratchpads: hart 0 of every minion streaming 1 KB tensor loads — which skip the L1 but are cached in the L2 and L3 — over a working set sized to each level. `+
+   `The probe does not set the contents of the L2, L3 and DRAM buffers, so those rows are not directly comparable to the zeros and random columns of section 4.1 (the DRAM level is within noise of the random-data row), and the L2 and L3 levels move a lot from pass to pass (${rspan(l2)} and ${rspan(l3)} pJ/B). The version-3 passes do set the scratchpads' contents, filling them with zeros or random data before they are read, and the own scratchpad follows the fill: `+
+   (sin.length?`in the zeros and random-data bands the check registered (1.7–2.3 and 3.7–4.7 pJ/B) on ${andList(sin.map(cname))}${sout.length?`, above them on ${andList(sout.map(h=>`${cname(h)} (${f2(band(h,'zeros'))} and ${f2(band(h,'random'))})`))}`:''}. `:'')+
+   `On the L1 and the own scratchpad no pair of cards differs beyond the 99% interval of their passes (the version-3 check). `+
+   `${pph.length?`${(w=>w[0].toUpperCase()+w.slice(1))(String(npp.length===1?(WORD[npp[0]]||npp[0]):'Several'))} passes on each of ${WORD[pph.length]||pph.length} cards`:'Passes'} at 600 MHz, every sample, pinned there on aifoundry3 and held there on the others by a warm die (n = ${lv.dram.n}; 26 September). They replace three passes on each of two cards of 23 September, whose scratchpads were not filled. The 18 September run of the same experiment (one run on aifoundry2, in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a>) had the governor free and its clock averaged ${gh.length?f2(Math.min(...gh))+'–'+f2(Math.max(...gh)):'0.6–0.7'} GHz across the levels; it is superseded.`;
  }
 })();
 
@@ -545,14 +669,14 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
     ro.set(`Fit over 1–${u===8?mxh:6} hops: <b>random</b> ${andList(W_.map(([h,w])=>`${f2(s(w,'random').b)} (${cname(h)})`))} pJ/B per hop, intercept ${andList(W_.map(([h,w])=>f2(s(w,'random').a)))}; <b>zeros</b> ${andList(W_.map(([h,w])=>f2(s(w,'zeros').b)))} per hop.`); return;}
    ro.set(`Fit over 1–${u===8?mxh:6} hops: <b>random ${f2(s(Wf,'random').b)}</b> (${CARDS[0]})${Wf2?` and ${f2(s(Wf2,'random').b)} (${CARDS[1]})`:''} pJ/B per hop, intercept ${f2(s(Wf,'random').a)}${Wf2?` and ${f2(s(Wf2,'random').a)}`:''}; <b>zeros ${f2(s(Wf,'zeros').b)}</b>${Wf2?` and ${f2(s(Wf2,'zeros').b)}`:''} per hop.`);}
   wread();
-  $('wirecap').textContent=`1 KB tensor loads from a scratchpad exactly d hops away, all 32 shires reading up to ${Math.max(...full)} hops (${shr(6)} at 6 hops, ${shr(8)} at 8, so the 8-hop point has half the traffic), at most two readers per target; d = 0 is the shire's own scratchpad. Filled: ${CARDS[0]}; whiskers: the range over both cards' passes. Dashed: the straight-line fit over the hops chosen above.`;
+  $('wirecap').textContent=`1 KB tensor loads from a scratchpad exactly d hops away, all 32 shires reading up to ${Math.max(...full)} hops (${shr(6)} at 6 hops, ${shr(8)} at 8, so the 8-hop point has half the traffic), at most two readers per target; d = 0 is the shire's own scratchpad. Filled: ${CARDS[0]}; hollow: ${andList(WO.map(o=>cname(o.h)))}; whiskers: the range over ${ALLC}' passes. Dashed: the straight-line fit over the hops chosen above.`;
   const dz=Wf.zeros.slope_pj_per_byte_per_hop, dr=Wf.random.slope_pj_per_byte_per_hop;
-  const dz2=Wf2&&Wf2.zeros?Wf2.zeros.slope_pj_per_byte_per_hop:null, dr2=Wf2&&Wf2.random?Wf2.random.slope_pj_per_byte_per_hop:null;
-  const s6=wf=>wf?fitOf(wf,6).b:null, r6=s6(Wf.random), z6=s6(Wf.zeros), r6b=Wf2?s6(Wf2.random):null, z6b=Wf2?s6(Wf2.zeros):null;
-  const z8=[dz,dz2].filter(v=>v!=null), z6s=[z6,z6b].filter(v=>v!=null), zall=z8.concat(z6s);
-  $('wiretext').innerHTML=`<b>One mesh hop costs about 2 pJ per byte on random data</b> (${f2(dr)} on ${CARDS[0]}${dr2!=null?` and ${f2(dr2)} on ${CARDS[1]}`:''} fitted over 1–${mxh} hops; ${f2(r6)}${r6b!=null?` and ${f2(r6b)}`:''} over 1–6, leaving out d = ${mxh}, which only ${shr(mxh)} shires reach and which sits level with d = 6) `+
+  /* the slopes per card: over 1–8 hops (analyze_catalogue's wire fit) and over 1–6 */
+  const WA=[[CARDS[0],Wf]].concat(WO.map(o=>[o.h,o.w])).filter(z=>z[1]&&z[1].random&&z[1].zeros);
+  const r8=WA.map(([h,w])=>w.random.slope_pj_per_byte_per_hop), r6=WA.map(([h,w])=>fitOf(w.random,6).b), z8=WA.map(([h,w])=>w.zeros.slope_pj_per_byte_per_hop), z6s=WA.map(([h,w])=>fitOf(w.zeros,6).b), zall=z8.concat(z6s);
+  $('wiretext').innerHTML=`<b>One mesh hop costs about 2 pJ per byte on random data</b> (${andList(WA.map(([h],i)=>`${f2(r8[i])} on ${cname(h)}`))} fitted over 1–${mxh} hops; ${f2(Math.min(...r6))}–${f2(Math.max(...r6))} over 1–6, leaving out d = ${mxh}, which only ${shr(mxh)} shires reach and which sits level with d = 6) `+
    `<b>and ${f1(Math.min(...zall))}–${f1(Math.max(...zall))} on zeros</b> (${f2(Math.min(...z8))}–${f2(Math.max(...z8))} over 1–${mxh} hops, ${f2(Math.min(...z6s))}–${f2(Math.max(...z6s))} over 1–6). `+
-   `Leaving the shire costs more than any hop: the intercept of the 1–${mxh}-hop fit is ${f2(Wf.random.intercept_pj_per_byte)} pJ/B on random data against ${f2(Wf.random.local_pj_per_byte||0)} for the shire's own scratchpad. `+
+   `Leaving the shire costs more than any hop: the intercept of the 1–${mxh}-hop fit is ${andList(WA.map(([h,w])=>f2(w.random.intercept_pj_per_byte)))} pJ/B on random data (${andList(WA.map(([h])=>cname(h)))}) against ${andList(WA.map(([h,w])=>f2(w.random.local_pj_per_byte||0)))} for the shire's own scratchpad. `+
    `For wires, use <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a>: 2.17 pJ/B per hop on board power, split into bits that differ between flits and ones carried.`;
  }
  /* ---- lines ---- */
@@ -568,11 +692,15 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   const tlz=cb('tload/scp/zeros'), tlr=cb('tload/scp/random');
   /* the fill against a tensor load, per byte, per card and operand set: the pooled 75% hides 71-86% and an aifoundry2 interval that reaches 1 */
   const c32zr=[c32z,c32r], c64zr=[c64z,c64r], tlzr=[tlz,tlr];
-  const frs=['aifoundry2','aifoundry3'].flatMap(h=>[0,1].filter(i=>c64zr[i].per_card[h]&&c32zr[i].per_card[h]&&tlzr[i].per_card[h]).map(i=>2*(c64zr[i].per_card[h].mean-c32zr[i].per_card[h].mean)/64/tlzr[i].per_card[h].mean));
+  const frs=CARDLIST.flatMap(h=>[0,1].filter(i=>c64zr[i].per_card[h]&&c32zr[i].per_card[h]&&tlzr[i].per_card[h]).map(i=>2*(c64zr[i].per_card[h].mean-c32zr[i].per_card[h].mean)/64/tlzr[i].per_card[h].mean));
+  /* the version-3 check's own test of the fill against a tensor load, random data (V3-CAT, CAT-f: the ratio and its ~99% interval) */
+  const FV=(V3.catalogue||{}).fill_vs_tload||{}, fvh=CK.cardsIn(FV), fvy=fvh.filter(h=>FV[h].decision==='holds'), fvn=fvh.filter(h=>FV[h].decision!=='holds');
+  const bwc=CARDLIST.map(h=>[SUMM(h)['scpline/stride64/random'],SUMM(h)['scpline/stride256/random']]).filter(z=>z[0]&&z[1]), bwSame=bwc.length&&bwc.every(z=>Math.abs(z[1].bytes_per_s.mean/z[0].bytes_per_s.mean-bwc[0][1].bytes_per_s.mean/bwc[0][0].bytes_per_s.mean)<0.02);
   const fr5=frs.length?[Math.round(20*Math.min(...frs))*5,Math.round(20*Math.max(...frs))*5]:[75,75];
   const bwOf=st=>S[`scpline/stride${st}/random`]?S[`scpline/stride${st}/random`].bytes_per_s.mean/1e9:null, bw64=bwOf(64), bw256=bwOf(256);
-  $('linetext').innerHTML=`Twice the difference between the stride-64 and stride-32 rows is what filling one 64 B line from the scratchpad into the L1 costs: <b>${fillz.toFixed(0)} pJ on zeros, ${fillr.toFixed(0)} pJ on random data</b> (${CK.cardsIn(c64r.per_card).map(h=>cshort(h)+' '+per(h).toFixed(0)).join(', ')} on random data) — ${f1(fillz/64)} and ${f1(fillr/64)} pJ per byte of line, roughly ${fr5[0]}–${fr5[1]}% of the ${f1(tlz.mean)} and ${f1(tlr.mean)} pJ/B a tensor load pays for the same bytes from the same scratchpad on the two cards (on aifoundry2 not separable from equal). What random data adds over zeros is about ${(fillr-fillz).toFixed(0)} pJ for the fill's 512 bits, ${((fillr-fillz)*1000/512).toFixed(0)} fJ per bit on the path from the shire cache into the L1.`+
-   (bw64&&bw256?` The 64 B tensor loads by stride show the banks: coming back to the same bank every time halves the bandwidth (${nf(bw256)} against ${nf(bw64)} GB/s, on both cards), but what it does to the energy per byte cannot be told apart from the other strides'.`:'');
+  $('linetext').innerHTML=`Twice the difference between the stride-64 and stride-32 rows is what filling one 64 B line from the scratchpad into the L1 costs: <b>${fillz.toFixed(0)} pJ on zeros, ${fillr.toFixed(0)} pJ on random data</b> (${CK.cardsIn(c64r.per_card).map(h=>cshort(h)+' '+per(h).toFixed(0)).join(', ')} on random data) — ${f1(fillz/64)} and ${f1(fillr/64)} pJ per byte of line, roughly ${fr5[0]}–${fr5[1]}% of the ${f1(tlz.mean)} and ${f1(tlr.mean)} pJ/B a tensor load pays for the same bytes from the same scratchpad on the ${WORD[CARDLIST.length]||CARDLIST.length} cards`+
+   (fvh.length?` (the version-3 check, a separate run, resolved the fill below the tensor load on random data on ${andList(fvy.map(h=>`${cname(h)} (${f2(FV[h].ratio)} [${f2(FV[h].ci99[0])}, ${f2(FV[h].ci99[1])}])`))}${fvn.length?`, but not on ${andList(fvn.map(h=>`${cname(h)} (${f2(FV[h].ratio)} [${f2(FV[h].ci99[0])}, ${f2(FV[h].ci99[1])}])`))}, where it is not separable from equal`:''})`:'')+`. What random data adds over zeros is about ${(fillr-fillz).toFixed(0)} pJ for the fill's 512 bits, ${((fillr-fillz)*1000/512).toFixed(0)} fJ per bit on the path from the shire cache into the L1.`+
+   (bw64&&bw256?` The 64 B tensor loads by stride show the banks: coming back to the same bank every time cuts the bandwidth by a third (${nf(bw256)} against ${nf(bw64)} GB/s${bwSame?`, on ${bwc.length===CARDLIST.length?'every card':andList(CARDLIST.filter(h=>SUMM(h)['scpline/stride256/random']).map(cname))}`:''}), but what it does to the energy per byte cannot be told apart from the other strides'.`:'');
  }
  /* ---- DRAM rows ---- */
  const rz2=n=>S[`dramrow2/${n}/zeros`], rr2=n=>S[`dramrow2/${n}/random`];
@@ -580,22 +708,28 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   const PAT=[['seq','sequential: next bank, 32 columns per row visit'],['rowhit','same bank and row, next column, every access'],['rowmiss','a new row on every visit to a bank']];
   $('rowtab').innerHTML='<thead><tr><th>1 KB tensor loads from DRAM, 32 harts with 64 MB each</th><th class="num">zeros pJ/B</th><th class="num">random pJ/B</th><th class="num">GB/s</th></tr></thead><tbody>'+
    PAT.map(r=>{const z=rz2(r[0]),x=rr2(r[0]),cz=cb(`dramrow2/${r[0]}/zeros`),cx=cb(`dramrow2/${r[0]}/random`);return z&&x?`<tr><td>${r[1]}</td><td class="num">${cz?bt(cz,f1):z.pj_per_byte.mean.toFixed(1)+' ± '+z.pj_per_byte.se.toFixed(1)}</td><td class="num">${cx?bt(cx,f1):x.pj_per_byte.mean.toFixed(1)+' ± '+x.pj_per_byte.se.toFixed(1)}</td><td class="num">${(x.bytes_per_s.mean/1e9).toFixed(1)}</td></tr>`:'';}).join('')+
-   `</tbody><tfoot><tr><td colspan="4" class="small">${cb('dramrow2/seq/random')&&cb('dramrow2/seq/random').n>3?'Mean and range over three passes on each of two cards.':'Mean and range over three passes on aifoundry2.'}</td></tr></tfoot>`;
+   `</tbody><tfoot><tr><td colspan="4" class="small">${(()=>{const c=cb('dramrow2/seq/random'), nc=c?Object.keys(c.per_card).length:0; return nc>1?`Mean and range over three passes on each of ${WORD[nc]||nc} cards; GB/s: ${CARDS[0]}'s, the same on every card within 1%.`:`Mean and range over three passes on ${CARDS[0]}.`;})()}</td></tr></tfoot>`;
   /* how often each of the 32 harts comes back to its row: one 1 KB access per visit, at the aggregate rate / 32, 600 MHz */
   const gbs=PAT.flatMap(r=>['zeros','random'].map(o=>S[`dramrow2/${r[0]}/${o}`].bytes_per_s.mean)), cyc=gbs.map(v=>1024*32/v*600e6);
   const prem=o=>PAT.map(r=>100*(cb(`dramrow2/${r[0]}/${o}`).mean/cb(`tload/dram/${o}`).mean-1)), pr=prem('random'), pz=prem('zeros');
   const dlg=S['tload/dram/random'].bytes_per_s.mean/1e9, r100=v=>nf(Math.round(v/100)*100);
   const l3=S['dramrow/stride8K/random'], l3z=S['dramrow/stride8K/zeros'], l3b=SB['dramrow/stride8K/random'], l3bz=SB['dramrow/stride8K/zeros'];
   /* 3.87 µs and 2,325 cycles: the refresh interval the memory-anatomy page reads from the controller (PLAN2 D21) */
-  $('rowtext').innerHTML=`<b>The row pattern does not change the energy per byte</b>: row hits, row misses and the streaming case agree within their pass-to-pass error on both operand sets. `+
+  /* the version-3 check's test of the rows (V3-CAT, CAT-c): one-way ANOVA over the three patterns, and rows − tensor loads per card */
+  const DR=(V3.catalogue||{}).dram_rows||{}, drh=CK.cardsIn(DR), anovaOK=drh.length&&drh.every(h=>['zeros','random'].every(o=>DR[h][o].anova_p>0.01));
+  const exR=o=>drh.filter(h=>DR[h][o].rows_minus_tload.lo>0), exN=o=>drh.filter(h=>!(DR[h][o].rows_minus_tload.lo>0));
+  $('rowtext').innerHTML=`<b>The row pattern does not change the energy per byte</b>: row hits, row misses and the streaming case agree within their pass-to-pass error on both operand sets${drh.length?`, on ${anovaOK?`every card (the version-3 check: no pattern differs at 99% on ${andList(drh.map(cname))})`:'some cards'}`:''}. `+
    `On aifoundry2 the controller runs an open-page policy: a row stays open until a refresh (every 3.87 µs) or an access to another row of its bank closes it (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#how-long-a-row-stays-open">Anatomy of a memory access</a>). `+
    `Each hart here comes back to its row only every ${r100(Math.min(...cyc))}–${r100(Math.max(...cyc))} cycles or so (32 harts at ${f0(Math.min(...gbs)/1e9)}–${f0(Math.max(...gbs)/1e9)} GB/s), with 31 other streams in between, and a refresh falls every 2,325 cycles. `+
    `So either every pattern paid an activation, or an activation is small next to the transfer (one of about 30 pJ/B on zeros, or 50 on random data, would have shown); for a programmer it makes no difference. `+
-   `These 32-hart loads cost ${f0(Math.min(...pr))}–${f0(Math.max(...pr))}% more per byte than section 4.1's tensor loads at ${f0(dlg)} GB/s (${f0(Math.min(...pz))}–${f0(Math.max(...pz))}% more on zeros): use them to compare patterns, and section 4.1 to price DRAM.`+
-   (l3&&l3z?` An earlier version of this experiment with all 1,024 minions and only 32 KB touched per hart fitted in the L3 and measured that instead: <b>${l3z.pj_per_byte.mean.toFixed(1)} pJ/B on zeros and ${l3.pj_per_byte.mean.toFixed(1)} on random data on ${CARDS[0]}</b>${l3b&&l3bz?`, <b>${l3bz.pj_per_byte.mean.toFixed(1)} and ${l3b.pj_per_byte.mean.toFixed(1)} on ${CARDS[1]}</b>, at ${nf(l3.bytes_per_s.mean/1e9)} GB/s on both`:` at ${nf(l3.bytes_per_s.mean/1e9)} GB/s`}, the L3 read by tensor loads through the mesh.`:'');
+   `These 32-hart loads cost ${f0(Math.min(...pr))}–${f0(Math.max(...pr))}% more per byte than section 4.1's tensor loads at ${f0(dlg)} GB/s (${f0(Math.min(...pz))}–${f0(Math.max(...pz))}% more on zeros)`+
+   (drh.length?`; the version-3 check resolved the premium from zero on zeros on ${exR('zeros').length===drh.length?'every card':andList(exR('zeros').map(cname))} and on random data on ${andList(exR('random').map(cname))}${exN('random').length?`, but not on ${andList(exN('random').map(h=>`${cname(h)} (${sg1(DR[h].random.rows_minus_tload.diff)} pJ/B [${sg1(DR[h].random.rows_minus_tload.lo)}, ${sg1(DR[h].random.rows_minus_tload.hi)}])`))}`:''}`:'')+
+   `: use them to compare patterns, and section 4.1 to price DRAM.`+
+   (l3&&l3z?(()=>{const L3=CARDS.map(h=>[h,SUMM(h)['dramrow/stride8K/zeros'],SUMM(h)['dramrow/stride8K/random']]).filter(z=>z[1]&&z[2]);
+     return ` An earlier version of this experiment with all 1,024 minions and only 32 KB touched per hart fitted in the L3 and measured that instead: <b>${L3.map(([h,z,r],i)=>`${z.pj_per_byte.mean.toFixed(1)}${i?'':' pJ/B on zeros'} and ${r.pj_per_byte.mean.toFixed(1)}${i?'':' on random data'} on ${cname(h)}`).join(', ')}</b>, at ${nf(l3.bytes_per_s.mean/1e9)} GB/s on ${L3.length>2?'every card':L3.length===2?'both':CARDS[0]}, the L3 read by tensor loads through the mesh.`;})():'');
  }
  const nb=[0,1,2,3].map(k=>S[`neigh/${k}/random`]); if(nb.every(v=>v)){
-  $('neightab').innerHTML='<thead><tr><th>Neighbourhood reading the shire’s own scratchpad (random data)</th><th class="num">pJ/B, both cards</th><th class="num" data-nosort>per card</th><th class="num">GB/s</th></tr></thead><tbody>'+
+  $('neightab').innerHTML='<thead><tr><th>Neighbourhood reading the shire’s own scratchpad (random data)</th><th class="num">pJ/B, '+ALLC+'</th><th class="num" data-nosort>per card</th><th class="num">GB/s</th></tr></thead><tbody>'+
    nb.map((v,k)=>{const c=cb(`neigh/${k}/random`);return `<tr><td>${k}: minions ${8*k}–${8*k+7}</td><td class="num">${c?bt(c,f2):v.pj_per_byte.mean.toFixed(2)}</td><td class="num small">${c?pcs(c,f2):v.pj_per_byte.se.toFixed(2)}</td><td class="num">${nf(v.bytes_per_s.mean/1e9)}</td></tr>`;}).join('')+'</tbody>';
  }
 })();
@@ -628,11 +762,11 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   CK.keynav(f,nodes);
  }});
  const RF=D.catalogue.rail_filter, taus=RF?Object.values(RF).map(v=>v.tau_s):[];
- $('railscap').textContent=`Random data, aifoundry2, mean of three passes. The split of each burst's power over idle across the three rails the PMIC meters, read from the end of the burst and corrected for the lag of the PMIC's own running average (a time constant of ${RF&&RF.aifoundry2&&RF.aifoundry3?f2(RF.aifoundry2.tau_s)+' s on aifoundry2 and '+f2(RF.aifoundry3.tau_s)+' s on aifoundry3':taus.length?f1(Math.min(...taus))+'–'+f1(Math.max(...taus))+' s on the two cards':'about a second'}); the remainder has no sensor.`;
+ $('railscap').textContent=`Random data, ${CARDS[0]}, mean of three passes. The split of each burst's power over idle across the three rails the PMIC meters, read from the end of the burst and corrected for the lag of the PMIC's own running average (a time constant of ${RF?andList(CK.cardsIn(RF).filter(h=>RF[h]).map(h=>`${f2(RF[h].tau_s)} s on ${cname(h)}`)):'about a second'}); the remainder has no sensor.`;
  const wire6=rows.find(r=>r.label==='scratchpad 6 hops away'), si=rows.find(r=>r.label==='scalar integer'), dr=rows.find(r=>r.label==='DRAM, tensor load');
- const U=D.unmetered, dd=U&&U.ddr_droop, dl=cb('tload/dram/random'), mn=['aifoundry2','aifoundry3'].filter(h=>U&&U[h]).map(h=>100*U[h].coef.minion);
+ const U=D.unmetered, dd=U&&U.ddr_droop, dl=cb('tload/dram/random'), uh=U?CK.cardsIn(U).filter(h=>U[h]&&U[h].coef):[], mn=uh.map(h=>100*U[h].coef.minion), dp=uh.map(h=>U[h].coef.dram_pj_per_byte);
  if(wire6&&si) $('railstext').innerHTML=`<p><b>An instruction’s energy is the core’s</b>: ${Math.round(100*si.parts[0]/si.o)}% of a scalar integer burst is on the minion rail, almost nothing on the SRAM or the mesh, and the rest is consistent with what the regulators lose delivering it. <b>A byte fetched across the mesh is mostly wire</b>: six hops away, ${Math.round(100*wire6.parts[2]/wire6.o)}% of the energy is on the mesh rail and ${Math.round(100*wire6.parts[1]/wire6.o)}% on the SRAM that holds it, with the minions that asked for it at most about a sixth (${Math.round(100*wire6.parts[0]/wire6.o)}% measured, not resolved from zero).`+
-  (dr?` <b>A DRAM byte is mostly off-chip</b>: ${Math.round(100*dr.parts[3]/dr.o)}% of its energy is on no metered rail.`+(U&&U.aifoundry2&&dl?` Fitted over this whole catalogue in <a href="${HUB}#the-unmetered-remainder-attributed">Limits of observability, §4.2–4.3</a>, ${U.aifoundry3?`${f0(Math.min(U.aifoundry2.coef.dram_pj_per_byte,U.aifoundry3.coef.dram_pj_per_byte))}–${f0(Math.max(U.aifoundry2.coef.dram_pj_per_byte,U.aifoundry3.coef.dram_pj_per_byte))}`:f0(U.aifoundry2.coef.dram_pj_per_byte)} of its ${f0(dl.mean)} pJ/B sit in the DDR PHY, the I/O rail and the DRAM chips (the fitted coefficient on the two cards), and the rest of the unmetered share is consistent with the regulators' delivery loss (${mn.length>1?`${f0(mn[0])}% of the minion rail's watts on aifoundry2 and ${f0(mn[1])}% on aifoundry3`:`${f0(mn[0])}% of the minion rail's watts`}, as far as the rails' meters can be trusted) plus the fit's residual${dd?`; the same page reads DRAM power from the DDR rail's voltage droop, 1 mV for about ${f1(1/dd.mv_per_dram_offrail_w)} W`:''}.`:''):'')+'</p>';
+  (dr?` <b>A DRAM byte is mostly off-chip</b>: ${Math.round(100*dr.parts[3]/dr.o)}% of its energy is on no metered rail.`+(U&&U.aifoundry2&&dl?` Fitted over this whole catalogue in <a href="${HUB}#the-unmetered-remainder-attributed">Limits of observability, §4.2–4.3</a>, ${f0(Math.min(...dp))}${Math.round(Math.min(...dp))!==Math.round(Math.max(...dp))?'–'+f0(Math.max(...dp)):''} of its ${f0(dl.mean)} pJ/B sit in the DDR PHY, the I/O rail and the DRAM chips (the fitted coefficient, ${andList(uh.map((h,i)=>`${f0(dp[i])} on ${cname(h)}`))}), and the rest of the unmetered share is consistent with the regulators' delivery loss (${mn.length>1?`${andList(uh.map((h,i)=>`${f0(mn[i])}%`))} of the minion rail's watts on ${andList(uh.map(cname))}`:`${f0(mn[0])}% of the minion rail's watts`}, as far as the rails' meters can be trusted) plus the fit's residual${dd?`; the same page reads DRAM power from the DDR rail's voltage droop, 1 mV for about ${f1(1/dd.mv_per_dram_offrail_w)} W`:''}.`:''):'')+'</p>';
 })();
 
 /* ---------- 5. comm ---------- */
@@ -656,11 +790,14 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
     /* the 18 September runs were on aifoundry2, so they are set against aifoundry2's own new passes */
     const d=D.comm.rows.filter(r=>rg[r.ring]&&rg[r.ring].per_card.aifoundry2&&r.pj_per_byte_local).map(r=>100*(r.pj_per_byte_local/rg[r.ring].per_card.aifoundry2.mean-1)).sort((a,b)=>a-b);
     const pm=v=>(v<0?'−':'+')+f0(Math.abs(v));
-    const dr=(RR.dropped||[]).map(x=>x.sampler_median_ms).filter(v=>v!=null);
-    const pc=(rr.dram||{}).per_card||{}, n2=(pc.aifoundry2||{}).n, n3=(pc.aifoundry3||{}).n;
-    return `<p class="small">Rings: re-measured on 23 September with the manual's own sampler, ${WORD[RR.passes.rings/2]||RR.passes.rings/2} passes on each card (n = ${rg.shire.n}). The 18 September pair of runs on aifoundry2, sampled without the die temperature and so without a leakage correction, is not pooled; against aifoundry2's own new passes the values <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> publishes from it read ${pm(d[0])}% to ${pm(d[d.length-1])}% (median ${pm(d[d.length>>1])}%). `+
-      `On aifoundry2 the s ↔ s+16 ring starves the service processor's own management path — the sampler's latency rises from 22 ms to ${dr.length?f0(Math.min(...dr))+'–'+f0(Math.max(...dr)):'over 60'} ms and the board reading takes a new value about twice a second instead of six times — so its aifoundry2 passes were dropped and that row is aifoundry3 only; aifoundry3's sampler stays at 22 ms in it. `+
-      `Relay: 22 September (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a>) and ${WORD[n2-1]||n2-1} warm passes on aifoundry2, ${WORD[n3]||n3} passes on aifoundry3 (n = ${rr.dram?rr.dram.n:'—'}). `+
+    const PP=RR.passes_per_card||{}, rp_=PP.rings||{}, yp=PP.relay||{}, nPass=o=>{const n=[...new Set(CK.cardsIn(o).map(h=>o[h].length))]; return n.length===1?`${WORD[n[0]]||n[0]} passes on each of ${WORD[CK.cardsIn(o).length]||CK.cardsIn(o).length} cards`:andList(CK.cardsIn(o).map(h=>`${WORD[o[h].length]||o[h].length} on ${cname(h)}`))+' passes';};
+    /* the s <-> s+16 ring: its bursts starved the sampler in every version-3 pass; it keeps the 23 September passes (reruns.fallback_23sep) */
+    const x16=(RR.dropped||[]).filter(x=>x.burst==='xshire16'&&x.sampler_median_ms!=null), v3x=x16.filter(x=>/claims-v3/.test(x.pass)), fb=(RR.fallback_23sep||{}).xshire16;
+    const cardsOf=xs=>[...new Set(xs.map(x=>(String(x.pass).match(/raw\/([^/]+)\//)||[])[1]).filter(Boolean))];
+    const ms=xs=>xs.length?`${f0(Math.min(...xs.map(x=>x.sampler_median_ms)))}–${f0(Math.max(...xs.map(x=>x.sampler_median_ms)))} ms`:'over 60 ms';
+    return `<p class="small">Rings: re-measured in the version-3 check (26 September) with the manual's own sampler, ${nPass(rp_)} (n = ${rg.shire.n}); they replace the three passes on each of two cards of 23 September. The 18 September pair of runs on aifoundry2, sampled without the die temperature and so without a leakage correction, is not pooled; against aifoundry2's own new passes the values <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> publishes from it read ${pm(d[0])}% to ${pm(d[d.length-1])}% (median ${pm(d[d.length>>1])}%). `+
+      (v3x.length?`The s ↔ s+16 ring starves the service processor's own management path — the sampler's latency rises from 22 ms to ${ms(v3x)} and the board reading takes a new value about twice a second instead of six times — in every version-3 pass on ${andList(CK.cardsIn(cardsOf(v3x)).map(cname))}, so those bursts were dropped${fb?` and that row keeps ${andList(fb.cards.map(cname))}'s three passes of 23 September, when its sampler stayed at 22 ms`:''}. `:'')+
+      `Relay: ${nPass(yp)} (n = ${rr.dram?rr.dram.n:'—'}), 26 September; they replace the 22 September session (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a>) and the 23 September passes. GB/s: the 22 September session's, on aifoundry2. `+
       `Mesh hops: the Manhattan distance between shire s and shire s + k (or s − 1 for the relay), averaged over all 32 compute shires.</p>`;})():'');
  const mesh=D.comm.rows.filter(r=>r.ring.startsWith('xshire')&&!r.ring.includes('c4'));
  const xs=mesh.map(r=>rg[r.ring]?rg[r.ring].mean:r.pj_per_byte);
@@ -669,15 +806,27 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  const pr=rg.pair?rg.pair.mean:D.comm.rows.find(r=>r.ring==='pair').pj_per_byte;
  const hop=rr.hop?rr.hop.mean:rp.hop.pj_per_byte, dram=rr.dram?rr.dram.mean:rp.dram.pj_per_byte;
  const hw=['dram','hop','scp'].filter(k=>rr[k]).map(k=>100*(rr[k].hi-rr[k].lo)/2/rr[k].mean), ow=['dram','hop','scp'].map(k=>rp[k].over_idle_w);
- /* the line through the rings between shires, per card, on the rings both cards measured (the pooled line mixes
-    cards that disagree, and aifoundry3's s <-> s+16 ring) */
- const both=mesh.filter(r=>rg[r.ring]&&rg[r.ring].per_card.aifoundry2&&rg[r.ring].per_card.aifoundry3&&MH[r.ring]);
- const pcFit=MH.xshire1&&both.length>=3?['aifoundry2','aifoundry3'].map(h=>lfit(both.map(r=>[MH[r.ring].mean,rg[r.ring].per_card[h].mean]))):null, hb=both.map(r=>MH[r.ring].mean);
- const rpc=['aifoundry2','aifoundry3'].filter(h=>rr.dram&&rr.hop&&rr.dram.per_card[h]&&rr.hop.per_card[h]);
+ /* the line through the rings between shires, per card, on the rings every card measured (the pooled line mixes cards,
+    and the s <-> s+16 ring has aifoundry3's 23 September passes only) */
+ const rcards=CK.cardsIn(Object.assign({},...mesh.filter(r=>rg[r.ring]).map(r=>rg[r.ring].per_card)));
+ const both=mesh.filter(r=>rg[r.ring]&&rcards.every(h=>rg[r.ring].per_card[h])&&MH[r.ring]);
+ const pcFit=MH.xshire1&&both.length>=3?rcards.map(h=>[h,lfit(both.map(r=>[MH[r.ring].mean,rg[r.ring].per_card[h].mean]))]):null, hb=both.map(r=>MH[r.ring].mean);
+ const rpc=CK.cardsIn((rr.dram||{}).per_card||{}).filter(h=>rr.hop&&rr.hop.per_card[h]);
+ /* the version-3 check on the rings (V3-RL): the mesh slope pooled over the cards (RL-a), the step out of the shire (RL-b), the
+    128 B rows against the 1 KB ones (RL-c), the relay's DRAM round trip against the hand-off (RL-d) */
+ const RL=V3.rl||{}, MS=RL.mesh_slope||{}, ES=RL.exit_step||{}, SMm=RL.small_messages||{}, RQ=RL.relay_ratio||{};
+ const esY=CK.cardsIn(ES).filter(h=>ES[h].ci99[0]>0), esN=CK.cardsIn(ES).filter(h=>!(ES[h].ci99[0]>0));
+ const smAll=Object.keys(SMm).length&&Object.values(SMm).every(o=>CK.cardsIn(o).every(h=>o[h].ci99[0]>0)), smCards=Object.keys(SMm).length?CK.cardsIn(Object.values(SMm)[0]):[];
+ const ci1=x=>`${f1(x.mean)} [${mf2(x.ci99[0]).replace(/(\.\d)\d$/,'$1')}, ${f1(x.ci99[1])}]`;
  $('commtext').innerHTML=`Between the two minions of a pair a byte costs under a picojoule (${f2(pr)} pJ); around a neighbourhood or a shire about ${f1((nb+sh)/2)} pJ; across the mesh ${f0(Math.min(...xs))}–${f0(Math.max(...xs))} pJ. `+
-  (pcFit?`A straight line through the 1 KB rings between shires against their mean distances (the ${WORD[both.length]||both.length} both cards measured, ${f1(Math.min(...hb))}–${f1(Math.max(...hb))} hops) gives ${f1(pcFit[0].a)} pJ to leave the shire plus ${f1(pcFit[0].b)} pJ per mesh hop on aifoundry2, and ${f1(pcFit[1].a)} plus ${f1(pcFit[1].b)} on aifoundry3. <b>Leaving the shire is the biggest single step (section 4.3's wire fit shows it on both cards), but the hops after it are not free.</b> `:'')+
-  `Small messages cost more per byte in the 128 B rows, a difference resolved so far only on aifoundry2's shire ring; the per-message overhead is 40–224 cycles of the sending and receiving harts (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a>, one session on aifoundry2). `+
-  (rpc.length===2?`Handing a slab to the next shire through its scratchpad is ${f1(rr.dram.per_card.aifoundry2.mean/rr.hop.per_card.aifoundry2.mean)}× cheaper than the DRAM round trip on aifoundry2 and ${f1(rr.dram.per_card.aifoundry3.mean/rr.hop.per_card.aifoundry3.mean)}× on aifoundry3; the hand-off itself costs ${f1(rr.hop.per_card.aifoundry2.mean)} pJ/B on aifoundry2 and ${f1(rr.hop.per_card.aifoundry3.mean)} on aifoundry3. The three relay bars are ±${f0(Math.min(...hw))}–${f0(Math.max(...hw))}%: the hop relay's is mostly that difference between the cards, and the others are a ${f0(Math.min(...ow))}–${f0(Math.max(...ow))} W signal over a board idle that drifts, the DRAM relay's power also riding on a path with no rail sensor.`:
+  (pcFit?`A straight line through the 1 KB rings between shires against their mean distances (the ${WORD[both.length]||both.length} that ${rcards.length>2?'every card':'both cards'} measured, ${f1(Math.min(...hb))}–${f1(Math.max(...hb))} hops) gives ${semiList(pcFit.map(([h,q],i)=>`${f1(q.a)}${i?'':' pJ to leave the shire'} plus ${f1(q.b)}${i?'':' pJ per mesh hop'} on ${cname(h)}`))}${MS.pooled!=null?`; the version-3 check finds no card's per-hop cost different from another's, ${f2(MS.pooled)} pJ/B per hop pooled`:''}. `+
+   `<b>Leaving the shire is the biggest single step (section 4.3's wire fit shows it on ${ALLC}), but the hops after it are not free.</b>`+
+   (esY.length?` The step out of the shire beyond one hop is ${andList(esY.map(h=>`${ci1(ES[h])} pJ/B on ${cname(h)}`))}${esN.length?`, not resolved on ${andList(esN.map(h=>`${cname(h)} (${ci1(ES[h])})`))}`:''} (99% intervals over six passes). `:' '):'')+
+  (smAll?`<b>Small messages cost more per byte</b>: the 128 B rows are dearer than the 1 KB ones on ${smCards.length>2?'every card':andList(smCards.map(cname))}, by ${andList(Object.entries(SMm).map(([k,o])=>`${f1(Math.min(...CK.cardsIn(o).map(h=>o[h].mean)))}–${f1(Math.max(...CK.cardsIn(o).map(h=>o[h].mean)))} pJ/B ${k.startsWith('shire')?'around a shire':'between neighbouring shire IDs'}`))} (resolved from zero at 99% on each); `:`Small messages cost more per byte in the 128 B rows; `)+
+  `the per-message overhead is 40–224 cycles of the sending and receiving harts (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a>, one session on aifoundry2). `+
+  (rpc.length>1?(()=>{const hi=rpc.reduce((a,h)=>rr.dram.per_card[h].mean>rr.dram.per_card[a].mean?h:a), rest=rpc.filter(h=>h!==hi), prem=rest.map(h=>100*(rr.dram.per_card[hi].mean/rr.dram.per_card[h].mean-1)), sePct=Math.max(...rpc.map(h=>100*rr.dram.per_card[h].se/rr.dram.per_card[h].mean));
+    return `<b>Handing a slab to the next shire through its scratchpad is ${andList(rpc.map(h=>f1(rr.dram.per_card[h].mean/rr.hop.per_card[h].mean)+'×'))} cheaper than the DRAM round trip</b> on ${andList(rpc.map(cname))}${RQ.pooled!=null?` (the same on every card at 99%, ${f1(RQ.pooled)}× pooled)`:''}; the hand-off itself costs ${andList(rpc.map(h=>f1(rr.hop.per_card[h].mean)))} pJ/B in that order. `+
+     `The three relay bars are ±${f0(Math.min(...hw))}–${f0(Math.max(...hw))}%, most of it ${cname(hi)} reading ${f0(Math.min(...prem))}–${f0(Math.max(...prem))}% above the others through DRAM (a difference the version-3 check resolves); within a card the passes agree to ${f0(Math.ceil(sePct))}% (standard error).`;})():
    `Handing a slab to the next shire through its scratchpad is ${f0(dram/hop)}× cheaper than the DRAM round trip. The three relay bars are ±${f0(Math.min(...hw))}–${f0(Math.max(...hw))}% because each is a ${f0(Math.min(...ow))}–${f0(Math.max(...ow))} W signal over a board idle that drifts; the DRAM relay's power also rides on a path with no rail sensor.`);
 })();
 
@@ -770,12 +919,12 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
    rows.push({i,e,rate,w:c.mean*rate*1e-12,lo:c.lo*rate*1e-12,hi:c.hi*rate*1e-12,c,op:e.only==='own'?'its own data':e.only&&o!=='random'?'random only':o});});
   const dyn=rows.reduce((s,r)=>s+r.w,0), lo=rows.reduce((s,r)=>s+r.lo,0), hi=rows.reduce((s,r)=>s+r.hi,0);
   return {fix,leak,rows,dyn,lo,hi,tot:fix+leak+dyn,miss,law:L,h};}
- /* the measurement the preset reproduces on card h: the ablation's board power at its 80 °C launch (TCARD's; shown for
-    the pooled bar too unless strict), or the relay's measured energy per byte times its rate, over idle (comparable at
+ /* the measurement the preset reproduces on card h: the ablation's board power at the card's own launch temperature (for
+    the pooled bar, LAWCARD's unless strict), or the relay's measured energy per byte times its rate, over idle (comparable at
     any temperature, like every priced row; per card from the reruns) */
  function measured(h,strict){const p=st.preset&&PRE.find(q=>q[0]===st.preset); if(!p)return null; const q=p[2];
-  if(q.tensor){if(h!==TCARD&&(strict||h!=='pooled'))return null; const t=tRow(q.tensor,st.o); if(!t||t.idle_w==null)return null;
-   return {tot:t.idle_w+t.over_idle_w,T:80,label:`measured ${f1(t.idle_w+t.over_idle_w)} W`,src:`the 21 September ablation on ${TCARD}, launched at 80 °C, one of the runs behind the price`};}
+  if(q.tensor){const PR=D.tensor.per_card_rows||{}, cfg=tcfg(q.tensor,st.o), hh=h==='pooled'?(strict?null:LAWCARD):h, r=hh&&PR[hh]&&PR[hh][cfg]; if(!r)return null;
+   const T=Math.round(r.launch_c); return {tot:r.idle_w+r.over_idle_w,T,label:`measured ${f1(r.idle_w+r.over_idle_w)} W`,src:`the version-3 ablation on ${cname(hh)}, launched at ${T} °C, the mean of its ${WORD[r.runs]||r.runs} runs, among those the price is built from`};}
   if(q.relay&&rr[q.relay]){const m0=rr[q.relay], pooled=h==='pooled', m=pooled?m0:CK.pick(m0,h); if(!m)return null; const bps=rp[q.relay].bytes_per_s, w=m.mean*bps*1e-12;
    return {over:w,label:`measured ${f1(w)} W over idle`,src:pooled?`the relay, ${f1(m0.mean)} pJ/B [${f1(m0.lo)}–${f1(m0.hi)}] × ${nf(bps/1e9)} GB/s, ${ALLC} (n = ${m0.n})`:`the relay on ${cname(h)}, ${f1(m.mean)} ± ${f1(m.se||0)} pJ/B × ${nf(bps/1e9)} GB/s (n = ${m.n})`,relay:q.relay};}
   return null;}
@@ -785,7 +934,7 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   let s=h==='pooled'?`Priced on ${ALLC}, pooled: each row's mean over every pass on them, at the mean of the rates they reached`
    :`Priced on ${cname(h)}: each row's own mean there (whisker: the range over its passes, or ± its standard error) at the rate it reached there`;
   if(x1.length)s+=`; ${andList(x1.map(r=>r.e.short))} at ${andList(one)}'s rate, the only card ${x1.length>1?'they were':'it was'} timed on`;
-  s+=L.card===h?`; idle: ${cname(h)}'s own law`:`; idle: ${L.card}'s law (section 1), the only one fitted`;
+  s+=L.card===h?`; idle: ${cname(h)}'s own law${h!==LAWCARD&&R.per_card&&R.per_card[h]?` (section 1's form refitted to its idle in the version-3 cycles, ${R.per_card[h].T[0]}–${R.per_card[h].T[1]} °C)`:''}`:`; idle: ${L.card}'s law (section 1)${h==='pooled'?'':', the only one fitted'}`;
   if(h!=='pooled'&&L.card!==h&&LR[h]&&LR[h].die_c)s+=` (${cname(h)} sat ${sgn(LR[h].mean)} W from it at ${f0(LR[h].die_c[0])}–${f0(LR[h].die_c[1])} °C in the catalogue's idle stretches)`;
   s+='.'; if(pz.miss.length)s+=` Not measured on ${cname(h)}, so left out: ${andList(pz.miss.map(e=>e.short))}.`;
   return s;}
@@ -830,7 +979,7 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
    const x1=[...new Set(PZ.flatMap(q=>q.rows.filter(r=>r.e.rcard).map(r=>r.e.short)))], rc=[...new Set(PZ.flatMap(q=>q.rows.filter(r=>r.e.rcard).map(r=>r.e.rcard)))];
    s+=`<br><span class="small">Each bar is priced on its own card: that card's means and the rates it reached (the pooled bar: every pass on ${ALLC}, the mean rate)`+
     (x1.length?`; ${andList(x1)} at ${andList(rc)}'s rate on every bar, the only card ${x1.length>1?'they were':'it was'} timed on`:'')+
-    `; idle: ${andList([...new Set(PZ.map(q=>q.law.card))])}'s law on ${PZ.every(q=>q.law.card===PZ[0].law.card)?'every bar, the only one fitted':'the bars without their own'}.`+
+    `; idle: ${PZ.every(q=>q.law.card===PZ[0].law.card)?`${PZ[0].law.card}'s law on every bar, the only one fitted`:`each card's own law, and ${LAWCARD}'s for the pooled bar`}.`+
     PZ.filter(q=>q.miss.length).map(q=>` Not measured on ${cname(q.h)}, so left out of its bar: ${andList(q.miss.map(e=>e.short))}.`).join('')+
     (bars().some(b=>measured(b,true))?` The measurement is drawn on the ${PZ.filter(q=>measured(q.h,true)).length>1?'bars':'bar'} it was made on.`:'')+'</span>';
    if(st.capped)s+=' <span class="small">Instruction rows share the harts’ issue slots, so together they stop at 100%.</span>';
@@ -844,23 +993,27 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   if(M){if(M.tot!=null)s+=Math.abs(st.T-M.T)<=2?` The measurement: ${f1(M.tot)} W (${M.src}).`:` The measurement (${f1(M.tot)} W) was at ${M.T} °C; move the temperature there to compare.`;
    else{const pzz=price('zeros',st.T,h), pzr=price('random',st.T,h), inb=M.over<pzz.dyn?'below the bracket':M.over>pzr.dyn?'above the bracket':'inside the bracket';
     s+=` Priced ${f1(pzz.dyn)} W on zeros … ${f1(pzr.dyn)} W on random data over idle; measured ${f1(M.over)} W (${M.src}): ${inb}.`;}}
-  else if(st.preset&&PRE.find(q=>q[0]===st.preset)[2].tensor&&h!=='pooled'&&h!==TCARD)s+=` The measurement behind this preset is ${TCARD}'s; pick it, or all cards, to compare.`;
   if(st.capped)s+=' <span class="small">Instruction rows share the harts’ issue slots, so together they stop at 100%.</span>';
   s+=`<br><span class="small">${basis(pz)}</span>`;
   ro.set(s);}
  sync(); load('fp32');
  /* text beneath: the default preset against its measurement, and the static share at 80 °C */
  const t=tRow('fp32','random'), tz=tRow('fp32','zeros'), tb=TB.fp32_randn;
- const dyns=[...CARDS.flatMap(h=>Object.values(D.catalogue.cards[h].summary).map(e=>e.over_idle_w.mean)),...D.tensor.rows.map(r=>r.over_idle_w)];
- const mxd=Math.max(...dyns), sw=tb.mean*t.per_s*1e-12;
- /* what cooling from 80 to 60 C saves, over the fits in R.profile (each its own T_L) */
+ /* the largest dynamic power measured: every card's catalogue entries and tensor rows (tensor.per_card_rows) */
+ const PR=D.tensor.per_card_rows||{};
+ const dynList=[...CARDS.flatMap(h=>Object.entries(D.catalogue.cards[h].summary).map(([k,e])=>[e.over_idle_w.mean,k,h])),...CK.cardsIn(PR).flatMap(h=>Object.entries(PR[h]).map(([k,r])=>[r.over_idle_w,k,h]))];
+ const mxe=dynList.reduce((a,b)=>b[0]>a[0]?b:a), mxd=mxe[0], sw=tb.mean*t.per_s*1e-12;
+ /* what cooling from 80 to 60 C saves, over the fits in R.profile (each its own T_L), and on each card by its own law */
  const sv=R.profile?R.profile.fits.map(q=>q.A_leak_80_w*(1-Math.exp(-20/q.T_L_c))):null, cool=sv?[Math.min(...sv),Math.max(...sv)]:null;
- const PF=R.profile;
- $('compcap').innerHTML=`How it is priced: ${LAWCARD}'s idle law of section 1 at the chosen die temperature, plus, for each row, its energy per event from sections 3–5 (the mean over ${ALLC}; the whisker spans the rows' ranges) times its rate. A rate is a fraction of what the card reached running that row alone. `+
-  `With a card chosen, each row takes that card's own mean (the whisker: the range over its passes) and the rate it reached; a row timed on one card only keeps that card's rate, the idle law is ${LAWCARD}'s on every card, and the line beneath the bar names the basis. "Compare cards" draws one bar per card for the same workload. Instruction rows share the harts' issue slots, so together they stop at 100%; byte streams are assumed to add, which no measurement of concurrent streams has tested beyond the relay's reads and writes (section 7.2). Per-instruction costs include the awake core (section 2), so two instruction rows count it twice. The static part carries the idle law's own bar: ±0.2 W on aifoundry2, ${D.cards.leakage?(D.cards.leakage.mean_offset_W>=0?'+':'')+f1(D.cards.leakage.mean_offset_W):'+0.7'} W on aifoundry3 (the mean of its four temperature bins). `+
-  (PF?`Its split into fixed and leakage is the best fit's: the e-foldings that fit the idle bins as well put the leakage at 80 °C anywhere from ${f0(PF.A_leak_80_w[0])} to ${f0(PF.A_leak_80_w[1])} W, but move the idle total by at most ${f1(PF.idle_spread_w_45_95)} W between 45 and 95 °C. `:'')+
-  `The default is the dense fp32 matmul on random data: ${f1(P80)} W of idle at 80 °C and ${f1(sw)} W of multiply-adds (section 3.2's ${f2(tb.mean)} pJ per MAC at ${sci(t.per_s)} MAC/s), ${f1(P80+sw)} W, against ${f1(t.idle_w+t.over_idle_w)} W measured on aifoundry2 — one of the runs the ${f2(tb.mean)} pJ is built from, so this checks the arithmetic rather than the price; the flip model of section 3.2, fitted on aifoundry2, prices the same tile at ${f1((D.cards.patterns||[]).find(p=>p.values==='randn').model)} W instead of ${f1(sw)}.`;
- $('comptext').innerHTML=`<b>At 80 °C the static ${f0(P80)} W exceeds the dynamic power of every kernel measured here</b>, ${mxd===t.over_idle_w?"the dense random matmul's":'the largest,'} ${f1(mxd)} W included. The same matmul on zeros draws ${f1(tz.over_idle_w)} W over idle instead of ${f1(t.over_idle_w)}, and its measured loaded cost per flop on aifoundry2 falls from ${f1(1e12*(t.idle_w+t.over_idle_w)/(2*t.per_s))} to ${f1(1e12*(tz.idle_w+tz.over_idle_w)/(2*tz.per_s))} pJ, almost all of it static. Cooling the die from 80 to 60 °C saves about ${f0(P80-lawAt(60))} W of aifoundry2's idle power${cool?` (${f1(cool[0])}–${f1(cool[1])} W over the e-foldings that fit)`:''}, and presumably as much under load. <b>On aifoundry2, where the temperature law was measured, the data decides the dynamic energy and the temperature decides the rest.</b>`;
+ const PF=R.profile, PCL=R.per_card||{}, lawH=(h,T)=>{const L=PCL[h]; return L.P_fix_w+L.A_leak_80_w*Math.exp((T-80)/L.T_L_c);}, pch=CK.cardsIn(PCL).filter(h=>PCL[h].T[0]<=60&&PCL[h].T[1]>=80);
+ const L2=VI.law_residual_a2, LRv=VI.law_residual||{};
+ $('compcap').innerHTML=`How it is priced: the idle law of section 1 at the chosen die temperature, plus, for each row, its energy per event from sections 3–5 (the mean over ${ALLC}; the whisker spans the rows' ranges) times its rate. A rate is a fraction of what the card reached running that row alone. `+
+  `With a card chosen, each row takes that card's own mean (the whisker: the range over its passes) and the rate it reached, and the idle is that card's own law: ${LAWCARD}'s of section 1, and for ${andList(CK.cardsIn(PCL).map(cname))} the same form refitted to their idle in the version-3 cycles (its e-folding held at ${f0(R.T_L_c)} °C); a row timed on one card only keeps that card's rate, and the line beneath the bar names the basis. "Compare cards" draws one bar per card for the same workload. Instruction rows share the harts' issue slots, so together they stop at 100%; byte streams are assumed to add, which no measurement of concurrent streams has tested beyond the relay's reads and writes (section 7.2). Per-instruction costs include the awake core (section 2), so two instruction rows count it twice. `+
+  `The static part carries each law's own bar: in the version-3 idle cycles ${LAWCARD} sat ${L2?`${sgw(L2.mean)} W [${sgw(L2.ci99[0])}, ${sgw(L2.ci99[1])}] from its law at ${L2.T[0]}–${L2.T[1]} °C`:'within 0.2 W of its law'}, and the other cards' own laws fit their cycles to ${andList(CK.cardsIn(PCL).map(h=>`${f2(PCL[h].rms_w)} W rms`))}${CK.cardsIn(LRv).length?`; priced with ${LAWCARD}'s law instead they would read ${andList(CK.cardsIn(LRv).map(h=>`${f1(LRv[h].mean)} W`))} low (${andList(CK.cardsIn(LRv).map(cname))})`:''}. `+
+  (PF?`Each law's split into fixed and leakage is its best fit's: on ${LAWCARD} the e-foldings that fit the idle bins as well put the leakage at 80 °C anywhere from ${f0(PF.A_leak_80_w[0])} to ${f0(PF.A_leak_80_w[1])} W, but move the idle total by at most ${f1(PF.idle_spread_w_45_95)} W between 45 and 95 °C. `:'')+
+  `The default is the dense fp32 matmul on random data: ${f1(P80)} W of idle at 80 °C and ${f1(sw)} W of multiply-adds (section 3.2's ${f2(tb.mean)} pJ per MAC at ${sci(t.per_s)} MAC/s), ${f1(P80+sw)} W, against ${f1(t.idle_w+t.over_idle_w)} W measured on ${LAWCARD} — the mean of four of the runs the ${f2(tb.mean)} pJ is built from, so this checks the arithmetic rather than the price; the flip model of section 3.2, fitted on aifoundry2, prices the same tile at ${f1((D.cards.patterns||[]).find(p=>p.values==='randn').model)} W instead of ${f1(sw)}.`;
+ const st80=[LAWCARD].concat(CK.cardsIn(PCL)).map(h=>[h,h===LAWCARD?P80:lawH(h,80)]);
+ $('comptext').innerHTML=`<b>At 80 °C the static power exceeds the dynamic power of every kernel measured here, on every card</b>: ${andList(st80.map(([h,v])=>`${f1(v)} W on ${cname(h)}`))} at rest, against at most ${f1(mxd)} W over idle (${mxe[1].startsWith('fp32_randn')?'the dense random matmul':mxe[1]}, on ${cname(mxe[2])}). The same matmul on zeros draws ${f1(tz.over_idle_w)} W over idle instead of ${f1(t.over_idle_w)} on ${LAWCARD}, and its measured loaded cost per flop there falls from ${f1(1e12*(t.idle_w+t.over_idle_w)/(2*t.per_s))} to ${f1(1e12*(tz.idle_w+tz.over_idle_w)/(2*tz.per_s))} pJ, almost all of it static. Cooling the die from 80 to 60 °C saves about ${f0(P80-lawAt(60))} W of ${LAWCARD}'s idle power${cool?` (${f1(cool[0])}–${f1(cool[1])} W over the e-foldings that fit)`:''}${pch.length?` and, by their own laws, ${andList(pch.map(h=>`${f1(lawH(h,80)-lawH(h,60))} W on ${cname(h)}`))}, whose version-3 idle cycles span those temperatures`:''}; under load it presumably saves as much. <b>On every card the data decides the dynamic energy and the temperature decides the rest.</b>`;
 })();
 
 /* ---------- 7.2 the relay, priced from section 4 ---------- */
@@ -873,8 +1026,12 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
  const wl=wireAt(HH,'zeros'), wh=wireAt(HH,'random'), wire=wl&&wh?[wl.mean,wh.mean]:null;
  const ts=zr('tstore/scp'), pd=mid(zr('tload/dram'),zr('tstore/dram')), l1f=zr('l1fill/stride32'), ps=l1f&&ts?mid(l1f,ts):null, ph=wire&&ts?mid(wire,ts):null;
- /* within 10% below a bracket is its low edge: the own scratchpad's 8% is within the noise on both cards (version 3) */
+ /* within 10% below a bracket is its low edge. The own scratchpad: the version-3 check (results/rl.json, item RL-f,
+    claim energy-manual-153) put the relay's cost minus each card's own catalogue low edge at these values, pJ/B with
+    99% intervals: at the edge on every card, not below it */
  const edge=(v,b)=>v<b[0]&&v>=0.9*b[0];
+ const RLF=[['aifoundry2',-0.32,-0.79,0.16],['aifoundry3',-0.19,-0.50,0.13],['aifoundry1-c1',-0.18,-0.41,0.04]],sg2=v=>(v<0?'−':'+')+f2(Math.abs(v));
+ const edgeTxt=x=>x[0]==='the own scratchpad'?`sits at the low edge of its bracket on every card, not below it (the version-3 check measured the relay's own-scratchpad cost minus each card's own catalogue low edge at ${andList(RLF.map(([h,m,lo,hi],i)=>`${sg2(m)}${i?'':' pJ/B'} [${sg2(lo)}, ${sg2(hi)}] on ${cname(h)}`))}, 99% intervals that include zero)`:`sits at the low edge of its bracket`;
  const inb=(v,b)=>edge(v,b)?'at its low edge':v<b[0]?'below':v>b[1]?'above':'inside';
  const M=k=>rr2[k]?rr2[k].mean:rp[k].pj_per_byte;
  $('relaycheck').innerHTML='<thead><tr><th>Where the relay keeps its intermediate</th><th class="num">priced pJ/B, zeros … random</th><th class="num">measured</th></tr></thead><tbody>'+
@@ -884,54 +1041,92 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  const V=[['DRAM',M('dram'),pd],['the next shire',M('hop'),ph],['the own scratchpad',M('scp'),ps]].filter(x=>x[2]);
  const inside=V.filter(x=>x[1]>=x[2][0]&&x[1]<=x[2][1]).map(x=>x[0]), out=V.filter(x=>!(x[1]>=x[2][0]&&x[1]<=x[2][1]));
  /* DRAM priced with the constant-operand rows instead, per card: closer to the relay's data than the zeros ... random bracket */
- const cst=['aifoundry2','aifoundry3'].map(h=>{const a=cb('tload/dram/const'),b=cb('tstore/dram/const'),m=rr2.dram&&rr2.dram.per_card[h];
+ const cst=CARDLIST.map(h=>{const a=cb('tload/dram/const'),b=cb('tstore/dram/const'),m=rr2.dram&&rr2.dram.per_card[h];
    return a&&b&&a.per_card[h]&&b.per_card[h]&&m?{h,p:(a.per_card[h].mean+b.per_card[h].mean)/2,m:m.mean}:null;}).filter(Boolean);
  $('relaytext').innerHTML=`No row of section 4 was derived from the relay, but the rows that price it were chosen after it was measured, so this is a consistency check with wide brackets, not a prediction. Each byte is read once and written once, so each bracket is the mean of a read row and a write row of section 4, from zeros to random data (the relay's data is one constant per slab). The relay reads with 32 B loads through the L1 and writes with tensor stores. It is priced with the 32 B L1 row of section 4.3 for its own scratchpad, the wire read of section 4.3 at ${f1(HH)} hops for the next shire, and, for DRAM, section 4.1's tensor-load row, the nearest the catalogue has. `+
   (inside.length?`${inside.join(' and ').replace(/^./,c=>c.toUpperCase())} fall${inside.length>1?'':'s'} inside ${inside.length>1?'their brackets':'its bracket'}`:'')+
-  out.map(x=>`${inside.length?' and ':''}${x[0]} ${edge(x[1],x[2])?`sits at the low edge of its bracket (${f0(100*(1-x[1]/x[2][0]))}% below it, within the noise on both cards)`:`reads ${f0(100*Math.abs(1-x[1]/(x[1]<x[2][0]?x[2][0]:x[2][1])))}% ${x[1]<x[2][0]?'below':'above'}`}`).join('')+
+  out.map(x=>`${inside.length?' and ':''}${x[0]} ${edge(x[1],x[2])?edgeTxt(x):`reads ${f0(100*Math.abs(1-x[1]/(x[1]<x[2][0]?x[2][0]:x[2][1])))}% ${x[1]<x[2][0]?'below':'above'}`}`).join('')+
   `; the adds and barriers the relay also runs are in no table.`+
-  (cst.length===2?` The brackets are wide: priced instead with the constant-operand rows, DRAM comes to ${f1(cst[0].p)} pJ/B on aifoundry2 against ${f1(cst[0].m)} measured, but ${f1(cst[1].p)} on aifoundry3 against ${f1(cst[1].m)}, ${f0(100*(cst[1].m/cst[1].p-1))}% more.`:'')+
+  (cst.length>1?` The brackets are wide: priced instead with the constant-operand rows, DRAM comes to ${andList(cst.map((c,i)=>`${f1(c.p)}${i?'':' pJ/B'} on ${cname(c.h)} against ${f1(c.m)} measured (${sg1(100*(c.m/c.p-1)).replace(/\.\d$/,'')}%)`))}.`:'')+
   ` Section 7.1 prices the three relays with the same rows.`;
 })();
 
-/* ---------- 8. two cards: the ratio against the value (em-l2) ---------- */
+/* ---------- 8. three cards: the ratio against the value (em-l2) ---------- */
 (function(){
- const S2c=D.catalogue.cards.aifoundry2&&D.catalogue.cards.aifoundry2.summary, S3c=D.catalogue.cards.aifoundry3&&D.catalogue.cards.aifoundry3.summary; if(!S2c||!S3c)return;
- const pts=[]; for(const k in S2c){const r2=S2c[k],r3=S3c[k]; if(!r3)continue; const byte=r2.bytes_per_s.mean>0, fld=byte?'pj_per_byte':'pj_per_op';
-  if(r2[fld].mean>0&&r3[fld].mean>0)pts.push({k,byte,v2:r2[fld].mean,v3:r3[fld].mean,s2:r2[fld].se,s3:r3[fld].se,r:r3[fld].mean/r2[fld].mean});}
+ /* every other card against the reference card (CARDS[0], aifoundry2), entry by entry; one series per card in its registry
+    colour and mark */
+ const REF=CARDS[0], SR=SUMM(REF), OC=CARDS.slice(1).filter(h=>Object.keys(SUMM(h)).length); if(!OC.length)return;
+ const pts=[]; OC.forEach(h=>{const Sh=SUMM(h); for(const k in SR){const r2=SR[k],r3=Sh[k]; if(!r3)continue; const byte=r2.bytes_per_s.mean>0, fld=byte?'pj_per_byte':'pj_per_op';
+  if(r2[fld].mean>0&&r3[fld].mean>0)pts.push({h,k,byte,v2:r2[fld].mean,v3:r3[fld].mean,s2:r2[fld].se,s3:r3[fld].se,r:r3[fld].mean/r2[fld].mean});}});
  const SEC={relay_pj_per_byte:['relay (section 5)','pJ/B'],hotline_nj_per_op:['hot line (section 6)','nJ'],rings_pj_per_byte:['ring (section 5)','pJ/B'],levels_pj_per_byte:['level (section 4.2)','pJ/B']};
- const rer=[]; Object.keys(SEC).forEach(sec=>{const o=RR[sec]||{}; for(const k in o){const v=o[k]; if(v&&v.per_card.aifoundry2&&v.per_card.aifoundry3)rer.push({k,sec,v2:v.per_card.aifoundry2.mean,v3:v.per_card.aifoundry3.mean,r:v.per_card.aifoundry3.mean/v.per_card.aifoundry2.mean});}});
- const cc=D.catalogue.cross_card, scale=D.cards&&D.cards.scale;
- CK.legend('cards-legend',[{key:'i',label:'per instruction',mark:'dot',color:'var(--c1)'},{key:'b',label:'per byte',mark:'dot',color:'var(--c2)'},{key:'r',label:'reruns (right strip)',mark:'ring',color:'var(--c7)'},
-  {key:'m',label:`median ${f3(cc.median)}, shaded 10–90%`,mark:'line',color:'var(--ink-2)'}].concat(scale?[{key:'s',label:`tensor-unit transfer ${f3(scale)}`,mark:'dash',color:'var(--ref)'}]:[]));
- const tipP=p=>`<b>${p.k}</b><br>${CARDS[0]} ${fs(p.v2)} ± ${fs(p.s2)}, ${CARDS[1]} ${fs(p.v3)} ± ${fs(p.s3)} ${p.byte?'pJ/B':'pJ'}<br>ratio <b>${f3(p.r)}</b>`;
- const tipR=p=>`<b>${SEC[p.sec][0]}: ${p.k}</b><br>${CARDS[0]} ${fs(p.v2)}, ${CARDS[1]} ${fs(p.v3)} ${SEC[p.sec][1]}<br>ratio <b>${f3(p.r)}</b>`;
- const byKey={};
- CK.frame('cards',{height:W=>W<600?300:340,label:'Every catalogue entry: aifoundry3 as a fraction of aifoundry2',draw:f=>{
-  const SW=f.narrow?58:84, L=40,Rr=10,T=24,B=40, xR=f.W-Rr-SW-10, x=CK.log(1,2000,L,xR), y=CK.lin(0.70,1.20,f.H-B,T);
-  CK.axes(f,{x,y,L,R:Rr+SW+10,T,B,yt:[0.7,0.8,0.9,1,1.1,1.2],yfmt:v=>f1(v),xl:`${CARDS[0]}, pJ per instruction or per byte (log)`,yl:`${CARDS[1]} / ${CARDS[0]}`});
-  CK.el('rect',{x:L,y:y(cc.p90),width:xR-L,height:y(cc.p10)-y(cc.p90),fill:'var(--grid)',opacity:0.7},f.svg);
-  CK.el('line',{x1:L,x2:f.W-Rr,y1:y(cc.median),y2:y(cc.median),stroke:'var(--ink-2)','stroke-width':1.5},f.svg);
+ const rer=[]; Object.keys(SEC).forEach(sec=>{const o=RR[sec]||{}; for(const k in o){const v=o[k]; if(!v||!v.per_card[REF])continue;
+  OC.forEach(h=>{if(v.per_card[h])rer.push({h,k,sec,v2:v.per_card[REF].mean,v3:v.per_card[h].mean,r:v.per_card[h].mean/v.per_card[REF].mean});});}});
+ const XC=D.catalogue.cross_cards||{}, lo=0.7, hi=Math.max(1.3,Math.ceil(10*Math.max(...pts.map(p=>p.r),...rer.map(p=>p.r)))/10);
+ CK.legend('cards-legend',OC.map(h=>cardItem(h,`${cname(h)}: median ${XC[h]?f3(XC[h].median):'—'} (dashed: 10–90%)`)).concat([{key:'eq',label:'equal to aifoundry2',mark:'line',color:'var(--axis)'}]));
+ legendMarks('cards-legend',OC.map(h=>cardItem(h,'')));
+ const tipP=p=>`<b>${p.k}</b> (${p.byte?'per byte':'per instruction'})<br>${cname(REF)} ${fs(p.v2)} ± ${fs(p.s2)}, ${cname(p.h)} ${fs(p.v3)} ± ${fs(p.s3)} ${p.byte?'pJ/B':'pJ'}<br>ratio <b>${f3(p.r)}</b>`;
+ const tipR=p=>`<b>${SEC[p.sec][0]}: ${p.k}</b><br>${cname(REF)} ${fs(p.v2)}, ${cname(p.h)} ${fs(p.v3)} ${SEC[p.sec][1]}<br>ratio <b>${f3(p.r)}</b>`;
+ CK.frame('cards',{height:W=>W<600?320:360,label:`Every catalogue entry: ${andList(OC.map(cname))} as a fraction of ${REF}`,draw:f=>{
+  const SW=f.narrow?58:84, L=40,Rr=10,T=24,B=40, xR=f.W-Rr-SW-10, x=CK.log(1,2000,L,xR), y=CK.lin(lo,hi,f.H-B,T);
+  CK.axes(f,{x,y,L,R:Rr+SW+10,T,B,yt:[0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,1.6].filter(v=>v<=hi+1e-9),yfmt:v=>f1(v),xl:`${REF}, pJ per instruction or per byte (log)`,yl:`card / ${REF}`});
   CK.el('line',{x1:L,x2:f.W-Rr,y1:y(1),y2:y(1),stroke:'var(--axis)','stroke-width':1},f.svg);
-  if(scale)CK.el('line',{x1:L,x2:f.W-Rr,y1:y(scale),y2:y(scale),stroke:'var(--ref)','stroke-width':1.5,'stroke-dasharray':'2 3'},f.svg);
-  const nodes=pts.slice().sort((a,b)=>a.v2-b.v2).map(p=>{const m=mark(f,f.svg,'circle',{cx:x(Math.max(1,p.v2)),cy:y(Math.max(0.7,Math.min(1.2,p.r))),r:3,fill:p.byte?'var(--c2)':'var(--c1)','fill-opacity':0.8},6,tipP(p)); byKey[p.k]=m; return m;});
+  OC.forEach(h=>{const c=CK.card(h).color, q=XC[h]; if(!q)return;
+   CK.el('line',{x1:L,x2:xR,y1:y(q.median),y2:y(q.median),stroke:c,'stroke-width':1.8},f.svg);
+   [q.p10,q.p90].forEach(v=>CK.el('line',{x1:L,x2:xR,y1:y(v),y2:y(v),stroke:c,'stroke-width':1,'stroke-dasharray':'4 3'},f.svg));});
+  const cl=v=>Math.max(lo,Math.min(hi,v));
+  OC.forEach(h=>{const nodes=pts.filter(p=>p.h===h).sort((a,b)=>a.v2-b.v2).map(p=>cmark(f,f.svg,h,x(Math.max(1,p.v2)),y(cl(p.r)),2.6,6,tipP(p))); CK.keynav(f,nodes);});
   /* the reruns: their x (pJ/B, nJ) is not comparable, so they get a strip of their own on the same ratio axis */
   const x0=f.W-Rr-SW, cx=x0+SW/2, placed=[];
   CK.el('line',{x1:x0,x2:x0,y1:T,y2:f.H-B,stroke:'var(--axis)'},f.svg);
   CK.txt(f.svg,cx,f.H-B+16,'reruns','tick','middle');
-  const rn=rer.slice().sort((a,b)=>a.r-b.r).map(p=>{const cy=y(Math.max(0.7,Math.min(1.2,p.r))); let o=0; for(let k=0;k<40;k++){o=(k%2?1:-1)*Math.ceil(k/2)*7; if(placed.every(q=>(q.o-o)**2+(q.cy-cy)**2>=49))break;} placed.push({o,cy});
-   const m=mark(f,f.svg,'circle',{cx:cx+Math.max(-SW/2+5,Math.min(SW/2-5,o)),cy,r:3.2,fill:'none',stroke:'var(--c7)','stroke-width':1.6},6,tipR(p)); byKey['rerun:'+p.sec+':'+p.k]=m; return m;});
-  CK.keynav(f,nodes); CK.keynav(f,rn);
+  const rn=rer.slice().sort((a,b)=>a.r-b.r).map(p=>{const cy=y(cl(p.r)); let o=0; for(let k=0;k<40;k++){o=(k%2?1:-1)*Math.ceil(k/2)*7; if(placed.every(q=>(q.o-o)**2+(q.cy-cy)**2>=49))break;} placed.push({o,cy});
+   return cmark(f,f.svg,p.h,cx+Math.max(-SW/2+5,Math.min(SW/2-5,o)),cy,3,6,tipR(p));});
+  CK.keynav(f,rn);
  }});
- const rat=pts.map(p=>p.r).sort((a,b)=>a-b), rr=rer.map(p=>p.r).sort((a,b)=>a-b);
- const med=v=>v.length%2?v[v.length>>1]:(v[v.length/2-1]+v[v.length/2])/2;   /* the median of an even count is the mean of the middle two */
- const DB=D.catalogue.die_c_busy_median, LN=D.cards&&D.cards.launch, rl=(sec,k)=>{const x=rer.find(p=>p.sec===sec&&p.k===k); return x?x.r:null;};
- const l1r=rl('levels_pj_per_byte','l1'), scr=rl('levels_pj_per_byte','scp-local');
- /* The lowest and highest ratios are not listed: none of the entries differs from the common scale beyond the noise of
-    three passes once the 386 comparisons are allowed for (version 3, energy-manual-158). */
- $('cardscap').textContent=`${pts.length} entries, each the mean of three passes on each card${DB?`, ${CARDS[0]}'s bursts at a median die temperature of ${f0(DB[CARDS[0]])} °C and ${CARDS[1]}'s at ${f0(DB[CARDS[1]])} °C`:''}: ratio ${f3(rat[0])} to ${f3(rat[rat.length-1])}, 10th–90th percentile ${f3(rat[Math.floor(rat.length/10)])}–${f3(rat[Math.floor(rat.length*0.9)])}, median ${f3(rat[rat.length>>1])}; the shaded band and the solid line are the catalogue's own 10–90% and median over its ${cc.n} configurations. The line at 1 is equality. No single entry differs from the common scale beyond the noise of three passes once the ${cc.n} comparisons are allowed for.`+
-  (rr.length?` The ${rr.length} rerun entries of sections 4.2, 5 and 6 (right, their energies in their own units) give ${f3(med(rr))} in the median (${f2(rr[0])}–${f2(rr[rr.length-1])}), but they do not share one scale${l1r&&scr?`: some differ from it beyond their noise, the L1 level at ${f2(l1r)} and the own-scratchpad level at ${f2(scr)}`:''}.`:'')+
-  ` The tensor-unit transfer of 22 September found ${f3(scale||0.924)} for the same pair of cards${LN&&LN.aifoundry2&&LN.aifoundry3?`, launched at ${f0(LN.aifoundry2.T)} °C on aifoundry2 and ${f0(LN.aifoundry3.T)} °C on aifoundry3`:''}. aifoundry3 runs 5 mV higher, which would make it about 2% dearer, so the voltage does not explain the scale; its die, 20–25 °C cooler in every comparison, has not been ruled out.`;
+ const med=v=>{v=v.slice().sort((a,b)=>a-b); return v.length%2?v[v.length>>1]:(v[v.length/2-1]+v[v.length/2])/2;};
+ const DB=D.catalogue.die_c_busy_median, CAT3=V3.catalogue||{}, GAP=CAT3.gap_vs_a2||{}, TP=CAT3.temperature||{}, CB_=CAT3.cool_a3_warm_a2, OUTL=D.catalogue.scale_outliers||{}, C23=CAT3.committed_23sep, CL=VI.clocks||{}, X5=V3.x5||{}, PR=D.tensor.per_card_rows||{};
+ const rng=h=>{const r=pts.filter(p=>p.h===h).map(p=>p.r); return [Math.min(...r),Math.max(...r)];};
+ const kind=(h,b)=>med(pts.filter(p=>p.h===h&&p.byte===b).map(p=>p.r));
+ const tIn=CK.cardsIn(TP).filter(h=>TP[h].decision==='temperature'), tNo=CK.cardsIn(TP).filter(h=>TP[h].decision!=='temperature');
+ const bci=b=>`${sgw(b.beta)}% per °C [${sgw(b.lo)}, ${sgw(b.hi)}]`;
+ const xr=CK.cardsIn(X5).filter(h=>X5[h]&&X5[h].fp32_randn&&X5[h].fp32_randn.ci[0]>0);
+ $('cardscap').innerHTML=`${XC[OC[0]]?XC[OC[0]].n:pts.length/OC.length} entries, each the mean of three passes on each card (26 September)${DB?`, the bursts at a median die temperature of ${andList(CARDS.filter(h=>DB[h]!=null).map(h=>`${f0(DB[h])} °C on ${cname(h)}`))}`:''}. `+
+  semiList(OC.map(h=>`${cname(h)} / ${REF}: median ${f3(XC[h].median)}, 10th–90th percentile ${f3(XC[h].p10)}–${f3(XC[h].p90)}, range ${f2(rng(h)[0])}–${f2(rng(h)[1])}; per instruction ${f3(kind(h,false))} and per byte ${f3(kind(h,true))} in the median`))+
+  `. Solid lines: each card's median; dashed: its 10th and 90th percentiles; the line at 1 is equality. `+
+  (OC.every(h=>OUTL[h])?`Against each card's common scale, once the ${OUTL[OC[0]].entries} comparisons are allowed for, ${andList(OC.map(h=>OUTL[h].outliers.length?`${WORD[OUTL[h].outliers.length]||OUTL[h].outliers.length} entr${OUTL[h].outliers.length>1?'ies':'y'} on ${cname(h)} (${andList(OUTL[h].outliers.map(o=>`<code>${o.cfg}</code> ${f2(o.vs_scale)}×`))})`:`no entry on ${cname(h)}`))} differ beyond the noise of three passes (99%, Bonferroni). `:'')+
+  (Object.keys(GAP).length?`Taken pass by pass over the whole catalogue, the version-3 check puts ${andList(CK.cardsIn(GAP).filter(h=>GAP[h]).map(h=>`${cname(h)} at ${f3(GAP[h].ratio)} [${f3(GAP[h].lo)}, ${f3(GAP[h].hi)}]`))} of ${REF} (99% intervals)${C23?`; the 23 September catalogue, which this one replaces, gave ${f3(C23.median)} for aifoundry3`:''}. `:'')+
+  (rer.length?`The ${rer.length} rerun entries of sections 4.2, 5 and 6 (right, their energies in their own units) do not share the catalogue's scale: ${andList(OC.map(h=>{const r=rer.filter(p=>p.h===h).map(p=>p.r); return r.length?`${cname(h)} ${f3(med(r))} in the median (${f2(Math.min(...r))}–${f2(Math.max(...r))})`:null;}).filter(Boolean))}${OC.some(h=>rer.some(p=>p.h===h&&p.sec==='hotline_nj_per_op'))?'':'; the hot line has aifoundry2 and aifoundry3 only (23 September)'}. `:'')+
+  `<b>What sets the scale.</b> `+(tIn.length?`The energy per operation rises with die temperature on ${andList(tIn.map(h=>`${cname(h)}, ${bci(TP[h].beta_pct_per_c)}`))}${tNo.length?`, and not resolved on ${andList(tNo.map(h=>`${cname(h)}, ${bci(TP[h].beta_pct_per_c)}`))}`:''} (a 30-entry panel run hot and cool on each card, 6–14 °C apart; 99% intervals): enough to account for aifoundry3's gap, its die ${DB&&DB.aifoundry3!=null?f0(DB[REF]-DB.aifoundry3)+' °C':'some 15 °C'} cooler here, so that aifoundry3 itself differs from ${REF} is not established. `:'')+
+  (CB_?`With aifoundry3 cool and aifoundry2 warm, as here, the panel gives ${f3(CB_.ratio)} [${f3(CB_.lo)}, ${f3(CB_.hi)}]. `:'')+
+  (xr.length?`Switching power itself follows the die: the random-data fp32 matmul drew ${andList(xr.map(h=>`${sg1(X5[h].fp32_randn.hot_minus_cool_w)} W [${sg1(X5[h].fp32_randn.ci[0])}, ${sg1(X5[h].fp32_randn.ci[1])}] more on ${cname(h)} launched at ${f0(X5[h].launch_c.hi)} than at ${f0(X5[h].launch_c.lo)} °C`))}. `:'')+
+  (()=>{const RM=D.catalogue.rail_mv||{}, rh=CK.cardsIn(RM); if(rh.length<2||!RM[REF])return '';
+    const v2=(h,k)=>100*((RM[h][k]/RM[REF][k])**2-1), dir=v=>`${f0(Math.abs(v))}% ${v>0?'more':'less'}`;
+    return `The minion rail runs at ${andList(rh.map(h=>`${f0(RM[h].minion)}`))} mV and the SRAM rail at ${andList(rh.map(h=>`${f0(RM[h].sram)}`))} mV on ${andList(rh.map(cname))} (the catalogue's median readings). By V² alone that would make ${semiList(rh.filter(h=>h!==REF).map(h=>`${cname(h)}'s instructions cost ${dir(v2(h,'minion'))} and its SRAM accesses ${dir(v2(h,'sram'))}`))}: the voltage does not explain aifoundry3's scale, and is in line with aifoundry1 card 1's cheaper instructions and dearer bytes (${f3(kindMed('aifoundry1-c1',false))} and ${f3(kindMed('aifoundry1-c1',true))} in the median), which its cooler die would not explain. `;})()+
+  (CK.cardsIn(PR).length>1&&PR[REF]&&PR[REF].fp32_randn?`The tensor unit's random-data fp32 switching power, launched at each card's own temperature (section 3.2), is ${andList(CK.cardsIn(PR).filter(h=>h!==REF&&PR[h].fp32_randn).map(h=>`${f3(PR[h].fp32_randn.over_idle_w/PR[REF].fp32_randn.over_idle_w)} on ${cname(h)}`))} of ${REF}'s`+
+   (CK.cardsIn(LO).length>1&&atL(REF,'fp32_randn')!=null?` as registered, and ${andList(CK.cardsIn(LO).filter(h=>h!==REF&&atL(h,'fp32_randn')!=null).map(h=>rng2(atL(h,'fp32_randn')/atL(REF,'fp32_randn'),atLs(h,'fp32_randn')!=null&&atLs(REF,'fp32_randn')!=null?atLs(h,'fp32_randn')/atLs(REF,'fp32_randn'):null,f3)))} at the die temperature of each launch (the launch-temperature offset of note C2, section 3.2, over its two readings of the launch temperature)`:'')+
+   `; the 22 September transfer found ${f3(D.cards&&D.cards.scale||0.924)} for aifoundry3.`:'');
+})();
+
+/* ---------- 9. how the bars were made, from the data ---------- */
+(function(){
+ const C=D.catalogue, nc=CARDS.length, cnt=Object.values(CB).map(c=>c.n), nCat=cnt.length?Math.max(...cnt):0, perCard=nc?nCat/nc:0;
+ const PP=RR.passes_per_card||{}, nPass=o=>{const n=[...new Set(CK.cardsIn(o||{}).map(h=>o[h].length))]; return n.length===1?`${WORD[n[0]]||n[0]} passes on each card`:'passes';};
+ const nr=D.tensor.runs_per_card||{}, nrs=[...new Set(CK.cardsIn(nr).map(h=>nr[h]))];
+ const hwOf=c=>(c.hi-c.lo)/2/c.mean, med=v=>{v=v.slice().sort((a,b)=>a-b); return v[v.length>>1];};
+ const share=med(Object.values(CB).filter(c=>c.cards>1&&c.hi>c.lo).map(c=>c.card_diff/(c.hi-c.lo)));
+ const instr=Object.entries(CB).filter(([k,c])=>/\/random\/h2$/.test(k)&&c.mean>0).map(([k,c])=>hwOf(c));
+ const REP=(V3.catalogue||{}).rep_pct||{}, rh=CK.cardsIn(REP);
+ const clk=CARDS.every(h=>{const q=(C.cards[h]||{}).idle_clock; return q&&q.frac_bursts_idle_600===1&&Object.keys(q.busy_by_mhz||{}).every(m=>m==='600');});
+ const c1=cb('spin/zeros/h1'), c2=cb('spin/zeros/h2'), rr=RR.relay_pj_per_byte||{}, hn=(RR.hotline_nj_per_op||{}).contended;
+ const nop=cb('nop/zeros/h2'), fen=cb('fence/zeros/h2'); if(nop&&fen)$('awakeslot').textContent=`${f1(Math.min(nop.mean,fen.mean))}–${f1(Math.max(nop.mean,fen.mean))}`;
+ const aw=[c1,c2].filter(Boolean).map(c=>100*hwOf(c)), rl=['dram','hop','scp'].filter(k=>rr[k]).map(k=>100*hwOf(rr[k]));
+ const rng=v=>Math.round(Math.min(...v))===Math.round(Math.max(...v))?f0(v[0]):`${f0(Math.min(...v))}–${f0(Math.max(...v))}`;
+ $('barstext').innerHTML=`The catalogue (sections 2, 3, 4.1, 4.3, 4.4, 8) is ${WORD[perCard]||perCard} passes in shuffled order on each of ${WORD[nc]||nc} cards, n = ${nCat} (the version-3 check's full catalogue, 26 September); the rings, the levels and the relay (4.2, 5) are ${nPass(PP.rings)} (n = ${rr.dram?rr.dram.n:'—'}), and the tensor rows (3.2) ${nrs.length===1?`${WORD[nrs[0]]||nrs[0]} runs on each card`:'several runs on each card'} (n = ${(TB.fp32_randn||{}).n||'—'}), both from the same check; the hot line (6) is its 22 September session plus three warm passes on aifoundry2 and three on aifoundry3 (23 September), n = ${hn?hn.n:'—'}. `+
+  `The range is used rather than a standard error because about half of a catalogue entry's bar is the difference between the cards (in the median entry the spread of the card means is ${f0(100*share)}% of the range), which a standard error of the pooled sample would understate; pass-to-pass scatter on one card is 1–2% for most entries (the median standard error is ${andList(rh.map(h=>`${f1(REP[h].median)}%`))} on ${andList(rh.map(cname))}). `+
+  (clk?`The bars leave out a change of operating point, and on 26 September none was needed: every idle and busy sample of the catalogue was at 600 MHz on every card. `:`The bars leave out a change of operating point: bursts whose busy samples left 600 MHz are dropped. `)+
+  `They do carry the drift of the idle between the two stretches that bracket each burst, which every "over idle" figure inherits; the idle law enters only through the leakage correction. `+
+  (hn?`The smallest signal, the hot line (about ${f1(HOT?HOT.mean:1.2)} W over idle), carries one of the widest bars, ±${f0(100*hwOf(hn))}%, mostly because its first session (aifoundry2, 22 September) read ${f1(at.contended.over_idle_w)} W against 1.0–1.2 W in every pass since, and because on so small a signal the leakage correction, a few tenths of a watt, moves each pass by 10–25%; `:'')+
+  `the awake core (±${rng(aw)}%) and the relay (±${rng(rl)}%, mostly aifoundry1 card 1 against the others) are wider than a typical catalogue entry (the median instruction's range is ±${f1(100*med(instr))}%, section 3.1).`;
 })();
 
 /* ---------- contents: every h2 and h3, with its section number; runs before the template adds its # links ---------- */

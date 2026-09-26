@@ -3,23 +3,23 @@
 What every kind of operation on this card costs in joules, arranged so that a workload's energy can be built
 up from parts, with every number traceable to the measurement that produced it.
 
-**Every repeated measurement carries a confidence bar** — mean [lo–hi] over repeated passes on two cards, with each card's own mean ± standard error beside it; rows measured once, or derived, say so. A figure with no card named held on both cards (three passes or more on each, or the same value on both); where one rests on one card, on fewer runs, or differs between the cards, the text says so. What the instruments can and cannot see, and what would let them see more, is the companion [limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability), which also has the glossary (minion, hart, shire, scratchpad, PMIC). The published page is <https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual>.
+**Every repeated measurement carries a confidence bar** — mean [lo–hi] over repeated passes on three cards (aifoundry2, aifoundry3 and aifoundry1's card 1, in the version-3 check of 26 September 2026), with each card's own mean ± standard error beside it; rows measured once, or derived, say so. A figure with no card named held on every card (three passes or more on each, or the same value on each); where one rests on one card, on fewer runs, or differs between the cards, the text says so. What the instruments can and cannot see, and what would let them see more, is the companion [limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability), which also has the glossary (minion, hart, shire, scratchpad, PMIC). The published page is <https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual>.
 
 **Start with [00-structure.md](00-structure.md)** for the equation and the conventions. Then:
 
 | § | Page | The one number to remember |
 |---|---|---|
-| 1 | [The card at rest](01-at-rest.md) | on aifoundry2, 35.9 W idle at 80 °C and 0.65 W more per °C; 20–29 W of it leakage (the idle bins do not pin the split closer) |
-| 2 | [A core that is awake](02-awake.md) | 2 mW per minion awake on one hart, 3.4 on two; one stalled on a contended atomic draws 1.2 mW |
-| 3 | [Instructions](03-instructions.md) | integer add 6 pJ on zeros (9 random), float add 23 pJ, 8-lane FMA 27 pJ on zeros and 56 on random data; a tensor multiply-add 0.4 pJ on zeros, 5.8 on random |
-| 3.1 | [Every instruction](03a-every-instruction.md) | all 161 instructions the silicon executes in U-mode, three shuffled passes on two cards: cheapest `fence` and `nop` (4.5–5.4 pJ), dearest the global atomics `amoaddg.w` and `.d` (about 1,390 pJ), pooled over both cards; pass-to-pass standard error 1.8% in the median on aifoundry2, 1.2% on aifoundry3; aifoundry3 at 0.950× aifoundry2 over all 386 configurations, each at its own die temperature |
-| 4 | [Bytes through memory](04-bytes-memory.md) | L1 hit 0.5 pJ/B, own scratchpad 2–8 pJ/B, DRAM 90–140 pJ/B; writes through the L1 to DRAM 240–330 pJ/B |
-| 4.3 | [Finer grain: wires, lines, rows, leakage](04a-fine-grain.md) | one mesh hop costs 1.7–1.8 pJ/B on random data and 0.6–0.75 on zeros, fitted over 1–8 hops; over 1–6 hops, leaving out the 8-hop point only 16 shires reach, 2.1–2.3 pJ/B, which is what [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) measures (use its figures for wires; it also separates flips from ones carried); filling a 64 B line into the L1 is about 100 pJ on zeros and 205 on random data; the DRAM row pattern does not change the energy; the SRAM rail idles at 1.6 W at 67 °C and 2.6 W at 82 °C; where each class's current flows, by rail; the unmetered remainder attributed (18–20% delivery loss on the minion rail, 68–73 pJ per DRAM byte off-rail) and a droop meter for DRAM, in full here; the canonical account is [Limits of observability, §4.2–4.3](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed) |
-| 5 | [Bytes between cores](05-bytes-between-cores.md) | under 1 pJ/B between the two minions of a pair, 2 around a neighbourhood or a shire, 12–18 across the mesh (7.6 to leave the shire plus 2.3 per mesh hop on aifoundry2, 10.2 plus 1.3 on aifoundry3); 9.1 pJ/B on aifoundry2 and 8.1 on aifoundry3 to hand a slab to the next shire, 11–13.5× less than the DRAM round trip |
+| 1 | [The card at rest](01-at-rest.md) | on aifoundry2, 35.9 W idle at 80 °C and 0.65 W more per °C; 20–29 W of it leakage (the idle bins do not pin the split closer); aifoundry3 idles 1.0 W above that law and aifoundry1's card 1 10.1 W above it |
+| 2 | [A core that is awake](02-awake.md) | 1.9 mW per minion awake on one hart, 3.0 on two; one stalled on a contended atomic draws 1.2 mW |
+| 3 | [Instructions](03-instructions.md) | integer add 6 pJ on zeros (10 random), float add 24 pJ, 8-lane FMA 27 pJ on zeros and 56 on random data; a tensor multiply-add 0.3 pJ on zeros, 5.8 on random |
+| 3.1 | [Every instruction](03a-every-instruction.md) | all 161 instructions the silicon executes in U-mode, three shuffled passes on each of three cards: cheapest `fence` and `auipc` (4.5–5.3 pJ on random data), dearest the global atomics `amoaddg.w` and `.d` (about 1,380 pJ), pooled over the cards; pass-to-pass standard error 2.1% in the median on aifoundry2, 1.4% on aifoundry3, 1.5% on aifoundry1's card 1; aifoundry3 at 0.972× and aifoundry1's card 1 at 0.962× aifoundry2 over all 392 configurations, each at its own die temperature |
+| 4 | [Bytes through memory](04-bytes-memory.md) | L1 hit 0.5 pJ/B, own scratchpad 2–9 pJ/B, DRAM 95–140 pJ/B; writes through the L1 to DRAM 250–340 pJ/B |
+| 4.3 | [Finer grain: wires, lines, rows, leakage](04a-fine-grain.md) | one mesh hop costs 1.7–1.9 pJ/B on random data and 0.6–0.7 on zeros, fitted over 1–8 hops; over 1–6 hops, leaving out the 8-hop point only 16 shires reach, 2.2–2.4 pJ/B, which is what [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) measures (use its figures for wires; it also separates flips from ones carried); filling a 64 B line into the L1 is about 100 pJ on zeros and 240 on random data; the DRAM row pattern does not change the energy on any card; the SRAM rail idles at 1.7 W at 67 °C and 2.7 W at 82 °C on aifoundry2, about 1 W more on the other cards; where each class's current flows, by rail; the unmetered remainder attributed (10–19% delivery loss on the minion rail, 73–82 pJ per DRAM byte off-rail) and a droop meter for DRAM, in full here; the canonical account is [Limits of observability, §4.2–4.3](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed) |
+| 5 | [Bytes between cores](05-bytes-between-cores.md) | under 1 pJ/B between the two minions of a pair, 2 around a neighbourhood or a shire, 12–18 across the mesh (about 9 pJ to leave the shire plus 1.75 per mesh hop, the same on every card); 8.6, 8.3 and 9.9 pJ/B on aifoundry2, aifoundry3 and aifoundry1's card 1 to hand a slab to the next shire, 13× less than the DRAM round trip on every card |
 | 6 | [Synchronisation](06-synchronisation.md) | a contended atomic 20 nJ [17–24]; a spread one 1.2 nJ; a chip barrier is 5,000 cycles of leakage |
-| 7 | [Composition](07-composition.md) | a dense matmul at 80 °C on aifoundry2 is 57% static energy (the published page prices any mix of rows at any die temperature); priced from §4 after the fact, the relay falls inside its wide brackets through DRAM and the next shire and at the low edge of its bracket (8% below, within noise) through its own scratchpad |
-| 8 | [Card-to-card variation](08-cards.md) | aifoundry3 reads 0.95× aifoundry2 in the median (10–90%: 0.91–0.99), each at its own die temperature; card or temperature not yet separated |
-| 9 | [Method and limits](09-method.md) | how each number was made, how the bars were made (three passes on two cards; warm die; bursts that moved the clock dropped, and in the reruns bursts that starved the sampler; the catalogue keeps the aifoundry2 DRAM-read bursts that slowed it), and what it cannot tell you |
+| 7 | [Composition](07-composition.md) | a dense matmul at 80 °C on aifoundry2 is 57% static energy (the published page prices any mix of rows at any die temperature, on each card with its own idle law); priced from §4 after the fact, the relay falls inside its wide brackets through DRAM and the next shire and at the low edge of its bracket (5% below, within noise) through its own scratchpad |
+| 8 | [Card-to-card variation](08-cards.md) | aifoundry3 reads 0.97× aifoundry2 in the median (10–90%: 0.92–1.00), which its cooler die accounts for (the energy per operation rises 0.3–0.5% per °C); aifoundry1's card 1 reads 0.95× per instruction but 1.15× per byte, in line with its lower minion and higher SRAM rail voltage |
+| 9 | [Method and limits](09-method.md) | how each number was made, how the bars were made (three passes on each of three cards; warm die; bursts that moved the clock dropped, and in the reruns bursts that starved the sampler; the catalogue keeps the DRAM-read bursts that slowed it), and what it cannot tell you |
 
 Everything is at **600 MHz** (the minion rail at 0.52 V), the point the governor pins a warm card to, unless stated.
 
@@ -28,8 +28,8 @@ Everything is at **600 MHz** (the minion rail at 0.52 V), the point the governor
 ```
 npm ci    # once: mathjax-full 3.2.1, pinned in package.json, for build-report.py's TeX
 python3 workloads/enercat/analyze_enercat.py docs/reports/data/2026-09-23-enercat-aifoundry2 docs/reports/data/2026-09-23-enercat-aifoundry3 --out docs/reports/data/2026-09-23-energy-manual/enercat.json
-python3 workloads/enercat/analyze_catalogue.py docs/reports/data/2026-09-23-catalogue-aifoundry2 docs/reports/data/2026-09-23-catalogue-aifoundry3 docs/reports/data/2026-09-23-catalogue-aifoundry2-rows --out docs/reports/data/2026-09-23-energy-manual/catalogue.json
-python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm docs/reports/data/2026-09-23-reruns-aifoundry3 --out docs/reports/data/2026-09-23-energy-manual/reruns.json
+python3 tools/claims-v3/catfull/reduce.py --data docs/reports/data/2026-09-25-claims-v3/raw --out /tmp/catfull-verdicts.json --catalogue-out docs/reports/data/2026-09-23-energy-manual/catalogue.json --cards aifoundry2,aifoundry3,aifoundry1-c1
+python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm docs/reports/data/2026-09-23-reruns-aifoundry3 --v3-rl docs/reports/data/2026-09-25-claims-v3/raw --out docs/reports/data/2026-09-23-energy-manual/reruns.json
 python3 tools/ettelem/fit_unmetered.py --out docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json --overwrite
 python3 tools/ettelem/build_energy_manual.py --out docs/reports/data/2026-09-23-energy-manual/manual.json
 python3 tools/ettelem/render_energy_manual.py docs/reports/data/2026-09-23-energy-manual/manual.json docs/energy-manual/
@@ -37,9 +37,14 @@ python3 tools/ettelem/render_catalogue.py docs/reports/data/2026-09-23-energy-ma
 python3 scripts/build-report.py energy-manual docs/reports/data/2026-09-23-energy-manual/manual.json docs/reports/2026-09-23-energy-manual.html
 ```
 
-The first four reduce the raw runs (the card-side runners, `run_enercat.sh`, `run_catalogue.py`,
-`run_reruns_warm.sh`, `run_rl_warm_a2.sh` and `run_rings_levels_power.sh`, are in docs/findings/03-experiments.md,
-E26–E29); `fit_unmetered.py` fits the attribution of the unmetered power and the DDR droop meter and writes
+The first four reduce the raw runs. Since 26 September the catalogue is the version-3 check's full catalogue on three
+cards (V3-CATFULL, `tools/claims-v3/catfull/`: its reducer cuts the bursts with `analyze_catalogue.py`'s own code and
+writes `catalogue.json` in that tool's shape), and the relay, rings and levels are its V3-RL passes (`--v3-rl`); the hot
+line keeps the 23 September reruns. The 23 September catalogue is kept as `catalogue-23sep.json` (the version-3
+reducers read it as a registered input; `analyze_catalogue.py` on the three `2026-09-23-catalogue-*` directories
+reproduces it). The card-side runners (`run_enercat.sh`, `run_catalogue.py`, `run_reruns_warm.sh`,
+`run_rl_warm_a2.sh`, `run_rings_levels_power.sh` and `tools/claims-v3/*/block.sh`) are in
+docs/findings/03-experiments.md (E26–E29 and the version-3 check); `fit_unmetered.py` fits the attribution of the unmetered power and the DDR droop meter and writes
 `unmetered_fit.json`. `build_energy_manual.py` then collects every table from its data file (the JSON records which,
 including the hot-line, relay, DVFS and Horace files that their own reports' pipelines write); the next two render
 the pages 01–06, 08, 03a and 04a from the data, so a number there is never typed by hand; the last builds the
@@ -52,3 +57,7 @@ Version 3 (25 September): every claim checked for proof on both cards; the idle 
 with its split into fixed and leakage given as a range; figures that rest on one card, on fewer than three runs,
 or that differ between the cards say so; rankings and differences within the noise removed. The record is
 `docs/reports/data/2026-09-25-claims-v3/`.
+
+26 September: the version-3 check's three-card measurements (aifoundry1's card 1 joins aifoundry2 and aifoundry3)
+replace the catalogue, the rings, the levels, the relay and the tensor rows, and add each card's idle; 52 of the
+published page's claims were re-measured under a pre-registered plan (the page's note lists the outcome).

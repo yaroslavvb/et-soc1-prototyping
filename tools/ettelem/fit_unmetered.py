@@ -11,14 +11,17 @@ card, each catalogue configuration's mean unmetered watts over idle is fitted, w
 
 where the rail terms are each rail's watts over idle (a delivery loss, plus whatever unmetered logic works in step
 with the rail) and the DRAM term counts the bytes per second of the configurations that move DRAM: those with
-'dram' in the name, except dramrow*/stride8K. The rows are configuration means over the three passes (392 on
-aifoundry2, 386 on aifoundry3), not bursts. Standard errors are rms * sqrt(diag((X^T X)^-1)).
+'dram' in the name, except dramrow*/stride8K. The rows are configuration means over the three passes (392 per card), not bursts. Standard
+errors are rms * sqrt(diag((X^T X)^-1)). Every card in catalogue.json is fitted: since 26 September 2026 that is the
+version-3 full catalogue (V3-CATFULL) on aifoundry2, aifoundry3 and aifoundry1-c1.
 
 The second fit is the DDR-rail droop: the Moortec monitors' ddr reading (die_mv.ddr, averaged over the eight memory
 shires) during each burst, below its reading in the idle gap before it, regressed with no intercept on the
 fitted off-rail DRAM watts (the unmetered watts less the fitted rail losses, DRAM configurations only) and on the
-rest of the board's power over idle. It uses the aifoundry2 catalogue telemetry only, which does not cover the six
-dramrow2 configurations run separately, hence n = 386.
+rest of the board's power over idle. It uses the aifoundry2 catalogue telemetry only: the nine V3-CATFULL blocks'
+telemetry.jsonl.gz (docs/reports/data/2026-09-25-claims-v3/raw/aifoundry2/catfull/p*/), read together; on the 23 September
+catalogue (one telemetry file, without the six dramrow2 configurations run separately) n was 386, now it is 392.
+catalogue_telemetry(card) gives any card's files, and droop() takes one path or a list of them.
 
 Writes unmetered_fit.json. The droop's windows are busy from 0.5 s after a burst starts to its end, and idle from
 2.5 s to 0.2 s before it starts.
@@ -34,6 +37,7 @@ droop_minion_mv, rail_minion_w], rounded to 3 decimals.
 """
 import argparse
 import collections
+import glob
 import gzip
 import json
 import os
@@ -43,8 +47,17 @@ import numpy as np
 
 D = "docs/reports/data"
 CAT = f"{D}/2026-09-23-energy-manual/catalogue.json"
-TEL = f"{D}/2026-09-23-catalogue-aifoundry2/telemetry.jsonl.gz"
+CATFULL = f"{D}/2026-09-25-claims-v3/raw"            # V3-CATFULL: <card>/catfull/p<pass><part>/telemetry.jsonl.gz
 COMMITTED = f"{D}/2026-09-23-energy-manual/unmetered_fit.json"
+CARD_ORDER = ["aifoundry2", "aifoundry3", "aifoundry1-c1", "aifoundry1-c0"]   # the pages' card registry order
+
+
+def catalogue_telemetry(card, root=CATFULL):
+    """The catalogue telemetry of one card: every V3-CATFULL block's telemetry.jsonl.gz, in block order."""
+    return sorted(glob.glob(os.path.join(root, card, "catfull", "p[0-9]*", "telemetry.jsonl.gz")))
+
+
+TEL = catalogue_telemetry("aifoundry2")
 MONITORS = ["ddr", "sram", "maxion", "minion", "pshire", "noc", "ioshire"]
 EXAMPLES = ["add/zeros/h2", "fmadd.ps/random/h2", "st_stream/dram/random", "tload/dram/random", "tload/dram/zeros",
             "tload/scp/random", "tstore/dram/random", "wire/hop6/random"]
@@ -100,7 +113,8 @@ def attribute(rows):
 
 
 def droop(bursts, fit, tel_path):
-    T = [json.loads(line) for line in gzip.open(tel_path, "rt")]
+    paths = [tel_path] if isinstance(tel_path, str) else list(tel_path)
+    T = sorted((json.loads(line) for p in paths for line in gzip.open(p, "rt") if line.startswith("{")), key=lambda r: r["t_ms"])
     ts = np.array([r["t_ms"] / 1000 for r in T])
     mv = {k: np.array([r["die_mv"][k] for r in T], float) for k in MONITORS}
     c = fit["coef"]
@@ -137,9 +151,16 @@ def droop(bursts, fit, tel_path):
         "per_config_fields": ["cfg", "droop_ddr_mv", "dram_offrail_w", "over_idle_w", "droop_minion_mv", "rail_minion_w"],
         "per_config": [[k] + [round(float(out[k][f]), 3) for f in ("droop_ddr_mv", "dram_offrail_w", "over_idle_w", "droop_minion_mv", "rail_minion_w")]
                        for k in cfgs],
-        "source": f"{TEL} (die_mv from DM_CMD_GET_ASIC_VOLTAGE: the Moortec voltage monitors averaged over the 8 memory shires "
+        "source": f"{_tel_name(paths)} (die_mv from DM_CMD_GET_ASIC_VOLTAGE: the Moortec voltage monitors averaged over the 8 memory shires "
                   "for ddr, the 34 minion shires for minion/sram/noc); computed by tools/ettelem/fit_unmetered.py",
     }
+
+
+def _tel_name(paths):
+    """One telemetry file by its path; a set of catfull blocks by their common directory and a wildcard."""
+    if len(paths) == 1:
+        return paths[0]
+    return os.path.join(os.path.dirname(os.path.dirname(paths[0])), "p*", os.path.basename(paths[0]))
 
 
 def compare(new, old, path=""):
@@ -159,14 +180,16 @@ def compare(new, old, path=""):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--catalogue", default=CAT)
-    ap.add_argument("--telemetry", default=TEL, help="aifoundry2 catalogue telemetry, for the droop fit")
+    ap.add_argument("--telemetry", nargs="+", default=TEL,
+                    help="aifoundry2 catalogue telemetry, for the droop fit (default: its V3-CATFULL blocks)")
     ap.add_argument("--out", help="write the fit here")
     ap.add_argument("--overwrite", action="store_true", help=f"allow --out to replace {COMMITTED}")
     a = ap.parse_args()
     cat = json.load(open(a.catalogue))
-    fit = {card: attribute(config_means(cat["bursts"][card])) for card in ("aifoundry2", "aifoundry3")}
+    cards = sorted(cat["bursts"], key=lambda c: CARD_ORDER.index(c) if c in CARD_ORDER else len(CARD_ORDER))
+    fit = {card: attribute(config_means(cat["bursts"][card])) for card in cards}
     fit["ddr_droop"] = droop(cat["bursts"]["aifoundry2"], fit["aifoundry2"], a.telemetry)
-    for card in ("aifoundry2", "aifoundry3"):
+    for card in cards:
         f = fit[card]
         print(f"{card}: unmetered = {f['coef']['minion']:.4f} minion + {f['coef']['sram']:.4f} sram + {f['coef']['noc']:.4f} noc "
               f"+ {f['coef']['dram_pj_per_byte']:.3f} pJ/B DRAM; rms {f['rms_w']:.4f} W over {f['n']} configuration means")
@@ -176,7 +199,7 @@ def main():
     if os.path.exists(COMMITTED):
         print(f"against {COMMITTED}:")
         old = json.load(open(COMMITTED))
-        attr = max(compare(fit[c], old[c], c) for c in ("aifoundry2", "aifoundry3"))
+        attr = max(compare(fit[c], old[c], c) for c in cards if c in old)
         drp = compare(dr, old["ddr_droop"], "ddr_droop")
         print(f"attribution: {'reproduced exactly' if attr < 1e-9 else f'differs by up to {100 * attr:.2g}%'}; "
               f"droop block: {'reproduced exactly' if drp < 1e-9 else f'differs by up to {100 * drp:.2g}%'}")
