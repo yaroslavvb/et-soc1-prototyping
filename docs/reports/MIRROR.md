@@ -141,7 +141,12 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Last check: 2026-09-25, 21:46 PDT**, against the files at `bde52e0`, run both ways (read-only):
+**Last check: 2026-09-26, about 15:30 PDT**, against the files at `299fac8` (the 26 September visualization pass is
+live), anonymously over HTTPS only: that session had no spacesheep key, so `spacesheep list` was not read. 21 of 21
+mirrored public pages equal to their files (the host's insertion, 16,757 B, identical on every page), the Horace GIFs
+3 of 3 equal, the viewer addresses of all 22 public rows answering 200, the private memo not served anonymously; exit 0.
+
+**Last check both ways: 2026-09-25, 21:46 PDT**, against the files at `bde52e0` (read-only):
 
 | | Through `spacesheep read` (key configured) | Anonymously over HTTPS |
 |---|---|---|
