@@ -3,10 +3,11 @@
  *     etcfg [/dev/et0_mgmt ...]
  *
  * ETSOC1_IOCTL_GET_DEVICE_CONFIGURATION (et_ioctl.h) returns `struct dev_config`, which carries the board's
- * static TDP in watts. The service processor's governor compares measured SoC power against exactly this
- * number (`check_power_throttle_conditions()` in ServiceProcessorBL2/services/thermal_pwr_mgmt.c reads
- * `g_pmic_power_reg.module_tdp_level`), so a card whose flashed TDP is 0 can only ever throttle down.
- * The ioctl only reads; it changes nothing on the card. */
+ * nameplate TDP in watts. The service processor's governor compares measured SoC power against its own TDP level
+ * instead (`check_power_throttle_conditions()` in ServiceProcessorBL2/services/thermal_pwr_mgmt.c reads
+ * `g_pmic_power_reg.module_tdp_level`), which this ioctl does not show: it reads 65 W on every lab card, including
+ * aifoundry3, whose governor level a boot service sets to 0 so that it can only ever throttle down (E21;
+ * `ettelem config` reads the governor's value). The ioctl only reads; it changes nothing on the card. */
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>

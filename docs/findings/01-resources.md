@@ -153,10 +153,12 @@ addresses instead.
 
 - **Authoritative for:** that these cards exist, their firmware and PMIC revisions, and — for aifoundry3 —
   everything measured in E20–E27, E29, E31 and E32 (E23 without power, E28 not at all).
-- **Not authoritative for:** anything about aifoundry1's silicon. Its cards cannot be opened (E21), so no
-  measurement of any kind was taken from them.
+- **Not authoritative for:** anything about aifoundry1's silicon before 25 September 2026. Its cards could not be
+  opened until then (E21; fixed that day, 14-card-behaviour.md). Since then card 1 (firmware 1.2.0) runs the
+  version-3 campaign; card 0 (firmware 1.4.1) overheats under load and is excluded.
 - **Caveat that matters:** aifoundry3 is **not** a drop-in replacement for aifoundry2. It idles 25 °C cooler,
-  its heatsink sheds heat faster, and its firmware pins it at 600 MHz because its flashed TDP is 0 W (E21).
+  its heatsink sheds heat faster, and its firmware holds it at 600 MHz because a boot service sets its TDP to 0 W at every boot (E21, corrected
+  2026-09-25 in 14-card-behaviour.md).
   Absolute watts from the two cards are not comparable; switching power over idle is.
 - **Used by:** E20–E27, E29, E31, E32. R4's sparsity work also ran on aifoundry3, which is why its absolute watts must not
   be mixed with aifoundry2's.

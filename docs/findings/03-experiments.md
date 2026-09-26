@@ -453,8 +453,12 @@ with device nodes present, but its kernel module's `srcversion` is `1383B256EB24
 `47D26A305A0428B29FB7FC4` on the other two, with the same `libDM.so`; the library refuses the card with
 `Error unable to evaluate compatibility!` and `dev_mngt_service` is inactive. Not fixed: it is a shared
 machine's kernel driver.
-**Caveats:** why aifoundry3's flashed TDP is zero, and whether it was ever different, is not established.
-Whether the 0 W is in flash or set at boot was not traced further than `g_pmic_power_reg.module_tdp_level`.
+**Corrections (2026-09-25):** the `srcversion` difference was not the cause. The module had an empty version
+string (a Makefile typo in its DKMS source), which the device layer's driver check reads; rebuilding the module
+from the fixed source brought both cards back on 25 September. And aifoundry3's zero TDP is not flashed: a boot
+service (`et-board-clock-guard.service`) sets it, with the 600/400 MHz clocks, at every boot. Both are in
+[14-card-behaviour.md](14-card-behaviour.md).
+**Caveats:** none left open from the two questions above.
 **Report:** [The ET-SoC-1's DVFS loop](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) (A11).
 
 ## E22 — Many-to-one contention on one global atomic line (2026-09-22, both cards)

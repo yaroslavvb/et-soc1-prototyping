@@ -196,8 +196,10 @@ version listed it as unverified. On aifoundry3 it is the only branch that ever f
 **And it shows the loop has no floor check.** The governor never asks whether its threshold is sane. A TDP of
 zero is not rejected at init, not logged as a warning, and not visible to the host: the driver's
 `ETSOC1_IOCTL_GET_DEVICE_CONFIGURATION` reports 65 W on all three machines. The card runs at the bottom of its
-VMIN table (the firmware's table of operating points) for as long as its flashed TDP stays at zero, and the only
-symptom is that it is slow.
+VMIN table (the firmware's table of operating points) for as long as its TDP stays at zero, and the only
+symptom is that it is slow. (Correction, 2026-09-25: the zero is not flashed. A boot service on aifoundry3,
+`et-board-clock-guard.service`, sets the static TDP level to 0 and the clocks to 600/400 MHz at every boot; see
+[14-card-behaviour.md](14-card-behaviour.md).)
 
 ## Not established
 
@@ -205,8 +207,8 @@ symptom is that it is slow.
   state. The chip-level netlist is not in the open drop; the RTL statement covers the Erbium configuration, and
   the card corroborates it only in the sense that nothing observable uses it.
 - What the boot frequency is set to in flash.
-- Why aifoundry3's flashed TDP is 0 W, and whether it was ever different. Traced to
-  `g_pmic_power_reg.module_tdp_level`, no further.
+- ~~Why aifoundry3's flashed TDP is 0 W.~~ Answered on 2026-09-25: the lab's boot service sets it at every boot
+  (above; 14-card-behaviour.md).
 - Whether the 8% switching-power difference between the two cards is silicon, package or board regulator.
 - The wake-up probe can only detect a penalty larger than about ten cycles, for arrays idled up to 27 ms (the
   widest the delay op encodes). A gating policy with a longer timer would not show up.

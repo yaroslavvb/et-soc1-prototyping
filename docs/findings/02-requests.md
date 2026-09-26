@@ -67,6 +67,9 @@ others were left open. Cite as **Q1**...**Q43**.
   configuration changes to shared lab hardware that would silently alter other people's results: one replaces a
   kernel module, the other lifts a card's clock ceiling mid-experiment for everyone. Both are documented in
   [14-card-behaviour.md](14-card-behaviour.md) with everything the lab admin needs, and neither was applied.
+  (Later, on 25 September 2026, the owner asked for aifoundry1 to be fixed with administrator access, and its
+  module was rebuilt: [the fix log](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix). aifoundry3's TDP turned out
+  to be the lab's own boot-time setting and was left as it is.)
 - **No GPU was measured.** Every A100 number in this work is from R7, R8, the Ampere whitepaper and the sourced notes
   in `docs/reports/sources/` (`2026-09-18-a100-memory-hierarchy.md`, `2026-09-18-gpu-on-chip-communication.md`). This was never in scope for the
   card time available, and it is the single largest caveat in [13-why-low-power.md](13-why-low-power.md).

@@ -19,4 +19,4 @@ LD_LIBRARY_PATH=/opt/et/lib build/ettelem/ettelem config
 ```
 
 Unlike `ettelem`, `etcfg` does not use `libDM.so` and does not open the management node, so it still works on
-a machine whose library refuses the card (aifoundry1) and while another process is sampling telemetry.
+a machine whose library refuses the card (aifoundry1 until 25 September 2026) and while another process is sampling telemetry.

@@ -9,7 +9,7 @@
 //                                                   stats (and sends the PMIC its stats reset) every R ms and tags
 //                                                   each sample with its window; whether that makes avg a window
 //                                                   mean is untested.
-//   ettelem config                                 static governor inputs: flashed TDP (W), SW temperature
+//   ettelem config                                 static governor inputs: TDP (W), SW temperature
 //                                                   threshold (C), power state, current minion clock and voltage
 //   ettelem loglevel debug|info                     SP log level (DM_CMD_SET_DM_TRACE_CONFIG). At debug the SP logs one
 //                                                   line per shire per pass with its on-die voltages (current/low/high).
@@ -76,7 +76,7 @@ struct Dm {
 
 int bin2mv(int reg, int base, int mul, int div) { return base + reg * mul / div; }
 
-// The static configuration the service processor's governor compares against: the flashed TDP in watts, the
+// The static configuration the service processor's governor compares against: the static TDP in watts, the
 // software temperature threshold, and the current power state. check_power_throttle_conditions() in
 // ServiceProcessorBL2/services/thermal_pwr_mgmt.c throttles down whenever measured SoC power exceeds the TDP
 // and steps up only when it is below, so these three numbers decide whether a card can ever leave its boot

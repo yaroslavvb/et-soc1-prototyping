@@ -9,7 +9,9 @@ self-contained write-up of everything measured on the card: what a workload's da
 temperature, the model that predicts it, why the chip is low power against an A100, and — for every number —
 which experiment produced it and which raw file holds the evidence. The published reports are indexed on the
 public hub, [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports);
-`docs/findings/04-artifacts.md` records every space, its uuid and its visibility.
+[`docs/reports/MIRROR.md`](docs/reports/MIRROR.md) records every published page, its space uuid, its visibility and the
+committed file it mirrors (`python3 scripts/check-mirror.py` compares them); `docs/findings/04-artifacts.md` records
+the code and data.
 
 **New machine? Start with [docs/getting-started.md](docs/getting-started.md).** It covers the current status,
 cloning, connecting to the lab machines over Tailscale, the hello worlds, rerunning the benchmark, and
@@ -19,8 +21,8 @@ section 9 lists the pinned upstream versions.
 - `docs/et-soc1-notes.md` is a condensed guide: architecture, programming model, the memory-coherency trap,
   the FOSDEM "zero to matmul" optimisation ladder, silicon errata, and simulator flags.
 - `docs/report/` is the first shareable write-up, published at https://spacesheep.dev/@yaroslavvb/et-soc1-testdrive.
-  Edit `index.html`, then run `npx --yes spacesheep deploy docs/report --space 16732875-c03e-434d-a643-7a432586c7f7`
-  to update the same space. Without `--space` the CLI creates a new one, and its `.spacesheep.json` pin files are gitignored.
+  Edit `index.html`, then redeploy it to the same space as [MIRROR.md, "Deploying one page"](docs/reports/MIRROR.md#deploying-one-page)
+  shows. Without `--space` the CLI creates a new one, and its `.spacesheep.json` pin files are gitignored.
 - `docs/reports/2026-09-18-et-soc1-matmul-efficiency.html` measures tensor-unit matmul speed and energy efficiency
   on aifoundry2's card against the A100 (`kernels/mmbench`, `launchers/mmbench`, `make bench-power`). Its raw data is in `docs/reports/data/`.
 - `docs/reports/2026-09-18-et-soc1-memory-hierarchy.html` measures each memory level's size, latency, bandwidth and energy per
@@ -99,7 +101,7 @@ section 9 lists the pinned upstream versions.
   report body is rendered to standalone SVG at build time by `scripts/tex2svg.js` (mathjax-full, pinned to 3.2.1 in
   `package.json`: run `npm ci` once at the repo root): the publishing host blocks external scripts, so a runtime MathJax from a CDN leaves every
   equation as raw TeX. After any `spacesheep deploy`, re-check that the space is still public: folder deploys have
-  changed visibility in both directions (`docs/findings/04-artifacts.md`, "Publishing notes").
+  changed visibility in both directions (`docs/reports/MIRROR.md`).
 - `docs/reports/2026-09-22-dvfs-leakage.html` checks six claims about DVFS loops and leakage suppression, from a
   conversation with David Kanter (MLCommons) on 20 September 2026 (private notes), against this chip: the governor
   reads a measured PMIC wattage rather than estimating power from activity counters, and from a cool die it hunts
@@ -108,8 +110,9 @@ section 9 lists the pinned upstream versions.
   array power gating (`gen_ops.py wakeup`); and leakage is 36% of a busy card against his 5–30%. The governor was
   read at et-platform `353f20e`; the cards' own trace strings match an older firmware build. It now also covers the three lab machines: aifoundry3's service processor reports a
   static TDP of **0 W** (the driver reports 65 W on every machine), which makes the governor's step-up test
-  unreachable and holds that card at 600 MHz for as long as its flashed TDP stays at zero, and aifoundry1's two cards cannot be opened because its
-  kernel module's `srcversion` does not match its `libDM.so`. Public space (the user's choice)
+  unreachable and holds that card at 600 MHz for as long as its TDP stays at zero (a boot service sets it at every boot; corrected
+  25 Sep 2026), and aifoundry1's two cards could not be opened until 25 Sep 2026 (an empty module version string, not the
+  `srcversion` difference the page names; 14-card-behaviour.md). Public space (the user's choice)
   https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage, uuid `171dcd4a-5b6d-49d3-aca0-db4980fabfa5`.
   Read a card's governor inputs with `tools/etcfg` (driver ioctl) and `build/ettelem/ettelem config`
   (service processor); both are read-only.

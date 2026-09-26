@@ -46,10 +46,11 @@ Read [Terms](#terms) first.
    random-normal runs alone predicts the other seven patterns to 0.27 W rms (0.36 in the median over the eight
    patterns, 0.93 at worst, calibrated on zeros). The leakage law extrapolated 7–14 °C below its fitted range lands
    within 0.73 W (the mean of four temperature bins). → [11-thermal-model.md](11-thermal-model.md), "Does it transfer to another card?"
-7. **The gotcha if you use these machines.** aifoundry3's firmware reports a TDP of **0 W**, which makes the
-   governor's step-up test unreachable and holds the card at 600 MHz for as long as it stays at zero. The driver
-   reports the nameplate 65 W on every machine, so nothing on the host notices. aifoundry1's two cards cannot be
-   opened at all. → [14-card-behaviour.md](14-card-behaviour.md)
+7. **The gotcha if you use these machines.** aifoundry3's firmware reports a TDP of **0 W** (a boot service sets
+   it at every boot), which makes the governor's step-up test unreachable and holds the card at 600 MHz for as long
+   as it stays at zero. The driver reports the nameplate 65 W on every machine, so nothing on the host notices.
+   aifoundry1's two cards work since 25 September 2026, on two more firmware releases, and its card 0 overheats
+   under load. → [14-card-behaviour.md](14-card-behaviour.md)
 8. **The sharpest edge on the chip.** One contended global atomic is shared out fairly, to within half a percent,
    and takes the entire memory path of the shire that hosts it to **zero** — 384 operations, then nothing, for as
    long as the hammering lasts. It takes 24 remote requesters, under one shire's worth. The vendor's errata
@@ -183,7 +184,8 @@ Stated in full in [05-claims.md](05-claims.md), last section. The big ones:
 - **Which firmware the cards run.** Their trace strings match a service-processor build older than the
   et-platform source read here (R3).
 - **The thermal resistance is this card in this desktop chassis**, not a property of the chip.
-- **aifoundry1 contributed no measurements.** aifoundry3 repeated the strict protocol (E20), the hot-line sweeps
+- **aifoundry1 contributed no measurements before 25 September 2026** (its cards could not be opened; card 1
+  runs the version-3 campaign since). aifoundry3 repeated the strict protocol (E20), the hot-line sweeps
   (E22–E23), the scratchpad probe and relay sweep (E24–E25), the catalogue (E26–E27), the reruns (E29) and the wire
   runs (E31–E32), but its thermal network was never characterised, so do not apply aifoundry2's 1.47 °C/W to it.
 - **The model's slow thermal stages are not identified.** They move a lot between fits; do not quote them as

@@ -195,8 +195,8 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
 | aifoundry3's governor log, one 8 KB window | **26 throttle-down events, 0 throttle-up**, each printing `tdp level: 0` | M | E21 | `DATAC/sptrace-aifoundry3.bin`, readable with `strings` |
 | Power state the firmware reports | `max_power` on aifoundry3 at 23 W, `managed_power` on aifoundry2 | M | E21 | `DATAC/config.json`; `get_power_state()` returns `MAX_POWER` iff power > TDP |
 | Minion clock ever seen above 600 MHz | aifoundry2 yes (700, 800); **aifoundry3 never seen** (10 Hz telemetry) | M | E10, E20, E21 | `DATA/cold1/telemetry.jsonl.gz`; `DATA3/telemetry.jsonl.gz`, `mhz.minion` constant at 600 |
-| aifoundry1's kernel module `srcversion` | `1383B256EB24A0A53F04CC7` against `47D26A305A0428B29FB7FC4` | M | E21 | `/sys/module/et_soc1/srcversion` on each machine |
-| aifoundry1's cards | 2, both on the bus, **neither usable**: `Error unable to evaluate compatibility!` | M | E21 | reproduce with `lspci` and any `libDM.so` client |
+| aifoundry1's kernel module `srcversion` | `1383B256EB24A0A53F04CC7` against `47D26A305A0428B29FB7FC4` (**not the cause**, corrected 25 Sep: the module's version string was empty; 14-card-behaviour.md) | M | E21 | `/sys/module/et_soc1/srcversion` on each machine |
+| aifoundry1's cards | 2, both on the bus, **neither usable** until 25 Sep: `Error unable to evaluate compatibility!` (both work since the module rebuild of 25 Sep) | M | E21 | reproduce with `lspci` and any `libDM.so` client |
 | aifoundry3 launch temperature, strict session | **55.77 ± 0.18 °C** | M | E20 | `DATA3/horace3.json`, `thermal.model_T_at_launch` |
 | aifoundry3 idle board power under those runs | 25.1 W | M | E20 | `DATA3/horace3.json`, `patterns.*.p_before` |
 | Switching power, zeros / random normal, aifoundry3 | **1.89 W / 24.86 W** over idle (aifoundry2: 1.96 / 27.11) | M | E20 | `DATA3/cards.json`, `rows[*]` |
@@ -434,10 +434,11 @@ Two corrections to earlier reports came out of this, both verified in the raw da
 - **Whether the taped-out ET-SoC-1 ever drives its sleep transistors.** The chip-level netlist is not in the
   open drop; the tie-off is a fact about the Erbium configuration, and the card only shows that nothing
   observable uses them.
-- **Why aifoundry3's flashed TDP is 0 W**, and whether it was ever something else. The value was traced to
-  `g_pmic_power_reg.module_tdp_level` and no further.
+- ~~**Why aifoundry3's flashed TDP is 0 W.**~~ Answered on 2026-09-25: it is not flashed; a boot service on
+  aifoundry3 sets it at every boot (14-card-behaviour.md).
 - **Whether the 8% switching-power gap between the two cards is silicon, package or board regulator.**
-  Separating those needs a third working card, which aifoundry1 is not.
+  Separating those needs a third working card: aifoundry1's card 1 works since 25 September, and the version-3
+  campaign measures it.
 - **Per-flip energies outside the tensor unit and the mesh links** (E11–E17, E31–E32), and the split of the
   unsensed 15 W of idle. E30 attributes the unmetered part of what a workload adds above idle (delivery losses plus
   a DRAM term, fitted over configuration means) and meters DRAM by droop; the idle 12–16 W (12–13 W on aifoundry3 at

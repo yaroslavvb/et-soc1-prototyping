@@ -103,16 +103,12 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
   [et-soc1-energy-manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual)) is generated: its markdown and
   page are rebuilt from `docs/reports/data/2026-09-23-energy-manual/manual.json` (04-artifacts.md, A16). Edit the
   builders, never the markdown.
-- **Known stale spots (2026-09-25).** 14-card-behaviour.md, lab-access.md and getting-started.md are current. These
-  still say that aifoundry1 cannot be used, that the cause was a `srcversion` mismatch, or that aifoundry3's zero TDP
-  is flashed, until their next revision: the findings README (item 7 and "What is not established"),
-  05-claims.md's aifoundry1 and aifoundry3 rows, 03-experiments.md E21, 16-dvfs-and-leakage.md, 01-resources.md,
-  02-requests.md's scope decisions, README.md's DVFS paragraph, the DVFS page, the energy manual's
-  `00-structure.md` and `08-cards.md` (generated: fix `tools/ettelem/render_energy_manual.py`), the comments in
-  `tools/etcfg/` and `tools/ettelem/ettelem.cpp`, and `docs/reports/data/2026-09-25-claims-v3/firmware.md` (a dated
-  record). `tools/claims-v3/lib.sh` still says aifoundry3 has no system numpy (it has, since 25 September). README.md
-  also still says `04-artifacts.md` is the page record (it is now MIRROR.md) and deploys the test drive with
-  `npx … deploy docs/report` (deploy as in section 8 instead). Trust 14-card-behaviour.md and this file.
+- **Known stale spots (2026-09-25).** The findings files, README.md and the tool comments were corrected on
+  25 September. These still say that aifoundry1 cannot be used, that the cause was a `srcversion` mismatch, or that
+  aifoundry3's zero TDP is flashed, until their next revision: the DVFS page, the energy manual's `00-structure.md`
+  and `08-cards.md` (generated: fix `tools/ettelem/render_energy_manual.py`), and
+  `docs/reports/data/2026-09-25-claims-v3/firmware.md` (a dated record). `tools/claims-v3/lib.sh` still says
+  aifoundry3 has no system numpy (it has, since 25 September). Trust 14-card-behaviour.md and this file.
 
 ## 4. The machines
 
