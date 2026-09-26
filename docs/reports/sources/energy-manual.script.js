@@ -19,7 +19,7 @@ const cb=(k,sc)=>{const c=CB[k]; if(!c)return null; sc=sc||1; const pc={}; for(c
 const pick=(fn,v)=>fn===fs?(Math.abs(v)>=10?f1:f2):fn;   /* fs: one precision for a whole bar, set by its mean */
 const bt=(c,fn)=>{if(!c)return '—'; const g=pick(fn,c.mean); return `<b>${g(c.mean)}</b> <span class="small">[${g(c.lo)}–${g(c.hi)}]</span>`;};
 const more=(v,fn)=>{let s=fn(v); if(v>0&&+s===0){const d=(s.split('.')[1]||'').length; for(let k=d+1;k<=d+2&&+s===0;k++)s=v.toFixed(k);} return s;};
-const pcs=(c,fn)=>c?Object.keys(c.per_card).sort().map(h=>{const g=pick(fn,c.per_card[h].mean); return `a${h.slice(-1)} ${g(c.per_card[h].mean)} ± ${more(c.per_card[h].se||0,g)}`;}).join('<br>'):'—';
+const pcs=(c,fn)=>c?CK.cardsIn(c.per_card).map(h=>{const g=pick(fn,c.per_card[h].mean); return `${cshort(h)} ${g(c.per_card[h].mean)} ± ${more(c.per_card[h].se||0,g)}`;}).join('<br>'):'—';
 const sup=n=>String(n).split('').map(ch=>'⁰¹²³⁴⁵⁶⁷⁸⁹'['0123456789'.indexOf(ch)]||ch).join('');
 const sci=v=>{const e=Math.floor(Math.log10(v)); return (v/10**e).toFixed(2)+' × 10'+sup(e);};
 const nf=v=>Math.round(v).toLocaleString('en-US');
@@ -35,8 +35,46 @@ function ebar(svg,x,y1,y2,col){const g2=CK.el('g',{},svg), st={stroke:col||'var(
 const $=id=>document.getElementById(id);
 const HUB='https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability';
 const lawAt=T=>R.P_fix_w+R.A_leak_80_w*Math.exp((T-80)/R.T_L_c);
-const CARDS=Object.keys(D.catalogue.cards), SA=D.catalogue.cards[CARDS[0]].summary, SB=CARDS[1]?D.catalogue.cards[CARDS[1]].summary:{};
+/* The cards. CARDS: the catalogue's cards in the registry's order (chartkit CK.cards fixes each card's colour, mark and
+   label); CARDLIST: every card any catalogue entry has a value for, which the card selectors offer. SA is the first
+   card's summary (aifoundry2's), SB the second's. Nothing below names a card for a chart: a third card in the data is
+   drawn and priced with no code change. */
+const CARDS=CK.cardsIn(D.catalogue.cards), SA=D.catalogue.cards[CARDS[0]].summary, SB=CARDS[1]?D.catalogue.cards[CARDS[1]].summary:{};
 const S2=SA;
+const CARDLIST=CK.cardsIn([...new Set(CARDS.concat(...Object.values(CB).map(c=>Object.keys(c.per_card||{}))))]);
+const ALLC=CARDLIST.length===2?'both cards':`all ${WORD[CARDLIST.length]||CARDLIST.length} cards`;
+const cshort=h=>CK.card(h).short, cname=h=>h==null||h==='pooled'?ALLC:CK.card(h).label;
+const andList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+const SUMM=h=>(D.catalogue.cards[h]||{}).summary||{};
+/* the card a single-card source was measured on, read from its data path (…-aifoundry2/…) */
+const srcCard=p=>{const m=String((Array.isArray(p)?p[0]:p)||'').match(/aifoundry\d(?:-c\d)?/); return m?CK.card(m[0]).id:null;};
+const LAWCARD=srcCard(R.source&&R.source.law)||CARDS[0];     /* the card the idle law of section 1 was fitted on */
+/* one catalogue entry on card h, scaled like cb(): {mean, lo, hi, se, n}, lo–hi the range over that card's passes;
+   h null or 'pooled' is cb() itself; null when the card has no value (never a zero) */
+const cbc=(k,h,sc)=>{if(h==null||h==='pooled')return cb(k,sc); const c=CB[k], p=c&&CK.pick(c,h); if(!p)return null; sc=sc||1;
+  const s=SUMM(h)[k], q=s&&(c.unit==='pJ/B'?s.pj_per_byte:s.pj_per_op);
+  return {mean:p.mean*sc,lo:(q&&q.min!=null?q.min:p.mean)*sc,hi:(q&&q.max!=null?q.max:p.mean)*sc,se:p.se!=null?p.se*sc:null,n:p.n,card:h};};
+/* a pooled value {mean, lo, hi, per_card} (reruns, tensor bars) on card h: that card's mean ± its pass-to-pass standard
+   error (sebar), or the pooled bar itself when h is the only card behind it, or its mean alone (nobar) when neither is
+   kept; null when h has no value */
+const pcv=(v,h)=>{if(!v)return null; if(h==null||h==='pooled')return v; const p=CK.pick(v,h); if(!p)return null;
+  const only=Object.keys(v.per_card||{}); if(only.length===1&&only[0]===h&&v.lo!=null)return Object.assign({},v,{card:h});
+  return {mean:p.mean,lo:p.se!=null?p.mean-p.se:p.mean,hi:p.se!=null?p.mean+p.se:p.mean,se:p.se,n:p.n,card:h,sebar:p.se!=null,nobar:p.se==null};};
+/* how a value's bar reads in a tooltip: [lo–hi], ± se, or the number of runs when no spread is kept per card */
+const barOf=(c,fn)=>c.nobar?`(${c.n!=null?`${WORD[c.n]||c.n} run${c.n>1?'s':''}, `:''}no per-card spread kept)`:c.sebar?`± ${more(c.se,pick(fn,c.mean))}`:`[${pick(fn,c.mean)(c.lo)}–${pick(fn,c.mean)(c.hi)}]`;
+/* what card h reached running one catalogue entry alone, per second (fld ops_per_s or bytes_per_s); pooled: the mean
+   over the cards that ran it; null when h did not */
+const rateC=(k,fld,h)=>{const v=(h==null||h==='pooled'?CARDLIST:[h]).map(c=>SUMM(c)[k]).filter(s=>s&&s[fld]&&s[fld].mean>0).map(s=>s[fld].mean);
+  return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;};
+/* a mark in a card's registry colour and shape (dot, ring, diamond), with a larger hit target and a tooltip */
+function cmark(f,parent,h,cx,cy,r,hitR,html){const gg=CK.el('g',{},parent); if(hitR)CK.el('circle',{cx,cy,r:hitR,class:'ck-hit'},gg);
+ CK.cardMark(gg,h,cx,cy,r); CK.tip(f,gg,html); return gg;}
+/* legend items for cards, in the card's registry mark, or hollow in another colour (CK.legend's swatches are filled
+   diamonds: legendMarks redraws a hollow one, for aifoundry1-c1 in the wire chart) */
+const cardItem=(h,label,hollowCol)=>{const c=CK.card(h); return {key:c.id,label,color:hollowCol||c.color,mark:hollowCol?'ring':c.mark,shape:c.mark,hollow:!!hollowCol};};
+function legendMarks(host,items){const lis=$(host).querySelectorAll('.ck-li');
+ items.forEach((it,k)=>{if(it.shape!=='diamond'||!it.hollow||!lis[k])return; const s=lis[k].querySelector('svg'); if(!s)return; while(s.firstChild)s.removeChild(s.firstChild);
+  const p=CK.el('polygon',{points:'9,0 14,5 9,10 4,5'},s); p.style.fill='none'; p.style.stroke=it.color; p.style.strokeWidth='1.5';});}
 const at={}; D.sync.atomics.runs.forEach(r=>at[r.label]=r);
 const HOT=RR.hotline_over_idle_w&&RR.hotline_over_idle_w.contended;       /* 1,024 minions stalled on one line, W over idle */
 const TB=D.tensor.bars||{};
@@ -56,8 +94,12 @@ const CLASSES=[['Scalar integer, one cycle',['add','sub','and','or','xor','sll',
   ['Branches and jumps',['beq_taken','bne_nottaken','blt_data','bge_data','bltu_data','bgeu_data','jal']],['Atomics on a private line',['amoaddl.w','amoswapl.w','amoorl.w','amomaxl.w','amoaddl.d','amoaddg.w','amoaddg.d']],
   ['System',['csrr_fccnb','fence']],['Compressed against full-width, in-place forms',['c.add','add_norvc','c.addi','addi_norvc','c.mv','c.li']]];
 const LANES=new Set([...CLASSES[4][1],...CLASSES[5][1],...CLASSES[6][1],...CLASSES[7][1]]);
-/* the wire read interpolated to a fractional hop count (the relay's next shire is 3.5 hops away on average) */
-const wireAt=(hh,o)=>{const lo=Math.floor(hh),hi=Math.ceil(hh),a=cb(`wire/hop${lo}/${o}`),b=cb(`wire/hop${hi}/${o}`); if(!a||!b)return null;
+/* the wire read interpolated to a fractional hop count (the relay's next shire is 3.5 hops away on average); on card h
+   (not pooled) its mean and the range over its passes */
+const wireAt=(hh,o,h)=>{const lo=Math.floor(hh),hi=Math.ceil(hh),t0=hi>lo?(hh-lo)/(hi-lo):0;
+ if(h!=null&&h!=='pooled'){const a=cbc(`wire/hop${lo}/${o}`,h),b=cbc(`wire/hop${hi}/${o}`,h); if(!a||!b)return null; const mx=k=>a[k]+(b[k]-a[k])*t0;
+  return {mean:mx('mean'),lo:mx('lo'),hi:mx('hi'),n:Math.min(a.n,b.n),card:h};}
+ const a=cb(`wire/hop${lo}/${o}`),b=cb(`wire/hop${hi}/${o}`); if(!a||!b)return null;
  const t=hi>lo?(hh-lo)/(hi-lo):0, mix=k=>a[k]+(b[k]-a[k])*t, pc={};
  for(const h in a.per_card)if(b.per_card[h])pc[h]={mean:a.per_card[h].mean+(b.per_card[h].mean-a.per_card[h].mean)*t,se:Math.max(a.per_card[h].se,b.per_card[h].se)};
  return {mean:mix('mean'),lo:mix('lo'),hi:mix('hi'),n:Math.min(a.n,b.n),per_card:pc};};
@@ -110,19 +152,23 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  const uns=IU&&IU.aifoundry2&&IU.aifoundry3?`draw about ${f0(IU.aifoundry2.mean)} W at idle on aifoundry2 (${rg0(IU.aifoundry2.die_c)} °C) and ${f0(IU.aifoundry3.mean)} W on aifoundry3 (${rg0(IU.aifoundry3.die_c)} °C), and`:`draw about ${f0(rl.unsensed)} W at idle and`;
  $('resttext').innerHTML=`Everything below is <em>above</em> this. On aifoundry2 the idle card draws ${f1(P80)} W at 80 °C and ${f2(R.lambda_80_w_per_c)} W more for each degree there, and that slope is what the idle measurements pin down${PF?` (${f2(PF.lambda_80_w_per_c[0])}–${f2(PF.lambda_80_w_per_c[1])} W per °C for every e-folding that fits)`:''}. ${split}The law drawn below is the best fit, ${f1(R.P_fix_w)} W fixed and ${f1(R.A_leak_80_w)} W of leakage at 80 °C e-folding every ${f0(R.T_L_c)} °C: a fit, not a block-by-block account. The blocks with no rail sensor (PCIe, the DDR PHY, the IO shire, the regulators) ${uns} barely move with temperature: 0.03 W per °C over 71–83 °C in the catalogue's idle gaps. The three metered rails carry the leakage, 0.55 W per °C between them at about 75 °C. What the unsensed blocks spend when a kernel uses them (DRAM traffic through the DDR PHY, the regulators' delivery loss) is counted in the per-event costs below, and <a href="${HUB}#the-unmetered-remainder-attributed">Limits of observability, §4.2</a> attributes it. The leakage answers to temperature, which the kernel sets.`;
  const LK=D.cards&&D.cards.leakage, ic3=(LK&&LK.idle_curve)||[];
- CK.legend('idle-legend',[{key:'law',label:'the law, fitted on aifoundry2',mark:'line',color:'var(--c1)'},{key:'fix',label:'its constant, at the best fit',mark:'dash',color:'var(--ref)'},
-   {key:'a2',label:'aifoundry2 idle bins',mark:'dot',color:'var(--c2)'}].concat(ic3.length?[{key:'a3',label:'aifoundry3 idle bins',mark:'ring',color:'var(--c3)'}]:[]));
+ /* the idle bins, one series per card in its registry colour and mark: the law's own card (R.measured_idle) and the other
+    card of the cards report (D.cards.leakage.idle_curve); the law itself is drawn in ink */
+ const OTH=CK.cardsIn((D.cards&&D.cards.idle)||{}).filter(h=>h!==LAWCARD)[0]||CARDS.find(h=>h!==LAWCARD);
+ const IB=[{card:LAWCARD,pts:R.measured_idle.map(p=>({T:p.T,W:p.P,n:p.n}))}].concat(ic3.length&&OTH?[{card:OTH,pts:ic3}]:[]);
+ const idleItems=[{key:'law',label:`the law, fitted on ${cname(LAWCARD)}`,mark:'line',color:'var(--ink)'},{key:'fix',label:'its constant, at the best fit',mark:'dash',color:'var(--ref)'}]
+   .concat(IB.map(s=>cardItem(s.card,`${cname(s.card)} idle bins`)));
+ CK.legend('idle-legend',idleItems); legendMarks('idle-legend',idleItems);
  CK.frame('idle',{height:W=>W<600?260:320,label:'Idle board power against die temperature: the law and the measured idle bins',draw:f=>{
   const L=40,Rr=12,T=24,B=40, x=CK.lin(40,95,L,f.W-Rr), y=CK.lin(10,50,f.H-B,T);
   CK.axes(f,{x,y,L,R:Rr,T,B,xt:[40,50,60,70,80,90],yt:[10,20,30,40,50],xl:'die temperature, °C',yl:'idle board power, W'});
   const law=[]; for(let t=40;t<=95;t++) law.push([t,lawAt(t)]);
-  CK.el('path',{d:CK.path(law,x,y),class:'ln s1'},f.svg);
+  CK.el('path',{d:CK.path(law,x,y),class:'ln',stroke:'var(--ink)'},f.svg);
   CK.el('line',{x1:L,x2:f.W-Rr,y1:y(R.P_fix_w),y2:y(R.P_fix_w),stroke:'var(--ref)','stroke-width':1.5,'stroke-dasharray':'5 4'},f.svg);
   CK.txt(f.svg,f.W-Rr-4,y(R.P_fix_w)-6,'best-fit constant '+f1(R.P_fix_w)+' W','lab','end');
-  const n2=R.measured_idle.map(p=>mark(f,f.svg,'circle',{cx:x(p.T),cy:y(p.P),r:3.5,fill:'var(--c2)'},8,`aifoundry2 idle at ${p.T} °C: <b>${f2(p.P)} W</b> (${nf(p.n)} samples)<br>the law: ${f2(lawAt(p.T))} W`));
-  const n3=ic3.map(p=>mark(f,f.svg,'circle',{cx:x(p.T),cy:y(p.W),r:4.5,fill:'none',stroke:'var(--c3)','stroke-width':2},8,`aifoundry3 idle at ${p.T} °C: <b>${f2(p.W)} W</b> (${nf(p.n)} samples)<br>the aifoundry2 law: ${f2(lawAt(p.T))} W`));
-  if(ic3.length){const p0=ic3.reduce((a,b)=>a.T<b.T?a:b); CK.txt(f.svg,x(p0.T)-9,y(p0.W)+4,'aifoundry3','lab','end');}
-  CK.keynav(f,n2); CK.keynav(f,n3);
+  IB.forEach((s,j)=>{const nm=cname(s.card);
+   CK.keynav(f,s.pts.map(p=>cmark(f,f.svg,s.card,x(p.T),y(p.W),j?4.5:3.5,8,`${nm} idle at ${p.T} °C: <b>${f2(p.W)} W</b> (${nf(p.n)} samples)<br>the ${s.card===LAWCARD?'':cname(LAWCARD)+' '}law: ${f2(lawAt(p.T))} W`)));
+   if(j&&s.pts.length){const p0=s.pts.reduce((a,b)=>a.T<b.T?a:b); CK.txt(f.svg,x(p0.T)-9,y(p0.W)+4,nm,'lab','end');}});
  }});
  const tmin=Math.min(...R.measured_idle.map(p=>p.T)), tmax=Math.max(...R.measured_idle.map(p=>p.T));
  const sg=v=>(v<0?'−':'+')+f2(Math.abs(v)), LR=D.catalogue&&D.catalogue.idle_law_residual;
@@ -141,16 +187,19 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
 (function(){
  const C=D.catalogue, sl=C.cards[CARDS[0]].sram_leakage; if(!(sl&&sl.fit&&sl.curve.length>2))return;
  const sl2=CARDS[1]&&C.cards[CARDS[1]].sram_leakage, fit=sl.fit, lawS=t=>fit.P_fix_w+fit.A_leak_80_w*Math.exp((t-80)/36);
- const xs=sl.curve.map(c=>c.T), ys=sl.curve.map(c=>c.sram_w), inr=sl2&&sl2.curve?sl2.curve.filter(c=>c.T>=Math.min(...xs)-1&&c.T<=Math.max(...xs)+1):[];
- CK.legend('sram-legend',[{key:'fit',label:'fit, 36 °C e-folding imposed',mark:'line',color:'var(--c1)'},{key:'a2',label:CARDS[0]+' idle bins',mark:'dot',color:'var(--c2)'}].concat(inr.length?[{key:'a3',label:CARDS[1]+' idle bins',mark:'ring',color:'var(--c3)'}]:[]));
+ const xs=sl.curve.map(c=>c.T), ys=sl.curve.map(c=>c.sram_w), inRange=cv=>cv.filter(c=>c.T>=Math.min(...xs)-1&&c.T<=Math.max(...xs)+1);
+ /* every other card's idle bins inside the fitted range, in its registry colour and mark (the fit in ink) */
+ const OS=CARDS.slice(1).map(h=>{const s=C.cards[h].sram_leakage; return {h,inr:s&&s.curve?inRange(s.curve):[]};}).filter(o=>o.inr.length);
+ const inr=(OS.find(o=>o.h===CARDS[1])||{inr:[]}).inr, ys2=ys.concat(...OS.map(o=>o.inr.map(c=>c.sram_w)));
+ const sramItems=[{key:'fit',label:'fit, 36 °C e-folding imposed',mark:'line',color:'var(--ink)'},cardItem(CARDS[0],CARDS[0]+' idle bins')].concat(OS.map(o=>cardItem(o.h,cname(o.h)+' idle bins')));
+ CK.legend('sram-legend',sramItems); legendMarks('sram-legend',sramItems);
  CK.frame('sram',{height:W=>W<600?240:280,label:'The SRAM rail at idle against die temperature',draw:f=>{
-  const L=44,Rr=12,T=24,B=40, x=CK.lin(Math.min(...xs)-1,Math.max(...xs)+1,L,f.W-Rr), y=CK.lin(Math.min(...ys)*0.9,Math.max(...ys)*1.05,f.H-B,T);
+  const L=44,Rr=12,T=24,B=40, x=CK.lin(Math.min(...xs)-1,Math.max(...xs)+1,L,f.W-Rr), y=CK.lin(Math.min(...ys2)*0.9,Math.max(...ys2)*1.05,f.H-B,T);
   CK.axes(f,{x,y,L,R:Rr,T,B,xl:'die temperature, °C',yl:'SRAM rail at idle, W',yfmt:v=>f1(v)});
   const law=[]; for(let t=Math.min(...xs)-1;t<=Math.max(...xs)+1;t+=0.5) law.push([t,lawS(t)]);
-  CK.el('path',{d:CK.path(law,x,y),class:'ln s1'},f.svg);
-  const n2=sl.curve.map(c=>mark(f,f.svg,'circle',{cx:x(c.T),cy:y(c.sram_w),r:3.5,fill:'var(--c2)'},8,`${CARDS[0]}, ${c.T} °C: <b>${f3(c.sram_w)} W</b> on the SRAM rail (${nf(c.n)} idle samples)`));
-  const n3=inr.map(c=>mark(f,f.svg,'circle',{cx:x(c.T),cy:y(c.sram_w),r:4.5,fill:'none',stroke:'var(--c3)','stroke-width':2},8,`${CARDS[1]}, ${c.T} °C: <b>${f3(c.sram_w)} W</b> on the SRAM rail (${nf(c.n)} idle samples)`));
-  CK.keynav(f,n2); CK.keynav(f,n3);
+  CK.el('path',{d:CK.path(law,x,y),class:'ln',stroke:'var(--ink)'},f.svg);
+  CK.keynav(f,sl.curve.map(c=>cmark(f,f.svg,CARDS[0],x(c.T),y(c.sram_w),3.5,8,`${CARDS[0]}, ${c.T} °C: <b>${f3(c.sram_w)} W</b> on the SRAM rail (${nf(c.n)} idle samples)`)));
+  OS.forEach(o=>CK.keynav(f,o.inr.map(c=>cmark(f,f.svg,o.h,x(c.T),y(c.sram_w),4.5,8,`${cname(o.h)}, ${c.T} °C: <b>${f3(c.sram_w)} W</b> on the SRAM rail (${nf(c.n)} idle samples)`))));
  }});
  let sl2note='';
  /* the other card at its most-sampled idle bin: the aifoundry2 fit does not describe it, and card and shape are confounded */
@@ -198,7 +247,7 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   list.forEach((l,i)=>{OPS.forEach(([o,lab],j)=>{const c=q(l[0],o); if(!c)return; const w=bw*0.26, xx=xg(i)+bw*(0.08+0.28*j);
     const gg=CK.el('g',{'data-series':o},f.svg);
     CK.el('rect',{x:xx,y:y(c.mean),width:w,height:f.H-B-y(c.mean),fill:cols[o]},gg); ebar(gg,xx+w/2,y(c.hi),y(c.lo));
-    CK.tip(f,gg,`<b>${l[1]}</b>, ${lab}<br>${f1(c.mean)} pJ per instruction [${f1(c.lo)}–${f1(c.hi)}], n = ${c.n}${l[2]>1?' ('+f1(c.mean/l[2])+' per lane)':''}<br>${pcs(c,f1).replace('<br>',' · ')}`);
+    CK.tip(f,gg,`<b>${l[1]}</b>, ${lab}<br>${f1(c.mean)} pJ per instruction [${f1(c.lo)}–${f1(c.hi)}], n = ${c.n}${l[2]>1?' ('+f1(c.mean/l[2])+' per lane)':''}<br>${pcs(c,f1).replace(/<br>/g,' · ')}`);
     nav[o].push(gg);});
    const lx=xg(i)+bw*0.5, ly=f.H-B+12, t=CK.txt(f.svg,lx,ly,l[1],'tick','end'); t.setAttribute('transform',`rotate(${narrow?-60:-40} ${lx} ${ly})`);});
   OPS.forEach(([o])=>CK.keynav(f,nav[o]));
@@ -227,8 +276,8 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   (issueShare.length===2?` (${issueShare[0]} issue on aifoundry2, ${issueShare[1]} on aifoundry3, with the fence or the nop as the issue cost)`:'')+
   `; that is arithmetic on rows whose operands differ (uniform in [0.5, 2) here, normal for the tensor unit), not a measured decomposition. `+
   `<b>The transcendentals rank with the 64-bit divides as the dearest arithmetic</b>: <code>flog.ps</code> is ${f0(lg.mean)} pJ and <code>fexp.ps</code> ${f0(ex.mean)} for eight lanes, at a quarter of the rate, against ${f0(Math.min(...dvs))}–${f0(Math.max(...dvs))} pJ for the 64-bit divides and remainders; <code>frcp.ps</code> (${f0(rc.mean)}) is cheaper. Only loads and stores that bypass the L1 (${f0(Math.min(...byp))}–${f0(Math.max(...byp))} pJ) and atomics (${nf(Math.min(...amo))}–${nf(Math.max(...amo))} pJ) cost more.`;
- $('tensor').innerHTML='<thead><tr><th>Tensor unit, 1,024 minions</th><th class="num">pJ per MAC, marginal</th><th class="num">per card</th><th class="num">pJ per MAC, loaded (a2)</th><th class="num">W over idle (a2)</th><th class="num">MACs per second</th></tr></thead><tbody>'+
-  D.tensor.rows.map(t=>{const b=TB[t.config]; return `<tr><td>${t.label}</td><td class="num">${b?bt(b,f3):'<b>'+f3(t.pj_marginal)+'</b>'}</td><td class="num small">${b?Object.keys(b.per_card).sort().map(h=>`a${h.slice(-1)} ${f3(b.per_card[h].mean)}`).join('<br>')+(b.cards>1?'':'<br>(a2 only)'):''}</td><td class="num">${f2(t.pj_loaded)}</td><td class="num">${f2(t.over_idle_w)}</td><td class="num">${sci(t.per_s)}</td></tr>`;}).join('')+
+ $('tensor').innerHTML='<thead><tr><th>Tensor unit, 1,024 minions</th><th class="num">pJ per MAC, marginal</th><th class="num" data-nosort>per card</th><th class="num">pJ per MAC, loaded (a2)</th><th class="num">W over idle (a2)</th><th class="num">MACs per second</th></tr></thead><tbody>'+
+  D.tensor.rows.map(t=>{const b=TB[t.config], bc=b?CK.cardsIn(b.per_card):[]; return `<tr><td>${t.label}</td><td class="num">${b?bt(b,f3):'<b>'+f3(t.pj_marginal)+'</b>'}</td><td class="num small">${b?bc.map(h=>`${cshort(h)} ${f3(b.per_card[h].mean)}`).join('<br>')+(b.cards>1?'':`<br>(${cshort(bc[0])} only)`):''}</td><td class="num">${f2(t.pj_loaded)}</td><td class="num">${f2(t.over_idle_w)}</td><td class="num" data-sort="${t.per_s}">${sci(t.per_s)}</td></tr>`;}).join('')+
   '</tbody>';
  $('tensornote').innerHTML='One instruction per tile: fp32 16×16×16 = 4,096 multiply-adds (MACs), fp16 8,192, int8 16,384, on all 1,024 minions, launched at 80 °C on aifoundry2'+(D.cards&&D.cards.launch&&D.cards.launch.aifoundry3?' and '+f0(D.cards.launch.aifoundry3.T)+' °C on aifoundry3 (so the per-card fp32 values compare a warm card with a cool one)':'')+'. <b>Marginal</b>: board power above idle per MAC. <b>Loaded</b>: total board power, idle included, per MAC — what a MAC costs when it is the only thing running. Bars on the fp32 rows: the envelope of ±1 sd around the ablation’s two runs on aifoundry2 and the 22 September transfer’s runs on both cards; fp16 and int8 were run twice on aifoundry2, and their bar is ±1 sd of those two runs: '+
   (()=>{const hw=k=>TB[k]?100*(TB[k].hi-TB[k].lo)/2/TB[k].mean:null; const rn=['fp16_randn','int8_randn'].map(hw), z=hw('int8_zeros'), on=['fp16_ones','int8_ones'].map(hw);
@@ -242,32 +291,36 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  const all=[]; CLASSES.forEach((c,ci)=>c[1].forEach(n=>{if(CB[`${n}/random/h2`]&&CB[`${n}/zeros/h2`]&&SA[`${n}/random/h2`])all.push({n,ci});}));
  if(!all.length)return;
  $('trapped').textContent='fdiv.s, fsqrt.s, fdiv.ps, fsqrt.ps, frsq.ps, fsin.ps, fdiv.pi, fdivu.pi, frem.pi, fremu.pi, fcvt.l.s, fcvt.s.l, csrr cycle';
- const st={unit:'instr',card:'both',zeros:false,found:null};
+ /* st.card: 'pooled' (the mean over every pass on every card) or a card id; it follows the page's card bus */
+ const st={unit:'instr',card:'pooled',zeros:false,found:null};
  const nop=cb('nop/zeros/h2'), fen=cb('fence/zeros/h2');
  const div=a=>st.unit==='lane'&&LANES.has(a.n)?8:1;
- const val=(a,o)=>{const k=`${a.n}/${o}/h2`; if(st.card==='both')return CB[k].mean/div(a); const s=D.catalogue.cards[st.card].summary[k]; return s?s.pj_per_op.mean/div(a):null;};
- const barTxt=(a,o)=>{const k=`${a.n}/${o}/h2`, d=div(a); if(st.card==='both'){const c=CB[k]; return `${f1(c.mean/d)} pJ [${f1(c.lo/d)}–${f1(c.hi/d)}]`;}
-   const s=D.catalogue.cards[st.card].summary[k]; return s?`${f1(s.pj_per_op.mean/d)} ± ${f2(s.pj_per_op.se/d)} pJ`:'—';};
- const tipHtml=a=>()=>{const k=`${a.n}/random/h2`, r2=SA[k], r3=SB[k], per=st.unit==='lane'&&LANES.has(a.n)?' per lane':'';
+ const val=(a,o)=>{const c=cbc(`${a.n}/${o}/h2`,st.card); return c?c.mean/div(a):null;};
+ const barTxt=(a,o)=>{const c=cbc(`${a.n}/${o}/h2`,st.card), d=div(a); if(!c)return '—'; if(st.card==='pooled')return `${f1(c.mean/d)} pJ [${f1(c.lo/d)}–${f1(c.hi/d)}]`;
+   return c.se!=null?`${f1(c.mean/d)} ± ${f2(c.se/d)} pJ`:`${f1(c.mean/d)} pJ`;};
+ const tipHtml=a=>()=>{const k=`${a.n}/random/h2`, rs=CARDS.map(h=>[h,SUMM(h)[k]]).filter(x=>x[1]), r0=rs[0][1], per=st.unit==='lane'&&LANES.has(a.n)?' per lane':'';
+   const iss=st.card==='pooled'?rateC(k,'ops_per_cycle_per_hart','pooled'):(SUMM(st.card)[k]||r0).ops_per_cycle_per_hart.mean;
    return `<b>${a.n}</b> — ${CLASSES[a.ci][0]}<br>random: ${barTxt(a,'random')}${per}<br>zeros: ${barTxt(a,'zeros')}${per}; random / zeros ${f2(val(a,'random')/val(a,'zeros'))}×<br>`+
-    `issue ${f3(r2.ops_per_cycle_per_hart.mean)} per hart per cycle<br>${CARDS[0]} ${f1(r2.pj_per_op.mean)} ± ${f2(r2.pj_per_op.se)}${r3?`, ${CARDS[1]} ${f1(r3.pj_per_op.mean)} ± ${f2(r3.pj_per_op.se)} pJ; ratio ${f3(r3.pj_per_op.mean/r2.pj_per_op.mean)}`:' pJ'}`;};
- const cardLabel=()=>st.card==='both'?'both cards (the mean over every pass)':st.card;
+    `issue ${f3(iss)} per hart per cycle<br>${rs.map(([h,r])=>`${cname(h)} ${f1(r.pj_per_op.mean)} ± ${f2(r.pj_per_op.se)}`).join(', ')} pJ`+
+    (rs.length===2?`; ratio ${f3(rs[1][1].pj_per_op.mean/r0.pj_per_op.mean)}`:rs.length>2?'; '+rs.slice(1).map(([h,r])=>`${cshort(h)} / ${cshort(rs[0][0])} ${f3(r.pj_per_op.mean/r0.pj_per_op.mean)}`).join(', '):'');};
+ const cardLabel=()=>st.card==='pooled'?`${ALLC} (the mean over every pass)`:cname(st.card);
  let lay=null, nodes=[], overlay=null, fr=null;
  function layout(W){
   const key=[W,st.unit,st.card].join('|'); if(lay&&lay.key===key)return lay;
   const L=10,Rr=14,T=30,B=34, lo=st.unit==='lane'?1:3, x=CK.log(lo,2000,L,W-Rr), r=3.5, sep=2*r+1;
   let y0=T; const rows=[];
-  CLASSES.forEach((c,ci)=>{const pts=all.filter(a=>a.ci===ci).map(a=>({a,x:x(Math.max(lo,val(a,'random')||lo))})).sort((p,q)=>p.x-q.x);
+  CLASSES.forEach((c,ci)=>{const pts=all.filter(a=>a.ci===ci&&val(a,'random')!=null).map(a=>({a,x:x(Math.max(lo,val(a,'random')))})).sort((p,q)=>p.x-q.x);   /* a card without the instruction draws no dot */
    if(!pts.length)return; const placed=[];
    pts.forEach(p=>{for(let k=0;k<200;k++){const o=(k%2?1:-1)*Math.ceil(k/2); if(placed.every(q=>(q.x-p.x)**2+(q.o-o)**2>=sep*sep)){p.o=o;break;}} if(p.o==null)p.o=0; placed.push(p);});
    const ext=Math.max(...placed.map(p=>Math.abs(p.o)));
    rows.push({ci,label:c[0],y:y0,cy:y0+17+ext+r+1,pts:placed}); y0+=17+2*(ext+r+1)+12;});
   lay={key,x,rows,H:y0+B,L,Rr,T,lo}; return lay;}
- const seg=(g,a,cy)=>{const xr=lay.x(Math.max(lay.lo,val(a,'random'))),xz=lay.x(Math.max(lay.lo,val(a,'zeros')));
-  CK.el('line',{x1:xz,x2:xr,y1:cy,y2:cy,stroke:'var(--ink-2)','stroke-width':1.2},g); CK.el('circle',{cx:xz,cy,r:3.5,fill:'var(--surface)',stroke:'var(--c3)','stroke-width':1.8},g);};
+ /* the same instruction on zeros: a hollow ring in ink (the dots carry the card's colour) */
+ const seg=(g,a,cy)=>{const vz=val(a,'zeros'); if(vz==null)return; const xr=lay.x(Math.max(lay.lo,val(a,'random'))),xz=lay.x(Math.max(lay.lo,vz));
+  CK.el('line',{x1:xz,x2:xr,y1:cy,y2:cy,stroke:'var(--ink-2)','stroke-width':1.2},g); CK.el('circle',{cx:xz,cy,r:3.5,fill:'var(--surface)',stroke:'var(--ink-2)','stroke-width':1.8},g);};
  const showZero=(i)=>{if(!overlay)return; while(overlay.firstChild)overlay.removeChild(overlay.firstChild); if(i==null)return; const p=nodes[i]; seg(overlay,p.a,p.cy);};
  CK.seg('all-unit',{options:[['instr','per instruction'],['lane','per lane']],value:'instr',onChange:v=>{st.unit=v; fr.redraw(); cap();}});
- CK.seg('all-card',{options:[['both','both cards']].concat(CARDS.map(h=>[h,h])),value:'both',onChange:v=>{st.card=v; fr.redraw(); cap();}});
+ CK.cardSeg('all-card',{cards:CARDLIST,pooled:true,label:'card',onChange:v=>{st.card=v; fr.redraw(); cap();}});
  const zb=document.createElement('button'); zb.type='button'; zb.textContent='show zeros for all'; zb.setAttribute('aria-pressed','false');
  zb.addEventListener('click',()=>{st.zeros=!st.zeros; zb.setAttribute('aria-pressed',String(st.zeros)); fr.redraw();});
  const zs=$('all-zeros'); zs.className='controls'; zs.style.margin='0'; zs.appendChild(zb);
@@ -286,7 +339,7 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   const layer=CK.el('g',{},svg); overlay=CK.el('g',{'aria-hidden':'true'},svg); nodes=[];
   Ly.rows.forEach(rw=>{CK.txt(layer,Ly.L,rw.y+13,rw.label,'lab','start');
    rw.pts.forEach(p=>{const cy=rw.cy+p.o; if(st.zeros)seg(layer,p.a,cy);
-    const gg=mark(f,layer,'circle',{cx:p.x,cy,r:3.5,fill:'var(--c2)'},7,tipHtml(p.a));
+    const gg=mark(f,layer,'circle',{cx:p.x,cy,r:3.5,fill:CK.card(st.card).color},7,tipHtml(p.a));
     gg.addEventListener('focus',()=>{showZero(nodes.findIndex(q=>q.g===gg)); ro.set(tipHtml(p.a)());});
     gg.addEventListener('pointerenter',()=>showZero(nodes.findIndex(q=>q.g===gg)));
     gg.addEventListener('pointerleave',()=>showZero(st.found));
@@ -295,7 +348,8 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   /* the dearest are the two global atomics, whose order is not resolved: label the pair, not one of them */
   const mx=nodes.reduce((a,b)=>val(a.a,'random')>val(b.a,'random')?a:b), mrow=Ly.rows.find(rw=>rw.ci===mx.row);
   const gl=nodes.filter(n=>/^amoaddg\./.test(n.a.n)).map(n=>val(n.a,'random')), gv=gl.length?gl.reduce((a,b)=>a+b,0)/gl.length:val(mx.a,'random');
-  CK.txt(layer,f.W-Ly.Rr,mrow.y+13,gl.length===2?`dearest: the global atomics, ~${nf(Math.round(gv/10)*10)} pJ`:`dearest: ${mx.a.n}, ${nf(val(mx.a,'random'))} pJ`,'lab','end');
+  const dtx=gl.length===2?`dearest: the global atomics, ~${nf(Math.round(gv/10)*10)} pJ`:`dearest: ${mx.a.n}, ${nf(val(mx.a,'random'))} pJ`;
+  if(Ly.L+6.3*mrow.label.length+12<f.W-Ly.Rr-6.3*dtx.length)CK.txt(layer,f.W-Ly.Rr,mrow.y+13,dtx,'lab','end');   /* not where it would run into the row's label */
   CK.keynav(f,nodes.map(n=>n.g),{step:(k,K)=>{if(K!=='ArrowDown'&&K!=='ArrowUp')return null;
    const rs=[...new Set(nodes.map(n=>n.row))], ri=rs.indexOf(nodes[k].row)+(K==='ArrowDown'?1:-1); if(ri<0||ri>=rs.length)return k;
    let best=null; nodes.forEach((n,j)=>{if(n.row===rs[ri]&&(best==null||Math.abs(n.x-nodes[k].x)<Math.abs(nodes[best].x-nodes[k].x)))best=j;}); return best;}});
@@ -307,16 +361,19 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  inp.addEventListener('input',find);
  inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){const j=find(); if(j>=0){ev.preventDefault(); nodes[j].g.focus();}}});
  const relOf=S=>all.filter(a=>S[`${a.n}/random/h2`]).map(a=>S[`${a.n}/random/h2`].pj_per_op.se/S[`${a.n}/random/h2`].pj_per_op.mean).sort((a,b)=>a-b);
- const rel=relOf(SA), rel3=relOf(SB), pct=(r,q)=>(100*r[Math.floor(r.length*q)]).toFixed(1);
+ const rel=relOf(SA), relN=CARDS.slice(1).map(h=>[h,relOf(SUMM(h))]).filter(x=>x[1].length), pct=(r,q)=>(100*r[Math.floor(r.length*q)]).toFixed(1);
  const half=all.map(a=>CB[`${a.n}/random/h2`]).map(c=>(c.hi-c.lo)/2/c.mean).sort((a,b)=>a-b);
- function cap(){$('allcap').textContent=`${all.length} instructions, one dot each at its random-data energy on ${cardLabel()}${st.unit==='lane'?', per lane for the eight-lane units':''}, one row per class. The hollow ring and the line to it are the same instruction on zeros: for the dot in focus, or for all of them with the toggle. `+
+ function cap(){const nd=st.card==='pooled'?all.length:all.filter(a=>val(a,'random')!=null).length; $('allcap').textContent=`${nd} instructions, one dot each at its random-data energy on ${cardLabel()}${st.unit==='lane'?', per lane for the eight-lane units':''}, one row per class. The hollow ring and the line to it are the same instruction on zeros: for the dot in focus, or for all of them with the toggle. `+
   (st.unit==='instr'?`The shaded band is the awake core, what a fence or a nop costs with both harts (${f1(fen.mean)}–${f1(nop.mean)} pJ). `:'')+
-  `Pass-to-pass standard error is ${(100*rel[rel.length>>1]).toFixed(1)}% in the median and ${(100*rel[Math.floor(rel.length*0.9)]).toFixed(1)}% at the 90th percentile on ${CARDS[0]}${rel3.length?` (${(100*rel3[rel3.length>>1]).toFixed(1)}% and ${pct(rel3,0.9)}% on ${CARDS[1]})`:''}; half the range over both cards' passes is ±${(100*half[half.length>>1]).toFixed(1)}% in the median and ±${(100*half[Math.floor(half.length*0.9)]).toFixed(1)}% at the 90th, about half of it the difference between the cards.`;}
+  `Pass-to-pass standard error is ${(100*rel[rel.length>>1]).toFixed(1)}% in the median and ${(100*rel[Math.floor(rel.length*0.9)]).toFixed(1)}% at the 90th percentile on ${CARDS[0]}${relN.length?` (${relN.map(([h,r])=>`${(100*r[r.length>>1]).toFixed(1)}% and ${pct(r,0.9)}% on ${cname(h)}`).join('; ')})`:''}; half the range over ${ALLC}' passes is ±${(100*half[half.length>>1]).toFixed(1)}% in the median and ±${(100*half[Math.floor(half.length*0.9)]).toFixed(1)}% at the 90th, about half of it the difference between the cards.`;}
  cap();
- const S=SA, gz=(n,o)=>S[`${n}/${o}/h2`], gz2=(n,o)=>SB[`${n}/${o}/h2`];
- $('alltab').innerHTML='<thead><tr><th>Instruction</th><th class="num">zeros pJ, both cards</th><th class="num">random pJ, both cards</th><th class="num">per lane</th><th class="num">random / zeros</th><th class="num">issue per hart per cycle</th><th class="num">'+CARDS[0]+' ± se</th><th class="num">'+(CARDS[1]||'card 2')+' ± se</th><th class="num">ratio</th></tr></thead><tbody>'+
-  CLASSES.map(c=>`<tr><td colspan="9"><b>${c[0]}</b></td></tr>`+c[1].map(n=>{const r=gz(n,'random'),z=gz(n,'zeros'),r2=gz2(n,'random'),cr=cb(`${n}/random/h2`),cz=cb(`${n}/zeros/h2`); if(!(r&&z))return '';
-   return `<tr><td><code>${n}</code></td><td class="num">${cz?bt(cz,f1):z.pj_per_op.mean.toFixed(1)}</td><td class="num">${cr?bt(cr,f1):'<b>'+r.pj_per_op.mean.toFixed(1)+'</b>'}</td><td class="num">${LANES.has(n)?((cr?cr.mean:r.pj_per_op.mean)/8).toFixed(1):'—'}</td><td class="num">${((cr?cr.mean:r.pj_per_op.mean)/(cz?cz.mean:z.pj_per_op.mean)).toFixed(2)}×</td><td class="num">${r.ops_per_cycle_per_hart.mean.toFixed(3)}</td><td class="num">${r.pj_per_op.mean.toFixed(1)} ± ${r.pj_per_op.se.toFixed(2)}</td><td class="num">${r2?r2.pj_per_op.mean.toFixed(1)+' ± '+r2.pj_per_op.se.toFixed(2):'—'}</td><td class="num">${r2?(r2.pj_per_op.mean/r.pj_per_op.mean).toFixed(3):'—'}</td></tr>`;}).join('')).join('')+'</tbody>';
+ const S=SA, gz=(n,o)=>S[`${n}/${o}/h2`], MORE=CARDS.slice(1), ncol=6+CARDS.length+MORE.length;
+ $('alltab').innerHTML=`<thead><tr><th>Instruction</th><th class="num">zeros pJ, ${ALLC}</th><th class="num">random pJ, ${ALLC}</th><th class="num">per lane</th><th class="num">random / zeros</th><th class="num">issue per hart per cycle</th>`+
+  CARDS.map(h=>`<th class="num">${cname(h)} ± se</th>`).join('')+(MORE.length?'':'<th class="num">card 2 ± se</th><th class="num">ratio</th>')+(MORE.length===1?'<th class="num">ratio</th>':MORE.map(h=>`<th class="num">${cshort(h)} / ${cshort(CARDS[0])}</th>`).join(''))+'</tr></thead><tbody>'+
+  CLASSES.map(c=>`<tr><td colspan="${ncol+(MORE.length?0:2)}"><b>${c[0]}</b></td></tr>`+c[1].map(n=>{const r=gz(n,'random'),z=gz(n,'zeros'),cr=cb(`${n}/random/h2`),cz=cb(`${n}/zeros/h2`); if(!(r&&z))return '';
+   const rN=MORE.map(h=>SUMM(h)[`${n}/random/h2`]);
+   return `<tr><td><code>${n}</code></td><td class="num">${cz?bt(cz,f1):z.pj_per_op.mean.toFixed(1)}</td><td class="num">${cr?bt(cr,f1):'<b>'+r.pj_per_op.mean.toFixed(1)+'</b>'}</td><td class="num">${LANES.has(n)?((cr?cr.mean:r.pj_per_op.mean)/8).toFixed(1):'—'}</td><td class="num">${((cr?cr.mean:r.pj_per_op.mean)/(cz?cz.mean:z.pj_per_op.mean)).toFixed(2)}×</td><td class="num">${r.ops_per_cycle_per_hart.mean.toFixed(3)}</td><td class="num">${r.pj_per_op.mean.toFixed(1)} ± ${r.pj_per_op.se.toFixed(2)}</td>`+
+    (MORE.length?rN.map(r2=>`<td class="num">${r2?r2.pj_per_op.mean.toFixed(1)+' ± '+r2.pj_per_op.se.toFixed(2):'—'}</td>`).join('')+rN.map(r2=>`<td class="num">${r2?(r2.pj_per_op.mean/r.pj_per_op.mean).toFixed(3):'—'}</td>`).join(''):'<td class="num">—</td><td class="num">—</td>')+'</tr>';}).join('')).join('')+'</tbody>';
  /* cheapest and dearest by the pooled mean over both cards, the page's convention */
  const pool=all.map(a=>({n:a.n,m:CB[`${a.n}/random/h2`].mean})).sort((a,b)=>a.m-b.m), cheapest=pool[0], dearest=pool[pool.length-1];
  const cc=D.catalogue.cross_card;
@@ -335,9 +392,14 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
 (function(){
  const rg=RR.rings_pj_per_byte||{}, rr=RR.relay_pj_per_byte||{};
  const FAM={read:['reads','var(--c1)'],write:['writes','var(--c2)'],msg:['core to core (rings of section 5)','var(--c7)'],relay:['the relay (a read and a write)','var(--c3)']};
- const P=[], cat=(fam,k,sfx,sc,label,short)=>{if(!CB[`${k}/random${sfx}`])return; P.push({fam,label,short,key:k,
-   e:o=>cb(`${k}/${CB[`${k}/${o}${sfx}`]?o:'random'}${sfx}`,sc), op:o=>CB[`${k}/${o}${sfx}`]?o:'random',
-   gbs:o=>{const s=SA[`${k}/${CB[`${k}/${o}${sfx}`]?o:'random'}${sfx}`]; return s.bytes_per_s.mean>0?s.bytes_per_s.mean/1e9:s.ops_per_s.mean*32/1e9;}});};
+ /* every point: e(o, h) its energy per byte on card h (h 'pooled' or left out: every pass on every card), null when h has
+    none; gbs(o, h) its bandwidth on h (pooled: the mean over the cards), rcard the one card a bandwidth was timed on when
+    only one was (the rings and the relay) */
+ const RCARD=srcCard(D.comm.source), YCARD=srcCard(D.relay.source);
+ const P=[], cat=(fam,k,sfx,sc,label,short)=>{if(!CB[`${k}/random${sfx}`])return; const kk=o=>`${k}/${CB[`${k}/${o}${sfx}`]?o:'random'}${sfx}`;
+  P.push({fam,label,short,key:k,rcard:null,
+   e:(o,h)=>cbc(kk(o),h,sc), op:o=>CB[`${k}/${o}${sfx}`]?o:'random',
+   gbs:(o,h)=>{const b=rateC(kk(o),'bytes_per_s',h); if(b!=null)return b/1e9; const r=rateC(kk(o),'ops_per_s',h); return r!=null?r*32/1e9:null;}});};
  cat('read','flw.ps','/h2',1/32,'L1 hit, 32 B vector loads','L1 hits');
  cat('read','l1fill/stride32','',1,'own scratchpad, 32 B loads through the L1',null);
  cat('read','tload/scp','',1,'own scratchpad, tensor load','own scratchpad');
@@ -349,15 +411,19 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  cat('write','tstore/dram','',1,'DRAM, tensor store',null);
  cat('write','st_stream/dram','',1,'DRAM, stores through the L1','stores through the L1');
  D.comm.rows.filter(r=>!r.ring.endsWith('c4')&&rg[r.ring]).forEach(r=>{const m=MH[r.ring];
-   P.push({fam:'msg',key:r.ring,label:`ring: ${r.ring}${m&&m.mean?` (${f1(m.mean)} mesh hops on average)`:''}, 1 KB messages`,short:null,e:()=>rg[r.ring],op:()=>'its own data',gbs:()=>r.gb_s});});
- [['dram','through DRAM'],['hop','to the next shire'],['scp','in its own scratchpad']].forEach(([m,t])=>{if(rr[m])P.push({fam:'relay',key:'relay-'+m,label:`the relay, intermediate ${t}`,short:m==='scp'?null:'relay '+t.replace('the ',''),e:()=>rr[m],op:()=>'one constant per slab',gbs:()=>rp[m].bytes_per_s/1e9});});
- const st={o:'random',X:10,on:Object.keys(FAM)};
+   P.push({fam:'msg',key:r.ring,label:`ring: ${r.ring}${m&&m.mean?` (${f1(m.mean)} mesh hops on average)`:''}, 1 KB messages`,short:null,e:(o,h)=>pcv(rg[r.ring],h),op:()=>'its own data',gbs:()=>r.gb_s,rcard:RCARD});});
+ [['dram','through DRAM'],['hop','to the next shire'],['scp','in its own scratchpad']].forEach(([m,t])=>{if(rr[m])P.push({fam:'relay',key:'relay-'+m,label:`the relay, intermediate ${t}`,short:m==='scp'?null:'relay '+t.replace('the ',''),e:(o,h)=>pcv(rr[m],h),op:()=>'one constant per slab',gbs:()=>rp[m].bytes_per_s/1e9,rcard:YCARD});});
+ const st={o:'random',X:10,on:Object.keys(FAM),card:'pooled'};
+ const has=p=>p.e(st.o,st.card)!=null&&p.gbs(st.o,st.card)!=null;   /* a card without a value draws no point */
  const LABEL_ORDER=['DRAM','own scratchpad','L1 hits','relay through DRAM','relay to next shire','stores through the L1','L3'], NARROW=LABEL_ORDER.slice(0,5);
  CK.seg('map-data',{label:'data',options:[['random','random'],['zeros','zeros']],value:'random',onChange:v=>{st.o=v; fr.redraw(); read();}});
+ CK.cardSeg('map-card',{cards:CARDLIST,pooled:true,label:'card',onChange:v=>{st.card=v; fr.redraw(); read();}});
  CK.range('map-watts',{label:'power over idle you can spend',stops:[1,2,3,5,7,10,15,20,30],value:10,fmt:v=>v+' W',onInput:v=>{st.X=v; fr.redraw(); read();}});
  CK.legend('map-legend',Object.keys(FAM).map(k=>({key:k,label:FAM[k][0],mark:'dot',color:FAM[k][1]})),{toggle:true,onChange:on=>{st.on=on; CK.showSeries(fr,on);}});
  const W_=(p,o)=>p.e(o).mean*p.gbs(o)/1000;
- const tipH=p=>()=>{const o=st.o, c=p.e(o), gb=p.gbs(o); return `<b>${p.label}</b>, ${p.op(o)}<br>${fs(c.mean)} pJ/B [${fs(c.lo)}–${fs(c.hi)}] at ${nf(gb)} GB/s<br>${f1(c.mean*gb/1000)} W over idle<br>${pcs(c,fs).replace('<br>',' · ')}`;};
+ const tipH=p=>()=>{const o=st.o, h=st.card, c=p.e(o,h), gb=p.gbs(o,h); if(!c)return p.label; const pc=h==='pooled'; if(!pc&&c.lo==null)return p.label;
+   return `<b>${p.label}</b>, ${p.op(o)}${pc?'':`, on ${cname(h)}`}<br>${fs(c.mean)} pJ/B ${barOf(c,fs)} at ${nf(gb)} GB/s${p.rcard&&p.rcard!==h?` (${p.rcard}'s bandwidth)`:''}<br>${f1(c.mean*gb/1000)} W over idle<br>`+
+    (pc?pcs(c,fs).replace(/<br>/g,' · '):c.sebar?'± its pass-to-pass standard error':c.nobar?'':c.n!=null?`the range over its ${WORD[c.n]||c.n} passes`:'');};
  const fr=CK.frame('bytemap',{height:W=>W<600?440:Math.round(Math.min(480,Math.max(360,W*0.6))),label:'Energy per byte against aggregate bandwidth, every path',draw:f=>{
   const L=44,Rr=14,T=24,B=40, x=CK.log(10,40000,L,f.W-Rr), y=CK.log(0.3,500,f.H-B,T), o=st.o;
   CK.axes(f,{x,y,L,R:Rr,T,B,xl:'aggregate bandwidth, GB/s (log)',yl:'pJ per byte, above idle (log)'});
@@ -372,17 +438,17 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   diag(st.X,'var(--ink)',1.6,true);
   dlab.forEach(d=>CK.txt(f.svg,d[0],d[1],d[2],d[3]?'lab-strong':'tick','end').classList.add('halo'));
   const layer=CK.el('g',{},f.svg), groups={}, labs=[];
-  const hops=P.filter(p=>/^wire\//.test(p.key)); if(hops.length){const pts=hops.map(p=>[p.gbs(o),p.e(o).mean]);
+  const h=st.card, hops=P.filter(p=>/^wire\//.test(p.key)&&has(p)); if(hops.length){const pts=hops.map(p=>[p.gbs(o,h),p.e(o,h).mean]);
    CK.el('path',{d:CK.path(pts,x,y),fill:'none',stroke:'var(--c1)','stroke-width':1,opacity:0.6,'data-series':'read'},layer);}
-  P.forEach(p=>{const c=p.e(o), gb=p.gbs(o), cx=x(gb), cy=y(c.mean), col=FAM[p.fam][1];
+  P.filter(has).forEach(p=>{const c=p.e(o,h), gb=p.gbs(o,h), cx=x(gb), cy=y(c.mean), col=FAM[p.fam][1];
    const gg=CK.el('g',{'data-series':p.fam},layer);
    CK.el('line',{x1:cx,x2:cx,y1:y(c.hi),y2:y(c.lo),stroke:col,'stroke-width':1.5},gg);
    const m=mark(f,gg,'circle',{cx,cy,r:4.5,fill:col,stroke:'var(--surface)','stroke-width':1.5},9,tipH(p));
    (groups[p.fam]=groups[p.fam]||[]).push([gb,m]); boxes.push([cx-4,cy-4,cx+4,cy+4]);
    if(p.short&&(!f.narrow||NARROW.includes(p.short)))labs.push({x:cx,y:cy,text:p.short,series:p.fam,rank:LABEL_ORDER.indexOf(p.short)});});
-  const h1=hops[0]; if(h1&&!f.narrow)labs.push({x:x(h1.gbs(o)),y:y(h1.e(o).mean),text:'1–8 hops away',series:'read',rank:50});
-  const rg1=P.find(p=>p.key==='xshire4'); if(rg1)labs.push({x:x(rg1.gbs()),y:y(rg1.e().mean),text:'rings between shires',series:'msg',rank:60});
-  const rg0=P.find(p=>p.key==='pair'); if(rg0&&!f.narrow)labs.push({x:x(rg0.gbs()),y:y(rg0.e().mean),text:'pair',series:'msg',rank:70});
+  const h1=hops[0]; if(h1&&!f.narrow)labs.push({x:x(h1.gbs(o,h)),y:y(h1.e(o,h).mean),text:'1–8 hops away',series:'read',rank:50});
+  const rg1=P.find(p=>p.key==='xshire4'&&has(p)); if(rg1)labs.push({x:x(rg1.gbs()),y:y(rg1.e(o,h).mean),text:'rings between shires',series:'msg',rank:60});
+  const rg0=P.find(p=>p.key==='pair'&&has(p)); if(rg0&&!f.narrow)labs.push({x:x(rg0.gbs()),y:y(rg0.e(o,h).mean),text:'pair',series:'msg',rank:70});
   placeLabels(layer,labs.sort((a,b)=>a.rank-b.rank),boxes,[L,T,f.W-Rr,f.H-B]);
   Object.keys(groups).forEach(k=>CK.keynav(f,groups[k].sort((a,b)=>a[0]-b[0]).map(z=>z[1])));
  }});
@@ -390,8 +456,8 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  const KEYS=[['tload/dram','DRAM tensor loads'],['tload/scp','the own scratchpad'],['wire/hop6','a scratchpad 6 hops away'],['relay-hop','the relay to the next shire'],['flw.ps','L1 hits']];
  const bw=v=>v>=1000?f1(v/1000)+' TB/s':nf(v)+' GB/s';
  const ro=CK.readout('map-readout');
- function read(){const o=st.o;
-  ro.set(`Within <b>${st.X} W</b> over idle, ${o==='zeros'?'on zeros':'on random data'}: `+KEYS.map(([k,l])=>{const p=P.find(q=>q.key===k); if(!p)return ''; const gb=p.gbs(o), cap=st.X*1000/p.e(o).mean;
+ function read(){const o=st.o, h=st.card;
+  ro.set(`Within <b>${st.X} W</b> over idle, ${o==='zeros'?'on zeros':'on random data'}${h==='pooled'?'':`, on ${cname(h)}`}: `+KEYS.map(([k,l])=>{const p=P.find(q=>q.key===k); if(!p||!has(p))return ''; const gb=p.gbs(o,h), cap=st.X*1000/p.e(o,h).mean;
    return cap>=gb?`${l} all of its ${bw(gb)}`:`${l} ${bw(cap)} of its ${bw(gb)}`;}).filter(Boolean).join('; ')+'.');}
  read();
  const pd=P.find(p=>p.key==='tload/dram'), ps=P.find(p=>p.key==='tload/scp'), prd=P.find(p=>p.key==='relay-dram'), prh=P.find(p=>p.key==='relay-hop');
@@ -399,7 +465,7 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  $('mapcap').innerHTML=(pd&&ps?`<b>DRAM (${f0(pd.e('random').mean)} pJ/B at ${f0(pd.gbs('random'))} GB/s, ${f1(W_(pd,'random'))} W) and the shire's own scratchpad (${f1(ps.e('random').mean)} pJ/B at ${nf(ps.gbs('random'))} GB/s, ${f1(W_(ps,'random'))} W) sit on the same 10 W diagonal, ${f0(ps.gbs('random')/pd.gbs('random'))}× apart in bandwidth</b> (random data). `:'')+
   (prd&&prh?`The relay through DRAM (${f1(prd.e().mean)} pJ/B at ${f0(prd.gbs())} GB/s) and to the next shire (${f1(prh.e().mean)} pJ/B at ${nf(prh.gbs())} GB/s) both draw about ${f0((W_(prd)+W_(prh))/2)} W, and the second moves ${f0(prh.gbs()/prd.gbs())}× the bytes. `:'')+
   (rings.length?`The rings between cores draw ${f1(Math.min(...rings))}–${f1(Math.max(...rings))} W. `:'')+
-  `Diagonals: constant power over idle, pJ/B × GB/s; the slider picks one. Whiskers: the range over every pass on both cards. The L1 rows' bandwidth is their instruction rate times 32 B; the relay counts each byte it reads and each it writes. Reads and writes switch between zeros and random data; the rings and the relay carry their own data. The numbers are in the tables of sections 4.1, 4.3 and 5.`;
+  `Diagonals: constant power over idle, pJ/B × GB/s; the slider picks one. Whiskers: the range over every pass on ${ALLC}; pick a card to see its own means, whiskers (the range over its passes, or ± its standard error for the rings and the relay) and bandwidths, the rings' and the relay's bandwidths being ${andList([...new Set([RCARD,YCARD].filter(Boolean))])}'s in every view. The L1 rows' bandwidth is their instruction rate times 32 B; the relay counts each byte it reads and each it writes. Reads and writes switch between zeros and random data; the rings and the relay carry their own data. The numbers are in the tables of sections 4.1, 4.3 and 5.`;
 })();
 
 /* ---------- 4.1 / 4.2 memory tables ---------- */
@@ -409,7 +475,7 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
    ['tload/dram/zeros','tload/dram/random',1,'DRAM, tensor load','read'],['tstore/dram/zeros','tstore/dram/random',1,'DRAM, tensor store','write'],['st_stream/dram/zeros','st_stream/dram/random',1,'DRAM, stores through the L1','write']];
  if(!cb(paths[0][1])){return;}
  $('memcap').textContent='Tensor loads skip the L1 (the L2 and L3 cache them when the working set fits); tensor stores skip the L1 and the L2; the L1 rows are hits in a 256 B buffer, and their GB/s is the instruction rate times 32 B; the last row is a plain vector store to DRAM through the L1.';
- $('memtab').innerHTML='<thead><tr><th>Path</th><th class="num">zeros pJ/B</th><th class="num">random pJ/B</th><th class="num">random / zeros</th><th class="num">GB/s</th><th class="num">per card, random</th></tr></thead><tbody>'+
+ $('memtab').innerHTML='<thead><tr><th>Path</th><th class="num">zeros pJ/B</th><th class="num">random pJ/B</th><th class="num">random / zeros</th><th class="num">GB/s</th><th class="num" data-nosort>per card, random</th></tr></thead><tbody>'+
   paths.map(p=>{const z=cb(p[0],p[2]),r=cb(p[1],p[2]); if(!(z&&r))return ''; const s2=S2[p[1]], bps=!s2?0:s2.bytes_per_s.mean>0?s2.bytes_per_s.mean:p[2]<1?s2.ops_per_s.mean/p[2]:0;
    return `<tr><td>${p[3]} <span class="small">(${p[4]})</span></td><td class="num">${bt(z,fs)}</td><td class="num">${bt(r,fs)}</td><td class="num">${f2(r.mean/z.mean)}×</td><td class="num">${bps?nf(bps/1e9):'—'}</td><td class="num small">${pcs(r,fs)}</td></tr>`;}).join('')+'</tbody>';
  const dl=cb('tload/dram/random'),sl=cb('tload/scp/random'),ds=cb('tstore/dram/random'),ss=cb('st_stream/dram/random'),dz=cb('tload/dram/zeros');
@@ -447,11 +513,15 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
 (function(){
  const C=D.catalogue, S=SA;
  const Wf=C.cards[CARDS[0]].wire, Wf2=CARDS[1]&&C.cards[CARDS[1]].wire;
+ /* every card after the first, drawn hollow in its registry shape (ring, diamond) and the operand's colour */
+ const WO=CARDS.slice(1).map(h=>({h,w:C.cards[h].wire})).filter(o=>o.w);
+ const hollow=(g,h,cx,cy,r,col)=>{const m=CK.card(h).mark, a={fill:'none',stroke:col,'stroke-width':1.5}, k=r*1.3;
+  return CK.el(m==='diamond'?'polygon':m==='box'?'rect':'circle',Object.assign(m==='diamond'?{points:`${cx},${cy-k} ${cx+k},${cy} ${cx},${cy+k} ${cx-k},${cy}`}:m==='box'?{x:cx-r,y:cy-r,width:2*r,height:2*r}:{cx,cy,r},a),g);};
  if(Wf&&Wf.random&&Wf.zeros){
   const st={upto:8}, fitOf=(wf,upto)=>lfit(wf.points.filter(p=>p.hops>=1&&p.hops<=upto).map(p=>[p.hops,p.pj_per_byte]));
   const mxh=Math.max(...Wf.random.points.map(p=>p.hops)), shr=d=>(Wf.random.points.find(p=>p.hops===d)||{}).shires, full=Wf.random.points.filter(p=>p.shires===32).map(p=>p.hops);
   CK.seg('wire-fit',{label:'straight-line fit',options:[['8','over 1–'+mxh+' hops'],['6','over 1–6 hops']],value:'8',onChange:v=>{st.upto=+v; fw.redraw(); wread();}});
-  CK.legend('wire-legend',[{key:'z',label:'zeros',mark:'dot',color:'var(--c3)'},{key:'r',label:'random data',mark:'dot',color:'var(--c2)'},{key:'h',label:CARDS[1]+' (hollow)',mark:'ring',color:'var(--ink-2)'},{key:'f',label:'fit, '+CARDS[0],mark:'dash',color:'var(--ink-2)'}]);
+  const wireItems=[{key:'z',label:'zeros',mark:'dot',color:'var(--c3)'},{key:'r',label:'random data',mark:'dot',color:'var(--c2)'},...WO.map(o=>cardItem(o.h,cname(o.h)+' (hollow)','var(--ink-2)')),{key:'f',label:'fit, '+CARDS[0],mark:'dash',color:'var(--ink-2)'}]; CK.legend('wire-legend',wireItems); legendMarks('wire-legend',wireItems);
   const mxy=Math.max(...Wf.random.points.map(p=>(CB[`wire/hop${p.hops}/random`]||{hi:p.pj_per_byte}).hi))*1.08;
   const fw=CK.frame('wire',{height:W=>W<600?270:320,label:'Energy per byte against mesh distance',draw:f=>{
    const L=40,Rr=12,T=24,B=40, x=CK.lin(-0.4,mxh+0.5,L,f.W-Rr), y=CK.lin(0,mxy,f.H-B,T);
@@ -460,17 +530,19 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
    [['zeros','var(--c3)'],['random','var(--c2)']].forEach(([o,col])=>{const wf=Wf[o], ft=fitOf(wf,st.upto);
     CK.el('line',{x1:x(0),x2:x(mxh),y1:y(ft.a),y2:y(ft.a+ft.b*mxh),stroke:col,'stroke-width':1.5,'stroke-dasharray':'5 4'},f.svg);
     const nodes=[];
-    if(wf.local_pj_per_byte!=null){const l2=Wf2&&Wf2[o]&&Wf2[o].local_pj_per_byte;
-     nodes.push(mark(f,f.svg,'circle',{cx:x(0)-dx/2,cy:y(wf.local_pj_per_byte),r:4,fill:col},8,`the shire's own scratchpad, ${o}: <b>${f2(wf.local_pj_per_byte)} pJ/B</b> on ${CARDS[0]}${l2!=null?`, ${f2(l2)} on ${CARDS[1]}`:''}`));}
-    wf.points.forEach(p=>{const c=CB[`wire/hop${p.hops}/${o}`], p3=Wf2&&Wf2[o]&&Wf2[o].points.find(q=>q.hops===p.hops);
+    if(wf.local_pj_per_byte!=null){const l2=WO.map(w=>[w.h,w.w[o]&&w.w[o].local_pj_per_byte]).filter(z=>z[1]!=null);
+     nodes.push(mark(f,f.svg,'circle',{cx:x(0)-dx/2,cy:y(wf.local_pj_per_byte),r:4,fill:col},8,`the shire's own scratchpad, ${o}: <b>${f2(wf.local_pj_per_byte)} pJ/B</b> on ${CARDS[0]}${l2.map(z=>`, ${f2(z[1])} on ${cname(z[0])}`).join('')}`));}
+    wf.points.forEach(p=>{const c=CB[`wire/hop${p.hops}/${o}`], p3=WO.map((w,j)=>[w.h,w.w[o]&&w.w[o].points.find(q=>q.hops===p.hops),j]).filter(z=>z[1]);
      if(c)CK.el('line',{x1:x(p.hops),x2:x(p.hops),y1:y(c.hi),y2:y(c.lo),stroke:col,'stroke-width':1.5},f.svg);
-     if(p3)CK.el('circle',{cx:x(p.hops)+dx,cy:y(p3.pj_per_byte),r:3.5,fill:'none',stroke:col,'stroke-width':1.5},f.svg);
-     nodes.push(mark(f,f.svg,'circle',{cx:x(p.hops)-dx/2,cy:y(p.pj_per_byte),r:4,fill:col},9,`${p.hops} hop${p.hops>1?'s':''}, ${o}: <b>${f2(p.pj_per_byte)} ± ${f2(p.se)} pJ/B</b> on ${CARDS[0]}${p3?`, ${f2(p3.pj_per_byte)} ± ${f2(p3.se)} on ${CARDS[1]}`:''}${c?`<br>both cards: ${f2(c.mean)} [${f2(c.lo)}–${f2(c.hi)}], n = ${c.n}`:''}<br>${p.shires} shires reading`));});
+     p3.forEach(([h,q,j])=>hollow(f.svg,h,x(p.hops)+dx*(1+j),y(q.pj_per_byte),3.5,col));
+     nodes.push(mark(f,f.svg,'circle',{cx:x(p.hops)-dx/2,cy:y(p.pj_per_byte),r:4,fill:col},9,`${p.hops} hop${p.hops>1?'s':''}, ${o}: <b>${f2(p.pj_per_byte)} ± ${f2(p.se)} pJ/B</b> on ${CARDS[0]}${p3.map(([h,q])=>`, ${f2(q.pj_per_byte)} ± ${f2(q.se)} on ${cname(h)}`).join('')}${c?`<br>${ALLC}: ${f2(c.mean)} [${f2(c.lo)}–${f2(c.hi)}], n = ${c.n}`:''}<br>${p.shires} shires reading`));});
     groups.push(nodes);});
    groups.forEach(n=>CK.keynav(f,n));
   }});
   const ro=CK.readout('wire-readout');
-  function wread(){const u=st.upto, s=(wf,o)=>wf&&wf[o]?fitOf(wf[o],u):null;
+  /* the fits per card; with more than two cards every card after the first is listed */
+  function wread(){const u=st.upto, s=(wf,o)=>wf&&wf[o]?fitOf(wf[o],u):null; if(WO.length>1){const W_=[[CARDS[0],Wf]].concat(WO.map(w=>[w.h,w.w])).filter(z=>z[1].random&&z[1].zeros);
+    ro.set(`Fit over 1–${u===8?mxh:6} hops: <b>random</b> ${andList(W_.map(([h,w])=>`${f2(s(w,'random').b)} (${cname(h)})`))} pJ/B per hop, intercept ${andList(W_.map(([h,w])=>f2(s(w,'random').a)))}; <b>zeros</b> ${andList(W_.map(([h,w])=>f2(s(w,'zeros').b)))} per hop.`); return;}
    ro.set(`Fit over 1–${u===8?mxh:6} hops: <b>random ${f2(s(Wf,'random').b)}</b> (${CARDS[0]})${Wf2?` and ${f2(s(Wf2,'random').b)} (${CARDS[1]})`:''} pJ/B per hop, intercept ${f2(s(Wf,'random').a)}${Wf2?` and ${f2(s(Wf2,'random').a)}`:''}; <b>zeros ${f2(s(Wf,'zeros').b)}</b>${Wf2?` and ${f2(s(Wf2,'zeros').b)}`:''} per hop.`);}
   wread();
   $('wirecap').textContent=`1 KB tensor loads from a scratchpad exactly d hops away, all 32 shires reading up to ${Math.max(...full)} hops (${shr(6)} at 6 hops, ${shr(8)} at 8, so the 8-hop point has half the traffic), at most two readers per target; d = 0 is the shire's own scratchpad. Filled: ${CARDS[0]}; whiskers: the range over both cards' passes. Dashed: the straight-line fit over the hops chosen above.`;
@@ -499,7 +571,7 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   const frs=['aifoundry2','aifoundry3'].flatMap(h=>[0,1].filter(i=>c64zr[i].per_card[h]&&c32zr[i].per_card[h]&&tlzr[i].per_card[h]).map(i=>2*(c64zr[i].per_card[h].mean-c32zr[i].per_card[h].mean)/64/tlzr[i].per_card[h].mean));
   const fr5=frs.length?[Math.round(20*Math.min(...frs))*5,Math.round(20*Math.max(...frs))*5]:[75,75];
   const bwOf=st=>S[`scpline/stride${st}/random`]?S[`scpline/stride${st}/random`].bytes_per_s.mean/1e9:null, bw64=bwOf(64), bw256=bwOf(256);
-  $('linetext').innerHTML=`Twice the difference between the stride-64 and stride-32 rows is what filling one 64 B line from the scratchpad into the L1 costs: <b>${fillz.toFixed(0)} pJ on zeros, ${fillr.toFixed(0)} pJ on random data</b> (${Object.keys(c64r.per_card).sort().map(h=>'a'+h.slice(-1)+' '+per(h).toFixed(0)).join(', ')} on random data) — ${f1(fillz/64)} and ${f1(fillr/64)} pJ per byte of line, roughly ${fr5[0]}–${fr5[1]}% of the ${f1(tlz.mean)} and ${f1(tlr.mean)} pJ/B a tensor load pays for the same bytes from the same scratchpad on the two cards (on aifoundry2 not separable from equal). What random data adds over zeros is about ${(fillr-fillz).toFixed(0)} pJ for the fill's 512 bits, ${((fillr-fillz)*1000/512).toFixed(0)} fJ per bit on the path from the shire cache into the L1.`+
+  $('linetext').innerHTML=`Twice the difference between the stride-64 and stride-32 rows is what filling one 64 B line from the scratchpad into the L1 costs: <b>${fillz.toFixed(0)} pJ on zeros, ${fillr.toFixed(0)} pJ on random data</b> (${CK.cardsIn(c64r.per_card).map(h=>cshort(h)+' '+per(h).toFixed(0)).join(', ')} on random data) — ${f1(fillz/64)} and ${f1(fillr/64)} pJ per byte of line, roughly ${fr5[0]}–${fr5[1]}% of the ${f1(tlz.mean)} and ${f1(tlr.mean)} pJ/B a tensor load pays for the same bytes from the same scratchpad on the two cards (on aifoundry2 not separable from equal). What random data adds over zeros is about ${(fillr-fillz).toFixed(0)} pJ for the fill's 512 bits, ${((fillr-fillz)*1000/512).toFixed(0)} fJ per bit on the path from the shire cache into the L1.`+
    (bw64&&bw256?` The 64 B tensor loads by stride show the banks: coming back to the same bank every time halves the bandwidth (${nf(bw256)} against ${nf(bw64)} GB/s, on both cards), but what it does to the energy per byte cannot be told apart from the other strides'.`:'');
  }
  /* ---- DRAM rows ---- */
@@ -508,7 +580,7 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   const PAT=[['seq','sequential: next bank, 32 columns per row visit'],['rowhit','same bank and row, next column, every access'],['rowmiss','a new row on every visit to a bank']];
   $('rowtab').innerHTML='<thead><tr><th>1 KB tensor loads from DRAM, 32 harts with 64 MB each</th><th class="num">zeros pJ/B</th><th class="num">random pJ/B</th><th class="num">GB/s</th></tr></thead><tbody>'+
    PAT.map(r=>{const z=rz2(r[0]),x=rr2(r[0]),cz=cb(`dramrow2/${r[0]}/zeros`),cx=cb(`dramrow2/${r[0]}/random`);return z&&x?`<tr><td>${r[1]}</td><td class="num">${cz?bt(cz,f1):z.pj_per_byte.mean.toFixed(1)+' ± '+z.pj_per_byte.se.toFixed(1)}</td><td class="num">${cx?bt(cx,f1):x.pj_per_byte.mean.toFixed(1)+' ± '+x.pj_per_byte.se.toFixed(1)}</td><td class="num">${(x.bytes_per_s.mean/1e9).toFixed(1)}</td></tr>`:'';}).join('')+
-   `<tr><td colspan="4" class="small">${cb('dramrow2/seq/random')&&cb('dramrow2/seq/random').n>3?'Mean and range over three passes on each of two cards.':'Mean and range over three passes on aifoundry2.'}</td></tr></tbody>`;
+   `</tbody><tfoot><tr><td colspan="4" class="small">${cb('dramrow2/seq/random')&&cb('dramrow2/seq/random').n>3?'Mean and range over three passes on each of two cards.':'Mean and range over three passes on aifoundry2.'}</td></tr></tfoot>`;
   /* how often each of the 32 harts comes back to its row: one 1 KB access per visit, at the aggregate rate / 32, 600 MHz */
   const gbs=PAT.flatMap(r=>['zeros','random'].map(o=>S[`dramrow2/${r[0]}/${o}`].bytes_per_s.mean)), cyc=gbs.map(v=>1024*32/v*600e6);
   const prem=o=>PAT.map(r=>100*(cb(`dramrow2/${r[0]}/${o}`).mean/cb(`tload/dram/${o}`).mean-1)), pr=prem('random'), pz=prem('zeros');
@@ -523,7 +595,7 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
    (l3&&l3z?` An earlier version of this experiment with all 1,024 minions and only 32 KB touched per hart fitted in the L3 and measured that instead: <b>${l3z.pj_per_byte.mean.toFixed(1)} pJ/B on zeros and ${l3.pj_per_byte.mean.toFixed(1)} on random data on ${CARDS[0]}</b>${l3b&&l3bz?`, <b>${l3bz.pj_per_byte.mean.toFixed(1)} and ${l3b.pj_per_byte.mean.toFixed(1)} on ${CARDS[1]}</b>, at ${nf(l3.bytes_per_s.mean/1e9)} GB/s on both`:` at ${nf(l3.bytes_per_s.mean/1e9)} GB/s`}, the L3 read by tensor loads through the mesh.`:'');
  }
  const nb=[0,1,2,3].map(k=>S[`neigh/${k}/random`]); if(nb.every(v=>v)){
-  $('neightab').innerHTML='<thead><tr><th>Neighbourhood reading the shire’s own scratchpad (random data)</th><th class="num">pJ/B, both cards</th><th class="num">per card</th><th class="num">GB/s</th></tr></thead><tbody>'+
+  $('neightab').innerHTML='<thead><tr><th>Neighbourhood reading the shire’s own scratchpad (random data)</th><th class="num">pJ/B, both cards</th><th class="num" data-nosort>per card</th><th class="num">GB/s</th></tr></thead><tbody>'+
    nb.map((v,k)=>{const c=cb(`neigh/${k}/random`);return `<tr><td>${k}: minions ${8*k}–${8*k+7}</td><td class="num">${c?bt(c,f2):v.pj_per_byte.mean.toFixed(2)}</td><td class="num small">${c?pcs(c,f2):v.pj_per_byte.se.toFixed(2)}</td><td class="num">${nf(v.bytes_per_s.mean/1e9)}</td></tr>`;}).join('')+'</tbody>';
  }
 })();
@@ -574,9 +646,9 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  /* in-shire rings first, then the 1 KB rings between shires by mean mesh distance, then the 128 B rows */
  const small=k=>k.endsWith('c4'), dist=k=>(MH[k]||{mean:0}).mean;
  const rows=[...D.comm.rows].sort((a,b)=>(small(a.ring)-small(b.ring))||(dist(a.ring)-dist(b.ring)));
- $('comm').innerHTML='<thead><tr><th>Ring, 1 KB messages unless said</th><th class="what">What moves</th><th class="num">Mesh hops, mean (range)</th><th class="num">pJ/B</th><th class="num">per card</th><th class="num">GB/s aggregate</th></tr></thead><tbody>'+
+ $('comm').innerHTML='<thead><tr><th>Ring, 1 KB messages unless said</th><th class="what" data-nosort>What moves</th><th class="num">Mesh hops, mean (range)</th><th class="num">pJ/B</th><th class="num" data-nosort>per card</th><th class="num">GB/s aggregate</th></tr></thead><tbody>'+
   rows.map(r=>`<tr><td title="${esc(r.what)}">${name(r.ring)} <span class="small">(${r.ring})</span></td><td class="small what">${r.what}</td><td class="num">${hopk(r.ring)}</td><td class="num">${val(r)}</td><td class="num small">${rg[r.ring]?pcs(rg[r.ring],f2):'a2, 2 runs'}</td><td class="num">${nf(r.gb_s)}</td></tr>`).join('')+
-  '<tr><td colspan="6"><b>Handing a slab to the next shire</b> <span class="small">(the relay: a stage reads a slab, adds 1 and writes it where the next stage reads it)</span></td></tr>'+
+  '</tbody><tbody><tr><td colspan="6"><b>Handing a slab to the next shire</b> <span class="small">(the relay: a stage reads a slab, adds 1 and writes it where the next stage reads it)</span></td></tr>'+
   [['hop','in the next shire’s scratchpad','write where the next shire reads, read there; the next shire by ID',MH.xshire1?hopk('xshire1'):'—'],['dram','through DRAM','write to DRAM, read back','—'],['scp','kept in this shire’s scratchpad','write and read in place','0']].map(m=>
    `<tr><td title="${esc(m[2])}">${m[1]}</td><td class="small what">${m[2]}</td><td class="num">${m[3]}</td><td class="num">${rr[m[0]]?bt(rr[m[0]],f1):'<b>'+f1(rp[m[0]].pj_per_byte)+'</b>'}</td><td class="num small">${rr[m[0]]?pcs(rr[m[0]],f1):'a2 only'}</td><td class="num">${nf(rp[m[0]].bytes_per_s/1e9)}</td></tr>`).join('')+
   '</tbody>';
@@ -615,11 +687,11 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  /* the chip barrier's waiting energy: 1,024 minions stalled for its length at the pooled stalled power (section 2) */
  const stallW=HOT?HOT.mean:at.contended.over_idle_w, bar=stallW*D.sync.barrier_cycles_chip/0.6e9*1e6;
  const conm=hn.contended?hn.contended.mean:at.contended.nj_per_op, sprm=hn.spread?hn.spread.mean:at.spread.nj_per_op;
- $('sync').innerHTML='<thead><tr><th>Event</th><th class="num">Energy</th><th class="num">per card</th><th class="num">Time</th><th>Note</th></tr></thead><tbody>'+
+ $('sync').innerHTML='<thead><tr><th>Event</th><th class="num">Energy</th><th class="num" data-nosort>per card</th><th class="num">Time</th><th data-nosort>Note</th></tr></thead><tbody>'+
   `<tr><td>Global atomic, one line, 1,024 requesters</td><td class="num">${hn.contended?bt(hn.contended,f1)+' nJ':'<b>'+f1(at.contended.nj_per_op)+' nJ</b>'}</td><td class="num small">${hn.contended?pcs(hn.contended,f1):'a2 only'}</td><td class="num">${f0(at.contended.cycles_per_op)} cycles each at the bank</td><td class="small">the bank serialises and every requester waits its turn; the host shire's own loads stop</td></tr>`+
   `<tr><td>Global atomic, 32 lines, one per shire</td><td class="num">${hn.spread?bt(hn.spread,f2)+' nJ':f1(at.spread.nj_per_op)+' nJ'}</td><td class="num small">${hn.spread?pcs(hn.spread,f2):'a2 only'}</td><td class="num">${f2(at.spread.cycles_per_op)} cycles each, aggregate</td><td class="small">the same instruction, ${f0(conm/sprm)}× cheaper</td></tr>`+
   `<tr><td>Uncontended remote atomic round trip</td><td class="num">—</td><td></td><td class="num">${f0(D.sync.remote_atomic_latency_cycles)} cycles</td><td class="small">the same on both cards</td></tr>`+
-  `<tr><td>Chip-wide barrier, ${nf(D.sync.barrier_participants||1024)} minions</td><td class="num">≈ ${f0(bar)} µJ of waiting</td><td></td><td class="num">${nf(D.sync.barrier_cycles_chip)} cycles</td><td class="small">derived: 1,024 minions stalled at ${f1(stallW/1024*1e3)} mW (section 2) for its length; the length is one run on aifoundry2 (18 September)</td></tr>`+
+  `<tr><td>Chip-wide barrier, ${nf(D.sync.barrier_participants||1024)} minions</td><td class="num" data-sort="${1000*bar}">≈ ${f0(bar)} µJ of waiting</td><td></td><td class="num">${nf(D.sync.barrier_cycles_chip)} cycles</td><td class="small">derived: 1,024 minions stalled at ${f1(stallW/1024*1e3)} mW (section 2) for its length; the length is one run on aifoundry2 (18 September)</td></tr>`+
   `<tr><td>FLB (fast local barrier) + credit barrier, one shire</td><td class="num">—</td><td></td><td class="num">237 cycles</td><td class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a>, aifoundry2, 18 September</td></tr>`+
   `<tr><td>TensorReduce (the hardware reduction tree) + broadcast, 32 minions</td><td class="num">—</td><td></td><td class="num">432 cycles</td><td class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a>, aifoundry2, 18 September</td></tr>`+
   '</tbody>';
@@ -629,37 +701,46 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
 /* ---------- 7.1 build a workload's energy (em-v1) ---------- */
 (function(){
  const rg=RR.rings_pj_per_byte||{}, rr=RR.relay_pj_per_byte||{};
- /* ENT: every event the calculator can price. e(o) is {mean,lo,hi} per event, rate(o) what the card reached per second
-    running it alone (aifoundry2), unit MAC | instr | byte; issue rows share the harts' issue slots. */
- const ENT={}, GROUPS=[], put=(grp,id,o)=>{ENT[id]=Object.assign({id},o); let gp=GROUPS.find(g=>g[0]===grp); if(!gp)GROUPS.push(gp=[grp,[]]); gp[1].push(id);};
+ /* ENT: every event the calculator can price, on card h ('pooled' or a card id from the page's card bus).
+    e(o,h) is {mean,lo,hi} per event: pooled, the mean over every pass on every card and their range; on a card, its own
+    mean and the range over its passes (± its standard error for the tensor unit and the rings); null when h has no value.
+    rate(o,h) is what the card reached per second running it alone: pooled, the mean over the cards; null when h did not
+    run it. rcard: the one card a row's rate was timed on, when only one was (the tensor unit, the rings), named in the
+    readout. unit MAC | instr | byte; issue rows share the harts' issue slots. */
+ const TCARD=srcCard(D.tensor.source&&D.tensor.source.rows), RCARD=srcCard(D.comm.source);
+ const ENT={}, GROUPS=[], put=(grp,id,o)=>{ENT[id]=Object.assign({id,rcard:null},o); let gp=GROUPS.find(g=>g[0]===grp); if(!gp)GROUPS.push(gp=[grp,[]]); gp[1].push(id);};
  const tcfg=(ty,o)=>`${ty}_${o==='zeros'?'zeros':'randn'}`;
  ['fp32','fp16','int8'].forEach(ty=>{if(!TB[tcfg(ty,'random')])return; put('Tensor unit, per multiply-add','t:'+ty,{label:`TensorFMA ${ty}, all 1,024 minions`,short:`TensorFMA ${ty}`,unit:'MAC',issue:true,
-   e:o=>TB[tcfg(ty,o)], rate:o=>D.tensor.rows.find(r=>r.config===tcfg(ty,o)).per_s});});
- const catE=(grp,k,sfx,label,short,issue,unit)=>{if(!CB[`${k}/random${sfx}`])return; const ok=o=>CB[`${k}/${o}${sfx}`]?o:'random';
-  put(grp,'c:'+k+sfx,{label,short:short||label,unit,issue,e:o=>cb(`${k}/${ok(o)}${sfx}`),rate:o=>{const s=SA[`${k}/${ok(o)}${sfx}`]; return unit==='byte'?s.bytes_per_s.mean:s.ops_per_s.mean;},only:CB[`${k}/zeros${sfx}`]?null:'random'});};
+   e:(o,h)=>pcv(TB[tcfg(ty,o)],h), rate:o=>D.tensor.rows.find(r=>r.config===tcfg(ty,o)).per_s, rcard:TCARD});});
+ const catE=(grp,k,sfx,label,short,issue,unit)=>{if(!CB[`${k}/random${sfx}`])return; const ok=o=>`${k}/${CB[`${k}/${o}${sfx}`]?o:'random'}${sfx}`;
+  put(grp,'c:'+k+sfx,{label,short:short||label,unit,issue,e:(o,h)=>cbc(ok(o),h),rate:(o,h)=>rateC(ok(o),unit==='byte'?'bytes_per_s':'ops_per_s',h),only:CB[`${k}/zeros${sfx}`]?null:'random'});};
  CLASSES.forEach(c=>c[1].forEach(n=>catE(c[0]+' (both harts, per instruction)',n,'/h2',n,n,true,'instr')));
  [['tload/scp','own scratchpad, tensor load'],['tstore/scp','own scratchpad, tensor store'],['l1fill/stride32','own scratchpad, 32 B loads through the L1'],['tload/dram','DRAM, tensor load'],['tstore/dram','DRAM, tensor store'],['st_stream/dram','DRAM, stores through the L1'],['dramrow/stride8K','L3, tensor load through the mesh']]
   .forEach(([k,l])=>catE('Bytes through the memory hierarchy (per byte)',k,'',l,l,false,'byte'));
  [1,2,3,4,5,6,8].forEach(d=>catE('Bytes from a scratchpad d hops away (tensor loads, per byte)',`wire/hop${d}`,'',`a scratchpad ${d} hop${d>1?'s':''} away`,null,false,'byte'));
- if(wireAt(HH,'random'))put('Bytes from a scratchpad d hops away (tensor loads, per byte)','w:hh',{label:`a scratchpad ${f1(HH)} hops away (interpolated; the relay's next shire)`,short:`a scratchpad ${f1(HH)} hops away`,unit:'byte',issue:false,e:o=>wireAt(HH,o),
-   rate:o=>{const lo=Math.floor(HH),hi=Math.ceil(HH),a=SA[`wire/hop${lo}/${o}`].bytes_per_s.mean,b=SA[`wire/hop${hi}/${o}`].bytes_per_s.mean; return a+(b-a)*(hi>lo?(HH-lo)/(hi-lo):0);}});
- D.comm.rows.filter(r=>!r.ring.endsWith('c4')&&rg[r.ring]).forEach(r=>put('Between cores: rings, 1 KB messages (per byte)','r:'+r.ring,{label:`ring ${r.ring}`,short:`ring ${r.ring}`,unit:'byte',issue:false,e:()=>rg[r.ring],rate:()=>r.gb_s*1e9,only:'own'}));
+ if(wireAt(HH,'random'))put('Bytes from a scratchpad d hops away (tensor loads, per byte)','w:hh',{label:`a scratchpad ${f1(HH)} hops away (interpolated; the relay's next shire)`,short:`a scratchpad ${f1(HH)} hops away`,unit:'byte',issue:false,e:(o,h)=>wireAt(HH,o,h),
+   rate:(o,h)=>{const lo=Math.floor(HH),hi=Math.ceil(HH),a=rateC(`wire/hop${lo}/${o}`,'bytes_per_s',h),b=rateC(`wire/hop${hi}/${o}`,'bytes_per_s',h); return a==null||b==null?null:a+(b-a)*(hi>lo?(HH-lo)/(hi-lo):0);}});
+ D.comm.rows.filter(r=>!r.ring.endsWith('c4')&&rg[r.ring]).forEach(r=>put('Between cores: rings, 1 KB messages (per byte)','r:'+r.ring,{label:`ring ${r.ring}`,short:`ring ${r.ring}`,unit:'byte',issue:false,e:(o,h)=>pcv(rg[r.ring],h),rate:()=>r.gb_s*1e9,only:'own',rcard:RCARD}));
  const tRow=(ty,o)=>D.tensor.rows.find(r=>r.config===tcfg(ty,o));
  const relayP=(m,rd,wr,label)=>({label,rows:[[rd,rp[m].bytes_per_s/2],[wr,rp[m].bytes_per_s/2]],relay:m});
  const PRE=[['fp32','fp32 matmul',{rows:[['t:fp32',1]],tensor:'fp32'}],['fp16','fp16 matmul',{rows:[['t:fp16',1]],tensor:'fp16'}],['int8','int8 matmul',{rows:[['t:int8',1]],tensor:'int8'}],
   ['dram','stream from DRAM (tensor loads)',{rows:[['c:tload/dram',1]]}],
   ['rhop','relay: next shire',relayP('hop','w:hh','c:tstore/scp')],['rscp','relay: own scratchpad',relayP('scp','c:l1fill/stride32','c:tstore/scp')],['rdram','relay: through DRAM',relayP('dram','c:tload/dram','c:tstore/dram')]]
   .filter(p=>p[2].rows.every(r=>ENT[r[0]]));
- const st={T:80,o:'random',dur:7,rows:[{id:'',p:0},{id:'',p:0},{id:'',p:0}],preset:'fp32',capped:false};
+ /* st.card follows the page's card bus; st.view 'one' draws the chosen card's bar, 'cmp' one bar per card */
+ const st={T:80,o:'random',dur:7,rows:[{id:'',p:0},{id:'',p:0},{id:'',p:0}],preset:'fp32',capped:false,card:'pooled',view:'one'};
  const COL=['var(--c1)','var(--c2)','var(--c3)'];
- /* a preset gives each row a fraction of its measured rate (a number ≤ 1) or an absolute rate per second (a number > 1) */
+ /* a preset gives each row a fraction of its measured rate (a number ≤ 1) or an absolute rate per second (a number > 1),
+    the fraction taken of the pooled rate so that a preset does not depend on the card */
  function load(id){const p=PRE.find(q=>q[0]===id)[2]; st.preset=id;
-  st.rows=[0,1,2].map(i=>{const r=p.rows[i]; if(!r)return {id:'',p:0}; const e=ENT[r[0]], v=r[1]>1?r[1]/e.rate(st.o):r[1]; return {id:r[0],p:Math.min(1,v)};});
+  st.rows=[0,1,2].map(i=>{const r=p.rows[i]; if(!r)return {id:'',p:0}; const e=ENT[r[0]], v=r[1]>1?r[1]/e.rate(st.o,'pooled'):r[1]; return {id:r[0],p:Math.min(1,v)};});
   sync(); upd();}
  const pbox=$('calc-presets'), pbtn={};
  PRE.forEach(([id,label])=>{const b=document.createElement('button'); b.type='button'; b.textContent=label; b.setAttribute('aria-pressed','false'); b.addEventListener('click',()=>load(id)); pbox.appendChild(b); pbtn[id]=b;});
  const tr=CK.range('calc-temp',{label:'die temperature',min:45,max:95,step:1,value:80,fmt:v=>v+' °C',onInput:v=>{st.T=v; upd();}});
  const ds=CK.seg('calc-data',{label:'data',options:[['random','random'],['zeros','zeros']],value:'random',onChange:v=>{st.o=v; sync(); upd();}});
+ CK.cardSeg('calc-card',{cards:CARDLIST,pooled:true,label:'priced on',onChange:v=>{st.card=v; sync(); upd();}});
+ CK.seg('calc-view',{label:'show',options:[['one','one bar'],['cmp','compare cards']],value:'one',onChange:v=>{st.view=v; upd();}});
  const dur=$('calc-dur'); dur.addEventListener('input',()=>{const v=+dur.value; if(v>0){st.dur=v; upd();}});
  /* the three event rows: a select, a rate slider, and the absolute rate */
  const rowsBox=$('calc-rows'), UI=[];
@@ -677,52 +758,95 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  const issueSum=skip=>st.rows.reduce((s,r,k)=>s+(k!==skip&&r.id&&ENT[r.id].issue?r.p:0),0);
  function sync(skipRange){st.rows.forEach((r,i)=>{const u=UI[i], e=r.id?ENT[r.id]:null; u.sel.value=r.id; u.rng.disabled=!e;
    if(skipRange!==i)u.rng.value=Math.round(100*r.p);
-   const s=e?`${f0(100*r.p)}% · ${rateTxt(e,r.p*e.rate(st.o))}`:'—'; u.out.textContent=s; u.rng.setAttribute('aria-valuetext',s);});
+   const rt=e?e.rate(st.o,st.card):null, s=e?`${f0(100*r.p)}% · ${rt!=null?rateTxt(e,r.p*rt):'not run on '+cname(st.card)}`:'—'; u.out.textContent=s; u.rng.setAttribute('aria-valuetext',s);});
   for(const id in pbtn)pbtn[id].setAttribute('aria-pressed',String(id===st.preset));}
- /* price the current state */
- function price(o,T){const fix=R.P_fix_w, leak=lawAt(T)-R.P_fix_w, rows=[];
-  st.rows.forEach((r,i)=>{if(!r.id||r.p<=0)return; const e=ENT[r.id], c=e.e(o), rate=r.p*e.rate(o); if(!c)return;
+ /* the idle law priced for card h: its own when the data has one (rest.per_card[h] with P_fix_w, A_leak_80_w, T_L_c),
+    otherwise the law fitted on LAWCARD in section 1, the only one fitted so far */
+ const lawOf=h=>{const own=h&&h!=='pooled'&&R.per_card&&R.per_card[h];
+  return own&&own.P_fix_w!=null&&own.A_leak_80_w!=null&&own.T_L_c?{P_fix_w:own.P_fix_w,A_leak_80_w:own.A_leak_80_w,T_L_c:own.T_L_c,card:h}:{P_fix_w:R.P_fix_w,A_leak_80_w:R.A_leak_80_w,T_L_c:R.T_L_c,card:LAWCARD};};
+ /* price the current state on card h; a row card h has no value or rate for is left out (miss), never priced at zero */
+ function price(o,T,h){const L=lawOf(h), fix=L.P_fix_w, leak=L.A_leak_80_w*Math.exp((T-80)/L.T_L_c), rows=[], miss=[];
+  st.rows.forEach((r,i)=>{if(!r.id||r.p<=0)return; const e=ENT[r.id], c=e.e(o,h), rt=e.rate(o,h); if(!c||rt==null){miss.push(e); return;} const rate=r.p*rt;
    rows.push({i,e,rate,w:c.mean*rate*1e-12,lo:c.lo*rate*1e-12,hi:c.hi*rate*1e-12,c,op:e.only==='own'?'its own data':e.only&&o!=='random'?'random only':o});});
   const dyn=rows.reduce((s,r)=>s+r.w,0), lo=rows.reduce((s,r)=>s+r.lo,0), hi=rows.reduce((s,r)=>s+r.hi,0);
-  return {fix,leak,rows,dyn,lo,hi,tot:fix+leak+dyn};}
- /* the measurement the preset reproduces: the ablation's board power at its 80 °C launch, or the relay's measured
-    energy per byte times its rate, over idle (comparable at any temperature, like every priced row) */
- function measured(){const p=st.preset&&PRE.find(q=>q[0]===st.preset); if(!p)return null; const q=p[2];
-  if(q.tensor){const t=tRow(q.tensor,st.o); if(!t||t.idle_w==null)return null; return {tot:t.idle_w+t.over_idle_w,T:80,label:`measured ${f1(t.idle_w+t.over_idle_w)} W`,src:'the 21 September ablation on aifoundry2, launched at 80 °C, one of the runs behind the price'};}
-  if(q.relay&&rr[q.relay]){const m=rr[q.relay], w=m.mean*rp[q.relay].bytes_per_s*1e-12; return {over:w,label:`measured ${f1(w)} W over idle`,src:`the relay, ${f1(m.mean)} pJ/B [${f1(m.lo)}–${f1(m.hi)}] × ${nf(rp[q.relay].bytes_per_s/1e9)} GB/s, both cards (n = ${m.n})`,relay:q.relay};}
+  return {fix,leak,rows,dyn,lo,hi,tot:fix+leak+dyn,miss,law:L,h};}
+ /* the measurement the preset reproduces on card h: the ablation's board power at its 80 °C launch (TCARD's; shown for
+    the pooled bar too unless strict), or the relay's measured energy per byte times its rate, over idle (comparable at
+    any temperature, like every priced row; per card from the reruns) */
+ function measured(h,strict){const p=st.preset&&PRE.find(q=>q[0]===st.preset); if(!p)return null; const q=p[2];
+  if(q.tensor){if(h!==TCARD&&(strict||h!=='pooled'))return null; const t=tRow(q.tensor,st.o); if(!t||t.idle_w==null)return null;
+   return {tot:t.idle_w+t.over_idle_w,T:80,label:`measured ${f1(t.idle_w+t.over_idle_w)} W`,src:`the 21 September ablation on ${TCARD}, launched at 80 °C, one of the runs behind the price`};}
+  if(q.relay&&rr[q.relay]){const m0=rr[q.relay], pooled=h==='pooled', m=pooled?m0:CK.pick(m0,h); if(!m)return null; const bps=rp[q.relay].bytes_per_s, w=m.mean*bps*1e-12;
+   return {over:w,label:`measured ${f1(w)} W over idle`,src:pooled?`the relay, ${f1(m0.mean)} pJ/B [${f1(m0.lo)}–${f1(m0.hi)}] × ${nf(bps/1e9)} GB/s, ${ALLC} (n = ${m0.n})`:`the relay on ${cname(h)}, ${f1(m.mean)} ± ${f1(m.se||0)} pJ/B × ${nf(bps/1e9)} GB/s (n = ${m.n})`,relay:q.relay};}
   return null;}
+ /* what a price rests on, in words: whose means and rates, whose idle law, and which rows the card has no value for */
+ const sgn=v=>(v<0?'−':'+')+f2(Math.abs(v)), LR=D.catalogue.idle_law_residual||{};
+ function basis(pz){const h=pz.h, L=pz.law, x1=pz.rows.filter(r=>r.e.rcard&&r.e.rcard!==h), one=[...new Set(x1.map(r=>r.e.rcard))];
+  let s=h==='pooled'?`Priced on ${ALLC}, pooled: each row's mean over every pass on them, at the mean of the rates they reached`
+   :`Priced on ${cname(h)}: each row's own mean there (whisker: the range over its passes, or ± its standard error) at the rate it reached there`;
+  if(x1.length)s+=`; ${andList(x1.map(r=>r.e.short))} at ${andList(one)}'s rate, the only card ${x1.length>1?'they were':'it was'} timed on`;
+  s+=L.card===h?`; idle: ${cname(h)}'s own law`:`; idle: ${L.card}'s law (section 1), the only one fitted`;
+  if(h!=='pooled'&&L.card!==h&&LR[h]&&LR[h].die_c)s+=` (${cname(h)} sat ${sgn(LR[h].mean)} W from it at ${f0(LR[h].die_c[0])}–${f0(LR[h].die_c[1])} °C in the catalogue's idle stretches)`;
+  s+='.'; if(pz.miss.length)s+=` Not measured on ${cname(h)}, so left out: ${andList(pz.miss.map(e=>e.short))}.`;
+  return s;}
+ const bars=()=>st.view==='cmp'?['pooled'].concat(CARDLIST):[st.card];
+ const spread=q=>q.rows.length&&!q.rows.every(r=>r.c.nobar);   /* a whisker only when some row carries a spread */
+ const barName=h=>h==='pooled'?`${ALLC}, pooled`:cname(h);
  const ro=CK.readout('calc-readout');
- const fc=CK.frame('calc',{height:W=>W<600?128:118,label:"Board power priced from the tables",draw:f=>{
-  const pz=price(st.o,st.T), M=measured(), mx=Math.max(80,Math.ceil((pz.fix+pz.leak+pz.hi+1)/20)*20);
-  const L=8,Rr=16,T=34,bh=34, x=CK.lin(0,mx,L,f.W-Rr), y0=T;
+ const fc=CK.frame('calc',{height:W=>st.view==='cmp'?104+(bars().length-1)*44:(W<600?128:118),label:"Board power priced from the tables, for the chosen card or one bar per card",draw:f=>{
+  const cmp=st.view==='cmp', hs=bars(), PZ=hs.map(h=>price(st.o,st.T,h)), MS=hs.map(h=>measured(h,cmp));
+  const mx=Math.max(80,...PZ.map(pz=>Math.ceil((pz.fix+pz.leak+pz.hi+1)/20)*20));
+  /* one bar: the original layout; compare: a name line above each bar */
+  const L=8,Rr=16,T=cmp?24:34,bh=cmp?20:34,pitch=44, x=CK.lin(0,mx,L,f.W-Rr), top=i=>cmp?T+i*pitch+18:T, bot=top(hs.length-1)+bh;
   const ax=CK.el('g',{'aria-hidden':'true'},f.svg);
-  x.ticks(f.narrow?4:8).forEach(t=>{CK.el('line',{x1:x(t),x2:x(t),y1:T-6,y2:T+bh+6,class:'grid-line'},ax); CK.txt(ax,x(t),T+bh+22,CK.fmt.num(t),'tick','middle');});
+  x.ticks(f.narrow?4:8).forEach(t=>{CK.el('line',{x1:x(t),x2:x(t),y1:(cmp?T:top(0))-6,y2:bot+6,class:'grid-line'},ax); CK.txt(ax,x(t),bot+22,CK.fmt.num(t),'tick','middle');});
   CK.txt(ax,f.W-Rr,f.H-4,'board power, W','lab','end');
-  const segs=[['fixed',pz.fix,'var(--ref)',`<b>fixed</b>: ${f1(pz.fix)} W, the idle law's constant at its best fit (section 1)`],['leakage',pz.leak,'var(--c4)',`<b>leakage at ${st.T} °C</b>: ${f1(pz.leak)} W (section 1)`]]
-   .concat(pz.rows.map(r=>[r.e.short,r.w,COL[r.i],`<b>${r.e.label}</b>, ${r.op}<br>${fs(r.c.mean)} ${r.e.unit==='byte'?'pJ/B':r.e.unit==='MAC'?'pJ per MAC':'pJ per instruction'} [${fs(r.c.lo)}–${fs(r.c.hi)}] × ${rateTxt(r.e,r.rate)} = <b>${f1(r.w)} W</b> [${f1(r.lo)}–${f1(r.hi)}]`]));
-  let acc=0; const nodes=[];
-  segs.forEach(s=>{const w=Math.max(0,x(acc+s[1])-x(acc)-2); if(w>0.3)nodes.push(mark(f,f.svg,'rect',{x:x(acc),y:y0,width:w,height:bh,fill:s[2],rx:2},0,s[3])); acc+=s[1];});
-  if(pz.rows.length){const a=x(pz.fix+pz.leak+pz.lo), b=x(pz.fix+pz.leak+pz.hi), cy=y0+bh/2;
-   CK.el('line',{x1:a,x2:b,y1:cy,y2:cy,stroke:'var(--ink)','stroke-width':1.5},f.svg); [a,b].forEach(v=>CK.el('line',{x1:v,x2:v,y1:cy-6,y2:cy+6,stroke:'var(--ink)','stroke-width':1.5},f.svg));}
-  if(M){const v=M.tot!=null?M.tot:pz.fix+pz.leak+M.over, live=M.T==null||Math.abs(st.T-M.T)<=2, xm=x(v);
-   CK.el('line',{x1:xm,x2:xm,y1:y0-8,y2:y0+bh+8,stroke:live?'var(--ink)':'var(--muted)','stroke-width':2,'stroke-dasharray':live?null:'3 3'},f.svg);
-   const lab=live?M.label:`measured at ${M.T} °C`, right=xm>f.W*0.6;
-   const t=CK.txt(f.svg,right?xm+4:xm+4,y0-12,lab,live?'lab-strong':'tick',right&&xm>f.W-150?'end':'start'); if(right&&xm>f.W-150)t.setAttribute('x',xm-4);}
+  const nodes=[];
+  hs.forEach((h,i)=>{const pz=PZ[i], M=MS[i], y0=top(i), who=cmp?`<b>${barName(h)}</b> · `:'';
+   if(cmp)CK.txt(f.svg,L,y0-6,`${barName(h)}: ${f1(pz.tot)} W${pz.miss.length?` (no ${andList(pz.miss.map(e=>e.short))})`:''}`,h===st.card?'lab-strong':'lab','start');
+   const segs=[['fixed',pz.fix,'var(--ref)',`${who}<b>fixed</b>: ${f1(pz.fix)} W, the idle law's constant at its best fit (section 1${pz.law.card!==h?`, ${pz.law.card}'s law`:''})`],
+     ['leakage',pz.leak,'var(--c4)',`${who}<b>leakage at ${st.T} °C</b>: ${f1(pz.leak)} W (section 1${pz.law.card!==h?`, ${pz.law.card}'s law`:''})`]]
+    .concat(pz.rows.map(r=>[r.e.short,r.w,COL[r.i],`${who}<b>${r.e.label}</b>, ${r.op}<br>${fs(r.c.mean)} ${r.e.unit==='byte'?'pJ/B':r.e.unit==='MAC'?'pJ per MAC':'pJ per instruction'} ${barOf(r.c,fs)} × ${rateTxt(r.e,r.rate)}${r.e.rcard&&r.e.rcard!==h?` (${r.e.rcard}'s rate)`:''} = <b>${f1(r.w)} W</b>${r.c.nobar?'':` [${f1(r.lo)}–${f1(r.hi)}]`}`]));
+   let acc=0;
+   segs.forEach(s=>{const w=Math.max(0,x(acc+s[1])-x(acc)-2); if(w>0.3)nodes.push(mark(f,f.svg,'rect',{x:x(acc),y:y0,width:w,height:bh,fill:s[2],rx:2},0,s[3])); acc+=s[1];});
+   if(spread(pz)){const a=x(pz.fix+pz.leak+pz.lo), b=x(pz.fix+pz.leak+pz.hi), cy=y0+bh/2;
+    CK.el('line',{x1:a,x2:b,y1:cy,y2:cy,stroke:'var(--ink)','stroke-width':1.5},f.svg); [a,b].forEach(v=>CK.el('line',{x1:v,x2:v,y1:cy-6,y2:cy+6,stroke:'var(--ink)','stroke-width':1.5},f.svg));}
+   if(M){const v=M.tot!=null?M.tot:pz.fix+pz.leak+M.over, live=M.T==null||Math.abs(st.T-M.T)<=2, xm=x(v), ext=cmp?4:8;
+    CK.el('line',{x1:xm,x2:xm,y1:y0-ext,y2:y0+bh+ext,stroke:live?'var(--ink)':'var(--muted)','stroke-width':2,'stroke-dasharray':live?null:'3 3'},f.svg);
+    const lab=live?M.label:`measured at ${M.T} °C`, right=xm>f.W*0.6, ly=cmp?y0-6:y0-12;
+    if(!cmp){const t=CK.txt(f.svg,xm+4,ly,lab,live?'lab-strong':'tick',right&&xm>f.W-150?'end':'start'); if(right&&xm>f.W-150)t.setAttribute('x',xm-4);}
+    else if(!f.narrow)CK.txt(f.svg,f.W-Rr,ly,lab,live?'lab-strong':'tick','end');}});
   CK.keynav(f,nodes);
  }});
- function upd(){fc.redraw(); const pz=price(st.o,st.T), M=measured(), J=pz.tot*st.dur, first=pz.rows[0];
-  CK.legend('calc-legend',[{key:'f',label:`fixed ${f1(pz.fix)} W`,mark:'box',color:'var(--ref)'},{key:'l',label:`leakage at ${st.T} °C ${f1(pz.leak)} W`,mark:'box',color:'var(--c4)'}]
+ function upd(){fc.redraw(); const cmp=st.view==='cmp', h=st.card, pz=price(st.o,st.T,h), M=measured(h,false), J=pz.tot*st.dur, first=pz.rows[0];
+  const used=st.rows.map((r,i)=>r.id&&r.p>0?{key:'r'+i,label:ENT[r.id].short,mark:'box',color:COL[i]}:null).filter(Boolean);
+  CK.legend('calc-legend',cmp?[{key:'f',label:'fixed',mark:'box',color:'var(--ref)'},{key:'l',label:`leakage at ${st.T} °C`,mark:'box',color:'var(--c4)'}].concat(used)
+    .concat(bars().some(b=>measured(b,true))?[{key:'m',label:'measurement',mark:'line',color:'var(--ink)'}]:[])
+   :[{key:'f',label:`fixed ${f1(pz.fix)} W`,mark:'box',color:'var(--ref)'},{key:'l',label:`leakage at ${st.T} °C ${f1(pz.leak)} W`,mark:'box',color:'var(--c4)'}]
    .concat(pz.rows.map(r=>({key:'r'+r.i,label:`${r.e.short} ${f1(r.w)} W`,mark:'box',color:COL[r.i]}))).concat(M?[{key:'m',label:'measurement',mark:'line',color:'var(--ink)'}]:[]));
+  if(cmp){const PZ=bars().map(b=>price(st.o,st.T,b));
+   let s=`At ${st.T} °C, ${st.o==='zeros'?'on zeros':'on random data'}: `+PZ.map(q=>{const m=measured(q.h,true); return `${barName(q.h)} <b>${f1(q.tot)} W</b>${spread(q)?` [${f1(q.fix+q.leak+q.lo)}–${f1(q.fix+q.leak+q.hi)}]`:''}, ${nf(q.tot*st.dur)} J over ${CK.fmt.num(st.dur)} s`+
+    (m?m.tot!=null&&Math.abs(st.T-m.T)>2?` (measured at ${m.T} °C)`:` (${m.label})`:'');}).join('; ')+'.';
+   const x1=[...new Set(PZ.flatMap(q=>q.rows.filter(r=>r.e.rcard).map(r=>r.e.short)))], rc=[...new Set(PZ.flatMap(q=>q.rows.filter(r=>r.e.rcard).map(r=>r.e.rcard)))];
+   s+=`<br><span class="small">Each bar is priced on its own card: that card's means and the rates it reached (the pooled bar: every pass on ${ALLC}, the mean rate)`+
+    (x1.length?`; ${andList(x1)} at ${andList(rc)}'s rate on every bar, the only card ${x1.length>1?'they were':'it was'} timed on`:'')+
+    `; idle: ${andList([...new Set(PZ.map(q=>q.law.card))])}'s law on ${PZ.every(q=>q.law.card===PZ[0].law.card)?'every bar, the only one fitted':'the bars without their own'}.`+
+    PZ.filter(q=>q.miss.length).map(q=>` Not measured on ${cname(q.h)}, so left out of its bar: ${andList(q.miss.map(e=>e.short))}.`).join('')+
+    (bars().some(b=>measured(b,true))?` The measurement is drawn on the ${PZ.filter(q=>measured(q.h,true)).length>1?'bars':'bar'} it was made on.`:'')+'</span>';
+   if(st.capped)s+=' <span class="small">Instruction rows share the harts’ issue slots, so together they stop at 100%.</span>';
+   ro.set(s); return;}
   /* per useful operation: every row in the first row's unit counts (a relay's read row and write row are its bytes moved) */
   const same=first?pz.rows.filter(r=>r.e.unit===first.e.unit):[], k=first&&first.e.unit==='MAC'?2:1, ops=same.reduce((a,r)=>a+k*r.rate,0), dw=same.reduce((a,r)=>a+r.w,0);
   const per=first&&ops>0?[pz.tot/ops*1e12,{MAC:first.e.id==='t:int8'?'pJ per int8 op':'pJ per FLOP',byte:'pJ per byte',instr:'pJ per instruction'}[first.e.unit],dw/ops*1e12]:null;   /* two ops per multiply-add */
-  let s=`<b>${f1(pz.tot)} W</b>${pz.rows.length?` [${f1(pz.fix+pz.leak+pz.lo)}–${f1(pz.fix+pz.leak+pz.hi)}]`:''} at ${st.T} °C: idle ${f1(pz.fix+pz.leak)} W (${f1(pz.fix)} fixed + ${f1(pz.leak)} leakage at the law's best fit)`+pz.rows.map(r=>` + ${f1(r.w)} W ${r.e.short}`).join('')+
+  let s=`<b>${f1(pz.tot)} W</b>${spread(pz)?` [${f1(pz.fix+pz.leak+pz.lo)}–${f1(pz.fix+pz.leak+pz.hi)}]`:''} at ${st.T} °C: idle ${f1(pz.fix+pz.leak)} W (${f1(pz.fix)} fixed + ${f1(pz.leak)} leakage at the law's best fit)`+pz.rows.map(r=>` + ${f1(r.w)} W ${r.e.short}`).join('')+
    `. Over ${CK.fmt.num(st.dur)} s: <b>${nf(J)} J</b>, ${f0(100*(pz.fix+pz.leak)/pz.tot)}% of it static.`;
   if(per)s+=` That is ${CK.fmt.num(per[0])} ${per[1]} with the card's idle, ${CK.fmt.num(per[2])} of it the ${per[1].replace('pJ per ','')}s themselves.`;
   if(M){if(M.tot!=null)s+=Math.abs(st.T-M.T)<=2?` The measurement: ${f1(M.tot)} W (${M.src}).`:` The measurement (${f1(M.tot)} W) was at ${M.T} °C; move the temperature there to compare.`;
-   else{const pzz=price('zeros',st.T), pzr=price('random',st.T), inb=M.over<pzz.dyn?'below the bracket':M.over>pzr.dyn?'above the bracket':'inside the bracket';
+   else{const pzz=price('zeros',st.T,h), pzr=price('random',st.T,h), inb=M.over<pzz.dyn?'below the bracket':M.over>pzr.dyn?'above the bracket':'inside the bracket';
     s+=` Priced ${f1(pzz.dyn)} W on zeros … ${f1(pzr.dyn)} W on random data over idle; measured ${f1(M.over)} W (${M.src}): ${inb}.`;}}
+  else if(st.preset&&PRE.find(q=>q[0]===st.preset)[2].tensor&&h!=='pooled'&&h!==TCARD)s+=` The measurement behind this preset is ${TCARD}'s; pick it, or all cards, to compare.`;
   if(st.capped)s+=' <span class="small">Instruction rows share the harts’ issue slots, so together they stop at 100%.</span>';
+  s+=`<br><span class="small">${basis(pz)}</span>`;
   ro.set(s);}
  sync(); load('fp32');
  /* text beneath: the default preset against its measurement, and the static share at 80 °C */
@@ -732,7 +856,8 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
  /* what cooling from 80 to 60 C saves, over the fits in R.profile (each its own T_L) */
  const sv=R.profile?R.profile.fits.map(q=>q.A_leak_80_w*(1-Math.exp(-20/q.T_L_c))):null, cool=sv?[Math.min(...sv),Math.max(...sv)]:null;
  const PF=R.profile;
- $('compcap').innerHTML=`How it is priced: aifoundry2's idle law of section 1 at the chosen die temperature, plus, for each row, its energy per event from sections 3–5 (the mean over both cards; the whisker spans the rows' ranges) times its rate. A rate is a fraction of what the card reached running that row alone. Instruction rows share the harts' issue slots, so together they stop at 100%; byte streams are assumed to add, which no measurement of concurrent streams has tested beyond the relay's reads and writes (section 7.2). Per-instruction costs include the awake core (section 2), so two instruction rows count it twice. The static part carries the idle law's own bar: ±0.2 W on aifoundry2, ${D.cards.leakage?(D.cards.leakage.mean_offset_W>=0?'+':'')+f1(D.cards.leakage.mean_offset_W):'+0.7'} W on aifoundry3 (the mean of its four temperature bins). `+
+ $('compcap').innerHTML=`How it is priced: ${LAWCARD}'s idle law of section 1 at the chosen die temperature, plus, for each row, its energy per event from sections 3–5 (the mean over ${ALLC}; the whisker spans the rows' ranges) times its rate. A rate is a fraction of what the card reached running that row alone. `+
+  `With a card chosen, each row takes that card's own mean (the whisker: the range over its passes) and the rate it reached; a row timed on one card only keeps that card's rate, the idle law is ${LAWCARD}'s on every card, and the line beneath the bar names the basis. "Compare cards" draws one bar per card for the same workload. Instruction rows share the harts' issue slots, so together they stop at 100%; byte streams are assumed to add, which no measurement of concurrent streams has tested beyond the relay's reads and writes (section 7.2). Per-instruction costs include the awake core (section 2), so two instruction rows count it twice. The static part carries the idle law's own bar: ±0.2 W on aifoundry2, ${D.cards.leakage?(D.cards.leakage.mean_offset_W>=0?'+':'')+f1(D.cards.leakage.mean_offset_W):'+0.7'} W on aifoundry3 (the mean of its four temperature bins). `+
   (PF?`Its split into fixed and leakage is the best fit's: the e-foldings that fit the idle bins as well put the leakage at 80 °C anywhere from ${f0(PF.A_leak_80_w[0])} to ${f0(PF.A_leak_80_w[1])} W, but move the idle total by at most ${f1(PF.idle_spread_w_45_95)} W between 45 and 95 °C. `:'')+
   `The default is the dense fp32 matmul on random data: ${f1(P80)} W of idle at 80 °C and ${f1(sw)} W of multiply-adds (section 3.2's ${f2(tb.mean)} pJ per MAC at ${sci(t.per_s)} MAC/s), ${f1(P80+sw)} W, against ${f1(t.idle_w+t.over_idle_w)} W measured on aifoundry2 — one of the runs the ${f2(tb.mean)} pJ is built from, so this checks the arithmetic rather than the price; the flip model of section 3.2, fitted on aifoundry2, prices the same tile at ${f1((D.cards.patterns||[]).find(p=>p.values==='randn').model)} W instead of ${f1(sw)}.`;
  $('comptext').innerHTML=`<b>At 80 °C the static ${f0(P80)} W exceeds the dynamic power of every kernel measured here</b>, ${mxd===t.over_idle_w?"the dense random matmul's":'the largest,'} ${f1(mxd)} W included. The same matmul on zeros draws ${f1(tz.over_idle_w)} W over idle instead of ${f1(t.over_idle_w)}, and its measured loaded cost per flop on aifoundry2 falls from ${f1(1e12*(t.idle_w+t.over_idle_w)/(2*t.per_s))} to ${f1(1e12*(tz.idle_w+tz.over_idle_w)/(2*tz.per_s))} pJ, almost all of it static. Cooling the die from 80 to 60 °C saves about ${f0(P80-lawAt(60))} W of aifoundry2's idle power${cool?` (${f1(cool[0])}–${f1(cool[1])} W over the e-foldings that fit)`:''}, and presumably as much under load. <b>On aifoundry2, where the temperature law was measured, the data decides the dynamic energy and the temperature decides the rest.</b>`;
@@ -819,5 +944,9 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
 ['awake','instrtab','tensor','memtab','memold','linetab','rowtab','neightab','comm','sync','relaycheck'].forEach(id=>{const t=$(id); if(!t||!t.tHead)return; CK.stackTable(t);
  /* the first header cell often names the table; stacked, the header row is hidden, so it becomes a caption there */
  const th=t.tHead.rows[0].cells[0], tx=th?th.textContent.replace(/\s+/g,' ').trim():''; if(tx.length>12){const c=t.createCaption(); c.className='stack-cap'; c.textContent=tx;}});
+/* sortable tables (after stackTable): click a header to sort; the per-card and description columns are left alone, and
+   #comm sorts its rings (the relay rows are a group of their own). #linetab is two small tables in different units and
+   is not sorted. */
+[['tensor'],['memtab'],['rowtab'],['neightab'],['comm',{filter:true,filterLabel:'Filter the rings'}],['sync']].forEach(([id,o])=>{const t=$(id); if(t&&t.tHead&&t.tBodies.length)CK.sortTable(t,o);});
 /* the Terms box opens when the page is opened at #terms */
 (function(){const t=$('terms'); const op=()=>{if(location.hash==='#terms'&&t)t.open=true;}; op(); window.addEventListener('hashchange',op);})();
