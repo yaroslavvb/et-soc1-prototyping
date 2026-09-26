@@ -65,6 +65,7 @@ before `</body>`. Private pages are listed but not mirrored.
 | Page | Space | Visibility | Repo file | Why |
 |---|---|---|---|---|
 | Notes of a conversation with David Kanter (R9, 20 Sep) | `f3533740-5ad9-45e1-927c-098dbbe5c210` | private | not mirrored | A personal memo quoting a private conversation; private and unlinked since 24 September (the owner's decision). The DVFS page and R9 describe it in words. |
+| [ET-SoC-1 review: the TODO list](https://spacesheep.dev/@yaroslavvb/et-soc1-review-todo) (26 Sep) | `1db405d2-34c6-45f0-b939-03b74d3d68b4` | private | not mirrored | `docs/reports/TODO.md` rendered by `scripts/build-todo-page.py` to `docs/reports/2026-09-26-review-todo.html`, deployed 26 Sep and checked equal to that file (`spacesheep read`). Private because a new space starts private; making it public is the owner's call, and it then moves to the mirrored tables. Redeploy after every change to TODO.md. |
 | The lab problems report for the lab lead (25 Sep) | — | private | not mirrored | Written for the lab lead about the lab machines; it stays out of this public repository (`38f6b02`), and its source is gitignored (`docs/reports/2026-09-25-lab-problems.html`). Its visibility is the owner's decision. |
 
 <!-- mirror:end -->
