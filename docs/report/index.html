@@ -707,6 +707,7 @@ window.CK = (function () {
   <p data-ss-id="intro-p-2" class="lede">I built the ET toolchain and platform on a Mac and ran the hello worlds on the <code>sys_emu</code> simulator.
   Then I ran a first real workload, a scalar fp32 matrix multiply, on an ET-SoC-1 card in the AI Foundry lab.
   Below are the numbers, what broke on the way, and what came next.</p>
+  <p data-ss-id="intro-p-v3" class="card small"><strong>Checked on three cards (26 September 2026).</strong> The 5 SGEMM claims on this page were re-measured under a pre-registered plan on aifoundry2, aifoundry3 and aifoundry1 card 1, three passes each: 1 held as it stood (every output exact again), 4 were corrected, and none differs by card. The n ≥ 512 times and the 127 GFLOP/s repeat on all three cards; the corrections are the n = 64 time (0.55 ms, not 0.31), the speedup's last digit (28.5×, not 28.7×), the launch-to-launch spread (up to 7% at n = 512 on 32 shires) and the device time per run (0.13–0.39 s). The table now gives the three cards' mean. Record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>.</p>
   <details data-ss-id="intro-p-terms" class="terms"><summary>Terms used on this page</summary><p class="secondary">The ET-SoC-1 is Esperanto's 1,088-core RISC-V accelerator, now open-sourced by AI Foundry.
   Kernels run on 32 compute <i>shires</i> of 32 <i>minion</i> cores; each minion runs two hardware threads (<i>harts</i>), so a full launch is 2,048 harts.
   <code>sys_emu</code> is the chip's functional simulator, part of et-platform: it checks results, not speed.
@@ -717,22 +718,22 @@ window.CK = (function () {
   <div data-ss-id="headline-numbers-div-1" class="tile hero">
     <p class="label">Scalar fp32 SGEMM on one card, n = 1024</p>
     <p class="value">127 GFLOP/s</p>
-    <p class="note">2,048 harts on 32 shires, plain <code>fmadd.s</code> (no SIMD, no tensor unit yet)</p>
+    <p class="note">2,048 harts on 32 shires, plain <code>fmadd.s</code> (no SIMD, no tensor unit yet); 127 on each of three cards</p>
   </div>
   <div data-ss-id="headline-numbers-div-2" class="tile">
     <p class="label">Speedup, 1 → 32 shires</p>
-    <p class="value">28.7×</p>
-    <p class="note">n = 512: 68.0 ms → 2.37 ms</p>
+    <p class="value">28.5×</p>
+    <p class="note">n = 512: 68.0 ms → 2.39 ms, three cards' mean (28.3–28.6× per card)</p>
   </div>
   <div data-ss-id="headline-numbers-div-3" class="tile">
     <p class="label">Mismatches vs host reference</p>
     <p class="value">0 of 1.6M</p>
-    <p class="note">all silicon runs, fp32 vs double</p>
+    <p class="note">all silicon runs, fp32 vs double; 0 of 14.2M in nine runs on three cards</p>
   </div>
   <div data-ss-id="headline-numbers-div-4" class="tile">
     <p class="label">Device held per run</p>
-    <p class="value">0.2–0.3 s</p>
-    <p class="note">mostly runtime init; the card is shared</p>
+    <p class="value">0.13–0.39 s</p>
+    <p class="note">mostly runtime init (0.13–0.18 s); the card is shared</p>
   </div>
   <div data-ss-id="headline-numbers-div-5" class="tile">
     <p class="label">Mac setup from scratch</p>
@@ -778,12 +779,12 @@ so giving each hart whole lines is what makes the parallel result correct.</li>
 <table data-ss-id="sgemm-on-the-card-table-1" id="sgemm-table">
   <thead><tr><th class="num">n</th><th class="num">Shires</th><th class="num">Harts</th><th class="num">Time per launch</th><th class="num">GFLOP/s</th><th class="num">Mismatches</th></tr></thead>
   <tbody>
-    <tr><td class="num">64</td><td class="num">1</td><td class="num">64</td><td class="num">0.31 ms</td><td class="num">1.7</td><td class="num">0 / 4,096</td></tr>
+    <tr><td class="num">64</td><td class="num">1</td><td class="num">64</td><td class="num">0.55 ms</td><td class="num">0.96</td><td class="num">0 / 4,096</td></tr>
     <tr><td class="num">512</td><td class="num">1</td><td class="num">64</td><td class="num">68.0 ms</td><td class="num">3.9</td><td class="num">0 / 262,144</td></tr>
-    <tr><td class="num">512</td><td class="num">32</td><td class="num">2,048</td><td class="num">2.37 ms</td><td class="num">113</td><td class="num">0 / 262,144</td></tr>
-    <tr><td class="num">1024</td><td class="num">32</td><td class="num">2,048</td><td class="num">16.8 ms</td><td class="num">127</td><td class="num">0 / 1,048,576</td></tr>
+    <tr><td class="num">512</td><td class="num">32</td><td class="num">2,048</td><td class="num">2.39 ms</td><td class="num">112</td><td class="num">0 / 262,144</td></tr>
+    <tr><td class="num">1024</td><td class="num">32</td><td class="num">2,048</td><td class="num">16.9 ms</td><td class="num">127</td><td class="num">0 / 1,048,576</td></tr>
   </tbody>
-  <caption>aifoundry3, one ET-SoC-1 card, 18 September 2026. Time is host-measured <code>kernelLaunch</code> → <code>waitForStream</code>, so launch overhead is included. The n ≥ 512 rows were launched 2–3× each; the spread was under 2%. The host's printout was not kept and was not found on either lab machine, so these values cannot be rechecked; a later card session will re-run them. At n = 1024, 2·n³ / 16.8 ms is 128 GFLOP/s, within the launch-to-launch spread of the 127 shown.</caption>
+  <caption>The three-card check, 25–26 September 2026: aifoundry2, aifoundry3 and aifoundry1 card 1, three passes each, each row its own process with three launches; the time is the mean over the three cards of each card's mean, and GFLOP/s is 2·n³ over it. Per card: 0.54, 0.54 and 0.56 ms; 68.0, 68.0 and 68.1 ms; 2.38, 2.38 and 2.41 ms; 16.9, 16.9 and 16.9 ms. Time is host-measured <code>kernelLaunch</code> → <code>waitForStream</code>, so launch overhead is included. Launch to launch within a process the time varied by up to 0.3% at n = 512 on one shire, 1.0% at n = 1024 and 3.6–6.9% at n = 512 on 32 shires; at n = 64 single launches ranged from 0.41 to 0.66 ms. Every output was exact, in every pass on every card. The first run, on aifoundry3 on 18 September, gave 0.31 ms (1.7 GFLOP/s), 68.0 ms, 2.37 ms and 16.8 ms; its printout was not kept, and its n = 64 time did not repeat on any card.</caption>
 </table>
 </div>
 <h3 id="ladder">How far from the chip's peak?</h3>
@@ -912,7 +913,7 @@ index 988aecb..2390811 100644
   <ul data-ss-id="things-worth-fixing-upstream-ul-3">
     <li><strong>GCC 15.x doesn’t insert the guard.</strong> This applies to both the lab’s 15.1 and the laptop’s 15.2.
     <code>sys_emu -vpurf_warn</code> flags every <code>fmadd.s</code> in this SGEMM, twice (524,291 “type A” warnings on the compute shire at n = 64; the firmware adds 68 more), and gp-sdk’s own <code>saxpy_vector.elf</code> as well.</li>
-    <li><strong>Silicon results were still correct</strong> for all 1.6 M outputs.</li>
+    <li><strong>Silicon results were still correct</strong> for all 1.6 M outputs, and for all 14.2 M outputs of the three-card check (nine runs of the four table rows on three cards).</li>
   </ul>
   <p data-ss-id="things-worth-fixing-upstream-p-4">Open questions: are the lab cards A0 steppings, and is the compiler meant to handle this? For now: check new kernels with <code>-vpurf_warn</code>, and treat
   “wrong only on silicon” as a prime suspect for this bug.</p>
@@ -924,13 +925,13 @@ index 988aecb..2390811 100644
   A 60-line decoder on top of the header-only <code>et-trace</code> is enough to read kernel <code>et_printf</code> output.</li>
   <li><code>GenericLauncher::loadKernel()</code> leaves <code>std::cout</code> in hex mode. My first “800/800 harts” result was really 2048/2048: 800 is 2,048 in hex.</li>
   <li>When the runtime starts <code>sys_emu</code>, it turns on the coherency, scratchpad, FLB, and tensor-store checkers by default. The errata checker is opt-in: <code>-vpurf_warn</code>.</li>
-  <li>On the card, runtime init takes about 0.19 s. Peak host RSS is about 2 GB for the duration of a run, which comes from the runtime’s mapped buffers.</li>
+  <li>On the card, runtime init (opening the device) takes 0.13–0.14 s on aifoundry2 and aifoundry1 card 1 and 0.18 s on aifoundry3 in the three-card check (about 0.19 s in the first session). Peak host RSS is about 2.1 GB on all three cards for the duration of a run, which comes from the runtime’s mapped buffers.</li>
 </ul>
 </section>
 
 <section data-ss-section="reproduce">
 <h2 data-ss-id="h2-reproduce">Reproduce</h2>
-<p data-ss-id="reproduce-p-1" class="secondary">All commands run from a checkout of the <a href="https://github.com/yaroslavvb/et-soc1-prototyping">project repository</a>. The first two blocks use the Lima VM on the Mac (on a Linux machine with <code>/opt/et</code>, drop the <code>scripts/vm</code> prefix). The last block runs from the same checkout, on the Mac or on Linux: it copies the sources to aifoundry3, builds them there against its <code>/opt/et</code> and runs each table row as its own <code>timeout 10</code> process. The table is the host's “launch r: X ms, Y GFLOP/s” lines.</p>
+<p data-ss-id="reproduce-p-1" class="secondary">All commands run from a checkout of the <a href="https://github.com/yaroslavvb/et-soc1-prototyping">project repository</a>. The first two blocks use the Lima VM on the Mac (on a Linux machine with <code>/opt/et</code>, drop the <code>scripts/vm</code> prefix). The last block runs from the same checkout, on the Mac or on Linux: it copies the sources to aifoundry3, builds them there against its <code>/opt/et</code> and runs each table row as its own <code>timeout 10</code> process. The table is the host's “launch r: X ms, Y GFLOP/s” lines; the three-card check ran the same four processes through <code>tools/claims-v3/lat/</code>, and its logs are in <code>docs/reports/data/2026-09-25-claims-v3/raw/&lt;card&gt;/lat/p*/sg/</code>.</p>
 <pre data-ss-id="reproduce-pre-1"><code># one-time: Lima VM + toolchain + et-platform (~15 min)
 scripts/create-vm.sh
 
@@ -963,8 +964,8 @@ ssh aifoundry3 'cd ~/nekko/build/sgemm &amp;&amp; for a in "-n 64 --shires 0x1" 
   <a href="https://github.com/aifoundry-org/et-man">et-man</a> (PRM, errata) ·
   <a href="https://github.com/openhwfoundation/core-et/tree/erbium">core-et (erbium)</a> ·
   <a href="https://github.com/marty1885/et-testdrive">et-testdrive</a> (marty1885).</p>
-  <p>All runs were on 18 September 2026. The laptop used et-platform <code>836a4ab</code>. aifoundry3 used its <code>/opt/et</code>: et-platform <code>353f20e</code> (December 2025), runtime 0.19.0, GCC 15.1; that card holds its minions at 600 MHz (aifoundry2's governor also uses 700 and 800 MHz).</p>
-  <p>Versions: published 18 September 2026; revised 24 and 25 September 2026; 25 September (version 3): the clock and the gp-sdk build name their card (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>).</p>
+  <p>All runs were on 18 September 2026, except the SGEMM table, which is the three-card check of 25–26 September (aifoundry1 card 1 runs firmware 1.2.0, the other two 1.3.1). The laptop used et-platform <code>836a4ab</code>. aifoundry3 used its <code>/opt/et</code>: et-platform <code>353f20e</code> (December 2025), runtime 0.19.0, GCC 15.1; that card holds its minions at 600 MHz (aifoundry2's governor also uses 700 and 800 MHz).</p>
+  <p>Versions: published 18 September 2026; revised 24 and 25 September 2026; 25 September (version 3): the clock and the gp-sdk build name their card (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>); 26 September: the SGEMM table, the headline numbers and the notes re-measured on three cards.</p>
 </footer>
 <script type="application/json" id="ladder-data">{"fosdem":{"clock_mhz":650,"n":512,"rungs":[{"step":"Naive scalar, 1 hart","gflops":0.007,"name":"1 hart"},{"step":"Parallelise over mhartid, 512 harts. Fix the output race with L stores.","gflops":3.4,"name":"512 harts"},{"step":"Use all 2048 harts","gflops":13.1,"name":"2,048 harts"},{"step":"8-lane SIMD (fbc.ps broadcast A, flw.ps load B, fmadd.ps)","gflops":104.0,"name":"8-lane SIMD"},{"step":"Put A and B in L2 scratchpad instead of DRAM","gflops":312.0,"name":"operands in the L2 scratchpad"},{"step":"Register-block 2x16 outputs per hart. FMA share goes from 14% to 32%.","gflops":1640.0,"name":"2×16 register blocks"},{"step":"Register-block 4x32. FMA share is 63%.","gflops":2940.0,"name":"4×32 register blocks"},{"step":"Tensor unit: tensor_load A into L1Scp and B streamed, then tensor_fma (16x16 fp32), tensor_store. Hart 0 only.","gflops":7050.0,"name":"tensor unit"},{"step":"Software-pipeline: overlap the next A-load with the current FMA, double-buffering L1Scp","gflops":10250.0,"name":"software-pipelined tensor unit"}],"transcription":"docs/et-soc1-notes.md"},"tensor":{"gflops":9510.8,"clock_mhz":600,"source":"docs/reports/data/2026-09-18-aifoundry2/results.json (fp32-tensor-L2)"},"peak":{"gflops":9830.4,"clock_mhz":600,"minions":1024,"flop_per_minion_cycle":16}}</script>
 <script>
@@ -982,7 +983,7 @@ ssh aifoundry3 'cd ~/nekko/build/sgemm &amp;&amp; for a in "-n 64 --shires 0x1" 
   document.querySelectorAll("#sgemm-table tbody tr").forEach(function (tr) {
     var c = tr.querySelectorAll("td"), n = int(c[0].textContent), sh = int(c[1].textContent), h = int(c[2].textContent);
     mine.push({ src: "me", name: "SGEMM n = " + n + ", " + sh + (sh === 1 ? " shire" : " shires"), v: int(c[4].textContent),
-      tip: "<b>This page: scalar SGEMM, n = " + n + "</b><br>" + num(h, 0) + " harts on " + sh + (sh === 1 ? " shire" : " shires") + ", 600 MHz, aifoundry3<br>" + c[3].textContent + " per launch, " + c[4].textContent + " GFLOP/s (the table above)" });
+      tip: "<b>This page: scalar SGEMM, n = " + n + "</b><br>" + num(h, 0) + " harts on " + sh + (sh === 1 ? " shire" : " shires") + ", 600 MHz, mean of three cards (26 Sep)<br>" + c[3].textContent + " per launch, " + c[4].textContent + " GFLOP/s (the table above)" });
   });
   mine.push({ src: "me", name: "Tensor unit, fp32 (Matmul efficiency)", v: LD.tensor.gflops, label: s3(LD.tensor.gflops),
     tip: "<b>Tensor unit, fp32, all 1,024 minions</b><br>" + s3(LD.tensor.gflops) + " GFLOP/s at " + LD.tensor.clock_mhz + " MHz, aifoundry2, 18 September<br>Matmul efficiency (" + LD.tensor.source + ")" });

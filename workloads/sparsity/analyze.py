@@ -12,6 +12,19 @@ the script replaces the JSON inside the report's <script type="application/json"
 temperature-controlled (the Horace experiment's aifoundry3 run): power above the idle just before each pattern
 (p80 - p_before; the Horace analysis's p80 is the power at the run's launch temperature, about 55 C on this card,
 not 80 C), the launch temperature and the throughput, for zeros, ones and random-normal operands.
+
+--claims-v3 DIR (default: docs/reports/data/2026-09-25-claims-v3, when it exists; "none" skips it) adds "v3": the
+three-card check of 25-26 September on every card it holds (aifoundry2, aifoundry3, aifoundry1-c1), read in the
+version-3 layout, which this script's own readers cannot take as a data directory:
+  v3.tload.<card>: the same TensorLoad rows as "tload" ([lines, cycles per load, GB/s]) from each kept V3-LAT pass
+      (raw/<card>/lat/p*/sp/, block.json "ok"), as the median over the passes, plus each pass's cycles per load;
+  v3.energy.<card>: V3-ABL-B's runs of the same TensorFMA and layer configurations (results/ablb.runs.json, the
+      reducer's per-run table; registered blocks 1-3, kept runs), in the shape of energy.configs: above-idle power
+      ("dyn" = p80 - p_before, the reducer's metric) as mean, min and max over the blocks, the rate, pJ per unit
+      above idle, J per unit above idle and on the board (p80 / rate), the idle just before the runs and the
+      launch temperature; and c2_reads_high_w: how far its registered above-idle values read from the runs' launch
+      temperature (the check's note C2, revised; W, positive = high), as the pair [die at the sensor's whole-degree
+      launch reading, die V3_C2_STEP_C above it], with leak and reference from ablb.runs.json's params_by_card.
 """
 import argparse
 import glob
@@ -20,6 +33,17 @@ import math
 import os
 import re
 import statistics
+
+CLAIMS_V3 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "docs", "reports", "data",
+                         "2026-09-25-claims-v3")
+V3_CARD_ORDER = ["aifoundry2", "aifoundry3", "aifoundry1-c1"]  # the chart kit's card registry order
+V3_BLOCKS = [1, 2, 3]  # V3-ABL-B's registered blocks (tools/claims-v3/ablb/reduce.py REG)
+# docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md, note C2 (revised 26 Sep): the registered leakage correction
+# references a fixed launch temperature per card (params_by_card: 80.9 C and 0.81 W/C on aifoundry2 and aifoundry1-c1,
+# 55.8 C and 0.55 W/C on aifoundry3), while each run launched at a whole-degree die reading; the die sat at the reading
+# or up to V3_C2_STEP_C above it, which cannot be settled. A run's value at its launch temperature is its registered
+# value + leak x (t_die - reference). The registered values are kept; c2_reads_high_w gives the mean offset, both ends.
+V3_C2_STEP_C = 0.96
 
 
 def load(path):
@@ -42,6 +66,83 @@ def clock_mhz(d):
     return statistics.median(vals) if vals else 600.0, sorted(set(vals))
 
 
+def tload_rows(path, ns_per_cycle):
+    """[lines, cycles per load, GB/s] per SPARSITY line of one tload-*.jsonl: the bytes the mask let through over the
+    slowest minion's loop time. (The host's gbps_wall divides by the launch's wall time, which adds 0.2-0.4 ms to runs
+    of about 1 ms.)"""
+    return [[int(r["lines"]), round(r["cycles_per_load"], 1), round(r["bytes_requested"] / (r["cycles_max"] * ns_per_cycle), 2)]
+            for r in load(path)]
+
+
+def claims_v3(root):
+    """The three-card check's TensorLoad sweeps and energy runs, per card (see --claims-v3 in the docstring)."""
+    raw = os.path.join(root, "raw")
+    cards = [c for c in V3_CARD_ORDER if os.path.isdir(os.path.join(raw, c, "lat"))]
+    cards += sorted(c for c in os.listdir(raw) if os.path.isdir(os.path.join(raw, c, "lat")) and c not in cards
+                    and c != "aifoundry1-c0")  # card 0 is outside the campaign (amendment A4)
+    out = {"source": "docs/reports/data/2026-09-25-claims-v3: raw/<card>/lat/p*/sp (V3-LAT) and results/ablb.runs.json (V3-ABL-B)",
+           "cards": cards, "tload": {}, "energy": {}}
+    ns = 1000.0 / 600  # V3-LAT keeps only launches at 600 MHz (its clock rule)
+    for c in cards:
+        passes = []
+        for d in sorted(glob.glob(os.path.join(raw, c, "lat", "p*"))):
+            try:
+                ok = json.load(open(os.path.join(d, "block.json"))).get("status") == "ok"
+            except (OSError, ValueError):
+                ok = False
+            if ok and os.path.isdir(os.path.join(d, "sp")):
+                passes.append(os.path.join(d, "sp"))
+        tl = {}
+        for w in ["dram", "l2", "scp"]:
+            for scope in ["one", "all"]:
+                per = [{r[0]: r for r in tload_rows(os.path.join(p, f"tload-{w}-{scope}.jsonl"), ns)} for p in passes]
+                lines = sorted({l for q in per for l in q}, reverse=True)
+                tl[f"{w}-{scope}"] = [[l, round(statistics.median(q[l][1] for q in per if l in q), 1),
+                                       round(statistics.median(q[l][2] for q in per if l in q), 2),
+                                       [q[l][1] for q in per if l in q]] for l in lines]
+        out["tload"][c] = {"passes": len(passes), "rows": tl}
+    runs_path = os.path.join(root, "results", "ablb.runs.json")
+    if os.path.exists(runs_path):
+        RJ = json.load(open(runs_path))
+        R, C2P = RJ["runs"], RJ.get("params_by_card", {})
+        for c in cards:
+            rs = [r for r in R.get(c, []) if r.get("kept") and r.get("kept_busy", True) and r.get("pass") in V3_BLOCKS]
+            if not rs:
+                continue
+            by = {}
+            for r in rs:
+                by.setdefault(r["config"], []).append(r)
+            cf = {}
+            for name, v in sorted(by.items()):
+                def col(vals):
+                    vals = [x for x in vals if x is not None]
+                    return {"mean": statistics.mean(vals), "min": min(vals), "max": max(vals)} if vals else None
+                rated = [r for r in v if r.get("per_s")]
+                x = {"n": len(v), "unit": v[0].get("unit"), "above_idle_w": col([r["dyn"] for r in v]),
+                     "per_s": col([r["per_s"] for r in rated]),
+                     "j_per_unit_above_idle": col([r["dyn"] / r["per_s"] for r in rated]),
+                     "j_per_unit": col([r["p80"] / r["per_s"] for r in rated]),
+                     "cycles_per_op": col([r.get("cycles_per_op") for r in v])}
+                if x["unit"] == "MAC":
+                    x["pj_slot"] = col([r["dyn"] / r["per_s"] * 1e12 for r in rated])
+                tiled = [r for r in v if r.get("nnz_a") is not None]
+                if tiled:  # the A tile differs between blocks (each block draws with its own seed): keep every draw
+                    rows_on = lambda r: bin(int(r.get("row_mask", "0xffff"), 16)).count("1")
+                    x["nnz_a_runs"] = [r["nnz_a"] for r in tiled]
+                    x["a_elems"], x["row_mask"] = tiled[0]["a_elems"], tiled[0].get("row_mask", "0xffff")
+                    x["rows_on"] = rows_on(tiled[0])
+                    # multiplies with a nonzero A element in an enabled row, the reducer's x (ABLB-3c)
+                    x["frac"] = col([r["nnz_a"] / r["a_elems"] * rows_on(r) / 16 for r in tiled])
+                cf[name] = x
+            out["energy"][c] = {"blocks": sorted({r["pass"] for r in rs}), "idle_w": statistics.mean(r["p_before"] for r in rs),
+                                "launch_c": statistics.mean(r["start_temp"] for r in rs), "configs": cf}
+            if c in C2P:  # the check's note C2 (revised): how far the registered values read high, both ends
+                leak, ref = C2P[c]["leak"], C2P[c]["launch"]
+                off = statistics.mean(leak * (r["t_launch"] - ref) for r in rs)
+                out["energy"][c]["c2_reads_high_w"] = [-off, -(off + leak * V3_C2_STEP_C)]
+    return out
+
+
 def pareto_eff(alpha, n):
     """Lane efficiency E[k] / E[max of n] for continuous Pareto(alpha, xmin = 1) (research note, verified by MC)."""
     if alpha <= 1:
@@ -54,6 +155,8 @@ def main():
     p.add_argument("data_dir")
     p.add_argument("--embed", metavar="REPORT_HTML")
     p.add_argument("--later", metavar="HORACE3_JSON", help="later runs of the same loop on this card (energy.later)")
+    p.add_argument("--claims-v3", metavar="DIR", default=CLAIMS_V3,
+                   help="the three-card check's data directory (adds v3; default %(default)s when it exists; 'none' skips it)")
     args = p.parse_args()
     d = args.data_dir
     mhz, mhz_values = clock_mhz(d)
@@ -89,12 +192,8 @@ def main():
     tload = {}
     for w in ["dram", "l2", "scp"]:
         for scope in ["one", "all"]:
-            rows = load(os.path.join(d, f"tload-{w}-{scope}.jsonl"))
-            # Bytes the mask let through over the slowest minion's loop time at the logged clock. (The host's
-            # gbps_wall divides by the launch's wall time, which adds 0.2-0.4 ms to runs of about 1 ms.)
-            tload[f"{w}-{scope}"] = [[int(r["lines"]), round(r["cycles_per_load"], 1),
-                                      round(r["bytes_requested"] / (r["cycles_max"] * ns_per_cycle), 2)]
-                                     for r in rows]
+            # Bytes the mask let through over the slowest minion's loop time at the logged clock.
+            tload[f"{w}-{scope}"] = tload_rows(os.path.join(d, f"tload-{w}-{scope}.jsonl"), ns_per_cycle)
     data["tload"] = tload
     print("\nTensorLoad (16 lines max) cycles per load and GB/s on chip by lines requested:")
     for k, rows in tload.items():
@@ -205,6 +304,22 @@ def main():
               + "; zero-skip saves " + ", ".join(f"{1 - L['zeros']['above_idle_w'] / L[k]['above_idle_w']:.0%} against {k}"
                                                   for k in ["ones", "randn"]))
 
+    if args.claims_v3 != "none" and os.path.isdir(args.claims_v3):
+        v3 = claims_v3(args.claims_v3)
+        data["v3"] = v3
+        print(f"\nthree-card check ({v3['source']}):")
+        for c in v3["cards"]:
+            t = v3["tload"][c]["rows"]
+            print(f"  {c}: {v3['tload'][c]['passes']} TensorLoad passes; one minion L2 " +
+                  "  ".join(f"{l}:{cy:.1f}c" for l, cy, g, _ in t["l2-one"]) + "; DRAM " +
+                  "  ".join(f"{l}:{cy:.1f}c {pp}" for l, cy, g, pp in t["dram-one"] if l in (16, 1)))
+            e = v3["energy"].get(c)
+            if e:
+                cf = e["configs"]
+                print(f"    energy blocks {e['blocks']}, idle {e['idle_w']:.2f} W, launch {e['launch_c']:.1f} C; dense "
+                      f"+{cf['fma-dense']['above_idle_w']['mean']:.2f} W, zeros +{cf['fma-zero']['above_idle_w']['mean']:.2f} W, "
+                      f"layer board uJ " + ", ".join(f"{k[10:]}% {cf[k]['j_per_unit']['mean'] * 1e6:.0f}" for k in
+                                                   ("gemv-skip-0", "gemv-skip-90", "gemv-skip-99")))
     if args.embed:
         html = open(args.embed).read()
         pat = re.compile(r'(<script type="application/json" id="sparsity-data">)(.*?)(</script>)', re.S)

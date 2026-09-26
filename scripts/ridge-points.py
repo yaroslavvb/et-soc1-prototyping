@@ -9,7 +9,10 @@ Specification and the PRM, measured bandwidths from the raw data of the earlier 
 checked against the 23 September reruns of the same probe on both cards (the rl-pass* runs the energy manual pools),
 spec bandwidths from the manuals and micro-architecture docs, and energy per FLOP and per byte from the energy
 manual's data (docs/reports/data/2026-09-23-energy-manual/manual.json: sections 2, 3.2, 4 and 5). Every constant
-below names its source. With --embed the script replaces the JSON inside the report's
+below names its source. With the version-3 manual (26 Sep, three cards) the cards are every card it carries, the
+scratchpad levels are the random-data fill (the re-runs filled them with zeros or random data), a byte level is given per
+card when any two cards' passes differ (99% Welch), int8 is pooled over the cards, and the launch-temperature offset of
+the ablation's values (AMENDMENTS.md C2, revised) is embedded as a range (energy.c2). With --embed the script replaces the JSON inside the report's
 <script type="application/json" id="ridge-data"> tag; running it twice changes nothing the second time.
 The page's charts are drawn from that JSON by the page's own script with the shared chart toolkit
 (docs/reports/sources/chartkit.js, pasted into the page by scripts/paste-chartkit.py).
@@ -32,6 +35,9 @@ CLOCK_MHZ = 600  # minion clock on both lab cards during every measured run (tel
 DESIGN_MHZ = 1000  # design clock of the minion shires (CORE-ET Minion Shire Description, Table 2)
 NOC_MHZ = 400  # NoC clock the firmware programs (SP BL2 PLL mode 37); reported by the card
 SCP_BYTES_SHIRE = 2.5 * 2 ** 20  # the L2 scratchpad share of a shire's 4 MB SRAM in these cards' default partition
+# AMENDMENTS.md C2 (revised 26 Sep): the die may sit this far above the sensor's whole-degree launch reading (a launch
+# on a downward step of the reading; the 21 Sep thermal network puts the die at 80.96 C when the reading first shows 80)
+C2_STEP_C = 0.96
 
 # ---- compute ceilings, per minion per minion-clock cycle -------------------------------------------------------
 # Minion VPU Specification sec. 2: 8 lanes, one TXFMA per lane (one fp32 or two fp16 FMAs per cycle) and two TIMA
@@ -398,13 +404,24 @@ def main():
     # that were never written) and section 5 (TensorSend, 1 KB messages, both cards). The L1 row is the catalogue's
     # 32 B vector load (flw.ps) hitting L1 on random data (section 4.1), set against the vector unit's fmadd.ps.
     lev, rings = man["reruns"]["levels_pj_per_byte"], man["reruns"]["rings_pj_per_byte"]
+    # The version-3 re-runs (26 Sep) filled the scratchpads with zeros (odd passes) or random data (even passes) before
+    # reading them, and section 4.2's scratchpad levels pool the two fills, which differ by about 2x
+    # (levels_by_contents_pj_per_byte). So the scratchpad rows here take the random-data fill (the balance points are
+    # for random-normal operands), and the other shire's scratchpad is matched to the operands where a fill is the
+    # same data (zeros, random: `filled`). A manual without the fills (23 Sep) keeps its unset-contents levels.
+    bc = man["reruns"].get("levels_by_contents_pj_per_byte") or {}
+    SCP_LEVELS = ("scp-local", "scp-remote")
+    scp_fill = all(k in bc.get(c, {}) for k in SCP_LEVELS for c in ("zeros", "random"))
+    lev_b = dict(lev)
+    if scp_fill:
+        lev_b.update({k: bc["random"][k] for k in SCP_LEVELS})
     fl = cat["flw.ps/random/h2"]
     # probe_pj: section 4.2's L1 row, the memory-hierarchy probe's slower loop (the "measured" L1 bandwidth above).
     e_l1 = {"name": "L1 data cache", "pj": fl["mean"] / 32, "lo": fl["lo"] / 32, "hi": fl["hi"] / 32,
             "balance_fp32": fl["mean"] / 32 / ev, "balance_int8": None, "vs": "fmadd.ps",
             "probe_pj": lev["l1"]["mean"]}
-    e_byte = [("L2 scratchpad, own shire", lev["scp-local"]), ("L2 cache", lev["l2"]),
-              ("L2 scratchpad, other shire", lev["scp-remote"]), ("L3", lev["l3"]), ("DRAM", lev["dram"]),
+    e_byte = [("L2 scratchpad, own shire", lev_b["scp-local"]), ("L2 cache", lev["l2"]),
+              ("L2 scratchpad, other shire", lev_b["scp-remote"]), ("L3", lev["l3"]), ("DRAM", lev["dram"]),
               ("TensorSend, fast local network", rings["pair"]), ("TensorSend inside a shire", rings["shire"])]
     xs_keys = sorted(k for k in rings if k.startswith("xshire") and not k.endswith("-c4"))
     xs_pj = [min(rings[k]["mean"] for k in xs_keys), max(rings[k]["mean"] for k in xs_keys)]
@@ -427,23 +444,67 @@ def main():
     for key, cfg in (("scp", "scp-local"), ("l2", "l2"), ("scp_remote", "scp-remote"), ("l3", "l3"), ("dram", "dram")):
         bw = next(lv for lv in L if lv["key"] == key)["measured"]["gbps"] * 1e9
         for w in floor_w:
-            drops.append(1 - ((lev[cfg]["mean"] - w / bw * 1e12) / (ef - w / flops * 1e12)) / (lev[cfg]["mean"] / ef))
+            drops.append(1 - ((lev_b[cfg]["mean"] - w / bw * 1e12) / (ef - w / flops * 1e12)) / (lev_b[cfg]["mean"] / ef))
     # TensorSend's power over idle at its measured rate (pairs, rings of 32 and the six shire-to-shire patterns), and the
     # share of it that the awake-core floor makes up: most or all, so its balance points fall by more than the levels above.
     ts_w = [rings[k]["mean"] * noc[k]["gb_per_s"] * 1e-3 for k in ["pair", "shire"] + xs_keys]
     ts_share = [min(floor_w) / max(ts_w), max(floor_w) / min(ts_w)]
     # ---- per card (claims check, version 3, 25 Sep) -------------------------------------------------------------------
-    # The page states a figure plainly only when it holds on both cards. Per-card FLOP energies (tensor.bars per_card:
-    # fp32 on both cards, int8 on aifoundry2 only, two runs).
-    CARDS = ("aifoundry2", "aifoundry3")
+    # The page states a figure plainly only when it holds on every card. Per-card FLOP energies (tensor.bars per_card:
+    # fp32 on both cards, int8 on aifoundry2 only, two runs, in the 23 Sep manual; fp32 and int8 on three cards, four
+    # runs each, in the version-3 manual of 26 Sep).
+    # The cards are every card the energy manual gives for all the per-card entries used below (the FLOP energies, the
+    # byte levels, the TensorSend rings and the catalogue's TensorLoads), in the chart kit's registry order: aifoundry2
+    # and aifoundry3 in the 23 Sep manual, and a third card once the manual carries the three-card check (26 Sep).
+    # (TensorSend between shires needs the card in at least one of its patterns: the 23 Sep manual has xshire16 on
+    # aifoundry3 only.)
+    per_card_sources = ([bars[k]["per_card"] for k in ("fp32_randn", "fp32_ones", "fp32_zeros")] +
+                        [v["per_card"] for v in lev.values()] + [rings[k]["per_card"] for k in ["pair", "shire"]] +
+                        [cat[f"tload/{w}/{o}"]["per_card"] for w in ("scp", "dram") for o in ops])
+    CARD_ORDER = ("aifoundry2", "aifoundry3", "aifoundry1-c1")
+    CARDS = tuple(c for c in CARD_ORDER if all(c in s for s in per_card_sources)
+                  and any(c in rings[k]["per_card"] for k in xs_keys))
     for k, cfg in (("fp32", "fp32_randn"), ("fp32_ones", "fp32_ones"), ("fp32_zeros", "fp32_zeros"), ("int8", "int8_randn")):
         e_flop[k]["per_card"] = {c: v["mean"] / 2 for c, v in bars[cfg]["per_card"].items()}
     ef_c = e_flop["fp32"]["per_card"]
-    ei_card = "aifoundry2"  # the only card with an int8 energy: the int8 balance points are that card's
-    # Byte energies the energy manual gives per card because the two cards differ beyond noise (its section 4.2: the
-    # L1 probe, L2 and the own scratchpad; L2 and the own scratchpad in opposite directions, so their pooled values look
-    # equal). The page gives both cards' values for these rows, each balance point against its own card's FLOP energy.
-    CARD_DIFFERENT = {"scp-local", "l2", "l1"}
+    # int8: the pooled energy over every card that has one, and each card's own against its own byte energies.
+    ei_c = e_flop["int8"]["per_card"]
+    int8_cards = [c for c in CARD_ORDER if c in ei_c] + sorted(c for c in ei_c if c not in CARD_ORDER)
+    # The launch-temperature offset of the ablation's switching values (AMENDMENTS.md C2 as revised; manual
+    # tensor.launch_offset): the registered values reference fixed launch temperatures, while each run launched at a
+    # whole-degree die reading, and how that reading maps to the die temperature is not settled: between the die at the
+    # reading (tensor.launch_offset) and C2_STEP_C above it (a launch on a downward step of the reading, as the thermal
+    # model puts the references). Per card: how far the registered values read high (W, both ends; negative = low), the
+    # switching over idle as registered (W), and each FLOP energy at the runs' launch temperature, both ends.
+    lof, pcr = man["tensor"].get("launch_offset") or {}, man["tensor"].get("per_card_rows") or {}
+    c2 = {}
+    for c in CARD_ORDER:
+        if c in lof and c in pcr:
+            step = lof[c]["leak_w_per_c"] * C2_STEP_C
+            c2[c] = {"reads_high_w": [-lof[c]["mean_w"], -(lof[c]["mean_w"] + step)], "over_idle_w": {}, "pj": {}}
+            for k, cfg in (("fp32", "fp32_randn"), ("fp32_ones", "fp32_ones"), ("fp32_zeros", "fp32_zeros"), ("int8", "int8_randn")):
+                reg, at = pcr[c][cfg]["over_idle_w"], lof[c]["at_launch_w"][cfg]
+                c2[c]["over_idle_w"][k] = reg
+                c2[c]["pj"][k] = [e_flop[k]["per_card"][c] * w / reg for w in (at, at + step)]
+    # aifoundry3 against aifoundry2 at the same die temperature, fp32 on random data (both ends)
+    c2_ratio = ([c2["aifoundry3"]["pj"]["fp32"][i] / c2["aifoundry2"]["pj"]["fp32"][i] for i in (0, 1)]
+                if "aifoundry2" in c2 and "aifoundry3" in c2 else None)
+    # Byte energies whose cards differ beyond noise: a 99% Welch test on each pair of cards' passes (a pair differs when
+    # its interval excludes 0). The page gives every card's value for these rows, each balance point against its own
+    # card's FLOP energy. (In the 23 Sep manual: the L1 probe, L2 and the own scratchpad, the last two in opposite
+    # directions on the two cards.)
+    T99 = {1: 63.657, 2: 9.925, 3: 5.841, 4: 4.604, 5: 4.032, 6: 3.707, 7: 3.499, 8: 3.355, 9: 3.250, 10: 3.169,
+           11: 3.106, 12: 3.055, 13: 3.012, 14: 2.977, 15: 2.947, 16: 2.921}
+
+    def pair_differs(a, b):
+        va, vb = a["se"] ** 2, b["se"] ** 2
+        df = (va + vb) ** 2 / (va ** 2 / (a["n"] - 1) + vb ** 2 / (b["n"] - 1))
+        return abs(a["mean"] - b["mean"]) / (va + vb) ** 0.5 > T99[max(1, min(16, int(df)))]
+
+    def cards_differ(pc):
+        cs = [c for c in CARDS if c in pc]
+        return any(pair_differs(pc[a], pc[b]) for i, a in enumerate(cs) for b in cs[i + 1:])
+    CARD_DIFFERENT = {k for k, v in lev_b.items() if cards_differ(v["per_card"])}
     e_byte_cfg = {"L2 scratchpad, own shire": "scp-local", "L2 cache": "l2", "L2 scratchpad, other shire": "scp-remote",
                   "L3": "l3", "DRAM": "dram"}
     e_l1["probe_pj_by_card"] = {c: lev["l1"]["per_card"][c]["mean"] for c in CARDS}
@@ -451,8 +512,9 @@ def main():
     def e_row(n, v):
         pc = v["per_card"]
         return {"name": n, "pj": v["mean"], "lo": v["lo"], "hi": v["hi"], "balance_fp32": v["mean"] / ef,
-                "balance_int8": pc[ei_card]["mean"] / ei, "differ": e_byte_cfg.get(n) in CARD_DIFFERENT,
-                "per_card": {c: {"pj": pc[c]["mean"], "balance_fp32": pc[c]["mean"] / ef_c[c]} for c in CARDS}}
+                "balance_int8": v["mean"] / ei, "differ": e_byte_cfg.get(n) in CARD_DIFFERENT,
+                "per_card": {c: {"pj": pc[c]["mean"], "balance_fp32": pc[c]["mean"] / ef_c[c],
+                                 "balance_int8": pc[c]["mean"] / ei_c[c] if c in ei_c else None} for c in CARDS}}
 
     # Energy against time, card by card: a balance point lies on one side of its time ridge only if it does on each
     # card. Per card, the byte energy's 99% interval over that card's passes (t with n - 1 df on the passes' se) is
@@ -475,7 +537,9 @@ def main():
 
     check = {}
     for op, (cfg, o) in OPS_FL.items():
-        src = {"scp": [cat[f"tload/scp/{o}"]], "l2": [lev["l2"]], "scp_remote": [lev["scp-remote"]], "l3": [lev["l3"]],
+        # the other shire's scratchpad: the fill on the same data where there is one, else the random-data fill
+        scp_r = bc["zeros" if o == "zeros" else "random"]["scp-remote"] if scp_fill else lev["scp-remote"]
+        src = {"scp": [cat[f"tload/scp/{o}"]], "l2": [lev["l2"]], "scp_remote": [scp_r], "l3": [lev["l3"]],
                "dram": [cat[f"tload/dram/{o}"]], "fln": [rings["pair"]], "xbar": [rings["shire"]],
                "xmesh": [rings[k] for k in xs_keys]}
         for basis in ("measured", "spec"):
@@ -490,12 +554,20 @@ def main():
                          "data" if all(x["ci99"][0] > r1 for x in cards.values()) else "overlap")
                 check.setdefault(op, {}).setdefault(basis, {})[key] = {"cards": cards, "verdict": v}
 
-    xs_card = [rings[k]["per_card"][ei_card]["mean"] for k in xs_keys if ei_card in rings[k]["per_card"]]
     energy = {"e_flop": e_flop,
               "e_byte": [e_l1] + [e_row(n, v) for n, v in e_byte],
               "xshire": {"pj": xs_pj, "patterns": xs_keys, "hops": [min(hops), max(hops)],
-                         "balance_fp32": [x / ef for x in xs_pj], "balance_int8": [min(xs_card) / ei, max(xs_card) / ei]},
-              "int8_card": ei_card,
+                         "balance_fp32": [x / ef for x in xs_pj], "balance_int8": [x / ei for x in xs_pj]},
+              "int8_cards": int8_cards,
+              # byte energies on the same data as the operands, beyond the TensorLoads of section 4.1 (tload_by_operand):
+              # the other shire's scratchpad, filled with zeros or random data before it was read (section 4.2)
+              "filled": ({"scp_remote": {o: {q: bc[f]["scp-remote"][q] for q in ("mean", "lo", "hi")}
+                                         for o, f in (("zeros", "zeros"), ("random", "random"))}} if scp_fill else {}),
+              "scp_fill_zeros": {k: bc["zeros"][k]["mean"] for k in SCP_LEVELS} if scp_fill else {},
+              "c2": {"cards": c2, "a3_over_a2_fp32": c2_ratio, "step_c": C2_STEP_C,
+                     "note": "AMENDMENTS.md C2 (revised): registered switching values carry a launch-temperature offset; "
+                             "range between the die at the whole-degree launch reading and C2_STEP_C above it"},
+              "card_different": sorted(CARD_DIFFERENT),
               "check": check,
               "random_tload": {w: {"pj": v, "balance_fp32": v / ef} for w, v in rnd.items()},
               "tload_by_operand": tload, "tload_by_operand_range": tload_rng,
@@ -550,18 +622,29 @@ def main():
     print(f"  fp32 on random data costs {ef / e_flop['fp32_zeros']['pj']:.1f}x its zeros figure and "
           f"{ef / e_flop['fp32_ones']['pj']:.1f}x its all-ones figure")
     print(f"  vector fmadd.ps on random data: {ev:.3f} pJ per FLOP (the L1 row's denominator)")
+    print("  fp32 per card, registered (pJ/FLOP): " + ", ".join(f"{c} {v:.3f}" for c, v in e_flop["fp32"]["per_card"].items())
+          + "; int8 per card (pJ/OP): " + ", ".join(f"{c} {v:.4f}" for c, v in e_flop["int8"]["per_card"].items()))
+    for c, v in energy["c2"]["cards"].items():
+        print(f"  C2 {c}: registered reads {v['reads_high_w'][0]:+.2f} to {v['reads_high_w'][1]:+.2f} W (+ = high); at launch " +
+              ", ".join(f"{k} {a:.3f}-{b:.3f}" for k, (a, b) in v["pj"].items()) +
+              " pJ; switching over idle as registered " + ", ".join(f"{k} {w:.2f}" for k, w in v["over_idle_w"].items()) + " W")
+    if energy["c2"]["a3_over_a2_fp32"]:
+        print("  C2 aifoundry3 / aifoundry2, fp32 random, same die temperature: %.3f-%.3f (registered %.3f)" % (
+            *energy["c2"]["a3_over_a2_fp32"], e_flop["fp32"]["per_card"]["aifoundry3"] / e_flop["fp32"]["per_card"]["aifoundry2"]))
+    print(f"  card-different byte levels (99% Welch, each pair): {energy['card_different'] or 'none'}; scratchpad fills used: "
+          + ("random for the rows, zeros/random matched for the other shire's scratchpad" if energy["filled"] else "none"))
     for e in energy["e_byte"]:
         if e.get("vs"):
             print(f"  {e['name']:34s} {e['pj']:7.2f} pJ/B -> balance against {e['vs']} {e['balance_fp32']:6.2f} FLOP/B")
             continue
         pc = "; per card " + ", ".join(f"{c} {v['pj']:.2f} pJ/B -> {v['balance_fp32']:.2f}" for c, v in e["per_card"].items())
         print(f"  {e['name']:34s} {e['pj']:7.2f} pJ/B -> balance fp32 {e['balance_fp32']:6.2f} FLOP/B, int8 "
-              f"{e['balance_int8']:6.1f} OP/B ({energy['int8_card']})" + (pc + " (the cards differ)" if e["differ"] else ""))
+              f"{e['balance_int8']:6.1f} OP/B (pooled)" + (pc + " (the cards differ)" if e["differ"] else ""))
     xs = energy["xshire"]
     print(f"  {'TensorSend between shires':34s} {xs['pj'][0]:.2f}-{xs['pj'][1]:.2f} pJ/B -> balance fp32 "
           f"{xs['balance_fp32'][0]:.2f}-{xs['balance_fp32'][1]:.2f}, int8 {xs['balance_int8'][0]:.1f}-{xs['balance_int8'][1]:.1f} "
-          f"({energy['int8_card']}) ({len(xs['patterns'])} patterns, {xs['hops'][0]:.2f}-{xs['hops'][1]:.2f} hops mean)")
-    print("  Energy against time, per card (99% interval of the balance point; verdict only when both cards agree):")
+          f"(pooled) ({len(xs['patterns'])} patterns, {xs['hops'][0]:.2f}-{xs['hops'][1]:.2f} hops mean)")
+    print("  Energy against time, per card (99% interval of the balance point; verdict only when every card agrees):")
     for op, bases in energy["check"].items():
         for basis, rows in bases.items():
             for key, r in rows.items():
