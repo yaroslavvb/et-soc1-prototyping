@@ -37,19 +37,25 @@ details.terms{margin:14px 0}
 details.terms p{margin:6px 0 0}
 </style>
 <h1>Heat per millimetre</h1>
-<p class="byline">24 September 2026 · two cards, aifoundry2 and aifoundry3 · data, tools and every source in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">yaroslavvb/et-soc1-prototyping</a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="byline">24 September 2026, re-measured on three cards 26 September · aifoundry2, aifoundry3 and aifoundry1 card 1 · data, tools and every source in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">yaroslavvb/et-soc1-prototyping</a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="small card" id="v3note"><b>Checked on three cards (26 September 2026).</b> 17 of this page's claims were re-measured
+under a pre-registered plan, in six new passes on each of aifoundry2, aifoundry3 and aifoundry1 card 1: 8 held on every
+card, 1 was corrected (all ones' excess over random data on board power, which no card resolved from zero), and 8 differ
+by card, as the text says where they appear. Every figure those passes cover now comes from them; the record is in
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>.</p>
 
 <p class="lede">Bill Dally's rule of thumb for on-chip communication is <b>"~100 fJ/b-mm"</b>: the heat of carrying one bit
 one millimetre across a chip. We measured it on the ET-SoC-1's mesh (the 6 × 6 grid of shires plus a column of memory
-shires down each side: 8 × 6 stops) by reading data from a scratchpad 0 to 6 hops away, with the bits on the wires chosen, three passes on each of two cards, and two meters: board power and the
+shires down each side: 8 × 6 stops) by reading data from a scratchpad 0 to 6 hops away, with the bits on the wires chosen, in three runs (the last with six
+passes on each of three cards), and two meters: board power and the
 mesh's own supply rail. One hop is <b id="l-hop"></b> of silicon. At the mesh's 0.485 V, with no other traffic on its
-links, a random bit costs <b id="l-unc"></b> per millimetre on the mesh rail, <b id="l-uncd"></b> of it depending on
-the data; board power, which also carries the regulator's loss, says <b id="l-uncb"></b>. On a busy mesh, where flows
+links, a random bit costs <b id="l-unc"></b> per millimetre on the mesh rail (<span id="l-unc-c"></span>), <b id="l-uncd"></b> of it depending on
+the data; board power, which also carries the regulator's loss, says <b id="l-uncb"></b> (<span id="l-uncb-c"></span>). On a busy mesh, where flows
 share links, the same bit costs <b id="l-load"></b>: <b id="l-cont"></b>.</p>
 <p class="lede"><b>What costs energy is surprising</b>: not only
 bits that differ between consecutive flits, but the <em>ones</em> carried. A stream of all ones, which never changes from
 one flit to the next, costs as much per hop as random data (<span id="l-ones"></span>), though at one hop it costs
-<span id="l-ones1"></span> less in all.</p>
+<span id="l-ones1"></span>.</p>
 <p class="lede">Dally states no voltage. Scaled to 0.9 V (the voltage of Keckler 2011's 40 nm wire figure, his
 likeliest source; <a href="#question">§1</a>), the mesh rail's
 data-dependent cost is <b id="l-09"></b>, so the rule of thumb holds, to within its own vagueness. Read instead at the
@@ -61,15 +67,15 @@ data-dependent cost is <b id="l-09"></b>, so the rule of thumb holds, to within 
 per shire; a <i>hop</i> is one step between neighbouring stops, and a <i>flit</i> is the unit the mesh moves as a whole,
 here at least one 64-byte line (<a href="#lanes">§9</a>). Both meters are in the board's power-management controller
 (PMIC): <i>board power</i> is its reading of the card's 12 V input, the <i>mesh rail</i> its reading of the regulator
-that feeds the mesh, and the service processor (SP), the chip's management core, reports them. a2 and a3 are the two
-cards, in the lab machines aifoundry2 and aifoundry3; more in the
+that feeds the mesh, and the service processor (SP), the chip's management core, reports them. a2, a3 and a1c1 are the three
+cards: those in the lab machines aifoundry2 and aifoundry3, and card 1 of aifoundry1; more in the
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p>
 </details>
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">One mesh hop</div><div class="val" id="k-hop"></div><div class="sub">tile pitch from the die plot and the 570 mm² die; x and y within 1%</div></div>
   <div class="card kpi"><div class="lab">A random bit, 1 mm, mesh rail, free links</div><div class="val" id="k-noc"></div><div class="sub" id="k-noc-sub">data-dependent + fixed, at 0.485 V</div></div>
-  <div class="card kpi"><div class="lab">Per one-bit vs per flit-to-flit difference, per mm</div><div class="val" id="k-one"></div><div class="sub">mesh rail, loaded mesh: fitted coefficients, not a physical ranking (<a href="#ones">§5</a>)</div></div>
+  <div class="card kpi"><div class="lab">Per one-bit vs per flit-to-flit difference, per mm</div><div class="val" id="k-one"></div><div class="sub">mesh rail, loaded mesh, second run: fitted coefficients, not a physical ranking (<a href="#ones">§5</a>)</div></div>
   <div class="card kpi"><div class="lab">Data-dependent, scaled to 0.9 V</div><div class="val" id="k-09"></div><div class="sub">per random bit·mm, mesh rail, free links to loaded; Dally ~100, Keckler 121</div></div>
 </div>
 
@@ -98,9 +104,9 @@ either direction is about <b>3.72 mm</b> (<span id="l-hoprange"></span> dependin
 shire grid spans 86% of the die's width; the rest is the memory shires and their DRAM PHYs down each side. A pair of
 shires <i>d</i> hops apart on the logical map (<a href="https://github.com/marty1885/etTopoScan">marty1885</a>'s shire
 coordinates, which the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication</a>
-report confirmed from latency on aifoundry2, in one run) crosses <i>d</i> links each way: on that card round-trip latency
-is linear in Manhattan distance, to within 1.1 cycles, over all 496 pairs. Latency was not measured on aifoundry3; there
-the map rests on the energies below, which follow its hop count as they do on aifoundry2.
+report confirmed from latency on all three cards, aifoundry2, aifoundry3 and aifoundry1 card 1) crosses <i>d</i> links each
+way: on each card round-trip latency is linear in Manhattan distance, to within 1.1–1.4 cycles, over all 496 pairs, in
+every one of three passes.
 "Per mm" below means per mm of mesh travel, one router and one link per 3.72 mm — per mm of displacement; the metal
 actually routed can only be longer, so per mm of wire the cost would be lower.</p>
 
@@ -112,23 +118,30 @@ scratchpad and never touches the mesh. The energy per payload byte is fitted aga
 cost of one hop</b>, and everything that happens once per byte — the SRAM read, the L1 write, the request, leaving and
 entering a shire — stays in the intercept.</li>
 <li><b>The bits on the wires are chosen.</b> Before each configuration every scratchpad is filled with a known image
-(checked byte for byte on the card): bits independently 1 with probability <i>P</i> (so two consecutive data flits differ
+(the store kernel's output checked byte for byte on a DRAM slice, on all three cards; the tool cannot read a scratchpad
+back): bits independently 1 with probability <i>P</i> (so two consecutive data flits differ
 in a bit with probability 2<i>P</i>(1−<i>P</i>): a difference rate between flits, not necessarily the transition rate on
 the wires), blocks of N bytes alternately all-zero and all-one, and one random 64 B line frozen everywhere (half ones, no
 two flits differ). The second run makes every line on the chip unique and <i>P</i> and 1−<i>P</i> exact bitwise
 complements, and adds reader–target pairs chosen so that no two flows share a link.</li>
-<li><b>Two meters.</b> Board power (10 mW steps; under the 10 Hz sampler used here its value changes about every 150 ms
-on aifoundry2 and every 255 ms on aifoundry3, as the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">observability
-report</a> measured) and the mesh rail, which feeds the routers and links at 0.485 V and 400 MHz. For board power each 3 s burst is measured against
+<li><b>Two meters.</b> Board power (10 mW steps; under the 10 Hz sampler used here its value changes about every 156 ms
+on aifoundry2 and 158 ms on aifoundry1 card 1, and every 263 ms on aifoundry3, where a slower poll sees 224 ms: there the
+sampler itself lengthens the period, as the three-card check measured; the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">observability report</a> has the meter chain) and the mesh rail, which feeds the routers and links at 0.485 V and 400 MHz. For board power each 3 s burst is measured against
 idle on both sides and corrected for the extra leakage of a burst that ran warmer. The mesh rail is read over the burst's
 last 0.6 s against the idle before it, without a leakage correction (about 2%, roughly cancelling a 2.5% under-correction
 of the meter's 1 s running average). A burst is dropped if the clock left 600 MHz or the meter itself was starved
 (<a href="#limits">§10</a>).</li>
-<li><b>Replication.</b> Every configuration three times in shuffled order on each of two cards (aifoundry2, aifoundry3):
-the bars are the range over those six passes. First run: 82 configurations, 492 bursts; second run: 44 configurations,
-264 bursts; <span id="l-drop"></span> dropped. A figure given without a card is resolved on both cards, with at
-least three passes on each; where only one card resolves it, or the cards differ, the text names the card, and what
-these runs leave open is listed in <a href="#limits">§10</a>.</li>
+<li><b>Replication.</b> Three runs, every configuration in shuffled order, the bars the range over every pass of every
+card. The first two (24 September) ran each configuration three times on each of two cards (aifoundry2, aifoundry3):
+first run 82 configurations, 492 bursts; second run 44 configurations, 264 bursts; <span id="l-drop"></span> dropped. The
+third (the three-card check, 25–26 September) ran 28 of the second run's configurations — all pairs at <i>P</i> = 0, ½
+and 1 over 0–6 hops, link-disjoint pairs at <i>P</i> = 0 and ½ over 1–5 hops — six times on each of aifoundry2,
+aifoundry3 and aifoundry1 card 1: <span id="l-drop3"></span>. Every figure those configurations give comes from the
+third run; the split into ones and differences (<a href="#ones">§5</a>), the block patterns (<a href="#lanes">§9</a>) and
+the x/y pairs come from the first two, which alone ran them. A figure given without a card holds on every card that
+measured it; where the cards differ, the text names them, and what these runs leave open is listed in
+<a href="#limits">§10</a>.</li>
 </ul>
 
 <h2 id="distance">4. Energy grows with every hop</h2>
@@ -137,7 +150,7 @@ these runs leave open is listed in <a href="#limits">§10</a>.</li>
 <div id="dist-leg"></div>
 <div id="dist"></div>
 <p class="small" id="distcap">Density of ones <i>P</i> runs from the faintest line (all zeros) to the strongest (all ones); bars are
-the range over three passes on each of two cards. Hover, tap or tab to a point.</p>
+the range over every pass of every card. Hover, tap or tab to a point.</p>
 <p id="disttext"></p>
 
 <h2 id="ones">5. Ones cost energy, not just flips</h2>
@@ -267,15 +280,20 @@ full-swing links; low-swing links would make it overstate.</li>
 
 <h2 id="data">11. Data and tools</h2>
 <ul>
-<li>Runs and analysis: <code>workloads/enercat/run_wire.py</code> (both runs), <code>workloads/enercat/analyze_wire.py</code> and
+<li>Runs and analysis: <code>workloads/enercat/run_wire.py</code> (the first two runs), <code>tools/claims-v3/wire/</code> (the
+third: <code>block.sh</code>, and <code>reduce.py</code> for the check's verdicts), <code>workloads/enercat/analyze_wire.py</code>,
+<code>workloads/enercat/analyze_wire_v3.py</code> (the same reduction over the third run's passes) and
 <code>tools/ettelem/build_wire_report.py</code>; the fill modes <code>tstore_raw</code> and <code>tstore_uniq</code> and the
 patterns <code>bern:P</code>, <code>alt:N</code>, <code>uq:P</code> and <code>frz</code> are in <code>workloads/enercat/host/main.cpp</code>.
-The three commands that rebuild the analysis, this page's data and this page from the raw data are in the docstring of
-<code>workloads/enercat/analyze_wire.py</code>.</li>
+The four commands that rebuild the two analyses, this page's data and this page from the raw data are in the docstring of
+<code>tools/ettelem/build_wire_report.py</code>.</li>
 <li>Raw data: the first run in <code>docs/reports/data/2026-09-24-wire-aifoundry2/</code> and
 <code>docs/reports/data/2026-09-24-wire-aifoundry3/</code>, the second in <code>docs/reports/data/2026-09-24-wire2-aifoundry2/</code>
-and <code>docs/reports/data/2026-09-24-wire2-aifoundry3/</code>. The analysis is <code>docs/reports/data/2026-09-24-wire-energy/wire.json</code>,
-and the page draws its charts and computed figures from <code>docs/reports/data/2026-09-24-wire-energy/report.json</code>.</li>
+and <code>docs/reports/data/2026-09-24-wire2-aifoundry3/</code>, the third in
+<code>docs/reports/data/2026-09-25-claims-v3/raw/&lt;card&gt;/wire/p1</code>–<code>p6</code> (its verdicts in
+<code>results/wire.json</code> there). The analyses are <code>docs/reports/data/2026-09-24-wire-energy/wire.json</code> (the first two
+runs) and <code>wire3.json</code> (the third), and the page draws its charts and computed figures from
+<code>docs/reports/data/2026-09-24-wire-energy/report.json</code>.</li>
 <li>Research notes behind the conversion to millimetres (die geometry, the NoC, the literature), gathered by AI agents
 run by the author: <code>docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md</code>. An independent
 re-analysis and adversarial review of this page, also by AI agents: <code>docs/reports/data/2026-09-24-wire-energy/review/VERDICT.md</code>;
@@ -297,7 +315,14 @@ new. 25 September (version 3): every claim checked against the passes of both ca
 findings, and what stays open is listed in §10: board power's split of the free-link cost, whether link sharing causes
 the four-hop step, and the 256 B pattern on board power. The 16–128 B blocks' shortfall is dropped (it came from
 comparing different hops); the all-ones excess and the 256 B pattern are given per card; the regulator's loss is no
-longer said to grow with load; the latency map is marked as aifoundry2's.</p>
+longer said to grow with load; the latency map is marked as aifoundry2's. 26 September (version 4): the three-card
+check's third run (six passes on each of aifoundry2, aifoundry3 and aifoundry1 card 1) is the basis of every figure its
+configurations give, and each tested claim says what the three cards showed. Corrected: all ones' excess over random
+data on board power, which no card resolved from zero. Now resolved: board power's split of the free-link cost and of
+the contention excess into data and fixed parts (§5, §6), and the four-hop step's absence with link-disjoint flows
+(§4). Given per card: the four-hop step off the line, the exit step, the one-hop agreement of the two sets, the
+link-disjoint line for zeros, and the board meter's refresh period (§3). The route calculator prices a route from the
+third run's measured lines, on each card.</p>
 
 <h2 id="related">12. Related reports</h2>
 <ul>
@@ -306,7 +331,7 @@ longer said to grow with load; the latency map is marked as aifoundry2's.</p>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">The energy manual, §5</a>
 — what messages between cores and shires cost, from a pair of minions to rings across the mesh.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a> — a computation
-that hands its intermediate to another shire's scratchpad instead of DRAM: 12× faster at a twelfth of the energy, with
+that hands its intermediate to another shire's scratchpad instead of DRAM: 12× faster at a thirteenth of the energy, with
 bandwidth within a quarter over the ring offsets tried.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the shire
 map behind these hop counts, and the first per-hop estimate, from messages around rings.</li>

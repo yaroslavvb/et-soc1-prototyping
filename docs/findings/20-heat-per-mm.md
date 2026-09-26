@@ -6,13 +6,14 @@ sources: [05-claims.md](05-claims.md)
 **Question (Q41):** Dally's rule of thumb says on-chip communication costs "~100 fJ/b-mm". What does moving a bit
 one millimetre cost on the ET-SoC-1's mesh, measured, and does the rule hold?
 
-**Answer:** at the mesh's own 0.485 V, with no other traffic on its links, a random bit costs **36 fJ per mm on the
+**Answer:** at the mesh's own 0.485 V, with no other traffic on its links, a random bit costs **37 fJ per mm on the
 mesh rail** (25 of it depending on the data, 12 not) and **47 fJ on board power**, which also carries the
-regulator's loss. On a loaded mesh, where flows share links, it is **50 and 73 fJ**: contention adds 40–45% on the
-mesh rail and 55–65% on board power. What costs energy is not only bits that change between consecutive flits but **the
-ones carried**: an all-ones stream, which never changes from flit to flit, costs 7–9% more per hop than random data.
+regulator's loss. On a loaded mesh, where flows share links, it is **53 and 79 fJ**: contention adds 45–55% on the
+mesh rail and 65–75% on board power. What costs energy is not only bits that change between consecutive flits but **the
+ones carried**: an all-ones stream, which never changes from flit to flit, costs 8–12% more per hop than random data on
+the mesh rail on all three cards (on board power 5–9%, not resolved from zero on any card).
 Dally's figure states no voltage. Scaled to 0.9 V, the voltage of the 40 nm figure it most likely descends from
-(an inference; no source says so), the mesh rail's data-dependent cost is 85–105 fJ per bit·mm, so the rule holds to
+(an inference; no source says so), the mesh rail's data-dependent cost is 85–107 fJ per bit·mm, so the rule holds to
 within its own vagueness; read at the "~0.5V" his 2023 talk sets beside it, the figure is 3–4 times what this mesh
 spends on the data.
 
@@ -46,7 +47,10 @@ the bits on the links are chosen:
 
 Two meters: board power (bracketed by idle, leakage-corrected) and the service processor's reading of the mesh
 (NoC) rail at 0.485 V and 400 MHz. Three passes in shuffled order on each of aifoundry2 and aifoundry3; 756 bursts,
-six dropped because the meter was starved.
+six dropped because the meter was starved. A third run, in the version-3 check of 26 September, repeated the random,
+all-zeros and all-ones sets, free links and loaded mesh, in six passes on each of aifoundry2, aifoundry3 and aifoundry1
+card 1 (`workloads/enercat/analyze_wire_v3.py`, `wire3.json`); every figure it covers comes from it, the three-term
+model below from the second run.
 
 ## What a hop costs, and what it depends on
 
@@ -75,8 +79,8 @@ stored complemented would cost 36% of what it does now.
 ## Sharing a link costs energy
 
 In the all-pairs traffic, link sharing grows with distance: 0, 22, 32, 55 and 72% of link-hops at 1, 2, 3, 4 and 6
-hops (dimension-ordered routing on the recorded maps). Over the same one to four hops, the loaded mesh costs **119
-against 91 fJ per bit per hop** for the data-dependent part and 76 against 43 for the rest, on the mesh rail. Each
+hops (dimension-ordered routing on the recorded maps). Over the same one to four hops, the loaded mesh costs **129
+against 92 fJ per bit per hop** for the data-dependent part and 81 against 45 for the rest, on the mesh rail. Each
 reader's bandwidth is within 6% of what it gets on free links, so flits are not held long; straight x-only flows
 that share links cost as much as the loaded mesh, which points to sharing rather than turns.
 
@@ -84,11 +88,11 @@ that share links cost as much as the loaded mesh, which points to sharing rather
 
 | fJ per random bit·mm | data-dependent | in all |
 |---|---|---|
-| mesh rail, free links, 0.485 V | 25 | 36 |
-| board power, free links | 33 | 47 |
-| mesh rail, loaded | 31 | 50 |
-| board power, loaded | 46 | 73 |
-| mesh rail data scaled to 0.9 V (× 3.44) | 85–105 | |
+| mesh rail, free links, 0.485 V | 25 | 37 |
+| board power, free links | 31 | 47 |
+| mesh rail, loaded | 31 | 53 |
+| board power, loaded | 49 | 79 |
+| mesh rail data scaled to 0.9 V (× 3.44) | 85–107 | |
 | Dally 2023 / CACM 2020 | 100 (no voltage, no activity) | |
 | Keckler et al. 2011, 40 nm, 0.9 V | 121 | |
 | Dally 2018, "in present day chips" | 20–40 | |
@@ -100,15 +104,15 @@ over the 0.9 V literature is mostly V². Only mesh-rail numbers are V²-scaled: 
 
 ## In practice
 
-- A random byte costs **1.50–2.17 pJ per hop** on the loaded mesh (mesh rail to board, everything included).
+- A random byte costs **1.58–2.34 pJ per hop** on the loaded mesh (mesh rail to board, everything included).
 - A 64-byte line carried between the two farthest shires (10 hops, about 37 mm of mesh travel, extrapolated from
-  1–6) costs 1.0–1.4 nJ in hops, against 8.3 nJ to read it from DRAM by random-data tensor load (129 pJ/B, like for
-  like with the 4.21 pJ/B own-scratchpad read): the whole hand-off, far scratchpad read and exit included, about
-  1.8 nJ, is about 4.5× cheaper than DRAM on the same meter. Each hop adds about half of what reading the byte from
-  the shire's own scratchpad costs (2.17 against 4.21 pJ/B, board power).
-- In Dally's currency, a 32-bit operand crossing one hop costs 8.7 pJ of board power, about 1.6 lanes of `fadd.ps`
-  on random data: one lane of a vector float add is worth about 0.6 of a hop, some 2.3 mm (230 times Dally's
-  10 µm); a scalar `fadd.s` (25.5 pJ) is worth about three hops.
+  1–6) costs 1.0–1.5 nJ in hops, against 8.5 nJ to read it from DRAM by random-data tensor load (132.6 pJ/B, like for
+  like with the 4.43 pJ/B own-scratchpad read; the energy manual's three-card values): the whole hand-off, far
+  scratchpad read and exit included, about 2.0 nJ, is about 4.3× cheaper than DRAM on the same meter. Each hop adds
+  about half of what reading the byte from the shire's own scratchpad costs (2.34 against 4.43 pJ/B, 53%, board power).
+- In Dally's currency, a 32-bit operand crossing one hop costs 9.4 pJ of board power, about 1.8 lanes of `fadd.ps`
+  on random data: one lane of a vector float add is worth about 0.5 of a hop, some 2.0 mm (200 times Dally's
+  10 µm); a scalar `fadd.s` (26.3 pJ) is worth about three hops.
 
 ## Lanes and flits
 

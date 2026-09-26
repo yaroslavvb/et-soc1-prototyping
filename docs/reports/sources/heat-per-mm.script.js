@@ -1,9 +1,17 @@
 /* Heat per millimetre. D is report.json (tools/ettelem/build_wire_report.py); every number on the page is computed
-   from it. Charts use the shared toolkit CK (docs/reports/sources/chartkit.js): responsive frames, tooltips that work by
+   from it. D.wire is the third run: the three-card check's six passes on each of aifoundry2, aifoundry3 and
+   aifoundry1-c1 (workloads/enercat/analyze_wire_v3.py), the basis of every figure its 28 configurations give.
+   D.wire_sep24 is the first two runs (24 September, two cards), kept for what only they measured: the two-term model
+   over five bit densities and the frozen line, the block patterns and the x/y axes. D.check_v3 holds the check's
+   per-card verdicts (mean, 99% interval, status), which the text quotes for the claims the check tested.
+   Charts use the shared toolkit CK (docs/reports/sources/chartkit.js): responsive frames, tooltips that work by
    pointer, touch and keyboard, HTML legends, template colour tokens only. */
-const W_=D.wire, IN=D.inputs, HD=D.headline;
-const SET=(W_.model.v2&&W_.model.v2.board&&W_.model.v2.board.toggle_fj_per_bit_transition_hop)?'v2':'v1';
-const HB=HD[`${SET}/board`], HN=HD[`${SET}/noc_rail`], UB=HD['uncontended/board'], UN=HD['uncontended/noc_rail'];
+const W_=D.wire, H_=D.wire_sep24, IN=D.inputs, HD=D.headline, CV=(D.check_v3||{}).items||{};
+const SET=(H_.model.v2&&H_.model.v2.board&&H_.model.v2.board.toggle_fj_per_bit_transition_hop)?'v2':'v1';
+// the third run: loaded mesh (all pairs, 1-6 hops) and free links (link-disjoint pairs, 1-4 hops), random against zeros
+const HB=HD['loaded/board'], HN=HD['loaded/noc_rail'], UB=HD['uncontended/board'], UN=HD['uncontended/noc_rail'];
+// the two-term model (second run, 24 September): per difference, per one, their fit's residual
+const MB=HD[`${SET}/board`], MN=HD[`${SET}/noc_rail`];
 const f0=v=>v.toFixed(0),f1=v=>v.toFixed(1),f2=v=>v.toFixed(2),f3=v=>v.toFixed(3);
 const bar=(p,fn)=>p?`<b>${fn(p.mean)}</b> <span class="small">[${fn(p.lo)}–${fn(p.hi)}]</span>`:'—';
 const cards=(p,fn)=>p&&p.per_card?CK.cardsIn(p.per_card).map(h=>`${CK.card(h).short} ${fn(typeof p.per_card[h]==='number'?p.per_card[h]:p.per_card[h].mean)}`).join(' · '):'';
@@ -17,7 +25,7 @@ const halo=n=>sty(n,{paintOrder:'stroke',stroke:'var(--page)',strokeWidth:'3px',
 function whisker(g,x,y1,y2,col){[[x,x,y1,y2],[x-3,x+3,y1,y1],[x-3,x+3,y2,y2]].forEach(q=>sty(CK.el('line',{x1:q[0],x2:q[1],y1:q[2],y2:q[3]},g),{stroke:col,strokeWidth:'1.4px'}));}
 const meanOf=v=>v.reduce((a,b)=>a+b,0)/v.length;
 /* per-pattern slopes from a model's per-pass points, pooled over passes and cards (pJ per byte per hop) */
-function pooled(set,src){const m=W_.model[set]&&W_.model[set][src], acc={}; if(!m||!m.per_pass)return acc;
+function pooled(set,src){const m=H_.model[set]&&H_.model[set][src], acc={}; if(!m||!m.per_pass)return acc;
  for(const h in m.per_pass)m.per_pass[h].forEach(f=>f.points.forEach(q=>{(acc[q.pattern]=acc[q.pattern]||{t:q.toggle,o:q.ones,v:[]}).v.push(q.slope);}));
  for(const k in acc){const a=acc[k];a.mean=meanOf(a.v);a.lo=Math.min(...a.v);a.hi=Math.max(...a.v);a.n=a.v.length;}
  return acc;}
@@ -25,12 +33,12 @@ function pooled(set,src){const m=W_.model[set]&&W_.model[set][src], acc={}; if(!
    run's all-zeros and all-ones averaged, (s(P = 0) + s(P = 1))/2, with every slope over the same d = 1, 3, 6. Pooled
    and per card; `below` is the blocks' shortfall as a fraction of the prediction (pJ per byte per hop). */
 function blocksLFL(k){
- const ds=[1,3,6], C=W_.configs, ok=pre=>ds.every(d=>C[pre+d]&&C[pre+d][k]);
+ const ds=[1,3,6], C=H_.configs, ok=pre=>ds.every(d=>C[pre+d]&&C[pre+d][k]);
  if(![16,32,64,128].every(n=>ok(`walt/n${n}/hop`))||!ok('wbern/p0/hop')||!ok('wbern/p1/hop'))return null;
  const lsq=ys=>{const mx=meanOf(ds),my=meanOf(ys);let a=0,b=0;ds.forEach((x,i)=>{a+=(x-mx)*(ys[i]-my);b+=(x-mx)*(x-mx);});return a/b;};
  const sl=(pre,h)=>lsq(ds.map(d=>{const c=C[pre+d][k];return h?c.per_card[h].mean:c.mean;}));
  const one=h=>{const blk=meanOf([16,32,64,128].map(n=>sl(`walt/n${n}/hop`,h))), nt=(sl('wbern/p0/hop',h)+sl('wbern/p1/hop',h))/2;return {blk,nt,below:1-blk/nt};};
- const out=one(null); out.per_card={}; W_.hosts.forEach(h=>{out.per_card[h]=one(h);}); return out;}
+ const out=one(null); out.per_card={}; H_.hosts.forEach(h=>{out.per_card[h]=one(h);}); return out;}
 /* de-collide end-of-line labels: keep at least `gap` px between them, inside [top, bottom] */
 function spread(items,gap,top,bottom){items.sort((a,b)=>a.y-b.y);for(let i=1;i<items.length;i++)items[i].y=Math.max(items[i].y,items[i-1].y+gap);
  const over=items.length?items[items.length-1].y-bottom:0; if(over>0)items.forEach(it=>it.y-=over);
@@ -70,8 +78,8 @@ const markWord=c=>({dot:'dots',ring:'rings',diamond:'diamonds',box:'squares'})[C
 (function(){
  setText('k-hop',`${f2(HOP)} mm`);
  setText('k-noc',`${f1(UN.random_bit_data.mean)} + ${f1(UN.fixed_per_bit.mean)} fJ`);
- setText('k-noc-sub',`data-dependent + fixed, 0.485 V, fitted over 1–4 hops; loaded mesh ${f1(HN.random_bit_data.mean)} + ${f1(HN.fixed_per_bit.mean)} (the model, 1–6 hops)`);
- setText('k-one',`${f0(HN.per_one.mean)} vs ${f0(HN.per_transition.mean)} fJ`);
+ setText('k-noc-sub',`data-dependent + fixed, 0.485 V, fitted over 1–4 hops on ${nw(CK.cardsIn(W_.hosts).length)} cards; loaded mesh ${f1(HN.random_bit_data.mean)} + ${f1(HN.fixed_per_bit.mean)} (all pairs, 1–6 hops)`);
+ setText('k-one',`${f0(MN.per_one.mean)} vs ${f0(MN.per_transition.mean)} fJ`);
  const s09=D.scaled['0.9'];
  setText('k-09',`${f0(UN.random_bit_data.mean*s09)}–${f0(HN.random_bit_data.mean*s09)} fJ`);
 })();
@@ -108,8 +116,8 @@ const markWord=c=>({dot:'dots',ring:'rings',diamond:'diamonds',box:'squares'})[C
 
 /* ---------- 4. energy against distance: all cards pooled, or one card (its means, ± one standard error) ---------- */
 (function(){
- const pre=SET==='v2'?'wu/p':'wbern/p', Ps=SET==='v2'?['0','0.25','0.5','0.75','1']:['0','0.1','0.25','0.5','0.75','0.9','1'];
- const C=W_.configs, ds=[0,1,2,3,4,6]; let key=NK, card='pooled';
+ const pre='wu/p', C=W_.configs, Ps=['0','0.1','0.25','0.5','0.75','0.9','1'].filter(p=>C[`${pre}${p}/hop1`]);   // the third run: 0, ½ and 1
+ const ds=[0,1,2,3,4,6]; let key=NK, card='pooled';
  // density of ones is ordered: one hue, from a visible floor (P = 0) to full strength and past it towards the ink (P = 1)
  const col=p=>p<=0.5?`color-mix(in srgb, var(--c1) ${f0(45+110*p)}%, var(--surface))`:`color-mix(in srgb, var(--c1) ${f0(100-130*(p-0.5))}%, var(--ink))`;
  const frac={'0':'0','0.1':'0.1','0.25':'¼','0.5':'½','0.75':'¾','0.9':'0.9','1':'1'};
@@ -157,7 +165,7 @@ const markWord=c=>({dot:'dots',ring:'rings',diamond:'diamonds',box:'squares'})[C
   mx*=1.1;
   const x=CK.lin(-0.04,1.04,L,f.W-R), y=CK.lin(0,mx,f.H-B,T);
   CK.axes(f,{x,y,L,R,T,B,xt:[0,0.25,0.5,0.75,1],xl:'density of ones in the data, P',yl:`${meterName(key)}: pJ per payload byte per hop (slope)`});
-  const M=W_.model[SET][src], a=M.toggle_fj_per_bit_transition_hop.mean*8/1000, b=M.ones_fj_per_one_bit_hop.mean*8/1000, s0=M.s0_pj_per_byte_hop.mean;
+  const M=H_.model[SET][src], a=M.toggle_fj_per_bit_transition_hop.mean*8/1000, b=M.ones_fj_per_one_bit_hop.mean*8/1000, s0=M.s0_pj_per_byte_hop.mean;
   const curve=[],tog=[]; for(let p=0;p<=1.0001;p+=0.02)curve.push([p,s0+a*2*p*(1-p)+b*p]);
   // the best pure-difference model (no ones term), fitted to the same points: the fair test of "only differences cost"
   const pp=pts.filter(q=>q.set[0]===SET&&!q.k.startsWith('wfrz')); let sxx=0,sx=0,sy=0,sxy=0,n=0; pp.forEach(q=>{sxx+=q.t*q.t;sx+=q.t;sy+=q.mean;sxy+=q.t*q.mean;n++;});
@@ -179,28 +187,32 @@ const markWord=c=>({dot:'dots',ring:'rings',diamond:'diamonds',box:'squares'})[C
 (function(){
  const rows=[['<i>a</i>: per flit-to-flit difference','per_transition'],['<i>b</i>: per one carried','per_one'],['random bit, data part (½<i>a</i> + ½<i>b</i>)','random_bit_data'],['per bit, data-independent','fixed_per_bit']];
  const t=document.getElementById('modeltab'); if(!t)return;
- const LD='loaded mesh', FR='free links', tot=h=>`<b>${f1(h.random_bit_total.mean)}</b> <span class="small">[${f1(h.random_bit_total.lo)}–${f1(h.random_bit_total.hi)}]</span>`;
- t.innerHTML='<thead><tr><th>At 0.485 V, 400 MHz</th><th>links</th><th class="num">mesh rail, fJ per hop</th><th class="num">mesh rail, fJ per mm</th><th class="num">board power, fJ per hop</th><th class="num">board power, fJ per mm</th></tr></thead><tbody>'+
-  rows.map(r=>`<tr><td>${r[0]}</td><td>${LD}</td><td class="num">${bar(HN.per_hop[r[1]],f0)}</td><td class="num">${bar(HN[r[1]],f1)}</td><td class="num">${bar(HB.per_hop[r[1]],f0)}</td><td class="num">${bar(HB[r[1]],f1)}</td></tr>`).join('')+
-  // board power resolves the free-link total but not its split into a data and a fixed part: those cells say so (§10 has the numbers)
-  `<tr><td>random bit, data part</td><td>${FR}</td><td class="num">${bar(UN.per_hop.random_bit_data,f0)}</td><td class="num">${bar(UN.random_bit_data,f1)}</td><td class="num small">not resolved</td><td class="num small">not resolved</td></tr>`+
-  `<tr><td>per bit, data-independent</td><td>${FR}</td><td class="num">${bar(UN.per_hop.fixed_per_bit,f0)}</td><td class="num">${bar(UN.fixed_per_bit,f1)}</td><td class="num small">not resolved</td><td class="num small">not resolved</td></tr>`+
+ const LD='loaded mesh, second run', FR='free links, third run', L3='loaded mesh, third run', tot=h=>`<b>${f1(h.random_bit_total.mean)}</b> <span class="small">[${f1(h.random_bit_total.lo)}–${f1(h.random_bit_total.hi)}]</span>`;
+ // the board free-link split, as the three-card check tested it (P3 data part, P4 fixed part, fJ per bit per hop)
+ const cvc=id=>CV[id]?CK.cardsIn(CV[id].per_card):[], cvl=id=>cvc(id).map(h=>f0(CV[id].per_card[h].mean)), lst=xs=>xs.length<2?xs.join(''):`${xs.slice(0,-1).join(', ')} and ${xs[xs.length-1]}`;
+ const clear=id=>cvc(id).every(h=>CV[id].per_card[h].lo99>0);
+ t.innerHTML='<thead><tr><th>At 0.485 V, 400 MHz</th><th>links, run</th><th class="num">mesh rail, fJ per hop</th><th class="num">mesh rail, fJ per mm</th><th class="num">board power, fJ per hop</th><th class="num">board power, fJ per mm</th></tr></thead><tbody>'+
+  rows.map(r=>`<tr><td>${r[0]}</td><td>${LD}</td><td class="num">${bar(MN.per_hop[r[1]],f0)}</td><td class="num">${bar(MN[r[1]],f1)}</td><td class="num">${bar(MB.per_hop[r[1]],f0)}</td><td class="num">${bar(MB[r[1]],f1)}</td></tr>`).join('')+
+  `<tr><td>random bit, data part</td><td>${FR}</td><td class="num">${bar(UN.per_hop.random_bit_data,f0)}</td><td class="num">${bar(UN.random_bit_data,f1)}</td><td class="num">${bar(UB.per_hop.random_bit_data,f0)}</td><td class="num">${bar(UB.random_bit_data,f1)}</td></tr>`+
+  `<tr><td>per bit, data-independent</td><td>${FR}</td><td class="num">${bar(UN.per_hop.fixed_per_bit,f0)}</td><td class="num">${bar(UN.fixed_per_bit,f1)}</td><td class="num">${bar(UB.per_hop.fixed_per_bit,f0)}</td><td class="num">${bar(UB.fixed_per_bit,f1)}</td></tr>`+
   `<tr><td><b>A random bit, everything</b></td><td>${FR}</td><td class="num">—</td><td class="num">${tot(UN)}</td><td class="num">—</td><td class="num">${tot(UB)}</td></tr>`+
-  `<tr><td><b>A random bit, everything</b></td><td>${LD}</td><td class="num">—</td><td class="num">${tot(HN)}</td><td class="num">—</td><td class="num">${tot(HB)}</td></tr></tbody>`+
-  `<tfoot><tr><td colspan="6" class="small"><b>Loaded mesh</b>: all pairs, sections 4–5; the model fitted over 1–6 hops. <b>Free links</b>: every flow on its own links, fitted over 1–4 hops (only random and zeros were run this way). `+
-  `Fit per card and pass over ${SET==='v2'?'five bit densities and the frozen line':'seven bit densities'}, then pooled: bold is the mean, brackets the range over passes and cards, with the hop length’s range (${IN.hop_mm.range[0]}–${IN.hop_mm.range[1]} mm) folded into the per-mm bars. Residual of the fit: ${f3(HN.rms_pj_per_byte_hop)} pJ/B/hop on the mesh rail, ${f3(HB.rms_pj_per_byte_hop)} on board power. Over the same 1–4 hops as the free-link rows, the loaded mesh rail gives ${f0(W_.disjoint_flows.noc_pj_per_byte.wu.random_minus_zeros_fj_per_bit_hop.mean/HOP)} + ${f0(W_.disjoint_flows.noc_pj_per_byte.wu.zeros_fj_per_bit_hop.mean/HOP)} fJ/mm (section 6). On board power the free-link total is resolved on both cards but its split into a data part and a data-independent part is not (<a href="#limits">§10</a>).</td></tr></tfoot>`;
+  `<tr><td><b>A random bit, everything</b></td><td>${L3}</td><td class="num">—</td><td class="num">${tot(HN)}</td><td class="num">—</td><td class="num">${tot(HB)}</td></tr></tbody>`+
+  `<tfoot><tr><td colspan="6" class="small"><b>Second run</b> (aifoundry2 and aifoundry3, three passes each): the model of this section, all pairs, fitted per card and pass over ${SET==='v2'?'five bit densities and the frozen line':'seven bit densities'} and 1–6 hops, then pooled; residual of the fit ${f3(MN.rms_pj_per_byte_hop)} pJ/B/hop on the mesh rail, ${f3(MB.rms_pj_per_byte_hop)} on board power. `+
+  `<b>Third run</b> (six passes on each of ${lst(CK.cardsIn(W_.hosts).map(h=>CK.card(h).label))}): random data against zeros, the only two densities run on free links; free links: every flow on its own links, fitted over 1–4 hops; loaded mesh: all pairs over 1–6 hops. `+
+  `Bold is the mean, brackets the range over passes and cards, with the hop length’s range (${IN.hop_mm.range[0]}–${IN.hop_mm.range[1]} mm) folded into the per-mm bars. Over the same 1–4 hops as the free-link rows, the loaded mesh rail gives ${f0(W_.disjoint_flows.noc_pj_per_byte.wu.random_minus_zeros_fj_per_bit_hop.mean/HOP)} + ${f0(W_.disjoint_flows.noc_pj_per_byte.wu.zeros_fj_per_bit_hop.mean/HOP)} fJ/mm (section 6). `+
+  (CV.P3&&CV.P4?`On board power the free-link split is ${clear('P3')&&clear('P4')?`resolved on ${cvc('P3').length===3?'all three':nw(cvc('P3').length)} cards`:'not resolved on every card'}: the data part ${lst(cvl('P3'))} and the data-independent part ${lst(cvl('P4'))} fJ per bit per hop on ${lst(cvc('P3').map(h=>CK.card(h).label))}, each 99% interval clear of zero.`:'')+`</td></tr></tfoot>`;
  CK.stackTable(t);
  CK.sortTable(t);
 })();
 
 /* ---------- 5b. what any bit pattern would cost: the plane of the second run's model ---------- */
 (function(){
- if(!(W_.model.v2&&W_.model.v2.noc_rail))return;
+ if(!(H_.model.v2&&H_.model.v2.noc_rail))return;
  let key=NK, P=0.5, t=0.5, preset='random', comp=null;
- const coef=k=>{const M=W_.model.v2[srcOf(k)];return {a:M.toggle_fj_per_bit_transition_hop.mean,b:M.ones_fj_per_one_bit_hop.mean,s0:M.s0_pj_per_byte_hop.mean*1000/8,s0pj:M.s0_pj_per_byte_hop.mean};};
+ const coef=k=>{const M=H_.model.v2[srcOf(k)];return {a:M.toggle_fj_per_bit_transition_hop.mean,b:M.ones_fj_per_one_bit_hop.mean,s0:M.s0_pj_per_byte_hop.mean*1000/8,s0pj:M.s0_pj_per_byte_hop.mean};};
  const E=(c,p,q)=>c.s0+c.a*q+c.b*p, tmax=p=>2*Math.min(p,1-p), r2=v=>Math.round(v*100)/100;
  function meas(k){   // measured cost per bit per hop (fJ), pooled over passes and cards
-  const acc=pooled('v2',srcOf(k)), out={}, al=n=>W_.patterns[`alt:${n}`][k].slope, fj=v=>v*1000/8;
+  const acc=pooled('v2',srcOf(k)), out={}, al=n=>H_.patterns[`alt:${n}`][k].slope, fj=v=>v*1000/8;
   for(const p in acc){const a=acc[p]; out[p]={P:a.o,t:a.t,mean:fj(a.mean),lo:fj(a.lo),hi:fj(a.hi),n:a.n};}
   const bl=[16,32,64,128].map(n=>fj(al(n).mean));
   out.blocks={P:0.5,t:0,mean:meanOf(bl),lo:Math.min(...bl),hi:Math.max(...bl),n:4,sizes:true};   // first run; t = 0 by the lane rule
@@ -332,16 +344,14 @@ const MAPBUS=CK.bus('heat-map-d');
   const dj=W_.disjoint_flows[key]; if(!(dj&&dj.wsep_d1_4&&dj.wu))return;
   const qs=cfgs().map(c=>c[key]), bars=`bars: ${barsText(card,qs)}`;
   if(card==='pooled'){const u=dj.wsep_d1_4.random_minus_zeros_fj_per_bit_hop, l=dj.wu.random_minus_zeros_fj_per_bit_hop, uz=dj.wsep_d1_4.zeros_fj_per_bit_hop, lz=dj.wu.zeros_fj_per_bit_hop;
-   // board power resolves only the total per card, not its split into a data and a fixed part (§10)
-   const body=key===NK?`the data-dependent part costs ${f0(u.mean)} fJ with every flow on its own links against ${f0(l.mean)} on the loaded mesh, the data-independent part ${f0(uz.mean)} against ${f0(lz.mean)}`
-    :`a random bit costs ${f0(dj.wsep_d1_4.random_fj_per_bit_hop.mean)} fJ with every flow on its own links against ${f0(dj.wu.random_fj_per_bit_hop.mean)} on the loaded mesh; on this meter the split into a data-dependent and a fixed part is not resolved (<a href="#limits">§10</a>)`;
+   // the third run resolves the data and fixed parts on both meters, on every card (the check's P1-P5)
+   const body=`the data-dependent part costs ${f0(u.mean)} fJ with every flow on its own links against ${f0(l.mean)} on the loaded mesh, the data-independent part ${f0(uz.mean)} against ${f0(lz.mean)}`;
    const n=new Set(qs.map(q=>q.n)), bp=n.size===1?`the range over ${nw([...n][0])} passes`:barsText(card,qs);
    setText('contcap',`Per bit per hop over 1–4 hops, ${meterName(key)}: ${body}. Solid: random data; dashed: zeros; bars: ${bp}${sel?`; rings: the ${sel}-hop points, the distance on the map`:''}.`);
    return;}
   // one card: the same per-bit-per-hop contrasts, that card's mean ± one standard error over its passes
   const F=v=>{const p=CK.pick(v,card); return p?`${f0(p.mean)}${p.se!=null?` ± ${f1(p.se)}`:''}`:'no value';};
-  const body=key===NK?`the data-dependent part costs ${F(dj.wsep_d1_4.random_minus_zeros_fj_per_bit_hop)} fJ with every flow on its own links against ${F(dj.wu.random_minus_zeros_fj_per_bit_hop)} on the loaded mesh, the data-independent part ${F(dj.wsep_d1_4.zeros_fj_per_bit_hop)} against ${F(dj.wu.zeros_fj_per_bit_hop)}`
-   :`a random bit costs ${F(dj.wsep_d1_4.random_fj_per_bit_hop)} fJ with every flow on its own links against ${F(dj.wu.random_fj_per_bit_hop)} on the loaded mesh; the split into a data-dependent and a fixed part is not resolved on this meter (<a href="#limits">§10</a>)`;
+  const body=`the data-dependent part costs ${F(dj.wsep_d1_4.random_minus_zeros_fj_per_bit_hop)} fJ with every flow on its own links against ${F(dj.wu.random_minus_zeros_fj_per_bit_hop)} on the loaded mesh, the data-independent part ${F(dj.wsep_d1_4.zeros_fj_per_bit_hop)} against ${F(dj.wu.zeros_fj_per_bit_hop)}`;
   setText('contcap',`Per bit per hop over 1–4 hops, ${meterName(key)}, ${cardName(card)} (mean ± one standard error): ${body}. Solid: random data; dashed: zeros; points (${markWord(card)}): ${cardName(card)}'s means, ${bars}; the axis stays put, so switching cards shows how they differ${sel?`; rings: the ${sel}-hop points, the distance on the map`:''}.`);}
  CK.seg('contbtn',{label:'Meter',options:METERS,value:key,onChange:v=>{key=v;f.redraw();}});
  if(CARDS.length){const cs=CK.cardSeg('contcard',{cards:CARDS,pooled:true,onChange:v=>{card=v;f.redraw();}}); if(cs.value!==card){card=cs.value;f.redraw();}}
@@ -411,18 +421,19 @@ const MAPBUS=CK.bus('heat-map-d');
 })();
 
 /* ---------- 8. price a transfer: two shires on the logical map, a payload and its data ----------
-   Hops are the Manhattan distance on the logical map (inputs.mesh_xy), each one inputs.hop_mm of mesh travel. The per-hop
-   cost is the loaded-mesh model of §5 from headline[<set>/<meter>].per_hop (fixed + a·t + b·P, t = 2P(1 − P) for
-   independent bits); the whole read is the straight line through the measured points of that density over 1–6 hops
-   (wire.configs), as §8's text does for random data; DRAM and the own scratchpad are context's random-data tensor loads
-   (board power, the energy manual, all cards). A card with no value in a quantity shows "no value", never zero. */
+   Hops are the Manhattan distance on the logical map (inputs.mesh_xy), each one inputs.hop_mm of mesh travel. For each
+   density of ones the third run measured on the loaded mesh (all pairs: 0, ½ and 1, on every card), the straight line
+   through its measured points over 1–6 hops (wire.configs; all cards pooled, or one card's own means) gives both the
+   cost per hop (its slope) and the whole read at the route's distance (the line itself), as §8's text does for random
+   data; DRAM and the own scratchpad are context's random-data tensor loads (board power, the energy manual). A card
+   with no value in a quantity shows "no value", never zero. */
 (function(){
  const MX=IN.mesh_xy&&IN.mesh_xy.value, X=D.context||{}; if(!MX||!X.tload_dram_random_pj_per_byte||!X.own_scratchpad_pj_per_byte)return;
  const C=W_.configs, px=IN.pitch_x_mm.value, py=IN.pitch_y_mm.value, XY=s=>MX[String(s)];
  const ids=Object.keys(MX).map(Number).sort((a,b)=>a-b), at=new Map(ids.map(s=>[XY(s).join(','),s]));
  const hops=(a,b)=>Math.abs(XY(a)[0]-XY(b)[0])+Math.abs(XY(a)[1]-XY(b)[1]);
- const pre=SET==='v2'?'wu/p':'wbern/p', DS=[1,2,3,4,6].filter(d=>C[`${pre}0.5/hop${d}`]), DLO=Math.min(...DS), DHI=Math.max(...DS);
- const DATA=(SET==='v2'?['0','0.25','0.5','0.75','1']:['0','0.1','0.25','0.5','0.75','0.9','1']).map(p=>[p,{'0':'all zeros','0.1':'10% ones','0.25':'¼ ones','0.5':'random','0.75':'¾ ones','0.9':'90% ones','1':'all ones'}[p]]);
+ const pre='wu/p', DS=[1,2,3,4,6].filter(d=>C[`${pre}0.5/hop${d}`]), DLO=Math.min(...DS), DHI=Math.max(...DS);
+ const DATA=['0','0.1','0.25','0.5','0.75','0.9','1'].filter(p=>DS.every(d=>C[`${pre}${p}/hop${d}`])).map(p=>[p,{'0':'all zeros','0.1':'10% ones','0.25':'¼ ones','0.5':'random','0.75':'¾ ones','0.9':'90% ones','1':'all ones'}[p]]);
  const STOPS=[]; for(let b=64;b<=1048576;b*=2)STOPS.push(b);
  const bFmt=b=>b>=1048576?`${b/1048576} MB`:b>=1024?`${b/1024} KB`:`${b} B`;
  const eFmt=nj=>nj==null?'—':nj>=1e6?`${CK.fmt.num(nj/1e6)} mJ`:nj>=1000?`${CK.fmt.num(nj/1000)} µJ`:`${CK.fmt.num(nj)} nJ`;
@@ -430,17 +441,14 @@ const MAPBUS=CK.bus('heat-map-d');
  const DFAR=Math.max(...ids.map(a=>Math.max(...ids.map(b=>hops(a,b)))));
  const PRESETS=[[1,'neighbours, 1 hop'],[DHI,`${DHI} hops, the farthest measured`],[DFAR,`${DFAR} hops, the farthest pair`]].map(([d,l])=>[pairAt(d),l]).filter(q=>q[0]);
  let [from,to]=pairAt(DFAR)||[ids[0],ids[ids.length-1]], next='from', bytes=64, P='0.5', key=BK, card='pooled';
- /* the loaded-mesh model's terms (fJ per bit per hop) for a card and meter, or null */
- function terms(k,cd){const H=HD[`${SET}/${srcOf(k)}`]; if(!H||!H.per_hop)return null; const g=n=>CK.pick(H.per_hop[n],cd), a=g('per_transition'), b=g('per_one'), s0=g('fixed_per_bit');
-  return a&&b&&s0?{a:a.mean,b:b.mean,s0:s0.mean}:null;}
- const hopPj=(k,cd,p)=>{const c=terms(k,cd); return c?(c.s0+c.a*2*p*(1-p)+c.b*p)*8/1000:null;};   // pJ per byte per hop
  /* the straight line through the measured points of one density (pJ per byte against hops), or null if a point is missing */
  function lineFit(k,cd,p){const ys=DS.map(d=>{const c=C[`${pre}${p}/hop${d}`], q=c&&c[k]; if(!q)return null; const v=cd==='pooled'?q.mean:(CK.pick(q,cd)||{}).mean; return v==null?null:v;});
   if(ys.some(v=>v==null))return null; const mx=meanOf(DS), my=meanOf(ys); let sxy=0,sxx=0; DS.forEach((x,i)=>{sxy+=(x-mx)*(ys[i]-my);sxx+=(x-mx)*(x-mx);});
   const sl=sxy/sxx; return {slope:sl,icpt:my-sl*mx};}
+ const hopPj=(k,cd,p)=>{const fl=lineFit(k,cd,p); return fl?fl.slope:null;};   // pJ per byte per hop: the line's slope
  /* x first, as analyze_wire.route(): the stops from the data's shire to the reader */
  function route(a,b){let [x,y]=XY(a); const [x1,y1]=XY(b), out=[[x,y]]; while(x!==x1){x+=x1>x?1:-1;out.push([x,y]);} while(y!==y1){y+=y1>y?1:-1;out.push([x,y]);} return out;}
- const meshNj=(s,k)=>{const h=hopPj(k,card,+P); return h==null?null:bytes*h*hops(from,s)/1000;};
+ const meshNj=(s,k)=>{const h=hopPj(k,card,P); return h==null?null:bytes*h*hops(from,s)/1000;};
  CK.legend('route-leg',[{key:'f',label:'the data’s shire (from)',mark:'box',color:'var(--c2)'},{key:'t',label:'the reader (to)',mark:'box',color:'var(--c7)'},
   {key:'r',label:`route, within the ${DLO}–${DHI} hops measured`,mark:'line',color:'var(--ink)'},{key:'x',label:'extrapolated',mark:'dash',color:'var(--ink)'},
   {key:'e',label:'no compute shire on the map',mark:'ring',color:'var(--ref)'}]);
@@ -492,12 +500,12 @@ const MAPBUS=CK.bus('heat-map-d');
  function update(){
   pb.querySelectorAll('button').forEach(b=>{const q=PRESETS[+b.dataset.i][0]; b.setAttribute('aria-pressed',String(q[0]===from&&q[1]===to));});
   const d=hops(from,to), p=+P, dn=DATA.find(q=>q[0]===P)[1], cn=cardName(card), board=key===BK, ext=d>DHI;
-  const hj=hopPj(key,card,p), fit=lineFit(key,card,P), nj=v=>v==null?null:bytes*v/1000;
+  const hj=hopPj(key,card,P), fit=lineFit(key,card,P), nj=v=>v==null?null:bytes*v/1000;
   const mesh=d===0?0:hj==null?null:nj(hj*d), whole=d===0?null:fit?nj(fit.icpt+fit.slope*d):null, dram=nj(X.tload_dram_random_pj_per_byte), own=nj(X.own_scratchpad_pj_per_byte);
   const rows=[
    [d===0?'over the mesh: none, the data stays in the shire':`over the mesh: ${d} hop${d>1?'s':''} × ${hj==null?'—':f2(hj)} pJ per byte`,mesh,'var(--c1)',''],
    d===0?null:[board?`the whole read from shire ${from}'s scratchpad: the read, leaving the shire and the hops`:`everything the mesh rail sees of that read, leaving the shire included`,whole,`color-mix(in srgb, var(--c1) 55%, var(--surface))`,''],
-   ['the same bytes from DRAM',dram,'var(--c4)','the energy manual: board power, random data, all cards'],
+   ['the same bytes from DRAM',dram,'var(--c4)','the energy manual: board power, random data'],
    [`the same bytes from shire ${to}'s own scratchpad`,own,'var(--c3)','same source']].filter(Boolean);
   const top=Math.max(...rows.map(r=>r[1]||0))||1;
   const cmp=(a,b)=>a<b?`${f1(b/a)}× cheaper than`:`${f1(a/b)} times the cost of`;   // a set against b
@@ -511,18 +519,18 @@ const MAPBUS=CK.bus('heat-map-d');
   if(card!=='pooled'&&(hj==null||(d>0&&whole==null)))h+=`<p class="small">“no value”: the data has no ${cn} value for that quantity.</p>`;
   out.set(h);}
  setText('routecap',`Shires are placed by their logical coordinates (marty1885's map, as in <a href="#contention">§6</a>; the die appears to be this map turned a quarter, which changes no distance), drawn at the die's ${f2(px)} × ${f2(py)} mm tile pitch, and a route is dimension-ordered, x first, as the analysis assumes (y first is as long). `+
-  `The cost per hop is the loaded-mesh model of <a href="#ones">§5</a>, as in the text above; the whole read is the straight line through the measured ${DS.join(', ')}-hop points for that density of ones, so it includes the far scratchpad read and leaving the shire. `+
-  `DRAM and the own scratchpad are the energy manual's random-data tensor loads on board power (${f1(X.tload_dram_random_pj_per_byte)} and ${f2(X.own_scratchpad_pj_per_byte)} pJ per byte, all cards). A single card uses its own fit's means. Beyond ${DHI} hops the route is dashed and every figure extrapolated along those lines. Click or tap a shire, or tab to the map and move with the arrow keys; Enter picks.`);
+  `For each density of ones the third run measured on every card (${DATA.map(q=>q[1]).join(', ')}), the straight line through its measured ${DS.join(', ')}-hop points on the loaded mesh gives the cost per hop (its slope) and the whole read (the line at the route's distance, so it includes the far scratchpad read and leaving the shire); “all cards” uses the means over every pass of the ${nw(CARDS.length)} cards, a single card its own. `+
+  `DRAM and the own scratchpad are the energy manual's random-data tensor loads on board power (${f1(X.tload_dram_random_pj_per_byte)} and ${f2(X.own_scratchpad_pj_per_byte)} pJ per byte). Beyond ${DHI} hops the route is dashed and every figure extrapolated along those lines. Click or tap a shire, or tab to the map and move with the arrow keys; Enter picks.`);
  update();
 })();
 
 /* ---------- 9. lanes and flit width ---------- */
 (function(){
- const Ns=[16,32,64,128,256], PT=W_.patterns; let key=NK;
+ const Ns=[16,32,64,128,256], PT=H_.patterns; let key=NK;
  if(!Ns.some(n=>PT[`alt:${n}`]))return;
  CK.legend('alt-leg',[{key:'s',label:'blocks of 16–128 B',mark:'box',color:'var(--c1)'},{key:'l',label:'256 B blocks',mark:'box',color:'var(--c2)'},{key:'p',label:'predicted over the same hops, with 0 or 1 difference per bit',mark:'dash',color:'var(--ink)'}]);
  const f=CK.frame('alt',{label:'Cost per hop of blocks of N bytes alternately all-zero and all-one',height:W=>W<600?260:280,draw(f){
-  const L=46,R=14,T=26,B=40, M=W_.model.v1[srcOf(key)], a=M.toggle_fj_per_bit_transition_hop.mean*8/1000, b=M.ones_fj_per_one_bit_hop.mean*8/1000, s0=M.s0_pj_per_byte_hop.mean;
+  const L=46,R=14,T=26,B=40, M=H_.model.v1[srcOf(key)], a=M.toggle_fj_per_bit_transition_hop.mean*8/1000, b=M.ones_fj_per_one_bit_hop.mean*8/1000, s0=M.s0_pj_per_byte_hop.mean;
   // like for like: the blocks' slopes are over d = 1, 3, 6, so the no-difference level is the first run's all-zeros and
   // all-ones averaged over the same hops (the model's s0 + b/2 is fitted over 1-6 hops, which the raised four-hop point
   // steepens); a full flip adds the first run's cost per difference, a
@@ -641,25 +649,40 @@ const MAPBUS=CK.bus('heat-map-d');
 
 /* ---------- the numeric sentences: every number below is computed from D ---------- */
 (function(){
- const s09=D.scaled['0.9'], s05=D.scaled['0.5'], L=HOP, X=D.context||{}, C=W_.configs, CHK=W_.checks||{};
+ const s09=D.scaled['0.9'], s05=D.scaled['0.5'], L=HOP, X=D.context||{}, C=W_.configs, CHK=W_.checks||{}, HC=H_.configs, HCHK=H_.checks||{};
  const v=(cfg,key)=>C[cfg]&&C[cfg][key]?C[cfg][key].mean:null;
  const vc=(cfg,key,h)=>C[cfg]&&C[cfg][key]&&C[cfg][key].per_card[h]?C[cfg][key].per_card[h].mean:null;
+ const hv=(cfg,key)=>HC[cfg]&&HC[cfg][key]?HC[cfg][key].mean:null;   // the first two runs
  const pc=x=>`${f0(100*x)}%`;
  const span=(xs,fn)=>{const lo=Math.min(...xs),hi=Math.max(...xs);return fn(lo)===fn(hi)?fn(lo):`${fn(lo)}–${fn(hi)}`;};
  const pcs=xs=>`${span(xs.map(x=>100*x),f0)}%`;
  const sg=x=>`${x<0?'−':'+'}${Math.abs(x).toFixed(1)}`;
+ const neg=fn=>x=>{const s=fn(Math.abs(x));return (x<0&&+s!==0?'−':'')+s;};   // a true minus, and no "−0"
  const r5=x=>Math.round(20*x)*5, pc5=xs=>{const a=r5(Math.min(...xs)),b=r5(Math.max(...xs));return a===b?`about ${a}%`:`${a}–${b}%`;};
  function line(xs,ys){const n=xs.length,mx=xs.reduce((a,b)=>a+b,0)/n,my=ys.reduce((a,b)=>a+b,0)/n;let sxy=0,sxx=0;xs.forEach((x,i)=>{sxy+=(x-mx)*(ys[i]-my);sxx+=(x-mx)*(x-mx);});const s=sxy/sxx;return {slope:s,intercept:my-s*mx};}
  const slope=(pre,key,ds)=>line(ds,ds.map(d=>v(`${pre}${d}`,key))).slope;
  const slopeC=(pre,key,ds,h)=>line(ds,ds.map(d=>vc(`${pre}${d}`,key,h))).slope;   // the same on one card's means
  // how far the four-hop point sits off the line through the other distances `ref`, on one card
  const off4=(pre,ref,key,h)=>{const q=line(ref,ref.map(d=>vc(`${pre}${d}`,key,h)));return vc(`${pre}4`,key,h)/(q.slope*4+q.intercept)-1;};
- const byCard=xs=>xs.map((x,i)=>`${x} on ${W_.hosts[i]}`).join(' and ');   // "5% on aifoundry2 and 9% on aifoundry3"
+ const lab=h=>CK.card(h).label;
+ const list=xs=>xs.length<2?xs.join(''):`${xs.slice(0,-1).join(', ')} and ${xs[xs.length-1]}`;
+ const byCard=(xs,hs)=>list(xs.map((x,i)=>`${x} on ${lab(hs[i])}`));   // "5% on aifoundry2, 5% on aifoundry3 and 9% on aifoundry1 card 1"
  const kek=D.literature.find(l=>l.who.startsWith('Keckler')), KEK=kek?kek.fj_bit_mm:121;
  const dn=W_.disjoint_flows.noc_pj_per_byte, db=W_.disjoint_flows.pj_per_byte;
  const sh=c=>CHK.link_sharing&&CHK.link_sharing[c]?CHK.link_sharing[c].shared_link_hop_fraction:0;
- const hosts=W_.hosts;
+ const shH=c=>HCHK.link_sharing&&HCHK.link_sharing[c]?HCHK.link_sharing[c].shared_link_hop_fraction:0;
+ const hosts=CK.cardsIn(W_.hosts), hostsH=CK.cardsIn(H_.hosts);
  const D6=[1,2,3,4,6];
+ /* the three-card check (D.check_v3): each tested statistic's per-card mean and 99% interval. `held` are the cards where
+    the registered test holds; `clear` those whose interval excludes zero (resolved from zero, in or out of the range) */
+ const cvH=id=>CV[id]?CK.cardsIn(CV[id].per_card):[];
+ const cvC=(id,h)=>CV[id].per_card[h];
+ const held=id=>cvH(id).filter(h=>cvC(id,h).status==='holds'), notHeld=id=>cvH(id).filter(h=>cvC(id,h).status!=='holds');
+ const clear=id=>cvH(id).filter(h=>cvC(id,h).lo99>0||cvC(id,h).hi99<0), unclear=id=>cvH(id).filter(h=>!(cvC(id,h).lo99>0||cvC(id,h).hi99<0));
+ const cvS=(id,hs,k,fn)=>span(hs.map(h=>k*cvC(id,h).mean),fn);                            // the means on cards hs, as a span
+ const cvL=(id,hs,k,fn)=>list(hs.map(h=>neg(fn)(k*cvC(id,h).mean)));                      // ... as a list
+ const cvI=(id,h,k,fn,u='')=>{const c=cvC(id,h),g=neg(fn);return `${g(k*c.mean)}${u} [${g(k*c.lo99)}, ${g(k*c.hi99)}]`;};   // mean [99% interval]
+ const onC=(hs,all)=>hs.length&&hs.length===all.length?(all.length===3?'on all three cards':`on all ${nw(all.length)} cards`):`on ${list(hs.map(lab))}`;
 
  /* the lede */
  setText('l-hop',`${f2(L)} mm`);
@@ -667,25 +690,33 @@ const MAPBUS=CK.bus('heat-map-d');
  setText('l-unc',`${f0(UN.random_bit_total.mean)} fJ`);
  setText('l-uncd',`${f0(UN.random_bit_data.mean)}`);
  setText('l-uncb',`${f0(UB.random_bit_total.mean)} fJ`);
+ // the check's P11a/P11b: the free-link total per card (fJ per bit·mm)
+ if(CV.P11a)setText('l-unc-c',`${cvL('P11a',cvH('P11a'),1,f0)} on the ${nw(cvH('P11a').length)} cards`);
+ if(CV.P11b)setText('l-uncb-c',`${cvL('P11b',cvH('P11b'),1,f0)}`);
  setText('l-load',`${f0(HN.random_bit_total.mean)} fJ on the mesh rail and ${f0(HB.random_bit_total.mean)} on board power`);
  const contN=[HN.random_bit_total.mean/UN.random_bit_total.mean-1, dn.wu.random_fj_per_bit_hop.mean/dn.wsep_d1_4.random_fj_per_bit_hop.mean-1];
  const contB=[HB.random_bit_total.mean/UB.random_bit_total.mean-1, db.wu.random_fj_per_bit_hop.mean/db.wsep_d1_4.random_fj_per_bit_hop.mean-1];
  setText('l-cont',`contention adds ${pc5(contN)} per millimetre on the mesh rail, and ${pc5(contB)} on board power`);
- // all ones against random data, per hop, per card: the mesh rail agrees on the two cards; board power is given per card
- const onesMoreC=k=>hosts.map(h=>slopeC('wu/p1/hop',k,D6,h)/slopeC('wu/p0.5/hop',k,D6,h)-1);
- const onesN=onesMoreC(NK), onesB=onesMoreC(BK);
- const onesTxt=`${pcs(onesN)} more on the mesh rail; on board power ${byCard(onesB.map(x=>pc(x)))}`;
- const onesLess1=[NK,BK].map(k=>1-v('wu/p1/hop1',k)/v('wu/p0.5/hop1',k));
+ // all ones against random data, per hop over 1-6 hops, per card: the check's P6a (mesh rail) and P6b (board power)
+ const onesN=cvH('P6a').map(h=>cvC('P6a',h).mean), onesB=cvH('P6b').map(h=>cvC('P6b',h).mean);
+ const onesTxt=`${pcs(onesN)} more on the mesh rail ${onC(held('P6a'),cvH('P6a'))}; on board power ${pcs(onesB)}, `+
+  (clear('P6b').length?`resolved from zero ${onC(clear('P6b'),cvH('P6b'))}`:'not resolved from zero on any card');
+ // at one hop, all ones against random data in all, mesh rail: the check's P12
+ const onesLess1=cvH('P12').map(h=>cvC('P12',h).mean);
  setText('l-ones',onesTxt);
- setText('l-ones1',pcs(onesLess1));
+ setText('l-ones1',`${pcs(onesLess1)} less in all on the mesh rail`);
  setText('l-09',`${f0(UN.random_bit_data.mean*s09)}–${f0(HN.random_bit_data.mean*s09)} fJ per bit·mm`);
  setText('l-05',`${span([100/(UN.random_bit_data.mean*s05),100/(HN.random_bit_data.mean*s05)],f1)} times`);
- const drops=[].concat(...Object.values(W_.dropped||{}));
+ const drops=[].concat(...Object.values(H_.dropped||{}));
  const why=[...new Set(drops.map(x=>x.why))];
  setText('l-drop',`${drops.length} bursts${why.length===1&&why[0]==='service processor starved'?' (a starved meter)':''}`);
+ // the third run: bursts kept and dropped, and configurations a pass did not launch (28 per pass)
+ const CI3=W_.cards||{}, nCfg=Object.keys(C).length, drops3=[].concat(...Object.values(W_.dropped||{}));
+ const miss=hosts.map(h=>{const c=CI3[h]; return c?nCfg*c.passes_used.length-c.bursts_kept-c.bursts_dropped:0;});
+ setText('l-drop3',`${W_.n_bursts} bursts kept, ${drops3.length?drops3.length+' dropped':'none dropped'}`+
+  (miss.some(n=>n>0)?` (${list(hosts.filter((h,i)=>miss[i]>0).map(h=>`${nw(miss[hosts.indexOf(h)])} configuration${miss[hosts.indexOf(h)]>1?'s':''} of one pass on ${lab(h)} not launched`))})`:''));
 
  /* 4. distance */
- const null0=(v('wu/p0.5/hop0',NK)-v('wu/p0/hop0',NK))/(v('wu/p0.5/hop1',NK)-v('wu/p0/hop1',NK));
  const d4=q=>[NK,BK].map(k=>CHK.d4_off_line[`wu/p${q}/${k}`]);
  const ex=k=>CHK.exit_step_hops[k];
  // per-hop increments on the mesh rail, per card (fJ per bit): the data-dependent part, and the data-independent part
@@ -693,25 +724,47 @@ const MAPBUS=CK.bus('heat-map-d');
  const incr=h=>{const dp=d=>(vc(`wu/p0.5/hop${d}`,NK,h)-vc(`wu/p0/hop${d}`,NK,h))*1000/8, z=d=>vc(`wu/p0/hop${d}`,NK,h)*1000/8;
   return {data:[dp(2)-dp(1),dp(3)-dp(2),dp(4)-dp(3),(dp(6)-dp(4))/2], zs:[z(2)-z(1),z(3)-z(2),(z(6)-z(4))/2], z34:z(4)-z(3)};};
  const INC=hosts.map(incr), incD=[].concat(...INC.map(q=>q.data)), incZ=[].concat(...INC.map(q=>q.zs)), incZ34=INC.map(q=>q.z34);
- const sepOff=hosts.map(h=>Math.abs(off4('wsep/p0.5/hop',[1,2,3,5],NK,h)));   // link-disjoint, random data, mesh rail
+ // the four-hop point off the line (the check's P7a-f): the patterns resolved from the line on every card first, then
+ // the others with the cards where they are resolved, and each card where not with its mean and 99% interval
+ const offT=(id,what)=>{const c=clear(id), u=unclear(id), n=cvH(id).length;
+  if(!c.length)return {all:false,t:`for ${what} not resolved on any card`};
+  if(c.length===n)return {all:true,t:`${cvS(id,c,100,f0)}% for ${what}`};
+  return {all:false,t:`for ${what} ${cvS(id,c,100,f0)}% on ${list(c.map(lab))} (not resolved on ${list(u.map(lab))}${u.length===1?': '+cvI(id,u[0],100,f0,'%'):''})`};};
+ const offJoin=xs=>list(xs.map(q=>offT(q[0],q[1])).sort((a,b)=>b.all-a.all).map(q=>q.t));
+ // the loaded set's four-hop step against the link-disjoint set's (the check's P15a random data, P15b zeros)
+ const p15=q=>{const id=q==='0.5'?'P15a':'P15b', hs=clear(id), u=unclear(id);
+  return `${cvS(id,hs,100,f0)}% ${q==='0.5'?'for random data':'for zeros'} ${onC(hs,cvH(id))}${u.length?` (not resolved on ${list(u.map(lab))})`:''}`;};
+ // link-disjoint flows, the four-hop point against the line through 1, 2, 3 and 5 hops (the check's P14a, P14b: equivalence)
+ const p14=id=>{const hs=held(id), u=notHeld(id);
+  return {on:onC(hs,cvH(id)), off:span(hs.map(h=>Math.abs(100*cvC(id,h).mean)),f1), u,
+          reach:list(u.map(h=>f1(100*Math.max(Math.abs(cvC(id,h).lo99),Math.abs(cvC(id,h).hi99)))+'%'))};};
+ const q14a=p14('P14a'), q14b=p14('P14b');
+ const out14=[[q14a,'random data'],[q14b,'zeros']].filter(q=>q[0].u.length).map(q=>`on ${list(q[0].u.map(lab))} the interval for ${q[1]} reaches ${q[0].reach}`);
+ // the exit step in hops (the check's P9 board power, P8 mesh rail), random data
+ const exC=held('P9').filter(h=>held('P8').includes(h)), exU=hosts.filter(h=>!exC.includes(h));
+ const exNone=exU.every(h=>unclear('P8').includes(h)&&unclear('P9').includes(h));
  setText('disttext',
-  `On the mesh rail the data-dependent energy is zero at <i>d</i> = 0 (${f1(100*Math.abs(null0))}% of its one-hop value: the shire's own scratchpad does not use the mesh) and grows with every hop out to 6, by ${span(incD,f0)} fJ per bit per hop. `+
-  `On this loaded mesh the step from three to four hops is larger, most clearly in the data-independent part (${span(incZ34,f0)} fJ per bit against ${span(incZ,f0)} for the other steps): on the mesh rail the four-hop point sits ${pcs([d4('0.5')[0],d4('0')[0]])} above the straight line through the others for random data and zeros, and ${pcs(d4('1'))} for all ones on both meters; on board power only the all-ones point is resolved from the line on both cards. `+
-  `The step comes at the same distance as a jump in link sharing, from ${pc(sh('wu/p0.5/hop3'))} to ${pc(sh('wu/p0.5/hop4'))} of link-hops on shared links, but these runs do not show that one causes the other (<a href="#limits">§10</a>). With link-disjoint flows (section 6) the mesh rail grows linearly within the noise: its four-hop point sits ${pcs(sepOff)} off the line through the others for random data. `+
-  `Leaving the shire adds a step of its own (the mesh-stop crossings) whose size depends on the data and the meter: about ${f1(ex('wu/p0.5/pj_per_byte'))} hops' worth for random data on board power, ${span([ex('wu/p0.5/noc_pj_per_byte'),ex('wu/random_minus_zeros/noc_pj_per_byte')],f2)} of a hop on the mesh rail in this sweep (${f1(ex('wsep/p0.5/noc_pj_per_byte'))} with link-disjoint flows), and almost nothing for all-ones data (${sg(Math.min(ex('wu/p1/pj_per_byte'),ex('wu/p1/noc_pj_per_byte')))} to ${sg(Math.max(ex('wu/p1/pj_per_byte'),ex('wu/p1/noc_pj_per_byte')))} hops). `+
-  `The lines fan out with the density of ones; the all-ones line (<i>P</i> = 1) starts ${pcs(onesLess1)} below the random one at one hop but climbs faster (<a href="#ones">§5</a>).`);
+  `On the mesh rail the data-dependent energy is zero at <i>d</i> = 0 (${cvS('P10',cvH('P10'),100,f1)}% of its one-hop value on the ${nw(cvH('P10').length)} cards: the shire's own scratchpad does not use the mesh) and grows with every hop out to 6, by ${span(incD,f0)} fJ per bit per hop. `+
+  `On this loaded mesh the step from three to four hops is larger, most clearly in the data-independent part (${span(incZ34,f0)} fJ per bit against ${span(incZ,f0)} for the other steps). On the mesh rail the four-hop point sits above the straight line through the others by `+
+  `${offJoin([['P7a','random data'],['P7b','zeros'],['P7c','all ones']])}; on board power by ${offJoin([['P7d','all ones'],['P7e','random data'],['P7f','zeros']])}. `+
+  `The step comes at the same distance as a jump in link sharing, from ${pc(sh('wu/p0.5/hop3'))} to ${pc(sh('wu/p0.5/hop4'))} of link-hops on shared links, and the link-disjoint flows of section 6 do not show it: on the mesh rail the loaded set's four-hop point sits further above its line than theirs by ${p15('0.5')}, and by ${p15('0')}; whether sharing itself causes it these runs cannot say (<a href="#limits">§10</a>). `+
+  `With link-disjoint flows the mesh rail grows linearly: the four-hop point sits within ±3% of the line through the others for random data ${q14a.on} (${q14a.off}% off), and within ±4% of it for zeros ${q14b.on} (${q14b.off}% off), each whole 99% interval inside the band${out14.length?'; '+out14.join('; '):''}. `+
+  `Leaving the shire adds a step of its own (the mesh-stop crossings) whose size depends on the data and the meter: for random data ${cvL('P9',exC,1,f1)} hops' worth on board power and ${cvL('P8',exC,1,f2)} of a hop on the mesh rail on ${list(exC.map(lab))}`+
+  (exU.length?` (on ${list(exU.map(lab))} ${exNone?'neither is resolved from zero':'not both are resolved'}: ${list(exU.map(h=>`${cvI('P9',h,1,f2)} and ${cvI('P8',h,1,f2)} hops`))})`:'')+
+  `, ${f2(ex('wu/random_minus_zeros/noc_pj_per_byte'))} of a hop for the mesh rail's data-dependent part and ${f1(ex('wsep/p0.5/noc_pj_per_byte'))} with link-disjoint flows (all cards pooled), and almost nothing for all-ones data (${sg(Math.min(ex('wu/p1/pj_per_byte'),ex('wu/p1/noc_pj_per_byte')))} to ${sg(Math.max(ex('wu/p1/pj_per_byte'),ex('wu/p1/noc_pj_per_byte')))} hops). `+
+  `The lines fan out with the density of ones; the all-ones line (<i>P</i> = 1) starts ${pcs(onesLess1)} below the random one at one hop on the mesh rail but climbs faster (<a href="#ones">§5</a>).`);
 
  /* 5. ones */
  setText('onestext',
   `If the mesh's wires held their value between flits and only transitions cost energy, the per-hop cost would rise and fall as 2<i>P</i>(1−<i>P</i>): the same for all-zeros and all-ones, highest at <i>P</i> = ½, symmetric about it (dashed: the best fit of that shape, which misses both ends). `+
-  `It does not: all-ones costs about as much per hop as random data (${onesTxt}, in the second run; the excess is resolved on both cards and both meters once the first run's passes are added), <i>P</i> = ¾ more than <i>P</i> = ¼, and the frozen line — half ones, no differences between flits at all — sits halfway up. `+
-  `Two terms fit every bit density and the frozen line — <i>a</i>, an energy per bit that differs from the previous flit, and <i>b</i>, an energy per one carried — on both cards and both meters, to ${f2(HN.rms_pj_per_byte_hop)} pJ/B per hop on the mesh rail and ${f2(HB.rms_pj_per_byte_hop)} on board power (the block patterns of <a href="#lanes">§9</a> were not fitted: compared over the same hops, the 16–128 B blocks sit on its no-transition prediction, and on the mesh rail the 256 B blocks come in far below a full flip):`);
- const M=W_.model[SET].noc_rail, aN=M.toggle_fj_per_bit_transition_hop.mean, bN=M.ones_fj_per_one_bit_hop.mean, s0N=M.s0_pj_per_byte_hop.mean*1000/8;
+  `It does not: all-ones costs about as much per hop as random data (in the third run's six passes per card: ${onesTxt}), <i>P</i> = ¾ more than <i>P</i> = ¼, and the frozen line — half ones, no differences between flits at all — sits halfway up (the second run). `+
+  `Two terms fit every bit density and the frozen line of the second run — <i>a</i>, an energy per bit that differs from the previous flit, and <i>b</i>, an energy per one carried — on both of its cards and both meters, to ${f2(MN.rms_pj_per_byte_hop)} pJ/B per hop on the mesh rail and ${f2(MB.rms_pj_per_byte_hop)} on board power (the block patterns of <a href="#lanes">§9</a> were not fitted: compared over the same hops, the 16–128 B blocks sit on its no-transition prediction, and on the mesh rail the 256 B blocks come in far below a full flip):`);
+ const M=H_.model[SET].noc_rail, aN=M.toggle_fj_per_bit_transition_hop.mean, bN=M.ones_fj_per_one_bit_hop.mean, s0N=M.s0_pj_per_byte_hop.mean*1000/8;
  const fb=2*aN/(2*aN+bN), Et=aN/fb, Cmm=2*(Et/L)/(IN.noc_v.value*IN.noc_v.value);
  const onesToZeros=s0N/(s0N+bN);
  const dP=Math.sqrt(2*512*0.25/Math.PI)/512, save=bN*dP/(s0N+0.5*aN+0.5*bN);   // per-flit inversion of 512 random bits
  setText('modeltext',
-  `On the mesh rail, on the loaded mesh, the fit gives <b>${f0(HN.per_transition.mean)} fJ per mm</b> per flit-to-flit difference and <b>${f0(HN.per_one.mean)}</b> per one carried, with no difference between the cards beyond the noise (per difference: ${cards(HN.per_transition,f0)}; per one: ${cards(HN.per_one,f0)}). `+
+  `On the mesh rail, on the loaded mesh, the fit gives <b>${f0(MN.per_transition.mean)} fJ per mm</b> per flit-to-flit difference and <b>${f0(MN.per_one.mean)}</b> per one carried, with no difference between the second run's two cards beyond the noise (per difference: ${cards(MN.per_transition,f0)}; per one: ${cards(MN.per_one,f0)}). `+
   `A cost per one-bit that does not need the bit to differ from the previous flit needs wires or nodes that rest at 0. The simplest case is ordinary logic whose output goes to 0 when no flit is present — a crossbar output with no grant, or data gated by valid. `+
   `Then each one rises and falls at the ends of a train of flits, and <i>a</i> and <i>b</i> are the same energy per transition, <i>E</i><sub>t</sub>, split by how often flits come back to back: if a fraction <i>f</i> of flits is followed directly by another, <i>a</i> = <i>f</i>·<i>E</i><sub>t</sub> and <i>b</i> = 2(1−<i>f</i>)·<i>E</i><sub>t</sub>, and the fitted <i>b</i>/<i>a</i> = ${f2(bN/aN)} gives <i>f</i> ≈ ${f1(fb)}. A transition then costs about ${f0(Et)} fJ per hop: ½<i>CV</i>² at ${IN.noc_v.value} V with <i>C</i> = ${f0(Cmm)} fF/mm, ordinary wire capacitance. `+
   `Precharged structures, such as buffer arrays with precharged read lines, would also do it. The fit cannot say which circuit it is — slowing the flows at a fixed distance would; it can say that the effect is the mesh's own: it is on the mesh rail, it grows with every hop, and it is absent at <i>d</i> = 0.`);
@@ -720,39 +773,49 @@ const MAPBUS=CK.bus('heat-map-d');
   `Storing or sending ones-dense data complemented would make it cost what its complement costs: all-ones data would then cost what zeros cost per hop, ${pc(1-onesToZeros)} less; the data-independent part remains (the plane above has a button for it). For random data a per-flit inversion code would save about ${Math.max(1,Math.round(100*save))}%. On this chip the mesh is fixed, so only software can choose the representation.`);
 
  /* 6. contention */
- // one hop, all pairs against link-disjoint, mesh rail, per card: the totals' offsets (resolved on aifoundry3 only)
+ // one hop, all pairs against link-disjoint, mesh rail, per card: the totals' offsets (not tested by the check)
  const agR=hosts.map(h=>vc('wu/p0.5/hop1',NK,h)/vc('wsep/p0.5/hop1',NK,h)-1), agZ=hosts.map(h=>vc('wu/p0/hop1',NK,h)/vc('wsep/p0/hop1',NK,h)-1);
  const agUp=[...agR,...agZ].every(x=>x>0)?'higher':[...agR,...agZ].every(x=>x<0)?'lower':'different';
+ const sp0=x=>{const s=f0(Math.abs(100*x));return `${+s===0?'':x<0?'−':'+'}${s}%`;};   // a signed percentage
  const uD=dn.wu.random_minus_zeros_fj_per_bit_hop.mean, sD=dn.wsep_d1_4.random_minus_zeros_fj_per_bit_hop.mean;
  const uZ=dn.wu.zeros_fj_per_bit_hop.mean, sZ=dn.wsep_d1_4.zeros_fj_per_bit_hop.mean;
  const bwd=Math.max(...[1,2,3,4].map(d=>Math.abs(CHK.per_reader_gb_s[`wu/p0.5/hop${d}`]/CHK.per_reader_gb_s[`wsep/p0.5/hop${d}`]-1)));
  const rd=d=>CHK.link_sharing[`wsep/p0.5/hop${d}`].reader_shires;
- const xa=W_.axes['x/noc_pj_per_byte/random_bit_fj_per_bit_hop_d1_3'];
- const xz=line([1,2,3],[1,2,3].map(d=>v(`waxis/x/hop${d}/p0`,NK))).slope*1000/8;
- const bD=db.wsep_d1_4.random_minus_zeros_fj_per_bit_hop;
+ const xa=H_.axes['x/noc_pj_per_byte/random_bit_fj_per_bit_hop_d1_3'];
+ const xz=line([1,2,3],[1,2,3].map(d=>hv(`waxis/x/hop${d}/p0`,NK))).slope*1000/8;
+ // the one-hop data parts, all pairs against link-disjoint (the check's P16, equivalence inside ±5%)
+ const p16=held('P16'), p16u=notHeld('P16');
+ // the loaded mesh's excess over link-disjoint flows, 1-4 hops (the check's P1, P2 mesh rail; P5a, P5b board power)
+ const exc=(id)=>`${cvL(id,cvH(id),1,f0)}`, outOf=id=>cvH(id).filter(h=>cvC(id,h).status==='sign');
  setText('conttext',
   `In the all-pairs traffic of sections 4 and 5, flows share links more as the distance grows (none at one hop, ${pcs([sh('wu/p0.5/hop2'),sh('wu/p0.5/hop3')])} of link-hops at two and three, ${pc(sh('wu/p0.5/hop4'))} at four, ${pc(sh('wu/p0.5/hop6'))} at six, with dimension-ordered routing). `+
-  `The second run added pairs chosen so that no two flows share a link and every scratchpad has one reader. At one hop, where neither set shares a link, the data-dependent parts agree within the noise; the totals on the mesh rail come out ${pcs(agR.map(Math.abs))} (random data) and ${pcs(agZ.map(Math.abs))} (zeros) ${agUp} for the all-pairs set, an offset resolved on aifoundry3 only (the all-pairs one-hop map puts two readers on some targets). `+
-  `Beyond one hop the loaded mesh climbs faster: over the same one to four hops, <b>${f0(uD)} against ${f0(sD)} fJ per bit per hop</b> for the data-dependent part and ${f0(uZ)} against ${f0(sZ)} for the rest, on the mesh rail.`);
+  `The second run added pairs chosen so that no two flows share a link and every scratchpad has one reader. At one hop, where neither set shares a link, the data-dependent parts agree within 5% ${onC(p16,cvH('P16'))} (${byCard(p16.map(h=>neg(f0)(100*cvC('P16',h).mean)+'%'),p16)}, 99% intervals inside ±5%)`+
+  (p16u.length?`; on ${list(p16u.map(lab))} the one-hop data part is too noisy to tell (${list(p16u.map(h=>cvI('P16',h,100,f0,'%')))})`:'')+
+  `. The totals on the mesh rail come out `+
+  (agUp==='different'?`${list(agR.map(sp0))} (random data) and ${list(agZ.map(sp0))} (zeros) against the link-disjoint set on ${list(hosts.map(lab))}`:`${pcs(agR.map(Math.abs))} (random data) and ${pcs(agZ.map(Math.abs))} (zeros) ${agUp} for the all-pairs set on the ${nw(hosts.length)} cards`)+
+  `, an offset the three-card check did not test (the all-pairs one-hop map puts two readers on some targets). `+
+  `Beyond one hop the loaded mesh climbs faster: over the same one to four hops, <b>${f0(uD)} against ${f0(sD)} fJ per bit per hop</b> for the data-dependent part and ${f0(uZ)} against ${f0(sZ)} for the rest, on the mesh rail. `+
+  `The excess is resolved from zero ${onC(clear('P1').filter(h=>clear('P2').includes(h)),hosts)}: ${exc('P1')} fJ per bit per hop for the data-dependent part and ${exc('P2')} for the rest on ${list(cvH('P1').map(lab))}`+
+  (outOf('P1').length?`; on ${list(outOf('P1').map(lab))} the data-dependent excess is larger than the ${CV.P1.predicted[0]}–${CV.P1.predicted[1]} fJ predicted and noisy (${list(outOf('P1').map(h=>cvI('P1',h,1,f0)))})`:'')+`.`);
  setText('conttext2',
   `That is energy the loaded mesh spends beyond carrying the bits, most likely buffer writes and arbitration where flows meet; flits are not held long, since each reader's bandwidth is within ${Math.ceil(100*bwd)}% of what it gets on free links. It raises the data-independent part proportionally more (+${f0(100*(uZ/sZ-1))}% against +${f0(100*(uD/sD-1))}%). `+
   `The link-disjoint set also has only straight paths, one reader per target and fewer readers at long distances (${rd(1)} shires at one hop, ${rd(5)} at five), but straight x-only flows that do share links (the first run, one to three hops: ${span(Object.values(xa.per_card).map(c=>c.mean),f0)} and ${f0(xz)} fJ) cost about as much as the loaded mesh, which points to sharing rather than turns. `+
-  `On board power only the total contrast is resolved: over one to four hops a random bit costs more per hop on the loaded mesh than on free links by ${byCard(hosts.map(h=>pc(db.wu.random_fj_per_bit_hop.per_card[h].mean/db.wsep_d1_4.random_fj_per_bit_hop.per_card[h].mean-1)))}; its split into a data-dependent and a fixed part is not resolved on that meter (<a href="#limits">§10</a>).`);
+  `On board power the contrast is larger, ${f0(db.wu.random_minus_zeros_fj_per_bit_hop.mean)} against ${f0(db.wsep_d1_4.random_minus_zeros_fj_per_bit_hop.mean)} fJ per bit per hop for the data-dependent part and ${f0(db.wu.zeros_fj_per_bit_hop.mean)} against ${f0(db.wsep_d1_4.zeros_fj_per_bit_hop.mean)} for the rest, and noisier, but resolved from zero ${onC(clear('P5a').filter(h=>clear('P5b').includes(h)),hosts)}: the loaded mesh's excess is ${exc('P5a')} fJ for the data-dependent part and ${exc('P5b')} for the rest on ${list(cvH('P5a').map(lab))}.`);
 
- /* 9. the block patterns */
- const A2=CHK.alt256||{}, ab=A2.board, an=A2.noc_rail;
+ /* 9. the block patterns (the first run) */
+ const A2=HCHK.alt256||{}, ab=A2.board, an=A2.noc_rail;
  // the 16-128 B blocks against the no-transition prediction, like for like over the same d = 1, 3, 6 (blocksLFL)
  const lfN=blocksLFL(NK), lfDev=lfN?Math.max(...Object.values(lfN.per_card).map(c=>Math.abs(c.below))):null;
  const blk=lfN?` The 16–128 B blocks, a first-run pattern the model was not fitted to, sit on the no-transition prediction (all-zeros and all-ones averaged, over the same one, three and six hops) within about ${Math.max(1,Math.round(100*lfDev))}% on the mesh rail on both cards, and within the noise on board power.`:'';
  // the 256 B pattern's extra cost per hop as a fraction of a full flip, per card: (its slope - the 16-128 B level) / a
- const flip256=k=>{const src=srcOf(k), M1=W_.model.v1[src].toggle_fj_per_bit_transition_hop, P=W_.patterns;
-  return hosts.map(h=>{const lv=meanOf([16,32,64,128].map(n=>P[`alt:${n}`][k].slope.per_card[h].mean)), a=M1.per_card[h];
+ const flip256=k=>{const src=srcOf(k), M1=H_.model.v1[src].toggle_fj_per_bit_transition_hop, P=H_.patterns;
+  return hostsH.map(h=>{const lv=meanOf([16,32,64,128].map(n=>P[`alt:${n}`][k].slope.per_card[h].mean)), a=M1.per_card[h];
    return (P['alt:256'][k].slope.per_card[h].mean-lv)/((typeof a==='number'?a:a.mean)*8/1000);});};
  if(ab&&an){
-  const v1a=W_.model.v1.noc_rail.toggle_fj_per_bit_transition_hop.mean, v2a=W_.model.v2.noc_rail.toggle_fj_per_bit_transition_hop.mean;
+  const v1a=H_.model.v1.noc_rail.toggle_fj_per_bit_transition_hop.mean, v2a=H_.model.v2.noc_rail.toggle_fj_per_bit_transition_hop.mean;
   setText('alttext',
-   `On the mesh rail the 256-byte pattern costs less than a full flip, every bit differing on every flit (dashed): its extra cost per hop is ${pcs(flip256(NK))} of that on both cards (on board power ${byCard(flip256(BK).map(x=>pc(x)))}, not resolved from a full flip), and it does not fall as more of the links are shared: `+
-   `on the mesh rail it adds ${f2(an.increment_1_to_3)} pJ/B per hop from one to three hops, where ${pcs([sh('walt/n256/hop1'),sh('walt/n256/hop3')])} of link-hops are shared, and ${f2(an.increment_3_to_6)} from three to six, where ${pcs([sh('walt/n256/hop3'),sh('walt/n256/hop6')])} are. `+
+   `On the mesh rail the 256-byte pattern costs less than a full flip, every bit differing on every flit (dashed): its extra cost per hop is ${pcs(flip256(NK))} of that on both cards (on board power ${byCard(flip256(BK).map(x=>pc(x)),hostsH)}, not resolved from a full flip), and it does not fall as more of the links are shared: `+
+   `on the mesh rail it adds ${f2(an.increment_1_to_3)} pJ/B per hop from one to three hops, where ${pcs([shH('walt/n256/hop1'),shH('walt/n256/hop3')])} of link-hops are shared, and ${f2(an.increment_3_to_6)} from three to six, where ${pcs([shH('walt/n256/hop3'),shH('walt/n256/hop6')])} are. `+
    `So it is not other flows slipping in between, and the other in-flight load is unlikely too: in the first run its lines are identical to the first load's, yet the first run's cost per difference equals the second's (${f0(v1a)} against ${f0(v2a)} fJ per hop on the mesh rail). `+
    `Why is open; one possibility is that when all wires flip the same way together, the capacitance between neighbours is not charged. Most of the excess is paid on leaving the shire (${f2(an.excess_pj_per_byte_at_d['1'])} pJ/B at one hop on the mesh rail, ${f2(an.excess_per_hop)} per further hop).`+blk);
  } else if(blk) setText('alttext',blk.trim());
@@ -764,7 +827,7 @@ const MAPBUS=CK.bus('heat-map-d');
  const brk=Math.min(...n09)<100&&Math.max(...n09)>100?"brackets Dally's 100":(Math.max(...n09)<=100?"is below Dally's 100":"is above Dally's 100");
  const a09=[UN.random_bit_total.mean*s09,HN.random_bit_total.mean*s09];
  setText('comparetext',
-  `At the voltage it runs at, the ET-SoC-1's mesh moves a random bit a millimetre on free links for <b>${f0(UN.random_bit_total.mean)}–${f0(UB.random_bit_total.mean)} fJ</b> in all (mesh rail to board), <b>${f0(UN.random_bit_data.mean)} fJ</b> of it data-dependent heat on the mesh rail (board power does not resolve that split on free links), and on the loaded mesh for ${f0(HN.random_bit_total.mean)}–${f0(HB.random_bit_total.mean)} fJ, ${f0(HN.random_bit_data.mean)}–${f0(HB.random_bit_data.mean)} of it data-dependent: in all, ${f2(Math.min(...tot)/100)}–${f2(Math.max(...tot)/100)} of Dally's 100 taken literally. `+
+  `At the voltage it runs at, the ET-SoC-1's mesh moves a random bit a millimetre on free links for <b>${f0(UN.random_bit_total.mean)}–${f0(UB.random_bit_total.mean)} fJ</b> in all (mesh rail to board), <b>${f0(UN.random_bit_data.mean)} fJ</b> of it data-dependent heat on the mesh rail (${f0(UB.random_bit_data.mean)} on board power), and on the loaded mesh for ${f0(HN.random_bit_total.mean)}–${f0(HB.random_bit_total.mean)} fJ, ${f0(HN.random_bit_data.mean)}–${f0(HB.random_bit_data.mean)} of it data-dependent: in all, ${f2(Math.min(...tot)/100)}–${f2(Math.max(...tot)/100)} of Dally's 100 taken literally. `+
   `But 0.485 V is low: the same capacitance at 0.9 V would cost ${f2(s09)}× more, <b>${f0(n09[0])}–${f0(n09[1])} fJ</b> per random bit·mm for the mesh rail's data-dependent part (free links to loaded), which ${brk} and is ${f1(n09[0]/KEK)}–${f1(n09[1]/KEK)} of Keckler's ${KEK} (40 nm, 0.9 V). `+
   `Counting the data-independent part too, and assuming it also scales as CV², the figure at 0.9 V is ${f0(a09[0])}–${f0(a09[1])} fJ, ${Math.min(...a09)>100?"above Dally's 100":Math.max(...a09)<100?"below Dally's 100":"around Dally's 100"}. `+
   `Board power would say up to ${f0(HB.random_bit_data.mean*s09)} for the data-dependent part, but it carries the regulator's loss, which is not switched capacitance on the die.`);
@@ -803,30 +866,31 @@ const MAPBUS=CK.bus('heat-map-d');
 
  /* 10. limits */
  setText('axistext',`(The first run's x-only and y-only pairs differ in link sharing as well as in direction, so they cannot separate the two either.)`);
- const SN=W_.sensitivity&&W_.sensitivity.no_leak_correction;
+ const SN=H_.sensitivity&&H_.sensitivity.no_leak_correction;
  if(SN){
-  const ch=[];['v1','v2'].forEach(st=>['toggle_fj_per_bit_transition_hop','ones_fj_per_one_bit_hop'].forEach(k=>ch.push(SN[st].board[k].mean/W_.model[st].board[k].mean-1)));
-  const nm=Math.max(...['v1','v2'].map(st=>Math.abs(SN[st].noc_rail.toggle_fj_per_bit_transition_hop.mean/W_.model[st].noc_rail.toggle_fj_per_bit_transition_hop.mean-1)));
+  const ch=[];['v1','v2'].forEach(st=>['toggle_fj_per_bit_transition_hop','ones_fj_per_one_bit_hop'].forEach(k=>ch.push(SN[st].board[k].mean/H_.model[st].board[k].mean-1)));
+  const nm=Math.max(...['v1','v2'].map(st=>Math.abs(SN[st].noc_rail.toggle_fj_per_bit_transition_hop.mean/H_.model[st].noc_rail.toggle_fj_per_bit_transition_hop.mean-1)));
   setText('senstext',
-   `Board-power numbers also depend on the leakage correction: without it the board coefficients come out ${pcs(ch)} higher (the second run's <i>a</i> ${f0(SN.v2.board.toggle_fj_per_bit_transition_hop.mean)} fJ against ${f0(W_.model.v2.board.toggle_fj_per_bit_transition_hop.mean)}), while the mesh-rail ones ${nm<0.005?'do not move':'move by '+pc(nm)}. `+
+   `Board-power numbers also depend on the leakage correction: without it the board coefficients come out ${pcs(ch)} higher (the second run's <i>a</i> ${f0(SN.v2.board.toggle_fj_per_bit_transition_hop.mean)} fJ against ${f0(H_.model.v2.board.toggle_fj_per_bit_transition_hop.mean)}), while the mesh-rail ones ${nm<0.005?'do not move':'move by '+pc(nm)}. `+
    `Three independent reductions of the same bursts, made for this page's review, agree within 3% on the mesh rail's coefficients (6% on the free-link fixed part) and within about 7% on board power, comparing like with like for the leakage correction.`);
  }
  // per-second bound: if the one-hop zeros energy were all paid per second, how much of the fixed part's slope over 1-4 hops it would explain
  const psb=(fam,k)=>{const ds=[1,2,3,4],z=ds.map(d=>v(`${fam}/p0/hop${d}`,k)),bw=ds.map(d=>CHK.per_reader_gb_s[`${fam}/p0.5/hop${d}`]);return line(ds,ds.map((d,i)=>z[0]*bw[0]/bw[i])).slope/line(ds,z).slope;};
- setText('persectext',`Even if all of the one-hop zeros energy were cost per second, on the mesh rail it would explain at most ${pc(psb('wsep',NK))} of the link-disjoint fixed part and ${pc(psb('wu',NK))} of the loaded one. On board power, whose one-hop energy also includes the scratchpad read and the cores, the same bound is about ${Math.round(10*psb('wsep',BK))*10}% for the link-disjoint part, poorly determined on both cards, and ${pc(psb('wu',BK))} for the loaded one, so it cannot rule out that most of the board's fixed part is per second.`);
+ // on board power, link-disjoint: the check's P13 per card (descriptive; the page keeps "cannot rule out" while the upper 99% bound is above 50%)
+ const p13=cvH('P13'), p13hi=p13.map(h=>100*cvC('P13',h).hi99);
+ setText('persectext',`Even if all of the one-hop zeros energy were cost per second, on the mesh rail it would explain at most ${pc(psb('wsep',NK))} of the link-disjoint fixed part and ${pc(psb('wu',NK))} of the loaded one. On board power, whose one-hop energy also includes the scratchpad read and the cores, the same bound is `+
+  (p13.length?`${byCard(p13.map(h=>pc(cvC('P13',h).mean)),p13)} for the link-disjoint part, poorly determined (upper 99% bounds ${span(p13hi,f0)}%),`:`about ${Math.round(10*psb('wsep',BK))*10}% for the link-disjoint part, poorly determined,`)+
+  ` and ${pc(psb('wu',BK))} for the loaded one, so it cannot rule out that most of the board's fixed part is per second.`);
  // what these runs leave open, with the numbers that make it open
- const dStep=q=>hosts.map(h=>off4(`wu/p${q}/hop`,[1,2,3,6],NK,h)-off4(`wsep/p${q}/hop`,[1,2,3,5],NK,h));   // loaded minus link-disjoint, four-hop point off its line
- const bZ=db.wsep_d1_4.zeros_fj_per_bit_hop;
  setText('opentext',
-  `Whether link sharing causes the loaded mesh's larger step between three and four hops (<a href="#distance">§4</a>): the step comes where sharing jumps, and on the mesh rail the loaded set's four-hop point sits ${pcs(dStep('0.5'))} (random data) and ${pcs(dStep('0'))} (zeros) further above its line than the link-disjoint set's, a difference resolved only on aifoundry3 and only for random data. `+
-  `How board power splits the cost on free links (<a href="#ones">§5</a>, <a href="#contention">§6</a>): the total, ${f0(UB.random_bit_total.mean)} fJ per bit·mm, is resolved on both cards, but its data-dependent part (${f0(bD.mean)} fJ per bit per hop, ${f0(bD.lo)}–${f0(bD.hi)} over passes) and fixed part (${f0(bZ.mean)}, ${f0(bZ.lo)}–${f0(bZ.hi)}) are not, and neither is how much each grows on the loaded mesh (to ${f0(db.wu.random_minus_zeros_fj_per_bit_hop.mean)} and ${f0(db.wu.zeros_fj_per_bit_hop.mean)}); most of that scatter comes from the leakage correction. `+
-  `Whether the 256 B blocks cost less than a full flip on board power (<a href="#lanes">§9</a>): their extra cost per hop, as a share of a full flip's, is ${byCard(flip256(BK).map(x=>pc(x)))} and not resolved from 100%; on the mesh rail (${pcs(flip256(NK))}) it is.`);
- const dr=(W_.dropped.aifoundry2||[]).filter(x=>x.why==='service processor starved');
+  `Whether link sharing itself causes the loaded mesh's larger step between three and four hops (<a href="#distance">§4</a>): the step comes where sharing jumps, and on the mesh rail the loaded set's four-hop point sits further above its line than the link-disjoint set's by ${p15('0.5')}, and by ${p15('0')}, but the link-disjoint set also differs in its straight paths and its one reader per target. `+
+  `Whether the 256 B blocks cost less than a full flip on board power (<a href="#lanes">§9</a>, the first run): their extra cost per hop, as a share of a full flip's, is ${byCard(flip256(BK).map(x=>pc(x)),hostsH)} and not resolved from 100%; on the mesh rail (${pcs(flip256(NK))}) it is.`);
+ const dr=(H_.dropped.aifoundry2||[]).filter(x=>x.why==='service processor starved');
  if(dr.length){
-  const a3max=Math.max(...['waxis/y/hop3/p0','waxis/y/hop3/p0.5'].map(c=>C[c]&&C[c].took_ms_max&&C[c].took_ms_max.aifoundry3||0));
+  const a3max=Math.max(...['waxis/y/hop3/p0','waxis/y/hop3/p0.5'].map(c=>HC[c]&&HC[c].took_ms_max&&HC[c].took_ms_max.aifoundry3||0));
   const nS=dr.map(x=>x.samples);
   setText('starvetext',
-   `On aifoundry2 the set of y-only pairs 3 hops apart slowed the service processor's management path so much (${f1(Math.min(...dr.map(x=>x.median_took_ms))/1000)}–${f1(Math.max(...dr.map(x=>x.max_took_ms))/1000)} s per reading instead of 22 ms) that each burst had ${Math.min(...nS)===Math.max(...nS)?Math.min(...nS):Math.min(...nS)+' or '+Math.max(...nS)} readings; those ${dr.length} bursts are dropped. `+
+   `In the first run, on aifoundry2, the set of y-only pairs 3 hops apart slowed the service processor's management path so much (${f1(Math.min(...dr.map(x=>x.median_took_ms))/1000)}–${f1(Math.max(...dr.map(x=>x.max_took_ms))/1000)} s per reading instead of 22 ms) that each burst had ${Math.min(...nS)===Math.max(...nS)?Math.min(...nS):Math.min(...nS)+' or '+Math.max(...nS)} readings; those ${dr.length} bursts are dropped. `+
    (a3max?`On aifoundry3 the same traffic delayed occasional readings to ${f1(a3max/1000)} s; those bursts were kept.`:''));
  }
 })();

@@ -1,13 +1,39 @@
 #!/usr/bin/env python3
-"""Assemble the heat-per-millimetre report's data: the wire analysis plus the sourced inputs it is compared with.
+"""Assemble the heat-per-millimetre report's data: the wire analyses plus the sourced inputs they are compared with.
 
     build_wire_report.py --wire docs/reports/data/2026-09-24-wire-energy/wire.json \\
+                         --wire3 docs/reports/data/2026-09-24-wire-energy/wire3.json \\
                          --out docs/reports/data/2026-09-24-wire-energy/report.json
+
+The page's data come from two analyses, joined here:
+  --wire   the 24 September runs (E31 --set v1, E32 --set v2; two cards, three passes each), analyze_wire.py over
+           docs/reports/data/2026-09-24-wire{,2}-aifoundry{2,3}: report.json "wire_sep24". The page takes from it only
+           what those runs alone measured: the two-term model over five bit densities and the frozen line (v1, v2), the
+           first run's block patterns and x/y axes, and their drops and sensitivity.
+  --wire3  the third run, the version-3 claims check's six passes on each of three cards (aifoundry2, aifoundry3,
+           aifoundry1-c1), analyze_wire_v3.py over docs/reports/data/2026-09-25-claims-v3/raw: report.json "wire", the
+           basis of every figure its 28 configurations give (the distance and contention charts, the free-link and
+           loaded-mesh costs, the checks, the route calculator). The two are never pooled (analyze_wire_v3.py says why).
+  --check  the check's verdicts for V3-WIRE (docs/reports/data/2026-09-25-claims-v3/results/wire.json, default):
+           report.json "check_v3", each item's per-card mean and 99% interval and its outcome, which the page quotes for
+           the claims the check tested.
+
+The full chain, from the repository root:
+
+    python3 workloads/enercat/analyze_wire.py docs/reports/data/2026-09-24-wire{,2}-aifoundry{2,3} \\
+        --out docs/reports/data/2026-09-24-wire-energy/wire.json --pitch-x-mm 3.73 --pitch-y-mm 3.70
+    python3 workloads/enercat/analyze_wire_v3.py docs/reports/data/2026-09-25-claims-v3/raw \\
+        --out docs/reports/data/2026-09-24-wire-energy/wire3.json --pitch-x-mm 3.73 --pitch-y-mm 3.70
+    python3 tools/ettelem/build_wire_report.py --wire docs/reports/data/2026-09-24-wire-energy/wire.json \\
+        --wire3 docs/reports/data/2026-09-24-wire-energy/wire3.json --out docs/reports/data/2026-09-24-wire-energy/report.json
+    python3 scripts/build-report.py heat-per-mm docs/reports/data/2026-09-24-wire-energy/report.json \\
+        docs/reports/2026-09-24-heat-per-mm.html
 
 Every constant below that is not measured here carries its source (docs/reports/data/2026-09-24-wire-energy/research/
 SYNTHESIS.md has the quotes and pages). Nothing is fitted in this script. It reads the energy manual's manual.json, the
 die geometry's pitch.json, the logical mesh map of workloads/nocbench/analyze.py and the raw runs' reader>target
-maps by paths relative to the repository, so it runs from any directory, and it stops with an error if one is missing.
+maps (the 24 September runs' and the third run's, which must agree) by paths relative to the repository, so it runs
+from any directory, and it stops with an error if one is missing.
 """
 import argparse
 import gzip
@@ -22,6 +48,7 @@ PITCH = "docs/reports/data/2026-09-24-wire-energy/research/geometry/pitch.json"
 RAW = ["docs/reports/data/2026-09-24-wire-aifoundry2", "docs/reports/data/2026-09-24-wire-aifoundry3",
        "docs/reports/data/2026-09-24-wire2-aifoundry2", "docs/reports/data/2026-09-24-wire2-aifoundry3"]
 MAP_SETS = ("wu/p0.5/hop", "wsep/p0.5/hop")   # the configurations whose reader>target maps the page draws
+CHECK = "docs/reports/data/2026-09-25-claims-v3/results/wire.json"   # the three-card check's V3-WIRE verdicts
 
 
 def need(rel, what):
@@ -79,10 +106,13 @@ def wire_first_principles(v):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--wire", required=True)
+    ap.add_argument("--wire", required=True, help="the 24 September runs' analysis (analyze_wire.py over E31 and E32)")
+    ap.add_argument("--wire3", required=True, help="the third run's analysis (analyze_wire_v3.py over the three-card check)")
+    ap.add_argument("--check", default=CHECK, help="the check's V3-WIRE verdicts (results/wire.json)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
-    w = json.load(open(a.wire))
+    w = json.load(open(a.wire))     # 24 September: E31 + E32, aifoundry2 and aifoundry3
+    w3 = json.load(open(a.wire3))   # the third run: six passes on each of three cards
     # the memory-shire + PHY strip: reading B of pitch.json (the scale the die width and pitch use); the range is the
     # two strips' widths measured to the tile outlines (research/SYNTHESIS.md 1a)
     pitch = json.load(open(need(PITCH, "the die geometry")))
@@ -98,7 +128,8 @@ def main():
                          "source": "workloads/nocbench/analyze.py MARTY and EMPTY (marty1885's shire coordinates; run_wire.py MESH is the same map)"}
     L = INPUTS["hop_mm"]["value"]
     Llo, Lhi = INPUTS["hop_mm"]["range"]
-    out = {"inputs": INPUTS, "literature": LIT, "wire": w, "first_principles": {"at_0485": wire_first_principles(V_NOC), "at_09": wire_first_principles(0.9)}}
+    out = {"inputs": INPUTS, "literature": LIT, "wire": w3, "wire_sep24": w,
+           "first_principles": {"at_0485": wire_first_principles(V_NOC), "at_09": wire_first_principles(0.9)}}
     # context from the energy manual (docs/reports/data/2026-09-23-energy-manual/manual.json), same cards and clock
     try:
         man = json.load(open(need(MANUAL, "the energy manual context")))
@@ -113,20 +144,29 @@ def main():
     except KeyError as e:
         raise SystemExit(f"build_wire_report: cannot read the energy manual context: {MANUAL} has no {e}")
 
-    # the reader>target map of each drawn configuration, from the raw runs (identical over passes and cards: checked)
+    # the reader>target map of each drawn configuration, from the raw runs of both analyses (identical over runs,
+    # passes and cards: checked here), written into both analyses' link_sharing
     maps = {}
-    for d in RAW:
-        for line in gzip.open(need(d + "/runs.jsonl.gz", "the raw runs"), "rt"):
+    runs = [gzip.open(need(d + "/runs.jsonl.gz", "the raw runs"), "rt") for d in RAW]
+    src3 = w3.get("source", {}).get("raw")
+    if not src3:
+        raise SystemExit("build_wire_report: the third run's analysis names no raw directory (source.raw)")
+    for h, c in sorted(w3.get("cards", {}).items()):
+        runs += [open(need(f"{src3}/{h}/wire/p{p}/runs.jsonl", "the third run's raw runs")) for p in c["passes_used"]]
+    for f in runs:
+        for line in f:
             if not line.startswith("{"):
                 continue
             r = json.loads(line)
             if r.get("cfg", "").startswith(MAP_SETS) and r.get("target_map"):
                 maps.setdefault(r["cfg"], set()).add(r["target_map"])
-    ls = w["checks"]["link_sharing"]
     for cfg, m in sorted(maps.items()):
         if len(m) != 1:
             raise SystemExit(f"build_wire_report: {cfg} has {len(m)} different reader>target maps")
-        ls[cfg]["target_map"] = m.pop()
+        tm = m.pop()
+        for ww in (w, w3):
+            if cfg in ww["checks"]["link_sharing"]:
+                ww["checks"]["link_sharing"][cfg]["target_map"] = tm
 
     # headline numbers per millimetre, per set and meter, with the pitch range folded into the bar
     head = {}
@@ -155,27 +195,58 @@ def main():
     # uncontended: the link-disjoint pairs (wsep) over d = 1-4, the same distances as the loaded set it is compared with
     # (wsep_d1_4; d = 5 has 14 reader shires and depresses board power), random (P = 1/2) against zeros; only these two
     # densities were run disjoint, so the ones/transition split comes from the loaded runs
-    dj = w.get("disjoint_flows", {})
+    # (from the third run, as are the loaded-mesh figures below)
+    dj = w3.get("disjoint_flows", {})
+
+    def mm2(pool):
+        return {"mean": pool["mean"] / L, "lo": pool["lo"] / Lhi, "hi": pool["hi"] / Llo,
+                "per_card": {h: c["mean"] / L for h, c in pool["per_card"].items()}}
     for src, key in (("board", "pj_per_byte"), ("noc_rail", "noc_pj_per_byte")):
         e = dj.get(key, {}).get("wsep_d1_4")
         if not e or not e.get("random_minus_zeros_fj_per_bit_hop"):
             continue
-        def mm2(pool):
-            return {"mean": pool["mean"] / L, "lo": pool["lo"] / Lhi, "hi": pool["hi"] / Llo,
-                    "per_card": {h: c["mean"] / L for h, c in pool["per_card"].items()}}
-        d_, z_ = e["random_minus_zeros_fj_per_bit_hop"], e["zeros_fj_per_bit_hop"]
+        d_, z_, r_ = e["random_minus_zeros_fj_per_bit_hop"], e["zeros_fj_per_bit_hop"], e["random_fj_per_bit_hop"]
         head[f"uncontended/{src}"] = {
             "random_bit_data": mm2(d_), "fixed_per_bit": mm2(z_),
-            "random_bit_total": {"mean": (d_["mean"] + z_["mean"]) / L, "lo": (d_["lo"] + z_["lo"]) / Lhi, "hi": (d_["hi"] + z_["hi"]) / Llo},
-            "per_hop": {"random_bit_data": d_, "fixed_per_bit": z_},
+            # the total per card is the random-data slope itself (per pass), which is what the check tested (P11a/b)
+            "random_bit_total": {"mean": (d_["mean"] + z_["mean"]) / L, "lo": (d_["lo"] + z_["lo"]) / Lhi, "hi": (d_["hi"] + z_["hi"]) / Llo,
+                                 "per_card": {h: c["mean"] / L for h, c in r_["per_card"].items()}},
+            "per_hop": {"random_bit_data": d_, "fixed_per_bit": z_, "random_bit_total": r_},
             "loaded_same_d": {k: dj[key]["wu"][k] for k in ("random_minus_zeros_fj_per_bit_hop", "zeros_fj_per_bit_hop")},
         }
+    # loaded: the all-pairs set over 1, 2, 3, 4 and 6 hops (the third run's "loaded" block), random against zeros,
+    # measured directly per card and pass; the ones/differences split of this cost is the 24 September model's (v1, v2)
+    for src, key in (("board", "pj_per_byte"), ("noc_rail", "noc_pj_per_byte")):
+        e = w3.get("loaded", {}).get(key)
+        if not e or not e.get("random_minus_zeros_fj_per_bit_hop"):
+            continue
+        d_, z_, r_ = e["random_minus_zeros_fj_per_bit_hop"], e["zeros_fj_per_bit_hop"], e["random_fj_per_bit_hop"]
+        head[f"loaded/{src}"] = {
+            "random_bit_data": mm2(d_), "fixed_per_bit": mm2(z_),
+            "random_bit_total": {"mean": (d_["mean"] + z_["mean"]) / L, "lo": (d_["lo"] + z_["lo"]) / Lhi, "hi": (d_["hi"] + z_["hi"]) / Llo,
+                                 "per_card": {h: c["mean"] / L for h, c in r_["per_card"].items()}},
+            "per_hop": {"random_bit_data": d_, "fixed_per_bit": z_, "random_bit_total": r_, "all_ones": e["ones_fj_per_bit_hop"]},
+            "hops": e.get("hops"),
+        }
     out["headline"] = head
+    # the three-card check's verdicts for the claims it tested: per card mean and 99% interval, outcome, where it holds
+    chk = json.load(open(need(a.check, "the three-card check's V3-WIRE results")))
+    keep = ("n", "mean", "lo99", "hi99", "status")
+    out["check_v3"] = {"source": a.check, "reduced_at": chk.get("reduced_at"), "cards": chk.get("all_cards"), "items": {}}
+    for it in chk["items"]:
+        ac = it.get("all_cards", {})
+        out["check_v3"]["items"][it["item"].split("/")[-1]] = {
+            "claims": it.get("claims"), "what": it.get("what"), "outcome": it.get("outcome"), "null": it.get("null"),
+            "predicted": it.get("predicted"),
+            "all_cards": {k: ac.get(k) for k in ("outcome", "holds_on", "sign_only_on", "fails_on", "insufficient_on") if k in ac},
+            "per_card": {h: {k: c[k] for k in keep if k in c} for h, c in it.get("per_card", {}).items()}}
     # V^2 factors to the voltages Dally's figure might assume; the page scales the mesh rail's numbers only (board power
     # carries the regulator's loss, which is not switched capacitance on the die)
     out["scaled"] = {str(v): (v / V_NOC) ** 2 for v in (0.5, 0.7, 0.75, 0.8, 0.9)}
     json.dump(out, open(a.out, "w"), indent=1)
     for k, h in head.items():
+        if "random_bit_data" not in h:
+            continue
         extra = f"per transition {h['per_transition']['mean']:5.1f}  per one {h['per_one']['mean']:5.1f}  " if "per_transition" in h else " " * 38
         print(f"{k:22s} {extra}random bit data {h['random_bit_data']['mean']:5.1f}  fixed {h['fixed_per_bit']['mean']:5.1f}  total {h['random_bit_total']['mean']:5.1f} fJ/bit.mm")
 
