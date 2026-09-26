@@ -8,7 +8,7 @@ This page covers everything needed to pick the work up somewhere else: clone, co
 rerun, and republish. Claude Code's memory for this project lives outside the repo, on each machine, so this
 page, [`AGENT.md`](../AGENT.md) (the entry point for an agent) and `CLAUDE.md` carry the context.
 
-## Where things stand (2026-09-25)
+## Where things stand (2026-09-26)
 
 The repository is the source of truth: every result, the experiment that produced it and the raw data are here,
 and `docs/findings/` traces each claim to its file. If a session is lost, resume from this page.
@@ -22,17 +22,19 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   `et-lab-manifest`); a full upgrade is installed and the reboot into kernel 7.0.0-34 is still pending. What that does
   to comparability, and every card's quirks: `docs/findings/14-card-behaviour.md`. The machines' shared tools:
   `docs/lab-access.md`.
-- **Running now: version 3 of the claims check.** Pre-registered in `docs/reports/data/2026-09-25-claims-v3/`
-  (`PLAN3.md`, and `AMENDMENTS.md` A1–A5, each written before the data it touches), with its code in `tools/claims-v3/`.
-  Its queues run unattended on aifoundry1's card 1, aifoundry2 and aifoundry3 (`queue.sh` with
-  `schedule-<card>.txt`), and their blocks hold the cards and the card locks. **Do not start card work on those
-  machines without asking**, and while a queue runs do not rebuild the binaries it uses or run
-  `scripts/deploy-lab*.sh` against its host (both write into `~/nekko`, which the blocks use; [`AGENT.md`](../AGENT.md)
-  §7); a queue stops at the next block boundary when `build/claims-v3/STOP` exists in its tree (the owner's call).
-  Next on the cards, after the campaign: gathers and scatters (E48, `tools/claims-v3/gs/`). The pages are revised
-  with the campaign's results in a later pass; until then their sources stay as they are. To reduce:
+- **Version 3 of the claims check is finished** (26 September, 06:55). Pre-registered in
+  `docs/reports/data/2026-09-25-claims-v3/` (`PLAN3.md`, and `AMENDMENTS.md` A1–A5, each written before the data it
+  touches; C1 and C2 are post-data notes), with its code in `tools/claims-v3/`; it ran on aifoundry1's card 1,
+  aifoundry2 and aifoundry3 (E35–E47). The results are in `docs/reports/data/2026-09-25-claims-v3/results/` (one
+  `<exp>.json` per experiment, each item with its registered and all-cards outcome, and `pagemap.md`, every page claim
+  with the items that test it), the raw data in its `raw/`. The pages were updated on the three cards on 26 September:
+  each tested claim says what the three cards showed, each page carries a dated note, and the generators gained
+  version-3 options (`docs/findings/04-artifacts.md`, "Rebuilding the version-3 data"). The gathers and scatters that
+  ran after the campaign (E48, `tools/claims-v3/gs/`) are being reduced. To reduce again:
   `tools/claims-v3/collect.sh <dir>` then `tools/claims-v3/reduce_all.sh <dir> <out>` (all-cards outcomes over the
-  three campaign cards, `tools/claims-v3/campaign.py`, per amendment A4).
+  three campaign cards, `tools/claims-v3/campaign.py`, per amendment A4). Before any card work, check `et-who`: a
+  queue stops at the next block boundary when `build/claims-v3/STOP` exists in its tree, and while one runs do not
+  rebuild the binaries it uses or run `scripts/deploy-lab*.sh` against its host ([`AGENT.md`](../AGENT.md) §7).
 - **aifoundry3's host crash is understood** (25 September, late): a race in the runtime's logging set-up, reproduced
   without a card (E49, `tools/g3log-race/`). Every host program now registers the log levels first in `main`; only
   the gather/scatter build has been rebuilt with it so far. After the campaign, rebuild the other `build/<workload>`
@@ -50,7 +52,7 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (second edition:
   the meter chain, the unmetered remainder attributed, the improvement ladder, the index of every measurement
   report) · [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (third edition: every
-  entry with a confidence bar from repeated passes on two cards) · [DVFS and leakage](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage)
+  entry with a confidence bar from repeated passes, on three cards since 26 September) · [DVFS and leakage](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage)
   · [Spatial temperature brief](https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief) · [Horace](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment)
   · [Why low power](https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power) · [Hot line](https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line)
   · [On-chip relay](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay) · [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm)
@@ -62,11 +64,14 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   "Deploying one page"; the history is in `docs/findings/04-artifacts.md`).
 - **The energy manual** (`docs/energy-manual/*.md`, page `docs/reports/2026-09-23-energy-manual.html`) is built
   by `tools/ettelem/build_energy_manual.py` → `manual.json` → `render_energy_manual.py` (sections 1–8),
-  `render_catalogue.py` (3a, 4a) and `scripts/build-report.py energy-manual`. Its data: the catalogue
-  (`workloads/enercat/run_catalogue.py`, 386 configurations × 3 shuffled passes on aifoundry2 and aifoundry3,
-  `docs/reports/data/2026-09-23-catalogue-*`, reduced by `workloads/enercat/analyze_catalogue.py`), the reruns of
+  `render_catalogue.py` (3a, 4a) and `scripts/build-report.py energy-manual`. Its data: the catalogue (since
+  26 September the version-3 full catalogue on three cards, V3-CATFULL, reduced by `tools/claims-v3/catfull/reduce.py
+  --catalogue-out`; the 23 September catalogue, `workloads/enercat/run_catalogue.py`, 386 configurations × 3 shuffled
+  passes on aifoundry2 and aifoundry3, `docs/reports/data/2026-09-23-catalogue-*`, reduced by
+  `workloads/enercat/analyze_catalogue.py`, is kept as `catalogue-23sep.json`), the reruns of
   the relay, hot line, rings and levels (`tools/ettelem/run_reruns_warm.sh`, `run_rings_levels_power.sh`,
-  `docs/reports/data/2026-09-23-reruns-*`, pooled by `tools/ettelem/analyze_reruns.py`), and the unmetered-power
+  `docs/reports/data/2026-09-23-reruns-*`, pooled by `tools/ettelem/analyze_reruns.py`, which since 26 September
+  takes the relay, rings and levels from the version-3 passes with `--v3-rl`), and the unmetered-power
   attribution (`docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json`, written by
   `tools/ettelem/fit_unmetered.py --overwrite`; until 25 September the droop block was the first, inline fit's,
   0.84 mV/W, and it is now the script's 0.87; the fit is described in `docs/energy-manual/04a-fine-grain.md` and in
@@ -83,8 +88,9 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   serves as a DRAM-activity meter (traffic with no DRAM access moves it too, by up to about 2 mV). What would meter more is the observability report's improvement ladder.
 - **Heat per millimetre** (`docs/findings/20-heat-per-mm.md`, page `docs/reports/2026-09-24-heat-per-mm.html`):
   `workloads/enercat/run_wire.py` (two runs, E31 and E32, both cards, `docs/reports/data/2026-09-24-wire*-aifoundry*`)
-  → `workloads/enercat/analyze_wire.py` → `wire.json` → `tools/ettelem/build_wire_report.py` → `report.json` →
-  `scripts/build-report.py heat-per-mm`. A random bit costs 36 fJ per mm on the mesh rail with free links, 50 on a
+  → `workloads/enercat/analyze_wire.py` → `wire.json`, and the version-3 check's passes on three cards →
+  `workloads/enercat/analyze_wire_v3.py` → `wire3.json`; both → `tools/ettelem/build_wire_report.py --wire --wire3` →
+  `report.json` → `scripts/build-report.py heat-per-mm`. A random bit costs 36 fJ per mm on the mesh rail with free links, 50 on a
   loaded mesh (47 and 73 on board power); ones carried cost energy, not just bit changes. An adversarial review
   by a workflow of six AI agents checked it before publication (`docs/reports/data/2026-09-24-wire-energy/review/`).
 - **New traps (24 September):** a sampler killed mid-request poisons the management queue until one

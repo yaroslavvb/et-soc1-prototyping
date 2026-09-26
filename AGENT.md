@@ -28,10 +28,10 @@ where the chip could beat a GPU.
   pages it indexes, plus two pages about the lab machines. All are listed in [`docs/reports/MIRROR.md`](docs/reports/MIRROR.md).
 - **The knowledge base** in [`docs/findings/`](docs/findings/README.md) traces every claim to its experiment and raw
   file. It was validated twice (24 and 25 September).
-- **Version 3 of the claims check is running**: every claim of the pages re-tested on three cards with
-  pre-registered predictions ([`docs/reports/data/2026-09-25-claims-v3/`](docs/reports/data/2026-09-25-claims-v3/README.md),
-  code in [`tools/claims-v3/`](tools/claims-v3)). Its queues hold aifoundry1's card 1, aifoundry2 and aifoundry3 for
-  hours at a time. A later pass revises the pages with its results.
+- **Version 3 of the claims check finished** on 26 September at 06:55: every claim of the pages re-tested on three
+  cards with pre-registered predictions ([`docs/reports/data/2026-09-25-claims-v3/`](docs/reports/data/2026-09-25-claims-v3/README.md),
+  results in its `results/`, code in [`tools/claims-v3/`](tools/claims-v3)), and the pages were updated with its three
+  cards. The gathers and scatters that ran after it (E48) are being reduced.
 - **The lab has four working cards** since 25 September (section 4). One of them overheats.
 
 The live status is kept in [`docs/getting-started.md`](docs/getting-started.md), "Where things stand". Read it next.
@@ -88,8 +88,8 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
 | ID | What | File |
 |---|---|---|
 | R1–R14 | resources that existed before any measurement: manuals, RTL, firmware source, papers, the machines | [`01-resources.md`](docs/findings/01-resources.md) |
-| Q1–Q43 | the owner's requests and what each produced (25 September's requests are not numbered yet; getting-started lists them) | [`02-requests.md`](docs/findings/02-requests.md) |
-| E1–E34, E49 | experiments: command, time, card, raw files. The version-3 experiments carry suggested numbers (E35–E48) in PLAN3 and their READMEs, and are recorded in their own data directory until registered; E49 is the card-free g3log race test | [`03-experiments.md`](docs/findings/03-experiments.md) |
+| Q1–Q54 | the owner's requests and what each produced (Q44–Q54: 25–26 September) | [`02-requests.md`](docs/findings/02-requests.md) |
+| E1–E49 | experiments: command, time, card, raw files. E35–E47 are the version-3 three-card check (25–26 September; its plan, results and raw data are in `docs/reports/data/2026-09-25-claims-v3/`), E48 the gathers and scatters, E49 the card-free g3log race test | [`03-experiments.md`](docs/findings/03-experiments.md) |
 | A1–A19 | published artifacts: pages, images, tools, commits | [`04-artifacts.md`](docs/findings/04-artifacts.md) |
 
 - **To answer a question:** the "where to look" table → the topic file (10–20) → the number in
@@ -103,12 +103,11 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
   [et-soc1-energy-manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual)) is generated: its markdown and
   page are rebuilt from `docs/reports/data/2026-09-23-energy-manual/manual.json` (04-artifacts.md, A16). Edit the
   builders, never the markdown.
-- **Known stale spots (2026-09-25).** The findings files, README.md and the tool comments were corrected on
-  25 September. These still say that aifoundry1 cannot be used, that the cause was a `srcversion` mismatch, or that
-  aifoundry3's zero TDP is flashed, until their next revision: the DVFS page, the energy manual's `00-structure.md`
-  and `08-cards.md` (generated: fix `tools/ettelem/render_energy_manual.py`), and
-  `docs/reports/data/2026-09-25-claims-v3/firmware.md` (a dated record). `tools/claims-v3/lib.sh` still says
-  aifoundry3 has no system numpy (it has, since 25 September). Trust 14-card-behaviour.md and this file.
+- **Known stale spots (2026-09-26).** The findings files, README.md and the tool comments were corrected on
+  25 September, and the DVFS page and the energy manual (`00-structure.md`, `08-cards.md`) in the version-3 update of
+  26 September. `docs/reports/data/2026-09-25-claims-v3/firmware.md` (a dated record) still says aifoundry3's zero TDP
+  is flashed (a boot service sets it), and `tools/claims-v3/lib.sh` still says aifoundry3 has no system numpy (it has,
+  since 25 September). Trust 14-card-behaviour.md and this file.
 
 ## 4. The machines
 

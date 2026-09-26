@@ -2,8 +2,9 @@
 
 The work in this directory was driven by a sequence of requests from the repo owner. Q1–Q42 come from one long
 session on aifoundry2 (18–24 September 2026); Q43 comes from a separate session and is listed in the order it was
-recorded. Each is recorded here because scope decisions explain why some questions were answered thoroughly and
-others were left open. Cite as **Q1**...**Q43**.
+recorded; Q44–Q54 are the requests of 25 September, in the order of their first commit. Each is recorded here because
+scope decisions explain why some questions were answered thoroughly and others were left open. Cite as
+**Q1**...**Q54**.
 
 | ID | Date | Request (condensed) | Produced |
 |---|---|---|---|
@@ -50,6 +51,17 @@ others were left open. Cite as **Q1**...**Q43**.
 | Q41 | 09-24 | Verify the energy of moving bits along wires against Dally's "~100 fJ/b-mm on-chip": look up this chip's numbers, run experiments, determine J per bit per metre, and publish it as a "heat per mm" report in the repo and on spacesheep | R14, E31, E32 → A17, A18, [20-heat-per-mm.md](20-heat-per-mm.md) |
 | Q42 | 09-24 | Install spacesheep's session hooks on aifoundry2; report the sessions board's missing links and mismatched titles to its author | Outside this repo: the hooks in `~/.claude/settings.json` and two bug reports on spacesheep. No card time |
 | Q43 | 09-18 | Compute the chip's ridge points from what is already known — how many FLOPs per byte are needed to saturate each level of the hierarchy — and write them up (published 09-24) | A19; the hub's index row (`6f8fba9`); every report's link back to the hub (`d04b29a`); no card time |
+| Q44 | 09-25 | A full validation of the 18 public pages: re-run the scripts, recheck the claims, remove redundancy, reorganise where needed, add interactive visualisations | commit `de26273`; the record in `docs/reports/data/2026-09-24-report-review/`; [04-artifacts.md](04-artifacts.md), "The 25 September validation"; no card time |
+| Q45 | 09-25 | Another check (version 3) of the reports' claims: test them on both machines, not just one, remove what may be chance; keep to effects that can be proven, with a full sweep | The claim inventory, PLAN3 and its predictions, committed before any card run (`d4e162f`); the run code and amendments (`a90ed50`); the page changes that need no card (`0399048`); E35–E46 (E47 registered, not run), recorded in `docs/reports/data/2026-09-25-claims-v3/`. The pages' revision from the results is a later pass |
+| Q46 | 09-25 | See exactly what is broken on aifoundry1 (Roman Shaposhnik's question) | A read-only troubleshooting report (`6953263`): the driver module's empty version string; evidence in `docs/reports/data/2026-09-25-aifoundry1/`; no card opened |
+| Q47 | 09-25 | *(mid-task)* Fix aifoundry1, with administrator access | The module rebuilt by DKMS and reloaded as root, 15:00–15:04; both cards answer; the fix log and the disk clean-up list (`7aded23`, `f44baa4`) |
+| Q48 | 09-25 | Fix the lab machines with root | 16:14–16:27: the three hosts brought to one configuration (performance power profile, chrony, core dumps, `et-who`, card locks, a login banner, `et-lab-manifest`, a persistent journal); recorded in [14-card-behaviour.md](14-card-behaviour.md), "Host changes of 25 September", and `docs/lab-access.md` (`e058139`); amendment A5 followed (`5ee6dda`) |
+| Q49 | 09-25 | Could the ET-SoC-1 speed up large-scale influence-function work? An exploratory report | [Influence functions on the ET-SoC-1](https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions) and the hub's research group (`edf0a14`); no card time |
+| Q50 | 09-25 | *(mid-task, Q45)* After the machine fixes, re-run every measurement on every card | aifoundry1's two cards join the campaign (amendment A2, `f7aea65`), the other-user rule for a two-card host (A3, `712b5be`), card 0 excluded for safety (A4, `8ca8d20`), the reducers over three cards (`8d61a8b`); the full catalogue re-run (E46); E35–E46 on aifoundry2, aifoundry3 and aifoundry1's card 1 |
+| Q51 | 09-25 | A report on the lab's problems, for the lab lead | A private report, kept out of this public repository while its security findings are open (`38f6b02`) |
+| Q52 | 09-25 | After the measurements, comprehensive throughput measurements of gather and scatter on all the cards, inserted where they belong | E48, ready for the cards (`bde52e0`, `tools/claims-v3/gs/`); running on the three cards on 26 September, after each card's campaign blocks; its result is recorded when it is reduced |
+| Q53 | 09-25 | Make the repository the ground truth a new agent can start from: an entry point, every published page mirrored and checked, the lessons in the repository rather than in one machine's memory | `AGENT.md`; `docs/reports/MIRROR.md` and `scripts/check-mirror.py` (21 of 21 public pages equal to their files) (`e058139`); stale statements corrected (`eb7c762`); E49 in the knowledge base (`1cc835b`); the card registry in `AGENT.md` (`3a7e335`) |
+| Q54 | 09-25 | Another look through the published pages for "compelling visualizations or interactive elements" | The visualization pass, finished on 26 September: charts and controls on 13 pages, the chart toolkit's card registry and sortable tables, no number changed (`be72084`–`7f0e7d2`); its plan and record in `docs/reports/data/2026-09-26-visualization-pass/` (`b2fc9a1`, `71a7b75`) |
 
 ## Scope decisions worth remembering
 
@@ -67,8 +79,8 @@ others were left open. Cite as **Q1**...**Q43**.
   configuration changes to shared lab hardware that would silently alter other people's results: one replaces a
   kernel module, the other lifts a card's clock ceiling mid-experiment for everyone. Both are documented in
   [14-card-behaviour.md](14-card-behaviour.md) with everything the lab admin needs, and neither was applied.
-  (Later, on 25 September 2026, the owner asked for aifoundry1 to be fixed with administrator access, and its
-  module was rebuilt: [the fix log](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix). aifoundry3's TDP turned out
+  (Later, on 25 September 2026, the owner asked for aifoundry1 to be fixed with administrator access (Q47), and
+  its module was rebuilt: [the fix log](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix). aifoundry3's TDP turned out
   to be the lab's own boot-time setting and was left as it is.)
 - **No GPU was measured.** Every A100 number in this work is from R7, R8, the Ampere whitepaper and the sourced notes
   in `docs/reports/sources/` (`2026-09-18-a100-memory-hierarchy.md`, `2026-09-18-gpu-on-chip-communication.md`). This was never in scope for the

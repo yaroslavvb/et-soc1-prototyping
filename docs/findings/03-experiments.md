@@ -1,20 +1,23 @@
 # Experiments: the register
 
-Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and
-where it ran, the command that produced it, where the **raw** data lives in this repository, and what it
-cannot tell you. Cite as **E1**...**E34**. E33 and E34 are the 18 September memory-hierarchy and on-chip
-communication sessions, registered on 25 September; they are numbered last so that no other number moves.
+Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
+ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
+as **E1**...**E47** and **E49**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
+check (25–26 September, three cards; E47 was registered and not run), E48 is the gathers and scatters (recorded here
+once reduced), and E49 a card-free test of the runtime's log-level race.
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
-(aifoundry2, aifoundry3 or both). Firmware behaviour is read from the et-platform source at `353f20e`; the cards' own trace strings
-match an older build (before et-platform commit `60b40c10f`, 24 Sep 2024; both cards report release 1.3.1), so which
-commit the cards run is not established (R3). Unless an entry says otherwise, the minion clock was a steady
-**600 MHz** at **516–518 mV** on aifoundry2 (521–523 mV on aifoundry3), verified in every telemetry sample of the
-session. Times are the lab machines' local time (UTC−7), from the first and last recorded sample.
+(aifoundry2, aifoundry3 or both; E35–E46 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
+source at `353f20e`; the cards' own trace strings match an older build (before et-platform commit `60b40c10f`, 24 Sep
+2024; both cards report release 1.3.1), so which commit the cards run is not established (R3). Unless an entry says
+otherwise, the minion clock was a steady **600 MHz** at **516–518 mV** on aifoundry2 (521–523 mV on aifoundry3),
+verified in every telemetry sample of the session. Times are the lab machines' local time (UTC−7), from the first and
+last recorded sample.
 
 Each entry ends with the published report it fed; [04-artifacts.md](04-artifacts.md) has every report's space and
-sources. Shorthand used below: a2 and a3 are aifoundry2 and aifoundry3; `mean [lo–hi]` is a mean with the full range
-over every pass on both cards.
+sources. Shorthand used below: a2 and a3 are aifoundry2 and aifoundry3, a1c1 is aifoundry1's card 1; `mean [lo–hi]` is
+a mean with the full range over every pass on both cards (in E35–E46, a mean with its 99% interval).
 
 Rebuild the Horace line (E9–E17 and the E20 transfer): every analysis, the model, the GIFs and the Horace and
 why-low-power pages, with one script. Every other entry gives its own command.
@@ -781,6 +784,8 @@ pooled; (3) rings between shires s and s+16 starve the service processor's own m
 latency, six management commands, 22 → 76–146 ms, the median in each of three passes; the board value changed
 1.4–2.4 times a second, against 5–6 in the other rings) while aifoundry3 stayed at 22 ms; on aifoundry2 that ring's
 energy read 33–45% low over three passes (39% on their mean) against aifoundry3's, so that row is aifoundry3 only.
+(Superseded, 26 Sep: in E43 the same ring starved the sampler on all three cards in every pass, aifoundry3 included,
+so the aifoundry3-only row is not supported either; see E43.)
 **Caveats:** the sampler failed to start in about one pass in three before the runners learnt to retry;
 aifoundry3's hot-line pass 3 was cut short when the driver script was overwritten while running. Only
 complete passes with telemetry are pooled.
@@ -976,6 +981,448 @@ and 5,018 with all 1,024 (`barrier-chip{1,32}.jsonl`). Energy: the re-measured r
 **Caveats:** one card, at 600 MHz throughout (`clock.csv`); the 18 September energies read 2–20% (median 10%) above
 the reruns.
 **Report:** [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication).
+
+## Version 3 of the claims check: what E35–E47 share
+
+E35–E46 are version 3 of the claims check (Q45, Q50), run unattended on three cards from 2026-09-25 17:23 to 09-26 06:53
+(the first block's `t0_ms` and the last one's `t1_ms`). What the entries share is stated here once. `V3` below is
+`docs/reports/data/2026-09-25-claims-v3/`; a1c1 is aifoundry1's card 1.
+
+- **Pre-registered.** `V3/PLAN3.md` §2 (commit `d4e162f`, before any card run) gives each experiment its items: the
+  page claims it tests, a prediction and a decision rule. Amendments A1–A5 (`V3/AMENDMENTS.md`), each committed before
+  the data it touches, change how rules are applied, never a band after the data. The code is
+  `tools/claims-v3/<exp>/` (`block.sh`, `reduce.py`, and a README that lists where it departs from PLAN3's command
+  lines); every block records the sha256 of the code it ran (`code.sha256`).
+- **Cards.** aifoundry2 and aifoundry3, the registered pair (firmware 1.3.1; aifoundry3 held at 600 MHz by its
+  boot-time 0 W TDP), and a1c1 (firmware 1.2.0), added by amendment A2 after the machine fixes of 25 September.
+  aifoundry1's card 0 was excluded for safety before any campaign data (A4: 98–102 °C in its smoke blocks, 115–117 °C
+  with nothing running after the last). All three idled at 600 MHz, at 518, 523 and 499 mV on a2, a3 and a1c1
+  (`V3/results/idle.json`, `idle_clocks.<card>.minion_mv_median_at_used`).
+- **Blocks.** Each card ran `tools/claims-v3/queue.sh tools/claims-v3/schedule-<card>.txt`, which runs
+  `tools/claims-v3/<exp>/block.sh <pass>` for each line. A block starts only when no one else uses the card (on
+  aifoundry1 a login alone no longer blocks: A3), holds the card's lock, runs every device process under `timeout 10`,
+  and writes `V3/raw/<card>/<exp>/p<N>/` with a `block.json` (`t0_ms`, `t1_ms`, `die_c_start`, `die_c_end`, `status`,
+  `note`). 197 blocks ran: 65 on a2, 67 on a3 and 65 on a1c1. Three failed, all on aifoundry3 (E35, E38, E43); each was
+  run again, and the failed attempt is kept as `p<N>.attempt-<epoch>` and not used. `queue-state.jsonl` beside each
+  card's data logs every block's return code, the gather/scatter blocks that followed (E48) included.
+- **The unit and the outcomes.** The unit is a pass: an independently started block, or the blocks that make one.
+  Intervals are 99% t on pass-level values. Each item has a **registered** outcome over aifoundry2 and aifoundry3,
+  exactly as PLAN3 defines it: PASS (holds on both), CARD-DIFFERENT (holds on one; the page gives per-card values), FAIL
+  (the prediction failed; the page drops or qualifies the claim and takes the measured values), INSUFFICIENT (fewer
+  than three kept passes on a card, or a missing input). Each item also has an **all-cards** outcome over the three
+  cards (A2, A4); REPORTED means the item names other cards and is shown, not tested, on this one. Decisions use this
+  campaign's passes only: committed runs are printed beside them, never pooled.
+- **Reduction.** From aifoundry2's checkout, `tools/claims-v3/collect.sh <dir>` copies the three cards' data and
+  `tools/claims-v3/reduce_all.sh <dir> <out>` runs every `reduce.py`, writing `<exp>.json` and `<exp>.log`: committed
+  as `V3/results/`. Each item carries `outcome` (registered), `all_cards`, `per_card` and `reading`;
+  `V3/results/pagemap.json` (and `.md`) maps every page claim to the items that decide it.
+- **Not run.** V3-COOL (aifoundry2 only, from a cool die; PLAN3's suggested E46) was not scheduled, so its claims keep
+  their one-card labels; E46 is used for catfull, the full-catalogue re-run that Q50 added. V3-LONG (E47) needed a
+  waiver of the 10 s rule, which the owner did not give.
+- **Comparability.** The host changes of 16:14–16:27 on 25 September precede every block, and aifoundry3's idle die
+  sat at 55–57 °C instead of 53–54 °C after them (A5); host-side timings are not comparable with the earlier sessions
+  ([14-card-behaviour.md](14-card-behaviour.md), "Host changes of 25 September"). The version-3 passes run before
+  those fixes (25 September, 10:00–16:19) are not used (A2) and are not in this directory.
+
+## E35 — The memory anatomy, the cycle-counter window and the wake-up probe on three cards (2026-09-25 23:20 – 09-26 06:51, three cards)
+
+**Question:** do the memory-anatomy page (61 claims on aifoundry2 alone, mostly one launch), the hub's cycle-counter
+tile and E18's no-power-gating result hold on every card, pass after pass? 80 claims, 15 items.
+**Method:** `tools/claims-v3/mem/block.sh <pass>`: the `workloads/memprobe` op programs with the registered seeds
+(timer phases, ladder, decomp, l3map, msmap, bits, refresh, pagetimeout), each its own `timeout 10` process in `shuf`
+order under the 10 Hz sampler, ladder and decomp again from requesters 7, 24, 31, and in passes 1–3 the wake-up probe
+(idle 0 to 16M cycles); a2 and a1c1 heat to 76 °C first. Five passes per card. Decision: the 99% t interval of the
+pass values inside each registered band on each card (one-sided for fractions; every pass for deterministic items);
+MEM-W holds if no level shifts ≥ 5 cycles in ≥ 18 of 20 lines after 16M cycles in 3 of 3 probes. A2.mem: a1c1 is
+judged on clock readings inside kernels only (the busy rule), a2 on every sample, a3 is pinned.
+**Raw data:** `V3/raw/<card>/mem/p<N>/` (`<prog>.u32` and labels, `req{7,24,31}/`, `wake/`, `telemetry.jsonl.gz`,
+`memprobe.log`, `drop.json`, `binary.sha256`); a3's failed first pass 3 (refresh returned nothing) is
+`p3.attempt-1790423247`; a3's extra pass 6 is kept but unused. Reduced to `V3/results/mem.json` (`mem.passes.json`).
+**Result:** five passes and three probes kept per card, every sample at 600 MHz. Registered and all cards alike: PASS
+MEM-P1, P2, P3, P9, X2, W; CARD-DIFFERENT P4, P7 (a3 fails); FAIL P5, P6, P8, P10, R1–R3. L3 hits: slope 11.99
+[11.96–12.02] cycles per hop and intercept 110.5–110.6 on every card
+(`[item=MEM-P1].per_card.<card>.tests.P1_l3_slope`). DRAM within ±3 cycles of the 19 September model for 97.0%, 92.9%,
+94.4% of lines (a2, a3, a1c1; `MEM-P2`). Ladder medians L2 49, L3 170.6–171.2, DRAM 303.0–304.6 cycles, the DRAM
+intervals wider than the 303–315 band (`MEM-P8`). Row conflict +36.9 [35.4–38.4], +37.4 [31.3–43.5], +36.5
+[35.2–37.8] cycles (`MEM-P4`). Refresh every 2,325.4 cycles on every card, but closed − open is 5.3–6.6 cycles (10–13
+predicted) and only 0.26–0.36 of pairs with no refresh between hit the open row (≥ 0.98 predicted; `MEM-P5`,
+`MEM-P6`). The counter's raw differences are only 10, 138 and −118 in all 30 t_raw and t_rawodd launches, but no
+single short window fits in 8, 15 and 13 of 15 launches (`MEM-R1`). No cache level wakes up after 16M idle cycles on
+any card; L2 reads 60–61 cycles without idle, 49–50 after (`MEM-W`).
+**Caveats:** the missed P5b and P6 bands came from the one-card analysis of 19 September; all three cards miss them
+alike, so the pages take the measured values. a3 ran its own build (kernel ELF `180eb2ac…`; a2 and a1c1 `55c6dbab…`).
+Passes started at 74–86 °C on a2, 54–66 °C on a3, 58–67 °C on a1c1. a3 gave no informative counter-window readout.
+**Report:** [Anatomy of a memory access](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy) (A1); [The ET-SoC-1's DVFS loop](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) (A11); [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2).
+
+## E36 — Latency, cycle-count and bandwidth sweeps, repeated on three cards (2026-09-25 17:28 – 09-26 06:53, three cards)
+
+**Question:** do the memory-hierarchy and on-chip-communication numbers (one aifoundry2 session, E33–E34), the
+sparse-compute cycle counts and layer times (one aifoundry3 run) and the hot-line and relay sweeps (one launch per
+card, E22–E25) repeat, pass after pass, on every card?
+**Method:** `tools/claims-v3/lat/block.sh <pass>`: nine units in an order shuffled per pass, the same on every card
+(memhier chases and scratchpad sweep, nocbench, the sparsity groups and extras, enercat's lone-minion DRAM streams,
+`sgemm_host`, 77 hot-line and 119 relay processes), every process under `timeout 10`, the 10 Hz sampler in every unit.
+a2 and a1c1 ran each pass as two half blocks (11–32) heated to 76 °C before every unit, a3 as whole blocks (1–3); each
+card added two divergence-only blocks (4, 5). Launches off 600 MHz are dropped (a2: the registered rule; a1c1:
+A2.lat's idle-aware rule; a3 is pinned). Deterministic items must hold in every kept pass, magnitudes by 99% t on pass
+means; N3 by a shire-block bootstrap, S5 over five short blocks, R by a permutation test; either card can decide FAIL.
+**Raw data:** `V3/raw/<card>/lat/p<N>/` (`order.json`, `idle.jsonl`, per unit the host printouts, `launches.jsonl`,
+`telemetry.jsonl.gz`; a2's also hold V3-COOL's warm controls, `c6/`, reduced by nothing); `V3/results/lat.json`.
+**Result:** registered PASS LAT-M1, M2, M3, S1; FAIL N1–N4, S2–S5, G, R3, H; INSUFFICIENT R. All cards: the same on
+every item. Every item kept 3 passes per card (R on a3: 2), none dropped for its clock, and the cards agree within a
+cycle on all but the chip barrier, so most FAILs are a band every card missed alike (paths under
+`.items[item=LAT-…]`): shire barrier 232.5–232.7 cycles (predicted 237 ± 1), 32-minion allreduce 444.1–444.3 (432 ±
+2), 1,024-minion allreduce 1,392.6–1,393.4 (1,368 ± 10), credits 140.2 + 14.42 per hop (148 + 12.2) (N1, N4, N2
+`credit_fit`); 4-line lone-minion loads 41.9 and 42.95 cycles (43–49) (S2); all-minion L2 at 20,000 loads 256.5 (259.3
+± 1.5), so the cold-start reading goes (S3); seed 3 at 99% 2.598 µs (1.9–2.5) (S4); 18 September's lane efficiencies
+not reproduced, though "from α = 2" stands, a2 +0.0155 [0.0128–0.0182] T/s (S5); sgemm n = 64 on one shire
+0.54–0.56 ms (0.31), 0 mismatches (G); a lone enercat minion 0.907 B per cycle, not 1.40 (R3); 31 one-per-shire
+requesters leave the hot line's host at 100% (≤ 1% predicted) (H `sub.P5_pollers`); the flag round trip's slope bound,
++9.2 on a2, lies between keep (< +6) and drop (≥ +12.02) (N3 `bootstrap99`).
+**Caveats:** five of a3's 917 LAT host processes exited abnormally (exit 139 four times in the relay units of passes 2
+and 3, once 134; the campaign's binaries predate E49's fix), which cost LAT-R its third a3 pass. Two probes moved with
+the pass on every card alike (16-line lone-minion DRAM 1,132.5 cycles in pass 1, 748–751 after; 2,000-load L2 351–353
+falling to 262–269), so their pass means carry 99% intervals hundreds of cycles wide.
+**Report:** [Sparse compute](https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute); [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication); [One hot line stops a shire](https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line) (A13); [Memory hierarchy](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy); [Ridge points](https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points) (A19); [Hand it to the next shire](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay) (A14); [Test drive](https://spacesheep.dev/@yaroslavvb/et-soc1-testdrive); [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2); [L2 mainline starvation brief](https://spacesheep.dev/@yaroslavvb/2026-09-22-et-soc1-l2-mainline-starvation).
+
+## E37 — The matmul benchmark on three cards: rate, exactness, watts, private tiles and the load step (2026-09-26, 00:19–06:36, three cards)
+
+**Question:** the matmul page's lede (9.5 / 19.0 / 71.8 T(FL)OP/s, exact, 57–62 W), the ridge page's cause for int8's
+7.3 B per minion-cycle and the power-and-temperature page's busy slope and load step each rested on one aifoundry2
+run.
+**Method:** `tools/claims-v3/mmb/block.sh <pass>`, four passes per card, all kept: smoke checks; the four 6 s mmbench
+workloads (fp32, fp16, int8 from the L2, fp32 from DRAM) in each pass's registered order, sampled by ettelem at 10 Hz
+through a patched `mmbench_power_v3.py`; private-tile launches (`-n 4 -p`) against the shared `-n 16` control, cycle
+counters only; and the E5 load step (eight fp32 matmul processes, then four memprobe DRAM streams) with
+`run_thermal.sh`'s phases. a2 and a1c1 heat to 76 °C before each part. Launches off 0.595–0.605 GHz are dropped; on a2
+any sample off 600 MHz, on a1c1 busy samples only (A2.mmb). Cycles, rate and exactness must hold in every launch;
+watts, per-W, the A100 lead, the rise and the load step's P1–P10 by 99% t over pass values against registered bands.
+**Raw data:** `V3/raw/<card>/mmb/p1`–`p4/` (`e1/<workload>/` telemetry, `runs.jsonl`, `results.json`; `x1/`;
+`thermal/`; `smoke/`; `passcheck.json`); reduced to `V3/results/mmb.json` (`.log`).
+**Result:** registered PASS on MMB-a to -f and MMB-X1; MMB-T FAIL (P1 FAIL; P3, P4 minion rail, P5 DRAM, P7
+CARD-DIFFERENT; the rest PASS). All cards: PASS MMB-a, -b, -X1; CARD-DIFFERENT MMB-f (a1c1's fp16 and DRAM rise) and
+MMB-T; MMB-c, -d, -e REPORTED. Every kept launch on every card: fp32 and fp16 529.001 cycles per op,
+int8 280.35–280.37, 9.5105–9.5119 / 19.018–19.022 / 71.766–71.775 T(FL)OP/s per pass, all exact (`.items[item=MMB-a]`,
+`[item=MMB-b]`). Board watts over idle, int8 (`[item=MMB-c].per_card.<card>["int8-tensor-L2"]`): a2 27.9 [26.6–29.3]
+at an 80 °C die, a3 26.3 [26.0–26.6] at 62 °C, a1c1 33.1 [32.6–33.5] at 76 °C; a3/a2 0.94–0.95 in all four workloads
+(`.cross`). Per W, a3 is 1.17 × a2 in each L2 mode (Welch p ≤ 1.2 × 10⁻⁴, `[item=MMB-d].cross`), a1c1 0.82–0.85 × a2;
+the A100's int8 lead is 1.33, 1.13 and 1.63 (`[item=MMB-e]…a100_lead`). Private int8 tiles take 511.94 cycles per op
+(4.00 B per minion-cycle) on all three cards against 280.47–280.48 (7.30 B) shared (`[item=MMB-X1/c]`). Load step:
+busy slope a2 1.02 [0.67–1.36] W/°C (0.7–0.9 predicted), a3 0.61 [0.49–0.74] (0.3–0.6), a1c1 1.13 [1.05–1.22]
+(`[item=MMB-T/P1]`); 600 MHz in every sample; PMIC average within 0.2 W of the board on every card (`MMB-T/P8`).
+**Caveats:** each card's watts are at its own die temperature and idle (33.3, 26.0, 41.8 W before the workloads): the
+per-W gap is the card at its operating temperature, not a card property. a2's load steps in passes 3 and 4 ran hotter
+(busy 86.9–97.0 and 85.6–95.3 °C against 80.6–89.0, `MMB-T/P1.per_card.aifoundry2.busy_T_range`) and split its P3–P5
+values into two pairs, which is why those intervals include 0. Private fp32/fp16 launches fail the result check by
+design; their cycle counts stand. The busy-minus-idle slope (a2 0.20 [0.08–0.32] W/°C) is reported, not decided.
+**Report:** [Power and temperature](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature) (A3); [Matmul efficiency](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency); [Ridge points](https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points) (A19); [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4); [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2); [Sparse compute](https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute).
+
+## E38 — Tensor-unit energy by operands, precision, structure and active minions (2026-09-25 19:04 – 09-26 04:37, three cards)
+
+**Question:** the why-low-power figures (pJ per MAC by precision, the integer loop, power linear in active minions),
+the Horace page's negative zero, bit-field ladder and structured matrices, and the energy manual's fp16 and int8 rows
+rested on aifoundry2 alone, two runs in one session (E15). Do they hold on each card, run by run?
+**Method:** `tools/claims-v3/abla/block.sh <pass>`, passes 1–4 per card: the 23 configurations of `abl_a.cfg` in
+shuffled order, each a separate 7 s `sparsity_host` process after its own strict start (a2 and a1c1 heat to 84 °C and
+launch at 80 °C; a3 heats to 62 °C and launches at 57 °C, A5). Switching = early power − leakage × the rise since
+launch − pre-launch idle (0.81 W/°C on a2 and a1c1, 0.55 on a3), after the registered dropout rule. Rule: per card 19
+sub-tests at alpha 0.01/19 (differences exclude 0 with the predicted sign and the point inside its tolerance;
+equivalences inside ±1.0 W); ABL-R descriptive, decided on a3 (leave-one-out rms ≤ 0.6 W); EM4c exact. A2.abla tests
+T1, T5's fp32/int8 ratio, the EM4 rider, T7 and EM4c on a1c1 and reports the rest.
+**Raw data:** `V3/raw/<card>/abla/p1`–`p4/` (runs, starts, telemetry, checks); a3's first p1 (25 Sep 19:04–19:39) hit
+its time cap after 7 of 23 runs (`p1.attempt-1790421750`), re-run 26 Sep 04:22–04:37; reduced to
+`V3/results/abla.json` (runs in `abla.runs.json`).
+**Result:** 92 runs kept per card, every sample at 600 MHz. Registered: PASS T2, T3, T5, T5-EM4, T8, EM4c, EM4d;
+CARD-DIFFERENT T1, T6, T7; FAIL T4, ABL-R; all cards the same. Corrected intervals, 4 runs, a2 / a3 / a1c1: pJ per MAC
+over idle, int8 random 0.313 [0.297–0.330] / 0.262 [0.238–0.287] / 0.309 [0.261–0.357], fp16 random 2.661 / 2.410 /
+2.70, fp32/int8 18.9 / 20.5 / 19.6 (`[item=ABL-T5]`); ones − zeros 8.52 / 8.09 / 9.00 W, random − zeros 25.33 / 23.91
+/ 26.66 W (`[item=ABL-T8]`); −0.0 over +0.0 +8.36 / +8.05 / +8.85 W, −0.0 − ones −0.15 [−0.80–0.50] / −0.04
+[−1.14–1.06] / −0.14 [−1.44–1.15] W (`[item=ABL-T1]`); integer loop over idle 1.51 [0.58–2.44] / 0.40 [−0.07–0.86] /
+0.73 [−0.68–2.14] W (`[item=ABL-T6]`); switching per minion at 1,024 over 256 minions 1.094 / 1.239 [1.104–1.390] /
+1.246 [1.013–1.532] against [0.98, 1.10] (`[item=ABL-T7]`); a3's Hadamard, butterfly and kaleidoscope 0.59–1.17 W
+below 0.924 × the flip model, its DFT pair 1.67 [1.45–1.90] W above (predicted 2.7 ± 1.0); refit leave-one-out rms
+1.01 / 0.91 / 0.97 W (`[item=ABL-R].per_card.<card>.refit_switching`); 1,320 timed launches per card at 546.00 (fp32,
+fp16) and 318.00 (int8); a2's nine EM4 patterns within 2% of 21 Sep.
+**Caveats:** corrected intervals use t = 16.05 at 4 runs (5.84 at plain 99%), so T1's equivalence and a2's T4
+equivalences fail on width, points within 0.51 W of zero; on a3 all three non-DFT intervals lie below zero. a3
+launches 23 °C cooler, so its lower values are the card at its temperature (E40 could not separate the two). a1c1
+takes a2's leakage slope, its own unmeasured, and idled at 50.15 W before launch (a2 36.34, a3 25.78).
+**Report:** [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4); [Why is the ET-SoC-1 low power?](https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power) (A5); [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15); [The ET-SoC-1's DVFS loop](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) (A11); [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2); [Ridge points](https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points) (A19).
+
+## E39 — Sparse-compute energy and TenB streaming, strict start (2026-09-25 21:39 – 09-26 05:07, three cards)
+
+**Question:** the sparse-compute page's "power saved 86%" and energy per layer rested on aifoundry3, two runs of one
+session without temperature correction; the matmul page's "the difference is the kernel" (B streamed through TenB
+against B in the L1) was never a controlled comparison.
+**Method:** `tools/claims-v3/ablb/block.sh <pass>`, passes 1–3 per card: the 18 configurations of `v3-energy.cfg`
+(run_energy.py's 11, gemv-dense-0, and int8 ones, int8 random and fp16 random with B in the L1 and with `--b-stream`)
+in shuffled order, each a separate 5 s run after the strict start of E38 (a3 heats to 59 °C and launches at 57 °C,
+A5). Metric: board power over pre-launch idle (no dropout rule registered). Rule: cycles per op inside fixed bands in
+every timed launch (2a); per-block values or within-block paired differences, 99% t with df 2, on each card (2b, 2c,
+3ab, 3c, 3d, 3f, 3g); the energy per layer stated per card, PASS only if every band is met, never CARD-DIFFERENT (3e).
+A2.ablb tests 2a, 2b, 3ab, 3d, 3f and 3g on a1c1 and reports 2c, 3c and 3e.
+**Raw data:** `V3/raw/<card>/ablb/p1`–`p3/` (as E38; no failed block); reduced to `V3/results/ablb.json`.
+**Result:** 54 runs kept per card, every sample at 600 MHz. Registered: PASS 2a, 2b, 2c, 3c, 3d, 3f; CARD-DIFFERENT
+3g; FAIL 3ab, 3e. All cards the same, except 3d CARD-DIFFERENT (a1c1's interval leaves 0.7–1.5). Values a2 / a3 /
+a1c1, 99%, 3 blocks: every timed launch at 546.00 (fp16, B in L1), 318.00 (int8, L1), 529.00 (fp16, TenB) and
+270.00 cycles (int8, TenB, never measured before), identical on the cards to 0.0002 cycle (`[item=ABLB-2a]`); TenB −
+L1, int8 random +6.55 [5.97–7.14] / +6.04 [3.65–8.43] / +7.53 [6.77–8.29] W, int8 ones +2.72 / +2.40 / +2.67 W
+(`[item=ABLB-2b]`); int8 random in L1 over idle 9.90 / 8.22 / 9.62 W (`[item=ABLB-2c]`); dense 17.51 / 15.53 /
+17.30 W, zeros 2.47 / 1.03 / 1.39 W, saving 0.859 [0.786–0.932] / 0.934 [0.895–0.972] / 0.920 [0.910–0.930], none
+inside 0.80–0.92 (`[item=ABLB-3ab]`); slope of power on the useful-slot fraction 14.97 [14.80–15.15] / 14.50
+[12.99–16.00] / 15.78 [15.33–16.24] W, rms 0.28 / 0.18 / 0.32 W (`[item=ABLB-3c]`); row mask against half zeros 1.10 /
+1.07 / 1.15 (`[item=ABLB-3d]`); µJ per layer over idle at skip-0 / 90 / 99%: a2 67.5 / 18.6 / 5.9 at 81.4 °C, a3 55.5
+/ 11.9 / 3.3 at 58.4 °C (predicted 70 / 19 / 7), a1c1 75.4 / 16.2 / 4.5 at 80.3 °C (`[item=ABLB-3e]`); gating alone
+(gemv-dense-0 − dense-90) +1.66 [0.65–2.68] / +1.59 [1.05–2.14] / +1.75 [0.72–2.78] W (`[item=ABLB-3f]`); fma on zeros
+over the integer loop +0.87 [−0.87–2.62] / +0.69 [0.08–1.29] / +0.67 [0.04–1.31] W (`[item=ABLB-3g]`).
+**Caveats:** three blocks give df 2 (t = 9.925); int8 ones' TenB cost and the gating alone miss their predicted bands
+(+3 to +8, +0.3 to +1.5 W), though the rule tests only the sign. "The difference is the kernel" is undecided: the
+reducer ran without V3-MMB's values (`[item=ABLB-2b].kernel_clause`). a3 runs 23 °C cooler than a2 and a1c1, so its
+values are that card at that temperature. a1c1 idled at 50.17 W before launch (a2 36.38, a3 25.77).
+**Report:** [Sparse compute](https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute); [Matmul efficiency](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency); [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4); [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2).
+
+## E40 — The card or its temperature? Switching power at two launch temperatures on each card (2026-09-25 21:46 – 09-26 06:03, three cards)
+
+**Question:** three pages put aifoundry3's 0.92–0.95 switching scale down to the card, but every comparison changed
+the card and the launch temperature together (81 against 56 °C). Does each card's switching move with temperature?
+**Method:** `tools/claims-v3/x5/block.sh <pass>`: a hot and then a cool arm, each one block of the ablation runner
+(`tools/claims-v3/abla/ablrun.sh`) on `x5.cfg` (fp32 zeros, ones, uniform and randn, fp16 randn; 7 s on 1,024 minions,
+the same tiles in both arms of a pass), each arm with its own 10 Hz sampler. Launch / preheat: a2 and a1c1 83 / 86 °C
+hot, 76 / 79 °C cool; a3 65 / 68 °C hot, 57 / 62 °C cool (A5; registered 55 / 60). Three passes per card. Decision:
+per card and pattern (fp32 uniform, fp32 randn), the Welch 99.75% interval (Bonferroni over 4) of hot − cool
+switching; "card property" if all four lie inside ±0.5 W, "temperature effect" if a3's two exclude 0 upwards with
+points ≥ +0.4 W, otherwise "not separated". A2.x5: all_cards tests the card hypothesis on every card (busy clock
+rule).
+**Raw data:** `V3/raw/<card>/x5/p<N>/` (`hi<b>/`, `lo<b>/` session directories as in E38: `runs.jsonl`,
+`starts.jsonl`, `telemetry.jsonl.gz`; `block.json`); per-run values in `V3/results/x5.runs.json`, reduced to
+`V3/results/x5.json`.
+**Result:** all 30 runs kept on every card, every idle and busy sample at 600 MHz. Registered: FAIL, verdict "not
+separated"; all cards: FAIL (the card hypothesis fails on every card). Hot − cool, fp32 randn: a2 +1.20 W [+0.26,
++2.15], a3 +1.97 [+1.47, +2.46], a1c1 −6.36 [−49.36, +36.63]; fp32 uniform −7.04 [−69.54, +55.47], −7.29 [−18.48,
++3.90], −6.92 [−42.04, +28.20] (99.75%, 3 against 3 runs;
+`[item=X5].per_card.<card>.tests.<pattern>.ci_hot_minus_cool`). fp32 randn switching, hot / cool: a2 27.68
+[26.98–28.38] / 26.48 [26.23–26.73] W, a3 26.72 [26.25–27.20] / 24.75 [24.50–25.01] (99%, `.switching_by_arm`), at
+measured launches of 83.3 / 76.7 °C (a2), 65.0 / 57.6 (a3), 83.0 / 76.0 (a1c1). The temperature-effect reading
+(reported) holds for fp32 randn on a2 and a3, for uniform on no card.
+**Caveats:** the runner's fixed order puts fp32 uniform first in every arm; in the hot arm it follows the preheat
+bursts directly, and its idle bracket reads high (a2 48.9 and 50.6 W in passes 1–2 against 38.2–38.9 W for the arm's
+later runs; a3 37.3–38.9 against 29.0–34.1 W), and its hot − cool reads −7.04 W on a2 and −7.29 W on a3: the uniform
+test decides nothing (`V3/results/x5.runs.json`, `runs.<card>[config=fp32_uniform, arm=hi].p_before`). a1c1's brackets
+read 45.9–69.3 W and rise after heated runs (mean 57.05 W, `[item=X5].all_cards.idle_clock.aifoundry1-c1.idle_w`), so
+its switching scatters (fp32 zeros −10.8 to +1.6 W). a2's pass 3 began on a 99 °C die (block.json). a3's cool arm
+launched at 57.6 °C and was reduced at 55.9 °C as registered (A5).
+**Report:** [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4); [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15); [Why is the ET-SoC-1 low power?](https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power) (A5).
+
+## E41 — The meter chain on three cards: the SP's pass, reset windows, peak-hold, voltage maps, governor readouts (2026-09-25 21:56 – 09-26 04:37, three cards)
+
+**Question:** "133 ms", quoted on 15 pages, was one aifoundry2 session with no sampler; the spatial brief's voltage
+map and peak-hold figures were one capture per card; `--reset-ms` had never run; the governor readouts were one
+session.
+**Method:** `tools/claims-v3/tel/block.sh <pass>`, three passes per card at least 30 min apart, all kept: governor
+readouts at INFO level (`sptrace` around five 2 s zeros launches, `etcfg`, `ettelem config`); seven arms in a shuffled
+order (quiet; a power poll about every 16 ms; one per 0.1 s; ettelem at 100, 50 and 25 ms; a voltage-query loop), each
+followed by an SP stats extract; a reset segment (`ettelem sample --reset-ms 1000` over three 3 s bursts); a DEBUG
+block (per-shire voltage captures, three 14 s peak-hold windows). a2 and a1c1 heat to 76 °C first. On aifoundry1 a
+pass takes the whole host (A2.tel). Rules: registered bands in 3 of 3 passes; P3, P4 and TEL-S by 99% t on paired pass
+differences.
+**Raw data:** `V3/raw/<card>/tel/p1`–`p3/` (`trace/merged.spst.gz`, `e10`/`e20`/`e40.jsonl.gz`, `pwr.csv.gz`,
+`l10.csv.gz`, `volt.log.gz`, `reset.jsonl.gz`, `gov/`, `dbg/`, `marks.jsonl`); reduced to `V3/results/tel.json`
+(`.log`).
+**Result:** registered PASS P1–P4, P6; CARD-DIFFERENT TEL-S, TEL-G; FAIL P5, P7, TEL-R; INSUFFICIENT TEL-Q; all cards
+the same except P6, CARD-DIFFERENT. In `.items[item=…].per_card.<card>`: the quiet SP pass is 133.2 ms in every a2
+pass (`TEL-P1`), 134.8 on a1c1, 224.1–224.5 on a3 (`TEL-P5`, ≥ 230 predicted); on a2 ettelem at 10 Hz adds 26.6 ms
+(one-sided 99% lower bound 21.6, `TEL-P3`), the voltage loop 12.4 [8.4–16.4], a single-command poll 0.8. The board
+value refreshes, for the 0.1 s poll / ettelem 10 Hz / 20 Hz, every 126–134.5 / 155.5–157 / 186.5–187 ms on a2, 223–224
+/ 262.5–264 / 319.5–322 on a3, 133.5–139 / 156.5–158.5 / 188–188.5 on a1c1; P_H − P_L is 39.8 [36.5–43.1] ms on a3 and
+includes 0 on a2 and a1c1 (`TEL-S`…`H_minus_L_t99`). `--reset-ms` windows work on every a2 and a3 pass (flat to
+0.47–0.66 W after a burst) and fail once on a1c1; the resets restart the rail average, median f(1 s) 0.93 on every
+card against 0.45–0.68 predicted (`TEL-P7`…`median_f1`). The peak-hold high ends load windows 2 or 3 °C above the SP
+maximum, pass medians disagreeing on every card (`TEL-R`). a3 reads TDP 0 W, 65 °C, `max_power` every pass, but its
+trace held no throttle or idle event (≥ 5 predicted); a2 65 W, `managed_power`, no governor line (`TEL-G`…`passes[]`).
+a3's idle voltage pattern has a plane (p = 0.001) and moves 1.6 mV sd under load (≤ 0.5 predicted); a2 and a1c1 have
+two complete idle captures.
+**Caveats:** the idle voltage pattern's pass-to-pass correlation is exactly 1.0 for every pair computed, which the
+reducer does not explain. At 25 ms ettelem stretches the SP pass to 307–317 ms (a2, a1c1) and 582 ms (a3;
+`passes.<card>[].sp.E40`). a1c1's P1–P5, TEL-G and the TEL-S bands are reported, not tested; three P7 bursts miss the
+catalogue rule (a3 2, a1c1 1).
+**Report:** [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2); [Power and temperature](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature) (A3); [The ET-SoC-1's DVFS loop](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) (A11); [Spatial temperature brief](https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief); [Anatomy of a memory access](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy) (A1); one claim each on A4, A15, A17, Matmul efficiency, Sparse compute and On-chip communication.
+
+## E42 — Heat per millimetre, third run: the board split, the four-hop step and link-disjoint flows (2026-09-25 18:08 – 09-26 06:46, three cards)
+
+**Question:** the heat-per-mm page's mesh-rail results were proven on both cards, but the board-power split into data
+and fixed parts, the four-hop step on board power and the link-disjoint contrast were within noise at E31–E32's three
+passes, and the byte-for-byte fill check rested on one card (16 claims).
+**Method:** `tools/claims-v3/wire/block.sh <pass>`, six passes per card, all kept: E32's `run_wire.py --set v2` loop
+on 28 configurations (`wu/p0`, `wu/p0.5`, `wu/p1`, `wsep/p0`, `wsep/p0.5`), shuffled per pass; per configuration a
+`tstore_uniq` prefill, 5 s idle, a 3 s burst of 1 KB tensor loads from the scratchpad *d* hops away, 4 s idle,
+`ettelem` at 10 Hz. a2 and a1c1 start each pass at ≥ 76 °C and heat for 2 s below 69 °C; a3 runs no heater. Pass 1
+adds WIRE-FILL's 12 `--dump-slice` launches. Reduced by verbatim copies of the registered scripts
+(`tools/claims-v3/wire/registered/`): an item passes when the 99% interval (df 5) excludes the null on both cards and
+both means lie in the registered range; P10, P14 and P16 are equivalence tests; P13 is descriptive. A2.wire: a1c1
+drops a burst only for a busy sample off 600 MHz.
+**Raw data:** `V3/raw/<card>/wire/p<N>/` (`telemetry.jsonl.gz`, `runs.jsonl`, `marks.jsonl`, `idle_state.jsonl`,
+`pass_check.json`; `dump/` in pass 1); reduced to `V3/results/wire.json` (`.log`).
+**Result:** registered (a2 + a3): 21 PASS (P1–P5b, P6a, P7a–P7d, P10–P12, P14a–P16, WIRE-FILL); CARD-DIFFERENT P7e,
+P7f, P8, P9 (fail on a3); FAIL P6b; P13 descriptive. All cards: 16 PASS; P1, P7b, P14b, P15b, P16 also CARD-DIFFERENT
+(a1c1). Per card, mean [99%], 6 passes (`.items[item=WIRE-P1-16/<P>].per_card.<card>.mean`, `.lo99`, `.hi99`): a
+random bit per mm on free links, mesh rail (P11a), a2 36.1 [35.2–37.0], a3 35.8 [35.1–36.5], a1c1 38.1 [26.3–49.9] fJ;
+board (P11b) 46.7 [40.3–53.1], 44.4 [41.9–46.9], 51.1 [47.8–54.5] fJ. Sharing a link, mesh rail, per bit per hop: data
+(P1) 31.7, 35.1, 44.9 fJ; fixed (P2) 33.8 [31.4–36.2], 33.0 [31.6–34.4], 42.3 [40.9–43.6] fJ. All ones over random per
+hop, mesh rail (P6a): +9.6 [8.1–11.0]%, +8.1 [0.5–15.8]%, +12.3 [0.2–24.4]%; at one hop all ones cost 35.2, 35.7 and
+36.7% less (P12). Four hops sit above the line through 1, 2, 3 and 6 hops by 6.5, 8.0, 7.9% (random, P7a) and 14.5,
+15.2, 15.4% (all ones, P7c); link-disjoint flows at four hops are 0.1, 0.6 and 0.4% off their line (P14a). WIRE-FILL:
+12 of 12 launches matched on each card (`.items[item=WIRE-FILL].per_card.<card>.matched`).
+**Caveats:** most card differences come from one pass per card, which the rule keeps: a3's pass 4 (P8 −0.16 hop
+against 0.56–0.60 in its other passes, P9 −0.25 against 1.11–1.18) and a1c1's pass 6 (P16 −47.6% against 0.1–2.9%,
+P11a 23.5 against 40.9–41.3 fJ/mm; `.per_card.<card>.vals`). No burst was dropped (every sample at 600 MHz, implied
+clock 0.5988–0.5997 GHz); one a3 burst did not launch (pass 6, `wu/p0.5/hop3`, exit 139). Dies: a2 72–90 °C, a3
+55–60 °C, a1c1 60–75 °C with 26–27 heater launches per pass; the leakage correction is aifoundry2's idle law on every
+card. WIRE-FILL checks the store kernel on a DRAM slice, not the scratchpad image.
+**Report:** [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) (A17).
+
+## E43 — Rings, levels and the relay, with spin brackets and controlled scratchpad contents (2026-09-25 18:15 – 09-26 06:19, three cards)
+
+**Question:** E29's L1, L2 and own-scratchpad energies and its per-hop ring slope differed between the cards, and
+nothing said whether the scratchpad's contents caused it; "rings draw less than spinning", the small-message costs and
+the leaving-the-shire step were within noise (30 claims).
+**Method:** `tools/claims-v3/rl/block.sh <pass>`, six passes per card, all kept: half A, nocbench spin, the eleven
+rings of E29 (reversed on even passes), spin; half B, memhier spin, L2 and own scratchpad in ABBA order after a
+scratchpad prefill (zeros on odd passes, random on even), L1, L3, DRAM, remote scratchpad, spin; then the relay by
+DRAM, next shire and own scratchpad. 10 Hz sampling; a2 and a1c1 heated to ≥ 76 °C before each part. 99% t on pass
+values, Welch 99% between cards. Registered: a card difference only if Welch excludes 0, else pooled; RL-b decided on
+a2, RL-c on a3; a ring draws "less than spinning" only if spin − ring > 0 on both cards; RL-h's bands 1.7–2.3 (zeros)
+and 3.7–4.7 (random) pJ/B. A2.rl: a1c1 counts busy samples for its 600 MHz rules.
+**Raw data:** `V3/raw/<card>/rl/p<N>/` (`A/`, `B/`, `relay/` with `telemetry.jsonl.gz`, `runs.jsonl`, `marks.jsonl`;
+`state.jsonl`, `quality-windows.json`); a3's first pass 4 (an xshire4 launch exited 139) kept aside as
+`p4.attempt-1790422676`; reduced to `V3/results/rl.json` (`.log`).
+**Result:** registered: 18 of 30 parts PASS (RL-a to RL-d, RL-g, RL-h, X3 (a) pair and the five 1 KB cross-shire
+rings, X3 (e) inside-shire rings); CARD-DIFFERENT X3 (a) shire-c4 and xshire1-c4, both (d) spin bands, (e) scp-remote;
+FAIL RL-f and X3 (a) neigh and shire; INSUFFICIENT X3 (a) xshire16 and the three X4 rows. All cards: relay DRAM and
+RL-h CARD-DIFFERENT (a1c1), RL-f INSUFFICIENT, the rest the same. Per card, mean [99%], 6 passes
+(`.items[item=<id>, part=<part>].per_card.<card>.mean`, `.ci99`): ring slope a2 1.78 [1.31–2.25], a3 1.73 [0.48–2.97],
+a1c1 1.74 [0.95–2.53] pJ/B per hop, pooled 1.753 (predicted a2 2.3, a3 1.3); relay DRAM ÷ next shire 12.9, 13.0, 13.1×
+(pooled 12.97; predicted 11.2, 13.5); relay through DRAM 111.3, 107.5, 129.9 pJ/B; L1 level 0.77, 0.75, 0.72 pJ/B,
+pooled 0.759 (predicted a2 − a3 +0.18). Own scratchpad after zeros 2.11 [1.81–2.41], 2.10 [1.84–2.36], 2.55
+[2.22–2.87] and after random 4.13, 4.04, 5.03 pJ/B (3 passes each), a3 − a2 at equal contents −0.012 and −0.084: the
+E29 card difference is the contents (RL-h). Small messages cost more (shire-c4 − shire 1.51, 1.34, 1.47 pJ/B); a2's
+leaving-the-shire step 5.17 [3.35–6.99] pJ/B. Spin − ring: pair 0.45, 0.32, 0.42 W; cross-shire rings 0.38–1.18 W.
+**Caveats:** the s ↔ s+16 ring starved the sampler on every card in every pass (median 63–141 ms; aifoundry3 had
+stayed at 22 ms in E29), so its 18 bursts were dropped (`dropped_bursts`). RL-g's scratchpad parts mix the two
+contents and pass through their width; RL-h is the test (the prefill covers 87.5% of the bytes read). RL-f and RL-X4
+were reduced without the catfull low edge and the V3-ABL-A FLOP side (`low_edge_source`, `flop_source` null). Dies at
+block start and end: a2 71–77 °C, a3 55–59 °C, a1c1 60–66 °C, all idling at 600 MHz, with aifoundry2's leakage law on
+every card.
+**Report:** [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication); [Memory hierarchy](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy); [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15); [Ridge points](https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points) (A19); [Hand it to the next shire](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay) (A14).
+
+## E44 — Idle heat/cool cycles: the idle law on three cards (2026-09-25 20:55 – 09-26 05:25, three cards)
+
+**Question:** the idle law (12.6 W + 23.3 W·e^((T−80)/36)) was fitted on aifoundry2 alone with its leakage split
+unidentified, and aifoundry3's shape and SRAM rail rested on single-bin readings. Does the law hold on each card, what
+does the unsensed remainder do with temperature, and is busy leakage above Kanter's 30%? (PLAN3 V3-IDLE, 34 claims.)
+**Method:** `tools/claims-v3/idle/block.sh <pass>`, one cycle per block: 2 s random-data fma bursts on 1,024 minions,
+back to back, to 88 °C (a2, a1c1) or 90 °C (a3), at most 150 bursts, then 900 s with no launch, `ettelem` at 10 Hz.
+Three cycles per card, all kept; the overnight IDLE-LONG passes were never scheduled. Whole-degree bins (n ≥ 20),
+samples 1 s before to 6 s after a launch dropped, unsensed = board − the three rails, 99% t over cycles. Each band is
+one card's (IDLE-0, a, e, f a3's; b, c, d, k a2's), so a1c1 is reported, not tested (A2.idle); A1 drops each cycle's
+edge bins from IDLE-b.
+**Raw data:** `V3/raw/<card>/idle/p{1,2,3}/` (`telemetry.jsonl.gz`, `heat.jsonl`, `launches.jsonl`, `marks.jsonl`,
+`cycle.json`, `check.json`); reduced to `V3/results/idle.json` (`.log`).
+**Result:** registered and all cards: PASS IDLE-c, e, f; FAIL IDLE-0, a, b, k; INSUFFICIENT IDLE-d, L. Every cooling
+sample was at 600 MHz (`.idle_clocks`). IDLE-0: a3's die peaked at 90 °C in 3 of 3 cycles (after 126, 131 and 150
+bursts), not the predicted 60–66 °C plateau (`.items[item=IDLE-0].per_card.aifoundry3.tmax_per_cycle`). IDLE-a: a3 −
+the aifoundry2 law over 55–84 °C +1.01 [0.95–1.07] W (predicted +0.3 to +0.9), residual slope 0.036 [0.031–0.041]
+W/°C; a1c1 +10.07 [9.73–10.40] W, slope 0.237 [0.228–0.246] (`.items[item=IDLE-a].per_card.<card>.offset_W`,
+`.resid_slope_W_per_C`). IDLE-b: a2 sits on its own law, +0.04 [−0.15–0.22] W, not −0.23 ± 0.3
+(`.items[item=IDLE-b].per_card.aifoundry2.info_cycle_offset_W`). IDLE-c: a2's unsensed slope over 74–88 °C 0.100
+[0.056–0.145] W/°C, the rails' 0.525 [0.498–0.551] over 75–80 °C; a1c1 0.162 [0.081–0.244] and 0.767 [0.758–0.776]
+(`.items[item=IDLE-c].per_card.<card>`). IDLE-e: a3's SRAM rail 0.066 [0.062–0.069] W/°C, at least 0.93 W above
+aifoundry2's SRAM law in every bin 55–84 °C; a1c1 0.051 [0.046–0.057] (`.sram_slope_W_per_C`). IDLE-f: unsensed at
+70 °C a3 13.69 [13.56–13.83] W, a1c1 17.46 [17.31–17.62], a2 14.81 (one cycle) (`.unsensed_70C_W`). IDLE-k: a2's T_L
+profile is flat (best 32, 32, 16 °C; busy shares 0.17–0.80 within 0.005 W rms), so Kanter's 30% is not established
+(`.items[item=IDLE-k].per_card.aifoundry2`).
+**Caveats:** a2 cooled only to 67–77 °C in 15 minutes, so IDLE-d had a 73 °C bin in two cycles and stays open; IDLE-L
+had no long pass. a1c1 (firmware 1.2.0) idles 10 W above the law, 42.71 [42.62–42.80] W at 73 °C against a2's 31.73:
+per card, not a residual. All nine cycles ran in one night, not on two days as PLAN3 suggested (not a rule).
+**Report:** [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15); [The ET-SoC-1's DVFS loop](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) (A11); [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4); [Why is the ET-SoC-1 low power?](https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power) (A5); [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2); [Anatomy of a memory access](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy) (A1); [Power and temperature](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature) (A3).
+
+## E45 — The catalogue's temperature panel and the DRAM-row rows (2026-09-25 17:23 – 09-26 05:58, three cards)
+
+**Question:** is the catalogue's 5% card gap (E27: aifoundry3 / aifoundry2 0.950) the card or its temperature; do
+E28's DRAM-row rows, aifoundry2's only, hold elsewhere; are the store-over-load, L1-fill and fence/nop rankings real?
+(V3-CAT, 14 claims.)
+**Method:** `tools/claims-v3/cat/block.sh <pass>`, one pass per block through
+`tools/claims-v3/cat/run_catalogue_t10.py`. Arm A, a 30-configuration panel at `--burst 3 --gap 4.5`: on a2 and a1c1
+four warm passes (≤ 82 °C after heating to ≥ 76 °C) and four held at 88 °C (up to 5 heater launches before each
+configuration); on a3 three cool passes (no heater) and three held at 89 °C (V3-IDLE's 90 °C less 1). Arm B, 23
+configurations (dramrow2, tload/dram, tstore/dram, tload/scp, l1fill stride 32 and 64, fence, nop): three passes on a2
+and a1c1, six on a3. Every block `ok`, every burst kept. Rules, Welch 99% on pass values: CAT-a, β = (hot − cool)/ΔT
+of the panel's median log ratio, "card" if it excludes 0.21 %/°C, "temperature" if it excludes 0 only; CAT-b, cool a3
+/ warm a2 in 0.951 ± 0.015 excluding 1; CAT-c, ANOVA p > 0.01 over seq/rowhit/rowmiss and rows − tload/dram excluding
+0; CAT-e, tstore − tload in +3.2 ± 3 pJ/B on a3; CAT-f, fill / tensor load in 0.75 ± 0.10 excluding 1. a1c1 reports
+CAT-b and e.
+**Raw data:** `V3/raw/<card>/cat/p<N>/` (`runs.jsonl.gz`, `telemetry.jsonl.gz`, `marks.jsonl.gz`, `pass.json`,
+`check.json`), `V3/raw/aifoundry3/cat/hold_c.json`; reduced to `V3/results/cat.json` (`.log`).
+**Result:** registered FAIL CAT-a, b, e; CARD-DIFFERENT CAT-c, f (hold on a3 and a1c1, fail on a2); all cards the
+same. CAT-a: a hotter die costs more, β a2 +0.484 [0.068–0.901] %/°C over ΔT 14.4 °C, a3 +0.301 [0.178–0.424] over
+10.6 °C (both "temperature"), a1c1 +0.354 [−0.105–0.814] over 6.2 °C
+(`.items[item=CAT-a].per_card.<card>.beta_pct_per_c`). CAT-b: cool a3 (58.8–60.4 °C busy) / warm a2 (76.2–76.6 °C)
+0.985 [0.977–0.993], against 0.951 predicted and 0.953 on 23 Sep; a1c1 / a2, both warm, 0.999 [0.984–1.014]
+(`.items[item=CAT-b].per_card.ratio`). CAT-c: the three row patterns are indistinguishable (ANOVA p 0.056–0.95) and
+cost more than a DRAM tensor load, zeros +21.7 [11.6–31.8], +27.1 [22.9–31.4], +24.9 [9.9–40.0] pJ/B on a2, a3, a1c1,
+random +21.4 [−26.2–69.0], +24.7 [13.8–35.5], +22.1 [14.9–29.3]
+(`.items[item=CAT-c].per_card.<card>.<set>.rows_minus_tload`). CAT-e: tstore − tload includes 0 on every card (a3
++7.32 [−1.94–16.58] pJ/B). CAT-f: a2 0.77 [≈0.43–1.11], a3 0.80 [≈0.66–0.94], a1c1 0.83 [≈0.69–0.97]
+(`.items[item=CAT-f].per_card.<card>.ratio_ci99_approx`). fence − nop, registered as within noise, is not: −0.82 to
+−1.00 pJ/op on zeros, every interval excluding 0
+(`.items[item=CAT-f].per_card.<card>.fence_vs_nop_expected_within_noise`).
+**Caveats:** the hot holds fell short on a3 and a1c1 (busy 69.6–71.1 °C and 70.6–74.9 °C after 150 heater launches per
+pass), shrinking ΔT; a2's ran at 87.9–96.4 °C. Stride-256 was not run (energy-manual-102 untested).
+**Report:** [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15); [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2).
+
+## E46 — The energy manual's full catalogue, three passes on three cards (2026-09-25 17:28 – 09-26 04:58, three cards)
+
+**Question:** does E27's catalogue reproduce configuration by configuration, is aifoundry3 still about 5% cheaper than
+aifoundry2, and where does a third card fall? Not in PLAN3: after the machine fixes of 25 September the owner asked
+for every measurement to be re-run on every card (Q50), and amendment A2.catfull fixed the rules before any of its
+data.
+**Method:** `tools/claims-v3/catfull/block.sh <KS>`, pass K, part S. A pass is `workloads/enercat/run_catalogue.py`'s
+392 configurations (its two `dramrow/stride256K` ones left out, E28's `dramrow2` rows in) in the order
+`random.Random(40<K>)` gives, cut into three parts of 130–131; each part is one block through
+`tools/claims-v3/cat/run_catalogue_t10.py` with E27's timing (`--passes 1 --burst 3 --gap 4.5 --seed 40<K><S>`). a2
+and a1c1 are heated to ≥ 76 °C before each part; a3 is not; no heater runs inside a part. Nine blocks per card, all
+`ok`. Drops: on a2 and a1c1 a busy sample off 600 MHz or an implied clock outside 0.595–0.605 GHz, idle brackets never
+tested; on a3 no clock rule. Items: CF-GAP, Welch 99% of a3 − a2 on each pass's median log ratio to a2's means, PASS
+if wholly below 1 (a1c1 reported); CF-COVER, ≥ 3 complete passes with every configuration kept; CF-REP, the
+pass-to-pass error, reported.
+**Raw data:** `V3/raw/<card>/catfull/p<KS>/` (`runs.jsonl.gz`, `telemetry.jsonl.gz`, `marks.jsonl.gz`, `plan.json`,
+`pass.json`, `preheat.jsonl`, `check.json`); reduced to `V3/results/catfull.json` (`.log`), with every configuration's
+per-card and pooled values (`.configs`).
+**Result:** registered PASS CF-GAP and CF-COVER, CF-REP reported; all cards: CF-COVER PASS, CF-GAP and CF-REP
+reported. Every card kept all 1,176 bursts (392 × 3), none dropped or missing, every sample at 600 MHz
+(`.items[item=CF-COVER].per_card.<card>`, `.idle_clock`). CF-GAP: a3 / a2 = 0.976 [0.961–0.990] over the pass-level
+medians (3 v 3), against 0.950 on 23 Sep; a1c1 / a2 0.967 [0.950–0.985]
+(`.items[item=CF-GAP].per_card.<card>.vs_aifoundry2`). Over the 392 configurations the median ratio to a2 is 0.972 on
+a3 (10–90%: 0.916–1.004) and 0.962 on a1c1 (0.902–1.141) (`.ratios.per_card`). CF-REP, median / 90th-percentile
+pass-to-pass standard error: a2 2.1% / 5.7%, a3 1.4% / 3.6%, a1c1 1.5% / 4.1% (23 Sep: 1.9% / 6.1% and 1.2% / 3.6%;
+`.items[item=CF-REP].per_card.<card>`). Configuration by configuration the new values are 0.999 of 23 Sep's on a2
+(10–90%: 0.932–1.095) and 1.023 on a3 (0.967–1.091) (`.vs_committed_23sep`).
+**Caveats:** each card ran at its own temperature (busy dies 70.6–86.2 °C on a2, 57.2–58.8 °C on a3, 59.9–62.2 °C on
+a1c1, block notes), and E45 finds the catalogue moving 0.3–0.5% per °C, so the card ratios mix card and temperature.
+Idle between bursts, all at 600 MHz, was 32.7 W on a2, 25.8 on a3 and 34.4 on a1c1
+(`.idle_clock.<card>.idle_w_by_mhz`); energies are over each card's own idle.
+**Report:** [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15), its catalogue; not in `V3/results/pagemap.json`, which maps PLAN3's items only.
+
+## E47 — Minutes-long runs to a temperature cap on both cards (registered, not run)
+
+**Question:** do the Horace long runs' times to the cap ("19–26 s / 107–167 s / never") and the equal flip power of
+ones on 1,024 minions and random data on 384 hold on both cards? They rest on one aifoundry2 session (E12).
+**Method, as registered:** PLAN3 §2 "V3-LONG" (horace-lowpower X3): `tools/ettelem/run_horace_long.sh` with three runs
+per pattern per card (ones and zeros on 1,024 minions, random data on 384 and on 1,024), each up to ten minutes; item
+LONG decides on the log time ratio, 99% Welch, per card.
+**Not run.** Each run holds a card for minutes, against the lab's 10 s rule. PLAN3 made the experiment conditional on
+the owner's waiver, and the owner's decision D1 kept the rule (`V3/README.md`, "Owner decisions"). No block, schedule
+line or data exists; the seven claims of item LONG stay labelled one card, one session.
+**Report:** [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4) keeps that label.
 
 ## E49 — The runtime's log-level race, reproduced without a card (2026-09-25, 23:12, aifoundry2's CPU)
 
