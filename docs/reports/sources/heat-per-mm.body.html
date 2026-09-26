@@ -16,11 +16,22 @@ main{max-width:1100px}
 .hv-key b{color:var(--ink);font-weight:600}
 .hv-key u{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;text-decoration:none}
 #volt-readout table{max-width:640px}
+#modeltab tfoot td{border-bottom:0;padding-top:8px}
+.rt-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 10px;align-items:baseline;margin:8px 0 0;font-size:.85rem}
+.rt-row .rt-lab{color:var(--ink-2)}
+.rt-row .rt-val{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.rt-row .rt-track{grid-column:1/-1;height:10px;margin-top:3px;background:var(--grid);border-radius:4px;overflow:hidden}
+.rt-row .rt-track span{display:block;height:100%;border-radius:0 4px 4px 0}
+.rt-flag{display:inline-block;margin:2px 0 0;padding:0 8px;border:1.5px solid var(--warn);border-radius:999px;font-size:.78rem;font-weight:600;color:var(--ink)}
+#route-readout p{margin:4px 0 0}
 @media (max-width:599px){
  #modeltab.stack tr{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px}
  #modeltab.stack td{width:auto}
- #modeltab.stack td:first-child,#modeltab.stack td[colspan]{grid-column:1/-1}
+ #modeltab.stack td:first-child,#modeltab.stack td:nth-child(2),#modeltab.stack td[colspan]{grid-column:1/-1}
+ #modeltab.stack td:nth-child(2){font-size:.8rem;color:var(--ink-2)}
+ #modeltab.stack td:nth-child(2)::before{content:none}
  #modeltab.stack td.small{font-weight:400}
+ #modeltab.stack tfoot tr{display:block}
 }
 details.terms{margin:14px 0}
 details.terms p{margin:6px 0 0}
@@ -122,10 +133,10 @@ these runs leave open is listed in <a href="#limits">§10</a>.</li>
 
 <h2 id="distance">4. Energy grows with every hop</h2>
 <div class="chart-title">Energy per payload byte against hop distance, by density of ones</div>
-<div class="hv-controls"><div id="distbtn"></div></div>
+<div class="hv-controls"><div id="distbtn"></div><div id="distcard"></div></div>
 <div id="dist-leg"></div>
 <div id="dist"></div>
-<p class="small">Density of ones <i>P</i> runs from the faintest line (all zeros) to the strongest (all ones); bars are
+<p class="small" id="distcap">Density of ones <i>P</i> runs from the faintest line (all zeros) to the strongest (all ones); bars are
 the range over three passes on each of two cards. Hover, tap or tab to a point.</p>
 <p id="disttext"></p>
 
@@ -160,7 +171,7 @@ the block patterns of <a href="#lanes">§9</a> leave it. Drag the cursor, use th
 <p id="modeltext2"></p>
 
 <h2 id="contention">6. Sharing a link costs energy</h2>
-<div class="hv-controls"><div id="contbtn"></div></div>
+<div class="hv-controls"><div id="contbtn"></div><div id="contcard"></div></div>
 <div class="hv-row">
   <div class="hv-main">
     <div class="chart-title">Energy per payload byte against distance: every flow on its own links, against a loaded mesh</div>
@@ -193,6 +204,24 @@ the block patterns of <a href="#lanes">§9</a> leave it. Drag the cursor, use th
 <h2 id="meaning">8. What it means in practice</h2>
 <p id="practice"></p>
 <p id="practice2"></p>
+<div class="chart-title">Price a transfer: two shires, a payload and its data</div>
+<p class="small">The same comparison for any route: pick where the data sits and who reads it, and the readout sets the
+hops against reading the same bytes from DRAM or from the reader's own scratchpad.</p>
+<div class="hv-row">
+  <div class="hv-main" style="flex-basis:300px;max-width:440px">
+    <div class="hv-controls"><div id="route-next"></div></div>
+    <div id="route-leg"></div>
+    <div id="route"></div>
+  </div>
+  <div class="hv-side">
+    <div class="controls" id="route-presets"></div>
+    <div class="hv-controls" style="flex-direction:column;align-items:flex-start;gap:6px">
+      <div id="route-bytes"></div><div id="route-data"></div><div id="route-meter"></div><div id="route-card"></div>
+    </div>
+    <div id="route-readout" class="hv-readout"></div>
+  </div>
+</div>
+<p class="small" id="routecap"></p>
 
 <h2 id="lanes">9. Lanes and flits</h2>
 <p>These patterns test the model of <a href="#ones">§5</a> with data whose ones and differences do not move together.

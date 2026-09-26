@@ -6,7 +6,7 @@ const SET=(W_.model.v2&&W_.model.v2.board&&W_.model.v2.board.toggle_fj_per_bit_t
 const HB=HD[`${SET}/board`], HN=HD[`${SET}/noc_rail`], UB=HD['uncontended/board'], UN=HD['uncontended/noc_rail'];
 const f0=v=>v.toFixed(0),f1=v=>v.toFixed(1),f2=v=>v.toFixed(2),f3=v=>v.toFixed(3);
 const bar=(p,fn)=>p?`<b>${fn(p.mean)}</b> <span class="small">[${fn(p.lo)}–${fn(p.hi)}]</span>`:'—';
-const cards=(p,fn)=>p&&p.per_card?Object.keys(p.per_card).sort().map(h=>`a${h.slice(-1)} ${fn(typeof p.per_card[h]==='number'?p.per_card[h]:p.per_card[h].mean)}`).join(' · '):'';
+const cards=(p,fn)=>p&&p.per_card?CK.cardsIn(p.per_card).map(h=>`${CK.card(h).short} ${fn(typeof p.per_card[h]==='number'?p.per_card[h]:p.per_card[h].mean)}`).join(' · '):'';
 function setText(id,html){const e=document.getElementById(id);if(e)e.innerHTML=html;}
 const NK='noc_pj_per_byte', BK='pj_per_byte';
 const METERS=[[NK,'mesh rail'],[BK,'board power']];   // every meter toggle opens on the mesh rail, the page's primary meter
@@ -35,6 +35,36 @@ function blocksLFL(k){
 function spread(items,gap,top,bottom){items.sort((a,b)=>a.y-b.y);for(let i=1;i<items.length;i++)items[i].y=Math.max(items[i].y,items[i-1].y+gap);
  const over=items.length?items[items.length-1].y-bottom:0; if(over>0)items.forEach(it=>it.y-=over);
  for(let i=items.length-2;i>=0;i--)items[i].y=Math.min(items[i].y,items[i+1].y-gap); if(items.length&&items[0].y<top){const d=top-items[0].y;items.forEach(it=>it.y+=d);} return items;}
+
+/* ---------- the card view (sections 4, 6 and 8): every card present in the configs' per-card values, in the
+   registry's order, so a third card needs no code change; one selector on CK.bus('card') drives all three ---------- */
+const CARDS=(()=>{const s=new Set(); Object.values(W_.configs).forEach(c=>[NK,BK].forEach(k=>{if(c[k]&&c[k].per_card)Object.keys(c[k].per_card).forEach(h=>s.add(h));})); return CK.cardsIn([...s]);})();
+const NW=['no','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'], nw=n=>NW[n]||String(n);
+const cardName=c=>c==='pooled'?'all cards':CK.card(c).label;
+/* a point for the card view: all cards pooled {mean, lo, hi} (bars: the range over every pass), or one card's mean with
+   bars at ± one standard error; null where that card has no value (never drawn as zero) */
+function vOf(q,card){if(!q)return null; if(card==='pooled')return {mean:q.mean,lo:q.lo,hi:q.hi,n:q.n};
+ const p=CK.pick(q,card); if(!p)return null; const se=p.se||0; return {mean:p.mean,lo:p.mean-se,hi:p.mean+se,se:p.se,n:p.n};}
+/* every card's mean ± se, one line each, for a tooltip */
+const perCardTip=(q,fn,skip)=>q&&q.per_card?CK.cardsIn(q.per_card).filter(h=>h!==skip).map(h=>{const p=CK.pick(q,h);
+ return p?`${CK.card(h).label} ${fn(p.mean)}${p.se!=null?' ± '+fn(p.se):''}${p.n!=null?`, n = ${p.n}`:''}`:null;}).filter(Boolean).join('<br>'):'';
+/* the top of a card-view axis, the same for every card: switching cards moves the points, not the axis */
+function topOf(q){if(!q)return 0; let m=q.hi!=null?q.hi:q.mean; if(q.per_card)CK.cardsIn(q.per_card).forEach(h=>{const p=CK.pick(q,h); if(p)m=Math.max(m,p.mean+(p.se||0));}); return m;}
+/* a point in its series colour, shaped by card as in the registry: dot, ring, diamond or box (all cards: a dot) */
+function cardDot(g,card,x,y,r,col){const m=card==='pooled'?'dot':CK.card(card).mark; let e;
+ if(m==='diamond'){const R=r*1.3; e=CK.el('polygon',{points:`${x},${y-R} ${x+R},${y} ${x},${y+R} ${x-R},${y}`},g);}
+ else if(m==='box')e=CK.el('rect',{x:x-r,y:y-r,width:2*r,height:2*r},g);
+ else e=CK.el('circle',{cx:x,cy:y,r:m==='ring'?r+0.3:r},g);
+ return sty(e,m==='ring'?{fill:'var(--surface)',stroke:col,strokeWidth:'2.5px'}:{fill:col,stroke:'var(--surface)',strokeWidth:'1.5px'});}
+/* what the bars are, in words, for the points drawn (qs: the {mean, lo, hi, n, per_card} values on the chart) */
+function barsText(card,qs){
+ if(card==='pooled'){const hs=CK.cardsIn([].concat(...qs.map(q=>Object.keys(q.per_card||{})))), ns=new Set();
+  qs.forEach(q=>hs.forEach(h=>{const p=CK.pick(q,h); ns.add(p&&p.n);}));
+  const n=ns.size===1?[...ns][0]:null;
+  return n?`the range over ${nw(n)} passes on each of ${nw(hs.length)} cards`:'the range over every pass of every card';}
+ const ns=new Set(qs.map(q=>{const p=CK.pick(q,card);return p?p.n:null;}).filter(n=>n!=null)), n=ns.size===1?[...ns][0]:null;
+ return `± one standard error over ${n?`its ${nw(n)} passes`:'its passes'}`;}
+const markWord=c=>({dot:'dots',ring:'rings',diamond:'diamonds',box:'squares'})[CK.card(c).mark]||'marks';
 
 /* ---------- KPIs ---------- */
 (function(){
@@ -76,32 +106,41 @@ function spread(items,gap,top,bottom){items.sort((a,b)=>a.y-b.y);for(let i=1;i<i
  setText('meshcap',`Drawn to scale from the pitch measured on Esperanto's published die plot. 8 × 6 mesh stops: 34 minion shires (blue) — the 32 compute shires (1,024 minions) that the other reports count, plus the master shire, which runs the firmware, and a spare — the PCIe and I/O shires (pink, top row), and four memory shires with their LPDDR4x PHYs down each side (amber); the corners are empty. The 6 × 6 grid of the other reports is the inner six columns. Dots are mesh stops, lines the links between neighbours. Tiles are drawn at the ${f2(px)} mm period, so the grid looks slightly wider than the 86% its outlines span. Hover, tap or tab to a tile.`);
 })();
 
-/* ---------- 4. energy against distance ---------- */
+/* ---------- 4. energy against distance: all cards pooled, or one card (its means, ± one standard error) ---------- */
 (function(){
  const pre=SET==='v2'?'wu/p':'wbern/p', Ps=SET==='v2'?['0','0.25','0.5','0.75','1']:['0','0.1','0.25','0.5','0.75','0.9','1'];
- const C=W_.configs, ds=[0,1,2,3,4,6]; let key=NK;
+ const C=W_.configs, ds=[0,1,2,3,4,6]; let key=NK, card='pooled';
  // density of ones is ordered: one hue, from a visible floor (P = 0) to full strength and past it towards the ink (P = 1)
  const col=p=>p<=0.5?`color-mix(in srgb, var(--c1) ${f0(45+110*p)}%, var(--surface))`:`color-mix(in srgb, var(--c1) ${f0(100-130*(p-0.5))}%, var(--ink))`;
  const frac={'0':'0','0.1':'0.1','0.25':'¼','0.5':'½','0.75':'¾','0.9':'0.9','1':'1'};
+ const cfgs=()=>[].concat(...Ps.map(p=>ds.map(d=>C[`${pre}${p}/hop${d}`]).filter(c=>c&&c[key])));
  CK.legend('dist-leg',Ps.map(p=>({key:p,label:`P = ${frac[p]}`,mark:'line',color:col(+p)})));
  const f=CK.frame('dist',{label:'Energy per payload byte against hop distance, one line per density of ones',height:W=>W<600?300:340,draw(f){
   const L=46,R=f.narrow?48:62,T=26,B=40;
-  let mx=0; Ps.forEach(p=>ds.forEach(d=>{const c=C[`${pre}${p}/hop${d}`]; if(c&&c[key])mx=Math.max(mx,c[key].hi);})); mx*=1.06;
+  const mx=Math.max(...cfgs().map(c=>topOf(c[key])))*1.06;   // the same axis for every card
   const x=CK.lin(-0.2,6.15,L,f.W-R), y=CK.lin(0,mx,f.H-B,T);
-  CK.axes(f,{x,y,L,R,T,B,xt:ds,xl:'hops to the scratchpad read (0 = the shire’s own)',yl:`${meterName(key)}: pJ per payload byte above idle`});
+  CK.axes(f,{x,y,L,R,T,B,xt:ds,xl:'hops to the scratchpad read (0 = the shire’s own)',yl:`${meterName(key)}: pJ per payload byte above idle`+(card==='pooled'?'':`, ${cardName(card)}`)});
   const ends=[];
   Ps.forEach(p=>{const c0=col(+p), g=CK.el('g',{'data-series':p},f.svg), pts=[], nodes=[];
-   ds.forEach(d=>{const c=C[`${pre}${p}/hop${d}`]; if(c&&c[key])pts.push([d,c[key].mean]);});
+   ds.forEach(d=>{const c=C[`${pre}${p}/hop${d}`], q=c&&vOf(c[key],card); if(q)pts.push([d,q.mean]);});
    if(pts.length>1)sty(CK.el('path',{d:CK.path(pts,x,y)},g),{fill:'none',stroke:c0,strokeWidth:'2px',strokeLinejoin:'round'});
-   ds.forEach(d=>{const c=C[`${pre}${p}/hop${d}`]; if(!c||!c[key])return; const q=c[key], m=CK.el('g',{},g);
-    whisker(m,x(d),y(q.hi),y(q.lo),c0); sty(CK.el('circle',{cx:x(d),cy:y(q.mean),r:4},m),{fill:c0,stroke:'var(--surface)',strokeWidth:'1.5px'});
-    CK.tip(f,m,`<b>P(one) = ${p}</b>, ${d} hop${d===1?'':'s'}, ${meterName(key)}<br>${f2(q.mean)} pJ/B [${f2(q.lo)}–${f2(q.hi)}], n = ${q.n}<br>${c.participants} minions reading (${Math.round(c.participants/32)} shires), ${f0(c.gb_s)} GB/s`);
+   ds.forEach(d=>{const c=C[`${pre}${p}/hop${d}`], q0=c&&c[key], q=q0&&vOf(q0,card); if(!q)return; const m=CK.el('g',{},g);
+    if(q.hi>q.lo)whisker(m,x(d),y(q.hi),y(q.lo),c0); cardDot(m,card,x(d),y(q.mean),4,c0);
+    const head=`<b>P(one) = ${p}</b>, ${d} hop${d===1?'':'s'}, ${meterName(key)}`, how=`${c.participants} minions reading (${Math.round(c.participants/32)} shires), ${f0(c.gb_s)} GB/s`;
+    CK.tip(f,m,card==='pooled'?`${head}<br>${f2(q.mean)} pJ/B [${f2(q.lo)}–${f2(q.hi)}], n = ${q.n}<br>${perCardTip(q0,f2)}<br>${how}`
+     :`${head}<br><b>${cardName(card)}</b>: ${f2(q.mean)} pJ/B${q.se!=null?` ± ${f2(q.se)}`:''}${q.n!=null?`, n = ${q.n}`:''}<br>all cards: ${f2(q0.mean)} [${f2(q0.lo)}–${f2(q0.hi)}]${CK.cardsIn(q0.per_card||{}).length>1?'<br>'+perCardTip(q0,f2,CK.card(card).id):''}<br>${how}`);
     nodes.push(m);});
    CK.keynav(f,nodes);
    if(pts.length)ends.push({y:y(pts[pts.length-1][1]),p,x:x(pts[pts.length-1][0])});});
   spread(ends,14,T,f.H-B).forEach(e=>CK.txt(f.svg,e.x+8,e.y+4,`P = ${frac[e.p]}`,'lab'));
  }});
- CK.seg('distbtn',{label:'Meter',options:METERS,value:key,onChange:v=>{key=v;f.redraw();}});
+ function cap(){const qs=cfgs().map(c=>c[key]);
+  setText('distcap',`Density of ones <i>P</i> runs from the faintest line (all zeros) to the strongest (all ones); `+
+   (card==='pooled'?`bars are ${barsText(card,qs)}.`:`the points (${markWord(card)}) are ${cardName(card)}'s means and the bars ${barsText(card,qs)}; the axis stays put, so switching cards shows how they differ.`)+
+   ` Hover, tap or tab to a point for every card's value.`);}
+ CK.seg('distbtn',{label:'Meter',options:METERS,value:key,onChange:v=>{key=v;f.redraw();cap();}});
+ if(CARDS.length){const cs=CK.cardSeg('distcard',{cards:CARDS,pooled:true,onChange:v=>{card=v;f.redraw();cap();}}); if(cs.value!==card){card=cs.value;f.redraw();}}
+ cap();
 })();
 
 /* ---------- 5. what a bit costs per hop: ones and differences ---------- */
@@ -136,21 +175,22 @@ function spread(items,gap,top,bottom){items.sort((a,b)=>a.y-b.y);for(let i=1;i<i
  CK.seg('modelbtn',{label:'Meter',options:METERS,value:key,onChange:v=>{key=v;f.redraw();}});
 })();
 
-/* ---------- the model table ---------- */
+/* ---------- the model table: one row per quantity and set of links, so it sorts; the notes go in its foot ---------- */
 (function(){
  const rows=[['<i>a</i>: per flit-to-flit difference','per_transition'],['<i>b</i>: per one carried','per_one'],['random bit, data part (½<i>a</i> + ½<i>b</i>)','random_bit_data'],['per bit, data-independent','fixed_per_bit']];
  const t=document.getElementById('modeltab'); if(!t)return;
- t.innerHTML='<thead><tr><th>At 0.485 V, 400 MHz; the model on the loaded mesh</th><th class="num">mesh rail, fJ per hop</th><th class="num">fJ per mm</th><th class="num">board power, fJ per hop</th><th class="num">fJ per mm</th></tr></thead><tbody>'+
-  rows.map(r=>`<tr><td>${r[0]}</td><td class="num">${bar(HN.per_hop[r[1]],f0)}</td><td class="num">${bar(HN[r[1]],f1)}</td><td class="num">${bar(HB.per_hop[r[1]],f0)}</td><td class="num">${bar(HB[r[1]],f1)}</td></tr>`).join('')+
-  `<tr><td colspan="5"><b>With every flow on its own links</b>, fitted over 1–4 hops (only random and zeros were run this way)</td></tr>`+
+ const LD='loaded mesh', FR='free links', tot=h=>`<b>${f1(h.random_bit_total.mean)}</b> <span class="small">[${f1(h.random_bit_total.lo)}–${f1(h.random_bit_total.hi)}]</span>`;
+ t.innerHTML='<thead><tr><th>At 0.485 V, 400 MHz</th><th>links</th><th class="num">mesh rail, fJ per hop</th><th class="num">mesh rail, fJ per mm</th><th class="num">board power, fJ per hop</th><th class="num">board power, fJ per mm</th></tr></thead><tbody>'+
+  rows.map(r=>`<tr><td>${r[0]}</td><td>${LD}</td><td class="num">${bar(HN.per_hop[r[1]],f0)}</td><td class="num">${bar(HN[r[1]],f1)}</td><td class="num">${bar(HB.per_hop[r[1]],f0)}</td><td class="num">${bar(HB[r[1]],f1)}</td></tr>`).join('')+
   // board power resolves the free-link total but not its split into a data and a fixed part: those cells say so (§10 has the numbers)
-  `<tr><td>random bit, data part</td><td class="num">${bar(UN.per_hop.random_bit_data,f0)}</td><td class="num">${bar(UN.random_bit_data,f1)}</td><td class="num small">not resolved</td><td class="num small">not resolved</td></tr>`+
-  `<tr><td>per bit, data-independent</td><td class="num">${bar(UN.per_hop.fixed_per_bit,f0)}</td><td class="num">${bar(UN.fixed_per_bit,f1)}</td><td class="num small">not resolved</td><td class="num small">not resolved</td></tr>`+
-  `<tr><td><b>A random bit, everything, free links</b></td><td class="num">—</td><td class="num"><b>${f1(UN.random_bit_total.mean)}</b> <span class="small">[${f1(UN.random_bit_total.lo)}–${f1(UN.random_bit_total.hi)}]</span></td><td class="num">—</td><td class="num"><b>${f1(UB.random_bit_total.mean)}</b> <span class="small">[${f1(UB.random_bit_total.lo)}–${f1(UB.random_bit_total.hi)}]</span></td></tr>`+
-  `<tr><td colspan="5"><b>On the loaded mesh</b> (all pairs, sections 4–5; the model fitted over 1–6 hops)</td></tr>`+
-  `<tr><td><b>A random bit, everything, loaded mesh</b></td><td class="num">—</td><td class="num"><b>${f1(HN.random_bit_total.mean)}</b> <span class="small">[${f1(HN.random_bit_total.lo)}–${f1(HN.random_bit_total.hi)}]</span></td><td class="num">—</td><td class="num"><b>${f1(HB.random_bit_total.mean)}</b> <span class="small">[${f1(HB.random_bit_total.lo)}–${f1(HB.random_bit_total.hi)}]</span></td></tr>`+
-  `<tr><td colspan="5" class="small">Fit per card and pass over ${SET==='v2'?'five bit densities and the frozen line':'seven bit densities'}, then pooled: bold is the mean, brackets the range over passes and cards, with the hop length’s range (${IN.hop_mm.range[0]}–${IN.hop_mm.range[1]} mm) folded into the per-mm bars. Residual of the fit: ${f3(HN.rms_pj_per_byte_hop)} pJ/B/hop on the mesh rail, ${f3(HB.rms_pj_per_byte_hop)} on board power. Over the same 1–4 hops as the free-link rows, the loaded mesh rail gives ${f0(W_.disjoint_flows.noc_pj_per_byte.wu.random_minus_zeros_fj_per_bit_hop.mean/HOP)} + ${f0(W_.disjoint_flows.noc_pj_per_byte.wu.zeros_fj_per_bit_hop.mean/HOP)} fJ/mm (section 6). On board power the free-link total is resolved on both cards but its split into a data part and a data-independent part is not (<a href="#limits">§10</a>).</td></tr></tbody>`;
+  `<tr><td>random bit, data part</td><td>${FR}</td><td class="num">${bar(UN.per_hop.random_bit_data,f0)}</td><td class="num">${bar(UN.random_bit_data,f1)}</td><td class="num small">not resolved</td><td class="num small">not resolved</td></tr>`+
+  `<tr><td>per bit, data-independent</td><td>${FR}</td><td class="num">${bar(UN.per_hop.fixed_per_bit,f0)}</td><td class="num">${bar(UN.fixed_per_bit,f1)}</td><td class="num small">not resolved</td><td class="num small">not resolved</td></tr>`+
+  `<tr><td><b>A random bit, everything</b></td><td>${FR}</td><td class="num">—</td><td class="num">${tot(UN)}</td><td class="num">—</td><td class="num">${tot(UB)}</td></tr>`+
+  `<tr><td><b>A random bit, everything</b></td><td>${LD}</td><td class="num">—</td><td class="num">${tot(HN)}</td><td class="num">—</td><td class="num">${tot(HB)}</td></tr></tbody>`+
+  `<tfoot><tr><td colspan="6" class="small"><b>Loaded mesh</b>: all pairs, sections 4–5; the model fitted over 1–6 hops. <b>Free links</b>: every flow on its own links, fitted over 1–4 hops (only random and zeros were run this way). `+
+  `Fit per card and pass over ${SET==='v2'?'five bit densities and the frozen line':'seven bit densities'}, then pooled: bold is the mean, brackets the range over passes and cards, with the hop length’s range (${IN.hop_mm.range[0]}–${IN.hop_mm.range[1]} mm) folded into the per-mm bars. Residual of the fit: ${f3(HN.rms_pj_per_byte_hop)} pJ/B/hop on the mesh rail, ${f3(HB.rms_pj_per_byte_hop)} on board power. Over the same 1–4 hops as the free-link rows, the loaded mesh rail gives ${f0(W_.disjoint_flows.noc_pj_per_byte.wu.random_minus_zeros_fj_per_bit_hop.mean/HOP)} + ${f0(W_.disjoint_flows.noc_pj_per_byte.wu.zeros_fj_per_bit_hop.mean/HOP)} fJ/mm (section 6). On board power the free-link total is resolved on both cards but its split into a data part and a data-independent part is not (<a href="#limits">§10</a>).</td></tr></tfoot>`;
  CK.stackTable(t);
+ CK.sortTable(t);
 })();
 
 /* ---------- 5b. what any bit pattern would cost: the plane of the second run's model ---------- */
@@ -265,31 +305,46 @@ function spread(items,gap,top,bottom){items.sort((a,b)=>a.y-b.y);for(let i=1;i<i
 /* ---------- 6. contention, and the link-sharing map ---------- */
 const MAPBUS=CK.bus('heat-map-d');
 (function(){
- const C=W_.configs; let key=NK, sel=null;
+ const C=W_.configs; let key=NK, sel=null, card='pooled';
  const series=[['wu/p0.5/hop',[1,2,3,4,6],'var(--c2)','loaded mesh, random',''],['wsep/p0.5/hop',[1,2,3,4,5],'var(--c1)','own links, random',''],
                ['wu/p0/hop',[1,2,3,4,6],'var(--c4)','loaded mesh, zeros','5 3'],['wsep/p0/hop',[1,2,3,4,5],'var(--c3)','own links, zeros','5 3']];
+ const cfgs=()=>[].concat(...series.map(sr=>sr[1].map(d=>C[sr[0]+d]).filter(c=>c&&c[key])));
  CK.legend('cont-leg',series.map((s,i)=>({key:String(i),label:s[3],mark:s[4]?'dash':'line',color:s[2]})));
  const f=CK.frame('cont',{label:'Energy per payload byte against distance, with every flow on its own links and on a loaded mesh',height:W=>W<600?300:330,draw(f){
   const L=46,R=14,T=26,B=40;
-  let mx=0; series.forEach(sr=>sr[1].forEach(d=>{const c=C[sr[0]+d]; if(c&&c[key])mx=Math.max(mx,c[key].hi);})); mx*=1.08;
+  const mx=Math.max(...cfgs().map(c=>topOf(c[key])))*1.08;   // the same axis for every card
   const x=CK.lin(0.6,6.3,L,f.W-R), y=CK.lin(0,mx,f.H-B,T);
-  CK.axes(f,{x,y,L,R,T,B,xt:[1,2,3,4,5,6],xl:'hops',yl:`${meterName(key)}: pJ per payload byte above idle`});
+  CK.axes(f,{x,y,L,R,T,B,xt:[1,2,3,4,5,6],xl:'hops',yl:`${meterName(key)}: pJ per payload byte above idle`+(card==='pooled'?'':`, ${cardName(card)}`)});
   series.forEach((sr,i)=>{const pts=[],nodes=[],g=CK.el('g',{'data-series':String(i)},f.svg);
-   sr[1].forEach(d=>{const c=C[sr[0]+d]; if(c&&c[key])pts.push([d,c[key].mean]);});
-   sty(CK.el('path',{d:CK.path(pts,x,y)},g),{fill:'none',stroke:sr[2],strokeWidth:'1.8px',strokeDasharray:sr[4]||'none'});
-   sr[1].forEach(d=>{const c=C[sr[0]+d]; if(!c||!c[key])return; const q=c[key], m=CK.el('g',{},g);
-    whisker(m,x(d),y(q.hi),y(q.lo),sr[2]); sty(CK.el('circle',{cx:x(d),cy:y(q.mean),r:4},m),{fill:sr[2],stroke:'var(--surface)',strokeWidth:'1.5px'});
+   sr[1].forEach(d=>{const c=C[sr[0]+d], q=c&&vOf(c[key],card); if(q)pts.push([d,q.mean]);});
+   if(pts.length>1)sty(CK.el('path',{d:CK.path(pts,x,y)},g),{fill:'none',stroke:sr[2],strokeWidth:'1.8px',strokeDasharray:sr[4]||'none'});
+   sr[1].forEach(d=>{const c=C[sr[0]+d], q0=c&&c[key], q=q0&&vOf(q0,card); if(!q)return; const m=CK.el('g',{},g);
+    if(q.hi>q.lo)whisker(m,x(d),y(q.hi),y(q.lo),sr[2]); cardDot(m,card,x(d),y(q.mean),4,sr[2]);
     if(sel===d)sty(CK.el('circle',{cx:x(d),cy:y(q.mean),r:8},m),{fill:'none',stroke:'var(--ink)',strokeWidth:'1.5px'});
-    CK.tip(f,m,`<b>${sr[3]}</b>, ${d} hop${d>1?'s':''}<br>${f2(q.mean)} pJ/B [${f2(q.lo)}–${f2(q.hi)}], ${meterName(key)}<br>${Math.round(c.participants/32)} reader shires, ${f0(c.gb_s)} GB/s`);
+    const head=`<b>${sr[3]}</b>, ${d} hop${d>1?'s':''}`, how=`${Math.round(c.participants/32)} reader shires, ${f0(c.gb_s)} GB/s`;
+    CK.tip(f,m,card==='pooled'?`${head}<br>${f2(q.mean)} pJ/B [${f2(q.lo)}–${f2(q.hi)}], ${meterName(key)}<br>${perCardTip(q0,f2)}<br>${how}`
+     :`${head}, ${meterName(key)}<br><b>${cardName(card)}</b>: ${f2(q.mean)} pJ/B${q.se!=null?` ± ${f2(q.se)}`:''}${q.n!=null?`, n = ${q.n}`:''}<br>all cards: ${f2(q0.mean)} [${f2(q0.lo)}–${f2(q0.hi)}]${CK.cardsIn(q0.per_card||{}).length>1?'<br>'+perCardTip(q0,f2,CK.card(card).id):''}<br>${how}`);
     nodes.push(m);});
    CK.keynav(f,nodes);});
-  const dj=W_.disjoint_flows[key]; if(dj&&dj.wsep_d1_4&&dj.wu){const u=dj.wsep_d1_4.random_minus_zeros_fj_per_bit_hop, l=dj.wu.random_minus_zeros_fj_per_bit_hop, uz=dj.wsep_d1_4.zeros_fj_per_bit_hop, lz=dj.wu.zeros_fj_per_bit_hop;
+  cap();
+ }});
+ function cap(){
+  const dj=W_.disjoint_flows[key]; if(!(dj&&dj.wsep_d1_4&&dj.wu))return;
+  const qs=cfgs().map(c=>c[key]), bars=`bars: ${barsText(card,qs)}`;
+  if(card==='pooled'){const u=dj.wsep_d1_4.random_minus_zeros_fj_per_bit_hop, l=dj.wu.random_minus_zeros_fj_per_bit_hop, uz=dj.wsep_d1_4.zeros_fj_per_bit_hop, lz=dj.wu.zeros_fj_per_bit_hop;
    // board power resolves only the total per card, not its split into a data and a fixed part (§10)
    const body=key===NK?`the data-dependent part costs ${f0(u.mean)} fJ with every flow on its own links against ${f0(l.mean)} on the loaded mesh, the data-independent part ${f0(uz.mean)} against ${f0(lz.mean)}`
     :`a random bit costs ${f0(dj.wsep_d1_4.random_fj_per_bit_hop.mean)} fJ with every flow on its own links against ${f0(dj.wu.random_fj_per_bit_hop.mean)} on the loaded mesh; on this meter the split into a data-dependent and a fixed part is not resolved (<a href="#limits">§10</a>)`;
-   setText('contcap',`Per bit per hop over 1–4 hops, ${meterName(key)}: ${body}. Solid: random data; dashed: zeros; bars: the range over six passes${sel?`; rings: the ${sel}-hop points, the distance on the map`:''}.`);}
- }});
+   const n=new Set(qs.map(q=>q.n)), bp=n.size===1?`the range over ${nw([...n][0])} passes`:barsText(card,qs);
+   setText('contcap',`Per bit per hop over 1–4 hops, ${meterName(key)}: ${body}. Solid: random data; dashed: zeros; bars: ${bp}${sel?`; rings: the ${sel}-hop points, the distance on the map`:''}.`);
+   return;}
+  // one card: the same per-bit-per-hop contrasts, that card's mean ± one standard error over its passes
+  const F=v=>{const p=CK.pick(v,card); return p?`${f0(p.mean)}${p.se!=null?` ± ${f1(p.se)}`:''}`:'no value';};
+  const body=key===NK?`the data-dependent part costs ${F(dj.wsep_d1_4.random_minus_zeros_fj_per_bit_hop)} fJ with every flow on its own links against ${F(dj.wu.random_minus_zeros_fj_per_bit_hop)} on the loaded mesh, the data-independent part ${F(dj.wsep_d1_4.zeros_fj_per_bit_hop)} against ${F(dj.wu.zeros_fj_per_bit_hop)}`
+   :`a random bit costs ${F(dj.wsep_d1_4.random_fj_per_bit_hop)} fJ with every flow on its own links against ${F(dj.wu.random_fj_per_bit_hop)} on the loaded mesh; the split into a data-dependent and a fixed part is not resolved on this meter (<a href="#limits">§10</a>)`;
+  setText('contcap',`Per bit per hop over 1–4 hops, ${meterName(key)}, ${cardName(card)} (mean ± one standard error): ${body}. Solid: random data; dashed: zeros; points (${markWord(card)}): ${cardName(card)}'s means, ${bars}; the axis stays put, so switching cards shows how they differ${sel?`; rings: the ${sel}-hop points, the distance on the map`:''}.`);}
  CK.seg('contbtn',{label:'Meter',options:METERS,value:key,onChange:v=>{key=v;f.redraw();}});
+ if(CARDS.length){const cs=CK.cardSeg('contcard',{cards:CARDS,pooled:true,onChange:v=>{card=v;f.redraw();}}); if(cs.value!==card){card=cs.value;f.redraw();}}
  MAPBUS.on(d=>{sel=d;f.redraw();});
 })();
 (function(){
@@ -353,6 +408,112 @@ const MAPBUS=CK.bus('heat-map-d');
  fix();
  const sx=dd=>LS[`wu/p0.5/hop${dd}`];
  setText('mapcap',`The map is the logical 6 × 6 grid of the 32 compute shires (marty1885's coordinates, as in on-chip communication; it appears to be the die turned a quarter), and each arrow a directed link that carries data from a target's scratchpad to its reader. Routes are drawn dimension-ordered, as the analysis assumes; the chip's routing order is not measured, so the map can route y first too, and the shares hardly change (3 hops: ${f0(100*sx(3).shared_link_hop_fraction)}% x first, ${f0(100*sx(3).shared_link_hop_fraction_yx)}% y first; 6 hops: ${f0(100*sx(6).shared_link_hop_fraction)}% and ${f0(100*sx(6).shared_link_hop_fraction_yx)}%). The own-links pairs use only straight paths, so both orders give the same routes. That set also has fewer flows at long distances (${LS['wsep/p0.5/hop4'].flows} against ${LS['wu/p0.5/hop4'].flows} at four hops), so the energy gap between the sets is not sharing alone. Hover, tap or tab to a reader shire to see its route, or to a link to list its flows.`);
+})();
+
+/* ---------- 8. price a transfer: two shires on the logical map, a payload and its data ----------
+   Hops are the Manhattan distance on the logical map (inputs.mesh_xy), each one inputs.hop_mm of mesh travel. The per-hop
+   cost is the loaded-mesh model of §5 from headline[<set>/<meter>].per_hop (fixed + a·t + b·P, t = 2P(1 − P) for
+   independent bits); the whole read is the straight line through the measured points of that density over 1–6 hops
+   (wire.configs), as §8's text does for random data; DRAM and the own scratchpad are context's random-data tensor loads
+   (board power, the energy manual, all cards). A card with no value in a quantity shows "no value", never zero. */
+(function(){
+ const MX=IN.mesh_xy&&IN.mesh_xy.value, X=D.context||{}; if(!MX||!X.tload_dram_random_pj_per_byte||!X.own_scratchpad_pj_per_byte)return;
+ const C=W_.configs, px=IN.pitch_x_mm.value, py=IN.pitch_y_mm.value, XY=s=>MX[String(s)];
+ const ids=Object.keys(MX).map(Number).sort((a,b)=>a-b), at=new Map(ids.map(s=>[XY(s).join(','),s]));
+ const hops=(a,b)=>Math.abs(XY(a)[0]-XY(b)[0])+Math.abs(XY(a)[1]-XY(b)[1]);
+ const pre=SET==='v2'?'wu/p':'wbern/p', DS=[1,2,3,4,6].filter(d=>C[`${pre}0.5/hop${d}`]), DLO=Math.min(...DS), DHI=Math.max(...DS);
+ const DATA=(SET==='v2'?['0','0.25','0.5','0.75','1']:['0','0.1','0.25','0.5','0.75','0.9','1']).map(p=>[p,{'0':'all zeros','0.1':'10% ones','0.25':'¼ ones','0.5':'random','0.75':'¾ ones','0.9':'90% ones','1':'all ones'}[p]]);
+ const STOPS=[]; for(let b=64;b<=1048576;b*=2)STOPS.push(b);
+ const bFmt=b=>b>=1048576?`${b/1048576} MB`:b>=1024?`${b/1024} KB`:`${b} B`;
+ const eFmt=nj=>nj==null?'—':nj>=1e6?`${CK.fmt.num(nj/1e6)} mJ`:nj>=1000?`${CK.fmt.num(nj/1000)} µJ`:`${CK.fmt.num(nj)} nJ`;
+ const pairAt=d=>{for(const a of ids)for(const b of ids)if(hops(a,b)===d)return [a,b];return null;};
+ const DFAR=Math.max(...ids.map(a=>Math.max(...ids.map(b=>hops(a,b)))));
+ const PRESETS=[[1,'neighbours, 1 hop'],[DHI,`${DHI} hops, the farthest measured`],[DFAR,`${DFAR} hops, the farthest pair`]].map(([d,l])=>[pairAt(d),l]).filter(q=>q[0]);
+ let [from,to]=pairAt(DFAR)||[ids[0],ids[ids.length-1]], next='from', bytes=64, P='0.5', key=BK, card='pooled';
+ /* the loaded-mesh model's terms (fJ per bit per hop) for a card and meter, or null */
+ function terms(k,cd){const H=HD[`${SET}/${srcOf(k)}`]; if(!H||!H.per_hop)return null; const g=n=>CK.pick(H.per_hop[n],cd), a=g('per_transition'), b=g('per_one'), s0=g('fixed_per_bit');
+  return a&&b&&s0?{a:a.mean,b:b.mean,s0:s0.mean}:null;}
+ const hopPj=(k,cd,p)=>{const c=terms(k,cd); return c?(c.s0+c.a*2*p*(1-p)+c.b*p)*8/1000:null;};   // pJ per byte per hop
+ /* the straight line through the measured points of one density (pJ per byte against hops), or null if a point is missing */
+ function lineFit(k,cd,p){const ys=DS.map(d=>{const c=C[`${pre}${p}/hop${d}`], q=c&&c[k]; if(!q)return null; const v=cd==='pooled'?q.mean:(CK.pick(q,cd)||{}).mean; return v==null?null:v;});
+  if(ys.some(v=>v==null))return null; const mx=meanOf(DS), my=meanOf(ys); let sxy=0,sxx=0; DS.forEach((x,i)=>{sxy+=(x-mx)*(ys[i]-my);sxx+=(x-mx)*(x-mx);});
+  const sl=sxy/sxx; return {slope:sl,icpt:my-sl*mx};}
+ /* x first, as analyze_wire.route(): the stops from the data's shire to the reader */
+ function route(a,b){let [x,y]=XY(a); const [x1,y1]=XY(b), out=[[x,y]]; while(x!==x1){x+=x1>x?1:-1;out.push([x,y]);} while(y!==y1){y+=y1>y?1:-1;out.push([x,y]);} return out;}
+ const meshNj=(s,k)=>{const h=hopPj(k,card,+P); return h==null?null:bytes*h*hops(from,s)/1000;};
+ CK.legend('route-leg',[{key:'f',label:'the data’s shire (from)',mark:'box',color:'var(--c2)'},{key:'t',label:'the reader (to)',mark:'box',color:'var(--c7)'},
+  {key:'r',label:`route, within the ${DLO}–${DHI} hops measured`,mark:'line',color:'var(--ink)'},{key:'x',label:'extrapolated',mark:'dash',color:'var(--ink)'},
+  {key:'e',label:'no compute shire on the map',mark:'ring',color:'var(--ref)'}]);
+ let segNext=null;
+ const f=CK.frame('route',{label:'The 32 compute shires on the logical 6 by 6 map, drawn at the die’s tile pitch, with the route between the two picked shires',minW:280,maxW:440,
+  height:W=>Math.round(6*py*(W-20)/(6*px)+40),draw(f){
+  const svg=f.svg, pad=10, sc=(f.W-2*pad)/(6*px), tw=px*sc, th=py*sc, ox=pad, oy=6, cx=x=>ox+(x+0.5)*tw, cy=y=>oy+(y+0.5)*th, tiles=[];
+  const occ=new Set(ids.map(s=>XY(s).join(',')));
+  for(let y=0;y<6;y++)for(let x=0;x<6;x++){if(occ.has(`${x},${y}`))continue;
+   sty(CK.el('rect',{x:ox+x*tw+2,y:oy+y*th+2,width:tw-4,height:th-4,rx:3,'aria-hidden':'true'},svg),{fill:'none',stroke:'var(--ref)',strokeWidth:'1px',strokeDasharray:'3 3'});}
+  const d=hops(from,to);
+  ids.slice().sort((a,b)=>XY(a)[1]-XY(b)[1]||XY(a)[0]-XY(b)[0]).forEach(s=>{const [x,y]=XY(s), role=s===from?'from':s===to?'to':null, g=CK.el('g',{'data-shire':s,'data-x':x,'data-y':y},svg);
+   const c=role==='from'?'var(--c2)':role==='to'?'var(--c7)':'var(--c1)';
+   sty(CK.el('rect',{x:ox+x*tw+2,y:oy+y*th+2,width:tw-4,height:th-4,rx:3},g),{fill:c,fillOpacity:role?0.3:0.12,stroke:c,strokeWidth:role?'2px':'1px',strokeOpacity:role?1:0.55});
+   CK.txt(g,ox+x*tw+6,oy+y*th+16,String(s),role?'lab-strong':'lab');
+   if(role)CK.txt(g,ox+x*tw+tw-6,oy+y*th+th-7,role,'lab-strong','end');
+   const e=s===from?null:meshNj(s,key), hs=hops(from,s);
+   CK.tip(f,g,`<b>shire ${s}</b> at (${x}, ${y})${role==='from'?': the data’s shire':role==='to'?': the reader':''}`+
+    (s!==from?`<br>${hs} hop${hs>1?'s':''} from shire ${from}, about ${f1(hs*HOP)} mm${hs>DHI?' (extrapolated)':''}<br>${bFmt(bytes)} over the mesh: ${e==null?'no value for this card':eFmt(e)}, ${meterName(key)}`:'')+
+    `<br>Click, tap or press Enter to make it ${next==='from'?'the data’s shire (from)':'the reader (to)'}`,{role:'button'});
+   g.style.cursor='pointer'; g.addEventListener('click',()=>choose(s)); tiles.push(g);});
+  if(d>0){const pts=route(from,to).map(([x,y])=>[cx(x),cy(y)]), rg=CK.el('g',{'aria-hidden':'true'},svg);
+   const seg=(i0,i1,dash)=>{if(i1<=i0)return; const q=pts.slice(i0,i1+1).map(p=>p.slice()); const n=q.length-1;
+    if(i1===pts.length-1){const [ax,ay]=q[n-1],[bx,by]=q[n], L0=Math.hypot(bx-ax,by-ay); q[n]=[bx-(bx-ax)/L0*9,by-(by-ay)/L0*9];}
+    sty(CK.el('polyline',{points:q.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')},rg),{fill:'none',stroke:'var(--ink)',strokeWidth:'2.5px',strokeLinejoin:'round',strokeDasharray:dash?'6 4':'none'});};
+   seg(0,Math.min(DHI,d),false); seg(DHI,d,true);
+   pts.slice(1,-1).forEach(([x,y])=>sty(CK.el('circle',{cx:x,cy:y,r:2.6},rg),{fill:'var(--ink)'}));
+   sty(CK.el('circle',{cx:pts[0][0],cy:pts[0][1],r:4},rg),{fill:'var(--ink)'});
+   const [ax,ay]=pts[d-1],[bx,by]=pts[d], ux=Math.sign(bx-ax), uy=Math.sign(by-ay);
+   sty(CK.el('polygon',{points:`${bx},${by} ${bx-ux*10-uy*5},${by-uy*10+ux*5} ${bx-ux*10+uy*5},${by-uy*10-ux*5}`},rg),{fill:'var(--ink)'});}
+  const yb=oy+6*th+14; sty(CK.el('line',{x1:ox+2,x2:ox+tw-2,y1:yb,y2:yb,'aria-hidden':'true'},svg),{stroke:'var(--c1)',strokeWidth:'2px'});
+  CK.txt(svg,ox+tw+6,yb+4,`one hop ≈ ${f2(HOP)} mm`,'lab');
+  const pos=tiles.map(n=>[+n.getAttribute('data-x'),+n.getAttribute('data-y')]);
+  CK.keynav(f,tiles,{onEnter:n=>choose(+n.getAttribute('data-shire')),step:(k,K)=>{   // arrows move on the grid, over the gaps
+   const [x,y]=pos[k], dir={ArrowRight:[1,0],ArrowLeft:[-1,0],ArrowDown:[0,1],ArrowUp:[0,-1]}[K]; if(!dir)return null;
+   let best=k,bd=1e9; pos.forEach(([u,v],j)=>{const along=dir[0]?(u-x)*dir[0]:(v-y)*dir[1], off=dir[0]?Math.abs(v-y):Math.abs(u-x); if(along>0&&off===0&&along<bd){bd=along;best=j;}}); return best;}});
+ }});
+ function choose(s){if(next==='from')from=s; else to=s; next=next==='from'?'to':'from'; segNext.set(next);}
+ segNext=CK.seg('route-next',{label:'A click sets',options:[['from','the data’s shire (from)'],['to','the reader (to)']],value:next,onChange:v=>{next=v;draw();}});
+ const pb=document.getElementById('route-presets');
+ pb.innerHTML=PRESETS.map((q,i)=>`<button type="button" data-i="${i}" aria-pressed="false">${q[1]}</button>`).join('');
+ pb.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{[from,to]=PRESETS[+b.dataset.i][0]; next='from'; segNext.set(next);}));
+ CK.range('route-bytes',{label:'Payload',stops:STOPS,value:bytes,fmt:bFmt,onInput:v=>{bytes=v;draw();}});
+ CK.seg('route-data',{label:'Data',options:DATA,value:P,onChange:v=>{P=v;draw();}});
+ CK.seg('route-meter',{label:'Meter',options:[[BK,'board power'],[NK,'mesh rail']],value:key,onChange:v=>{key=v;draw();}});
+ if(CARDS.length){const cs=CK.cardSeg('route-card',{cards:CARDS,pooled:true,onChange:v=>{card=v;draw();}}); card=cs.value;}
+ const out=CK.readout('route-readout');
+ function draw(){f.redraw(); update();}
+ function update(){
+  pb.querySelectorAll('button').forEach(b=>{const q=PRESETS[+b.dataset.i][0]; b.setAttribute('aria-pressed',String(q[0]===from&&q[1]===to));});
+  const d=hops(from,to), p=+P, dn=DATA.find(q=>q[0]===P)[1], cn=cardName(card), board=key===BK, ext=d>DHI;
+  const hj=hopPj(key,card,p), fit=lineFit(key,card,P), nj=v=>v==null?null:bytes*v/1000;
+  const mesh=d===0?0:hj==null?null:nj(hj*d), whole=d===0?null:fit?nj(fit.icpt+fit.slope*d):null, dram=nj(X.tload_dram_random_pj_per_byte), own=nj(X.own_scratchpad_pj_per_byte);
+  const rows=[
+   [d===0?'over the mesh: none, the data stays in the shire':`over the mesh: ${d} hop${d>1?'s':''} × ${hj==null?'—':f2(hj)} pJ per byte`,mesh,'var(--c1)',''],
+   d===0?null:[board?`the whole read from shire ${from}'s scratchpad: the read, leaving the shire and the hops`:`everything the mesh rail sees of that read, leaving the shire included`,whole,`color-mix(in srgb, var(--c1) 55%, var(--surface))`,''],
+   ['the same bytes from DRAM',dram,'var(--c4)','the energy manual: board power, random data, all cards'],
+   [`the same bytes from shire ${to}'s own scratchpad`,own,'var(--c3)','same source']].filter(Boolean);
+  const top=Math.max(...rows.map(r=>r[1]||0))||1;
+  const cmp=(a,b)=>a<b?`${f1(b/a)}× cheaper than`:`${f1(a/b)} times the cost of`;   // a set against b
+  let h=`<p><b>Shire ${from} → shire ${to}</b>: ${d===0?'the same shire, no hops':`${d} hop${d>1?'s':''}, about ${f1(d*HOP)} mm of mesh travel`}`+
+   (ext?`<br><span class="rt-flag">⚠ extrapolated: these runs measured ${DLO}–${DHI} hops</span>`:'')+`</p>`+
+   `<p class="small">${bFmt(bytes)} of ${dn} data, ${meterName(key)}, ${cn}</p>`+
+   rows.map(r=>`<div class="rt-row"><span class="rt-lab">${r[0]}${r[3]?` <span class="small">(${r[3]})</span>`:''}</span><span class="rt-val">${r[1]==null?'no value':eFmt(r[1])}</span>`+
+    `<div class="rt-track" role="img" aria-label="${r[1]==null?'no value':eFmt(r[1])}">${r[1]==null?'':`<span style="width:${Math.max(0.4,100*r[1]/top).toFixed(2)}%;background:${r[2]}"></span>`}</div></div>`).join('');
+  if(d>0&&board&&mesh!=null)h+=`<p class="small">On board power the hops are ${cmp(mesh,dram)} the DRAM read${whole!=null?`, and the whole read is ${cmp(whole,dram)} DRAM and ${cmp(whole,own)} the own scratchpad`:''}${P!=='0.5'?'; the DRAM and scratchpad figures are for random data':''}.</p>`;
+  else if(d>0&&!board)h+=`<p class="small">The mesh rail leaves out the regulator's loss and everything off the mesh, so it is not like for like with the DRAM and scratchpad figures, which are board power.</p>`;
+  if(card!=='pooled'&&(hj==null||(d>0&&whole==null)))h+=`<p class="small">“no value”: the data has no ${cn} value for that quantity.</p>`;
+  out.set(h);}
+ setText('routecap',`Shires are placed by their logical coordinates (marty1885's map, as in <a href="#contention">§6</a>; the die appears to be this map turned a quarter, which changes no distance), drawn at the die's ${f2(px)} × ${f2(py)} mm tile pitch, and a route is dimension-ordered, x first, as the analysis assumes (y first is as long). `+
+  `The cost per hop is the loaded-mesh model of <a href="#ones">§5</a>, as in the text above; the whole read is the straight line through the measured ${DS.join(', ')}-hop points for that density of ones, so it includes the far scratchpad read and leaving the shire. `+
+  `DRAM and the own scratchpad are the energy manual's random-data tensor loads on board power (${f1(X.tload_dram_random_pj_per_byte)} and ${f2(X.own_scratchpad_pj_per_byte)} pJ per byte, all cards). A single card uses its own fit's means. Beyond ${DHI} hops the route is dashed and every figure extrapolated along those lines. Click or tap a shire, or tab to the map and move with the arrow keys; Enter picks.`);
+ update();
 })();
 
 /* ---------- 9. lanes and flit width ---------- */
