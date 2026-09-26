@@ -34,6 +34,8 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "abla"))
 import ablcore as C  # noqa: E402
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import campaign  # noqa: E402  (the campaign's cards: amendments A2 and A4)
 
 EXP = "ablb"
 REG = [1, 2, 3]
@@ -119,7 +121,7 @@ def main():
     ap.add_argument("--data", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--mmb-values", default=None)
-    ap.add_argument("--expect", default=",".join(C.CAMPAIGN), help="cards the all-cards outcome needs (comma list)")
+    ap.add_argument("--expect", default=",".join(campaign.CAMPAIGN), help="cards the all-cards outcome needs (comma list)")
     a = ap.parse_args()
     expect = [c for c in a.expect.split(",") if c]
     present = C.cards_present(a.data, EXP)

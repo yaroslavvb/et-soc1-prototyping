@@ -44,6 +44,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.dont_write_bytecode = True
 sys.path.insert(0, HERE)
 import cardrules  # noqa: E402  (the per-card clock rules, shared with finish and passcheck)
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import campaign  # noqa: E402  (the campaign's cards: amendments A2 and A4)
 CARDS = ("aifoundry2", "aifoundry3")   # the registered cards: every "outcome" comes from these two only
 SHORT = {"aifoundry2": "a2", "aifoundry3": "a3"}
 REPORTED = "reported"                  # all_cards: the item (or this part) is not tested on that card, only reported
@@ -1118,11 +1120,14 @@ def main():
     ap.add_argument("--data", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--quiet", action="store_true")
+    ap.add_argument("--cards", default=",".join(campaign.CAMPAIGN),
+                    help="comma-separated cards all_cards expects (default: tools/claims-v3/campaign.py)")
     a = ap.parse_args()
-    # every card directory present (one holding mmb/ or mmb-smoke/), and the four campaign cards whether present or not
+    # every card directory present (one holding mmb/ or mmb-smoke/), and the campaign's cards whether present or not
     present = [c for c in sorted(os.listdir(a.data)) if os.path.isdir(os.path.join(a.data, c, "mmb"))
                or os.path.isdir(os.path.join(a.data, c, "mmb-smoke"))]
-    cards = list(cardrules.CAMPAIGN) + [c for c in present if c not in cardrules.CAMPAIGN]
+    expected = [c for c in a.cards.split(",") if c]
+    cards = expected + [c for c in present if c not in expected]
     D = {c: load_card(os.path.join(a.data, c), c) for c in cards}
     per = load_step(D)
     IDLE.clear(); IDLE.update(idle_clock(D, per))

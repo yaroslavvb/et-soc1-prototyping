@@ -82,8 +82,10 @@ import sys
 
 sys.dont_write_bytecode = True
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import campaign  # noqa: E402  (the campaign's cards: amendments A2 and A4)
 CARDS = ("aifoundry2", "aifoundry3")                                   # the registered outcome's cards
-EXPECTED = ("aifoundry2", "aifoundry3", "aifoundry1-c0", "aifoundry1-c1")   # the four-card campaign
+EXPECTED = campaign.CAMPAIGN                                         # the campaign's cards (--cards overrides)
 PINNED = ("aifoundry3",)                   # lib.sh: aifoundry3 is pinned at 600 MHz; every other card is governor-free
 CARD_RE = re.compile(r"aifoundry\d+(-c\d+)?$")
 SHORT = {"aifoundry2": "a2", "aifoundry3": "a3", "aifoundry1-c0": "a1c0", "aifoundry1-c1": "a1c1"}
@@ -645,11 +647,11 @@ def fill_item(card_dumps, allc, cinfo):
             "outcome": out, "reading": rd, "all_cards": ac}
 
 
-def card_dirs(data):
-    """Every card of the four-card campaign, then any other card directory present under DATA."""
+def card_dirs(data, expected=EXPECTED):
+    """Every card of the campaign (EXPECTED or --cards), then any other card directory present under DATA."""
     present = sorted(n for n in os.listdir(data) if CARD_RE.fullmatch(n) and os.path.isdir(os.path.join(data, n))) \
         if os.path.isdir(data) else []
-    return list(EXPECTED) + [n for n in present if n not in EXPECTED]
+    return list(expected) + [n for n in present if n not in expected]
 
 
 def main():
@@ -659,11 +661,13 @@ def main():
     ap.add_argument("--root", default=os.getcwd())
     ap.add_argument("--beside", nargs=2, metavar=("A2_DIR", "A3_DIR"))
     ap.add_argument("-q", "--quiet", action="store_true")
+    ap.add_argument("--cards", default=",".join(campaign.CAMPAIGN),
+                    help="comma-separated cards all_cards expects (default: tools/claims-v3/campaign.py)")
     a = ap.parse_args()
     root = os.path.abspath(a.root)
     aw, E, V3, WC = setup(root)
     tests = list(E.EXP1) + list(V3.EXTRA)
-    allc = card_dirs(a.data)
+    allc = card_dirs(a.data, [c for c in a.cards.split(",") if c])
 
     cards, ixs, ixns, card_dumps = {}, {}, {}, {}
     for h in allc:

@@ -40,6 +40,8 @@ import os
 import re
 import statistics as st
 import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import campaign  # noqa: E402  (the campaign's cards: amendments A2 and A4)
 
 sys.dont_write_bytecode = True
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -54,7 +56,7 @@ import numpy as np  # noqa: E402
 
 A2, A3 = "aifoundry2", "aifoundry3"
 CARDS = (A2, A3)                  # the registered cards: every registered outcome is computed from these two only
-EXPECT = (A2, A3, "aifoundry1-c0", "aifoundry1-c1")    # the four-card campaign (amendment TEL-4C); --expect overrides
+EXPECT = campaign.CAMPAIGN        # the campaign's cards (amendments TEL-4C, A4); --expect overrides
 ALL = list(EXPECT)                # every card of this reduction: the expected cards and any other present (set in main)
 PRESENT = set()                   # the cards with a directory under --data
 PINNED = (A3,)                    # pinned at 600 MHz by a boot service: no clock rule

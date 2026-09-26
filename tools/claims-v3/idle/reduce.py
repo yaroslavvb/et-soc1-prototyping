@@ -56,11 +56,14 @@ import os
 import re
 import sys
 import time
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import campaign  # noqa: E402  (the campaign's cards: amendments A2 and A4)
 
 A2, A3 = "aifoundry2", "aifoundry3"
 C0, C1 = "aifoundry1-c0", "aifoundry1-c1"
 CARDS = (A2, A3)                  # the registered cards (PLAN3)
 KNOWN = (A2, A3, C0, C1)          # the four-card campaign (amendment A2)
+LISTED = tuple(c for c in campaign.CAMPAIGN if c not in (A2, A3))   # always listed, data or not (A4: not card 0)
 PINNED = {A3}                     # clock pinned at 600 MHz by a boot service: off-600 samples counted, not dropped
 # the idle clock rules A/K/F keep on each governor-free card (aifoundry2: the registered 600 MHz; amendment A2 for
 # aifoundry1's cards, the expected clock after the heater: c1 idles at 600 MHz / 499 mV "managed_power"; c0 rests at
@@ -470,8 +473,8 @@ def fmt_ci(s, k=2):
 
 
 def others(C):
-    """the cards that are not registered, in order: aifoundry1's cards (always listed) and any other card present"""
-    return [c for c in card_order(list(C) + [C0, C1]) if c not in CARDS]
+    """the cards that are not registered, in order: the campaign's others (LISTED, always) and any other card present"""
+    return [c for c in card_order(list(C) + list(LISTED)) if c not in CARDS]
 
 
 def reported(entry, holds, band_of, n_key="n"):
@@ -501,7 +504,7 @@ def finish(item, holds_reg, tested, C, IC, rep_txt):
     item["all_cards"] = all_cards(holds_reg, tested, C)
     # a card with no kept cooling sample has no idle clock (None), whatever its expected one
     item["idle_clocks_MHz"] = {c: ((IC.get(c) or {}).get("used_mhz") if (IC.get(c) or {}).get("n_samples") else None)
-                               for c in card_order(list(C) + [C0, C1])}
+                               for c in card_order(list(C) + list(LISTED))}
     item["idle_clock_note"] = clock_note(IC, C)
     fb = fallback_txt(IC, C)
     item["reading_all_cards"] = (item["reading"] + ("; reported, not tested: " + "; ".join(rep_txt) if rep_txt else "")
@@ -512,7 +515,7 @@ def finish(item, holds_reg, tested, C, IC, rep_txt):
 def fallback_txt(IC, C):
     """the cards whose idle clock came from amendment A2's fallback (their most common cooling clock), for the readings"""
     fb = []
-    for c in card_order(list(C) + [C0, C1]):
+    for c in card_order(list(C) + list(LISTED)):
         x = IC.get(c) or {}
         if x.get("n_samples") and x.get("used_mhz") != x.get("expected_mhz"):
             fb.append(f"{c} at {x['used_mhz']} MHz, not the expected {x['expected_mhz']} MHz "
@@ -522,7 +525,7 @@ def fallback_txt(IC, C):
 
 def clock_note(IC, C):
     parts, diff = [], []
-    for c in card_order(list(C) + [C0, C1]):
+    for c in card_order(list(C) + list(LISTED)):
         x = IC.get(c) or {}
         if not x.get("n_samples"):
             parts.append(f"{c} no kept cooling samples")
@@ -536,7 +539,7 @@ def clock_note(IC, C):
             diff.append(c)
     txt = "idle clocks: " + ", ".join(parts)
     reg_fw = sorted({FIRMWARE[c] for c in CARDS if c in FIRMWARE})
-    ofw = [c for c in card_order(list(C) + [C0, C1]) if (IC.get(c) or {}).get("n_samples") and c not in CARDS
+    ofw = [c for c in card_order(list(C) + list(LISTED)) if (IC.get(c) or {}).get("n_samples") and c not in CARDS
            and (IC[c].get("firmware") or FIRMWARE.get(c)) not in reg_fw]
     if ofw:
         txt += ("; " + " and ".join(f"{c} ({IC[c].get('firmware') or FIRMWARE.get(c) or 'unknown'})" for c in ofw)
@@ -1042,7 +1045,7 @@ def reduce_all(data, out_path):
                     lb, _ = rule_a_bins(p, cool_s=0, keep_mhz=keep_mhz, drop=reg_drop)
                     x["offset"] = mean([r["resid"] for r in lb.values()]) if lb else None
                 L[card].append(x)
-    for c in (C0, C1):                 # aifoundry1's cards are always listed, with or without data
+    for c in LISTED:                   # the campaign's other cards are always listed, with or without data
         C.setdefault(c, []); L.setdefault(c, []); passes.setdefault(c, [])
         IC.setdefault(c, {"expected_mhz": IDLE_MHZ[c], "firmware": FIRMWARE.get(c), "used_mhz": None, "n_samples": 0, "rule": "no data"})
     items = [item_0(C, IC), item_a(C, IC), item_b(C, IC), item_c(C, IC), item_d(C, IC), item_e(C, IC), item_f(C, IC), item_k(C, IC), item_L(L, C, IC)]

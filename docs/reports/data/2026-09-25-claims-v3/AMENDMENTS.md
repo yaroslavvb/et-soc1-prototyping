@@ -848,6 +848,12 @@ heat sink or airflow), which its low-power idle at 300 MHz normally hides; a ful
 firmware's throttling would take its clock off 600 MHz. The campaign therefore runs on aifoundry1-c1, aifoundry2 and
 aifoundry3. Card 0's smoke data are kept as a record of the fault. `all_cards` outcomes are over those three cards.
 
+*Implementation note (25 Sep 2026, 23:55, before any campaign result was used):* until then the reducers still expected
+card 0 and would have called every `all_cards` outcome INSUFFICIENT for its missing data. `tools/claims-v3/campaign.py`
+now holds the campaign's three cards, and every `reduce.py` takes it as the default of its `--cards` (or `--expect`)
+option; no registered rule, band or drop changed. `collect.sh` and `reduce_all.sh` in the same directory gather the
+three cards' data and run every reducer.
+
 ## A5 (25 Sep 2026, 19:45, after a failed aifoundry3 block and before any usable aifoundry3 ablation data of the campaign)
 
 After the host changes of 25 September (among them the host CPU's performance power profile) aifoundry3's card idles

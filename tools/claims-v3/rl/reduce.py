@@ -62,6 +62,8 @@ A2, A3 = "aifoundry2", "aifoundry3"
 CARDS = (A2, A3)  # the registered cards: every registered outcome is computed from these two only
 A1C0, A1C1 = "aifoundry1-c0", "aifoundry1-c1"
 KNOWN = (A1C0, A1C1, A2, A3)   # the four cards of the 25 Sep campaign, in the order the page shows them
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import campaign  # noqa: E402  (the campaign's cards: amendments A2 and A4)
 
 
 def clock_rule(card):
@@ -655,7 +657,7 @@ def build(data, flop, legacy=True, include_failed=False, expected=None, low_edge
     # every card directory under --data with an rl/ inside (a card id: aifoundry<N> or aifoundry<N>-c<M>)
     present = [d for d in sorted(os.listdir(data)) if re.match(r"^aifoundry\d+(-c\d+)?$", d)
                and os.path.isdir(os.path.join(data, d, "rl"))] if os.path.isdir(data) else []
-    EXP = card_order(expected) if expected else card_order(set(KNOWN) | set(present))
+    EXP = card_order(expected) if expected else card_order(set(campaign.CAMPAIGN) | set(present))
     ALL = card_order(set(EXP) | set(CARDS) | set(present))
     P, LOG, DROP = {}, {}, []
     for c in ALL:
@@ -1206,8 +1208,8 @@ def main():
     ap.add_argument("--flop", help="V3-ABL-A FLOP side: {\"<card>\": {\"random\": [pJ/FLOP per block], \"zeros\": [...]}, ..., \"unit\": \"pJ/FLOP\"}")
     ap.add_argument("--low-edge", help="RL-f low edge for cards outside the 23 Sep catalogue: {\"<card>\": [0.5 * (l1fill/stride32/zeros + "
                                        "tstore/scp/zeros) pJ/B, one per catalogue pass], ...} (from V3-CATFULL); aifoundry2 and aifoundry3 always use 23 Sep")
-    ap.add_argument("--cards", help="comma-separated cards the all_cards outcome covers (default: aifoundry1-c0, aifoundry1-c1, aifoundry2, "
-                                    "aifoundry3 and any other card under --data)")
+    ap.add_argument("--cards", help="comma-separated cards the all_cards outcome covers (default: the campaign's cards, "
+                                    "tools/claims-v3/campaign.py, and any other card under --data)")
     ap.add_argument("--no-legacy", action="store_true", help="RL-X4 byte side without the 23 Sep passes (not the registered rule; for tests)")
     ap.add_argument("--include-failed", action="store_true", help="also use passes whose block.json status is not ok (not the registered rule)")
     a = ap.parse_args()

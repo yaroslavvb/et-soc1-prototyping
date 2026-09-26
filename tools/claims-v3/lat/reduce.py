@@ -62,9 +62,11 @@ import numpy as np
 
 sys.dont_write_bytecode = True
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import campaign  # noqa: E402  (the campaign's cards: amendments A2 and A4)
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 CARDS = ("aifoundry2", "aifoundry3")    # the registered outcome: these two cards, exactly as registered
-CAMPAIGN = ("aifoundry1-c0", "aifoundry1-c1", "aifoundry2", "aifoundry3")   # the four-card campaign (all_cards)
+CAMPAIGN = tuple(sorted(campaign.CAMPAIGN))   # the campaign's cards for all_cards (amendments A2, A4)
 PINNED = {"aifoundry3"}                  # lib.sh: GOV_FREE on every other card
 REGISTERED_RULE = {"aifoundry2"}         # governor-free cards judged by the registered drop rule
 # the low-power operating point of aifoundry1's cards (300 MHz / 398 mV, queried on c0, firmware 1.4.1, 25 Sep): an
@@ -1806,7 +1808,7 @@ def main():
     ap.add_argument("--data", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--no-search", action="store_true", help="skip LAT-N2's layout search (then LAT-N2 is INSUFFICIENT)")
-    ap.add_argument("--cards", help="comma-separated cards for all_cards (default: the four campaign cards and every "
+    ap.add_argument("--cards", help="comma-separated cards for all_cards (default: the campaign's cards, tools/claims-v3/campaign.py, and every "
                                     "other card directory with a lat/ subdirectory under --data)")
     a = ap.parse_args()
     plan = {}

@@ -37,6 +37,8 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import ablcore as C  # noqa: E402
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import campaign  # noqa: E402  (the campaign's cards: amendments A2 and A4)
 
 EXP = "abla"
 REG = [1, 2, 3, 4]                      # registered passes (blocks 0-3)
@@ -237,7 +239,7 @@ def main():
     ap.add_argument("--data", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--legacy-a2", default=LEGACY_A2, help="the 21 Sep aifoundry2 ablation session (ABL-EM4d)")
-    ap.add_argument("--expect", default=",".join(C.CAMPAIGN), help="cards the all-cards outcome needs (comma list)")
+    ap.add_argument("--expect", default=",".join(campaign.CAMPAIGN), help="cards the all-cards outcome needs (comma list)")
     a = ap.parse_args()
     pred_path = os.path.join(HERE, "x1_predictions.json")
     X1 = json.load(open(pred_path))["pred"]

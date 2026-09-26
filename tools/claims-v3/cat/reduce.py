@@ -75,6 +75,8 @@ import numpy as np
 sys.dont_write_bytecode = True
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import campaign  # noqa: E402  (the campaign's cards: amendments A2 and A4)
 import catlib as L  # noqa: E402
 
 A2, A3 = L.A2, L.A3
@@ -82,7 +84,7 @@ CARDS = (A2, A3)
 MIN_N = 3
 USABLE = ("ok", "offclock", "partial")
 REGISTERED = (A2, A3)                          # the registered outcome: these two cards, as before
-CAMPAIGN = (A2, A3, L.A1C0, L.A1C1)            # the four-card campaign: all_cards needs every one of them
+CAMPAIGN = campaign.CAMPAIGN                   # the campaign's cards (--cards overrides): all_cards needs every one
 PANEL = ["fadd.s/zeros/h2", "fadd.s/random/h2", "fmul.s/zeros/h2", "fmul.s/random/h2", "fmadd.s/random/h2",
          "fcvt.s.w/random/h2", "fadd.ps/random/h2", "fsub.ps/random/h2", "fmul.ps/random/h2", "fsgnj.ps/random/h2",
          "feq.ps/random/h2", "fadd.pi/random/h2", "fmul.pi/random/h2", "fxor.pi/random/h2", "fmadd.ps/zeros/h2",
@@ -607,7 +609,11 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--root", default=os.path.abspath(os.path.join(HERE, "..", "..", "..")))
     ap.add_argument("--committed", default=None, help="23 Sep catalogue.json (default: the tree's; 'none' to skip)")
+    ap.add_argument("--cards", default=",".join(campaign.CAMPAIGN),
+                    help="comma-separated cards all_cards expects (default: tools/claims-v3/campaign.py)")
     a = ap.parse_args()
+    global CAMPAIGN
+    CAMPAIGN = tuple(c for c in a.cards.split(",") if c)
     cpath = a.committed or os.path.join(a.root, "docs", "reports", "data", "2026-09-23-energy-manual", "catalogue.json")
     committed = None if cpath == "none" else committed_passes(cpath)
     present = sorted((d for d in os.listdir(a.data) if os.path.isdir(os.path.join(a.data, d, "cat"))),

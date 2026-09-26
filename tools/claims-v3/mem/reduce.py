@@ -45,12 +45,14 @@ PRE = os.path.join(HERE, "prereg")
 sys.path.insert(0, HERE)
 sys.path.insert(0, PRE)
 import memv3  # noqa: E402
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import campaign  # noqa: E402  (the campaign's cards: amendments A2 and A4)
 import crosscard_tests as cc  # noqa: E402  (the copy in prereg/; crosscard_v3 below then reuses this module)
 import crosscard_v3 as ccv3  # noqa: E402,F401  (patches cc.BANDS and cc.pass_values: P5b, P6r, P8b, P8c, X2, one-sided)
 
 CARDS = memv3.CARDS          # the registered pair: "outcome" and "reading" are theirs, computed as registered
 SHORT = memv3.SHORT
-ALL = list(memv3.EXPECTED)   # main() sets it: the four cards of the campaign, then any other card folder under --data
+ALL = list(campaign.CAMPAIGN)   # main() sets it: the campaign's cards (--cards), then any other card folder under --data
 PRESENT = set()              # cards with a <card>/mem folder under --data
 INF = float("inf")
 
@@ -285,7 +287,7 @@ def _over(hs):
 
 
 ALL_CARDS_TEST = ("the registered per-card test, unchanged, on every card of the campaign (aifoundry2, aifoundry3, "
-                  "aifoundry1-c0, aifoundry1-c1 and any other card folder present): PASS if it holds on every tested "
+                  "aifoundry1-c1 (amendment A4) and any other card folder present): PASS if it holds on every tested "
                   "card, CARD-DIFFERENT if on some, FAIL if on none, INSUFFICIENT while a tested card (a missing one "
                   "included) has fewer than 3 kept repeats; a test registered for one card only is reported, not "
                   "tested, on the others.")
@@ -602,12 +604,12 @@ def load_plan():
         return None
 
 
-def discover(data):
-    """The cards: the four of the campaign (aifoundry2, aifoundry3 first), then any other folder with a mem/ inside."""
+def discover(data, expected=campaign.CAMPAIGN):
+    """The cards: the campaign's (aifoundry2, aifoundry3 first), then any other folder with a mem/ inside."""
     present = set()
     if os.path.isdir(data):
         present = {n for n in os.listdir(data) if os.path.isdir(os.path.join(data, n, "mem"))}
-    return list(memv3.EXPECTED) + sorted(present - set(memv3.EXPECTED)), present
+    return list(expected) + sorted(present - set(expected)), present
 
 
 def main():
@@ -616,8 +618,10 @@ def main():
                                                   "aifoundry1-c0/, aifoundry1-c1/) laid out like DATA_ROOT")
     ap.add_argument("--out", required=True, help="verdicts.json")
     ap.add_argument("--tmp", default=None, help="scratch folder for staged copies (default: the system temp dir)")
+    ap.add_argument("--cards", default=",".join(campaign.CAMPAIGN),
+                    help="comma-separated cards all_cards expects (default: tools/claims-v3/campaign.py)")
     a = ap.parse_args()
-    cards, present = discover(a.data)
+    cards, present = discover(a.data, [c for c in a.cards.split(",") if c])
     ALL[:] = cards
     PRESENT.clear()
     PRESENT.update(present)

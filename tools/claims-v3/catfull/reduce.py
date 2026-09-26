@@ -39,6 +39,8 @@ import numpy as np
 
 sys.dont_write_bytecode = True
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import campaign  # noqa: E402  (the campaign's cards: amendments A2 and A4)
 sys.path.insert(0, HERE)
 import cflib as L  # noqa: E402
 
@@ -236,7 +238,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--catalogue-out")
     ap.add_argument("--committed", default=None, help="the committed catalogue.json, or 'none'")
-    ap.add_argument("--cards", default=",".join(L.FOUR_CARDS), help="the cards all_cards expects")
+    ap.add_argument("--cards", default=",".join(campaign.CAMPAIGN), help="the cards all_cards expects")
     ap.add_argument("--root", default=os.path.abspath(os.path.join(HERE, "..", "..", "..")))
     a = ap.parse_args()
     committed_path = a.committed or os.path.join(a.root, "docs", "reports", "data", "2026-09-23-energy-manual", "catalogue.json")
