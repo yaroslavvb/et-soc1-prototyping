@@ -132,6 +132,7 @@ const M = [
 $('methods').innerHTML = '<thead><tr><th>What</th><th>Granularity</th><th>How</th><th>Status</th></tr></thead><tbody>' +
   M.map(r => `<tr><td class="lvl" style="white-space:normal">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${chip(r[3], r[4])}</td></tr>`).join('') + '</tbody>';
 CK.stackTable($('methods'));
+CK.sortTable('methods');  // after stackTable. (No filter box: chartkit's inserts it via t.parentNode before the .wide wrapper, which is that parent.)
 
 /* ---------- the time bus: one moment, shown on every chart ---------- */
 const TB = CK.bus('pt-time');
@@ -215,6 +216,7 @@ timeChart('temp', {h: [140, 170], y0: tLo, y1: tHi, series: [{key: 'temp', color
 
 /* ---------- §2: board power against die temperature ---------- */
 const PV = {view: 'board', from: 5, rings: true, dropGaps: false};
+let fDrift = null;  // the busy-drift chart below, which shows the matmul fit's slope
 const GCOL = {idle: 'var(--ref)', matmul: 'var(--c7)', dram: 'var(--c5)'};
 const GNAME = {idle: 'idle', matmul: 'matmul', dram: 'DRAM loads'};
 const groupOf = p => GROUP[phaseAt(p.t + 0.5)];
@@ -260,6 +262,7 @@ function pvtOut() {
   if (PV.view === 'above') h += ` Median above the law, leaving out each phase's first 3 s and the gap bins: ` +
     ['idle', 'dram', 'matmul'].filter(g => MED[g]).map(g => `${GNAME[g]} ${sign(MED[g].m)} W`).join(', ') + '.';
   pvtRead.set(h);
+  if (fDrift) { fDrift.redraw(); driftOut(); }
 }
 const fPvt = CK.frame('pvt', {height: W => (W < 600 ? 300 : 360), label: 'Board power against die temperature, one dot per second', draw: f => {
   const W = f.W, H = f.H, L = 42, R = 14, T = 16, B = 36;
@@ -307,6 +310,68 @@ const fPvt = CK.frame('pvt', {height: W => (W < 600 ? 300 : 360), label: 'Board 
 }});
 frames.push(fPvt);
 pvtOut();
+
+/* ---------- §2 bullet 1: the busy drift on each card, with its uncertainty ---------- */
+// context.busy_drift_cards: per card, the mean slope over its strict Horace runs (w_per_c), the runs' sd, the standard
+// error of the mean, the run count and the die temperatures. Cards come from the data's keys, in the registry's order,
+// with the registry's colour and mark, so a card added to the data appears with no change here.
+const BD = CX.busy_drift_cards || {};
+const DCARDS = CK.cardsIn(BD).filter(c => BD[c] && isFinite(BD[c].w_per_c));
+const two = c => 2 * (BD[c].se || 0);
+const halo = t => { Object.assign(t.style, {paintOrder: 'stroke', stroke: 'var(--page)', strokeWidth: '4px', strokeLinejoin: 'round'}); return t; };
+const driftRefs = () => {
+  const fit = fitOf(PV.from, PV.dropGaps).board.b, lw = lawSlope(80);
+  return [{key: 'law', v: lw, text: `idle law at 80 °C: ${num(lw, 2)}`, color: 'var(--ink)', dash: '5 4', row: 0},
+    {key: 'fit', v: fit, text: `this session's matmul fit: ${num(fit, 2)}`, color: 'var(--ink-2)', dash: null, row: 1}];
+};
+CK.legend('drift-leg', CK.cardLegend(DCARDS).concat([
+  {key: 'fit', label: 'matmul fit, this session (aifoundry2)', mark: 'line', color: 'var(--ink-2)'},
+  {key: 'law', label: 'idle law’s slope at 80 °C (aifoundry2)', mark: 'dash', color: 'var(--ink)'}]));
+const driftRead = CK.readout('drift-out');
+function driftOut() {
+  const r = driftRefs();
+  driftRead.set(DCARDS.map(c => `${CK.card(c).label}: <b>${num(BD[c].w_per_c, 2)} W/°C</b> ` +
+    `(±${num(two(c), 2)} at 2 se; ${num(BD[c].runs, 0)} runs at ${wholeRange(BD[c].temp_c[0], BD[c].temp_c[1])} °C)`).join(' · ') +
+    ` · for reference: the matmul fit ${num(r[1].v, 2)}, the idle law at 80 °C ${num(r[0].v, 2)} W/°C.`);
+}
+fDrift = CK.frame('drift', {label: 'Busy drift per card: the mean slope with ±2 standard errors, against the matmul fit and the idle law',
+  height: W => (W < 600 ? 56 : 38) * Math.max(1, DCARDS.length) + 44 + 38, draw: f => {
+    const nar = f.narrow, rowH = nar ? 56 : 38, L = nar ? 12 : 250, R = 52, T = 44, B = 38, yb = f.H - B;
+    const refs = driftRefs();
+    const vals = DCARDS.flatMap(c => [BD[c].w_per_c - two(c), BD[c].w_per_c + two(c)]).concat(refs.map(r => r.v));
+    const lo = Math.min(0, Math.floor(Math.min(...vals) / 0.2) * 0.2), hi = Math.ceil(Math.max(...vals) * 1.05 / 0.2) * 0.2;
+    const x = CK.lin(lo, hi, L, f.W - R), xt = x.ticks(nar ? 4 : 6);
+    const g0 = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+    for (const t of xt) CK.el('line', {x1: x(t), x2: x(t), y1: T - 6, y2: yb, class: 'grid-line'}, g0);
+    CK.axes(f, {x, y: CK.lin(0, 1, yb, T), L, R, T, B, xt, yt: [], grid: false, xfmt: v => num(v, 1), xl: 'W per °C of die temperature (board power, the same work)'});
+    const labs = [];
+    for (const r of refs) {
+      const e = CK.el('line', {x1: x(r.v), x2: x(r.v), y1: T - 6, y2: yb, 'stroke-width': 1.5}, g0);
+      e.style.stroke = r.color; if (r.dash) e.style.strokeDasharray = r.dash;
+      labs.push(CK.txt(g0, x(r.v), 13 + 16 * r.row, r.text, 'lab', 'middle'));
+    }
+    CK.inside(f, labs);
+    const nodes = [];
+    DCARDS.forEach((c, i) => {
+      const v = BD[c], cd = CK.card(c), y = T + rowH * i + (nar ? 34 : rowH / 2), w = v.w_per_c, e2 = two(c);
+      const name = `${cd.label} · ${wholeRange(v.temp_c[0], v.temp_c[1])} °C · ${num(v.runs, 0)} runs`;
+      // on a phone the name sits above its row, where the reference lines cross it: a page-coloured outline stops them short
+      halo(nar ? CK.txt(g0, L, y - 16, name, 'lab') : CK.txt(g0, L - 12, y + 4, name, 'lab', 'end'));
+      const g = CK.el('g', {}, f.svg);
+      if (e2 > 0) {
+        const wl = CK.el('line', {x1: x(w - e2), x2: x(w + e2), y1: y, y2: y, 'stroke-width': 2}, g); wl.style.stroke = cd.color;
+        for (const u of [w - e2, w + e2]) { const cap = CK.el('line', {x1: x(u), x2: x(u), y1: y - 5, y2: y + 5, 'stroke-width': 2}, g); cap.style.stroke = cd.color; }
+      }
+      CK.cardMark(g, c, x(w), y, 5.5);
+      halo(CK.txt(g, x(w + e2) + 8, y + 4, num(w, 2), 'lab-strong'));
+      CK.el('rect', {x: L, y: y - (nar ? 26 : rowH / 2), width: f.W - L - R, height: nar ? 40 : rowH, class: 'ck-hit'}, g);
+      CK.tip(f, g, `<b>${cd.label}</b>: ${num(w, 2)} W/°C, the mean over ${num(v.runs, 0)} strict runs at ${wholeRange(v.temp_c[0], v.temp_c[1])} °C` +
+        `<br>run-to-run sd ${num(v.sd, 2)}, standard error ${num(v.se, 2)}; ±2 standard errors: ${num(w - e2, 2)} to ${num(w + e2, 2)} W/°C`);
+      nodes.push(g);
+    });
+    CK.keynav(f, nodes);
+  }});
+driftOut();
 
 /* ---------- §2 bullet 4: the remainder at the load edges, board power filtered like the rails ---------- */
 const EDGE = {tau: 0, avg: false};

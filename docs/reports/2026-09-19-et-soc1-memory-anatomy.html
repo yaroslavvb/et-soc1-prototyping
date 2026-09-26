@@ -89,6 +89,19 @@ select { font: inherit; font-size: 0.88rem; padding: 5px 8px; border-radius: 8px
 .fn { font-size: 0.8rem; color: var(--ink-2); margin: 4px 0 0; }
 /* the memory-shire counter table: on a phone, drop the address column (PA[8:6] carries the point) and tighten */
 #mstable td.pa code { white-space: nowrap; }
+/* the physical-address decoder (§5) */
+.pa-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 6px 0 2px; font-size: 0.88rem; }
+#pa-in { font: 0.95rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; padding: 5px 8px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--ink); min-height: 34px; width: 12em; max-width: 100%; }
+#pa-in[aria-invalid="true"] { border-color: var(--c2); }
+.pa-presets { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.pa-btn { font: inherit; font-size: 0.82rem; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.pa-presets .pa-btn { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.pa-btn[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.pa-btn:focus-visible, #pa-in:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+#pa-cells .k code { font-size: 0.95em; }
+#pa-cells .v .small { font-weight: 400; }
 @media (max-width: 599px) { #mstable .pa { display: none; } #mstable th, #mstable td { padding: 6px 4px; } }
 /* section anchors and contents list (as in docs/reports/sources/report.template.html) */
 ol li, ul li { margin: 5px 0; }
@@ -137,6 +150,18 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 .ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
 .ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-sortable th[aria-sort] { padding: 0; }
+.ck-sortable th .ck-sort { font: inherit; font-weight: inherit; color: inherit; text-align: inherit; background: none; border: 0;
+  width: 100%; min-height: 32px; padding: inherit; padding: 6px 8px; cursor: pointer; }
+.ck-sortable th .ck-sort::after { content: ' \2195'; color: var(--muted); font-weight: 400; }
+.ck-sortable th[aria-sort="ascending"] .ck-sort::after { content: ' \2191'; color: var(--ink); }
+.ck-sortable th[aria-sort="descending"] .ck-sort::after { content: ' \2193'; color: var(--ink); }
+.ck-sortable th .ck-sort:focus-visible { outline: 2px solid var(--c1); outline-offset: -2px; }
+.ck-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 8px 0 6px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-filter input { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 8px; padding: 4px 8px; min-height: 32px; width: min(260px, 100%); }
+.ck-filter input:focus-visible { outline: 2px solid var(--c1); outline-offset: 1px; }
+.ck-filter-n { color: var(--muted); font-variant-numeric: tabular-nums; }
 /* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
    letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
 th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
@@ -160,7 +185,9 @@ th.num { white-space: normal; }
    Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
    --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
    API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
-   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame. Every mark with a tooltip is reachable from the keyboard. */
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame.
+   Added 26 Sep 2026: sortTable (sortable, filterable tables) and the card registry (cards, card, cardsIn, cardSeg,
+   pick, cardMark, cardLegend): aifoundry2 --c1 dot, aifoundry3 --c2 ring, aifoundry1-c1 --c3 diamond, all cards --ink. Every mark with a tooltip is reachable from the keyboard. */
 window.CK = (function () {
   'use strict';
   const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
@@ -406,10 +433,11 @@ window.CK = (function () {
     const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
     const m = it.mark || 'box';
     const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'diamond' ? el('polygon', {points: '9,0 14,5 9,10 4,5'}, s)
       : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
-    if (m === 'dot' || m === 'box') e.style.fill = c;
+    if (m === 'dot' || m === 'box' || m === 'diamond') e.style.fill = c;
     else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
-    if (m === 'dash') e.style.strokeDasharray = '4 3';
+    if (it.dash) e.style.strokeDasharray = it.dash; else if (m === 'dash') e.style.strokeDasharray = '4 3';
     return s;
   }
   function legend(hostEl, items, o) {
@@ -471,6 +499,7 @@ window.CK = (function () {
     }
     h.appendChild(g); set(api.value, false);
     api.set = v => set(v, true);
+    api.quiet = v => set(v, false);  // show v as selected without calling onChange
     return api;
   }
   function range(hostEl, o) {
@@ -505,6 +534,124 @@ window.CK = (function () {
     return t;
   }
 
+  /* ---- cards: one registry for every page (fixed colour, mark and label per card), a shared card selector and a picker
+     for values shaped {mean, se, n, per_card: {<card>: {mean, se, n}}}. aifoundry1-c0 is kept for old data only: it is
+     excluded from the version-3 campaign (amendment A4) and never offered by cardSeg unless a page passes it. ---- */
+  const CARDS = [
+    {id: 'aifoundry2', short: 'a2', label: 'aifoundry2', color: 'var(--c1)', mark: 'dot'},
+    {id: 'aifoundry3', short: 'a3', label: 'aifoundry3', color: 'var(--c2)', mark: 'ring'},
+    {id: 'aifoundry1-c1', short: 'a1c1', label: 'aifoundry1 card 1', color: 'var(--c3)', mark: 'diamond'},
+    {id: 'aifoundry1-c0', short: 'a1c0', label: 'aifoundry1 card 0', color: 'var(--ref)', mark: 'box'},
+  ];
+  const POOLED = {id: 'pooled', short: 'all', label: 'all cards', color: 'var(--ink)', mark: 'dot'};
+  const cardIndex = {};
+  CARDS.forEach(c => { cardIndex[c.id] = c; cardIndex[c.short] = c; });
+  /* The registry entry for a card id or short name; an unknown card gets --ref and its own name. */
+  function card(id) {
+    if (id === 'pooled' || id === 'all') return POOLED;
+    return cardIndex[id] || {id, short: id, label: id, color: 'var(--ref)', mark: 'box'};
+  }
+  /* The cards present in an object's keys (or a list), in registry order, then any others in their order. */
+  function cardsIn(keysOrObj) {
+    const ks = Array.isArray(keysOrObj) ? keysOrObj : Object.keys(keysOrObj || {});
+    const norm = ks.map(k => (cardIndex[k] ? cardIndex[k].id : k));
+    return CARDS.map(c => c.id).filter(id => norm.includes(id)).concat(norm.filter(k => !cardIndex[k]));
+  }
+  /* A card selector on bus('card'): options are o.cards (default: every registered card but aifoundry1-c0), with
+     "all cards" first when o.pooled. Every cardSeg on a page follows the others. */
+  function cardSeg(hostEl, o) {
+    o = o || {};
+    const ids = (o.cards || CARDS.filter(c => c.id !== 'aifoundry1-c0').map(c => c.id)).map(k => card(k).id);
+    const opts = (o.pooled ? [['pooled', o.pooledLabel || POOLED.label]] : []).concat(ids.map(id => [id, card(id).label]));
+    const b = bus(o.bus || 'card');
+    const start = b.value != null && opts.some(x => x[0] === b.value) ? b.value : (o.value || opts[0][0]);
+    const api = seg(hostEl, {label: o.label == null ? 'Card' : o.label, options: opts, value: start,
+      onChange: v => { b.emit(v, api); if (o.onChange) o.onChange(v); }});
+    b.on((v, from) => { if (from !== api && opts.some(x => x[0] === v) && api.value !== v) { api.quiet(v); if (o.onChange) o.onChange(v); } });
+    return api;
+  }
+  /* {mean, se, n, card} of v for a card ('pooled' = v itself), or null when the card has no value (never a zero). */
+  function pick(v, id) {
+    if (v == null) return null;
+    if (typeof v === 'number') return {mean: v, se: null, n: null, card: 'pooled'};
+    const c = id == null || id === 'pooled' || id === 'all' ? null : card(id).id;
+    const src = c == null ? v : (v.per_card || {})[c];
+    if (src == null) return null;
+    const m = typeof src === 'number' ? src : src.mean;
+    if (m == null || !isFinite(m)) return null;
+    return {mean: m, se: typeof src === 'number' ? null : (src.se == null ? null : src.se), n: typeof src === 'number' ? null : (src.n == null ? null : src.n), card: c || 'pooled'};
+  }
+  /* A card's mark at (x, y) in an SVG group: dot, ring, diamond or box, in the card's colour (or colour, if given). */
+  function cardMark(g, id, x, y, r, colour) {
+    const c = Object.assign({}, card(id)), R = r || 4;
+    if (colour) c.color = colour;
+    let e;
+    if (c.mark === 'diamond') e = el('polygon', {points: `${x},${y - R * 1.25} ${x + R * 1.25},${y} ${x},${y + R * 1.25} ${x - R * 1.25},${y}`}, g);
+    else if (c.mark === 'box') e = el('rect', {x: x - R, y: y - R, width: 2 * R, height: 2 * R}, g);
+    else e = el('circle', {cx: x, cy: y, r: c.mark === 'ring' ? R - 0.5 : R}, g);
+    if (c.mark === 'ring') { e.style.fill = 'var(--surface)'; e.style.stroke = c.color; e.style.strokeWidth = '2'; }
+    else e.style.fill = c.color;
+    return e;
+  }
+  /* Legend items for a list of cards (for legend()). */
+  const cardLegend = ids => ids.map(id => { const c = card(id); return {key: c.id, label: c.label, color: c.color, mark: c.mark}; });
+
+  /* ---- a sortable, filterable table: click a header to sort (aria-sort), numbers parsed with the true minus, thin
+     spaces and thousands commas; o.filter adds a text box that hides rows not containing it. Rows keep their DOM
+     nodes, so any listeners on them survive. A header with data-nosort is left alone. ---- */
+  function cellValue(td) {
+    const raw = (td.getAttribute('data-sort') != null ? td.getAttribute('data-sort') : td.textContent).trim();
+    const t = raw.replace(/−/g, '-').replace(/[   ,]/g, '').replace(/^[~≈<>≤≥]\s*/, '');
+    const m = t.match(/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?/i);
+    return m && (t.length === m[0].length || /^[\s%×x°a-zA-Zµ/()]/.test(t.slice(m[0].length))) ? {n: parseFloat(m[0])} : {s: raw.toLowerCase()};
+  }
+  function sortTable(table, o) {
+    o = o || {};
+    const t = $(table), tb = t.tBodies[0], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (!tb || !hr) return null;
+    const orig = [...tb.rows];
+    let col = -1, dir = 0;
+    const heads = [...hr.cells];
+    let k = 0;
+    const colOf = heads.map(h => { const c = k; k += h.colSpan || 1; return c; });
+    heads.forEach((h, i) => {
+      if (h.hasAttribute('data-nosort') || (h.colSpan || 1) > 1) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ck-sort';
+      while (h.firstChild) b.appendChild(h.firstChild);
+      h.appendChild(b); h.setAttribute('aria-sort', 'none');
+      b.addEventListener('click', () => {
+        dir = col === colOf[i] ? (dir === 1 ? -1 : dir === -1 ? 0 : 1) : 1; col = colOf[i];
+        heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none'));
+        if (dir) h.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
+        const rows = dir ? [...orig].sort((a, b2) => {
+          const ca = a.cells[col], cb = b2.cells[col];
+          if (!ca || !cb) return 0;
+          const va = cellValue(ca), vb = cellValue(cb);
+          if (va.n != null && vb.n != null) return dir * (va.n - vb.n);
+          if (va.n != null) return -1;
+          if (vb.n != null) return 1;
+          return dir * va.s.localeCompare(vb.s);
+        }) : orig;
+        rows.forEach(r => tb.appendChild(r));
+      });
+    });
+    if (o.filter) {
+      const w = document.createElement('div'); w.className = 'ck-filter';
+      const id = 'ck-f' + (++uid), lab = document.createElement('label'), inp = document.createElement('input');
+      lab.htmlFor = id; lab.textContent = o.filterLabel || 'Filter rows'; inp.id = id; inp.type = 'search';
+      const cnt = document.createElement('span'); cnt.className = 'ck-filter-n'; cnt.setAttribute('aria-live', 'polite');
+      inp.addEventListener('input', () => {
+        const q = inp.value.trim().toLowerCase(); let n = 0;
+        orig.forEach(r => { const on = !q || r.textContent.toLowerCase().includes(q); r.classList.toggle('ck-hidden', !on); if (on) n++; });
+        cnt.textContent = q ? `${n} of ${orig.length} rows` : '';
+      });
+      w.append(lab, inp, cnt);
+      const ref = t.closest('.wide, .scroll, .ck-table-wrap') || t; ref.parentNode.insertBefore(w, ref);
+    }
+    t.classList.add('ck-sortable');
+    return {table: t, reset() { col = -1; dir = 0; heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none')); orig.forEach(r => tb.appendChild(r)); }};
+  }
+
   /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
   const SERIES = [1, 2, 3, 4, 5, 7];
   const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
@@ -530,7 +677,8 @@ window.CK = (function () {
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
-    stackTable, reduced, ramp, rampInk, color, hide: f => hide(f, true)};
+    stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
 })();
 </script>
 <!-- chartkit:end -->
@@ -727,6 +875,22 @@ saves about 12 when it shares A's row, and costs nothing extra in another bank.<
 <div class="ck-controls"><span id="bits-mode"></span></div>
 <div id="bits-legend"></div>
 <div class="chart" id="bits"></div>
+<div class="card" id="pa-decoder" style="margin-top:16px">
+  <div class="chart-title">Decode a physical address</div>
+  <p class="small" style="margin:0 0 6px">Which bits of an address pick each part of its path, as this page reads
+  them: the L3 home shire, the memory shire, and the bank, column and row inside it. Hover, focus or tap a bit for
+  what flipping it cost in the sweep above; click it, or press Enter, to flip it.</p>
+  <div class="pa-controls">
+    <label for="pa-in">Physical address</label>
+    <input id="pa-in" type="text" autocomplete="off" spellcheck="false" aria-describedby="pa-err">
+    <span class="pa-presets" id="pa-presets" role="group" aria-label="Example addresses"></span>
+  </div>
+  <div class="fn" id="pa-err" aria-live="polite"></div>
+  <div id="pa-legend"></div>
+  <div class="chart" id="pa-strip"></div>
+  <div class="cells" id="pa-cells"></div>
+  <div class="pa-controls" style="margin-top:10px"><button type="button" class="pa-btn" id="pa-trace"></button><div class="small" id="pa-trace-out" aria-live="polite"></div></div>
+</div>
 
 <h3 id="refresh-caught-in-the-act">Refresh, caught in the act</h3>
 <p>Loading the same line from DRAM 19,000 times at random intervals, and folding the timestamps on a period of
@@ -1283,6 +1447,8 @@ function sync() {
   meshF = CK.frame('mesh', {minW: 260, maxW: 360, label: 'Map of the compute shires and memory shires: pick the requesting shire and the L3 home shire', height: W => 8 * Math.floor(Math.min(56, (W - 8) / 6)) + 8, draw: drawMesh});
   flameF = CK.frame('flame', {minW: 260, maxW: 900, label: 'The load’s latency, part by part', height: 86, draw: drawFlame});
   stripF = CK.frame('mstrip', {minW: 260, maxW: 900, label: 'This path among the measured loads', height: () => (st.lvl === 'L1' || st.lvl === 'L2' ? 30 : 140), draw: drawStrip});
+  // §5's address decoder can hand its home shire (PA[10:6]) to this explorer
+  CK.bus('l3-home').on(h => { if (MESH[h] !== undefined) { st.home = h; sync(); } });
   sync();
 })();
 
@@ -1407,6 +1573,128 @@ CK.frame('modelerr', {label: 'Measured DRAM latency minus the model, per line', 
   }});
   CK.seg('bits-mode', {label: 'Show', options: [['ab', 'issued together'], ['after', 'one after the other']], value: mode, onChange: v => { mode = v; legend(); title(); F.redraw(); }});
   legend(); title();
+})();
+
+/* ---------- 5a'. decode a physical address ---------- */
+(function () {
+  // The fields and their bits as this page states them: a line is 64 bytes; PA[10:6] the L3 home shire and PA[8:6]
+  // the memory shire (§1, §3, §4); bank PA[12:10], column PA[17:13], row from PA[18] (§5); bit 9 the channel (the
+  // bit chart above). The strip stops at the sweep's highest bit (the runs' arena is 1 GB, so its offsets are PA bits).
+  const TOP = Math.max(...Object.keys(D.bits).map(Number));
+  const FIELDS = [
+    {key: 'byte', name: 'byte in the 64-byte line', short: 'byte', lo: 0, hi: 5, lane: 0, col: 'ref'},
+    {key: 'home', name: 'L3 home shire', short: 'home', lo: 6, hi: 10, lane: 0, col: 'c7'},
+    {key: 'ms', name: 'memory shire', short: '', lo: 6, hi: 8, lane: 1, col: 'c4'},
+    {key: 'ch', name: 'channel', short: 'ch', lo: 9, hi: 9, lane: 1, col: 'c5'},
+    {key: 'bank', name: 'bank', short: 'bank', lo: 10, hi: 12, lane: 2, col: 'c1'},
+    {key: 'col', name: 'column', short: 'col', lo: 13, hi: 17, lane: 2, col: 'c3'},
+    {key: 'row', name: 'row', short: 'row', lo: 18, hi: TOP, lane: 2, col: 'c2'},
+  ];
+  const FK = Object.fromEntries(FIELDS.map(x => [x.key, x]));
+  const pa0 = f => f.lo === f.hi ? `PA[${f.lo}]` : `PA[${f.hi}:${f.lo}]`;
+  const LOW = (1n << BigInt(TOP + 1)) - 1n;
+  const hex = v => '0x' + v.toString(16);
+  const parse = s => { const t = s.trim().replace(/[\s_]/g, '').replace(/^0x/i, ''); return /^[0-9a-f]{1,12}$/i.test(t) ? BigInt('0x' + t) : null; };
+  // examples: the runs' arena base (§10) and the first lines of §4's counter test that fall on different memory shires
+  const PRESETS = ['0x8040000000'], seenMs = new Set();
+  for (const r of D.msmap.rows) if (PRESETS.length < 4 && !seenMs.has(r.ms_bits)) { seenMs.add(r.ms_bits); PRESETS.push(r.pa); }
+  let pa = parse(PRESETS[1] || PRESETS[0]);
+  const low = () => Number(pa & LOW);
+  const bit = b => (low() >>> b) & 1;
+  const val = f => (low() >>> f.lo) & ((1 << (f.hi - f.lo + 1)) - 1);
+  const fieldsOf = b => FIELDS.filter(x => b >= x.lo && b <= x.hi);
+  const effect = b => {
+    const k = fieldsOf(b).map(x => x.key), other = low() ^ (1 << b);
+    if (k.includes('row')) return 'B is in A’s bank, in another row';
+    if (k.includes('col')) return 'B is in A’s row, another column';
+    const p = [];
+    if (k.includes('home')) p.push(`another L3 home (shire ${(other >>> 6) & 31})`);
+    if (k.includes('ms')) p.push(`another memory shire (M${(other >>> 6) & 7})`);
+    if (k.includes('ch')) p.push('another channel');
+    if (k.includes('bank')) p.push(`another bank (${(other >>> 10) & 7})`);
+    return 'B has ' + p.join(', ');
+  };
+  const tipOf = b => {
+    const d = D.bits[b], fs = fieldsOf(b).map(x => `${x.name} (${x.key === 'row' ? 'from PA[18]' : pa0(x)})`).join(' and ');
+    let h = `<b>PA[${b}] = ${bit(b)}</b> · ${fs}`;
+    if (!d) return h + '<br>Flipping it stays inside the same 64-byte line, so the sweep did not test it.';
+    h += `<br>Flipped, B = <b>${hex(pa ^ (1n << BigInt(b)))}</b>: ${effect(b)}.` +
+      `<br>Issued together with A, B took <b>${f0(d.ab_med)} cycles</b> (median; 10–90% ${f0(d.ab_p10)}–${f0(d.ab_p90)}).` +
+      `<br>Issued after A: <b>${sgn(d.b_minus_b0_med)} cycles</b> against B alone (median; middle half ${sgn(d.b_minus_b0_p25)} to ${sgn(d.b_minus_b0_p75)}).`;
+    return h + '<br><span class="small">Click or Enter flips it.</span>';
+  };
+  CK.legend('pa-legend', FIELDS.map(x => ({key: x.key, label: `${x.name} ${x.key === 'row' ? 'from PA[18]' : pa0(x)}`, mark: 'box', color: `var(--${x.col})`})));
+  // wide: one line of bits TOP..0; narrow: two lines, split between the column and the bank so no field is cut
+  const blocks = W => (W >= 600 ? [[TOP, 0]] : [[TOP, FK.col.lo], [FK.col.lo - 1, 0]]);
+  const lanesIn = ([hi, lo]) => [...new Set(FIELDS.filter(x => x.lo <= hi && x.hi >= lo).map(x => x.lane))].sort();
+  const IDX = 16, CELL = 26, LANE = 21, GAP = 12;
+  const blockH = bl => IDX + CELL + 5 + lanesIn(bl).length * LANE;
+  const F = CK.frame('pa-strip', {minW: 280, maxW: 900, label: 'The bits of the physical address, grouped by the field each one selects',
+    height: W => blocks(W).reduce((s, bl) => s + blockH(bl), 0) + GAP * (blocks(W).length - 1) + 4, draw: f => {
+      const BL = blocks(f.W), n = Math.max(...BL.map(([hi, lo]) => hi - lo + 1));
+      const cw = Math.floor(Math.min(28, (f.W - 4) / n)), x0 = 2, nodes = [];
+      let y = 2;
+      for (const bl of BL) {
+        const [hi, lo] = bl, X = b => x0 + (hi - b) * cw;
+        for (let b = hi; b >= lo; b--) {
+          txt(f.svg, X(b) + cw / 2, y + 12, String(b), 'tick', 'middle').setAttribute('aria-hidden', 'true');
+          const g = el('g', {}, f.svg), v = bit(b);
+          const r = el('rect', {x: X(b) + 1, y: y + IDX, width: cw - 2, height: CELL, rx: 3, 'stroke-width': 1}, g);
+          r.style.fill = v ? 'var(--ink)' : 'var(--surface)'; r.style.stroke = 'var(--axis)';
+          txt(g, X(b) + cw / 2, y + IDX + 17, String(v), 'lab-strong', 'middle').style.fill = v ? 'var(--page)' : 'var(--ink)';
+          CK.tip(f, g, () => tipOf(b));
+          let kind = '';
+          g.addEventListener('pointerdown', ev => { kind = ev.pointerType; });
+          g.addEventListener('click', () => { if (kind !== 'touch') flip(b); });  // a tap shows the tooltip only
+          g._bit = b; nodes.push(g);
+        }
+        const lanes = lanesIn(bl), ly = y + IDX + CELL + 5;
+        for (const x of FIELDS) {
+          const a = Math.min(x.hi, hi), z = Math.max(x.lo, lo);
+          if (a < z) continue;
+          const yy = ly + lanes.indexOf(x.lane) * LANE, w = (a - z + 1) * cw - 2, g = el('g', {'aria-hidden': 'true'}, f.svg);
+          const r = el('rect', {x: X(a) + 1, y: yy, width: w, height: LANE - 3, rx: 3, 'stroke-width': 1.5}, g);
+          r.style.fill = soft(`var(--${x.col})`, 30); r.style.stroke = `var(--${x.col})`;
+          const v = x.key === 'ms' ? 'M' + val(x) : String(val(x)), long = x.key === 'ms' ? v : `${x.short} ${v}`;
+          const lab = w >= long.length * 7 + 6 ? long : w >= v.length * 7 + 4 ? v : '';
+          if (lab) txt(g, X(a) + 1 + w / 2, yy + 13, lab, 'lab-strong', 'middle');
+        }
+        y += blockH(bl) + GAP;
+      }
+      CK.keynav(f, nodes, {onEnter: n => flip(n._bit)});
+    }});
+  const cells = $('pa-cells'), inp = $('pa-in'), err = $('pa-err'), btn = $('pa-trace'), out = $('pa-trace-out');
+  const presetBtns = PRESETS.map(p => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'pa-btn'; b.textContent = p;
+    b.title = p === PRESETS[0] ? 'the arena base of this page’s runs' : 'a line from §4’s memory-shire counter test';
+    b.addEventListener('click', () => { inp.value = p; set(parse(p)); });
+    $('pa-presets').appendChild(b); return b;
+  });
+  function show() {
+    const h = val(FK.home), l3 = D.l3[h], mb = D.memByHome[h], up = pa >> BigInt(TOP + 1);
+    const rows = FIELDS.map(x => [`${x.name[0].toUpperCase() + x.name.slice(1)}${x.key === 'row' ? ', from PA[18]' : ''} · <code>${x.key === 'row' ? `PA[${TOP}:18]` : pa0(x)}</code>`,
+      x.key === 'ms' ? `M${val(x)} <span class="small">(the home’s low three bits)</span>` : x.key === 'byte' ? `${val(x)} <span class="small">(0x${val(x).toString(16)})</span>` : String(val(x))]);
+    if (up) rows.push([`Bits above PA[${TOP}] <span class="small">(outside the sweep)</span>`, hex(up)]);
+    if (l3 && mb) rows.push([`Measured from shire 0 for home shire ${h} (§3, §4): the median over its ${l3.n} lines of an L3 hit, and of each line’s fastest of three DRAM loads`,
+      `L3 hit ${f0(l3.med)} cycles · DRAM load ${f0(mb.fast_med)} cycles <span class="small">(model ${110 + 12 * l3.hops} and ${f0(mb.model)})</span>`, 'full']);
+    cells.innerHTML = rows.map(([k, v, cls]) => `<div class="card${cls ? ' ' + cls : ''}"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+    presetBtns.forEach((b, i) => b.setAttribute('aria-pressed', String(parse(PRESETS[i]) === pa)));
+    btn.textContent = `Trace a load to home shire ${h} in §1`;
+  }
+  function set(v) {
+    if (v == null) { inp.setAttribute('aria-invalid', 'true'); err.textContent = 'Type a hexadecimal address of up to 12 digits, such as ' + PRESETS[0] + '.'; return; }
+    inp.removeAttribute('aria-invalid'); err.textContent = '';
+    pa = v; out.textContent = ''; show(); F.redraw();
+  }
+  function flip(b) { pa ^= 1n << BigInt(b); inp.value = hex(pa); set(pa); }
+  inp.value = hex(pa);
+  inp.addEventListener('input', () => set(parse(inp.value)));
+  btn.addEventListener('click', () => {
+    const h = val(FK.home);
+    CK.bus('l3-home').emit(h, 'decoder');
+    out.innerHTML = `§1’s explorer now has home shire ${h}. <a href="#trace-one-load">Go to §1</a>`;
+  });
+  show();
 })();
 
 /* ---------- 5b. refresh ---------- */
@@ -1541,12 +1829,14 @@ CK.frame('modelerr', {label: 'Measured DRAM latency minus the model, per line', 
   // the numbers, for reading without the chart
   const t1 = $('rowlife-table');
   t1.innerHTML = '<thead><tr><th>Idle cycles (refresh series)</th><th class="num">no refresh in between: hits / loads</th><th class="num">a refresh in between: hits / loads</th></tr></thead><tbody>' +
-    RL.map(r => `<tr><td>${f0(r.gap)}–${f0(r.gap + 249)}</td><td class="num">${r.n_no_refresh ? `${f0(r.hit_no_refresh)} / ${f0(r.n_no_refresh)} (${pc(r.hit_no_refresh / r.n_no_refresh)})` : '—'}</td>` +
-      `<td class="num">${r.n_refresh ? `${f0(r.hit_refresh)} / ${f0(r.n_refresh)} (${pc(r.hit_refresh / r.n_refresh)})` : '—'}</td></tr>`).join('') + '</tbody>';
+    RL.map(r => `<tr><td data-sort="${r.gap}">${f0(r.gap)}–${f0(r.gap + 249)}</td><td class="num"${r.n_no_refresh ? ` data-sort="${r.hit_no_refresh / r.n_no_refresh}"` : ''}>${r.n_no_refresh ? `${f0(r.hit_no_refresh)} / ${f0(r.n_no_refresh)} (${pc(r.hit_no_refresh / r.n_no_refresh)})` : '—'}</td>` +
+      `<td class="num"${r.n_refresh ? ` data-sort="${r.hit_refresh / r.n_refresh}"` : ''}>${r.n_refresh ? `${f0(r.hit_refresh)} / ${f0(r.n_refresh)} (${pc(r.hit_refresh / r.n_refresh)})` : '—'}</td></tr>`).join('') + '</tbody>';
   const t2 = $('pto-table');
   t2.innerHTML = '<thead><tr><th>Set delay, cycles (pairs in one random row)</th><th class="num">row hits / pairs</th><th class="num">refresh alone predicts</th></tr></thead><tbody>' +
-    D.pto.map(p => `<tr><td>${f0(p.delay)}</td><td class="num">${p.hits} / ${p.n} (${pc(p.hit)})</td><td class="num">${pc(p.refresh_model_loop)}</td></tr>`).join('') + '</tbody>';
+    D.pto.map(p => `<tr><td>${f0(p.delay)}</td><td class="num" data-sort="${p.hit}">${p.hits} / ${p.n} (${pc(p.hit)})</td><td class="num">${pc(p.refresh_model_loop)}</td></tr>`).join('') + '</tbody>';
   CK.stackTable(t1); CK.stackTable(t2);
+  // sortable: a share sorts by its percentage, not by its hit count
+  CK.sortTable(t1); CK.sortTable(t2);
 })();
 
 /* ---------- 6. energy ---------- */
@@ -1627,8 +1917,8 @@ CK.frame('modelerr', {label: 'Measured DRAM latency minus the model, per line', 
   legend(); texts();
   const t = $('energy-table');
   t.innerHTML = '<thead><tr><th>Pattern (1,024 minions)</th><th class="num">cycles/load (mean / slowest minion)</th><th class="num">loads/s</th><th class="num">cores</th><th class="num">SRAM</th><th class="num">NoC</th><th class="num">rest</th><th class="num">total (trace)</th><th class="num">total (host log)</th><th class="num">pJ per byte of line (trace / host)</th></tr></thead><tbody>' +
-    pats.map(([k, n]) => { const e = D.energy[k]; return `<tr><td>${n}</td><td class="num">${f1(e.cpl)} / ${f1(e.cpl_slow)}</td><td class="num">${f2(e.rate / 1e9)} G</td><td class="num">${f0(e.minion)}</td><td class="num">${f0(e.sram)}</td><td class="num">${f0(e.noc)}</td><td class="num">${f0(e.rest)}</td><td class="num"><b>${f0(e.sp_total)}</b></td><td class="num">${f0(e.host_total)}</td><td class="num">${k === 'l1' ? '—' : f1(e.sp_total / 64) + ' / ' + f1(e.host_total / 64)}</td></tr>`; }).join('') + '</tbody>';
-  CK.stackTable(t);
+    pats.map(([k, n]) => { const e = D.energy[k]; return `<tr><td>${n}</td><td class="num" data-sort="${e.cpl}">${f1(e.cpl)} / ${f1(e.cpl_slow)}</td><td class="num">${f2(e.rate / 1e9)} G</td><td class="num">${f0(e.minion)}</td><td class="num">${f0(e.sram)}</td><td class="num">${f0(e.noc)}</td><td class="num">${f0(e.rest)}</td><td class="num"><b>${f0(e.sp_total)}</b></td><td class="num">${f0(e.host_total)}</td><td class="num">${k === 'l1' ? '—' : f1(e.sp_total / 64) + ' / ' + f1(e.host_total / 64)}</td></tr>`; }).join('') + '</tbody>';
+  CK.stackTable(t); CK.sortTable(t);
 })();
 
 /* ---------- 7. timer ---------- */
