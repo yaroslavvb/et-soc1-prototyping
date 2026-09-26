@@ -69,6 +69,86 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
    'The TensorLoad rows leave out an energy per byte: use the energy manual’s two-card values (Memory, in section 4).';}
 })();
 
+/* ---------- §1 as a ratio chart: A100 ÷ ET-SoC-1 for every metric the facts give on both chips ----------
+   Each bar's length is the factor between the two chips on a log scale: to the right where the A100's value is the
+   larger, to the left where it is the smaller. Colour gives the kind of metric (size, power, throughput, energy per
+   FLOP); no bar claims a winner, because lower power is the card's premise, not a virtue on its own. A metric with two ET values (idle at 62 and 80 °C, fp32 and fp16, the A100's
+   clock range) is a solid bar to the smaller factor and a light one on to the larger. Every ratio is computed here from
+   D.facts (and, for fp16, the same ablation row the table uses), and each tooltip shows its inputs. */
+(function(){const A=D.facts.a100,E=D.facts.et,num=CK.fmt.num,h16=C.fp16_randn;
+ const has=(...v)=>v.every(x=>x!=null&&isFinite(x)&&x>0);
+ const fx=v=>num(v,v>=10?0:1)+'×',rng=(a,b)=>b==null||fx(a)===fx(b)?fx(a):num(a,a>=10?0:1)+'–'+fx(b);
+ const ET='ET-SoC-1 card',COL={size:'var(--ref)',power:'var(--c1)',thru:'var(--c4)',eff:'var(--c3)'};
+ const tf16=h16?2*h16.per_s/1e12:null,mhzLo=has(A.tflops,A.mhz)?Math.round(A.tflops/312*A.mhz/10)*10:null;
+ /* each metric: name, ratio(s) A100 ÷ ET (one value or [lo, hi]), and its kind: size, power, throughput (thru) or energy per FLOP (eff) */
+ const M=[];
+ const add=(o,ok)=>{if(ok)M.push(o);};
+ add({name:'Transistors',r:[A.transistors_b/E.transistors_b],kind:'size',
+  tip:`A100 ${num(A.transistors_b)} billion; ${ET} over ${num(E.transistors_b)} billion (Esperanto: “over 24 billion”), so the A100 has at most ${fx(A.transistors_b/E.transistors_b)} as many`},has(A.transistors_b,E.transistors_b));
+ add({name:'Die area',r:[A.die_mm2/E.die_mm2],kind:'size',
+  tip:`A100 ${num(A.die_mm2,0)} mm²; ${ET} ${num(E.die_mm2,0)} mm²: ratio ${num(A.die_mm2/E.die_mm2,2)}`},has(A.die_mm2,E.die_mm2));
+ add({name:'Board power, matmul',low:'board power under a matmul',r:[A.watts/E.watts],kind:'power',
+  tip:`A100 ${num(A.watts,0)} W (bf16, Horace He’s run at a 330 W limit); ${ET} ${num(E.watts,1)} W (fp32 random data, aifoundry2, 80 °C): ratio ${num(A.watts/E.watts,2)}`},has(A.watts,E.watts));
+ const idl=[E.idle80,E.idle62].filter(v=>has(v));
+ add({name:'Idle power',r:idl.map(v=>A.idle/v).sort((a,b)=>a-b),kind:'power',
+  tip:`A100 ${num(A.idle,0)} W; ${ET} `+[[E.idle80,80],[E.idle62,62]].filter(q=>has(q[0])).map(q=>`${num(q[0],1)} W at ${q[1]} °C`).join(', ')+
+   `: ratio ${idl.map(v=>A.idle/v).sort((a,b)=>a-b).map(v=>num(v,2)).join(' to ')}`},has(A.idle)&&idl.length>0);
+ add({name:'Power per transistor',r:[(A.watts/A.transistors_b)/(E.watts/E.transistors_b)],kind:'power',
+  tip:`A100 ${num(A.watts,0)} W ÷ ${num(A.transistors_b)} billion = ${num(A.watts/A.transistors_b,1)} nW; ${ET} ${num(E.watts,1)} W ÷ ${num(E.transistors_b)} billion = ${num(E.watts/E.transistors_b,1)} nW`},has(A.watts,A.transistors_b,E.watts,E.transistors_b));
+ add({name:'Power per mm² (W/mm²)',low:'power per mm²',r:[(A.watts/A.die_mm2)/(E.watts/E.die_mm2)],kind:'power',
+  tip:`A100 ${num(A.watts,0)} W ÷ ${num(A.die_mm2,0)} mm² = ${num(A.watts/A.die_mm2,2)} W/mm²; ${ET} ${num(E.watts,1)} W ÷ ${num(E.die_mm2,0)} mm² = ${num(E.watts/E.die_mm2,2)} W/mm²`},has(A.watts,A.die_mm2,E.watts,E.die_mm2));
+ const v2f=m=>(A.volts/E.volts)**2*m/E.mhz;
+ add({name:'V² × f',low:'V² × f',r:[v2f(mhzLo),v2f(A.mhz)],kind:'power',
+  tip:`(${num(A.volts,2)} V ÷ ${num(E.volts,2)} V)² × (${num(mhzLo,0)} to ${num(A.mhz,0)} MHz ÷ ${num(E.mhz,0)} MHz). Neither the A100’s voltage nor its clock under the cap is published: about ${num(A.volts,2)} V, and ${num(mhzLo,0)} MHz is the least clock that gives ${num(A.tflops,0)} of the 312 peak TFLOPS`},has(A.volts,E.volts,A.mhz,E.mhz,mhzLo));
+ const pjA=A.watts/A.tflops,pj32=E.watts/E.tflops,pj16=h16&&tf16?h16.p80/tf16:null;
+ add({name:'Energy per FLOP',low:'energy per FLOP',r:[pj32,pj16].filter(v=>has(v)).map(v=>pjA/v).sort((a,b)=>a-b),kind:'eff',
+  tip:`A100 ${num(A.watts,0)} W ÷ ${num(A.tflops,0)} TFLOPS = ${num(pjA,2)} pJ (bf16); ${ET} ${num(E.watts,1)} W ÷ ${num(E.tflops,2)} TFLOPS = ${num(pj32,2)} pJ (fp32)`+
+   (pj16?`, ${num(h16.p80,1)} W ÷ ${num(tf16,1)} TFLOPS = ${num(pj16,2)} pJ (fp16)`:'')},has(A.watts,A.tflops,E.watts,E.tflops));
+ add({name:'Matmul TFLOPS',low:'matmul TFLOPS',r:[A.tflops/E.tflops,tf16?A.tflops/tf16:null].filter(v=>has(v)).sort((a,b)=>a-b),kind:'thru',
+  tip:`A100 ${num(A.tflops,0)} TFLOPS (bf16); ${ET} ${num(E.tflops,2)} TFLOPS (fp32)`+(tf16?`, ${num(tf16,1)} TFLOPS (fp16)`:'')},has(A.tflops,E.tflops));
+ add({name:'Memory bandwidth',r:[A.mem_gbs/E.mem_gbs],kind:'thru',
+  tip:`A100 HBM2 ${num(A.mem_gbs,0)} GB/s (40 GB); ${ET} LPDDR4x ${num(E.mem_gbs,0)} GB/s (the datasheet maximum)`},has(A.mem_gbs,E.mem_gbs));
+ /* which chip's value is the larger, and by how much: a factor ≥ 1 and a side (+1: the A100's, −1: the ET card's) */
+ for(const m of M){const up=m.r[0]>=1;   /* the A100's value is the larger one */
+  m.f=m.r.map(v=>(up?v:1/v)).sort((a,b)=>a-b);
+  m.up=up;m.side=up?1:-1;m.col=COL[m.kind];
+  const fr=rng(m.f[0],m.f[m.f.length-1]);
+  m.say=`the ${up?'A100':ET}’s is ${fr} the ${up?ET+'’s':'A100’s'}`;}
+ CK.legend('ratio-leg',[{key:'s',label:'size',mark:'box',color:COL.size},{key:'p',label:'power',mark:'box',color:COL.power},
+  {key:'t',label:'throughput',mark:'box',color:COL.thru},{key:'e',label:'energy per FLOP',mark:'box',color:COL.eff}]);
+ const lab=m=>rng(m.f[0],m.f[m.f.length-1]);
+ CK.frame('ratio',{height:W=>(W<600?44:32)*M.length+70,minW:300,maxW:760,label:'Ratio of the A100 to the ET-SoC-1 card for each metric, on a log scale: right where the A100’s value is larger, left where it is smaller',draw:ff=>{
+  const nar=ff.narrow,W=ff.W,H=ff.H,svg=ff.svg,LW=nar?8:178,RP=8,T=34,B=36,rh=nar?44:32,bh=14,nodes=[];
+  const cw=s=>7*s.length+10;   /* room for a factor label at a bar's end */
+  const Lmax=Math.max(1.5,...M.filter(m=>m.side<0).map(m=>m.f[m.f.length-1])),Rmax=Math.max(1.5,...M.filter(m=>m.side>0).map(m=>m.f[m.f.length-1]));
+  const padL=Math.max(20,...M.filter(m=>m.side<0).map(m=>cw(lab(m)))),padR=Math.max(20,...M.filter(m=>m.side>0).map(m=>cw(lab(m))));
+  const k=(W-LW-RP-padL-padR)/(Math.log10(Lmax)+Math.log10(Rmax)),cx=LW+padL+k*Math.log10(Lmax);
+  const X=(f,side)=>cx+side*k*Math.log10(f);
+  /* grid: parity in the middle, then 2×, 5×, 10×, … on each side while they fit */
+  const g=CK.el('g',{'aria-hidden':'true'},svg);
+  for(const side of [-1,1])for(const t of [2,5,10,20,50,100])if(t<=(side<0?Lmax:Rmax)*1.02){const xx=X(t,side);
+   CK.el('line',{x1:xx,x2:xx,y1:T,y2:H-B,class:'grid-line'},g);CK.txt(g,xx,H-B+16,t+'×','tick','middle');}
+  CK.el('line',{x1:cx,x2:cx,y1:T-6,y2:H-B,stroke:'var(--axis)','stroke-width':1.5},g);
+  CK.txt(g,cx,H-B+16,'1×','tick','middle');
+  CK.txt(g,(LW+W-RP)/2,H-6,nar?'factor between the chips (log)':'factor between the two chips (log scale); 1× is parity','lab','middle');
+  CK.txt(g,cx-8,T-12,'← A100 smaller','lab-strong','end');CK.txt(g,cx+8,T-12,'A100 larger →','lab-strong','start');
+  M.forEach((m,i)=>{const y0=T+i*rh,yc=nar?y0+29:y0+rh/2,gr=CK.el('g',{},svg);
+   CK.txt(gr,nar?LW:LW-10,nar?y0+13:yc+4,m.name,'lab',nar?'start':'end');
+   const x0=X(1,m.side),x1=X(m.f[0],m.side),x2=X(m.f[m.f.length-1],m.side);
+   const rect=(a,b,op)=>CK.el('rect',{x:Math.min(a,b),y:yc-bh/2,width:Math.max(1.5,Math.abs(b-a)),height:bh,rx:2,fill:m.col,opacity:op},gr);
+   rect(x0,x1,1);if(m.f.length>1&&x2!==x1)rect(x1,x2,0.4);
+   CK.txt(gr,x2+m.side*5,yc+4,lab(m),'lab-strong',m.side>0?'start':'end');
+   CK.el('rect',{class:'ck-hit',x:Math.min(x0,x2)-4,y:yc-bh/2-4,width:Math.abs(x2-x0)+8,height:bh+8},gr);
+   CK.tip(ff,gr,`<b>${m.name}</b>: ${m.say}<br>${m.tip}`);nodes.push(gr);});
+  CK.keynav(ff,nodes);}});
+ const lc=m=>m.low||m.name.charAt(0).toLowerCase()+m.name.slice(1),list=ms=>ms.map(m=>`${lc(m)} ${lab(m)}`).join(', ');
+ const big=M.filter(m=>m.up),small=M.filter(m=>!m.up),by=k=>M.find(m=>m.kind===k&&m.name!=='Memory bandwidth');
+ const pw=M.find(m=>m.name==='Board power, matmul'),tp=M.find(m=>m.name==='Matmul TFLOPS'),ef=M.find(m=>m.kind==='eff');
+ document.getElementById('ratio-sum').textContent=`The A100’s value is the larger on ${list(big)}`+(small.length?`, and the smaller on ${list(small)}`:'')+'. '+
+  (pw&&tp&&ef&&!ef.up?`It draws ${lab(pw)} the board power under a matmul but does ${lab(tp)} the FLOPS, so each FLOP costs this card ${lab(ef)} the A100’s energy. `:'')+
+  'Each bar’s inputs are in its tooltip and in the table below.';
+})();
+
 /* ---------- Esperanto's published voltage curve and this card: 600 MHz points filled, 800 MHz points as rings ---------- */
 (function(){const pub=[[0.3,8.5],[0.4,20],[0.67,118],[0.75,164],[0.9,275]];   /* Hot Chips 33 slide, W per chip (0.9 V read off its axis) */
  const vf=D.vf,COLV={zeros:'var(--c1)',ones:'var(--c4)',randn:'var(--bad)'},NM={zeros:'zeros',ones:'ones',randn:'random fp32'};

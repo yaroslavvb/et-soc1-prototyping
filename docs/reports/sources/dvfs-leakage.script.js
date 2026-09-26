@@ -586,13 +586,14 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
       `<td class="num">${sgn(r.W - r.card2_law_W, 2)}</td><td class="num">${num(r.n, 0)}</td></tr>`).join('') +
     `<tr><td colspan="3"><b>mean of the four bins</b></td><td class="num"><b>${sgn(lk.mean_offset_W, 2)}</b></td><td class="num"></td></tr>` +
     `<tr><td colspan="3">mean by sample</td><td class="num">${sgn(lk.mean_offset_W_by_sample, 2)}</td><td class="num">${num(lk.idle_curve.reduce((a, r) => a + r.n, 0), 0)}</td></tr></tbody>`;
-  const SES = [...D.idle_sessions.sessions].sort((a, b) => a.card.localeCompare(b.card) || a.session.localeCompare(b.session));
+  const cardOrder = CK.cardsIn([...new Set([...Object.keys(IS), ...D.idle_sessions.sessions.map(r => r.card)])]);   // registry order
+  const SES = [...D.idle_sessions.sessions].sort((a, b) => cardOrder.indexOf(a.card) - cardOrder.indexOf(b.card) || a.session.localeCompare(b.session));
   const sname = r => r.session.replace(/\.jsonl(\.gz)?$/, '').replace(/^\d{4}-\d{2}-\d{2}-/, '');
   document.getElementById('sesstab').innerHTML = '<thead><tr><th>Session (the card is in its name)</th><th class="num">die °C</th>' +
     '<th class="num">idle samples</th><th class="num">measured − law, W</th></tr></thead><tbody>' +
     SES.map(r => `<tr><td class="small">${+r.day.slice(8, 10)} Sep · ${sname(r)}</td><td class="num">${range(r.T[0], r.T[1], 0)}</td>` +
       `<td class="num">${num(r.n, 0)}</td><td class="num">${sgn(r.offset_W, 2)}</td></tr>`).join('') +
-    ['aifoundry2', 'aifoundry3'].map(c => `<tr><td colspan="3"><b>${c}: mean of ${IS[c].sessions} sessions</b> ` +
+    CK.cardsIn(IS).map(c => `<tr><td colspan="3"><b>${c}: mean of ${IS[c].sessions} sessions</b> ` +
       `(range ${sgn(IS[c].min_W, 2)} to ${sgn(IS[c].max_W, 2)})</td><td class="num"><b>${sgn(IS[c].mean_W, 2)}</b></td></tr>`).join('') + '</tbody>';
   // the prose around the chart
   const groups = []; for (const t of fitT) { const g = groups[groups.length - 1]; if (g && t === g[1] + 1) g[1] = t; else groups.push([t, t]); }
@@ -615,6 +616,100 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
     `The chart's second button shifts the law by aifoundry3's offset; its squares are that card's first session, 22 September.`;
   const c64 = m.idle_curve.find(b => b.T === 64), c66 = m.idle_curve.find(b => b.T === 66);
   V.idleslope = f1((c66.P - c64.P) / 2); V.idleslopeT = '64–66';
+})();
+
+/* ---------- §5: every idle session's offset from the law, one row per card ---------- */
+// A strip plot of D.idle_sessions.sessions[].offset_W (measured − law over the session's binned idle samples), one row
+// per card in registry order, with each card's mean ± sd from D.idle_sessions.summary (or, for a card the summary
+// lacks, computed here from its sessions the same way: mean and the ddof=1 standard deviation). Marks within a row are
+// dodged into lanes so none hides another.
+(function () {
+  const SES = D.idle_sessions.sessions;
+  const sname = r => r.session.replace(/\.jsonl(\.gz)?$/, '').replace(/^\d{4}-\d{2}-\d{2}-/, '');
+  const ids = CK.cardsIn([...new Set([...Object.keys(IS), ...SES.map(r => r.card)])]);
+  const stat = c => {
+    const rs = SES.filter(r => r.card === c), v = rs.map(r => r.offset_W), s = IS[c];
+    if (s) return {n: s.sessions, mean: s.mean_W, sd: s.sd_W, min: s.min_W, max: s.max_W, T: s.T, days: s.days, rs};
+    const n = v.length, mean = v.reduce((a, b) => a + b, 0) / n;
+    const sd = n > 1 ? Math.sqrt(v.reduce((a, b) => a + (b - mean) * (b - mean), 0) / (n - 1)) : null;
+    return {n, mean, sd, min: Math.min(...v), max: Math.max(...v), T: [Math.min(...rs.map(r => r.T[0])), Math.max(...rs.map(r => r.T[1]))],
+      days: [...new Set(rs.map(r => r.day))].sort(), rs};
+  };
+  const ROWS = ids.map(c => Object.assign({card: c}, stat(c))).filter(r => r.rs.length);
+  const allV = ROWS.flatMap(r => r.rs.map(q => q.offset_W).concat(r.sd == null ? [] : [r.mean - r.sd, r.mean + r.sd])).concat([0]);
+  const span = Math.max(...allV) - Math.min(...allV), X0 = Math.min(...allV) - 0.06 * span, X1 = Math.max(...allV) + 0.06 * span;
+  const R = 5, STEP = 2 * R + 2, LABH = 22, MEANH = 24, GAP = 14, TOP = 6, B = 40;
+  const tempR = T => range(T[0], T[1], 0) + ' °C';
+  const msd = r => `mean ${sgn(r.mean, 2)} W` + (r.sd == null ? '' : `, sd ${f2(r.sd)} W`);
+  // lanes: each mark, taken in order of offset, goes to the nearest lane (0, −1, +1, −2, …) where it clears the others
+  function lanes(r, x) {
+    const pts = [...r.rs].sort((a, b) => a.offset_W - b.offset_W).map(q => ({q, px: x(q.offset_W)})), last = {};
+    for (const p of pts) {
+      for (let k = 0; ; k++) {
+        const lane = k % 2 ? -(k + 1) / 2 : k / 2;
+        if (last[lane] == null || p.px - last[lane] >= STEP) { p.lane = lane; last[lane] = p.px; break; }
+      }
+    }
+    const lo = Math.min(...pts.map(p => p.lane)), hi = Math.max(...pts.map(p => p.lane));
+    return {pts, lo, hi, h: LABH + (hi - lo + 1) * STEP + MEANH + GAP};
+  }
+  const L = 14, RR = 14;
+  const lay = W => { const x = CK.lin(X0, X1, L, W - RR); return {x, rows: ROWS.map(r => lanes(r, x))}; };
+  const height = W => { const l = lay(W); return TOP + l.rows.reduce((a, r) => a + r.h, 0) + B; };
+  CK.legend('off-leg', CK.cardLegend(ROWS.map(r => r.card)).concat([{key: 'msd', label: 'mean ± sd across sessions', mark: 'line', color: 'var(--ink-2)'}]));
+  function draw(f) {
+    const W = f.W, H = f.H, svg = f.svg, {x, rows} = lay(W), yAx = CK.lin(0, 1, H - B, TOP);
+    const xt = x.ticks(Math.max(3, Math.round((W - L - RR) / 80)));
+    for (const t of xt) if (t) CK.el('line', {x1: x(t), x2: x(t), y1: TOP, y2: H - B, class: 'grid-line'}, svg);
+    CK.axes(f, {x, y: yAx, L, R: RR, T: TOP, B, yt: [], xt, xfmt: v => sgn(v, 1),
+      xl: f.narrow ? 'measured − law, W' : 'idle measured − the aifoundry2 idle law, W (per session)'});
+    const zero = (ya, yb) => CK.el('line', {x1: x(0), x2: x(0), y1: ya, y2: yb, stroke: 'var(--ink-2)', 'stroke-width': 1.5, 'stroke-dasharray': '4 3'}, svg);
+    const nodes = [];
+    let y0 = TOP;
+    rows.forEach((l, ri) => {
+      const r = ROWS[ri], c = CK.card(r.card);
+      if (ri) CK.el('line', {x1: L, x2: W - RR, y1: y0, y2: y0, class: 'grid-line'}, svg);
+      zero(y0 + LABH - 2, y0 + l.h);                                // the law, below the row's label
+      const g = CK.el('g', {}, svg);
+      const lab = CK.txt(g, L, y0 + 15, '', 'lab');
+      Object.assign(lab.style, {paintOrder: 'stroke', stroke: 'var(--page)', strokeWidth: '4px', strokeLinejoin: 'round'});   // a halo over the grid
+      const b = CK.el('tspan', {class: 'lab-strong'}, lab); b.textContent = c.label;
+      CK.el('tspan', {}, lab).textContent = ` · ${r.n} session${r.n === 1 ? '' : 's'} · ` + (f.narrow && r.sd != null ? `${sgn(r.mean, 2)} ± ${f2(r.sd)} W` : msd(r));
+      const yc = y0 + LABH + (-l.lo) * STEP + STEP / 2;
+      for (const p of l.pts) {
+        const q = p.q, m = CK.cardMark(g, r.card, p.px, yc + p.lane * STEP, R);
+        CK.tip(f, m, `<b>${+q.day.slice(8, 10)} Sep · ${sname(q)}</b><br>${c.label}, die ${tempR(q.T)}<br>` +
+          `${num(q.n, 0)} idle samples<br>measured − law: <b>${sgn(q.offset_W, 2)} W</b>`);
+        m._row = ri; m._x = p.px; nodes.push(m);
+      }
+      const ym = y0 + LABH + (l.hi - l.lo + 1) * STEP + MEANH / 2;
+      const mg = CK.el('g', {}, svg);
+      if (r.sd != null) {
+        const a = x(r.mean - r.sd), z = x(r.mean + r.sd);
+        CK.el('line', {x1: a, x2: z, y1: ym, y2: ym, stroke: c.color, 'stroke-width': 2}, mg);
+        for (const e of [a, z]) CK.el('line', {x1: e, x2: e, y1: ym - 5, y2: ym + 5, stroke: c.color, 'stroke-width': 2}, mg);
+      }
+      const lo = r.sd == null ? x(r.mean) - 6 : Math.min(x(r.mean - r.sd), x(r.mean) - 6), hi = r.sd == null ? x(r.mean) + 6 : Math.max(x(r.mean + r.sd), x(r.mean) + 6);
+      CK.el('rect', {class: 'ck-hit', x: lo - 4, y: ym - 10, width: hi - lo + 8, height: 20}, mg);
+      CK.el('rect', {x: x(r.mean) - 2, y: ym - 8, width: 4, height: 16, rx: 1, fill: c.color}, mg);
+      CK.tip(f, mg, `<b>${c.label}: ${r.n} session${r.n === 1 ? '' : 's'}</b><br>${msd(r)}<br>` +
+        `range ${sgn(r.min, 2)} to ${sgn(r.max, 2)} W<br>die ${tempR(r.T)}; ${dayList(r.days)}`);
+      mg._row = ri; mg._x = x(r.mean); nodes.push(mg);
+      y0 += l.h;
+    });
+    CK.txt(svg, x(0) + 4, H - B - 4, 'law', 'lab');
+    // Up and Down move to the nearest mark in the row above or below; Left and Right step through a row
+    CK.keynav(f, nodes, {step: (k, K) => {
+      if (K !== 'ArrowUp' && K !== 'ArrowDown') return null;
+      const row = nodes[k]._row + (K === 'ArrowDown' ? 1 : -1), cand = nodes.map((n, j) => j).filter(j => nodes[j]._row === row);
+      if (!cand.length) return k;
+      return cand.reduce((b, j) => (Math.abs(nodes[j]._x - nodes[k]._x) < Math.abs(nodes[b]._x - nodes[k]._x) ? j : b), cand[0]);
+    }});
+  }
+  CK.frame('offstrip', {height, minW: 280, maxW: 640, draw,
+    label: 'Idle offset from the aifoundry2 idle law, one mark per session, one row per card, with each card’s mean ± sd'});
+  document.getElementById('off-sum').innerHTML = ROWS.map(r => `${CK.card(r.card).label}: ${word(r.n)} session${r.n === 1 ? '' : 's'} ` +
+    `(${dayList(r.days)}, die ${tempR(r.T)}), ${sgn(r.min, 2)} to ${sgn(r.max, 2)} W, ${msd(r)}`).join('; ') + '.';
 })();
 
 /* ---------- §6: the second card, in one paragraph ---------- */

@@ -138,6 +138,18 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 .ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
 .ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-sortable th[aria-sort] { padding: 0; }
+.ck-sortable th .ck-sort { font: inherit; font-weight: inherit; color: inherit; text-align: inherit; background: none; border: 0;
+  width: 100%; min-height: 32px; padding: inherit; padding: 6px 8px; cursor: pointer; }
+.ck-sortable th .ck-sort::after { content: ' \2195'; color: var(--muted); font-weight: 400; }
+.ck-sortable th[aria-sort="ascending"] .ck-sort::after { content: ' \2191'; color: var(--ink); }
+.ck-sortable th[aria-sort="descending"] .ck-sort::after { content: ' \2193'; color: var(--ink); }
+.ck-sortable th .ck-sort:focus-visible { outline: 2px solid var(--c1); outline-offset: -2px; }
+.ck-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 8px 0 6px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-filter input { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 8px; padding: 4px 8px; min-height: 32px; width: min(260px, 100%); }
+.ck-filter input:focus-visible { outline: 2px solid var(--c1); outline-offset: 1px; }
+.ck-filter-n { color: var(--muted); font-variant-numeric: tabular-nums; }
 /* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
    letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
 th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
@@ -495,6 +507,14 @@ predicts <span data-v="checks"></span>. In that one 22 September session, nearly
 §1</a>).</p>
 
 <p><b>Leakage transfers too, and further than it should.</b> <span data-v="a3law"></span></p>
+<div class="chart-block" id="off-fig">
+  <div class="chart-title">Every idle session against the law: measured minus law, one row per card</div>
+  <p class="small">Each mark is one idle session from the table below, measured minus the law; the bar under each row is
+  that card's mean ± one standard deviation across its sessions. Zero is the law fitted on aifoundry2.</p>
+  <div id="off-leg"></div>
+  <div class="chart" id="offstrip"></div>
+  <p class="small" id="off-sum"></p>
+</div>
 <details><summary>aifoundry3's first session bin by bin, and every session the law was not fitted on, against the aifoundry2 law</summary>
 <div class="table-wrap"><table id="leaktab"></table></div>
 <div class="table-wrap"><table id="sesstab"></table></div>
@@ -683,7 +703,9 @@ refresh and the 11-cycle activate behind §4's DRAM result</li>
    Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
    --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
    API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
-   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame. Every mark with a tooltip is reachable from the keyboard. */
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame.
+   Added 26 Sep 2026: sortTable (sortable, filterable tables) and the card registry (cards, card, cardsIn, cardSeg,
+   pick, cardMark, cardLegend): aifoundry2 --c1 dot, aifoundry3 --c2 ring, aifoundry1-c1 --c3 diamond, all cards --ink. Every mark with a tooltip is reachable from the keyboard. */
 window.CK = (function () {
   'use strict';
   const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
@@ -929,10 +951,11 @@ window.CK = (function () {
     const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
     const m = it.mark || 'box';
     const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'diamond' ? el('polygon', {points: '9,0 14,5 9,10 4,5'}, s)
       : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
-    if (m === 'dot' || m === 'box') e.style.fill = c;
+    if (m === 'dot' || m === 'box' || m === 'diamond') e.style.fill = c;
     else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
-    if (m === 'dash') e.style.strokeDasharray = '4 3';
+    if (it.dash) e.style.strokeDasharray = it.dash; else if (m === 'dash') e.style.strokeDasharray = '4 3';
     return s;
   }
   function legend(hostEl, items, o) {
@@ -994,6 +1017,7 @@ window.CK = (function () {
     }
     h.appendChild(g); set(api.value, false);
     api.set = v => set(v, true);
+    api.quiet = v => set(v, false);  // show v as selected without calling onChange
     return api;
   }
   function range(hostEl, o) {
@@ -1028,6 +1052,124 @@ window.CK = (function () {
     return t;
   }
 
+  /* ---- cards: one registry for every page (fixed colour, mark and label per card), a shared card selector and a picker
+     for values shaped {mean, se, n, per_card: {<card>: {mean, se, n}}}. aifoundry1-c0 is kept for old data only: it is
+     excluded from the version-3 campaign (amendment A4) and never offered by cardSeg unless a page passes it. ---- */
+  const CARDS = [
+    {id: 'aifoundry2', short: 'a2', label: 'aifoundry2', color: 'var(--c1)', mark: 'dot'},
+    {id: 'aifoundry3', short: 'a3', label: 'aifoundry3', color: 'var(--c2)', mark: 'ring'},
+    {id: 'aifoundry1-c1', short: 'a1c1', label: 'aifoundry1 card 1', color: 'var(--c3)', mark: 'diamond'},
+    {id: 'aifoundry1-c0', short: 'a1c0', label: 'aifoundry1 card 0', color: 'var(--ref)', mark: 'box'},
+  ];
+  const POOLED = {id: 'pooled', short: 'all', label: 'all cards', color: 'var(--ink)', mark: 'dot'};
+  const cardIndex = {};
+  CARDS.forEach(c => { cardIndex[c.id] = c; cardIndex[c.short] = c; });
+  /* The registry entry for a card id or short name; an unknown card gets --ref and its own name. */
+  function card(id) {
+    if (id === 'pooled' || id === 'all') return POOLED;
+    return cardIndex[id] || {id, short: id, label: id, color: 'var(--ref)', mark: 'box'};
+  }
+  /* The cards present in an object's keys (or a list), in registry order, then any others in their order. */
+  function cardsIn(keysOrObj) {
+    const ks = Array.isArray(keysOrObj) ? keysOrObj : Object.keys(keysOrObj || {});
+    const norm = ks.map(k => (cardIndex[k] ? cardIndex[k].id : k));
+    return CARDS.map(c => c.id).filter(id => norm.includes(id)).concat(norm.filter(k => !cardIndex[k]));
+  }
+  /* A card selector on bus('card'): options are o.cards (default: every registered card but aifoundry1-c0), with
+     "all cards" first when o.pooled. Every cardSeg on a page follows the others. */
+  function cardSeg(hostEl, o) {
+    o = o || {};
+    const ids = (o.cards || CARDS.filter(c => c.id !== 'aifoundry1-c0').map(c => c.id)).map(k => card(k).id);
+    const opts = (o.pooled ? [['pooled', o.pooledLabel || POOLED.label]] : []).concat(ids.map(id => [id, card(id).label]));
+    const b = bus(o.bus || 'card');
+    const start = b.value != null && opts.some(x => x[0] === b.value) ? b.value : (o.value || opts[0][0]);
+    const api = seg(hostEl, {label: o.label == null ? 'Card' : o.label, options: opts, value: start,
+      onChange: v => { b.emit(v, api); if (o.onChange) o.onChange(v); }});
+    b.on((v, from) => { if (from !== api && opts.some(x => x[0] === v) && api.value !== v) { api.quiet(v); if (o.onChange) o.onChange(v); } });
+    return api;
+  }
+  /* {mean, se, n, card} of v for a card ('pooled' = v itself), or null when the card has no value (never a zero). */
+  function pick(v, id) {
+    if (v == null) return null;
+    if (typeof v === 'number') return {mean: v, se: null, n: null, card: 'pooled'};
+    const c = id == null || id === 'pooled' || id === 'all' ? null : card(id).id;
+    const src = c == null ? v : (v.per_card || {})[c];
+    if (src == null) return null;
+    const m = typeof src === 'number' ? src : src.mean;
+    if (m == null || !isFinite(m)) return null;
+    return {mean: m, se: typeof src === 'number' ? null : (src.se == null ? null : src.se), n: typeof src === 'number' ? null : (src.n == null ? null : src.n), card: c || 'pooled'};
+  }
+  /* A card's mark at (x, y) in an SVG group: dot, ring, diamond or box, in the card's colour (or colour, if given). */
+  function cardMark(g, id, x, y, r, colour) {
+    const c = Object.assign({}, card(id)), R = r || 4;
+    if (colour) c.color = colour;
+    let e;
+    if (c.mark === 'diamond') e = el('polygon', {points: `${x},${y - R * 1.25} ${x + R * 1.25},${y} ${x},${y + R * 1.25} ${x - R * 1.25},${y}`}, g);
+    else if (c.mark === 'box') e = el('rect', {x: x - R, y: y - R, width: 2 * R, height: 2 * R}, g);
+    else e = el('circle', {cx: x, cy: y, r: c.mark === 'ring' ? R - 0.5 : R}, g);
+    if (c.mark === 'ring') { e.style.fill = 'var(--surface)'; e.style.stroke = c.color; e.style.strokeWidth = '2'; }
+    else e.style.fill = c.color;
+    return e;
+  }
+  /* Legend items for a list of cards (for legend()). */
+  const cardLegend = ids => ids.map(id => { const c = card(id); return {key: c.id, label: c.label, color: c.color, mark: c.mark}; });
+
+  /* ---- a sortable, filterable table: click a header to sort (aria-sort), numbers parsed with the true minus, thin
+     spaces and thousands commas; o.filter adds a text box that hides rows not containing it. Rows keep their DOM
+     nodes, so any listeners on them survive. A header with data-nosort is left alone. ---- */
+  function cellValue(td) {
+    const raw = (td.getAttribute('data-sort') != null ? td.getAttribute('data-sort') : td.textContent).trim();
+    const t = raw.replace(/−/g, '-').replace(/[   ,]/g, '').replace(/^[~≈<>≤≥]\s*/, '');
+    const m = t.match(/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?/i);
+    return m && (t.length === m[0].length || /^[\s%×x°a-zA-Zµ/()]/.test(t.slice(m[0].length))) ? {n: parseFloat(m[0])} : {s: raw.toLowerCase()};
+  }
+  function sortTable(table, o) {
+    o = o || {};
+    const t = $(table), tb = t.tBodies[0], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (!tb || !hr) return null;
+    const orig = [...tb.rows];
+    let col = -1, dir = 0;
+    const heads = [...hr.cells];
+    let k = 0;
+    const colOf = heads.map(h => { const c = k; k += h.colSpan || 1; return c; });
+    heads.forEach((h, i) => {
+      if (h.hasAttribute('data-nosort') || (h.colSpan || 1) > 1) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ck-sort';
+      while (h.firstChild) b.appendChild(h.firstChild);
+      h.appendChild(b); h.setAttribute('aria-sort', 'none');
+      b.addEventListener('click', () => {
+        dir = col === colOf[i] ? (dir === 1 ? -1 : dir === -1 ? 0 : 1) : 1; col = colOf[i];
+        heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none'));
+        if (dir) h.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
+        const rows = dir ? [...orig].sort((a, b2) => {
+          const ca = a.cells[col], cb = b2.cells[col];
+          if (!ca || !cb) return 0;
+          const va = cellValue(ca), vb = cellValue(cb);
+          if (va.n != null && vb.n != null) return dir * (va.n - vb.n);
+          if (va.n != null) return -1;
+          if (vb.n != null) return 1;
+          return dir * va.s.localeCompare(vb.s);
+        }) : orig;
+        rows.forEach(r => tb.appendChild(r));
+      });
+    });
+    if (o.filter) {
+      const w = document.createElement('div'); w.className = 'ck-filter';
+      const id = 'ck-f' + (++uid), lab = document.createElement('label'), inp = document.createElement('input');
+      lab.htmlFor = id; lab.textContent = o.filterLabel || 'Filter rows'; inp.id = id; inp.type = 'search';
+      const cnt = document.createElement('span'); cnt.className = 'ck-filter-n'; cnt.setAttribute('aria-live', 'polite');
+      inp.addEventListener('input', () => {
+        const q = inp.value.trim().toLowerCase(); let n = 0;
+        orig.forEach(r => { const on = !q || r.textContent.toLowerCase().includes(q); r.classList.toggle('ck-hidden', !on); if (on) n++; });
+        cnt.textContent = q ? `${n} of ${orig.length} rows` : '';
+      });
+      w.append(lab, inp, cnt);
+      const ref = t.closest('.wide, .scroll, .ck-table-wrap') || t; ref.parentNode.insertBefore(w, ref);
+    }
+    t.classList.add('ck-sortable');
+    return {table: t, reset() { col = -1; dir = 0; heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none')); orig.forEach(r => tb.appendChild(r)); }};
+  }
+
   /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
   const SERIES = [1, 2, 3, 4, 5, 7];
   const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
@@ -1053,7 +1195,8 @@ window.CK = (function () {
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
-    stackTable, reduced, ramp, rampInk, color, hide: f => hide(f, true)};
+    stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
 })();
 
 </script>
@@ -1647,13 +1790,14 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
       `<td class="num">${sgn(r.W - r.card2_law_W, 2)}</td><td class="num">${num(r.n, 0)}</td></tr>`).join('') +
     `<tr><td colspan="3"><b>mean of the four bins</b></td><td class="num"><b>${sgn(lk.mean_offset_W, 2)}</b></td><td class="num"></td></tr>` +
     `<tr><td colspan="3">mean by sample</td><td class="num">${sgn(lk.mean_offset_W_by_sample, 2)}</td><td class="num">${num(lk.idle_curve.reduce((a, r) => a + r.n, 0), 0)}</td></tr></tbody>`;
-  const SES = [...D.idle_sessions.sessions].sort((a, b) => a.card.localeCompare(b.card) || a.session.localeCompare(b.session));
+  const cardOrder = CK.cardsIn([...new Set([...Object.keys(IS), ...D.idle_sessions.sessions.map(r => r.card)])]);   // registry order
+  const SES = [...D.idle_sessions.sessions].sort((a, b) => cardOrder.indexOf(a.card) - cardOrder.indexOf(b.card) || a.session.localeCompare(b.session));
   const sname = r => r.session.replace(/\.jsonl(\.gz)?$/, '').replace(/^\d{4}-\d{2}-\d{2}-/, '');
   document.getElementById('sesstab').innerHTML = '<thead><tr><th>Session (the card is in its name)</th><th class="num">die °C</th>' +
     '<th class="num">idle samples</th><th class="num">measured − law, W</th></tr></thead><tbody>' +
     SES.map(r => `<tr><td class="small">${+r.day.slice(8, 10)} Sep · ${sname(r)}</td><td class="num">${range(r.T[0], r.T[1], 0)}</td>` +
       `<td class="num">${num(r.n, 0)}</td><td class="num">${sgn(r.offset_W, 2)}</td></tr>`).join('') +
-    ['aifoundry2', 'aifoundry3'].map(c => `<tr><td colspan="3"><b>${c}: mean of ${IS[c].sessions} sessions</b> ` +
+    CK.cardsIn(IS).map(c => `<tr><td colspan="3"><b>${c}: mean of ${IS[c].sessions} sessions</b> ` +
       `(range ${sgn(IS[c].min_W, 2)} to ${sgn(IS[c].max_W, 2)})</td><td class="num"><b>${sgn(IS[c].mean_W, 2)}</b></td></tr>`).join('') + '</tbody>';
   // the prose around the chart
   const groups = []; for (const t of fitT) { const g = groups[groups.length - 1]; if (g && t === g[1] + 1) g[1] = t; else groups.push([t, t]); }
@@ -1676,6 +1820,100 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
     `The chart's second button shifts the law by aifoundry3's offset; its squares are that card's first session, 22 September.`;
   const c64 = m.idle_curve.find(b => b.T === 64), c66 = m.idle_curve.find(b => b.T === 66);
   V.idleslope = f1((c66.P - c64.P) / 2); V.idleslopeT = '64–66';
+})();
+
+/* ---------- §5: every idle session's offset from the law, one row per card ---------- */
+// A strip plot of D.idle_sessions.sessions[].offset_W (measured − law over the session's binned idle samples), one row
+// per card in registry order, with each card's mean ± sd from D.idle_sessions.summary (or, for a card the summary
+// lacks, computed here from its sessions the same way: mean and the ddof=1 standard deviation). Marks within a row are
+// dodged into lanes so none hides another.
+(function () {
+  const SES = D.idle_sessions.sessions;
+  const sname = r => r.session.replace(/\.jsonl(\.gz)?$/, '').replace(/^\d{4}-\d{2}-\d{2}-/, '');
+  const ids = CK.cardsIn([...new Set([...Object.keys(IS), ...SES.map(r => r.card)])]);
+  const stat = c => {
+    const rs = SES.filter(r => r.card === c), v = rs.map(r => r.offset_W), s = IS[c];
+    if (s) return {n: s.sessions, mean: s.mean_W, sd: s.sd_W, min: s.min_W, max: s.max_W, T: s.T, days: s.days, rs};
+    const n = v.length, mean = v.reduce((a, b) => a + b, 0) / n;
+    const sd = n > 1 ? Math.sqrt(v.reduce((a, b) => a + (b - mean) * (b - mean), 0) / (n - 1)) : null;
+    return {n, mean, sd, min: Math.min(...v), max: Math.max(...v), T: [Math.min(...rs.map(r => r.T[0])), Math.max(...rs.map(r => r.T[1]))],
+      days: [...new Set(rs.map(r => r.day))].sort(), rs};
+  };
+  const ROWS = ids.map(c => Object.assign({card: c}, stat(c))).filter(r => r.rs.length);
+  const allV = ROWS.flatMap(r => r.rs.map(q => q.offset_W).concat(r.sd == null ? [] : [r.mean - r.sd, r.mean + r.sd])).concat([0]);
+  const span = Math.max(...allV) - Math.min(...allV), X0 = Math.min(...allV) - 0.06 * span, X1 = Math.max(...allV) + 0.06 * span;
+  const R = 5, STEP = 2 * R + 2, LABH = 22, MEANH = 24, GAP = 14, TOP = 6, B = 40;
+  const tempR = T => range(T[0], T[1], 0) + ' °C';
+  const msd = r => `mean ${sgn(r.mean, 2)} W` + (r.sd == null ? '' : `, sd ${f2(r.sd)} W`);
+  // lanes: each mark, taken in order of offset, goes to the nearest lane (0, −1, +1, −2, …) where it clears the others
+  function lanes(r, x) {
+    const pts = [...r.rs].sort((a, b) => a.offset_W - b.offset_W).map(q => ({q, px: x(q.offset_W)})), last = {};
+    for (const p of pts) {
+      for (let k = 0; ; k++) {
+        const lane = k % 2 ? -(k + 1) / 2 : k / 2;
+        if (last[lane] == null || p.px - last[lane] >= STEP) { p.lane = lane; last[lane] = p.px; break; }
+      }
+    }
+    const lo = Math.min(...pts.map(p => p.lane)), hi = Math.max(...pts.map(p => p.lane));
+    return {pts, lo, hi, h: LABH + (hi - lo + 1) * STEP + MEANH + GAP};
+  }
+  const L = 14, RR = 14;
+  const lay = W => { const x = CK.lin(X0, X1, L, W - RR); return {x, rows: ROWS.map(r => lanes(r, x))}; };
+  const height = W => { const l = lay(W); return TOP + l.rows.reduce((a, r) => a + r.h, 0) + B; };
+  CK.legend('off-leg', CK.cardLegend(ROWS.map(r => r.card)).concat([{key: 'msd', label: 'mean ± sd across sessions', mark: 'line', color: 'var(--ink-2)'}]));
+  function draw(f) {
+    const W = f.W, H = f.H, svg = f.svg, {x, rows} = lay(W), yAx = CK.lin(0, 1, H - B, TOP);
+    const xt = x.ticks(Math.max(3, Math.round((W - L - RR) / 80)));
+    for (const t of xt) if (t) CK.el('line', {x1: x(t), x2: x(t), y1: TOP, y2: H - B, class: 'grid-line'}, svg);
+    CK.axes(f, {x, y: yAx, L, R: RR, T: TOP, B, yt: [], xt, xfmt: v => sgn(v, 1),
+      xl: f.narrow ? 'measured − law, W' : 'idle measured − the aifoundry2 idle law, W (per session)'});
+    const zero = (ya, yb) => CK.el('line', {x1: x(0), x2: x(0), y1: ya, y2: yb, stroke: 'var(--ink-2)', 'stroke-width': 1.5, 'stroke-dasharray': '4 3'}, svg);
+    const nodes = [];
+    let y0 = TOP;
+    rows.forEach((l, ri) => {
+      const r = ROWS[ri], c = CK.card(r.card);
+      if (ri) CK.el('line', {x1: L, x2: W - RR, y1: y0, y2: y0, class: 'grid-line'}, svg);
+      zero(y0 + LABH - 2, y0 + l.h);                                // the law, below the row's label
+      const g = CK.el('g', {}, svg);
+      const lab = CK.txt(g, L, y0 + 15, '', 'lab');
+      Object.assign(lab.style, {paintOrder: 'stroke', stroke: 'var(--page)', strokeWidth: '4px', strokeLinejoin: 'round'});   // a halo over the grid
+      const b = CK.el('tspan', {class: 'lab-strong'}, lab); b.textContent = c.label;
+      CK.el('tspan', {}, lab).textContent = ` · ${r.n} session${r.n === 1 ? '' : 's'} · ` + (f.narrow && r.sd != null ? `${sgn(r.mean, 2)} ± ${f2(r.sd)} W` : msd(r));
+      const yc = y0 + LABH + (-l.lo) * STEP + STEP / 2;
+      for (const p of l.pts) {
+        const q = p.q, m = CK.cardMark(g, r.card, p.px, yc + p.lane * STEP, R);
+        CK.tip(f, m, `<b>${+q.day.slice(8, 10)} Sep · ${sname(q)}</b><br>${c.label}, die ${tempR(q.T)}<br>` +
+          `${num(q.n, 0)} idle samples<br>measured − law: <b>${sgn(q.offset_W, 2)} W</b>`);
+        m._row = ri; m._x = p.px; nodes.push(m);
+      }
+      const ym = y0 + LABH + (l.hi - l.lo + 1) * STEP + MEANH / 2;
+      const mg = CK.el('g', {}, svg);
+      if (r.sd != null) {
+        const a = x(r.mean - r.sd), z = x(r.mean + r.sd);
+        CK.el('line', {x1: a, x2: z, y1: ym, y2: ym, stroke: c.color, 'stroke-width': 2}, mg);
+        for (const e of [a, z]) CK.el('line', {x1: e, x2: e, y1: ym - 5, y2: ym + 5, stroke: c.color, 'stroke-width': 2}, mg);
+      }
+      const lo = r.sd == null ? x(r.mean) - 6 : Math.min(x(r.mean - r.sd), x(r.mean) - 6), hi = r.sd == null ? x(r.mean) + 6 : Math.max(x(r.mean + r.sd), x(r.mean) + 6);
+      CK.el('rect', {class: 'ck-hit', x: lo - 4, y: ym - 10, width: hi - lo + 8, height: 20}, mg);
+      CK.el('rect', {x: x(r.mean) - 2, y: ym - 8, width: 4, height: 16, rx: 1, fill: c.color}, mg);
+      CK.tip(f, mg, `<b>${c.label}: ${r.n} session${r.n === 1 ? '' : 's'}</b><br>${msd(r)}<br>` +
+        `range ${sgn(r.min, 2)} to ${sgn(r.max, 2)} W<br>die ${tempR(r.T)}; ${dayList(r.days)}`);
+      mg._row = ri; mg._x = x(r.mean); nodes.push(mg);
+      y0 += l.h;
+    });
+    CK.txt(svg, x(0) + 4, H - B - 4, 'law', 'lab');
+    // Up and Down move to the nearest mark in the row above or below; Left and Right step through a row
+    CK.keynav(f, nodes, {step: (k, K) => {
+      if (K !== 'ArrowUp' && K !== 'ArrowDown') return null;
+      const row = nodes[k]._row + (K === 'ArrowDown' ? 1 : -1), cand = nodes.map((n, j) => j).filter(j => nodes[j]._row === row);
+      if (!cand.length) return k;
+      return cand.reduce((b, j) => (Math.abs(nodes[j]._x - nodes[k]._x) < Math.abs(nodes[b]._x - nodes[k]._x) ? j : b), cand[0]);
+    }});
+  }
+  CK.frame('offstrip', {height, minW: 280, maxW: 640, draw,
+    label: 'Idle offset from the aifoundry2 idle law, one mark per session, one row per card, with each card’s mean ± sd'});
+  document.getElementById('off-sum').innerHTML = ROWS.map(r => `${CK.card(r.card).label}: ${word(r.n)} session${r.n === 1 ? '' : 's'} ` +
+    `(${dayList(r.days)}, die ${tempR(r.T)}), ${sgn(r.min, 2)} to ${sgn(r.max, 2)} W, ${msd(r)}`).join('; ') + '.';
 })();
 
 /* ---------- §6: the second card, in one paragraph ---------- */
