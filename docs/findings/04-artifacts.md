@@ -102,6 +102,15 @@ None has an A-number yet.
 | aifoundry1 is fixed: the fix log, and who should delete what on the nearly full disk (`7aded23`, `f44baa4`) | `docs/reports/2026-09-25-aifoundry1-fix.html` (standalone) | [aifoundry1-fix](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix) `31e35ba7-36f4-486e-b6f3-687f7c7ad3a0` | public |
 | A report on the lab's problems, for the lab lead | none: kept out of this public repository (`38f6b02`) | not listed here | private (the owner's decision); not mirrored |
 
+## The visualization pass (26 September)
+
+Charts and controls added to 16 pages, with the toolkit's card registry and sortable tables; every new chart takes
+its cards from the data, ready for the version-3 campaign's third card. What was built, how it was checked, and one
+error caught in review: [`docs/reports/data/2026-09-26-visualization-pass/`](../reports/data/2026-09-26-visualization-pass/README.md).
+No number on any page changed. Build commands are unchanged: `workloads/memhier/analyze.py --embed` now also embeds
+`energy_levels` from the energy manual's `reruns.json` (`--reruns`, defaulting to it), and
+`workloads/onchip/analyze_onchip.py` adds `by_card` rows to the relay's sweeps.
+
 ## A12 — Math rendered at build time
 
 `scripts/tex2svg.js` turns the TeX in a report body into standalone SVG, called from
