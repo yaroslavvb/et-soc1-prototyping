@@ -30,7 +30,13 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   `scripts/deploy-lab*.sh` against its host (both write into `~/nekko`, which the blocks use; [`AGENT.md`](../AGENT.md)
   §7); a queue stops at the next block boundary when `build/claims-v3/STOP` exists in its tree (the owner's call).
   Next on the cards, after the campaign: gathers and scatters (E48, `tools/claims-v3/gs/`). The pages are revised
-  with the campaign's results in a later pass; until then their sources stay as they are.
+  with the campaign's results in a later pass; until then their sources stay as they are. To reduce:
+  `tools/claims-v3/collect.sh <dir>` then `tools/claims-v3/reduce_all.sh <dir> <out>` (all-cards outcomes over the
+  three campaign cards, `tools/claims-v3/campaign.py`, per amendment A4).
+- **aifoundry3's host crash is understood** (25 September, late): a race in the runtime's logging set-up, reproduced
+  without a card (E49, `tools/g3log-race/`). Every host program now registers the log levels first in `main`; only
+  the gather/scatter build has been rebuilt with it so far. After the campaign, rebuild the other `build/<workload>`
+  directories on all three hosts (the campaign's binaries stay as registered until then).
 - **New pages, 25 September:** [Influence functions on the ET-SoC-1](https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions)
   (exploratory, no card run; `docs/reports/data/2026-09-25-influence-on-et/`),
   [What is broken on aifoundry1](https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting) and its
