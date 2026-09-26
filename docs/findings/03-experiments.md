@@ -990,6 +990,10 @@ Every `workloads/*/host/main.cpp` now calls `registerRuntimeLogLevels()` first i
 **Caveats:** the test shows the mechanism and the fix, not the crash rate on aifoundry3, which depends on its
 `-O3` runtime's timing. Binaries built before the fix, the version-3 campaign's among them, keep the crash; the
 gather/scatter host (E48) is the first card program built with it.
+**On the card (26 Sep):** aifoundry3's E48 queue ran that fixed build for 641 host processes (3,096 launches,
+04:48–06:13) with no crash and no core dump, where the unfixed binaries' rate of about 1 in 100 predicts 6.4
+(Poisson chance of none: 0.2%). aifoundry2's and aifoundry3's other host builds were rebuilt with the fix once
+their queues had ended.
 
 ## A note on E10, re-analysed for Q20
 

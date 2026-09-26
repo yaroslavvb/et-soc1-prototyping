@@ -13,4 +13,6 @@ Four core dumps on aifoundry3 (25 Sep 2026) stop in exactly that insert (`g3::lo
 On aifoundry2 (25 Sep 2026, three runs each), 1,087, 1,358 and 1,412 of 20,000 trials without registration left
 the map with the wrong number of levels; 0 of 60,000 with it. Every host program in `workloads/*/host/main.cpp`
 calls `registerRuntimeLogLevels()` first in `main` since then. Binaries built before that (the version-3
-campaign's) can still crash this way: about one launch in 100 on aifoundry3, none seen on aifoundry2.
+campaign's) can still crash this way: about one launch in 100 on aifoundry3, none seen on aifoundry2. On the card,
+the fix holds: aifoundry3 ran the fixed gather/scatter host for 641 processes on 26 September 2026 with no crash,
+where the old rate predicts 6.4 (E49 in docs/findings/03-experiments.md).

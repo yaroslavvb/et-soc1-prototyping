@@ -313,8 +313,9 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
   has not been seen to. `tools/g3log-race/` reproduces the race without a card (6–7 % of trials corrupt the map;
   none once the level is registered first). **Fix:** every `workloads/*/host/main.cpp` now calls
   `registerRuntimeLogLevels()` first in `main`; a new host program must do the same (or construct
-  `logging::LoggerDefault`). Binaries built before that change, the version-3 campaign's among them, can still
-  crash: treat such a launch as failed and repeat it. Cores are kept: `coredumpctl list`, `coredumpctl gdb <pid>`.
+  `logging::LoggerDefault`). On the card it holds: aifoundry3 ran the fixed gather/scatter build for 641 host
+  processes on 26 September without a crash (6.4 expected at the old rate). Binaries built before that change, the
+  version-3 campaign's among them, can still crash: treat such a launch as failed and repeat it. Cores are kept: `coredumpctl list`, `coredumpctl gdb <pid>`.
 - **`ettelem sample` sometimes fails to start** right after a previous instance was stopped (about one start in
   three). The runners retry until the telemetry file has a line (`start_sampler` in `tools/claims-v3/lib.sh` and
   the `tools/ettelem/run_*_power.sh` scripts).
