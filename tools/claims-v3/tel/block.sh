@@ -5,25 +5,137 @@
 #
 # One pass = four phases, in this order (README.md has the timings, the drops and every deviation from the plan):
 #   1 governor readouts at INFO, no sampler: sptrace sp0, etcfg, 5 x 2 s fma-zeros launches 3 s apart, sptrace sp1,
-#     ettelem config, firmware revisions (aifoundry2: heater first if the die is below 68 C);
-#   2 the arms: [a2 heat to 76 C] SPST enable + extract, 60 s quiet, then Q PWR L10 E10 E20 E40 VOLT in an order drawn
-#     per pass (tel_util.py order <card*100+pass>), each followed by an SPST extract and 30 s quiet; before each arm a
-#     wrap guard waits in quiet if the SP stats ring could wrap inside the arm;
-#   3 [a2 reheat] reset segment: ettelem --reset-ms 1000 while three 3 s enercat fmadd_ps bursts run 10 s apart, then
-#     SPST enable (ettelem's reset turns the SP stats trace off, see README) and an extract;
-#   4 [a2 reheat] DEBUG block: loglevel debug, idle sptrace, the X2 load/after captures around a 7 s randn burst, three
-#     14 s --reset-ms windows with a 7 s randn burst 3 s in and an sptrace after each, one idle window; loglevel info.
+#     ettelem config, firmware revisions (a governor-free card: heater first if the die is below 68 C);
+#   2 the arms: [governor-free: heat to 76 C] SPST enable + extract, 60 s quiet, then Q PWR L10 E10 E20 E40 VOLT in an
+#     order drawn per pass (tel_util.py order <seed base*100+pass>), each followed by an SPST extract and 30 s quiet;
+#     before each arm a wrap guard waits in quiet if the SP stats ring could wrap inside the arm;
+#   3 [governor-free: reheat] reset segment: ettelem --reset-ms 1000 while three 3 s enercat fmadd_ps bursts run 10 s
+#     apart, then SPST enable (ettelem's reset turns the SP stats trace off, see README) and an extract;
+#   4 [governor-free: reheat] DEBUG block: loglevel debug, idle sptrace, the X2 load/after captures around a 7 s randn
+#     burst, three 14 s --reset-ms windows with a 7 s randn burst 3 s in and an sptrace after each, one idle window;
+#     loglevel info.
+# The card's idle operating point (ettelem config: power state, minion MHz and mV) is read at six points (the smoke
+# check: two) with no sampler running (idle_clock.jsonl), so the reducer knows which idle state each idle bracket was
+# in; on aifoundry1's cards a card idling off 600 MHz is woken by a 2 s launch before the reset segment and the DEBUG
+# block (wake600).
 # Every device process runs under hold10 (timeout 10); samplers only through start_sampler/stop_sampler (SIGTERM);
 # nothing else opens the management node while a sampler runs. The EXIT trap stops the sampler, re-enables the SP
 # stats trace and restores the INFO log level.
+# On a host with several cards (aifoundry1, V3_DEVICE set) the pass takes the whole host first (take_host below).
 . "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"          # cd's to the tree root, sets CARD, binaries, DATA_ROOT
 PASS=${1:?usage: block.sh <pass> [--smoke]}
 case "$PASS" in ''|*[!0-9]*) echo "pass must be a number" >&2; exit 2 ;; esac
 SMOKE=; [ "${2:-}" = --smoke ] && SMOKE=1
 others_present && exit 3
+# a device process of ours still running on this card (lib.sh, per card with V3_DEVICE). Checked before take_host:
+# after it, this pass's own tel_hold_host marker would count here
+ours_running && { log "tel: one of our device processes on this card is still running, not starting"; exit 3; }
 
 TEL=tools/claims-v3/tel
 DRY=${V3_DRY:-}
+
+# ---- per-card parameters (README "Four cards"). The governor-free cards (GOV_FREE, lib.sh: every card but aifoundry3)
+# take aifoundry2's values: heat to 76 C before the arms, the reset segment and the DEBUG block; governor readouts on a
+# die >= 68 C. aifoundry1's two cards have aifoundry2's configuration (TDP 65 W, threshold 65 C, governor free).
+HEAT_C=76; GOV_C=68
+DEVN=${V3_DEVICE:-0}          # the card's device nodes /dev/et<DEVN>_{mgmt,ops}; etcfg opens the node by path
+# dev_mngt_service (/opt/et/bin, the Jan 2026 build) does not honour ET_DEVICES: it opens every card of the host and -n
+# picks /dev/et<n>_mgmt, so on aifoundry1 its node is the card's own index (V3_DM_NODE overrides, for a filtered build)
+DMN=${V3_DM_NODE:-$DEVN}
+# SEEDB: the arm-order seed is SEEDB*100 + pass; FW_EXPECT: the firmware that identifies the card; RPOST: the reset log
+# after the last burst (s, full pass); WAKE: wake a card idling off 600 MHz before the reset segment and the DEBUG block.
+# aifoundry1's cards (firmware 1.4.1 and 1.2.0; card 0 idles in a 300 MHz low-power state): the idle state may change
+# some seconds after a burst, and P6's late windows then start 8 s after that change, so the reset log runs 8 s longer.
+case "$CARD" in
+  aifoundry2) SEEDB=2; FW_EXPECT=; RPOST=12; WAKE= ;;
+  aifoundry3) SEEDB=3; FW_EXPECT=; RPOST=12; WAKE= ;;
+  aifoundry1-c0) SEEDB=10; FW_EXPECT=1.4.1; RPOST=20; WAKE=1 ;;
+  aifoundry1-c1) SEEDB=11; FW_EXPECT=1.2.0; RPOST=20; WAKE=1 ;;
+esac
+FW_EXPECT=${V3_TEL_FW_EXPECT-$FW_EXPECT}
+# lib.sh's drain_mgmt addresses -n 0; on card 1 of aifoundry1 that would drain the other card's queue
+if [ -z "$DRY" ] && [ "$DMN" != 0 ]; then
+  drain_mgmt() { timeout 20 "$DEVMNGT" -m DM_CMD_GET_MODULE_POWER -n "$DMN" -u 5000 > /dev/null 2>&1 || true; }
+fi
+
+# ---- a host with several cards (aifoundry1): take the host for the whole pass.
+# The driver lets one process at a time open a card's management node (EBUSY), and dev_mngt_service opens EVERY card's
+# node. This pass runs about 5,000 dev_mngt_service calls (PWR, L10, VOLT, SPST), so each would fail while the other
+# card's sampler runs, and each would make the other card's sampler starts fail. So, before block_begin touches the
+# card:
+#  1 one TEL pass at a time per host (flock on build/claims-v3/tel-host.lock, on fd 8: lib.sh's block_begin puts the
+#    card lock on fd 9; a TEL pass waiting on the flock has not touched a card);
+#  2 wait (at most 45 min in all) until no block of the other card is running. No marker yet: a running block that
+#    checks ours_running mid-pass (rl's between()) would abandon its pass if it saw one;
+#  3 at once (the other card's queue sleeps 20 s between blocks), a marker process of ours named tel_hold_host with no
+#    ET_DEVICES in its environment: lib.sh's ours_running counts such a process on every card, so the other card's
+#    queue starts no block while it lives (it ends with this block, or within 2 s of the block dying);
+#  4 wait (within the same 45 min) until no block of the other card and none of our device processes on it run (a
+#    block that started in the gap exits 3 at its own ours_running check, or runs to its end).
+# If the host does not come free, the block exits 3 (the queue retries it). A single-card host skips all of this.
+HOLD_PID=
+other_card_busy() {    # prints what of ours still runs on another card of this host
+  local pid c e
+  for pid in $(pgrep -u "$(id -u)" -f 'tools/claims-v3/[^ ]*/block\.sh' || true); do
+    [ "$pid" = "$$" ] && continue
+    c=$( { tr '\0' '\n' < "/proc/$pid/cmdline" | sed -n 2p; } 2>/dev/null) || continue   # a block runs as: bash <block.sh> <pass>
+    case "$c" in
+      *tools/claims-v3/tel/block.sh) continue ;;          # a TEL pass of another card waits on the lock
+      *tools/claims-v3/*/block.sh) ;;
+      *) continue ;;                                       # a shell whose command text only mentions a block
+    esac
+    e=$( { tr '\0' '\n' < "/proc/$pid/environ" | sed -n 's/^V3_DEVICE=//p'; } 2>/dev/null)
+    [ "$e" = "$V3_DEVICE" ] && continue
+    echo "block:$pid"
+  done
+  for pid in $(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 == me && $3 ~ re {print $2}'); do
+    [ "$pid" = "${HOLD_PID:-x}" ] && continue
+    e=$( { tr '\0' '\n' < "/proc/$pid/environ" | sed -n 's/^ET_DEVICES=//p'; } 2>/dev/null)
+    [ "$e" = "$V3_DEVICE" ] && continue
+    echo "dev:$pid"
+  done
+}
+release_host() {
+  if [ -n "${HOLD_PID:-}" ]; then kill -TERM "$HOLD_PID" 2>/dev/null; wait "$HOLD_PID" 2>/dev/null; HOLD_PID=; fi
+  exec 8>&- 2>/dev/null || true
+}
+take_host() {
+  [ -n "${V3_DEVICE:-}" ] || return 0
+  if [ -n "$DRY" ]; then
+    echo "DRY take_host: flock build/claims-v3/tel-host.lock (fd 8); wait for the other card's block; marker tel_hold_host (no ET_DEVICES); wait for the other card's device processes" >&2
+    return 0
+  fi
+  mkdir -p build/claims-v3
+  exec 8> build/claims-v3/tel-host.lock
+  flock -w 3600 8 || { log "another card's TEL pass held the host for 1 h"; return 1; }
+  local t=0 busy
+  while busy=$(other_card_busy | grep '^block:') && [ -n "$busy" ]; do     # step 2: no marker while its block runs
+    [ "$t" = 0 ] && log "take_host: waiting for the other card's block ($(echo $busy))"
+    [ "$t" -ge 2700 ] && { log "take_host: the other card's block ran for 45 min ($(echo $busy))"; release_host; return 1; }
+    sleep 2; t=$((t + 2))
+  done
+  env -u ET_DEVICES python3 -c 'import os, sys, time
+open("/proc/self/comm", "w").write("tel_hold_host")
+p, t0 = int(sys.argv[1]), time.time()
+while time.time() - t0 < 7200:
+    try:
+        os.kill(p, 0)
+    except OSError:
+        break
+    time.sleep(2)' "$$" < /dev/null > /dev/null 2>&1 8>&- 9>&- &
+  HOLD_PID=$!
+  sleep 3                                                  # a queue that passed wait_free just now has started its block
+  local said=
+  while busy=$(other_card_busy) && [ -n "$busy" ]; do
+    [ -z "$said" ] && { log "take_host: waiting for the other card ($(echo $busy))"; said=1; }
+    [ "$t" -ge 2700 ] && { log "take_host: the other card stayed busy for 45 min ($(echo $busy))"; release_host; return 1; }
+    sleep 15; t=$((t + 15))
+  done
+  return 0
+}
+take_host || exit 3
+trap 'release_host' EXIT                                   # block_begin and the helpers below replace it with their own
+others_present && exit 3
 EXPN=tel; [ -n "$SMOKE" ] && EXPN=tel-smoke
 # A leftover directory of this pass (interrupted, or V3_FORCE=1 over a finished one) is set aside, never appended to
 PDIR=$DATA_ROOT/$EXPN/p$PASS
@@ -33,12 +145,11 @@ fi
 block_begin "$EXPN" "$PASS"
 [ -n "$SMOKE" ] && sha256sum tools/claims-v3/lib.sh $TEL/* > "$OUT/code.sha256" 2>/dev/null
 mkdir -p "$OUT/gov" "$OUT/trace" "$OUT/dbg"
-CARDN=${CARD#aifoundry}
 
 # ---- durations (s) and counts: the full pass, or the smoke check (<= 60 s of card time)
 if [ -z "$SMOKE" ]; then
   Q0=60 GAP=30 QARM=60 PWR_S=60 L10_N=450 E10_S=60 E20_S=60 E40_S=30 VOLT_S=60
-  GOV_N=5 GOV_S=2 R_PRE=5 R_GAP=10 R_POST=12 R_N=3 R_BURST=3
+  GOV_N=5 GOV_S=2 R_PRE=5 R_GAP=10 R_POST=$RPOST R_N=3 R_BURST=3
   X2_S=7 X2_AT=4 X2_AFTER=20 W_N=3 W_S=14 W_AT=3 W_BURST=7 W_GAP=30 W_IDLE=1
 else
   Q0=1 GAP=0 QARM=1 PWR_S=2 L10_N=8 E10_S=2 E20_S=2 E40_S=2 VOLT_S=1
@@ -71,23 +182,23 @@ wait_sampler() {   # wait up to $1 s for the running sampler to finish its --sec
 RESET_USED=; DEBUG_ON=
 restore() {        # safe to call twice: sampler off, SP stats trace on, SP log level back to INFO
   stop_sampler
-  if [ -n "$RESET_USED" ]; then dev_to "$OUT/mgmt.log" "$DEVMNGT" -n 0 -t SPST:enable; RESET_USED=; fi
+  if [ -n "$RESET_USED" ]; then dev_to "$OUT/mgmt.log" "$DEVMNGT" -n "$DMN" -t SPST:enable; RESET_USED=; fi
   if [ -n "$DEBUG_ON" ]; then dev_to "$OUT/mgmt.log" "$ETTELEM" loglevel info; DEBUG_ON=; fi
 }
-trap 'restore' EXIT
+trap 'restore; release_host' EXIT
 trap 'exit 143' TERM INT
 abort() { note "ABORT: $1"; restore; block_end fail "$1"; exit 1; }
 bail_if_others() { others_present || return 0; note "another user appeared before $1"; restore; block_end fail "other user before $1"; exit 3; }
 start_or_abort() { start_sampler "$@" || abort "sampler failed to start ($1)"; }
 
-spst_enable() { mark SPSTEN begin; dev_to "$OUT/mgmt.log" "$DEVMNGT" -n 0 -t SPST:enable; mark SPSTEN end; }
+spst_enable() { mark SPSTEN begin; dev_to "$OUT/mgmt.log" "$DEVMNGT" -n "$DMN" -t SPST:enable; mark SPSTEN end; }
 spst_extract() {   # $1 label; the extract lands in trace/, renamed <t_end>-<label>-<name>.done, listed in extracts.jsonl
   local t0 t1 f nf info
   t0=$(now_ms); mark "X_$1" begin
-  if [ -n "$DRY" ]; then hold10 "$DEVMNGT" -n 0 -t SPST:extract
-  else (cd "$OUT/trace" && hold10 "$DEVMNGT" -n 0 -t SPST:extract >> "$OUT/mgmt.log" 2>&1); fi
+  if [ -n "$DRY" ]; then hold10 "$DEVMNGT" -n "$DMN" -t SPST:extract
+  else (cd "$OUT/trace" && hold10 "$DEVMNGT" -n "$DMN" -t SPST:extract >> "$OUT/mgmt.log" 2>&1); fi
   t1=$(now_ms); mark "X_$1" end
-  for f in "$OUT"/trace/dev0_sp_stats*; do
+  for f in "$OUT"/trace/dev"$DMN"_sp_stats*; do
     [ -e "$f" ] || continue
     case "$f" in *.done) continue ;; esac
     nf="$OUT/trace/$t1-$1-$(basename "$f").done"
@@ -113,7 +224,7 @@ power_poll() {     # <out.csv> <seconds|0> <interval s> <max iterations|0>: one 
     [ "$secs" -gt 0 ] && [ "$(now_ms)" -ge "$end" ] && break
     [ "$max" -gt 0 ] && [ "$i" -ge "$max" ] && break
     i=$((i + 1)); t=$(now_ms); : > "$tmp"
-    dev_to "$tmp" "$DEVMNGT" -m DM_CMD_GET_MODULE_POWER -n 0 -u 2000
+    dev_to "$tmp" "$DEVMNGT" -m DM_CMD_GET_MODULE_POWER -n "$DMN" -u 2000
     w=$(sed -n 's/.*Module Power Output: \([0-9.]*\) W.*/\1/p' "$tmp")
     [ -n "$w" ] && echo "$t,$w" >> "$out"
     if [ -n "$DRY" ] && [ "$i" -ge 2 ]; then echo "DRY (poll loop continues: ${secs}s / ${max} calls, ${iv}s apart)" >&2; break; fi
@@ -125,7 +236,7 @@ volt_poll() {      # <seconds>: DM_CMD_GET_MODULE_VOLTAGE 80 ms apart, bounded b
   local end i=0; end=$(( $(now_ms) + $1 * 1000 ))
   while [ "$(now_ms)" -lt "$end" ]; do
     i=$((i + 1)); echo "T $(now_ms)" >> "$OUT/volt.log"
-    dev_to "$OUT/volt.log" "$DEVMNGT" -m DM_CMD_GET_MODULE_VOLTAGE -n 0 -u 2000
+    dev_to "$OUT/volt.log" "$DEVMNGT" -m DM_CMD_GET_MODULE_VOLTAGE -n "$DMN" -u 2000
     if [ -n "$DRY" ] && [ "$i" -ge 2 ]; then echo "DRY (voltage loop continues for $1 s, 80 ms apart)" >&2; break; fi
     sleep 0.08
   done
@@ -150,36 +261,67 @@ run_arm() {
 }
 arm_len() { case "$1" in Q) echo "$QARM" ;; PWR) echo "$PWR_S" ;; L10) echo $(( L10_N * 15 / 100 + 5 )) ;;
   E10) echo "$E10_S" ;; E20) echo "$E20_S" ;; E40) echo "$E40_S" ;; VOLT) echo "$VOLT_S" ;; esac; }
-heat_a2() {        # aifoundry2 only, full passes only: heat_to 76 with its curve and marks
-  [ "$CARD" = aifoundry2 ] && [ -z "$SMOKE" ] || return 0
-  mark "HEAT$1" begin; heat_to 76 "$OUT/heat$1.jsonl" || note "heat_to 76 gave up (phase $1)"; mark "HEAT$1" end
+heat_gf() {        # governor-free cards only, full passes only: heat_to $HEAT_C with its curve and marks
+  [ -n "$GOV_FREE" ] && [ -z "$SMOKE" ] || return 0
+  mark "HEAT$1" begin; heat_to "$HEAT_C" "$OUT/heat$1.jsonl" || note "heat_to $HEAT_C gave up (phase $1)"; mark "HEAT$1" end
+}
+idle_clock() {     # <label>: the card's idle operating point (ettelem config), read with no sampler running
+  local tmp="$OUT/.ic.tmp" j
+  : > "$tmp"
+  mark "IC_$1" begin
+  dev_to "$tmp" "$ETTELEM" config
+  mark "IC_$1" end
+  j=$(grep '^{' "$tmp" | tail -1)
+  echo "{\"label\":\"$1\",\"t_ms\":$(now_ms)${j:+,\"config\":$j}}" >> "$OUT/idle_clock.jsonl"
+  rm -f "$tmp"
+}
+wake600() {        # <label>: read the idle clock; on a WAKE card (aifoundry1's), full passes, wake it if off 600 MHz
+  # Card 0 (firmware 1.4.1) idles in a 300 MHz low-power state, and on 25 Sep its first launch after such an idle drew no
+  # power until its end (lessons.md): so before the reset segment and the DEBUG block, up to two 2 s heater launches
+  # bring it to 600 MHz, where it then stayed, and the measured bursts do not start from the low-power state.
+  local k m
+  idle_clock "$1"
+  [ -n "$WAKE" ] && [ -z "$SMOKE" ] || return 0
+  for k in 1 2; do
+    m=$(tail -1 "$OUT/idle_clock.jsonl" | sed -n 's/.*"minion_mhz":\([0-9]*\).*/\1/p')
+    if [ -n "$DRY" ]; then echo "DRY wake600 $1: when the idle clock reads off 600 MHz, one 2 s heater launch and a re-read" >&2; return 0; fi
+    { [ -z "$m" ] || [ "$m" = 600 ]; } && return 0
+    note "wake $1: the idle clock reads $m MHz, one 2 s launch"
+    mark "WAKE_$1" begin
+    hold10 "$HEATER" --test fma --type fp32 --pattern none --values randn --shires 0xffffffff --per-shire 32 --seconds 2 --seed 1 > /dev/null 2>&1
+    mark "WAKE_$1" end
+    idle_clock "$1+wake$k"
+  done
 }
 fma() {            # fma <values> <seconds> <seed> [budget]: the sparsity_host fma launch of the plan
   echo "$SPARSITY" --test fma --type fp32 --pattern none --values "$1" --shires 0xffffffff --per-shire 32 \
        --seconds "$2" ${4:+--budget "$4"} --seed "$3"
 }
 
-# etcfg (a read-only ioctl on /dev/et0_mgmt) is a source file: compile it once per host, outside the data tree
+# etcfg (a read-only ioctl on /dev/et<n>_mgmt) is a source file: compile it once per host, outside the data tree
 ETCFG=$V3_ROOT/build/claims-v3-bin/etcfg
 if [ ! -x "$ETCFG" ]; then
   if [ -n "$DRY" ]; then echo "DRY gcc -O2 -I/opt/et/include -o $ETCFG tools/etcfg/etcfg.c" >&2
   else mkdir -p "$(dirname "$ETCFG")"; gcc -O2 -I/opt/et/include -o "$ETCFG" tools/etcfg/etcfg.c || abort "etcfg did not compile"; fi
 fi
 
-ORDER=$(python3 "$TEL/tel_util.py" order $(( CARDN * 100 + PASS )))
-echo "{\"seed\":$(( CARDN * 100 + PASS )),\"order\":\"$ORDER\"}" > "$OUT/arms_order.json"
-note "pass $PASS on $CARD, arm order: $ORDER${SMOKE:+ (smoke)}"
+SEED=$(( SEEDB * 100 + PASS ))
+ORDER=$(python3 "$TEL/tel_util.py" order "$SEED")
+echo "{\"seed\":$SEED,\"order\":\"$ORDER\"}" > "$OUT/arms_order.json"
+echo "{\"card\":\"$CARD\",\"device\":\"${V3_DEVICE:-}\",\"dm_node\":$DMN,\"mgmt\":\"/dev/et${DEVN}_mgmt\",\"gov_free\":\"$GOV_FREE\",\"heat_c\":$HEAT_C,\"gov_c\":$GOV_C,\"r_post_s\":$R_POST,\"wake\":\"$WAKE\"}" > "$OUT/card.json"
+note "pass $PASS on $CARD (dev_mngt_service -n $DMN), arm order: $ORDER${SMOKE:+ (smoke)}"
 
 # ---- phase 1: governor readouts (INFO level, no sampler)
 mark GOV begin
 dev_to "$OUT/mgmt.log" "$ETTELEM" loglevel info          # a previous interrupted block may have left DEBUG on
-if [ "$CARD" = aifoundry2 ] && [ -z "$SMOKE" ] && { [ -z "${BLOCK_C0:-}" ] || [ "$BLOCK_C0" -lt 68 ]; }; then
-  heat_a2 0                                                # the plan's rule: aifoundry2 readouts on a die >= 68 C
+idle_clock start                                           # the idle state as found (INFO level), before any heating or launch
+if [ -n "$GOV_FREE" ] && [ -z "$SMOKE" ] && { [ -z "${BLOCK_C0:-}" ] || [ "$BLOCK_C0" -lt "$GOV_C" ]; }; then
+  heat_gf 0                                                # the plan's rule: governor-free readouts on a die >= 68 C
 fi
 echo "${BLOCK_C0:-}" > "$OUT/gov/die_block_start.txt"
 [ -e "$OUT/heat0.jsonl" ] && tail -1 "$OUT/heat0.jsonl" > "$OUT/gov/die_after_heat.json"
 sptrace "$OUT/gov/sp0.bin"
-dev_to "$OUT/gov/driver.json" "$ETCFG" /dev/et0_mgmt
+dev_to "$OUT/gov/driver.json" "$ETCFG" "/dev/et${DEVN}_mgmt"
 for i in $(seq 1 "$GOV_N"); do
   launch "$OUT/gov/runs.jsonl" "G$i" $(fma zeros "$GOV_S" 1 5)
   [ "$i" -lt "$GOV_N" ] && zz 3
@@ -187,11 +329,17 @@ done
 zz 1
 sptrace "$OUT/gov/sp1.bin"                                 # after the launches, before any config query
 dev_to "$OUT/gov/config.json" "$ETTELEM" config
-dev_to "$OUT/gov/fw.txt" "$DEVMNGT" -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS -n 0 -u 5000
+dev_to "$OUT/gov/fw.txt" "$DEVMNGT" -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS -n "$DMN" -u 5000
 mark GOV end
+# The first dev_mngt_service call of the pass: on aifoundry1 its node must be this card (the two cards' firmware differ)
+if [ -n "$FW_EXPECT" ] && [ -z "$DRY" ]; then
+  fwv=$(sed -n 's/.*Firmware release revision: Major: \([0-9]*\) Minor: \([0-9]*\) Revision: \([0-9]*\).*/\1.\2.\3/p' "$OUT/gov/fw.txt" | head -1)
+  [ "$fwv" = "$FW_EXPECT" ] || abort "dev_mngt_service -n $DMN read firmware '${fwv:-none}', $CARD has $FW_EXPECT: wrong node or no reply (set V3_DM_NODE / V3_TEL_FW_EXPECT)"
+fi
 
 # ---- phase 2: the arms
-heat_a2 1
+heat_gf 1
+[ -z "$SMOKE" ] && idle_clock arms                        # the idle state the quiet segments and the arms start in
 spst_enable
 spst_extract X0
 quiet Q0 "$Q0"
@@ -202,10 +350,12 @@ for arm in $ORDER; do
   quiet "G_$arm" "$GAP"
 done
 [ -n "$SMOKE" ] && spst_extract ARMS
+[ -z "$SMOKE" ] && idle_clock arms_end
 
 # ---- phase 3: the --reset-ms segment with three enercat bursts
 bail_if_others "the reset segment"
-heat_a2 2
+heat_gf 2
+[ -z "$SMOKE" ] && wake600 reset                          # the idle state before the bursts (aifoundry1: woken to 600 MHz)
 mark R begin
 RESET_USED=1                                               # set first: a failed start's attempts reset the stats too
 start_or_abort "$OUT/reset.jsonl" $(( R_PRE + R_N * (R_BURST + 8) + (R_N - 1) * R_GAP + R_POST + 10 )) --reset-ms 1000
@@ -216,7 +366,7 @@ for b in $(seq 1 "$R_N"); do
   mark "B$b" end
   [ "$b" -lt "$R_N" ] && zz "$R_GAP"
 done
-zz "$R_POST"                                               # >= 8 s of 1 s windows after the last burst (P6)
+zz "$R_POST"                                               # >= 8 s of 1 s windows after the last burst (P6; 20 s on aifoundry1)
 stop_sampler
 mark R end
 spst_enable; RESET_USED=
@@ -224,7 +374,8 @@ spst_extract R
 
 # ---- phase 4: DEBUG block (X2 captures, X3 windows)
 bail_if_others "the DEBUG block"
-heat_a2 3                                                  # a no-op when the die is still >= 76 C
+heat_gf 3                                                  # a no-op when the die is still >= 76 C
+wake600 debug                                              # the idle state of the x2-idle capture (TEL-Q Q4, TEL-R R6)
 dev_to "$OUT/mgmt.log" "$ETTELEM" loglevel debug; DEBUG_ON=1
 mark DEBUG begin
 zz 2                                                       # a full SP pass at DEBUG in the 8 KB ring
@@ -256,12 +407,13 @@ done
 mark DEBUG end
 dev_to "$OUT/mgmt.log" "$ETTELEM" loglevel info; DEBUG_ON=
 spst_enable; RESET_USED=
+[ -z "$SMOKE" ] && idle_clock end
 
 # ---- pack: one merged SP stats file, gzip the telemetry, a check of what the pass holds
 python3 "$TEL/tel_util.py" merge-spst "$OUT/trace" >> "$OUT/notes.txt" 2>&1
-rm -f "$OUT/trace/dev0_traces.txt"                         # dev_mngt_service's text decode of the extracts: merged.spst has it all
+rm -f "$OUT/trace/dev${DMN}_traces.txt"                    # dev_mngt_service's text decode of the extracts: merged.spst has it all
 for f in "$OUT"/*.jsonl "$OUT"/*.csv "$OUT"/volt.log "$OUT"/mgmt.log "$OUT"/dbg/*.jsonl "$OUT"/trace/merged.spst; do
-  case "$(basename "$f")" in marks.jsonl|arms_order.json) continue ;; esac
+  case "$(basename "$f")" in marks.jsonl|arms_order.json|idle_clock.jsonl) continue ;; esac
   [ -s "$f" ] && gzip -f "$f"
 done
 python3 "$TEL/tel_util.py" check "$OUT" ${SMOKE:+--smoke} > "$OUT/check.json"; rc=$?

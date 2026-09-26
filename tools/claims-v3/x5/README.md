@@ -1,7 +1,8 @@
 # x5: V3-X5 (PLAN3 §2, suggested E40)
 
 Is aifoundry3's 0.92-0.95 switching scale a property of the card, or of its cooler launch temperature? Each card
-launches the same patterns at two temperatures. Registered item: X5 (9 claims).
+launches the same patterns at two temperatures. Registered item: X5 (9 claims), on aifoundry2 and aifoundry3; since
+25 Sep also run on aifoundry1's two cards (section "Four cards").
 
 ## What a pass does
 
@@ -15,9 +16,13 @@ cool arms of a pass therefore run the same random tiles, and the passes differ f
 |---|---|---|---|
 | aifoundry2 | 83 / 86 C | 76 / 79 C | 83.9 / 76.9 C, leak 0.81 W/C |
 | aifoundry3 | 65 / 68 C | 55 / 60 C | 65.9 / 55.9 C, leak 0.55 W/C |
+| aifoundry1-c0, -c1 | 83 / 86 C | 76 / 79 C | 83.9 / 76.9 C, leak 0.81 W/C (aifoundry2's) |
+
+The temperatures follow the governor (`GOV_FREE`): a governor-free card keeps both arms above the window where its
+governor lifts the clock (>= 76 C); aifoundry1's cards have aifoundry2's TDP 65 W and 65 C threshold.
 
 Data: `$DATA_ROOT/x5/p<N>/hi<b>/` and `lo<b>/`. These are session directories with the same files as an abla pass.
-`block.json` is in `p<N>/`. `--smoke` (`x5-smoke`) holds the card for about 12 s (up to ~25 s on aifoundry2, which
+`block.json` is in `p<N>/`. `--smoke` (`x5-smoke`) holds the card for about 12 s (up to ~25 s on a governor-free card, which
 first runs lib.sh's `heat_to 76` before any sampler opens the management node): both arms' session paths, including
 the sampler stop and restart, one heater burst each, and 3 s of fp32 uniform (hot) and fp16 randn (cool).
 The runner changes of `../abla/README.md` apply (use count 0 before each arm's sampler starts, the sampler's own
@@ -25,18 +30,19 @@ count as the baseline, a card check before every heater burst, no blind heating)
 
 ## Card minutes per pass
 
-| | aifoundry2 | aifoundry3 |
-|---|---|---|
-| per pass (hot + cool, 10 runs) | ~13-15 min (first cool run waits for ~88 -> 76 C) | ~10 min if 68 C is reached; up to ~20 min if not (60 bursts per hot run) |
-| 3 passes (plan: 38 / 30) | ~40-45 min | 30-60 min |
-| safety caps (hot / cool arm) | 20 / 20 min | 25 / 15 min |
+| | aifoundry2 | aifoundry3 | aifoundry1-c0, aifoundry1-c1 |
+|---|---|---|---|
+| per pass (hot + cool, 10 runs) | ~13-15 min (first cool run waits for ~88 -> 76 C) | ~10 min if 68 C is reached; up to ~20 min if not (60 bursts per hot run) | ~13-15 min each (aifoundry2's protocol; unmeasured cooling) |
+| 3 passes (plan: 38 / 30) | ~40-45 min | 30-60 min | ~40-45 min each |
+| safety caps (hot / cool arm) | 20 / 20 min | 25 / 15 min | 20 / 20 min |
 
 Schedule `x5 1`, `x5 2`, `x5 3` in the AM rounds, as the plan's "X5 hi<b> + lo<b>" items.
 
 ## What is dropped, and why
 
-The rules are the same as abla's. A run is dropped if a launch is not ok, it has no timed launch, the telemetry has a
-gap, or any mhz.minion sample in [t0-2 s, t1] is not 600. On aifoundry2 the cool arm's 76 C is kept above the
+The rules are the same as abla's. For the registered outcome a run is dropped if a launch is not ok, it has no timed
+launch, the telemetry has a gap, or any mhz.minion sample in [t0-2 s, t1] is not 600; the all-cards outcome uses the
+busy rule (samples in [t0+0.3 s, t1] only; ../abla/README.md "Four cards"). On aifoundry2 the cool arm's 76 C is kept above the
 governor's window, so a run that is still off 600 MHz is dropped. The V3-ABL-A dropout rule applies to power samples.
 A pass 4+ replaces dropped runs, up to 3 per pattern per temperature. Fewer than 3 gives INSUFFICIENT.
 
@@ -74,11 +80,34 @@ A pass 4+ replaces dropped runs, up to 3 per pattern per temperature. Fewer than
 - **Power.** At n = 3 v 3, the half-width is about 5.5 x the run sd. The +-0.5 W window needs run sd <= ~0.09 W.
   E15/E20 uniform run sd was 0.04-0.07 W.
 
+## Four cards (25 Sep 2026)
+
+As V3-ABL-A (../abla/README.md "Four cards"). The REGISTERED outcome and verdict stay those of aifoundry2 and
+aifoundry3. `all_cards` tests the card hypothesis, registered for each card (hot - cool inside +-0.5 W for fp32
+uniform and randn), on every card: PASS = card property on every card, CARD-DIFFERENT = on some (`verdict` names
+them), FAIL = on none, INSUFFICIENT = a card lacks 3 kept runs per pattern and arm or has no data. The
+temperature-effect reading (registered on aifoundry3) is reported per card (`temperature_effect_reading`), with the
+launch-shortfall warnings of every card.
+
+**aifoundry1-c0's idle state.** Its firmware can idle at 300 MHz / 398 mV (after a long idle) or at 600 MHz (after a
+launch; aifoundry1 clock test, 25 Sep), and the burst runs at 600 MHz. When the idle bracket is at 300 MHz, switching
+subtracts an idle power that changes with temperature at the low-power state's leakage slope, while the burst's power
+changes at the 600 MHz slope. Hot - cool on that card then carries (busy slope - idle slope) x 7 C besides any change
+in switching: with the busy slope 0.81 W/C and an idle slope of 0.40 W/C it would read about +2.9 W (the synthetic
+test). If the hot and cool arms (or runs within an arm) idled in different states, hot - cool also carries the step
+between the states' idle powers (several watts). The card's result is computed as stated and carries the
+`idle_note` (and `by_idle_state`, the hypothesis on each state's runs alone, when the states are mixed); on that card
+it cannot separate card from temperature, and the page must say so rather than read it as a temperature effect.
+
 ## How to reduce
 
-    python3 tools/claims-v3/x5/reduce.py --data <dir with aifoundry2/ and aifoundry3/> --out x5.json
+    python3 tools/claims-v3/x5/reduce.py --data <dir with one directory per card> --out x5.json \
+        [--expect aifoundry2,aifoundry3,aifoundry1-c0,aifoundry1-c1]
 
-Output: an item list of one item (X5) with per-card intervals, measured launch temperatures and diagnostics, plus
-`x5.runs.json`. It was tested on synthetic sessions: card property, temperature effect, aifoundry3 shortfall, off600
-+ replacement, and partial (validate3/drv/x5/). The committed E9/E20 blocks were also laid out as hi/lo arms to
-check the mechanics only.
+Output: an item list of one item (X5) with per-card intervals (all four cards), measured launch temperatures and
+diagnostics, `all_cards`, plus `x5.runs.json`. It was tested on synthetic sessions: card property, temperature
+effect, aifoundry3 shortfall, off600 + replacement, and partial (validate3/drv/x5/), and on synthetic four-card
+sessions (validate3/fourcards/x5/: card property on all four; aifoundry1-c0's idle state with a lower leakage slope,
+CARD-DIFFERENT; a card missing, INSUFFICIENT; validate3/fourcards/review/syn/x5/: c0's idle states mixed), and on
+aifoundry2's real passes p1-p2, where the registered output is identical to the two-card reducer's.
+The committed E9/E20 blocks were also laid out as hi/lo arms to check the mechanics only.

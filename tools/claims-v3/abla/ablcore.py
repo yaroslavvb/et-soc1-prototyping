@@ -15,7 +15,18 @@ tools/ettelem/analyze_ablation.py:
   per_s       work per second as analyze_ablation.py (MAC/s for fma, instructions/s for spin); layers/s for gemv
               as sum(iters) / (t1 - t0) from runs.jsonl (analyze_ablation.py leaves gemv work empty)
 A run is KEPT when every launch printed ok, it has at least one timed launch (launch >= 0), the telemetry covers
-both windows, and every mhz.minion sample in [t0-2.0, t1] (all samples its metrics read) is 600.
+both windows, and every mhz.minion sample in [t0-2.0, t1] (all samples its metrics read) is 600. This registered
+rule decides the REGISTERED outcome, over aifoundry2 and aifoundry3 (CARDS), exactly as before the four-card campaign.
+
+Four cards (25 Sep 2026: aifoundry1's two cards joined; README "Four cards"): a run is also judged by the BUSY rule
+(kept_busy): the same conditions, but the clock test covers only the samples the busy metrics read, [t0+0.3, t1]
+(p_mean's window, which holds p_early's). The idle bracket's clock is recorded instead of tested (idle_state,
+idle_mhz_min/max, idle_mv), because aifoundry1 card 0's firmware idles at 300 MHz / 398 mV between kernels, which
+the registered rule would count against every burst. The ALL-CARDS outcome of every item uses the busy rule on every
+card (all_cards_block); aifoundry1's cards take aifoundry2's reduction parameters (params_card). Card 0 can also idle at
+600 MHz after a launch, so its brackets may be in different states from run to run: a card whose kept runs idled in
+more than one state is flagged (idle_mixed_on), and the item on each state's runs alone (state_view) is reported
+beside the outcome as by_idle_state, never deciding it.
 """
 import collections
 import glob
@@ -27,8 +38,11 @@ import re
 
 import numpy as np
 
-CARDS = ("aifoundry2", "aifoundry3")
-SHORT = {"aifoundry2": "a2", "aifoundry3": "a3"}
+CARDS = ("aifoundry2", "aifoundry3")          # the registered cards: the registered outcome is over these two
+CAMPAIGN = ("aifoundry2", "aifoundry3", "aifoundry1-c0", "aifoundry1-c1")   # the four-card campaign (all_cards)
+PINNED = ("aifoundry3",)                       # clock pinned at 600 MHz by a boot service; every other card is governor-free
+SHORT = {"aifoundry2": "a2", "aifoundry3": "a3", "aifoundry1-c0": "a1c0", "aifoundry1-c1": "a1c1"}
+BUSY_S = 0.3                                   # the busy window starts where p_mean's does: [t0 + 0.3 s, t1]
 MAC_PER_OP = {"fp32": 4096, "fp16": 8192, "int8": 16384}
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 
@@ -69,6 +83,7 @@ class Session:
         self.P = np.array([float(s["board_w"]) for s in tel])
         self.T = np.array([float(s.get("temp_c", {}).get("minshire", [np.nan])[0]) for s in tel])
         self.mhz = np.array([float(s.get("mhz", {}).get("minion", np.nan)) for s in tel])
+        self.mv = np.array([float(s.get("die_mv", {}).get("minion", np.nan)) for s in tel])
         self.launches = collections.OrderedDict()
         for r in load_jsonl(os.path.join(d, "runs.jsonl")):
             if r.get("block", -9) >= 0 and "config" in r:
@@ -94,9 +109,10 @@ def run_metrics(S, key, leak, launch):
     en = S.ends.get(key, {})
     r = {"block": block, "config": cfg, "launches": len(ls), "rc": en.get("rc"), "start_temp": st.get("start_temp"),
          "approach_ms": st.get("approach_ms"), "heats": st.get("heats"), "preheat_reached": st.get("preheat_reached"),
-         "seed": st.get("seed"), "waited_ms": st.get("waited_ms"), "kept": False, "reason": ""}
+         "seed": st.get("seed"), "waited_ms": st.get("waited_ms"), "kept": False, "reason": "",
+         "kept_busy": False, "reason_busy": "", "idle_mhz_start": st.get("idle_mhz"), "idle_mv_start": st.get("idle_mv")}
     if not ls:
-        r["reason"] = "no launch output" + (f" (host exit {en.get('rc')})" if en else "")
+        r["reason"] = r["reason_busy"] = "no launch output" + (f" (host exit {en.get('rc')})" if en else "")
         return r
     r0 = ls[0]
     timed = [x for x in ls if x.get("launch", 0) >= 0]
@@ -112,12 +128,12 @@ def run_metrics(S, key, leak, launch):
                   "cycles_calib": [x["cycles_per_op"] for x in ls if x.get("launch", 0) < 0],
                   "cycles_per_op": float(np.mean([x["cycles_per_op"] for x in (ls[1:] if len(ls) > 1 else ls)]))})
     if S.n_samples == 0:
-        r["reason"] = "no telemetry"
+        r["reason"] = r["reason_busy"] = "no telemetry"
         return r
     early, before, run_w = S.sel(t0 + 1.0, t0 + 3.0), S.sel(t0 - 2.0, t0 - 0.3), S.sel(t0 + 0.3, t1)
     clock_w = S.sel(t0 - 2.0, t1)
     if early.sum() < 5 or before.sum() < 3 or run_w.sum() < 3:
-        r["reason"] = f"telemetry gap (early {int(early.sum())}, before {int(before.sum())} samples)"
+        r["reason"] = r["reason_busy"] = f"telemetry gap (early {int(early.sum())}, before {int(before.sum())} samples)"
         return r
     Pe, Te = S.P[early], S.T[early]
     med = float(np.median(Pe))
@@ -129,6 +145,16 @@ def run_metrics(S, key, leak, launch):
     p80_d = p_early_d - leak * (t_early - launch)
     mz = S.mhz[clock_w]
     mz = mz[~np.isnan(mz)]
+    bz = S.mhz[S.sel(t0 + BUSY_S, t1)]          # the busy samples (four-card rule)
+    bz = bz[~np.isnan(bz)]
+    iz = S.mhz[before]                          # the idle bracket p_before reads: recorded, not tested
+    iz = iz[~np.isnan(iz)]
+    iv, bv = S.mv[before], S.mv[run_w]
+    iv, bv = iv[~np.isnan(iv)], bv[~np.isnan(bv)]
+    r.update({"idle_mhz_min": float(iz.min()) if len(iz) else None, "idle_mhz_max": float(iz.max()) if len(iz) else None,
+              "idle_state": (f"{int(iz.min())}" if iz.min() == iz.max() else f"mixed {int(iz.min())}-{int(iz.max())}") if len(iz) else None,
+              "idle_mv": float(iv.mean()) if len(iv) else None, "busy_mv": float(bv.mean()) if len(bv) else None,
+              "busy_mhz_min": float(bz.min()) if len(bz) else None, "busy_mhz_max": float(bz.max()) if len(bz) else None})
     i0 = int(np.searchsorted(S.t, t0)) - 1
     r.update({"p_before": p_before, "p_early": p_early, "p_early_d": p_early_d, "dropped_samples": int((~keep).sum()),
               "t_early": t_early, "p80": p80, "p80_d": p80_d, "dyn": p80 - p_before, "switching": p80_d - p_before,
@@ -151,17 +177,24 @@ def run_metrics(S, key, leak, launch):
     g = S.sel(t0 + 1.0, t1 - 0.2)
     if g.sum() >= 10 and np.nanmax(S.T[g]) - np.nanmin(S.T[g]) >= 3:
         r["drift_w_per_c"] = float(np.polyfit(S.T[g], S.P[g], 1)[0])
-    # keep / drop
+    # keep / drop (registered rule: kept; four-card busy rule: kept_busy)
     if not r["all_ok"]:
-        r["reason"] = "a launch did not print ok"
+        r["reason"] = r["reason_busy"] = "a launch did not print ok"
     elif not timed:
-        r["reason"] = "no timed launch"
-    elif len(mz) == 0:
-        r["reason"] = "no clock samples"
-    elif mz.min() != 600 or mz.max() != 600:
-        r["reason"] = f"mhz.minion {int(mz.min())}-{int(mz.max())} != 600"
+        r["reason"] = r["reason_busy"] = "no timed launch"
     else:
-        r["kept"] = True
+        if len(mz) == 0:
+            r["reason"] = "no clock samples"
+        elif mz.min() != 600 or mz.max() != 600:
+            r["reason"] = f"mhz.minion {int(mz.min())}-{int(mz.max())} != 600"
+        else:
+            r["kept"] = True
+        if len(bz) == 0:
+            r["reason_busy"] = "no clock samples in the burst"
+        elif bz.min() != 600 or bz.max() != 600:
+            r["reason_busy"] = f"busy mhz.minion {int(bz.min())}-{int(bz.max())} != 600"
+        else:
+            r["kept_busy"] = True
     return r
 
 
@@ -179,6 +212,61 @@ def session_runs(d, leak, launch, extra=None):
             r.update(extra)
         out.append(r)
     return out
+
+
+# ------------------------------------------------------------------------------------------------ cards
+def short(card):
+    return SHORT.get(card, card)
+
+
+def params_card(card):
+    """The registered card whose reduction parameters (leak, launch temperature, targets) a card takes: aifoundry3's
+    for the pinned card, aifoundry2's for every governor-free card (aifoundry1's two cards: same TDP 65 W and 65 C
+    threshold, heated to the same launch temperatures; their own leakage slopes are unmeasured)."""
+    return "aifoundry3" if card in PINNED else "aifoundry2"
+
+
+def cards_present(data, exp):
+    """Card directories under `data` that hold an `exp` directory (any name: campaign cards first)."""
+    try:
+        found = sorted(d for d in os.listdir(data) if os.path.isdir(os.path.join(data, d, exp)))
+    except OSError:
+        found = []
+    return [c for c in CAMPAIGN if c in found] + [c for c in found if c not in CAMPAIGN]
+
+
+def card_list(data, exp, expect=CAMPAIGN):
+    """The cards an all-cards outcome covers: the expected ones (present or not) and any other card with data."""
+    return list(expect) + [c for c in cards_present(data, exp) if c not in expect]
+
+
+def busy_view(runs):
+    """The runs with `kept` / `reason` taken from the four-card busy rule (copies; the originals are unchanged)."""
+    out = []
+    for r in runs:
+        q = dict(r)
+        q["kept"], q["reason"] = r.get("kept_busy", False), r.get("reason_busy", r.get("reason", ""))
+        out.append(q)
+    return out
+
+
+def state_view(runs, state):
+    """The busy view restricted to the runs whose idle bracket was in `state` ("600", "300", "mixed 300-600", ...):
+    for a card whose kept runs idled in more than one state (aifoundry1-c0: after a launch it can stay at 600 MHz for a
+    while, after a long idle it drops to 300 MHz), so that a difference between two configurations is taken between
+    runs that subtract the same idle state. Reported beside the all-cards outcome, never deciding it."""
+    out = []
+    for q in busy_view(runs):
+        if q["kept"] and (q.get("idle_state") or "unknown") != state:
+            q["kept"], q["reason"] = False, f"idle state {q.get('idle_state')} (view: {state} only)"
+        out.append(q)
+    return out
+
+
+def mixed_states(idle_sum):
+    """The idle states of a card's busy-rule-kept runs when there is more than one, else []."""
+    st = sorted((idle_sum or {}).get("idle_states_mhz", {}))
+    return st if len(st) > 1 else []
 
 
 def pass_dirs(data, card, exp):
@@ -401,6 +489,108 @@ def combine(per_card):
     if all(o == "FAIL" for o in oc):
         return "FAIL"
     return "CARD-DIFFERENT"
+
+
+# ------------------------------------------------------------------------------------------------ all cards
+TESTED = ("PASS", "FAIL", "INSUFFICIENT")
+BUSY_RULE = ("busy rule on every card: a run is kept when every launch printed ok, it has a timed launch, the telemetry "
+             "covers its windows and every mhz.minion sample in [t0+0.3 s, t1] is 600; the idle bracket [t0-2, t0-0.3 s] "
+             "is not tested, its clock is recorded")
+IDLE_EFFECT = {
+    "difference": "the item compares over-idle values of configurations launched at the same temperature on the same card, "
+                  "so the idle state enters both sides and cancels (up to the scatter of p_before)",
+    "absolute": "the item uses over-idle values themselves: on a card whose idle bracket sits below the burst's operating "
+                "point they include the step between idling at 600 MHz and idling at the card's idle clock, so they are "
+                "not comparable with the other cards' values",
+    "temperature": "the item compares over-idle values at two launch temperatures: with the idle bracket at a lower "
+                   "operating point than the burst, hot - cool also carries (busy leakage slope - idle leakage slope) x the "
+                   "temperature step, so it does not separate card from temperature on that card",
+}
+
+
+def combine_all(status):
+    """All-cards outcome from per-card outcomes, over the cards on which the item is tested (REPORTED / N/A cards are
+    left out): PASS on every card, FAIL on every card, CARD-DIFFERENT on some; INSUFFICIENT when a card lacks the
+    kept repeats (or has no data)."""
+    t = [o for o in status.values() if o in TESTED]
+    if not t:
+        return "N/A"
+    if "INSUFFICIENT" in t:
+        return "INSUFFICIENT"
+    if all(o == "PASS" for o in t):
+        return "PASS"
+    if all(o == "FAIL" for o in t):
+        return "FAIL"
+    return "CARD-DIFFERENT"
+
+
+def idle_summary(runs):
+    """A card's idle operating point in an experiment: the idle-bracket clocks of its busy-rule-kept runs, and the
+    idle bracket's board power (p_before, at the launch temperature) per idle state: the firmware releases idle at
+    different powers even at 600 MHz (26 W on 1.4.1, 33-35 W on 1.2.0, 32 W on 1.3.1; aifoundry1 clock test, 25 Sep)."""
+    ks = [r for r in runs if r.get("kept_busy")]
+    states = collections.Counter(r.get("idle_state") or "unknown" for r in ks)
+    mv = [r["idle_mv"] for r in ks if r.get("idle_mv") is not None]
+    bmv = [r["busy_mv"] for r in ks if r.get("busy_mv") is not None]
+    off = sum(n for st, n in states.items() if st != "600")
+    pw = collections.defaultdict(list)
+    for r in ks:
+        if r.get("p_before") is not None:
+            pw[r.get("idle_state") or "unknown"].append(r["p_before"])
+    allw = [w for ws in pw.values() for w in ws]
+    return {"kept_runs": len(ks), "idle_states_mhz": dict(states), "idle_mhz": states.most_common(1)[0][0] if states else None,
+            "idle_mv": round(float(np.mean(mv)), 1) if mv else None, "busy_mhz": 600,
+            "busy_mv": round(float(np.mean(bmv)), 1) if bmv else None, "runs_idle_off_600": off, "differs": off > 0,
+            "idle_w": round(float(np.mean(allw)), 2) if allw else None,
+            "idle_w_by_state": {st: round(float(np.mean(ws)), 2) for st, ws in pw.items()}}
+
+
+def all_cards_block(status, present, expect=CAMPAIGN, registered=None, idle=None, idle_effect=None, note=None,
+                    by_state=None):
+    """The `all_cards` field of an item. status: {card: PASS/FAIL/INSUFFICIENT/REPORTED/N/A} under the busy rule;
+    registered: {card: registered outcome} of aifoundry2/aifoundry3, to flag where the busy rule changes a card's
+    outcome; idle: {card: idle_summary} for items about energy over idle, with idle_effect a key of IDLE_EFFECT;
+    by_state: {card: {idle state: outcome on that state's runs alone}} for cards whose runs idled in more than one
+    state (state_view; reported, not deciding)."""
+    d = {"outcome": combine_all(status), "per_card": dict(status), "rule": BUSY_RULE,
+         "holds_on": [c for c, o in status.items() if o == "PASS"], "fails_on": [c for c, o in status.items() if o == "FAIL"],
+         "insufficient_on": [c for c, o in status.items() if o == "INSUFFICIENT"],
+         "reported_on": [c for c, o in status.items() if o not in TESTED],
+         "cards_missing": [c for c in expect if c not in present]}
+    if registered:
+        d["registered_cards_busy_vs_registered_rule"] = {c: {"busy_rule": status.get(c), "registered_rule": o,
+                                                             "same": status.get(c) == o} for c, o in registered.items()}
+    if idle is not None:
+        d["idle_clock"] = {c: idle[c] for c in status if c in idle}
+        diff = [c for c in status if c in idle and idle[c].get("differs")]
+        d["idle_differs_on"] = diff
+        if diff:
+            d["idle_note"] = ("; ".join(f"{c}: {idle[c]['runs_idle_off_600']} of {idle[c]['kept_runs']} kept runs had the idle "
+                                        f"bracket off 600 MHz ({idle[c]['idle_states_mhz']}, {idle[c]['idle_mv']} mV idle vs "
+                                        f"{idle[c]['busy_mv']} mV busy; idle W by state {idle[c].get('idle_w_by_state')})" for c in diff)
+                              + (f". {IDLE_EFFECT[idle_effect][0].upper()}{IDLE_EFFECT[idle_effect][1:]}" if idle_effect else ""))
+            mixed = [c for c in diff if mixed_states(idle[c])]
+            if mixed:
+                d["idle_mixed_on"] = mixed
+                d["idle_note"] += (". MIXED idle states on " + ", ".join(mixed) + ": runs of one configuration or of two "
+                                   "configurations idled in different states, so a difference between them carries the step "
+                                   "between the states' idle powers and does NOT cancel; the outcome is computed as stated, and "
+                                   "by_idle_state gives the item on each state's runs alone (reported, not deciding)")
+    if by_state:
+        d["by_idle_state"] = by_state
+    if note:
+        d["note"] = note
+    return d
+
+
+def reading_all(ac):
+    """One line for the page: the all-cards outcome and each card's."""
+    return (f"all cards: {ac['outcome']} (" + ", ".join(f"{short(c)} {o}" for c, o in ac["per_card"].items()) + ")"
+            + (f"; missing {', '.join(ac['cards_missing'])}" if ac["cards_missing"] else "")
+            + (f"; idle state differs on {', '.join(short(c) for c in ac['idle_differs_on'])}" if ac.get("idle_differs_on") else "")
+            + (f" (mixed on {', '.join(short(c) for c in ac['idle_mixed_on'])}"
+               + ("; by idle state " + "; ".join(f"{short(c)} {v}" for c, v in ac["by_idle_state"].items()) if ac.get("by_idle_state") else "")
+               + ")" if ac.get("idle_mixed_on") else ""))
 
 
 def jsonable(v):

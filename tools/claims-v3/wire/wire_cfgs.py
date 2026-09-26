@@ -8,7 +8,8 @@ configs.json (next to this file) holds the 28 configurations of PLAN3 V3-WIRE, i
 --set v2 --only wu/p0/,wu/p0.5/,wu/p1/,wsep/p0/,wsep/p0.5/, in the runner's own list order. The order printed is
 random.Random(S).shuffle of that list's indices, which is exactly the order run_wire.py uses for its pass p when
 S = --seed + p; the block passes S = 31 + (pass - 1) on aifoundry2 and 41 + (pass - 1) on aifoundry3, so block pass
-N reproduces the runner's pass N-1 of `--passes 6 --seed 31` (a2) / `--seed 41` (a3).
+N reproduces the runner's pass N-1 of `--passes 6 --seed 31` (a2) / `--seed 41` (a3); aifoundry1's cards, which the
+runner never ran, take 51 + (pass - 1) (aifoundry1-c0) and 61 + (pass - 1) (aifoundry1-c1), orders of their own.
 
 The table is used instead of importing run_wire.py on the card so that both cards run byte-identical arguments even
 if ~/nekko's copy of the runner differs; --check-runner compares the table with the tree's run_wire.py.

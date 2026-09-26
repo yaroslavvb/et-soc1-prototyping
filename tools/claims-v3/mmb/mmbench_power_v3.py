@@ -32,6 +32,11 @@ What differs, and why:
  9. Each launcher process's wall time and exit code go to meta.json and results.json (launcher_processes). If the
     calibration process's fixed cost (its wall time minus its launch) plus the planned launches would pass 9 s, the
     timed process runs fewer launches (repeat_planned is kept), so timeout 10 never kills it.
+10. Four cards (README.md "Four cards"): --card takes any card id. aifoundry2 keeps the registered clock rule above,
+    aifoundry3 (pinned) has none, and every other governor-free card (aifoundry1-c0, -c1) takes cardrules.py's busy
+    rule (only samples inside a launch count; a sample below 600 MHz in the first second of the process is the clock
+    rising from the idle state, recorded as ramp). results.json records the idle clock (idle_mhz_minion over the 8 s
+    idle, idle_before_mhz_minion per workload), the clock rule, and whether the workload's power values are kept.
 """
 import argparse
 import gzip
@@ -42,6 +47,10 @@ import statistics
 import subprocess
 import sys
 import time
+
+sys.dont_write_bytecode = True  # no __pycache__ in the tool directory (its files are hashed per block)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import cardrules  # noqa: E402
 
 DRY = bool(os.environ.get("V3_DRY"))
 
@@ -226,7 +235,19 @@ def cmd_finish(args):
             "source": "ettelem telemetry of the block's sampler (tools/claims-v3/mmb/mmbench_power_v3.py finish)"}
 
     # drop flags per launch (PLAN3 V3-MMB): implied_ghz outside 0.595-0.605; on aifoundry2 any mhz.minion != 600
+    clock_rule = cardrules.rule(args.card, args.gov_free)
+    proc_t0 = {}  # the start of each workload's timed process (its first launch): the busy rule's ramp second
     for r in all_runs:
+        proc_t0[r["workload"]] = min(proc_t0.get(r["workload"], r["t_start_ms"]), r["t_start_ms"])
+    for r in all_runs:
+        if clock_rule == "busy":  # aifoundry1's cards: busy samples only (cardrules.py), never the idle either side
+            b = cardrules.busy_launch(r, tel_f, proc_t0[r["workload"]])
+            r["tel_mhz_minion"], r["tel_samples"], r["tel_ramp_mhz"] = b["mhz"], b["samples"], b["ramp"]
+            drop = [] if GHZ_BAND[0] <= r["implied_ghz"] <= GHZ_BAND[1] else ["implied_ghz"]
+            if b["drop"]:
+                drop.append("mhz_minion")
+            r["drop"] = drop
+            continue
         inside = [s for s in tel if r["t_start_ms"] <= s["t_ms"] <= r["t_end_ms"] and mhz_of(s) is not None]
         if not inside:  # a launch shorter than the sample interval: the samples on either side (with a clock reading)
             b = [s for s in tel_f if s["t_ms"] <= r["t_start_ms"]][-1:]
@@ -239,6 +260,8 @@ def cmd_finish(args):
         if args.card == "aifoundry2" and (not inside or r["tel_mhz_minion"] != [600]):
             drop.append("mhz_minion")
         r["drop"] = drop
+    # the idle clock (four cards: aifoundry1-c0 idles at 300 MHz between kernels), so the reducer can tell the state
+    clocks_in = lambda lo, hi: sorted({mhz_of(s) for s in tel_f if lo <= s["t_ms"] <= hi})
 
     results = []
     prev_end = None
@@ -278,19 +301,26 @@ def cmd_finish(args):
             "die_c_mean_power_window": statistics.mean(win_die) if win_die else None,
             "mhz_minion_launches": sorted({m for r in runs for m in r["tel_mhz_minion"]}),
             "dropped_launches": [r["launch"] for r in runs if r["drop"]],
+            # four cards: the idle state before the workload, and whether its power values stand (cardrules.py)
+            "idle_before_mhz_minion": clocks_in(*idle_b_window),
+            "ramp_mhz_minion": sorted({m for r in runs for m in r.get("tel_ramp_mhz", [])}),
+            "power_kept": cardrules.e1_power_kept(args.card, runs, args.gov_free)[0],
+            "power_kept_note": cardrules.e1_power_kept(args.card, runs, args.gov_free)[1],
         })
     summary = {"idle_w": idle_w, "idle_samples": len(idle), "idle_window_ms": [round(t_idle0 + 1000), round(t_idle1)],
                "info": info, "results": results, "shire_mask": meta["args"]["shire_mask"],
                "device": meta["args"]["device"], "card": args.card, "telemetry_samples": len(tel),
                "telemetry_samples_without": {"board_w": len(tel) - len(samples), "mhz": len(tel) - len(tel_f),
                                              "temp_c": len(tel) - len(tel_t)},
-               "launcher_processes": meta.get("procs", []), "timed_workloads": meta.get("workloads", [])}
+               "launcher_processes": meta.get("procs", []), "timed_workloads": meta.get("workloads", []),
+               "clock_rule": clock_rule, "gov_free": cardrules.gov_free(args.card, args.gov_free),
+               "idle_mhz_minion": clocks_in(t_idle0 + 1000, t_idle1)}
     with open(os.path.join(args.out, "results.json"), "w") as f:
         json.dump(summary, f, indent=2)
     with open(os.path.join(args.out, "launch_flags.jsonl"), "w") as f:
         for r in all_runs:
             f.write(json.dumps({k: r[k] for k in ("workload", "launch", "t_start_ms", "t_end_ms", "implied_ghz",
-                                                  "tel_mhz_minion", "tel_samples", "drop")}) + "\n")
+                                                  "tel_mhz_minion", "tel_samples", "drop", "tel_ramp_mhz") if k in r}) + "\n")
     print(f"idle board power: {idle_w:.2f} W (median of {len(idle)} samples)")
     for r in results:
         print(f"{r['workload']}: {r['tflops']:.3f} T, {r['mean_w']:.2f} W ({r['power_samples']} samples), idle before "
@@ -320,7 +350,9 @@ def main():
     f = sub.add_parser("finish")
     f.add_argument("--out", required=True)
     f.add_argument("--telemetry", required=True)
-    f.add_argument("--card", required=True, choices=("aifoundry2", "aifoundry3"))
+    f.add_argument("--card", required=True, help="aifoundry2 | aifoundry3 | aifoundry1-c0 | aifoundry1-c1")
+    f.add_argument("--gov-free", dest="gov_free", type=int, choices=(0, 1), default=None,
+                   help="lib.sh's GOV_FREE (default: aifoundry3 pinned, every other card free)")
     a = p.parse_args()
     if a.cmd == "run":
         a.out, a.rundir = os.path.abspath(a.out), os.path.abspath(a.rundir)

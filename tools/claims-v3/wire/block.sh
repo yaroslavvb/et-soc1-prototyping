@@ -2,14 +2,19 @@
 # V3-WIRE (PLAN3 §2 "V3-WIRE": heat per millimetre, third run, plus the byte-for-byte fill check), one pass per block:
 #   bash tools/claims-v3/wire/block.sh <pass> [--smoke]          (passes 1-6 on each card; 7, 8 ... only as re-runs)
 #   V3_DRY=1 bash tools/claims-v3/wire/block.sh 1                (no device access: prints every device call)
+#   on aifoundry1 (two cards): V3_DEVICE=0 or V3_DEVICE=1 selects the card (lib.sh: card aifoundry1-c0 / -c1)
+# Four cards: aifoundry2, aifoundry3, aifoundry1-c0, aifoundry1-c1. What differs by card is only what lib.sh's GOV_FREE
+# says (every card but aifoundry3: heat_to, mid-pass heater, implied clock) and the per-card table below (seed, the
+# clock rule of the end-of-block check); the passes are otherwise identical.
 # A pass is run_wire.py's pass loop (--set v2, the 28 configurations of configs.json) done in bash so that every
 # device call goes through lib.sh (hold10, start_sampler/stop_sampler, heat_to):
 #   [pass 1 only] the 12 --dump-slice launches of WIRE-FILL (before the sampler, before heating);
-#   [aifoundry2] heat_to 76;  the 10 Hz sampler;  8 s settle;
-#   per configuration, in the pass's shuffled order (seed 31+pass-1 on aifoundry2, 41+pass-1 on aifoundry3):
+#   [governor-free] heat_to 76;  the 10 Hz sampler;  8 s settle;
+#   per configuration, in the pass's shuffled order (seed 31/41/51/61 + pass-1 on aifoundry2/3/1-c0/1-c1):
 #     check the sampler (restart it with SIGTERM + start_sampler if it died or stalled);
-#     [aifoundry2] a 2 s heater launch if the die (read from the sampler's own output) is below 69 C, marked;
-#     tstore_uniq prefill of every scratchpad (marked);  5 s idle;  3 s burst of 1 KB tensor loads;  4 s idle;
+#     [governor-free] a 2 s heater launch if the die (read from the sampler's own output) is below 69 C, marked;
+#     tstore_uniq prefill of every scratchpad (marked);  5 s idle;  the idle state (the sampler's last line) into
+#     idle_state.jsonl;  3 s burst of 1 KB tensor loads;  4 s idle;
 #   8 s idle; stop the sampler; quick check (wire_check.py); gzip the telemetry.
 # Every enercat launch is under hold10 (timeout 10) and --budget 8. Exit: 0 ok, 1 failed (block.json says why),
 # 3 another user on the card (at the start, or a foreign device process mid-pass) or one of our own device processes
@@ -24,14 +29,27 @@ PASS=${1:-}
 SMOKE=; [ "${2:-}" = --smoke ] && SMOKE=1
 case "$PASS" in ''|*[!0-9]*|0) echo "usage: block.sh <pass >= 1> [--smoke]" >&2; exit 2 ;; esac
 WD=tools/claims-v3/wire                        # this experiment's directory, relative to the tree root (lib.sh cd'd there)
-if [ "$CARD" = aifoundry2 ]; then SEED0=31; WARM_C=69; else SEED0=41; WARM_C=0; fi
+# Per-card table. SEED0: the runner's --seed on aifoundry2 (31) and aifoundry3 (41), new ones for aifoundry1's cards (own
+# orders). CLOCK_RULE, for the end-of-block check: aifoundry2/aifoundry3 keep the registered drop rule (a sample off
+# 600 MHz in the burst or its idle brackets, analyze_wire.bursts()); aifoundry1's cards are checked on the burst's own
+# samples only (aifoundry1-c0 idles at 300 MHz between kernels, so a bracket rule would drop every burst).
+case "$CARD" in
+  aifoundry2)    SEED0=31; CLOCK_RULE=window ;;
+  aifoundry3)    SEED0=41; CLOCK_RULE=window ;;
+  aifoundry1-c0) SEED0=51; CLOCK_RULE=busy ;;
+  aifoundry1-c1) SEED0=61; CLOCK_RULE=busy ;;
+  *) echo "wire: no per-card parameters for $CARD" >&2; exit 2 ;;
+esac
+# Governor-free cards (lib.sh GOV_FREE: every card but aifoundry3) take aifoundry2's thermal values: heat_to 76 before
+# the pass, a 2 s heater before a configuration whose die is below 69 C; a pinned card runs no heater.
+if [ -n "$GOV_FREE" ]; then HEAT_C=76; WARM_C=69; else HEAT_C=; WARM_C=0; fi
 SEED=$((SEED0 + PASS - 1))
 GAP=5; AFTER=4; BURST=3; SETTLE=8; TAIL=8      # run_wire.py: --gap 5 --after 4 --burst 3, 8 s after the sampler starts, gap + 3 at the end
 ONLY=; EXP=wire; FORCE_HEAT=
 if [ -n "$SMOKE" ]; then
   EXP=wire-smoke; SETTLE=2; TAIL=1
   ONLY=wu/p0.5/hop4,wsep/p0/hop5               # the two argument shapes: --hop-distance + --uniq-regions, and --pairs
-  [ "$CARD" = aifoundry2 ] && FORCE_HEAT=1     # run the mid-pass heater once whatever the die reads
+  [ -n "$GOV_FREE" ] && FORCE_HEAT=1           # run the mid-pass heater once whatever the die reads
 fi
 
 nap() { if [ -n "${V3_DRY:-}" ]; then echo "DRY sleep $1" >&2; else sleep "$1"; fi; }
@@ -47,10 +65,17 @@ tel_die() {
   if [ -n "${V3_DRY:-}" ]; then echo 80; return; fi
   tail -c 4000 "$OUT/telemetry.jsonl.raw" 2>/dev/null | grep '^{' | tail -1 | sed -n 's/.*"minshire":\[\([0-9]*\),.*/\1/p'
 }
-# another user's device process appeared mid-block (logins alone do not stop a running pass)
+# the running sampler's last complete line as it is (the minion and NoC clocks and voltages of the idle state), or null
+tel_line() {
+  if [ -n "${V3_DRY:-}" ]; then echo null; return; fi
+  local l; l=$(tail -c 4000 "$OUT/telemetry.jsonl.raw" 2>/dev/null | grep '^{.*}$' | tail -1)
+  echo "${l:-null}"
+}
+# another user's device process (or a CI job, lib.sh OTHER_COMM) appeared mid-block (logins alone do not stop a pass);
+# on aifoundry1 this counts the other card too: another user's processes cannot be told apart by card
 foreign_device() {
   [ -n "${V3_DRY:-}" ] && return 1
-  ps -eo uid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 != me && $2 ~ re {f=1} END {exit !f}'
+  ps -eo uid=,comm= | awk -v me="$(id -u)" -v re="$OTHER_COMM" '$1 != me && $2 ~ re {f=1} END {exit !f}'
 }
 LAST_SZ=0; LAST_T=0
 check_sampler() {  # run_wire.py's check_sampler, with SIGTERM (stop_sampler) instead of kill
@@ -81,12 +106,12 @@ fi
 block_begin "$EXP" "$PASS"
 if [ -n "$SMOKE" ]; then sha256sum "$WD"/*.sh "$WD"/*.py "$WD"/*.json "$WD"/registered/*.py; else sha256sum "$WD"/registered/*.py; fi \
   >> "$OUT/code.sha256" 2>/dev/null
-echo "$CARD $EXP pass $PASS seed $SEED warm_c $WARM_C $(date +%FT%T)" >> "$OUT/run.log"
+echo "$CARD $EXP pass $PASS seed $SEED gov_free ${GOV_FREE:-0} heat_c ${HEAT_C:-none} warm_c $WARM_C clock_rule $CLOCK_RULE et_devices ${ET_DEVICES:-all} $(date +%FT%T)" >> "$OUT/run.log"
 
 # ---- pre-flight (no device access) ----
 miss=
 for f in "$ENERCAT2" "$ETTELEM"; do [ -x "$f" ] || miss="$miss $f"; done
-[ "$CARD" = aifoundry2 ] && { [ -x "$HEATER" ] || miss="$miss $HEATER"; }
+[ -n "$GOV_FREE" ] && { [ -x "$HEATER" ] || miss="$miss $HEATER"; }
 [ -n "$miss" ] && { block_end fail "missing:$miss"; exit 1; }
 python3 "$WD/wire_cfgs.py" --root "$V3_ROOT" --seed "$SEED" ${ONLY:+--only "$ONLY"} --json "$OUT/order.json" > "$OUT/order.tsv" \
   || { block_end fail "wire_cfgs.py failed"; exit 1; }
@@ -114,9 +139,9 @@ if [ -n "$SMOKE" ] || [ "$PASS" = 1 ] || [ -n "${WIRE_DUMPS:-}" ]; then
   log "WIRE-FILL: $FILL_NOTE"
 fi
 
-# ---- heat (aifoundry2 power work starts on a die >= 76 C), then the sampler ----
-if [ "$CARD" = aifoundry2 ] && [ -z "$SMOKE" ]; then
-  heat_to 76 "$OUT/heat.jsonl" || { block_end fail "heat_to 76 gave up"; exit 1; }
+# ---- heat (power work on a governor-free card starts on a die >= 76 C), then the sampler ----
+if [ -n "$HEAT_C" ] && [ -z "$SMOKE" ]; then
+  heat_to "$HEAT_C" "$OUT/heat.jsonl" || { block_end fail "heat_to $HEAT_C gave up"; exit 1; }
 fi
 start_sampler "$OUT/telemetry.jsonl" "$SAMPLER_S" || { block_end fail "sampler would not start"; exit 1; }
 LAST_T=$(date +%s)
@@ -145,6 +170,10 @@ while IFS=$'\t' read -r -u 9 cfg fpat fops args; do
   frc=$?
   mark fill "$cfg" "$f0" "$(now_ms)"
   nap "$GAP"
+  # the idle state just before the burst (its bracket), from the sampler's own output; not in marks.jsonl, whose every
+  # entry analyze_wire.bursts() removes from the idle brackets
+  printf '{"kind":"pre_burst","cfg":"%s","pass":%s,"t_ms":%s,"sample":%s}\n' "$cfg" "$PASS" "$(now_ms)" "$(tel_line)" \
+    >> "$OUT/idle_state.jsonl"
   # shellcheck disable=SC2086  # args is a list of simple tokens (configs.json)
   run10 "$OUT/burst.out" "$OUT/host.err" "$ENERCAT2" $args --seconds "$BURST" --window 240000000 --budget 8
   brc=$?
@@ -159,7 +188,8 @@ rm -f "$OUT/burst.out"
 
 # ---- quick check and compression ----
 touch "$OUT/runs.jsonl" "$OUT/marks.jsonl"
-NOTE=$(python3 "$WD/wire_check.py" pass "$OUT" --card "$CARD" --pass "$PASS" --expect "$NC" ${SMOKE:+--smoke} ${V3_DRY:+--dry})
+NOTE=$(python3 "$WD/wire_check.py" pass "$OUT" --card "$CARD" --pass "$PASS" --expect "$NC" --clock-rule "$CLOCK_RULE" \
+       ${GOV_FREE:+--gov-free} ${SMOKE:+--smoke} ${V3_DRY:+--dry})
 PASS_RC=$?
 [ -s "$OUT/telemetry.jsonl" ] && gzip -f "$OUT/telemetry.jsonl"
 [ -n "$FILL_NOTE" ] && NOTE="$NOTE; $FILL_NOTE"

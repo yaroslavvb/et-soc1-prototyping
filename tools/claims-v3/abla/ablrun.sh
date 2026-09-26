@@ -10,15 +10,23 @@
 #    block + 1 + SEED_OFFSET (SEED_OFFSET 0 unless given);
 #  - before the sampler starts, the et_soc1 use count must be 0; the count with only our sampler open is then
 #    measured (ABL_NS, the plan's "1"). Before each run it waits while anyone else holds the card (use count > ABL_NS,
-#    or another user's device process), at most ABL_WAIT_MAX_S (900 s), else the session stops with code 3; the
-#    check is repeated before every heater burst and after the approach, and a card taken during the approach means
-#    wait and approach again (no burst is fired while someone else holds the card);
+#    or another user's device process or a CI job: lib.sh's OTHER_COMM), at most ABL_WAIT_MAX_S (900 s), else the
+#    session stops with code 3; the check is repeated before every heater burst and after the approach, and a card
+#    taken during the approach means wait and approach again (no burst is fired while someone else holds the card);
+#  - on a host with several cards (V3_DEVICE set: aifoundry1) the et_soc1 use count counts every card, and the other
+#    card's queue holds its own card, so the count is not used: "someone else holds the card" is then another user's
+#    device process or CI job (the process half of lib.sh's others_present) or one of our own device processes that
+#    can open this card (lib.sh's ours_running rule: ET_DEVICES unset or this card; a dev_mngt_service always, as it
+#    ignores ET_DEVICES and opens every card), other than this session's sampler;
 #  - the approach stops (code 2) when the sampler's lines carry no die temperature, instead of heating blind;
 #  - one session is ONE block (the framework's pass) with the block index given, so the shuffle of a pass is the
 #    one the original's one-invocation loop gave that block: random.Random(block + 11);
 #  - safety stops the original lacked: sampler dead or stale (> 5 s) -> code 2; session longer than ABL_CAP_S
 #    -> code 4; each run's host exit code goes to ends.jsonl; host stderr to host.log;
-#  - starts.jsonl lines carry heats (heater launches of that approach), preheat_reached, seed and waited_ms.
+#  - starts.jsonl lines carry heats (heater launches of that approach), preheat_reached, seed, waited_ms, and the
+#    idle operating point just before the launch (idle_mhz, idle_mv from the sampler's last complete line): a card
+#    whose firmware idles in a low-power state (aifoundry1 card 0: 300 MHz / 398 mV) shows it there;
+#  - every card runs the approach with its block's temperatures (blocks choose them by GOV_FREE, not by host name).
 # The approach itself is the original's: up to 60 heater bursts (2 s fp32 randn on 1,024 minions) until the
 # minion-shire mean reads >= preheat, then idle (0.2 s polls, at most 600 s) until it reads <= target.
 # V3_DRY=1: the die temperature is simulated (a burst adds 3 C, a poll removes 1 C) and sleeps are skipped.
@@ -41,15 +49,37 @@ abl_hash_code() {  # abl_hash_code <exp-dir-name> [extra files...]   (paths rela
   return 0
 }
 
-# The structured tiles that abl_a.cfg reads must be the committed ones (aifoundry3: rsynced copies).
+# The structured tiles that abl_a.cfg reads must be the committed ones (aifoundry3, aifoundry1: rsynced copies).
 abl_check_tiles() {
   sha256sum --quiet -c "$ABL_LIB/tiles.sha256" > "$OUT/tiles.check" 2>&1 && return 0
   log "structured tiles missing or different: $(tr '\n' ' ' < "$OUT/tiles.check")"; return 1
 }
 
 abl_use_count() { awk '$1=="et_soc1"{print $3; f=1} END{if(!f) print 0}' /proc/modules 2>/dev/null; }
-abl_foreign_dev() {  # another user's device process (the same test as lib.sh's others_present, processes only)
-  ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 != me && $3 ~ re {f=1} END {exit !f}'
+abl_foreign_dev() {  # another user's device process or CI job (the same test as lib.sh's others_present, processes only)
+  ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="${OTHER_COMM:-$DEV_COMM}" '$1 != me && $3 ~ re {f=1} END {exit !f}'
+}
+# V3_DEVICE set: one of our own device processes that can open this card (ET_DEVICES unset: every card; or this
+# card), other than this session's sampler: lib.sh's ours_running rule, which would otherwise count our sampler.
+# /opt/et/bin/dev_mngt_service ignores ET_DEVICES and opens every card (lessons, 25 Sep), so one from the other card's
+# queue (lib.sh's drain_mgmt) counts whatever its ET_DEVICES says.
+abl_ours_other() {
+  local pid e c
+  while read -r pid c; do
+    [ "$pid" = "${SAMPLER_PID:-}" ] && continue
+    [ -r "/proc/$pid/environ" ] || continue          # exited since ps listed it
+    case $c in dev_mngt_servi*) return 0 ;; esac
+    e=$(tr '\0' '\n' < "/proc/$pid/environ" 2>/dev/null | grep '^ET_DEVICES=' || true)
+    if [ -z "$e" ] || [ "$e" = "ET_DEVICES=$V3_DEVICE" ]; then return 0; fi
+  done < <(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 == me && $3 ~ re {print $2, $3}')
+  return 1
+}
+# The card is held by someone else. With V3_DEVICE: processes only (see above); otherwise the use count must be
+# <= $1 and no other user's device process may run.
+abl_held() {
+  if [ -n "${V3_DEVICE:-}" ]; then abl_foreign_dev || abl_ours_other; return; fi
+  local n; n=$(abl_use_count)
+  [ "${n:-0}" -gt "$1" ] || abl_foreign_dev
 }
 # ABL_NS: the et_soc1 use count with only our sampler open (the plan's "1"; measured after the sampler starts, so a
 # sampler that holds more than one handle does not make every run wait for ever). Set by abl_session.
@@ -59,12 +89,11 @@ ABL_NS=1
 abl_wait_card() {
   ABL_WAITED_MS=0
   [ -n "${V3_DRY:-}" ] && return 0
-  local t0 n logged= lim=${1:-$ABL_NS}
+  local t0 logged= lim=${1:-$ABL_NS}
   t0=$(now_ms)
   while :; do
-    n=$(abl_use_count)
-    if [ "${n:-0}" -le "$lim" ] && ! abl_foreign_dev; then ABL_WAITED_MS=$(( $(now_ms) - t0 )); [ -n "$logged" ] && log "card free again"; return 0; fi
-    [ -z "$logged" ] && { log "card held by someone else (et_soc1 use count ${n:-?}, ours ${lim}): waiting"; logged=1; }
+    if ! abl_held "$lim"; then ABL_WAITED_MS=$(( $(now_ms) - t0 )); [ -n "$logged" ] && log "card free again"; return 0; fi
+    [ -z "$logged" ] && { log "card held by someone else ($([ -n "${V3_DEVICE:-}" ] && echo "a device process that can open card $V3_DEVICE" || echo "et_soc1 use count $(abl_use_count), ours $lim")): waiting"; logged=1; }
     [ $(( $(now_ms) - t0 )) -ge $(( ABL_WAIT_MAX_S * 1000 )) ] && { log "still held after ${ABL_WAIT_MAX_S} s"; return 1; }
     sleep 5
   done
@@ -72,8 +101,7 @@ abl_wait_card() {
 
 abl_card_free_now() {  # no waiting: nobody else holds the card at this moment
   [ -n "${V3_DRY:-}" ] && return 0
-  local n; n=$(abl_use_count)
-  [ "${n:-0}" -le "$ABL_NS" ] && ! abl_foreign_dev
+  ! abl_held "$ABL_NS"
 }
 
 # The sampler is alive and its last line is at most 5 s old.
@@ -89,6 +117,17 @@ abl_alive() {
 abl_temp() {
   if [ -n "${V3_DRY:-}" ]; then echo "$ABL_DRY_T"; return; fi
   tail -n 3 "$SAMPLER_OUT.raw" 2>/dev/null | grep '^{' | tail -n 2 | head -n 1 | sed -n 's/.*"minshire":\[\([0-9]*\).*/\1/p'
+}
+
+# The idle operating point just before a launch: "<minion MHz> <minion mV>" from the sampler's second-to-last line
+# ("null" for a field that is absent). V3_DRY: ABL_DRY_IDLE (default "600 516").
+abl_clock() {
+  if [ -n "${V3_DRY:-}" ]; then echo "${ABL_DRY_IDLE:-600 516}"; return; fi
+  local ln mhz mv
+  ln=$(tail -n 3 "$SAMPLER_OUT.raw" 2>/dev/null | grep '^{' | tail -n 2 | head -n 1)
+  mhz=$(sed -n 's/.*"mhz":{"minion":\([0-9]*\).*/\1/p' <<< "$ln")
+  mv=$(sed -n 's/.*"die_mv":{[^}]*"minion":\([0-9]*\).*/\1/p' <<< "$ln")
+  echo "${mhz:-null} ${mv:-null}"
 }
 
 abl_heat_burst() {  # one 2 s heater launch (the original's approach() burst)
@@ -130,26 +169,28 @@ abl_approach() {
 # ABL_NO_APPROACH=1 (smoke only): one heater burst at the start instead of an approach before every run.
 abl_session() {
   local out=$1 cfg=$2 block=$3 secs=$4 target=$5 preheat=$6 so=${7:-0}
-  local name args seed t_a t_run rc=0 hrc t0 cap=${ABL_CAP_S:-2700} tstart try waited arc
+  local name args seed t_a t_run rc=0 hrc t0 cap=${ABL_CAP_S:-2700} tstart try waited arc imhz imv
   ABL_OUT=$out; mkdir -p "$out"
   # host stderr: host.log (V3_DRY: this shell's stderr, so the dry run shows every launch in order)
   if [ -n "${V3_DRY:-}" ]; then exec {ABL_EFD}>&2; ABL_DRY_T=$(( target - 3 )); else exec {ABL_EFD}>>"$out/host.log"; fi
   cp "$cfg" "$out/config.cfg"
   : > "$out/runs.jsonl"; : > "$out/starts.jsonl"; : > "$out/ends.jsonl"
   # Before our sampler opens the card nobody may hold it (use count 0); then measure what our sampler alone holds.
-  local n0=0 i n
-  [ -n "${V3_DRY:-}" ] || n0=$(abl_use_count)
+  # V3_DEVICE set (a host with several cards): no use count (it counts both cards), the process checks only.
+  local n0=0 i n check=use_count
+  [ -n "${V3_DEVICE:-}" ] && { check="processes (V3_DEVICE set: the et_soc1 use count counts every card of the host)"; n0=null; }
+  [ -n "${V3_DRY:-}" ] || [ -n "${V3_DEVICE:-}" ] || n0=$(abl_use_count)
   abl_wait_card 0 || { exec {ABL_EFD}>&-; return 3; }
   t0=$(now_ms)
   # The sampler outlives the cap by 15 min, so the last run's approach (<= 60 bursts + 600 s idle) cannot outlast it;
   # it is stopped with SIGTERM when the session ends.
   start_sampler "$out/telemetry.jsonl" $(( cap + 900 )) || { exec {ABL_EFD}>&-; return 2; }
   ABL_NS=1
-  if [ -z "${V3_DRY:-}" ]; then
+  if [ -z "${V3_DRY:-}" ] && [ -z "${V3_DEVICE:-}" ]; then
     for i in 1 2 3 4 5; do n=$(abl_use_count); [ -n "$n" ] && [ "$n" -gt "$ABL_NS" ] && ABL_NS=$n; sleep 0.2; done
     [ "$ABL_NS" -gt 1 ] && log "et_soc1 use count with only our sampler open: $ABL_NS (the plan expects 1); using it as the baseline"
   fi
-  echo "{\"block\":$block,\"seconds\":$secs,\"target_c\":$target,\"preheat_c\":$preheat,\"seed_offset\":$so,\"host\":\"$ABL_HOST\",\"card\":\"$CARD\",\"cap_s\":$cap,\"use_count_before\":${n0:-null},\"use_count_sampler\":$ABL_NS}" > "$out/session.json"
+  echo "{\"block\":$block,\"seconds\":$secs,\"target_c\":$target,\"preheat_c\":$preheat,\"seed_offset\":$so,\"host\":\"$ABL_HOST\",\"card\":\"$CARD\",\"device\":\"${V3_DEVICE:-}\",\"gov_free\":$([ -n "${GOV_FREE:-}" ] && echo true || echo false),\"cap_s\":$cap,\"card_check\":\"$check\",\"use_count_before\":${n0:-null},\"use_count_sampler\":$([ -n "${V3_DEVICE:-}" ] && echo null || echo $ABL_NS)}" > "$out/session.json"
   nap 3
   python3 -c "import random,sys; l=[x for x in open(sys.argv[2]).read().splitlines() if x.strip() and not x.startswith('#')]; random.Random(int(sys.argv[1])+11).shuffle(l); print('\n'.join(l))" "$block" "$cfg" > "$out/order.$block"
   [ -n "${ABL_NO_APPROACH:-}" ] && { abl_heat_burst; nap 1; }
@@ -177,7 +218,8 @@ abl_session() {
       log "someone took the card during the approach to $name: waiting, then approaching again"
     done
     tstart=$(abl_temp)
-    echo "{\"block\":$block,\"config\":\"$name\",\"start_temp\":${tstart:-null},\"approach_ms\":$(( $(now_ms) - t_a )),\"t_ms\":$(now_ms),\"heats\":$ABL_HEATS,\"preheat_reached\":$ABL_PREHEAT_OK,\"seed\":$seed,\"waited_ms\":$waited,\"tries\":$try}" >> "$out/starts.jsonl"
+    read -r imhz imv <<< "$(abl_clock)"
+    echo "{\"block\":$block,\"config\":\"$name\",\"start_temp\":${tstart:-null},\"approach_ms\":$(( $(now_ms) - t_a )),\"t_ms\":$(now_ms),\"heats\":$ABL_HEATS,\"preheat_reached\":$ABL_PREHEAT_OK,\"seed\":$seed,\"waited_ms\":$waited,\"tries\":$try,\"idle_mhz\":${imhz:-null},\"idle_mv\":${imv:-null}}" >> "$out/starts.jsonl"
     t_run=$(now_ms)
     # shellcheck disable=SC2086
     hold10 "$ABL_HOST" $args --seconds "$secs" --seed "$seed" 2>&"$ABL_EFD" | grep SPARSITY |

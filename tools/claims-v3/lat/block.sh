@@ -2,6 +2,7 @@
 # V3-LAT (PLAN3.md §2 "V3-LAT", plan3.json experiments[V3-LAT]): one block of the latency, cycle-count and
 # bandwidth sweeps on the local card (memhier chases, nocbench, sparsity cycle counts and extras, enercat lone-minion
 # streams, sgemm, the hot-line sweep, the relay sweep; on aifoundry2 also V3-COOL's steady-600 warm controls).
+# Runs on aifoundry2, aifoundry3 and aifoundry1's two cards (V3_DEVICE=0 or 1 on aifoundry1; lib.sh names the card).
 #
 #   bash tools/claims-v3/lat/block.sh <pass> [--smoke]
 #
@@ -17,6 +18,15 @@
 # README.md in this directory says what a pass does, what is dropped, and every deviation from the plan.
 . "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"      # cd's to the tree root, sets CARD, binaries, DATA_ROOT
 others_present && exit 3
+# a device process of ours still on this card (with V3_DEVICE set, lib.sh counts only this card's): not starting
+ours_running && { log "a device process of ours on this card is still running: not starting"; exit 3; }
+# On a host with several cards (V3_DEVICE set) lib.sh's drain_mgmt must not run: /opt/et/bin/dev_mngt_service is not
+# ET_DEVICES-filtered and opens every card, so it would reach the other card while that card's queue holds its
+# management node (the two-openers case). heat_to, start_sampler and stop_sampler call it by name, so this also
+# covers them; a management node that stays stuck then fails the unit (samp) instead of being drained.
+if [ -n "${V3_DEVICE:-}" ]; then
+  drain_mgmt() { log "drain_mgmt skipped (V3_DEVICE=$V3_DEVICE: dev_mngt_service opens every card)"; }
+fi
 
 ARG=${1:?usage: block.sh <pass> [--smoke]}
 SMOKE=; [ "${2:-}" = --smoke ] && SMOKE=1
@@ -27,6 +37,21 @@ elif [[ "$ARG" =~ ^[1236789]$ ]]; then KIND=full; K=$ARG; HALF=0
 elif [[ "$ARG" =~ ^[1236789][12]$ ]]; then KIND=half; K=${ARG:0:1}; HALF=${ARG:1:1}
 elif [[ "$ARG" =~ ^(4|5|4[1-9])$ ]]; then KIND=div; K=$ARG; HALF=0
 else echo "bad pass '$ARG' (1-3, 6-9, K1/K2, 4, 5, 41-49)" >&2; exit 2; fi
+
+# Per-card parameters (README "Four cards"). lib.sh sets GOV_FREE on every card but aifoundry3, whose clock a boot
+# service pins at 600 MHz. A governor-free card is heated to HEAT_C before every unit, nocbench invocation and
+# sparsity group, and its launches off 600 MHz are dropped by the reducer; aifoundry1's two cards take aifoundry2's
+# target. V3-COOL's warm controls (unit c6) run where V3-COOL is registered, aifoundry2 only.
+# IDLE_MHZ: the idle point known before any run (reduce.py REGISTERED_IDLE), the low-power operating point of
+# aifoundry1's cards (300 MHz / 398 mV, queried on c0, firmware 1.4.1, 25 Sep); the idle probes add what they read
+# below 600 MHz. WITNESS: the card idles below 600 MHz between kernels, so its divergence blocks carry clock witnesses.
+case "$CARD" in
+  aifoundry3)    HEAT_C=;   IDLE_MHZ=;    WITNESS=;  COOL_CONTROLS= ;;    # pinned at 600 MHz: never heated
+  aifoundry2)    HEAT_C=76; IDLE_MHZ=;    WITNESS=;  COOL_CONTROLS=1 ;;   # governor free, TDP 65 W, 65 C; idles at 600
+  aifoundry1-c0) HEAT_C=76; IDLE_MHZ=300; WITNESS=1; COOL_CONTROLS= ;;    # as aifoundry2; idles at 300 ("low_power")
+  aifoundry1-c1) HEAT_C=76; IDLE_MHZ=300; WITNESS=;  COOL_CONTROLS= ;;    # as aifoundry2; seen idling at 600 MHz
+  *)             HEAT_C=76; IDLE_MHZ=;    WITNESS=;  COOL_CONTROLS= ;;
+esac
 
 pause() { [ -n "${V3_DRY:-}" ] || sleep "$1"; }
 mark() {  # mark <event> <unit> [note]
@@ -72,47 +97,64 @@ run_lab1() {  # run_lab1 <out.jsonl> <PREFIX> <group> <cfg-id> <cmd> [args...]
   return 0
 }
 
-# Units. unit_begin heats aifoundry2 to >= 76 C (heat_to reads the die through the management node, so the
-# sampler is stopped first) and starts the unit's 10 Hz sampler; rewarm does the same between groups of a unit.
+# Units. unit_begin heats a governor-free card to >= HEAT_C (heat_to reads the die through the management node, so
+# the sampler is stopped first), records the idle clock, and starts the unit's 10 Hz sampler; rewarm does the same
+# between groups of a unit.
 U=; UD=
-warm() {  # aifoundry2: heat_to 76, unless the die cannot be read (heat_to would then loop its 150 heater launches)
-  [ "$CARD" = aifoundry2 ] || return 0
+warm() {  # governor-free card: heat_to HEAT_C, unless the die cannot be read (heat_to would then loop 150 launches)
+  [ -n "$GOV_FREE" ] || return 0
   if [ -z "$(die_c)" ]; then drain_mgmt; [ -n "$(die_c)" ] || { note "$1: die unreadable, not heated"; return 0; }; fi
-  heat_to 76 "$OUT/heat.jsonl" || note "$1: heat_to 76 gave up"
+  heat_to "$HEAT_C" "$OUT/heat.jsonl" || note "$1: heat_to $HEAT_C gave up"
 }
-samp() {  # samp <label>: start the unit's sampler. On aifoundry2 a unit without one is useless (every launch would be
-  # dropped for want of a clock reading) and the management node is probably stuck, so the block stops there.
+# The card's clock at rest, read once before each sampler start (every card): aifoundry1-c0's firmware idles the
+# minions at 300 MHz between kernels, and the reducer sets samples at a card's idle point aside (README "Four cards").
+idle_probe() {  # idle_probe <label>  -> $OUT/idle.jsonl {"t_ms","unit","mhz"} (mhz null if the node did not answer)
+  local m; m=$(clock_mhz)
+  printf '{"t_ms":%s,"unit":"%s","mhz":%s,"pass":%s}\n' "$(now_ms)" "$1" "${m:-null}" "$ARG" >> "$OUT/idle.jsonl"
+}
+samp() {  # samp <label>: start the unit's sampler. On a governor-free card a unit without one is useless (every
+  # launch would be dropped for want of a clock reading) and the management node is probably stuck: the block stops.
   start_sampler "$UD/telemetry.jsonl" 900 && return 0
   note "$1: sampler failed to start"
-  if [ "$CARD" = aifoundry2 ]; then mark sampler_failed "$U" "$1"; block_end fail "sampler failed at $1"; exit 1; fi
+  if [ -n "$GOV_FREE" ]; then mark sampler_failed "$U" "$1"; block_end fail "sampler failed at $1"; exit 1; fi
 }
 unit_begin() {  # unit_begin <unit> [nosampler]
   U=$1; UD=$OUT/$U; rm -rf "${UD:?}"; mkdir -p "$UD"; guard "$U"   # one attempt per pass dir (V3_FORCE re-runs)
   mark begin "$U"
   warm "$U"
+  idle_probe "$U"
   [ "${2:-}" = nosampler ] && return 0
   samp "$U"
 }
-rewarm() {  # rewarm <label>: aifoundry2 only; aifoundry3's sampler keeps running
-  [ "$CARD" = aifoundry2 ] || return 0
+rewarm() {  # rewarm <label>: governor-free cards only; aifoundry3's sampler keeps running
+  [ -n "$GOV_FREE" ] || return 0
   stop_sampler; mark rewarm "$U" "$1"
   warm "$U/$1"
+  idle_probe "$U/$1"
   samp "$U/$1"
 }
-# aifoundry2's drop rule, made visible at the block: a unit whose samples (unit sampler or sgemm brackets) read
-# mhz.minion != 600 gets an "off600" mark and a note in block.json, so the operator knows to re-run the pass
-# (6-9 / K1-K2 halves) without running reduce.py first. The reducer still decides launch by launch.
+# The drop rule, made visible at the block (governor-free cards): a unit whose samples (unit sampler or sgemm
+# brackets) read mhz.minion != 600 gets an "off600" mark with the clocks seen; if any of them is not the card's idle
+# point (a reading below 600 MHz of this block's idle probes), a note goes into block.json, so the operator knows a
+# pass may need a re-run (6-9 / K1-K2 halves) without running reduce.py first. The reducer decides launch by launch.
 off600() { sed -n 's/.*"mhz":{"minion":\([0-9]*\).*/\1/p' "$1" 2>/dev/null | grep -cvx 600; }
+offhist() { sed -n 's/.*"mhz":{"minion":\([0-9]*\).*/\1/p' "$1" 2>/dev/null | grep -vx 600 | sort -n | uniq -c |
+            awk '{printf "%s%sx%s", (NR > 1 ? " " : ""), $2, $1}'; }
+idle_points() { { sed -n 's/.*"mhz":\([0-9]*\).*/\1/p' "$OUT/idle.jsonl" 2>/dev/null; echo "${IDLE_MHZ:-}"; } |
+                awk '$1 != "" && $1 < 600' | sort -un | tr '\n' ' '; }
 unit_end() {
   stop_sampler
-  if [ "$CARD" = aifoundry2 ] && [ -z "${V3_DRY:-}" ]; then
-    local f n
+  if [ -n "$GOV_FREE" ] && [ -z "${V3_DRY:-}" ]; then
+    local f n h ip nl
+    ip=$(idle_points)
     for f in "$UD/telemetry.jsonl" "$UD/brackets.jsonl"; do
       [ -s "$f" ] || continue
       n=$(off600 "$f")
       if [ "${n:-0}" -gt 0 ]; then
-        mark off600 "$U" "$n of $(grep -c '^{' "$f") samples in $(basename "$f")"
-        note "$U: $n samples off 600 MHz (launches near them are dropped)"
+        h=$(offhist "$f")
+        mark off600 "$U" "$n of $(grep -c '^{' "$f") samples in $(basename "$f"): $h (idle point: ${ip:-none})"
+        nl=$(sed -n 's/.*"mhz":{"minion":\([0-9]*\).*/\1/p' "$f" | awk -v ip=" $ip" '$1 != 600 && index(ip, " " $1 " ") == 0' | wc -l)
+        [ "$nl" -gt 0 ] && note "$U: $nl samples off 600 MHz and off the idle point ($h): launches near them are dropped"
       fi
     done
   fi
@@ -265,7 +307,24 @@ u_e4x() {  # E4 extras (i) probe lengths, (ii) layer draws 2 and 3, (iii) the di
   div_subset
   unit_end
 }
-u_div() { unit_begin div; div_subset; unit_end; }
+# Clock witnesses (README "Four cards"): a divergence-only short block has four 2 ms kernels and nothing else, so on a
+# card that idles below 600 MHz between kernels (aifoundry1-c0: 300 MHz) its samples are all idle and the reducer has
+# no reading of the burst clock. There the block adds one 85 ms all-minion TensorLoad (E4 extra (i)'s 200,000-load
+# probe) before and after the subset: samples inside it and its cycles / wall time give the unit's busy clock.
+witness_needed() {
+  [ -n "$WITNESS" ] && return 0
+  [ -n "$GOV_FREE" ] && [ -n "$(sed -n 's/.*"mhz":\([0-9]*\).*/\1/p' "$OUT/idle.jsonl" 2>/dev/null | tail -1 | awk '$1 < 600')" ]
+}
+witness() { sr "witness-$1" --test tload --where l2 --masks 0xFFFF $ALL --iters 200000; }
+u_div() {
+  local w=
+  unit_begin div
+  witness_needed && w=1
+  [ -n "$w" ] && witness 1
+  div_subset
+  [ -n "$w" ] && witness 2
+  unit_end
+}
 
 # ---------------------------------------------------------------- ridge-X3: enercat lone-minion DRAM streams
 u_x3() {
@@ -422,7 +481,7 @@ unit_order() {  # prints this block's units, one per line
           if (d < best) { best = d; c = i } } ; print c }')
   local h1 h2
   h1=$(echo "$order" | head -n "$cut"); h2=$(echo "$order" | tail -n +"$((cut + 1))")
-  if [ "$CARD" = aifoundry2 ]; then   # c6 joins the lighter half (ties: the second)
+  if [ -n "$COOL_CONTROLS" ]; then   # c6 (aifoundry2) joins the lighter half (ties: the second)
     local s1 s2
     s1=$(for u in $h1; do echo "${EST[$u]}"; done | awk '{s += $1} END {print s + 0}')
     s2=$(for u in $h2; do echo "${EST[$u]}"; done | awk '{s += $1} END {print s + 0}')
@@ -436,13 +495,47 @@ unit_order() {  # prints this block's units, one per line
 }
 
 # ---------------------------------------------------------------- smoke: every component once, < 60 s of card time
+# (plus heating to HEAT_C on a governor-free card whose die is cooler, so the smoke sees the passes' conditions)
+# The smoke's clock readout: the sampler's readings inside the launches' kernel windows (bursts) and outside them
+# (idle). A card whose bursts do not read 600 MHz on a heated die would have every pass launch dropped (README "Four
+# cards": aifoundry1-c0 idles at 300 MHz, and its bursts on a die above 65 C may stay there).
+smoke_clock() {
+  python3 - "$UD" <<'PYEOF'
+import collections, glob, json, os, sys
+d = sys.argv[1]
+win = []
+for p in glob.glob(os.path.join(d, "*.jsonl")):
+    if os.path.basename(p) in ("telemetry.jsonl", "brackets.jsonl", "launches.jsonl"):
+        continue
+    for line in open(p):
+        i = line.find("{")
+        try:
+            r = json.loads(line[i:]) if i >= 0 else {}
+        except ValueError:
+            continue
+        if isinstance(r.get("t_start_ms"), (int, float)):
+            win.append((r["t_start_ms"], r.get("t_end_ms") or r["t_start_ms"]))
+busy, idle = collections.Counter(), collections.Counter()
+for line in open(os.path.join(d, "telemetry.jsonl")):
+    try:
+        r = json.loads(line)
+        t, m = r["t_ms"], r["mhz"]["minion"]
+    except (ValueError, KeyError, TypeError):
+        continue
+    (busy if any(a <= t <= b for a, b in win) else idle)[m] += 1
+print("minion MHz: inside kernel windows %s; outside %s" % (dict(sorted(busy.items())) or "no sample",
+                                                            dict(sorted(idle.items())) or "no sample"))
+PYEOF
+}
 smoke() {
   local S1 rc f
-  U=smoke; UD=$OUT/smoke; rm -rf "${UD:?}"; rm -f "$OUT/marks.jsonl"; mkdir -p "$UD"; mark begin smoke
+  U=smoke; UD=$OUT/smoke; rm -rf "${UD:?}"; rm -f "$OUT/marks.jsonl" "$OUT/idle.jsonl"; mkdir -p "$UD"; mark begin smoke
   log "smoke: die $(die_c) C, clock $(clock_mhz) MHz"
-  if [ "$CARD" = aifoundry2 ]; then                          # heat_to's two parts: a die read (above), one heater launch
+  if [ -n "$GOV_FREE" ]; then                                # heat_to's two parts: a die read (above), one heater launch
     run1 heater "$HEATER" --test fma --type fp32 --pattern none --values randn --shires 0xffffffff --per-shire 32 --seconds 1 --seed 1
+    warm smoke                                               # then to HEAT_C, as before every pass unit
   fi
+  idle_probe smoke
   start_sampler "$UD/telemetry.jsonl" 120 || note "smoke: sampler failed to start"
   run1 mh-chase "$MEMHIER" --budget 8 --test chase --sizes 4K,4M
   run1 mh-scp "$MEMHIER" --budget 8 --test chase --where scp --scp-shire local --sizes 64K
@@ -456,7 +549,7 @@ smoke() {
     --slice-bytes 64M --region 64M --stride 1K --access-bytes 1K --seconds 1 --window 240000000
   run_lab1 "$UD/rl.jsonl" ONCHIP smoke 1 "$ONCHIP" --test probe --method 0 --shift 1
   run_lab1 "$UD/rl.jsonl" ONCHIP smoke 2 "$ONCHIP" --test relay --medium hop --stage-bytes 1M --stages 8 --work 1 --shires 0xffffffff --hop-distance 3
-  if [ "$CARD" = aifoundry2 ]; then
+  if [ -n "$COOL_CONTROLS" ]; then
     run_lab1 "$UD/c6.jsonl" NOCBENCH c6 1 "$NOCBENCH" --test hotline --home scplocal:0 --shires 0xffffffff --per-shire 32 --window 1200000000 --warmup 5
     run_lab1 "$UD/c6.jsonl" ONCHIP c6 2 "$ONCHIP" --test relay --medium dram --stage-bytes 1M --stages 640 --work 1
   fi
@@ -470,13 +563,15 @@ smoke() {
   mark end smoke
   if [ -n "${V3_DRY:-}" ]; then SMOKE_BAD="(dry: not checked)"; return 0; fi
   SMOKE_BAD=
-  for f in mh-chase mh-scp noc-pairs hl sp-fma sp-tload sp-gemv sp-div x3-m32 rl $([ "$CARD" = aifoundry2 ] && echo c6); do
+  for f in mh-chase mh-scp noc-pairs hl sp-fma sp-tload sp-gemv sp-div x3-m32 rl $([ -n "$COOL_CONTROLS" ] && echo c6); do
     grep -q '"ok":true' "$UD/$f.jsonl" 2>/dev/null || SMOKE_BAD="$SMOKE_BAD $f"
   done
   grep -q '^PASS' "$UD/sgemm.log" || SMOKE_BAD="$SMOKE_BAD sgemm"
   [ -s "$UD/telemetry.jsonl" ] || SMOKE_BAD="$SMOKE_BAD sampler"
   [ -s "$UD/brackets.jsonl" ] || SMOKE_BAD="$SMOKE_BAD bracket"
-  if [ "$CARD" = aifoundry2 ]; then grep -q '"rc":0' <(grep '"heater"' "$UD/launches.jsonl") || SMOKE_BAD="$SMOKE_BAD heater"; fi
+  if [ -n "$GOV_FREE" ]; then grep -q '"rc":0' <(grep '"heater"' "$UD/launches.jsonl") || SMOKE_BAD="$SMOKE_BAD heater"; fi
+  log "smoke idle probe: $(tail -1 "$OUT/idle.jsonl" 2>/dev/null)"
+  [ -s "$UD/telemetry.jsonl" ] && log "smoke clock: $(smoke_clock 2>&1)"
   log "smoke launches (name rc):"; sed 's/^/    /' "$UD/launches.jsonl"
   log "smoke x3-m32 process seconds: $(awk -F'[:,}]' '/"x3-m32"/ {print ($8 - $6) / 1000}' "$UD/launches.jsonl")"
 }
@@ -491,10 +586,10 @@ if [ "$KIND" = smoke ]; then
   if [ -z "$SMOKE_BAD" ] || [ -n "${V3_DRY:-}" ]; then block_end ok "smoke ${SMOKE_BAD:-all components ok}"; exit 0; fi
   block_end fail "smoke failed:$SMOKE_BAD"; exit 1
 fi
-rm -f "$OUT/marks.jsonl" "$OUT/heat.jsonl" "$OUT/order.json"     # left by an earlier attempt (V3_FORCE)
+rm -f "$OUT/marks.jsonl" "$OUT/heat.jsonl" "$OUT/order.json" "$OUT/idle.jsonl"   # left by an earlier attempt (V3_FORCE)
 UNITS=$(unit_order)
-printf '{"pass_arg":%s,"kind":"%s","pass":%s,"half":%s,"card":"%s","units":"%s"}\n' \
-  "$ARG" "$KIND" "$K" "$HALF" "$CARD" "$(echo $UNITS)" > "$OUT/order.json"
+printf '{"pass_arg":%s,"kind":"%s","pass":%s,"half":%s,"card":"%s","gov_free":%s,"heat_c":%s,"device":"%s","units":"%s"}\n' \
+  "$ARG" "$KIND" "$K" "$HALF" "$CARD" "${GOV_FREE:-0}" "${HEAT_C:-null}" "${V3_DEVICE:-}" "$(echo $UNITS)" > "$OUT/order.json"
 log "lat $KIND pass $K half $HALF: units $(echo $UNITS)"
 for u in $UNITS; do "u_$u"; done
 gzip -f "$OUT"/*/telemetry.jsonl "$OUT"/*/brackets.jsonl "$OUT"/*/*.err "$OUT"/*/stderr.log 2>/dev/null

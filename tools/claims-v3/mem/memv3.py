@@ -7,6 +7,7 @@ No device access: this only reads files a pass left behind. CLI (block.sh calls 
     memv3.py kept --root DATA_ROOT/mem --card CARD      # "<kept X1 passes> <kept wake-up probes>"
     memv3.py wake-needed --root DATA_ROOT/mem --card CARD --pass K   # 1 if pass K must run the wake-up probe
     memv3.py smoke --out SMOKE_DIR --card CARD          # parse check of a --smoke block (printed)
+    memv3.py rule --card CARD                           # the card's clock rule: registered | pinned | busy
 
 A pass directory holds, per program, <name>.u32 (memprobe_host) and <name>.json or <name>.json.gz (gen_ops labels),
 telemetry.jsonl[.gz] (10 Hz sampler through the X1/X2 programs), memprobe.log (MEMPROBE lines), req<S>/ (anat-X2) and,
@@ -22,7 +23,12 @@ import statistics as st
 import struct
 import sys
 
-CARDS = ("aifoundry2", "aifoundry3")
+CARDS = ("aifoundry2", "aifoundry3")   # the registered pair: the registered outcome of every item is theirs
+# The four-card campaign (amendment for aifoundry1's two cards, written before any of their data): the all-cards
+# outcome covers these, and any other card folder the data holds.
+EXPECTED = ("aifoundry2", "aifoundry3", "aifoundry1-c0", "aifoundry1-c1")
+SHORT = {"aifoundry2": "a2", "aifoundry3": "a3", "aifoundry1-c0": "a1c0", "aifoundry1-c1": "a1c1"}
+PINNED = ("aifoundry3",)   # lib.sh: GOV_FREE is empty only here (et-board-clock-guard pins 600 MHz at boot)
 X1_PROGS = ["t_raw", "t_glitch", "t_rawodd", "ladder", "decomp", "l3map", "msmap", "bits", "refresh", "refresh_jit",
             "pagetimeout"]
 TIMER_PROGS = ["t_raw", "t_glitch", "t_rawodd"]
@@ -137,17 +143,130 @@ def memprobe_lines(pdir):
     return out
 
 
+def clock_rule(card):
+    """The clock rule of a card.
+    registered: aifoundry2, as registered: an X1 part is dropped on any sample off 600 MHz (or no clock reading), a
+        wake-up probe on its 1 s pre or post samples off 600 MHz (or missing).
+    pinned: aifoundry3 (600 MHz set at boot): the clock is recorded, never a drop.
+    busy: every other card, whose governor is free (lib.sh GOV_FREE; aifoundry1's two cards). The registered test is
+        applied to the clock readings taken while a memprobe kernel ran (at least one, every one 600 MHz); the wake-up
+        probe is judged on its own clock (its cycle count over its wall time, F_EFF_BAND). Readings between kernels
+        and the probe's pre/post samples are idle brackets: recorded (the idle clock; aifoundry1's card 0 idles at
+        300 MHz in its "low_power" state), never a drop."""
+    if card == "aifoundry2":
+        return "registered"
+    if card in PINNED:
+        return "pinned"
+    return "busy"
+
+
+# The wake-up probe's own clock on a busy-rule card: cycles / wall time of its one 4.9 s launch, in MHz. It reads 599.84
+# on aifoundry2 at 600 MHz (passes 1-3 of 25 Sep; the launch overhead is ~2 ms). The band is 600 MHz less 1% (6 MHz:
+# 100 ms at 300 MHz, one sampler period, or up to ~50 ms of launch overhead) and plus 2 MHz (100 ms at 700 MHz): an
+# excursion to another operating point for about one sampler period (100 ms) or more takes the probe out of it.
+F_EFF_BAND = (594.0, 602.0)
+
+
+def sample_read_ms(s):
+    """When a sample read the clock: ettelem asks for the frequencies last of its six requests, so at the end of the
+    sample (t_ms + took_ms); t_ms when took_ms is missing; None without t_ms."""
+    t = s.get("t_ms")
+    if not isinstance(t, (int, float)):
+        return None
+    took = s.get("took_ms")
+    return t + (took if isinstance(took, (int, float)) and took > 0 else 0)
+
+
+def kernel_windows(pdir, which="x1"):
+    """The MEMPROBE program lines of a pass (memprobe.log): which="x1" every launch but the wake-up probe (the 11
+    programs and the 6 requester launches), "wake" the probe. Each line carries the kernel's epoch window
+    (t_start_ms .. t_end_ms, host clock, the same clock as the sampler's t_ms), its minion cycles and wall time."""
+    out = []
+    for l in memprobe_lines(pdir):
+        if l.get("test") != "program":
+            continue
+        if (l.get("name") == "wakeup") != (which == "wake"):
+            continue
+        out.append(l)
+    return out
+
+
+def split_busy(samples, lines):
+    """(busy, idle, unplaced): a sample is busy when it read the clock inside a kernel window; the others are idle
+    brackets (process start-up and tear-down, the gaps between processes). Without windows nothing is busy."""
+    w = [(l["t_start_ms"], l["t_end_ms"]) for l in lines
+         if isinstance(l.get("t_start_ms"), (int, float)) and isinstance(l.get("t_end_ms"), (int, float))]
+    busy, idle, unplaced = [], [], 0
+    for s in samples:
+        t = sample_read_ms(s)
+        if t is None:
+            unplaced += 1
+        elif any(a <= t <= b for a, b in w):
+            busy.append(s)
+        else:
+            idle.append(s)
+    return busy, idle, unplaced, len(w)
+
+
+def f_eff(line):
+    """A launch's own clock in MHz: minion cycles of its timed part over its wall time (a lower bound: the wall time
+    includes the launch)."""
+    try:
+        c, w = float(line["cycles"]), float(line["wall_s"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    return c / w / 1e6 if w > 0 and c > 0 else None
+
+
+def idle_states(pdir):
+    """idle_state.jsonl (block.sh on busy-rule cards: `ettelem config` with no kernel and no sampler running, at the
+    start and the end of the pass): [{at, power_state_name, minion_mhz, minion_mv}]."""
+    out = []
+    for r in read_jsonl(os.path.join(pdir, "idle_state.jsonl")):
+        c = r.get("config") or {}
+        out.append({"at": r.get("at"), "power_state_name": c.get("power_state_name"),
+                    "minion_mhz": c.get("minion_mhz"), "minion_mv": c.get("minion_mv")})
+    return out
+
+
 def pass_status(pdir, card):
     """Everything the drop rules need, from the files alone (the reducer never trusts drop.json)."""
     progs = {n: complete(pdir, n) for n in X1_PROGS}
     x1_complete = all(ok for ok, _ in progs.values())
     tel = read_jsonl(find(pdir, "telemetry.jsonl"))
     clk = clock(tel)
-    if card == "aifoundry2":
+    rule = clock_rule(card)
+    xl = kernel_windows(pdir, "x1")
+    busy, idle, unplaced, nwin = split_busy(tel, xl)
+    cb, ci = clock(busy), clock(idle)
+    effs = [(l.get("name"), f_eff(l)) for l in xl]
+    split = {"kernel_windows": nwin, "x1_launch_lines": len(xl), "busy": cb, "idle": ci, "unplaced": unplaced,
+             "x1_launch_mhz_eff": {"min": min((e for _, e in effs if e), default=None),
+                                   "max": max((e for _, e in effs if e), default=None)}}
+    rule_applied = rule
+    if rule == "registered":
         # plan: drop an aifoundry2 pass only on telemetry: any sample with mhz.minion != 600, or no telemetry
         keep_clock = clk["all600"]
         why = "" if keep_clock else ("no telemetry" if not clk["n"] else "no clock reading" if not clk["mhz_minion"]
                                      else f"mhz.minion {clk['mhz_minion']}")
+    elif rule == "busy":
+        # amendment (aifoundry1): the sampler must have read clocks, as on aifoundry2, but only readings taken inside
+        # a kernel window can drop; between kernels a card may sit in an idle state (card 0: 300 MHz, "low_power")
+        if not clk["n"]:
+            keep_clock, why = False, "no telemetry"
+        elif not clk["mhz_minion"]:
+            keep_clock, why = False, "no clock reading"
+        elif not nwin:
+            # no kernel window to test (memprobe.log missing, or a memprobe build without the epoch stamps): the
+            # registered rule applies
+            rule_applied = "busy: no kernel windows, any sample"
+            keep_clock = clk["all600"]
+            why = "" if keep_clock else f"no kernel windows and mhz.minion {clk['mhz_minion']}"
+        else:
+            # the registered test applied to the busy readings: at least one, and every one at 600 MHz
+            keep_clock = cb["all600"]
+            why = "" if keep_clock else ("no busy clock reading (no sample read the clock inside a kernel)"
+                                         if not cb["mhz_minion"] else f"busy mhz.minion {cb['mhz_minion']}")
     else:
         keep_clock, why = True, ""   # aifoundry3 is pinned at 600 MHz; its clock is recorded, not a drop rule
     missing = [f"{n}: {r}" for n, (ok, r) in progs.items() if not ok]
@@ -163,17 +282,33 @@ def pass_status(pdir, card):
     if os.path.isdir(wd) and find(wd, "wakeup.json"):
         wok, wwhy = complete(wd, "wakeup")
         pre, post = clock(read_jsonl(find(wd, "pre.jsonl"))), clock(read_jsonl(find(wd, "post.jsonl")))
-        if card == "aifoundry2":
+        wl = kernel_windows(pdir, "wake")
+        fw = f_eff(wl[-1]) if wl else None
+        wrule = rule
+        if rule == "registered":
             wkeep = wok and pre["all600"] and post["all600"]
             wreason = "" if wkeep else (wwhy if not wok else f"pre {pre['mhz_minion']} post {post['mhz_minion']}")
+        elif rule == "busy":
+            lo, hi = F_EFF_BAND
+            if not wok:
+                wkeep, wreason = False, wwhy
+            elif fw is None:
+                # no MEMPROBE line with cycles and wall time for the probe: the registered bracket rule applies
+                wrule = "busy: no probe clock, pre/post samples"
+                wkeep = pre["all600"] and post["all600"]
+                wreason = "" if wkeep else f"no probe clock and pre {pre['mhz_minion']} post {post['mhz_minion']}"
+            else:
+                wkeep = lo <= fw <= hi
+                wreason = "" if wkeep else f"probe clock {fw:.2f} MHz (cycles / wall time) outside {lo:g}-{hi:g}"
         else:
             wkeep, wreason = wok, ("" if wok else wwhy)
-        wake = {"complete": wok, "keep": wkeep, "reason": wreason, "pre": pre, "post": post}
+        wake = {"complete": wok, "keep": wkeep, "reason": wreason, "pre": pre, "post": post, "rule": wrule,
+                "probe_mhz_eff": fw}
     return {"x1_complete": x1_complete, "missing": missing, "telemetry": clk,
             "x1_keep": x1_complete and keep_clock, "x1_reason": "; ".join(filter(None, [why] + missing)),
             "req_complete": req, "arena_bases": bases,
             "arena_aligned": (all(int(b, 16) % (1 << 30) == 0 for b in bases) if bases else None),
-            "wake": wake}
+            "wake": wake, "clock_rule": rule_applied, "clock_split": split, "idle_state": idle_states(pdir)}
 
 
 def pass_dirs(root):
@@ -486,6 +621,19 @@ def cmd_smoke(a):
         problems.append("req7 did not run on hart 448")
     if not isinstance(res.get("timer"), dict) or any(v is None for v in res["timer"].values()):
         problems.append("timer readouts incomplete")
+    res["clock_rule"] = clock_rule(a.card)
+    if res["clock_rule"] == "busy":
+        # the busy rule needs each launch's epoch window, and the probe rule its cycles and wall time: a memprobe build
+        # that does not print them would silently fall back to the registered rules
+        need = ("t_start_ms", "t_end_ms", "cycles", "wall_s")
+        res["launch_fields_missing"] = sorted({k for l in lines for k in need if l.get(k) is None})
+        res["launch_wall_s_min"] = min((l["wall_s"] for l in lines if isinstance(l.get("wall_s"), (int, float))),
+                                       default=None)
+        busy, idle, _, nwin = split_busy(read_jsonl(find(d, "telemetry.jsonl")), kernel_windows(d, "x1"))
+        res["telemetry_busy"], res["telemetry_idle"] = clock(busy), clock(idle)
+        res["idle_state"] = idle_states(d)
+        if res["launch_fields_missing"] or not nwin:
+            problems.append(f"memprobe lines lack {res['launch_fields_missing'] or 'kernel windows'}")
     res["problems"] = problems
     res["ok"] = not problems
     print(json.dumps(res, indent=1, default=str))
@@ -502,6 +650,8 @@ def main():
     p.add_argument("--pass", dest="k", type=int, required=True); p.set_defaults(f=cmd_wake_needed)
     p = sp.add_parser("smoke"); p.add_argument("--out", required=True); p.add_argument("--card", required=True)
     p.set_defaults(f=cmd_smoke)
+    p = sp.add_parser("rule"); p.add_argument("--card", required=True)
+    p.set_defaults(f=lambda a: print(clock_rule(a.card)))
     a = ap.parse_args()
     a.f(a)
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Standard-library helpers for the V3-TEL block (tools/claims-v3/tel/block.sh); they run on both lab hosts.
+"""Standard-library helpers for the V3-TEL block (tools/claims-v3/tel/block.sh); they run on every lab host.
 
     tel_util.py order <seed>                      the pass's arm order (random.Random(seed).shuffle), one line
     tel_util.py spst-info <file>                  one SP stats extract: records, first/last SP time, recent pass (JSON)
@@ -216,6 +216,10 @@ def check(pdir, smoke):
     wins = sorted(glob.glob(os.path.join(dbg, "x3-w*.jsonl*")))
     r["dbg_windows"] = {os.path.basename(w): len(jl(w.replace(".gz", ""))) for w in wins}
     need("dbg_windows", bool(wins) and all(v > 0 for v in r["dbg_windows"].values()))
+    ic = jl(os.path.join(pdir, "idle_clock.jsonl"))          # the idle operating point read with no sampler running
+    r["idle_clock"] = [[x.get("label"), (x.get("config") or {}).get("minion_mhz"), (x.get("config") or {}).get("power_state_name")]
+                       for x in ic]
+    need("idle_clock", any(x.get("config") for x in ic))
     r["missing"] = bad
     print(json.dumps(r))
     return 1 if (smoke and bad) else 0

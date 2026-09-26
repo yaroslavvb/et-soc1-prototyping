@@ -2,19 +2,29 @@
 """End-of-block check for one V3-MMB pass (no card access): did every component produce its data, and does the pass
 have to be re-run under the registered drop rules?
 
-    python3 tools/claims-v3/mmb/passcheck.py <pass dir> --card aifoundry2|aifoundry3 [--smoke] > passcheck.json
+    python3 tools/claims-v3/mmb/passcheck.py <pass dir> --card <card id> [--gov-free 0|1] [--smoke] > passcheck.json
 
 Exit 0: the pass is complete and nothing in it is dropped. Exit 4: re-run the pass (reasons printed), because a
 component is missing or failed, or a registered drop rule hit: an E1 or ridge-X1 launch with implied_ghz outside
 0.595-0.605, an E1 launch on aifoundry2 with a sample off 600 MHz, or an aifoundry2 load step (pt X1) with any
 mhz.minion != 600, or a load step that the registered reducer (x1_reduce.py) cannot reduce. The smoke tests' results
 are reported, never a reason to re-run (they are data for MMB-b).
+Four cards (README.md "Four cards"): on aifoundry1's cards (governor free, not registered) the clock rules are
+cardrules.py's busy rule: an E1 workload is re-run when its power values are dropped (a launch-0 ramp from the idle
+state is a note), a ridge-X1 process when a launch other than a launch 0 below the band is off 0.595-0.605 (launch 0
+alone below the band is a ramp from the idle state after the 3 s gap: a note, the reducer drops that launch), a load
+step when a busy sample is off 600 MHz; idle brackets never. The idle clock of every
+load-step phase is recorded for every card (components.thermal.clock).
 """
 import argparse
 import gzip
 import json
 import os
 import sys
+
+sys.dont_write_bytecode = True  # no __pycache__ in the tool directory (its files are hashed per block)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import cardrules  # noqa: E402
 
 GHZ = (0.595, 0.605)
 
@@ -44,11 +54,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("dir")
     ap.add_argument("--card", required=True)
+    ap.add_argument("--gov-free", dest="gov_free", type=int, choices=(0, 1), default=None)
     ap.add_argument("--smoke", action="store_true")
     a = ap.parse_args()
     d = a.dir
     order = json.load(open(os.path.join(d, "order.json")))
-    rep = {"card": a.card, "smoke": a.smoke, "rerun": [], "notes": [], "components": {}}
+    rule = cardrules.rule(a.card, a.gov_free if a.gov_free is not None else order.get("gov_free"))
+    rep = {"card": a.card, "smoke": a.smoke, "clock_rule": rule, "rerun": [], "notes": [], "components": {}}
 
     # smoke tests (data for MMB-b; never a re-run reason)
     sm = load_jsonl(os.path.join(d, "smoke", "smoke.jsonl"))
@@ -85,7 +97,16 @@ def main():
                                     f"(process overhead {tw['proc_overhead_s']} s)")
         if not r["power_samples"]:
             rep["rerun"].append(f"e1 {w}: no power samples inside the launches")
-        if r["dropped_launches"]:  # in a smoke block (no heater on aifoundry2) a note only
+        e1[w]["idle_before_mhz"] = r.get("idle_before_mhz_minion")
+        if rule == "busy":  # aifoundry1's cards: re-run when the power values are dropped (cardrules.e1_power_kept)
+            if r["dropped_launches"] and (a.smoke or r.get("power_kept")):
+                rep["notes"].append(f"e1 {w}: dropped launches {r['dropped_launches']} (clock)"
+                                    + (f"; {r['power_kept_note']}" if r.get("power_kept_note") else ""))
+            elif r["dropped_launches"]:
+                rep["rerun"].append(f"e1 {w}: dropped launches {r['dropped_launches']} (clock; power values dropped)")
+            if r.get("ramp_mhz_minion"):
+                rep["notes"].append(f"e1 {w}: busy samples at {r['ramp_mhz_minion']} MHz in the ramp second (not drops)")
+        elif r["dropped_launches"]:  # in a smoke block (no heater on aifoundry2) a note only
             rep["notes" if a.smoke else "rerun"].append(f"e1 {w}: dropped launches {r['dropped_launches']} (clock)")
         if r["check"] != ["exact"]:
             rep["notes"].append(f"e1 {w}: check {r['check']}")
@@ -106,7 +127,15 @@ def main():
                                  "check": sorted({r["check"] for r in L})}
             if len(L) < want:
                 rep["rerun"].append(f"x1 {kind}-{m}: {len(L)} launches (want {want})")
-            if off:
+            # aifoundry1's cards (busy rule): the process's launch 0 alone below the band is the clock rising from the
+            # idle state after the 3 s gap, as E1's launch 0: the reducer drops that launch (registered implied_ghz rule)
+            # and keeps the others, so it is a note; anything else off the band re-runs the pass, as on every card
+            ramp0 = (rule == "busy" and off == [L[0]["launch"]] and L[0]["launch"] == 0 and L[0]["implied_ghz"] < GHZ[0]
+                     and len(L) > 1)
+            if off and ramp0:
+                rep["notes"].append(f"x1 {kind}-{m}: launch 0 at implied_ghz {L[0]['implied_ghz']} (below 0.595: a ramp "
+                                    "from the idle state; that launch is dropped, the others kept)")
+            elif off:
                 rep["notes" if a.smoke else "rerun"].append(f"x1 {kind}-{m}: launches {off} off 0.595-0.605 GHz")
     for kind in ("private", "shared"):
         for m in order["x1"]:
@@ -133,6 +162,19 @@ def main():
         rep["rerun"].append(f"thermal: {mm} MMBENCH and {mp} MEMPROBE lines (want {want_mm} and {want_mp})")
     if a.card == "aifoundry2" and tel and mhz != [600]:
         rep["notes" if a.smoke else "rerun"].append(f"thermal: mhz.minion {mhz} on aifoundry2 (the pass is dropped)")
+    ph_all = load_jsonl(os.path.join(td, "thermal-phases.jsonl"))
+    if tel and ph_all:  # every card: the clock of each phase's idle and busy samples (the idle state of the brackets)
+        ck = cardrules.load_step_clock(td, tel, ph_all)
+        rep["components"]["thermal"]["clock"] = ck
+        if rule == "busy":
+            if ck["busy_off_600"] or not ck["busy_samples"]:
+                rep["notes" if a.smoke else "rerun"].append(
+                    f"thermal: busy samples off 600 MHz {ck['busy_off_600']} ({ck['busy_samples']} busy samples; "
+                    "the pass is dropped)")
+            if ck["busy_ramp"]:
+                rep["notes"].append(f"thermal: busy samples at {ck['busy_ramp']} MHz in a process's ramp second (not drops)")
+            if ck["idle_mhz"] and ck["idle_mhz"] != [600]:
+                rep["notes"].append(f"thermal: idle brackets at {ck['idle_mhz']} MHz (recorded, never a drop here)")
     # The registered load-step reducer (x1_reduce.py, the plan's copy) on this pass, off the card: a pass it cannot reduce
     # (a sample without a block, a phase too short) would be lost at reduction time, so it is re-run now instead.
     # x1_reduce (via summarize_power_session.py) reads the edges in fixed windows, 15-35 s and 73-95 s after the idle0
@@ -156,7 +198,7 @@ def main():
             rep["notes"].append(f"thermal: x1_reduce not importable here ({type(e).__name__}: {e}); not checked")
         else:
             try:
-                o = x1_reduce.reduce_pass(td, "a2" if a.card == "aifoundry2" else "a3")
+                o = x1_reduce.reduce_pass(td, cardrules.short(a.card))
                 rep["components"]["thermal"]["x1_reduce"] = {k: o[k] for k in (
                     "valid", "busy_slope_board", "idle_after_minus_before_w", "dram_rest_rise_w", "cool_drop_40s_c",
                     "edge_tau_card", "board_avg_minus_board_steady_median")}

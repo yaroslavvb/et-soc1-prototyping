@@ -14,6 +14,13 @@ R-clock), applied after bursts_of:
     bursts_of averages, exactly as it cuts them) off 600 MHz (R-clock: "any sample at mhz.minion != 600"; the idle
     at 700-800 MHz is 5-9 W higher, which would enter the burst's over-idle power); or with a launch whose implied
     clock (cycles_max / wall_s) is outside 0.595-0.605 GHz (R-clock);
+  - aifoundry1's two cards (governor-free, like aifoundry2; amendment for the four-card campaign): the busy-sample
+    rule and the implied-clock rule above, NOT the idle-bracket rule: card 0 (firmware 1.4.1) was read idle in its
+    "low_power" state at 300 MHz before any launch (after two launches, a 25 Sep 16:40 test saw it idle at 600 MHz,
+    ~26 W), so its brackets may sit off 600 MHz by design, and the rule would then drop every burst.
+    Every burst instead records the clock of its idle brackets (idle_state: "600", "300", another single value, or
+    "mixed:a/b"), and reduce.py reports it per card;
+  - aifoundry3 (pinned at 600 MHz by its boot service): no clock rule (as registered);
   - both cards: a burst whose idle brackets overlap a heater launch. The launch is padded -0.2 s before and +2.3 s
     after, the settling time analyze_catalogue itself leaves after a preceding burst (prev_hi + 2.3); the brackets
     are lo - 3.5 s .. hi + 5.5 s, the widest analyze_catalogue uses. run_catalogue_t10.py's --hold-after and
@@ -30,11 +37,15 @@ import math
 import os
 import re
 import sys
+from collections import Counter
 
 import numpy as np
 
 sys.dont_write_bytecode = True
 A2, A3 = "aifoundry2", "aifoundry3"
+A1C0, A1C1 = "aifoundry1-c0", "aifoundry1-c1"
+PINNED = {A3}                 # lib.sh: GOV_FREE is empty on aifoundry3 only (et-board-clock-guard pins 600 MHz)
+IDLE_RULE = {A2}              # cards whose idle-bracket clock rule is registered (R-clock, aifoundry2)
 CLOCK_LO, CLOCK_HI = 0.595, 0.605
 HEAT_PAD_BEFORE, HEAT_PAD_AFTER = 0.2, 2.3   # s: a heater launch's reach (see the header)
 _AC = {}
@@ -80,6 +91,20 @@ def load_block_json(path):
             return None
 
 
+def gov_free(card):
+    """lib.sh's GOV_FREE: every card except the pinned one (its governor may move the clock off 600 MHz)."""
+    return card not in PINNED
+
+
+def idle_state(mhz_values):
+    """The clock of an idle bracket: "600", "300" (aifoundry1 card 0's low_power), another single value, or
+    "mixed:a/b" when its samples sit at more than one clock; "none" when it has no samples."""
+    u = sorted({int(v) for v in mhz_values})
+    if not u:
+        return "none"
+    return str(u[0]) if len(u) == 1 else "mixed:" + "/".join(str(v) for v in u)
+
+
 def value(b):
     """The catalogue's energy: pJ per byte for byte configurations, pJ per operation otherwise."""
     return b["pj_per_byte"] if b["bytes"] else b["pj_per_op"]
@@ -106,6 +131,12 @@ def pass_bursts(d, card, root):
     spans = sorted((min(r["t_start_ms"] for r in rs) / 1000.0, max(r["t_end_ms"] for r in rs) / 1000.0) for rs in grp.values())
     los = np.array([s[0] for s in spans])
     info["samples_off_600"] = int((mhz != 600).sum())
+    mv = np.array([(s.get("die_mv") or {}).get("minion", 0) or 0 for s in tel], float)
+    # the lead: the runner's idle stretch before the first configuration (no burst, no heater, no prefill yet)
+    first = min([spans[0][0]] + [m["t_start_ms"] / 1000.0 for m in marks]) if spans else t[-1]
+    lead = t <= first - 0.3
+    info["lead_mhz"] = sorted({int(v) for v in mhz[lead]})
+    info["lead_minion_mv"] = float(np.median(mv[lead])) if lead.any() and (mv[lead] > 0).any() else None
     by_cfg = {}
     for r in runs:
         by_cfg.setdefault(r["cfg"], []).append(r)
@@ -126,21 +157,36 @@ def pass_bursts(d, card, root):
         next_lo = spans[i + 1][0] if i + 1 < len(spans) else t[-1]
         idle = (((t >= max(prev_hi + 2.3, lo - 3.5)) & (t <= lo - 0.3)) | ((t >= hi + 2.3) & (t <= min(next_lo - 0.3, hi + 5.5))))
         b["mhz_idle_all_600"] = bool((mhz[idle] == 600).all())
+        # which idle state the brackets were in (aifoundry1 card 0: "300" = its low_power idle)
+        b["idle_state"] = idle_state(mhz[idle])
+        b["idle_minion_mv"] = float(np.median(mv[idle])) if idle.any() and (mv[idle] > 0).any() else None
         why = None
-        if card == A2 and not b["mhz_busy_all_600"]:
+        if gov_free(card) and not b["mhz_busy_all_600"]:
             why = "clock left 600 MHz (busy samples)"
-        elif card == A2 and not b["mhz_idle_all_600"]:
+        elif card in IDLE_RULE and not b["mhz_idle_all_600"]:
             why = "clock left 600 MHz (idle-bracket samples, R-clock)"
-        elif card == A2 and clk and not all(CLOCK_LO <= g <= CLOCK_HI for g in clk):
+        elif gov_free(card) and clk and not all(CLOCK_LO <= g <= CLOCK_HI for g in clk):
             why = f"implied clock outside {CLOCK_LO}-{CLOCK_HI} GHz"
         elif any(h0 < hi + 5.5 and h1 > lo - 3.5 for h0, h1 in heat):
             why = "heater launch inside the idle brackets"
         if why:
-            dropped.append({"cfg": b["cfg"], "why": why})
+            dropped.append({"cfg": b["cfg"], "why": why, "idle_state": b["idle_state"]})
         else:
             b["value"] = value(b)
             kept.append(b)
     info["heater_launches"] = len(heat)
+    info["idle_states"] = dict(sorted(Counter(b["idle_state"] for b in bursts).items()))
+    # descriptive: board power of the settled idle (outside every burst, prefill and heater, 2.3 s after each) per
+    # minion clock, so a card that idles at two clocks (aifoundry1 card 0: 300 and 600 MHz) shows the size of the step
+    w = np.array([s.get("board_w", np.nan) for s in tel], float)
+    near = np.zeros(len(t), bool)
+    for lo_, hi_ in spans:
+        near |= (t >= lo_ - 0.3) & (t <= hi_ + 2.3)
+    for m in marks:
+        near |= (t >= m["t_start_ms"] / 1000.0 - 0.3) & (t <= m["t_end_ms"] / 1000.0 + 2.3)
+    settled = ~near & np.isfinite(w)
+    info["idle_w_by_mhz"] = {str(int(fq)): {"w": float(np.median(w[settled & (mhz == fq)])), "n": int((settled & (mhz == fq)).sum())}
+                             for fq in sorted(set(mhz[settled].tolist())) if (settled & (mhz == fq)).sum() >= 5}
     return kept, dropped, expected, info
 
 
@@ -254,7 +300,9 @@ def check(d, card, root):
     off = [x for x in dropped if "clock" in x["why"]]
     pj = jload(os.path.join(d, "pass.json"), {}) or {}
     hold = pj.get("hold_c")
-    res = {"card": card, "expected": len(expected), "missing": missing, "kept": len(kept), "dropped": dropped, **info,
+    res = {"card": card, "gov_free": gov_free(card), "idle_bracket_rule": card in IDLE_RULE,
+           "config_start": pj.get("config_start"),
+           "expected": len(expected), "missing": missing, "kept": len(kept), "dropped": dropped, **info,
            "die_c_busy_mean": rnd(float(np.mean([b["die_c_busy"] for b in kept]))) if kept else None,
            "die_c_before_min": rnd(float(min(b["die_c_before"] for b in kept))) if kept else None,
            "die_c_before_max": rnd(float(max(b["die_c_before"] for b in kept))) if kept else None,
@@ -266,7 +314,7 @@ def check(d, card, root):
     if info["n_tel"] < 50 or not runs or len(missing) > len(expected) // 2:
         st, note = "fail", (f"no data (telemetry lines {info['n_tel']}, launches {len(runs)}, "
                             f"{len(missing)} of {len(expected)} configurations without a launch)")
-    elif card == A2 and off:
+    elif gov_free(card) and off:
         st, note = "offclock", f"{len(off)} bursts off 600 MHz: re-run this pass (R-clock); reduce.py drops those bursts"
     elif missing:
         # a launch that failed once (the burst process printed no ENERCAT line): the rest of the pass is good data,
@@ -276,6 +324,9 @@ def check(d, card, root):
         st = "ok"
         note = (f"{len(kept)}/{len(expected)} bursts kept, die {res['die_c_busy_mean']} C busy"
                 + (f", {len(dropped)} dropped" if dropped else ""))
+    if set(info.get("idle_states", {})) - {"600"}:
+        # not a status: a card whose idle is not at 600 MHz (aifoundry1 card 0's low_power) says so in every block
+        note += "; idle brackets " + ", ".join(f"{k} MHz x{v}" for k, v in info["idle_states"].items())
     res.update({"status": st, "note": note})
     json.dump(res, open(os.path.join(d, "check.json"), "w"), indent=1)
     return st, note

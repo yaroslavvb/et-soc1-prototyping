@@ -1,16 +1,36 @@
 #!/usr/bin/env python3
 """V3-CAT reducer: the pre-registered items CAT-a, CAT-b, CAT-c, CAT-e, CAT-f of PLAN3 section 2 (V3-CAT).
 
-    python3 tools/claims-v3/cat/reduce.py --data <dir with aifoundry2/ and aifoundry3/ laid out like DATA_ROOT>
+    python3 tools/claims-v3/cat/reduce.py --data <dir with one <card>/ per card, laid out like DATA_ROOT>
                                           --out verdicts.json [--root <tree root>] [--committed <catalogue.json>]
 
-Input: <data>/<card>/cat/p<N>/ as block.sh leaves it. A pass is used when its block.json status is "ok",
+Input: <data>/<card>/cat/p<N>/ as block.sh leaves it, for every card directory present (aifoundry2, aifoundry3,
+aifoundry1-c0, aifoundry1-c1, and any other <card>/cat/).
+
+Two outcomes per item:
+  outcome   the REGISTERED outcome, computed exactly as before from aifoundry2 and aifoundry3 only (the rules below);
+  all_cards the four-card outcome (amendment for the four-card campaign, fixed before any aifoundry1 data): the
+            item's per-card rule applied to every card of the campaign (aifoundry2, aifoundry3, aifoundry1-c0,
+            aifoundry1-c1, plus any other card present): PASS when it holds on every card, CARD-DIFFERENT when on
+            some, FAIL when on none, INSUFFICIENT when a card lacks kept repeats or is missing (with_data then gives
+            the outcome over the cards that have them). A band registered for one card only (CAT-e: aifoundry3; CAT-b:
+            the aifoundry3 / aifoundry2 pair) is not tested on the other cards: their values are REPORTED. On
+            aifoundry1's cards the governor-free design applies (warm W passes as the cool condition, as on
+            aifoundry2), and their bursts are dropped on busy samples and implied clock only (catlib.py).
+per_card holds every card's values; idle_clock notes, per card, the clock of the idle brackets the item's energies
+are measured over (aifoundry1 card 0 was read at 300 MHz in its low_power state before any launch, and at 600 MHz
+after launches: where its brackets sit at 300 MHz, its energies over idle include the step from that idle to 600 MHz,
+and the page must say so). all_cards.idle_caveat lists the tested cards of CAT-a, CAT-c and CAT-f whose kept
+brackets were mostly (more than half) off 600 MHz: they are tested as registered, but their result is not read as
+evidence for or against the claim (amendment); it never changes an outcome.
+A pass is used when its block.json status is "ok",
 "offclock" (the off-clock bursts are dropped below) or "partial" (a few configurations without a launch) and it is
 not a smoke pass; p<N>.attempt-*, "others" (stopped when another user appeared) and failed or unfinished blocks are
 skipped (listed under "passes").
 Bursts: workloads/enercat/analyze_catalogue.py bursts_of(), unchanged, one pass directory at a time (catlib.py);
 value = pJ/B for byte configurations, pJ/op otherwise (the catalogue's own unit); drop rules in catlib.py
-(aifoundry2 off-600 MHz bursts, R-clock implied clock; heater inside an idle bracket).
+(aifoundry2 off-600 MHz bursts, R-clock implied clock; aifoundry1's cards off-600 MHz busy samples and implied
+clock; heater inside an idle bracket).
 Unit = pass. Decisions use the new passes only; the committed 23 Sep catalogue is printed beside ("committed_23sep"),
 never pooled. 99% two-sided intervals throughout. A card with fewer than 3 kept passes in a group an item needs
 leaves the item INSUFFICIENT (R-both); with data on one card only, the item is INSUFFICIENT and that card's values are
@@ -48,6 +68,7 @@ import math
 import os
 import re
 import sys
+from collections import Counter
 
 import numpy as np
 
@@ -60,6 +81,8 @@ A2, A3 = L.A2, L.A3
 CARDS = (A2, A3)
 MIN_N = 3
 USABLE = ("ok", "offclock", "partial")
+REGISTERED = (A2, A3)                          # the registered outcome: these two cards, as before
+CAMPAIGN = (A2, A3, L.A1C0, L.A1C1)            # the four-card campaign: all_cards needs every one of them
 PANEL = ["fadd.s/zeros/h2", "fadd.s/random/h2", "fmul.s/zeros/h2", "fmul.s/random/h2", "fmadd.s/random/h2",
          "fcvt.s.w/random/h2", "fadd.ps/random/h2", "fsub.ps/random/h2", "fmul.ps/random/h2", "fsgnj.ps/random/h2",
          "feq.ps/random/h2", "fadd.pi/random/h2", "fmul.pi/random/h2", "fxor.pi/random/h2", "fmadd.ps/zeros/h2",
@@ -73,6 +96,18 @@ CAT_C_SPREAD, CAT_C_EXCESS = 15.0, (0.13, 0.26)
 CAT_E = (3.2, 3.0)
 CAT_F = (0.75, 0.10)
 COOL = {A2: "W", A3: "C"}
+
+
+def cool_cond(card):
+    """The cool condition of CAT-a: C on the pinned card, W (warm, aifoundry2's design) on a governor-free card."""
+    return COOL.get(card) or ("W" if L.gov_free(card) else "C")
+
+
+def short(c):
+    """aifoundry2 -> a2, aifoundry1-c0 -> a1c0 (readings)."""
+    return c.replace("aifoundry", "a").replace("-", "")
+
+
 CLAIMS = {
     "CAT-a": ["energy-manual-05", "energy-manual-09", "energy-manual-46", "energy-manual-154", "energy-manual-157", "hub-122"],
     "CAT-b": ["energy-manual-05"],
@@ -114,15 +149,21 @@ def load_card(data, card, root):
             listing.append({"dir": name, "used": False, "why": f"status {bj.get('status')}: {bj.get('note', '')}"})
             continue
         kept, dropped, expected, info = L.pass_bursts(d, card, root)
+        cfg0 = pj.get("config_start") or {}
         p = {"pass": pj["pass"], "arm": pj["arm"], "cond": pj["cond"], "k": pj["k"], "seed": pj["seed"],
-             "hold_c": pj.get("hold_c"), "status": bj["status"], "bursts": {b["cfg"]: b for b in kept}}
+             "hold_c": pj.get("hold_c"), "status": bj["status"], "bursts": {b["cfg"]: b for b in kept},
+             "power_state_start": cfg0.get("power_state_name"), "mhz_start": cfg0.get("minion_mhz"),
+             "lead_mhz": info.get("lead_mhz"), "idle_w_by_mhz": info.get("idle_w_by_mhz", {})}
         used.append(p)
         listing.append({"dir": name, "used": True, "pass": pj["pass"], "arm": pj["arm"], "cond": pj["cond"], "k": pj["k"],
                         "status": bj["status"], "expected": len(expected), "kept": len(kept), "dropped": dropped,
                         "die_c_busy_mean": R(mean([b["die_c_busy"] for b in kept])) if kept else None,
                         "die_c_start": bj.get("die_c_start"),
                         "sampler_median_ms": R(float(np.median([b["sampler_median_ms"] for b in kept]))) if kept else None,
-                        "heater_launches": info.get("heater_launches", 0)})
+                        "heater_launches": info.get("heater_launches", 0),
+                        "idle_states": dict(sorted(Counter(b["idle_state"] for b in kept).items())),
+                        "power_state_start": cfg0.get("power_state_name"), "mhz_start": cfg0.get("minion_mhz"),
+                        "lead_mhz": info.get("lead_mhz"), "idle_w_by_mhz": R(info.get("idle_w_by_mhz", {}))})
     return used, listing
 
 
@@ -168,8 +209,8 @@ def cat_a_card(card, P):
         s, n = pass_scale(p, ref)
         if s is not None:
             rows.setdefault(p["cond"], []).append({"pass": p["pass"], "s_pct": s, "n_cfg": n, "die_c": pass_temp(p)})
-    hot, cool = rows.get("H", []), rows.get(COOL[card], [])
-    res = {"cool_cond": COOL[card], "n_hot": len(hot), "n_cool": len(cool),
+    hot, cool = rows.get("H", []), rows.get(cool_cond(card), [])
+    res = {"cool_cond": cool_cond(card), "n_hot": len(hot), "n_cool": len(cool),
            "hot": R(hot), "cool": R(cool)}
     if len(hot) < MIN_N or len(cool) < MIN_N:
         res["decision"] = "INSUFFICIENT"
@@ -201,23 +242,113 @@ def outcome_per_card(per, holds):
     return "PASS" if all(h) else ("CARD-DIFFERENT" if any(h) else "FAIL")
 
 
+# ---------------------------------------------------------------- the four-card layer (amendment)
+PRESENT = set()     # cards with a <data>/<card>/cat directory (main() fills it)
+ALL = list(CAMPAIGN)
+
+
+def card_status(c, r, holds):
+    if c not in PRESENT:
+        return "missing"
+    if r is None or r.get("decision", "INSUFFICIENT") == "INSUFFICIENT":
+        return "INSUFFICIENT"
+    return "holds" if holds(r) else "fails"
+
+
+def verdict(st):
+    if not st:
+        return "INSUFFICIENT"
+    h = [v == "holds" for v in st]
+    return "PASS" if all(h) else ("CARD-DIFFERENT" if any(h) else "FAIL")
+
+
+def all_cards(per, holds, line, tested=None, scope="each card"):
+    """PASS / CARD-DIFFERENT / FAIL over every tested card of the campaign; INSUFFICIENT when one lacks repeats or is
+    missing. Cards not tested (a band registered for another card) are 'reported'. line(c) is one card's reading."""
+    tested = [c for c in ALL if tested is None or c in tested]
+    status = {c: (card_status(c, per.get(c), holds) if c in tested else "reported") for c in ALL}
+    st = [status[c] for c in tested]
+    out = "INSUFFICIENT" if any(v in ("missing", "INSUFFICIENT") for v in st) else verdict(st)
+    have = [status[c] for c in tested if status[c] in ("holds", "fails")]
+    return {"outcome": out, "scope": scope, "tested": tested, "cards": status,
+            "with_data": {"cards": [c for c in tested if status[c] in ("holds", "fails")], "outcome": verdict(have)},
+            "reading": "; ".join(line(c) if status[c] != "missing" else f"{short(c)}: no data" for c in ALL)}
+
+
+def idle_clock(P, arms):
+    """Per card: the clock of the idle brackets of the kept bursts in the item's passes (idle_state counts), the
+    power state ettelem config read at each block's start, and a note when a card's idle is not at 600 MHz."""
+    out, notes = {}, []
+    for c in ALL:
+        ps = [p for p in P.get(c, []) if p["arm"] in arms]
+        cnt = {}
+        for p in ps:
+            for b in p["bursts"].values():
+                cnt[b.get("idle_state", "?")] = cnt.get(b.get("idle_state", "?"), 0) + 1
+        n = sum(cnt.values())
+        starts = sorted({str(p.get("power_state_start")) for p in ps if p.get("power_state_start")})
+        iw = {}
+        for p in ps:
+            for fq, v in (p.get("idle_w_by_mhz") or {}).items():
+                iw.setdefault(fq, []).append(v["w"])
+        r = {"bracket_states": dict(sorted(cnt.items())), "n_bursts": n,
+             "frac_600": R(cnt.get("600", 0) / n) if n else None, "power_state_start": starts,
+             "mhz_start": sorted({p["mhz_start"] for p in ps if p.get("mhz_start") is not None}),
+             "idle_board_w_by_mhz": {fq: {"median_w": R(float(np.median(v))), "passes": len(v)} for fq, v in sorted(iw.items())}}
+        out[c] = r
+        if n and cnt.get("600", 0) < n:
+            main_state = max(cnt, key=cnt.get)
+            notes.append(f"{short(c)} idle brackets " + ", ".join(f"{k} MHz x{v}" for k, v in sorted(cnt.items(), key=lambda kv: -kv[1]))
+                         + f" of {n} bursts" + (f" (start state {'/'.join(starts)})" if starts else "")
+                         + (f"; its energies over idle include the step from its {main_state} MHz idle to the 600 MHz burst"
+                            if main_state != "600" else "")
+                         + (" (settled idle board " + ", ".join(f"{fq} MHz {v['median_w']:.1f} W" for fq, v in r["idle_board_w_by_mhz"].items()) + ")"
+                            if len(r["idle_board_w_by_mhz"]) > 1 else ""))
+    out["note"] = ("; ".join(notes) + ": values over idle are not comparable across cards whose idle clocks differ"
+                   if notes else "every card's idle brackets at 600 MHz")
+    return out
+
+
+IDLE_CAVEAT_FRAC = 0.5    # amendment: a tested card whose kept brackets are mostly (more than half) off 600 MHz
+
+
+def idle_caveat(it):
+    """Amendment (four cards), additive: the tested cards whose kept bursts' idle brackets in this item's passes are
+    mostly not at 600 MHz (aifoundry1 card 0's low_power idle). Their energies over idle include the idle-to-600 MHz
+    step, a roughly constant number of watts that enters configurations with different rates differently, so their
+    holds / fails is not read as evidence for or against the claim. Never changes an outcome."""
+    ic, ac = it["idle_clock"], it["all_cards"]
+    cards = [c for c in ac.get("tested", []) if isinstance(ic.get(c), dict) and ic[c].get("frac_600") is not None
+             and ic[c]["frac_600"] < IDLE_CAVEAT_FRAC and ac["cards"].get(c) in ("holds", "fails")]
+    ac["idle_caveat"] = {"cards": cards, "rule": f"kept brackets at 600 MHz < {IDLE_CAVEAT_FRAC:.0%} in the item's passes: "
+                                                 "tested as registered, but the card's result is not read as evidence"}
+    if cards:
+        ac["reading"] += ("; idle caveat (" + ", ".join(short(c) for c in cards) + ": brackets mostly off 600 MHz, "
+                          "result not read as evidence)")
+    return it
+
+
 def cat_a(P):
-    per = {c: cat_a_card(c, P.get(c, [])) for c in CARDS}
+    per = {c: cat_a_card(c, P.get(c, [])) for c in dict.fromkeys(CARDS + tuple(ALL))}
     out = outcome_per_card(per, lambda r: r["decision"] == "card")
 
-    def one(c):
+    def one(c, lab=None):
+        lab = c[-1] if lab is None else lab
         r = per[c]
         if r["decision"] == "INSUFFICIENT":
-            return f"{c[-1]}: insufficient ({r['n_hot']} hot v {r['n_cool']} {r['cool_cond']})"
+            return f"{lab}: insufficient ({r['n_hot']} hot v {r['n_cool']} {r['cool_cond']})"
         if "beta_pct_per_c" not in r:
-            return f"{c[-1]}: {r['decision']} ({r.get('why', '')})"
+            return f"{lab}: {r['decision']} ({r.get('why', '')})"
         b = r["beta_pct_per_c"]
-        return f"{c[-1]}: beta {b['beta']:+.3f} %/C [{b['lo']:+.3f}, {b['hi']:+.3f}] over dT {r['dT_c']:.1f} C -> {r['decision']}"
+        return f"{lab}: beta {b['beta']:+.3f} %/C [{b['lo']:+.3f}, {b['hi']:+.3f}] over dT {r['dT_c']:.1f} C -> {r['decision']}"
     return {"item": "CAT-a", "claims": CLAIMS["CAT-a"], "per_card": per,
             "test": "beta = (hot - cool)/dT per card, Welch 99% on pass values (a2 4 v 4, a3 3 v 3): excludes 0.21 %/C -> "
                     "'the scale is the card'; excludes 0 and includes 0.21 -> temperature explains it; else not established. "
                     "Prediction (card hypothesis): hot - cool = 0 +- 0.5%.",
-            "outcome": out, "reading": "; ".join(one(c) for c in CARDS)}
+            "outcome": out, "reading": "; ".join(one(c) for c in CARDS),
+            "all_cards": all_cards(per, lambda r: r["decision"] == "card", lambda c: one(c, short(c)),
+                                   scope="each card (registered per card; aifoundry1's cards: 4 W v 4 H, as aifoundry2)"),
+            "idle_clock": idle_clock(P, ("A",))}
 
 
 # ---------------------------------------------------------------- CAT-b
@@ -250,9 +381,40 @@ def cat_b(P, committed):
                    f"(predicted {CAT_B[0]} +- {CAT_B[1]}); " + ("interval excludes 1" if excl(w, 0.0) else "interval includes 1")
                    + ("; estimate outside the predicted range (sign only: the page takes the measured value)"
                       if excl(w, 0.0) and not ok else ""))
+    # the other cards (aifoundry1's): REPORTED against aifoundry2-W, as the registered pair's ratio is computed; the
+    # band 0.951 +- 0.015 is registered for cool aifoundry3 / warm aifoundry2 only, so nothing is tested here
+    ref2 = {c: mean(vals(W2, c)) for c in PANEL if vals(W2, c)}
+    m2 = [x for x in (pass_scale(p, ref2)[0] for p in W2) if x is not None]
+    rep_lines = []
+    for c in ALL:
+        if c in CARDS:
+            continue
+        cc = cool_cond(c)
+        g = [p for p in P.get(c, []) if p["arm"] == "A" and p["cond"] == cc]
+        mc = [x for x in (pass_scale(p, ref2)[0] for p in g) if x is not None]
+        rr = {"cond": cc, "m_pct": R(mc), "n": len(mc),
+              "decision": "reported (the band is registered for cool aifoundry3 / warm aifoundry2 only)"}
+        ratios = [mean(vals(g, k)) / ref2[k] for k in PANEL if k in ref2 and vals(g, k)]
+        rr["config_ratio_median"] = R(float(np.median(ratios))) if ratios else None
+        wc = L.welch(mc, m2) if len(mc) >= MIN_N and len(m2) >= MIN_N else None
+        if wc:
+            rr["ratio_vs_aifoundry2_W"] = R({"ratio": math.exp(wc["diff"] / 100), "lo": math.exp(wc["lo"] / 100),
+                                             "hi": math.exp(wc["hi"] / 100), "p": wc["p"], "df": wc["df"]})
+            rep_lines.append(f"{short(c)} {cc} / a2 W = {math.exp(wc['diff'] / 100):.3f} "
+                             f"[{math.exp(wc['lo'] / 100):.3f}, {math.exp(wc['hi'] / 100):.3f}] (reported)")
+        else:
+            rr["decision"] = "INSUFFICIENT" if c in PRESENT else "missing"
+            rep_lines.append(f"{short(c)}: " + ("no data" if c not in PRESENT else f"reported: insufficient ({len(mc)} {cc} passes)"))
+        per[c] = rr
     res = {"item": "CAT-b", "claims": CLAIMS["CAT-b"], "per_card": per,
            "test": "Welch 99% on pass-level medians (panel, ln(value / aifoundry2-W config mean)); PASS when the interval "
-                   "excludes 1 and the ratio is in 0.951 +- 0.015.", "outcome": out, "reading": reading}
+                   "excludes 1 and the ratio is in 0.951 +- 0.015.", "outcome": out, "reading": reading,
+           "all_cards": {"outcome": out, "scope": "the registered pair only (cool aifoundry3 / warm aifoundry2); every other "
+                                                  "card's ratio to aifoundry2-W is reported, not tested",
+                         "tested": [A3 + " / " + A2], "cards": {c: ("tested (pair)" if c in CARDS else "reported") for c in ALL},
+                         "with_data": {"cards": list(CARDS) if out != "INSUFFICIENT" else [], "outcome": out},
+                         "reading": "a3/a2 (registered pair): " + reading + ("; " + "; ".join(rep_lines) if rep_lines else "")},
+           "idle_clock": idle_clock(P, ("A",))}
     if committed and A2 in committed and A3 in committed:
         cr, _, _, _ = run(committed[A2], committed[A3])
         res["committed_23sep"] = {"ratio": cr.get("ratio"), "config_ratio_median": cr.get("config_ratio_median"),
@@ -291,14 +453,15 @@ def rows_card(P):
 
 
 def cat_c(P, committed):
-    per = {c: rows_card(P.get(c, [])) for c in CARDS}
+    per = {c: rows_card(P.get(c, [])) for c in dict.fromkeys(CARDS + tuple(ALL))}
     out = outcome_per_card(per, lambda r: r["decision"] == "holds")
 
-    def one(c):
+    def one(c, lab=None):
+        lab = c[-1] if lab is None else lab
         r = per[c]
         if r["decision"] == "INSUFFICIENT":
-            return f"{c[-1]}: insufficient"
-        return f"{c[-1]}: " + ", ".join(
+            return f"{lab}: insufficient"
+        return f"{lab}: " + ", ".join(
             f"{o} ANOVA p {r[o]['anova']['p']:.3g}, rows - tload {r[o]['rows_minus_tload']['diff']:+.1f} "
             f"[{r[o]['rows_minus_tload']['lo']:+.1f}, {r[o]['rows_minus_tload']['hi']:+.1f}] pJ/B ({100 * r[o]['excess_over_tload']:+.0f}%)"
             for o in ("zeros", "random")) + f" -> {r['decision']}" + (band(r) if c == A3 else "")
@@ -309,7 +472,11 @@ def cat_c(P, committed):
     res = {"item": "CAT-c", "claims": CLAIMS["CAT-c"], "per_card": per,
            "test": "per card and operand set: one-way ANOVA p > 0.01 over seq/rowhit/rowmiss AND Welch 99% of rows - "
                    "tload/dram excludes 0 -> PROVEN-BOTH. Prediction bands (within 15 pJ/B; 13-26% above tload/dram) "
-                   "reported as band_ok.", "outcome": out, "reading": "; ".join(one(c) for c in CARDS)}
+                   "reported as band_ok.", "outcome": out, "reading": "; ".join(one(c) for c in CARDS),
+           "all_cards": all_cards(per, lambda r: r["decision"] == "holds", lambda c: one(c, short(c)),
+                                  scope="each card (the registered decision, applied per card; the bands, registered "
+                                        "for aifoundry3, are reported as band_ok on every card)"),
+           "idle_clock": idle_clock(P, ("B",))}
     if committed and A2 in committed:
         res["committed_23sep"] = {A2: rows_card(committed[A2]), "note": "aifoundry2 23 Sep main + rows sessions; printed beside"}
     return res
@@ -331,7 +498,7 @@ def store_load(P):
 def cat_e(P, committed):
     per = {}
     ws = {}
-    for c in CARDS:
+    for c in dict.fromkeys(CARDS + tuple(ALL)):
         per[c], ws[c] = store_load(P.get(c, []))
     lo, hi = CAT_E[0] - CAT_E[1], CAT_E[0] + CAT_E[1]
     w3 = ws[A3]
@@ -347,11 +514,26 @@ def cat_e(P, committed):
     if ws[A2] is not None:
         per[A2]["decision"] = "reported (no band registered for aifoundry2)"
         reading += f"; a2: {ws[A2]['diff']:+.2f} [{ws[A2]['lo']:+.2f}, {ws[A2]['hi']:+.2f}] pJ/B ({per[A2]['pct']:+.1f}%)"
+    rep_lines = []
+    for c in ALL:
+        if c in CARDS:
+            continue
+        if ws[c] is not None:
+            per[c]["decision"] = "reported (the band is registered for aifoundry3 only)"
+            rep_lines.append(f"{short(c)}: {ws[c]['diff']:+.2f} [{ws[c]['lo']:+.2f}, {ws[c]['hi']:+.2f}] pJ/B "
+                             f"({per[c]['pct']:+.1f}%, reported)")
+        else:
+            rep_lines.append(f"{short(c)}: " + ("no data" if c not in PRESENT else "reported: insufficient"))
     res = {"item": "CAT-e", "claims": CLAIMS["CAT-e"], "per_card": per,
            "test": "Welch 99% of tstore/dram/random - tload/dram/random per card; the band +3.2 +- 3 pJ/B is registered for "
                    "aifoundry3: PASS when its interval excludes 0 and the estimate is in the band (PASS = holds on "
                    "aifoundry3, the only card with a registered band; aifoundry2 is reported beside).",
-           "outcome": out, "reading": reading}
+           "outcome": out, "reading": reading,
+           "all_cards": {"outcome": out, "scope": "aifoundry3 only (the band is registered for it); every other card reported",
+                         "tested": [A3], "cards": {c: ("tested" if c == A3 else "reported") for c in ALL},
+                         "with_data": {"cards": [A3] if out != "INSUFFICIENT" else [], "outcome": out},
+                         "reading": reading + ("; " + "; ".join(rep_lines) if rep_lines else "")},
+           "idle_clock": idle_clock(P, ("B",))}
     if committed:
         res["committed_23sep"] = {c: store_load(committed[c])[0] for c in CARDS if c in committed}
     return res
@@ -391,25 +573,29 @@ def fence_nop(P):
 
 def cat_f(P, committed):
     per = {}
-    for c in CARDS:
+    for c in dict.fromkeys(CARDS + tuple(ALL)):
         per[c] = fill_card(P.get(c, []))
         per[c]["zeros_descriptive"] = fill_card(P.get(c, []), "zeros")
         per[c]["fence_vs_nop_expected_within_noise"] = fence_nop(P.get(c, []))
     out = outcome_per_card(per, lambda r: r["decision"] == "holds")
 
-    def one(c):
+    def one(c, lab=None):
+        lab = c[-1] if lab is None else lab
         r = per[c]
         if r["decision"] == "INSUFFICIENT":
-            return f"{c[-1]}: insufficient"
+            return f"{lab}: insufficient"
         lo, hi = r["ratio_ci99_approx"]
         why = ("" if r["decision"] == "holds" else " (interval includes 1)" if not excl(r["fill_minus_tload"], 0.0)
                else " (excludes 1, ratio outside 0.65-0.85: sign only)")
-        return f"{c[-1]}: fill/tload {r['ratio']:.2f} [~{lo:.2f}, {hi:.2f}] -> {r['decision']}{why}"
+        return f"{lab}: fill/tload {r['ratio']:.2f} [~{lo:.2f}, {hi:.2f}] -> {r['decision']}{why}"
     res = {"item": "CAT-f", "claims": CLAIMS["CAT-f"], "per_card": per,
            "test": "per card: Welch 99% of L1 fill per byte (2 x (stride64 - stride32) / 64, random) - tload/scp/random; holds "
                    "when the interval excludes 0 (ratio 1) and the ratio is in 0.75 +- 0.10. Registered as underpowered and "
                    "expected within noise: fence vs nop (reported); stride-256 (not run: dropped from arm B).",
-           "outcome": out, "reading": "; ".join(one(c) for c in CARDS) + "; stride-256 not measured (energy-manual-102 stays as it is)"}
+           "outcome": out, "reading": "; ".join(one(c) for c in CARDS) + "; stride-256 not measured (energy-manual-102 stays as it is)",
+           "all_cards": all_cards(per, lambda r: r["decision"] == "holds", lambda c: one(c, short(c)),
+                                  scope="each card (registered 'on each card')"),
+           "idle_clock": idle_clock(P, ("B",))}
     if committed:
         res["committed_23sep"] = {c: fill_card(committed[c]) for c in CARDS if c in committed}
     return res
@@ -424,19 +610,34 @@ def main():
     a = ap.parse_args()
     cpath = a.committed or os.path.join(a.root, "docs", "reports", "data", "2026-09-23-energy-manual", "catalogue.json")
     committed = None if cpath == "none" else committed_passes(cpath)
+    present = sorted((d for d in os.listdir(a.data) if os.path.isdir(os.path.join(a.data, d, "cat"))),
+                     key=lambda d: (CAMPAIGN.index(d) if d in CAMPAIGN else len(CAMPAIGN), d))
+    PRESENT.update(present)
+    ALL[:] = list(CAMPAIGN) + [c for c in present if c not in CAMPAIGN]
     P, listing = {}, {}
-    for c in CARDS:
+    for c in ALL:
         P[c], listing[c] = load_card(a.data, c, a.root)
-    items = [cat_a(P), cat_b(P, committed), cat_c(P, committed), cat_e(P, committed), cat_f(P, committed)]
+    items = [idle_caveat(cat_a(P)), cat_b(P, committed), idle_caveat(cat_c(P, committed)), cat_e(P, committed),
+             idle_caveat(cat_f(P, committed))]
     res = {"exp": "V3-CAT", "plan": "PLAN3 section 2 V3-CAT (CAT-a, b, c, e, f)", "data": os.path.abspath(a.data),
            "generated": datetime.datetime.now().isoformat(timespec="seconds"),
+           "cards": {"present": present, "registered": list(REGISTERED), "campaign": list(CAMPAIGN)},
            "rules": {"unit": "pass", "min_kept_passes": MIN_N, "conf": 0.99,
-                     "drops": "aifoundry2: bursts with mhz_busy_all_600 false or a launch's implied clock outside "
-                              "0.595-0.605 GHz; any card: heater launch inside a burst's idle brackets"},
+                     "drops": "aifoundry2: bursts with mhz_busy_all_600 false, any idle-bracket sample off 600 MHz "
+                              "(R-clock) or a launch's implied clock outside 0.595-0.605 GHz; aifoundry1's cards "
+                              "(governor-free, amendment): busy samples and implied clock only, the idle-bracket clock "
+                              "recorded (idle_state) and reported, never a drop; aifoundry3: no clock rule; any card: "
+                              "heater launch inside a burst's idle brackets",
+                     "outcomes": "outcome = registered (aifoundry2 + aifoundry3, unchanged); all_cards = the four-card "
+                                 "amendment (every campaign card; card-specific bands reported, not tested; "
+                                 "all_cards.idle_caveat lists tested cards whose brackets were mostly off 600 MHz)"},
            "passes": listing, "items": R(items)}
     json.dump(res, open(a.out, "w"), indent=1)
     for it in res["items"]:
         print(f"{it['item']:6s} {it['outcome']:14s} {it['reading']}")
+        print(f"{'':6s} all_cards {it['all_cards']['outcome']:14s} {it['all_cards']['reading']}")
+        if it["idle_clock"]["note"] != "every card's idle brackets at 600 MHz":
+            print(f"{'':6s} idle: {it['idle_clock']['note']}")
 
 
 if __name__ == "__main__":

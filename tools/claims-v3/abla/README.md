@@ -1,6 +1,7 @@
 # abla: V3-ABL-A (PLAN3 §2, suggested E38)
 
-Tensor-unit energy by operands, precision, structure and active minions, strict start, 7 s runs, both cards.
+Tensor-unit energy by operands, precision, structure and active minions, strict start, 7 s runs. Registered on
+aifoundry2 and aifoundry3; since 25 Sep also run on aifoundry1's two cards (section "Four cards" below).
 Registered items: ABL-T1..T8 (a Bonferroni family of 19 sub-tests per card), the EM4 rider of T5, ABL-R, ABL-EM4c,
 ABL-EM4d (60 claims). This directory also holds the runner and reduction core shared with `ablb` and `x5`.
 
@@ -22,8 +23,9 @@ runner, and so are the seeds (`--seed block + 1`). Structured tiles use seed `(b
    configuration:
    1. It waits while the card is held by someone else: the et_soc1 use count is above the sampler's own, or
       another user's device process is running. The wait is capped at 15 min, after which the block fails with exit 3.
-   2. It approaches the launch temperature. aifoundry2 heats to >= 84 C with 2 s fp32-randn bursts under hold10, then
-      idles until the die reads <= 80 C. aifoundry3 does the same with 60 / 55 C. Before every burst it checks the
+   2. It approaches the launch temperature. A governor-free card (aifoundry2, aifoundry1-c0, aifoundry1-c1) heats to
+      >= 84 C with 2 s fp32-randn bursts under hold10, then idles until the die reads <= 80 C. The pinned aifoundry3
+      does the same with 60 / 55 C. Before every burst it checks the
       card again, and stops the approach (wait, then approach again) if someone else took it; it never heats blind:
       five sampler reads without a die temperature stop the block (exit 1, "sampler lost").
    3. It checks the card again. If the card was taken during the approach, it waits and approaches again.
@@ -35,12 +37,19 @@ runner, and so are the seeds (`--seed block + 1`). Structured tiles use seed `(b
 5. `block_end ok` if the session completed and at most 2 runs failed. Otherwise `block_end fail`, with exit 3 when
    someone else held the card mid-block.
 
+On aifoundry1 (V3_DEVICE set) steps 3 and 3.1 do not use the et_soc1 use count, which counts both cards of the host
+while the other card's queue holds its own card: "someone else holds the card" is then another user's device process
+or CI job (lib.sh's OTHER_COMM), or one of our own device processes that can open this card (ET_DEVICES unset or this
+card, lib.sh's ours_running rule; a dev_mngt_service whatever its ET_DEVICES, since that binary ignores it and opens
+every card), other than this session's sampler. session.json records which check ran.
+
 Files per pass (`$DATA_ROOT/abla/p<N>/`): telemetry.jsonl.gz, runs.jsonl (block -9 = heater bursts), starts.jsonl
-(start temperature, approach time, heater bursts, whether the preheat was reached, seed, time waited for other users),
+(start temperature, approach time, heater bursts, whether the preheat was reached, seed, time waited for other users,
+and the idle clock and voltage read from the sampler just before the launch: idle_mhz, idle_mv),
 ends.jsonl (host exit code), order.<block>, config.cfg, session.json, host.log, check.json, tiles.check,
 code.sha256, block.json.
 
-`--smoke` (`abla-smoke`) holds the card for about 20 s (up to ~35 s on aifoundry2: it first runs lib.sh's
+`--smoke` (`abla-smoke`) holds the card for about 20 s (up to ~35 s on a cool governor-free card: it first runs lib.sh's
 `heat_to 76`, before its sampler opens the management node, so the smoke also starts on a warm die). It starts the
 sampler, fires one heater burst, then does 3 s runs of m_negzero (reads a structured tile on this host), int8_ones,
 fp16_zeros and spin. `ablcheck.py --smoke` then
@@ -48,18 +57,18 @@ requires every launch to be ok and every telemetry field the reducers read to be
 
 ## Card minutes per pass
 
-| | aifoundry2 | aifoundry3 |
-|---|---|---|
-| per pass (23 runs) | ~26 min (committed strict sessions: 66-69 s start to start) | ~13 min (E20: 33 s start to start) |
-| 4 passes (plan: 115 / 65) | ~105 min | ~53 min |
-| safety cap per block (`ABL_CAP_S`) | 45 min | 30 min |
+| | aifoundry2 | aifoundry3 | aifoundry1-c0, aifoundry1-c1 |
+|---|---|---|---|
+| per pass (23 runs) | ~26 min (committed strict sessions: 66-69 s start to start) | ~13 min (E20: 33 s start to start) | ~26 min each (aifoundry2's protocol; their heating and cooling rates are unmeasured) |
+| 4 passes (plan: 115 / 65) | ~105 min | ~53 min | ~105 min each |
+| safety cap per block (`ABL_CAP_S`) | 45 min | 30 min | 45 min |
 
 Schedule `abla 1` .. `abla 4` as separate queue lines, at least 30 min apart with other experiments between them
 (PLAN3 §2.13).
 
 ## What is dropped, and why
 
-`ablcore.py` decides which runs are kept. It drops a run when:
+`ablcore.py` decides which runs are kept. For the registered outcome (aifoundry2 and aifoundry3) it drops a run when:
 
 - a launch did not print `ok`, or there is no timed launch (host failure, or killed by timeout 10);
 - the telemetry does not cover the windows (under 5 samples in seconds 1-3, or under 3 before the launch);
@@ -142,17 +151,110 @@ off-600 runs, run `abla 5`. Fewer than 3 kept runs of a configuration on a card 
   each of the 9 EM4 tensor patterns, the Welch 99% interval of new - old p80 must include 0. The 2% prediction is
   reported. Other common patterns are reported outside the decision.
 
+## Four cards (25 Sep 2026: aifoundry1's two cards)
+
+The owner asked for every measurement on every card after the day's machine fixes, so the campaign runs on
+aifoundry2, aifoundry3, aifoundry1-c0 and aifoundry1-c1 (lib.sh: `V3_DEVICE=0|1` on aifoundry1). The amendment for
+aifoundry1's cards (docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md) is committed before any of their data.
+
+**Parameters.** The blocks choose them by what the card is, not by host name. Launch temperatures follow the
+governor (lib.sh's `GOV_FREE`): a governor-free card heats to 84 C and launches at 80 C, above the window where its
+governor lifts the clock; the pinned aifoundry3 uses 60 / 55 C. aifoundry1's cards are governor-free with aifoundry2's
+configuration (TDP 65 W, threshold 65 C), so they take aifoundry2's values: targets, cap, and the reduction's leakage
+slope 0.81 W/C at 80.9 C. Their own slopes are unmeasured; the slope multiplies only the few degrees between the
+launch temperature and seconds 1-3, so a 30% error in it (0.24 W/C) moves a run's switching by 0.24 W per degree of
+that rise, and largely cancels in differences between patterns that heat alike. Physics that a parameter cannot fix
+is handled in the reduction (below).
+
+**aifoundry1-c0 can idle at 300 MHz.** Its firmware (1.4.1) idles in a "low_power" state at 300 MHz / 398 mV
+(18.8 W board) after a long idle, and a burst runs at 600 MHz. The aifoundry1 clock test (25 Sep ~16:40, two 2 s
+launches 1 s apart) showed both idle states: the first launch after the low-power idle showed no power rise and the
+clock reached 600 MHz only at its end; after it the card idled at 600 MHz (26 W) and the second launch drew 49.4 W. So
+which state a block's idle brackets are in (each run follows an approach that may end with tens of seconds of idle)
+is not known in advance; it may differ from run to run. The registered rule ("any sample in [t0-2 s, t1] off 600 MHz")
+covers the pre-launch idle bracket and would drop every run whose bracket is in the low-power state. So:
+
+- *Busy rule* (`kept_busy`): the clock test covers only the samples the busy metrics read, [t0+0.3 s, t1] (p_mean's
+  window, which contains p_early's; the first 0.3 s after the launch are read by no metric). Every other condition is
+  the registered one. The idle bracket is recorded, not tested: `idle_state` (e.g. "300", "600", "mixed 300-600"),
+  `idle_mhz_min/max`, `idle_mv`, beside `busy_mv`; starts.jsonl also records the clock and voltage the sampler read
+  just before the launch. A run whose burst itself starts in the low-power state (as the clock test's first launch) has
+  busy samples off 600 MHz and is dropped by the busy rule.
+- *What the idle state does to the metrics.* switching and dyn subtract p_before, the idle bracket's power. When the
+  bracket is in the 300 MHz / 398 mV state, the over-idle values include the step from idling at 600 MHz to idling at
+  300 MHz (several watts): differences between configurations whose runs idled in the same state cancel it; absolute
+  over-idle values (pJ per MAC, spin, the minion-count intercept, the dense/zero saving, uJ per layer) do not; and
+  hot - cool at two launch temperatures (V3-X5) also carries (busy leakage slope - idle leakage slope) x the
+  temperature step. If a card's runs idled in MORE THAN ONE state (`idle_mixed_on`), a difference between two runs in
+  different states carries the step and does not cancel either; `by_idle_state` then gives the item on each state's
+  runs alone (reported, never deciding; usually INSUFFICIENT, since each state holds only part of the runs). The
+  reducers attach each card's idle clock, voltage and idle power by state (`idle_w_by_state`; the firmware releases
+  idle at different powers even at 600 MHz: 26 W on 1.4.1, 33-35 W on 1.2.0, 32 W on 1.3.1) to every item about energy
+  over idle, with the kind of effect, so the page can say when a card's idle state differs.
+- *If aifoundry1-c0's bursts are not at 600 MHz* (its governor's operating points above the 65 C threshold are
+  unknown), the busy rule drops them and its items are INSUFFICIENT. No other operating point or launch temperature is
+  substituted after seeing data. Run the smoke on each aifoundry1 card first: its note shows `busy-off600` and the
+  idle clocks (`idle-mhz`).
+
+**Block note.** `ablcheck.py` gives both rules: `off600` (registered), `busy-off600` (four-card rule), and the idle
+clocks seen (`idle-mhz 300:23`). Neither fails the block; a pass 5+ replaces runs dropped by the busy rule on
+aifoundry1's cards, as the registered replacement does for aifoundry2.
+
+**Reduction.** Each item keeps its REGISTERED outcome, computed exactly as before from aifoundry2 and aifoundry3 with
+the registered rule (checked: identical output on the synthetic and legacy test sets, and on aifoundry2's real
+passes collected so far, abla p1-p4, ablb p1-p2, x5 p1-p2). Each item gains `all_cards`:
+
+- The busy rule on every card of `--expect` (default the four campaign cards) and any other card directory found. Per
+  card: PASS / FAIL / INSUFFICIENT where the item is registered for each card; REPORTED where its band is given for
+  aifoundry2 or aifoundry3 only (the card's values are shown against both cards' bands, `vs_<card>_values`, with the
+  outcome each would give as `would_be`); N/A for aifoundry2-only checks.
+- Outcome over the tested cards: PASS on every one, FAIL on every one, CARD-DIFFERENT on some; INSUFFICIENT when one
+  lacks the kept repeats or has no data (`cards_missing`).
+- `registered_cards_busy_vs_registered_rule` flags where the busy rule changes aifoundry2's or aifoundry3's outcome.
+- `idle_clock` (idle clock, voltage and power by state per card), `idle_differs_on`, `idle_note` on items about
+  energy over idle; `idle_mixed_on` and `by_idle_state` (the item on each idle state's runs alone, reported) for a
+  tested card whose runs idled in more than one state.
+- `per_card` holds all four cards: aifoundry2 / aifoundry3 as registered; aifoundry1's cards under the busy rule with
+  aifoundry2's reduction parameters (`"rule": "busy"`).
+
+Which V3-ABL-A items are tested on aifoundry1's cards:
+
+| item | on aifoundry1's cards | idle state |
+|---|---|---|
+| ABL-T1 negative zero | tested (same bands on both cards) | cancels (if the runs idled in the same state) |
+| ABL-T2, T3, T8 | REPORTED (a2 / a3 values) | cancels (same condition) |
+| ABL-T4 structured matrices | REPORTED (a3: 0.924 x model; a2: its E15 values) | absolute |
+| ABL-T5 | tested: the fp32/int8 ratio in [15, 23] (registered "on each card"); pJ per MAC bands REPORTED | absolute |
+| ABL-T5-EM4 rider | tested (switching > 0 per card); each card / aifoundry2 ratio reported | absolute |
+| ABL-T6 spin | REPORTED (1.46 / 1.35 W bands) | absolute |
+| ABL-T7 active minions | tested (same band and bound on both cards) | absolute |
+| ABL-R refit | REPORTED (decided on aifoundry3); each card's fit stated | the free constant absorbs it |
+| ABL-EM4c cycles per op | tested (exact) | none |
+| ABL-EM4d | N/A (aifoundry2 against its own 21 Sep session) | none |
+
+**Card checks on aifoundry1** (runner, above): no use count; processes only.
+
+**Structured tiles.** aifoundry1's tree (~/nekko) needs the same rsync of the 21 Sep structured tiles as aifoundry3;
+the block fails before any launch if `tiles.sha256` does not match.
+
 ## How to reduce
 
-    python3 tools/claims-v3/abla/reduce.py --data <dir with aifoundry2/ and aifoundry3/ like DATA_ROOT> --out abla.json
+    python3 tools/claims-v3/abla/reduce.py --data <dir with one directory per card, like DATA_ROOT> --out abla.json \
+        [--expect aifoundry2,aifoundry3,aifoundry1-c0,aifoundry1-c1]
 
-It writes a list of items, each `{item, claims, per_card, test, outcome, reading}` with sub-test intervals, pass
-numbers used and robustness, to `abla.json`. The per-run table goes to `abla.runs.json`. It runs on partial data:
-missing cards or passes give INSUFFICIENT. Tested on the committed 21 Sep / E9 / E20 sessions laid out as passes, and
-on synthetic sessions (validate3/drv/abla/: pred, shift, off600 + replacement pass, dropout, model, partial).
+It writes a list of items, each `{item, claims, per_card, test, outcome, reading, all_cards, reading_all_cards}` with
+sub-test intervals, pass numbers used and robustness, to `abla.json`. The per-run table (both rules' keep decisions
+and the idle clocks) goes to `abla.runs.json`. It runs on partial data: missing cards or passes give INSUFFICIENT.
+Tested on the committed 21 Sep / E9 / E20 sessions laid out as passes, on synthetic sessions (validate3/drv/abla/:
+pred, shift, off600 + replacement pass, dropout, model, partial), and on synthetic four-card sessions
+(validate3/fourcards/abla/: all four hold with aifoundry1-c0 idling at 300 MHz; aifoundry1-c0's idle state 9 W below
+its 600 MHz idle, plus a busy-off-600 run and its replacement pass; aifoundry1-c1 missing; and, in
+validate3/fourcards/review/syn/, aifoundry1-c0's runs alternating between the two idle states, or all but one per pass
+at 300 MHz, where differences fail on c0 and `by_idle_state` shows the per-state view).
 
 ## Files
 
-`block.sh` (the pass), `ablrun.sh` (patched runner, shared), `ablcore.py` (per-run metrics and statistics, shared),
+`block.sh` (the pass), `ablrun.sh` (patched runner, shared), `ablcore.py` (per-run metrics, both clock rules,
+statistics and the all-cards combination, shared),
 `ablcheck.py` (end-of-block check, shared), `abl_a.cfg`, `tiles.sha256`, `x1_predictions.json` (registered),
 `reduce.py`.

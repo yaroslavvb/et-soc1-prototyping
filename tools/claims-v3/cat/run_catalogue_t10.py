@@ -4,7 +4,7 @@
     python3 tools/claims-v3/cat/run_catalogue_t10.py <out-dir> --root <tree root> --only NAMES [--passes 1]
         [--burst 3] [--gap 5] [--seed 7] [--host-bin build/enercat_v2/host/enercat_host]
         [--hold-hot C --heater PATH] [--tel-live PATH] [--heat-settle 1.5] [--stall-s 6] [--no-yield]
-        [--lead 10] [--dry] [--list]
+        [--lead 10] [--card <card id>] [--dry] [--list]
     exit 0 done; 3 another user or device process appeared (pass stopped); 4 the sampler stopped writing
 
 What is the same as run_catalogue.py: the configurations (imported from workloads/enercat/run_catalogue.py itself,
@@ -35,7 +35,11 @@ What is changed (each is recorded in tools/claims-v3/cat/README.md):
  10. before every configuration: if --tel-live has not grown for --stall-s (6) s, the sampler has died or run out
      of --seconds, so the pass stops (exit 4) instead of running bursts nobody measures; and if lib.sh's
      others_present finds another user or another user's device process, the pass stops (exit 3, the queue's
-     "someone else on the card" code), because another kernel spoils the idle brackets and the card is shared.
+     "someone else on the card" code), because another kernel spoils the idle brackets and the card is shared;
+ 11. --card: the card id (lib.sh CARD: aifoundry2, aifoundry3, aifoundry1-c0, aifoundry1-c1) written as each
+     runs.jsonl line's "host" and in configs.json, so analyze_catalogue.py (which groups bursts by "host") keeps
+     the two cards of aifoundry1 apart; default the hostname, as run_catalogue.py writes. The device the processes
+     open is chosen by ET_DEVICES in the environment (lib.sh exports it with V3_DEVICE), not here.
 """
 import argparse
 import json
@@ -90,6 +94,7 @@ def main():
     ap.add_argument("--stall-s", type=float, default=6.0, help="stop the pass when --tel-live has not grown for this long")
     ap.add_argument("--no-yield", action="store_true", help="do not stop when lib.sh others_present finds someone")
     ap.add_argument("--lead", type=float, default=10.0, help="idle seconds before the first configuration")
+    ap.add_argument("--card", default=None, help="card id for the runs' host field (default: the hostname)")
     ap.add_argument("--dry", action="store_true", default=bool(os.environ.get("V3_DRY")))
     ap.add_argument("--list", action="store_true")
     a = ap.parse_args()
@@ -141,6 +146,8 @@ def main():
                            capture_output=True, text=True)
         if r.returncode == 0:
             print(f"others present: {r.stdout.strip()[-300:]}", file=log, flush=True)
+        elif r.returncode != 1:   # lib.sh itself failed (e.g. aifoundry1 without V3_DEVICE): say so, do not stop
+            print(f"others_present check failed (rc {r.returncode}): {r.stderr.strip()[-300:]}", file=log, flush=True)
         return r.returncode == 0
 
     tel_seen = [None, None]   # [size, time it last grew]
@@ -159,8 +166,9 @@ def main():
         return now - tel_seen[1] > a.stall_s
 
     os.makedirs(a.out, exist_ok=True)
-    host = socket.gethostname()
-    json.dump({"host": host, "host_bin": H, "args": vars(a), "cfgs": cfgs}, open(os.path.join(a.out, "configs.json"), "w"), indent=1)
+    host = a.card or socket.gethostname()
+    json.dump({"host": host, "hostname": socket.gethostname(), "et_devices": os.environ.get("ET_DEVICES"), "host_bin": H,
+               "args": vars(a), "cfgs": cfgs}, open(os.path.join(a.out, "configs.json"), "w"), indent=1)
     runs = open(os.path.join(a.out, "runs.jsonl"), "a")
     marks = open(os.path.join(a.out, "marks.jsonl"), "a")
     log = open(os.path.join(a.out, "run.log"), "a")

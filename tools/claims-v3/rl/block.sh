@@ -4,13 +4,16 @@
 # bursts bracketed by 10 s of idle), with the plan's changes: every device process under hold10 (timeout 10) and
 # --budget 8; spin brackets (nocbench spin first and last in half A, memhier spin first and last in half B);
 # ABBA l2/scp-local (BAAB on even passes); the ring order reversed on even passes; a scratchpad contents prefill
-# (enercat tstore, zeros on odd passes, random on even) before scp-local and before scp-remote; on aifoundry2 the
-# die heated to >= 76 C before each half and before the relay (lib.sh heat_to; a no-op on aifoundry3).
+# (enercat tstore, zeros on odd passes, random on even) before scp-local and before scp-remote; on a governor-free
+# card (lib.sh GOV_FREE: aifoundry2, aifoundry1-c0, aifoundry1-c1) the die heated to >= HEAT_C before each half and
+# before the relay (lib.sh heat_to; a no-op on the pinned aifoundry3).
+# Runs on all four cards: aifoundry2, aifoundry3, and aifoundry1's two cards (V3_DEVICE=0|1, lib.sh).
 #
 #   bash tools/claims-v3/rl/block.sh <pass> [--smoke]        (V3_DRY=1 prints the device calls instead)
+#   V3_DEVICE=1 bash tools/claims-v3/rl/block.sh <pass>      (on aifoundry1: card 1)
 #
 # Output: $DATA_ROOT/rl/p<pass>/{A,B,relay}/{telemetry.jsonl.gz,runs.jsonl,marks.jsonl,launches.jsonl,...},
-# pass.json, heat-*.jsonl, quality.json, block.json. Reduce with tools/claims-v3/rl/reduce.py (README.md).
+# pass.json, heat-*.jsonl, state.jsonl, quality.json, block.json. Reduce with tools/claims-v3/rl/reduce.py (README.md).
 . "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 cd "$V3_ROOT" || exit 2
 others_present && exit 3
@@ -28,6 +31,22 @@ RELAY_SECS=8    # seconds per relay medium (run_reruns_warm.sh called run_onchip
 LEAD=8; TAIL=6  # idle before the first burst and after the last one, as in the committed runners
 if [ -n "$SMOKE" ]; then SECS=0.5; GAP=1; RELAY_SECS=0; LEAD=2; TAIL=1; fi
 if [ $((K % 2)) = 1 ]; then CONTENTS=zeros; EVEN=; else CONTENTS=random; EVEN=1; fi
+# ---- per-card parameters (README "Cards"; AMENDMENTS for aifoundry1's cards) ----
+# HEAT_C: the die temperature every half and the relay start from, on governor-free cards (heat_to returns at once on a
+#   pinned card). aifoundry1's cards take aifoundry2's 76 C: the same 65 C software threshold and 65 W TDP
+#   (ettelem config, 25 Sep). aifoundry2's governor lifts the clock off 600 MHz below ~68 C; aifoundry1's clock test
+#   saw no boost (two launches), so there the heat is a precaution, puts the die where aifoundry2's is, and wakes
+#   card 0 from its 300 MHz low-power idle before each half (README "Four cards").
+# OFF600: which samples the pass-level 600 MHz rule covers (quality.py):
+#   all  - aifoundry2 (registered, PLAN3 common rule): any telemetry sample of the pass off 600 MHz fails the pass;
+#   busy - the other governor-free cards (aifoundry1-c0, -c1; amendment): only samples inside a burst's window, never
+#          the idle brackets or launch gaps (between two relay processes, up to 50 ms into the next kernel), so card
+#          0's 300 MHz low-power idle cannot fail a pass, but a kernel running below 600 MHz does;
+#   none - a pinned card (aifoundry3): recorded only; reduce.py's burst rule applies.
+HEAT_C=76
+if [ -z "$GOV_FREE" ]; then OFF600=none
+elif [ "$CARD" = aifoundry2 ]; then OFF600=all     # the registered rule stays as it was for aifoundry2
+else OFF600=busy; fi
 ERRLOG_DRY=; [ -n "${V3_DRY:-}" ] && ERRLOG_DRY=/dev/stderr   # dry run: show the DRY lines instead of logging them
 
 pause() { [ -n "${V3_DRY:-}" ] || sleep "$1"; }
@@ -122,9 +141,21 @@ start_half() {  # dir seconds: the half's own sampler (lib.sh start_sampler: fir
   pause "$LEAD"
 }
 end_half() { pause "$TAIL"; stop_sampler; }
-heat() {  # aifoundry2: die >= 76 C before each half and the relay (sampler stopped: heat_to opens the management node)
+heat() {  # governor-free card: die >= HEAT_C before each half and the relay (sampler stopped: heat_to opens the management node)
   stop_sampler   # none runs here; kept so a later edit cannot put heat_to next to a running sampler
-  heat_to 76 "$OUT/heat-$1.jsonl" || bail "heat_to 76 gave up before $1"
+  heat_to "$HEAT_C" "$OUT/heat-$1.jsonl" || bail "heat_to $HEAT_C gave up before $1"
+}
+# card_state <tag>: the firmware's own view of the idle card into state.jsonl (ettelem config: TDP, temperature
+# threshold, power state and its name, minion clock and voltage), so the reducer can tell which idle state the card
+# rests in (aifoundry1's card 0 idles in "low_power" at 300 MHz). Read-only; the sampler must be stopped (it opens the
+# management node), and a 2 s pause follows so the next opener (die_c, the sampler) does not start right behind it.
+# A failed read records null and the pass goes on: the telemetry holds every sample's clock anyway.
+card_state() {
+  local s
+  stop_sampler
+  s=$(hold10 "$ETTELEM" config 2>> "${ERRLOG_DRY:-/dev/null}" | grep '^{' | tail -1)
+  printf '{"at":"%s","t_ms":%s,"config":%s}\n' "$1" "$(now_ms)" "${s:-null}" >> "$OUT/state.jsonl"
+  pause 2
 }
 between() {  # another user arrived mid-pass: stop politely, the queue retries the pass later (exit 3)
   others_present && bail "others present before $1: pass abandoned" 3
@@ -156,7 +187,8 @@ if [ -n "$SMOKE" ]; then
   level "$S" scp-remote
   for m in "${MEDIA[@]}"; do relay_medium "$S" "${m%%:*}" "${m##*:}" "relay-${m%%:*}"; done
   end_half
-  if [ "$CARD" = aifoundry2 ]; then   # the heater binary once (1 s), after the sampler has stopped
+  card_state smoke   # checks that ettelem config answers on this card (recorded, not a smoke criterion)
+  if [ -n "$GOV_FREE" ]; then   # governor-free card: the heater binary once (1 s), after the sampler has stopped
     launch "$S/heater.jsonl" "$S" heater SPARSITY "$HEATER" --test fma --type fp32 --pattern none --values randn \
       --shires 0xffffffff --per-shire 32 --seconds 1 --seed 1
     echo "{\"die_c\":\"$(die_c)\"}" >> "$S/heater.jsonl"
@@ -175,9 +207,11 @@ if [ -n "$SMOKE" ]; then
 fi
 
 block_begin rl "$K"
-printf '{"pass":%s,"card":"%s","contents":"%s","rings":"%s","levels":"%s","media":"%s","secs":%s,"gap_s":%s,"relay_secs":%s,"dry":%s}\n' \
-  "$K" "$CARD" "$CONTENTS" "${RINGS[*]}" "${LEVELS[*]}" "${MEDIA[*]}" "$SECS" "$GAP" "$RELAY_SECS" \
+printf '{"pass":%s,"card":"%s","device":"%s","gov_free":%s,"heat_c":%s,"off600_scope":"%s","contents":"%s","rings":"%s","levels":"%s","media":"%s","secs":%s,"gap_s":%s,"relay_secs":%s,"dry":%s}\n' \
+  "$K" "$CARD" "${V3_DEVICE:-}" "$([ -n "$GOV_FREE" ] && echo true || echo false)" "$([ -n "$GOV_FREE" ] && echo "$HEAT_C" || echo null)" "$OFF600" \
+  "$CONTENTS" "${RINGS[*]}" "${LEVELS[*]}" "${MEDIA[*]}" "$SECS" "$GAP" "$RELAY_SECS" \
   "$([ -n "${V3_DRY:-}" ] && echo true || echo false)" > "$OUT/pass.json"
+card_state start   # the card's resting idle state, before the first heat
 
 # ---- half A: nocbench spin, the eleven rings (reversed on even passes), nocbench spin ----
 heat A
@@ -203,9 +237,16 @@ heat relay
 R=$OUT/relay; start_half "$R" 200
 for m in "${MEDIA[@]}"; do relay_medium "$R" "${m%%:*}" "${m##*:}"; done
 end_half
+card_state end     # the idle state after 16 s of idle behind the last relay launch
 
 # ---- quality: the drop rules the reducer applies, checked now so a pass that must be re-run is marked failed ----
-if [ -n "${V3_DRY:-}" ]; then block_end ok "dry run"; exit 0; fi
+# quality.py reads the pass's files only: the windows (busy / launch gap / idle bracket), each window's clock and
+# voltage (the idle clock), and the OFF600 rule of this card.
+QPY=tools/claims-v3/rl/quality.py
+if [ -n "${V3_DRY:-}" ]; then
+  python3 "$QPY" "$OUT" --scope "$OFF600" > "$OUT/quality-windows.json" || { block_end fail "dry run: quality.py failed"; exit 1; }
+  block_end ok "dry run"; exit 0
+fi
 miss=; off=0; tot=0; short=
 for lab in nspin-first "${RINGS[@]}" nspin-last; do grep -q "\"label\":\"$lab\"" "$A/runs.jsonl" 2>/dev/null || miss="$miss A:$lab"; done
 for lab in "${LEVELS[@]}"; do [ "$lab" = prefill ] && continue; grep -q "\"label\":\"$lab\"" "$B/runs.jsonl" 2>/dev/null || miss="$miss B:$lab"; done
@@ -218,12 +259,27 @@ for h in A B relay; do
   [ "$n" -gt 300 ] || short="$short $h($n)"
   gzip -f "$f"
 done
-printf '{"samples":%s,"off600":%s,"missing":"%s","short":"%s","rc":"%s"}\n' "$tot" "$off" "${miss# }" "${short# }" "${BAD# }" > "$OUT/quality.json"
-# PLAN3 common rules: an aifoundry2 repeat with any sample off 600 MHz is dropped and re-run (schedule the pass
-# again: queue.sh skips ok passes). aifoundry3 is pinned at 600 MHz; there only V3-RL's burst rule applies (clock
-# off 600 MHz in > 2% of a burst's samples drops that burst, in reduce.py), so its off-600 count is recorded only.
-offbad=0; [ "$CARD" = aifoundry2 ] && [ "$off" -gt 0 ] && offbad=1
+# the windows: busy samples, launch gaps, idle brackets, each with its clock (quality.py); an empty object if it failed
+qw=$(python3 "$QPY" "$OUT" --scope "$OFF600" 2>> "$OUT/stderr.log") || qw=
+[ -n "$qw" ] || qw='{}'
+echo "$qw" > "$OUT/quality-windows.json"
+qv() { python3 -c 'import json,sys; q=json.load(open(sys.argv[1])); k=sys.argv[2].split("."); v=q
+for x in k: v=v.get(x, {}) if isinstance(v, dict) else {}
+print("" if v == {} or v is None else str(v).lower())' "$OUT/quality-windows.json" "$1" 2>/dev/null; }
+bsy=$(qv busy.n); boff=$(qv busy.off600); iclk=$(qv idle_clock_mhz); qfail=$(qv fail)
+printf '{"samples":%s,"off600":%s,"busy":%s,"busy_off600":%s,"idle_clock_mhz":%s,"off600_scope":"%s","missing":"%s","short":"%s","rc":"%s"}\n' \
+  "$tot" "$off" "${bsy:-null}" "${boff:-null}" "${iclk:-null}" "$OFF600" "${miss# }" "${short# }" "${BAD# }" > "$OUT/quality.json"
+# The pass-level 600 MHz rule of this card (OFF600 above); a failed pass is re-run by scheduling it again (queue.sh
+# skips ok passes).
+#  all  (aifoundry2, PLAN3 common rule): any sample off 600 MHz;
+#  busy (aifoundry1's cards, amendment): any busy sample off 600 MHz; if quality.py could not say, the pass fails;
+#  none (aifoundry3, pinned): recorded only; reduce.py drops a burst with > 2% of its samples off 600 MHz.
+offbad=0
+case "$OFF600" in
+  all) [ "$off" -gt 0 ] && offbad=1 ;;
+  busy) [ "$qfail" = false ] || offbad=1 ;;
+esac
 if [ "$offbad" = 1 ] || [ -n "$miss$short$BAD" ]; then
-  block_end fail "off600=$off of $tot; missing:${miss:- none}; short:${short:- none}; rc:${BAD:- none}"; exit 1
+  block_end fail "off600=$off of $tot (busy ${boff:-?} of ${bsy:-?}, rule $OFF600); missing:${miss:- none}; short:${short:- none}; rc:${BAD:- none}"; exit 1
 fi
-block_end ok "contents $CONTENTS; $tot samples, $off off 600 MHz"
+block_end ok "contents $CONTENTS; $tot samples, $off off 600 MHz (busy ${boff:-?} of ${bsy:-?}; idle clock ${iclk:-?} MHz)"

@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # V3-ABL-A (PLAN3 §2, suggested E38): tensor-unit energy by operands, precision, structure and active minions.
 # One pass = one shuffled block (block index pass-1) of the 23 configurations in abl_a.cfg, 7 s runs, strict start
-# (aifoundry2: heat to 84 C, launch when the die reads 80 C; aifoundry3: 60 / 55 C), 10 Hz sampler for the block.
-#   bash tools/claims-v3/abla/block.sh <pass 1..4> [--smoke]
+# (governor-free cards, aifoundry2 and aifoundry1-c0/-c1: heat to 84 C, launch when the die reads 80 C; the pinned
+# aifoundry3: 60 / 55 C), 10 Hz sampler for the block.
+#   bash tools/claims-v3/abla/block.sh <pass 1..4> [--smoke]        (aifoundry1: V3_DEVICE=0 or 1 selects the card)
 # The plan's one invocation of 4 blocks is split into passes 1-4 (blocks 0-3: the same shuffles, seeds 1-4 and
 # structured-tile seeds 1,2,1,2 as the original runner's loop). A pass 5+ replaces runs dropped from passes 1-4.
 . "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
@@ -12,9 +13,16 @@ case $pass in ''|*[!0-9]*|0) echo "pass must be 1, 2, ..." >&2; exit 2 ;; esac
 others_present && exit 3
 
 HERE=$V3_ROOT/tools/claims-v3/abla
+# Launch temperatures follow the governor: a governor-free card (TDP 65 W, 65 C threshold) launches at 80 C after
+# heating to 84 C, above the window where its governor lifts the clock off 600 MHz; the pinned card at 55 / 60 C.
+if [ -n "$GOV_FREE" ]; then TARGET=80; PREHEAT=84; LAUNCH=80.9; export ABL_CAP_S=2700
+else                        TARGET=55; PREHEAT=60; LAUNCH=55.8; export ABL_CAP_S=1800; fi
+# Leakage slope of the reduction, per card (measured on aifoundry2 and aifoundry3; aifoundry1's cards take
+# aifoundry2's: their own slopes are unmeasured; the slope multiplies only the few degrees the die rises by seconds 1-3).
 case $CARD in
-  aifoundry2) TARGET=80; PREHEAT=84; LEAK=0.81; LAUNCH=80.9; export ABL_CAP_S=2700 ;;
-  aifoundry3) TARGET=55; PREHEAT=60; LEAK=0.55; LAUNCH=55.8; export ABL_CAP_S=1800 ;;
+  aifoundry3) LEAK=0.55 ;;
+  aifoundry2|aifoundry1-c0|aifoundry1-c1) LEAK=0.81 ;;
+  *) echo "abla: no leakage slope for card $CARD" >&2; exit 2 ;;
 esac
 
 finish() {  # finish <session-rc> <check-args...>
@@ -29,14 +37,15 @@ finish() {  # finish <session-rc> <check-args...>
 }
 
 if [ "$mode" = --smoke ]; then
-  # Smallest real check (~20 s of card time; up to ~35 s on a cool aifoundry2, which first runs heat_to 76): sampler
+  # Smallest real check (~20 s of card time; up to ~35 s on a cool governor-free card, which first runs heat_to 76): sampler
   # start, one heater burst, 3 s runs of a structured-tile file
   # (reads the committed tiles on this host), int8, fp16 and the integer loop; then the reducer's per-run metrics.
   block_begin abla-smoke "$pass"
   abl_hash_code abla docs/reports/data/2026-09-25-claims-v3/PLAN3.md
   abl_check_tiles || { block_end fail "structured tiles missing or changed (see tiles.check)"; exit 1; }
   grep -E '^(m_negzero|int8_ones|fp16_zeros|spin) ' "$HERE/abl_a.cfg" > "$OUT/smoke.cfg"
-  # aifoundry2: start on a warm die (lib rule, heat_to 76, before the sampler opens the management node); no-op on a3
+  # governor-free cards: start on a warm die (lib rule, heat_to 76, before the sampler opens the management node);
+  # a no-op on the pinned aifoundry3
   heat_to 76 "$OUT/heat.jsonl" || log "smoke: heat_to 76 gave up; runs below 600 MHz will be marked"
   ABL_NO_APPROACH=1 ABL_CAP_S=120 abl_session "$OUT" "$OUT/smoke.cfg" 0 3 "$TARGET" "$PREHEAT" 0
   finish $? --smoke

@@ -38,6 +38,10 @@ sps.load_jsonl = _load_jsonl_gz
 DV = json.load(open(os.path.join(REPO, "docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json")))["leak_model"]
 law = lambda T: DV["P_fix"] + DV["A_at_80"] * math.exp((T - 80) / DV["T_L"])
 TAU = {"a2": 1.148, "a3": 1.217}  # catalogue.json rail_filter
+# V3 four cards: a card without a measured rail filter (aifoundry1's, codes a1c0/a1c1) is filtered with aifoundry2's tau;
+# reduce.py reports that clause for those cards instead of deciding it. "valid" stays the registered a2-only rule: the
+# callers apply the busy-sample clock rule (cardrules.py) to aifoundry1's cards.
+tau_of = lambda card: TAU.get(card, TAU["a2"])
 mean = lambda xs: sum(xs) / len(xs)
 
 
@@ -101,7 +105,8 @@ def reduce_pass(d, card):
             r.append(y - FA["rails"][i])
         return r
     o["edge_tau0"] = {"start_max": round(max(rem(0, 0)), 2), "min_start_window": round(min(rem(0, 0)), 2), "min_stop_window": round(min(rem(1, 0)), 2)}
-    o["edge_tau_card"] = [round(min(min(rem(w, TAU[card])) for w in (0, 1)), 2), round(max(max(rem(w, TAU[card])) for w in (0, 1)), 2)]
+    o["edge_tau_card"] = [round(min(min(rem(w, tau_of(card))) for w in (0, 1)), 2), round(max(max(rem(w, tau_of(card))) for w in (0, 1)), 2)]
+    o["edge_tau_used"] = tau_of(card)  # V3 four cards
     edges = [M[x] for x in M] + G
     tt = [(r["t_ms"] - t0) / 1000 for r in tel]
     dd = [r["sp"]["board_avg_w"] - r["board_w"] for r, x in zip(tel, tt) if min(abs(x - e) for e in edges) >= 3]
@@ -139,7 +144,7 @@ def pool(files):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("dir", nargs="?")
-    ap.add_argument("--card", default="a2", choices=("a2", "a3"))
+    ap.add_argument("--card", default="a2", help="a2 | a3 | a1c0 | a1c1 (cardrules.short)")
     ap.add_argument("--pool", nargs="+")
     a = ap.parse_args()
     json.dump(pool(a.pool) if a.pool else reduce_pass(a.dir, a.card), sys.stdout, indent=1)

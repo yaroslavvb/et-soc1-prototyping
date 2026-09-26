@@ -4,15 +4,26 @@ bands, tests and decision rules exactly as registered (plan3.json experiments[V3
 components' test_as_registered). Every choice the registration left open is fixed in README.md "Reduction", before
 any data.
 
-    python3 tools/claims-v3/tel/reduce.py --data <dir holding aifoundry2/ and aifoundry3/, laid out like DATA_ROOT>
-                                           --out verdicts.json
+    python3 tools/claims-v3/tel/reduce.py --data <dir holding one directory per card, laid out like DATA_ROOT>
+                                           --out verdicts.json [--expect aifoundry2,aifoundry3,aifoundry1-c0,aifoundry1-c1]
 
-Input per card: <data>/<card>/tel/p<N>/ as block.sh writes it; only passes whose block.json says "ok" are used.
-It runs on partial data: a card with fewer than 3 kept passes gives INSUFFICIENT.
+Input per card: <data>/<card>/tel/p<N>/ as block.sh writes it; only passes whose block.json says "ok" are used. Every
+card directory present is read. It runs on partial data: a card with fewer than 3 kept passes gives INSUFFICIENT.
 
 Output: {"exp": "tel", "items": [{"item", "claims", "per_card": {card: {..., "n", "status"}}, "test", "outcome",
-"reading", ...}], "passes": {...}, "notes": [...]}; outcome is PASS (holds on every card the item names),
-FAIL, CARD-DIFFERENT (holds on one of the two cards) or INSUFFICIENT (a card has fewer than 3 kept passes).
+"reading", "all_cards": {...}, "reading_all_cards", ...}], "cards": {...}, "idle_clock": {...}, "passes": {...},
+"notes": [...]}.
+- "outcome" is the REGISTERED outcome, computed from aifoundry2 and aifoundry3 only, exactly as registered: PASS (holds
+  on every card the item names), FAIL, CARD-DIFFERENT (holds on one of the two cards) or INSUFFICIENT (a card has
+  fewer than 3 kept passes).
+- "all_cards" (amendment TEL-4C, README "Four cards") is the same test over every card the item tests: PASS (holds
+  on every one), CARD-DIFFERENT (on some), FAIL (on none), INSUFFICIENT (a tested card, including an expected card
+  with no data, has fewer than 3 kept passes). Items whose registered band names aifoundry2 or aifoundry3 only are
+  REPORTED for the other cards (per_card status "reported"), not tested; items registered for each card are tested
+  on every card unchanged.
+- A new governor-free card (every card but aifoundry2 and aifoundry3) drops for the clock only BUSY samples: those
+  inside a burst from 500 ms after its start; its idle brackets are never dropped for their clock (aifoundry1-c0
+  idles at 300 MHz). aifoundry2 keeps its registered rule, aifoundry3 (pinned) has none.
 
 Reused code: tools/ettelem/parse_sptrace_voltage.py parse() (voltage maps), workloads/enercat/analyze_catalogue.py
 bursts_of() and rail_fall_curves() (f(1 s), the catalogue definition), the SP stats record layout of
@@ -42,7 +53,12 @@ import analyze_catalogue as AC  # noqa: E402
 import numpy as np  # noqa: E402
 
 A2, A3 = "aifoundry2", "aifoundry3"
-CARDS = (A2, A3)
+CARDS = (A2, A3)                  # the registered cards: every registered outcome is computed from these two only
+EXPECT = (A2, A3, "aifoundry1-c0", "aifoundry1-c1")    # the four-card campaign (amendment TEL-4C); --expect overrides
+ALL = list(EXPECT)                # every card of this reduction: the expected cards and any other present (set in main)
+PRESENT = set()                   # the cards with a directory under --data
+PINNED = (A3,)                    # pinned at 600 MHz by a boot service: no clock rule
+SETTLE_MS = 500.0                 # new governor-free cards: a burst's samples count as busy from 500 ms after its start
 NEED = 3
 T2 = {1: 63.657, 2: 9.925, 3: 5.841, 4: 4.604, 5: 4.032, 6: 3.707, 7: 3.499, 8: 3.355, 9: 3.250, 10: 3.169}  # 99% two-sided
 T1 = {1: 31.821, 2: 6.965, 3: 4.541, 4: 3.747, 5: 3.365, 6: 3.143, 7: 2.998, 8: 2.896, 9: 2.821, 10: 2.764}  # 99% one-sided
@@ -78,6 +94,45 @@ def combine(pc, cards):
 
 def status_of(n, ok):
     return "insufficient" if n < NEED else ("holds" if ok else "fails")
+
+
+def new_cards():
+    return [c for c in ALL if c not in CARDS]
+
+
+def clock_rule(card):
+    """'a2': aifoundry2's registered rule (any sample off 600 MHz drops, idle arms included); None: aifoundry3, pinned;
+    'busy': a new governor-free card, where only busy samples (inside a burst, from SETTLE_MS after its start) drop."""
+    if card == A2:
+        return "a2"
+    if card in PINNED:
+        return None
+    return "busy"
+
+
+def reported(n, **kw):
+    d = {"n": n, "status": "reported",
+         "note": "the registered band or rule names aifoundry2 or aifoundry3 only: reported for this card, not tested (amendment TEL-4C)"}
+    d.update(kw)
+    return d
+
+
+def all_cards(pc, tested, **kw):
+    """The four-card outcome over the cards the item tests (the others, status 'reported', are listed, not tested)."""
+    s = {c: pc[c]["status"] for c in tested}
+    if not tested or any(x == "insufficient" for x in s.values()):
+        oc = "INSUFFICIENT"
+    elif all(x == "holds" for x in s.values()):
+        oc = "PASS"
+    elif any(x == "holds" for x in s.values()):
+        oc = "CARD-DIFFERENT"
+    else:
+        oc = "FAIL"
+    d = {"outcome": oc, "tested": list(tested), "status": s,
+         "reported": [c for c in ALL if c not in tested and pc.get(c, {}).get("status") == "reported"],
+         "missing": [c for c in ALL if c not in PRESENT]}
+    d.update(kw)
+    return d
 
 
 # ------------------------------------------------------------------------------------------------ loading
@@ -152,6 +207,7 @@ def load_pass(pdir, card):
         P["die_block_start"] = None
     dah = TU.jl(os.path.join(g, "die_after_heat.json"))
     P["die_after_heat"] = dah[0].get("die_c") if dah else None
+    P["idle_clock"] = TU.jl(os.path.join(pdir, "idle_clock.jsonl"))
     d = os.path.join(pdir, "dbg")
     P["caps"] = {n: rb(os.path.join(d, n + ".bin")) for n in ("x2-idle", "x2-load", "x2-after", "x3-w1", "x3-w2", "x3-w3", "x3-w4")}
     P["wins"] = {k: sorted(TU.jl(os.path.join(d, "x3-w%d.jsonl" % k)), key=lambda s: s["t_ms"]) for k in (1, 2, 3, 4)}
@@ -161,7 +217,12 @@ def load_pass(pdir, card):
 
 def load(root):
     out, notes = {}, []
-    for card in CARDS:
+    PRESENT.clear()
+    PRESENT.update(c for c in sorted(os.listdir(root)) if os.path.isdir(os.path.join(root, c, "tel")))
+    for c in sorted(PRESENT):
+        if c not in ALL:
+            ALL.append(c)
+    for card in ALL:
         out[card] = []
         for pdir in sorted(glob.glob(os.path.join(root, card, "tel", "p*"))):
             if not re.fullmatch(r"p\d+", os.path.basename(pdir)):
@@ -184,6 +245,113 @@ def mhz_bad(samples, lo=None, hi=None):
         if m is not None and m != 600:
             return True
     return False
+
+
+def mhz_of(s):
+    return (s.get("mhz") or {}).get("minion")
+
+
+def mhz_count(vals):
+    c = collections.Counter(v for v in vals if v is not None)
+    return {str(k): c[k] for k in sorted(c)}
+
+
+def mode(vals):
+    vals = [v for v in vals if v is not None]
+    return collections.Counter(vals).most_common(1)[0][0] if vals else None
+
+
+def burst_clock_bad(card, R, lo, hi):
+    """The clock rule for one burst [lo, hi] (host ms) over samples R: aifoundry2's registered rule (any sample in
+    [lo, hi] off 600 MHz); a new governor-free card: busy samples only, in [lo + 500 ms, hi] (its first samples may
+    still read the idle state's clock, 300 MHz on aifoundry1-c0); aifoundry3: none."""
+    r = clock_rule(card)
+    if r == "a2":
+        return mhz_bad(R, lo, hi)
+    if r == "busy":
+        return mhz_bad(R, lo + SETTLE_MS, hi)
+    return False
+
+
+def burst_clock(R, lo, hi):
+    """Where the clock was around one burst: the idle bracket before it, the ramp to 600 MHz, and the return to the
+    idle bracket's clock after it when that is not 600 MHz (reported; no rule uses it)."""
+    pre = mode(mhz_of(s) for s in R if lo - 3000 <= s["t_ms"] <= lo - 200)
+    first = next((s["t_ms"] for s in R if lo <= s["t_ms"] <= hi and mhz_of(s) == 600), None)
+    back = None
+    if pre is not None and pre != 600:
+        back = next((s["t_ms"] - hi for s in R if s["t_ms"] > hi and mhz_of(s) == pre), None)
+    return {"idle_mhz_before": pre, "ramp_to_600_ms": None if first is None else first - lo,
+            "busy_mhz": mhz_count(mhz_of(s) for s in R if lo <= s["t_ms"] <= hi), "back_to_idle_clock_ms": back}
+
+
+def idle_readouts(P):
+    """block.sh's idle-clock readouts (ettelem config with no sampler running), by label."""
+    out = {}
+    for r in P.get("idle_clock", []):
+        c = r.get("config") or {}
+        out[r.get("label")] = {"minion_mhz": c.get("minion_mhz"), "power_state_name": c.get("power_state_name"),
+                               "minion_mv": c.get("minion_mv")}
+    return out
+
+
+def debug_idle_mhz(P):
+    """The clock of the DEBUG block's idle state (the x2-idle capture): the 'debug' readout, else the X3 windows' idle
+    samples (before each load burst, and the idle window)."""
+    rows = [r for r in P.get("idle_clock", []) if str(r.get("label", "")).startswith("debug")
+            and (r.get("config") or {}).get("minion_mhz") is not None]
+    if rows:                                   # the last readout: after a wake launch (aifoundry1), if there was one
+        return rows[-1]["config"]["minion_mhz"], "readout"
+    vals = []
+    for k in (1, 2, 3, 4):
+        run = P["dbg_runs"].get("W%d" % k, [])
+        lo = min((r["t_start_ms"] for r in run if "t_start_ms" in r), default=None)
+        vals += [mhz_of(s) for s in P["wins"][k] if k == 4 or (lo is not None and s["t_ms"] < lo)]
+    m = mode(vals)
+    return m, ("x3 idle samples" if m is not None else "none")
+
+
+def idle_ref_elsewhere(P):
+    """A new governor-free card whose DEBUG-block idle state is not at 600 MHz: its idle capture sits at another
+    operating point than its load captures, so Q4 and R6 (load against the idle reference) are reported, not tested."""
+    m, _ = debug_idle_mhz(P)
+    return clock_rule(P["card"]) == "busy" and m is not None and m != 600
+
+
+def idle_summary(D, card):
+    """Each card's idle clock, for the items that measure energy over idle or against an idle reference: the idle arms
+    (E arms and the 'arms' readouts), the reset segment's idle brackets, and the DEBUG block's idle state."""
+    rows, states = [], set()
+    where = {"arms": set(), "reset brackets": set(), "DEBUG block": set()}
+    for P in D.get(card, []):
+        rd = idle_readouts(P)
+        B = burst_spans(P)
+        pre = [mhz_of(s) for b in B for s in P["reset"] if b["lo"] - 3000 <= s["t_ms"] <= b["lo"] - 200]
+        arms = {a: mhz_count(mhz_of(s) for s in P[a]) for a in ("E10", "E20", "E40")}
+        dm, src = debug_idle_mhz(P)
+        wakes = sum(1 for k in rd if "+wake" in str(k))
+        rows.append({"pass": P["pass"], "readouts": rd, "reset_idle_brackets_mhz": mhz_count(pre), "E_arms_mhz": arms,
+                     "debug_idle_mhz": dm, "debug_idle_source": src, "wake_launches": wakes})
+        where["arms"].update(int(k) for a in arms.values() for k in a)
+        where["arms"].update(v["minion_mhz"] for k, v in rd.items() if k in ("start", "arms", "arms_end") and v["minion_mhz"] is not None)
+        where["reset brackets"].update(v for v in pre if v is not None)
+        if dm is not None:
+            where["DEBUG block"].add(dm)
+        states.update(v["power_state_name"] for v in rd.values() if v.get("power_state_name"))
+    seen = sorted(set().union(*where.values()))
+    nw = sum(r["wake_launches"] for r in rows)
+    if not rows:
+        note = "no data"
+    elif not seen:
+        note = "idle clock not recorded"
+    elif seen == [600]:
+        note = "idle at 600 MHz (%s)" % (", ".join(sorted(states)) or "state not read")
+    else:
+        note = "idle clock: %s MHz (%s); not the 600 MHz of its bursts%s" % (
+            "; ".join("%s %s" % (k, "/".join(str(x) for x in sorted(v)) or "?") for k, v in where.items()),
+            ", ".join(sorted(states)) or "state not read", "; %d wake launches" % nw if nw else "")
+    return {"passes": rows, "idle_mhz_seen": seen, "idle_mhz_by_phase": {k: sorted(v) for k, v in where.items()},
+            "power_states_seen": sorted(states), "idle_not_600": bool(seen) and seen != [600], "wake_launches": nw, "note": note}
 
 
 # ------------------------------------------------------------------------------------------------ SP stats trace
@@ -266,7 +434,8 @@ def quiet_names(spans):
 
 
 def sp_pass_values(P):
-    out = {"pass": P["pass"], "align": align(P), "seg": {}, "Qseg": {}, "drops": []}
+    out = {"pass": P["pass"], "align": align(P), "seg": {}, "Qseg": {}, "drops": [],
+           "idle_mhz": {a: mhz_count(mhz_of(s) for s in P[a]) for a in ("E10", "E20", "E40")}}
     off = out["align"]["offset"]
     if off is None or len(P["spst"]) < 2:
         out.update(Q=None)
@@ -288,7 +457,7 @@ def sp_pass_values(P):
     for arm in ("PWR", "L10", "E10", "E20", "E40", "VOLT"):
         if arm in ("E10", "E20", "E40") and P[arm]:
             a, b = P[arm][0]["t_ms"], P[arm][-1]["t_ms"]
-            if P["card"] == A2 and mhz_bad(P[arm]):
+            if clock_rule(P["card"]) == "a2" and mhz_bad(P[arm]):   # idle arms: aifoundry2's registered rule only
                 out["drops"].append("%s: a sample off 600 MHz" % arm)
                 out[arm] = None
                 continue
@@ -413,17 +582,30 @@ def p6_pass(P, E10):
         res["why"] = "no bursts"
         return res
     last_hi = B[-1]["hi"]
-    late = [w for w in W if w["start"] >= last_hi + 8000]
+    late_from = last_hi
+    if clock_rule(P["card"]) == "busy":
+        # a new governor-free card: if the idle clock changes after the last burst (the card entering its low-power idle
+        # state), the rail steps again there, so the late windows start >= 8 s after that change instead (amendment TEL-4C)
+        post = [s for s in R if s["t_ms"] > last_hi and mhz_of(s) is not None]
+        ch = [b["t_ms"] for a, b in zip(post, post[1:]) if mhz_of(a) != mhz_of(b)]
+        if ch:
+            late_from = ch[-1]
+            res["idle_clock_change_after_last_burst_ms"] = ch[-1] - last_hi
+    late = [w for w in W if w["start"] >= late_from + 8000]
+    late_undecided = not late and late_from > last_hi
     spans = [r3(w["close"]["sp"]["minion_w"][2] - w["close"]["sp"]["minion_w"][1]) for w in late]
     res["late_windows_max_minus_min_w"] = spans
-    if not late:
+    if late_undecided:
+        pass
+    elif not late:
         fails.append("no complete 1 s window >= 8 s after the last burst")
     elif max(spans) > 1.0:
         fails.append("a late window spans %.3f W > 1.0 W" % max(spans))
     first, dropped_all = [], False
     for b in B:
-        if P["card"] == A2 and mhz_bad(R, b["lo"], b["hi"]):
-            first.append({"burst": b["tag"], "dropped": "a sample off 600 MHz"})
+        if burst_clock_bad(P["card"], R, b["lo"], b["hi"]):
+            first.append({"burst": b["tag"], "dropped": "a sample off 600 MHz" if P["card"] == A2 else "a busy sample off 600 MHz",
+                          "clock": burst_clock(R, b["lo"], b["hi"])})
             continue
         pre = [s["sp"]["minion_w"][0] for s in R if b["lo"] - 3000 <= s["t_ms"] <= b["lo"] - 200]
         dur = [s["sp"]["minion_w"][0] for s in R if b["lo"] <= s["t_ms"] <= b["hi"] + 1000]
@@ -435,7 +617,7 @@ def p6_pass(P, E10):
         step = max(dur) - idle
         mx = w[0]["close"]["sp"]["minion_w"][2]
         first.append({"burst": b["tag"], "idle_w": r3(idle), "step_w": r3(step), "window_max_w": r3(mx),
-                      "holds": mx >= idle + 0.5 * step})
+                      "holds": mx >= idle + 0.5 * step, "clock": burst_clock(R, b["lo"], b["hi"])})
     res["first_second"] = first
     kept = [x for x in first if "holds" in x]
     if not kept:
@@ -456,6 +638,9 @@ def p6_pass(P, E10):
     if dropped_all and not fails:
         res["holds"] = None
         res["why"] = "every burst dropped from the first-second test (a2 600 MHz rule or no samples): pass not used"
+    elif late_undecided and not fails:
+        res["holds"] = None
+        res["why"] = "no complete window >= 8 s after the idle-clock change that followed the last burst: pass not used"
     return res
 
 
@@ -479,15 +664,17 @@ def p7_bursts(P):
     for b in bursts:
         tag = B[b["pass"]]["tag"]
         lo, hi = B[b["pass"]]["lo"], B[b["pass"]]["hi"]
-        if P["card"] == A2 and mhz_bad(R, lo, hi):
-            out.append({"pass": P["pass"], "burst": tag, "dropped": "a sample off 600 MHz"})
+        clk = burst_clock(R, lo, hi)
+        if burst_clock_bad(P["card"], R, lo, hi):
+            out.append({"pass": P["pass"], "burst": tag, "dropped": "a sample off 600 MHz" if P["card"] == A2 else "a busy sample off 600 MHz",
+                        "clock": clk})
             continue
         cv = AC.rail_fall_curves([b], arrays, spans)
         if not cv:
-            out.append({"pass": P["pass"], "burst": tag, "dropped": "outside the catalogue rule (> 8 W, >= 4 s idle each side)"})
+            out.append({"pass": P["pass"], "burst": tag, "dropped": "outside the catalogue rule (> 8 W, >= 4 s idle each side)", "clock": clk})
             continue
         out.append({"pass": P["pass"], "burst": tag, "f1": r3(cv[0][int(np.argmin(np.abs(AC.RF_S - 1.0)))]),
-                    "minion_over_w": r3(b["rails_over"]["minion_w"])})
+                    "minion_over_w": r3(b["rails_over"]["minion_w"]), "clock": clk})
     return out
 
 
@@ -550,44 +737,35 @@ def na(card):
     return {"status": "not registered", "n": 0, "note": "the item names the other card only"}
 
 
-def items_sp(D, SPV):
-    out = []
-    # TEL-P1
-    rows = [v for v in SPV[A2] if v["Q"] is not None]
-    per = [{"pass": v["pass"], "Q_ms": v["Q"], "quiet_segment_medians": v["Qseg"],
-            "in_band": all(131.6 <= m <= 135.6 for m in v["Qseg"].values() if m is not None) and any(m is not None for m in v["Qseg"].values())}
-           for v in rows]
-    pc = {A2: {"n": len(per), "passes": per, "status": status_of(len(per), all(p["in_band"] for p in per))}, A3: na(A3)}
-    oc = combine(pc, [A2])
-    out.append(item("TEL-P1", ["hub-034", "hub-127", "hub-003", "hub-069", "hub-117"], pc,
-                    "aifoundry2: the median SP stats pass interval of every quiet segment in 131.6-135.6 ms, in every pass (3/3)",
-                    oc, "aifoundry2 quiet SP pass: %s ms per pass (%s)" % ([p["Q_ms"] for p in per], oc)))
-    # TEL-P2
-    rows = [v for v in SPV[A2] if v["Q"] is not None and v["PWR"] is not None]
-    per = [{"pass": v["pass"], "PWR_ms": v["PWR"], "Q_ms": v["Q"], "diff_ms": r3(v["PWR"] - v["Q"], 2),
-            "holds": abs(v["PWR"] - v["Q"]) <= 1.5} for v in rows]
-    pc = {A2: {"n": len(per), "passes": per, "status": status_of(len(per), all(p["holds"] for p in per))}, A3: na(A3)}
-    oc = combine(pc, [A2])
-    out.append(item("TEL-P2", ["hub-034"], pc, "aifoundry2: |PWR - Q| <= 1.5 ms in every pass (3/3)", oc,
-                    "aifoundry2 single-command poll (~16 ms) moves the pass by %s ms (%s)" % ([p["diff_ms"] for p in per], oc)))
-    # TEL-P3
-    rows = [v for v in SPV[A2] if v["Q"] is not None and v["E10"] is not None]
+def p1_rows(SPVc):
+    rows = [v for v in SPVc if v["Q"] is not None]
+    return [{"pass": v["pass"], "Q_ms": v["Q"], "quiet_segment_medians": v["Qseg"],
+             "in_band": all(131.6 <= m <= 135.6 for m in v["Qseg"].values() if m is not None) and any(m is not None for m in v["Qseg"].values())}
+            for v in rows]
+
+
+def p2_rows(SPVc):
+    rows = [v for v in SPVc if v["Q"] is not None and v["PWR"] is not None]
+    return [{"pass": v["pass"], "PWR_ms": v["PWR"], "Q_ms": v["Q"], "diff_ms": r3(v["PWR"] - v["Q"], 2),
+             "holds": abs(v["PWR"] - v["Q"]) <= 1.5} for v in rows]
+
+
+def p3_card(SPVc):
+    rows = [v for v in SPVc if v["Q"] is not None and v["E10"] is not None]
     per = [{"pass": v["pass"], "E10_ms": v["E10"], "Q_ms": v["Q"], "diff_ms": r3(v["E10"] - v["Q"], 2), "E40_ms": v.get("E40"),
             "E10_ge_145": v["E10"] >= 145, "diff_gt_8": v["E10"] - v["Q"] > 8,
             "E40_ge_E10": (v["E40"] >= v["E10"]) if v.get("E40") is not None else None} for v in rows]
     t = tstat([p["diff_ms"] for p in per], T1)
     lb = r3(t["mean"] - t["half"], 2) if t else None
     ok = bool(per) and all(p["E10_ge_145"] for p in per) and lb is not None and lb > 0
-    pc = {A2: {"n": len(per), "passes": per, "diff_one_sided_99_lower_ms": lb, "t": t,
-               "parts_not_in_decision": {"E10_minus_Q_gt_8_every_pass": all(p["diff_gt_8"] for p in per) if per else None,
-                                         "E40_ge_E10_every_pass": all(p["E40_ge_E10"] for p in per) if per and all(p["E40_ge_E10"] is not None for p in per) else None},
-               "status": status_of(len(per), ok)}, A3: na(A3)}
-    oc = combine(pc, [A2])
-    out.append(item("TEL-P3", ["hub-034", "hub-127", "pt-spatial-01"], pc,
-                    "aifoundry2: E10 >= 145 ms in every pass and the 99% one-sided t lower bound (df n-1) on paired E10 - Q > 0",
-                    oc, "aifoundry2 pass under ettelem 10 Hz: %s ms, E10 - Q lower bound %s ms (%s)" % ([p["E10_ms"] for p in per], lb, oc)))
-    # TEL-P4
-    rows = [v for v in SPV[A2] if v["Q"] is not None and v["VOLT"] is not None]
+    d = {"n": len(per), "passes": per, "diff_one_sided_99_lower_ms": lb, "t": t,
+         "parts_not_in_decision": {"E10_minus_Q_gt_8_every_pass": all(p["diff_gt_8"] for p in per) if per else None,
+                                   "E40_ge_E10_every_pass": all(p["E40_ge_E10"] for p in per) if per and all(p["E40_ge_E10"] is not None for p in per) else None}}
+    return d, ok, lb
+
+
+def p4_card(SPVc):
+    rows = [v for v in SPVc if v["Q"] is not None and v["VOLT"] is not None]
     d = [r3(v["VOLT"] - v["Q"], 2) for v in rows]
     t = tstat(d, T2)
     dec, ok = None, False
@@ -595,33 +773,97 @@ def items_sp(D, SPV):
         lo, hi = t["mean"] - t["half"], t["mean"] + t["half"]
         dec = "confirmed" if lo > 5 else ("rejected" if lo >= -1.5 and hi <= 1.5 else "not resolved")
         ok = dec == "confirmed"
-    pc = {A2: {"n": len(d), "VOLT_minus_Q_ms": d, "t99": t, "decision": dec, "status": status_of(len(d), ok)}, A3: na(A3)}
-    oc = combine(pc, [A2])
-    out.append(item("TEL-P4", ["hub-034"], pc,
-                    "aifoundry2: 99% t interval (df n-1) on VOLT - Q: above 5 ms -> DM_CMD_GET_MODULE_VOLTAGE lengthens the pass "
-                    "(PASS); inside +-1.5 ms -> rejected (FAIL); else not resolved (FAIL)", oc,
-                    "aifoundry2 VOLT - Q %s ms: %s" % (d, dec or "insufficient"), decision=dec))
-    # TEL-P5
-    rows = [v for v in SPV[A3] if v["Q"] is not None and v["E10"] is not None]
+    return d, t, dec, ok
+
+
+def p5_card(SPVc):
+    rows = [v for v in SPVc if v["Q"] is not None and v["E10"] is not None]
     per = [{"pass": v["pass"], "E10_ms": v["E10"], "Q_ms": v["Q"], "slow": 255 <= v["E10"] <= 272 and v["Q"] >= 230,
             "q_lt_160": v["Q"] < 160} for v in rows]
     dec = None
     if len(per) >= NEED:
         dec = ("the SP loop is slow" if all(p["slow"] for p in per) else
                "sampler-induced" if all(p["q_lt_160"] for p in per) else "reported as is")
+    return per, dec
+
+
+def items_sp(D, SPV):
+    out = []
+    NEW = new_cards()
+    # TEL-P1
+    per = p1_rows(SPV[A2])
+    pc = {A2: {"n": len(per), "passes": per, "status": status_of(len(per), all(p["in_band"] for p in per))}, A3: na(A3)}
+    oc = combine(pc, [A2])
+    for c in NEW:
+        pr = p1_rows(SPV[c])
+        pc[c] = reported(len(pr), passes=pr, registered_band_met_every_pass=all(p["in_band"] for p in pr) if pr else None)
+    out.append(item("TEL-P1", ["hub-034", "hub-127", "hub-003", "hub-069", "hub-117"], pc,
+                    "aifoundry2: the median SP stats pass interval of every quiet segment in 131.6-135.6 ms, in every pass (3/3)",
+                    oc, "aifoundry2 quiet SP pass: %s ms per pass (%s)" % ([p["Q_ms"] for p in per], oc),
+                    all_cards=all_cards(pc, [A2]),
+                    reading_all_cards="quiet SP pass per card (ms): %s; tested on aifoundry2 only" % {c: [p["Q_ms"] for p in pc[c].get("passes", [])] for c in [A2] + NEW}))
+    # TEL-P2
+    per = p2_rows(SPV[A2])
+    pc = {A2: {"n": len(per), "passes": per, "status": status_of(len(per), all(p["holds"] for p in per))}, A3: na(A3)}
+    oc = combine(pc, [A2])
+    for c in NEW:
+        pr = p2_rows(SPV[c])
+        pc[c] = reported(len(pr), passes=pr, registered_band_met_every_pass=all(p["holds"] for p in pr) if pr else None)
+    out.append(item("TEL-P2", ["hub-034"], pc, "aifoundry2: |PWR - Q| <= 1.5 ms in every pass (3/3)", oc,
+                    "aifoundry2 single-command poll (~16 ms) moves the pass by %s ms (%s)" % ([p["diff_ms"] for p in per], oc),
+                    all_cards=all_cards(pc, [A2]),
+                    reading_all_cards="PWR - Q per card (ms): %s; tested on aifoundry2 only" % {c: [p["diff_ms"] for p in pc[c].get("passes", [])] for c in [A2] + NEW}))
+    # TEL-P3
+    d3, ok, lb = p3_card(SPV[A2])
+    per = d3["passes"]
+    d3["status"] = status_of(len(per), ok)
+    pc = {A2: d3, A3: na(A3)}
+    oc = combine(pc, [A2])
+    for c in NEW:
+        dc, okc, _ = p3_card(SPV[c])
+        pc[c] = reported(dc.pop("n"), registered_rule_met=okc if dc["passes"] else None, **dc)
+    out.append(item("TEL-P3", ["hub-034", "hub-127", "pt-spatial-01"], pc,
+                    "aifoundry2: E10 >= 145 ms in every pass and the 99% one-sided t lower bound (df n-1) on paired E10 - Q > 0",
+                    oc, "aifoundry2 pass under ettelem 10 Hz: %s ms, E10 - Q lower bound %s ms (%s)" % ([p["E10_ms"] for p in per], lb, oc),
+                    all_cards=all_cards(pc, [A2]),
+                    reading_all_cards="E10 per card (ms): %s; tested on aifoundry2 only" % {c: [p["E10_ms"] for p in pc[c].get("passes", [])] for c in [A2] + NEW}))
+    # TEL-P4
+    d, t, dec, ok = p4_card(SPV[A2])
+    pc = {A2: {"n": len(d), "VOLT_minus_Q_ms": d, "t99": t, "decision": dec, "status": status_of(len(d), ok)}, A3: na(A3)}
+    oc = combine(pc, [A2])
+    for c in NEW:
+        dc, tc, decc, _ = p4_card(SPV[c])
+        pc[c] = reported(len(dc), VOLT_minus_Q_ms=dc, t99=tc, decision=decc)
+    out.append(item("TEL-P4", ["hub-034"], pc,
+                    "aifoundry2: 99% t interval (df n-1) on VOLT - Q: above 5 ms -> DM_CMD_GET_MODULE_VOLTAGE lengthens the pass "
+                    "(PASS); inside +-1.5 ms -> rejected (FAIL); else not resolved (FAIL)", oc,
+                    "aifoundry2 VOLT - Q %s ms: %s" % (d, dec or "insufficient"), decision=dec,
+                    all_cards=all_cards(pc, [A2]),
+                    reading_all_cards="VOLT - Q per card: %s; tested on aifoundry2 only" % {c: pc[c].get("decision") for c in [A2] + NEW}))
+    # TEL-P5
+    per, dec = p5_card(SPV[A3])
     pc = {A3: {"n": len(per), "passes": per, "decision": dec, "status": status_of(len(per), dec == "the SP loop is slow")}, A2: na(A2)}
     oc = combine(pc, [A3])
+    for c in NEW:
+        pr, decc = p5_card(SPV[c])
+        pc[c] = reported(len(pr), passes=pr, decision=decc)
     out.append(item("TEL-P5", ["hub-070", "dvfs-19"], pc,
                     "aifoundry3: every pass E10 median 255-272 ms and quiet >= 230 ms -> 'the SP loop is slow' (PASS); quiet < 160 "
                     "ms in every pass -> sampler-induced; anything else reported as is", oc,
                     "aifoundry3 SP pass quiet %s / E10 %s ms: %s" % ([p["Q_ms"] for p in per], [p["E10_ms"] for p in per], dec or "insufficient"),
-                    decision=dec))
+                    decision=dec, all_cards=all_cards(pc, [A3]),
+                    reading_all_cards="SP pass quiet / E10 per card (ms): %s; tested on aifoundry3 only" % {
+                        c: [(p["Q_ms"], p["E10_ms"]) for p in pc[c].get("passes", [])] for c in [A3] + NEW}))
     return out
+
+
+def idle_notes():
+    return {c: IDLE.get(c, {}).get("note") for c in ALL}
 
 
 def items_reset(D):
     out, pc6, pc7 = [], {}, {}
-    for card in CARDS:
+    for card in ALL:
         rows = [p6_pass(P, P["E10"]) for P in D[card]]
         kept = [r for r in rows if r["holds"] is not None]
         pc6[card] = {"n": len(kept), "passes": rows, "status": status_of(len(kept), all(r["holds"] for r in kept))}
@@ -632,16 +874,22 @@ def items_reset(D):
         pc7[card] = {"n": npass, "bursts_kept": len(f1), "bursts": B, "median_f1": med,
                      "status": status_of(npass, med is not None and 0.45 <= med <= 0.68)}
     oc = combine(pc6, list(CARDS))
+    ac = all_cards(pc6, ALL)
     out.append(item("TEL-P6", ["hub-037"], pc6,
                     "exact, 0 failures, every kept pass on each card: since_reset_ms cycles 0-1000; every complete 1 s window "
                     "starting >= 8 s after the last burst has sp.minion_w max - min <= 1.0 W; the window holding each burst's "
                     "first second has max >= idle + 50% of the burst's minion-rail step; in E10 (no reset) the max never falls",
                     oc, "--reset-ms windows: %s (rung 6 %s)" % (
-                        {c: pc6[c]["status"] for c in CARDS}, "stands" if oc == "PASS" else "reads 'untested / not working'" if oc in ("FAIL", "CARD-DIFFERENT") else "undecided")))
+                        {c: pc6[c]["status"] for c in CARDS}, "stands" if oc == "PASS" else "reads 'untested / not working'" if oc in ("FAIL", "CARD-DIFFERENT") else "undecided"),
+                    all_cards=ac, idle_clock=idle_notes(),
+                    reading_all_cards="--reset-ms windows on every card: %s (%s)" % (ac["status"], ac["outcome"])))
     oc = combine(pc7, list(CARDS))
+    ac = all_cards(pc7, ALL)
     out.append(item("TEL-P7", ["hub-036"], pc7,
                     "median f(1 s) over the kept bursts per card (9 = 3 per pass) inside 0.45-0.68 (a restarted average gives >= 0.9)",
-                    oc, "f(1 s) under 1 s resets: a2 %s, a3 %s (%s)" % (pc7[A2]["median_f1"], pc7[A3]["median_f1"], oc)))
+                    oc, "f(1 s) under 1 s resets: a2 %s, a3 %s (%s)" % (pc7[A2]["median_f1"], pc7[A3]["median_f1"], oc),
+                    all_cards=ac, idle_clock=idle_notes(),
+                    reading_all_cards="f(1 s) under 1 s resets per card: %s (%s)" % ({c: pc7[c]["median_f1"] for c in ALL}, ac["outcome"])))
     return out
 
 
@@ -649,23 +897,27 @@ def item_S(D):
     pc = {}
     bands = {A2: {"L": (131, 140), "H": (152, 160)}, A3: {"L": (200, 245), "H": (258, 268)}}
     ref = {A2: 156, A3: 263}
-    for card in CARDS:
+    for card in ALL:
         per = []
         for P in D[card]:
             pl, nl = fit_any_poll([x[0] for x in P["L10"]], [x[1] for x in P["L10"]])
             E10 = [s for s in P["E10"]]
             E20 = [s for s in P["E20"]]
-            ph, nh = fit_ettelem10(E10) if not (card == A2 and mhz_bad(E10)) else (None, "E10 dropped: a sample off 600 MHz")
+            a2rule = clock_rule(card) == "a2"                      # the E arms are idle: aifoundry2's registered rule only
+            ph, nh = fit_ettelem10(E10) if not (a2rule and mhz_bad(E10)) else (None, "E10 dropped: a sample off 600 MHz")
             ph2, nh2 = (fit_any_poll([s["t_ms"] for s in E20 if "board_w" in s], [s["board_w"] for s in E20 if "board_w" in s])
-                        if not (card == A2 and mhz_bad(E20)) else (None, "E20 dropped: a sample off 600 MHz"))
+                        if not (a2rule and mhz_bad(E20)) else (None, "E20 dropped: a sample off 600 MHz"))
             row = {"pass": P["pass"], "P_L": pl, "P_H": ph, "P_H2": ph2, "fit_notes": [nl, nh, nh2]}
             if pl is not None and ph is not None:
                 row["H_minus_L"] = r3(ph - pl, 2)
-            b = bands[card]
+            b = bands.get(card, bands[A2])                          # a new card: aifoundry2's bands, reported only
+            rf = ref.get(card, ref[A2])
             row["band_L"] = None if pl is None else b["L"][0] <= pl <= b["L"][1]
             row["band_H"] = None if ph is None else b["H"][0] <= ph <= b["H"][1]
             row["H2_ge_H_plus_10"] = None if ph is None or ph2 is None else ph2 >= ph + 10
-            row["P_H_within_5_of_%d" % ref[card]] = None if ph is None else abs(ph - ref[card]) <= 5
+            row["P_H_within_5_of_%d" % rf] = None if ph is None else abs(ph - rf) <= 5
+            if card not in CARDS:
+                row["E_arms_idle_mhz"] = {a: mhz_count(mhz_of(s) for s in P[a]) for a in ("E10", "E20")}
             per.append(row)
         d = [r["H_minus_L"] for r in per if "H_minus_L" in r]
         t = tstat(d, T2)
@@ -677,10 +929,13 @@ def item_S(D):
         pc[card] = {"n": len(d), "passes": per, "H_minus_L_t99": t, "interval": excl,
                     "S_bands_every_pass": all(r["band_L"] and r["band_H"] and r["H2_ge_H_plus_10"] for r in full) if full else None,
                     "status": status_of(len(d), excl == "positive")}
+        if card not in CARDS:
+            pc[card]["S_bands_from"] = "aifoundry2's (S1/S2 are registered for aifoundry2 and aifoundry3 only): reported, not tested"
     oc = combine(pc, list(CARDS))
     pages = {c: (None if pc[c]["status"] == "insufficient" else "per sampler" if pc[c]["interval"] == "positive" else
                  "ettelem figure only" if pc[c]["interval"] == "includes 0" and pc[c]["H_minus_L_t99"] and abs(pc[c]["H_minus_L_t99"]["mean"]) < 5
-                 else "as measured") for c in CARDS}
+                 else "as measured") for c in ALL}
+    ac = all_cards(pc, ALL)
     return item("TEL-S", ["pt-spatial-01", "pt-spatial-13", "pt-spatial-15", "pt-spatial-16", "dvfs-73", "anatomy-08", "anatomy-110",
                           "energy-manual-159", "heat-15", "horace-lowpower-129", "matmul-sparse-testdrive-32",
                           "matmul-sparse-testdrive-96", "memhier-onchip-110"], pc,
@@ -689,12 +944,14 @@ def item_S(D):
                 "P_H 258-268; P_H2 >= P_H + 10) reported per pass", oc,
                 "board refresh P_L/P_H/P_H2 a2 %s, a3 %s ms; pages: %s (%s)" % (
                     [(r["P_L"], r["P_H"], r["P_H2"]) for r in pc[A2]["passes"]],
-                    [(r["P_L"], r["P_H"], r["P_H2"]) for r in pc[A3]["passes"]], pages, oc), pages=pages)
+                    [(r["P_L"], r["P_H"], r["P_H2"]) for r in pc[A3]["passes"]], {c: pages[c] for c in CARDS}, oc), pages=pages,
+                all_cards=ac, reading_all_cards="P_H - P_L 99%% interval per card: %s; pages %s (%s)" % (
+                    {c: pc[c]["interval"] for c in ALL}, pages, ac["outcome"]))
 
 
 def item_Q(D):
     pc, idle_mean = {}, {}
-    for card in CARDS:
+    for card in ALL:
         per, idle_vecs = [], []
         for P in D[card]:
             ci = {k: cap_info(v) for k, v in P["caps"].items()}
@@ -710,14 +967,19 @@ def item_Q(D):
             if iv is not None:
                 idle_vecs.append((P["pass"], iv))
             ghz = [r.get("ghz") for r in timed(P["dbg_runs"].get("X2", []))]
-            x2_drop = card == A2 and (not ghz or not all(g is not None and 0.59 <= g <= 0.61 for g in ghz))
+            # the launch clock is a busy measure: aifoundry2's rule, and the new governor-free cards'; not aifoundry3's
+            x2_drop = clock_rule(card) is not None and (not ghz or not all(g is not None and 0.59 <= g <= 0.61 for g in ghz))
             if ci["x2-load"] and ci["x2-load"]["shires"] == 34 and iv is not None and not x2_drop:
                 lv = np.array([ci["x2-load"]["map"][s]["mnn"][0] for s in S34], float)
                 dd = (lv - lv.mean()) - (iv - iv.mean())
                 row["Q4"] = {"common_shift_mv": r3(lv.mean() - iv.mean(), 2), "sd_dev_change_mv": r3(dd.std(ddof=1)),
                              "max_abs_dev_change_mv": r3(abs(dd).max(), 2)}
+                if idle_ref_elsewhere(P):
+                    row["Q4"]["reported_only"] = "the idle capture is at %s MHz, the load at 600 MHz: two operating points (amendment TEL-4C)" % debug_idle_mhz(P)[0]
             elif x2_drop:
-                row["Q4"] = {"dropped": "X2 launch off 0.59-0.61 GHz (aifoundry2 rule)"}
+                row["Q4"] = {"dropped": "X2 launch off 0.59-0.61 GHz (%s rule)" % ("aifoundry2" if card == A2 else "busy-clock")}
+            if card not in CARDS:
+                row["debug_idle_mhz"] = debug_idle_mhz(P)[0]
             q5 = {}
             for k in ("x2-idle", "x3-w4"):
                 if ci[k] and ci[k]["shires"] == 34:
@@ -732,7 +994,9 @@ def item_Q(D):
         for (pa, a), (pb, b) in [(x, y) for i, x in enumerate(idle_vecs) for y in idle_vecs[i + 1:]]:
             pairs["p%d~p%d" % (pa, pb)] = r3(float(np.corrcoef(a, b)[0, 1]))
         q2 = (all(v is not None and v >= 0.6 for v in pairs.values()) if len(idle_vecs) >= NEED else None)
-        q4rows = [r["Q4"] for r in per if "Q4" in r and "sd_dev_change_mv" in r["Q4"]]
+        q4rows = [r["Q4"] for r in per if "Q4" in r and "sd_dev_change_mv" in r["Q4"] and "reported_only" not in r["Q4"]]
+        q4rep = [r["Q4"] for r in per if "Q4" in r and "reported_only" in r["Q4"]]
+        q4_not_tested = card not in CARDS and bool(q4rep) and not q4rows      # every pass's idle capture elsewhere
         t = tstat([r["sd_dev_change_mv"] for r in q4rows], T2)
         q4_ub = r3(t["mean"] + t["half"]) if t else None
         q4 = (q4_ub <= 0.5) if q4_ub is not None and len(q4rows) >= NEED else None
@@ -745,18 +1009,39 @@ def item_Q(D):
             (card != A3 or all(r["Q1_34_lines_parse"] for r in per))
         if idle_vecs:
             idle_mean[card] = np.mean([v for _, v in idle_vecs], axis=0)
-        ok = q1 and q2 and q4 and q5
+        if q4_not_tested:
+            ok = q1 and q2 and q5
+            n_eff = min(n, len(idle_vecs))
+        else:
+            ok = q1 and q2 and q4 and q5
+            n_eff = min(n, len(idle_vecs), len(q4rows))
         pc[card] = {"n": n, "passes": per, "Q1": q1, "Q2_pairs_r": pairs, "Q2": q2, "Q4_sd_99_upper_mv": q4_ub, "Q4_t": t, "Q4": q4,
                     "Q4_parts_not_in_decision": q4_parts, "Q5_minion_now_no_plane": q5_min,
-                    "Q5_sram_gradient_passes": q5_sram if card == A2 else None, "Q5": q5,
-                    "status": status_of(min(n, len(idle_vecs), len(q4rows)), ok)}
-    q3r = r3(float(np.corrcoef(idle_mean[A2], idle_mean[A3])[0, 1])) if len(idle_mean) == 2 else None
+                    "Q5_sram_gradient_passes": q5_sram if card != A3 else None, "Q5": q5,
+                    "status": status_of(n_eff, ok)}
+        if card not in CARDS:
+            pc[card]["reported_parts"] = {"Q1_34_lines_parse_every_pass": all(r["Q1_34_lines_parse"] for r in per) if per else None,
+                                          "Q5_sram_gradient_passes": q5_sram,
+                                          "note": "Q1's 34-line parse (aifoundry3) and Q5's SRAM gradient (aifoundry2) are reported, not tested"}
+            if q4_not_tested:
+                pc[card]["Q4"] = "not tested"
+                pc[card]["Q4_reported"] = q4rep
+    q3r = r3(float(np.corrcoef(idle_mean[A2], idle_mean[A3])[0, 1])) if A2 in idle_mean and A3 in idle_mean else None
     q3 = None if q3r is None else abs(q3r) < 0.45
     oc = combine(pc, list(CARDS))
     if oc == "PASS" and q3 is False:
         oc = "FAIL"
     q24 = [pc[c][k] for c in CARDS for k in ("Q2", "Q4")]
     offset = "kept" if all(x is True for x in q24) else ("dropped" if any(x is False for x in q24) else "undecided")
+    # all cards: Q3 over every pair of cards, the offset sentence over every card's Q2 and tested Q4
+    have = [c for c in ALL if c in idle_mean]
+    q3_pairs = {"%s~%s" % (a, b): r3(float(np.corrcoef(idle_mean[a], idle_mean[b])[0, 1])) for i, a in enumerate(have) for b in have[i + 1:]}
+    q3_all = (all(abs(v) < 0.45 for v in q3_pairs.values()) if len(have) == len(ALL) and len(have) >= 2 else None)
+    ac = all_cards(pc, ALL, Q3_pairs_r=q3_pairs, Q3_holds_every_pair=q3_all)
+    if ac["outcome"] == "PASS" and q3_all is False:
+        ac["outcome"] = "FAIL"
+    q24a = [pc[c][k] for c in ALL for k in ("Q2", "Q4") if pc[c][k] != "not tested"]
+    ac["offset_sentence"] = "kept" if all(x is True for x in q24a) else ("dropped" if any(x is False for x in q24a) else "undecided")
     return item("TEL-Q", ["pt-spatial-10", "pt-spatial-12", "pt-spatial-46", "pt-spatial-47", "pt-spatial-48", "pt-spatial-49",
                           "pt-spatial-50", "pt-spatial-71", "hub-V04", "hub-012", "hub-025", "pt-spatial-61"], pc,
                 "Q1 (a3: 34 'MS nn Voltage' lines parse; both: 0 'Temp [C]' lines, 'MEM n Voltage' only right after a sample); "
@@ -767,16 +1052,19 @@ def item_Q(D):
                 "voltage maps: Q2 %s, Q4 upper %s mV, Q3 r %s; offset sentence %s (%s)" % (
                     {c: pc[c]["Q2"] for c in CARDS}, {c: pc[c]["Q4_sd_99_upper_mv"] for c in CARDS}, q3r,
                     offset, oc),
-                Q3_cross_card_r=q3r, Q3_holds=q3, offset_sentence=offset)
+                Q3_cross_card_r=q3r, Q3_holds=q3, offset_sentence=offset, all_cards=ac, idle_clock=idle_notes(),
+                reading_all_cards="voltage maps on every card: Q2 %s, Q4 %s, Q3 every pair %s; offset sentence %s (%s)" % (
+                    {c: pc[c]["Q2"] for c in ALL}, {c: pc[c]["Q4"] for c in ALL}, q3_all, ac["offset_sentence"], ac["outcome"]))
 
 
 def item_R(D):
     pc = {}
-    for card in CARDS:
+    for card in ALL:
         per = []
         for P in D[card]:
             idle_cap = cap_info(P["caps"]["x2-idle"])
             idle_now = {s: idle_cap["map"][s]["mnn"][0] for s in S34} if idle_cap and idle_cap["shires"] == 34 else None
+            elsewhere = idle_ref_elsewhere(P)
             wins = []
             for k in (1, 2, 3, 4):
                 rows = P["wins"][k]
@@ -785,12 +1073,18 @@ def item_R(D):
                     continue
                 w["window"] = k
                 w["kind"] = "load" if k <= 3 else "idle"
+                run = P["dbg_runs"].get("W%d" % k, [])
+                lo = min((r["t_start_ms"] for r in run), default=None)
+                hi = max((r["t_end_ms"] for r in run if "t_end_ms" in r), default=None)
                 if card == A2 and mhz_bad(rows):
                     w["dropped"] = "a sample off 600 MHz"
+                elif (clock_rule(card) == "busy" and w["kind"] == "load" and lo is not None and hi is not None
+                      and burst_clock_bad(card, rows, lo, hi)):
+                    w["dropped"] = "a busy sample off 600 MHz"          # the idle window and idle samples never drop here
+                if card not in CARDS and w["kind"] == "load" and lo is not None and hi is not None:
+                    w["clock"] = burst_clock(rows, lo, hi)
                 if w["kind"] == "load":
                     cap = cap_info(P["caps"]["x3-w%d" % k])
-                    run = P["dbg_runs"].get("W%d" % k, [])
-                    lo = min((r["t_start_ms"] for r in run), default=None)
                     if cap and cap["shires"] == 34 and idle_now and lo is not None:
                         below = sum(1 for s in S34 if cap["map"][s]["mnn"][1] <= idle_now[s] - 2)
                         pre = [r["die_mv"]["minion"] for r in rows if r["t_ms"] < lo and "die_mv" in r]
@@ -809,6 +1103,11 @@ def item_R(D):
                                               "median_die_mv_fall": st.median([x["die_mv_fall"] for x in r6])}}
             if row["R6"]:
                 row["R6"]["holds"] = row["R6"]["median_lows_below"] >= 17 and row["R6"]["median_die_mv_fall"] <= 2.5
+                if elsewhere:
+                    row["R6"]["reported_only"] = ("the idle reference (x2-idle) is at %s MHz, the bursts at 600 MHz: two operating points "
+                                                  "(amendment TEL-4C)" % debug_idle_mhz(P)[0])
+            if card not in CARDS:
+                row["debug_idle_mhz"] = debug_idle_mhz(P)[0]
             per.append(row)
         allw = [w for r in per for w in r["windows"] if "dropped" not in w]
         loadw = [w for w in allw if w["kind"] == "load"]
@@ -830,19 +1129,21 @@ def item_R(D):
         R3 = (sum(1 for x in rises if x in (3, 4)) / len(rises) >= 0.8) if rises else None
         R4 = all(w["end_high_minus_spmax"] <= 2 for w in idlew) if idlew else None
         R5 = all(w["end_low_minus_spmin"] in (-1, -2) for w in allw) if allw else None
-        r6p = [r["R6"]["holds"] for r in per if r["R6"]]
+        r6p = [r["R6"]["holds"] for r in per if r["R6"] and "reported_only" not in r["R6"]]
+        r6_not_tested = card not in CARDS and not r6p and any(r["R6"] and "reported_only" in r["R6"] for r in per)
         R6 = (sum(r6p) >= 2) if len(r6p) >= NEED else None
-        parts = [R1, None if R2 is None else R2 == "holds", R3, R4, R5, R6]
+        parts = [R1, None if R2 is None else R2 == "holds", R3, R4, R5] + ([] if r6_not_tested else [R6])
         ok = all(x is True for x in parts)
         # a part that could not be computed (no kept window of its kind, fewer than 3 passes with an R6 figure) leaves the
         # card INSUFFICIENT unless another part has already failed
         n_eff = len(per) if (ok or False in parts) else min(len(per), NEED - 1)
         pc[card] = {"n": len(per), "passes": per, "R1_reset_resets_peak_hold": R1, "R2": R2,
                     "R3_share_3_or_4": r3(sum(1 for x in rises if x in (3, 4)) / len(rises)) if rises else None, "R3": R3,
-                    "R4": R4, "R5": R5, "R6_passes_holding": sum(r6p), "R6": R6,
+                    "R4": R4, "R5": R5, "R6_passes_holding": sum(r6p), "R6": "not tested" if r6_not_tested else R6,
                     "status": status_of(n_eff, ok)}
     oc = combine(pc, list(CARDS))
     gate = {c: pc[c]["R1_reset_resets_peak_hold"] for c in CARDS}
+    ac = all_cards(pc, ALL, R1_gate={c: pc[c]["R1_reset_resets_peak_hold"] for c in ALL})
     return item("TEL-R", ["pt-spatial-51", "pt-spatial-59", "pt-spatial-65", "pt-spatial-67", "pt-spatial-68", "pt-spatial-69",
                           "pt-spatial-70", "hub-022"], pc,
                 "unit = pass (3 load windows are sub-samples). R1 (gate) reset within 1 s: low >= mean - 2, high <= mean + 3 in "
@@ -852,7 +1153,10 @@ def item_R(D):
                 "(pass medians) in >= 2 of 3 passes. PASS needs R1-R6 on both cards", oc,
                 "peak-hold: R1 %s, R2 %s, R6 %s (%s)%s" % (gate, {c: pc[c]["R2"] for c in CARDS}, {c: pc[c]["R6"] for c in CARDS}, oc,
                                                          "" if all(gate.values()) else "; R1 failed: the claims stay UNDER-REPLICATED"),
-                R1_gate=gate)
+                R1_gate=gate, all_cards=ac, idle_clock=idle_notes(),
+                reading_all_cards="peak-hold on every card: R1 %s, R2 %s, R6 %s (%s)%s" % (
+                    ac["R1_gate"], {c: pc[c]["R2"] for c in ALL}, {c: pc[c]["R6"] for c in ALL}, ac["outcome"],
+                    "" if all(ac["R1_gate"].values()) else "; R1 failed on a card"))
 
 
 GOV_DOWN = re.compile(rb"Power throttle down event, current pwr (\d+)\s+tdp level: (\d+)")
@@ -873,7 +1177,7 @@ def gov_events(buf):
 
 def item_G(D):
     pc, fws = {}, {}
-    for card in CARDS:
+    for card in ALL:
         per = []
         for P in D[card]:
             if P["sp1"] is None or P["config"] is None:
@@ -918,7 +1222,12 @@ def item_G(D):
             per.append(row)
         kept = [r for r in per if "dropped" not in r]
         fws[card] = sorted({tuple(r["fw"]) for r in kept})
-        pc[card] = {"n": len(kept), "passes": per, "status": status_of(len(kept), all(r["holds"] for r in kept))}
+        if card in CARDS:
+            pc[card] = {"n": len(kept), "passes": per, "status": status_of(len(kept), all(r["holds"] for r in kept))}
+        else:   # a new card: the governor-free (aifoundry2) readouts, the 'both' parts and the firmware, reported
+            pc[card] = reported(len(kept), passes=per, firmware=[list(x) for x in fws[card]],
+                                aifoundry2_spec_met_every_kept_pass=all(r["holds"] for r in kept) if kept else None,
+                                config_seen=sorted({json.dumps(r["config"], sort_keys=True) for r in per}))
     same_fw = len(fws.get(A2, [])) == 1 and fws.get(A2) == fws.get(A3)
     oc = combine(pc, list(CARDS))
     if oc == "PASS" and not same_fw:
@@ -934,6 +1243,12 @@ def item_G(D):
         d75 = "aifoundry2 prints pre-60b40c10f idle lines: both cards run the older governor"
     else:
         d75 = "aifoundry2 governor lines without an idle event: format not decided"
+    # tested on aifoundry2 and aifoundry3 only (the others are reported), with the registered same-firmware rule, so
+    # all_cards equals the registered outcome
+    ac = all_cards(pc, list(CARDS), firmware={c: [list(x) for x in fws.get(c, [])] for c in ALL},
+                   same_firmware_every_card=len({x for c in ALL for x in fws.get(c, [])}) == 1)
+    if ac["outcome"] == "PASS" and not same_fw:
+        ac["outcome"] = "FAIL"
     return item("TEL-G", ["dvfs-07", "dvfs-40", "dvfs-41", "dvfs-42", "dvfs-43", "dvfs-44", "dvfs-46", "dvfs-51", "dvfs-75"], pc,
                 "deterministic, every kept pass (>= 3) per card. a3: config 0 / 65 / max_power; sp1 >= 5 throttle-down lines "
                 "'tdp level: 0' and >= 5 old-format idle lines 'tdp level 0', <= 1 repeated idle event, 0 throttle-up; a2 "
@@ -941,27 +1256,48 @@ def item_G(D):
                 "tdp 65 / boot 600 / mask 0xffffffff / l3 32768, firmware 1.3.1 and PMIC 1.5.0, the same on both cards", oc,
                 "governor readouts: a2 %s, a3 %s, firmware %s; dvfs-75: %s (%s)" % (pc[A2]["status"], pc[A3]["status"],
                                                                                  {c: fws.get(c) for c in CARDS}, d75, oc),
-                same_firmware=same_fw, dvfs_75=d75)
+                same_firmware=same_fw, dvfs_75=d75,
+                all_cards=ac,
+                reading_all_cards="governor readouts tested on aifoundry2 and aifoundry3 only; firmware per card %s; the others' "
+                                  "config %s" % ({c: fws.get(c) for c in ALL},
+                                                 {c: pc[c].get("config_seen") for c in ALL if c not in CARDS}))
+
+
+IDLE = {}
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--data", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--expect", default=",".join(EXPECT),
+                    help="the cards the campaign expects (an expected card with no data makes all_cards INSUFFICIENT)")
     a = ap.parse_args()
+    exp = [c for c in a.expect.split(",") if c]
+    ALL[:] = list(dict.fromkeys(list(CARDS) + exp))       # the registered cards always take part
     D, notes = load(a.data)
-    SPV = {c: [sp_pass_values(P) for P in D[c]] for c in CARDS}
-    for c in CARDS:
+    SPV = {c: [sp_pass_values(P) for P in D[c]] for c in ALL}
+    for c in ALL:
         for v in SPV[c]:
             for x in v["drops"]:
                 notes.append("%s p%d: %s" % (c, v["pass"], x))
+    for c in ALL:
+        IDLE[c] = idle_summary(D, c)
+        if c not in PRESENT:
+            notes.append("%s: no data directory (all_cards INSUFFICIENT for every item it is tested in)" % c)
     items = items_sp(D, SPV) + items_reset(D) + [item_S(D), item_Q(D), item_R(D), item_G(D)]
     out = {"exp": "tel", "plan_id": "V3-TEL", "data": os.path.abspath(a.data), "items": items,
-           "passes": {c: [{"pass": P["pass"], "block": P["block"], "sp": SPV[c][i]} for i, P in enumerate(D[c])] for c in CARDS},
+           "cards": {"registered": list(CARDS), "all": list(ALL), "present": sorted(PRESENT), "missing": [c for c in ALL if c not in PRESENT],
+                     "clock_rule": {c: clock_rule(c) for c in ALL}, "settle_ms": SETTLE_MS},
+           "idle_clock": IDLE,
+           "passes": {c: [{"pass": P["pass"], "block": P["block"], "sp": SPV[c][i]} for i, P in enumerate(D[c])] for c in ALL},
            "notes": notes}
     json.dump(out, open(a.out, "w"), indent=1, default=lambda o: o.item() if hasattr(o, "item") else str(o))
+    print("%-7s %-14s %-14s %s" % ("item", "registered", "all_cards", "reading (registered)"))
     for it in items:
-        print("%-7s %-14s %s" % (it["item"], it["outcome"], it["reading"]))
+        print("%-7s %-14s %-14s %s" % (it["item"], it["outcome"], it["all_cards"]["outcome"], it["reading"]))
+    for c in ALL:
+        print("idle clock %-14s %s" % (c, IDLE[c]["note"]))
 
 
 if __name__ == "__main__":

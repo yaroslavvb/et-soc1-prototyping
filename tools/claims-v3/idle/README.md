@@ -1,52 +1,72 @@
 # V3-IDLE: idle heat/cool cycles (PLAN3 §2 "V3-IDLE", suggested E44)
 
 The idle law's shape on aifoundry3, the unsensed slope, the 73 C split and the leakage split
-(items IDLE-0, a, b, c, d, e, f, k, L; 34 claims). Pre-registered predictions: `docs/reports/data/2026-09-25-claims-v3/PLAN3.md`
+(items IDLE-0, a, b, c, d, e, f, k, L; 34 claims). Runs on four cards: aifoundry2, aifoundry3, aifoundry1-c0 and
+aifoundry1-c1 (amendment A2: aifoundry1's cards are measured and reported; the registered outcomes stay those of
+aifoundry2 and aifoundry3). Pre-registered predictions: `docs/reports/data/2026-09-25-claims-v3/PLAN3.md`
 §2 V3-IDLE and `plan3.json` `experiments[V3-IDLE]` (`predictions`, `components_detail`: energy-manual EXP-EM1, dvfs
 EXP-dvfs-4, horace-lowpower-X4).
 
 ## Running
 
 ```
-bash tools/claims-v3/idle/block.sh <pass> [--smoke]     # from either tree (this repository or ~/nekko on aifoundry3)
-V3_DRY=1 bash tools/claims-v3/idle/block.sh 1           # no device access: prints every device call
+bash tools/claims-v3/idle/block.sh <pass> [--smoke]              # aifoundry2 (this repository), aifoundry3 (~/nekko)
+V3_DEVICE=0 bash tools/claims-v3/idle/block.sh <pass> [--smoke]  # aifoundry1 (~/nekko): card 0 (aifoundry1-c0); 1 for c1
+V3_DRY=1 bash tools/claims-v3/idle/block.sh 1                    # no device access: prints every device call
 ```
+On aifoundry1 lib.sh refuses to run without V3_DEVICE (exit 2). Each card has its own queue and data directory
+(`build/claims-v3/<card>/idle/`).
 
 | pass | what | cooling | used by |
 |---|---|---|---|
 | 1-9 | a short cycle | 900 s | IDLE-0, a-f, k |
-| 11-19 | an IDLE-LONG cycle (overnight, when the room is cool) | 5400 s aifoundry2, 2700 s aifoundry3 | IDLE-L; also a cycle for 0, a-f, k (first 900 s of its cooling) |
+| 11-19 | an IDLE-LONG cycle (overnight, when the room is cool) | 5400 s aifoundry2 and aifoundry1's cards, 2700 s aifoundry3 | IDLE-L; also a cycle for 0, a-f, k (first 900 s of its cooling) |
 | any, `--smoke` | the pipeline check (exp `idle-smoke`) | 20 s, 2 bursts | nothing (checked by `reduce.py --check-pass`) |
 
-Schedule lines: `idle 1`, `idle 2`, `idle 3` on each card, >= 30 min apart and on at least two different days (PLAN3
-"cycles on at least two different days"). IDLE-LONG passes (`idle 11`, `idle 12`, `idle 13`) go in an overnight
-schedule of their own, never interleaved. On aifoundry3 run `idle 1` before V3-CAT's hot passes: `tools/claims-v3/cat/block.sh`
-takes its hold temperature from the highest reading in `$DATA_ROOT/idle/p*/telemetry.jsonl.gz` (PLAN3 day 3: "IDLE cycle 1 first").
+Schedule lines: `idle 1`, `idle 2`, `idle 3` on each of the four cards, >= 30 min apart and on at least two different
+days (PLAN3 "cycles on at least two different days"). IDLE-LONG passes (`idle 11`, `idle 12`, `idle 13`) go in an
+overnight schedule of their own, never interleaved. On aifoundry3 run `idle 1` before V3-CAT's hot passes:
+`tools/claims-v3/cat/block.sh` takes its hold temperature from the highest reading in `$DATA_ROOT/idle/p*/telemetry.jsonl.gz`
+(PLAN3 day 3: "IDLE cycle 1 first"); the same holds on aifoundry1's cards as long as cat/block.sh treats every card but
+aifoundry2 that way. On aifoundry1 the two cards' queues run in parallel; an idle cycle is best scheduled when the other
+card runs light blocks (the cards share the chassis air; see the risks).
 Every kept cycle counts in the reduction, so decide beforehand which passes run and do not leave kept passes out afterwards.
 
 ## What one pass does, in order
 
-1. Refuses to start (exit 3, no directory) when lib's `others_present` sees another user or another user's device
-   process, when lib's `ours_running` sees a device process of this user (another session, a leftover), or when the
-   `et_soc1` use count (`lsmod`) is not 0.
+1. Refuses to start (exit 3, no directory) when lib's `others_present` sees another user, another user's device
+   process or a running CI job, when lib's `ours_running` sees a device process of this user on this card (another
+   session, a leftover; on aifoundry1 our processes with the other card's `ET_DEVICES` do not count), or when the
+   `et_soc1` use count (`lsmod`) is not 0. With `V3_DEVICE` set the use count is not checked (`modcount_check:
+   skipped` in cycle.json): the module serves both cards of aifoundry1, and the other card's queue may hold its own card.
 2. `block_begin` (one die reading), then `start_sampler` (`ettelem sample --every-ms 100`, `--seconds` = 900 + cooling
-   + 90) for the whole cycle. Right after the start the use count is read 5 times; its maximum (normally 1: our
-   sampler) is the intrusion baseline.
+   + 90) for the whole cycle. Right after the start the use count is read 5 times (where it is checked); its maximum
+   (normally 1: our sampler) is the intrusion baseline. The card's idle state before heating, the minion clock
+   (`mhz.minion`) and on-die minion voltage (`die_mv.minion`) of the sampler's first line, goes into the `cycle_start`
+   mark (`idle_mhz`, `idle_minion_mv`): aifoundry1-c0 (firmware 1.4.1) rests in "low_power" at 300 MHz / 398 mV and
+   stayed idle at 600 MHz after a launch (25 Sep clock test); the other cards idle at 600 MHz.
 3. **Heat.** 2 s random-data fma bursts on all 1024 minions, each under `hold10`:
    `$HEATER --test fma --type fp32 --pattern none --values randn --shires 0xffffffff --per-shire 32 --seconds 2 --seed 1`
-   (lib's HEATER: `build/sparsity_t2/host/sparsity_host` on aifoundry2, `build/sparsity/host/sparsity_host` on aifoundry3),
-   until the die reads >= the target (aifoundry2 88 C; aifoundry3 90 C, which it never reaches, so it heats to its
-   plateau), at most 150 bursts or 900 s. Before each burst the die is read from the running sampler's newest line
+   (lib's HEATER: `build/sparsity_t2/host/sparsity_host` on aifoundry2, `build/sparsity/host/sparsity_host` on aifoundry3
+   and aifoundry1), until the die reads >= the target (aifoundry2 and aifoundry1's cards 88 C; aifoundry3 90 C, which it
+   has not reached in 150 bursts, so it heats to its plateau), at most 150 bursts or 900 s. Before each burst the die is read from the running sampler's newest line
    (`$SAMPLER_OUT.raw`, at most 3 s old), and the card is checked: another user (`others_present`) or any device
-   process but our sampler, of any user, stops the cycle (exit 3), so the heater never lands on someone else's run.
+   process on this card but our sampler stops the cycle (exit 3), so the heater never lands on someone else's run.
 4. **Cool.** No launch for the cooling time. Every 10 s the block checks that the sampler is alive, that no device process
-   other than our sampler runs (any user, by lib's `DEV_COMM`), and that the use count is not above the baseline. An
-   intrusion stops the cycle (mark `abort`, `block_end fail`, exit 3: the queue sets the pass aside and retries it after
-   10 min), because another kernel spoils the idle samples. A login without a device process is only marked (`login`).
-5. SIGTERM the sampler (`stop_sampler`), wait 2 s (block_end's die reading starts ettelem again, which often fails right
-   after an instance), gzip the telemetry and the heater's output, `reduce.py --check-pass` (stdlib only),
-   `block_end ok|fail` with a one-line note (bursts, Tmax, cooling samples, largest sample gap, off-600 count, bins,
-   warnings such as a failed heater burst).
+   on this card other than our sampler runs, and that the use count is not above the baseline (where it is checked).
+   "On this card" (`scan_procs`): another user's device process or CI job (lib's `OTHER_COMM`), whatever card it uses
+   (its environment cannot be read); one of ours with `ET_DEVICES` equal to `V3_DEVICE` or unset (it opens every card);
+   `dev_mngt_service`, which opens every card whatever its `ET_DEVICES`. Without `V3_DEVICE` (aifoundry2, aifoundry3)
+   every device process but our sampler counts, as before. An intrusion stops the cycle (mark `abort`, `block_end fail`,
+   exit 3: the queue sets the pass aside and retries it after 10 min), because another kernel spoils the idle samples.
+   A login without a device process is only marked (`login`). Our own processes on the other card of aifoundry1 are
+   not an intrusion; the polls that saw one are counted (`cool_end` `other_card_polls` of `polls`).
+5. The `cool_end` mark gets the idle state at the end of the cooling (as in step 2). SIGTERM the sampler (`stop_sampler`),
+   wait 2 s (block_end's die reading starts ettelem again, which often fails right after an instance), gzip the telemetry
+   and the heater's output, `reduce.py --check-pass` (stdlib only), `block_end ok|fail` with a one-line note (bursts, Tmax,
+   cooling samples, largest sample gap, off-600 count, the idle clock and its share of the cooling samples, bins,
+   warnings such as a failed heater burst or an aifoundry1 card idling at another clock than expected). check.json
+   holds the cooling window's clock histogram (`idle_clock_hist_MHz`).
 
 block.sh wraps lib's `die_c` (local helper, lib.sh unchanged): lib's `block_end` writes the reading unquoted into
 block.json, so a failed reading would leave invalid JSON (`"die_c_end":,`); the wrapper writes `null`. After an
@@ -54,22 +74,24 @@ intrusion (exit 3) the wrapper does not open the card at all, because the other 
 the management node has one opener. reduce.py also reads a block.json with an empty value (older blocks, other writers).
 
 Files in `$DATA_ROOT/idle/p<N>/`: `telemetry.jsonl.gz`, `launches.jsonl` (host times around every heater process and its
-rc), `heat.jsonl` (the die reading before every burst), `marks.jsonl` (`cycle_start`, `heat_end` with die/reason/bursts,
-`cool_start`, `cool_end`, `abort`, `login`), `cycle.json` (parameters), `heater.out.gz`, `check.json`, `block.json`,
+rc), `heat.jsonl` (the die reading before every burst), `marks.jsonl` (`cycle_start` with the idle state, `heat_end` with
+die/reason/bursts, `cool_start`, `cool_end` with the idle state and the other-card polls, `abort`, `login`), `cycle.json`
+(parameters, including `gov_free`, `v3_device`, `modcount_check`), `heater.out.gz`, `check.json`, `block.json`,
 `code.sha256`. About 1 MB per short pass, 3-4 MB per long pass (gzipped 10 Hz telemetry).
 
 ## Card minutes per pass
 
-| | aifoundry2 | aifoundry3 |
-|---|---|---|
-| short pass | ~17-20 (begin, sampler and end ~1; heating from a ~74 C rest to 88 C ~1-3; idle 15) | ~22 (150 bursts ~6.5; idle 15; ~0.5) |
-| 3 short passes | ~55 (plan: 66) | ~66 (plan: 80) |
-| long pass | ~93 | ~52 |
-| smoke | ~30 s | ~30 s |
+| | aifoundry2 | aifoundry3 | aifoundry1-c0 | aifoundry1-c1 |
+|---|---|---|---|---|
+| short pass | ~16-17 (measured 16.4 and 15.6 min, passes 1-2 of 25 Sep: begin, sampler and end ~1; heating 32-80 s; idle 15) | ~22 (150 bursts ~6.5; idle 15; ~0.5) | <= 22 (heating unknown: at most 150 bursts ~6.5; idle 15; ~0.5) | <= 22 (as c0) |
+| 3 short passes | ~50 (plan: 66) | ~66 (plan: 80) | <= 66 | <= 66 |
+| long pass | ~93 | ~52 | <= 97 | <= 97 |
+| smoke | ~30 s | ~30 s | ~30 s | ~30 s |
 
 The heating time on aifoundry2 is estimated from the committed runs (randn from 81 C reached 88 C in 10-210 s,
 2026-09-21-horace-aifoundry2/long). On aifoundry3 the burst cap (150 back-to-back bursts of ~2.6 s) ends the heating before the
-900 s cap.
+900 s cap. aifoundry1's cards have no heating data yet (c0 rests at ~65 C, c1 at ~57 C, 25 Sep): the table gives the caps
+(150 bursts), so their times are upper bounds.
 
 ## What is dropped, and why
 
@@ -80,11 +102,22 @@ The heating time on aifoundry2 is estimated from the committed runs (randn from 
 - Samples from 1 s before to 6 s after any heater launch (rule A), and every sample outside the cooling window.
 - aifoundry2 samples with `mhz.minion != 600` (registered sample-level rule; the count is in the block note as `off600` and in
   `passes[].counts`). aifoundry3 is pinned at 600 MHz; its off-600 samples are counted, not dropped (none expected).
+- aifoundry1's cards (amendment A2): samples off the card's idle clock. The expected clock is 600 MHz on both:
+  aifoundry1-c1 (firmware 1.2.0) idles at 600 MHz / 499 mV like aifoundry2; aifoundry1-c0 (firmware 1.4.1) rests in
+  "low_power" at 300 MHz / 398 mV, but in the 25 Sep clock test it moved to 600 MHz during its first launch and stayed
+  there idle afterwards, so its cooling after the heater is expected at 600 MHz. If fewer than half of a card's cooling
+  samples (rule-A window, pooled over its kept cycles) are at the expected clock, its most common cooling clock is used
+  instead (for example 300 MHz if c0 falls back into low_power), so a card's idle samples are never all dropped for
+  being at its own idle clock; the idle-clock note and `reading_all_cards` then name the fallback. The count of samples
+  off the card's clock is in `passes[].counts` (`off600`, and `off_idle_clock` when the clock used is not 600 MHz);
+  `idle_clocks` in verdicts.json has each card's clock histogram. The heater bursts are never measured here (every launch
+  window is dropped), so no rule on busy samples applies.
 - Whole-degree bins with fewer than 20 samples in a cycle.
 - Not dropped: a pass that found the die already at its target (e.g. right after another experiment's heavy block) makes no
   burst; its cooling starts at `cool_start` and it is kept.
 - For IDLE-k: aifoundry2 cycles whose highest reading is below 86 C, and samples within 20 s of the last burst.
 - For IDLE-L: flip_thermal_model.py step 2a's own rule (no launch within 4.5 s, the first 20 s of the pass, off-600 samples).
+- IDLE-k and IDLE-L on aifoundry1's cards (reported): the same rules with the card's idle clock in place of 600 MHz.
 
 ## Deviations from the plan's commands, with reasons
 
@@ -110,13 +143,20 @@ The heating time on aifoundry2 is estimated from the committed runs (randn from 
    the ~35 min block limit: a cooling curve cannot be split into blocks without other experiments' kernels in between, so these
    passes run overnight from their own schedule.
 9. **Sampler length**: `--seconds` 900 + cooling + 90 per block (the plan: 5400 for its three-cycle script); stopped with SIGTERM.
+10. **Four cards** (amendment A2, before any data of aifoundry1's cards): aifoundry1-c0 and -c1 run the same blocks with
+    aifoundry2's governor-free values (target 88 C, IDLE-LONG cooling 5400 s: both are governor-free at TDP 65 W, and their
+    heatsinks are unknown, so the longer cooling is kept); the idle state is recorded per pass; the use-count check is skipped
+    with V3_DEVICE and the intrusion check is per card. Tests of `$CARD` against a host name became what they mean:
+    per-card parameters (target, long cooling), GOV_FREE (the dry run's synthetic die).
 
 ## The reduction (reduce.py), and the readings the plan left open
 
 ```
-python3 tools/claims-v3/idle/reduce.py --data <dir with aifoundry2/ and aifoundry3/ laid out like DATA_ROOT> --out verdicts.json
+python3 tools/claims-v3/idle/reduce.py --data <dir with one directory per card, laid out like DATA_ROOT> --out verdicts.json
 python3 tools/claims-v3/idle/reduce.py --check-pass $DATA_ROOT/idle/p1      # stdlib only; what block.sh runs
 ```
+`--data` is read for every card directory present (`aifoundry2/`, `aifoundry3/`, `aifoundry1-c0/`, `aifoundry1-c1/`, any
+other); aifoundry1's two cards are always listed in the output, with or without data.
 The full reduction needs numpy (not scipy); `--check-pass` needs only the standard library, so the card hosts need no numpy.
 It runs on partial data (one card, fewer passes) and says INSUFFICIENT where a card has fewer than 3 kept cycles.
 Constants are the published ones: the law 12.6349 + 23.2568 e^((T-80)/36) (2026-09-21-horace-aifoundry2/model.json), the
@@ -140,6 +180,22 @@ band test means the whole interval lies inside the band.
 | IDLE-k | a2 | cycles from >= 86 C; samples >= 20 s after the last burst within the first 900 s of cooling; flip_thermal_model.py step 2a fit per cycle; each cycle's best T_L inside 30-48 C, its shares A80/63.9 over the T_L values within 0.005 W rms of the best inside 0.31-0.47, and the interval of the cycle residual over 70-85 C bins inside [-0.4, 0.0] W. `decision`: Kanter's 30% established only if every cycle's lowest share > 0.30 |
 | IDLE-L | both | long passes; flip_thermal_model.py step 2a exactly; a2 intervals of best T_L inside [30, 45], A80 inside [19, 29], A80/T_L inside [0.62, 0.68]; a3 slope at 56 C inside [0.22, 0.38] and offset (rule-A bins of the whole cooling) inside [0.3, 1.1]. `leakage_split` identified only if A80's interval is narrower than +-3 W |
 
+**Four cards (amendment A2).** `outcome` is the registered outcome, computed exactly as before from aifoundry2 and
+aifoundry3 (checked: identical outcomes, readings and aifoundry2/aifoundry3 per-card values on the ten earlier synthetic and
+legacy sets). Every item's band is a value given for aifoundry2 or for aifoundry3 only, so aifoundry1's cards are
+REPORTED, not tested: `per_card` has all four cards; an aifoundry1 entry carries the same statistics as the registered
+card's, `tested: false`, `status` (REPORTED, or INSUFFICIENT with fewer than 3 kept cycles), `registered_band_of`, and
+`info_registered_band_holds` (whether that card's band would hold: information only). `all_cards` is the outcome over the
+tested cards with enough repeats (PASS on every card, CARD-DIFFERENT on some, FAIL on none, INSUFFICIENT if a tested card
+lacks repeats); here the tested cards are the registered ones, so it equals `outcome`, and it lists the reported cards.
+`reading_all_cards` adds the reported cards' values to the reading, and names any card whose idle clock came from the
+fallback. Every item carries `idle_clocks_MHz` (None for a card with no kept cooling sample) and `idle_clock_note` (each
+card's idle clock, minion voltage and firmware; a card on other firmware than aifoundry2/aifoundry3's 1.3.1 is stated per
+card, and a card idling off 600 MHz, as aifoundry1-c0 would in low_power, is at another operating point than the law and
+the other cards, and the note says so);
+verdicts.json `idle_clocks` has the details, and `passes[].idle_clock` each pass's clock histogram, its idle state before
+heating and at the end of the cooling, and the other-card polls.
+
 Outcomes: PASS (holds on each registered card), FAIL, CARD-DIFFERENT (holds on one registered card and fails on the other: IDLE-L;
 and IDLE-f when its condition is not met), INSUFFICIENT (a registered card has fewer than 3 kept cycles for the item; for the
 per-bin tests of IDLE-b and IDLE-e also when no bin was visited by >= 3 kept cycles, since no bin then has the needed repeats;
@@ -150,15 +206,64 @@ IDLE-e still FAILs on its slope alone). `verdicts.json` also lists every pass wi
 
 - **Edge bins.** The reading is whole degrees, so the highest and lowest bin of a cycle hold only part of a degree of true
   temperature; on aifoundry2 (0.6 W/C) their means sit up to ~0.2-0.3 W off the law. The synthetic test (truth: a flat -0.10 W)
-  fails IDLE-b's "every bin" test in its edge bins (70, 75, 76, 87 C). The registered rule has no edge-bin exclusion, so none is
-  applied; an amendment (for example, drop each cycle's first and last bin) would have to be made before the first run.
+  failed IDLE-b's "every bin" test in its edge bins (70, 75, 76, 87 C); amendment A1 (before any data) therefore leaves each
+  cycle's first and last bin out of IDLE-b.
 - aifoundry2 cools from 88 C to only ~76 C in 15 min on a warm day (the committed gaps: 89 -> 81 C in ~6 min), so IDLE-d (73 C
   bin) is INSUFFICIENT unless a cycle runs on a cool evening or IDLE-LONG runs.
 - IDLE-k and IDLE-L on aifoundry2 are expected to be unidentified: the T_L profile is flat over the short cooling range (plan:
   "Expect it to be inconclusive"), so IDLE-k FAILs on the share band and Kanter's 30% is not established.
 - The intrusion poll runs every 10 s: a foreign process that opens and closes the card between two polls is not seen.
+- aifoundry1 (amendment A2): the two cards share the chassis air, so the other card's heavy blocks can slow a card's cooling
+  (fewer low bins, not a different P(T): board power follows the die temperature). The polls that saw our own process on
+  the other card are counted per pass (`other_card_polls`). Another user's device process is an intrusion whichever card it
+  uses (its environment is not readable); a CI job (Runner.Worker) likewise.
+- aifoundry1-c0's idle state: it rests in "low_power" at 300 MHz / 398 mV (18.8 W board at 65 C), and after a launch it
+  stayed idle at 600 MHz (26 W, 25 Sep clock test). When, if ever, it falls back to 300 MHz during a 15 or 90 min cooling
+  is not known; the per-pass clock histograms and the idle state at `cycle_start`/`cool_end` show it, and the fallback to
+  its most common clock keeps the reduction defined either way. Even at 600 MHz its idle power differs from the other
+  cards' (26 W on 1.4.1, 33-35 W on 1.2.0, 32 W on 1.3.1 in the clock test), so the clock note names each card's firmware
+  and aifoundry1's values are stated per card. Its first launch after a low-power idle ran late (the clock rose only at the
+  end of it), so its first heater bursts may heat little; the heating curve (`heat.jsonl`) records it.
+- Without the `et_soc1` use count (aifoundry1), a process that opens this card under a name lib's `DEV_COMM`/`OTHER_COMM`
+  does not match (for example a Python program on the runtime library) is not seen during the cycle; on aifoundry2 and
+  aifoundry3 the use count still catches it.
+- The thermal limits of firmware 1.4.1 (c0) and 1.2.0 (c1) above ~75 C are not known; aifoundry2 and aifoundry3 (1.3.1)
+  reached 88 C. Run each aifoundry1 card's `--smoke` first and watch its first short pass (heat_end in marks.jsonl).
+- lib.sh's `drain_mgmt` runs /opt/et/bin/dev_mngt_service, which ignores ET_DEVICES and opens every card of aifoundry1: a
+  drain by one card's queue is seen as an intrusion on the other card's idle cycle (it opens that card's management node,
+  where the sampler runs), which exits 3 and is retried.
 
 ## Tests done
+
+Four cards (25 Sep, scratchpad `validate3/fourcards/idle/`, no card access):
+- `V3_DRY=1` of passes 1 and 11 and `--smoke` on each card id, run from the repository with the block's absolute path:
+  aifoundry2 (this host), aifoundry3 and aifoundry1 through a `hostname` shim, aifoundry1 with `V3_DEVICE=0` and `=1`
+  (card ids aifoundry1-c0/-c1, HEATER build/sparsity, target 88 C, long cooling 5400 s, use count skipped); aifoundry1
+  without `V3_DEVICE` exits 2 (`dry/*.log`).
+- `unit/test_scan.sh`: the per-card process classification (`scan_procs`) with a fake `ps` over ordinary `sleep` processes
+  carrying `ET_DEVICES` (our process on the other card: not an intrusion; on this card, without ET_DEVICES, a
+  dev_mngt_service, another user's process, a CI job: intrusions; the sampler and a vanished process: ignored; without
+  V3_DEVICE everything counts as before) and the idle-state parsing of an ettelem line (`idle_state`, `live_reading`).
+- reduce.py on four-card synthetic data (`gen4.py`): `allpass` (all cards complete), `c0differs` (c0 at its own 300 MHz
+  low-power law: its reported residual -12.9 W, split 7.79 / 1.49 / 2.50 / 9.00 W as generated), `c1missing` (no c1
+  directory, c0 with 2 cycles: INSUFFICIENT, reported), `c0clock600` (c0 idling at 600 MHz);
+  the registered outcomes are the same in all four. Since the review c0's expected clock is 600 MHz, so `c0differs` (c0
+  cooling at 300 MHz) takes the fallback, with the note and the check-pass warning, and `c0clock600` does not. `--check-pass` on synthetic passes of each card.
+- Regression: the registered part of verdicts.json (outcome, reading, aifoundry2/aifoundry3 per_card, passes) is identical
+  to the previous reduce.py on the ten earlier sets (five gen_synth scenarios, the legacy aifoundry2 gaps, four review
+  scenarios).
+
+Review (25 Sep, scratchpad `validate3/fourcards/idle/review/`, no card access):
+- The registered part of verdicts.json is identical between the committed reduce.py (git HEAD) and this one on 18 sets:
+  the real aifoundry2 passes 1-2 of 25 Sep (`build/claims-v3/aifoundry2/idle`, copied), those passes with duplicates plus
+  synthetic aifoundry3/aifoundry1 cards, the four four-card sets, and the twelve earlier synthetic, legacy and review sets.
+  `--check-pass` gives the same problems and warnings on the real passes (the note adds the idle clock).
+- `V3_DRY=1` of passes 1, 2, 11, 13 and `--smoke` on each card id from the repository with the absolute block path (hostname
+  shim, `V3_DEVICE=0|1`); aifoundry1 without V3_DEVICE, pass 10 and `V3_DEVICE` on aifoundry2 exit 2.
+- `unit/test_scan.sh` with the functions extracted from block.sh itself, plus a process whose `ET_DEVICES` lists both cards
+  (counted on this card).
+
+Before (two cards):
 
 - `bash -n`; `V3_DRY=1` of passes 1 and 11 and `--smoke` on aifoundry2, and of passes 2 and 12 and `--smoke` with a `hostname`
   shim for aifoundry3 (which exercises the aifoundry3 branch: HEATER build/sparsity, target 90, 150-burst cap, 2700 s cooling).

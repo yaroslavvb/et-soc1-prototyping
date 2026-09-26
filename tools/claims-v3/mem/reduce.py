@@ -4,14 +4,22 @@ MEM-W, exactly as registered. No card.
 
     python3 tools/claims-v3/mem/reduce.py --data DIR --out verdicts.json
 
-DIR holds aifoundry2/ and aifoundry3/, each laid out like the card's DATA_ROOT (build/claims-v3/<card>): the passes are
+DIR holds one folder per card (aifoundry2/, aifoundry3/, aifoundry1-c0/, aifoundry1-c1/, and any other card folder
+with a mem/ inside), each laid out like the card's DATA_ROOT (build/claims-v3/<card>): the passes are
 DIR/<card>/mem/p<k>/. Only passes whose block.json says "ok" count; the drop rules are applied here from the pass's own
-files (drop.json is only a note for the operator). Works on partial data: an item with fewer than 3 kept passes on a
-card is INSUFFICIENT there.
+files (drop.json is only a note for the operator), with each card's clock rule (memv3.clock_rule: aifoundry2's
+registered rule, aifoundry3 pinned, the busy rule on every other card). Works on partial data: an item with fewer than
+3 kept passes on a card is INSUFFICIENT there.
 
-verdicts.json is a list with one record per item: {"item", "claims", "prediction", "test", "per_card":
-{"aifoundry2": {...}, "aifoundry3": {...}}, "outcome": PASS | FAIL | CARD-DIFFERENT | INSUFFICIENT, "reading"}.
-A sidecar <out>.passes.json lists every pass seen, kept or dropped, and why.
+verdicts.json is a list with one record per item: {"item", "claims", "prediction", "test", "per_card": {<every card>},
+"outcome": PASS | FAIL | CARD-DIFFERENT | INSUFFICIENT, "reading", "all_cards": {"outcome", "reading", ...}}.
+"outcome" and "reading" are the registered ones, computed exactly as before from aifoundry2 and aifoundry3 only.
+"all_cards" (the four-card amendment) covers every card of the campaign (the four expected ones and any other card
+folder present): PASS if the item holds on every tested card, CARD-DIFFERENT if on some, FAIL if on none, INSUFFICIENT
+while a tested card (a missing one included) has too few kept repeats; "decided_outcome" is the same over the cards
+that have enough. An item whose registered test names one card (MEM-R2: aifoundry2) is tested there only and reported
+for the others. A sidecar <out>.passes.json lists every pass seen, kept or dropped, and why, with each card's clocks
+inside and between kernels (the idle clock).
 
 MEM-P1..P10 and MEM-X2 use the pre-registered decision code in prereg/ (byte-identical copies of the scratch reducers
 the plan names: crosscard_tests.py and recompute_latency.py of the inventory, crosscard_v3.py and extra_values.py of the
@@ -40,9 +48,15 @@ import memv3  # noqa: E402
 import crosscard_tests as cc  # noqa: E402  (the copy in prereg/; crosscard_v3 below then reuses this module)
 import crosscard_v3 as ccv3  # noqa: E402,F401  (patches cc.BANDS and cc.pass_values: P5b, P6r, P8b, P8c, X2, one-sided)
 
-CARDS = memv3.CARDS
-SHORT = {"aifoundry2": "a2", "aifoundry3": "a3"}
+CARDS = memv3.CARDS          # the registered pair: "outcome" and "reading" are theirs, computed as registered
+SHORT = memv3.SHORT
+ALL = list(memv3.EXPECTED)   # main() sets it: the four cards of the campaign, then any other card folder under --data
+PRESENT = set()              # cards with a <card>/mem folder under --data
 INF = float("inf")
+
+
+def short(c):
+    return SHORT.get(c, c)
 
 # The items as registered (plan3.json experiments[V3-MEM].predictions), with the keys of the pass-level values each uses.
 ITEMS = [
@@ -259,6 +273,36 @@ def outcome(h2, h3):
     return "CARD-DIFFERENT"
 
 
+def _over(hs):
+    """PASS / CARD-DIFFERENT / FAIL over decided cards (None when there is none)."""
+    if not hs:
+        return None
+    if all(hs):
+        return "PASS"
+    if not any(hs):
+        return "FAIL"
+    return "CARD-DIFFERENT"
+
+
+ALL_CARDS_TEST = ("the registered per-card test, unchanged, on every card of the campaign (aifoundry2, aifoundry3, "
+                  "aifoundry1-c0, aifoundry1-c1 and any other card folder present): PASS if it holds on every tested "
+                  "card, CARD-DIFFERENT if on some, FAIL if on none, INSUFFICIENT while a tested card (a missing one "
+                  "included) has fewer than 3 kept repeats; a test registered for one card only is reported, not "
+                  "tested, on the others.")
+
+
+def all_cards(per, tested=None):
+    """The all-cards outcome of an item (amendment for aifoundry1's two cards): per = {card: {"holds": ...}}."""
+    tested = list(ALL if tested is None else tested)
+    holds = {c: per[c]["holds"] for c in tested}
+    lacking = [c for c in tested if holds[c] is None]
+    dec = [holds[c] for c in tested if holds[c] is not None]
+    return {"outcome": "INSUFFICIENT" if lacking else (_over(dec) or "INSUFFICIENT"), "test": ALL_CARDS_TEST,
+            "cards": list(ALL), "tested": tested, "reported_only": [c for c in ALL if c not in tested],
+            "no_data": [c for c in ALL if c not in PRESENT], "holds": holds, "lacking_repeats": lacking,
+            "decided_outcome": _over(dec), "decided_cards": [c for c in tested if holds[c] is not None]}
+
+
 def describe_fail(tests):
     out = []
     for k, t in tests.items():
@@ -272,7 +316,7 @@ def describe_fail(tests):
 
 
 def card_phrase(card, pc):
-    s = SHORT[card]
+    s = short(card)
     if pc["holds"] is True:
         return f"{s} holds ({pc['n']} passes)"
     if pc["holds"] is False:
@@ -281,9 +325,14 @@ def card_phrase(card, pc):
     return f"{s} undecided ({pc['n']} kept passes" + (f"; seen: {'; '.join(seen)})" if seen else ")")
 
 
+def phrase_all(card, text):
+    """A card's phrase in an all-cards reading: 'no data' for a card with no folder under --data."""
+    return f"{short(card)} no data" if card not in PRESENT else text
+
+
 def keyed_item(item, claims, keys, kept):
     per = {}
-    for card in CARDS:
+    for card in ALL:
         rows = kept[card]
         tests = {k: subtest(k, rows, card) for k in keys}
         extra = {k: {f"p{p}": v.get(k) for p, v in rows} for k in DESCRIPTIVE.get(item, [])}
@@ -291,16 +340,28 @@ def keyed_item(item, claims, keys, kept):
                      "holds": combine(tests)}
     oc = outcome(per["aifoundry2"]["holds"], per["aifoundry3"]["holds"])
     reading = f"{oc}: " + "; ".join(card_phrase(c, per[c]) for c in CARDS)
+    ac = all_cards(per)
+    ac_reading = f"{ac['outcome']}: " + "; ".join(phrase_all(c, card_phrase(c, per[c])) for c in ALL)
     if item == "MEM-P8":
         hs = [per[c]["tests"][k]["holds"] for c in CARDS for k in ("P8b_open_frac_diff", "P8c_nonopen_resid")]
         reading += (". anatomy-35 restored (P8b and P8c hold on both cards)" if all(h is True for h in hs) else
                     ". anatomy-35 stays rewritten (P8b/P8c do not hold on both cards)" if any(h is False for h in hs)
                     else ". anatomy-35 undecided")
+        ha = {c: [per[c]["tests"][k]["holds"] for k in ("P8b_open_frac_diff", "P8c_nonopen_resid")] for c in ALL}
+        bad = [short(c) for c, v in ha.items() if any(h is False for h in v)]
+        ac_reading += (". anatomy-35's P8b and P8c hold on every card" if all(h is True for v in ha.values() for h in v)
+                       else f". anatomy-35's P8b/P8c fail on {', '.join(bad)}" if bad
+                       else ". anatomy-35's P8b/P8c undecided on some card")
     if item == "MEM-P5":
-        na = [SHORT[c] for c in CARDS if per[c]["tests"]["P5_locked_slow_frac"].get("reported_not_tested")]
+        na = [short(c) for c in CARDS if per[c]["tests"]["P5_locked_slow_frac"].get("reported_not_tested")]
         if na:
             reading += f". Locked-loop slow fraction reported, not tested, for passes on {', '.join(na)} (loop period)"
-    return {"item": item, "claims": claims, "per_card": per, "outcome": oc, "reading": reading}
+        na = [short(c) for c in ALL if per[c]["tests"]["P5_locked_slow_frac"].get("reported_not_tested")]
+        if na:
+            ac_reading += (f". Locked-loop slow fraction reported, not tested, for passes on {', '.join(na)} "
+                           "(loop period)")
+    ac["reading"] = ac_reading
+    return {"item": item, "claims": claims, "per_card": per, "outcome": oc, "reading": reading, "all_cards": ac}
 
 
 # ---------------------------------------------------------------- the counter window
@@ -308,7 +369,7 @@ def timer_items(timers):
     """timers[card] = [(k, {prog: readout})]."""
     res = {}
     per1, per2, per3 = {}, {}, {}
-    for card in CARDS:
+    for card in ALL:
         rows = timers[card]
         launches = [(k, name, r) for k, t in rows for name, r in t.items() if r is not None]
         exc = [f"p{k}/{name}: {r['r1_why']}" for k, name, r in launches if not r["r1_ok"]]
@@ -324,9 +385,13 @@ def timer_items(timers):
                       "common_e": memv3._rng(inter) if inter is not None else None, "varies": varies}
         if card == "aifoundry2":
             per2[card]["holds"] = (True if varies else False) if n >= 3 else None
-        else:
+        elif card == "aifoundry3":
             per2[card]["holds"] = None
             per2[card]["note"] = "no prior: reported per readout"
+        else:
+            per2[card]["holds"] = None
+            per2[card]["note"] = ("reported per readout, not tested: the registered count (>= 2 distinct e) is "
+                                  "aifoundry2's")
         gl = [(k, r) for k, name, r in launches if name == "t_glitch"]
         exc3 = [f"p{k}: e {r['e']}, {r['plus128'] + r['minus128']} of {r['intervals']} off by 128" for k, r in gl
                 if not r["r3_ok"]]
@@ -335,23 +400,30 @@ def timer_items(timers):
                                                              "minus_phase": r.get("minus_phase")} for k, r in gl},
                       "exceptions": exc3, "holds": (False if exc3 else True) if len(gl) >= 3 else None}
     # R1
+    r1 = lambda c: (f"{short(c)} {per1[c]['launches']} launches, "  # noqa: E731
+                    + (f"{len(per1[c]['exceptions'])} exceptions ({per1[c]['exceptions'][0]})" if per1[c]["exceptions"]
+                       else "no exception"))
     oc = outcome(per1["aifoundry2"]["holds"], per1["aifoundry3"]["holds"])
-    rd = "; ".join(f"{SHORT[c]} {per1[c]['launches']} launches, "
-                   + (f"{len(per1[c]['exceptions'])} exceptions ({per1[c]['exceptions'][0]})" if per1[c]["exceptions"]
-                      else "no exception") for c in CARDS)
-    res["MEM-R1"] = {"per_card": per1, "outcome": oc, "reading": f"{oc}: {rd}"}
+    rd = "; ".join(r1(c) for c in CARDS)
+    ac = all_cards(per1)
+    ac["reading"] = f"{ac['outcome']}: " + "; ".join(phrase_all(c, r1(c)) for c in ALL)
+    res["MEM-R1"] = {"per_card": per1, "outcome": oc, "reading": f"{oc}: {rd}", "all_cards": ac}
     # R2
     h2 = per2["aifoundry2"]["holds"]
     oc = "PASS" if h2 is True else "FAIL" if h2 is False else "INSUFFICIENT"
     const_both = all(per2[c]["n"] >= 3 and not per2[c]["varies"] for c in CARDS)
     anyvar = any(per2[c]["n"] >= 3 and per2[c]["varies"] for c in CARDS)
-    rng = set()   # the readouts that pin e to one value (t_glitch always; t_rawodd when it reached 10 and 11)
-    for c in CARDS:
-        for _, t in timers[c]:
-            for r in t.values():
-                if r and r.get("readout_set") is not None and len(r["readout_set"]) == 1:
-                    rng.add(r["readout_set"][0])
-    rng = sorted(rng)
+
+    # the readouts that pin e to one value (t_glitch always; t_rawodd when it reached 10 and 11)
+    def single_valued(cards):
+        rng = set()
+        for c in cards:
+            for _, t in timers[c]:
+                for r in t.values():
+                    if r and r.get("readout_set") is not None and len(r["readout_set"]) == 1:
+                        rng.add(r["readout_set"][0])
+        return sorted(rng)
+    rng = single_valued(CARDS)
     if const_both:
         page = (f"low 7 bits 0-{per2['aifoundry2']['common_e']} (a2) / 0-{per2['aifoundry3']['common_e']} (a3) read "
                 "128 short (both cards)")
@@ -360,24 +432,49 @@ def timer_items(timers):
                 + (f" (single-valued readouts seen: e = {', '.join(map(str, rng))})" if rng else ""))
     else:
         page = "undecided (fewer than 3 kept passes on a card)"
+    # the same page rule over every card of the campaign (reported; the registered outcome is aifoundry2's count)
+    const_all = all(per2[c]["n"] >= 3 and not per2[c]["varies"] for c in ALL)
+    anyvar_all = any(per2[c]["n"] >= 3 and per2[c]["varies"] for c in ALL)
+    rng_all = single_valued(ALL)
+    if const_all:
+        page_all = ("low 7 bits " + " / ".join(f"0-{per2[c]['common_e']} ({short(c)})" for c in ALL)
+                    + " read 128 short (every card)")
+    elif anyvar_all:
+        page_all = ("the window is 10-12 cycles and changes between launches; check corrected intervals for +-128 "
+                    "outliers"
+                    + (f" (single-valued readouts seen: e = {', '.join(map(str, rng_all))})" if rng_all else "")
+                    + f" (varies on {', '.join(short(c) for c in ALL if per2[c]['n'] >= 3 and per2[c]['varies'])})")
+    else:
+        page_all = "undecided (fewer than 3 kept passes on a card)"
+    ac = all_cards(per2, tested=["aifoundry2"])
+    ac["page"] = page_all
+    ac["reading"] = (f"{ac['outcome']} (tested on a2 only, as registered): "
+                     + "; ".join(phrase_all(c, f"{short(c)} e {'varies' if per2[c]['varies'] else 'constant'} "
+                                               f"(common e {per2[c]['common_e']}, {per2[c]['n']} kept passes)")
+                                 for c in ALL) + f". Page (every card): {page_all}")
     res["MEM-R2"] = {"per_card": per2, "outcome": oc, "page": page,
                      "reading": f"{oc}: a2 e {'varies' if per2['aifoundry2']['varies'] else 'constant'} "
                                 f"(common e {per2['aifoundry2']['common_e']}, {per2['aifoundry2']['informative_readouts']}"
                                 f" readouts); a3 e {'varies' if per2['aifoundry3']['varies'] else 'constant'} "
-                                f"(common e {per2['aifoundry3']['common_e']}). Page: {page}"}
+                                f"(common e {per2['aifoundry3']['common_e']}). Page: {page}", "all_cards": ac}
     # R3
+    r3 = lambda c: f"{short(c)} " + ", ".join(  # noqa: E731
+        f"{p} e={v['e']} {fmt(100 * v['off128_frac'], 2) if v['off128_frac'] is not None else '-'}%"
+        for p, v in per3[c]["launches"].items())
     oc = outcome(per3["aifoundry2"]["holds"], per3["aifoundry3"]["holds"])
-    rd = "; ".join(f"{SHORT[c]} " + ", ".join(f"{p} e={v['e']} {fmt(100 * v['off128_frac'], 2) if v['off128_frac'] is not None else '-'}%"
-                                              for p, v in per3[c]["launches"].items()) for c in CARDS)
-    res["MEM-R3"] = {"per_card": per3, "outcome": oc, "reading": f"{oc}: {rd}"}
+    rd = "; ".join(r3(c) for c in CARDS)
+    ac = all_cards(per3)
+    ac["reading"] = f"{ac['outcome']}: " + "; ".join(phrase_all(c, r3(c)) for c in ALL)
+    res["MEM-R3"] = {"per_card": per3, "outcome": oc, "reading": f"{oc}: {rd}", "all_cards": ac}
     return res
 
 
 # ---------------------------------------------------------------- the wake-up probe
-def wake_item(wakes):
-    """wakes[card] = [(k, wake_values, status)] of the kept wake-up passes, in pass order."""
+def wake_item(wakes, idle):
+    """wakes[card] = [(k, wake_values, status)] of the kept wake-up passes, in pass order; idle = idle_summary()."""
     per = {}
-    for card in CARDS:
+    for card in ALL:
+        rule = memv3.clock_rule(card)
         rows = [(k, w, s) for k, w, s in wakes[card] if w.get("evaluable")]
         used = rows[:3]
         p5 = [w["P5"]["holds"] for _, w, _ in used]
@@ -400,28 +497,94 @@ def wake_item(wakes):
                                "P4": w["P4"]["holds"], "P4_slow_frac": w["P4"]["slow_frac"],
                                "P5": w["P5"]["holds"], "P5_lines_ge5": w["P5"]["lines_ge5_by_level"],
                                "P6_clock": {"pre": s["pre"]["mhz_minion"], "post": s["post"]["mhz_minion"]},
+                               "P6_probe_mhz_eff": s.get("probe_mhz_eff"),
                                "l1_raw": w["l1_raw_median"], "shift_to_22sep_frame": w["shift_to_22sep_frame"]}
-        p6 = all(s["pre"]["all600"] and s["post"]["all600"] for _, _, s in used) if used else None
+        if rule == "busy":
+            # the probe's own clock (cycles / wall time); its pre/post samples are idle brackets, reported in P6_clock
+            lo, hi = memv3.F_EFF_BAND
+            fs = [s.get("probe_mhz_eff") for _, _, s in used]
+            p6 = all(f is not None and lo <= f <= hi for f in fs) if used else None
+            basis = f"the probe's own clock (cycles / wall time) in {lo:g}-{hi:g} MHz"
+        else:
+            p6 = all(s["pre"]["all600"] and s["post"]["all600"] for _, _, s in used) if used else None
+            basis = "pre/post samples all 600 MHz"
         per[card] = {"n": len(used), "kept_probes": [f"p{k}" for k, _, _ in rows], "passes": passes,
                      "P4_same_class_pooled": agree, "P4_same_class_holds": (agree >= 0.80) if agree is not None else None,
-                     "P6_600MHz": p6, "decision": verdict, "holds": holds}
+                     "P6_600MHz": p6, "P6_basis": basis, "clock_rule": rule, "decision": verdict, "holds": holds}
     oc = outcome(per["aifoundry2"]["holds"], per["aifoundry3"]["holds"])
 
     def sub(c):
         pc = per[c]
         if not pc["passes"]:
-            return f"{SHORT[c]}: no kept probe"
+            return f"{short(c)}: no kept probe"
         n = len(pc["passes"])
         cnt = lambda key: sum(1 for v in pc["passes"].values() if v[key] is True)  # noqa: E731
-        s = (f"{SHORT[c]}: {pc['decision']}; P1 {cnt('P1')}/{n}, P2 {cnt('P2')}/{n}, P3a {cnt('P3a')}/{n}, "
+        s = (f"{short(c)}: {pc['decision']}; P1 {cnt('P1')}/{n}, P2 {cnt('P2')}/{n}, P3a {cnt('P3a')}/{n}, "
              f"P3b {cnt('P3b_settling')}/{n}, P4 {cnt('P4')}/{n}, same class at 1,000 and 16M "
              f"{fmt(pc['P4_same_class_pooled'], 2)}{'' if pc['P4_same_class_holds'] is not False else ' (< 0.80)'}")
         if cnt("P3b_settling") < n:
             s += " (P3b failing drops only the settling explanation, dvfs-14)"
         if c == "aifoundry3" and pc["P6_600MHz"] is False:
             s += ", P6 fails: pre/post clock not 600 MHz"
+        if pc["clock_rule"] == "busy":
+            fs = [v["P6_probe_mhz_eff"] for v in pc["passes"].values() if v["P6_probe_mhz_eff"] is not None]
+            s += (f", probe clock {fmt(min(fs), 4)}-{fmt(max(fs), 4)} MHz" if fs else ", probe clock not recorded")
         return s
-    return {"per_card": per, "outcome": oc, "reading": f"{oc}: " + "; ".join(sub(c) for c in CARDS)}
+    ac = all_cards(per)
+    note = idle_note(idle)
+    ac["reading"] = (f"{ac['outcome']}: " + "; ".join(phrase_all(c, sub(c)) for c in ALL) + f". {note}")
+    ac["idle_clock"] = idle
+    return {"per_card": per, "outcome": oc, "reading": f"{oc}: " + "; ".join(sub(c) for c in CARDS), "all_cards": ac,
+            "idle_clock_note": note}
+
+
+# ---------------------------------------------------------------- the idle clock (between kernels)
+def idle_summary(idle_rows):
+    """idle_rows[card] = [pass_status of every block-ok pass]: the clock the card reads between kernels (the X1
+    sampler's readings outside kernel windows, the probe's pre/post samples) and, on busy-rule cards, the idle state
+    `ettelem config` reports at the start and end of a pass."""
+    out = {}
+    for card in ALL:
+        x1, br, ps, cm = {}, {}, {}, {}
+        for s in idle_rows.get(card, []):
+            for k, v in ((s.get("clock_split") or {}).get("idle") or {}).get("mhz_minion", {}).items():
+                x1[k] = x1.get(k, 0) + v
+            w = s.get("wake") or {}
+            for side in ("pre", "post"):
+                for k, v in ((w.get(side) or {}).get("mhz_minion") or {}).items():
+                    br[k] = br.get(k, 0) + v
+            for r in s.get("idle_state") or []:
+                if r.get("power_state_name"):
+                    ps[r["power_state_name"]] = ps.get(r["power_state_name"], 0) + 1
+                if r.get("minion_mhz") is not None:
+                    cm[str(r["minion_mhz"])] = cm.get(str(r["minion_mhz"]), 0) + 1
+        tot = {}
+        for d in (x1, br, cm):
+            for k, v in d.items():
+                tot[k] = tot.get(k, 0) + v
+        modal = max(tot, key=lambda k: (tot[k], k)) if tot else None
+        # the card idles off 600 MHz if most of its idle readings are, or if `ettelem config` (read with no kernel and
+        # no sampler, before the heat) ever found it off 600 (aifoundry1-c0's low_power state), even when the heated
+        # card then stayed at 600 between kernels
+        out[card] = {"passes": len(idle_rows.get(card, [])), "modal_mhz": modal, "x1_between_kernels_mhz": x1,
+                     "probe_brackets_mhz": br, "config_power_state": ps, "config_minion_mhz": cm,
+                     "differs_from_600": (modal is not None and modal != "600") or any(k != "600" for k in cm)}
+    return out
+
+
+def idle_note(idle):
+    def one(c):
+        v = idle[c]
+        if v["modal_mhz"] is None:
+            return f"{short(c)} -"
+        cfg = [f"{k} MHz x{n}" for k, n in sorted(v["config_minion_mhz"].items())]
+        cfg += [f"{k} x{n}" for k, n in sorted(v["config_power_state"].items())]
+        return f"{short(c)} {v['modal_mhz']} MHz" + (f" (ettelem config: {', '.join(cfg)})" if cfg else "")
+    diff = [short(c) for c in ALL if idle[c]["differs_from_600"]]
+    return ("Idle clock between kernels: " + ", ".join(one(c) for c in ALL)
+            + (f"; {', '.join(diff)} idle(s) off 600 MHz (another idle state)" if diff else "")
+            + ". The probe's idle delays spin inside one kernel, so a card's between-kernel idle state is not what P5 "
+              "tests.")
 
 
 # ---------------------------------------------------------------- main
@@ -439,19 +602,33 @@ def load_plan():
         return None
 
 
+def discover(data):
+    """The cards: the four of the campaign (aifoundry2, aifoundry3 first), then any other folder with a mem/ inside."""
+    present = set()
+    if os.path.isdir(data):
+        present = {n for n in os.listdir(data) if os.path.isdir(os.path.join(data, n, "mem"))}
+    return list(memv3.EXPECTED) + sorted(present - set(memv3.EXPECTED)), present
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--data", required=True, help="folder with aifoundry2/ and aifoundry3/ laid out like DATA_ROOT")
+    ap.add_argument("--data", required=True, help="folder with one folder per card (aifoundry2/, aifoundry3/, "
+                                                  "aifoundry1-c0/, aifoundry1-c1/) laid out like DATA_ROOT")
     ap.add_argument("--out", required=True, help="verdicts.json")
     ap.add_argument("--tmp", default=None, help="scratch folder for staged copies (default: the system temp dir)")
     a = ap.parse_args()
+    cards, present = discover(a.data)
+    ALL[:] = cards
+    PRESENT.clear()
+    PRESENT.update(present)
     plan = load_plan()
-    passes_log = {c: [] for c in CARDS}
-    kept = {c: [] for c in CARDS}
-    timers = {c: [] for c in CARDS}
-    wakes = {c: [] for c in CARDS}
+    passes_log = {c: [] for c in ALL}
+    kept = {c: [] for c in ALL}
+    timers = {c: [] for c in ALL}
+    wakes = {c: [] for c in ALL}
+    idle_rows = {c: [] for c in ALL}
     errors = []
-    for card in CARDS:
+    for card in ALL:
         root = os.path.join(a.data, card, "mem")
         for k, d in memv3.pass_dirs(root):
             for base in sorted({l.get("arena_base") for l in memv3.memprobe_lines(d) if l.get("arena_base")}):
@@ -465,9 +642,17 @@ def main():
                 entry["used"] = "no (block not ok)"
                 continue
             s = memv3.pass_status(d, card)
+            idle_rows[card].append(s)
+            sp = s["clock_split"]
             entry.update({"x1_keep": s["x1_keep"], "x1_reason": s["x1_reason"], "telemetry": s["telemetry"],
+                          "clock_rule": s["clock_rule"],
+                          "clock_split": {"kernel_windows": sp["kernel_windows"], "busy": sp["busy"]["mhz_minion"],
+                                          "idle": sp["idle"]["mhz_minion"], "unplaced": sp["unplaced"],
+                                          "x1_launch_mhz_eff": sp["x1_launch_mhz_eff"]},
+                          "idle_state": s["idle_state"],
                           "arena_bases": s["arena_bases"], "req_complete": s["req_complete"],
-                          "wake": s["wake"] and {x: s["wake"][x] for x in ("complete", "keep", "reason")}})
+                          "wake": s["wake"] and {x: s["wake"][x] for x in ("complete", "keep", "reason", "rule",
+                                                                         "probe_mhz_eff")}})
             if s["x1_keep"] and len(kept[card]) >= memv3.X1_TARGET:
                 entry["used"] = f"no: the card already has {memv3.X1_TARGET} kept passes (the first ones are used)"
             elif s["x1_keep"]:
@@ -484,8 +669,9 @@ def main():
                     wakes[card].append((k, memv3.wake_values(os.path.join(d, "wake")), s["wake"]))
                 except Exception as e:  # noqa: BLE001
                     errors.append(f"{card} p{k}: wake-up reduction failed: {e!r}")
+    idle = idle_summary(idle_rows)
     ti = timer_items(timers)
-    wi = wake_item(wakes)
+    wi = wake_item(wakes, idle)
     out = []
     for item, claims, keys in ITEMS:
         if keys is not None:
@@ -509,11 +695,14 @@ def main():
     side = os.path.splitext(a.out)[0] + ".passes.json"
     with open(side, "w") as f:
         json.dump(_clean({"generated": datetime.datetime.now().isoformat(timespec="seconds"), "data": os.path.abspath(a.data),
-                          "passes": passes_log, "errors": errors,
+                          "cards": ALL, "present": sorted(PRESENT),
+                          "clock_rule": {c: memv3.clock_rule(c) for c in ALL},
+                          "passes": passes_log, "errors": errors, "idle_clock": idle,
                           "kept": {c: {"x1": [f"p{k}" for k, _ in kept[c]], "wake": [f"p{k}" for k, _, _ in wakes[c]]}
-                                   for c in CARDS}}), f, indent=1, default=str)
+                                   for c in ALL}}), f, indent=1, default=str)
     for r in out:
         print(f"{r['item']:8s} {r['outcome']:14s} {r['reading'][:220]}")
+        print(f"{'':8s} all cards: {r['all_cards']['outcome']:14s} {r['all_cards']['reading'][:260]}")
     for e in errors:
         print("ERROR", e, file=sys.stderr)
 

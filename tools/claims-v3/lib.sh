@@ -14,8 +14,21 @@ set -u
 V3_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 cd "$V3_ROOT"
 export LD_LIBRARY_PATH=/opt/et/lib
-CARD=$(hostname)                      # aifoundry2 | aifoundry3
-case "$CARD" in aifoundry2|aifoundry3) ;; *) echo "unknown host $CARD" >&2; exit 2 ;; esac
+# aifoundry3 has no system numpy: a user-level virtual environment in the tree (numpy 1.26.4, as on aifoundry2);
+# aifoundry1 has no venv module either: the same numpy unpacked in pylib/
+[ -x "$V3_ROOT/.venv/bin/python3" ] && export PATH="$V3_ROOT/.venv/bin:$PATH"
+[ -d "$V3_ROOT/pylib/numpy" ] && export PYTHONPATH="$V3_ROOT/pylib${PYTHONPATH:+:$PYTHONPATH}"
+CARD=$(hostname)                      # aifoundry2 | aifoundry3 | aifoundry1-c0 | aifoundry1-c1
+# A host with several cards (aifoundry1 has two): V3_DEVICE=<n> selects card n. The host's deviceLayer honours
+# ET_DEVICES (it then opens only that card, which the program sees as device 0), so every tool, the sampler included,
+# works on the selected card; the card is named <host>-c<n> and has its own data directory.
+if [ -n "${V3_DEVICE:-}" ]; then export ET_DEVICES=$V3_DEVICE; CARD="$CARD-c$V3_DEVICE"; fi
+case "$CARD" in aifoundry2|aifoundry3|aifoundry1-c0|aifoundry1-c1) ;;
+  aifoundry1) echo "aifoundry1 has two cards: set V3_DEVICE=0 or 1" >&2; exit 2 ;;
+  *) echo "unknown card $CARD" >&2; exit 2 ;; esac
+# Cards whose governor is free to move the clock (it lifts it off 600 MHz on a cool die): heat before power work and
+# drop anything off 600 MHz. aifoundry3 is pinned at 600 MHz by a boot-time service (et-board-clock-guard).
+case "$CARD" in aifoundry3) GOV_FREE= ;; *) GOV_FREE=1 ;; esac
 ETTELEM=build/ettelem/ettelem
 DEVMNGT=/opt/et/bin/dev_mngt_service
 # Binaries: the same sources built on each host against its own /opt/et.
@@ -24,7 +37,7 @@ if [ "$CARD" = aifoundry2 ]; then
   MMBENCH_DIR=$HOME/nekko                         # gp-sdk tree (deploy-lab-gpsdk.sh), outside this repository
   HEATER=build/sparsity_t2/host/sparsity_host
 else
-  MEMPROBE=build/memprobe/host/memprobe_host
+  MEMPROBE=build/memprobe/host/memprobe_host      # aifoundry3 and aifoundry1 (~/nekko trees)
   MMBENCH_DIR=$HOME/nekko
   HEATER=build/sparsity/host/sparsity_host
 fi
@@ -43,16 +56,28 @@ now_ms() { date +%s%3N; }
 # Device processes are recognised by executable name (ps comm, 15 characters), never by command line, so a shell
 # whose command text mentions a host binary does not count.
 DEV_COMM='_host$|^ettelem$|^dev_mngt_servi|^et-powertop$|^mmbench_launch|^sys_emu$'
+# Other users' work also includes a running CI job (aifoundry1's GitHub Actions runner runs benchmarks as root).
+OTHER_COMM="$DEV_COMM|^Runner.Worker$"
 # Another user logged in, or a device process of another user running: the block must not start.
 others_present() {
   local users procs
   users=$(who | awk '{print $1}' | sort -u | grep -vx "$USER" | tr '\n' ' ' || true)
-  procs=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 != me && $3 ~ re {print $1":"$2":"$3}' | tr '\n' ' ')
+  procs=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$OTHER_COMM" '$1 != me && $3 ~ re {print $1":"$2":"$3}' | tr '\n' ' ')
   if [ -n "${users// /}${procs// /}" ]; then log "others present: users=[$users] procs=[$procs]"; return 0; fi
   return 1
 }
 # Our own device processes still running (a previous block that did not clean up).
-ours_running() { ps -eo uid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 == me && $2 ~ re {f=1} END {exit !f}'; }
+# With V3_DEVICE set, only our processes on the same card count (or with no ET_DEVICES, which open every card), so
+# the two cards of one host can each run their own queue.
+ours_running() {
+  local pid e
+  for pid in $(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 == me && $3 ~ re {print $2}'); do
+    [ -z "${V3_DEVICE:-}" ] && return 0
+    e=$(tr '\0' '\n' < /proc/$pid/environ 2>/dev/null | grep '^ET_DEVICES=' || true)
+    if [ -z "$e" ] || [ "$e" = "ET_DEVICES=$V3_DEVICE" ]; then return 0; fi
+  done
+  return 1
+}
 wait_free() {  # wait (up to $1 s, default 3600) until no other user and none of our device processes run
   local lim=${1:-3600} t=0
   while others_present || ours_running; do sleep 30; t=$((t + 30)); [ $t -ge "$lim" ] && return 1; done
@@ -71,7 +96,7 @@ clock_mhz() { timeout 20 "$ETTELEM" sample --seconds 1 --every-ms 500 2>/dev/nul
 # aifoundry2 only: heat the die to >= $1 C (default 76) with 2 s random-fp32 matmul launches; records the curve.
 heat_to() {
   local target=${1:-76} out=${2:-/dev/null} t i
-  [ "$CARD" = aifoundry2 ] || return 0
+  [ -n "$GOV_FREE" ] || return 0
   local empty=0
   for i in $(seq 1 150); do
     t=$(die_c); echo "{\"t_ms\":$(now_ms),\"die_c\":${t:-0}}" >> "$out"
@@ -88,7 +113,23 @@ heat_to() {
   log "heat_to $target: gave up at ${t:-?} C"; return 1
 }
 
-drain_mgmt() { timeout 20 "$DEVMNGT" -m DM_CMD_GET_MODULE_POWER -n 0 -u 5000 > /dev/null 2>&1 || true; }
+# Drain a stale reply from the management queue (a sampler killed mid-request leaves one). /opt/et/bin/dev_mngt_service
+# opens EVERY card's management node whatever -n says (it is the stock build, without ET_DEVICES), so on a host with
+# several cards it runs only while no other card's block holds that card's lock; otherwise the drain is deferred.
+drain_mgmt() {
+  if [ -n "${V3_DEVICE:-}" ]; then
+    local lk
+    for lk in /run/lock/etsoc-shire*.lock; do
+      [ "$lk" = "/run/lock/etsoc-shire$V3_DEVICE.lock" ] && continue
+      exec 8<>"$lk"
+      if ! flock -n 8; then exec 8>&-; log "drain deferred: another card's block holds $lk"; return 0; fi
+    done
+    timeout 20 "$DEVMNGT" -m DM_CMD_GET_MODULE_POWER -n "$V3_DEVICE" -u 5000 > /dev/null 2>&1 || true
+    exec 8>&- 2>/dev/null
+    return 0
+  fi
+  timeout 20 "$DEVMNGT" -m DM_CMD_GET_MODULE_POWER -n 0 -u 5000 > /dev/null 2>&1 || true
+}
 
 # Start the 10 Hz sampler into $1 (JSON lines) for at most $2 s (extra ettelem args after); sets SAMPLER_PID.
 # Waits for its first line and retries (about one start in three fails right after a previous instance).
@@ -126,6 +167,11 @@ stop_sampler() {
 block_begin() {
   EXP=$1; PASS=$2; OUT=$DATA_ROOT/$EXP/p$PASS
   if [ -e "$OUT/block.json" ] && [ -z "${V3_FORCE:-}" ]; then log "$EXP p$PASS already done"; exit 0; fi
+  # the machine's advisory card lock (labfix, 25 Sep): CI jobs and other tools take it too; held until the block exits
+  local lk=/run/lock/etsoc-shire${V3_DEVICE:-0}.lock
+  if [ -e "$lk" ] && [ -z "${V3_DRY:-}" ]; then
+    exec 9<>"$lk"; flock -n 9 || { log "card lock $lk is held by another process: not starting"; exit 3; }
+  fi
   mkdir -p "$OUT"; BLOCK_T0=$(now_ms)
   BLOCK_C0=$(die_c)
   sha256sum tools/claims-v3/lib.sh tools/claims-v3/"$EXP"/* > "$OUT/code.sha256" 2>/dev/null || true

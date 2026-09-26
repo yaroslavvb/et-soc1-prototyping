@@ -1,42 +1,48 @@
 # V3-CAT: energy catalogue, a within-card temperature panel and the DRAM-row rows on aifoundry3
 
 PLAN3 section 2, "V3-CAT (SHOULD)" (merges energy-manual EXP-EM2; suggested experiment number E45). Items CAT-a,
-CAT-b, CAT-c, CAT-e, CAT-f; 14 claims. Files:
+CAT-b, CAT-c, CAT-e, CAT-f; 14 claims. Written for aifoundry2 and aifoundry3; since 25 Sep it runs on four cards
+(aifoundry2, aifoundry3, aifoundry1-c0, aifoundry1-c1: section "Four cards" below, and the amendment for V3-CAT in
+`docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md`). Files:
 
 | file | what |
 |---|---|
-| `block.sh` | one pass (one block) on the local card: `bash tools/claims-v3/cat/block.sh <pass> [--smoke]` |
+| `block.sh` | one pass (one block) on the local card: `[V3_DEVICE=<0\|1>] bash tools/claims-v3/cat/block.sh <pass> [--smoke]` |
 | `run_catalogue_t10.py` | the patched copy of `workloads/enercat/run_catalogue.py` (PLAN3 N6) that the block runs |
 | `catlib.py` | burst cutting (analyze_catalogue's `bursts_of`, unchanged), drop rules, statistics, the post-pass check |
 | `reduce.py` | the registered items: `reduce.py --data <dir> --out verdicts.json` |
 
 ## What a pass does
 
-The pass number fixes arm, condition and seed (the registered interleave: per card, arm A and arm B alternate):
+The pass number fixes arm, condition and seed (the registered interleave: per card, arm A and arm B alternate). A
+card's design follows lib.sh's `GOV_FREE`, never its name: governor-free cards (aifoundry2, aifoundry1-c0,
+aifoundry1-c1) run aifoundry2's registered design, the pinned card (aifoundry3) its own:
 
 | card | pass: arm-condition |
 |---|---|
-| aifoundry2 (11 blocks) | 1 A-W, 2 B, 3 A-H, 4 A-W, 5 B, 6 A-H, 7 A-W, 8 B, 9 A-H, 10 A-W, 11 A-H |
-| aifoundry3 (12 blocks) | 1 A-C, 2 B, 3 A-H, 4 B, 5 A-C, 6 B, 7 A-H, 8 B, 9 A-C, 10 B, 11 A-H, 12 B |
+| governor-free: aifoundry2, aifoundry1-c0, aifoundry1-c1 (11 blocks each) | 1 A-W, 2 B, 3 A-H, 4 A-W, 5 B, 6 A-H, 7 A-W, 8 B, 9 A-H, 10 A-W, 11 A-H |
+| pinned: aifoundry3 (12 blocks) | 1 A-C, 2 B, 3 A-H, 4 B, 5 A-C, 6 B, 7 A-H, 8 B, 9 A-C, 10 B, 11 A-H, 12 B |
 
 - **Arm A** (temperature panel): the 30 registered configurations (all >= 8 W over idle on both cards), `--passes 1
   --burst 3 --gap 4.5 --seed 20<k>`, k = the arm-A pass index (1-8 on aifoundry2, 1-6 on aifoundry3).
-  - W (aifoundry2, warm, no hold): wait (die_c every 20 s, no launch, at most 10 min) until the die reads <= 82 C, then
-    lib `heat_to 76`.
-  - H (hold hot): aifoundry2 `heat_to 76` (the binding rule), then on both cards a preheat to the hold temperature
+  - W (governor-free cards, warm, no hold): wait (die_c every 20 s, no launch, at most 10 min) until the die reads
+    <= 82 C, then lib `heat_to 76`.
+  - H (hold hot): governor-free cards `heat_to 76` (the binding rule), then on every card a preheat to the hold temperature
     (at most 40 heater launches, before the sampler starts), then `--hold-hot C`: before every configuration, up to 5
     heater launches until the running sampler's last minshire >= C, then 1.5 s of settling (`--heat-settle`) before the
-    prefill and the gap. C = 88 on aifoundry2; on aifoundry3 C = Tmax - 1,
+    prefill and the gap. C = 88 on the governor-free cards; on aifoundry3 C = Tmax - 1,
     Tmax = the highest minshire in V3-IDLE's telemetry (`$DATA_ROOT/idle/p<N>/telemetry.jsonl.gz`), frozen at the first
     hot pass in `$DATA_ROOT/cat/hold_c.json` so every hot pass holds the same temperature (`CAT_HOLD_C=<C>` overrides).
   - C (aifoundry3, cool): no hold, no heater.
 - **Arm B** (rows and bytes): `--only dramrow2,tload/dram,tstore/dram,l1fill/stride32,l1fill/stride64,tload/scp,fence,nop
-  --passes 1` = 23 configurations, run_catalogue's defaults `--burst 3 --gap 5`, `--seed 30<k>`; aifoundry2 `heat_to 76`
-  first; aifoundry3 nothing.
+  --passes 1` = 23 configurations, run_catalogue's defaults `--burst 3 --gap 5`, `--seed 30<k>`; governor-free cards
+  `heat_to 76` first; aifoundry3 nothing.
 
 Order inside a block: `others_present && exit 3`; preflight (files only: the enercat build has `--jump-every`, its
 compiled-in kernel ELF exists, the heater has `--per-shire`/`randn`, every `--only` prefix selects something, numpy);
-`block_begin cat <pass>`; the temperature step above (die_c and heater only now, the sampler is not running; the
+`block_begin cat <pass>`; `ettelem config` once (read-only: TDP, temperature threshold, power state, minion clock
+and voltage) into `config_start.json` and pass.json's `config_start`, the card's idle state before the block touches
+it; the temperature step above (die_c and heater only now, the sampler is not running; the
 wait-for-cool and preheat loops call lib's `others_present` before every die reading); `start_sampler telemetry.jsonl`
 (lib, 10 Hz, retry + drain); the runner (every device process `timeout 10`, stdin /dev/null; the heater hold reads the
 die from `telemetry.jsonl.raw`, which the running sampler writes, so nothing else opens the management node; before
@@ -45,9 +51,10 @@ has not grown for 6 s, i.e. the sampler is gone (exit 4)); `stop_sampler` (SIGTE
 (`catlib.py check`, off-card) writes `check.json`; gzip of telemetry/runs/marks; `block_end` (through `finish`, which
 gives block_end a die reading of `null` instead of an empty one, so block.json stays valid JSON).
 
-Block status: `ok`; `offclock` (aifoundry2 only: a burst's busy or idle-bracket samples left 600 MHz, or its implied
-clock did. R-clock says drop and re-run, so the queue treats the pass as not done and re-runs it the next time the
-schedule runs, moving this attempt aside to `p<N>.attempt-*`; if it is never re-run, reduce.py uses the pass with
+Block status: `ok`; `offclock` (governor-free cards only: on aifoundry2 a burst's busy or idle-bracket samples left
+600 MHz, or its implied clock did; on aifoundry1's cards its busy samples or its implied clock did. R-clock says drop
+and re-run, so the queue treats the pass as not done and re-runs it the next time the schedule runs, moving this
+attempt aside to `p<N>.attempt-*`; if it is never re-run, reduce.py uses the pass with
 those bursts dropped, as V3-CAT registered); `partial` (up to half the configurations printed no launch: reduce.py
 uses the rest; the queue re-runs it if the schedule runs again); `others` (another user or another user's device
 process appeared mid-block: the block stopped, exit 3, so the queue moves it aside and retries after 10 min; it never
@@ -57,8 +64,10 @@ earlier attempt is moved aside first, so runs.jsonl is never appended to.
 
 Files in `$DATA_ROOT/cat/p<N>/`: `runs.jsonl.gz` (one ENERCAT line per launch, as run_catalogue.py writes),
 `telemetry.jsonl.gz`, `marks.jsonl.gz` (heater and prefill intervals), `run.log`, `configs.json` (the exact argument
-lists run), `pass.json`, `preheat.jsonl` (die readings of the temperature step), `check.json`, `block.json`,
-`code.sha256`. About 0.1 MB per pass (gzipped).
+lists run, the card id, the hostname and ET_DEVICES), `pass.json` (with `gov_free`, `device`, `config_start`),
+`config_start.json`, `preheat.jsonl` (die readings of the temperature step), `check.json` (with the idle clock of
+every burst's brackets, `idle_states`, the lead's clock `lead_mhz` and voltage, and the settled idle board power per
+clock `idle_w_by_mhz`), `block.json`, `code.sha256`. About 0.1 MB per pass (gzipped).
 
 `--smoke` (exp name `cat-smoke`, about 40 s of card time, no heat_to): three configurations, one of each kind that
 can break (`fmul.ps/random` compute, `tload/scp/random` with its scratchpad prefill, `dramrow2/seq/random` with
@@ -67,20 +76,22 @@ can break (`fmul.ps/random` compute, `tload/scp/random` with its scratchpad pref
 gap) keeps the first burst after the heater clear of the heater guard below, so the smoke shows its bursts kept. It
 passes (exit 0) on ok or offclock and always re-runs (earlier smoke directories are moved aside).
 
-## Card minutes (estimates; the runner's own bound is in pass.json `max_s`)
+## Card minutes (the runner's own bound is in pass.json `max_s`: A 5.4 min, A-H 20.3, B 4.5)
 
-| pass | aifoundry2 | aifoundry3 |
-|---|---|---|
-| A-W / A-C | 5-8 (heat_to 0-3, wait for <= 82 C only if hotter, 4.5 run) | 4.5 |
-| A-H | 11-16 typical, bound ~26 (preheat <= 4, per-configuration hold <= 5.8 s wait + 5 x 4.5 s + 1.5 s settle) | 9-16, bound ~25 |
-| B | 4-7 (heat_to 0-3, 4 run) | 4 |
-| all passes | ~95 (plan: 81) | ~75 (plan: 78) |
-| smoke | < 1 | < 1 |
+| pass | aifoundry2 (measured 25 Sep, p1-p10) | aifoundry3 (estimate) | aifoundry1-c0 / -c1 (estimate) |
+|---|---|---|---|
+| A-W / A-C | 4.4-5.3 (heat_to included) | 4.5 | 5-9 (heat_to 76 from a 57-65 C idle: 1-4, 4.5 run) |
+| A-H | 5.5-10.2 | 9-16, bound ~25 | 8-16 (heat_to + preheat to 88: 2-6) |
+| B | 3.9 | 4 | 5-8 |
+| all passes | 52 for 10 blocks, ~57 for 11 (plan: 81) | ~75 (plan: 78) | ~70-110 per card (no plan: amendment) |
+| smoke | < 1 | < 1 | < 1 |
 
+Worst case of one block on a governor-free card: heat_to's 150 launches (~9 min) + preheat's 40 (~2.5 min) + the A-H
+runner bound (20.3 min) = ~32 min; a W block's 10 min wait for <= 82 C replaces heat_to (the die is then >= 76 C).
 Every block stays under the ~35 min limit. PLAN3 2.13: passes of one experiment >= 30 min apart with other experiments'
 blocks between; on aifoundry3 the first hot pass (pass 3) must come after V3-IDLE pass 1.
 
-## What is dropped and why (catlib.py; exactly the registered rules)
+## What is dropped and why (catlib.py; exactly the registered rules, plus the four-card amendment)
 
 - aifoundry2: a burst whose busy samples are not all at mhz.minion = 600 (`mhz_busy_all_600` false: V3-CAT's sampler
   line); or any of whose idle-bracket samples (the before and after windows bursts_of averages for it, cut exactly as
@@ -88,7 +99,18 @@ blocks between; on aifoundry3 the first hot pass (pass 3) must come after V3-IDL
   burst's over-idle power); or with a launch whose implied clock cycles_max / wall_s is outside 0.595-0.605 GHz
   (R-clock). In the committed 23 Sep data every sample is at 600 MHz and every launch lies in 0.598-0.600 GHz, so none
   of these fires there.
-- Both cards: a burst whose idle brackets (lo - 3.5 s .. hi + 5.5 s, the widest window analyze_catalogue uses) overlap a
+- aifoundry1-c0 and aifoundry1-c1 (governor-free; amendment): a burst whose busy samples are not all at 600 MHz, or
+  with a launch whose implied clock is outside 0.595-0.605 GHz; never on idle-bracket samples. Card 0 (firmware 1.4.1)
+  was read idle in its "low_power" state at 300 MHz / ~400 mV before any launch, and at 600 MHz (~26 W) after two
+  launches (25 Sep 16:40 test); where its brackets sit at 300 MHz the aifoundry2 rule would drop every burst. Its
+  first launch after the low-power idle drew no extra power and the clock reached 600 MHz only at its end, so a burst
+  that starts from that state is expected to be dropped by the busy-sample or implied-clock rule (the smoke on card 0
+  shows whether it is). Every burst records `idle_state`, the clock of its bracket samples ("600", "300", another
+  single value, or "mixed:a/b"), and `idle_minion_mv`; a bracket above 600 MHz on aifoundry1 (the governor's lift on a
+  cool die) is counted and reported, not dropped, although on aifoundry2 such a bracket is dropped (R-clock): an idle
+  5-9 W higher lowers that burst's over-idle power, and `idle_clock` shows how many such bursts a card kept.
+- aifoundry3: no clock rule (pinned at 600 MHz; as registered).
+- Every card: a burst whose idle brackets (lo - 3.5 s .. hi + 5.5 s, the widest window analyze_catalogue uses) overlap a
   heater launch padded -0.2 s before and +2.3 s after (2.3 s: the settling time analyze_catalogue itself leaves after a
   preceding burst before its idle window starts). This is a guard for the hold-hot design; the runner's `--hold-after
   5.8` and `--heat-settle 1.5` keep it from firing (the next burst's window starts >= 2.8 s after the heater).
@@ -141,6 +163,13 @@ blocks between; on aifoundry3 the first hot pass (pass 3) must come after V3-IDL
     stopped writing (exit 4: the bursts after it would be unmeasured). The wait-for-cool and preheat loops check
     `others_present` too. The sampler's own `--seconds` is the runner's bound + 300 s, a backstop only (stop_sampler
     ends it).
+14. **Card id** (four-card campaign): the runner takes `--card` (block.sh passes lib.sh's CARD) and writes it as each
+    runs.jsonl line's `host`, so analyze_catalogue.py, which groups bursts by `host`, keeps aifoundry1's two cards
+    apart; on aifoundry2 and aifoundry3 the card id is the hostname, as before. configs.json also records the hostname
+    and ET_DEVICES. The runner logs (does not hide) a failure of lib.sh inside its own others_present check.
+15. **Idle state record** (four-card campaign): one read-only `ettelem config` at the block's start
+    (`config_start.json`), before the temperature step, on every card; the per-burst bracket clock and the settled
+    idle power per clock come from the telemetry the block already records.
 
 ## How the registered decision rules become outcomes (reduce.py; no new thresholds)
 
@@ -174,15 +203,70 @@ blocks between; on aifoundry3 the first hot pass (pass 3) must come after V3-IDL
   ratio is in 0.65-0.85. Reported beside as registered "expected within noise": fence vs nop per card (Welch 99%). The
   stride-256 row (energy-manual-102) was dropped from arm B in the plan and is not measured, so that claim stays as it is.
 
+## Four cards (amendment, 25 Sep 2026, before any aifoundry1 data)
+
+aifoundry1 carries two cards, selected with `V3_DEVICE=0|1` (lib.sh exports `ET_DEVICES`, which the host's
+deviceLayer honours: the selected card is device 0 to every program, the sampler included); their ids are
+`aifoundry1-c0` and `aifoundry1-c1` and each has its own `DATA_ROOT` (`~/nekko/build/claims-v3/aifoundry1-c<n>`).
+block.sh exports `V3_DEVICE` so the runner's own `others_present` (which sources lib.sh again) works there too.
+
+- **Design**: both are governor-free (TDP 65 W, temperature threshold 65 C, as aifoundry2), so they run aifoundry2's
+  11-block table (W/H arm A, B arm B) with aifoundry2's values: warm passes start <= 82 C after `heat_to 76`, hot
+  passes hold 88 C (preheat <= 40 launches, per-configuration hold as on aifoundry2), arm B after `heat_to 76`,
+  heater `build/sparsity/host/sparsity_host` (lib.sh HEATER). Nothing known today says otherwise: both report the
+  same TDP (65 W) and temperature threshold (65 C) as aifoundry2, whose firmware (1.3.1) governor holds 600 MHz above
+  that threshold, which `heat_to 76` puts the die over; card 1 (1.2.0) stayed at 600 MHz under a launch at 57-62 C.
+  Three things are not known from source (the cards run releases 1.2.0 and 1.4.1, not 1.3.1) and are measured, not
+  assumed: whether each card keeps 600 MHz under load above 65 C (the busy-sample and implied-clock rules decide per
+  burst), when card 0 falls back to its 300 MHz low-power idle (recorded per burst), and how hot the cards get (the
+  reduction uses the measured busy die temperatures, so a hold that falls short shrinks dT, it does not bias beta).
+  The die reading is minshire[0]; card 0's 123 C peak-hold value (minshire[2]) is not used.
+- **Leakage correction**: analyze_catalogue.py's own (aifoundry2's idle law, A80 23.3 W, T_L 36 C) on every card, as
+  the 23 Sep catalogue applied it to aifoundry3; it corrects only the busy-minus-idle temperature difference.
+- **Drops**: busy samples and implied clock only (above). The idle-bracket clock is recorded per burst and reported.
+- **Idle state**: card 0 was read at 300 MHz / 398 mV (18.8 W board, "low_power") before any launch, and idled at
+  600 MHz / ~26 W after two launches in a 16:40 test (how long it stays there is not known); card 1 idles at 600 MHz /
+  499 mV (32.9-35 W). Which state card 0's brackets sit in during a pass is measured, not assumed. Where they sit at
+  300 MHz, a burst's energy over idle includes the step from the low-power idle to the 600 MHz operating point, not
+  only the work, and its catalogue values are not comparable with the other cards'. The step is a roughly constant
+  number of watts, so it adds a different pJ/B (or pJ/op) to configurations with different rates, and dilutes
+  CAT-a's hot/cool ratio. A tested card whose kept brackets in an item's passes are mostly (more than half) off
+  600 MHz is still tested as registered for CAT-a, CAT-c and CAT-f, but reduce.py lists it under
+  `all_cards.idle_caveat`, and its holds / fails is not read as evidence for or against the claim (the page says so;
+  the outcome is not changed). Every item carries `idle_clock` (per card: bracket states, the power state at each
+  block's start, the settled idle board power per clock) and the page must state it when a card's idle differs. At 600 MHz the three firmwares idle at different powers (1.4.1 ~26 W, 1.2.0 33-35 W,
+  1.3.1 ~32 W at 74 C); over-idle values subtract each card's own idle, so this does not enter them.
+- **Outcomes**: every item keeps its registered `outcome` from aifoundry2 and aifoundry3, computed exactly as before
+  (tested: identical output on the 23 Sep legacy data, the real 25 Sep aifoundry2 passes and every earlier synthetic
+  set). Each item adds `all_cards`: the item's per-card rule on every campaign card; PASS on every card, CARD-DIFFERENT
+  on some, FAIL on none, INSUFFICIENT when a card lacks 3 kept repeats or has no data (`with_data` then gives the
+  outcome over the cards that have them). CAT-a (per card, cool = W on a governor-free card), CAT-c (per card; the
+  bands, registered for aifoundry3, stay `band_ok` reports on every card) and CAT-f ("on each card") apply unchanged.
+  CAT-b's band is registered for the pair cool aifoundry3 / warm aifoundry2 and CAT-e's for aifoundry3 only: on
+  aifoundry1's cards they are REPORTED (CAT-b: each card's W passes against aifoundry2-W as a ratio with its 99%
+  interval; CAT-e: tstore - tload per card), not tested, and their `all_cards` outcome is the registered one.
+- **Repeats**: aifoundry2's design gives 3 arm-B passes, the minimum; one burst of a CAT-c/e/f configuration dropped
+  on a card leaves that card INSUFFICIENT until the pass is re-run (the queue re-runs an `offclock` pass when the
+  schedule is run again).
+- **Two cards in one chassis**: the two aifoundry1 queues may run at once (lib.sh's `ours_running` is per card), so
+  one card's heater can warm the other. Nothing is dropped for it: the die temperatures are measured per burst, and
+  CAT-a's dT uses them.
+
 ## How to reduce
 
-Collect both cards' `DATA_ROOT` into one directory laid out as `<dir>/aifoundry2/cat/p<N>/...` and
-`<dir>/aifoundry3/cat/p<N>/...` (e.g. `rsync -a aifoundry3:nekko/build/claims-v3/aifoundry3/cat <dir>/aifoundry3/`), then
+Collect every card's `DATA_ROOT` into one directory laid out as `<dir>/<card>/cat/p<N>/...` (e.g.
+`rsync -a aifoundry3:nekko/build/claims-v3/aifoundry3/cat <dir>/aifoundry3/`,
+`rsync -a aifoundry1:nekko/build/claims-v3/aifoundry1-c0/cat <dir>/aifoundry1-c0/`, the same for `-c1`), then
 
     python3 tools/claims-v3/cat/reduce.py --data <dir> --out verdicts.json [--committed none]
 
-It prints one line per item and writes `{"exp", "rules", "passes": {card: [...]}, "items": [{"item", "claims",
-"per_card", "test", "outcome", "reading", "committed_23sep"}]}` (a page builder that expects a bare list reads
-`.items`). It runs on partial data (one card, fewer passes: those items say INSUFFICIENT). Tested on the committed
-23 Sep raw data laid out as passes and on synthetic data with known effects (scratchpad `validate3/drv/cat/`:
-mk_legacy.py, mk_synth.py; the review's all-fail scenario and drop-rule mutations: mk_review.py, rev-*).
+It reads every `<card>/cat/` present, prints two lines per item (registered, all_cards; a third when a card's idle
+differs) and writes `{"exp", "cards", "rules", "passes": {card: [...]}, "items": [{"item", "claims", "per_card",
+"test", "outcome", "reading", "all_cards": {"outcome", "scope", "tested", "cards", "with_data", "reading",
+"idle_caveat"},
+"idle_clock", "committed_23sep"}]}` (a page builder that expects a bare list reads `.items`). It runs on partial data
+(one card, fewer passes: those items say INSUFFICIENT). Tested on the committed 23 Sep raw data laid out as passes and
+on synthetic data with known effects (scratchpad `validate3/drv/cat/`: mk_legacy.py, mk_synth.py; the review's
+all-fail scenario and drop-rule mutations: mk_review.py, rev-*), and on four-card synthetic data
+(`validate3/fourcards/cat/mk_synth4.py`: every item holding on all four cards; aifoundry1-c0 different; aifoundry1-c1
+missing; aifoundry1-c0 short of repeats; card 0's 300 MHz brackets kept, off-clock busy samples dropped).

@@ -6,10 +6,15 @@ TEL-P1..P7, TEL-S, TEL-Q, TEL-R and TEL-G.
 
 ```
 bash tools/claims-v3/tel/block.sh <pass>            # one pass on the local card (passes 1, 2, 3 on each card)
+V3_DEVICE=1 bash tools/claims-v3/tel/block.sh <pass>   # aifoundry1: V3_DEVICE=0 or 1 picks the card (lib.sh)
 bash tools/claims-v3/tel/block.sh 1 --smoke         # the pipeline check, about 55 s of card time; data in tel-smoke/p1
 V3_DRY=1 bash tools/claims-v3/tel/block.sh 1        # prints every device call, touches nothing
-python3 tools/claims-v3/tel/reduce.py --data <dir holding aifoundry2/ and aifoundry3/> --out verdicts.json
+python3 tools/claims-v3/tel/reduce.py --data <dir holding one directory per card> --out verdicts.json
 ```
+
+The campaign of 25 Sep runs on four cards: aifoundry2, aifoundry3, aifoundry1-c0 and aifoundry1-c1. What changes for
+aifoundry1's cards, in the block and in the reducer, is in "Four cards" below (amendment TEL-4C, written before any of
+their data).
 
 The files:
 
@@ -20,24 +25,34 @@ The files:
   in, or from `V3_REPO` when that is set.
 
 Schedule: three passes per card, at least 30 minutes apart, with other experiments' blocks in between. PLAN3 §2.13
-interleaves them as a2 p1, a3 p1, a2 p2, a3 p2, a2 p3, a3 p3. The schedule lines are `tel 1`, `tel 2` and `tel 3`.
+interleaves them as a2 p1, a3 p1, a2 p2, a3 p2, a2 p3, a3 p3. The schedule lines are `tel 1`, `tel 2` and `tel 3`, in
+every card's schedule (aifoundry1's two queues included: a TEL pass there takes the whole host, see "Four cards").
 The smoke directory is `tel-smoke`. Re-running a smoke check needs `V3_FORCE=1`, which replaces the old smoke data.
 On a full pass, `V3_FORCE=1` sets the old directory aside as `p<N>.attempt-<time>`. A leftover pass directory with no
 `block.json` is always set aside, so data from two runs never mix.
 
 ## What a pass does (in this order)
 
+0. **Idle clock** (every card). `ettelem config` (power state, minion MHz and mV) with no sampler running, into
+   `idle_clock.jsonl`, labelled `start` (as found: right after phase 1's `loglevel info`, before any heating, launch or
+   `sptrace`), `arms` (after heating, before the arms), `arms_end`, `reset` (before the reset segment), `debug` (before
+   the DEBUG block's `loglevel debug`) and `end`. None falls inside an arm, a quiet segment, the reset log or the DEBUG
+   block. The smoke check reads `start` and `debug` only.
 1. **Governor readouts** at INFO log level, with no sampler (EXP-dvfs-2). The block first sets `ettelem loglevel info`.
-   On aifoundry2 it runs `heat_to 76` first if the die is below 68 C. Then it runs `sptrace gov/sp0.bin`, `etcfg
-   /dev/et0_mgmt` into `gov/driver.json`, and five `sparsity_host --test fma --type fp32 --pattern none --values zeros
-   --shires 0xffffffff --per-shire 32 --seconds 2 --budget 5 --seed 1` launches 3 s apart. After those it runs
+   On a governor-free card (every card but aifoundry3) it runs `heat_to 76` first if the die is below 68 C. Then it runs
+   `sptrace gov/sp0.bin`, `etcfg /dev/et<n>_mgmt` into `gov/driver.json`, and five `sparsity_host --test fma --type
+   fp32 --pattern none --values zeros --shires 0xffffffff --per-shire 32 --seconds 2 --budget 5 --seed 1` launches 3 s
+   apart. After those it runs
    `sptrace gov/sp1.bin` (after the launches and before any config query), `ettelem config` and
-   `dev_mngt_service -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS`.
+   `dev_mngt_service -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS`. On aifoundry1 the firmware must be the card's own (1.4.1
+   on card 0, 1.2.0 on card 1), or the pass aborts before any SPST work: the check that `dev_mngt_service -n <n>`
+   reached this card.
 2. **The arms** (E-hub-1 and X4).
-   - On aifoundry2 the block first heats the die to at least 76 C.
+   - On a governor-free card the block first heats the die to at least 76 C.
    - It sends `SPST:enable` and takes an SPST extract, then waits 60 s in quiet (Q0).
-   - It then runs the seven arms Q, PWR, L10, E10, E20, E40 and VOLT, in the order `random.Random(card*100 +
-     pass).shuffle` gives. The order is logged in `arms_order.json`.
+   - It then runs the seven arms Q, PWR, L10, E10, E20, E40 and VOLT, in the order `random.Random(seed base*100 +
+     pass).shuffle` gives (seed base 2 for aifoundry2, 3 for aifoundry3, 10 and 11 for aifoundry1's cards 0 and 1). The
+     order is logged in `arms_order.json`.
      - Q: 60 s quiet.
      - PWR: one `DM_CMD_GET_MODULE_POWER` after another for 60 s, about one per 16 ms.
      - L10: one call per 0.1 s sleep, 450 calls.
@@ -46,13 +61,15 @@ On a full pass, `V3_FORCE=1` sets the old directory aside as `p<N>.attempt-<time
    - After each arm the block takes an SPST extract and waits 30 s in quiet (`G_<arm>`).
    - Before each arm, a wrap guard may add a quiet wait (`W_<arm>`), explained under Deviations.
 3. **Reset segment** (E-hub-1, P6 and P7).
-   - On aifoundry2 the block first reheats the die to 76 C.
+   - On a governor-free card the block first reheats the die to 76 C. On aifoundry1's cards, if the `reset` idle-clock
+     readout is off 600 MHz (card 0's 300 MHz low-power state), up to two 2 s heater launches wake the card first.
    - It starts `ettelem sample --every-ms 100 --reset-ms 1000`. Then come 5 s of idle and three `enercat_host --pattern
      fmadd_ps --operands random --harts 2 --seconds 3 --budget 8` bursts, 10 s apart.
-   - The sampler stops (SIGTERM) 12 s after the third burst.
+   - The sampler stops (SIGTERM) 12 s after the third burst (20 s on aifoundry1's cards, see "Four cards").
    - Then the block sends `SPST:enable` and takes an extract.
 4. **DEBUG block** (X2 and X3).
-   - On aifoundry2 `heat_to 76` runs first; it does nothing on a die that is still at 76 C.
+   - On a governor-free card `heat_to 76` runs first; it does nothing on a die that is still at 76 C. On aifoundry1's
+     cards the same wake as before the reset segment follows, after the `debug` readout.
    - The block sets `ettelem loglevel debug`, waits 2 s and runs `sptrace dbg/x2-idle.bin`.
    - Next comes a 7 s `--values randn` burst (seed = pass), with `sptrace dbg/x2-load.bin` taken 4 s after its
      launch. The block then waits 20 s and runs `sptrace dbg/x2-after.bin`.
@@ -75,15 +92,21 @@ restores the INFO log level.
 
 ## Card minutes per pass
 
-| | aifoundry2 | aifoundry3 |
-|---|---|---|
-| governor readouts | 0.6 (+ heating when the die is below 68 C) | 0.6 |
-| heat to 76 C before the arms, and reheats | 1-5 | 0 |
-| arms (Q0, 7 arms, 8 extracts, 7 x 30 s gaps) | 11.1-12.6 (the upper end when the wrap guard waits) | 11.1-12.6 |
-| reset segment | 0.9 | 0.9 |
-| DEBUG block | 3.1 | 3.1 |
-| **pass** | **about 17-23** | **about 16-17** |
-| **3 passes** | **about 52-69** (plan: 60) | **about 48-52** (plan: 48) |
+| | aifoundry2 | aifoundry3 | aifoundry1-c0, aifoundry1-c1 (each) |
+|---|---|---|---|
+| idle-clock readouts (6 x `ettelem config`) | 0.1 | 0.1 | 0.1 |
+| governor readouts | 0.6 (+ heating when the die is below 68 C) | 0.6 | 0.6 (+ heating) |
+| heat to 76 C before the arms, and reheats | 0-5 (0 on a die already at 76 C) | 0 | 1-5 (card 0 idled at 65 C, card 1 at 57 C) |
+| wake launches (only when idling off 600 MHz) | 0 | 0 | 0-0.2 |
+| arms (Q0, 7 arms, 8 extracts, 7 x 30 s gaps) | 11.1-12.6 (the upper end when the wrap guard waits) | 11.1-12.6 | 11.1-12.6 |
+| reset segment | 0.9 | 0.9 | 1.0 |
+| DEBUG block | 3.1 | 3.1 | 3.1 |
+| **pass** | **about 16-23** (25 Sep: 17.7, 15.4, 16.7) | **about 16-17** | **about 17-23** |
+| **3 passes** | **about 48-69** (25 Sep: 50) (plan: 60) | **about 48-52** (plan: 48) | **about 52-69** |
+
+On aifoundry1 a TEL pass also stops the other card's queue for its length (it takes the whole host, "Four cards"), and
+may first wait up to 45 min for the other card's running block: the six aifoundry1 passes cost the host about 1.7-2.3 h
+in which only one card works.
 
 The management node is held almost throughout. Launch time on the ops node is small: 5 x 2 s of zeros, 3 x 3 s of
 enercat, 4 x 7 s of randn, and the heater on aifoundry2.
@@ -98,7 +121,8 @@ is empty).
 
 - A pass whose `block.json` status is not `ok` is not used. The block aborts when a sampler cannot start, and exits 3
   when another user appears.
-- The aifoundry2 rule "anything with `mhz.minion != 600` is dropped" is applied like this:
+- The clock rule differs by card. aifoundry3 (pinned at 600 MHz) has none. aifoundry1's cards drop busy samples only
+  ("Four cards"). The aifoundry2 rule "anything with `mhz.minion != 600` is dropped" is applied like this:
   - An ettelem arm (E10, E20 or E40) with any sample off 600 MHz is dropped from every item that uses it: its
     SP-interval value (P3 and its E40 part) and its refresh fit (P_H from E10, P_H2 from E20, in TEL-S). The
     alignment still uses it, because it does not depend on the clock.
@@ -130,7 +154,7 @@ is empty).
      May 2024 build (`validate3/fw-may2024/performance.c` l.562) and in 353f20e.
    - So the first `--reset-ms` sample stops all SPST records until something re-enables the trace. That would include
      every later pass's P1-P5, and anyone else's extracts.
-   - The block therefore sends `dev_mngt_service -n 0 -t SPST:enable` in four places: after the reset segment, after
+   - The block therefore sends `dev_mngt_service -n <n> -t SPST:enable` in four places: after the reset segment, after
      the DEBUG block, in the EXIT trap, and at the start of the arms. The trap's re-enable is armed before each
      `--reset-ms` sampler starts, because `start_sampler`'s failed attempts reset the stats too. At the start of the arms it only restores the
      default if something left the trace off. It sends DM_CMD_SET_STATS_RUN_CONTROL with control 1: enable, no reset.
@@ -164,7 +188,8 @@ is empty).
    - The plan's order lists "60 s quiet, then the arms Q, PWR, ...". The block runs both: Q0 (60 s) and a shuffled Q
      arm (60 s).
    - The 30 s gaps and any wrap-guard waits are quiet too.
-   - The arm-order seed is `card*100 + pass` (201-203 and 301-303). The plan's "K" was not specified.
+   - The arm-order seed is `seed base*100 + pass` (201-203, 301-303, and 1001-1003 and 1101-1103 on aifoundry1's
+     cards). The plan's "K" was not specified.
 7. **Reset segment.** The sampler runs until 12 s after the third burst ends (at most 80 s), instead of a fixed 45 s.
    - With the plan's timing the third burst ends 36-39 s in. P6's "every 1 s window starting ≥ 8 s after the last
      burst" could then be empty.
@@ -175,7 +200,7 @@ is empty).
    command.
    - The "mem" capture of X2 is served by the X3 window-end captures, which come right after a sample.
    - A 2 s pause after `loglevel debug` lets the 8 KB ring fill with DEBUG-level passes before the idle capture.
-9. **aifoundry2 heating.**
+9. **Heating on governor-free cards** (aifoundry2, and aifoundry1's two cards with aifoundry2's values).
    - Phase 1 heats only when the die is below 68 C (EXP-dvfs-2's rule).
    - Before phase 2 the die is heated to 76 C (the plan), and again before phase 3 (the plan).
    - Before phase 4 there is one more `heat_to 76`. It is a no-op when the die is still warm. X2 and X3 want the load
@@ -183,8 +208,9 @@ is empty).
 10. **Defensive `ettelem loglevel info` at the start** of phase 1, in case an interrupted block left DEBUG on. INFO is
     the level the plan restores.
 11. **etcfg.** The block compiles `tools/etcfg/etcfg.c` once per host into `build/claims-v3-bin/etcfg`, outside the
-    data tree. It is called with `/dev/et0_mgmt` explicitly, because by default it also tries `/dev/et1_mgmt`. It runs
-    under `hold10`: it does open `/dev/et0_mgmt`, although its README says it does not.
+    data tree. It is called with the card's node explicitly (`/dev/et0_mgmt`, or `/dev/et<V3_DEVICE>_mgmt` on
+    aifoundry1), because by default it tries both. It runs under `hold10`: it does open the node, although its README
+    says it does not.
 12. **Launch result lines are tagged** (`G1..G5 SPARSITY`, `B1..B3 ENERCAT`, `X2` / `W1..W3 SPARSITY`) so the reducer
     knows which launch each line belongs to.
 13. **Binaries.** `build/sparsity/host/sparsity_host` is used for the zeros and randn launches on both hosts, as the
@@ -308,6 +334,111 @@ is empty).
 - CARD-DIFFERENT: the item holds on one of the two.
 - FAIL: otherwise.
 
+## Four cards (amendment TEL-4C, 25 Sep 2026, before any aifoundry1 data)
+
+The owner asked to re-run every measurement on every card after the day's machine fixes, so V3-TEL runs on
+aifoundry2, aifoundry3, aifoundry1-c0 and aifoundry1-c1. The registered items and rules name aifoundry2 and aifoundry3;
+this section fixes, before any aifoundry1 data, what the block does on aifoundry1's cards and how the reducer treats
+them. The amendment text for AMENDMENTS.md says the same in brief.
+
+**The cards.** aifoundry1's cards (lessons.md, queried 25 Sep): card 0 runs firmware 1.4.1, TDP 65 W, threshold
+65 C, and idles in a `low_power` state at 300 MHz / 398 mV (18.8 W board); card 1 runs firmware 1.2.0, TDP 65 W,
+threshold 65 C, `managed_power`, and idles at 600 MHz / 499 mV (32.9 W). aifoundry2 and aifoundry3 run 1.3.1. In a
+clock test later that day, card 0's first 2 s launch after a low-power idle drew no power until its end (the card
+reached 600 MHz only then); after that it stayed at 600 MHz, 26 W idle.
+
+**Per-card parameters in the block.** Both aifoundry1 cards are governor-free with aifoundry2's configuration (TDP
+65 W, threshold 65 C), so they take aifoundry2's values, except where the physics differs:
+
+| | aifoundry2 | aifoundry3 | aifoundry1-c0 | aifoundry1-c1 | why |
+|---|---|---|---|---|---|
+| heat before the arms, reset, DEBUG | 76 C | none | 76 C | 76 C | governor free, TDP 65 W, threshold 65 C |
+| governor readouts only on a die >= | 68 C | - | 68 C | 68 C | as aifoundry2 |
+| arm-order seed | 201-203 | 301-303 | 1001-1003 | 1101-1103 | one seed per card and pass |
+| `dev_mngt_service -n` | 0 | 0 | 0 | 1 | it ignores ET_DEVICES (below) |
+| etcfg node | /dev/et0_mgmt | /dev/et0_mgmt | /dev/et0_mgmt | /dev/et1_mgmt | etcfg opens a path |
+| firmware check before SPST work | - | - | 1.4.1 | 1.2.0 | proves `-n` reached this card |
+| reset log after the last burst | 12 s | 12 s | 20 s | 20 s | the idle state may change after a burst |
+| wake launch when idling off 600 MHz | no | no | yes | yes | card 0's first launch after low-power idle |
+
+aifoundry1-c1 showed no clock boost at 57-62 C in the 25 Sep clock test, so its heating may be unnecessary; it keeps
+aifoundry2's heating anyway, so that the governor-free cards are treated alike. These parameters are set in one `case`
+at the top of `block.sh` (with lib.sh's `GOV_FREE`), not by tests on the card name elsewhere.
+
+- **Taking the host.** The Jan 2026 `dev_mngt_service` in /opt/et/bin does not honour ET_DEVICES and opens every card's
+  management node, which the driver lets one process open at a time (EBUSY; `et-soc1-pcie.c`, `DevicePcie.cpp`
+  opens all `/dev/et<n>_mgmt`). A TEL pass makes about 5,000 such calls (PWR, L10, VOLT, SPST). With the other card's
+  queue running, each call would fail whenever that card's sampler holds its node, and each call would make that
+  card's sampler starts fail. So on aifoundry1 (V3_DEVICE set) the block, after its `others_present` and
+  `ours_running` (this card) checks and before `block_begin` touches the card:
+  1. takes `flock build/claims-v3/tel-host.lock` on fd 8 (lib.sh's `block_begin` puts the card lock on fd 9, which
+     would release a lock held there). One TEL pass per host; a TEL pass waiting there has not touched a card, so two
+     TEL passes never wait on each other;
+  2. waits (2 s polls) until no block of the other card is running: a `bash tools/claims-v3/<exp>/block.sh` process
+     with the other V3_DEVICE. No marker exists yet, because a running block that checks `ours_running` mid-pass
+     (rl's `between()`) would abandon its pass on seeing one;
+  3. at once (the other card's queue sleeps 20 s after a block) starts a marker process `tel_hold_host` without
+     ET_DEVICES in its environment. lib.sh's `ours_running` counts such a process on every card, so the other card's
+     queue starts no block while it lives; a block that started in the gap exits 3 at its own `ours_running` check.
+     The marker ends with the block, or within 2 s of the block dying;
+  4. waits until no block of the other card and none of our device processes on it are running.
+  Steps 2 and 4 share a 45 min limit. If the host does not come free, the block exits 3 and the queue retries it.
+  The block also redefines lib.sh's `drain_mgmt` to use `-n <card>` (lib.sh's addresses card 0).
+- **Wake.** Before the reset segment and before the DEBUG block, on aifoundry1's cards, the block reads the idle clock
+  and, if it is off 600 MHz, runs up to two 2 s heater launches (the heater's command) and reads it again
+  (`reset+wake1`, `debug+wake1` in `idle_clock.jsonl`). Heating usually wakes the card anyway; this covers a die
+  already at 76 C. The arms are not preceded by a wake: they measure the card's idle state as it is.
+- **The idle clock** is read on every card at six points (phase 0 above), so the reducer knows which idle state each
+  bracket was in without polling inside a measured segment. On aifoundry2 and aifoundry3 these six `ettelem config`
+  reads (about 0.1 s each, between segments) are the only change to the registered procedure: their `V3_DRY=1` device
+  calls are otherwise identical to those of the block that ran aifoundry2's passes 1-3 on 25 Sep (same commands, arm
+  orders and seeds). The `start` read comes before `sptrace gov/sp0.bin` and the five launches, so `sp1.bin` is still
+  taken after the launches and before phase 1's own `ettelem config`. No registered rule reads `idle_clock.jsonl`.
+
+**Clock rules in the reducer.** aifoundry2 keeps its registered rule (any sample off 600 MHz drops the arm, burst or
+window, idle arms included). aifoundry3 is pinned and has none. A new governor-free card (aifoundry1's two) drops for
+the clock only BUSY samples: a burst (reset segment, X3 load window) is dropped when a sample in [start + 500 ms, end]
+reads off 600 MHz. Its idle arms (E10, E20, E40), idle brackets and idle window are never dropped for their clock, so
+card 0's 300 MHz idle drops nothing. The 500 ms: the SP raises the clock after the minions start, and a 10 Hz sample
+taken in that interval still reads the idle state's 300 MHz. On synthetic data where card 0's first burst sample reads
+300 MHz, a rule without it drops all 9 bursts, and aifoundry2's rule drops them and every E arm
+(`validate3/fourcards/tel/a2rule_on_c0.py`). The X2 launch-clock check (0.59-0.61 GHz) is a busy measure and applies to
+aifoundry1's cards as to aifoundry2. Each burst row records its clock: the idle bracket's clock before it, the time
+to the first 600 MHz sample, the busy samples' clocks, and the time until the clock returned to the idle bracket's.
+
+**Items: tested on every card, or reported.**
+- Tested on all four cards, unchanged: TEL-P6, TEL-P7, TEL-S's decision (S3, P_H - P_L > 0), TEL-Q's Q1 (no `Temp`
+  lines, `MEM` lines only after a sample), Q2, Q4 and Q5 (minion "now"), and TEL-R's R1-R6.
+- Reported, not tested, on aifoundry1's cards (the registered band or value names aifoundry2 or aifoundry3 only):
+  TEL-P1-P4 (aifoundry2's SP-interval bands), TEL-P5 (aifoundry3's), TEL-G (per-card configuration, firmware 1.3.1),
+  the S1/S2 bands (reported against aifoundry2's), Q1's 34-line parse (aifoundry3), and Q5's SRAM gradient
+  (aifoundry2). Their per-pass figures are computed the same way and listed with the registered flags.
+- Physics fixed now for aifoundry1's cards:
+  - **P6 late windows** start 8 s after the last change of the idle clock that follows the last burst, when there is
+    one, instead of 8 s after the burst: the rail steps again when the card changes its idle state. The 20 s reset log
+    leaves room for that. A pass with no such window left cannot decide P6 and is not used, unless another part failed.
+  - **Q4 and R6** compare a load capture with the idle capture (`x2-idle`). On a pass whose DEBUG-block idle clock (the
+    last `debug` readout, after any wake) is off 600 MHz, the two are at different operating points (398 mV against
+    ~500 mV on card 0), so that pass's Q4 and R6 are reported, not tested. If no pass qualifies, the card's TEL-Q and
+    TEL-R are decided without Q4 (R6), which are then "not tested".
+  - **P7** stays as registered: f(1 s) against the idle before the burst. On a card whose idle before a burst is at
+    another operating point than after it, f(1 s) mixes the average's lag with the set-point step. The reading names
+    each card's idle clock, and each burst's clock record shows when that happened.
+
+**The outcomes.** `outcome` stays the registered one, computed from aifoundry2 and aifoundry3 exactly as before. The
+reducer gives identical registered outcomes and aifoundry2/aifoundry3 values on the eight earlier synthetic sets and
+the four four-card sets, with two or four cards expected (`validate3/fourcards/tel/regress.py`), and on the real
+aifoundry2 passes 1-3 of 25 Sep, alone and copied under all four card names (`validate3/fourcards/tel/rev2/cmp.py`).
+`all_cards` is the same test over every card the item tests: PASS if it holds on every card, CARD-DIFFERENT if on
+some, FAIL if on none, INSUFFICIENT if a tested card has fewer than 3 kept passes. An expected card with no data
+directory counts as that (`--expect` lists the expected cards, by default the four). For an item tested on one
+registered card only, `all_cards` covers that card and lists the reported ones. TEL-Q's `all_cards` also needs Q3 on
+every pair of cards (|r| < 0.45), and gives the offset sentence over every card. TEL-G's `all_cards` gives each card's
+firmware and applies the registered same-firmware rule, so it equals the registered outcome. The reducer reads every
+card directory under `--data`, and `per_card` holds all four. Items about energy over idle or an idle reference (P6,
+P7, Q, R) carry `idle_clock`, a line per card saying where its idle clock sat in the arms, the reset brackets and the
+DEBUG block. The top-level `idle_clock` has the per-pass detail.
+
 ## Tests done (off the card)
 
 Reviewer's tests (25 Sep), in `validate3/drv/tel/rev/`:
@@ -339,7 +470,55 @@ Reviewer's tests (25 Sep), in `validate3/drv/tel/rev/`:
   - f(1 s) on the catalogue's fmadd.ps random bursts comes out at 0.52-0.62 on aifoundry2 and 0.45-0.65 on
     aifoundry3.
 
+Four-card tests (25 Sep), in `validate3/fourcards/tel/`:
+- `V3_DRY=1` runs of passes 1-3 and the smoke check for all four card ids (hostname shims; aifoundry1 with V3_DEVICE=0
+  and 1), from the tree root with the block's absolute path: every run ends "ok dry run". Card 1 uses `-n 1` and
+  `/dev/et1_mgmt`, card 0 `-n 0`. The governor-free cards heat, aifoundry1's cards wake, and aifoundry2's and
+  aifoundry3's arm orders are unchanged. Logs in `drylogs/`, output in `dry/`.
+- `hosttest/`: take_host on fake processes. It waits for another card's block (bash <block.sh> <pass> with the other
+  V3_DEVICE) and not for a TEL block or a shell that only mentions one. A second TEL pass waits on the lock. The
+  marker has comm `tel_hold_host` and no ET_DEVICES, lib.sh's `ours_running` sees it from both cards, and it ends
+  when the block is killed.
+- `make_synth4.py` builds four-card synthetic passes. Card 0 idles at 300 MHz, its first burst sample reads 300 MHz,
+  it stays at 600 MHz for a while after a burst, and its idle voltage captures sit 120 mV low. Card 1 idles at
+  600 MHz. The cases and their `all_cards` outcomes:
+  - `good`: every item PASS, registered and all_cards. Card 0's bursts are kept, and its Q4 and R6 are "not tested".
+  - `c0woken`: card 0 is woken before the reset segment. Every item PASSes, with card 0's Q4 and R6 tested.
+  - `c0diff`: card 0's running average restarts at each reset, one of its peak-holds is not reset, and one burst has
+    a busy sample at 700 MHz (dropped). TEL-P7 and TEL-R are CARD-DIFFERENT; the registered outcomes stay PASS.
+  - `missing`: aifoundry1-c1 has no data. Every item tested on all cards is INSUFFICIENT; the registered outcomes
+    stay PASS.
+
+Reviewer's four-card checks (25 Sep), in `validate3/fourcards/tel/rev2/`:
+- `cmp.py`: HEAD's reducer (`orig/`, from `git show HEAD:`) against this one on the real aifoundry2 passes 1-3 of 25
+  Sep (made by HEAD's `block.sh`: the `code.sha256` matches), and on those passes copied under all four card names,
+  with two or four cards expected: 0 differences in registered outcome, reading, test and aifoundry2/aifoundry3
+  per-card values and passes. `regress.py` again on all twelve synthetic sets after the fixes: identical.
+- `V3_DRY=1` runs of the smoke check and passes 1-3 for all four card ids, from the tree root with the block's
+  absolute path (`drylogs/`, `dry/`). Against the 25 Sep dry logs of aifoundry2 and aifoundry3, the only device-call
+  change is the six `ettelem config` reads.
+- `hosttest/` runs the real `take_host` (cut from `block.sh`) against a fake other-card block that watches for the
+  marker: take_host waited for it, the block never saw the marker, lib.sh's `ours_running` for card 1 saw it
+  afterwards, and the host lock survived a card lock put on fd 9. `hosttest-writer/`, the same test on the first
+  four-card version (lock on fd 9, marker before the wait), shows both faults: the running block saw the marker, and
+  the host lock was free after the fd 9 reuse.
+
 ## Known risks
+
+- **aifoundry1's two queues cannot overlap a TEL pass.** The block enforces this ("Four cards"). The other card's
+  queue waits for up to 2 h per block, and the TEL pass for up to 45 min. The marker and the lock work through
+  lib.sh's process checks, so a block run by hand outside the queue does not see the marker. Run no manual work on
+  aifoundry1 during a TEL pass.
+- **Other blocks on aifoundry1 that call dev_mngt_service** (lib.sh's `drain_mgmt`, any power poll) open both cards'
+  nodes too. That is outside this experiment. The TEL block redefines `drain_mgmt` for itself only.
+- **While the marker lives, the other card's blocks do not start.** Blocks that check `ours_running` at their start
+  (mem, idle, rl, catfull) exit 3 and their queue retries them 10 min later; the queue itself waits in `wait_free`.
+  A TEL pass on aifoundry1 therefore delays the other card's schedule by its own length plus the wait for that card's
+  running block.
+- **Card 0's first launch after a low-power idle.** The governor readouts are not preceded by a wake: they read the
+  governor as it is, and TEL-G is reported for aifoundry1. If card 0 drops back to 300 MHz between the reset segment's
+  bursts (10 s apart) or between the X3 windows (30 s), those bursts run their first seconds off 600 MHz. The busy
+  rule then drops them, and P6, P7 and R may become INSUFFICIENT on card 0; each burst's clock record says why.
 
 - **The L10 poll interval sits close to the refresh period on aifoundry2.** The interval is about 115-120 ms (0.1 s
   sleep plus about 15 ms per call). Simulated with 450 polls around a true 135.5 ms, the per-pass P_L fit spread is
