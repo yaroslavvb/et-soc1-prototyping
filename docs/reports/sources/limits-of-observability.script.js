@@ -6,7 +6,9 @@ const PAGES = 'https://spacesheep.dev/@yaroslavvb/';
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
 const chip = s => `<span class="chip ${s}">${STATUS[s]}</span>`;
 const verif = c => `<span class="ck ${c}" title="${CHECK[c]}" aria-label="${CHECK[c]}">${CHECK_SYM[c] || '·'}</span>`;
-const P = D.power, CARDS = ['aifoundry2', 'aifoundry3'];
+/* §4's cards: every card the power blocks carry (the version-3 campaign's three since 26 September), in registry order;
+   CARDS[0] (aifoundry2) is the reference the droop chart and the cross-card ratios use. */
+const P = D.power, CARDS = CK.cardsIn(Object.keys(P.rail_filter).filter(k => k !== 'rule'));
 const f = (v, n) => Number(v).toFixed(n == null ? 2 : n);
 const num = CK.fmt.num, rng = (a, b, dp, unit) => CK.fmt.range(Math.min(a, b), Math.max(a, b), dp, unit);
 const mm = a => [Math.min(...a), Math.max(...a)];
@@ -14,6 +16,16 @@ const sgn = (v, dp) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(dp == null ?
 const pct = (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%';
 const med = a => { const s = [...a].sort((p, q) => p - q), n = s.length; return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2; };
 const setHTML = (id, h) => { const e = document.getElementById(id); if (e) e.innerHTML = h; };
+const andList = a => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
+/* per-card values as prose: "0.86 on aifoundry2, 0.87 on aifoundry3 and 1.00 on aifoundry1-c1" (unit after the first),
+   or, when every card gives the same text, "767 mV on all three cards" */
+const perCard = (vals, unit, cards) => { cards = cards || CARDS; const u = unit ? ' ' + unit : '';
+  if (vals.every(v => v === vals[0])) return `${vals[0]}${u} on ${cards.length === 2 ? 'both' : `all ${WORD[cards.length] || cards.length}`} cards`;
+  return andList(vals.map((v, i) => `${v}${i ? '' : u} on ${cards[i]}`)); };
+/* the nearest plain fraction, for "about a quarter" */
+const FRAC = [[1, 'all'], [3 / 4, 'three quarters'], [7 / 10, 'seven tenths'], [2 / 3, 'two thirds'], [3 / 5, 'three fifths'], [1 / 2, 'half'], [2 / 5, 'two fifths'], [1 / 3, 'a third'],
+  [1 / 4, 'a quarter'], [1 / 5, 'a fifth'], [1 / 6, 'a sixth'], [1 / 7, 'a seventh'], [1 / 8, 'an eighth'], [1 / 10, 'a tenth']];
+const fracWord = x => FRAC.reduce((b, e) => (Math.abs(Math.log(e[0] / x)) < Math.abs(Math.log(b[0] / x)) ? e : b))[1];
 const WORD = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 const word = n => WORD[n] || num(n, 0);
 /* The same classification as tools/ettelem/fit_unmetered.py moves_dram(): 'dram' in the name, except the stride-8K
@@ -70,14 +82,20 @@ const TOK = (function () {
   const rel = k => CARDS.map(c => CH.fit[c].se_hc3[k] / F[c].coef[k]);
   const pr = (a, dp) => rng(...mm(a), dp);
   const pc = a => rng(...mm(a.map(v => Math.round(100 * v))), 0) + '%';
+  const ns = CARDS.map(c => num(F[c].n, 0));
   return {
+    cards: andList(CARDS),
     rf_tau: pr(CARDS.map(c => RF[c].tau_s), 2), rf_1s: pc(CARDS.map(c => RF[c].frac_1s)), rf_2s: pc(CARDS.map(c => RF[c].frac_2s)),
     droop_slope: f(Dp.mv_per_dram_offrail_w, 2), droop_n: num(Dp.n, 0), droop_rms: f(Dp.rms_mv, 2), droop_mvw: f(1 / Dp.mv_per_dram_offrail_w, 1),
     droop_slope_a3: f(CH.droop.aifoundry3.slope, 2), droop_rms_a3: f(CH.droop.aifoundry3.rms_mv, 2),
+    /* per card, in CARDS order ("0.86, 0.87 and 1.00"), and the range of 1 mV in watts over the cards */
+    droop_slopes: andList(CARDS.map(c => f(CH.droop[c].slope, 2))), droop_rmss: andList(CARDS.map(c => f(CH.droop[c].rms_mv, 2))),
+    droop_ns: ns.every(n => n === ns[0]) ? ns[0] : andList(ns), droop_mvw_cards: pr(CARDS.map(c => 1 / CH.droop[c].slope), 1),
     fit_rms_a2: f(A2.rms_w, 2), fit_n_a2: num(A2.n, 0), fit_rmsd_a2: f(A2.rms_dram_w, 1), fit_nd_a2: num(A2.n_dram, 0),
     fit_rms_a3: f(A3.rms_w, 2), fit_n_a3: num(A3.n, 0), fit_rmsd: pr(CARDS.map(c => F[c].rms_dram_w), 1),
-    se_minion: num(100 * Math.max(...rel('minion')), 1) + '%', se_dram: num(100 * Math.max(...rel('dram_pj_per_byte')), 0) + '%',
-    se_noc_sram: rng(Math.round(100 * Math.min(...rel('noc'))), Math.round(100 * Math.max(...rel('sram'))), 0) + '%',
+    fit_rmss: andList(CARDS.map(c => f(F[c].rms_w, 2))), fit_ns: ns.every(n => n === ns[0]) ? ns[0] : andList(ns),
+    se_minion: pc(rel('minion')), se_dram: num(100 * Math.max(...rel('dram_pj_per_byte')), 0) + '%',
+    se_noc_sram: pc(rel('noc').concat(rel('sram'))),
     minion_pct: pc(CARDS.map(c => F[c].coef.minion)), dram_pj: pr(CARDS.map(c => F[c].coef.dram_pj_per_byte), 0),
     idle_unsensed: rng(Math.round(Math.min(...CARDS.map(c => IU[c].w[0]))), Math.round(Math.max(...CARDS.map(c => IU[c].w[1]))), 0, 'W'),
     idle15: f(P.idle_73c.unsensed_w, 0),
@@ -217,7 +235,7 @@ LAD = (function () {
   const title = e => { if (e.family === 'instr') { const m = e.label.match(/^(\S+)(.*)$/); return `<code>${esc(m[1])}</code>${esc(m[2])}`; } return esc(e.label[0].toUpperCase() + e.label.slice(1)); };
   function describe(e) {
     const v = V(e), ok = seen(e), ratio = ok ? v.rate / need(e) : need(e) / v.rate, lift = v.rate * v.e[0], got = st.sigma / lift;
-    const cards = Object.keys(v.cards || {}).length ? ` (aifoundry2 ${J(v.cards.aifoundry2)}, aifoundry3 ${J(v.cards.aifoundry3)})` : '';
+    const cards = Object.keys(v.cards || {}).length ? ` (${CK.cardsIn(v.cards).map(c => `${c} ${J(v.cards[c])}`).join(', ')})` : '';
     const range = v.e[1] < v.e[2] ? ` [${JR(v.e[1], v.e[2])}]` : '';
     const opnd = e.v.any ? '' : (st.data === 'random' ? ', random data' : ', zeros');
     return `<b>${title(e)}</b>${opnd}: ${J(v.e[0])}${range} per ${e.unit}${cards}. At ±${num(100 * st.prec, 0)}% against a ${num(st.sigma, 2)} W baseline it needs about ${sci(need(e), 1)} a second; ` +
@@ -278,9 +296,11 @@ LAD = (function () {
   const hot = EV.find(x => x.id === 's-contended').v.any;
   const ring = EV.find(x => x.id === 'm-xshire1');
   setHTML('ev-note', `σ defaults to 0.2 W, about the idle law's rms (${num(M.idle_law_rms_w, 3)} W): the uncertainty of a baseline predicted from temperature. The hot line's contended atomic, about ${num(hot.e[0] * hot.rate, 1)} W over idle, carries a bar of ${sgn(100 * (hot.e[1] / hot.e[0] - 1), 0)}% to ${sgn(100 * (hot.e[2] / hot.e[0] - 1), 0)}%, about that size. ` +
-    `A burst bracketed by idle measured just before and after does better than σ = 0.2 W, which is why some hollow events still carry bars of a few per cent (${esc(ring.label)}: ${sgn(100 * (ring.v.any.e[1] / ring.v.any.e[0] - 1), 0)}% to ${sgn(100 * (ring.v.any.e[2] / ring.v.any.e[0] - 1), 0)}%); the flips and the wires were priced by fits over many bursts. ` +
+    `A burst bracketed by idle measured just before and after does better than σ = 0.2 W on one card; the bars are the range over every pass on every card measured, so they include the difference between the cards ` +
+    `(${esc(ring.label)}: ${sgn(100 * (ring.v.any.e[1] / ring.v.any.e[0] - 1), 0)}% to ${sgn(100 * (ring.v.any.e[2] / ring.v.any.e[0] - 1), 0)}%${Object.keys(ring.v.any.cards || {}).length > 1 ? `, with ${andList(CK.cardsIn(ring.v.any.cards).map(c => `${J(ring.v.any.cards[c])} on ${c}`))}` : ''}); the flips and the wires were priced by fits over many bursts. ` +
     `Each event's rate is ${esc(E.rate_rule)}. The band is one reading's step on aifoundry2 while ettelem samples, 1 mW × about ${num(1000 * M.pass_s, 0)} ms on a rail and 10 mW × ${num(1000 * M.pass_s, 0)} ms on the board ` +
-    `(a reading lasts about ${num(1000 * M.pass_s_a3, 0)} ms on aifoundry3, and the SP's own pass on aifoundry2 is ${num(1000 * M.sp_pass_s_quiet_a2, 0)} ms without the sampler); the rail's own average spreads a single event over about a second.`);
+    `(a reading lasts about ${num(1000 * M.pass_s_a3, 0)} ms on aifoundry3${M.pass_s_a1c1 ? ` and ${num(1000 * M.pass_s_a1c1, 0)} ms on aifoundry1-c1` : ''}, and the SP's own pass on aifoundry2 is ${num(1000 * M.sp_pass_s_quiet_a2, 0)} ms without the sampler: ` +
+    `the medians of three passes on each card in the version-3 campaign); the rail's own average spreads a single event over about a second.`);
   upd();
 })();
 
@@ -328,19 +348,33 @@ function fitOf(card, line) {
 (function () {
   const I = P.idle_73c, F = P.fit, Dp = P.droop, RF = P.rail_filter, SA = P.sampler, IU = P.idle_unsensed, CH = P.checks;
   setHTML('norails', esc(P.rails_no_telemetry.join(', ')));
-  const R2 = RF.aifoundry2, R3 = RF.aifoundry3;
-  setHTML('rf-fall', `${pct(R2.frac_1s)} of the way after one second and ${pct(R2.frac_2s)} after two on aifoundry2 (τ ≈ ${f(R2.tau_s, 2)} s), ` +
-    `${pct(R3.frac_1s)} and ${pct(R3.frac_2s)} on aifoundry3 (τ ≈ ${f(R3.tau_s, 2)} s; the median over ${num(R2.n, 0)} bursts of the energy manual's catalogue on aifoundry2 and ${num(R3.n, 0)} on aifoundry3)`);
-  const s2 = SA.aifoundry2, s3 = SA.aifoundry3, low = s2.slow.map(b => b.noc_other_passes_w - b.noc_w);
-  setHTML('ring-ms', `${rng(...mm(SA.ring.median_ms), 0, 'ms')} (the median in each of ${word(SA.ring.passes)} passes)`);
-  setHTML('sampler-dram', `DRAM reads slow it too on aifoundry2: over a burst of tensor loads or row walks from DRAM, the median sample takes ${rng(...s2.read_median_ms, 0, 'ms')}, ` +
-    `the longest single one ${num(s2.read_max_ms, 0)} ms, while every aifoundry3 burst stays at ${rng(...s3.read_median_ms, 0, 'ms')}. The catalogue keeps those bursts: their board watts stand to aifoundry3's ` +
-    `as every other configuration's do (aifoundry3 ÷ aifoundry2 ${rng(...SA.reads_a3_over_a2, 2)}, against ${num(SA.cross_card.p10, 2)}–${num(SA.cross_card.p90, 2)} for the middle 80% of the catalogue), ` +
-    `though in the ${word(s2.over_60ms)} slowest of aifoundry2's ${num(s2.bursts, 0)} bursts (a median over 60 ms) the rails' readings are stale and the NoC rail reads ${rng(...mm(low), 1)} W below the same configuration's other passes ` +
-    `(aifoundry2's alone: ${s3.over_60ms ? `${word(s3.over_60ms)} of aifoundry3's bursts slowed too` : `none of aifoundry3's ${num(s3.bursts, 0)} slowed`}).`);
+  setHTML('rf-fall', andList(CARDS.map((c, i) => (i ? `${pct(RF[c].frac_1s)} and ${pct(RF[c].frac_2s)}` : `${pct(RF[c].frac_1s)} of the way after one second and ${pct(RF[c].frac_2s)} after two`) +
+    ` on ${c} (τ ≈ ${f(RF[c].tau_s, 2)} s)`)) + ` (the median over ${andList(CARDS.map(c => num(RF[c].n, 0)))} bursts of the energy manual's catalogue, in that order)`);
+  /* the s <-> s+16 ring: the medians of the passes it starved, per campaign and card (power.sampler.ring.per_card) */
+  const RG = SA.ring, RV3 = (RG.per_card || {}).v3 || {}, R23 = (RG.per_card || {})['23sep'] || {}, rv3 = CK.cardsIn(RV3), r23 = CK.cardsIn(R23);
+  setHTML('ring-ms', `${rng(...mm(RG.median_ms), 0, 'ms')} (the median in each pass it starved: ` +
+    andList([...rv3.map(c => `${rng(...mm(RV3[c]), 0)} ms on ${c}`)].concat(r23.map(c => `${rng(...mm(R23[c]), 0)} ms on ${c} on 23 September`))) + ')');
+  const fb = RG.fallback_23sep, nv3 = RG.v3_passes_per_card || {};
+  setHTML('ring-v3', rv3.length ? `In the version-3 campaign's reruns the ring starved the sampler on ${rv3.length === CARDS.length ? `all ${WORD[rv3.length]} cards` : andList(rv3)}, ` +
+    `in ${rv3.every(c => RV3[c].length === nv3[c]) ? `every pass (${andList([...new Set(rv3.map(c => word(nv3[c])))])} on each card)` : andList(rv3.map(c => `${word(RV3[c].length)} of ${word(nv3[c])} passes on ${c}`))}` +
+    (fb ? `, so the energy manual keeps ${andList(fb.cards)}'s passes of 23 September for it.` : '.') : '');
+  /* DRAM reads: per card, the sampler's latency over the DRAM-read bursts, the slowest bursts' stale NoC reading, and
+     those bursts' board watts over aifoundry2's against every catalogue entry's */
+  const REF = CARDS[0], slow = CARDS.flatMap(c => SA[c].slow.map(b => b.noc_w - b.noc_other_passes_w)), RO = SA['reads_over_' + REF] || {}, AO = SA['all_over_' + REF] || {};
+  setHTML('sampler-dram', `DRAM reads slow it too: over a burst of tensor loads or row walks from DRAM, the median sample takes up to ` +
+    andList(CARDS.map((c, i) => `${num(SA[c].read_median_ms[1], 0)}${i ? '' : ' ms'} on ${c}`)) +
+    ` (the longest single sample ${andList(CARDS.map(c => num(SA[c].read_max_ms, 0)))} ms, in that order), against ${rng(...mm(CARDS.flatMap(c => SA[c].other_median_ms)), 0, 'ms')} in every other burst. ` +
+    `The catalogue keeps those bursts. In the slowest of them (a median over 60 ms: ` +
+    andList(CARDS.map(c => SA[c].over_60ms ? `${word(SA[c].over_60ms)} of ${c}'s ${num(SA[c].bursts, 0)}` : `none of ${c}'s`)) + `) the rails' readings are stale` +
+    (slow.length ? `: the NoC rail reads ${slow.every(v => v < 0) ? `${rng(...mm(slow.map(v => -v)), 1)} W below` : `from ${f(-Math.min(...slow), 1)} W below to ${f(Math.max(...slow), 1)} W above`} the same configuration's other passes` : '') + '. ' +
+    `Their board watts over ${REF}'s are ` + andList(CK.cardsIn(RO).map(c => `${rng(...RO[c], 2)} on ${c}`)) +
+    `, against ${andList(CK.cardsIn(AO).map(c => `${rng(...AO[c].p10_p90, 2)}`))} over the middle 80% of the catalogue's entries.`);
   setHTML('idle-unsensed', `${f(I.unsensed_w, 1)} W of the ${f(I.board_w, 1)} W the board draws at ${num(I.die_c, 0)} °C on aifoundry2 (one 60 s window), about half`);
-  setHTML('idle-unsensed-a3', `On aifoundry3, which idles cooler, it is about half too: ${rng(...IU.aifoundry3.w, 1, 'W')} of ${rng(...IU.aifoundry3.board_w, 1, 'W')} over the catalogue's idle gaps, at ${rng(...IU.aifoundry3.die_c, 0, '°C')}.`);
-  setHTML('fit-n', `${num(F.aifoundry3.n, 0)} configurations (${num(F.aifoundry2.n, 0)} on aifoundry2)`);
+  /* the other cards' idle over the catalogue's idle gaps, with the share as a plain fraction */
+  setHTML('idle-unsensed-a3', 'Over the catalogue\'s idle gaps it is about ' + andList(CARDS.slice(1).map(c => { const u = IU[c], sh = (u.w[0] / u.board_w[0] + u.w[1] / u.board_w[1]) / 2;
+    return `${fracWord(sh)} on ${c} (${rng(...u.w, 1, 'W')} of ${rng(...u.board_w, 1, 'W')} at ${rng(...u.die_c, 0, '°C')})`; })) + '.');
+  const nsF = CARDS.map(c => F[c].n);
+  setHTML('fit-n', nsF.every(n => n === nsF[0]) ? `${num(nsF[0], 0)} configurations` : andList(CARDS.map((c, i) => `${num(nsF[i], 0)} configurations on ${c}`)));
 
   /* the fit table and the text under it */
   const hosts = CARDS;
@@ -348,59 +382,72 @@ function fitOf(card, line) {
     [['× minion-rail W', 'minion', 3, ''], ['× SRAM-rail W', 'sram', 3, ''], ['× NoC-rail W', 'noc', 3, ''], ['pJ per DRAM byte', 'dram_pj_per_byte', 1, ' pJ/B']].map(r =>
       `<tr><td>${r[0]}</td>` + hosts.map(h => `<td class="num">${f(F[h].coef[r[1]], r[2])} ± ${f(CH.fit[h].se_hc3[r[1]], r[2])}${r[3]}</td>`).join('') + '</tr>').join('') +
     '<tr><td class="small">residual rms, configuration means</td>' + hosts.map(h => `<td class="num small">${f(F[h].rms_w)} W, n = ${F[h].n}</td>`).join('') + '</tr></tbody>';
+  CK.stackTable(document.getElementById('fittab'));  /* one card per term on a phone, each card's value labelled */
   const fit = Object.fromEntries(V1CARDS.map(c => [c, fitOf(c, false)])), refit = Object.fromEntries(V1CARDS.map(c => [c, fitOf(c, true)]));
   const all = CARDS.flatMap(c => fit[c].pts), full = p => /^(tload|tstore)\/dram\/|^dramrow\/stride1K\//.test(p.cfg);
   const cm = k => CARDS.map(c => F[c].coef[k]), dif = a => 100 * (Math.max(...a) / Math.min(...a) - 1);
   const quarter = CARDS.map(c => { const d = fit[c].pts.filter(p => p.g > 0); return fit[c].rmsd / (d.reduce((s, p) => s + p.un, 0) / d.length); });
   const stR = all.filter(p => p.k === 'st').map(p => p.res), rR = all.filter(p => full(p) && p.rnd).map(p => p.res), zR = all.filter(p => full(p) && !p.rnd).map(p => -p.res);
-  setHTML('fittext', `Four coefficients, no intercept, fitted per card to the mean of each configuration's three passes (${F.aifoundry2.n} configurations on aifoundry2, which also ran six DRAM-row configurations, ${F.aifoundry3.n} on aifoundry3), ` +
+  /* the minion coefficient: the cards within 10% of the reference card's form its group; any other card is set apart,
+     with its SRAM coefficient beside the group's (on aifoundry1-c1 the fit moves the loss from the minion rail to the SRAM one) */
+  const mc = c => F[c].coef.minion, grp = CARDS.filter(c => Math.abs(mc(c) / mc(CARDS[0]) - 1) <= 0.1), apart = CARDS.filter(c => !grp.includes(c));
+  const gm = grp.reduce((a, c) => a + mc(c), 0) / grp.length, gs = grp.map(c => F[c].coef.sram);
+  const dramAgree = (() => { const se = CARDS.map(c => CH.fit[c].se_hc3.dram_pj_per_byte), v = cm('dram_pj_per_byte');
+    return CARDS.every((c, i) => CARDS.every((d, j) => Math.abs(v[i] - v[j]) <= 2.58 * Math.hypot(se[i], se[j]))); })();
+  const cmp = (a, b) => (a >= 0 ? `${sgn(a, 1).slice(1)} W above` : `${f(-a, 1)} W below`);
+  const posR = rR.filter(v => v > 0), posZ = zR.filter(v => v > 0);
+  setHTML('fittext', `Four coefficients, no intercept, fitted per card to the mean of each configuration's three passes (${nsF.every(n => n === nsF[0]) ? `${num(nsF[0], 0)} configurations on each of ${andList(CARDS)}` : andList(CARDS.map((c, i) => `${num(nsF[i], 0)} configurations on ${c}`))}), ` +
     `on bursts of ${rng(...mm(all.map(p => p.over)), 1)} W over idle. DRAM bytes are the bytes the DRAM load, store and row configurations move; stores through the L1 (<code>st_stream</code>) count only the bytes written, not the line read before each write. ` +
     `Each ± is one standard error, robust to the larger scatter of the DRAM configurations. ` +
-    `The minion coefficient is pinned to about ${TOK.se_minion} (one standard error) on each card but differs by ${num(dif(cm('minion')), 0)}% between them, about the cards' spread elsewhere in the manual; ` +
-    (() => { const se = CARDS.map(c => CH.fit[c].se_hc3.dram_pj_per_byte), v = cm('dram_pj_per_byte'), s = se.map(x => num(x, 0));
-      return Math.abs(v[0] - v[1]) <= 2.58 * Math.hypot(...se)
-        ? `the DRAM terms agree within their errors (${f(v[0], 1)} and ${f(v[1], 1)} pJ/B, ${s[0] === s[1] ? `each ±${s[0]}` : `±${s[0]} and ±${s[1]}`}). `
-        : `the DRAM terms differ by ${num(dif(v), 0)}%. `; })() +
+    `The minion coefficient is pinned to ${TOK.se_minion} (one standard error) on each card. ${grp.length > 1 ? `On ${andList(grp)} it differs by ${num(dif(grp.map(mc)), 0)}%, about the cards' spread elsewhere in the manual` : ''}` +
+    (apart.length ? `${grp.length > 1 ? '; ' : ''}${andList(apart)}'s is ${andList(apart.map(c => f(mc(c), 2)))}, about ${fracWord(apart.reduce((a, c) => a + mc(c), 0) / apart.length / gm)} of that, and there the fit puts ${andList(apart.map(c => f(F[c].coef.sram, 2)))} on the SRAM rail against ${rng(...mm(gs), 2)}: ` +
+      `its unmetered power follows the SRAM rail more than the minion rail, for a reason not measured (that card runs the older firmware and a higher SRAM rail voltage: <a href="${PAGES}et-soc1-energy-manual#two-cards">the energy manual, §8</a>). ` : '. ') +
+    `The DRAM terms ${dramAgree ? 'agree within their errors' : 'differ'} (${andList(cm('dram_pj_per_byte').map(v => f(v, 1)))} pJ/B, ${(() => { const s = CARDS.map(c => num(CH.fit[c].se_hc3.dram_pj_per_byte, 0)); return s.every(x => x === s[0]) ? `each ±${s[0]}` : andList(s.map(x => '±' + x)); })()}). ` +
     `The SRAM and NoC coefficients are collinear with each other (not with the minion one) and uncertain to ${TOK.se_noc_sram}` +
-    CARDS.filter(c => CH.fit[c].pass_ci99.sram[0] <= 0).map(c => `; the SRAM one is not distinguishable from zero on ${c}, whose ${word(CH.fit[c].pass_coef.sram.length)} passes fit it at ${rng(...mm(CH.fit[c].pass_coef.sram), 2)}`).join('') +
-    `. The residual is small overall but not on DRAM traffic: ${rng(...CARDS.map(c => fit[c].rmsd), 1)} W rms on the DRAM configurations, ` +
-    `about a quarter of their unmetered power (${CARDS.map(c => c.slice(-1) === '2' ? pct(quarter[0]) : pct(quarter[1])).join(' and ')}). It has a pattern: the three stores through the L1 sit ${rng(...mm(stR), 1)} W above the fit, because their line reads are not counted ` +
-    `(counting them brings the DRAM rms to ${rng(...CARDS.map(c => refit[c].rmsd), 2)} W: the checkbox in the chart below); on the full-rate tensor loads, tensor stores and row walks, random data sits ${rng(...mm(rR), 1)} W above it and zeros or constants ${rng(...mm(zR), 1)} W below.`);
+    (() => { const z = CARDS.filter(c => CH.fit[c].pass_ci99.sram[0] <= 0), np = [...new Set(z.map(c => word(CH.fit[c].pass_coef.sram.length)))];
+      return z.length ? `; the SRAM one is not distinguishable from zero on ${andList(z)}, whose ${np.length === 1 ? np[0] + ' ' : ''}passes fit it at ${andList(z.map(c => rng(...mm(CH.fit[c].pass_coef.sram), 2)))}` : ''; })() +
+    `. The residual is small overall but not on DRAM traffic: ${rng(...mm(CARDS.map(c => fit[c].rmsd)), 1)} W rms on the DRAM configurations, ` +
+    `about ${fracWord(quarter.reduce((a, b) => a + b, 0) / quarter.length)} of their unmetered power (${andList(quarter.map(q => pct(q)))}). It has a pattern: the three stores through the L1 sit ${rng(...mm(stR), 1)} W above the fit on every card, because their line reads are not counted ` +
+    `(counting them brings the DRAM rms to ${rng(...mm(CARDS.map(c => refit[c].rmsd)), 2)} W: the checkbox in the chart below); on the full-rate tensor loads, tensor stores and row walks, random data sits ` +
+    (posR.length === rR.length ? `${rng(...mm(rR), 1)} W above it` : `above it in ${word(posR.length)} of the ${word(rR.length)} configurations on the ${WORD[CARDS.length]} cards (up to ${f(Math.max(...rR), 1)} W; the other ${cmp(Math.min(...rR))})`) +
+    ` and zeros or constants ` + (posZ.length === zR.length ? `${rng(...mm(zR), 1)} W below.` : `below it in ${posZ.length} of ${zR.length}.`));
 
   /* 'three things follow', from the per-configuration rows (the full-rate DRAM configurations; st_stream apart) */
   const off = all.filter(p => p.g > 0 && full(p)).map(p => ({...p, pj: (p.un - p.loss) / (p.g * 1e-3), tot: p.over / (p.g * 1e-3)}));
   const offSt = all.filter(p => p.k === 'st').map(p => (p.un - p.loss) / (p.g * 1e-3));
   const zc = off.filter(p => !p.rnd), rd = off.filter(p => p.rnd), tl = off.filter(p => p.cfg.startsWith('tload/dram/') && !p.cfg.endsWith('const'));
-  const a2 = F.aifoundry2.coef.minion, a3 = F.aifoundry3.coef.minion, perPct = 100 * (1 + a2) * (1 / 0.99 - 1), scale = 100 * (1 - (1 + Math.min(a2, a3)) / (1 + Math.max(a2, a3)));
+  const gmm = grp.map(mc), perPct = 100 * (1 + mc(CARDS[0])) * (1 / 0.99 - 1), scale = 100 * (1 - (1 + Math.min(...gmm)) / (1 + Math.max(...gmm)));
   const r0 = v => Math.round(v);
   setHTML('three-things', `<b>Three things follow.</b> <b>An instruction's unmetered energy is consistent with a regulator's delivery loss</b>: ` +
-    `${pct(F.aifoundry2.coef.minion)} of what the minion rail delivers on aifoundry2 and ${pct(F.aifoundry3.coef.minion)} on aifoundry3 goes missing between the 12 V input and the core, ` +
+    `${perCard(CARDS.map(c => pct(mc(c))), '')} of what the minion rail delivers goes missing between the 12 V input and the core, ` +
     `as far as the rails' own meters can be trusted: the figure rests on their gain and on the correction for their one-second average, and each 1% in either moves it by about ${num(perPct, 1)} points ` +
-    `(a ${num(scale, 1)}% difference in rail scale would explain the two cards' ${num(dif(cm('minion')), 0)}%; the mesh rail's gain is not checked either, <a href="${PAGES}et-soc1-heat-per-mm#limits">Heat per millimetre, §10</a>). Nothing else moves. ` +
+    `(${grp.length > 1 ? `a ${num(scale, 1)}% difference in rail scale would explain the ${num(dif(gmm), 0)}% between ${andList(grp)}` : ''}${apart.length ? `${grp.length > 1 ? '; ' : ''}${andList(apart)}'s smaller figure goes with the SRAM coefficient above` : ''}; ` +
+    `the mesh rail's gain is not checked either, <a href="${PAGES}et-soc1-heat-per-mm#limits">Heat per millimetre, §10</a>). Nothing else moves. ` +
     `<b>A DRAM byte's unmetered energy is the memory's</b>: the fitted ${TOK.dram_pj} pJ per byte, off the rails, in the DDR PHY, the I/O rail and the DRAM chips (${rng(...mm(zc.map(p => r0(p.pj))), 0)} on zeros and constants, ` +
     `${rng(...mm(rd.map(p => r0(p.pj))), 0)} on random data, per configuration), on top of the ${rng(...mm(off.map(p => r0(p.tot - p.pj))), 0)} pJ the mesh, the SRAM and the delivery losses take on the way: ` +
     `together ${rng(...mm(tl.map(p => r0(p.tot))), 0)} pJ per byte for tensor loads from DRAM, zeros to random data. A byte written through the L1 costs about twice that off-rail (${rng(...mm(offSt.map(r0)), 0)} pJ), ` +
     `because the line is read from DRAM before it is written. <b>And the NoC coefficient is not all regulator</b>: ${rng(...mm(cm('noc').map(v => r0(100 * v))), 0)}% is more than a delivery loss would take; ` +
-    `the likely rest, not measured, is the memory shires' own logic, on an unmetered rail, which works whenever the mesh moves bytes to them. What the fit cannot say is how the idle ${TOK.idle_unsensed} (${rng(r0(IU.aifoundry3.w[0]), r0(IU.aifoundry3.w[1]), 0, 'W')} on aifoundry3 at ` +
-    `${rng(r0(IU.aifoundry3.die_c[0]), r0(IU.aifoundry3.die_c[1]), 0, '°C')}, ${rng(r0(IU.aifoundry2.w[0]), r0(IU.aifoundry2.w[1]), 0, 'W')} on aifoundry2 at ${rng(r0(IU.aifoundry2.die_c[0]), r0(IU.aifoundry2.die_c[1]), 0, '°C')}) ` +
+    `the likely rest, not measured, is the memory shires' own logic, on an unmetered rail, which works whenever the mesh moves bytes to them. What the fit cannot say is how the idle ${TOK.idle_unsensed} (` +
+    andList(CARDS.map(c => `${rng(r0(IU[c].w[0]), r0(IU[c].w[1]), 0, 'W')} on ${c} at ${rng(r0(IU[c].die_c[0]), r0(IU[c].die_c[1]), 0, '°C')}`)) + ') ' +
     `splits between DDR refresh and PHY, PCIe, the IO shire, Maxion and the regulators' own draw, nor how the DRAM term splits below the regulator.`);
 
   /* §5's paragraph */
-  const dUn = all.filter(p => full(p) || p.k === 'st').map(p => p.un), c2 = F.aifoundry2.coef, U3 = IU.aifoundry3;
+  const dUn = all.filter(p => full(p) || p.k === 'st').map(p => p.un), c2 = F.aifoundry2.coef;
   const w0 = a => rng(Math.round(a[0]), Math.round(a[1]), 0, 'W');
-  setHTML('unmet-today', `${f(I.unsensed_w, 0)} W of a ${f(I.board_w, 0)} W idle on aifoundry2 (${w0(U3.w)} of ${w0(U3.board_w)} on aifoundry3) and ${rng(...mm(dUn), 1)} W of a full-rate DRAM workload are on no sensor`);
+  setHTML('unmet-today', `${f(I.unsensed_w, 0)} W of a ${f(I.board_w, 0)} W idle on aifoundry2 (${andList(CARDS.slice(1).map(c => `${w0(IU[c].w)} of ${w0(IU[c].board_w)} on ${c}`))}) and ${rng(...mm(dUn), 1)} W of a full-rate DRAM workload are on no sensor`);
   setHTML('idle15b', rng(Math.round(Math.min(...CARDS.map(c => IU[c].w[0]))), Math.round(Math.max(...CARDS.map(c => IU[c].w[1]))), 0));
   setHTML('idle-nometer', `about ${f(I.unsensed_w - (c2.minion * I.minion_w + c2.sram * I.sram_w + c2.noc * I.noc_w), 0)} W of aifoundry2's idle at ${num(I.die_c, 0)} °C, ` +
     `if the loss fractions fitted above idle also hold for the rails' idle power (an assumption)`);
 
   /* ---------- V1: where a workload's watts go ---------- */
-  const share = (c, k) => pct(med(fit[c].pts.filter(p => k(p)).map(p => p.un / p.over)));
+  const shareV = (c, k) => med(fit[c].pts.filter(p => k(p)).map(p => p.un / p.over)), share = (c, k) => pct(shareV(c, k));
   setHTML('v1-cap', `Of what each configuration adds above idle, how much is on no sensor, and does the four-term fit account for it? The scatter: every catalogue configuration's unmetered watts ` +
     `(board over idle less the three rails) against what the fit gives it; filled dots ran on random data, open ones on zeros or constants. The first bar: the idle card at ${num(I.die_c, 0)} °C on aifoundry2 ` +
     `(${f(I.board_w, 2)} W, the mean of one 60 s window of ${num(I.samples, 0)} samples whose standard deviation is ${f(I.board_sd, 2)} W, after ${num(I.hours, 1)} h idle apart from a 4.9 s probe five minutes before the window): ${f(I.unsensed_w, 1)} W of it is on no sensor ` +
     `and cannot be split further. The second bar: the chosen configuration's watts over idle, the three rails and then the fit's delivery loss and DRAM term, with the measured total as a tick. ` +
-    `Above idle, about a sixth of an instruction's watts are on no sensor (median ${share('aifoundry2', p => p.k === 'instr')} on aifoundry2, ${share('aifoundry3', p => p.k === 'instr')} on aifoundry3) ` +
-    `and about two thirds of DRAM traffic's (${share('aifoundry2', p => p.g > 0)} and ${share('aifoundry3', p => p.g > 0)}). Hover, tap or tab to a point to break it down; arrows step through the points in residual order.`);
+    `Above idle, ${(() => { const ins = CARDS.map(c => shareV(c, p => p.k === 'instr')), w = [...new Set(ins.slice().sort((a, b) => b - a).map(fracWord))];
+      return `${w.length === 1 ? `about ${w[0]}` : `between ${w[w.length - 1]} and ${w[0]}`} of an instruction's watts are on no sensor (median ${perCard(ins.map(v => pct(v)), '')})`; })()} ` +
+    `and about ${fracWord(med(CARDS.map(c => shareV(c, p => p.g > 0))))} of DRAM traffic's (${andList(CARDS.map(c => share(c, p => p.g > 0)))}). Hover, tap or tab to a point to break it down; arrows step through the points in residual order.`);
   const st = {card: V1CARDS[0], line: false, on: new Set(CLS.map(c => c[0])), sel: 'tload/dram/random'};
   const ctl = document.getElementById('v1-ctl'), box = () => { const d = document.createElement('div'); ctl.appendChild(d); return d; };
   CK.cardSeg(box(), {cards: V1CARDS, value: st.card, onChange: v => { st.card = v; fr.redraw(); out(); }});
@@ -512,26 +559,34 @@ function fitOf(card, line) {
     .map(p => ({...p, pred: a * p.off + b * (p.over - p.off)})).map(p => ({...p, ex: p.dd - p.pred}));
   const nd = DR.filter(p => !p.dram), dRows = DR.filter(p => p.dram), minD = dRows.reduce((s, p) => (p.dd < s.dd ? p : s)), big = DR.filter(p => p.ex > 1);
   const l3 = nd.filter(p => p.cfg.startsWith('dramrow/stride8K')).reduce((s, p) => (p.dd > s.dd ? p : s));
-  const DC = CH.droop, d2 = DC.aifoundry2, d3 = DC.aifoundry3;
-  const both = (v2, v3, u) => (v2 === v3 ? `${v2} ${u} on both cards` : `${v2} ${u} on aifoundry2 and ${v3} on aifoundry3`);
-  setHTML('droopidle', both(f(Dp.idle_die_mv.ddr, 0), f(d3.idle_ddr_mv, 0), 'mV'));
-  setHTML('irdrop', `about ${f(d2.ir, 2)} mV per watt the cores draw on aifoundry2 and ${f(d3.ir, 2)} on aifoundry3`);
-  setHTML('droop-mvw', `1 mV ≈ ${both(f(1 / d2.slope, 1), f(1 / d3.slope, 1), 'W').replace(' on both cards', '')}`);
-  setHTML('droop-temp', `aifoundry3 idles at ${rng(...IU.aifoundry3.die_c, 0, '°C')} in the catalogue and reads ${f(d3.idle_ddr_mv, 0)} mV there`);
+  const DC = CH.droop, d2 = DC.aifoundry2, OTH = CARDS.slice(1);
+  setHTML('droopidle', perCard(CARDS.map(c => f(DC[c].idle_ddr_mv, 0)), 'mV'));
+  const irz = OTH.filter(c => DC[c].pass_ci99.ir[0] <= 0), irp = irz.every(c => DC[c].passes.ir.every(v => v > 0));
+  setHTML('irdrop', `about ${perCard(CARDS.map(c => f(DC[c].ir, 2)), 'mV per watt the cores draw')}` +
+    (irz.length ? ` (on ${andList(irz)} ${irp ? 'the sag is there in every pass, but ' : ''}the 99% interval over ${irz.length > 1 ? 'their' : 'its'} ${word(DC[irz[0]].passes.ir.length)} passes includes zero)` : ''));
+  setHTML('droop-mvw', `1 mV ≈ ${perCard(CARDS.map(c => f(1 / DC[c].slope, 1)), 'W')}`);
+  /* how the idle reading moves with the die temperature (power.checks.droop[card].idle_vs_temp) */
+  const IT = c => DC[c].idle_vs_temp, it2 = IT(CARDS[0]);
+  setHTML('droop-temp', it2 ? `Its idle reading falls as the die warms, by about ${f(-it2.slope_mv_per_c, 2)} mV per °C on ${CARDS[0]} (${f(-it2.slope_mv_per_c * (it2.die_c_p10_p90[1] - it2.die_c_p10_p90[0]), 1)} mV ` +
+    `between ${num(it2.die_c_p10_p90[0], 0)} and ${num(it2.die_c_p10_p90[1], 0)} °C, the middle 80% of its catalogue's idle gaps), ${andList(OTH.map(c => `${f(-IT(c).slope_mv_per_c, 2)} on ${c}`))}; ` +
+    OTH.map((c, i) => (i ? `${c} ${rng(...IU[c].die_c, 0, '°C')} and ${f(DC[c].idle_ddr_mv, 0)} mV` : `${c} idles at ${rng(...IU[c].die_c, 0, '°C')} in the catalogue and reads ${f(DC[c].idle_ddr_mv, 0)} mV there`)).join(', ') : '');
   const onMesh = big.filter(p => /^(wire|tload\/scp|tstore\/scp|scpline|neigh|dramrow\/stride8K)/.test(p.cfg)).length;
-  setHTML('drooptext', `Over aifoundry2's ${Dp.n} catalogue configurations (its ${F.aifoundry2.n} less the ${word(F.aifoundry2.n - Dp.n)} DRAM-row ones, run separately and not in this telemetry), the DDR rail droops ` +
+  setHTML('drooptext', `Over aifoundry2's ${Dp.n} catalogue configurations (${F.aifoundry2.n > Dp.n ? `its ${F.aifoundry2.n} less the ${word(F.aifoundry2.n - Dp.n)} not in this telemetry` : 'all of them, from the telemetry of its version-3 catalogue'}), the DDR rail droops ` +
     `<b>${f(a, 2)} mV per watt of off-rail DRAM power</b> (the unmetered watts less the fitted rail losses), with an rms of ${f(rms, 2)} mV: ` +
-    `about an eighth of the smallest DRAM burst's droop (${f(minD.dd, 2)} mV, <code>${esc(minD.cfg)}</code>). The same fit on aifoundry3's ${d3.n} configurations gives ${f(d3.slope, 2)} mV per watt (rms ${f(d3.rms_mv, 2)} mV). ` +
+    `about ${fracWord(rms / minD.dd)} of the smallest DRAM burst's droop (${f(minD.dd, 2)} mV, <code>${esc(minD.cfg)}</code>). The same fit gives ` +
+    andList(OTH.map(c => `${f(DC[c].slope, 2)} mV per watt on ${c}'s ${num(DC[c].n, 0)} configurations (rms ${f(DC[c].rms_mv, 2)} mV)`)) + '. ' +
     `The fit also carries a small term for the rest of the board's power: ` +
-    CARDS.map(c => { const z = DC[c].pass_ci99.common[0] <= 0; return `${num(DC[c].common, 3)} mV per watt on ${c}${z ? `, which its ${word(DC[c].passes.common.length)} passes do not distinguish from zero` : ''}`; }).join(', and ') + '. ' +
+    andList(CARDS.map(c => { const z = DC[c].pass_ci99.common[0] <= 0; return `${num(DC[c].common, 3)} mV per watt on ${c}${z ? `, which its ${word(DC[c].passes.common.length)} passes do not distinguish from zero` : ''}`; })) + '. ' +
     `The DRAM slope rests on ${word(dRows.length)} configurations, and the ${word(big.length)} residuals above 1 mV ` +
     `(${rng(...mm(big.map(p => p.ex)), 1, 'mV')}) are all bursts with no DRAM traffic, ${word(onMesh)} of them on the mesh, the scratchpads or the L3.`);
   const NM = DC.named, nmv = (c, k) => DC[c].named[k].mean, top = Math.max(...CARDS.flatMap(c => [...NM.mesh, NM.l3].map(k => nmv(c, k))));
   const l3med = med(d2.named[NM.l3].passes);
-  setHTML('droopmesh', `heavy mesh, scratchpad and L3 traffic with no DRAM access droops it by up to about ${f(top, 0)} mV on both cards (on aifoundry2 ` +
-    NM.mesh.map(k => `<code>${esc(k)}</code> ${f(nmv('aifoundry2', k), 2)} mV` + (Math.abs(nmv('aifoundry2', k) - nmv('aifoundry3', k)) > 0.3 ? `, which reads ${f(nmv('aifoundry3', k), 2)} mV on aifoundry3` : '')).join(' and ') +
+  setHTML('droopmesh', `heavy mesh, scratchpad and L3 traffic with no DRAM access droops it by up to about ${f(top, 0)} mV on ${CARDS.length === 2 ? 'both' : `all ${WORD[CARDS.length]}`} cards (on aifoundry2 ` +
+    NM.mesh.map(k => `<code>${esc(k)}</code> ${f(nmv('aifoundry2', k), 2)} mV`).join(' and ') +
+    NM.mesh.map(k => { const o = OTH.filter(c => Math.abs(nmv('aifoundry2', k) - nmv(c, k)) > 0.3);
+      return o.length ? `; <code>${esc(k)}</code> reads ${andList(o.map(c => `${f(nmv(c, k), 2)} mV on ${c}`))}` : ''; }).join('') +
     `; ${f(l3med, 1)} mV for L3 reads through the mesh, <code>${esc(NM.l3)}</code>, the median of ${word(d2.named[NM.l3].passes.length)} passes), ` +
-    `up to ${f(d2.max_nondram_excess_mv[0], 1)} mV more than the calibration allows on aifoundry2 and ${f(d3.max_nondram_excess_mv[0], 1)} on aifoundry3, ` +
+    `up to ${perCard(CARDS.map(c => f(DC[c].max_nondram_excess_mv[0], 1)), 'mV')} more than the calibration allows, ` +
     `which it would read as up to about ${f(Math.max(...CARDS.map(c => DC[c].max_nondram_excess_mv[0] / DC[c].slope)), 0)} W of DRAM.`);
   const mv1 = v => (Math.round(v * 10) / 10).toFixed(1);
   const dt = document.getElementById('drooptab');
@@ -842,9 +897,11 @@ function cardsOfText(str) {
 (function () {
   const C = D.claims_status, SER = C.series, S = SER.length, VD = C.verdicts;
   const GREY = 'color-mix(in srgb, var(--ref) 55%, var(--surface))';
-  /* verdict colours, strongest evidence first (checked for colour-blind separation of neighbours, light and dark);
-     "not a measurement" is neutral grey. A verdict not listed here draws in --ref. */
-  const VCOL = {'PROVEN-BOTH': 'var(--c3)', 'CARD-DIFFERENT': 'var(--c1)', 'ONE-CARD': 'var(--c4)', 'UNDER-REPLICATED': 'var(--c7)', 'WITHIN-NOISE': 'var(--c5)', 'NOT-EMPIRICAL': GREY};
+  /* verdict colours, strongest evidence first (checked for colour-blind separation of neighbours, light and dark:
+     the dataviz validator on c3, c2, c1, c4, c7, c5 passes every adjacent pair against both surfaces, 26 Sep);
+     "not a measurement" is neutral grey. "a test behind it failed" (any pre-registered test covering the claim failed in some part) exists only after the campaign.
+     A verdict not listed here draws in --ref. */
+  const VCOL = {'PROVEN': 'var(--c3)', 'CORRECTED': 'var(--c2)', 'CARD-DIFFERENT': 'var(--c1)', 'ONE-CARD': 'var(--c4)', 'UNDER-REPLICATED': 'var(--c7)', 'WITHIN-NOISE': 'var(--c5)', 'NOT-EMPIRICAL': GREY};
   const VLAB = Object.fromEntries(VD.map(v => [v[0], v[1]]));
   const slugOf = u => u.split('#')[0].replace(/\/$/, '').split('/').pop();
   const REP = D.reports.map(r => ({...r, slug: slugOf(r.url)}));
@@ -870,12 +927,12 @@ function cardsOfText(str) {
   const phrase = (k, n, tot) => `${esc(st.view === 'verdict' ? VLAB[k] || k : cats().find(c => c.key === k).label)}: ${num(n, 0)} (${pct(n / tot)})`;
 
   /* status line, scope, definitions */
-  setHTML('claims-status', SER.map(s => `<b>${esc(s.label)}</b>: ${esc(s.note)}.`).join(' '));
+  setHTML('claims-status', SER.map(s => `<b>${esc(s.label)}</b> (“${esc(s.short)}”): ${esc(s.note)}${s.tested ? ` (${num(s.tested, 0)} claims tested)` : ''}.`).join('<br>'));
   if (S > 1) setHTML('claims-bars', 'one bar per page for each status');
   const out = REP.filter(r => !inAny(r.slug));
   setHTML('claims-scope', out.length ? `Not in the check: ${out.map(r => esc(r.title)).join(', ')}.` : '');
   setHTML('claims-defs', VD.map(v => `<dt>${esc(v[1])}</dt><dd>${esc(v[2] || v[0])}</dd>`).join('') +
-    '<dt>the cards behind a claim</dt><dd>the cards whose data the claim rests on, as the check recorded them (most claims with no card’s data are source readings, specifications or arithmetic)</dd>');
+    '<dt>the cards behind a claim</dt><dd>the cards whose data the claim rests on, as the check recorded them (most claims with no card’s data are source readings, specifications or arithmetic); after the campaign, a claim it tested adds the cards the campaign tested or reported it on (a corrected claim rests on those alone)</dd>');
 
   /* controls and legend */
   const ctl = document.getElementById('claims-ctl'), box = () => { const d = document.createElement('div'); ctl.appendChild(d); return d; };
@@ -946,5 +1003,5 @@ function cardsOfText(str) {
     CK.keynav(f, nodes, {onEnter: (node, k) => open(list[k])});
   }
   legend(); summary();
-  const fr = CK.frame('claims', {height: W => layout(W).H, minW: 300, maxW: 1100, label: 'Claims on each page, by the verdict of the version-3 check or by the cards whose data they rest on; a bar opens its page', draw});
+  const fr = CK.frame('claims', {height: W => layout(W).H, minW: 300, maxW: 1100, label: 'Claims on each page before and after the version-3 campaign, by verdict or by the cards whose data they rest on; a bar opens its page', draw});
 })();
