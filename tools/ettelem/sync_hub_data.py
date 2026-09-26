@@ -29,13 +29,17 @@ the page without anyone copying numbers.
                       own telemetry, per pass (checks(): the version-3 claims check asks for them per card)
   energy_events       every event the reports priced, with its energy [range] and the rate at which the measurement
                       ran it, for the chart "How many identical events before the meter sees one?"
+  claims_status       the claims check's verdicts per page, and the cards behind each claim, for §1's scoreboard: one
+                      series per file in CLAIM_SERIES (today the version-3 plan, before any campaign run)
 
 Deterministic: the same inputs give the same file, byte for byte.
 """
 import argparse
 import glob
+import gzip
 import json
 import os
+import re
 import statistics
 import sys
 
@@ -60,9 +64,44 @@ METER = {"board_lsb_w": 0.010, "rail_lsb_w": 0.001, "pass_s": 0.150, "pass_s_a3"
 # Two-sided 99% t quantiles by degrees of freedom, for intervals over passes (three passes: df 2).
 T99 = {1: 63.657, 2: 9.925, 3: 5.841, 4: 4.604, 5: 4.032}
 
+# The claims check, per page (§1's scoreboard). Each series is one file whose claims[] carry page, cards and a verdict
+# field; the page draws every series, in this order, one bar per page and series. The first is the version-3 plan,
+# committed before any card run. When the campaign's results give each claim a new verdict in the same shape
+# (claims[].{page, cards, <verdict>}), add that file here as the next series; nothing else changes, here or in the page.
+CLAIMS_V3 = os.path.join(D, "2026-09-25-claims-v3")
+CLAIM_SERIES = [
+    {"id": "pre-v3", "file": os.path.join(CLAIMS_V3, "plan3.json.gz"), "verdict": "effective_verdict", "date": "2026-09-25",
+     "label": "Status before the version-3 campaign", "short": "before v3",
+     "note": "pre-registered 25 Sep; the campaign's results will update it"},
+]
+# The verdicts in order, strongest evidence first, with the words the page shows (PLAN3's standard). A quoted number
+# takes its home page's verdict (effective_verdict), so QUOTED does not appear. A verdict a later file adds that is
+# not listed here is drawn after these, under its own name.
+VERDICTS = [
+    ["PROVEN-BOTH", "proven on both cards", "at least three independent repeats on each card, a 99% interval that excludes the null on each, the same sign on both"],
+    ["CARD-DIFFERENT", "differs by card", "measured on both cards, with values that differ between them: stated per card"],
+    ["ONE-CARD", "one card only", "rests on one card's data"],
+    ["UNDER-REPLICATED", "fewer than three repeats", "measured, with fewer than three independent repeats on a card"],
+    ["WITHIN-NOISE", "within noise", "the effect is not resolved from the noise"],
+    ["NOT-EMPIRICAL", "not a measurement", "arithmetic, a source reading, a specification or a simulation"],
+]
+# claims[].cards as the inventories write it, mapped to card ids (the chartkit registry's): a2, a3, both, none; a1c1
+# (or aifoundry1-c1) and "all" (the campaign's three cards, amendment A4) for the results. Any other token is kept as
+# its own card id, so a new card needs no change here.
+CARD_WORDS = {"a2": ["aifoundry2"], "a3": ["aifoundry3"], "a1c1": ["aifoundry1-c1"], "a1c0": ["aifoundry1-c0"],
+              "both": ["aifoundry2", "aifoundry3"], "all": ["aifoundry2", "aifoundry3", "aifoundry1-c1"],
+              "all3": ["aifoundry2", "aifoundry3", "aifoundry1-c1"], "none": [], "": []}
+CARD_ORDER = ["aifoundry2", "aifoundry3", "aifoundry1-c1", "aifoundry1-c0"]
+
 
 def load(p):
     with open(p) as fh:
+        return json.load(fh)
+
+
+def load_any(p):
+    """A JSON file, gzipped or not."""
+    with (gzip.open(p, "rt") if p.endswith(".gz") else open(p)) as fh:
         return json.load(fh)
 
 
@@ -80,8 +119,12 @@ def power_blocks(fit, cat, dvfs, reruns):
     out = {"idle_73c": {"board_w": ic["board_w"], "board_sd": ic["board_sd"], "minion_w": ic["rails"]["minion"],
                         "sram_w": ic["rails"]["sram"], "noc_w": ic["rails"]["noc"], "unsensed_w": ic["board_minus_rails"],
                         "die_c": ic["die_c"], "hours": ic["hours_idle"], "samples": ic["samples"]}}
-    out["fit"] = {c: {k: v for k, v in fit[c].items() if k not in ("per_config", "per_config_fields")} for c in CARDS}
-    out["per_config"] = {"fields": fit[CARDS[0]]["per_config_fields"], **{c: fit[c]["per_config"] for c in CARDS}}
+    # The fit and its per-configuration rows go to the page for every card the fit has (the V1 chart offers each);
+    # the blocks below, and the page's text, stay on the two cards the catalogue measured first.
+    fc = sorted((c for c in fit if isinstance(fit[c], dict) and "coef" in fit[c] and "per_config" in fit[c]),
+                key=lambda c: (CARD_ORDER.index(c) if c in CARD_ORDER else len(CARD_ORDER), c))
+    out["fit"] = {c: {k: v for k, v in fit[c].items() if k not in ("per_config", "per_config_fields")} for c in fc}
+    out["per_config"] = {"fields": fit[CARDS[0]]["per_config_fields"], **{c: fit[c]["per_config"] for c in fc}}
     out["droop"] = fit["ddr_droop"]
     out["rail_filter"] = {c: {k: cat["rail_filter"][c][k] for k in ("frac_1s", "frac_2s", "tau_s", "n")} for c in CARDS}
     out["rail_filter"]["rule"] = cat["rail_filter"][CARDS[0]]["rule"]
@@ -321,6 +364,53 @@ def energy_events(man, reruns, wire, model, hrep):
                       "and the Horace model.json / report.json"}
 
 
+# ---------------------------------------------------------------- the claims check, per page
+def card_set(cards):
+    """claims[].cards (a word, or card names joined by +, commas or spaces) as a key: card ids in registry order joined
+    by '+', or 'none'."""
+    ids = []
+    for tok in re.split(r"[+,;/\s]+", str(cards or "").strip().lower()):
+        for c in CARD_WORDS.get(tok.replace("-", "") if tok.startswith("a1") else tok, [tok]):
+            if c not in ids:
+                ids.append(c)
+    ids.sort(key=lambda c: (CARD_ORDER.index(c) if c in CARD_ORDER else len(CARD_ORDER), c))
+    return "+".join(ids) or "none"
+
+
+def claims_series(s):
+    """One series of the scoreboard: per page, the claims by verdict and by the cards behind them."""
+    src = load_any(s["file"])
+    pages = {}
+    for c in src["claims"]:
+        p = pages.setdefault(c["page"], {"claims": 0, "verdict": {}, "cards": {}})
+        p["claims"] += 1
+        v = c[s["verdict"]]
+        p["verdict"][v] = p["verdict"].get(v, 0) + 1
+        k = card_set(c.get("cards"))
+        p["cards"][k] = p["cards"].get(k, 0) + 1
+    # The file's own per-page counts, where it has them, must agree with the claims it lists.
+    for slug, cnt in (src.get("counts", {}).get("per_page") or {}).items():
+        want = {k: v for k, v in (cnt.get("effective_verdict_quoted_resolved") or {}).items() if v}
+        if s["verdict"] == "effective_verdict" and want and want != pages.get(slug, {}).get("verdict"):
+            sys.exit(f"{s['file']}: counts.per_page[{slug}] disagrees with its claims[]")
+    order = [v[0] for v in VERDICTS]
+    rank = lambda k: (k.count("+") * -1 if k != "none" else 1, [CARD_ORDER.index(c) if c in CARD_ORDER else 9 for c in k.split("+")], k)  # noqa: E731
+    for p in pages.values():
+        p["verdict"] = {k: p["verdict"][k] for k in sorted(p["verdict"], key=lambda k: (order.index(k) if k in order else len(order), k))}
+        p["cards"] = {k: p["cards"][k] for k in sorted(p["cards"], key=rank)}
+    return {"id": s["id"], "label": s["label"], "short": s["short"], "note": s["note"], "date": s["date"],
+            "source": os.path.relpath(s["file"], ROOT) + f" (claims[].page, .cards, .{s['verdict']})",
+            "pages": {k: pages[k] for k in sorted(pages)}}
+
+
+def claims_status():
+    series = [claims_series(s) for s in CLAIM_SERIES]
+    seen = {v for s in series for p in s["pages"].values() for v in p["verdict"]}
+    extra = sorted(seen - {v[0] for v in VERDICTS})
+    return {"verdicts": VERDICTS + [[v, v.lower().replace("-", " "), ""] for v in extra], "series": series,
+            "source": "tools/ettelem/sync_hub_data.py claims_status(), from the files in its CLAIM_SERIES"}
+
+
 # ---------------------------------------------------------------- writing
 def dumps(obj, ind=0):
     """json.dumps(indent=1, ensure_ascii=False), except that a list of scalars goes on one line."""
@@ -347,6 +437,7 @@ def build(hub):
     for k, v in power_blocks(fit, cat, load(DVFS), reruns).items():
         P[k] = v
     new["energy_events"] = energy_events(man, reruns, load(WIRE), load(os.path.join(HORACE, "model.json")), load(os.path.join(HORACE, "report.json")))
+    new["claims_status"] = claims_status()
     return new
 
 
@@ -365,7 +456,7 @@ def main():
             print(f"{os.path.relpath(a.hub, ROOT)}: up to date")
             return
         stale = [f"power.{k}" for k in new["power"] if new["power"].get(k) != hub.get("power", {}).get(k)]
-        stale += ["energy_events"] if new.get("energy_events") != hub.get("energy_events") else []
+        stale += [k for k in ("energy_events", "claims_status") if new.get(k) != hub.get(k)]
         sys.exit(f"{os.path.relpath(a.hub, ROOT)} is stale: " + (", ".join(stale) if stale else "formatting only") +
                  "\n  run python3 tools/ettelem/sync_hub_data.py, then rebuild the page")
     with open(a.hub, "w") as fh:
@@ -374,7 +465,8 @@ def main():
     f2, f3 = P["fit"]["aifoundry2"], P["fit"]["aifoundry3"]
     print(f"wrote {os.path.relpath(a.hub, ROOT)}: fit rms {f2['rms_w']:.3f}/{f3['rms_w']:.3f} W, droop {P['droop']['mv_per_dram_offrail_w']:.4f} mV/W, "
           f"rail filter tau {P['rail_filter']['aifoundry2']['tau_s']}/{P['rail_filter']['aifoundry3']['tau_s']} s, "
-          f"{len(new['energy_events']['events'])} energy events")
+          f"{len(new['energy_events']['events'])} energy events, claims status for "
+          + ", ".join(f"{len(s['pages'])} pages ({s['id']})" for s in new["claims_status"]["series"]))
 
 
 if __name__ == "__main__":

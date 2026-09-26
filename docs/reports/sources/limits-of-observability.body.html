@@ -34,7 +34,12 @@ button.linkbtn{font:inherit;font-size:0.82rem;background:none;border:1px solid v
 /* stacked tables on phones, compact: each label runs in before its text; short cells sit side by side; the report's date under its title */
 @media (max-width:599px){table.stack td[data-label]::before{display:inline;content:attr(data-label) ": ";font-size:0.72rem;margin-right:2px}
 table.stack td{padding:2px 0}table.stack td.inl{display:inline-block;width:auto;margin-right:16px;vertical-align:middle}
-table.stack td:first-child::before,#reportstab.stack td:nth-child(2)::before{content:none}#reportstab.stack td:nth-child(2){padding-top:0}}.mapnode.dim{opacity:0.22}.mapedge.dim{opacity:0.12}.maphead{font-size:0.86rem;color:var(--ink-2);margin:4px 0}</style>
+table.stack td:first-child::before,#reportstab.stack td:nth-child(2)::before{content:none}#reportstab.stack td:nth-child(2){padding-top:0}}.mapnode.dim{opacity:0.22}.mapedge.dim{opacity:0.12}.maphead{font-size:0.86rem;color:var(--ink-2);margin:4px 0}
+/* the claims scoreboard; group rows of a sorted or filtered table, and rows a status filter hides */
+.claims-status{display:inline-block;font-size:0.8rem;color:var(--ink);background:color-mix(in srgb,var(--warn) 14%,transparent);border:1px solid var(--warn);border-radius:8px;padding:2px 9px;margin:0 0 8px}
+.cbar{cursor:pointer}.cbar .seg{stroke:var(--surface);stroke-width:1px}
+table tr.grp-off,table tr.st-off{display:none !important}
+.claims-defs{font-size:0.85rem;margin:4px 0 12px}.claims-defs dl{margin:6px 0}.claims-defs dt{font-weight:600;margin-top:4px}.claims-defs dd{margin:0 0 0 1.2em;color:var(--ink-2)}</style>
 <h1>Limits of observability on the ET-SoC-1</h1>
 <p class="byline">25 September 2026 (first published 20 September; versions in §8) · the AI Foundry cards in aifoundry2 and aifoundry3 · firmware source read at et-platform <code>353f20e</code> (the cards' own log strings point to an older build; see §8), RTL core-et <code>b38a1a3</code> · the index of every ET-SoC-1 measurement report</p>
 
@@ -99,14 +104,22 @@ table.stack td:first-child::before,#reportstab.stack td:nth-child(2)::before{con
 <h2 id="reports">1. The measurement reports</h2>
 <p>Everything measured on these cards so far. The map shows what was measured, when and on which card, which report each session fed, and which later page now holds a number an earlier page first gave; the table under it is the index, grouped by subject and newest first within each group, with what each report found and which of the instruments in §2 it leaned on.</p>
 <div class="chart-title">Reports and sessions, 18–25 September</div>
-<p class="caption">Each session (an E-ID of the experiment register, §7) sits in the lane of the card it ran on, and each report at the day it was first published. Grey curves run from a session to the reports it fed; dashed arrows from a number's first page to the page that now holds it. Hover, tap or tab to any mark; Enter or a click selects it and shows its details.</p>
+<p class="caption">Each session (an E-ID of the experiment register, §7) sits in the lane of the card it ran on, and each report at the day it was first published. A session on several cards sits in each of their lanes. Grey curves run from a session to the reports it fed; dashed arrows from a number's first page to the page that now holds it. Hover, tap or tab to any mark; Enter or a click selects it and shows its details.</p>
 <div class="ck-controls" id="map-ctl"></div>
 <div class="maphead" id="map-head"></div>
 <div class="vgrid map">
 <div id="map-frame"></div>
 <div class="card panel" id="map-panel" aria-live="polite"></div>
 </div>
-<div class="table-wrap"><table id="reportstab"></table></div>
+<div class="chart-title" id="claims-title">How each page's claims stand on the cards</div>
+<p class="caption" id="claims-cap">Every claim the <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">version-3 claims check</a> listed, <span id="claims-bars">one bar per page</span>: split by the verdict the check gave it (a number quoted from another page takes that page's verdict), or by the cards whose data it rests on. <span id="claims-scope"></span> Hover, tap or tab to a bar for its counts; a click or Enter opens the page (on a touch screen, a second tap).</p>
+<p class="claims-status" id="claims-status"></p>
+<div class="ck-controls" id="claims-ctl"></div>
+<div class="ck-legend" id="claims-leg"></div>
+<div id="claims"></div>
+<div class="ck-readout" id="claims-read"></div>
+<details class="claims-defs"><summary>What each verdict means</summary><dl id="claims-defs"></dl></details>
+<div class="table-wrap ck-table-wrap"><table id="reportstab"></table></div>
 
 <h2 id="ladder">2. The ladder</h2>
 <p>Every instrument, roughly coarsest to finest. <b>Status</b> says what it takes on this card: <span class="chip works_now">works now</span> from a user account;
@@ -214,7 +227,7 @@ each configuration's mean as a fraction of each rail's power plus a cost per DRA
 <h2 id="improve">5. The improvement ladder</h2>
 <p>Every way found to see more, grouped by what it costs: software on the data the card already gives; lab hardware that needs no firmware change; firmware changes, each ending in a signed image; tooling against interfaces that already exist (a debugger client, an RTL flow); and research. Each rung says what it adds and what it would change in the numbers; where a rung is an instrument of §2, the link opens that row. Rungs marked done are in the energy manual or on this page. The firmware caveat at the end of the section applies to every rung in its group.</p>
 <div class="controls" id="impfilters"></div>
-<div class="table-wrap"><table id="imptab"></table></div>
+<div class="table-wrap ck-table-wrap"><table id="imptab"></table></div>
 <p><b>What each rung does to the unmetered watts.</b> Today: <span id="unmet-today"></span>; rungs 2 and 3 attribute the part above idle (§4.2, §4.3) and leave the idle <span id="idle15b"></span> W unsplit. The riser (rung 8) does not meter them either, but it makes every bracketed burst sharper and shows the input side of every regulator's transient. The camera (rung 9) says which package the watts warm. Forwarding the PMIC's input-side readings (rung 11) measures the delivery losses and leaves only the rails with no meter — DDR, VDDQ, PCIe, IO, Maxion — as a remainder: <span id="idle-nometer"></span>. Below that is the board, and the board is shared.</p>
 <p><b>The firmware caveat.</b> Every "firmware" row above ends with a reflash. The minion runtime and the service processor
 bootloader are signed executable images; BL1 and BL2 verify a certificate and signature against a public-key hash in OTP unless a chicken bit
@@ -244,7 +257,7 @@ every bit.</p>
 <h2 id="sessions">7. The power and temperature sessions</h2>
 <p>Every registered session (E1 onward) that measured power or temperature, in order, with what it established, the instruments it used, where its raw data is in the repository (paths are under <code>docs/reports/data/</code> and link to GitHub) and the reports that use it; the 18 September reports predate the register and are summarised in one row. The map in <a href="#reports">§1</a> shows them on a timeline, by card. The IDs are those of the experiment register, <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/03-experiments.md">docs/findings/03-experiments.md</a>, which gives each session's command, protocol and caveats.</p>
 <details id="sessions-table"><summary>All <span id="nsess"></span> sessions as a table</summary>
-<div class="table-wrap"><table id="sessionstab"></table></div>
+<div class="table-wrap ck-table-wrap"><table id="sessionstab"></table></div>
 </details>
 
 <h2 id="method">8. Method and caveats</h2>

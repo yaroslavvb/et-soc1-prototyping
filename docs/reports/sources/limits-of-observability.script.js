@@ -28,6 +28,40 @@ function inkOn(css) {  /* --ink or --page, whichever contrasts more with a fill 
   return k(b, lum('var(--ink)')) >= k(b, lum('var(--page)')) ? 'var(--ink)' : 'var(--page)';
 }
 const pretty = c => c.startsWith('dramrow/stride8K') ? `L3 reads through the mesh (<code>${esc(c)}</code>)` : `<code>${esc(c)}</code>`;
+/* A session's "when" ("22 Sep, 13:16–13:22", "20–21 Sep") as days after 18 September 00:00: [start, end]. */
+const parseWhen = w => {
+  const m = String(w).match(/^(\d+)(?:–(\d+))? Sep(?:, (\d\d):(\d\d)(?:–(\d\d):(\d\d))?)?/);
+  if (!m) return [NaN, NaN];  /* not a September date: the map leaves it out, the table sorts it last */
+  const d0 = +m[1], d1 = m[2] ? +m[2] : d0;
+  const T = (d, h, mi) => d - 18 + (h + mi / 60) / 24;
+  if (m[3]) { const a = T(d0, +m[3], +m[4]); return [a, m[5] ? T(d0, +m[5], +m[6]) : a]; }
+  return [T(d0, 12, 0), T(d1, 12, 0)];
+};
+/* CK.sortTable on a table whose tr.grp rows head groups: while a column is sorted the group rows step aside, and
+   while the text filter (o.filter) or a status filter (class st-off) hides rows, a group row shows only above a
+   visible one. The filter's count counts entries (o.noun), not group rows. Call it after CK.stackTable. */
+function sortGrouped(t, o) {
+  o = o || {};
+  const api = CK.sortTable(t, o), tb = t.tBodies[0], wrap = t.closest('.ck-table-wrap');
+  const fw = o.filter && wrap && wrap.previousElementSibling && wrap.previousElementSibling.classList.contains('ck-filter') ? wrap.previousElementSibling : null;
+  const inp = fw && fw.querySelector('input'), cnt = fw && fw.querySelector('.ck-filter-n');
+  const isGrp = r => r.classList.contains('grp'), vis = r => !r.classList.contains('ck-hidden') && !r.classList.contains('st-off');
+  function fix() {
+    const sorted = !!t.querySelector('th[aria-sort="ascending"], th[aria-sort="descending"]');
+    let head = null, any = false;
+    const close = () => { if (head) { head.classList.remove('ck-hidden'); head.classList.toggle('grp-off', sorted || !any); } };  /* the text filter does not judge group rows */
+    for (const r of tb.rows) { if (isGrp(r)) { close(); head = r; any = false; } else if (vis(r)) any = true; }
+    close();
+    if (cnt) {
+      const q = inp.value.trim(), pool = [...tb.rows].filter(r => !isGrp(r) && !r.classList.contains('st-off'));
+      cnt.textContent = q ? `${pool.filter(vis).length} of ${pool.length} ${o.noun || 'rows'}` : '';
+    }
+  }
+  if (t.tHead) t.tHead.addEventListener('click', fix);  /* runs after the header button's own sort */
+  if (inp) inp.addEventListener('input', fix);
+  fix();
+  return Object.assign({fix}, api);
+}
 
 /* ---------- numbers the hand-kept rows quote, filled from the data: {{name}} in data.json ---------- */
 const TOK = (function () {
@@ -75,8 +109,9 @@ document.getElementById('toclist').innerHTML = [...document.querySelectorAll('h2
   const t = document.getElementById('reportstab');
   t.innerHTML = '<thead><tr><th style="width:18%">Report</th><th style="width:9%">When</th><th style="width:50%">What it established</th><th style="width:23%">Instruments</th></tr></thead><tbody>' +
     D.reports.map(r => { const g = r.group && r.group !== group ? `<tr class="grp"><td colspan="4"><b>${esc(r.group)}</b></td></tr>` : ''; if (r.group) group = r.group;
-      return g + `<tr><td class="lvl"><a href="${r.url}">${esc(r.title)}</a></td><td class="small">${esc(r.date)}</td><td>${r.what}</td><td class="small">${esc(r.instruments)}</td></tr>`; }).join('') + '</tbody>';
+      return g + `<tr><td class="lvl"><a href="${r.url}">${esc(r.title)}</a></td><td class="small" data-sort="${esc(r.pub)}">${esc(r.date)}</td><td>${r.what}</td><td class="small">${esc(r.instruments)}</td></tr>`; }).join('') + '</tbody>';
   CK.stackTable(t);
+  sortGrouped(t);  /* "When" sorts by the day a report was first published */
 })();
 
 /* ---------- the ladder: the time-resolution chart and the table share one filter ---------- */
@@ -273,13 +308,16 @@ function solve4(A, b) {  /* Gaussian elimination with partial pivoting on a copy
   for (let r = n - 1; r >= 0; r--) { let s = M[r][n]; for (let j = r + 1; j < n; j++) s -= M[r][j] * x[j]; x[r] = s / M[r][r]; }
   return x;
 }
-/* Each card's configurations as the fit sees them; the refit counts st_stream's bytes twice (the line read). */
-const PC = Object.fromEntries(CARDS.map(c => [c, P.per_config[c].map(r => ({cfg: r[0], over: r[1], mi: r[2], sr: r[3], no: r[4], g: r[5],
+/* Each card's configurations as the fit sees them; the refit counts st_stream's bytes twice (the line read). The
+   V1 chart offers every card in power.per_config (the text above it stays on CARDS); a card with no published fit
+   gets the same least-squares fit here, from its own rows. */
+const V1CARDS = CK.cardsIn(Object.keys(P.per_config).filter(k => k !== 'fields' && Array.isArray(P.per_config[k]) && Array.isArray(P.per_config[k][0])));  /* its keys: 'fields', then one list of rows per card */
+const PC = Object.fromEntries(V1CARDS.map(c => [c, P.per_config[c].map(r => ({cfg: r[0], over: r[1], mi: r[2], sr: r[3], no: r[4], g: r[5],
   un: r[1] - r[2] - r[3] - r[4], k: klass(r[0]), rnd: r[0].includes('/random')}))]));
 function fitOf(card, line) {
   const R = PC[card], dram = r => r.g * 1e-3 * (line && r.k === 'st' ? 2 : 1);
   let coef;
-  if (!line) { const c = P.fit[card].coef; coef = [c.minion, c.sram, c.noc, c.dram_pj_per_byte]; } else {
+  if (!line && P.fit[card]) { const c = P.fit[card].coef; coef = [c.minion, c.sram, c.noc, c.dram_pj_per_byte]; } else {
     const X = R.map(r => [r.mi, r.sr, r.no, dram(r)]), A = [0, 1, 2, 3].map(i => [0, 1, 2, 3].map(j => X.reduce((s, x) => s + x[i] * x[j], 0)));
     coef = solve4(A, [0, 1, 2, 3].map(i => X.reduce((s, x, n) => s + x[i] * R[n].un, 0)));
   }
@@ -310,7 +348,7 @@ function fitOf(card, line) {
     [['× minion-rail W', 'minion', 3, ''], ['× SRAM-rail W', 'sram', 3, ''], ['× NoC-rail W', 'noc', 3, ''], ['pJ per DRAM byte', 'dram_pj_per_byte', 1, ' pJ/B']].map(r =>
       `<tr><td>${r[0]}</td>` + hosts.map(h => `<td class="num">${f(F[h].coef[r[1]], r[2])} ± ${f(CH.fit[h].se_hc3[r[1]], r[2])}${r[3]}</td>`).join('') + '</tr>').join('') +
     '<tr><td class="small">residual rms, configuration means</td>' + hosts.map(h => `<td class="num small">${f(F[h].rms_w)} W, n = ${F[h].n}</td>`).join('') + '</tr></tbody>';
-  const fit = Object.fromEntries(CARDS.map(c => [c, fitOf(c, false)])), refit = Object.fromEntries(CARDS.map(c => [c, fitOf(c, true)]));
+  const fit = Object.fromEntries(V1CARDS.map(c => [c, fitOf(c, false)])), refit = Object.fromEntries(V1CARDS.map(c => [c, fitOf(c, true)]));
   const all = CARDS.flatMap(c => fit[c].pts), full = p => /^(tload|tstore)\/dram\/|^dramrow\/stride1K\//.test(p.cfg);
   const cm = k => CARDS.map(c => F[c].coef[k]), dif = a => 100 * (Math.max(...a) / Math.min(...a) - 1);
   const quarter = CARDS.map(c => { const d = fit[c].pts.filter(p => p.g > 0); return fit[c].rmsd / (d.reduce((s, p) => s + p.un, 0) / d.length); });
@@ -363,9 +401,9 @@ function fitOf(card, line) {
     `and cannot be split further. The second bar: the chosen configuration's watts over idle, the three rails and then the fit's delivery loss and DRAM term, with the measured total as a tick. ` +
     `Above idle, about a sixth of an instruction's watts are on no sensor (median ${share('aifoundry2', p => p.k === 'instr')} on aifoundry2, ${share('aifoundry3', p => p.k === 'instr')} on aifoundry3) ` +
     `and about two thirds of DRAM traffic's (${share('aifoundry2', p => p.g > 0)} and ${share('aifoundry3', p => p.g > 0)}). Hover, tap or tab to a point to break it down; arrows step through the points in residual order.`);
-  const st = {card: 'aifoundry2', line: false, on: new Set(CLS.map(c => c[0])), sel: 'tload/dram/random'};
+  const st = {card: V1CARDS[0], line: false, on: new Set(CLS.map(c => c[0])), sel: 'tload/dram/random'};
   const ctl = document.getElementById('v1-ctl'), box = () => { const d = document.createElement('div'); ctl.appendChild(d); return d; };
-  CK.seg(box(), {label: 'Card', options: CARDS.map(c => [c, c]), value: st.card, onChange: v => { st.card = v; fr.redraw(); out(); }});
+  CK.cardSeg(box(), {cards: V1CARDS, value: st.card, onChange: v => { st.card = v; fr.redraw(); out(); }});
   const cb = box(); cb.innerHTML = '<label class="chk"><input type="checkbox" id="v1-line"> Count the line read before each L1 store</label>';
   document.getElementById('v1-line').addEventListener('change', ev => { st.line = ev.target.checked; fr.redraw(); out(); });
   const legHost = document.getElementById('v1-leg'), l1 = document.createElement('div'), l2 = document.createElement('div');
@@ -434,6 +472,10 @@ function fitOf(card, line) {
     CK.txt(g0, 2, 13, 'unmetered W measured (board − rails, over idle)', 'lab');
     const dg = CK.el('line', {x1: x(0), y1: y(0), x2: x(8), y2: y(8), 'stroke-dasharray': '5 4', 'stroke-width': 1.3}, g0); dg.style.stroke = 'var(--ref)';
     CK.txt(g0, x(7.9), y(7.9) + 14, 'fit = measured', 'tick', 'end');
+    /* the card shown, with its registry mark, in the empty corner under the diagonal */
+    const kc = CK.card(st.card), kt = CK.txt(g0, G.aW - R - 4, G.aH - B - 10, kc.label, 'lab-strong', 'end');
+    let kw = 0; try { kw = kt.getComputedTextLength(); } catch (_) { /* no layout */ }
+    CK.cardMark(g0, st.card, G.aW - R - 4 - (kw || 7 * kc.label.length) - 10, G.aH - B - 14, 5);
     const pts = cur().pts.filter(p => st.on.has(p.k)).sort((p, q) => p.res - q.res), nodes = [];
     circ = {};
     pts.forEach(p => {
@@ -552,24 +594,26 @@ function fitOf(card, line) {
   dout();
 })();
 
-/* ---------- the improvement ladder ---------- */
+/* ---------- the improvement ladder: every rung drawn once; the status buttons and the text filter hide rows ---------- */
 (function () {
   let filter = 'all';
   const fbox = document.getElementById('impfilters'), t = document.getElementById('imptab');
   const opts = [['all', 'all rungs'], ['done', 'done'], ['works_now', 'works now'], ['needs_tooling', 'tooling or lab hardware'], ['needs_fw_change', 'firmware'], ['research_only', 'research'], ['impossible_on_silicon', 'not on silicon']];
-  function render() {
-    fbox.innerHTML = opts.map(([k, n]) => `<button type="button" aria-pressed="${filter === k}" data-k="${k}">${n}</button>`).join('');
-    fbox.querySelectorAll('button').forEach(b => { b.onclick = () => { filter = b.dataset.k; render(); }; });
-    const rows = D.improvements.filter(r => filter === 'all' || (filter === 'done' ? r.done : r.status === filter));
-    let group = null;
-    t.innerHTML = '<thead><tr><th style="width:23%">Rung</th><th style="width:28%">What it adds</th><th style="width:15%">Cost</th><th style="width:24%">What changes in the numbers</th><th style="width:10%">Status</th></tr></thead><tbody>' +
-      rows.map(r => { const g = r.group !== group ? `<tr class="grp"><td colspan="5"><b>${esc(r.group)}</b></td></tr>` : ''; group = r.group;
-        const cap = !r.adds || /\.$/.test(r.adds), see = r.row ? `${r.adds ? ' ' : ''}<a href="#${ladId(r.row)}" class="seerow" data-row="${esc(r.row)}">${cap ? 'See' : 'see'} §2: ${esc(r.row)}</a>` : '';
-        return g + `<tr><td class="lvl">${r.rung}. ${esc(r.what)}${r.done ? ' <span class="verif confirmed">done</span>' : ''}</td><td>${esc(fill(r.adds))}${see}</td><td class="small">${esc(r.cost)}</td><td>${esc(fill(r.effect))}</td><td class="inl">${chip(r.status)}</td></tr>`; }).join('') + '</tbody>';
-    t.querySelectorAll('a.seerow').forEach(a => a.addEventListener('click', ev => { ev.preventDefault(); goRow(a.dataset.row); }));
-    CK.stackTable(t);
-  }
-  render();
+  let group = null;
+  t.innerHTML = '<thead><tr><th style="width:23%">Rung</th><th style="width:28%">What it adds</th><th style="width:15%">Cost</th><th style="width:24%">What changes in the numbers</th><th style="width:10%">Status</th></tr></thead><tbody>' +
+    D.improvements.map((r, i) => { const g = r.group !== group ? `<tr class="grp"><td colspan="5"><b>${esc(r.group)}</b></td></tr>` : ''; group = r.group;
+      const cap = !r.adds || /\.$/.test(r.adds), see = r.row ? `${r.adds ? ' ' : ''}<a href="#${ladId(r.row)}" class="seerow" data-row="${esc(r.row)}">${cap ? 'See' : 'see'} §2: ${esc(r.row)}</a>` : '';
+      return g + `<tr data-i="${i}"><td class="lvl">${r.rung}. ${esc(r.what)}${r.done ? ' <span class="verif confirmed">done</span>' : ''}</td><td>${esc(fill(r.adds))}${see}</td><td class="small">${esc(r.cost)}</td><td>${esc(fill(r.effect))}</td><td class="inl">${chip(r.status)}</td></tr>`; }).join('') + '</tbody>';
+  t.querySelectorAll('a.seerow').forEach(a => a.addEventListener('click', ev => { ev.preventDefault(); goRow(a.dataset.row); }));
+  CK.stackTable(t);
+  const sorter = sortGrouped(t, {filter: true, filterLabel: 'Filter rungs', noun: 'rungs'});
+  fbox.innerHTML = opts.map(([k, n]) => `<button type="button" aria-pressed="${filter === k}" data-k="${k}">${n}</button>`).join('');
+  fbox.querySelectorAll('button').forEach(b => { b.onclick = () => {
+    filter = b.dataset.k;
+    fbox.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    t.querySelectorAll('tr[data-i]').forEach(tr => { const r = D.improvements[+tr.dataset.i]; tr.classList.toggle('st-off', !(filter === 'all' || (filter === 'done' ? r.done : r.status === filter))); });
+    sorter.fix();
+  }; });
 })();
 
 /* ---------- the sessions table (§7) ---------- */
@@ -579,12 +623,29 @@ const rawLink = p => { const PRE = 'docs/reports/data/'; return `<a href="${REPO
 (function () {
   const t = document.getElementById('sessionstab');
   t.innerHTML = '<thead><tr><th style="width:7%">Session</th><th style="width:9%">When</th><th style="width:8%">Card</th><th style="width:28%">What it measured</th><th style="width:14%">Instruments</th><th style="width:21%">Raw data</th><th style="width:13%">Reports</th></tr></thead><tbody>' +
-    D.sessions.map(r => `<tr><td class="lvl">${esc(r.id)}</td><td class="small">${esc(r.when)}</td><td class="small">${esc(r.card)}</td><td>${esc(r.what)}</td><td class="small">${esc(r.instruments)}</td><td class="small">${r.data.map(rawLink).join('<br>')}</td><td class="small">${r.reports.map(x => `<a href="${x.url}">${esc(x.title)}</a>`).join('<br>')}</td></tr>`).join('') + '</tbody>';
+    D.sessions.map(r => `<tr><td class="lvl" data-sort="${+((r.id.match(/\d+/) || [0])[0])}">${esc(r.id)}</td><td class="small" data-sort="${parseWhen(r.when)[0].toFixed(4)}">${esc(r.when)}</td><td class="small">${esc(r.card)}</td><td>${esc(r.what)}</td><td class="small">${esc(r.instruments)}</td><td class="small">${r.data.map(rawLink).join('<br>')}</td><td class="small">${r.reports.map(x => `<a href="${x.url}">${esc(x.title)}</a>`).join('<br>')}</td></tr>`).join('') + '</tbody>';
   CK.stackTable(t);
+  sortGrouped(t, {filter: true, filterLabel: 'Filter sessions', noun: 'sessions'});  /* Session sorts by E-number, When by start time */
   setHTML('nsess', String(D.sessions.length));
 })();
 
 /* ---------- V2: the reports and sessions map (§1) ---------- */
+/* The cards a session ran on, read from its free-text card field (D.sessions[].card): card ids and labels
+   (aifoundry2, aifoundry1-c1, "aifoundry1 card 1"; a bare "aifoundry1" is that machine), the registry's short names
+   (a2, a1c1), "both" (the two cards measured before version 3), "all three cards" (the version-3 campaign's cards,
+   amendment A4) and "all three" alone (E21's "all three machines"). No card ("—") is an analysis. The cards come back
+   in registry order, any other name after them. */
+const V3CARDS = CK.cards.filter(c => c.id !== 'aifoundry1-c0').map(c => c.id);
+function cardsOfText(str) {
+  const t = String(str || '').toLowerCase(), out = [], add = id => { if (!out.includes(id)) out.push(id); };
+  const known = id => CK.cards.some(c => c.id === id);
+  for (const m of t.matchAll(/aifoundry(\d)(?:-c(\d)|\s+card\s+(\d))?/g)) add(CK.card(m[2] || m[3] ? `aifoundry${m[1]}-c${m[2] || m[3]}` : `aifoundry${m[1]}`).id);
+  for (const m of t.matchAll(/\b(a\d)-?(c\d)?\b/g)) { const id = CK.card(m[1] + (m[2] || '')).id; if (known(id)) add(id); }
+  if (/\bboth\b/.test(t)) ['aifoundry2', 'aifoundry3'].forEach(add);
+  if (/\b(?:all three|all 3|three|all) cards\b/.test(t)) V3CARDS.forEach(add);
+  else if (/\ball three\b/.test(t)) ['aifoundry2', 'aifoundry3', 'aifoundry1'].forEach(add);
+  return CK.cardsIn(out);
+}
 (function () {
   const GROUPS = [['This hub', 'Hub', 'var(--ref)'], ['Energy and power', 'Energy and power', 'var(--c1)'], ['Contention and moving data', 'Contention', 'var(--c3)'],
     ['Memory and compute baselines, 18–19 September', 'Baselines', 'var(--c4)'], ['Research and exploratory', 'Research', 'var(--c5)'],
@@ -592,29 +653,25 @@ const rawLink = p => { const PRE = 'docs/reports/data/'; return `<a href="${REPO
   const gOf = Object.fromEntries(GROUPS.map(([k, s, c], i) => [k, {s, c, i}]));
   const base = u => u.split('#')[0];
   const REP = D.reports.map((r, i) => ({...r, key: 'r' + i, kind: 'report', grp: r.group || 'This hub', day: +r.pub.slice(8, 10)}));
-  const NDAYS = Math.max(7, ...REP.map(r => r.day - 17));  // the timeline runs from 18 September to the newest report
   const repOf = u => (u.startsWith('#') ? REP[0] : REP.find(r => base(r.url) === base(u)));
   const byShort = s => REP.find(r => r.short === s);
-  const parseWhen = w => {
-    const m = w.match(/^(\d+)(?:–(\d+))? Sep(?:, (\d\d):(\d\d)(?:–(\d\d):(\d\d))?)?/), d0 = +m[1], d1 = m[2] ? +m[2] : d0;
-    const T = (d, h, mi) => d - 18 + (h + mi / 60) / 24;
-    if (m[3]) { const a = T(d0, +m[3], +m[4]); return [a, m[5] ? T(d0, +m[5], +m[6]) : a]; }
-    return [T(d0, 12, 0), T(d1, 12, 0)];
-  };
-  const cardOf = s => (/both|all three/.test(s) || (s.includes('aifoundry2') && s.includes('aifoundry3')) ? 'both' : s.includes('aifoundry2') ? 'a2' : s.includes('aifoundry3') ? 'a3' : 'none');
-  const CARD = {a2: 'aifoundry2', a3: 'aifoundry3', both: 'both cards', none: 'analysis, no card'};
-  const SES = D.sessions.map((s, i) => { const [t0, t1] = parseWhen(s.when); return {...s, key: 's' + i, kind: 'session', t0, t1, lane: cardOf(s.card), name: s.id === '—' ? 'before E1' : s.id,
-    reps: [...new Set(s.reports.map(x => repOf(x.url)).filter(Boolean))]}; });
+  const SES = D.sessions.map((s, i) => { const [t0, t1] = parseWhen(s.when); return {...s, key: 's' + i, kind: 'session', t0, t1, cards: cardsOfText(s.card), name: s.id === '—' ? 'before E1' : s.id,
+    reps: [...new Set(s.reports.map(x => repOf(x.url)).filter(Boolean))]}; }).filter(s => isFinite(s.t0));
+  /* one lane (a column on a phone) per card any session names, in registry order, coloured from the registry */
+  const LANES = CK.cardsIn(SES.flatMap(s => s.cards));
+  const NDAYS = Math.max(7, ...REP.map(r => r.day - 17), ...SES.map(s => Math.ceil(s.t1)));  // from 18 September to the newest report or session
+  const colShort = id => { const c = CK.card(id); return c.short !== c.id ? c.short : id.replace(/^aifoundry/, 'a'); };
   const SUP = D.superseded.map((s, i) => ({...s, key: 'e' + i, fromR: byShort(s.from), to: s.to.map(t => ({...t, r: byShort(t.report)}))}));
-  const st = {sel: null, card: 'all', sup: true};
+  const st = {sel: null, card: 'pooled', sup: true};
   const byKey = k => REP.find(r => r.key === k) || SES.find(s => s.key === k);
   setHTML('map-head', `${REP.length} reports · ${SES.length} sessions · ${SUP.length} superseded numbers`);
   const ctl = document.getElementById('map-ctl'), box = () => { const d = document.createElement('div'); ctl.appendChild(d); return d; };
-  CK.seg(box(), {label: 'Card', options: [['all', 'both cards'], ['a2', 'aifoundry2'], ['a3', 'aifoundry3']], value: st.card, onChange: v => { st.card = v; fr.redraw(); }});
+  CK.cardSeg(box(), {cards: LANES, pooled: true, bus: 'map-card', value: st.card, onChange: v => { st.card = v; fr.redraw(); }});  /* its own bus: a filter, not §4.2's card */
   const cb = box(); cb.innerHTML = '<label class="chk"><input type="checkbox" id="map-sup" checked> Show superseded numbers</label>';
   document.getElementById('map-sup').addEventListener('change', ev => { st.sup = ev.target.checked; fr.redraw(); });
   const panel = document.getElementById('map-panel');
-  const showCard = s => st.card === 'all' || s.lane === 'both' || s.lane === 'none' || s.lane === st.card;
+  const showCard = s => st.card === 'pooled' || !s.cards.length || s.cards.includes(st.card);
+  const laneCards = () => LANES.filter(c => st.card === 'pooled' || c === st.card);
   function related(k) {
     const out = new Set([k]);
     if (!k) return out;
@@ -662,7 +719,7 @@ const rawLink = p => { const PRE = 'docs/reports/data/'; return `<a href="${REPO
   function draw(f) {
     const vert = f.W < 600, W = vert ? f.W - 16 : f.W, svg = f.svg; els = {};
     const defs = CK.el('defs', {}, svg), mk = CK.el('marker', {id: 'map-arr', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse'}, defs);
-    const ap = CK.el('path', {d: 'M0,0 L10,5 L0,10 Z'}, mk); ap.style.fill = 'var(--c2)';
+    const ap = CK.el('path', {d: 'M0,0 L10,5 L0,10 Z'}, mk); ap.style.fill = 'var(--ink-2)';  /* not a card's colour */
     const gE = CK.el('g', {}, svg), gN = CK.el('g', {}, svg), nodes = [];
     const pos = {};  // key -> {x, y, w, h}
     const ses = SES.filter(showCard);
@@ -670,16 +727,19 @@ const rawLink = p => { const PRE = 'docs/reports/data/'; return `<a href="${REPO
       const L = 112, R = 10, T = 30, x = t => L + t / NDAYS * (W - L - R), rowS = 19, rowR = 26;
       for (let d = 0; d <= NDAYS; d++) { CK.el('line', {x1: x(d), x2: x(d), y1: T - 6, y2: f.H - 8, class: 'grid-line'}, gE); if (d < NDAYS) CK.txt(gE, x(d + 0.5), T - 12, `${18 + d} Sep`, 'tick', 'middle'); }
       let y = T + 4;
-      const lanes = [['a2', 'aifoundry2'], ['both', 'both cards'], ['a3', 'aifoundry3'], ['none', 'analysis']];
-      lanes.forEach(([ln, lab]) => {
-        const items = ses.filter(s => s.lane === ln).sort((p, q) => p.t0 - q.t0), rows = [];
+      /* a lane per card, then the analyses; a session on several cards has a box in each of their lanes */
+      laneCards().concat(['none']).forEach(ln => {
+        const items = ses.filter(s => (ln === 'none' ? !s.cards.length : s.cards.includes(ln))).sort((p, q) => p.t0 - q.t0), rows = [];
         if (!items.length) return;
-        items.forEach(s => { const x0 = x(s.t0), w = Math.max(x(s.t1) - x0, measure(svg, s.name, 'tick') + 10); let k = rows.findIndex(e => e + 3 <= x0); if (k < 0) { rows.push(0); k = rows.length - 1; } rows[k] = x0 + w; pos[s.key] = {x: x0, y: y + k * rowS, w, h: 15}; });
+        items.forEach(s => { const x0 = x(s.t0), w = Math.max(x(s.t1) - x0, measure(svg, s.name, 'tick') + 10); let k = rows.findIndex(e => e + 3 <= x0); if (k < 0) { rows.push(0); k = rows.length - 1; } rows[k] = x0 + w;
+          (pos[s.key] = pos[s.key] || {boxes: []}).boxes.push({x: x0, y: y + k * rowS, w, h: 15, cards: ln === 'none' ? [] : [ln]}); });
         const band = CK.el('rect', {x: 0, y: y - 2, width: L - 8, height: rows.length * rowS, rx: 4}, gE);
-        band.style.fill = ln === 'a2' ? 'color-mix(in srgb, var(--c1) 12%, transparent)' : ln === 'a3' ? 'color-mix(in srgb, var(--c5) 14%, transparent)' : 'color-mix(in srgb, var(--ref) 10%, transparent)';
-        CK.txt(gE, 6, y + 11, lab, 'lab');
+        band.style.fill = `color-mix(in srgb, ${ln === 'none' ? 'var(--ref)' : CK.card(ln).color} ${ln === 'none' ? 10 : 12}%, transparent)`;
+        const lab = ln === 'none' ? 'analysis' : CK.card(ln).label;
+        CK.txt(gE, 6, y + 11, measure(svg, lab, 'lab') <= L - 16 ? lab : CK.card(ln).id, 'lab');
         y += rows.length * rowS + 4;
       });
+      ses.forEach(s => { const p = pos[s.key]; if (p) Object.assign(p, p.boxes.reduce((a, b) => (b.y > a.y ? b : a))); });  /* curves leave from the lowest box */
       y += 22;
       CK.el('line', {x1: 0, x2: W, y1: y - 12, y2: y - 12, class: 'ck-axis'}, gE);
       GROUPS.forEach(([gk, gs, gc]) => {
@@ -690,17 +750,22 @@ const rawLink = p => { const PRE = 'docs/reports/data/'; return `<a href="${REPO
         y += rows.length * rowR + 6;
       });
     } else {
-      const T = 16, dayH = 158, xT = 40, lw = 58, xA = xT + 4, xB = xA + lw + 4, xR = xB + lw + 12, y = t => T + t * dayH;
+      /* a column per card; a session spans its cards' columns (one box per run of adjacent columns), an analysis all */
+      const cols = laneCards(), n = Math.max(1, cols.length), lw = n <= 2 ? 58 : Math.max(30, Math.floor((0.56 * W - 44) / n) - 4), bow = n <= 2 ? 34 : 22;
+      const T = 16, dayH = 158, xT = 40, xA = xT + 4, colX = i => xA + i * (lw + 4), xR = colX(n) + 8, y = t => T + t * dayH;
       for (let d = 0; d <= NDAYS; d++) { CK.el('line', {x1: 0, x2: W, y1: y(d), y2: y(d), class: 'grid-line'}, gE); if (d < NDAYS) { CK.txt(gE, 2, y(d) + 14, `${18 + d}`, 'lab-strong'); CK.txt(gE, 2, y(d) + 28, 'Sep', 'tick'); } }
-      CK.txt(gE, xA + lw / 2, T - 4, 'a2', 'tick', 'middle'); CK.txt(gE, xB + lw / 2, T - 4, 'a3', 'tick', 'middle');
-      const bottom = {a2: 0, a3: 0};
+      cols.forEach((c, i) => CK.txt(gE, colX(i) + lw / 2, T - 4, colShort(c), 'tick', 'middle'));
+      const bottom = cols.map(() => 0);
       ses.slice().sort((p, q) => p.t0 - q.t0).forEach(s => {
-        const cols = s.lane === 'a2' ? ['a2'] : s.lane === 'a3' ? ['a3'] : ['a2', 'a3'], h = Math.min(40, Math.max(16, y(s.t1) - y(s.t0))), y0 = Math.max(y(s.t0), ...cols.map(c => bottom[c] + 2));
-        cols.forEach(c => { bottom[c] = y0 + h; });
-        pos[s.key] = {x: cols[0] === 'a2' ? xA : xB, y: y0, w: cols.length * lw + (cols.length - 1) * 4, h};
+        const idx = s.cards.length ? cols.map((c, i) => (s.cards.includes(c) ? i : -1)).filter(i => i >= 0) : cols.map((c, i) => i);
+        if (!idx.length) return;
+        const h = Math.min(40, Math.max(16, y(s.t1) - y(s.t0))), y0 = Math.max(y(s.t0), ...idx.map(i => bottom[i] + 2)), runs = [];
+        idx.forEach(i => { bottom[i] = y0 + h; const r = runs[runs.length - 1]; if (r && r[1] === i - 1) r[1] = i; else runs.push([i, i]); });
+        const boxes = runs.map(([i0, i1]) => ({x: colX(i0), y: y0, w: (i1 - i0 + 1) * lw + (i1 - i0) * 4, h, cards: s.cards.length ? cols.slice(i0, i1 + 1) : []}));
+        pos[s.key] = Object.assign({boxes}, boxes[boxes.length - 1]);  /* curves leave from the rightmost box */
       });
       const byDay = {};
-      REP.slice().sort((p, q) => p.day - q.day || gOf[p.grp].i - gOf[q.grp].i).forEach(r => { const k = (byDay[r.day] = (byDay[r.day] || 0) + 1) - 1; pos[r.key] = {x: xR, y: y(r.day - 18) + 6 + k * 26, w: Math.min(W - xR - 34, measure(svg, r.short, 'tick') + 16), h: 20}; });
+      REP.slice().sort((p, q) => p.day - q.day || gOf[p.grp].i - gOf[q.grp].i).forEach(r => { const k = (byDay[r.day] = (byDay[r.day] || 0) + 1) - 1; pos[r.key] = {x: xR, y: y(r.day - 18) + 6 + k * 26, w: Math.min(W - xR - bow, measure(svg, r.short, 'tick') + 16), h: 20}; });
     }
     /* session -> report curves */
     ses.forEach(s => s.reps.forEach(r => {
@@ -718,7 +783,7 @@ const rawLink = p => { const PRE = 'docs/reports/data/'; return `<a href="${REPO
       let d;
       if (vert) { const x0 = a.x + a.w, x1 = b.x + b.w, bow = Math.min(W - 4, Math.max(x0, x1) + 18 + 6 * j); d = `M${x0},${a.y + a.h / 2} C${bow},${a.y + a.h / 2} ${bow},${b.y + b.h / 2} ${x1 + 2},${b.y + b.h / 2}`; }
       else { const ax = a.x + a.w / 2, bx = b.x + b.w / 2, ay = a.y + (b.y > a.y ? a.h : 0), by = b.y + (b.y > a.y ? 0 : b.h), my = (ay + by) / 2 + (Math.abs(by - ay) < 8 ? 34 : 0); d = `M${ax},${ay} C${ax},${my} ${bx},${my} ${bx},${by}`; }
-      const p = CK.el('path', {d, fill: 'none', class: 'mapedge', 'stroke-dasharray': '5 3', 'stroke-width': 1.5, 'marker-end': 'url(#map-arr)'}, gE); p.style.stroke = 'var(--c2)';
+      const p = CK.el('path', {d, fill: 'none', class: 'mapedge', 'stroke-dasharray': '5 3', 'stroke-width': 1.5, 'marker-end': 'url(#map-arr)'}, gE); p.style.stroke = 'var(--ink-2)';
       els[e.key + '/' + j] = {el: p, edge: true, kind: 'sup', a: e.fromR.key, b: t.r.key};
     }));
     /* nodes: sessions, then reports */
@@ -730,18 +795,20 @@ const rawLink = p => { const PRE = 'docs/reports/data/'; return `<a href="${REPO
       g.addEventListener('keydown', ev => { if (ev.key === 'Escape' && st.sel) select(st.sel); });
       els[n.key] = {el: g}; nodes.push(g);
     };
-    ses.slice().sort((p, q) => p.t0 - q.t0).forEach(s => addNode(s, `<b>${esc(s.name)}</b> · ${esc(s.when)} · ${CARD[s.lane]}<br>${esc(s.what)}`, (g, p) => {
-      const mix = c => `color-mix(in srgb, ${c} 30%, var(--surface))`;
-      if (s.lane === 'both') {
-        CK.el('rect', {x: p.x, y: p.y, width: p.w, height: p.h / 2, fill: mix('var(--c1)')}, g);
-        CK.el('rect', {x: p.x, y: p.y + p.h / 2, width: p.w, height: p.h / 2, fill: mix('var(--c5)')}, g);
-        CK.el('rect', {x: p.x, y: p.y, width: p.w, height: p.h, rx: 3, fill: 'none', stroke: 'var(--ink-2)', 'stroke-width': 1}, g);
-      } else {
-        const c = s.lane === 'a2' ? 'var(--c1)' : s.lane === 'a3' ? 'var(--c5)' : 'var(--ref)';
-        CK.el('rect', {x: p.x, y: p.y, width: p.w, height: p.h, rx: 3, fill: s.lane === 'none' ? 'var(--surface)' : mix(c), stroke: c, 'stroke-width': 1.2, 'stroke-dasharray': s.lane === 'none' ? '3 2' : null}, g);
-      }
-      CK.el('rect', {x: p.x, y: p.y, width: p.w, height: p.h, class: 'ck-hit'}, g);
-      const t = CK.txt(g, p.x + 5, p.y + Math.min(p.h, 15) / 2 + 4, s.name, 'tick'); t.style.fill = 'var(--ink)'; t.style.fontWeight = '600';
+    const mix = c => `color-mix(in srgb, ${c} 30%, var(--surface))`, paint = (e, fill, stroke) => { e.style.fill = fill; if (stroke) e.style.stroke = stroke; return e; };
+    ses.slice().sort((p, q) => p.t0 - q.t0).forEach(s => addNode(s, `<b>${esc(s.name)}</b> · ${esc(s.when)} · ${s.cards.length ? esc(s.card) : 'analysis, no card'}<br>${esc(s.what)}`, (g, p) => {
+      p.boxes.forEach(b => {
+        if (!b.cards.length) paint(CK.el('rect', {x: b.x, y: b.y, width: b.w, height: b.h, rx: 3, 'stroke-width': 1.2, 'stroke-dasharray': '3 2'}, g), 'var(--surface)', 'var(--ref)');
+        else if (b.cards.length === 1) paint(CK.el('rect', {x: b.x, y: b.y, width: b.w, height: b.h, rx: 3, 'stroke-width': 1.2}, g), mix(CK.card(b.cards[0]).color), CK.card(b.cards[0]).color);
+        else {  /* a box across several cards' columns: each card's part in its tint, one outline */
+          const k = b.cards.length;
+          b.cards.forEach((c, i) => paint(CK.el('rect', {x: b.x + i * b.w / k, y: b.y, width: b.w / k, height: b.h}, g), mix(CK.card(c).color)));
+          paint(CK.el('rect', {x: b.x, y: b.y, width: b.w, height: b.h, rx: 3, 'stroke-width': 1}, g), 'none', 'var(--ink-2)');
+        }
+        CK.el('rect', {x: b.x, y: b.y, width: b.w, height: b.h, class: 'ck-hit'}, g);
+        const t = CK.txt(g, b.x + 5, b.y + Math.min(b.h, 15) / 2 + 4, s.name, 'tick'); t.style.fill = 'var(--ink)'; t.style.fontWeight = '600';
+        if (vert && /[,–]/.test(s.name) && 1.1 * measure(svg, s.name, 'tick') + 8 > b.w) t.textContent = s.name.split(/[,–]/)[0] + '…';  /* a narrow column: the first ID; the tooltip has all */
+      });
     }));
     REP.slice().sort((p, q) => p.day - q.day || gOf[p.grp].i - gOf[q.grp].i).forEach(r => addNode(r, `<b>${esc(r.title)}</b><br>first published ${r.day} September · ${esc(gOf[r.grp].s)}`, (g, p) => {
       const c = gOf[r.grp].c;
@@ -766,4 +833,118 @@ const rawLink = p => { const PRE = 'docs/reports/data/'; return `<a href="${REPO
     }
   }});
   fillPanel();
+})();
+
+/* ---------- the claims scoreboard (§1): each page's claims by verdict, or by the cards whose data they rest on ----------
+   D.claims_status comes from tools/ettelem/sync_hub_data.py: verdicts [[key, label, meaning]] and series[], each
+   {label, short, note, pages: {<slug>: {claims, verdict: {<key>: n}, cards: {<card ids joined by +, or none>: n}}}}.
+   Every series is drawn, one bar per page and series, so the campaign's results only add a series to the data. */
+(function () {
+  const C = D.claims_status, SER = C.series, S = SER.length, VD = C.verdicts;
+  const GREY = 'color-mix(in srgb, var(--ref) 55%, var(--surface))';
+  /* verdict colours, strongest evidence first (checked for colour-blind separation of neighbours, light and dark);
+     "not a measurement" is neutral grey. A verdict not listed here draws in --ref. */
+  const VCOL = {'PROVEN-BOTH': 'var(--c3)', 'CARD-DIFFERENT': 'var(--c1)', 'ONE-CARD': 'var(--c4)', 'UNDER-REPLICATED': 'var(--c7)', 'WITHIN-NOISE': 'var(--c5)', 'NOT-EMPIRICAL': GREY};
+  const VLAB = Object.fromEntries(VD.map(v => [v[0], v[1]]));
+  const slugOf = u => u.split('#')[0].replace(/\/$/, '').split('/').pop();
+  const REP = D.reports.map(r => ({...r, slug: slugOf(r.url)}));
+  const inAny = slug => SER.some(s => s.pages[slug]);
+  const extra = [...new Set(SER.flatMap(s => Object.keys(s.pages)))].filter(k => !REP.some(r => r.slug === k)).sort();
+  const PAGES = REP.filter(r => inAny(r.slug)).concat(extra.map(k => ({slug: k, short: k, title: k, url: 'https://spacesheep.dev/@yaroslavvb/' + k})));
+  const HUB = REP[0].slug;
+  const st = {view: 'verdict', scale: 'n'};
+  /* the categories of the current view, in order, each {key, label, fills: [colours]} (a card set: one stripe a card) */
+  const setCards = k => (k === 'none' ? [] : k.split('+'));
+  const cardsLab = ids => (ids.length ? ids.map(c => CK.card(c).label).reduce((a, b, i, l) => a + (i === l.length - 1 ? ' and ' : ', ') + b) : '');
+  function cats() {
+    if (st.view === 'verdict') {
+      const seen = new Set(SER.flatMap(s => Object.values(s.pages).flatMap(p => Object.keys(p.verdict))));
+      return VD.filter(v => seen.has(v[0])).map(v => ({key: v[0], label: v[1], fills: [VCOL[v[0]] || 'var(--ref)']}));
+    }
+    const keys = [...new Set(SER.flatMap(s => Object.values(s.pages).flatMap(p => Object.keys(p.cards))))];
+    const rank = k => { const c = setCards(k); return [k === 'none' ? 1 : 0, -c.length, ...CK.cardsIn(c).map(x => CK.cards.findIndex(y => y.id === x))]; };
+    keys.sort((a, b) => { const ra = rank(a), rb = rank(b); for (let i = 0; i < Math.max(ra.length, rb.length); i++) { const d = (ra[i] == null ? -1 : ra[i]) - (rb[i] == null ? -1 : rb[i]); if (d) return d; } return 0; });
+    return keys.map(k => { const c = CK.cardsIn(setCards(k)); return {key: k, label: c.length ? (c.length === 1 ? cardsLab(c) + ' only' : cardsLab(c)) : 'no card’s data', fills: c.length ? c.map(x => CK.card(x).color) : [GREY]}; });
+  }
+  const counts = p => (st.view === 'verdict' ? p.verdict : p.cards);
+  const phrase = (k, n, tot) => `${esc(st.view === 'verdict' ? VLAB[k] || k : cats().find(c => c.key === k).label)}: ${num(n, 0)} (${pct(n / tot)})`;
+
+  /* status line, scope, definitions */
+  setHTML('claims-status', SER.map(s => `<b>${esc(s.label)}</b>: ${esc(s.note)}.`).join(' '));
+  if (S > 1) setHTML('claims-bars', 'one bar per page for each status');
+  const out = REP.filter(r => !inAny(r.slug));
+  setHTML('claims-scope', out.length ? `Not in the check: ${out.map(r => esc(r.title)).join(', ')}.` : '');
+  setHTML('claims-defs', VD.map(v => `<dt>${esc(v[1])}</dt><dd>${esc(v[2] || v[0])}</dd>`).join('') +
+    '<dt>the cards behind a claim</dt><dd>the cards whose data the claim rests on, as the check recorded them (most claims with no card’s data are source readings, specifications or arithmetic)</dd>');
+
+  /* controls and legend */
+  const ctl = document.getElementById('claims-ctl'), box = () => { const d = document.createElement('div'); ctl.appendChild(d); return d; };
+  CK.seg(box(), {label: 'Split by', options: [['verdict', 'verdict'], ['cards', 'cards behind it']], value: st.view, onChange: v => { st.view = v; legend(); fr.redraw(); summary(); }});
+  CK.seg(box(), {label: 'Scale', options: [['n', 'claims'], ['share', 'share of the page']], value: st.scale, onChange: v => { st.scale = v; fr.redraw(); }});
+  function swatch(fills) {
+    const s = CK.el('svg', {viewBox: '0 0 18 12', width: 18, height: 12, 'aria-hidden': 'true'}), h = 12 / fills.length;
+    fills.forEach((c, i) => { const r = CK.el('rect', {x: 2, y: i * h, width: 14, height: h}, s); r.style.fill = c; });
+    return s;
+  }
+  function legend() {
+    const h = document.getElementById('claims-leg'); h.textContent = '';
+    cats().forEach(c => { const sp = document.createElement('span'); sp.className = 'ck-li'; sp.append(swatch(c.fills), document.createTextNode(c.label)); h.appendChild(sp); });
+  }
+  const read = CK.readout('claims-read');
+  function summary() {
+    read.set(SER.map(s => {
+      const tot = {}, pages = Object.values(s.pages), N = pages.reduce((a, p) => a + p.claims, 0);
+      pages.forEach(p => { for (const k in counts(p)) tot[k] = (tot[k] || 0) + counts(p)[k]; });
+      return `${esc(s.label)}: ${num(N, 0)} claims on ${pages.length} pages. ${st.view === 'verdict' ? 'By verdict' : 'By the cards behind them'}: ` +
+        cats().filter(c => tot[c.key]).map(c => phrase(c.key, tot[c.key], N)).join('; ') + '.';
+    }).join('<br>'));
+  }
+
+  /* the chart */
+  const open = r => { if (r.slug === HUB) window.scrollTo({top: 0, behavior: CK.reduced ? 'auto' : 'smooth'}); else location.href = r.url; };
+  const bh = 14, bg = 4, pad = 10, T = 6, B = 40;
+  const barsH = S * bh + (S - 1) * bg;
+  const layout = W => { const nar = W < 600, rowH = (nar ? 17 : 0) + Math.max(barsH, 16) + pad; let y = T, prev; const rows = PAGES.map(r => { if (prev !== undefined && r.group !== prev) y += 6; prev = r.group; const o = {r, y}; y += rowH; return o; }); return {nar, rows, H: y + B}; };
+  function draw(f) {
+    const W = f.W, {nar, rows, H} = layout(W), svg = f.svg, cs = cats(), yEnd = H - B;
+    const tw = (s, cls) => { const t = CK.txt(svg, -999, -999, s, cls); let w = 0; try { w = t.getComputedTextLength(); } catch (_) { /* no layout */ } t.remove(); return w || s.length * 7; };
+    const endTxt = (p, s) => num(p.claims, 0) + (S > 1 ? ' · ' + s.short : '');
+    const endW = Math.ceil(Math.max(...rows.flatMap(({r}) => SER.map(s => (s.pages[r.slug] ? tw(endTxt(s.pages[r.slug], s), 'tick') : 0))))) + 10;
+    const L = nar ? 2 : Math.min(Math.round(0.32 * W), Math.ceil(Math.max(...rows.map(({r}) => tw(r.short, 'lab')))) + 14);
+    const maxN = Math.max(...SER.flatMap(s => Object.values(s.pages).map(p => p.claims)));
+    const x = st.scale === 'share' ? CK.lin(0, 1, L, W - endW) : CK.lin(0, maxN, L, W - endW);
+    const g0 = CK.el('g', {'aria-hidden': 'true'}, svg);
+    const ticks = st.scale === 'share' ? [0, 0.25, 0.5, 0.75, 1] : x.ticks(Math.max(2, Math.round((W - L - endW) / 80)));
+    ticks.forEach(t => { CK.el('line', {x1: x(t), x2: x(t), y1: T, y2: yEnd, class: 'grid-line'}, g0); CK.txt(g0, x(t), yEnd + 16, st.scale === 'share' ? pct(t) : num(t, 0), 'tick', 'middle'); });
+    CK.txt(g0, (L + W - endW) / 2, H - 6, st.scale === 'share' ? 'share of the page’s claims' : 'claims on the page', 'lab', 'middle');
+    const nodes = [], list = [];
+    rows.forEach(({r, y}) => {
+      const by = nar ? y + 17 : y + (Math.max(barsH, 16) - barsH) / 2;
+      if (nar) CK.txt(g0, 2, y + 12, r.short, 'lab'); else CK.txt(g0, L - 8, by + barsH / 2 + 4, r.short, 'lab', 'end');
+      SER.forEach((s, si) => {
+        const p = s.pages[r.slug], yb = by + si * (bh + bg);
+        if (!p) { if (S > 1) CK.txt(g0, L + 2, yb + bh - 3, `not in the check (${s.short})`, 'tick'); return; }
+        const g = CK.el('g', {class: 'cbar'}, svg), n = counts(p), tot = p.claims, scale = st.scale === 'share' ? 1 / tot : 1;
+        CK.el('rect', {x: 0, y: yb - bg / 2, width: W, height: bh + bg, class: 'ck-hit'}, g);
+        let x0 = 0;
+        cs.forEach(c => {
+          const v = n[c.key] || 0; if (!v) return;
+          const xa = x(x0 * scale), xb = x((x0 + v) * scale), w = Math.max(0.5, xb - xa), sh = bh / c.fills.length;
+          c.fills.forEach((col, i) => { const e = CK.el('rect', {x: xa, y: yb + i * sh, width: w, height: sh}, g); e.style.fill = col; });
+          CK.el('rect', {x: xa, y: yb, width: w, height: bh, class: 'seg', fill: 'none'}, g);
+          x0 += v;
+        });
+        CK.txt(g0, x(x0 * scale) + 5, yb + bh - 2, endTxt(p, s), 'tick');
+        const tip = `<b>${esc(r.title)}</b>${S > 1 ? ' · ' + esc(s.short) : ''}: ${num(tot, 0)} claims<br>` + cs.filter(c => n[c.key]).map(c => phrase(c.key, n[c.key], tot)).join('<br>') +
+          `<br><span class="small">${r.slug === HUB ? 'this page' : 'click or Enter: open the page'}</span>`;
+        CK.tip(f, g, tip, {role: 'link'});
+        g.addEventListener('pointerdown', ev => { g._touch = ev.pointerType === 'touch'; g._go = f.pinned !== g; });  /* after the tip's own handler: a second tap opens */
+        g.addEventListener('click', () => { if (g._touch && !g._go) return; open(r); });
+        nodes.push(g); list.push(r);
+      });
+    });
+    CK.keynav(f, nodes, {onEnter: (node, k) => open(list[k])});
+  }
+  legend(); summary();
+  const fr = CK.frame('claims', {height: W => layout(W).H, minW: 300, maxW: 1100, label: 'Claims on each page, by the verdict of the version-3 check or by the cards whose data they rest on; a bar opens its page', draw});
 })();
