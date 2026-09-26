@@ -1,0 +1,328 @@
+{
+ "card": "aifoundry3",
+ "smoke": false,
+ "clock_rule": "pinned",
+ "rerun": [],
+ "notes": [
+  "x1 private-fp16: launcher rc 1 (a failed check; cycle counts kept)",
+  "x1 private-fp32: launcher rc 1 (a failed check; cycle counts kept)"
+ ],
+ "components": {
+  "smoke": {
+   "tests": 5,
+   "failed": []
+  },
+  "e1": {
+   "fp32-tensor-DRAM": {
+    "launches": 5,
+    "tflops": 0.3103,
+    "mean_w": 34.25,
+    "idle_before_w": 25.83,
+    "die_c_start": 58,
+    "mhz": [
+     600
+    ],
+    "dropped": [],
+    "check": [
+     "exact"
+    ],
+    "power_samples": 59,
+    "proc_wall_s": [
+     0.588,
+     7.435
+    ],
+    "timed": [
+     {
+      "workload": "fp32-tensor-DRAM",
+      "iters": 795,
+      "repeat": 5,
+      "repeat_planned": 5,
+      "proc_overhead_s": 0.55,
+      "predicted_proc_s": 8.048
+     }
+    ],
+    "idle_before_mhz": [
+     600
+    ]
+   },
+   "int8-tensor-L2": {
+    "launches": 5,
+    "tflops": 71.7747,
+    "mean_w": 51.99,
+    "idle_before_w": 25.7,
+    "die_c_start": 57,
+    "mhz": [
+     600
+    ],
+    "dropped": [],
+    "check": [
+     "exact"
+    ],
+    "power_samples": 64,
+    "proc_wall_s": [
+     0.246,
+     7.573
+    ],
+    "timed": [
+     {
+      "workload": "int8-tensor-L2",
+      "iters": 196181,
+      "repeat": 5,
+      "repeat_planned": 5,
+      "proc_overhead_s": 0.231,
+      "predicted_proc_s": 7.731
+     }
+    ],
+    "idle_before_mhz": [
+     600
+    ]
+   },
+   "fp16-tensor-L2": {
+    "launches": 8,
+    "tflops": 19.021,
+    "mean_w": 51.52,
+    "idle_before_w": 26.09,
+    "die_c_start": 58,
+    "mhz": [
+     600
+    ],
+    "dropped": [],
+    "check": [
+     "exact"
+    ],
+    "power_samples": 58,
+    "proc_wall_s": [
+     0.259,
+     7.004
+    ],
+    "timed": [
+     {
+      "workload": "fp16-tensor-L2",
+      "iters": 59918,
+      "repeat": 8,
+      "repeat_planned": 8,
+      "proc_overhead_s": 0.23,
+      "predicted_proc_s": 7.072
+     }
+    ],
+    "idle_before_mhz": [
+     600
+    ]
+   },
+   "fp32-tensor-L2": {
+    "launches": 6,
+    "tflops": 9.5112,
+    "mean_w": 50.62,
+    "idle_before_w": 26.25,
+    "die_c_start": 59,
+    "mhz": [
+     600
+    ],
+    "dropped": [],
+    "check": [
+     "exact"
+    ],
+    "power_samples": 58,
+    "proc_wall_s": [
+     0.258,
+     7.002
+    ],
+    "timed": [
+     {
+      "workload": "fp32-tensor-L2",
+      "iters": 79891,
+      "repeat": 6,
+      "repeat_planned": 6,
+      "proc_overhead_s": 0.229,
+      "predicted_proc_s": 7.069
+     }
+    ],
+    "idle_before_mhz": [
+     600
+    ]
+   }
+  },
+  "x1": {
+   "private-int8": {
+    "launches": 3,
+    "cycles_per_op": [
+     511.92,
+     511.95
+    ],
+    "implied_ghz": [
+     0.5997
+    ],
+    "off_clock": [],
+    "check": [
+     "exact"
+    ]
+   },
+   "private-fp16": {
+    "launches": 3,
+    "cycles_per_op": [
+     529.0,
+     529.0
+    ],
+    "implied_ghz": [
+     0.5998
+    ],
+    "off_clock": [],
+    "check": [
+     "FAIL"
+    ]
+   },
+   "private-fp32": {
+    "launches": 3,
+    "cycles_per_op": [
+     529.0,
+     529.0
+    ],
+    "implied_ghz": [
+     0.5998
+    ],
+    "off_clock": [],
+    "check": [
+     "FAIL"
+    ]
+   },
+   "shared-int8": {
+    "launches": 3,
+    "cycles_per_op": [
+     280.45,
+     280.47
+    ],
+    "implied_ghz": [
+     0.5995,
+     0.5996
+    ],
+    "off_clock": [],
+    "check": [
+     "exact"
+    ]
+   },
+   "shared-fp16": {
+    "launches": 3,
+    "cycles_per_op": [
+     529.0,
+     529.0
+    ],
+    "implied_ghz": [
+     0.5997,
+     0.5998
+    ],
+    "off_clock": [],
+    "check": [
+     "approx"
+    ]
+   },
+   "shared-fp32": {
+    "launches": 3,
+    "cycles_per_op": [
+     529.0,
+     529.0
+    ],
+    "implied_ghz": [
+     0.5998
+    ],
+    "off_clock": [],
+    "check": [
+     "exact"
+    ]
+   }
+  },
+  "thermal": {
+   "telemetry": 1757,
+   "mmbench": 8,
+   "memprobe": 4,
+   "mhz_minion": [
+    600
+   ],
+   "samples_missing_a_block": 0,
+   "clock": {
+    "processes": 12,
+    "launch_windows": 88,
+    "busy_samples": 897,
+    "busy_off_600": [],
+    "busy_ramp": [],
+    "valid_busy_rule": true,
+    "idle_mhz": [
+     600
+    ],
+    "idle0_mhz": [
+     600
+    ],
+    "idle_after_mhz": [
+     600
+    ],
+    "mhz_by_phase": {
+     "before": {
+      "idle": [
+       600
+      ],
+      "busy": []
+     },
+     "idle0": {
+      "idle": [
+       600
+      ],
+      "busy": []
+     },
+     "matmul": {
+      "idle": [
+       600
+      ],
+      "busy": [
+       600
+      ]
+     },
+     "cool1": {
+      "idle": [
+       600
+      ],
+      "busy": []
+     },
+     "dram": {
+      "idle": [
+       600
+      ],
+      "busy": [
+       600
+      ]
+     },
+     "cool2": {
+      "idle": [
+       600
+      ],
+      "busy": []
+     },
+     "end": {
+      "idle": [
+       600
+      ],
+      "busy": []
+     }
+    }
+   },
+   "phases_s": {
+    "idle0": 0.0,
+    "matmul": 20.0,
+    "cool1": 78.4,
+    "dram": 118.4,
+    "cool2": 152.6,
+    "end": 174.6
+   },
+   "x1_reduce": {
+    "valid": true,
+    "busy_slope_board": 0.638,
+    "idle_after_minus_before_w": 1.573,
+    "dram_rest_rise_w": 4.63,
+    "cool_drop_40s_c": 7,
+    "edge_tau_card": [
+     10.36,
+     19.59
+    ],
+    "board_avg_minus_board_steady_median": 0.01
+   }
+  }
+ }
+}

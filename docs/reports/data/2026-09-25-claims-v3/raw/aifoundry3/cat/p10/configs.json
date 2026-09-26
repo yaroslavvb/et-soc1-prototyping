@@ -1,0 +1,398 @@
+{
+ "host": "aifoundry3",
+ "hostname": "aifoundry3",
+ "et_devices": null,
+ "host_bin": "build/enercat_v2/host/enercat_host",
+ "args": {
+  "out": "/home/yaroslavvb/nekko/build/claims-v3/aifoundry3/cat/p10",
+  "root": "/home/yaroslavvb/nekko",
+  "passes": 1,
+  "burst": 3.0,
+  "gap": 5.0,
+  "only": "dramrow2,tload/dram,tstore/dram,l1fill/stride32,l1fill/stride64,tload/scp,fence,nop",
+  "seed": 305,
+  "host_bin": "build/enercat_v2/host/enercat_host",
+  "hold_hot": null,
+  "hold_max": 5,
+  "hold_limit": null,
+  "hold_after": 5.8,
+  "heat_settle": 1.5,
+  "heater": null,
+  "tel_live": "/home/yaroslavvb/nekko/build/claims-v3/aifoundry3/cat/p10/telemetry.jsonl.raw",
+  "stall_s": 6.0,
+  "no_yield": false,
+  "lead": 10.0,
+  "card": "aifoundry3",
+  "dry": false,
+  "list": false
+ },
+ "cfgs": [
+  {
+   "cfg": "fence/zeros/h2",
+   "args": [
+    "--pattern",
+    "fence",
+    "--operands",
+    "zeros",
+    "--harts",
+    "2"
+   ]
+  },
+  {
+   "cfg": "fence/random/h2",
+   "args": [
+    "--pattern",
+    "fence",
+    "--operands",
+    "random",
+    "--harts",
+    "2"
+   ]
+  },
+  {
+   "cfg": "nop/zeros/h2",
+   "args": [
+    "--pattern",
+    "nop",
+    "--operands",
+    "zeros",
+    "--harts",
+    "2"
+   ]
+  },
+  {
+   "cfg": "nop/random/h2",
+   "args": [
+    "--pattern",
+    "nop",
+    "--operands",
+    "random",
+    "--harts",
+    "2"
+   ]
+  },
+  {
+   "cfg": "tstore/dram/zeros",
+   "args": [
+    "--pattern",
+    "tstore",
+    "--operands",
+    "zeros",
+    "--slice-bytes",
+    "256K"
+   ]
+  },
+  {
+   "cfg": "tload/dram/zeros",
+   "args": [
+    "--pattern",
+    "tload",
+    "--operands",
+    "zeros",
+    "--slice-bytes",
+    "256K"
+   ]
+  },
+  {
+   "cfg": "tload/scp/zeros",
+   "args": [
+    "--pattern",
+    "tload",
+    "--operands",
+    "zeros",
+    "--slice-bytes",
+    "32K",
+    "--scp"
+   ],
+   "prefill": "zeros"
+  },
+  {
+   "cfg": "tstore/dram/random",
+   "args": [
+    "--pattern",
+    "tstore",
+    "--operands",
+    "random",
+    "--slice-bytes",
+    "256K"
+   ]
+  },
+  {
+   "cfg": "tload/dram/random",
+   "args": [
+    "--pattern",
+    "tload",
+    "--operands",
+    "random",
+    "--slice-bytes",
+    "256K"
+   ]
+  },
+  {
+   "cfg": "tload/scp/random",
+   "args": [
+    "--pattern",
+    "tload",
+    "--operands",
+    "random",
+    "--slice-bytes",
+    "32K",
+    "--scp"
+   ],
+   "prefill": "random"
+  },
+  {
+   "cfg": "tstore/dram/const",
+   "args": [
+    "--pattern",
+    "tstore",
+    "--operands",
+    "const",
+    "--slice-bytes",
+    "256K"
+   ]
+  },
+  {
+   "cfg": "tload/dram/const",
+   "args": [
+    "--pattern",
+    "tload",
+    "--operands",
+    "const",
+    "--slice-bytes",
+    "256K"
+   ]
+  },
+  {
+   "cfg": "tload/scp/const",
+   "args": [
+    "--pattern",
+    "tload",
+    "--operands",
+    "const",
+    "--slice-bytes",
+    "32K",
+    "--scp"
+   ],
+   "prefill": "const"
+  },
+  {
+   "cfg": "l1fill/stride32/zeros",
+   "prefill": "zeros",
+   "args": [
+    "--pattern",
+    "flw_pat",
+    "--operands",
+    "zeros",
+    "--scp",
+    "--slice-bytes",
+    "32K",
+    "--stride",
+    "32",
+    "--region",
+    "16K"
+   ]
+  },
+  {
+   "cfg": "l1fill/stride64/zeros",
+   "prefill": "zeros",
+   "args": [
+    "--pattern",
+    "flw_pat",
+    "--operands",
+    "zeros",
+    "--scp",
+    "--slice-bytes",
+    "32K",
+    "--stride",
+    "64",
+    "--region",
+    "16K"
+   ]
+  },
+  {
+   "cfg": "l1fill/stride32/random",
+   "prefill": "random",
+   "args": [
+    "--pattern",
+    "flw_pat",
+    "--operands",
+    "random",
+    "--scp",
+    "--slice-bytes",
+    "32K",
+    "--stride",
+    "32",
+    "--region",
+    "16K"
+   ]
+  },
+  {
+   "cfg": "l1fill/stride64/random",
+   "prefill": "random",
+   "args": [
+    "--pattern",
+    "flw_pat",
+    "--operands",
+    "random",
+    "--scp",
+    "--slice-bytes",
+    "32K",
+    "--stride",
+    "64",
+    "--region",
+    "16K"
+   ]
+  },
+  {
+   "cfg": "dramrow2/seq/zeros",
+   "args": [
+    "--pattern",
+    "tload_pat",
+    "--operands",
+    "zeros",
+    "--shires",
+    "0xffffffff",
+    "--minions",
+    "0x1",
+    "--slice-bytes",
+    "64M",
+    "--region",
+    "64M",
+    "--stride",
+    "1K",
+    "--access-bytes",
+    "1K",
+    "--jump-every",
+    "0",
+    "--jump-bytes",
+    "0"
+   ]
+  },
+  {
+   "cfg": "dramrow2/rowhit/zeros",
+   "args": [
+    "--pattern",
+    "tload_pat",
+    "--operands",
+    "zeros",
+    "--shires",
+    "0xffffffff",
+    "--minions",
+    "0x1",
+    "--slice-bytes",
+    "64M",
+    "--region",
+    "64M",
+    "--stride",
+    "8K",
+    "--access-bytes",
+    "1K",
+    "--jump-every",
+    "0",
+    "--jump-bytes",
+    "0"
+   ]
+  },
+  {
+   "cfg": "dramrow2/rowmiss/zeros",
+   "args": [
+    "--pattern",
+    "tload_pat",
+    "--operands",
+    "zeros",
+    "--shires",
+    "0xffffffff",
+    "--minions",
+    "0x1",
+    "--slice-bytes",
+    "64M",
+    "--region",
+    "64M",
+    "--stride",
+    "1K",
+    "--access-bytes",
+    "1K",
+    "--jump-every",
+    "8",
+    "--jump-bytes",
+    "248K"
+   ]
+  },
+  {
+   "cfg": "dramrow2/seq/random",
+   "args": [
+    "--pattern",
+    "tload_pat",
+    "--operands",
+    "random",
+    "--shires",
+    "0xffffffff",
+    "--minions",
+    "0x1",
+    "--slice-bytes",
+    "64M",
+    "--region",
+    "64M",
+    "--stride",
+    "1K",
+    "--access-bytes",
+    "1K",
+    "--jump-every",
+    "0",
+    "--jump-bytes",
+    "0"
+   ]
+  },
+  {
+   "cfg": "dramrow2/rowhit/random",
+   "args": [
+    "--pattern",
+    "tload_pat",
+    "--operands",
+    "random",
+    "--shires",
+    "0xffffffff",
+    "--minions",
+    "0x1",
+    "--slice-bytes",
+    "64M",
+    "--region",
+    "64M",
+    "--stride",
+    "8K",
+    "--access-bytes",
+    "1K",
+    "--jump-every",
+    "0",
+    "--jump-bytes",
+    "0"
+   ]
+  },
+  {
+   "cfg": "dramrow2/rowmiss/random",
+   "args": [
+    "--pattern",
+    "tload_pat",
+    "--operands",
+    "random",
+    "--shires",
+    "0xffffffff",
+    "--minions",
+    "0x1",
+    "--slice-bytes",
+    "64M",
+    "--region",
+    "64M",
+    "--stride",
+    "1K",
+    "--access-bytes",
+    "1K",
+    "--jump-every",
+    "8",
+    "--jump-bytes",
+    "248K"
+   ]
+  }
+ ]
+}

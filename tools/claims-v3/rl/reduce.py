@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """V3-RL reducer: the pre-registered prediction items RL-a .. RL-h, RL-X3 and RL-X4 of PLAN3 (section 2, V3-RL).
 
-    python3 tools/claims-v3/rl/reduce.py --data <dir> --out <verdicts.json> [--flop <flop.json>] [--no-legacy]
+    python3 tools/claims-v3/rl/reduce.py --data <dir> --out <verdicts.json> [--flop <flop.json>] [--low-edge <low_edge.json>]
+        [--no-legacy]      (the two inputs: export_flop.py and export_low_edge.py beside this file; ../reduce_all.sh)
 
 <dir> holds one directory per card, each laid out like DATA_ROOT: <card>/rl/p<K>/{A,B,relay}/ written by block.sh
 (telemetry.jsonl[.gz], runs.jsonl), with block.json and pass.json. Every card directory with an rl/ inside is read
@@ -787,7 +788,7 @@ def build(data, flop, legacy=True, include_failed=False, expected=None, low_edge
     S, below, ok_n = {}, {}, True
     for c in CARDS:
         m = media[c]["scp"]
-        S[c] = {"measured": m, "low_edge_per_catalogue_pass": low.get(c), "n": m["n"]}
+        S[c] = {"measured": m, "low_edge_per_catalogue_pass": low.get(c), "low_edge_source": CAT23_SOURCE[0], "n": m["n"]}
         if m["n"]:
             S[c]["measured_in_band"] = inband(m["mean"], 3.95, 4.05)
         if low.get(c):
@@ -1082,12 +1083,31 @@ def every_pass_item(item, part, claims, pred, rule, S, test, ok, what, exp=CARDS
                  ("every pass on both cards" if n == 2 else "every pass on " + (",".join(c for c in CARDS if every[c]) or "neither card")), n == 2, all_cards=ac)
 
 
+# RL-f's registered low edge is the 23 Sep catalogue's. The energy manual's version-3 rebuild (26 Sep) rewrote
+# catalogue.json with the V3-CATFULL cards and passes, so the 23 Sep file is kept beside it as catalogue-23sep.json
+# (byte for byte the catalogue.json of commit de26273, git blob f574b851) and read from there.
+CAT23 = "docs/reports/data/2026-09-23-energy-manual/catalogue-23sep.json"
+CAT23_SOURCE = [None]
+
+
+def catalogue_23sep():
+    p = os.path.join(REPO, CAT23)
+    if not os.path.exists(p):
+        return None
+    cat = json.load(open(p))
+    passes = {b["pass"] for bs in cat.get("bursts", {}).values() for b in bs}
+    if set(cat.get("bursts", {})) != set(CARDS) or "combined_600idle" in cat or not passes <= {0, 1, 2}:
+        CAT23_SOURCE[0] = f"{CAT23} in the tree is not the 23 Sep catalogue: not used"
+        return None
+    CAT23_SOURCE[0] = f"{CAT23} (tree)"
+    return cat
+
+
 def catalogue_low_edge():
     """Per catalogue pass (23 Sep energy manual): 0.5 * (l1fill/stride32/zeros + tstore/scp/zeros), as rings_relay_extra.py."""
-    p = os.path.join(REPO, "docs/reports/data/2026-09-23-energy-manual/catalogue.json")
-    if not os.path.exists(p):
+    cat = catalogue_23sep()
+    if cat is None:
         return {}
-    cat = json.load(open(p))
     out = {}
     for c in CARDS:
         def ps(cfg):

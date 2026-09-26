@@ -241,7 +241,7 @@ def main():
     ap.add_argument("--cards", default=",".join(campaign.CAMPAIGN), help="the cards all_cards expects")
     ap.add_argument("--root", default=os.path.abspath(os.path.join(HERE, "..", "..", "..")))
     a = ap.parse_args()
-    committed_path = a.committed or os.path.join(a.root, "docs", "reports", "data", "2026-09-23-energy-manual", "catalogue.json")
+    committed_path = a.committed or os.path.join(a.root, "docs", "reports", "data", "2026-09-23-energy-manual", "catalogue-23sep.json")
     committed = None if a.committed == "none" else L.jload(committed_path)
 
     present = sorted(c for c in os.listdir(a.data) if os.path.isdir(os.path.join(a.data, c, "catfull")))

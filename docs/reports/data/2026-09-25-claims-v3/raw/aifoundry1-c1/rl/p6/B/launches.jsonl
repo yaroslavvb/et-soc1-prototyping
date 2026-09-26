@@ -1,0 +1,12 @@
+{"label":"mspin-first","t0_ms":1790428359695,"t1_ms":1790428364997,"rc":0,"cmd":"build/memhier/host/memhier_host --test spin --seconds 5 --budget 8"}
+{"label":"prefill:scp-local","t0_ms":1790428375000,"t1_ms":1790428375492,"rc":0,"cmd":"build/enercat/host/enercat_host --pattern tstore --operands random --slice-bytes 64K --scp --seconds 0.3 --window 60000000 --budget 8"}
+{"label":"scp-local-1","t0_ms":1790428385495,"t1_ms":1790428390968,"rc":0,"cmd":"build/memhier/host/memhier_host --test stream --where scp-local --bytes-per-minion 64K --seconds 5 --budget 8"}
+{"label":"l2-1","t0_ms":1790428400971,"t1_ms":1790428406480,"rc":0,"cmd":"build/memhier/host/memhier_host --test stream --where dram --bytes-per-minion 8K --seconds 5 --budget 8"}
+{"label":"l2-2","t0_ms":1790428416483,"t1_ms":1790428422002,"rc":0,"cmd":"build/memhier/host/memhier_host --test stream --where dram --bytes-per-minion 8K --seconds 5 --budget 8"}
+{"label":"scp-local-2","t0_ms":1790428432004,"t1_ms":1790428437268,"rc":0,"cmd":"build/memhier/host/memhier_host --test stream --where scp-local --bytes-per-minion 64K --seconds 5 --budget 8"}
+{"label":"l1","t0_ms":1790428447271,"t1_ms":1790428452618,"rc":0,"cmd":"build/memhier/host/memhier_host --test l1 --seconds 5 --budget 8"}
+{"label":"l3","t0_ms":1790428462621,"t1_ms":1790428468144,"rc":0,"cmd":"build/memhier/host/memhier_host --test stream --where dram --bytes-per-minion 24K --seconds 5 --budget 8"}
+{"label":"dram","t0_ms":1790428478147,"t1_ms":1790428483619,"rc":0,"cmd":"build/memhier/host/memhier_host --test stream --where dram --bytes-per-minion 256K --seconds 5 --budget 8"}
+{"label":"prefill:scp-remote","t0_ms":1790428493622,"t1_ms":1790428494112,"rc":0,"cmd":"build/enercat/host/enercat_host --pattern tstore --operands random --slice-bytes 64K --scp --seconds 0.3 --window 60000000 --budget 8"}
+{"label":"scp-remote","t0_ms":1790428504115,"t1_ms":1790428509799,"rc":0,"cmd":"build/memhier/host/memhier_host --test stream --where scp-remote --bytes-per-minion 64K --scp-shift 16 --seconds 5 --budget 8"}
+{"label":"mspin-last","t0_ms":1790428519802,"t1_ms":1790428525212,"rc":0,"cmd":"build/memhier/host/memhier_host --test spin --seconds 5 --budget 8"}

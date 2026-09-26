@@ -608,13 +608,13 @@ def main():
     ap.add_argument("--data", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--root", default=os.path.abspath(os.path.join(HERE, "..", "..", "..")))
-    ap.add_argument("--committed", default=None, help="23 Sep catalogue.json (default: the tree's; 'none' to skip)")
+    ap.add_argument("--committed", default=None, help="23 Sep catalogue (default: the tree's catalogue-23sep.json; 'none' to skip)")
     ap.add_argument("--cards", default=",".join(campaign.CAMPAIGN),
                     help="comma-separated cards all_cards expects (default: tools/claims-v3/campaign.py)")
     a = ap.parse_args()
     global CAMPAIGN
     CAMPAIGN = tuple(c for c in a.cards.split(",") if c)
-    cpath = a.committed or os.path.join(a.root, "docs", "reports", "data", "2026-09-23-energy-manual", "catalogue.json")
+    cpath = a.committed or os.path.join(a.root, "docs", "reports", "data", "2026-09-23-energy-manual", "catalogue-23sep.json")
     committed = None if cpath == "none" else committed_passes(cpath)
     present = sorted((d for d in os.listdir(a.data) if os.path.isdir(os.path.join(a.data, d, "cat"))),
                      key=lambda d: (CAMPAIGN.index(d) if d in CAMPAIGN else len(CAMPAIGN), d))

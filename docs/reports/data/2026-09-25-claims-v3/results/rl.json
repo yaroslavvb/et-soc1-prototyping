@@ -1,0 +1,7156 @@
+{
+ "experiment": "V3-RL",
+ "plan": "docs/reports/data/2026-09-25-claims-v3/PLAN3.md section 2 V3-RL",
+ "data": "/home/yaroslavvb/claude/et-soc1-pages/docs/reports/data/2026-09-25-claims-v3/raw",
+ "cards": {
+  "registered": [
+   "aifoundry2",
+   "aifoundry3"
+  ],
+  "all_cards": [
+   "aifoundry1-c1",
+   "aifoundry2",
+   "aifoundry3"
+  ],
+  "present": [
+   "aifoundry1-c1",
+   "aifoundry2",
+   "aifoundry3"
+  ],
+  "per_card": [
+   "aifoundry1-c1",
+   "aifoundry2",
+   "aifoundry3"
+  ]
+ },
+ "rules": {
+  "burst_drop": "clock off 600 MHz in > 2% of the burst's samples, or sampler median > 60 ms",
+  "pass_drop": "aifoundry2: any telemetry sample of the pass off 600 MHz (common rules); both cards: block.json status not ok",
+  "clock_rule_per_card": {
+   "aifoundry1-c1": "busy",
+   "aifoundry2": "all",
+   "aifoundry3": "none"
+  },
+  "clock_rules": {
+   "all": "registered (aifoundry2): pass dropped on any sample off 600 MHz; burst rule over the burst and its idle brackets",
+   "none": "registered (aifoundry3, pinned): burst rule over the burst and its idle brackets",
+   "busy": "amendment (other governor-free cards): pass dropped on any busy sample off 600 MHz; burst rule over busy samples; idle brackets and launch gaps never drop (quality.py)"
+  },
+  "all_cards": "each-card claims: PASS on every card / CARD-DIFFERENT on some / FAIL on none; comparisons: every pair of cards, Welch at 1 - 0.01/pairs; INSUFFICIENT if a card lacks 3 kept repeats; bands registered for one card are reported only",
+  "min_kept_repeats": 3,
+  "interval": "99% t on pass-level values; Welch between cards"
+ },
+ "idle_clock": {
+  "aifoundry1-c1": {
+   "passes": 6,
+   "idle_clock_mhz": 600,
+   "bracket_clock_mhz": {
+    "600": 11760
+   },
+   "bracket_at600_frac": 1.0,
+   "bracket_minion_mv_median": 499.0,
+   "busy_clock_mhz": 600,
+   "card_state": {
+    "start: managed_power 600 MHz 499 mV": 6,
+    "end: managed_power 600 MHz 499 mV": 6
+   },
+   "all_finished_passes": {
+    "passes": 6,
+    "bracket_clock_mhz": {
+     "600": 11760
+    },
+    "busy_clock_mhz": {
+     "600": 7555
+    }
+   }
+  },
+  "aifoundry2": {
+   "passes": 6,
+   "idle_clock_mhz": 600,
+   "bracket_clock_mhz": {
+    "600": 11769
+   },
+   "bracket_at600_frac": 1.0,
+   "bracket_minion_mv_median": 518.0,
+   "busy_clock_mhz": 600,
+   "card_state": {
+    "start: managed_power 600 MHz 518 mV": 6,
+    "end: managed_power 600 MHz 518 mV": 6
+   },
+   "all_finished_passes": {
+    "passes": 6,
+    "bracket_clock_mhz": {
+     "600": 11769
+    },
+    "busy_clock_mhz": {
+     "600": 7553
+    }
+   }
+  },
+  "aifoundry3": {
+   "passes": 6,
+   "idle_clock_mhz": 600,
+   "bracket_clock_mhz": {
+    "600": 11838
+   },
+   "bracket_at600_frac": 1.0,
+   "bracket_minion_mv_median": 523.0,
+   "busy_clock_mhz": 600,
+   "card_state": {
+    "start: max_power 600 MHz 522 mV": 3,
+    "end: max_power 600 MHz 523 mV": 5,
+    "end: max_power 600 MHz 522 mV": 1,
+    "start: max_power 600 MHz 523 mV": 3
+   },
+   "all_finished_passes": {
+    "passes": 6,
+    "bracket_clock_mhz": {
+     "600": 11838
+    },
+    "busy_clock_mhz": {
+     "600": 7488
+    }
+   }
+  }
+ },
+ "idle_note": null,
+ "passes": {
+  "aifoundry1-c1": [
+   {
+    "pass": 1,
+    "status": "ok",
+    "note": "contents zeros; 4723 samples, 0 off 600 MHz (busy 0 of 1269; idle clock 600 MHz)",
+    "contents": "zeros",
+    "samples": 4723,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1269,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1269
+      },
+      "minion_mv_median": 499.0
+     },
+     "gap": {
+      "n": 47,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 47
+      },
+      "minion_mv_median": 499
+     },
+     "bracket": {
+      "n": 1959,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1959
+      },
+      "minion_mv_median": 499.0
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790390963806,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 499
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790391689108,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 499
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 2,
+    "status": "ok",
+    "note": "contents random; 4708 samples, 0 off 600 MHz (busy 0 of 1259; idle clock 600 MHz)",
+    "contents": "random",
+    "samples": 4708,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1259,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1259
+      },
+      "minion_mv_median": 499
+     },
+     "gap": {
+      "n": 45,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 45
+      },
+      "minion_mv_median": 499
+     },
+     "bracket": {
+      "n": 1959,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1959
+      },
+      "minion_mv_median": 499
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790394481810,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 499
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790395219140,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 499
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 3,
+    "status": "ok",
+    "note": "contents zeros; 4713 samples, 0 off 600 MHz (busy 0 of 1257; idle clock 600 MHz)",
+    "contents": "zeros",
+    "samples": 4713,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1257,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1257
+      },
+      "minion_mv_median": 499
+     },
+     "gap": {
+      "n": 45,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 45
+      },
+      "minion_mv_median": 499
+     },
+     "bracket": {
+      "n": 1962,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1962
+      },
+      "minion_mv_median": 499
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790401296037,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 499
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790402048238,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 499
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 4,
+    "status": "ok",
+    "note": "contents random; 4704 samples, 0 off 600 MHz (busy 0 of 1254; idle clock 600 MHz)",
+    "contents": "random",
+    "samples": 4704,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1254,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1254
+      },
+      "minion_mv_median": 499
+     },
+     "gap": {
+      "n": 45,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 45
+      },
+      "minion_mv_median": 499
+     },
+     "bracket": {
+      "n": 1962,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1962
+      },
+      "minion_mv_median": 499
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790407398755,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 499
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790408180173,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 499
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 5,
+    "status": "ok",
+    "note": "contents zeros; 4715 samples, 0 off 600 MHz (busy 0 of 1257; idle clock 600 MHz)",
+    "contents": "zeros",
+    "samples": 4715,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1257,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1257
+      },
+      "minion_mv_median": 499.0
+     },
+     "gap": {
+      "n": 47,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 47
+      },
+      "minion_mv_median": 499
+     },
+     "bracket": {
+      "n": 1958,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1958
+      },
+      "minion_mv_median": 499
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790418512902,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 499
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790419356898,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 499
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 6,
+    "status": "ok",
+    "note": "contents random; 4715 samples, 0 off 600 MHz (busy 0 of 1259; idle clock 600 MHz)",
+    "contents": "random",
+    "samples": 4715,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1259,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1259
+      },
+      "minion_mv_median": 499
+     },
+     "gap": {
+      "n": 46,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 46
+      },
+      "minion_mv_median": 499.0
+     },
+     "bracket": {
+      "n": 1960,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1960
+      },
+      "minion_mv_median": 499
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790427843807,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 499
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790428746116,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 499
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   }
+  ],
+  "aifoundry2": [
+   {
+    "pass": 1,
+    "status": "ok",
+    "note": "contents zeros; 4721 samples, 0 off 600 MHz (busy 0 of 1263; idle clock 600 MHz)",
+    "contents": "zeros",
+    "samples": 4721,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1263,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1263
+      },
+      "minion_mv_median": 518
+     },
+     "gap": {
+      "n": 45,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 45
+      },
+      "minion_mv_median": 518
+     },
+     "bracket": {
+      "n": 1963,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1963
+      },
+      "minion_mv_median": 518
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790386769270,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 518
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790387281295,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 518
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 2,
+    "status": "ok",
+    "note": "contents random; 4725 samples, 0 off 600 MHz (busy 0 of 1264; idle clock 600 MHz)",
+    "contents": "random",
+    "samples": 4725,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1264,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1264
+      },
+      "minion_mv_median": 518.0
+     },
+     "gap": {
+      "n": 51,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 51
+      },
+      "minion_mv_median": 518
+     },
+     "bracket": {
+      "n": 1962,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1962
+      },
+      "minion_mv_median": 518.0
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790389500552,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 518
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790389995035,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 518
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 3,
+    "status": "ok",
+    "note": "contents zeros; 4720 samples, 0 off 600 MHz (busy 0 of 1262; idle clock 600 MHz)",
+    "contents": "zeros",
+    "samples": 4720,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1262,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1262
+      },
+      "minion_mv_median": 518
+     },
+     "gap": {
+      "n": 46,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 46
+      },
+      "minion_mv_median": 518.0
+     },
+     "bracket": {
+      "n": 1962,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1962
+      },
+      "minion_mv_median": 518
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790394707976,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 518
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790395242125,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 518
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 4,
+    "status": "ok",
+    "note": "contents random; 4729 samples, 0 off 600 MHz (busy 0 of 1271; idle clock 600 MHz)",
+    "contents": "random",
+    "samples": 4729,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1271,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1271
+      },
+      "minion_mv_median": 518
+     },
+     "gap": {
+      "n": 47,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 47
+      },
+      "minion_mv_median": 518
+     },
+     "bracket": {
+      "n": 1962,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1962
+      },
+      "minion_mv_median": 518
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790399954154,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 518
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790400448703,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 518
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 5,
+    "status": "ok",
+    "note": "contents zeros; 4694 samples, 0 off 600 MHz (busy 0 of 1239; idle clock 600 MHz)",
+    "contents": "zeros",
+    "samples": 4694,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1239,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1239
+      },
+      "minion_mv_median": 518.0
+     },
+     "gap": {
+      "n": 48,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 48
+      },
+      "minion_mv_median": 518.0
+     },
+     "bracket": {
+      "n": 1958,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1958
+      },
+      "minion_mv_median": 518
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790408428903,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 518
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790408968902,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 518
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 6,
+    "status": "ok",
+    "note": "contents random; 4711 samples, 0 off 600 MHz (busy 0 of 1254; idle clock 600 MHz)",
+    "contents": "random",
+    "samples": 4711,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1254,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1254
+      },
+      "minion_mv_median": 518
+     },
+     "gap": {
+      "n": 47,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 47
+      },
+      "minion_mv_median": 518
+     },
+     "bracket": {
+      "n": 1962,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1962
+      },
+      "minion_mv_median": 518.0
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790416430449,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 518
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790416916746,
+      "config": {
+       "tdp_w": 65,
+       "temp_threshold_c": 65,
+       "power_state": 1,
+       "power_state_name": "managed_power",
+       "minion_mhz": 600,
+       "minion_mv": 518
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   }
+  ],
+  "aifoundry3": [
+   {
+    "pass": 1,
+    "status": "ok",
+    "note": "contents zeros; 4731 samples, 0 off 600 MHz (busy 0 of 1250; idle clock 600 MHz)",
+    "contents": "zeros",
+    "samples": 4731,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1250,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1250
+      },
+      "minion_mv_median": 522
+     },
+     "gap": {
+      "n": 56,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 56
+      },
+      "minion_mv_median": 523.0
+     },
+     "bracket": {
+      "n": 1974,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1974
+      },
+      "minion_mv_median": 523
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790385333922,
+      "config": {
+       "tdp_w": 0,
+       "temp_threshold_c": 65,
+       "power_state": 0,
+       "power_state_name": "max_power",
+       "minion_mhz": 600,
+       "minion_mv": 522
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790385812058,
+      "config": {
+       "tdp_w": 0,
+       "temp_threshold_c": 65,
+       "power_state": 0,
+       "power_state_name": "max_power",
+       "minion_mhz": 600,
+       "minion_mv": 523
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 2,
+    "status": "ok",
+    "note": "contents random; 4725 samples, 0 off 600 MHz (busy 0 of 1244; idle clock 600 MHz)",
+    "contents": "random",
+    "samples": 4725,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1244,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1244
+      },
+      "minion_mv_median": 522
+     },
+     "gap": {
+      "n": 54,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 54
+      },
+      "minion_mv_median": 522.0
+     },
+     "bracket": {
+      "n": 1975,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1975
+      },
+      "minion_mv_median": 523.0
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790387740987,
+      "config": {
+       "tdp_w": 0,
+       "temp_threshold_c": 65,
+       "power_state": 0,
+       "power_state_name": "max_power",
+       "minion_mhz": 600,
+       "minion_mv": 522
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790388218125,
+      "config": {
+       "tdp_w": 0,
+       "temp_threshold_c": 65,
+       "power_state": 0,
+       "power_state_name": "max_power",
+       "minion_mhz": 600,
+       "minion_mv": 522
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 3,
+    "status": "ok",
+    "note": "contents zeros; 4724 samples, 0 off 600 MHz (busy 0 of 1249; idle clock 600 MHz)",
+    "contents": "zeros",
+    "samples": 4724,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1249,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1249
+      },
+      "minion_mv_median": 522
+     },
+     "gap": {
+      "n": 53,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 53
+      },
+      "minion_mv_median": 523
+     },
+     "bracket": {
+      "n": 1971,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1971
+      },
+      "minion_mv_median": 523
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790393348252,
+      "config": {
+       "tdp_w": 0,
+       "temp_threshold_c": 65,
+       "power_state": 0,
+       "power_state_name": "max_power",
+       "minion_mhz": 600,
+       "minion_mv": 522
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790393825305,
+      "config": {
+       "tdp_w": 0,
+       "temp_threshold_c": 65,
+       "power_state": 0,
+       "power_state_name": "max_power",
+       "minion_mhz": 600,
+       "minion_mv": 523
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 4,
+    "status": "ok",
+    "note": "contents random; 4732 samples, 0 off 600 MHz (busy 0 of 1255; idle clock 600 MHz)",
+    "contents": "random",
+    "samples": 4732,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1255,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1255
+      },
+      "minion_mv_median": 522
+     },
+     "gap": {
+      "n": 54,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 54
+      },
+      "minion_mv_median": 523.0
+     },
+     "bracket": {
+      "n": 1975,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1975
+      },
+      "minion_mv_median": 523
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790422677429,
+      "config": {
+       "tdp_w": 0,
+       "temp_threshold_c": 65,
+       "power_state": 0,
+       "power_state_name": "max_power",
+       "minion_mhz": 600,
+       "minion_mv": 523
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790423155267,
+      "config": {
+       "tdp_w": 0,
+       "temp_threshold_c": 65,
+       "power_state": 0,
+       "power_state_name": "max_power",
+       "minion_mhz": 600,
+       "minion_mv": 523
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 5,
+    "status": "ok",
+    "note": "contents zeros; 4734 samples, 0 off 600 MHz (busy 0 of 1257; idle clock 600 MHz)",
+    "contents": "zeros",
+    "samples": 4734,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1257,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1257
+      },
+      "minion_mv_median": 522.0
+     },
+     "gap": {
+      "n": 54,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 54
+      },
+      "minion_mv_median": 523.0
+     },
+     "bracket": {
+      "n": 1972,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1972
+      },
+      "minion_mv_median": 523.0
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790411851421,
+      "config": {
+       "tdp_w": 0,
+       "temp_threshold_c": 65,
+       "power_state": 0,
+       "power_state_name": "max_power",
+       "minion_mhz": 600,
+       "minion_mv": 523
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790412328828,
+      "config": {
+       "tdp_w": 0,
+       "temp_threshold_c": 65,
+       "power_state": 0,
+       "power_state_name": "max_power",
+       "minion_mhz": 600,
+       "minion_mv": 523
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   },
+   {
+    "pass": 6,
+    "status": "ok",
+    "note": "contents random; 4705 samples, 0 off 600 MHz (busy 0 of 1233; idle clock 600 MHz)",
+    "contents": "random",
+    "samples": 4705,
+    "off600": 0,
+    "windows": {
+     "busy": {
+      "n": 1233,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1233
+      },
+      "minion_mv_median": 522.0
+     },
+     "gap": {
+      "n": 51,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 51
+      },
+      "minion_mv_median": 523
+     },
+     "bracket": {
+      "n": 1971,
+      "off600": 0,
+      "clock_mhz": {
+       "600": 1971
+      },
+      "minion_mv_median": 523
+     }
+    },
+    "idle_clock_mhz": 600,
+    "card_state": [
+     {
+      "at": "start",
+      "t_ms": 1790420149615,
+      "config": {
+       "tdp_w": 0,
+       "temp_threshold_c": 65,
+       "power_state": 0,
+       "power_state_name": "max_power",
+       "minion_mhz": 600,
+       "minion_mv": 523
+      }
+     },
+     {
+      "at": "end",
+      "t_ms": 1790420625129,
+      "config": {
+       "tdp_w": 0,
+       "temp_threshold_c": 65,
+       "power_state": 0,
+       "power_state_name": "max_power",
+       "minion_mhz": 600,
+       "minion_mv": 523
+      }
+     }
+    ],
+    "kept_bursts": 25,
+    "dropped_bursts": [
+     "A:xshire16"
+    ]
+   }
+  ]
+ },
+ "dropped_bursts": [
+  {
+   "where": "aifoundry1-c1/p1",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 114.0
+  },
+  {
+   "where": "aifoundry1-c1/p2",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 113.0
+  },
+  {
+   "where": "aifoundry1-c1/p3",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 69.5
+  },
+  {
+   "where": "aifoundry1-c1/p4",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 135.5
+  },
+  {
+   "where": "aifoundry1-c1/p5",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 76.0
+  },
+  {
+   "where": "aifoundry1-c1/p6",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 121.0
+  },
+  {
+   "where": "aifoundry2/p1",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 75.0
+  },
+  {
+   "where": "aifoundry2/p2",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 63.0
+  },
+  {
+   "where": "aifoundry2/p3",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 74.0
+  },
+  {
+   "where": "aifoundry2/p4",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 109.0
+  },
+  {
+   "where": "aifoundry2/p5",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 138.0
+  },
+  {
+   "where": "aifoundry2/p6",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 69.0
+  },
+  {
+   "where": "aifoundry3/p1",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 141.0
+  },
+  {
+   "where": "aifoundry3/p2",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 81.0
+  },
+  {
+   "where": "aifoundry3/p3",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 88.0
+  },
+  {
+   "where": "aifoundry3/p4",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 105.0
+  },
+  {
+   "where": "aifoundry3/p5",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 73.0
+  },
+  {
+   "where": "aifoundry3/p6",
+   "burst": "A:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 78.0
+  },
+  {
+   "where": "aifoundry2/23sep-rl-pass1",
+   "burst": "AB:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 145.5
+  },
+  {
+   "where": "aifoundry2/23sep-rl-pass2",
+   "burst": "AB:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 75.5
+  },
+  {
+   "where": "aifoundry2/23sep-rl-pass3",
+   "burst": "AB:xshire16",
+   "clock_moved_frac": 0.0,
+   "sampler_median_ms": 138.0
+  }
+ ],
+ "items": [
+  {
+   "item": "RL-a",
+   "part": "mesh slope (five 1 KB xshire rings)",
+   "claims": [
+    "energy-manual-127",
+    "memhier-onchip-112",
+    "memhier-onchip-84"
+   ],
+   "prediction": "mesh slope over the five 1 KB cross-shire rings a2 2.3+-0.5, a3 1.3+-0.5 pJ/B per hop.",
+   "decision_rule": "Welch 99% of the per-pass slope difference excludes 0 (6 new passes per card) -> CARD-DIFFERENT stands with per-card slopes; else pooled with +-50%.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      1.6312235174773477,
+      1.2584745751998587,
+      1.8969898619833698,
+      1.6135365302050713,
+      1.406591103661639,
+      2.611521260791182
+     ],
+     "mean": 1.7364,
+     "sd": 0.4806,
+     "se": 0.1962,
+     "ci99": [
+      0.9452,
+      2.5275
+     ]
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      1.377474835459381,
+      1.4965792490188055,
+      1.8516794038925317,
+      1.8486262153031459,
+      2.1174959518581273,
+      1.9889764120742872
+     ],
+     "mean": 1.7801,
+     "sd": 0.2863,
+     "se": 0.1169,
+     "ci99": [
+      1.3089,
+      2.2514
+     ],
+     "band": [
+      1.8,
+      2.8
+     ],
+     "in_band": false
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      1.6485759261155577,
+      2.248417018799215,
+      0.8681296245813522,
+      2.3113932208074544,
+      0.7811065610603135,
+      2.4952262662192686
+     ],
+     "mean": 1.7255,
+     "sd": 0.7539,
+     "se": 0.3078,
+     "ci99": [
+      0.4844,
+      2.9665
+     ],
+     "band": [
+      0.8,
+      1.8
+     ],
+     "in_band": true
+    }
+   },
+   "test": "Welch 99% on per-pass slopes (pJ/B per mean hop, xshire8/1/4/2/6), a2 - a3",
+   "outcome": "PASS",
+   "prediction_held": false,
+   "reading": "mesh slope (five 1 KB xshire rings): no card difference at 99% (a2 - a3 +0.055, [-1.134, +1.244]): pooled 1.753 pJ/B/hop (+-50% on the page)",
+   "welch": {
+    "diff": 0.0547,
+    "se": 0.3292,
+    "df": 6.41,
+    "ci99": [
+     -1.1344,
+     1.2437
+    ],
+    "p": 0.8732427962928128
+   },
+   "pooled_mean": 1.7528,
+   "all_cards": {
+    "test": "every pair of cards: Welch on per-pass mesh slope, each pair at 1 - 0.01/pairs (Bonferroni)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "per_card_mean": {
+     "aifoundry1-c1": 1.7364,
+     "aifoundry2": 1.7801,
+     "aifoundry3": 1.7255
+    },
+    "outcome": "PASS",
+    "pair_conf": 0.99667,
+    "pairs": {
+     "a1c1 - a2": {
+      "diff": -0.0437,
+      "se": 0.2284,
+      "df": 8.15,
+      "ci": [
+       -0.9786,
+       0.8911
+      ],
+      "conf": 0.99667
+     },
+     "a1c1 - a3": {
+      "diff": 0.0109,
+      "se": 0.365,
+      "df": 8.49,
+      "ci": [
+       -1.4616,
+       1.4834
+      ],
+      "conf": 0.99667
+     },
+     "a2 - a3": {
+      "diff": 0.0547,
+      "se": 0.3292,
+      "df": 6.41,
+      "ci": [
+       -1.4397,
+       1.549
+      ],
+      "conf": 0.99667
+     }
+    },
+    "differing_pairs": [],
+    "pooled": 1.7473,
+    "reading": "mesh slope: no pair of cards differs; pooled 1.747 pJ/B/hop (per card a1c1 1.736, a2 1.780, a3 1.726)",
+    "bands_reported_only_for_other_cards": "the per-card bands are registered for aifoundry2 and aifoundry3 only"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-b",
+   "part": "leaving-the-shire step, aifoundry2",
+   "claims": [
+    "energy-manual-128"
+   ],
+   "prediction": "aifoundry2 \"leaving the shire\" step (intercept - shire ring - one hop) +3.3+-2 pJ/B.",
+   "decision_rule": "99% t excludes 0 on that card.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      6.764787561081511,
+      8.750328927003503,
+      5.601110030674498,
+      6.481431000804909,
+      7.3690186795022585,
+      2.419368926505207
+     ],
+     "mean": 6.231,
+     "sd": 2.1408,
+     "se": 0.874,
+     "ci99": [
+      2.707,
+      9.755
+     ]
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      6.367333455685518,
+      6.473513937230456,
+      4.891862066541521,
+      5.082898915867032,
+      3.546115337201538,
+      4.655444863767359
+     ],
+     "mean": 5.1695,
+     "sd": 1.1063,
+     "se": 0.4516,
+     "ci99": [
+      3.3484,
+      6.9906
+     ],
+     "band": [
+      1.3,
+      5.3
+     ],
+     "in_band": true
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      3.8830427111195362,
+      2.5090620442439717,
+      7.6616447046395875,
+      1.0711916352903579,
+      8.376861673660274,
+      1.5878074683483367
+     ],
+     "mean": 4.1816,
+     "sd": 3.1305,
+     "se": 1.278,
+     "ci99": [
+      -0.9715,
+      9.3348
+     ]
+    }
+   },
+   "test": "99% t on per-pass steps, aifoundry2 (aifoundry3 for information)",
+   "outcome": "PASS",
+   "prediction_held": true,
+   "reading": "step a2 5.17 [3.35, 6.99] (n=6) pJ/B: above 0, leaving the shire is a step beyond one hop; a3 4.18 [-0.97, 9.33] (n=6) (not decided)",
+   "all_cards": {
+    "test": "on each card: leaving-the-shire step > 0 at 99%",
+    "cards": [
+     "aifoundry2"
+    ],
+    "reported_cards": [
+     "aifoundry1-c1",
+     "aifoundry3"
+    ],
+    "holds": {
+     "aifoundry2": true
+    },
+    "outcome": "PASS",
+    "reading": "leaving-the-shire step > 0 at 99%: holds on aifoundry2, where the item is decided (the other cards are reported)",
+    "info_step_ci99": {
+     "aifoundry1-c1": [
+      2.707,
+      9.755
+     ],
+     "aifoundry2": [
+      3.3484,
+      6.9906
+     ],
+     "aifoundry3": [
+      -0.9715,
+      9.3348
+     ]
+    },
+    "note": "decided on aifoundry2 as registered; the other cards are reported in per_card"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-c",
+   "part": "shire-c4 - shire",
+   "claims": [
+    "energy-manual-129",
+    "memhier-onchip-83"
+   ],
+   "prediction": "aifoundry3: shire-c4 - shire = +1.0 and xshire1-c4 - xshire1 = +3.6 pJ/B.",
+   "decision_rule": "99% t excludes 0 (6 passes) on aifoundry3 -> \"small messages cost more\" on both cards.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      1.1946176493574154,
+      1.6219257444922457,
+      1.4541699621191224,
+      1.7086601771741736,
+      1.2496637387016736,
+      1.597893536120194
+     ],
+     "mean": 1.4712,
+     "sd": 0.2102,
+     "se": 0.0858,
+     "ci99": [
+      1.1251,
+      1.8172
+     ]
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.5941738009117308,
+      1.496027621372991,
+      1.9038027101754724,
+      1.5595864642565203,
+      1.439491077047637,
+      2.0927847174561656
+     ],
+     "mean": 1.5143,
+     "sd": 0.5179,
+     "se": 0.2114,
+     "ci99": [
+      0.6618,
+      2.3668
+     ]
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      1.5582617962843965,
+      1.7833147318484421,
+      1.4322109742266607,
+      1.5016579474880358,
+      0.7216894117197161,
+      1.0517181874814576
+     ],
+     "mean": 1.3415,
+     "sd": 0.3858,
+     "se": 0.1575,
+     "ci99": [
+      0.7064,
+      1.9765
+     ]
+    }
+   },
+   "test": "99% t on per-pass paired differences, aifoundry3 (aifoundry2 shown)",
+   "outcome": "PASS",
+   "prediction_held": true,
+   "reading": "shire-c4 - shire a3 1.34 [0.71, 1.98] (n=6) pJ/B (predicted +1.0): small messages cost more; a2 also > 0 1.51 [0.66, 2.37] (n=6)",
+   "predicted": 1.0,
+   "predicted_in_ci99": true,
+   "all_cards": {
+    "test": "on each card: shire-c4 - shire > 0 at 99%",
+    "cards": [
+     "aifoundry3"
+    ],
+    "reported_cards": [
+     "aifoundry1-c1",
+     "aifoundry2"
+    ],
+    "holds": {
+     "aifoundry3": true
+    },
+    "outcome": "PASS",
+    "reading": "shire-c4 - shire > 0 at 99%: holds on aifoundry3, where the item is decided (the other cards are reported)",
+    "info_sign_each_card": {
+     "aifoundry1-c1": "> 0",
+     "aifoundry2": "> 0",
+     "aifoundry3": "> 0"
+    },
+    "note": "decided on aifoundry3 as registered; the other cards are reported in per_card"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-c",
+   "part": "xshire1-c4 - xshire1",
+   "claims": [
+    "energy-manual-129",
+    "memhier-onchip-83"
+   ],
+   "prediction": "aifoundry3: shire-c4 - shire = +1.0 and xshire1-c4 - xshire1 = +3.6 pJ/B.",
+   "decision_rule": "99% t excludes 0 (6 passes) on aifoundry3 -> \"small messages cost more\" on both cards.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      3.304299005036924,
+      7.5590343156464215,
+      5.965342693437835,
+      5.443231322532366,
+      6.656043815997977,
+      9.47222880857066
+     ],
+     "mean": 6.4,
+     "sd": 2.0753,
+     "se": 0.8473,
+     "ci99": [
+      2.9838,
+      9.8163
+     ]
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      8.025812663543404,
+      5.539034969203218,
+      5.361999444349166,
+      5.5535062484771025,
+      7.947224648897329,
+      4.024864450686454
+     ],
+     "mean": 6.0754,
+     "sd": 1.5863,
+     "se": 0.6476,
+     "ci99": [
+      3.4642,
+      8.6866
+     ]
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      3.7738832657751846,
+      8.05861373581445,
+      3.829513699227208,
+      5.445414861402224,
+      3.004873714208653,
+      5.163926784387632
+     ],
+     "mean": 4.8794,
+     "sd": 1.8081,
+     "se": 0.7382,
+     "ci99": [
+      1.9029,
+      7.8558
+     ]
+    }
+   },
+   "test": "99% t on per-pass paired differences, aifoundry3 (aifoundry2 shown)",
+   "outcome": "PASS",
+   "prediction_held": true,
+   "reading": "xshire1-c4 - xshire1 a3 4.88 [1.90, 7.86] (n=6) pJ/B (predicted +3.6): small messages cost more; a2 also > 0 6.08 [3.46, 8.69] (n=6)",
+   "predicted": 3.6,
+   "predicted_in_ci99": true,
+   "all_cards": {
+    "test": "on each card: xshire1-c4 - xshire1 > 0 at 99%",
+    "cards": [
+     "aifoundry3"
+    ],
+    "reported_cards": [
+     "aifoundry1-c1",
+     "aifoundry2"
+    ],
+    "holds": {
+     "aifoundry3": true
+    },
+    "outcome": "PASS",
+    "reading": "xshire1-c4 - xshire1 > 0 at 99%: holds on aifoundry3, where the item is decided (the other cards are reported)",
+    "info_sign_each_card": {
+     "aifoundry1-c1": "> 0",
+     "aifoundry2": "> 0",
+     "aifoundry3": "> 0"
+    },
+    "note": "decided on aifoundry3 as registered; the other cards are reported in per_card"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-d",
+   "part": "relay DRAM / next shire",
+   "claims": [
+    "energy-manual-121",
+    "energy-manual-122",
+    "energy-manual-131",
+    "energy-manual-152",
+    "energy-manual-171"
+   ],
+   "prediction": "relay DRAM/next-shire ratio a2 11.2+-0.6, a3 13.5+-0.8; relay DRAM a3/a2 1.07+-0.03.",
+   "decision_rule": "Welch 99% on log ratios.",
+   "per_card": {
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "ratio_per_pass": [
+      13.424,
+      12.418,
+      14.708,
+      12.589,
+      13.151,
+      11.586
+     ],
+     "relay_pj_per_byte": {
+      "dram": {
+       "n": 6,
+       "passes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+       ],
+       "values": [
+        110.30108138562623,
+        111.66817642394368,
+        116.00459557941191,
+        114.38869197257517,
+        111.09133298401349,
+        104.51511978044431
+       ],
+       "mean": 111.3282,
+       "sd": 3.9719,
+       "se": 1.6215,
+       "ci99": [
+        104.79,
+        117.8664
+       ]
+      },
+      "scp": {
+       "n": 6,
+       "passes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+       ],
+       "values": [
+        3.9660634944926203,
+        3.753476120868425,
+        4.202620266861899,
+        4.043542764681237,
+        4.303381759349771,
+        4.033109520977091
+       ],
+       "mean": 4.0504,
+       "sd": 0.1912,
+       "se": 0.0781,
+       "ci99": [
+        3.7356,
+        4.3651
+       ]
+      },
+      "hop": {
+       "n": 6,
+       "passes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+       ],
+       "values": [
+        8.216876263679756,
+        8.992130508783807,
+        7.887155086297909,
+        9.08665480887108,
+        8.447294326581725,
+        9.021185087006158
+       ],
+       "mean": 8.6085,
+       "sd": 0.4992,
+       "se": 0.2038,
+       "ci99": [
+        7.7869,
+        9.4302
+       ]
+      }
+     },
+     "band": [
+      10.6,
+      11.8
+     ],
+     "ratio_geo_mean": 12.944,
+     "in_band": false,
+     "ratio_ci99": [
+      11.331,
+      14.786
+     ]
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "ratio_per_pass": [
+      12.773,
+      12.743,
+      12.485,
+      12.659,
+      13.154,
+      14.275
+     ],
+     "relay_pj_per_byte": {
+      "dram": {
+       "n": 6,
+       "passes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+       ],
+       "values": [
+        111.10375458622993,
+        108.01455376603015,
+        104.68910914580337,
+        104.64796280330653,
+        107.77613422472972,
+        108.87474195236307
+       ],
+       "mean": 107.5177,
+       "sd": 2.5001,
+       "se": 1.0206,
+       "ci99": [
+        103.4023,
+        111.6331
+       ]
+      },
+      "scp": {
+       "n": 6,
+       "passes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+       ],
+       "values": [
+        4.3761897071605125,
+        4.232825560938038,
+        3.8999398355435786,
+        4.133326893180299,
+        3.9077441231560237,
+        4.113466951904808
+       ],
+       "mean": 4.1106,
+       "sd": 0.1852,
+       "se": 0.0756,
+       "ci99": [
+        3.8057,
+        4.4155
+       ]
+      },
+      "hop": {
+       "n": 6,
+       "passes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+       ],
+       "values": [
+        8.69863310600894,
+        8.476545354406428,
+        8.385092651070387,
+        8.266986080398567,
+        8.193531794547633,
+        7.6270285839601835
+       ],
+       "mean": 8.2746,
+       "sd": 0.363,
+       "se": 0.1482,
+       "ci99": [
+        7.6771,
+        8.8721
+       ]
+      }
+     },
+     "band": [
+      12.7,
+      14.3
+     ],
+     "ratio_geo_mean": 13.002,
+     "in_band": true,
+     "ratio_ci99": [
+      11.996,
+      14.09
+     ]
+    },
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "ratio_per_pass": [
+      13.647,
+      13.464,
+      12.835,
+      12.893,
+      12.71,
+      13.293
+     ],
+     "relay_pj_per_byte": {
+      "dram": {
+       "n": 6,
+       "passes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+       ],
+       "values": [
+        130.40648603034882,
+        130.7074884752279,
+        130.25026266174547,
+        125.73394395556012,
+        126.85027063705867,
+        135.34229296777235
+       ],
+       "mean": 129.8818,
+       "sd": 3.3854,
+       "se": 1.3821,
+       "ci99": [
+        124.309,
+        135.4546
+       ]
+      },
+      "scp": {
+       "n": 6,
+       "passes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+       ],
+       "values": [
+        5.066738443632174,
+        4.839091918371331,
+        4.909421869194188,
+        4.921197615356068,
+        4.688304038293084,
+        4.715327877629424
+       ],
+       "mean": 4.8567,
+       "sd": 0.1412,
+       "se": 0.0577,
+       "ci99": [
+        4.6242,
+        5.0891
+       ]
+      },
+      "hop": {
+       "n": 6,
+       "passes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+       ],
+       "values": [
+        9.555774264963874,
+        9.707928653282663,
+        10.147830037403773,
+        9.752471128040488,
+        9.980233905139636,
+        10.18113347694409
+       ],
+       "mean": 9.8876,
+       "sd": 0.2542,
+       "se": 0.1038,
+       "ci99": [
+        9.4691,
+        10.306
+       ]
+      }
+     },
+     "ratio_geo_mean": 13.135,
+     "ratio_ci99": [
+      12.526,
+      13.776
+     ]
+    }
+   },
+   "test": "Welch 99% on per-pass log(DRAM/next shire), a2 vs a3",
+   "outcome": "PASS",
+   "prediction_held": false,
+   "reading": "relay DRAM/next shire the same on both cards at 99%: pooled 12.97x (a2/a3 99% [0.876, 1.132])",
+   "welch_log": {
+    "diff": -0.0044,
+    "se": 0.0386,
+    "df": 8.22,
+    "ci99": [
+     -0.1328,
+     0.124
+    ],
+    "p": 0.9109602293626217
+   },
+   "ratio_a2_over_a3": {
+    "diff": 0.9956,
+    "se": 0.0386,
+    "df": 8.22,
+    "ci99": [
+     0.8756,
+     1.132
+    ],
+    "p": 0.9109602293626217
+   },
+   "pooled_ratio": 12.973,
+   "all_cards": {
+    "test": "every pair of cards: Welch on per-pass relay DRAM / next-shire ratio (logs), each pair at 1 - 0.01/pairs (Bonferroni)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "per_card_mean": {
+     "aifoundry1-c1": 13.1353,
+     "aifoundry2": 12.9436,
+     "aifoundry3": 13.002
+    },
+    "outcome": "PASS",
+    "pair_conf": 0.99667,
+    "pairs": {
+     "a1c1 - a2": {
+      "diff": 0.0147,
+      "se": 0.0351,
+      "df": 6.26,
+      "ci": [
+       -0.1463,
+       0.1758
+      ],
+      "conf": 0.99667
+     },
+     "a1c1 - a3": {
+      "diff": 0.0103,
+      "se": 0.0232,
+      "df": 8.12,
+      "ci": [
+       -0.0848,
+       0.1053
+      ],
+      "conf": 0.99667
+     },
+     "a2 - a3": {
+      "diff": -0.0044,
+      "se": 0.0386,
+      "df": 8.22,
+      "ci": [
+       -0.1618,
+       0.1529
+      ],
+      "conf": 0.99667
+     }
+    },
+    "differing_pairs": [],
+    "pooled": 13.0267,
+    "reading": "relay DRAM / next-shire ratio: no pair of cards differs; pooled 13.027 x (per card a1c1 13.135, a2 12.944, a3 13.002)"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-d",
+   "part": "relay DRAM a3/a2",
+   "claims": [
+    "energy-manual-121",
+    "energy-manual-122",
+    "energy-manual-131",
+    "energy-manual-152",
+    "energy-manual-171"
+   ],
+   "prediction": "relay DRAM/next-shire ratio a2 11.2+-0.6, a3 13.5+-0.8; relay DRAM a3/a2 1.07+-0.03.",
+   "decision_rule": "Welch 99% on log ratios.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "relay_dram_pj_per_byte": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       130.40648603034882,
+       130.7074884752279,
+       130.25026266174547,
+       125.73394395556012,
+       126.85027063705867,
+       135.34229296777235
+      ],
+      "mean": 129.8818,
+      "sd": 3.3854,
+      "se": 1.3821,
+      "ci99": [
+       124.309,
+       135.4546
+      ]
+     }
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "relay_dram_pj_per_byte": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       110.30108138562623,
+       111.66817642394368,
+       116.00459557941191,
+       114.38869197257517,
+       111.09133298401349,
+       104.51511978044431
+      ],
+      "mean": 111.3282,
+      "sd": 3.9719,
+      "se": 1.6215,
+      "ci99": [
+       104.79,
+       117.8664
+      ]
+     }
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "relay_dram_pj_per_byte": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       111.10375458622993,
+       108.01455376603015,
+       104.68910914580337,
+       104.64796280330653,
+       107.77613422472972,
+       108.87474195236307
+      ],
+      "mean": 107.5177,
+      "sd": 2.5001,
+      "se": 1.0206,
+      "ci99": [
+       103.4023,
+       111.6331
+      ]
+     }
+    }
+   },
+   "test": "Welch 99% on per-pass log(relay DRAM pJ/B), a3 vs a2",
+   "outcome": "PASS",
+   "prediction_held": false,
+   "reading": "relay DRAM a3/a2 0.966 (99% [0.912, 1.023]): the same on both cards at 99%; a2 111.3 [104.8, 117.9] (n=6), a3 107.5 [103.4, 111.6] (n=6) pJ/B",
+   "welch_log": {
+    "diff": -0.0345,
+    "se": 0.0175,
+    "df": 8.54,
+    "ci99": [
+     -0.0923,
+     0.0232
+    ],
+    "p": 0.08220222211559353
+   },
+   "ratio_a3_over_a2": {
+    "ratio": 0.9661,
+    "ci99": [
+     0.9118,
+     1.0235
+    ]
+   },
+   "all_cards": {
+    "test": "every pair of cards: Welch on per-pass log relay DRAM pJ/B (logs), each pair at 1 - 0.01/pairs (Bonferroni)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "per_card_mean": {
+     "aifoundry1-c1": 129.8396,
+     "aifoundry2": 111.2634,
+     "aifoundry3": 107.4902
+    },
+    "outcome": "CARD-DIFFERENT",
+    "pair_conf": 0.99667,
+    "pairs": {
+     "a1c1 - a2": {
+      "diff": 0.1544,
+      "se": 0.0182,
+      "df": 9.08,
+      "ci": [
+       0.0828,
+       0.226
+      ],
+      "conf": 0.99667
+     },
+     "a1c1 - a3": {
+      "diff": 0.1889,
+      "se": 0.0142,
+      "df": 9.88,
+      "ci": [
+       0.1343,
+       0.2436
+      ],
+      "conf": 0.99667
+     },
+     "a2 - a3": {
+      "diff": 0.0345,
+      "se": 0.0175,
+      "df": 8.54,
+      "ci": [
+       -0.036,
+       0.1051
+      ],
+      "conf": 0.99667
+     }
+    },
+    "differing_pairs": [
+     "a1c1 - a2",
+     "a1c1 - a3"
+    ],
+    "pooled": 115.8048,
+    "reading": "log relay DRAM pJ/B: cards differ (a1c1 - a2; a1c1 - a3 at 0.9967); per card a1c1 129.840, a2 111.263, a3 107.490 pJ/B",
+    "info_ratio_to_aifoundry2": {
+     "aifoundry1-c1": 1.167,
+     "aifoundry2": 1.0,
+     "aifoundry3": 0.9661
+    },
+    "note": "the registered ratio a3/a2 1.07+-0.03 is specific to those two cards: the other cards' ratios to aifoundry2 are reported"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-f",
+   "part": "relay own scratchpad vs bracket low edge",
+   "claims": [
+    "energy-manual-153"
+   ],
+   "prediction": "relay own scratchpad 3.95-4.05 against a bracket low edge of 4.30-4.40.",
+   "decision_rule": "Welch 99% of measured - low edge excludes 0 on each card -> \"8% below its bracket\"; else \"at the low edge\".",
+   "per_card": {
+    "aifoundry2": {
+     "measured": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       3.9660634944926203,
+       3.753476120868425,
+       4.202620266861899,
+       4.043542764681237,
+       4.303381759349771,
+       4.033109520977091
+      ],
+      "mean": 4.0504,
+      "sd": 0.1912,
+      "se": 0.0781,
+      "ci99": [
+       3.7356,
+       4.3651
+      ]
+     },
+     "low_edge_per_catalogue_pass": [
+      4.1998,
+      4.5049,
+      4.3929
+     ],
+     "low_edge_source": "git blob f574b851c18780ac2a6e30118681e00f792cad6b (docs/reports/data/2026-09-23-energy-manual/catalogue.json as committed in de26273)",
+     "n": 6,
+     "measured_in_band": false,
+     "low_edge_mean": 4.3659,
+     "low_edge_in_band": true,
+     "welch_measured_minus_low": {
+      "diff": -0.3155,
+      "se": 0.1185,
+      "df": 5.06,
+      "ci99": [
+       -0.7904,
+       0.1594
+      ],
+      "p": 0.044204328507424444
+     },
+     "side": "at"
+    },
+    "aifoundry3": {
+     "measured": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       4.3761897071605125,
+       4.232825560938038,
+       3.8999398355435786,
+       4.133326893180299,
+       3.9077441231560237,
+       4.113466951904808
+      ],
+      "mean": 4.1106,
+      "sd": 0.1852,
+      "se": 0.0756,
+      "ci99": [
+       3.8057,
+       4.4155
+      ]
+     },
+     "low_edge_per_catalogue_pass": [
+      4.3058,
+      4.373,
+      4.2114
+     ],
+     "low_edge_source": "git blob f574b851c18780ac2a6e30118681e00f792cad6b (docs/reports/data/2026-09-23-energy-manual/catalogue.json as committed in de26273)",
+     "n": 6,
+     "measured_in_band": false,
+     "low_edge_mean": 4.2967,
+     "low_edge_in_band": false,
+     "welch_measured_minus_low": {
+      "diff": -0.1862,
+      "se": 0.089,
+      "df": 7.0,
+      "ci99": [
+       -0.4975,
+       0.1252
+      ],
+      "p": 0.074711763406211
+     },
+     "side": "at"
+    },
+    "aifoundry1-c1": {
+     "measured": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       5.066738443632174,
+       4.839091918371331,
+       4.909421869194188,
+       4.921197615356068,
+       4.688304038293084,
+       4.715327877629424
+      ],
+      "mean": 4.8567,
+      "sd": 0.1412,
+      "se": 0.0577,
+      "ci99": [
+       4.6242,
+       5.0891
+      ]
+     },
+     "low_edge_per_catalogue_pass": [
+      5.048897,
+      4.99664,
+      5.076368
+     ],
+     "low_edge_source": "--low-edge",
+     "n": 6,
+     "measured_in_band": false,
+     "low_edge_mean": 5.0406,
+     "low_edge_in_band": false,
+     "welch_measured_minus_low": {
+      "diff": -0.184,
+      "se": 0.0622,
+      "df": 6.35,
+      "ci99": [
+       -0.4095,
+       0.0416
+      ],
+      "p": 0.023737554599940855
+     },
+     "side": "at"
+    }
+   },
+   "test": "Welch 99% (new relay scp passes - catalogue low edge per pass), each card",
+   "outcome": "FAIL",
+   "prediction_held": false,
+   "reading": "relay own scratchpad a2 4.05 [3.74, 4.37] (n=6), a3 4.11 [3.81, 4.42] (n=6) vs low edge a2 4.37, a3 4.30: at the low edge (not below at 99%)",
+   "all_cards": {
+    "test": "on each card: relay own scratchpad below its card's catalogue low edge (Welch 99%)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": false,
+     "aifoundry2": false,
+     "aifoundry3": false
+    },
+    "outcome": "FAIL",
+    "reading": "relay own scratchpad below its card's catalogue low edge (Welch 99%): holds on no card (a1c1, a2, a3)",
+    "low_edge_passes": {
+     "aifoundry1-c1": 3,
+     "aifoundry2": 3,
+     "aifoundry3": 3
+    },
+    "note": "the low edge is each card's own catalogue: 23 Sep for aifoundry2 and aifoundry3, --low-edge (V3-CATFULL) for the other cards; a card without one is INSUFFICIENT"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-g",
+   "part": "L1 level a2 - a3",
+   "claims": [
+    "energy-manual-83",
+    "energy-manual-84",
+    "energy-manual-87",
+    "energy-manual-90",
+    "memhier-onchip-34",
+    "ridge-94",
+    "ridge-96",
+    "memhier-onchip-16",
+    "hotline-relay-l2-73"
+   ],
+   "prediction": "L1 level a2 - a3 = +0.18+-0.06 pJ/B; own-scratchpad level a3 - a2 = +0.23+-0.06; L2 - scratchpad a2 +0.18+-0.15, a3 -0.28+-0.15.",
+   "decision_rule": "as RL-a; both L2 - scratchpad intervals containing 0 -> \"the same within +-10%\".",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.6759807000395256,
+      0.8147056387309526,
+      0.6828051091263099,
+      0.7841215249399571,
+      0.6673731497551315,
+      0.701587072246989
+     ],
+     "mean": 0.7211,
+     "sd": 0.0625,
+     "se": 0.0255,
+     "ci99": [
+      0.6183,
+      0.8239
+     ]
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.6616769414326222,
+      0.8676629300756608,
+      0.679014220264477,
+      0.88019858128239,
+      0.7191513603209923,
+      0.7932186994511272
+     ],
+     "mean": 0.7668,
+     "sd": 0.0946,
+     "se": 0.0386,
+     "ci99": [
+      0.6111,
+      0.9226
+     ]
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.6583009886296137,
+      0.8530355522953053,
+      0.6243542574925546,
+      0.8419212793992571,
+      0.6869589363344742,
+      0.8371253106161207
+     ],
+     "mean": 0.7503,
+     "sd": 0.1047,
+     "se": 0.0427,
+     "ci99": [
+      0.5779,
+      0.9227
+     ]
+    }
+   },
+   "test": "Welch 99% on per-pass L1 level (pJ/B), a2 - a3",
+   "outcome": "PASS",
+   "prediction_held": false,
+   "reading": "L1 level a2 - a3: no card difference at 99% (a2 - a3 +0.017, [-0.167, +0.200]): pooled 0.759 pJ/B",
+   "welch": {
+    "diff": 0.0165,
+    "se": 0.0576,
+    "df": 9.9,
+    "ci99": [
+     -0.1665,
+     0.1996
+    ],
+    "p": 0.7800006360454409
+   },
+   "pooled_mean": 0.7586,
+   "all_cards": {
+    "test": "every pair of cards: Welch on per-pass L1 level, each pair at 1 - 0.01/pairs (Bonferroni)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "per_card_mean": {
+     "aifoundry1-c1": 0.7211,
+     "aifoundry2": 0.7668,
+     "aifoundry3": 0.7503
+    },
+    "outcome": "PASS",
+    "pair_conf": 0.99667,
+    "pairs": {
+     "a1c1 - a2": {
+      "diff": -0.0457,
+      "se": 0.0463,
+      "df": 8.66,
+      "ci": [
+       -0.2311,
+       0.1397
+      ],
+      "conf": 0.99667
+     },
+     "a1c1 - a3": {
+      "diff": -0.0292,
+      "se": 0.0498,
+      "df": 8.16,
+      "ci": [
+       -0.2329,
+       0.1745
+      ],
+      "conf": 0.99667
+     },
+     "a2 - a3": {
+      "diff": 0.0165,
+      "se": 0.0576,
+      "df": 9.9,
+      "ci": [
+       -0.2046,
+       0.2377
+      ],
+      "conf": 0.99667
+     }
+    },
+    "differing_pairs": [],
+    "pooled": 0.7461,
+    "reading": "L1 level: no pair of cards differs; pooled 0.746 pJ/B (per card a1c1 0.721, a2 0.767, a3 0.750)",
+    "note": "the registered difference a2 - a3 = +0.18+-0.06 is specific to those two cards; the other cards are compared, not banded"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-g",
+   "part": "own-scratchpad level a3 - a2",
+   "claims": [
+    "energy-manual-83",
+    "energy-manual-84",
+    "energy-manual-87",
+    "energy-manual-90",
+    "memhier-onchip-34",
+    "ridge-94",
+    "ridge-96",
+    "memhier-onchip-16",
+    "hotline-relay-l2-73"
+   ],
+   "prediction": "L1 level a2 - a3 = +0.18+-0.06 pJ/B; own-scratchpad level a3 - a2 = +0.23+-0.06; L2 - scratchpad a2 +0.18+-0.15, a3 -0.28+-0.15.",
+   "decision_rule": "as RL-a; both L2 - scratchpad intervals containing 0 -> \"the same within +-10%\".",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      2.61145904288495,
+      5.077443981640569,
+      2.51122498262286,
+      4.990646498169683,
+      2.513556395413732,
+      5.028857593640209
+     ],
+     "mean": 3.7889,
+     "sd": 1.3629,
+     "se": 0.5564,
+     "ci99": [
+      1.5454,
+      6.0323
+     ]
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      2.0712751823272413,
+      4.133906052010968,
+      2.1713226785228352,
+      4.1198040161114955,
+      2.0945105291275388,
+      4.123601299014862
+     ],
+     "mean": 3.1191,
+     "sd": 1.1033,
+     "se": 0.4504,
+     "ci99": [
+      1.3029,
+      4.9352
+     ]
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      2.086348389313436,
+      4.100378477028952,
+      2.063634887282541,
+      3.9414829071856503,
+      2.1507849547252675,
+      4.084058732965037
+     ],
+     "mean": 3.0711,
+     "sd": 1.0653,
+     "se": 0.4349,
+     "ci99": [
+      1.3174,
+      4.8248
+     ]
+    }
+   },
+   "test": "Welch 99% on per-pass own-scratchpad level (pJ/B), all passes (both contents), a3 - a2",
+   "outcome": "PASS",
+   "prediction_held": false,
+   "reading": "own-scratchpad level a3 - a2: no card difference at 99% (a3 - a2 -0.048, [-2.033, +1.937]): pooled 3.095 pJ/B [confounded: every pass is prefilled, zeros/random alternating; see RL-h]",
+   "welch": {
+    "diff": -0.048,
+    "se": 0.6261,
+    "df": 9.99,
+    "ci99": [
+     -2.0329,
+     1.937
+    ],
+    "p": 0.9404619710269082
+   },
+   "pooled_mean": 3.0951,
+   "note": "every V3-RL pass is prefilled (odd zeros, even random, the same schedule on both cards), so this compares the cards averaged over the two contents; RL-h compares them at equal contents",
+   "info_by_contents": {
+    "zeros": {
+     "aifoundry1-c1": {
+      "n": 3,
+      "passes": [
+       1,
+       3,
+       5
+      ],
+      "values": [
+       2.61145904288495,
+       2.51122498262286,
+       2.513556395413732
+      ],
+      "mean": 2.5454,
+      "sd": 0.0572,
+      "se": 0.033,
+      "ci99": [
+       2.2176,
+       2.8732
+      ]
+     },
+     "aifoundry2": {
+      "n": 3,
+      "passes": [
+       1,
+       3,
+       5
+      ],
+      "values": [
+       2.0712751823272413,
+       2.1713226785228352,
+       2.0945105291275388
+      ],
+      "mean": 2.1124,
+      "sd": 0.0524,
+      "se": 0.0302,
+      "ci99": [
+       1.8123,
+       2.4124
+      ]
+     },
+     "aifoundry3": {
+      "n": 3,
+      "passes": [
+       1,
+       3,
+       5
+      ],
+      "values": [
+       2.086348389313436,
+       2.063634887282541,
+       2.1507849547252675
+      ],
+      "mean": 2.1003,
+      "sd": 0.0452,
+      "se": 0.0261,
+      "ci99": [
+       1.8412,
+       2.3593
+      ]
+     }
+    },
+    "random": {
+     "aifoundry1-c1": {
+      "n": 3,
+      "passes": [
+       2,
+       4,
+       6
+      ],
+      "values": [
+       5.077443981640569,
+       4.990646498169683,
+       5.028857593640209
+      ],
+      "mean": 5.0323,
+      "sd": 0.0435,
+      "se": 0.0251,
+      "ci99": [
+       4.783,
+       5.2816
+      ]
+     },
+     "aifoundry2": {
+      "n": 3,
+      "passes": [
+       2,
+       4,
+       6
+      ],
+      "values": [
+       4.133906052010968,
+       4.1198040161114955,
+       4.123601299014862
+      ],
+      "mean": 4.1258,
+      "sd": 0.0073,
+      "se": 0.0042,
+      "ci99": [
+       4.084,
+       4.1676
+      ]
+     },
+     "aifoundry3": {
+      "n": 3,
+      "passes": [
+       2,
+       4,
+       6
+      ],
+      "values": [
+       4.100378477028952,
+       3.9414829071856503,
+       4.084058732965037
+      ],
+      "mean": 4.042,
+      "sd": 0.0874,
+      "se": 0.0505,
+      "ci99": [
+       3.5411,
+       4.5428
+      ]
+     }
+    }
+   },
+   "all_cards": {
+    "test": "every pair of cards: Welch on per-pass own-scratchpad level (both contents), each pair at 1 - 0.01/pairs (Bonferroni)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "per_card_mean": {
+     "aifoundry1-c1": 3.7889,
+     "aifoundry2": 3.1191,
+     "aifoundry3": 3.0711
+    },
+    "outcome": "PASS",
+    "pair_conf": 0.99667,
+    "pairs": {
+     "a1c1 - a2": {
+      "diff": 0.6698,
+      "se": 0.7159,
+      "df": 9.58,
+      "ci": [
+       -2.1049,
+       3.4445
+      ],
+      "conf": 0.99667
+     },
+     "a1c1 - a3": {
+      "diff": 0.7178,
+      "se": 0.7062,
+      "df": 9.45,
+      "ci": [
+       -2.0316,
+       3.4671
+      ],
+      "conf": 0.99667
+     },
+     "a2 - a3": {
+      "diff": 0.048,
+      "se": 0.6261,
+      "df": 9.99,
+      "ci": [
+       -2.3493,
+       2.4452
+      ],
+      "conf": 0.99667
+     }
+    },
+    "differing_pairs": [],
+    "pooled": 3.3263,
+    "reading": "own-scratchpad level (both contents): no pair of cards differs; pooled 3.326 pJ/B (per card a1c1 3.789, a2 3.119, a3 3.071)",
+    "note": "confounded by the contents arm as the registered part is; RL-h compares at equal contents"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-g",
+   "part": "L2 - own scratchpad",
+   "claims": [
+    "energy-manual-83",
+    "energy-manual-84",
+    "energy-manual-87",
+    "energy-manual-90",
+    "memhier-onchip-34",
+    "ridge-94",
+    "ridge-96",
+    "memhier-onchip-16",
+    "hotline-relay-l2-73"
+   ],
+   "prediction": "L1 level a2 - a3 = +0.18+-0.06 pJ/B; own-scratchpad level a3 - a2 = +0.23+-0.06; L2 - scratchpad a2 +0.18+-0.15, a3 -0.28+-0.15.",
+   "decision_rule": "as RL-a; both L2 - scratchpad intervals containing 0 -> \"the same within +-10%\".",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      1.388476542157643,
+      -2.918633755582363,
+      1.4821208963176078,
+      -0.9378848309831298,
+      1.4563337033934531,
+      -0.0418222825036505
+     ],
+     "mean": 0.0714,
+     "sd": 1.7672,
+     "se": 0.7214,
+     "ci99": [
+      -2.8376,
+      2.9804
+     ],
+     "l2_level": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       3.999935585042593,
+       2.1588102260582063,
+       3.9933458789404677,
+       4.052761667186553,
+       3.969890098807185,
+       4.987035311136559
+      ],
+      "mean": 3.8603,
+      "sd": 0.922,
+      "se": 0.3764,
+      "ci99": [
+       2.3425,
+       5.3781
+      ]
+     },
+     "scp_local_level": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       2.61145904288495,
+       5.077443981640569,
+       2.51122498262286,
+       4.990646498169683,
+       2.513556395413732,
+       5.028857593640209
+      ],
+      "mean": 3.7889,
+      "sd": 1.3629,
+      "se": 0.5564,
+      "ci99": [
+       1.5454,
+       6.0323
+      ]
+     }
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      -0.3549929131840437,
+      -2.389177716206686,
+      -0.4296084310162611,
+      -0.8663468328196791,
+      1.1137640215054034,
+      0.032183708113084464
+     ],
+     "mean": -0.4824,
+     "sd": 1.1502,
+     "se": 0.4696,
+     "ci99": [
+      -2.3757,
+      1.411
+     ],
+     "band": [
+      0.03,
+      0.33
+     ],
+     "in_band": false,
+     "l2_level": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       1.7162822691431976,
+       1.7447283358042815,
+       1.741714247506574,
+       3.2534571832918164,
+       3.208274550632942,
+       4.155785007127946
+      ],
+      "mean": 2.6367,
+      "sd": 1.0448,
+      "se": 0.4266,
+      "ci99": [
+       0.9168,
+       4.3566
+      ]
+     },
+     "scp_local_level": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       2.0712751823272413,
+       4.133906052010968,
+       2.1713226785228352,
+       4.1198040161114955,
+       2.0945105291275388,
+       4.123601299014862
+      ],
+      "mean": 3.1191,
+      "sd": 1.1033,
+      "se": 0.4504,
+      "ci99": [
+       1.3029,
+       4.9352
+      ]
+     }
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.9382953354848169,
+      -2.386936763936398,
+      -0.6466573841172458,
+      -0.41021267057495114,
+      2.1316299968022294,
+      -1.0934674733882428
+     ],
+     "mean": -0.2446,
+     "sd": 1.584,
+     "se": 0.6467,
+     "ci99": [
+      -2.852,
+      2.3629
+     ],
+     "band": [
+      -0.43,
+      -0.13
+     ],
+     "in_band": true,
+     "l2_level": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       3.0246437247982527,
+       1.7134417130925543,
+       1.4169775031652954,
+       3.531270236610699,
+       4.282414951527497,
+       2.990591259576794
+      ],
+      "mean": 2.8266,
+      "sd": 1.087,
+      "se": 0.4438,
+      "ci99": [
+       1.0372,
+       4.6159
+      ]
+     },
+     "scp_local_level": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       2.086348389313436,
+       4.100378477028952,
+       2.063634887282541,
+       3.9414829071856503,
+       2.1507849547252675,
+       4.084058732965037
+      ],
+      "mean": 3.0711,
+      "sd": 1.0653,
+      "se": 0.4349,
+      "ci99": [
+       1.3174,
+       4.8248
+      ]
+     }
+    }
+   },
+   "test": "99% t per card on per-pass (L2 - scp-local), mean of the two ABBA bursts each; Welch 99% a2 vs a3",
+   "outcome": "PASS",
+   "prediction_held": false,
+   "reading": "L2 and own scratchpad the same within +-10% on both cards: a2 -0.482 [-2.376, 1.411] (n=6), a3 -0.245 [-2.852, 2.363] (n=6) pJ/B [confounded: the scratchpad bursts are prefilled, zeros/random alternating; see RL-h]",
+   "welch": {
+    "diff": -0.2378,
+    "se": 0.7992,
+    "df": 9.13,
+    "ci99": [
+     -2.8259,
+     2.3503
+    ],
+    "p": 0.7726956800710402
+   },
+   "note": "the scratchpad bursts are prefilled (odd zeros, even random), so this difference mixes the two contents; see RL-h",
+   "info_l2_level_a2_minus_a3": {
+    "diff": -0.1898,
+    "se": 0.6155,
+    "df": 9.98,
+    "ci99": [
+     -2.1414,
+     1.7617
+    ],
+    "p": 0.7640960780506654
+   },
+   "all_cards": {
+    "test": "every pair of cards: Welch on per-pass L2 - own scratchpad, each pair at 1 - 0.01/pairs (Bonferroni)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "per_card_mean": {
+     "aifoundry1-c1": 0.0714,
+     "aifoundry2": -0.4824,
+     "aifoundry3": -0.2446
+    },
+    "outcome": "PASS",
+    "pair_conf": 0.99667,
+    "pairs": {
+     "a1c1 - a2": {
+      "diff": 0.5538,
+      "se": 0.8608,
+      "df": 8.59,
+      "ci": [
+       -2.9039,
+       4.0115
+      ],
+      "conf": 0.99667
+     },
+     "a1c1 - a3": {
+      "diff": 0.316,
+      "se": 0.9688,
+      "df": 9.88,
+      "ci": [
+       -3.4049,
+       4.0369
+      ],
+      "conf": 0.99667
+     },
+     "a2 - a3": {
+      "diff": -0.2378,
+      "se": 0.7992,
+      "df": 9.13,
+      "ci": [
+       -3.3836,
+       2.908
+      ],
+      "conf": 0.99667
+     }
+    },
+    "differing_pairs": [],
+    "pooled": -0.2185,
+    "reading": "L2 - own scratchpad: the same within +-10% on every card [confounded by the contents arm; see RL-h]",
+    "contains_0": {
+     "aifoundry1-c1": true,
+     "aifoundry2": true,
+     "aifoundry3": true
+    }
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-h",
+   "part": "scp-local level follows the prefill",
+   "claims": [
+    "energy-manual-87",
+    "memhier-onchip-34"
+   ],
+   "prediction": "contents arm: each card's scp-local level follows the prefill (zeros 2.0+-0.3, random 4.2+-0.5 pJ/B) and at equal contents a3 - a2 is within +-0.1 pJ/B.",
+   "decision_rule": "as RL-a on the prefilled passes; a3 - a2 inside +-0.1 -> the card difference is contents, and the page says so.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "zeros": {
+      "n": 3,
+      "passes": [
+       1,
+       3,
+       5
+      ],
+      "values": [
+       2.61145904288495,
+       2.51122498262286,
+       2.513556395413732
+      ],
+      "mean": 2.5454,
+      "sd": 0.0572,
+      "se": 0.033,
+      "ci99": [
+       2.2176,
+       2.8732
+      ],
+      "band": [
+       1.7,
+       2.3
+      ],
+      "in_band": false
+     },
+     "random": {
+      "n": 3,
+      "passes": [
+       2,
+       4,
+       6
+      ],
+      "values": [
+       5.077443981640569,
+       4.990646498169683,
+       5.028857593640209
+      ],
+      "mean": 5.0323,
+      "sd": 0.0435,
+      "se": 0.0251,
+      "ci99": [
+       4.783,
+       5.2816
+      ],
+      "band": [
+       3.7,
+       4.7
+      ],
+      "in_band": false
+     },
+     "welch_random_minus_zeros": {
+      "diff": 2.4869,
+      "se": 0.0415,
+      "df": 3.73,
+      "ci99": [
+       2.2862,
+       2.6876
+      ],
+      "p": 1.0415823573706978e-06
+     }
+    },
+    "aifoundry2": {
+     "zeros": {
+      "n": 3,
+      "passes": [
+       1,
+       3,
+       5
+      ],
+      "values": [
+       2.0712751823272413,
+       2.1713226785228352,
+       2.0945105291275388
+      ],
+      "mean": 2.1124,
+      "sd": 0.0524,
+      "se": 0.0302,
+      "ci99": [
+       1.8123,
+       2.4124
+      ],
+      "band": [
+       1.7,
+       2.3
+      ],
+      "in_band": true
+     },
+     "random": {
+      "n": 3,
+      "passes": [
+       2,
+       4,
+       6
+      ],
+      "values": [
+       4.133906052010968,
+       4.1198040161114955,
+       4.123601299014862
+      ],
+      "mean": 4.1258,
+      "sd": 0.0073,
+      "se": 0.0042,
+      "ci99": [
+       4.084,
+       4.1676
+      ],
+      "band": [
+       3.7,
+       4.7
+      ],
+      "in_band": true
+     },
+     "welch_random_minus_zeros": {
+      "diff": 2.0134,
+      "se": 0.0305,
+      "df": 2.08,
+      "ci99": [
+       1.7288,
+       2.298
+      ],
+      "p": 0.0001747358869442405
+     }
+    },
+    "aifoundry3": {
+     "zeros": {
+      "n": 3,
+      "passes": [
+       1,
+       3,
+       5
+      ],
+      "values": [
+       2.086348389313436,
+       2.063634887282541,
+       2.1507849547252675
+      ],
+      "mean": 2.1003,
+      "sd": 0.0452,
+      "se": 0.0261,
+      "ci99": [
+       1.8412,
+       2.3593
+      ],
+      "band": [
+       1.7,
+       2.3
+      ],
+      "in_band": true
+     },
+     "random": {
+      "n": 3,
+      "passes": [
+       2,
+       4,
+       6
+      ],
+      "values": [
+       4.100378477028952,
+       3.9414829071856503,
+       4.084058732965037
+      ],
+      "mean": 4.042,
+      "sd": 0.0874,
+      "se": 0.0505,
+      "ci99": [
+       3.5411,
+       4.5428
+      ],
+      "band": [
+       3.7,
+       4.7
+      ],
+      "in_band": true
+     },
+     "welch_random_minus_zeros": {
+      "diff": 1.9417,
+      "se": 0.0568,
+      "df": 3.0,
+      "ci99": [
+       1.6097,
+       2.2737
+      ],
+      "p": 5.528585514064315e-05
+     }
+    }
+   },
+   "test": "per-card means of the zeros-prefill and random-prefill passes against the registered bands; Welch random - zeros per card for information",
+   "outcome": "PASS",
+   "prediction_held": true,
+   "reading": "scp-local by prefill: 2 zeros 2.11 [1.81, 2.41] (n=3), random 4.13 [4.08, 4.17] (n=3); 3 zeros 2.10 [1.84, 2.36] (n=3), random 4.04 [3.54, 4.54] (n=3) pJ/B (in both bands on both cards)",
+   "all_cards": {
+    "test": "on each card: scp-local level in the zeros band (1.7-2.3) on zeros passes and the random band (3.7-4.7) on random passes",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": false,
+     "aifoundry2": true,
+     "aifoundry3": true
+    },
+    "outcome": "CARD-DIFFERENT",
+    "reading": "scp-local level in the zeros band (1.7-2.3) on zeros passes and the random band (3.7-4.7) on random passes: holds on a2, a3 only, not on a1c1"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-h",
+   "part": "a3 - a2 at equal contents",
+   "claims": [
+    "energy-manual-87",
+    "memhier-onchip-34"
+   ],
+   "prediction": "contents arm: each card's scp-local level follows the prefill (zeros 2.0+-0.3, random 4.2+-0.5 pJ/B) and at equal contents a3 - a2 is within +-0.1 pJ/B.",
+   "decision_rule": "as RL-a on the prefilled passes; a3 - a2 inside +-0.1 -> the card difference is contents, and the page says so.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "zeros": {
+      "n": 3,
+      "passes": [
+       1,
+       3,
+       5
+      ],
+      "values": [
+       2.61145904288495,
+       2.51122498262286,
+       2.513556395413732
+      ],
+      "mean": 2.5454,
+      "sd": 0.0572,
+      "se": 0.033,
+      "ci99": [
+       2.2176,
+       2.8732
+      ]
+     },
+     "random": {
+      "n": 3,
+      "passes": [
+       2,
+       4,
+       6
+      ],
+      "values": [
+       5.077443981640569,
+       4.990646498169683,
+       5.028857593640209
+      ],
+      "mean": 5.0323,
+      "sd": 0.0435,
+      "se": 0.0251,
+      "ci99": [
+       4.783,
+       5.2816
+      ]
+     }
+    },
+    "aifoundry2": {
+     "zeros": {
+      "n": 3,
+      "passes": [
+       1,
+       3,
+       5
+      ],
+      "values": [
+       2.0712751823272413,
+       2.1713226785228352,
+       2.0945105291275388
+      ],
+      "mean": 2.1124,
+      "sd": 0.0524,
+      "se": 0.0302,
+      "ci99": [
+       1.8123,
+       2.4124
+      ]
+     },
+     "random": {
+      "n": 3,
+      "passes": [
+       2,
+       4,
+       6
+      ],
+      "values": [
+       4.133906052010968,
+       4.1198040161114955,
+       4.123601299014862
+      ],
+      "mean": 4.1258,
+      "sd": 0.0073,
+      "se": 0.0042,
+      "ci99": [
+       4.084,
+       4.1676
+      ]
+     }
+    },
+    "aifoundry3": {
+     "zeros": {
+      "n": 3,
+      "passes": [
+       1,
+       3,
+       5
+      ],
+      "values": [
+       2.086348389313436,
+       2.063634887282541,
+       2.1507849547252675
+      ],
+      "mean": 2.1003,
+      "sd": 0.0452,
+      "se": 0.0261,
+      "ci99": [
+       1.8412,
+       2.3593
+      ]
+     },
+     "random": {
+      "n": 3,
+      "passes": [
+       2,
+       4,
+       6
+      ],
+      "values": [
+       4.100378477028952,
+       3.9414829071856503,
+       4.084058732965037
+      ],
+      "mean": 4.042,
+      "sd": 0.0874,
+      "se": 0.0505,
+      "ci99": [
+       3.5411,
+       4.5428
+      ]
+     }
+    }
+   },
+   "test": "Welch 99% a3 - a2 within each contents group (3 passes per card each)",
+   "outcome": "PASS",
+   "prediction_held": true,
+   "reading": "a3 - a2 at equal contents: zeros -0.012 [-0.199, +0.174]; random -0.084 [-0.575, +0.407] pJ/B: inside +-0.1: the card difference is contents",
+   "welch_a3_minus_a2": {
+    "zeros": {
+     "diff": -0.0121,
+     "se": 0.0399,
+     "df": 3.92,
+     "ci99": [
+      -0.1987,
+      0.1745
+     ],
+     "p": 0.7770902118733625
+    },
+    "random": {
+     "diff": -0.0838,
+     "se": 0.0506,
+     "df": 2.03,
+     "ci99": [
+      -0.5749,
+      0.4073
+     ],
+     "p": 0.23810922076223728
+    }
+   },
+   "info_interval_inside_0p1": {
+    "zeros": false,
+    "random": false
+   },
+   "all_cards": {
+    "test": "every pair of cards, Welch within each contents group, each pair at 1 - 0.01/pairs (Bonferroni): a pair differs -> CARD-DIFFERENT; else every pairwise difference within +-0.1 pJ/B in both groups -> PASS; else FAIL",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "outcome": "CARD-DIFFERENT",
+    "by_contents": {
+     "zeros": {
+      "pair_conf": 0.99667,
+      "pairs": {
+       "a1c1 - a2": {
+        "diff": 0.433,
+        "se": 0.0448,
+        "df": 3.97,
+        "ci": [
+         0.151,
+         0.7151
+        ],
+        "conf": 0.99667
+       },
+       "a1c1 - a3": {
+        "diff": 0.4452,
+        "se": 0.0421,
+        "df": 3.8,
+        "ci": [
+         0.1687,
+         0.7216
+        ],
+        "conf": 0.99667
+       },
+       "a2 - a3": {
+        "diff": 0.0121,
+        "se": 0.0399,
+        "df": 3.92,
+        "ci": [
+         -0.2425,
+         0.2668
+        ],
+        "conf": 0.99667
+       }
+      },
+      "differing_pairs": [
+       "a1c1 - a2",
+       "a1c1 - a3"
+      ]
+     },
+     "random": {
+      "pair_conf": 0.99667,
+      "pairs": {
+       "a1c1 - a2": {
+        "diff": 0.9065,
+        "se": 0.0255,
+        "df": 2.11,
+        "ci": [
+         0.5151,
+         1.298
+        ],
+        "conf": 0.99667
+       },
+       "a1c1 - a3": {
+        "diff": 0.9903,
+        "se": 0.0564,
+        "df": 2.93,
+        "ci": [
+         0.4923,
+         1.4884
+        ],
+        "conf": 0.99667
+       },
+       "a2 - a3": {
+        "diff": 0.0838,
+        "se": 0.0506,
+        "df": 2.03,
+        "ci": [
+         -0.765,
+         0.9326
+        ],
+        "conf": 0.99667
+       }
+      },
+      "differing_pairs": [
+       "a1c1 - a2",
+       "a1c1 - a3"
+      ]
+     }
+    },
+    "reading": "at equal contents: some cards still differ"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(a) spin - pair",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.16524480140930864,
+      0.6109158061758739,
+      0.21871194812698214,
+      0.5883503343091738,
+      0.5032496755001983,
+      0.429225571598123
+     ],
+     "mean": 0.4193,
+     "sd": 0.1883,
+     "se": 0.0769,
+     "ci99": [
+      0.1094,
+      0.7292
+     ],
+     "band": [
+      0.0,
+      0.5
+     ],
+     "in_band": true
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.7262273351308979,
+      0.3174741294339478,
+      0.16424809517424155,
+      0.3245802411287464,
+      0.7698853850025795,
+      0.4193245766770608
+     ],
+     "mean": 0.4536,
+     "sd": 0.2427,
+     "se": 0.0991,
+     "ci99": [
+      0.0542,
+      0.8531
+     ],
+     "band": [
+      0.0,
+      0.5
+     ],
+     "in_band": true
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.3670274105023159,
+      0.5626362880717877,
+      0.36215346026109474,
+      0.13523688811979362,
+      0.1557278815575649,
+      0.3619654167054893
+     ],
+     "mean": 0.3241,
+     "sd": 0.1585,
+     "se": 0.0647,
+     "ci99": [
+      0.0632,
+      0.5851
+     ],
+     "band": [
+      0.0,
+      0.5
+     ],
+     "in_band": true
+    }
+   },
+   "test": "99% t per card on per-pass (nocbench spin W - ring W over idle)",
+   "outcome": "PASS",
+   "prediction_held": true,
+   "reading": "spin - pair: a2 0.45 [0.05, 0.85] (n=6), a3 0.32 [0.06, 0.59] (n=6) W: less than spinning on both cards",
+   "robustness_ci99": {
+    "noleak": {
+     "aifoundry1-c1": [
+      0.2305,
+      0.6507
+     ],
+     "aifoundry2": [
+      0.2868,
+      0.5235
+     ],
+     "aifoundry3": [
+      0.2941,
+      0.4732
+     ]
+    },
+    "before": {
+     "aifoundry1-c1": [
+      -0.4185,
+      0.7708
+     ],
+     "aifoundry2": [
+      0.1936,
+      0.4415
+     ],
+     "aifoundry3": [
+      0.2508,
+      0.4922
+     ]
+    }
+   },
+   "all_cards": {
+    "test": "on each card: spin - pair > 0 at 99% (less than spinning)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": true,
+     "aifoundry2": true,
+     "aifoundry3": true
+    },
+    "outcome": "PASS",
+    "reading": "spin - pair > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)",
+    "prediction_held": true
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(a) spin - neigh",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      -0.3501064843157704,
+      0.22694812846486023,
+      -0.27328054287690495,
+      -0.2750870066108404,
+      -0.2211455462248253,
+      -0.37641668243898785
+     ],
+     "mean": -0.2115,
+     "sd": 0.2221,
+     "se": 0.0907,
+     "ci99": [
+      -0.5771,
+      0.1541
+     ],
+     "band": [
+      -0.4,
+      0.4
+     ],
+     "in_band": true
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.15271610134694136,
+      0.15481417520054297,
+      0.3941109041962796,
+      -0.23294911199559243,
+      0.3872376537934379,
+      0.18767113401888214
+     ],
+     "mean": 0.1739,
+     "sd": 0.2283,
+     "se": 0.0932,
+     "ci99": [
+      -0.2018,
+      0.5497
+     ],
+     "band": [
+      -0.4,
+      0.4
+     ],
+     "in_band": true
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.25631677220444526,
+      0.3409269191142452,
+      0.2486287099354425,
+      0.17026335010809568,
+      -0.08873533854942517,
+      0.12687453772231727
+     ],
+     "mean": 0.1757,
+     "sd": 0.1493,
+     "se": 0.061,
+     "ci99": [
+      -0.0701,
+      0.4215
+     ],
+     "band": [
+      -0.4,
+      0.4
+     ],
+     "in_band": true
+    }
+   },
+   "test": "99% t per card on per-pass (nocbench spin W - ring W over idle)",
+   "outcome": "FAIL",
+   "prediction_held": true,
+   "reading": "spin - neigh: a2 0.17 [-0.20, 0.55] (n=6), a3 0.18 [-0.07, 0.42] (n=6) W: about as much as spinning (+-0.55 W)",
+   "robustness_ci99": {
+    "noleak": {
+     "aifoundry1-c1": [
+      -0.4072,
+      0.0395
+     ],
+     "aifoundry2": [
+      0.1081,
+      0.3172
+     ],
+     "aifoundry3": [
+      0.0742,
+      0.3867
+     ]
+    },
+    "before": {
+     "aifoundry1-c1": [
+      -0.9384,
+      -0.2374
+     ],
+     "aifoundry2": [
+      0.0041,
+      0.2306
+     ],
+     "aifoundry3": [
+      0.0471,
+      0.3683
+     ]
+    }
+   },
+   "all_cards": {
+    "test": "on each card: spin - neigh > 0 at 99% (less than spinning)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": false,
+     "aifoundry2": false,
+     "aifoundry3": false
+    },
+    "outcome": "FAIL",
+    "reading": "spin - neigh > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)",
+    "prediction_held": true
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(a) spin - shire",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      -0.41022014231014126,
+      -0.0797008491784772,
+      -0.20192858661274427,
+      -0.4166402728064016,
+      -0.3304639213454088,
+      -0.4767219344663016
+     ],
+     "mean": -0.3193,
+     "sd": 0.1509,
+     "se": 0.0616,
+     "ci99": [
+      -0.5677,
+      -0.0709
+     ],
+     "band": [
+      -0.4,
+      0.4
+     ],
+     "in_band": true
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.06378964218385397,
+      0.09427702798468918,
+      0.21699955080243427,
+      -0.25311310135794995,
+      0.181160119519018,
+      0.5127445770974037
+     ],
+     "mean": 0.136,
+     "sd": 0.2486,
+     "se": 0.1015,
+     "ci99": [
+      -0.2732,
+      0.5451
+     ],
+     "band": [
+      -0.4,
+      0.4
+     ],
+     "in_band": true
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.23057548814321205,
+      0.3659869325683558,
+      0.1246279087302864,
+      0.0009060650514793878,
+      -0.11512347555862101,
+      0.13076743638234056
+     ],
+     "mean": 0.123,
+     "sd": 0.1687,
+     "se": 0.0689,
+     "ci99": [
+      -0.1547,
+      0.4006
+     ],
+     "band": [
+      -0.4,
+      0.4
+     ],
+     "in_band": true
+    }
+   },
+   "test": "99% t per card on per-pass (nocbench spin W - ring W over idle)",
+   "outcome": "FAIL",
+   "prediction_held": true,
+   "reading": "spin - shire: a2 0.14 [-0.27, 0.55] (n=6), a3 0.12 [-0.15, 0.40] (n=6) W: about as much as spinning (+-0.55 W)",
+   "robustness_ci99": {
+    "noleak": {
+     "aifoundry1-c1": [
+      -0.3582,
+      -0.0733
+     ],
+     "aifoundry2": [
+      0.0541,
+      0.2395
+     ],
+     "aifoundry3": [
+      0.0751,
+      0.2826
+     ]
+    },
+    "before": {
+     "aifoundry1-c1": [
+      -0.9996,
+      -0.4175
+     ],
+     "aifoundry2": [
+      -0.0635,
+      0.1355
+     ],
+     "aifoundry3": [
+      0.0697,
+      0.2527
+     ]
+    }
+   },
+   "all_cards": {
+    "test": "on each card: spin - shire > 0 at 99% (less than spinning)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": false,
+     "aifoundry2": false,
+     "aifoundry3": false
+    },
+    "outcome": "FAIL",
+    "reading": "spin - shire > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)",
+    "prediction_held": true
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(a) spin - xshire1",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.44335929961878184,
+      0.5196319392679785,
+      0.4951092816632363,
+      0.3771259194599734,
+      0.699290285592729,
+      0.6829977173515815
+     ],
+     "mean": 0.5363,
+     "sd": 0.1296,
+     "se": 0.0529,
+     "ci99": [
+      0.3228,
+      0.7497
+     ]
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      1.030410065684607,
+      0.6480758017046968,
+      0.4460317214863032,
+      0.3129490207025083,
+      1.1205450464752529,
+      0.9954098356679792
+     ],
+     "mean": 0.7589,
+     "sd": 0.3375,
+     "se": 0.1378,
+     "ci99": [
+      0.2034,
+      1.3144
+     ]
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.717632235063717,
+      0.9591030795553503,
+      0.7580998172249349,
+      0.6532246342708827,
+      0.5689052032813264,
+      0.7561790490005134
+     ],
+     "mean": 0.7355,
+     "sd": 0.131,
+     "se": 0.0535,
+     "ci99": [
+      0.5199,
+      0.9511
+     ]
+    }
+   },
+   "test": "99% t per card on per-pass (nocbench spin W - ring W over idle)",
+   "outcome": "PASS",
+   "prediction_held": null,
+   "reading": "spin - xshire1: a2 0.76 [0.20, 1.31] (n=6), a3 0.74 [0.52, 0.95] (n=6) W: less than spinning on both cards",
+   "robustness_ci99": {
+    "noleak": {
+     "aifoundry1-c1": [
+      0.392,
+      0.7474
+     ],
+     "aifoundry2": [
+      0.6714,
+      0.8041
+     ],
+     "aifoundry3": [
+      0.7499,
+      0.8283
+     ]
+    },
+    "before": {
+     "aifoundry1-c1": [
+      -0.0921,
+      0.2361
+     ],
+     "aifoundry2": [
+      0.5675,
+      0.7126
+     ],
+     "aifoundry3": [
+      0.6988,
+      0.8577
+     ]
+    }
+   },
+   "all_cards": {
+    "test": "on each card: spin - xshire1 > 0 at 99% (less than spinning)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": true,
+     "aifoundry2": true,
+     "aifoundry3": true
+    },
+    "outcome": "PASS",
+    "reading": "spin - xshire1 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)",
+    "prediction_held": null
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(a) spin - xshire16",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 0,
+     "passes": [],
+     "values": []
+    },
+    "aifoundry2": {
+     "n": 0,
+     "passes": [],
+     "values": []
+    },
+    "aifoundry3": {
+     "n": 0,
+     "passes": [],
+     "values": []
+    }
+   },
+   "test": "99% t per card on per-pass (nocbench spin W - ring W over idle)",
+   "outcome": "INSUFFICIENT",
+   "prediction_held": null,
+   "reading": "spin - xshire16: fewer than 3 kept passes on a card (a2 n=0, a3 n=0)",
+   "robustness_ci99": {
+    "noleak": {
+     "aifoundry1-c1": null,
+     "aifoundry2": null,
+     "aifoundry3": null
+    },
+    "before": {
+     "aifoundry1-c1": null,
+     "aifoundry2": null,
+     "aifoundry3": null
+    }
+   },
+   "all_cards": {
+    "test": "on each card: spin - xshire16 > 0 at 99% (less than spinning)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {},
+    "outcome": "INSUFFICIENT",
+    "lacking": {
+     "aifoundry1-c1": 0,
+     "aifoundry2": 0,
+     "aifoundry3": 0
+    },
+    "over_sufficient": {
+     "cards": [],
+     "outcome": null
+    },
+    "reading": "spin - xshire16 > 0 at 99% (less than spinning): fewer than 3 kept repeats on a1c1 (n=0), a2 (n=0), a3 (n=0)",
+    "prediction_held": null
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(a) spin - xshire8",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.33699457527593735,
+      0.3122418538231049,
+      0.36517202573243024,
+      0.3769428152789409,
+      0.4475179885727716,
+      0.42685781715405824
+     ],
+     "mean": 0.3776,
+     "sd": 0.0517,
+     "se": 0.0211,
+     "ci99": [
+      0.2924,
+      0.4628
+     ]
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.7583535082728237,
+      0.5408621157039812,
+      0.6625358973703648,
+      0.28253454701829783,
+      0.8082519006021629,
+      0.632417473051722
+     ],
+     "mean": 0.6142,
+     "sd": 0.1879,
+     "se": 0.0767,
+     "ci99": [
+      0.3049,
+      0.9234
+     ]
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.9876299594284581,
+      0.7566440126755856,
+      0.6684548230400451,
+      0.8873057144965979,
+      0.3812604216844746,
+      0.9927245173530825
+     ],
+     "mean": 0.779,
+     "sd": 0.2332,
+     "se": 0.0952,
+     "ci99": [
+      0.3952,
+      1.1628
+     ]
+    }
+   },
+   "test": "99% t per card on per-pass (nocbench spin W - ring W over idle)",
+   "outcome": "PASS",
+   "prediction_held": null,
+   "reading": "spin - xshire8: a2 0.61 [0.30, 0.92] (n=6), a3 0.78 [0.40, 1.16] (n=6) W: less than spinning on both cards",
+   "robustness_ci99": {
+    "noleak": {
+     "aifoundry1-c1": [
+      0.2948,
+      0.6306
+     ],
+     "aifoundry2": [
+      0.6252,
+      0.7655
+     ],
+     "aifoundry3": [
+      0.5216,
+      0.926
+     ]
+    },
+    "before": {
+     "aifoundry1-c1": [
+      -0.2538,
+      0.096
+     ],
+     "aifoundry2": [
+      0.5135,
+      0.6739
+     ],
+     "aifoundry3": [
+      0.5341,
+      0.9001
+     ]
+    }
+   },
+   "all_cards": {
+    "test": "on each card: spin - xshire8 > 0 at 99% (less than spinning)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": true,
+     "aifoundry2": true,
+     "aifoundry3": true
+    },
+    "outcome": "PASS",
+    "reading": "spin - xshire8 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)",
+    "prediction_held": null
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(a) spin - xshire2",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.9040306332203376,
+      1.0751862172180573,
+      0.7100992895033595,
+      0.8833115615073974,
+      0.7348390909122451,
+      0.49533352266943886
+     ],
+     "mean": 0.8005,
+     "sd": 0.1993,
+     "se": 0.0814,
+     "ci99": [
+      0.4724,
+      1.1286
+     ],
+     "band": [
+      0.4,
+      null
+     ],
+     "in_band": true
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      1.4119261392531577,
+      0.9684429616768095,
+      1.0979686603943046,
+      0.7235533164309538,
+      1.102787498525541,
+      0.9366158260771491
+     ],
+     "mean": 1.0402,
+     "sd": 0.2287,
+     "se": 0.0934,
+     "ci99": [
+      0.6637,
+      1.4167
+     ],
+     "band": [
+      0.4,
+      null
+     ],
+     "in_band": true
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      1.3029832921412208,
+      0.9632963375816943,
+      1.3392976728108459,
+      0.9625925274593081,
+      0.9045302746861283,
+      1.0598080858784247
+     ],
+     "mean": 1.0888,
+     "sd": 0.1871,
+     "se": 0.0764,
+     "ci99": [
+      0.7807,
+      1.3968
+     ],
+     "band": [
+      0.4,
+      null
+     ],
+     "in_band": true
+    }
+   },
+   "test": "99% t per card on per-pass (nocbench spin W - ring W over idle)",
+   "outcome": "PASS",
+   "prediction_held": true,
+   "reading": "spin - xshire2: a2 1.04 [0.66, 1.42] (n=6), a3 1.09 [0.78, 1.40] (n=6) W: less than spinning on both cards",
+   "robustness_ci99": {
+    "noleak": {
+     "aifoundry1-c1": [
+      0.7461,
+      1.0269
+     ],
+     "aifoundry2": [
+      0.9797,
+      1.0746
+     ],
+     "aifoundry3": [
+      0.9013,
+      1.1501
+     ]
+    },
+    "before": {
+     "aifoundry1-c1": [
+      0.1733,
+      0.5597
+     ],
+     "aifoundry2": [
+      0.8423,
+      1.0193
+     ],
+     "aifoundry3": [
+      0.874,
+      1.1522
+     ]
+    }
+   },
+   "all_cards": {
+    "test": "on each card: spin - xshire2 > 0 at 99% (less than spinning)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": true,
+     "aifoundry2": true,
+     "aifoundry3": true
+    },
+    "outcome": "PASS",
+    "reading": "spin - xshire2 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)",
+    "prediction_held": true
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(a) spin - xshire4",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.7925463875209466,
+      1.0247342983953265,
+      0.9209620655808168,
+      1.0130442854057562,
+      1.005861772097283,
+      0.7837535732892904
+     ],
+     "mean": 0.9235,
+     "sd": 0.1111,
+     "se": 0.0454,
+     "ci99": [
+      0.7406,
+      1.1064
+     ],
+     "band": [
+      0.4,
+      null
+     ],
+     "in_band": true
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      1.0752806913934965,
+      1.4573794956519903,
+      0.8589995338744245,
+      0.9579548050424644,
+      1.4187499569771007,
+      1.3005693246889103
+     ],
+     "mean": 1.1782,
+     "sd": 0.2497,
+     "se": 0.1019,
+     "ci99": [
+      0.7671,
+      1.5892
+     ],
+     "band": [
+      0.4,
+      null
+     ],
+     "in_band": true
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      1.3370244069394028,
+      0.9782885993161856,
+      1.3308008385989238,
+      0.8867456261501367,
+      1.1694228118926735,
+      1.0766510504326607
+     ],
+     "mean": 1.1298,
+     "sd": 0.1843,
+     "se": 0.0752,
+     "ci99": [
+      0.8265,
+      1.4331
+     ],
+     "band": [
+      0.4,
+      null
+     ],
+     "in_band": true
+    }
+   },
+   "test": "99% t per card on per-pass (nocbench spin W - ring W over idle)",
+   "outcome": "PASS",
+   "prediction_held": true,
+   "reading": "spin - xshire4: a2 1.18 [0.77, 1.59] (n=6), a3 1.13 [0.83, 1.43] (n=6) W: less than spinning on both cards",
+   "robustness_ci99": {
+    "noleak": {
+     "aifoundry1-c1": [
+      0.841,
+      1.1256
+     ],
+     "aifoundry2": [
+      1.054,
+      1.1519
+     ],
+     "aifoundry3": [
+      0.9959,
+      1.2399
+     ]
+    },
+    "before": {
+     "aifoundry1-c1": [
+      0.2598,
+      0.7171
+     ],
+     "aifoundry2": [
+      0.93,
+      1.099
+     ],
+     "aifoundry3": [
+      0.9853,
+      1.2306
+     ]
+    }
+   },
+   "all_cards": {
+    "test": "on each card: spin - xshire4 > 0 at 99% (less than spinning)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": true,
+     "aifoundry2": true,
+     "aifoundry3": true
+    },
+    "outcome": "PASS",
+    "reading": "spin - xshire4 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)",
+    "prediction_held": true
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(a) spin - xshire6",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.6246275189208639,
+      0.7205663665682964,
+      0.6801880551371873,
+      0.6812060969755933,
+      1.1010720303676038,
+      0.5805081464336386
+     ],
+     "mean": 0.7314,
+     "sd": 0.1877,
+     "se": 0.0766,
+     "ci99": [
+      0.4224,
+      1.0403
+     ],
+     "band": [
+      0.4,
+      null
+     ],
+     "in_band": true
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.9729453259285976,
+      0.9611552898611377,
+      0.6751622263198271,
+      0.4566695094243127,
+      0.9783374090160466,
+      0.9003929116482303
+     ],
+     "mean": 0.8241,
+     "sd": 0.2134,
+     "se": 0.0871,
+     "ci99": [
+      0.4728,
+      1.1754
+     ],
+     "band": [
+      0.4,
+      null
+     ],
+     "in_band": true
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      1.048005272983504,
+      0.7647598488686449,
+      1.0515859248203112,
+      0.7391708927742915,
+      1.0081654263644586,
+      0.8982519455275391
+     ],
+     "mean": 0.9183,
+     "sd": 0.1405,
+     "se": 0.0574,
+     "ci99": [
+      0.687,
+      1.1496
+     ],
+     "band": [
+      0.4,
+      null
+     ],
+     "in_band": true
+    }
+   },
+   "test": "99% t per card on per-pass (nocbench spin W - ring W over idle)",
+   "outcome": "PASS",
+   "prediction_held": true,
+   "reading": "spin - xshire6: a2 0.82 [0.47, 1.18] (n=6), a3 0.92 [0.69, 1.15] (n=6) W: less than spinning on both cards",
+   "robustness_ci99": {
+    "noleak": {
+     "aifoundry1-c1": [
+      0.6732,
+      0.8997
+     ],
+     "aifoundry2": [
+      0.849,
+      1.0292
+     ],
+     "aifoundry3": [
+      0.8744,
+      0.9791
+     ]
+    },
+    "before": {
+     "aifoundry1-c1": [
+      0.097,
+      0.5718
+     ],
+     "aifoundry2": [
+      0.7055,
+      0.9812
+     ],
+     "aifoundry3": [
+      0.8774,
+      0.9759
+     ]
+    }
+   },
+   "all_cards": {
+    "test": "on each card: spin - xshire6 > 0 at 99% (less than spinning)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": true,
+     "aifoundry2": true,
+     "aifoundry3": true
+    },
+    "outcome": "PASS",
+    "reading": "spin - xshire6 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)",
+    "prediction_held": true
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(a) spin - shire-c4",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.3653068471970706,
+      0.357839080626138,
+      0.3118652567795057,
+      0.08778398082045191,
+      0.4428791049044336,
+      0.0977536441111111
+     ],
+     "mean": 0.2772,
+     "sd": 0.149,
+     "se": 0.0608,
+     "ci99": [
+      0.032,
+      0.5225
+     ]
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      1.0474790379116734,
+      0.5361675095076501,
+      0.26921570823890306,
+      0.16033393111684235,
+      0.6908567251635676,
+      0.423588791098394
+     ],
+     "mean": 0.5213,
+     "sd": 0.3191,
+     "se": 0.1303,
+     "ci99": [
+      -0.0041,
+      1.0466
+     ]
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.5294526477605936,
+      0.4214605649445482,
+      0.5519850515337146,
+      0.3162925898741822,
+      0.7387435081903972,
+      0.7737858793160561
+     ],
+     "mean": 0.5553,
+     "sd": 0.1773,
+     "se": 0.0724,
+     "ci99": [
+      0.2635,
+      0.8471
+     ]
+    }
+   },
+   "test": "99% t per card on per-pass (nocbench spin W - ring W over idle)",
+   "outcome": "CARD-DIFFERENT",
+   "prediction_held": null,
+   "reading": "spin - shire-c4: a2 0.52 [-0.00, 1.05] (n=6), a3 0.56 [0.26, 0.85] (n=6) W: less than spinning on aifoundry3 only",
+   "robustness_ci99": {
+    "noleak": {
+     "aifoundry1-c1": [
+      0.2233,
+      0.5597
+     ],
+     "aifoundry2": [
+      0.4938,
+      0.6895
+     ],
+     "aifoundry3": [
+      0.4369,
+      0.7169
+     ]
+    },
+    "before": {
+     "aifoundry1-c1": [
+      -0.3102,
+      0.3208
+     ],
+     "aifoundry2": [
+      0.3655,
+      0.6158
+     ],
+     "aifoundry3": [
+      0.4258,
+      0.7196
+     ]
+    }
+   },
+   "all_cards": {
+    "test": "on each card: spin - shire-c4 > 0 at 99% (less than spinning)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": true,
+     "aifoundry2": false,
+     "aifoundry3": true
+    },
+    "outcome": "CARD-DIFFERENT",
+    "reading": "spin - shire-c4 > 0 at 99% (less than spinning): holds on a1c1, a3 only, not on a2",
+    "prediction_held": null
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(a) spin - xshire1-c4",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.25321569888274764,
+      -0.13977061652398115,
+      0.006860105603700095,
+      -0.04536730370429387,
+      0.12555439094562226,
+      -0.21618411070855492
+     ],
+     "mean": -0.0026,
+     "sd": 0.1722,
+     "se": 0.0703,
+     "ci99": [
+      -0.286,
+      0.2808
+     ]
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.2842662624640315,
+      0.207264365894674,
+      0.02114810172260917,
+      -0.13029681031929474,
+      0.3830037763020586,
+      0.6927469252118659
+     ],
+     "mean": 0.243,
+     "sd": 0.2875,
+     "se": 0.1174,
+     "ci99": [
+      -0.2303,
+      0.7164
+     ]
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.4591483210129481,
+      0.1930921438919193,
+      0.4906950524713172,
+      0.1909311502323492,
+      0.3953957897790501,
+      0.34108352447490553
+     ],
+     "mean": 0.3451,
+     "sd": 0.1293,
+     "se": 0.0528,
+     "ci99": [
+      0.1322,
+      0.5579
+     ]
+    }
+   },
+   "test": "99% t per card on per-pass (nocbench spin W - ring W over idle)",
+   "outcome": "CARD-DIFFERENT",
+   "prediction_held": null,
+   "reading": "spin - xshire1-c4: a2 0.24 [-0.23, 0.72] (n=6), a3 0.35 [0.13, 0.56] (n=6) W: less than spinning on aifoundry3 only",
+   "robustness_ci99": {
+    "noleak": {
+     "aifoundry1-c1": [
+      -0.1591,
+      0.251
+     ],
+     "aifoundry2": [
+      0.2568,
+      0.3196
+     ],
+     "aifoundry3": [
+      0.2205,
+      0.4346
+     ]
+    },
+    "before": {
+     "aifoundry1-c1": [
+      -0.74,
+      0.3187
+     ],
+     "aifoundry2": [
+      0.1203,
+      0.2596
+     ],
+     "aifoundry3": [
+      0.2008,
+      0.4381
+     ]
+    }
+   },
+   "all_cards": {
+    "test": "on each card: spin - xshire1-c4 > 0 at 99% (less than spinning)",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": false,
+     "aifoundry2": false,
+     "aifoundry3": true
+    },
+    "outcome": "CARD-DIFFERENT",
+    "reading": "spin - xshire1-c4 > 0 at 99% (less than spinning): holds on a3 only, not on a1c1, a2",
+    "prediction_held": null
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(d) nocbench one-hart spin",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      2.378306573700673,
+      2.513176676110075,
+      2.373573954054607,
+      2.3957242008778037,
+      2.517299013371249,
+      2.3423179581137727
+     ],
+     "mean": 2.4201,
+     "sd": 0.0757,
+     "se": 0.0309,
+     "ci99": [
+      2.2954,
+      2.5447
+     ],
+     "band": [
+      2.2,
+      2.6
+     ],
+     "every_pass_in_band": true
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      2.617375965292526,
+      2.5621314139495945,
+      2.348593339817853,
+      2.206335424211279,
+      2.703340058496896,
+      2.5853145729443177
+     ],
+     "mean": 2.5038,
+     "sd": 0.1873,
+     "se": 0.0764,
+     "ci99": [
+      2.1956,
+      2.8121
+     ],
+     "band": [
+      2.2,
+      2.6
+     ],
+     "every_pass_in_band": false
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      2.4954133754145955,
+      2.3974482842427975,
+      2.4957958071998694,
+      2.2389276775934785,
+      2.3125599830879913,
+      2.528197559562633
+     ],
+     "mean": 2.4114,
+     "sd": 0.1162,
+     "se": 0.0474,
+     "ci99": [
+      2.2201,
+      2.6027
+     ],
+     "band": [
+      2.2,
+      2.6
+     ],
+     "every_pass_in_band": true
+    }
+   },
+   "test": "each pass's over-idle W (mean of the kept first/last brackets) in the band",
+   "outcome": "CARD-DIFFERENT",
+   "prediction_held": false,
+   "reading": "(d) nocbench one-hart spin W over idle: a2 [2.62, 2.56, 2.35, 2.21, 2.7, 2.59], a3 [2.5, 2.4, 2.5, 2.24, 2.31, 2.53] (band 2.2-2.6): in band every pass on aifoundry3",
+   "all_cards": {
+    "test": "on each card: (d) nocbench one-hart spin W over idle in 2.2-2.6 on every pass",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": true,
+     "aifoundry2": false,
+     "aifoundry3": true
+    },
+    "outcome": "CARD-DIFFERENT",
+    "reading": "(d) nocbench one-hart spin W over idle in 2.2-2.6 on every pass: holds on a1c1, a3 only, not on a2"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(d) memhier two-hart spin",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      2.3556919035329607,
+      2.3046008036103327,
+      2.3242843321018256,
+      2.431042833970075,
+      2.417208641618682,
+      2.4685434546549336
+     ],
+     "mean": 2.3836,
+     "sd": 0.065,
+     "se": 0.0265,
+     "ci99": [
+      2.2765,
+      2.4906
+     ],
+     "band": [
+      2.3,
+      2.8
+     ],
+     "every_pass_in_band": true
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      2.2193523840699565,
+      2.36083788846128,
+      2.613850986625942,
+      2.4099870825535756,
+      2.166028771372871,
+      2.4555199149432525
+     ],
+     "mean": 2.3709,
+     "sd": 0.1629,
+     "se": 0.0665,
+     "ci99": [
+      2.1027,
+      2.6392
+     ],
+     "band": [
+      2.3,
+      2.8
+     ],
+     "every_pass_in_band": false
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      2.481907169724634,
+      2.311767367663815,
+      2.3963793271136726,
+      2.402403420752403,
+      2.4312113318489286,
+      2.4305033586627234
+     ],
+     "mean": 2.409,
+     "sd": 0.0564,
+     "se": 0.023,
+     "ci99": [
+      2.3161,
+      2.5019
+     ],
+     "band": [
+      2.3,
+      2.8
+     ],
+     "every_pass_in_band": true
+    }
+   },
+   "test": "each pass's over-idle W (mean of the kept first/last brackets) in the band",
+   "outcome": "CARD-DIFFERENT",
+   "prediction_held": false,
+   "reading": "(d) memhier two-hart spin W over idle: a2 [2.22, 2.36, 2.61, 2.41, 2.17, 2.46], a3 [2.48, 2.31, 2.4, 2.4, 2.43, 2.43] (band 2.3-2.8): in band every pass on aifoundry3",
+   "all_cards": {
+    "test": "on each card: (d) memhier two-hart spin W over idle in 2.3-2.8 on every pass",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": true,
+     "aifoundry2": false,
+     "aifoundry3": true
+    },
+    "outcome": "CARD-DIFFERENT",
+    "reading": "(d) memhier two-hart spin W over idle in 2.3-2.8 on every pass: holds on a1c1, a3 only, not on a2"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(e) inside-shire ring W above mesh-ring W",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.818672291316908,
+      0.47775110656713404,
+      0.7198052039776286,
+      0.7007851174282214,
+      0.8138361641985385,
+      0.7351945038153238
+     ],
+     "mean": 0.711,
+     "sd": 0.1244,
+     "se": 0.0508,
+     "ci99": [
+      0.5063,
+      0.9157
+     ],
+     "info_min_inside_minus_max_across": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       0.1717497738666287,
+       -0.29867395235276906,
+       0.1464600776054481,
+       -0.21140751903023292,
+       -0.055731686927426694,
+       -0.0023677544440647846
+      ],
+      "mean": -0.0417,
+      "sd": 0.1884,
+      "se": 0.0769,
+      "ci99": [
+       -0.3519,
+       0.2685
+      ]
+     },
+     "every_pass": true
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.7355387865526386,
+      0.7263280220466632,
+      0.48968675783139326,
+      0.6005595637986392,
+      0.6396399762142089,
+      0.5798343116290159
+     ],
+     "mean": 0.6286,
+     "sd": 0.0933,
+     "se": 0.0381,
+     "ci99": [
+      0.4749,
+      0.7823
+     ],
+     "info_min_inside_minus_max_across": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       0.032126173141925785,
+       0.22338798627003342,
+       0.051920817290023624,
+       -0.04204569411044856,
+       0.03836651559958337,
+       0.11967289595431829
+      ],
+      "mean": 0.0706,
+      "sd": 0.0909,
+      "se": 0.0371,
+      "ci99": [
+       -0.0791,
+       0.2202
+      ]
+     },
+     "every_pass": true
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      0.7940151430279363,
+      0.4612349956813626,
+      0.7845111223234043,
+      0.7236724446037872,
+      0.8225004717653062,
+      0.7501871327017282
+     ],
+     "mean": 0.7227,
+     "sd": 0.1327,
+     "se": 0.0542,
+     "ci99": [
+      0.5043,
+      0.9411
+     ],
+     "info_min_inside_minus_max_across": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       0.3506048245614011,
+       0.1940077246037979,
+       0.30630136277895037,
+       0.48296128416278705,
+       0.2255325401269097,
+       0.39421363229502404
+      ],
+      "mean": 0.3256,
+      "sd": 0.1075,
+      "se": 0.0439,
+      "ci99": [
+       0.1486,
+       0.5026
+      ]
+     },
+     "every_pass": true
+    }
+   },
+   "test": "per pass: mean over-idle W of pair/neigh/shire minus mean of the five 1 KB xshire rings (8,1,4,2,6) > 0",
+   "outcome": "PASS",
+   "prediction_held": true,
+   "reading": "(e) inside-shire ring W above mesh-ring W: inside minus across W a2 [0.74, 0.73, 0.49, 0.6, 0.64, 0.58], a3 [0.79, 0.46, 0.78, 0.72, 0.82, 0.75]: every pass on both cards",
+   "all_cards": {
+    "test": "on each card: inside minus across W > 0 in every pass",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": true,
+     "aifoundry2": true,
+     "aifoundry3": true
+    },
+    "outcome": "PASS",
+    "reading": "inside minus across W > 0 in every pass: holds on every card (a1c1, a2, a3)"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X3",
+   "part": "(e) scp-remote cheaper than s->s+8 and s->s+16",
+   "claims": [
+    "memhier-onchip-88",
+    "memhier-onchip-50",
+    "memhier-onchip-51",
+    "memhier-onchip-52",
+    "memhier-onchip-89",
+    "memhier-onchip-90",
+    "memhier-onchip-93"
+   ],
+   "prediction": "(a) nocbench spin - ring over idle per pass: pair +0.0..+0.5 W; neigh and shire within +-0.4 W; xshire2/4/6 >= +0.4 W on both cards; (d) memhier two-hart spin 2.3-2.8 W, nocbench one-hart spin 2.2-2.6 W; (e) inside-shire ring power above mesh-ring power and scp-remote cheaper than s->s+8 and s->s+16 in every pass.",
+   "decision_rule": "(a) \"less than spinning\" kept for a ring only if its interval is > 0 on both cards, else \"about as much as spinning (+-x W)\"; (d), (e) every pass on both cards -> PROVEN-BOTH.",
+   "per_card": {
+    "aifoundry1-c1": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      7.3019538209647905,
+      1.53021621677531,
+      7.9533780197602635,
+      -0.8093999023809122,
+      8.866237086418586,
+      -0.161364572697277
+     ],
+     "mean": 4.1135,
+     "sd": 4.3973,
+     "se": 1.7952,
+     "ci99": [
+      -3.125,
+      11.352
+     ],
+     "passes_with_xshire16": [],
+     "every_pass": false
+    },
+    "aifoundry2": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      7.332460847802408,
+      1.3846492075486996,
+      6.850239003296098,
+      3.424976803055591,
+      7.372678307425845,
+      1.5391930459101086
+     ],
+     "mean": 4.6507,
+     "sd": 2.8737,
+     "se": 1.1732,
+     "ci99": [
+      -0.0797,
+      9.3811
+     ],
+     "passes_with_xshire16": [],
+     "every_pass": true
+    },
+    "aifoundry3": {
+     "n": 6,
+     "passes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     "values": [
+      5.757546613875988,
+      0.9537227649085693,
+      7.657262422061075,
+      -2.2413694732896,
+      8.402315402901436,
+      -0.5611503519962788
+     ],
+     "mean": 3.3281,
+     "sd": 4.5205,
+     "se": 1.8455,
+     "ci99": [
+      -4.1132,
+      10.7693
+     ],
+     "passes_with_xshire16": [],
+     "every_pass": false
+    }
+   },
+   "test": "per pass: min(xshire8, xshire16 if kept) pJ/B - scp-remote pJ/B > 0",
+   "outcome": "CARD-DIFFERENT",
+   "prediction_held": false,
+   "reading": "(e) scp-remote cheaper than s->s+8 and s->s+16: ring minus scp-remote pJ/B a2 [7.33, 1.38, 6.85, 3.42, 7.37, 1.54], a3 [5.76, 0.95, 7.66, -2.24, 8.4, -0.56]: every pass on aifoundry2; s->s+16 untested in passes where its burst was dropped (aifoundry2 kept in 0 of 6, aifoundry3 kept in 0 of 6)",
+   "all_cards": {
+    "test": "on each card: ring minus scp-remote pJ/B > 0 in every pass",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "reported_cards": [],
+    "holds": {
+     "aifoundry1-c1": false,
+     "aifoundry2": true,
+     "aifoundry3": false
+    },
+    "outcome": "CARD-DIFFERENT",
+    "reading": "ring minus scp-remote pJ/B > 0 in every pass: holds on a2 only, not on a1c1, a3",
+    "info_xshire16_kept": {
+     "aifoundry1-c1": "0 of 6",
+     "aifoundry2": "0 of 6",
+     "aifoundry3": "0 of 6"
+    }
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X4",
+   "part": "L3, random, spec ridge",
+   "claims": [
+    "ridge-88",
+    "ridge-91"
+   ],
+   "prediction": "L3 random vs spec 3.0 -> 3.6+-0.5 (above); other shire random -> 2.3+-0.6 (below); zeros in-shire TensorSend vs 8.8 -> 10.0+-1.5 (above).",
+   "decision_rule": "byte side 99% t over all passes per card (23 Sep + V3-RL), FLOP side over V3-ABL-A blocks; balance interval [byte lo / FLOP hi, byte hi / FLOP lo]; a verdict only when both cards' intervals lie on the same side of the ridge, else \"ranges overlap: no verdict\". ridge-89, ridge-92 and the pairs half of ridge-91 are not tested (margins need 11 to > 100 passes).",
+   "per_card": {
+    "aifoundry1-c1": {
+     "byte_pj_per_byte": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       19.660457231343266,
+       9.07634647612573,
+       20.546912292630605,
+       20.458342609776853,
+       20.327941453889217,
+       20.35370522060012
+      ],
+      "mean": 18.404,
+      "sd": 4.5804,
+      "se": 1.8699,
+      "ci99": [
+       10.8641,
+       25.9438
+      ]
+     },
+     "flop_pj_per_flop": {
+      "n": 4,
+      "passes": [
+       1,
+       2,
+       3,
+       4
+      ],
+      "values": [
+       3.0208995,
+       2.9886245,
+       3.0398405,
+       3.0664165
+      ],
+      "mean": 3.0289,
+      "sd": 0.0327,
+      "se": 0.0164,
+      "ci99": [
+       2.9334,
+       3.1245
+      ]
+     },
+     "n_legacy": 0,
+     "n_new": 6,
+     "n": 6,
+     "balance_point": 6.076,
+     "balance_ci": [
+      3.477,
+      8.844
+     ],
+     "point_in_band": false,
+     "side": "above"
+    },
+    "aifoundry2": {
+     "byte_pj_per_byte": {
+      "n": 9,
+      "passes": [
+       "23sep-rl-pass1",
+       "23sep-rl-pass2",
+       "23sep-rl-pass3",
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       11.202180821860962,
+       10.349540393054054,
+       10.508187619413444,
+       7.34491425078257,
+       8.28073157985122,
+       7.564255829728325,
+       17.6169541964537,
+       16.659287542000282,
+       16.29641958825208
+      ],
+      "mean": 11.7581,
+      "sd": 4.0613,
+      "se": 1.3538,
+      "ci99": [
+       7.2156,
+       16.3005
+      ]
+     },
+     "flop_pj_per_flop": {
+      "n": 4,
+      "passes": [
+       1,
+       2,
+       3,
+       4
+      ],
+      "values": [
+       2.9542835,
+       2.9364265,
+       2.97302,
+       2.9763305
+      ],
+      "mean": 2.96,
+      "sd": 0.0185,
+      "se": 0.0092,
+      "ci99": [
+       2.906,
+       3.014
+      ]
+     },
+     "n_legacy": 3,
+     "n_new": 6,
+     "n": 9,
+     "balance_point": 3.972,
+     "balance_ci": [
+      2.394,
+      5.609
+     ],
+     "point_in_band": true,
+     "side": "overlap"
+    },
+    "aifoundry3": {
+     "byte_pj_per_byte": {
+      "n": 9,
+      "passes": [
+       "23sep-rl-pass1",
+       "23sep-rl-pass2",
+       "23sep-rl-pass3",
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       9.61028699079379,
+       11.444763574190846,
+       9.917234454729897,
+       17.664147913093853,
+       7.05062820994418,
+       7.892967564288995,
+       18.394860063804604,
+       18.3967894732502,
+       11.582308271220892
+      ],
+      "mean": 12.4393,
+      "sd": 4.5284,
+      "se": 1.5095,
+      "ci99": [
+       7.3744,
+       17.5042
+      ]
+     },
+     "flop_pj_per_flop": {
+      "n": 4,
+      "passes": [
+       1,
+       2,
+       3,
+       4
+      ],
+      "values": [
+       2.6732865,
+       2.6839635,
+       2.684529,
+       2.696021
+      ],
+      "mean": 2.6845,
+      "sd": 0.0093,
+      "se": 0.0046,
+      "ci99": [
+       2.6573,
+       2.7116
+      ]
+     },
+     "n_legacy": 3,
+     "n_new": 6,
+     "n": 9,
+     "balance_point": 4.634,
+     "balance_ci": [
+      2.72,
+      6.587
+     ],
+     "point_in_band": false,
+     "side": "overlap"
+    }
+   },
+   "test": "per card: byte-side 99% t (23 Sep + V3-RL passes) / FLOP-side 99% t (V3-ABL-A blocks, fp32 random); ridge 3.00-3.00 (ridge-points page)",
+   "outcome": "FAIL",
+   "prediction_held": false,
+   "reading": "L3, random, spec ridge: balance a2 3.972 [2.394, 5.609], a3 4.634 [2.72, 6.587] FLOP/B vs ridge 3.00: ranges overlap: no verdict",
+   "ridge": [
+    2.9999999999999996,
+    2.9999999999999996
+   ],
+   "predicted_side": "above",
+   "all_cards": {
+    "test": "the registered rule over every card: all on the predicted side -> PASS; any overlap -> FAIL (no verdict); all on the other side -> FAIL; cards on opposite sides -> CARD-DIFFERENT",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "sides": {
+     "aifoundry1-c1": "above",
+     "aifoundry2": "overlap",
+     "aifoundry3": "overlap"
+    },
+    "outcome": "FAIL",
+    "reading": "L3, random, spec ridge: a1c1 above, a2 overlap, a3 overlap its ridge (predicted above)"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X4",
+   "part": "other shire's scratchpad, random, spec ridge",
+   "claims": [
+    "ridge-88",
+    "ridge-91"
+   ],
+   "prediction": "L3 random vs spec 3.0 -> 3.6+-0.5 (above); other shire random -> 2.3+-0.6 (below); zeros in-shire TensorSend vs 8.8 -> 10.0+-1.5 (above).",
+   "decision_rule": "byte side 99% t over all passes per card (23 Sep + V3-RL), FLOP side over V3-ABL-A blocks; balance interval [byte lo / FLOP hi, byte hi / FLOP lo]; a verdict only when both cards' intervals lie on the same side of the ridge, else \"ranges overlap: no verdict\". ridge-89, ridge-92 and the pairs half of ridge-91 are not tested (margins need 11 to > 100 passes).",
+   "per_card": {
+    "aifoundry1-c1": {
+     "byte_pj_per_byte": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       6.451089810970229,
+       13.30545134335268,
+       5.58447740696805,
+       14.425367030804145,
+       5.085351556106892,
+       13.073714947395219
+      ],
+      "mean": 9.6542,
+      "sd": 4.37,
+      "se": 1.7841,
+      "ci99": [
+       2.4607,
+       16.8478
+      ]
+     },
+     "flop_pj_per_flop": {
+      "n": 4,
+      "passes": [
+       1,
+       2,
+       3,
+       4
+      ],
+      "values": [
+       3.0208995,
+       2.9886245,
+       3.0398405,
+       3.0664165
+      ],
+      "mean": 3.0289,
+      "sd": 0.0327,
+      "se": 0.0164,
+      "ci99": [
+       2.9334,
+       3.1245
+      ]
+     },
+     "n_legacy": 0,
+     "n_new": 6,
+     "n": 6,
+     "info_random_prefill_only": {
+      "n": 3,
+      "passes": [
+       2,
+       4,
+       6
+      ],
+      "values": [
+       13.30545134335268,
+       14.425367030804145,
+       13.073714947395219
+      ],
+      "mean": 13.6015,
+      "sd": 0.7228,
+      "se": 0.4173,
+      "ci99": [
+       9.4596,
+       17.7434
+      ]
+     },
+     "balance_point": 3.187,
+     "balance_ci": [
+      0.788,
+      5.743
+     ],
+     "point_in_band": false,
+     "side": "overlap"
+    },
+    "aifoundry2": {
+     "byte_pj_per_byte": {
+      "n": 9,
+      "passes": [
+       "23sep-rl-pass1",
+       "23sep-rl-pass2",
+       "23sep-rl-pass3",
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       6.666831377999845,
+       6.530956631718088,
+       5.309567389596654,
+       5.198586885238504,
+       12.220591265222193,
+       4.514772141782519,
+       9.53048461393824,
+       5.398311194145105,
+       11.618700007674612
+      ],
+      "mean": 7.4432,
+      "sd": 2.924,
+      "se": 0.9747,
+      "ci99": [
+       4.1728,
+       10.7136
+      ]
+     },
+     "flop_pj_per_flop": {
+      "n": 4,
+      "passes": [
+       1,
+       2,
+       3,
+       4
+      ],
+      "values": [
+       2.9542835,
+       2.9364265,
+       2.97302,
+       2.9763305
+      ],
+      "mean": 2.96,
+      "sd": 0.0185,
+      "se": 0.0092,
+      "ci99": [
+       2.906,
+       3.014
+      ]
+     },
+     "n_legacy": 3,
+     "n_new": 6,
+     "n": 9,
+     "info_random_prefill_only": {
+      "n": 3,
+      "passes": [
+       2,
+       4,
+       6
+      ],
+      "values": [
+       12.220591265222193,
+       9.53048461393824,
+       11.618700007674612
+      ],
+      "mean": 11.1233,
+      "sd": 1.4118,
+      "se": 0.8151,
+      "ci99": [
+       3.0333,
+       19.2132
+      ]
+     },
+     "balance_point": 2.515,
+     "balance_ci": [
+      1.384,
+      3.687
+     ],
+     "point_in_band": true,
+     "side": "overlap"
+    },
+    "aifoundry3": {
+     "byte_pj_per_byte": {
+      "n": 9,
+      "passes": [
+       "23sep-rl-pass1",
+       "23sep-rl-pass2",
+       "23sep-rl-pass3",
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       7.338980544351085,
+       6.603471121812278,
+       7.477977170985222,
+       4.400839130199321,
+       10.090142177581093,
+       4.64135360309016,
+       11.343757265567351,
+       4.599489658019626,
+       10.895966658985184
+      ],
+      "mean": 7.488,
+      "sd": 2.7394,
+      "se": 0.9131,
+      "ci99": [
+       4.4241,
+       10.5519
+      ]
+     },
+     "flop_pj_per_flop": {
+      "n": 4,
+      "passes": [
+       1,
+       2,
+       3,
+       4
+      ],
+      "values": [
+       2.6732865,
+       2.6839635,
+       2.684529,
+       2.696021
+      ],
+      "mean": 2.6845,
+      "sd": 0.0093,
+      "se": 0.0046,
+      "ci99": [
+       2.6573,
+       2.7116
+      ]
+     },
+     "n_legacy": 3,
+     "n_new": 6,
+     "n": 9,
+     "info_random_prefill_only": {
+      "n": 3,
+      "passes": [
+       2,
+       4,
+       6
+      ],
+      "values": [
+       10.090142177581093,
+       11.343757265567351,
+       10.895966658985184
+      ],
+      "mean": 10.7766,
+      "sd": 0.6353,
+      "se": 0.3668,
+      "ci99": [
+       7.1364,
+       14.4168
+      ]
+     },
+     "balance_point": 2.789,
+     "balance_ci": [
+      1.632,
+      3.971
+     ],
+     "point_in_band": true,
+     "side": "overlap"
+    }
+   },
+   "test": "per card: byte-side 99% t (23 Sep + V3-RL passes) / FLOP-side 99% t (V3-ABL-A blocks, fp32 random); ridge 3.00-3.00 (ridge-points page)",
+   "outcome": "FAIL",
+   "prediction_held": true,
+   "reading": "other shire's scratchpad, random, spec ridge: balance a2 2.515 [1.384, 3.687], a3 2.789 [1.632, 3.971] FLOP/B vs ridge 3.00: ranges overlap: no verdict",
+   "ridge": [
+    2.9999999999999996,
+    2.9999999999999996
+   ],
+   "predicted_side": "below",
+   "all_cards": {
+    "test": "the registered rule over every card: all on the predicted side -> PASS; any overlap -> FAIL (no verdict); all on the other side -> FAIL; cards on opposite sides -> CARD-DIFFERENT",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "sides": {
+     "aifoundry1-c1": "overlap",
+     "aifoundry2": "overlap",
+     "aifoundry3": "overlap"
+    },
+    "outcome": "FAIL",
+    "reading": "other shire's scratchpad, random, spec ridge: a1c1 overlap, a2 overlap, a3 overlap its ridge (predicted below)"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  },
+  {
+   "item": "RL-X4",
+   "part": "in-shire TensorSend (shire ring), zeros, measured ridge",
+   "claims": [
+    "ridge-88",
+    "ridge-91"
+   ],
+   "prediction": "L3 random vs spec 3.0 -> 3.6+-0.5 (above); other shire random -> 2.3+-0.6 (below); zeros in-shire TensorSend vs 8.8 -> 10.0+-1.5 (above).",
+   "decision_rule": "byte side 99% t over all passes per card (23 Sep + V3-RL), FLOP side over V3-ABL-A blocks; balance interval [byte lo / FLOP hi, byte hi / FLOP lo]; a verdict only when both cards' intervals lie on the same side of the ridge, else \"ranges overlap: no verdict\". ridge-89, ridge-92 and the pairs half of ridge-91 are not tested (margins need 11 to > 100 passes).",
+   "per_card": {
+    "aifoundry1-c1": {
+     "byte_pj_per_byte": {
+      "n": 6,
+      "passes": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       2.5142238524814986,
+       2.3361013883053285,
+       2.321177269748143,
+       2.5307983112895154,
+       2.5713831176124122,
+       2.5385791885323647
+      ],
+      "mean": 2.4687,
+      "sd": 0.1102,
+      "se": 0.045,
+      "ci99": [
+       2.2873,
+       2.6501
+      ]
+     },
+     "flop_pj_per_flop": {
+      "n": 4,
+      "passes": [
+       1,
+       2,
+       3,
+       4
+      ],
+      "values": [
+       0.120871,
+       0.112169,
+       0.1327445,
+       0.13668
+      ],
+      "mean": 0.1256,
+      "sd": 0.0112,
+      "se": 0.0056,
+      "ci99": [
+       0.0929,
+       0.1583
+      ]
+     },
+     "n_legacy": 0,
+     "n_new": 6,
+     "n": 6,
+     "balance_point": 19.655,
+     "balance_ci": [
+      14.449,
+      28.526
+     ],
+     "point_in_band": false,
+     "side": "above"
+    },
+    "aifoundry2": {
+     "byte_pj_per_byte": {
+      "n": 9,
+      "passes": [
+       "23sep-rl-pass1",
+       "23sep-rl-pass2",
+       "23sep-rl-pass3",
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       1.9318894890082396,
+       2.048872169476354,
+       2.156784939717586,
+       2.2942396577410964,
+       2.220087420872616,
+       1.9214391441637915,
+       2.218742088994209,
+       2.271138009864095,
+       1.867245880647557
+      ],
+      "mean": 2.1034,
+      "sd": 0.1642,
+      "se": 0.0547,
+      "ci99": [
+       1.9198,
+       2.287
+      ]
+     },
+     "flop_pj_per_flop": {
+      "n": 4,
+      "passes": [
+       1,
+       2,
+       3,
+       4
+      ],
+      "values": [
+       0.1787925,
+       0.2224895,
+       0.212882,
+       0.1926425
+      ],
+      "mean": 0.2017,
+      "sd": 0.0197,
+      "se": 0.0098,
+      "ci99": [
+       0.1442,
+       0.2592
+      ]
+     },
+     "n_legacy": 3,
+     "n_new": 6,
+     "n": 9,
+     "balance_point": 10.428,
+     "balance_ci": [
+      7.407,
+      15.86
+     ],
+     "point_in_band": true,
+     "side": "overlap"
+    },
+    "aifoundry3": {
+     "byte_pj_per_byte": {
+      "n": 9,
+      "passes": [
+       "23sep-rl-pass1",
+       "23sep-rl-pass2",
+       "23sep-rl-pass3",
+       1,
+       2,
+       3,
+       4,
+       5,
+       6
+      ],
+      "values": [
+       2.0522485756188193,
+       2.1408061645214786,
+       2.1634161161809655,
+       2.039786403020986,
+       1.828019414973162,
+       2.1334360590928214,
+       2.0141441178884993,
+       2.184590000454717,
+       2.157702450484484
+      ],
+      "mean": 2.0793,
+      "sd": 0.1122,
+      "se": 0.0374,
+      "ci99": [
+       1.9539,
+       2.2048
+      ]
+     },
+     "flop_pj_per_flop": {
+      "n": 4,
+      "passes": [
+       1,
+       2,
+       3,
+       4
+      ],
+      "values": [
+       0.0703265,
+       0.0854555,
+       0.082746,
+       0.0881605
+      ],
+      "mean": 0.0817,
+      "sd": 0.0079,
+      "se": 0.0039,
+      "ci99": [
+       0.0587,
+       0.1047
+      ]
+     },
+     "n_legacy": 3,
+     "n_new": 6,
+     "n": 9,
+     "balance_point": 25.45,
+     "balance_ci": [
+      18.662,
+      37.56
+     ],
+     "point_in_band": false,
+     "side": "above"
+    }
+   },
+   "test": "per card: byte-side 99% t (23 Sep + V3-RL passes) / FLOP-side 99% t (V3-ABL-A blocks, fp32 zeros); ridge 8.78-8.78 (ridge-points page)",
+   "outcome": "FAIL",
+   "prediction_held": false,
+   "reading": "in-shire TensorSend (shire ring), zeros, measured ridge: balance a2 10.428 [7.407, 15.86], a3 25.45 [18.662, 37.56] FLOP/B vs ridge 8.78: ranges overlap: no verdict",
+   "ridge": [
+    8.775847758214265,
+    8.775847758214265
+   ],
+   "predicted_side": "above",
+   "all_cards": {
+    "test": "the registered rule over every card: all on the predicted side -> PASS; any overlap -> FAIL (no verdict); all on the other side -> FAIL; cards on opposite sides -> CARD-DIFFERENT",
+    "cards": [
+     "aifoundry1-c1",
+     "aifoundry2",
+     "aifoundry3"
+    ],
+    "sides": {
+     "aifoundry1-c1": "above",
+     "aifoundry2": "overlap",
+     "aifoundry3": "above"
+    },
+    "outcome": "FAIL",
+    "reading": "in-shire TensorSend (shire ring), zeros, measured ridge: a1c1 above, a2 overlap, a3 above its ridge (predicted above)"
+   },
+   "idle_clock_mhz": {
+    "aifoundry1-c1": 600,
+    "aifoundry2": 600,
+    "aifoundry3": 600
+   },
+   "idle_note": null
+  }
+ ],
+ "flop_source": "/home/yaroslavvb/claude/et-soc1-pages/docs/reports/data/2026-09-25-claims-v3/results/inputs/flop.json",
+ "low_edge_source": "/home/yaroslavvb/claude/et-soc1-pages/docs/reports/data/2026-09-25-claims-v3/results/inputs/low_edge.json"
+}

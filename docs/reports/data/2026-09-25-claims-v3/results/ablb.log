@@ -1,0 +1,18 @@
+ABLB-2a   PASS           cycles/op: a2 fp16_randn_l1 546.00, int8_randn_l1 318.00, int8_ones_l1 318.00, fp16_randn_tenb 529.00, int8_randn_tenb 270.00, int8_ones_tenb 270.00 -> PASS; a3 fp16_randn_l1 546.00, int8_randn_l1 318.00, int8_ones_l1 318.00, fp16
+          PASS           all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS); TenB int8 spread over cards {'int8_randn_tenb': 0.0, 'int8_ones_tenb': 0.0}
+ABLB-2b   PASS           TenB - L1: a2 randn +6.55 W [+5.97, +7.14], ones +2.72 W [+1.01, +4.43] -> PASS; a3 randn +6.04 W [+3.65, +8.43], ones +2.40 W [+1.71, +3.10] -> PASS; kernel clause: 'the difference is the kernel' kept
+          PASS           all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS); kernel clause: 'the difference is the kernel' kept
+ABLB-2c   PASS           int8 randn in L1: a2 +9.89 W [+9.71, +10.08] band [9.5, 10.5] -> PASS; a3 +8.22 W [+7.04, +9.41] band [8.103, 10.103] -> PASS
+          PASS           all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+ABLB-3ab  FAIL           power saved dense -> zero: a2 +0.859  [+0.786, +0.932] (dense 17.508 W, zero 2.47 W) -> FAIL; a3 +0.934  [+0.895, +0.972] (dense 15.534 W, zero 1.03 W) -> FAIL
+          FAIL           all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL)
+ABLB-3c   PASS           power vs nonzero fraction: a2 slope +14.97 W [+14.80, +15.15], rms 0.279 W -> PASS; a3 slope +14.50 W [+12.99, +16.00], rms 0.182 W -> PASS
+          PASS           all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+ABLB-3d   PASS           row mask vs half zeros: a2 +1.10  [+0.91, +1.29] -> PASS; a3 +1.06  [+0.72, +1.41] -> PASS
+          CARD-DIFFERENT all cards: CARD-DIFFERENT (a2 PASS, a3 PASS, a1c1 FAIL)
+ABLB-3e   FAIL           uJ per layer above idle: a2 skip-0 67.466, skip-90 18.606, skip-99 5.861 at 81.377 C; a3 skip-0 55.509, skip-90 11.941, skip-99 3.29 at 58.377 C -> FAIL
+          FAIL           all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 REPORTED)
+ABLB-3f   PASS           gating alone: a2 +1.66 W [+0.65, +2.68] -> PASS; a3 +1.59 W [+1.05, +2.14] -> PASS
+          PASS           all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+ABLB-3g   CARD-DIFFERENT tensor unit on zeros over the integer loop: a2 +0.87 W [-0.87, +2.62] (spin 1.6 W) -> FAIL; a3 +0.69 W [+0.08, +1.29] (spin 0.345 W) -> PASS
+          CARD-DIFFERENT all cards: CARD-DIFFERENT (a2 FAIL, a3 PASS, a1c1 PASS)

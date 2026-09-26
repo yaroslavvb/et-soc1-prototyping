@@ -1,0 +1,10 @@
+IDLE-0  FAIL           all_cards FAIL           aifoundry3's plateau under the heater: 90-90 C over 3 cycles (predicted 60-66 C)
+IDLE-a  FAIL           all_cards FAIL           aifoundry3 idle - aifoundry2 law 1.01 [0.95, 1.07] W, residual slope 0.036 [0.031, 0.041] W/C over 3 cycles; the +0.6 W statement is not established
+IDLE-b  FAIL           all_cards FAIL           aifoundry2 idle - law in 5 bins 78-82 C over 3 cycles: bins [79, 80, 81, 82] outside -0.23 +- 0.3 W; cycle mean 0.04 [-0.15, 0.22] W
+IDLE-c  PASS           all_cards PASS           aifoundry2 unsensed idle slope 74-88 C 0.100 [0.056, 0.145] W/C (3 cycles; holds if the upper end < 0.15); metered rails 75-80 C 0.525 [0.498, 0.551] W/C
+IDLE-d  INSUFFICIENT   all_cards INSUFFICIENT   aifoundry2 73 C split over 2 cycles: minion 11.07 [10.69, 11.46] / sram 1.99 [1.95, 2.03] / noc 3.62 [3.42, 3.83] / unsensed 15.05 [14.56, 15.54]
+IDLE-e  PASS           all_cards PASS           aifoundry3 SRAM rail slope 0.066 [0.062, 0.069] W/C (predicted 0.047 +- 0.03) over 3 cycles; excess over the aifoundry2 SRAM law 99% lower ends 0.93-1.14 W in bins 55-84 C
+IDLE-f  PASS           all_cards PASS           aifoundry3 unsensed at 70 C 13.69 [13.56, 13.83] W against aifoundry2's 14.7 W (predicted 12.9-13.9)
+IDLE-k  FAIL           all_cards FAIL           aifoundry2 cooling from >= 86 C, 3 cycles: best T_L [32, 32, 16], busy share over the flat range down to 0.17; law residual 70-85 C 0.01 [-0.12, 0.15] W; Kanter 30%: not established
+IDLE-L  INSUFFICIENT   all_cards INSUFFICIENT   IDLE-LONG: aifoundry2 T_L - C, A80 - W, slope80 - W/C (0 passes, split not identified); aifoundry3 slope56 - W/C, offset - W (0 passes)
+idle clocks: aifoundry2 600 MHz / 518 mV (firmware 1.3.1), aifoundry3 600 MHz / 523 mV (firmware 1.3.1), aifoundry1-c1 600 MHz / 499 mV (firmware 1.2.0); aifoundry1-c1 (1.2.0) runs other firmware than aifoundry2 and aifoundry3 (1.3.1); the firmware sets the idle state, so the idle power is stated per card

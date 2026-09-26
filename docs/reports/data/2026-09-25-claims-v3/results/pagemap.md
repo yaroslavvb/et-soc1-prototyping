@@ -1,0 +1,1799 @@
+# Page map: verdicts from docs/reports/data/2026-09-25-claims-v3/results
+
+## 2026-09-22-et-soc1-l2-mainline-starvation (2 claims)
+- **hotline-relay-l2-105** [lede] What stops is the owner shire's other memory traffic, to 0.01-0.05% of normal, once more than about 20 remote requesters saturate its bank (24 stopped it, 20 did not)
+  - planned: keep (inherits the hot line's '600 MHz' qualification if the hot line adds it)
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-107** [lede; where-its-points-now-live] The placement advice holds (owner a shire that does no compute, not the master shire; pace; spread; read the victim's bank counters from user mode), and so does the TensorSend warning for cells that take two partners at once
+  - planned: keep
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+
+## et-soc1-dvfs-leakage (28 claims)
+- **dvfs-04** [lede; verdict row 4; §4 'And the card shows no sign of it'] the card shows no sign of array power gating ... after 27 ms of idle no cache level shows a wake-up
+  - planned: keep, say one card
+  - MEM-W: registered **PASS**, all cards **PASS** — PASS: a2: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 2/3, P2 3/3, P3a 3/3, P3b 3/3, P4 1/3, same class at 1,000 and 16M 0.82; a3: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 0/3, P2 3/3, P3a 0/3, P3b 3/3, P4 0/3, same class at 1,000 and 16M 0.77 (< 0.80); a1c1: no wake-up >=
+- **dvfs-05** [lede; verdict row 5; #what-that-costs (law chart readout, share strip, prose)] 36% of a 64 W random-data matmul and 65% of an idle card at 80 °C (23.3 of the idle law's 35.9 W)
+  - planned: qualify: give the share as a range set by the fit (about 55-80% of idle, 30-45% of a busy card at 80 °C on aifoundry2) and say it is aifoundry2's law
+  - IDLE-k: registered **FAIL**, all cards **FAIL** — aifoundry2 cooling from >= 86 C, 3 cycles: best T_L [32, 32, 16], busy share over the flat range down to 0.17; law residual 70-85 C 0.01 [-0.12, 0.15] W; Kanter 30%: not established; reported, not tested: aifoundry1-c1 cooling from >= 86 C, 3 cycles: best T_L [24, 30, 28], busy share down to 0.40, l
+- **dvfs-06** [lede; verdict row 5 ('this card is worse'); #what-that-costs] above the 5–30% David Kanter called typical ... This card is above that range whether busy or idle
+  - planned: qualify: 'worse' holds for an idle card; for a busy card at 80 °C it is at or just above 30% within the fit's uncertainty, and at 55 °C (aifoundry3) it is about 23%
+  - IDLE-k: registered **FAIL**, all cards **FAIL** — aifoundry2 cooling from >= 86 C, 3 cycles: best T_L [32, 32, 16], busy share over the flat range down to 0.17; law residual 70-85 C 0.01 [-0.12, 0.15] W; Kanter 30%: not established; reported, not tested: aifoundry1-c1 cooling from >= 86 C, 3 cycles: best T_L [24, 30, 28], busy share down to 0.40, l
+- **dvfs-07** [lede; #the-same-firmware-on-three-cards] a second card's firmware holds a power limit of 0 W, which pins it at 600 MHz while the driver still reports 65 W
+  - planned: keep, state per card
+  - TEL-G: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — governor readouts tested on aifoundry2 and aifoundry3 only; firmware per card {'aifoundry2': [('1.3.1', '1.5.0')], 'aifoundry3': [('1.3.1', '1.5.0')], 'aifoundry1-c1': [('1.2.0', '1.3.0')]}; the others' config {'aifoundry1-c1': ['{"power_state_name": "managed_power", "tdp_w": 65, "temp_threshold_c":
+- **dvfs-13** [verdict row 4; #the-leakage-suppression-transistors (per-level bullets, chart)] Paired shifts: L1 (line left in place) 0, L1 0, L2 −11, L3 0, DRAM +10.5 cycles
+  - planned: keep, say one card
+  - MEM-W: registered **PASS**, all cards **PASS** — PASS: a2: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 2/3, P2 3/3, P3a 3/3, P3b 3/3, P4 1/3, same class at 1,000 and 16M 0.82; a3: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 0/3, P2 3/3, P3a 0/3, P3b 3/3, P4 0/3, same class at 1,000 and 16M 0.77 (< 0.80); a1c1: no wake-up >=
+- **dvfs-14** [verdict row 4; §4 L2 bullet] The L2 shift comes from a slow no-idle baseline ... probably because the line was still settling after the asynchronous evict
+  - planned: keep, say one card
+  - MEM-W: registered **PASS**, all cards **PASS** — PASS: a2: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 2/3, P2 3/3, P3a 3/3, P3b 3/3, P4 1/3, same class at 1,000 and 16M 0.82; a3: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 0/3, P2 3/3, P3a 0/3, P3b 3/3, P4 0/3, same class at 1,000 and 16M 0.77 (< 0.80); a1c1: no wake-up >=
+- **dvfs-15** [verdict row 4; §4 DRAM bullet] the DRAM one is a row closing ... the line's DRAM row has closed, so the next load pays an activate, 11 cycles (tRCD)
+  - planned: qualify: say 12 of 20 lines pay an activate-sized +11 at every idle from 1.7 µs and the rest never do; what closes the row within 1.7 µs is not established (refresh alone would leave ~40% open)
+  - MEM-W: registered **PASS**, all cards **PASS** — PASS: a2: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 2/3, P2 3/3, P3a 3/3, P3b 3/3, P4 1/3, same class at 1,000 and 16M 0.82; a3: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 0/3, P2 3/3, P3a 0/3, P3b 3/3, P4 0/3, same class at 1,000 and 16M 0.77 (< 0.80); a1c1: no wake-up >=
+- **dvfs-19** [#the-loop-as-built pseudo-code; §7 'one new board reading per ~133 ms pass'] once per device-management pass, about every 133 ms
+  - planned: keep, state per card
+  - TEL-P5: registered **FAIL**, all cards **FAIL** — SP pass quiet / E10 per card (ms): {'aifoundry3': [(224.07, 266.47), (224.5, 266.11), (224.2, 265.9)], 'aifoundry1-c1': [(134.8, 162.4), (134.8, 162.4), (134.8, 162.4)]}; tested on aifoundry3 only
+- **dvfs-40** [#cardcfg row 1] Firmware release / PMIC 1.3.1 / 1.5.0 on both aifoundry2 and aifoundry3
+  - planned: keep
+  - TEL-G: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — governor readouts tested on aifoundry2 and aifoundry3 only; firmware per card {'aifoundry2': [('1.3.1', '1.5.0')], 'aifoundry3': [('1.3.1', '1.5.0')], 'aifoundry1-c1': [('1.2.0', '1.3.0')]}; the others' config {'aifoundry1-c1': ['{"power_state_name": "managed_power", "tdp_w": 65, "temp_threshold_c":
+- **dvfs-41** [#the-same-firmware-on-three-cards; #cardcfg row 2] same static device configuration over the driver's ioctl: 65 W TDP, 600 MHz boot clock, 32 compute shires, 32 MB of L3 (65 W on all three machines, including aifoundry3)
+  - planned: keep
+  - TEL-G: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — governor readouts tested on aifoundry2 and aifoundry3 only; firmware per card {'aifoundry2': [('1.3.1', '1.5.0')], 'aifoundry3': [('1.3.1', '1.5.0')], 'aifoundry1-c1': [('1.2.0', '1.3.0')]}; the others' config {'aifoundry1-c1': ['{"power_state_name": "managed_power", "tdp_w": 65, "temp_threshold_c":
+- **dvfs-42** [#cardcfg row 3; §3 prose] TDP the service processor reports: 65 W (aifoundry2), 0 W (aifoundry3)
+  - planned: keep, state per card
+  - TEL-G: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — governor readouts tested on aifoundry2 and aifoundry3 only; firmware per card {'aifoundry2': [('1.3.1', '1.5.0')], 'aifoundry3': [('1.3.1', '1.5.0')], 'aifoundry1-c1': [('1.2.0', '1.3.0')]}; the others' config {'aifoundry1-c1': ['{"power_state_name": "managed_power", "tdp_w": 65, "temp_threshold_c":
+- **dvfs-43** [#cardcfg row 4] Software temperature threshold 65 °C on both cards
+  - planned: keep
+  - TEL-G: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — governor readouts tested on aifoundry2 and aifoundry3 only; firmware per card {'aifoundry2': [('1.3.1', '1.5.0')], 'aifoundry3': [('1.3.1', '1.5.0')], 'aifoundry1-c1': [('1.2.0', '1.3.0')]}; the others' config {'aifoundry1-c1': ['{"power_state_name": "managed_power", "tdp_w": 65, "temp_threshold_c":
+- **dvfs-44** [#cardcfg row 5] Power state the firmware reports: managed_power (aifoundry2), max_power (aifoundry3)
+  - planned: keep, state per card
+  - TEL-G: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — governor readouts tested on aifoundry2 and aifoundry3 only; firmware per card {'aifoundry2': [('1.3.1', '1.5.0')], 'aifoundry3': [('1.3.1', '1.5.0')], 'aifoundry1-c1': [('1.2.0', '1.3.0')]}; the others' config {'aifoundry1-c1': ['{"power_state_name": "managed_power", "tdp_w": 65, "temp_threshold_c":
+- **dvfs-46** [#the-same-firmware-on-three-cards (log excerpt, #spcount)] Each kernel start logs a power throttle-down request and each return to idle an idle event ... 26 throttle-down events alternating with 27 idle events (one idle event follows another once), 0 throttle-up events, every one printing a TDP level of 0; six consecutive lines verbatim
+  - planned: keep
+  - TEL-G: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — governor readouts tested on aifoundry2 and aifoundry3 only; firmware per card {'aifoundry2': [('1.3.1', '1.5.0')], 'aifoundry3': [('1.3.1', '1.5.0')], 'aifoundry1-c1': [('1.2.0', '1.3.0')]}; the others' config {'aifoundry1-c1': ['{"power_state_name": "managed_power", "tdp_w": 65, "temp_threshold_c":
+- **dvfs-51** [#the-same-firmware-on-three-cards (last paragraph)] This also settles ... whether the power branch works at all ... On aifoundry3 it is the only branch that fires, at every kernel start ... and it does what the comparison says it will
+  - planned: qualify: 'on aifoundry3 the power comparison is evaluated and requests a throttle at every start; that it lowers a clock above the floor is shown on neither card'
+  - TEL-G: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — governor readouts tested on aifoundry2 and aifoundry3 only; firmware per card {'aifoundry2': [('1.3.1', '1.5.0')], 'aifoundry3': [('1.3.1', '1.5.0')], 'aifoundry1-c1': [('1.2.0', '1.3.0')]}; the others' config {'aifoundry1-c1': ['{"power_state_name": "managed_power", "tdp_w": 65, "temp_threshold_c":
+- **dvfs-54** [#wake-fig readouts (#wake-count, #wake-off); §4 bullets; §8 probe paragraph] At 27 ms: 13 of 20 at +9 to +14 cycles, 6 within 6 of zero, 1 outlier (−51); off the scale: repeat 14 −62 to −50, +54/+60/+85 at 1.7 µs, +113 at 17 µs; one L1 no-idle load 128 too long; L2 60/61 -> 49/50 (139 of 140); the paired medians are the same whether misfires are kept, corrected or dropped
+  - planned: keep, say one card
+  - MEM-W: registered **PASS**, all cards **PASS** — PASS: a2: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 2/3, P2 3/3, P3a 3/3, P3b 3/3, P4 1/3, same class at 1,000 and 16M 0.82; a3: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 0/3, P2 3/3, P3a 0/3, P3b 3/3, P4 0/3, same class at 1,000 and 16M 0.77 (< 0.80); a1c1: no wake-up >=
+- **dvfs-55** [#the-leakage-suppression-transistors DRAM bullet] The shift is there in full after the shortest idle, 1.7 µs, and does not grow out to 27 ms, which is not how a wake-up would behave
+  - planned: keep, say one card
+  - MEM-W: registered **PASS**, all cards **PASS** — PASS: a2: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 2/3, P2 3/3, P3a 3/3, P3b 3/3, P4 1/3, same class at 1,000 and 16M 0.82; a3: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 0/3, P2 3/3, P3a 0/3, P3b 3/3, P4 0/3, same class at 1,000 and 16M 0.77 (< 0.80); a1c1: no wake-up >=
+- **dvfs-57** [#the-leakage-suppression-transistors (conclusion)] So on this card, in this firmware, no leakage suppression is in use
+  - planned: keep, say one card
+  - MEM-W: registered **PASS**, all cards **PASS** — PASS: a2: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 2/3, P2 3/3, P3a 3/3, P3b 3/3, P4 1/3, same class at 1,000 and 16M 0.82; a3: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 0/3, P2 3/3, P3a 0/3, P3b 3/3, P4 0/3, same class at 1,000 and 16M 0.77 (< 0.80); a1c1: no wake-up >=
+- **dvfs-58** [#the-leakage-suppression-transistors (last paragraph)] The gating that demonstrably works is clock gating, which the open RTL uses aggressively ... That is why an idle-but-powered core costs so little dynamic power and still leaks
+  - planned: keep
+  - ABL-T6: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 REPORTED)
+- **dvfs-59** [#what-that-costs (law chart; 'fitted on 21 September to idle readings at 64–67 and 81–88 °C'; slope 0.65 W/°C)] the idle law 12.6 W + 23.3 W·e^((T−80)/36), fitted on 21 September to idle readings at 64–67 and 81–88 °C; slope 0.65 W/°C at 80 °C
+  - planned: keep
+  - IDLE-L: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — IDLE-LONG: aifoundry2 T_L - C, A80 - W, slope80 - W/C (0 passes, split not identified); aifoundry3 slope56 - W/C, offset - W (0 passes); reported, not tested: aifoundry1-c1 no long pass
+- **dvfs-61** [#what-that-costs ('its idle on 22 September, after about 20.6 hours'); §1 bullet 2; §8] its idle on 22 September, after about 20.6 hours with no workload, 31.79 ± 0.04 W at 73.0 °C, against 31.78 W. Both agree within what the sensor's whole-degree readings allow (±0.2 W at 62 °C, ±0.3 W at 73 °C)
+  - planned: qualify: say the law predicts aifoundry2's idle within 0.4 W in all 24 later sessions (typically 0.2 W high); the 20.6-hour point (+0.01 W) is the best case
+  - IDLE-b: registered **FAIL**, all cards **FAIL** — aifoundry2 idle - law in 5 bins 78-82 C over 3 cycles: bins [79, 80, 81, 82] outside -0.23 +- 0.3 W; cycle mean 0.04 [-0.15, 0.22] W; reported, not tested: aifoundry1-c1 idle - law cycle mean 10.07 [9.73, 10.40] W (3 cycles, bins 58-80 C)
+- **dvfs-62** [#what-that-costs] Nearly half of that 22 September idle, 15.1 W, is on no rail sensor
+  - planned: keep
+  - IDLE-d: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — aifoundry2 73 C split over 2 cycles: minion 11.07 [10.69, 11.46] / sram 1.99 [1.95, 2.03] / noc 3.62 [3.42, 3.83] / unsensed 15.05 [14.56, 15.54]; reported, not tested: aifoundry1-c1 73 C split over 3 cycles: minion 15.96 [15.95, 15.97] / sram 3.05 [3.01, 3.09] / noc 5.83 [5.82, 5.83] / unsensed 17.
+- **dvfs-63** [#what-that-costs ('Leakage transfers too'); law chart second button; aifoundry3 bin table] The idle law, extrapolated 7 to 14 °C below its fit range onto aifoundry3, which idled at 50 to 57 °C, predicts that card's idle to within a watt: aifoundry3 reads 0.6–0.9 W above it, +0.73 W on the mean of the four temperature bins (+0.68 W weighted by sample)
+  - planned: keep, state per card: replace +0.73 (one session's bin mean) by '+0.6 W (0.5-0.7 over 16 sessions, 22-24 Sep)'; the chart's shift button likewise
+  - IDLE-a: registered **FAIL**, all cards **FAIL** — aifoundry3 idle - aifoundry2 law 1.01 [0.95, 1.07] W, residual slope 0.036 [0.031, 0.041] W/C over 3 cycles; the +0.6 W statement is not established; reported, not tested: aifoundry1-c1 idle - law 10.07 [9.73, 10.40] W, residual slope 0.237 [0.228, 0.246] W/C (3 cycles)
+- **dvfs-69** [#what-this-means-for-the-equation-and-for-measuring-power bullet 1] Power over idle is close to linear in active minions: 25.6 mW per minion at 256 and 512 active, 26.2 at 768 and 27.0 at 1,024; a line through zero fits 26.5 mW per minion
+  - planned: keep
+  - ABL-T7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 FAIL)
+- **dvfs-73** [#what-this-means... bullet 2] the meter gives one new board reading per ~133 ms pass, with the rail readings behind the PMIC's own running average (a time constant of about one second)
+  - planned: qualify: add '(on aifoundry2; about 250 ms on aifoundry3)'
+  - TEL-S: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P_H - P_L 99% interval per card: {'aifoundry2': 'includes 0', 'aifoundry3': 'positive', 'aifoundry1-c1': 'includes 0'}; pages {'aifoundry2': 'as measured', 'aifoundry3': 'per sampler', 'aifoundry1-c1': 'as measured'} (CARD-DIFFERENT)
+- **dvfs-75** [#method-and-what-is-not-established ('The cards run an older governor')] The cards run an older governor than that source. The service processor on aifoundry3 prints log lines that exist only in et-platform firmware before commit 60b40c10f
+  - planned: keep, say one card
+  - TEL-G: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — governor readouts tested on aifoundry2 and aifoundry3 only; firmware per card {'aifoundry2': [('1.3.1', '1.5.0')], 'aifoundry3': [('1.3.1', '1.5.0')], 'aifoundry1-c1': [('1.2.0', '1.3.0')]}; the others' config {'aifoundry1-c1': ['{"power_state_name": "managed_power", "tdp_w": 65, "temp_threshold_c":
+- **dvfs-77** [#method-and-what-is-not-established (probe paragraph)] It can only detect a wake-up longer than about ten cycles, and only for arrays idled up to 27 ms
+  - planned: keep
+  - MEM-W: registered **PASS**, all cards **PASS** — PASS: a2: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 2/3, P2 3/3, P3a 3/3, P3b 3/3, P4 1/3, same class at 1,000 and 16M 0.82; a3: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 0/3, P2 3/3, P3a 0/3, P3b 3/3, P4 0/3, same class at 1,000 and 16M 0.77 (< 0.80); a1c1: no wake-up >=
+- **dvfs-V05** [#the-leakage-suppression-transistors ('from zero to 27 ms (0, 1.7 µs, 17 µs … 27 ms)'); wake-fig axis; §8 ('arrays idled up to 27 ms')] The probe's idle intervals are 1.7 µs … 27 ms
+  - planned: keep; EXP-dvfs-1 records the clock before and after each probe
+  - MEM-W: registered **PASS**, all cards **PASS** — PASS: a2: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 2/3, P2 3/3, P3a 3/3, P3b 3/3, P4 1/3, same class at 1,000 and 16M 0.82; a3: no wake-up >= 5 cycles up to 16M cycles (P5 3 of 3); P1 0/3, P2 3/3, P3a 0/3, P3b 3/3, P4 0/3, same class at 1,000 and 16M 0.77 (< 0.80); a1c1: no wake-up >=
+
+## et-soc1-energy-manual (52 claims)
+- **energy-manual-01** [top] The card at rest is 12.6 W plus leakage that doubles every 25 °C.
+  - planned: keep, say one card
+  - IDLE-a: registered **FAIL**, all cards **FAIL** — aifoundry3 idle - aifoundry2 law 1.01 [0.95, 1.07] W, residual slope 0.036 [0.031, 0.041] W/C over 3 cycles; the +0.6 W statement is not established; reported, not tested: aifoundry1-c1 idle - law 10.07 [9.73, 10.40] W, residual slope 0.237 [0.228, 0.246] W/C (3 cycles)
+- **energy-manual-05** [top] A second card reads about 5% lower (median 0.95; 80% of entries 1–9% lower).
+  - planned: keep, state per card
+  - CAT-a: registered **FAIL**, all cards **FAIL** — a2: beta +0.484 %/C [+0.068, +0.901] over dT 14.4 C -> temperature; a3: beta +0.301 %/C [+0.178, +0.424] over dT 10.6 C -> temperature; a1c1: beta +0.354 %/C [-0.105, +0.814] over dT 6.2 C -> not established
+  - CAT-b: registered **FAIL**, all cards **FAIL** — a3/a2 (registered pair): cool a3 / warm a2 = 0.985 [0.977, 0.993] (predicted 0.951 +- 0.015); interval excludes 1; estimate outside the predicted range (sign only: the page takes the measured value); a1c1 W / a2 W = 0.999 [0.984, 1.014] (reported)
+  - X5: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL); hot - cool: a2 fp32_uniform -7.04 W [-69.54, +55.47], fp32_randn +1.20 W [+0.26, +2.15]; a3 fp32_uniform -7.29 W [-18.48, +3.90], fp32_randn +1.97 W [+1.47, +2.46]; a1c1 fp32_uniform -6.92 W [-42.04, +28.20], fp32_randn -6.36 W [-49.36, +36.63]
+- **energy-manual-06** [top] Idle at 80 °C: 35.9 W, 65% leakage — 12.6 W fixed, the rest leakage e-folding every 36 °C.
+  - planned: keep, say one card
+  - IDLE-b: registered **FAIL**, all cards **FAIL** — aifoundry2 idle - law in 5 bins 78-82 C over 3 cycles: bins [79, 80, 81, 82] outside -0.23 +- 0.3 W; cycle mean 0.04 [-0.15, 0.22] W; reported, not tested: aifoundry1-c1 idle - law cycle mean 10.07 [9.73, 10.40] W (3 cycles, bins 58-80 C)
+- **energy-manual-09** [top] Second card, 386 catalogue entries: 0.950 median ratio aifoundry3 / aifoundry2 (10–90%: 0.906–0.987).
+  - planned: keep, state per card
+  - CAT-a: registered **FAIL**, all cards **FAIL** — a2: beta +0.484 %/C [+0.068, +0.901] over dT 14.4 C -> temperature; a3: beta +0.301 %/C [+0.178, +0.424] over dT 10.6 C -> temperature; a1c1: beta +0.354 %/C [-0.105, +0.814] over dT 6.2 C -> not established
+- **energy-manual-10** [the-card-at-rest] The fixed part is the law's constant, 12.6 W.
+  - planned: keep, say one card
+  - IDLE-L: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — IDLE-LONG: aifoundry2 T_L - C, A80 - W, slope80 - W/C (0 passes, split not identified); aifoundry3 slope56 - W/C, offset - W (0 passes); reported, not tested: aifoundry1-c1 no long pass
+- **energy-manual-100** [finer-grain-wires-lines-rows-and-the-leakage-of-the-arrays] — 1.6 and 3.2 pJ per byte of line, about 75% of the 2.0 and 4.2 pJ/B a tensor load pays for the same bytes from the same scratchpad.
+  - planned: qualify: 'roughly 70–90% of a tensor load's cost (not separable from equal on aifoundry2)'
+  - CAT-f: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — a2: fill/tload 0.77 [~0.43, 1.11] -> fails (interval includes 1); a3: fill/tload 0.80 [~0.66, 0.94] -> holds; a1c1: fill/tload 0.83 [~0.69, 0.97] -> holds
+- **energy-manual-102** [finer-grain-wires-lines-rows-and-the-leakage-of-the-arrays] 64 B tensor loads from the scratchpad by stride: 64 B 248.3 / 382.1 per 64 B at 1,126 GB/s; 128 B 235.5 / 380.6 at 1,121; 256 B (the same bank every time) 276.8 / 422.3 at 614 GB/s.
+  - planned: qualify: say the same-bank stride halves the bandwidth; its energy per byte is not separable from the others
+  - CAT-f: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — a2: fill/tload 0.77 [~0.43, 1.11] -> fails (interval includes 1); a3: fill/tload 0.80 [~0.66, 0.94] -> holds; a1c1: fill/tload 0.83 [~0.69, 0.97] -> holds
+- **energy-manual-103** [finer-grain-wires-lines-rows-and-the-leakage-of-the-arrays] 1 KB tensor loads from DRAM, 32 harts: sequential 114.5 / 147.1, same row 118.0 / 155.7, new row 114.5 / 153.4 pJ/B (zeros / random), 16.9 / 13.9 / 16.9 GB/s — mean and range over three passes on aifoundry2.
+  - planned: keep, say one card
+  - CAT-c: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — a2: zeros ANOVA p 0.347, rows - tload +21.7 [+11.6, +31.8] pJ/B (+24%), random ANOVA p 0.946, rows - tload +21.4 [-26.2, +69.0] pJ/B (+16%) -> fails; a3: zeros ANOVA p 0.0564, rows - tload +27.1 [+22.9, +31.4] pJ/B (+32%), random ANOVA p 0.877, rows - tload +24.7 [+13.8, +35.5] pJ/B (+20%) -> holds 
+- **energy-manual-104** [finer-grain-wires-lines-rows-and-the-leakage-of-the-arrays] The row pattern does not change the energy per byte: row hits, row misses and the streaming case agree within their pass-to-pass error on both operand sets.
+  - planned: keep, say one card
+  - CAT-c: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — a2: zeros ANOVA p 0.347, rows - tload +21.7 [+11.6, +31.8] pJ/B (+24%), random ANOVA p 0.946, rows - tload +21.4 [-26.2, +69.0] pJ/B (+16%) -> fails; a3: zeros ANOVA p 0.0564, rows - tload +27.1 [+22.9, +31.4] pJ/B (+32%), random ANOVA p 0.877, rows - tload +24.7 [+13.8, +35.5] pJ/B (+20%) -> holds 
+- **energy-manual-105** [finer-grain-wires-lines-rows-and-the-leakage-of-the-arrays] …or an activation is small next to the transfer (one of 20 pJ/B would have shown)
+  - planned: qualify: 'one of about 30 pJ/B on zeros, 50 on random data, would have shown'
+  - CAT-c: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — a2: zeros ANOVA p 0.347, rows - tload +21.7 [+11.6, +31.8] pJ/B (+24%), random ANOVA p 0.946, rows - tload +21.4 [-26.2, +69.0] pJ/B (+16%) -> fails; a3: zeros ANOVA p 0.0564, rows - tload +27.1 [+22.9, +31.4] pJ/B (+32%), random ANOVA p 0.877, rows - tload +24.7 [+13.8, +35.5] pJ/B (+20%) -> holds 
+- **energy-manual-108** [finer-grain-wires-lines-rows-and-the-leakage-of-the-arrays] These 32-hart loads cost 14–21% more per byte than section 4.1's tensor loads at 76 GB/s (26–30% more on zeros)
+  - planned: keep, say one card
+  - CAT-c: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — a2: zeros ANOVA p 0.347, rows - tload +21.7 [+11.6, +31.8] pJ/B (+24%), random ANOVA p 0.946, rows - tload +21.4 [-26.2, +69.0] pJ/B (+16%) -> fails; a3: zeros ANOVA p 0.0564, rows - tload +27.1 [+22.9, +31.4] pJ/B (+32%), random ANOVA p 0.877, rows - tload +24.7 [+13.8, +35.5] pJ/B (+20%) -> holds 
+- **energy-manual-11** [the-card-at-rest] The blocks with no rail sensor (PCIe, the DDR PHY, the IO shire, the regulators) draw about 15 W at idle
+  - planned: keep, state per card
+  - IDLE-c: registered **PASS**, all cards **PASS** — aifoundry2 unsensed idle slope 74-88 C 0.100 [0.056, 0.145] W/C (3 cycles; holds if the upper end < 0.15); metered rails 75-80 C 0.525 [0.498, 0.551] W/C; reported, not tested: aifoundry1-c1 unsensed slope 74-88 C 0.162 [0.081, 0.244] W/C (3 cycles)
+- **energy-manual-12** [the-card-at-rest] …and barely move with temperature: 0.03 W per °C over 71–83 °C in the catalogue's idle gaps.
+  - planned: qualify: say about 0.06 W per °C (99% CI -0.04 to 0.15) on aifoundry2; unmeasured on aifoundry3
+  - IDLE-c: registered **PASS**, all cards **PASS** — aifoundry2 unsensed idle slope 74-88 C 0.100 [0.056, 0.145] W/C (3 cycles; holds if the upper end < 0.15); metered rails 75-80 C 0.525 [0.498, 0.551] W/C; reported, not tested: aifoundry1-c1 unsensed slope 74-88 C 0.162 [0.081, 0.244] W/C (3 cycles)
+- **energy-manual-121** [bytes-between-cores-and-shires] Handing a slab to the next shire (in its scratchpad): 8.6 [7.8–9.2] pJ/B; a2 9.1 ± 0.1, a3 8.1 ± 0.1; 594 GB/s
+  - planned: keep, state per card
+  - RL-d (relay DRAM / next shire): registered **PASS**, all cards **PASS** — relay DRAM / next-shire ratio: no pair of cards differs; pooled 13.027 x (per card a1c1 13.135, a2 12.944, a3 13.002)
+  - RL-d (relay DRAM a3/a2): registered **PASS**, all cards **CARD-DIFFERENT** — log relay DRAM pJ/B: cards differ (a1c1 - a2; a1c1 - a3 at 0.9967); per card a1c1 129.840, a2 111.263, a3 107.490 pJ/B
+- **energy-manual-122** [bytes-between-cores-and-shires] …through DRAM: 105.7 [99.5–111.0] pJ/B; a2 102.1 ± 1.3, a3 109.3 ± 1.5; 50 GB/s
+  - planned: keep
+  - RL-d (relay DRAM / next shire): registered **PASS**, all cards **PASS** — relay DRAM / next-shire ratio: no pair of cards differs; pooled 13.027 x (per card a1c1 13.135, a2 12.944, a3 13.002)
+  - RL-d (relay DRAM a3/a2): registered **PASS**, all cards **CARD-DIFFERENT** — log relay DRAM pJ/B: cards differ (a1c1 - a2; a1c1 - a3 at 0.9967); per card a1c1 129.840, a2 111.263, a3 107.490 pJ/B
+- **energy-manual-127** [bytes-between-cores-and-shires] …about 9 pJ to leave the shire plus 1.7 pJ per mesh hop (a straight line through the six 1 KB rings between shires against their mean distances of 1.6–4.7 hops, r² 0.95).
+  - planned: keep, state per card
+  - RL-a (mesh slope (five 1 KB xshire rings)): registered **PASS**, all cards **PASS** — mesh slope: no pair of cards differs; pooled 1.747 pJ/B/hop (per card a1c1 1.736, a2 1.780, a3 1.726)
+- **energy-manual-128** [bytes-between-cores-and-shires] Leaving the shire is the biggest single step, but the hops after it are not free.
+  - planned: qualify: cite section 4.3's wire fit (random data, both cards) for 'leaving the shire is the biggest step'
+  - RL-b (leaving-the-shire step, aifoundry2): registered **PASS**, all cards **PASS** — leaving-the-shire step > 0 at 99%: holds on aifoundry2, where the item is decided (the other cards are reported)
+- **energy-manual-129** [bytes-between-cores-and-shires] Small messages cost more per byte (the 128 B rows)
+  - planned: qualify: 'resolved on aifoundry2's shire ring; not yet on aifoundry3' (EXP-EM3)
+  - RL-c (shire-c4 - shire): registered **PASS**, all cards **PASS** — shire-c4 - shire > 0 at 99%: holds on aifoundry3, where the item is decided (the other cards are reported)
+  - RL-c (xshire1-c4 - xshire1): registered **PASS**, all cards **PASS** — xshire1-c4 - xshire1 > 0 at 99%: holds on aifoundry3, where the item is decided (the other cards are reported)
+- **energy-manual-13** [the-card-at-rest] The three metered rails carry the leakage, 0.55 W per °C between them at about 75 °C.
+  - planned: qualify: 0.5 W per °C (aifoundry2); cite the script that computes it
+  - IDLE-c: registered **PASS**, all cards **PASS** — aifoundry2 unsensed idle slope 74-88 C 0.100 [0.056, 0.145] W/C (3 cycles; holds if the upper end < 0.15); metered rails 75-80 C 0.525 [0.498, 0.551] W/C; reported, not tested: aifoundry1-c1 unsensed slope 74-88 C 0.162 [0.081, 0.244] W/C (3 cycles)
+- **energy-manual-131** [bytes-between-cores-and-shires] Handing a slab to the next shire through its scratchpad is 12× cheaper than the DRAM round trip.
+  - planned: keep, state per card
+  - RL-d (relay DRAM / next shire): registered **PASS**, all cards **PASS** — relay DRAM / next-shire ratio: no pair of cards differs; pooled 13.027 x (per card a1c1 13.135, a2 12.944, a3 13.002)
+  - RL-d (relay DRAM a3/a2): registered **PASS**, all cards **CARD-DIFFERENT** — log relay DRAM pJ/B: cards differ (a1c1 - a2; a1c1 - a3 at 0.9967); per card a1c1 129.840, a2 111.263, a3 107.490 pJ/B
+- **energy-manual-145** [build-a-workload-s-energy] The static part carries the idle law's own bar: ±0.2 W on aifoundry2, +0.7 W on aifoundry3 (the mean of its four temperature bins).
+  - planned: keep, say one card
+  - IDLE-a: registered **FAIL**, all cards **FAIL** — aifoundry3 idle - aifoundry2 law 1.01 [0.95, 1.07] W, residual slope 0.036 [0.031, 0.041] W/C over 3 cycles; the +0.6 W statement is not established; reported, not tested: aifoundry1-c1 idle - law 10.07 [9.73, 10.40] W, residual slope 0.237 [0.228, 0.246] W/C (3 cycles)
+- **energy-manual-147** [build-a-workload-s-energy] At 80 °C the static 36 W exceeds the dynamic power of every kernel measured here, the dense random matmul's 27.6 W included.
+  - planned: keep, say one card
+  - IDLE-k: registered **FAIL**, all cards **FAIL** — aifoundry2 cooling from >= 86 C, 3 cycles: best T_L [32, 32, 16], busy share over the flat range down to 0.17; law residual 70-85 C 0.01 [-0.12, 0.15] W; Kanter 30%: not established; reported, not tested: aifoundry1-c1 cooling from >= 86 C, 3 cycles: best T_L [24, 30, 28], busy share down to 0.40, l
+- **energy-manual-149** [build-a-workload-s-energy] Cooling the die from 80 to 60 °C saves 10 W whatever runs.
+  - planned: keep, say one card
+  - IDLE-k: registered **FAIL**, all cards **FAIL** — aifoundry2 cooling from >= 86 C, 3 cycles: best T_L [32, 32, 16], busy share over the flat range down to 0.17; law residual 70-85 C 0.01 [-0.12, 0.15] W; Kanter 30%: not established; reported, not tested: aifoundry1-c1 cooling from >= 86 C, 3 cycles: best T_L [24, 30, 28], busy share down to 0.40, l
+- **energy-manual-15** [the-card-at-rest] Line: the law fitted on 21 September … Dots: every whole-degree idle bin of that session on aifoundry2, 64–88 °C.
+  - planned: qualify: say the fitted bins are 64–67 and 81–88 °C (the 23 September session confirms the gap to within 0.3 W)
+  - IDLE-b: registered **FAIL**, all cards **FAIL** — aifoundry2 idle - law in 5 bins 78-82 C over 3 cycles: bins [79, 80, 81, 82] outside -0.23 +- 0.3 W; cycle mean 0.04 [-0.15, 0.22] W; reported, not tested: aifoundry1-c1 idle - law cycle mean 10.07 [9.73, 10.40] W (3 cycles, bins 58-80 C)
+- **energy-manual-152** [the-relay-priced-from-section-4] Priced 90 … 133 (DRAM, measured 105.7, inside), 5.1 … 11.2 (next shire, 8.59, inside): DRAM and the next shire fall inside their brackets
+  - planned: qualify: say the brackets are wide; the sharper constant-operand price fits aifoundry2 and misses aifoundry3 by 16%
+  - RL-d (relay DRAM / next shire): registered **PASS**, all cards **PASS** — relay DRAM / next-shire ratio: no pair of cards differs; pooled 13.027 x (per card a1c1 13.135, a2 12.944, a3 13.002)
+  - RL-d (relay DRAM a3/a2): registered **PASS**, all cards **CARD-DIFFERENT** — log relay DRAM pJ/B: cards differ (a1c1 - a2; a1c1 - a3 at 0.9967); per card a1c1 129.840, a2 111.263, a3 107.490 pJ/B
+- **energy-manual-153** [the-relay-priced-from-section-4] …and the own scratchpad reads 8% below (3.99 against 4.3 … 7.1)
+  - planned: qualify: 'at the low edge of its bracket (8% below, within noise)'
+  - RL-f (relay own scratchpad vs bracket low edge): registered **FAIL**, all cards **FAIL** — relay own scratchpad below its card's catalogue low edge (Welch 99%): holds on no card (a1c1, a2, a3)
+- **energy-manual-154** [two-cards] 386 entries, each the mean of three passes on each card: ratio 0.753 to 1.078, 10th–90th percentile 0.906–0.987, median 0.950
+  - planned: keep, state per card
+  - CAT-a: registered **FAIL**, all cards **FAIL** — a2: beta +0.484 %/C [+0.068, +0.901] over dT 14.4 C -> temperature; a3: beta +0.301 %/C [+0.178, +0.424] over dT 10.6 C -> temperature; a1c1: beta +0.354 %/C [-0.105, +0.814] over dT 6.2 C -> not established
+- **energy-manual-157** [two-cards] …with aifoundry3 running 5 mV higher — the scale is the card, not the operating point.
+  - planned: await experiment
+  - CAT-a: registered **FAIL**, all cards **FAIL** — a2: beta +0.484 %/C [+0.068, +0.901] over dT 14.4 C -> temperature; a3: beta +0.301 %/C [+0.178, +0.424] over dT 10.6 C -> temperature; a1c1: beta +0.354 %/C [-0.105, +0.814] over dT 6.2 C -> not established
+  - X5: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL); hot - cool: a2 fp32_uniform -7.04 W [-69.54, +55.47], fp32_randn +1.20 W [+0.26, +2.15]; a3 fp32_uniform -7.29 W [-18.48, +3.90], fp32_randn +1.97 W [+1.47, +2.46]; a1c1 fp32_uniform -6.92 W [-42.04, +28.20], fp32_randn -6.36 W [-49.36, +36.63]
+- **energy-manual-159** [method-and-what-the-manual-cannot-tell-you] Board power is the PMIC's reading, 10 mW resolution, refreshed every 133 ms, sampled at 10 Hz.
+  - planned: qualify: say 133 ms on aifoundry2, about 250 ms on aifoundry3
+  - TEL-S: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P_H - P_L 99% interval per card: {'aifoundry2': 'includes 0', 'aifoundry3': 'positive', 'aifoundry1-c1': 'includes 0'}; pages {'aifoundry2': 'as measured', 'aifoundry3': 'per sampler', 'aifoundry1-c1': 'as measured'} (CARD-DIFFERENT)
+- **energy-manual-16** [the-card-at-rest] Rings: the other card's idle at 50–57 °C (22 September), 7–14 °C below the coolest fitted bin and +0.7 W from the law (the mean of its four temperature bins).
+  - planned: keep
+  - IDLE-a: registered **FAIL**, all cards **FAIL** — aifoundry3 idle - aifoundry2 law 1.01 [0.95, 1.07] W, residual slope 0.036 [0.031, 0.041] W/C over 3 cycles; the +0.6 W statement is not established; reported, not tested: aifoundry1-c1 idle - law 10.07 [9.73, 10.40] W, residual slope 0.237 [0.228, 0.246] W/C (3 cycles)
+- **energy-manual-163** [method-and-what-the-manual-cannot-tell-you] The unsensed 15 W — the largest single component of idle — cannot be split with any instrument here.
+  - planned: keep, state per card
+  - IDLE-c: registered **PASS**, all cards **PASS** — aifoundry2 unsensed idle slope 74-88 C 0.100 [0.056, 0.145] W/C (3 cycles; holds if the upper end < 0.15); metered rails 75-80 C 0.525 [0.498, 0.551] W/C; reported, not tested: aifoundry1-c1 unsensed slope 74-88 C 0.162 [0.081, 0.244] W/C (3 cycles)
+  - IDLE-f: registered **PASS**, all cards **PASS** — aifoundry3 unsensed at 70 C 13.69 [13.56, 13.83] W against aifoundry2's 14.7 W (predicted 12.9-13.9); reported, not tested: aifoundry1-c1 unsensed 17.47 [17.36, 17.57] W at [56, 81] C, at 70 C 17.46 [17.31, 17.62] W
+- **energy-manual-171** [related-reports] Hand it to the next shire — … 12× the bandwidth at a twelfth of the energy, and where that stops paying.
+  - planned: keep, state per card
+  - RL-d (relay DRAM / next shire): registered **PASS**, all cards **PASS** — relay DRAM / next-shire ratio: no pair of cards differs; pooled 13.027 x (per card a1c1 13.135, a2 12.944, a3 13.002)
+  - RL-d (relay DRAM a3/a2): registered **PASS**, all cards **CARD-DIFFERENT** — log relay DRAM pJ/B: cards differ (a1c1 - a2; a1c1 - a3 at 0.9967); per card a1c1 129.840, a2 111.263, a3 107.490 pJ/B
+- **energy-manual-18** [the-card-at-rest] Idle at 73 °C, by rail: minions 11.05 W (35%), SRAM 2.00 (6%), mesh 3.64 (11%), no rail sensor 15.10 (48%); board 31.79 W (aifoundry2, 22 September, 300 samples over a minute, sd 0.04 W).
+  - planned: keep, say one card
+  - IDLE-d: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — aifoundry2 73 C split over 2 cycles: minion 11.07 [10.69, 11.46] / sram 1.99 [1.95, 2.03] / noc 3.62 [3.42, 3.83] / unsensed 15.05 [14.56, 15.54]; reported, not tested: aifoundry1-c1 73 C split over 3 cycles: minion 15.96 [15.95, 15.97] / sram 3.05 [3.01, 3.09] / noc 5.83 [5.82, 5.83] / unsensed 17.
+- **energy-manual-19** [the-sram-arrays-at-rest] SRAM rail at idle, fitted with the 36 °C e-folding imposed: −0.32 W + 2.81 W·e^((T−80)/36); the negative constant says the rail rises faster than that shape.
+  - planned: keep, say one card
+  - IDLE-e: registered **PASS**, all cards **PASS** — aifoundry3 SRAM rail slope 0.066 [0.062, 0.069] W/C (predicted 0.047 +- 0.03) over 3 cycles; excess over the aifoundry2 SRAM law 99% lower ends 0.93-1.14 W in bins 55-84 C; reported, not tested: aifoundry1-c1 SRAM slope 0.051 [0.046, 0.057] W/C (3 cycles), excess over the aifoundry2 SRAM law 0.99-1.
+- **energy-manual-20** [the-sram-arrays-at-rest] The whole rail at 80 °C is 2.48 W, 19.4 mW per MB, an upper bound on the arrays' leakage including the cache logic.
+  - planned: keep, say one card
+  - IDLE-e: registered **PASS**, all cards **PASS** — aifoundry3 SRAM rail slope 0.066 [0.062, 0.069] W/C (predicted 0.047 +- 0.03) over 3 cycles; excess over the aifoundry2 SRAM law 99% lower ends 0.93-1.14 W in bins 55-84 C; reported, not tested: aifoundry1-c1 SRAM slope 0.051 [0.046, 0.057] W/C (3 cycles), excess over the aifoundry2 SRAM law 0.99-1.
+- **energy-manual-22** [the-sram-arrays-at-rest] aifoundry3 idles cooler: its SRAM rail reads 1.90 W at 51 °C, where the aifoundry2 fit, extrapolated, says 0.93 W.
+  - planned: keep, state per card
+  - IDLE-0: registered **FAIL**, all cards **FAIL** — aifoundry3's plateau under the heater: 90-90 C over 3 cycles (predicted 60-66 C); reported, not tested: aifoundry1-c1 Tmax 88-88 C (3 cycles, heat ended by target)
+  - IDLE-e: registered **PASS**, all cards **PASS** — aifoundry3 SRAM rail slope 0.066 [0.062, 0.069] W/C (predicted 0.047 +- 0.03) over 3 cycles; excess over the aifoundry2 SRAM law 99% lower ends 0.93-1.14 W in bins 55-84 C; reported, not tested: aifoundry1-c1 SRAM slope 0.051 [0.046, 0.057] W/C (3 cycles), excess over the aifoundry2 SRAM law 0.99-1.
+- **energy-manual-25** [a-core-that-is-awake] The 21 September ablation's integer loop, hart 0: 8.1 pJ, 1.46 W, 1.43 mW; about half the one-hart addi loop's issue rate (a2 only).
+  - planned: keep
+  - ABL-T6: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 REPORTED)
+- **energy-manual-29** [a-core-that-is-awake] For scale: every minion running a random-data fp32 matmul: 27.6 W, 27.0 mW per minion; 25.6 mW per minion with 256 or 512 active, 26.2 with 768 (a2 only).
+  - planned: keep
+  - ABL-T7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 FAIL)
+- **energy-manual-46** [every-instruction-the-core-executes] Across 386 configurations the second card is 0.950× the first (10th to 90th percentile 0.906 to 0.987).
+  - planned: keep, state per card
+  - CAT-a: registered **FAIL**, all cards **FAIL** — a2: beta +0.484 %/C [+0.068, +0.901] over dT 14.4 C -> temperature; a3: beta +0.301 %/C [+0.178, +0.424] over dT 10.6 C -> temperature; a1c1: beta +0.354 %/C [-0.105, +0.814] over dT 6.2 C -> not established
+- **energy-manual-51** [the-tensor-unit-per-multiply-add] TensorFMA fp32: zeros 0.418 [0.406–0.426] (a2 0.421, a3 0.411), ones 2.229 [2.031–2.304] (2.289, 2.109), randn 5.779 [5.241–6.025] (5.961, 5.415) pJ per MAC; 1.91 / 10.56 / 27.63 W over idle (a2).
+  - planned: keep
+  - ABL-T8: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **energy-manual-52** [the-tensor-unit-per-multiply-add] zeros → random normal: 0.42 → 5.78 pJ per MAC (the data decides, ~14×)
+  - planned: keep
+  - ABL-T8: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **energy-manual-53** [the-tensor-unit-per-multiply-add] TensorFMA fp16 zeros 0.207, ones 1.094, randn 2.699 pJ per MAC (a2 only).
+  - planned: await experiment
+  - ABL-T5: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+  - ABL-T5-EM4: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+- **energy-manual-54** [the-tensor-unit-per-multiply-add] TensorFMA int8 zeros 0.082, ones 0.134, randn 0.316 pJ per MAC (a2 only).
+  - planned: await experiment
+  - ABL-T5: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+  - ABL-T5-EM4: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+- **energy-manual-55** [the-tensor-unit-per-multiply-add] MACs per second: fp32 4.59 × 10¹², fp16 9.18 × 10¹², int8 3.15 × 10¹³ (546 cycles per instruction, 318 for int8).
+  - planned: keep (rates identical on both cards)
+  - ABL-EM4c: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+- **energy-manual-56** [the-tensor-unit-per-multiply-add] Loaded (idle included) per MAC: 8.32 / 10.21 / 13.92 pJ (fp32), 4.16 / 5.04 / 6.65 (fp16), 1.23 / 1.29 / 1.47 (int8) (a2).
+  - planned: keep, say one card
+  - ABL-T5: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+  - ABL-T5-EM4: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+- **energy-manual-57** [the-tensor-unit-per-multiply-add] fp16 and int8 were run twice on aifoundry2, and their bar is ±1 sd of those two runs: under 1% on random data, 1.5% on int8 zeros, 5–6% on the ones patterns.
+  - planned: keep
+  - ABL-T5: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+  - ABL-T5-EM4: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+- **energy-manual-75** [reads-and-writes-measured-together] A DRAM write by tensor store costs about what a read costs (136 against 129 pJ/B)
+  - planned: qualify: 'within 10–15%: 8% more on aifoundry2, 2.5% on aifoundry3'
+  - CAT-e: registered **FAIL**, all cards **FAIL** — a3 (the card the band is registered for): +7.32 [-1.94, +16.58] pJ/B (predicted +3.2 +- 3); interval includes 0; a2: +8.35 [-47.35, +64.05] pJ/B (+6.4%); a1c1: +14.51 [-2.75, +31.77] pJ/B (+10.1%, reported)
+- **energy-manual-83** [reads-by-level] L1 hits: 0.77 [0.66–0.88] pJ/B; a2 0.86 ± 0.01, a3 0.68 ± 0.01
+  - planned: keep, state per card
+  - RL-g (L1 level a2 - a3): registered **PASS**, all cards **PASS** — L1 level: no pair of cards differs; pooled 0.746 pJ/B (per card a1c1 0.721, a2 0.767, a3 0.750)
+  - RL-g (own-scratchpad level a3 - a2): registered **PASS**, all cards **PASS** — own-scratchpad level (both contents): no pair of cards differs; pooled 3.326 pJ/B (per card a1c1 3.789, a2 3.119, a3 3.071)
+  - RL-g (L2 - own scratchpad): registered **PASS**, all cards **PASS** — L2 - own scratchpad: the same within +-10% on every card [confounded by the contents arm; see RL-h]
+- **energy-manual-84** [reads-by-level] L2: 2.51 [2.36–2.64]; a2 2.61 ± 0.02, a3 2.40 ± 0.02
+  - planned: keep, state per card
+  - RL-g (L1 level a2 - a3): registered **PASS**, all cards **PASS** — L1 level: no pair of cards differs; pooled 0.746 pJ/B (per card a1c1 0.721, a2 0.767, a3 0.750)
+  - RL-g (own-scratchpad level a3 - a2): registered **PASS**, all cards **PASS** — own-scratchpad level (both contents): no pair of cards differs; pooled 3.326 pJ/B (per card a1c1 3.789, a2 3.119, a3 3.071)
+  - RL-g (L2 - own scratchpad): registered **PASS**, all cards **PASS** — L2 - own scratchpad: the same within +-10% on every card [confounded by the contents arm; see RL-h]
+- **energy-manual-87** [reads-by-level] Own scratchpad: 2.52 [2.39–2.64]; a2 2.40 ± 0.003, a3 2.63 ± 0.01
+  - planned: keep, state per card
+  - RL-g (L1 level a2 - a3): registered **PASS**, all cards **PASS** — L1 level: no pair of cards differs; pooled 0.746 pJ/B (per card a1c1 0.721, a2 0.767, a3 0.750)
+  - RL-g (own-scratchpad level a3 - a2): registered **PASS**, all cards **PASS** — own-scratchpad level (both contents): no pair of cards differs; pooled 3.326 pJ/B (per card a1c1 3.789, a2 3.119, a3 3.071)
+  - RL-g (L2 - own scratchpad): registered **PASS**, all cards **PASS** — L2 - own scratchpad: the same within +-10% on every card [confounded by the contents arm; see RL-h]
+  - RL-h (scp-local level follows the prefill): registered **PASS**, all cards **CARD-DIFFERENT** — scp-local level in the zeros band (1.7-2.3) on zeros passes and the random band (3.7-4.7) on random passes: holds on a2, a3 only, not on a1c1
+  - RL-h (a3 - a2 at equal contents): registered **PASS**, all cards **CARD-DIFFERENT** — at equal contents: some cards still differ
+- **energy-manual-90** [reads-by-level] …and it reads 44% above the catalogue's L1 row in section 4.1 (0.54 pJ/B on random data)
+  - planned: keep, state per card
+  - RL-g (L1 level a2 - a3): registered **PASS**, all cards **PASS** — L1 level: no pair of cards differs; pooled 0.746 pJ/B (per card a1c1 0.721, a2 0.767, a3 0.750)
+  - RL-g (own-scratchpad level a3 - a2): registered **PASS**, all cards **PASS** — own-scratchpad level (both contents): no pair of cards differs; pooled 3.326 pJ/B (per card a1c1 3.789, a2 3.119, a3 3.071)
+  - RL-g (L2 - own scratchpad): registered **PASS**, all cards **PASS** — L2 - own scratchpad: the same within +-10% on every card [confounded by the contents arm; see RL-h]
+- **energy-manual-V01** [the-tensor-unit-per-multiply-add] Tensor unit, 1,024 minions, 80 °C ... on all 1,024 minions, launched at 80 °C (table header and caption over rows that print aifoundry3's values)
+  - planned: qualify: 'launched at 80 °C on aifoundry2, 56 °C on aifoundry3'
+  - ABL-R: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 REPORTED, a3 FAIL, a1c1 REPORTED)
+
+## et-soc1-heat-per-mm (17 claims)
+- **heat-01** [l-unc / k-noc (lede, KPI 2)] At the mesh's 0.485 V, with no other traffic on its links, a random bit costs 36 fJ per millimetre on the mesh rail, 25 of it depending on the data (24.6 + 11.7 fJ, fitted over 1-4 hops)
+  - planned: keep
+  - WIRE-P1-16/P11a: registered **PASS**, all cards **PASS** — P11a on all cards: a2 36.1 fJ/mm [35.2, 37] n=6; a3 35.8 fJ/mm [35.1, 36.5] n=6; a1c1 38.1 fJ/mm [26.3, 49.9] n=6; predicted 33..39.5 fJ/mm: PASS (holds on a2, a3, a1c1).
+- **heat-02** [l-uncb (lede)] board power, which also carries the regulator's loss, says 47 fJ [per random bit per mm, free links]
+  - planned: keep
+  - WIRE-P1-16/P11b: registered **PASS**, all cards **PASS** — P11b on all cards: a2 46.7 fJ/mm [40.3, 53.1] n=6; a3 44.4 fJ/mm [41.9, 46.9] n=6; a1c1 51.1 fJ/mm [47.8, 54.5] n=6; predicted 35..58 fJ/mm: PASS (holds on a2, a3, a1c1).
+- **heat-05b** [l-ones (lede); onestext (section 5)] [all ones costs] 7-9% more [per hop than random data]
+  - planned: qualify: give per card (second run: mesh rail 8-9% on both cards; board 5% on aifoundry2, 9% on aifoundry3) and say the board-power excess is resolved on aifoundry2 only with both runs
+  - WIRE-P1-16/P6a: registered **PASS**, all cards **PASS** — P6a on all cards: a2 9.59% [8.14, 11] n=6; a3 8.13% [0.482, 15.8] n=6; a1c1 12.3% [0.225, 24.4] n=6; predicted 4.5..12.5%: PASS (holds on a2, a3, a1c1).
+  - WIRE-P1-16/P6b: registered **FAIL**, all cards **FAIL** — P6b on all cards: a2 5.84% [-0.641, 12.3] n=6; a3 5.15% [-6.1, 16.4] n=6; a1c1 8.68% [-0.918, 18.3] n=6; predicted 2..12%: FAIL (fails on a2, a3, a1c1).
+- **heat-06** [l-ones1 (lede); disttext (section 4)] though at one hop it costs 36-37% less in all; the all-ones line (P = 1) starts 36-37% below the random one at one hop but climbs faster
+  - planned: keep, state per card
+  - WIRE-P1-16/P12: registered **PASS**, all cards **PASS** — P12 on all cards: a2 35.2% [34.1, 36.4] n=6; a3 35.7% [33.7, 37.8] n=6; a1c1 36.7% [35.6, 37.8] n=6; predicted 31..41%: PASS (holds on a2, a3, a1c1).
+- **heat-15** [method (section 3)] Board power (10 mW steps, a new reading about every 133 ms on aifoundry2 and every 250 ms on aifoundry3)
+  - planned: keep
+  - TEL-S: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P_H - P_L 99% interval per card: {'aifoundry2': 'includes 0', 'aifoundry3': 'positive', 'aifoundry1-c1': 'includes 0'}; pages {'aifoundry2': 'as measured', 'aifoundry3': 'per sampler', 'aifoundry1-c1': 'as measured'} (CARD-DIFFERENT)
+- **heat-19** [disttext (section 4)] On the mesh rail the data-dependent energy is zero at d = 0 (1.5% of its one-hop value: the shire's own scratchpad does not use the mesh)
+  - planned: keep
+  - WIRE-P1-16/P10: registered **PASS**, all cards **PASS** — P10 on all cards: a2 2.28% [0.962, 3.61] n=6; a3 1.01% [0.613, 1.41] n=6; a1c1 2.25% [1.42, 3.07] n=6; predicted -4..4%: PASS (holds on a2, a3, a1c1).
+- **heat-21a** [disttext (section 4)] On this loaded mesh the step from three to four hops is larger: the four-hop point sits 3-7% above the straight line through the others for random data and zeros, 12-15% for all ones [mesh rail; and all ones on both meters]
+  - planned: keep, state per card
+  - WIRE-P1-16/P7a: registered **PASS**, all cards **PASS** — P7a on all cards: a2 6.47% [5, 7.95] n=6; a3 8.04% [2.72, 13.4] n=6; a1c1 7.89% [2.28, 13.5] n=6; predicted 3..9%: PASS (holds on a2, a3, a1c1).
+  - WIRE-P1-16/P7b: registered **PASS**, all cards **CARD-DIFFERENT** — P7b on all cards: a2 6.86% [5.16, 8.56] n=6; a3 6.83% [5.61, 8.04] n=6; a1c1 3.74% [-10.8, 18.3] n=6; predicted 3.5..9.5%: CARD-DIFFERENT (holds on a2, a3; fails on a1c1).
+  - WIRE-P1-16/P7c: registered **PASS**, all cards **PASS** — P7c on all cards: a2 14.5% [12.2, 16.8] n=6; a3 15.2% [14.5, 15.8] n=6; a1c1 15.4% [14.2, 16.6] n=6; predicted 11..19%: PASS (holds on a2, a3, a1c1).
+  - WIRE-P1-16/P7d: registered **PASS**, all cards **PASS** — P7d on all cards: a2 12.4% [10.4, 14.3] n=6; a3 11.9% [9.45, 14.3] n=6; a1c1 12.3% [9.77, 14.9] n=6; predicted 7..17%: PASS (holds on a2, a3, a1c1).
+- **heat-21b** [disttext (section 4)] the four-hop point sits 3-7% above the straight line ... for random data and zeros [board power part: 2.6% zeros, 4.7% random]
+  - planned: qualify: give the 3-7% for the mesh rail only; on board power only all-ones (11-12%) is resolved
+  - WIRE-P1-16/P7e: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P7e on all cards: a2 3.98% [1.92, 6.05] n=6; a3 6.23% [-0.623, 13.1] n=6; a1c1 4.89% [3.29, 6.48] n=6; predicted 1.5..7.5%: CARD-DIFFERENT (holds on a2, a1c1; fails on a3).
+  - WIRE-P1-16/P7f: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P7f on all cards: a2 5.13% [0.732, 9.52] n=6; a3 3.8% [-1.94, 9.54] n=6; a1c1 4.56% [-0.176, 9.29] n=6; predicted -0.5..5.5%: CARD-DIFFERENT (holds on a2; fails on a3, a1c1).
+- **heat-22** [disttext (section 4)] with link-disjoint flows (section 6) the mesh rail grows linearly to within 1%
+  - planned: qualify: 'with link-disjoint flows the mesh rail grows linearly within the noise (the four-hop point sits 0-2% off the line for random data; 99% bounds +-4%, +-7% for zeros)', or drop '1%' until EXP-heat-1 P14
+  - WIRE-P1-16/P14a: registered **PASS**, all cards **PASS** — P14a on all cards: a2 0.111% [-1.18, 1.4] n=6; a3 0.572% [-1.27, 2.41] n=6; a1c1 0.372% [-0.894, 1.64] n=6; predicted -3..3%: PASS (holds on a2, a3, a1c1).
+  - WIRE-P1-16/P14b: registered **PASS**, all cards **CARD-DIFFERENT** — P14b on all cards: a2 0.89% [-0.697, 2.48] n=6; a3 -0.188% [-2.87, 2.49] n=6; a1c1 2.12% [-0.353, 4.59] n=6; predicted -4..4%: CARD-DIFFERENT (holds on a2, a3; fails on a1c1).
+- **heat-23** [disttext (section 4)] Leaving the shire adds a step of its own: about 1.1 hops' worth for random data on board power, 0.55-0.71 of a hop on the mesh rail in this sweep (1.1 with link-disjoint flows), and almost nothing for all-ones data (-0.1 to +0.1 hops)
+  - planned: keep
+  - WIRE-P1-16/P8: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P8 on all cards: a2 0.55 hop [0.535, 0.566] n=6; a3 0.448 hop [-0.0433, 0.94] n=6; a1c1 0.64 hop [0.361, 0.919] n=6; predicted 0.35..0.75 hop: CARD-DIFFERENT (holds on a2, a1c1; fails on a3).
+  - WIRE-P1-16/P9: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P9 on all cards: a2 1.11 hop [0.986, 1.23] n=6; a3 0.926 hop [-0.0211, 1.87] n=6; a1c1 1.27 hop [1.02, 1.52] n=6; predicted 0.7..1.5 hop: CARD-DIFFERENT (holds on a2, a1c1; fails on a3).
+- **heat-32** [modeltab (section 5); comparetext (section 7)] [board power, free links] random bit data part 122 [96-146] fJ/hop (32.7 fJ/mm, '33'), data-independent 52 [33-68] (14.0 fJ/mm)
+  - planned: qualify: give the board free-link total (47 fJ/mm, resolved) and say its split into data and fixed parts is not resolved per card with the leakage correction (resolved without it: 118-120 + 53-61 fJ per hop); await EXP-heat-1
+  - WIRE-P1-16/P3: registered **PASS**, all cards **PASS** — P3 on all cards: a2 110 fJ/bit/hop [80, 139] n=6; a3 110 fJ/bit/hop [90.2, 130] n=6; a1c1 128 fJ/bit/hop [110, 147] n=6; predicted 75..165 fJ/bit/hop: PASS (holds on a2, a3, a1c1).
+  - WIRE-P1-16/P4: registered **PASS**, all cards **PASS** — P4 on all cards: a2 64.1 fJ/bit/hop [38.3, 89.9] n=6; a3 55.3 fJ/bit/hop [43, 67.6] n=6; a1c1 61.8 fJ/bit/hop [42.8, 80.7] n=6; predicted 22..82 fJ/bit/hop: PASS (holds on a2, a3, a1c1).
+- **heat-42** [conttext (section 6)] At one hop, where neither set shares a link, the data-dependent parts agree within 2%, and the totals within 3% for random data and 6% for zeros on the mesh rail (the all-pairs one-hop map puts two readers on some targets)
+  - planned: qualify: 'agree within the noise (99% bounds +-11% on aifoundry2, +-6% on aifoundry3)'; the 3%/6% total offsets are resolved on aifoundry3 only
+  - WIRE-P1-16/P16: registered **PASS**, all cards **CARD-DIFFERENT** — P16 on all cards: a2 0.823% [-2.09, 3.74] n=6; a3 1.57% [-0.95, 4.08] n=6; a1c1 -6.37% [-39.7, 26.9] n=6; predicted -5..5%: CARD-DIFFERENT (holds on a2, a3; fails on a1c1).
+- **heat-43** [conttext (section 6); contcap; 20-heat-per-mm.md] Beyond one hop the loaded mesh climbs faster: over the same one to four hops, 119 against 91 fJ per bit per hop for the data-dependent part and 76 against 43 for the rest, on the mesh rail
+  - planned: keep
+  - WIRE-P1-16/P1: registered **PASS**, all cards **CARD-DIFFERENT** — P1 on all cards: a2 31.7 fJ/bit/hop [24.2, 39.2] n=6; a3 35.1 fJ/bit/hop [14.8, 55.3] n=6; a1c1 44.9 fJ/bit/hop [1.73, 88.1] n=6; predicted 16..40 fJ/bit/hop: CARD-DIFFERENT (holds on a2, a3; null excluded, mean outside the range on a1c1); the null is excluded on every card with 3 kept passes, on th
+  - WIRE-P1-16/P2: registered **PASS**, all cards **PASS** — P2 on all cards: a2 33.8 fJ/bit/hop [31.4, 36.2] n=6; a3 33 fJ/bit/hop [31.6, 34.4] n=6; a1c1 42.3 fJ/bit/hop [40.9, 43.6] n=6; predicted 23..43 fJ/bit/hop: PASS (holds on a2, a3, a1c1).
+- **heat-48** [conttext2 (section 6)] On board power the contrast is larger (122 against 186, 52 against 103) but noisier (96-146 over passes for the free-link data part)
+  - planned: qualify: on board power only the total contrast (+64-69% over 1-4 hops) is resolved per card; the data/fixed split is not
+  - WIRE-P1-16/P5a: registered **PASS**, all cards **PASS** — P5a on all cards: a2 70.8 fJ/bit/hop [44.7, 96.9] n=6; a3 88.8 fJ/bit/hop [13.1, 165] n=6; a1c1 82.9 fJ/bit/hop [59.4, 106] n=6; predicted 24..104 fJ/bit/hop: PASS (holds on a2, a3, a1c1).
+  - WIRE-P1-16/P5b: registered **PASS**, all cards **PASS** — P5b on all cards: a2 50 fJ/bit/hop [24.3, 75.8] n=6; a3 43.8 fJ/bit/hop [16.7, 70.9] n=6; a1c1 63.5 fJ/bit/hop [46.8, 80.3] n=6; predicted 16..86 fJ/bit/hop: PASS (holds on a2, a3, a1c1).
+- **heat-75** [persectext (section 10)] On board power ... the same bound is 98% and 58%, so it cannot rule out that most of the board's fixed part is per second
+  - planned: keep the conclusion; replace '98%' by 'about 100% (97% and 115% on the two cards, poorly determined)'
+  - WIRE-P1-16/P13: registered **DESCRIPTIVE**, all cards **DESCRIPTIVE** — P13 on all cards: a2 83.6% [49.2, 118] n=6; a3 93.5% [66.8, 120] n=6; a1c1 104% [70.9, 137] n=6: descriptive; upper 99% bound above 50% on a2, a3, a1c1.
+- **heat-V01** [method (section 3)] Before each configuration every scratchpad is filled with a known image (checked byte for byte on the card)
+  - planned: qualify: 'the store kernel's output was checked byte for byte on a DRAM slice (the tool cannot read a scratchpad back)', or drop the parenthesis; EXP-heat-2 records the DRAM check on both cards
+  - WIRE-FILL: registered **PASS**, all cards **PASS** — WIRE-FILL on all cards: a2 all 12 match; a3 all 12 match; a1c1 all 12 match: PASS.
+- **heat-V04** [disttext (section 4)] [implied contrast] the four-hop step appears on the loaded mesh, where link sharing jumps from 32% to 55%, and not with link-disjoint flows
+  - planned: qualify: present the sharing jump as a coincidence in distance, not as shown by the link-disjoint contrast, until EXP-heat-1 P15
+  - WIRE-P1-16/P15a: registered **PASS**, all cards **PASS** — P15a on all cards: a2 6.36% [4.48, 8.25] n=6; a3 7.47% [1.74, 13.2] n=6; a1c1 7.52% [0.967, 14.1] n=6; predicted 1.5..9%: PASS (holds on a2, a3, a1c1).
+  - WIRE-P1-16/P15b: registered **PASS**, all cards **CARD-DIFFERENT** — P15b on all cards: a2 5.97% [3.07, 8.88] n=6; a3 7.01% [4.1, 9.93] n=6; a1c1 1.62% [-14, 17.3] n=6; predicted 2..10%: CARD-DIFFERENT (holds on a2, a3; fails on a1c1).
+
+## et-soc1-horace-experiment (39 claims)
+- **horace-lowpower-004** [(lede)] It follows the sparse compute report, which found that zeros save most of the tensor unit's power but no cycles
+  - planned: keep
+  - ABLB-3ab: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL)
+- **horace-lowpower-006** [from-flips-to-watts] register bits clocked and nets toggled predict the board power of 14 patterns to 0.5 W rms, each predicted by a fit that left it out (KPI: 0.5 W rms leave-one-out over 14 patterns spanning 38.3-63.4 W)
+  - planned: keep, say one card (and give the a3 transfer figure)
+  - ABL-T8: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **horace-lowpower-012** [custom-workloads-structured-matrices] It priced 14 structured matrices, from Hadamard to kaleidoscope, to 0.9 W rms before they ran (KPI 0.9 W rms)
+  - planned: keep, say one card
+  - ABL-T4: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-013** [a-second-card-and-what-transfers] On a second card the power model is off by a single factor, 0.92, which a calibration on random data recovers; the thermal network does not transfer
+  - planned: keep (the page states per-card values)
+  - X5: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL); hot - cool: a2 fp32_uniform -7.04 W [-69.54, +55.47], fp32_randn +1.20 W [+0.26, +2.15]; a3 fp32_uniform -7.29 W [-18.48, +3.90], fp32_randn +1.97 W [+1.47, +2.46]; a1c1 fp32_uniform -6.92 W [-42.04, +28.20], fp32_randn -6.36 W [-49.36, +36.63]
+- **horace-lowpower-017** [tbl] table: eight extra patterns (2 runs each): checkerboard 40.9, 75%-zeroed 41.0, ternary 45.7, random sign 51.4, random exponent 52.6, A random/B ones 54.3, A ones/B random 57.9, random mantissa 60.4 W
+  - planned: keep, say one card and two runs (await X1 for signs, exponents, mantissas and the two single-random-operand patterns)
+  - ABL-T3: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **horace-lowpower-024** [same-flops-different-heat] Which bits are random matters. Random signs alone (+-1) cost 51.4 W, random exponents alone 52.6 W, random mantissas alone 60.4 W, and all three together 63.4 W
+  - planned: await experiment
+  - ABL-T3: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **horace-lowpower-025** [same-flops-different-heat] (ladder implied by the same sentence) random exponents alone (52.6 W) cost more than random signs alone (51.4 W), and all three fields together (63.4 W) more than random mantissas alone (60.4 W)
+  - planned: qualify: 'signs and exponents cost about the same (51-53 W)'; keep the mantissa step pending X1 T3
+  - ABL-T3: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **horace-lowpower-026** [same-flops-different-heat] One random operand with the other held at 1 costs 54.3 W when A is the random one and 57.9 W when B is
+  - planned: await experiment
+  - ABL-T2: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **horace-lowpower-030** [strict-temperature-control] about 0.8 W per C on the board while a hot pattern runs, measured from the drift of power within the hot 7 s runs (80-86 C); the idle law's slope is 0.65 W/C at 80 C
+  - planned: keep, say one card
+  - ABL-R: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 REPORTED, a3 FAIL, a1c1 REPORTED)
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **horace-lowpower-040** [coef] model terms: constant 38.6 W; 3.331, 0.035, 0.883, 14.102 W per million events per op = 2.96, 0.03, 0.78, 12.53 fJ per event
+  - planned: keep, say one card
+  - ABL-R: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 REPORTED, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-041** [from-flips-to-watts] It fits to 0.3 W and predicts to 0.5 W ... rms 0.32 W over a 25 W range ... left-out 0.50 W rms ... worst zeros and random exponents (+0.9 W) and ternary (-0.8 W)
+  - planned: keep, say one card
+  - ABL-R: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 REPORTED, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-043** [from-flips-to-watts] Counted separately, a toggle in the tree costs 0.03 fJ and one in the rest of the unit 0.8 fJ (and §5: the fitted energies differ 25-fold)
+  - planned: keep, say one card
+  - ABL-R: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 REPORTED, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-045** [from-flips-to-watts] It explains the odd orderings. A random with B = 1 flips 38 million tree nets per op, and A = 1 with B random only 13 million, yet the second draws 3.6 W more: it moves 10.1 million nets in the rest of the unit against 5.9 million, and twice as many operand-word bits
+  - planned: await experiment
+  - ABL-T2: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **horace-lowpower-046** [from-flips-to-watts] Random signs or exponents leave the tree still (under 0.4 million toggles) and cost 5 to 6 W over ones, all of it in the rest of the unit
+  - planned: await experiment; say '4.7 to 5.8 W'
+  - ABL-T3: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **horace-lowpower-049** [stack] chart annotation: A ones, B random - A random, B ones: +3.6 W measured, +4.1 W modelled (multiplier tree -0.7, rest of the unit +3.8, operand words +1.0 W)
+  - planned: await experiment
+  - ABL-T2: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **horace-lowpower-056** [where-the-model-is-off-and-why] Of random normal's 63.4 W, 38.6 W is the model's constant: what the card draws at 80 C with every multiply-add gated
+  - planned: keep, state per card
+  - ABL-R: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 REPORTED, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-061** [where-the-model-is-off-and-why] Leakage feeds back. Random normal reads 65.8 W in seconds 1 to 3 and 68.0 W in the last two seconds: +2.2 W as its own heating lifts the reading another 2.4 C (5.2 C over the whole run)
+  - planned: keep, say one card for the numbers
+  - ABL-T8: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **horace-lowpower-084** [leak] The power line has a fixed part, leakage that grows exponentially with die temperature ... the leakage to the idle samples (rms error 0.20 W from 64 to 88 C)
+  - planned: keep, say one card
+  - IDLE-L: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — IDLE-LONG: aifoundry2 T_L - C, A80 - W, slope80 - W/C (0 passes, split not identified); aifoundry3 slope56 - W/C, offset - W (0 passes); reported, not tested: aifoundry1-c1 no long pass
+- **horace-lowpower-087** [a-model-from-flips-to-temperature] Leakage is two thirds of an idle card's power at 80 C (23 of 36 W) and it is what makes temperature so sensitive to flips here
+  - planned: qualify: 'about 20-29 W (two thirds is the best fit; the split depends on the fitted exponential)'; quote the slope 0.65 W/C as the robust number
+  - IDLE-L: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — IDLE-LONG: aifoundry2 T_L - C, A80 - W, slope80 - W/C (0 passes, split not identified); aifoundry3 slope56 - W/C, offset - W (0 passes); reported, not tested: aifoundry1-c1 no long pass
+- **horace-lowpower-088** [a-model-from-flips-to-temperature] Each degree adds 0.65 W at 80 C
+  - planned: keep, say one card
+  - IDLE-L: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — IDLE-LONG: aifoundry2 T_L - C, A80 - W, slope80 - W/C (0 passes, split not identified); aifoundry3 slope56 - W/C, offset - W (0 passes); reported, not tested: aifoundry1-c1 no long pass
+- **horace-lowpower-090** [a-model-from-flips-to-temperature] Sections 2 and 4 use 0.81 W per degree, the drift of busy power inside the hot 7 s runs: a different measurement, a quarter higher
+  - planned: keep, say one card
+  - ABL-R: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 REPORTED, a3 FAIL, a1c1 REPORTED)
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **horace-lowpower-099** [budget] The flip energies and the leakage belong to the chip design, up to the per-card scale of section 10
+  - planned: qualify: 'on the two cards measured'
+  - X5: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL); hot - cool: a2 fp32_uniform -7.04 W [-69.54, +55.47], fp32_randn +1.20 W [+0.26, +2.15]; a3 fp32_uniform -7.29 W [-18.48, +3.90], fp32_randn +1.97 W [+1.47, +2.46]; a1c1 fp32_uniform -6.92 W [-42.04, +28.20], fp32_randn -6.36 W [-49.36, +36.63]
+- **horace-lowpower-102** [struct-tbl] structured-matrix table: predicted vs measured board W, rms 0.92 W, ten within 0.6 W (eleven within 0.75 W)
+  - planned: keep, say one card
+  - ABL-T4: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-103** [custom-workloads-structured-matrices] Structure in the values buys nothing. Kaleidoscope products, the DCT, circulant and rank-1 matrices are dense, and they cost what random normal costs (63 to 64 W)
+  - planned: keep, say one card; note rank-1 is 0.8 W lower
+  - ABL-T4: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-104** [custom-workloads-structured-matrices] The Hadamard matrix costs 50 W, like random signs: only the sign and the adder move
+  - planned: qualify: 'within 1.5 W of random signs'
+  - ABL-T4: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-105** [custom-workloads-structured-matrices] Structure in the zeros buys a lot. Butterfly factors (64 of 4,096 products survive) 39.3 W, the identity 38.5 W, tridiagonal 40.2 W, 4x4 blocks 41.1 W, upper-triangular 44.4 W
+  - planned: keep, say one card
+  - ABL-T4: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-106** [custom-workloads-structured-matrices] The ReLU pair, random weights times half-zero activations, gates half its products and saves 11 of random data's 27.6 W over idle
+  - planned: keep, say one card and two runs
+  - ABL-T4: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-107** [custom-workloads-structured-matrices] Negative zero is not zero. The gating looks for the all-zero bit pattern, so a matrix of -0.0 clocks every register: 46.7 W, the same as ones, against 38.2 W for +0.0 ... The model said 47.2 W. In practice: mask with a select
+  - planned: await experiment (keep the RTL mechanism; the watts are one card, two runs)
+  - ABL-T1: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 FAIL)
+- **horace-lowpower-108** [custom-workloads-structured-matrices] The worst miss is the DFT pair, 2.8 W low. Its products cancel almost exactly, which works the normaliser harder than any pattern the energies were fitted on; one energy for every toggle outside the multiplier tree is too coarse there
+  - planned: qualify: keep the miss; replace the explanation with 'cause unknown (glitching in near-cancelling sums, invisible to a zero-delay simulation, is one candidate)'
+  - ABL-T4: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-119** [scaletext] Applied to aifoundry3 unchanged, the model is off by 1.38 W rms, worst case 2.32 W, and it overestimates every pattern, by 3 to 10%
+  - planned: keep; say 'about 7% (3-10% per pattern, differences within noise)' and that the cards ran at different temperatures
+  - X5: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL); hot - cool: a2 fp32_uniform -7.04 W [-69.54, +55.47], fp32_randn +1.20 W [+0.26, +2.15]; a3 fp32_uniform -7.29 W [-18.48, +3.90], fp32_randn +1.97 W [+1.47, +2.46]; a1c1 fp32_uniform -6.92 W [-42.04, +28.20], fp32_randn -6.36 W [-49.36, +36.63]
+- **horace-lowpower-120** [scaletext] Multiply every flip energy by one number, 0.92, and the residual falls to 0.20 W rms over a 1.9 to 25 W range, which is as good as the in-sample fit on the card the coefficients came from
+  - planned: keep
+  - X5: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL); hot - cool: a2 fp32_uniform -7.04 W [-69.54, +55.47], fp32_randn +1.20 W [+0.26, +2.15]; a3 fp32_uniform -7.29 W [-18.48, +3.90], fp32_randn +1.97 W [+1.47, +2.46]; a1c1 fp32_uniform -6.92 W [-42.04, +28.20], fp32_randn -6.36 W [-49.36, +36.63]
+- **horace-lowpower-121** [scaletext] Calibrating that number on one pattern's runs and predicting the other seven patterns gives 0.36 W rms in the median and 0.93 W rms at worst (calibrated on zeros), with 1.53 W the largest single-pattern error; calibrated on random normal it is 0.27 W rms
+  - planned: keep; say 'in this session'
+  - ABL-T8: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **horace-lowpower-123** [a-second-card-and-what-transfers] Whatever the 8% is - silicon, package, or the board regulator's efficiency at that load - it belongs to the card, and one number captures it
+  - planned: keep
+  - X5: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL); hot - cool: a2 fp32_uniform -7.04 W [-69.54, +55.47], fp32_randn +1.20 W [+0.26, +2.15]; a3 fp32_uniform -7.29 W [-18.48, +3.90], fp32_randn +1.97 W [+1.47, +2.46]; a1c1 fp32_uniform -6.92 W [-42.04, +28.20], fp32_randn -6.36 W [-49.36, +36.63]
+- **horace-lowpower-124** [leaktab] The leakage half transfers as well, and further than it has any right to ... predicts that card's idle power to +0.73 W (the mean of the four temperature bins) out of 25 W; table 50/55/56/57 C; with the model's idle rule only 55-57 C remain and the offset is +0.69 W
+  - planned: keep
+  - IDLE-a: registered **FAIL**, all cards **FAIL** — aifoundry3 idle - aifoundry2 law 1.01 [0.95, 1.07] W, residual slope 0.036 [0.031, 0.041] W/C over 3 cycles; the +0.6 W statement is not established; reported, not tested: aifoundry1-c1 idle - law 10.07 [9.73, 10.40] W, residual slope 0.237 [0.228, 0.246] W/C (3 cycles)
+- **horace-lowpower-125** [a-second-card-and-what-transfers] The shape of the data-dependence ... is a property of the design and moves between cards unchanged. The absolute scale and the idle offset are per-card constants, worth about 8% and 0.7 W. A single random-data matmul on a new card calibrates both, after which the power predictions of sections 3 and 9 apply to it
+  - planned: qualify: 'on the second card measured'; await X1 for section 9 on aifoundry3
+  - ABL-T8: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+  - X5: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL); hot - cool: a2 fp32_uniform -7.04 W [-69.54, +55.47], fp32_randn +1.20 W [+0.26, +2.15]; a3 fp32_uniform -7.29 W [-18.48, +3.90], fp32_randn +1.97 W [+1.47, +2.46]; a1c1 fp32_uniform -6.92 W [-42.04, +28.20], fp32_randn -6.36 W [-49.36, +36.63]
+- **horace-lowpower-128** [method] Power 'at 80 C': the mean over seconds 1-3 of a run, moved to the start temperature with the measured leakage slope ... The correction is below 0.5 W for the cool patterns and about 2 W for random data
+  - planned: qualify: 'about 2.4 W for random data'
+  - ABL-EM4d: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 N/A, a1c1 N/A)
+- **horace-lowpower-129** [method] Telemetry: tools/ettelem samples board power (10 mW steps, refreshed every 133 ms), the rail averages, the mean minion-shire temperature (whole degrees), clock and core voltage at 10 Hz
+  - planned: keep
+  - TEL-S: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P_H - P_L 99% interval per card: {'aifoundry2': 'includes 0', 'aifoundry3': 'positive', 'aifoundry1-c1': 'includes 0'}; pages {'aifoundry2': 'as measured', 'aifoundry3': 'per sampler', 'aifoundry1-c1': 'as measured'} (CARD-DIFFERENT)
+- **horace-lowpower-132** [related] Sparsity on the ET-SoC-1 - the first sign, on 18 September on aifoundry3: power above idle falling from 17.3 to 2.4 W as A goes to zeros, with no cycles saved
+  - planned: keep
+  - ABLB-3ab: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL)
+- **horace-lowpower-V02** [perflop chart (section 1)] Heating per 10^12 FLOPs for the eight extra patterns: ternary 21 (+1.4 C), half-zero 26, random sign 41 (+2.8 C), random exponent 43, A random/B ones 42, A ones/B random 55 (+3.7 C), random mantissa 60 (+4.1 C), uniform 70
+  - planned: keep, say one card and two runs per extra pattern
+  - ABL-T3: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+
+## et-soc1-hot-line (17 claims)
+- **hotline-relay-l2-07** [the-thing-that-actually-starves (#localtab); esperanto-knew-two-errata-describe-it] Under a DRAM-homed line (L3 slice of the same shire) the host gets 208 / 240 (scratchpad reads) and 192 (DRAM reads) through: 0.012% / 0.014% and 0.023%; 'slightly worse' than a scratchpad line
+  - planned: keep the per-card counts but say 'one launch per card'; await E-HL1
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-08** [the-thing-that-actually-starves (#wintab)] The host shire's count is the same number whether the window is 5 ms or 100: 384 loads with 0.30 M, 0.60 M, 2.4 M, 6.0 M atomics
+  - planned: qualify: replace or back the table with E29's 2-second runs (384 loads in every one of 21 runs, 3 passes on aifoundry2 and 4 on aifoundry3, 120 M atomics each); label the hand-kept table 'aifoundry2, one run per window, not in the raw data'
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-10** [the-thing-that-actually-starves; esperanto-knew-two-errata-describe-it] The stop (not slow-down) holds for the other three combinations: host reading DRAM, and/or the hot line DRAM-homed ('the behaviour is not specific to the scratchpad')
+  - planned: qualify: say the window test was made for a scratchpad-homed line; await E-HL1
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-14** [lede / k3 / k3sub / the-threshold-is-the-bank-going-saturated] The switch is sharp: 20 remote requesters leave the host at 98.9%, 24 stop it (0.02%); 21-24 needed to flip it
+  - planned: keep
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-15** [k3sub / the-threshold-is-the-bank-going-saturated (#ineqtext)] N x 10 cycles < P + t: with P = 0 the inequality puts the edge at 22 requesters, between the 20 and 24 that were tested
+  - planned: keep (it says 'puts', a prediction); await E-HL1 which tests it with the prediction written down
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-16** [the-threshold-is-the-bank-going-saturated] From 2 to 20 remote requesters the host shire stays within about a percent of untouched (98.9-99.9%)
+  - planned: qualify: '98.9-99.9% of the 32-minion loop's per-minion rate; the N-minion baseline was not run'; await E-HL1 (adds N-minion alone baselines)
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-21** [the-threshold-is-the-bank-going-saturated (#ineqtext); the-workaround-priced (#pacecap)] For 992 requesters the rule needs P above about 9,700 cycles, which is why 8,000 does nothing and 10,000 is the knee; nothing tested below 10,000 (1,000, 4,000 or 8,000) helps at all; no pause gives 0.02%
+  - planned: keep; E-HL1 tests the predicted 9,704 knee (P = 9,000-10,500)
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-23** [the-threshold-is-the-bank-going-saturated (#ineqtext, #reqout)] ...not sufficient: one shire's 20 requesters leave the host at 99% with the bank 93% busy, while 992 paced requesters leave it at 85-87% with the bank 81% busy and 95% at 61%
+  - planned: keep, state per card (the page already prints 85-87%); E-HL1 gives 3 passes per card
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-24** [the-threshold-is-the-bank-going-saturated (#reqout, chart readout at the default N = 992, P = 12,000)] Load 0.81 ... Below saturation, not free: one shire's 12 and 16 requesters left the host at 99.0-99.7%; 992 paced at 12,000 and 16,000 cycles left it at 85-95%. Measured at this setting: host at 85-87%, measured load 0.81.
+  - planned: keep, state per card
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-29** [the-workaround-priced (#pace, #pacecap); what-to-do-instead (#pacerule)] At 10,000 cycles between atomics the host shire is back to 54% while the hammering shires keep 96% of their rate (4% of their rate)
+  - planned: keep, state per card (54% / 55%); E-HL1 gives 3 passes per card
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-30** [what-to-do-instead (#pacerule); the-workaround-priced] 12,000 gives it 85% for 20%, and 16,000 gives it 95% for 39%
+  - planned: keep, state per card; E-HL1
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-43** [what-to-do-instead (#bar1)] 31 shires polling one line are already past the edge in section 3
+  - planned: keep; await E-HL1 (P5 tests 31 remote minions, one per shire, against the host)
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-48** [what-to-do-instead (#pacerule)] If you must, pace it: keep N x 10 cycles below the pause plus the 216-cycle round trip. For the 992 here that is 10,000 cycles (about 17 us), 54% for 4%
+  - planned: keep, state per card
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-52** [method-and-what-is-not-established] Addressed through the self ID 0x7F, amoaddg raises a kernel bus error
+  - planned: qualify: say it was seen during development (card not recorded); E-HL1 optional step reproduces it on both cards
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-V01** [section 2 table (#localtab), 'Alone, a2 / a3' column] Alone, the host shire's 32 minions complete 1,688,306 / 1,688,298 scratchpad loads (1,688,300 / 1,674,057 in the DRAM-homed-line row) and 821,182 / 822,053 (822,066 / 820,907) DRAM loads in the 10 ms window
+  - planned: keep
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-V02** [section 6, energy table (#pwrtab), row 'host shire reading, nobody hammering'] Host shire reading, nobody hammering: 180 M operations per second (0.40 nJ in the first session)
+  - planned: print 169 M (both cards, E29 and the sweeps) or say the first session's build ran the loop at 3.34 cycles per load; the 0.40 nJ uses 180 M
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-V03** [section 2 ('Twelve loads per minion get through'), lede ('0.02%')] (Missing qualifier) The number of the host's loads that get through before the stop depends on the kernel's warm-up: 384 (12 per minion) inside the window after 5 warm-up loads; 528 (16.5 per minion) in a build with no host warm-up
+  - planned: say the count is the in-window loads after 5 warm-up loads (about 17 per minion in total); E-HL1 adds --warmup 0 and 10
+  - LAT-H: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; reported, not tested, on a1c1: P1c host fractions (a per-card committed value; shown against aifoundry2's and aifoundry3's)
+
+## et-soc1-limits-of-observability (27 claims)
+- **hub-001** [start (tile 'Finest time on the card')] 1 cycle: hpmcounter3 from a kernel, after correcting a late carry into bit 7
+  - planned: keep the tile, say 'on aifoundry2'; add that the correction can leave +-128 outliers (1.4% of intervals in one of two 19 Sep launches), which a kernel should detect rather than trust the fixed threshold
+  - MEM-R1: registered **FAIL**, all cards **FAIL** — FAIL: a2 15 launches, 8 exceptions (p1/t_raw: no single window 0..e fits every pair); a3 15 launches, 15 exceptions (p1/t_raw: no single window 0..e fits every pair); a1c1 15 launches, 13 exceptions (p1/t_raw: no single window 0..e fits every pair)
+- **hub-003** [start (tile 'One reading's energy step')] 133 µJ: 1 mW × 133 ms on a rail (aifoundry2)
+  - planned: qualify: 1 mW × one refresh: about 133-150 µJ on aifoundry2 (133 ms is the SP pass without the sampler, ~150 ms under ettelem), about 250 µJ on aifoundry3; board 1.3-1.5 mJ
+  - TEL-P1: registered **PASS**, all cards **PASS** — quiet SP pass per card (ms): {'aifoundry2': [133.2, 133.2, 133.2], 'aifoundry1-c1': [134.8, 134.8, 134.8]}; tested on aifoundry2 only
+- **hub-009** [reports (row DVFS)] idle law Pidle = 12.6 W + 23.3 W·e^((T−80)/36) (aifoundry2); aifoundry3 TDP 0 W, never leaves 600 MHz; sleep controls tied off; no array power gating
+  - planned: keep
+  - IDLE-L: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — IDLE-LONG: aifoundry2 T_L - C, A80 - W, slope80 - W/C (0 passes, split not identified); aifoundry3 slope56 - W/C, offset - W (0 passes); reported, not tested: aifoundry1-c1 no long pass
+- **hub-010** [reports (row Horace)] 38 W on zeros, 47 on ones, 63 on random; flips predict power to 0.5 W rms (leave-one-out); from a cool die zeros run 25% faster; 14 structured matrices priced before they ran; one scale factor to a second card
+  - planned: keep
+  - ABL-T8: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **hub-011** [reports (row Why low power)] 5–6× less switching power; 1,024 cores in an integer loop add 1.5 W; leakage 23 W of the 36 W idle; per FLOP more than the A100's bf16
+  - planned: keep
+  - ABL-T8: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **hub-012** [reports (row Power and temperature)] board power every 133 ms (aifoundry2) and three rails behind a ~1 s average; idle rises with die temperature; 34-shire voltage map
+  - planned: keep
+  - TEL-Q: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — voltage maps on every card: Q2 {'aifoundry2': None, 'aifoundry3': True, 'aifoundry1-c1': None}, Q4 {'aifoundry2': None, 'aifoundry3': False, 'aifoundry1-c1': None}, Q3 every pair False; offset sentence dropped (INSUFFICIENT)
+- **hub-016** [reports (row Memory hierarchy)] L1 8.8 ns, L2 78 ns, L3 ~280 ns, DRAM ~490 ns at 600 MHz, 76 GB/s; energy per byte L2 2.51, L3 10.5, DRAM 122 pJ/B (energy manual §4)
+  - planned: keep
+  - LAT-M1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **hub-017** [reports (row On-chip communication)] round trip 150 cycles + 12 per hop, hop 20 ns at any clock; 2.3 µs chip-wide allreduce; 7–34× less bandwidth between shires
+  - planned: keep
+  - LAT-N2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **hub-018** [reports (row Matmul efficiency)] 9.5 TFLOP/s fp32, 19.0 fp16, 71.8 TOP/s int8 (91–97% of peak); operands ±1/±2; random data draws more power
+  - planned: keep
+  - MMB-b: registered **PASS**, all cards **PASS** — holds on every card tested; the smoke-test clause is registered for aifoundry3: reported on the other cards
+- **hub-019** [reports (row Sparse compute)] zero-skip saves power (86% in a TensorFMA loop on small integers) but never a cycle; 1024×4096 layer 7.5 → 2.1 µs at 99% zeros
+  - planned: keep
+  - ABLB-3ab: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL)
+- **hub-021** [reports (row Test drive)] scalar fp32 SGEMM on aifoundry3: 127 GFLOP/s on 2,048 harts
+  - planned: keep
+  - LAT-G: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **hub-022** [reports (row Spatial temperature brief)] the peak-hold high sat about 3 °C above the average each time it rose, on both cards
+  - planned: keep
+  - TEL-R: registered **FAIL**, all cards **FAIL** — peak-hold on every card: R1 {'aifoundry2': True, 'aifoundry3': True, 'aifoundry1-c1': False}, R2 {'aifoundry2': 'WITHIN-NOISE', 'aifoundry3': 'WITHIN-NOISE', 'aifoundry1-c1': 'WITHIN-NOISE'}, R6 {'aifoundry2': None, 'aifoundry3': None, 'aifoundry1-c1': None} (FAIL); R1 failed on a card
+- **hub-025** [reports map / §7 (session E6)] per-shire idle voltage map of 34 minion shires, 517–521 mV, low captures to 513 mV
+  - planned: keep
+  - TEL-Q: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — voltage maps on every card: Q2 {'aifoundry2': None, 'aifoundry3': True, 'aifoundry1-c1': None}, Q4 {'aifoundry2': None, 'aifoundry3': False, 'aifoundry1-c1': None}, Q3 every pair False; offset sentence dropped (INSUFFICIENT)
+- **hub-034** [lad-board-power, lad-rail-power, lad-ddr-rail-droop, lad-temperature-and-voltage, the-chain, droopidle, rung 3/4, gpu (Power)] a new value every 133 ms (aifoundry2; about every 250 ms on aifoundry3) — 'the SP's copy refreshes every 133 ms'
+  - planned: qualify: 'one SP pass is 133 ms on aifoundry2 in the SP's own trace (one session, no sampler); under ettelem's 10 Hz sampling, which every power page used, aifoundry2's values change about every 150 ms (148-164 ms over 29 sessions), aifoundry3's about every 255 ms (251-260 over 16)'; carry the same wording to the tiles, §4.1, §4.3, rungs 3-4, the GPU row and METER.pass_s
+  - TEL-P1: registered **PASS**, all cards **PASS** — quiet SP pass per card (ms): {'aifoundry2': [133.2, 133.2, 133.2], 'aifoundry1-c1': [134.8, 134.8, 134.8]}; tested on aifoundry2 only
+  - TEL-P2: registered **PASS**, all cards **PASS** — PWR - Q per card (ms): {'aifoundry2': [0.8, 0.8, 0.8], 'aifoundry1-c1': [0.4, 0.4, 0.4]}; tested on aifoundry2 only
+  - TEL-P3: registered **PASS**, all cards **PASS** — E10 per card (ms): {'aifoundry2': [159.51, 161.2, 158.78], 'aifoundry1-c1': [162.4, 162.4, 162.4]}; tested on aifoundry2 only
+  - TEL-P4: registered **PASS**, all cards **PASS** — VOLT - Q per card: {'aifoundry2': 'confirmed', 'aifoundry1-c1': 'confirmed'}; tested on aifoundry2 only
+- **hub-036** [lad-rail-power / the-chain / rung 4] the PMIC's running average: roughly first-order, τ ≈ 1.15–1.22 s; a step reaches 55–57% after 1 s and 83–84% after 2 s (242 bursts a2, 229 a3)
+  - planned: keep, state per card: τ ≈ 1.15 s and 84% at 2 s on aifoundry2, τ ≈ 1.22 s and 83% on aifoundry3 (the current range already spans both)
+  - TEL-P7: registered **FAIL**, all cards **FAIL** — f(1 s) under 1 s resets per card: {'aifoundry2': 0.934, 'aifoundry3': 0.93, 'aifoundry1-c1': 0.93} (FAIL)
+- **hub-037** [lad-rail-power (note), improve rung 6] ettelem --reset-ms reads the min/max over a chosen window ('min/max windows for peaks', done, works now)
+  - planned: qualify: 'ettelem --reset-ms (added 24 Sep, not yet used in a run)'; rung 6's 'done' should cover the step timing only until E-hub-1 P6 passes
+  - TEL-P6: registered **PASS**, all cards **CARD-DIFFERENT** — --reset-ms windows on every card: {'aifoundry2': 'holds', 'aifoundry3': 'holds', 'aifoundry1-c1': 'fails'} (CARD-DIFFERENT)
+- **hub-047** [lad-cycle-counter] Two counters per neighbourhood, not synchronised; a read whose low 7 bits are 0–10 is 128 short; the standard cycle, time and instret CSRs trap
+  - planned: keep
+  - MEM-R1: registered **FAIL**, all cards **FAIL** — FAIL: a2 15 launches, 8 exceptions (p1/t_raw: no single window 0..e fits every pair); a3 15 launches, 15 exceptions (p1/t_raw: no single window 0..e fits every pair); a1c1 15 launches, 13 exceptions (p1/t_raw: no single window 0..e fits every pair)
+- **hub-062** [bits] hpmcounter3 reads 128 short whenever its low 7 bits are 0–10 (on the card)
+  - planned: keep
+  - MEM-R1: registered **FAIL**, all cards **FAIL** — FAIL: a2 15 launches, 8 exceptions (p1/t_raw: no single window 0..e fits every pair); a3 15 launches, 15 exceptions (p1/t_raw: no single window 0..e fits every pair); a1c1 15 launches, 13 exceptions (p1/t_raw: no single window 0..e fits every pair)
+- **hub-063** [bits (A first result from the RTL)] neigh_pmu.v under Verilator: 7-bit pre-counter + 57-bit post-counter, one shared round-robin adder, a read ignores the pending overflow; 128 short for 12 cycles in the simulation (card half: hub-V05)
+  - planned: keep the mechanism; see hub-V05 for the card's window
+  - MEM-R1: registered **FAIL**, all cards **FAIL** — FAIL: a2 15 launches, 8 exceptions (p1/t_raw: no single window 0..e fits every pair); a3 15 launches, 15 exceptions (p1/t_raw: no single window 0..e fits every pair); a1c1 15 launches, 13 exceptions (p1/t_raw: no single window 0..e fits every pair)
+- **hub-069** [the-chain] On aifoundry2 the SP's copy refreshes every 133 ms, because its I2C driver waits a millisecond after each transaction
+  - planned: qualify: say the 133 ms is the SP pass without the sampler, and that the cause is read from the 353f20e source, not the cards' build
+  - TEL-P1: registered **PASS**, all cards **PASS** — quiet SP pass per card (ms): {'aifoundry2': [133.2, 133.2, 133.2], 'aifoundry1-c1': [134.8, 134.8, 134.8]}; tested on aifoundry2 only
+- **hub-070** [the-chain] aifoundry3's readings change only about every 250 ms; whether its SP loop or its PMIC is the slower is not established; how often the PMIC itself updates is unknown
+  - planned: replace 'whether its SP loop or its PMIC is the slower is not established' with 'its SP's own loop runs about every 260 ms (the timestamps of its governor log, 22 Sep, one window, under 10 Hz sampling); why the same firmware loops twice as slowly on this card is not established'; E-hub-1 P5 checks it with the SP stats trace, quiet and sampled
+  - TEL-P5: registered **FAIL**, all cards **FAIL** — SP pass quiet / E10 per card (ms): {'aifoundry3': [(224.07, 266.47), (224.5, 266.11), (224.2, 265.9)], 'aifoundry1-c1': [(134.8, 162.4), (134.8, 162.4), (134.8, 162.4)]}; tested on aifoundry3 only
+- **hub-080** [idle-unsensed] At idle it is 15.1 W of the 31.8 W the board draws at 73 °C on aifoundry2 (V1 idle bar 31.79 ± 0.04 W, 300 samples over 60 s, after 20.6 h idle; minion 11.05, SRAM 2.00, NoC 3.64, no sensor 15.10)
+  - planned: keep, say one card; qualify the ± as a within-window sample sd (not a repeat-level uncertainty)
+  - IDLE-d: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — aifoundry2 73 C split over 2 cycles: minion 11.07 [10.69, 11.46] / sram 1.99 [1.95, 2.03] / noc 3.62 [3.42, 3.83] / unsensed 15.05 [14.56, 15.54]; reported, not tested: aifoundry1-c1 73 C split over 3 cycles: minion 15.96 [15.95, 15.97] / sram 3.05 [3.01, 3.09] / noc 5.83 [5.82, 5.83] / unsensed 17.
+- **hub-117** [improve rung 4] Inverting that filter sample by sample recovers rail power every 133 ms (aifoundry2)
+  - planned: qualify: 'every refresh (133-150 ms on aifoundry2, ~255 ms on aifoundry3)'
+  - TEL-P1: registered **PASS**, all cards **PASS** — quiet SP pass per card (ms): {'aifoundry2': [133.2, 133.2, 133.2], 'aifoundry1-c1': [134.8, 134.8, 134.8]}; tested on aifoundry2 only
+- **hub-122** [improve rung 10] The card factor: 0.95 over the catalogue (10–90%: 0.91–0.99); on the tensor unit's flip energies alone, 0.92
+  - planned: keep
+  - CAT-a: registered **FAIL**, all cards **FAIL** — a2: beta +0.484 %/C [+0.068, +0.901] over dT 14.4 C -> temperature; a3: beta +0.301 %/C [+0.178, +0.424] over dT 10.6 C -> temperature; a1c1: beta +0.354 %/C [-0.105, +0.814] over dT 6.2 C -> not established
+- **hub-127** [gpu (contrast table, ET column)] Power: board power every 133 ms at 10 mW (aifoundry2; ~250 ms on aifoundry3), three rails as the PMIC's ~1 s running average at 1 mW; no energy counter; ECC dark at this firmware; hpmcounter3 with a documented carry bug
+  - planned: qualify: as hub-034 (the 133 ms)
+  - TEL-P1: registered **PASS**, all cards **PASS** — quiet SP pass per card (ms): {'aifoundry2': [133.2, 133.2, 133.2], 'aifoundry1-c1': [134.8, 134.8, 134.8]}; tested on aifoundry2 only
+  - TEL-P3: registered **PASS**, all cards **PASS** — E10 per card (ms): {'aifoundry2': [159.51, 161.2, 158.78], 'aifoundry1-c1': [162.4, 162.4, 162.4]}; tested on aifoundry2 only
+- **hub-V04** [pvttab (DEBUG trace row)] In the SP's DEBUG trace: per-shire VDD_MNN/SRAM/NOC lines and per-memory-shire VDD_MS/NOC lines every loop pass at LOG_LEVEL_DEBUG
+  - planned: qualify: 'per-minion-shire lines (read on aifoundry2); the per-memory-shire lines are in the source, not yet seen on a card'
+  - TEL-Q: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — voltage maps on every card: Q2 {'aifoundry2': None, 'aifoundry3': True, 'aifoundry1-c1': None}, Q4 {'aifoundry2': None, 'aifoundry3': False, 'aifoundry1-c1': None}, Q3 every pair False; offset sentence dropped (INSUFFICIENT)
+- **hub-V05** [bits (A first result from the RTL)] 128 short ... 11 [cycles] on the card
+  - planned: rewrite: '12 cycles in the simulation; 10 to 11 or more on the card, changing between launches (aifoundry2, 19 September)', or drop the card number until E-hub-2
+  - MEM-R2: registered **FAIL**, all cards **FAIL** — FAIL (tested on a2 only, as registered): a2 e constant (common e 10, 5 kept passes); a3 e constant (common e None, 5 kept passes); a1c1 e constant (common e 10, 5 kept passes). Page (every card): low 7 bits 0-10 (a2) / 0-None (a3) / 0-10 (a1c1) read 128 short (every card)
+
+## et-soc1-matmul-efficiency (19 claims)
+- **matmul-sparse-testdrive-01** [top (lede, KPI tiles)] A tensor-unit matmul kernel on all 1,024 compute minions sustains 9.5 TFLOP/s in fp32, 19.0 TFLOP/s with fp16 inputs and 71.8 TOP/s in int8
+  - planned: keep, say one card
+  - MMB-b: registered **PASS**, all cards **PASS** — holds on every card tested; the smoke-test clause is registered for aifoundry3: reported on the other cards
+- **matmul-sparse-testdrive-03** [top (lede); how-the-benchmark-works] every result is checked bit-exact against a host reference; every launch passed with zero bad minions
+  - planned: keep, say one card
+  - MMB-b: registered **PASS**, all cards **PASS** — holds on every card tested; the smoke-test clause is registered for aifoundry3: reported on the other cards
+- **matmul-sparse-testdrive-04** [top (lede); results] The card draws 57-62 W doing it, against 30.6 W at idle with the die at 71 C
+  - planned: qualify: one run per workload on aifoundry2 at 71-77 C; board watts depend on the card and the die temperature
+  - MMB-c: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the watt bands are aifoundry2's (aifoundry3's relative to it): aifoundry1's above-idle watts are reported with their idle clock
+- **matmul-sparse-testdrive-05** [top (lede); energy-efficiency-against-the-a100 (eff-fp32-read, eff-sum); later measurements] the ET-SoC-1 is 3.4x more energy-efficient [than the A100 SXM4's fp32 CUDA-core datasheet figure] at full fp32 precision on these +-1/+-2 operands (168.1 vs 48.8 GFLOP/s per W; 3.45x)
+  - planned: keep, say one card
+  - MMB-d: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; a comparison of aifoundry3 with aifoundry2: aifoundry1's per-W values and their ratio to aifoundry2 are reported
+- **matmul-sparse-testdrive-07** [top (lede); eff-fp16-read; eff-int8-read; a100 table] At fp16 and int8 the A100's tensor cores win on efficiency (2.4x and 1.3x)
+  - planned: qualify: on aifoundry2 at 71-77 C; state the int8 margin per card after E1
+  - MMB-d: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; a comparison of aifoundry3 with aifoundry2: aifoundry1's per-W values and their ratio to aifoundry2 are reported
+  - MMB-e: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the lead bands are per registered card; consequence over all cards: the A100 wins int8 efficiency on every card with 3 kept passes ['aifoundry2', 'aifoundry3', 'aifoundry1-c1']
+- **matmul-sparse-testdrive-13** [later measurements; eff-sum] In int8 the energy manual's variant is more efficient than this loop even on random data: 1,360 GOP/s per W (63.1 TOP/s at 46.3 W, 80 C) vs 1,162.5
+  - planned: keep, say one card
+  - ABLB-2b: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS); kernel clause: 'the difference is the kernel' kept
+  - ABLB-2c: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **matmul-sparse-testdrive-15** [later measurements; eff-sum] The difference is the kernel, not the operands. This loop streams both tiles from L2 at 280 cycles per op, while that one keeps them in the L1 scratchpad (318 cycles per op)
+  - planned: qualify: 'probably the kernel (L2 streaming)'; untested until the same operands run on both kernels (E2)
+  - ABLB-2b: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS); kernel clause: 'the difference is the kernel' kept
+- **matmul-sparse-testdrive-21** [results] Board power per workload: fp32 56.6 W (54.7-57.9), fp16 59.3 W (57.6-60.5), int8 61.7 W (60.0-63.0), DRAM 43.4 W (42.5-44.4)
+  - planned: keep, say one card (one run per workload)
+  - MMB-c: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the watt bands are aifoundry2's (aifoundry3's relative to it): aifoundry1's above-idle watts are reported with their idle clock
+- **matmul-sparse-testdrive-22** [results; KPI tiles; trace-read] Per W (board): 168 / 321 / 1,162 / 7 G(FL)OP/s per W
+  - planned: keep, say one card; after E1 state per card
+  - MMB-d: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; a comparison of aifoundry3 with aifoundry2: aifoundry1's per-W values and their ratio to aifoundry2 are reported
+- **matmul-sparse-testdrive-23** [results; board-power-during-the-benchmark] Per W above idle: 366 / 711 / 2,571 / 38, subtracting the idle just before each workload (30.6, 32.5, 33.8, 35.2 W)
+  - planned: keep, say one card
+  - MMB-c: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the watt bands are aifoundry2's (aifoundry3's relative to it): aifoundry1's above-idle watts are reported with their idle clock
+- **matmul-sparse-testdrive-24** [results; how-the-benchmark-works] fp32 tensor, every tile from DRAM: 0.31 TFLOP/s (3.2% of peak); effective read bandwidth about 78 GB/s (2 KB per op), in line with the 76 GB/s the memory-hierarchy probe streams
+  - planned: keep, say one card
+  - MMB-a: registered **PASS**, all cards **PASS** — holds on every card tested; DRAM cycles/op reported on aifoundry1's cards (its band is aifoundry2's)
+- **matmul-sparse-testdrive-25** [results; KPI tiles] Idle (median of the last 7 s of the 8 s before the first workload, die at 71 C): 30.6 W; about half of the load power, mostly die leakage at 71 C
+  - planned: keep, say one card
+  - MMB-c: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the watt bands are aifoundry2's (aifoundry3's relative to it): aifoundry1's above-idle watts are reported with their idle clock
+- **matmul-sparse-testdrive-29** [results] 529 cycles per 16x16x32 fp16 op (512 ideal), and 280 cycles per 16x16x64 int8 op (256 ideal) [B streamed through TenB]
+  - planned: keep, say one card
+  - ABLB-2a: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS); TenB int8 spread over cards {'int8_randn_tenb': 0.0, 'int8_ones_tenb': 0.0}
+  - MMB-a: registered **PASS**, all cards **PASS** — holds on every card tested; DRAM cycles/op reported on aifoundry1's cards (its band is aifoundry2's)
+- **matmul-sparse-testdrive-30** [results] The minions' cycle counters agree with [host-timed throughput] to within 0.1% (implied clock 0.600 GHz)
+  - planned: keep
+  - MMB-a: registered **PASS**, all cards **PASS** — holds on every card tested; DRAM cycles/op reported on aifoundry1's cards (its band is aifoundry2's)
+- **matmul-sparse-testdrive-31** [results] Launch-to-launch spread was below 0.03% in the L2 runs and 0.34% in the DRAM run
+  - planned: keep
+  - MMB-a: registered **PASS**, all cards **PASS** — holds on every card tested; DRAM cycles/op reported on aifoundry1's cards (its band is aifoundry2's)
+- **matmul-sparse-testdrive-32** [board-power-during-the-benchmark; how-the-benchmark-works] Board power was polled about 8 times a second (the reading itself changes once per service-processor pass, about every 133 ms)
+  - planned: keep
+  - TEL-S: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P_H - P_L 99% interval per card: {'aifoundry2': 'includes 0', 'aifoundry3': 'positive', 'aifoundry1-c1': 'includes 0'}; pages {'aifoundry2': 'as measured', 'aifoundry3': 'per sampler', 'aifoundry1-c1': 'as measured'} (CARD-DIFFERENT)
+- **matmul-sparse-testdrive-34** [caveats (one clock point)] Power rose about 3 W within each 12 s run as the chip warmed, so longer runs would read slightly worse
+  - planned: qualify: 'about 2 W (2.0-2.3 W from the first to the last 2 s; 3 W min to max) in the L2 runs, none in the DRAM run'
+  - MMB-f: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the L2 rise's sign (no band registered for them, as aifoundry3) and the DRAM ~0 clause
+- **matmul-sparse-testdrive-43** [setup-notes-for-running-it-yourself] it_test_code_loading --mode=pcie passes 3/3 on the card in 0.6 s; et-testdrive: all 64 harts of shire 0 print 'Hello World from hart N'
+  - planned: keep (functional check, not a measurement)
+  - MMB-b: registered **PASS**, all cards **PASS** — holds on every card tested; the smoke-test clause is registered for aifoundry3: reported on the other cards
+- **matmul-sparse-testdrive-V03** [How the benchmark works (Code)] It passed exact checks on the simulator on one shire in all modes, then on the card on all 32 shires, before the timed runs
+  - planned: keep (functional); E1 keeps the aifoundry3 mmbench-check log
+  - MMB-b: registered **PASS**, all cards **PASS** — holds on every card tested; the smoke-test clause is registered for aifoundry3: reported on the other cards
+
+## et-soc1-memory-anatomy (66 claims)
+- **anatomy-01** [top (byline)] aifoundry2's card · minion clock 600 MHz, NoC 400 MHz, LPDDR4X at 3,733 MT/s
+  - planned: keep (the byline already names aifoundry2)
+  - MEM-P5: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P5b_closed_minus_open 6 [4.42, 7.57] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a3 fails (5 passes: P5b_closed_minus_open 5.34 [5.23, 5.46] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a1c1 fails (5 passes: P5b_closed_minus_open 6.56 [6.15, 6.97] vs [10, 1
+- **anatomy-03** [top] For time, the answer is one cycle, for a single load.
+  - planned: keep, say one card
+  - MEM-P10: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2; P10_stamps_at_11_short fails in p5); a3 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2,p3,p4,p5; P10_raw_off_frac 0.136 [0.111, 0.161] vs [0.14, 0.172]; P10_stamps_at_11_short fails in p1); a1c1 fails (5 passes: P10_raw_fixed_all10 f
+- **anatomy-04** [top] You can put any one line in L1, L2, L3 or DRAM, time one load of it, and split the result into cache lookups, mesh hops, the memory controller and the DRAM row state.
+  - planned: keep, say one card
+  - MEM-P8: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P8_ladder_MEM 305 [295, 314] vs [303, 315]; P8b_open_frac_diff 0.313 [0.091, 0.534] vs [0.2, 0.8]; P8c_nonopen_resid 10.4 [4.65, 16.2] vs [6, 30]); a3 fails (5 passes: P8_ladder_MEM 305 [294, 315] vs [303, 315]; P8b_open_frac_diff 0.341 [0.123, 0.559] vs [0.2, 0.8]; P8c_non
+- **anatomy-05** [top] A model built from those parts, fitted with one constant and eight memory shire positions, matches each line's DRAM latency to within ±3 cycles for 97% of lines.
+  - planned: keep, say one card
+  - MEM-P2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+  - MEM-X2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-07** [top] A DRAM row stays open until a refresh or a load to another row of its bank closes it; no idle timer was seen to close it.
+  - planned: keep, say one card
+  - MEM-P6: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P6r_hit_no_refresh 0.258 [0.206, 0.311] vs [0.98, inf]); a3 fails (5 passes: P6r_hit_no_refresh 0.263 [0.234, 0.291] vs [0.98, inf]); a1c1 fails (5 passes: P6r_hit_no_refresh 0.357 [0.337, 0.378] vs [0.98, inf])
+- **anatomy-08** [top] The meters give a new value every 133 ms, so each energy number is an average over billions of identical loads.
+  - planned: keep
+  - TEL-S: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P_H - P_L 99% interval per card: {'aifoundry2': 'includes 0', 'aifoundry3': 'positive', 'aifoundry1-c1': 'includes 0'}; pages {'aifoundry2': 'as measured', 'aifoundry3': 'per sampler', 'aifoundry1-c1': 'as measured'} (CARD-DIFFERENT)
+- **anatomy-100** [a-timer-bug-worth-knowing] Inside a running kernel it catches most but not all of them (57 of 4,000 corrected timed no-ops read 138 or −118)
+  - planned: keep, say one card
+  - MEM-P10: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2; P10_stamps_at_11_short fails in p5); a3 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2,p3,p4,p5; P10_raw_off_frac 0.136 [0.111, 0.161] vs [0.14, 0.172]; P10_stamps_at_11_short fails in p1); a1c1 fails (5 passes: P10_raw_fixed_all10 f
+  - MEM-R3: registered **FAIL**, all cards **FAIL** — FAIL: a2 p1 e=10 0%, p2 e=10 0%, p3 e=10 0%, p4 e=10 0%, p5 e=None 2.1%; a3 p1 e=None 2.4%, p2 e=None 1.7%, p3 e=None 4.7%, p4 e=None 3%, p5 e=None 1.7%; a1c1 p1 e=None 0.65%, p2 e=None 0.8%, p3 e=None 0.65%, p4 e=10 0%, p5 e=None 0.12%
+- **anatomy-101** [a-timer-bug-worth-knowing] the seven lines about 128 cycles fast in §4 are such misses, picked out by taking the fastest of three loads.
+  - planned: keep
+  - MEM-P2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-102** [a-timer-bug-worth-knowing] Any code that times short intervals with hpmcounter3 on this card needs the same correction
+  - planned: keep, say one card ('on aifoundry2; aifoundry3 untested')
+  - MEM-P10: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2; P10_stamps_at_11_short fails in p5); a3 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2,p3,p4,p5; P10_raw_off_frac 0.136 [0.111, 0.161] vs [0.14, 0.172]; P10_stamps_at_11_short fails in p1); a1c1 fails (5 passes: P10_raw_fixed_all10 f
+- **anatomy-103** [what-the-chip-lets-you-see (Time)] Even corrected in the kernel, about 1 timed interval in 70 is still ±128 off
+  - planned: keep, say one card
+  - MEM-P10: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2; P10_stamps_at_11_short fails in p5); a3 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2,p3,p4,p5; P10_raw_off_frac 0.136 [0.111, 0.161] vs [0.14, 0.172]; P10_stamps_at_11_short fails in p1); a1c1 fails (5 passes: P10_raw_fixed_all10 f
+  - MEM-R3: registered **FAIL**, all cards **FAIL** — FAIL: a2 p1 e=10 0%, p2 e=10 0%, p3 e=10 0%, p4 e=10 0%, p5 e=None 2.1%; a3 p1 e=None 2.4%, p2 e=None 1.7%, p3 e=None 4.7%, p4 e=None 3%, p5 e=None 1.7%; a1c1 p1 e=None 0.65%, p2 e=None 0.8%, p3 e=None 0.65%, p4 e=10 0%, p5 e=None 0.12%
+- **anatomy-105** [what-the-chip-lets-you-see (Where a line lives)] Level code 1/2/3 leaves the line in L2 / L3 / memory, and code 0 does nothing.
+  - planned: keep, say one card
+  - MEM-P8: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P8_ladder_MEM 305 [295, 314] vs [303, 315]; P8b_open_frac_diff 0.313 [0.091, 0.534] vs [0.2, 0.8]; P8c_nonopen_resid 10.4 [4.65, 16.2] vs [6, 30]); a3 fails (5 passes: P8_ladder_MEM 305 [294, 315] vs [303, 315]; P8b_open_frac_diff 0.341 [0.123, 0.559] vs [0.2, 0.8]; P8c_non
+- **anatomy-106** [what-the-chip-lets-you-see (Where a line lives)] Asynchronous: a load issued straight after queues behind it, and may find its DRAM row still open (§2). A dirty line's evict costs a write-back (§2).
+  - planned: keep, say one card
+  - MEM-P8: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P8_ladder_MEM 305 [295, 314] vs [303, 315]; P8b_open_frac_diff 0.313 [0.091, 0.534] vs [0.2, 0.8]; P8c_nonopen_resid 10.4 [4.65, 16.2] vs [6, 30]); a3 fails (5 passes: P8_ladder_MEM 305 [294, 315] vs [303, 315]; P8b_open_frac_diff 0.341 [0.123, 0.559] vs [0.2, 0.8]; P8c_non
+- **anatomy-11** [top (KPI)] A DRAM load, typical: 299 cycles; 500 ns at 600 MHz: median of 4,500 loads from shire 0 to random lines.
+  - planned: keep, say one card
+  - MEM-P2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-110** [what-the-chip-lets-you-see (Board power)] 10 mW, new value every 133 ms. The host can ask 60 times a second, but the service processor refreshes the value once per loop pass.
+  - planned: keep
+  - TEL-S: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P_H - P_L 99% interval per card: {'aifoundry2': 'includes 0', 'aifoundry3': 'positive', 'aifoundry1-c1': 'includes 0'}; pages {'aifoundry2': 'as measured', 'aifoundry3': 'per sampler', 'aifoundry1-c1': 'as measured'} (CARD-DIFFERENT)
+- **anatomy-115** [what-would-split-it-further] The DVFS report has since separated static from dynamic power another way, as a leakage law in temperature (23.3 W at 80 °C).
+  - planned: keep
+  - IDLE-L: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — IDLE-LONG: aifoundry2 T_L - C, A80 - W, slope80 - W/C (0 passes, split not identified); aifoundry3 slope56 - W/C, offset - W (0 passes); reported, not tested: aifoundry1-c1 no long pass
+- **anatomy-12** [top (KPI)] Each mesh hop, round trip: 12 cycles
+  - planned: keep, say one card
+  - MEM-P1: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-121** [reproduce] The runs used arena base 0x8040000000, 1 GB aligned, so arena offsets are physical address bits.
+  - planned: keep; on aifoundry3 record the host's arena_base and check it is 1 GB aligned
+  - MEM-P10: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2; P10_stamps_at_11_short fails in p5); a3 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2,p3,p4,p5; P10_raw_off_frac 0.136 [0.111, 0.161] vs [0.14, 0.172]; P10_stamps_at_11_short fails in p1); a1c1 fails (5 passes: P10_raw_fixed_all10 f
+- **anatomy-13** [top (KPI)] Paid twice on a DRAM load: to the L3 home shire, then on to the memory shire.
+  - planned: keep, say one card
+  - MEM-P2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-16** [top (KPI)] Latency model ±3 cycles for 1,450 of 1,500 random lines (±5 for 1,490), from address bits alone, with its constants fitted to those lines.
+  - planned: keep, say one card
+  - MEM-P2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-17** [trace-one-load] Physical-address bits 10:6 give the home shire
+  - planned: keep, say one card
+  - MEM-P1: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-18** [trace-one-load] bits 8:6 give the memory shire, so the memory shire is always the home shire's low three bits
+  - planned: keep, say one card
+  - MEM-P3: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-19** [trace-one-load] (the fastest of three loads of each line; 83% of single loads)
+  - planned: keep, say one card
+  - MEM-P2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-20** [trace-one-load] for every home shire the model sits within 1 cycle of the measured median, as it should, since it was fitted to those loads
+  - planned: keep, say one card
+  - MEM-P2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-22** [trace-one-load] All loads were timed from shire 0; other requesting shires use the same 12 cycles per hop, which the on-chip communication report measured between every pair of shires.
+  - planned: keep; the explorer's other requesters are the model's extrapolation until anat-X2
+  - MEM-X2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-24** [trace-one-load (readout)] 345 cycles ... measured, 45 lines: 345
+  - planned: keep, say one card
+  - MEM-P2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-28** [the-ladder-one-load-at-a-time] A timed no-op and a timed L1 hit both read 10 raw; the offset moves every absolute number but none of the differences between levels.
+  - planned: qualify: the offset belongs to the 19 Sep build (the 22 Sep build reads an L1 hit 7 cycles slower); absolute load-to-use numbers are build-specific, differences between levels replicate
+  - MEM-P10: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2; P10_stamps_at_11_short fails in p5); a3 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2,p3,p4,p5; P10_raw_off_frac 0.136 [0.111, 0.161] vs [0.14, 0.172]; P10_stamps_at_11_short fails in p1); a1c1 fails (5 passes: P10_raw_fixed_all10 f
+- **anatomy-29** [the-ladder-one-load-at-a-time (chart)] Load-to-use latency by where the line was left ... in L1 5, evicted to L2 48, evicted to L3 171, evicted to memory 309, to memory fence no wait 307, no fence 365 (128 loads each; one L2 reading dropped as a counter glitch)
+  - planned: keep, say one card
+  - MEM-P8: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P8_ladder_MEM 305 [295, 314] vs [303, 315]; P8b_open_frac_diff 0.313 [0.091, 0.534] vs [0.2, 0.8]; P8c_nonopen_resid 10.4 [4.65, 16.2] vs [6, 30]); a3 fails (5 passes: P8_ladder_MEM 305 [294, 315] vs [303, 315]; P8b_open_frac_diff 0.341 [0.123, 0.559] vs [0.2, 0.8]; P8c_non
+- **anatomy-30** [the-ladder-one-load-at-a-time] The spread at L3 and DRAM is almost entirely distance on the mesh (§3, §4), not noise.
+  - planned: keep, say one card
+  - MEM-P1: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-31** [the-ladder-one-load-at-a-time] Evicting a dirty line and fencing, which is not a load, took 112–480 cycles (median 241), the write-back; one of 128 took 16, as fast as a clean one.
+  - planned: keep, say one card
+  - MEM-P8: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P8_ladder_MEM 305 [295, 314] vs [303, 315]; P8b_open_frac_diff 0.313 [0.091, 0.534] vs [0.2, 0.8]; P8c_nonopen_resid 10.4 [4.65, 16.2] vs [6, 30]); a3 fails (5 passes: P8_ladder_MEM 305 [294, 315] vs [303, 315]; P8b_open_frac_diff 0.341 [0.123, 0.559] vs [0.2, 0.8]; P8c_non
+- **anatomy-32** [the-ladder-one-load-at-a-time] none of the 256 loads timed straight after an evict to memory came back in L3 time: every one went to DRAM.
+  - planned: keep, say one card
+  - MEM-P8: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P8_ladder_MEM 305 [295, 314] vs [303, 315]; P8b_open_frac_diff 0.313 [0.091, 0.534] vs [0.2, 0.8]; P8c_nonopen_resid 10.4 [4.65, 16.2] vs [6, 30]); a3 fails (5 passes: P8_ladder_MEM 305 [294, 315] vs [303, 315]; P8b_open_frac_diff 0.341 [0.123, 0.559] vs [0.2, 0.8]; P8c_non
+- **anatomy-33** [the-ladder-one-load-at-a-time] With no fence, the load queues behind the evict (median 365, about 58 cycles above the §4 model).
+  - planned: keep, say one card
+  - MEM-P8: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P8_ladder_MEM 305 [295, 314] vs [303, 315]; P8b_open_frac_diff 0.313 [0.091, 0.534] vs [0.2, 0.8]; P8c_nonopen_resid 10.4 [4.65, 16.2] vs [6, 30]); a3 fails (5 passes: P8_ladder_MEM 305 [294, 315] vs [303, 315]; P8b_open_frac_diff 0.341 [0.123, 0.559] vs [0.2, 0.8]; P8c_non
+- **anatomy-34** [the-ladder-one-load-at-a-time] With a fence but no wait, 49 of the 128 loads find the row that the previous load of the same line opened still open, and read 6–12 cycles fast (median 10; minimum 213, on a line whose closed-row time is 225).
+  - planned: keep, say one card
+  - MEM-P8: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P8_ladder_MEM 305 [295, 314] vs [303, 315]; P8b_open_frac_diff 0.313 [0.091, 0.534] vs [0.2, 0.8]; P8c_nonopen_resid 10.4 [4.65, 16.2] vs [6, 30]); a3 fails (5 passes: P8_ladder_MEM 305 [294, 315] vs [303, 315]; P8b_open_frac_diff 0.341 [0.123, 0.559] vs [0.2, 0.8]; P8c_non
+- **anatomy-35** [the-ladder-one-load-at-a-time] For memory shires 3, 5 and 7 they instead read 10–30 cycles slower than a closed row: even after the fence, the load still waits behind the evict at the memory shire.
+  - planned: rewrite: 'With a fence but no wait, 49 of 128 loads still found the row open and read 6-12 cycles fast; that was common for memory shires 0, 1, 2 and 4 and rare for 3, 5, 6 and 7. The loads that missed it read a median 16 cycles above the closed-row time, whichever the memory shire: even after the fence, the load still waits a little behind the evict.' (one card, one run). anat-X1 now pre-registers both parts (P8b, P8c) instead of memory shire 7 alone.
+  - MEM-P8: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P8_ladder_MEM 305 [295, 314] vs [303, 315]; P8b_open_frac_diff 0.313 [0.091, 0.534] vs [0.2, 0.8]; P8c_nonopen_resid 10.4 [4.65, 16.2] vs [6, 30]); a3 fails (5 passes: P8_ladder_MEM 305 [294, 315] vs [303, 315]; P8b_open_frac_diff 0.341 [0.123, 0.559] vs [0.2, 0.8]; P8c_non
+- **anatomy-36** [the-ladder-one-load-at-a-time] With no fence that wait runs from about 10 cycles for memory shire 0 to 92–94 for memory shires 3 and 7.
+  - planned: keep, say one card; add 'median over all loads; 4 of memory shire 0's 16 loads found the row still open and did not wait'
+  - MEM-P8: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P8_ladder_MEM 305 [295, 314] vs [303, 315]; P8b_open_frac_diff 0.313 [0.091, 0.534] vs [0.2, 0.8]; P8c_nonopen_resid 10.4 [4.65, 16.2] vs [6, 30]); a3 fails (5 passes: P8_ladder_MEM 305 [294, 315] vs [303, 315]; P8b_open_frac_diff 0.341 [0.123, 0.559] vs [0.2, 0.8]; P8c_non
+- **anatomy-37** [the-ladder-one-load-at-a-time] With the fence and the 300-cycle wait, none read fast (...): 115 of 128 land within ±6 cycles of the §4 model, which is the closed-row time, and the rest are slower.
+  - planned: keep, say one card
+  - MEM-P8: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P8_ladder_MEM 305 [295, 314] vs [303, 315]; P8b_open_frac_diff 0.313 [0.091, 0.534] vs [0.2, 0.8]; P8c_nonopen_resid 10.4 [4.65, 16.2] vs [6, 30]); a3 fails (5 passes: P8_ladder_MEM 305 [294, 315] vs [303, 315]; P8b_open_frac_diff 0.341 [0.123, 0.559] vs [0.2, 0.8]; P8c_non
+- **anatomy-40** [the-ladder-one-load-at-a-time] Every load on this page ran at a steady 600 MHz (the refresh period in §5 matches the DRAM's refresh interval only at that clock).
+  - planned: keep
+  - MEM-P5: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P5b_closed_minus_open 6 [4.42, 7.57] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a3 fails (5 passes: P5b_closed_minus_open 5.34 [5.23, 5.46] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a1c1 fails (5 passes: P5b_closed_minus_open 6.56 [6.15, 6.97] vs [10, 1
+- **anatomy-41** [l3-110-cycles-plus-12-per-hop] Latency depends only on the home shire's Manhattan distance on the mesh: 110 + 12 × hops, within ±4 cycles for 1,498 of 1,500 lines (the median of three loads per line; 1,309 are within ±2).
+  - planned: keep, say one card
+  - MEM-P1: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-43** [l3-110-cycles-plus-12-per-hop] Each hop adds 12 cycles (20 ns) for the request and the reply.
+  - planned: keep, say one card
+  - MEM-P1: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-45** [l3-110-cycles-plus-12-per-hop] L2 hits in the same run come in two flavours: 37 cycles when the line is still in the bank's 8-entry read buffer, and 48 from the array.
+  - planned: keep, say one card
+  - MEM-P9: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-46** [the-memory-shire-leg-91-cycles-plus-12-per-hop] Every one of these loads found its row closed and paid an activate. ... home shire 0's lines read 225, the refresh series' closed-row time ... (226), not its open-row time (215); and no line read 11 cycles fast.
+  - planned: keep, say one card
+  - MEM-P6: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P6r_hit_no_refresh 0.258 [0.206, 0.311] vs [0.98, inf]); a3 fails (5 passes: P6r_hit_no_refresh 0.263 [0.234, 0.291] vs [0.98, inf]); a1c1 fails (5 passes: P6r_hit_no_refresh 0.357 [0.337, 0.378] vs [0.98, inf])
+- **anatomy-47** [the-memory-shire-leg-91-cycles-plus-12-per-hop] for all 64 lines tested, 16 DRAM loads raised the read count of the shire named by those bits, by 16 for 60 lines and by 15 for 4. The other seven shires' counts didn't move (one stray count of 1 in 448).
+  - planned: keep, say one card
+  - MEM-P3: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-48** [the-memory-shire-leg-91-cycles-plus-12-per-hop (table note)] For 4 lines it rose by 15: one of their 16 loads was not counted, and this run does not show why.
+  - planned: keep (stated as unexplained)
+  - MEM-P3: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-49** [the-memory-shire-leg-91-cycles-plus-12-per-hop] Assuming each memory shire hangs one hop outside the grid (...; moving all eight one hop further out fits equally well with a constant of 79), the best fit puts memory shires 0–3 above the grid and 4–7 below it, at x = 1…4. The total squared error is 2 cycles² over 32 home/memory-shire pairs.
+  - planned: qualify: M2's position is not determined (x = 3 or x = 5 above the grid, or (6, 0), fit equally: its four home shires are all in column x = 4); say one card
+  - MEM-P2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-50** [the-memory-shire-leg-91-cycles-plus-12-per-hop] latency = 110 + 12·hops(requester → L3 home) + 91 + 12·hops(L3 home → memory shire)
+  - planned: keep, say one card; requesters other than shire 0 untested (anat-X2)
+  - MEM-P2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+  - MEM-X2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-51** [the-memory-shire-leg-91-cycles-plus-12-per-hop] the model's error is within ±3 cycles for 1,450 of 1,500 lines and within ±5 for 1,490 (of all 4,500 single loads, 3,721 (83%) are within ±3: taking each line's fastest drops refresh waits and a few cycles of jitter, though it keeps the timer glitches).
+  - planned: keep, say one card
+  - MEM-P2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-52** [the-memory-shire-leg-91-cycles-plus-12-per-hop] The other ten lines are outliers: seven read about 128 cycles short (counter glitches the correction missed, §7), two are 44 and 71 cycles slow (probably refresh), and one is 29 cycles fast.
+  - planned: keep
+  - MEM-P2: registered **PASS**, all cards **PASS** — PASS: a2 holds (5 passes); a3 holds (5 passes); a1c1 holds (5 passes)
+- **anatomy-54** [which-address-bits-share-a-row] When B shares A's row, or sits in another bank or channel, it rides along and arrives with A (~300 cycles).
+  - planned: keep, say one card
+  - MEM-P4: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — CARD-DIFFERENT: a2 holds (5 passes); a3 fails (5 passes: P4_row_conflict_extra 37.4 [31.3, 43.5] vs [32, 48]); a1c1 holds (5 passes)
+- **anatomy-55** [which-address-bits-share-a-row] When B is in the same bank but a different row, the controller must wait for A's row to finish before opening B's: +40 cycles (67 ns) for every bit from 18 up.
+  - planned: keep, say one card
+  - MEM-P4: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — CARD-DIFFERENT: a2 holds (5 passes); a3 fails (5 passes: P4_row_conflict_extra 37.4 [31.3, 43.5] vs [32, 48]); a1c1 holds (5 passes)
+- **anatomy-57** [which-address-bits-share-a-row] Issued one after the other instead, B pays about 9 cycles more (median) when it needs another row of A's bank (the precharge; tRP = 18 ns = 11 cycles), saves about 12 when it shares A's row, and costs nothing extra in another bank.
+  - planned: keep, say one card
+  - MEM-P4: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — CARD-DIFFERENT: a2 holds (5 passes); a3 fails (5 passes: P4_row_conflict_extra 37.4 [31.3, 43.5] vs [32, 48]); a1c1 holds (5 passes)
+- **anatomy-58** [refresh-caught-in-the-act] folding the timestamps on a period of 2,325 cycles = 3.88 µs, shows LPDDR4X refresh (the controller is programmed for one every 3.87 µs, tREFI)
+  - planned: keep, say one card
+  - MEM-P5: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P5b_closed_minus_open 6 [4.42, 7.57] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a3 fails (5 passes: P5b_closed_minus_open 5.34 [5.23, 5.46] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a1c1 fails (5 passes: P5b_closed_minus_open 6.56 [6.15, 6.97] vs [10, 1
+- **anatomy-59** [refresh-caught-in-the-act] A load that arrives while refresh is running waits up to 210 extra cycles (350 ns). That's close to the 281 ns all-bank refresh time, and the wait shrinks as the load arrives later in the refresh window.
+  - planned: keep, say one card
+  - MEM-P5: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P5b_closed_minus_open 6 [4.42, 7.57] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a3 fails (5 passes: P5b_closed_minus_open 5.34 [5.23, 5.46] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a1c1 fails (5 passes: P5b_closed_minus_open 6.56 [6.15, 6.97] vs [10, 1
+- **anatomy-60** [refresh-caught-in-the-act] Refresh also closes the open row. The next load pays an activate, 215 → 226 cycles. That's 11 cycles = 18 ns, exactly tRCD
+  - planned: keep, say one card; write '11-12 cycles (about 19 ns), consistent with tRCD (18 ns)' rather than 'exactly'
+  - MEM-P5: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P5b_closed_minus_open 6 [4.42, 7.57] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a3 fails (5 passes: P5b_closed_minus_open 5.34 [5.23, 5.46] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a1c1 fails (5 passes: P5b_closed_minus_open 6.56 [6.15, 6.97] vs [10, 1
+- **anatomy-61** [refresh-caught-in-the-act] With a fixed loop period of 576 cycles, a loop locks onto refresh: every fourth load is the slow one, and none ever lands inside the refresh itself.
+  - planned: keep, say one card
+  - MEM-P5: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P5b_closed_minus_open 6 [4.42, 7.57] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a3 fails (5 passes: P5b_closed_minus_open 5.34 [5.23, 5.46] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a1c1 fails (5 passes: P5b_closed_minus_open 6.56 [6.15, 6.97] vs [10, 1
+- **anatomy-62** [refresh-caught-in-the-act] Of those 576 cycles, about 360 are the probe's own: it fetches each of its four ops (evict, fence, time stamp, timed load) from the scratchpad, about 90 cycles apiece.
+  - planned: keep, say one card
+  - MEM-P5: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P5b_closed_minus_open 6 [4.42, 7.57] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a3 fails (5 passes: P5b_closed_minus_open 5.34 [5.23, 5.46] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a1c1 fails (5 passes: P5b_closed_minus_open 6.56 [6.15, 6.97] vs [10, 1
+- **anatomy-63** [how-long-a-row-stays-open] Open-row hits save 11 cycles.
+  - planned: keep, say one card
+  - MEM-P5: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P5b_closed_minus_open 6 [4.42, 7.57] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a3 fails (5 passes: P5b_closed_minus_open 5.34 [5.23, 5.46] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a1c1 fails (5 passes: P5b_closed_minus_open 6.56 [6.15, 6.97] vs [10, 1
+- **anatomy-64** [how-long-a-row-stays-open] In the refresh series, 96% of loads whose previous load came after the last refresh were row hits (3,556 of 3,713, after 450–2,000 idle cycles), against 4% of those with a refresh in between (201 of 5,382).
+  - planned: keep, say one card; optionally note the split is conservative
+  - MEM-P6: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P6r_hit_no_refresh 0.258 [0.206, 0.311] vs [0.98, inf]); a3 fails (5 passes: P6r_hit_no_refresh 0.263 [0.234, 0.291] vs [0.98, inf]); a1c1 fails (5 passes: P6r_hit_no_refresh 0.357 [0.337, 0.378] vs [0.98, inf])
+- **anatomy-65** [how-long-a-row-stays-open] Between the two loads the program spends about 180 cycles fetching its next ops from the scratchpad, on top of the first load's ~300 cycles, and 7% of loads land inside a refresh.
+  - planned: keep, say one card
+  - MEM-P5: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P5b_closed_minus_open 6 [4.42, 7.57] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a3 fails (5 passes: P5b_closed_minus_open 5.34 [5.23, 5.46] vs [10, 13]; P5_locked_max fails in p1,p2,p3,p4,p5); a1c1 fails (5 passes: P5b_closed_minus_open 6.56 [6.15, 6.97] vs [10, 1
+- **anatomy-66** [how-long-a-row-stays-open] Refresh alone then predicts about 72% hits with no added idle time, 29% after 1,000 cycles and 7% after 1,500; the pairs gave 67%, 23% and 5% (60 pairs each).
+  - planned: keep, say one card
+  - MEM-P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — CARD-DIFFERENT: a2 holds (5 passes); a3 fails (5 passes: P7_late_hits fails in p1,p4,p5); a1c1 holds (5 passes)
+- **anatomy-67** [how-long-a-row-stays-open (chart caption)] From 3,000 to 20,000 cycles, 1 of 300 pairs found the row open.
+  - planned: keep
+  - MEM-P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — CARD-DIFFERENT: a2 holds (5 passes); a3 fails (5 passes: P7_late_hits fails in p1,p4,p5); a1c1 holds (5 passes)
+- **anatomy-68** [how-long-a-row-stays-open (chart caption)] The hollow point of the no-refresh series (1,750–2,250 idle cycles) is uncertain: ... whether a refresh fell in between depends on exactly where the refresh starts.
+  - planned: keep
+  - MEM-P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — CARD-DIFFERENT: a2 holds (5 passes); a3 fails (5 passes: P7_late_hits fails in p1,p4,p5); a1c1 holds (5 passes)
+- **anatomy-69** [how-long-a-row-stays-open (chart takeaway)] One closer: refresh (or a conflict). With no refresh in between the row stays open; with one, it is closed; the random-row pairs fall where refresh alone puts them.
+  - planned: keep, say one card
+  - MEM-P6: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P6r_hit_no_refresh 0.258 [0.206, 0.311] vs [0.98, inf]); a3 fails (5 passes: P6r_hit_no_refresh 0.263 [0.234, 0.291] vs [0.98, inf]); a1c1 fails (5 passes: P6r_hit_no_refresh 0.357 [0.337, 0.378] vs [0.98, inf])
+- **anatomy-94** [a-timer-bug-worth-knowing] 16% of back-to-back read pairs (320 by +138 and 314 by −118, of 4,000) differed from the expected 10 cycles.
+  - planned: keep, say one card
+  - MEM-P10: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2; P10_stamps_at_11_short fails in p5); a3 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2,p3,p4,p5; P10_raw_off_frac 0.136 [0.111, 0.161] vs [0.14, 0.172]; P10_stamps_at_11_short fails in p1); a1c1 fails (5 passes: P10_raw_fixed_all10 f
+- **anatomy-95** [a-timer-bug-worth-knowing] a read whose low 7 bits are 0–10 is 128 too small, because the carry into bit 7 lands 11 cycles late.
+  - planned: keep, say one card
+  - MEM-P10: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2; P10_stamps_at_11_short fails in p5); a3 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2,p3,p4,p5; P10_raw_off_frac 0.136 [0.111, 0.161] vs [0.14, 0.172]; P10_stamps_at_11_short fails in p1); a1c1 fails (5 passes: P10_raw_fixed_all10 f
+- **anatomy-96** [a-timer-bug-worth-knowing] A simulation of the open RTL (...) shows the mechanism, with a 12-cycle window where this card shows 11: twelve counters share one adder that folds overflows in round-robin, and a read ignores the pending overflow (hub §3).
+  - planned: keep
+  - MEM-R1: registered **FAIL**, all cards **FAIL** — FAIL: a2 15 launches, 8 exceptions (p1/t_raw: no single window 0..e fits every pair); a3 15 launches, 15 exceptions (p1/t_raw: no single window 0..e fits every pair); a1c1 15 launches, 13 exceptions (p1/t_raw: no single window 0..e fits every pair)
+- **anatomy-99** [a-timer-bug-worth-knowing] Adding 128 to any read with low bits 0–10 does, for all 4,000 pairs.
+  - planned: keep, say one card
+  - MEM-P10: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2; P10_stamps_at_11_short fails in p5); a3 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2,p3,p4,p5; P10_raw_off_frac 0.136 [0.111, 0.161] vs [0.14, 0.172]; P10_stamps_at_11_short fails in p1); a1c1 fails (5 passes: P10_raw_fixed_all10 f
+- **anatomy-V01** [the-ladder-one-load-at-a-time] Values are load-to-use cycles: the raw reading minus 5, an offset chosen so an L1 hit reads the 5 cycles the memory-hierarchy report's pointer chase measured.
+  - planned: keep; it is load-bearing: every absolute latency on the page (299, 110, 48, 91, 225) is raw - 5 on this assumption, while every difference between levels is independent of it
+  - MEM-P10: registered **FAIL**, all cards **FAIL** — FAIL: a2 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2; P10_stamps_at_11_short fails in p5); a3 fails (5 passes: P10_raw_fixed_all10 fails in p1,p2,p3,p4,p5; P10_raw_off_frac 0.136 [0.111, 0.161] vs [0.14, 0.172]; P10_stamps_at_11_short fails in p1); a1c1 fails (5 passes: P10_raw_fixed_all10 f
+
+## et-soc1-memory-hierarchy (20 claims)
+- **memhier-onchip-01** [top (KPI) / et-soc-1-measured] a load hits L1 in 8.8 ns ... 5.25 cycles
+  - planned: keep, say one card
+  - LAT-M1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-02** [top (KPI) / et-soc-1-measured] the shire's L2 in 78 ns ... 47 cycles
+  - planned: keep, say one card
+  - LAT-M1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-04** [top / what-the-numbers-say item 1] the firmware leaves each hart only 512 B of L1 data cache ... The chase's first knee sits exactly at 512 B
+  - planned: keep, say one card
+  - LAT-M1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-05** [top / et-soc-1-measured (DRAM row)] DRAM latency is about 490 ns at the 600 MHz base clock, a fifth more than the A100's HBM (405 ns); 287-297 cycles (479-495 ns)
+  - planned: keep, say one card
+  - LAT-M2: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-08** [top (KPI) / et-soc-1-measured (L3 row)] L3 ~280 ns: 159-169 cycles at 600 MHz (265-282 ns), depending on the requesting shire
+  - planned: keep, say one card
+  - LAT-M2: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-13** [scratchpad-latency-across-the-mesh (scp-read, scp-map)] From shire 0: 31 remote loads, 112-220 cycles (186-366 ns); map from 0: 24 186 ns ... 31 366 ns
+  - planned: keep, say one card
+  - LAT-M3: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-16** [et-soc-1-measured (L1..DRAM energy column); what-the-numbers-say item 3] Energy per byte 0.77 / 2.51 / 2.52 / 6.65 / 10.5 / 122 pJ (energy manual section 4)
+  - planned: keep
+  - RL-g (L1 level a2 - a3): registered **PASS**, all cards **PASS** — L1 level: no pair of cards differs; pooled 0.746 pJ/B (per card a1c1 0.721, a2 0.767, a3 0.750)
+  - RL-g (own-scratchpad level a3 - a2): registered **PASS**, all cards **PASS** — own-scratchpad level (both contents): no pair of cards differs; pooled 3.326 pJ/B (per card a1c1 3.789, a2 3.119, a3 3.071)
+  - RL-g (L2 - own scratchpad): registered **PASS**, all cards **PASS** — L2 - own scratchpad: the same within +-10% on every card [confounded by the contents arm; see RL-h]
+- **memhier-onchip-18** [et-soc-1-measured (L1 row)] Hart 1 is the same size but pays +3 cycles on misses
+  - planned: keep, say one card
+  - LAT-M1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-20** [et-soc-1-measured (read buffer row); what-the-numbers-say item 2] There is a 2 KB level between L1 and L2 ... Working sets up to 2 KB hit it at 36 cycles, 11 fewer than the L2 array. That is the same 11-cycle difference the shire cache spec gives (10 vs 21 shire cycles).
+  - planned: keep, say one card
+  - LAT-M1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-23** [et-soc-1-measured (scratchpad local row); what-the-numbers-say item 3] L2 scratchpad: same SRAM, latency ... as L2; also cached in L1 and the read buffer; the same 47-cycle latency, goes through the read buffer and L1
+  - planned: keep, say one card
+  - LAT-M1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-26** [et-soc-1-measured (scratchpad remote row)] remote scratchpad 112-220 cycles (186-366 ns); 20 ns per mesh hop (12 cycles at 600 MHz, 16 at 800 MHz), the same in both directions
+  - planned: keep, say one card
+  - LAT-M3: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-34** [what-the-numbers-say item 3] [the L2 scratchpad] at a pinned 600 MHz costs the same energy per byte (2.51 against 2.52 pJ/B, energy manual section 4)
+  - planned: state per card: 'within 10%: on aifoundry2 the L2 costs 2.6 against the scratchpad's 2.4 pJ/B, on aifoundry3 2.4 against 2.6; the buffers' contents were not controlled'
+  - RL-g (L1 level a2 - a3): registered **PASS**, all cards **PASS** — L1 level: no pair of cards differs; pooled 0.746 pJ/B (per card a1c1 0.721, a2 0.767, a3 0.750)
+  - RL-g (own-scratchpad level a3 - a2): registered **PASS**, all cards **PASS** — own-scratchpad level (both contents): no pair of cards differs; pooled 3.326 pJ/B (per card a1c1 3.789, a2 3.119, a3 3.071)
+  - RL-g (L2 - own scratchpad): registered **PASS**, all cards **PASS** — L2 - own scratchpad: the same within +-10% on every card [confounded by the contents arm; see RL-h]
+  - RL-h (scp-local level follows the prefill): registered **PASS**, all cards **CARD-DIFFERENT** — scp-local level in the zeros band (1.7-2.3) on zeros passes and the random band (3.7-4.7) on random passes: holds on a2, a3 only, not on a1c1
+  - RL-h (a3 - a2 at equal contents): registered **PASS**, all cards **CARD-DIFFERENT** — at equal contents: some cards still differ
+- **memhier-onchip-36** [what-the-numbers-say item 4] A remote scratchpad load costs 66 minion cycles plus 56 ns plus 20 ns per mesh hop: 186-366 ns at 600 MHz over 1-10 hops
+  - planned: keep, say one card
+  - LAT-M3: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-39** [what-the-numbers-say item 4] Anatomy's 110 cycles + 12 per hop, averaged over the slices (4.2-5.0 hops), predicts 160-170 cycles, and the chases measured 159-169 (265-282 ns) at 600 MHz
+  - planned: keep, say one card
+  - LAT-M2: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-44** [what-the-numbers-say item 5] 72 cycles + 61 ns + 20 ns per hop gives every requester's L3 latency here within a cycle at 600 MHz
+  - planned: keep, say one card
+  - LAT-M2: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-50** [what-the-numbers-say item 6] (the on-chip communication runs on this card, the same day, measured 2.7 W for one hart per minion in an integer loop)
+  - planned: replace '2.7 W' with '2.3-2.7 W (18 and 23 September, both cards)' or drop the parenthesis and cite the manual's value
+  - RL-X3 ((a) spin - pair): registered **PASS**, all cards **PASS** — spin - pair > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - neigh): registered **FAIL**, all cards **FAIL** — spin - neigh > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire): registered **FAIL**, all cards **FAIL** — spin - shire > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire1): registered **PASS**, all cards **PASS** — spin - xshire1 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire16): registered **INSUFFICIENT**, all cards **INSUFFICIENT** — spin - xshire16 > 0 at 99% (less than spinning): fewer than 3 kept repeats on a1c1 (n=0), a2 (n=0), a3 (n=0)
+  - RL-X3 ((a) spin - xshire8): registered **PASS**, all cards **PASS** — spin - xshire8 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire2): registered **PASS**, all cards **PASS** — spin - xshire2 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire4): registered **PASS**, all cards **PASS** — spin - xshire4 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire6): registered **PASS**, all cards **PASS** — spin - xshire6 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - shire-c4 > 0 at 99% (less than spinning): holds on a1c1, a3 only, not on a2
+  - RL-X3 ((a) spin - xshire1-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - xshire1-c4 > 0 at 99% (less than spinning): holds on a3 only, not on a1c1, a2
+  - RL-X3 ((d) nocbench one-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) nocbench one-hart spin W over idle in 2.2-2.6 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((d) memhier two-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) memhier two-hart spin W over idle in 2.3-2.8 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((e) inside-shire ring W above mesh-ring W): registered **PASS**, all cards **PASS** — inside minus across W > 0 in every pass: holds on every card (a1c1, a2, a3)
+  - RL-X3 ((e) scp-remote cheaper than s->s+8 and s->s+16): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — ring minus scp-remote pJ/B > 0 in every pass: holds on a2 only, not on a1c1, a3
+- **memhier-onchip-51** [what-the-numbers-say item 6] this page's two-hart spin loop added 12 W, and that floor was inside every energy per byte measured here
+  - planned: keep
+  - RL-X3 ((a) spin - pair): registered **PASS**, all cards **PASS** — spin - pair > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - neigh): registered **FAIL**, all cards **FAIL** — spin - neigh > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire): registered **FAIL**, all cards **FAIL** — spin - shire > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire1): registered **PASS**, all cards **PASS** — spin - xshire1 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire16): registered **INSUFFICIENT**, all cards **INSUFFICIENT** — spin - xshire16 > 0 at 99% (less than spinning): fewer than 3 kept repeats on a1c1 (n=0), a2 (n=0), a3 (n=0)
+  - RL-X3 ((a) spin - xshire8): registered **PASS**, all cards **PASS** — spin - xshire8 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire2): registered **PASS**, all cards **PASS** — spin - xshire2 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire4): registered **PASS**, all cards **PASS** — spin - xshire4 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire6): registered **PASS**, all cards **PASS** — spin - xshire6 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - shire-c4 > 0 at 99% (less than spinning): holds on a1c1, a3 only, not on a2
+  - RL-X3 ((a) spin - xshire1-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - xshire1-c4 > 0 at 99% (less than spinning): holds on a3 only, not on a1c1, a2
+  - RL-X3 ((d) nocbench one-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) nocbench one-hart spin W over idle in 2.2-2.6 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((d) memhier two-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) memhier two-hart spin W over idle in 2.3-2.8 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((e) inside-shire ring W above mesh-ring W): registered **PASS**, all cards **PASS** — inside minus across W > 0 in every pass: holds on every card (a1c1, a2, a3)
+  - RL-X3 ((e) scp-remote cheaper than s->s+8 and s->s+16): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — ring minus scp-remote pJ/B > 0 in every pass: holds on a2 only, not on a1c1, a3
+- **memhier-onchip-52** [what-the-numbers-say item 6] At a pinned 600 MHz the busy-core floor is most of an L1 read, but only a fifth to a third of an L2, L3 or DRAM stream.
+  - planned: keep
+  - RL-X3 ((a) spin - pair): registered **PASS**, all cards **PASS** — spin - pair > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - neigh): registered **FAIL**, all cards **FAIL** — spin - neigh > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire): registered **FAIL**, all cards **FAIL** — spin - shire > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire1): registered **PASS**, all cards **PASS** — spin - xshire1 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire16): registered **INSUFFICIENT**, all cards **INSUFFICIENT** — spin - xshire16 > 0 at 99% (less than spinning): fewer than 3 kept repeats on a1c1 (n=0), a2 (n=0), a3 (n=0)
+  - RL-X3 ((a) spin - xshire8): registered **PASS**, all cards **PASS** — spin - xshire8 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire2): registered **PASS**, all cards **PASS** — spin - xshire2 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire4): registered **PASS**, all cards **PASS** — spin - xshire4 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire6): registered **PASS**, all cards **PASS** — spin - xshire6 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - shire-c4 > 0 at 99% (less than spinning): holds on a1c1, a3 only, not on a2
+  - RL-X3 ((a) spin - xshire1-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - xshire1-c4 > 0 at 99% (less than spinning): holds on a3 only, not on a1c1, a2
+  - RL-X3 ((d) nocbench one-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) nocbench one-hart spin W over idle in 2.2-2.6 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((d) memhier two-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) memhier two-hart spin W over idle in 2.3-2.8 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((e) inside-shire ring W above mesh-ring W): registered **PASS**, all cards **PASS** — inside minus across W > 0 in every pass: holds on every card (a1c1, a2, a3)
+  - RL-X3 ((e) scp-remote cheaper than s->s+8 and s->s+16): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — ring minus scp-remote pJ/B > 0 in every pass: holds on a2 only, not on a1c1, a3
+- **memhier-onchip-53** [how-it-was-measured] Each chase's final pointer is checked against a host-side walk of the same chain, and every one of the 227 chases passed.
+  - planned: keep
+  - LAT-M1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **memhier-onchip-V02** [scratchpad-latency-across-the-mesh (scp-map caption, scp-read)] 159-366 ns, four rows, each at its own clock; from shire 0 ... nearest line: 31 at 600 MHz
+  - planned: keep, say one card
+  - LAT-M2: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+
+## et-soc1-on-chip-communication (29 claims)
+- **memhier-onchip-105** [a-trap-one-ready-flag-per-minion] With that rule, TensorSend works across all 496 shire pairs; all 3,699 pair and stream measurements, all 40 tree and 4 barrier runs, and every ring launch of the energy runs passed
+  - planned: keep, say one card; say that 1 KB ring launches were checked for completion, 128 B ones for data
+  - LAT-N4: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-107** [what-it-means-for-systolic-and-wavefront-designs] a 32-minion FLB plus credit barrier is 237 cycles against 68-114 per hop; 432 cycles for a 32-minion reduce and broadcast
+  - planned: keep, say one card
+  - LAT-N1: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-110** [how-it-was-measured (energy)] the meter itself refreshes about every 133 ms on this card
+  - planned: keep
+  - TEL-S: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P_H - P_L 99% interval per card: {'aifoundry2': 'includes 0', 'aifoundry3': 'positive', 'aifoundry1-c1': 'includes 0'}; pages {'aifoundry2': 'as measured', 'aifoundry3': 'per sampler', 'aifoundry1-c1': 'as measured'} (CARD-DIFFERENT)
+- **memhier-onchip-112** [caveats] The deltas are small (1.6-2.5 W on a 34 W card, 18 September), and the per-hop slope's r2 is 0.95, so treat the mesh numbers as +-20%.
+  - planned: qualify: '+-20% for each configuration's energy; the per-hop slope is 1.3 (aifoundry3) to 2.3 (aifoundry2) pJ/B per hop, known to about +-50%'
+  - RL-a (mesh slope (five 1 KB xshire rings)): registered **PASS**, all cards **PASS** — mesh slope: no pair of cards differs; pooled 1.747 pJ/B/hop (per card a1c1 1.736, a2 1.780, a3 1.726)
+- **memhier-onchip-60** [top (KPI) / inside-a-shire-only-the-tree-edges-are-fast] 68 cycles (113 ns) for 28 pairs per shire: 0-1, 0-2, 0-4, 2-3, 4-5, 4-6 and 6-7 in every neighbourhood; 114-115 cycles (190 ns) for all 468 others. Being in the same neighbourhood doesn't help.
+  - planned: keep, say one card
+  - LAT-N1: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-62** [top (KPI) / where-the-shires-are-a-6-6-mesh / latency-grows-with-distance-except-through-memory] each mesh hop adds 20 ns; 250 ns + 20 ns/hop across shires, r2 0.9999 over 496 pairs; Every round trip between two shires is 150 + 12.02 x (Manhattan distance) cycles, with a worst residual of 1.1 cycles
+  - planned: keep, say one card
+  - LAT-N2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-63** [where-the-shires-are-a-6-6-mesh (map)] map colours from shire 0: 24 272 ns ... 31 452 ns
+  - planned: keep, say one card
+  - LAT-N2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-64** [where-the-shires-are-a-6-6-mesh / what-the-numbers-say item 1] All 12 restarts of a search from random layouts, without his map, found the same distances. This card has marty1885's shire layout.
+  - planned: keep, say one card; add the indirect aifoundry3 evidence
+  - LAT-N2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-66** [where-the-shires-are-a-6-6-mesh / what-the-numbers-say item 1] The four grey squares ... route traffic too; Pure Manhattan distance means the routes are shortest paths through all 36 cells, the four non-compute ones included.
+  - planned: qualify: say that (5,3) is shown to route traffic; the three cells of column 0 are never on a forced path, so the data cannot tell
+  - LAT-N2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-68** [latency-grows-with-distance-except-through-memory (dist-read)] The TensorSend and credit round trips each rise by 20 ns per hop; credits 246 + 20.4 ns per hop; Across shires the credit and TensorSend round trips almost coincide.
+  - planned: keep, say one card
+  - LAT-N2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-70** [latency-grows-with-distance-except-through-memory / every-primitive-against-a-gpu] It costs 590-1,150 ns (median 870 across shires) whatever the distance; It doesn't depend on distance.
+  - planned: qualify: 'no measurable dependence on distance (at most ~15 ns per hop), one card'
+  - LAT-N3: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-71** [every-primitive-against-a-gpu (prim-table)] Per 32 B register add 2.3-4.6 cycles each way; each path has a fixed cost per message (40, 86, 135 and 224 cycles) plus a cost per register (2.3, 4.0, 3.0 and 4.6 cycles)
+  - planned: keep, say one card
+  - LAT-N4: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-72** [every-primitive-against-a-gpu / what-the-numbers-say item 4] Combine on arrival +0 cycles ... identical to a plain move for 32 B and 1 KB messages; Combining in the channel is free.
+  - planned: keep, say one card
+  - LAT-N4: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-73** [top (KPI) / every-primitive-against-a-gpu / reduction-trees] A tree allreduce over all 1,024 minions takes 2.3 us; 0.72 us within a shire; All 32 shires can run their own trees at once without slowing each other.
+  - planned: keep, say one card
+  - LAT-N4: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-74** [every-primitive-against-a-gpu] Credit counters (FCC) 200 ns ... Measured with the blocking wait inside a shire, and polled across shires.
+  - planned: keep, say one card
+  - LAT-N2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-75** [every-primitive-against-a-gpu / what-the-numbers-say item 5] Fast local barrier + credits 395 ns (all 32 shires at once); Chip-wide barrier 8.3 us (atomics + credits) or 2.3 us (allreduce tree)
+  - planned: keep, say one card
+  - LAT-N4: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-76** [what-the-numbers-say item 5] The hardware trees are the fastest way to synchronise the whole chip. A 1,024-minion allreduce of 32 B takes 2.3 us, against 8.3 us for a barrier made from global atomics and credits.
+  - planned: keep, say one card
+  - LAT-N4: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-78** [message-size-and-bandwidth (links-table)] One link: 5.3/7.2 (fast local), 2.9/4.1 (crossbar), 2.7/4.7 (1 hop), 1.8/2.9 GB/s (10 hops) for 1 KB/4 KB messages
+  - planned: keep, say one card
+  - LAT-N4: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-79** [message-size-and-bandwidth / latency-grows-with-distance-except-through-memory (1 KB view)] 1 KB round trips between all 496 shire pairs add 12 cycles per hop up to 5 hops and 27-36 per hop beyond
+  - planned: keep, say one card
+  - LAT-N2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-82** [reduction-trees] Each level adds about one round trip between the minions it pairs: 68 cycles (levels 0-2), 114 (levels 3-4), and 156-235 over the mesh (levels 5-9), where the slowest branch sets the pace.
+  - planned: keep, say one card
+  - LAT-N1: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-83** [top (KPI) / energy-per-byte-moved / what-the-numbers-say item 7] Messaging costs 0.7-2.1 pJ per byte inside a shire with 1 KB messages (3.3 with 128 B), busy cores included (re-measured on two cards); 0.7-18 pJ per byte
+  - planned: keep
+  - RL-c (shire-c4 - shire): registered **PASS**, all cards **PASS** — shire-c4 - shire > 0 at 99%: holds on aifoundry3, where the item is decided (the other cards are reported)
+  - RL-c (xshire1-c4 - xshire1): registered **PASS**, all cards **PASS** — xshire1-c4 - xshire1 > 0 at 99%: holds on aifoundry3, where the item is decided (the other cards are reported)
+- **memhier-onchip-84** [top (KPI) / energy-per-byte-moved (energy-read)] 9.3 + 1.7 pJ per mean hop across the mesh (two cards); fits 9.28 + 1.71 pJ/B per mean hop (r2 0.95, 23 September, two cards)
+  - planned: keep, state per card
+  - RL-a (mesh slope (five 1 KB xshire rings)): registered **PASS**, all cards **PASS** — mesh slope: no pair of cards differs; pooled 1.747 pJ/B/hop (per card a1c1 1.736, a2 1.780, a3 1.726)
+- **memhier-onchip-88** [energy-per-byte-moved (energy-read) / caveats] less than the 2.71 W of the same cores spinning (18 September); Every configuration drew less power over idle than the same cores spinning with no messages
+  - planned: drop 'less than the same cores spinning' for rings inside a shire; say 'about as much as the same cores spinning (within 0.3 W); 1 KB rings across the mesh draw 0.2-1.2 W less'; X3 settles it with 3 passes per card
+  - RL-X3 ((a) spin - pair): registered **PASS**, all cards **PASS** — spin - pair > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - neigh): registered **FAIL**, all cards **FAIL** — spin - neigh > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire): registered **FAIL**, all cards **FAIL** — spin - shire > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire1): registered **PASS**, all cards **PASS** — spin - xshire1 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire16): registered **INSUFFICIENT**, all cards **INSUFFICIENT** — spin - xshire16 > 0 at 99% (less than spinning): fewer than 3 kept repeats on a1c1 (n=0), a2 (n=0), a3 (n=0)
+  - RL-X3 ((a) spin - xshire8): registered **PASS**, all cards **PASS** — spin - xshire8 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire2): registered **PASS**, all cards **PASS** — spin - xshire2 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire4): registered **PASS**, all cards **PASS** — spin - xshire4 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire6): registered **PASS**, all cards **PASS** — spin - xshire6 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - shire-c4 > 0 at 99% (less than spinning): holds on a1c1, a3 only, not on a2
+  - RL-X3 ((a) spin - xshire1-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - xshire1-c4 > 0 at 99% (less than spinning): holds on a3 only, not on a1c1, a2
+  - RL-X3 ((d) nocbench one-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) nocbench one-hart spin W over idle in 2.2-2.6 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((d) memhier two-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) memhier two-hart spin W over idle in 2.3-2.8 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((e) inside-shire ring W above mesh-ring W): registered **PASS**, all cards **PASS** — inside minus across W > 0 in every pass: holds on every card (a1c1, a2, a3)
+  - RL-X3 ((e) scp-remote cheaper than s->s+8 and s->s+16): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — ring minus scp-remote pJ/B > 0 in every pass: holds on a2 only, not on a1c1, a3
+- **memhier-onchip-89** [energy-per-byte-moved (energy-read)] Read these as the cost of messaging, not of wires ... these figures are the cost of 1,024 cores kept busy by messaging, divided by the bytes they moved; the ~9 pJ intercept is the cores
+  - planned: qualify: 'mostly the busy cores' without 'less than spinning'
+  - RL-X3 ((a) spin - pair): registered **PASS**, all cards **PASS** — spin - pair > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - neigh): registered **FAIL**, all cards **FAIL** — spin - neigh > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire): registered **FAIL**, all cards **FAIL** — spin - shire > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire1): registered **PASS**, all cards **PASS** — spin - xshire1 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire16): registered **INSUFFICIENT**, all cards **INSUFFICIENT** — spin - xshire16 > 0 at 99% (less than spinning): fewer than 3 kept repeats on a1c1 (n=0), a2 (n=0), a3 (n=0)
+  - RL-X3 ((a) spin - xshire8): registered **PASS**, all cards **PASS** — spin - xshire8 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire2): registered **PASS**, all cards **PASS** — spin - xshire2 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire4): registered **PASS**, all cards **PASS** — spin - xshire4 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire6): registered **PASS**, all cards **PASS** — spin - xshire6 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - shire-c4 > 0 at 99% (less than spinning): holds on a1c1, a3 only, not on a2
+  - RL-X3 ((a) spin - xshire1-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - xshire1-c4 > 0 at 99% (less than spinning): holds on a3 only, not on a1c1, a2
+  - RL-X3 ((d) nocbench one-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) nocbench one-hart spin W over idle in 2.2-2.6 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((d) memhier two-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) memhier two-hart spin W over idle in 2.3-2.8 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((e) inside-shire ring W above mesh-ring W): registered **PASS**, all cards **PASS** — inside minus across W > 0 in every pass: holds on every card (a1c1, a2, a3)
+  - RL-X3 ((e) scp-remote cheaper than s->s+8 and s->s+16): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — ring minus scp-remote pJ/B > 0 in every pass: holds on a2 only, not on a1c1, a3
+- **memhier-onchip-90** [energy-per-byte-moved (energy-read) / what-the-numbers-say item 6] The step at the shire boundary mostly mirrors the drop in bandwidth, not costlier wires; mostly because the same ~2 W of busy cores moves 7-34x fewer bytes
+  - planned: keep
+  - RL-X3 ((a) spin - pair): registered **PASS**, all cards **PASS** — spin - pair > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - neigh): registered **FAIL**, all cards **FAIL** — spin - neigh > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire): registered **FAIL**, all cards **FAIL** — spin - shire > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire1): registered **PASS**, all cards **PASS** — spin - xshire1 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire16): registered **INSUFFICIENT**, all cards **INSUFFICIENT** — spin - xshire16 > 0 at 99% (less than spinning): fewer than 3 kept repeats on a1c1 (n=0), a2 (n=0), a3 (n=0)
+  - RL-X3 ((a) spin - xshire8): registered **PASS**, all cards **PASS** — spin - xshire8 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire2): registered **PASS**, all cards **PASS** — spin - xshire2 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire4): registered **PASS**, all cards **PASS** — spin - xshire4 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire6): registered **PASS**, all cards **PASS** — spin - xshire6 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - shire-c4 > 0 at 99% (less than spinning): holds on a1c1, a3 only, not on a2
+  - RL-X3 ((a) spin - xshire1-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - xshire1-c4 > 0 at 99% (less than spinning): holds on a3 only, not on a1c1, a2
+  - RL-X3 ((d) nocbench one-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) nocbench one-hart spin W over idle in 2.2-2.6 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((d) memhier two-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) memhier two-hart spin W over idle in 2.3-2.8 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((e) inside-shire ring W above mesh-ring W): registered **PASS**, all cards **PASS** — inside minus across W > 0 in every pass: holds on every card (a1c1, a2, a3)
+  - RL-X3 ((e) scp-remote cheaper than s->s+8 and s->s+16): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — ring minus scp-remote pJ/B > 0 in every pass: holds on a2 only, not on a1c1, a3
+- **memhier-onchip-93** [what-the-numbers-say item 6 / energy-per-byte-moved (last row)] Across shires, bulk data moves better as TensorLoads from the other shire's scratchpad (0.96 TB/s at 6.7 pJ/B) than as messages
+  - planned: keep
+  - RL-X3 ((a) spin - pair): registered **PASS**, all cards **PASS** — spin - pair > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - neigh): registered **FAIL**, all cards **FAIL** — spin - neigh > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire): registered **FAIL**, all cards **FAIL** — spin - shire > 0 at 99% (less than spinning): holds on no card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire1): registered **PASS**, all cards **PASS** — spin - xshire1 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire16): registered **INSUFFICIENT**, all cards **INSUFFICIENT** — spin - xshire16 > 0 at 99% (less than spinning): fewer than 3 kept repeats on a1c1 (n=0), a2 (n=0), a3 (n=0)
+  - RL-X3 ((a) spin - xshire8): registered **PASS**, all cards **PASS** — spin - xshire8 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire2): registered **PASS**, all cards **PASS** — spin - xshire2 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire4): registered **PASS**, all cards **PASS** — spin - xshire4 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - xshire6): registered **PASS**, all cards **PASS** — spin - xshire6 > 0 at 99% (less than spinning): holds on every card (a1c1, a2, a3)
+  - RL-X3 ((a) spin - shire-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - shire-c4 > 0 at 99% (less than spinning): holds on a1c1, a3 only, not on a2
+  - RL-X3 ((a) spin - xshire1-c4): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — spin - xshire1-c4 > 0 at 99% (less than spinning): holds on a3 only, not on a1c1, a2
+  - RL-X3 ((d) nocbench one-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) nocbench one-hart spin W over idle in 2.2-2.6 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((d) memhier two-hart spin): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — (d) memhier two-hart spin W over idle in 2.3-2.8 on every pass: holds on a1c1, a3 only, not on a2
+  - RL-X3 ((e) inside-shire ring W above mesh-ring W): registered **PASS**, all cards **PASS** — inside minus across W > 0 in every pass: holds on every card (a1c1, a2, a3)
+  - RL-X3 ((e) scp-remote cheaper than s->s+8 and s->s+16): registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — ring minus scp-remote pJ/B > 0 in every pass: holds on a2 only, not on a1c1, a3
+- **memhier-onchip-94** [what-the-numbers-say item 1] TensorSend round trips, credit round trips and scratchpad loads at a steady clock all fit a+b x (Manhattan distance on his map), with worst residuals of 1-5 cycles
+  - planned: keep, say one card
+  - LAT-N2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-95** [what-the-numbers-say item 1] Minion 31 of each shire gives the same numbers as minion 0, so each shire meets the mesh at a single point.
+  - planned: keep, say one card
+  - LAT-N2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **memhier-onchip-98** [what-the-numbers-say item 3] Three speeds, not four. A message takes 68 cycles on a reduction-tree edge, 114 anywhere else in the shire, and 150 + 12 per hop between shires.
+  - planned: keep, say one card
+  - LAT-N1: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+
+## et-soc1-on-chip-relay (9 claims)
+- **hotline-relay-l2-65** [lede / k4 / where-the-advantage-comes-from (#size, #sizetext)] Both need the data to outgrow the 32 MB L3: below that the hand-off wins at most 1.4x and the own scratchpad 1.3-3.3x
+  - planned: keep
+  - LAT-R: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — INSUFFICIENT over 3 cards: kept repeats a1c1 3, a2 3, a3 2; a1c1 fails, a2 fails, a3 undecided; reported, not tested, on a1c1: (ii) the per-card 5-offset line and (v) the size / intensity / stage ratios (per-card committed values; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-73** [the-same-watts (#remeasured)] Reading a byte costs 122 [117-129] pJ from DRAM, 2.52 from the shire's own scratchpad and 6.65 from another shire's
+  - planned: keep
+  - RL-g (L1 level a2 - a3): registered **PASS**, all cards **PASS** — L1 level: no pair of cards differs; pooled 0.746 pJ/B (per card a1c1 0.721, a2 0.767, a3 0.750)
+  - RL-g (own-scratchpad level a3 - a2): registered **PASS**, all cards **PASS** — own-scratchpad level (both contents): no pair of cards differs; pooled 3.326 pJ/B (per card a1c1 3.789, a2 3.119, a3 3.071)
+  - RL-g (L2 - own scratchpad): registered **PASS**, all cards **PASS** — L2 - own scratchpad: the same within +-10% on every card [confounded by the contents arm; see RL-h]
+- **hotline-relay-l2-76** [where-the-advantage-comes-from (#sizetext, #sizecap)] At 32 MB per buffer (64 MB footprint) the DRAM route falls to 47.9 GB/s and stays there: 47.9, 51.0 and 53.4 GB/s at 64, 128 and 256 MB per buffer
+  - planned: qualify: 'stays below 54 GB/s' rather than 'stays there' (it rises 11% with size on both cards)
+  - LAT-R: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — INSUFFICIENT over 3 cards: kept repeats a1c1 3, a2 3, a3 2; a1c1 fails, a2 fails, a3 undecided; reported, not tested, on a1c1: (ii) the per-card 5-offset line and (v) the size / intensity / stage ratios (per-card committed values; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-79** [how-much-arithmetic-it-takes-to-stop-mattering (#intensity, #inttext)] One add per element: 12.2x; holds to about four adds (11.4x), then falls faster with each quadrupling: 8.4x at 16, 4.1x at 64, 2.4x at 128, 1.5x at 256
+  - planned: keep (the chart is aifoundry2 only; the numbers agree with aifoundry3)
+  - LAT-R: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — INSUFFICIENT over 3 cards: kept repeats a1c1 3, a2 3, a3 2; a1c1 fails, a2 fails, a3 undecided; reported, not tested, on a1c1: (ii) the per-card 5-offset line and (v) the size / intensity / stage ratios (per-card committed values; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-82** [how-far-the-slab-moves (#dist, #ringcap)] It does not follow the mean distance (1.6 to 4.5 hops): r = -0.32 and -0.30 against the mean
+  - planned: qualify: 'over five offsets no relation to the mean hop count could be seen (r = -0.3)'; await E-RL1 (31 offsets)
+  - LAT-R: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — INSUFFICIENT over 3 cards: kept repeats a1c1 3, a2 3, a3 2; a1c1 fails, a2 fails, a3 undecided; reported, not tested, on a1c1: (ii) the per-card 5-offset line and (v) the size / intensity / stage ratios (per-card committed values; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-83** [how-far-the-slab-moves (#dist, #ringout, #ringcap)] It falls with the longest hand-off in the ring: 10, 8, 7 and 6 hops give 593, 652, 686-703 and 733 GB/s, in the same order on both cards; r = -0.99 against the longest
+  - planned: keep the page's own caveat ('a correlation, not a controlled test'); await E-RL1, which predicts the 26 untested offsets from this line
+  - LAT-R: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — INSUFFICIENT over 3 cards: kept repeats a1c1 3, a2 3, a3 2; a1c1 fails, a2 fails, a3 undecided; reported, not tested, on a1c1: (ii) the per-card 5-offset line and (v) the size / intensity / stage ratios (per-card committed values; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-84** [how-far-the-slab-moves (#distafter)] The stage time grows about 3,200-3,300 cycles for each hop of the longest hand-off (a least-squares line over the five offsets, one per card)
+  - planned: qualify: give the interval ('about 2,000-4,500 cycles per hop at 99%') or 'about 3,300'; await E-RL1
+  - LAT-R: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — INSUFFICIENT over 3 cards: kept repeats a1c1 3, a2 3, a3 2; a1c1 fails, a2 fails, a3 undecided; reported, not tested, on a1c1: (ii) the per-card 5-offset line and (v) the size / intensity / stage ratios (per-card committed values; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-85** [how-far-the-slab-moves (#distafter)] In this sweep the ID ring's 10-hop pair cost 19% of the bandwidth of the best offset
+  - planned: qualify: 'offset 1 ran 19% (a2) / 18% (a3) below the best offset; its 10-hop pair is the suspected cause'
+  - LAT-R: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — INSUFFICIENT over 3 cards: kept repeats a1c1 3, a2 3, a3 2; a1c1 fails, a2 fails, a3 undecided; reported, not tested, on a1c1: (ii) the per-card 5-offset line and (v) the size / intensity / stage ratios (per-card committed values; shown against aifoundry2's and aifoundry3's)
+- **hotline-relay-l2-V10** [section 6, 'with one or two stages it is larger (15.3x, 13.4x), where the DRAM route reaches only 38 and 44 GB/s'] With two stages the advantage is larger than the flat 4-32-stage level: 13.4x, DRAM at 44 GB/s
+  - planned: state per card (13.4x / 14.1x) and 'one launch each'; E-RL1 repeats it 3x per card
+  - LAT-R: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — INSUFFICIENT over 3 cards: kept repeats a1c1 3, a2 3, a3 2; a1c1 fails, a2 fails, a3 undecided; reported, not tested, on a1c1: (ii) the per-card 5-offset line and (v) the size / intensity / stage ratios (per-card committed values; shown against aifoundry2's and aifoundry3's)
+
+## et-soc1-power-temperature (30 claims)
+- **pt-spatial-01** [(lede); every-way-to-measure-by-granularity; kpi-tau; rf-tau] a PMIC that reports 12 V board power and three of its rails ..., polled by the service processor every 133 ms (also KPI '10 mW · 133 ms', §1 'new value per 133 ms', §2 'Board power is a fresh reading every 133 ms')
+  - planned: state per card and per sampler: while ettelem samples at 10 Hz, board power and the rail records refresh about every 156 ms on aifoundry2 and 263 ms on aifoundry3 (a one-command poller saw 135 ms on aifoundry2); replace '133 ms' in the lede, KPI, §1 rows and §2; flag the hub group (D2')
+  - TEL-P3: registered **PASS**, all cards **PASS** — E10 per card (ms): {'aifoundry2': [159.51, 161.2, 158.78], 'aifoundry1-c1': [162.4, 162.4, 162.4]}; tested on aifoundry2 only
+  - TEL-S: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P_H - P_L 99% interval per card: {'aifoundry2': 'includes 0', 'aifoundry3': 'positive', 'aifoundry1-c1': 'includes 0'}; pages {'aifoundry2': 'as measured', 'aifoundry3': 'per sampler', 'aifoundry1-c1': 'as measured'} (CARD-DIFFERENT)
+- **pt-spatial-02** [(lede); kpi 'Power slope under load'] under load near 80 °C, the same work costs about 0.8 W more for every °C the die warms
+  - planned: keep, say one card, and give the range: 'about 0.6-0.9 W per °C near 80 °C on aifoundry2, depending on the fit window'
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-04** [(lede); rest-idle0, rest-cool ('Idle is not one number')] idle power after a load is 5 W higher than before it
+  - planned: qualify: 'after this load step on aifoundry2 idle was 5 W higher, because the die was 9 °C warmer'; the size depends on the warming
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-05** [law-fix, law-a, law-tl, law-slope80 ('Later measurements' box)] Idle power is now a fitted law, Pidle = 12.6 W + 23.3 W·e^((T−80)/36) ... Its slope is 0.65 W/°C at 80 °C
+  - planned: keep
+  - IDLE-L: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — IDLE-LONG: aifoundry2 T_L - C, A80 - W, slope80 - W/C (0 passes, split not identified); aifoundry3 slope56 - W/C, offset - W (0 passes); reported, not tested: aifoundry1-c1 no long pass
+- **pt-spatial-08** [KPI 'Power slope under load'; slope-minion] 0.8 W/°C board, 75-87 °C, half of it on the minion rail
+  - planned: keep, say one card
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-10** [KPI 'Finest voltage map'; the-per-shire-voltage-map (intro)] 34 shires, 3 rails each, 1 mV, with hardware low/high, from a user account; with its log level raised to DEBUG, the SP writes one line per shire per pass
+  - planned: keep, say one card
+  - TEL-Q: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — voltage maps on every card: Q2 {'aifoundry2': None, 'aifoundry3': True, 'aifoundry1-c1': None}, Q4 {'aifoundry2': None, 'aifoundry3': False, 'aifoundry1-c1': None}, Q3 every pair False; offset sentence dropped (INSUFFICIENT)
+- **pt-spatial-12** [every-way-to-measure-by-granularity (§1 'On-die voltage per shire')] 34 minion shires × 3 rails + 8 memory shires × 2 · 1 mV ... SP log at DEBUG level (4 KB buffer, wraps about once per pass)
+  - planned: qualify: say the memory shires' lines are printed only during an on-die voltage query and were not captured; the dumps hold the 34 minion shires
+  - TEL-Q: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — voltage maps on every card: Q2 {'aifoundry2': None, 'aifoundry3': True, 'aifoundry1-c1': None}, Q4 {'aifoundry2': None, 'aifoundry3': False, 'aifoundry1-c1': None}, Q3 every pair False; offset sentence dropped (INSUFFICIENT)
+- **pt-spatial-13** [every-way-to-measure-by-granularity (§1 'Temperature' row)] Temperature: IO shire, and mean, low and high of the 34 minion-shire sensors · 1 °C; 'low/high' are extremes since reset; its field labelled PMIC holds the minion mean again
+  - planned: keep
+  - TEL-S: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P_H - P_L 99% interval per card: {'aifoundry2': 'includes 0', 'aifoundry3': 'positive', 'aifoundry1-c1': 'includes 0'}; pages {'aifoundry2': 'as measured', 'aifoundry3': 'per sampler', 'aifoundry1-c1': 'as measured'} (CARD-DIFFERENT)
+- **pt-spatial-15** [every-way-to-measure-by-granularity (§1 'Instantaneous rail power', 'Faster sampling')] the SP already reads [instantaneous rail power] each pass and discards it; the 133 ms pass is ~96 I2C transactions each followed by a hard-coded 1 ms wait; skip the 84-read snapshot
+  - planned: qualify: 'about 135 ms on aifoundry2 with a light poller, 156 ms while ettelem samples at 10 Hz; about 1.7x longer on aifoundry3'; keep the I2C explanation as the firmware's floor, not the measured pass
+  - TEL-S: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P_H - P_L 99% interval per card: {'aifoundry2': 'includes 0', 'aifoundry3': 'positive', 'aifoundry1-c1': 'includes 0'}; pages {'aifoundry2': 'as measured', 'aifoundry3': 'per sampler', 'aifoundry1-c1': 'as measured'} (CARD-DIFFERENT)
+- **pt-spatial-16** [every-way-to-measure-by-granularity (§1 remaining rows)] per-shire temperature 0.06 °C in hardware, never exported; DDR/PCIe/Maxion/IO rails have no current sense; board power at kHz needs hardware; the SPST trace keeps ~15 min of records with µs stamps
+  - planned: say 'about 15-30 min, depending on the card and the host's query load' or drop the figure
+  - TEL-S: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P_H - P_L 99% interval per card: {'aifoundry2': 'includes 0', 'aifoundry3': 'positive', 'aifoundry1-c1': 'includes 0'}; pages {'aifoundry2': 'as measured', 'aifoundry3': 'per sampler', 'aifoundry1-c1': 'as measured'} (CARD-DIFFERENT)
+- **pt-spatial-20** [pvt-out, fit-from, slope-board, slope-minion, slope-law] Fit from 5 s after launch: board 0.80 W/°C (minion 0.40) over 52 bins at 77.1-87.0 °C; the idle law's own slope there: 0.69 W/°C. Without the seven launch-gap bins: 0.79 W/°C
+  - planned: keep, say one card; say the slope depends on where the fit starts (0.76-0.89)
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-21** [mm-runs, mm-work, mm-spans] The matmul, eight back-to-back runs, draws 56 W two seconds after it starts and 65 W at its end, 56 s later, while the die warms from about 75 to 87 °C. Same kernel, same 600 MHz clock, steady rate: every run did the same work; the runs took 7.1-7.4 s dip to dip, the late ones no longer than the early ones
+  - planned: keep, say one card
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-22** [law-part, extra-w] The idle law accounts for 7.7 W of the extra 8.9 W as leakage; the rest is why busy power climbs a little faster per degree than an idle card
+  - planned: qualify: keep 'the idle law accounts for 7.7 of the 8.9 W'; drop 'the rest is why busy power climbs a little faster per degree than an idle card' (the remaining 0.6-1.3 W is not established as a slope difference)
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-23** [busy-drift] The strict 7 s runs of the Horace experiment found the same drift on this card: 0.81 W/°C at 82-86 °C (14 runs, standard error 0.01 W/°C)
+  - planned: keep, name the filter: '14 runs that heated by at least 3 °C'
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-24** [busy-drift-a3] On the second card, aifoundry3, the same runs at 57-61 °C gave 0.55 W/°C, but its seven runs scatter so widely (standard error 0.14 W/°C) that the drift there is not pinned down
+  - planned: qualify: 'six of the seven runs gave 0.33-0.43 W/°C (median 0.41), one 1.41; at 57-61 °C, where the idle law's own slope is about 0.36'
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-25** [rest-idle0, rest-idle0-t, rest-cool, rest-cool-t] Before the load: 31.2 W at 72 °C. Forty seconds after it: 36.5 W at 81 °C. Both sit on the idle law measured later (31.3 and 36.5 W at those temperatures)
+  - planned: keep, say one card
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-26** [pvt-view, pvt-out ('Above the idle law' view)] Median above the law, leaving out each phase's first 3 s and the gap bins: idle −0.0 W, DRAM loads +6.8 W, matmul +23.7 W
+  - planned: keep, say one card
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-27** [rest-cool] The die sheds heat slowly (6 °C in 40 s), so a baseline taken before a run understates the idle power during and after it. Energy measurements here should take their baseline at the same temperature, or fit a temperature term
+  - planned: qualify: 'on aifoundry2, 6 °C in the 40 s after this load'; the die takes tens of seconds to cool on both cards
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-29** [rest-mm, rest-dram] 20-22 W under matmul and 21 W under DRAM load
+  - planned: qualify: one load step on aifoundry2
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-31** [dram-rest, dram-mnn, dram-dt, mm-mnn] A DRAM-bound load moves it [the unmetered remainder] by 5 W and the minion rail by only 0.4 W (with the die 1 °C warmer)
+  - planned: keep; add 'the same on both cards: about 5 W off the rails and < 0.2 W on the minion rail for 76 GB/s streams (catalogue, 3 passes each)'; link hub §4.2
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-32** [edge-a-out, edge-b-out, edge-cap] At τ = 0 the remainder spikes to 38.8 W when the matmul starts, and drops below zero when it stops (−3.5 W) and at each gap (to −4.3 W). Filter board power ... with any τ from 1.0 to 1.4 s, and it steps cleanly between about 15 and 21 W. The PMIC's own board average stays within 15.0-21.3 W
+  - planned: keep, say one card for the numbers; may add 'the same edges appear on aifoundry3'
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-38** [ddr-idle] The DDR domain reads 768 mV on die at 72 °C idle and 766 mV at 81 °C, against an 800 mV set-point: at idle it falls about 0.2 mV per °C
+  - planned: keep 'on aifoundry2, about 0.15-0.2 mV per °C'; aifoundry3's reading also falls, by about 1 mV between 56 and 59 °C, but its slope is not pinned down
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-39** [ddr-load] Under the DRAM-bound load, at 82 °C, it reads 763 mV, 3 mV below that trend. Under the matmul, with little DRAM traffic, it reads 765 mV at 84-87 °C, which the trend alone predicts
+  - planned: keep the E5 readout as one instance and add that the catalogue shows the same on both cards (about 4 mV at 76 GB/s of DRAM streaming, 3 passes each; none under compute)
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+- **pt-spatial-46** [vmap, vmap-live, vmap-leg; (§3 prose)] Minion rail, current reading: 517-521 mV over the 34 shires; the lowest captured minimum is 513 mV (shires 0-2 and 18)
+  - planned: qualify: 'one idle capture on aifoundry2'
+  - TEL-Q: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — voltage maps on every card: Q2 {'aifoundry2': None, 'aifoundry3': True, 'aifoundry1-c1': None}, Q4 {'aifoundry2': None, 'aifoundry3': False, 'aifoundry1-c1': None}, Q3 every pair False; offset sentence dropped (INSUFFICIENT)
+- **pt-spatial-47** [vmap-live, vmap-r2] A plane across the 32 grid shires explains R² = 0.09 of the spread, no more than random scatter would give (p = 0.25); 'no gradient across the grid'
+  - planned: keep as 'no gradient in this idle capture on aifoundry2'
+  - TEL-Q: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — voltage maps on every card: Q2 {'aifoundry2': None, 'aifoundry3': True, 'aifoundry1-c1': None}, Q4 {'aifoundry2': None, 'aifoundry3': False, 'aifoundry1-c1': None}, Q3 every pair False; offset sentence dropped (INSUFFICIENT)
+- **pt-spatial-48** [vmap-live (Rail and Value toggles)] the live readout for the other views: SRAM current reading R² 0.38 'unlikely to be chance (p = 0.001, under 0.004, the bar for twelve views)'; minion swing and mesh swing also pass the bar; minion low, SRAM low and SRAM high 'a hint only'
+  - planned: qualify: say in the §3 prose that the SRAM rail's current readings do lean across the grid in this capture, so 'no gradient' is the minion rail's; one capture on one card
+  - TEL-Q: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — voltage maps on every card: Q2 {'aifoundry2': None, 'aifoundry3': True, 'aifoundry1-c1': None}, Q4 {'aifoundry2': None, 'aifoundry3': False, 'aifoundry1-c1': None}, Q3 every pair False; offset sentence dropped (INSUFFICIENT)
+- **pt-spatial-49** [vmap-shire-w] Idle currents of about 0.3 W per shire are far too small to cause that, so they are most likely each monitor's own offset: a baseline to subtract from a map taken under load
+  - planned: qualify: call it a hypothesis and say what would test it (captures minutes apart, a loaded map, the second card)
+  - TEL-Q: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — voltage maps on every card: Q2 {'aifoundry2': None, 'aifoundry3': True, 'aifoundry1-c1': None}, Q4 {'aifoundry2': None, 'aifoundry3': False, 'aifoundry1-c1': None}, Q3 every pair False; offset sentence dropped (INSUFFICIENT)
+- **pt-spatial-50** [vmap-repeat] The readings repeat: two more trace dumps, taken moments later, hold later passes, and their readings differ from this map's in 6 and 7 of its 102 cells, by at most 1 mV, always in the current reading; every low and high is the same
+  - planned: qualify: 'two more dumps 0.3 s later'
+  - TEL-Q: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — voltage maps on every card: Q2 {'aifoundry2': None, 'aifoundry3': True, 'aifoundry1-c1': None}, Q4 {'aifoundry2': None, 'aifoundry3': False, 'aifoundry1-c1': None}, Q3 every pair False; offset sentence dropped (INSUFFICIENT)
+- **pt-spatial-51** [(§3 prose after the map)] The lows are not idle values. They hold the deepest droop since the last stats reset, a window that included loads that evening, so they catch droops that the 133 ms polling misses
+  - planned: qualify: 'they hold the lowest reading since the last stats reset (when, is not recorded)'; drop 'so they catch droops that the 133 ms polling misses' until X3 shows it
+  - TEL-R: registered **FAIL**, all cards **FAIL** — peak-hold on every card: R1 {'aifoundry2': True, 'aifoundry3': True, 'aifoundry1-c1': False}, R2 {'aifoundry2': 'WITHIN-NOISE', 'aifoundry3': 'WITHIN-NOISE', 'aifoundry1-c1': 'WITHIN-NOISE'}, R6 {'aifoundry2': None, 'aifoundry3': None, 'aifoundry1-c1': None} (FAIL); R1 failed on a card
+- **pt-spatial-V02** [rest-mm / mm-mnn] a matmul moves the minion rail by 16-20 W
+  - planned: keep as E5's readout: 'this matmul moved the minion rail by 16-20 W'
+  - MMB-T: registered **FAIL**, all cards **CARD-DIFFERENT** — P1 REPORTED, P2 REPORTED, P3 REPORTED, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul CARD-DIFFERENT, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 REPORTED (all cards)
+  - MMB-T/P1: registered **FAIL**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the busy-slope bands are per registered card
+  - MMB-T/P2: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the share bands are per registered card
+  - MMB-T/P3: registered **CARD-DIFFERENT**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; the bands (and the idle-law clause) are per registered card
+  - MMB-T/P4-remainder: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card (3-7 W): tested on every card
+  - MMB-T/P4-minion: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P5-dram: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card (2-5 mV): tested on every card
+  - MMB-T/P5-matmul: registered **PASS**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; registered for each card: tested on every card
+  - MMB-T/P6: registered **PASS**, all cards **PASS** — holds on every card tested; the interval test is registered for each card (the bands are reported only): tested on every card
+  - MMB-T/P7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — holds on some cards only: per-card values; aifoundry1's cards: the tau = 0 overshoot and dip tested; the filtered clause (the card's own tau, registered for aifoundry2 and aifoundry3) reported with aifoundry2's tau
+  - MMB-T/P8: registered **PASS**, all cards **PASS** — holds on every card tested; registered for each card: tested on every card
+  - MMB-T/P9: registered **PASS**, all cards **PASS** — holds on every card tested; '600 MHz throughout' is registered for each card: every sample of every kept pass, idle ones included, so a card that idles below 600 MHz does not hold it
+  - MMB-T/P10: registered **PASS**, all cards **REPORTED** — registered for aifoundry2/aifoundry3 only: the other cards are reported (per_card), not tested; registered for aifoundry2 only
+
+## et-soc1-ridge-points (27 claims)
+- **ridge-07** [intro] One full-size TensorFMA already does 4 FLOP per byte it loads in fp32 (8 in fp16), so tiles held in the shire can just keep fp32 and fp16 busy, with no margin
+  - planned: qualify: say the measured 4.0 B per cycle just covers it and that no matmul with private tiles in the shire has been run (await ridge-X1)
+  - MMB-X1: registered **PASS**, all cards **PASS** — a PASS, b PASS, c PASS (all cards)
+  - MMB-X1/a: registered **PASS**, all cards **PASS** — holds on every card tested
+  - MMB-X1/b: registered **PASS**, all cards **PASS** — holds on every card tested
+  - MMB-X1/c: registered **PASS**, all cards **PASS** — holds on every card tested
+- **ridge-11** [tbl-peaks] fp32 tensor: best measured 15.49 FLOP/cycle (97%); the matmul report's tensor loop with tiles in L2, 529 cycles per fp32 op against 512 ideal
+  - planned: keep; say the 1,024-minion loop is aifoundry2 and that aifoundry3 reproduced 529 cycles/op on one minion (B through TenB)
+  - MMB-a: registered **PASS**, all cards **PASS** — holds on every card tested; DRAM cycles/op reported on aifoundry1's cards (its band is aifoundry2's)
+- **ridge-12** [tbl-peaks] fp16 in, fp32 accumulate: best measured 30.97 FLOP/cycle (97%); 529 cycles per fp16 op
+  - planned: keep, say one card
+  - MMB-a: registered **PASS**, all cards **PASS** — holds on every card tested; DRAM cycles/op reported on aifoundry1's cards (its band is aifoundry2's)
+- **ridge-13** [tbl-peaks] int8 in, int32 accumulate: best measured 116.9 OP/cycle (91%); 280 cycles per int8 op against 256 ideal
+  - planned: keep, say one card
+  - MMB-a: registered **PASS**, all cards **PASS** — holds on every card tested; DRAM cycles/op reported on aifoundry1's cards (its band is aifoundry2's)
+- **ridge-18** [t-ridge] same, all minions reading one shared 32 KB tile pool (int8 matmul loop): 7.30 B/cycle, 4.49 TB/s; ridge 2.2 / 4.4 / 18
+  - planned: keep, say one card
+  - MMB-X1: registered **PASS**, all cards **PASS** — a PASS, b PASS, c PASS (all cards)
+  - MMB-X1/a: registered **PASS**, all cards **PASS** — holds on every card tested
+  - MMB-X1/b: registered **PASS**, all cards **PASS** — holds on every card tested
+  - MMB-X1/c: registered **PASS**, all cards **PASS** — holds on every card tested
+- **ridge-28** [t-ridge] (In int8 with B also in the scratchpad it reaches 88%, and the op slows from 280 to 318 cycles.)
+  - planned: keep, say one card (the 280)
+  - MMB-a: registered **PASS**, all cards **PASS** — holds on every card tested; DRAM cycles/op reported on aifoundry1's cards (its band is aifoundry2's)
+- **ridge-31** [spar-l2] only the sparsity report's shorter L2 probe read 3.3 (slowest minion)
+  - planned: qualify: 'one 1.4 ms launch on aifoundry3' (the same card's scratchpad probe of the same length read 3.995); await E4
+  - LAT-S3: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; decided by a1c1 and a2 and a3 (registered either-card rule, applied to every card)
+- **ridge-33** [demo-bpc] The int8 matmul loop consumed 7.3 B per cycle per minion, but all 1,024 minions read the same 32 KB of tiles, so some lines may have come from the L2's read buffers rather than its banks
+  - planned: keep, say one card
+  - MMB-X1: registered **PASS**, all cards **PASS** — a PASS, b PASS, c PASS (all cards)
+  - MMB-X1/a: registered **PASS**, all cards **PASS** — holds on every card tested
+  - MMB-X1/b: registered **PASS**, all cards **PASS** — holds on every card tested
+  - MMB-X1/c: registered **PASS**, all cards **PASS** — holds on every card tested
+- **ridge-40** [dram-card2] the sparsity report's shorter probe read 72 GB/s on aifoundry3
+  - planned: qualify: say 'one 29 ms launch' (the 23 Sep full-length probe read 75.9 on the same card); await E4
+  - LAT-S3: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; decided by a1c1 and a2 and a3 (registered either-card rule, applied to every card)
+- **ridge-55** [mm-pct32] The matmul benchmark's 97% and 91% of peak came from one shared 32 KB tile pool, so they do not show that private tiles would keep the tensor unit busy. A kernel with its own tiles in the shire sits exactly at the fp32 and fp16 ridge, with no margin
+  - planned: keep
+  - MMB-X1: registered **PASS**, all cards **PASS** — a PASS, b PASS, c PASS (all cards)
+  - MMB-X1/a: registered **PASS**, all cards **PASS** — holds on every card tested
+  - MMB-X1/b: registered **PASS**, all cards **PASS** — holds on every card tested
+  - MMB-X1/c: registered **PASS**, all cards **PASS** — holds on every card tested
+- **ridge-62** [gemv-tf] The sparsity report's batch-1 layer, with its weights in the scratchpads and its partial sums added by the host, ran at 1.24 TFLOP/s (6.8 us per 1,024 x 4,096 layer). That is the scratchpad bandwidth times 0.5, within 1%
+  - planned: keep, say one card (aifoundry3)
+  - LAT-S4: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **ridge-63** [gemv-tree-us] With the on-chip reduction the layer takes 7.3 us, 1.15 TFLOP/s
+  - planned: keep, say one card (aifoundry3)
+  - LAT-S4: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **ridge-64** [c-roof] Roofline rings: the matmul benchmark with tiles in L2 (fp32 9.51, fp16 19.0, int8 71.8 T), the same fp32 loop with every tile from DRAM (0.31 TFLOP/s), and the batch-1 fp32 layer (1.24); 'the two below the ceilings sit on their bandwidth lines'
+  - planned: keep, say which card each ring comes from
+  - MMB-a: registered **PASS**, all cards **PASS** — holds on every card tested; DRAM cycles/op reported on aifoundry1's cards (its band is aifoundry2's)
+- **ridge-65** [int8-own-t] The int8 matmul sits above the measured own-shire line (39 TOP/s at 16 OP per byte; it ran at 72) because every minion read the same 32 KB of tiles; it stays under the spec line
+  - planned: qualify: 'probably because every minion read the same 32 KB of tiles' (one card); await ridge-X1
+  - MMB-X1: registered **PASS**, all cards **PASS** — a PASS, b PASS, c PASS (all cards)
+  - MMB-X1/a: registered **PASS**, all cards **PASS** — holds on every card tested
+  - MMB-X1/b: registered **PASS**, all cards **PASS** — holds on every card tested
+  - MMB-X1/c: registered **PASS**, all cards **PASS** — holds on every card tested
+- **ridge-68** [other-limits-that-act-like-ridge-points] A lone minion. A minion keeps at most 4 line requests in flight, shared by its two TensorLoad paths, so its rate is 4 lines per round trip
+  - planned: keep; optionally add 'the round trip itself is not measured for TensorLoads'
+  - LAT-R3: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **ridge-69** [lim-l2] Streaming its own data alone, one minion measured 6.4 B per cycle from L2 or the scratchpad and 1.4 from DRAM
+  - planned: keep, say one card (aifoundry3)
+  - LAT-R3: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **ridge-70** [demo-bpc2] This is not a hard ceiling: the int8 matmul loop drew 7.3 B per cycle per minion
+  - planned: keep, say one card
+  - MMB-X1: registered **PASS**, all cards **PASS** — a PASS, b PASS, c PASS (all cards)
+  - MMB-X1/a: registered **PASS**, all cards **PASS** — holds on every card tested
+  - MMB-X1/b: registered **PASS**, all cards **PASS** — holds on every card tested
+  - MMB-X1/c: registered **PASS**, all cards **PASS** — holds on every card tested
+- **ridge-71** [lim-n] It takes at least 90 minions streaming 1 KB loads at once to reach the chip's 76 GB/s from DRAM, and more once queueing raises the latency
+  - planned: keep
+  - LAT-R3: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **ridge-72** [lim-floor] Every TensorLoad costs at least about 45 cycles, even with every line masked off
+  - planned: qualify: 'a 16-line TensorLoad under a tensor mask costs at least about 45 cycles even with every line masked off (aifoundry3, one launch); an unmasked 1-line TensorLoad streams at one per 34.9 cycles on both cards'
+  - LAT-S2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **ridge-73** [lim-small] and about 65 for up to 4 lines when all minions load at once
+  - planned: keep, say one card, 'from L2 or the scratchpad' and 'under a tensor mask'
+  - LAT-S2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **ridge-74** [lim-1line] So loads of fewer than 4 lines cannot reach the 4 B per cycle streaming rate: a 1-line load gets about 1.0 B per cycle. 4-line loads still reach 3.9
+  - planned: qualify: 'a 1-line load under a mask gets about 1.0 B per cycle (aifoundry3); unmasked 1-line loads reach 1.83 on both cards (1.0 when every load hits the same bank)'
+  - LAT-S2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **ridge-75** [lim-launch] Kernel launch. In the matmul runs, a launch from the host took 0.43 ms (median; 0.35-0.69 ms)
+  - planned: keep, say one card; optionally 'about 0.4 ms on both cards in another harness (aifoundry3 one session)'
+  - MMB-a: registered **PASS**, all cards **PASS** — holds on every card tested; DRAM cycles/op reported on aifoundry1's cards (its band is aifoundry2's)
+- **ridge-83** [e-flop] the fp32 tensor unit costs 2.89 pJ per FLOP above idle [2.62-3.01] and int8 0.158 pJ per OP (energy manual sec. 3.2; fp32 on both cards, int8 on aifoundry2, at 600 MHz)
+  - planned: keep
+  - ABL-T5: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+- **ridge-88** [e-spec-l3] At the spec rates only L3's 3.6 FLOP/B lies above its ridge of 3.0
+  - planned: qualify: 'at the spec rates L3 (3.6, range 3.2-4.4) sits at or just above the assumed spec ridge of 3.0 and another shire's scratchpad (2.3) just below it: not established'; await ridge-X4
+  - RL-X4 (L3, random, spec ridge): registered **FAIL**, all cards **FAIL** — L3, random, spec ridge: a1c1 above, a2 overlap, a3 overlap its ridge (predicted above)
+  - RL-X4 (other shire's scratchpad, random, spec ridge): registered **FAIL**, all cards **FAIL** — other shire's scratchpad, random, spec ridge: a1c1 overlap, a2 overlap, a3 overlap its ridge (predicted below)
+  - RL-X4 (in-shire TensorSend (shire ring), zeros, measured ridge): registered **FAIL**, all cards **FAIL** — in-shire TensorSend (shire ring), zeros, measured ridge: a1c1 above, a2 overlap, a3 above its ridge (predicted above)
+- **ridge-91** [c-ebal] Zeros readout: '... and so does TensorSend inside a shire; TensorSend between shires overlaps its ridge' (and TensorSend pairs drawn as 'the arithmetic costs more' at 3.18 against 3.29)
+  - planned: qualify: show both rows as 'ranges overlap: no verdict'; the pairs row (3.2 vs 3.3) is not worth testing, the in-shire row (10.0 vs 8.8) can be decided by ridge-X4 with >= 6 passes per card
+  - RL-X4 (L3, random, spec ridge): registered **FAIL**, all cards **FAIL** — L3, random, spec ridge: a1c1 above, a2 overlap, a3 overlap its ridge (predicted above)
+  - RL-X4 (other shire's scratchpad, random, spec ridge): registered **FAIL**, all cards **FAIL** — other shire's scratchpad, random, spec ridge: a1c1 overlap, a2 overlap, a3 overlap its ridge (predicted below)
+  - RL-X4 (in-shire TensorSend (shire ring), zeros, measured ridge): registered **FAIL**, all cards **FAIL** — in-shire TensorSend (shire ring), zeros, measured ridge: a1c1 above, a2 overlap, a3 above its ridge (predicted above)
+- **ridge-94** [t-energy] Energy per byte by level: L1 0.54, own scratchpad 2.52, L2 2.51, other shire 6.65, L3 10.5, DRAM 122, TensorSend pairs 0.67, in a shire 2.08, between shires 11.9-17.8 pJ/B
+  - planned: keep
+  - RL-g (L1 level a2 - a3): registered **PASS**, all cards **PASS** — L1 level: no pair of cards differs; pooled 0.746 pJ/B (per card a1c1 0.721, a2 0.767, a3 0.750)
+  - RL-g (own-scratchpad level a3 - a2): registered **PASS**, all cards **PASS** — own-scratchpad level (both contents): no pair of cards differs; pooled 3.326 pJ/B (per card a1c1 3.789, a2 3.119, a3 3.071)
+  - RL-g (L2 - own scratchpad): registered **PASS**, all cards **PASS** — L2 - own scratchpad: the same within +-10% on every card [confounded by the contents arm; see RL-h]
+- **ridge-96** [e-vec] The L1 row ... a 32 B vector load (flw.ps) against the vector unit's fmadd.ps (3.49 pJ per FLOP) ... Its time ridge uses the same loop's 14.2 TB/s; the memory-hierarchy probe's slower loop ran at 6.2 TB/s and cost 0.77 pJ/B (sec. 4.2)
+  - planned: keep
+  - RL-g (L1 level a2 - a3): registered **PASS**, all cards **PASS** — L1 level: no pair of cards differs; pooled 0.746 pJ/B (per card a1c1 0.721, a2 0.767, a3 0.750)
+  - RL-g (own-scratchpad level a3 - a2): registered **PASS**, all cards **PASS** — own-scratchpad level (both contents): no pair of cards differs; pooled 3.326 pJ/B (per card a1c1 3.789, a2 3.119, a3 3.071)
+  - RL-g (L2 - own scratchpad): registered **PASS**, all cards **PASS** — L2 - own scratchpad: the same within +-10% on every card [confounded by the contents arm; see RL-h]
+
+## et-soc1-sparse-compute (33 claims)
+- **matmul-sparse-testdrive-100** [zeros (text after the power chart)] The tensor unit itself adds about 0.6 W with all zeros (0.14 pJ per slot), against 15.6 W dense
+  - planned: qualify: 'under 1 W, not separated from the spin baseline in these runs' and drop the 0.14 pJ, unless E3 (A-zero vs spin, the page's configuration) or E2 (A and B zero vs spin) confirms it
+  - ABLB-3g: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 FAIL, a3 PASS, a1c1 PASS)
+- **matmul-sparse-testdrive-101** [zeros (text after the power chart)] In this loop about 86% of the power above idle follows the nonzero count (96% of the tensor unit's own 15.6 W)
+  - planned: keep, say one card ('about 95%')
+  - ABLB-3c: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **matmul-sparse-testdrive-47** [top (lede); zeros table (tensor_mask on TensorFMA)] row-masked ops are just as flat: 544 cycles with 8, 4, 1 or 0 rows enabled (546 with all 16)
+  - planned: keep, say one card
+  - LAT-S1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **matmul-sparse-testdrive-48** [c-fma caption] With B streamed from L2 through TenB, as in the matmul report, an fp32 op takes 529 cycles, also flat
+  - planned: keep
+  - LAT-S1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **matmul-sparse-testdrive-50** [top (lede, KPI 'Power saved'); c-pow] Board power above idle falls from 17.3 W to 2.4 W as A goes from dense to all zeros in a loop of TensorFMAs on small-integer operands; 86% saved; 3.8 -> 0.5 pJ per multiply slot
+  - planned: keep, say one card (two runs); cite the two-card Horace saving beside it
+  - ABLB-3ab: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL)
+- **matmul-sparse-testdrive-55** [zeros table (fp16 row); answers] fp16: correct arithmetic. A pair with one zero still adds its other product. The manual's rule is a documentation bug
+  - planned: keep, say one card
+  - LAT-S1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **matmul-sparse-testdrive-56** [zeros (intro)] Each probe ran on one minion; the fp32 TensorFMA and TensorLoad probes also ran on all 1,024 at once ... every result could be checked exactly on the host. All of them were exact.
+  - planned: keep
+  - LAT-S1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **matmul-sparse-testdrive-57** [zeros table (tensor_mask on TensorFMA); c-pow] Masking 8 of 16 rows cuts power like zeros do (+9.2 W instead of +17.3 W)
+  - planned: keep, say one card
+  - ABLB-3d: registered **PASS**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 PASS, a1c1 FAIL)
+- **matmul-sparse-testdrive-58** [zeros table (tensor_mask on TensorLoad); masked-loads chart] Time scales with the rows loaded: 160 -> 81 -> 45-47 cycles for 16, 8 and 4 of 16 rows from L2 or the scratchpad [one minion]; floor of about 45-47 cycles, the load's latency
+  - planned: keep, say one card
+  - LAT-S2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-59** [zeros table; masked-loads] From DRAM [one minion] it falls almost in proportion, from 730 cycles for 16 lines to 73 for one (320 at 8, 144 at 4): a lone minion's requests go out at about 45 cycles per line
+  - planned: keep, say one card
+  - LAT-S2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-60** [masked-loads (t-tl table)] With all 1,024 minions, on-chip memory behaves the same way: L2 297/131/66/65 and local scratchpad 256/128/65/65 cycles per load at 16/8/4/1 lines (2.03-2.45 TB/s)
+  - planned: keep, say one card
+  - LAT-S3: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; decided by a1c1 and a2 and a3 (registered either-card rule, applied to every card)
+- **matmul-sparse-testdrive-61** [masked-loads (t-tl table, text)] All 1,024 minions from DRAM: 8308 cycles (72.1 GB/s) at 16 lines; asking for fewer lines hardly shortens a load (7598 / 7658 / 7268 at 8/4/1), so the useful bandwidth falls with the mask instead of the time
+  - planned: keep, say one card
+  - LAT-S3: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; decided by a1c1 and a2 and a3 (registered either-card rule, applied to every card)
+- **matmul-sparse-testdrive-62** [masked-loads; method; ridge ledger] At 16 lines the chip streams 72 GB/s from DRAM, close to the 76 GB/s measured in the memory-hierarchy report
+  - planned: qualify: quote 76.0 GB/s (both cards, E27 catalogue, 3 passes); call 72 the short probe's slowest-minion figure
+  - LAT-S3: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; decided by a1c1 and a2 and a3 (registered either-card rule, applied to every card)
+- **matmul-sparse-testdrive-63** [masked-loads (t-tl caption)] At 16 lines L2 reads 2.03 TB/s here, below the 2.45 TB/s the memory-hierarchy probe reads on both cards ... This probe is shorter (2,000 loads per minion); the cause of the gap was not isolated
+  - planned: qualify: add that the same probe at 20,000 loads reads 2.46 TB/s (aifoundry2, E15); the gap is probably the cold start of a 2,000-load probe (to be confirmed by E4)
+  - LAT-S3: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails; decided by a1c1 and a2 and a3 (registered either-card rule, applied to every card)
+- **matmul-sparse-testdrive-69** [top (lede, KPI 'Batch-1 layer'); layer; lx-sum; s-batch1] a batch-1 1024x4096 fp32 layer held in the on-chip scratchpads goes from 7.5 us dense (7.3 us with plain loads) to 2.1 us at 99% zero activations, including the on-chip reduction
+  - planned: keep, say one card
+  - LAT-S4: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-70** [layer] Masked loads cut the bytes, so at 50% zeros the layer drops from 7.5 to 5.7 us. After that the per-slice fixed costs take over ... the curve flattens at 5.4 us
+  - planned: keep, say one card
+  - LAT-S4: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-71** [lx-read (default 90%)] 90% of x zero, masked loads + skip, on-chip reduction: 5.23 us (3,135 cycles) ... Rows loaded 26.8 of 256; slices computed 13.62 of 16. Empty slices measured 14.9%, independent zeros predict 0.9^16 = 18.5%
+  - planned: keep, say one card
+  - LAT-S4: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-73** [top (KPI 'Board energy per layer'); lx-sum; lx-read; s-batch1] Board energy per layer, idle included, from separate runs of the compute-only kernel: 251 uJ dense, 137 at 90% zeros, 74 at 99% (2.7 and 7.4 us per layer)
+  - planned: keep, say one card (and that idle is ~70% of it)
+  - ABLB-3e: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 REPORTED)
+- **matmul-sparse-testdrive-74** [layer; lx-read] Energy per layer above idle falls from 70 to 7 uJ (19 at 90%), mostly because skipped slices and masked loads do less work in less time
+  - planned: keep, say one card
+  - ABLB-3e: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 REPORTED)
+- **matmul-sparse-testdrive-75** [layer; answers] The tensor unit's own gating adds no speed and little energy here: with every row loaded, 90% zeros in x cut the layer's power above idle only from 9.4 to 8.3 W, about 12%
+  - planned: qualify: one card, two runs, and the two points are different kernels
+  - ABLB-3f: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+- **matmul-sparse-testdrive-78** [layer] (a launch from the host took 0.2-0.4 ms on this card)
+  - planned: qualify: '0.2-0.5 ms'
+  - LAT-S5: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-81** [divergence] Refilling lanes raises ET's efficiency to 0.96 and 0.46
+  - planned: keep, say one card
+  - LAT-S5: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-82** [divergence (c-thr)] its bookkeeping costs cycles: at alpha = 3 it does fewer useful FMAs per second than static (0.59 against 0.73 T/s), and it pulls ahead only from alpha = 2
+  - planned: qualify: 'pulls ahead between alpha = 3 and 2 (by 3% at alpha = 2 in one run)'
+  - LAT-S5: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-83** [divergence; answers] This loop peaks at about 1.5 useful FMAs per cycle per minion, or 0.9 T/s for the chip, under a fifth of the 8-lane peak (4.9 T/s at 600 MHz); a vector-FMA loop reaches 0.9 of 4.9 T FMA/s
+  - planned: keep, say one card
+  - LAT-S5: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-87** [divergence] An 8-lane iteration also takes 84 cycles against 33 for a one-lane scalar iteration, so the loop's mask test and branch cost too
+  - planned: qualify: the 84 cycles include queue waits
+  - LAT-S5: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-88** [divergence] The scalar variant, which uses the queue at a third of the rate, held 0.30 T/s at every alpha
+  - planned: keep, say one card
+  - LAT-S5: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-96** [method] on this card the board-power reading itself changes only about every 250 ms; on aifoundry2 about every 133 ms
+  - planned: keep
+  - TEL-S: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — P_H - P_L 99% interval per card: {'aifoundry2': 'includes 0', 'aifoundry3': 'positive', 'aifoundry1-c1': 'includes 0'}; pages {'aifoundry2': 'as measured', 'aifoundry3': 'per sampler', 'aifoundry1-c1': 'as measured'} (CARD-DIFFERENT)
+- **matmul-sparse-testdrive-98** [c-pow (legend, fit)] least-squares line: 2.4 W + 14.8 W x fraction [Power falls in step with the zeros]
+  - planned: qualify: a straight line on these small-integer operands on aifoundry3; not a general law (random data is not linear in the zero fraction)
+  - ABLB-3c: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+- **matmul-sparse-testdrive-99** [zeros (text after the power chart)] an integer loop on the same harts draws 1.7 of those 2.4 W
+  - planned: keep, say one card (two runs, 1.4-2.0 W)
+  - ABLB-3g: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 FAIL, a3 PASS, a1c1 PASS)
+- **matmul-sparse-testdrive-V04** [Caveats (One card, one day)] [Implied by 'Cycle counts carry over between the cards':] the masked-load, layer and work-queue cycle counts on this page would read the same on aifoundry2
+  - planned: qualify: 'tensor-op and full-line load counts carry over; the masked-load, layer and queue counts are aifoundry3's'
+  - LAT-S1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **matmul-sparse-testdrive-V06** [section 3 (Three effects add up)] The tensor unit's own gating adds no speed here [the every-row kernel stays at 7.3 us at every zero fraction]
+  - planned: keep, say one card
+  - LAT-S1: registered **PASS**, all cards **PASS** — PASS over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 holds, a2 holds, a3 holds
+- **matmul-sparse-testdrive-V07** [Answers (inactive neurons)] No bandwidth for SRAM-resident weights [inactive neurons cost no bandwidth]; a zero still spends its TensorFMA cycles unless its whole 16-element slice is skipped
+  - planned: keep, say one card for the bandwidth half
+  - LAT-S2: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-V09** [cycles chart caption] (that report's int8 op takes 280 that way [B streamed through TenB], against 318 here)
+  - planned: qualify: 'that report's int8 loop, which streams both tiles, takes 280'
+  - ABLB-2a: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS); TenB int8 spread over cards {'int8_randn_tenb': 0.0, 'int8_ones_tenb': 0.0}
+  - MMB-a: registered **PASS**, all cards **PASS** — holds on every card tested; DRAM cycles/op reported on aifoundry1's cards (its band is aifoundry2's)
+
+## et-soc1-spatial-temperature-brief (8 claims)
+- **pt-spatial-59** [lede-excess; KPI 'What the host sees today'; sp-excess2; both-cards (closing sentence)] The high leaks one number: each time it rose, on both cards, the hottest shire read about 3 °C above the average (in whole degrees), but the host never learns which shire that was
+  - planned: qualify: 'at the peaks recorded (one evening on aifoundry2, one session on aifoundry3), 2-4 °C, mostly 3'
+  - TEL-R: registered **FAIL**, all cards **FAIL** — peak-hold on every card: R1 {'aifoundry2': True, 'aifoundry3': True, 'aifoundry1-c1': False}, R2 {'aifoundry2': 'WITHIN-NOISE', 'aifoundry3': 'WITHIN-NOISE', 'aifoundry1-c1': 'WITHIN-NOISE'}, R6 {'aifoundry2': None, 'aifoundry3': None, 'aifoundry1-c1': None} (FAIL); R1 failed on a card
+- **pt-spatial-61** [grid-view ('Minion-rail voltage at idle'); (voltage paragraph in §2)] At idle the minion rail read 517-521 mV across the 34 shires, in whole millivolts; the monitors' low/high captures span 513-522 mV
+  - planned: keep
+  - TEL-Q: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — voltage maps on every card: Q2 {'aifoundry2': None, 'aifoundry3': True, 'aifoundry1-c1': None}, Q4 {'aifoundry2': None, 'aifoundry3': False, 'aifoundry1-c1': None}, Q3 every pair False; offset sentence dropped (INSUFFICIENT)
+- **pt-spatial-65** [(bottleneck, after sys-zero)] So the host never sees the current spread between shires: the low and high are peak-hold values. The firmware resets them together with the SP's own statistics, so both cover the same window
+  - planned: keep ('in the firmware source')
+  - TEL-R: registered **FAIL**, all cards **FAIL** — peak-hold on every card: R1 {'aifoundry2': True, 'aifoundry3': True, 'aifoundry1-c1': False}, R2 {'aifoundry2': 'WITHIN-NOISE', 'aifoundry3': 'WITHIN-NOISE', 'aifoundry1-c1': 'WITHIN-NOISE'}, R6 {'aifoundry2': None, 'aifoundry3': None, 'aifoundry1-c1': None} (FAIL); R1 failed on a card
+- **pt-spatial-67** [sp-excess, sp-first, sp-step-pairs, sp-step-lag, sp-horace-pairs, sp-slow-high, sp-slow-lag; ht-out (chart readout)] Every rise followed a new record of the average and settled exactly 3 °C above the SP's maximum: 84/87 when the load step began, then 85/88, 86/89 and 87/90 (each 1.5-2.8 s after the record), and 88/91, 89/92 and 90/93 in the uncontrolled Horace session (the 92 came 27 s after its record)
+  - planned: keep (it names card and date); say 84/87 was the state when the log began
+  - TEL-R: registered **FAIL**, all cards **FAIL** — peak-hold on every card: R1 {'aifoundry2': True, 'aifoundry3': True, 'aifoundry1-c1': False}, R2 {'aifoundry2': 'WITHIN-NOISE', 'aifoundry3': 'WITHIN-NOISE', 'aifoundry1-c1': 'WITHIN-NOISE'}, R6 {'aifoundry2': None, 'aifoundry3': None, 'aifoundry1-c1': None} (FAIL); R1 failed on a card
+- **pt-spatial-68** [both-cards] Every committed log that carries these fields was checked (41 logs, 174,233 samples on aifoundry2 and 172,176 on aifoundry3). The low sits exactly 1 °C under the SP's minimum of the average in every sample, at each minimum the cards recorded (61/60 and 63/62 on aifoundry2 and 49/48 on aifoundry3)
+  - planned: qualify: 'in every committed sample (one or two stats windows on aifoundry2, one on aifoundry3)'
+  - TEL-R: registered **FAIL**, all cards **FAIL** — peak-hold on every card: R1 {'aifoundry2': True, 'aifoundry3': True, 'aifoundry1-c1': False}, R2 {'aifoundry2': 'WITHIN-NOISE', 'aifoundry3': 'WITHIN-NOISE', 'aifoundry1-c1': 'WITHIN-NOISE'}, R6 {'aifoundry2': None, 'aifoundry3': None, 'aifoundry1-c1': None} (FAIL); R1 failed on a card
+- **pt-spatial-69** [both-cards] Each time the high rose, six times on aifoundry2 and three times on aifoundry3, it came to 3 °C above the average at that sample in eight of the nine rises (once 4 °C)
+  - planned: qualify as the lede
+  - TEL-R: registered **FAIL**, all cards **FAIL** — peak-hold on every card: R1 {'aifoundry2': True, 'aifoundry3': True, 'aifoundry1-c1': False}, R2 {'aifoundry2': 'WITHIN-NOISE', 'aifoundry3': 'WITHIN-NOISE', 'aifoundry1-c1': 'WITHIN-NOISE'}, R6 {'aifoundry2': None, 'aifoundry3': None, 'aifoundry1-c1': None} (FAIL); R1 failed on a card
+- **pt-spatial-70** [both-cards] On aifoundry2 each of the average's six new records was followed by a rise, and the high settled 3 °C above the SP's maximum. On aifoundry3 two of three were; after the 61 °C record the high did not move in the remaining 444 s of the log, so the hottest shire was then at most 2 °C above the average, and the high settled 2 °C above the maximum
+  - planned: keep, state per card (as it does)
+  - TEL-R: registered **FAIL**, all cards **FAIL** — peak-hold on every card: R1 {'aifoundry2': True, 'aifoundry3': True, 'aifoundry1-c1': False}, R2 {'aifoundry2': 'WITHIN-NOISE', 'aifoundry3': 'WITHIN-NOISE', 'aifoundry1-c1': 'WITHIN-NOISE'}, R6 {'aifoundry2': None, 'aifoundry3': None, 'aifoundry1-c1': None} (FAIL); R1 failed on a card
+- **pt-spatial-71** [(§2 'Why voltage reaches the host shire by shire')] That line is printed because it sits inside the GET_MINION_VM macro, which the per-pass power update calls. For temperature the firmware has the matching DEBUG line ... reached only through pvt_print_all(), which nothing calls
+  - planned: keep
+  - TEL-Q: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — voltage maps on every card: Q2 {'aifoundry2': None, 'aifoundry3': True, 'aifoundry1-c1': None}, Q4 {'aifoundry2': None, 'aifoundry3': False, 'aifoundry1-c1': None}, Q3 every pair False; offset sentence dropped (INSUFFICIENT)
+
+## et-soc1-testdrive (5 claims)
+- **matmul-sparse-testdrive-106** [top (KPIs); sgemm-on-the-card (sgemm-table)] Scalar fp32 SGEMM on the card: n = 64 1 shire 0.31 ms (1.7 GFLOP/s); n = 512 1 shire 68.0 ms (3.9); n = 512 32 shires 2.37 ms (113); n = 1024 32 shires 16.8 ms (127 GFLOP/s)
+  - planned: await experiment (E5); if not rerun, say the values cannot be rechecked (the page already does)
+  - LAT-G: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-107** [top (KPI 'Speedup')] Speedup, 1 -> 32 shires: 28.7x (n = 512: 68.0 ms -> 2.37 ms)
+  - planned: keep, say one card
+  - LAT-G: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-108** [top (KPI 'Mismatches'); a0-errata-1-29-and-the-compiler] Mismatches vs host reference: 0 of 1.6M, all silicon runs, fp32 vs double; 'Silicon results were still correct for all 1.6 M outputs' [despite the errata 1.29 type A hazard sys_emu flags on every fmadd.s]
+  - planned: await experiment (E5)
+  - LAT-G: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-109** [sgemm-table caption] The n >= 512 rows were launched 2-3x each; the spread was under 2%
+  - planned: await experiment (E5)
+  - LAT-G: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+- **matmul-sparse-testdrive-111** [top (KPI 'Device held'); smaller-notes] Device held per run 0.2-0.3 s, mostly runtime init; on the card runtime init takes about 0.19 s; peak host RSS is about 2 GB
+  - planned: await experiment (E5)
+  - LAT-G: registered **FAIL**, all cards **FAIL** — FAIL over 3 cards: kept repeats a1c1 3, a2 3, a3 3; a1c1 fails, a2 fails, a3 fails
+
+## et-soc1-why-low-power (20 claims)
+- **horace-lowpower-136** [(lede, kpis)] whatever is not computing is clock-gated (an integer loop on all 1,024 cores, which Esperanto calls minions, costs 1.5 W); KPI: 'A core spinning in an integer loop 1.4 mW'
+  - planned: keep; cite the catalogue's two-card addi-loop figure (2.0-2.2 W for 1,024 minions, 3 passes per card) as the established number, and say the 1.5 W loop is one card, two runs
+  - ABL-T6: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-138** [(lede, kpis, the-comparison)] It is not more efficient per FLOP at dense matmul: the A100 spends 1.3 pJ per bf16 FLOP at the board, this card 3.3 pJ in fp16 and 7.0 pJ in fp32 (KPI 3.3-7.0 vs 1.3 pJ)
+  - planned: keep, state per card (fp16 is one card)
+  - ABL-T5: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+- **horace-lowpower-139** [(lede)] the term Esperanto's slide leaves without a number, leakage, is the largest single item on this card: 23 W at 80 C
+  - planned: qualify: 'about 20-29 W at 80 C, the largest item of an idle card'
+  - IDLE-L: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — IDLE-LONG: aifoundry2 T_L - C, A80 - W, slope80 - W/C (0 passes, split not identified); aifoundry3 slope56 - W/C, offset - W (0 passes); reported, not tested: aifoundry1-c1 no long pass
+- **horace-lowpower-142** [(kpis)] KPI: Leakage at 80 C 23 W of 36 W idle; 14 W at 62 C. It grows 0.65 W per C at 80 C
+  - planned: qualify: '20-29 W' (see Horace §8 claim)
+  - IDLE-L: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — IDLE-LONG: aifoundry2 T_L - C, A80 - W, slope80 - W/C (0 passes, split not identified); aifoundry3 slope56 - W/C, offset - W (0 passes); reported, not tested: aifoundry1-c1 no long pass
+- **horace-lowpower-143** [(kpis, prec)] Energy per multiply-add, over idle: 0.32 · 2.7 · 6.0 pJ (int8 · fp16 · fp32 on random data); chart: int8 zeros 0.08, ones 0.13, random 0.32; fp16 0.21, 1.1, 2.7; fp32 0.42, 2.3, 6.0
+  - planned: keep, say one card and two runs (fp32 on both)
+  - ABL-T5: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+- **horace-lowpower-145** [cmp] Dense matmul, measured: ET 9.18 TFLOPS fp32 at 63.9 W; 18.4 TFLOPS fp16 at 61.1 W (random data, board power at 80 C)
+  - planned: keep, state per card
+  - ABL-T5: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+- **horace-lowpower-155** [putting-the-terms-together] table row: Switched capacitance ... linear in active cores (section 4); 9 to 172 nF for the whole chip, depending on workload, data and precision
+  - planned: keep, say one card
+  - ABL-T7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 FAIL)
+- **horace-lowpower-158** [putting-the-terms-together] table row: Idle floor 88 W vs 36 W; of the ET's, 23 W is leakage at 80 C
+  - planned: qualify: '20-29 W'
+  - IDLE-L: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — IDLE-LONG: aifoundry2 T_L - C, A80 - W, slope80 - W/C (0 passes, split not identified); aifoundry3 slope56 - W/C, offset - W (0 passes); reported, not tested: aifoundry1-c1 no long pass
+- **horace-lowpower-161** [putting-the-terms-together] Everything idle is clock-gated to nearly no switching power
+  - planned: keep, say which parts are one card
+  - ABL-T6: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-163** [putting-the-terms-together] On the workload it was designed for, int8 with sparse memory access, the arithmetic is 19 times cheaper than fp32 (section 4) and the comparison would be much closer; that was not measured against a GPU here
+  - planned: keep, say one card (the GPU part is already flagged as not measured)
+  - ABL-T5: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+- **horace-lowpower-166** [cdyn] table rows fp16 random (61.1 W, +24.8, 24.2 mW, 0.151 nF, 9.2e12 MACs, 2.7 pJ) and int8 random (46.3 W, +10.0, 9.7 mW, 0.061 nF, 31.5e12 MACs, 0.32 pJ)
+  - planned: keep, say one card and two runs
+  - ABL-T5: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+- **horace-lowpower-167** [cdyn] table row integer loop: 37.8 W, +1.5, 1.4 mW, 0.009 nF, 0.18e12 instructions/s, 8.1 pJ
+  - planned: keep, say one card
+  - ABL-T6: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-170** [esperanto-s-equation-measured] Capacitance: the architecture term holds. An integer loop switches 0.009 nF per minion, a fully gated tensor op 0.012 nF, int8 multiply-adds on random data 0.061 nF. The slide's 0.04 nF sits in the middle of the chip's intended workloads. Only floating-point multiply-adds on random data ... reach 0.15 to 0.17 nF
+  - planned: keep, say which rows are one card
+  - ABL-T6: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-171** [esperanto-s-equation-measured] 10 mW per core: the switching part fits for int8 ... 4 mW over idle on constant data and 10 mW on random data. ... this card's minion rail alone reads 22 W under int8 random data at the end of a 7 s run (about 83 C), 21.7 mW per minion. fp32 on random data switches 27 mW per core
+  - planned: keep, say one card; fp32 per card (27.0 a2, 24.3 mW a3)
+  - ABL-T7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 FAIL)
+- **horace-lowpower-175** [cores] Power is close to linear in active cores: 25.6 mW per minion at 256 and 512 active, 26.2 at 768 and 27.0 at 1,024; a line through zero fits 26.5 mW per minion. Idle cores cost nothing measurable; there is no cliff and no floor beyond the card's idle (chart: 26.5 mW per active minion)
+  - planned: keep, say one card; qualify 'slightly superlinear (+5% per minion from 256 to 1,024)'
+  - ABL-T7: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 FAIL)
+- **horace-lowpower-176** [activity-what-is-not-computing-costs-almost-nothing] 1,024 minions spinning in an integer loop add 1.46 W to the idle card: 1.4 mW per core, 8 pJ per instruction. That loop, four adds and a branch, issues about 0.3 instructions per cycle on hart 0 ... Esperanto's claim that RISC-V compatibility costs little is borne out
+  - planned: keep, say one card and two runs
+  - ABL-T6: registered **CARD-DIFFERENT**, all cards **CARD-DIFFERENT** — all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 REPORTED)
+- **horace-lowpower-180** [prec] Precision is the biggest lever inside the chip. On random data an int8 multiply-add costs 0.32 pJ over idle, fp16 2.7 pJ and fp32 6.0 pJ: a factor of 19 between int8, the type the chip was built for, and fp32
+  - planned: keep, say one card and two runs
+  - ABL-T5: registered **PASS**, all cards **PASS** — all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+- **horace-lowpower-187** [leakage-and-temperature] Idle board power follows the idle law from 64 to 88 C, to 0.2 W rms. At 80 C that is 23 W of leakage in a 36 W idle; at 62 C ... 14 W in 27 W
+  - planned: qualify: '20-29 W' (split weakly identified; see Horace §8)
+  - IDLE-L: registered **INSUFFICIENT**, all cards **INSUFFICIENT** — IDLE-LONG: aifoundry2 T_L - C, A80 - W, slope80 - W/C (0 passes, split not identified); aifoundry3 slope56 - W/C, offset - W (0 passes); reported, not tested: aifoundry1-c1 no long pass
+- **horace-lowpower-198** [caveats] One card. The second working card, aifoundry3, switches about 8% less power for the same work ... so the capacitances here are this card's
+  - planned: keep
+  - X5: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 FAIL); hot - cool: a2 fp32_uniform -7.04 W [-69.54, +55.47], fp32_randn +1.20 W [+0.26, +2.15]; a3 fp32_uniform -7.29 W [-18.48, +3.90], fp32_randn +1.97 W [+1.47, +2.46]; a1c1 fp32_uniform -6.92 W [-42.04, +28.20], fp32_randn -6.36 W [-49.36, +36.63]
+- **horace-lowpower-199** [method-and-sources] Every configuration ran twice for 7 s under the strict start ... Repeats agree to 0.05 W for most configurations
+  - planned: keep (n = 2 per configuration is the key limitation)
+  - ABL-R: registered **FAIL**, all cards **FAIL** — all cards: FAIL (a2 REPORTED, a3 FAIL, a1c1 REPORTED)
+
+## Items without claim ids
+- catfull CF-GAP: PASS / REPORTED; claims: E27 cross-card: aifoundry3 / aifoundry2 median 0.950 over the catalogue
+- catfull CF-COVER: PASS / PASS; claims: E27: every configuration measured, at 600 MHz, no failed launch
+- catfull CF-REP: REPORTED / REPORTED; claims: E27: pass-to-pass standard error per card

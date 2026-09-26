@@ -73,6 +73,9 @@ card gives INSUFFICIENT.
   - The "kernel" clause needs V3-MMB's pass-level mmbench int8 above-idle values, passed as `--mmb-values
     {"aifoundry2": [...], "aifoundry3": [...]}`. The test is Welch, one-sided alpha 0.01 (the lower end of the
     two-sided 98% interval) > 10 W on each card. Without the values it says "pending V3-MMB".
+    `export_mmb_values.py --data <dir> --out mmb_values.json` builds them: MMB-c's pass values for int8-tensor-L2
+    (mean_w - idle_before_w), read through `../mmb/reduce.py`'s own `load_card` and `e1_values`, so the same drops
+    apply. `../reduce_all.sh` runs it before this reducer.
 - **ABLB-2c.** For the aifoundry3 band, 0.92 x the aifoundry2 mean +- 1 W. On each card the 99% interval must exclude
   0 and the mean must lie in the band.
 - **ABLB-3c.** The x value is nnz_a / a_elems x (rows on in row_mask) / 16, as the page's fit. It comes from each

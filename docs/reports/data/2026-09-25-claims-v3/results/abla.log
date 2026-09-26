@@ -1,0 +1,24 @@
+ABL-T1      CARD-DIFFERENT -0.0 vs +0.0 and vs ones: a2 negzero - zeros > +6 W +8.36 W [+7.21, +9.52] / negzero - ones within +-1 W -0.15 W [-0.80, +0.50] -> PASS; a3 negzero - zeros > +6 W +8.05 W [+7.62, +8.48] / negzero - ones within +-1 W -0.04 W [-1.14
+            CARD-DIFFERENT all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 FAIL)
+ABL-T2      PASS           operand order: a2 A ones/B randn - A randn/B ones +3.73 W [+2.85, +4.62] -> PASS; a3 A ones/B randn - A randn/B ones +3.44 W [+2.86, +4.01] -> PASS
+            PASS           all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+ABL-T3      PASS           bit-field ladder: a2 fp32_signs - fp32_ones +5.05 W [+4.36, +5.74], fp32_mant - fp32_signs +8.75 W [+7.96, +9.55], fp32_randn - fp32_mant +3.01 W [+2.25, +3.77] -> PASS; a3 fp32_signs - fp32_ones +4.79 W [+4.01, +5.58], fp32_mant 
+            PASS           all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+ABL-T4      FAIL           structured matrices vs the flip model: a2 m_hadamard - E15 13.78 W within +-1 W -0.14 W [-1.09, +0.80] x, m_butterfly - E15 2.82 W within +-1 W +0.03 W [-0.42, +0.47], m_kaleidoscope - E15 27.55 W within +-1 W -0.51 W [-1.66, +0.6
+            FAIL           all cards: FAIL (a2 FAIL, a3 FAIL, a1c1 REPORTED)
+ABL-T5      PASS           pJ per MAC: a2 int8 randn pJ/MAC +0.313  [+0.297, +0.330], fp16 randn pJ/MAC +2.661  [+2.635, +2.686], fp32/int8 pJ per MAC ratio in [15, 23] +18.884  [+18.312, +19.475] -> PASS; a3 int8 randn pJ/MAC +0.262  [+0.238, +0.287], fp16
+            PASS           all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+ABL-T5-EM4  PASS           fp16/int8 rows: a2 6/6 exclude 0 -> PASS; a3 6/6 exclude 0 -> PASS; a3/a2 fp16_zeros 0.400, fp16_ones 0.861, fp16_randn 0.906, int8_zeros 0.551, int8_ones 0.712, int8_randn 0.837 (1/6 in the predicted 0.92 +- 0.04)
+            PASS           all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+ABL-T6      CARD-DIFFERENT integer loop: a2 spin over idle +1.51 W [+0.58, +2.44] -> PASS; a3 spin over idle +0.40 W [-0.07, +0.86] x -> FAIL
+            CARD-DIFFERENT all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 REPORTED)
+ABL-T7      CARD-DIFFERENT active minions: a2 ratio 1.094, intercept -0.95 W (hi -0.10) -> PASS; a3 ratio 1.239, intercept -1.77 W (hi -1.15) -> FAIL
+            CARD-DIFFERENT all cards: CARD-DIFFERENT (a2 PASS, a3 FAIL, a1c1 FAIL)
+ABL-T8      PASS           anchors: a2 fp32_ones - fp32_zeros +8.52 W [+7.70, +9.34], fp32_randn - fp32_zeros +25.33 W [+24.49, +26.17] -> PASS; a3 fp32_ones - fp32_zeros +8.09 W [+7.33, +8.86], fp32_randn - fp32_zeros +23.91 W [+23.51, +24.30] -> PASS
+            PASS           all cards: PASS (a2 PASS, a3 PASS, a1c1 REPORTED)
+ABL-R       FAIL           flip-model refit: a2 loo rms 1.008 W over 14 patterns, drift 0.80 W/C, launch 80.1 C; a3 loo rms 0.906 W over 14 patterns, drift 0.38 W/C, launch 57.4 C -> FAIL (decided on aifoundry3)
+            FAIL           all cards: FAIL (a2 REPORTED, a3 FAIL, a1c1 REPORTED)
+ABL-EM4c    PASS           cycles per op: a2 1320 launches, 0 off, {'fp32': [546.0], 'fp16': [546.0], 'int8': [318.0]} -> PASS; a3 1320 launches, 0 off, {'fp32': [546.0], 'fp16': [546.0], 'int8': [318.0]} -> PASS
+            PASS           all cards: PASS (a2 PASS, a3 PASS, a1c1 PASS)
+ABL-EM4d    PASS           a2 vs 21 Sep: 9/9 include 0, 9 within 2% -> PASS
+            PASS           all cards: PASS (a2 PASS, a3 N/A, a1c1 N/A)

@@ -863,3 +863,82 @@ aifoundry3 only, the launch targets become: V3-ABL-A 57 C (preheat 62, was 55 / 
 55 / 57), V3-X5's cool arm 57 C (preheat 62, was 55 / 60); the hot arm is unchanged. The registered correction of each run
 to the launch temperature (55.8 C, the leakage slope 0.55 W/C) is unchanged, so the reduction is the same; the failed
 block is re-run at the end of aifoundry3's schedule.
+
+## C1 (26 Sep 2026, AFTER the data): a reducer bug in MEM-P5 (P5b) and MEM-P6 — a post-data correction, not an amendment
+
+PLAN3 registers that "every latency is re-referenced to the pass's own L1 hit" (the version-3 memprobe build reads a
+timed L1 hit at 17 raw cycles instead of the 19 September build's 10, so every pass needs a shift of 7; it is 7 in all
+15 passes). `tools/claims-v3/mem/prereg/extra_values.py` applies that shift to every program except the refresh series,
+which it loads with shift 0 (`load(D, "refresh_jit", 0)`), so the refresh-series latencies sit 7 cycles high and the
+row-hit / row-miss classification that P5b and P6r rest on is off. The registered outcomes stay as run: MEM-P5's P5b
+and MEM-P6 FAIL on every card (results/mem.json). With the refresh series re-referenced like every other program
+(`tools/claims-v3/mem/post_fix_refresh_shift.py`, output `results/mem-refresh-shift.json`; the same script without
+the shift reproduces the registered values exactly), P5b reads 11.0–11.6 cycles on every pass of every card (band
+[10, 13]) and P6r's row-hit fraction with no refresh between reads 0.9989–1.0000 (>= 0.98), across a refresh
+0.0000–0.0005 (<= 0.02). The pages give the re-referenced values and say that the registered test failed because of
+this bug. MEM-P5's other failing part (the locked loop's maximum) is not affected: the version-3 build's loop period
+is 558 cycles (576 on 19 September), and its slow load now lands inside the refresh.
+
+## Implementation note (26 Sep 2026, after the first reduction): the inputs of RL-f, RL-X4 and ABLB-2b
+
+*Implementation note (26 Sep 2026; no registered rule, band or drop changed):* the first reduction of the finished
+campaign (`tools/claims-v3/reduce_all.sh` into `results/`) ran the V3-RL and V3-ABL-B reducers without the values three
+registered rules take from other experiments, so these read INSUFFICIENT or pending for that reason alone: RL-X4 (its
+FLOP side "over V3-ABL-A blocks", `--flop`), RL-f on aifoundry1-c1 (its own catalogue's low edge, from V3-CATFULL,
+`--low-edge`; A2.rl) and ABLB-2b's kernel clause (V3-MMB's pass-level mmbench int8 above-idle, `--mmb-values`). They are
+now built as registered by three exporters, which `reduce_all.sh` runs before the reducer that reads them (output in
+`results/inputs/`):
+- `rl/export_flop.py`: per card and V3-ABL-A block, fp32_randn ("random") and fp32_zeros ("zeros"), switching / per_s
+  in pJ per MAC over the kept runs of the passes abla used (the energy manual's tensor bars, which the ridge page halves
+  for its FLOP side); the reducer halves it to pJ per FLOP;
+- `rl/export_low_edge.py`: aifoundry1-c1 only, per complete V3-CATFULL pass (its three parts together)
+  0.5 x (l1fill/stride32/zeros + tstore/scp/zeros) pJ/B, as `rings_relay_extra.py` computed the 23 Sep low edge, with
+  the bursts cut by catfull's own reducer code; aifoundry2 and aifoundry3 keep the 23 Sep catalogue;
+- `ablb/export_mmb_values.py`: MMB-c's int8-tensor-L2 pass values (mean_w - idle_before_w), read through V3-MMB's own
+  reducer code, so its drops apply.
+
+Two code changes go with them. The V3-RL reducer read the 23 Sep catalogue from
+`docs/reports/data/2026-09-23-energy-manual/catalogue.json` in the tree, which the energy manual's version-3 rebuild
+overwrites with the V3-CATFULL catalogue; it now reads the file as committed (git blob `f574b851`, commit de26273) and
+records the source, and without the new inputs it reproduces the first reduction's `rl.json` exactly. ABLB-2b's
+all-cards reading now names the kernel clause's status. Only `rl.json`, `ablb.json` and `ablb.runs.json` (with their
+logs) and the page map were rewritten; every other item of the two reducers is unchanged.
+
+## C2 (26 Sep 2026, AFTER the data): every card's ablation values carry a launch-temperature offset — a post-data note
+
+The registered switching metric of V3-ABL-A and V3-ABL-B is p_early' - leak x (t_early - launch) - p_before, with a
+fixed per-card reference: launch = 80.9 C, leak 0.81 W/C for aifoundry2 (and aifoundry1-c1, which takes aifoundry2's
+parameters), launch = 55.8 C, leak 0.55 W/C for aifoundry3. Since p_before is read at the run's actual launch, each run's
+switching is off by leak x (t_launch - launch): low when the run launched above the reference, high when below. The runs
+did not launch at the references (the die reading is in whole degrees; amendment A5 moved aifoundry3's target to 57 C
+and kept its 55.8 C reference):
+
+| | V3-ABL-A kept runs | V3-ABL-B kept runs |
+|---|---|---|
+| aifoundry2 | launch 80.0-81.0 C (mean 80.13): reads 0.62 W high (0.73 high to 0.08 low) | mean 80.30 C: 0.49 W high |
+| aifoundry3 | launch 57.0-58.0 C (mean 57.45): reads 0.91 W low (0.66-1.21) | mean 57.28 C: 0.81 W low |
+| aifoundry1-c1 | launch 80.0 C on every run: reads 0.73 W high | 0.73 W high |
+
+(results/abla.runs.json and ablb.runs.json, field t_launch; params_by_card.) So about 1.5 W of any aifoundry3-against-
+aifoundry2 difference in these switching values comes from the reduction, not the cards (aifoundry1-c1 against aifoundry2:
+about 0.1-0.2 W). A5 said "the reduction is the same", which was true of the procedure but not of its result. The
+registered outcomes stand as computed; the pages that give or compare these values state the offsets. A per-run value at
+the actual launch is switching + leak x (t_launch - launch). V3-X5 is not affected: it references each arm to its own
+target + 0.9 C.
+What it changes (tools/ettelem/build_cards_data.py --v3 writes both, the second as `at_launch`): over the Horace
+patterns, aifoundry3's least-squares ratio to aifoundry2's switching is 0.895 as registered and 0.969 with every run at
+its own launch temperature; aifoundry1-c1's is 1.009 and 1.004. The at-launch 0.969 agrees with V3-CATFULL's
+independent catalogue ratio (median 0.972, E46), so most of aifoundry3's apparent 10% deficit in V3-ABL-A is the
+reference offset, and the cards differ by about 3%. The model scales (the aifoundry2 flip model's prediction to each
+card) move from 1.000 / 0.883 / 0.995 to 0.956 / 0.926 / 0.959 (aifoundry2 / aifoundry3 / aifoundry1-c1).
+
+**C2, revised the same day (review of the offsets).** The launch temperatures above are the die sensor's whole-degree
+readings, while the references (80.9 C, 55.8 C) are thermal-model temperatures at the 21 and 22 September launches, which
+were made on a downward step of the reading (cooling from a preheat; the 21 September thermal network puts the die at
+80.96 C when the reading first shows 80). If each version-3 launch was likewise at a downward step (die = reading + 0.96
+C), the offsets are 0.18 W low (aifoundry2), 1.41 W low (aifoundry3) and 0.05 W low (aifoundry1-c1) instead of the
+0.60 high / 0.88 low / 0.73 high above (these two are over the Horace patterns' kept runs). Under that reading aifoundry2's
+model scale is 0.994, matching its 21 September fit, which favours it; the whole-degree reading cannot settle it. The
+conclusion holds under both: at the same die temperature aifoundry3 switches 0.958-0.969 of aifoundry2 (registered 0.895;
+the catalogue's independent 0.972), and aifoundry1-c1 1.004 of it (registered 1.009). Model scales: registered
+0.986 / 0.882 / 0.995; at launch 0.956-0.994 / 0.926-0.952 / 0.959-0.997. Pages state the range.

@@ -12,8 +12,10 @@ bash tools/claims-v3/rl/block.sh <pass>              # one pass on the local car
 V3_DEVICE=1 bash tools/claims-v3/rl/block.sh <pass>  # on aifoundry1: card 1 (V3_DEVICE=0: card 0; required there)
 bash tools/claims-v3/rl/block.sh <pass> --smoke      # every component once, about 20 s of device time
 V3_DRY=1 bash tools/claims-v3/rl/block.sh <pass>     # print every device call, touch nothing
+python3 tools/claims-v3/rl/export_flop.py --runs <results>/abla.runs.json --out flop.json      # --flop (RL-X4)
+python3 tools/claims-v3/rl/export_low_edge.py --data <dir with one directory per card> --out low_edge.json   # --low-edge (RL-f)
 python3 tools/claims-v3/rl/reduce.py --data <dir with one directory per card> --out verdicts.json \
-    --flop abla_flop.json [--low-edge catfull_low_edge.json] [--cards aifoundry1-c0,aifoundry1-c1,aifoundry2,aifoundry3]
+    --flop flop.json [--low-edge low_edge.json] [--cards aifoundry1-c0,aifoundry1-c1,aifoundry2,aifoundry3]
 python3 tools/claims-v3/rl/quality.py <pass dir> --scope all|busy|none   # a pass's windows and 600 MHz rule (files only)
 ```
 
@@ -280,6 +282,10 @@ the verdict over the other cards for information. `per_card` holds every card's 
 `{"aifoundry1-c0": [...], "aifoundry1-c1": [...]}`. Each value is one catalogue pass on that card (V3-CATFULL):
 0.5 x (l1fill/stride32/zeros + tstore/scp/zeros) pJ/B, as `rings_relay_extra.py` computed it for 23 Sep. At least
 two passes are needed. aifoundry2 and aifoundry3 always use the 23 Sep catalogue, as registered.
+`export_low_edge.py` builds it: the catfull bursts cut by `../catfull/reduce.py`'s own `load_card` (the used blocks,
+`cflib.pass_bursts`' drop rules), one value per complete catfull pass (its three parts together; the two rows may sit in
+different parts). By default it writes the campaign's cards outside the 23 Sep catalogue (aifoundry1-c1) and prints
+aifoundry2's and aifoundry3's V3-CATFULL values for comparison only. `../reduce_all.sh` runs it before the reducer.
 
 ## Reduction (reduce.py)
 
@@ -287,7 +293,10 @@ two passes are needed. aifoundry2 and aifoundry3 always use the 23 Sep catalogue
 `aifoundry1-c1/`), each laid out like `DATA_ROOT`; every card directory with an `rl/` inside is read. Run the
 reducer inside a repository tree, because it reads these committed files (and `quality.py` beside it):
 - the 23 Sep rl-passes (the byte side of RL-X4);
-- the 23 Sep catalogue (the bracket low edge of RL-f);
+- the 23 Sep catalogue (the bracket low edge of RL-f). The energy manual's version-3 rebuild (26 Sep) rewrites
+  `docs/reports/data/2026-09-23-energy-manual/catalogue.json` with the V3-CATFULL cards, so the 23 Sep file is kept
+  beside it as `catalogue-23sep.json` (byte for byte the catalogue.json of commit de26273) and the reducer reads that
+  (the cat and catfull reducers too); RL-f's `per_card` records the source (`low_edge_source`). On the campaign data this gives exactly the first reduction's RL-f;
 - the ridge-points page (the RL-X4 ridges).
 
 It works on partial data: any cards, or fewer passes. An item without 3 kept passes per card is INSUFFICIENT.
@@ -324,6 +333,9 @@ More on RL-X4:
 - The FLOP side comes from V3-ABL-A through `--flop`, a JSON file of this shape:
   `{"unit": "pJ/FLOP", "aifoundry2": {"random": [one value per ABL-A block, fp32 randn], "zeros": [fp32 zeros]},
   "aifoundry3": {...}}`. With `"unit": "pJ/MAC"` the values are halved. Without `--flop`, RL-X4 is INSUFFICIENT.
+  `export_flop.py` builds it from V3-ABL-A's `abla.runs.json`: per run switching / per_s x 1e12 pJ/MAC (the energy
+  manual's tensor bars, `tools/ettelem/build_energy_manual.py` v3_bar, which the ridge page halves for its FLOP side),
+  kept runs in `passes_used`, averaged within each block, `"unit": "pJ/MAC"`. `../reduce_all.sh` runs it after abla.
 
 **Known limits of the registered rules.** The code implements them as written.
 - **RL-g's scratchpad parts are confounded by the contents arm.** Every V3-RL pass is prefilled, zeros and random

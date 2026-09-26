@@ -1,0 +1,24 @@
+item             registered      all cards       reading (registered)
+MMB-a            PASS            PASS            every kept launch of every pass inside its cycles/op band on both cards
+MMB-b            PASS            PASS            throughput inside the bands, every kept launch exact with 0 bad minions, and the smoke tests pass on aifoundry3
+MMB-c            PASS            REPORTED        above-idle power real (99% t excludes 0) and inside the registered bands on both cards; a3/a2 ratios {'fp32-tensor-L2': 0.9481, 'fp16-tensor-L2': 0.9529, 'int8-tensor-L2': 0.9405, 'fp32-tensor-DRAM': 0.9513} inside 0.85-1.0
+MMB-d            PASS            REPORTED        board per W higher on a3 by >= 8% in every L2 mode (Welch, alpha 0.01/3): stated as the card at its operating temperature, not a card property
+MMB-e            PASS            REPORTED        the A100 wins on both cards with the lead inside the registered bands {'aifoundry2': 1.3308, 'aifoundry3': 1.1329}
+MMB-f            PASS            CARD-DIFFERENT  power rises within each 6 s L2 workload on both cards (a2 by 0.5-2 W) and not on the DRAM workload
+MMB-X1           PASS            PASS            a PASS, b PASS, c PASS
+MMB-X1/a         PASS            PASS            X1(a) every kept launch inside the band on both cards
+MMB-X1/b         PASS            PASS            X1(b) every kept launch inside the band on both cards; no card above 560 cycles/op
+MMB-X1/c         PASS            PASS            X1(c) every kept launch inside the band on both cards; 480-560 cycles/op on both cards: the own-shire streaming rate binds and the shared pool explains 7.3 B/cycle
+MMB-T            FAIL            CARD-DIFFERENT  P1 FAIL, P2 PASS, P3 CARD-DIFFERENT, P4-remainder PASS, P4-minion CARD-DIFFERENT, P5-dram CARD-DIFFERENT, P5-matmul PASS, P6 PASS, P7 CARD-DIFFERENT, P8 PASS, P9 PASS, P10 PASS
+MMB-T/P1         FAIL            REPORTED        busy slope FAIL
+MMB-T/P2         PASS            REPORTED        minion share PASS
+MMB-T/P3         CARD-DIFFERENT  REPORTED        idle after the load CARD-DIFFERENT
+MMB-T/P4-remainder PASS            PASS            DRAM remainder PASS
+MMB-T/P4-minion  CARD-DIFFERENT  CARD-DIFFERENT  minion rail under DRAM load
+MMB-T/P5-dram    CARD-DIFFERENT  CARD-DIFFERENT  DDR droop under DRAM load CARD-DIFFERENT
+MMB-T/P5-matmul  PASS            CARD-DIFFERENT  DDR under the matmul
+MMB-T/P6         PASS            PASS            minion droop PASS
+MMB-T/P7         CARD-DIFFERENT  CARD-DIFFERENT  edges
+MMB-T/P8         PASS            PASS            PMIC average vs board
+MMB-T/P9         PASS            PASS            clock
+MMB-T/P10        PASS            REPORTED        cooling after the matmul (a2)

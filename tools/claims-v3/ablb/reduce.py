@@ -249,6 +249,7 @@ def main():
                                         for c in C.CARDS) + f"; kernel clause: {kernel['status']}", outcome=oc, extra={"kernel_clause": kernel})
     four(it, c2b, "each", "difference")
     it["all_cards"]["kernel_clause"] = kernel_clause(RB, ALL, it["all_cards"]["outcome"] == "PASS")
+    it["reading_all_cards"] += f"; kernel clause: {it['all_cards']['kernel_clause']['status']}"
     items.append(it)
 
     # ---- 2c int8_randn_l1 above idle: a2 9.5-10.5 W; a3 0.92 x a2 mean +- 1 W (the band needs aifoundry2's mean,

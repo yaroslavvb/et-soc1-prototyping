@@ -1,0 +1,34 @@
+aifoundry1-c1: kept passes [1, 2, 3, 4, 5, 6]; idle clock 600 MHz; skipped 
+aifoundry2: kept passes [1, 2, 3, 4, 5, 6]; idle clock 600 MHz; skipped 
+aifoundry3: kept passes [1, 2, 3, 4, 5, 6]; idle clock 600 MHz; skipped 
+dropped bursts: 21
+RL-a   PASS           all_cards PASS           mesh slope (five 1 KB xshire rings): no card difference at 99% (a2 - a3 +0.055, [-1.134, +1.244]): pooled 1.753 pJ/B/hop (+-50% on the page)
+RL-b   PASS           all_cards PASS           step a2 5.17 [3.35, 6.99] (n=6) pJ/B: above 0, leaving the shire is a step beyond one hop; a3 4.18 [-0.97, 9.33] (n=6) (not decided)
+RL-c   PASS           all_cards PASS           shire-c4 - shire a3 1.34 [0.71, 1.98] (n=6) pJ/B (predicted +1.0): small messages cost more; a2 also > 0 1.51 [0.66, 2.37] (n=6)
+RL-c   PASS           all_cards PASS           xshire1-c4 - xshire1 a3 4.88 [1.90, 7.86] (n=6) pJ/B (predicted +3.6): small messages cost more; a2 also > 0 6.08 [3.46, 8.69] (n=6)
+RL-d   PASS           all_cards PASS           relay DRAM/next shire the same on both cards at 99%: pooled 12.97x (a2/a3 99% [0.876, 1.132])
+RL-d   PASS           all_cards CARD-DIFFERENT relay DRAM a3/a2 0.966 (99% [0.912, 1.023]): the same on both cards at 99%; a2 111.3 [104.8, 117.9] (n=6), a3 107.5 [103.4, 111.6] (n=6) pJ/B
+RL-f   FAIL           all_cards FAIL           relay own scratchpad a2 4.05 [3.74, 4.37] (n=6), a3 4.11 [3.81, 4.42] (n=6) vs low edge a2 4.37, a3 4.30: at the low edge (not below at 99%)
+RL-g   PASS           all_cards PASS           L1 level a2 - a3: no card difference at 99% (a2 - a3 +0.017, [-0.167, +0.200]): pooled 0.759 pJ/B
+RL-g   PASS           all_cards PASS           own-scratchpad level a3 - a2: no card difference at 99% (a3 - a2 -0.048, [-2.033, +1.937]): pooled 3.095 pJ/B [confounded: every pass is prefilled, zeros/random alternating; see RL-h]
+RL-g   PASS           all_cards PASS           L2 and own scratchpad the same within +-10% on both cards: a2 -0.482 [-2.376, 1.411] (n=6), a3 -0.245 [-2.852, 2.363] (n=6) pJ/B [confounded: the scratchpad bursts are prefilled, zeros/random alternating; see RL-h]
+RL-h   PASS           all_cards CARD-DIFFERENT scp-local by prefill: 2 zeros 2.11 [1.81, 2.41] (n=3), random 4.13 [4.08, 4.17] (n=3); 3 zeros 2.10 [1.84, 2.36] (n=3), random 4.04 [3.54, 4.54] (n=3) pJ/B (in both bands on both cards)
+RL-h   PASS           all_cards CARD-DIFFERENT a3 - a2 at equal contents: zeros -0.012 [-0.199, +0.174]; random -0.084 [-0.575, +0.407] pJ/B: inside +-0.1: the card difference is contents
+RL-X3  PASS           all_cards PASS           spin - pair: a2 0.45 [0.05, 0.85] (n=6), a3 0.32 [0.06, 0.59] (n=6) W: less than spinning on both cards
+RL-X3  FAIL           all_cards FAIL           spin - neigh: a2 0.17 [-0.20, 0.55] (n=6), a3 0.18 [-0.07, 0.42] (n=6) W: about as much as spinning (+-0.55 W)
+RL-X3  FAIL           all_cards FAIL           spin - shire: a2 0.14 [-0.27, 0.55] (n=6), a3 0.12 [-0.15, 0.40] (n=6) W: about as much as spinning (+-0.55 W)
+RL-X3  PASS           all_cards PASS           spin - xshire1: a2 0.76 [0.20, 1.31] (n=6), a3 0.74 [0.52, 0.95] (n=6) W: less than spinning on both cards
+RL-X3  INSUFFICIENT   all_cards INSUFFICIENT   spin - xshire16: fewer than 3 kept passes on a card (a2 n=0, a3 n=0)
+RL-X3  PASS           all_cards PASS           spin - xshire8: a2 0.61 [0.30, 0.92] (n=6), a3 0.78 [0.40, 1.16] (n=6) W: less than spinning on both cards
+RL-X3  PASS           all_cards PASS           spin - xshire2: a2 1.04 [0.66, 1.42] (n=6), a3 1.09 [0.78, 1.40] (n=6) W: less than spinning on both cards
+RL-X3  PASS           all_cards PASS           spin - xshire4: a2 1.18 [0.77, 1.59] (n=6), a3 1.13 [0.83, 1.43] (n=6) W: less than spinning on both cards
+RL-X3  PASS           all_cards PASS           spin - xshire6: a2 0.82 [0.47, 1.18] (n=6), a3 0.92 [0.69, 1.15] (n=6) W: less than spinning on both cards
+RL-X3  CARD-DIFFERENT all_cards CARD-DIFFERENT spin - shire-c4: a2 0.52 [-0.00, 1.05] (n=6), a3 0.56 [0.26, 0.85] (n=6) W: less than spinning on aifoundry3 only
+RL-X3  CARD-DIFFERENT all_cards CARD-DIFFERENT spin - xshire1-c4: a2 0.24 [-0.23, 0.72] (n=6), a3 0.35 [0.13, 0.56] (n=6) W: less than spinning on aifoundry3 only
+RL-X3  CARD-DIFFERENT all_cards CARD-DIFFERENT (d) nocbench one-hart spin W over idle: a2 [2.62, 2.56, 2.35, 2.21, 2.7, 2.59], a3 [2.5, 2.4, 2.5, 2.24, 2.31, 2.53] (band 2.2-2.6): in band every pass on aifoundry3
+RL-X3  CARD-DIFFERENT all_cards CARD-DIFFERENT (d) memhier two-hart spin W over idle: a2 [2.22, 2.36, 2.61, 2.41, 2.17, 2.46], a3 [2.48, 2.31, 2.4, 2.4, 2.43, 2.43] (band 2.3-2.8): in band every pass on aifoundry3
+RL-X3  PASS           all_cards PASS           (e) inside-shire ring W above mesh-ring W: inside minus across W a2 [0.74, 0.73, 0.49, 0.6, 0.64, 0.58], a3 [0.79, 0.46, 0.78, 0.72, 0.82, 0.75]: every pass on both cards
+RL-X3  CARD-DIFFERENT all_cards CARD-DIFFERENT (e) scp-remote cheaper than s->s+8 and s->s+16: ring minus scp-remote pJ/B a2 [7.33, 1.38, 6.85, 3.42, 7.37, 1.54], a3 [5.76, 0.95, 7.66, -2.24, 8.4, -0.56]: every pass on aifoundry2; s->s+16 untested in passes where its burst was dropped (aifoundry2 kept in 0 of 6, aifoundry3 kept in 0 of 6)
+RL-X4  FAIL           all_cards FAIL           L3, random, spec ridge: balance a2 3.972 [2.394, 5.609], a3 4.634 [2.72, 6.587] FLOP/B vs ridge 3.00: ranges overlap: no verdict
+RL-X4  FAIL           all_cards FAIL           other shire's scratchpad, random, spec ridge: balance a2 2.515 [1.384, 3.687], a3 2.789 [1.632, 3.971] FLOP/B vs ridge 3.00: ranges overlap: no verdict
+RL-X4  FAIL           all_cards FAIL           in-shire TensorSend (shire ring), zeros, measured ridge: balance a2 10.428 [7.407, 15.86], a3 25.45 [18.662, 37.56] FLOP/B vs ridge 8.78: ranges overlap: no verdict
