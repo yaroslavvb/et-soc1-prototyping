@@ -129,6 +129,18 @@ h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
 .ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
 .ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-sortable th[aria-sort] { padding: 0; }
+.ck-sortable th .ck-sort { font: inherit; font-weight: inherit; color: inherit; text-align: inherit; background: none; border: 0;
+  width: 100%; min-height: 32px; padding: inherit; padding: 6px 8px; cursor: pointer; }
+.ck-sortable th .ck-sort::after { content: ' \2195'; color: var(--muted); font-weight: 400; }
+.ck-sortable th[aria-sort="ascending"] .ck-sort::after { content: ' \2191'; color: var(--ink); }
+.ck-sortable th[aria-sort="descending"] .ck-sort::after { content: ' \2193'; color: var(--ink); }
+.ck-sortable th .ck-sort:focus-visible { outline: 2px solid var(--c1); outline-offset: -2px; }
+.ck-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 8px 0 6px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-filter input { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 8px; padding: 4px 8px; min-height: 32px; width: min(260px, 100%); }
+.ck-filter input:focus-visible { outline: 2px solid var(--c1); outline-offset: 1px; }
+.ck-filter-n { color: var(--muted); font-variant-numeric: tabular-nums; }
 /* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
    letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
 th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
@@ -152,7 +164,9 @@ th.num { white-space: normal; }
    Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
    --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
    API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
-   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame. Every mark with a tooltip is reachable from the keyboard. */
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame.
+   Added 26 Sep 2026: sortTable (sortable, filterable tables) and the card registry (cards, card, cardsIn, cardSeg,
+   pick, cardMark, cardLegend): aifoundry2 --c1 dot, aifoundry3 --c2 ring, aifoundry1-c1 --c3 diamond, all cards --ink. Every mark with a tooltip is reachable from the keyboard. */
 window.CK = (function () {
   'use strict';
   const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
@@ -398,10 +412,11 @@ window.CK = (function () {
     const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
     const m = it.mark || 'box';
     const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'diamond' ? el('polygon', {points: '9,0 14,5 9,10 4,5'}, s)
       : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
-    if (m === 'dot' || m === 'box') e.style.fill = c;
+    if (m === 'dot' || m === 'box' || m === 'diamond') e.style.fill = c;
     else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
-    if (m === 'dash') e.style.strokeDasharray = '4 3';
+    if (it.dash) e.style.strokeDasharray = it.dash; else if (m === 'dash') e.style.strokeDasharray = '4 3';
     return s;
   }
   function legend(hostEl, items, o) {
@@ -463,6 +478,7 @@ window.CK = (function () {
     }
     h.appendChild(g); set(api.value, false);
     api.set = v => set(v, true);
+    api.quiet = v => set(v, false);  // show v as selected without calling onChange
     return api;
   }
   function range(hostEl, o) {
@@ -497,6 +513,124 @@ window.CK = (function () {
     return t;
   }
 
+  /* ---- cards: one registry for every page (fixed colour, mark and label per card), a shared card selector and a picker
+     for values shaped {mean, se, n, per_card: {<card>: {mean, se, n}}}. aifoundry1-c0 is kept for old data only: it is
+     excluded from the version-3 campaign (amendment A4) and never offered by cardSeg unless a page passes it. ---- */
+  const CARDS = [
+    {id: 'aifoundry2', short: 'a2', label: 'aifoundry2', color: 'var(--c1)', mark: 'dot'},
+    {id: 'aifoundry3', short: 'a3', label: 'aifoundry3', color: 'var(--c2)', mark: 'ring'},
+    {id: 'aifoundry1-c1', short: 'a1c1', label: 'aifoundry1 card 1', color: 'var(--c3)', mark: 'diamond'},
+    {id: 'aifoundry1-c0', short: 'a1c0', label: 'aifoundry1 card 0', color: 'var(--ref)', mark: 'box'},
+  ];
+  const POOLED = {id: 'pooled', short: 'all', label: 'all cards', color: 'var(--ink)', mark: 'dot'};
+  const cardIndex = {};
+  CARDS.forEach(c => { cardIndex[c.id] = c; cardIndex[c.short] = c; });
+  /* The registry entry for a card id or short name; an unknown card gets --ref and its own name. */
+  function card(id) {
+    if (id === 'pooled' || id === 'all') return POOLED;
+    return cardIndex[id] || {id, short: id, label: id, color: 'var(--ref)', mark: 'box'};
+  }
+  /* The cards present in an object's keys (or a list), in registry order, then any others in their order. */
+  function cardsIn(keysOrObj) {
+    const ks = Array.isArray(keysOrObj) ? keysOrObj : Object.keys(keysOrObj || {});
+    const norm = ks.map(k => (cardIndex[k] ? cardIndex[k].id : k));
+    return CARDS.map(c => c.id).filter(id => norm.includes(id)).concat(norm.filter(k => !cardIndex[k]));
+  }
+  /* A card selector on bus('card'): options are o.cards (default: every registered card but aifoundry1-c0), with
+     "all cards" first when o.pooled. Every cardSeg on a page follows the others. */
+  function cardSeg(hostEl, o) {
+    o = o || {};
+    const ids = (o.cards || CARDS.filter(c => c.id !== 'aifoundry1-c0').map(c => c.id)).map(k => card(k).id);
+    const opts = (o.pooled ? [['pooled', o.pooledLabel || POOLED.label]] : []).concat(ids.map(id => [id, card(id).label]));
+    const b = bus(o.bus || 'card');
+    const start = b.value != null && opts.some(x => x[0] === b.value) ? b.value : (o.value || opts[0][0]);
+    const api = seg(hostEl, {label: o.label == null ? 'Card' : o.label, options: opts, value: start,
+      onChange: v => { b.emit(v, api); if (o.onChange) o.onChange(v); }});
+    b.on((v, from) => { if (from !== api && opts.some(x => x[0] === v) && api.value !== v) { api.quiet(v); if (o.onChange) o.onChange(v); } });
+    return api;
+  }
+  /* {mean, se, n, card} of v for a card ('pooled' = v itself), or null when the card has no value (never a zero). */
+  function pick(v, id) {
+    if (v == null) return null;
+    if (typeof v === 'number') return {mean: v, se: null, n: null, card: 'pooled'};
+    const c = id == null || id === 'pooled' || id === 'all' ? null : card(id).id;
+    const src = c == null ? v : (v.per_card || {})[c];
+    if (src == null) return null;
+    const m = typeof src === 'number' ? src : src.mean;
+    if (m == null || !isFinite(m)) return null;
+    return {mean: m, se: typeof src === 'number' ? null : (src.se == null ? null : src.se), n: typeof src === 'number' ? null : (src.n == null ? null : src.n), card: c || 'pooled'};
+  }
+  /* A card's mark at (x, y) in an SVG group: dot, ring, diamond or box, in the card's colour (or colour, if given). */
+  function cardMark(g, id, x, y, r, colour) {
+    const c = Object.assign({}, card(id)), R = r || 4;
+    if (colour) c.color = colour;
+    let e;
+    if (c.mark === 'diamond') e = el('polygon', {points: `${x},${y - R * 1.25} ${x + R * 1.25},${y} ${x},${y + R * 1.25} ${x - R * 1.25},${y}`}, g);
+    else if (c.mark === 'box') e = el('rect', {x: x - R, y: y - R, width: 2 * R, height: 2 * R}, g);
+    else e = el('circle', {cx: x, cy: y, r: c.mark === 'ring' ? R - 0.5 : R}, g);
+    if (c.mark === 'ring') { e.style.fill = 'var(--surface)'; e.style.stroke = c.color; e.style.strokeWidth = '2'; }
+    else e.style.fill = c.color;
+    return e;
+  }
+  /* Legend items for a list of cards (for legend()). */
+  const cardLegend = ids => ids.map(id => { const c = card(id); return {key: c.id, label: c.label, color: c.color, mark: c.mark}; });
+
+  /* ---- a sortable, filterable table: click a header to sort (aria-sort), numbers parsed with the true minus, thin
+     spaces and thousands commas; o.filter adds a text box that hides rows not containing it. Rows keep their DOM
+     nodes, so any listeners on them survive. A header with data-nosort is left alone. ---- */
+  function cellValue(td) {
+    const raw = (td.getAttribute('data-sort') != null ? td.getAttribute('data-sort') : td.textContent).trim();
+    const t = raw.replace(/−/g, '-').replace(/[   ,]/g, '').replace(/^[~≈<>≤≥]\s*/, '');
+    const m = t.match(/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?/i);
+    return m && (t.length === m[0].length || /^[\s%×x°a-zA-Zµ/()]/.test(t.slice(m[0].length))) ? {n: parseFloat(m[0])} : {s: raw.toLowerCase()};
+  }
+  function sortTable(table, o) {
+    o = o || {};
+    const t = $(table), tb = t.tBodies[0], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (!tb || !hr) return null;
+    const orig = [...tb.rows];
+    let col = -1, dir = 0;
+    const heads = [...hr.cells];
+    let k = 0;
+    const colOf = heads.map(h => { const c = k; k += h.colSpan || 1; return c; });
+    heads.forEach((h, i) => {
+      if (h.hasAttribute('data-nosort') || (h.colSpan || 1) > 1) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ck-sort';
+      while (h.firstChild) b.appendChild(h.firstChild);
+      h.appendChild(b); h.setAttribute('aria-sort', 'none');
+      b.addEventListener('click', () => {
+        dir = col === colOf[i] ? (dir === 1 ? -1 : dir === -1 ? 0 : 1) : 1; col = colOf[i];
+        heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none'));
+        if (dir) h.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
+        const rows = dir ? [...orig].sort((a, b2) => {
+          const ca = a.cells[col], cb = b2.cells[col];
+          if (!ca || !cb) return 0;
+          const va = cellValue(ca), vb = cellValue(cb);
+          if (va.n != null && vb.n != null) return dir * (va.n - vb.n);
+          if (va.n != null) return -1;
+          if (vb.n != null) return 1;
+          return dir * va.s.localeCompare(vb.s);
+        }) : orig;
+        rows.forEach(r => tb.appendChild(r));
+      });
+    });
+    if (o.filter) {
+      const w = document.createElement('div'); w.className = 'ck-filter';
+      const id = 'ck-f' + (++uid), lab = document.createElement('label'), inp = document.createElement('input');
+      lab.htmlFor = id; lab.textContent = o.filterLabel || 'Filter rows'; inp.id = id; inp.type = 'search';
+      const cnt = document.createElement('span'); cnt.className = 'ck-filter-n'; cnt.setAttribute('aria-live', 'polite');
+      inp.addEventListener('input', () => {
+        const q = inp.value.trim().toLowerCase(); let n = 0;
+        orig.forEach(r => { const on = !q || r.textContent.toLowerCase().includes(q); r.classList.toggle('ck-hidden', !on); if (on) n++; });
+        cnt.textContent = q ? `${n} of ${orig.length} rows` : '';
+      });
+      w.append(lab, inp, cnt);
+      const ref = t.closest('.wide, .scroll, .ck-table-wrap') || t; ref.parentNode.insertBefore(w, ref);
+    }
+    t.classList.add('ck-sortable');
+    return {table: t, reset() { col = -1; dir = 0; heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none')); orig.forEach(r => tb.appendChild(r)); }};
+  }
+
   /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
   const SERIES = [1, 2, 3, 4, 5, 7];
   const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
@@ -522,7 +656,8 @@ window.CK = (function () {
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
-    stackTable, reduced, ramp, rampInk, color, hide: f => hide(f, true)};
+    stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
 })();
 </script>
 <!-- chartkit:end -->
@@ -558,13 +693,13 @@ window.CK = (function () {
 <p>Bandwidths are given per minion per minion-clock cycle, as a kernel running on all 1,024 minions sees them, and for the whole chip at 600 MHz. <i>Measured</i> is the median streaming rate of the earlier reports' probes with every minion reading its own data. Bytes per cycle come from the cycle counters, and GB/s from the 600 MHz launches only. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy report</a> uses the same launches. <i>Spec</i> is what the documented port and bank widths allow. Ridge = peak per minion-cycle ÷ bytes per minion-cycle.</p>
 
 <div class="chart-title">Roofline explorer: where does the data come from, and how fast can the kernel run?</div>
-<div class="ck-controls" id="roof-ctl1"><div id="roof-prec"></div><div id="roof-clock"></div><button type="button" class="ck-toggle" id="roof-spec" aria-pressed="false">Spec lines</button></div>
+<div class="ck-controls" id="roof-ctl1"><div id="roof-prec"></div><div id="roof-clock"></div><button type="button" class="ck-toggle" id="roof-spec" aria-pressed="false">Spec lines</button><button type="button" class="ck-toggle" id="roof-a100" aria-pressed="false">A100 roofs</button></div>
 <div class="ck-controls" id="roof-ctl2"><div id="roof-level"></div></div>
 <div class="ck-controls" id="roof-ctl3"><div id="roof-int"></div></div>
 <div id="roof-legend"></div>
 <div id="c-roof"></div>
 <div id="roof-readout"></div>
-<p class="small">Pick where the data comes from, a precision and the operations the kernel does per byte it fetches; the readout gives the fastest it can run. Speed is capped by the lower of the compute ceiling (horizontal) and the bandwidth line of the level (diagonal); the dots are the ridge points, labelled for the selected precision. The clock buttons apply the model in <a href="#which-ridge-points-move-with-the-clock">which ridge points move with the clock</a>, measured on <code>aifoundry2</code> only: the ceilings and the bandwidths inside a shire scale with the minion clock, DRAM and PCIe stay fixed, and L3 and another shire's scratchpad span a wedge between rising as measured and staying fixed. TensorSend between shires is drawn fixed: it is NoC-bound, not measured against clock, and spans six shire-to-shire patterns. The rings are kernels measured at 600 MHz: the matmul benchmark with tiles in L2 (fp32, fp16, int8), the same fp32 loop with every tile from DRAM, and the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparsity report</a>'s batch-1 fp32 layer with its weights in the scratchpads; the two below the ceilings sit on their bandwidth lines. The int8 matmul sits above the measured own-shire line (<span id="int8-own-t">39</span> TOP/s at 16 OP per byte; it ran at <span id="int8-ran">72</span>) because every minion read the same 32 KB of tiles; it stays under the spec line. The tables below hold every number without the chart.</p>
+<p class="small">Pick where the data comes from, a precision and the operations the kernel does per byte it fetches; the readout gives the fastest it can run. Speed is capped by the lower of the compute ceiling (horizontal) and the bandwidth line of the level (diagonal); the dots are the ridge points, labelled for the selected precision. The clock buttons apply the model in <a href="#which-ridge-points-move-with-the-clock">which ridge points move with the clock</a>, measured on <code>aifoundry2</code> only: the ceilings and the bandwidths inside a shire scale with the minion clock, DRAM and PCIe stay fixed, and L3 and another shire's scratchpad span a wedge between rising as measured and staying fixed. TensorSend between shires is drawn fixed: it is NoC-bound, not measured against clock, and spans six shire-to-shire patterns. The rings are kernels measured at 600 MHz: the matmul benchmark with tiles in L2 (fp32, fp16, int8), the same fp32 loop with every tile from DRAM, and the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparsity report</a>'s batch-1 fp32 layer with its weights in the scratchpads; the two below the ceilings sit on their bandwidth lines. The int8 matmul sits above the measured own-shire line (<span id="int8-own-t">39</span> TOP/s at 16 OP per byte; it ran at <span id="int8-ran">72</span>) because every minion read the same 32 KB of tiles; it stays under the spec line. The tables below hold every number without the chart. <i>A100 roofs</i> overlays, dash-dotted, the A100's dense peaks (fp32 on the CUDA cores, fp16 and int8 on the tensor cores) and its three sustained bandwidths from <a href="#the-same-numbers-for-an-a100">the A100 table</a>, with its ridge points on the selected precision's ceiling; the A100 lines do not move with the clock buttons.</p>
 
 <div class="chart-title">Measured bandwidth and ridge points</div>
 <div class="table-wrap"><table class="ridge measured">
@@ -922,9 +1057,11 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
     return eByte(key).pj / f;
   }
   function eridge(basis, key) { var r = LV[key].ridge[basis]; return r ? r.fp32 : null; }
-  var CARDS = ["aifoundry2", "aifoundry3"];
-  // A cell that gives both cards' values, aifoundry2's first (rows whose cards differ beyond noise).
-  function tdCards(vals) { return "<td class='num' title='" + CARDS.join(" · ") + "'>" + vals.join(" · ") + "</td>"; }
+  // A cell that gives each card's value, in the registry's order (rows whose cards differ beyond noise); sortv is the
+  // pooled value, which the sortable table sorts it by.
+  function tdCards(vals, cards, sortv) { return "<td class='num' title='" + cards.join(" · ") + "'" + (sortv == null ? "" : " data-sort='" + sortv + "'") + ">" + vals.join(" · ") + "</td>"; }
+  // A cell with a sort key (a range sorts by its low end).
+  function tdS(s, cls, sortv) { return "<td" + (cls ? " class='" + cls + "'" : "") + " data-sort='" + sortv + "'>" + s + "</td>"; }
   function renderEnergy() {
     var tb = document.getElementById("t-energy"); tb.innerHTML = "";
     var E = D.energy, F = E.e_flop, ef = F.fp32.pj, T = E.tload_by_operand;
@@ -961,18 +1098,20 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
                  td("–", "num"), td(fr(lv.ridge.demonstrated.vec32) + " (vector)", "num")]);
         return;
       }
-      var pc = CARDS.map(function (c) { return e.per_card[c]; });
+      var cs = CK.cardsIn(e.per_card || {}), pc = cs.map(function (c) { return e.per_card[c]; });
       row(tb, [td(e.name, "lvl"),
-               e.differ ? tdCards(pc.map(function (v) { return fpj(v.pj); })) : td(fpj(e.pj), "num"),
-               e.differ ? tdCards(pc.map(function (v) { return fr(v.balance_fp32); })) : td(fr(e.balance_fp32), "num"),
+               e.differ ? tdCards(pc.map(function (v) { return fpj(v.pj); }), cs, e.pj) : td(fpj(e.pj), "num"),
+               e.differ ? tdCards(pc.map(function (v) { return fr(v.balance_fp32); }), cs, e.balance_fp32) : td(fr(e.balance_fp32), "num"),
                td(fr(e.balance_int8), "num"), td(lv ? fr(lv.ridge.measured.fp32) : "–", "num")]);
     });
     var X = E.xshire;
-    row(tb, [td("TensorSend between shires, " + X.hops[0].toFixed(1) + "–" + X.hops[1].toFixed(1) + " hops (mean per pattern)", "lvl"), td(fpj(X.pj[0]) + "–" + fpj(X.pj[1]), "num"),
-             td(fr(X.balance_fp32), "num"), td(fr(X.balance_int8), "num"), td(fr(LV.xmesh.ridge.measured.fp32), "num")]);
+    row(tb, [td("TensorSend between shires, " + X.hops[0].toFixed(1) + "–" + X.hops[1].toFixed(1) + " hops (mean per pattern)", "lvl"), tdS(fpj(X.pj[0]) + "–" + fpj(X.pj[1]), "num", X.pj[0]),
+             tdS(fr(X.balance_fp32), "num", [].concat(X.balance_fp32)[0]), tdS(fr(X.balance_int8), "num", [].concat(X.balance_int8)[0]), tdS(fr(LV.xmesh.ridge.measured.fp32), "num", [].concat(LV.xmesh.ridge.measured.fp32)[0])]);
     CK.stackTable("tbl-energy");
   }
 
+  // Each A100 level (D.a100.levels, in order) next to its closest ET-SoC-1 counterpart.
+  var A100_ET = ["scp", "l3", "dram"];
   function renderA100() {
     var tb = document.getElementById("t-a100"); tb.innerHTML = "";
     [["scp", "ET-SoC-1, own shire (L2 or scratchpad)"], ["l3", "ET-SoC-1, L3 or another shire"], ["dram", "ET-SoC-1, DRAM"]].forEach(function (k, i) {
@@ -1047,7 +1186,9 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
   function fI(v) { return CK.fmt.num(v); }
 
   function roofline() {
-    var st = { prec: "fp32", level: "dram", I: 20, mhz: 600, spec: false };
+    var st = { prec: "fp32", level: "dram", I: 20, mhz: 600, spec: false, a100: false };
+    var A = D.a100, ADASH = "9 3 2 3";  // the A100 overlay: dash-dotted in --ref (the spec lines are dashed)
+    function aShort(n) { return n.replace(/\s*\(.*?\)/, "").replace(/^Shared memory \/ /, ""); }  // "L1", "L2", "HBM2"
     var name = {}, shortName = {};
     ROOF_LEVELS.forEach(function (l) { name[l[0]] = l[2]; shortName[l[0]] = l[3]; });
     function f() { return st.mhz / D.clock_mhz; }
@@ -1071,6 +1212,8 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
       onChange: function (v) { st.level = v; update(); } });
     var slider = CK.range("roof-int", { label: "Operations per byte fetched", stops: INT_STOPS, value: st.I,
       fmt: function (v) { return fI(v) + " " + opu(st.prec) + "/B"; }, onInput: function (v) { st.I = v; update(); } });
+    var a100Btn = document.getElementById("roof-a100");
+    a100Btn.addEventListener("click", function () { st.a100 = !st.a100; a100Btn.setAttribute("aria-pressed", String(st.a100)); CK.hide(fr_); update(); });
     var specBtn = document.getElementById("roof-spec");
     specBtn.addEventListener("click", function () { st.spec = !st.spec; specBtn.setAttribute("aria-pressed", String(st.spec)); fr_.redraw(); });
     var legendHost = document.getElementById("roof-legend");
@@ -1084,7 +1227,9 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
                  { key: "sp", mark: "dash", color: "var(--ref)", label: "spec" },
                  { key: "rg", mark: "dot", color: PCOL[st.prec], label: "ridge point" },
                  { key: "k", mark: "ring", color: "var(--ink)", label: "measured kernel (600 MHz)" }]);
+      if (st.a100) items.push({ key: "a100", mark: "dash", color: "var(--ref)", label: "A100: dense peaks, sustained bandwidth" });
       CK.legend(legendHost, items);
+      if (st.a100) { var sw = legendHost.lastChild && legendHost.lastChild.querySelector("line"); if (sw) sw.style.strokeDasharray = "6 2 2 2"; }
     }
 
     function say() {
@@ -1112,6 +1257,12 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
       if (key === "xmesh") s += " TensorSend between shires spans six shire-to-shire patterns; NoC-bound, not measured against clock.";
       if ((key === "l3" || key === "scp_remote") && st.mhz !== D.clock_mhz) s += " The range is the NoC wedge: bandwidth rising with the clock as measured up to about 740 MHz, or fixed.";
       if (key === "pcie") s += " PCIe is the spec rate; host transfers have not been timed.";
+      var ai = A100_ET.indexOf(key);
+      if (st.a100 && ai >= 0 && A.levels[ai]) {
+        var al = A.levels[ai], ac = A.peaks[p], aa = Math.min(ac, al.tbs * I);
+        s += " The A100 at the same intensity, from its " + al.name + " at " + CK.fmt.num(al.tbs) + " TB/s sustained, " + (aa >= ac * 0.9999 ? "runs at its peak, " + fT(ac) + " T" + u + "/s" :
+             "runs at most " + fT(aa) + " T" + u + "/s, " + pct(aa / ac) + "% of its " + fT(ac) + " T" + u + "/s peak") + " (ridge " + fr(al.ridge[p]) + " " + u + "/B).";
+      }
       readout.set(s);
     }
 
@@ -1121,9 +1272,10 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
     function draw(F) {
       var W = F.W, H = F.H, narrow = F.narrow, g = F.svg;
       var L = 46, R = narrow ? 12 : 24, T = 22, B = 38;
-      var x = CK.log(0.1, 10000, L, W - R), y = CK.log(0.01, 300, H - B, T);
-      var X0 = 0.1, X1 = 10000, Y0 = 0.01, Y1 = 300;
-      CK.axes(F, { x: x, y: y, L: L, R: R, T: T, B: B, xt: [0.1, 1, 10, 100, 1000, 10000], yt: [0.01, 0.1, 1, 10, 100],
+      var Y1 = st.a100 ? 1000 : 300;
+      var x = CK.log(0.1, 10000, L, W - R), y = CK.log(0.01, Y1, H - B, T);
+      var X0 = 0.1, X1 = 10000, Y0 = 0.01;
+      CK.axes(F, { x: x, y: y, L: L, R: R, T: T, B: B, xt: [0.1, 1, 10, 100, 1000, 10000], yt: st.a100 ? [0.01, 0.1, 1, 10, 100, 1000] : [0.01, 0.1, 1, 10, 100],
         xfmt: function (t) { return t >= 1000 ? (narrow ? t / 1000 + "k" : CK.fmt.num(t)) : String(t); },
         yfmt: function (t) { return String(t); },
         xl: "operations per byte fetched (log)", yl: "T operations/s (log)" });
@@ -1162,6 +1314,21 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
           void i;
         });
       }
+      // A100 overlay: its three ceilings and three sustained-bandwidth diagonals (ending on the selected precision's ceiling)
+      var a100Labs = [], atop = A.peaks[p];
+      if (st.a100) {
+        PRECS.forEach(function (q) {
+          var v = A.peaks[q], sel = q === p;
+          var ln = CK.el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v) }, layer);
+          ln.style.stroke = "var(--ref)"; ln.style.strokeWidth = sel ? "2" : "1.5"; ln.style.strokeDasharray = ADASH; ln.style.opacity = sel ? "1" : "0.5";
+        });
+        A.levels.forEach(function (al) {
+          var d = diag(al.tbs * 1000, atop);
+          var ln = CK.el("line", { x1: x(d[0][0]), y1: y(d[0][1]), x2: x(d[1][0]), y2: y(d[1][1]) }, layer);
+          ln.style.stroke = "var(--ref)"; ln.style.strokeWidth = "1.5"; ln.style.strokeDasharray = ADASH;
+          a100Labs.push({ b: al.tbs * 1000, c: atop, lab: "A100 " + aShort(al.name) + (narrow ? "" : " " + fbw(al.tbs * 1000)) });
+        });
+      }
       // level lines (thin), wedges and bands; the selected level last, as its bent roof
       var ang = Math.atan2(y(10) - y(1), x(10) - x(1)) * 180 / Math.PI;
       var order = ROOF_LEVELS.map(function (l) { return l[0]; }).filter(function (k) { return k !== st.level; }).concat([st.level]);
@@ -1191,25 +1358,31 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
         var b = bw(key), sel = key === st.level;
         return { b: one(b) ? b[1] : b[0], sel: sel, lab: shortName[key] + (sel && !narrow ? " " + (one(b) ? fbw(b[1]) : fbwr(b[0], b[1])) : "") };
       });
-      items = items.slice(0, 1).concat(specLabs, items.slice(1));
+      items = items.slice(0, 1).concat(specLabs, a100Labs, items.slice(1));
       items.forEach(function (it) {
         var sel = it.sel, bb = it.b, lab = it.lab;
-        var d = diag(bb, top), px0 = x(d[0][0]), py0 = y(d[0][1]), px1 = x(d[1][0]), py1 = y(d[1][1]);
-        var len = Math.hypot(px1 - px0, py1 - py0), w = tw(lab, sel ? 12 : 11) + 4;
+        var d = diag(bb, it.c || top), px0 = x(d[0][0]), py0 = y(d[0][1]), px1 = x(d[1][0]), py1 = y(d[1][1]);
+        var len = Math.hypot(px1 - px0, py1 - py0), w = tw(lab, sel || it.c ? 12 : 11) + 4;
         var v = (px0 * -sn + py0 * cs);  // perpendicular coordinate of the line
+        // baseline 15 px below the line; an A100 label (it.c) may also sit 4 px above its line
+        var offs = it.c ? [15, -4] : [15], done = false;
+        for (var oi = 0; oi < offs.length && !done; oi++) {
+        var off = offs[oi], vv = v + off - 15;
         for (var u = 14; u + w < len - 16; u += 18) {
           var ua = px0 * cs + py0 * sn + u, ok = true;
-          for (var i = 0; i < placed.length; i++) { var o = placed[i]; if (ua < o[1] + 14 && ua + w + 14 > o[0] && Math.abs(v - o[2]) < 13) { ok = false; break; } }
+          for (var i = 0; i < placed.length; i++) { var o = placed[i]; if (ua < o[1] + 14 && ua + w + 14 > o[0] && Math.abs(vv - o[2]) < 13) { ok = false; break; } }
           if (!ok) continue;
-          var tx = px0 + u * cs - 15 * sn, ty = py0 + u * sn + 15 * cs;  // baseline 15 px below the line
+          var tx = px0 + u * cs - off * sn, ty = py0 + u * sn + off * cs;
           var ax = { x0: Math.min(tx, tx + w * cs) - 2, x1: Math.max(tx, tx + w * cs) + 2, y0: Math.min(ty - 11, ty + w * sn - 11), y1: Math.max(ty, ty + w * sn) };
           var clash = boxes.some(function (o) { return ax.x0 < o.x1 && ax.x1 > o.x0 && ax.y0 < o.y1 && ax.y1 > o.y0 && o.kind !== "diag"; });
           if (clash || ty > H - B - 2) continue;
-          var t = CK.txt(layer, tx, ty, lab, sel ? "lab-strong halo" : "lab-small halo", "start");
+          var t = CK.txt(layer, tx, ty, lab, sel ? "lab-strong halo" : it.c ? "lab halo" : "lab-small halo", "start");
           t.setAttribute("transform", "rotate(" + ang.toFixed(1) + " " + tx.toFixed(1) + " " + ty.toFixed(1) + ")");
-          placed.push([ua, ua + w, v]);
+          placed.push([ua, ua + w, vv]);
           boxes.push({ x0: ax.x0, x1: ax.x1, y0: ax.y0, y1: ax.y1, kind: "diag" });
+          done = true;
           break;
+        }
         }
       });
       // ridge points on the selected ceiling
@@ -1261,6 +1434,35 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
         }
       });
       CK.keynav(F, rings);
+      if (st.a100) {
+        var anodes = [], u = opu(p);
+        // ceiling labels at the right end, above the line (else below), the selected precision's first; the group is
+        // the tooltip target whether or not its label found room
+        [p].concat(PRECS.filter(function (q) { return q !== p; })).forEach(function (q) {
+          var v = A.peaks[q], sel = q === p, uq = opu(q), gg = CK.el("g", {}, g), cy = y(v);
+          var lab = "A100 " + q + (narrow && !sel ? "" : " " + CK.fmt.num(v) + " T" + uq + "/s"), w = tw(lab) + 4, xr = W - R - 4;
+          var spot = null;  // [baseline, top, bottom]: the first free place, above then below the line
+          [[cy - 5, cy - 17, cy - 3], [cy + 15, cy + 3, cy + 17]].some(function (o) { if (o[1] >= 2 && box({ x0: xr - w, x1: xr, y0: o[1], y1: o[2] })) { spot = o; return true; } return false; });
+          CK.el("rect", { x: xr - w, y: spot ? spot[1] : cy - 6, width: w, height: spot ? 14 : 12, "class": "ck-hit" }, gg);
+          if (spot) CK.txt(gg, xr, spot[0], lab, sel ? "lab-strong halo" : "lab halo", "end");
+          var et = ceilT(q);
+          CK.tip(F, gg, "<b>A100 " + q + " ceiling</b><br>" + CK.fmt.num(v) + " T" + uq + "/s, dense, " + (q === "fp32" ? "on the CUDA cores (TF32 on the tensor cores: " + CK.fmt.num(A.peaks.tf32) + " TFLOP/s)" : "on the tensor cores") +
+            "<br>ET-SoC-1 at " + CK.fmt.num(st.mhz) + " MHz: " + fT(et) + " T" + uq + "/s (A100 " + fX(v / et) + "×)");
+          anodes.push(gg);
+        });
+        // ridge points of the three A100 levels on the selected precision's ceiling
+        A.levels.forEach(function (al, i) {
+          var r = al.ridge[p], gg = CK.el("g", {}, g), cx = x(Math.min(r, X1)), cy = y(atop);
+          CK.el("rect", { x: cx - 10, y: cy - 10, width: 20, height: 20, "class": "ck-hit" }, gg);
+          var dm = CK.el("rect", { x: cx - 4, y: cy - 4, width: 8, height: 8, transform: "rotate(45 " + cx.toFixed(1) + " " + cy.toFixed(1) + ")" }, gg);
+          dm.style.fill = "var(--surface)"; dm.style.stroke = "var(--ref)"; dm.style.strokeWidth = "2";
+          var ek = A100_ET[i], er = ek ? ridgeAt(ek, p) : null;
+          CK.tip(F, gg, "<b>A100 " + al.name + " × " + p + "</b><br>ridge " + fr(r) + " " + u + " per byte<br>" + CK.fmt.num(al.tbs) + " TB/s sustained (" + CK.fmt.num(al.tbs_peak) + " peak) against " + CK.fmt.num(atop) + " T" + u + "/s" +
+            (er ? "<br>ET-SoC-1, " + name[ek] + ": ridge " + (one(er) ? fr(er[1]) : fr(er)) + " " + u + " per byte at " + CK.fmt.num(st.mhz) + " MHz" : ""));
+          anodes.push(gg);
+        });
+        CK.keynav(F, anodes);
+      }
       // intensity cursor and the attainable speed on the selected roof
       var a = attain(st.level, p, st.I), cx = x(st.I);
       var cl = CK.el("line", { x1: cx, x2: cx, y1: T, y2: H - B }, g);
@@ -1308,12 +1510,12 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
       var ridge = rr === null ? null : Array.isArray(rr) ? rr : [rr, rr];
       var prim = bm || bu;
       // Verdict and whisker card by card (scripts/ridge-points.py): each card's 99% range of the primary balance point;
-      // a verdict only when both cards' ranges lie on the same side of the ridge.
-      var ck = E.check[st.op][st.ridge][key], cards = CARDS.map(function (c) { return ck.cards[c]; });
-      var wr = [Math.min(cards[0].ci99[0], cards[1].ci99[0]), Math.max(cards[0].ci99[1], cards[1].ci99[1])];
+      // a verdict only when every card's range lies on the same side of the ridge.
+      var ck = E.check[st.op][st.ridge][key], cids = CK.cardsIn(ck.cards), cards = cids.map(function (c) { return ck.cards[c]; });
+      var wr = [Math.min.apply(null, cards.map(function (v) { return v.ci99[0]; })), Math.max.apply(null, cards.map(function (v) { return v.ci99[1]; }))];
       var verdict = ridge === null ? "none" : ck.verdict;
       return { key: key, fl: fl, unset: unset, bu: bu, bur: bur, bm: bm, bmr: bmr, pjm: pjm, ridge: ridge, prim: prim, verdict: verdict,
-               cards: cards, wr: wr };
+               cards: cards, cids: cids, wr: wr };
     }
     function v1(a) { return a[0] === a[1] ? fr(a[0]) : fr(a); }
 
@@ -1334,7 +1536,7 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
         if (narrow) CK.txt(gg, L, top + 13, rw[2], "lab", "start");
         else CK.txt(gg, L - 10, cy + 4, rw[1], "lab", "end");
         var cx = function (v) { return x(Math.max(0.1, Math.min(1000, v))); };
-        // whisker: both cards' 99% ranges of the primary balance point
+        // whisker: every card's 99% range of the primary balance point
         var wr = d.wr, wl = CK.el("line", { x1: cx(wr[0]), x2: cx(wr[1]), y1: cy, y2: cy }, gg);
         wl.style.stroke = "var(--ink-2)"; wl.style.strokeWidth = "1";
         [wr[0], wr[1]].forEach(function (v) { var t = CK.el("line", { x1: cx(v), x2: cx(v), y1: cy - 4, y2: cy + 4 }, gg); t.style.stroke = "var(--ink-2)"; t.style.strokeWidth = "1"; });
@@ -1365,7 +1567,7 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
           (rw[0] === "xmesh" ? "" : "") + "unset buffers (§" + (rw[0].charAt(0) === "x" || rw[0] === "fln" ? "5" : "4.2") + "): " +
           (rw[0] === "xmesh" ? fpj(d.unset.pj) + "–" + fpj(d.unset.pj1) : fpj(d.unset.pj)) + " pJ/B, balance " + v1(d.bu) +
           "<br>time ridge (" + st.ridge + "): " + (d.ridge ? v1(d.ridge) : "none (no spec)") +
-          "<br>" + (d.bm ? "same-operand balance" : "balance") + " by card, with its 99% range: " + CARDS.map(function (c, i) { var v = d.cards[i]; return c + " " + v1(v.point) + " (" + fr(v.ci99[0]) + "–" + fr(v.ci99[1]) + ")"; }).join(", ") +
+          "<br>" + (d.bm ? "same-operand balance" : "balance") + " by card, with its 99% range: " + d.cids.map(function (c, i) { var v = d.cards[i]; return CK.card(c).label + " " + v1(v.point) + " (" + fr(v.ci99[0]) + "–" + fr(v.ci99[1]) + ")"; }).join(", ") +
           "<br>" + (d.verdict === "data" ? "moving the data costs more" : d.verdict === "arith" ? "the arithmetic costs more" : d.verdict === "overlap" ? "ranges overlap: no verdict" : "");
         CK.tip(F, gg, html);
         nodes.push(gg);
@@ -1567,6 +1769,7 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
 
   function renderAll() { renderKpis(); renderPeaks(); renderRidge(); renderClock(); renderBatch(); renderEnergy(); renderA100(); renderText(); }
   renderAll();
+  CK.sortTable("tbl-energy");  // after renderEnergy's rows and its stackTable
   roofline();
   energyChart();
   reuseChart();

@@ -2,7 +2,7 @@
 """Summarize memhier results into the numbers and chart data used by the report.
 
     python3 workloads/memhier/analyze.py docs/reports/data/2026-09-18-memhier-aifoundry2 \
-        [--embed docs/reports/2026-09-18-et-soc1-memory-hierarchy.html]
+        [--embed docs/reports/2026-09-18-et-soc1-memory-hierarchy.html] [--reruns RERUNS_JSON]
 
 The data directory holds the chase-*.jsonl files from memhier_host and energy/ from run_energy.py.
 The script prints the plateau latency of each level (L3 and DRAM per clock: the governor ran some chases at
@@ -10,7 +10,10 @@ The script prints the plateau latency of each level (L3 and DRAM per clock: the 
 matrix and the energy table (superseded, 18 September). With --embed it also replaces the JSON inside the
 report's <script type="application/json" id="memhier-data"> tag with the chart data: the latency curves, every
 L3 and DRAM chase with its clock, the clock models (fits, scp_model), the per-requester L3 latency, the scratchpad
-matrix and marty1885's shire layout (imported from workloads/nocbench/analyze.py).
+matrix and marty1885's shire layout (imported from workloads/nocbench/analyze.py), and, for the spec sheet's energy
+dot plot, energy_levels: the energy manual's energy per byte by level (--reruns, by default
+docs/reports/data/2026-09-23-energy-manual/reruns.json, levels_pj_per_byte), copied as it is there: the mean and
+lo-hi over every pass of every card, and each card's mean, standard error and number of passes.
 """
 import argparse
 import glob
@@ -40,6 +43,8 @@ MIN_WALL_S = 0.01  # chases shorter than this are dominated by launch overhead
 # model that workloads/memprobe/analyze.py uses. main() refits it from that report's summary.json when present.
 ANATOMY_L3 = {"base": 110, "per_hop": 12}
 ANATOMY_SUMMARY = os.path.join(HERE, "..", "..", "docs", "reports", "data", "2026-09-19-memprobe-aifoundry2", "summary.json")
+# The energy manual's 23 September re-runs at 600 MHz: the energy per byte the report's tables and charts use.
+RERUNS = os.path.join(HERE, "..", "..", "docs", "reports", "data", "2026-09-23-energy-manual", "reruns.json")
 
 # Working-set ranges (bytes) that sit on each plateau of the latency curve.
 LEVELS = [
@@ -98,6 +103,9 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("data_dir")
     p.add_argument("--embed", metavar="REPORT_HTML")
+    p.add_argument("--reruns", metavar="RERUNS_JSON", default=RERUNS,
+                   help="the energy manual's re-runs, whose levels_pj_per_byte is embedded as energy_levels "
+                        "(default: docs/reports/data/2026-09-23-energy-manual/reruns.json)")
     args = p.parse_args()
     d = args.data_dir
 
@@ -256,6 +264,11 @@ def main():
             "scp_model": scp_model, "l3_by_requester": l3_by_requester, "anatomy_l3": anatomy,
             "scp_matrix": {str(k): v for k, v in sorted(matrix.items())},
             "layout": {str(s): list(xy) for s, xy in noc.MARTY.items()}, "empty_cells": [list(c) for c in noc.EMPTY]}
+    # Energy per byte by level (the spec sheet's dot plot): the energy manual's re-runs, as they are.
+    lv = json.load(open(args.reruns))["levels_pj_per_byte"]
+    data["energy_levels"] = {k: {q: v[q] for q in ("mean", "lo", "hi", "n", "per_card")} for k, v in lv.items()}
+    print("energy per byte by level (energy manual re-runs): " + ", ".join(
+        f"{k} {v['mean']:.2f} [{v['lo']:.2f}-{v['hi']:.2f}] pJ/B" for k, v in data["energy_levels"].items()))
     if args.embed:
         html = open(args.embed).read()
         pat = re.compile(r'(<script type="application/json" id="memhier-data">)(.*?)(</script>)', re.S)
