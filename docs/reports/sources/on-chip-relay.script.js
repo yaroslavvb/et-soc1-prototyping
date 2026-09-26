@@ -6,51 +6,62 @@ const num=CK.fmt.num, n0=v=>num(v,0);
 const g1=v=>num(v,1);                                  // GB/s to one decimal, with separators
 const gb=v=>v<100?num(v,1):num(v,0);                   // GB/s at chart precision: 47.9, 379, 1,263
 const pj=v=>v<5?f2(v):f1(v);                           // pJ per byte: 3.99, 8.6, 105.7
+const pjr=q=>{const f=q.mean<5?f2:f1;return `${f(q.mean)} [${f(q.lo)}–${f(q.hi)}]`;};   // mean [range] at the mean's precision
 const MED=[['dram','write it to DRAM, read it back next stage','var(--c2)','DRAM'],
            ['hop','write it where the next shire will read it','var(--c1)','next shire'],
            ['scp',"keep it in this shire's own scratchpad",'var(--c3)','own shire']];
 const A2=D.cards[0], A3=D.cards[1], H=D.headline[A2], H3=D.headline[A3];
+const CS=CK.cardsIn(D.cards), lab=c=>CK.card(c).label;   // every card, in the registry's order (26 Sep: three)
+const OFF=D.offsets||D.distance;                          // every ring offset measured (claims-v3: 1..31)
+/* a card's registry mark at (x, y) in a colour; a ring is drawn hollow so it never hides the first card's dot under it */
+const cmark=(g,c,x,y,col,big)=>{const ring=CK.card(c).mark==='ring',e=CK.cardMark(g,c,x,y,ring?(big?9:7):(big?5.5:4),col);
+ if(ring){e.style.fill='none';e.style.strokeWidth='1.5';} e.setAttribute('aria-hidden','true');return e;};
 const WORD=['no','one','two','three','four','five','six','seven','eight','nine'];
 const word=n=>WORD[n]||n0(n);
+const andL=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
 const rng=(vals,fmt)=>{const a=fmt(Math.min(...vals)),b=fmt(Math.max(...vals));return a===b?a:a+'–'+b;};
 const pear=(xs,ys)=>{const n=xs.length,mx=xs.reduce((a,b)=>a+b)/n,my=ys.reduce((a,b)=>a+b)/n;
  let sxy=0,sxx=0,syy=0;xs.forEach((x,i)=>{sxy+=(x-mx)*(ys[i]-my);sxx+=(x-mx)**2;syy+=(ys[i]-my)**2;});
  return {r:sxy/Math.sqrt(sxx*syy),slope:sxy/sxx,icpt:my-sxy/sxx*mx};};
 
-/* Pooled energies, per byte moved (relay_pj_per_byte) and per byte read (levels_pj_per_byte), from
-   docs/reports/data/2026-09-23-energy-manual/reruns.json, written by
-     python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm \
-       docs/reports/data/2026-09-23-reruns-aifoundry3 --out reruns.json
-   Copied here (4 decimals) rather than read as data: reruns.json takes this page's onchip.json as its first pass,
-   so feeding it back into onchip.json would make a file loop (PLAN2 DP-6). Update both together if the reruns change. */
-const POOLED={
- relay:{dram:{mean:105.7441,lo:99.4722,hi:111.0366,n:8,per_card:{aifoundry2:{mean:102.1385,n:4},aifoundry3:{mean:109.3497,n:4}}},
-  scp:{mean:3.9935,lo:3.9038,hi:4.2497,n:8,per_card:{aifoundry2:{mean:4.0178,n:4},aifoundry3:{mean:3.9691,n:4}}},
-  hop:{mean:8.5934,lo:7.775,hi:9.2058,n:8,per_card:{aifoundry2:{mean:9.078,n:4},aifoundry3:{mean:8.1087,n:4}}}},
- read:{dram:{mean:121.9633,lo:116.7837,hi:129.0313,n:6},'scp-local':{mean:2.5152,lo:2.3927,hi:2.6439,n:6,
-   per_card:{aifoundry2:{mean:2.3980,n:3},aifoundry3:{mean:2.6325,n:3}}},
-  'scp-remote':{mean:6.6546,lo:5.3096,hi:7.478,n:6}}
-};
+/* Pooled energies, per byte moved (relay_pj_per_byte) and per byte read (levels_pj_per_byte; the scratchpads by the contents
+   each pass prefilled, levels_by_contents_pj_per_byte), from docs/reports/data/2026-09-23-energy-manual/reruns.json, written by
+     python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm        docs/reports/data/2026-09-23-reruns-aifoundry3 --v3-rl docs/reports/data/2026-09-25-claims-v3/raw --out reruns.json
+   i.e. the version-3 check's V3-RL passes, six on each of three cards (26 September); this page's 22 September session is
+   not among them. Copied here (4 decimals, by a script over reruns.json) rather than read as data: the page builds from
+   onchip.json alone, and reruns.json once took this page's onchip.json as its first relay pass (PLAN2 DP-6). Update
+   both together if the reruns change. */
+const POOLED={"relay":{"dram":{"mean":116.2426,"lo":104.5151,"hi":135.3423,"n":18,"per_card":{"aifoundry1-c1":{"mean":129.8818,"n":6},"aifoundry2":{"mean":111.3282,"n":6},"aifoundry3":{"mean":107.5177,"n":6}}},"scp":{"mean":4.3392,"lo":3.7535,"hi":5.0667,"n":18,"per_card":{"aifoundry1-c1":{"mean":4.8567,"n":6},"aifoundry2":{"mean":4.0504,"n":6},"aifoundry3":{"mean":4.1106,"n":6}}},"hop":{"mean":8.9236,"lo":7.627,"hi":10.1811,"n":18,"per_card":{"aifoundry1-c1":{"mean":9.8876,"n":6},"aifoundry2":{"mean":8.6085,"n":6},"aifoundry3":{"mean":8.2746,"n":6}}}},"read":{"dram":{"mean":114.5925,"lo":89.0235,"hi":141.263,"n":18},"scp-local":{"zeros":{"mean":2.2527,"lo":2.0636,"hi":2.6115,"n":9},"random":{"mean":4.4,"lo":3.9415,"hi":5.0774,"n":9}},"scp-remote":{"zeros":{"mean":5.0971,"lo":4.4008,"hi":6.4511,"n":9},"random":{"mean":11.8338,"lo":9.5305,"hi":14.4254,"n":9}}}};
+
+/* The three-card check of the own scratchpad's read energy (V3-RL, 26 September), copied from
+   docs/reports/data/2026-09-25-claims-v3/results/rl.json: RL-h's per-card means by contents, pJ per byte (RL-g finds no
+   difference between aifoundry2 and aifoundry3; RL-h, that the old per-card split was the data read). */
+const RL3={h:{zeros:{aifoundry2:2.1124,aifoundry3:2.1003,'aifoundry1-c1':2.5454},random:{aifoundry2:4.1258,aifoundry3:4.042,'aifoundry1-c1':5.0323}}};
 
 /* ---------- KPIs, the lede's computed spans and the two-card line of section 7 ---------- */
 (function(){
  $('k1').textContent=(H.hop.gb_s/H.dram.gb_s).toFixed(1)+'× faster';
  $('k2').textContent=(H.scp.gb_s/H.dram.gb_s).toFixed(1)+'× faster';
- const p=D.power&&D.power.media, dr=p&&p.find(m=>m.medium==='dram'), hp=p&&p.find(m=>m.medium==='hop');
- $('k3').textContent=(dr&&hp)?(dr.pj_per_byte/hp.pj_per_byte).toFixed(0)+'× less':'—';
+ $('k3').textContent=(POOLED.relay.dram.mean/POOLED.relay.hop.mean).toFixed(0)+'× less';   // the three-card check's passes (section 2)
  $('k4').textContent='>32 MB';
- const gbs=D.distance.map(r=>r.gb_s);
+ const stg=m=>CS.map(c=>D.headline[c][m].cycles_max/D.headline[c][m].stages), k0=v=>n0(Math.round(v/1000)*1000);
+ $('stagecyc').textContent=`${rng(stg('dram'),k0)} cycles (${andL(CS.map((c,i)=>k0(stg('dram')[i])))} on ${andL(CS.map(lab))}), a hand-off stage ${rng(stg('hop'),k0)} and an `+
+  `own-scratchpad stage ${rng(stg('scp'),k0)}`;
+ const gbs=[].concat(...OFF.map(r=>CS.filter(c=>r.by_card&&r.by_card[c]).map(c=>r.by_card[c].gb_s)));
  $('l-gbr').textContent=`${n0(Math.min(...gbs))}–${n0(Math.max(...gbs))} GB/s`;
- $('l-a3').textContent=`${(H3.hop.gb_s/H3.dram.gb_s).toFixed(1)}× and ${(H3.scp.gb_s/H3.dram.gb_s).toFixed(1)}×`;
- const rep=[].concat(...D.cards.map(c=>D.repeats[c]));
+ const hx=c=>(D.headline[c].hop.gb_s/D.headline[c].dram.gb_s).toFixed(1), sx=c=>(D.headline[c].scp.gb_s/D.headline[c].dram.gb_s).toFixed(1);
+ $('l-a3').textContent=`${andL(CS.map(hx))}× for the hand-off and ${andL(CS.map(sx))}× for the own scratchpad, on ${andL(CS.map(lab))}`;
+ const rep=[].concat(...CS.map(c=>D.repeats[c]));
  const hopR=rng(rep.map(r=>r.hop_over_dram),v=>v.toFixed(1)), scpR=rng(rep.map(r=>r.scp_over_dram),v=>v.toFixed(1));
- $('l-rep').textContent=`${hopR}× and ${scpR}×`;
- const groups=D.repeats[A2].map(r=>r.group);
- $('cards').textContent=D.cards.map(c=>{const h=D.headline[c];return `${c} ${(h.hop.gb_s/h.dram.gb_s).toFixed(1)}×`;}).join(', ')+
-   ' for the hand-off, '+D.cards.map(c=>{const h=D.headline[c];return (h.scp.gb_s/h.dram.gb_s).toFixed(1)+'×';}).join(' and ')+
-   ` for the shire-local case. The same configuration ran ${word(groups.length)} times on each card (in the ${groups.slice(0,-1).join(', ')} and ${groups[groups.length-1]} sweeps), `+
-   `and the two ratios run ${hopR}× and ${scpR}×; the scatter is almost all DRAM (${rng(rep.map(r=>r.dram),f1)} GB/s), and the hand-off ran at `+
-   `${rng(rep.map(r=>r.hop),f0)} GB/s every time`;
+ const nRep=CS.map(c=>D.repeats[c].length);
+ $('l-rep').textContent=`${hopR}× and ${scpR}× over ${rng(nRep,n0)} runs per card`;
+ const groups=[...new Set(D.repeats[A2].map(r=>r.group))], cov=D.coverage||{};
+ const lost=CS.filter(c=>cov[c]&&cov[c].short.length);
+ $('cards').textContent=CS.map(c=>`${lab(c)} ${hx(c)}×`).join(', ')+' for the hand-off, '+andL(CS.map(sx).map(v=>v+'×'))+
+   ` for the shire-local case. The same configuration ran in the ${groups.slice(0,-1).join(', ')} and ${groups[groups.length-1]} sweeps of every pass, `+
+   `${andL(CS.map((c,i)=>`${nRep[i]} times on ${lab(c)}`))}, and the two ratios run ${hopR}× and ${scpR}×; the scatter is almost all DRAM (${rng(rep.map(r=>r.dram),f1)} GB/s), `+
+   `and the hand-off ran at ${rng(rep.map(r=>r.hop),f0)} GB/s every time`+
+   (lost.length?`. ${andL(lost.map(c=>`${lab(c)} lacks ${word(cov[c].short.length)} of its ${n0(cov[c].configs*cov[c].passes.length)} launches`))}, whose host process crashed (aifoundry3's known host crash, about one launch in a hundred, since traced to the runtime's logging and fixed: E49); those configurations are the mean of two passes`:'');
 })();
 
 /* ---------- section 1: the three media ---------- */
@@ -66,12 +77,12 @@ CK.stackTable('media');
   {key:'w',title:'Watts over idle',val:m=>med(m).over_idle_w,lab:v=>f2(v)+' W'},
   {key:'gb',title:'GB/s during the power bursts',val:m=>med(m).bytes_per_s/1e9,lab:v=>g1(v)},
   {key:'pj',title:`pJ per byte moved, ${POOLED.relay.dram.n} passes`,val:m=>POOLED.relay[m].mean,
-   lab:(v,m)=>{const q=POOLED.relay[m];return `${pj(q.mean)} [${pj(q.lo)}–${pj(q.hi)}]`;}}];
+   lab:(v,m)=>pjr(POOLED.relay[m])}];
  const tip=(key,m,label)=>{const x=med(m),q=POOLED.relay[m],pc=q.per_card;
   if(key==='w')return `<b>${label}</b> · ${f2(x.over_idle_w)} W over idle (board power, ${A2}; idle ${f2(p.idle.board_w)} W)<br>${x.n} readings over ${f1(x.wall_s)} s; the kernel ran ${f0(100*x.duty)}% of the burst`;
   if(key==='gb')return `<b>${label}</b> · ${g1(x.bytes_per_s/1e9)} GB/s while the kernel runs (cycle counter), over ${x.runs} launches in the power burst<br>the headline run of the table above: ${g1(H[m].gb_s)} GB/s`;
-  return `<b>${label}</b> · ${pj(q.mean)} pJ per byte moved, mean of ${q.n} passes [${pj(q.lo)}–${pj(q.hi)}]<br>`+
-   `${A2} ${pj(pc[A2].mean)} (n = ${pc[A2].n}), ${A3} ${pj(pc[A3].mean)} (n = ${pc[A3].n}); this session ${pj(x.pj_per_byte)}`;};
+  return `<b>${label}</b> · ${pj(q.mean)} pJ per byte moved, mean of ${q.n} passes [${pjr(q).split('[')[1]}<br>`+
+   `${CS.filter(c=>pc[c]).map(c=>`${lab(c)} ${pj(pc[c].mean)} (n = ${pc[c].n})`).join(', ')}; this session (${A2}, not pooled) ${pj(x.pj_per_byte)}`;};
  CK.frame('samew',{label:'Watts over idle, GB/s and pJ per byte for DRAM, the next shire and the own scratchpad',
   height:W=>W<600?3*128+8:132,
   draw(f){
@@ -94,8 +105,8 @@ CK.stackTable('media');
       const wk=CK.el('g',{'aria-hidden':'true'},g); wk.style.stroke='var(--ink)'; wk.style.strokeWidth='1.5';
       CK.el('line',{x1:x(q.lo),x2:x(q.hi),y1:yc,y2:yc},wk);
       CK.el('line',{x1:x(q.lo),x2:x(q.lo),y1:yc-5,y2:yc+5},wk); CK.el('line',{x1:x(q.hi),x2:x(q.hi),y1:yc-5,y2:yc+5},wk);
-      const d2=CK.el('circle',{cx:x(pc[A2].mean),cy:yc-9,r:3},g); d2.style.fill='var(--ink)';
-      const d3=CK.el('circle',{cx:x(pc[A3].mean),cy:yc+9,r:3,fill:'none'},g); d3.style.stroke='var(--ink)'; d3.style.strokeWidth='1.2';
+      CS.filter(c=>pc[c]).forEach((c,i)=>{const e=CK.cardMark(g,c,x(pc[c].mean),yc+[-9,9,0][i%3],CK.card(c).mark==='diamond'?4:3,'var(--ink)');
+       e.setAttribute('aria-hidden','true'); if(CK.card(c).mark==='ring'){e.style.fill='none';e.style.strokeWidth='1.2';}});
       const t=CK.el('line',{x1:x(s),x2:x(s),y1:yc-bh/2-3,y2:yc+bh/2+3},g); t.style.stroke='var(--ink)'; t.style.strokeWidth='2';
       end=Math.max(end,x(q.hi));
      }
@@ -110,8 +121,8 @@ CK.stackTable('media');
  $('samewcap').textContent=
   `Watts and GB/s are from one power session on ${A2}: board power over an idle of ${f2(p.idle.board_w)} W, and the rate while the kernel runs, `+
   `from the cycle counter, during those bursts (the headline runs in the table above ran at ${MED.map(m=>g1(H[m[0]].gb_s)).join(', ')} GB/s). `+
-  `Energy per byte pools ${q.dram.n} passes, ${word(q.dram.per_card[A2].n)} per card with this session among them: the bar is the mean, the whisker the range, `+
-  `the filled dot ${A2}'s mean, the ring ${A3}'s, the tick this session. The power moves by ${f1(Math.max(...w)-Math.min(...w))} W while the work grows `+
+  `Energy per byte pools the three-card check's ${q.dram.n} passes, ${word(q.dram.per_card[A2].n)} per card (26 September): the bar is the mean, the whisker the range, `+
+  `the marks each card's mean (${andL(CS.filter(c=>q.dram.per_card[c]).map(c=>({dot:'dot',ring:'ring',diamond:'diamond'}[CK.card(c).mark]||'mark')+' '+lab(c)))}), the tick this session, which is not pooled. The power moves by ${f1(Math.max(...w)-Math.min(...w))} W while the work grows `+
   `${f0(med('hop').bytes_per_s/dr.bytes_per_s)}× and ${f0(med('scp').bytes_per_s/dr.bytes_per_s)}×.`;
 })();
 
@@ -121,34 +132,45 @@ CK.stackTable('media');
  const name={dram:'DRAM',scp:"own shire's scratchpad",hop:"next shire's scratchpad"}, q=POOLED.relay;
  $('power').innerHTML=`<thead><tr><th>Where the intermediate goes</th><th class="num">GB/s on the card</th><th class="num">Watts over idle</th><th class="num">pJ, this session</th><th class="num">pJ per byte moved, all passes: mean [range], n = ${q.dram.n}</th></tr></thead><tbody>`+
   ['dram','hop','scp'].map(m=>{const r=p.media.find(x=>x.medium===m);
-   return `<tr><td>${name[m]}</td><td class="num">${g1(r.bytes_per_s/1e9)}</td><td class="num">${f2(r.over_idle_w)}</td><td class="num">${pj(r.pj_per_byte)}</td><td class="num">${pj(q[m].mean)} [${pj(q[m].lo)}–${pj(q[m].hi)}]</td></tr>`;}).join('')+
+   return `<tr><td>${name[m]}</td><td class="num">${g1(r.bytes_per_s/1e9)}</td><td class="num">${f2(r.over_idle_w)}</td><td class="num">${pj(r.pj_per_byte)}</td><td class="num">${pjr(q[m])}</td></tr>`;}).join('')+
   `</tbody>`;
  CK.stackTable('power');
  const duty=p.media.map(m=>m.duty);
  $('powernote').textContent=
-  `One session on ${A2}, board power, reduced against one idle for the whole session with no leakage correction (the 23 September `+
-  `passes pooled in the last column were reduced against the idle just before and after each burst and corrected for leakage). `+
+  `One session on ${A2}, board power, reduced against one idle for the whole session with no leakage correction (the 26 September `+
+  `passes in the last column were reduced against the idle just before and after each burst and corrected for leakage). `+
   `Idle was ${f2(p.idle.board_w)} W at a die temperature of ${f0(p.idle.die_c)} °C, and the `+
   `minion clock stayed at 600 MHz throughout. The GB/s column is the rate while the kernel runs, from the cycle counter, and the kernel ran only `+
   `${f0(100*Math.min(...duty))}–${f0(100*Math.max(...duty))}% of each burst; `+
   `the watts are averaged over the whole burst, launch gaps included, so pJ per byte is watts over idle ÷ `+
   `(GB/s × ${Math.min(...duty).toFixed(2)}–${Math.max(...duty).toFixed(2)}).`;
- const pc=q.dram.per_card, r=POOLED.read;
+ const pc=q.dram.per_card, r=POOLED.read, pcs=CS.filter(c=>pc[c]), nper=[...new Set(pcs.map(c=>pc[c].n))];
+ const rd=m=>`${f2(m.mean)} [${f2(m.lo)}–${f2(m.hi)}]`, hi1=pcs.reduce((a,c)=>pc[c].mean>pc[a].mean?c:a,pcs[0]);
  $('remeasured').innerHTML=
-  `<b>Re-measured.</b> The last column pools this session with the energy manual's 23 September passes (n = ${q.dram.n}, `+
-  `${pc[A2].n===pc[A3].n?word(pc[A2].n)+' per card':word(pc[A2].n)+' on '+A2+', '+word(pc[A3].n)+' on '+A3}; `+
-  `<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">§5</a>): `+
-  `${f0(q.dram.mean/q.hop.mean)}× and ${f0(q.dram.mean/q.scp.mean)}× less than DRAM. Reading a byte costs ${f0(r.dram.mean)} `+
-  `[${f0(r.dram.lo)}–${f0(r.dram.hi)}] pJ from DRAM, ${f2(r['scp-local'].per_card[A2].mean)} on ${A2} and `+
-  `${f2(r['scp-local'].per_card[A3].mean)} on ${A3} from the shire's own scratchpad, and `+
-  `${f2(r['scp-remote'].mean)} from another shire's (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">the energy manual, §4</a>).`;
+  `<b>Re-measured.</b> The last column is the energy manual's pool of the three-card check (n = ${q.dram.n}, `+
+  `${nper.length===1?word(nper[0])+' passes on each of '+word(pcs.length)+' cards':pcs.map(c=>word(pc[c].n)+' on '+lab(c)).join(', ')}, 26 September; `+
+  `this session is not among them; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">§5</a>): `+
+  `${f0(q.dram.mean/q.hop.mean)}× and ${f0(q.dram.mean/q.scp.mean)}× less than DRAM. The hand-off's advantage is the same on every card `+
+  `(${andL(pcs.map(c=>f1(pc[c].mean/q.hop.per_card[c].mean)))}× on ${andL(pcs.map(lab))}), although the DRAM relay itself costs more on ${lab(hi1)} `+
+  `(${f0(pc[hi1].mean)} pJ per byte against ${andL(pcs.filter(c=>c!==hi1).map(c=>f0(pc[c].mean)))}, beyond the 99% interval). Reading a byte costs ${f0(r.dram.mean)} `+
+  `[${f0(r.dram.lo)}–${f0(r.dram.hi)}] pJ from DRAM; from the shire's own scratchpad ${rd(r['scp-local'].zeros)} when it holds zeros and ${rd(r['scp-local'].random)} `+
+  `when it holds random data, and from another shire's ${f2(r['scp-remote'].zeros.mean)} and ${f1(r['scp-remote'].random.mean)} `+
+  `(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">the energy manual, §4</a>; the check filled the scratchpads `+
+  `with zeros or random data before reading them). `+
+  `The own scratchpad's figure is not split by card: in the three-card check the difference between ${A2} and ${A3} was the data `+
+  `read, not the card; at equal contents they agree (${f2(RL3.h.zeros[A2])} and ${f2(RL3.h.zeros[A3])} pJ per byte for zeros, `+
+  `${f2(RL3.h.random[A2])} and ${f2(RL3.h.random[A3])} for random data), while ${lab('aifoundry1-c1')} read more `+
+  `(${f2(RL3.h.zeros['aifoundry1-c1'])} and ${f2(RL3.h.random['aifoundry1-c1'])}).`;
 })();
 
 /* ---------- section 3: working-set size, to 256 MB ---------- */
 (function(){
  const rows=D.size, mb=r=>r.stage_bytes*32/1048576, top=Math.max(...rows.map(mb));
  const big=D.bigsize.filter(r=>mb(r)>top);                    // DRAM-only continuation past the on-chip limit
- CK.legend('sizelegend',MED.map(m=>({key:m[0],label:m[3],mark:'dot',color:m[2]})));
+ const OTH=CS.filter(c=>c!==A2&&rows.some(r=>r.by_card&&r.by_card[c]));   // cards drawn as marks beside the first card's lines
+ const perCard=(r,m)=>OTH.filter(c=>r.by_card&&r.by_card[c]).map(c=>`${lab(c)} ${gb(r.by_card[c][m].gb_s)}`).join(', ');
+ CK.legend('sizelegend',MED.map(m=>({key:m[0],label:m[3],mark:'dot',color:m[2]})).concat(
+  OTH.map(c=>({key:c,label:lab(c),mark:CK.card(c).mark,color:'var(--ink-2)'}))));
  CK.frame('size',{label:'Relay bandwidth against working-set size for the three media, to 256 MB per buffer',height:W=>W<600?320:340,
   draw(f){
    const svg=f.svg,W=f.W,Hh=f.H,L=52,R=26,T=26,B=46,narrow=f.narrow;
@@ -165,6 +187,11 @@ CK.stackTable('media');
     const pts=rows.map(r=>[mb(r),r[m[0]].gb_s]).concat(m[0]==='dram'?big.map(r=>[mb(r),r.gb_s]):[]);
     CK.el('path',{d:CK.path(pts,x,y),fill:'none',style:`stroke:${m[2]};stroke-width:2`},svg);
     for(const [a,b] of pts){const c=CK.el('circle',{cx:x(a),cy:y(b),r:4,'aria-hidden':'true'},svg);c.style.fill=m[2];}
+    /* the other cards at the same sizes: their registry mark in the medium's colour */
+    for(const c of OTH){
+     const q=rows.map(r=>[mb(r),r.by_card&&r.by_card[c]&&r.by_card[c][m[0]].gb_s]).concat(m[0]==='dram'?big.map(r=>[mb(r),r.by_card&&r.by_card[c]]):[]);
+     for(const [a,b] of q) if(b) cmark(svg,c,x(a),y(b),m[2]);
+    }
    });
    /* one focusable column per size: the crosshair lists every medium at that size */
    const cols=rows.map(r=>({mb:mb(r),r})).concat(big.map(r=>({mb:mb(r),big:r}))), nodes=[];
@@ -174,9 +201,11 @@ CK.stackTable('media');
     const ln=CK.el('line',{x1:xc,x2:xc,y1:T,y2:Hh-B,class:'xh'},g); ln.style.stroke='var(--ink-2)'; ln.style.strokeWidth='1'; ln.style.opacity='0';
     g.addEventListener('pointerenter',()=>{ln.style.opacity='0.6';}); g.addEventListener('pointerleave',()=>{ln.style.opacity='0';});
     g.addEventListener('focus',()=>{ln.style.opacity='0.6';}); g.addEventListener('blur',()=>{ln.style.opacity='0';});
-    const html=c.big?`<b>${c.mb} MB per buffer</b> (footprint ${2*c.mb} MB)<br>DRAM ${gb(c.big.gb_s)} GB/s; the on-chip routes have no room`
-     :`<b>${c.mb} MB per buffer</b> (footprint ${2*c.mb} MB)<br>DRAM ${gb(c.r.dram.gb_s)}, next shire ${gb(c.r.hop.gb_s)} (${f2(c.r.hop_over_dram)}×), `+
-      `own ${gb(c.r.scp.gb_s)} (${f2(c.r.scp_over_dram)}×) GB/s`;
+    const html=c.big?`<b>${c.mb} MB per buffer</b> (footprint ${2*c.mb} MB)<br>DRAM ${gb(c.big.gb_s)} GB/s (${lab(A2)})`+
+      (OTH.length&&c.big.by_card?`; ${OTH.filter(k=>c.big.by_card[k]).map(k=>`${lab(k)} ${gb(c.big.by_card[k])}`).join(', ')}`:'')+`<br>the on-chip routes have no room`
+     :`<b>${c.mb} MB per buffer</b> (footprint ${2*c.mb} MB), ${lab(A2)}<br>DRAM ${gb(c.r.dram.gb_s)}, next shire ${gb(c.r.hop.gb_s)} (${f2(c.r.hop_over_dram)}×), `+
+      `own ${gb(c.r.scp.gb_s)} (${f2(c.r.scp_over_dram)}×) GB/s`+
+      (OTH.length?MED.map(m=>`<br>${m[3]}: ${perCard(c.r,m[0])}`).join(''):'');
     CK.tip(f,g,html); nodes.push(g);
    }
    CK.keynav(f,nodes);
@@ -185,8 +214,12 @@ CK.stackTable('media');
  const and=a=>a.slice(0,-1).join(', ')+' and '+a[a.length-1];
  const fit=rows.filter(r=>2*mb(r)<=32), lastfit=fit[fit.length-1];
  const hopMax=Math.max(...fit.map(r=>r.hop_over_dram));
+ const devs=[0];   // every other card's relative distance from the first card, every medium and size
+ for(const r of rows) for(const c of OTH) if(r.by_card&&r.by_card[c]) for(const m of MED) devs.push(Math.abs(r.by_card[c][m[0]].gb_s/r[m[0]].gb_s-1));
+ for(const r of big) for(const c of OTH) if(r.by_card&&r.by_card[c]) devs.push(Math.abs(r.by_card[c]/r.gb_s-1));
  $('sizecap').textContent=
-  `${A2}, log axes. Two buffers are live at once, so the chip footprint is twice the figure on the x axis; the dashed line `+
+  `Lines and dots ${lab(A2)}${OTH.length?`, ${andL(OTH.map(c=>`${CK.card(c).mark==='ring'?'rings':CK.card(c).mark==='diamond'?'diamonds':'marks'} ${lab(c)}`))} (each point the mean of that card's passes, `+
+  `and every card within ${f0(Math.ceil(100*Math.max(...devs)))}% of ${lab(A2)} at every size)`:''}, log axes. Two buffers are live at once, so the chip footprint is twice the figure on the x axis; the dashed line `+
   `marks where that footprint equals the 32 MB L3. Past ${top} MB per buffer only the DRAM route can run: the buffers start 256 KB into `+
   `each shire's 2.5 MB scratchpad, and two of them no longer fit in what is left.`;
  $('sizetext').innerHTML=
@@ -194,9 +227,11 @@ CK.stackTable('media');
   `going to DRAM at all: the 32 MB L3 holds the whole thing. Handing the data to the next shire then buys `+
   `${small.hop_over_dram.toFixed(2)}×, which is nothing, and keeping it in the shire's own scratchpad `+
   `${small.scp_over_dram.toFixed(1)}×. Up to ${mb(lastfit)} MB per buffer, while both buffers fit in the L3, the hand-off `+
-  `wins at most ${hopMax.toFixed(1)}×. At ${mb(last)} MB per buffer, a ${2*mb(last)} MB footprint, the DRAM route falls to `+
+  `wins at most `+(OTH.length?andL(CS.map(c=>`${Math.max(...fit.filter(r=>r.by_card&&r.by_card[c]).map(r=>r.by_card[c].hop_over_dram)).toFixed(1)}× on ${lab(c)}`)):`${hopMax.toFixed(1)}×`)+
+  `. At ${mb(last)} MB per buffer, a ${2*mb(last)} MB footprint, the DRAM route falls to `+
   `<b>${g1(last.dram.gb_s)} GB/s</b> and stays below ${f0(Math.ceil(Math.max(...big.map(r=>r.gb_s))))} GB/s: ${and(big.map(r=>g1(r.gb_s)))} GB/s at `+
-  `${and(big.map(r=>String(mb(r))))} MB per buffer. `+
+  `${and(big.map(r=>String(mb(r))))} MB per buffer`+
+  (OTH.length&&big[0].by_card?`, rising ${rng(CS.filter(c=>big[0].by_card[c]&&big[big.length-1].by_card[c]).map(c=>100*(big[big.length-1].by_card[c]/big[0].by_card[c]-1)),f0)}% from ${mb(big[0])} to ${mb(big[big.length-1])} MB on every card`:'')+`. `+
   `<b>The advantage is not a property of the computation. It is the L3 capacity.</b> Below it the cache is already doing most of the job; `+
   `above it, nothing is, unless you place the data yourself.`;
 })();
@@ -292,7 +327,9 @@ CK.stackTable('media');
 (function(){
  const rows=D.intensity;
  const S=[['scp_over_dram',"own shire",'var(--c3)','scp'],['hop_over_dram',"next shire",'var(--c1)','hop']];
- CK.legend('intlegend',S.map(s=>({key:s[0],label:s[1],mark:'dot',color:s[2]})));
+ const OTH=CS.filter(c=>c!==A2&&rows.some(r=>r.by_card&&r.by_card[c]));
+ CK.legend('intlegend',S.map(s=>({key:s[0],label:s[1],mark:'dot',color:s[2]})).concat(
+  OTH.map(c=>({key:c,label:lab(c),mark:CK.card(c).mark,color:'var(--ink-2)'}))));
  CK.frame('intensity',{label:'Advantage over the DRAM route against vector adds per element',height:W=>W<600?320:340,
   draw(f){
    const svg=f.svg,W=f.W,Hh=f.H,L=48,R=14,T=48,B=46,narrow=f.narrow;
@@ -308,19 +345,24 @@ CK.stackTable('media');
    S.forEach(s=>{
     CK.el('path',{d:CK.path(rows.map(r=>[r.work,r[s[0]]]),x,y),fill:'none',style:`stroke:${s[2]};stroke-width:2`},svg);
     for(const r of rows){const c=CK.el('circle',{cx:x(r.work),cy:y(r[s[0]]),r:4,'aria-hidden':'true'},svg);c.style.fill=s[2];}
+    for(const c of OTH) for(const r of rows) if(r.by_card&&r.by_card[c])
+     cmark(svg,c,x(r.work),y(r.by_card[c][s[0]]),s[2]);
    });
    const nodes=[];
    for(const r of rows){
     const g=CK.el('g',{},svg), xc=x(r.work);
     CK.el('rect',{x:xc-14,y:T,width:28,height:Hh-B-T,class:'ck-hit'},g);
     CK.tip(f,g,`<b>${r.work} add${r.work>1?'s':''} per element</b> (${num(r.work/8)} flop per byte moved, ${num(r.work/4)} per byte read)<br>`+
-     S.map(s=>`${s[1]}: ${r[s[0]].toFixed(1)}× DRAM (${g1(r[s[3]].gb_s)} GB/s)`).join('<br>'));
+     S.map(s=>`${s[1]}: ${r[s[0]].toFixed(1)}× DRAM (${g1(r[s[3]].gb_s)} GB/s)`+
+      (OTH.length?`, ${lab(A2)}; `+OTH.filter(c=>r.by_card&&r.by_card[c]).map(c=>`${lab(c)} ${r.by_card[c][s[0]].toFixed(1)}×`).join(', '):'')).join('<br>'));
     nodes.push(g);
    }
    CK.keynav(f,nodes);
   }});
- const last=rows[rows.length-1], at=w=>rows.find(r=>r.work===w).hop_over_dram.toFixed(1);
- $('intcap').textContent=`${A2}, log axes. The dashed line is parity with DRAM. Each element is 4 bytes read `+
+ /* a value per setting over every card: one number when the cards agree to the printed digit, else the range */
+ const last=rows[rows.length-1], at=w=>{const r=rows.find(q=>q.work===w);
+  return rng(CS.filter(c=>r.by_card&&r.by_card[c]).map(c=>r.by_card[c].hop_over_dram).concat(r.by_card?[]:[r.hop_over_dram]),v=>v.toFixed(1));};
+ $('intcap').textContent=`Lines and dots ${lab(A2)}${OTH.length?', '+andL(OTH.map(c=>`${CK.card(c).mark==='ring'?'rings':CK.card(c).mark==='diamond'?'diamonds':'marks'} ${lab(c)}`))+' (each point the mean of that card\u2019s passes); the text gives the range over the cards':''}, log axes. The dashed line is parity with DRAM. Each element is 4 bytes read `+
   'and 4 bytes written, so w adds per element are w/8 flops per byte moved; the top axis counts flops per byte read (w/4), the unit of the ridge points report.';
  $('inttext').innerHTML=
   `One add per element is pure data movement, and the hand-off is ${at(1)}× ahead. The lead holds to about four adds per element `+
@@ -333,40 +375,70 @@ CK.stackTable('media');
   `near 130 FLOP per byte read.`;
 })();
 
-/* ---------- section 5: distance ---------- */
+/* ---------- section 5: distance ----------
+   Since 26 September the ring offsets are the three-card passes' 'offsets' sweep, every offset d = 1..31 on every card
+   (D.offsets, pass means), and the fits over the 16 ring geometries (offset g with its mirror 32 - g) are
+   analyze_onchip.py's D.offset_fit. Without D.offsets (the 22 September data) the five offsets of D.distance are drawn. */
 (function(){
- const d=D.distance, k=n=>d.find(r=>r.hop_distance===n).mesh_hops, mh=d.map(r=>r.mesh_hops.mean);
- const gb2=d.map(r=>r.by_card[A2].gb_s), gb3=d.map(r=>r.by_card[A3].gb_s), Ls=d.map(r=>r.longest.hops);
- const rk=a=>a.map((v,i)=>i).sort((i,j)=>a[j]-a[i]).join(','), same=rk(gb2)===rk(gb3);
+ const d=OFF, k=n=>d.find(r=>r.hop_distance===n).mesh_hops, mh=d.map(r=>r.mesh_hops.mean);
+ const cs=CS.filter(c=>d.every(r=>r.by_card&&r.by_card[c]));   // the cards with every offset, registry order
+ const gbOf=c=>d.map(r=>r.by_card[c].gb_s), Ls=d.map(r=>r.longest.hops), FIT=D.offset_fit||{};
+ const fitted=cs.filter(c=>FIT[c]);
  const byL=[...new Set(Ls)].sort((a,b)=>b-a);
- const rngOf=Lh=>rng(d.filter(r=>r.longest.hops===Lh).map(r=>r.gb_s),n0);
+ const rngOf=Lh=>rng([].concat(...cs.map(c=>d.filter(r=>r.longest.hops===Lh).map(r=>r.by_card[c].gb_s))),n0);
  const and=a=>a.slice(0,-1).join(', ')+' and '+a[a.length-1];
  const rngH=m=>`${m.min} to ${m.max}`;
+ const allG=[].concat(...cs.map(gbOf));
+ const R={longest:{},mean:{}};
+ for(const c of cs){const g=gbOf(c);R.longest[c]=pear(Ls,g);R.mean[c]=pear(mh,g);}
+ const rr=o=>rng(cs.map(c=>R[o][c].r),v=>num(v,2));
+ /* how far apart the cards are: the largest spread of one offset over the cards, relative to its mean */
+ const spread=Math.max(...d.map(r=>{const v=cs.map(c=>r.by_card[c].gb_s);return (Math.max(...v)-Math.min(...v))/(v.reduce((a,b)=>a+b)/v.length);}));
+ const ci=(c,key)=>`${num(FIT[c][key][0],1)} to ${num(FIT[c][key][1],1)}`;
+ const mk=c=>{const m=CK.card(c).mark;return m==='dot'?'dots':m==='ring'?'rings':m==='diamond'?'diamonds':'squares';};
  $('distintro').innerHTML=
   `The obvious worry about handing data to another shire is the network in between. Shire numbers do not follow `+
   `the mesh: on the shire map of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip `+
   `communication report</a>, the next shire in the ring is on average ${f1(k(1).mean)} mesh hops away `+
   `(${rngH(k(1))}), two places on ${f1(k(2).mean)}, and sixteen places on only ${f1(k(16).mean)} (${rngH(k(16))}). `+
-  `Across the ${word(d.length)} offsets the bandwidth runs from ${n0(Math.min(...gb2))} to ${n0(Math.max(...gb2))} GB/s. Over these `+
-  `${word(d.length)} offsets no relation to the mean distance (${f1(Math.min(...mh))} to ${f1(Math.max(...mh))} hops) could be seen. It falls with the longest hand-off in the ring: `+
-  `${and(byL.map(String))} hops give ${and(byL.map(rngOf))} GB/s${same?', in the same order on both cards':''}. That is what one would expect `+
-  `when every stage waits at a barrier for its slowest shire, but ${word(d.length)} offsets are a correlation, not a controlled test.`;
+  `Across all ${d.length} offsets the bandwidth runs from ${n0(Math.min(...allG))} to ${n0(Math.max(...allG))} GB/s, `+
+  (cs.length>1?`and the ${word(cs.length)} cards agree within ${f1(100*spread)}% at every offset. `:'')+
+  `It does not follow the mean distance (${f1(Math.min(...mh))} to ${f1(Math.max(...mh))} hops): r = ${rr('mean')} against it. `+
+  `It falls with the longest hand-off in the ring: ${and(byL.map(String))} hops give ${and(byL.map(rngOf))} GB/s, `+
+  `r = ${rr('longest')}. `+
+  (fitted.length?`That was a prediction. A line fitted on 22 September to five offsets (1, 2, 4, 8 and 16) put the eleven ring geometries `+
+   `not tried then within 0.7% of where they landed, on every card, where the registered test allowed 5%; and with the longest hand-off `+
+   `in the fit, the mean hop count adds ${and(fitted.map(c=>`${num(FIT[c].mean_hops_coef,1)} GB/s per hop (99% interval ${ci(c,'mean_hops_coef_ci99')}) on ${lab(c)}`))}: `+
+   `nothing measurable. `:'')+
+  `That is what one would expect when every stage waits at a barrier for its slowest shire, though it is an observation across `+
+  `ring geometries, not a test of one link.`;
  const W_='style="white-space:normal"';
  $('dist').innerHTML=`<thead><tr><th class="num" ${W_}>Shire IDs back round the ring</th>`+
-  `<th class="num" ${W_}>Mesh hops, mean</th><th class="num" ${W_}>Longest hand-off, hops</th><th class="num">GB/s, a2 / a3</th>`+
-  `<th class="num" ${W_}>Against the next shire in ID order, a2 / a3</th></tr></thead><tbody>`+
+  `<th class="num" ${W_}>Mesh hops, mean</th><th class="num" ${W_}>Longest hand-off, hops</th>`+
+  cs.map(c=>`<th class="num" ${W_}>GB/s, ${lab(c)}</th>`).join('')+
+  `<th class="num" ${W_}>Against the next shire in ID order, ${cs.map(c=>CK.card(c).short).join(' / ')}</th></tr></thead><tbody>`+
   d.map(r=>`<tr><td class="num">${r.hop_distance}</td><td class="num">${f1(r.mesh_hops.mean)}</td><td class="num">${r.longest.hops}</td>`+
-   `<td class="num">${g1(r.by_card[A2].gb_s)} / ${g1(r.by_card[A3].gb_s)}</td>`+
-   `<td class="num">${(r.by_card[A2].gb_s/d[0].by_card[A2].gb_s).toFixed(2)}× / ${(r.by_card[A3].gb_s/d[0].by_card[A3].gb_s).toFixed(2)}×</td></tr>`).join('')+'</tbody>';
+   cs.map(c=>`<td class="num">${g1(r.by_card[c].gb_s)}</td>`).join('')+
+   `<td class="num">${cs.map(c=>(r.by_card[c].gb_s/d[0].by_card[c].gb_s).toFixed(2)+'×').join(' / ')}</td></tr>`).join('')+'</tbody>';
  CK.stackTable('dist');
- const slope=D.cards.map(c=>pear(Ls,d.map(r=>r.by_card[c].stage_cycles)).slope);
- const best=Math.max(...gb2), worst=d[0].by_card[A2].gb_s;
+ CK.sortTable('dist');
+ const slope=fitted.length?fitted.map(c=>FIT[c].stage_cycles_per_hop):cs.map(c=>pear(Ls,d.map(r=>r.by_card[c].stage_cycles)).slope);
+ const r10=v=>n0(Math.round(v/10)*10);
+ const cost=cs.map(c=>{const g=gbOf(c);return 1-d[0].by_card[c].gb_s/Math.max(...g);});
+ const bestOff=cs.map(c=>FIT[c]?FIT[c].best.offset:d[gbOf(c).indexOf(Math.max(...gbOf(c)))].hop_distance);
+ const mir=fitted.map(c=>Math.abs(FIT[c].worst_mirror.rel)), W0=fitted.length&&FIT[fitted[0]].worst_mirror;
  $('distafter').innerHTML=
-  `The headline in section 1 uses offset ${d[0].hop_distance}, the slowest of these. Transfers here are 32 KB per minion and pipelined, yet `+
-  `the mesh distance still shows: the stage time grows about ${rng(slope,v=>n0(Math.round(v/100)*100))} cycles for each hop of the longest `+
-  `hand-off (a least-squares line over the ${word(d.length)} offsets, one per card). The practical consequence is to keep the longest hand-off `+
-  `short; in this sweep the ID ring's ${d[0].longest.hops}-hop pair cost ${f0(100*(1-worst/best))}% of the bandwidth of the best offset. `+
-  `Placement is not free in energy either. On a loaded mesh each hop costs 1.5–2.2 pJ per byte of random data `+
+  `The headline in section 1 uses offset ${d[0].hop_distance}, the slowest geometry together with its mirror image, offset ${d[d.length-1].hop_distance}. `+
+  `Transfers here are 32 KB per minion and pipelined, yet the mesh distance still shows: the stage time grows about `+
+  `${rng(slope,r10)} cycles for each hop of the longest hand-off`+
+  (fitted.length?` (99% interval ${r10(Math.min(...fitted.map(c=>FIT[c].stage_cycles_per_hop_ci99[0])))}–${r10(Math.max(...fitted.map(c=>FIT[c].stage_cycles_per_hop_ci99[1])))} `+
+   `on every card; a least-squares line over the ${FIT[fitted[0]].geometries} ring geometries, each offset averaged with its mirror, one per card)`
+   :` (a least-squares line over the ${word(d.length)} offsets, one per card)`)+
+  `. The practical consequence is to keep the longest hand-off short: the ID ring's ${d[0].longest.hops}-hop pair costs `+
+  `${rng(cost.map(v=>100*v),f0)}% of the bandwidth of the best offset (${[...new Set(bestOff)].join(', ')}), on every card. `+
+  (fitted.length?`An offset and its mirror hand the same pairs of shires the slab in opposite directions; they agree within `+
+   `${rng(mir.map(v=>100*v),f1)}% (offsets ${W0.offset} and ${W0.mirror} differ most), a little more than the 2% the registered test allowed. `:'')+
+  `Placement is not free in energy either. On a loaded mesh each hop costs 1.6–2.3 pJ per byte of random data `+
   `(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#meaning">Heat per millimetre, §8</a>), about half of what a tensor `+
   `load of that byte from the shire's own scratchpad costs. The hand-off's bytes cross ${f1(k(1).mean)} hops on average, so a physical `+
   `neighbour should cost less (untested; section 7). This relay's slabs each hold a single value repeated, and such data costs less to `+
@@ -376,16 +448,16 @@ CK.stackTable('media');
  const LAY=D.layout, ring=D.ring, n=ring.length;
  const hops=(a,b)=>Math.abs(LAY[a][0]-LAY[b][0])+Math.abs(LAY[a][1]-LAY[b][1]);
  const src=(s,o)=>ring[(ring.indexOf(s)-o+n)%n];
- const R={longest:{},mean:{}};
- for(const c of D.cards){const g=d.map(r=>r.by_card[c].gb_s);R.longest[c]=pear(Ls,g);R.mean[c]=pear(mh,g);}
  let off=d[0].hop_distance, xm='longest', f=null;
- CK.seg('ringoff',{label:'Ring offset (shire IDs back)',options:d.map(r=>[r.hop_distance,String(r.hop_distance)]),value:off,onChange:v=>{off=v;upd();}});
+ const offCtl=CK.range('ringoff',{label:'Ring offset (shire IDs back)',stops:d.map(r=>r.hop_distance),value:off,fmt:v=>String(v),onInput:v=>{off=v;upd();}});
  CK.seg('ringx',{label:'Scatter against',options:[['longest','longest hand-off'],['mean','mean hops']],value:xm,onChange:v=>{xm=v;upd();}});
  const out=CK.readout('ringout');
  function upd(){
   const r=d.find(q=>q.hop_distance===off);
-  out.set(`<b>Offset ${off}:</b> mean ${f1(r.mesh_hops.mean)} hops, longest ${r.longest.hops} → ${f1(r.by_card[A2].gb_s)} GB/s (${A2}), ${f1(r.by_card[A3].gb_s)} (${A3}). `+
-   `Bandwidth against the ${xm==='longest'?'longest hand-off':'mean hops'}, ${word(d.length)} offsets: r = ${num(R[xm][A2].r,2)} (${A2}), ${num(R[xm][A3].r,2)} (${A3}).`);
+  out.set(`<b>Offset ${off}:</b> mean ${f1(r.mesh_hops.mean)} hops, longest ${r.longest.hops} → `+
+   cs.map(c=>`${f1(r.by_card[c].gb_s)} GB/s (${lab(c)})`).join(', ')+'. '+
+   `Bandwidth against the ${xm==='longest'?'longest hand-off':'mean hops'}, ${d.length} offsets: r = `+
+   cs.map(c=>`${num(R[xm][c].r,2)} (${lab(c)})`).join(', ')+'.');
   if(f) f.redraw();
  }
  const ramp=h=>CK.ramp((h-1)/9);
@@ -434,7 +506,7 @@ CK.stackTable('media');
    const ak=CK.el('g',{'aria-hidden':'true'},svg);
    CK.el('line',{x1:kx,x2:kx+22,y1:ky+38,y2:ky+38,'marker-end':'url(#rl-ah)',style:'stroke:var(--c2);stroke-width:2.5'},ak);
    CK.txt(svg,kx+28,ky+42,'longest hand-off','tick');
-   /* scatter */
+   /* scatter: every offset, each card's registry mark */
    const sx0=narrow?48:mx+mapW+70, sx1=W-14, sy0=narrow?ky+78:28, sy1=f.H-44;
    const x=xm==='longest'?CK.lin(5.5,10.5,sx0,sx1):CK.lin(1,5,sx0,sx1), y=CK.lin(575,750,sy1,sy0);
    CK.axes({svg,W:sx1+14,H:sy1+44},{x,y,L:sx0,R:14,T:sy0,B:44,xt:xm==='longest'?[6,7,8,9,10]:[1,2,3,4,5],yt:[600,650,700,750],
@@ -442,33 +514,36 @@ CK.stackTable('media');
    CK.txt(svg,sx0-44,sy0-10,'GB/s, whole relay','lab');
    const xv=q=>xm==='longest'?q.longest.hops:q.mesh_hops.mean;
    const F=R[xm][A2];
-   /* the least-squares line, clipped to the plot (it would run past the axes at the ends) */
+   /* the least-squares line of the first card, clipped to the plot (it would run past the axes at the ends) */
    const fy=v=>F.icpt+F.slope*v, cl=[y.domain[0],y.domain[1]].map(g=>(g-F.icpt)/F.slope).sort((p,q)=>p-q);
    const lx0=Math.max(x.domain[0],cl[0]), lx1=Math.min(x.domain[1],cl[1]);
    CK.el('line',{x1:x(lx0),x2:x(lx1),y1:y(fy(lx0)),y2:y(fy(lx1)),'aria-hidden':'true',
      style:'stroke:var(--ref);stroke-width:1.5;stroke-dasharray:5 4'},svg);
    /* r is in the readout above the chart, which follows the toggle */
    const pts=[];
-   for(const q of d.slice().sort((a,b)=>xv(a)-xv(b))){
+   for(const q of d.slice().sort((a,b)=>xv(a)-xv(b)||a.hop_distance-b.hop_distance)){
     const g=CK.el('g',{},svg), sel=q.hop_distance===off, X=x(xv(q));
-    const p2=CK.el('circle',{cx:X,cy:y(q.by_card[A2].gb_s),r:sel?6.5:5},g); p2.style.fill='var(--c1)';
-    const p3=CK.el('circle',{cx:X,cy:y(q.by_card[A3].gb_s),r:sel?10:8.5,fill:'none'},g); p3.style.stroke='var(--c1)'; p3.style.strokeWidth='1.5';
-    if(sel){const rr=CK.el('circle',{cx:X,cy:y(q.by_card[A2].gb_s),r:14,fill:'none','aria-hidden':'true'},g);rr.style.stroke='var(--ink)';rr.style.strokeWidth='2';}
-    const edge=X>sx1-70;
-    CK.txt(g,edge?X-8:X+12,y(q.by_card[A2].gb_s)+(edge?-14:4),`offset ${q.hop_distance}`,'tick',edge?'end':'start');
+    cs.forEach((cc,ci)=>cmark(g,cc,X+(ci-(cs.length-1)/2)*7,y(q.by_card[cc].gb_s),CK.card(cc).color,sel));   // side by side: the cards agree within 1%
+    const y0=y(q.by_card[A2].gb_s);
+    if(sel){
+     const rr_=CK.el('circle',{cx:X,cy:y0,r:14,fill:'none','aria-hidden':'true'},g);rr_.style.stroke='var(--ink)';rr_.style.strokeWidth='2';
+     const edge=X>sx1-70;
+     CK.txt(g,edge?X-18:X+18,y0+(edge?-14:4),`offset ${q.hop_distance}`,'tick',edge?'end':'start');
+    }
     CK.tip(f,g,`<b>offset ${q.hop_distance}</b> · longest hand-off ${q.longest.hops} hops, mean ${f1(q.mesh_hops.mean)}<br>`+
-     `${f1(q.by_card[A2].gb_s)} GB/s (${A2}), ${f1(q.by_card[A3].gb_s)} (${A3})<br>Enter shows this offset on the map`);
+     cs.map(cc=>`${f1(q.by_card[cc].gb_s)} GB/s (${lab(cc)})`).join(', ')+`<br>Enter shows this offset on the map`);
     g.dataset.o=q.hop_distance; g.addEventListener('click',()=>{off=q.hop_distance;segSet();});
     pts.push(g);
    }
    CK.keynav(f,pts,{onEnter:n=>{off=+n.dataset.o;segSet();}});
   }});
- function segSet(){const b=[...document.querySelectorAll('#ringoff [role=radio]')].find(e=>e.textContent===String(off));if(b)b.click();}
+ function segSet(){offCtl.set(off);}
  upd();
  $('ringcap').textContent=
   `The map colours each shire by how many mesh hops the slab it reads at this offset has to travel (the stronger the blue, the farther); the arrows mark `+
   `the longest hand-offs, drawn straight from source to destination because the route the data takes on the mesh was not measured. `+
-  `The scatter puts the relay's bandwidth against the longest hand-off (or, toggled, the mean): r = ${rng(D.cards.map(c=>R.longest[c].r),v=>num(v,2))} `+
-  `against the longest on the two cards, ${D.cards.map(c=>num(R.mean[c].r,2)).join(' and ')} against the mean, which ${word(d.length)} points cannot tell from none. Filled ${A2}, rings ${A3}. `+
-  `Consistent with the slowest pair setting the pace at each barrier; ${word(d.length)} offsets, not a controlled test.`;
+  `The scatter puts the relay's bandwidth at every offset against the longest hand-off (or, toggled, the mean): r = ${rr('longest')} `+
+  `against the longest${cs.length>1?` on the ${word(cs.length)} cards`:''}, ${rr('mean')} against the mean. `+
+  (cs.length>1?`${(t=>t[0].toUpperCase()+t.slice(1))(andL(cs.map(c=>`${mk(c)} ${lab(c)}`)))}, side by side at each offset; each point is the mean of that card's passes, and the dashed line is ${lab(A2)}'s least-squares line. `:'')+
+  `Consistent with the slowest pair setting the pace at each barrier.`;
 })();

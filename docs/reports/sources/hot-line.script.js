@@ -3,23 +3,37 @@
 const $=id=>document.getElementById(id);
 const f1=v=>v.toFixed(1),f2=v=>v.toFixed(2),f3=v=>v.toFixed(3);
 const num=CK.fmt.num, n0=v=>num(v,0);
-const A2=r=>r.card==='aifoundry2', A3=r=>r.card==='aifoundry3';
-const CARDS=D.cards, CARD3=CARDS[1];
+/* The sweeps' cards in the chart kit's registry order (aifoundry2, aifoundry3, aifoundry1-c1); each card's row of a
+   configuration is the mean of its passes (analyze_hotline.py --v3). SESSION is the card of the first energy session
+   (power.json). */
+const CARDS=CK.cardsIn(D.cards), C0=CARDS[0], SESSION='aifoundry2';
+const on=c=>r=>r.card===c;
+const SHORT=CARDS.map(c=>CK.card(c).short).join(' / ');   // the column label, "a2 / a3 / a1c1"
+/* a card's style in the charts whose colour already means something else: filled, hollow, hollow dashed */
+const cardStyle=i=>({fill:i===0,grow:[0,3,6][Math.min(i,2)],dash:i>=2?'3 2':null});
+const markWord=i=>['filled','hollow','dashed'][Math.min(i,2)];
+const cardKey=()=>CARDS.map((c,i)=>`${markWord(i)} ${CK.card(c).label}`).join(', ');
 const CTX=D.context||{};
 const BANK=CTX.bank_service_cycles, RT=CTX.remote_atomic_latency_cycles, WIN=CTX.window_cycles;
 const CLOCK_MHZ=WIN/1e4;  // the 6,000,000-cycle window is 10 ms: the cards ran at 600 MHz
 /* a percentage range over values in [0,1]: "85–87%", or one value when both ends print the same */
 const pr=(vals,dp)=>{const d=dp==null?0:dp,a=(100*Math.min(...vals)).toFixed(d),b=(100*Math.max(...vals)).toFixed(d);return a===b?a+'%':a+'–'+b+'%';};
 const pct=(v,dp)=>(100*v).toFixed(dp==null?0:dp)+'%';
-const both=(a,b)=>a===b?a:a+' / '+b;   // one value when the two cards agree to the printed precision
+const agree=vs=>vs.every(v=>v===vs[0])?vs[0]:vs.join(' / ');   // one value when every card agrees to the printed precision
+/* a value per card, printed once when every card agrees: "55% (aifoundry2), 57% (aifoundry3) and ..." */
+const vals=(rows,fmt)=>{const v=rows.map(fmt);if(v.every(x=>x===v[0]))return v[0];
+ const p=rows.map((r,i)=>`${v[i]} (${CK.card(r.card).label})`);return p.slice(0,-1).join(', ')+' and '+p[p.length-1];};
+const perCard=pick=>CARDS.map(c=>pick(c)).filter(Boolean);   // one row per card, registry order
+const span2=(v,f)=>{const lo=f(Math.min(...v)),hi=f(Math.max(...v));return lo===hi?lo:lo+'–'+hi;};   // "168–169"
 const WORD=['no','one','two','three','four','five','six','seven','eight','nine'];
 const word=n=>WORD[n]||n0(n);
 
-/* Pooled energies: 22 September plus the 23 September passes, both cards, from
+/* Pooled energies: 22 September plus the 23 September passes on aifoundry2 and aifoundry3, from
    docs/reports/data/2026-09-23-energy-manual/reruns.json (hotline_nj_per_op and hotline_over_idle_w.contended),
    written by
      python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm \
-       docs/reports/data/2026-09-23-reruns-aifoundry3 --out reruns.json
+       docs/reports/data/2026-09-23-reruns-aifoundry3 --v3-rl docs/reports/data/2026-09-25-claims-v3/raw --out reruns.json
+   (--v3-rl replaces the relay, rings and levels only; the hot line's blocks are the same as without it, checked 26 September)
    Copied here (4 decimals) rather than read as data: reruns.json is built from this page's power.json, so feeding
    it back into hotline.json would make a file loop (PLAN2 DP-6). Update both together if the reruns change. */
 const POOLED={
@@ -33,16 +47,21 @@ const POOLED={
 
 /* ---------- KPIs ---------- */
 (function(){
- const fair=D.fairness.find(r=>A2(r)&&r.home==='0'&&r.per_shire===32);
- const loc=D.local.find(r=>A2(r)&&r.home==='scplocal:0'&&r.shires>1);
- const reqs=D.requesters.filter(A2).sort((a,b)=>a.remote_minions-b.remote_minions);
- const req=reqs.find(r=>r.frac_of_alone<0.5), prev=req?reqs[reqs.indexOf(req)-1]:null;
+ const fair=perCard(c=>D.fairness.find(r=>r.card===c&&r.home==='0'&&r.per_shire===32));
+ const loc=perCard(c=>D.local.find(r=>r.card===c&&r.home==='scplocal:0'&&r.shires>1));
+ /* the edge on each card: the first requester count that leaves the host below half its rate, and the one before */
+ const edge=perCard(c=>{const reqs=D.requesters.filter(on(c)).sort((a,b)=>a.remote_minions-b.remote_minions);
+  const req=reqs.find(r=>r.frac_of_alone<0.5);return req?{req,prev:reqs[reqs.indexOf(req)-1]}:null;});
+ const fr=r=>r.frac_of_alone_n!=null?r.frac_of_alone_n:r.frac_of_alone;   // against its own N-minion rate alone, where run
  const pw=D.power.runs, c=pw.find(r=>r.label==='contended'), s=pw.find(r=>r.label==='spread');
- $('k1').textContent=f3(fair.host_share);
- $('k2').textContent=pct(loc.frac_of_alone,2);
- $('k3').textContent=req&&prev?`${prev.remote_minions+1}–${req.remote_minions}`:'—';
- $('k3sub').textContent=req&&prev&&RT?
-  `${prev.remote_minions} leave the host at ${pct(prev.frac_of_alone,1)}, ${req.remote_minions} stop it (the inequality in section 3 puts the edge at ${Math.ceil(RT/BANK)}); one shire has 32`:'';
+ $('k1').textContent=agree(fair.map(r=>f3(r.host_share)));
+ $('k2').textContent=agree(loc.map(r=>pct(r.frac_of_alone,2)));
+ const lo=agree(edge.map(e=>String(e.prev.remote_minions+1))), hi=agree(edge.map(e=>String(e.req.remote_minions)));
+ $('k3').textContent=edge.length?(lo===hi?hi:`${lo}–${hi}`):'—';
+ const e0=edge[0];
+ $('k3sub').textContent=e0&&RT?
+  `${e0.prev.remote_minions} leave the host at ${pr(edge.map(e=>fr(e.prev)),1)} of its rate, ${e0.req.remote_minions} stop it, on all ${word(edge.length)} cards `+
+  `(the inequality in section 3 puts the edge at ${Math.ceil(RT/BANK)}); one shire has 32`:'';
  $('k4').textContent=(c.nj_per_op/s.nj_per_op).toFixed(0)+'×';
 })();
 
@@ -62,8 +81,8 @@ const POOLED={
  CK.seg('fairctl',{label:'Minions taking part',options:[['one','32 minions, one per shire'],['full','1,024 minions, 32 per shire']],
   value:mode,onChange:v=>{mode=v;f.redraw();}});
  const tipHtml=s=>`<b>shire ${s}</b> · ${hopsOf(s)} hop${hopsOf(s)===1?'':'s'} from shire 0, which holds the line<br>`+
-  `one minion per shire: ${f3(share(CARDS[0],'one',s))} (${CARDS[0]}), ${f3(share(CARD3,'one',s))} (${CARD3})<br>`+
-  `32 per shire: ${f3(share(CARDS[0],'full',s))}, ${f3(share(CARD3,'full',s))}`;
+  `one minion per shire: ${CARDS.map(c=>`${f3(share(c,'one',s))} (${CK.card(c).label})`).join(', ')}<br>`+
+  `32 per shire: ${CARDS.map(c=>f3(share(c,'full',s))).join(', ')}`;
  const f=CK.frame('fair',{label:'Share of the contended atomic for each shire, on the mesh map and against mesh hops from shire 0',
   height:W=>W<600?Math.min(46,Math.floor((W-24)/6))*6+64+300:360,
   draw(f){
@@ -112,9 +131,11 @@ const POOLED={
    }
    const dots=[];
    for(const s of ids.slice().sort((a,b)=>hopsOf(a)-hopsOf(b)||a-b)){
-    const v2=share(CARDS[0],mode,s),v3=share(CARD3,mode,s),g=CK.el('g',{},svg);
+    const v2=share(CARDS[0],mode,s),g=CK.el('g',{},svg);
     const d=CK.el('circle',{cx:x(hopsOf(s)),cy:y(v2),r:5},g); d.style.fill=fill(v2); d.style.stroke='var(--ink-2)';
-    const o=CK.el('circle',{cx:x(hopsOf(s)),cy:y(v3),r:8,fill:'none','aria-hidden':'true'},g); o.style.stroke='var(--ink-2)';
+    /* the other cards: a ring, then a dashed ring, around the first card's dot */
+    CARDS.slice(1).forEach((c,i)=>{const st=cardStyle(i+1),o=CK.el('circle',{cx:x(hopsOf(s)),cy:y(share(c,mode,s)),r:5+st.grow,fill:'none','aria-hidden':'true'},g);
+     o.style.stroke='var(--ink-2)'; if(st.dash)o.style.strokeDasharray=st.dash;});
     g.dataset.s=s; dots.push(g);
     CK.tip(f,g,()=>tipHtml(s));
     g.addEventListener('pointerenter',()=>hl(s)); g.addEventListener('pointerleave',()=>hl(null)); g.addEventListener('blur',()=>hl(null));
@@ -129,33 +150,36 @@ const POOLED={
     const r=CK.el('circle',{cx:x(hopsOf(s)),cy:y(share(CARDS[0],mode,s)),r:11,fill:'none'},mark); r.style.stroke='var(--ink)'; r.style.strokeWidth='2';
    }
   }});
- const full=[...byc[CARDS[0]],...byc[CARD3]].filter(r=>r.kind==='full').map(r=>r.share);
+ const full=[].concat(...CARDS.map(c=>byc[c])).filter(r=>r.kind==='full').map(r=>r.share);
  const one=byc[CARDS[0]].filter(r=>r.kind==='one'), far=Math.max(...one.map(r=>hopsOf(r.s)));
  const at=h=>one.filter(r=>hopsOf(r.s)===h).map(r=>r.share);
- const host=D.fairness.find(r=>A2(r)&&r.home==='0'&&r.per_shire===32).host_share;
+ const host=agree(perCard(c=>D.fairness.find(r=>r.card===c&&r.home==='0'&&r.per_shire===32)).map(r=>f3(r.host_share)));
+ /* Ivan's case: one scratchpad word in shire 0, every minion hammering (the placement rows) */
+ const ivan=perCard(c=>D.placement.find(r=>r.card===c&&r.home==='scp:0'));
  /* section 3's round trip: one requester, the bank idle, from this shire */
  const rtS=CTX.remote_atomic_latency_shire, rtH=rtS!=null&&LAY[rtS]?hopsOf(rtS):null;
  const rtNote=RT&&rtH!=null?`; section 3's ${n0(RT)} cycles is the uncontended round trip of a single requester in shire ${rtS}, ${rtH} hop${rtH===1?'':'s'} away`:'';
  $('faircap').textContent=
   `The map colours each shire by its share (towards blue above an even split, towards orange below; shire 0, outlined, holds the line). `+
-  `The scatter plots the same shares against mesh hops from shire 0; dots are ${CARDS[0]}, rings ${CARD3}. `+
+  `The scatter plots the same shares against mesh hops from shire 0: ${CARDS.map((c,i)=>`${['dots','rings','dashed rings'][Math.min(i,2)]} ${CK.card(c).label}`).join(', ')}; each is the mean of the card's passes. `+
   `With one minion per shire the dashed curve is ${num(F.harmonic_mean_cycles,0)}/(${num(F.round_trip_cycles_0_hops,0)} + ${num(F.cycles_per_hop,1)} × hops): `+
   `a request's round trip, ${num(F.round_trip_cycles_0_hops,0)} cycles plus ${num(F.cycles_per_hop,1)} per hop, sets how often a shire gets its turn, and the curve fits every shire `+
-  `within ${F.max_share_error} (${fit[CARD3].max_share_error} on ${CARD3}), from ${f3(Math.max(...at(0)))} at 0 hops to ${f3(Math.min(...at(far)))} at ${far}. `+
+  `within ${F.max_share_error} on ${CARDS[0]} (${CARDS.slice(1).map(c=>`${fit[c].max_share_error} on ${CK.card(c).label}`).join(', ')}), from ${f3(Math.max(...at(0)))} at 0 hops to ${f3(Math.min(...at(far)))} at ${far}. `+
   `That round trip is taken under the saturated bank, so it includes the queueing${rtNote}. `+
-  `With every minion taking part the whole chip lands within ${f3(Math.min(...full))}–${f3(Math.max(...full))} on both cards and the host shire is at ${f3(host)}: the map goes flat. `+
+  `With every minion taking part the whole chip lands within ${f3(Math.min(...full))}–${f3(Math.max(...full))} on all ${word(CARDS.length)} cards and the host shire is at ${host}: the map goes flat. `+
   `A hovered or focused shire is joined to shire 0 by a straight line, not by its route (the mesh's routing order was not measured). `+
-  `The same holds for Ivan's exact case, a scratchpad word in shire 0: host share 1.004, every shire 0.998–1.004.`;
+  (ivan.length?`The same holds for Ivan's exact case, a scratchpad word in shire 0: host share ${agree(ivan.map(r=>f3(r.host_share)))}, `+
+   `every shire ${f3(Math.min(...ivan.map(r=>r.min_share)))}–${f3(Math.max(...ivan.map(r=>r.max_share)))}.`:'');
 })();
 
 /* ---------- section 1 table: home sweep, the two cards side by side ---------- */
 (function(){
- const key=r=>r.home+'|'+r.per_shire, a3={};
- D.fairness.filter(A3).forEach(r=>{a3[key(r)]=r;});
- $('fairtab').innerHTML='<thead><tr><th>DRAM line homed in</th><th class="num">Minions per shire</th><th class="num">Host shire’s share, a2 / a3</th><th class="num">Spread across 32 shires, a2 / a3</th></tr></thead><tbody>'+
-  D.fairness.filter(A2).map(r=>{const b=a3[key(r)];
-   return `<tr><td>shire ${r.home}</td><td class="num">${r.per_shire}</td><td class="num">${both(f3(r.host_share),b?f3(b.host_share):'—')}</td>`+
-    `<td class="num">${both(f3(r.min_share)+'–'+f3(r.max_share),b?f3(b.min_share)+'–'+f3(b.max_share):'—')}</td></tr>`;}).join('')+'</tbody>';
+ const key=r=>r.home+'|'+r.per_shire, by={};
+ D.fairness.forEach(r=>{by[r.card+'|'+key(r)]=r;});
+ const row=(r,f)=>agree(CARDS.map(c=>{const b=by[c+'|'+key(r)];return b?f(b):'—';}));
+ $('fairtab').innerHTML=`<thead><tr><th>DRAM line homed in</th><th class="num">Minions per shire</th><th class="num">Host shire’s share, ${SHORT}</th><th class="num">Spread across 32 shires, ${SHORT}</th></tr></thead><tbody>`+
+  D.fairness.filter(on(C0)).map(r=>`<tr><td>shire ${r.home}</td><td class="num">${r.per_shire}</td><td class="num">${row(r,b=>f3(b.host_share))}</td>`+
+    `<td class="num">${row(r,b=>f3(b.min_share)+'–'+f3(b.max_share))}</td></tr>`).join('')+'</tbody>';
  CK.stackTable('fairtab');
 })();
 
@@ -166,16 +190,40 @@ const POOLED={
  const names={'scplocal':'its own scratchpad','dramlocal':'its own scratchpad','scpstream':'DRAM','dramstream':'DRAM'};
  const hotin={'scplocal':'scratchpad of the same shire','dramlocal':'L3 slice of the same shire',
               'scpstream':'scratchpad of the same shire','dramstream':'L3 slice of the same shire'};
- const homes=D.local.filter(r=>A2(r)&&r.shires>1).map(r=>r.home);
- $('localtab').innerHTML='<thead><tr><th>Host shire is reading</th><th>Hot line is in the</th><th class="num">Alone, a2 / a3</th><th class="num">While hammered, a2 / a3</th><th class="num">Fraction, a2 / a3</th></tr></thead><tbody>'+
-  homes.map(h=>{const base=h.split(':')[0],w2=with_[CARDS[0]+'|'+h],w3=with_[CARD3+'|'+h],l2=alone[CARDS[0]+'|'+h],l3=alone[CARD3+'|'+h];
-   return `<tr><td>${names[base]}</td><td>${hotin[base]}</td><td class="num">${both(n0(l2.host_ops),n0(l3.host_ops))}</td>`+
-    `<td class="num">${both(n0(w2.host_ops),n0(w3.host_ops))}</td><td class="num">${both(pct(w2.frac_of_alone,3),pct(w3.frac_of_alone,3))}</td></tr>`;}).join('')+'</tbody>';
+ const homes=D.local.filter(r=>r.card===C0&&r.shires>1).map(r=>r.home);
+ const col=(tab,h,f)=>agree(CARDS.map(c=>tab[c+'|'+h]?f(tab[c+'|'+h]):'—'));
+ $('localtab').innerHTML=`<thead><tr><th>Host shire is reading</th><th>Hot line is in the</th><th class="num">Alone, ${SHORT}</th><th class="num">While hammered, ${SHORT}</th><th class="num">Fraction, ${SHORT}</th></tr></thead><tbody>`+
+  homes.map(h=>{const base=h.split(':')[0];
+   return `<tr><td>${names[base]}</td><td>${hotin[base]}</td><td class="num">${col(alone,h,r=>n0(r.host_ops))}</td>`+
+    `<td class="num">${col(with_,h,r=>n0(r.host_ops))}</td><td class="num">${col(with_,h,r=>pct(r.frac_of_alone,3))}</td></tr>`;}).join('')+'</tbody>';
  CK.stackTable('localtab');
- if(CTX.window_independence){
+ /* the window table: measured in the three-card check ('windows': every home at 5, 10, 40 and 100 ms, every card's
+    passes), or the hand-kept table of the first session where no measured one is at hand */
+ const WN=D.windows;
+ if(WN&&WN.length){
+  const scp=WN.filter(r=>r.home==='scplocal:0'), ws=[...new Set(scp.map(r=>r.window_cycles))].sort((a,b)=>a-b);
+  const lohi=rs=>{const lo=Math.min(...rs.map(r=>r.host_ops_lo)),hi=Math.max(...rs.map(r=>r.host_ops_hi));return lo===hi?n0(lo):n0(lo)+'–'+n0(hi);};
+  $('wintab').innerHTML='<thead><tr><th class="num">Window</th><th class="num">Host shire’s loads, every launch</th><th class="num">Atomics completed in the window</th></tr></thead><tbody>'+
+   ws.map(w=>{const rs=scp.filter(r=>r.window_cycles===w),rem=rs.reduce((a,r)=>a+r.remote_ops,0)/rs.length;
+    return `<tr><td class="num">${(w/(CLOCK_MHZ*1e3)).toFixed(0)} ms</td><td class="num">${lohi(rs)}</td><td class="num">${(rem/1e6).toPrecision(2)} M</td></tr>`;}).join('')+'</tbody>';
+  const other=h=>WN.filter(r=>r.home===h), np=Math.max(...WN.map(r=>r.n_passes||1));
+  const dram=[...other('dramlocal:0'),...other('dramstream:0')], dstream=other('scpstream:0');
+  $('wincap').textContent=`Every launch at each window: ${word(np)} passes on each of ${CARDS.map(c=>CK.card(c).label).join(', ')}, with the hot line in the host's `+
+   `scratchpad and the host reading it. With the host reading DRAM instead the count is ${lohi(dstream)} at every window, and under a DRAM-homed hot line `+
+   `${lohi(dram)}.`;
+ } else if(CTX.window_independence){
   $('wintab').innerHTML='<thead><tr><th class="num">Window</th><th class="num">Host shire’s loads</th><th class="num">Atomics completed in the window</th></tr></thead><tbody>'+
    CTX.window_independence.map(r=>`<tr><td class="num">${(r.window/(CLOCK_MHZ*1e3)).toFixed(0)} ms</td><td class="num">${r.host_ops}</td><td class="num">${(r.remote_ops/1e6).toPrecision(2)} M</td></tr>`).join('')+'</tbody>';
  } else $('wintab').closest('.table-wrap').hidden=true;
+ /* the warm-up: the host's loads inside the window after 0, 5 and 10 warm-up loads per minion (three-card check) */
+ const WU=D.warmup||[], wu=w=>WU.filter(r=>r.warmup===w);
+ if($('warmtext')&&wu(0).length&&wu(10).length){
+  const cnt=w=>{const rs=wu(w),lo=Math.min(...rs.map(r=>r.host_ops_lo)),hi=Math.max(...rs.map(r=>r.host_ops_hi));return {txt:lo===hi?n0(lo):n0(lo)+'–'+n0(hi),per:lo===hi?lo/rs[0].host_minions:null};};
+  const c0=cnt(0),c10=cnt(10),c5=cnt(5);
+  $('warmtext').textContent=`The warm-up only moves loads out of the window: with no warm-up ${c0.txt} get through inside it`+
+   (c0.per!=null?` (${n0(c0.per)} per minion)`:'')+`, with ten warm-up loads ${c10.txt}`+(c10.per!=null?` (${n0(c10.per)} per minion)`:'')+
+   `, against ${c5.txt} after the usual five, in every pass on all ${word(CK.cardsIn(WU.map(r=>r.card)).length)} cards of the three-card check.`;
+ }
 })();
 
 /* ---------- section 3: the inequality, and the explorer that puts both sweeps on one load axis ---------- */
@@ -189,22 +237,32 @@ const RUNS=[...D.requesters.map(r=>({...r,ser:'req'})),...D.pace.map(r=>({...r,s
  const unsat=RUNS.filter(r=>r.x<1), err=Math.max(...unsat.map(r=>Math.abs(r.x-r.m)/r.m));
  const tested=[...new Set(D.requesters.map(r=>r.remote_minions))].sort((a,b)=>a-b), edge=Math.ceil(RT/BANK);
  const below=Math.max(...tested.filter(n=>n<edge)), above=Math.min(...tested.filter(n=>n>=edge));
+ /* the host against its own rate alone with as many minions (the N-minion baselines), where they were run */
+ const frN=r=>r.frac_of_alone_n!=null?r.frac_of_alone_n:r.frac_of_alone, reqAt=n=>D.requesters.filter(r=>r.remote_minions===n);
+ const stopEvery=n=>reqAt(n).every(r=>r.host_alone_n_ops?r.host_ops_hi/r.host_alone_n_ops<0.01:r.frac_of_alone<0.01);
  const NP=Math.max(...D.pace.map(r=>r.remote_minions)), need=NP*BANK-RT;
  const paces=[...new Set(D.pace.map(r=>r.pace))].sort((a,b)=>a-b);
  const lastBad=Math.max(...paces.filter(p=>p<need)), knee=Math.min(...paces.filter(p=>p>need));
  const run=(ser,N,P)=>RUNS.filter(r=>r.ser===ser&&r.remote_minions===N&&r.pace===P);
- const r20=run('req',below,0), p12=run('pace',NP,12000), p16=run('pace',NP,16000);
+ const N20=tested.includes(20)?20:below, r20=run('req',N20,0), p12=run('pace',NP,12000), p16=run('pace',NP,16000);
+ const PL=D.pollers||[];
  $('ineqtext').innerHTML=
   `Here <i>N</i> is the number of remote minions hammering the line, <i>P</i> the cycles each waits between atomics, `+
-  `and <i>t</i> the measured ${n0(RT)}-cycle round trip. With <i>P</i> = 0 it puts the edge at ${edge} requesters, between the `+
-  `${below} and ${above} that were tested. It also prices section 5: for ${n0(NP)} requesters it needs <i>P</i> above about `+
+  `and <i>t</i> the measured ${n0(RT)}-cycle round trip. With <i>P</i> = 0 it puts the edge at ${edge} requesters`+
+  (above===edge&&below===edge-1?`, and that is where it is: ${below} requesters leave the host at ${pr(reqAt(below).map(frN),1)} of its rate alone `+
+   `with as many minions, and ${edge} stop it (${pr(reqAt(edge).map(frN),2)})${stopEvery(edge)?' in every pass':''}, on all ${word(CARDS.length)} cards. `
+   :`, between the ${below} and ${above} that were tested. `)+
+  `It also prices section 5: for ${n0(NP)} requesters it needs <i>P</i> above about `+
   `${n0(Math.round(need/100)*100)} cycles, which is why ${n0(lastBad)} does nothing and ${n0(knee)} is the knee. In every unsaturated run `+
   `of both sweeps it predicts the bank's measured load to within about ${(100*err).toFixed(0)}%. <b>Not saturating the bank is `+
-  `necessary, not sufficient:</b> one shire's ${below} requesters leave the host at ${pr(r20.map(r=>r.frac_of_alone))} with the bank `+
-  `${pct(LOAD(below,0))} busy, while ${n0(NP)} paced requesters leave it at ${pr(p12.map(r=>r.frac_of_alone))} with the bank `+
+  `not sufficient:</b> one shire's ${N20} requesters leave the host at ${pr(r20.map(r=>r.frac_of_alone))} with the bank `+
+  `${pct(LOAD(N20,0))} busy, while ${n0(NP)} paced requesters leave it at ${pr(p12.map(r=>r.frac_of_alone))} with the bank `+
   `${pct(LOAD(NP,12000))} busy and ${pr(p16.map(r=>r.frac_of_alone))} at ${pct(LOAD(NP,16000))}. The two tests differ in how many `+
-  `requesters there are and in how many minions the host runs (${below} against ${p12[0].host_minions}), and which of these matters `+
-  `was not tested.`;
+  `requesters there are and in how many minions the host runs (${N20} against ${p12[0].host_minions}), and which of these matters `+
+  `was not tested.`+
+  (PL.length?` <b>Nor was it always necessary:</b> ${PL[0].remote_minions} requesters, one in each other shire, held the bank at `+
+   `${agree(PL.map(r=>f2(r.remote_cycles_per_atomic)))} cycles per atomic, saturated, and the owner shire's ${word(PL[0].host_minions)} reading minion `+
+   `kept ${pr(PL.map(r=>r.frac_of_alone_n),0)} of its rate alone, on all ${word(PL.length)} cards (section 7).`:'');
 
  /* verdict bands, each summarised from the runs that fall in it */
  const BANDS=[[1,Infinity,'Saturated'],[0.9,1,'At the knee'],[0.5,0.9,'Below saturation, not free'],[0,0.5,'Light load']];
@@ -227,7 +285,7 @@ const RUNS=[...D.requesters.map(r=>({...r,ser:'req'})),...D.pace.map(r=>({...r,s
   const x=LOAD(N,P), hit=RUNS.filter(r=>r.remote_minions===N&&r.pace===P);
   const hf=hit.map(r=>r.frac_of_alone), hdp=Math.max(...hf)<0.01?2:Math.min(...hf)>=0.95?1:0;  // the band text's precision
   const hitTxt=hit.length?` <b>Measured at this setting:</b> host at ${pr(hf,hdp)}, `+
-    `measured load ${both(lf(Math.min(...hit.map(r=>r.m))),lf(Math.max(...hit.map(r=>r.m))))}.`:' This setting was not run.';
+    `measured load ${agree([lf(Math.min(...hit.map(r=>r.m))),lf(Math.max(...hit.map(r=>r.m)))])}.`:' This setting was not run.';
   out.set(`<b>Load ${lf(x)}</b> = ${n0(N)} × ${n0(BANK)} cycles of bank per round ÷ (${n0(P)} + ${n0(RT)}) cycles per round `+
    `(predicted). ${verdict(x)}${hitTxt}`);
   if(f) f.redraw();
@@ -239,7 +297,7 @@ const RUNS=[...D.requesters.map(r=>({...r,ser:'req'})),...D.pace.map(r=>({...r,s
  const rP=CK.range('reqP',{label:'Pause between atomics, P (cycles)',stops:[0,1000,4000,8000,10000,12000,16000,20000,40000,100000],value:P,fmt:n0,onInput:v=>{P=v;upd();tell();}});
  busNP.on((v,from)=>{if(from==='req'||!(v.N>0))return;fromBus=true;rN.set(v.N);rP.set(v.P);fromBus=false;});   // N = 0 (nobody hammering) is not on the slider
  let f=null;
- f=CK.frame('req',{label:'Host throughput against predicted bank load, both sweeps, both cards',height:W=>W<600?340:380,
+ f=CK.frame('req',{label:'Host throughput against predicted bank load, both sweeps, every card',height:W=>W<600?340:380,
   draw(f){
    const svg=f.svg,W=f.W,H=f.H,L=48,R=14,T=26,B=46,narrow=f.narrow;
    const x=CK.log(0.03,50,L,W-R), y=CK.lin(0,1.15,H-B,T);
@@ -258,16 +316,16 @@ const RUNS=[...D.requesters.map(r=>({...r,ser:'req'})),...D.pace.map(r=>({...r,s
    const nodes=[];
    const order=RUNS.slice().sort((a,b)=>a.x-b.x||(a.card<b.card?-1:1));
    for(const r of order){
-    const g=CK.el('g',{'data-series':r.ser},svg), a2=A2(r), col=r.ser==='req'?'var(--c1)':'var(--c3)', px=x(Math.min(50,r.x)), py=y(r.frac_of_alone);
-    const on=r.remote_minions===N&&r.pace===P;
+    const g=CK.el('g',{'data-series':r.ser},svg), ci=Math.max(0,CARDS.indexOf(r.card)), st=cardStyle(ci), col=r.ser==='req'?'var(--c1)':'var(--c3)', px=x(Math.min(50,r.x)), py=y(r.frac_of_alone);
+    const at=r.remote_minions===N&&r.pace===P;
     let m;
-    if(r.ser==='req') m=CK.el('circle',{cx:px,cy:py,r:a2?5:8},g);
-    else {const s=a2?10:15;m=CK.el('rect',{x:px-s/2,y:py-s/2,width:s,height:s,rx:1.5},g);}
-    if(a2){m.style.fill=col;} else {m.style.fill='none';m.style.stroke=col;m.style.strokeWidth='1.5';}
-    if(on&&a2){const ring=CK.el('circle',{cx:px,cy:py,r:13,fill:'none','aria-hidden':'true'},g);ring.style.stroke='var(--ink)';ring.style.strokeWidth='2';}
+    if(r.ser==='req') m=CK.el('circle',{cx:px,cy:py,r:5+st.grow},g);
+    else {const s=10+2*st.grow;m=CK.el('rect',{x:px-s/2,y:py-s/2,width:s,height:s,rx:1.5},g);}
+    if(st.fill){m.style.fill=col;} else {m.style.fill='none';m.style.stroke=col;m.style.strokeWidth='1.5';if(st.dash)m.style.strokeDasharray=st.dash;}
+    if(at&&ci===0){const ring=CK.el('circle',{cx:px,cy:py,r:16,fill:'none','aria-hidden':'true'},g);ring.style.stroke='var(--ink)';ring.style.strokeWidth='2';}
     const who=r.ser==='req'?`${n0(r.remote_minions)} minion${r.remote_minions>1?'s':''} of one other shire, no pause (host runs ${r.host_minions})`
                           :`${n0(r.remote_minions)} minions of 31 shires, pause ${n0(r.pace)} cycles (host runs ${r.host_minions})`;
-    CK.tip(f,g,`<b>${who}</b> · ${r.card}<br>load ${lf(r.x)} predicted, ${lf(r.m)} measured<br>host at ${pct(r.frac_of_alone,r.frac_of_alone<0.01?3:1)} of alone`);
+    CK.tip(f,g,`<b>${who}</b> · ${CK.card(r.card).label}${r.n_passes?`, mean of ${word(r.n_passes)} passes`:''}<br>load ${lf(r.x)} predicted, ${lf(r.m)} measured<br>host at ${pct(r.frac_of_alone,r.frac_of_alone<0.01?3:1)} of alone`);
     nodes.push(g);
    }
    CK.keynav(f,nodes);
@@ -280,7 +338,7 @@ const RUNS=[...D.requesters.map(r=>({...r,ser:'req'})),...D.pace.map(r=>({...r,s
   `The x axis is the predicted load, N × ${n0(BANK)} ÷ (P + ${n0(RT)}), not a measurement: each point's tooltip also gives the load `+
   `measured from its completed atomics, and in every unsaturated run the two agree within ${(100*err).toFixed(1)}%. Circles: one other `+
   `shire's N minions with no pause, while the host runs N minions (this section's sweep). Squares: ${n0(NP)} minions of 31 shires, paced, `+
-  `while the host runs ${p12[0].host_minions} (section 5's sweep). Filled ${CARDS[0]}, hollow ${CARD3}. The dotted line and the ringed `+
+  `while the host runs ${p12[0].host_minions} (section 5's sweep). Marks: ${cardKey()}; each is the mean of the card's passes. The dotted line and the ringed `+
   `point follow the sliders${RUNS.some(r=>r.x>50)?'; loads above 50 are drawn at 50':''}.`;
 })();
 
@@ -307,9 +365,6 @@ const RUNS=[...D.requesters.map(r=>({...r,ser:'req'})),...D.pace.map(r=>({...r,s
  const stateOf=(n,p)=>n===0?'alone':LOAD(n,p)<1?'below':'sat';
  let N=0,P=0,st='alone',motion=!CK.reduced,f=null;
  const hits=()=>st==='alone'?alone:oneEach(RUNS.filter(r=>r.remote_minions===N&&r.pace===P));
- /* a value per card, printed once when every card agrees (this page's convention for a2 / a3) */
- const vals=(rows,fmt)=>{const v=rows.map(fmt);if(v.every(x=>x===v[0]))return v[0];
-  const p=rows.map((r,i)=>`${v[i]} (${r.card})`);return p.slice(0,-1).join(', ')+' and '+p[p.length-1];};
  const span=a=>{const lo=Math.min(...a),hi=Math.max(...a);return lo===hi?n0(lo):n0(lo)+'–'+n0(hi);};
  const where=run=>run?(run.shires>2?`${n0(N)} minions in ${run.shires-1} other shires`:`${n0(N)} minion${N>1?'s':''} of one other shire`):`${n0(N)} remote minions`;
  const satRuns=RUNS.filter(r=>r.x>=1);                                                  // every run on section 3's chart at a load of 1 or more
@@ -331,7 +386,7 @@ const RUNS=[...D.requesters.map(r=>({...r,ser:'req'})),...D.pace.map(r=>({...r,s
    `does not empty, and remote requests outrank the host's own.${meas}`+
    (run?'':` Every run on section 3's chart at a load of 1 or more left the host at ${pct(lo,2)}${pct(hi,2)===pct(lo,2)?'':'–'+pct(hi,2)} of its rate.`)+
    ` With ${span(shR.map(r=>r.shires-1))} other shires hammering, all of their minions taking part, the host's ${shR[0].host_minions} minions complete `+
-   `${span(shR.map(r=>r.host_ops))} loads in the window (${CK.cardsIn(shR.map(r=>r.card)).join(', ')}), stalled in a load that does not return.`;
+   `${span(shR.map(r=>r.host_ops))} loads in the window (${CK.cardsIn(shR.map(r=>r.card)).map(c=>CK.card(c).label).join(', ')}), stalled in a load that does not return.`;
  }
  const out=CK.readout('starveout');
  const seg=CK.seg('starvestep',{label:'Step',options:STEPS,value:st,onChange:v=>{st=v; ({N,P}=PRE[v]); busNP.emit({N,P},'diagram'); upd();}});
@@ -463,12 +518,15 @@ if(CTX.errata) $('errata').innerHTML=CTX.errata.map(e=>
 
 /* ---------- section 5: pacing ---------- */
 (function(){
- const rows=D.pace.filter(A2).sort((a,b)=>a.pace-b.pace), sat=rows[0].remote_ops_per_shire;
- const r3=D.pace.filter(A3), sat3=r3.find(r=>r.pace===0).remote_ops_per_shire, at3=p=>r3.find(r=>r.pace===p);
- const drawn=rows.filter(r=>r.pace>0), zero=rows[0], z3=at3(0);
+ const rows=D.pace.filter(on(C0)).sort((a,b)=>a.pace-b.pace), sat=rows[0].remote_ops_per_shire;
+ /* every card's rows by pause, and its unpaced rate of the hammering shires */
+ const OTH=CARDS.slice(1).map(c=>{const rs=D.pace.filter(on(c));return {c,at:p=>rs.find(r=>r.pace===p),sat:(rs.find(r=>r.pace===0)||{}).remote_ops_per_shire};});
+ const atAll=p=>perCard(c=>D.pace.find(r=>r.card===c&&r.pace===p));
+ const satOf=c=>(D.pace.find(r=>r.card===c&&r.pace===0)||{}).remote_ops_per_shire;
+ const drawn=rows.filter(r=>r.pace>0), zero=rows[0];
  CK.legend('pacelegend',[{key:'host',label:'host shire’s own memory',mark:'dot',color:'var(--c1)'},
-  {key:'rem',label:'the 31 hammering shires',mark:'box',color:'var(--c3)'},
-  {key:'a3',label:`hollow: ${CARD3}`,mark:'ring',color:'var(--ink-2)'}]);
+  {key:'rem',label:'the 31 hammering shires',mark:'box',color:'var(--c3)'}]
+  .concat(OTH.map((o,i)=>({key:o.c,label:`${markWord(i+1)}: ${CK.card(o.c).label}`,mark:'ring',color:'var(--ink-2)',dash:cardStyle(i+1).dash}))));
  CK.frame('pace',{label:'Host and hammering shires against the pause between atomics',height:W=>W<600?300:330,
   draw(f){
    const svg=f.svg,W=f.W,H=f.H,L=48,R=14,T=26,B=46,narrow=f.narrow;
@@ -480,44 +538,54 @@ if(CTX.errata) $('errata').innerHTML=CTX.errata.map(e=>
    CK.el('path',{d:CK.path(drawn.map(r=>[r.pace,r.remote_ops_per_shire/sat]),x,y),fill:'none',style:'stroke:var(--c3);stroke-width:2'},svg);
    const nodes=[];
    for(const r of drawn){
-    const b=at3(r.pace), g=CK.el('g',{},svg);
+    const g=CK.el('g',{},svg);
     const hit=CK.el('rect',{x:x(r.pace)-12,y:T,width:24,height:H-B-T,class:'ck-hit'},g);
     const d1=CK.el('circle',{cx:x(r.pace),cy:y(r.frac_of_alone),r:4.5},g); d1.style.fill='var(--c1)';
     const d2=CK.el('rect',{x:x(r.pace)-4.5,y:y(r.remote_ops_per_shire/sat)-4.5,width:9,height:9,rx:1.5},g); d2.style.fill='var(--c3)';
-    const o1=CK.el('circle',{cx:x(b.pace),cy:y(b.frac_of_alone),r:7.5,fill:'none'},g); o1.style.stroke='var(--c1)';
-    const o2=CK.el('rect',{x:x(b.pace)-7,y:y(b.remote_ops_per_shire/sat3)-7,width:14,height:14,rx:2,fill:'none'},g); o2.style.stroke='var(--c3)';
-    CK.tip(f,g,`<b>pause ${n0(r.pace)} cycles</b> (${n0(r.remote_minions)} remote minions)<br>host shire ${pct(r.frac_of_alone,1)} of its own baseline (${pct(b.frac_of_alone,1)} on ${CARD3})`+
-     `<br>hammering shires ${pct(r.remote_ops_per_shire/sat)} of their unpaced rate (${pct(b.remote_ops_per_shire/sat3)})`);
+    OTH.forEach((o,i)=>{const b=o.at(r.pace),st=cardStyle(i+1);if(!b)return;
+     const o1=CK.el('circle',{cx:x(b.pace),cy:y(b.frac_of_alone),r:4.5+st.grow,fill:'none'},g); o1.style.stroke='var(--c1)';
+     const s=9+2*st.grow,o2=CK.el('rect',{x:x(b.pace)-s/2,y:y(b.remote_ops_per_shire/o.sat)-s/2,width:s,height:s,rx:2,fill:'none'},g); o2.style.stroke='var(--c3)';
+     if(st.dash){o1.style.strokeDasharray=st.dash;o2.style.strokeDasharray=st.dash;}});
+    const all=atAll(r.pace);
+    CK.tip(f,g,`<b>pause ${n0(r.pace)} cycles</b> (${n0(r.remote_minions)} remote minions)<br>host shire, of its own baseline: `+
+     all.map(b=>`${pct(b.frac_of_alone,1)} (${CK.card(b.card).label})`).join(', ')+
+     `<br>hammering shires, of their unpaced rate: `+all.map(b=>`${pct(b.remote_ops_per_shire/satOf(b.card))}`).join(', '));
     nodes.push(g);
    }
    CK.keynav(f,nodes);
   }});
- const knee=rows.find(r=>r.frac_of_alone>0.4), before=rows.filter(r=>r.pace>0&&r.pace<knee.pace).map(r=>n0(r.pace));
+ /* the knee: the first pause at which the host is back above 1% of its rate on every card */
+ const knee=rows.find(r=>r.pace>0&&atAll(r.pace).every(b=>b.frac_of_alone>0.01)), before=rows.filter(r=>r.pace>0&&r.pace<knee.pace).map(r=>n0(r.pace));
+ const need=knee.remote_minions*BANK-RT, k10=rows.find(r=>r.pace===10000);
+ const hostAt=p=>pr(atAll(p).map(b=>b.frac_of_alone)), keepAt=p=>pr(atAll(p).map(b=>b.remote_ops_per_shire/satOf(b.card)));
  $('pacecap').textContent=
-  `At ${n0(knee.pace)} cycles between atomics the host shire is back to ${pct(knee.frac_of_alone)} `+
-  `while the hammering shires keep ${pct(knee.remote_ops_per_shire/sat)} of their rate. Nothing tested below ${n0(knee.pace)} cycles `+
-  `(${before.slice(0,-1).join(', ')} or ${before[before.length-1]}) helps at all. No pause at all, not drawn on the log axis, gives the same as `+
-  `${before[0]}: the host at ${pct(zero.frac_of_alone,2)}. Filled marks ${CARDS[0]}, hollow ${CARD3}.`;
+  `At ${n0(knee.pace)} cycles between atomics, the first pause tested above the ${n0(need)} that section 3's rule asks for, the host shire is back to `+
+  `${hostAt(knee.pace)} while the hammering shires keep ${keepAt(knee.pace)} of their rate`+
+  (k10&&k10!==knee?`; at ${n0(k10.pace)} the host gets ${vals(atAll(k10.pace),b=>pct(b.frac_of_alone))} for the hammering shires' ${keepAt(k10.pace)}`:'')+
+  `. Nothing tested below ${n0(knee.pace)} cycles (${before.slice(0,-1).join(', ')} or ${before[before.length-1]}) helps at all. No pause at all, not drawn on the log axis, gives the same as `+
+  `${before[0]}: the host at ${pct(zero.frac_of_alone,2)}. Filled marks ${CK.card(C0).label}; `+
+  OTH.map((o,i)=>`${markWord(i+1)} ${CK.card(o.c).label}`).join(', ')+`; each is the mean of the card's passes.`;
 
- /* section 7's pacing rule, priced from the same runs */
- const NP=rows[0].remote_minions, need=NP*BANK-RT, ok=rows.find(r=>r.pace>need);
- const cost=r=>pct(1-r.remote_ops_per_shire/sat), at=p=>rows.find(r=>r.pace===p);
- const more=[12000,16000].map(at).filter(Boolean);
+ /* section 7's pacing rule, priced from the same runs (every card) */
+ const NP=rows[0].remote_minions, ok=rows.find(r=>r.pace>need);
+ const cost=p=>pr(atAll(p).map(b=>1-b.remote_ops_per_shire/satOf(b.card))), at=p=>rows.find(r=>r.pace===p);
+ const half=at(10000), more=[12000,16000].map(at).filter(Boolean);
  $('pacerule').textContent=
-  `keep N × ${n0(BANK)} cycles below the pause plus the ${n0(RT)}-cycle round trip. For the ${n0(NP)} here that is ${n0(ok.pace)} `+
-  `cycles (about ${(ok.pace/CLOCK_MHZ).toFixed(0)} µs), which gives the host shire back about half its memory path (${pct(ok.frac_of_alone)}) for `+
-  `${cost(ok)} of the hammering shires' rate; `+more.map(r=>`${n0(r.pace)} gives it ${pct(r.frac_of_alone)} for ${cost(r)}`).join(', and ')+` (section 5).`;
+  `keep N × ${n0(BANK)} cycles below the pause plus the ${n0(RT)}-cycle round trip. For the ${n0(NP)} here that is a pause above ${n0(need)} `+
+  `cycles: ${n0(ok.pace)} gives the host shire back ${hostAt(ok.pace)} of its memory path for ${cost(ok.pace)} of the hammering shires' rate, `+
+  (half&&half!==ok?`${n0(half.pace)} (about ${(half.pace/CLOCK_MHZ).toFixed(0)} µs) about half (${hostAt(half.pace)}) for ${cost(half.pace)}, `:'')+
+  more.map(r=>`${n0(r.pace)} ${hostAt(r.pace)} for ${cost(r.pace)}`).join(', and ')+` (section 5; the ranges are over the ${word(CARDS.length)} cards).`;
 })();
 
 /* ---------- section 6: placement ---------- */
 (function(){
  const name={'0':'one DRAM line, homed in shire 0','scp:0':'one scratchpad word in shire 0',
    'own':'32 DRAM lines, one per shire','scp:own':'32 scratchpad words, one per shire'};
- const a3={}; D.placement.filter(A3).forEach(r=>{a3[r.home]=r;});
+ const by={}; D.placement.forEach(r=>{by[r.card+'|'+r.home]=r;});
  const ms=WIN/(CLOCK_MHZ*1e3), rate=r=>n0(r.total_ops/(ms/1e3)/1e6)+' M/s';
- $('placetab').innerHTML=`<thead><tr><th>Where the atomic lives</th><th class="num">Atomics in a ${n0(ms)} ms window, a2 / a3</th><th class="num">Cycles per atomic</th><th class="num">Rate</th></tr></thead><tbody>`+
-  D.placement.filter(A2).map(r=>{const b=a3[r.home];
-   return `<tr><td>${name[r.home]||r.home}</td><td class="num">${both(n0(r.total_ops),n0(b.total_ops))}</td><td class="num">${both(f2(r.cycles_per_op),f2(b.cycles_per_op))}</td><td class="num">${both(rate(r),rate(b))}</td></tr>`;}).join('')+'</tbody>';
+ const col=(h,f)=>agree(CARDS.map(c=>by[c+'|'+h]?f(by[c+'|'+h]):'—'));
+ $('placetab').innerHTML=`<thead><tr><th>Where the atomic lives</th><th class="num">Atomics in a ${n0(ms)} ms window, ${SHORT}</th><th class="num">Cycles per atomic</th><th class="num">Rate</th></tr></thead><tbody>`+
+  D.placement.filter(on(C0)).map(r=>`<tr><td>${name[r.home]||r.home}</td><td class="num">${col(r.home,b=>n0(b.total_ops))}</td><td class="num">${col(r.home,b=>f2(b.cycles_per_op))}</td><td class="num">${col(r.home,rate)}</td></tr>`).join('')+'</tbody>';
  CK.stackTable('placetab');
 })();
 
@@ -532,12 +600,18 @@ if(CTX.errata) $('errata').innerHTML=CTX.errata.map(e=>
   p.runs.map(r=>`<tr><td>${names[r.label]||r.label}</td><td class="num">${n0(r.ops_per_s/1e6)} M</td><td class="num">${f2(r.over_idle_w)}</td><td class="num">${f(r.nj_per_op)}</td><td class="num">${pool(r.label)}</td></tr>`).join('')+
   `<tr><td>idle card, die at ${p.idle.die_c.toFixed(0)} °C</td><td class="num">0</td><td class="num">(idle ${f2(p.idle.board_w)} W)</td><td class="num">—</td><td class="num">—</td></tr></tbody>`;
  CK.stackTable('pwrtab');
- $('pooln').textContent=`n = ${nP}, ${word(pc[CARDS[0]].n)} on ${CARDS[0]} including this one, ${word(pc[CARD3].n)} on ${CARD3}`;
+ const pcs=CK.cardsIn(pc);   // the pooled passes' cards (the energy manual's reruns), not the sweeps'
+ $('pooln').textContent=`n = ${nP}, `+pcs.map(c=>`${word(pc[c].n)} on ${c}${c===SESSION?' including this one':''}`).join(', ');
  /* the two reductions the pool mixes (power.json: analyze_hotline_power.py; the passes: analyze_reruns.py), and the reading-only row */
  const lo_=p.runs.find(r=>r.label==='local_only');
  $('pooltop').textContent=`This session was reduced against one idle for the whole session, with no leakage correction; `+
   `the 23 September passes against the idle just before and after each burst, corrected for leakage. The pool mixes the two. `+
   (lo_?`The reading-only row's ${f2(lo_.over_idle_w)} W is inside the idle baseline's ±0.2 W, so its energy is an order of magnitude, not a measurement.`:'');
+ /* the reading-only row's rate: this session's build against the sweeps' loop (the host's 32 minions alone, every card) */
+ const al=D.local.filter(r=>r.home==='scplocal:0'&&r.shires===1);
+ if(lo_&&al.length&&$('pwrrate')) $('pwrrate').textContent=`The reading-only row ran at ${n0(lo_.ops_per_s/1e6)} M loads a second (${f2(lo_.cycles_per_op)} cycles per load across the shire) `+
+  `in this session's build; the sweeps run the same loop at ${span2(al.map(r=>r.total_ops/(WIN/(CLOCK_MHZ*1e6))/1e6),n0)} M a second (${span2(al.map(r=>r.cycles_per_op),f2)} cycles per load) on all ${word(al.length)} cards, `+
+  `and its energy per load is this session's.`;
  const w=POOLED.w_contended, c=p.runs.find(r=>r.label==='contended'), s=p.runs.find(r=>r.label==='spread');
  $('hlw').textContent=`about ${f1(w.mean)} W over idle (${f2(w.mean)} W on the mean of ${word(w.n)} passes, ${f1(w.lo)}–${f1(w.hi)} W; this session read ${f1(c.over_idle_w)} W)`;
  $('enfac').textContent=(POOLED.nj.contended.mean/POOLED.nj.spread.mean).toFixed(0);
@@ -553,7 +627,7 @@ if(CTX.errata) $('errata').innerHTML=CTX.errata.map(e=>
  const tipE=r=>{const q=r.q,pc=q.per_card||{};
   return `<b>${r.name}</b><br>${f(q.mean)} nJ per operation, mean of ${q.n} passes [${f(q.lo)}–${f(q.hi)}]<br>`+
    ecards.filter(c=>pc[c]).map(c=>`${CK.card(c).label} ${f(pc[c].mean)} (n = ${pc[c].n})`).join(', ')+
-   `<br>first session (${CARDS[0]}): ${f(r.s)}`+(rough(r)?'<br>an order of magnitude only: its power is inside the idle baseline\u2019s noise':'');};
+   `<br>first session (${SESSION}): ${f(r.s)}`+(rough(r)?'<br>an order of magnitude only: its power is inside the idle baseline\u2019s noise':'');};
  CK.frame('nrg',{label:'Energy per operation for each hot-line case: range over the pooled passes, mean, and each card\u2019s mean, log scale',
   height:()=>rows.length*50+54,
   draw(fr){
@@ -587,5 +661,15 @@ if(CTX.errata) $('errata').innerHTML=CTX.errata.map(e=>
   `The reading-only row is grey and dashed because its power is inside the idle baseline's noise (the note above).`;
 })();
 
-/* ---------- section 7: the barrier ---------- */
+/* ---------- section 7: the barrier, and one requester per shire (the three-card check's pollers) ---------- */
 $('bar1').textContent=CTX.barrier_cycles_chip?n0(CTX.barrier_cycles_chip):'about 5,000';
+(function(){
+ const PL=perCard(c=>(D.pollers||[]).find(r=>r.card===c)), el=$('pollers');
+ if(!el)return;
+ if(!PL.length)return;   // the body's own sentence stays
+ const p0=PL[0], np=Math.max(...PL.map(r=>r.n_passes||1));
+ el.textContent=`But ${p0.remote_shires} shires hammering one line already saturate its bank: in the three-card check, ${p0.remote_minions} minions, one in each other shire, `+
+  `hammering one scratchpad word with no pause held it at ${agree(PL.map(r=>f2(r.remote_cycles_per_atomic)))} cycles per atomic. They did not stop the shire that holds the line, `+
+  `though: its ${word(p0.host_minions)} reading minion kept ${pr(PL.map(r=>r.frac_of_alone_n),0)} of its rate alone, in ${np===1?'the pass':'every pass'} on `+
+  `${CARDS.length===PL.length?'all '+word(PL.length):word(PL.length)} cards; whether they would stop a shire whose 32 minions all read was not tested.`;
+})();

@@ -1,17 +1,26 @@
 <h1>Hand it to the next shire</h1>
-<p class="byline">22 September 2026 · two ET-SoC-1 cards, aifoundry2 and aifoundry3 · a new probe, <code>workloads/onchip</code> (<code>--test relay</code>) · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="byline">22 September 2026 · three ET-SoC-1 cards, aifoundry2, aifoundry3 and aifoundry1 card 1 (every sweep re-run three times on each, 25 September) · a new probe, <code>workloads/onchip</code> (<code>--test relay</code>) · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">A shire's own scratchpad runs at 2.5 TB/s and another shire's at about 1 TB/s, while DRAM
 manages 76 GB/s for the whole chip. Those are bandwidths, not results. The question is whether a computation
 can be rearranged to collect them. <b>It can. A chain of stages that hands each stage's output to another
-shire, instead of writing it to DRAM and reading it back, runs 12.3 times faster and uses a twelfth of the
+shire, instead of writing it to DRAM and reading it back, runs 12.2–12.4 times faster and uses a thirteenth of the
 energy per byte.</b> The shire that receives it is the next one in ID order, which on the
-mesh is 1 to 10 hops away (3.5 on average). Over the five ring offsets tried, which shire it is moved the
+mesh is 1 to 10 hops away (3.5 on average). Over all 31 ring offsets, which shire it is moved the
 bandwidth by up to a quarter (<span id="l-gbr"></span>), against the twelvefold gain over DRAM; the ring in ID
-order, used for the headline, was the slowest of the five. Keeping the output in the shire's own scratchpad is
-30.7 times faster. Both hold on a second card (<span id="l-a3"></span>) and across five repeats on each card
-(<span id="l-rep"></span>). Both also need the data to outgrow the 32 MB L3: below that, the hand-off wins at
-most 1.4× and the shire's own scratchpad 1.3–3.3×.</p>
+order, used for the headline, is the slowest, together with its mirror image. Keeping the output in the shire's
+own scratchpad is 30.8–31.2 times faster. Both hold on all three cards (<span id="l-a3"></span>) and in every
+repeat (<span id="l-rep"></span>). Both also need the data to outgrow the 32 MB L3: below that, the hand-off wins
+at most 1.4–1.5× and the shire's own scratchpad 1.3–3.2×.</p>
+
+<p class="small" id="v3-note"><b>Checked on three cards (26 September 2026):</b> nine of this page's claims were
+re-measured under a pre-registered plan, every sweep three times on aifoundry2, aifoundry3 and aifoundry1 card 1,
+and the sweep figures here are now the means of those passes (one sweep per card before). Seven held, and section 5
+now covers all 31 ring offsets (the line fitted to the first five predicted the other eleven ring geometries within
+0.7% on every card); two were corrected: the single-stage advantage (14.3–14.8×, not 15.3×) and the own scratchpad's
+read energy, no longer split by card. The energies per byte are now that check's too (six passes on each card). aifoundry3 lost four of its 351 relay launches to a host-process crash, so the
+registered test of section 5 is complete on the other two cards only. Record:
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>.</p>
 
 <details class="terms"><summary>Terms used on this page</summary>
 <p class="small">The ET-SoC-1's cores are <i>minions</i>, 32 to a <i>shire</i>; each shire has 4 MB of SRAM,
@@ -49,11 +58,11 @@ fail.</p>
 
 <h2 id="the-same-watts-a-thirtieth-of-the-work">2. Power within a watt, a thirtieth of the work</h2>
 <p>Power was measured separately, in one session on aifoundry2, with each medium launched back to back for
-twelve seconds so the card reaches a steady state; the table's last column adds the 23 September passes on both
-cards. The striking part is not that DRAM costs more energy per byte. It is that the three draw <em>within
-about a watt of each other</em>, and one of them gets thirty times as much done with it. Across the passes of
-both cards the own scratchpad draws about 0.5–0.8 W more than DRAM while the kernel runs, and the next shire and
-DRAM could not be told apart:</p>
+twelve seconds so the card reaches a steady state; the table's last column gives the three-card check's passes (six on
+each card, 26 September). The striking part is not that DRAM costs more energy per byte. It is that the three draw <em>within
+about a watt of each other</em>, and one of them gets thirty times as much done with it. Across those passes
+the own scratchpad draws 0.5–0.7 W more than DRAM, more at 99% on every card, and the next shire 0.3–0.5 W less,
+a difference resolved at 99% on aifoundry1 card 1 only (on aifoundry3 its interval just reaches zero):</p>
 
 <div class="table-wrap"><table id="power"></table></div>
 
@@ -98,7 +107,9 @@ most of the same job for free:</p>
 <div class="chart" id="ring"></div>
 <p class="small" id="ringcap"></p>
 
+<details><summary>The 31 offsets, card by card</summary>
 <div class="table-wrap"><table id="dist"></table></div>
+</details>
 
 <p id="distafter"></p>
 
@@ -113,10 +124,9 @@ other shire, and written by a tensor store that bypasses both caches, so what on
 with no coherence problem at all. That is the mechanism this whole report rests on.</li>
 <li><b>Budget one barrier per stage.</b> A chip-wide barrier costs about 5,000 cycles (8.3 µs at 600 MHz; see
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">on-chip
-communication</a>). At 1 MB per shire a DRAM stage is 830,000 cycles, a hand-off stage 68,000 and an
-own-scratchpad stage 27,000, so the barrier is under a fifth of even the fastest case. From four stages to
-thirty-two the advantage is flat (12.0–12.5×); with one or two stages it is larger (15.3×, 13.4×), where the
-DRAM route reaches only 38 and 44 GB/s. Build the barrier with one atomic per shire and a credit release, so
+communication</a>). At 1 MB per shire a DRAM stage is <span id="stagecyc"></span>, so the barrier is under a fifth of even the fastest case. From four stages to
+thirty-two the advantage is flat (12.0–12.8× on the three cards); with one or two stages it is larger (14.3–14.8×
+and 13.3–13.8×), where the DRAM route reaches only 39–41 and 43–44 GB/s. Build the barrier with one atomic per shire and a credit release, so
 that nobody spins on a shared counter: the first version of this relay had every shire's leader poll one
 counter, which is <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">the hot line</a> of the
 companion report, and the barrier hung in the one development run we made (card not recorded).</li>
@@ -147,10 +157,12 @@ measure the host.</li>
 <li>Scratchpad addressing is the Programmer's Reference Manual's (PRM) format 0, shire in bits [29:23].
 <b>Offset 0 of a shire's scratchpad faulted</b> during development (card not recorded); the buffers start
 256 KB in, which also leaves room for two of them inside the 2.5 MB.</li>
-<li>All 88 configurations were run on aifoundry2 and repeated on aifoundry3 (the power session of §2 ran on
-aifoundry2 only): <span id="cards"></span>. A result that names no card held on both, in three or more
-independent runs or as the same deterministic value on each; where one rests on one card, one session or fewer
-runs, the text says so.</li>
+<li>The 88 configurations, and the hand-off at every ring offset from 1 to 31, ran three times on each of
+three cards on 25 September, in the pre-registered passes of the three-card check; the first sweep, on
+22 September, ran each configuration once on aifoundry2 and aifoundry3, and the power session of §2 ran on
+aifoundry2 only. Every sweep figure on this page is the mean of those passes: <span id="cards"></span>. A result
+that names no card held on all three, in three independent runs or as the same deterministic value on each; where
+one rests on one card, one session or fewer runs, the text says so.</li>
 <li><b>Not established:</b>
 <ul>
 <li>Whether a working set larger than the 80 MB of scratchpad can be streamed through the same relay. That is
@@ -169,15 +181,19 @@ and carries this relay's reads and writes at 48 GB/s, not against a memory syste
 </ul></li>
 </ul>
 
-<pre><code>workloads/onchip/run_onchip.sh DATA                 # 88 configurations on aifoundry2, milliseconds of card time each
-workloads/onchip/run_onchip.sh DATA3                # the same sweep on aifoundry3
+<pre><code>workloads/onchip/run_onchip.sh DATA                 # 88 configurations, milliseconds of card time each (22 September)
+tools/claims-v3/lat/block.sh PASS                   # the three-card passes (unit rl: the 88 and ring offsets 1-31; its README)
 tools/ettelem/run_onchip_power.sh DATA 12           # board power, one burst per medium
-python3 workloads/onchip/analyze_onchip.py DATA/sweep.jsonl DATA3/sweep.jsonl --power DATA --out onchip.json
+R=docs/reports/data/2026-09-25-claims-v3/raw
+python3 workloads/onchip/analyze_onchip.py $R/aifoundry2/lat/p*/rl/sweep.jsonl $R/aifoundry3/lat/p*/rl/sweep.jsonl \
+    $R/aifoundry1-c1/lat/p*/rl/sweep.jsonl --cards aifoundry2,aifoundry3,aifoundry1-c1 \
+    --power docs/reports/data/2026-09-22-onchip-aifoundry2 --out onchip.json   # pass means; power from 22 September
 python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm \
     docs/reports/data/2026-09-23-reruns-aifoundry3 --out reruns.json   # the passes behind §2's ranges</code></pre>
 <p class="small">Raw data and the analysis output:
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry2">docs/reports/data/2026-09-22-onchip-aifoundry2</a>
-and <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry3">…-aifoundry3</a>.
+and <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry3">…-aifoundry3</a> (22 September), and the
+three-card passes under <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3/raw">docs/reports/data/2026-09-25-claims-v3/raw/&lt;card&gt;/lat/p*/rl/</a>.
 Versions: first published 22 September 2026; revised 24 September 2026 to say that the “next shire” is the
 next by ID rather than a mesh neighbour, to add the mesh distances and the 23 September energy re-measurement,
 and to correct the flops-per-byte unit in section 4; revised 25 September 2026: the ring offset moves the
@@ -186,11 +202,15 @@ difference), the pooled energies in the table of section 2, both cards in sectio
 phone; 25 September (version 3): “the same power” replaced by what the passes show (within about a watt, the own
 scratchpad drawing more than DRAM), the session's reduction named, the own-scratchpad read energy per card, the
 element check's two failures in a discarded aifoundry2 attempt, and one-off observations labelled; record in
-<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>.</p>
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>;
+26 September: every sweep figure now the mean of three passes on each of three cards, section 5 over all 31 ring
+offsets, the one-stage advantage corrected (14.3–14.8×, not 15.3×) and the own-scratchpad read energy no longer
+split by card; the energies per byte now the three-card check's passes (13× and 27× less than DRAM; the read energies
+by the data read) and the stage lengths of section 6 per card.</p>
 
 <h2 id="related-reports">8. Related reports</h2>
 <ul>
-<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">The energy manual, §5</a> — this relay's energy re-measured, with bars from both cards.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">The energy manual, §5</a> — this relay's energy re-measured, with bars from three cards.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> — what each mesh hop costs in energy, measured with chosen bit patterns.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — the 2.5 TB/s, 1 TB/s and 76 GB/s of the lede.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the shire map, 12 cycles per hop, the chip-wide barrier and the one-ready-flag trap.</li>

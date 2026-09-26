@@ -21,6 +21,24 @@ The keys the relay page draws from (added 25 Sep; every earlier key is unchanged
 Added 26 Sep (every earlier key and value is unchanged; the rows' own fields stay the first card's):
   intensity/size/stages/shires[].by_card   each card's row at the same setting, {card: {ok, dram, scp, hop,
                            scp_over_dram, hop_over_dram}}, for every card with all three media there
+
+The version-3 layout (added 26 Sep, for the three-card check): the sweeps may be the claims-v3 passes,
+docs/reports/data/2026-09-25-claims-v3/raw/<card>/lat/p*/rl/sweep.jsonl, whose lines carry 'pass' and 'cfg' and
+whose 'host' is the card id (aifoundry2, aifoundry3, aifoundry1-c1). Such rows are first reduced to one row per card
+and configuration (pass_means below: the mean over the passes), so every key above holds pass means; nothing is
+dropped here, because the V3-LAT reducer (tools/claims-v3/lat/reduce.py) kept every relay launch these passes
+recorded (checked 26 Sep; aifoundry3 lacks four launches whose host process crashed, exit 139). With such rows:
+  --cards a,b,c            the card order of 'cards' (the first card's rows are the rows' own fields); default sorted
+  repeats                  one row per sweep group and pass (key 'pass')
+  offsets                  the 'offsets' group, the hand-off at every ring offset d = 1..31: per offset its mesh hops,
+                           longest hand-off and by_card {card: {gb_s, stage_cycles, passes}}
+  offset_fit               per card, over the 16 ring geometries (offset g with its mirror 32 - g, averaged; 16 alone),
+                           as the V3-LAT item LAT-R defines them: the GB/s line against the longest hand-off, r against
+                           the longest and the mean hops (geometries and all 31 offsets), the stage cycles added per hop
+                           of the longest hand-off with its 99% interval, the mean-hops coefficient of GB/s ~ longest +
+                           mean hops with its 99% interval (LAT-R part iii), and the worst mirror pair (part iv)
+  coverage                 per card, the passes read and every configuration some pass lacks
+  bigsize[].by_card        (any sweep with more than one card) each card's DRAM GB/s at that size
 """
 import argparse
 import collections
@@ -84,14 +102,108 @@ HEADLINE_CONFIG = {"stage_bytes": 1048576, "stages": 8, "shires": 32, "work": 1}
 
 def repeats(rows, card):
     """Every run of the headline configuration on one card that has all three media, one row per sweep group
-    (the distance group runs the hand-off only, so it is not here)."""
+    (the distance group runs the hand-off only, so it is not here), and per pass when the rows carry one."""
     by = collections.defaultdict(dict)
     for r in rows:
         if (r.get("test") == "relay" and r["host"] == card and r.get("hop_distance", 1) == 1
                 and all(r.get(k) == v for k, v in HEADLINE_CONFIG.items())):
-            by[r["group"]][r["medium"]] = r["gb_s"]
-    return [{"group": g, **m, "hop_over_dram": m["hop"] / m["dram"], "scp_over_dram": m["scp"] / m["dram"]}
-            for g, m in sorted(by.items()) if len(m) == 3]
+            by[(r["group"], r.get("pass"))][r["medium"]] = r["gb_s"]
+    return [{"group": g, **({"pass": p} if p is not None else {}), **m,
+             "hop_over_dram": m["hop"] / m["dram"], "scp_over_dram": m["scp"] / m["dram"]}
+            for (g, p), m in sorted(by.items(), key=lambda kv: (kv[0][0], kv[0][1] or 0)) if len(m) == 3]
+
+
+RELAY_KEY = ("host", "group", "medium", "stage_bytes", "stages", "work", "shires", "hop_distance")
+MEAN_FIELDS = ("gb_s", "cycles_max", "cycles_mean", "wall_s", "bytes_per_cycle", "gflop_s")
+
+
+def pass_means(rows):
+    """Reduce claims-v3 relay rows (with 'pass') to one row per card and configuration: MEAN_FIELDS are the mean over
+    the passes that ran it, 'ok' holds only if every pass's run was ok, 'wrong_elements' is their sum, 'passes' is
+    the number of passes and 'gb_s_passes' each pass's GB/s (in pass order); the other fields are the first pass's
+    ('shire0_final' must agree across passes, or it is None). Rows without 'pass' (the 22 September sweeps), and
+    probe rows, are returned unchanged."""
+    out, groups = [], collections.OrderedDict()
+    for r in rows:
+        if "pass" not in r or r.get("test") != "relay":
+            out.append(r)
+            continue
+        groups.setdefault(tuple(r.get(k) for k in RELAY_KEY), []).append(r)
+    for rs in groups.values():
+        rs = sorted(rs, key=lambda q: q["pass"])
+        m = dict(rs[0])
+        for k in MEAN_FIELDS:
+            if all(k in q for q in rs):
+                m[k] = float(np.mean([q[k] for q in rs]))
+        m["ok"] = all(q.get("ok") for q in rs)
+        m["wrong_elements"] = int(sum(q.get("wrong_elements", 0) for q in rs))
+        sf = {q.get("shire0_final") for q in rs}
+        m["shire0_final"] = sf.pop() if len(sf) == 1 else None
+        m["passes"] = len(rs)
+        m["gb_s_passes"] = [q["gb_s"] for q in rs]
+        m.pop("pass", None), m.pop("cfg", None)
+        out.append(m)
+    return out
+
+
+T995 = {13: 3.0123, 14: 2.9768}   # two-sided 99% Student t quantiles for the offset fits (16 geometries)
+
+
+def offset_fit(offsets, card):
+    """The ring-offset sweep of one card reduced to the 16 geometries LAT-R uses (offset g and its mirror 32 - g
+    hand the same pairs of shires the slab in opposite directions, so the two are averaged; 16 is its own mirror)."""
+    G = {r["hop_distance"]: r["by_card"][card] for r in offsets if card in r["by_card"]}
+    if sorted(G) != list(range(1, 32)):
+        return None
+    geo = {g: {k: (G[g][k] + G[32 - g][k]) / 2 if g < 16 else G[16][k] for k in ("gb_s", "stage_cycles")}
+           for g in range(1, 17)}
+    L = np.array([longest_handoff(g)["hops"] for g in range(1, 17)], float)
+    MH = np.array([ring_hops(g)["mean"] for g in range(1, 17)], float)
+    y = np.array([geo[g]["gb_s"] for g in range(1, 17)])
+    c = np.array([geo[g]["stage_cycles"] for g in range(1, 17)])
+
+    def ols(X, v, j):
+        beta, *_ = np.linalg.lstsq(X, v, rcond=None)
+        res = v - X @ beta
+        df = len(v) - X.shape[1]
+        se = float(np.sqrt(float(res @ res) / df * np.linalg.inv(X.T @ X)[j, j]))
+        return beta, se, df
+
+    X1 = np.vstack([np.ones(16), L]).T
+    b1, _, _ = ols(X1, y, 1)
+    bc, sec, dfc = ols(X1, c, 1)
+    X2 = np.vstack([np.ones(16), L, MH]).T
+    b2, se2, df2 = ols(X2, y, 2)
+    d31 = sorted(G)
+    L31 = [longest_handoff(d)["hops"] for d in d31]
+    M31 = [ring_hops(d)["mean"] for d in d31]
+    g31 = [G[d]["gb_s"] for d in d31]
+    mir = {d: G[32 - d]["gb_s"] / G[d]["gb_s"] - 1 for d in range(1, 16)}
+    wm = max(mir, key=lambda d: abs(mir[d]))
+    best = max(d31, key=lambda d: G[d]["gb_s"])
+    return {"geometries": 16, "passes_min": int(min(G[d].get("passes", 1) for d in d31)),
+            "gb_s_line": {"a": float(b1[0]), "b_per_hop": float(b1[1])},
+            "r_longest": float(np.corrcoef(L, y)[0, 1]), "r_mean": float(np.corrcoef(MH, y)[0, 1]),
+            "r_longest_offsets": float(np.corrcoef(L31, g31)[0, 1]), "r_mean_offsets": float(np.corrcoef(M31, g31)[0, 1]),
+            "stage_cycles_per_hop": float(bc[1]),
+            "stage_cycles_per_hop_ci99": [float(bc[1] - T995[dfc] * sec), float(bc[1] + T995[dfc] * sec)],
+            "mean_hops_coef": float(b2[2]), "mean_hops_coef_ci99": [float(b2[2] - T995[df2] * se2), float(b2[2] + T995[df2] * se2)],
+            "worst_mirror": {"offset": int(wm), "mirror": int(32 - wm), "rel": float(mir[wm])},
+            "best": {"offset": int(best), "gb_s": float(G[best]["gb_s"])},
+            "slowest": {"offset": int(min(d31, key=lambda d: G[d]["gb_s"])), "gb_s": float(min(g31))}}
+
+
+def coverage(raw, card):
+    """The passes read for a card and every relay configuration that some pass lacks (claims-v3 rows only)."""
+    rs = [r for r in raw if r.get("host") == card and r.get("test") == "relay" and "pass" in r]
+    if not rs:
+        return None
+    passes = sorted({r["pass"] for r in rs})
+    have = collections.defaultdict(set)
+    for r in rs:
+        have[tuple(r.get(k) for k in RELAY_KEY[1:])].add(r["pass"])
+    short = [{**dict(zip(RELAY_KEY[1:], k)), "passes": sorted(p)} for k, p in sorted(have.items(), key=str) if len(p) < len(passes)]
+    return {"passes": passes, "configs": len(have), "short": short}
 
 
 def by_medium(rows, group, key, host=None):
@@ -165,10 +277,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("sweeps", nargs="+")
     ap.add_argument("--power")
+    ap.add_argument("--cards", help="comma-separated card order for 'cards' (default: sorted); the first card's rows "
+                                    "are the rows' own fields")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
-    rows = load(a.sweeps)
-    out = {"cards": sorted({r["host"] for r in rows if "host" in r})}
+    raw = load(a.sweeps)
+    rows = pass_means(raw)
+    present = sorted({r["host"] for r in rows if "host" in r})
+    order = [c.strip() for c in a.cards.split(",")] if a.cards else []
+    out = {"cards": [c for c in order if c in present] + [c for c in present if c not in order]}
     for grp, key in (("headline", "medium"), ("intensity", "work"), ("size", "stage_bytes"),
                      ("stages", "stages"), ("shires", "shires")):
         if grp == "headline":
@@ -197,13 +314,32 @@ def main():
     out["layout"] = {str(k): list(v) for k, v in layout.items()}
     out["empty"] = [list(e) for e in shire_empty()]
     out["ring"] = sorted(layout)
-    out["repeats"] = {c: repeats(rows, c) for c in out["cards"]}
+    out["repeats"] = {c: repeats(raw, c) for c in out["cards"]}
+    # claims-v3 only: the hand-off at every ring offset d = 1..31, and each card's fit over the 16 geometries
+    offs = sorted({r["hop_distance"] for r in rows if r.get("group") == "offsets" and r.get("test") == "relay"})
+    if offs:
+        out["offsets"] = []
+        for dd in offs:
+            bc = {r["host"]: {"gb_s": r["gb_s"], "stage_cycles": r["cycles_max"] / r["stages"], "passes": r.get("passes", 1)}
+                  for r in rows if r.get("group") == "offsets" and r.get("test") == "relay" and r["hop_distance"] == dd}
+            out["offsets"].append({"hop_distance": dd, "mesh_hops": ring_hops(dd), "longest": longest_handoff(dd),
+                                   "ok": all(r["ok"] for r in rows if r.get("group") == "offsets" and r["hop_distance"] == dd),
+                                   "by_card": {c: bc[c] for c in out["cards"] if c in bc}})
+        out["offset_fit"] = {c: offset_fit(out["offsets"], c) for c in out["cards"]}
+    cov = {c: coverage(raw, c) for c in out["cards"]}
+    if any(cov.values()):
+        out["coverage"] = cov
     out["bigsize"] = sorted([{"stage_bytes": r["stage_bytes"], "gb_s": r["gb_s"]}
                              for r in rows
                              if r.get("group") in ("size", "bigsize") and r.get("medium") == "dram"
                              and r["host"] == out["cards"][0]],
                             key=lambda r: r["stage_bytes"])
-    out["probe"] = [{k: r[k] for k in ("method_name", "remote_words_wrong", "ok", "host")}
+    if len(out["cards"]) > 1:   # added 26 Sep: every card's DRAM rate at the same size
+        for b in out["bigsize"]:
+            b["by_card"] = {c: r["gb_s"] for c in out["cards"] for r in rows
+                            if r.get("group") in ("size", "bigsize") and r.get("medium") == "dram" and r.get("test") == "relay"
+                            and r["host"] == c and r["stage_bytes"] == b["stage_bytes"]}
+    out["probe"] = [{k: r[k] for k in ("method_name", "remote_words_wrong", "ok", "host", "pass") if k in r}
                     for r in rows if r.get("group") == "probe"]
     if a.power:
         out["power"] = power(a.power)
