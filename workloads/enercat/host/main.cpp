@@ -32,6 +32,11 @@
 #include "Constants.h"
 #include "enercat_args.h"
 #include "enercat_modes.h"
+#ifdef ENERCAT_GS
+#include <functional>
+#include <set>
+#include "enercat_gs.h"
+#endif
 
 namespace fs = std::filesystem;
 using Clock = std::chrono::steady_clock;
@@ -90,6 +95,12 @@ struct Options {
   std::string targets;   // "shift:K" or an explicit 32-entry list "t0,t1,...": the shire each shire reads from
   double seconds = 4.0, budget = 9.5;
   std::string kernel = KERNEL_ELF;
+#ifdef ENERCAT_GS
+  // gathers and scatters (host/enercat_gs_host.inc)
+  std::string gsIndex = "rand", gsShare = "hart", suite;
+  uint64_t gsWs = 0, gsMask = 0xff, gsVerify = 0;
+  int gsWarm = -1;   // -1: automatic (tables up to 64 KB, not the atomics)
+#endif
 };
 
 class Session {
@@ -148,6 +159,12 @@ public:
     rt_->waitForStream(stream_);
   }
   bool overBudget() const { return secondsSince(tOpen_) > o_.budget; }
+#ifdef ENERCAT_GS
+  void freeAll() {   // between the configurations of a --suite session
+    for (auto* p : allocs_) rt_->freeDevice(dev_, p);
+    allocs_.clear();
+  }
+#endif
 
   long long t0Ms = 0, t1Ms = 0;  // epoch bounds of the last launch, for lining up with power samples
 
@@ -310,6 +327,10 @@ std::pair<std::vector<uint32_t>, uint64_t> targetsAtDistance(int d, uint64_t shi
   }
   return {t, mask};
 }
+
+#ifdef ENERCAT_GS
+#include "enercat_gs_host.inc"
+#endif
 
 int run(const Options& o, Session& dev) {
   const Pat p = lookup(o.pattern);
@@ -488,12 +509,19 @@ int main(int argc, char** argv) {
     else if (a == "--jump-bytes") o.jumpBytes = parseSize(next());
     else if (a == "--list") { for (const auto& g : EC_GEN_MODES) std::printf("%s\t%s\n", g.name, g.note); return 0; }
     else if (a == "--kernel") o.kernel = next();
+#ifdef ENERCAT_GS
+    else if (gsParseOne(o, a, next)) {}
+#endif
     else { std::fprintf(stderr, "unknown option %s\n", a.c_str()); return 2; }
   }
   try {
     const auto elf = readFile(o.kernel);
     if (elf.empty()) throw std::runtime_error("cannot read kernel " + o.kernel);
     Session dev(o, elf);
+#ifdef ENERCAT_GS
+    if (!o.suite.empty()) return runGsSuite(o, dev);
+    if (o.pattern.rfind("gs.", 0) == 0) return runGs(o, dev);
+#endif
     return run(o, dev);
   } catch (const std::exception& e) {
     std::fprintf(stderr, "FAIL: %s\n", e.what());

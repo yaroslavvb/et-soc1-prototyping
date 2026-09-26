@@ -68,7 +68,9 @@ others_present() {
   if [ -n "${V3_DEVICE:-}" ]; then
     users=
     if [ -x /usr/local/sbin/et-holders ]; then
-      holders=$(sudo -n /usr/local/sbin/et-holders 2>/dev/null | awk -v me="$USER" '$1 ~ /^\/dev\/et|^lock:/ && $2 != me && $2 != "" {print $2":"$3}' | tr '\n' ' ')
+      # fd 9 (our card lock) is closed for the call, or the helper's own sudo would show up as a root lock holder
+      holders=$(sudo -n /usr/local/sbin/et-holders 9>&- 8>&- 2>/dev/null | grep -v 'et-holders' |
+                awk -v me="$USER" '$1 ~ /^\/dev\/et|^lock:/ && $2 != me && $2 != "" {print $2":"$3}' | tr '\n' ' ')
       [ -n "${holders// /}" ] && users="holders:$holders"
     fi
   fi

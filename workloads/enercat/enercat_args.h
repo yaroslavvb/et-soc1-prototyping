@@ -69,6 +69,23 @@ struct EcArgs {
   uint64_t jump_every;  // EC_TLOAD_PAT: after this many accesses, add jump_bytes to the pointer (0: never).
   uint64_t jump_bytes;  //   With stride 1 KB, jump_every 8 and jump_bytes 248 KB, every DRAM bank sees a new
                         //   row on every visit; without the jump it sees 32 columns of one row.
+#ifdef ENERCAT_GS
+  // Gathers and scatters (modes 400+, enercat_gs.h), compiled only into build/enercat_gs (cmake -DENERCAT_GS=ON):
+  // the catalogue's own builds keep the 17-word layout above. A walk visits one tile of 2^gs_tile_log2 bytes of
+  // the table at a time, k <- (k + gs_step) mod ntiles, eight indexed instructions per visit.
+  uint64_t gs_ws;        // table bytes: per hart (private tables) or per table (shared)
+  uint64_t gs_tile_log2; // log2 of the tile the index vectors address (offsets are taken mod gs_ws when it is smaller)
+  uint64_t gs_step;      // the walk's tile step P (odd, so ntiles visits cover every tile once)
+  uint64_t gs_mask;      // m0 during the timed and verify loops
+  uint64_t gs_verify;    // 0: deadline loop (rate, energy); N: exactly N tile visits, then the check data
+  uint64_t gs_share;     // GS_SHARE_HART (private tables) / _SHIRE (one table per shire) / _CHIP (one table)
+  uint64_t gs_params;    // DRAM: index vectors and fg32 fields (GS_PARAM_*)
+  uint64_t gs_stage;     // DRAM: the scratchpad tables' image, GS_SCP_BYTES per participant (scp 1 or 2)
+  uint64_t gs_check;     // DRAM: gs_check_bytes per participant (verify launches and the probe)
+  uint64_t gs_copy;      // DRAM: GS_SCP_BYTES per participant: a scratchpad table after a verify launch
+  uint64_t gs_warm;      // 1: one untimed walk over every tile before the loop
+  uint64_t gs_check_bytes; // bytes of gs_check per participant (>= GS_CHECK_MIN; 256 per verify visit for gathers)
+#endif
 };
 
 // One cache line per hart.
@@ -78,10 +95,14 @@ struct EcResult {
   uint64_t bytes;    // bytes moved, for the memory patterns
   uint32_t hart;
   uint32_t magic;
-  uint64_t pad[4];
+  uint64_t pad[4];       // gs modes: instructions issued, gsc_progress at exit, setup cycles, EC_GS_MAGIC | mode
 };
 
 #ifdef __cplusplus
+#ifdef ENERCAT_GS
+static_assert(sizeof(EcArgs) == 29 * 8, "EcArgs layout must match on host and device");
+#else
 static_assert(sizeof(EcArgs) == 17 * 8, "EcArgs layout must match on host and device");
+#endif
 static_assert(sizeof(EcResult) == 64, "EcResult must be one cache line");
 #endif

@@ -31,6 +31,11 @@ while :; do
   fi
   # a failed or interrupted earlier attempt: keep it aside, never mix it into the pass
   [ -d "$DATA_ROOT/$exp/p$pass" ] && mv "$DATA_ROOT/$exp/p$pass" "$DATA_ROOT/$exp/p$pass.attempt-$(date +%s)"
+  # aifoundry1's card 0 ran to 95 C in its smoke blocks: on a multi-card host, start each block at <= 80 C
+  if [ -n "${V3_DEVICE:-}" ]; then
+    for w in $(seq 1 60); do c=$(die_c); [ -z "$c" ] || [ "$c" -le 80 ] && break
+      [ $w = 1 ] && log "die $c C: cooling to 80 C before $exp p$pass"; sleep 30; done
+  fi
   for try in 1 2 3 4 5 6; do
     wait_free 7200 || { log "card busy for 2 h: giving up on $exp p$pass"; break; }
     t0=$(now_ms)

@@ -14,3 +14,10 @@ target_sources(enercat.elf PRIVATE enercat.c crt.S)
 target_include_directories(enercat.elf PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 target_link_libraries(enercat.elf PRIVATE et-common-libs::cm-umode)
 set_target_properties(enercat.elf PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+# Gathers and scatters (V3-GS): only in the build configured with -DENERCAT_GS=ON (build/enercat_gs); without it the
+# kernel is the catalogue's, unchanged.
+option(ENERCAT_GS "compile the gather/scatter modes (400+)" OFF)
+if(ENERCAT_GS)
+  target_sources(enercat.elf PRIVATE enercat_gs.c)
+  target_compile_definitions(enercat.elf PRIVATE ENERCAT_GS)
+endif()

@@ -20,3 +20,6 @@ target_include_directories(enercat_host PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CM
 target_compile_features(enercat_host PRIVATE cxx_std_17)
 target_compile_options(enercat_host PRIVATE -O2)
 target_link_libraries(enercat_host PRIVATE runtime::etrt deviceLayer::deviceLayer sw-sysemu::sw-sysemu)
+if(ENERCAT_GS)
+  target_compile_definitions(enercat_host PRIVATE ENERCAT_GS)
+endif()

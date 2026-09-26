@@ -18,6 +18,10 @@
 #include "etsoc/isa/hart.h"
 #include "enercat_args.h"
 #include "../enercat_modes.h"
+#ifdef ENERCAT_GS
+#include "../enercat_gs.h"   // gathers and scatters (build/enercat_gs only): kernel/enercat_gs.c
+int gs_run(const struct EcArgs* a, uint64_t hart, uint64_t* iters_out, uint64_t* cyc_out);
+#endif
 
 int64_t entry_point(const struct EcArgs* args);
 
@@ -376,6 +380,11 @@ int64_t entry_point(const struct EcArgs* a)
         break;
     }
     default:
+#ifdef ENERCAT_GS
+        if (mode >= EC_GS_FIRST && mode < EC_GS_FIRST + EC_GS_COUNT && gs_run(a, hart, &iters, &cyc)) {
+            break;
+        }
+#endif
         return 0;
     }
 

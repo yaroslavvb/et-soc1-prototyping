@@ -33,3 +33,25 @@ die temperature. Results: `docs/energy-manual/` and `docs/reports/2026-09-23-ene
 Things that bit: `fdiv.ps` and `fsqrt.ps` trap (no hardware divide); a `double` anywhere in a kernel traps
 too (64-bit integer-to-float conversion); the transcendental unit issues at a quarter of the rate and a
 64-bit `mul` at an eighth, so their per-instruction cost is mostly the awake core amortised over a slow op.
+
+## Gathers, scatters and packed atomics (V3-GS, E48; build/enercat_gs only)
+
+A separate build adds modes 400+ for the indexed memory instructions: `--pattern gs.<op>` with `fg{w,h,b}{,l,g}.ps`,
+`fsc{w,h,b}{,l,g}.ps`, `fg32{w,h,b}.ps`, `fsc32{w,h,b}.ps`, `upd` (gather + `fadd.ps` 1.0 + scatter), `famoaddl.pi`,
+`famoaddg.pi`, the scalar baselines `flw`, `fsw`, `amoaddl.w`, `amoaddg.w` on the same offsets, and `probe` (the
+semantic probes). Options: `--gs-index unit|s2|s4|s16|line|rand|bcast`, `--ws BYTES` (per hart), `--share
+hart|shire|chip`, `--mask M`, `--verify N` (one launch of N tile visits, checked on the host), `--warm 0|1`, with the
+catalogue's `--scp`, `--hop-distance 2 --uniq-regions`, `--shires`, `--minions`, `--harts`, `--operands zeros|random`.
+`--sysemu --suite FILE` runs one configuration per line in one simulator session.
+
+```bash
+cmake -B build/enercat_gs -S workloads/enercat -DCMAKE_PREFIX_PATH=/opt/et -DENERCAT_GS=ON -Wno-dev
+nice cmake --build build/enercat_gs -j4
+python3 workloads/enercat/gs_catalogue.py --set E --names          # the configurations (sets E, R, C, smoke)
+```
+
+Files: `gen_gs.py` (seeded; writes `enercat_gs.h`, `kernel/enercat_gs.inc`, `enercat_gs_modes.json`),
+`kernel/enercat_gs.c` (the walk, the loops, the probe), `host/enercat_gs_host.inc` (plan, tables, launches, the
+host-side models every verify launch is checked against), `gs_catalogue.py`, `analyze_gs.py`. Without
+`-DENERCAT_GS=ON` none of it is compiled: the catalogue's kernel ELF is byte-identical to the one built before it
+existed. The campaign's blocks, rules and items are in `tools/claims-v3/gs/README.md`.
