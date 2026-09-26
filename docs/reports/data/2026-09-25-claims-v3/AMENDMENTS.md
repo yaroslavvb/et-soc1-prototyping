@@ -827,3 +827,13 @@ of its data, on every card.
 
 Code: `tools/claims-v3/catfull/` (`block.sh`, `cflib.py`, `reduce.py`, `README.md`). Every block records the sha256 of
 lib.sh, this directory, the runner, run_catalogue.py, analyze_catalogue.py and the enercat host.
+
+## A3 (25 Sep 2026, before any data from aifoundry1's cards): the other-user check on aifoundry1
+
+On aifoundry2 and aifoundry3 a block still does not start while any other user is logged in (the lab's rule). On
+aifoundry1 another user has kept an idle session open since 18 September (a shell and a long-running interactive
+program, no ET device process, no card held), so under that rule the machine could never be measured, which the owner
+asked for. On a host with several cards a login alone therefore no longer blocks; using the cards does: a device node
+held by another user (the machine's `et-who` helper lists every user's open nodes), another user's device process, a
+running CI job, or the card's lock file (`/run/lock/etsoc-shire<N>.lock`, which every block holds). Blocks that re-check
+during a run keep doing so and stop (exit 3) if another user takes a card. `tools/claims-v3/lib.sh` `others_present`.

@@ -60,8 +60,18 @@ DEV_COMM='_host$|^ettelem$|^dev_mngt_servi|^et-powertop$|^mmbench_launch|^sys_em
 OTHER_COMM="$DEV_COMM|^Runner.Worker$"
 # Another user logged in, or a device process of another user running: the block must not start.
 others_present() {
-  local users procs
+  local users procs holders
   users=$(who | awk '{print $1}' | sort -u | grep -vx "$USER" | tr '\n' ' ' || true)
+  # A host with several cards (aifoundry1, amendment A3): another user who is only logged in does not block, since a
+  # user there has kept an idle session open for days; what blocks is using the cards: a device node held by another
+  # user (et-who sees every user's open nodes), another user's device process, or a running CI job (below).
+  if [ -n "${V3_DEVICE:-}" ]; then
+    users=
+    if [ -x /usr/local/sbin/et-holders ]; then
+      holders=$(sudo -n /usr/local/sbin/et-holders 2>/dev/null | awk -v me="$USER" '$1 ~ /^\/dev\/et|^lock:/ && $2 != me && $2 != "" {print $2":"$3}' | tr '\n' ' ')
+      [ -n "${holders// /}" ] && users="holders:$holders"
+    fi
+  fi
   procs=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$OTHER_COMM" '$1 != me && $3 ~ re {print $1":"$2":"$3}' | tr '\n' ' ')
   if [ -n "${users// /}${procs// /}" ]; then log "others present: users=[$users] procs=[$procs]"; return 0; fi
   return 1
