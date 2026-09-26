@@ -134,7 +134,7 @@ def main():
     if "cards" in r:
         c = r["cards"]
         s += ["## The two working cards\n", "| | aifoundry2 | aifoundry3 |", "|---|---|---|",
-              f"| Static TDP the firmware uses | {c['aifoundry2']['tdp_w']} W | **{c['aifoundry3']['tdp_w']} W** (pinned at 600 MHz for life) |",
+              f"| Static TDP the firmware uses | {c['aifoundry2']['tdp_w']} W | **{c['aifoundry3']['tdp_w']} W** (set to 0 W by a lab service at every boot, so pinned at 600 MHz) |",
               f"| Minion voltage at 600 MHz | {c['aifoundry2']['minion_mv']} mV | {c['aifoundry3']['minion_mv']} mV |",
               "| Idle during the 23 September catalogue (catalogue.json bursts) | 31–37 W at 71–82 °C | 23.6–25.0 W at 51–56 °C |", ""]
     open(os.path.join(out, "01-at-rest.md"), "w").write("\n".join(s))
@@ -410,7 +410,7 @@ def main():
     rmed = (rer[len(rer) // 2 - 1] + rer[len(rer) // 2]) / 2 if len(rer) % 2 == 0 else rer[len(rer) // 2]   # the median of an even count
     lvr = lambda k: (RR["levels_pj_per_byte"][k]["per_card"]["aifoundry3"]["mean"] / RR["levels_pj_per_byte"][k]["per_card"]["aifoundry2"]["mean"])
     s = ["# 8. Card-to-card variation\n",
-         "Every catalogue and rerun table in sections 2 to 6 was measured on aifoundry2 and repeated on aifoundry3 with the same binaries; the rows that ran on one card say so. aifoundry1 holds two cards that cannot be opened (docs/findings/14-card-behaviour.md).\n",
+         "Every catalogue and rerun table in sections 2 to 6 was measured on aifoundry2 and repeated on aifoundry3 with the same binaries; the rows that ran on one card say so. aifoundry1's two cards, working since 25 September 2026, were not measured for this manual (docs/findings/14-card-behaviour.md).\n",
          f"| Comparison | aifoundry3 / aifoundry2 |", "|---|---|",
          f"| Instruction and byte energies, {len(ratios)} catalogue entries, 3 passes each, each card at its own die temperature (median under load {db.get('aifoundry2', 0):.0f} °C and {db.get('aifoundry3', 0):.0f} °C) | median **{f(med,3)}**, 10th–90th percentile {f(p10,3)}–{f(p90,3)}, range {f(ratios[0],2)}–{f(ratios[-1],2)} |",
          (f"| Relay, hot line, rings and levels, {len(rer)} entries | median {f(rmed,3)}, range {f(rer[0],2)}–{f(rer[-1],2)}; not one scale (the L1 level {f(lvr('l1'),2)}, the own-scratchpad level {f(lvr('scp-local'),2)}) |" if rer else ""),

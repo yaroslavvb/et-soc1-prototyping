@@ -181,8 +181,8 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
 | Idle board power after about 20.6 h with no workload (E18's 4.9 s probe aside) | **31.79 ± 0.04 W at 73.0 °C** | M | E19 | `DATA2/idle_20h.jsonl.gz` |
 | …predicted by the model fitted a day earlier | 31.78 W, error **+0.01 W** | P | E17 → E19 | `DATA2/dvfs.json` → `idle_check` |
 | Idle rails | minion 11.05 W, SRAM 2.00 W, mesh 3.64 W, 15.10 W on no sensor | M | E19 | same |
-| Leakage share of an idle card at 80 °C | **65%** (23.3 of the idle law's 35.9 W; 64% of the 36.3 W measured) | F | E17 | `DATA2/dvfs.json` → `leak_fraction.idle_80c_law` (`idle_80c` for the measured denominator) |
-| Leakage share of a random-data matmul at 80 °C | **36%** | F | E17 | same |
+| Leakage share of an idle card at 80 °C | **55–80%** (20–29 W of the idle law's 35.9 W; 65%, 23.3 W, in the best fit; a range since version 3, decision D3) | F | E17 | `DATA2/dvfs.json` → `leak_fraction.idle_80c_law` (`idle_80c` for the measured denominator) |
+| Leakage share of a random-data matmul at 80 °C | **31–45%** (36% in the best fit) | F | E17 | same |
 | Kanter's reference range for leakage | 5–30%, ~20% common | X | R9 | the private notes of the conversation (R9); not published |
 
 ## The three machines (E20, E21)
@@ -219,7 +219,7 @@ All in `DATA/model.json`, printed in `DATA/model.txt`.
 | Uncontended remote global-atomic round trip | 216 cycles (216.2 = 6,000,000 / 27,755) | M | E22 | `DATAH/sweep.jsonl`, the one-remote-minion row; `DATAH/hotline.json`, `context.remote_atomic_latency_cycles` |
 | Host shire's own memory operations while hammered | **192–384 total**, 0.01–0.05% of its uncontended rate | M | E23 | `DATAH/hotline.json`, `local` |
 | …and it does not grow with time | identical at 5, 10, 40 and 100 ms windows | M | E23 | `DATAH/context.json` → `hotline.json` `context.window_independence`; hand-kept: the 5, 40 and 100 ms runs are in no raw data file |
-| Remote requesters needed to flip it | **24** (20 leaves the host at 98.9%) | M | E23 | `DATAH/hotline.json`, `requesters` |
+| Remote requesters needed to flip it | **21–24** (20 leave the host at 98.9%, 24 stop it; N × 10 < 216 puts the edge at 22) | M | E23 | `DATAH/hotline.json`, `requesters` |
 | Pacing that restores the host | 10,000 cycles → host 54%, hammering shires 96% | M | E23 | `DATAH/hotline.json`, `pace` |
 | Energy, contended vs spread | **23.6 vs 1.4 nJ per atomic**, 17× (first run; the E29 reruns give 19.8 [16.9–23.6] vs 1.16 [1.01–1.37] nJ, below: quote those) | M | E23 | `DATAH/power.json` |
 | 1,024 minions stalled on a contended line | 1.41 W over idle (first run); about 1.2 W pooled over the reruns, 1.19 [1.01–1.41] W, n = 7 | M | E23, E29 | `DATAH/power.json`; `docs/reports/data/2026-09-23-energy-manual/reruns.json`, `hotline_over_idle_w.contended` |
@@ -376,7 +376,7 @@ coefficients are the second run's model (`model.v2`) over 1–6 hops; free-link 
 | Shire barrier; 32-minion allreduce | 237 cycles; 432 cycles | M | E34 | `DATANOC/barrier-shire{1,32}.jsonl`, `allreduce-c1.jsonl`; `NOC`, `primitives` |
 | Allreduce of 32 B over 1,024 minions | 1,368 cycles (2.28 µs) | M | E34 | `DATANOC/xallreduce-c1.jsonl`; `NOC`, `allreduce` |
 | Chip barrier | 4,995 cycles with one minion per shire, 5,018 with all 1,024 | M | E34 | `DATANOC/barrier-chip{1,32}.jsonl`, `cycles_per_iter_mean` |
-| Energy per byte of messaging, re-measured on two cards (23 Sep) | 0.67 pJ/B on pairs, 2.1 in a neighbourhood or a shire ring, 9.3 + 1.7 pJ/B per mean hop across the mesh (r² 0.95); the 18 September runs gave 0.8, 2.3 and 10.0 + 1.9 and are superseded | M, F | E29 (E34's rings) | `docs/reports/data/2026-09-23-energy-manual/reruns.json`, `rings_pj_per_byte`; `NOC`, `reruns.mesh_fit` |
+| Energy per byte of messaging, re-measured on two cards (23 Sep) | 0.67 pJ/B on pairs, 2.1 in a neighbourhood or a shire ring, 9.3 + 1.7 pJ/B per mean hop across the mesh with the two cards pooled (r² 0.95; the pooling mixes a card difference, so quote the per-card fits as On-chip communication does: 7.6 + 2.3 on aifoundry2, 10.2 + 1.3 on aifoundry3, the slope known to about ±50%); the 18 September runs gave 0.8, 2.3 and 10.0 + 1.9 and are superseded | M, F | E29 (E34's rings) | `docs/reports/data/2026-09-23-energy-manual/reruns.json`, `rings_pj_per_byte`; `NOC`, `reruns.mesh_fit` |
 
 ## Ridge points (derived; no card time)
 

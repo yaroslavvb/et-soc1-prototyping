@@ -98,7 +98,7 @@ None has an A-number yet.
 | Page | Source in this repository | Space | Visibility (2026-09-25) |
 |---|---|---|---|
 | Influence functions on the ET-SoC-1: which steps of large-scale influence-function work the chip could speed up (none of the bill; two narrow research items and one measurement). A desk analysis: no card was run. In the hub's research group since `edf0a14` | `docs/reports/2026-09-25-influence-on-et.html`, built by `scripts/build-report.py influence-on-et` from `docs/reports/sources/influence-on-et.*` and `docs/reports/data/2026-09-25-influence-on-et/analysis.json` (written by `make_analysis.py` there) | [et-soc1-influence-functions](https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions) `55ae9267-3fc8-42a4-8621-4102fd7c97f7` | public |
-| What is broken on aifoundry1: the empty driver version string, found read-only for the lab lead's question (`6953263`), marked fixed in `7aded23` | `docs/reports/2026-09-25-aifoundry1-troubleshooting.html` (standalone); evidence in `docs/reports/data/2026-09-25-aifoundry1/` | [aifoundry1-troubleshooting](https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting) `a2d70512-f892-474e-aca6-0568176cb092` | public (the data directory's README says "published privately"; the two disagree) |
+| What is broken on aifoundry1: the empty driver version string, found read-only for the lab lead's question (`6953263`), marked fixed in `7aded23` | `docs/reports/2026-09-25-aifoundry1-troubleshooting.html` (standalone); evidence in `docs/reports/data/2026-09-25-aifoundry1/` | [aifoundry1-troubleshooting](https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting) `a2d70512-f892-474e-aca6-0568176cb092` | public |
 | aifoundry1 is fixed: the fix log, and who should delete what on the nearly full disk (`7aded23`, `f44baa4`) | `docs/reports/2026-09-25-aifoundry1-fix.html` (standalone) | [aifoundry1-fix](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix) `31e35ba7-36f4-486e-b6f3-687f7c7ad3a0` | public |
 | A report on the lab's problems, for the lab lead | none: kept out of this public repository (`38f6b02`) | not listed here | private (the owner's decision); not mirrored |
 
@@ -509,13 +509,13 @@ one review of the set's structure, and wrote the plan (`PLAN2.md`); page owners 
 
 ## Publishing notes, learned the hard way
 
-- Deploy with `npx --yes spacesheep deploy <file-or-dir> --space <uuid> -m "<message>"`. **Always pass
-  `--space`** when updating, or the CLI creates a new space.
+- Deploy with `spacesheep deploy <dir> --space <uuid> -m "<message>"` from a directory of its own (MIRROR.md,
+  "Deploying one page"). **Always pass `--space`** when updating, or the CLI creates a new space.
 - **Deploy A4 as its folder, never as a single file.** The GIFs (A6–A8) are part of that space, and a single-file
   deploy drops them (it happened on 2026-09-24; the folder was redeployed the same day).
 - A folder deploy (`index.html` plus assets, which is how A4 ships its GIFs) has **changed a space's
-  visibility in both directions**. Run `npx spacesheep list` after every deploy and fix it with
-  `npx spacesheep share <uuid> --visibility public|private`. The visibility column above is a snapshot, and
+  visibility in both directions**. Run `spacesheep list` after every deploy and fix it with
+  `spacesheep share <uuid> --visibility public|private`. The visibility column above is a snapshot, and
   visibility is the repo owner's call, not the deploy script's.
 - **Delete any `.spacesheep.json` the CLI leaves behind, every time.** It pins a folder to a space, and
   `deploy` uses it when `--space` is absent. On 2026-09-22 a stale `docs/reports/.spacesheep.json` from the

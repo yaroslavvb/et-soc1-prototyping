@@ -8,7 +8,7 @@ This page covers everything needed to pick the work up somewhere else: clone, co
 rerun, and republish. Claude Code's memory for this project lives outside the repo, on each machine, so this
 page, [`AGENT.md`](../AGENT.md) (the entry point for an agent) and `CLAUDE.md` carry the context.
 
-## Where things stand (2026-09-25)
+## Where things stand (2026-09-26)
 
 The repository is the source of truth: every result, the experiment that produced it and the raw data are here,
 and `docs/findings/` traces each claim to its file. If a session is lost, resume from this page.
@@ -22,21 +22,33 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   `et-lab-manifest`); a full upgrade is installed and the reboot into kernel 7.0.0-34 is still pending. What that does
   to comparability, and every card's quirks: `docs/findings/14-card-behaviour.md`. The machines' shared tools:
   `docs/lab-access.md`.
-- **Running now: version 3 of the claims check.** Pre-registered in `docs/reports/data/2026-09-25-claims-v3/`
+- **Version 3 of the claims check.** Pre-registered in `docs/reports/data/2026-09-25-claims-v3/`
   (`PLAN3.md`, and `AMENDMENTS.md` A1–A5, each written before the data it touches), with its code in `tools/claims-v3/`.
-  Its queues run unattended on aifoundry1's card 1, aifoundry2 and aifoundry3 (`queue.sh` with
-  `schedule-<card>.txt`), and their blocks hold the cards and the card locks. **Do not start card work on those
+  Its queues ran unattended on aifoundry1's card 1, aifoundry2 and aifoundry3 (`queue.sh` with
+  `schedule-<card>.txt`), their blocks holding the cards and the card locks. By 06:16 on 26 September aifoundry2's and
+  aifoundry3's had ended, aifoundry3 having also run gathers and scatters (E48, `tools/claims-v3/gs/`); the results
+  are not committed yet. Check `pgrep -af queue.sh` and `et-who` on a host first. **Do not start card work on those
   machines without asking**, and while a queue runs do not rebuild the binaries it uses or run
   `scripts/deploy-lab*.sh` against its host (both write into `~/nekko`, which the blocks use; [`AGENT.md`](../AGENT.md)
   §7); a queue stops at the next block boundary when `build/claims-v3/STOP` exists in its tree (the owner's call).
-  Next on the cards, after the campaign: gathers and scatters (E48, `tools/claims-v3/gs/`). The pages are revised
-  with the campaign's results in a later pass; until then their sources stay as they are. To reduce:
+  The pages are revised with the campaign's results in a later pass, together with the page changes waiting in
+  [`reports/TODO.md`](reports/TODO.md); until then their numbers stay as they are (the visualization pass changed
+  charts only). To reduce:
   `tools/claims-v3/collect.sh <dir>` then `tools/claims-v3/reduce_all.sh <dir> <out>` (all-cards outcomes over the
   three campaign cards, `tools/claims-v3/campaign.py`, per amendment A4).
 - **aifoundry3's host crash is understood** (25 September, late): a race in the runtime's logging set-up, reproduced
-  without a card (E49, `tools/g3log-race/`). Every host program now registers the log levels first in `main`; only
-  the gather/scatter build has been rebuilt with it so far. After the campaign, rebuild the other `build/<workload>`
-  directories on all three hosts (the campaign's binaries stay as registered until then).
+  without a card (E49, `tools/g3log-race/`). Every host program now registers the log levels first in `main`. On 26
+  September the fixed gather/scatter build ran 641 host processes on aifoundry3 with no crash (6.4 expected at the old
+  rate; E49), and aifoundry2's and aifoundry3's other host builds were rebuilt with the fix after their queues ended.
+  Rebuild aifoundry1's `build/<workload>` directories once its queue has ended.
+- **The visualization pass (26 September):** charts and controls on 13 pages, the chart toolkit's card registry (a
+  third card appears when its data does) and sortable tables; no number changed. Record:
+  `reports/data/2026-09-26-visualization-pass/` and `findings/04-artifacts.md`.
+- **The review of 26 September:** eight AI review agents read every published page and the repository for
+  inconsistencies, room to be more concise and charts worth adding. Repository-only fixes went in with its record;
+  every page change waits for the next pass in [`reports/TODO.md`](reports/TODO.md), which starts with items for the
+  owner (two public aifoundry1 pages and a committed transcript name other people's home directories). The live
+  pages equal the repository (21 of 21, `check-mirror.py`, 26 September).
 - **New pages, 25 September:** [Influence functions on the ET-SoC-1](https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions)
   (exploratory, no card run; `docs/reports/data/2026-09-25-influence-on-et/`),
   [What is broken on aifoundry1](https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting) and its

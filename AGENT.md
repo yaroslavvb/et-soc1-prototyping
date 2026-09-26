@@ -21,18 +21,21 @@ cards in the AI Foundry lab, and share what was learned. It became a measurement
 the chip's power and temperature, what every operation costs in joules, what the meters can and cannot see, and
 where the chip could beat a GPU.
 
-**Status on 2026-09-25:**
+**Status on 2026-09-26:**
 
 - **19 published measurement pages**: the hub,
   [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports), and the 18
   pages it indexes, plus two pages about the lab machines. All are listed in [`docs/reports/MIRROR.md`](docs/reports/MIRROR.md).
 - **The knowledge base** in [`docs/findings/`](docs/findings/README.md) traces every claim to its experiment and raw
   file. It was validated twice (24 and 25 September).
-- **Version 3 of the claims check is running**: every claim of the pages re-tested on three cards with
+- **Version 3 of the claims check** (started 25 September): every claim of the pages re-tested on three cards with
   pre-registered predictions ([`docs/reports/data/2026-09-25-claims-v3/`](docs/reports/data/2026-09-25-claims-v3/README.md),
-  code in [`tools/claims-v3/`](tools/claims-v3)). Its queues hold aifoundry1's card 1, aifoundry2 and aifoundry3 for
-  hours at a time. A later pass revises the pages with its results.
+  code in [`tools/claims-v3/`](tools/claims-v3)). Its queues held aifoundry1's card 1, aifoundry2 and aifoundry3 for
+  hours at a time; aifoundry2's and aifoundry3's had ended by 06:16 on 26 September, and no results are committed
+  yet (check `pgrep -af queue.sh` on a host). A later pass revises the pages with its results.
 - **The lab has four working cards** since 25 September (section 4). One of them overheats.
+- **Page changes waiting for the next pass**, from the review of 26 September, are in
+  [`docs/reports/TODO.md`](docs/reports/TODO.md); its first items are for the owner.
 
 The live status is kept in [`docs/getting-started.md`](docs/getting-started.md), "Where things stand". Read it next.
 
@@ -88,8 +91,8 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
 | ID | What | File |
 |---|---|---|
 | R1–R14 | resources that existed before any measurement: manuals, RTL, firmware source, papers, the machines | [`01-resources.md`](docs/findings/01-resources.md) |
-| Q1–Q43 | the owner's requests and what each produced (25 September's requests are not numbered yet; getting-started lists them) | [`02-requests.md`](docs/findings/02-requests.md) |
-| E1–E34, E49 | experiments: command, time, card, raw files. The version-3 experiments carry suggested numbers (E35–E48) in PLAN3 and their READMEs, and are recorded in their own data directory until registered; E49 is the card-free g3log race test | [`03-experiments.md`](docs/findings/03-experiments.md) |
+| Q1–Q43 | the owner's requests and what each produced (the requests since 25 September are not numbered yet; 02-requests.md lists them) | [`02-requests.md`](docs/findings/02-requests.md) |
+| E1–E34, E49 | experiments: command, time, card, raw files. The version-3 experiments carry suggested numbers (E35–E48) in PLAN3 and their READMEs, and are recorded in their own data directory until registered; E49 is the g3log race, reproduced without a card on 25 September, the fixed build checked on aifoundry3's card on 26 September | [`03-experiments.md`](docs/findings/03-experiments.md) |
 | A1–A19 | published artifacts: pages, images, tools, commits | [`04-artifacts.md`](docs/findings/04-artifacts.md) |
 
 - **To answer a question:** the "where to look" table → the topic file (10–20) → the number in
@@ -100,15 +103,19 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
   protocol, the four cards, the traps) and [`19-observability-and-the-unmetered.md`](docs/findings/19-observability-and-the-unmetered.md)
   (what the meters miss).
 - **The energy manual** ([`docs/energy-manual/`](docs/energy-manual/README.md), page
-  [et-soc1-energy-manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual)) is generated: its markdown and
-  page are rebuilt from `docs/reports/data/2026-09-23-energy-manual/manual.json` (04-artifacts.md, A16). Edit the
-  builders, never the markdown.
-- **Known stale spots (2026-09-25).** The findings files, README.md and the tool comments were corrected on
-  25 September. These still say that aifoundry1 cannot be used, that the cause was a `srcversion` mismatch, or that
-  aifoundry3's zero TDP is flashed, until their next revision: the DVFS page, the energy manual's `00-structure.md`
-  and `08-cards.md` (generated: fix `tools/ettelem/render_energy_manual.py`), and
-  `docs/reports/data/2026-09-25-claims-v3/firmware.md` (a dated record). `tools/claims-v3/lib.sh` still says
-  aifoundry3 has no system numpy (it has, since 25 September). Trust 14-card-behaviour.md and this file.
+  [et-soc1-energy-manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual)) is mostly generated: sections 01–06, 08, 03a and
+  04a and the page are rebuilt from its data (`docs/reports/data/2026-09-23-energy-manual/`; 04-artifacts.md, A16).
+  Edit the builders, never that markdown; the README, 00, 07 and 09 are written by hand.
+- **Known stale spots (2026-09-26).** The version-3 first pass (`0399048`, 25 September) revised the pages but not
+  `docs/findings/` or README.md: where a page and the findings differ (leakage at 80 °C: 20–29 W on the pages, a
+  best fit of 23.3 W in older text), the page holds, and PLAN3 §1 gives each claim's verdict. The review of
+  26 September corrected the findings' summaries it checked and lists the rest in
+  [`docs/reports/TODO.md`](docs/reports/TODO.md), part B. Pages that still say aifoundry1 cannot be used, blame
+  `srcversion` or call aifoundry3's zero TDP flashed or set by firmware: the DVFS page, Horace, Why low power and the
+  matmul, sparse-compute and test-drive caveats (TODO, part A). `docs/reports/data/2026-09-25-claims-v3/firmware.md`
+  is a dated record. `tools/claims-v3/lib.sh` still says aifoundry3 has no system numpy (it has, since
+  25 September; to fix after the campaign). Trust 14-card-behaviour.md (except its meter refresh periods: TODO,
+  HUB-01) and this file.
 
 ## 4. The machines
 

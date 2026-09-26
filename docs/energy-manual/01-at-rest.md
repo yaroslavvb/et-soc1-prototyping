@@ -48,6 +48,6 @@ A warm card is held at the first row by the governor, which steps down when the 
 
 | | aifoundry2 | aifoundry3 |
 |---|---|---|
-| Static TDP the firmware uses | 65 W | **0 W** (pinned at 600 MHz for life) |
+| Static TDP the firmware uses | 65 W | **0 W** (set to 0 W by a lab service at every boot, so pinned at 600 MHz) |
 | Minion voltage at 600 MHz | 518 mV | 523 mV |
 | Idle during the 23 September catalogue (catalogue.json bursts) | 31–37 W at 71–82 °C | 23.6–25.0 W at 51–56 °C |

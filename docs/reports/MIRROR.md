@@ -13,6 +13,8 @@ before `</body>`. Private pages are listed but not mirrored.
 - **Addresses.** `https://spacesheep.dev/@yaroslavvb/<slug>` is the viewer (the page framed, with comments).
   `https://<space-uuid>.spacesheep.app/` is the raw page, and a folder deploy serves each of its files at
   `https://<space-uuid>.spacesheep.app/<file>`. A private space answers both anonymously with a sign-in step only.
+- **Waiting changes.** Page changes found by the review of 26 September wait in [`TODO.md`](TODO.md) for the next
+  pass, which deploys them with this file's procedure.
 - The per-page history (what each version changed, the A-numbers, the reviews) is in
   [`docs/findings/04-artifacts.md`](../findings/04-artifacts.md). The review's `manifest.tsv` in
   `data/2026-09-24-report-review/` is a dated record of 24 September; this file supersedes it.

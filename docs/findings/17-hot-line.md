@@ -137,7 +137,7 @@ over idle, which says plainly that waiting is cheap and what contention destroys
 - **Keep hot shared lines out of shires that compute.** The cost is not paid by the code touching the line.
   It is paid by whatever else lives in that shire, and it is total.
 - **Keep N × 10 cycles below P + 216** (N remote requesters, each waiting P cycles between atomics; 216 cycles is the
-  uncontended round trip): with no pause, at most about 20 remote requesters; for 992, P ≥ 10,000 unsaturates the
+  uncontended round trip): with no pause, at most 21 remote requesters; for 992, P ≥ 10,000 unsaturates the
   bank (host 54%) and P ≈ 16,000 gives the host 95%. The rule is necessary, not sufficient: one shire's 20
   requesters leave the host at 99% with the bank 93% busy, while 992 paced requesters leave it at 85% with the bank
   81% busy.

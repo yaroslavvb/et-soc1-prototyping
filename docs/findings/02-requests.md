@@ -51,6 +51,18 @@ others were left open. Cite as **Q1**...**Q43**.
 | Q42 | 09-24 | Install spacesheep's session hooks on aifoundry2; report the sessions board's missing links and mismatched titles to its author | Outside this repo: the hooks in `~/.claude/settings.json` and two bug reports on spacesheep. No card time |
 | Q43 | 09-18 | Compute the chip's ridge points from what is already known — how many FLOPs per byte are needed to saturate each level of the hierarchy — and write them up (published 09-24) | A19; the hub's index row (`6f8fba9`); every report's link back to the hub (`d04b29a`); no card time |
 
+### Since 25 September (not yet numbered)
+
+Each is quoted in its own record; number them when the version-3 results are registered. The requests of
+25 September about aifoundry1, influence functions and gathers and scatters are quoted in their records
+(`docs/reports/data/2026-09-25-aifoundry1/`, `docs/reports/data/2026-09-25-influence-on-et/`, `tools/claims-v3/gs/`).
+
+| Date | Request (condensed) | Produced |
+|---|---|---|
+| 09-25 | Version 3 of the claims check: test every claim on both machines, remove what randomness could explain, a full sweep of the effects that can be proven | [`claims-v3/`](../reports/data/2026-09-25-claims-v3/README.md), `tools/claims-v3/` |
+| 09-25 | Another look through the published pages for compelling visualizations or interactive elements | [the visualization pass](../reports/data/2026-09-26-visualization-pass/README.md) (26 Sep) |
+| 09-26 | Go through the repository and the pages the hub indexes: fix inconsistencies, find chances for compelling visualizations and for being more concise; mark anything that needs a page update as a TODO for the next pass | [`../reports/TODO.md`](../reports/TODO.md) and the repository fixes committed with it; `MIRROR.md`'s last check |
+
 ## Scope decisions worth remembering
 
 - **The reflash was not done (Q7).** The minion runtime and the service-processor bootloader are signed

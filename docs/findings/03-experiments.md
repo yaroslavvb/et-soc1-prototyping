@@ -2,7 +2,7 @@
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and
 where it ran, the command that produced it, where the **raw** data lives in this repository, and what it
-cannot tell you. Cite as **E1**...**E34**. E33 and E34 are the 18 September memory-hierarchy and on-chip
+cannot tell you. Cite as **E1**...**E34** and **E49**. E33 and E34 are the 18 September memory-hierarchy and on-chip
 communication sessions, registered on 25 September; they are numbered last so that no other number moves.
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
@@ -587,7 +587,7 @@ stage time (`distance[].by_card`) and the longest hand-off (`distance[].longest`
 **Result:** at 1 MB per shire per stage, eight stages, 512 MB of traffic: DRAM **48.4 GB/s**, the next shire's
 scratchpad **592.9 GB/s (12.3×)**, the shire's own **1,483.7 GB/s (30.7×)**. Energy per byte moved: 104.8,
 8.9 and 4.25 pJ (first run; E29 re-measured them at 105.7, 8.6 and 3.99 pJ/B) — and all three draw within a watt of
-each other over idle, so the on-chip routes get 12× and 30× more done for the same power. aifoundry3 gives 12.4× and
+each other over idle, so the on-chip routes get 12× and 30× more done for about the same power. aifoundry3 gives 12.4× and
 31.2×.
 **The boundary:** the advantage is against DRAM, not against the hierarchy. Below the 32 MB L3 the DRAM route
 runs at 280–410 GB/s and the hand-off buys 1.0–1.4×; at 32 MB per buffer it falls to 47.9 GB/s and stays

@@ -4,6 +4,9 @@ A workspace for prototyping on AINekko / AI Foundry's **ET platform**, the open-
 **ET-SoC-1**: 1088 RISC-V minion cores with custom vector and tensor units. Work runs on the
 `sys_emu` simulator first, then on real cards in the AI Foundry lab.
 
+**An agent, or a person picking up the work? Start with [AGENT.md](AGENT.md)**: the map, the rules, and where to find
+the current state. Page changes waiting for the next pass are listed in [docs/reports/TODO.md](docs/reports/TODO.md).
+
 **Looking for results rather than code? Start with [docs/findings/](docs/findings/README.md).** It is a
 self-contained write-up of everything measured on the card: what a workload's data does to power and
 temperature, the model that predicts it, why the chip is low power against an A100, and — for every number —
@@ -71,11 +74,11 @@ section 9 lists the pinned upstream versions.
   out); the speed
   effect from a cool die (`run_horace_cold.sh`); ten-minute runs with a 90 °C cap (`run_horace_long.sh`: random data gets from 80 to
   90 °C in 19 to 26 s, ones in about two minutes, zeros never); a three-line model from flip rates to temperature
-  (`tools/ettelem/flip_thermal_model.py`: leakage 23 W at 80 °C, thermal stages out to 2,500 s; on the later runs of the same session, which it was not fitted to, the time to 90 °C is
+  (`tools/ettelem/flip_thermal_model.py`: leakage 20–29 W at 80 °C (23 W in the best fit), thermal stages out to 2,500 s; on the later runs of the same session, which it was not fitted to, the time to 90 °C is
   predicted to 9% in the median and 23% at worst; on a different afternoon with new matrices, 7% and 65% (the DFT pair, whose
   power it put 2.8 W low); ten-minute end temperatures come out 3 to 5 °C hot: `tools/ettelem/validate_flip_model.py`);
   and structured matrices (Hadamard, DCT, butterfly, kaleidoscope, ...: `tools/ettelem/make_tiles.py`) whose power was predicted to
-  0.92 W rms before they ran. `tools/ettelem/predict_heat.py --model .../model.json --tiles my.bin` prices a custom workload: flips,
+  0.92 W rms before they ran. `python3 tools/ettelem/predict_heat.py --model docs/reports/data/2026-09-21-horace-aifoundry2/model.json --tiles my.bin` prices a custom workload: flips,
   watts, heating curve, time to a cap, sustainable duty cycle. GIFs: `docs/reports/horace-heating.gif`, `horace-heating-6.gif`,
   `horace-long.gif`. `tools/ettelem/finish_horace.sh` rebuilds the Horace analyses, model, GIFs and pages from
   `docs/reports/data/2026-09-21-horace-aifoundry2/`.
@@ -90,8 +93,8 @@ section 9 lists the pinned upstream versions.
   `docs/reports/data/2026-09-22-horace-aifoundry3/`).
 - `docs/reports/2026-09-21-why-low-power.html` asks why the chip draws so little next to an A100, using Esperanto's own equation
   (power = C V² f + leakage) and ablations on the card (`tools/ettelem/run_ablation.sh`, `ablation.cfg`, `analyze_ablation.py`):
-  an integer loop on all cores costs 1.5 W, int8 multiply-adds 0.32 pJ against 6.0 pJ for fp32, power is linear in active cores,
-  the 0.62 V / 800 MHz point costs 2× the switching power of 0.52 V / 600 MHz, and leakage is 23 W at 80 °C. Per FLOP of dense
+  an integer loop on all cores costs 1.5 W, int8 multiply-adds 0.32 pJ against 6.0 pJ for fp32, power is close to linear in active cores,
+  the 0.62 V / 800 MHz point costs 2× the switching power of 0.52 V / 600 MHz, and leakage is 20–29 W at 80 °C (23 W in the best fit). Per FLOP of dense
   matmul the A100's bf16 tensor cores are 5.4× more efficient than this card's fp32 and 2.6× more than its fp16; against the
   A100's fp32 CUDA-core datasheet figure (19.5 TFLOPS at 400 W) this card is about 2.9× better on random data and 3.4× on
   the matmul benchmark's ±1/±2 operands. Notes and sources in
@@ -107,7 +110,7 @@ section 9 lists the pinned upstream versions.
   reads a measured PMIC wattage rather than estimating power from activity counters, and from a cool die it hunts
   across the 65 °C threshold, which has no dead band (36 transitions analysed, `tools/ettelem/analyze_dvfs.py`); the
   open (Erbium) RTL's per-minion sleep controls are tied off and no firmware drives them; a wake-up probe finds no
-  array power gating (`gen_ops.py wakeup`); and leakage is 36% of a busy card against his 5–30%. The governor was
+  array power gating (`gen_ops.py wakeup`); and leakage is 31–45% of a busy card (55–80% of an idle one) against his 5–30%. The governor was
   read at et-platform `353f20e`; the cards' own trace strings match an older firmware build. It now also covers the three lab machines: aifoundry3's service processor reports a
   static TDP of **0 W** (the driver reports 65 W on every machine), which makes the governor's step-up test
   unreachable and holds that card at 600 MHz for as long as its TDP stays at zero (a boot service sets it at every boot; corrected
@@ -119,7 +122,7 @@ section 9 lists the pinned upstream versions.
 - `docs/reports/2026-09-22-hot-line.html` follows up a Discord claim that the shire hosting a contended global
   atomic gets 6% of its fair share. It does not: the atomic is shared to within half a percent. What that
   shire loses is its **own** memory path, which stops dead - 384 operations and then nothing, identical at 5, 10,
-  40 and 100 ms windows, while the mesh retires six million atomics. The threshold is a cliff at 24 remote
+  40 and 100 ms windows, while the mesh retires six million atomics. The threshold is a cliff at 21–24 remote
   requesters, under one shire's worth, and it is exactly where the shire cache reaches its 10-cycles-per-atomic
   floor. ET-SoC Errata 4.1 (RTLMIN-6207) and 4.2 (RTLMIN-6214) describe it, rate the impact "Low", say
   `l3_yield_priority` does not fix the same-address case, and are both Postponed. Pacing the remotes to one
@@ -131,7 +134,7 @@ section 9 lists the pinned upstream versions.
 - `docs/reports/2026-09-22-on-chip-relay.html` answers whether on-chip communication can beat main memory for a
   real computation. A chain of stages that hands each stage's output to the next shire's scratchpad (the next
   shire ID, 3.5 mesh hops away on average) instead of writing it to DRAM runs **12.3× faster and uses 12× less
-  energy per byte, on the same watts**; keeping it in the shire's own scratchpad is 30.7×. Both reproduce on aifoundry3. The boundary is sharp:
+  energy per byte**, the three routes drawing within about a watt of each other; keeping it in the shire's own scratchpad is 30.7×. Both reproduce on aifoundry3. The boundary is sharp:
   below the 32 MB L3 the DRAM route runs at 280-410 GB/s and the hand-off buys nothing, and at 32 MB per
   buffer DRAM falls to 48 GB/s and stays there out to 256 MB. The lead holds to about four adds per element and
   then shrinks with each quadrupling of the arithmetic: 4.1× at 8 flops per byte moved, 1.5× at 32. Which shire
@@ -141,10 +144,10 @@ section 9 lists the pinned upstream versions.
   `analyze_onchip.py` and `tools/ettelem/run_onchip_power.sh`. Public space
   https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay, uuid `8678d49d-3f0c-49be-b08a-5528de8ece3c`.
 - `docs/energy-manual/` is **the energy manual**: what every kind of operation on the card costs in joules, arranged
-  so a workload's energy can be built from parts - the card at rest (12.6 W fixed plus leakage e-folding every
-  36 °C), an awake minion (2 mW), every instruction on zeros/constant/random data (integer add 6 pJ on zeros and 9 on
+  so a workload's energy can be built from parts - the card at rest (35.9 W at 80 °C, rising 0.65 W per °C, 20–29 W of
+  it leakage), an awake minion (2 mW), every instruction on zeros/constant/random data (integer add 6 pJ on zeros and 9 on
   random, float add 23, 8-lane FMA 27 on zeros and 56 on random), bytes at every level (L1 0.5 pJ/B, own scratchpad 2-8, DRAM 90-140,
-  the L1 write-back path to DRAM 250-350), bytes between shires, synchronisation, worked compositions, and the
+  the L1 write-back path to DRAM 240-330), bytes between shires, synchronisation, worked compositions, and the
   second card at 0.95× the first over 56 entries. Measured by the new `workloads/enercat` (`run_enercat.sh`,
   `analyze_enercat.py`); every table is assembled from its data file by `tools/ettelem/build_energy_manual.py`
   and the pages rendered by `render_energy_manual.py`, so no number is typed by hand. The second edition

@@ -1,6 +1,6 @@
 # 8. Card-to-card variation
 
-Every catalogue and rerun table in sections 2 to 6 was measured on aifoundry2 and repeated on aifoundry3 with the same binaries; the rows that ran on one card say so. aifoundry1 holds two cards that cannot be opened (docs/findings/14-card-behaviour.md).
+Every catalogue and rerun table in sections 2 to 6 was measured on aifoundry2 and repeated on aifoundry3 with the same binaries; the rows that ran on one card say so. aifoundry1's two cards, working since 25 September 2026, were not measured for this manual (docs/findings/14-card-behaviour.md).
 
 | Comparison | aifoundry3 / aifoundry2 |
 |---|---|
