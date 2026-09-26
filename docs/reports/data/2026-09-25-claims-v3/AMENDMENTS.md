@@ -837,3 +837,13 @@ asked for. On a host with several cards a login alone therefore no longer blocks
 held by another user (the machine's `et-who` helper lists every user's open nodes), another user's device process, a
 running CI job, or the card's lock file (`/run/lock/etsoc-shire<N>.lock`, which every block holds). Blocks that re-check
 during a run keep doing so and stop (exit 3) if another user takes a card. `tools/claims-v3/lib.sh` `others_present`.
+
+## A4 (25 Sep 2026, before any campaign data from aifoundry1's card 0): card 0 is excluded for safety
+
+aifoundry1's card 0 cannot hold a load: in its smoke blocks (about ten minutes of short launches in all) its die reached
+98-102 C, and after the last one it read 115-117 C with nothing running, drawing 66-71 W at 600 MHz, before its
+firmware dropped it to 300 MHz and it cooled (104 C to 78 C in eight minutes). Card 1 in the same machine peaked at
+about 71 C under the same smokes, and aifoundry2 stays near 90 C in hours of work. Card 0's cooling is at fault (a fan,
+heat sink or airflow), which its low-power idle at 300 MHz normally hides; a full block would run it far hotter, and the
+firmware's throttling would take its clock off 600 MHz. The campaign therefore runs on aifoundry1-c1, aifoundry2 and
+aifoundry3. Card 0's smoke data are kept as a record of the fault. `all_cards` outcomes are over those three cards.
