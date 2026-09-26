@@ -264,11 +264,128 @@ def pagetimeout(data, ref):
     return out
 
 
+def v3_cards(raw, passes_json, out_path, model_json):
+    """The version-3 claims check's memprobe passes (tools/claims-v3/mem/README.md), every card, reduced with this
+    file's own functions so the page can put them beside its 19 September session:
+
+        analyze.py --v3 docs/reports/data/2026-09-25-claims-v3/raw \
+            --v3-passes docs/reports/data/2026-09-25-claims-v3/results/mem.passes.json \
+            --out docs/reports/data/2026-09-26-memprobe-3cards/cards.json
+
+    The passes used are the reducer's (mem.passes.json "kept": each card's first five kept X1 passes). Each pass is
+    copied to a scratch folder with its labels un-gzipped. The version-3 build's timed L1 hit reads 17 raw, not 10, so
+    every latency is re-referenced to the pass's own L1 hit, as the reducer's recompute_latency.py --l1-ref does:
+    OVERHEAD becomes 5 + (median raw L1 hit - 10), which leaves the time stamps raw. The refresh series' row
+    clusters are read after that shift (the reducer's extra_values.py reads P5b and P6r without it). The DRAM model
+    error uses the 19 September model as it stands (model_json: that session's summary.json, its constant and memory
+    shire positions, not refitted), each line's fastest of three loads, as the reducer's MEM-P2 does."""
+    import gzip
+    import shutil
+    import tempfile
+    global OVERHEAD
+    meta = json.load(open(passes_json))
+    m19 = json.load(open(model_json))["decomp"]
+    const19, pos19 = m19["ms_const"], {int(k): v for k, v in m19["ms_pos"].items()}
+    progs = ["ladder", "decomp", "refresh", "refresh_jit", "pagetimeout"]
+    out = {"source": {"raw": raw, "passes": passes_json, "kept": meta["kept"],
+                      "note": "every latency re-referenced to the pass's own timed L1 hit (= 5 cycles)"}, "cards": {}}
+    for card in meta["cards"]:
+        info = {p["pass"]: p for p in meta["passes"][card]}
+        C = {"passes": [], "shift": [], "ladder": collections.defaultdict(list), "l3_by_slice": collections.defaultdict(list),
+             "dram_med": [], "dram_hist": collections.Counter(), "ms_const": [], "period": [], "op_cycles": [],
+             "rows": [0, 0, 0, 0], "closed_minus_open": [], "closed_mean": [], "open_mean": [],
+             "pto": collections.defaultdict(lambda: [0, 0]), "model_err": collections.Counter(), "within3": [],
+             "locked": []}
+        for pk in meta["kept"][card]["x1"]:
+            k = int(pk[1:])
+            if info[k]["arena_bases"] != [hex(ARENA_BASE)]:
+                raise SystemExit(f"{card} {pk}: arena base {info[k]['arena_bases']}, not {hex(ARENA_BASE)}")
+            src, tmp = os.path.join(raw, card, "mem", pk), tempfile.mkdtemp(prefix="memprobe-v3-")
+            try:
+                for n in progs:
+                    with gzip.open(os.path.join(src, n + ".json.gz"), "rt") as f, open(os.path.join(tmp, n + ".json"), "w") as fo:
+                        shutil.copyfileobj(f, fo)
+                    shutil.copy(os.path.join(src, n + ".u32"), os.path.join(tmp, n + ".u32"))
+                OVERHEAD = 5
+                _, labels, r = load(tmp, "ladder", raw=True)
+                shift = int(round(st.median(v for lab, v in zip(labels, r) if lab[0] == "ladder" and lab[2] in (-1, 0)) - 10))
+                OVERHEAD = 5 + shift
+                lad, dec, ref = ladder(tmp), decomp(tmp), refresh(tmp)
+                pto = pagetimeout(tmp, ref)
+                _, _, rj = load(tmp, "refresh_jit")
+                lat = rj[1::2]
+                _, _, rl = load(tmp, "refresh")
+                _, dl, dr = load(tmp, "decomp")
+            finally:
+                OVERHEAD = 5
+                shutil.rmtree(tmp, ignore_errors=True)
+            C["passes"].append(pk)
+            C["shift"].append(shift)
+            for key, v in lad.items():
+                C["ladder"][key].append(v["med"])
+            for s, v in dec["l3_by_slice"].items():
+                C["l3_by_slice"][s].append(v["med"])
+            C["dram_med"].append(dec["mem"]["med"])
+            C["dram_hist"].update(dict(dec["mem_hist"]))
+            C["ms_const"].append(dec["ms_const"])
+            C["period"].append(ref["period_cycles"])
+            C["op_cycles"].append(ref["op_cycles"])
+            for x in ref["rowlife"]:  # the page's split: gaps under 2,000 idle cycles
+                if x["gap"] < 2000:
+                    for i, key in enumerate(("hit_no_refresh", "n_no_refresh", "hit_refresh", "n_refresh")):
+                        C["rows"][i] += x[key]
+            # the open- and closed-row clusters of the refresh series (as extra_values.py's P5b windows)
+            cl, op = [x for x in lat if 220 <= x < 232], [x for x in lat if 208 <= x < 220]
+            C["closed_mean"].append(st.mean(cl))
+            C["open_mean"].append(st.mean(op))
+            C["closed_minus_open"].append(st.mean(cl) - st.mean(op))
+            for p in pto:
+                C["pto"][p["delay"]][0] += p["hits"]
+                C["pto"][p["delay"]][1] += p["n"]
+            # the 19 September DRAM model, not refitted: each line's fastest of three loads against it
+            fast = collections.defaultdict(list)
+            for lab, v in zip(dl, dr):
+                if lab[0] == "mem" and v > 0:
+                    fast[lab[1]].append(v)
+            errs = []
+            for a, v in fast.items():
+                s_, ms_ = ((ARENA_BASE + a) >> 6) & 31, ((ARENA_BASE + a) >> 6) & 7
+                errs.append(min(v) - (110 + 12 * g.hops(0, s_) + const19 + 12 * dist(s_, pos19[ms_])))
+            C["model_err"].update(errs)
+            C["within3"].append([sum(1 for e in errs if abs(e) <= 3), len(errs)])
+            # the locked series (fixed loop period): its period, how many loads were slow, and how many waited in a refresh
+            ts0, lat0 = [v + OVERHEAD for v in rl[0::2]], rl[1::2]
+            per = [(ts0[i + 1] - ts0[i]) % 2**32 for i in range(len(ts0) - 1)]
+            C["locked"].append({"period_med": st.median(per), "n": len(lat0), "slow": sum(1 for v in lat0 if v >= 220),
+                                "in_refresh": sum(1 for v in lat0 if v >= 250), "max": max(lat0),
+                                "slow_med": st.median(v for v in lat0 if v >= 220)})
+        C["ladder"] = dict(C["ladder"])
+        C["l3_by_slice"] = {s: {"med": v, "hops": g.hops(0, s)} for s, v in sorted(C["l3_by_slice"].items())}
+        C["dram_hist"] = sorted(C["dram_hist"].items())
+        C["pto"] = {d: v for d, v in sorted(C["pto"].items())}
+        C["model_err"] = sorted(C["model_err"].items())
+        out["cards"][card] = C
+        print(f"{card}: passes {C['passes']}, L1 shift {C['shift']}, DRAM median {C['dram_med']}, "
+              f"ladder DRAM {C['ladder']['ladder:3']}, closed - open {[round(x, 1) for x in C['closed_minus_open']]}, "
+              f"rows {C['rows']}, within 3 of the 19 Sep model {C['within3']}, locked {C['locked'][0]}")
+    os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
+    json.dump(out, open(out_path, "w"), indent=1, default=str)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--data", required=True)
+    ap.add_argument("--data")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--v3", metavar="RAW_ROOT", help="reduce the version-3 passes of every card instead (see v3_cards)")
+    ap.add_argument("--v3-passes", metavar="MEM_PASSES_JSON", help="the reducer's mem.passes.json (which passes are kept)")
+    ap.add_argument("--v3-model", metavar="SUMMARY_JSON", default=os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "..", "docs", "reports", "data", "2026-09-19-memprobe-aifoundry2", "summary.json"),
+        help="the 19 September summary.json, whose DRAM model (constant, memory shire positions) is tested as it stands")
     args = ap.parse_args()
+    if args.v3:
+        return v3_cards(args.v3, args.v3_passes, args.out, args.v3_model)
+    if not args.data:
+        ap.error("--data is required")
     dec, ref = decomp(args.data), refresh(args.data)
     out = {"timer": timer(args.data), "ladder": ladder(args.data), "decomp": dec,
            "msmap": msmap(args.data), "bits": bits(args.data), "refresh": ref,

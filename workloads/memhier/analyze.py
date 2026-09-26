@@ -13,7 +13,10 @@ L3 and DRAM chase with its clock, the clock models (fits, scp_model), the per-re
 matrix and marty1885's shire layout (imported from workloads/nocbench/analyze.py), and, for the spec sheet's energy
 dot plot, energy_levels: the energy manual's energy per byte by level (--reruns, by default
 docs/reports/data/2026-09-23-energy-manual/reruns.json, levels_pj_per_byte), copied as it is there: the mean and
-lo-hi over every pass of every card, and each card's mean, standard error and number of passes.
+lo-hi over every pass of every card, and each card's mean, standard error and number of passes; the scratchpad
+levels, whose contents the version-3 re-runs set, once per contents (levels_by_contents_pj_per_byte). With --v3
+docs/reports/data/2026-09-25-claims-v3/raw it also embeds v3: each card's chases from the version-3 claims check
+(26 September, 600 MHz, the passes V3-LAT kept; see v3_curves), which the latency chart draws beside this session's.
 """
 import argparse
 import glob
@@ -45,6 +48,10 @@ ANATOMY_L3 = {"base": 110, "per_hop": 12}
 ANATOMY_SUMMARY = os.path.join(HERE, "..", "..", "docs", "reports", "data", "2026-09-19-memprobe-aifoundry2", "summary.json")
 # The energy manual's 23 September re-runs at 600 MHz: the energy per byte the report's tables and charts use.
 RERUNS = os.path.join(HERE, "..", "..", "docs", "reports", "data", "2026-09-23-energy-manual", "reruns.json")
+# the levels whose contents the version-3 re-runs set before reading them (tools/claims-v3/rl/README.md: a zeros or
+# random-data prefill of the scratchpads), and the two contents
+CONTENTS_SET = ("scp-local", "scp-remote")
+CONTENTS = ("zeros", "random")
 
 # Working-set ranges (bytes) that sit on each plateau of the latency curve.
 LEVELS = [
@@ -99,6 +106,43 @@ def load(path):
     return out
 
 
+V3_LAT = os.path.join(HERE, "..", "..", "docs", "reports", "data", "2026-09-25-claims-v3", "results", "lat.json")
+
+
+def v3_curves(raw, lat_json):
+    """The version-3 claims check (26 September) re-ran this page's chases on every card at 600 MHz, in the V3-LAT
+    block's unit `mc` (tools/claims-v3/lat/README.md: run_lab.sh's chase group, commands copied verbatim). For each
+    card: the blocks that ran `mc` (lat.json cards.<card>.blocks), in the passes LAT-M1 kept (lat.json items LAT-M1
+    per_card), and per chain size the median, min and max over those passes of cycles per load from shire 0
+    (chase-dram.jsonl) and shire 24 (chase-dram-sweep-from24.jsonl). Every chase must pass its pointer check. Lines
+    that are not records (aifoundry1's host prints "Opening device 1") are skipped, as the V3-LAT reducer skips them."""
+    def records(path):
+        return [json.loads(x.split(" ", 1)[1] if x.startswith("MEMHIER {") else x)
+                for x in (line.strip() for line in open(path)) if x.startswith("MEMHIER {") or x.startswith("{")]
+    L = json.load(open(lat_json))
+    m1 = next(it for it in L["items"] if it["item"] == "LAT-M1")
+    out = {"source": {"raw": "docs/reports/data/2026-09-25-claims-v3/raw", "verdicts": "results/lat.json", "clock_mhz": 600},
+           "cards": {}}
+    for card, info in sorted(L["cards"].items()):
+        kept = {p["pass"] for p in m1["per_card"][card]["passes"] if p["kept"]}
+        blocks = [b for b in info["blocks"] if "mc" in b["units"] and b["pass"] in kept]
+        curves = {}
+        for name, label in (("chase-dram", "shire 0"), ("chase-dram-sweep-from24", "shire 24")):
+            by = {}
+            for b in blocks:
+                for r in records(os.path.join(raw, card, "lat", f"p{b['block']}", "mc", name + ".jsonl")):
+                    if not r["ok"]:
+                        raise SystemExit(f"{card} block {b['block']} {name}: a chase failed its pointer check")
+                    by.setdefault(r["size"], []).append(r["cycles_per_load"])
+            curves[label] = [[s, round(statistics.median(v), 2), round(min(v), 2), round(max(v), 2), len(v)]
+                             for s, v in sorted(by.items())]
+        out["cards"][card] = {"passes": sorted(kept), "blocks": [b["block"] for b in blocks], "curves": curves}
+        c0 = dict((s, m) for s, m, *_ in curves["shire 0"])
+        print(f"V3 {card}: passes {sorted(kept)}, shire 0: L1 {c0[256]}, RB {c0[1024]}, L2 {c0[65536]}, "
+              f"L3 {c0[4 << 20]}, 32 MB {c0[32 << 20]}, 64 MB {c0[64 << 20]}, DRAM {c0[256 << 20]} cycles")
+    return out
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("data_dir")
@@ -106,6 +150,11 @@ def main():
     p.add_argument("--reruns", metavar="RERUNS_JSON", default=RERUNS,
                    help="the energy manual's re-runs, whose levels_pj_per_byte is embedded as energy_levels "
                         "(default: docs/reports/data/2026-09-23-energy-manual/reruns.json)")
+    p.add_argument("--v3", metavar="RAW_ROOT", help="also embed the version-3 claims check's chases of every card "
+                   "(docs/reports/data/2026-09-25-claims-v3/raw; see v3_curves)")
+    p.add_argument("--v3-lat", metavar="LAT_JSON", default=V3_LAT,
+                   help="the V3-LAT verdicts, which name each card's blocks and kept passes (default: "
+                        "docs/reports/data/2026-09-25-claims-v3/results/lat.json)")
     args = p.parse_args()
     d = args.data_dir
 
@@ -264,9 +313,21 @@ def main():
             "scp_model": scp_model, "l3_by_requester": l3_by_requester, "anatomy_l3": anatomy,
             "scp_matrix": {str(k): v for k, v in sorted(matrix.items())},
             "layout": {str(s): list(xy) for s, xy in noc.MARTY.items()}, "empty_cells": [list(c) for c in noc.EMPTY]}
-    # Energy per byte by level (the spec sheet's dot plot): the energy manual's re-runs, as they are.
-    lv = json.load(open(args.reruns))["levels_pj_per_byte"]
-    data["energy_levels"] = {k: {q: v[q] for q in ("mean", "lo", "hi", "n", "per_card")} for k, v in lv.items()}
+    if args.v3:
+        data["v3"] = v3_curves(args.v3, args.v3_lat)
+    # Energy per byte by level (the spec sheet's dot plot): the energy manual's re-runs, as they are. Where the re-runs
+    # set a level's contents (the version-3 passes fill the scratchpads with zeros or random data before reading them:
+    # levels_by_contents_pj_per_byte), that level is given once per contents ("scp-local:zeros", ...) instead of pooled
+    # over both, which would mix the two fills; the L1, L2, L3 and DRAM buffers' contents were not set.
+    rr = json.load(open(args.reruns))
+    lv, bc = rr["levels_pj_per_byte"], rr.get("levels_by_contents_pj_per_byte", {})
+    keep = ("mean", "lo", "hi", "n", "per_card")
+    data["energy_levels"] = {}
+    for k, v in lv.items():
+        if k in CONTENTS_SET and all(k in bc.get(c, {}) for c in CONTENTS):
+            data["energy_levels"].update({f"{k}:{c}": {q: bc[c][k][q] for q in keep} for c in CONTENTS})
+        else:
+            data["energy_levels"][k] = {q: v[q] for q in keep}
     print("energy per byte by level (energy manual re-runs): " + ", ".join(
         f"{k} {v['mean']:.2f} [{v['lo']:.2f}-{v['hi']:.2f}] pJ/B" for k, v in data["energy_levels"].items()))
     if args.embed:
