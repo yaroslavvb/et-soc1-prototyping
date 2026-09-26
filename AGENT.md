@@ -89,7 +89,7 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
 |---|---|---|
 | R1–R14 | resources that existed before any measurement: manuals, RTL, firmware source, papers, the machines | [`01-resources.md`](docs/findings/01-resources.md) |
 | Q1–Q43 | the owner's requests and what each produced (25 September's requests are not numbered yet; getting-started lists them) | [`02-requests.md`](docs/findings/02-requests.md) |
-| E1–E34 | experiments: command, time, card, raw files. The version-3 experiments carry suggested numbers (E35–E48) in PLAN3 and their READMEs, and are recorded in their own data directory until registered | [`03-experiments.md`](docs/findings/03-experiments.md) |
+| E1–E34, E49 | experiments: command, time, card, raw files. The version-3 experiments carry suggested numbers (E35–E48) in PLAN3 and their READMEs, and are recorded in their own data directory until registered; E49 is the card-free g3log race test | [`03-experiments.md`](docs/findings/03-experiments.md) |
 | A1–A19 | published artifacts: pages, images, tools, commits | [`04-artifacts.md`](docs/findings/04-artifacts.md) |
 
 - **To answer a question:** the "where to look" table → the topic file (10–20) → the number in
@@ -276,8 +276,9 @@ numbers in 05, the request in 02, and any published artifact in 04 and MIRROR.md
 4. **Deploy** from a directory of its own, with `--space <uuid>`, and with `--slug` whenever you pass `--title`
    ([MIRROR.md, "Deploying one page"](docs/reports/MIRROR.md#deploying-one-page)). A new space starts private;
    making it public is the owner's decision. Check `spacesheep --version`: the pages up to 25 September were deployed
-   with 1.5.1, and 1.9.1 (npm's latest from the evening of 25 September) reads them back the same; an older CLI
-   (npm's latest was 1.2.1 until then) may not. Never put the CLI's key in the repository.
+   with 1.5.1; 1.9.1 (npm's latest from the evening of 25 September) reads them back the same, and a 1.9.1 redeploy
+   of an existing space keeps its slug, title and visibility (tested 25 Sep, 23:40). An older CLI (npm's latest was
+   1.2.1 until then) may not. Never put the CLI's key in the repository.
 5. **Verify**: `spacesheep list` (visibility and address unchanged), then `python3 scripts/check-mirror.py --only <slug>`.
 6. **Commit** the page, its sources and data, and MIRROR.md together.
 
