@@ -1,7 +1,7 @@
 # aifoundry1: what is broken (25 September 2026)
 
 The evidence behind [`../../2026-09-25-aifoundry1-troubleshooting.html`](../../2026-09-25-aifoundry1-troubleshooting.html)
-(published privately as <https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting>), written for Roman
+(published at <https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting>, with the fix log at <https://spacesheep.dev/@yaroslavvb/aifoundry1-fix>), written for Roman
 Shaposhnik's question "Can someone try to see exactly what is broken on 1?".
 
 - `facts.md`: the read-only facts gathered on aifoundry1, 2 and 3 (sysfs, modinfo, lspci, dpkg, file hashes,
