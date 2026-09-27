@@ -1,0 +1,489 @@
+#!/usr/bin/env python3
+"""Build facts.json for the chip diagram (docs/reports/sources/chip-diagram.*) from the three research fact files.
+
+    python3 docs/reports/data/2026-09-27-chip-diagram/build_facts.py
+
+Inputs, in research/ next to this script (copied from the session that made them, 27 Sep 2026):
+  facts-arch.json    164 facts: the chip's hierarchy, caches, mesh, DRAM and clocks (build_facts_arch.py)
+  facts-layout.json   81 facts: die, tile pitch, shire placement, memory-shire fit (build_layout_facts.py)
+  facts-numbers.json 136 facts: latency, bandwidth, energy, power, E48 gathers (build_facts_numbers.py)
+  layout.json        the logical 6x6 map, the inferred die view, memory-shire positions (build_layout_facts.py)
+Each fact has a source (a repo file with line or field, a manual PDF page, or a source file:line) and a kind
+(measured, spec, derived, inferred). The builders read the repository directly; they are kept in research/ as a record.
+
+The page's review (27 Sep) added, here and not in research/: ADD, six facts written for the page, each with its
+source (board watts of the three-card matmul, the tensor instructions running on the vector lanes, a minion's 256-bit
+ET-Link width, the memory-shire fit's three-card check, why memory shire 2 has one place left, and the LPDDR4X pairing
+as inferred); AMEND, the pooled cycles per instruction of DRAM scatters; CARDS, card coverage set by hand where the
+card string's aside names a card that was not measured.
+
+Output, facts.json:
+  facts  the facts the page uses, by id, with one page link field (`url`, a spacesheep URL, or null), the lab cards
+         each one covers (`cards`: a2, a3, a1c1) and, for the CARDS entries, the text shown for them (`cards_txt`)
+  num    every number the page prints outside a fact's own statement: {v, t, u, f}. `f` is the fact it comes from; the
+         build asserts that the printed text t occurs in that fact's statement (or equals its value), so no number on
+         the page lacks a source. A row may give a rounding to print instead (sixth field); the build checks that each
+         of its numbers rounds from the statement's, and keeps the statement's text as `src_t`
+  comp   the facts each component's and each flow's details panel lists
+  layout layout.json as is
+"""
+import json
+import os
+import re
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+R = os.path.join(HERE, 'research')
+
+ALL = {}
+for fn, tag in (('facts-arch.json', 'arch'), ('facts-layout.json', 'layout'), ('facts-numbers.json', 'numbers')):
+    for f in json.load(open(os.path.join(R, fn))):
+        assert f['id'] not in ALL, 'duplicate fact id ' + f['id']
+        f['set'] = tag
+        ALL[f['id']] = f
+layout = json.load(open(os.path.join(R, 'layout.json')))
+
+# ---- facts written for this page in its review (27 Sep 2026), each with its source. Kinds as in the research files.
+MATMUL = 'https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency'
+ADD = [
+    {'id': 'mm-board-w', 'component': 'board', 'topic': 'power', 'kind': 'derived',
+     'statement': 'Board power during the fp32 L2 matmul that runs at 9.51 TFLOP/s, idle before the run plus the watts '
+                  'over idle: aifoundry2 33.3 + 25.7 = 59.0 W (die 80 °C), aifoundry3 26.0 + 24.4 = 50.4 W (62 °C), '
+                  'aifoundry1-c1 41.8 + 27.2 = 69.0 W (75-76 °C): 50.4-69.0 W across the three cards (die 62-80 °C). '
+                  '9.51 TFLOP/s over these is the 161, 189 and 138 GFLOP/s per W of the same run (138-189).',
+     'value': 59.0, 'unit': 'W (aifoundry2)',
+     'source': 'docs/findings/05-claims.md:418 (E37, MMB-c: docs/reports/data/2026-09-25-claims-v3/results/mmb.json '
+               '.items[item=MMB-c].per_card.<card>.fp32 mean, idle_before_w, die_c_mean) and :419 (MMB-d, GFLOP/s per W)',
+     'card': 'aifoundry2, aifoundry3, aifoundry1-c1', 'page': 'Matmul efficiency', 'url': MATMUL,
+     'note': 'The sum is this page\'s; 05-claims.md gives the watts over idle and the idle before each run. Idle power '
+             'moves with the card and its temperature (26.0-41.8 W here).'},
+    {'id': 'minion.vec-peak', 'component': 'minion', 'topic': 'compute', 'kind': 'spec',
+     'statement': 'The tensor instructions run on the vector unit\'s own lanes: each of the 8 lanes holds the FMA '
+                  '(TxFMA) and the two int8 multiply-add (IMA/TIMA) units, and state machines in the VPU sequence '
+                  'the multi-cycle tensor operations on them. An 8-lane fmadd.ps does 16 FLOP per cycle, the same '
+                  'fp32 peak as TensorFMA.',
+     'value': 16, 'unit': 'fp32 FLOP per minion-cycle',
+     'source': 'external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.8 (§2.1.1.2: TxFMA, a pair of IMA units '
+               'and \'Finite state machines that generate long sequences of vector operations to implement '
+               'multi-cycle tensor operations\'); external/core-et/docs/Minion VPU Specification.pdf, pdf p.11 (§2: '
+               'TXFMA and two TIMA units per lane); scripts/ridge-points.py:46, 51 (fp32 TensorFMA and vec32 '
+               'fmadd.ps, per_cycle 16 each)',
+     'card': None, 'page': 'Ridge points', 'url': 'https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points', 'note': None},
+    {'id': 'minion.etlink-width', 'component': 'minion', 'topic': 'interconnect', 'kind': 'spec',
+     'statement': 'A minion\'s ET-Link request and response interfaces are 256 bits wide: the neighbourhood\'s '
+                  'request datapath is 256 bits, up-converted to 512 bits only at its output to the shire, and a '
+                  '512-bit response reaches the minion as two 256-bit halves.',
+     'value': 256, 'unit': 'bits',
+     'source': 'external/core-et/docs/CORE-ET-Neigborhood-MAS.pdf, pdf p.15 (§4.3: \'The data size of the request '
+               'datapath is 256 bits\' ... \'a final up-conversion to 512 bits\') and p.23 (§4.4.3: \'the Minion '
+               'response interface is 256-bit wide\')',
+     'card': None, 'page': None, 'url': None, 'note': None},
+    {'id': 'ms-fit-3cards', 'component': 'memory shire', 'topic': 'placement', 'kind': 'measured',
+     'statement': 'Left as fitted on aifoundry2 on 19 September (constant 91 and the memory-shire places, not '
+                  'refitted), the DRAM latency model is within ±3 cycles for 93-97% of loads on all three cards: '
+                  'aifoundry2 97.0%, aifoundry3 92.9%, aifoundry1-c1 94.4% (5 passes each).',
+     'value': 97.0, 'unit': '% of loads within ±3 cycles (aifoundry2)',
+     'source': 'docs/findings/05-claims.md:404 (E35, MEM-P2: docs/reports/data/2026-09-25-claims-v3/results/mem.json '
+               '[item=MEM-P2].per_card.<card>.tests.P2_dram_within3_frac)',
+     'card': 'aifoundry2, aifoundry3, aifoundry1-c1', 'page': 'Anatomy of a memory access',
+     'url': 'https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy', 'note': None},
+    {'id': 'ms2-forced', 'component': 'memory shire', 'topic': 'placement', 'kind': 'derived',
+     'statement': 'Memory shire 2\'s fit ties (3, -1), (5, -1) and (6, 0), but (5, -1) is a corner of the 8 × 6 grid, '
+                  'and the corners are empty, while (6, 0) lies outside the grid: within the fit\'s assumptions '
+                  '(3, -1) is the only place left.',
+     'value': None, 'unit': None,
+     'source': 'L42 (docs/reports/2026-09-19-et-soc1-memory-anatomy.html:778-780); external/et-man/ET Preliminary '
+               'Datasheet Rev 1.0.pdf, pdf p.21 (§4: \'the corners of the grid are not occupied\')',
+     'card': None, 'page': None, 'url': None,
+     'note': 'The logical map is 6 rows (x = 0-5) by 8 columns (y = -1 to 6, the memory shires at y = -1 and 6).'},
+    {'id': 'dram.pkg-pairing', 'component': 'memory', 'topic': 'placement', 'kind': 'inferred',
+     'statement': 'Which two memory shires share each LPDDR4X device is not documented: the datasheet says only that '
+                  'two memory shires communicate with each 64-bit device. The diagram pairs neighbouring memory '
+                  'shires on each side (0 and 1, 2 and 3, 4 and 5, 6 and 7), after the block diagram\'s two LPDDR4X '
+                  'blocks per side, on the inferred die placement.',
+     'value': None, 'unit': None,
+     'source': 'external/et-man/ET Preliminary Datasheet Rev 1.0.pdf, pdf p.30 (§7: \'Two Memshires communicate with '
+               'each 64-bit LPDDR4X memory device\') and p.15 (Figure 2-6, fact L23)',
+     'card': None, 'page': None, 'url': None, 'note': None},
+]
+for f in ADD:
+    assert f['id'] not in ALL, 'duplicate fact id ' + f['id']
+    f['set'] = 'page'
+    ALL[f['id']] = f
+
+# ---- amendments to research facts (27 Sep review): the pooled figure the page prints, with its source
+AMEND = {
+    'gs-s-dram-256K': {
+        'find': '24,599 cycles per instruction per hart.',
+        'statement': '24,584 cycles per instruction per hart (median, pooled over the 9 passes; per card 24,599 on '
+                     'aifoundry2 and aifoundry3, 24,554 on aifoundry1-c1). 2,048 harts × 8 elements at 600 MHz over '
+                     'that is 0.400 G elements/s, about 5% under the measured aggregate rate.',
+        'source': '; .pooled[same key].cpi_med (mean 24,584)'},
+}
+for fid, a in AMEND.items():
+    f = ALL[fid]
+    assert a['find'] in f['statement'], fid
+    f['statement'] = f['statement'].replace(a['find'], a['statement'])
+    f['source'] += a['source']
+
+# ---- card coverage set by hand where the card string's aside names a card that was not measured, or the number the
+# page prints covers fewer cards than the fact (27 Sep review). Value: (cards, text shown for them)
+CARDS = {
+    'clock.minion-opps': (['a2'], 'aifoundry2 (aifoundry3 is pinned at 600 MHz, not measured here)'),
+    'mesh.clock': (['a2'], 'aifoundry2 (aifoundry3 is set to 400 MHz by its boot service)'),
+    'L101': (['a2'], 'aifoundry2 (telemetry of the hot-line run)'),
+    'bw-scp-own': (['a2', 'a3'], 'aifoundry2, aifoundry3 (the read rate); the store rate on three cards'),
+    'bw-l1': (['a2', 'a3', 'a1c1'], 'three cards (14.5 TB/s); 6.2 TB/s on aifoundry2, aifoundry3'),
+    'relay-bw': (['a2'], 'aifoundry2 pass means (the other cards within 1.5%)'),
+}
+
+# page titles by URL (the arch and numbers files name their page; the layout file gives only the URL)
+TITLE = {}
+for f in ALL.values():
+    u = f.get('page_url') or f.get('url')
+    if u and f.get('page') and not str(f['page']).startswith('http'):
+        TITLE.setdefault(u.split('#')[0], re.sub(r'\s*\((the )?reports hub\)', '', f['page']))
+
+
+def norm(f):
+    url = f.get('page_url') or f.get('url') or (f['page'] if str(f.get('page') or '').startswith('http') else None)
+    title = TITLE.get(url.split('#')[0]) if url else None
+    if url and not title:
+        raise SystemExit('no title for ' + url)
+    c = f.get('card') or ''
+    cards = [k for k, pat in (('a2', r'aifoundry2'), ('a3', r'aifoundry3'),
+                              ('a1c1', r'aifoundry1-c1|aifoundry1 card 1|aifoundry1 \(both cards\)|aifoundry1, '))
+             if re.search(pat, c)]
+    cards_txt = None
+    if f['id'] in CARDS:
+        cards, cards_txt = CARDS[f['id']]
+    out = {k: f.get(k) for k in ('id', 'component', 'topic', 'statement', 'value', 'unit', 'source', 'kind', 'card', 'note')}
+    out.update(range=f.get('range'), url=url, page=title, cards=cards, set=f['set'])
+    if cards_txt:
+        out['cards_txt'] = cards_txt
+    return out
+
+
+# ---- numbers the page prints: key -> (fact, value, text, unit). The text must occur in the fact's statement.
+N = [
+    # the chip
+    ('cores', 'chip.cores-total', 1093, '1,093', 'cores'),
+    ('minions', 'chip.minions', 1088, '1,088', 'minions'),
+    ('shires', 'chip.minion-shires', 34, '34', 'minion shires'),
+    ('cshires', 'chip.compute-array', 32, '32', 'compute shires'),
+    ('maxions', 'chip.cores-total', 4, '4 ET-Maxions', ''),
+    ('die_mm2', 'chip.die-area', 570, '570', 'mm²'),
+    ('transistors', 'chip.process', 24, '24 billion', 'transistors'),
+    ('process', 'chip.process', 7, '7 nm', ''),
+    ('stops', 'mesh.grid', 44, '44', 'mesh stops'),
+    ('memshires', 'chip.memshires', 8, 'Eight', 'memory shires'),
+    ('channels', 'dram.channels', 16, '16', 'LPDDR4X channels'),
+    ('ch_bits', 'dram.channels', 16, '16 bits', ''),
+    ('dram_gb', 'dram.capacity', 32, '32 GB', ''),
+    ('mts', 'dram.rate-card', 3733, '3,733', 'MT/s'),
+    ('dram_peak', 'dram.peak-card', 119, '119', 'GB/s'),
+    ('dram_bw', 'bw-dram', 76, '76', 'GB/s'),
+    ('cache_mb', 'shire.cache-geometry', 4, '4 MB', ''),
+    ('banks', 'shire.cache-geometry', 4, '4 banks', ''),
+    ('subbanks', 'shire.cache-geometry', 4, '4 sub-banks', ''),
+    ('scp_mb', 'shire.partition-m0', 2.5, '2.5 MB', ''),
+    ('l2_kb', 'shire.partition-m0', 512, '512 KB', ''),
+    ('l3_mb', 'shire.partition-m0', 1, '1 MB', ''),
+    ('scp_chip', 'shire.partition-m0', 80, '80 MB', ''),
+    ('l2_chip', 'shire.partition-m0', 16, '16 MB', ''),
+    ('l3_chip', 'shire.partition-m0', 32, '32 MB', ''),
+    ('neigh', 'shire.composition', 4, '4 neighbourhoods', ''),
+    ('per_neigh', 'neigh.composition', 8, '8 minions', ''),
+    ('icache', 'neigh.composition', 32, '32 KB', ''),
+    ('harts', 'minion.isa', 2, '2 harts', ''),
+    ('lanes', 'minion.vpu', 8, '8 identical 32-bit lanes', ''),
+    ('vregs', 'minion.vpu-regs', 32, '32 vector registers of 32 bytes', ''),
+    ('l1_kb', 'minion.l1d', 4, '4 KB', ''),
+    ('l1_scp', 'minion.l1-modes', 3, '3 KB', ''),
+    ('l1_hart', 'minion.l1-firmware', 512, '512 B', ''),
+    ('tflops', 'mm-rate', 9.51, '9.51', 'TFLOP/s fp32'),
+    ('tflops16', 'mm-rate', 19.02, '19.02', 'TFLOP/s fp16'),
+    ('tops8', 'mm-rate', 71.77, '71.77', 'TOP/s int8'),
+    ('peak32', 'mm-peak', 16, '16 fp32', 'FLOP per minion-cycle'),
+    ('peak16', 'mm-peak', 32, '32 fp16', ''),
+    ('peak8', 'mm-peak', 128, '128 int8', ''),
+    ('mhz', 'op-600', 600, '600 MHz', ''),
+    ('noc_mhz', 'mesh.clock', 400, '400 MHz', ''),
+    ('noc_v', 'L101', 0.485, '0.485 V', ''),
+    ('mmw', 'mm-board-w', 69.0, '50.4-69.0 W', '', '50-69 W'),
+    ('mmtemp', 'mm-board-w', 80, '62-80 °C', ''),
+    ('perw', 'mm-board-w', 189, '138-189', 'GFLOP/s per W'),
+    ('vecpeak', 'minion.vec-peak', 16, '16 FLOP', ''),
+    ('etl_min', 'minion.etlink-width', 256, '256 bits', ''),
+    ('ms_fit', 'ms-fit-3cards', 97, '93-97%', ''),
+    ('chipbar', 'sync-chip-barrier', 5013, '4,998-5,013', 'cycles'),
+    ('rs_hops', 'bw-scp-remote', 2.1, '2.1 hops', ''),
+    ('pcie_gbs', 'bw-pcie', 15.75, '15.75 GB/s', ''),
+    ('pcie_lanes', 'chip.pcie-shire', 8, '8-lane', ''),
+    ('master_id', 'chip.master-shire-id', 32, '32', ''),
+    ('spare_id', 'chip.spare-shire-id', 33, '33', ''),
+    ('mask', 'chip.cm-shire-mask', 0, '0xffffffff', ''),
+    ('n1024', 'chip-minions', 1024, '1,024', 'minions'),
+    ('per_shire', 'shire.composition', 32, '32 minions', ''),
+    ('grid86', 'mesh.grid', 8, '8 × 6', ''),
+    ('pkg_ch', 'L47', 4, 'four 16-bit channels', ''),
+    ('ch16', 'L47', 16, 'two 16-bit LPDDR4X channels', ''),
+    ('esr_ms', 'L25', 232, '232–239', ''),
+    ('port512', 'mesh.port-width', 512, '512 bits', ''),
+    ('lanes4', 'L103', 4, '4 to_l3 master and 4 L3 slave lanes', ''),
+    ('bank1mb', 'shire.cache-geometry', 1, '4 banks × 1 MB', ''),
+    ('xbar512', 'shire.crossbar', 512, '512-bit', ''),
+    ('etl512', 'shire.neigh-link', 512, '512-bit ET-Link bus', ''),
+    ('etl256', 'shire.neigh-link', 256, '256-bit bus', ''),
+    ('edges', 'neigh.fln-edges', 7, '0-1, 0-2, 0-4, 2-3, 4-5, 4-6, 6-7', ''),
+    ('fln7', 'neigh.fln-edges', 7, '7', ''),
+    ('b32', 'ts-rt-fln', 32, '32 B', ''),
+    ('flb', 'sync-shire-barrier', 233, '233 cycles', ''),
+    ('ar1024', 'sync-allreduce1024', 1393, '1,393 cycles', ''),
+    ('hot10', 'hot-cost', 10, '10.00 cycles', ''),
+    ('vreg256', 'minion.vpu', 256, '256 bits wide', ''),
+    ('tshape', 'minion.tensor-shape', 16, 'M, N ≤ 16', ''),
+    ('tenb', 'minion.tenb-tenc', 1, '1 KiB', ''),
+    ('h1pen', 'lat-l2', 3, 'hart 1 pays 3 more', ''),
+    ('sets011', 'minion.l1-modes', 11, 'sets 0-11', ''),
+    ('sets1213', 'minion.l1-modes', 12, 'hart 0 sets 12-13', ''),
+    ('sets1415', 'minion.l1-modes', 14, 'hart 1 sets 14-15', ''),
+    ('l1geom', 'minion.l1d', 16, '16 sets × 4 ways × 64 B', ''),
+    ('awake', 'e-awake', 2, 'about 2 mW', ''),
+    ('e_fmadd', 'e-fmadd-ps', 55.8, '55.8', 'pJ'),
+    ('rl_13th', 'relay-13x', 13, 'about a thirteenth', ''),
+    ('dram_region', 'addr.dram-region', 0, '0x80_0000_0000', ''),
+    ('scp_base', 'scp.format0', 0, '0x80000000 + (shire << 23) + offset', ''),
+    ('ms_pos_card', 'L40', 2, 'total squared error 2', ''),
+    ('lanes_n', 'minion.vpu', 8, '8', 'lanes'),
+    ('line64', 'shire.cache-geometry', 64, '64-byte', ''),
+    ('l3_b12', 'l3.latency', 12, '12', ''),
+    ('rl_stages', 'relay-bw', 8, '8 stages', ''),
+    ('gs_8', 'gs-l1', 8, '32-bit gather of 8 lanes', ''),
+    ('ms8', 'chip.memshires', 8, '8', ''),
+    ('pairs496', 'mesh.shortest-paths', 496, '496', 'shire pairs'),
+    # the mesh
+    ('hop_cyc', 'mesh-hop-lat', 12, '12 cycles', 'cycles per hop, round trip'),
+    ('hop_ns', 'mesh-hop-lat', 20, '20 ns', ''),
+    ('hop_mm', 'chip.hop-pitch', 3.72, '3.72 mm', ''),
+    ('bitmm', 'mesh-bit-mm-free', 37, '37 fJ', 'per bit·mm (mesh rail, free links)'),
+    # latency (minion cycles at 600 MHz)
+    ('lat_l1', 'lat-l1', 5.25, '5.25', 'cycles'),
+    ('lat_rb', 'lat-rb', 36, '36', 'cycles'),
+    ('lat_l2', 'lat-l2', 47, '47', 'cycles'),
+    ('lat_scp', 'lat-scp-own', 47, '47', 'cycles'),
+    ('lat_rs_a', 'lat-scp-remote', 99.84, '99.84', 'cycles'),
+    ('lat_rs_b', 'lat-scp-remote', 12.00, '12.00', 'cycles per hop'),
+    ('lat_l3_a', 'l3.latency', 110, '110', 'cycles'),
+    ('lat_l3_b', 'l3.latency', 12, '12 cycles per mesh hop', ''),
+    ('lat_l3_avg', 'lat-l3-avg', 159, '159-169', 'cycles'),
+    ('lat_ms_a', 'dram.leg', 91, '91', 'cycles'),
+    ('lat_ms_b', 'dram.leg', 12, '12', 'cycles per hop'),
+    ('lat_dram', 'lat-dram-typical', 299, '299', 'cycles'),
+    ('lat_dram_ns', 'lat-dram-typical', 500, '500 ns', ''),
+    ('lat_dram_rng', 'lat-dram', 297, '287-297', 'cycles'),
+    ('lat_dram_chip', 'lat-dram-chip', 28, 'about 25-28', 'cycles'),
+    ('row_conf', 'lat-dram-rowconflict', 37, '+37 cycles', ''),
+    ('refresh', 'lat-dram-refresh', 3.88, '3.88 us', ''),
+    # bandwidth (chip-wide, 1,024 minions at 600 MHz)
+    ('bw_l1', 'bw-l1', 6.2, '6.2', 'TB/s'),
+    ('bw_l1b', 'bw-l1', 14.5, '14.5', 'TB/s'),
+    ('bw_l2', 'bw-l2', 2.45, '2.45', 'TB/s'),
+    ('bw_scp', 'bw-scp-own', 2.46, '2.46', 'TB/s'),
+    ('bw_rs', 'bw-scp-remote', 0.96, '0.96', 'TB/s'),
+    ('bw_l3', 'bw-l3', 0.98, '0.98', 'TB/s'),
+    # energy above idle, per byte read
+    ('e_l1', 'e-l1', 0.75, '0.75', 'pJ/B'),
+    ('e_l2', 'e-l2', 3.11, '3.11', 'pJ/B', '3.1'),
+    ('e_l2_rng', 'e-l2', 4.99, '1.42-4.99', 'pJ/B', '1.4-5.0'),
+    ('e_scp0', 'e-scp-own-zeros', 2.25, '2.25', 'pJ/B'),
+    ('e_scp1', 'e-scp-own-rand', 4.40, '4.40', 'pJ/B'),
+    ('e_rs0', 'e-scp-remote-zeros', 5.10, '5.10', 'pJ/B'),
+    ('e_rs1', 'e-scp-remote-rand', 11.8, '11.8', 'pJ/B'),
+    ('e_l3', 'e-l3', 14.7, '14.7', 'pJ/B', '15'),
+    ('e_l3_rng', 'e-l3', 20.5, '7.1-20.5', 'pJ/B', '7-21'),
+    ('e_dram', 'e-dram', 114.6, '114.6', 'pJ/B', '115'),
+    ('e_dram_rng', 'e-dram', 141.3, '89.0-141.3', 'pJ/B', '89-141'),
+    ('e_mac32', 'e-tfma-fp32', 5.782, '5.782', 'pJ per fp32 multiply-add', '5.8'),
+    ('e_mac32_rng', 'e-tfma-fp32', 6.133, '5.347-6.133', 'pJ', '5.3-6.1'),
+    # TensorSend
+    ('ts_a', 'ts-rt-mesh', 150, '150', 'cycles'),
+    ('ts_b', 'ts-rt-mesh', 12.02, '12.02', 'cycles per hop'),
+    ('ts_fln', 'ts-rt-fln', 68, '68 cycles', ''),
+    ('ts_xbar', 'ts-rt-fln', 114, '114-115', 'cycles'),
+    ('ts_e_a', 'mesh-hop-ring', 9.2, '9.2 pJ/B', ''),
+    ('ts_e_b', 'mesh-hop-ring', 1.75, '1.75 pJ/B', 'per mean hop'),
+    ('ts_bw_mesh', 'bw-tsend-mesh', 156, '87-156 GB/s', ''),
+    # relay
+    ('rl_e_dram', 'relay-energy', 116.2, '116.2', 'pJ/B'),
+    ('rl_e_next', 'relay-energy', 8.9, '8.9', 'pJ/B'),
+    ('rl_e_own', 'relay-energy', 4.3, '4.3', 'pJ/B'),
+    ('rl_x', 'relay-13x', 12.97, '12.9x, 13.0x and 13.1x', ''),
+    ('rl_bw_dram', 'relay-bw', 47.7, '47.7', 'GB/s'),
+    ('rl_bw_next', 'relay-bw', 592.5, '592.5', 'GB/s'),
+    ('rl_bw_own', 'relay-bw', 1487, '1487', 'GB/s'),
+    ('rl_speed', 'relay-bw', 12.4, '12.4x', ''),
+    # gathers and scatters (E48): rate (G elements/s), energy (pJ per element), cycles per instruction per hart
+    ('g_l1_r', 'gs-g-dram-512B', 452, '452', 'G elements/s'),
+    ('g_l1_e', 'gs-g-dram-512B', 12.76, '12.76', 'pJ per element'),
+    ('g_l1_c', 'gs-g-dram-512B', 21.78, '21.78', 'cycles per instruction'),
+    ('g_l2_r', 'gs-g-dram-4K', 27.4, '27.4', 'G elements/s'),
+    ('g_l2_e', 'gs-g-dram-4K', 354.5, '354.5', 'pJ per element'),
+    ('g_l2_c', 'gs-g-dram-4K', 359.3, '359.3', 'cycles per instruction'),
+    ('g_sp_r', 'gs-g-scp-16K', 27.4, '27.4', 'G elements/s'),
+    ('g_sp_e', 'gs-g-scp-16K', 367.8, '367.8', 'pJ per element'),
+    ('g_sp_c', 'gs-g-scp-16K', 359.3, '359.3', 'cycles per instruction'),
+    ('g_rs_r', 'gs-g-rscp-16K', 10.2, '10.2', 'G elements/s'),
+    ('g_rs_e', 'gs-g-rscp-16K', 903.1, '903.1', 'pJ per element'),
+    ('g_rs_c', 'gs-g-rscp-16K', 969.0, '969.0', 'cycles per instruction'),
+    ('g_dr_r', 'gs-g-dram-256K', 1.19, '1.19', 'G elements/s'),
+    ('g_dr_e', 'gs-g-dram-256K', 9830, '9,830', 'pJ per element'),
+    ('g_dr_c', 'gs-g-dram-256K', 8232, '8,232', 'cycles per instruction'),
+    ('s_l1_r', 'gs-s-dram-512B', 452, '452', 'G elements/s'),
+    ('s_l1_e', 'gs-s-dram-512B', 14.69, '14.69', 'pJ per element'),
+    ('s_l1_c', 'gs-s-dram-512B', 21.78, '21.78', 'cycles per instruction'),
+    ('s_l2_r', 'gs-s-dram-4K', 23.5, '23.5', 'G elements/s'),
+    ('s_l2_e', 'gs-s-dram-4K', 731.5, '731.5', 'pJ per element'),
+    ('s_l2_c', 'gs-s-dram-4K', 417.6, '417.6', 'cycles per instruction'),
+    ('s_sp_r', 'gs-s-scp-16K', 23.5, '23.5', 'G elements/s'),
+    ('s_sp_e', 'gs-s-scp-16K', 690.5, '690.5', 'pJ per element'),
+    ('s_sp_c', 'gs-s-scp-16K', 417.5, '417.5', 'cycles per instruction'),
+    ('s_rs_r', 'gs-s-rscp-16K', 10.2, '10.2', 'G elements/s'),
+    ('s_rs_e', 'gs-s-rscp-16K', 1983, '1,983', 'pJ per element'),
+    ('s_rs_c', 'gs-s-rscp-16K', 958.3, '958.3', 'cycles per instruction'),
+    ('s_dr_r', 'gs-s-dram-256K', 0.422, '0.422', 'G elements/s'),
+    ('s_dr_e', 'gs-s-dram-256K', 23770, '23,770', 'pJ per element'),
+    ('s_dr_c', 'gs-s-dram-256K', 24584, '24,584', 'cycles per instruction'),
+    ('g_mh', 'gs-mh', 27.36, '27.36', 'G elements/s'),
+    ('g_dram_line', 'gs-dram', 76.4, '76.4 GB/s', ''),
+    # die geometry (inferred from a die plot; used to draw the die to scale)
+    ('die_w', 'chip.die-dims', 25.7, '25.6-25.8 mm', ''),
+    ('die_h', 'chip.die-dims', 22.2, '22.1-22.2 mm', ''),
+    ('strip_mm', 'L09', 1.76, '1.76 mm', ''),
+    ('grid_mm', 'L08', 22.2, '22.2 mm', ''),
+]
+DASH = str.maketrans({'–': '-', '‑': '-', '−': '-', ' ': ' ', 'µ': 'u', 'μ': 'u'})
+NUMS = re.compile(r'\d[\d,]*(?:\.\d+)?')
+
+
+def rounds_to(src, disp):
+    """True when every number in disp is the matching number of src rounded to disp's decimals."""
+    a, b = NUMS.findall(src), NUMS.findall(disp)
+    if len(a) != len(b):
+        return False
+    for x, y in zip(a, b):
+        dec = len(y.split('.')[1]) if '.' in y else 0
+        if abs(float(x.replace(',', '')) - float(y.replace(',', ''))) > 0.5 * 10 ** -dec + 1e-9:
+            return False
+    return True
+
+
+num = {}
+for row in N:
+    key, fid, v, t, u = row[:5]
+    disp = row[5] if len(row) > 5 else None   # a rounding of t the page prints instead (27 Sep review)
+    assert key not in num, key
+    f = ALL[fid]
+    s = f['statement'].translate(DASH)
+    if t.translate(DASH) not in s and not (isinstance(f['value'], (int, float)) and abs(f['value'] - v) < 1e-9 and t == str(v)):
+        raise SystemExit(f'{key}: "{t}" not in {fid}: {f["statement"]}')
+    if disp and not rounds_to(t, disp):
+        raise SystemExit(f'{key}: "{disp}" is not a rounding of "{t}"')
+    shown = disp or t
+    num[key] = {'v': v, 't': re.sub(r'(?<=\d)-(?=\d)', '–', shown), 'u': u, 'f': fid}
+    if disp:
+        num[key]['src_t'] = t
+
+# ---- what each details panel lists (components at three zoom levels, then the flows)
+COMP = {
+    'chip': ['chip.cores-total', 'chip.minion-shires', 'chip.compute-array', 'chip.cm-shire-mask', 'chip.die-area',
+             'chip.process', 'chip.die-dims', 'chip.sram-total', 'op-600', 'clock.minion-opps', 'mm-rate',
+             'mm-board-w', 'mm-perw', 'power.idle', 'chip.die-revision', 'chip.advertised-range'],
+    'cshire': ['shire.composition', 'chip.compute-array', 'shire.partition-m0', 'shire.partition-measured',
+               'mesh.single-attach', 'L11', 'chip.hop-pitch', 'sync-shire-barrier', 'L123', 'L121'],
+    'master': ['chip.master-shire-id', 'chip.spare-shire-id', 'L26', 'L31', 'L32', 'chip.compute-array', 'chip.cm-shire-mask'],
+    'pcie': ['chip.pcie-shire', 'L28', 'pcie.link', 'bw-pcie', 'addr.regions', 'L24', 'L32', 'L25'],
+    'io': ['chip.io-shire', 'L29', 'chip.maxions', 'chip.service-processor', 'volt.other', 'L24', 'L32', 'L25'],
+    'memshire': ['chip.memshires', 'L40', 'ms-fit-3cards', 'L41', 'L43', 'L42', 'ms2-forced', 'mesh.grid', 'L44', 'L46', 'L48', 'dram.memshire-select',
+                 'dram.controller-policy', 'L47', 'dram.counters', 'L25'],
+    'dram': ['dram.channels', 'dram.capacity', 'dram.rate-datasheet', 'dram.rate-card', 'dram.peak-card', 'bw-dram',
+             'lat-dram', 'lat-dram-typical', 'lat-dram-chip', 'dram.row-bits', 'lat-dram-rowconflict', 'lat-dram-refresh',
+             'e-dram', 'e-dram-tload', 'dram.unmetered', 'dram.placeholder', 'L47', 'dram.pkg-pairing', 'L23'],
+    'mesh': ['mesh.grid', 'mesh.logical-map', 'mesh.empty-cells', 'mesh.orientation', 'L34', 'mesh-hop-lat', 'L72',
+             'mesh.shortest-paths', 'L104', 'chip.hop-pitch', 'mesh.clock', 'mesh.voltage', 'L102', 'L105',
+             'mesh.1kb-knee', 'mesh-hop-ring', 'mesh-bit-mm-free', 'mesh-bit-mm-loaded', 'L91', 'mesh.no-counters'],
+    'host': ['pcie.link', 'bw-pcie', 'board.card', 'board.meters', 'ridge.levels'],
+    # shire level
+    'meshstop': ['mesh.single-attach', 'L103', 'mesh.port-width', 'L114', 'mesh-hop-lat', 'L91'],
+    'banks': ['shire.cache-geometry', 'L111', 'shire.partition-m0', 'shire.other-modes', 'shire.bank-queues',
+              'shire.sc-latency-spec', 'l2.decode', 'l3.bank', 'volt.sram', 'sram-idle'],
+    'l2': ['l2.private', 'lat-l2', 'lat-rb', 'l2.read-buffer', 'bw-l2', 'shire.l2-bw-spec', 'e-l2', 'l2.decode', 'l2.latency'],
+    'l3': ['l3.capacity', 'l3.home', 'l3.latency', 'lat-l3-hop', 'lat-l3-avg', 'L79', 'L80', 'bw-l3', 'e-l3', 'l3.bank',
+           'l3.writearound', 'mem.global-atomic', 'sync.flag-memory'],
+    'scp': ['scp.size', 'lat-scp-own', 'bw-scp-own', 'e-scp-own-zeros', 'e-scp-own-rand', 'lat-scp-remote',
+            'bw-scp-remote', 'e-scp-remote-zeros', 'e-scp-remote-rand', 'scp.format0', 'scp.format1', 'scp.offset0'],
+    'uc': ['shire.composition', 'sync.flb', 'sync.fcc', 'sync-shire-barrier', 'sync-chip-barrier', 'ts-credit',
+           'hot-cost', 'hot-edge', 'hot-energy'],
+    'xbar': ['shire.crossbar', 'shire.neigh-link', 'L114', 'ts-rt-fln'],
+    'neigh': ['neigh.composition', 'L115', 'neigh.fln-edges', 'L116', 'neigh.fln-latency-spec', 'bw-tsend-fln',
+              'ts-e-pair', 'sync.tree-levels', 'sync-allreduce32', 'sync-allreduce1024', 'neigh.coop-tload', 'neigh.pmu',
+              'neigh.ptw'],
+    # minion level
+    'minion': ['minion.isa', 'chip.harts', 'minion.vec-peak', 'clock.minion-opps', 'volt.minion', 'e-awake', 'e-nop', 'e-add', 'e-fadd',
+               'minion.no-divide', 'minion.sleep-unused'],
+    'hart': ['minion.isa', 'chip.harts', 'minion.tensor-hart0', 'minion.vpu-regs', 'lat-l1', 'l2.latency'],
+    'vpu': ['minion.vpu', 'minion.vec-peak', 'minion.vpu-regs', 'minion.vpu-pipeline', 'minion.l1-port', 'e-fmadd-ps', 'e-fadd-ps',
+            'e-fexp-ps', 'minion.vector-rate'],
+    'tensor': ['minion.vec-peak', 'minion.vpu', 'mm-peak', 'mm-rate', 'minion.tensorfma-546', 'minion.tensor-shape', 'minion.tenb-tenc',
+               'minion.tensor-hart0', 'e-tfma-fp32', 'e-tfma-fp16', 'e-tfma-int8', 'e-tfma-fp32-zeros', 'mm-perw',
+               'minion.tensorload', 'minion.tensor-cache-path', 'minion.tensor-csrs'],
+    'l1d': ['minion.l1d', 'minion.l1-modes', 'minion.l1-firmware', 'minion.miss-handlers', 'lat-l1', 'bw-l1', 'e-l1',
+            'e-l1-cat', 'e-l1-fill', 'e-dram-writeback'],
+    'l1scp': ['minion.l1-modes', 'minion.tensorload', 'minion.tensor-shape', 'minion.tensorfma-546', 'e-scp-tload'],
+    'etlink': ['minion.etlink-width', 'shire.neigh-link', 'addr.load-path', 'minion.miss-handlers', 'shire.crossbar'],
+    'fln': ['neigh.fln-edges', 'ts-rt-fln', 'neigh.fln-latency-spec', 'minion.msg-cost', 'bw-tsend-link',
+            'minion.tensorsend', 'minion.one-ready-bit', 'minion.combine-free', 'sync-allreduce1024', 'sync.tree-levels'],
+    # flows
+    'flowA': ['addr.load-path', 'addr.load-model', 'L45', 'l2.decode', 'l3.home', 'dram.memshire-select', 'L43',
+              'dram.row-bits', 'L50', 'lat-l1', 'lat-l2', 'l3.latency', 'dram.leg', 'lat-dram-typical', 'lat-dram',
+              'L46', 'lat-dram-chip', 'e-l1', 'e-l2', 'e-l3', 'e-dram', 'mesh-hop-lat', 'L104', 'mesh.memshire-positions'],
+    'flowB': ['lat-l1', 'lat-rb', 'lat-l2', 'lat-scp-own', 'lat-scp-remote', 'lat-l3-hop', 'l3.latency', 'lat-l3-avg',
+              'dram.leg', 'lat-dram-typical', 'lat-dram', 'bw-l1', 'bw-l2', 'bw-scp-own', 'bw-scp-remote', 'bw-l3',
+              'bw-dram', 'e-l1', 'e-l2', 'e-scp-own-zeros', 'e-scp-own-rand', 'e-scp-remote-zeros',
+              'e-scp-remote-rand', 'e-l3', 'e-dram'],
+    'flowC': ['ts-rt-mesh', 'L70', 'L71', 'L72', 'minion.tensorsend', 'mesh-hop-ring', 'L86', 'L87', 'bw-tsend-mesh',
+              'bw-tsend-link', 'mesh.1kb-knee', 'minion.one-ready-bit', 'L104'],
+    'flowD': ['relay-energy', 'relay-13x', 'relay-bw', 'relay.speedup', 'L93', 'L94', 'relay-watts', 'e-dram-vs-scp',
+              'addr.load-path', 'minion.tensor-cache-path', 'l3.home', 'dram.memshire-select', 'L104'],
+    'flowE': ['gs-g-dram-512B', 'gs-g-dram-4K', 'gs-g-scp-16K', 'gs-g-rscp-16K', 'gs-g-dram-256K', 'gs-s-dram-512B',
+              'gs-s-dram-4K', 'gs-s-scp-16K', 'gs-s-rscp-16K', 'gs-s-dram-256K', 'gs-mh', 'gs-dram', 'gs-l1', 'gs-uc',
+              'gs-add', 'gs-card'],
+    'flowF': ['pcie.link', 'bw-pcie', 'chip.pcie-shire', 'addr.regions', 'addr.dram-region', 'dram.memshire-select',
+              'chip.master-shire-id', 'chip.cm-shire-mask', 'L32', 'ridge.levels', 'L104'],
+}
+used = set(v['f'] for v in num.values())
+for k, ids in COMP.items():
+    for i in ids:
+        if i not in ALL:
+            raise SystemExit(f'{k}: no fact {i}')
+    used.update(ids)
+# facts the honest note and the text cite by id
+NOTE = ['mesh.orientation', 'L33', 'L34', 'L32', 'L24', 'L42', 'L40', 'L104', 'mesh.xy-assumption', 'mesh.shortest-paths',
+        'chip.die-dims', 'L114', 'chip.hop-pitch', 'addr.load-model', 'L37', 'chip.io-shire', 'L47', 'L23', 'dram.pkg-pairing',
+        'ms-fit-3cards', 'ms2-forced', 'mesh.grid']
+for i in NOTE:
+    assert i in ALL, i
+used.update(NOTE)
+
+facts = {i: norm(ALL[i]) for i in sorted(used)}
+kinds = {}
+for f in facts.values():
+    kinds[f['kind']] = kinds.get(f['kind'], 0) + 1
+out = {
+    'meta': {'built_from': ['research/facts-arch.json', 'research/facts-layout.json', 'research/facts-numbers.json',
+                            'research/layout.json'],
+             'n_facts': len(facts), 'kinds': kinds, 'n_num': len(num), 'et_platform_head': '836a4ab'},
+    'facts': facts, 'num': num, 'comp': COMP, 'layout': layout,
+}
+p = os.path.join(HERE, 'facts.json')
+json.dump(out, open(p, 'w'), indent=1, ensure_ascii=False)
+print('wrote', p, len(facts), 'facts', kinds, len(num), 'numbers')

@@ -1,0 +1,288 @@
+<style>
+main{max-width:none;padding:0}
+.prose{max-width:940px;margin:0 auto;padding:28px 16px 72px}
+/* ---- the stage: one screen at 1920x1080 and 1280x720, nothing inside it scrolls but the details list ---- */
+#stage{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:8px;height:100vh;height:100dvh;min-height:560px;
+  padding:10px 16px;background:var(--page);color:var(--ink);overflow:hidden;position:relative}
+#stage:fullscreen{width:100vw;height:100vh}
+#stage::backdrop{background:var(--page)}
+.st-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;min-width:0}
+.st-title{display:flex;align-items:baseline;gap:2px 14px;flex-wrap:wrap;min-width:0;margin-right:auto}
+.st-title h1{font-size:clamp(1.15rem,.7vw + .85rem,1.75rem);margin:0;white-space:nowrap}
+.st-sub{color:var(--ink-2);font-size:clamp(.8rem,.3vw + .68rem,1.02rem)}
+.st-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.st-row .lab2{color:var(--ink-2);font-size:clamp(.78rem,.3vw + .66rem,.98rem);margin-right:2px}
+.st-btn{font:inherit;font-size:clamp(.8rem,.32vw + .66rem,1.05rem);background:var(--surface);color:var(--ink);border:1px solid var(--border);
+  border-radius:999px;padding:4px 12px;min-height:34px;cursor:pointer;white-space:nowrap;line-height:1.2}
+.st-btn:hover{border-color:var(--ink-2)}
+.st-btn[aria-pressed="true"]{background:var(--ink);color:var(--page);border-color:var(--ink)}
+/* the fill is --c1 darkened toward --ink so that --page text on it passes 4.5:1 in both themes */
+.st-btn.primary{background:color-mix(in srgb,var(--c1) 80%,var(--ink));border-color:color-mix(in srgb,var(--c1) 80%,var(--ink));color:var(--page);font-weight:650}
+.st-btn.primary.on{background:var(--ink);border-color:var(--ink);color:var(--page)}
+.st-btn:disabled{opacity:.4;cursor:default}
+.st-btn .k{display:inline-block;margin-right:6px;font-weight:750;color:color-mix(in srgb,var(--c2) 70%,var(--ink))}
+.st-btn[aria-pressed="true"] .k{color:inherit}
+.w-play{min-width:5.2em}.w-tour{min-width:6.4em}.w-fs{min-width:8.6em}
+.st-btn:focus-visible,.pn button:focus-visible,.pn a:focus-visible,.pn select:focus-visible,.crumb:focus-visible{outline:3px solid var(--c1);outline-offset:2px}
+.st-body{display:grid;grid-template-columns:minmax(0,1fr) clamp(300px,24vw,470px);gap:14px;min-height:0;min-width:0}
+.st-svg{position:relative;min-height:0;min-width:0}
+#chip{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
+/* ---- the details panel: a scrolling list above a fixed legend ---- */
+.pn{display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  font-size:clamp(.84rem,.32vw + .72rem,1.05rem);line-height:1.45}
+.pn-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;padding:12px 14px 10px;overscroll-behavior:contain}
+.pn-scroll:focus{outline:none}
+.pn-foot{flex:none;border-top:1px solid var(--border);padding:7px 12px}
+.pn-kick{color:var(--ink-2);font-size:.78em;text-transform:uppercase;letter-spacing:.06em;margin:0}
+.pn-title{font-size:1.35em;font-weight:700;line-height:1.2;margin:2px 0 6px}
+.pn-what{margin:0 0 8px}
+.pn-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:6px;margin:6px 0 8px}
+.pn-kpi{border:1px solid var(--border);border-radius:8px;padding:5px 8px;background:var(--page)}
+.pn-kpi b{display:block;font-size:1.28em;line-height:1.15;font-variant-numeric:tabular-nums}
+.pn-kpi>span{display:block;color:var(--ink-2);font-size:.78em;line-height:1.25}
+.pn-act{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:6px 0 8px}
+.pn-act label{font-size:.85em;color:var(--ink-2);display:inline-flex;align-items:center;gap:6px}
+.pn-act select{font:inherit;font-size:.92em;color:var(--ink);background:var(--page);border:1px solid var(--border);border-radius:6px;padding:2px 4px;min-height:32px}
+.pn-act .st-btn{font-size:.9em;min-height:32px}
+.pn .pn-h{font-size:.9em;font-weight:650;margin:12px 0 4px;color:var(--ink-2)}
+.pn ul.facts{list-style:none;margin:0;padding:0}
+.pn li.fact{border-top:1px solid var(--grid);padding:6px 3px;margin:0;font-size:.9em;border-radius:4px}
+.pn li.fact:focus-visible{outline:3px solid var(--c1);outline-offset:0}
+.pn li.fact:hover{background:var(--page)}
+.pn .meta{display:flex;flex-wrap:wrap;gap:3px 8px;align-items:center;margin-top:3px;font-size:.86em;color:var(--ink-2)}
+.pn .fid{color:var(--ink-2);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+.kd{display:inline-block;font-size:.8em;font-weight:650;padding:0 7px;border-radius:999px;border:1.5px solid;white-space:nowrap;line-height:1.5}
+.kd.measured{color:var(--ok);border-color:var(--ok)}
+.kd.spec{color:var(--c1);border-color:var(--c1)}
+.kd.derived{color:var(--c7);border-color:var(--c7)}
+.kd.inferred{color:color-mix(in srgb,var(--warn) 55%,var(--ink));border-color:var(--warn)}
+.cd{white-space:nowrap}
+.legs{width:100%;border-collapse:collapse;font-size:.88em;margin:4px 0}
+.legs td,.legs th{padding:4px 5px;border-bottom:1px solid var(--grid);vertical-align:top}
+.legs th{color:var(--ink-2);font-weight:600}
+.legs td.num,.legs th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.legs tr.on td{background:color-mix(in srgb,var(--c2) 18%,transparent)}
+.legs tr.todo td{color:var(--muted)}
+.lad{display:grid;grid-template-columns:minmax(0,6.6em) minmax(0,1fr);gap:6px 8px;align-items:center;font-size:.9em;margin:6px 0 4px}
+.lad .nm{color:var(--ink-2);text-align:right;line-height:1.15}
+.lad .tr{position:relative;height:1.6em;background:var(--grid);border-radius:4px;overflow:hidden}
+.lad .tr u{position:absolute;left:0;top:0;bottom:0;width:0;background:color-mix(in srgb,var(--c2) 55%,transparent);text-decoration:none;border-radius:4px}
+.lad .tr.done u{background:color-mix(in srgb,var(--c2) 38%,transparent)}
+.lad .tr.pale u{background:color-mix(in srgb,var(--c3) 45%,transparent)}
+.lad .tr s{position:absolute;left:6px;right:6px;top:0;line-height:1.6em;text-decoration:none;font-weight:650;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ---- caption bar ---- */
+.st-cap{display:grid;grid-template-columns:minmax(8.5em,13em) minmax(0,1fr) auto;align-items:center;gap:6px 18px;border-top:1px solid var(--border);padding-top:8px;min-width:0}
+.cap-k{font-size:clamp(.78rem,.3vw + .66rem,1rem);color:var(--ink-2);min-width:0}
+#cap-k{color:var(--ink);font-weight:650;margin-top:2px}
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:0 2px}
+.crumb{font:inherit;background:none;border:0;color:var(--c1);cursor:pointer;padding:1px 3px;border-radius:4px;text-decoration:underline;text-underline-offset:2px}
+.crumb[aria-current="true"]{color:var(--ink-2);text-decoration:none;cursor:default}
+.crumbs .sep{color:var(--muted)}
+.dots{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;min-height:10px}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--grid);display:block}
+.dots i.past{background:var(--ink-2)}
+.dots i.on{background:var(--c2);box-shadow:0 0 0 2px color-mix(in srgb,var(--c2) 35%,transparent)}
+.cap-txt{min-width:0}
+#cap{margin:0;font-size:clamp(17px,.95vw + 11px,32px);line-height:1.25;min-height:2.5em;display:flex;align-items:center;font-weight:560;overflow:hidden}
+#cap .cap-in{display:block;text-wrap:balance}
+/* the sub-caption wraps to a second line rather than losing its end (two lines are kept free, so the die never jumps) */
+#cap-sub{margin:2px 0 0;font-size:clamp(13px,.5vw + 8.5px,19px);line-height:1.3;min-height:2.6em;color:var(--ink-2);overflow:hidden;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
+.cap-nav{display:flex;gap:6px}
+.cap-nav .st-btn{min-width:2.8em;font-size:1.15em}
+.num[data-f]{text-decoration:underline dotted var(--muted);text-underline-offset:3px;cursor:help}
+/* ---- legend ---- */
+.lg{display:flex;flex-wrap:wrap;gap:2px 12px;font-size:.8em;color:var(--ink-2)}
+.lg span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.lg i{display:inline-block;width:12px;height:12px;border-radius:3px;border:2px solid;flex:none}
+.lg i.line{height:0;border-width:3px 0 0;width:16px;border-radius:0}
+.lg i.dash{border-style:dashed;background:none}
+/* ---- source tooltip ---- */
+#srctip{position:fixed;z-index:50;pointer-events:none;display:none;max-width:min(460px,calc(100vw - 16px));background:var(--surface);color:var(--ink);
+  border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.84rem;line-height:1.4;box-shadow:0 6px 22px rgba(0,0,0,.18)}
+#srctip .s{color:var(--ink-2);display:block;margin-top:4px;overflow-wrap:anywhere}
+/* ---- the SVG ---- */
+#chip text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+#chip .comp{cursor:pointer}
+#chip .comp:focus{outline:none}
+#chip .ring{fill:none;stroke:var(--ink);stroke-width:5;opacity:0;pointer-events:none}
+#chip .comp:focus-visible .ring{opacity:1;stroke-dasharray:none}
+#chip .comp.sel .ring{opacity:.9;stroke-dasharray:none;stroke:var(--c2)}
+#chip .comp:hover .shape{stroke-width:4.5}
+#chip.dimming .dimmable:not(.hi){opacity:.2}
+#chip.fdim .dimmable:not(.hi){opacity:.45}
+/* dimmed parts stay visible on a dark page (and on a projector) */
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #chip.dimming .dimmable:not(.hi){opacity:.38}:root:not([data-theme="light"]) #chip.fdim .dimmable:not(.hi){opacity:.55}}
+:root[data-theme="dark"] #chip.dimming .dimmable:not(.hi){opacity:.38}
+:root[data-theme="dark"] #chip.fdim .dimmable:not(.hi){opacity:.55}
+#chip .hi .shape{stroke-width:5}
+#chip .lay.busy{pointer-events:none}
+.t-id{font-size:36px;font-weight:750;fill:var(--ink)}
+.t-lab{font-size:20px;fill:var(--ink-2)}
+.t-labb{font-size:20px;font-weight:650;fill:var(--ink)}
+.t-big{font-size:30px;font-weight:750;fill:var(--ink)}
+.t-mid{font-size:24px;font-weight:650;fill:var(--ink)}
+.t-sm{font-size:17px;fill:var(--ink-2)}
+.halo{paint-order:stroke;stroke:var(--page);stroke-width:6px;stroke-linejoin:round}
+.halo-s{paint-order:stroke;stroke:var(--surface);stroke-width:6px;stroke-linejoin:round}
+.co-box{fill:var(--surface);stroke-width:3}
+.co-t{font-size:22px;fill:var(--ink)}
+.co-t.b{font-weight:750}
+/* ---- presenting (the tour): panel text at 18 px or more at 1920 wide, no reference lists, no dotted numbers ---- */
+#stage.present .pn{font-size:clamp(.95rem,.55vw + .5rem,1.3rem)}
+#stage.present .pn-kpi>span,#stage.present .pn-kick{font-size:.88em}
+#stage.present .legs,#stage.present .lad{font-size:1em}
+#stage.present .pn-fh,#stage.present .pn ul.facts,#stage.present .pn-foot{display:none}
+#stage.present #cap .num[data-f],#stage.present #cap-sub .num[data-f]{text-decoration:none;cursor:default}
+/* ---- the panel hidden (P): the die takes the whole width ---- */
+#stage.nopanel .st-body{grid-template-columns:minmax(0,1fr)}
+#stage.nopanel .pn{display:none}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+#facttab{table-layout:fixed}
+#facttab td{overflow-wrap:anywhere}
+#facttab th:nth-child(1){width:11%}#facttab th:nth-child(2){width:44%}#facttab th:nth-child(3){width:10%}#facttab th:nth-child(4){width:10%}#facttab th:nth-child(5){width:25%}
+/* ---- narrow windows and phones: the stage stacks and the page scrolls ---- */
+@media (max-width:899px){
+  #stage{display:flex;flex-direction:column;height:auto;min-height:0;overflow:visible;gap:8px}
+  .st-body{display:contents}
+  .st-head{order:0}.st-svg{order:1}.st-cap{order:2}.pn{order:3}
+  /* the drawing keeps a readable size and scrolls sideways inside its own box */
+  .st-svg{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #chip{height:auto;aspect-ratio:1300/792;min-width:720px}
+  /* full screen on a narrow screen: the drawing fits the space left, the panel scrolls below it */
+  #stage:fullscreen{height:100vh;overflow:hidden}
+  #stage:fullscreen .st-svg{flex:1 1 auto;min-height:0;overflow:hidden}
+  #stage:fullscreen #chip{height:100%;min-width:0;aspect-ratio:auto}
+  #stage:fullscreen .pn{flex:0 1 30vh;min-height:0}
+  #stage:fullscreen .pn-scroll{max-height:none}
+  .pn-scroll{max-height:70vh}
+  .st-cap{grid-template-columns:minmax(0,1fr) auto}
+  .cap-txt{grid-column:1/-1;grid-row:1}
+  #cap{min-height:0}
+  #cap-sub{white-space:normal}
+}
+/* laptops and projectors, 900-1450 wide: tighter header buttons so that the header stays on one row */
+@media (min-width:900px) and (max-width:1450px){
+  .st-head{gap:4px 10px}
+  .st-row{gap:4px}
+  .st-btn{padding:3px 8px}
+  .st-btn .k{margin-right:4px}
+  .w-play{min-width:4.6em}.w-tour{min-width:5.6em}.w-fs{min-width:7.4em}
+}
+@media (max-height:780px) and (min-width:900px){
+  #stage{gap:5px;padding-top:6px;padding-bottom:6px}
+  .st-btn{min-height:30px;padding:2px 10px}
+  .st-sub,.st-row .lab2{display:none}
+}
+</style>
+
+<section id="stage" aria-label="Interactive schematic of the ET-SoC-1">
+<div class="st-head">
+  <div class="st-title"><h1>The ET-SoC-1, interactively</h1></div>
+  <div class="st-row" role="group" aria-label="Data flows">
+    <span class="lab2">Flows</span>
+    <button type="button" class="st-btn" data-flow="A" aria-pressed="false" title="A load that misses to DRAM (key 1)"><span class="k">1</span>Load&#8202;&#8594;&#8202;DRAM</button>
+    <button type="button" class="st-btn" data-flow="B" aria-pressed="false" title="The latency ladder (key 2)"><span class="k">2</span>Ladder</button>
+    <button type="button" class="st-btn" data-flow="C" aria-pressed="false" title="TensorSend between shires (key 3)"><span class="k">3</span>TensorSend</button>
+    <button type="button" class="st-btn" data-flow="D" aria-pressed="false" title="The relay against DRAM (key 4)"><span class="k">4</span>Relay</button>
+    <button type="button" class="st-btn" data-flow="E" aria-pressed="false" title="Gathers and scatters, E48 (key 5)"><span class="k">5</span>Gathers</button>
+    <button type="button" class="st-btn" data-flow="F" aria-pressed="false" title="The host pushes work over PCIe (key 6)"><span class="k">6</span>Host&#8202;/&#8202;PCIe</button>
+  </div>
+  <div class="st-row">
+    <button type="button" class="st-btn w-play" id="btn-play" title="Space">Pause</button>
+    <button type="button" class="st-btn primary w-tour" id="btn-tour" title="Right and Left arrows step; Q ends">Tour</button>
+    <button type="button" class="st-btn w-fs" id="btn-fs" title="F">Full screen</button>
+  </div>
+</div>
+<div class="st-body">
+  <div class="st-svg" id="svgwrap"><svg id="chip" role="group" aria-label="Schematic of the ET-SoC-1 die. Every part is a button: Tab to it and press Enter for its details; Enter again zooms into a shire or a minion." xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <aside class="pn" id="panel" aria-label="Details">
+    <p id="pn-live" class="vh" aria-live="polite"></p>
+    <div class="pn-scroll" id="pn-body" tabindex="-1"><p class="pn-kick">Details</p><p class="pn-title">The ET-SoC-1</p><p class="pn-what">Click any part of the chip for its numbers and sources.</p></div>
+    <div class="pn-foot lg" aria-label="Legend">
+      <span><i style="border-color:var(--c1);background:color-mix(in srgb,var(--c1) 16%,transparent)"></i>compute shire</span>
+      <span><i style="border-color:var(--c7)"></i>master or spare</span>
+      <span><i style="border-color:var(--c4)"></i>PCIe</span>
+      <span><i style="border-color:var(--c5)"></i>I/O (Maxions)</span>
+      <span><i style="border-color:var(--c3)"></i>memory shire, LPDDR4X</span>
+      <span><i class="line" style="border-color:var(--axis)"></i>mesh link</span>
+      <span><i class="dash" style="border-color:var(--ink-2)"></i>dashed: identity or place inferred</span>
+      <span>every die position assumes the inferred orientation</span>
+    </div>
+  </aside>
+</div>
+<div class="st-cap">
+  <div class="cap-k">
+    <nav class="crumbs" id="crumbs" aria-label="Zoom level"><span class="crumb" aria-current="true">ET-SoC-1</span></nav>
+    <div id="cap-k" aria-live="polite">Explore</div>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+  </div>
+  <div class="cap-txt">
+    <p id="cap" aria-live="polite">Click any part of the chip, pick a data flow, or press Tour to step through it in 12 steps.</p>
+    <p id="cap-sub">Space pauses · F full screen · P hides the panel · Q ends the tour · Backspace zooms out</p>
+  </div>
+  <div class="cap-nav">
+    <button type="button" class="st-btn" id="btn-panel" aria-pressed="true" title="P: hide or show the details panel">Panel</button>
+    <button type="button" class="st-btn" id="btn-prev" aria-label="Previous step (Left arrow)" title="Left arrow">&#8592;</button>
+    <button type="button" class="st-btn" id="btn-next" aria-label="Next step (Right arrow)" title="Right arrow">&#8594;</button>
+  </div>
+</div>
+<div id="srctip" role="tooltip"></div>
+</section>
+<div class="prose">
+<p class="byline">27 September 2026 · every number is a fact with a source: a repository file and field, a manual page, or a source line · the chip's facts: <a href="#facts">the table below</a>, built in the repository's docs/reports/data/2026-09-27-chip-diagram · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+
+<p class="lede">A schematic of Esperanto's ET-SoC-1 that you can click through: the die with its mesh of shires, a shire with its
+cache and minions, a minion with its vector unit, whose lanes also run the tensor instructions. Six animated flows show where data goes and what it costs,
+with the latency, bandwidth and energy measured on the lab's cards. A tour steps through it all in twelve steps.</p>
+
+<h2 id="use">How to use it</h2>
+<ul>
+<li><b>Click</b> any part (or Tab to it and press Enter) for what it is, its numbers with their units and card coverage,
+and a link to the report that measured them. Point at a number to see its source; from the keyboard, Tab to a fact in
+the details list. <b>Click again</b> (or Enter again) on a shire or a minion to zoom in; the path under the diagram,
+or Backspace, zooms out.</li>
+<li><b>Flows</b> 1 to 6 animate a load that misses to DRAM, the latency ladder, TensorSend across the mesh, the relay
+against DRAM, gathers and scatters, and the host pushing work over PCIe. Space pauses and resumes; the details panel
+shows each leg's numbers.</li>
+<li><b>Tour</b> steps through twelve slides: Right and Left arrows, PageDown and PageUp (a clicker) or the arrow
+buttons move, Space pauses a flow, F goes full screen, Q or End tour ends the tour (in full screen, Esc
+usually leaves full screen instead). The tour enlarges the panel's text and hides its fact lists.</li>
+<li><b>For a projector</b>: P (or the Panel button) hides the details panel so that the die takes the whole width, and
+D switches between light and dark. The same from the address: <code>?theme=light</code>, <code>?panel=off</code>. The
+stage fits one screen from 1280 × 720 up; on a narrow screen the drawing scrolls sideways.</li>
+</ul>
+
+<h2 id="summary">What the diagram shows</h2>
+<div id="summary-text"><p>The text version of the diagram is written when the page's script runs.</p></div>
+
+<h2 id="honest">What is measured, what is specified, what is inferred</h2>
+<div id="honest-text"><p>The count of facts by kind is written when the page's script runs.</p></div>
+
+<h2 id="facts">Every fact on this page</h2>
+<p>The facts behind the diagram, the panels and the captions, with their kind, the cards they were measured on and their
+source. Sort by any column or filter the rows.</p>
+<div class="table-wrap wide"><table id="facttab" class="stack"><thead><tr><th>Fact</th><th>Statement</th><th>Kind</th><th>Cards</th><th>Source</th></tr></thead><tbody></tbody></table></div>
+
+<h2 id="related">Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the measured
+map of the 32 compute shires and what messages cost inside a neighbourhood, a shire and across the mesh.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy">Anatomy of a memory access</a> — one load traced
+from L1 to DRAM; the memory-shire fit the diagram places the memory shires by.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — latency, bandwidth and
+energy at every level.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> — the die's dimensions, the
+tile pitch and what a bit costs per millimetre of mesh.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a> — the relay against a
+round trip through DRAM.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The energy manual</a> — what each instruction, level
+and message costs.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a> — the compute ceilings and the
+arithmetic intensity each level needs.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a> — the hub:
+every report, and what the instruments cannot see.</li>
+</ul>
+<p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
+</div>
+</main>
