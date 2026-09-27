@@ -53,20 +53,21 @@ before `</body>`. Private pages are listed but not mirrored.
 |---|---|---|---|---|
 | [What is broken on aifoundry1](https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting) (25 Sep) | `a2d70512-f892-474e-aca6-0568176cb092` | public | `docs/reports/2026-09-25-aifoundry1-troubleshooting.html` | file |
 | [aifoundry1 is fixed](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix) (25 Sep, the fix log) | `31e35ba7-36f4-486e-b6f3-687f7c7ad3a0` | public | `docs/reports/2026-09-25-aifoundry1-fix.html` | file |
+| [ET-SoC-1 review: the TODO list](https://spacesheep.dev/@yaroslavvb/et-soc1-review-todo) (26 Sep) | `1db405d2-34c6-45f0-b939-03b74d3d68b4` | public | `docs/reports/2026-09-26-review-todo.html` | file (rendered from docs/reports/TODO.md by scripts/build-todo-page.py; redeploy after every change to TODO.md) |
 
 ### Public, not mirrored
 
 | Page | Space | Visibility | Repo file | Why |
 |---|---|---|---|---|
 | [Lab machine accounts](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-accounts) (18 Sep) | `5bcb11cb-7e1f-4cf2-bde3-c375c904b3a9` | public | not mirrored | A standalone copy of an older [`docs/lab-access.md`](../lab-access.md) with `scripts/add-lab-user.sh` built in, written by hand on 18 September. The machines' login banners link it. It is older than `lab-access.md`, which is the current text. |
+| [What trips people up on the AI Foundry lab](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman) (25 Sep, the lab problems report for the lab lead) | `6c75b258-53fe-45fe-b2cf-11f8572ac2c3` | public | not mirrored | Written for the lab lead; public since the owner confirmed it on 26 September. Its source stays out of this repository (`38f6b02`; `docs/reports/2026-09-25-lab-problems.html` is gitignored). |
+| [AI Foundry Discord map](https://spacesheep.dev/@yaroslavvb/aifoundry-discord-map) | `c6433479-e2a7-4c9d-bcef-b45bbd1709fd` | public | not mirrored | Not part of this line of work; listed because its slug starts like this set's. Public (the owner, 26 September). |
 
 ### Private: listed, not mirrored
 
 | Page | Space | Visibility | Repo file | Why |
 |---|---|---|---|---|
 | Notes of a conversation with David Kanter (R9, 20 Sep) | `f3533740-5ad9-45e1-927c-098dbbe5c210` | private | not mirrored | A personal memo quoting a private conversation; private and unlinked since 24 September (the owner's decision). The DVFS page and R9 describe it in words. |
-| [ET-SoC-1 review: the TODO list](https://spacesheep.dev/@yaroslavvb/et-soc1-review-todo) (26 Sep) | `1db405d2-34c6-45f0-b939-03b74d3d68b4` | private | not mirrored | `docs/reports/TODO.md` rendered by `scripts/build-todo-page.py` to `docs/reports/2026-09-26-review-todo.html`, deployed 26 Sep and checked equal to that file (`spacesheep read`). Private because a new space starts private; making it public is the owner's call, and it then moves to the mirrored tables. Redeploy after every change to TODO.md. |
-| The lab problems report for the lab lead (25 Sep) | — | private | not mirrored | Written for the lab lead about the lab machines; it stays out of this public repository (`38f6b02`), and its source is gitignored (`docs/reports/2026-09-25-lab-problems.html`). Its visibility is the owner's decision. |
 
 <!-- mirror:end -->
 
@@ -146,8 +147,8 @@ could not be reached and nothing else was wrong.
 
 **Last check: 2026-09-26, 17:25 PDT**, after the chart pass, through `spacesheep read` with a key: 21 of 21 mirrored
 public pages equal to their files; exit 1 because the review's TODO space (`et-soc1-review-todo`), deployed private,
-is now public, and two other spaces are public but not listed here as public (`aifoundry-lab-problems-for-roman`,
-`aifoundry-discord-map`). Their visibility is the owner's call; this file will follow it.
+was public although deployed private, and two other spaces were public but not listed here as public. The
+owner confirmed all three as public the same day, and this file now lists them so.
 
 **Previous check: 2026-09-26, about 15:30 PDT**, against the files at `299fac8` (the 26 September visualization pass is
 live), anonymously over HTTPS only: that session had no spacesheep key, so `spacesheep list` was not read. 21 of 21
