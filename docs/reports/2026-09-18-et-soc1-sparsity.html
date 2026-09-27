@@ -103,6 +103,7 @@ svg text.halo { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; 
 .lx-guide { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 2 3; }
 .lx-sel { fill: none; stroke: var(--ink); stroke-width: 2; }
 .cell-on { fill: var(--et); }
+.cell-on2 { fill: var(--et2); }
 .cell-off { fill: var(--grid); }
 .cell-skip { fill: color-mix(in srgb, var(--ink-2) 75%, var(--surface)); }  /* same mix as its legend swatch; about 3.2:1 on --grid in light, 4.8:1 in dark */
 .qfloor { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 6 4; }
@@ -759,6 +760,14 @@ window.CK = (function () {
 <div class="chart" id="c-tl"></div>
 
 <p>With all 1,024 minions loading at once, on-chip memory behaves the same way. DRAM does not. At 16 lines per load the chip streams 72 GB/s from DRAM, close to the 76 GB/s measured in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy report</a>. Asking for fewer lines hardly shortens a load, so the useful bandwidth falls with the mask instead of the time. Each minion streams 1 KB blocks, and every mask tested keeps the same low rows of every block, so all the kept lines are homed in a few shires' L3 slices (see <a href="#caveats">Caveats</a>). Masks that vary from block to block were not tested. What matters for kernels is that weights to be skipped should sit in SRAM.</p>
+<div class="chart-title">The page's hypothesis: fewer home shires answering, not less DRAM bandwidth from each</div>
+<div class="ck-controls"><div id="hs-mask"></div></div>
+<div class="panels two">
+<div><div class="chart-sub">(a) 32 home shires (L3 slices, address bits 10:6)</div><div id="hs-home"></div></div>
+<div><div class="chart-sub">(b) 8 memory shires (DRAM controllers)</div><div id="hs-mem"></div></div>
+</div>
+<p class="ck-readout" id="hs-read"></p>
+<p class="small">Shire positions here are illustrative, not the physical layout; only which count is lit is measured, from the address mapping in <a href="#caveats">Caveats</a>. GB/s per shire divides the chip's measured DRAM bandwidth at that mask (from the table below) by the shires it should reach. If the hypothesis holds, (a)'s per-shire rate stays flat across masks while (b)'s does not, since the 8-line mask still reaches all 8 memory shires.</p>
 <div class="table-wrap"><table>
 <thead><tr><th>All 1,024 minions</th><th class="num">16 lines</th><th class="num">8 lines</th><th class="num">4 lines</th><th class="num">1 line</th></tr></thead>
 <tbody id="t-tl"></tbody></table></div>
@@ -1180,6 +1189,48 @@ python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifo
     });
   }
 
+  /* Masked-load hypothesis: a mask keeps the same low lines of every 1 KB block, so it should reach fewer home
+     shires (L3 slices) rather than less bandwidth from each. Shire counts follow the Caveats prose; positions
+     within each grid are illustrative. */
+  var hsHomeFrame = null, hsMemFrame = null;
+  function renderHomeShires() {
+    var T = D.tload || {}, byLines = {};
+    (T["dram-all"] || []).forEach(function (r) { byLines[r[0]] = r; });
+    var MASKS = [16, 8, 4, 1].filter(function (m) { return byLines[m]; });
+    if (!MASKS.length) return;
+    var HOME_LIT = { 16: 32, 8: 16, 4: 8, 1: 2 }, MEM_LIT = { 16: 8, 8: 8, 4: 4, 1: 1 };
+    var hs = { lines: MASKS[0] };
+    function shireGrid(hostId, total, cols, litOf, cls, what) {
+      var rowsN = Math.ceil(total / cols);
+      return CK.frame(hostId, { height: function (W) { return Math.round(Math.min(W, 420) / cols * rowsN) + 6; }, minW: 160, maxW: 420,
+        label: what + ": which of the " + total + " light up at each mask",
+        draw: function (f) {
+          var lit = litOf[hs.lines], r = byLines[hs.lines], S = Math.floor(f.W / cols), x0 = Math.floor((f.W - cols * S) / 2);
+          var g = CK.el("g", {}, f.svg);
+          CK.tip(f, g, "<b>" + what + "</b>, " + hs.lines + (hs.lines === 1 ? " line" : " lines") + " kept<br>" + lit + " of " + total + " active" +
+            (r ? "<br>" + num(r[2] / lit, 2) + " GB/s per active shire (" + num(r[2], 1) + " GB/s total)" : ""));
+          for (var i = 0; i < total; i++) {
+            var c = i % cols, rr = Math.floor(i / cols);
+            CK.el("rect", { x: x0 + c * S + 1, y: rr * S + 1, width: S - 2, height: S - 2, rx: 2, "class": i < lit ? cls : "cell-off" }, g);
+          }
+        } });
+    }
+    if (hsHomeFrame) hsHomeFrame.redraw(); else hsHomeFrame = shireGrid("hs-home", 32, 8, HOME_LIT, "cell-on", "Home shires");
+    if (hsMemFrame) hsMemFrame.redraw(); else hsMemFrame = shireGrid("hs-mem", 8, 8, MEM_LIT, "cell-on2", "Memory shires");
+    function updateReadout() {
+      var r = byLines[hs.lines], hl = HOME_LIT[hs.lines], ml = MEM_LIT[hs.lines];
+      CK.readout("hs-read").set(r ? "At " + hs.lines + (hs.lines === 1 ? " line" : " lines") + " kept: " + num(r[2], 1) + " GB/s total, " +
+        num(r[2] / hl, 2) + " GB/s per home shire (" + hl + " of 32 lit) against " + num(r[2] / ml, 2) + " GB/s per memory shire (" + ml + " of 8 lit)." : "");
+    }
+    CK.seg("hs-mask", { label: "Lines kept by the mask", value: hs.lines,
+      options: MASKS.map(function (m) { return [m, m === 16 ? "16 (dense)" : m === 1 ? "1 line" : String(m) + " lines"]; }),
+      onChange: function (v) {
+        if (v === hs.lines) return;
+        hs.lines = v; hsHomeFrame.redraw(); hsMemFrame.redraw(); updateReadout();
+      } });
+    updateReadout();
+  }
+
   /* §3 layer explorer (sp-viz-layer): a zero fraction and a kernel drive the slice grid, the curve and the readout. */
   var SPARS = [0, 0.5, 0.75, 0.9, 0.95, 0.99, 1];
   var SLAB = SPARS.map(function (v) { return num(v * 100, 0) + "%"; });
@@ -1368,7 +1419,7 @@ python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifo
   CK.legend("q-legend", [{ key: "st", label: "static, 8 lanes", mark: "box", color: "var(--c2)" }, { key: "rf", label: "refill", mark: "box", color: "var(--c1)" },
     { key: "sc", label: "scalar", mark: "box", color: "var(--c3)" }, { key: "fl", label: "queue floor", mark: "dash", color: "var(--ink)" }]);
 
-  renderFma(); renderPow(); renderTl(); renderLayer(); renderGemvTable(); renderLane(); renderThr(); renderQueue();
+  renderFma(); renderPow(); renderTl(); renderHomeShires(); renderLayer(); renderGemvTable(); renderLane(); renderThr(); renderQueue();
   var hooks = document.querySelector("#zeros ~ .table-wrap table.wide");
   if (hooks) CK.stackTable(hooks);
   CK.stackTable(document.getElementById("t-tl").parentNode);   // the all-minion TensorLoad table, as cards on a phone

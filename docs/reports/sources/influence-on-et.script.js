@@ -251,7 +251,7 @@
       + (full ? '' : 'At ' + perS(lam) + ' the ET card’s idle is ' + (idleShare > 0.9999 ? 'over 99.99%' : pct(idleShare)) + ' of its energy per query. ')
       + (S.cpuOK ? 'The host CPU would spend ' + fmtJr(c[0], c[1]) + ' per query. ' : 'Too big for one host’s memory. ')
       + 'Scoring is ' + share(h[0] / qs[1], h[1] / qs[0]) + ' the H100 energy of the query’s own gradient and iHVP at 8B (' + fmtJr(qs[0], qs[1]) + ').');
-    capFrame.redraw(); rateFrame.redraw();
+    capFrame.redraw(); rateFrame.redraw(); s1qFrame.redraw();
   }
   function fmtW(w) { const u = unitFor(w, [[1e12, 'TW'], [1e9, 'GW'], [1e6, 'MW'], [1e3, 'kW'], [1, 'W']]); return sig(w / u[0]) + ' ' + u[1]; }
   function fmtWr(a, b) {
@@ -365,6 +365,64 @@
       if (S.cpuOK && lam <= S.capC) pt(Math.sqrt(S.c[0] * S.c[1]), 'var(--c3)', '<b>Host CPU</b>, pass only: ' + fmtJr(S.c[0], S.c[1]) + ' per query<br>pass ' + fmtT(S.cl.t) + ' (estimate)');
       CK.inside(f, labs);
       CK.keynav(f, nodes);
+    },
+  });
+
+  /* S1's lead against queries per pass (the "Few queries per pass" bullet): mJ per query, ET against H100, as Q
+     grows, for the int8 and fp16 shards from D.s1.parity_*. Linked to the explorer's Q slider: a point sets it. */
+  const s1 = D.s1;
+  let s1qPrec = 'int8';
+  CK.legend('s1q-leg', [
+    {key: 'et', label: 'ET-SoC-1 card, idle charged', color: 'var(--c1)', mark: 'box'},
+    {key: 'h', label: 'H100 in the server, pass only', color: 'var(--c2)', mark: 'box'},
+  ]);
+  CK.seg('s1q-prec', {label: 'Shard', options: [['int8', 'int8, 65.5 MB'], ['fp16', 'fp16, 32 MB']], value: s1qPrec,
+    onChange: v => { s1qPrec = v; s1qFrame.redraw(); }});
+  const s1qFrame = CK.frame('s1q', {
+    label: 'Energy per query on a log scale against queries per pass, for the ET-SoC-1 and an H100, int8 and fp16 shards',
+    height: W => (W < 600 ? 280 : 300),
+    draw(f) {
+      const P = s1[s1qPrec === 'int8' ? 'parity_int8' : 'parity_fp16'], rows = P.table, qCross = P.Q;
+      const L = 60, R = 14, T = 20, B = 40;
+      const qs = rows.map(r => r.Q);
+      const x = CK.log(qs[0], qs[qs.length - 1], L, f.W - R);
+      const vals = rows.reduce((a, r) => a.concat(r.et_mJ_per_q, r.h100_mJ_per_q), []);
+      const lo = Math.pow(10, Math.floor(Math.log10(Math.min(...vals) * 0.85))), hi = Math.pow(10, Math.ceil(Math.log10(Math.max(...vals) * 1.15)));
+      const y = CK.log(lo, hi, f.H - B, T);
+      const xt = qs.filter((q, i) => !f.narrow || i % 2 === 0 || q === qs[qs.length - 1]);
+      CK.axes(f, {x, y, L, R, T, B, xt, yt: y.ticks(5), xfmt: v => num(v, 0), yfmt: v => fmtJ(v * 1e-3), xl: 'queries per pass, Q', yl: 'energy per query'});
+      if (qCross && qCross[0] != null && qCross[1] != null) {
+        const bx0 = Math.max(qs[0], qCross[0]), bx1 = Math.min(qs[qs.length - 1], qCross[1]);
+        if (bx1 >= bx0) {
+          const r = CK.el('rect', {x: x(bx0), y: T, width: Math.max(2, x(bx1) - x(bx0)), height: f.H - T - B, style: 'fill:var(--ref);fill-opacity:0.16'}, f.svg);
+          CK.tip(f, r, 'The lead is gone by Q ≈ ' + intf(qCross[0]) + '–' + intf(qCross[1]) + ' in this page’s model');
+        }
+      }
+      const band = (key, col, get) => {
+        const top = rows.map(r => [r.Q, get(r)[1]]), bot = rows.map(r => [r.Q, get(r)[0]]);
+        const d = top.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ')
+          + ' ' + bot.slice().reverse().map(p => 'L' + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ') + ' Z';
+        CK.el('path', {d, 'data-series': key, style: 'fill:' + col + ';fill-opacity:0.2;stroke:none'}, f.svg);
+      };
+      band('et', 'var(--c1)', r => r.et_mJ_per_q);
+      band('h', 'var(--c2)', r => r.h100_mJ_per_q);
+      const nodes = [];
+      const setQ = r => { const was = quiet; quiet = true; cQ.set(r.Q); quiet = was; recompute(); };
+      const dot = (r, key, col, get) => {
+        const v = get(r), cur = st.Q === r.Q, cx = x(r.Q), cy = y(Math.sqrt(v[0] * v[1]));
+        const d = CK.el('circle', {cx, cy, r: cur ? 7 : 5}, f.svg);
+        d.style.fill = col; d.style.stroke = cur ? 'var(--ink)' : 'var(--surface)'; d.style.strokeWidth = cur ? '2.5' : '1.5';
+        CK.tip(f, d, '<b>' + (key === 'et' ? 'ET-SoC-1' : 'H100') + '</b>, Q = ' + r.Q + ': ' + fmtJr(v[0] * 1e-3, v[1] * 1e-3) + ' per query' + (cur ? ' (the explorer’s Q)' : ''));
+        d.style.cursor = 'pointer';
+        d.addEventListener('click', () => setQ(r));
+        nodes.push(d);
+      };
+      rows.forEach(r => dot(r, 'et', 'var(--c1)', rr => rr.et_mJ_per_q));
+      rows.forEach(r => dot(r, 'h', 'var(--c2)', rr => rr.h100_mJ_per_q));
+      CK.keynav(f, nodes, {onEnter: (n, k) => setQ(rows[k % rows.length])});
+      CK.readout('s1q-read').set(qCross && qCross[0] != null
+        ? 'For the ' + (s1qPrec === 'int8' ? 'int8' : 'fp16') + ' shard, the ET’s lead over the H100 is gone by Q ≈ ' + intf(qCross[0]) + '–' + intf(qCross[1]) + ' queries per pass.'
+        : '');
     },
   });
   recompute();
