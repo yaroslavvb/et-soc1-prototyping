@@ -35,6 +35,7 @@ to it, and writes it out; the next stage reads what the last one wrote. Thirty-t
 eight stages, 1 MB per shire per stage, half a gigabyte of traffic. The same code, the same barriers and the
 same arithmetic run three ways, and the only thing that differs is where a stage's output goes:</p>
 
+<details class="more"><summary>The table, and how we know the data really crossed a shire</summary>
 <div class="table-wrap"><table id="media"></table></div>
 
 <p><b>How we know the data really crossed a shire.</b> Each shire starts its slab filled with its own number.
@@ -42,6 +43,7 @@ After eight stages of adding one, a shire that kept its own data holds 8. In the
 <b>32</b> — which is 24 plus 8, and 24 is the shire eight places back round the ring. Every element is
 checked against that expectation, on every run in this report; a run that did not really move its data would
 fail.</p>
+</details>
 
 <div class="chart-title">Within about a watt, work up to thirty times apart: power, rate and energy per byte for the three places, side by side</div>
 <div class="chart" id="samew"></div>
@@ -55,11 +57,13 @@ about a watt of each other</em>, and one of them gets thirty times as much done 
 both cards the own scratchpad draws about 0.5–0.8 W more than DRAM while the kernel runs, and the next shire and
 DRAM could not be told apart:</p>
 
+<details class="more"><summary>The table, method note and cross-card re-measurement</summary>
 <div class="table-wrap"><table id="power"></table></div>
 
 <p class="small" id="powernote"></p>
 
 <p class="small" id="remeasured"></p>
+</details>
 
 <h2 id="where-the-advantage-comes-from-and-where-there-isn-t-one">3. Where the advantage comes from, and where there isn't one</h2>
 <p>The win is against DRAM, not against the memory hierarchy. Shrink the working set and the L3 quietly does
@@ -70,13 +74,17 @@ most of the same job for free:</p>
 <div class="chart" id="size"></div>
 <p class="small" id="sizecap"></p>
 
+<details class="more"><summary>The numbers behind the L3 crossover</summary>
 <p id="sizetext"></p>
+</details>
 
+<details class="more"><summary>Two more sweeps: stages, and shires taking part</summary>
 <p id="stshlead"></p>
 <div class="chart-title">The same relay with one setting changed at a time: pipeline stages, and shires taking part</div>
 <div id="stshlegend"></div>
 <div class="chart" id="stsh"></div>
 <p class="small" id="stshcap"></p>
+</details>
 
 <h2 id="how-much-arithmetic-it-takes-to-stop-mattering">4. How much arithmetic it takes to stop mattering</h2>
 <p>All of this is a statement about moving data, so it fades as the arithmetic grows. Repeating the add
@@ -98,9 +106,11 @@ most of the same job for free:</p>
 <div class="chart" id="ring"></div>
 <p class="small" id="ringcap"></p>
 
+<details class="more"><summary>The table, and what the mesh distance costs</summary>
 <div class="table-wrap"><table id="dist"></table></div>
 
 <p id="distafter"></p>
+</details>
 
 <h2 id="what-this-is-good-for">6. What this is good for</h2>
 <ul>
@@ -130,6 +140,7 @@ has one reader, and none of the runs reported here hung.</li>
 </ul>
 
 <h2 id="method-and-what-is-not-established">7. Method, and what is not established</h2>
+<details class="more"><summary>Method, and what is not established, in full</summary>
 <ul>
 <li>The probe is <code>workloads/onchip</code>, new for this. A stage's output is written with a tensor store,
 which bypasses the L1 and L2 caches, so the shire that reads it next cannot read a stale line. Inputs are read
@@ -168,13 +179,18 @@ credit from each shire to the one that reads its output would do, and would help
 and carries this relay's reads and writes at 48 GB/s, not against a memory system in general.</li>
 </ul></li>
 </ul>
+</details>
 
+<details class="more"><summary>Reproduce this</summary>
 <pre><code>workloads/onchip/run_onchip.sh DATA                 # 88 configurations on aifoundry2, milliseconds of card time each
 workloads/onchip/run_onchip.sh DATA3                # the same sweep on aifoundry3
 tools/ettelem/run_onchip_power.sh DATA 12           # board power, one burst per medium
 python3 workloads/onchip/analyze_onchip.py DATA/sweep.jsonl DATA3/sweep.jsonl --power DATA --out onchip.json
 python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm \
     docs/reports/data/2026-09-23-reruns-aifoundry3 --out reruns.json   # the passes behind §2's ranges</code></pre>
+</details>
+
+<details class="more"><summary>Version history and provenance</summary>
 <p class="small">Raw data and the analysis output:
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry2">docs/reports/data/2026-09-22-onchip-aifoundry2</a>
 and <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry3">…-aifoundry3</a>.
@@ -187,6 +203,7 @@ phone; 25 September (version 3): “the same power” replaced by what the passe
 scratchpad drawing more than DRAM), the session's reduction named, the own-scratchpad read energy per card, the
 element check's two failures in a discarded aifoundry2 attempt, and one-off observations labelled; record in
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>.</p>
+</details>
 
 <h2 id="related-reports">8. Related reports</h2>
 <ul>

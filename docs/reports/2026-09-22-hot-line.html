@@ -165,6 +165,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 /* chartkit:css:end */
 </style>
 </head>
@@ -210,16 +218,20 @@ it completed inside it. A shire's share is its count divided by what an even spl
 <div class="chart" id="fair"></div>
 <p class="small" id="faircap"></p>
 
+<details class="more"><summary>Why shares spread out with one minion per shire</summary>
 <p>Moving the line's home to shire 7, 15 or 31 changes nothing, so shire 0 is not special. The one case where
 shares do spread out is the opposite of starvation. With a single minion per shire the bank still retires one
 atomic every 10 cycles, but each shire has only one request in the queue, so the time a request spends crossing
 the mesh decides how often each shire gets its turn. Shares fall step by step with distance from the line, and
 <b>the host shire comes first</b> because its request crosses no mesh links at all. The map above shows the
 rings.</p>
+</details>
 
+<details class="more"><summary>The table, shire by shire</summary>
 <div class="table-wrap"><table id="fairtab"></table></div>
 <p class="small">In the a2 / a3 columns of this page's tables, a single number means the two cards agree to the
 digits shown.</p>
+</details>
 
 <h2 id="the-thing-that-actually-starves">2. The thing that actually starves</h2>
 <p>So we changed what the host shire does. Instead of joining the atomic, its 32 minions stream their own
@@ -237,23 +249,28 @@ moving those sliders sets this drawing.</p>
 <p class="small" id="starvecap"></p>
 </div>
 
+<details class="more"><summary>The table</summary>
 <div class="table-wrap"><table id="localtab"></table></div>
+</details>
 
 <p><b>These are not slow-downs, they are stops.</b> The host shire's count is the same number whether the
 window is 5 milliseconds or 100:</p>
 
+<details class="more"><summary>The window-length chart and table</summary>
 <div id="winstops">
 <div class="chart-title">Stops, not slows: operations completed in the window, host against the remote atomics hammering it</div>
 <div class="chart" id="wincht"></div>
 <p class="small" id="wincap"></p>
 </div>
 <details><summary>The table</summary><div class="table-wrap"><table id="wintab"></table></div></details>
+</details>
 
 <p>About seventeen loads per minion get through, five warm-up loads before the window opens and twelve inside
 it, and then nothing: none through the 120 million remote atomics of a 2-second window, in all 21 such runs of
 the 23 September passes on the two cards. The 32 minions of that shire, a full thirty-second of the chip, are
 stalled in a load instruction that does not return. Nothing reports an error; the kernel finishes when the hammering stops.</p>
 
+<details class="more"><summary>A caveat: one session where the clock moved</summary>
 <p>The stop was measured with the minion clock steady at 600 MHz. In one session on aifoundry2, whose governor
 can move the clock (aifoundry3's firmware holds it at 600 MHz), the ten 2-second runs in which the clock moved
 between 600, 700 and 800 MHz let the host's loads through at 1–7% of their rate with nobody hammering, while
@@ -262,6 +279,7 @@ at 384. One session does not establish that the clock is the cause, nor whether 
 be. That session, the
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-23-reruns-aifoundry2">first
 rerun attempt of 23 September</a>, was discarded for the energy figures because its clock moved.</p>
+</details>
 
 <h2 id="the-threshold-is-the-bank-going-saturated">3. The threshold is the bank going saturated</h2>
 <p>It takes one other shire. Two shires run, the host and one other, each with the same number of minions
@@ -290,7 +308,9 @@ shire's own requests stop getting resources. One inequality says when:</p>
 <a href="https://github.com/aifoundry-org/et-man">ET-SoC-1 errata</a> describe it (numbered 4.1 and 4.2 in the
 document's body, 3.1 and 3.2 in its table of contents), and both are marked <i>Postponed</i>:</p>
 
+<details class="more"><summary>The two errata, quoted</summary>
 <div id="errata"></div>
+</details>
 
 <p>That bears on both questions worth sending back. <b>Would setting <code>l3_yield</code> restore the
 host?</b> Not certainly. Erratum 4.1 says it does not when the host and the mesh want the same address. The
@@ -318,24 +338,30 @@ the bank was already saturated, so the first thing pacing takes away is queueing
 <p>Spreading the same work over 32 lines, one per shire, changes everything: the same 1,024 minions running
 the same instruction do 32 times the work.</p>
 
+<details class="more"><summary>The table</summary>
 <div class="table-wrap"><table id="placetab"></table></div>
+</details>
 
+<details class="more"><summary>What a sub-bank slot works out to</summary>
 <p>Ten cycles per atomic is the shire cache retiring one request at a time. If a sub-bank accepts a request
 every two cycles, as a reading of the shire-cache spec in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/research/counters-and-dram.md"><code>docs/research/counters-and-dram.md</code></a> has it
 (not measured here), a global atomic occupies about five sub-bank slots. The aggregate of about 60 million
 atomics a second matches the figure Ivan quoted, which settles that it was an aggregate and not a per-shire
 number.</p>
+</details>
 
 <h3 id="what-it-costs-in-energy">What it costs in energy</h3>
 <p>Contention is not just slow, it is expensive per unit of work. Board power over idle on aifoundry2, in one
 session, measured at 10 Hz across three back-to-back launches of each case, with the die at 72–73 °C; the last
 column adds the 23 September passes on both cards:</p>
 
+<details class="more"><summary>The table</summary>
 <div class="table-wrap"><table id="pwrtab"></table></div>
 <p class="small" id="pwrnote">The rates in this table are timed by the power runs themselves, so they differ
 slightly from the placement table's above (1,919 against 1,920 million a second). The last column pools this
 session with the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#synchronisation">energy
 manual</a>'s 23 September passes: <span id="pooln"></span>. <span id="pooltop"></span></p>
+</details>
 
 <div class="chart-title">The last column drawn: energy per operation over every pass, one contended line against the same atomic spread over 32</div>
 <div id="nrglegend"></div>
@@ -369,6 +395,7 @@ counters of any shire, so a kernel can watch the host shire's banks without touc
 </ul>
 
 <h2 id="method-and-what-is-not-established">8. Method, and what is not established</h2>
+<details class="more"><summary>Method, and what is not established, in full</summary>
 <ul>
 <li>The probe is <code>NB_HOTLINE</code> in <code>workloads/nocbench</code>, new for this. Every participant
 warms up, meets at a chip-wide barrier, then loops until a cycle deadline, counting completed operations.
@@ -406,7 +433,9 @@ instrument. The per-shire sensors exist on the die;
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature</a> says what
 it would take to read them.</li>
 </ul>
+</details>
 
+<details class="more"><summary>Reproduce this</summary>
 <p class="small">To reproduce, with <code>DATA</code> a run directory on aifoundry2 and <code>DATA3</code> one
 on aifoundry3:</p>
 <pre><code>workloads/nocbench/run_hotline.sh DATA 6000000           # 42 configurations, each well under a second
@@ -418,7 +447,9 @@ python3 workloads/nocbench/analyze_hotline.py DATA/sweep.jsonl DATA3/sweep.jsonl
     --out DATA/hotline.json
 python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm \
     docs/reports/data/2026-09-23-reruns-aifoundry3 --out reruns.json   # the passes behind the ranges in section 6</code></pre>
+</details>
 
+<details class="more"><summary>Version history and provenance</summary>
 <p class="small">The errata text, quoted by hand from the errata document, and the window table, whose 5, 40
 and 100 ms runs are in no raw data file, come from <code>context.json</code>. The barrier is read from the
 18 September nocbench run. The round trip and the bank's 10 cycles are computed from the sweep. Versions: first
@@ -430,6 +461,7 @@ next to its energy); 25 September (version 3): the stop stated for a steady 600 
 session in which a moving clock let loads through; the loads that get through counted with their warm-up; the
 first energy session's reduction named instead of its place in the ranges; one-off observations labelled; record
 in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3/</code></a>.</p>
+</details>
 
 <h2 id="related-reports">Related reports</h2>
 <ul>
@@ -955,9 +987,30 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 
 </script>
