@@ -316,6 +316,10 @@ against latency on aifoundry2).</p>
 <div class="small" id="commnote"></div>
 <p id="commtext"></p>
 
+<div id="rings-legend"></div>
+<div class="chart" id="rings"></div>
+<p class="small" id="ringscap"></p>
+
 <h2 id="synchronisation">6. Synchronisation</h2>
 <div class="table-wrap wide"><table id="sync"></table></div>
 <p class="small" id="syncnote"></p>
@@ -357,6 +361,9 @@ caption.stack-cap { display: none; }
 
 <h3 id="the-relay-priced-from-section-4">7.2 The relay, priced from section 4</h3>
 <div class="table-wrap"><table id="relaycheck"></table></div>
+<div id="relay-legend"></div>
+<div class="chart" id="relaychart"></div>
+<p class="small" id="relaychartcap"></p>
 <p class="small" id="relaytext"></p>
 
 <h2 id="two-cards">8. Two cards</h2>
@@ -1113,26 +1120,32 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
 (function(){
  const C=D.catalogue, sl=C.cards[CARDS[0]].sram_leakage; if(!(sl&&sl.fit&&sl.curve.length>2))return;
  const sl2=CARDS[1]&&C.cards[CARDS[1]].sram_leakage, fit=sl.fit, lawS=t=>fit.P_fix_w+fit.A_leak_80_w*Math.exp((t-80)/36);
- const xs=sl.curve.map(c=>c.T), ys=sl.curve.map(c=>c.sram_w), inRange=cv=>cv.filter(c=>c.T>=Math.min(...xs)-1&&c.T<=Math.max(...xs)+1);
- /* every other card's idle bins inside the fitted range, in its registry colour and mark (the fit in ink) */
- const OS=CARDS.slice(1).map(h=>{const s=C.cards[h].sram_leakage; return {h,inr:s&&s.curve?inRange(s.curve):[]};}).filter(o=>o.inr.length);
- const inr=(OS.find(o=>o.h===CARDS[1])||{inr:[]}).inr, ys2=ys.concat(...OS.map(o=>o.inr.map(c=>c.sram_w)));
+ const xs=sl.curve.map(c=>c.T), ys=sl.curve.map(c=>c.sram_w), fitLo=Math.min(...xs), fitHi=Math.max(...xs);
+ const inRange=cv=>cv.filter(c=>c.T>=fitLo-1&&c.T<=fitHi+1);
+ /* every other card's idle bins, in its registry colour and mark (the fit in ink): the whole curve, not only the part
+    inside the fitted range, so a card that idles at a different temperature (aifoundry3 never reaches 67-82 °C) still
+    shows against the extrapolated line — the chart's point is exactly that miss */
+ const OS=CARDS.slice(1).map(h=>{const s=C.cards[h].sram_leakage; return {h,curve:s&&s.curve?s.curve:[]};}).filter(o=>o.curve.length);
+ const inr=(OS.find(o=>o.h===CARDS[1])||{curve:[]}).curve.filter(c=>inRange([c]).length);
+ const allT=xs.concat(...OS.map(o=>o.curve.map(c=>c.T))), allW=ys.concat(...OS.map(o=>o.curve.map(c=>c.sram_w)));
+ const xlo=Math.min(...allT)-1, xhi=Math.max(...allT)+1, ylo=Math.min(...allW)*0.9, yhi=Math.max(...allW)*1.05;
  const sramItems=[{key:'fit',label:'fit, 36 °C e-folding imposed',mark:'line',color:'var(--ink)'},cardItem(CARDS[0],CARDS[0]+' idle bins')].concat(OS.map(o=>cardItem(o.h,cname(o.h)+' idle bins')));
  CK.legend('sram-legend',sramItems); legendMarks('sram-legend',sramItems);
- CK.frame('sram',{height:W=>W<600?240:280,label:'The SRAM rail at idle against die temperature',draw:f=>{
-  const L=44,Rr=12,T=24,B=40, x=CK.lin(Math.min(...xs)-1,Math.max(...xs)+1,L,f.W-Rr), y=CK.lin(Math.min(...ys2)*0.9,Math.max(...ys2)*1.05,f.H-B,T);
+ CK.frame('sram',{height:W=>W<600?240:280,label:'The SRAM rail at idle against die temperature, every card',draw:f=>{
+  const L=44,Rr=12,T=24,B=40, x=CK.lin(xlo,xhi,L,f.W-Rr), y=CK.lin(ylo,yhi,f.H-B,T);
   CK.axes(f,{x,y,L,R:Rr,T,B,xl:'die temperature, °C',yl:'SRAM rail at idle, W',yfmt:v=>f1(v)});
-  const law=[]; for(let t=Math.min(...xs)-1;t<=Math.max(...xs)+1;t+=0.5) law.push([t,lawS(t)]);
+  const law=[]; for(let t=xlo;t<=xhi;t+=0.5) law.push([t,lawS(t)]);
   CK.el('path',{d:CK.path(law,x,y),class:'ln',stroke:'var(--ink)'},f.svg);
   CK.keynav(f,sl.curve.map(c=>cmark(f,f.svg,CARDS[0],x(c.T),y(c.sram_w),3.5,8,`${CARDS[0]}, ${c.T} °C: <b>${f3(c.sram_w)} W</b> on the SRAM rail (${nf(c.n)} idle samples)`)));
-  OS.forEach(o=>CK.keynav(f,o.inr.map(c=>cmark(f,f.svg,o.h,x(c.T),y(c.sram_w),4.5,8,`${cname(o.h)}, ${c.T} °C: <b>${f3(c.sram_w)} W</b> on the SRAM rail (${nf(c.n)} idle samples)`))));
+  OS.forEach(o=>CK.keynav(f,o.curve.map(c=>cmark(f,f.svg,o.h,x(c.T),y(c.sram_w),4.5,8,`${cname(o.h)}, ${c.T} °C: <b>${f3(c.sram_w)} W</b> on the SRAM rail (${nf(c.n)} idle samples)<br>the ${CARDS[0]} fit here: ${f3(lawS(c.T))} W`))));
  }});
  let sl2note='';
  /* the other card at its most-sampled idle bin: the aifoundry2 fit does not describe it, and card and shape are confounded */
- if(sl2&&sl2.curve&&sl2.curve.length){const lo2=sl2.curve.reduce((a,b)=>b.n>a.n?b:a); sl2note=` On ${CARDS[1]}, which idles cooler, the rail reads ${f2(lo2.sram_w)} W at ${lo2.T} °C (its most-sampled bin), where the ${CARDS[0]} fit, extrapolated, says ${f2(lawS(lo2.T))} W: the ${CARDS[0]} fit does not describe ${CARDS[1]}, and whether that is the card or the fit's shape outside its range is not known${inr.length?'; its points inside the fitted range are the hollow ones':''}.`;}
+ if(sl2&&sl2.curve&&sl2.curve.length){const lo2=sl2.curve.reduce((a,b)=>b.n>a.n?b:a), miss=lo2.sram_w/lawS(lo2.T);
+  sl2note=` On ${CARDS[1]}, which idles cooler, the rail reads ${f2(lo2.sram_w)} W at ${lo2.T} °C (its most-sampled bin), where the ${CARDS[0]} fit, extrapolated, says ${f2(lawS(lo2.T))} W — about ${f1(miss)}× higher: the ${CARDS[0]} fit does not describe ${CARDS[1]}, and whether that is the card or the fit's shape outside its range is not known${inr.length?'; its points inside the fitted range are the hollow ones':''}.`;}
  const c80=sl.curve.find(c=>c.T===80), rd=cb('tload/scp/random');
  const mb=c80?1000*c80.sram_w/128:fit.mw_per_mb_at_80, nj=mb/1048576*1e6;
- $('sramcap').textContent=`The rail feeding 128 MB of on-chip SRAM, at idle, on ${CARDS[0]}. Fitted with the idle law's 36 °C e-folding imposed: ${f2(fit.P_fix_w).replace('-','−')} W + ${f2(fit.A_leak_80_w)} W·e^((T−80)/36); ${fit.P_fix_w<0?'the negative constant says the rail rises faster than that shape. ':''}`+
+ $('sramcap').textContent=`The rail feeding 128 MB of on-chip SRAM, at idle. The line is ${CARDS[0]}'s fit (36 °C e-folding imposed: ${f2(fit.P_fix_w).replace('-','−')} W + ${f2(fit.A_leak_80_w)} W·e^((T−80)/36)${fit.P_fix_w<0?', whose negative constant says the rail rises faster than that shape':''}), drawn from ${f0(xlo)} to ${f0(xhi)} °C — beyond its own ${f0(fitLo)}–${f0(fitHi)} °C fitting range — so every card's idle bins show against it. `+
   (c80?`The whole rail at 80 °C is ${f2(c80.sram_w)} W, ${f1(mb)} mW per MB, an upper bound on the arrays' leakage including the cache logic. `:'')+
   `At about ${f0(mb)} mW per MB, a byte held in scratchpad for one second at 80 °C leaks at most about ${f0(nj)} nJ on ${CARDS[0]} — as much as reading it ${rd?nf(Math.round(nj*1000/rd.mean/100)*100):'—'} times (${rd?f1(rd.mean):'—'} pJ per read).`+sl2note;
 })();
@@ -1605,6 +1618,33 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   `Small messages cost more per byte in the 128 B rows, a difference resolved so far only on aifoundry2's shire ring; the per-message overhead is 40–224 cycles of the sending and receiving harts (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a>, one session on aifoundry2). `+
   (rpc.length===2?`Handing a slab to the next shire through its scratchpad is ${f1(rr.dram.per_card.aifoundry2.mean/rr.hop.per_card.aifoundry2.mean)}× cheaper than the DRAM round trip on aifoundry2 and ${f1(rr.dram.per_card.aifoundry3.mean/rr.hop.per_card.aifoundry3.mean)}× on aifoundry3; the hand-off itself costs ${f1(rr.hop.per_card.aifoundry2.mean)} pJ/B on aifoundry2 and ${f1(rr.hop.per_card.aifoundry3.mean)} on aifoundry3. The three relay bars are ±${f0(Math.min(...hw))}–${f0(Math.max(...hw))}%: the hop relay's is mostly that difference between the cards, and the others are a ${f0(Math.min(...ow))}–${f0(Math.max(...ow))} W signal over a board idle that drifts, the DRAM relay's power also riding on a path with no rail sensor.`:
    `Handing a slab to the next shire through its scratchpad is ${f0(dram/hop)}× cheaper than the DRAM round trip. The three relay bars are ±${f0(Math.min(...hw))}–${f0(Math.max(...hw))}% because each is a ${f0(Math.min(...ow))}–${f0(Math.max(...ow))} W signal over a board idle that drifts; the DRAM relay's power also rides on a path with no rail sensor.`);
+ /* the rings chart: pJ/B against mean mesh hops, one dot per ring per card, each card's own line (the same fit as the
+    text above) and, dashed in the same colour, section 4.3's tensor-load wire fit over 1-6 hops, for comparison */
+ const ringCards=CK.cardsIn(mesh.reduce((s,r)=>rg[r.ring]?s.concat(Object.keys(rg[r.ring].per_card)):s,[]));
+ const wireFit=h=>{const w=D.catalogue.cards[h]&&D.catalogue.cards[h].wire&&D.catalogue.cards[h].wire.random;
+  if(!w)return null; const pts=w.points.filter(p=>p.hops>=1&&p.hops<=6).map(p=>[p.hops,p.pj_per_byte]); return pts.length>=2?lfit(pts):null;};
+ if(ringCards.length&&pcFit){
+  const ringItems=ringCards.map(h=>cardItem(h,cname(h)+', rings (solid) and wire (dashed)'));
+  CK.legend('rings-legend',ringItems); legendMarks('rings-legend',ringItems);
+  const mxx=Math.max(...hb,6)+0.4, mxy=Math.max(...mesh.flatMap(r=>ringCards.map(h=>rg[r.ring]&&rg[r.ring].per_card[h]?rg[r.ring].per_card[h].mean+(rg[r.ring].per_card[h].se||0):0)))*1.08;
+  CK.frame('rings',{height:W=>W<600?260:300,label:'Energy per byte for the rings between shires against mean mesh distance',draw:f=>{
+   const L=40,Rr=12,T=24,B=38, x=CK.lin(0,mxx,L,f.W-Rr), y=CK.lin(0,mxy,f.H-B,T);
+   CK.axes(f,{x,y,L,R:Rr,T,B,xl:'mean mesh hops',yl:'pJ per byte'});
+   ringCards.forEach((h,j)=>{const wf=wireFit(h);
+    if(wf)CK.el('line',{x1:x(0),x2:x(mxx),y1:y(wf.a),y2:y(wf.a+wf.b*mxx),stroke:CK.card(h).color,'stroke-width':1.3,'stroke-dasharray':'5 4'},f.svg);
+    const ft=pcFit[j]; if(ft)CK.el('line',{x1:x(0),x2:x(mxx),y1:y(ft.a),y2:y(ft.a+ft.b*mxx),stroke:CK.card(h).color,'stroke-width':1.8},f.svg);
+   });
+   ringCards.forEach(h=>{
+    const nodes=mesh.filter(r=>MH[r.ring]&&rg[r.ring]&&rg[r.ring].per_card[h]).map(r=>{
+     const c=rg[r.ring].per_card[h], hh=MH[r.ring].mean;
+     if(c.se)ebar(f.svg,x(hh),y(c.mean+c.se),y(c.mean-c.se),CK.card(h).color);
+     return cmark(f,f.svg,h,x(hh),y(c.mean),4,8,`${name(r.ring)}, ${cname(h)}: <b>${f1(c.mean)}</b> ± ${f2(c.se||0)} pJ/B at ${f1(hh)} mean hops (n = ${c.n})`);
+    });
+    CK.keynav(f,nodes);
+   });
+  }});
+  $('ringscap').textContent=`Solid: each card's own line through the ${WORD[both.length]||both.length} rings both cards measured, the same fit as the text above. Dashed: section 4.3's tensor-load wire fit over 1–6 hops, in the same card's colour, for comparison — leaving the shire is the biggest step for both, but the lines need not agree past it.`;
+ }
 })();
 
 /* ---------- 6. sync ---------- */
@@ -1818,6 +1858,32 @@ function placeLabels(parent,items,boxes,bounds,cls){const bx=boxes.slice(), wOf=
   `; the adds and barriers the relay also runs are in no table.`+
   (cst.length===2?` The brackets are wide: priced instead with the constant-operand rows, DRAM comes to ${f1(cst[0].p)} pJ/B on aifoundry2 against ${f1(cst[0].m)} measured, but ${f1(cst[1].p)} on aifoundry3 against ${f1(cst[1].m)}, ${f0(100*(cst[1].m/cst[1].p-1))}% more.`:'')+
   ` Section 7.1 prices the three relays with the same rows.`;
+ /* the bracket chart: for each place the relay keeps its intermediate, the priced zeros ... random range, the measured
+    mean, and each card's own measured mean, on a log x axis (3-150 pJ/B spans DRAM down to the own scratchpad) */
+ const ROWS=[['dram','DRAM',pd],['scp','the own scratchpad',ps],['hop','the next shire',ph]].filter(x=>x[2]);
+ if(ROWS.length){
+  const relCards=CK.cardsIn(ROWS.reduce((s,r)=>rr2[r[0]]?s.concat(Object.keys(rr2[r[0]].per_card)):s,[]));
+  const relItems=[{key:'priced',label:'priced, zeros … random',mark:'line',color:'var(--muted)'},{key:'measured',label:'measured mean',mark:'diamond',color:'var(--ink)'}].concat(CK.cardLegend(relCards));
+  CK.legend('relay-legend',relItems); legendMarks('relay-legend',relItems);
+  CK.frame('relaychart',{height:W=>W<600?230:190,label:'Priced range against measured energy for the relay’s three places to keep its intermediate',draw:f=>{
+   const L=f.narrow?102:150,Rr=14,T=18,B=30,pitch=(f.H-T-B)/ROWS.length, x=CK.log(3,150,L,f.W-Rr), nodes=[];
+   ROWS.forEach((r,i)=>{const[key,label,b]=r, y0=T+pitch*(i+0.5), m=M(key), st={stroke:'var(--muted)','stroke-width':1.5};
+    CK.txt(f.svg,L-8,y0+4,label,'lab','end');
+    CK.el('line',Object.assign({x1:x(b[0]),x2:x(b[1]),y1:y0,y2:y0},st),f.svg);
+    CK.el('line',Object.assign({x1:x(b[0]),x2:x(b[0]),y1:y0-4,y2:y0+4},st),f.svg);
+    CK.el('line',Object.assign({x1:x(b[1]),x2:x(b[1]),y1:y0-4,y2:y0+4},st),f.svg);
+    const meas=mark(f,f.svg,'polygon',{points:`${x(m)},${y0-5} ${x(m)+5},${y0} ${x(m)},${y0+5} ${x(m)-5},${y0}`,fill:'var(--ink)'},9,
+     `${label}: priced ${f1(b[0])}–${f1(b[1])} pJ/B (zeros … random), measured <b>${f1(m)}</b> pJ/B (${inb(m,b)})`);
+    nodes.push(meas);
+    const pc=(rr2[key]&&rr2[key].per_card)||{};
+    CK.cardsIn(pc).forEach(h=>nodes.push(cmark(f,f.svg,h,x(pc[h].mean),y0+(f.narrow?11:14),3.5,7,`${label}, ${cname(h)}: <b>${f1(pc[h].mean)}</b> ± ${f2(pc[h].se||0)} pJ/B (n = ${pc[h].n})`)));
+   });
+   [3,10,30,100,150].forEach(t=>{CK.el('line',{x1:x(t),x2:x(t),y1:T-4,y2:f.H-B,class:'grid-line'},f.svg); CK.txt(f.svg,x(t),f.H-B+16,CK.fmt.num(t),'tick','middle');});
+   CK.txt(f.svg,(L+f.W-Rr)/2,f.H-4,'pJ per byte (log)','lab','middle');
+   CK.keynav(f,nodes);
+  }});
+  $('relaychartcap').textContent=`Bracket: the priced range of the table above, zeros to random data. Diamond: the measured mean. Dots and rings: each card's own mean.`;
+ }
 })();
 
 /* ---------- 8. two cards: the ratio against the value (em-l2) ---------- */

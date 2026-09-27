@@ -17,8 +17,9 @@ const halo=n=>sty(n,{paintOrder:'stroke',stroke:'var(--page)',strokeWidth:'3px',
 function whisker(g,x,y1,y2,col){[[x,x,y1,y2],[x-3,x+3,y1,y1],[x-3,x+3,y2,y2]].forEach(q=>sty(CK.el('line',{x1:q[0],x2:q[1],y1:q[2],y2:q[3]},g),{stroke:col,strokeWidth:'1.4px'}));}
 const meanOf=v=>v.reduce((a,b)=>a+b,0)/v.length;
 /* per-pattern slopes from a model's per-pass points, pooled over passes and cards (pJ per byte per hop) */
-function pooled(set,src){const m=W_.model[set]&&W_.model[set][src], acc={}; if(!m||!m.per_pass)return acc;
- for(const h in m.per_pass)m.per_pass[h].forEach(f=>f.points.forEach(q=>{(acc[q.pattern]=acc[q.pattern]||{t:q.toggle,o:q.ones,v:[]}).v.push(q.slope);}));
+function pooled(set,src,card){const m=W_.model[set]&&W_.model[set][src], acc={}; if(!m||!m.per_pass)return acc;
+ const hs=card&&card!=='pooled'?[card]:Object.keys(m.per_pass);
+ hs.forEach(h=>(m.per_pass[h]||[]).forEach(f=>f.points.forEach(q=>{(acc[q.pattern]=acc[q.pattern]||{t:q.toggle,o:q.ones,v:[]}).v.push(q.slope);})));
  for(const k in acc){const a=acc[k];a.mean=meanOf(a.v);a.lo=Math.min(...a.v);a.hi=Math.max(...a.v);a.n=a.v.length;}
  return acc;}
 /* the 16-128 B blocks (first run, d = 1, 3, 6) against the no-transition prediction compared like for like: the first
@@ -145,7 +146,7 @@ const markWord=c=>({dot:'dots',ring:'rings',diamond:'diamonds',box:'squares'})[C
 
 /* ---------- 5. what a bit costs per hop: ones and differences ---------- */
 (function(){
- let key=NK;
+ let key=NK, card='pooled';
  const SETS=[['v1','var(--c1)','first run: one 512 B image'],['v2','var(--c2)','second run: lines unique']];
  CK.legend('model-leg',[{key:'v1',label:'first run: one 512 B image',mark:'dot',color:'var(--c1)'},{key:'v2',label:'second run: lines unique',mark:'dot',color:'var(--c2)'},
   {key:'frz',label:'second run: frozen line',mark:'box',color:'var(--c3)'},{key:'fit',label:'ones + differences (the fit)',mark:'line',color:'var(--ink)'},
@@ -153,10 +154,10 @@ const markWord=c=>({dot:'dots',ring:'rings',diamond:'diamonds',box:'squares'})[C
  const f=CK.frame('model',{label:'Cost of one hop against the density of ones, with the two-term fit and the best differences-only curve',height:W=>W<600?300:340,draw(f){
   const L=46,R=14,T=26,B=40, src=srcOf(key), pts=[];
   let mx=0;
-  SETS.forEach(s=>{const acc=pooled(s[0],src); for(const k in acc){const a=acc[k]; pts.push(Object.assign({set:s,k},a)); mx=Math.max(mx,a.hi);}});
+  SETS.forEach(s=>{const acc=pooled(s[0],src,card); for(const k in acc){const a=acc[k]; pts.push(Object.assign({set:s,k},a)); mx=Math.max(mx,a.hi);}});
   mx*=1.1;
   const x=CK.lin(-0.04,1.04,L,f.W-R), y=CK.lin(0,mx,f.H-B,T);
-  CK.axes(f,{x,y,L,R,T,B,xt:[0,0.25,0.5,0.75,1],xl:'density of ones in the data, P',yl:`${meterName(key)}: pJ per payload byte per hop (slope)`});
+  CK.axes(f,{x,y,L,R,T,B,xt:[0,0.25,0.5,0.75,1],xl:'density of ones in the data, P',yl:`${meterName(key)}: pJ per payload byte per hop (slope)`+(card==='pooled'?'':`, ${cardName(card)}`)});
   const M=W_.model[SET][src], a=M.toggle_fj_per_bit_transition_hop.mean*8/1000, b=M.ones_fj_per_one_bit_hop.mean*8/1000, s0=M.s0_pj_per_byte_hop.mean;
   const curve=[],tog=[]; for(let p=0;p<=1.0001;p+=0.02)curve.push([p,s0+a*2*p*(1-p)+b*p]);
   // the best pure-difference model (no ones term), fitted to the same points: the fair test of "only differences cost"
@@ -168,11 +169,16 @@ const markWord=c=>({dot:'dots',ring:'rings',diamond:'diamonds',box:'squares'})[C
   pts.forEach(q=>{const frz=q.k.startsWith('wfrz'), g=CK.el('g',{},f.svg), xx=x(q.o)+(q.set[0]==='v1'?-3:3), col=frz?'var(--c3)':q.set[1];
    whisker(g,xx,y(q.hi),y(q.lo),col);
    sty(frz?CK.el('rect',{x:xx-4.5,y:y(q.mean)-4.5,width:9,height:9},g):CK.el('circle',{cx:xx,cy:y(q.mean),r:4.5},g),{fill:col,stroke:'var(--surface)',strokeWidth:'1.5px'});
-   CK.tip(f,g,`<b>${q.k.replace(/\/$/,'')}</b> (${frz?'second run: frozen line':q.set[2]})<br>ones ${f3(q.o)}, bits differing from the previous flit ${f3(q.t)}<br>${f3(q.mean)} pJ/B per hop [${f3(q.lo)}–${f3(q.hi)}], n = ${q.n}<br>the fit: ${f3(s0+a*q.t+b*q.o)}`);
+   CK.tip(f,g,`<b>${q.k.replace(/\/$/,'')}</b> (${frz?'second run: frozen line':q.set[2]})${card==='pooled'?'':`, ${cardName(card)}`}<br>ones ${f3(q.o)}, bits differing from the previous flit ${f3(q.t)}<br>${f3(q.mean)} pJ/B per hop [${f3(q.lo)}–${f3(q.hi)}], n = ${q.n} (${card==='pooled'?'the range over every card and pass':`over ${cardName(card)}'s own passes`})<br>the fit: ${f3(s0+a*q.t+b*q.o)}`);
    groups[frz?'frz':q.set[0]].push(g);});
   Object.values(groups).forEach(g=>CK.keynav(f,g.sort((p,q)=>p.getBBox().x-q.getBBox().x)));
  }});
- CK.seg('modelbtn',{label:'Meter',options:METERS,value:key,onChange:v=>{key=v;f.redraw();}});
+ CK.seg('modelbtn',{label:'Meter',options:METERS,value:key,onChange:v=>{key=v;f.redraw();cap();}});
+ if(CARDS.length){const cs=CK.cardSeg('modelcard',{cards:CARDS,pooled:true,onChange:v=>{card=v;f.redraw();cap();}}); if(cs.value!==card){card=cs.value;f.redraw();}}
+ function cap(){setText('modelcap',card==='pooled'?
+   `Card: all cards' passes pooled. The solid two-term fit is fixed (fitted per card and pass, then pooled, in the table below); the dashed differences-only line is refitted to whichever points are shown.`:
+   `Card: ${cardName(card)}'s own means and range, ± the spread over its own passes; the solid two-term fit stays the pooled one, but the dashed differences-only line is refitted to ${cardName(card)}'s points, so it shows how well "only differences cost" fits this card alone.`);}
+ cap();
 })();
 
 /* ---------- the model table: one row per quantity and set of links, so it sorts; the notes go in its foot ---------- */
