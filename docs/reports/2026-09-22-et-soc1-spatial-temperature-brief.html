@@ -86,6 +86,12 @@ details.terms p { margin: 6px 0 0; }
 #grid-leg { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 0.8rem; color: var(--ink-2); max-width: 600px; margin: 6px auto; }
 .gl-sw { display: inline-block; min-width: 2.6em; text-align: center; border-radius: 4px; padding: 1px 4px; font-weight: 600; font-variant-numeric: tabular-nums; }
 #grid-view { justify-content: center; max-width: 600px; margin: 8px auto 0; display: flex; }
+.pipe-box rect { fill: var(--surface); stroke: var(--axis); stroke-width: 1.3; }
+.pipe-live { fill: var(--c1); font-weight: 600; }
+.pipe-box.pipe-field rect { stroke: var(--c1); }
+.pipe-arrow { fill: none; stroke: var(--ink-2); stroke-width: 1.3; }
+.pipe-dim { opacity: 0.28; }
+.pipe-field:focus-visible rect, .pipe-field:hover rect { stroke: var(--ink); stroke-width: 2px; }
 @media (max-width: 480px) {
   .mesh-grid { gap: 4px; }
   .mesh-cell .id { font-size: 0.74rem; }
@@ -825,6 +831,15 @@ int get_module_current_temperature(struct current_temperature_t *temperature) {
     temperature-&gt;pmic_sys = pmic_temperature;
 }</code></pre>
 
+<div class="chart-title" style="margin-top:10px">The sensor-to-host pipeline that code implements</div>
+<div class="ck-controls"><div id="pipe-raw"></div></div>
+<div id="pipe-out" class="ck-readout" aria-live="polite"></div>
+<div class="chart" id="pipeline"></div>
+<p class="small">Tab to (or hover) one of the five packet fields on the right to light what feeds it. The average and
+peak-hold boxes track whichever session and moment the time slider below ("What the host's temperature fields did")
+is set to; until you drag it, the raw-code slider follows along too, showing a 12-bit code that would truncate to the
+current mean. Drag it to try any other sample.</p>
+
 <p>The field named <code>pmic_sys</code> is not a board sensor either: the firmware fills it with the same 34-shire average (<span id="pmic-agree"></span>), and the SP does not forward the PMIC’s own regulator temperatures. The service processor’s stats packet has a system-temperature slot meant for the PMIC, but the firmware writes 0 into it (a TODO in <code>thermal_pwr_mgmt.c</code>), and it read 0 in all <span id="sys-zero"></span> samples of 20 September and in every committed sample from both cards.</p>
 
 <p>So the host never sees the current spread between shires: the low and high are peak-hold values. The firmware resets them together with the service processor’s own statistics, so both cover the same window. In aifoundry2’s telemetry of 20 September the low read <span id="sp-low"></span> °C in all <span id="sp-n"></span> samples, 1 °C under the service processor’s minimum of the average (<span id="sp-spmin"></span> °C), while the average ran from <span id="sp-mean-range"></span> °C. The high only ratchets, but it leaks one number. Every rise followed a new record of the average and settled exactly <span id="sp-excess"></span> °C above the service processor’s maximum of the average (written below as maximum/high): <span id="sp-first"></span> when the load step began, then <span id="sp-step-pairs"></span> during it (each <span id="sp-step-lag"></span> after the record), and <span id="sp-horace-pairs"></span> in the uncontrolled Horace session (the <span id="sp-slow-high"></span> came <span id="sp-slow-lag"></span> s after its record). So at those peaks the hottest shire’s sensor read about <span id="sp-excess2"></span> °C above the 34-shire mean, in the firmware’s whole degrees. The high is a single hardware sample, so sensor noise can add to it. Which shire it was, the host cannot tell.</p>
@@ -1047,6 +1062,7 @@ const SHIRE_MV = {"7":{"mnn":[519,518,520],"sram":[703,702,704],"noc":[485,484,4
     if (last && ST.t - last.t <= 3) h += ` <b>→ at this peak the hottest shire read about ${r[HIGH] - r[SPMAX]} °C above the mean’s record (SP max)</b>`;
     else h += ` · high held since ${last ? `t = ${num(last.t, 1)} s` : 'before this session began'}; it says nothing about now`;
     out.set(h);
+    if (window.__pipeUpdate) window.__pipeUpdate(r);
   }
   let timeCtl;
   function makeTime() {
@@ -1116,6 +1132,97 @@ const SHIRE_MV = {"7":{"mnn":[519,518,520],"sram":[703,702,704],"noc":[485,484,4
     f.cross();
   }});
   ST.t = defaultT(ST.id); makeTime(); f.cross(); readout();
+
+  /* ---- the sensor-to-host pipeline (§2): 35 sensors -> truncation to 1 °C -> mean/peak-hold -> a 5-field packet.
+     The average and peak-hold boxes track whichever session/moment the time slider above is set to (readout() calls
+     window.__pipeUpdate after every change); the raw-code slider follows the current mean until dragged by hand. */
+  (function () {
+    const rawToC = s => (57400 + 249400 * s / 4096 - 124700) / 1000;
+    const cToRaw = t => Math.max(0, Math.min(4095, Math.round((t * 1000 - 57400 + 124700) * 4096 / 249400)));
+    const FIELDS = [
+      {key: 'minshire_avg', lines: ['minshire_', 'avg'], from: ['s34', 'avg'], why: "the 34-shire average"},
+      {key: 'minshire_high', lines: ['minshire_', 'high'], from: ['s34', 'peak'], why: "the peak-hold high"},
+      {key: 'minshire_low', lines: ['minshire_', 'low'], from: ['s34', 'peak'], why: "the peak-hold low"},
+      {key: 'ioshire_current', lines: ['ioshire_', 'current'], from: ['sio', 'io2'], why: "the I/O shire’s own sample"},
+      {key: 'pmic_sys', lines: ['pmic_', 'sys'], from: ['s34', 'avg'], why: "the 34-shire average again — not a PMIC reading"}];
+    let raw = cToRaw(rowAt(byId[ST.id], ST.t)[MEAN]), userRaw = false;
+    const rawCtl = CK.range('pipe-raw', {label: 'Try a raw 12-bit code', min: 0, max: 4095, step: 1, value: raw,
+      fmt: v => num(v, 0), onInput: v => { raw = v; userRaw = true; pf.redraw(); }});
+    const syncRaw = v => { rawCtl.input.value = v; const o = rawCtl.el.querySelector('output'); if (o) o.textContent = num(v, 0);
+      rawCtl.input.setAttribute('aria-valuetext', num(v, 0)); };
+    const out2 = CK.readout('pipe-out');
+    let NODE = {}, ARROW = {};
+    function box(g, key, x, y, w, h, lines, field) {
+      const grp = CK.el('g', {class: 'pipe-box' + (field ? ' pipe-field' : '')}, g);
+      CK.el('rect', {x, y, width: w, height: h, rx: 6}, grp);
+      let ty = y + 15;
+      lines.forEach(ln => { CK.txt(grp, x + w / 2, ty, ln, 'lab-strong', 'middle'); ty += 13; });
+      NODE[key] = {x, y, w, h, g: grp, liveY: ty + 2};
+      return grp;
+    }
+    function arrow(g, a, b) {
+      const A = NODE[a], B = NODE[b], ax = A.x + A.w, ay = A.y + A.h / 2, bx = B.x, by = B.y + B.h / 2;
+      ARROW[a + '>' + b] = CK.el('path', {d: `M${ax},${ay} C${(ax + bx) / 2},${ay} ${(ax + bx) / 2},${by} ${bx},${by}`,
+        class: 'pipe-arrow', 'marker-end': 'url(#pipe-arrow-head)'}, g);
+      return ARROW[a + '>' + b];
+    }
+    function draw(f) {
+      const W = f.W, H = f.H, svg = f.svg;
+      const defs = CK.el('defs', {}, svg);
+      const mk = CK.el('marker', {id: 'pipe-arrow-head', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto-start-reverse'}, defs);
+      CK.el('path', {d: 'M0,0 L10,5 L0,10 Z', fill: 'var(--ink-2)'}, mk);
+      NODE = {}; ARROW = {};
+      const g = CK.el('g', {}, svg);
+      const L = 8, R = 8, T = 10, B = 10, gap = 14, colW = (W - L - R - 2 * gap) / 3, midGap = 14;
+      const x0 = L, x1 = L + colW + gap, x2 = L + 2 * (colW + gap);
+      const pStep = (H - T - B - 2 * midGap) / 3;   // three equal rows in columns 1 and 2, so the arrows read cleanly
+      box(g, 's34', x0, T, colW, pStep, ['34 shires’', 'sensors']);
+      box(g, 'sio', x0, T + pStep + midGap, colW, pStep, ['I/O shire', 'sensor']);
+      box(g, 'raw', x0, T + 2 * (pStep + midGap), colW, pStep, ['raw code', '→ °C →', 'whole °']);
+      box(g, 'avg', x1, T, colW, pStep, ['pvt_avg_', 'temperature()']);
+      box(g, 'peak', x1, T + pStep + midGap, colW, pStep, ['pvt_avg_low_', 'high_temp()']);
+      box(g, 'io2', x1, T + 2 * (pStep + midGap), colW, pStep, ['pvt_ioshire_', 'ts_sample()']);
+      const fGap = 8, fh = (H - T - B - 4 * fGap) / 5;
+      FIELDS.forEach((fl, i) => box(g, fl.key, x2, T + i * (fh + fGap), colW, fh, fl.lines, true));
+      [['s34', 'avg'], ['s34', 'peak'], ['sio', 'io2']].forEach(([a, b]) => arrow(g, a, b));
+      FIELDS.forEach(fl => arrow(g, fl.from[1], fl.key));
+      // live values, from the currently selected session and moment
+      const live = rowAt(byId[ST.id], ST.t);
+      if (!userRaw) { raw = cToRaw(live[MEAN]); syncRaw(raw); }
+      const put = (key, txt) => { const n = NODE[key]; if (n) CK.txt(g, n.x + n.w / 2, n.liveY, txt, 'tick pipe-live', 'middle'); };
+      put('avg', `= ${live[MEAN]} °C`);
+      put('peak', `${live[LOW]}–${live[HIGH]} °C`);
+      put('io2', 'not in this log');
+      put('minshire_avg', `${live[MEAN]}`);
+      put('minshire_high', `${live[HIGH]}`);
+      put('minshire_low', `${live[LOW]}`);
+      put('ioshire_current', 'n/a here');
+      put('pmic_sys', `${live[MEAN]}`);
+      const rc = rawToC(raw), rt = Math.trunc(rc);
+      put('raw', `${num(raw, 0)}→${num(rc, 1)}→${rt}°`);
+      out2.set(`Raw code <b>${num(raw, 0)}</b> → <b>${num(rc, 2)} °C</b> → the firmware keeps <b>${rt} °C</b>` +
+        (rt === live[MEAN] ? `, matching the current mean (${live[MEAN]} °C)` : ` (the current mean is ${live[MEAN]} °C)`));
+      // hovering or focusing a packet field lights the box(es), the processing step and the arrows that feed it
+      const dim = on => Object.values(NODE).concat(Object.values(ARROW).map(e => ({g: e})))
+        .forEach(n => n.g.classList.toggle('pipe-dim', on));
+      const nodes = FIELDS.map(fl => {
+        const n = NODE[fl.key], src = fl.from[0], step = fl.from[1];
+        CK.tip(f, n.g, `<b>${fl.key}</b> comes from ${fl.why}.`);
+        n.g.style.cursor = 'pointer';
+        const lit = [NODE[src], NODE[step], NODE[fl.key]].filter(Boolean).map(n2 => n2.g)
+          .concat([ARROW[src + '>' + step], ARROW[step + '>' + fl.key]].filter(Boolean));
+        const on = () => { dim(true); lit.forEach(el => el.classList.remove('pipe-dim')); };
+        const off = () => dim(false);
+        n.g.addEventListener('pointerenter', on); n.g.addEventListener('focus', on);
+        n.g.addEventListener('pointerleave', off); n.g.addEventListener('blur', off);
+        return n.g;
+      });
+      CK.keynav(f, nodes);
+    }
+    const pf = CK.frame('pipeline', {height: W => (W < 600 ? 430 : 380), minW: 300, maxW: 720,
+      label: 'The sensor-to-host pipeline: 35 sensors, the raw-code conversion, and the five fields the host packet carries', draw});
+    window.__pipeUpdate = () => pf.redraw();
+  })();
 
   /* ---- the sensor grid: channel labels, or each shire's minion-rail voltage at idle (Power and temperature, §3) ---- */
   const cells = [...document.querySelectorAll('#meshgrid .mesh-cell.compute')].map(c => ({c, s: c.querySelector('.id').textContent.replace(/\D/g, ''),
