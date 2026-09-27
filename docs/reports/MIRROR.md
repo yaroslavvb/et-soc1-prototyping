@@ -155,11 +155,11 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Not yet deployed (2026-09-27):** the merge of the version-3 pages (the three-card results of 26 September) with the
-review's chart and collapsible-depth passes changed most mirrored pages' files. Until each is redeployed and this
-file records a new check, the live pages are the ones of the check below.
+**Last check: 2026-09-27, 14:40 PDT**, after deploying the merge (the version-3 three-card results, the review's chart
+and collapsible-depth passes, E48, the in-depth audit's fixes) and the new chip diagram, through the CLI: 23 of 23
+mirrored public pages equal to their files, no warnings, exit 0.
 
-**Last check: 2026-09-26, 23:26 PDT**, after the collapsible-depth pass, through `spacesheep read` with a key: 22 of 22
+**Earlier check: 2026-09-26, 23:26 PDT**, after the collapsible-depth pass, through `spacesheep read` with a key: 22 of 22
 mirrored public pages equal to their files, no warnings, exit 0.
 
 **Earlier check: 2026-09-26, 17:25 PDT**, after the chart pass, through `spacesheep read` with a key: 21 of 21 mirrored
