@@ -165,6 +165,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 /* chartkit:css:end */
 </style>
 </head>
@@ -181,9 +189,10 @@ temperature (section 1) and the cost of an awake core (section 2).</p>
 On zeros an integer add is 6 pJ, a float add 23 and an eight-lane multiply-add 27; on random data 9, 25 and 56.
 A byte from the shire's own scratchpad is 2–8 pJ; from DRAM, 90–140; written back through the L1 to DRAM,
 240–330.</b> <span id="cardlede">aifoundry3 reads about 5% lower than aifoundry2 (median 0.95; 80% of entries 1–9% lower), each card at its own die temperature, aifoundry3's about 25 °C cooler; whether the difference is the card or the temperature is not yet known.</span></p>
+<details class="more"><summary>What the range in brackets means</summary>
 <p class="small">Brackets are the range over every pass on both cards. A figure with no card named held on both
 cards (three passes or more on each, or the same value on both); where one rests on one card, on fewer runs, or
-differs between the cards, the text says so. Section 9 says how each bar was made.</p>
+differs between the cards, the text says so. Section 9 says how each bar was made.</p></details>
 
 <span class="math-display"><svg style="vertical-align: -2.697ex;" xmlns="http://www.w3.org/2000/svg" width="46.12ex" height="6.16ex" role="img" focusable="false" viewBox="0 -1530.7 20385.2 2722.9" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-1-TEX-I-1D438" d="M492 213Q472 213 472 226Q472 230 477 250T482 285Q482 316 461 323T364 330H312Q311 328 277 192T243 52Q243 48 254 48T334 46Q428 46 458 48T518 61Q567 77 599 117T670 248Q680 270 683 272Q690 274 698 274Q718 274 718 261Q613 7 608 2Q605 0 322 0H133Q31 0 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H757Q764 676 764 669Q764 664 751 557T737 447Q735 440 717 440H705Q698 445 698 453L701 476Q704 500 704 528Q704 558 697 578T678 609T643 625T596 632T532 634H485Q397 633 392 631Q388 629 386 622Q385 619 355 499T324 377Q347 376 372 376H398Q464 376 489 391T534 472Q538 488 540 490T557 493Q562 493 565 493T570 492T572 491T574 487T577 483L544 351Q511 218 508 216Q505 213 492 213Z"></path><path id="MJX-1-TEX-N-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path><path id="MJX-1-TEX-N-77" d="M90 368Q84 378 76 380T40 385H18V431H24L43 430Q62 430 84 429T116 428Q206 428 221 431H229V385H215Q177 383 177 368Q177 367 221 239L265 113L339 328L333 345Q323 374 316 379Q308 384 278 385H258V431H264Q270 428 348 428Q439 428 454 431H461V385H452Q404 385 404 369Q404 366 418 324T449 234T481 143L496 100L537 219Q579 341 579 347Q579 363 564 373T530 385H522V431H529Q541 428 624 428Q692 428 698 431H703V385H697Q696 385 691 385T682 384Q635 377 619 334L559 161Q546 124 528 71Q508 12 503 1T487 -11H479Q460 -11 456 -4Q455 -3 407 133L361 267Q359 263 266 -4Q261 -11 243 -11H238Q225 -11 220 -3L90 368Z"></path><path id="MJX-1-TEX-N-6F" d="M28 214Q28 309 93 378T250 448Q340 448 405 380T471 215Q471 120 407 55T250 -10Q153 -10 91 57T28 214ZM250 30Q372 30 372 193V225V250Q372 272 371 288T364 326T348 362T317 390T268 410Q263 411 252 411Q222 411 195 399Q152 377 139 338T126 246V226Q126 130 145 91Q177 30 250 30Z"></path><path id="MJX-1-TEX-N-72" d="M36 46H50Q89 46 97 60V68Q97 77 97 91T98 122T98 161T98 203Q98 234 98 269T98 328L97 351Q94 370 83 376T38 385H20V408Q20 431 22 431L32 432Q42 433 60 434T96 436Q112 437 131 438T160 441T171 442H174V373Q213 441 271 441H277Q322 441 343 419T364 373Q364 352 351 337T313 322Q288 322 276 338T263 372Q263 381 265 388T270 400T273 405Q271 407 250 401Q234 393 226 386Q179 341 179 207V154Q179 141 179 127T179 101T180 81T180 66V61Q181 59 183 57T188 54T193 51T200 49T207 48T216 47T225 47T235 46T245 46H276V0H267Q249 3 140 3Q37 3 28 0H20V46H36Z"></path><path id="MJX-1-TEX-N-6B" d="M36 46H50Q89 46 97 60V68Q97 77 97 91T97 124T98 167T98 217T98 272T98 329Q98 366 98 407T98 482T98 542T97 586T97 603Q94 622 83 628T38 637H20V660Q20 683 22 683L32 684Q42 685 61 686T98 688Q115 689 135 690T165 693T176 694H179V463L180 233L240 287Q300 341 304 347Q310 356 310 364Q310 383 289 385H284V431H293Q308 428 412 428Q475 428 484 431H489V385H476Q407 380 360 341Q286 278 286 274Q286 273 349 181T420 79Q434 60 451 53T500 46H511V0H505Q496 3 418 3Q322 3 307 0H299V46H306Q330 48 330 65Q330 72 326 79Q323 84 276 153T228 222L176 176V120V84Q176 65 178 59T189 49Q210 46 238 46H254V0H246Q231 3 137 3T28 0H20V46H36Z"></path><path id="MJX-1-TEX-N-6C" d="M42 46H56Q95 46 103 60V68Q103 77 103 91T103 124T104 167T104 217T104 272T104 329Q104 366 104 407T104 482T104 542T103 586T103 603Q100 622 89 628T44 637H26V660Q26 683 28 683L38 684Q48 685 67 686T104 688Q121 689 141 690T171 693T182 694H185V379Q185 62 186 60Q190 52 198 49Q219 46 247 46H263V0H255L232 1Q209 2 183 2T145 3T107 3T57 1L34 0H26V46H42Z"></path><path id="MJX-1-TEX-N-61" d="M137 305T115 305T78 320T63 359Q63 394 97 421T218 448Q291 448 336 416T396 340Q401 326 401 309T402 194V124Q402 76 407 58T428 40Q443 40 448 56T453 109V145H493V106Q492 66 490 59Q481 29 455 12T400 -6T353 12T329 54V58L327 55Q325 52 322 49T314 40T302 29T287 17T269 6T247 -2T221 -8T190 -11Q130 -11 82 20T34 107Q34 128 41 147T68 188T116 225T194 253T304 268H318V290Q318 324 312 340Q290 411 215 411Q197 411 181 410T156 406T148 403Q170 388 170 359Q170 334 154 320ZM126 106Q126 75 150 51T209 26Q247 26 276 49T315 109Q317 116 318 175Q318 233 317 233Q309 233 296 232T251 223T193 203T147 166T126 106Z"></path><path id="MJX-1-TEX-N-64" d="M376 495Q376 511 376 535T377 568Q377 613 367 624T316 637H298V660Q298 683 300 683L310 684Q320 685 339 686T376 688Q393 689 413 690T443 693T454 694H457V390Q457 84 458 81Q461 61 472 55T517 46H535V0Q533 0 459 -5T380 -11H373V44L365 37Q307 -11 235 -11Q158 -11 96 50T34 215Q34 315 97 378T244 442Q319 442 376 393V495ZM373 342Q328 405 260 405Q211 405 173 369Q146 341 139 305T131 211Q131 155 138 120T173 59Q203 26 251 26Q322 26 373 103V342Z"></path><path id="MJX-1-TEX-N-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path><path id="MJX-1-TEX-N-3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path><path id="MJX-1-TEX-LO-222B" d="M114 -798Q132 -824 165 -824H167Q195 -824 223 -764T275 -600T320 -391T362 -164Q365 -143 367 -133Q439 292 523 655T645 1127Q651 1145 655 1157T672 1201T699 1257T733 1306T777 1346T828 1360Q884 1360 912 1325T944 1245Q944 1220 932 1205T909 1186T887 1183Q866 1183 849 1198T832 1239Q832 1287 885 1296L882 1300Q879 1303 874 1307T866 1313Q851 1323 833 1323Q819 1323 807 1311T775 1255T736 1139T689 936T633 628Q574 293 510 -5T410 -437T355 -629Q278 -862 165 -862Q125 -862 92 -831T55 -746Q55 -711 74 -698T112 -685Q133 -685 150 -700T167 -741Q167 -789 114 -798Z"></path><path id="MJX-1-TEX-I-1D461" d="M26 385Q19 392 19 395Q19 399 22 411T27 425Q29 430 36 430T87 431H140L159 511Q162 522 166 540T173 566T179 586T187 603T197 615T211 624T229 626Q247 625 254 615T261 596Q261 589 252 549T232 470L222 433Q222 431 272 431H323Q330 424 330 420Q330 398 317 385H210L174 240Q135 80 135 68Q135 26 162 26Q197 26 230 60T283 144Q285 150 288 151T303 153H307Q322 153 322 145Q322 142 319 133Q314 117 301 95T267 48T216 6T155 -11Q125 -11 98 4T59 56Q57 64 57 83V101L92 241Q127 382 128 383Q128 385 77 385H26Z"></path><path id="MJX-1-TEX-N-30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path><path id="MJX-1-TEX-I-1D443" d="M287 628Q287 635 230 637Q206 637 199 638T192 648Q192 649 194 659Q200 679 203 681T397 683Q587 682 600 680Q664 669 707 631T751 530Q751 453 685 389Q616 321 507 303Q500 302 402 301H307L277 182Q247 66 247 59Q247 55 248 54T255 50T272 48T305 46H336Q342 37 342 35Q342 19 335 5Q330 0 319 0Q316 0 282 1T182 2Q120 2 87 2T51 1Q33 1 33 11Q33 13 36 25Q40 41 44 43T67 46Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628ZM645 554Q645 567 643 575T634 597T609 619T560 635Q553 636 480 637Q463 637 445 637T416 636T404 636Q391 635 386 627Q384 621 367 550T332 412T314 344Q314 342 395 342H407H430Q542 342 590 392Q617 419 631 471T645 554Z"></path><path id="MJX-1-TEX-N-69" d="M69 609Q69 637 87 653T131 669Q154 667 171 652T188 609Q188 579 171 564T129 549Q104 549 87 564T69 609ZM247 0Q232 3 143 3Q132 3 106 3T56 1L34 0H26V46H42Q70 46 91 49Q100 53 102 60T104 102V205V293Q104 345 102 359T88 378Q74 385 41 385H30V408Q30 431 32 431L42 432Q52 433 70 434T106 436Q123 437 142 438T171 441T182 442H185V62Q190 52 197 50T232 46H255V0H247Z"></path><path id="MJX-1-TEX-N-65" d="M28 218Q28 273 48 318T98 391T163 433T229 448Q282 448 320 430T378 380T406 316T415 245Q415 238 408 231H126V216Q126 68 226 36Q246 30 270 30Q312 30 342 62Q359 79 369 104L379 128Q382 131 395 131H398Q415 131 415 121Q415 117 412 108Q393 53 349 21T250 -11Q155 -11 92 58T28 218ZM333 275Q322 403 238 411H236Q228 411 220 410T195 402T166 381T143 340T127 274V267H333V275Z"></path><path id="MJX-1-TEX-SO-28" d="M152 251Q152 646 388 850H416Q422 844 422 841Q422 837 403 816T357 753T302 649T255 482T236 250Q236 124 255 19T301 -147T356 -251T403 -315T422 -340Q422 -343 416 -349H388Q359 -325 332 -296T271 -213T212 -97T170 56T152 251Z"></path><path id="MJX-1-TEX-I-1D447" d="M40 437Q21 437 21 445Q21 450 37 501T71 602L88 651Q93 669 101 677H569H659Q691 677 697 676T704 667Q704 661 687 553T668 444Q668 437 649 437Q640 437 637 437T631 442L629 445Q629 451 635 490T641 551Q641 586 628 604T573 629Q568 630 515 631Q469 631 457 630T439 622Q438 621 368 343T298 60Q298 48 386 46Q418 46 427 45T436 36Q436 31 433 22Q429 4 424 1L422 0Q419 0 415 0Q410 0 363 1T228 2Q99 2 64 0H49Q43 6 43 9T45 27Q49 40 55 46H83H94Q174 46 189 55Q190 56 191 56Q196 59 201 76T241 233Q258 301 269 344Q339 619 339 625Q339 630 310 630H279Q212 630 191 624Q146 614 121 583T67 467Q60 445 57 441T43 437H40Z"></path><path id="MJX-1-TEX-I-1D70F" d="M39 284Q18 284 18 294Q18 301 45 338T99 398Q134 425 164 429Q170 431 332 431Q492 431 497 429Q517 424 517 402Q517 388 508 376T485 360Q479 358 389 358T299 356Q298 355 283 274T251 109T233 20Q228 5 215 -4T186 -13Q153 -13 153 20V30L203 192Q214 228 227 272T248 336L254 357Q254 358 208 358Q206 358 197 358T183 359Q105 359 61 295Q56 287 53 286T39 284Z"></path><path id="MJX-1-TEX-SO-29" d="M305 251Q305 -145 69 -349H56Q43 -349 39 -347T35 -338Q37 -333 60 -307T108 -239T160 -136T204 27T221 250T204 473T160 636T108 740T60 807T35 839Q35 850 50 850H56H69Q197 743 256 566Q305 425 305 251Z"></path><path id="MJX-1-TEX-N-2B" d="M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z"></path><path id="MJX-1-TEX-LO-2211" d="M60 948Q63 950 665 950H1267L1325 815Q1384 677 1388 669H1348L1341 683Q1320 724 1285 761Q1235 809 1174 838T1033 881T882 898T699 902H574H543H251L259 891Q722 258 724 252Q725 250 724 246Q721 243 460 -56L196 -356Q196 -357 407 -357Q459 -357 548 -357T676 -358Q812 -358 896 -353T1063 -332T1204 -283T1307 -196Q1328 -170 1348 -124H1388Q1388 -125 1381 -145T1356 -210T1325 -294L1267 -449L666 -450Q64 -450 61 -448Q55 -446 55 -439Q55 -437 57 -433L590 177Q590 178 557 222T452 366T322 544L56 909L55 924Q55 945 60 948Z"></path><path id="MJX-1-TEX-I-1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"></path><path id="MJX-1-TEX-I-1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path><path id="MJX-1-TEX-I-1D452" d="M39 168Q39 225 58 272T107 350T174 402T244 433T307 442H310Q355 442 388 420T421 355Q421 265 310 237Q261 224 176 223Q139 223 138 221Q138 219 132 186T125 128Q125 81 146 54T209 26T302 45T394 111Q403 121 406 121Q410 121 419 112T429 98T420 82T390 55T344 24T281 -1T205 -11Q126 -11 83 42T39 168ZM373 353Q367 405 305 405Q272 405 244 391T199 357T170 316T154 280T149 261Q149 260 169 260Q282 260 327 284T373 353Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><use data-c="1D438" xlink:href="#MJX-1-TEX-I-1D438"></use></g><g data-mml-node="mo" transform="translate(764,0)"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mtext" transform="translate(1153,0)"><use data-c="77" xlink:href="#MJX-1-TEX-N-77"></use><use data-c="6F" xlink:href="#MJX-1-TEX-N-6F" transform="translate(722,0)"></use><use data-c="72" xlink:href="#MJX-1-TEX-N-72" transform="translate(1222,0)"></use><use data-c="6B" xlink:href="#MJX-1-TEX-N-6B" transform="translate(1614,0)"></use><use data-c="6C" xlink:href="#MJX-1-TEX-N-6C" transform="translate(2142,0)"></use><use data-c="6F" xlink:href="#MJX-1-TEX-N-6F" transform="translate(2420,0)"></use><use data-c="61" xlink:href="#MJX-1-TEX-N-61" transform="translate(2920,0)"></use><use data-c="64" xlink:href="#MJX-1-TEX-N-64" transform="translate(3420,0)"></use></g><g data-mml-node="mo" transform="translate(5129,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g><g data-mml-node="mstyle" transform="translate(5518,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="mo" transform="translate(6073.8,0)"><use data-c="3D" xlink:href="#MJX-1-TEX-N-3D"></use></g><g data-mml-node="mstyle" transform="translate(6851.8,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="msubsup" transform="translate(7407.6,0)"><g data-mml-node="mo" transform="translate(0 1)"><use data-c="222B" xlink:href="#MJX-1-TEX-LO-222B"></use></g><g data-mml-node="TeXAtom" transform="translate(1046.4,1088.1) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D461" xlink:href="#MJX-1-TEX-I-1D461"></use></g></g><g data-mml-node="mn" transform="translate(589,-896.4) scale(0.707)"><use data-c="30" xlink:href="#MJX-1-TEX-N-30"></use></g></g><g data-mml-node="msub" transform="translate(8925.9,0)"><g data-mml-node="mi"><use data-c="1D443" xlink:href="#MJX-1-TEX-I-1D443"></use></g><g data-mml-node="mtext" transform="translate(675,-150) scale(0.707)"><use data-c="69" xlink:href="#MJX-1-TEX-N-69"></use><use data-c="64" xlink:href="#MJX-1-TEX-N-64" transform="translate(278,0)"></use><use data-c="6C" xlink:href="#MJX-1-TEX-N-6C" transform="translate(834,0)"></use><use data-c="65" xlink:href="#MJX-1-TEX-N-65" transform="translate(1112,0)"></use></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="OPEN" transform="translate(10751.1,0)"><g data-mml-node="mo" transform="translate(0 -0.5)"><use data-c="28" xlink:href="#MJX-1-TEX-SO-28"></use></g></g><g data-mml-node="mi" transform="translate(11209.1,0)"><use data-c="1D447" xlink:href="#MJX-1-TEX-I-1D447"></use></g><g data-mml-node="mo" transform="translate(11913.1,0)"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mi" transform="translate(12302.1,0)"><use data-c="1D70F" xlink:href="#MJX-1-TEX-I-1D70F"></use></g><g data-mml-node="mo" transform="translate(12819.1,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="CLOSE" transform="translate(13208.1,0)"><g data-mml-node="mo" transform="translate(0 -0.5)"><use data-c="29" xlink:href="#MJX-1-TEX-SO-29"></use></g></g><g data-mml-node="mstyle" transform="translate(13666.1,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(13833.1,0)"><g data-mml-node="mi"><use data-c="64" xlink:href="#MJX-1-TEX-N-64"></use></g></g><g data-mml-node="mi" transform="translate(14389.1,0)"><use data-c="1D70F" xlink:href="#MJX-1-TEX-I-1D70F"></use></g><g data-mml-node="mstyle" transform="translate(14906.1,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="mo" transform="translate(15406.4,0)"><use data-c="2B" xlink:href="#MJX-1-TEX-N-2B"></use></g><g data-mml-node="mstyle" transform="translate(16184.4,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="munder" transform="translate(16684.6,0)"><g data-mml-node="mo"><use data-c="2211" xlink:href="#MJX-1-TEX-LO-2211"></use></g><g data-mml-node="mi" transform="translate(600,-1084.4) scale(0.707)"><use data-c="1D456" xlink:href="#MJX-1-TEX-I-1D456"></use></g></g><g data-mml-node="msub" transform="translate(18295.3,0)"><g data-mml-node="mi"><use data-c="1D441" xlink:href="#MJX-1-TEX-I-1D441"></use></g><g data-mml-node="mi" transform="translate(836,-150) scale(0.707)"><use data-c="1D456" xlink:href="#MJX-1-TEX-I-1D456"></use></g></g><g data-mml-node="mstyle" transform="translate(19425.2,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="msub" transform="translate(19592.2,0)"><g data-mml-node="mi"><use data-c="1D452" xlink:href="#MJX-1-TEX-I-1D452"></use></g><g data-mml-node="mi" transform="translate(499,-150) scale(0.707)"><use data-c="1D456" xlink:href="#MJX-1-TEX-I-1D456"></use></g></g></g></g></svg></span>
 
@@ -196,7 +205,7 @@ differs between the cards, the text says so. Section 9 says how each bar was mad
 
 <nav class="card"><b>Contents</b><ol id="toclist"></ol></nav>
 
-<details class="card small terms" id="terms"><summary>Terms used on this page</summary>
+<details class="card small terms more" id="terms"><summary>Terms used on this page</summary>
 <p><b>Minions</b> are the chip's small in-order RISC-V cores, each with two hardware threads (<b>harts</b>), an
 8-lane vector unit and a tensor unit whose <b>TensorFMA</b> instruction multiplies 16×16×16 fp32 tiles; eight
 minions form a <b>neighbourhood</b>, 32 a <b>shire</b>, and 32 shires (1,024 minions) run kernels. Each shire's
@@ -212,20 +221,24 @@ mesh), which the service processor (<b>SP</b>), the on-die management core, repo
 <div class="chart-title">Idle board power against die temperature: the fitted law and every measured idle bin</div>
 <div id="idle-legend"></div>
 <div class="chart" id="idle"></div>
+<details class="more"><summary>How the fit was made, and idle power by rail</summary>
 <p class="small" id="idlecap"></p>
-<div class="table-wrap"><table id="rails"></table></div>
+<div class="table-wrap"><table id="rails"></table></div></details>
 
 <h3 id="the-sram-arrays-at-rest">1.1 The SRAM arrays at rest</h3>
 <div class="chart-title">Leakage of the arrays: the SRAM rail during every idle stretch, against die temperature</div>
 <div id="sram-legend"></div>
 <div class="chart" id="sram"></div>
-<p class="small" id="sramcap"></p>
+<details class="more"><summary>Fit details</summary>
+<p class="small" id="sramcap"></p></details>
 
 <h2 id="a-core-that-is-awake">2. A core that is awake</h2>
+<details class="more"><summary>How to read "mean [lo–hi]" and the per-card column</summary>
 <p class="small">Bars from here on: <b>mean</b> [lo–hi] is the mean over every pass on every card and the range
-those passes spanned; the per-card column is each card's own mean ± its pass-to-pass standard error.</p>
+those passes spanned; the per-card column is each card's own mean ± its pass-to-pass standard error.</p></details>
 <div class="table-wrap wide"><table id="awake"></table></div>
-<p class="small" id="awaketext"></p>
+<details class="more"><summary>Why a nop or a fence isn't the floor</summary>
+<p class="small" id="awaketext"></p></details>
 
 <h2 id="instructions">3. Instructions</h2>
 <p>Energy per instruction retired, above idle, both harts of all 1,024 minions running it flat out, at
@@ -233,8 +246,9 @@ those passes spanned; the per-card column is each card's own mean ± its pass-to
 <div class="chart-title">Scalar and vector units, per instruction</div>
 <div id="instr-leg"></div>
 <div class="chart" id="instr"></div>
-<p class="small" id="instrcap"></p>
-<details><summary>The 13 as a table: constant operand, per lane, issue rate</summary>
+<details class="more"><summary>How the chart was measured</summary>
+<p class="small" id="instrcap"></p></details>
+<details class="more"><summary>The 13 as a table: constant operand, per lane, issue rate</summary>
 <div class="table-wrap"><table id="instrtab"></table></div></details>
 <p id="instrtext"></p>
 
@@ -250,13 +264,15 @@ written, and so have no energy (the card and the log of that check were not kept
 <span class="ck-range"><label for="all-find">find an instruction</label><input id="all-find" type="search" list="all-names" size="12" autocomplete="off" spellcheck="false"><datalist id="all-names"></datalist></span></div>
 <div class="chart" id="allinstr"></div>
 <div class="ck-readout small" id="all-readout"></div>
-<p class="small" id="allcap"></p>
-<details><summary>The table, by class</summary><div class="table-wrap"><table id="alltab"></table></div></details>
+<details class="more"><summary>How the chart was measured</summary>
+<p class="small" id="allcap"></p></details>
+<details class="more"><summary>The table, by class</summary><div class="table-wrap"><table id="alltab"></table></div></details>
 <p id="alltext"></p>
 
 <h3 id="the-tensor-unit-per-multiply-add">3.2 The tensor unit, per multiply-add</h3>
 <div class="table-wrap wide"><table id="tensor"></table></div>
-<p class="small" id="tensornote"></p>
+<details class="more"><summary>What "marginal" and "loaded" mean, and the bars</summary>
+<p class="small" id="tensornote"></p></details>
 <p>The tensor unit is the one place on the chip resolved below the instruction, by simulating its RTL on the
 operands aifoundry2 ran (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#from-flips-to-watts">The
 Horace experiment</a>): four kinds of event, four energies fitted on that card —
@@ -272,16 +288,19 @@ costs and the aggregate bandwidth the card reached on it; the diagonals are cons
 <div id="map-legend"></div>
 <div class="chart" id="bytemap"></div>
 <div class="ck-readout" id="map-readout"></div>
-<p class="small" id="mapcap"></p>
+<details class="more"><summary>What the map's numbers are</summary>
+<p class="small" id="mapcap"></p></details>
 
 <h3 id="reads-and-writes-measured-together">4.1 Reads and writes, measured together</h3>
 <div class="table-wrap wide"><table id="memtab"></table></div>
-<p class="small" id="memcap"></p>
+<details class="more"><summary>What each row measures</summary>
+<p class="small" id="memcap"></p></details>
 <p id="memtext"></p>
 
+<details class="more"><summary>An older, superseded table: reads by level</summary>
 <h3 id="reads-by-level">4.2 Reads by level</h3>
 <div class="table-wrap"><table id="memold"></table></div>
-<p class="small" id="memoldnote"></p>
+<p class="small" id="memoldnote"></p></details>
 
 <h3 id="finer-grain-wires-lines-rows-and-the-leakage-of-the-arrays">4.3 Finer grain: wires, lines and rows</h3>
 <p>What a byte costs is not one number. These are the parts of it the card's instruments can separate.</p>
@@ -290,19 +309,22 @@ costs and the aggregate bandwidth the card reached on it; the diagonals are cons
 <div id="wire-legend"></div>
 <div class="chart" id="wire"></div>
 <div class="ck-readout small" id="wire-readout"></div>
-<p class="small" id="wirecap"></p>
+<details class="more"><summary>How the wire chart was measured</summary>
+<p class="small" id="wirecap"></p></details>
 <p id="wiretext"></p>
+<details class="more"><summary>Line fills, row patterns and neighbourhood reads, as tables</summary>
 <div class="table-wrap"><table id="linetab"></table></div>
 <p id="linetext"></p>
 <div class="table-wrap"><table id="rowtab"></table></div>
 <p id="rowtext"></p>
-<div class="table-wrap"><table id="neightab"></table></div>
+<div class="table-wrap"><table id="neightab"></table></div></details>
 
 <h3 id="where-the-current-flows">4.4 Where the current flows, by meter</h3>
 <div class="chart-title">Each class of operation split across the metered rails</div>
 <div id="rails-legend"></div>
 <div class="chart" id="railsplit"></div>
-<p class="small" id="railscap"></p>
+<details class="more"><summary>How the split was measured</summary>
+<p class="small" id="railscap"></p></details>
 <div id="railstext"></div>
 
 <h2 id="bytes-between-cores-and-shires">5. Bytes between cores and shires</h2>
@@ -313,16 +335,19 @@ how many IDs apart its shires are and by how many mesh hops that is on average, 
 against latency on aifoundry2).</p>
 <style>@media (max-width: 480px) { #comm .what { display: none; } }</style>
 <div class="table-wrap wide"><table id="comm"></table></div>
-<div class="small" id="commnote"></div>
+<details class="more"><summary>How the rings and the relay were measured</summary>
+<div class="small" id="commnote"></div></details>
 <p id="commtext"></p>
 
+<details class="more"><summary>The same data as a chart, against mesh distance</summary>
 <div id="rings-legend"></div>
 <div class="chart" id="rings"></div>
-<p class="small" id="ringscap"></p>
+<p class="small" id="ringscap"></p></details>
 
 <h2 id="synchronisation">6. Synchronisation</h2>
 <div class="table-wrap wide"><table id="sync"></table></div>
-<p class="small" id="syncnote"></p>
+<details class="more"><summary>Notes on the sync table</summary>
+<p class="small" id="syncnote"></p></details>
 <p class="small">The contended atomic is measured in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line#what-it-costs-in-energy">One
 hot line stops a shire</a>; the barriers, the reduction trees and every other primitive in
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">On-chip
@@ -356,23 +381,27 @@ caption.stack-cap { display: none; }
 <div class="ck-readout" id="calc-readout"></div>
 <p class="small" style="margin:12px 0 0"><b>What the workload does</b>: up to three events at a rate (a preset fills them; change any).</p>
 <div id="calc-rows"></div>
-<p class="small" id="compcap"></p>
+<details class="more"><summary>How the calculator prices a row</summary>
+<p class="small" id="compcap"></p></details>
 <p id="comptext"></p>
 
 <h3 id="the-relay-priced-from-section-4">7.2 The relay, priced from section 4</h3>
 <div class="table-wrap"><table id="relaycheck"></table></div>
 <div id="relay-legend"></div>
 <div class="chart" id="relaychart"></div>
+<details class="more"><summary>How the relay's price was computed</summary>
 <p class="small" id="relaychartcap"></p>
-<p class="small" id="relaytext"></p>
+<p class="small" id="relaytext"></p></details>
 
 <h2 id="two-cards">8. Two cards</h2>
 <div class="chart-title">Every catalogue entry: aifoundry3's energy as a fraction of aifoundry2's</div>
 <div id="cards-legend"></div>
 <div class="chart" id="cards"></div>
-<p class="small" id="cardscap"></p>
+<details class="more"><summary>What the chart's numbers are</summary>
+<p class="small" id="cardscap"></p></details>
 
 <h2 id="method-and-what-the-manual-cannot-tell-you">9. Method, and what the manual cannot tell you</h2>
+<details class="more"><summary>Caveats and method in full</summary>
 <ul>
 <li>Board power is the PMIC's reading, 10 mW resolution, sampled at 10 Hz; under that sampling it takes a new value
 about every 150 ms on aifoundry2 (the service processor's own pass is 133 ms with no sampler running) and about every
@@ -406,9 +435,11 @@ only through the leakage correction. The smallest signal, the hot line (about 1.
 widest bars, ±17%, mostly because its first session (aifoundry2, 22 September) read 1.4 W against 1.0–1.2 W in
 every pass since, and because on so small a signal the leakage correction, a few tenths of a watt, moves each pass
 by 10–25%; the awake core (±5–7%) and the DRAM relay (±5.5%) are about as wide as a typical catalogue entry (the median instruction's range is ±5.9%, section 3.1).</li>
-</ul>
-<p class="small">Every table is rebuilt from the committed data by the commands in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/energy-manual#regenerating">docs/energy-manual/README.md</a>; the measurement runs are docs/findings/03-experiments.md, E26–E30.</p>
-<p class="small">Versions: three editions on 23 September (the first; every instruction on two cards and section 4.3; confidence bars and the reruns); corrected 24 September after a review; revised 25 September after a second review (DRAM rows, the stalled minion and the chip barrier, the unmetered attribution moved to the hub, and the maps and the calculator of sections 3.1, 4 and 7.1). 25 September (version 3): every claim checked for proof on both cards; the idle law is led by its measured slope, with its split into fixed and leakage given as a range; figures that rest on one card, on fewer than three runs, or that differ between the cards now say so; rankings and differences within the noise removed (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3/</a>).</p>
+</ul></details>
+<details class="more"><summary>Reproduce this</summary>
+<p class="small">Every table is rebuilt from the committed data by the commands in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/energy-manual#regenerating">docs/energy-manual/README.md</a>; the measurement runs are docs/findings/03-experiments.md, E26–E30.</p></details>
+<details class="more"><summary>Version history</summary>
+<p class="small">Versions: three editions on 23 September (the first; every instruction on two cards and section 4.3; confidence bars and the reruns); corrected 24 September after a review; revised 25 September after a second review (DRAM rows, the stalled minion and the chip barrier, the unmetered attribution moved to the hub, and the maps and the calculator of sections 3.1, 4 and 7.1). 25 September (version 3): every claim checked for proof on both cards; the idle law is led by its measured slope, with its split into fixed and leakage given as a range; figures that rest on one card, on fewer than three runs, or that differ between the cards now say so; rankings and differences within the noise removed (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3/</a>).</p></details>
 
 <h2 id="related-reports">10. Related reports</h2>
 <p>The manual is the table of costs; these are the reports that measured its parts, by the section they feed,
@@ -923,9 +954,30 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 
 </script>

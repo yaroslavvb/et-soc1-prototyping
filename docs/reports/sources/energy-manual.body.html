@@ -9,9 +9,10 @@ temperature (section 1) and the cost of an awake core (section 2).</p>
 On zeros an integer add is 6 pJ, a float add 23 and an eight-lane multiply-add 27; on random data 9, 25 and 56.
 A byte from the shire's own scratchpad is 2–8 pJ; from DRAM, 90–140; written back through the L1 to DRAM,
 240–330.</b> <span id="cardlede">aifoundry3 reads about 5% lower than aifoundry2 (median 0.95; 80% of entries 1–9% lower), each card at its own die temperature, aifoundry3's about 25 °C cooler; whether the difference is the card or the temperature is not yet known.</span></p>
+<details class="more"><summary>What the range in brackets means</summary>
 <p class="small">Brackets are the range over every pass on both cards. A figure with no card named held on both
 cards (three passes or more on each, or the same value on both); where one rests on one card, on fewer runs, or
-differs between the cards, the text says so. Section 9 says how each bar was made.</p>
+differs between the cards, the text says so. Section 9 says how each bar was made.</p></details>
 
 $$E(\text{workload}) \;=\; \int_0^{t} P_\text{idle}\bigl(T(\tau)\bigr)\,\mathrm{d}\tau \;+\; \sum_i N_i\, e_i$$
 
@@ -24,7 +25,7 @@ $$E(\text{workload}) \;=\; \int_0^{t} P_\text{idle}\bigl(T(\tau)\bigr)\,\mathrm{
 
 <nav class="card"><b>Contents</b><ol id="toclist"></ol></nav>
 
-<details class="card small terms" id="terms"><summary>Terms used on this page</summary>
+<details class="card small terms more" id="terms"><summary>Terms used on this page</summary>
 <p><b>Minions</b> are the chip's small in-order RISC-V cores, each with two hardware threads (<b>harts</b>), an
 8-lane vector unit and a tensor unit whose <b>TensorFMA</b> instruction multiplies 16×16×16 fp32 tiles; eight
 minions form a <b>neighbourhood</b>, 32 a <b>shire</b>, and 32 shires (1,024 minions) run kernels. Each shire's
@@ -40,20 +41,24 @@ mesh), which the service processor (<b>SP</b>), the on-die management core, repo
 <div class="chart-title">Idle board power against die temperature: the fitted law and every measured idle bin</div>
 <div id="idle-legend"></div>
 <div class="chart" id="idle"></div>
+<details class="more"><summary>How the fit was made, and idle power by rail</summary>
 <p class="small" id="idlecap"></p>
-<div class="table-wrap"><table id="rails"></table></div>
+<div class="table-wrap"><table id="rails"></table></div></details>
 
 <h3 id="the-sram-arrays-at-rest">1.1 The SRAM arrays at rest</h3>
 <div class="chart-title">Leakage of the arrays: the SRAM rail during every idle stretch, against die temperature</div>
 <div id="sram-legend"></div>
 <div class="chart" id="sram"></div>
-<p class="small" id="sramcap"></p>
+<details class="more"><summary>Fit details</summary>
+<p class="small" id="sramcap"></p></details>
 
 <h2 id="a-core-that-is-awake">2. A core that is awake</h2>
+<details class="more"><summary>How to read "mean [lo–hi]" and the per-card column</summary>
 <p class="small">Bars from here on: <b>mean</b> [lo–hi] is the mean over every pass on every card and the range
-those passes spanned; the per-card column is each card's own mean ± its pass-to-pass standard error.</p>
+those passes spanned; the per-card column is each card's own mean ± its pass-to-pass standard error.</p></details>
 <div class="table-wrap wide"><table id="awake"></table></div>
-<p class="small" id="awaketext"></p>
+<details class="more"><summary>Why a nop or a fence isn't the floor</summary>
+<p class="small" id="awaketext"></p></details>
 
 <h2 id="instructions">3. Instructions</h2>
 <p>Energy per instruction retired, above idle, both harts of all 1,024 minions running it flat out, at
@@ -61,8 +66,9 @@ those passes spanned; the per-card column is each card's own mean ± its pass-to
 <div class="chart-title">Scalar and vector units, per instruction</div>
 <div id="instr-leg"></div>
 <div class="chart" id="instr"></div>
-<p class="small" id="instrcap"></p>
-<details><summary>The 13 as a table: constant operand, per lane, issue rate</summary>
+<details class="more"><summary>How the chart was measured</summary>
+<p class="small" id="instrcap"></p></details>
+<details class="more"><summary>The 13 as a table: constant operand, per lane, issue rate</summary>
 <div class="table-wrap"><table id="instrtab"></table></div></details>
 <p id="instrtext"></p>
 
@@ -78,13 +84,15 @@ written, and so have no energy (the card and the log of that check were not kept
 <span class="ck-range"><label for="all-find">find an instruction</label><input id="all-find" type="search" list="all-names" size="12" autocomplete="off" spellcheck="false"><datalist id="all-names"></datalist></span></div>
 <div class="chart" id="allinstr"></div>
 <div class="ck-readout small" id="all-readout"></div>
-<p class="small" id="allcap"></p>
-<details><summary>The table, by class</summary><div class="table-wrap"><table id="alltab"></table></div></details>
+<details class="more"><summary>How the chart was measured</summary>
+<p class="small" id="allcap"></p></details>
+<details class="more"><summary>The table, by class</summary><div class="table-wrap"><table id="alltab"></table></div></details>
 <p id="alltext"></p>
 
 <h3 id="the-tensor-unit-per-multiply-add">3.2 The tensor unit, per multiply-add</h3>
 <div class="table-wrap wide"><table id="tensor"></table></div>
-<p class="small" id="tensornote"></p>
+<details class="more"><summary>What "marginal" and "loaded" mean, and the bars</summary>
+<p class="small" id="tensornote"></p></details>
 <p>The tensor unit is the one place on the chip resolved below the instruction, by simulating its RTL on the
 operands aifoundry2 ran (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#from-flips-to-watts">The
 Horace experiment</a>): four kinds of event, four energies fitted on that card —
@@ -100,16 +108,19 @@ costs and the aggregate bandwidth the card reached on it; the diagonals are cons
 <div id="map-legend"></div>
 <div class="chart" id="bytemap"></div>
 <div class="ck-readout" id="map-readout"></div>
-<p class="small" id="mapcap"></p>
+<details class="more"><summary>What the map's numbers are</summary>
+<p class="small" id="mapcap"></p></details>
 
 <h3 id="reads-and-writes-measured-together">4.1 Reads and writes, measured together</h3>
 <div class="table-wrap wide"><table id="memtab"></table></div>
-<p class="small" id="memcap"></p>
+<details class="more"><summary>What each row measures</summary>
+<p class="small" id="memcap"></p></details>
 <p id="memtext"></p>
 
+<details class="more"><summary>An older, superseded table: reads by level</summary>
 <h3 id="reads-by-level">4.2 Reads by level</h3>
 <div class="table-wrap"><table id="memold"></table></div>
-<p class="small" id="memoldnote"></p>
+<p class="small" id="memoldnote"></p></details>
 
 <h3 id="finer-grain-wires-lines-rows-and-the-leakage-of-the-arrays">4.3 Finer grain: wires, lines and rows</h3>
 <p>What a byte costs is not one number. These are the parts of it the card's instruments can separate.</p>
@@ -118,19 +129,22 @@ costs and the aggregate bandwidth the card reached on it; the diagonals are cons
 <div id="wire-legend"></div>
 <div class="chart" id="wire"></div>
 <div class="ck-readout small" id="wire-readout"></div>
-<p class="small" id="wirecap"></p>
+<details class="more"><summary>How the wire chart was measured</summary>
+<p class="small" id="wirecap"></p></details>
 <p id="wiretext"></p>
+<details class="more"><summary>Line fills, row patterns and neighbourhood reads, as tables</summary>
 <div class="table-wrap"><table id="linetab"></table></div>
 <p id="linetext"></p>
 <div class="table-wrap"><table id="rowtab"></table></div>
 <p id="rowtext"></p>
-<div class="table-wrap"><table id="neightab"></table></div>
+<div class="table-wrap"><table id="neightab"></table></div></details>
 
 <h3 id="where-the-current-flows">4.4 Where the current flows, by meter</h3>
 <div class="chart-title">Each class of operation split across the metered rails</div>
 <div id="rails-legend"></div>
 <div class="chart" id="railsplit"></div>
-<p class="small" id="railscap"></p>
+<details class="more"><summary>How the split was measured</summary>
+<p class="small" id="railscap"></p></details>
 <div id="railstext"></div>
 
 <h2 id="bytes-between-cores-and-shires">5. Bytes between cores and shires</h2>
@@ -141,16 +155,19 @@ how many IDs apart its shires are and by how many mesh hops that is on average, 
 against latency on aifoundry2).</p>
 <style>@media (max-width: 480px) { #comm .what { display: none; } }</style>
 <div class="table-wrap wide"><table id="comm"></table></div>
-<div class="small" id="commnote"></div>
+<details class="more"><summary>How the rings and the relay were measured</summary>
+<div class="small" id="commnote"></div></details>
 <p id="commtext"></p>
 
+<details class="more"><summary>The same data as a chart, against mesh distance</summary>
 <div id="rings-legend"></div>
 <div class="chart" id="rings"></div>
-<p class="small" id="ringscap"></p>
+<p class="small" id="ringscap"></p></details>
 
 <h2 id="synchronisation">6. Synchronisation</h2>
 <div class="table-wrap wide"><table id="sync"></table></div>
-<p class="small" id="syncnote"></p>
+<details class="more"><summary>Notes on the sync table</summary>
+<p class="small" id="syncnote"></p></details>
 <p class="small">The contended atomic is measured in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line#what-it-costs-in-energy">One
 hot line stops a shire</a>; the barriers, the reduction trees and every other primitive in
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">On-chip
@@ -184,23 +201,27 @@ caption.stack-cap { display: none; }
 <div class="ck-readout" id="calc-readout"></div>
 <p class="small" style="margin:12px 0 0"><b>What the workload does</b>: up to three events at a rate (a preset fills them; change any).</p>
 <div id="calc-rows"></div>
-<p class="small" id="compcap"></p>
+<details class="more"><summary>How the calculator prices a row</summary>
+<p class="small" id="compcap"></p></details>
 <p id="comptext"></p>
 
 <h3 id="the-relay-priced-from-section-4">7.2 The relay, priced from section 4</h3>
 <div class="table-wrap"><table id="relaycheck"></table></div>
 <div id="relay-legend"></div>
 <div class="chart" id="relaychart"></div>
+<details class="more"><summary>How the relay's price was computed</summary>
 <p class="small" id="relaychartcap"></p>
-<p class="small" id="relaytext"></p>
+<p class="small" id="relaytext"></p></details>
 
 <h2 id="two-cards">8. Two cards</h2>
 <div class="chart-title">Every catalogue entry: aifoundry3's energy as a fraction of aifoundry2's</div>
 <div id="cards-legend"></div>
 <div class="chart" id="cards"></div>
-<p class="small" id="cardscap"></p>
+<details class="more"><summary>What the chart's numbers are</summary>
+<p class="small" id="cardscap"></p></details>
 
 <h2 id="method-and-what-the-manual-cannot-tell-you">9. Method, and what the manual cannot tell you</h2>
+<details class="more"><summary>Caveats and method in full</summary>
 <ul>
 <li>Board power is the PMIC's reading, 10 mW resolution, sampled at 10 Hz; under that sampling it takes a new value
 about every 150 ms on aifoundry2 (the service processor's own pass is 133 ms with no sampler running) and about every
@@ -234,9 +255,11 @@ only through the leakage correction. The smallest signal, the hot line (about 1.
 widest bars, ±17%, mostly because its first session (aifoundry2, 22 September) read 1.4 W against 1.0–1.2 W in
 every pass since, and because on so small a signal the leakage correction, a few tenths of a watt, moves each pass
 by 10–25%; the awake core (±5–7%) and the DRAM relay (±5.5%) are about as wide as a typical catalogue entry (the median instruction's range is ±5.9%, section 3.1).</li>
-</ul>
-<p class="small">Every table is rebuilt from the committed data by the commands in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/energy-manual#regenerating">docs/energy-manual/README.md</a>; the measurement runs are docs/findings/03-experiments.md, E26–E30.</p>
-<p class="small">Versions: three editions on 23 September (the first; every instruction on two cards and section 4.3; confidence bars and the reruns); corrected 24 September after a review; revised 25 September after a second review (DRAM rows, the stalled minion and the chip barrier, the unmetered attribution moved to the hub, and the maps and the calculator of sections 3.1, 4 and 7.1). 25 September (version 3): every claim checked for proof on both cards; the idle law is led by its measured slope, with its split into fixed and leakage given as a range; figures that rest on one card, on fewer than three runs, or that differ between the cards now say so; rankings and differences within the noise removed (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3/</a>).</p>
+</ul></details>
+<details class="more"><summary>Reproduce this</summary>
+<p class="small">Every table is rebuilt from the committed data by the commands in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/energy-manual#regenerating">docs/energy-manual/README.md</a>; the measurement runs are docs/findings/03-experiments.md, E26–E30.</p></details>
+<details class="more"><summary>Version history</summary>
+<p class="small">Versions: three editions on 23 September (the first; every instruction on two cards and section 4.3; confidence bars and the reruns); corrected 24 September after a review; revised 25 September after a second review (DRAM rows, the stalled minion and the chip barrier, the unmetered attribution moved to the hub, and the maps and the calculator of sections 3.1, 4 and 7.1). 25 September (version 3): every claim checked for proof on both cards; the idle law is led by its measured slope, with its split into fixed and leakage given as a range; figures that rest on one card, on fewer than three runs, or that differ between the cards now say so; rankings and differences within the noise removed (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3/</a>).</p></details>
 
 <h2 id="related-reports">10. Related reports</h2>
 <p>The manual is the table of costs; these are the reports that measured its parts, by the section they feed,
