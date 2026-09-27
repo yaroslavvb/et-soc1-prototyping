@@ -506,6 +506,13 @@ same state, and over minutes that matters. The model below carries that state.</
 35.6 W as it cooled) the die fell from 84 to 72 °C in four minutes; presumably something changed the airflow in the lab. That run and the one after it are in the chart but
 not in the fits.</li>
 </ul>
+<div class="chart-title">Seconds to 90 °C against switching power, every long run. Dots: runs that reached 90 °C, coloured as in the
+chart above. Arrows: runs that ran the ten-minute limit without reaching it (the true time is beyond the arrow). Rings:
+<a href="#custom-workloads-structured-matrices">section 9</a>'s afternoon matrices. The line is the fitted model launched from
+an idle die at 80.9 °C; the dashed line is the card's flip budget (<a href="#a-model-from-flips-to-temperature">section
+8</a>).</div>
+<div id="watts-cap-leg"></div>
+<div class="chart" id="watts-cap"></div>
 
 <h2 id="a-model-from-flips-to-temperature">8. A model from flips to temperature</h2>
 <p>With the long runs the chain of <a href="#from-flips-to-watts">sections 3</a> and <a href="#from-watts-to-degrees">4</a> closes into one model that needs only the flip schedule. It is
@@ -1654,6 +1661,47 @@ if (D.long && D.model) (function(){
    D.long.map(r=>{const p=pr.find(q=>q.run===r.run),cap=r.reason==='cap',tend=cap?r.t_max:(r.T_at['600']!==undefined&&r.T_at['600']!==null?r.T_at['600']:r.t_max);
     const nf='<td class="num small">not in the fit</td>';
     return `<tr><td>${NAMES[r.values]||r.values}</td><td class="num">${r.minions.toLocaleString()}</td><td class="num">${PDYN(r.values,r.minions)!==null?f1(PDYN(r.values,r.minions)):'–'}</td><td class="num"><b>${r.dur.toFixed(0)}</b></td><td>${cap?'at 90 °C':'time limit'}</td>`+(p?`<td class="num">${p.t_cap_pred?p.t_cap_pred.toFixed(0):'never'}</td>`:nf)+`<td class="num">${cap?'90':f1(tend)}</td>`+(p?`<td class="num">${p.T_end_pred?f1(p.T_end_pred):'–'}</td>`:nf)+'</tr>';}).join('')+'</tbody>';})();
+ /* seconds to 90 °C against switching power: every long run against the fitted model and the flip budget, ties this section to section 8 */
+ (function(){
+  const GRP=[['ones at full load',r=>r.minions===1024&&r.values==='ones'],['random normal at full load',r=>r.minions===1024&&r.values==='randn'],
+   ['zeros at full load',r=>r.minions===1024&&r.values==='zeros'],['random normal on fewer minions',r=>r.minions<1024&&r.values==='randn'],
+   ['ones and uniform on fewer minions',r=>r.minions<1024&&r.values!=='randn'],['other patterns at full load',r=>r.minions===1024&&!MAINL.includes(r.values)]];
+  CK.legend('watts-cap-leg',GRP.map(([l,t])=>{const q=D.long.find(t);return q?{key:l,label:l,mark:'dot',color:LCOL(q)}:null;}).filter(Boolean).concat([
+   {key:'afternoon',label:'section 9’s afternoon matrices',mark:'ring',color:'var(--ink)'},
+   {key:'model',label:'the fitted model, launched at 80.9 °C',mark:'line',color:'var(--ink)'},
+   {key:'budget',label:'the card’s flip budget',mark:'dash',color:'var(--bad)'}]));
+  const leak=T=>PW.A_leak_at_80*Math.exp((Math.min(T,140)-80)/PW.T_L),Ta=M.T_amb,Rt=M.R_total;
+  let budget=-1e9;for(let t=50;t<=100;t+=0.05){const p=(t-Ta)/Rt-PW.P_fix-leak(t);if(p>budget)budget=p;}
+  /* the same difference equation as the pricer of section 9's run(), driven by a constant switching power from an idle launch */
+  function tcapAt(pdyn,start){const taus=M.taus,Rs=M.R;let xs=Rs.map((r,k)=>taus[k]<=25?r*(PW.P_fix+leak(start)):0);
+   const slowR=Rs.reduce((q,r,k)=>q+(taus[k]>25?r:0),0)||1,rest=start-Ta-xs.reduce((q,v)=>q+v,0);
+   xs=xs.map((v,k)=>taus[k]<=25?v:rest*Rs[k]/slowR);
+   const dt=0.1,al=taus.map(t=>1-Math.exp(-dt/t));let T=start;
+   for(let n=1;n<=8000;n++){const p=PW.P_fix+leak(T)+pdyn;xs=xs.map((v,k)=>v+al[k]*(Rs[k]*p-v));T=Ta+xs.reduce((q,v)=>q+v,0);if(T>=90)return n*dt;}
+   return null;}
+  const pts=D.long.map(r=>({r,x:PDYN(r.values,r.minions),y:r.dur,capped:r.reason==='cap'})).filter(p=>p.x!=null);
+  const ring=(D.validation?D.validation.afternoon.rows:[]).map(r=>({name:SNAME[r.values]||NAMES[r.values]||r.values,x:r.p_flips,y:r.dur,capped:r.capped})).filter(p=>p.x!=null);
+  const xmax=Math.max(...pts.map(p=>p.x),...ring.map(p=>p.x))*1.1;
+  CK.frame('watts-cap',{maxW:640,height:W=>Math.round(Math.min(W,640)*0.78),label:'Seconds to 90 °C against switching power, every long run',draw:ff=>{
+   const W=ff.W,H=ff.H,L=48,R=16,T=20,B=40;
+   const x=CK.lin(0,xmax,L,W-R),y=CK.log(8,800,H-B,T);
+   CK.axes(ff,{x,y,L,R,T,B,xt:x.ticks(6),yt:[10,20,50,100,200,500],xfmt:v=>CK.fmt.num(v,0),xl:'switching power from flip counts, W',yl:'seconds to 90 °C (log scale)'});
+   const bx=x(budget);CK.el('line',{x1:bx,x2:bx,y1:T,y2:H-B,style:'stroke:var(--bad)','stroke-dasharray':'5 4','stroke-width':1.5},ff.svg);
+   CK.inside(ff,[CK.txt(ff.svg,bx+5,T+10,`flip budget: +${budget.toFixed(1)} W`,'lab')]);
+   const curve=[];for(let i=1;i<=90;i++){const pdyn=budget+(xmax-budget)*Math.pow(i/90,2.3),t=tcapAt(pdyn,80.9);if(t!=null&&t<=800)curve.push([pdyn,t]);}
+   if(curve.length>1)CK.el('path',{d:CK.path(curve,x,y),style:'fill:none;stroke:var(--ink)','stroke-width':2},ff.svg);
+   const nodes=[];
+   for(const p of pts){const cy=y(Math.min(p.y,798));
+    if(p.capped){const c=CK.el('circle',{cx:x(p.x),cy,r:5,style:`fill:${LCOL(p.r)};fill-opacity:0.85;stroke:var(--surface)`,'stroke-width':1.3},ff.svg);
+     CK.tip(ff,c,`<b>${LNAME(p.r)}</b><br>${f1(p.x)} W of switching<br>90 °C after ${p.y.toFixed(0)} s`);nodes.push(c);}
+    else{const cx0=x(p.x),g=CK.el('g',{},ff.svg);CK.el('polygon',{points:`${cx0-6},${cy+5} ${cx0+6},${cy+5} ${cx0},${cy-7}`,style:`fill:${LCOL(p.r)}`},g);
+     const endT=p.r.T_at['600']!=null?p.r.T_at['600']:p.r.t_max;
+     CK.tip(ff,g,`<b>${LNAME(p.r)}</b><br>${f1(p.x)} W of switching<br>ran the ten-minute limit, ended at ${f1(endT)} °C: at least ${p.y.toFixed(0)} s to 90 °C`);nodes.push(g);}}
+   for(const r of ring){const cy=y(Math.min(r.y,798)),g=CK.el('g',{},ff.svg);
+    CK.el('circle',{cx:x(r.x),cy,r:6,style:'fill:none;stroke:var(--ink)','stroke-width':2},g);
+    CK.tip(ff,g,`<b>${r.name}</b>, afternoon session<br>${f1(r.x)} W of switching<br>${r.capped?'90 °C after '+r.y.toFixed(0)+' s':'ran '+r.y.toFixed(0)+' s without reaching 90 °C'}`);nodes.push(g);}
+   nodes.sort((a,b)=>a.getBBox().x-b.getBBox().x);CK.keynav(ff,nodes);}});
+ })();
  /* predicted against measured time to the cap: fitted runs (dots, coloured by group as in section 7) and held-out runs (rings) */
  (function(){const pr=M.per_run.filter(p=>p.capped&&p.t_cap_pred);const colr=p=>LC(p.values,p.active);
   const GRP=[['ones at full load',p=>p.active===1024&&p.values==='ones'],['random normal at full load',p=>p.active===1024&&p.values==='randn'],

@@ -69,6 +69,48 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
    'The TensorLoad rows leave out an energy per byte: use the energy manual’s two-card values (Memory, in section 4).';}
 })();
 
+/* ---------- the capacitance ladder: every one of the 30 ablation configs, against Esperanto's target and aifoundry3's fp32 points ---------- */
+(function(){
+ /* short row labels, so 30 of them fit the margin at 11 px; the tooltip on each dot gives the full config and its minion count */
+ const NAME={spin:'integer loop',spin_8:'integer loop, 256',
+  fp32_zeros:'fp32 zeros',fp16_zeros:'fp16 zeros',int8_zeros:'int8 zeros',
+  fp32_ones:'fp32 ones',fp16_ones:'fp16 ones',int8_ones:'int8 ones',
+  fp32_randn:'fp32 random',fp16_randn:'fp16 random',int8_randn:'int8 random',
+  fp32_randn_8:'fp32 random, 256',fp32_randn_16:'fp32 random, 512',fp32_randn_24:'fp32 random, 768',
+  tload_l2:'L2 stream',tload_dram:'DRAM stream',
+  m_identity:'identity',m_butterfly:'butterfly',m_tridiagonal:'tridiagonal',m_upper:'upper-triangular',
+  m_block_diag:'4×4 blocks',m_negzero:'all −0.0',m_fft_cos:'DFT (cos/sin)',m_hadamard:'Hadamard, ±1',
+  m_relu:'ReLU weights',m_quant4:'4-bit quantised',m_lowrank:'rank 1',m_circulant:'circulant',
+  m_kaleidoscope:'kaleidoscope',m_dct:'DCT-II'};
+ /* per-minion capacitance from each config's own board power over idle, voltage and clock (the same P/(V²f) as the table above) */
+ const cfgs=Object.keys(C).map(k=>{const c=C[k],Vv=c.mv/1000,F0=c.mhz[0]*1e6;
+   return {k,name:NAME[k]||k,nf:(c.mw_per_minion/1000)/(Vv*Vv*F0)*1e9,minions:c.minions};}).sort((a,b)=>a.nf-b.nf);
+ const S2=D.second_card,P3=S2&&S2.patterns,MAP3={fp32_zeros:'zeros',fp32_ones:'ones',fp32_randn:'randn'};
+ const a3={};if(P3)for(const k in MAP3){const q=P3[MAP3[k]];if(q){const V3=q.mv/1000;a3[k]=q.dyn/1024/(V3*V3*600e6)*1e9;}}
+ const ids=CK.cardsIn(Object.keys(a3).length?['aifoundry2','aifoundry3']:['aifoundry2']);
+ CK.legend('cap-ladder-leg',CK.cardLegend(ids).concat([{key:'target',label:'Esperanto’s target (10 mW at 0.425 V, 1 GHz)',mark:'dash',color:'var(--bad)'}]));
+ const vals=cfgs.map(c=>c.nf).concat(Object.values(a3)).concat([0.040]);
+ const lo=Math.min(...vals)*0.8,hi=Math.max(...vals)*1.25;
+ CK.frame('cap-ladder',{minW:320,maxW:640,height:cfgs.length*18+50,label:'Effective switched capacitance per minion for every ablation config',draw:ff=>{
+  const W=ff.W,H=ff.H,L=ff.narrow?128:150,R=14,T=14,B=32;
+  const x=CK.log(lo,hi,L,W-R);
+  const labs=[];x.ticks(6).forEach(t=>{CK.el('line',{x1:x(t),x2:x(t),y1:T,y2:H-B,class:'grid-line'},ff.svg);labs.push(CK.txt(ff.svg,x(t),H-B+16,CK.fmt.num(t,t<0.1?2:1),'tick','middle'));});
+  CK.el('line',{x1:L,x2:W-R,y1:H-B,y2:H-B,class:'ck-axis'},ff.svg);
+  labs.push(CK.txt(ff.svg,(L+W-R)/2,H-4,'switched capacitance per minion, nF (log scale)','lab','middle'));
+  const tx=x(0.040);CK.el('line',{x1:tx,x2:tx,y1:T,y2:H-B,style:'stroke:var(--bad)','stroke-dasharray':'5 4','stroke-width':1.5},ff.svg);
+  const rowH=(H-T-B)/cfgs.length,nodes=[],rowLabs=[];
+  cfgs.forEach((c,i)=>{const y=T+rowH*(i+0.5);
+   rowLabs.push(CK.txt(ff.svg,L-8,y+4,c.name,'tick','end'));
+   CK.el('line',{x1:x(lo),x2:x(c.nf),y1:y,y2:y,style:'stroke:var(--grid)'},ff.svg);
+   const dot=CK.el('circle',{cx:x(c.nf),cy:y,r:4.5,style:'fill:var(--c1)'},ff.svg);
+   CK.tip(ff,dot,`<b>${c.name}</b><br>${c.nf.toFixed(3)} nF per minion (${c.minions.toLocaleString('en-GB')} minions)`);nodes.push(dot);
+   if(a3[c.k]!=null){const g=CK.el('g',{},ff.svg);CK.cardMark(g,'aifoundry3',x(a3[c.k]),y,4.5);
+    CK.tip(ff,g,`<b>${c.name}, aifoundry3</b><br>${a3[c.k].toFixed(3)} nF per minion`);nodes.push(g);}});
+  CK.inside(ff,labs.concat(rowLabs));
+  CK.keynav(ff,nodes);
+ }});
+})();
+
 /* ---------- §1 as a ratio chart: A100 ÷ ET-SoC-1 for every metric the facts give on both chips ----------
    Each bar's length is the factor between the two chips on a log scale: to the right where the A100's value is the
    larger, to the left where it is the smaller. Colour gives the kind of metric (size, power, throughput, energy per
