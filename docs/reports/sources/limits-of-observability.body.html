@@ -24,6 +24,7 @@ tr.flash td{background:color-mix(in srgb,var(--c1) 14%,var(--surface));transitio
 .panel dl{margin:6px 0}.panel dt{color:var(--ink-2);font-size:0.78rem;margin-top:6px}.panel dd{margin:0}
 @media (min-width:1100px){.vgrid.map{grid-template-columns:minmax(0,1fr) 320px}}
 #map-frame .ck-plot{max-height:none}
+@media (min-width:820px){.vgrid.coefgrid{grid-template-columns:minmax(0,1fr) 300px;align-items:start}}
 .ck-controls label.chk{display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--ink-2);min-height:32px;cursor:pointer}
 .ck-controls label.chk input{width:18px;height:18px;accent-color:var(--c1);margin:0}
 .ck-controls select{font:inherit;font-size:0.82rem;background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:8px;padding:4px 8px;min-height:32px;max-width:100%}
@@ -191,11 +192,29 @@ both sides of the regulator, and its temperature, each as a current value, a min
 <p>The chain has one more limit, found while making the manual's bars: <b>the workload can starve the meter</b>. Rings of messages between shires s and s+16 slow the service processor's own management path — on aifoundry2 a telemetry sample of six management commands takes <span id="ring-ms"></span> instead of 22, and the board reading takes a new value only about twice a second instead of six times — so a burst measured through it reads 33–45% low in those passes against the same ring on aifoundry3, whose sampler stays at 22 ms. The sampler records its own latency with every sample, and the reruns and the heat-per-millimetre runs drop bursts with that signature (rung 7). <span id="sampler-dram"></span> The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">heat-per-millimetre runs</a> found a second pattern that starves it — on aifoundry2, tensor loads between shires in the same column three hops apart take a sample to about a second — and a way to stop the meter outright: a sampler killed in the middle of a request leaves its reply in the management queue, and every later opener crashes on that reply until one command (<code>dev_mngt_service</code>) drains it (seen once on each card, at the first start of E32).</p>
 <p>So the meter chain gives one number for the whole card and three for its inside, and the difference between them is the subject of this section. At idle it is <span id="idle-unsensed"></span>: the first bar of the chart in §4.2. <span id="idle-unsensed-a3"></span></p>
 
+<div class="chart-title">The meter chain</div>
+<p class="caption" id="chain-cap">From the 12 V input to a number in this page's charts. The grey box at the bottom carries no current or power telemetry at all. Hover, tap or tab to a box for what it does and its numbers on the selected card.</p>
+<div class="ck-controls" id="chain-ctl"></div>
+<div id="chain"></div>
+<div class="ck-readout" id="chain-read"></div>
+
+<div class="chart-title">The meter starved by the workload</div>
+<p class="caption" id="starve-cap">Every catalogue burst's own sampler latency (the time one telemetry sample took), one strip per card; a dot's size is how many bursts took that long. Diamonds are rerun passes dropped from the manual because the sampler was this slow. Hover, tap or tab to a mark.</p>
+<div id="starve"></div>
+<div class="ck-readout" id="starve-read"></div>
+
 <h3 id="the-unmetered-remainder-attributed">4.2 The unmetered remainder, attributed</h3>
 <p>The remainder cannot be metered with anything on the card, but it can be attributed. Over the energy manual's catalogue — <span id="fit-n"></span>, three passes,
 two cards — each configuration's power above idle is known on the board and on the three rails, and the bytes it moved through DRAM are counted. Fitting the unmetered part of
 each configuration's mean as a fraction of each rail's power plus a cost per DRAM byte gives:</p>
+<div class="vgrid coefgrid">
 <div class="table-wrap"><table id="fittab"></table></div>
+<div class="card panel" id="coef-panel">
+<h4 style="margin-top:0">The fit's coefficients, per card</h4>
+<p class="caption" id="coef-cap">Each coefficient's estimate, with one robust (HC3) standard error either side; aifoundry2 above aifoundry3 in every row. Hover, tap or tab to a whisker.</p>
+<div id="coef"></div>
+</div>
+</div>
 <p id="fittext"></p>
 <div class="chart-title">Where a workload's watts go</div>
 <p class="caption" id="v1-cap"></p>
@@ -212,7 +231,7 @@ each configuration's mean as a fraction of each rail's power plus a cost per DRA
 <div class="table-wrap"><table id="pvttab"></table></div>
 <p><b>None of it measures current</b>, so none of it meters the unmetered rails. What the monitors do measure is voltage, and voltage droops with current. The host already receives, every SP pass (about 150 ms on aifoundry2 while <code>ettelem</code> samples, 255 ms on aifoundry3), the memory shires' reading of the 0.8 V DDR rail (<code>DM_CMD_GET_ASIC_VOLTAGE</code>, <code>ettelem</code>'s <code>die_mv.ddr</code>): across the catalogue it reads <span id="droopidle"></span> at idle against an 800 mV set point, and under load it droops roughly in proportion to the DRAM power the regression attributes off-rail:</p>
 <div class="chart-title">Is the DDR monitor a DRAM meter?</div>
-<p class="caption">Every catalogue configuration on aifoundry2, in the colours of the chart in §4.2. Hover, tap or tab to a point for its droop, the droop the calibration predicts, and the DRAM power the excess would be read as.</p>
+<p class="caption">Every catalogue configuration, in the colours of the chart in §4.2; aifoundry2 by default (the calibration above), or pick a card. Hover, tap or tab to a point for its droop, the droop the calibration predicts, and the DRAM power the excess would be read as.</p>
 <div class="ck-controls" id="dr-ctl"></div>
 <div id="dr-leg"></div>
 <div id="dr"></div>

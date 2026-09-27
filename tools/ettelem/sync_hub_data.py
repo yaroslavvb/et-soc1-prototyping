@@ -22,11 +22,17 @@ the page without anyone copying numbers.
                       steps down, and the fitted time constant, per card
   power.sampler       catalogue.json bursts: the sampler's own latency per burst (sampler_median_ms, sampler_max_ms),
                       summarised for the DRAM-read bursts that slow it on aifoundry2; and, as .ring, reruns.json dropped[]:
-                      the median latency in each rerun pass dropped because the sampler was starved (the s <-> s+16 ring)
+                      the median latency in each rerun pass dropped because the sampler was starved (the s <-> s+16 ring).
+                      Per card, .dist is every distinct latency a catalogue burst took (value, count, and the
+                      configuration/pass for six or fewer), and .dropped is every reruns.json dropped[] entry of that
+                      card's own runs (burst, rerun pass, latency): both for the chart "The meter starved by the
+                      workload"
   power.idle_unsensed catalogue.json bursts: board idle less the three rails' idle, per card, with the board's idle
                       and the die range
   power.checks        the fit's robust errors and per-pass coefficients, and the DDR-droop calibration on each card's
-                      own telemetry, per pass (checks(): the version-3 claims check asks for them per card)
+                      own telemetry, per pass (checks(): the version-3 claims check asks for them per card); each
+                      card's droop block also carries its own per_config rows (fu.droop's full output), so the "Is
+                      the DDR monitor a DRAM meter?" chart can draw a card besides aifoundry2
   energy_events       every event the reports priced, with its energy [range] and the rate at which the measurement
                       ran it, for the chart "How many identical events before the meter sees one?"
   claims_status       the claims check's verdicts per page, and the cards behind each claim, for §1's scoreboard: one
@@ -145,6 +151,24 @@ def power_blocks(fit, cat, dvfs, reruns):
                    "read_median_ms": [min(b["sampler_median_ms"] for b in rd), max(b["sampler_median_ms"] for b in rd)],
                    "read_max_ms": max(b["sampler_max_ms"] for b in rd),
                    "other_median_ms": [min(b["sampler_median_ms"] for b in other), max(b["sampler_median_ms"] for b in other)]}
+    # Every distinct latency a card's own bursts took (a rug for "The meter starved by the workload"): the value,
+    # how many bursts took it, and, for six or fewer, which configuration and pass.
+    for c in CARDS:
+        by_ms = {}
+        for b in cat["bursts"][c]:
+            by_ms.setdefault(b["sampler_median_ms"], []).append(b)
+        dist = []
+        for ms in sorted(by_ms):
+            grp = by_ms[ms]
+            row = {"ms": r3(ms), "n": len(grp)}
+            if len(grp) <= 6:
+                row["cfgs"] = [{"cfg": b["cfg"], "pass": b["pass"]} for b in grp]
+            dist.append(row)
+        samp[c]["dist"] = dist
+    # Every reruns.json dropped[] entry that is this card's own run (burst, which rerun pass, and its latency).
+    for c in CARDS:
+        samp[c]["dropped"] = [{"burst": d["burst"], "run": os.path.basename(d["pass"]), "ms": r3(d["sampler_median_ms"])}
+                              for d in reruns.get("dropped", []) if c in d["pass"]]
     s2, s3 = cat["cards"][CARDS[0]]["summary"], cat["cards"][CARDS[1]]["summary"]
     ratio = [s3[k]["over_idle_w"]["mean"] / s2[k]["over_idle_w"]["mean"] for k in sorted(s2) if reads(k) and k in s3]
     cc = cat["cross_card"]
@@ -231,7 +255,8 @@ def checks(cat, fit):
                            "pass_ci99": {v: ci99([d[k] for d in per]) for k, v in k3.items()},
                            "max_nondram_excess_mv": [r3(ex[0]), ex[1]],
                            "named": {k: {"mean": r3({r[0]: r[1] for r in w["per_config"]}[k]), "passes": [r3(q[k]) for q in pcfg]}
-                                     for k in top + [l3]}}
+                                     for k in top + [l3]},
+                           "per_config_fields": w["per_config_fields"], "per_config": w["per_config"]}
     out["droop"]["named"] = {"mesh": top, "l3": l3}
     out["source"] = "tools/ettelem/sync_hub_data.py checks(), with fit_unmetered.py's config_means, _fit and droop on catalogue.json and each card's catalogue telemetry"
     return out
