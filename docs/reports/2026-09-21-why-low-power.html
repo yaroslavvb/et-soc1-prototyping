@@ -165,6 +165,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 /* chartkit:css:end */
 </style>
 </head>
@@ -217,12 +225,14 @@ power and thermal models are used here; more in the
 <p>Same process, 44% of the transistors, 69% of the die, and a fifth of the power. But also a twenty-eighth of the matmul
 throughput in fp32 (a fourteenth in fp16), so per FLOP the A100's bf16 tensor cores win by 5.4× against fp32 and 2.6×
 against fp16 (4.2× against aifoundry3's fp32, from its cooler launch).</p>
+<details class="more"><summary>The other A100 baseline: fp32 CUDA cores instead of tensor cores</summary>
 <p>Against the A100's fp32 CUDA-core datasheet figure instead (19.5 TFLOPS at 400 W, 20.5 pJ per FLOP, no tensor cores),
 this card's 7.0 pJ is about 2.9× better; the
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">matmul efficiency report</a>, whose faster kernel
 ran ±1 and ±2 operands at 57 W, puts it at 3.4×. The verdict depends on which precision the GPU is allowed. Per transistor
 and per square millimetre the ET-SoC-1 really is cooler, by 2.3 and 3.6 times. The rest of this report asks where that
 comes from.</p>
+</details>
 
 <h2>2. Putting the terms together</h2>
 <p>Take the switching power of each chip under its matmul and split it with the equation. The A100 measured by Horace He
@@ -234,6 +244,7 @@ effective capacitance. This card's fp32 matmul switches 27.6 W (<a href="#ablati
 <div id="fx-leg"></div>
 <div class="chart" id="fx"></div>
 <div id="fx-out"></div>
+<details class="more"><summary>The eight terms, in a table</summary>
 <div class="table-wrap"><table>
 <thead><tr><th>Term</th><th class="num">A100</th><th class="num">ET-SoC-1 (fp32)</th><th class="num">ratio</th><th>How it was established here</th></tr></thead>
 <tbody>
@@ -247,6 +258,7 @@ effective capacitance. This card's fp32 matmul switches 27.6 W (<a href="#ablati
 <tr><td>Switching energy per FLOP</td><td class="num">0.94 pJ</td><td class="num">3.0 pJ</td><td class="num">0.31×</td><td class="small">the voltage wins back 2.7× of that 8.6×</td></tr>
 <tr><td>Board energy per FLOP</td><td class="num">1.3 pJ</td><td class="num">7.0 pJ</td><td class="num">0.18×</td><td class="small">the idle floor is 57% of this card's power under load, 27% of the GPU's; in fp16 this card spends 3.3 pJ, 0.39×</td></tr>
 </tbody></table></div>
+</details>
 <p>So of the 8.8× lower switching power, most is the operating point: 6.3× at the A100's maximum clock (2.7× from V²,
 2.35× from the clock), about 5.2–5.5× at the 1,160–1,230 MHz its capped random-data run implies. The rest, 1.4–1.7×, is
 switching less capacitance per cycle.</p>
@@ -262,10 +274,12 @@ minions, "so only 10 mW per core". Their slide compares a generic x86 server cor
 capacitance) with the minion they needed (0.01 W, 1 GHz, 0.425 V, 0.04 nF): a reduction of 3× in frequency ("easy"), 4× in
 V² ("hard": circuits and SRAM) and 58× in capacitance ("very hard": architecture). The card lets each term be read off.
 Dividing a workload's power over idle by 1,024 minions, V² and f gives its effective switched capacitance per minion:</p>
+<details class="more"><summary>The capacitance table, and how it compares to Esperanto's target</summary>
 <div class="table-wrap wide"><table id="cdyn"></table></div>
 <p class="small">Esperanto's target row: by P/(V²f), 10 mW at 0.425 V and 1 GHz is 0.055 nF, so the slide's 0.040 nF would
 leave about 3 mW for the leakage its equation includes. The measured rows are power over idle, which leaves leakage out.</p>
 <p class="small" id="cdyn-a3"></p>
+</details>
 <ul>
 <li><b>Capacitance: the architecture term holds.</b> An integer loop switches 0.009 nF per minion, a fully gated tensor op
 0.012 nF, int8 multiply-adds on random data 0.061 nF. The slide's 0.04 nF sits in the middle of the chip's intended
@@ -294,6 +308,7 @@ configs above, against Esperanto's 0.040 nF target. Rings: aifoundry3's fp32 zer
   <div style="flex:2 1 260px;min-width:0"><div class="chart" id="leak"></div></div>
 </div>
 <div id="eq-out"></div>
+<details class="more"><summary>How the equation chart is computed</summary>
 <p class="small">Switching is <i>C</i>·<i>V</i>²·<i>f</i> with each workload's capacitance measured at 0.517 V and 600 MHz (the
 table in <a href="#esperanto-s-equation-measured">section 3</a>), scaled by the share of minions active. The fp32 matmuls are
 split in the proportions of the Horace experiment's flip model. The fixed part and the leakage come from the idle law, in its
@@ -301,11 +316,13 @@ best-fit split (20 to 29 W of leakage at 80 °C fits the idle data as well); the
 extra idle measured at 0.62 V is added in proportion between the two measured voltages. Outside 0.517–0.618 V leakage was
 not measured, so only switching is priced there. TensorLoad streams are left out: most of their watts are in DRAM, the PHY
 and the SRAM rail, which the minion supply's <i>V</i> and <i>f</i> do not describe.</p>
+</details>
 <h3>Activity: what is not computing costs almost nothing</h3>
 <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:14px">
   <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Power over idle against the number of active minions</div><div class="chart" id="cores"></div></div>
   <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Energy per multiply-add by precision and data</div><div class="chart" id="prec"></div></div>
 </div>
+<details class="more"><summary>The four findings behind the chart, with every number</summary>
 <ul>
 <li><b>The general-purpose side is nearly free.</b> 1,024 minions spinning in an integer loop add 1.46 W to the idle card:
 1.4 mW per core, 8 pJ per instruction. That loop, four adds and a branch, issues about 0.3 instructions per cycle on
@@ -328,11 +345,13 @@ structured matrices priced before they ran to 0.9 W rms
 2.7 pJ and fp32 6.0 pJ: a factor of 19 between int8, the type the chip was built for, and fp32. The int8 unit also runs
 6.9 times more multiply-adds per second (51 per cycle per minion against 7.5).</li>
 </ul>
+</details>
 
 <h3 id="voltage-and-clock">Voltage and clock</h3>
 <div class="chart-title">Esperanto's modelled chip power against core voltage (Hot Chips 33), and this card's measured board power</div>
 <div id="volt-leg"></div>
 <div class="chart" id="volt"></div>
+<details class="more"><summary>The voltage and clock findings, with every number</summary>
 <ul>
 <li><b>The card has three operating points (600, 700 and 800 MHz); on random data the two ends differ about as CV²f
 says.</b> This is aifoundry2 alone, in the seven cool-start runs of one morning (21 September); aifoundry3's clock never
@@ -359,7 +378,9 @@ Esperanto's own model is in the same range: about 230 W at 0.85 V, 164 W at 0.75
 0.52 V, 47 W on ones and 64 W on random fp32, brackets the 44 to 49 W the curve gives there (depending on how its published
 points are interpolated), although the curve is chip power at its own clock and workload.</li>
 </ul>
+</details>
 
+<details class="more"><summary>Leakage and temperature, with the idle law and the thermal budget</summary>
 <h3>Leakage and temperature</h3>
 <ul>
 <li>Idle board power follows <span class="math-inline"><svg style="vertical-align: -0.186ex;" xmlns="http://www.w3.org/2000/svg" width="29.916ex" height="2.207ex" role="img" focusable="false" viewBox="0 -893.3 13222.7 975.3" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-2-TEX-N-31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path id="MJX-2-TEX-N-32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path><path id="MJX-2-TEX-N-2E" d="M78 60Q78 84 95 102T138 120Q162 120 180 104T199 61Q199 36 182 18T139 0T96 17T78 60Z"></path><path id="MJX-2-TEX-N-36" d="M42 313Q42 476 123 571T303 666Q372 666 402 630T432 550Q432 525 418 510T379 495Q356 495 341 509T326 548Q326 592 373 601Q351 623 311 626Q240 626 194 566Q147 500 147 364L148 360Q153 366 156 373Q197 433 263 433H267Q313 433 348 414Q372 400 396 374T435 317Q456 268 456 210V192Q456 169 451 149Q440 90 387 34T253 -22Q225 -22 199 -14T143 16T92 75T56 172T42 313ZM257 397Q227 397 205 380T171 335T154 278T148 216Q148 133 160 97T198 39Q222 21 251 21Q302 21 329 59Q342 77 347 104T352 209Q352 289 347 316T329 361Q302 397 257 397Z"></path><path id="MJX-2-TEX-N-57" d="M792 683Q810 680 914 680Q991 680 1003 683H1009V637H996Q931 633 915 598Q912 591 863 438T766 135T716 -17Q711 -22 694 -22Q676 -22 673 -15Q671 -13 593 231L514 477L435 234Q416 174 391 92T358 -6T341 -22H331Q314 -21 310 -15Q309 -14 208 302T104 622Q98 632 87 633Q73 637 35 637H18V683H27Q69 681 154 681Q164 681 181 681T216 681T249 682T276 683H287H298V637H285Q213 637 213 620Q213 616 289 381L364 144L427 339Q490 535 492 546Q487 560 482 578T475 602T468 618T461 628T449 633T433 636T408 637H380V683H388Q397 680 508 680Q629 680 650 683H660V637H647Q576 637 576 619L727 146Q869 580 869 600Q869 605 863 612T839 627T794 637H783V683H792Z"></path><path id="MJX-2-TEX-N-2B" d="M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z"></path><path id="MJX-2-TEX-N-33" d="M127 463Q100 463 85 480T69 524Q69 579 117 622T233 665Q268 665 277 664Q351 652 390 611T430 522Q430 470 396 421T302 350L299 348Q299 347 308 345T337 336T375 315Q457 262 457 175Q457 96 395 37T238 -22Q158 -22 100 21T42 130Q42 158 60 175T105 193Q133 193 151 175T169 130Q169 119 166 110T159 94T148 82T136 74T126 70T118 67L114 66Q165 21 238 21Q293 21 321 74Q338 107 338 175V195Q338 290 274 322Q259 328 213 329L171 330L168 332Q166 335 166 348Q166 366 174 366Q202 366 232 371Q266 376 294 413T322 525V533Q322 590 287 612Q265 626 240 626Q208 626 181 615T143 592T132 580H135Q138 579 143 578T153 573T165 566T175 555T183 540T186 520Q186 498 172 481T127 463Z"></path><path id="MJX-2-TEX-I-1D452" d="M39 168Q39 225 58 272T107 350T174 402T244 433T307 442H310Q355 442 388 420T421 355Q421 265 310 237Q261 224 176 223Q139 223 138 221Q138 219 132 186T125 128Q125 81 146 54T209 26T302 45T394 111Q403 121 406 121Q410 121 419 112T429 98T420 82T390 55T344 24T281 -1T205 -11Q126 -11 83 42T39 168ZM373 353Q367 405 305 405Q272 405 244 391T199 357T170 316T154 280T149 261Q149 260 169 260Q282 260 327 284T373 353Z"></path><path id="MJX-2-TEX-N-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path><path id="MJX-2-TEX-I-1D447" d="M40 437Q21 437 21 445Q21 450 37 501T71 602L88 651Q93 669 101 677H569H659Q691 677 697 676T704 667Q704 661 687 553T668 444Q668 437 649 437Q640 437 637 437T631 442L629 445Q629 451 635 490T641 551Q641 586 628 604T573 629Q568 630 515 631Q469 631 457 630T439 622Q438 621 368 343T298 60Q298 48 386 46Q418 46 427 45T436 36Q436 31 433 22Q429 4 424 1L422 0Q419 0 415 0Q410 0 363 1T228 2Q99 2 64 0H49Q43 6 43 9T45 27Q49 40 55 46H83H94Q174 46 189 55Q190 56 191 56Q196 59 201 76T241 233Q258 301 269 344Q339 619 339 625Q339 630 310 630H279Q212 630 191 624Q146 614 121 583T67 467Q60 445 57 441T43 437H40Z"></path><path id="MJX-2-TEX-N-2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"></path><path id="MJX-2-TEX-N-38" d="M70 417T70 494T124 618T248 666Q319 666 374 624T429 515Q429 485 418 459T392 417T361 389T335 371T324 363L338 354Q352 344 366 334T382 323Q457 264 457 174Q457 95 399 37T249 -22Q159 -22 101 29T43 155Q43 263 172 335L154 348Q133 361 127 368Q70 417 70 494ZM286 386L292 390Q298 394 301 396T311 403T323 413T334 425T345 438T355 454T364 471T369 491T371 513Q371 556 342 586T275 624Q268 625 242 625Q201 625 165 599T128 534Q128 511 141 492T167 463T217 431Q224 426 228 424L286 386ZM250 21Q308 21 350 55T392 137Q392 154 387 169T375 194T353 216T330 234T301 253T274 270Q260 279 244 289T218 306L210 311Q204 311 181 294T133 239T107 157Q107 98 150 60T250 21Z"></path><path id="MJX-2-TEX-N-30" d="M96 585Q152 666 249 666Q297 666 345 640T423 548Q460 465 460 320Q460 165 417 83Q397 41 362 16T301 -15T250 -22Q224 -22 198 -16T137 16T82 83Q39 165 39 320Q39 494 96 585ZM321 597Q291 629 250 629Q208 629 178 597Q153 571 145 525T137 333Q137 175 145 125T181 46Q209 16 250 16Q290 16 318 46Q347 76 354 130T362 333Q362 478 354 524T321 597Z"></path><path id="MJX-2-TEX-N-2218" d="M55 251Q55 328 112 386T249 444T386 388T444 249Q444 171 388 113T250 55Q170 55 113 112T55 251ZM245 403Q188 403 142 361T96 250Q96 183 141 140T250 96Q284 96 313 109T354 135T375 160Q403 197 403 250Q403 313 360 358T245 403Z"></path><path id="MJX-2-TEX-N-43" d="M56 342Q56 428 89 500T174 615T283 681T391 705Q394 705 400 705T408 704Q499 704 569 636L582 624L612 663Q639 700 643 704Q644 704 647 704T653 705H657Q660 705 666 699V419L660 413H626Q620 419 619 430Q610 512 571 572T476 651Q457 658 426 658Q322 658 252 588Q173 509 173 342Q173 221 211 151Q232 111 263 84T328 45T384 29T428 24Q517 24 571 93T626 244Q626 251 632 257H660L666 251V236Q661 133 590 56T403 -21Q262 -21 159 83T56 342Z"></path><path id="MJX-2-TEX-N-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path><path id="MJX-2-TEX-N-2F" d="M423 750Q432 750 438 744T444 730Q444 725 271 248T92 -240Q85 -250 75 -250Q68 -250 62 -245T56 -231Q56 -221 230 257T407 740Q411 750 423 750Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mn"><use data-c="31" xlink:href="#MJX-2-TEX-N-31"></use><use data-c="32" xlink:href="#MJX-2-TEX-N-32" transform="translate(500,0)"></use><use data-c="2E" xlink:href="#MJX-2-TEX-N-2E" transform="translate(1000,0)"></use><use data-c="36" xlink:href="#MJX-2-TEX-N-36" transform="translate(1278,0)"></use></g><g data-mml-node="mstyle" transform="translate(1778,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(1945,0)"><g data-mml-node="mi"><use data-c="57" xlink:href="#MJX-2-TEX-N-57"></use></g></g><g data-mml-node="mo" transform="translate(3195.2,0)"><use data-c="2B" xlink:href="#MJX-2-TEX-N-2B"></use></g><g data-mml-node="mn" transform="translate(4195.4,0)"><use data-c="32" xlink:href="#MJX-2-TEX-N-32"></use><use data-c="33" xlink:href="#MJX-2-TEX-N-33" transform="translate(500,0)"></use><use data-c="2E" xlink:href="#MJX-2-TEX-N-2E" transform="translate(1000,0)"></use><use data-c="33" xlink:href="#MJX-2-TEX-N-33" transform="translate(1278,0)"></use></g><g data-mml-node="mstyle" transform="translate(5973.4,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(6140.4,0)"><g data-mml-node="mi"><use data-c="57" xlink:href="#MJX-2-TEX-N-57"></use></g></g><g data-mml-node="mstyle" transform="translate(7168.4,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="msup" transform="translate(7335.4,0)"><g data-mml-node="mi"><use data-c="1D452" xlink:href="#MJX-2-TEX-I-1D452"></use></g><g data-mml-node="TeXAtom" transform="translate(499,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mo"><use data-c="28" xlink:href="#MJX-2-TEX-N-28"></use></g><g data-mml-node="mi" transform="translate(389,0)"><use data-c="1D447" xlink:href="#MJX-2-TEX-I-1D447"></use></g><g data-mml-node="mo" transform="translate(1093,0)"><use data-c="2212" xlink:href="#MJX-2-TEX-N-2212"></use></g><g data-mml-node="mn" transform="translate(1871,0)"><use data-c="38" xlink:href="#MJX-2-TEX-N-38"></use><use data-c="30" xlink:href="#MJX-2-TEX-N-30" transform="translate(500,0)"></use></g><g data-mml-node="msup" transform="translate(2871,0)"><g data-mml-node="mstyle" transform="scale(1.414)"><g data-mml-node="mspace"></g></g><g data-mml-node="mo" transform="translate(269.2,363) scale(0.707)"><use data-c="2218" xlink:href="#MJX-2-TEX-N-2218"></use></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(3543.7,0)"><g data-mml-node="mi"><use data-c="43" xlink:href="#MJX-2-TEX-N-43"></use></g></g><g data-mml-node="mo" transform="translate(4265.7,0)"><use data-c="29" xlink:href="#MJX-2-TEX-N-29"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(4654.7,0)"><g data-mml-node="mo"><use data-c="2F" xlink:href="#MJX-2-TEX-N-2F"></use></g></g><g data-mml-node="mn" transform="translate(5154.7,0)"><use data-c="33" xlink:href="#MJX-2-TEX-N-33"></use><use data-c="36" xlink:href="#MJX-2-TEX-N-36" transform="translate(500,0)"></use></g><g data-mml-node="msup" transform="translate(6154.7,0)"><g data-mml-node="mstyle" transform="scale(1.414)"><g data-mml-node="mspace"></g></g><g data-mml-node="mo" transform="translate(269.2,363) scale(0.707)"><use data-c="2218" xlink:href="#MJX-2-TEX-N-2218"></use></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(6827.5,0)"><g data-mml-node="mi"><use data-c="43" xlink:href="#MJX-2-TEX-N-43"></use></g></g></g></g></g></g></svg></span> from 64 to 88 °C, to 0.2 W rms (the
@@ -379,7 +400,9 @@ of <span id="lg-gain"></span> at 80 °C. The Horace experiment's
 turns that into a budget: about 3 W (2.6 to 3.1 W, depending on the fit) of sustained switching before the die runs away to 90 °C in 21 September's room, and
 0.3 to 0.7 W under 22 September's warmer conditions.</li>
 </ul>
+</details>
 
+<details class="more"><summary>Memory: bandwidth traded for power, and the per-byte costs</summary>
 <h3>Memory</h3>
 <ul>
 <li>Moving data costs power too: on this card a TensorLoad stream from LPDDR4x at <span id="mem-dg"></span> GB/s
@@ -393,8 +416,10 @@ aifoundry2 and 2.4 on aifoundry3.</li>
 times the LPDDR4x datasheet maximum of 137 GB/s in the <a href="#the-comparison">section 1</a> table). Esperanto's choice trades bandwidth per chip for
 power, cost and capacity, and gets bandwidth back by using six chips per card.</li>
 </ul>
+</details>
 
 <h2>5. Caveats</h2>
+<details class="more"><summary>Caveats in full</summary>
 <ul>
 <li>No A100 was measured here. Its numbers are the datasheet's and Horace He's (one GPU, bf16 8192³ matmul, a 330 W
 limit). Its core voltage is not published; 0.85 V is an assumption, and the table gives the range. Nor is its clock under
@@ -420,8 +445,10 @@ temperature 25 °C lower
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-second-card-and-what-transfers">the Horace
 experiment, section 10</a>), so the capacitances here are this card's; where aifoundry3 ran the same measurement, its values are given beside them.</li>
 </ul>
+</details>
 
 <h2>6. Method and sources</h2>
+<details class="more"><summary>Method, sources, and version history</summary>
 <ul>
 <li>Evidence: this page rests on aifoundry2's card. Where aifoundry3 ran the same measurement (the fp32 matmul, idle and
 rails, in the Horace experiment's section 10) its values are given beside aifoundry2's; everything else here (the other
@@ -469,6 +496,7 @@ ran the same measurement; the V²f check and the 800 MHz idle labelled as one ca
 per byte replaced by the energy manual's two-card values; and the two sessions' 0.5 W difference traced to the leakage slope
 each page uses.</li>
 </ul>
+</details>
 
 <h2>7. Related reports</h2>
 <ul>
@@ -989,9 +1017,30 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 
 </script>
