@@ -717,8 +717,11 @@ window.CK = (function () {
 <p class="muted">Each square is one position on the mesh in <a href="https://github.com/marty1885/etTopoScan">marty1885</a>'s logical map (which appears to be the die turned a quarter), labelled with the logical shire ID the firmware uses. Colour is the measured TensorSend round-trip time from the selected shire (outlined), between minion 0 of each shire; stronger blue is slower. Hover or focus a shire for its numbers; tap it, or press Enter on it, to measure from there. The four grey squares hold no compute shire: they are the master shire, the spare shire, and the PCIe and I/O shires, and they route traffic too. The datasheet's full 8 × 6 mesh adds eight memory shires, not shown: in this map's orientation the latency fit on aifoundry2 in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#the-memory-shire-leg-91-cycles-plus-12-per-hop">Anatomy of a memory access</a> (§4) places memory shires 0–3 above the top row and 4–7 below the bottom row, over the middle four columns (memory shire 2's own position is not pinned down by that fit).</p>
 <p class="small" id="mesh-shade-note"><i>Shade by</i> recolours the map with another of the page's shire-to-shire round trips, each on its own scale: TensorSend with 1 KB messages, the credit counter, or a flag passed through memory. The readout under the map gives that matrix's straight-line fit against mesh hops over all 496 shire pairs.</p>
 <div class="ck-controls"><div id="mesh-shade"></div></div>
-<div class="controls"><button type="button" id="ring-btn" aria-pressed="false">Show a one-hop ring through all 32 shires</button><span id="mesh-status"></span></div>
-<p class="small" id="ring-note" hidden>The orange ring visits every compute shire and moves one hop at each step: 0 24 9 25 2 11 19 27 18 10 17 14 22 26 15 23 31 7 6 30 29 5 28 20 12 21 13 1 16 4 3 8, then back to 0.</p>
+<div class="controls"><span id="mesh-status"></span></div>
+<p class="small" id="ring-intro">A chain hands data from one shire to the next in some order, all the way round; the orange path is that order, and the darker dashed segment its longest step. Compare three orderings, on the same 32 compute shires the relay report chains:</p>
+<div class="ck-controls"><div id="ring-seg"></div></div>
+<p class="small" id="ring-note"></p>
+<p class="ck-readout" id="ring-read"></p>
 <div class="card chart" id="mesh"></div>
 <p class="ck-readout" id="mesh-read"></p>
 <p class="small">Coordinates follow marty1885's map (x across, y down). Every round trip between two shires is 150 + 12.02 × (Manhattan distance on this grid) cycles, with a worst residual of 1.1 cycles over all 496 pairs. All 12 restarts of a search from random layouts, without his map, found the same distances.</p>
@@ -996,6 +999,29 @@ message on this page, demands before the tensor unit is the limit.</li>
   const pairMap = m => { const o = {}; (m.pairs || []).forEach(p => { o[p[0] + "-" + p[1]] = p[2]; o[p[1] + "-" + p[0]] = p[2]; }); return o; };
   const hopsOf = (a, b) => Math.abs(LAYOUT[a][0] - LAYOUT[b][0]) + Math.abs(LAYOUT[a][1] - LAYOUT[b][1]);
   const RING = [0, 24, 9, 25, 2, 11, 19, 27, 18, 10, 17, 14, 22, 26, 15, 23, 31, 7, 6, 30, 29, 5, 28, 20, 12, 21, 13, 1, 16, 4, 3, 8];
+  // Chain-order comparison (#ring-seg): the same 32 compute shires, three orders to hand data round in. "ID order" and
+  // "every 3rd ID" step through shire IDs (which do not follow the mesh, as the relay report notes); the one-hop ring
+  // is marty1885's RING above, built so every step is exactly one mesh hop. Stats use the measured 32 B TensorSend
+  // pairwise matrix (M), not the hop-count fit, so the total and the worst step are both real numbers.
+  const idOrder = k => Array.from({ length: 32 }, (_, i) => (i * k) % 32);
+  const CHAINS = [
+    { key: "idorder", label: "ID order", order: idOrder(1) },
+    { key: "everyk", label: "every 3rd ID", order: idOrder(3) },
+    { key: "onehop", label: "one-hop ring", order: RING }
+  ];
+  const Mg = M.ghz || GHZ, Mmap = pairMap(M);
+  function chainStats(order) {
+    const n = order.length, steps = [];
+    let total = 0, worstIdx = 0;
+    for (let i = 0; i < n; i++) {
+      const a = order[i], b = order[(i + 1) % n], h = hopsOf(a, b), key = a + "-" + b;
+      const ns = Mmap[key] != null ? Mmap[key] / Mg : null;
+      steps.push({ a, b, h, ns });
+      if (ns != null) total += ns;
+      if (h > steps[worstIdx].h) worstIdx = i;
+    }
+    return { steps, total, worstIdx };
+  }
   const median = v => { const s = v.slice().sort((a, b) => a - b), n = s.length; return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2; };
   const tw = t => (t.getComputedTextLength ? t.getComputedTextLength() : 0);
   const onFocusOrHover = (g, fn, off) => {
@@ -1016,7 +1042,7 @@ message on this page, demands before the tensor unit is the limit.</li>
     s.g = s.m.ghz || GHZ; s.map = pairMap(s.m);
     const v = s.m.pairs.map(p => p[2] / s.g); s.lo = Math.min(...v); s.hi = Math.max(...v);
   });
-  let shade = SHADES[0], src = 0, showRing = false;
+  let shade = SHADES[0], src = 0, chainKey = "idorder";
   const meshLabel = () => "Map of the 32 compute shires on the 6 by 6 mesh, shaded by the " + shade.long + " from the selected shire " + src;
   const meshF = CK.frame("mesh", {
     label: meshLabel(),
@@ -1067,9 +1093,13 @@ message on this page, demands before the tensor unit is the limit.</li>
           return k;
         }
       });
-      if (showRing) {
-        const pth = CK.el("path", { d: RING.map((s, i) => (i ? "L" : "M") + centres[s][0].toFixed(1) + " " + centres[s][1].toFixed(1)).join("") + "Z", "pointer-events": "none" }, f.svg);
+      {
+        const chain = CHAINS.find(c => c.key === chainKey) || CHAINS[0], order = chain.order, st = chainStats(order);
+        const pth = CK.el("path", { d: order.map((s, i) => (i ? "L" : "M") + centres[s][0].toFixed(1) + " " + centres[s][1].toFixed(1)).join("") + "Z", "pointer-events": "none" }, f.svg);
         pth.style.fill = "none"; pth.style.stroke = "var(--c2)"; pth.style.strokeWidth = "3"; pth.style.strokeLinejoin = "round";
+        const w = st.steps[st.worstIdx], p1 = centres[w.a], p2 = centres[w.b];
+        const seg = CK.el("line", { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], "pointer-events": "none" }, f.svg);
+        seg.style.stroke = "var(--ink)"; seg.style.strokeWidth = "4"; seg.style.strokeDasharray = "2 3"; seg.style.strokeLinecap = "round";
       }
       const ly = top + gw + 14, lw = Math.min(260, gw), steps = 13;
       for (let i = 0; i < steps; i++) {
@@ -1101,12 +1131,20 @@ message on this page, demands before the tensor unit is the limit.</li>
   CK.seg("mesh-shade", { label: "Shade by", value: shade.key, options: SHADES.map(o => [o.key, o.seg]),
     onChange: v => { shade = SHADES.filter(o => o.key === v)[0] || SHADES[0]; CK.hide(meshF); meshF.svg.setAttribute("aria-label", meshLabel()); meshF.redraw(); meshSay(); } });
   meshSay();
-  document.getElementById("ring-btn").addEventListener("click", function () {
-    showRing = !showRing;
-    this.setAttribute("aria-pressed", showRing ? "true" : "false");
-    document.getElementById("ring-note").hidden = !showRing;
-    meshF.redraw();
-  });
+  // The chain-order comparison: total and worst-step round trip, from the same measured pairwise matrix as #mesh.
+  const ringRead = CK.readout("ring-read");
+  function ringSay() {
+    const chain = CHAINS.find(c => c.key === chainKey) || CHAINS[0], st = chainStats(chain.order), w = st.steps[st.worstIdx];
+    const meanH = st.steps.reduce((s, x) => s + x.h, 0) / st.steps.length;
+    document.getElementById("ring-note").textContent = "The orange path visits every compute shire in " + chain.label + ": " +
+      chain.order.join(" ") + ", then back to " + chain.order[0] + ".";
+    ringRead.set("<b>" + chain.label + "</b>: " + num(meanH, 2) + " hops per step on average, worst " + w.h + (w.h === 1 ? " hop" : " hops") +
+      " (shire " + w.a + " → shire " + w.b + (w.ns != null ? ", measured round trip " + num(w.ns, 0) + " ns" : "") + "), the dark dashed segment. " +
+      "Total round trip round the chain, all 32 steps, from the measured 32 B pairwise matrix: " + num(st.total, 0) + " ns.");
+  }
+  CK.seg("ring-seg", { label: "Chain order", value: chainKey, options: CHAINS.map(c => [c.key, c.label]),
+    onChange: v => { chainKey = v; CK.hide(meshF); meshF.redraw(); ringSay(); } });
+  ringSay();
 
   // ---------- 2. Latency against hops: 32 B (three ways to signal) or 1 KB (the knee) ----------
   let size = "32", hideFlag = false;

@@ -176,6 +176,49 @@ const POOLED={
   $('wintab').innerHTML='<thead><tr><th class="num">Window</th><th class="num">Host shire’s loads</th><th class="num">Atomics completed in the window</th></tr></thead><tbody>'+
    CTX.window_independence.map(r=>`<tr><td class="num">${(r.window/(CLOCK_MHZ*1e3)).toFixed(0)} ms</td><td class="num">${r.host_ops}</td><td class="num">${(r.remote_ops/1e6).toPrecision(2)} M</td></tr>`).join('')+'</tbody>';
  } else $('wintab').closest('.table-wrap').hidden=true;
+
+ /* "Stops, not slows": operations in the window, host against remote, log-log, from the same window_independence
+    rows plus the 21 two-second "starved" runs of the 23 September reruns (both cards). */
+ if(CTX.window_independence&&CTX.window_stop_runs&&CTX.window_stop_runs.length){
+  const msOf=w=>w/(CLOCK_MHZ*1e3);
+  const wi=CTX.window_independence.map(r=>({ms:msOf(r.window),host:r.host_ops,remote:r.remote_ops})).sort((a,b)=>a.ms-b.ms);
+  const stops=CTX.window_stop_runs.map(r=>({ms:msOf(r.window_cycles),host:r.host_ops,remote:r.remote_ops,card:r.card}));
+  const allMs=[...wi.map(r=>r.ms),...stops.map(r=>r.ms)], x0=Math.min(...allMs), x1=Math.max(...allMs);
+  const hostY0=wi[0].host, slowY1=hostY0*(x1/x0);
+  const allY=[...wi.map(r=>r.host),...wi.map(r=>r.remote),...stops.map(r=>r.host),...stops.map(r=>r.remote),slowY1];
+  const f=CK.frame('wincht',{label:'Operations completed in the window, host against the remote atomics hammering it, log scale on both axes',
+   height:300,
+   draw(f){
+    const svg=f.svg,W=f.W,H=f.H;
+    const x=CK.log(x0*0.8,x1*1.4,54,W-14), y=CK.log(Math.min(...allY)*0.6,Math.max(...allY)*1.5,H-38,20);
+    CK.axes(f,{x,y,L:54,R:14,T:20,B:38,xl:'window',yl:'operations completed in it',xt:[5,10,40,100,1000,2000],
+      xfmt:v=>v>=1000?n0(v/1000)+' s':n0(v)+' ms'});
+    CK.el('path',{d:CK.path([[x0,hostY0],[x1,slowY1]],x,y),fill:'none',style:'stroke:var(--ref);stroke-width:1.5;stroke-dasharray:5 4'},svg);
+    CK.txt(svg,x(x1),y(slowY1)-6,'if it only slowed','lab','end');
+    CK.el('path',{d:CK.path(wi.map(r=>[r.ms,r.remote]),x,y),fill:'none',style:'stroke:var(--c1);stroke-width:2'},svg);
+    CK.el('path',{d:CK.path(wi.map(r=>[r.ms,r.host]),x,y),fill:'none',style:'stroke:var(--ink-2);stroke-width:2'},svg);
+    CK.txt(svg,x(wi[wi.length-1].ms),y(wi[wi.length-1].remote)-8,'remote atomics','lab-strong','end').style.fill='var(--c1)';
+    CK.txt(svg,x(wi[0].ms),y(wi[0].host)+15,'host shire’s own loads','lab-strong','start');
+    const marks=[];
+    const dot=(cx,cy,ms,host,remote,card,forHost)=>{
+     const g=CK.el('g',{},svg);
+     if(card) CK.cardMark(g,card,cx,cy,4,forHost?'var(--ink-2)':undefined);
+     else CK.el('circle',{cx,cy,r:4,fill:forHost?'var(--ink-2)':'var(--c1)'},g);
+     CK.tip(f,g,()=>`<b>${card?card+', ':''}${ms>=1000?(ms/1000)+' s':n0(ms)+' ms'} window</b><br>`+
+      `host: ${n0(host)} loads<br>remote: ${(remote/1e6).toPrecision(remote>1e7?6:3)} M atomics`);
+     marks.push(g);
+    };
+    for(const r of wi){ dot(x(r.ms),y(r.host),r.ms,r.host,r.remote,null,true); dot(x(r.ms),y(r.remote),r.ms,r.host,r.remote,null,false); }
+    for(const r of stops){ dot(x(r.ms),y(r.host),r.ms,r.host,r.remote,r.card,true); dot(x(r.ms),y(r.remote),r.ms,r.host,r.remote,r.card,false); }
+    CK.keynav(f,marks);
+   }});
+  const growth=(Math.max(...stops.map(r=>r.remote))/wi[0].remote).toFixed(0);
+  $('wincap').textContent=`Log–log. From a ${n0(wi[0].ms)} ms window to the 23 September reruns' 2 s windows `+
+   `(${n0(x1/x0)}× more time), the remote atomics completed rise ${growth}×, while the host shire's own loads stay at `+
+   `${n0(wi[0].host)} in every one of them — including all ${stops.length} of those 2-second runs on both cards `+
+   `(${CK.cardsIn(stops.map(r=>r.card)).map(id=>CK.card(id).label).join(', ')}). The dashed line is not a measurement: `+
+   `it is what the host's own count would reach if it merely slowed down, growing with the window the way the pressure on it does.`;
+ } else $('winstops').hidden=true;
 })();
 
 /* ---------- section 3: the inequality, and the explorer that puts both sweeps on one load axis ---------- */

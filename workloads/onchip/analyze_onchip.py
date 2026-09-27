@@ -21,6 +21,8 @@ The keys the relay page draws from (added 25 Sep; every earlier key is unchanged
 Added 26 Sep (every earlier key and value is unchanged; the rows' own fields stay the first card's):
   intensity/size/stages/shires[].by_card   each card's row at the same setting, {card: {ok, dram, scp, hop,
                            scp_over_dram, hop_over_dram}}, for every card with all three media there
+Added 27 Sep (every earlier key and value is unchanged):
+  bigsize[].by_card        each card's DRAM-only rate at that working-set size (past the on-chip routes' room)
 """
 import argparse
 import collections
@@ -203,6 +205,10 @@ def main():
                              if r.get("group") in ("size", "bigsize") and r.get("medium") == "dram"
                              and r["host"] == out["cards"][0]],
                             key=lambda r: r["stage_bytes"])
+    for r in out["bigsize"]:
+        r["by_card"] = {x["host"]: {"gb_s": x["gb_s"]} for x in rows
+                        if x.get("group") in ("size", "bigsize") and x.get("medium") == "dram"
+                        and x["stage_bytes"] == r["stage_bytes"]}
     out["probe"] = [{k: r[k] for k in ("method_name", "remote_words_wrong", "ok", "host")}
                     for r in rows if r.get("group") == "probe"]
     if a.power:

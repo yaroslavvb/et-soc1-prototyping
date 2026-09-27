@@ -3,7 +3,10 @@
 
     D=docs/reports/data; DATA=$D/2026-09-22-hotline-aifoundry2; DATA3=$D/2026-09-22-hotline-aifoundry3
     analyze_hotline.py $DATA/sweep.jsonl $DATA3/sweep.jsonl --power $DATA/power.json --context $DATA/context.json \
-        --barrier $D/2026-09-18-nocbench-aifoundry2/barrier-chip1.jsonl --out $DATA/hotline.json
+        --barrier $D/2026-09-18-nocbench-aifoundry2/barrier-chip1.jsonl \
+        --stop-runs $D/2026-09-23-reruns-aifoundry2-warm/hotline-pass*/runs.jsonl \
+                    $D/2026-09-23-reruns-aifoundry3/hotline-pass*/runs.jsonl \
+        --out $DATA/hotline.json
 
 Nothing is fitted except the one-per-shire round trip against mesh hops. Every other number is a count of
 completed operations in a common, barrier-aligned window, or a ratio of two such counts. The host shire is the
@@ -16,12 +19,16 @@ computed from the sweeps; the chip-wide barrier is read from --barrier (NOCBENCH
 minion per shire); the errata text and the window table (whose 5, 40 and 100 ms runs are in no raw data file)
 are hand-kept in --context. 'layout' and 'empty' are marty1885's shire map from workloads/nocbench/analyze.py,
 and 'share_fit' fits each card's one-per-shire round trip (window / ops) against Manhattan hops from shire 0.
+'context.window_stop_runs' is computed, not hand-kept: --stop-runs takes the 23 September reruns' hotline-pass*
+runs.jsonl files (both cards) and pulls out every "starved" (host reading its own scratchpad while the other 31
+shires hammer a scratchpad word) record's window, the host shire's ops and the remote total, one entry per run.
 """
 import argparse
 import collections
 import importlib.util
 import json
 import os
+import re
 
 import numpy as np
 
@@ -49,12 +56,34 @@ def host_shire(r):
     return None if spec == "own" else int(spec)
 
 
+def window_stop_runs(paths):
+    """Every 'starved' run in the given runs.jsonl files: the host shire's ops (s == 0) against the remote total,
+    tagged by card (the run directory's aifoundryN name)."""
+    out = []
+    for p in paths:
+        m = re.search(r"aifoundry\d", p)
+        card = m.group(0) if m else "?"
+        for line in open(p):
+            if not line.strip():
+                continue
+            d = json.loads(line)
+            if d.get("label") != "starved":
+                continue
+            h = next(s for s in d["shire"] if s["s"] == 0)
+            out.append({"card": card, "window_cycles": d["window_cycles"], "host_ops": h["ops"],
+                        "remote_ops": d["total_ops"] - h["ops"]})
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("sweeps", nargs="+")
     ap.add_argument("--power")
     ap.add_argument("--context", help="hand-kept context.json (errata, window_independence, note) to merge")
     ap.add_argument("--barrier", help="nocbench barrier-chip1.jsonl: the chip-wide barrier, one minion per shire")
+    ap.add_argument("--stop-runs", nargs="+", default=[],
+                    help="the 23 September reruns' hotline-pass*/runs.jsonl (both cards): every 'starved' run, "
+                         "for context.window_stop_runs")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     rows = load(a.sweeps)
@@ -125,6 +154,8 @@ def main():
     if a.context:
         c = json.load(open(a.context))
         ctx.update({k: c[k] for k in ("window_independence", "errata") if k in c})
+    if a.stop_runs:
+        ctx["window_stop_runs"] = window_stop_runs(a.stop_runs)
     wins = sorted({r["window_cycles"] for r in rows})
     ctx["window_cycles"] = wins[0] if len(wins) == 1 else wins
     if a.barrier:
