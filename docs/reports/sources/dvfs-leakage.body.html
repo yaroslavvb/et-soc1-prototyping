@@ -44,6 +44,7 @@ of an idle card</b>, well above the 5–30% David Kanter called typical, and <sp
 a random-data matmul, at or above its top. And the second card, aifoundry3, has a firmware power limit of 0 W (aifoundry2's
 is 65 W), which pins it at 600 MHz while the driver still reports 65 W.</p>
 
+<details class="more"><summary>Kanter's yardstick for a mature chip's DVFS loop</summary>
 <p>The yardstick is how Kanter described a mature chip managing its own power. It runs a DVFS loop (dynamic
 voltage and frequency scaling) that knows
 \(P = C_\mathrm{sw}\,V^{2}f\) and, because voltage and frequency are already known, computes its own power estimate
@@ -52,6 +53,7 @@ puts cache data arrays behind leakage-suppression transistors, so that only the 
 hedged that this might not hold for Esperanto's part, only for anything from a more mature company. The hedge was
 right. The table below checks six of his statements, paraphrased, against the firmware source, the open RTL and
 the card.</p>
+</details>
 
 <details class="terms"><summary>Terms used on this page</summary>
 <p class="small">DVFS (dynamic voltage and frequency scaling) moves the clock and the supply voltage together: here the
@@ -68,6 +70,7 @@ Horace experiment</a>'s model of power from the bits the multiply-add unit clock
 <div class="table-wrap wide"><table id="verdict"></table></div>
 
 <h2 id="the-loop-as-built">1. The loop as built</h2>
+<details class="more"><summary>The governor's rule, as pseudocode, and where it lives in the source</summary>
 <p>In the et-platform firmware source at <code>353f20e</code>, the governor's decisions are one function,
 <code>check_power_throttle_conditions()</code> in <code>ServiceProcessorBL2/services/thermal_pwr_mgmt.c</code>, called
 once per pass of the device-management task. (The cards' own log lines show that they run an older build of this
@@ -83,8 +86,10 @@ governor; <a href="#method-and-what-is-not-established">§8</a> says what differ
         elif P &lt; 65 W and f &lt; f_max:  step UP   one VMIN-LUT point
     on master minion going IDLE:
         set frequency back to the boot point</code></pre>
+</details>
 <p>Four things follow, and all four show up in aifoundry2's measurements below (aifoundry3's clock cannot move,
 <a href="#the-same-firmware-on-three-cards">§3</a>), the last one with a delay.</p>
+<details class="more"><summary>The four behaviours, explained</summary>
 <ul>
 <li><b>The input is a measurement, not an estimate.</b> <code>pmic_read_average_soc_power()</code> is a read of
 the power-management controller's own averaged wattage. Nothing in the loop counts bus bits, instructions or
@@ -110,6 +115,7 @@ the boot frequency (<code>go_to_idle_state_and_update_pwr_status()</code>). On a
 above 600 MHz), and at <span data-v="resetUp"></span> of those the loop first stepped the clock up.
 Back-to-back launches rarely trigger it, and a short pause between launches more often: <span data-v="bnd"></span>.</li>
 </ul>
+</details>
 
 <h2 id="the-loop-as-measured">2. The loop as measured</h2>
 <p>Only aifoundry2's clock can move (aifoundry3's firmware holds it at 600 MHz, <a href="#the-same-firmware-on-three-cards">§3</a>),
@@ -145,6 +151,7 @@ test sees 38 W &lt; 65 W, and the clock steps back up. The clock changed seven t
 1.6 s apart. Then, with the die settled at 66 °C, it stayed at 600 MHz for the last 4.5 s. Over the whole 7.4 s run it
 spent 5.6 s at the bottom point, 1.0 s at 700 MHz and 0.8 s at 800 MHz.</p>
 
+<details class="more"><summary>How the down-steps split by branch: the plane, the breakdown and the full table</summary>
 <div class="chart-block" id="attrib-fig">
   <div class="chart-title">The rule's plane: die temperature against board power, shaded by the branch that fires,
   with all <span data-v="ndown"></span> down-steps and every up-step placed on it</div>
@@ -173,6 +180,8 @@ on a die above about 82 °C, where the thermal test already holds the floor), an
 <span data-v="meterLag"></span>, so a 700→600 MHz step can still show an 800 MHz burst. "Unattributed" means neither test fired on the
 values we sampled (the die read 65 °C or less and the board under 65 W).</p>
 </details>
+</details>
+<details class="more"><summary>How fast the loop starts, and steps thereafter</summary>
 <p>The loop is also slow to start: the first clock change came a median <span data-v="firstMed"></span> s after a block
 of launches began (<span data-v="firstR"></span> s over <span data-v="firstN"></span> starts on 21 and 23 September;
 <span data-v="first"></span> s in the seven runs charted), about <span data-v="firstPasses"></span> passes of the
@@ -181,11 +190,13 @@ of launches began (<span data-v="firstR"></span> s over <span data-v="firstN"></
 up-steps charted (<span data-v="direct"></span>) go straight from 600 to 800 MHz between two 100 ms samples, faster than
 one table point per pass. The 353f20e source does not explain that; the older governor the cards' logs point to (<a href="#method-and-what-is-not-established">§8</a>)
 climbs to the top point in one go.</p>
+</details>
 
 <h2 id="the-same-firmware-on-three-cards">3. The same firmware on three cards</h2>
 <p>So far the loop has been measured on one card. AI Foundry has three machines, and the loop's behaviour turned out to depend on a
 single byte that differs between them.</p>
 
+<details class="more"><summary>aifoundry1: not measured, and why</summary>
 <p><b>aifoundry1 could not be measured</b> when we checked it, once, on 22 September. It holds two ET-SoC-1 cards, both enumerated on the PCIe bus, with
 their device nodes present. Its kernel module is built from different sources than the other two machines
 (<code>srcversion 1383B256EB24A0A53F04CC7</code> against <code>47D26A305A0428B29FB7FC4</code>) while carrying
@@ -194,6 +205,7 @@ the same <code>libDM.so</code>, and the library's compatibility check refuses to
 kernel driver on a shared lab machine is not ours to do, so those two cards are reported here as unavailable
 and the lab admin has what they need to fix it. (Only the driver's configuration readout is stored; the rest was read
 by hand.)</p>
+</details>
 
 <p><b>aifoundry2 and aifoundry3 look identical and are not.</b> Same firmware release, same PMIC firmware, same
 static device configuration over the driver's ioctl: 65 W TDP, 600 MHz boot clock, 32 compute shires, 32 MB of
@@ -212,7 +224,7 @@ $$\underbrace{P_\text{measured} < P_\text{TDP}}_{\text{step up}}\;\equiv\;P_\tex
 to idle an idle event, and the step-up request, the only way above 600 MHz, can never fire: the clock read 600 MHz
 in all 7,745 samples of the session. The service processor's own log, read back out of the card, shows the
 pattern (six consecutive lines, verbatim):</p>
-
+<details class="more"><summary>The log, and a second reading that agrees</summary>
 <pre><code>Power idle state event, current pwr 26220  tdp level 0
 Power throttle down event, current pwr 35380  tdp level: 0
 Power idle state event, current pwr 26100  tdp level 0
@@ -227,6 +239,7 @@ Power throttle down event, current pwr 48470  tdp level: 0</code></pre>
 above the 30 W safe threshold. aifoundry3 reports <code>max_power</code> while sitting at 23 W and 600 MHz,
 which is only consistent with a TDP level below 23 W; aifoundry2, drawing more, reports
 <code>managed_power</code>. Two different code paths, one cause.</p>
+</details>
 
 <p><b>The host cannot see this.</b> The driver's <code>ETSOC1_IOCTL_GET_DEVICE_CONFIGURATION</code> reports a
 65 W TDP on all three machines, including aifoundry3. Anything that checks a card's configuration from the host
@@ -234,6 +247,7 @@ side gets the nameplate number, not the one the governor is using. The card work
 for as long as its flashed TDP stays at zero, which on a compute-bound workload that would otherwise run at 800 MHz
 gives up a quarter of the throughput (800 MHz is a third faster than 600), and nothing reports an error.</p>
 
+<details class="more"><summary>How this compares with aifoundry2's own throttling, and what it settles</summary>
 <p><b>The contrast is not that aifoundry2 is always faster.</b> Launched warm, it too runs at 600 MHz: the thermal
 branch holds it at the floor, and every one of the strict protocol's launches at 80 °C ran at 600 MHz (§1). The
 difference is the remedy. aifoundry2 reaches 700 and 800 MHz when it starts cool (§2). aifoundry3 cannot at any
@@ -242,6 +256,7 @@ temperature, because the branch that would raise it is unreachable.</p>
 <p>This also settles what §2 could not: whether the power branch works at all. It never fired on its own
 in any aifoundry2 run. On aifoundry3 it is the <em>only</em> branch that fires, at every kernel start, on a die well
 below the thermal threshold, and it does what the comparison says it will.</p>
+</details>
 
 <h2 id="the-leakage-suppression-transistors">4. The leakage-suppression transistors</h2>
 <p>Kanter's mechanism is a tag check that wakes only the part of an array a lookup needs, at a small wake-up latency;
@@ -251,10 +266,13 @@ interface: a per-minion sleep control and its acknowledge (<code>pwr_ctrl_min_ns
 <code>nsleepout</code>, one bit per minion), a global pair, and per-minion isolation
 (<code>pwr_ctrl_min_isolate</code>) with level shifters and a power stub that forces the outputs safe while a
 domain is down. That is a textbook power-gating structure, sized for the granularity he described.</p>
+<details class="more"><summary>Why this doesn't cover L2/L3</summary>
 <p>That RTL is the Erbium configuration (one neighbourhood, no shire cache), so it says nothing about the L2 and L3
 arrays; for those, the wake-up probe below is the only evidence.</p>
+</details>
 <p><b>Nothing drives it.</b> In the open configuration the whole interface is tied off, with a comment saying
 so:</p>
+<details class="more"><summary>The tied-off RTL, verbatim, and the firmware search behind it</summary>
 <pre><code>// Power Ctrl - power control handled outside cpu subsystem and this ifce is not used
 .pwr_ctrl_glb_nsleepin ('1),   // '1 = never asleep
 .pwr_ctrl_min_nsleepin ('1),
@@ -263,12 +281,15 @@ so:</p>
 power-gating control of any kind: its only <code>PWR_CTRL</code> hits are an eMMC controller's bus voltage, and
 elsewhere in the tree the name appears only in eMMC and PCIe PHY register headers. Whatever drives those pins on
 the taped-out part, it is not this firmware, and the chip-level netlist is not in the open release.</p>
+</details>
+<details class="more"><summary>How the wake-up probe works</summary>
 <p><b>And the card shows no sign of it.</b> If an array were suppressed once idle, the first access afterwards
 would pay the wake-up. The probe: put one line at a chosen level, let the minion spin on its cycle counter for a
 swept interval from zero to 27 ms (0, 1.7 µs, 17 µs … 27 ms) without touching that line, then time a single load
 of it: same line, same address, only the idle time varying, 20 repeats. (The probe counts the idle in cycles; the times
 assume 600 MHz. The clock during the probe was not recorded; aifoundry2 was resting at about 73 °C that morning, and in
 26 sessions on five days it never ran above 600 MHz at a die reading of 68 °C or more.)</p>
+</details>
 
 <div class="chart-block" id="wake-fig">
   <div class="chart-title">Every repeat of the wake-up probe: each line is one repeat's load latency after the idle,
@@ -326,6 +347,7 @@ $$\left.\frac{\partial P_\text{idle}}{\partial T}\right|_{80\,^\circ\mathrm{C}}=
   <p class="ck-readout" id="law-read"></p>
 </div>
 
+<details class="more"><summary>Cross-checks: the 22 September session, and the unsensed rails</summary>
 <p><b>Checks the fit never saw.</b> The idle law above was fitted on aifoundry2 on 21 September to idle readings at
 <span data-v="fitT"></span> °C (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">the
 Horace experiment, §8</a>; tabulated in
@@ -333,8 +355,10 @@ Horace experiment, §8</a>; tabulated in
 predicts <span data-v="checks"></span>. In that one 22 September session, nearly half of the idle,
 <span data-v="unsensed"></span> W, is on no rail sensor (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">energy manual,
 §1</a>).</p>
+</details>
 
 <p><b>Leakage transfers too, and further than it should.</b> <span data-v="a3law"></span></p>
+<details class="more"><summary>Every idle session against the law, session by session</summary>
 <div class="chart-block" id="off-fig">
   <div class="chart-title">Every idle session against the law: measured minus law, one row per card</div>
   <p class="small">Each mark is one idle session from the table below, measured minus the law; the bar under each row is
@@ -349,6 +373,7 @@ predicts <span data-v="checks"></span>. In that one 22 September session, nearly
 <p class="small">Each session's idle samples are the 600 MHz samples outside [launch start − 1 s, launch end + 6 s],
 binned by whole degree (bins of 20 samples or more); the session's figure is measured minus law over those samples.
 The 22 September idle has no launches, so all of it counts.</p>
+</details>
 </details>
 
 <p>Kanter put leakage at 5–30% of a design's power, with 20% common, and noted that parts which clock lower and use
@@ -381,6 +406,9 @@ cool-start runs give about 2.1 for ones, a loose check: the idle levels it subtr
 the runs are seven short, uncontrolled ones on one morning, and zeros are too small to test it at all
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power#voltage-and-clock">Why is the ET-SoC-1 low power?,
 Voltage and clock</a>). A clean test needs a die below 65 °C and a runner that pins the work rate.</li>
+</ul>
+<details class="more"><summary>The MLPerf cost argument, and the hunting-vs-provisioned-power point</summary>
+<ul>
 <li><b>Kanter's argument that measured power is too expensive to mandate is weaker for this card, though it does
 not vanish.</b> His reason MLPerf cannot require measured power is that most submitters will not pay the time and
 energy to instrument a system. This chip is already instrumented, as a load-bearing part of its own safety loop: a
@@ -393,8 +421,10 @@ rail readings behind the PMIC's own running average (a time constant of about on
 normalisation by provisioned kilowatts scores a card by its nameplate. On aifoundry2 a governor with no dead band
 moves the clock, and so the throughput, by up to a third within a single 7-second run, invisibly.</li>
 </ul>
+</details>
 
 <h2 id="method-and-what-is-not-established">8. Method, and what is not established</h2>
+<details class="more"><summary>All method notes and limits, in full</summary>
 <ul>
 <li><b>Which card.</b> A result stated with no card named holds on both aifoundry2 and aifoundry3 (at least three
 independent repeats on each, or a readout identical on both). aifoundry3's firmware holds its clock at 600 MHz (§3), so
@@ -469,6 +499,8 @@ attempt at a cool-card rerun. Both ran while the governor dropped the clock from
 the relay's other launches on both cards were correct. An error at the clock transition and a race in the relay's own
 completion flags when the clock ratio changes would both fit; one pass on one card cannot tell them apart.</li>
 </ul>
+</details>
+<details class="more"><summary>Reproduce this</summary>
 <p>To rebuild this report's data and page from the raw files (the wake-up probe itself needs a card):</p>
 <pre><code>python3 workloads/memprobe/gen_ops.py wakeup --out W --reps 20 --seed 11 \
     --delays 0,1000,10000,100000,1000000,4000000,8000000,16000000
@@ -488,6 +520,8 @@ python3 tools/ettelem/build_cards_data.py --cards $A3/cards.json --transfer $A3/
     --merge $D/2026-09-22-dvfs-aifoundry2/dvfs.json
 python3 scripts/build-report.py dvfs-leakage $D/2026-09-22-dvfs-aifoundry2/dvfs.json \
     docs/reports/2026-09-22-dvfs-leakage.html</code></pre>
+</details>
+<details class="more"><summary>Version history</summary>
 <p class="small">Versions: first published 22 September 2026 for aifoundry2; extended the same day with the
 three-machine comparison and the second card (§3 and §6); revised 24 September 2026 after a review, which corrected the
 governor's pass period (about 133 ms, not 10 ms), the hunting mechanism (the thermal threshold, not the power
@@ -503,6 +537,7 @@ clock moves; the idle law is checked session by session on both cards (aifoundry
 sessions, not one session's +0.7 W); "every result checked was correct" is withdrawn (two relay launches failed during a
 clock drop); record:
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>.</p>
+</details>
 
 <h2 id="related-reports">Related reports</h2>
 <ul>

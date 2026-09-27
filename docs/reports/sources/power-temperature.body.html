@@ -62,11 +62,13 @@ mesh rails), and Moortec <i>PVT</i> monitors measure voltage and temperature on 
 with the tools in this repo; <span class="chip needs_fw_change">firmware</span> means a service-processor change and a signed
 image; <span class="chip needs_tooling">hardware</span> means physical access.</p>
 <div class="table-wrap wide"><table id="methods"></table></div>
+<details class="more"><summary>More instruments, and the improvement ladder</summary>
 <p><b>Beyond these meters.</b> The Minion Debug Interface adds no power or temperature sensor: it reads the registers and
 memory of a halted hart (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#bits">Limits of
 observability, §3</a>). Its one use for energy work, writing the counter event selectors before a launch, is rung 17 of
 the hub's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">improvement ladder</a>,
 which also ranks what firmware changes or physical access would add and marks what has since been done.</p>
+</details>
 
 <h2>2. A load step, seen through every sensor</h2>
 <p>Twenty seconds idle, 58 s of fp32 matmul on all 1,024 minions, 40 s idle, 34 s of DRAM-bound loads, idle. Sampled at
@@ -82,6 +84,7 @@ which also ranks what firmware changes or physical access would add and marks wh
 under the power chart mark the gaps between successive load processes, found in the 10 Hz stream. Hover or tap a chart,
 or move the time slider, for the readings at that moment; the slider also marks that second in the chart below.</p>
 
+<details class="more"><summary>How the load step proves the slope: power against temperature, and the per-card comparison</summary>
 <div class="chart-title">Board power against die temperature</div>
 <p class="small" style="margin:0 0 4px">Does idle power depend on temperature alone, and how much of the rise under load is the
 idle law's leakage? Each dot is one second.</p>
@@ -110,10 +113,16 @@ on this card: <span id="busy-drift"></span>. <span id="busy-drift-a3"></span>
 <p class="small" style="margin-top:2px">Each card's strict 7 s Horace runs: the mark is the mean slope over its runs, the
 whisker ±2 standard errors of that mean. The two vertical lines are this session's matmul fit, which follows the
 "Fit starts" slider above, and the idle law's slope at 80 °C.</p></li>
+</ul>
+</details>
+<ul class="findings">
 <li><b>Idle is not one number.</b> Before the load: 31.2 W at 72 °C. Forty seconds after it: 36.5 W at 81 °C. Both sit on
 the idle law measured later (31.3 and 36.5 W at those temperatures). The die sheds heat slowly (6 °C in 40 s), so a
 baseline taken before a run understates the idle power during and after it. Energy measurements here should take their
 baseline at the same temperature, or fit a temperature term.</li>
+</ul>
+<details class="more"><summary>What's in the unmetered remainder, and how it moves under DRAM and matmul loads</summary>
+<ul class="findings">
 <li><b>The three rails are not the whole card.</b> Board minus rails is <span id="rest-idle0"></span> W at idle at
 <span id="rest-idle0-t"></span> °C (<span id="rest-cool"></span> W in the idle window at <span id="rest-cool-t"></span> °C;
 two windows are too few to show a trend with temperature),
@@ -125,6 +134,10 @@ show the same for DRAM traffic: in the energy catalogue, 76 GB/s DRAM streams mo
 minion rail by under 0.2 W on each
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits
 of observability, §4.2</a>).</li>
+</ul>
+</details>
+<details class="more"><summary>Why the remainder briefly looks wrong at each load edge, with the edge charts</summary>
+<ul class="findings">
 <li><b>Why the remainder sometimes looks too small, or the rails seem to exceed the step.</b> Board power is a fresh
 reading at every service-processor pass (about every 156 ms here). The rail figures are the PMIC's own running averages,
 which the service processor copies each pass, roughly first-order with τ ≈ <span id="rf-tau"></span>: a step reaches
@@ -144,6 +157,9 @@ step the average trails the reading just as the rails do. The same averaging is 
 service-processor trace and the host log in
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes">the memory-anatomy
 report</a>, where the host log's totals came out 14–25% higher in each of its twelve runs on aifoundry2.</li>
+</ul>
+</details>
+<ul class="findings">
 <li><b>Voltage barely droops at the die.</b> The minion rail's on-die monitor reads 518 mV idle and 517 mV with 18 W more
 load (about 35 A more at 0.52 V), consistent with a regulator that senses at the die. The hub puts the sag at
 about <span id="ir-drop"></span> mV per watt on aifoundry2 and 0.14 on aifoundry3. <span id="ddr-idle"></span> <span id="ddr-load"></span> That droop
@@ -190,6 +206,7 @@ window that included loads that evening, so they catch droops that the 133 ms po
 out the options).</p>
 
 <h2>4. Reproduce</h2>
+<details class="more"><summary>Reproduce this</summary>
 <pre><code>cmake -S tools/ettelem -B build/ettelem -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev \
   &amp;&amp; cmake --build build/ettelem
 export LD_LIBRARY_PATH=/opt/et/lib
@@ -228,6 +245,8 @@ command returns, the governor) was read at et-platform <code>353f20e</code>. The
 build, from before et-platform commit <code>60b40c10f</code> (24 September 2024), which rewrote the governor, so the
 governor details may differ on the card (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">the
 DVFS report</a>). The measurements do not depend on it.</p>
+</details>
+<details class="more"><summary>Version history</summary>
 <p class="small"><b>Versions.</b> 20 September 2026: first edition. 21 September: §2's governor bullet corrected (it
 first said the governor never acts). 24 September: the rail averaging described from the firmware (first described as a
 2 s moving average), the leakage slope set beside the later idle law, the transients in §2 re-read from the data, shires
@@ -242,6 +261,7 @@ aifoundry3 under <code>ettelem</code>) instead of 133 ms; the rail filter per ca
 the leakage split as a range; the cool-die clock result labelled a demonstration; where a result holds on both cards,
 or differs, said so; and the clause that busy power climbs faster per degree than idle removed, since it is within the
 noise.</p>
+</details>
 
 <h2>Related reports</h2>
 <ul>

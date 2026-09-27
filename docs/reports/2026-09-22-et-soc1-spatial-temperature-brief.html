@@ -174,6 +174,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 </style>
 <script>
 /* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
@@ -673,9 +681,30 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 </script>
 <!-- chartkit:end -->
@@ -787,8 +816,11 @@ Can the ET-SoC-1 measure how heat moves across its 1,088-core die?
   <div class="mesh-cell compute"><div class="id">S7</div><div class="sub"><span class="xy">(4,5) </span>TS7</div></div>
   <div class="mesh-cell compute"><div class="id">S31</div><div class="sub"><span class="xy">(5,5) </span>TS31</div></div>
 </div>
+<details class="more"><summary>Reading this diagram: orientation and the inferred cells</summary>
 <p class="small caption">The mesh as latency places it (x across, y down). S<i>n</i> is compute shire <i>n</i> and TS<i>n</i> its sensor channel. In this frame the eight memory shires sit one step beyond the top row (0–3, at x = 1–4) and the bottom row (4–7); the PRM calls those sides west and east, so this drawing is the die turned a quarter. The grey cells hold the master, spare, PCIe and I/O shires; which is which is not measured (the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die">heat-per-mm die study</a> infers I/O and PCIe at (0,4) and (0,5)). TS32 (master), TS33 (spare) and TS34 (I/O) are read like the others; the PCIe shire has no sensor.</p>
+</details>
 
+<details class="more"><summary>The sensors' hardware registers, in full</summary>
 <h3 id="controllers">The sensors’ hardware registers</h3>
 <p>Five PVT controllers read the 35 sensors, sampling continuously at 12 bits (their addresses are under <a href="#implementation-notes">Implementation notes</a>). Every sensor has its own hardware registers:</p>
 <ul>
@@ -799,9 +831,11 @@ Can the ET-SoC-1 measure how heat moves across its 1,088-core die?
     <br>The firmware evaluates this in integer arithmetic (<code>pvt_ts_conversion</code>), so every per-shire value it holds is already whole degrees; the 0.061 °C step exists only in the raw 12-bit code in <code>TS_SDIF_DATA</code>.
   </li>
 </ul>
+</details>
 
 <h2 id="bottleneck">2. The firmware reduction bottleneck</h2>
 
+<details class="more"><summary>The firmware source: what it can read, and what it sends</summary>
 <p>The SP’s PVT driver can read each shire’s sensor on its own. In <code>ServiceProcessorBL2/driver/pvt_controller.c</code>:</p>
 <pre><code>int pvt_get_min_shire_ts_sample(PVTC_MINSHIRE_e min_id,
                                 TS_Sample *ts_sample);
@@ -830,6 +864,7 @@ int get_module_current_temperature(struct current_temperature_t *temperature) {
     // the same minion-shire average, not a PMIC reading
     temperature-&gt;pmic_sys = pmic_temperature;
 }</code></pre>
+</details>
 
 <div class="chart-title" style="margin-top:10px">The sensor-to-host pipeline that code implements</div>
 <div class="ck-controls"><div id="pipe-raw"></div></div>
@@ -846,6 +881,7 @@ current mean. Drag it to try any other sample.</p>
 
 <p id="both-cards"></p>
 
+<details class="more"><summary>The host's temperature fields over time, charted</summary>
 <div class="chart-title">What the host’s temperature fields did on aifoundry2 on 20 September</div>
 <div class="ck-controls"><div id="ht-session"></div></div>
 <div class="ck-controls"><div id="ht-time"></div></div>
@@ -853,18 +889,22 @@ current mean. Drag it to try any other sample.</p>
 <div id="ht-leg"></div>
 <div class="chart" id="hosttemp"></div>
 <p class="small">The four whole-degree fields the host received, one step line each, and the band between the service processor’s maximum of the average and the high, labelled with its width. The short ticks at the top mark each rise of the high. The load step was sampled at 10 Hz; the two Horace logs were committed thinned to 2 Hz, so their step times are good to 0.5 s. Move the time slider, or hover or tap the chart: away from a rise, the high only says what the hottest shire read at the last peak, nothing about now.</p>
+</details>
 
+<details class="more"><summary>Why voltage reaches the host shire by shire, and temperature does not</summary>
 <div class="card">
   <div style="font-weight:700;margin-bottom:6px">Why voltage reaches the host shire by shire, and temperature does not</div>
   <p class="small" style="margin:0">
   The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#the-per-shire-voltage-map">Power and temperature</a> report (20 Sep, §3 The per-shire voltage map) reads per-shire voltages this way: with the SP’s log level at DEBUG, the firmware prints one line per shire per pass (<code>MS %2d Voltage [mV]: VDD_MNN: %d [%d, %d] …</code>). In one idle capture on aifoundry2 the minion rail read 517–521 mV across the 34 shires, in whole millivolts; the monitors’ low/high captures span 513–522 mV. That line is printed because it sits inside the <code>GET_MINION_VM</code> macro, which the per-pass power update calls. For temperature the firmware already has the matching DEBUG line (<code>MS %2d Temp [C]: %d [%d, %d]</code>, in <code>pvt_print_min_shire_temperature_sampled_values()</code>), but it is reached only through <code>pvt_print_all()</code>, which nothing calls, so the host is left with the chip-wide aggregate.
   </p>
 </div>
+</details>
 
 <h2 id="needed">3. What is needed to measure spatial thermal flow</h2>
 
 <p>To watch heat move across the grid (say, by running multiply-add kernels on the shires in one corner and watching the heat spread to their neighbours), the following pieces are needed:</p>
 
+<details class="more"><summary>What each of the five pieces needs, table by table</summary>
 <div class="table-wrap stack">
 <table>
   <thead>
@@ -907,7 +947,9 @@ current mean. Drag it to try any other sample.</p>
   </tbody>
 </table>
 </div>
+</details>
 
+<details class="more"><summary>Implementation notes: the PVT controllers' register map</summary>
 <h3 id="implementation-notes">Implementation notes</h3>
 <p>The five PVT controllers (PVTC 0–4) are mapped in the service processor’s address space at <code>0x00_5400_0000 + n·0x1_0000</code>, and all five sample continuously at 12 bits (<code>RUN_1</code> mode):</p>
 
@@ -925,6 +967,7 @@ current mean. Drag it to try any other sample.</p>
   </tbody>
 </table>
 </div>
+</details>
 
 <h2 id="workaround">4. Current best workaround: temporal reconstruction</h2>
 
@@ -937,6 +980,7 @@ current mean. Drag it to try any other sample.</p>
 <p>Both sharpen the chip-wide average; neither says where on the die the heat is.</p>
 
 <h2 id="sources">Sources</h2>
+<details class="more"><summary>Sources, in full</summary>
 <ul class="small">
   <li>Firmware: <a href="https://github.com/aifoundry-org/et-platform/tree/353f20e982f4efd99019d04f8022681cc727c4f2">et-platform at 353f20e</a>, <code>device-bootloaders/src/ServiceProcessorBL2/</code>: <code>driver/pvt_controller.c</code> (<code>pvt_ts_conversion</code>, the per-shire temperature print, <code>pvt_get_and_print</code>), <code>include/bl2_pvt_controller.h</code> (the conversion constants) and <code>services/thermal_pwr_mgmt.c</code> (<code>get_module_current_temperature</code>). The cards’ own trace strings match an older build (before et-platform commit 60b40c10f, 24 Sep 2024); in that build these two PVT files differ only in their licence header, and <code>get_module_current_temperature()</code> is the same.</li>
   <li>RTL: <a href="https://github.com/openhwfoundation/core-et/tree/b38a1a31da67efe00c61e983e64b892c58080115">core-et’s Erbium branch at b38a1a3</a>, <code>rtl/inc/pvt_defines.vh</code>: the same Minion core lineage in a later MCU-class configuration, not the taped-out ET-SoC-1.</li>
@@ -944,8 +988,13 @@ current mean. Drag it to try any other sample.</p>
   <li>Mesh map: <code>workloads/nocbench/analyze.py</code> (marty1885’s layout and the four empty cells).</li>
   <li>Telemetry: the three <code>*-telemetry.jsonl</code> files in <code>docs/reports/data/2026-09-20-power-aifoundry2/</code> (<code>thermal</code>, <code>horace</code> and <code>horace2</code>: 3,681 samples, 20 Sep) and <code>per-shire-voltage-idle.json</code> in the same directory. The chart’s change points, the check on both cards (every committed ettelem log, on either card, that records these fields) and the grid’s voltages are the two constants that <code>tools/ettelem/host_temp_fields.py</code> prints (<code>--check</code> confirms this page embeds them unchanged).</li>
   <li>Thermal model: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/11-thermal-model.md"><code>docs/findings/11-thermal-model.md</code></a>.</li>
+</ul>
+</details>
+<details class="more"><summary>Version history</summary>
+<ul class="small">
   <li>Versions: first published 22 September 2026; corrected 24 September 2026 (the tile size, where the firmware truncates to whole degrees, the <code>pmic_sys</code> field, the peak-hold minimum and maximum, the existing temperature print, the firmware-signing status, the labels of the four non-compute cells, and the figures in §4); revised 25 September 2026 (what the peak-hold high reveals, checked on both cards, with a chart of the host’s temperature fields; the stats packet’s system-temperature slot; the sensor grid’s voltage view; the register details moved to Implementation notes; §4 cut to the two reconstruction methods); 25 September 2026 (version 3), after a check of every claim against both cards (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>): the byline says a measured result holds on both cards unless a card is named, and the results that rest on one card now name it (the mesh map, the idle voltage capture, the host-field chart, and the thermal and flip-to-heat models, all aifoundry2’s), and the <code>pmic_sys</code> field and the zeroed system slot are checked in every committed log from both cards.</li>
 </ul>
+</details>
 
 <h2 id="related">Related reports</h2>
 <ul class="related">
