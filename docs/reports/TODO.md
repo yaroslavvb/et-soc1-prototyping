@@ -44,6 +44,13 @@ finding checked against the page text or the data before it was listed (the requ
 
 ## A. Page changes (rebuild and deploy)
 
+**Charts: done on 26–27 September** (commits `6f207ce` to `974d120`, each page deployed and checked equal to its
+file). Every "Chart"/"Charts" item below is built, except three: heat per mm's optional per-step increments, On-chip
+communication's systolic grain calculator, and the power page's per-card SP pass (which waits for V3-TEL). The hot
+line and relay now order cards through `CK.cardsIn` with aifoundry2 named, as do memory anatomy's §6 chart, the
+hub's droop chart and the DVFS plane; the other positional picks in "Cards picked by position" remain. The fix and
+cut items are all still open.
+
 ### Across pages
 
 - [ ] **Cards picked by position (NOC-2; medium, and high before the three-card data).**

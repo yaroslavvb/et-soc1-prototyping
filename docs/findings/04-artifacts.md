@@ -111,6 +111,17 @@ No number on any page changed. Build commands are unchanged: `workloads/memhier/
 `energy_levels` from the energy manual's `reruns.json` (`--reruns`, defaulting to it), and
 `workloads/onchip/analyze_onchip.py` adds `by_card` rows to the relay's sweeps.
 
+## The chart pass (26–27 September)
+
+The chart ideas of the 26 September review (`docs/reports/TODO.md`, part A) built on 17 pages by seven agents, one
+per group of pages, then checked page by page before each commit: `check_page.sh` OK at 1280 and 390 px in light
+and dark; the rendered text compared line by line with the version before, so that no number changed; any new data
+added only through its producer, with the old values unchanged; each page redeployed to its own space and checked
+equal to its file. New data keys: `hotline.json` `context.window_stop_runs` (`analyze_hotline.py --stop-runs`),
+`onchip.json` `bigsize[].by_card`, the hub's `power.sampler.<card>.{dist,dropped}` and per-card droop rows
+(`sync_hub_data.py`), ridge points' `levels[].clock_points`, matmul's `eff.operands`. Commits `6f207ce`, `071f678`,
+`a92abf9`, `347f232`, `7bb96c1`, `76f1b58`, `974d120`.
+
 ## A12 — Math rendered at build time
 
 `scripts/tex2svg.js` turns the TeX in a report body into standalone SVG, called from

@@ -144,7 +144,12 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Last check: 2026-09-26, about 15:30 PDT**, against the files at `299fac8` (the 26 September visualization pass is
+**Last check: 2026-09-26, 17:25 PDT**, after the chart pass, through `spacesheep read` with a key: 21 of 21 mirrored
+public pages equal to their files; exit 1 because the review's TODO space (`et-soc1-review-todo`), deployed private,
+is now public, and two other spaces are public but not listed here as public (`aifoundry-lab-problems-for-roman`,
+`aifoundry-discord-map`). Their visibility is the owner's call; this file will follow it.
+
+**Previous check: 2026-09-26, about 15:30 PDT**, against the files at `299fac8` (the 26 September visualization pass is
 live), anonymously over HTTPS only: that session had no spacesheep key, so `spacesheep list` was not read. 21 of 21
 mirrored public pages equal to their files (the host's insertion, 16,757 B, identical on every page), the Horace GIFs
 3 of 3 equal, the viewer addresses of all 22 public rows answering 200, the private memo not served anonymously; exit 0.
