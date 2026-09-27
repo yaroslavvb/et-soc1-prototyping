@@ -145,7 +145,10 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Last check: 2026-09-26, 17:25 PDT**, after the chart pass, through `spacesheep read` with a key: 21 of 21 mirrored
+**Last check: 2026-09-26, 23:26 PDT**, after the collapsible-depth pass, through `spacesheep read` with a key: 22 of 22
+mirrored public pages equal to their files, no warnings, exit 0.
+
+**Earlier check: 2026-09-26, 17:25 PDT**, after the chart pass, through `spacesheep read` with a key: 21 of 21 mirrored
 public pages equal to their files; exit 1 because the review's TODO space (`et-soc1-review-todo`), deployed private,
 was public although deployed private, and two other spaces were public but not listed here as public. The
 owner confirmed all three as public the same day, and this file now lists them so.

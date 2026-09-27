@@ -122,6 +122,18 @@ equal to its file. New data keys: `hotline.json` `context.window_stop_runs` (`an
 (`sync_hub_data.py`), ridge points' `levels[].clock_points`, matmul's `eff.operands`. Commits `6f207ce`, `071f678`,
 `a92abf9`, `347f232`, `7bb96c1`, `76f1b58`, `974d120`.
 
+## Collapsible depth (27 September)
+
+The owner found the pages too long to scroll ("the important things should show, and more detail hidden under
+collapsibles"). The toolkit gained `details.more` (style in `report.template.html`'s chartkit CSS) and `CK.reveal`,
+which opens every `<details>` around the target of an address or in-page link; printing opens them all. Seven agents
+then folded method, derivations, caveats, version histories, long tables and "Reproduce" blocks on 20 pages (the L2
+pointer brief left as it was), keeping each section's finding and main chart in view: visible text fell to 42–60%
+of before (the hub 76k to 35k characters, Horace 68k to 30k). Nothing was deleted or reworded: each page, rendered
+with every section open, still contains every line of its old text, and passes `check_page.sh` at 1280 and 390 px
+in light and dark. The two aifoundry1 pages carry their own copy of the style and `reveal()`. New pages should keep
+to this: a section's finding and main chart visible, the rest in `details.more` with a plain label.
+
 ## A12 — Math rendered at build time
 
 `scripts/tex2svg.js` turns the TeX in a report body into standalone SVG, called from
