@@ -26,20 +26,26 @@ the page without anyone copying numbers.
                       per card, summarised for the DRAM-read bursts that slow it, and those bursts' board watts on each
                       card over aifoundry2's; and, as .ring, reruns.json dropped[]: the median latency in each rerun pass
                       dropped because the sampler was starved (the s <-> s+16 ring), per card, for the version-3
-                      campaign's reruns and the 23 September ones
+                      campaign's reruns and the 23 September ones. Per card, .dist is every distinct latency a catalogue
+                      burst took (value, count, and the configuration/pass for six or fewer), and .dropped is every
+                      reruns.json dropped[] entry of that card's own runs (burst, rerun pass, latency): both for the
+                      chart "The meter starved by the workload"
   power.idle_unsensed catalogue.json bursts: board idle less the three rails' idle, per card, with the board's idle
                       and the die range
   power.checks        the fit's robust errors and per-pass coefficients, and the DDR-droop calibration on each card's
                       own telemetry (its V3-CATFULL blocks, fit_unmetered.catalogue_telemetry()), per pass (checks():
-                      the version-3 claims check asks for them per card)
+                      the version-3 claims check asks for them per card); each card's droop block also carries its own
+                      per_config rows (fu.droop's full output), so the "Is the DDR monitor a DRAM meter?" chart can
+                      draw any card
   energy_events       every event the reports priced, with its energy [range] and the rate at which the measurement
                       ran it, for the chart "How many identical events before the meter sees one?" (the energy manual's
                       catalogue, tensor bars and reruns, on three cards since 26 September; the wires from Heat per
-                      millimetre's third run; the hot line and the flips as before); its meter block
+                      millimetre's third run; the hot line and the flips as before; since 27 September E48's gathered and
+                      scattered elements and packed atomic adds, manual.json gs); its meter block
                       takes the service processor's pass per card from the version-3 campaign (meter())
   claims_status       the claims check's verdicts per page, and the cards behind each claim, for §1's scoreboard: one
-                      series per entry of CLAIM_SERIES (the version-3 plan before any campaign run, and the same claims
-                      after the campaign of 25-26 Sep, each tested claim with its outcome on the campaign's cards)
+                      series per entry of CLAIM_SERIES (the claims after the campaign of 25-26 Sep, each tested claim
+                      with its outcome on the campaign's cards, and the version-3 plan before any campaign run)
 
 Deterministic: the same inputs give the same file, byte for byte.
 """
@@ -51,6 +57,9 @@ import os
 import re
 import statistics
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gs_levels as GL  # noqa: E402  E48's configurations (the gathered and scattered elements, the packed atomics)
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 D = os.path.join(ROOT, "docs", "reports", "data")
@@ -89,24 +98,26 @@ T99 = {1: 63.657, 2: 9.925, 3: 5.841, 4: 4.604, 5: 4.032}
 
 # The claims check, per page (§1's scoreboard). Each series is one file whose claims[] carry page, cards and a verdict
 # field, optionally overlaid with the campaign's results (below); the page draws every series, in this order, one bar
-# per page and series. The first is the version-3 plan, committed before any card run; the second is the same claims
-# after the campaign of 25-26 September.
+# per page and series. The first is the claims after the version-3 campaign of 25-26 September (complete; its results
+# are in results/), the second the version-3 plan's verdicts, committed before any card run, for comparison.
 PAGEMAP_V3 = os.path.join(CLAIMS_V3, "results", "pagemap.json")
 CLAIM_SERIES = [
+    {"id": "post-v3", "file": os.path.join(CLAIMS_V3, "plan3.json.gz"), "verdict": "effective_verdict", "date": "2026-09-26",
+     "overlay": PAGEMAP_V3, "label": "After the version-3 campaign: its results, 26 September", "short": "after v3",
+     "note": "the campaign is complete: it measured aifoundry2, aifoundry3 and aifoundry1-c1 on 25\u201326 September, and its "
+             "results are in docs/reports/data/2026-09-25-claims-v3/results; each claim it tested takes its outcome on those "
+             "cards, the others keep their earlier verdict"},
     {"id": "pre-v3", "file": os.path.join(CLAIMS_V3, "plan3.json.gz"), "verdict": "effective_verdict", "date": "2026-09-25",
      "label": "Before the version-3 campaign: the plan of 25 September", "short": "before v3",
      "note": "its verdicts, pre-registered before any campaign run, on the evidence the pages then rested on "
              "(aifoundry2 and aifoundry3)"},
-    {"id": "post-v3", "file": os.path.join(CLAIMS_V3, "plan3.json.gz"), "verdict": "effective_verdict", "date": "2026-09-26",
-     "overlay": PAGEMAP_V3, "label": "After the version-3 campaign: its results, 26 September", "short": "after v3",
-     "note": "measured on aifoundry2, aifoundry3 and aifoundry1-c1 (25\u201326 September); each claim the campaign tested "
-             "takes its outcome on those cards, the others keep their earlier verdict"},
 ]
 # The verdicts in order, strongest evidence first, with the words the page shows (PLAN3's standard, and the campaign's
-# outcomes for the second series). A quoted number takes its home page's verdict (effective_verdict), so QUOTED does
-# not appear. The plan's PROVEN-BOTH ("on both cards") is read as PROVEN (VERDICT_ALIAS): one class, "proven on the
-# cards", for both series, since after the campaign a claim can be proven on up to three cards. CORRECTED exists only
-# after the campaign. A verdict a later file adds that is not listed here is drawn after these, under its own name.
+# outcomes for the after-campaign series). A quoted number takes its home page's verdict (effective_verdict), so
+# QUOTED does not appear. The plan's PROVEN-BOTH ("on both cards") is read as PROVEN (VERDICT_ALIAS): one class,
+# "proven on the cards", for both series, since after the campaign a claim can be proven on up to three cards.
+# CORRECTED exists only after the campaign. A verdict a later file adds that is not listed here is drawn after these,
+# under its own name.
 VERDICTS = [
     ["PROVEN", "proven on the cards", "held on every card measured, with at least three independent repeats on each (a 99% interval that "
      "excludes the null, or a deterministic value in every repeat) and the same sign: before the campaign on aifoundry2 and aifoundry3, "
@@ -192,6 +203,36 @@ def power_blocks(fit, cat, dvfs, reruns):
                    "read_median_ms": [min(b["sampler_median_ms"] for b in rd), max(b["sampler_median_ms"] for b in rd)],
                    "read_max_ms": max(b["sampler_max_ms"] for b in rd),
                    "other_median_ms": [min(b["sampler_median_ms"] for b in other), max(b["sampler_median_ms"] for b in other)]}
+    # Every distinct latency a card's own bursts took (a rug for "The meter starved by the workload"): the value,
+    # how many bursts took it, and, for six or fewer, which configuration and pass.
+    for c in CARDS:
+        by_ms = {}
+        for b in cat["bursts"][c]:
+            by_ms.setdefault(b["sampler_median_ms"], []).append(b)
+        dist = []
+        for ms in sorted(by_ms):
+            grp = by_ms[ms]
+            row = {"ms": r3(ms), "n": len(grp)}
+            if len(grp) <= 6:
+                row["cfgs"] = [{"cfg": b["cfg"], "pass": b["pass"]} for b in grp]
+            dist.append(row)
+        samp[c]["dist"] = dist
+    # Every reruns.json dropped[] entry that is this card's own run (burst, which rerun pass, and its latency). The card
+    # is the longest card name in the pass's path (so aifoundry1-c1 is not read as another card); the run is the
+    # version-3 pass (raw/<card>/rl/p<K>/A: "version-3 rerun, pass K") or the 23 September directory's pass.
+    def card_in(path):
+        return next((c for c in sorted(CARDS, key=len, reverse=True) if c in path), None)
+
+    def run_of(path):
+        m = re.search(r"/rl/p(\d+)/", path + "/")
+        if "claims-v3" in path and m:
+            return f"version-3 rerun, pass {m.group(1)}"
+        if "2026-09-23-reruns" in path:
+            return f"23 September rerun, {os.path.basename(path)}"
+        return f"{os.path.basename(os.path.dirname(path))}/{os.path.basename(path)}"
+    for c in CARDS:
+        samp[c]["dropped"] = [{"burst": d["burst"], "run": run_of(d["pass"]), "ms": r3(d["sampler_median_ms"])}
+                              for d in reruns.get("dropped", []) if card_in(d["pass"]) == c]
     # The DRAM-read bursts' board watts over idle on each other card over the reference card's (their range), against
     # the same ratio over every catalogue entry (its 10th-90th percentiles, "the middle 80%"); and catalogue.json's
     # own cross_card block (aifoundry3 over aifoundry2).
@@ -302,7 +343,8 @@ def checks(cat, fit):
                            "pass_ci99": {v: ci99([d[k] for d in per]) for k, v in k3.items()},
                            "max_nondram_excess_mv": [r3(ex[0]), ex[1]],
                            "named": {k: {"mean": r3({r[0]: r[1] for r in w["per_config"]}[k]), "passes": [r3(q[k]) for q in pcfg]}
-                                     for k in top + [l3]}}
+                                     for k in top + [l3]},
+                           "per_config_fields": w["per_config_fields"], "per_config": w["per_config"]}
     out["droop"]["named"] = {"mesh": top, "l3": l3}
     out["source"] = ("tools/ettelem/sync_hub_data.py checks(), with fit_unmetered.py's config_means, _fit and droop on catalogue.json and each "
                      "card's catalogue telemetry (catalogue_telemetry(): the V3-CATFULL blocks, raw/<card>/catfull/p*/telemetry.jsonl.gz)")
@@ -498,7 +540,32 @@ def energy_events(man, reruns, wire, model, hrep, tel):
         add("bytes", "b-" + n.replace("/", "-"), lab, "byte", src_rw,
             {p: {**pooled(cb[f"{n}/{p}"], 1e-12), "rate": r3sig(sm[f"{n}/{p}"]["bytes_per_s"]["mean"])} for p in ("random", "zeros")})
 
-    # Messages (energy manual §5) and the relay (Hand it to the next shire).
+    # Gathered and scattered elements (energy manual §4.4, E48): one random 4 B element per event, both harts of all
+    # 1,024 minions, pooled over every pass of the three cards (manual.json gs, build_energy_manual.py); rate: the chip's
+    # element rate in that measurement. "Random" is random lines within 4 KB tiles.
+    G = man.get("gs")
+    GK = G["configs"] if G else {}
+
+    def gsv(cfg):
+        e = GK.get(cfg)
+        return {**pooled(e["pj_per_element"], 1e-12), "rate": r3sig(e["elements_per_s"]["mean"])} if e and e.get("pj_per_element") else None
+    if G:
+        src_g = {"url": PAGES + "et-soc1-energy-manual#irregular-access-gathers-and-scatters-by-level", "label": "The energy manual, §4.4"}
+        for k, lab, op, table in (("l1", "a random 4 B element gathered from the L1", "fgw.ps", "dram-512B"),
+                                  ("l2", "a random 4 B element gathered from the L2", "fgw.ps", "dram-4K"),
+                                  ("scp", "a random 4 B element gathered from the own scratchpad", "fgw.ps", "scp-16K"),
+                                  ("dram", "a random 4 B element gathered from DRAM", "fgw.ps", "dram-256K"),
+                                  ("s-l1", "a 4 B element scattered into the L1", "fscw.ps", "dram-512B"),
+                                  ("s-l2", "a 4 B element scattered into the L2", "fscw.ps", "dram-4K")):
+            v = {p: gsv(GL.cfg(op, table, data=p)) for p in ("random", "zeros")}
+            v = {p: x for p, x in v.items() if x}
+            if "random" in v and "zeros" not in v:
+                v = {"any": v["random"]}
+            if v:
+                add("bytes", "gs-" + k, lab, "element", src_g, v,
+                    note=f"`{op}`, eight elements an instruction on random lines within 4 KB tiles, both harts of 1,024 minions (E48, three cards)")
+
+
     src_m = {"url": PAGES + "et-soc1-energy-manual#bytes-between-cores-and-shires", "label": "The energy manual, §5"}
     rg = reruns["rings_pj_per_byte"]
     for k, lab in (("pair", "a byte messaged to the other minion of a pair"), ("neigh", "a byte messaged around a neighbourhood"),
@@ -514,19 +581,27 @@ def energy_events(man, reruns, wire, model, hrep, tel):
     for k, lab in (("spread", "a global atomic, each shire on its own line"), ("contended", "a global atomic on one contended line")):
         add("sync", "s-" + k, lab, "atomic", src_s, {"any": {**pooled(reruns["hotline_nj_per_op"][k], 1e-9), "rate": r3sig(hot[k])}})
 
+    if G:   # packed atomic adds (energy manual §6, E48): one update per event, random words of shared tables
+        src_a = {"url": PAGES + "et-soc1-energy-manual#synchronisation", "label": "The energy manual, §6"}
+        for k, lab, op, table in (("famoaddl", "a packed atomic add at the shire's L2 (famoaddl.pi), per lane", "famoaddl.pi", "shire-256K"),
+                                  ("famoaddg", "a packed atomic add at the home L3 (famoaddg.pi), per lane", "famoaddg.pi", "chip-8M")):
+            x = gsv(GL.cfg(op, table, data="zeros"))
+            if x:
+                add("sync", "gs-" + k, lab, "update", src_a, {"any": x}, note="random words of a shared table, both harts of 1,024 minions (E48, three cards)")
+
     fam = [["flips", "Flips and wires", "var(--c7)"], ["tensor", "Tensor multiply-adds", "var(--c1)"], ["instr", "Instructions", "var(--c2)"],
            ["bytes", "Bytes by level", "var(--c3)"], ["msg", "Messages and relay", "var(--c4)"], ["sync", "Synchronisation", "var(--c5)"]]
     return {"families": fam, "events": ev,
             "meter": {**meter(tel), "idle_law_rms_w": r3(model["power"]["rms_idle"])},
             "rate_rule": "the one at which the measurement ran it on all 1,024 minions at 600 MHz: the median launch rate of the "
                          "energy manual's rerun passes (bytes by level, messages and relay: the version-3 campaign's, on three cards; "
-                         "atomics: 23 September), the catalogue's aifoundry2 runs "
+                         "atomics: 23 September), the gathers', scatters' and packed atomics' own element rate (E48, pooled over three cards), the catalogue's aifoundry2 runs "
                          "(instructions, byte paths), the tensor rows, the Horace experiment's flip counts, and the heat runs' most "
                          "bit·mm per second (wires)",
             "source": ENERGY_EVENTS_SOURCE}
 
 
-ENERGY_EVENTS_SOURCE = ("tools/ettelem/sync_hub_data.py from manual.json, reruns.json and its rerun passes (V3-RL and the 23 September directories), the wire report.json, "
+ENERGY_EVENTS_SOURCE = ("tools/ettelem/sync_hub_data.py from manual.json (its gs block: E48's gathers, scatters and packed atomics), reruns.json and its rerun passes (V3-RL and the 23 September directories), the wire report.json, "
                         "the Horace model.json / report.json, and the version-3 campaign's tel.json (the meter's pass)")
 
 

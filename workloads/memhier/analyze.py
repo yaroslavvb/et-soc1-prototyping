@@ -17,6 +17,9 @@ lo-hi over every pass of every card, and each card's mean, standard error and nu
 levels, whose contents the version-3 re-runs set, once per contents (levels_by_contents_pj_per_byte). With --v3
 docs/reports/data/2026-09-25-claims-v3/raw it also embeds v3: each card's chases from the version-3 claims check
 (26 September, 600 MHz, the passes V3-LAT kept; see v3_curves), which the latency chart draws beside this session's.
+It also embeds gs, E48's gathers and scatters on the same three cards (26 September), as the energy manual's manual.json
+pools them (--manual, by default docs/reports/data/2026-09-23-energy-manual/manual.json), for the "Irregular access"
+section.
 """
 import argparse
 import glob
@@ -48,6 +51,9 @@ ANATOMY_L3 = {"base": 110, "per_hop": 12}
 ANATOMY_SUMMARY = os.path.join(HERE, "..", "..", "docs", "reports", "data", "2026-09-19-memprobe-aifoundry2", "summary.json")
 # The energy manual's 23 September re-runs at 600 MHz: the energy per byte the report's tables and charts use.
 RERUNS = os.path.join(HERE, "..", "..", "docs", "reports", "data", "2026-09-23-energy-manual", "reruns.json")
+# The energy manual's manual.json, whose gs block (E48: gathers and scatters on three cards, 26 September) the
+# "Irregular access" section draws: by level (gs.levels), and the word gather's and scatter's working-set sweep.
+MANUAL = os.path.join(HERE, "..", "..", "docs", "reports", "data", "2026-09-23-energy-manual", "manual.json")
 # the levels whose contents the version-3 re-runs set before reading them (tools/claims-v3/rl/README.md: a zeros or
 # random-data prefill of the scratchpads), and the two contents
 CONTENTS_SET = ("scp-local", "scp-remote")
@@ -150,6 +156,9 @@ def main():
     p.add_argument("--reruns", metavar="RERUNS_JSON", default=RERUNS,
                    help="the energy manual's re-runs, whose levels_pj_per_byte is embedded as energy_levels "
                         "(default: docs/reports/data/2026-09-23-energy-manual/reruns.json)")
+    p.add_argument("--manual", metavar="MANUAL_JSON", default=MANUAL,
+                   help="the energy manual's manual.json, whose gs block (E48) is embedded as gs (default: "
+                        "docs/reports/data/2026-09-23-energy-manual/manual.json; 'none' leaves it out)")
     p.add_argument("--v3", metavar="RAW_ROOT", help="also embed the version-3 claims check's chases of every card "
                    "(docs/reports/data/2026-09-25-claims-v3/raw; see v3_curves)")
     p.add_argument("--v3-lat", metavar="LAT_JSON", default=V3_LAT,
@@ -330,6 +339,29 @@ def main():
             data["energy_levels"][k] = {q: v[q] for q in keep}
     print("energy per byte by level (energy manual re-runs): " + ", ".join(
         f"{k} {v['mean']:.2f} [{v['lo']:.2f}-{v['hi']:.2f}] pJ/B" for k, v in data["energy_levels"].items()))
+    # Gathers and scatters (E48), as the energy manual's manual.json pools them: every configuration a level column of
+    # gs.levels names, the word gather's and scatter's sweep over the working set (random lines within 4 KB tiles, both
+    # harts of 1,024 minions), the 32 B-block gather and the verdicts; per card mean and standard error, pooled mean and
+    # lo-hi over every pass of every card.
+    if args.manual and args.manual != "none" and os.path.exists(args.manual):
+        G = json.load(open(args.manual)).get("gs")
+        if G:
+            K = G["configs"]
+            want = {c for lv in G["levels"] for c in lv["cols"].values()}
+            want |= {k for k, e in K.items() if e["set"] == "E" and e["op"] in ("fgw.ps", "fscw.ps") and e["index"] == "rand"
+                     and e["data"] == "random" and e["harts"] == 2 and e["mask"] == "0xff" and e["target"] == "dram"}
+            slim = lambda v: v and {q: v[q] for q in ("mean", "lo", "hi", "n", "cards")} | {
+                "per_card": {c: {"mean": x["mean"], "se": x["se"]} for c, x in v["per_card"].items()}}
+            data["gs"] = {
+                "cards": G["cards"], "experiment": G["experiment"], "date": G["date"], "random": G["random"],
+                "levels": G["levels"], "columns": G["columns"],
+                "configs": {k: {"op": K[k]["op"], "ws": K[k]["ws"], "table": K[k]["table"], "lines_per_instr": K[k]["lines_per_instr"],
+                                **{m: slim(K[k].get(m)) for m in ("elements_per_s", "pj_per_element", "cpi_minion") if K[k].get(m)}}
+                            for k in sorted(want) if k in K},
+                "items": {k: {q: v[q] for q in ("outcome", "outcomes", "range", "bound_elements_per_s", "per_card") if q in v}
+                          for k, v in G["items"].items() if k in ("GS-L1", "GS-MH", "GS-UC", "GS-DRAM", "GS-CHECK")},
+                "dropped": G["dropped"], "source": G["source"]}
+            print(f"gathers and scatters (E48): {len(data['gs']['configs'])} configurations from {args.manual}")
     if args.embed:
         html = open(args.embed).read()
         pat = re.compile(r'(<script type="application/json" id="memhier-data">)(.*?)(</script>)', re.S)

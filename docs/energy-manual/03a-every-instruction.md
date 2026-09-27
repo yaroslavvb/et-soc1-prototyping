@@ -237,3 +237,21 @@ Thirteen instructions **trapped** in U-mode in a one-off check while the catalog
 | `addi_norvc` | **10.8** [10.0–11.5] | **15.9** [15.2–17.0] | 1.47× | 0.214 | a2 16.9 ± 0.0 · a3 15.4 ± 0.1 · a1c1 15.3 ± 0.0 |
 | `c.mv` | **10.1** [9.2–10.7] | **15.0** [13.4–18.0] | 1.49× | 0.219 | a2 16.0 ± 1.1 · a3 14.8 ± 0.4 · a1c1 14.2 ± 0.4 |
 | `c.li` | **10.5** [9.5–12.1] | **15.7** [14.4–18.2] | 1.50× | 0.219 | a2 17.0 ± 0.6 · a3 15.3 ± 0.3 · a1c1 14.8 ± 0.2 |
+
+## Gathers, scatters and packed atomics, from the L1 (E48)
+
+E48 measured 15 more instructions on the same three cards after the catalogue (26 September, three passes on each): the vector unit's indexed loads and stores, which take eight addresses from a vector of byte offsets. Here from a 512 B table per hart (the hart's whole L1), eight random words on one line per instruction; the packed atomics with all eight lanes on the hart's own word. **The bold figure pools the six passes of aifoundry2 and aifoundry3**, as E48's rules, fixed before its data, pool rows set beside this catalogue; the per-card column gives every card, aifoundry1 card 1 included. Per instruction, with the figure per element (or per update) after it; `fg32*` and `fsc32*` are the 32 B-block forms, one access per instruction with the lanes permuted inside the block. The costs of the same instructions from the L2, the scratchpads and DRAM, where they are dearer by one or two orders of magnitude, are in [4.4](04-bytes-memory.md); the packed atomics on shared tables are in [6](06-synchronisation.md).
+
+| Instruction | zeros pJ [range] | random pJ [range] | random / zeros | issue per hart per cycle | by card ± se |
+|---|---|---|---|---|---|
+| `fgw.ps` | **87.1** [83.5–93.8] (10.9/element) | **104.0** [95.1–116.5] (13.0/element) | 1.19× | 0.046 | a2 108.3 ± 4.8 · a3 99.7 ± 2.5 · a1c1 98.3 ± 1.4 |
+| `fgh.ps` | — | **105.6** [102.7–116.9] (13.2/element) | — | 0.046 | a2 107.9 ± 4.5 · a3 103.4 ± 0.4 · a1c1 100.1 ± 1.2 |
+| `fgb.ps` | — | **101.8** [98.2–105.6] (12.7/element) | — | 0.046 | a2 101.1 ± 2.3 · a3 102.6 ± 0.0 · a1c1 95.2 ± 1.2 |
+| `fscw.ps` | **94.0** [90.6–99.4] (11.7/element) | **117.2** [111.0–122.6] (14.7/element) | 1.25× | 0.046 | a2 117.6 ± 3.5 · a3 116.8 ± 1.4 · a1c1 118.1 ± 3.0 |
+| `fsch.ps` | — | **120.0** [115.2–131.7] (15.0/element) | — | 0.046 | a2 123.8 ± 4.1 · a3 116.2 ± 0.6 · a1c1 113.7 ± 0.7 |
+| `fscb.ps` | — | **119.8** [118.6–121.6] (15.0/element) | — | 0.046 | a2 120.1 ± 0.8 · a3 119.5 ± 0.6 · a1c1 112.8 ± 1.0 |
+| `fg32w.ps` | — | **30.9** [29.6–31.8] (3.9/element) | — | 0.179 | a2 31.0 ± 0.7 · a3 30.9 ± 0.2 · a1c1 29.6 ± 0.2 |
+| `fg32b.ps` | — | **31.7** [28.2–34.1] (4.0/element) | — | 0.187 | a2 32.7 ± 0.8 · a3 30.7 ± 1.2 · a1c1 31.2 ± 0.2 |
+| `fsc32w.ps` | — | **38.6** [37.8–39.6] (4.8/element) | — | 0.187 | a2 38.8 ± 0.6 · a3 38.4 ± 0.3 · a1c1 38.3 ± 0.5 |
+| `famoaddl.pi` | **3229.1** [3040.6–3583.1] (403.6/update) | — | — | 0.00107 | a2 3287.4 ± 151.5 · a3 3170.9 ± 66.1 · a1c1 3446.1 ± 36.1 (zeros) |
+| `famoaddg.pi` | **19791.2** [18141.6–22420.8] (2473.9/update) | — | — | 0.000138 | a2 20852.8 ± 1208.3 · a3 18730.4 ± 404.3 · a1c1 20856.8 ± 704.7 (zeros) |

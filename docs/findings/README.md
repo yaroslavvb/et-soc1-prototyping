@@ -1,7 +1,16 @@
 # ET-SoC-1 findings: start here
 
+> **Revised only in part for version 3.** The pages were revised under the version-3 standard on 25 September
+> (`0399048`: 57 claims dropped or weakened, one-card results labelled) and carry the three-card check's results
+> since 26 September. Here, 02, 03 (E35–E49), 04, 05's "Version 3: the three-card check" and 20-heat-per-mm.md have
+> them; the other topic files and the findings in brief were corrected on 25 and 26 September but not rewritten for
+> three cards. Where a page and these files differ, the page holds: each claim's outcome is in
+> [`results/pagemap.md`](../reports/data/2026-09-25-claims-v3/results/pagemap.md), and the known differences are in
+> [`../reports/TODO.md`](../reports/TODO.md), part B.
+
 Everything measured on AI Foundry's ET-SoC-1 cards between 18 and 24 September 2026 (`aifoundry2`; `aifoundry3`
-for the 18 September sparsity runs, the cross-card sessions E20–E21, and repeats of E22–E27, E29, E31 and E32),
+for the 18 September sparsity runs, the cross-card sessions E20–E21, and repeats of E22–E27, E29, E31 and E32), and
+in the three-card check of 25–26 September (E35–E48, adding aifoundry1's card 1),
 written so that **you never have to open the HTML reports or the raw data to get an answer** — though every
 number says where to find both.
 
@@ -25,7 +34,7 @@ Read [Terms](#terms) first.
    data; random values toggle 87 million nets. Four fitted energies turn those counts into watts to
    **0.50 W rms** when each pattern is left out of the fit, and 14 structured matrices priced from their tiles
    before they ran came within 0.92 W rms. → [11-thermal-model.md](11-thermal-model.md)
-3. **The consequence.** Leakage is 23 of the 36 W an idle card draws at 80 °C and grows 0.65 W per °C there, which
+3. **The consequence.** Leakage is 20–29 W (23 W in the best fit) of the 36 W an idle card draws at 80 °C and grows 0.65 W per °C there, which
    closes a feedback loop with gain 0.95. Sustained switching above **about 3 W** has no equilibrium on this
    card in 21 September's room (less on a warmer day): random data drives the die from 80 to 90 °C in
    **20 seconds**, ones in **two minutes**, zeros never. → [12-heat-management.md](12-heat-management.md)
@@ -53,17 +62,17 @@ Read [Terms](#terms) first.
    under load. → [14-card-behaviour.md](14-card-behaviour.md)
 8. **The sharpest edge on the chip.** One contended global atomic is shared out fairly, to within half a percent,
    and takes the entire memory path of the shire that hosts it to **zero** — 384 operations, then nothing, for as
-   long as the hammering lasts. It takes 24 remote requesters, under one shire's worth. The vendor's errata
+   long as the hammering lasts. It takes 21–24 remote requesters (20 leave the host at 98.9%, 24 stop it), under one shire's worth. The vendor's errata
    describe it; they say the configuration bit that looks like the fix does not help when the host and the mesh
    want the same address, and the case measured here (different addresses) was not tested.
    → [17-hot-line.md](17-hot-line.md)
 9. **The biggest win available.** A chain of stages that hands its intermediate to the next shire's scratchpad
    (in ID order, 3.5 mesh hops away on average) instead of DRAM runs **12.3× faster at a twelfth of the energy per
-   byte, on the same watts**; keeping it in the shire's own scratchpad is 30.7×. The catch is a sharp one: below
+   byte** (the three routes draw within about a watt of each other); keeping it in the shire's own scratchpad is 30.7×. The catch is a sharp one: below
    the 32 MB L3 the cache already does the job and you gain nothing. → [18-on-chip-relay.md](18-on-chip-relay.md)
 10. **What the bars say.** Re-running every table and repeating it on the second card puts a bar on every
    entry: ±6% in the median for the catalogue, mostly the 5% between the cards; ±17% on the hot line, where a
-   1.4 W signal rides on a drifting 30 W idle; ±5–7% on the awake core and ±5.5% on the DRAM relay. Two traps
+   1.2 W signal (1.19 W pooled) rides on a drifting 30 W idle; ±5–7% on the awake core and ±5.5% on the DRAM relay. Two traps
    found on the way: aifoundry2's governor lifts the clock mid-burst below 68 °C, and rings between shires s and
    s+16 starve the service processor that reads the meter. → [../energy-manual/09-method.md](../energy-manual/09-method.md)
 11. **What the meters miss.** Half of idle is on no rail sensor, as is about a sixth of what an arithmetic workload
@@ -81,9 +90,22 @@ Read [Terms](#terms) first.
    → [20-heat-per-mm.md](20-heat-per-mm.md)
 13. **The caveat that matters most.** The temperature half of the model was only held out properly after the
    fact, when the fit was challenged. On the later runs of the same session, which it was not fitted to, the
-   time-to-90 °C error is 9% in the median and 23% at worst. On a different afternoon with new matrices it is 7% in
+   time-to-90 °C error is 9% in the median and 23% at worst. In a separate session that afternoon, with new matrices, it is 7% in
    the median but 65% at worst: the DFT pair, whose power the flip model got 2.8 W low. It also runs 3–5 °C hot at
    ten minutes. → [11-thermal-model.md](11-thermal-model.md), section "How well it predicts"
+14. **Three cards, pre-registered.** Every claim the pages make was listed and given a verdict (1,372), and those
+   that needed new data got a prediction and a decision rule before any run and were re-tested on aifoundry2,
+   aifoundry3 and aifoundry1's card 1 (25–26 September, E35–E46). The
+   pages now say what the three cards showed, name the card where a result rests on one, and correct the claims whose
+   test failed (among them the cycle counter's short window, the rails' reset, aifoundry3's 224 ms service-processor
+   pass and the factor between cards). Cycle counts and rates agree across the cards; energies differ by a few
+   percent (the full catalogue: aifoundry3 0.976 and aifoundry1's card 1 0.967 of aifoundry2).
+   → [03-experiments.md](03-experiments.md), "Version 3 of the claims check"; [05-claims.md](05-claims.md),
+   "Version 3: the three-card check"
+15. **Gathers and scatters.** On each of the three cards a word gather runs at 452 G elements/s from L1 (12.8 pJ
+   each), 27 G/s from L2 or the own scratchpad (about 360 pJ) and 1.2 G/s from DRAM (9.8 nJ, the DRAM's 76 GB/s of
+   whole lines); a scatter keeps pace from L1 and falls to 0.42 G/s from DRAM. All 159 verify launches per card were
+   exact. Not on a page yet. → [03-experiments.md](03-experiments.md), E48
 
 ## Terms
 
@@ -121,14 +143,14 @@ The same glossary is on the hub, [Limits of observability](https://spacesheep.de
 | Know what the card's instruments can and cannot see | [19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md) and the hub's [ladder](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#ladder); [15-earlier-findings.md](15-earlier-findings.md) for the first survey |
 | Share a counter, lock or flag between shires | [17-hot-line.md](17-hot-line.md) — one hot line stops the shire that hosts it |
 | Make a multi-pass computation faster than main memory | [18-on-chip-relay.md](18-on-chip-relay.md) — hand each stage to the next shire's scratchpad |
-| **Look up what anything costs in joules** | [../energy-manual/](../energy-manual/README.md) — the energy manual: at rest, awake, every instruction, per byte, wires, lines, rows, leakage, rails, between shires, synchronisation, composition; every entry with a confidence bar from repeated passes on two cards |
+| **Look up what anything costs in joules** | [../energy-manual/](../energy-manual/README.md) — the energy manual: at rest, awake, every instruction, per byte, wires, lines, rows, leakage, rails, between shires, synchronisation, composition; every entry with a confidence bar from repeated passes, on three cards since 26 September |
 | Know what moving data across the chip costs per millimetre, or compare with Dally's rule of thumb | [20-heat-per-mm.md](20-heat-per-mm.md) — per bit per mm, per flip against per one, free against shared links |
 | Know what the meters miss, and what would let them see more | [19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md) — the power meter chain, the unmetered remainder attributed, the DDR-rail droop meter, the meter starved by s ↔ s+16 rings, the improvement ladder |
 | Pick a machine, or compare two cards | [14-card-behaviour.md](14-card-behaviour.md) — the three machines side by side, and why aifoundry3 is slow |
 | Understand the clock/voltage governor, or why the card leaks so much | [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) |
 | Re-run an experiment | [03-experiments.md](03-experiments.md) — command, protocol, raw data path, caveats, and the report it fed |
 | Find the published version | [04-artifacts.md](04-artifacts.md) — reports, spaces and their visibility, GIFs, tools, commits |
-| Know what was re-checked, what reproduced and what did not | [04-artifacts.md](04-artifacts.md), "The 25 September validation", and its record in [../reports/data/2026-09-24-report-review/](../reports/data/2026-09-24-report-review/README.md) |
+| Know what was re-checked, what reproduced and what did not | [04-artifacts.md](04-artifacts.md), "The 25 September validation", and its record in [../reports/data/2026-09-24-report-review/](../reports/data/2026-09-24-report-review/README.md); for the three-card check, each page claim with its outcome in [`results/pagemap.md`](../reports/data/2026-09-25-claims-v3/results/pagemap.md) |
 | Know why a question was or was not answered | [02-requests.md](02-requests.md) |
 | Check a source | [01-resources.md](01-resources.md) — what each is authoritative for, and what it is not |
 
@@ -139,8 +161,8 @@ Four kinds of thing have IDs, and every claim cites them:
 | Prefix | Meaning | File |
 |---|---|---|
 | **R1–R14** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
-| **Q1–Q54** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E49** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters; E49 the runtime's log-level race) | [03-experiments.md](03-experiments.md) |
+| **Q1–Q57** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
+| **E1–E49** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September) | [03-experiments.md](03-experiments.md) |
 | **A1–A19** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused) | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":
@@ -168,7 +190,7 @@ tools/ettelem/finish_horace.sh     # no card needed: re-runs the Horace line (E9
 
 Every other experiment gives its own command in [03-experiments.md](03-experiments.md). Re-running on a card
 needs `aifoundry2`, the build in `build/`, and an idle machine; see [14-card-behaviour.md](14-card-behaviour.md)
-for the etiquette and the traps.
+for the traps and [AGENT.md](../../AGENT.md) §5 for the etiquette.
 
 ## What is *not* established
 
@@ -185,7 +207,7 @@ Stated in full in [05-claims.md](05-claims.md), last section. The big ones:
   et-platform source read here (R3).
 - **The thermal resistance is this card in this desktop chassis**, not a property of the chip.
 - **aifoundry1 contributed no measurements before 25 September 2026** (its cards could not be opened; card 1
-  runs the version-3 campaign since). aifoundry3 repeated the strict protocol (E20), the hot-line sweeps
+  ran the version-3 campaign, E35–E46, and E48). aifoundry3 repeated the strict protocol (E20), the hot-line sweeps
   (E22–E23), the scratchpad probe and relay sweep (E24–E25), the catalogue (E26–E27), the reruns (E29) and the wire
   runs (E31–E32), but its thermal network was never characterised, so do not apply aifoundry2's 1.47 °C/W to it.
 - **The model's slow thermal stages are not identified.** They move a lot between fits; do not quote them as

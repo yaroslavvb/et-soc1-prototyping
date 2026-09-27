@@ -9,12 +9,12 @@
    "access": "host, management node",
    "status": "works_now",
    "check": "changed",
-   "note": "The host can poll much faster than the value changes (ettelem's six-command sample takes 22 ms), but the service processor refreshes once per loop pass. The PMIC (a closed ATSAMD20 firmware) does the averaging. Some workloads starve aifoundry2's SP and freeze the reading; aifoundry3's sampler kept its pace in the same bursts (§4.1)."
+   "note": "The host can poll much faster than the value changes (ettelem's six-command sample takes 22 ms), but the service processor refreshes once per loop pass. The PMIC (a closed ATSAMD20 firmware) does the averaging. Some workloads starve the SP and slow the reading, on aifoundry2 to about two new values a second; on 23 September aifoundry3's sampler kept its pace in the same bursts, but in the version-3 campaign's reruns the same ring starved the sampler on all three cards (§4.1)."
   },
   {
    "level": "Rail power",
    "what": "Minion cores, SRAM (L2/L3/scratchpad arrays), NoC",
-   "gran": "1 mW; the PMIC's running average (τ ≈ {{rf_tau}} s) of each regulator's output power, copied by the SP every pass (about 160 ms on aifoundry2 and aifoundry1-c1 while ettelem samples, 266 ms on aifoundry3); min and max since the last reset, which restarts the average too",
+   "gran": "1 mW; the PMIC's running average (τ ≈ {{rf_tau}} s) of each regulator's output power, copied by the SP every pass (160–266 ms by card while ettelem samples, §4.1); min and max since the last reset, which restarts the average too",
    "sec": 1,
    "instrument": "SP stats trace (dev_mngt_service -t SPST:extract)",
    "access": "host, management node",
@@ -47,13 +47,13 @@
   {
    "level": "Temperature and voltage",
    "what": "35 temperature sensors, 125 voltage sense points (3 per minion shire, 2 per memory shire, IO and PCIe shires), 35 process detectors",
-   "gran": "hardware 0.06 °C (12-bit) / 75 µV (14-bit); host sees 34-shire avg/low/high at 1 °C / 1 mV every SP pass (about 160 ms on aifoundry2 and aifoundry1-c1 while ettelem samples, 266 ms on aifoundry3)",
+   "gran": "hardware 0.06 °C (12-bit) / 75 µV (14-bit); host sees 34-shire avg/low/high at 1 °C / 1 mV every SP pass (160–266 ms by card while ettelem samples, §4.1)",
    "sec": 0.133,
    "instrument": "Moortec PVT controllers (SP-only); DM_CMD_GET_MODULE_CURRENT_TEMPERATURE",
    "access": "service processor",
-   "status": "needs_tooling",
-   "check": "disputed",
-   "note": "Per-shire voltages leak out today as DEBUG log strings through DM_CMD_SET_DM_TRACE_CONFIG (the per-shire voltage map in Power and temperature, §3); per-shire temperature needs a firmware change; the process detectors are configured with measurement disabled and never read; two external analog VM inputs have a stub reader and no caller. No sensor measures current (§4.3)."
+   "status": "needs_fw_change",
+   "check": "changed",
+   "note": "Per-shire voltages work now (DEBUG trace): they leak out as DEBUG log strings through DM_CMD_SET_DM_TRACE_CONFIG (the per-shire voltage map in Power and temperature, §3); per-shire temperature needs a firmware change; the process detectors are configured with measurement disabled and never read; two external analog VM inputs have a stub reader and no caller. No sensor measures current (§4.3)."
   },
   {
    "level": "DDR-rail droop",
@@ -353,7 +353,7 @@
   {
    "title": "Limits of observability (this page)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability",
-   "date": "20–26 Sep",
+   "date": "20–27 Sep",
    "what": "The hub: every instrument on the card, what it resolves, what it cannot see, the unmetered power attributed, and the ladder of improvements; since 26 September, the version-3 campaign on three cards and every page's claims before and after it.",
    "instruments": "all of them",
    "short": "This hub",
@@ -374,7 +374,7 @@
    "title": "The energy manual",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual",
    "date": "18–23 Sep",
-   "what": "Energy per instruction, per byte at every level, per message, per atomic, with confidence bars from repeated passes on three cards; the idle law; wires, lines, rows, leakage of the arrays, rails.",
+   "what": "Energy per instruction, per byte at every level, per message, per atomic, with confidence bars from repeated passes on three cards; the idle law; wires, lines, rows, leakage of the arrays, rails; since 27 September gathers, scatters and packed atomics by level (E48, three cards: a random 4 B element 12.8 pJ from the L1, 354 pJ from the L2, 9.8 nJ from DRAM).",
    "instruments": "board power, rails, die temperature, cycle counter; the leakage law",
    "short": "Energy manual",
    "pub": "2026-09-23"
@@ -383,7 +383,7 @@
    "group": "Energy and power",
    "title": "The DVFS loop and its leakage",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage",
-   "date": "21–22 Sep",
+   "date": "21–24 Sep",
    "what": "The governor's states and thresholds and the three operating points (aifoundry2; aifoundry3's firmware runs with a TDP of 0 W, which a lab service sets at every boot, so that card never leaves 600 MHz); the idle law on aifoundry2: idle power rises about 0.65 W per °C near 80 °C, and 20–29 W of the 36 W idle at 80 °C is leakage (a fixed part plus an exponential fits equally for e-folding lengths of 30 to 45 °C, so the split is a range; one session: the three-card check got no long idle pass to confirm it); the rail split of idle, the activity term; the open RTL's per-minion sleep controls are tied off, and the wake-up probe showed no array power gating (one probe on aifoundry2; since 26 September three on each of the three cards).",
    "instruments": "board power, rails, SP trace, DM_CMD config reads, driver ioctl",
    "short": "DVFS and leakage",
@@ -414,7 +414,7 @@
    "title": "Power and temperature telemetry",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature",
    "date": "20 Sep",
-   "what": "The first look at the meters: every way to read power, voltage and temperature and what each resolves; board power refreshed once per service-processor pass, about every 160 ms on aifoundry2 and aifoundry1-c1 while ettelem samples (133 and 135 ms in the SP's own trace without it) and 266 ms on aifoundry3 (224 ms without), three rails behind the PMIC's ~1 s average; idle power that rises with die temperature; the 34-shire voltage map from the SP's DEBUG trace (aifoundry2, one idle capture; not confirmed by the three-card check, which got too few complete idle captures).",
+   "what": "The first look at the meters: every way to read power, voltage and temperature and what each resolves; board power refreshed once per service-processor pass, every 160–266 ms by card while ettelem samples (this page, §4.1), three rails behind the PMIC's ~1 s average; idle power that rises with die temperature; the 34-shire voltage map from the SP's DEBUG trace (aifoundry2, one idle capture; not confirmed by the three-card check, which got too few complete idle captures).",
    "instruments": "board power, rails, die temperature, SP stats and DEBUG traces",
    "short": "Power and temp.",
    "pub": "2026-09-20"
@@ -434,7 +434,7 @@
    "title": "One hot line stops a shire",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line",
    "date": "22 Sep",
-   "what": "One contended global atomic: every shire, the host included, gets its fair share (0.998–1.004) at one atomic per 10 cycles, while the host shire's own loads fall to 0.02% of normal; about 20 nJ per contended atomic, 17× a spread one.",
+   "what": "One contended global atomic: every shire, the host included, gets its fair share (0.998–1.004) at one atomic per 10 cycles, while, at a steady 600 MHz, the host shire's own loads fall to 0.02% of normal; about 20 nJ per contended atomic, 17× a spread one.",
    "instruments": "cycle counter, per-minion completion counts, board power",
    "short": "Hot line",
    "pub": "2026-09-22"
@@ -454,7 +454,7 @@
    "title": "Memory hierarchy",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy",
    "date": "18 Sep",
-   "what": "Latency, bandwidth and capacity of every level, next to the A100: L1 8.8 ns, L2 78 ns, L3 ~280 ns and DRAM ~490 ns at 600 MHz, the same on all three cards (three passes each in the three-card check; first measured on aifoundry2), and 76 GB/s streaming (aifoundry2). Its energy per byte now comes from the <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy\">energy manual §4</a> (since 26 September six passes on each of three cards: L2 3.1, L3 14.7 and DRAM 115 pJ/B pooled, the L2 and L3 moving from 1.4 to 5.0 and from 7 to 21 pJ/B pass to pass), which superseded the page's own 18 September figures.",
+   "what": "Latency, bandwidth and capacity of every level, next to the A100: L1 8.8 ns, L2 78 ns, L3 ~280 ns and DRAM ~490 ns at 600 MHz, the same on all three cards (three passes each in the three-card check; first measured on aifoundry2), and 76 GB/s streaming (aifoundry2). Its energy per byte now comes from the <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy\">energy manual §4</a> (since 26 September six passes on each of three cards: L2 3.1, L3 14.7 and DRAM 115 pJ/B pooled, the L2 and L3 moving from 1.4 to 5.0 and from 7 to 21 pJ/B pass to pass), which superseded the page's own 18 September figures. Since 27 September, gathers and scatters by level on the three cards (E48): past the L1 every element fetches its own 64 B line, 27.4 G elements/s from the L2 and 1.19 G/s from DRAM.",
    "instruments": "cycle counter, board power polled through dev_mngt_service",
    "short": "Memory hierarchy",
    "pub": "2026-09-18"
@@ -500,6 +500,16 @@
    "pub": "2026-09-18"
   },
   {
+   "title": "Influence functions on the ET-SoC-1",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions",
+   "date": "25 Sep",
+   "what": "Exploratory, estimates from the measured numbers: which steps of large-scale influence-function work suit the chip. None of a big lab's bill does; two narrow research items survive, the stronger (S1) scoring a small fixed index held in on-chip SRAM a few queries at a time, and one card experiment would settle it. The gather/scatter measurement it asked for (S3) was made on three cards on 26 September: a scatter-add passes 10 G updates a second only while its buckets stay inside a shire.",
+   "instruments": "none: desk analysis of the set's measurements",
+   "short": "Influence functions",
+   "pub": "2026-09-25",
+   "group": "Research and exploratory"
+  },
+  {
    "group": "Research and exploratory",
    "title": "Sparse compute",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute",
@@ -508,16 +518,6 @@
    "instruments": "cycle counter, board power polled through dev_mngt_service",
    "short": "Sparse compute",
    "pub": "2026-09-18"
-  },
-  {
-   "title": "Influence functions on the ET-SoC-1",
-   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions",
-   "date": "25 Sep",
-   "what": "Exploratory, estimates from the measured numbers: which steps of large-scale influence-function work suit the chip. None of a big lab's bill does; one narrow case survives, scoring a small fixed index held in on-chip SRAM a few queries at a time, and a first experiment would settle it.",
-   "instruments": "none: desk analysis of the set's measurements",
-   "short": "Influence functions",
-   "pub": "2026-09-25",
-   "group": "Research and exploratory"
   },
   {
    "group": "Briefs: analysis, no new measurements",
@@ -2362,7 +2362,162 @@
     ],
     "read_median_ms": [22.0, 148.0],
     "read_max_ms": 442.0,
-    "other_median_ms": [21.0, 22.0]
+    "other_median_ms": [21.0, 22.0],
+    "dist": [
+     {
+      "ms": 21.0,
+      "n": 11
+     },
+     {
+      "ms": 21.5,
+      "n": 2,
+      "cfgs": [
+       {
+        "cfg": "c.li/random/h2",
+        "pass": 1
+       },
+       {
+        "cfg": "flem.ps/zeros/h2",
+        "pass": 2
+       }
+      ]
+     },
+     {
+      "ms": 22.0,
+      "n": 1151
+     },
+     {
+      "ms": 22.5,
+      "n": 2,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/random",
+        "pass": 3
+       },
+       {
+        "cfg": "dramrow/stride1K/random",
+        "pass": 3
+       }
+      ]
+     },
+     {
+      "ms": 23.0,
+      "n": 5,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/const",
+        "pass": 1
+       },
+       {
+        "cfg": "dramrow/stride1K/zeros",
+        "pass": 2
+       },
+       {
+        "cfg": "tload/dram/const",
+        "pass": 2
+       },
+       {
+        "cfg": "tload/dram/random",
+        "pass": 2
+       },
+       {
+        "cfg": "tload/dram/zeros",
+        "pass": 3
+       }
+      ]
+     },
+     {
+      "ms": 25.0,
+      "n": 2,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/zeros",
+        "pass": 1
+       },
+       {
+        "cfg": "dramrow/stride1K/zeros",
+        "pass": 3
+       }
+      ]
+     },
+     {
+      "ms": 29.5,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/random",
+        "pass": 1
+       }
+      ]
+     },
+     {
+      "ms": 52.0,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/zeros",
+        "pass": 2
+       }
+      ]
+     },
+     {
+      "ms": 148.0,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "dramrow/stride1K/zeros",
+        "pass": 1
+       }
+      ]
+     }
+    ],
+    "dropped": [
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 1",
+      "ms": 75.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 2",
+      "ms": 63.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 3",
+      "ms": 74.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 4",
+      "ms": 109.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 5",
+      "ms": 138.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 6",
+      "ms": 69.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "23 September rerun, rl-pass1",
+      "ms": 145.5
+     },
+     {
+      "burst": "xshire16",
+      "run": "23 September rerun, rl-pass2",
+      "ms": 75.5
+     },
+     {
+      "burst": "xshire16",
+      "run": "23 September rerun, rl-pass3",
+      "ms": 138.0
+     }
+    ]
    },
    "aifoundry3": {
     "bursts": 1176,
@@ -2419,7 +2574,209 @@
     ],
     "read_median_ms": [22.0, 206.0],
     "read_max_ms": 800.0,
-    "other_median_ms": [21.0, 22.0]
+    "other_median_ms": [21.0, 22.0],
+    "dist": [
+     {
+      "ms": 21.0,
+      "n": 135
+     },
+     {
+      "ms": 21.5,
+      "n": 5,
+      "cfgs": [
+       {
+        "cfg": "fxor.pi/zeros/h2",
+        "pass": 1
+       },
+       {
+        "cfg": "c.add/random/h2",
+        "pass": 1
+       },
+       {
+        "cfg": "remw/random/h2",
+        "pass": 2
+       },
+       {
+        "cfg": "sllw/random/h2",
+        "pass": 2
+       },
+       {
+        "cfg": "st_stream/dram/zeros",
+        "pass": 2
+       }
+      ]
+     },
+     {
+      "ms": 22.0,
+      "n": 1022
+     },
+     {
+      "ms": 22.5,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/const",
+        "pass": 1
+       }
+      ]
+     },
+     {
+      "ms": 23.0,
+      "n": 2,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/random",
+        "pass": 3
+       },
+       {
+        "cfg": "tload/dram/zeros",
+        "pass": 3
+       }
+      ]
+     },
+     {
+      "ms": 24.0,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "dramrow/stride1K/random",
+        "pass": 2
+       }
+      ]
+     },
+     {
+      "ms": 30.5,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "dramrow/stride1K/zeros",
+        "pass": 1
+       }
+      ]
+     },
+     {
+      "ms": 31.0,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/random",
+        "pass": 1
+       }
+      ]
+     },
+     {
+      "ms": 41.5,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/random",
+        "pass": 2
+       }
+      ]
+     },
+     {
+      "ms": 46.0,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "dramrow/stride1K/random",
+        "pass": 3
+       }
+      ]
+     },
+     {
+      "ms": 72.0,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "dramrow/stride1K/random",
+        "pass": 1
+       }
+      ]
+     },
+     {
+      "ms": 75.0,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/zeros",
+        "pass": 1
+       }
+      ]
+     },
+     {
+      "ms": 100.5,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/const",
+        "pass": 2
+       }
+      ]
+     },
+     {
+      "ms": 143.5,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/zeros",
+        "pass": 2
+       }
+      ]
+     },
+     {
+      "ms": 196.0,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "dramrow/stride1K/zeros",
+        "pass": 2
+       }
+      ]
+     },
+     {
+      "ms": 206.0,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "dramrow/stride1K/zeros",
+        "pass": 3
+       }
+      ]
+     }
+    ],
+    "dropped": [
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 1",
+      "ms": 141.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 2",
+      "ms": 81.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 3",
+      "ms": 88.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 4",
+      "ms": 105.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 5",
+      "ms": 73.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 6",
+      "ms": 78.0
+     }
+    ]
    },
    "aifoundry1-c1": {
     "bursts": 1176,
@@ -2427,7 +2784,93 @@
     "slow": [],
     "read_median_ms": [22.0, 31.0],
     "read_max_ms": 674.0,
-    "other_median_ms": [22.0, 23.0]
+    "other_median_ms": [22.0, 23.0],
+    "dist": [
+     {
+      "ms": 22.0,
+      "n": 1158
+     },
+     {
+      "ms": 22.5,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "dramrow/stride1K/random",
+        "pass": 1
+       }
+      ]
+     },
+     {
+      "ms": 23.0,
+      "n": 13
+     },
+     {
+      "ms": 25.0,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/zeros",
+        "pass": 1
+       }
+      ]
+     },
+     {
+      "ms": 26.0,
+      "n": 2,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/random",
+        "pass": 1
+       },
+       {
+        "cfg": "tload/dram/const",
+        "pass": 3
+       }
+      ]
+     },
+     {
+      "ms": 31.0,
+      "n": 1,
+      "cfgs": [
+       {
+        "cfg": "tload/dram/random",
+        "pass": 2
+       }
+      ]
+     }
+    ],
+    "dropped": [
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 1",
+      "ms": 114.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 2",
+      "ms": 113.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 3",
+      "ms": 69.5
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 4",
+      "ms": 135.5
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 5",
+      "ms": 76.0
+     },
+     {
+      "burst": "xshire16",
+      "run": "version-3 rerun, pass 6",
+      "ms": 121.0
+     }
+    ]
    },
    "reads_over_aifoundry2": {
     "aifoundry3": [0.888, 0.968],
@@ -2602,7 +3045,402 @@
        "mean": 1.988,
        "passes": [2.0, 1.963, 2.0]
       }
-     }
+     },
+     "per_config_fields": ["cfg", "droop_ddr_mv", "dram_offrail_w", "over_idle_w", "droop_minion_mv", "rail_minion_w"],
+     "per_config": [
+      ["flwl.ps/random/h2", 1.226, 0.0, 8.015, 0.045, 2.718],
+      ["remw/random/h2", 0.002, 0.0, 1.454, 0.0, 0.974],
+      ["sra/random/h2", 0.247, 0.0, 4.492, 0.0, 3.718],
+      ["sub/zeros/h2", 0.479, 0.0, 3.012, 0.272, 2.466],
+      ["fsub.pi/zeros/h2", 0.537, 0.0, 6.075, 0.0, 5.172],
+      ["fmulh.pi/random/h2", 0.424, 0.0, 22.021, 1.333, 18.096],
+      ["and/random/h2", 0.021, 0.0, 4.753, 0.333, 3.35],
+      ["l1fill/stride32/zeros", 0.188, 0.0, 4.049, 0.0, 2.366],
+      ["fclass.s/random/h2", 0.232, 0.0, 4.464, 0.0, 3.868],
+      ["slt/zeros/h2", 0.242, 0.0, 3.104, 0.0, 2.307],
+      ["fsrai.pi/zeros/h2", 0.215, 0.0, 5.451, 0.116, 4.483],
+      ["neigh/0/random", 0.519, 0.0, 3.914, 0.0, 0.843],
+      ["scpline/stride64/zeros", 0.083, 0.0, 3.63, 0.0, 1.992],
+      ["flwl.ps/zeros/h2", 0.13, 0.0, 3.673, 0.333, 1.564],
+      ["fcvt.s.wu/random/h2", 0.328, 0.0, 13.223, 0.988, 10.929],
+      ["fround.ps/zeros/h2", 0.333, 0.0, 10.047, 0.679, 8.157],
+      ["dramrow2/seq/zeros", 1.296, 1.722, 2.104, 0.0, -0.14],
+      ["fence/random/h2", 0.113, 0.0, 2.22, 0.333, 1.712],
+      ["fltu.pi/random/h2", 0.227, 0.0, 9.805, 0.012, 8.222],
+      ["fle.pi/zeros/h2", 0.136, 0.0, 6.044, 0.0, 4.81],
+      ["fmadd.s/const/h2", 0.101, 0.0, 12.941, 0.864, 10.524],
+      ["tload/scp/zeros", 1.004, 0.0, 4.854, 0.0, 0.785],
+      ["wire/hop8/zeros", 0.391, 0.0, 3.145, 0.0, 0.161],
+      ["fmaxu.pi/random/h2", 0.045, 0.0, 9.651, 0.317, 8.099],
+      ["fmv.w.x/zeros/h2", 0.254, 0.0, 5.26, 0.0, 4.289],
+      ["bge_data/zeros/h2", 0.039, 0.0, 1.633, 0.0, 1.113],
+      ["lb/zeros/h2", 0.149, 0.0, 4.752, 0.029, 3.73],
+      ["fpackrepb.pi/zeros/h2", 0.246, 0.0, 5.594, 0.014, 4.38],
+      ["dramrow/stride1K/random", 5.672, 6.269, 10.01, 0.0, 0.158],
+      ["fcmovm.ps/random/h2", 0.325, 0.0, 8.373, 0.014, 6.932],
+      ["slti/zeros/h2", 0.217, 0.0, 3.016, 0.0, 2.263],
+      ["fsw/zeros/h2", 0.031, 0.0, 7.738, 0.0, 6.681],
+      ["fmul.ps/zeros/h2", 0.501, 0.0, 11.374, 0.556, 9.524],
+      ["amoaddl.w/random/h2", 0.637, 0.0, 4.87, 0.321, 1.366],
+      ["fcvt.w.s/zeros/h2", 0.0, 0.0, 4.559, 0.0, 3.806],
+      ["neigh/3/random", 0.588, 0.0, 3.796, 0.0, 0.826],
+      ["fpackreph.pi/random/h2", 0.0, 0.0, 8.546, 0.333, 7.089],
+      ["fadd.pi/random/h2", 0.043, 0.0, 9.39, 0.358, 7.584],
+      ["frcp.ps/zeros/h2", 0.352, 0.0, 10.407, 0.543, 8.268],
+      ["xori/zeros/h2", 0.014, 0.0, 3.009, 0.642, 2.192],
+      ["lbu/zeros/h2", 0.224, 0.0, 4.577, 0.0, 3.673],
+      ["lw/random/h2", 0.136, 0.0, 5.066, 0.333, 4.445],
+      ["sh/random/h2", 0.0, 0.0, 6.654, 0.0, 5.592],
+      ["fsub.ps/zeros/h2", 0.292, 0.0, 11.053, 0.63, 9.183],
+      ["l1fill/stride64/random", 0.988, 0.0, 7.195, 0.0, 3.221],
+      ["fadd.s/const/h2", 0.0, 0.0, 11.017, 0.321, 9.034],
+      ["fsw.ps/zeros/h2", 0.206, 0.0, 6.289, 0.333, 5.08],
+      ["fslli.pi/random/h2", 0.166, 0.0, 8.068, 0.0, 6.617],
+      ["remuw/random/h2", 0.0, 0.0, 1.434, 0.0, 1.051],
+      ["flt.ps/zeros/h2", 0.16, 0.0, 10.809, 0.296, 9.031],
+      ["flw.ps/zeros/h2", 0.232, 0.0, 5.815, 0.0, 4.319],
+      ["flog.ps/zeros/h2", 0.319, 0.0, 14.724, 1.0, 12.295],
+      ["bgeu_data/random/h2", 0.0, 0.0, 2.218, 0.058, 1.136],
+      ["fround.ps/random/h2", 0.0, 0.0, 12.781, 0.652, 10.545],
+      ["beq_taken/zeros/h2", 0.0, 0.0, 1.412, 0.0, 1.069],
+      ["st_stream/dram/const", 3.319, 3.513, 7.233, 0.0, 0.818],
+      ["fltu.pi/zeros/h2", 0.0, 0.0, 6.173, 0.0, 5.073],
+      ["wire/hop2/zeros", 0.837, 0.0, 5.677, 0.0, 0.643],
+      ["srli/zeros/h2", 0.146, 0.0, 3.003, 0.025, 2.048],
+      ["sraw/zeros/h2", -0.002, 0.0, 3.142, 0.0, 2.263],
+      ["fminu.pi/random/h2", 0.074, 0.0, 9.448, 0.012, 7.81],
+      ["mul/random/h2", 0.106, 0.0, 2.56, 0.0, 1.621],
+      ["fadd.s/zeros/h2", 0.025, 0.0, 10.955, 0.656, 8.85],
+      ["fbci.ps/random/h2", 0.0, 0.0, 5.029, 0.0, 3.897],
+      ["tload/dram/const", 3.864, 4.949, 7.665, -0.003, 0.089],
+      ["srlw/random/h2", 0.116, 0.0, 4.495, 0.654, 3.269],
+      ["flw.ps/const/h2", 0.0, 0.0, 5.623, 0.0, 4.598],
+      ["rem/zeros/h2", 0.099, 0.0, 0.864, 0.0, 0.513],
+      ["fmadd.ps/zeros/h2", 0.0, 0.0, 12.338, 1.0, 10.236],
+      ["bgeu_data/zeros/h2", -0.012, 0.0, 1.704, 0.319, 0.958],
+      ["fand.pi/zeros/h2", 0.057, 0.0, 6.418, 0.0, 5.055],
+      ["sra/zeros/h2", 0.0, 0.0, 3.099, 0.0, 2.37],
+      ["fle.s/random/h2", 0.165, 0.0, 5.358, 0.0, 4.3],
+      ["neigh/1/random", 0.407, 0.0, 3.507, 0.0, 0.819],
+      ["fmadd.s/zeros/h2", 0.159, 0.0, 12.46, 0.963, 10.455],
+      ["fmsub.ps/zeros/h2", 0.024, 0.0, 12.264, 0.714, 10.126],
+      ["addi/random/h2", 0.0, 0.0, 4.15, 0.014, 3.279],
+      ["dramrow2/rowmiss/zeros", 1.475, 1.527, 1.907, 0.0, -0.151],
+      ["srai/random/h2", 0.0, 0.0, 4.137, 0.25, 3.55],
+      ["fandi.pi/random/h2", 0.0, 0.0, 6.741, 0.0, 5.42],
+      ["fmul.pi/random/h2", 0.0, 0.0, 23.251, 1.333, 18.796],
+      ["fmax.s/random/h2", 0.16, 0.0, 12.495, 0.681, 9.701],
+      ["fslli.pi/zeros/h2", 0.0, 0.0, 5.758, 0.0, 4.29],
+      ["auipc/zeros/h2", 0.0, 0.0, 2.705, 0.0, 2.026],
+      ["scpline/stride128/zeros", 0.413, 0.0, 3.954, 0.0, 2.034],
+      ["fsra.pi/zeros/h2", 0.252, 0.0, 5.757, 0.0, 4.729],
+      ["c.addi/zeros/h2", 0.095, 0.0, 3.188, 0.0, 2.361],
+      ["mulh/zeros/h2", 0.072, 0.0, 1.266, 0.0, 1.065],
+      ["wire/hop1/zeros", 0.889, 0.0, 5.459, 0.0, 0.73],
+      ["fnmsub.ps/random/h2", 0.642, 0.0, 26.062, 1.222, 21.095],
+      ["dramrow/stride8K/random", 1.988, 0.0, 20.567, 0.0, 1.509],
+      ["addi_norvc/random/h2", 0.012, 0.0, 4.439, 0.0, 3.283],
+      ["sltu/zeros/h2", 0.0, 0.0, 2.953, 0.0, 2.47],
+      ["amoaddl.w/zeros/h2", 0.869, 0.0, 4.234, 0.0, 1.269],
+      ["c.addi/random/h2", 0.0, 0.0, 4.595, 0.174, 3.93],
+      ["addiw/zeros/h2", 0.012, 0.0, 2.744, 0.0, 2.341],
+      ["ffrc.ps/zeros/h2", 0.388, 0.0, 9.978, 0.58, 8.361],
+      ["feqm.ps/random/h2", 0.0, 0.0, 5.665, 0.0, 4.642],
+      ["add_norvc/zeros/h2", 0.0, 0.0, 2.712, 0.0, 2.33],
+      ["fsw/random/h2", 0.0, 0.0, 9.2, 0.497, 7.877],
+      ["fmul.ps/random/h2", 0.0, 0.0, 23.275, 1.333, 18.707],
+      ["fsgnjx.ps/random/h2", 0.036, 0.0, 9.136, 0.123, 7.24],
+      ["for.pi/random/h2", 0.178, 0.0, 8.915, 0.333, 7.12],
+      ["sb/zeros/h2", 0.217, 0.0, 5.381, 0.333, 4.158],
+      ["amomaxl.w/random/h2", 0.975, 0.0, 5.064, 0.014, 1.303],
+      ["fmaxu.pi/zeros/h2", 0.086, 0.0, 6.16, 0.0, 5.021],
+      ["fcvt.pw.ps/random/h2", 0.198, 0.0, 12.782, 1.0, 10.466],
+      ["fsgnjx.ps/zeros/h2", 0.272, 0.0, 5.773, 0.0, 4.71],
+      ["lwu/random/h2", 0.218, 0.0, 5.18, 0.0, 4.41],
+      ["fminu.pi/zeros/h2", 0.0, 0.0, 6.088, 0.0, 5.124],
+      ["slt/random/h2", 0.0, 0.0, 3.765, 0.0, 2.979],
+      ["flem.ps/random/h2", 0.0, 0.0, 5.738, 0.0, 4.946],
+      ["flw.ps/random/h2", 0.222, 0.0, 7.92, 0.0, 6.337],
+      ["fmadd.ps/random/h1", 0.321, 0.0, 18.756, 1.0, 15.398],
+      ["flem.ps/zeros/h2", 0.029, 0.0, 4.172, 0.0, 3.297],
+      ["sltiu/random/h2", 0.0, 0.0, 3.395, 0.0, 2.594],
+      ["scpline/stride256/random", 0.691, 0.0, 4.385, 0.0, 1.954],
+      ["flt.ps/random/h2", 0.286, 0.0, 19.709, 1.232, 16.081],
+      ["tstore/scp/const", 1.345, 0.0, 6.386, 0.0, 1.011],
+      ["amoaddg.w/zeros/h2", 0.228, 0.0, 3.629, 0.0, 0.881],
+      ["mulhu/random/h2", 0.014, 0.0, 2.402, 0.0, 1.717],
+      ["c.mv/zeros/h2", 0.012, 0.0, 2.759, 0.0, 2.182],
+      ["c.add/zeros/h2", 0.0, 0.0, 3.005, 0.0, 2.286],
+      ["fmax.s/zeros/h2", 0.048, 0.0, 10.924, 0.333, 9.02],
+      ["ld/random/h2", 0.232, 0.0, 5.562, 0.259, 4.432],
+      ["fnmadd.ps/zeros/h2", 0.465, 0.0, 12.61, 0.976, 10.233],
+      ["csrr_fccnb/random/h2", 0.0, 0.0, 1.524, 0.0, 0.951],
+      ["fmin.pi/random/h2", 0.333, 0.0, 9.133, 0.148, 7.602],
+      ["fmv.x.w/zeros/h2", 0.183, 0.0, 3.087, 0.025, 2.507],
+      ["amoaddl.d/random/h2", 0.888, 0.0, 4.785, 0.0, 1.155],
+      ["divu/random/h2", 0.0, 0.0, 1.125, 0.0, 0.977],
+      ["fsub.pi/random/h2", 0.348, 0.0, 9.427, 0.159, 8.048],
+      ["flt.s/zeros/h2", 0.049, 0.0, 4.608, 0.0, 3.681],
+      ["sh/zeros/h2", 0.054, 0.0, 5.211, 0.0, 4.188],
+      ["scpline/stride128/random", 0.464, 0.0, 5.752, 0.0, 2.544],
+      ["and/zeros/h2", 0.0, 0.0, 3.183, 0.333, 2.446],
+      ["blt_data/zeros/h2", 0.101, 0.0, 2.551, 0.0, 1.727],
+      ["fcvt.s.w/zeros/h2", 0.223, 0.0, 9.941, 0.209, 8.055],
+      ["div/random/h2", 0.2, 0.0, 1.458, 0.0, 0.829],
+      ["amoaddg.d/zeros/h2", 0.42, 0.0, 3.893, 0.0, 1.064],
+      ["feq.pi/random/h2", 0.11, 0.0, 8.467, 0.0, 6.827],
+      ["fmsub.s/random/h2", 0.014, 0.0, 13.099, 0.951, 10.933],
+      ["tload/dram/zeros", 2.999, 4.77, 6.881, 0.0, -0.096],
+      ["flt.pi/random/h2", 0.217, 0.0, 9.682, 0.012, 8.16],
+      ["fandi.pi/zeros/h2", 0.101, 0.0, 4.995, 0.0, 4.086],
+      ["mulw/zeros/h2", 0.047, 0.0, 1.292, 0.037, 1.013],
+      ["fcvt.wu.s/random/h2", 0.13, 0.0, 4.724, 0.0, 3.87],
+      ["fclass.ps/random/h2", 0.116, 0.0, 15.078, 1.0, 12.306],
+      ["mulh/random/h2", 0.0, 0.0, 2.401, 0.0, 1.745],
+      ["fmulhu.pi/random/h2", 0.634, 0.0, 23.018, 1.0, 18.516],
+      ["addw/random/h2", 0.206, 0.0, 4.435, 0.333, 3.217],
+      ["fnmadd.s/zeros/h2", 0.074, 0.0, 12.538, 0.556, 10.339],
+      ["amoswapl.w/random/h2", 0.8, 0.0, 4.958, 0.333, 1.52],
+      ["lh/random/h2", 0.064, 0.0, 5.365, 0.0, 4.331],
+      ["fmadd.ps/const/h2", 0.025, 0.0, 12.403, 0.753, 10.129],
+      ["fmul.s/random/h2", 0.162, 0.0, 13.284, 0.963, 10.867],
+      ["fmax.pi/zeros/h2", 0.002, 0.0, 6.044, 0.025, 4.724],
+      ["lhu/random/h2", 0.101, 0.0, 4.902, 0.0, 4.047],
+      ["blt_data/random/h2", 0.0, 0.0, 2.215, 0.0, 1.513],
+      ["remuw/zeros/h2", 0.072, 0.0, 1.208, 0.037, 0.703],
+      ["feq.s/zeros/h2", 0.292, 0.0, 4.916, 0.0, 4.057],
+      ["fmadd.s/random/h2", 0.027, 0.0, 14.442, 1.0, 12.026],
+      ["c.li/random/h2", 0.0, 0.0, 4.546, 0.333, 3.001],
+      ["lbu/random/h2", 0.156, 0.0, 5.224, 0.0, 4.203],
+      ["wire/hop4/random", 1.545, 0.0, 16.646, 0.0, 1.511],
+      ["divuw/zeros/h2", -0.003, 0.0, 1.131, 0.0, 0.434],
+      ["fmin.ps/zeros/h2", 0.05, 0.0, 10.377, 0.33, 8.565],
+      ["fsll.pi/random/h2", 0.029, 0.0, 8.082, 0.333, 6.696],
+      ["fsub.ps/random/h2", 0.235, 0.0, 19.773, 1.0, 16.234],
+      ["tstore/dram/const", 4.0, 4.392, 7.374, 0.048, -0.108],
+      ["fsw.ps/random/h2", 0.025, 0.0, 10.735, 0.406, 8.995],
+      ["sraw/random/h2", 0.029, 0.0, 4.197, 0.0, 3.085],
+      ["wire/hop2/random", 1.872, 0.0, 14.421, 0.0, 1.846],
+      ["fbci.pi/random/h2", 0.0, 0.0, 5.164, 0.333, 3.965],
+      ["addw/zeros/h2", 0.0, 0.0, 3.119, 0.0, 2.348],
+      ["sll/random/h2", 0.025, 0.0, 4.285, 0.333, 3.431],
+      ["fcvt.ps.pw/random/h2", 0.0, 0.0, 12.876, 0.938, 10.734],
+      ["ld/const/h2", 0.0, 0.0, 4.75, 0.0, 3.588],
+      ["wire/hop3/random", 1.418, 0.0, 15.281, 0.145, 1.613],
+      ["feq.s/random/h2", 0.117, 0.0, 5.372, 0.0, 4.162],
+      ["bne_nottaken/zeros/h2", 0.012, 0.0, 2.631, 0.0, 2.065],
+      ["nop/zeros/h2", 0.0, 0.0, 2.509, 0.0, 2.007],
+      ["l1fill/stride64/zeros", 0.239, 0.0, 4.315, 0.333, 2.24],
+      ["wire/hop4/zeros", 0.951, 0.0, 6.502, 0.0, 0.537],
+      ["amoaddg.w/random/h2", 0.037, 0.0, 3.771, 0.0, 0.967],
+      ["remu/zeros/h2", 0.0, 0.0, 0.891, 0.0, 0.615],
+      ["srai/zeros/h2", 0.071, 0.0, 3.006, 0.0, 2.258],
+      ["feq.ps/zeros/h2", 0.058, 0.0, 10.672, 0.58, 8.773],
+      ["flt.s/random/h2", 0.0, 0.0, 5.355, 0.0, 4.189],
+      ["fnot.pi/random/h2", 0.145, 0.0, 7.829, 0.0, 6.506],
+      ["jal/zeros/h2", -0.01, 0.0, 1.684, 0.0, 1.201],
+      ["lb/random/h2", 0.0, 0.0, 5.353, 0.0, 4.49],
+      ["flt.pi/zeros/h2", -0.043, 0.0, 5.969, 0.0, 4.66],
+      ["rem/random/h2", 0.0, 0.0, 1.498, 0.333, 1.003],
+      ["divu/zeros/h2", 0.0, 0.0, 1.003, 0.0, 0.633],
+      ["andi/random/h2", 0.094, 0.0, 3.173, 0.086, 2.418],
+      ["wire/hop3/zeros", 0.543, 0.0, 6.31, 0.0, 0.573],
+      ["wire/hop6/random", 1.0, 0.0, 15.995, 0.217, 1.343],
+      ["fsrl.pi/zeros/h2", 0.012, 0.0, 6.109, 0.0, 5.007],
+      ["fcvt.wu.s/zeros/h2", 0.151, 0.0, 4.336, 0.0, 3.558],
+      ["fnot.pi/zeros/h2", 0.183, 0.0, 5.379, 0.333, 4.518],
+      ["fadd.ps/zeros/h2", 0.0, 0.0, 10.32, 0.284, 8.702],
+      ["amoswapl.w/zeros/h2", 0.741, 0.0, 4.306, 0.0, 1.216],
+      ["l1fill/stride128/random", 0.986, 0.0, 6.757, 0.145, 3.139],
+      ["slti/random/h2", 0.0, 0.0, 3.463, 0.333, 2.611],
+      ["fmsub.s/zeros/h2", 0.321, 0.0, 11.375, 0.704, 9.566],
+      ["flw/random/h2", 0.0, 0.0, 6.068, 0.0, 4.783],
+      ["sllw/zeros/h2", 0.039, 0.0, 2.987, 0.0, 2.418],
+      ["fsra.pi/random/h2", 0.512, 0.0, 7.99, 0.0, 6.706],
+      ["fmulhu.pi/zeros/h2", 0.099, 0.0, 11.672, 0.667, 9.621],
+      ["srli/random/h2", 0.0, 0.0, 4.147, 0.304, 3.0],
+      ["c.li/zeros/h2", 0.158, 0.0, 2.983, 0.329, 2.205],
+      ["fmin.pi/zeros/h2", 0.354, 0.0, 6.182, 0.0, 4.929],
+      ["fmv.w.x/random/h2", 0.16, 0.0, 6.81, 0.0, 5.571],
+      ["add/random/h1", 0.113, 0.0, 3.12, 0.159, 2.207],
+      ["fsgnj.ps/random/h2", 0.321, 0.0, 9.446, 0.159, 7.865],
+      ["dramrow2/rowhit/random", 1.872, 1.539, 2.092, 0.0, -0.133],
+      ["fmax.ps/zeros/h2", 0.116, 0.0, 10.432, 0.543, 8.751],
+      ["fswl.ps/random/h2", 1.642, 0.0, 8.275, 0.0, 1.912],
+      ["dramrow/stride8K/zeros", 1.0, 0.0, 8.13, 0.083, 0.668],
+      ["fnmsub.s/random/h2", 0.267, 0.0, 13.136, 0.963, 10.961],
+      ["fclass.s/zeros/h2", 0.0, 0.0, 4.306, 0.0, 3.463],
+      ["bne_nottaken/random/h2", 0.203, 0.0, 3.229, 0.0, 2.226],
+      ["fsrli.pi/zeros/h2", 0.0, 0.0, 5.551, 0.0, 4.338],
+      ["fadd.pi/zeros/h2", 0.27, 0.0, 5.808, 0.0, 4.797],
+      ["fpackreph.pi/zeros/h2", 0.0, 0.0, 5.222, 0.0, 4.367],
+      ["div/zeros/h2", 0.0, 0.0, 1.101, 0.319, 0.471],
+      ["neigh/2/random", 0.986, 0.0, 3.844, 0.0, 0.808],
+      ["fmax.pi/random/h2", 0.272, 0.0, 9.256, 0.333, 7.56],
+      ["sd/random/h2", 0.0, 0.0, 6.84, 0.0, 5.671],
+      ["beq_taken/random/h2", 0.0, 0.0, 1.83, 0.0, 1.322],
+      ["fle.s/zeros/h2", 0.179, 0.0, 4.923, 0.0, 3.987],
+      ["fcvt.s.w/random/h2", 0.0, 0.0, 13.235, 0.914, 11.089],
+      ["sltiu/zeros/h2", 0.109, 0.0, 2.927, 0.237, 2.13],
+      ["fltm.ps/zeros/h2", 0.014, 0.0, 4.043, 0.0, 2.843],
+      ["divw/random/h2", -0.012, 0.0, 1.377, 0.0, 1.017],
+      ["fmin.s/zeros/h2", 0.246, 0.0, 10.822, 0.37, 8.812],
+      ["andi/zeros/h2", 0.0, 0.0, 2.617, 0.0, 1.893],
+      ["mulhsu/random/h2", 0.0, 0.0, 2.429, 0.058, 1.66],
+      ["amoaddg.d/random/h2", 0.247, 0.0, 4.208, 0.0, 1.106],
+      ["fxor.pi/zeros/h2", 0.0, 0.0, 6.026, 0.0, 4.952],
+      ["fexp.ps/random/h2", 0.42, 0.0, 18.153, 1.0, 15.078],
+      ["ffrc.ps/random/h2", 0.012, 0.0, 13.701, 0.975, 11.413],
+      ["fsgnjx.s/zeros/h2", 0.0, 0.0, 6.516, 0.333, 5.068],
+      ["frcp.ps/random/h2", 0.138, 0.0, 16.692, 1.0, 13.664],
+      ["fmin.s/random/h2", 0.0, 0.0, 12.009, 0.63, 9.891],
+      ["fsgnjn.ps/zeros/h2", 0.0, 0.0, 6.123, 0.0, 4.747],
+      ["wire/hop1/random", 1.87, 0.0, 13.137, 0.0, 1.797],
+      ["slli/random/h2", 0.139, 0.0, 4.232, 0.0, 3.389],
+      ["xori/random/h2", 0.0, 0.0, 4.633, 0.275, 3.571],
+      ["fnmsub.ps/zeros/h2", 0.259, 0.0, 12.328, 0.642, 10.213],
+      ["fle.pi/random/h2", 0.062, 0.0, 9.597, 0.099, 8.12],
+      ["add/zeros/h2", 0.02, 0.0, 2.947, 0.0, 2.246],
+      ["wire/hop8/random", 0.63, 0.0, 8.25, 0.0, 0.368],
+      ["fbcx.ps/zeros/h2", 0.064, 0.0, 4.788, 0.333, 4.06],
+      ["fence/zeros/h2", 0.173, 0.0, 2.044, 0.0, 1.643],
+      ["mulhsu/zeros/h2", 0.0, 0.0, 1.333, 0.0, 1.032],
+      ["srl/random/h2", 0.023, 0.0, 4.347, 0.0, 3.675],
+      ["fcvt.s.wu/zeros/h2", 0.205, 0.0, 10.177, 0.66, 8.301],
+      ["fclass.ps/zeros/h2", 0.089, 0.0, 10.688, 0.655, 8.682],
+      ["fcvt.w.s/random/h2", 0.014, 0.0, 4.769, 0.0, 3.83],
+      ["mulw/random/h2", 0.158, 0.0, 2.249, 0.072, 1.704],
+      ["fadd.ps/const/h2", 0.302, 0.0, 10.543, 0.286, 8.911],
+      ["fcvt.pw.ps/zeros/h2", 0.497, 0.0, 9.592, 0.0, 8.109],
+      ["fxor.pi/random/h2", 0.147, 0.0, 9.375, 0.333, 7.536],
+      ["lw/zeros/h2", 0.188, 0.0, 5.016, 0.0, 3.797],
+      ["fsgnj.s/random/h2", 0.203, 0.0, 6.704, 0.101, 5.533],
+      ["for.pi/zeros/h2", 0.322, 0.0, 6.329, 0.333, 5.049],
+      ["lui/zeros/h2", 0.148, 0.0, 2.612, 0.203, 2.204],
+      ["fnmadd.ps/random/h2", 0.345, 0.0, 25.714, 1.333, 21.144],
+      ["c.mv/random/h2", 0.014, 0.0, 4.285, 0.348, 3.198],
+      ["fsgnj.ps/zeros/h2", 0.188, 0.0, 6.055, 0.148, 4.699],
+      ["fmulh.pi/zeros/h2", 0.174, 0.0, 11.387, 0.576, 9.479],
+      ["spin/zeros/h2", 0.248, 0.0, 3.094, 0.0, 2.518],
+      ["slli/zeros/h2", 0.232, 0.0, 2.996, 0.0, 2.213],
+      ["fmul.pi/const/h2", 0.553, 0.0, 11.339, 0.296, 9.688],
+      ["fsgnjx.s/random/h2", 0.379, 0.0, 6.773, 0.0, 5.387],
+      ["addi_norvc/zeros/h2", 0.075, 0.0, 2.918, 0.0, 2.122],
+      ["fexp.ps/zeros/h2", 0.436, 0.0, 11.476, 0.42, 9.714],
+      ["fswl.ps/zeros/h2", 1.114, 0.0, 5.625, 0.0, 1.3],
+      ["ori/zeros/h2", 0.002, 0.0, 2.906, 0.014, 2.343],
+      ["faddi.pi/random/h2", 0.336, 0.0, 8.492, 0.333, 6.965],
+      ["spin/zeros/h1", 0.058, 0.0, 1.92, 0.0, 1.53],
+      ["bge_data/random/h2", 0.061, 0.0, 2.201, 0.0, 1.557],
+      ["amomaxl.w/zeros/h2", 0.621, 0.0, 4.36, 0.333, 1.439],
+      ["fbci.ps/zeros/h2", 0.222, 0.0, 4.782, 0.0, 4.07],
+      ["divw/zeros/h2", 0.255, 0.0, 0.904, 0.0, 0.629],
+      ["wire/hop5/zeros", 0.638, 0.0, 6.942, 0.0, 0.634],
+      ["subw/random/h2", 0.208, 0.0, 4.828, 0.321, 4.005],
+      ["remw/zeros/h2", -0.009, 0.0, 0.804, 0.0, 0.521],
+      ["feqm.ps/zeros/h2", 0.247, 0.0, 4.401, 0.0, 3.594],
+      ["xor/zeros/h2", 0.086, 0.0, 2.856, 0.072, 2.357],
+      ["fmsub.ps/random/h2", 0.536, 0.0, 26.107, 1.025, 21.324],
+      ["dramrow2/rowmiss/random", 1.68, 1.996, 2.607, -0.003, -0.233],
+      ["wire/hop6/zeros", 0.667, 0.0, 6.536, 0.0, 0.468],
+      ["nop/random/h2", 0.155, 0.0, 2.697, 0.0, 2.166],
+      ["sb/random/h2", 0.119, 0.0, 6.615, 0.0, 5.478],
+      ["st_stream/dram/random", 4.478, 4.387, 8.841, 0.0, 0.849],
+      ["mul/zeros/h2", 0.134, 0.0, 1.428, 0.014, 0.722],
+      ["fadd.ps/random/h2", 0.64, 0.0, 18.888, 1.0, 15.802],
+      ["fsgnjn.s/zeros/h2", 0.282, 0.0, 6.312, 0.333, 4.994],
+      ["c.add/random/h2", 0.208, 0.0, 4.901, 0.0, 3.976],
+      ["fnmsub.s/zeros/h2", 0.198, 0.0, 11.232, 0.667, 9.527],
+      ["fmv.x.w/random/h2", 0.097, 0.0, 3.081, 0.379, 2.736],
+      ["fle.ps/zeros/h2", 0.272, 0.0, 10.564, 0.333, 8.768],
+      ["sw/random/h2", 0.425, 0.0, 6.617, 0.0, 5.484],
+      ["ld/zeros/h2", 0.265, 0.0, 4.535, 0.0, 3.761],
+      ["sltu/random/h2", 0.195, 0.0, 3.873, 0.333, 3.14],
+      ["fsgnj.s/zeros/h2", 0.185, 0.0, 6.588, 0.333, 5.072],
+      ["fpackrepb.pi/random/h2", 0.331, 0.0, 8.316, 0.0, 6.894],
+      ["sw/zeros/h2", 0.148, 0.0, 5.588, 0.056, 4.238],
+      ["fsrai.pi/random/h2", 0.173, 0.0, 7.732, 0.333, 6.282],
+      ["tstore/dram/random", 5.902, 5.924, 10.34, 0.0, 0.215],
+      ["fcmovm.ps/zeros/h2", 0.284, 0.0, 5.847, 0.0, 4.822],
+      ["add/random/h2", 0.331, 0.0, 4.555, 0.0, 3.714],
+      ["fmin.ps/random/h2", 0.358, 0.0, 18.235, 1.0, 15.102],
+      ["lui/random/h2", 0.074, 0.0, 2.754, 0.0, 1.875],
+      ["lh/zeros/h2", 0.066, 0.0, 4.621, 0.333, 3.619],
+      ["faddi.pi/zeros/h2", 0.062, 0.0, 5.544, 0.0, 4.487],
+      ["subw/zeros/h2", 0.025, 0.0, 2.995, 0.0, 2.416],
+      ["fexp.ps/const/h2", 0.363, 0.0, 11.564, 0.444, 9.534],
+      ["sub/random/h2", 0.111, 0.0, 5.029, 0.333, 3.913],
+      ["srlw/zeros/h2", 0.072, 0.0, 3.074, 0.217, 2.41],
+      ["l1fill/stride128/zeros", 0.333, 0.0, 4.082, 0.309, 2.272],
+      ["fexp.ps/random/h1", 0.767, 0.0, 18.57, 1.0, 15.464],
+      ["flog.ps/random/h2", 0.79, 0.0, 25.661, 1.304, 20.211],
+      ["add/const/h2", 0.162, 0.0, 3.015, 0.0, 2.135],
+      ["mulhu/zeros/h2", 0.039, 0.0, 1.654, 0.306, 1.156],
+      ["fbcx.ps/random/h2", 0.198, 0.0, 7.179, 0.333, 6.108],
+      ["fsrli.pi/random/h2", 0.258, 0.0, 7.259, 0.0, 6.17],
+      ["fcmov.ps/zeros/h2", 0.259, 0.0, 6.348, 0.333, 5.185],
+      ["lhu/zeros/h2", 0.248, 0.0, 4.572, 0.0, 3.788],
+      ["add_norvc/random/h2", 0.302, 0.0, 4.613, 0.333, 3.678],
+      ["addi/zeros/h2", 0.0, 0.0, 2.939, 0.0, 2.227],
+      ["divuw/random/h2", 0.0, 0.0, 1.503, 0.0, 1.143],
+      ["tload/scp/const", 1.598, 0.0, 6.391, 0.0, 1.337],
+      ["tload/dram/random", 5.533, 6.38, 10.204, 0.0, 0.216],
+      ["addiw/random/h2", 0.282, 0.0, 3.744, 0.0, 3.076],
+      ["dramrow/stride1K/zeros", 3.522, 4.809, 6.958, 0.0, -0.003],
+      ["fsgnjn.ps/random/h2", 0.378, 0.0, 9.119, 0.0, 7.697],
+      ["ori/random/h2", 0.229, 0.0, 4.314, 0.333, 3.34],
+      ["fltm.ps/random/h2", 0.19, 0.0, 5.838, 0.0, 4.845],
+      ["or/zeros/h2", 0.025, 0.0, 2.856, 0.0, 2.32],
+      ["tstore/scp/zeros", 1.012, 0.0, 5.4, 0.0, 0.951],
+      ["fswizz.ps/zeros/h2", 0.012, 0.0, 5.105, 0.0, 4.435],
+      ["wire/hop5/random", 1.617, 0.0, 17.899, 0.0, 1.621],
+      ["or/random/h2", 0.039, 0.0, 4.47, 0.0, 3.336],
+      ["amoorl.w/random/h2", 1.0, 0.0, 4.545, 0.0, 1.4],
+      ["fle.ps/random/h2", 0.605, 0.0, 18.76, 1.0, 15.737],
+      ["srl/zeros/h2", 0.099, 0.0, 2.885, 0.029, 2.182],
+      ["sll/zeros/h2", 0.025, 0.0, 3.028, 0.0, 2.332],
+      ["fsll.pi/zeros/h2", 0.148, 0.0, 5.971, 0.111, 4.907],
+      ["feq.pi/zeros/h2", 0.099, 0.0, 6.028, 0.015, 4.841],
+      ["sllw/random/h2", 0.24, 0.0, 4.604, 0.058, 3.629],
+      ["fswizz.ps/random/h2", 0.173, 0.0, 7.58, 0.0, 6.26],
+      ["scpline/stride64/random", 0.703, 0.0, 6.055, 0.0, 2.509],
+      ["csrr_fccnb/zeros/h2", -0.048, 0.0, 1.371, 0.0, 1.127],
+      ["l1fill/stride32/random", 0.655, 0.0, 5.619, 0.0, 3.073],
+      ["fadd.pi/const/h2", 0.025, 0.0, 5.883, 0.0, 4.882],
+      ["fadd.s/random/h2", 0.418, 0.0, 12.078, 0.817, 9.921],
+      ["fsgnjn.s/random/h2", 0.34, 0.0, 6.895, 0.333, 5.521],
+      ["amoorl.w/zeros/h2", 0.926, 0.0, 4.424, 0.0, 1.28],
+      ["tstore/dram/zeros", 4.01, 4.357, 6.771, 0.043, -0.213],
+      ["tload/scp/random", 2.0, 0.0, 10.185, 0.0, 2.446],
+      ["auipc/random/h2", 0.265, 0.0, 2.548, 0.0, 2.098],
+      ["amoaddl.d/zeros/h2", 0.841, 0.0, 4.139, 0.0, 1.219],
+      ["fmul.pi/zeros/h2", 0.394, 0.0, 11.489, 0.481, 9.582],
+      ["fand.pi/random/h2", 0.86, 0.0, 8.892, 0.0, 7.49],
+      ["fmadd.ps/random/h2", 0.986, 0.0, 24.823, 1.025, 20.541],
+      ["jal/random/h2", -0.104, 0.0, 1.686, 0.0, 1.004],
+      ["scpline/stride256/zeros", 0.558, 0.0, 2.961, 0.0, 1.585],
+      ["fsub.s/zeros/h2", 0.516, 0.0, 10.895, 0.481, 9.038],
+      ["remu/random/h2", 0.019, 0.0, 1.373, 0.0, 0.833],
+      ["sd/zeros/h2", 0.177, 0.0, 5.49, 0.667, 4.33],
+      ["dramrow2/seq/random", 1.652, 1.703, 2.502, 0.0, -0.082],
+      ["fcmov.ps/random/h2", 0.393, 0.0, 9.927, 0.321, 8.43],
+      ["feq.ps/random/h2", 0.596, 0.0, 17.445, 1.0, 14.426],
+      ["fsub.s/random/h2", 0.249, 0.0, 12.137, 0.926, 9.93],
+      ["st_stream/dram/zeros", 3.05, 3.059, 6.209, 0.0, 0.683],
+      ["dramrow2/rowhit/zeros", 1.654, 1.367, 1.65, 0.0, -0.099],
+      ["fmul.s/zeros/h2", 0.674, 0.0, 12.07, 0.741, 10.173],
+      ["bltu_data/random/h2", 0.072, 0.0, 2.049, 0.0, 1.617],
+      ["fcvt.ps.pw/zeros/h2", 0.437, 0.0, 9.575, 0.014, 7.927],
+      ["fmax.ps/random/h2", 0.4, 0.0, 18.004, 1.0, 15.183],
+      ["fbci.pi/zeros/h2", 0.158, 0.0, 4.396, 0.0, 3.579],
+      ["lwu/zeros/h2", 0.13, 0.0, 4.6, 0.0, 3.8],
+      ["fsrl.pi/random/h2", 0.76, 0.0, 8.229, 0.0, 6.906],
+      ["fnmadd.s/random/h2", 0.232, 0.0, 14.321, 1.0, 11.709],
+      ["flw/zeros/h2", 0.118, 0.0, 5.526, 0.087, 4.663],
+      ["tstore/scp/random", 1.871, 0.0, 9.833, 0.333, 1.977],
+      ["bltu_data/zeros/h2", 0.232, 0.0, 2.543, 0.0, 1.981],
+      ["xor/random/h2", 0.228, 0.0, 4.528, 0.333, 3.801]
+     ]
     },
     "aifoundry3": {
      "slope": 0.874,
@@ -2641,7 +3479,402 @@
        "mean": 1.797,
        "passes": [2.0, 2.0, 1.391]
       }
-     }
+     },
+     "per_config_fields": ["cfg", "droop_ddr_mv", "dram_offrail_w", "over_idle_w", "droop_minion_mv", "rail_minion_w"],
+     "per_config": [
+      ["flwl.ps/random/h2", 1.01, 0.0, 7.715, 0.362, 2.571],
+      ["remw/random/h2", -0.069, 0.0, 1.35, 0.174, 0.884],
+      ["sra/random/h2", 0.069, 0.0, 4.354, 0.333, 3.662],
+      ["sub/zeros/h2", -0.083, 0.0, 2.943, 0.348, 2.418],
+      ["fsub.pi/zeros/h2", 0.185, 0.0, 6.048, 0.275, 5.108],
+      ["fmulh.pi/random/h2", 0.025, 0.0, 21.407, 1.377, 17.733],
+      ["and/random/h2", 0.023, 0.0, 4.206, 0.13, 3.208],
+      ["l1fill/stride32/zeros", 0.651, 0.0, 3.717, 0.333, 2.426],
+      ["fclass.s/random/h2", 0.069, 0.0, 4.344, 0.391, 3.824],
+      ["slt/zeros/h2", 0.0, 0.0, 2.932, 0.348, 2.263],
+      ["fsrai.pi/zeros/h2", 0.145, 0.0, 5.358, 0.159, 4.504],
+      ["neigh/0/random", 0.727, 0.0, 3.739, 0.367, 0.834],
+      ["scpline/stride64/zeros", 0.584, 0.0, 3.898, 0.254, 1.983],
+      ["flwl.ps/zeros/h2", 0.899, 0.0, 3.569, 0.087, 1.596],
+      ["fcvt.s.wu/random/h2", 0.197, 0.0, 13.222, 0.134, 10.862],
+      ["fround.ps/zeros/h2", 0.19, 0.0, 9.614, 0.304, 8.084],
+      ["dramrow2/seq/zeros", 1.868, 1.448, 1.887, 0.027, -0.111],
+      ["fence/random/h2", 0.025, 0.0, 2.07, 0.304, 1.698],
+      ["fltu.pi/random/h2", -0.013, 0.0, 9.762, 0.464, 8.269],
+      ["fle.pi/zeros/h2", 0.201, 0.0, 5.885, 0.203, 4.798],
+      ["fmadd.s/const/h2", 0.25, 0.0, 12.425, 0.319, 10.35],
+      ["tload/scp/zeros", 0.899, 0.0, 4.817, 0.232, 0.726],
+      ["wire/hop8/zeros", 0.593, 0.0, 3.015, 0.362, 0.131],
+      ["fmaxu.pi/random/h2", 0.415, 0.0, 9.216, 0.348, 7.895],
+      ["fmv.w.x/zeros/h2", 0.111, 0.0, 5.254, 0.42, 4.255],
+      ["bge_data/zeros/h2", 0.033, 0.0, 1.513, 0.275, 1.066],
+      ["lb/zeros/h2", -0.09, 0.0, 4.493, 0.145, 3.702],
+      ["fpackrepb.pi/zeros/h2", 0.281, 0.0, 5.506, 0.275, 4.335],
+      ["dramrow/stride1K/random", 4.976, 6.423, 9.66, 0.232, -0.027],
+      ["fcmovm.ps/random/h2", -0.014, 0.0, 8.361, 0.333, 6.98],
+      ["slti/zeros/h2", -0.017, 0.0, 2.872, 0.377, 2.277],
+      ["fsw/zeros/h2", 0.0, 0.0, 7.733, 0.696, 6.62],
+      ["fmul.ps/zeros/h2", 0.035, 0.0, 10.79, 0.319, 9.489],
+      ["amoaddl.w/random/h2", 0.841, 0.0, 4.708, 0.246, 1.265],
+      ["fcvt.w.s/zeros/h2", 0.0, 0.0, 4.53, 0.667, 3.814],
+      ["neigh/3/random", 0.855, 0.0, 3.893, 0.464, 0.823],
+      ["fpackreph.pi/random/h2", -0.063, 0.0, 8.157, 0.478, 6.93],
+      ["fadd.pi/random/h2", 0.171, 0.0, 9.006, 0.325, 7.419],
+      ["frcp.ps/zeros/h2", 0.039, 0.0, 10.078, 0.116, 8.15],
+      ["xori/zeros/h2", -0.001, 0.0, 2.849, 0.232, 2.129],
+      ["lbu/zeros/h2", 0.097, 0.0, 4.522, 0.42, 3.656],
+      ["lw/random/h2", 0.107, 0.0, 5.164, 0.348, 4.302],
+      ["sh/random/h2", -0.002, 0.0, 6.656, 0.29, 5.509],
+      ["fsub.ps/zeros/h2", 0.004, 0.0, 10.865, 0.449, 9.11],
+      ["l1fill/stride64/random", 0.725, 0.0, 7.01, 0.174, 3.167],
+      ["fadd.s/const/h2", 0.045, 0.0, 10.818, 0.334, 8.926],
+      ["fsw.ps/zeros/h2", 0.074, 0.0, 5.965, 0.246, 5.017],
+      ["fslli.pi/random/h2", 0.345, 0.0, 7.904, 0.333, 6.582],
+      ["remuw/random/h2", 0.041, 0.0, 1.363, 0.174, 1.027],
+      ["flt.ps/zeros/h2", 0.108, 0.0, 10.449, 0.427, 9.078],
+      ["flw.ps/zeros/h2", 0.043, 0.0, 5.65, 0.116, 4.272],
+      ["flog.ps/zeros/h2", -0.057, 0.0, 14.768, 0.572, 12.231],
+      ["bgeu_data/random/h2", -0.046, 0.0, 1.911, 0.145, 1.104],
+      ["fround.ps/random/h2", -0.025, 0.0, 12.317, 0.304, 10.363],
+      ["beq_taken/zeros/h2", -0.031, 0.0, 1.477, 0.451, 1.029],
+      ["st_stream/dram/const", 3.588, 3.34, 6.924, 0.246, 0.748],
+      ["fltu.pi/zeros/h2", -0.002, 0.0, 6.224, 0.551, 5.073],
+      ["wire/hop2/zeros", 0.957, 0.0, 5.564, 0.188, 0.59],
+      ["srli/zeros/h2", 0.095, 0.0, 2.896, 0.121, 1.95],
+      ["sraw/zeros/h2", -0.017, 0.0, 2.995, 0.362, 2.247],
+      ["fminu.pi/random/h2", 0.11, 0.0, 9.309, 0.551, 7.863],
+      ["mul/random/h2", 0.061, 0.0, 2.334, 0.406, 1.617],
+      ["fadd.s/zeros/h2", -0.064, 0.0, 10.813, 0.175, 8.824],
+      ["fbci.ps/random/h2", 0.031, 0.0, 4.896, 0.536, 3.838],
+      ["tload/dram/const", 3.935, 4.908, 7.243, 0.188, 0.022],
+      ["srlw/random/h2", 0.218, 0.0, 4.02, 0.232, 3.19],
+      ["flw.ps/const/h2", 0.049, 0.0, 5.297, 0.522, 4.61],
+      ["rem/zeros/h2", 0.049, 0.0, 0.772, 0.319, 0.507],
+      ["fmadd.ps/zeros/h2", 0.014, 0.0, 12.012, 0.362, 10.047],
+      ["bgeu_data/zeros/h2", -0.104, 0.0, 1.46, 0.25, 0.932],
+      ["fand.pi/zeros/h2", 0.085, 0.0, 6.205, 0.362, 5.062],
+      ["sra/zeros/h2", -0.079, 0.0, 2.859, 0.406, 2.326],
+      ["fle.s/random/h2", 0.009, 0.0, 5.05, 0.217, 4.25],
+      ["neigh/1/random", 1.0, 0.0, 3.5, 0.504, 0.824],
+      ["fmadd.s/zeros/h2", 0.116, 0.0, 12.471, 0.326, 10.422],
+      ["fmsub.ps/zeros/h2", 0.074, 0.0, 12.032, 0.362, 9.973],
+      ["addi/random/h2", 0.033, 0.0, 4.069, 0.348, 3.263],
+      ["dramrow2/rowmiss/zeros", 1.905, 1.461, 1.828, -0.046, -0.169],
+      ["srai/random/h2", 0.094, 0.0, 3.849, 0.493, 3.525],
+      ["fandi.pi/random/h2", 0.105, 0.0, 6.562, 0.275, 5.351],
+      ["fmul.pi/random/h2", 0.097, 0.0, 22.616, 1.681, 18.593],
+      ["fmax.s/random/h2", 0.042, 0.0, 11.814, 0.159, 9.407],
+      ["fslli.pi/zeros/h2", 0.286, 0.0, 5.473, 0.348, 4.325],
+      ["auipc/zeros/h2", -0.074, 0.0, 2.598, 0.464, 2.021],
+      ["scpline/stride128/zeros", 0.668, 0.0, 3.814, 0.391, 2.079],
+      ["fsra.pi/zeros/h2", -0.034, 0.0, 5.937, 0.101, 4.691],
+      ["c.addi/zeros/h2", 0.165, 0.0, 3.056, 0.174, 2.341],
+      ["mulh/zeros/h2", 0.031, 0.0, 1.298, 0.493, 1.071],
+      ["wire/hop1/zeros", 0.768, 0.0, 5.473, 0.232, 0.672],
+      ["fnmsub.ps/random/h2", 0.352, 0.0, 25.42, 1.188, 21.155],
+      ["dramrow/stride8K/random", 1.797, 0.0, 20.065, 0.275, 1.142],
+      ["addi_norvc/random/h2", 0.028, 0.0, 4.043, 0.145, 3.249],
+      ["sltu/zeros/h2", -0.019, 0.0, 2.913, 0.362, 2.447],
+      ["amoaddl.w/zeros/h2", 0.638, 0.0, 4.111, 0.101, 1.232],
+      ["c.addi/random/h2", 0.031, 0.0, 4.547, 0.406, 3.835],
+      ["addiw/zeros/h2", 0.048, 0.0, 2.811, 0.333, 2.312],
+      ["ffrc.ps/zeros/h2", 0.024, 0.0, 9.719, 0.424, 8.276],
+      ["feqm.ps/random/h2", 0.203, 0.0, 5.595, 0.362, 4.645],
+      ["add_norvc/zeros/h2", -0.06, 0.0, 2.732, 0.362, 2.268],
+      ["fsw/random/h2", 0.025, 0.0, 8.775, 0.31, 7.78],
+      ["fmul.ps/random/h2", 0.244, 0.0, 22.377, 1.188, 18.342],
+      ["fsgnjx.ps/random/h2", 0.104, 0.0, 9.066, 0.188, 7.147],
+      ["for.pi/random/h2", 0.086, 0.0, 8.689, 0.072, 7.005],
+      ["sb/zeros/h2", 0.025, 0.0, 4.954, 0.333, 4.089],
+      ["amomaxl.w/random/h2", 0.826, 0.0, 4.52, 0.246, 1.181],
+      ["fmaxu.pi/zeros/h2", 0.045, 0.0, 5.935, 0.406, 5.034],
+      ["fcvt.pw.ps/random/h2", 0.116, 0.0, 11.539, 0.391, 10.316],
+      ["fsgnjx.ps/zeros/h2", 0.018, 0.0, 5.657, 0.333, 4.714],
+      ["lwu/random/h2", -0.106, 0.0, 4.969, 0.406, 4.341],
+      ["fminu.pi/zeros/h2", 0.097, 0.0, 6.096, 0.406, 5.135],
+      ["slt/random/h2", 0.226, 0.0, 3.667, 0.13, 2.917],
+      ["flem.ps/random/h2", -0.071, 0.0, 5.755, 0.435, 4.922],
+      ["flw.ps/random/h2", 0.174, 0.0, 7.716, 0.362, 6.342],
+      ["fmadd.ps/random/h1", 0.121, 0.0, 18.499, 1.451, 15.279],
+      ["flem.ps/zeros/h2", -0.081, 0.0, 4.09, 0.667, 3.238],
+      ["sltiu/random/h2", -0.017, 0.0, 3.22, 0.332, 2.548],
+      ["scpline/stride256/random", 0.986, 0.0, 4.25, 0.696, 1.965],
+      ["flt.ps/random/h2", 0.438, 0.0, 18.978, 1.319, 15.759],
+      ["tstore/scp/const", 1.201, 0.0, 6.37, 0.362, 0.901],
+      ["amoaddg.w/zeros/h2", 0.528, 0.0, 3.478, 0.029, 0.837],
+      ["mulhu/random/h2", 0.037, 0.0, 2.272, 0.043, 1.691],
+      ["c.mv/zeros/h2", -0.058, 0.0, 2.76, 0.029, 2.153],
+      ["c.add/zeros/h2", 0.025, 0.0, 2.836, 0.304, 2.249],
+      ["fmax.s/zeros/h2", 0.057, 0.0, 10.74, 0.217, 8.98],
+      ["ld/random/h2", 0.012, 0.0, 5.237, 0.377, 4.377],
+      ["fnmadd.ps/zeros/h2", -0.016, 0.0, 12.47, 0.029, 10.174],
+      ["csrr_fccnb/random/h2", -0.031, 0.0, 1.446, 0.072, 0.875],
+      ["fmin.pi/random/h2", 0.067, 0.0, 8.991, 0.478, 7.616],
+      ["fmv.x.w/zeros/h2", 0.008, 0.0, 2.79, 0.232, 2.449],
+      ["amoaddl.d/random/h2", 0.87, 0.0, 4.822, 0.072, 1.1],
+      ["divu/random/h2", 0.071, 0.0, 1.379, 0.014, 0.952],
+      ["fsub.pi/random/h2", 0.06, 0.0, 9.628, 0.449, 8.118],
+      ["flt.s/zeros/h2", 0.026, 0.0, 4.444, 0.333, 3.604],
+      ["sh/zeros/h2", -0.038, 0.0, 5.051, 0.348, 4.141],
+      ["scpline/stride128/random", 0.781, 0.0, 5.632, 0.455, 2.504],
+      ["and/zeros/h2", 0.028, 0.0, 2.878, 0.505, 2.411],
+      ["blt_data/zeros/h2", 0.047, 0.0, 2.533, 0.435, 1.674],
+      ["fcvt.s.w/zeros/h2", 0.037, 0.0, 9.8, 0.159, 8.031],
+      ["div/random/h2", 0.084, 0.0, 1.349, 0.348, 0.821],
+      ["amoaddg.d/zeros/h2", 0.353, 0.0, 3.692, 0.464, 1.014],
+      ["feq.pi/random/h2", -0.044, 0.0, 7.86, 0.507, 6.692],
+      ["fmsub.s/random/h2", -0.032, 0.0, 12.937, 0.507, 10.886],
+      ["tload/dram/zeros", 3.638, 5.164, 6.659, 0.182, -0.174],
+      ["flt.pi/random/h2", 0.247, 0.0, 9.626, 0.391, 8.165],
+      ["fandi.pi/zeros/h2", 0.143, 0.0, 5.314, 0.188, 4.035],
+      ["mulw/zeros/h2", -0.033, 0.0, 1.219, 0.638, 1.034],
+      ["fcvt.wu.s/random/h2", 0.02, 0.0, 4.488, 0.377, 3.846],
+      ["fclass.ps/random/h2", -0.056, 0.0, 14.028, 0.786, 12.221],
+      ["mulh/random/h2", 0.028, 0.0, 2.197, 0.435, 1.749],
+      ["fmulhu.pi/random/h2", 0.347, 0.0, 22.04, 1.341, 18.095],
+      ["addw/random/h2", 0.084, 0.0, 4.086, 0.261, 3.175],
+      ["fnmadd.s/zeros/h2", 0.084, 0.0, 12.375, 0.406, 10.407],
+      ["amoswapl.w/random/h2", 0.725, 0.0, 4.486, 0.275, 1.407],
+      ["lh/random/h2", 0.047, 0.0, 5.155, 0.217, 4.282],
+      ["fmadd.ps/const/h2", 0.201, 0.0, 12.084, 0.13, 10.131],
+      ["fmul.s/random/h2", 0.074, 0.0, 13.249, 0.317, 10.833],
+      ["fmax.pi/zeros/h2", 0.283, 0.0, 5.997, 0.072, 4.729],
+      ["lhu/random/h2", 0.146, 0.0, 4.933, 0.275, 3.961],
+      ["blt_data/random/h2", 0.025, 0.0, 2.017, 0.145, 1.521],
+      ["remuw/zeros/h2", 0.012, 0.0, 0.981, 0.29, 0.719],
+      ["feq.s/zeros/h2", 0.017, 0.0, 4.883, 0.464, 4.022],
+      ["fmadd.s/random/h2", 0.062, 0.0, 14.241, 0.934, 11.929],
+      ["c.li/random/h2", 0.033, 0.0, 4.106, 0.348, 2.982],
+      ["lbu/random/h2", 0.037, 0.0, 5.079, 0.391, 4.208],
+      ["wire/hop4/random", 1.2, 0.0, 16.199, 0.377, 1.275],
+      ["divuw/zeros/h2", 0.37, 0.0, 1.093, 0.304, 0.441],
+      ["fmin.ps/zeros/h2", -0.05, 0.0, 10.343, 0.304, 8.491],
+      ["fsll.pi/random/h2", 0.02, 0.0, 7.889, 0.42, 6.626],
+      ["fsub.ps/random/h2", 0.183, 0.0, 19.358, 1.29, 16.152],
+      ["tstore/dram/const", 4.48, 4.399, 7.289, 0.043, -0.178],
+      ["fsw.ps/random/h2", 0.048, 0.0, 10.519, 0.319, 8.792],
+      ["sraw/random/h2", 0.051, 0.0, 4.059, 0.304, 3.017],
+      ["wire/hop2/random", 1.853, 0.0, 13.988, 0.377, 1.57],
+      ["fbci.pi/random/h2", 0.11, 0.0, 4.566, 0.232, 3.895],
+      ["addw/zeros/h2", -0.185, 0.0, 2.743, 0.348, 2.321],
+      ["sll/random/h2", -0.118, 0.0, 4.028, 0.246, 3.361],
+      ["fcvt.ps.pw/random/h2", 0.072, 0.0, 12.673, 0.536, 10.695],
+      ["ld/const/h2", 0.018, 0.0, 4.36, 0.333, 3.51],
+      ["wire/hop3/random", 1.318, 0.0, 14.858, 0.029, 1.468],
+      ["feq.s/random/h2", -0.072, 0.0, 4.979, 0.105, 4.127],
+      ["bne_nottaken/zeros/h2", -0.03, 0.0, 2.408, 0.319, 2.027],
+      ["nop/zeros/h2", -0.108, 0.0, 2.496, 0.304, 2.007],
+      ["l1fill/stride64/zeros", 0.899, 0.0, 4.251, 0.406, 2.247],
+      ["wire/hop4/zeros", 0.913, 0.0, 6.418, 0.638, 0.519],
+      ["amoaddg.w/random/h2", 0.549, 0.0, 3.78, 0.391, 0.881],
+      ["remu/zeros/h2", -0.035, 0.0, 0.909, 0.232, 0.598],
+      ["srai/zeros/h2", -0.019, 0.0, 2.858, 0.344, 2.23],
+      ["feq.ps/zeros/h2", 0.183, 0.0, 10.504, 0.232, 8.707],
+      ["flt.s/random/h2", -0.014, 0.0, 5.138, 0.435, 4.086],
+      ["fnot.pi/random/h2", 0.012, 0.0, 7.68, 0.42, 6.444],
+      ["jal/zeros/h2", 0.158, 0.0, 1.631, 0.087, 1.194],
+      ["lb/random/h2", 0.173, 0.0, 5.302, 0.406, 4.437],
+      ["flt.pi/zeros/h2", -0.003, 0.0, 5.898, 0.188, 4.647],
+      ["rem/random/h2", 0.02, 0.0, 1.312, 0.217, 0.945],
+      ["divu/zeros/h2", 0.074, 0.0, 0.844, 0.42, 0.662],
+      ["andi/random/h2", 0.09, 0.0, 2.739, 0.348, 2.346],
+      ["wire/hop3/zeros", 0.652, 0.0, 5.911, 0.464, 0.523],
+      ["wire/hop6/random", 0.986, 0.0, 15.613, 0.435, 1.144],
+      ["fsrl.pi/zeros/h2", 0.187, 0.0, 6.065, 0.58, 5.049],
+      ["fcvt.wu.s/zeros/h2", 0.01, 0.0, 4.419, 0.58, 3.541],
+      ["fnot.pi/zeros/h2", -0.006, 0.0, 5.295, 0.536, 4.467],
+      ["fadd.ps/zeros/h2", -0.005, 0.0, 10.212, 0.362, 8.705],
+      ["amoswapl.w/zeros/h2", 0.899, 0.0, 3.936, 0.435, 1.1],
+      ["l1fill/stride128/random", 0.942, 0.0, 6.811, 0.362, 3.106],
+      ["slti/random/h2", 0.0, 0.0, 3.256, 0.348, 2.532],
+      ["fmsub.s/zeros/h2", 0.012, 0.0, 11.222, 0.275, 9.394],
+      ["flw/random/h2", 0.102, 0.0, 6.191, 0.058, 4.731],
+      ["sllw/zeros/h2", 0.012, 0.0, 2.97, 0.42, 2.395],
+      ["fsra.pi/random/h2", -0.181, 0.0, 7.646, 0.391, 6.674],
+      ["fmulhu.pi/zeros/h2", 0.023, 0.0, 11.375, 0.522, 9.618],
+      ["srli/random/h2", -0.04, 0.0, 4.027, 0.174, 2.952],
+      ["c.li/zeros/h2", 0.034, 0.0, 2.764, 0.188, 2.178],
+      ["fmin.pi/zeros/h2", 0.0, 0.0, 5.918, 0.681, 4.909],
+      ["fmv.w.x/random/h2", 0.094, 0.0, 6.712, 0.42, 5.56],
+      ["add/random/h1", 0.02, 0.0, 2.806, 0.449, 2.169],
+      ["fsgnj.ps/random/h2", 0.124, 0.0, 9.278, 0.526, 7.803],
+      ["dramrow2/rowhit/random", 1.797, 1.541, 2.088, 0.038, -0.137],
+      ["fmax.ps/zeros/h2", 0.012, 0.0, 10.406, 0.551, 8.749],
+      ["fswl.ps/random/h2", 1.778, 0.0, 8.003, 0.377, 1.773],
+      ["dramrow/stride8K/zeros", 0.749, 0.0, 8.034, 0.298, 0.624],
+      ["fnmsub.s/random/h2", 0.167, 0.0, 12.87, 0.177, 10.986],
+      ["fclass.s/zeros/h2", 0.107, 0.0, 4.208, 0.217, 3.459],
+      ["bne_nottaken/random/h2", 0.011, 0.0, 2.985, 0.188, 2.149],
+      ["fsrli.pi/zeros/h2", 0.079, 0.0, 5.357, 0.246, 4.292],
+      ["fadd.pi/zeros/h2", 0.03, 0.0, 5.835, 0.232, 4.772],
+      ["fpackreph.pi/zeros/h2", -0.071, 0.0, 5.183, 0.42, 4.309],
+      ["div/zeros/h2", 0.037, 0.0, 0.898, 0.449, 0.443],
+      ["neigh/2/random", 0.768, 0.0, 3.963, 0.13, 0.762],
+      ["fmax.pi/random/h2", -0.062, 0.0, 8.923, 0.072, 7.469],
+      ["sd/random/h2", -0.038, 0.0, 6.711, 0.522, 5.565],
+      ["beq_taken/random/h2", 0.043, 0.0, 1.698, 0.42, 1.288],
+      ["fle.s/zeros/h2", 0.0, 0.0, 4.739, 0.319, 3.965],
+      ["fcvt.s.w/random/h2", 0.111, 0.0, 13.171, 0.102, 11.109],
+      ["sltiu/zeros/h2", 0.211, 0.0, 2.773, 0.116, 2.088],
+      ["fltm.ps/zeros/h2", 0.112, 0.0, 3.817, 0.13, 2.819],
+      ["divw/random/h2", 0.02, 0.0, 1.309, 0.551, 1.006],
+      ["fmin.s/zeros/h2", 0.077, 0.0, 10.557, 0.435, 8.822],
+      ["andi/zeros/h2", -0.022, 0.0, 2.507, 0.134, 1.891],
+      ["mulhsu/random/h2", 0.165, 0.0, 2.346, 0.319, 1.652],
+      ["amoaddg.d/random/h2", 0.659, 0.0, 4.087, 0.364, 1.089],
+      ["fxor.pi/zeros/h2", 0.062, 0.0, 5.794, 0.438, 5.012],
+      ["fexp.ps/random/h2", 0.216, 0.0, 17.747, 1.333, 14.962],
+      ["ffrc.ps/random/h2", 0.045, 0.0, 13.588, 0.464, 11.274],
+      ["fsgnjx.s/zeros/h2", 0.063, 0.0, 6.059, 0.493, 4.976],
+      ["frcp.ps/random/h2", 0.007, 0.0, 16.327, 1.106, 13.555],
+      ["fmin.s/random/h2", 0.107, 0.0, 11.873, 0.304, 9.805],
+      ["fsgnjn.ps/zeros/h2", 0.136, 0.0, 6.038, 0.246, 4.703],
+      ["wire/hop1/random", 1.959, 0.0, 12.422, 0.058, 1.57],
+      ["slli/random/h2", 0.03, 0.0, 3.994, 0.101, 3.414],
+      ["xori/random/h2", -0.01, 0.0, 4.015, 0.377, 3.475],
+      ["fnmsub.ps/zeros/h2", 0.018, 0.0, 12.116, 0.348, 10.101],
+      ["fle.pi/random/h2", 0.191, 0.0, 9.69, 0.203, 8.074],
+      ["add/zeros/h2", -0.024, 0.0, 2.747, 0.058, 2.181],
+      ["wire/hop8/random", 0.961, 0.0, 7.932, 0.188, 0.276],
+      ["fbcx.ps/zeros/h2", 0.094, 0.0, 4.662, 0.217, 4.056],
+      ["fence/zeros/h2", 0.033, 0.0, 2.003, 0.362, 1.646],
+      ["mulhsu/zeros/h2", -0.075, 0.0, 1.398, 0.478, 0.983],
+      ["srl/random/h2", 0.172, 0.0, 4.411, 0.145, 3.602],
+      ["fcvt.s.wu/zeros/h2", 0.194, 0.0, 9.84, 0.341, 8.178],
+      ["fclass.ps/zeros/h2", 0.236, 0.0, 10.549, 0.174, 8.647],
+      ["fcvt.w.s/random/h2", -0.116, 0.0, 4.564, 0.362, 3.783],
+      ["mulw/random/h2", 0.01, 0.0, 2.063, 0.623, 1.728],
+      ["fadd.ps/const/h2", 0.025, 0.0, 10.415, 0.638, 8.844],
+      ["fcvt.pw.ps/zeros/h2", 0.017, 0.0, 9.579, 0.609, 8.147],
+      ["fxor.pi/random/h2", 0.011, 0.0, 9.072, 0.261, 7.49],
+      ["lw/zeros/h2", 0.01, 0.0, 4.413, 0.536, 3.717],
+      ["fsgnj.s/random/h2", 0.043, 0.0, 6.515, 0.464, 5.539],
+      ["for.pi/zeros/h2", 0.012, 0.0, 5.814, 0.609, 4.936],
+      ["lui/zeros/h2", 0.023, 0.0, 2.601, 0.464, 2.171],
+      ["fnmadd.ps/random/h2", 0.487, 0.0, 25.464, 1.507, 21.013],
+      ["c.mv/random/h2", 0.115, 0.0, 3.966, 0.217, 3.1],
+      ["fsgnj.ps/zeros/h2", 0.151, 0.0, 6.11, 0.058, 4.648],
+      ["fmulh.pi/zeros/h2", 0.242, 0.0, 11.275, 0.145, 9.517],
+      ["spin/zeros/h2", -0.116, 0.0, 3.236, 0.362, 2.477],
+      ["slli/zeros/h2", -0.014, 0.0, 2.794, 0.319, 2.197],
+      ["fmul.pi/const/h2", 0.012, 0.0, 11.482, 0.282, 9.684],
+      ["fsgnjx.s/random/h2", 0.129, 0.0, 6.74, 0.449, 5.356],
+      ["addi_norvc/zeros/h2", -0.092, 0.0, 2.852, 0.101, 2.034],
+      ["fexp.ps/zeros/h2", 0.025, 0.0, 11.366, 0.507, 9.803],
+      ["fswl.ps/zeros/h2", 0.706, 0.0, 5.44, 0.145, 1.246],
+      ["ori/zeros/h2", -0.013, 0.0, 2.764, 0.043, 2.337],
+      ["faddi.pi/random/h2", 0.07, 0.0, 8.271, 0.295, 6.902],
+      ["spin/zeros/h1", 0.114, 0.0, 2.016, 0.145, 1.53],
+      ["bge_data/random/h2", 0.049, 0.0, 1.948, 0.377, 1.542],
+      ["amomaxl.w/zeros/h2", 0.739, 0.0, 3.694, 0.565, 1.281],
+      ["fbci.ps/zeros/h2", 0.224, 0.0, 4.778, 0.623, 4.019],
+      ["divw/zeros/h2", 0.025, 0.0, 0.838, 0.568, 0.616],
+      ["wire/hop5/zeros", 0.778, 0.0, 6.785, 0.582, 0.581],
+      ["subw/random/h2", 0.16, 0.0, 4.613, 0.565, 3.978],
+      ["remw/zeros/h2", -0.026, 0.0, 0.885, 0.464, 0.511],
+      ["feqm.ps/zeros/h2", 0.146, 0.0, 3.991, 0.406, 3.56],
+      ["xor/zeros/h2", 0.096, 0.0, 2.722, 0.545, 2.335],
+      ["fmsub.ps/random/h2", 0.197, 0.0, 25.956, 1.609, 21.211],
+      ["dramrow2/rowmiss/random", 1.725, 1.887, 2.505, -0.003, -0.233],
+      ["wire/hop6/zeros", 0.899, 0.0, 6.277, 0.449, 0.433],
+      ["nop/random/h2", -0.004, 0.0, 2.559, 0.406, 2.141],
+      ["sb/random/h2", 0.022, 0.0, 6.613, 0.275, 5.476],
+      ["st_stream/dram/random", 4.09, 4.53, 8.735, 0.464, 0.694],
+      ["mul/zeros/h2", 0.009, 0.0, 1.431, 0.101, 0.669],
+      ["fadd.ps/random/h2", 0.23, 0.0, 18.907, 1.493, 15.737],
+      ["fsgnjn.s/zeros/h2", 0.089, 0.0, 5.954, 0.275, 4.854],
+      ["c.add/random/h2", 0.103, 0.0, 4.669, 0.278, 3.921],
+      ["fnmsub.s/zeros/h2", 0.069, 0.0, 11.314, 0.435, 9.491],
+      ["fmv.x.w/random/h2", -0.041, 0.0, 2.829, 0.275, 2.703],
+      ["fle.ps/zeros/h2", 0.181, 0.0, 10.266, 0.449, 8.696],
+      ["sw/random/h2", 0.082, 0.0, 6.384, 0.58, 5.436],
+      ["ld/zeros/h2", 0.29, 0.0, 4.492, 0.392, 3.662],
+      ["sltu/random/h2", 0.064, 0.0, 3.773, 0.319, 3.112],
+      ["fsgnj.s/zeros/h2", -0.016, 0.0, 6.122, 0.217, 4.995],
+      ["fpackrepb.pi/random/h2", -0.16, 0.0, 8.223, 0.25, 6.832],
+      ["sw/zeros/h2", 0.075, 0.0, 4.832, 0.333, 4.187],
+      ["fsrai.pi/random/h2", 0.049, 0.0, 7.248, 0.246, 6.221],
+      ["tstore/dram/random", 5.826, 5.841, 10.034, 0.087, 0.069],
+      ["fcmovm.ps/zeros/h2", 0.161, 0.0, 5.616, 0.609, 4.864],
+      ["add/random/h2", -0.029, 0.0, 4.382, 0.261, 3.688],
+      ["fmin.ps/random/h2", 0.259, 0.0, 17.994, 1.232, 14.942],
+      ["lui/random/h2", 0.023, 0.0, 2.527, 0.333, 1.816],
+      ["lh/zeros/h2", 0.069, 0.0, 4.411, 0.29, 3.574],
+      ["faddi.pi/zeros/h2", 0.195, 0.0, 5.307, 0.058, 4.528],
+      ["subw/zeros/h2", -0.043, 0.0, 2.921, 0.304, 2.373],
+      ["fexp.ps/const/h2", 0.129, 0.0, 11.389, 0.188, 9.468],
+      ["sub/random/h2", -0.02, 0.0, 4.584, 0.188, 3.775],
+      ["srlw/zeros/h2", -0.068, 0.0, 2.892, 0.101, 2.345],
+      ["l1fill/stride128/zeros", 0.986, 0.0, 4.121, 0.391, 2.238],
+      ["fexp.ps/random/h1", 0.047, 0.0, 17.814, 1.058, 15.445],
+      ["flog.ps/random/h2", 0.284, 0.0, 24.811, 1.29, 19.757],
+      ["add/const/h2", -0.049, 0.0, 3.055, 0.319, 2.081],
+      ["mulhu/zeros/h2", -0.009, 0.0, 1.46, 0.174, 1.135],
+      ["fbcx.ps/random/h2", 0.03, 0.0, 7.207, 0.043, 6.058],
+      ["fsrli.pi/random/h2", 0.192, 0.0, 7.523, 0.058, 6.148],
+      ["fcmov.ps/zeros/h2", 0.503, 0.0, 6.247, 0.151, 5.151],
+      ["lhu/zeros/h2", 0.137, 0.0, 4.416, 0.348, 3.778],
+      ["add_norvc/random/h2", 0.081, 0.0, 4.222, 0.246, 3.582],
+      ["addi/zeros/h2", 0.135, 0.0, 2.695, 0.362, 2.241],
+      ["divuw/random/h2", -0.025, 0.0, 1.36, 0.087, 1.118],
+      ["tload/scp/const", 1.341, 0.0, 6.212, 0.246, 1.256],
+      ["tload/dram/random", 5.251, 6.225, 9.637, 0.29, 0.036],
+      ["addiw/random/h2", 0.002, 0.0, 3.676, 0.333, 3.13],
+      ["dramrow/stride1K/zeros", 3.818, 4.962, 6.18, 0.432, -0.082],
+      ["fsgnjn.ps/random/h2", -0.034, 0.0, 9.076, 0.246, 7.747],
+      ["ori/random/h2", 0.098, 0.0, 3.912, 0.261, 3.335],
+      ["fltm.ps/random/h2", 0.052, 0.0, 5.596, 0.334, 4.837],
+      ["or/zeros/h2", 0.162, 0.0, 2.75, 0.536, 2.281],
+      ["tstore/scp/zeros", 0.983, 0.0, 5.272, 0.522, 0.849],
+      ["fswizz.ps/zeros/h2", 0.146, 0.0, 5.224, 0.435, 4.449],
+      ["wire/hop5/random", 0.971, 0.0, 17.038, 0.565, 1.312],
+      ["or/random/h2", 0.215, 0.0, 4.256, 0.348, 3.315],
+      ["amoorl.w/random/h2", 0.942, 0.0, 4.413, 0.42, 1.33],
+      ["fle.ps/random/h2", 0.154, 0.0, 18.749, 1.101, 15.615],
+      ["srl/zeros/h2", 0.02, 0.0, 2.858, 0.246, 2.178],
+      ["sll/zeros/h2", 0.038, 0.0, 2.8, 0.193, 2.27],
+      ["fsll.pi/zeros/h2", 0.085, 0.0, 5.772, 0.348, 4.895],
+      ["feq.pi/zeros/h2", 0.167, 0.0, 5.855, 0.406, 4.842],
+      ["sllw/random/h2", 0.193, 0.0, 4.381, 0.275, 3.649],
+      ["fswizz.ps/random/h2", -0.099, 0.0, 7.52, 0.362, 6.216],
+      ["scpline/stride64/random", 0.913, 0.0, 5.837, 0.217, 2.457],
+      ["csrr_fccnb/zeros/h2", 0.009, 0.0, 1.474, 0.261, 1.101],
+      ["l1fill/stride32/random", 1.0, 0.0, 5.361, 0.188, 3.022],
+      ["fadd.pi/const/h2", 0.221, 0.0, 5.809, 0.161, 4.885],
+      ["fadd.s/random/h2", 0.043, 0.0, 12.073, 0.348, 9.932],
+      ["fsgnjn.s/random/h2", 0.201, 0.0, 6.586, 0.304, 5.415],
+      ["amoorl.w/zeros/h2", 0.913, 0.0, 3.94, 0.478, 1.145],
+      ["tstore/dram/zeros", 4.265, 4.019, 6.383, 0.0, -0.255],
+      ["tload/scp/random", 1.826, 0.0, 10.144, 0.014, 2.294],
+      ["auipc/random/h2", -0.171, 0.0, 2.411, 0.319, 2.046],
+      ["amoaddl.d/zeros/h2", 0.899, 0.0, 3.837, 0.333, 1.132],
+      ["fmul.pi/zeros/h2", 0.177, 0.0, 11.264, 0.188, 9.572],
+      ["fand.pi/random/h2", 0.056, 0.0, 8.966, 0.203, 7.489],
+      ["fmadd.ps/random/h2", 0.238, 0.0, 25.124, 1.304, 20.619],
+      ["jal/random/h2", -0.171, 0.0, 1.551, 0.087, 0.989],
+      ["scpline/stride256/zeros", 0.885, 0.0, 2.881, 0.043, 1.612],
+      ["fsub.s/zeros/h2", 0.193, 0.0, 10.722, 0.491, 8.884],
+      ["remu/random/h2", -0.033, 0.0, 1.257, 0.159, 0.799],
+      ["sd/zeros/h2", 0.092, 0.0, 5.079, 0.203, 4.28],
+      ["dramrow2/seq/random", 1.681, 1.824, 2.629, 0.002, -0.064],
+      ["fcmov.ps/random/h2", 0.411, 0.0, 9.863, 0.159, 8.379],
+      ["feq.ps/random/h2", 0.138, 0.0, 17.346, 1.188, 14.427],
+      ["fsub.s/random/h2", 0.31, 0.0, 12.036, 0.304, 9.86],
+      ["st_stream/dram/zeros", 3.123, 3.058, 6.084, 0.043, 0.611],
+      ["dramrow2/rowhit/zeros", 1.826, 1.196, 1.522, 0.106, -0.059],
+      ["fmul.s/zeros/h2", 0.368, 0.0, 11.818, 0.261, 9.993],
+      ["bltu_data/random/h2", -0.071, 0.0, 1.959, 0.389, 1.6],
+      ["fcvt.ps.pw/zeros/h2", 0.133, 0.0, 9.541, 0.029, 7.872],
+      ["fmax.ps/random/h2", 0.338, 0.0, 18.234, 1.087, 15.166],
+      ["fbci.pi/zeros/h2", 0.036, 0.0, 4.631, 0.362, 3.542],
+      ["lwu/zeros/h2", -0.018, 0.0, 4.594, 0.348, 3.752],
+      ["fsrl.pi/random/h2", 0.186, 0.0, 8.171, 0.304, 6.832],
+      ["fnmadd.s/random/h2", -0.008, 0.0, 14.251, 0.721, 11.65],
+      ["flw/zeros/h2", 0.235, 0.0, 5.599, 0.319, 4.646],
+      ["tstore/scp/random", 1.886, 0.0, 9.647, 0.261, 1.774],
+      ["bltu_data/zeros/h2", 0.025, 0.0, 2.452, 0.319, 1.92],
+      ["xor/random/h2", 0.086, 0.0, 4.309, 0.217, 3.695]
+     ]
     },
     "aifoundry1-c1": {
      "slope": 1.005,
@@ -2680,7 +3913,402 @@
        "mean": 2.225,
        "passes": [2.444, 2.23, 2.0]
       }
-     }
+     },
+     "per_config_fields": ["cfg", "droop_ddr_mv", "dram_offrail_w", "over_idle_w", "droop_minion_mv", "rail_minion_w"],
+     "per_config": [
+      ["flwl.ps/random/h2", 0.988, 0.0, 9.726, 0.0, 2.579],
+      ["remw/random/h2", 0.012, 0.0, 1.265, 0.0, 0.805],
+      ["sra/random/h2", 0.333, 0.0, 4.382, 0.0, 3.679],
+      ["sub/zeros/h2", 0.318, 0.0, 2.809, 0.0, 2.434],
+      ["fsub.pi/zeros/h2", 0.667, 0.0, 6.08, 0.0, 5.258],
+      ["fmulh.pi/random/h2", 2.0, 0.0, 21.228, 1.0, 18.551],
+      ["and/random/h2", 0.605, 0.0, 4.089, 0.0, 3.259],
+      ["l1fill/stride32/zeros", 0.726, 0.0, 4.437, 0.0, 1.832],
+      ["fclass.s/random/h2", 0.333, 0.0, 4.506, 0.0, 3.897],
+      ["slt/zeros/h2", 0.425, 0.0, 2.842, 0.0, 2.296],
+      ["fsrai.pi/zeros/h2", 0.409, 0.0, 5.221, 0.0, 4.562],
+      ["neigh/0/random", 0.346, 0.0, 4.305, 0.0, 0.847],
+      ["scpline/stride64/zeros", 0.321, 0.0, 3.96, 0.0, 2.043],
+      ["flwl.ps/zeros/h2", 0.579, 0.0, 4.569, 0.0, 1.637],
+      ["fcvt.s.wu/random/h2", 0.996, 0.0, 12.857, 0.628, 11.243],
+      ["fround.ps/zeros/h2", 0.704, 0.0, 9.465, 0.0, 8.38],
+      ["dramrow2/seq/zeros", 1.412, 1.687, 2.102, 0.0, -0.189],
+      ["fence/random/h2", 0.217, 0.0, 1.89, 0.0, 1.703],
+      ["fltu.pi/random/h2", 0.975, 0.0, 9.606, 0.0, 7.858],
+      ["fle.pi/zeros/h2", 0.753, 0.0, 5.674, 0.0, 4.964],
+      ["fmadd.s/const/h2", 1.062, 0.0, 12.059, 0.247, 10.644],
+      ["tload/scp/zeros", 0.951, 0.0, 5.889, 0.0, 0.834],
+      ["wire/hop8/zeros", 0.502, 0.0, 3.546, 0.0, 0.144],
+      ["fmaxu.pi/random/h2", 1.0, 0.0, 9.015, 0.0, 8.17],
+      ["fmv.w.x/zeros/h2", 0.561, 0.0, 4.993, 0.0, 4.409],
+      ["bge_data/zeros/h2", 0.062, 0.0, 1.422, 0.0, 1.084],
+      ["lb/zeros/h2", 0.714, 0.0, 4.465, 0.0, 3.842],
+      ["fpackrepb.pi/zeros/h2", 0.802, 0.0, 5.321, 0.0, 4.53],
+      ["dramrow/stride1K/random", 7.301, 6.795, 11.087, 0.0, 0.113],
+      ["fcmovm.ps/random/h2", 1.0, 0.0, 8.149, 0.0, 7.188],
+      ["slti/zeros/h2", 0.321, 0.0, 2.749, 0.0, 2.302],
+      ["fsw/zeros/h2", 0.901, 0.0, 7.574, 0.333, 6.743],
+      ["fmul.ps/zeros/h2", 1.0, 0.0, 10.947, 0.0, 9.805],
+      ["amoaddl.w/random/h2", 0.901, 0.0, 5.631, 0.0, 1.399],
+      ["fcvt.w.s/zeros/h2", 0.333, 0.0, 4.285, 0.0, 3.792],
+      ["neigh/3/random", 1.0, 0.0, 4.569, 0.0, 0.862],
+      ["fpackreph.pi/random/h2", 0.827, 0.0, 7.846, 0.0, 7.19],
+      ["fadd.pi/random/h2", 1.0, 0.0, 8.759, 0.0, 7.656],
+      ["frcp.ps/zeros/h2", 1.0, 0.0, 9.832, 0.0, 8.49],
+      ["xori/zeros/h2", 0.321, 0.0, 2.756, 0.0, 2.213],
+      ["lbu/zeros/h2", 0.728, 0.0, 4.361, 0.0, 3.779],
+      ["lw/random/h2", 0.667, 0.0, 4.965, 0.0, 4.433],
+      ["sh/random/h2", 0.901, 0.0, 6.338, 0.0, 4.171],
+      ["fsub.ps/zeros/h2", 0.722, 0.0, 10.553, 0.0, 9.399],
+      ["l1fill/stride64/random", 1.0, 0.0, 8.25, 0.0, 3.354],
+      ["fadd.s/const/h2", 1.0, 0.0, 10.409, 0.0, 9.224],
+      ["fsw.ps/zeros/h2", 0.767, 0.0, 5.842, 0.0, 5.073],
+      ["fslli.pi/random/h2", 0.975, 0.0, 7.861, 0.0, 6.829],
+      ["remuw/random/h2", 0.097, 0.0, 1.388, 0.0, 1.004],
+      ["flt.ps/zeros/h2", 1.0, 0.0, 10.368, 0.025, 9.322],
+      ["flw.ps/zeros/h2", 0.681, 0.0, 5.479, 0.0, 4.436],
+      ["flog.ps/zeros/h2", 1.457, 0.0, 14.292, 0.914, 12.689],
+      ["bgeu_data/random/h2", 0.413, 0.0, 1.868, 0.0, 1.15],
+      ["fround.ps/random/h2", 0.986, 0.0, 12.078, 0.198, 10.681],
+      ["beq_taken/zeros/h2", 0.072, 0.0, 1.398, 0.0, 1.029],
+      ["st_stream/dram/const", 4.619, 4.01, 8.077, 0.0, 0.805],
+      ["fltu.pi/zeros/h2", 0.934, 0.0, 6.012, 0.0, 5.216],
+      ["wire/hop2/zeros", 0.877, 0.0, 6.655, 0.0, 0.675],
+      ["srli/zeros/h2", 0.874, 0.0, 2.784, 0.0, 2.052],
+      ["sraw/zeros/h2", 0.432, 0.0, 2.94, 0.0, 2.289],
+      ["fminu.pi/random/h2", 1.0, 0.0, 9.124, 0.0, 8.119],
+      ["mul/random/h2", 0.37, 0.0, 2.341, 0.0, 1.672],
+      ["fadd.s/zeros/h2", 1.0, 0.0, 10.352, 0.0, 9.115],
+      ["fbci.ps/random/h2", 0.679, 0.0, 4.795, 0.0, 3.992],
+      ["tload/dram/const", 4.963, 5.572, 8.752, 0.0, 0.062],
+      ["srlw/random/h2", 0.58, 0.0, 3.838, 0.0, 3.301],
+      ["flw.ps/const/h2", 0.753, 0.0, 5.548, 0.0, 4.737],
+      ["rem/zeros/h2", 0.0, 0.0, 0.854, 0.0, 0.436],
+      ["fmadd.ps/zeros/h2", 1.0, 0.0, 11.866, 0.111, 10.343],
+      ["bgeu_data/zeros/h2", 0.0, 0.0, 1.437, 0.0, 0.983],
+      ["fand.pi/zeros/h2", 0.889, 0.0, 5.895, 0.0, 5.179],
+      ["sra/zeros/h2", 0.037, 0.0, 2.838, 0.0, 1.687],
+      ["fle.s/random/h2", 0.988, 0.0, 4.843, 0.0, 4.367],
+      ["neigh/1/random", 0.667, 0.0, 4.352, 0.0, 0.867],
+      ["fmadd.s/zeros/h2", 1.0, 0.0, 12.162, 0.107, 10.693],
+      ["fmsub.ps/zeros/h2", 0.988, 0.0, 11.826, 0.0, 10.352],
+      ["addi/random/h2", 0.617, 0.0, 3.893, 0.0, 3.368],
+      ["dramrow2/rowmiss/zeros", 1.961, -0.082, 2.251, 0.0, -0.212],
+      ["srai/random/h2", 0.358, 0.0, 3.954, 0.0, 3.571],
+      ["fandi.pi/random/h2", 0.51, 0.0, 6.191, 0.0, 5.516],
+      ["fmul.pi/random/h2", 1.896, 0.0, 22.755, 1.0, 19.149],
+      ["fmax.s/random/h2", 0.998, 0.0, 11.642, 0.099, 9.798],
+      ["fslli.pi/zeros/h2", 0.652, 0.0, 5.385, 0.0, 4.47],
+      ["auipc/zeros/h2", 0.247, 0.0, 2.481, 0.0, 2.085],
+      ["scpline/stride128/zeros", 0.667, 0.0, 4.214, 0.0, 2.137],
+      ["fsra.pi/zeros/h2", 1.0, 0.0, 5.799, 0.0, 4.875],
+      ["c.addi/zeros/h2", 0.259, 0.0, 2.88, 0.0, 2.432],
+      ["mulh/zeros/h2", 0.0, 0.0, 1.437, 0.0, 1.045],
+      ["wire/hop1/zeros", 0.988, 0.0, 6.285, 0.0, 0.744],
+      ["fnmsub.ps/random/h2", 2.0, 0.0, 25.68, 1.0, 22.123],
+      ["dramrow/stride8K/random", 2.225, 0.0, 24.361, 0.0, 1.642],
+      ["addi_norvc/random/h2", 0.406, 0.0, 4.014, 0.0, 3.325],
+      ["sltu/zeros/h2", 0.49, 0.0, 2.988, 0.0, 2.504],
+      ["amoaddl.w/zeros/h2", 0.975, 0.0, 4.84, 0.0, 1.324],
+      ["c.addi/random/h2", 0.926, 0.0, 4.4, 0.0, 3.9],
+      ["addiw/zeros/h2", 0.358, 0.0, 2.783, 0.0, 2.363],
+      ["ffrc.ps/zeros/h2", 1.0, 0.0, 9.631, 0.025, 8.525],
+      ["feqm.ps/random/h2", 0.667, 0.0, 5.188, 0.0, 4.792],
+      ["add_norvc/zeros/h2", 0.57, 0.0, 2.795, 0.0, 2.315],
+      ["fsw/random/h2", 1.0, 0.0, 8.554, 0.0, 8.079],
+      ["fmul.ps/random/h2", 1.714, 0.0, 21.856, 1.0, 19.124],
+      ["fsgnjx.ps/random/h2", 0.928, 0.0, 8.569, 0.0, 7.445],
+      ["for.pi/random/h2", 0.754, 0.0, 8.49, 0.0, 7.259],
+      ["sb/zeros/h2", 0.217, 0.0, 4.89, 0.0, 4.198],
+      ["amomaxl.w/random/h2", 0.652, 0.0, 5.671, 0.0, 1.292],
+      ["fmaxu.pi/zeros/h2", 0.963, 0.0, 5.777, 0.0, 5.148],
+      ["fcvt.pw.ps/random/h2", 1.0, 0.0, 12.007, 0.148, 10.682],
+      ["fsgnjx.ps/zeros/h2", 0.536, 0.0, 5.746, 0.0, 4.892],
+      ["lwu/random/h2", 0.681, 0.0, 5.033, 0.0, 4.418],
+      ["fminu.pi/zeros/h2", 0.667, 0.0, 5.925, 0.0, 5.264],
+      ["slt/random/h2", 0.383, 0.0, 3.577, 0.0, 3.011],
+      ["flem.ps/random/h2", 0.667, 0.0, 5.612, 0.0, 5.06],
+      ["flw.ps/random/h2", 0.929, 0.0, 7.529, 0.0, 6.571],
+      ["fmadd.ps/random/h1", 1.926, 0.0, 17.8, 1.0, 15.923],
+      ["flem.ps/zeros/h2", 0.348, 0.0, 3.971, 0.0, 3.259],
+      ["sltiu/random/h2", 0.469, 0.0, 3.017, 0.0, 2.603],
+      ["scpline/stride256/random", 0.667, 0.0, 4.822, 0.0, 1.982],
+      ["flt.ps/random/h2", 1.914, 0.0, 18.639, 1.0, 16.429],
+      ["tstore/scp/const", 1.0, 0.0, 7.794, 0.0, 1.054],
+      ["amoaddg.w/zeros/h2", 0.566, 0.0, 3.926, 0.0, 0.864],
+      ["mulhu/random/h2", 0.309, 0.0, 2.258, 0.0, 1.63],
+      ["c.mv/zeros/h2", 0.433, 0.0, 2.573, 0.0, 2.22],
+      ["c.add/zeros/h2", 0.198, 0.0, 2.835, 0.0, 2.324],
+      ["fmax.s/zeros/h2", 1.0, 0.0, 10.526, 0.0, 9.243],
+      ["ld/random/h2", 0.393, 0.0, 5.047, 0.0, 4.431],
+      ["fnmadd.ps/zeros/h2", 1.0, 0.0, 12.18, 0.247, 10.518],
+      ["csrr_fccnb/random/h2", 0.0, 0.0, 1.443, 0.0, 0.907],
+      ["fmin.pi/random/h2", 1.0, 0.0, 8.93, 0.0, 7.841],
+      ["fmv.x.w/zeros/h2", 0.409, 0.0, 2.698, 0.0, 2.53],
+      ["amoaddl.d/random/h2", 1.0, 0.0, 5.52, 0.0, 1.2],
+      ["divu/random/h2", 0.0, 0.0, 1.147, 0.0, 0.949],
+      ["fsub.pi/random/h2", 1.0, 0.0, 9.318, 0.333, 8.26],
+      ["flt.s/zeros/h2", 0.63, 0.0, 4.556, 0.0, 3.66],
+      ["sh/zeros/h2", 0.346, 0.0, 4.988, 0.0, 4.223],
+      ["scpline/stride128/random", 0.712, 0.0, 6.479, 0.0, 2.565],
+      ["and/zeros/h2", 0.309, 0.0, 2.963, 0.0, 2.384],
+      ["blt_data/zeros/h2", 0.272, 0.0, 2.496, 0.0, 1.702],
+      ["fcvt.s.w/zeros/h2", 1.0, 0.0, 9.617, 0.062, 8.265],
+      ["div/random/h2", 0.0, 0.0, 1.259, 0.0, 0.789],
+      ["amoaddg.d/zeros/h2", 0.309, 0.0, 4.121, 0.0, 1.021],
+      ["feq.pi/random/h2", 0.449, 0.0, 7.813, 0.0, 6.873],
+      ["fmsub.s/random/h2", 1.0, 0.0, 12.736, 0.568, 11.254],
+      ["tload/dram/zeros", 4.794, 5.732, 7.953, 0.0, -0.14],
+      ["flt.pi/random/h2", 0.716, 0.0, 9.42, 0.0, 8.483],
+      ["fandi.pi/zeros/h2", 0.585, 0.0, 5.029, 0.0, 4.227],
+      ["mulw/zeros/h2", 0.118, 0.0, 1.333, 0.0, 0.915],
+      ["fcvt.wu.s/random/h2", 0.625, 0.0, 4.442, 0.0, 3.946],
+      ["fclass.ps/random/h2", 1.29, 0.0, 14.238, 0.593, 15.362],
+      ["mulh/random/h2", 0.13, 0.0, 2.276, 0.0, 1.775],
+      ["fmulhu.pi/random/h2", 1.988, 0.0, 21.744, 1.0, 18.781],
+      ["addw/random/h2", 0.362, 0.0, 4.04, 0.0, 3.291],
+      ["fnmadd.s/zeros/h2", 1.073, 0.0, 12.198, 0.409, 10.756],
+      ["amoswapl.w/random/h2", 0.754, 0.0, 5.29, 0.0, 1.491],
+      ["lh/random/h2", 0.822, 0.0, 5.149, 0.0, 4.434],
+      ["fmadd.ps/const/h2", 1.033, 0.0, 11.924, 0.21, 10.493],
+      ["fmul.s/random/h2", 1.122, 0.0, 12.917, 0.605, 11.271],
+      ["fmax.pi/zeros/h2", 0.759, 0.0, 5.812, 0.0, 4.895],
+      ["lhu/random/h2", 0.471, 0.0, 4.929, 0.0, 4.109],
+      ["blt_data/random/h2", 0.333, 0.0, 1.967, 0.0, 1.55],
+      ["remuw/zeros/h2", 0.012, 0.0, 0.917, 0.0, 0.646],
+      ["feq.s/zeros/h2", 0.721, 0.0, 4.797, 0.0, 4.145],
+      ["fmadd.s/random/h2", 1.148, 0.0, 13.852, 0.605, 12.383],
+      ["c.li/random/h2", 0.319, 0.0, 3.971, 0.0, 3.109],
+      ["lbu/random/h2", 1.0, 0.0, 4.749, 0.0, 4.293],
+      ["wire/hop4/random", 1.654, 0.0, 18.789, 0.0, 1.637],
+      ["divuw/zeros/h2", 0.121, 0.0, 0.861, 0.0, -0.292],
+      ["fmin.ps/zeros/h2", 0.826, 0.0, 10.177, 0.0, 8.855],
+      ["fsll.pi/random/h2", 0.594, 0.0, 7.777, 0.0, 6.825],
+      ["fsub.ps/random/h2", 1.677, 0.0, 19.155, 1.0, 16.846],
+      ["tstore/dram/const", 6.064, 5.44, 8.999, 0.0, -0.096],
+      ["fsw.ps/random/h2", 0.884, 0.0, 10.361, 0.086, 9.131],
+      ["sraw/random/h2", 0.507, 0.0, 4.08, 0.0, 3.106],
+      ["wire/hop2/random", 2.0, 0.0, 16.881, 0.0, 1.908],
+      ["fbci.pi/random/h2", 0.348, 0.0, 4.408, 0.0, 4.028],
+      ["addw/zeros/h2", 0.375, 0.0, 2.845, 0.0, 2.304],
+      ["sll/random/h2", 0.319, 0.0, 4.032, 0.0, 3.398],
+      ["fcvt.ps.pw/random/h2", 1.025, 0.0, 12.484, 0.185, 11.051],
+      ["ld/const/h2", 0.652, 0.0, 4.423, 0.0, 3.634],
+      ["wire/hop3/random", 1.986, 0.0, 17.837, 0.0, 1.771],
+      ["feq.s/random/h2", 0.4, 0.0, 4.699, 0.0, 4.24],
+      ["bne_nottaken/zeros/h2", 0.377, 0.0, 2.321, 0.0, 1.862],
+      ["nop/zeros/h2", 0.304, 0.0, 2.354, 0.0, 2.084],
+      ["l1fill/stride64/zeros", 0.667, 0.0, 4.983, 0.0, 2.345],
+      ["wire/hop4/zeros", 0.938, 0.0, 7.708, 0.0, 0.567],
+      ["amoaddg.w/random/h2", 0.643, 0.0, 4.096, 0.0, 0.956],
+      ["remu/zeros/h2", 0.0, 0.0, 0.855, 0.0, 0.572],
+      ["srai/zeros/h2", 0.469, 0.0, 2.764, 0.0, 2.279],
+      ["feq.ps/zeros/h2", 1.0, 0.0, 10.211, 0.0, 9.04],
+      ["flt.s/random/h2", 0.654, 0.0, 4.828, 0.0, 4.182],
+      ["fnot.pi/random/h2", 0.975, 0.0, 7.378, 0.0, 6.664],
+      ["jal/zeros/h2", 0.025, 0.0, 1.38, 0.0, 1.193],
+      ["lb/random/h2", 0.716, 0.0, 5.106, 0.0, 4.574],
+      ["flt.pi/zeros/h2", 0.802, 0.0, 5.877, 0.0, 4.834],
+      ["rem/random/h2", 0.232, 0.0, 1.228, 0.0, 0.957],
+      ["divu/zeros/h2", 0.0, 0.0, 0.85, 0.0, 0.611],
+      ["andi/random/h2", 0.235, 0.0, 2.787, 0.0, 0.97],
+      ["wire/hop3/zeros", 1.0, 0.0, 6.908, 0.0, 0.613],
+      ["wire/hop6/random", 1.642, 0.0, 17.834, 0.0, 1.473],
+      ["fsrl.pi/zeros/h2", 0.728, 0.0, 5.715, 0.0, 5.131],
+      ["fcvt.wu.s/zeros/h2", 0.444, 0.0, 4.191, 0.0, 3.62],
+      ["fnot.pi/zeros/h2", 0.333, 0.0, 5.253, 0.0, 4.588],
+      ["fadd.ps/zeros/h2", 1.0, 0.0, 10.203, 0.0, 8.937],
+      ["amoswapl.w/zeros/h2", 0.986, 0.0, 4.838, 0.0, 1.258],
+      ["l1fill/stride128/random", 1.0, 0.0, 8.297, 0.0, 3.265],
+      ["slti/random/h2", 0.403, 0.0, 3.261, 0.0, 2.584],
+      ["fmsub.s/zeros/h2", 1.0, 0.0, 10.884, 0.0, 9.729],
+      ["flw/random/h2", 0.971, 0.0, 5.836, 0.0, 4.912],
+      ["sllw/zeros/h2", 0.354, 0.0, 2.97, 0.0, 2.449],
+      ["fsra.pi/random/h2", 0.667, 0.0, 7.854, 0.0, 6.88],
+      ["fmulhu.pi/zeros/h2", 1.0, 0.0, 11.166, 0.321, 12.256],
+      ["srli/random/h2", 0.362, 0.0, 3.986, 0.0, 2.994],
+      ["c.li/zeros/h2", 0.667, 0.0, 2.688, 0.0, 2.274],
+      ["fmin.pi/zeros/h2", 0.907, 0.0, 5.908, 0.0, 5.003],
+      ["fmv.w.x/random/h2", 0.691, 0.0, 6.467, 0.0, 5.715],
+      ["add/random/h1", 0.317, 0.0, 2.861, 0.0, 2.161],
+      ["fsgnj.ps/random/h2", 1.0, 0.0, 9.143, 0.0, 8.082],
+      ["dramrow2/rowhit/random", 2.559, 2.396, 2.298, 0.0, -0.827],
+      ["fmax.ps/zeros/h2", 0.589, 0.0, 10.165, 0.0, 9.059],
+      ["fswl.ps/random/h2", 1.136, 0.0, 9.676, 0.0, 1.996],
+      ["dramrow/stride8K/zeros", 0.986, 0.0, 9.633, 0.0, 0.739],
+      ["fnmsub.s/random/h2", 1.1, 0.0, 12.821, 0.37, 11.311],
+      ["fclass.s/zeros/h2", 0.435, 0.0, 4.032, 0.0, 3.525],
+      ["bne_nottaken/random/h2", 0.528, 0.0, 2.907, 0.0, 2.265],
+      ["fsrli.pi/zeros/h2", 0.924, 0.0, 5.187, 0.0, 4.427],
+      ["fadd.pi/zeros/h2", 0.691, 0.0, 5.717, 0.0, 4.909],
+      ["fpackreph.pi/zeros/h2", 0.605, 0.0, 5.16, 0.0, 4.506],
+      ["div/zeros/h2", 0.037, 0.0, 0.835, 0.0, 0.399],
+      ["neigh/2/random", 0.914, 0.0, 4.464, 0.0, 0.835],
+      ["fmax.pi/random/h2", 1.0, 0.0, 8.626, 0.0, 6.251],
+      ["sd/random/h2", 0.716, 0.0, 6.505, 0.0, 5.76],
+      ["beq_taken/random/h2", 0.185, 0.0, 1.557, 0.0, 1.32],
+      ["fle.s/zeros/h2", 0.988, 0.0, 4.446, 0.0, 4.1],
+      ["fcvt.s.w/random/h2", 1.012, 0.0, 12.838, 0.58, 11.338],
+      ["sltiu/zeros/h2", 0.407, 0.0, 2.727, 0.0, 2.205],
+      ["fltm.ps/zeros/h2", 0.536, 0.0, 3.554, 0.0, 2.927],
+      ["divw/random/h2", 0.012, 0.0, 1.189, 0.0, 0.984],
+      ["fmin.s/zeros/h2", 0.986, 0.0, 10.308, 0.0, 9.082],
+      ["andi/zeros/h2", 0.207, 0.0, 2.407, 0.0, 1.96],
+      ["mulhsu/random/h2", 0.074, 0.0, 2.236, 0.0, 1.654],
+      ["amoaddg.d/random/h2", 0.321, 0.0, 4.572, 0.0, 1.104],
+      ["fxor.pi/zeros/h2", 0.667, 0.0, 5.864, 0.0, 5.103],
+      ["fexp.ps/random/h2", 1.333, 0.0, 17.866, 0.988, 15.426],
+      ["ffrc.ps/random/h2", 1.086, 0.0, 13.272, 0.272, 11.865],
+      ["fsgnjx.s/zeros/h2", 0.87, 0.0, 5.919, 0.0, 5.141],
+      ["frcp.ps/random/h2", 1.384, 0.0, 15.66, 0.94, 14.125],
+      ["fmin.s/random/h2", 0.928, 0.0, 11.377, 0.235, 10.151],
+      ["fsgnjn.ps/zeros/h2", 0.518, 0.0, 5.814, 0.0, 4.921],
+      ["wire/hop1/random", 1.476, 0.0, 15.165, 0.0, 1.88],
+      ["slli/random/h2", 0.259, 0.0, 3.857, 0.0, 3.454],
+      ["xori/random/h2", 0.719, 0.0, 3.991, 0.0, 3.554],
+      ["fnmsub.ps/zeros/h2", 0.989, 0.0, 11.955, 0.012, 10.506],
+      ["fle.pi/random/h2", 0.768, 0.0, 9.459, 0.0, 8.387],
+      ["add/zeros/h2", 0.367, 0.0, 2.804, 0.0, 2.236],
+      ["wire/hop8/random", 0.87, 0.0, 9.232, 0.0, 0.42],
+      ["fbcx.ps/zeros/h2", 0.406, 0.0, 4.571, 0.0, 4.177],
+      ["fence/zeros/h2", 0.306, 0.0, 1.993, 0.0, 1.553],
+      ["mulhsu/zeros/h2", 0.232, 0.0, 1.312, 0.0, 0.989],
+      ["srl/random/h2", 0.975, 0.0, 4.285, 0.0, 3.739],
+      ["fcvt.s.wu/zeros/h2", 1.0, 0.0, 9.545, 0.0, 8.455],
+      ["fclass.ps/zeros/h2", 0.986, 0.0, 10.365, 0.0, 9.044],
+      ["fcvt.w.s/random/h2", 0.652, 0.0, 4.482, 0.0, 3.851],
+      ["mulw/random/h2", 0.071, 0.0, 2.11, 0.0, 1.509],
+      ["fadd.ps/const/h2", 1.0, 0.0, 10.387, 0.333, 9.116],
+      ["fcvt.pw.ps/zeros/h2", 0.568, 0.0, 9.594, 0.333, 8.363],
+      ["fxor.pi/random/h2", 0.681, 0.0, 9.101, 0.136, 7.665],
+      ["lw/zeros/h2", 0.594, 0.0, 4.547, 0.0, 3.713],
+      ["fsgnj.s/random/h2", 0.667, 0.0, 6.629, 0.0, 5.661],
+      ["for.pi/zeros/h2", 0.938, 0.0, 5.909, 0.0, 5.006],
+      ["lui/zeros/h2", 0.012, 0.0, 2.564, 0.0, 2.157],
+      ["fnmadd.ps/random/h2", 2.086, 0.0, 25.501, 1.0, 21.946],
+      ["c.mv/random/h2", 0.296, 0.0, 3.802, 0.0, 3.163],
+      ["fsgnj.ps/zeros/h2", 0.679, 0.0, 5.987, 0.0, 4.831],
+      ["fmulh.pi/zeros/h2", 1.0, 0.0, 11.151, 0.185, 9.893],
+      ["spin/zeros/h2", 0.16, 0.0, 2.975, 0.0, 2.551],
+      ["slli/zeros/h2", 0.062, 0.0, 2.65, 0.0, 2.246],
+      ["fmul.pi/const/h2", 0.988, 0.0, 11.217, 0.024, 10.02],
+      ["fsgnjx.s/random/h2", 0.667, 0.0, 6.539, 0.0, 5.42],
+      ["addi_norvc/zeros/h2", 0.286, 0.0, 2.738, 0.0, 2.112],
+      ["fexp.ps/zeros/h2", 0.836, 0.0, 11.431, 0.333, 9.933],
+      ["fswl.ps/zeros/h2", 0.594, 0.0, 6.435, 0.0, 1.346],
+      ["ori/zeros/h2", 0.33, 0.0, 2.744, 0.0, 2.366],
+      ["faddi.pi/random/h2", 0.665, 0.0, 8.037, 0.0, 7.092],
+      ["spin/zeros/h1", 0.188, 0.0, 1.933, 0.0, 1.549],
+      ["bge_data/random/h2", 0.278, 0.0, 1.884, 0.0, 1.519],
+      ["amomaxl.w/zeros/h2", 0.988, 0.0, 5.225, 0.0, 1.431],
+      ["fbci.ps/zeros/h2", 0.617, 0.0, 4.68, 0.0, 4.137],
+      ["divw/zeros/h2", 0.012, 0.0, 0.777, 0.0, 0.583],
+      ["wire/hop5/zeros", 1.0, 0.0, 7.999, 0.0, 0.56],
+      ["subw/random/h2", 0.418, 0.0, 4.548, 0.0, 4.034],
+      ["remw/zeros/h2", 0.026, 0.0, 0.951, 0.0, 0.47],
+      ["feqm.ps/zeros/h2", 0.667, 0.0, 3.912, 0.0, 3.641],
+      ["xor/zeros/h2", 0.42, 0.0, 2.678, 0.0, 2.397],
+      ["fmsub.ps/random/h2", 2.136, 0.0, 25.362, 1.0, 21.989],
+      ["dramrow2/rowmiss/random", 2.559, 2.372, 2.897, 0.0, -0.265],
+      ["wire/hop6/zeros", 1.0, 0.0, 7.283, 0.0, 0.491],
+      ["nop/random/h2", 0.319, 0.0, 2.513, 0.0, 2.137],
+      ["sb/random/h2", 1.0, 0.0, 6.378, 0.0, 5.644],
+      ["st_stream/dram/random", 5.975, 5.048, 9.892, 0.0, 0.827],
+      ["mul/zeros/h2", 0.062, 0.0, 1.247, 0.0, 0.701],
+      ["fadd.ps/random/h2", 1.924, 0.0, 18.553, 1.0, 16.37],
+      ["fsgnjn.s/zeros/h2", 0.667, 0.0, 6.041, 0.0, 4.935],
+      ["c.add/random/h2", 0.667, 0.0, 4.54, 0.0, 4.03],
+      ["fnmsub.s/zeros/h2", 0.988, 0.0, 11.109, 0.111, 8.402],
+      ["fmv.x.w/random/h2", 0.63, 0.0, 2.84, 0.0, 2.741],
+      ["fle.ps/zeros/h2", 0.942, 0.0, 10.214, 0.0, 9.043],
+      ["sw/random/h2", 0.986, 0.0, 6.396, 0.0, 5.495],
+      ["ld/zeros/h2", 0.556, 0.0, 4.358, 0.0, 3.748],
+      ["sltu/random/h2", 0.455, 0.0, 3.699, 0.0, 3.164],
+      ["fsgnj.s/zeros/h2", 0.753, 0.0, 6.099, 0.0, 5.156],
+      ["fpackrepb.pi/random/h2", 1.0, 0.0, 7.875, 0.0, 7.067],
+      ["sw/zeros/h2", 0.971, 0.0, 5.019, 0.0, 4.246],
+      ["fsrai.pi/random/h2", 1.0, 0.0, 7.222, 0.0, 6.432],
+      ["tstore/dram/random", 8.11, 6.832, 11.888, 0.0, 0.192],
+      ["fcmovm.ps/zeros/h2", 0.667, 0.0, 5.545, 0.0, 4.945],
+      ["add/random/h2", 0.667, 0.0, 4.396, 0.0, 3.782],
+      ["fmin.ps/random/h2", 1.543, 0.0, 17.627, 1.0, 15.432],
+      ["lui/random/h2", 0.613, 0.0, 2.398, 0.0, 1.892],
+      ["lh/zeros/h2", 0.319, 0.0, 4.447, 0.0, 3.649],
+      ["faddi.pi/zeros/h2", 0.963, 0.0, 5.331, 0.0, 4.644],
+      ["subw/zeros/h2", 0.667, 0.0, 2.862, 0.0, 2.424],
+      ["fexp.ps/const/h2", 1.0, 0.0, 11.202, 0.0, 9.919],
+      ["sub/random/h2", 0.667, 0.0, 4.647, 0.0, 3.908],
+      ["srlw/zeros/h2", 0.499, 0.0, 2.912, 0.0, 2.432],
+      ["l1fill/stride128/zeros", 0.434, 0.0, 5.11, 0.0, 2.343],
+      ["fexp.ps/random/h1", 1.667, 0.0, 18.253, 1.0, 15.967],
+      ["flog.ps/random/h2", 2.057, 0.0, 24.281, 1.0, 20.58],
+      ["add/const/h2", 0.012, 0.0, 2.928, 0.0, 2.185],
+      ["mulhu/zeros/h2", 0.157, 0.0, 1.408, 0.0, 1.114],
+      ["fbcx.ps/random/h2", 1.0, 0.0, 6.82, 0.0, 6.286],
+      ["fsrli.pi/random/h2", 0.986, 0.0, 7.197, 0.0, 6.408],
+      ["fcmov.ps/zeros/h2", 0.739, 0.0, 6.073, 0.0, 5.292],
+      ["lhu/zeros/h2", 1.0, 0.0, 4.346, 0.0, 3.899],
+      ["add_norvc/random/h2", 0.667, 0.0, 4.313, 0.0, 3.691],
+      ["addi/zeros/h2", 0.51, 0.0, 2.717, 0.0, 2.273],
+      ["divuw/random/h2", 0.086, 0.0, 1.403, 0.0, 1.103],
+      ["tload/scp/const", 1.0, 0.0, 7.335, 0.0, 1.396],
+      ["tload/dram/random", 7.096, 5.939, 10.276, 0.0, 0.136],
+      ["addiw/random/h2", 0.457, 0.0, 3.382, 0.0, 3.166],
+      ["dramrow/stride1K/zeros", 4.968, 5.268, 7.87, 0.0, -0.028],
+      ["fsgnjn.ps/random/h2", 1.0, 0.0, 8.931, 0.0, 8.034],
+      ["ori/random/h2", 0.667, 0.0, 3.928, 0.0, 3.407],
+      ["fltm.ps/random/h2", 0.938, 0.0, 5.511, 0.0, 4.982],
+      ["or/zeros/h2", 0.198, 0.0, 2.802, 0.0, 2.339],
+      ["tstore/scp/zeros", 0.889, 0.0, 6.407, 0.0, 0.967],
+      ["fswizz.ps/zeros/h2", 0.667, 0.0, 4.89, 0.0, 4.551],
+      ["wire/hop5/random", 1.505, 0.0, 20.312, 0.0, 1.696],
+      ["or/random/h2", 0.652, 0.0, 4.091, 0.0, 3.416],
+      ["amoorl.w/random/h2", 0.69, 0.0, 5.043, 0.0, 1.428],
+      ["fle.ps/random/h2", 1.867, 0.0, 18.376, 1.0, 16.216],
+      ["srl/zeros/h2", 0.696, 0.0, 2.774, 0.0, 2.228],
+      ["sll/zeros/h2", 0.369, 0.0, 2.817, 0.0, 2.323],
+      ["fsll.pi/zeros/h2", 0.667, 0.0, 5.622, 0.0, 5.064],
+      ["feq.pi/zeros/h2", 0.654, 0.0, 5.825, 0.0, 5.035],
+      ["sllw/random/h2", 0.762, 0.0, 4.368, 0.0, 3.59],
+      ["fswizz.ps/random/h2", 0.84, 0.0, 7.39, 0.0, 6.458],
+      ["scpline/stride64/random", 0.976, 0.0, 6.422, 0.0, 2.599],
+      ["csrr_fccnb/zeros/h2", 0.049, 0.0, 1.293, 0.0, 1.099],
+      ["l1fill/stride32/random", 1.0, 0.0, 6.186, 0.0, 3.155],
+      ["fadd.pi/const/h2", 0.716, 0.0, 5.744, 0.0, 5.011],
+      ["fadd.s/random/h2", 1.0, 0.0, 11.524, 0.086, 10.301],
+      ["fsgnjn.s/random/h2", 0.862, 0.0, 6.417, 0.0, 5.601],
+      ["amoorl.w/zeros/h2", 0.652, 0.0, 5.103, 0.0, 1.322],
+      ["tstore/dram/zeros", 5.841, 5.376, 8.314, 0.0, -0.21],
+      ["tload/scp/random", 1.667, 0.0, 12.201, 0.0, 2.568],
+      ["auipc/random/h2", 0.254, 0.0, 2.367, 0.0, 2.1],
+      ["amoaddl.d/zeros/h2", 0.971, 0.0, 4.766, 0.0, 1.266],
+      ["fmul.pi/zeros/h2", 1.0, 0.0, 11.256, 0.0, 9.95],
+      ["fand.pi/random/h2", 0.928, 0.0, 8.796, 0.0, 7.759],
+      ["fmadd.ps/random/h2", 2.072, 0.0, 24.762, 1.0, 21.234],
+      ["jal/random/h2", 0.014, 0.0, 1.505, 0.0, 1.018],
+      ["scpline/stride256/zeros", 0.522, 0.0, 3.164, 0.0, 1.654],
+      ["fsub.s/zeros/h2", 0.85, 0.0, 10.557, 0.333, 9.173],
+      ["remu/random/h2", 0.147, 0.0, 1.191, 0.0, 0.809],
+      ["sd/zeros/h2", 0.3, 0.0, 5.033, 0.0, 4.362],
+      ["dramrow2/seq/random", 2.823, 1.896, 2.769, 0.0, -0.125],
+      ["fcmov.ps/random/h2", 1.0, 0.0, 9.609, 0.0, 8.674],
+      ["feq.ps/random/h2", 1.63, 0.0, 17.106, 1.0, 14.923],
+      ["fsub.s/random/h2", 0.959, 0.0, 11.777, 0.272, 10.227],
+      ["st_stream/dram/zeros", 4.185, 4.143, 7.608, 0.0, 0.646],
+      ["dramrow2/rowhit/zeros", 1.756, 1.48, 1.829, 0.0, -0.118],
+      ["fmul.s/zeros/h2", 1.0, 0.0, 11.54, 0.072, 10.422],
+      ["bltu_data/random/h2", 0.541, 0.0, 1.934, 0.0, 1.588],
+      ["fcvt.ps.pw/zeros/h2", 0.986, 0.0, 9.133, 0.0, 8.208],
+      ["fmax.ps/random/h2", 1.986, 0.0, 17.914, 1.0, 15.688],
+      ["fbci.pi/zeros/h2", 0.493, 0.0, 4.611, 0.0, 3.695],
+      ["lwu/zeros/h2", 0.549, 0.0, 4.296, 0.0, 3.848],
+      ["fsrl.pi/random/h2", 0.924, 0.0, 8.019, 0.0, 7.044],
+      ["fnmadd.s/random/h2", 1.226, 0.0, 14.056, 0.679, 12.04],
+      ["flw/zeros/h2", 0.437, 0.0, 5.414, 0.0, 4.766],
+      ["tstore/scp/random", 1.402, 0.0, 12.045, 0.0, 1.863],
+      ["bltu_data/zeros/h2", 0.177, 0.0, 2.343, 0.0, 1.921],
+      ["xor/random/h2", 0.244, 0.0, 4.225, 0.0, 3.793]
+     ]
     },
     "named": {
      "mesh": ["tload/scp/random", "wire/hop2/random"],
@@ -2730,7 +4358,7 @@
    "status": "needs_tooling",
    "what": "Undo the rails' one-second average",
    "done": false,
-   "adds": "The PMIC's rail averages, as the SP forwards them, are roughly first-order ({{rf_1s}} of a step at 1 s, {{rf_2s}} at 2 s; τ ≈ {{rf_tau}} s, measured on the catalogue's bursts with no reset; a reset restarts the average, §4.1). Inverting that filter sample by sample recovers rail power every refresh (about 160 ms on aifoundry2 and aifoundry1-c1 and 266 ms on aifoundry3 while ettelem samples; 133, 135 and 224 ms with no sampler).",
+   "adds": "The PMIC's rail averages, as the SP forwards them, are roughly first-order ({{rf_1s}} of a step at 1 s, {{rf_2s}} at 2 s; τ ≈ {{rf_tau}} s, measured on the catalogue's bursts with no reset; a reset restarts the average, §4.1). Inverting that filter sample by sample recovers rail power every refresh (§4.1).",
    "cost": "~50 lines in the analysis scripts; a calibration burst to pin τ",
    "effect": "Rail split of bursts shorter than 3 s; per-launch rail energy; the minion/SRAM/NoC split of transients."
   },
@@ -2750,7 +4378,7 @@
    "status": "works_now",
    "what": "Sub-degree temperature by step timing; min/max windows for peaks",
    "done": true,
-   "adds": "The integer die reading steps at sharp moments when polled at 10–45 Hz; fitting the heating that reproduces the steps gives rises that repeat to ±0.03 °C on aifoundry2 and about 0.2 °C on aifoundry3 for a pattern heating the die by a degree or more (the Horace experiment); below half a degree it only bounds the rise. ettelem --reset-ms reads the PMIC's min/max over a window (in every pass on aifoundry2 and aifoundry3; on aifoundry1-c1 one pass of three saw the maximum fall once with no reset), and restarts the rails' running average with each reset.",
+   "adds": "The integer die reading steps at sharp moments when polled at 10–45 Hz; fitting the heating that reproduces the steps gives rises that repeat to ±0.03 °C on aifoundry2 and about 0.2 °C on aifoundry3 for a pattern heating the die by a degree or more (the Horace experiment); below about one degree it only bounds the rise. ettelem --reset-ms reads the PMIC's min/max over a window (in every pass on aifoundry2 and aifoundry3; on aifoundry1-c1 one pass of three saw the maximum fall once with no reset), and restarts the rails' running average with each reset.",
    "cost": "done",
    "effect": "Thermal responses without a firmware change; peak power over any window."
   },
@@ -2906,18 +4534,12 @@
    "id": "—",
    "when": "18 Sep",
    "card": "aifoundry2; aifoundry3 for sparsity",
-   "what": "Before the register: matmul power, energy per byte by memory level and by message ring, tensor-unit power against sparsity (board power polled through dev_mngt_service)",
+   "what": "Before the register: matmul power, and tensor-unit power against sparsity (board power polled through dev_mngt_service)",
    "instruments": "board power, cycle counter",
    "data": [
     {
      "path": "docs/reports/data/2026-09-18-aifoundry2/",
      "note": "matmul"
-    },
-    {
-     "path": "docs/reports/data/2026-09-18-memhier-aifoundry2/"
-    },
-    {
-     "path": "docs/reports/data/2026-09-18-nocbench-aifoundry2/"
     },
     {
      "path": "docs/reports/data/2026-09-18-sparsity-aifoundry3/"
@@ -2929,16 +4551,44 @@
      "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency"
     },
     {
+     "title": "Sparse compute",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute"
+    }
+   ]
+  },
+  {
+   "id": "E33",
+   "when": "18 Sep, 17:44–17:52",
+   "card": "aifoundry2",
+   "what": "Registered on 25 September for a session that predates the register: the load-to-use latency and bandwidth of each memory level and of another shire's scratchpad by distance, with board power per level (its energies per byte superseded by the energy manual's §4, E29)",
+   "instruments": "cycle counter, board power",
+   "data": [
+    {
+     "path": "docs/reports/data/2026-09-18-memhier-aifoundry2/"
+    }
+   ],
+   "reports": [
+    {
      "title": "Memory hierarchy",
      "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy"
-    },
+    }
+   ]
+  },
+  {
+   "id": "E34",
+   "when": "18 Sep, 19:14–19:28",
+   "card": "aifoundry2",
+   "what": "Registered on 25 September, like E33: TensorSend round trips, reductions and barriers, and the energy of message rings at several distances from board power (its ring energies superseded by the energy manual's reruns, E29)",
+   "instruments": "cycle counter, board power",
+   "data": [
+    {
+     "path": "docs/reports/data/2026-09-18-nocbench-aifoundry2/"
+    }
+   ],
+   "reports": [
     {
      "title": "On-chip communication",
      "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication"
-    },
-    {
-     "title": "Sparse compute",
-     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute"
     }
    ]
   },
@@ -4146,6 +5796,192 @@
     }
    },
    {
+    "id": "gs-l1",
+    "family": "bytes",
+    "label": "a random 4 B element gathered from the L1",
+    "unit": "element",
+    "src": {
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#irregular-access-gathers-and-scatters-by-level",
+     "label": "The energy manual, §4.4"
+    },
+    "v": {
+     "random": {
+      "e": [1.276e-11, 1.189e-11, 1.457e-11],
+      "cards": {
+       "aifoundry2": 1.354e-11,
+       "aifoundry3": 1.246e-11,
+       "aifoundry1-c1": 1.228e-11
+      },
+      "rate": 452300000000.0
+     },
+     "zeros": {
+      "e": [1.073e-11, 1.021e-11, 1.173e-11],
+      "cards": {
+       "aifoundry2": 1.127e-11,
+       "aifoundry3": 1.051e-11,
+       "aifoundry1-c1": 1.04e-11
+      },
+      "rate": 452300000000.0
+     }
+    },
+    "note": "`fgw.ps`, eight elements an instruction on random lines within 4 KB tiles, both harts of 1,024 minions (E48, three cards)"
+   },
+   {
+    "id": "gs-l2",
+    "family": "bytes",
+    "label": "a random 4 B element gathered from the L2",
+    "unit": "element",
+    "src": {
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#irregular-access-gathers-and-scatters-by-level",
+     "label": "The energy manual, §4.4"
+    },
+    "v": {
+     "random": {
+      "e": [3.545e-10, 3.299e-10, 3.916e-10],
+      "cards": {
+       "aifoundry2": 3.432e-10,
+       "aifoundry3": 3.331e-10,
+       "aifoundry1-c1": 3.871e-10
+      },
+      "rate": 27360000000.0
+     },
+     "zeros": {
+      "e": [1.675e-10, 1.582e-10, 1.763e-10],
+      "cards": {
+       "aifoundry2": 1.64e-10,
+       "aifoundry3": 1.643e-10,
+       "aifoundry1-c1": 1.743e-10
+      },
+      "rate": 27360000000.0
+     }
+    },
+    "note": "`fgw.ps`, eight elements an instruction on random lines within 4 KB tiles, both harts of 1,024 minions (E48, three cards)"
+   },
+   {
+    "id": "gs-scp",
+    "family": "bytes",
+    "label": "a random 4 B element gathered from the own scratchpad",
+    "unit": "element",
+    "src": {
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#irregular-access-gathers-and-scatters-by-level",
+     "label": "The energy manual, §4.4"
+    },
+    "v": {
+     "random": {
+      "e": [3.678e-10, 3.443e-10, 3.996e-10],
+      "cards": {
+       "aifoundry2": 3.597e-10,
+       "aifoundry3": 3.446e-10,
+       "aifoundry1-c1": 3.993e-10
+      },
+      "rate": 27360000000.0
+     },
+     "zeros": {
+      "e": [2.001e-10, 1.883e-10, 2.214e-10],
+      "cards": {
+       "aifoundry2": 1.93e-10,
+       "aifoundry3": 1.925e-10,
+       "aifoundry1-c1": 2.148e-10
+      },
+      "rate": 27360000000.0
+     }
+    },
+    "note": "`fgw.ps`, eight elements an instruction on random lines within 4 KB tiles, both harts of 1,024 minions (E48, three cards)"
+   },
+   {
+    "id": "gs-dram",
+    "family": "bytes",
+    "label": "a random 4 B element gathered from DRAM",
+    "unit": "element",
+    "src": {
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#irregular-access-gathers-and-scatters-by-level",
+     "label": "The energy manual, §4.4"
+    },
+    "v": {
+     "random": {
+      "e": [9.83e-09, 9.215e-09, 1.034e-08],
+      "cards": {
+       "aifoundry2": 9.873e-09,
+       "aifoundry3": 9.32e-09,
+       "aifoundry1-c1": 1.03e-08
+      },
+      "rate": 1193000000.0
+     },
+     "zeros": {
+      "e": [7.105e-09, 6.672e-09, 7.815e-09],
+      "cards": {
+       "aifoundry2": 6.913e-09,
+       "aifoundry3": 6.742e-09,
+       "aifoundry1-c1": 7.66e-09
+      },
+      "rate": 1193000000.0
+     }
+    },
+    "note": "`fgw.ps`, eight elements an instruction on random lines within 4 KB tiles, both harts of 1,024 minions (E48, three cards)"
+   },
+   {
+    "id": "gs-s-l1",
+    "family": "bytes",
+    "label": "a 4 B element scattered into the L1",
+    "unit": "element",
+    "src": {
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#irregular-access-gathers-and-scatters-by-level",
+     "label": "The energy manual, §4.4"
+    },
+    "v": {
+     "random": {
+      "e": [1.469e-11, 1.387e-11, 1.55e-11],
+      "cards": {
+       "aifoundry2": 1.47e-11,
+       "aifoundry3": 1.46e-11,
+       "aifoundry1-c1": 1.476e-11
+      },
+      "rate": 451500000000.0
+     },
+     "zeros": {
+      "e": [1.165e-11, 1.107e-11, 1.242e-11],
+      "cards": {
+       "aifoundry2": 1.186e-11,
+       "aifoundry3": 1.163e-11,
+       "aifoundry1-c1": 1.147e-11
+      },
+      "rate": 451500000000.0
+     }
+    },
+    "note": "`fscw.ps`, eight elements an instruction on random lines within 4 KB tiles, both harts of 1,024 minions (E48, three cards)"
+   },
+   {
+    "id": "gs-s-l2",
+    "family": "bytes",
+    "label": "a 4 B element scattered into the L2",
+    "unit": "element",
+    "src": {
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#irregular-access-gathers-and-scatters-by-level",
+     "label": "The energy manual, §4.4"
+    },
+    "v": {
+     "random": {
+      "e": [7.315e-10, 6.769e-10, 8.139e-10],
+      "cards": {
+       "aifoundry2": 7.019e-10,
+       "aifoundry3": 6.791e-10,
+       "aifoundry1-c1": 8.135e-10
+      },
+      "rate": 23540000000.0
+     },
+     "zeros": {
+      "e": [2.859e-10, 2.698e-10, 3.061e-10],
+      "cards": {
+       "aifoundry2": 2.785e-10,
+       "aifoundry3": 2.733e-10,
+       "aifoundry1-c1": 3.06e-10
+      },
+      "rate": 23540000000.0
+     }
+    },
+    "note": "`fscw.ps`, eight elements an instruction on random lines within 4 KB tiles, both harts of 1,024 minions (E48, three cards)"
+   },
+   {
     "id": "m-pair",
     "family": "msg",
     "label": "a byte messaged to the other minion of a pair",
@@ -4331,6 +6167,50 @@
       "rate": 59990000.0
      }
     }
+   },
+   {
+    "id": "gs-famoaddl",
+    "family": "sync",
+    "label": "a packed atomic add at the shire's L2 (famoaddl.pi), per lane",
+    "unit": "update",
+    "src": {
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#synchronisation",
+     "label": "The energy manual, §6"
+    },
+    "v": {
+     "any": {
+      "e": [3.921e-10, 3.526e-10, 4.25e-10],
+      "cards": {
+       "aifoundry2": 3.993e-10,
+       "aifoundry3": 3.583e-10,
+       "aifoundry1-c1": 4.188e-10
+      },
+      "rate": 12690000000.0
+     }
+    },
+    "note": "random words of a shared table, both harts of 1,024 minions (E48, three cards)"
+   },
+   {
+    "id": "gs-famoaddg",
+    "family": "sync",
+    "label": "a packed atomic add at the home L3 (famoaddg.pi), per lane",
+    "unit": "update",
+    "src": {
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#synchronisation",
+     "label": "The energy manual, §6"
+    },
+    "v": {
+     "any": {
+      "e": [1.731e-09, 1.566e-09, 1.872e-09],
+      "cards": {
+       "aifoundry2": 1.748e-09,
+       "aifoundry3": 1.649e-09,
+       "aifoundry1-c1": 1.798e-09
+      },
+      "rate": 2802000000.0
+     }
+    },
+    "note": "random words of a shared table, both harts of 1,024 minions (E48, three cards)"
    }
   ],
   "meter": {
@@ -4359,8 +6239,8 @@
    "source": "results/tel.json of the version-3 campaign (TEL-P1, TEL-P3, TEL-P5): the SP stats trace's pass, per pass, quiet and under ettelem at 10 Hz; the medians over the passes",
    "idle_law_rms_w": 0.205
   },
-  "rate_rule": "the one at which the measurement ran it on all 1,024 minions at 600 MHz: the median launch rate of the energy manual's rerun passes (bytes by level, messages and relay: the version-3 campaign's, on three cards; atomics: 23 September), the catalogue's aifoundry2 runs (instructions, byte paths), the tensor rows, the Horace experiment's flip counts, and the heat runs' most bit·mm per second (wires)",
-  "source": "tools/ettelem/sync_hub_data.py from manual.json, reruns.json and its rerun passes (V3-RL and the 23 September directories), the wire report.json, the Horace model.json / report.json, and the version-3 campaign's tel.json (the meter's pass)"
+  "rate_rule": "the one at which the measurement ran it on all 1,024 minions at 600 MHz: the median launch rate of the energy manual's rerun passes (bytes by level, messages and relay: the version-3 campaign's, on three cards; atomics: 23 September), the gathers', scatters' and packed atomics' own element rate (E48, pooled over three cards), the catalogue's aifoundry2 runs (instructions, byte paths), the tensor rows, the Horace experiment's flip counts, and the heat runs' most bit·mm per second (wires)",
+  "source": "tools/ettelem/sync_hub_data.py from manual.json (its gs block: E48's gathers, scatters and packed atomics), reruns.json and its rerun passes (V3-RL and the 23 September directories), the wire report.json, the Horace model.json / report.json, and the version-3 campaign's tel.json (the meter's pass)"
  },
  "superseded": [
   {
@@ -4490,305 +6370,10 @@
   ],
   "series": [
    {
-    "id": "pre-v3",
-    "label": "Before the version-3 campaign: the plan of 25 September",
-    "short": "before v3",
-    "note": "its verdicts, pre-registered before any campaign run, on the evidence the pages then rested on (aifoundry2 and aifoundry3)",
-    "date": "2026-09-25",
-    "source": "docs/reports/data/2026-09-25-claims-v3/plan3.json.gz (claims[].page, .cards, .effective_verdict)",
-    "pages": {
-     "2026-09-22-et-soc1-l2-mainline-starvation": {
-      "claims": 8,
-      "verdict": {
-       "PROVEN": 2,
-       "UNDER-REPLICATED": 3,
-       "NOT-EMPIRICAL": 3
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 3,
-       "none": 5
-      }
-     },
-     "et-soc1-dvfs-leakage": {
-      "claims": 82,
-      "verdict": {
-       "PROVEN": 4,
-       "CARD-DIFFERENT": 11,
-       "ONE-CARD": 29,
-       "UNDER-REPLICATED": 21,
-       "NOT-EMPIRICAL": 17
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 19,
-       "aifoundry2": 46,
-       "aifoundry3": 5,
-       "none": 12
-      }
-     },
-     "et-soc1-energy-manual": {
-      "claims": 178,
-      "verdict": {
-       "PROVEN": 77,
-       "CARD-DIFFERENT": 23,
-       "ONE-CARD": 24,
-       "UNDER-REPLICATED": 11,
-       "WITHIN-NOISE": 11,
-       "NOT-EMPIRICAL": 32
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 126,
-       "aifoundry2": 42,
-       "aifoundry3": 2,
-       "none": 8
-      }
-     },
-     "et-soc1-heat-per-mm": {
-      "claims": 87,
-      "verdict": {
-       "PROVEN": 44,
-       "CARD-DIFFERENT": 2,
-       "ONE-CARD": 1,
-       "UNDER-REPLICATED": 1,
-       "WITHIN-NOISE": 11,
-       "NOT-EMPIRICAL": 28
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 73,
-       "none": 14
-      }
-     },
-     "et-soc1-horace-experiment": {
-      "claims": 138,
-      "verdict": {
-       "PROVEN": 11,
-       "CARD-DIFFERENT": 23,
-       "ONE-CARD": 50,
-       "UNDER-REPLICATED": 27,
-       "WITHIN-NOISE": 2,
-       "NOT-EMPIRICAL": 25
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 49,
-       "aifoundry2": 73,
-       "aifoundry3": 5,
-       "none": 11
-      }
-     },
-     "et-soc1-hot-line": {
-      "claims": 62,
-      "verdict": {
-       "PROVEN": 29,
-       "ONE-CARD": 6,
-       "UNDER-REPLICATED": 10,
-       "WITHIN-NOISE": 2,
-       "NOT-EMPIRICAL": 15
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 38,
-       "aifoundry2": 6,
-       "none": 18
-      }
-     },
-     "et-soc1-limits-of-observability": {
-      "claims": 136,
-      "verdict": {
-       "PROVEN": 31,
-       "CARD-DIFFERENT": 18,
-       "ONE-CARD": 14,
-       "UNDER-REPLICATED": 16,
-       "WITHIN-NOISE": 7,
-       "NOT-EMPIRICAL": 50
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 79,
-       "aifoundry2": 24,
-       "aifoundry3": 2,
-       "none": 31
-      }
-     },
-     "et-soc1-matmul-efficiency": {
-      "claims": 48,
-      "verdict": {
-       "PROVEN": 4,
-       "CARD-DIFFERENT": 3,
-       "ONE-CARD": 11,
-       "UNDER-REPLICATED": 14,
-       "NOT-EMPIRICAL": 16
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 5,
-       "aifoundry2": 37,
-       "none": 6
-      }
-     },
-     "et-soc1-memory-anatomy": {
-      "claims": 127,
-      "verdict": {
-       "PROVEN": 4,
-       "CARD-DIFFERENT": 5,
-       "ONE-CARD": 69,
-       "UNDER-REPLICATED": 20,
-       "WITHIN-NOISE": 3,
-       "NOT-EMPIRICAL": 26
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 11,
-       "aifoundry2": 103,
-       "none": 13
-      }
-     },
-     "et-soc1-memory-hierarchy": {
-      "claims": 61,
-      "verdict": {
-       "PROVEN": 11,
-       "CARD-DIFFERENT": 2,
-       "ONE-CARD": 31,
-       "UNDER-REPLICATED": 4,
-       "WITHIN-NOISE": 1,
-       "NOT-EMPIRICAL": 12
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 14,
-       "aifoundry2": 35,
-       "none": 12
-      }
-     },
-     "et-soc1-on-chip-communication": {
-      "claims": 61,
-      "verdict": {
-       "PROVEN": 7,
-       "CARD-DIFFERENT": 2,
-       "ONE-CARD": 27,
-       "UNDER-REPLICATED": 4,
-       "WITHIN-NOISE": 3,
-       "NOT-EMPIRICAL": 18
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 14,
-       "aifoundry2": 33,
-       "none": 14
-      }
-     },
-     "et-soc1-on-chip-relay": {
-      "claims": 49,
-      "verdict": {
-       "PROVEN": 27,
-       "CARD-DIFFERENT": 1,
-       "ONE-CARD": 3,
-       "UNDER-REPLICATED": 7,
-       "WITHIN-NOISE": 2,
-       "NOT-EMPIRICAL": 9
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 34,
-       "aifoundry2": 3,
-       "none": 12
-      }
-     },
-     "et-soc1-power-temperature": {
-      "claims": 58,
-      "verdict": {
-       "PROVEN": 10,
-       "CARD-DIFFERENT": 4,
-       "ONE-CARD": 19,
-       "UNDER-REPLICATED": 11,
-       "WITHIN-NOISE": 1,
-       "NOT-EMPIRICAL": 13
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 17,
-       "aifoundry2": 32,
-       "aifoundry3": 1,
-       "none": 8
-      }
-     },
-     "et-soc1-ridge-points": {
-      "claims": 104,
-      "verdict": {
-       "PROVEN": 22,
-       "CARD-DIFFERENT": 3,
-       "ONE-CARD": 16,
-       "UNDER-REPLICATED": 5,
-       "WITHIN-NOISE": 4,
-       "NOT-EMPIRICAL": 54
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 50,
-       "aifoundry2": 16,
-       "aifoundry3": 8,
-       "none": 30
-      }
-     },
-     "et-soc1-sparse-compute": {
-      "claims": 66,
-      "verdict": {
-       "PROVEN": 10,
-       "CARD-DIFFERENT": 4,
-       "ONE-CARD": 18,
-       "UNDER-REPLICATED": 20,
-       "WITHIN-NOISE": 1,
-       "NOT-EMPIRICAL": 13
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 13,
-       "aifoundry2": 5,
-       "aifoundry3": 42,
-       "none": 6
-      }
-     },
-     "et-soc1-spatial-temperature-brief": {
-      "claims": 23,
-      "verdict": {
-       "PROVEN": 4,
-       "ONE-CARD": 4,
-       "UNDER-REPLICATED": 6,
-       "NOT-EMPIRICAL": 9
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 10,
-       "aifoundry2": 6,
-       "none": 7
-      }
-     },
-     "et-soc1-testdrive": {
-      "claims": 14,
-      "verdict": {
-       "PROVEN": 1,
-       "CARD-DIFFERENT": 1,
-       "ONE-CARD": 1,
-       "UNDER-REPLICATED": 4,
-       "NOT-EMPIRICAL": 7
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 1,
-       "aifoundry2": 2,
-       "aifoundry3": 6,
-       "none": 5
-      }
-     },
-     "et-soc1-why-low-power": {
-      "claims": 70,
-      "verdict": {
-       "PROVEN": 7,
-       "CARD-DIFFERENT": 8,
-       "ONE-CARD": 12,
-       "UNDER-REPLICATED": 18,
-       "WITHIN-NOISE": 1,
-       "NOT-EMPIRICAL": 24
-      },
-      "cards": {
-       "aifoundry2+aifoundry3": 24,
-       "aifoundry2": 38,
-       "none": 8
-      }
-     }
-    }
-   },
-   {
     "id": "post-v3",
     "label": "After the version-3 campaign: its results, 26 September",
     "short": "after v3",
-    "note": "measured on aifoundry2, aifoundry3 and aifoundry1-c1 (25–26 September); each claim the campaign tested takes its outcome on those cards, the others keep their earlier verdict",
+    "note": "the campaign is complete: it measured aifoundry2, aifoundry3 and aifoundry1-c1 on 25–26 September, and its results are in docs/reports/data/2026-09-25-claims-v3/results; each claim it tested takes its outcome on those cards, the others keep their earlier verdict",
     "date": "2026-09-26",
     "source": "docs/reports/data/2026-09-25-claims-v3/plan3.json.gz (claims[].page, .cards, .effective_verdict); 448 claims the campaign tested take their outcome from docs/reports/data/2026-09-25-claims-v3/results/pagemap.json (all_cards of each item that tests them, V3_ORDER) and their cards from those items' all_cards blocks",
     "tested": 448,
@@ -5107,6 +6692,301 @@
        "aifoundry2+aifoundry3+aifoundry1-c1": 20,
        "aifoundry2+aifoundry3": 16,
        "aifoundry2": 26,
+       "none": 8
+      }
+     }
+    }
+   },
+   {
+    "id": "pre-v3",
+    "label": "Before the version-3 campaign: the plan of 25 September",
+    "short": "before v3",
+    "note": "its verdicts, pre-registered before any campaign run, on the evidence the pages then rested on (aifoundry2 and aifoundry3)",
+    "date": "2026-09-25",
+    "source": "docs/reports/data/2026-09-25-claims-v3/plan3.json.gz (claims[].page, .cards, .effective_verdict)",
+    "pages": {
+     "2026-09-22-et-soc1-l2-mainline-starvation": {
+      "claims": 8,
+      "verdict": {
+       "PROVEN": 2,
+       "UNDER-REPLICATED": 3,
+       "NOT-EMPIRICAL": 3
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 3,
+       "none": 5
+      }
+     },
+     "et-soc1-dvfs-leakage": {
+      "claims": 82,
+      "verdict": {
+       "PROVEN": 4,
+       "CARD-DIFFERENT": 11,
+       "ONE-CARD": 29,
+       "UNDER-REPLICATED": 21,
+       "NOT-EMPIRICAL": 17
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 19,
+       "aifoundry2": 46,
+       "aifoundry3": 5,
+       "none": 12
+      }
+     },
+     "et-soc1-energy-manual": {
+      "claims": 178,
+      "verdict": {
+       "PROVEN": 77,
+       "CARD-DIFFERENT": 23,
+       "ONE-CARD": 24,
+       "UNDER-REPLICATED": 11,
+       "WITHIN-NOISE": 11,
+       "NOT-EMPIRICAL": 32
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 126,
+       "aifoundry2": 42,
+       "aifoundry3": 2,
+       "none": 8
+      }
+     },
+     "et-soc1-heat-per-mm": {
+      "claims": 87,
+      "verdict": {
+       "PROVEN": 44,
+       "CARD-DIFFERENT": 2,
+       "ONE-CARD": 1,
+       "UNDER-REPLICATED": 1,
+       "WITHIN-NOISE": 11,
+       "NOT-EMPIRICAL": 28
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 73,
+       "none": 14
+      }
+     },
+     "et-soc1-horace-experiment": {
+      "claims": 138,
+      "verdict": {
+       "PROVEN": 11,
+       "CARD-DIFFERENT": 23,
+       "ONE-CARD": 50,
+       "UNDER-REPLICATED": 27,
+       "WITHIN-NOISE": 2,
+       "NOT-EMPIRICAL": 25
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 49,
+       "aifoundry2": 73,
+       "aifoundry3": 5,
+       "none": 11
+      }
+     },
+     "et-soc1-hot-line": {
+      "claims": 62,
+      "verdict": {
+       "PROVEN": 29,
+       "ONE-CARD": 6,
+       "UNDER-REPLICATED": 10,
+       "WITHIN-NOISE": 2,
+       "NOT-EMPIRICAL": 15
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 38,
+       "aifoundry2": 6,
+       "none": 18
+      }
+     },
+     "et-soc1-limits-of-observability": {
+      "claims": 136,
+      "verdict": {
+       "PROVEN": 31,
+       "CARD-DIFFERENT": 18,
+       "ONE-CARD": 14,
+       "UNDER-REPLICATED": 16,
+       "WITHIN-NOISE": 7,
+       "NOT-EMPIRICAL": 50
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 79,
+       "aifoundry2": 24,
+       "aifoundry3": 2,
+       "none": 31
+      }
+     },
+     "et-soc1-matmul-efficiency": {
+      "claims": 48,
+      "verdict": {
+       "PROVEN": 4,
+       "CARD-DIFFERENT": 3,
+       "ONE-CARD": 11,
+       "UNDER-REPLICATED": 14,
+       "NOT-EMPIRICAL": 16
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 5,
+       "aifoundry2": 37,
+       "none": 6
+      }
+     },
+     "et-soc1-memory-anatomy": {
+      "claims": 127,
+      "verdict": {
+       "PROVEN": 4,
+       "CARD-DIFFERENT": 5,
+       "ONE-CARD": 69,
+       "UNDER-REPLICATED": 20,
+       "WITHIN-NOISE": 3,
+       "NOT-EMPIRICAL": 26
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 11,
+       "aifoundry2": 103,
+       "none": 13
+      }
+     },
+     "et-soc1-memory-hierarchy": {
+      "claims": 61,
+      "verdict": {
+       "PROVEN": 11,
+       "CARD-DIFFERENT": 2,
+       "ONE-CARD": 31,
+       "UNDER-REPLICATED": 4,
+       "WITHIN-NOISE": 1,
+       "NOT-EMPIRICAL": 12
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 14,
+       "aifoundry2": 35,
+       "none": 12
+      }
+     },
+     "et-soc1-on-chip-communication": {
+      "claims": 61,
+      "verdict": {
+       "PROVEN": 7,
+       "CARD-DIFFERENT": 2,
+       "ONE-CARD": 27,
+       "UNDER-REPLICATED": 4,
+       "WITHIN-NOISE": 3,
+       "NOT-EMPIRICAL": 18
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 14,
+       "aifoundry2": 33,
+       "none": 14
+      }
+     },
+     "et-soc1-on-chip-relay": {
+      "claims": 49,
+      "verdict": {
+       "PROVEN": 27,
+       "CARD-DIFFERENT": 1,
+       "ONE-CARD": 3,
+       "UNDER-REPLICATED": 7,
+       "WITHIN-NOISE": 2,
+       "NOT-EMPIRICAL": 9
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 34,
+       "aifoundry2": 3,
+       "none": 12
+      }
+     },
+     "et-soc1-power-temperature": {
+      "claims": 58,
+      "verdict": {
+       "PROVEN": 10,
+       "CARD-DIFFERENT": 4,
+       "ONE-CARD": 19,
+       "UNDER-REPLICATED": 11,
+       "WITHIN-NOISE": 1,
+       "NOT-EMPIRICAL": 13
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 17,
+       "aifoundry2": 32,
+       "aifoundry3": 1,
+       "none": 8
+      }
+     },
+     "et-soc1-ridge-points": {
+      "claims": 104,
+      "verdict": {
+       "PROVEN": 22,
+       "CARD-DIFFERENT": 3,
+       "ONE-CARD": 16,
+       "UNDER-REPLICATED": 5,
+       "WITHIN-NOISE": 4,
+       "NOT-EMPIRICAL": 54
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 50,
+       "aifoundry2": 16,
+       "aifoundry3": 8,
+       "none": 30
+      }
+     },
+     "et-soc1-sparse-compute": {
+      "claims": 66,
+      "verdict": {
+       "PROVEN": 10,
+       "CARD-DIFFERENT": 4,
+       "ONE-CARD": 18,
+       "UNDER-REPLICATED": 20,
+       "WITHIN-NOISE": 1,
+       "NOT-EMPIRICAL": 13
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 13,
+       "aifoundry2": 5,
+       "aifoundry3": 42,
+       "none": 6
+      }
+     },
+     "et-soc1-spatial-temperature-brief": {
+      "claims": 23,
+      "verdict": {
+       "PROVEN": 4,
+       "ONE-CARD": 4,
+       "UNDER-REPLICATED": 6,
+       "NOT-EMPIRICAL": 9
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 10,
+       "aifoundry2": 6,
+       "none": 7
+      }
+     },
+     "et-soc1-testdrive": {
+      "claims": 14,
+      "verdict": {
+       "PROVEN": 1,
+       "CARD-DIFFERENT": 1,
+       "ONE-CARD": 1,
+       "UNDER-REPLICATED": 4,
+       "NOT-EMPIRICAL": 7
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 1,
+       "aifoundry2": 2,
+       "aifoundry3": 6,
+       "none": 5
+      }
+     },
+     "et-soc1-why-low-power": {
+      "claims": 70,
+      "verdict": {
+       "PROVEN": 7,
+       "CARD-DIFFERENT": 8,
+       "ONE-CARD": 12,
+       "UNDER-REPLICATED": 18,
+       "WITHIN-NOISE": 1,
+       "NOT-EMPIRICAL": 24
+      },
+      "cards": {
+       "aifoundry2+aifoundry3": 24,
+       "aifoundry2": 38,
        "none": 8
       }
      }

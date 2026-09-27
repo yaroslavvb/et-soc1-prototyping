@@ -75,5 +75,5 @@ build/sparsity/host/sparsity_host --sysemu --test fma --type fp16 --pattern pair
 
 ## Lab etiquette
 
-The card is shared. Check `uptime`, `who` and `ps` first. Every command here holds the device for under 10 s, and
+The card is shared. Check `et-who`, `who` and `uptime` first, ask before using it, and hold its lock for each run (`flock -n /run/lock/etsoc-shire0.lock timeout 10 <command>`; AGENT.md §5). Every command here holds the device for under 10 s, and
 builds use `nice -j4`.

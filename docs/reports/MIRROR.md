@@ -13,11 +13,13 @@ before `</body>`. Private pages are listed but not mirrored.
 - **Addresses.** `https://spacesheep.dev/@yaroslavvb/<slug>` is the viewer (the page framed, with comments).
   `https://<space-uuid>.spacesheep.app/` is the raw page, and a folder deploy serves each of its files at
   `https://<space-uuid>.spacesheep.app/<file>`. A private space answers both anonymously with a sign-in step only.
+- **Waiting changes.** Page changes found by the review of 26 September wait in [`TODO.md`](TODO.md) for the next
+  pass, which deploys them with this file's procedure.
 - The per-page history (what each version changed, the A-numbers, the reviews) is in
   [`docs/findings/04-artifacts.md`](../findings/04-artifacts.md). The review's `manifest.tsv` in
   `data/2026-09-24-report-review/` is a dated record of 24 September; this file supersedes it.
 
-## The pages (as of 2026-09-25)
+## The pages (as of 2026-09-27)
 
 <!-- mirror:begin -->
 
@@ -51,19 +53,21 @@ before `</body>`. Private pages are listed but not mirrored.
 |---|---|---|---|---|
 | [What is broken on aifoundry1](https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting) (25 Sep) | `a2d70512-f892-474e-aca6-0568176cb092` | public | `docs/reports/2026-09-25-aifoundry1-troubleshooting.html` | file |
 | [aifoundry1 is fixed](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix) (25 Sep, the fix log) | `31e35ba7-36f4-486e-b6f3-687f7c7ad3a0` | public | `docs/reports/2026-09-25-aifoundry1-fix.html` | file |
+| [ET-SoC-1 review: the TODO list](https://spacesheep.dev/@yaroslavvb/et-soc1-review-todo) (26 Sep) | `1db405d2-34c6-45f0-b939-03b74d3d68b4` | public | `docs/reports/2026-09-26-review-todo.html` | file (rendered from docs/reports/TODO.md by scripts/build-todo-page.py; redeploy after every change to TODO.md) |
 
 ### Public, not mirrored
 
 | Page | Space | Visibility | Repo file | Why |
 |---|---|---|---|---|
 | [Lab machine accounts](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-accounts) (18 Sep) | `5bcb11cb-7e1f-4cf2-bde3-c375c904b3a9` | public | not mirrored | A standalone copy of an older [`docs/lab-access.md`](../lab-access.md) with `scripts/add-lab-user.sh` built in, written by hand on 18 September. The machines' login banners link it. It is older than `lab-access.md`, which is the current text. |
+| [What trips people up on the AI Foundry lab](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman) (25 Sep, the lab problems report for the lab lead) | `6c75b258-53fe-45fe-b2cf-11f8572ac2c3` | public | not mirrored | Written for the lab lead; public since the owner confirmed it on 26 September. Its source stays out of this repository (`38f6b02`; `docs/reports/2026-09-25-lab-problems.html` is gitignored). |
+| [AI Foundry Discord map](https://spacesheep.dev/@yaroslavvb/aifoundry-discord-map) | `c6433479-e2a7-4c9d-bcef-b45bbd1709fd` | public | not mirrored | Not part of this line of work; listed because its slug starts like this set's. Public (the owner, 26 September). |
 
 ### Private: listed, not mirrored
 
 | Page | Space | Visibility | Repo file | Why |
 |---|---|---|---|---|
 | Notes of a conversation with David Kanter (R9, 20 Sep) | `f3533740-5ad9-45e1-927c-098dbbe5c210` | private | not mirrored | A personal memo quoting a private conversation; private and unlinked since 24 September (the owner's decision). The DVFS page and R9 describe it in words. |
-| The lab problems report for the lab lead (25 Sep) | — | private | not mirrored | Written for the lab lead about the lab machines; it stays out of this public repository (`38f6b02`), and its source is gitignored (`docs/reports/2026-09-25-lab-problems.html`). Its visibility is the owner's decision. |
 
 <!-- mirror:end -->
 
@@ -85,7 +89,7 @@ once for mathjax-full).
 | DVFS (A11) | `sources/dvfs-leakage.*` | `python3 scripts/build-report.py dvfs-leakage docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json docs/reports/2026-09-22-dvfs-leakage.html` | E19 in 03-experiments.md: `analyze_dvfs.py ... --v3 docs/reports/data/2026-09-25-claims-v3` (04-artifacts.md, "Rebuilding the version-3 data"), then `build_cards_data.py --merge` |
 | Power and temperature (A3) | `sources/power-temperature.*` | `python3 scripts/build-report.py power-temperature docs/reports/data/2026-09-20-power-aifoundry2/summary.json docs/reports/2026-09-20-et-soc1-power-temperature.html` | `tools/ettelem/summarize_power_session.py DATA --out DATA/summary.json` |
 | Horace (A4), Why low power (A5) | `sources/horace-experiment.*`, `sources/why-low-power.*` | `tools/ettelem/finish_horace.sh` (its last two lines build both pages from `docs/reports/data/2026-09-21-horace-aifoundry2/report.json` and `lowpower-report.json`) | the whole Horace line, inside the script; the GIFs too. The version-3 check's three cards come in through the script's `build_cards_data.py --v3` (section 10, merged into `report.json` only) and `build_lowpower_report_data.py --v3` lines |
-| Hot line (A13) | `sources/hot-line.*` | `python3 scripts/build-report.py hot-line docs/reports/data/2026-09-22-hotline-aifoundry2/hotline.json docs/reports/2026-09-22-hot-line.html` | 04-artifacts.md A16: `analyze_hotline_power.py`, then `analyze_hotline.py --v3 docs/reports/data/2026-09-25-claims-v3/raw --power ... --context ... --barrier ...` (since 26 September the three cards' V3-LAT passes; the 22 September sweeps stay as history) |
+| Hot line (A13) | `sources/hot-line.*` | `python3 scripts/build-report.py hot-line docs/reports/data/2026-09-22-hotline-aifoundry2/hotline.json docs/reports/2026-09-22-hot-line.html` | 04-artifacts.md A16: `analyze_hotline_power.py`, then `analyze_hotline.py --v3 docs/reports/data/2026-09-25-claims-v3/raw --power ... --context ... --barrier ... --stop-runs ...` (since 26 September the three cards' V3-LAT passes; the 22 September sweeps stay as history) |
 | On-chip relay (A14) | `sources/on-chip-relay.*` | `python3 scripts/build-report.py on-chip-relay docs/reports/data/2026-09-22-onchip-aifoundry2/onchip.json docs/reports/2026-09-22-on-chip-relay.html` | `workloads/onchip/analyze_onchip.py` over the three cards' V3-LAT relay sweeps with `--cards aifoundry2,aifoundry3,aifoundry1-c1` (04-artifacts.md, "Rebuilding the version-3 data"; E25 gives the 22 September form) |
 | Influence functions | `sources/influence-on-et.*` | `python3 scripts/build-report.py influence-on-et docs/reports/data/2026-09-25-influence-on-et/analysis.json docs/reports/2026-09-25-influence-on-et.html` | `python3 docs/reports/data/2026-09-25-influence-on-et/make_analysis.py` |
 | Memory anatomy (A1) | `workloads/memprobe/report_template.html` | `python3 workloads/memprobe/build_report.py docs/reports/data/2026-09-19-memprobe-aifoundry2/summary.json docs/reports/data/2026-09-23-energy-manual/manual.json docs/reports/2026-09-19-et-soc1-memory-anatomy.html` (its `--v3` defaults to `docs/reports/data/2026-09-26-memprobe-3cards/cards.json`) | E1 in 03-experiments.md; the three cards: `workloads/memprobe/analyze.py --v3 docs/reports/data/2026-09-25-claims-v3/raw --v3-passes docs/reports/data/2026-09-25-claims-v3/results/mem.passes.json --out docs/reports/data/2026-09-26-memprobe-3cards/cards.json` |
@@ -144,7 +148,24 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Last check: 2026-09-25, 21:46 PDT**, against the files at `bde52e0`, run both ways (read-only):
+**Not yet deployed (2026-09-27):** the merge of the version-3 pages (the three-card results of 26 September) with the
+review's chart and collapsible-depth passes changed most mirrored pages' files. Until each is redeployed and this
+file records a new check, the live pages are the ones of the check below.
+
+**Last check: 2026-09-26, 23:26 PDT**, after the collapsible-depth pass, through `spacesheep read` with a key: 22 of 22
+mirrored public pages equal to their files, no warnings, exit 0.
+
+**Earlier check: 2026-09-26, 17:25 PDT**, after the chart pass, through `spacesheep read` with a key: 21 of 21 mirrored
+public pages equal to their files; exit 1 because the review's TODO space (`et-soc1-review-todo`), deployed private,
+was public although deployed private, and two other spaces were public but not listed here as public. The
+owner confirmed all three as public the same day, and this file now lists them so.
+
+**Previous check: 2026-09-26, about 15:30 PDT**, against the files at `299fac8` (the 26 September visualization pass is
+live), anonymously over HTTPS only: that session had no spacesheep key, so `spacesheep list` was not read. 21 of 21
+mirrored public pages equal to their files (the host's insertion, 16,757 B, identical on every page), the Horace GIFs
+3 of 3 equal, the viewer addresses of all 22 public rows answering 200, the private memo not served anonymously; exit 0.
+
+**Last check both ways: 2026-09-25, 21:46 PDT**, against the files at `bde52e0` (read-only):
 
 | | Through `spacesheep read` (key configured) | Anonymously over HTTPS |
 |---|---|---|

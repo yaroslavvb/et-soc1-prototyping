@@ -2,7 +2,7 @@
 
 Energy per instruction retired, above idle, at 600 MHz and 0.52 V, with both harts of all 1,024 minions running the instruction flat out. Three operand sets: all zeros, one constant everywhere, and random values in [0.5, 2).
 
-Every entry is **mean** [lo–hi]: the mean over every pass on every card, and the full range those passes spanned. "a2", "a3" and "a1c1" are aifoundry2, aifoundry3 and aifoundry1's card 1, each as its own mean ± its pass-to-pass standard error. Three shuffled passes on each of three cards (26 September), so n = 9 for every entry. The full catalogue of 161 instructions is in [3.1](03a-every-instruction.md).
+Every entry is **mean** [lo–hi]: the mean over every pass on every card, and the full range those passes spanned. "a2", "a3" and "a1c1" are aifoundry2, aifoundry3 and aifoundry1's card 1, each as its own mean ± its pass-to-pass standard error. Three shuffled passes on each of three cards (26 September), so n = 9 for every entry. The full catalogue of 161 instructions is in [3.1](03a-every-instruction.md), with the 15 gather, scatter and packed-atomic instructions of E48.
 
 ## Scalar and vector units
 

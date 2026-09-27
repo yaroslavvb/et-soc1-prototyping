@@ -81,6 +81,7 @@ where they appear.
 | §4.2 levels | V3-RL: 6 passes per card, the scratchpads filled with zeros or random data on alternate passes, n = 18 | ±17% (L1) to ±46–59% (L2, L3, the scratchpads over both contents); split by contents the scratchpads are much tighter |
 | §5 rings | V3-RL: 6 passes per card, n = 18 (s ↔ s+16: aifoundry3's 23 September passes only, see below) | ±11–24% |
 | §5 relay | V3-RL: 6 passes per card, n = 18 | ±13–15%, mostly aifoundry1's card 1 reading 17–21% above the other two |
+| §3.1's last table, §4.3's gathers, §4.4, §6's last six rows | E48 (V3-GS): 3 passes × 3 cards, n = 9, with the catalogue's clock rule (§3.1's bold figures: aifoundry2 and aifoundry3, n = 6; the 64 KB gather: aifoundry3 alone, n = 3, the rule having dropped the other cards' bursts) | ±8% median, ±10% at the 90th percentile, mostly the difference between the cards; pass-to-pass on one card 0.8% median, 2.5% at the 90th |
 | §6 hot line | 22 September + 3 warm passes on aifoundry2 + 3 on aifoundry3, n = 7 | ±17%: a 1.2 W signal, widened mostly by the first session (1.4 W against 1.0–1.2 W since) |
 | §1 idle law | one fit on aifoundry2; a check 20.6 hours after the last workload; the version-3 idle cycles on three cards | within 0.1 W on aifoundry2 at 67–83 °C (+0.04 [−0.15, +0.22] W); aifoundry3 +1.0 W and aifoundry1's card 1 +10.1 W above it, each with its own refitted law to 0.1 W rms; the leakage within it 20–29 W at 80 °C, depending on the law's shape |
 

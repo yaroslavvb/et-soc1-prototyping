@@ -2,13 +2,13 @@
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E47** and **E49**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E49**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
-check (25–26 September, three cards; E47 was registered and not run), E48 is the gathers and scatters (recorded here
-once reduced), and E49 a card-free test of the runtime's log-level race.
+check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
+same three cards after each card's campaign blocks (26 September), and E49 a card-free test of the runtime's log-level race.
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
-(aifoundry2, aifoundry3 or both; E35–E46 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
+(aifoundry2, aifoundry3 or both; E35–E46 and E48 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
 source at `353f20e`; the cards' own trace strings match an older build (before et-platform commit `60b40c10f`, 24 Sep
 2024; both cards report release 1.3.1), so which commit the cards run is not established (R3). Unless an entry says
 otherwise, the minion clock was a steady **600 MHz** at **516–518 mV** on aifoundry2 (521–523 mV on aifoundry3),
@@ -69,7 +69,8 @@ check of the L3 model (8,124 within ±4 cycles of 110 + 12·hops, 60 more 5–6 
 the page does not use it.
 **Findings:** [15-earlier-findings.md](15-earlier-findings.md).
 **Caveats:** timing is load-to-use with one load in flight; the energy figures come from the rails' running
-averages, read every 133 ms, not from a per-access measurement. The energy manual re-measured the levels at a pinned
+averages, copied once per service-processor pass (133 ms on aifoundry2 with nothing polling, 156 ms under ettelem at
+10 Hz: E41), not from a per-access measurement. The energy manual re-measured the levels at a pinned
 600 MHz on both cards (E29); quote those.
 **Report:** [Anatomy of a memory access](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy) (A1).
 
@@ -81,8 +82,9 @@ averages, read every 133 ms, not from a per-access measurement. The energy manua
 **Method:** assert count-up on counter 0 every cycle, read it every cycle, print every step that is not 1.
 **Finding:** each counter is a 7-bit pre-counter plus a 57-bit post-counter; twelve counters share **one**
 adder that folds pre-counter overflows into the post-counters round-robin, and a read ignores the pending
-overflow bit. So after every wrap the value is 128 short until the adder comes round: 12 cycles in simulation,
-11 on the card. `fixcyc()` in `workloads/memprobe/kernel/memprobe.c` corrects it.
+overflow bit. So after every wrap the value is 128 short until the adder comes round: a 12-cycle window in
+simulation; on the card it covered at least 0–10 in one launch and 0–9 in the other (19 September), and in E35 no
+single window fitted every pair in most launches on any of three cards (MEM-R1). `fixcyc()` in `workloads/memprobe/kernel/memprobe.c` corrects it.
 **Caveat:** the Erbium RTL is a later revision than the taped-out silicon; the cycle counts differ by one.
 **Report:** [Anatomy of a memory access](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy) (A1), section 8, and [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2).
 
@@ -302,7 +304,7 @@ TensorLoad streaming from L2 and from DRAM; and 14 structured matrices from E13.
 **Raw data:** `long2/` (+ `schedule.txt`). 8 runs: ones and random normal as references, then Hadamard,
 kaleidoscope, ReLU, −0.0, the DFT pair and a block-diagonal matrix.
 **Why it matters for provenance:** this session happened **after** the model was fitted and the predictions
-recorded, on a different afternoon, with matrices that did not exist when the model was built.
+recorded, in a separate session that afternoon, with matrices that did not exist when the model was built.
 **Report:** [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4), section 9.
 
 ## E17 — The flips-to-temperature model, and its out-of-sample tests (offline, 2026-09-21 and 09-22)
@@ -430,7 +432,8 @@ extrapolated 7–14 °C below that range onto this card (which idled at 50–57 
 +0.68 W weighted by samples; with the model's own idle rule, +0.69 W over 55–57 °C).
 **Caveats:** the two sessions are at different launch temperatures, so only *switching* power (board power
 minus the idle power measured just before each run) is comparable, not absolute watts. The thermal network is
-not comparable at all: aifoundry3 sheds heat visibly faster. The scale factor is one number fitted on this
+aifoundry2's alone: this session did not measure aifoundry3's cooling over minutes, so whether the network transfers
+was not tested. The scale factor is one number fitted on this
 card; the claim is that one number suffices, not that it was predicted.
 **Report:** [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4), section 10; [The ET-SoC-1's DVFS loop](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) (A11), section 6.
 
@@ -590,7 +593,7 @@ stage time (`distance[].by_card`) and the longest hand-off (`distance[].longest`
 **Result:** at 1 MB per shire per stage, eight stages, 512 MB of traffic: DRAM **48.4 GB/s**, the next shire's
 scratchpad **592.9 GB/s (12.3×)**, the shire's own **1,483.7 GB/s (30.7×)**. Energy per byte moved: 104.8,
 8.9 and 4.25 pJ (first run; E29 re-measured them at 105.7, 8.6 and 3.99 pJ/B) — and all three draw within a watt of
-each other over idle, so the on-chip routes get 12× and 30× more done for the same power. aifoundry3 gives 12.4× and
+each other over idle, so the on-chip routes get 12× and 30× more done for about the same power. aifoundry3 gives 12.4× and
 31.2×.
 **The boundary:** the advantage is against DRAM, not against the hierarchy. Below the 32 MB L3 the DRAM route
 runs at 280–410 GB/s and the hand-off buys 1.0–1.4×; at 32 MB per buffer it falls to 47.9 GB/s and stays
@@ -673,7 +676,9 @@ python3 workloads/enercat/analyze_catalogue.py DATA_A2 DATA_A3 DATA_A2_ROWS --ou
 ```
 **Raw data:** `docs/reports/data/2026-09-23-catalogue-aifoundry2/` and `-aifoundry3/` (`runs.jsonl`, one line per
 launch with pass and configuration; `telemetry.jsonl.gz`), reduced to
-`docs/reports/data/2026-09-23-energy-manual/catalogue.json` (per-burst detail and per-configuration statistics).
+`docs/reports/data/2026-09-23-energy-manual/catalogue.json` (per-burst detail and per-configuration statistics). Since
+26 September that file holds E46's catalogue on three cards, and this entry's is `catalogue-23sep.json` beside it
+(byte-identical to `catalogue.json` at `299fac8`).
 **Result:** all 386 configurations at 600 MHz on every sample, no failed launches. Pass-to-pass standard error
 **1.9% in the median, 6.1% at the 90th percentile** on aifoundry2 (1.2% and 3.6% on
 aifoundry3). Cross-card ratio **0.950** in the median, 10th–90th percentile 0.906–0.987, over
@@ -752,7 +757,9 @@ python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifo
     docs/reports/data/2026-09-23-reruns-aifoundry3 --out docs/reports/data/2026-09-23-energy-manual/reruns.json
 ```
 **Raw data:** `docs/reports/data/2026-09-23-reruns-aifoundry2-warm/`, `-aifoundry3/`; the discarded cool-card
-attempt `-aifoundry2/`; pooled into `docs/reports/data/2026-09-23-energy-manual/reruns.json`.
+attempt `-aifoundry2/`; pooled into `docs/reports/data/2026-09-23-energy-manual/reruns.json`. Since 26 September that
+file takes the relay, the rings and the levels from the version-3 passes (`analyze_reruns.py --v3-rl`, E43), and this
+entry's values are in it as committed at `299fac8` (`git show 299fac8:<path>`).
 **Result:** the catalogue's bars are ±5.6% in the median and ±11.5% at the 90th percentile (half the range), mostly
 the 5% between the cards. The re-run tables, with `mean [lo–hi]` over every pass on both cards and each card's mean ±
 pass-to-pass standard error. The rings are those of the energy manual §5: *pair* is messages between the two minions
@@ -804,7 +811,9 @@ DDR rail, in every ettelem sample) was regressed, with no intercept, on the off-
 board's power over idle.
 **Raw data:** `docs/reports/data/2026-09-23-catalogue-aifoundry2/`, `-aifoundry3/` and `-aifoundry2-rows/`
 (`telemetry.jsonl.gz`), and `catalogue.json` (392 configurations on aifoundry2 including E28's rows, 386 on
-aifoundry3); result in `docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json`.
+aifoundry3); result in `docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json`. Since 26 September that file
+is the same fit over E46's catalogue on three cards (the droop on aifoundry2's: 0.86 mV per off-rail DRAM watt, 0.034
+per other watt, minion IR drop 0.053 mV/W), and this entry's numbers are in it as committed at `299fac8`.
 **Command:**
 ```
 python3 tools/ettelem/fit_unmetered.py --out docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json --overwrite
@@ -827,7 +836,7 @@ mesh moves bytes to them. The DRAM residual is about a quarter of those configur
 pattern: stores through the L1 sit 1.3–2.7 W above the fit, because their line reads are not counted as bytes;
 random data sits above, zeros and constants below. **The DDR rail droops 0.87 mV per off-rail DRAM watt** (0.029 mV
 per watt of anything else, rms 0.37 mV over 386 configurations; 767 mV at idle against an 800 mV set point):
-1 mV ≈ 1.2 W of DRAM, refreshed every 133 ms on aifoundry2, a meter for the largest unmetered consumer that was in
+1 mV ≈ 1.2 W of DRAM, refreshed once per service-processor pass (133–156 ms on aifoundry2, depending on the poller: E41), a meter for the largest unmetered consumer that was in
 every telemetry file all along. It responds mostly to DRAM traffic, not only: heavy mesh and scratchpad traffic with
 no DRAM access droops it by up to about 2 mV (2.2 mV for L3 reads through the mesh), which it would read as up to
 about 2 W of DRAM, and its idle reading moves by about 1 mV between 71 and 77 °C. The minion rail sags 0.070 mV per
@@ -977,7 +986,9 @@ elsewhere in a shire (`primitives`); between shires 150 + 12.02 cycles per mesh 
 a 1,024-minion allreduce of 32 B 1,368 cycles (2.28 µs); the chip barrier is 4,995 cycles with one minion per shire
 and 5,018 with all 1,024 (`barrier-chip{1,32}.jsonl`). Energy: the re-measured rings of 23 September (E29) give
 0.67 pJ/B on pairs, 2.1 in a neighbourhood or a shire ring, and 9.3 + 1.7 pJ/B per mean hop across the mesh
-(r² 0.95, two cards; `reruns.mesh_fit`); the 18 September runs gave 0.8, 2.3 and 10.0 + 1.9 and are superseded.
+(r² 0.95, the two cards pooled, which mixes a card difference: 7.6 + 2.3 on aifoundry2 and 10.2 + 1.3 on aifoundry3,
+the slope known to about ±50%; `reruns.mesh_fit` at `299fac8`; E43 re-measured the rings on three cards); the
+18 September runs gave 0.8, 2.3 and 10.0 + 1.9 and are superseded.
 **Caveats:** one card, at 600 MHz throughout (`clock.csv`); the 18 September energies read 2–20% (median 10%) above
 the reruns.
 **Report:** [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication).
@@ -1423,6 +1434,74 @@ LONG decides on the log time ratio, 99% Welch, per card.
 the owner's waiver, and the owner's decision D1 kept the rule (`V3/README.md`, "Owner decisions"). No block, schedule
 line or data exists; the seven claims of item LONG stay labelled one card, one session.
 **Report:** [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4) keeps that label.
+
+## E48 — Gathers, scatters and packed atomics on three cards (2026-09-26, 03:19–09:22, three cards)
+
+**Question:** how fast, and at what energy, do the vector unit's indexed memory instructions run (gathers and scatters
+of bytes, halves and words, their L1-bypassing `l` and global `g` forms, the 32-byte-block forms `fg32`/`fsc32`, and
+the packed atomics `famoadd{l,g}.pi`) from each level of memory, against scalar atomics and a gather-add-scatter
+update on the same address streams? Does the design's model of them hold, and are they exact on silicon (erratum
+1.3)? The owner's Q52, run after each card's campaign queue had ended.
+**Method:** `tools/claims-v3/gs/block.sh <KS>` (pass K = 1–3; S = 0 check, 1 energy, 2 rate), queued by
+`tools/claims-v3/queue.sh tools/claims-v3/schedule-gs-<card>.txt`, on `workloads/enercat` built with `-DENERCAT_GS=ON`
+into `build/enercat_gs` (the configurations in `workloads/enercat/gs_catalogue.py`, the analysis
+`workloads/enercat/analyze_gs.py`). The C block runs one verify launch per configuration (159, the semantic probe
+among them) and checks every gathered element, the table after scatters, every counter after atomics and the lane
+order of the returned values; the E blocks run 101 configurations at 1,024 minions with E27's timing (`--burst 3 --gap
+4.5`) under the 10 Hz sampler; the R blocks 57 at one minion, 32 in one shire and 32 spread. a2 and a1c1 were heated
+to ≥ 76 °C before each E and R block and held above 74 °C between R configurations; a3 is pinned and was not heated.
+"Random" is one random word on each of the 64 lines of a 4 KB tile, the tiles visited in a scrambled order, not
+uniform addresses over the table. The items, drop rules and ranges were fixed in `tools/claims-v3/gs/README.md`
+before any card ran it (`bde52e0`): unit the pass, 99% t over three passes per card, PASS inside the range on every
+card, FAIL wholly outside.
+**Raw data:** `V3/raw/<card>/gs/p<KS>/` (`block.json`, `check.json`, `plan.json`, `pass.json`, `configs.json`,
+`code.sha256`, `run.log`, `runs.jsonl.gz`, and for E and R `telemetry.jsonl.gz`, `preheat.jsonl`); seven blocks per
+card: a2 03:19–04:43, a3 04:50–06:13, a1c1 06:57–09:22. Reduced by `python3 tools/claims-v3/gs/reduce.py --data V3/raw
+--out V3/results/gs.json --gs-out V3/results/gs-full.json` (`reduce_all.sh` writes `gs.json` and `gs.log`);
+`gs-full.json` holds every configuration per card and pooled (`.combined`; `.combined_catalogue` over a2 and a3 only).
+**Result:** GS-L1, GS-MH, GS-DRAM and GS-CHECK PASS on every card, GS-UC FAILS on every card; the rest is reported
+(`V3/results/gs.log`). Rates are the same on the three cards to 0.02% (median ratio 1.000 over 157 configurations);
+energies per element are a3 / a2 0.965 (10–90%: 0.937–0.994) and a1c1 / a2 1.085 (0.933–1.148) (`GS-CARD`). Word
+gathers at 1,024 minions, pooled over the cards (`.items[item=GS-RATE].pooled`): from L1 (512 B per hart) 452 G
+elements/s at 12.8 pJ each, 10.89 cycles per instruction per minion on every card (range 7–12, `GS-L1`); from L2
+(4 KB per hart) and from the own scratchpad (16 KB) 27.4 G/s at 355 and 368 pJ, 1.15× the two-miss-handler bound of
+23.9 G/s, with the second hart adding nothing (h2 / h1 1.000–1.001; `GS-MH`); from a scratchpad two hops away
+10.2 G/s at 903 pJ; from DRAM (256 KB per hart) 1.19 G/s at 9.8 nJ, 76.4 GB/s of lines on every card (57–95 GB/s
+registered, `GS-DRAM`). Word scatters: L1 452 G/s at 14.7 pJ, L2 23.5 G/s at 732 pJ, DRAM 0.42 G/s at 23.8 nJ. The
+L1-bypassing gather `fgwl.ps` with both harts of one minion runs 1.03× one hart's rate, not the 1.6–2.4× that strict
+per-thread order predicted (`GS-UC`). All 159 verify launches passed on every card, and all 2,937 timed launches per
+card ended with `gsc_progress` 0 on every hart (`GS-CHECK`). When every lane of a scatter writes one word, lane 7 wins,
+every time on every card (`GS-CONFLICT`, as predicted). Updates (`GS-ADD`, pooled): gather + `fadd.ps` + scatter
+139 G/s at 0.036 nJ in L1, 18.2 G/s at 0.80–0.85 nJ in L2 or the scratchpad, 0.42 G/s at 22 nJ in DRAM; packed
+atomics 12.7 G/s at 0.39 nJ on a shire table and 2.8 G/s at 1.7 nJ on a chip table; scalar `amoaddl.w` 12.8 G/s at
+0.27 nJ, `amoaddg.w` 2.8 G/s at 1.1 nJ (the energy manual's spread global atomics: 1.9 G/s at 1.16 nJ).
+**Caveats:** on a2 and a1c1 each energy block dropped the burst of the word gather from 64 KB per hart (its launches'
+implied clock 0.594–0.597 GHz, just outside the 0.595–0.605 rule), so that configuration has values on a3 only;
+every other configuration kept three passes on every card. Each card ran at its own temperature, so the card
+ratios mix card and temperature, as in E46. The timed launches cannot see erratum 1.3's skipped elements; only the
+verify launches can. A FAIL says the design's model is wrong, not the measured values. aifoundry3's queue was the
+first card run of the g3log fix (E49): 641 host processes, no crash.
+**Validation across machines:** every tested item was decided per card, on three cards in three machines (aifoundry2,
+aifoundry3 and aifoundry1's card 1), each from its own three passes: GS-L1, GS-MH, GS-DRAM and GS-CHECK passed on each,
+GS-UC failed on each (`V3/results/gs.json`, `.items[item=<GS-…>].outcomes`).
+**Gap:** the word gather from 64 KB per hart (`gs/E/fgw.ps/dram-64K/rand/random/h2/mff/n1024`) lost every energy burst
+on a2 and a1c1, three of three passes each: in each burst one launch's implied clock read 0.594 GHz (0.5941–0.5945),
+just under the pre-registered 0.595–0.605 GHz band, while the telemetry read 600 MHz (`gs-full.json`,
+`.cards.<card>.dropped`). The rule was not relaxed: that row's energy (9.2 nJ per element) is a3's alone, and every
+page that shows it says so; its rate equals the 256 KB (DRAM) row's.
+**Report:** since 27 September, [the energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15):
+§3.1's last table (the L1 rows: bold pooled over a2 and a3, `.combined_catalogue`'s rule, with a1c1 in the per-card
+column), §4.3 (patterns, masks, element sizes, lane conflicts, scaling), a new §4.4 "Irregular access: gathers and
+scatters by level" and six rows of §6 (the packed and scalar atomics, scatter-add), all pooled over the three cards; [the
+memory hierarchy](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy) (a section "Irregular access", two charts,
+rules for kernels, and the spec sheet's random-element column); [influence functions](https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions)
+(S3 measured, K3, K6, §6); and [the hub](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability)'s chart
+of events (eight gathered, scattered and atomic events). Chain: `tools/ettelem/build_energy_manual.py` pools
+`gs-full.json`'s pass values into `manual.json` `gs` (the rows from `tools/ettelem/gs_levels.py`);
+`render_catalogue.py` and `render_energy_manual.py` write 03a, 04, 04a and 06; `workloads/memhier/analyze.py --embed`
+embeds it (`--manual`, by default the manual's `manual.json`); `sync_hub_data.py` and
+`docs/reports/data/2026-09-25-influence-on-et/make_analysis.py` read it. No page claim of E48 is in
+`V3/results/pagemap.json` (written before E48), so the hub's scoreboard does not count it.
 
 ## E49 — The runtime's log-level race, reproduced without a card (2026-09-25, 23:12, aifoundry2's CPU)
 

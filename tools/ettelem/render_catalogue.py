@@ -12,6 +12,9 @@ import math
 import os
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gs_levels as GL  # noqa: E402  E48's rows (section 3.1's gathers and scatters from the L1, 4.3's patterns)
+
 CLASSES = [
     ("Scalar integer, one cycle", ["add", "sub", "and", "or", "xor", "sll", "srl", "sra", "slt", "sltu", "addw", "subw", "sllw", "srlw", "sraw",
                                    "addi", "andi", "ori", "xori", "slli", "srli", "srai", "slti", "sltiu", "addiw", "lui", "auipc", "nop"]),
@@ -69,6 +72,126 @@ def cards_of(c, n=1):
     return " · ".join(f"{SHORT.get(h, h)} {f(c['per_card'][h]['mean'], n)} ± {f(c['per_card'][h]['se'], n)}" for h in order(c["per_card"])) if c else "—"
 
 
+
+def gs_pool_txt(c, per=1.0, n=1):
+    return "—" if not c else f"**{f(c['mean'] * per, n)}** [{f(c['lo'] * per, n)}–{f(c['hi'] * per, n)}]"
+
+
+def gs_31(G):
+    """Section 3.1's last table: E48's gathers, scatters and packed atomics from the L1, per instruction (per element in
+    brackets). The bold figure pools aifoundry2's and aifoundry3's passes (gs cat_pj_per_element: the rule E48 fixed
+    before its data for rows set beside this catalogue); the per-card column gives every card, aifoundry1-c1 included."""
+    K = G["configs"]
+    cards = order(G["cards"])
+    cat = order(G["catalogue_cards"])
+    rows = []
+    for op, table, pat, lab in GL.L1_ROWS:
+        data = "zeros" if op.startswith("famo") else "random"
+        r = K.get(GL.cfg(op, table, pattern=pat, data=data))
+        if not r or not r.get("cat_pj_per_element"):
+            continue
+        z = K.get(GL.cfg(op, table, pattern=pat, data="zeros")) if data == "random" else None
+        k = r["per_instr"] if op != "upd" else 1
+        rc, zc = r["cat_pj_per_element"], z and z["cat_pj_per_element"]
+        issue = 1 / (2 * r["cpi_minion"]["mean"])      # instructions per hart per cycle, both harts issuing
+        iss = f"{issue:.3g}" if issue < 0.01 else f(issue, 3)
+        n = 1 if rc["mean"] * k >= 10 else 2
+        per = " · ".join(f"{SHORT.get(h, h)} {f(r['pj_per_element']['per_card'][h]['mean'] * k, n)} ± {f(r['pj_per_element']['per_card'][h]['se'] * k, n)}"
+                         for h in order(r["pj_per_element"]["per_card"]))
+        if data == "zeros":
+            rows.append(f"| `{op}` | {gs_pool_txt(rc, k, n)} ({f(rc['mean'], 1)}/update) | — | — | {iss} | {per} (zeros) |")
+        else:
+            rows.append(f"| `{op}` | {(gs_pool_txt(zc, k, n) + ' (' + f(zc['mean'], 1) + '/element)') if zc else '—'} | {gs_pool_txt(rc, k, n)} ({f(rc['mean'], 1)}/element) | "
+                        f"{f(rc['mean'] / zc['mean'], 2) + '×' if zc else '—'} | {iss} | {per} |")
+    if not rows:
+        return []
+    npc = sorted({len(v["E"]) for v in G["passes"].values()})
+    nops = len({c["op"] for c in K.values() if c["op"] not in ("flw", "fsw", "amoaddl.w", "amoaddg.w", "upd")})
+    return ["\n## Gathers, scatters and packed atomics, from the L1 (E48)\n",
+            f"E48 measured {WORD[nops] if nops < len(WORD) else nops} more instructions on the same {WORD[len(cards)]} cards after the catalogue (26 September, {WORD[npc[0]] if len(npc) == 1 else 'three'} passes on each): "
+            "the vector unit's indexed loads and stores, which take eight addresses from a vector of byte offsets. Here from a 512 B table per hart (the hart's whole L1), eight random words on one "
+            "line per instruction; the packed atomics with all eight lanes on the hart's own word. **The bold figure pools the "
+            + f"{WORD[sum(len(G['passes'][h]['E']) for h in cat)]} passes of " + and_list(name(h) for h in cat) + "**, as E48's rules, fixed before its data, pool rows set beside this catalogue; "
+            "the per-card column gives every card, " + and_list(name(h) for h in cards if h not in cat) + " included. Per instruction, with the figure per element (or per update) after it; "
+            "`fg32*` and `fsc32*` are the 32 B-block forms, one access per instruction with the lanes permuted inside the block. The costs of the same instructions from the L2, the scratchpads "
+            "and DRAM, where they are dearer by one or two orders of magnitude, are in [4.4](04-bytes-memory.md); the packed atomics on shared tables are in [6](06-synchronisation.md).\n",
+            "| Instruction | zeros pJ [range] | random pJ [range] | random / zeros | issue per hart per cycle | by card ± se |", "|---|---|---|---|---|---|"] + rows
+
+
+def gs_43(G, C, d):
+    """Section 4.3's part on gathers (E48): the pattern sweep split into a cost per line and per instruction, the masks,
+    the element sizes, the lane conflict, and the per-minion rate against the number of minions."""
+    K = G["configs"]
+    cards = order(G["cards"])
+    get = lambda op, table, **kw: K.get(GL.cfg(op, table, **kw))
+    E_ = lambda op, table, **kw: (get(op, table, **kw) or {})
+    t = ["\n## Gathers: what a line costs, and what an element costs (E48)\n",
+         "The word gather `fgw.ps` from the L1 (512 B per hart) and from the L2 (4 KB per hart), with its eight offsets drawn from seven patterns that touch between half a line and "
+         "eight lines per instruction, on random data; cycles per instruction per minion with one minion running (hart 0 alone) and with all 1,024 (both harts), and energy at 1,024. "
+         f"Every figure pools the {WORD[len(cards)]} cards' passes (E48, 26 September).\n",
+         "| Pattern | L1: cycles per instruction, 1 minion / 1,024 | L1: pJ per element | L2: lines per instruction | L2: cycles per instruction, 1 minion / 1,024 | L2: pJ per element | L2: pJ per instruction | L2: pJ per line |",
+         "|---|---|---|---|---|---|---|---|"]
+    pts = []
+    for pat, lab in GL.PATTERNS:
+        a1, a2 = get("fgw.ps", "dram-512B", pattern=pat), get("fgw.ps", "dram-4K", pattern=pat)
+        r1 = get("fgw.ps", "dram-512B", pattern=pat, harts=1, minions="M1", s="R")
+        r2 = get("fgw.ps", "dram-4K", pattern=pat, harts=1, minions="M1", s="R")
+        if not (a1 and a2):
+            continue
+        lpi = a2["lines_per_instr"]
+        pji = a2["pj_per_element"]["mean"] * a2["per_instr"]
+        pts.append((lpi, pji))
+        cy = lambda r, a: f"{f(r['cpi_minion']['mean'], 1) if r else '—'} / {f(a['cpi_minion']['mean'], 1)}"
+        t.append(f"| {lab} (`{pat}`) | {cy(r1, a1)} | {f(a1['pj_per_element']['mean'], 1)} | {f(lpi, 1)} | {cy(r2, a2)} | {f(a2['pj_per_element']['mean'], 1)} | {f(pji, 0)} | {f(a2['pj_per_line']['mean'], 0)} |")
+    if len(pts) >= 3:
+        import numpy as np
+        b_, a_ = np.polyfit([p_[0] for p_ in pts], [p_[1] for p_ in pts], 1)
+        z32, z64 = C.get("l1fill/stride32/random"), C.get("l1fill/stride64/random")
+        fill = 2 * 32 * (z64["mean"] - z32["mean"]) if z32 and z64 else None
+        spin = [d["cards"][h]["summary"]["spin/zeros/h2"]["over_idle_w"]["mean"] for h in cards if "spin/zeros/h2" in d["cards"].get(h, {}).get("summary", {})]
+        pw = sum(spin) / len(spin) / 1024 if spin else None            # W per minion, both harts awake (section 2)
+        r8 = E_("fgw.ps", "dram-4K")
+        cyl = r8["cpi_minion"]["mean"] / r8["lines_per_instr"] if r8 else None
+        t.append(f"\n**In the L1 the pattern does not matter**: every pattern issues in about {f(E_('fgw.ps', 'dram-512B')['cpi_minion']['mean'], 1)} minion-cycles an instruction. "
+                 f"**From the L2 the time and the energy follow the lines, not the elements.** Fitted over the seven patterns at 1,024 minions, a gather instruction costs **{f(a_, 0)} pJ plus {f(b_, 0)} pJ per line it fetches** "
+                 f"(random data). An instruction whose lanes fall on one or two lines takes about one L2 latency, whether the lanes are consecutive, permuted, strided or all on one word, "
+                 f"because the two miss handlers of a minion fetch two lines at once; eight lines take four rounds. The chip at full load runs each minion at the rate one minion reaches alone, so nothing shared limits it at this level. "
+                 + (f"The {f(b_, 0)} pJ per line is about a line's fill into the L1 ({f(fill, 0)} pJ on random data, the Lines table above) plus the awake minion for the {f(cyl, 1)} cycles each line takes "
+                    f"({f(pw * 1e3, 1)} mW with both harts, section 2: {f(pw / 0.6e9 * cyl * 1e12, 0)} pJ), {f(fill + pw / 0.6e9 * cyl * 1e12, 0)} pJ together." if fill and pw and cyl else "") + "\n")
+    # masks, element sizes, lane conflicts, scaling
+    m1 = [(mk, E_("fgw.ps", "dram-512B", mask=mk), E_("fgw.ps", "dram-4K", mask=mk)) for mk in ("ff", "0f", "01")]
+    if all(a and b for _, a, b in m1):
+        lanes = {"ff": 8, "0f": 4, "01": 1}
+        t.append("**Masked lanes.** With four lanes or one active (`m0` = 0x0f, 0x01), the L1 gather keeps its "
+                 + " / ".join(f(a["cpi_minion"]["mean"], 1) for _, a, _ in m1) + " cycles an instruction, so a masked lane still takes its issue slot, and the energy per instruction falls only to "
+                 + " / ".join(f(a["pj_per_element"]["mean"] * lanes[mk], 0) for mk, a, _ in m1) + " pJ (8 / 4 / 1 lanes); from the L2 the time follows the active lanes' lines ("
+                 + " / ".join(f(b["cpi_minion"]["mean"], 1) for _, _, b in m1) + " cycles an instruction), at "
+                 + " / ".join(f(b["pj_per_element"]["mean"], 0) for _, _, b in m1) + " pJ per active element.")
+    es = [(op, E_(op, "dram-512B"), E_(op, "dram-4K")) for op in ("fgw.ps", "fgh.ps", "fgb.ps")]
+    if all(a and b for _, a, b in es):
+        t.append(" **Element size.** Bytes and halfwords cost what words cost, per element and per cycle: "
+                 + "; ".join(f"`{op}` {f(a['pj_per_element']['mean'], 1)} pJ from the L1 and {f(b['pj_per_element']['mean'], 0)} from the L2" for op, a, b in es)
+                 + ", so per useful byte a byte gather is four times a word gather.")
+    bw, bs = E_("fgw.ps", "dram-512B", pattern="bcast"), E_("fscw.ps", "dram-512B", pattern="bcast")
+    wins = sorted({w for c in G["checks"].values() for op in c.get("winners_by_op", {}).values() for w in op})
+    if bw and bs:
+        t.append(f" **Lane conflicts.** Eight lanes on one word cost less than eight lines' worth: from the L1 {f(bw['pj_per_element']['mean'], 1)} pJ per gathered element against "
+                 f"{f(E_('fgw.ps', 'dram-512B')['pj_per_element']['mean'], 1)} for random words, {f(bs['pj_per_element']['mean'], 1)} per scattered one against {f(E_('fscw.ps', 'dram-512B')['pj_per_element']['mean'], 1)}; "
+                 f"from the L2 the gather takes one line's time. When all eight lanes scatter to one word, lane {', '.join(wins)}'s value remains, every time on every card (the functional model's order, lanes 0 to 7).\n")
+    sc = []
+    for lab, table in (("the L1", "dram-512B"), ("the L2", "dram-4K"), ("the own scratchpad", "scp-16K"), ("a scratchpad 2 hops away", "rscp-16K")):
+        one = get("fgw.ps", table, harts=2, minions="M1", s="R")
+        shire = get("fgw.ps", table, minions="S32", s="R")
+        full = get("fgw.ps", table)
+        if one and full:
+            sc.append(f"{lab} {f(one['elements_per_s']['mean'] * 1024 / 1e9, 1)} G/s from one minion's rate, "
+                      + (f"{f(shire['elements_per_s']['mean'] * 32 / 1e9, 1)} from one full shire's, " if shire else "")
+                      + f"{f(full['elements_per_s']['mean'] / 1e9, 1)} measured")
+    if sc:
+        t.append("**Scaling.** Times 1,024 minions (or 32 shires), the rate of one minion (both harts) predicts the whole chip's: " + "; ".join(sc)
+                 + ". From DRAM the one-minion and spread-minion runs are no test: their 256 KB tables per hart fit in the L2 and L3.\n")
+    return t
+
 def main():
     d = json.load(open(sys.argv[1]))
     out = sys.argv[2]
@@ -113,6 +236,8 @@ def main():
         if rows:
             s += [f"\n## {title}\n", "| Instruction | zeros pJ [range] | random pJ [range] | random / zeros | issue per hart per cycle | random, by card ± se |",
                   "|---|---|---|---|---|---|"] + rows
+    if man.get("gs"):
+        s += gs_31(man["gs"])
     open(os.path.join(out, "03a-every-instruction.md"), "w").write("\n".join(s) + "\n")
 
     # ---------------- fine grain
@@ -127,6 +252,12 @@ def main():
         """the same points fitted over 1–6 hops, leaving out d = 8"""
         pts = [(p_["hops"], p_["pj_per_byte"]) for p_ in wf["points"] if 1 <= p_["hops"] <= 6]
         return float(np.polyfit([q[0] for q in pts], [q[1] for q in pts], 1)[0])
+
+    def fit6(wf):
+        """(intercept, slope) over 1–6 hops"""
+        pts = [(p_["hops"], p_["pj_per_byte"]) for p_ in wf["points"] if 1 <= p_["hops"] <= 6]
+        b_, a_ = np.polyfit([q[0] for q in pts], [q[1] for q in pts], 1)
+        return float(a_), float(b_)
     sl = d["cards"][cards[0]]["sram_leakage"]
     sl2 = d["cards"][cards[1]]["sram_leakage"] if len(cards) > 1 else None
     t = ["# 4.3 Finer grain: wires, lines, rows, and the leakage of the arrays\n",
@@ -159,6 +290,14 @@ def main():
         t.append(f"**Over 1–6 hops**, leaving out d = 8, where only {shr(8)} shires have a partner and the point sits nearly level with d = 6, the same data give "
                  f"{and_list(f(x, 2) for x in r6)} pJ/B per hop on random data ({and_list(name(h) for h, _ in WA)}) and {and_list(f((a_ - b_) * 1000 / 8, 0) for a_, b_ in zip(r6, z6))} fJ per random bit per hop, "
                  f"which is what [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) measures (2.17 pJ/B per hop on board power, loaded mesh): use its figures for wires.\n")
+        # EN-1: the step out of the shire is about one hop over 1–6 hops; only the 1–8 fit, pulled down by the half-traffic 8-hop point, makes it two
+        f6 = [fit6(w["random"]) for _, w in WA]
+        loc = [w["random"].get("local_pj_per_byte") or 0 for _, w in WA]
+        st6 = [(a_ - l_) / b_ for (a_, b_), l_ in zip(f6, loc)]
+        st8 = [(w["random"]["intercept_pj_per_byte"] - l_) / w["random"]["slope_pj_per_byte_per_hop"] for (_, w), l_ in zip(WA, loc)]
+        t.append(f"**Leaving the shire costs about one more hop**: over 1–6 hops the intercept is {and_list(f(a_, 2) for a_, _ in f6)} pJ/B on random data against "
+                 f"{and_list(f(l_, 2) for l_ in loc)} for the shire's own scratchpad, {f(min(st6), 1)}–{f(max(st6), 1)} hops' worth; the 1–8-hop fit, which the half-traffic "
+                 f"8-hop point pulls down, puts it at {f(min(st8), 1)}–{f(max(st8), 1)}.\n")
         t += [f"| hops | zeros pJ/B [range over {NC} cards, {npc * len(cards)} runs] | random pJ/B [range] | shires reading |", "|---|---|---|---|"]
         for p_ in W["random"]["points"]:
             dd = p_["hops"]
@@ -271,6 +410,8 @@ def main():
         v = A.get(f"neigh/{k}/random")
         if v:
             t.append(f"| {k} (minions {8*k}–{8*k+7}) | {bar(C.get(f'neigh/{k}/random'), 2)} | {v['bytes_per_s']['mean'] / 1e9:,.0f} |")
+    if man.get("gs"):
+        t += gs_43(man["gs"], C, d)
     if sl and sl.get("fit"):
         fit = sl["fit"]
         fit2 = sl2["fit"] if sl2 and sl2.get("fit") else None
@@ -345,8 +486,11 @@ def main():
         import numpy as np
         x = np.array([p[0] for p in hp], float); y = np.array([p[1] for p in hp])
         c = np.polyfit(x, y, 1)
-        t += ["", f"**The mesh rail alone**, against hop distance on random data: {f(c[0], 3)} pJ/B per hop with an intercept of {f(c[1], 2)} pJ/B "
-              f"(the cost of leaving the shire). This is the wire and router energy measured on its own supply, independently of the "
+        k6 = x <= 6
+        c6 = np.polyfit(x[k6], y[k6], 1)   # leaving out d = 8, which has half the traffic and pulls the 1-8 intercept up and slope down
+        t += ["", f"**The mesh rail alone**, against hop distance on random data ({name(cards[0])}): {f(c[0], 3)} pJ/B per hop with an intercept of {f(c[1], 2)} pJ/B over 1–8 hops; "
+              f"over 1–6 hops, leaving out the half-traffic 8-hop point, {f(c6[0], 3)} pJ/B per hop and an intercept of {f(c6[1], 2)}, so on this rail leaving the shire costs "
+              f"about {f(c6[1] / c6[0], 1)} of a hop. This is the wire and router energy measured on its own supply, independently of the "
               f"board-power fit above.\n", "| hops | mesh rail, pJ/B |", "|---|---|"] + [f"| {p[0]} | {f(p[1], 2)} |" for p in hp]
     # ---- the unmetered remainder, attributed; the DDR rail's droop as a DRAM-power proxy
     ufp = os.path.join(os.path.dirname(sys.argv[1]), "unmetered_fit.json")
@@ -359,8 +503,27 @@ def main():
               f"The canonical account of it is [Limits of observability, §4.2–4.3]({HUB}#the-unmetered-remainder-attributed); this section keeps the full tables.\n",
               "| unmetered W of a configuration = | " + " | ".join(name(h) for h in order(h for h in uf if h.startswith("aifoundry"))) + " |", "|---|" + "---|" * len([h for h in uf if h.startswith("aifoundry")])]
         hosts = order(h for h in uf if h.startswith("aifoundry"))
+        # EN-4: the heteroscedasticity-robust (HC3) standard errors beside the OLS ones, computed as sync_hub_data.py does for
+        # the hub (the DRAM configurations that fix the DRAM term carry 3-4x the pooled residual, so HC3 is the honest bar)
+        hc3 = {}
+        try:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import fit_unmetered as fu
+            for h in hosts:
+                bs = d.get("bursts", {}).get(h)
+                if not bs:
+                    continue
+                rows = fu.config_means(bs)
+                X, _, res, _ = fu._fit(rows, list(rows))
+                XtXi = np.linalg.inv(X.T @ X)
+                lev = np.einsum("ij,jk,ik->i", X, XtXi, X)
+                Wm = X * (res / (1 - lev))[:, None]
+                hc3[h] = dict(zip(["minion", "sram", "noc", "dram_pj_per_byte"], np.sqrt(np.diag(XtXi @ (Wm.T @ Wm) @ XtXi))))
+        except Exception as e:   # the table keeps its OLS bars
+            print("render_catalogue: no HC3 standard errors:", e, file=sys.stderr)
+            hc3 = {}
         for label, k, n, unit in (("× minion-rail W", "minion", 3, ""), ("× SRAM-rail W", "sram", 3, ""), ("× mesh-rail W", "noc", 3, ""), ("per DRAM byte", "dram_pj_per_byte", 1, " pJ/B")):
-            t.append(f"| {label} | " + " | ".join(f"{f(uf[h]['coef'][k], n)} ± {f(uf[h]['se'][k], n)}{unit}" for h in hosts) + " |")
+            t.append(f"| {label} | " + " | ".join(f"{f(uf[h]['coef'][k], n)} ± {f(uf[h]['se'][k], n)}" + (f" (HC3 ± {f(hc3[h][k], n)})" if h in hc3 else "") + unit for h in hosts) + " |")
         t.append("| residual rms, configuration means | " + " | ".join(f"{f(uf[h]['rms_w'], 2)} W, n = {uf[h]['n']}" for h in hosts) + " |")
         def dram_rms(h):   # the residual on the configurations that move DRAM
             Sx = d["cards"].get(h, {}).get("summary", {})
@@ -374,6 +537,9 @@ def main():
                 r.append(e["over_idle_w"]["mean"] - m_ - sr_ - n_ - (cf["minion"] * m_ + cf["sram"] * sr_ + cf["noc"] * n_ + cf["dram_pj_per_byte"] * e["bytes_per_s"]["mean"] * 1e-12))
             return (float(np.sqrt(np.mean(np.square(r)))), len(r)) if r else None
         t.append("| residual rms, the configurations that move DRAM | " + " | ".join((lambda x: f"{f(x[0], 2)} W, n = {x[1]}" if x else "—")(dram_rms(h)) for h in hosts) + " |")
+        if hc3:
+            t.append("\n± is the ordinary least-squares standard error; HC3, the heteroscedasticity-robust one, is the bar the hub gives, "
+                     f"and it is {(lambda r: f'{min(r)}–{max(r)}' if min(r) != max(r) else f'{min(r)}')([round(hc3[h]['dram_pj_per_byte'] / uf[h]['se']['dram_pj_per_byte']) for h in hc3])} times wider on the DRAM term because the few configurations that fix it carry several times the pooled residual (the row above).\n")
         a2 = uf["aifoundry2"]["coef"]
         def split(h, k):   # (off-rail, rest) pJ per byte of one configuration: rest = the rails plus the fitted delivery losses
             e, cf = d["cards"][h]["summary"][k], uf[h]["coef"]

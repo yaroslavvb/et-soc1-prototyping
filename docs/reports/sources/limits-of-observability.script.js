@@ -298,9 +298,8 @@ LAD = (function () {
   setHTML('ev-note', `σ defaults to 0.2 W, about the idle law's rms (${num(M.idle_law_rms_w, 3)} W): the uncertainty of a baseline predicted from temperature. The hot line's contended atomic, about ${num(hot.e[0] * hot.rate, 1)} W over idle, carries a bar of ${sgn(100 * (hot.e[1] / hot.e[0] - 1), 0)}% to ${sgn(100 * (hot.e[2] / hot.e[0] - 1), 0)}%, about that size. ` +
     `A burst bracketed by idle measured just before and after does better than σ = 0.2 W on one card; the bars are the range over every pass on every card measured, so they include the difference between the cards ` +
     `(${esc(ring.label)}: ${sgn(100 * (ring.v.any.e[1] / ring.v.any.e[0] - 1), 0)}% to ${sgn(100 * (ring.v.any.e[2] / ring.v.any.e[0] - 1), 0)}%${Object.keys(ring.v.any.cards || {}).length > 1 ? `, with ${andList(CK.cardsIn(ring.v.any.cards).map(c => `${J(ring.v.any.cards[c])} on ${c}`))}` : ''}); the flips and the wires were priced by fits over many bursts. ` +
-    `Each event's rate is ${esc(E.rate_rule)}. The band is one reading's step on aifoundry2 while ettelem samples, 1 mW × about ${num(1000 * M.pass_s, 0)} ms on a rail and 10 mW × ${num(1000 * M.pass_s, 0)} ms on the board ` +
-    `(a reading lasts about ${num(1000 * M.pass_s_a3, 0)} ms on aifoundry3${M.pass_s_a1c1 ? ` and ${num(1000 * M.pass_s_a1c1, 0)} ms on aifoundry1-c1` : ''}, and the SP's own pass on aifoundry2 is ${num(1000 * M.sp_pass_s_quiet_a2, 0)} ms without the sampler: ` +
-    `the medians of three passes on each card in the version-3 campaign); the rail's own average spreads a single event over about a second.`);
+    `Each event's rate is ${esc(E.rate_rule.split(':')[0])} (each event's tip names its source). The band is one reading's step on aifoundry2 while ettelem samples, 1 mW × about ${num(1000 * M.pass_s, 0)} ms on a rail and 10 mW × ${num(1000 * M.pass_s, 0)} ms on the board ` +
+    `(the other cards' refresh is in §4.1); the rail's own average spreads a single event over about a second.`);
   upd();
 })();
 
@@ -443,7 +442,7 @@ function fitOf(card, line) {
   const shareV = (c, k) => med(fit[c].pts.filter(p => k(p)).map(p => p.un / p.over)), share = (c, k) => pct(shareV(c, k));
   setHTML('v1-cap', `Of what each configuration adds above idle, how much is on no sensor, and does the four-term fit account for it? The scatter: every catalogue configuration's unmetered watts ` +
     `(board over idle less the three rails) against what the fit gives it; filled dots ran on random data, open ones on zeros or constants. The first bar: the idle card at ${num(I.die_c, 0)} °C on aifoundry2 ` +
-    `(${f(I.board_w, 2)} W, the mean of one 60 s window of ${num(I.samples, 0)} samples whose standard deviation is ${f(I.board_sd, 2)} W, after ${num(I.hours, 1)} h idle apart from a 4.9 s probe five minutes before the window): ${f(I.unsensed_w, 1)} W of it is on no sensor ` +
+    `(${f(I.board_w, 2)} W, the mean of one 60 s window after ${num(I.hours, 1)} h idle): ${f(I.unsensed_w, 1)} W of it is on no sensor ` +
     `and cannot be split further. The second bar: the chosen configuration's watts over idle, the three rails and then the fit's delivery loss and DRAM term, with the measured total as a tick. ` +
     `Above idle, ${(() => { const ins = CARDS.map(c => shareV(c, p => p.k === 'instr')), w = [...new Set(ins.slice().sort((a, b) => b - a).map(fracWord))];
       return `${w.length === 1 ? `about ${w[0]}` : `between ${w[w.length - 1]} and ${w[0]}`} of an instruction's watts are on no sensor (median ${perCard(ins.map(v => pct(v)), '')})`; })()} ` +
@@ -559,6 +558,22 @@ function fitOf(card, line) {
     .map(p => ({...p, pred: a * p.off + b * (p.over - p.off)})).map(p => ({...p, ex: p.dd - p.pred}));
   const nd = DR.filter(p => !p.dram), dRows = DR.filter(p => p.dram), minD = dRows.reduce((s, p) => (p.dd < s.dd ? p : s)), big = DR.filter(p => p.ex > 1);
   const l3 = nd.filter(p => p.cfg.startsWith('dramrow/stride8K')).reduce((s, p) => (p.dd > s.dd ? p : s));
+  /* The chart's own per-card calibrations (power.checks.droop[card].per_config), so it can draw any card; the
+     prose below and DR/a/b/rms/ir/minD/l3 stay aifoundry2's (the reference calibration), unaffected. */
+  const DROOP_BY_CARD = {aifoundry2: {a, b, rms, ir, rows: DR, minD, l3}};
+  CARDS.filter(c => c !== 'aifoundry2').forEach(c => {
+    const w = CH.droop[c];
+    if (!w || !w.per_config) return;
+    const a2 = w.slope, b2 = w.common;
+    const rows = w.per_config.map(r => ({cfg: r[0], dd: r[1], off: r[2], over: r[3], dm: r[4], mi: r[5], k: klass(r[0]), rnd: r[0].includes('/random'), dram: movesDram(r[0])}))
+      .map(p => ({...p, pred: a2 * p.off + b2 * (p.over - p.off)})).map(p => ({...p, ex: p.dd - p.pred}));
+    const ndc = rows.filter(p => !p.dram), drc = rows.filter(p => p.dram);
+    const minDc = drc.length ? drc.reduce((s, p) => (p.dd < s.dd ? p : s)) : null;
+    const l3c = ndc.filter(p => p.cfg.startsWith('dramrow/stride8K'));
+    DROOP_BY_CARD[c] = {a: a2, b: b2, rms: w.rms_mv, ir: w.ir, rows,
+      minD: minDc, l3: l3c.length ? l3c.reduce((s, p) => (p.dd > s.dd ? p : s)) : null};
+  });
+  const DRCARDS = CK.cardsIn(Object.keys(DROOP_BY_CARD));
   const DC = CH.droop, d2 = DC.aifoundry2, OTH = CARDS.slice(1);
   setHTML('droopidle', perCard(CARDS.map(c => f(DC[c].idle_ddr_mv, 0)), 'mV'));
   const irz = OTH.filter(c => DC[c].pass_ci99.ir[0] <= 0), irp = irz.every(c => DC[c].passes.ir.every(v => v > 0));
@@ -593,20 +608,28 @@ function fitOf(card, line) {
   dt.innerHTML = '<thead><tr><th>Configuration (aifoundry2)</th><th class="num">W over idle</th><th class="num">unmetered W less fitted rail losses</th><th class="num">DDR-rail droop, mV</th><th class="num">minion-rail droop, mV</th></tr></thead><tbody>' +
     Dp.examples.map(e => `<tr><td><code>${esc(e.cfg)}</code></td><td class="num">${f(e.over_idle_w)}</td><td class="num">${e.dram_offrail_w ? f(e.dram_offrail_w) : '—'}</td><td class="num">${mv1(e.droop_ddr_mv)}</td><td class="num">${mv1(e.droop_minion_mv)}</td></tr>`).join('') + '</tbody>';
   CK.stackTable(dt);
-  const ds = {view: 'board', on: new Set(CLS.map(c => c[0])), sel: l3.cfg};
+  const ds = {view: 'board', on: new Set(CLS.map(c => c[0])), sel: l3.cfg, card: 'aifoundry2'};
   const VIEWS = {board: {x: p => p.over, y: p => p.dd, xd: [0, 27], yd: [-0.5, 6.5], xl: 'board watts over idle', yl: 'DDR-rail droop, mV'},
     pred: {x: p => p.pred, y: p => p.dd, xd: [-0.5, 7], yd: [-0.5, 7], xl: 'droop the calibration predicts, mV', yl: 'DDR-rail droop measured, mV'},
     minion: {x: p => p.mi, y: p => p.dm, xd: [0, 22], yd: [-0.5, 2.5], xl: 'minion-rail watts over idle', yl: 'minion-rail droop, mV'}};
-  CK.seg('dr-ctl', {label: 'View', options: [['board', 'against board watts'], ['pred', 'predicted against measured'], ['minion', 'minion rail (IR drop)']], value: ds.view, onChange: v => { ds.view = v; dfr.redraw(); dout(); }});
+  const drCtl = document.getElementById('dr-ctl'), drBox = () => { const d = document.createElement('div'); drCtl.appendChild(d); return d; };
+  if (DRCARDS.length > 1) CK.cardSeg(drBox(), {cards: DRCARDS, bus: 'chain-card', value: ds.card, onChange: v => {
+    ds.card = v;
+    if (!DROOP_BY_CARD[v].rows.some(p => p.cfg === ds.sel)) ds.sel = (DROOP_BY_CARD[v].l3 || DROOP_BY_CARD[v].rows[0]).cfg;
+    dfr.redraw(); dout();
+  }});
+  CK.seg(drBox(), {label: 'View', options: [['board', 'against board watts'], ['pred', 'predicted against measured'], ['minion', 'minion rail (IR drop)']], value: ds.view, onChange: v => { ds.view = v; dfr.redraw(); dout(); }});
   CK.legend('dr-leg', CLS.map(([k, l, c]) => ({key: k, label: l, mark: 'dot', color: c})), {toggle: true, onChange: keys => { ds.on = new Set(keys); dfr.redraw(); }});
   const dread = CK.readout('dr-read');
   function dout() {
+    const cd = DROOP_BY_CARD[ds.card], a = cd.a, b = cd.b, ir = cd.ir, DR = cd.rows;
     const p = DR.find(q => q.cfg === ds.sel);
-    if (ds.view === 'minion') { dread.set(`${pretty(p.cfg)}: the minion rail draws ${f(p.mi, 2)} W over idle and its monitors read ${f(p.dm, 2)} mV lower; ${f(ir, 3)} mV per watt predicts ${f(ir * p.mi, 2)} mV.`); return; }
-    dread.set(`${pretty(p.cfg)}: droop ${f(p.dd, 2)} mV measured, ${f(p.pred, 2)} mV predicted (${f(a, 2)} × ${f(p.off, 2)} W off-rail DRAM + ${f(b, 3)} × ${f(p.over - p.off, 2)} W of the rest); ` +
+    if (ds.view === 'minion') { dread.set(`${pretty(p.cfg)} on ${ds.card}: the minion rail draws ${f(p.mi, 2)} W over idle and its monitors read ${f(p.dm, 2)} mV lower; ${f(ir, 3)} mV per watt predicts ${f(ir * p.mi, 2)} mV.`); return; }
+    dread.set(`${pretty(p.cfg)} on ${ds.card}: droop ${f(p.dd, 2)} mV measured, ${f(p.pred, 2)} mV predicted (${f(a, 2)} × ${f(p.off, 2)} W off-rail DRAM + ${f(b, 3)} × ${f(p.over - p.off, 2)} W of the rest); ` +
       `excess ${sgn(p.ex)} mV, which reads as ${sgn(p.ex / a)} W of ${p.dram ? 'extra' : 'phantom'} DRAM.`);
   }
   function ddraw(fm) {
+    const cd = DROOP_BY_CARD[ds.card], a = cd.a, b = cd.b, rms = cd.rms, ir = cd.ir, DR = cd.rows, minD = cd.minD, l3 = cd.l3;
     const W = fm.W, H = fm.H, v = VIEWS[ds.view], L = 46, R = 12, T = 26, B = 42;
     const x = CK.lin(v.xd[0], v.xd[1], L, W - R), y = CK.lin(v.yd[0], v.yd[1], H - B, T);
     CK.axes(fm, {x, y, L, R, T, B, xl: v.xl, yl: v.yl});
@@ -617,7 +640,7 @@ function fitOf(card, line) {
       if (lab) CK.txt(g0, x(x1) - 4, y(Math.min(v.yd[1], yy(x1))) - 8, lab, 'tick', 'end');
     };
     /* the reference line's label: on the line when there is room, else as a key at top right, clear of the points */
-    const noDram = [`no DRAM: ${f(b, 3)} mV per W${P.checks.droop.aifoundry2.pass_ci99.common[0] <= 0 ? ', within noise' : ''}`, `band ± ${f(rms, 2)} mV rms`];
+    const noDram = [`no DRAM: ${f(b, 3)} mV per W${CH.droop[ds.card].pass_ci99.common[0] <= 0 ? ', within noise' : ''}`, `band ± ${f(rms, 2)} mV rms`];
     if (ds.view === 'board') line(b, 0, fm.narrow ? '' : noDram.join('; '));
     if (ds.view === 'pred') line(1, 0, `measured = predicted ± ${f(rms, 2)} mV`);
     if (ds.view === 'minion') line(ir, 0, `${f(ir, 3)} mV per W`);
@@ -635,7 +658,7 @@ function fitOf(card, line) {
       nodes.push(n);
     });
     if (ds.view === 'board') {
-      const note = (p, s, dy) => { if (!ds.on.has(p.k)) return; const px = x(p.over), right = px > (L + W - R) / 2; CK.txt(g0, px + (right ? -9 : 8), y(p.dd) + dy, s, 'tick', right ? 'end' : 'start'); };
+      const note = (p, s, dy) => { if (!p || !ds.on.has(p.k)) return; const px = x(p.over), right = px > (L + W - R) / 2; CK.txt(g0, px + (right ? -9 : 8), y(p.dd) + dy, s, 'tick', right ? 'end' : 'start'); };
       note(l3, 'L3 reads through the mesh', 4); note(minD, 'smallest DRAM droop', 14);
       CK.txt(g0, W - R - 4, T + 12, '◇ predicted for a DRAM point', 'tick', 'end');
       if (fm.narrow) { const kx = W - R - 4, ky = T + 60, k = CK.el('line', {x1: kx - 22, x2: kx, y1: ky - 4, y2: ky - 4, 'stroke-dasharray': '5 4', 'stroke-width': 1.4}, g0);
@@ -645,8 +668,168 @@ function fitOf(card, line) {
   }
   let dcirc = {};
   function dpick(cfg) { if (ds.sel === cfg) return; mark(dcirc, ds.sel, false); ds.sel = cfg; mark(dcirc, cfg, true); dout(); }
-  const dfr = CK.frame('dr', {height: W => (W < 600 ? 340 : 380), minW: 300, maxW: 900, label: 'DDR-rail droop of every aifoundry2 catalogue configuration against board watts, its prediction, or the minion rail', draw: ddraw});
+  const dfr = CK.frame('dr', {height: W => (W < 600 ? 340 : 380), minW: 300, maxW: 900, label: 'DDR-rail droop of every catalogue configuration, on the chosen card, against board watts, its prediction, or the minion rail', draw: ddraw});
   dout();
+})();
+
+/* ---------- the meter chain as a diagram (S4.1) ---------- */
+(function () {
+  const M = D.energy_events.meter, RF = P.rail_filter, SA = P.sampler, I = P.idle_73c, NR = P.rails_no_telemetry;
+  const nMods = P.pmbus_modules.length, nVals = P.pmbus_values.length, nRead = P.pmbus_readings.length, nNum = nMods * nVals * nRead;
+  const st = {card: CARDS[0]};
+  CK.cardSeg('chain-ctl', {cards: CARDS, bus: 'chain-card', value: st.card, onChange: v => { st.card = v; fr.redraw(); }});
+  const read = CK.readout('chain-read');
+  /* the SP's pass per card, the medians of the version-3 campaign's three passes (energy_events.meter.sp_pass_ms):
+     under ettelem's 10 Hz sampling, and in the SP's own trace with no sampler running */
+  const SPM = M.sp_pass_ms || {}, medOf = a => (a && a.length ? med(a) : null);
+  const passMs = c => medOf((SPM[c] || {}).sampled_ms) || 1000 * (c === 'aifoundry2' ? M.pass_s : M.pass_s_a3);
+  const quietMs = c => medOf((SPM[c] || {}).quiet_ms);
+  const ROWS = [
+    {key: 'in', lines: ['12 V input', 'from the power supply'],
+      desc: () => `The board's 12 V input, metered too: ${num(1000 * M.board_lsb_w, 0)} mW steps, one new value a pass.`},
+    {key: 'reg', lines: ['3 PMBus regulators', 'minion · SRAM · NoC'],
+      desc: c => `Each regulator's running average has fallen ${pct(RF[c].frac_1s)} of the way one second after ${c} steps down (τ ≈ ${f(RF[c].tau_s, 2)} s); ${num(1000 * M.rail_lsb_w, 0)} mW steps.`},
+    {key: 'pmic', lines: ['PMIC', `${nMods} × ${nVals} × ${nRead} = ${nNum} numbers`, 'V, I, W ×2 sides, °C'],
+      desc: () => `${nMods} regulator modules × ${nVals} values (voltage, current and power on both sides of the regulator, and its temperature) × ${nRead} readings (current, min, max, running average) = ${nNum} numbers; only 4 leave it each pass.`},
+    {key: 'sp', lines: ['SP loop', 'rereads all 84 each pass', 'forwards the averages'],
+      desc: c => `On ${c} a pass refreshes about every ${num(passMs(c), 0)} ms while ettelem samples${quietMs(c) ? ` (${num(quietMs(c), 0)} ms without it)` : ''}; it forwards each rail's average power, its min and max, and the 12 V input power.`},
+    {key: 'ettelem', lines: ['ettelem', 'samples at 10 Hz'],
+      desc: c => `${SA[c].bursts} catalogue bursts on ${c}; in ${SA[c].over_60ms ? word(SA[c].over_60ms) : 'none'} of them did the median sample take over 60 ms, and the longest single sample of a DRAM-read burst took ${num(SA[c].read_max_ms, 0)} ms (the strips of “The meter starved by the workload”, above).`},
+  ];
+  const REST = {lines: [`${NR.length} more rails`, 'no current or power meter', `≈${f(I.unsensed_w, 1)} W of idle unmetered`],
+    desc: () => `${NR.join(', ')}: set-point registers only, no current or power telemetry (their on-die voltage is reported, §4.3). About ${f(I.unsensed_w, 1)} W of aifoundry2's ${f(I.board_w, 1)} W idle draw (§4.2) is on none of the meters above.`};
+  const boxH = n => 20 + 16 * n;
+  function layout() {
+    let y = 14; const pos = {};
+    ROWS.forEach(r => { const h = boxH(r.lines.length); pos[r.key] = {y, h}; y += h + 22; });
+    const chainEnd = y - 22, restY = chainEnd + 34, restH = boxH(REST.lines.length);
+    return {pos, restY, restH, H: restY + restH + 14};
+  }
+  function draw(f) {
+    const W = f.W, LY = layout(), bw = Math.min(380, W - 70), bx = (W - bw) / 2, branchX = Math.max(10, bx - 22);
+    const defs = CK.el('defs', {}, f.svg), mk = CK.el('marker', {id: 'chain-arr', viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto-start-reverse'}, defs);
+    const ap = CK.el('path', {d: 'M0,0 L10,5 L0,10 Z'}, mk); ap.style.fill = 'var(--ink-2)';
+    const g0 = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+    for (let i = 0; i < ROWS.length - 1; i++) {
+      const a = LY.pos[ROWS[i].key], b = LY.pos[ROWS[i + 1].key];
+      const l = CK.el('line', {x1: bx + bw / 2, y1: a.y + a.h, x2: bx + bw / 2, y2: b.y, 'stroke-width': 1.6, 'marker-end': 'url(#chain-arr)'}, g0);
+      l.style.stroke = 'var(--ink-2)';
+    }
+    const bp = LY.pos.reg, midY1 = bp.y + bp.h / 2, midY2 = LY.restY + LY.restH / 2;
+    const dpath = CK.el('path', {d: `M${bx},${midY1} L${branchX},${midY1} L${branchX},${midY2} L${bx},${midY2}`, fill: 'none', 'stroke-width': 1.4, 'stroke-dasharray': '5 4'}, g0);
+    dpath.style.stroke = 'var(--ref)';
+    function box(x0, y0, w, h, lines, fill, stroke, dash, subCls) {
+      const g = CK.el('g', {}, f.svg);
+      const r = CK.el('rect', {x: x0, y: y0, width: w, height: h, rx: 8, 'stroke-width': 1.4, 'stroke-dasharray': dash || null}, g);
+      r.style.fill = fill; r.style.stroke = stroke;
+      CK.txt(g, x0 + 10, y0 + 17, lines[0], 'lab-strong');
+      lines.slice(1).forEach((s, i) => CK.txt(g, x0 + 10, y0 + 17 + 15 * (i + 1), s, subCls || 'tick'));
+      CK.el('rect', {x: x0, y: y0, width: w, height: h, class: 'ck-hit'}, g);
+      return g;
+    }
+    const nodes = [];
+    ROWS.forEach(r => {
+      const p = LY.pos[r.key];
+      const g = box(bx, p.y, bw, p.h, r.lines, 'color-mix(in srgb, var(--c1) 9%, var(--surface))', 'var(--c1)');
+      const html = () => `<b>${esc(r.lines[0])}</b><br>${esc(r.desc(st.card))}`;
+      CK.tip(f, g, html, {role: 'button'});
+      g._desc = html; nodes.push(g);
+    });
+    const rg = box(bx, LY.restY, bw, LY.restH, REST.lines, 'color-mix(in srgb, var(--ref) 16%, var(--surface))', 'var(--ref)', '5 4', 'lab');
+    const rhtml = () => `<b>${esc(REST.lines[0])}</b><br>${esc(REST.desc())}`;
+    CK.tip(f, rg, rhtml, {role: 'button'});
+    rg._desc = rhtml; nodes.push(rg);
+    CK.keynav(f, nodes, {onFocus: n => read.set(n._desc())});
+  }
+  const fr = CK.frame('chain', {height: () => layout().H, minW: 280, maxW: 620, label: 'The meter chain, from the 12 V input to a number on this page', draw});
+  read.set(`<b>${esc(ROWS[0].lines[0])}</b>: ${esc(ROWS[0].desc(st.card))}`);
+})();
+
+/* ---------- the fit's coefficients per card, beside #fittab (S4.2) ---------- */
+(function () {
+  const F = P.fit, CH2 = P.checks.fit;
+  const COEFS = [['minion', '× minion-rail W'], ['sram', '× SRAM-rail W'], ['noc', '× NoC-rail W'], ['dram_pj_per_byte', 'pJ per DRAM byte']];
+  const rowH = 38 + 16 * CARDS.length, L = 8, R = 10, T = 4, B = 10;  /* one whisker per card in each row */
+  function draw(f) {
+    const W = f.W, g0 = CK.el('g', {'aria-hidden': 'true'}, f.svg), nodes = [];
+    COEFS.forEach(([k, lab], i) => {
+      const y0 = T + i * rowH, dp = k === 'dram_pj_per_byte' ? 1 : 3;
+      CK.txt(f.svg, L, y0 + 11, lab, 'lab-strong');
+      const vals = CARDS.map(c => ({card: c, v: F[c].coef[k], se: CH2[c].se_hc3[k]}));
+      const lo0 = Math.min(0, ...vals.map(v => v.v - 1.3 * v.se)), hi0 = Math.max(...vals.map(v => v.v + 1.3 * v.se));
+      const pad = (hi0 - lo0) * 0.1 || 1;
+      const x = CK.lin(lo0 - pad, hi0 + pad, L, W - R);
+      const gy0 = y0 + 26, gy1 = y0 + rowH - 12;
+      x.ticks(3).forEach(t => {
+        CK.el('line', {x1: x(t), x2: x(t), y1: gy0, y2: gy1, class: 'grid-line'}, g0);
+        CK.txt(g0, x(t), y0 + rowH - 2, num(t), 'tick', 'middle');
+      });
+      if (lo0 - pad < 0 && hi0 + pad > 0) {
+        const zl = CK.el('line', {x1: x(0), x2: x(0), y1: gy0, y2: gy1, 'stroke-dasharray': '3 3'}, g0); zl.style.stroke = 'var(--ref)';
+      }
+      vals.forEach((v, j) => {
+        const cy = gy0 + 8 + j * 16, cc = CK.card(v.card), xlo = x(v.v - v.se), xhi = x(v.v + v.se), xc = x(v.v);
+        const g = CK.el('g', {}, f.svg);
+        const w0 = CK.el('line', {x1: xlo, x2: xhi, y1: cy, y2: cy, 'stroke-width': 2}, g); w0.style.stroke = cc.color;
+        [xlo, xhi].forEach(xx => { const cap = CK.el('line', {x1: xx, x2: xx, y1: cy - 4, y2: cy + 4, 'stroke-width': 1.4}, g); cap.style.stroke = cc.color; });
+        CK.cardMark(g, v.card, xc, cy, 4);
+        CK.el('rect', {x: L, y: cy - 8, width: W - L - R, height: 16, class: 'ck-hit'}, g);
+        CK.tip(f, g, `<b>${esc(cc.label)}</b> ${esc(lab)}<br>${num(v.v, dp)} ± ${num(v.se, dp)} (one robust SE)`, {role: 'img'});
+        nodes.push(g);
+      });
+    });
+    CK.keynav(f, nodes);
+  }
+  CK.frame('coef', {height: () => T + COEFS.length * rowH + B, minW: 220, maxW: 340, label: "The fit's coefficients per card, each ± one robust standard error", draw});
+})();
+
+/* ---------- the meter starved by the workload: one strip per card (S4.1) ---------- */
+(function () {
+  const SA = P.sampler;
+  const SCARDS = CK.cardsIn(Object.keys(SA).filter(c => SA[c] && Array.isArray(SA[c].dist)));
+  const read = CK.readout('starve-read');
+  const allMs = SCARDS.flatMap(c => SA[c].dist.map(d => d.ms).concat((SA[c].dropped || []).map(d => d.ms)));
+  const lo = 18, hi = Math.max(...allMs) * 1.12;
+  const maxN = Math.max(...SCARDS.flatMap(c => SA[c].dist.map(d => d.n)));
+  const rad = n => Math.max(3, Math.min(13, 3 + 9 * Math.sqrt(n / maxN)));
+  const TICKS = [20, 25, 30, 50, 75, 100, 150, 200, 300];
+  const rowH = 46, T = 24, B = 34;
+  function draw(f) {
+    const W = f.W, L = 14, R = 14, plotBottom = T + SCARDS.length * rowH;
+    const x = CK.log(lo, hi, L, W - R);
+    const g0 = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+    TICKS.filter(t => t >= lo && t <= hi).forEach(t => {
+      CK.el('line', {x1: x(t), x2: x(t), y1: T - 8, y2: plotBottom - 6, class: 'grid-line'}, g0);
+      CK.txt(g0, x(t), plotBottom + 12, num(t, 0), 'tick', 'middle');
+    });
+    CK.txt(g0, (L + W - R) / 2, plotBottom + 30, 'one telemetry sample, ms (log scale)', 'lab', 'middle');
+    const nodes = [];
+    SCARDS.forEach((c, i) => {
+      const cy = T + i * rowH + rowH / 2 - 4, cc = CK.card(c), total = SA[c].bursts;
+      CK.txt(g0, L, T + i * rowH - 2, `${cc.label} (${total} bursts)`, 'lab-strong');
+      CK.el('line', {x1: L, x2: W - R, y1: cy, y2: cy, class: 'grid-line', opacity: 0.5}, g0);
+      (SA[c].dist || []).forEach(d => {
+        const cx = x(Math.max(lo, Math.min(hi, d.ms))), r = rad(d.n);
+        const n0 = CK.el('circle', {cx, cy, r, 'stroke-width': 1.4}, f.svg);
+        n0.style.fill = cc.color; n0.style.stroke = 'var(--surface)';
+        const detail = d.cfgs ? '<br>' + d.cfgs.map(x2 => `<code>${esc(x2.cfg)}</code> pass ${x2.pass}`).join('<br>') : '';
+        const html = `<b>${num(d.ms, 1)} ms</b> · ${esc(cc.label)}: ${d.n} of ${total} burst${d.n === 1 ? '' : 's'}${detail}`;
+        CK.tip(f, n0, html, {role: 'img'});
+        n0._desc = html; nodes.push(n0);
+      });
+      (SA[c].dropped || []).forEach(d => {
+        const cx = x(Math.max(lo, Math.min(hi, d.ms))), s = 6;
+        const dm = CK.el('polygon', {points: `${cx},${cy - s} ${cx + s},${cy} ${cx},${cy + s} ${cx - s},${cy}`, 'stroke-width': 1.6}, f.svg);
+        dm.style.fill = 'var(--surface)'; dm.style.stroke = 'var(--warn)';
+        const html = `<b>${num(d.ms, 1)} ms</b> · ${esc(cc.label)}: dropped, not counted — <code>${esc(d.burst)}</code> (${esc(d.run)})`;
+        CK.tip(f, dm, html, {role: 'img'});
+        dm._desc = html; nodes.push(dm);
+      });
+    });
+    CK.keynav(f, nodes, {onFocus: n => read.set(n._desc)});
+  }
+  CK.frame('starve', {height: () => T + SCARDS.length * rowH + B, minW: 300, maxW: 1000, label: "Every catalogue burst's own sampler latency, one strip per card", draw});
+  read.set(`Most bursts take the usual sample time on ${SCARDS.length === 2 ? 'both cards' : `all ${word(SCARDS.length)} cards`}; the tail past it is what the workload starves. Hover, tap or tab to a mark.`);
 })();
 
 /* ---------- the improvement ladder: every rung drawn once; the status buttons and the text filter hide rows ---------- */
@@ -893,7 +1076,8 @@ function cardsOfText(str) {
 /* ---------- the claims scoreboard (§1): each page's claims by verdict, or by the cards whose data they rest on ----------
    D.claims_status comes from tools/ettelem/sync_hub_data.py: verdicts [[key, label, meaning]] and series[], each
    {label, short, note, pages: {<slug>: {claims, verdict: {<key>: n}, cards: {<card ids joined by +, or none>: n}}}}.
-   Every series is drawn, one bar per page and series, so the campaign's results only add a series to the data. */
+   Every series is drawn, one bar per page and series, in the data's order: the claims after the version-3 campaign
+   (complete, 25-26 September) first, then the plan's verdicts before it. */
 (function () {
   const C = D.claims_status, SER = C.series, S = SER.length, VD = C.verdicts;
   const GREY = 'color-mix(in srgb, var(--ref) 55%, var(--surface))';
@@ -927,7 +1111,7 @@ function cardsOfText(str) {
   const phrase = (k, n, tot) => `${esc(st.view === 'verdict' ? VLAB[k] || k : cats().find(c => c.key === k).label)}: ${num(n, 0)} (${pct(n / tot)})`;
 
   /* status line, scope, definitions */
-  setHTML('claims-status', SER.map(s => `<b>${esc(s.label)}</b> (“${esc(s.short)}”): ${esc(s.note)}${s.tested ? ` (${num(s.tested, 0)} claims tested)` : ''}.`).join('<br>'));
+  setHTML('claims-status', SER.map(s => `<b>${esc(s.label)}</b> (“${esc(s.short)}”): ${esc(s.note)}${s.tested ? ` (${num(s.tested, 0)} claims tested, over all the pages)` : ''}.`).join('<br>'));
   if (S > 1) setHTML('claims-bars', 'one bar per page for each status');
   const out = REP.filter(r => !inAny(r.slug));
   setHTML('claims-scope', out.length ? `Not in the check: ${out.map(r => esc(r.title)).join(', ')}.` : '');

@@ -78,7 +78,7 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
  const e=PW.e_fJ;const cd=(w)=>(w/1024/(V*V*F)*1e9);
  const rate=c=>!c.per_s?'':c.unit==='byte'?(c.per_s>=1e12?(c.per_s/1e12).toFixed(2)+' TB':(c.per_s/1e9).toFixed(1)+' GB'):(c.per_s/1e12).toFixed(c.per_s<1e12?2:1)+'×10¹² '+c.unit+'s';
  const LIST=[['spin','integer loop on every minion (4 adds and a branch)'],['fp32_zeros','fp32 TensorFMA, zeros: every multiply-add gated'],['fp32_ones','fp32 TensorFMA, ones: registers clocked, no data toggles'],['fp32_randn','fp32 TensorFMA, random data'],['fp16_randn','fp16 TensorFMA, random data'],['int8_randn','int8 TensorFMA, random data'],['tload_l2','TensorLoad streaming from the shire’s L2 cache'],['tload_dram','TensorLoad streaming from LPDDR4x (DRAM)']].filter(q=>C[q[0]]);
- document.getElementById('cdyn').innerHTML='<thead><tr><th>Workload on all 1,024 minions</th><th class="num">board W at 80 °C</th><th class="num">over idle</th><th class="num">mW per minion, over idle</th><th class="num">C<sub>dynamic</sub> per minion, nF</th><th class="num">work per second</th><th class="num">pJ per unit of work, over idle</th></tr></thead><tbody>'+
+ document.getElementById('cdyn').innerHTML='<thead><tr><th>Workload on all 1,024 minions</th><th class="num">board W at launch (81 °C)</th><th class="num">over idle</th><th class="num">mW per minion, over idle</th><th class="num">C<sub>dynamic</sub> per minion, nF</th><th class="num">work per second</th><th class="num">pJ per unit of work, over idle</th></tr></thead><tbody>'+
   LIST.map(q=>{const c=C[q[0]];return `<tr><td>${q[1]}</td><td class="num">${f1(c.p80)}</td><td class="num">+${f1(c.dyn)}</td><td class="num">${f1(c.mw_per_minion)}</td><td class="num">${cd(c.dyn).toFixed(3)}</td><td class="num">${rate(c)}</td><td class="num">${c.unit==='byte'?'–':c.pj_per_unit_dyn?c.pj_per_unit_dyn.toFixed(c.pj_per_unit_dyn<1?2:c.pj_per_unit_dyn<100?1:0):''}</td></tr>`;}).join('')+
   `<tr><td><i>Esperanto’s design target (Hot Chips 33)</i></td><td></td><td></td><td class="num"><i>10 (total)</i></td><td class="num"><i>0.040</i></td><td class="num"><i>at 1 GHz, 0.425 V</i></td><td></td></tr></tbody>`;
  /* the note under the table: which card, aifoundry3's fp32 rows beside these, and where the per-byte energies live */
@@ -95,6 +95,56 @@ const C=D.ablation.configs,PW=D.model.power,V=0.517,F=600e6;
   t3.innerHTML='<thead><tr><th>Workload on all 1,024 minions</th><th>card</th><th class="num">board W</th><th class="num">over idle</th><th class="num">mW per minion, over idle</th><th class="num">C<sub>dynamic</sub> per minion, nF</th><th class="num">pJ per unit of work, over idle</th></tr></thead><tbody>'+
    L3.map(q=>v3ids.map(id=>{const c=v3c(id,q[0]);return `<tr><td>${q[1]}</td><td>${lbl(id)} (${V3.cards[id].busy_mv.toFixed(0)} mV, ${v3T(id)} °C)</td><td class="num">${f1(c.p80)}</td><td class="num">${c.dyn>=0?'+':'−'}${f1(Math.abs(c.dyn))}</td><td class="num">${f1(c.mw_per_minion)}</td><td class="num">${c.nf_per_minion.toFixed(3)}</td><td class="num">${c.pj_per_unit_dyn.toFixed(c.pj_per_unit_dyn<1?2:1)}</td></tr>`;}).join('')).join('')+'</tbody>';
   CK.sortTable('cdyn3',{filter:true});}
+})();
+
+/* ---------- the capacitance ladder: every one of the 30 ablation configs, against Esperanto's target, with each card's values from
+   the three-card check (D.v3, 26 September, each at its own voltage under load; before it, aifoundry3's fp32 points of 22 September) ---------- */
+(function(){
+ /* short row labels, so 30 of them fit the margin at 11 px; the tooltip on each dot gives the full config and its minion count */
+ const NAME={spin:'integer loop',spin_8:'integer loop, 256',
+  fp32_zeros:'fp32 zeros',fp16_zeros:'fp16 zeros',int8_zeros:'int8 zeros',
+  fp32_ones:'fp32 ones',fp16_ones:'fp16 ones',int8_ones:'int8 ones',
+  fp32_randn:'fp32 random',fp16_randn:'fp16 random',int8_randn:'int8 random',
+  fp32_randn_8:'fp32 random, 256',fp32_randn_16:'fp32 random, 512',fp32_randn_24:'fp32 random, 768',
+  tload_l2:'L2 stream',tload_dram:'DRAM stream',
+  m_identity:'identity',m_butterfly:'butterfly',m_tridiagonal:'tridiagonal',m_upper:'upper-triangular',
+  m_block_diag:'4×4 blocks',m_negzero:'all −0.0',m_fft_cos:'DFT (cos/sin)',m_hadamard:'Hadamard, ±1',
+  m_relu:'ReLU weights',m_quant4:'4-bit quantised',m_lowrank:'rank 1',m_circulant:'circulant',
+  m_kaleidoscope:'kaleidoscope',m_dct:'DCT-II'};
+ /* per-minion capacitance from each config's own board power over idle, voltage and clock (the same P/(V²f) as the table above) */
+ const cfgs=Object.keys(C).map(k=>{const c=C[k],Vv=c.mv/1000,F0=c.mhz[0]*1e6;
+   return {k,name:NAME[k]||k,nf:(c.mw_per_minion/1000)/(Vv*Vv*F0)*1e9,minions:c.minions};}).sort((a,b)=>a.nf-b.nf);
+ /* per card: {config: nF per minion}. The check's cards when present; otherwise aifoundry3's three fp32 points of 22 September */
+ const V3=D.v3,per={};
+ if(V3)CK.cardsIn(V3.cards).forEach(id=>{const cf=V3.cards[id].configs;per[id]={};for(const k in cf)if(cf[k].nf_per_minion>0)per[id][k]=cf[k].nf_per_minion;});
+ else{const S2=D.second_card,P3=S2&&S2.patterns,MAP3={fp32_zeros:'zeros',fp32_ones:'ones',fp32_randn:'randn'},a3={};
+  if(P3)for(const k in MAP3){const q=P3[MAP3[k]];if(q){const V3v=q.mv/1000;a3[k]=q.dyn/1024/(V3v*V3v*600e6)*1e9;}}
+  if(Object.keys(a3).length)per.aifoundry3=a3;}
+ const ids=CK.cardsIn(per),when=V3?', 26 September':', 22 September';
+ CK.legend('cap-ladder-leg',[{key:'s21',label:V3?'aifoundry2, 21 September (every configuration)':'aifoundry2',mark:'dot',color:V3?'var(--ref)':'var(--c1)'}]
+  .concat(CK.cardLegend(ids).map(x=>Object.assign(x,{label:x.label+when})))
+  .concat([{key:'target',label:'Esperanto’s target (10 mW at 0.425 V, 1 GHz)',mark:'dash',color:'var(--bad)'}]));
+ const vals=cfgs.map(c=>c.nf).concat(...ids.map(id=>Object.values(per[id]))).concat([0.040]);
+ const lo=Math.min(...vals)*0.8,hi=Math.max(...vals)*1.25;
+ CK.frame('cap-ladder',{minW:320,maxW:640,height:cfgs.length*18+50,label:'Effective switched capacitance per minion for every ablation config',draw:ff=>{
+  const W=ff.W,H=ff.H,L=ff.narrow?128:150,R=14,T=14,B=32;
+  const x=CK.log(lo,hi,L,W-R);
+  const labs=[];x.ticks(6).forEach(t=>{CK.el('line',{x1:x(t),x2:x(t),y1:T,y2:H-B,class:'grid-line'},ff.svg);labs.push(CK.txt(ff.svg,x(t),H-B+16,CK.fmt.num(t,t<0.01?3:t<0.1?2:1),'tick','middle'));});
+  CK.el('line',{x1:L,x2:W-R,y1:H-B,y2:H-B,class:'ck-axis'},ff.svg);
+  labs.push(CK.txt(ff.svg,(L+W-R)/2,H-4,'switched capacitance per minion, nF (log scale)','lab','middle'));
+  const tx=x(0.040);CK.el('line',{x1:tx,x2:tx,y1:T,y2:H-B,style:'stroke:var(--bad)','stroke-dasharray':'5 4','stroke-width':1.5},ff.svg);
+  const rowH=(H-T-B)/cfgs.length,nodes=[],rowLabs=[];
+  cfgs.forEach((c,i)=>{const y=T+rowH*(i+0.5);
+   rowLabs.push(CK.txt(ff.svg,L-8,y+4,c.name,'tick','end'));
+   CK.el('line',{x1:x(lo),x2:x(c.nf),y1:y,y2:y,style:'stroke:var(--grid)'},ff.svg);
+   const dot=CK.el('circle',{cx:x(c.nf),cy:y,r:4.5,style:`fill:${V3?'var(--ref)':'var(--c1)'}`},ff.svg);
+   CK.tip(ff,dot,`<b>${c.name}</b>, aifoundry2, 21 September<br>${c.nf.toFixed(3)} nF per minion (${c.minions.toLocaleString('en-GB')} minions)`);nodes.push(dot);
+   ids.forEach(id=>{const v=per[id][c.k];if(v==null)return;const g=CK.el('g',{},ff.svg),e=CK.cardMark(g,id,x(v),y,4.5);
+    if(CK.card(id).mark!=='ring'){e.style.stroke='var(--surface)';e.style.strokeWidth='1';}
+    CK.tip(ff,g,`<b>${c.name}, ${CK.card(id).label}</b>${when}<br>${v.toFixed(3)} nF per minion`+(V3?` (four runs, at ${V3.cards[id].busy_mv.toFixed(0)} mV)`:''));nodes.push(g);});});
+  CK.inside(ff,labs.concat(rowLabs));
+  CK.keynav(ff,nodes);
+ }});
 })();
 
 /* ---------- §1 as a ratio chart: A100 ÷ ET-SoC-1 for every metric the facts give on both chips ----------

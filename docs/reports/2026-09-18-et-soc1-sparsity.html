@@ -104,6 +104,7 @@ svg text.halo { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; 
 .lx-guide { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 2 3; }
 .lx-sel { fill: none; stroke: var(--ink); stroke-width: 2; }
 .cell-on { fill: var(--et); }
+.cell-on2 { fill: var(--et2); }
 .cell-off { fill: var(--grid); }
 .cell-skip { fill: color-mix(in srgb, var(--ink-2) 75%, var(--surface)); }  /* same mix as its legend swatch; about 3.2:1 on --grid in light, 4.8:1 in dark */
 .qfloor { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 6 4; }
@@ -192,6 +193,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 </style>
 <script>
 /* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
@@ -691,9 +700,30 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 </script>
 <!-- chartkit:end -->
@@ -711,7 +741,7 @@ window.CK = (function () {
 <li><b>Where it should win, and where it loses.</b> The chip should win where a GPU is stuck at its per-kernel floor and the state fits in SRAM: event-driven simulation, batch-1 pipelines of many small layers, fine-grained wavefronts. It loses wherever the sparse data has to stream from DRAM, and, against a modelled A100, on divergence alone.</li>
 </ul>
 
-<p class="note" id="later"><b>Later measurements.</b> Power depends on the operand values, not only on how many are zero. On this same card (aifoundry3) and loop (546 cycles per op, B in the L1 scratchpad), temperature-controlled runs four days later measured +1.9 W over idle with every operand zero, +9.7 W on all ones and +24.9 W on random normal data (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-second-card-and-what-transfers">the Horace experiment, §10</a>). Per multiply-add that is 0.41, 2.1 and 5.4 pJ on this card in that session. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">energy manual</a> (§3.2, per-card column) now has the three-card check's runs of the same loop (26 September, four per card): 0.40, 2.26 and 5.92 pJ on aifoundry2, 0.16, 1.93 and 5.37 on this card and 0.25, 2.21 and 6.06 on aifoundry1 card 1, registered values with the launch-temperature offset of <a href="#three-cards">the next note</a>. So zero-skip saves 81–92% of the loop's power above idle, depending on the data (the power chart in <a href="#zeros">§1</a> shows these runs in its first-run view). The Horace experiment explains why by simulating the open RTL of the multiply-add unit: power follows the register bits clocked and the nets toggled, not the count of nonzero operands (a model fitted on aifoundry2, which fits this card's runs after one scale factor). This page's all-zero point (+2.4 W) zeroed only A and was read without the later runs' temperature correction, so the two zero figures are not directly comparable. The three-card check re-ran this page's loop with that correction (A zeroed, three runs per card from a set launch temperature): +2.5 W on aifoundry2, +1.4 W on aifoundry1 card 1 and +1.0 W on this card, each with a launch-temperature offset (see the next note).</p>
+<p class="note" id="later"><b>Later measurements.</b> Power depends on the operand values, not only on how many are zero. On this same card (aifoundry3) and loop (546 cycles per op, B in the L1 scratchpad), temperature-controlled runs four days later measured +1.9 W over idle with every operand zero, +9.7 W on all ones and +24.9 W on random normal data (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-second-card-and-what-transfers">the Horace experiment, §10</a>). Per multiply-add that is 0.41, 2.1 and 5.4 pJ on this card in that session. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">energy manual</a> (§3.2, per-card column) now has the three-card check's runs of the same loop (26 September, four per card): 0.40, 2.26 and 5.92 pJ on aifoundry2, 0.16, 1.93 and 5.37 on this card and 0.25, 2.21 and 6.06 on aifoundry1 card 1, registered values with the launch-temperature offset of <a href="#three-cards">the next note</a>. So zero-skip saves 81–92% of the loop's power above idle, depending on the data (the power chart in <a href="#zeros">§1</a> shows these runs in its first-run view). The Horace experiment explains why by simulating the open RTL of the multiply-add unit: power follows the register bits clocked and the nets toggled, not the count of nonzero operands (a model fitted on aifoundry2, which fits this card's runs after one scale factor). This page's all-zero point (+2.4 W) zeroed only A, without that temperature control; the three-card check re-ran it with A zeroed from a set launch temperature (three runs per card): +2.5 W on aifoundry2, +1.4 W on aifoundry1 card 1 and +1.0 W on this card, each with a launch-temperature offset (see the next note).</p>
 
 <p class="note" id="three-cards"><b>Checked on three cards (26 September 2026).</b> 33 of this page's claims were re-measured under a pre-registered plan on aifoundry3, aifoundry2 and aifoundry1 card 1 (three passes of every probe per card, three strict-start runs of every energy configuration): 23 held, 6 were corrected and 4 differ by card. The cycle counts of the TensorFMA, the TensorLoad sweeps, the layer and the divergence loop repeat on every card, most to 0.1%. The corrections: a lone minion's masked TensorLoads bottom out at 42–43 cycles, not 45–47, and its 16-line DRAM load takes 749–751 cycles, not 730; zeros save 86–93% of the loop's power, not 86%; the layer's energies are now per card; and a launch from the host takes up to 0.6 ms. What differs by card: the power left once A is all zeros, whether masking rows matches zeros on aifoundry1 card 1, and how often the power meter refreshes. The check's above-idle watts, given here as registered, carry a launch-temperature offset (the check's <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md">note C2</a>, revised): its leakage correction references fixed launch temperatures (80.9&nbsp;°C on aifoundry2 and aifoundry1 card 1, 55.8&nbsp;°C on this card), while the runs launched at a whole-degree reading of the die sensor (about 80, 80 and 57&nbsp;°C), and whether the die sat at that reading or up to 0.96&nbsp;°C above it cannot be settled. So the registered values read from 0.5 W high to 0.3 W low on aifoundry2, 0.8–1.3 W low on this card and from 0.7 W high to 0.05 W low on aifoundry1 card 1. At the same die temperature this card switches about 0.96–0.97 of aifoundry2's power in the ablations (the energy manual's catalogue, measured separately, gives 0.972), so most of this card's lower readings below come from the reduction, not the card. Differences between runs on one card (the tensor unit on zeros against the spin loop) cancel the offset; ratios such as the saving do not. The TensorLoad chart and table, the power chart and the layer table now offer the three cards beside this page's first run. Record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>.</p>
 
@@ -725,6 +755,7 @@ window.CK = (function () {
 <details class="terms small"><summary>Terms used on this page</summary><p>Kernels run on 1,024 small RISC-V cores called <i>minions</i>, 32 to a <i>shire</i>; each has two hardware threads (<i>harts</i>), an 8-lane vector unit and a tensor unit, and only hart 0 issues tensor operations. A shire's 4 MB of SRAM holds a 512 KB L2 cache, a 1 MB slice of the chip-wide 32 MB L3 and a 2.5 MB <i>scratchpad</i> that any shire can address (the "L2 scratchpad" below), and 8 <i>memory shires</i> on the mesh network-on-chip drive the DRAM. <i>TensorFMA</i> is the tensor unit's matrix multiply-accumulate (16×16×16 in fp32, 16×16×32 in fp16, 16×16×64 in int8), <i>TensorLoad</i> fills the minion's <i>L1 scratchpad</i> (part of its L1 data cache) and <i>TenB</i> streams B from L2 instead; a <i>multiply slot</i> is one of an fp32 op's 4,096 multiply-adds, zero or not. More in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#terms">hub's glossary</a>.</p></details>
 
 <h2 id="zeros">Zeros save power, never cycles</h2>
+<details class="more"><summary>Method, and the full manual-vs-RTL-vs-measured table for all five hooks</summary>
 <p>The Programmer's Reference Manual describes three sparsity hooks: zero-skip in TensorFMA, and <code>tensor_mask</code> on TensorFMA and on TensorLoad. The table sets what the manual promises against what the open RTL implies and what the card measured, and adds rows for fp16 and int8, which behave differently. The RTL is core-et's Erbium branch, read for this report: the same Minion core lineage in a later MCU-class configuration, not the taped-out ET-SoC-1. Each probe ran on one minion; the fp32 TensorFMA and the TensorLoad probes also ran on all 1,024 at once. Inputs were nonzero integers from −3 to 3, plus the zeros under test, so every result could be checked exactly on the host. All of them were exact, and so were all of them again in three passes on each of three cards in the three-card check, whose TensorFMA cycle counts matched this table's.</p>
 <div class="table-wrap"><table class="wide">
 <thead><tr><th>Hook</th><th>Programmer's Reference Manual</th><th>RTL</th><th>Measured on the card</th></tr></thead>
@@ -735,6 +766,7 @@ window.CK = (function () {
 <tr><td class="lvl"><code>tensor_mask</code> on TensorFMA</td><td>Masked rows of C "generate no calculations".</td><td>Masked rows issue no multiply-adds, but their micro-op slots are still spent.</td><td><b>No cycles saved:</b> 544 cycles with 8, 4, 1 or 0 rows enabled (546 with all 16). Masking 8 of 16 rows cuts power like zeros do (+9.2 W instead of +17.3 W; three-card check: +9.2 instead of +17.5 W on aifoundry2 and +7.8 instead of +15.5 W on this card, each as much as half zeros within its 99% range; on aifoundry1 card 1, +8.8 instead of +17.3 W, the match could not be confirmed).</td></tr>
 <tr><td class="lvl"><code>tensor_mask</code> on TensorLoad</td><td>A masked row generates no memory access.</td><td>No request is sent for a masked row.</td><td><b>Time scales with the rows loaded:</b> 160 → 80 → 42–43 cycles for 16, 8 and 4 of 16 rows from L2 or the scratchpad, and 749–751 → 320 → 144 from DRAM on one minion, on all three cards (160 → 81 → 45–47 and 730 → 320 → 144 in the first run). <b>Not when the whole chip streams from DRAM</b> (next section).</td></tr>
 </tbody></table></div>
+</details>
 
 <div class="panels two">
 <div>
@@ -763,15 +795,27 @@ window.CK = (function () {
 <div class="chart" id="c-tl"></div>
 
 <p>With all 1,024 minions loading at once, on-chip memory behaves the same way. DRAM does not. At 16 lines per load this short probe (2,000 loads per minion) streams 72 GB/s from DRAM counting the slowest minion (71–73 GB/s on all three cards). The same probe with 20,000 loads per minion reads 75.6–75.9 GB/s on all three cards, the 76 GB/s measured in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy report</a>. Asking for fewer lines hardly shortens a load, so the useful bandwidth falls with the mask instead of the time. Each minion streams 1 KB blocks, and every mask tested keeps the same low rows of every block, so all the kept lines are homed in a few shires' L3 slices (see <a href="#caveats">Caveats</a>). Masks that vary from block to block were not tested. What matters for kernels is that weights to be skipped should sit in SRAM.</p>
-<p class="small">Table and chart show: <span id="t-tl-src">first run, 18 Sep, aifoundry3</span>.</p>
+<details class="more"><summary>Why: the home-shire hypothesis, charted, and the full bandwidth table</summary>
+<p class="small">This chart, the table below and the TensorLoad chart above show: <span id="t-tl-src">first run, 18 Sep, aifoundry3</span> (the Data buttons above the TensorLoad chart choose).</p>
+<div class="chart-title">The page's hypothesis: fewer home shires answering, not less DRAM bandwidth from each</div>
+<div class="ck-controls"><div id="hs-mask"></div></div>
+<div class="panels two">
+<div><div class="chart-sub">(a) 32 home shires (L3 slices, address bits 10:6)</div><div id="hs-home"></div></div>
+<div><div class="chart-sub">(b) 8 memory shires (DRAM controllers)</div><div id="hs-mem"></div></div>
+</div>
+<p class="ck-readout" id="hs-read"></p>
+<p class="small">Shire positions here are illustrative, not the physical layout; only which count is lit is measured, from the address mapping in <a href="#caveats">Caveats</a>. GB/s per shire divides the chip's measured DRAM bandwidth at that mask (from the table below) by the shires it should reach. If the hypothesis holds, (a)'s per-shire rate stays flat across masks while (b)'s does not, since the 8-line mask still reaches all 8 memory shires.</p>
 <div class="table-wrap"><table>
 <thead><tr><th>All 1,024 minions</th><th class="num">16 lines</th><th class="num">8 lines</th><th class="num">4 lines</th><th class="num">1 line</th></tr></thead>
 <tbody id="t-tl"></tbody></table></div>
 <p class="small">Cycles per load, mean over the 1,024 minions. In brackets, the bytes the mask let through per second over the whole chip, using the slowest minion's total time at 600 MHz (so they are a few percent below what the mean cycle count implies). The three cards give the median of their three passes: they repeat the first run's L2 and scratchpad counts to within 1.5% (the L2 at 16 lines varies from 286 to 306 cycles between passes), and read DRAM 3–4% faster at 16 lines, within 2% at 8 and 4, and 4–5% slower at 1 line. At 16 lines L2 reads 2.03 TB/s here (1.96–2.13 TB/s over the check's nine passes), below the 2.45 TB/s the memory-hierarchy probe reads on both cards, including this one on 23 September at a pinned 600 MHz (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a>). This probe is shorter (2,000 loads per minion). Run with 20,000 or 200,000 loads per minion it reads 2.45 and 2.46 TB/s on all three cards, so the gap belongs to the short probe; the three-card check could not tie it to a cold start, since a separate 2,000-load run varied from 1.63 to 2.37 TB/s between passes.</p>
+</details>
 
 <h2 id="layer">A batch-1 layer that skips zeros</h2>
+<details class="more"><summary>Method: how the layer kernel works and was timed</summary>
 <p>This is the case most relevant to ML: one output of a ReLU layer, y = W x with a batch of one, where most of x is zero. The layer is 1024 outputs × 4096 inputs in fp32 (16.8 MB of weights). It is spread over all 32 shires, and each shire keeps its 512 KB share of W in its own L2 scratchpad. Minion <i>j</i> of shire <i>s</i> owns 16 outputs and 256 inputs, in 16 slices of 16. For each slice it loads only the rows of Wᵀ whose x is nonzero (a masked TensorLoad), then runs one single-row TensorFMA. Where all 16 x values of a slice are zero, it skips the slice. Sixteen minions then add their partial rows with a TensorReduce tree that stays inside the shire.</p>
 <p>Latency runs from a shire barrier to the moment the block's result is in registers, averaged over 2,000 repeats per sparsity level. Each level uses one random x, the same for every variant. Every output was checked exactly against the host. The host supplies a bitmask of which x are nonzero. In a real pipeline the layer that produced x would build it, which takes two vector instructions per 8 values (<code>fltm.ps</code>, then read the mask).</p>
+</details>
 <div class="chart-title">What the layer skips at each sparsity, and its latency against an A100</div>
 <div class="ck-controls"><div id="lx-zeros"></div><div id="lx-var"></div><div id="lx-red"></div></div>
 <div class="panels lx">
@@ -791,12 +835,18 @@ window.CK = (function () {
 
 <p>Three effects add up. Masked loads cut the bytes, so at 50% zeros the layer drops from 7.5 to 5.7 µs. After that the per-slice fixed costs take over. Each nonempty slice waits for a load (at least 42 cycles) and an FMA, and the curve flattens at 5.4 µs. These times repeat to within 0.01 µs on all three cards. The big gains come only from skipping whole slices, which random sparsity allows only near the top: for independent zeros 18.5% of slices are empty at 90% zeros and 85% at 99% (0.9¹⁶ and 0.99¹⁶; the x drawn here had 14.9% and 87.5%). Energy per layer above idle falls from 67 to 5.9 µJ on aifoundry2 (19 at 90% zeros), from 75 to 4.5 µJ on aifoundry1 card 1 (16) and from 56 to 3.3 µJ on this card (12), mostly because skipped slices and masked loads do less work in less time (70 to 7 µJ, 19 at 90%, in the first run). The tensor unit's own gating adds no speed and little energy here: with every row loaded, 90% zeros in x cut the layer's power above idle only from 9.9 to 8.2 W on aifoundry2, 11.0 to 9.3 W on aifoundry1 card 1 and 8.4 to 6.8 W on this card, 16–19% (the three-card check ran the every-row kernel at both points; the first run, 9.4 to 8.3 W or about 12%, had the masked kernel at 0%, which with no zeros also loads every row).</p>
 
+<details class="more"><summary>How the A100 comparison numbers were built up</summary>
 <p><b>Against the A100.</b> No one has published a timing for this exact layer on an A100, so the reference lines are rough references, not bounds. Launching even an empty kernel costs 2.26 µs, plus 1.44 µs for the kernel itself (measured on an A100-SXM4-80GB). Kernels queued back to back in a stream cost less, about 1.5–2.3 µs each on an A100 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">on-chip communication report</a>). cuBLAS half-precision GEMM has a latency floor of about 4.5 µs. Streaming 16.8 MB of weights from L2 at 2.5–4.5 TB/s takes 3.7–6.7 µs. Added to the 2.26 µs launch, or to cuBLAS's 4.5 µs floor, a dense fp32 layer probably takes 6–11 µs, against 7.3–7.5 µs here. CUDA graphs cut launch cost to about 1.3 µs per kernel (measured on H100). At batch 1 a GPU's sparse GEMV is floor-bound too: TEAL's kernel gets 3× at 99–100% sparsity on a 4096×14336 fp16 layer, with 14× this one's weights and 7× its bytes (102 → 33 µs), and Deja Vu reported 1.8–2× end to end at about 75% sparsity (OPT-175B on 8 A100s, against FasterTransformer).</p>
+</details>
 <p>So at batch 1, on these runs, <b>ET-SoC-1 reaches A100-class latency on one layer. It beats a single isolated A100 launch (3.7 µs) only at 99% zeros or more, and there (2.1 µs) it only matches a queued A100 kernel (1.5–2.3 µs).</b> That comparison favours ET: its 2.1 µs is a layer inside a kernel that is already running (a launch from the host took 0.2–0.6 ms on the three cards, median 0.36 ms on this one), and a GPU can avoid launches too, with a persistent kernel whose grid-wide sync costs 1.1–1.2 µs (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">on-chip communication report</a>).</p>
-<p>The whole board spends 60–246 µJ per layer on this card, idle included (85–337 on aifoundry2 and 114–446 on aifoundry1 card 1, whose idles are higher). No A100 energy for this layer has been published; the benchmark in <a href="#s-batch1">scenario 2</a> would measure it. The larger prize is a stack of such layers. A pipeline of tens of small layers could stay on chip with no launch between layers, but each layer would still have to pass its outputs across shires (2.3–5.4 µs per chip-wide allreduce on aifoundry2; <a href="#scenarios">§5</a>), and a GPU could run the same stack as one persistent kernel. None of this is measured here.</p>
+<details class="more"><summary>Board energy, and what a stack of layers would still need</summary>
+<p>The whole board spends 60–246 µJ per layer on this card, idle included (85–337 on aifoundry2 and 114–446 on aifoundry1 card 1, whose idles are higher). No A100 energy for this layer has been published; the benchmark in <a href="#s-batch1">scenario 2</a> would measure it. The larger prize is a stack of such layers. A pipeline of tens of small layers could stay on chip with no launch between layers, but each layer would still have to pass its outputs across shires (a chip-wide allreduce, <a href="#scenarios">§5</a>), and a GPU could run the same stack as one persistent kernel. None of this is measured here.</p>
+</details>
 
 <h2 id="divergence">Divergence: narrow lanes help, but not enough</h2>
+<details class="more"><summary>Method: the workload and the three lane-scheduling variants</summary>
 <p>The other half of the question is irregular work, here divergence. Each work item needs <i>k</i> iterations of an FMA loop (8 independent chains), and <i>k</i> is drawn from a heavy-tailed Pareto distribution with mean 64. The case for ET-SoC-1 is that its SIMD is only 8 lanes wide and each core runs its own code, so a long item wastes less. All 2,048 harts took 32-item chunks from a shared work queue (a global atomic counter), 524,288 items in all, and every result was checked. Three variants ran, once each, and again in three passes on each of three cards in the three-card check, which repeated every figure in this section. <i>Static</i> runs 8 items per 8 lanes until the longest finishes, as a GPU warp would. <i>Refill</i> gives a lane its next item as soon as it finishes. <i>Scalar</i> runs one item at a time on one lane.</p>
+</details>
 <div class="panels two">
 <div>
   <div class="chart-title">Lane efficiency against the heaviness of the tail</div>
@@ -811,6 +861,7 @@ window.CK = (function () {
 </div>
 <p>Static 8-lane groups keep busy exactly the share of lanes that grouping the same items in eights predicts: 0.55 at α = 3 and 0.21 at α = 1.2, against 0.35 and 0.08 for a 32-lane warp on the same items. (The continuous order-statistics formula gives 0.55 and 0.19; the cap at 16,384 iterations trims the heaviest tail.) Refilling lanes raises ET's efficiency to 0.96 and 0.46 (0.962–0.963 and 0.453–0.459 over the three cards' passes; which lane gets which item depends on timing, so the refill figures move in the third decimal), but its bookkeeping costs cycles: at α = 3 it does fewer useful FMAs per second than static (0.59 against 0.73 T/s, on every card), and it pulls ahead only from α = 2 (by 0.016 T/s there, a 99% range within 0.012–0.020 T/s on each card over five runs).</p>
 <p><b>It is not enough to beat a modelled A100.</b> This loop peaks at about 1.5 useful FMAs per cycle per minion, or 0.9 T/s for the chip, under a fifth of the 8-lane peak (4.9 T/s at 600 MHz). An A100 has 9.75 T FP32 FMA/s. A naive kernel that keeps only 8% of its lanes busy at α = 1.2 would still do 0.74 T/s if it issued FMAs at the A100's peak (a model, not a measurement), against ET's 0.39 T/s measured on each of three cards. That 1.9× gap is within what tuning might recover, but at α = 1.5–3 the modelled A100 stays 2.3–4.6× ahead of ET's faster variant, and GPUs have compaction and refill tricks of their own.</p>
+<details class="more"><summary>Investigating the work-queue hypothesis, charted</summary>
 <p>What limits the loop was not measured, and the shared work queue may be part of it. A contended global atomic retires one operation every 10 cycles (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a>). The 16,384 chunk grabs plus each hart's final empty grab need about 184,000 cycles of it, more than the average hart's whole run without divergence; the chart below sets that floor against every run. An 8-lane iteration also takes 84 cycles against 33 for a one-lane scalar iteration, so the loop's mask test and branch cost too. The scalar variant, which uses the queue at a third of the rate, held 0.30 T/s at every α. Larger chunks or one queue per shire would separate the two.</p>
 <div class="chart-title">Could the one global work queue be what limits the loop? Mean hart cycles against the queue's floor</div>
 <div class="ck-controls"><div id="q-cost"></div></div>
@@ -818,13 +869,17 @@ window.CK = (function () {
 <div id="c-queue"></div>
 <p class="ck-readout" id="q-read"></p>
 <p class="small">Bars: the mean hart's cycles in each run; the slowest hart is in each bar's tooltip. Dashed line: the cycles the queue alone needs if every grab waits its turn, (items ÷ chunk + harts) × cycles per contended atomic, here (524,288 ÷ 32 + 2,048) × the slider's value. 10 is the ceiling measured in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a>; the slider shows how the floor moves if the true cost differs. Only 32-item chunks were run.</p>
+</details>
 <p>On this evidence (three cards, against a modelled A100), divergence in how long items run is not an ET-SoC-1 advantage. What the chip has that a GPU lacks is one instruction stream per core. That matters when items run <i>different code</i>, as in interpreters, simulators and heterogeneous state machines, which this sweep does not test.</p>
 
 <h2 id="scenarios">Where ET-SoC-1 should beat an A100, and how to prove it</h2>
 <p>These measurements and the published literature give one recipe for a win. The work must be latency-bound or event-driven, so that a GPU sits at its per-kernel or per-sync floor. Its state must fit in the 80 MB of on-chip scratchpad, or be regenerated rather than fetched. And each step's surviving work must be dense enough for 8-lane SIMD or the tensor unit.</p>
+<details class="more"><summary>The sync-cost numbers behind the estimates below</summary>
 <p>The chip's sync costs come from the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#reduction-trees">on-chip communication report</a>, measured on aifoundry2. A 1,024-minion allreduce takes 2.3 µs for 32 B and 5.4 µs for 1 KB, a chip-wide barrier from atomics and credits 8.3 µs, and a shire allreduce 0.72 µs. A message round trip takes 113–190 ns inside a shire and 250 ns + 20 ns per mesh hop across shires.</p>
+</details>
 <p>Each scenario below gives why a GPU struggles, the best published baseline (an A100 result where one exists; otherwise the hardware is named), an estimate for this chip from the measurements above, and the benchmark that would settle it. Only scenario 2 is measured here.</p>
 
+<details class="more"><summary>Scenario 1: spiking cortical microcircuit (unmeasured estimate)</summary>
 <h3 id="s-spiking">1. Spiking cortical microcircuit</h3>
 <p class="small">The Potjans–Diesmann model (PD14): 77,169 neurons, 3×10⁸ synapses, 0.1 ms steps. RTF is the real-time factor, wall-clock time over model time.</p>
 <dl class="scen">
@@ -833,15 +888,17 @@ window.CK = (function () {
 <dt>ET-SoC-1 estimate</dt><dd>About 75 neurons per minion, resident in L1/L2, with synapses regenerated from a counter-based RNG. Per step: an exchange of the ~25 spike IDs through the hardware tree (2.3–5.4 µs for 32 B to 1 KB, above; an all-gather of a variable-length list needs fixed slots or a prefix sum), plus the compute: about 95 synaptic events and 75 neuron updates per minion per step, each event's target, weight and delay regenerated from the RNG, with no hardware divide or square root. That compute was not measured. If it fits in about a microsecond, a step takes about 4–10 µs, an RTF of 0.04–0.1, 5–13× the A100. At about 30 W this would be a few nJ per synaptic event: an estimate, not a measurement.</dd>
 <dt>Benchmark that would settle it</dt><dd>PD14 under the community recipe (Senk et al. 2026): RTF, and energy per synaptic event measured at the outlet, over ≥ 10 s of model time and 10 seeds. Validate with rate, CV and correlation distributions, and declare procedural connectivity.</dd>
 </dl>
+</details>
 
 <h3 id="s-batch1">2. Batch-1 activation-sparse inference, SRAM-resident</h3>
 <dl class="scen">
 <dt>Why a GPU struggles</dt><dd>Batch 1 is floor-bound: launch plus sync per layer. Gains from sparsity saturate on fixed costs.</dd>
 <dt>Published baseline</dt><dd>A100: one isolated launch plus a null kernel 3.7 µs; cuBLAS fp16 GEMM floor ~4.5 µs. TEAL 1.33–1.45× end to end at 50% sparsity; Deja Vu 1.8–2× at ~75% (8×A100).</dd>
-<dt>ET-SoC-1 estimate</dt><dd>Measured in <a href="#layer">§3</a>: 7.5 → 2.1 µs and 251 → 74 µJ per layer. A model of ≤ 40 M fp16 parameters fits on chip, and every layer after the first avoids a kernel launch, though each still has to pass its outputs across shires (not measured).</dd>
+<dt>ET-SoC-1 estimate</dt><dd>Measured in <a href="#layer">§3</a>, dense against 99% zeros: 7.5 → 2.1 µs per layer with the on-chip reduction, and 246 → 60 µJ of board energy per layer on aifoundry3 (337 → 85 on aifoundry2, 446 → 114 on aifoundry1 card 1) from the energy runs, which used the compute-only kernel whose partial sums the host adds. A model of ≤ 40 M fp16 parameters fits on chip, and every layer after the first avoids a kernel launch, though each still has to pass its outputs across shires (not measured).</dd>
 <dt>Benchmark that would settle it</dt><dd>The same layer on an A100 with CUDA graphs, cuBLAS against a gather GEMV, 0–99% sparsity, time and NVML power. Then a whole small ReLU model at batch 1: µs and J per token.</dd>
 </dl>
 
+<details class="more"><summary>Scenario 3: sparse triangular solve (unmeasured estimate)</summary>
 <h3 id="s-sptrsv">3. Sparse triangular solve (ILU/IC preconditioner, deep DAG)</h3>
 <dl class="scen">
 <dt>Why a GPU struggles</dt><dd>Thousands of thin dependency levels, each needing a sync.</dd>
@@ -849,7 +906,9 @@ window.CK = (function () {
 <dt>ET-SoC-1 estimate</dt><dd>Inside a shire, a level handoff by credit or message takes 113–400 ns. A chip-wide barrier per level (2.3–8.3 µs) would lose, so it only wins with per-shire subdomains and point-to-point credits. FP32 only: a mixed-precision preconditioner.</dd>
 <dt>Benchmark that would settle it</dt><dd>A thin-level SuiteSparse subset: <code>cusparseSpSV</code> and AG-SpTRSV on the A100 against an ET version partitioned into per-shire blocks. Report solve time and time per level.</dd>
 </dl>
+</details>
 
+<details class="more"><summary>Scenario 4: RTL and gate-level simulation (unmeasured estimate)</summary>
 <h3 id="s-rtl">4. RTL and gate-level simulation</h3>
 <dl class="scen">
 <dt>Why a GPU struggles</dt><dd>Tiny tasks, and a sync every simulated cycle. The GPU needs thousands of stimuli to fill up.</dd>
@@ -857,7 +916,9 @@ window.CK = (function () {
 <dt>ET-SoC-1 estimate</dt><dd>Same bulk-synchronous model at 4.5× Manticore's core count. Synchronisation alone caps a shire at about 2.5 MHz (a 395 ns barrier every cycle) and the whole chip at about 430 kHz (the 2.3 µs tree). Gate evaluation and exchanging signal values between shires come on top, so real rates would be well below these ceilings. Several million gates fit in scratchpad.</dd>
 <dt>Benchmark that would settle it</dt><dd>Manticore's designs: simulated kHz against Verilator at 1 and N threads, and GEM on the A100 with 1, 8 and 1K stimuli. Needs a partitioning compiler.</dd>
 </dl>
+</details>
 
+<details class="more"><summary>Scenario 5: interpreters over per-item programs (unmeasured estimate)</summary>
 <h3 id="s-interpreters">5. Interpreters over per-item programs (symbolic regression, GP)</h3>
 <p class="small">GP is genetic programming. GPop/s counts GP operations per second, one expression node evaluated on one data row; it is not 10⁹ of anything.</p>
 <dl class="scen">
@@ -866,7 +927,9 @@ window.CK = (function () {
 <dt>ET-SoC-1 estimate</dt><dd>One expression per minion, one data row per lane (8 rows per vector instruction), so the lanes never diverge. Guessing from this issue rate: about 10¹¹ GPop/s; 10¹² would need the interpreter to match the plain FMA loop's 0.9 × 10¹² lane-ops/s with no overhead. The sweep above says to measure it.</dd>
 <dt>Benchmark that would settle it</dt><dd>SRBench-style evaluation: GPop/s against EvoGP on the A100 and Operon on x86.</dd>
 </dl>
+</details>
 
+<details class="more"><summary>Scenario 6: tree ensembles and motion planning (unmeasured estimate)</summary>
 <h3 id="s-trees">6. Tree ensembles and motion planning at batch 1</h3>
 <dl class="scen">
 <dt>Why a GPU struggles</dt><dd>Small batches don't fill a GPU; per-query paths are data-dependent.</dd>
@@ -874,6 +937,7 @@ window.CK = (function () {
 <dt>ET-SoC-1 estimate</dt><dd>Throughput plays (1,024 independent queries), with x86 as the rival more than the A100. A single query on one minion will probably be slower than on one x86 core.</dd>
 <dt>Benchmark that would settle it</dt><dd>MSLR-WEB30K with a LightGBM model: µs/doc at batch 1–100 against RAPIDS FIL. MotionBenchMaker: plans/s and tail latency against VAMP and cuRobo.</dd>
 </dl>
+</details>
 
 <h3 id="a100-wins">Where the A100 wins</h3>
 <ul>
@@ -883,17 +947,14 @@ window.CK = (function () {
 </ul>
 
 <h2 id="answers">Answers to the questions this work started from</h2>
-<p>The work began from two research briefs (not published); these are their questions and what the measurements say.</p>
+<p>The work began from two research briefs (not published). The sections above answer most of their questions; these two answers are easy to miss:</p>
 <ul>
-<li><b>Does zero-skip save cycles or only energy?</b> Only energy: 81–93% of a TensorFMA loop's power above idle, 16–19% in the batch-1 layer (<a href="#zeros">§1</a>, <a href="#layer">§3</a>). <code>tensor_mask</code> on TensorFMA behaves the same.</li>
 <li><b>Is the manual's fp16 skip rule right?</b> No; the silicon computes the correct sum (<a href="#zeros">§1</a>).</li>
-<li><b>Do inactive neurons cost neither bandwidth nor FMAs?</b> No bandwidth for SRAM-resident weights; a zero still spends its TensorFMA cycles unless its whole 16-element slice is skipped (<a href="#masked-loads">§2</a>, <a href="#layer">§3</a>).</li>
-<li><b>Can a step afford its synchronisation?</b> Within 10 µs only through the hardware tree (on aifoundry2: 2.3 µs for 32 B, 5.4 µs for 1 KB; 8.3 µs for a barrier from atomics); an all-gather was not measured (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#reduction-trees">on-chip communication, reduction trees</a>).</li>
 <li><b>Does point-to-point messaging work across shires?</b> Yes on aifoundry2, with one ready flag per minion: change partners only after a barrier (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#a-trap-one-ready-flag-per-minion">on-chip communication, A trap: one ready flag per minion</a>).</li>
-<li><b>How close does it get to peak?</b> A vector-FMA loop reaches 0.9 of 4.9 T FMA/s; the tensor unit 9.2 TFLOP/s here, 9.5 in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">matmul report</a> (<a href="#divergence">§4</a>).</li>
 </ul>
 
 <h2 id="method">How it was measured</h2>
+<details class="more"><summary>Method for every probe: kernel, timing, and each probe's design</summary>
 <ul>
 <li><b>Kernel and host.</b> <code>workloads/sparsity</code> is a standalone kernel plus host built on the runtime API, as in the other workloads. It was built on the lab machine against its <code>/opt/et</code>, and every probe was validated first in <code>sys_emu</code> (the platform's functional simulator) with its vector-unit hazard checker (<code>-vpurf_warn</code>). The checker found two register-file hazards (errata 1.29 types B and C), which the kernel now avoids.</li>
 <li><b>Timing</b> is the minion cycle counter (<code>hpmcounter3</code>) on the timed section of each hart. On aifoundry3 the service processor (the on-die management core) reported 600 MHz in every sample of this session, logged about 4 times a second during the sweeps, so cycles convert to µs at 1.667 ns.</li>
@@ -903,19 +964,23 @@ window.CK = (function () {
 <li><b>Divergence probe.</b> k = ceil(Pareto(α)) with mean 64, capped at 16,384. Chunks of 32 items come off a global atomic counter. Lane state lives in f1–f9, the running lanes are the mask m0, and every item's result must equal its k. Lane efficiency is useful lane-iterations over 8 × vector iterations. Throughput is taken over the mean hart time, which is the steady state; the slowest hart is set by the single longest item. The A100 lines apply the warp-of-32 order statistics to the same draws, times 9.75 T FMA/s.</li>
 <li><b>Energy.</b> A background thread read board power, clock and voltage from the service processor about 9 times a second. The board-power reading itself changes less often, and how often depends on the card and the poller: in the three-card check, on this card about every 223–224 ms under a poll of about 8 per second and 262–264 ms under a 10 Hz sampler, on aifoundry2 about every 126–135 and 155–157 ms, and on aifoundry1 card 1 133–139 and 156–159 ms. Each configuration then ran 4 s of launches in its own <code>timeout 10</code> process, with 6 s of idle at the start and end. The second run, in the same session on aifoundry3, used the reverse order. The two agree within 0.5 W above idle, except the spin baseline (0.6 W). No temperature correction was applied. The three-card check (<code>tools/claims-v3/ablb/</code>) ran every configuration for 5 s in three shuffled blocks per card, each run launched at a set die temperature (about 57&nbsp;°C on this card, 80&nbsp;°C on the other two), with power above the idle just before it, corrected for leakage to that temperature.</li>
 </ul>
-<p class="small">Versions: published 18 September 2026; revised 24 September 2026 (operand values, later measurements, the masked-DRAM cause, the work queue, the A100 launch comparison) and 25 September 2026 (the layer explorer, the later runs on the power chart and the queue-floor chart; this card's meter rate; shorter answers); 25 September (version 3): which card and how many runs each figure rests on, aifoundry2's values beside this card's, and the tensor unit's own all-zero power no longer quoted as a number (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>); 26 September: the three-card check (aifoundry2, aifoundry3, aifoundry1 card 1) in the text, the KPIs, the power chart, the TensorLoad chart and table and the layer table.</p>
+</details>
+<details class="more"><summary>Version history</summary>
+<p class="small">Versions: published 18 September 2026; revised 24 September 2026 (operand values, later measurements, the masked-DRAM cause, the work queue, the A100 launch comparison) and 25 September 2026 (the layer explorer, the later runs on the power chart and the queue-floor chart; this card's meter rate; shorter answers); 25 September (version 3): which card and how many runs each figure rests on, aifoundry2's values beside this card's, and the tensor unit's own all-zero power no longer quoted as a number (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>); 26 September: the three-card check (aifoundry2, aifoundry3, aifoundry1 card 1) in the text, the KPIs, the power chart, the TensorLoad chart and table and the layer table; 27 September: the masked-load hypothesis charted (per card), scenario 2 names the kernel behind each figure and takes the three-card energies, and aifoundry3's 600 MHz traced to the boot service that sets its TDP to 0 W.</p>
+</details>
 
 <h2 id="caveats">Caveats</h2>
+<details class="more"><summary>Caveats in full</summary>
 <ul>
-<li>A100 numbers are published measurements on other shapes, plus labelled estimates. None of this was run on an A100. The layer comparison in particular needs the benchmark in <a href="#s-batch1">scenario 2</a>.</li>
-<li>One card, one day, then three. <code>aifoundry3</code> held 600 MHz throughout; later work found why: its firmware reports a TDP of 0 W, so its governor can never raise the clock (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">The DVFS loop and its leakage, §3</a>). Its sister card <code>aifoundry2</code> runs at 600, 700 or 800 MHz depending on die temperature and board power. Cycle counts carry over between the cards: the three-card check read the same tensor-op counts (546 cycles per fp32 or fp16 op, 318 per int8 op and 529 per fp32 op with B streamed through TenB), the same masked and full-line TensorLoads, the same layer times and the same work-queue results on aifoundry2, aifoundry3 and aifoundry1 card 1 (though a lone minion's load floor and its 16-line DRAM load read 42–43 and 749–751 cycles on all three, against 45–47 and 730 in this page's first run). Switching power on aifoundry3 ran about 8% below aifoundry2's for the same work, with aifoundry3's die at 56&nbsp;°C and aifoundry2's at 81&nbsp;°C (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-second-card-and-what-transfers">the Horace experiment, §10</a>), and idle power differs with die temperature.</li>
+<li>One card, one day, then three. <code>aifoundry3</code> held 600 MHz throughout; later work found why: a boot service sets its TDP to 0 W at every boot, so its governor can never raise the clock (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">The DVFS loop and its leakage, §3</a>). Its sister card <code>aifoundry2</code> runs at 600, 700 or 800 MHz depending on die temperature and board power. Cycle counts carry over between the cards: the three-card check read the same tensor-op counts (546 cycles per fp32 or fp16 op, 318 per int8 op and 529 per fp32 op with B streamed through TenB), the same masked and full-line TensorLoads, the same layer times and the same work-queue results on aifoundry2, aifoundry3 and aifoundry1 card 1 (though a lone minion's load floor and its 16-line DRAM load read 42–43 and 749–751 cycles on all three, against 45–47 and 730 in this page's first run). Switching power on aifoundry3 ran about 8% below aifoundry2's for the same work, with aifoundry3's die at 56&nbsp;°C and aifoundry2's at 81&nbsp;°C (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-second-card-and-what-transfers">the Horace experiment, §10</a>), and idle power differs with die temperature.</li>
 <li>The flat DRAM time under a mask is probably caused by which lines the masks kept. A line's L3 home shire is physical-address bits 10:6 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#l3-110-cycles-plus-12-per-hop">Anatomy of a memory access</a>), and these masks keep the same low lines of every 1 KB block, so at 8, 4 and 1 lines all 1,024 minions' misses land on 16, 8 and 2 of the 32 home shires (and at 4 and 1 lines on 4 and 1 of the 8 memory shires). Per home shire the chip streams 2.3–2.6 GB/s at every mask in this one run. The 8-line mask still reaches all 8 memory shires yet halves the bandwidth, which points at the home shires rather than the memory controllers. A mask that rotates from block to block would test this.</li>
 <li>The layer's bitmask of nonzero x comes from the host. The tree reduction assumes that all 16 minions of a block take part in every layer.</li>
 <li>The divergence loop is not hand-optimised. The performance-counter events that would count its micro-ops (such as TXFMA ops) can only be programmed in machine mode (M-mode), where the firmware runs, not from a user kernel, so micro-op counts were not read.</li>
-<li>The scenario estimates are back-of-envelope. Scenario 2 is the only one measured end to end, for one layer.</li>
 </ul>
+</details>
 
 <h2 id="reproduce">Reproduce</h2>
+<details class="more"><summary>Reproduce this</summary>
 <pre><code>scripts/deploy-lab.sh aifoundry3 workloads/sparsity
 ssh aifoundry3 'cd ~/nekko &amp;&amp; bash workloads/sparsity/run_lab.sh build/sparsity/host/sparsity_host build/sparsity-data'
 ssh aifoundry3 'cd ~/nekko &amp;&amp; python3 workloads/sparsity/run_energy.py --host-bin build/sparsity/host/sparsity_host --out build/sparsity-data/energy-a'
@@ -925,8 +990,10 @@ python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifo
     --later docs/reports/data/2026-09-22-horace-aifoundry3/horace3.json \
     --embed docs/reports/2026-09-18-et-soc1-sparsity.html</code></pre>
 <p class="small"><code>scripts/deploy-lab.sh</code> copies the sources to <code>~/nekko</code> on the lab machine and builds them there. Every card command runs in its own <code>timeout 10</code> process with <code>--budget 8</code>, and waits until no other process holds the card. Raw data: <code>docs/reports/data/2026-09-18-sparsity-aifoundry3/</code> (its README lists what each file is). <code>analyze.py</code> also reads the three-card check (<code>docs/reports/data/2026-09-25-claims-v3</code>: V3-LAT's raw TensorLoad sweeps and V3-ABL-B's per-run table, <code>results/ablb.runs.json</code>) into the three-card views of the charts and tables; the check's runs are <code>tools/claims-v3/lat/</code> and <code>tools/claims-v3/ablb/</code>. Without a card, add <code>--sysemu</code> to any <code>sparsity_host</code> command to check a kernel (the simulator's cycle counts mean nothing), e.g. <code>build/sparsity/host/sparsity_host --sysemu --test fma --type fp16 --pattern pair --sweep 0,0.5,1 --shires 0x1 --per-shire 1</code>.</p>
+</details>
 
 <h2 id="sources">Sources</h2>
+<details class="more"><summary>Full source list</summary>
 <ol class="small">
 <li>ET-SoC-1 Programmer's Reference Manual (<a href="https://github.com/aifoundry-org/et-man">aifoundry-org/et-man</a>), §9.2.1 tensor_mask, §9.4 TensorFMA32 / TensorFMA16A32 / TensorIMA8A32 / TensorLoad pseudo-code; ET-SoC errata 1.29. <a href="https://github.com/openhwfoundation/core-et/tree/erbium">core-et</a> (Erbium branch) RTL <code>vpu_ctrl.v</code>, <code>vpu_tensorfma.v</code> and the Minion VPU Specification, for zero gating and issue.</li>
 <li>Vellaisamy et al., Characterizing and Optimizing LLM Inference Workloads on CPU-GPU Coupled Architectures, <a href="https://arxiv.org/abs/2504.11750">arXiv 2504.11750</a>, Table V (A100 launch 2.26 µs + null kernel 1.44 µs). Hazy Research, <a href="https://hazyresearch.stanford.edu/blog/2025-05-27-no-bubbles">"Look Ma, No Bubbles!"</a> (2025), H100 launch 2.1 µs, 1.3 µs with CUDA graphs. Erdil &amp; Schneider-Joseph, <a href="https://arxiv.org/abs/2411.01137">arXiv 2411.01137</a> §5.1.1 (cuBLAS fp16 GEMM floor ~4.5 µs). Luo et al., <a href="https://arxiv.org/abs/2402.13499">arXiv 2402.13499</a>, Chips and Cheese, and Zhang et al., GPGPU 2025, Fig. 6a (A100 L2 bandwidth).</li>
@@ -936,6 +1003,7 @@ python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifo
 <li>Emami et al., Manticore, <a href="https://arxiv.org/abs/2301.09413">arXiv 2301.09413v4</a> (ASPLOS 2024). Guo et al., GEM, DAC 2025. Emami, Bourgeat, Larus, Parendi: Thousand-Way Parallel RTL Simulation, ASPLOS 2025 (<a href="https://arxiv.org/abs/2403.04714">arXiv 2403.04714</a>). Thomason, Kingston, Kavraki, VAMP, ICRA 2024. Huang et al., pRRTC, <a href="https://arxiv.org/abs/2503.06757">arXiv 2503.06757</a>. Sundaralingam et al., cuRobo, <a href="https://arxiv.org/abs/2310.17274">arXiv 2310.17274</a>. Lucchese et al., QuickScorer, SIGIR 2015. Lettich et al., Parallel Traversal of Large Ensembles of Decision Trees, IEEE TPDS 30(9) 2019. Wu et al., EvoGP, <a href="https://arxiv.org/abs/2501.17168">arXiv 2501.17168</a>. Burlacu et al., Operon, GECCO 2020.</li>
 <li>Pareto order statistics: E[max of n] = Γ(n+1) Γ(1−1/α) / Γ(n+1−1/α). Laine, Karras, Aila, HPG 2013, and Aila &amp; Laine, HPG 2009, for GPU wavefront and refill techniques.</li>
 </ol>
+</details>
 
 <h2 id="related">Related reports</h2>
 <ul>
@@ -1244,10 +1312,61 @@ python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifo
     });
     var cap = document.getElementById("t-tl-src"); if (cap) cap.textContent = src;
     CK.stackTable(tb.parentNode);   // re-label the new cells for the phone layout (the table is stacked as cards there)
+    if (hsRefresh) hsRefresh();     // the home-shire chart reads the same data
   }
   if (V3CARDS.length) CK.seg("tl-data", { label: "Data", value: tlSel,
     options: V3CARDS.map(function (c) { return [c, CK.card(c).label]; }).concat([["first", "First run, 18 Sep"]]),
     onChange: function (v) { tlSel = v; renderTl(); } });
+
+  /* Masked-load hypothesis: a mask keeps the same low lines of every 1 KB block, so it should reach fewer home
+     shires (L3 slices) rather than less bandwidth from each. Shire counts follow the Caveats prose; positions
+     within each grid are illustrative. */
+  var hsHomeFrame = null, hsMemFrame = null, hsRefresh = null;
+  function renderHomeShires() {
+    // the DRAM rows of the TensorLoad table's data: the first run, or the card the Data buttons above chose
+    var byLines = {}, srcName = "";
+    function load() {
+      var v3 = tlSel !== "first" ? (V3.tload || {})[tlSel] : null, T = v3 ? v3.rows : (D.tload || {});
+      srcName = v3 ? CK.card(tlSel).label + ", three-card check" : "first run, 18 Sep, aifoundry3";
+      byLines = {};
+      (T["dram-all"] || []).forEach(function (r) { byLines[r[0]] = r; });
+    }
+    load();
+    var MASKS = [16, 8, 4, 1].filter(function (m) { return byLines[m]; });
+    if (!MASKS.length) return;
+    var HOME_LIT = { 16: 32, 8: 16, 4: 8, 1: 2 }, MEM_LIT = { 16: 8, 8: 8, 4: 4, 1: 1 };
+    var hs = { lines: MASKS[0] };
+    function shireGrid(hostId, total, cols, litOf, cls, what) {
+      var rowsN = Math.ceil(total / cols);
+      return CK.frame(hostId, { height: function (W) { return Math.round(Math.min(W, 420) / cols * rowsN) + 6; }, minW: 160, maxW: 420,
+        label: what + ": which of the " + total + " light up at each mask",
+        draw: function (f) {
+          var lit = litOf[hs.lines], r = byLines[hs.lines], S = Math.floor(f.W / cols), x0 = Math.floor((f.W - cols * S) / 2);
+          var g = CK.el("g", {}, f.svg);
+          CK.tip(f, g, "<b>" + what + "</b>, " + hs.lines + (hs.lines === 1 ? " line" : " lines") + " kept (" + srcName + ")<br>" + lit + " of " + total + " active" +
+            (r ? "<br>" + num(r[2] / lit, 2) + " GB/s per active shire (" + num(r[2], 1) + " GB/s total)" : ""));
+          for (var i = 0; i < total; i++) {
+            var c = i % cols, rr = Math.floor(i / cols);
+            CK.el("rect", { x: x0 + c * S + 1, y: rr * S + 1, width: S - 2, height: S - 2, rx: 2, "class": i < lit ? cls : "cell-off" }, g);
+          }
+        } });
+    }
+    if (hsHomeFrame) hsHomeFrame.redraw(); else hsHomeFrame = shireGrid("hs-home", 32, 8, HOME_LIT, "cell-on", "Home shires");
+    if (hsMemFrame) hsMemFrame.redraw(); else hsMemFrame = shireGrid("hs-mem", 8, 8, MEM_LIT, "cell-on2", "Memory shires");
+    function updateReadout() {
+      var r = byLines[hs.lines], hl = HOME_LIT[hs.lines], ml = MEM_LIT[hs.lines];
+      CK.readout("hs-read").set(r ? "At " + hs.lines + (hs.lines === 1 ? " line" : " lines") + " kept (" + srcName + "): " + num(r[2], 1) + " GB/s total, " +
+        num(r[2] / hl, 2) + " GB/s per home shire (" + hl + " of 32 lit) against " + num(r[2] / ml, 2) + " GB/s per memory shire (" + ml + " of 8 lit)." : "");
+    }
+    CK.seg("hs-mask", { label: "Lines kept by the mask", value: hs.lines,
+      options: MASKS.map(function (m) { return [m, m === 16 ? "16 (dense)" : m === 1 ? "1 line" : String(m) + " lines"]; }),
+      onChange: function (v) {
+        if (v === hs.lines) return;
+        hs.lines = v; hsHomeFrame.redraw(); hsMemFrame.redraw(); updateReadout();
+      } });
+    updateReadout();
+    hsRefresh = function () { load(); hsHomeFrame.redraw(); hsMemFrame.redraw(); updateReadout(); };
+  }
 
   /* §3 layer explorer (sp-viz-layer): a zero fraction and a kernel drive the slice grid, the curve and the readout. */
   var SPARS = [0, 0.5, 0.75, 0.9, 0.95, 0.99, 1];
@@ -1453,7 +1572,7 @@ python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifo
   CK.legend("q-legend", [{ key: "st", label: "static, 8 lanes", mark: "box", color: "var(--c2)" }, { key: "rf", label: "refill", mark: "box", color: "var(--c1)" },
     { key: "sc", label: "scalar", mark: "box", color: "var(--c3)" }, { key: "fl", label: "queue floor", mark: "dash", color: "var(--ink)" }]);
 
-  renderFma(); renderPow(); renderTl(); renderLayer(); renderGemvTable(); renderLane(); renderThr(); renderQueue();
+  renderFma(); renderPow(); renderTl(); renderHomeShires(); renderLayer(); renderGemvTable(); renderLane(); renderThr(); renderQueue();
   var hooks = document.querySelector("#zeros ~ .table-wrap table.wide");
   if (hooks) CK.stackTable(hooks);
   CK.stackTable(document.getElementById("t-tl").parentNode);   // the all-minion TensorLoad table, as cards on a phone

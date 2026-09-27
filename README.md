@@ -4,6 +4,9 @@ A workspace for prototyping on AINekko / AI Foundry's **ET platform**, the open-
 **ET-SoC-1**: 1088 RISC-V minion cores with custom vector and tensor units. Work runs on the
 `sys_emu` simulator first, then on real cards in the AI Foundry lab.
 
+**An agent, or a person picking up the work? Start with [AGENT.md](AGENT.md)**: the map, the rules, and where to find
+the current state. Page changes waiting for the next pass are listed in [docs/reports/TODO.md](docs/reports/TODO.md).
+
 **Looking for results rather than code? Start with [docs/findings/](docs/findings/README.md).** It is a
 self-contained write-up of everything measured on the card: what a workload's data does to power and
 temperature, the model that predicts it, why the chip is low power against an A100, and — for every number —
@@ -17,6 +20,10 @@ the code and data.
 cloning, connecting to the lab machines over Tailscale, the hello worlds, rerunning the benchmark, and
 republishing the reports. Its section 8 shows how to regenerate every report from the raw data committed here, and
 section 9 lists the pinned upstream versions.
+
+The descriptions below were written as each report was published. Since 26 September the pages carry version 3 of
+the claims check, every claim re-tested on three cards (`docs/reports/data/2026-09-25-claims-v3/`); where a page and
+this list differ, the page holds.
 
 - `docs/et-soc1-notes.md` is a condensed guide: architecture, programming model, the memory-coherency trap,
   the FOSDEM "zero to matmul" optimisation ladder, silicon errata, and simulator flags.
@@ -71,11 +78,11 @@ section 9 lists the pinned upstream versions.
   out); the speed
   effect from a cool die (`run_horace_cold.sh`); ten-minute runs with a 90 °C cap (`run_horace_long.sh`: random data gets from 80 to
   90 °C in 19 to 26 s, ones in about two minutes, zeros never); a three-line model from flip rates to temperature
-  (`tools/ettelem/flip_thermal_model.py`: leakage 23 W at 80 °C, thermal stages out to 2,500 s; on the later runs of the same session, which it was not fitted to, the time to 90 °C is
-  predicted to 9% in the median and 23% at worst; on a different afternoon with new matrices, 7% and 65% (the DFT pair, whose
+  (`tools/ettelem/flip_thermal_model.py`: leakage 20–29 W at 80 °C (23 W in the best fit), thermal stages out to 2,500 s; on the later runs of the same session, which it was not fitted to, the time to 90 °C is
+  predicted to 9% in the median and 23% at worst; in a separate session that afternoon, with new matrices, 7% and 65% (the DFT pair, whose
   power it put 2.8 W low); ten-minute end temperatures come out 3 to 5 °C hot: `tools/ettelem/validate_flip_model.py`);
   and structured matrices (Hadamard, DCT, butterfly, kaleidoscope, ...: `tools/ettelem/make_tiles.py`) whose power was predicted to
-  0.92 W rms before they ran. `tools/ettelem/predict_heat.py --model .../model.json --tiles my.bin` prices a custom workload: flips,
+  0.92 W rms before they ran. `python3 tools/ettelem/predict_heat.py --model docs/reports/data/2026-09-21-horace-aifoundry2/model.json --tiles my.bin` prices a custom workload: flips,
   watts, heating curve, time to a cap, sustainable duty cycle. GIFs: `docs/reports/horace-heating.gif`, `horace-heating-6.gif`,
   `horace-long.gif`. `tools/ettelem/finish_horace.sh` rebuilds the Horace analyses, model, GIFs and pages from
   `docs/reports/data/2026-09-21-horace-aifoundry2/`.
@@ -84,14 +91,14 @@ section 9 lists the pinned upstream versions.
   https://da445a93-7be3-42c2-b9be-4992fa4a3b62.spacesheep.app/horace-heating.gif. Always deploy it as that folder: a
   single-file deploy drops the GIFs. A folder deploy can leave the space private; put it back with
   `spacesheep share <uuid> --visibility public` and check `spacesheep list` after every deploy.
-  Section 10 repeats the whole experiment on aifoundry3's card: the flip model fitted here, applied to that card
-  unchanged, is off by a flat 8%, and one scale factor of 0.92 brings it to 0.20 W rms over a 1.9-25 W range
+  Section 10 repeats the 7 s runs on aifoundry3's card: the flip model fitted here, applied to that card
+  unchanged, is off by about 8% (3–10% per pattern), and one scale factor of 0.92 brings it to 0.20 W rms over a 1.9-25 W range
   (`tools/ettelem/compare_cards.py`, `build_cards_data.py`; raw data
   `docs/reports/data/2026-09-22-horace-aifoundry3/`).
 - `docs/reports/2026-09-21-why-low-power.html` asks why the chip draws so little next to an A100, using Esperanto's own equation
   (power = C V² f + leakage) and ablations on the card (`tools/ettelem/run_ablation.sh`, `ablation.cfg`, `analyze_ablation.py`):
-  an integer loop on all cores costs 1.5 W, int8 multiply-adds 0.32 pJ against 6.0 pJ for fp32, power is linear in active cores,
-  the 0.62 V / 800 MHz point costs 2× the switching power of 0.52 V / 600 MHz, and leakage is 23 W at 80 °C. Per FLOP of dense
+  an integer loop on all cores costs 1.5 W, int8 multiply-adds 0.32 pJ against 6.0 pJ for fp32, power is close to linear in active cores,
+  the 0.62 V / 800 MHz point costs 2× the switching power of 0.52 V / 600 MHz, and leakage is 20–29 W at 80 °C (23 W in the best fit). Per FLOP of dense
   matmul the A100's bf16 tensor cores are 5.4× more efficient than this card's fp32 and 2.6× more than its fp16; against the
   A100's fp32 CUDA-core datasheet figure (19.5 TFLOPS at 400 W) this card is about 2.9× better on random data and 3.4× on
   the matmul benchmark's ±1/±2 operands. Notes and sources in
@@ -107,7 +114,7 @@ section 9 lists the pinned upstream versions.
   reads a measured PMIC wattage rather than estimating power from activity counters, and from a cool die it hunts
   across the 65 °C threshold, which has no dead band (36 transitions analysed, `tools/ettelem/analyze_dvfs.py`); the
   open (Erbium) RTL's per-minion sleep controls are tied off and no firmware drives them; a wake-up probe finds no
-  array power gating (`gen_ops.py wakeup`); and leakage is 36% of a busy card against his 5–30%. The governor was
+  array power gating (`gen_ops.py wakeup`); and leakage is 31–45% of a busy card (55–80% of an idle one) against his 5–30%. The governor was
   read at et-platform `353f20e`; the cards' own trace strings match an older firmware build. It now also covers the three lab machines: aifoundry3's service processor reports a
   static TDP of **0 W** (the driver reports 65 W on every machine), which makes the governor's step-up test
   unreachable and holds that card at 600 MHz for as long as its TDP stays at zero (a boot service sets it at every boot; corrected
@@ -119,7 +126,7 @@ section 9 lists the pinned upstream versions.
 - `docs/reports/2026-09-22-hot-line.html` follows up a Discord claim that the shire hosting a contended global
   atomic gets 6% of its fair share. It does not: the atomic is shared to within half a percent. What that
   shire loses is its **own** memory path, which stops dead - 384 operations and then nothing, identical at 5, 10,
-  40 and 100 ms windows, while the mesh retires six million atomics. The threshold is a cliff at 24 remote
+  40 and 100 ms windows, while the mesh retires six million atomics. The threshold is a cliff at 21–24 remote
   requesters, under one shire's worth, and it is exactly where the shire cache reaches its 10-cycles-per-atomic
   floor. ET-SoC Errata 4.1 (RTLMIN-6207) and 4.2 (RTLMIN-6214) describe it, rate the impact "Low", say
   `l3_yield_priority` does not fix the same-address case, and are both Postponed. Pacing the remotes to one
@@ -131,7 +138,7 @@ section 9 lists the pinned upstream versions.
 - `docs/reports/2026-09-22-on-chip-relay.html` answers whether on-chip communication can beat main memory for a
   real computation. A chain of stages that hands each stage's output to the next shire's scratchpad (the next
   shire ID, 3.5 mesh hops away on average) instead of writing it to DRAM runs **12.3× faster and uses 12× less
-  energy per byte, on the same watts**; keeping it in the shire's own scratchpad is 30.7×. Both reproduce on aifoundry3. The boundary is sharp:
+  energy per byte**, the three routes drawing within about a watt of each other; keeping it in the shire's own scratchpad is 30.7×. Both reproduce on aifoundry3. The boundary is sharp:
   below the 32 MB L3 the DRAM route runs at 280-410 GB/s and the hand-off buys nothing, and at 32 MB per
   buffer DRAM falls to 48 GB/s and stays there out to 256 MB. The lead holds to about four adds per element and
   then shrinks with each quadrupling of the arithmetic: 4.1× at 8 flops per byte moved, 1.5× at 32. Which shire
@@ -141,17 +148,17 @@ section 9 lists the pinned upstream versions.
   `analyze_onchip.py` and `tools/ettelem/run_onchip_power.sh`. Public space
   https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay, uuid `8678d49d-3f0c-49be-b08a-5528de8ece3c`.
 - `docs/energy-manual/` is **the energy manual**: what every kind of operation on the card costs in joules, arranged
-  so a workload's energy can be built from parts - the card at rest (12.6 W fixed plus leakage e-folding every
-  36 °C), an awake minion (2 mW), every instruction on zeros/constant/random data (integer add 6 pJ on zeros and 9 on
+  so a workload's energy can be built from parts - the card at rest (35.9 W at 80 °C, rising 0.65 W per °C, 20–29 W of
+  it leakage), an awake minion (2 mW), every instruction on zeros/constant/random data (integer add 6 pJ on zeros and 9 on
   random, float add 23, 8-lane FMA 27 on zeros and 56 on random), bytes at every level (L1 0.5 pJ/B, own scratchpad 2-8, DRAM 90-140,
-  the L1 write-back path to DRAM 250-350), bytes between shires, synchronisation, worked compositions, and the
+  the L1 write-back path to DRAM 240-330), bytes between shires, synchronisation, worked compositions, and the
   second card at 0.95× the first over 56 entries. Measured by the new `workloads/enercat` (`run_enercat.sh`,
   `analyze_enercat.py`); every table is assembled from its data file by `tools/ettelem/build_energy_manual.py`
   and the pages rendered by `render_energy_manual.py`, so no number is typed by hand. The second edition
   (`workloads/enercat/run_catalogue.py`) measures every one of the 161 instructions the silicon executes in U-mode
   three times in shuffled order on both working cards (pass-to-pass error 1.9% median, second card 0.95× over 386
-  configurations), and separates a memory access into its parts: one mesh hop is 0.75 pJ/B on zeros and 1.81 on
-  random data fitted over 1–8 hops (2.3 over 1–6 hops, in line with heat per millimetre; the difference is bits that
+  configurations), and separates a memory access into its parts: one mesh hop is 0.6–0.7 pJ/B on zeros and 1.7–1.9 on
+  random data fitted over 1–8 hops (2.2–2.4 over 1–6 hops, in line with heat per millimetre; the three cards' ranges since 26 September; the difference is bits that
   change between flits plus ones carried), a 64 B line fill into the L1 is about 100-205 pJ (zeros to random data), the DRAM row
   pattern makes no difference, the SRAM rail leaks 1.6 W at 67 °C rising to 2.6 W at 82 °C, and each class of
   operation is split across the minion, SRAM and mesh rails. The third edition puts a confidence bar on every
@@ -159,9 +166,10 @@ section 9 lists the pinned upstream versions.
   line, the rings and the levels (`tools/ettelem/run_reruns_warm.sh`, `run_rings_levels_power.sh`,
   `analyze_reruns.py`; bursts in which aifoundry2's governor moved the clock, or in which the workload starved the
   service processor that reads the meter, are dropped) - and attributes what a workload adds on no rail sensor (`tools/ettelem/fit_unmetered.py`,
-  which writes the fit; the idle 15 W is not split): 18-20% delivery loss on the minion rail, 5% on SRAM, 26-29% on the mesh,
-  about 70 pJ per DRAM byte off-rail, plus a
-  DRAM-activity meter from the memory shires' Moortec voltage monitor (0.87 mV per off-rail DRAM watt).
+  which writes the fit; the idle 15 W is not split): on the three cards since 26 September, 10-19% delivery loss on
+  the minion rail, 20-29% on the mesh, 73-82 pJ per DRAM byte off-rail and an SRAM term that differs by card (3-4% on
+  aifoundry2 and aifoundry3, 54% on aifoundry1's card 1), plus a DRAM-activity meter from the memory shires' Moortec
+  voltage monitor (0.86 mV per off-rail DRAM watt).
   Published, public, at https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual, uuid `cc3cb1d6-51cf-420b-a165-7d8629904d97`.
 - `docs/reports/2026-09-24-heat-per-mm.html` ("Heat per millimetre") measures what moving a bit one millimetre across
   the mesh costs, against Dally's "~100 fJ/b-mm": a random bit costs 36 fJ per mm on the mesh rail with free links and
@@ -205,7 +213,7 @@ scripts/create-vm.sh
 
 This does four things:
 1. Installs [Lima](https://lima-vm.io) and creates the VM `et`: Ubuntu 24.04 arm64, 16 vCPU, 48 GB RAM, with this repo mounted at the same path.
-2. Clones et-platform, et-man, and core-et (erbium) into `external/`.
+2. Clones et-platform, et-man, core-et (erbium), et-testdrive and etTopoScan into `external/`.
 3. Builds the ET RISC-V toolchain from source into `/opt/et`, since the prebuilt release is x86-only.
 4. Builds et-platform (firmware, `sys_emu`, runtime, gp-sdk) into `/opt/et`.
 
@@ -251,7 +259,10 @@ This adds the simulator's A0-errata checker to a run.
 On a lab machine with a card and the et-platform stack installed:
 
 ```bash
-make run-hello DEVICE=silicon
+scripts/deploy-lab-gpsdk.sh aifoundry2        # from a clone: sources, the lab's patched gp-sdk, a nice -j4 build
+ssh aifoundry2                                # then, in ~/nekko on the host:
+et-who                                        # nobody on the card? (and ask first: AGENT.md §5)
+flock -n /run/lock/etsoc-shire0.lock timeout 10 make run-hello DEVICE=silicon
 ```
 
 ## Adding a prototype

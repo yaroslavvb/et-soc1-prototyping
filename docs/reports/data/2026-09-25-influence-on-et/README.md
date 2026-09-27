@@ -18,12 +18,15 @@ research/exploratory group of the set, next to the sparse-compute report it buil
 
 | Quantity | File and field |
 |---|---|
-| Tensor-load bandwidth and pJ/B above idle, own scratchpad and DRAM, random data, both cards | `../2026-09-23-energy-manual/manual.json`: `catalogue.combined["tload/scp/random"]`, `["tload/dram/random"]`; `catalogue.cards.<card>.summary[...].bytes_per_s` |
+| Tensor-load bandwidth and pJ/B above idle, own scratchpad and DRAM, random data, every card of the catalogue (three since 26 September) | `../2026-09-23-energy-manual/manual.json`: `catalogue.combined["tload/scp/random"]`, `["tload/dram/random"]`; `catalogue.cards.<card>.summary[...].bytes_per_s` |
 | Board power at rest (aifoundry3 cool, aifoundry2 hot) | same file, `cards.idle`, `cards.launch` (temperatures) |
 | Packed-integer vector instruction energy and rate (for the 1-bit SWAR estimate) | same file, `catalogue.combined["fxor.pi/random/h2"]` and three others; `catalogue.cards.<card>.summary["fxor.pi/random/h2"].ops_per_s` |
 | Spread global atomics: rate and energy | same file, `sync.atomics.runs[label=spread]`, `reruns.hotline_nj_per_op.spread` |
-| Matmul peak rates and board power, fp32/fp16/int8, aifoundry2 | `../2026-09-18-aifoundry2/results.json`: `results[*]`, `idle_w` |
-| The batch-1 1024×4096 fp32 layer in the scratchpads (S1's anchor), aifoundry3, one run | `../2026-09-18-sparsity-aifoundry3/energy-b/results.json` (`gemv-skip-0`), `gemv-tree-dense.jsonl` |
+| Matmul peak rates and board power, fp32/fp16/int8, aifoundry2; energy per op above the idle just before each workload | `../2026-09-18-aifoundry2/results.json`: `results[*]`; the idle before each workload from `power.csv` and `runs.jsonl` (`idle_before()` of `scripts/mmbench-report-data.py`: 30.61, 32.53, 33.83 W), not `idle_w` |
+| Board power of the tensor unit on random operands, fp16 and fp32 (dense work, S2), aifoundry2 at 80 °C | `../2026-09-23-energy-manual/manual.json`: `tensor.rows[config=fp16_randn, fp32_randn]` (`idle_w` + `over_idle_w`) |
+| S3: gathers, scatters, scatter-add and packed atomics, per element or update, both harts of 1,024 minions, three cards (E48) | same file, `gs.configs["gs/E/<op>/<table>/rand/<data>/h2/mff/n1024"]` (`elements_per_s`, `pj_per_element`), written as `model.et.gs` |
+| The board meter's refresh per card and the rails' running average | same file, `v3.refresh_ms.<card>.sampler_10hz`, `catalogue.rail_filter.<card>.tau_s` (`model.et.meter`) |
+| The batch-1 1024×4096 fp32 layer in the scratchpads (S1's anchor), aifoundry3, one run | `../2026-09-18-sparsity-aifoundry3/energy-b/results.json` (`gemv-skip-0`: joules per layer, and layers per second at 600 MHz for its time, 7.36 µs) |
 | Chip-wide allreduce, 32 B, 1,024 minions, aifoundry2 | `../2026-09-18-nocbench-aifoundry2/xallreduce-c1.jsonl` |
 
 Stated in the producer with a source rather than read: the usable scratchpad (32 × 2.25 MB, from the on-chip relay
@@ -40,8 +43,8 @@ pJ/B), else HBM (3.0 TB/s, 105 pJ/B): the A100's per-level energies, not its who
 155 pJ/B, recorded as `path` and not used); 80 GB per GPU, 60% of tensor peak, 1.3 µs launch, idle 60–90 W; 1-bit
 work at an xor, a popc and an add per 32 bits, each at one fp32 lane-operation's energy at the TDP (1.75 pJ per bit).
 Energy per query at arrival rate λ: ET = chips·P_idle/λ + E_above/Q (a dedicated card); H100 and host CPU =
-E_pass/Q (already in the server). The energy rule max(), not sum, is the one that reproduces the anchor: 71 µJ
-modelled against 68 µJ measured above idle (the anchor is checked on its matrix bytes; its own layout splits rows
+E_pass/Q (already in the server). The energy rule max(), not sum, is the one that reproduces the anchor: 74 µJ
+modelled against 68 µJ measured above idle (71 µJ on the two-card data of 25 September) (the anchor is checked on its matrix bytes; its own layout splits rows
 across minions). `kills` holds the numbers the page quotes for K1, K4, K5 and K7, from the same model.
 
 **Reproduce**
@@ -55,3 +58,23 @@ python3 scripts/build-report.py influence-on-et docs/reports/data/2026-09-25-inf
 The research notes and the two desk maps the page was distilled from, and the skeptical pass that ranked their
 candidates, were working files of the session and are not committed; the page's section 6 lists the corrections that
 pass made.
+
+**Corrections folded in** (moved here from the page's section 6 on 27 September) from the two desk maps the page started
+from: the atlas comparison is against its measured 0.231 s scan, not the 0.558 s gradient-pass primitive (so the ET is
+slower, not 45–140× faster); the atlas uses tanh, so its hidden activations have no exact zeros, and its scan is
+4.1×10¹² FLOP, not 4.2×10¹¹; the "one row costs a full 16-row op" figure was a measurement of masked rows, not of smaller
+ops; the top-k state was over-sized for the SRAM; a ±1 energy lead compared energy above idle with board energy;
+per-query shortlists are not resident; the 0.2–0.4 ms host launch was ignored in a latency claim; a posting-list rate was
+halved. The rest of their arithmetic reproduced. A later check of the page charged the H100 the A100's per-level energies
+only (the first draft's upper end used the whole path and gave a 7–13× lead), added the query tiles each minion re-reads,
+re-priced the H100's 1-bit work per instruction rather than at its full power, and computed K1, K4, K5 and K7 from the
+same model.
+
+**27 September.** S3 was measured (E48: gathers, scatters, scatter-add and packed atomics on three cards, 26 September;
+the energy manual's §4.4 and §6), so `model.et.gs` carries its rates and energies and the page's S3, K3, K6 and section 6
+quote them. The review's TODO items for this page were applied at the same time: the dense energy and S2 use the tensor
+unit's board power on random operands (CMP-1), the anchor's time is the energy run's own rate at 600 MHz (7.36 µs, 2.3
+TB/s, CMP-2), "72 MB of on-chip SRAM" became the scratchpads' 72 MB usable of 80 MB (CMP-5), the per-op energies
+subtract each workload's own idle (int8 0.39 pJ, fp16 1.41 pJ; CMP-6), and S1's L2 lead prints one decimal (CMP-7).
+The measured inputs now come from the energy manual's three-card data, which moved the model's scratchpad energy from
+4.21 to 4.43 pJ/B and the anchor's model to 9% above the measured 68 µJ.

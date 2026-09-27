@@ -165,6 +165,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 /* chartkit:css:end */
 </style>
 </head>
@@ -216,6 +224,7 @@ to it, and writes it out; the next stage reads what the last one wrote. Thirty-t
 eight stages, 1 MB per shire per stage, half a gigabyte of traffic. The same code, the same barriers and the
 same arithmetic run three ways, and the only thing that differs is where a stage's output goes:</p>
 
+<details class="more"><summary>The table, and how we know the data really crossed a shire</summary>
 <div class="table-wrap"><table id="media"></table></div>
 
 <p><b>How we know the data really crossed a shire.</b> Each shire starts its slab filled with its own number.
@@ -223,12 +232,10 @@ After eight stages of adding one, a shire that kept its own data holds 8. In the
 <b>32</b> — which is 24 plus 8, and 24 is the shire eight places back round the ring. Every element is
 checked against that expectation, on every run in this report; a run that did not really move its data would
 fail.</p>
+</details>
 
-<div class="chart-title">Within about a watt, work up to thirty times apart: power, rate and energy per byte for the three places, side by side</div>
-<div class="chart" id="samew"></div>
-<p class="small" id="samewcap"></p>
-
-<h2 id="the-same-watts-a-thirtieth-of-the-work">2. Power within a watt, a thirtieth of the work</h2>
+<a id="the-same-watts-a-thirtieth-of-the-work"></a>
+<h2 id="power-within-a-watt-a-thirtieth-of-the-work">2. Power within a watt, a thirtieth of the work</h2>
 <p>Power was measured separately, in one session on aifoundry2, with each medium launched back to back for
 twelve seconds so the card reaches a steady state; the table's last column gives the three-card check's passes (six on
 each card, 26 September). The striking part is not that DRAM costs more energy per byte. It is that the three draw <em>within
@@ -236,11 +243,17 @@ about a watt of each other</em>, and one of them gets thirty times as much done 
 the own scratchpad draws 0.5–0.7 W more than DRAM, more at 99% on every card, and the next shire 0.3–0.5 W less,
 a difference resolved at 99% on aifoundry1 card 1 only (on aifoundry3 its interval just reaches zero):</p>
 
+<div class="chart-title">Power, rate and energy per byte for the three places, side by side</div>
+<div class="chart" id="samew"></div>
+<p class="small" id="samewcap"></p>
+
+<details class="more"><summary>The table, method note and cross-card re-measurement</summary>
 <div class="table-wrap"><table id="power"></table></div>
 
 <p class="small" id="powernote"></p>
 
 <p class="small" id="remeasured"></p>
+</details>
 
 <h2 id="where-the-advantage-comes-from-and-where-there-isn-t-one">3. Where the advantage comes from, and where there isn't one</h2>
 <p>The win is against DRAM, not against the memory hierarchy. Shrink the working set and the L3 quietly does
@@ -251,13 +264,17 @@ most of the same job for free:</p>
 <div class="chart" id="size"></div>
 <p class="small" id="sizecap"></p>
 
+<details class="more"><summary>The numbers behind the L3 crossover</summary>
 <p id="sizetext"></p>
+</details>
 
+<details class="more"><summary>Two more sweeps: stages, and shires taking part</summary>
 <p id="stshlead"></p>
 <div class="chart-title">The same relay with one setting changed at a time: pipeline stages, and shires taking part</div>
 <div id="stshlegend"></div>
 <div class="chart" id="stsh"></div>
 <p class="small" id="stshcap"></p>
+</details>
 
 <h2 id="how-much-arithmetic-it-takes-to-stop-mattering">4. How much arithmetic it takes to stop mattering</h2>
 <p>All of this is a statement about moving data, so it fades as the arithmetic grows. Repeating the add
@@ -270,7 +287,8 @@ most of the same job for free:</p>
 
 <p id="inttext"></p>
 
-<h2 id="how-far-the-slab-moves-does-not-change-the-bandwidth">5. How far the slab moves: the farthest hand-off sets the pace</h2>
+<a id="how-far-the-slab-moves-does-not-change-the-bandwidth"></a>
+<h2 id="how-far-the-slab-moves-the-farthest-hand-off-sets-the-pace">5. How far the slab moves: the farthest hand-off sets the pace</h2>
 <p id="distintro"></p>
 
 <div class="chart-title">Which shire reads from which, and what sets the bandwidth</div>
@@ -279,11 +297,11 @@ most of the same job for free:</p>
 <div class="chart" id="ring"></div>
 <p class="small" id="ringcap"></p>
 
-<details><summary>The 31 offsets, card by card</summary>
+<details class="more"><summary>The 31 offsets, card by card, and what the mesh distance costs</summary>
 <div class="table-wrap"><table id="dist"></table></div>
-</details>
 
 <p id="distafter"></p>
+</details>
 
 <h2 id="what-this-is-good-for">6. What this is good for</h2>
 <ul>
@@ -293,7 +311,7 @@ to memory between stages, which on this chip runs at 48 GB/s of reads and writes
 have to go there.</li>
 <li><b>The unit that matters is the shire, not the minion.</b> Its scratchpad is 2.5 MB, addressable by every
 other shire, and written by a tensor store that bypasses both caches, so what one shire writes another reads
-with no coherence problem at all. That is the mechanism this whole report rests on.</li>
+with no coherence problem at all.</li>
 <li><b>Budget one barrier per stage.</b> A chip-wide barrier costs about 5,000 cycles (8.3 µs at 600 MHz; see
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">on-chip
 communication</a>). At 1 MB per shire a DRAM stage is <span id="stagecyc"></span>, so the barrier is under a fifth of even the fastest case. From four stages to
@@ -306,12 +324,11 @@ companion report, and the barrier hung in the one development run we made (card 
 is immune to shire-cache contention, but a minion that takes readies from two partners at once can hang until the
 chip is reset, as read from the RTL and seen once, on aifoundry2
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#a-trap-one-ready-flag-per-minion">on-chip
-communication</a>): give each link its own minion, or take the directions in barrier-separated phases. The relay is
-the same idea at shire granularity, through the scratchpads: a path with no ready-flag handshake, since each slab
-has one reader, and none of the runs reported here hung.</li>
+communication</a>): give each link its own minion, or take the directions in barrier-separated phases.</li>
 </ul>
 
 <h2 id="method-and-what-is-not-established">7. Method, and what is not established</h2>
+<details class="more"><summary>Method, and what is not established, in full</summary>
 <ul>
 <li>The probe is <code>workloads/onchip</code>, new for this. A stage's output is written with a tensor store,
 which bypasses the L1 and L2 caches, so the shire that reads it next cannot read a stale line. Inputs are read
@@ -352,7 +369,9 @@ credit from each shire to the one that reads its output would do, and would help
 and carries this relay's reads and writes at 48 GB/s, not against a memory system in general.</li>
 </ul></li>
 </ul>
+</details>
 
+<details class="more"><summary>Reproduce this</summary>
 <pre><code>workloads/onchip/run_onchip.sh DATA                 # 88 configurations, milliseconds of card time each (22 September)
 tools/claims-v3/lat/block.sh PASS                   # the three-card passes (unit rl: the 88 and ring offsets 1-31; its README)
 tools/ettelem/run_onchip_power.sh DATA 12           # board power, one burst per medium
@@ -361,24 +380,24 @@ python3 workloads/onchip/analyze_onchip.py $R/aifoundry2/lat/p*/rl/sweep.jsonl $
     $R/aifoundry1-c1/lat/p*/rl/sweep.jsonl --cards aifoundry2,aifoundry3,aifoundry1-c1 \
     --power docs/reports/data/2026-09-22-onchip-aifoundry2 --out onchip.json   # pass means; power from 22 September
 python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifoundry2-warm \
-    docs/reports/data/2026-09-23-reruns-aifoundry3 --out reruns.json   # the passes behind §2's ranges</code></pre>
+    docs/reports/data/2026-09-23-reruns-aifoundry3 --v3-rl $R --out reruns.json   # the passes behind §2's ranges</code></pre>
+</details>
+
+<details class="more"><summary>Version history and provenance</summary>
 <p class="small">Raw data and the analysis output:
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry2">docs/reports/data/2026-09-22-onchip-aifoundry2</a>
 and <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry3">…-aifoundry3</a> (22 September), and the
 three-card passes under <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3/raw">docs/reports/data/2026-09-25-claims-v3/raw/&lt;card&gt;/lat/p*/rl/</a>.
-Versions: first published 22 September 2026; revised 24 September 2026 to say that the “next shire” is the
-next by ID rather than a mesh neighbour, to add the mesh distances and the 23 September energy re-measurement,
-and to correct the flops-per-byte unit in section 4; revised 25 September 2026: the ring offset moves the
-bandwidth by up to a quarter, following the longest hand-off (it had said distance made no measurable
-difference), the pooled energies in the table of section 2, both cards in section 5, and charts that fit a
-phone; 25 September (version 3): “the same power” replaced by what the passes show (within about a watt, the own
-scratchpad drawing more than DRAM), the session's reduction named, the own-scratchpad read energy per card, the
-element check's two failures in a discarded aifoundry2 attempt, and one-off observations labelled; record in
-<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>;
-26 September: every sweep figure now the mean of three passes on each of three cards, section 5 over all 31 ring
-offsets, the one-stage advantage corrected (14.3–14.8×, not 15.3×) and the own-scratchpad read energy no longer
-split by card; the energies per byte now the three-card check's passes (13× and 27× less than DRAM; the read energies
-by the data read) and the stage lengths of section 6 per card.</p>
+Versions: first published 22 September 2026; 24 September, the “next shire” is the next by ID, not a mesh
+neighbour, and the flops-per-byte unit of section 4 corrected; 25 September, the ring offset moves the bandwidth by
+up to a quarter, following the longest hand-off (it had said distance made no measurable difference), then (version
+3) “the same power” replaced by what the passes show (within about a watt, the own scratchpad drawing more than
+DRAM); 26 September, every sweep figure the mean of three passes on each of three cards, section 5 over all 31 ring
+offsets, the one-stage advantage corrected (14.3–14.8×, not 15.3×), the own-scratchpad read energy no longer split
+by card and the energies per byte the three-card check's; 27 September, the size and intensity charts drawn per card, the power chart moved into section 2 and the
+detail folded into collapsible sections. Record:
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>.</p>
+</details>
 
 <h2 id="related-reports">8. Related reports</h2>
 <ul>
@@ -890,9 +909,30 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 
 </script>
@@ -1067,11 +1107,23 @@ CK.stackTable('media');
 (function(){
  const rows=D.size, mb=r=>r.stage_bytes*32/1048576, top=Math.max(...rows.map(mb));
  const big=D.bigsize.filter(r=>mb(r)>top);                    // DRAM-only continuation past the on-chip limit
- const OTH=CS.filter(c=>c!==A2&&rows.some(r=>r.by_card&&r.by_card[c]));   // cards drawn as marks beside the first card's lines
- const perCard=(r,m)=>OTH.filter(c=>r.by_card&&r.by_card[c]).map(c=>`${lab(c)} ${gb(r.by_card[c][m].gb_s)}`).join(', ');
- CK.legend('sizelegend',MED.map(m=>({key:m[0],label:m[3],mark:'dot',color:m[2]})).concat(
-  OTH.map(c=>({key:c,label:lab(c),mark:CK.card(c).mark,color:'var(--ink-2)'}))));
- CK.frame('size',{label:'Relay bandwidth against working-set size for the three media, to 256 MB per buffer',height:W=>W<600?320:340,
+ /* Colour is the medium, as everywhere on this page; the mark's shape is the card (CK's registry: filled, ring,
+    diamond), one line per card (the first solid, the others dashed), for every card the rows' by_card carries: each
+    point the mean of that card's passes (analyze_onchip.py). bigsize's by_card is {card: GB/s}. Data without by_card
+    draws the first card from the row itself. */
+ const cards=CK.cardsIn([...new Set(rows.flatMap(r=>Object.keys(r.by_card||{[A2]:1})))]), OTH=cards.filter(c=>c!==A2);
+ const rowOf=(r,c)=>r.by_card?r.by_card[c]||null:(c===A2?r:null);
+ const bigOf=(r,c)=>r.by_card?(r.by_card[c]!=null?r.by_card[c]:null):(c===A2?r.gb_s:null);
+ const mark=(g,c,x,y,col)=>{const k=CK.card(c).mark,e=CK.cardMark(g,c,x,y,k==='ring'?6.5:k==='dot'?3.5:4,col);
+  if(k==='ring'){e.style.fill='none';e.style.strokeWidth='1.5';}   // a ring round a dot: both cards stay visible
+  e.setAttribute('aria-hidden','true');return e;};
+ const lg=CK.legend('sizelegend',MED.map(m=>({key:m[0],label:m[3],mark:'dot',color:m[2]})));
+ if(cards.length>1) for(const c of cards){  // the card key: the mark's shape, in ink
+  const s=document.createElement('span'); s.className='ck-li';
+  const v=CK.el('svg',{viewBox:'0 0 18 12',width:18,height:12,'aria-hidden':'true'}); mark(v,c,9,6,'var(--ink-2)');
+  s.append(v,document.createTextNode(lab(c))); lg.el.appendChild(s);
+ }
+ CK.frame('size',{label:'Relay bandwidth against working-set size for the three media, to 256 MB per buffer, every card',height:W=>W<600?320:340,
   draw(f){
    const svg=f.svg,W=f.W,Hh=f.H,L=52,R=26,T=26,B=46,narrow=f.narrow;
    const x=CK.log(2,256,L,W-R), y=CK.log(20,2000,Hh-B,T);
@@ -1083,17 +1135,14 @@ CK.stackTable('media');
    lines.forEach((t,i)=>CK.txt(svg,x(top)+6,y(400)+i*14,t,'lab'));
    CK.el('line',{x1:x(top/2),x2:x(top/2),y1:T,y2:Hh-B,style:'stroke:var(--ref);stroke-width:1.5;stroke-dasharray:5 4'},svg);
    CK.txt(svg,x(top/2)-6,T+12,narrow?'footprint = L3':'footprint = 32 MB of L3','lab','end');
-   MED.forEach(m=>{
-    const pts=rows.map(r=>[mb(r),r[m[0]].gb_s]).concat(m[0]==='dram'?big.map(r=>[mb(r),r.gb_s]):[]);
-    CK.el('path',{d:CK.path(pts,x,y),fill:'none',style:`stroke:${m[2]};stroke-width:2`},svg);
-    for(const [a,b] of pts){const c=CK.el('circle',{cx:x(a),cy:y(b),r:4,'aria-hidden':'true'},svg);c.style.fill=m[2];}
-    /* the other cards at the same sizes: their registry mark in the medium's colour */
-    for(const c of OTH){
-     const q=rows.map(r=>[mb(r),r.by_card&&r.by_card[c]&&r.by_card[c][m[0]].gb_s]).concat(m[0]==='dram'?big.map(r=>[mb(r),r.by_card&&r.by_card[c]]):[]);
-     for(const [a,b] of q) if(b) cmark(svg,c,x(a),y(b),m[2]);
-    }
-   });
-   /* one focusable column per size: the crosshair lists every medium at that size */
+   MED.forEach(m=>cards.forEach((c,ci)=>{
+    const pts=rows.map(r=>[mb(r),rowOf(r,c)]).filter(p=>p[1]).map(p=>[p[0],p[1][m[0]].gb_s])
+     .concat(m[0]==='dram'?big.map(r=>[mb(r),bigOf(r,c)]).filter(p=>p[1]!=null):[]);
+    const ln=CK.el('path',{d:CK.path(pts,x,y),fill:'none'},svg); ln.style.stroke=m[2]; ln.style.strokeWidth=ci?'1.25':'2';
+    if(ci) ln.style.strokeDasharray='4 3';
+    for(const [a,b] of pts) mark(CK.el('g',{},svg),c,x(a),y(b),m[2]);
+   }));
+   /* one focusable column per size: the crosshair lists every medium on every card at that size */
    const cols=rows.map(r=>({mb:mb(r),r})).concat(big.map(r=>({mb:mb(r),big:r}))), nodes=[];
    for(const c of cols){
     const g=CK.el('g',{},svg), xc=x(c.mb);
@@ -1101,11 +1150,11 @@ CK.stackTable('media');
     const ln=CK.el('line',{x1:xc,x2:xc,y1:T,y2:Hh-B,class:'xh'},g); ln.style.stroke='var(--ink-2)'; ln.style.strokeWidth='1'; ln.style.opacity='0';
     g.addEventListener('pointerenter',()=>{ln.style.opacity='0.6';}); g.addEventListener('pointerleave',()=>{ln.style.opacity='0';});
     g.addEventListener('focus',()=>{ln.style.opacity='0.6';}); g.addEventListener('blur',()=>{ln.style.opacity='0';});
-    const html=c.big?`<b>${c.mb} MB per buffer</b> (footprint ${2*c.mb} MB)<br>DRAM ${gb(c.big.gb_s)} GB/s (${lab(A2)})`+
-      (OTH.length&&c.big.by_card?`; ${OTH.filter(k=>c.big.by_card[k]).map(k=>`${lab(k)} ${gb(c.big.by_card[k])}`).join(', ')}`:'')+`<br>the on-chip routes have no room`
-     :`<b>${c.mb} MB per buffer</b> (footprint ${2*c.mb} MB), ${lab(A2)}<br>DRAM ${gb(c.r.dram.gb_s)}, next shire ${gb(c.r.hop.gb_s)} (${f2(c.r.hop_over_dram)}×), `+
-      `own ${gb(c.r.scp.gb_s)} (${f2(c.r.scp_over_dram)}×) GB/s`+
-      (OTH.length?MED.map(m=>`<br>${m[3]}: ${perCard(c.r,m[0])}`).join(''):'');
+    const html=`<b>${c.mb} MB per buffer</b> (footprint ${2*c.mb} MB)<br>`+cards.map(cd=>{
+     if(c.big){const v=bigOf(c.big,cd);return v==null?null:`${lab(cd)}: DRAM ${gb(v)} GB/s; the on-chip routes have no room`;}
+     const q=rowOf(c.r,cd); if(!q)return null;
+     return `${lab(cd)}: DRAM ${gb(q.dram.gb_s)}, next shire ${gb(q.hop.gb_s)} (${f2(q.hop_over_dram)}×), own ${gb(q.scp.gb_s)} (${f2(q.scp_over_dram)}×) GB/s`;
+    }).filter(Boolean).join('<br>');
     CK.tip(f,g,html); nodes.push(g);
    }
    CK.keynav(f,nodes);
@@ -1118,10 +1167,11 @@ CK.stackTable('media');
  for(const r of rows) for(const c of OTH) if(r.by_card&&r.by_card[c]) for(const m of MED) devs.push(Math.abs(r.by_card[c][m[0]].gb_s/r[m[0]].gb_s-1));
  for(const r of big) for(const c of OTH) if(r.by_card&&r.by_card[c]) devs.push(Math.abs(r.by_card[c]/r.gb_s-1));
  $('sizecap').textContent=
-  `Lines and dots ${lab(A2)}${OTH.length?`, ${andL(OTH.map(c=>`${CK.card(c).mark==='ring'?'rings':CK.card(c).mark==='diamond'?'diamonds':'marks'} ${lab(c)}`))} (each point the mean of that card's passes, `+
-  `and every card within ${f0(Math.ceil(100*Math.max(...devs)))}% of ${lab(A2)} at every size)`:''}, log axes. Two buffers are live at once, so the chip footprint is twice the figure on the x axis; the dashed line `+
+  `Log axes. Colour is where a stage's output goes; the mark is the card`+
+  (cards.length>1?` (${cards.map(c=>`${lab(c)} ${CK.card(c).mark==='dot'?'filled':CK.card(c).mark==='ring'?'ring':CK.card(c).mark}`).join(', ')}; each point the mean of that card's passes, and every card within ${f0(Math.ceil(100*Math.max(...devs)))}% of ${lab(A2)} at every size)`:` (${lab(A2)})`)+
+  `. Two buffers are live at once, so the chip footprint is twice the figure on the x axis; the dashed line `+
   `marks where that footprint equals the 32 MB L3. Past ${top} MB per buffer only the DRAM route can run: the buffers start 256 KB into `+
-  `each shire's 2.5 MB scratchpad, and two of them no longer fit in what is left.`;
+  `each shire's 2.5 MB scratchpad, and two of them no longer fit in what is left. The numbers below are ${lab(A2)}'s unless the text names a card.`;
  $('sizetext').innerHTML=
   `At ${mb(small)} MB per buffer the DRAM route runs at <b>${g1(small.dram.gb_s)} GB/s</b>, because it is not `+
   `going to DRAM at all: the 32 MB L3 holds the whole thing. Handing the data to the next shire then buys `+
@@ -1227,10 +1277,19 @@ CK.stackTable('media');
 (function(){
  const rows=D.intensity;
  const S=[['scp_over_dram',"own shire",'var(--c3)','scp'],['hop_over_dram',"next shire",'var(--c1)','hop']];
- const OTH=CS.filter(c=>c!==A2&&rows.some(r=>r.by_card&&r.by_card[c]));
- CK.legend('intlegend',S.map(s=>({key:s[0],label:s[1],mark:'dot',color:s[2]})).concat(
-  OTH.map(c=>({key:c,label:lab(c),mark:CK.card(c).mark,color:'var(--ink-2)'}))));
- CK.frame('intensity',{label:'Advantage over the DRAM route against vector adds per element',height:W=>W<600?320:340,
+ /* Colour is which route is compared with DRAM; the mark's shape is the card, as in section 3. */
+ const cards=CK.cardsIn([...new Set(rows.flatMap(r=>Object.keys(r.by_card||{[A2]:1})))]);
+ const rowOf=(r,c)=>r.by_card?r.by_card[c]||null:(c===A2?r:null);
+ const mark=(g,c,x,y,col)=>{const k=CK.card(c).mark,e=CK.cardMark(g,c,x,y,k==='ring'?6.5:k==='dot'?3.5:4,col);
+  if(k==='ring'){e.style.fill='none';e.style.strokeWidth='1.5';}
+  e.setAttribute('aria-hidden','true');return e;};
+ const lg=CK.legend('intlegend',S.map(s=>({key:s[0],label:s[1],mark:'dot',color:s[2]})));
+ if(cards.length>1) for(const c of cards){
+  const s=document.createElement('span'); s.className='ck-li';
+  const v=CK.el('svg',{viewBox:'0 0 18 12',width:18,height:12,'aria-hidden':'true'}); mark(v,c,9,6,'var(--ink-2)');
+  s.append(v,document.createTextNode(lab(c))); lg.el.appendChild(s);
+ }
+ CK.frame('intensity',{label:'Advantage over the DRAM route against vector adds per element, every card',height:W=>W<600?320:340,
   draw(f){
    const svg=f.svg,W=f.W,Hh=f.H,L=48,R=14,T=48,B=46,narrow=f.narrow;
    const x=CK.log(1,256,L,W-R), y=CK.log(1,40,Hh-B,T);
@@ -1242,27 +1301,29 @@ CK.stackTable('media');
    CK.el('line',{x1:L,x2:W-R,y1:T,y2:T,class:'ck-axis'},svg);
    for(const w of (narrow?[1,16,256]:[1,4,16,64,256])) CK.txt(svg,x(w),T-8,num(w/4),'tick','middle');
    CK.el('line',{x1:L,x2:W-R,y1:y(1),y2:y(1),style:'stroke:var(--ref);stroke-width:1.5;stroke-dasharray:5 4'},svg);
-   S.forEach(s=>{
-    CK.el('path',{d:CK.path(rows.map(r=>[r.work,r[s[0]]]),x,y),fill:'none',style:`stroke:${s[2]};stroke-width:2`},svg);
-    for(const r of rows){const c=CK.el('circle',{cx:x(r.work),cy:y(r[s[0]]),r:4,'aria-hidden':'true'},svg);c.style.fill=s[2];}
-    for(const c of OTH) for(const r of rows) if(r.by_card&&r.by_card[c])
-     cmark(svg,c,x(r.work),y(r.by_card[c][s[0]]),s[2]);
-   });
+   S.forEach(s=>cards.forEach((c,ci)=>{
+    const pts=rows.map(r=>[r.work,rowOf(r,c)]).filter(p=>p[1]).map(p=>[p[0],p[1][s[0]]]);
+    const ln=CK.el('path',{d:CK.path(pts,x,y),fill:'none'},svg); ln.style.stroke=s[2]; ln.style.strokeWidth=ci?'1.25':'2';
+    if(ci) ln.style.strokeDasharray='4 3';
+    for(const [a,b] of pts) mark(CK.el('g',{},svg),c,x(a),y(b),s[2]);
+   }));
    const nodes=[];
    for(const r of rows){
     const g=CK.el('g',{},svg), xc=x(r.work);
     CK.el('rect',{x:xc-14,y:T,width:28,height:Hh-B-T,class:'ck-hit'},g);
     CK.tip(f,g,`<b>${r.work} add${r.work>1?'s':''} per element</b> (${num(r.work/8)} flop per byte moved, ${num(r.work/4)} per byte read)<br>`+
-     S.map(s=>`${s[1]}: ${r[s[0]].toFixed(1)}× DRAM (${g1(r[s[3]].gb_s)} GB/s)`+
-      (OTH.length?`, ${lab(A2)}; `+OTH.filter(c=>r.by_card&&r.by_card[c]).map(c=>`${lab(c)} ${r.by_card[c][s[0]].toFixed(1)}×`).join(', '):'')).join('<br>'));
+     cards.map(c=>{const q=rowOf(r,c);if(!q)return null;
+      return `${lab(c)}: `+S.map(s=>`${s[1]} ${q[s[0]].toFixed(1)}× DRAM (${g1(q[s[3]].gb_s)} GB/s)`).join(', ');}).filter(Boolean).join('<br>'));
     nodes.push(g);
    }
    CK.keynav(f,nodes);
   }});
  /* a value per setting over every card: one number when the cards agree to the printed digit, else the range */
  const last=rows[rows.length-1], at=w=>{const r=rows.find(q=>q.work===w);
-  return rng(CS.filter(c=>r.by_card&&r.by_card[c]).map(c=>r.by_card[c].hop_over_dram).concat(r.by_card?[]:[r.hop_over_dram]),v=>v.toFixed(1));};
- $('intcap').textContent=`Lines and dots ${lab(A2)}${OTH.length?', '+andL(OTH.map(c=>`${CK.card(c).mark==='ring'?'rings':CK.card(c).mark==='diamond'?'diamonds':'marks'} ${lab(c)}`))+' (each point the mean of that card\u2019s passes); the text gives the range over the cards':''}, log axes. The dashed line is parity with DRAM. Each element is 4 bytes read `+
+  return rng(cards.map(c=>rowOf(r,c)).filter(Boolean).map(q=>q.hop_over_dram),v=>v.toFixed(1));};
+ $('intcap').textContent=`Log axes. The mark is the card`+
+  (cards.length>1?` (${cards.map(c=>`${lab(c)} ${CK.card(c).mark==='dot'?'filled':CK.card(c).mark==='ring'?'ring':CK.card(c).mark}`).join(', ')}; each point the mean of that card\u2019s passes); the text gives the range over the cards`:` (${lab(A2)})`)+
+  `. The dashed line is parity with DRAM. Each element is 4 bytes read `+
   'and 4 bytes written, so w adds per element are w/8 flops per byte moved; the top axis counts flops per byte read (w/4), the unit of the ridge points report.';
  $('inttext').innerHTML=
   `One add per element is pure data movement, and the hand-off is ${at(1)}× ahead. The lead holds to about four adds per element `+
@@ -1339,8 +1400,8 @@ CK.stackTable('media');
   (fitted.length?`An offset and its mirror hand the same pairs of shires the slab in opposite directions; they agree within `+
    `${rng(mir.map(v=>100*v),f1)}% (offsets ${W0.offset} and ${W0.mirror} differ most), a little more than the 2% the registered test allowed. `:'')+
   `Placement is not free in energy either. On a loaded mesh each hop costs 1.6–2.3 pJ per byte of random data `+
-  `(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#meaning">Heat per millimetre, §8</a>), about half of what a tensor `+
-  `load of that byte from the shire's own scratchpad costs. The hand-off's bytes cross ${f1(k(1).mean)} hops on average, so a physical `+
+  `(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#meaning">Heat per millimetre, §8</a>), about half of the `+
+  `${f1(POOLED.read['scp-local'].random.mean)} pJ a tensor load of a random byte from the shire's own scratchpad costs (section 2). The hand-off's bytes cross ${f1(k(1).mean)} hops on average, so a physical `+
   `neighbour should cost less (untested; section 7). This relay's slabs each hold a single value repeated, and such data costs less to `+
   `carry than random data.`;
 
@@ -1441,11 +1502,9 @@ CK.stackTable('media');
  upd();
  $('ringcap').textContent=
   `The map colours each shire by how many mesh hops the slab it reads at this offset has to travel (the stronger the blue, the farther); the arrows mark `+
-  `the longest hand-offs, drawn straight from source to destination because the route the data takes on the mesh was not measured. `+
-  `The scatter puts the relay's bandwidth at every offset against the longest hand-off (or, toggled, the mean): r = ${rr('longest')} `+
-  `against the longest${cs.length>1?` on the ${word(cs.length)} cards`:''}, ${rr('mean')} against the mean. `+
-  (cs.length>1?`${(t=>t[0].toUpperCase()+t.slice(1))(andL(cs.map(c=>`${mk(c)} ${lab(c)}`)))}, side by side at each offset; each point is the mean of that card's passes, and the dashed line is ${lab(A2)}'s least-squares line. `:'')+
-  `Consistent with the slowest pair setting the pace at each barrier.`;
+  `the longest hand-offs, drawn straight because the route on the mesh was not measured. `+
+  `The scatter puts the bandwidth at every offset against the longest hand-off or, toggled, the mean`+
+  (cs.length>1?`: ${andL(cs.map(c=>`${mk(c)} ${lab(c)}`))}, side by side at each offset, each the mean of that card's passes; the dashed line is ${lab(A2)}'s least-squares line.`:'.');
 })();
 
 </script>

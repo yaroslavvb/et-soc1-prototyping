@@ -42,7 +42,7 @@ The firmware source, read at `353f20e` (the lab machines' `/opt/et` is built fro
 checks out `836a4ab`, and `device-bootloaders/src/ServiceProcessorBL2/` is identical at both), plus the installed
 runtime, `sys_emu` functional simulator, and `libDM.so` management library. **Which firmware the cards run is not
 established:** their own trace strings match an older service-processor build, from before et-platform commit
-`60b40c10f` (24 September 2024, "Dvfs fixes and refactoring", which reworked the governor), and both cards report release 1.3.1. Read every
+`60b40c10f` (24 September 2024, "Dvfs fixes and refactoring", which reworked the governor), and aifoundry2 and aifoundry3 report release 1.3.1 (aifoundry1's cards 1.4.1 and 1.2.0). Read every
 statement below about the governor as a statement about the `353f20e` source.
 
 - **Authoritative for:** the service processor's power and thermal policy. The two thresholds quoted
@@ -81,9 +81,8 @@ shires), 32 GB LPDDR4X, in a desktop chassis. Reached over Tailscale SSH.
 
 - **Authoritative for:** everything measured. Note that it is *one* card in *one* chassis: the thermal
   resistance in [11-thermal-model.md](11-thermal-model.md) is a property of this installation, not of the chip.
-- **Etiquette (set by the repo owner, in `CLAUDE.md`):** ask which machine to use, check `uptime`/`who`/
-  `lsmod | grep et_soc1` (third column is open handles) before touching a card, keep builds to `nice -j4`, and
-  do not reset a card yourself (ping the lab admin). The original 10-second hold limit was **waived by the
+- **Etiquette:** the current rules, with the reason for each, are in [AGENT.md](../../AGENT.md) §5 (since
+  25 September every host has `et-who` and card locks). The original 10-second hold limit was **waived by the
   repo owner on 2026-09-21** for the long-run experiments (see Q13 in [02-requests.md](02-requests.md)); every
   other session kept each kernel process under 10 s. The telemetry sampler (`ettelem sample`) held the single-opener
   management node for whole sessions (up to 2.6 h in E27).
@@ -147,20 +146,21 @@ words.
 
 ## R10 — The other two lab machines
 
-`aifoundry1` (two ET-SoC-1 cards) and `aifoundry3` (one), reached over Tailscale SSH the same way as R5. Note
-that `/etc/hosts` on aifoundry2 carries stale LAN addresses for both; `~/.ssh/config` pins the Tailscale
-addresses instead.
+`aifoundry1` (two ET-SoC-1 cards) and `aifoundry3` (one), reached over Tailscale SSH the same way as R5. From
+aifoundry2, name them by their full tailnet names, or `ssh` goes over the LAN ([lab-access.md](../lab-access.md),
+"Logging in from one lab machine to another").
 
 - **Authoritative for:** that these cards exist, their firmware and PMIC revisions, and — for aifoundry3 —
-  everything measured in E20–E27, E29, E31 and E32 (E23 without power, E28 not at all).
+  everything measured in E20–E27, E29, E31 and E32 (E23 without power, E28 not at all); for all three cards
+  (aifoundry2, aifoundry3 and aifoundry1's card 1), E35–E46 and E48.
 - **Not authoritative for:** anything about aifoundry1's silicon before 25 September 2026. Its cards could not be
-  opened until then (E21; fixed that day, 14-card-behaviour.md). Since then card 1 (firmware 1.2.0) runs the
-  version-3 campaign; card 0 (firmware 1.4.1) overheats under load and is excluded.
-- **Caveat that matters:** aifoundry3 is **not** a drop-in replacement for aifoundry2. It idles 25 °C cooler,
-  its heatsink sheds heat faster, and its firmware holds it at 600 MHz because a boot service sets its TDP to 0 W at every boot (E21, corrected
-  2026-09-25 in 14-card-behaviour.md).
+  opened until then (E21; fixed that day, 14-card-behaviour.md). Since then card 1 (firmware 1.2.0) ran the
+  version-3 campaign and E48; card 0 (firmware 1.4.1) overheats under load and is excluded.
+- **Caveat that matters:** aifoundry3 is **not** a drop-in replacement for aifoundry2. It idles about 25 °C cooler,
+  and its governor holds it at 600 MHz because a boot service sets its TDP to 0 W at every boot (E21, corrected
+  2026-09-25 in 14-card-behaviour.md); how fast it sheds heat over minutes was not measured.
   Absolute watts from the two cards are not comparable; switching power over idle is.
-- **Used by:** E20–E27, E29, E31, E32. R4's sparsity work also ran on aifoundry3, which is why its absolute watts must not
+- **Used by:** E20–E27, E29, E31, E32, E35–E46, E48. R4's sparsity work also ran on aifoundry3, which is why its absolute watts must not
   be mixed with aifoundry2's.
 
 ## R11 — Ivan's benchmark result (external, a Discord message)
@@ -195,9 +195,9 @@ same repository state (`b36acd6`) and from R11.
   [18-on-chip-relay.md](18-on-chip-relay.md) is built at shire granularity on the scratchpad rather than as a
   mesh of TensorSend cells.
 - **Where this work disagrees with it:** it repeats R11's 6% figure as measured fact and builds on it. E22
-  did not reproduce that figure; see [17-hot-line.md](17-hot-line.md). The brief is kept, corrected in place with an
-  Update box pointing to the hot-line report, and its source is now in the repository
-  (`docs/reports/2026-09-22-et-soc1-l2-mainline-starvation.html`).
+  did not reproduce that figure; see [17-hot-line.md](17-hot-line.md). The brief was corrected in place on
+  24 September and, since 25 September, is a pointer page: its points that no other page made moved to the hot line
+  (A13). Its source is in the repository (`docs/reports/2026-09-22-et-soc1-l2-mainline-starvation.html`).
 
 ## R13 — The service processor's PMIC and PVT drivers (firmware source, read for E30)
 

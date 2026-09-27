@@ -15,7 +15,9 @@ prose, which are written by hand. --embed replaces the JSON inside the report's
 workload's windows (launches, the idle window before it, the settle second, its mean power and
 throughput) for the idle-window chart, and, with --manual, an "eff" object for the efficiency
 explorer: this run's GFLOP/s per W, the energy manual's random-normal variant (2000 / pj_loaded of
-tensor.rows fp32_randn, fp16_randn, int8_randn) and the A100 constants below.
+tensor.rows fp32_randn, fp16_randn, int8_randn), the operand-and-card band (the same variant on zeros, ones and
+random data, aifoundry2's from tensor.rows and every card's from tensor.per_card_rows, all on board power) and the
+A100 constants below.
 
 --ladder TESTDRIVE_HTML writes the test drive's performance ladder (<script id="ladder-data">):
 the FOSDEM 2026 rungs parsed from docs/et-soc1-notes.md, this run's fp32 tensor-unit rate and the
@@ -87,9 +89,34 @@ def eff_object(res, manual_path, run_dir):
         r = rows[cfg]
         randn[mode] = {"tflops": sig(2 * r["per_s"] / 1e12, 5), "board_w": sig(r["idle_w"] + r["over_idle_w"]),
                        "per_w": sig(2000 / r["pj_loaded"], 5), "idle_w": sig(r["idle_w"]), "cycles_per_op": round(r["cycles_per_op"])}
+    # The operand-and-card band: GFLOP/s per W of total board power (tensor.rows, aifoundry2, the same basis as
+    # "randn" above) at each of the three operand patterns, all three precisions; and each card's figure on the same
+    # board-power basis, from tensor.per_card_rows (each card's idle and power above idle, four runs per card in the
+    # version-3 manual of 26 September) over tensor.rows' throughput, which repeats on every card (the three-card
+    # check: cycle counts within 0.05%). Only where the manual has more than one card.
+    pcr = man["tensor"].get("per_card_rows", {})
+    OPERANDS = (("zeros", "zeros"), ("ones", "ones"), ("random", "randn"))
+    operand_band = {}
+    for mode in RANDN:
+        operand_band[mode] = {}
+        for op, suffix in OPERANDS:
+            cfg = f"{mode}_{suffix}"
+            r = rows[cfg]
+            entry = {"per_w": sig(2000 / r["pj_loaded"], 5), "tflops": sig(2 * r["per_s"] / 1e12, 5)}
+            byc = {c: {"per_w": sig(2 * r["per_s"] / 1e9 / (v[cfg]["idle_w"] + v[cfg]["over_idle_w"]), 5),
+                       "board_w": sig(v[cfg]["idle_w"] + v[cfg]["over_idle_w"]), "idle_w": sig(v[cfg]["idle_w"]),
+                       "launch_c": v[cfg].get("launch_c")}
+                   for c, v in pcr.items() if cfg in v}
+            if len(byc) > 1:
+                entry["by_card"] = byc
+            operand_band[mode][op] = entry
+    a100_per_w = {k: sig(A100_PEAK[k] * 1000 / A100_TDP["SXM4"], 5) for k in A100_PEAK}
     return {"run": {"source": os.path.join(run_dir, "results.json"), "rows": run},
             "randn": {"source": manual_path + " tensor.rows (" + ", ".join(RANDN.values()) + "); power at 80 C",
                       "rows": randn},
+            "operands": {"source": manual_path + " tensor.rows (board power, aifoundry2) and tensor.per_card_rows "
+                         "(each card's board power over the same throughput)",
+                         "rows": operand_band, "a100_per_w": a100_per_w},
             "a100": {"peak": {**A100_PEAK, "tf32": A100_TF32}, "tdp": {"SXM4": A100_TDP["SXM4"], "PCIe": A100_TDP["PCIe 40GB"]},
                      "measured": A100_MEASURED}}
 

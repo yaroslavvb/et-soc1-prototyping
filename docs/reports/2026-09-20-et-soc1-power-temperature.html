@@ -165,6 +165,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 /* chartkit:css:end */
 </style>
 </head>
@@ -196,7 +204,8 @@ lists every way to read them, what each resolves, and what a small client on the
 tool: the <b>per-rail snapshot the CLI refuses, every refresh instead of et-powertop's one poll a second, and a
 34-shire on-die voltage map</b>. Then what the numbers show. The main surprise is temperature: <b>under load, the same work costs about 1 W more for every °C the die warms</b>
 on aifoundry2 and aifoundry1-c1 (0.9–1.2 W/°C at 73–97 °C, four load steps on each) and 0.6 W on the cooler
-aifoundry3. The die idled at 72 °C here (62–73 °C on other days; aifoundry3 idles near 50–56 °C), and idle power after a
+aifoundry3. The die idled at 72 °C here (62–74 °C on other days; aifoundry3 50–58 °C on 22–24 September and 55–57 °C since
+25 September), and idle power after a
 load differs from idle before it by what the die's temperature did: 5 W higher here, with the die 9 °C warmer. So every
 energy comparison on this card has to control for heat.</p>
 
@@ -207,24 +216,21 @@ main correction is the busy slope: this session's 0.8 W/°C is the low end on ai
 the idle voltage map is not a per-monitor offset to subtract. The 20 September numbers stay, labelled as that session's
 (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">the record</a>).</div>
 
-<div class="card" style="margin:18px 0 8px"><b>Later measurements.</b> Idle power on aifoundry2 now follows a fitted
-law that rises <span id="law-slope80"></span> W for every °C at 80 °C
-(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a>;
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">the energy manual, §1</a>). Written
-out, P<sub>idle</sub> = <span id="law-fix"></span> W + <span id="law-a"></span> W·e<sup>(T−80)/<span id="law-tl"></span></sup>
-with T the die temperature in °C. The idle readings it was fitted to, at <span id="law-trange"></span> °C, pin its
-slope and level there but not how much of the power is leakage: e-folding temperatures from 30 to 45 °C fit as well,
-and put leakage at 20–29 W of the <span id="law-80"></span> W at 80 °C. The three-card check did not confirm the law's
-constants: its long idle cycles, which would have refitted them, did not run. §2 compares this page's readings
-with the law. What a workload adds to §2's unmetered remainder is now attributed to delivery losses and DRAM traffic;
-the <span id="box-idle-rest"></span> W at idle on this card (12–13 W on aifoundry3) is still not split
-(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits
-of observability, §4.2</a>).</div>
+<div class="card" style="margin:18px 0 8px"><b>Later measurements.</b> Idle power on aifoundry2 follows a fitted law,
+P<sub>idle</sub> = <span id="law-fix"></span> W + <span id="law-a"></span> W·e<sup>(T−80)/<span id="law-tl"></span></sup>
+(T the die temperature in °C), fitted to idle readings at <span id="law-trange"></span> °C and not re-measured by the
+three-card check: it rises <span id="law-slope80"></span> W per °C at 80 °C, and e-folding temperatures from 30 to 45 °C
+fit as well, putting 20–29 W of the <span id="law-80"></span> W at 80 °C in leakage
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-that-costs">the DVFS report, §5</a>;
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">the energy manual, §1</a>). §2 compares
+this page's readings with it. The unmetered remainder is attributed in
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits of
+observability, §4.2</a>.</div>
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">Idle</div><div class="val">31.2 W</div><div class="sub">aifoundry2 at 72 °C die; 16 W on the three measured rails, 15 W elsewhere (12–13 W on aifoundry3, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits §4.2</a>)</div></div>
   <div class="card kpi"><div class="lab">Power slope under load</div><div class="val">0.6–1.2 W/°C</div><div class="sub">board, the same matmul, four load steps per card: 0.90–1.12 on aifoundry2 (81–97 °C), 0.56–0.66 on aifoundry3 (61–70 °C), 1.10–1.16 on aifoundry1-c1 (73–83 °C); about half on the minion rail on all three. An idle card: 0.65 W/°C at 80 °C</div></div>
-  <div class="card kpi"><div class="lab">Finest power record</div><div class="val">10 mW · 156 ms</div><div class="sub">board power, fresh each service-processor pass: 156 ms apart on aifoundry2, 158 ms on aifoundry1-c1 and 263 ms on aifoundry3 while <code>ettelem</code> samples at 10 Hz; the rails read to 1 mW but are the PMIC's running average (τ ≈ <span id="kpi-tau"></span>)</div></div>
+  <div class="card kpi"><div class="lab">Finest power record</div><div class="val">10 mW · 156 ms</div><div class="sub">board power, fresh each service-processor pass (156–263 ms, by card: the lede); the rails read to 1 mW but are the PMIC's running average (§2)</div></div>
   <div class="card kpi"><div class="lab">Finest voltage map</div><div class="val">34 shires</div><div class="sub">3 rails each, 1 mV, with hardware low/high, from a user account; captured on all three cards</div></div>
 </div>
 
@@ -241,13 +247,16 @@ mesh rails), and Moortec <i>PVT</i> monitors measure voltage and temperature on 
 <h2>1. Every way to measure, by granularity</h2>
 <p>Space, time and resolution for each instrument. <span class="chip works_now">works now</span> means from a user account
 with the tools in this repo; <span class="chip needs_fw_change">firmware</span> means a service-processor change and a signed
-image; <span class="chip needs_tooling">hardware</span> means physical access.</p>
+image; <span class="chip needs_tooling">hardware</span> means physical access; <span class="chip research_only">lab admin only</span>
+means a change to the card that the lab's rules leave to its admin.</p>
 <div class="table-wrap wide"><table id="methods"></table></div>
+<details class="more"><summary>More instruments, and the improvement ladder</summary>
 <p><b>Beyond these meters.</b> The Minion Debug Interface adds no power or temperature sensor: it reads the registers and
 memory of a halted hart (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#bits">Limits of
 observability, §3</a>). Its one use for energy work, writing the counter event selectors before a launch, is rung 17 of
 the hub's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">improvement ladder</a>,
 which also ranks what firmware changes or physical access would add and marks what has since been done.</p>
+</details>
 
 <h2>2. A load step, seen through every sensor</h2>
 <p>Twenty seconds idle, 58 s of fp32 matmul on all 1,024 minions, 40 s idle, 34 s of DRAM-bound loads, idle. Sampled at
@@ -266,6 +275,7 @@ results beside it.</p>
 under the power chart mark the gaps between successive load processes, found in the 10 Hz stream. Hover or tap a chart,
 or move the time slider, for the readings at that moment; the slider also marks that second in the chart below.</p>
 
+<details class="more"><summary>How the load step proves the slope: power against temperature, and the per-card comparison</summary>
 <div class="chart-title">Board power against die temperature</div>
 <p class="small" style="margin:0 0 4px">Does idle power depend on temperature alone, and how much of the rise under load is the
 idle law's leakage? Each dot is one second.</p>
@@ -302,6 +312,9 @@ W/°C in aifoundry2's repeats). Whether busy power climbs faster per degree than
 rows the three-card check's four repeats of this page's load step (26 September; small rings, one per repeat). The mark is
 the mean slope over a card's runs, the whisker ±2 standard errors of that mean. The two vertical lines are this session's
 matmul fit, which follows the "Fit starts" slider above, and the idle law's slope at 80 °C.</p></li>
+</ul>
+</details>
+<ul class="findings">
 <li><b>Idle is not one number.</b> In this session, before the load: 31.2 W at 72 °C. Forty seconds after it: 36.5 W at
 81 °C. Both sit on the idle law measured later (31.3 and 36.5 W at those temperatures). The three-card check's repeats agree
 on aifoundry2: idle rose by 3.0–7.2 W across the load step (from 33.5–37.2 W at 76–82 °C to 36.5–44.4 W at 81–91 °C), and the
@@ -311,6 +324,9 @@ its die read 2–4 °C cooler than before it. The die sheds heat over tens of se
 load; 6.0–7.5 °C on aifoundry2 and aifoundry3 in the repeats, 15–16 °C on aifoundry1-c1), so a baseline taken at another
 temperature misstates the idle power during and after a run: taken before it, it understates it. Energy measurements here
 should take their baseline at the same temperature, or fit a temperature term.</li>
+</ul>
+<details class="more"><summary>What's in the unmetered remainder, and how it moves under DRAM and matmul loads</summary>
+<ul class="findings">
 <li><b>The three rails are not the whole card.</b> Board minus rails is <span id="rest-idle0"></span> W at idle at
 <span id="rest-idle0-t"></span> °C (<span id="rest-cool"></span> W in the idle window at <span id="rest-cool-t"></span> °C;
 two windows are too few to show a trend with temperature),
@@ -327,6 +343,10 @@ show the same for DRAM traffic: in the energy catalogue, 76 GB/s DRAM streams mo
 minion rail by under 0.2 W on each
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits
 of observability, §4.2</a>).</li>
+</ul>
+</details>
+<details class="more"><summary>Why the remainder briefly looks wrong at each load edge, with the edge charts</summary>
+<ul class="findings">
 <li><b>Why the remainder sometimes looks too small, or the rails seem to exceed the step.</b> Board power is a fresh
 reading at every service-processor pass (about every 156 ms here). The rail figures are the PMIC's own running averages,
 which the service processor copies each pass, roughly first-order with τ ≈ <span id="rf-tau"></span>: a step reaches
@@ -353,6 +373,9 @@ step the average trails the reading just as the rails do. The same averaging is 
 service-processor trace and the host log in
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes">the memory-anatomy
 report</a>, where the host log's totals came out 14–25% higher in each of its twelve runs on aifoundry2.</li>
+</ul>
+</details>
+<ul class="findings">
 <li><b>Voltage barely droops at the die.</b> The minion rail's on-die monitor reads 518 mV idle and 517 mV with 18 W more
 load (about 35 A more at 0.52 V), consistent with a regulator that senses at the die. The three-card check's load steps put
 the sag at 0.08 mV per watt of minion-rail rise on aifoundry2 and on aifoundry3 and 0.055 on aifoundry1-c1 (four repeats
@@ -360,7 +383,7 @@ each). <span id="ddr-idle"></span> <span id="ddr-load"></span> In the three-card
 0.11–0.21 mV per °C on aifoundry2, 0.21–0.24 on aifoundry3 and 0.10–0.15 on aifoundry1-c1; under the DRAM load it sat
 2.9–5.7 mV below that trend on aifoundry2, 2.9 mV on aifoundry3 and 4.1–7.0 mV on aifoundry1-c1; and under the matmul within
 1.5 mV of it on aifoundry2 and aifoundry3 but 2.4–3.2 mV below it on aifoundry1-c1. That droop
-under DRAM traffic, which the energy catalogue finds on both cards (about 4 mV at 76 GB/s of DRAM streaming, none under
+under DRAM traffic, which the energy catalogue finds on aifoundry2 and aifoundry3 (about 4 mV at 76 GB/s of DRAM streaming, none under
 compute), is now used as a meter for DRAM power
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#what-the-moortec-sensors-can-and-cannot-do-for-power">Limits
 of observability, §4.3</a>).</li>
@@ -370,8 +393,9 @@ so it held the lowest operating point (600 MHz at 0.52 V) even at 65 W. From a c
 within about a second (seven cool-start runs on one morning, a demonstration:
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#the-speed-effect-appears-on-a-cool-die">the Horace
 experiment, §6</a>; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">the DVFS report</a> reads the
-governor and classifies every clock change). The second card, aifoundry3, never leaves 600 MHz: its firmware reports a
-power limit of 0 W (a lab service sets it at every boot), so its governor only ever steps down.</li>
+governor and classifies every clock change). aifoundry3 never leaves 600 MHz: a boot service sets its power limit to 0 W
+at every boot, so its governor only ever steps down. aifoundry1-c1, launched warm in the three-card check, read 600 MHz
+throughout.</li>
 </ul>
 
 <h2 id="the-per-shire-voltage-map">3. The per-shire voltage map</h2>
@@ -416,6 +440,7 @@ aifoundry2 and aifoundry3 never gave (on aifoundry1-c1, in the two passes that d
 out the options).</p>
 
 <h2>4. Reproduce</h2>
+<details class="more"><summary>Reproduce this</summary>
 <pre><code>cmake -S tools/ettelem -B build/ettelem -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev \
   &amp;&amp; cmake --build build/ettelem
 export LD_LIBRARY_PATH=/opt/et/lib
@@ -457,24 +482,21 @@ command returns, the governor) was read at et-platform <code>353f20e</code>. The
 build, from before et-platform commit <code>60b40c10f</code> (24 September 2024), which rewrote the governor, so the
 governor details may differ on the card (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">the
 DVFS report</a>). The measurements do not depend on it.</p>
+</details>
+<details class="more"><summary>Version history</summary>
 <p class="small"><b>Versions.</b> 20 September 2026: first edition. 21 September: §2's governor bullet corrected (it
 first said the governor never acts). 24 September: the rail averaging described from the firmware (first described as a
-2 s moving average), the leakage slope set beside the later idle law, the transients in §2 re-read from the data, shires
-32 and 33 added to the map, and terms and links added. 25 September: §4 and §5 folded into §1, since they pointed
-to the hub's fuller versions (Reproduce is now §4); the summary rebuilt by a committed reducer and the map by a committed
-parser, from the recovered raw records; the rail filter's step figures replaced by the measured ones; how much of the matmul's rise is leakage, the idle remainder's temperature and the droop's DRAM caveat
-stated; three interactive charts added; the busy drift compared with the second card's, and the DDR reading under the
-matmul set against its temperature. 25 September (version 3), after a check of every claim against both cards
-(<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">the
-record</a>): the byline names the card and sessions; the refresh period given per card (156 ms on aifoundry2, 263 ms on
-aifoundry3 under <code>ettelem</code>) instead of 133 ms; the rail filter per card; the idle law led by its slope, with
-the leakage split as a range; the cool-die clock result labelled a demonstration; where a result holds on both cards,
-or differs, said so; and the clause that busy power climbs faster per degree than idle removed, since it is within the
-noise. 26 September: the three-card check's results added beside this session's (four repeats of the load step and three
-of the meter and voltage-map tests on aifoundry2, aifoundry3 and aifoundry1-c1): the busy slope corrected (0.8 W/°C was
-this session's; the repeats give 0.9–1.1 on aifoundry2), the refresh period, SP pass and trace span given per card, the
-voltage map's offset hypothesis withdrawn, the lows' "droops the polling misses" clause withdrawn, and the repeats' load
-step added to the busy-drift chart.</p>
+2 s moving average), and the transients re-read from the data. 25 September: the summary and the map rebuilt by committed
+tools from the recovered raw records, and the rail filter's step figures replaced by the measured ones. 25 September
+(version 3), every claim checked against both cards
+(<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">record</a>):
+the refresh period per card (156 and 263 ms, not 133 ms), the idle law led by its slope, and the clause that busy power climbs
+faster per degree than idle removed. 26 September (version 4), the three-card check: the busy slope corrected (0.8 W/°C was
+this session's; the repeats give 0.9–1.1 on aifoundry2), the refresh period, SP pass and trace span per card, and the voltage
+map's offset hypothesis and the lows' "droops the polling misses" withdrawn. 27 September: the review of 26 September (the
+resting temperatures, the frequency sweep marked lab admin only, the cards named), fresh readings ticked in the edge charts,
+and detail folded into sections.</p>
+</details>
 
 <h2>Related reports</h2>
 <ul>
@@ -996,9 +1018,30 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 
 </script>
@@ -1078,7 +1121,7 @@ put('rf-12s', andList(RFC.map((c, i) => (i ? `${pct(RF[c].frac_1s)} and ${pct(RF
     if (n < 3) return '';
     return e[n - 1] > 2 * e[n - 2] ? `: ${word(n - 1)} gave ${CK.fmt.range(e[0], e[n - 2], 2, 'W/°C')} (median ${num(median(e.slice(0, -1)), 2)}) and one ${num(e[n - 1], 2)}`
       : `: from ${num(e[0], 2)} to ${num(e[n - 1], 2)} W/°C`; };
-  put('busy-drift-a3', `On the second card, aifoundry3, the same runs at ${rng(a3)} °C, where the idle law's own slope is about ` +
+  put('busy-drift-a3', `On aifoundry3 the same runs at ${rng(a3)} °C, where the idle law's own slope is about ` +
     `${num(lawSlope((a3.temp_c[0] + a3.temp_c[1]) / 2), 2)} W/°C, gave ${num(a3.w_per_c, 2)} W/°C on average` +
     (a3.se > 0.1 * a3.w_per_c ? `, but its ${word(a3.runs)} runs scatter widely (standard error ${num(a3.se, 2)} W/°C)${each(a3)}.`
       : ` (${word(a3.runs)} runs, standard error ${num(a3.se, 2)} W/°C).`));
@@ -1134,7 +1177,7 @@ const M = [
  ['Power state, throttle residency, thresholds', 'card-wide · µs residency counters', 'DM_CMD_GET_MODULE_POWER_STATE, _RESIDENCY_*, _TEMPERATURE_THRESHOLDS, _STATIC_TDP_LEVEL', 'works_now', 'works now'],
  ['Device-wide bandwidth and utilisation', 'DDR, L2/L3, PCIe · 1 ms samples', 'MMST trace; a proxy for where memory energy goes', 'works_now', 'works now'],
  ['Energy per event', 'pJ per load, per multiply-add, per mesh hop · needs ≥10⁹ identical events/s for seconds', 'rail power above a same-temperature baseline ÷ event rate (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes">memory anatomy</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment</a>; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">the energy manual</a> does it for every instruction and byte)', 'works_now', 'works now'],
- ['Static against dynamic power', 'per rail', 'frequency sweep at fixed voltage: DM_CMD_SET_FREQUENCY with power management off. Changes the card for everyone; not run here', 'works_now', 'works now, with care'],
+ ['Static against dynamic power', 'per rail', 'frequency sweep at fixed voltage: DM_CMD_SET_FREQUENCY with power management off. Changes the card for everyone, which the lab leaves to its admin; not run here', 'research_only', 'lab admin only'],
  ['Instantaneous rail power', '3 rails · 1 mW · per pass', 'the SP already reads it each pass and discards it; a few assignments in thermal_pwr_mgmt.c', 'needs_fw_change', 'firmware'],
  ['Faster sampling', 'tens to hundreds of Hz', 'in the firmware source each pass makes ~96 I2C transactions, each followed by a hard-coded 1 ms wait, a floor of about 100 ms; the measured pass is longer. In the SP\'s own trace (three passes per card) it is 133 ms on aifoundry2 and 135 ms on aifoundry1-c1 with no telemetry client, 160 and 162 ms while ettelem samples at 10 Hz; on aifoundry3 224 and 266 ms, 1.7× as long, for reasons not established. Skip the 84-read snapshot and fix the wait', 'needs_fw_change', 'firmware'],
  ['Per-shire temperature; process detectors', '34 shires · 0.06 °C in hardware; ring-oscillator counts in µs windows', 'sampled continuously by the PVT controllers, never exported', 'needs_fw_change', 'firmware'],
@@ -1414,6 +1457,8 @@ driftOut();
 /* ---------- §2 bullet 4: the remainder at the load edges, board power filtered like the rails ---------- */
 const EDGE = {tau: 0, avg: false};
 const FT = FAST.t, FIDX = FAST.windows.map(([a, z]) => FT.map((t, i) => i).filter(i => FT[i] >= a && FT[i] < z));
+// a "fresh" 10 Hz sample: FAST.board actually changed from the sample before it (the service processor's own pass rate)
+const FRESH = FIDX.map(idx => idx.filter((i, j) => j > 0 && FAST.board[i] !== FAST.board[idx[j - 1]]));
 function boardPrime(idx, tau, avg) {
   let y = null, tp = null;
   return idx.map(i => {
@@ -1441,6 +1486,8 @@ function edgeFrame(id, w) {
     CK.axes(f, {x, y, L, R, T, B, xt, xfmt: v => v + ' s', yfmt: v => num(v, 0)});
     const z0 = CK.el('line', {x1: L, x2: W - R, y1: y(0), y2: y(0), 'stroke-width': 1}, f.svg); z0.style.stroke = 'var(--ink)';
     for (const g of GAPS) if (g >= a && g < z) CK.el('line', {x1: x(g), x2: x(g), y1: H - B, y2: H - B - 7, stroke: 'var(--ink-2)', 'stroke-width': 1.5}, f.svg);
+    const fresh = FRESH[w];
+    fresh.forEach(i => CK.el('line', {x1: x(FT[i]), x2: x(FT[i]), y1: H - B, y2: H - B - 4, stroke: 'var(--c1)', 'stroke-width': 1, opacity: 0.6}, f.svg));
     STEADY[w].forEach((v, j) => {
       const e = CK.el('line', {x1: L, x2: W - R, y1: y(v), y2: y(v), 'stroke-width': 1}, f.svg); e.style.stroke = 'var(--ref)'; e.style.strokeDasharray = '3 3';
       const lab = (j === 0) === (w === 0) ? 'idle' : 'matmul';
@@ -1452,7 +1499,9 @@ function edgeFrame(id, w) {
       e.style.stroke = color;
     };
     line(bp, 'var(--c1)', 1.5, 0.45, 'b'); line(idx.map(i => FAST.rails[i]), 'var(--c2)', 1.5, 0.45, 'r'); line(rem, 'var(--c5)', 2, 1, 'x');
-    edgeOut[w].set(`remainder from ${num(Math.min(...rem), 1)} to ${num(Math.max(...rem), 1)} W`);
+    const fDur = FT[idx[idx.length - 1]] - FT[idx[0]], fMs = fDur * 1000 / fresh.length;
+    edgeOut[w].set(`remainder from ${num(Math.min(...rem), 1)} to ${num(Math.max(...rem), 1)} W · ` +
+      `${num(fresh.length, 0)} new board readings (ticks) in ${num(fDur, 1)} s, one per ~${num(fMs, 0)} ms`);
     const cross = CK.el('line', {y1: T, y2: H - B, stroke: 'var(--ink-2)', 'stroke-width': 1, 'pointer-events': 'none', opacity: 0}, f.svg);
     const dot = CK.el('circle', {r: 4, 'pointer-events': 'none', opacity: 0}, f.svg); dot.style.fill = 'var(--c5)';
     let j = 0;
@@ -1495,7 +1544,8 @@ function setAvg(v, fromBtn) {
 }
 CK.legend('edge-leg', [{key: 'x', label: 'remainder (board − rails)', mark: 'line', color: 'var(--c5)'},
   {key: 'b', label: 'board power, as filtered', mark: 'line', color: 'var(--c1)'}, {key: 'r', label: 'the three rails', mark: 'line', color: 'var(--c2)'},
-  {key: 's', label: 'steady levels', mark: 'dash', color: 'var(--ref)'}]);
+  {key: 's', label: 'steady levels', mark: 'dash', color: 'var(--ref)'},
+  {key: 'f', label: 'tick: a fresh board reading (10 Hz log, slower true rate)', mark: 'line', color: 'var(--c1)'}]);
 const fEdges = [edgeFrame('edge-a', 0), edgeFrame('edge-b', 1)];
 function redrawEdges() { fEdges.forEach(f => f.redraw()); }
 { // the caption, from the same data
@@ -1510,7 +1560,8 @@ function redrawEdges() { fEdges.forEach(f => f.redraw()); }
     `it stops (${num(stopMin, 1)} W) and at each gap between launches (to ${num(Math.min(...gapMins), 1)} W). Filter board power the way the ` +
     `PMIC filters the rails, with any τ from ${num(taus[0], 1)} to ${num(taus[taus.length - 1], 1)} s, and it ` +
     (clean ? `steps cleanly between about ${num(lo, 0)} and ${num(hi, 0)} W, the steady levels on either side of the edges.`
-      : `stays within ${CK.fmt.range(Math.min(...filt), Math.max(...filt), 1, 'W')}.`) + ` The PMIC's own board average stays within ${CK.fmt.range(Math.min(...avg), Math.max(...avg), 1, 'W')}.`;
+      : `stays within ${CK.fmt.range(Math.min(...filt), Math.max(...filt), 1, 'W')}.`) + ` The PMIC's own board average stays within ${CK.fmt.range(Math.min(...avg), Math.max(...avg), 1, 'W')}.` +
+    ` The ticks under each panel mark the samples where the board reading actually changed; between them our 10 Hz log just repeats the last value (each panel's readout gives the count and rate).`;
 }
 
 /* ---------- §3: the per-shire voltage map ---------- */

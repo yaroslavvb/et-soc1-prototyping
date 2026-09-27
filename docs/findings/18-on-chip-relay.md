@@ -8,7 +8,7 @@ approach of putting the intermediate in main memory?
 
 **Answer:** yes, and by a lot. A chain of stages that hands each stage's output to the next shire's
 [scratchpad](README.md#terms) (the next shire in ID order, 3.5 mesh hops away on average) instead of writing it to
-DRAM runs **12.3× faster** and uses **12× less energy per byte**, at the same watts. Keeping the output in the
+DRAM runs **12.3× faster** and uses **12× less energy per byte**, the three routes drawing within about a watt of each other. Keeping the output in the
 shire's own scratchpad is **30.7×**. The advantage appears only once the working set outgrows the 32 MB L3.
 
 Evidence: [E24, E25](03-experiments.md). Published as [A14](04-artifacts.md).
@@ -34,8 +34,9 @@ run three ways, and only the destination of a stage's output differs.
 122 [117–129] pJ/B from DRAM, 2.5 from the own scratchpad, 6.7 from another shire's. The 18 September
 memory-hierarchy report printed 148 / 2.8 / 6.3, a mean of two runs taken at mixed clocks.
 
-**All three draw the same power.** Within a watt of each other, while moving 49.7, 594 and 1,503 GB/s. That is
-the cleanest way to say it: DRAM costs the same watts to move a thirtieth of the data.
+**All three draw within about a watt of each other** while moving 49.7, 594 and 1,503 GB/s (the own scratchpad
+about 0.5–0.8 W more than DRAM; the next shire and DRAM could not be told apart): DRAM spends about the same watts
+to move a thirtieth of the data.
 
 ## How we know the data really crossed a shire
 

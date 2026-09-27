@@ -81,6 +81,7 @@ def v3_data(path):
         mm = lambda v: {"med": st.median(v), "min": min(v), "max": max(v)}  # noqa: E731
         out[card] = {"passes": c["passes"], "ladder": {k: mm(v) for k, v in c["ladder"].items()},
                      "l3": {s: dict(mm(x["med"]), hops=x["hops"]) for s, x in c["l3_by_slice"].items()},
+                     "memByHome": {s: mm(v) for s, v in c.get("mem_by_home", {}).items()},
                      "dramMed": c["dram_med"], "modelErr": c["model_err"],
                      "within3": [sum(a for a, _ in c["within3"]), sum(n for _, n in c["within3"])]}
     return v3, out

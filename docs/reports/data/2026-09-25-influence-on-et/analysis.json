@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25",
+ "generated": "2026-09-27",
  "producer": "docs/reports/data/2026-09-25-influence-on-et/make_analysis.py",
  "kinds": {
   "M": "measured on an ET-SoC-1 lab card",
@@ -19,14 +19,14 @@
    "sram_bw": {
     "v": 2458000000000.0,
     "k": "M",
-    "src": "docs/reports/data/2026-09-23-energy-manual/manual.json: catalogue tensor loads from the shire's own scratchpad, random data, both cards"
+    "src": "docs/reports/data/2026-09-23-energy-manual/manual.json: catalogue tensor loads from the shire's own scratchpad, random data, three cards"
    },
    "sram_pj_B": {
-    "v": 4.208,
-    "lo": 4.011,
-    "hi": 4.365,
+    "v": 4.43,
+    "lo": 4.06,
+    "hi": 5.035,
     "k": "M",
-    "src": "energy manual §4.1, above idle, random data, 3 passes on each card"
+    "src": "energy manual §4.1, above idle, random data, three passes on each of three cards"
    },
    "dram_B": {
     "v": 32000000000.0,
@@ -36,12 +36,12 @@
    "dram_bw": {
     "v": 76010000000.0,
     "k": "M",
-    "src": "energy manual §4.1, tensor loads from DRAM, both cards"
+    "src": "energy manual §4.1, tensor loads from DRAM, three cards"
    },
    "dram_pj_B": {
-    "v": 129.1,
-    "lo": 127.5,
-    "hi": 131.5,
+    "v": 132.6,
+    "lo": 117.9,
+    "hi": 145.4,
     "k": "M",
     "src": "energy manual §4.1, above idle, random data"
    },
@@ -61,22 +61,32 @@
     "fp16": {
      "ops_per_s": 19020000000000.0,
      "board_w": 59.27,
-     "pj_op": 1.507,
+     "pj_op": 1.406,
      "k": "M/D"
     },
     "int8": {
      "ops_per_s": 71780000000000.0,
      "board_w": 61.75,
-     "pj_op": 0.4338,
+     "pj_op": 0.3889,
      "k": "M/D"
     }
    },
-   "peak_src": "docs/reports/data/2026-09-18-aifoundry2/results.json: matmul benchmark, tiles in L2, aifoundry2, 600 MHz; pJ per op above the run's 30.6 W idle (D)",
+   "peak_src": "docs/reports/data/2026-09-18-aifoundry2/results.json: matmul benchmark, tiles in L2, aifoundry2, 600 MHz; pJ per op above the idle just before each workload, 30.61 W for fp32, 32.53 W for fp16, 33.83 W for int8 (D)",
+   "tensor_randn_board_w": {
+    "fp16": 60.77,
+    "fp32": 63.56,
+    "k": "M",
+    "T": {
+     "fp16": 80.25,
+     "fp32": 80.0
+    },
+    "src": "energy manual §3.2 (manual.json tensor.rows *_randn): TensorFMA on random operands, aifoundry2 at 80 °C, board power (idle plus the rise over it)"
+   },
    "bit": {
-    "ops_per_s": 8377000000000.0,
-    "pj_op": 1.056,
+    "ops_per_s": 8224000000000.0,
+    "pj_op": 1.065,
     "k": "E",
-    "src": "no popcount instruction: SWAR on the vector unit, about 14 packed-integer instructions per 256 bits (E) at the catalogue's measured 458 G instructions/s and 19.3 pJ each (M)"
+    "src": "no popcount instruction: SWAR on the vector unit, about 14 packed-integer instructions per 256 bits (E) at the catalogue's measured 450 G instructions/s and 19.5 pJ each (M)"
    },
    "rows16": {
     "k": "E",
@@ -104,6 +114,154 @@
     "k": "M",
     "src": "global atomics spread over 32 lines (hot-line report; energy from the energy manual's reruns)"
    },
+   "gs": {
+    "gather_l1": {
+     "ops_per_s": 452300000000.0,
+     "nj": 0.0128,
+     "lo": 0.0119,
+     "hi": 0.0146,
+     "k": "M",
+     "src": "a word gathered from the L1 (512 B table per hart); E48, three passes on each of three cards (manual.json gs)"
+    },
+    "gather_l2": {
+     "ops_per_s": 27360000000.0,
+     "nj": 0.354,
+     "lo": 0.33,
+     "hi": 0.392,
+     "k": "M",
+     "src": "a word gathered from the L2 (4 KB per hart); E48, three passes on each of three cards (manual.json gs)"
+    },
+    "gather_scp": {
+     "ops_per_s": 27360000000.0,
+     "nj": 0.368,
+     "lo": 0.344,
+     "hi": 0.4,
+     "k": "M",
+     "src": "a word gathered from the shire's own scratchpad (16 KB per hart); E48, three passes on each of three cards (manual.json gs)"
+    },
+    "gather_dram": {
+     "ops_per_s": 1193000000.0,
+     "nj": 9.83,
+     "lo": 9.21,
+     "hi": 10.3,
+     "k": "M",
+     "src": "a word gathered from DRAM (256 KB per hart): a random DRAM read; E48, three passes on each of three cards (manual.json gs)"
+    },
+    "scatter_l2": {
+     "ops_per_s": 23540000000.0,
+     "nj": 0.731,
+     "lo": 0.677,
+     "hi": 0.814,
+     "k": "M",
+     "src": "a word scattered into the L2 (4 KB per hart); E48, three passes on each of three cards (manual.json gs)"
+    },
+    "scatter_dram": {
+     "ops_per_s": 422100000.0,
+     "nj": 23.8,
+     "lo": 22.2,
+     "hi": 25.3,
+     "k": "M",
+     "src": "a word scattered into DRAM (256 KB per hart); E48, three passes on each of three cards (manual.json gs)"
+    },
+    "upd_l1": {
+     "ops_per_s": 139400000000.0,
+     "nj": 0.0363,
+     "lo": 0.0347,
+     "hi": 0.0382,
+     "k": "M",
+     "src": "gather + fadd.ps + scatter, each hart's table in its L1 (512 B); E48, three passes on each of three cards (manual.json gs)"
+    },
+    "upd_l2": {
+     "ops_per_s": 18240000000.0,
+     "nj": 0.85,
+     "lo": 0.789,
+     "hi": 0.965,
+     "k": "M",
+     "src": "gather + fadd.ps + scatter, each hart's table in the L2 (4 KB); E48, three passes on each of three cards (manual.json gs)"
+    },
+    "upd_scp": {
+     "ops_per_s": 18240000000.0,
+     "nj": 0.801,
+     "lo": 0.699,
+     "hi": 0.888,
+     "k": "M",
+     "src": "gather + fadd.ps + scatter, each hart's table in the own scratchpad (16 KB); E48, three passes on each of three cards (manual.json gs)"
+    },
+    "upd_dram": {
+     "ops_per_s": 422500000.0,
+     "nj": 22.2,
+     "lo": 20.7,
+     "hi": 23.8,
+     "k": "M",
+     "src": "gather + fadd.ps + scatter, each hart's table in DRAM (256 KB); E48, three passes on each of three cards (manual.json gs)"
+    },
+    "famoadd_l": {
+     "ops_per_s": 12690000000.0,
+     "nj": 0.392,
+     "lo": 0.353,
+     "hi": 0.425,
+     "k": "M",
+     "src": "packed atomic add famoaddl.pi, random words of a 256 KB table per shire; E48, three passes on each of three cards (manual.json gs)"
+    },
+    "famoadd_g": {
+     "ops_per_s": 2802000000.0,
+     "nj": 1.73,
+     "lo": 1.57,
+     "hi": 1.87,
+     "k": "M",
+     "src": "packed atomic add famoaddg.pi, random words of one 8 MB table for the chip; E48, three passes on each of three cards (manual.json gs)"
+    },
+    "amoadd_l": {
+     "ops_per_s": 12820000000.0,
+     "nj": 0.27,
+     "lo": 0.242,
+     "hi": 0.302,
+     "k": "M",
+     "src": "scalar atomic add amoaddl.w on the same shire tables; E48, three passes on each of three cards (manual.json gs)"
+    },
+    "amoadd_g": {
+     "ops_per_s": 2792000000.0,
+     "nj": 1.12,
+     "lo": 0.853,
+     "hi": 1.3,
+     "k": "M",
+     "src": "scalar atomic add amoaddg.w on the same chip table; E48, three passes on each of three cards (manual.json gs)"
+    },
+    "over_10G": [
+     "upd_l1",
+     "upd_l2",
+     "upd_scp",
+     "famoadd_l",
+     "amoadd_l"
+    ],
+    "cards": [
+     "aifoundry2",
+     "aifoundry3",
+     "aifoundry1-c1"
+    ]
+   },
+   "meter": {
+    "refresh_ms": {
+     "aifoundry2": 156.0,
+     "aifoundry3": 263.0,
+     "aifoundry1-c1": 158.0
+    },
+    "refresh_ms_range": [
+     156.0,
+     263.0
+    ],
+    "rail_tau_s": {
+     "aifoundry1-c1": 1.153,
+     "aifoundry2": 1.133,
+     "aifoundry3": 1.235
+    },
+    "rail_tau_range": [
+     1.133,
+     1.235
+    ],
+    "k": "M",
+    "src": "the board meter's new value per service-processor pass under a 10 Hz sampler, per card (the version-3 check, E41), and the rails' running average (the catalogue's rail filter): energy manual §9"
+   },
    "pcie_Bps": {
     "v": 15750000000.0,
     "k": "S",
@@ -111,12 +269,16 @@
    },
    "anchor": {
     "bytes": 16777216,
-    "t_s": 7.523e-06,
+    "t_s": 7.364e-06,
     "board_j": 0.0002505,
     "above_idle_j": 6.824e-05,
     "board_w": 34.01,
-    "source": "docs/reports/data/2026-09-18-sparsity-aifoundry3/energy-b/results.json (gemv-skip-0: board J per layer) and docs/reports/data/2026-09-18-sparsity-aifoundry3/gemv-tree-dense.jsonl (cycles per layer)",
-    "model_above_idle_j": 7.06e-05
+    "source": "docs/reports/data/2026-09-18-sparsity-aifoundry3/energy-b/results.json (gemv-skip-0: board J per layer, and layers per second at 600 MHz for the time)",
+    "model_above_idle_j": 7.432e-05,
+    "model_over_measured": 0.08916,
+    "t_us": 7.364,
+    "tb_per_s": 2.278,
+    "under_model_bw": 0.07293
    }
   },
   "h100": {
@@ -258,10 +420,10 @@
    "chips": 1,
    "et_us": 28.4,
    "et_mJ": [
-    1.01,
-    1.32
+    1.02,
+    1.34
    ],
-   "et_above_mJ": 0.293,
+   "et_above_mJ": 0.309,
    "et_bound": "memory",
    "h100_where": "HBM",
    "h100_us": 23.1,
@@ -270,8 +432,8 @@
     9.01
    ],
    "lead": [
-    6.3,
-    8.9
+    6.2,
+    8.8
    ]
   },
   "l2_case": {
@@ -283,10 +445,10 @@
    "chips": 1,
    "et_us": 17.0,
    "et_mJ": [
-    0.602,
-    0.792
+    0.611,
+    0.801
    ],
-   "et_above_mJ": 0.175,
+   "et_above_mJ": 0.185,
    "et_bound": "memory",
    "h100_where": "L2",
    "h100_us": 10.0,
@@ -295,8 +457,8 @@
     2.34
    ],
    "lead": [
-    2.6,
-    3.9
+    2.5,
+    3.8
    ]
   },
   "fp16_case": {
@@ -308,10 +470,10 @@
    "chips": 1,
    "et_us": 30.1,
    "et_mJ": [
-    1.07,
-    1.4
+    1.08,
+    1.42
    ],
-   "et_above_mJ": 0.311,
+   "et_above_mJ": 0.327,
    "et_bound": "memory",
    "h100_where": "HBM",
    "h100_us": 23.1,
@@ -321,7 +483,7 @@
    ],
    "lead": [
     5.9,
-    8.4
+    8.3
    ]
   },
   "hbm_case_rows16": {
@@ -333,10 +495,10 @@
    "chips": 1,
    "et_us": 29.2,
    "et_mJ": [
-    1.64,
-    1.97
+    1.55,
+    1.88
    ],
-   "et_above_mJ": 0.91,
+   "et_above_mJ": 0.816,
    "et_bound": "compute",
    "h100_where": "HBM",
    "h100_us": 23.1,
@@ -345,8 +507,8 @@
     9.01
    ],
    "lead": [
-    4.2,
-    5.5
+    4.4,
+    5.8
    ]
   },
   "capacity_codes_k4096": {
@@ -360,8 +522,8 @@
     {
      "Q": 1,
      "et_mJ_per_q": [
-      1.01,
-      1.32
+      1.02,
+      1.34
      ],
      "h100_mJ_per_q": [
       8.31,
@@ -371,8 +533,8 @@
     {
      "Q": 2,
      "et_mJ_per_q": [
-      0.535,
-      0.7
+      0.54,
+      0.71
      ],
      "h100_mJ_per_q": [
       4.17,
@@ -382,8 +544,8 @@
     {
      "Q": 4,
      "et_mJ_per_q": [
-      0.297,
-      0.39
+      0.302,
+      0.395
      ],
      "h100_mJ_per_q": [
       2.11,
@@ -393,8 +555,8 @@
     {
      "Q": 8,
      "et_mJ_per_q": [
-      0.184,
-      0.24
+      0.181,
+      0.237
      ],
      "h100_mJ_per_q": [
       1.07,
@@ -404,8 +566,8 @@
     {
      "Q": 16,
      "et_mJ_per_q": [
-      0.142,
-      0.179
+      0.136,
+      0.174
      ],
      "h100_mJ_per_q": [
       0.558,
@@ -415,8 +577,8 @@
     {
      "Q": 24,
      "et_mJ_per_q": [
-      0.128,
-      0.159
+      0.122,
+      0.153
      ],
      "h100_mJ_per_q": [
       0.386,
@@ -426,8 +588,8 @@
     {
      "Q": 32,
      "et_mJ_per_q": [
-      0.121,
-      0.149
+      0.115,
+      0.143
      ],
      "h100_mJ_per_q": [
       0.3,
@@ -437,8 +599,8 @@
     {
      "Q": 48,
      "et_mJ_per_q": [
-      0.114,
-      0.139
+      0.108,
+      0.133
      ],
      "h100_mJ_per_q": [
       0.215,
@@ -448,8 +610,8 @@
     {
      "Q": 64,
      "et_mJ_per_q": [
-      0.11,
-      0.134
+      0.104,
+      0.128
      ],
      "h100_mJ_per_q": [
       0.17,
@@ -459,8 +621,8 @@
     {
      "Q": 96,
      "et_mJ_per_q": [
-      0.106,
-      0.129
+      0.101,
+      0.123
      ],
      "h100_mJ_per_q": [
       0.127,
@@ -470,8 +632,8 @@
     {
      "Q": 128,
      "et_mJ_per_q": [
-      0.105,
-      0.127
+      0.0992,
+      0.12
      ],
      "h100_mJ_per_q": [
       0.106,
@@ -481,8 +643,8 @@
     {
      "Q": 192,
      "et_mJ_per_q": [
-      0.103,
-      0.124
+      0.0974,
+      0.118
      ],
      "h100_mJ_per_q": [
       0.0844,
@@ -492,8 +654,8 @@
     {
      "Q": 256,
      "et_mJ_per_q": [
-      0.103,
-      0.123
+      0.0969,
+      0.117
      ],
      "h100_mJ_per_q": [
       0.0754,
@@ -503,8 +665,8 @@
     {
      "Q": 384,
      "et_mJ_per_q": [
-      0.103,
-      0.123
+      0.0969,
+      0.117
      ],
      "h100_mJ_per_q": [
       0.0661,
@@ -514,8 +676,8 @@
     {
      "Q": 512,
      "et_mJ_per_q": [
-      0.103,
-      0.123
+      0.0969,
+      0.117
      ],
      "h100_mJ_per_q": [
       0.0615,
@@ -525,8 +687,8 @@
     {
      "Q": 1024,
      "et_mJ_per_q": [
-      0.103,
-      0.123
+      0.0969,
+      0.117
      ],
      "h100_mJ_per_q": [
       0.0548,
@@ -535,7 +697,7 @@
     }
    ],
    "Q": [
-    96,
+    128,
     192
    ]
   },
@@ -544,8 +706,8 @@
     {
      "Q": 1,
      "et_mJ_per_q": [
-      1.07,
-      1.4
+      1.08,
+      1.42
      ],
      "h100_mJ_per_q": [
       8.31,
@@ -555,8 +717,8 @@
     {
      "Q": 2,
      "et_mJ_per_q": [
-      0.595,
-      0.78
+      0.605,
+      0.79
      ],
      "h100_mJ_per_q": [
       4.17,
@@ -566,8 +728,8 @@
     {
      "Q": 4,
      "et_mJ_per_q": [
-      0.357,
-      0.47
+      0.362,
+      0.475
      ],
      "h100_mJ_per_q": [
       2.11,
@@ -577,8 +739,8 @@
     {
      "Q": 8,
      "et_mJ_per_q": [
-      0.269,
-      0.344
+      0.261,
+      0.338
      ],
      "h100_mJ_per_q": [
       1.07,
@@ -588,8 +750,8 @@
     {
      "Q": 16,
      "et_mJ_per_q": [
-      0.226,
-      0.283
+      0.22,
+      0.277
      ],
      "h100_mJ_per_q": [
       0.558,
@@ -599,8 +761,8 @@
     {
      "Q": 24,
      "et_mJ_per_q": [
-      0.212,
-      0.263
+      0.206,
+      0.257
      ],
      "h100_mJ_per_q": [
       0.386,
@@ -610,8 +772,8 @@
     {
      "Q": 32,
      "et_mJ_per_q": [
-      0.205,
-      0.253
+      0.199,
+      0.247
      ],
      "h100_mJ_per_q": [
       0.3,
@@ -621,8 +783,8 @@
     {
      "Q": 48,
      "et_mJ_per_q": [
-      0.199,
-      0.244
+      0.192,
+      0.235
      ],
      "h100_mJ_per_q": [
       0.215,
@@ -632,8 +794,8 @@
     {
      "Q": 64,
      "et_mJ_per_q": [
-      0.195,
-      0.237
+      0.189,
+      0.231
      ],
      "h100_mJ_per_q": [
       0.17,
@@ -643,8 +805,8 @@
     {
      "Q": 96,
      "et_mJ_per_q": [
-      0.192,
-      0.233
+      0.185,
+      0.226
      ],
      "h100_mJ_per_q": [
       0.127,
@@ -654,8 +816,8 @@
     {
      "Q": 128,
      "et_mJ_per_q": [
-      0.19,
-      0.23
+      0.183,
+      0.223
      ],
      "h100_mJ_per_q": [
       0.106,
@@ -665,8 +827,8 @@
     {
      "Q": 192,
      "et_mJ_per_q": [
-      0.188,
-      0.228
+      0.181,
+      0.221
      ],
      "h100_mJ_per_q": [
       0.0844,
@@ -676,8 +838,8 @@
     {
      "Q": 256,
      "et_mJ_per_q": [
-      0.187,
-      0.227
+      0.18,
+      0.22
      ],
      "h100_mJ_per_q": [
       0.0754,
@@ -687,8 +849,8 @@
     {
      "Q": 384,
      "et_mJ_per_q": [
-      0.186,
-      0.225
+      0.18,
+      0.219
      ],
      "h100_mJ_per_q": [
       0.0661,
@@ -698,8 +860,8 @@
     {
      "Q": 512,
      "et_mJ_per_q": [
-      0.186,
-      0.225
+      0.179,
+      0.219
      ],
      "h100_mJ_per_q": [
       0.0615,
@@ -709,8 +871,8 @@
     {
      "Q": 1024,
      "et_mJ_per_q": [
-      0.186,
-      0.224
+      0.179,
+      0.218
      ],
      "h100_mJ_per_q": [
       0.0548,
@@ -732,10 +894,10 @@
    "chips": 1,
    "et_us": 54.0,
    "et_mJ": [
-    2.27,
-    2.87
+    2.17,
+    2.78
    ],
-   "et_above_mJ": 0.91,
+   "et_above_mJ": 0.816,
    "et_bound": "memory",
    "h100_where": "HBM",
    "h100_us": 23.1,
@@ -744,8 +906,8 @@
     9.63
    ],
    "lead": [
-    3.1,
-    4.2
+    3.2,
+    4.4
    ]
   }
  },
@@ -755,8 +917,8 @@
    36.33
   ],
   "et_active_mJ": [
-   1.01,
-   1.32
+   1.02,
+   1.34
   ],
   "ratio_idle_to_active": [
    19000.0,
@@ -822,7 +984,7 @@
    "MB": 64.0,
    "ms": 0.84,
    "mJ": [
-    29.0,
+    30.0,
     39.0
    ],
    "pcie_ms": 4.1,
@@ -836,13 +998,13 @@
    "MB": 25.0,
    "ms": 0.33,
    "mJ": [
-    11.0,
+    12.0,
     15.0
    ]
   },
   "k5": {
    "et_int8_pJ": [
-    15.0,
+    16.0,
     20.0
    ],
    "h100_bit_pJ": [
@@ -894,35 +1056,39 @@
     "prec": "fp16",
     "eff": 1.0,
     "s": 0.216,
-    "J": 12.8
+    "J": 13.1
    },
    {
     "prec": "fp32",
     "eff": 1.0,
     "s": 0.432,
-    "J": 24.4
+    "J": 27.4
    },
    {
     "prec": "fp32",
     "eff": 0.3,
     "s": 1.44,
-    "J": 81.4
+    "J": 91.5
    },
    {
     "prec": "fp32",
     "eff": 0.1,
     "s": 4.32,
-    "J": 244.0
+    "J": 274.0
    }
   ],
   "breakeven_eff_fp32": [
-   0.26,
-   0.42
+   0.3,
+   0.48
   ],
   "breakeven_eff_fp16": [
    0.14,
-   0.22
+   0.23
   ],
+  "board_w_random": {
+   "fp16": 60.8,
+   "fp32": 63.6
+  },
   "time_eff_needed": {
    "fp16": 0.93,
    "fp32": 1.9
@@ -942,9 +1108,12 @@
   ],
   "energy": [
    1.8,
-   2.9
+   3.0
   ],
-  "src": "ET fp16 at 60–100% of its measured 19.0 TFLOP/s and 59.3 W board (M/E) against an H100 at 40% of 989 TFLOP/s and 700 W (the owner's model, O/S)"
+  "tflops": 19.0,
+  "board_w": 60.8,
+  "T": 80.25,
+  "src": "ET fp16 at 60–100% of its measured 19.0 TFLOP/s (the matmul benchmark) at 60.8 W of board power on random operands (aifoundry2, 80 °C; M/E) against an H100 at 40% of 989 TFLOP/s and 700 W (the owner's model, O/S)"
  },
  "pipeline": [
   {
@@ -954,7 +1123,7 @@
    "per": "per batch of 100 queries",
    "fit": "no",
    "k": "O",
-   "why": "dense backprop, the bill itself; one ET card is 21–35× slower and spends 1.8–2.9× the energy",
+   "why": "dense backprop, the bill itself; one ET card is 21–35× slower and spends 1.8–3.0× the energy",
    "J": 1770000000.0
   },
   {
@@ -1024,7 +1193,7 @@
    "per": "once per checkpoint",
    "fit": "no",
    "k": "O",
-   "why": "needs fp64 (the chip has none, and no hardware divide or square root); factors up to 14,336² (0.8 GB in fp32, 1.6 GB in fp64) exceed the 72 MB of SRAM",
+   "why": "needs fp64 (the chip has none, and no hardware divide or square root); factors up to 14,336² (0.8 GB in fp32, 1.6 GB in fp64) exceed the chip's scratchpads (72 MB usable of 80 MB)",
    "J": 5040.0
   },
   {
@@ -1044,7 +1213,7 @@
    "per": "per query",
    "fit": "no",
    "k": "S",
-   "why": "bandwidth-bound: the ET's DRAM gives 76 GB/s at 129 pJ/B above idle, 44× slower than HBM, and holds 32 GB",
+   "why": "bandwidth-bound: the ET's DRAM gives 76 GB/s at 133 pJ/B above idle, 44× slower than HBM, and holds 32 GB",
    "J": 17.1
   },
   {
@@ -1064,7 +1233,7 @@
    "per": "per batch of 100 queries (at most 1% of the scan)",
    "fit": "killed",
    "k": "E",
-   "why": "the one ET-shaped step with real size, but the data is born in the GPU's backward pass (16 GB per sequence would have to cross a 15.75 GB/s link); GPUs keep the buckets in L2 or avoid the scatter; the chip's gather/scatter rate is unmeasured (S3)",
+   "why": "the one ET-shaped step with real size, but the data is born in the GPU's backward pass (16 GB per sequence would have to cross a 15.75 GB/s link); GPUs keep the buckets in L2 or avoid the scatter; the chip's scatter-add, measured since (S3), reaches 10 G updates a second only while the buckets stay in a shire, and runs at 0.42 G/s into DRAM",
    "J": 17700000.0
   },
   {
@@ -1074,7 +1243,7 @@
    "per": "per query",
    "fit": "research",
    "k": "E",
-   "why": "the one physical edge: 4.2 pJ/B from the chip's own SRAM; no time win, and it needs a busy card",
+   "why": "the one physical edge: 4.4 pJ/B from the chip's own scratchpad; no time win, and it needs a busy card",
    "J": 0.0162
   },
   {

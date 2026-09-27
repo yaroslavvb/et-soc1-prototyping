@@ -105,7 +105,40 @@ h2:hover .hlink,h3:hover .hlink,.hlink:focus{opacity:1}
   .glance{grid-template-columns:1fr;gap:2px}
   .glance dd{margin-bottom:10px}
 }
+/* Collapsible depth: details.more (mapped from docs/reports/sources/report.template.html's chartkit CSS block) */
+details.more{margin:14px 0;border-left:3px solid var(--line);padding:2px 0 2px 12px}
+details.more>summary{cursor:pointer;color:var(--ink);font-weight:600;font-size:.95rem;list-style:none;padding:4px 0}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"\25B8\00a0";color:var(--ink-3)}
+details.more[open]>summary::before{content:"\25BE\00a0"}
+details.more>summary .more-hint{color:var(--ink-3);font-weight:400}
+details.more[open]>summary{margin-bottom:6px}
 </style>
+<script>
+/* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+   inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all.
+   (Copied from docs/reports/sources/chartkit.js's reveal() and its three listeners.) */
+(function () {
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+})();
+</script>
 </head>
 <body>
 <main>
@@ -143,6 +176,7 @@ h2:hover .hlink,h3:hover .hlink,.hlink:focus{opacity:1}
 <section>
 <h2 id="what-was-done">2. What was done, in order</h2>
 <p>The procedure is section 1 of <a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting#1-the-fix-needs-root-on-aifoundry1">the troubleshooting report</a>; every command and its output is in the transcript (<code>docs/reports/data/2026-09-25-aifoundry1/fix-transcript.txt</code> in the repository). Backups are in <code>/root/et-soc1-fix-20260925/</code> on aifoundry1.</p>
+<details class="more"><summary>Every step, in order</summary>
 <ol class="steps">
 <li><b>Checks (15:00).</b> No process held any <code>/dev/et*</code> node (<code>fuser</code>), the module's reference count was 0, no CI job was running, 154 MB free on <code>/</code>, Secure Boot off. Another user was logged in but held no card.</li>
 <li><b>CI paused, backups taken (15:01).</b> The GitHub Actions runner <code>actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1</code> was stopped. <code>dkms status</code>, <code>modinfo</code>, the three installed <code>et-soc1.ko.zst</code> files and <code>/etc/modules-load.d</code> were copied to the backup directory.</li>
@@ -155,6 +189,7 @@ h2:hover .hlink,h3:hover .hlink,.hlink:focus{opacity:1}
 <li><b>Kernel update finished (15:03).</b> <code>dpkg --configure -a</code> (exit 0): DKMS autoinstall for 7.0.0-34, <code>update-initramfs</code> wrote <code>/boot/initrd.img-7.0.0-34-generic</code> (it contains the ZFS modules), and <code>update-grub</code> rewrote <code>grub.cfg</code>, whose default entry is now 7.0.0-34. <code>linux-image-7.0.0-34</code> and <code>linux-modules-7.0.0-34</code> read <code>ii</code>, <code>/var/lib/dpkg/updates</code> is empty, <code>apt-get check</code> is clean.</li>
 </ol>
 <p class="small">Rollback of the driver (puts back the broken module): the commands in <a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting#1-the-fix-needs-root-on-aifoundry1">the troubleshooting report's section 1</a>, with <code>B=/root/et-soc1-fix-20260925</code>.</p>
+</details>
 </section>
 
 <section>
@@ -172,6 +207,7 @@ h2:hover .hlink,h3:hover .hlink,.hlink:focus{opacity:1}
 <h2 id="the-disk">4. The disk: who should delete what</h2>
 <p>aifoundry1 has one ZFS pool, <code>rpool</code>, 452 GB. At 15:00 it was 96% allocated and every file system on it (<code>/</code>, <code>/home</code>, <code>/root</code>, <code>/var</code>) had only 155 MB available, because ZFS holds back the last ~3% of a pool. Only caches and logs that are re-created on demand were cleared, in two steps (15:03 and 15:11): the apt package cache (281 MB), archived journal files (118 MB), ten disabled snap revisions, root's Hugging Face download chunk cache <code>/root/.cache/huggingface/xet</code> (5.4 GB; the downloaded models in <code>hub/</code> were kept) and root's <code>ccache</code> (0.5 GB). <b>Every file system now has 6.4 GB available.</b> Nothing in a user's home directory, and no model, checkpoint, container or project directory, was touched.</p>
 <p>The remaining space is user data. From <code>zfs userspace</code> and <code>du</code> (sizes and dates only; no file was opened), 25 September 15:10 PDT:</p>
+<details class="more"><summary>Every directory, size and owner, as a table</summary>
 <div class="table-wrap"><table>
 <thead><tr><th scope="col">Where</th><th scope="col">Size</th><th scope="col">Owner (account)</th><th scope="col">What is in it</th><th scope="col">Newest file</th></tr></thead>
 <tbody>
@@ -183,6 +219,7 @@ h2:hover .hlink,h3:hover .hlink,.hlink:focus{opacity:1}
 <tr><td><code>/var/lib/docker</code></td><td>8.0 GB</td><td>root</td><td>5 images, 7.8 GB of them used by no running container; 3 stopped containers (<code>shelley</code>, exited 5 weeks ago; two <code>hello-world</code>)</td><td></td></tr>
 <tr><td>everyone else</td><td>&lt; 5 GB each</td><td>ruben 4.4, marin 1.7, ubergarm 1.2, jason 0.3 GB, others less</td><td></td><td></td></tr>
 </tbody></table></div>
+</details>
 <p><b>Who should delete:</b> <b>rehan</b> (123 GB of models, the only recent user among the large owners) and <b>whoever owns <code>/home/saqib</code></b> (120 GB of models; by name and size its GGUF files include Llama-3-8B-Instruct at Q8_0 twice) account for 243 GB, more than half the pool. <b>roman</b> should decide on <code>/home/roman/justin</code> (52 GB, untouched since October 2025). The lab admin should decide on <code>/home/sbn</code> (11 GB, which may duplicate a file in <code>justin/</code>), the unused Docker images (7.8 GB, <code>docker image prune -a</code> after removing the stopped containers) and the GGUF copies in <code>/root/et-jobs-deploy</code>. Deleting only the models nobody uses would leave the machine with well over 100 GB free; a shared read-only model directory (one copy per model, readable by everyone) would stop the duplication from coming back.</p>
 </section>
 

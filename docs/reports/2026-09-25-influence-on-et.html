@@ -165,6 +165,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 /* chartkit:css:end */
 </style>
 </head>
@@ -198,7 +206,8 @@ th.num { white-space: normal; }
 </style>
 <h1>Influence functions on the ET-SoC-1: one small step fits, none of the bill does</h1>
 <p class="byline">25 September 2026 · <span class="marker">exploratory: estimates, not measurements</span> · desk analysis built on
-numbers measured on aifoundry2 and aifoundry3; no card was run for this page · H100 and A100 figures are spec, published or
+numbers measured on the lab's cards (aifoundry2 and aifoundry3; the energy manual's catalogue and the gather/scatter rates
+also on aifoundry1's card 1); no card was run for this page · H100 and A100 figures are spec, published or
 estimated, as tagged · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">The question, from the author of the
@@ -209,15 +218,16 @@ runs, might this chip be uniquely suited to speed up? Perhaps finding the most i
 examples is not one either.</b> Picking the top k is about <span data-d="topk_inserts.inserts" data-f="sci">1.3×10⁵–1.5×10⁵</span>
 heap inserts per query even over 10¹⁰ candidates, free inside a GPU's scoring kernel. The cost lies in producing the
 scores: dense gradient work, on which one ET card is <span data-d="dense.slower" data-dp="0">21–35</span>× slower than an H100
-and spends <span data-d="dense.energy" data-dp="1">1.8–2.9</span>× the energy. Two narrow items survive, as exploratory research on
+and spends <span data-d="dense.energy" data-dp="1">1.8–3.0</span>× the energy on random data. Two narrow items survive, as exploratory research on
 the chip's handling of sparse and irregular work rather than as accelerators. <b>S1</b>: scoring a fixed shard of sketched training gradients held in the
-chip's 72 MB of on-chip SRAM, a few queries at a time, with the top k kept in the same pass. That spends
+chip's scratchpads (72 MB usable of 80 MB), a few queries at a time, with the top k kept in the same pass. That spends
 <span data-d="s1.hbm_case.lead" data-dp="0">6–9</span>× less board energy per pass than an H100 reading its HBM and
-<span data-d="s1.l2_case.lead" data-dp="0">3–4</span>× less than one holding the shard in its L2, and it is no faster.
+<span data-d="s1.l2_case.lead" data-dp="1">2.5–3.8</span>× less than one holding the shard in its L2, and it is no faster.
 <b>S2</b>: an MNIST-sized influence pipeline run entirely on one chip, which I expect to lose to the author's measured A100.
-A third item is a measurement: the chip's gather and scatter rates, which every sparse idea here waits on.</p>
-<p><b>How sure.</b> The ET side scales one measured kernel: a 1024×4096 fp32 layer read from the scratchpads in 7.5 µs for
-250 µJ of board energy (aifoundry3, one run), which the model below reproduces to within 5% above idle. The H100 side is spec, plus energies per
+A third item was a measurement, since made (S3): the chip's gather, scatter and scatter-add rates, which every sparse idea
+here waited on. A scatter-add passes 10 G updates a second only while its buckets stay inside a shire.</p>
+<p><b>How sure.</b> The ET side scales one measured kernel: a 1024×4096 fp32 layer read from the scratchpads in <span data-d="model.et.anchor.t_us" data-dp="1">7.4</span> µs for
+250 µJ of board energy (aifoundry3, one run), which the model below reproduces to within <span data-d="model.et.anchor.model_over_measured" data-f="pct">9%</span> above idle. The H100 side is spec, plus energies per
 byte measured on an A100; nobody has measured what an H100 spends on a 20 µs kernel, and that one number sets S1's lead.
 The verdict on value does not hang on either. The steps that survive are under a millionth of an amortized query; the
 one ET-shaped step with real size, scattering a gradient's sparse parts into a sketch, happens where the gradient is born, on
@@ -232,8 +242,8 @@ dead if one query costs 3 mJ or more of board energy, or if the GPU comes within
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">Share of an amortized query that S1 touches</div><div class="val">about 10⁻⁹</div><div class="sub">the author's 8B model: 8.4 H100-hours per query, against about 23 µs of H100 time to score a shard</div></div>
-  <div class="card kpi"><div class="lab">Dense gradient work, one ET card against an H100</div><div class="val"><span data-d="dense.slower" data-dp="0">21–35</span>× slower</div><div class="sub"><span data-d="dense.energy" data-dp="1">1.8–2.9</span>× the energy; this work is over 99% of the bill</div></div>
-  <div class="card kpi"><div class="lab">S1, board energy per pass at one query</div><div class="val"><span data-d="s1.hbm_case.lead" data-dp="0">6–9</span>× less</div><div class="sub">than an H100 reading HBM (<span data-d="s1.l2_case.lead" data-dp="0">3–4</span>× if the shard is pinned in L2); no faster: <span data-d="s1.hbm_case.et_us" data-dp="0">28</span> µs against <span data-d="s1.hbm_case.h100_us" data-dp="0">23</span> µs</div></div>
+  <div class="card kpi"><div class="lab">Dense gradient work, one ET card against an H100</div><div class="val"><span data-d="dense.slower" data-dp="0">21–35</span>× slower</div><div class="sub"><span data-d="dense.energy" data-dp="1">1.8–3.0</span>× the energy on random data; this work is over 99% of the bill</div></div>
+  <div class="card kpi"><div class="lab">S1, board energy per pass at one query</div><div class="val"><span data-d="s1.hbm_case.lead" data-dp="0">6–9</span>× less</div><div class="sub">than an H100 reading HBM (<span data-d="s1.l2_case.lead" data-dp="1">2.5–3.8</span>× if the shard is pinned in L2); no faster: <span data-d="s1.hbm_case.et_us" data-dp="0">28</span> µs against <span data-d="s1.hbm_case.h100_us" data-dp="0">23</span> µs</div></div>
   <div class="card kpi"><div class="lab">Arrival rate S1 needs to pay for its idle card</div><div class="val"><span data-d="duty.breakeven_vs_h100_qps" data-f="r2">2,900–20,000</span>/s</div><div class="sub">queries a second, against an H100 already in the server; <span data-d="duty.breakeven_vs_cpu_qps" data-f="r2">390–5,000</span>/s against the host CPU</div></div>
 </div>
 
@@ -251,6 +261,7 @@ approximation), dotted with the training example's gradient. A <i>scan</i> recom
 against an <i>index</i>. <i>Recall then rerank</i>: take the top k′ from the sketches, then score those exactly. <i>Q</i> is the
 number of queries scored in one pass over the data.</p></details>
 
+<details class="more"><summary>What the M/D/S/X/O/E evidence tags mean</summary>
 <div class="card small" id="evidence-box"><b>How to read the numbers.</b> Every figure carries a tag.
 <dl class="evkey">
 <dt><span class="ev m">M</span></dt><dd>measured on an ET-SoC-1 lab card, in the linked reports. As in the rest of the set, a measured
@@ -263,6 +274,7 @@ statement that names no card holds on both; a named card means that card only.</
 </dl>
 <p style="margin:8px 0 0">The numbers are computed by <code>docs/reports/data/2026-09-25-influence-on-et/make_analysis.py</code>, which reads the
 measured ones from the repository's data files and states the rest with their sources.</p></div>
+</details>
 
 <h2>1. Where the cost of influence functions goes</h2>
 <p>The author's report splits the work into four phases paid on different schedules: fit the curvature once per checkpoint,
@@ -286,6 +298,7 @@ H100 pass <span class="ev e">E</span>) and top-k (1 µs in a kernel epilogue <sp
 <div class="table-wrap"><table id="pipe-table"><thead><tr><th>Step</th><th>Paid</th><th class="num">H100-hours</th><th>On the ET-SoC-1</th></tr></thead><tbody></tbody></table></div>
 </details>
 
+<details class="more"><summary>Finding the most influential examples: why selection alone is worth nothing</summary>
 <h3>Finding the most influential examples</h3>
 <p>Selecting the top k of N scores takes about k(1 + ln N/k) heap inserts: <span data-d="topk_inserts.inserts" data-f="sci">1.3×10⁵–1.5×10⁵</span>
 per query for k = 10⁴ at N = 10⁹–10¹⁰ <span class="ev">D</span>. A GPU does that in the epilogue of the scoring kernel, or with a radix
@@ -297,21 +310,7 @@ merged on 14 September, a sketch index gives the top k′ = 10³–10⁴, then e
 at 70B that rerank is about 6 H100-hours per query <span class="ev e">E</span>, over 99.9% of a query's energy. Selection is the one
 step of "find the most influential examples" that the chip is shaped for, and it is worth nothing on its own. It survives
 only folded into S1.</p>
-
-<h3>What "sparse-friendly" buys here</h3>
-<p>Less than the phrase suggests. The silicon turns zeros into saved power, never saved time: a 16×16×16 fp32 TensorFMA takes 546
-cycles at any fraction of zeros, and a multiply-add on zeros costs 0.42 pJ against 6.0 pJ on random data on aifoundry2
-(0.41 and 5.4 on aifoundry3; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparse compute</a>, energy
-manual <span class="ev m">M</span>). Time
-is saved only when software issues less work from data already on chip: masked loads and skipped tiles took a batch-1 layer
-in the scratchpads from 7.5 µs to 2.1 µs at 99% zero activations (aifoundry3, one run <span class="ev m">M</span>). Influence
-gradients offer few such zeros. SwiGLU and GELU language models give gradients with few exact zeros; GraSS's sparsity argument
-is made for ReLU <span class="ev">X</span>; the author's MNIST atlas uses tanh <span class="ev">O</span>. The exact zeros that do exist
-(padding, embedding rows, mixture-of-experts routing, the top of the output layer's residual) are produced inside the GPU's
-backward pass and would have to cross a 15.75 GB/s host link <span class="ev">S</span> to reach the card. The sparse structure of
-influence work is elsewhere: in the scores, which are heavy-tailed (a few "loud" examples dominate), and in sparse sketches
-(CountSketch, SJLT), which are scatter-adds. The first is top-k selection, above. The second is K3 below, which waits on the
-gather/scatter measurement S3.</p>
+</details>
 
 <h2>2. Explorer: an influence index against the chip</h2>
 <div class="explorer">
@@ -374,7 +373,7 @@ per query, and the threshold is shared through the TensorReduce tree.</dd>
 path through L2 and L1) <span class="ev">X</span>; the H100 is charged the lower figures <span class="ev e">E</span>. The shard never
 leaves the chip, the maximum is combined in the tree for free, and every minion runs its own heap code.</dd>
 <dt>Where it wins (all of these)</dt>
-<dd><ul>
+<dd><details class="more"><summary>All five conditions, in full</summary><ul>
 <li>The shard is static. A per-query shortlist has to be fetched first: 64 MB from the card's DRAM takes
 <span data-d="kills.k1.ms" data-dp="2">0.84</span> ms and <span data-d="kills.k1.mJ" data-dp="0">29–39</span> mJ of board energy
 <span class="ev">D</span>, over PCIe <span data-d="kills.k1.pcie_ms" data-dp="1">4.1</span> ms <span class="ev">S</span>,
@@ -394,7 +393,7 @@ it by 1,024.</li>
 second against an H100 already in the server that reads a 65 MB shard from HBM, <span data-d="duty.l2_case.vs_h100_qps" data-f="r2">12,000–20,000</span>
 against one that pins a 37.5 MB shard in L2, or <span data-d="duty.breakeven_vs_cpu_qps" data-f="r2">390–5,000</span> against the host
 CPU <span class="ev e">E</span>.</li>
-</ul></dd>
+</ul></details></dd>
 <dt>ET-SoC-1 against an H100 <span class="ev e">E</span></dt>
 <dd>A 65.5 MB int8 shard, one query: the ET reads it in <span data-d="s1.hbm_case.et_us" data-dp="1">28.4</span> µs for
 <span data-d="s1.hbm_case.et_mJ" data-dp="2">1.01–1.32</span> mJ of board energy, idle included, bound by SRAM bandwidth; an
@@ -404,19 +403,23 @@ for <span data-d="s1.hbm_case.h100_mJ" data-dp="1">8.3–9.0</span> mJ. For a 37
 <span data-d="s1.l2_case.lead" data-dp="1">2.6–3.9</span>× <span class="ev e">E</span>. No time win, and no capacity win: 72 MB per chip against
 50 MB of L2 and 80 GB of HBM.</dd>
 <dt>Weakest assumption</dt>
-<dd>That the card is busy. An interactive attribution tool runs at well under 10 queries a second, since each query costs about
+<dd><details class="more"><summary>The three weakest assumptions, in full</summary><p>That the card is busy. An interactive attribution tool runs at well under 10 queries a second, since each query costs about
 1.3 H100-seconds of gradient and iHVP at 8B <span class="ev">O</span>; at 1–10 queries a second the card at rest costs 2.5–36 J
 per query, and the cheapest scorer is the host CPU that is already on. The second weakest is the H100's energy for a microsecond-scale kernel,
 which sets the whole lead and has not been measured by anyone here. The third is the cost of tensor ops with fewer than 16
 rows (one per query): measured only in fp32 at batch 1, where the pass stayed load-bound. If every op costs a full 16 rows, one
 query takes <span data-d="s1.hbm_case_rows16.et_us" data-dp="1">29.2</span> µs and <span data-d="s1.hbm_case_rows16.et_mJ" data-dp="1">1.6–2.0</span> mJ,
-and the lead is <span data-d="s1.hbm_case_rows16.lead" data-dp="1">4.2–5.5</span>×.</dd>
-<dt>Value to a big lab</dt>
-<dd>None: the step is about 10⁻⁹ of an amortized query, and <span data-d="duty.step_share_of_query" data-f="sci">9.1×10⁻⁶–2×10⁻⁵</span>
-of even the query's own gradient and iHVP (<span data-d="duty.query_side_J" data-dp="0">459–917</span> J at 8B <span class="ev e">E</span>).
-Worth running as the cleanest demonstration of the chip's per-SRAM-byte advantage on a kernel shaped like influence work.</dd>
+and the lead is <span data-d="s1.hbm_case_rows16.lead" data-dp="1">4.2–5.5</span>×.</p></details></dd>
 </dl>
 
+<div class="chart-title">S1's lead shrinks as queries per pass grow: energy per query, log-log</div>
+<div class="ck-controls" id="s1q-prec"></div>
+<div id="s1q-leg"></div>
+<div class="chart" id="s1q"></div>
+<p class="ck-readout" id="s1q-read"></p>
+<p class="small">Board energy per query for the 65.5 MB int8 shard and the 32 MB fp16 one, at the pass sizes actually run (this page's model). Where the bands cross is the parity Q quoted above; press Enter on a point to try that Q in the explorer above.</p>
+
+<details class="more"><summary>S2 in full: the MNIST-sized pipeline case, against the measured A100</summary>
 <h3>S2. An MNIST-sized influence pipeline run entirely on one chip</h3>
 <dl class="cand">
 <dt>The step</dt>
@@ -431,8 +434,9 @@ kernel avoids the 0.2–0.4 ms host launch <span class="ev m">M</span>.</dd>
 <span data-d="s2.scan_flop" data-f="sci">4.1×10¹²</span> nominal FLOP, <span data-d="s2.a100_tflops_nominal" data-dp="1">17.8</span> TFLOP/s.
 The ET needs 0.43 s even at 100% of its fp32 peak as measured on aifoundry2, and 1.4–4.3 s at 10–30% <span class="ev">D</span>. Only in fp16 at
 <span data-d="s2.time_eff_needed.fp16" data-f="pct">93%</span> of its peak or more would it match the A100's time. On energy it wins
-if it sustains <span data-d="s2.breakeven_eff_fp32" data-f="pct">26–42%</span> of fp32 peak or
-<span data-d="s2.breakeven_eff_fp16" data-f="pct">14–22%</span> of fp16 peak, against an A100 drawing 250–400 W
+if it sustains <span data-d="s2.breakeven_eff_fp32" data-f="pct">30–48%</span> of fp32 peak or
+<span data-d="s2.breakeven_eff_fp16" data-f="pct">14–23%</span> of fp16 peak (its board power on random operands, aifoundry2
+at 80 °C <span class="ev m">M</span>), against an A100 drawing 250–400 W
 <span class="ev e">E</span>. Nobody has measured what fraction a persistent multi-layer kernel on 10–128-wide layers gets.</dd>
 </dl>
 <div class="ck-controls" id="s2-ctl"></div>
@@ -445,41 +449,78 @@ path answers a query in 6 ms. Weakest assumption: at least 1 TFLOP/s sustained i
 atlas's curvature is fp64, so fp32 factors on the chip would have to be checked against it. Value: a demonstrator, and a
 joule-per-phase answer to the author's open question on energy per attribution at MNIST scale; NVML can give the GPU side
 of that too.</p>
+</details>
 
-<h3>S3 (a measurement, not a candidate). Gather, scatter and scatter-add rates</h3>
-<p>No influence use survives on its own (K3 below), but every sparse or irregular idea on this chip
-waits on one unmeasured primitive: the vector unit's gathers and scatters (<code>fgw.ps</code>, <code>fscw.ps</code> and their
-line variants) into the L1, L2 and scratchpad. Estimates from the spec span 10–300 G updates a second, a 30× spread; the
-nearest measured thing, global atomics spread over 32 lines, runs at <span data-d="model.et.atomics_spread.ops_per_s" data-s="1e-9" data-dp="2">1.92</span>
-G/s for <span data-d="model.et.atomics_spread.nj" data-dp="2">1.16</span> nJ each <span class="ev m">M</span>. Half a day of catalogue
-runs settles it.</p>
+<h3>S3 (a measurement, now made). Gather, scatter and scatter-add rates</h3>
+<p>No influence use survives on its own (K3 below), but every sparse or irregular idea on this chip waited on one
+primitive: the vector unit's gathers and scatters (<code>fgw.ps</code>, <code>fscw.ps</code> and their variants), which
+read or write eight elements at eight addresses per instruction. They were measured on 26 September on three cards (E48;
+the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#irregular-access-gathers-and-scatters-by-level">energy
+manual's §4.4</a> and §6), with both harts of all 1,024 minions and eight random words on eight lines of a 4 KB tile per
+instruction <span class="ev m">M</span>. A word gathered from the L1 costs
+<span data-d="model.et.gs.gather_l1.nj" data-s="1000" data-dp="1">12.8</span> pJ at
+<span data-d="model.et.gs.gather_l1.ops_per_s" data-s="1e-9" data-dp="0">452</span> G/s over the chip, about what a scalar load
+costs; from the L2 <span data-d="model.et.gs.gather_l2.nj" data-s="1000" data-dp="0">354</span> pJ at
+<span data-d="model.et.gs.gather_l2.ops_per_s" data-s="1e-9" data-dp="1">27.4</span> G/s and from the own scratchpad
+<span data-d="model.et.gs.gather_scp.nj" data-s="1000" data-dp="0">368</span> pJ at the same rate, every element fetching its own
+64 B line; from DRAM <span data-d="model.et.gs.gather_dram.nj" data-dp="1">9.8</span> nJ at
+<span data-d="model.et.gs.gather_dram.ops_per_s" data-s="1e-9" data-dp="2">1.19</span> G/s. A word scattered into the L2 costs
+<span data-d="model.et.gs.scatter_l2.nj" data-s="1000" data-dp="0">732</span> pJ at
+<span data-d="model.et.gs.scatter_l2.ops_per_s" data-s="1e-9" data-dp="1">23.5</span> G/s.</p>
+<p><b>Scatter-add</b>, which the spec-derived estimates put anywhere from 10 to 300 G updates a second: a gather, an
+<code>fadd.ps</code> and a scatter on tables private to each hart run at
+<span data-d="model.et.gs.upd_l1.ops_per_s" data-s="1e-9" data-dp="0">139</span> G updates/s
+(<span data-d="model.et.gs.upd_l1.nj" data-dp="3">0.036</span> nJ each) when the table fits the hart's 512 B of L1,
+<span data-d="model.et.gs.upd_l2.ops_per_s" data-s="1e-9" data-dp="1">18.2</span> G/s
+(<span data-d="model.et.gs.upd_l2.nj" data-dp="2">0.85</span> nJ) in the L2, and
+<span data-d="model.et.gs.upd_dram.ops_per_s" data-s="1e-9" data-dp="2">0.42</span> G/s
+(<span data-d="model.et.gs.upd_dram.nj" data-dp="0">22</span> nJ) in DRAM. The packed atomic <code>famoaddl.pi</code> on a table
+a shire shares runs at <span data-d="model.et.gs.famoadd_l.ops_per_s" data-s="1e-9" data-dp="1">12.7</span> G/s
+(<span data-d="model.et.gs.famoadd_l.nj" data-dp="2">0.39</span> nJ), no faster than scalar <code>amoaddl.w</code>
+(<span data-d="model.et.gs.amoadd_l.ops_per_s" data-s="1e-9" data-dp="1">12.8</span> G/s); <code>famoaddg.pi</code> on one table
+for the chip <span data-d="model.et.gs.famoadd_g.ops_per_s" data-s="1e-9" data-dp="1">2.8</span> G/s
+(<span data-d="model.et.gs.famoadd_g.nj" data-dp="1">1.7</span> nJ), against the spread global atomics'
+<span data-d="model.et.atomics_spread.ops_per_s" data-s="1e-9" data-dp="2">1.92</span> G/s at
+<span data-d="model.et.atomics_spread.nj" data-dp="2">1.16</span> nJ. <b>The condition this page set, 10 G updates a second, is met
+only by buckets that stay inside a shire</b> (a hart's L1, its shire's L2 or scratchpad, or a table the shire shares);
+nothing that updates DRAM or the home L3 comes near it.</p>
+<div class="chart-title">Scatter-add on the ET-SoC-1: updates a second against energy per update, by method and where the buckets live</div>
+<div id="s3-leg"></div>
+<div class="chart" id="s3"></div>
+<p class="ck-readout" id="s3-read"></p>
+<p class="small">Both harts of all 1,024 minions (E48, three passes on each of three cards <span class="ev m">M</span>); the energy is
+card power above idle over the update rate. The dashed line is the 10 G updates a second this page asked for. The grey point is
+the hot-line report's global atomics spread over 32 lines, the one rate this page had before S3.</p>
 
 <h2>4. What does not fit, and why</h2>
-<p>Everything that makes up the bill is dense arithmetic on gradients: one ET card does fp16 at 19.0 TFLOP/s for 59.3 W of
-board power (aifoundry2 <span class="ev m">M</span>), against an H100's 396 TFLOP/s at 40% of peak for 700 W <span class="ev">O</span>
+<p>Everything that makes up the bill is dense arithmetic on gradients: one ET card does fp16 at <span data-d="dense.tflops" data-dp="1">19.0</span> TFLOP/s for <span data-d="dense.board_w" data-dp="1">60.8</span> W of
+board power on random operands (aifoundry2, 80 °C <span class="ev m">M</span>), against an H100's 396 TFLOP/s at 40% of peak for 700 W <span class="ev">O</span>
 <span class="ev">S</span>, with no bf16, no fp64, no hardware divide or square root, 32 GB of DRAM at 76 GB/s and an untimed host
 link. The candidates that looked ET-shaped die for other reasons.</p>
+<details class="more"><summary>Why each candidate (K1–K9) doesn't work, in full</summary>
 <div class="table-wrap"><table id="k-table"><thead><tr><th>Candidate</th><th>Why it dies</th></tr></thead><tbody>
 <tr><td><b>K1.</b> Rerank a per-query shortlist in SRAM</td><td>The shortlist differs per query, so it must be fetched first: 64 MB is <span data-d="kills.k1.ms" data-dp="2">0.84</span> ms and <span data-d="kills.k1.mJ" data-dp="0">29–39</span> mJ from the card's DRAM <span class="ev">D</span>, <span data-d="kills.k1.pcie_ms" data-dp="1">4.1</span> ms over PCIe <span class="ev">S</span>, <span data-d="kills.k1.x_pass" data-dp="0">30–140</span>× the <span data-d="s1.hbm_case.et_us" data-dp="0">28</span> µs pass. An H100 reads it from HBM in about <span data-d="kills.k1.h100_us" data-dp="0">21</span> µs. Only a static shard stays resident (S1).</td></tr>
 <tr><td><b>K2.</b> Many-query top-k with the hardware threshold, on its own</td><td>Selection is 10⁴–1.5×10⁵ inserts per query, free on a GPU; the state does not fit as first sized (1,000 queries × 10⁴ entries is 80 MB, over the 72 MB usable, and even 16 queries need 1.3 GB if every minion keeps its own heaps). Kept inside S1.</td></tr>
-<tr><td><b>K3.</b> Sparse-sketch accumulation, scatter-add recall</td><td>Under 1% of a gradient's cost, and a prefilter is about 10⁻⁶ of the bill. GPUs keep the buckets in L2, use the tensor-sketch FFT or factored projections (GPUSparse's 12.5 GB/s is for accumulators in HBM <span class="ev">X</span>). The chip's atomics run at 1.92 G/s <span class="ev m">M</span> against the 10–19 G/s a posting stream from DRAM needs <span class="ev e">E</span>, and its gather/scatter is unmeasured (S3). The recall use rests on an open bet that sparse codes keep the top k.</td></tr>
+<tr><td><b>K3.</b> Sparse-sketch accumulation, scatter-add recall</td><td>Under 1% of a gradient's cost, and a prefilter is about 10⁻⁶ of the bill. GPUs keep the buckets in L2, use the tensor-sketch FFT or factored projections (GPUSparse's 12.5 GB/s is for accumulators in HBM <span class="ev">X</span>). Measured since (S3 <span class="ev m">M</span>): a scatter-add runs at <span data-d="model.et.gs.upd_l2.ops_per_s" data-s="1e-9" data-dp="1">18.2</span>–<span data-d="model.et.gs.upd_l1.ops_per_s" data-s="1e-9" data-dp="0">139</span> G updates/s while each hart's buckets stay in its shire's L2 or its own L1, and <span data-d="model.et.gs.famoadd_l.ops_per_s" data-s="1e-9" data-dp="1">12.7</span> G/s as packed atomics on a table a shire shares; a sketch the size of a real index lives in DRAM, where it runs at <span data-d="model.et.gs.upd_dram.ops_per_s" data-s="1e-9" data-dp="2">0.42</span> G/s for <span data-d="model.et.gs.upd_dram.nj" data-dp="0">22</span> nJ an update, or at the home L3 (packed atomics on one table for the chip, <span data-d="model.et.gs.famoadd_g.ops_per_s" data-s="1e-9" data-dp="1">2.8</span> G/s), against the 10–19 G/s a posting stream from DRAM needs <span class="ev e">E</span>. The recall use rests on an open bet that sparse codes keep the top k.</td></tr>
 <tr><td><b>K4.</b> Lexical or bitmap prefilter (BM25, TF-IDF)</td><td>About 10⁻⁶ of the bill, and biased toward token overlap <span class="ev">O</span>. The host CPU's inverted index does it; on the chip it is DRAM-bound at 10⁷ documents (a 20-term query reads 25 MB of bitmaps: about <span data-d="kills.k4.ms" data-dp="2">0.33</span> ms and <span data-d="kills.k4.mJ" data-dp="0">11–15</span> mJ <span class="ev e">E</span>).</td></tr>
 <tr><td><b>K5.</b> ±1 and 1-bit cascades</td><td>No lead at board level: ±1 in int8 from SRAM is <span data-d="kills.k5.et_int8_pJ" data-dp="0">15–20</span> pJ per compare, idle included, against <span data-d="kills.k5.h100_bit_pJ" data-dp="0">18–19</span> pJ per bit for an H100 reading the same 65.5 MB as packed bits from HBM (one query, this page's model <span class="ev e">E</span>). No popcount instruction (SWAR on the vector unit, about 1 pJ per bit <span class="ev e">E</span>); 1-bit codes are shown to work for data selection (QLESS <span class="ev">X</span>), not for top-k recall. Kept as a storage format to try inside S1.</td></tr>
-<tr><td><b>K6.</b> Branchy pruned search over a DRAM shard (WAND, block-max, suffix arrays)</td><td>32 GB per chip, random DRAM reads unmeasured; real indexes are terabytes on SSD and served by CPUs (OLMoTrace <span class="ev">X</span>). Worth about 10⁻⁶.</td></tr>
+<tr><td><b>K6.</b> Branchy pruned search over a DRAM shard (WAND, block-max, suffix arrays)</td><td>32 GB per chip, and a random DRAM read costs <span data-d="model.et.gs.gather_dram.nj" data-dp="1">9.8</span> nJ per 4 B at <span data-d="model.et.gs.gather_dram.ops_per_s" data-s="1e-9" data-dp="2">1.19</span> G/s over the chip (S3 <span class="ev m">M</span>); real indexes are terabytes on SSD and served by CPUs (OLMoTrace <span class="ev">X</span>). Worth about 10⁻⁶.</td></tr>
 <tr><td><b>K7.</b> A sharded SRAM index, "29 µs at any N"</td><td>10⁷ codes of 4,096 in int8 need <span data-d="kills.k7.chips_1e7" data-f="int">569</span> chips, <span data-d="kills.k7.kW_1e7" data-dp="0">14–21</span> kW at rest <span class="ev">D</span>. A hot tier of the top 1% is <span data-d="kills.k7.hot_tier.chips" data-f="int">6</span> chips, and like S1 it pays for its idle chips only at <span data-d="kills.k7.hot_tier.vs_h100_qps" data-f="r2">2,800–4,400</span> unbatched queries a second or more against an H100 <span class="ev e">E</span> (try it in the explorer).</td></tr>
 <tr><td><b>K8.</b> Fine-tuning-scale attribution (LESS, QLESS)</td><td>Queries come in batches: the whole 2.7×10⁵ × 8,192 score matrix at Q = 100 is 4.4×10¹⁴ operations, 0.2–0.4 s of H100 int8 <span class="ev e">E</span>. Held resident it needs 31 chips in int8 or 4 at 1 bit.</td></tr>
-<tr><td><b>K9.</b> The dense steps: the scan, curvature statistics, eigendecompositions, the EK-FAC iHVP, iterative iHVPs, the exact rerank, batched scoring, scans from DRAM or flash, graph and IVF indexes, projections, zero-skip as a speed lever, mixture-of-experts gradients, validation retrains</td><td>21–35× slower and 1.8–2.9× the energy on dense work <span class="ev">D</span>; eigendecompositions need fp64; the EK-FAC state (108 GB) would take about 1,500 chips of SRAM; streaming an index is bandwidth-bound and the chip's DRAM is 44× slower than HBM and 3–5× dearer per byte at board level; zeros save power, not time.</td></tr>
+<tr><td><b>K9.</b> The dense steps: the scan, curvature statistics, eigendecompositions, the EK-FAC iHVP, iterative iHVPs, the exact rerank, batched scoring, scans from DRAM or flash, graph and IVF indexes, projections, zero-skip as a speed lever, mixture-of-experts gradients, validation retrains</td><td><span data-d="dense.slower" data-dp="0">21–35</span>× slower and <span data-d="dense.energy" data-dp="1">1.8–3.0</span>× the energy on dense work <span class="ev">D</span>; eigendecompositions need fp64; the EK-FAC state (108 GB) would take about 1,500 chips of SRAM; streaming an index is bandwidth-bound and the chip's DRAM is 44× slower than HBM and 3–5× dearer per byte at board level; zeros save power, not time.</td></tr>
 </tbody></table></div>
+</details>
 
 <h2>5. The first experiment on a lab card</h2>
 <p>One new kernel settles S1, in one to two days of work. Nothing below has been run.</p>
+<details class="more"><summary>The experiment plan, step by step</summary>
 <ol>
 <li><b>Prerequisite, about an hour.</b> Time the host link (host-to-device and back, 4 KB to 1 GB, with the <code>workloads/memhier</code>
 host; PCIe Gen4 x8 is 15.75 GB/s by spec and has never been timed), the round trip of a persistent kernel waiting on a
 doorbell, and the board power of that waiting kernel. Poll a flag in the scratchpad, not a global atomic: 24 requesters on one
 line stop a shire (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">one hot line</a>).</li>
 <li><b>The kernel, <code>--test score</code> in <code>workloads/sparsity</code>.</b> Start from <code>--test gemv --gemv-tree</code>,
-which already reads a 1024×4096 fp32 matrix from the 32 scratchpads and reduces on chip (the 7.5 µs, 250 µJ anchor):
+which already reads a 1024×4096 fp32 matrix from the 32 scratchpads and reduces on chip (the 7.4 µs, 250 µJ anchor):
 <ul>
 <li>the shard: 65.5 MB of int8 codes (16,000 × 4,096) with TensorIMA8A32, then 8,000 fp16 codes with TensorFMA16A32, starting
 256 KB into each scratchpad (offset 0 faults);</li>
@@ -490,22 +531,23 @@ which already reads a 1024×4096 fp32 matrix from the 32 scratchpads and reduces
 TensorReduce and TensorBroadcast; the host checks the final lists against its own top-k.</li>
 </ul></li>
 <li><b>Measure.</b> Microseconds and board microjoules per pass, bracketed by idle as <code>workloads/sparsity/run_energy.py</code>
-does, each Q in its own <code>timeout 10</code> process looping for about 8 s (the board meter refreshes every 150–255 ms and its
-rails average over about 1.2 s): some 3×10⁵ passes. On aifoundry3, pinned at 600 MHz, then aifoundry2 warm (68 °C or more, or
+does, each Q in its own <code>timeout 10</code> process looping for about 8 s (the board meter takes a new value every <span data-d="model.et.meter.refresh_ms_range" data-dp="0">156–263</span> ms, depending on the card, and its
+rails average over about <span data-d="model.et.meter.rail_tau_range" data-dp="1">1.1–1.2</span> s): some 3×10⁵ passes. On aifoundry3, pinned at 600 MHz, then aifoundry2 warm (68 °C or more, or
 its governor lifts the clock). From the passes and the measured idle, report energy per query at 1, 100 and 10⁴ arrivals a
 second.</li>
 <li><b>The GPU side, mandatory.</b> The same scoring on an A100 or H100, the shard in HBM and pinned in L2, timed and metered
-through NVML's energy counter over loops of 10 s or more. S1's lead is that ratio; it is the number this page cannot supply.</li>
+through NVML's energy counter over loops of 10 s or more. S1's lead is that ratio.</li>
 <li><b>Verdict.</b> Pass if one query over 65 MB takes 40 µs or less and 1.5 mJ or less of board energy, and the fused top-k adds
 at most 20%. Kill S1 if one query costs 3 mJ or more, or the GPU comes within 3× per pass.</li>
 </ol>
 <p>Then, if S1 passes: <b>S2</b> as <code>atlasscan</code>, a persistent kernel holding the atlas MLP, the digits and 100 query
 gradients; kill the speed story above 0.231 s and the energy story above the A100's metered joules, and time one LiSSA step
-against 14 ms. And <b>S3</b>, independent of both: add the gather and scatter patterns to <code>workloads/enercat</code> (rate and
-picojoules per element from L1, L2 and scratchpad, zeros and random data), then a scatter-add probe only if the rate reaches
-10 G updates a second.</p>
+against 14 ms. <b>S3</b>, independent of both, is done: the gather and scatter patterns were added to <code>workloads/enercat</code> and
+measured with the scatter-add on three cards on 26 September (E48; section 3).</p>
+</details>
 
 <h2>6. Method and caveats</h2>
+<details class="more"><summary>Method and caveats in full</summary>
 <ul>
 <li><b>The ET model.</b> One pass reads B = N·k·bytes of codes and does 2QNk operations (QNk bit compares at 1 bit). Chips =
 ⌈B / 72 MB⌉ in SRAM (⌈B / 32 GB⌉ in DRAM). A minion's 3 KB L1 scratchpad cannot hold a query, so every minion also reads the
@@ -514,16 +556,16 @@ Q queries once for each tile of 16 codes it holds, from the shire's SRAM <span c
 Q = 16. Time = the larger of (B + B<sub>q</sub>)/chips ÷ bandwidth and operations/chips ÷ peak rate (from DRAM, the codes at
 DRAM bandwidth and the query tiles at SRAM bandwidth); energy above idle = the larger of the bytes × energy per byte and
 operations × energy per operation. Bandwidth and energy per byte are
-the energy manual's tensor loads on random data, both cards <span class="ev m">M</span> (own scratchpad
+the energy manual's tensor loads on random data, three cards <span class="ev m">M</span> (own scratchpad
 <span data-d="model.et.sram_bw.v" data-s="1e-12" data-dp="2">2.46</span> TB/s and <span data-d="model.et.sram_pj_B.v" data-dp="2">4.21</span> pJ/B;
 DRAM <span data-d="model.et.dram_bw.v" data-s="1e-9" data-dp="0">76</span> GB/s and <span data-d="model.et.dram_pj_B.v" data-dp="0">129</span> pJ/B);
-the peak rates and their power above idle come from the matmul benchmark on aifoundry2 <span class="ev m">M</span> <span class="ev">D</span> (int8
+the peak rates and their power above the idle just before each workload come from the matmul benchmark on aifoundry2 <span class="ev m">M</span> <span class="ev">D</span> (int8
 <span data-d="model.et.peak.int8.pj_op" data-dp="2">0.43</span> pJ per operation, fp16 <span data-d="model.et.peak.fp16.pj_op" data-dp="2">1.51</span>, fp32
 <span data-d="model.et.peak.fp32.pj_op" data-dp="2">2.73</span>); 1-bit codes use a SWAR estimate on the vector unit
 <span class="ev e">E</span>. The larger-of rule for energy, rather than the sum, is chosen because it reproduces the one measured
 pass: the batch-1 fp32 layer (aifoundry3, one run) spent <span data-d="model.et.anchor.above_idle_j" data-s="1e6" data-dp="0">68</span> µJ above idle
 <span class="ev m">M</span> where the model gives <span data-d="model.et.anchor.model_above_idle_j" data-s="1e6" data-dp="0">71</span> µJ.
-Its time, 7.5 µs for 16.8 MB, is 2.2 TB/s, 9% under the model's bandwidth. That kernel splits each row across minions, so it
+Its time, <span data-d="model.et.anchor.t_us" data-dp="1">7.4</span> µs for 16.8 MB at 600 MHz, is <span data-d="model.et.anchor.tb_per_s" data-dp="1">2.3</span> TB/s, <span data-d="model.et.anchor.under_model_bw" data-f="pct">7%</span> under the model's bandwidth. That kernel splits each row across minions, so it
 is checked on its matrix bytes alone; the query tiles are this page's layout, not measured.</li>
 <li><b>The H100 model</b> <span class="ev e">E</span>. A shard of 37.5 MB or less is read from a pinned L2 at 4.3 TB/s (an A100's
 measured L2 rate as a floor <span class="ev">X</span>); larger ones from HBM at 3.0 TB/s (90% of the 3.35 TB/s spec
@@ -538,27 +580,26 @@ up to 1.4× more per pass and S1's lead would reach 12×; this page does not use
 scores.</li>
 <li><b>Duty cycle.</b> Energy per query at arrival rate λ is, for the ET, chips × P<sub>idle</sub> ÷ λ + energy above idle
 per pass ÷ Q; for the H100 and the CPU, energy per pass ÷ Q. A device is full when λ exceeds Q ÷ time per pass.</li>
-<li><b>Dense work.</b> "21–35× slower, 1.8–2.9× the energy" sets the chip's fp16 at 60–100% of its measured 19.0 TFLOP/s and
-59.3 W <span class="ev m">M</span> <span class="ev e">E</span> against an H100 at 40% of 989 TFLOP/s and 700 W, the author's
+<li><b>Dense work.</b> "<span data-d="dense.slower" data-dp="0">21–35</span>× slower, <span data-d="dense.energy" data-dp="1">1.8–3.0</span>× the energy" sets the chip's fp16 at 60–100% of its measured <span data-d="dense.tflops" data-dp="1">19.0</span> TFLOP/s and
+<span data-d="dense.board_w" data-dp="1">60.8</span> W of board power on random operands (aifoundry2, 80 °C) <span class="ev m">M</span> <span class="ev e">E</span> against an H100 at 40% of 989 TFLOP/s and 700 W, the author's
 cost model <span class="ev">O</span>.</li>
-<li><b>Not measured on the chip</b>: the host link; gathers, scatters and packed atomics; random DRAM reads; tensor ops with
+<li><b>Measured since the first version</b>: gathers, scatters, packed atomics and random DRAM reads (S3; E48, three passes on
+each of three cards, 26 September; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#irregular-access-gathers-and-scatters-by-level">energy manual's §4.4</a> and §6).</li>
+<li><b>Not measured on the chip</b>: the host link; tensor ops with
 fewer than 16 rows outside fp32 batch 1; int8 scoring with fresh tiles from the scratchpad; persistent multi-layer kernels;
-a polling kernel's power. On the GPU side, nothing on this page is measured on an H100 by us.</li>
-<li><b>Corrections folded in</b> from the two desk maps this page started from: the atlas comparison is against its measured
-0.231 s scan, not the 0.558 s gradient-pass primitive (so the ET is slower, not 45–140× faster); the atlas uses tanh, so its
-hidden activations have no exact zeros, and its scan is 4.1×10¹² FLOP, not 4.2×10¹¹; the "one row costs a full 16-row op"
-figure was a measurement of masked rows, not of smaller ops; the top-k state was over-sized for the SRAM; a ±1 energy lead
-compared energy above idle with board energy; per-query shortlists are not resident; the 0.2–0.4 ms host launch was ignored
-in a latency claim; a posting-list rate was halved. The rest of their arithmetic reproduced. A later check of this page
-charged the H100 the A100's per-level energies only (the first draft's upper end used the whole path and gave a 7–13× lead),
-added the query tiles each minion re-reads, re-priced the H100's 1-bit work per instruction rather than at its full power, and
-computed K1, K4, K5 and K7 from the same model.</li>
+a polling kernel's power.</li>
+<li><b>Corrections.</b> The two desk maps this page started from needed several; they are listed in the <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-influence-on-et">data README</a>.</li>
 <li><b>Reproduce.</b> <code>python3 docs/reports/data/2026-09-25-influence-on-et/make_analysis.py</code>, then
 <code>python3 scripts/build-report.py influence-on-et docs/reports/data/2026-09-25-influence-on-et/analysis.json docs/reports/2026-09-25-influence-on-et.html</code>.</li>
-<li><b>Versions.</b> 25 September 2026: first version, desk analysis; no card was touched.</li>
+<li><b>Versions.</b> 25 September 2026: first version, desk analysis; no card was touched. 27 September: S3 measured (E48,
+three cards: section 3, K3, K6); the dense energy and S2 on random operands; the per-operation energies over each workload's
+own idle; the anchor's time at 600 MHz; the energy manual's three-card values; the corrections the two desk maps needed
+moved to the data README.</li>
 </ul>
+</details>
 
 <h2>7. Sources</h2>
+<details class="more"><summary>Full source list</summary>
 <ul>
 <li>This set: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">the energy manual</a> (§4.1 bytes by level, §3 per
 instruction, idle), <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparse compute</a> (546 cycles at any zero
@@ -567,7 +608,8 @@ fraction, the batch-1 layer, the host launch), <a href="https://spacesheep.dev/@
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">matmul efficiency</a>,
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication</a> (the 2.3 µs tree),
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">on-chip relay</a> (2.25 MB usable per scratchpad),
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">one hot line</a> (atomics).</li>
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">one hot line</a> (atomics); the energy manual's §4.4 and §6 (S3's
+gathers, scatters and scatter-add, E48).</li>
 <li>Data read by the producer: <code>docs/reports/data/2026-09-23-energy-manual/manual.json</code>,
 <code>docs/reports/data/2026-09-18-aifoundry2/results.json</code>, <code>docs/reports/data/2026-09-18-sparsity-aifoundry3/</code>,
 <code>docs/reports/data/2026-09-18-nocbench-aifoundry2/</code>.</li>
@@ -592,6 +634,7 @@ GPU-Accelerated Supercomputing</a>, SC'25 (A100 energy per bit by level); <a hre
 C++ Programming Guide 12.4</a> (popc throughput); Luo et al., <a href="https://arxiv.org/abs/2402.13499">Benchmarking and Dissecting
 the Nvidia Hopper GPU Architecture</a> (no binary tensor cores on Hopper).</li>
 </ul>
+</details>
 
 <h2 id="related">8. Related reports</h2>
 <ul>
@@ -604,7 +647,7 @@ decides when S1 turns from load-bound to compute-bound.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a>: latency and bandwidth by level,
 and the A100 figures the H100 side leans on.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The energy manual</a>: every per-byte and per-operation
-energy used here, with bars from both cards.</li>
+energy used here, with bars from three cards, and S3's gather and scatter rates (§4.4).</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/influence-functions-hessians-sketching-weak-factoring">Influence functions:
 Hessians, cost, sketching, and weak factoring</a>: the question's source, with the cost model this page prices against.</li>
 </ul>
@@ -1109,14 +1152,35 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 
 </script>
 <script>
-const D = {"generated":"2026-09-25","producer":"docs/reports/data/2026-09-25-influence-on-et/make_analysis.py","kinds":{"M":"measured on an ET-SoC-1 lab card","D":"derived: arithmetic on measured numbers","S":"vendor spec","X":"published by others","O":"the influence-function report's owner (his measurements or cost model)","E":"estimate: an assumption of this page, never measured"},"model":{"et":{"sram_usable_B":{"v":72000000.0,"k":"D","src":"32 shires \u00d7 2.25 MB: each 2.5 MB scratchpad less the first 256 KB (on-chip relay report)"},"sram_bw":{"v":2458000000000.0,"k":"M","src":"docs/reports/data/2026-09-23-energy-manual/manual.json: catalogue tensor loads from the shire's own scratchpad, random data, both cards"},"sram_pj_B":{"v":4.208,"lo":4.011,"hi":4.365,"k":"M","src":"energy manual \u00a74.1, above idle, random data, 3 passes on each card"},"dram_B":{"v":32000000000.0,"k":"S","src":"LPDDR4X, 32 GB per card"},"dram_bw":{"v":76010000000.0,"k":"M","src":"energy manual \u00a74.1, tensor loads from DRAM, both cards"},"dram_pj_B":{"v":129.1,"lo":127.5,"hi":131.5,"k":"M","src":"energy manual \u00a74.1, above idle, random data"},"idle_W":{"lo":25.13,"hi":36.33,"k":"M","src":"board power at rest: aifoundry3 25.1 W at 56 \u00b0C, aifoundry2 36.3 W at 81 \u00b0C (energy manual, cards block)"},"peak":{"fp32":{"ops_per_s":9511000000000.0,"board_w":56.57,"pj_op":2.73,"k":"M/D"},"fp16":{"ops_per_s":19020000000000.0,"board_w":59.27,"pj_op":1.507,"k":"M/D"},"int8":{"ops_per_s":71780000000000.0,"board_w":61.75,"pj_op":0.4338,"k":"M/D"}},"peak_src":"docs/reports/data/2026-09-18-aifoundry2/results.json: matmul benchmark, tiles in L2, aifoundry2, 600 MHz; pJ per op above the run's 30.6 W idle (D)","bit":{"ops_per_s":8377000000000.0,"pj_op":1.056,"k":"E","src":"no popcount instruction: SWAR on the vector unit, about 14 packed-integer instructions per 256 bits (E) at the catalogue's measured 458 G instructions/s and 19.3 pJ each (M)"},"rows16":{"k":"E","src":"a tensor op multiplies 16 rows of A; ops with fewer rows (one query per row) were measured only in fp32, at batch 1, where the pass stayed load-bound"},"l1_scp_B":{"v":3072,"k":"S/M","src":"the L1 in scratchpad mode: sets 0\u201311, 3 KB per minion (memory-hierarchy report); a 4,096-coordinate int8 query (4 KB) does not fit, so every minion re-reads the query tiles for each tile of 16 codes it holds (E)"},"launch_ms":{"lo":0.2,"hi":0.4,"k":"M","src":"host kernel launch on aifoundry3 (sparse-compute report); a persistent kernel avoids it"},"allreduce_us":{"v":2.3,"k":"M","src":"32 B TensorReduce + TensorBroadcast over 1,024 minions, aifoundry2 (on-chip communication report)"},"atomics_spread":{"ops_per_s":1920000000.0,"nj":1.16,"k":"M","src":"global atomics spread over 32 lines (hot-line report; energy from the energy manual's reruns)"},"pcie_Bps":{"v":15750000000.0,"k":"S","src":"PCIe Gen4 x8, never timed on these cards"},"anchor":{"bytes":16777216,"t_s":7.523e-06,"board_j":0.0002505,"above_idle_j":6.824e-05,"board_w":34.01,"source":"docs/reports/data/2026-09-18-sparsity-aifoundry3/energy-b/results.json (gemv-skip-0: board J per layer) and docs/reports/data/2026-09-18-sparsity-aifoundry3/gemv-tree-dense.jsonl (cycles per layer)","model_above_idle_j":7.06e-05}},"h100":{"hbm_B":{"v":80000000000.0,"k":"S","src":"H100 SXM datasheet"},"hbm_bw":{"v":3000000000000.0,"spec":3350000000000.0,"k":"E","src":"90% of the 3.35 TB/s spec"},"l2_pin_B":{"v":37500000.0,"k":"E","src":"at most three quarters of the 50 MB L2 kept pinned with an access-policy window (the true set-aside limit not checked)"},"l2_bw":{"v":4300000000000.0,"k":"X","src":"an A100 SXM4's measured L2 read bandwidth, as a floor (memory-hierarchy report's A100 notes)"},"hbm_pj_B":{"v":105.0,"path":155.3,"k":"X/E","src":"A100 study (Antepara et al., SC'25): 13.11 pJ/bit for the HBM level alone, standing in for Hopper's newer process and HBM3 (E); the A100's whole path through L2 and L1 is 19.41 pJ/bit (155 pJ/B), not used"},"l2_pj_B":{"v":37.7,"path":50.4,"k":"X/E","src":"same study: 4.71 pJ/bit for the L2 level alone; 6.30 with L1 (50 pJ/B), not used"},"idle_W":{"lo":60.0,"hi":90.0,"k":"E","src":"not measured here"},"launch_s":{"v":1.3e-06,"k":"X","src":"per kernel with CUDA graphs, measured on an H100 (cited in the sparse-compute report)"},"peak":{"int8":{"ops_per_s":1978900000000000.0,"eff":0.6,"pj_op":0.3158},"fp16":{"ops_per_s":989400000000000.0,"eff":0.6,"pj_op":0.6317},"fp32":{"ops_per_s":494700000000000.0,"eff":0.6,"pj_op":1.263}},"bit":{"ops_per_s":66910000000000.0,"eff":0.6,"pj_op":1.751,"k":"E","src":"popc 16 per clock per SM (CUDA C++ Programming Guide) \u00d7 132 SMs \u00d7 1.98 GHz \u00d7 32 bits, halved for the xor and the add; Hopper has no binary tensor cores. Energy: an xor, a popc and an add per 32 bits, each priced as one fp32 lane-operation at the TDP, (700 \u2212 75) W \u00f7 (132 \u00d7 128 lanes \u00d7 1.98 GHz)"},"peak_src":"H100 SXM datasheet (dense int8, fp16/bf16, TF32); 60% sustained (E); energy per op above idle = (700 W TDP \u2212 75 W) \u00f7 peak (E)"},"cpu":{"bw":{"v":200000000000.0,"k":"E","src":"one server socket's DDR5, or its L3 for a small shard"},"rate":{"int8":4000000000000.0,"fp16":2000000000000.0,"fp32":2000000000000.0,"bit":50000000000000.0,"k":"E","src":"AVX-512 VNNI / FMA / VPOPCNTDQ on one socket"},"inc_W":{"lo":40.0,"hi":200.0,"k":"E","src":"incremental socket power while it scores; the host is powered anyway"}},"bytes_per":{"bit":0.125,"int8":1,"fp16":2,"fp32":4},"h_eff":0.6},"owner":{"q_grad_s":0.25,"ihvp_s":1.06,"query_energy_J":[458.5,917.0],"amortized_query_h100h":8.4,"src":"influence-functions report \u00a73.1 (the 8B price table: P = 8\u00d710\u2079, T = 2,048, H100 at 40% of 989 TFLOP/s); power 350\u2013700 W is E","atlas":{"P":34122,"N":60000,"Q":100,"C":10,"activation":"tanh","curvature_dtype":"float64","scan_s":0.231,"grad_pass_s":0.558,"lissa_500_s":7.07,"cg_20_s":5.36,"ekfac_query_s":0.0061,"gpu":"A100-SXM4-80GB","src":"MNIST influence atlas manifest (costs.rows[kfac].phases.scan.seconds; costs.measured; config.activation)"},"haiku_k":{"v":3000000.0,"src":"secondhand: a summary of Grosse's 13 April 2026 talk (the owner's Bergson page, \u00a79.4)"}},"s1":{"hbm_case":{"n":16000,"k":4096,"prec":"int8","Q":1,"MB":65.54,"chips":1,"et_us":28.4,"et_mJ":[1.01,1.32],"et_above_mJ":0.293,"et_bound":"memory","h100_where":"HBM","h100_us":23.1,"h100_mJ":[8.31,9.01],"lead":[6.3,8.9]},"l2_case":{"n":9155,"k":4096,"prec":"int8","Q":1,"MB":37.5,"chips":1,"et_us":17.0,"et_mJ":[0.602,0.792],"et_above_mJ":0.175,"et_bound":"memory","h100_where":"L2","h100_us":10.0,"h100_mJ":[2.04,2.34],"lead":[2.6,3.9]},"fp16_case":{"n":8000,"k":4096,"prec":"fp16","Q":1,"MB":65.54,"chips":1,"et_us":30.1,"et_mJ":[1.07,1.4],"et_above_mJ":0.311,"et_bound":"memory","h100_where":"HBM","h100_us":23.1,"h100_mJ":[8.31,9.01],"lead":[5.9,8.4]},"hbm_case_rows16":{"n":16000,"k":4096,"prec":"int8","Q":1,"MB":65.54,"chips":1,"et_us":29.2,"et_mJ":[1.64,1.97],"et_above_mJ":0.91,"et_bound":"compute","h100_where":"HBM","h100_us":23.1,"h100_mJ":[8.31,9.01],"lead":[4.2,5.5]},"capacity_codes_k4096":{"bit":140625,"int8":17578,"fp16":8789,"fp32":4394},"parity_int8":{"table":[{"Q":1,"et_mJ_per_q":[1.01,1.32],"h100_mJ_per_q":[8.31,9.01]},{"Q":2,"et_mJ_per_q":[0.535,0.7],"h100_mJ_per_q":[4.17,4.53]},{"Q":4,"et_mJ_per_q":[0.297,0.39],"h100_mJ_per_q":[2.11,2.28]},{"Q":8,"et_mJ_per_q":[0.184,0.24],"h100_mJ_per_q":[1.07,1.16]},{"Q":16,"et_mJ_per_q":[0.142,0.179],"h100_mJ_per_q":[0.558,0.602]},{"Q":24,"et_mJ_per_q":[0.128,0.159],"h100_mJ_per_q":[0.386,0.415]},{"Q":32,"et_mJ_per_q":[0.121,0.149],"h100_mJ_per_q":[0.3,0.322]},{"Q":48,"et_mJ_per_q":[0.114,0.139],"h100_mJ_per_q":[0.215,0.229]},{"Q":64,"et_mJ_per_q":[0.11,0.134],"h100_mJ_per_q":[0.17,0.181]},{"Q":96,"et_mJ_per_q":[0.106,0.129],"h100_mJ_per_q":[0.127,0.134]},{"Q":128,"et_mJ_per_q":[0.105,0.127],"h100_mJ_per_q":[0.106,0.112]},{"Q":192,"et_mJ_per_q":[0.103,0.124],"h100_mJ_per_q":[0.0844,0.088]},{"Q":256,"et_mJ_per_q":[0.103,0.123],"h100_mJ_per_q":[0.0754,0.0785]},{"Q":384,"et_mJ_per_q":[0.103,0.123],"h100_mJ_per_q":[0.0661,0.0695]},{"Q":512,"et_mJ_per_q":[0.103,0.123],"h100_mJ_per_q":[0.0615,0.065]},{"Q":1024,"et_mJ_per_q":[0.103,0.123],"h100_mJ_per_q":[0.0548,0.0582]}],"Q":[96,192]},"parity_fp16":{"table":[{"Q":1,"et_mJ_per_q":[1.07,1.4],"h100_mJ_per_q":[8.31,9.01]},{"Q":2,"et_mJ_per_q":[0.595,0.78],"h100_mJ_per_q":[4.17,4.53]},{"Q":4,"et_mJ_per_q":[0.357,0.47],"h100_mJ_per_q":[2.11,2.28]},{"Q":8,"et_mJ_per_q":[0.269,0.344],"h100_mJ_per_q":[1.07,1.16]},{"Q":16,"et_mJ_per_q":[0.226,0.283],"h100_mJ_per_q":[0.558,0.602]},{"Q":24,"et_mJ_per_q":[0.212,0.263],"h100_mJ_per_q":[0.386,0.415]},{"Q":32,"et_mJ_per_q":[0.205,0.253],"h100_mJ_per_q":[0.3,0.322]},{"Q":48,"et_mJ_per_q":[0.199,0.244],"h100_mJ_per_q":[0.215,0.229]},{"Q":64,"et_mJ_per_q":[0.195,0.237],"h100_mJ_per_q":[0.17,0.181]},{"Q":96,"et_mJ_per_q":[0.192,0.233],"h100_mJ_per_q":[0.127,0.134]},{"Q":128,"et_mJ_per_q":[0.19,0.23],"h100_mJ_per_q":[0.106,0.112]},{"Q":192,"et_mJ_per_q":[0.188,0.228],"h100_mJ_per_q":[0.0844,0.088]},{"Q":256,"et_mJ_per_q":[0.187,0.227],"h100_mJ_per_q":[0.0754,0.0785]},{"Q":384,"et_mJ_per_q":[0.186,0.225],"h100_mJ_per_q":[0.0661,0.0695]},{"Q":512,"et_mJ_per_q":[0.186,0.225],"h100_mJ_per_q":[0.0615,0.065]},{"Q":1024,"et_mJ_per_q":[0.186,0.224],"h100_mJ_per_q":[0.0548,0.0582]}],"Q":[48,64]},"q16_case":{"n":16000,"k":4096,"prec":"int8","Q":16,"MB":65.54,"chips":1,"et_us":54.0,"et_mJ":[2.27,2.87],"et_above_mJ":0.91,"et_bound":"memory","h100_where":"HBM","h100_us":23.1,"h100_mJ":[8.93,9.63],"lead":[3.1,4.2]}},"duty":{"et_idle_per_query_J_at_1qps":[25.13,36.33],"et_active_mJ":[1.01,1.32],"ratio_idle_to_active":[19000.0,36000.0],"hbm_case":{"chips":1,"h100_mJ":[8.31,9.01],"cpu_mJ":[13.1,65.5],"vs_h100_qps":[2900.0,4500.0],"vs_cpu_qps":[390.0,2800.0]},"l2_case":{"chips":1,"h100_mJ":[2.04,2.34],"cpu_mJ":[7.5,37.5],"vs_h100_qps":[12000.0,20000.0],"vs_cpu_qps":[670.0,5000.0]},"breakeven_vs_h100_qps":[2900.0,20000.0],"breakeven_vs_cpu_qps":[390.0,5000.0],"query_side_J":[458.5,917.0],"step_share_of_query":[9.1e-06,2e-05]},"kills":{"k1":{"MB":64.0,"ms":0.84,"mJ":[29.0,39.0],"pcie_ms":4.1,"h100_us":21.0,"x_pass":[30.0,140.0]},"k4":{"MB":25.0,"ms":0.33,"mJ":[11.0,15.0]},"k5":{"et_int8_pJ":[15.0,20.0],"h100_bit_pJ":[18.0,19.0]},"k7":{"chips_1e7":569,"kW_1e7":[14.0,21.0],"hot_tier":{"chips":6,"h100_mJ":[51.5,55.7],"cpu_mJ":[81.9,410.0],"vs_h100_qps":[2800.0,4400.0],"vs_cpu_qps":[370.0,2700.0]}}},"s2":{"scan_flop":4110000000000,"a100_s":0.231,"a100_tflops_nominal":17.8,"a100_J":[58.0,92.0],"a100_W":[250,400],"et":[{"prec":"fp16","eff":1.0,"s":0.216,"J":12.8},{"prec":"fp32","eff":1.0,"s":0.432,"J":24.4},{"prec":"fp32","eff":0.3,"s":1.44,"J":81.4},{"prec":"fp32","eff":0.1,"s":4.32,"J":244.0}],"breakeven_eff_fp32":[0.26,0.42],"breakeven_eff_fp16":[0.14,0.22],"time_eff_needed":{"fp16":0.93,"fp32":1.9},"atlas_bytes":{"weights_KB":136.0,"images_MB":11.8,"queries_MB":13.6},"lissa_ms_per_step":14.0,"cg_ms_per_iter":268.0},"dense":{"slower":[21.0,35.0],"energy":[1.8,2.9],"src":"ET fp16 at 60\u2013100% of its measured 19.0 TFLOP/s and 59.3 W board (M/E) against an H100 at 40% of 989 TFLOP/s and 700 W (the owner's model, O/S)"},"pipeline":[{"key":"scan","label":"Scan 10\u2077 candidates by recomputing gradients","h":702,"per":"per batch of 100 queries","fit":"no","k":"O","why":"dense backprop, the bill itself; one ET card is 21\u201335\u00d7 slower and spends 1.8\u20132.9\u00d7 the energy","J":1770000000.0},{"key":"build","label":"Build a sketch index of 10\u2077 gradients","h":1150,"per":"once per checkpoint","fit":"no","k":"O","why":"dense backprop plus a projection; the sparse sketches would need 16 GB per sequence over a 15.75 GB/s link","J":2900000000.0},{"key":"valid","label":"Validation retrains (LDS)","h":506,"per":"per method","fit":"no","k":"O","why":"training runs","J":1280000000.0},{"key":"rerank","label":"Exact rerank of the top 10\u2074 at 70B","h":6.0,"per":"per query","fit":"no","k":"E","why":"10\u2074 fresh gradients; with an EK-FAC iHVP it is over 99.9% of a query's energy","J":15100000.0},{"key":"stats","label":"EK-FAC curvature statistics","h":2.07,"per":"once per checkpoint","fit":"no","k":"O","why":"dense gradient passes","J":5220000.0},{"key":"astra","label":"Iterative iHVP (ASTRA, 300 steps)","h":1.41,"per":"per query","fit":"no","k":"O","why":"minibatch Hessian-vector products are gradients","J":3550000.0},{"key":"qgrad","label":"Query gradients, 100 queries","h":0.007,"per":"per batch","fit":"no","k":"O","why":"dense backprop; an 8B model in fp16 does not fit one card's 32 GB comfortably, and there is no bf16","J":17600.0},{"key":"eigh","label":"Eigendecompose the Kronecker factors","h":0.002,"per":"once per checkpoint","fit":"no","k":"O","why":"needs fp64 (the chip has none, and no hardware divide or square root); factors up to 14,336\u00b2 (0.8 GB in fp32, 1.6 GB in fp64) exceed the 72 MB of SRAM","J":5040.0},{"key":"ihvp","label":"EK-FAC iHVP (1.06 s)","h":0.000294,"per":"per query","fit":"no","k":"O","why":"compute-bound matmuls against 108 GB of resident bases: 1,500 chips of SRAM to keep them on chip","J":741.0},{"key":"lookup","label":"Stream the whole 82 GB sketch index, 1 query","h":6.8e-06,"per":"per query","fit":"no","k":"S","why":"bandwidth-bound: the ET's DRAM gives 76 GB/s at 129 pJ/B above idle, 44\u00d7 slower than HBM, and holds 32 GB","J":17.1},{"key":"prefilter","label":"Lexical prefilter (BM25/TF-IDF)","h":3.53e-07,"per":"per query","fit":"killed","k":"X","why":"ET-shaped (per-core document ownership, no atomics) but about 10\u207b\u2076 of the bill; the host CPU's inverted index does it","J":0.89},{"key":"scatter","label":"Scatter the gradients' sparse parts into sketches","h":7.02,"per":"per batch of 100 queries (at most 1% of the scan)","fit":"killed","k":"E","why":"the one ET-shaped step with real size, but the data is born in the GPU's backward pass (16 GB per sequence would have to cross a 15.75 GB/s link); GPUs keep the buckets in L2 or avoid the scatter; the chip's gather/scatter rate is unmeasured (S3)","J":17700000.0},{"key":"shard","label":"Score a static 65 MB shard, 1 query (S1)","h":6.42e-09,"per":"per query","fit":"research","k":"E","why":"the one physical edge: 4.2 pJ/B from the chip's own SRAM; no time win, and it needs a busy card","J":0.0162},{"key":"topk","label":"Select the top k (fused into scoring)","h":2.78e-10,"per":"per query","fit":"feature","k":"E","why":"10\u2074\u20131.5\u00d710\u2075 heap inserts per query even at N = 10\u00b9\u2070: free in a GPU kernel's epilogue; kept only as part of S1","J":0.000701}],"presets":[{"key":"shard","label":"S1: a static shard","n":16000,"k":4096,"prec":"int8","Q":1,"lam":1,"where":"sram"},{"key":"busy","label":"The same, kept busy","n":16000,"k":4096,"prec":"int8","Q":1,"lam":10000.0,"where":"sram"},{"key":"less","label":"Fine-tuning attribution","n":270000,"k":8192,"prec":"int8","Q":100,"lam":1,"where":"sram"},{"key":"owner","label":"The author's 10\u2077 index","n":10000000.0,"k":4096,"prec":"int8","Q":1,"lam":1,"where":"sram"},{"key":"haiku","label":"3 million dimensions","n":1000000.0,"k":3000000.0,"prec":"fp16","Q":1,"lam":1,"where":"dram"}],"topk_inserts":{"N":[1000000000.0,10000000000.0],"k":10000.0,"inserts":[130000.0,150000.0]}};
+const D = {"generated":"2026-09-27","producer":"docs/reports/data/2026-09-25-influence-on-et/make_analysis.py","kinds":{"M":"measured on an ET-SoC-1 lab card","D":"derived: arithmetic on measured numbers","S":"vendor spec","X":"published by others","O":"the influence-function report's owner (his measurements or cost model)","E":"estimate: an assumption of this page, never measured"},"model":{"et":{"sram_usable_B":{"v":72000000.0,"k":"D","src":"32 shires \u00d7 2.25 MB: each 2.5 MB scratchpad less the first 256 KB (on-chip relay report)"},"sram_bw":{"v":2458000000000.0,"k":"M","src":"docs/reports/data/2026-09-23-energy-manual/manual.json: catalogue tensor loads from the shire's own scratchpad, random data, three cards"},"sram_pj_B":{"v":4.43,"lo":4.06,"hi":5.035,"k":"M","src":"energy manual \u00a74.1, above idle, random data, three passes on each of three cards"},"dram_B":{"v":32000000000.0,"k":"S","src":"LPDDR4X, 32 GB per card"},"dram_bw":{"v":76010000000.0,"k":"M","src":"energy manual \u00a74.1, tensor loads from DRAM, three cards"},"dram_pj_B":{"v":132.6,"lo":117.9,"hi":145.4,"k":"M","src":"energy manual \u00a74.1, above idle, random data"},"idle_W":{"lo":25.13,"hi":36.33,"k":"M","src":"board power at rest: aifoundry3 25.1 W at 56 \u00b0C, aifoundry2 36.3 W at 81 \u00b0C (energy manual, cards block)"},"peak":{"fp32":{"ops_per_s":9511000000000.0,"board_w":56.57,"pj_op":2.73,"k":"M/D"},"fp16":{"ops_per_s":19020000000000.0,"board_w":59.27,"pj_op":1.406,"k":"M/D"},"int8":{"ops_per_s":71780000000000.0,"board_w":61.75,"pj_op":0.3889,"k":"M/D"}},"peak_src":"docs/reports/data/2026-09-18-aifoundry2/results.json: matmul benchmark, tiles in L2, aifoundry2, 600 MHz; pJ per op above the idle just before each workload, 30.61 W for fp32, 32.53 W for fp16, 33.83 W for int8 (D)","tensor_randn_board_w":{"fp16":60.77,"fp32":63.56,"k":"M","T":{"fp16":80.25,"fp32":80.0},"src":"energy manual \u00a73.2 (manual.json tensor.rows *_randn): TensorFMA on random operands, aifoundry2 at 80 \u00b0C, board power (idle plus the rise over it)"},"bit":{"ops_per_s":8224000000000.0,"pj_op":1.065,"k":"E","src":"no popcount instruction: SWAR on the vector unit, about 14 packed-integer instructions per 256 bits (E) at the catalogue's measured 450 G instructions/s and 19.5 pJ each (M)"},"rows16":{"k":"E","src":"a tensor op multiplies 16 rows of A; ops with fewer rows (one query per row) were measured only in fp32, at batch 1, where the pass stayed load-bound"},"l1_scp_B":{"v":3072,"k":"S/M","src":"the L1 in scratchpad mode: sets 0\u201311, 3 KB per minion (memory-hierarchy report); a 4,096-coordinate int8 query (4 KB) does not fit, so every minion re-reads the query tiles for each tile of 16 codes it holds (E)"},"launch_ms":{"lo":0.2,"hi":0.4,"k":"M","src":"host kernel launch on aifoundry3 (sparse-compute report); a persistent kernel avoids it"},"allreduce_us":{"v":2.3,"k":"M","src":"32 B TensorReduce + TensorBroadcast over 1,024 minions, aifoundry2 (on-chip communication report)"},"atomics_spread":{"ops_per_s":1920000000.0,"nj":1.16,"k":"M","src":"global atomics spread over 32 lines (hot-line report; energy from the energy manual's reruns)"},"gs":{"gather_l1":{"ops_per_s":452300000000.0,"nj":0.0128,"lo":0.0119,"hi":0.0146,"k":"M","src":"a word gathered from the L1 (512 B table per hart); E48, three passes on each of three cards (manual.json gs)"},"gather_l2":{"ops_per_s":27360000000.0,"nj":0.354,"lo":0.33,"hi":0.392,"k":"M","src":"a word gathered from the L2 (4 KB per hart); E48, three passes on each of three cards (manual.json gs)"},"gather_scp":{"ops_per_s":27360000000.0,"nj":0.368,"lo":0.344,"hi":0.4,"k":"M","src":"a word gathered from the shire's own scratchpad (16 KB per hart); E48, three passes on each of three cards (manual.json gs)"},"gather_dram":{"ops_per_s":1193000000.0,"nj":9.83,"lo":9.21,"hi":10.3,"k":"M","src":"a word gathered from DRAM (256 KB per hart): a random DRAM read; E48, three passes on each of three cards (manual.json gs)"},"scatter_l2":{"ops_per_s":23540000000.0,"nj":0.731,"lo":0.677,"hi":0.814,"k":"M","src":"a word scattered into the L2 (4 KB per hart); E48, three passes on each of three cards (manual.json gs)"},"scatter_dram":{"ops_per_s":422100000.0,"nj":23.8,"lo":22.2,"hi":25.3,"k":"M","src":"a word scattered into DRAM (256 KB per hart); E48, three passes on each of three cards (manual.json gs)"},"upd_l1":{"ops_per_s":139400000000.0,"nj":0.0363,"lo":0.0347,"hi":0.0382,"k":"M","src":"gather + fadd.ps + scatter, each hart's table in its L1 (512 B); E48, three passes on each of three cards (manual.json gs)"},"upd_l2":{"ops_per_s":18240000000.0,"nj":0.85,"lo":0.789,"hi":0.965,"k":"M","src":"gather + fadd.ps + scatter, each hart's table in the L2 (4 KB); E48, three passes on each of three cards (manual.json gs)"},"upd_scp":{"ops_per_s":18240000000.0,"nj":0.801,"lo":0.699,"hi":0.888,"k":"M","src":"gather + fadd.ps + scatter, each hart's table in the own scratchpad (16 KB); E48, three passes on each of three cards (manual.json gs)"},"upd_dram":{"ops_per_s":422500000.0,"nj":22.2,"lo":20.7,"hi":23.8,"k":"M","src":"gather + fadd.ps + scatter, each hart's table in DRAM (256 KB); E48, three passes on each of three cards (manual.json gs)"},"famoadd_l":{"ops_per_s":12690000000.0,"nj":0.392,"lo":0.353,"hi":0.425,"k":"M","src":"packed atomic add famoaddl.pi, random words of a 256 KB table per shire; E48, three passes on each of three cards (manual.json gs)"},"famoadd_g":{"ops_per_s":2802000000.0,"nj":1.73,"lo":1.57,"hi":1.87,"k":"M","src":"packed atomic add famoaddg.pi, random words of one 8 MB table for the chip; E48, three passes on each of three cards (manual.json gs)"},"amoadd_l":{"ops_per_s":12820000000.0,"nj":0.27,"lo":0.242,"hi":0.302,"k":"M","src":"scalar atomic add amoaddl.w on the same shire tables; E48, three passes on each of three cards (manual.json gs)"},"amoadd_g":{"ops_per_s":2792000000.0,"nj":1.12,"lo":0.853,"hi":1.3,"k":"M","src":"scalar atomic add amoaddg.w on the same chip table; E48, three passes on each of three cards (manual.json gs)"},"over_10G":["upd_l1","upd_l2","upd_scp","famoadd_l","amoadd_l"],"cards":["aifoundry2","aifoundry3","aifoundry1-c1"]},"meter":{"refresh_ms":{"aifoundry2":156.0,"aifoundry3":263.0,"aifoundry1-c1":158.0},"refresh_ms_range":[156.0,263.0],"rail_tau_s":{"aifoundry1-c1":1.153,"aifoundry2":1.133,"aifoundry3":1.235},"rail_tau_range":[1.133,1.235],"k":"M","src":"the board meter's new value per service-processor pass under a 10 Hz sampler, per card (the version-3 check, E41), and the rails' running average (the catalogue's rail filter): energy manual \u00a79"},"pcie_Bps":{"v":15750000000.0,"k":"S","src":"PCIe Gen4 x8, never timed on these cards"},"anchor":{"bytes":16777216,"t_s":7.364e-06,"board_j":0.0002505,"above_idle_j":6.824e-05,"board_w":34.01,"source":"docs/reports/data/2026-09-18-sparsity-aifoundry3/energy-b/results.json (gemv-skip-0: board J per layer, and layers per second at 600 MHz for the time)","model_above_idle_j":7.432e-05,"model_over_measured":0.08916,"t_us":7.364,"tb_per_s":2.278,"under_model_bw":0.07293}},"h100":{"hbm_B":{"v":80000000000.0,"k":"S","src":"H100 SXM datasheet"},"hbm_bw":{"v":3000000000000.0,"spec":3350000000000.0,"k":"E","src":"90% of the 3.35 TB/s spec"},"l2_pin_B":{"v":37500000.0,"k":"E","src":"at most three quarters of the 50 MB L2 kept pinned with an access-policy window (the true set-aside limit not checked)"},"l2_bw":{"v":4300000000000.0,"k":"X","src":"an A100 SXM4's measured L2 read bandwidth, as a floor (memory-hierarchy report's A100 notes)"},"hbm_pj_B":{"v":105.0,"path":155.3,"k":"X/E","src":"A100 study (Antepara et al., SC'25): 13.11 pJ/bit for the HBM level alone, standing in for Hopper's newer process and HBM3 (E); the A100's whole path through L2 and L1 is 19.41 pJ/bit (155 pJ/B), not used"},"l2_pj_B":{"v":37.7,"path":50.4,"k":"X/E","src":"same study: 4.71 pJ/bit for the L2 level alone; 6.30 with L1 (50 pJ/B), not used"},"idle_W":{"lo":60.0,"hi":90.0,"k":"E","src":"not measured here"},"launch_s":{"v":1.3e-06,"k":"X","src":"per kernel with CUDA graphs, measured on an H100 (cited in the sparse-compute report)"},"peak":{"int8":{"ops_per_s":1978900000000000.0,"eff":0.6,"pj_op":0.3158},"fp16":{"ops_per_s":989400000000000.0,"eff":0.6,"pj_op":0.6317},"fp32":{"ops_per_s":494700000000000.0,"eff":0.6,"pj_op":1.263}},"bit":{"ops_per_s":66910000000000.0,"eff":0.6,"pj_op":1.751,"k":"E","src":"popc 16 per clock per SM (CUDA C++ Programming Guide) \u00d7 132 SMs \u00d7 1.98 GHz \u00d7 32 bits, halved for the xor and the add; Hopper has no binary tensor cores. Energy: an xor, a popc and an add per 32 bits, each priced as one fp32 lane-operation at the TDP, (700 \u2212 75) W \u00f7 (132 \u00d7 128 lanes \u00d7 1.98 GHz)"},"peak_src":"H100 SXM datasheet (dense int8, fp16/bf16, TF32); 60% sustained (E); energy per op above idle = (700 W TDP \u2212 75 W) \u00f7 peak (E)"},"cpu":{"bw":{"v":200000000000.0,"k":"E","src":"one server socket's DDR5, or its L3 for a small shard"},"rate":{"int8":4000000000000.0,"fp16":2000000000000.0,"fp32":2000000000000.0,"bit":50000000000000.0,"k":"E","src":"AVX-512 VNNI / FMA / VPOPCNTDQ on one socket"},"inc_W":{"lo":40.0,"hi":200.0,"k":"E","src":"incremental socket power while it scores; the host is powered anyway"}},"bytes_per":{"bit":0.125,"int8":1,"fp16":2,"fp32":4},"h_eff":0.6},"owner":{"q_grad_s":0.25,"ihvp_s":1.06,"query_energy_J":[458.5,917.0],"amortized_query_h100h":8.4,"src":"influence-functions report \u00a73.1 (the 8B price table: P = 8\u00d710\u2079, T = 2,048, H100 at 40% of 989 TFLOP/s); power 350\u2013700 W is E","atlas":{"P":34122,"N":60000,"Q":100,"C":10,"activation":"tanh","curvature_dtype":"float64","scan_s":0.231,"grad_pass_s":0.558,"lissa_500_s":7.07,"cg_20_s":5.36,"ekfac_query_s":0.0061,"gpu":"A100-SXM4-80GB","src":"MNIST influence atlas manifest (costs.rows[kfac].phases.scan.seconds; costs.measured; config.activation)"},"haiku_k":{"v":3000000.0,"src":"secondhand: a summary of Grosse's 13 April 2026 talk (the owner's Bergson page, \u00a79.4)"}},"s1":{"hbm_case":{"n":16000,"k":4096,"prec":"int8","Q":1,"MB":65.54,"chips":1,"et_us":28.4,"et_mJ":[1.02,1.34],"et_above_mJ":0.309,"et_bound":"memory","h100_where":"HBM","h100_us":23.1,"h100_mJ":[8.31,9.01],"lead":[6.2,8.8]},"l2_case":{"n":9155,"k":4096,"prec":"int8","Q":1,"MB":37.5,"chips":1,"et_us":17.0,"et_mJ":[0.611,0.801],"et_above_mJ":0.185,"et_bound":"memory","h100_where":"L2","h100_us":10.0,"h100_mJ":[2.04,2.34],"lead":[2.5,3.8]},"fp16_case":{"n":8000,"k":4096,"prec":"fp16","Q":1,"MB":65.54,"chips":1,"et_us":30.1,"et_mJ":[1.08,1.42],"et_above_mJ":0.327,"et_bound":"memory","h100_where":"HBM","h100_us":23.1,"h100_mJ":[8.31,9.01],"lead":[5.9,8.3]},"hbm_case_rows16":{"n":16000,"k":4096,"prec":"int8","Q":1,"MB":65.54,"chips":1,"et_us":29.2,"et_mJ":[1.55,1.88],"et_above_mJ":0.816,"et_bound":"compute","h100_where":"HBM","h100_us":23.1,"h100_mJ":[8.31,9.01],"lead":[4.4,5.8]},"capacity_codes_k4096":{"bit":140625,"int8":17578,"fp16":8789,"fp32":4394},"parity_int8":{"table":[{"Q":1,"et_mJ_per_q":[1.02,1.34],"h100_mJ_per_q":[8.31,9.01]},{"Q":2,"et_mJ_per_q":[0.54,0.71],"h100_mJ_per_q":[4.17,4.53]},{"Q":4,"et_mJ_per_q":[0.302,0.395],"h100_mJ_per_q":[2.11,2.28]},{"Q":8,"et_mJ_per_q":[0.181,0.237],"h100_mJ_per_q":[1.07,1.16]},{"Q":16,"et_mJ_per_q":[0.136,0.174],"h100_mJ_per_q":[0.558,0.602]},{"Q":24,"et_mJ_per_q":[0.122,0.153],"h100_mJ_per_q":[0.386,0.415]},{"Q":32,"et_mJ_per_q":[0.115,0.143],"h100_mJ_per_q":[0.3,0.322]},{"Q":48,"et_mJ_per_q":[0.108,0.133],"h100_mJ_per_q":[0.215,0.229]},{"Q":64,"et_mJ_per_q":[0.104,0.128],"h100_mJ_per_q":[0.17,0.181]},{"Q":96,"et_mJ_per_q":[0.101,0.123],"h100_mJ_per_q":[0.127,0.134]},{"Q":128,"et_mJ_per_q":[0.0992,0.12],"h100_mJ_per_q":[0.106,0.112]},{"Q":192,"et_mJ_per_q":[0.0974,0.118],"h100_mJ_per_q":[0.0844,0.088]},{"Q":256,"et_mJ_per_q":[0.0969,0.117],"h100_mJ_per_q":[0.0754,0.0785]},{"Q":384,"et_mJ_per_q":[0.0969,0.117],"h100_mJ_per_q":[0.0661,0.0695]},{"Q":512,"et_mJ_per_q":[0.0969,0.117],"h100_mJ_per_q":[0.0615,0.065]},{"Q":1024,"et_mJ_per_q":[0.0969,0.117],"h100_mJ_per_q":[0.0548,0.0582]}],"Q":[128,192]},"parity_fp16":{"table":[{"Q":1,"et_mJ_per_q":[1.08,1.42],"h100_mJ_per_q":[8.31,9.01]},{"Q":2,"et_mJ_per_q":[0.605,0.79],"h100_mJ_per_q":[4.17,4.53]},{"Q":4,"et_mJ_per_q":[0.362,0.475],"h100_mJ_per_q":[2.11,2.28]},{"Q":8,"et_mJ_per_q":[0.261,0.338],"h100_mJ_per_q":[1.07,1.16]},{"Q":16,"et_mJ_per_q":[0.22,0.277],"h100_mJ_per_q":[0.558,0.602]},{"Q":24,"et_mJ_per_q":[0.206,0.257],"h100_mJ_per_q":[0.386,0.415]},{"Q":32,"et_mJ_per_q":[0.199,0.247],"h100_mJ_per_q":[0.3,0.322]},{"Q":48,"et_mJ_per_q":[0.192,0.235],"h100_mJ_per_q":[0.215,0.229]},{"Q":64,"et_mJ_per_q":[0.189,0.231],"h100_mJ_per_q":[0.17,0.181]},{"Q":96,"et_mJ_per_q":[0.185,0.226],"h100_mJ_per_q":[0.127,0.134]},{"Q":128,"et_mJ_per_q":[0.183,0.223],"h100_mJ_per_q":[0.106,0.112]},{"Q":192,"et_mJ_per_q":[0.181,0.221],"h100_mJ_per_q":[0.0844,0.088]},{"Q":256,"et_mJ_per_q":[0.18,0.22],"h100_mJ_per_q":[0.0754,0.0785]},{"Q":384,"et_mJ_per_q":[0.18,0.219],"h100_mJ_per_q":[0.0661,0.0695]},{"Q":512,"et_mJ_per_q":[0.179,0.219],"h100_mJ_per_q":[0.0615,0.065]},{"Q":1024,"et_mJ_per_q":[0.179,0.218],"h100_mJ_per_q":[0.0548,0.0582]}],"Q":[48,64]},"q16_case":{"n":16000,"k":4096,"prec":"int8","Q":16,"MB":65.54,"chips":1,"et_us":54.0,"et_mJ":[2.17,2.78],"et_above_mJ":0.816,"et_bound":"memory","h100_where":"HBM","h100_us":23.1,"h100_mJ":[8.93,9.63],"lead":[3.2,4.4]}},"duty":{"et_idle_per_query_J_at_1qps":[25.13,36.33],"et_active_mJ":[1.02,1.34],"ratio_idle_to_active":[19000.0,36000.0],"hbm_case":{"chips":1,"h100_mJ":[8.31,9.01],"cpu_mJ":[13.1,65.5],"vs_h100_qps":[2900.0,4500.0],"vs_cpu_qps":[390.0,2800.0]},"l2_case":{"chips":1,"h100_mJ":[2.04,2.34],"cpu_mJ":[7.5,37.5],"vs_h100_qps":[12000.0,20000.0],"vs_cpu_qps":[670.0,5000.0]},"breakeven_vs_h100_qps":[2900.0,20000.0],"breakeven_vs_cpu_qps":[390.0,5000.0],"query_side_J":[458.5,917.0],"step_share_of_query":[9.1e-06,2e-05]},"kills":{"k1":{"MB":64.0,"ms":0.84,"mJ":[30.0,39.0],"pcie_ms":4.1,"h100_us":21.0,"x_pass":[30.0,140.0]},"k4":{"MB":25.0,"ms":0.33,"mJ":[12.0,15.0]},"k5":{"et_int8_pJ":[16.0,20.0],"h100_bit_pJ":[18.0,19.0]},"k7":{"chips_1e7":569,"kW_1e7":[14.0,21.0],"hot_tier":{"chips":6,"h100_mJ":[51.5,55.7],"cpu_mJ":[81.9,410.0],"vs_h100_qps":[2800.0,4400.0],"vs_cpu_qps":[370.0,2700.0]}}},"s2":{"scan_flop":4110000000000,"a100_s":0.231,"a100_tflops_nominal":17.8,"a100_J":[58.0,92.0],"a100_W":[250,400],"et":[{"prec":"fp16","eff":1.0,"s":0.216,"J":13.1},{"prec":"fp32","eff":1.0,"s":0.432,"J":27.4},{"prec":"fp32","eff":0.3,"s":1.44,"J":91.5},{"prec":"fp32","eff":0.1,"s":4.32,"J":274.0}],"breakeven_eff_fp32":[0.3,0.48],"breakeven_eff_fp16":[0.14,0.23],"board_w_random":{"fp16":60.8,"fp32":63.6},"time_eff_needed":{"fp16":0.93,"fp32":1.9},"atlas_bytes":{"weights_KB":136.0,"images_MB":11.8,"queries_MB":13.6},"lissa_ms_per_step":14.0,"cg_ms_per_iter":268.0},"dense":{"slower":[21.0,35.0],"energy":[1.8,3.0],"tflops":19.0,"board_w":60.8,"T":80.25,"src":"ET fp16 at 60\u2013100% of its measured 19.0 TFLOP/s (the matmul benchmark) at 60.8 W of board power on random operands (aifoundry2, 80 \u00b0C; M/E) against an H100 at 40% of 989 TFLOP/s and 700 W (the owner's model, O/S)"},"pipeline":[{"key":"scan","label":"Scan 10\u2077 candidates by recomputing gradients","h":702,"per":"per batch of 100 queries","fit":"no","k":"O","why":"dense backprop, the bill itself; one ET card is 21\u201335\u00d7 slower and spends 1.8\u20133.0\u00d7 the energy","J":1770000000.0},{"key":"build","label":"Build a sketch index of 10\u2077 gradients","h":1150,"per":"once per checkpoint","fit":"no","k":"O","why":"dense backprop plus a projection; the sparse sketches would need 16 GB per sequence over a 15.75 GB/s link","J":2900000000.0},{"key":"valid","label":"Validation retrains (LDS)","h":506,"per":"per method","fit":"no","k":"O","why":"training runs","J":1280000000.0},{"key":"rerank","label":"Exact rerank of the top 10\u2074 at 70B","h":6.0,"per":"per query","fit":"no","k":"E","why":"10\u2074 fresh gradients; with an EK-FAC iHVP it is over 99.9% of a query's energy","J":15100000.0},{"key":"stats","label":"EK-FAC curvature statistics","h":2.07,"per":"once per checkpoint","fit":"no","k":"O","why":"dense gradient passes","J":5220000.0},{"key":"astra","label":"Iterative iHVP (ASTRA, 300 steps)","h":1.41,"per":"per query","fit":"no","k":"O","why":"minibatch Hessian-vector products are gradients","J":3550000.0},{"key":"qgrad","label":"Query gradients, 100 queries","h":0.007,"per":"per batch","fit":"no","k":"O","why":"dense backprop; an 8B model in fp16 does not fit one card's 32 GB comfortably, and there is no bf16","J":17600.0},{"key":"eigh","label":"Eigendecompose the Kronecker factors","h":0.002,"per":"once per checkpoint","fit":"no","k":"O","why":"needs fp64 (the chip has none, and no hardware divide or square root); factors up to 14,336\u00b2 (0.8 GB in fp32, 1.6 GB in fp64) exceed the chip's scratchpads (72 MB usable of 80 MB)","J":5040.0},{"key":"ihvp","label":"EK-FAC iHVP (1.06 s)","h":0.000294,"per":"per query","fit":"no","k":"O","why":"compute-bound matmuls against 108 GB of resident bases: 1,500 chips of SRAM to keep them on chip","J":741.0},{"key":"lookup","label":"Stream the whole 82 GB sketch index, 1 query","h":6.8e-06,"per":"per query","fit":"no","k":"S","why":"bandwidth-bound: the ET's DRAM gives 76 GB/s at 133 pJ/B above idle, 44\u00d7 slower than HBM, and holds 32 GB","J":17.1},{"key":"prefilter","label":"Lexical prefilter (BM25/TF-IDF)","h":3.53e-07,"per":"per query","fit":"killed","k":"X","why":"ET-shaped (per-core document ownership, no atomics) but about 10\u207b\u2076 of the bill; the host CPU's inverted index does it","J":0.89},{"key":"scatter","label":"Scatter the gradients' sparse parts into sketches","h":7.02,"per":"per batch of 100 queries (at most 1% of the scan)","fit":"killed","k":"E","why":"the one ET-shaped step with real size, but the data is born in the GPU's backward pass (16 GB per sequence would have to cross a 15.75 GB/s link); GPUs keep the buckets in L2 or avoid the scatter; the chip's scatter-add, measured since (S3), reaches 10 G updates a second only while the buckets stay in a shire, and runs at 0.42 G/s into DRAM","J":17700000.0},{"key":"shard","label":"Score a static 65 MB shard, 1 query (S1)","h":6.42e-09,"per":"per query","fit":"research","k":"E","why":"the one physical edge: 4.4 pJ/B from the chip's own scratchpad; no time win, and it needs a busy card","J":0.0162},{"key":"topk","label":"Select the top k (fused into scoring)","h":2.78e-10,"per":"per query","fit":"feature","k":"E","why":"10\u2074\u20131.5\u00d710\u2075 heap inserts per query even at N = 10\u00b9\u2070: free in a GPU kernel's epilogue; kept only as part of S1","J":0.000701}],"presets":[{"key":"shard","label":"S1: a static shard","n":16000,"k":4096,"prec":"int8","Q":1,"lam":1,"where":"sram"},{"key":"busy","label":"The same, kept busy","n":16000,"k":4096,"prec":"int8","Q":1,"lam":10000.0,"where":"sram"},{"key":"less","label":"Fine-tuning attribution","n":270000,"k":8192,"prec":"int8","Q":100,"lam":1,"where":"sram"},{"key":"owner","label":"The author's 10\u2077 index","n":10000000.0,"k":4096,"prec":"int8","Q":1,"lam":1,"where":"sram"},{"key":"haiku","label":"3 million dimensions","n":1000000.0,"k":3000000.0,"prec":"fp16","Q":1,"lam":1,"where":"dram"}],"topk_inserts":{"N":[1000000000.0,10000000000.0],"k":10000.0,"inserts":[130000.0,150000.0]}};
 /* Influence functions on the ET-SoC-1: the page's numbers and charts, all computed from D (analysis.json,
    written by docs/reports/data/2026-09-25-influence-on-et/make_analysis.py) with the shared toolkit CK. */
 (function () {
@@ -1360,7 +1424,7 @@ const D = {"generated":"2026-09-25","producer":"docs/reports/data/2026-09-25-inf
       : (be[0] > capE ? 'but the ET is full at ' + r2s(capE) + '/s at this Q' : 'queries a second (host CPU: ' + (inR(bec[0]) ? range(bec[0], bec[1], r2s) + '/s' : 'never') + ')');
     // readout: what binds, and the scale of the step
     const fits = where === 'sram'
-      ? (e.chips === 1 ? 'fits one chip’s 72 MB of SRAM' : 'needs ' + fmtCount(e.chips) + ' chips’ SRAM, ' + fmtWr(e.chips * ET.idle_W.lo, e.chips * ET.idle_W.hi) + ' at rest')
+      ? (e.chips === 1 ? 'fits one chip’s scratchpads (72 MB usable)' : 'needs ' + fmtCount(e.chips) + ' chips’ scratchpads, ' + fmtWr(e.chips * ET.idle_W.lo, e.chips * ET.idle_W.hi) + ' at rest')
       : (e.chips === 1 ? 'fits one card’s 32 GB of DRAM' : 'needs ' + fmtCount(e.chips) + ' cards’ DRAM');
     const idleShare = S.etQ(lam, 0) > 0 ? (e.chips * ET.idle_W.lo / lam) / S.etQ(lam, 0) : 0;
     const qs = D.owner.query_energy_J;
@@ -1370,7 +1434,7 @@ const D = {"generated":"2026-09-25","producer":"docs/reports/data/2026-09-25-inf
       + (full ? '' : 'At ' + perS(lam) + ' the ET card’s idle is ' + (idleShare > 0.9999 ? 'over 99.99%' : pct(idleShare)) + ' of its energy per query. ')
       + (S.cpuOK ? 'The host CPU would spend ' + fmtJr(c[0], c[1]) + ' per query. ' : 'Too big for one host’s memory. ')
       + 'Scoring is ' + share(h[0] / qs[1], h[1] / qs[0]) + ' the H100 energy of the query’s own gradient and iHVP at 8B (' + fmtJr(qs[0], qs[1]) + ').');
-    capFrame.redraw(); rateFrame.redraw();
+    capFrame.redraw(); rateFrame.redraw(); s1qFrame.redraw();
   }
   function fmtW(w) { const u = unitFor(w, [[1e12, 'TW'], [1e9, 'GW'], [1e6, 'MW'], [1e3, 'kW'], [1, 'W']]); return sig(w / u[0]) + ' ' + u[1]; }
   function fmtWr(a, b) {
@@ -1396,7 +1460,7 @@ const D = {"generated":"2026-09-25","producer":"docs/reports/data/2026-09-25-inf
       CK.el('rect', {x: x(1e4), y: y0, width: x(1e18) - x(1e4), height: y1 - y0, rx: 3, style: 'fill:var(--grid)'}, g);
       for (let e10 = 4; e10 <= 18; e10 += 2) labs.push(CK.txt(g, x(Math.pow(10, e10)), 108, fmtBtick(Math.pow(10, e10)), 'tick', 'middle'));
       const refs = [
-        [ET.sram_usable_B.v, 'ET chip SRAM 72 MB', 'var(--c1)', 'top', 'end', false],
+        [ET.sram_usable_B.v, 'ET scratchpads, 72 MB usable', 'var(--c1)', 'top', 'end', false],
         [ET.dram_B.v, 'ET card DRAM 32 GB', 'var(--c1)', 'top', 'start', true],
         [HH.l2_pin_B.v, 'H100 L2 37.5 MB', 'var(--c2)', 'bot', 'end', false],
         [HH.hbm_B.v, 'H100 HBM 80 GB', 'var(--c2)', 'bot', 'start', true],
@@ -1486,7 +1550,109 @@ const D = {"generated":"2026-09-25","producer":"docs/reports/data/2026-09-25-inf
       CK.keynav(f, nodes);
     },
   });
+
+  /* S1's lead against queries per pass (the "Few queries per pass" bullet): mJ per query, ET against H100, as Q
+     grows, for the int8 and fp16 shards from D.s1.parity_*. Linked to the explorer's Q slider: a point sets it. */
+  const s1 = D.s1;
+  let s1qPrec = 'int8';
+  CK.legend('s1q-leg', [
+    {key: 'et', label: 'ET-SoC-1 card, idle charged', color: 'var(--c1)', mark: 'box'},
+    {key: 'h', label: 'H100 in the server, pass only', color: 'var(--c2)', mark: 'box'},
+  ]);
+  CK.seg('s1q-prec', {label: 'Shard', options: [['int8', 'int8, 65.5 MB'], ['fp16', 'fp16, 32 MB']], value: s1qPrec,
+    onChange: v => { s1qPrec = v; s1qFrame.redraw(); }});
+  const s1qFrame = CK.frame('s1q', {
+    label: 'Energy per query on a log scale against queries per pass, for the ET-SoC-1 and an H100, int8 and fp16 shards',
+    height: W => (W < 600 ? 280 : 300),
+    draw(f) {
+      const P = s1[s1qPrec === 'int8' ? 'parity_int8' : 'parity_fp16'], rows = P.table, qCross = P.Q;
+      const L = 60, R = 14, T = 20, B = 40;
+      const qs = rows.map(r => r.Q);
+      const x = CK.log(qs[0], qs[qs.length - 1], L, f.W - R);
+      const vals = rows.reduce((a, r) => a.concat(r.et_mJ_per_q, r.h100_mJ_per_q), []);
+      const lo = Math.pow(10, Math.floor(Math.log10(Math.min(...vals) * 0.85))), hi = Math.pow(10, Math.ceil(Math.log10(Math.max(...vals) * 1.15)));
+      const y = CK.log(lo, hi, f.H - B, T);
+      const xt = qs.filter((q, i) => !f.narrow || i % 2 === 0 || q === qs[qs.length - 1]);
+      CK.axes(f, {x, y, L, R, T, B, xt, yt: y.ticks(5), xfmt: v => num(v, 0), yfmt: v => fmtJ(v * 1e-3), xl: 'queries per pass, Q', yl: 'energy per query'});
+      if (qCross && qCross[0] != null && qCross[1] != null) {
+        const bx0 = Math.max(qs[0], qCross[0]), bx1 = Math.min(qs[qs.length - 1], qCross[1]);
+        if (bx1 >= bx0) {
+          const r = CK.el('rect', {x: x(bx0), y: T, width: Math.max(2, x(bx1) - x(bx0)), height: f.H - T - B, style: 'fill:var(--ref);fill-opacity:0.16'}, f.svg);
+          CK.tip(f, r, 'The lead is gone by Q ≈ ' + intf(qCross[0]) + '–' + intf(qCross[1]) + ' in this page’s model');
+        }
+      }
+      const band = (key, col, get) => {
+        const top = rows.map(r => [r.Q, get(r)[1]]), bot = rows.map(r => [r.Q, get(r)[0]]);
+        const d = top.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ')
+          + ' ' + bot.slice().reverse().map(p => 'L' + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ') + ' Z';
+        CK.el('path', {d, 'data-series': key, style: 'fill:' + col + ';fill-opacity:0.2;stroke:none'}, f.svg);
+      };
+      band('et', 'var(--c1)', r => r.et_mJ_per_q);
+      band('h', 'var(--c2)', r => r.h100_mJ_per_q);
+      const nodes = [];
+      const setQ = r => { const was = quiet; quiet = true; cQ.set(r.Q); quiet = was; recompute(); };
+      const dot = (r, key, col, get) => {
+        const v = get(r), cur = st.Q === r.Q, cx = x(r.Q), cy = y(Math.sqrt(v[0] * v[1]));
+        const d = CK.el('circle', {cx, cy, r: cur ? 7 : 5}, f.svg);
+        d.style.fill = col; d.style.stroke = cur ? 'var(--ink)' : 'var(--surface)'; d.style.strokeWidth = cur ? '2.5' : '1.5';
+        CK.tip(f, d, '<b>' + (key === 'et' ? 'ET-SoC-1' : 'H100') + '</b>, Q = ' + r.Q + ': ' + fmtJr(v[0] * 1e-3, v[1] * 1e-3) + ' per query' + (cur ? ' (the explorer’s Q)' : ''));
+        d.style.cursor = 'pointer';
+        d.addEventListener('click', () => setQ(r));
+        nodes.push(d);
+      };
+      rows.forEach(r => dot(r, 'et', 'var(--c1)', rr => rr.et_mJ_per_q));
+      rows.forEach(r => dot(r, 'h', 'var(--c2)', rr => rr.h100_mJ_per_q));
+      CK.keynav(f, nodes, {onEnter: (n, k) => setQ(rows[k % rows.length])});
+      CK.readout('s1q-read').set(qCross && qCross[0] != null
+        ? 'For the ' + (s1qPrec === 'int8' ? 'int8' : 'fp16') + ' shard, the ET’s lead over the H100 is gone by Q ≈ ' + intf(qCross[0]) + '–' + intf(qCross[1]) + ' queries per pass.'
+        : '');
+    },
+  });
   recompute();
+
+  /* ---------------------------------------------------------------- S3: scatter-add, measured (E48) */
+  /* updates per second against nJ per update, log-log, for each method and where its buckets live (D.model.et.gs,
+     from the energy manual's manual.json gs); the dashed line is the 10 G updates a second the page asked for */
+  (function s3chart() {
+    const G = ET.gs;
+    if (!G || !$('s3')) return;
+    const P = [
+      ['upd_l1', 'gather + fadd + scatter, buckets in the hart’s L1', 0], ['upd_l2', 'gather + fadd + scatter, buckets in the L2', 0],
+      ['upd_scp', 'gather + fadd + scatter, buckets in the own scratchpad', 0], ['upd_dram', 'gather + fadd + scatter, buckets in DRAM', 0],
+      ['famoadd_l', 'packed atomic famoaddl.pi, a table per shire', 1], ['famoadd_g', 'packed atomic famoaddg.pi, one table for the chip', 1],
+      ['amoadd_l', 'scalar atomic amoaddl.w, a table per shire', 2], ['amoadd_g', 'scalar atomic amoaddg.w, one table for the chip', 2],
+    ].filter(p => G[p[0]]);
+    const GR = [['gather, fadd.ps and scatter, private buckets', 'var(--c1)', 'dot'], ['packed atomic add (famoadd*.pi)', 'var(--c2)', 'dot'], ['scalar atomic add (amoadd*.w)', 'var(--c3)', 'dot'],
+      ['global atomics spread over 32 lines (before S3)', 'var(--ref)', 'dot']];
+    CK.legend('s3-leg', GR.map((g, i) => ({key: 'g' + i, label: g[0], color: g[1], mark: g[2]})));
+    const read = CK.readout('s3-read');
+    const nj = v => (v < 0.1 ? num(v, 3) : v < 10 ? num(v, 2) : num(v, 0)) + ' nJ';
+    const gps = v => (v >= 1e11 ? num(v / 1e9, 0) : v >= 1e10 ? num(v / 1e9, 1) : num(v / 1e9, 2)) + ' G/s';
+    read.set('Only the points right of the dashed line reach 10 G updates a second: every one keeps its buckets inside a shire.');
+    CK.frame('s3', {
+      label: 'Scatter-add on the ET-SoC-1: updates per second against nanojoules per update, log-log, by method and where the buckets live',
+      height: W => (W < 600 ? 300 : 320),
+      draw(f) {
+        const L = 56, R = 16, T = 24, B = 42, x = CK.log(1e8, 1e12, L, f.W - R), y = CK.log(0.01, 100, f.H - B, T);
+        CK.axes(f, {x, y, L, R, T, B, xt: [1e8, 1e9, 1e10, 1e11, 1e12], yt: [0.01, 0.1, 1, 10, 100], xfmt: v => (v >= 1e9 ? num(v / 1e9, 0) + ' G' : num(v / 1e6, 0) + ' M'),
+          yfmt: v => num(v), xl: 'updates per second over the chip (log)', yl: 'nJ per update, above idle (log)'});
+        const g = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+        CK.el('line', {x1: x(1e10), x2: x(1e10), y1: T, y2: f.H - B, style: 'stroke:var(--ink-2);stroke-width:1.2;stroke-dasharray:5 4'}, g);
+        CK.inside(f, [CK.txt(g, x(1e10) + 5, T + 10, '10 G updates/s', 'lab', 'start')]);
+        const nodes = [];
+        const pt = (v, e, col, html) => {
+          const gg = CK.el('g', {}, f.svg);
+          CK.el('circle', {cx: x(v), cy: y(e), r: 9, class: 'ck-hit'}, gg);
+          const c = CK.el('circle', {cx: x(v), cy: y(e), r: 5}, gg); c.style.fill = col; c.style.stroke = 'var(--surface)'; c.style.strokeWidth = '1.5';
+          CK.tip(f, gg, html); gg.addEventListener('focus', () => read.set(html)); nodes.push(gg);
+        };
+        P.forEach(([k, lab, gi]) => { const d = G[k]; pt(d.ops_per_s, d.nj, GR[gi][1], '<b>' + lab + '</b>: ' + gps(d.ops_per_s) + ' at ' + nj(d.nj) + ' per update [' + nj(d.lo) + '–' + nj(d.hi) + ']'); });
+        const A = ET.atomics_spread;
+        if (A) pt(A.ops_per_s, A.nj, 'var(--ref)', '<b>Global atomics spread over 32 lines</b> (the hot-line report, before S3): ' + gps(A.ops_per_s) + ' at ' + nj(A.nj));
+        CK.keynav(f, nodes);
+      },
+    });
+  })();
 
   /* ---------------------------------------------------------------- 3. S2: the atlas scan */
   const s2 = D.s2;
@@ -1527,7 +1693,7 @@ const D = {"generated":"2026-09-25","producer":"docs/reports/data/2026-09-25-inf
         CK.txt(f.svg, x(v) + 6, yb + 11, txt, 'lab', 'start').setAttribute('aria-hidden', 'true');
         const html = r.gpu
           ? '<b>A100, measured</b>: the scan took ' + fmtT(s2.a100_s) + ' (' + num(s2.a100_tflops_nominal) + ' TFLOP/s nominal); at 250–400 W that is ' + fmtJr(s2.a100_J[0], s2.a100_J[1]) + ' (power estimated)'
-          : '<b>' + r.label + '</b>: ' + fmtT(r.s) + ' and ' + fmtJ(r.J[0]) + ' at the matmul benchmark’s board power (estimate: the fraction of peak a persistent kernel sustains is unmeasured)';
+          : '<b>' + r.label + '</b>: ' + fmtT(r.s) + ' and ' + fmtJ(r.J[0]) + ' at its board power on random operands (aifoundry2, 80 °C; estimate: the fraction of peak a persistent kernel sustains is unmeasured)';
         CK.tip(f, bar, html); nodes.push(bar);
       });
       CK.keynav(f, nodes);

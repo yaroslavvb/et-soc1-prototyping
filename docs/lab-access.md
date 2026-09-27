@@ -73,7 +73,7 @@ that `tailscale status` shows) as its `HostName` in `~/.ssh/config` on aifoundry
   never opens a device node, so it is safe to run at any time. The login banner runs it too.
 - **Card locks.** `flock /run/lock/etsoc-shire<N>.lock <command>` reserves card N for the length of the command
   (aifoundry1 has `etsoc-shire0.lock` and `etsoc-shire1.lock`, the others `etsoc-shire0.lock`). The lock is advisory:
-  it protects you only from tools that take it too. The version-3 campaign's blocks hold it, and aifoundry3's clock
+  it protects you only from tools that take it too. The `tools/claims-v3` blocks hold it, and aifoundry3's clock
   guard and CI configuration use the same path.
 - **`et-lab-manifest`** prints the machine facts a measurement should record: host, kernel, CPU, power profile,
   clock sync, `et_soc1` driver version, each card's PCIe link, the hashes of the ET runtime libraries, and

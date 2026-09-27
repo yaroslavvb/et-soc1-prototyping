@@ -20,7 +20,7 @@ $$P_\text{idle}(T) = 12.6\,\mathrm{W} + 23.3\,\mathrm{W}\; e^{(T-80\,^\circ\math
 | 80 | 35.9 | 65% | 55–80% |
 | 90 | 43.3 | 71% | 63–83% |
 
-The fitted bins run from 64 to 88 °C; the other rows are the law extrapolated, where the e-foldings that fit differ by up to 2.4 W in the idle itself.
+The law was fitted to bins at 64–67 and 81–88 °C, none between: the 70 and 80 °C rows are interpolated across that gap (the version-3 idle cycles on aifoundry2, 67–83 °C, sit +0.04 W from the law there); the rows outside 64–88 °C are the law extrapolated, where the e-foldings that fit differ by up to 2.4 W in the idle itself.
 
 ## Where idle goes, by rail (73 °C)
 
@@ -49,7 +49,7 @@ A warm card is held at the first row by the governor, which steps down when the 
 | | aifoundry2 | aifoundry3 | aifoundry1 card 1 |
 |---|---|---|---|
 | Firmware | 1.3.1 | 1.3.1 | 1.2.0 |
-| Static TDP the firmware uses | 65 W | **0 W** (pinned at 600 MHz for life) | 65 W |
+| Static TDP the firmware uses | 65 W | **0 W** (set to 0 W by a lab service at every boot, so pinned at 600 MHz) | 65 W |
 | Power state at rest | managed_power | max_power | managed_power |
 | Minion voltage at 600 MHz | 518 mV | 523 mV | 499 mV |
 | Idle during the catalogue (26 September; mean board power, die range) | 32.8 W at 67–92 °C | 25.8 W at 55–60 °C | 34.3 W at 57–71 °C |

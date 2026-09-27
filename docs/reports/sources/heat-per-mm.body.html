@@ -60,7 +60,7 @@ one flit to the next, costs as much per hop as random data (<span id="l-ones"></
 likeliest source; <a href="#question">§1</a>), the mesh rail's
 data-dependent cost is <b id="l-09"></b>, so the rule of thumb holds, to within its own vagueness. Read instead at the
 "~0.5V" his 2023 talk sets beside it, the figure is <span id="l-05"></span> what this mesh spends on the data.</p>
-<details class="terms"><summary>Terms used on this page</summary>
+<details class="terms more"><summary>Terms used on this page</summary>
 <p class="small">The ET-SoC-1's cores are <i>minions</i> (two hardware threads, <i>harts</i>, each), 32 to a
 <i>shire</i>; part of each shire's 4 MB of SRAM is a 2.5 MB <i>scratchpad</i> that any shire can address, and a
 <i>tensor load</i> is a minion's bulk load of up to 1 KB. Shires talk over a mesh network-on-chip (NoC), one mesh stop
@@ -96,7 +96,8 @@ Symposium 2018, a paper set in 16 nm). The sources and quotes are in <code>docs/
 <h2 id="die">2. How long is a hop?</h2>
 <div class="chart-title">The ET-SoC-1 die, to scale</div>
 <div id="mesh"></div>
-<p class="small" id="meshcap"></p>
+<details class="more"><summary>What the die diagram shows</summary>
+<p class="small" id="meshcap"></p></details>
 <p>Esperanto publishes the die area (570 mm²) and a die plot, but not the dimensions. We measured the plot's tile
 period in pixels — the shire outlines and an autocorrelation of the image agree — and scaled it to the published area:
 the minion-shire tiles are <b>3.73 mm</b> east–west and <b>3.70 mm</b> north–south, square to within 1%, so a hop in
@@ -111,6 +112,7 @@ every one of three passes.
 actually routed can only be longer, so per mm of wire the cost would be lower.</p>
 
 <h2 id="method">3. The experiment</h2>
+<details class="more"><summary>Method in full</summary>
 <ul>
 <li><b>Traffic.</b> Hart 0 of every minion streams 1 KB tensor loads, two in flight, from the scratchpad of a shire
 exactly <i>d</i> hops away (<i>d</i> = 1, 2, 3, 4, 6), at most two readers per target; <i>d</i> = 0 reads the shire's own
@@ -142,30 +144,35 @@ third run; the split into ones and differences (<a href="#ones">§5</a>), the bl
 the x/y pairs come from the first two, which alone ran them. A figure given without a card holds on every card that
 measured it; where the cards differ, the text names them, and what these runs leave open is listed in
 <a href="#limits">§10</a>.</li>
-</ul>
+</ul></details>
 
 <h2 id="distance">4. Energy grows with every hop</h2>
 <div class="chart-title">Energy per payload byte against hop distance, by density of ones</div>
 <div class="hv-controls"><div id="distbtn"></div><div id="distcard"></div></div>
 <div id="dist-leg"></div>
 <div id="dist"></div>
+<details class="more"><summary>How to read the chart</summary>
 <p class="small" id="distcap">Density of ones <i>P</i> runs from the faintest line (all zeros) to the strongest (all ones); bars are
-the range over every pass of every card. Hover, tap or tab to a point.</p>
+the range over every pass of every card. Hover, tap or tab to a point.</p></details>
 <p id="disttext"></p>
 
 <h2 id="ones">5. Ones cost energy, not just flips</h2>
 <div class="chart-title">Cost of one hop against the density of ones in the data</div>
-<div class="hv-controls"><div id="modelbtn"></div></div>
+<div class="hv-controls"><div id="modelbtn"></div><div id="modelcard"></div></div>
 <div id="model-leg"></div>
 <div id="model"></div>
+<details class="more"><summary>How to read the chart</summary>
+<p class="small" id="modelcap"></p></details>
 <p id="onestext"></p>
 $$E_\text{hop} \;=\; s_0 \;+\; a\cdot\underbrace{2P(1-P)}_{\text{bits that differ from the previous flit}} \;+\; b\cdot\underbrace{P}_{\text{ones per bit}}$$
+<details class="more"><summary>What a, b and s₀ mean, and the fitted coefficients as a table</summary>
 <p class="small" id="eqcap">Here <i>a</i> is the energy per bit that differs from the same bit of the previous flit,
 <i>b</i> the energy per one-bit carried (a 1, whether it changed or not), and <i>s</i><sub>0</sub> the part that does
 not depend on the data (clocking, headers, requests).</p>
-<div class="table-wrap"><table id="modeltab"></table></div>
+<div class="table-wrap"><table id="modeltab"></table></div></details>
 
 <h3 id="what-any-bit-pattern-would-cost">What any bit pattern would cost</h3>
+<details class="more"><summary>Try it: the interactive plane</summary>
 <p class="small">The fitted model spans a plane of patterns: the density of ones <i>P</i> across, the fraction of bits
 that differ from the previous flit <i>t</i> up. Independent random bits sit on the dashed curve; the frozen line and
 the block patterns of <a href="#lanes">§9</a> leave it. Drag the cursor, use the sliders or pick a pattern.</p>
@@ -179,7 +186,7 @@ the block patterns of <a href="#lanes">§9</a> leave it. Drag the cursor, use th
     <div id="plane-readout" class="hv-readout"></div>
   </div>
 </div>
-<p class="small" id="planecap"></p>
+<p class="small" id="planecap"></p></details>
 <p id="modeltext"></p>
 <p id="modeltext2"></p>
 
@@ -190,7 +197,8 @@ the block patterns of <a href="#lanes">§9</a> leave it. Drag the cursor, use th
     <div class="chart-title">Energy per payload byte against distance: every flow on its own links, against a loaded mesh</div>
     <div id="cont-leg"></div>
     <div id="cont"></div>
-    <p class="small" id="contcap"></p>
+    <details class="more"><summary>How to read the chart</summary>
+    <p class="small" id="contcap"></p></details>
   </div>
   <div class="hv-side">
     <div class="chart-title">Which links the flows share, at one distance</div>
@@ -200,7 +208,8 @@ the block patterns of <a href="#lanes">§9</a> leave it. Drag the cursor, use th
     <div id="map-readout" class="hv-readout"></div>
   </div>
 </div>
-<p class="small" id="mapcap"></p>
+<details class="more"><summary>What the link-sharing map shows</summary>
+<p class="small" id="mapcap"></p></details>
 <p id="conttext"></p>
 <p id="conttext2"></p>
 
@@ -209,7 +218,8 @@ the block patterns of <a href="#lanes">§9</a> leave it. Drag the cursor, use th
 <div class="hv-controls"><div id="volt-v"></div><div class="controls" id="volt-snap"></div></div>
 <div id="volt-leg"></div>
 <div id="volt"></div>
-<p class="small" id="volttext"></p>
+<details class="more"><summary>How the scaling was done</summary>
+<p class="small" id="volttext"></p></details>
 <div id="volt-readout" class="hv-readout"></div>
 <p id="comparetext"></p>
 <p id="comparetext2"></p>
@@ -217,6 +227,7 @@ the block patterns of <a href="#lanes">§9</a> leave it. Drag the cursor, use th
 <h2 id="meaning">8. What it means in practice</h2>
 <p id="practice"></p>
 <p id="practice2"></p>
+<details class="more"><summary>Try it: price your own transfer</summary>
 <div class="chart-title">Price a transfer: two shires, a payload and its data</div>
 <p class="small">The same comparison for any route: pick where the data sits and who reads it, and the readout sets the
 hops against reading the same bytes from DRAM or from the reader's own scratchpad.</p>
@@ -234,7 +245,7 @@ hops against reading the same bytes from DRAM or from the reader's own scratchpa
     <div id="route-readout" class="hv-readout"></div>
   </div>
 </div>
-<p class="small" id="routecap"></p>
+<p class="small" id="routecap"></p></details>
 
 <h2 id="lanes">9. Lanes and flits</h2>
 <p>These patterns test the model of <a href="#ones">§5</a> with data whose ones and differences do not move together.
@@ -250,9 +261,11 @@ apart. With 16–128-byte blocks lines <i>i</i> and <i>i</i>+4 hold the same val
 are opposite and every bit flips. It also says a flit carries at least a 64-byte line at a time: with 32-byte flits the
 32-byte pattern would flip on every flit, and with 16-byte flits the 16- and 32-byte patterns would too, on every or every
 other flit; neither costs more.</p>
-<p id="alttext"></p>
+<details class="more"><summary>More on the 256-byte pattern</summary>
+<p id="alttext"></p></details>
 
 <h2 id="limits">10. What this cannot tell</h2>
+<details class="more"><summary>Caveats in full</summary>
 <ul>
 <li><b>Router against wire.</b> Every hop is one router plus one pitch of link, and the x and y pitches are equal to
 within 1% on the die plot, so the experiment cannot split a hop's energy between the router's flops and crossbar and the
@@ -276,9 +289,10 @@ report (§4.1; the stray write in §3)</a>.</li>
 <li><b>Voltage scaling</b> assumes full-swing CMOS at constant capacitance; whether the links are low-swing is not known.
 Gate capacitance is somewhat lower near threshold, so constant-C scaling slightly understates the 0.9 V figure for
 full-swing links; low-swing links would make it overstate.</li>
-</ul>
+</ul></details>
 
 <h2 id="data">11. Data and tools</h2>
+<details class="more"><summary>Reproduce this</summary>
 <ul>
 <li>Runs and analysis: <code>workloads/enercat/run_wire.py</code> (the first two runs), <code>tools/claims-v3/wire/</code> (the
 third: <code>block.sh</code>, and <code>reduce.py</code> for the check's verdicts), <code>workloads/enercat/analyze_wire.py</code>,
@@ -298,31 +312,19 @@ runs) and <code>wire3.json</code> (the third), and the page draws its charts and
 run by the author: <code>docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md</code>. An independent
 re-analysis and adversarial review of this page, also by AI agents: <code>docs/reports/data/2026-09-24-wire-energy/review/VERDICT.md</code>;
 the measurements reproduced, and its corrections are applied here.</li>
-</ul>
-<p class="small"><b>Versions.</b> First published 24 September 2026 and corrected the same day after a review. Revised
-25 September after a second review. Claims corrected: the bound on how much of the fixed per-hop cost could be cost per
-second is given for each meter, and on board power it rules little out (§10); the two-term model is said to fit the bit
-densities and the frozen line, with the block patterns coming in below it (§5, §9); the reviewers' agreement is given
-per quantity (§10); the x-only against y-only comparison drops a three-hop point that rested on bursts with delayed
-readings (§10); the cost at 0.9 V counting the fixed part is stated (§7); the board meter's refresh interval is given
-for each card (§3); the die figure gives the memory-shire strips' width as measured on the die plot (§2). Sections
-reordered: Against the rule of thumb is now §7, What it means in practice §8, Lanes and flits §9; §10 is retitled "What
-this cannot tell", and the other workloads that starve the meter, the stopped meter and the stray write moved to the
-observability report (§4.1 and §3). Charts: a
-voltage explorer replaces the comparison chart (§7), and a bit-pattern plane (§5) and a link-sharing map (§6) are
-new. 25 September (version 3): every claim checked against the passes of both cards (record:
-<code>docs/reports/data/2026-09-25-claims-v3/</code>). Differences the passes do not resolve are no longer stated as
-findings, and what stays open is listed in §10: board power's split of the free-link cost, whether link sharing causes
-the four-hop step, and the 256 B pattern on board power. The 16–128 B blocks' shortfall is dropped (it came from
-comparing different hops); the all-ones excess and the 256 B pattern are given per card; the regulator's loss is no
-longer said to grow with load; the latency map is marked as aifoundry2's. 26 September (version 4): the three-card
-check's third run (six passes on each of aifoundry2, aifoundry3 and aifoundry1 card 1) is the basis of every figure its
-configurations give, and each tested claim says what the three cards showed. Corrected: all ones' excess over random
-data on board power, which no card resolved from zero. Now resolved: board power's split of the free-link cost and of
-the contention excess into data and fixed parts (§5, §6), and the four-hop step's absence with link-disjoint flows
-(§4). Given per card: the four-hop step off the line, the exit step, the one-hop agreement of the two sets, the
-link-disjoint line for zeros, and the board meter's refresh period (§3). The route calculator prices a route from the
-third run's measured lines, on each card.</p>
+</ul></details>
+<details class="more"><summary>Version history</summary>
+<p class="small"><b>Versions.</b> 24 September 2026: first published, and corrected the same day after a review.
+25 September, after a second review: the per-second bound on the fixed per-hop cost is given for each meter (on board
+power it rules little out), the block patterns fall below the two-term model, and the 0.9 V figure counting the fixed
+part is stated. 25 September (version 3): every claim checked against both cards' passes
+(<code>docs/reports/data/2026-09-25-claims-v3/</code>); differences the passes do not resolve are no longer findings,
+the 16–128 B blocks' shortfall is dropped, and the regulator's loss is no longer said to grow with load. 26 September
+(version 4): the three-card check's third run is the basis of every figure its configurations give; all ones' excess
+over random data on board power is corrected (no card resolves it from zero), and board power's split of the
+free-link cost and of the contention excess (§5, §6) and the four-hop step's absence with link-disjoint flows (§4) are
+now resolved. 27 September: the lede's contention figure compares like with like over one to four hops (it had mixed
+two bases). Every earlier wording is in the repository's history of <code>docs/reports/sources/heat-per-mm.*</code>.</p></details>
 
 <h2 id="related">12. Related reports</h2>
 <ul>

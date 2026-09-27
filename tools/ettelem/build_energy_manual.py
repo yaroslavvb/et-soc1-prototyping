@@ -8,7 +8,8 @@ published page and the markdown are two renderings of one JSON. Nothing is fitte
 fits and measurements other tools produced (docs/findings/03-experiments.md says which), except the idle law's
 refits with its e-folding held (rest.profile over a window of e-foldings on aifoundry2's bins; rest.per_card, each other
 card's own law on its version-3 idle bins). Two more things are derived here rather than read: the mean mesh distance of each ring, from marty1885's shire map in
-workloads/nocbench/analyze.py, and the median and largest leakage correction over the catalogue's bursts.
+workloads/nocbench/analyze.py, and the median and largest leakage correction over the catalogue's bursts. The `gs`
+block (E48, gathers, scatters and packed atomics on three cards) pools gs-full.json's pass values the catalogue's way.
 """
 import argparse
 import csv
@@ -20,6 +21,8 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "workloads", "nocbench"))
 from analyze import MARTY, hops  # noqa: E402  marty1885's shire map, the one On-chip communication uses
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gs_levels as GL  # noqa: E402  E48's configurations by level: the rows every gs page renders
 
 D = "docs/reports/data"
 MODEL = f"{D}/2026-09-21-horace-aifoundry2/model.json"
@@ -40,6 +43,9 @@ UNMET = f"{D}/2026-09-23-energy-manual/unmetered_fit.json"
 # The version-3 claims check (26 September 2026, three cards): its results files, read as they are
 V3 = f"{D}/2026-09-25-claims-v3/results"
 ABLA_RUNS = f"{V3}/abla.runs.json"                 # V3-ABL-A: the tensor unit, the integer loop, the active minions
+# E48 (V3-GS, 26 September 2026): gathers, scatters and packed atomics on the same three cards, after the campaign
+# (tools/claims-v3/gs/reduce.py): gs.json holds the items, gs-full.json every configuration's pass values per card
+GS, GS_FULL = f"{V3}/gs.json", f"{V3}/gs-full.json"
 CARD_ORDER = ["aifoundry2", "aifoundry3", "aifoundry1-c1", "aifoundry1-c0"]   # the pages' card registry order
 
 
@@ -202,6 +208,80 @@ def v3_block(m):
                      if k[0] in ("RL-a", "RL-b", "RL-c", "RL-d", "RL-f", "RL-g", "RL-h")},
     }
     return out
+
+
+def gs_block():
+    """E48's gathers, scatters and packed atomics (tools/claims-v3/gs/, README "Items"), for sections 3.1, 4.3, 4.4 and 6
+    and for the pages that quote them (memory hierarchy, influence functions, the hub's events). Every value is read
+    from gs-full.json's pass values (one per card per pass: three passes of each block on each of three cards) and
+    pooled here the way the catalogue is: mean over every pass of every card, lo-hi the range of those passes, and each
+    card's mean with its pass-to-pass standard error. `pool` is over the three cards (what the gs rows use);
+    `cat` over aifoundry2 and aifoundry3 only (gs-full.json combined_catalogue's cards: the README's rule for rows set
+    beside the catalogue's tables), with aifoundry1-c1 beside in `pool.per_card`. Nothing is refitted."""
+    g, F = j(GS), j(GS_FULL)
+    cards = in_order(g["cards"])
+    cat_cards = in_order(next(iter(F["combined_catalogue"].values()))["cards"])
+    sig = lambda v: None if v is None else float(f"{float(v):.5g}")
+    MET = {"E": ("elements_per_s", "pj_per_element", "cpi_minion", "pj_per_line", "line_bytes_per_s"),
+           "R": ("elements_per_s", "cpi_minion")}
+
+    def pool(cfg, metric, over):
+        vals, per = [], {}
+        for c in over:
+            pv = [x for x in (F["cards"][c]["pass_values"].get(cfg, {}).get(metric) or []) if x is not None]
+            if not pv:
+                continue
+            n = len(pv)
+            se = statistics.stdev(pv) / math.sqrt(n) if n > 1 else 0.0
+            per[c] = {"mean": sig(statistics.fmean(pv)), "se": sig(se), "n": n}
+            vals += pv
+        if not vals:
+            return None
+        return {"mean": sig(statistics.fmean(vals)), "lo": sig(min(vals)), "hi": sig(max(vals)), "n": len(vals), "cards": len(per), "per_card": per}
+
+    configs = {}
+    for cfg in sorted(set().union(*[F["cards"][c]["configs"] for c in cards])):
+        rec = next(F["cards"][c]["configs"][cfg] for c in cards if cfg in F["cards"][c]["configs"])
+        fl = rec["fields"]
+        parts = cfg.split("/")     # gs/<set>/<op>/<target>-<WS>/<pattern>/<data>/h<harts>/m<mask>/n<minions>
+        op = parts[2]
+        e = {"set": rec["set"], "op": op, "table": parts[3], "target": fl["target"], "ws": fl["ws"], "index": fl["index"],
+             "data": parts[5], "harts": fl["harts"], "mask": fl["mask"], "lanes": fl["lanes"], "minions": parts[8][1:],
+             "elem_bytes": fl["elem_bytes"], "per_instr": fl["per_instr"], "lines_per_instr": sig(fl["lines_per_instr"]),
+             "unit": fl["unit"]}
+        for mt in MET.get(rec["set"], ()):
+            v = pool(cfg, mt, cards)
+            if v:
+                e[mt] = v
+        if rec["set"] == "E":
+            e["cat_pj_per_element"] = pool(cfg, "pj_per_element", cat_cards)
+            if cfg in F.get("model", {}):
+                e["model"] = {"elements_per_s": F["model"][cfg]["elements_per_s"], "why": F["model"][cfg]["why"]}
+        configs[cfg] = e
+    items = {k: v for k, v in g["items"].items() if k != "GS-RATE"}
+    checks = {c: {k: F["checks"][c][0].get(k) for k in ("expected", "passed", "failed", "launches", "gsc_nonzero_launches",
+                                                         "not_ok_launches", "winners_by_op")} | {"probe_winner_lane": F["checks"][c][0]["probe"]["winner_lane"]}
+              for c in cards if F["checks"].get(c)}
+    return {"experiment": g.get("experiment", "E48"), "date": "2026-09-26", "cards": cards, "catalogue_cards": cat_cards,
+            "passes": g["passes"], "rules": g["rules"], "overhead_rule": F["rules"].get("overhead"),
+            "random": "random lines within 4 KB tiles: within a visit the 64 elements fall on the 64 distinct lines of one 4 KB "
+                      "tile in a fixed random order (one random word per line), and the tiles are visited in a scrambled order; "
+                      "not uniform random addresses over the table (tools/claims-v3/gs/README.md)",
+            "blocks": {c: [{k: b[k] for k in ("block", "pass", "kind", "status", "heat_reached")} for b in g["blocks"][c]] for c in cards},
+            "dropped": {c: [{k: x[k] for k in ("block", "cfg", "why")} for x in F["cards"][c].get("dropped", [])] for c in cards},
+            "checks": checks, "items": items, "configs": configs,
+            # the rows every page draws (tools/ettelem/gs_levels.py): levels with each column's configuration, the L1
+            # rows of section 3.1, the scatter-add and atomic rows, the pattern sweep
+            "levels": [{"key": k, "label": lab, "table": what, "stream": src, "cols": {c: GL.cfg(*oc) for c, oc in ops.items()}}
+                       for k, lab, what, src, ops in GL.LEVELS],
+            "columns": [list(c) for c in GL.COLUMNS],
+            "l1_rows": [{"cfg": GL.cfg(op, t, pattern=pt, data="zeros" if op.startswith("famo") else "random"), "op": op, "label": lab,
+                         "zeros": None if op.startswith("famo") else GL.cfg(op, t, pattern=pt, data="zeros")} for op, t, pt, lab in GL.L1_ROWS],
+            "updates": [{"cfg": GL.cfg(op, t, pattern=pt, data=dt), "op": op, "label": lab} for op, t, pt, dt, lab in GL.UPDATES],
+            "patterns": [list(p) for p in GL.PATTERNS],
+            "source": {"items": GS, "configs": GS_FULL, "raw": f"{D}/2026-09-25-claims-v3/raw/<card>/gs/p<KS>/",
+                       "reduce": "python3 tools/claims-v3/gs/reduce.py --data docs/reports/data/2026-09-25-claims-v3/raw "
+                                 "--out docs/reports/data/2026-09-25-claims-v3/results/gs.json --gs-out docs/reports/data/2026-09-25-claims-v3/results/gs-full.json"}}
 
 
 def main():
@@ -566,6 +646,10 @@ def main():
                        "rule": "section 1's form, T_L held at its 36 C, weighted least squares (weights: kept cycles per bin) "
                                "on the card's version-3 idle bins (v3.idle.bins)", "source": V3 + "/idle.json"}
     out["rest"]["per_card"] = per_card
+
+    # --- 3.1, 4.3, 4.4, 6: gathers, scatters and packed atomics (E48, three cards, 26 September) ---------------------
+    if os.path.exists(GS) and os.path.exists(GS_FULL):
+        out["gs"] = gs_block()
 
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     json.dump(out, open(a.out, "w"), indent=1)

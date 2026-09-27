@@ -165,6 +165,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 /* chartkit:css:end */
 </style>
 </head>
@@ -206,7 +214,7 @@ pre.rule span.on2 { border-left-style: dashed; border-left-color: var(--ink-2); 
 <p class="byline">21–24 September 2026, checked on three cards on 25–26 September · aifoundry2 and aifoundry3, and in the
 check aifoundry1's card 1 · firmware source read at et-platform <code>353f20e</code> (the cards run builds of about
 mid-May 2024; see <a href="#method-and-what-is-not-established">§8</a>), open RTL core-et <code>b38a1a3</code> (Erbium branch) ·
-checks six claims from a conversation with David Kanter (MLCommons) on 20 September 2026, in private notes ·
+checks five claims from a conversation with David Kanter (MLCommons) on 20 September 2026, in private notes ·
 part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede"><b>The ET-SoC-1 manages its power more simply than a mature chip, and leakage is where it pays.</b>
@@ -227,14 +235,16 @@ law predicts aifoundry2's idle to a tenth of a watt, while aifoundry3's offset f
 card 1 sits 8–13 W above it; and leakage above 30% of a busy card is not established. The 21–24 September numbers stay,
 labelled as theirs (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">the record</a>).</div>
 
+<details class="more"><summary>Kanter's yardstick for a mature chip's DVFS loop</summary>
 <p>The yardstick is how Kanter described a mature chip managing its own power. It runs a DVFS loop (dynamic
 voltage and frequency scaling) that knows
 <span class="math-inline"><svg style="vertical-align: -0.464ex;" xmlns="http://www.w3.org/2000/svg" width="12.791ex" height="2.351ex" role="img" focusable="false" viewBox="0 -833.9 5653.5 1038.9" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-1-TEX-I-1D443" d="M287 628Q287 635 230 637Q206 637 199 638T192 648Q192 649 194 659Q200 679 203 681T397 683Q587 682 600 680Q664 669 707 631T751 530Q751 453 685 389Q616 321 507 303Q500 302 402 301H307L277 182Q247 66 247 59Q247 55 248 54T255 50T272 48T305 46H336Q342 37 342 35Q342 19 335 5Q330 0 319 0Q316 0 282 1T182 2Q120 2 87 2T51 1Q33 1 33 11Q33 13 36 25Q40 41 44 43T67 46Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628ZM645 554Q645 567 643 575T634 597T609 619T560 635Q553 636 480 637Q463 637 445 637T416 636T404 636Q391 635 386 627Q384 621 367 550T332 412T314 344Q314 342 395 342H407H430Q542 342 590 392Q617 419 631 471T645 554Z"></path><path id="MJX-1-TEX-N-3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path><path id="MJX-1-TEX-I-1D436" d="M50 252Q50 367 117 473T286 641T490 704Q580 704 633 653Q642 643 648 636T656 626L657 623Q660 623 684 649Q691 655 699 663T715 679T725 690L740 705H746Q760 705 760 698Q760 694 728 561Q692 422 692 421Q690 416 687 415T669 413H653Q647 419 647 422Q647 423 648 429T650 449T651 481Q651 552 619 605T510 659Q484 659 454 652T382 628T299 572T226 479Q194 422 175 346T156 222Q156 108 232 58Q280 24 350 24Q441 24 512 92T606 240Q610 253 612 255T628 257Q648 257 648 248Q648 243 647 239Q618 132 523 55T319 -22Q206 -22 128 53T50 252Z"></path><path id="MJX-1-TEX-N-73" d="M295 316Q295 356 268 385T190 414Q154 414 128 401Q98 382 98 349Q97 344 98 336T114 312T157 287Q175 282 201 278T245 269T277 256Q294 248 310 236T342 195T359 133Q359 71 321 31T198 -10H190Q138 -10 94 26L86 19L77 10Q71 4 65 -1L54 -11H46H42Q39 -11 33 -5V74V132Q33 153 35 157T45 162H54Q66 162 70 158T75 146T82 119T101 77Q136 26 198 26Q295 26 295 104Q295 133 277 151Q257 175 194 187T111 210Q75 227 54 256T33 318Q33 357 50 384T93 424T143 442T187 447H198Q238 447 268 432L283 424L292 431Q302 440 314 448H322H326Q329 448 335 442V310L329 304H301Q295 310 295 316Z"></path><path id="MJX-1-TEX-N-77" d="M90 368Q84 378 76 380T40 385H18V431H24L43 430Q62 430 84 429T116 428Q206 428 221 431H229V385H215Q177 383 177 368Q177 367 221 239L265 113L339 328L333 345Q323 374 316 379Q308 384 278 385H258V431H264Q270 428 348 428Q439 428 454 431H461V385H452Q404 385 404 369Q404 366 418 324T449 234T481 143L496 100L537 219Q579 341 579 347Q579 363 564 373T530 385H522V431H529Q541 428 624 428Q692 428 698 431H703V385H697Q696 385 691 385T682 384Q635 377 619 334L559 161Q546 124 528 71Q508 12 503 1T487 -11H479Q460 -11 456 -4Q455 -3 407 133L361 267Q359 263 266 -4Q261 -11 243 -11H238Q225 -11 220 -3L90 368Z"></path><path id="MJX-1-TEX-I-1D449" d="M52 648Q52 670 65 683H76Q118 680 181 680Q299 680 320 683H330Q336 677 336 674T334 656Q329 641 325 637H304Q282 635 274 635Q245 630 242 620Q242 618 271 369T301 118L374 235Q447 352 520 471T595 594Q599 601 599 609Q599 633 555 637Q537 637 537 648Q537 649 539 661Q542 675 545 679T558 683Q560 683 570 683T604 682T668 681Q737 681 755 683H762Q769 676 769 672Q769 655 760 640Q757 637 743 637Q730 636 719 635T698 630T682 623T670 615T660 608T652 599T645 592L452 282Q272 -9 266 -16Q263 -18 259 -21L241 -22H234Q216 -22 216 -15Q213 -9 177 305Q139 623 138 626Q133 637 76 637H59Q52 642 52 648Z"></path><path id="MJX-1-TEX-N-32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path><path id="MJX-1-TEX-I-1D453" d="M118 -162Q120 -162 124 -164T135 -167T147 -168Q160 -168 171 -155T187 -126Q197 -99 221 27T267 267T289 382V385H242Q195 385 192 387Q188 390 188 397L195 425Q197 430 203 430T250 431Q298 431 298 432Q298 434 307 482T319 540Q356 705 465 705Q502 703 526 683T550 630Q550 594 529 578T487 561Q443 561 443 603Q443 622 454 636T478 657L487 662Q471 668 457 668Q445 668 434 658T419 630Q412 601 403 552T387 469T380 433Q380 431 435 431Q480 431 487 430T498 424Q499 420 496 407T491 391Q489 386 482 386T428 385H372L349 263Q301 15 282 -47Q255 -132 212 -173Q175 -205 139 -205Q107 -205 81 -186T55 -132Q55 -95 76 -78T118 -61Q162 -61 162 -103Q162 -122 151 -136T127 -157L118 -162Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><use data-c="1D443" xlink:href="#MJX-1-TEX-I-1D443"></use></g><g data-mml-node="mo" transform="translate(1028.8,0)"><use data-c="3D" xlink:href="#MJX-1-TEX-N-3D"></use></g><g data-mml-node="msub" transform="translate(2084.6,0)"><g data-mml-node="mi"><use data-c="1D436" xlink:href="#MJX-1-TEX-I-1D436"></use></g><g data-mml-node="TeXAtom" transform="translate(748,-150) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="73" xlink:href="#MJX-1-TEX-N-73"></use><use data-c="77" xlink:href="#MJX-1-TEX-N-77" transform="translate(394,0)"></use></g></g></g><g data-mml-node="mstyle" transform="translate(3671.7,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="msup" transform="translate(3838.7,0)"><g data-mml-node="mi"><use data-c="1D449" xlink:href="#MJX-1-TEX-I-1D449"></use></g><g data-mml-node="TeXAtom" transform="translate(861.3,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mn"><use data-c="32" xlink:href="#MJX-1-TEX-N-32"></use></g></g></g><g data-mml-node="mi" transform="translate(5103.5,0)"><use data-c="1D453" xlink:href="#MJX-1-TEX-I-1D453"></use></g></g></g></svg></span> and, because voltage and frequency are already known, computes its own power estimate
 from activity counters. It folds thermal sensors into the same loop, because leakage depends on temperature. And it
 puts cache data arrays behind leakage-suppression transistors, so that only the ~10% of an array in use is awake. He
 hedged that this might not hold for Esperanto's part, only for anything from a more mature company. The hedge was
-right. The table below checks six of his statements, paraphrased, against the firmware source, the open RTL and
+right. The table below checks five of his statements, paraphrased, against the firmware source, the open RTL and
 the card.</p>
+</details>
 
 <details class="terms"><summary>Terms used on this page</summary>
 <p class="small">DVFS (dynamic voltage and frequency scaling) moves the clock and the supply voltage together: here the
@@ -251,6 +261,7 @@ Horace experiment</a>'s model of power from the bits the multiply-add unit clock
 <div class="table-wrap wide"><table id="verdict"></table></div>
 
 <h2 id="the-loop-as-built">1. The loop as built</h2>
+<details class="more"><summary>The governor's rule, as pseudocode, and where it lives in the source</summary>
 <p>In the et-platform firmware source at <code>353f20e</code>, the governor's decisions are one function,
 <code>check_power_throttle_conditions()</code> in <code>ServiceProcessorBL2/services/thermal_pwr_mgmt.c</code>, called
 once per pass of the device-management task. (The cards run an older build of this governor, of about mid-May 2024 by
@@ -267,8 +278,10 @@ their firmware revisions; <a href="#method-and-what-is-not-established">§8</a> 
         elif P &lt; 65 W and f &lt; f_max:  step UP   one VMIN-LUT point
     on master minion going IDLE:
         set frequency back to the boot point</code></pre>
+</details>
 <p>Four things follow, and all four show up in aifoundry2's measurements below (aifoundry3's clock cannot move,
 <a href="#the-same-firmware-on-three-cards">§3</a>), the last one with a delay.</p>
+<details class="more"><summary>The four behaviours, explained</summary>
 <ul>
 <li><b>The input is a measurement, not an estimate.</b> <code>pmic_read_average_soc_power()</code> is a read of
 the power-management controller's own averaged wattage (the cards' May 2024 build tests its instantaneous reading instead,
@@ -278,7 +291,8 @@ anywhere in this firmware, because the chip does not need to infer the left-hand
 the die reads above 65 °C the power tests are never reached, not even at the lowest operating point, where the
 thermal test itself does nothing. aifoundry2 often rests above 65 °C (73 °C on 22 September, about
 <span data-v="hours"></span> hours after our last recorded workload, and 73–74 °C after a night of no recorded work
-on each of the next two days; aifoundry3 rests at 50–55 °C), so a kernel launched on aifoundry2 starts above the
+on each of the next two days; aifoundry3 rested at 50–58 °C on 22–24 September and at 55–57 °C since 25 September), so a
+kernel launched on aifoundry2 starts above the
 threshold and runs at the lowest operating point however little power it draws: every launch of the strict protocol,
 at 80 °C, ran at 600 MHz.</li>
 <li><b>There is no hysteresis.</b> The 353f20e source defines <code>UPPER_POWER_THRESHOLD_GUARDBAND</code> and
@@ -294,6 +308,7 @@ the boot frequency (<code>go_to_idle_state_and_update_pwr_status()</code>). On a
 above 600 MHz), and at <span data-v="resetUp"></span> of those the loop first stepped the clock up.
 Back-to-back launches rarely trigger it, and a short pause between launches more often: <span data-v="bnd"></span>.</li>
 </ul>
+</details>
 
 <h2 id="the-loop-as-measured">2. The loop as measured</h2>
 <p>Only aifoundry2's clock has been seen to move (aifoundry3 is held at 600 MHz, <a href="#the-same-firmware-on-three-cards">§3</a>,
@@ -329,14 +344,15 @@ test sees 38 W &lt; 65 W, and the clock steps back up. The clock changed seven t
 1.6 s apart. Then, with the die settled at 66 °C, it stayed at 600 MHz for the last 4.5 s. Over the whole 7.4 s run it
 spent 5.6 s at the bottom point, 1.0 s at 700 MHz and 0.8 s at 800 MHz.</p>
 
+<details class="more"><summary>How the down-steps split by branch: the plane, the breakdown and the full table</summary>
 <div class="chart-block" id="attrib-fig">
-  <div class="chart-title">All <span data-v="ndown"></span> down-steps, placed against the two thresholds they could
-  have tripped</div>
-  <div class="ck-controls"><div id="attrib-mode"></div></div>
+  <div class="chart-title">The rule's plane: die temperature against board power, shaded by the branch that fires,
+  with all <span data-v="ndown"></span> down-steps and every up-step placed on it</div>
+  <div class="ck-controls"><div id="attrib-card"></div><div id="attrib-mode"></div></div>
   <div id="attrib-leg"></div>
   <div class="chart" id="attrib"></div>
-  <p class="small">Points within one whole degree are spread sideways so each is visible. Select a point (click, tap
-  or Enter) to replay its step in the chart above.</p>
+  <p class="small" id="attrib-cap">Points within one whole degree are spread sideways so each is visible. Select a
+  point (click, tap or Enter) to replay its step in the chart above.</p>
 </div>
 
 <p><b>No down-step is the power branch acting alone.</b> Of the 18, seven were thermal only (the die above 65 °C
@@ -346,8 +362,8 @@ our telemetry: the die read 65 °C (once 64) and the board 34–56 W, so neither
 of them, a single event (run 1, zeros, at 5.95 s: 800→600 MHz in one step, 171 ms after a launch boundary), looks like the
 boot-point reset. (Launches run back to back every 0.37–0.49 s, so nearness to a boundary alone explains nothing.) The
 other six are single-point steps in pairs 0.4–0.5 s apart, which looks like the stepping loop, most likely thermal
-steps on passes where the service processor read 66 °C between our 10 Hz samples. Read on the last sample before each
-step instead, the split is <span data-v="prevsplit"></span>: <span data-v="prevwhy"></span>. The power branch never
+steps on passes where the service processor read 66 °C between our 10 Hz samples (§8 gives the split read on the sample
+before each step). The power branch never
 fired on its own, because on a cool die only random data at 700–800 MHz exceeds 65 W (at 600 MHz it does too, but only
 on a die above about 82 °C, where the thermal test already holds the floor), and random data takes the die through
 65 °C within half a second.</p>
@@ -357,6 +373,8 @@ on a die above about 82 °C, where the thermal test already holds the floor), an
 <span data-v="meterLag"></span>, so a 700→600 MHz step can still show an 800 MHz burst. "Unattributed" means neither test fired on the
 values we sampled (the die read 65 °C or less and the board under 65 W).</p>
 </details>
+</details>
+<details class="more"><summary>How fast the loop starts, and steps thereafter</summary>
 <p>The loop is also slow to start: the first clock change came a median <span data-v="firstMed"></span> s after a block
 of launches began (<span data-v="firstR"></span> s over <span data-v="firstN"></span> starts on 21 and 23 September;
 <span data-v="first"></span> s in the seven runs charted), about <span data-v="firstPasses"></span> passes of the
@@ -365,16 +383,19 @@ loop as it runs under our 10 Hz sampling (about <span data-v="passE2"></span> ms
 up-steps charted (<span data-v="direct"></span>) go straight from 600 to 800 MHz between two 100 ms samples, faster than
 one table point per pass. The 353f20e source does not explain that; the older governor the cards run (<a href="#method-and-what-is-not-established">§8</a>)
 climbs to the top point in one go.</p>
+</details>
 
 <h2 id="the-same-firmware-on-three-cards">3. The governor's settings on three cards</h2>
 <p>So far the loop has been measured on one card. AI Foundry has three machines, and the loop's behaviour turned out to depend on a
 single setting that differs between them.</p>
 
+<details class="more"><summary>aifoundry1: why it could not be measured on 22 September, and how its card 1 joined the check</summary>
 <p><b>aifoundry1 could not be measured on 22 September.</b> It holds two ET-SoC-1 cards, and the management library
 refused both (<code>Error unable to evaluate compatibility!</code>). The cause, found on 25 September, was an empty
 version string in the kernel module built there, not the <code>srcversion</code> mismatch this page first blamed; a
 rebuild of the driver fixed it that day. Its card 1 (firmware 1.2.0) then took part in the three-card check; its card 0
 (firmware 1.4.1) overheats and was left out.</p>
+</details>
 
 <p><b>aifoundry2 and aifoundry3 look identical and are not.</b> Same firmware release, same PMIC firmware, same
 static device configuration over the driver's ioctl: 65 W TDP, 600 MHz boot clock, 32 compute shires, 32 MB of
@@ -395,7 +416,7 @@ throttle-down request and each return to idle an idle event, and the step-up req
 never fire: the clock read 600 MHz in all 7,745 samples of that session, and in every sample of the three-card check (§8).
 The service processor's own log, read back out of the card on 22 September, shows the pattern (six consecutive lines,
 verbatim):</p>
-
+<details class="more"><summary>The log, and a second reading that agrees</summary>
 <pre><code>Power idle state event, current pwr 26220  tdp level 0
 Power throttle down event, current pwr 35380  tdp level: 0
 Power idle state event, current pwr 26100  tdp level 0
@@ -411,6 +432,7 @@ above the 30 W safe threshold. aifoundry3 reports <code>max_power</code> while s
 which is only consistent with a TDP level below 23 W; aifoundry2, drawing more, reports
 <code>managed_power</code>, and so does aifoundry1's card 1 (every pass of the three-card check read the same). Two
 different code paths, one cause.</p>
+</details>
 
 <p><b>The host cannot see this.</b> The driver's <code>ETSOC1_IOCTL_GET_DEVICE_CONFIGURATION</code> reports a
 65 W TDP on all three machines, including aifoundry3. Anything that checks a card's configuration from the host
@@ -422,6 +444,7 @@ the TDP level to 0 and the minion and mesh clocks to 600 and 400 MHz at every bo
 reset returns the card to its firmware's own DVFS until the service runs again. It is the lab's deliberate setting
 (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/14-card-behaviour.md">the lab's card notes</a>).</p>
 
+<details class="more"><summary>How this compares with aifoundry2's own throttling, and what it settles</summary>
 <p><b>The contrast is not that aifoundry2 is always faster.</b> Launched warm, it too runs at 600 MHz: the thermal
 branch holds it at the floor, and every one of the strict protocol's launches at 80 °C ran at 600 MHz (§1). The
 difference is the remedy. aifoundry2 reaches 700 and 800 MHz when it starts cool (§2). aifoundry3 cannot at any
@@ -431,6 +454,7 @@ temperature, because the branch that would raise it is unreachable.</p>
 in any aifoundry2 run. On aifoundry3, in the 22 September window, it was the <em>only</em> branch that fired, at every
 kernel start, on a die well below the thermal threshold, as the comparison says it will; the three-card check's windows
 hold no governor line to repeat that. That the branch lowers a clock that is above the floor is shown on neither card.</p>
+</details>
 
 <h2 id="the-leakage-suppression-transistors">4. The leakage-suppression transistors</h2>
 <p>Kanter's mechanism is a tag check that wakes only the part of an array a lookup needs, at a small wake-up latency;
@@ -440,10 +464,13 @@ interface: a per-minion sleep control and its acknowledge (<code>pwr_ctrl_min_ns
 <code>nsleepout</code>, one bit per minion), a global pair, and per-minion isolation
 (<code>pwr_ctrl_min_isolate</code>) with level shifters and a power stub that forces the outputs safe while a
 domain is down. That is a textbook power-gating structure, sized for the granularity he described.</p>
+<details class="more"><summary>Why this doesn't cover L2/L3</summary>
 <p>That RTL is the Erbium configuration (one neighbourhood, no shire cache), so it says nothing about the L2 and L3
 arrays; for those, the wake-up probe below is the only evidence.</p>
+</details>
 <p><b>Nothing drives it.</b> In the open configuration the whole interface is tied off, with a comment saying
 so:</p>
+<details class="more"><summary>The tied-off RTL, verbatim, and the firmware search behind it</summary>
 <pre><code>// Power Ctrl - power control handled outside cpu subsystem and this ifce is not used
 .pwr_ctrl_glb_nsleepin ('1),   // '1 = never asleep
 .pwr_ctrl_min_nsleepin ('1),
@@ -452,6 +479,8 @@ so:</p>
 power-gating control of any kind: its only <code>PWR_CTRL</code> hits are an eMMC controller's bus voltage, and
 elsewhere in the tree the name appears only in eMMC and PCIe PHY register headers. Whatever drives those pins on
 the taped-out part, it is not this firmware, and the chip-level netlist is not in the open release.</p>
+</details>
+<details class="more"><summary>How the wake-up probe works</summary>
 <p><b>And no card shows any sign of it.</b> If an array were suppressed once idle, the first access afterwards
 would pay the wake-up. The probe: put one line at a chosen level, let the minion spin on its cycle counter for a
 swept interval from zero to 27 ms (0, 1.7 µs, 17 µs … 27 ms) without touching that line, then time a single load
@@ -460,6 +489,7 @@ chart), and three times on each of the three cards in the three-card check (the 
 in cycles; the times assume 600 MHz. On 22 September the clock during the probe was not recorded; aifoundry2 was resting at
 about 73 °C that morning, and in 26 sessions on five days it never ran above 600 MHz at a die reading of 68 °C or more. In
 the check it was recorded, and read 600 MHz before and after every probe.)</p>
+</details>
 
 <div class="chart-block" id="wake-fig">
   <div class="chart-title">Every repeat of the wake-up probe: each line is one repeat's load latency after the idle,
@@ -525,6 +555,7 @@ test the law below).</p>
   <p class="ck-readout" id="law-read"></p>
 </div>
 
+<details class="more"><summary>Cross-checks: the 22 September session, and the unsensed rails</summary>
 <p><b>Checks the fit never saw.</b> The idle law above was fitted on aifoundry2 on 21 September to idle readings at
 <span data-v="fitT"></span> °C (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">the
 Horace experiment, §8</a>; tabulated in
@@ -532,8 +563,9 @@ Horace experiment, §8</a>; tabulated in
 predicts <span data-v="checks"></span>. <span data-v="checksV3"></span>. In that one 22 September session, nearly half of
 the idle, <span data-v="unsensed"></span> W, is on no rail sensor (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">energy manual,
 §1</a>). <span data-v="unsensedV3"></span>.</p>
-
+</details>
 <p><b>Leakage transfers, but not as a constant.</b> <span data-v="a3law"></span></p>
+<details class="more"><summary>Every idle session against the law, session by session</summary>
 <div class="chart-block" id="off-fig">
   <div class="chart-title">Every idle session against the law: measured minus law, one row per card and campaign</div>
   <p class="small">Each mark is one idle session from the table below, measured minus the law over its idle samples; the bar
@@ -553,21 +585,26 @@ binned by whole degree (bins of 20 samples or more); the session's figure is mea
 The 22 September idle has no launches, so all of it counts. A cooling cycle counts only its 900 s of cooling, the check's own
 window, so its bins are the check's.</p>
 </details>
+</details>
 
-<p>Kanter put leakage at 5–30% of a design's power, with 20% common, and noted that parts which clock lower and use
-slower transistors leak less. On aifoundry2 at 80 °C, where every strict run launched, leakage is
-<b><span data-v="idleShR"></span> of an idle card</b>, above that range whatever the split, and
-<b><span data-v="busyShR"></span> of a <span data-v="busyW"></span> W random-data matmul</b>, by the law's own readings.
-<span data-v="kcyc"></span>
-Three things plausibly make it so, and only the third is the chip's own: (1) it runs at 0.52 V rather than the 0.4 V
+<p>Kanter noted that parts which clock lower and use slower transistors leak less; this card, at idle, leaks more than his
+5–30% whatever the split (the lede and the table above). <span data-v="kcyc"></span>
+Three things plausibly make the share high, and only the third is the chip's own: (1) it runs at 0.52 V rather than the 0.4 V
 Esperanto designed for; (2) aifoundry2's desktop chassis rests it at 62–74 °C, and these shares are quoted at 80 °C;
 server airflow would keep it cooler, and at <span data-v="T3"></span> °C, where aifoundry3 ran in another machine, the
 same law puts leakage at <span data-v="busy3R"></span> of a busy card; (3) it carries 128 MB of shire SRAM (Esperanto
 quotes over 160 MB on die, at Hot Chips 33) with no array power gating in play. Only (2) has data behind it here;
 (1) and (3) are reasoning, since no run varies the voltage at a fixed temperature or gates the SRAM.</p>
 
-<h2 id="what-the-second-card-says-about-the-model">6. What the second card says about the model</h2>
+<h2 id="what-the-second-card-says-about-the-model">6. What the other cards say about the model</h2>
 <p id="card2"></p>
+<p>The three-card check of 26 September re-ran eight of these patterns, four runs each, on aifoundry2, aifoundry3 and
+aifoundry1's card 1. As registered, the same model needs a factor of 0.88 on aifoundry3 and 0.99 on aifoundry1's card 1 (0.99
+on aifoundry2 itself). Most of aifoundry3's deficit is the reduction's fixed reference temperature (post-data note C2): at
+each run's own launch temperature the factors are 0.93–0.95 on aifoundry3, 0.96–1.00 on aifoundry1's card 1 and 0.96–0.99 on
+aifoundry2, over the two readings of the whole-degree launch temperature. A test at two launch temperatures could not say
+whether what remains is the card or its temperature (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-second-card-and-what-transfers">the Horace experiment,
+§10</a>).</p>
 
 <h2 id="what-this-means-for-the-equation-and-for-measuring-power">7. What this means for the equation, and for measuring power</h2>
 <ul>
@@ -585,6 +622,9 @@ cool-start runs give about 2.1 for ones, a loose check: the idle levels it subtr
 the runs are seven short, uncontrolled ones on one morning, and zeros are too small to test it at all
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power#voltage-and-clock">Why is the ET-SoC-1 low power?,
 Voltage and clock</a>). A clean test needs a die below 65 °C and a runner that pins the work rate.</li>
+</ul>
+<details class="more"><summary>The MLPerf cost argument, and the hunting-vs-provisioned-power point</summary>
+<ul>
 <li><b>Kanter's argument that measured power is too expensive to mandate is weaker for this card, though it does
 not vanish.</b> His reason MLPerf cannot require measured power is that most submitters will not pay the time and
 energy to instrument a system. This chip is already instrumented, as a load-bearing part of its own safety loop: a
@@ -597,8 +637,10 @@ rail readings behind the PMIC's own running average (a time constant of about on
 normalisation by provisioned kilowatts scores a card by its nameplate. On aifoundry2 a governor with no dead band
 moves the clock, and so the throughput, by up to a third within a single 7-second run, invisibly.</li>
 </ul>
+</details>
 
 <h2 id="method-and-what-is-not-established">8. Method, and what is not established</h2>
+<details class="more"><summary>All method notes and limits, in full</summary>
 <ul>
 <li><b>Which card.</b> A result stated with no card named holds on both aifoundry2 and aifoundry3 (at least three
 independent repeats on each, or a readout identical on both). The three-card check of 25–26 September
@@ -633,10 +675,7 @@ days add the six cool passes of 23 September (the first, discarded attempt at E2
 <code>relay-pass1</code>, <code>2</code> and <code>4</code>); a block of launches is a run of launches less than 2 s
 apart. The classification into
 thermal, thermal+power, power and unattributed is mechanical, in <code>tools/ettelem/analyze_dvfs.py</code>;
-nothing is fitted. Our 10 Hz sampling and the sensor's whole-degree steps mean that a step recorded at 66 °C may
-have been decided at 65 °C, and one recorded at 65 °C may have been decided on a 66 °C reading between our samples.
-That is the likeliest reading of the seven unattributed steps, and it is why the exact crossing instants are not
-known. The split also depends on which sample is read: <span data-v="prevnote"></span>, because the board meter lags
+nothing is fitted. The split depends on which sample is read: <span data-v="prevnote"></span>, because the board meter lags
 the clock by <span data-v="meterLag"></span>. Either way the power branch never fired alone on aifoundry2.</li>
 <li>The wake-up probe is <code>gen_ops.py wakeup</code> in <code>workloads/memprobe</code>, one hart, 20
 repeats, raw results in <code>docs/reports/data/2026-09-22-dvfs-aifoundry2/wakeup/</code>. It can only detect a
@@ -675,8 +714,8 @@ trace buffer in three passes per card (V3-TEL; <code>raw/&lt;card&gt;/tel/p&lt;N
 (20 runs); raw data in <code>docs/reports/data/2026-09-22-horace-aifoundry3/</code>.</li>
 <li><b>Not established:</b> whether the taped-out ET-SoC-1 drives its sleep transistors under some other firmware
 or in some other power state; exactly which governor build the cards run, beyond the firmware revisions and the log-format evidence above;
-what the boot frequency is set to in flash (why aifoundry3's TDP is zero is now known: a boot service sets it, §3); whether the 8% switching-power gap between the two cards is silicon, package or board regulator,
-which would need a third working card to separate; whether the unattributed down-steps of §2 are thermal steps
+what the boot frequency is set to in flash (why aifoundry3's TDP is zero is now known: a boot service sets it, §3); whether aifoundry3's lower switching power (3–4% below aifoundry2's at the same die temperature, §6) is silicon, package
+or board regulator, which neither the third card nor the two-temperature test separated; whether the unattributed down-steps of §2 are thermal steps
 decided on readings between our samples, which is the likeliest reading but untested (sampling at 25 ms on a cool die
 would settle it); how the idle law's power divides between fixed and leakage beyond the range of §5; and why two relay
 launches on aifoundry2 returned wrong elements (1,118 and 1,000) on 23 September, in one pass of the discarded first
@@ -684,6 +723,8 @@ attempt at a cool-card rerun. Both ran while the governor dropped the clock from
 the relay's other launches on both cards were correct. An error at the clock transition and a race in the relay's own
 completion flags when the clock ratio changes would both fit; one pass on one card cannot tell them apart.</li>
 </ul>
+</details>
+<details class="more"><summary>Reproduce this</summary>
 <p>To rebuild this report's data and page from the raw files (the wake-up probe itself needs a card):</p>
 <pre><code>python3 workloads/memprobe/gen_ops.py wakeup --out W --reps 20 --seed 11 \
     --delays 0,1000,10000,100000,1000000,4000000,8000000,16000000
@@ -703,31 +744,26 @@ python3 tools/ettelem/build_cards_data.py --cards $A3/cards.json --transfer $A3/
     --merge $D/2026-09-22-dvfs-aifoundry2/dvfs.json
 python3 scripts/build-report.py dvfs-leakage $D/2026-09-22-dvfs-aifoundry2/dvfs.json \
     docs/reports/2026-09-22-dvfs-leakage.html</code></pre>
-<p class="small">Versions: first published 22 September 2026 for aifoundry2; extended the same day with the
-three-machine comparison and the second card (§3 and §6); revised 24 September 2026 after a review, which corrected the
-governor's pass period (about 133 ms, not 10 ms), the hunting mechanism (the thermal threshold, not the power
-guardband), the reading of the open RTL (Erbium, not the chip), the seven down-steps once put down to kernel
-boundaries (now unattributed) and the idle duration (recomputed from timestamps), and added the firmware-version
-caveat; revised 25 September 2026 after a second review: the rule's frequency check nested inside the thermal test as
-in the source, the DRAM wake-up counts (the analysis had corrected the cycle counter a second time), the operating-point
-voltages computed from the telemetry, the sections reordered, the second card cut to one paragraph (the Horace
-experiment, §10, has it in full), and interactive charts. 25 September (version 3): every claim checked for which card
-and how many runs stand behind it. The leakage shares are now ranges led by the slope (the split between fixed and
-leakage power is not pinned down); the governor's timings are given over two days on aifoundry2, the only card whose
-clock moves; the idle law is checked session by session on both cards (aifoundry3's offset is +0.6 W over sixteen
-sessions, not one session's +0.7 W); "every result checked was correct" is withdrawn (two relay launches failed during a
-clock drop); record:
-<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>.
-26 September (version 4): the three-card check's results (aifoundry2, aifoundry3, aifoundry1's card 1): the wake-up probe
-on all three cards, with a table; the §3 table read from the check, with aifoundry1's card 1; the governor's log lines
-not found again; aifoundry3's zero TDP set by a boot service, not flashed; the pass period and board refresh per card and
-sampler; the idle law's check on the cooling cycles (the strip and the law chart's second button, which no longer shifts
-the law by a constant); the busy leakage share no longer said to exceed 30%; the active-minion line per card.</p>
+</details>
+<details class="more"><summary>Version history</summary>
+<p class="small">Versions. 22 September 2026: first published for aifoundry2, then the three-machine comparison and the
+second card. 24 September: after a review, the governor's pass period (about 133 ms, not 10 ms), the hunting mechanism (the
+thermal threshold, not the power guardband), the open RTL read as Erbium, not the chip, and seven down-steps unattributed.
+25 September: the rule's frequency check nested inside the thermal test, as in the source, and the DRAM wake-up counts
+corrected. 25 September (version 3), every claim checked for card and runs
+(<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">record</a>):
+the leakage shares as ranges; aifoundry3's idle offset over sixteen sessions; "every result checked was correct" withdrawn.
+26 September (version 4), the three-card check: the wake-up probe on three cards, the governor's settings read from the check,
+aifoundry3's zero TDP set by a boot service, not flashed, the pass period per card, the idle law against the cooling cycles,
+and the busy leakage share no longer said to exceed 30%. 27 September: the review of 26 September (aifoundry3's resting
+temperatures; §6 and the open questions on three cards; verdict row 6 cut), the governor plane per card, and detail folded
+into sections.</p>
+</details>
 
 <h2 id="related-reports">Related reports</h2>
 <ul>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">The Horace experiment</a> — the
-flip-counting model, the thermal network, the cool-start runs this report reuses and the second card in full</li>
+flip-counting model, the thermal network, the cool-start runs this report reuses and the other cards in full</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power">Why is the ET-SoC-1 low power?</a> — the
 <span class="math-inline"><svg style="vertical-align: -0.464ex;" xmlns="http://www.w3.org/2000/svg" width="6.203ex" height="2.351ex" role="img" focusable="false" viewBox="0 -833.9 2741.9 1038.9" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-10-TEX-I-1D436" d="M50 252Q50 367 117 473T286 641T490 704Q580 704 633 653Q642 643 648 636T656 626L657 623Q660 623 684 649Q691 655 699 663T715 679T725 690L740 705H746Q760 705 760 698Q760 694 728 561Q692 422 692 421Q690 416 687 415T669 413H653Q647 419 647 422Q647 423 648 429T650 449T651 481Q651 552 619 605T510 659Q484 659 454 652T382 628T299 572T226 479Q194 422 175 346T156 222Q156 108 232 58Q280 24 350 24Q441 24 512 92T606 240Q610 253 612 255T628 257Q648 257 648 248Q648 243 647 239Q618 132 523 55T319 -22Q206 -22 128 53T50 252Z"></path><path id="MJX-10-TEX-I-1D449" d="M52 648Q52 670 65 683H76Q118 680 181 680Q299 680 320 683H330Q336 677 336 674T334 656Q329 641 325 637H304Q282 635 274 635Q245 630 242 620Q242 618 271 369T301 118L374 235Q447 352 520 471T595 594Q599 601 599 609Q599 633 555 637Q537 637 537 648Q537 649 539 661Q542 675 545 679T558 683Q560 683 570 683T604 682T668 681Q737 681 755 683H762Q769 676 769 672Q769 655 760 640Q757 637 743 637Q730 636 719 635T698 630T682 623T670 615T660 608T652 599T645 592L452 282Q272 -9 266 -16Q263 -18 259 -21L241 -22H234Q216 -22 216 -15Q213 -9 177 305Q139 623 138 626Q133 637 76 637H59Q52 642 52 648Z"></path><path id="MJX-10-TEX-N-32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path><path id="MJX-10-TEX-I-1D453" d="M118 -162Q120 -162 124 -164T135 -167T147 -168Q160 -168 171 -155T187 -126Q197 -99 221 27T267 267T289 382V385H242Q195 385 192 387Q188 390 188 397L195 425Q197 430 203 430T250 431Q298 431 298 432Q298 434 307 482T319 540Q356 705 465 705Q502 703 526 683T550 630Q550 594 529 578T487 561Q443 561 443 603Q443 622 454 636T478 657L487 662Q471 668 457 668Q445 668 434 658T419 630Q412 601 403 552T387 469T380 433Q380 431 435 431Q480 431 487 430T498 424Q499 420 496 407T491 391Q489 386 482 386T428 385H372L349 263Q301 15 282 -47Q255 -132 212 -173Q175 -205 139 -205Q107 -205 81 -186T55 -132Q55 -95 76 -78T118 -61Q162 -61 162 -103Q162 -122 151 -136T127 -157L118 -162Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><use data-c="1D436" xlink:href="#MJX-10-TEX-I-1D436"></use></g><g data-mml-node="mstyle" transform="translate(760,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="msup" transform="translate(927,0)"><g data-mml-node="mi"><use data-c="1D449" xlink:href="#MJX-10-TEX-I-1D449"></use></g><g data-mml-node="TeXAtom" transform="translate(861.3,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mn"><use data-c="32" xlink:href="#MJX-10-TEX-N-32"></use></g></g></g><g data-mml-node="mi" transform="translate(2191.9,0)"><use data-c="1D453" xlink:href="#MJX-10-TEX-I-1D453"></use></g></g></g></svg></span> equation term by term, and the comparison with an A100</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The ET-SoC-1 energy manual</a> — builds on
@@ -735,7 +771,7 @@ this idle law; every table at 600 MHz</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature">Power and temperature</a> — the meters
 and sensors the loop reads</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">Limits of
-observability, §4.1</a> — the meter chain, and why the loop's power input lags</li>
+observability, §4.1</a> — the meter chain, and how often the loop's power input refreshes</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy">Anatomy of a memory access</a> — DRAM rows,
 refresh and the 11-cycle activate behind §4's DRAM result</li>
 <li><a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/16-dvfs-and-leakage.md">docs/findings/16-dvfs-and-leakage.md</a>
@@ -1242,9 +1278,30 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 
 </script>
@@ -1600,44 +1657,92 @@ const GOV = (function () {
   return {select(r) { stop(); if (r.run !== st.run) { st.run = r.run; seg.set(r.run); selectRun(r.run, r.i); } else setIdx(r.i); }};
 })();
 
-/* ---------- the down-steps against the two thresholds ---------- */
+/* ---------- the governor's rule as a plane: die temperature x board power, shaded by the branch that fires,
+   with a card seg (top 12, item 4(b)) that moves the TDP line from aifoundry2's 65 W to aifoundry3's 0 W, where the
+   step-up region has no height left to draw. aifoundry3 pairs no die reading with its throttle-down log, so its
+   events show as a board-power rug instead of points on the plane. The cards and their settings are the three-card
+   check's readouts (D.v3.governor, 26 September) when present, else the 22 September readouts (D.cards.config); a card
+   with neither clock steps nor a governor log (aifoundry1's card 1) shows its plane and says why it has no points. */
 (function () {
   let mode = 'after';
+  const G3 = D.v3 && D.v3.governor, SP3 = D.cards.sptrace_aifoundry3;
+  const CFG = G3 ? Object.fromEntries(Object.keys(G3).map(c => [c, G3[c].config[0]])) : D.cards.config;
+  const cardIds = CK.cardsIn(CFG);
+  let cardId = cardIds[0];
   CK.seg('attrib-mode', {label: 'Read the sample', options: [['after', 'just after the step'], ['before', 'just before it']],
     value: mode, onChange: v => { mode = v; frame.redraw(); }});
-  const tip = (r, why) => `<b>Run ${r.run + 1} · ${r.values}</b>, ${r.f0}→${r.f1} MHz at ${f2(r.t)} s<br>` +
-    `just before: die ${f0(r.T_prev)} °C, board ${f1(r.P_prev)} W → ${r.why_prev}<br>` +
-    `just after: die ${f0(r.T)} °C, board ${f1(r.P)} W → ${r.why}<br>Selecting it replays the step in the chart above`;
+  CK.cardSeg('attrib-card', {cards: cardIds, bus: 'dvfs-attrib-card', value: cardId, onChange: v => { cardId = v; frame.redraw(); }});
+  const tip = r => `<b>Run ${r.run + 1} · ${r.values}</b>, ${r.f0}→${r.f1} MHz at ${f2(r.t)} s<br>` +
+    `just before: die ${f0(r.T_prev)} °C, board ${f1(r.P_prev)} W${r.why_prev ? ' → ' + r.why_prev : ' → neither test fires'}<br>` +
+    `just after: die ${f0(r.T)} °C, board ${f1(r.P)} W${r.why ? ' → ' + r.why : ' → neither test fires'}<br>Selecting it replays the step in the chart above`;
+  const cap = document.getElementById('attrib-cap');
   function draw(f) {
     const W = f.W, H = f.H, L = 44, R = 12, T = 26, B = 40;
     const x = CK.lin(62.5, 68.5, L, W - R), y = CK.lin(25, 95, H - B, T);
+    const cfg = CFG[cardId], cTC = cfg.temp_threshold_c, cTW = cfg.tdp_w;
+    const xTC = x(cTC + 0.5), yTWraw = y(cTW), yTW = Math.min(Math.max(yTWraw, T), H - B), offChart = yTWraw > H - B + 0.5;
+    // the three branches of rule(): thermal-down (right of xTC), power-down (below xTC, above the TDP line), step-up (below both)
+    CK.el('rect', {x: xTC, y: T, width: (W - R) - xTC, height: (H - B) - T, fill: 'var(--c7)', opacity: 0.12}, f.svg);
+    CK.el('rect', {x: L, y: T, width: xTC - L, height: yTW - T, fill: 'var(--c4)', opacity: 0.14}, f.svg);
+    if (!offChart) CK.el('rect', {x: L, y: yTW, width: xTC - L, height: (H - B) - yTW, fill: UPC, opacity: 0.12}, f.svg);
     CK.axes(f, {x, y, L, R, T, B, xt: [63, 64, 65, 66, 67, 68], yt: [30, 50, 70, 90],
       xl: 'die temperature on that sample, °C (whole degrees)', yl: 'board power on that sample, W'});
     const dash = a => CK.el('line', Object.assign({stroke: 'var(--bad)', 'stroke-width': 1.3, 'stroke-dasharray': '5 4'}, a), f.svg);
-    dash({x1: x(TC + 0.5), x2: x(TC + 0.5), y1: T, y2: H - B}); dash({x1: L, x2: W - R, y1: y(TW), y2: y(TW)});
-    CK.txt(f.svg, x(TC + 0.5) + 5, T + 12, 'thermal test fires →', 'lab');
-    CK.txt(f.svg, L + 4, y(TW) - 5, `power test fires above ${TW} W`, 'lab');
-    const pts = DOWN.map(r => mode === 'after' ? {r, T: r.T, P: r.P, why: r.why} : {r, T: r.T_prev, P: r.P_prev, why: r.why_prev});
-    const groups = {};
-    pts.forEach(p => (groups[p.T + '|' + Math.round(p.P / 2)] = groups[p.T + '|' + Math.round(p.P / 2)] || []).push(p));
-    Object.values(groups).forEach(g => g.forEach((p, k) => (p.dx = (k - (g.length - 1) / 2) * 0.22)));
-    pts.sort((a, b) => a.T + a.dx - (b.T + b.dx) || a.P - b.P);
-    const nodes = pts.map(p => {
-      const cx = x(p.T + p.dx), cy = y(p.P), c = CAUSE[p.why];
-      const node = c.m === 'box' ? CK.el('rect', {x: cx - 5.5, y: cy - 5.5, width: 11, height: 11, rx: 1.5, fill: c.c, stroke: 'var(--surface)', 'stroke-width': 1.5}, f.svg)
-        : c.m === 'ring' ? CK.el('circle', {cx, cy, r: 5.5, fill: 'var(--surface)', stroke: c.c, 'stroke-width': 2.2}, f.svg)
-        : CK.el('circle', {cx, cy, r: 6, fill: c.c, stroke: 'var(--surface)', 'stroke-width': 1.5}, f.svg);
-      CK.tip(f, node, tip(p.r));
-      node.style.cursor = 'pointer';
-      node.addEventListener('click', () => GOV.select(p.r));
-      return node;
-    });
-    CK.keynav(f, nodes, {onEnter: (n_, k) => GOV.select(pts[k].r)});
-    const cnt = tally(pts, 'why');
-    CK.legend('attrib-leg', Object.keys(CAUSE).filter(k => cnt[k]).map(k => ({key: k, label: `${k} (${cnt[k]})`, mark: CAUSE[k].m, color: CAUSE[k].c})));
+    dash({x1: xTC, x2: xTC, y1: T, y2: H - B});
+    CK.txt(f.svg, xTC + 5, T + 12, 'thermal test fires →', 'lab');
+    if (offChart) CK.txt(f.svg, L + 4, H - B - 6, `power test fires above ${cTW} W: always true here`, 'lab');
+    else { dash({x1: L, x2: W - R, y1: yTW, y2: yTW}); CK.txt(f.svg, L + 4, yTW - 5, `power test fires above ${cTW} W`, 'lab'); }
+    const nodes = [], legItems = [];
+    if (cardId === 'aifoundry2') {
+      const pts = TR.map(r => mode === 'after' ? {r, T: r.T, P: r.P, why: r.why} : {r, T: r.T_prev, P: r.P_prev, why: r.why_prev});
+      const groups = {};
+      pts.forEach(p => (groups[p.T + '|' + Math.round(p.P / 2)] = groups[p.T + '|' + Math.round(p.P / 2)] || []).push(p));
+      Object.values(groups).forEach(g => g.forEach((p, k) => (p.dx = (k - (g.length - 1) / 2) * 0.22)));
+      pts.sort((a, b) => a.T + a.dx - (b.T + b.dx) || a.P - b.P);
+      pts.forEach(p => {
+        const cx = x(p.T + p.dx), cy = y(p.P);
+        const node = p.r.dir === 'up'
+          ? CK.el('polygon', {points: `${cx},${cy - 6} ${cx + 6},${cy + 5} ${cx - 6},${cy + 5}`, fill: UPC, stroke: 'var(--surface)', 'stroke-width': 1.3}, f.svg)
+          : CAUSE[p.why].m === 'box' ? CK.el('rect', {x: cx - 5.5, y: cy - 5.5, width: 11, height: 11, rx: 1.5, fill: CAUSE[p.why].c, stroke: 'var(--surface)', 'stroke-width': 1.5}, f.svg)
+          : CAUSE[p.why].m === 'ring' ? CK.el('circle', {cx, cy, r: 5.5, fill: 'var(--surface)', stroke: CAUSE[p.why].c, 'stroke-width': 2.2}, f.svg)
+          : CK.el('circle', {cx, cy, r: 6, fill: CAUSE[p.why].c, stroke: 'var(--surface)', 'stroke-width': 1.5}, f.svg);
+        CK.tip(f, node, tip(p.r));
+        node.style.cursor = 'pointer';
+        node.addEventListener('click', () => GOV.select(p.r));
+        nodes.push(node);
+      });
+      CK.keynav(f, nodes, {onEnter: (n_, k) => GOV.select(pts[k].r)});
+      const cnt = tally(pts.filter(p => p.r.dir === 'down'), 'why'), nUp = pts.filter(p => p.r.dir === 'up').length;
+      Object.keys(CAUSE).filter(k => cnt[k]).forEach(k => legItems.push({mark: CAUSE[k].m, color: CAUSE[k].c, label: `${k} down (${cnt[k]})`}));
+      if (nUp) legItems.push({mark: 'up', color: UPC, label: `step up (${nUp})`});
+      if (cap) cap.innerHTML = 'Points within one whole degree are spread sideways so each is visible. Select a point ' +
+        '(click, tap or Enter) to replay its step in the chart above.';
+    } else if (cardId !== 'aifoundry3') {
+      // a card whose clock never left 600 MHz in the check and whose trace windows held no governor line
+      const lab = CK.card(cardId).label, h = (D.v3 && D.v3.clock_mhz[cardId]) || {}, n = Object.values(h).reduce((a, b) => a + b, 0);
+      CK.txt(f.svg, L + 6, H - B - 10, 'no step to place', 'lab');
+      if (cap) cap.innerHTML = `${lab} reads the same settings as aifoundry2 (${cTW} W, ${cTC} °C), so the plane is aifoundry2's. ` +
+        `The three-card check launched it warm and its clock read ${Object.keys(h).join(', ')} MHz in all ${num(n, 0)} samples, ` +
+        `and its trace windows held no governor line, so it has no step to place.`;
+    } else {
+      const pw = (SP3 && SP3.pwr_mw) || [], rx = W - R - 9;
+      pw.forEach(mw => {
+        const w = mw / 1000, cy = y(Math.min(95, Math.max(25, w)));
+        const node = CK.el('rect', {x: rx - 5, y: cy - 2, width: 10, height: 4, rx: 1, fill: 'var(--ref)'}, f.svg);
+        CK.tip(f, node, `<b>${cardId} down-event</b>: board ${f1(w)} W<br>die temperature not recorded by this trace`);
+        nodes.push(node);
+      });
+      CK.txt(f.svg, rx, T + 12, 'board W ↓', 'lab', 'middle');
+      CK.keynav(f, nodes);
+      legItems.push({mark: 'dash', color: 'var(--ref)', label: `${cardId} down-events, board power only (${pw.length})`});
+      if (cap) cap.innerHTML = `${CK.card(cardId).label}'s TDP reads 0 W (a boot service sets it), so the power test is always true and every launch logs a down-event ` +
+        `(${SP3 ? f0(SP3.down_events) : '?'} in the trace window of 22 September; the check's windows of 26 September held no governor line); its die temperature is not in that log, so the ` +
+        `${word(pw.length)} readings we have sit in a rug at the right, by board power alone.`;
+    }
+    legendHTML('attrib-leg', legItems);
   }
   const frame = CK.frame('attrib', {height: W => (W < 600 ? 300 : 320), minW: 280, maxW: 640,
-    label: 'Every down-step by the die temperature and board power on the chosen sample', draw});
+    label: "The governor's rule as a die-temperature by board-power plane, shaded by the branch that fires, with the selected card's own events", draw});
 })();
 
 /* ---------- the down-steps as a table ---------- */
@@ -1663,9 +1768,7 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
     `On aifoundry2 at 80 °C, leakage is ${V.leakR} W: ${V.idleShR} of an idle card and ${V.busyShR} of a ${V.busyW} W random-data matmul. ` +
     `The idle readings fix its slope, ${V.slope80} W/°C, but not its split from the fixed power, hence the ranges (the idle law, <a href="#what-that-costs">§5</a>). ` +
     `The three-card check's cooling cycles could not narrow the split: they allow ${V.kBusy} of a busy card, so leakage above 30% under load is not established. ` +
-    `At ${V.T3} °C, where aifoundry3 ran, the same law puts it at ${V.busy3R} of a busy card.`],
-  ['Leakage costs power, not correctness.', 'consistent, weakly tested',
-    `The matmul benchmark checks its outputs bit-exact against a host reference, and the relay checks every element. Every checked result was correct except two relay launches on aifoundry2 on 23 September, in one pass of the discarded first attempt at a cool-card rerun: both ran on a 65–66 °C die while the governor dropped the clock from 800 to 600 MHz inside the launch, and the relay’s launches on a hotter die (71–73 °C, four sessions), where leakage is higher, were all correct. Why the two failed is not established (<a href="#method-and-what-is-not-established">§8</a>). The power sessions’ launches were not compared with a reference (none raised the tensor unit’s error flag). The long idle before the 22 September sample (about ${f1(ic.hours_idle)} hours since our last recorded workload) cannot show errors either way: no checked result spans it, DRAM ECC is compiled off and the SRAM ECC interrupt sources are never enabled.`]];
+    `At ${V.T3} °C, where aifoundry3 ran, the same law puts it at ${V.busy3R} of a busy card.`]];
   const t = document.getElementById('verdict');
   t.innerHTML = '<thead><tr><th>What David Kanter said (paraphrased)</th><th>Verdict on the ET-SoC-1</th><th>Evidence</th></tr></thead><tbody>' +
     R.map(v => `<tr><td>${v[0]}</td><td class="lvl">${v[1]}</td><td class="small">${v[2]}</td></tr>`).join('') + '</tbody>';

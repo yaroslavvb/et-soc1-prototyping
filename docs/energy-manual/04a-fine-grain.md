@@ -19,6 +19,8 @@ What a byte costs is not one number. Below, the parts of it that can be separate
 
 **Over 1–6 hops**, leaving out d = 8, where only 16 shires have a partner and the point sits nearly level with d = 6, the same data give 2.23, 2.19 and 2.40 pJ/B per hop on random data (aifoundry2, aifoundry3 and aifoundry1 card 1) and 170, 170 and 179 fJ per random bit per hop, which is what [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) measures (2.17 pJ/B per hop on board power, loaded mesh): use its figures for wires.
 
+**Leaving the shire costs about one more hop**: over 1–6 hops the intercept is 6.52, 6.19 and 7.95 pJ/B on random data against 4.16, 4.14 and 4.98 for the shire's own scratchpad, 0.9–1.2 hops' worth; the 1–8-hop fit, which the half-traffic 8-hop point pulls down, puts it at 2.0–2.3.
+
 | hops | zeros pJ/B [range over three cards, 9 runs] | random pJ/B [range] | shires reading |
 |---|---|---|---|
 | 1 | **3.85** [3.45–4.28] | **9.10** [7.82–10.47] | 32 |
@@ -75,6 +77,29 @@ The shire's own scratchpad read by only one of its four neighbourhoods at a time
 | 1 (minions 8–15) | **3.93** [3.43–4.64] | 966 |
 | 2 (minions 16–23) | **4.25** [3.64–4.68] | 967 |
 | 3 (minions 24–31) | **4.25** [3.76–4.97] | 966 |
+
+## Gathers: what a line costs, and what an element costs (E48)
+
+The word gather `fgw.ps` from the L1 (512 B per hart) and from the L2 (4 KB per hart), with its eight offsets drawn from seven patterns that touch between half a line and eight lines per instruction, on random data; cycles per instruction per minion with one minion running (hart 0 alone) and with all 1,024 (both harts), and energy at 1,024. Every figure pools the three cards' passes (E48, 26 September).
+
+| Pattern | L1: cycles per instruction, 1 minion / 1,024 | L1: pJ per element | L2: lines per instruction | L2: cycles per instruction, 1 minion / 1,024 | L2: pJ per element | L2: pJ per instruction | L2: pJ per line |
+|---|---|---|---|---|---|---|---|
+| unit stride (`unit`) | 11.2 / 10.9 | 12.1 | 0.5 | 32.7 / 31.9 | 34.2 | 274 | 547 |
+| stride 2 words (`s2`) | 11.2 / 10.9 | 12.5 | 1.0 | 53.1 / 53.0 | 57.5 | 460 | 460 |
+| stride 4 words (`s4`) | 11.2 / 10.9 | 11.8 | 2.0 | 53.1 / 49.7 | 91.7 | 733 | 367 |
+| 8 words of one line, permuted (`line`) | 11.2 / 10.9 | 12.4 | 1.0 | 53.1 / 53.0 | 59.5 | 476 | 476 |
+| every lane one word (`bcast`) | 11.2 / 10.9 | 9.3 | 1.0 | 53.1 / 53.0 | 53.7 | 429 | 429 |
+| one word per line, lines in order (`s16`) | 11.2 / 10.9 | 12.9 | 8.0 | 176.0 / 176.1 | 347.7 | 2782 | 348 |
+| one word per line, lines random (`rand`) | 11.2 / 10.9 | 12.8 | 8.0 | 176.0 / 179.7 | 354.5 | 2836 | 354 |
+
+**In the L1 the pattern does not matter**: every pattern issues in about 10.9 minion-cycles an instruction. **From the L2 the time and the energy follow the lines, not the elements.** Fitted over the seven patterns at 1,024 minions, a gather instruction costs **104 pJ plus 338 pJ per line it fetches** (random data). An instruction whose lanes fall on one or two lines takes about one L2 latency, whether the lanes are consecutive, permuted, strided or all on one word, because the two miss handlers of a minion fetch two lines at once; eight lines take four rounds. The chip at full load runs each minion at the rate one minion reaches alone, so nothing shared limits it at this level. The 338 pJ per line is about a line's fill into the L1 (238 pJ on random data, the Lines table above) plus the awake minion for the 22.5 cycles each line takes (3.0 mW with both harts, section 2: 113 pJ), 352 pJ together.
+
+**Masked lanes.** With four lanes or one active (`m0` = 0x0f, 0x01), the L1 gather keeps its 10.9 / 10.9 / 10.9 cycles an instruction, so a masked lane still takes its issue slot, and the energy per instruction falls only to 102 / 82 / 69 pJ (8 / 4 / 1 lanes); from the L2 the time follows the active lanes' lines (179.7 / 90.2 / 13.5 cycles an instruction), at 354 / 361 / 189 pJ per active element.
+ **Element size.** Bytes and halfwords cost what words cost, per element and per cycle: `fgw.ps` 12.8 pJ from the L1 and 354 from the L2; `fgh.ps` 13.0 pJ from the L1 and 355 from the L2; `fgb.ps` 12.5 pJ from the L1 and 355 from the L2, so per useful byte a byte gather is four times a word gather.
+ **Lane conflicts.** Eight lanes on one word cost less than eight lines' worth: from the L1 9.3 pJ per gathered element against 12.8 for random words, 11.9 per scattered one against 14.7; from the L2 the gather takes one line's time. When all eight lanes scatter to one word, lane 7's value remains, every time on every card (the functional model's order, lanes 0 to 7).
+
+**Scaling.** Times 1,024 minions (or 32 shires), the rate of one minion (both harts) predicts the whole chip's: the L1 451.3 G/s from one minion's rate, 451.2 from one full shire's, 452.3 measured; the L2 27.9 G/s from one minion's rate, 27.4 from one full shire's, 27.4 measured; the own scratchpad 27.9 G/s from one minion's rate, 27.4 from one full shire's, 27.4 measured; a scratchpad 2 hops away 10.1 G/s from one minion's rate, 10.1 from one full shire's, 10.2 measured. From DRAM the one-minion and spread-minion runs are no test: their 256 KB tables per hart fit in the L2 and L3.
+
 
 ## Leakage of the arrays: the SRAM rail against temperature
 
@@ -153,7 +178,7 @@ The PMIC meters three rails — the minions, the on-chip SRAM, and the mesh — 
 | DRAM, tensor store | 10.34 | 2% | 16% | 19% | 64% |
 | DRAM, stores through the L1 | 8.84 | 10% | 12% | 21% | 58% |
 
-**The mesh rail alone**, against hop distance on random data: 1.273 pJ/B per hop with an intercept of 1.44 pJ/B (the cost of leaving the shire). This is the wire and router energy measured on its own supply, independently of the board-power fit above.
+**The mesh rail alone**, against hop distance on random data (aifoundry2): 1.273 pJ/B per hop with an intercept of 1.44 pJ/B over 1–8 hops; over 1–6 hops, leaving out the half-traffic 8-hop point, 1.496 pJ/B per hop and an intercept of 0.80, so on this rail leaving the shire costs about 0.5 of a hop. This is the wire and router energy measured on its own supply, independently of the board-power fit above.
 
 | hops | mesh rail, pJ/B |
 |---|---|
@@ -171,12 +196,15 @@ The remainder — board power minus the three rails — cannot be metered with a
 
 | unmetered W of a configuration = | aifoundry2 | aifoundry3 | aifoundry1 card 1 |
 |---|---|---|---|
-| × minion-rail W | 0.188 ± 0.003 | 0.181 ± 0.002 | 0.102 ± 0.004 |
-| × SRAM-rail W | 0.034 ± 0.016 | 0.043 ± 0.015 | 0.540 ± 0.027 |
-| × mesh-rail W | 0.291 ± 0.021 | 0.294 ± 0.020 | 0.205 ± 0.026 |
-| per DRAM byte | 72.7 ± 1.5 pJ/B | 72.7 ± 1.4 pJ/B | 81.6 ± 2.2 pJ/B |
+| × minion-rail W | 0.188 ± 0.003 (HC3 ± 0.002) | 0.181 ± 0.002 (HC3 ± 0.002) | 0.102 ± 0.004 (HC3 ± 0.005) |
+| × SRAM-rail W | 0.034 ± 0.016 (HC3 ± 0.012) | 0.043 ± 0.015 (HC3 ± 0.011) | 0.540 ± 0.027 (HC3 ± 0.020) |
+| × mesh-rail W | 0.291 ± 0.021 (HC3 ± 0.016) | 0.294 ± 0.020 (HC3 ± 0.016) | 0.205 ± 0.026 (HC3 ± 0.025) |
+| per DRAM byte | 72.7 ± 1.5 (HC3 ± 4.4) pJ/B | 72.7 ± 1.4 (HC3 ± 4.5) pJ/B | 81.6 ± 2.2 (HC3 ± 3.9) pJ/B |
 | residual rms, configuration means | 0.33 W, n = 392 | 0.31 W, n = 392 | 0.48 W, n = 392 |
 | residual rms, the configurations that move DRAM | 0.99 W, n = 17 | 0.99 W, n = 17 | 1.19 W, n = 17 |
+
+± is the ordinary least-squares standard error; HC3, the heteroscedasticity-robust one, is the bar the hub gives, and it is 2–3 times wider on the DRAM term because the few configurations that fix it carry several times the pooled residual (the row above).
+
 
 - **An instruction's unmetered energy is consistent with the regulators' delivery loss**: 19%, 18% and 10% of what the minion rail delivers on aifoundry2, aifoundry3 and aifoundry1 card 1 goes missing between the 12 V input and the core, and nothing else moves; that is as far as the rails' meters can be trusted, since each 1% of error in their scale moves it by about 1.2 points. The 20% "unmetered" share of the scalar integer class above is this.
 - **A DRAM byte's unmetered energy is the memory's**: 73–82 pJ per byte on average (the fitted coefficient on the three cards) in the DDR PHY, the I/O rail and the DRAM chips (53–75 on zeros and constants, 77–90 on random data), on top of the 16–66 pJ the mesh, the SRAM and the delivery losses take on the way: together the 95–133 pJ per byte of [4.1](04-bytes-memory.md)'s tensor loads from DRAM. A byte written through the L1 costs about twice that off-rail (114–187 pJ), because the line is read from DRAM before it is written.

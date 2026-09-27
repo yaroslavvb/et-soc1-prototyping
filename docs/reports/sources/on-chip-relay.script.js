@@ -167,11 +167,23 @@ CK.stackTable('media');
 (function(){
  const rows=D.size, mb=r=>r.stage_bytes*32/1048576, top=Math.max(...rows.map(mb));
  const big=D.bigsize.filter(r=>mb(r)>top);                    // DRAM-only continuation past the on-chip limit
- const OTH=CS.filter(c=>c!==A2&&rows.some(r=>r.by_card&&r.by_card[c]));   // cards drawn as marks beside the first card's lines
- const perCard=(r,m)=>OTH.filter(c=>r.by_card&&r.by_card[c]).map(c=>`${lab(c)} ${gb(r.by_card[c][m].gb_s)}`).join(', ');
- CK.legend('sizelegend',MED.map(m=>({key:m[0],label:m[3],mark:'dot',color:m[2]})).concat(
-  OTH.map(c=>({key:c,label:lab(c),mark:CK.card(c).mark,color:'var(--ink-2)'}))));
- CK.frame('size',{label:'Relay bandwidth against working-set size for the three media, to 256 MB per buffer',height:W=>W<600?320:340,
+ /* Colour is the medium, as everywhere on this page; the mark's shape is the card (CK's registry: filled, ring,
+    diamond), one line per card (the first solid, the others dashed), for every card the rows' by_card carries: each
+    point the mean of that card's passes (analyze_onchip.py). bigsize's by_card is {card: GB/s}. Data without by_card
+    draws the first card from the row itself. */
+ const cards=CK.cardsIn([...new Set(rows.flatMap(r=>Object.keys(r.by_card||{[A2]:1})))]), OTH=cards.filter(c=>c!==A2);
+ const rowOf=(r,c)=>r.by_card?r.by_card[c]||null:(c===A2?r:null);
+ const bigOf=(r,c)=>r.by_card?(r.by_card[c]!=null?r.by_card[c]:null):(c===A2?r.gb_s:null);
+ const mark=(g,c,x,y,col)=>{const k=CK.card(c).mark,e=CK.cardMark(g,c,x,y,k==='ring'?6.5:k==='dot'?3.5:4,col);
+  if(k==='ring'){e.style.fill='none';e.style.strokeWidth='1.5';}   // a ring round a dot: both cards stay visible
+  e.setAttribute('aria-hidden','true');return e;};
+ const lg=CK.legend('sizelegend',MED.map(m=>({key:m[0],label:m[3],mark:'dot',color:m[2]})));
+ if(cards.length>1) for(const c of cards){  // the card key: the mark's shape, in ink
+  const s=document.createElement('span'); s.className='ck-li';
+  const v=CK.el('svg',{viewBox:'0 0 18 12',width:18,height:12,'aria-hidden':'true'}); mark(v,c,9,6,'var(--ink-2)');
+  s.append(v,document.createTextNode(lab(c))); lg.el.appendChild(s);
+ }
+ CK.frame('size',{label:'Relay bandwidth against working-set size for the three media, to 256 MB per buffer, every card',height:W=>W<600?320:340,
   draw(f){
    const svg=f.svg,W=f.W,Hh=f.H,L=52,R=26,T=26,B=46,narrow=f.narrow;
    const x=CK.log(2,256,L,W-R), y=CK.log(20,2000,Hh-B,T);
@@ -183,17 +195,14 @@ CK.stackTable('media');
    lines.forEach((t,i)=>CK.txt(svg,x(top)+6,y(400)+i*14,t,'lab'));
    CK.el('line',{x1:x(top/2),x2:x(top/2),y1:T,y2:Hh-B,style:'stroke:var(--ref);stroke-width:1.5;stroke-dasharray:5 4'},svg);
    CK.txt(svg,x(top/2)-6,T+12,narrow?'footprint = L3':'footprint = 32 MB of L3','lab','end');
-   MED.forEach(m=>{
-    const pts=rows.map(r=>[mb(r),r[m[0]].gb_s]).concat(m[0]==='dram'?big.map(r=>[mb(r),r.gb_s]):[]);
-    CK.el('path',{d:CK.path(pts,x,y),fill:'none',style:`stroke:${m[2]};stroke-width:2`},svg);
-    for(const [a,b] of pts){const c=CK.el('circle',{cx:x(a),cy:y(b),r:4,'aria-hidden':'true'},svg);c.style.fill=m[2];}
-    /* the other cards at the same sizes: their registry mark in the medium's colour */
-    for(const c of OTH){
-     const q=rows.map(r=>[mb(r),r.by_card&&r.by_card[c]&&r.by_card[c][m[0]].gb_s]).concat(m[0]==='dram'?big.map(r=>[mb(r),r.by_card&&r.by_card[c]]):[]);
-     for(const [a,b] of q) if(b) cmark(svg,c,x(a),y(b),m[2]);
-    }
-   });
-   /* one focusable column per size: the crosshair lists every medium at that size */
+   MED.forEach(m=>cards.forEach((c,ci)=>{
+    const pts=rows.map(r=>[mb(r),rowOf(r,c)]).filter(p=>p[1]).map(p=>[p[0],p[1][m[0]].gb_s])
+     .concat(m[0]==='dram'?big.map(r=>[mb(r),bigOf(r,c)]).filter(p=>p[1]!=null):[]);
+    const ln=CK.el('path',{d:CK.path(pts,x,y),fill:'none'},svg); ln.style.stroke=m[2]; ln.style.strokeWidth=ci?'1.25':'2';
+    if(ci) ln.style.strokeDasharray='4 3';
+    for(const [a,b] of pts) mark(CK.el('g',{},svg),c,x(a),y(b),m[2]);
+   }));
+   /* one focusable column per size: the crosshair lists every medium on every card at that size */
    const cols=rows.map(r=>({mb:mb(r),r})).concat(big.map(r=>({mb:mb(r),big:r}))), nodes=[];
    for(const c of cols){
     const g=CK.el('g',{},svg), xc=x(c.mb);
@@ -201,11 +210,11 @@ CK.stackTable('media');
     const ln=CK.el('line',{x1:xc,x2:xc,y1:T,y2:Hh-B,class:'xh'},g); ln.style.stroke='var(--ink-2)'; ln.style.strokeWidth='1'; ln.style.opacity='0';
     g.addEventListener('pointerenter',()=>{ln.style.opacity='0.6';}); g.addEventListener('pointerleave',()=>{ln.style.opacity='0';});
     g.addEventListener('focus',()=>{ln.style.opacity='0.6';}); g.addEventListener('blur',()=>{ln.style.opacity='0';});
-    const html=c.big?`<b>${c.mb} MB per buffer</b> (footprint ${2*c.mb} MB)<br>DRAM ${gb(c.big.gb_s)} GB/s (${lab(A2)})`+
-      (OTH.length&&c.big.by_card?`; ${OTH.filter(k=>c.big.by_card[k]).map(k=>`${lab(k)} ${gb(c.big.by_card[k])}`).join(', ')}`:'')+`<br>the on-chip routes have no room`
-     :`<b>${c.mb} MB per buffer</b> (footprint ${2*c.mb} MB), ${lab(A2)}<br>DRAM ${gb(c.r.dram.gb_s)}, next shire ${gb(c.r.hop.gb_s)} (${f2(c.r.hop_over_dram)}×), `+
-      `own ${gb(c.r.scp.gb_s)} (${f2(c.r.scp_over_dram)}×) GB/s`+
-      (OTH.length?MED.map(m=>`<br>${m[3]}: ${perCard(c.r,m[0])}`).join(''):'');
+    const html=`<b>${c.mb} MB per buffer</b> (footprint ${2*c.mb} MB)<br>`+cards.map(cd=>{
+     if(c.big){const v=bigOf(c.big,cd);return v==null?null:`${lab(cd)}: DRAM ${gb(v)} GB/s; the on-chip routes have no room`;}
+     const q=rowOf(c.r,cd); if(!q)return null;
+     return `${lab(cd)}: DRAM ${gb(q.dram.gb_s)}, next shire ${gb(q.hop.gb_s)} (${f2(q.hop_over_dram)}×), own ${gb(q.scp.gb_s)} (${f2(q.scp_over_dram)}×) GB/s`;
+    }).filter(Boolean).join('<br>');
     CK.tip(f,g,html); nodes.push(g);
    }
    CK.keynav(f,nodes);
@@ -218,10 +227,11 @@ CK.stackTable('media');
  for(const r of rows) for(const c of OTH) if(r.by_card&&r.by_card[c]) for(const m of MED) devs.push(Math.abs(r.by_card[c][m[0]].gb_s/r[m[0]].gb_s-1));
  for(const r of big) for(const c of OTH) if(r.by_card&&r.by_card[c]) devs.push(Math.abs(r.by_card[c]/r.gb_s-1));
  $('sizecap').textContent=
-  `Lines and dots ${lab(A2)}${OTH.length?`, ${andL(OTH.map(c=>`${CK.card(c).mark==='ring'?'rings':CK.card(c).mark==='diamond'?'diamonds':'marks'} ${lab(c)}`))} (each point the mean of that card's passes, `+
-  `and every card within ${f0(Math.ceil(100*Math.max(...devs)))}% of ${lab(A2)} at every size)`:''}, log axes. Two buffers are live at once, so the chip footprint is twice the figure on the x axis; the dashed line `+
+  `Log axes. Colour is where a stage's output goes; the mark is the card`+
+  (cards.length>1?` (${cards.map(c=>`${lab(c)} ${CK.card(c).mark==='dot'?'filled':CK.card(c).mark==='ring'?'ring':CK.card(c).mark}`).join(', ')}; each point the mean of that card's passes, and every card within ${f0(Math.ceil(100*Math.max(...devs)))}% of ${lab(A2)} at every size)`:` (${lab(A2)})`)+
+  `. Two buffers are live at once, so the chip footprint is twice the figure on the x axis; the dashed line `+
   `marks where that footprint equals the 32 MB L3. Past ${top} MB per buffer only the DRAM route can run: the buffers start 256 KB into `+
-  `each shire's 2.5 MB scratchpad, and two of them no longer fit in what is left.`;
+  `each shire's 2.5 MB scratchpad, and two of them no longer fit in what is left. The numbers below are ${lab(A2)}'s unless the text names a card.`;
  $('sizetext').innerHTML=
   `At ${mb(small)} MB per buffer the DRAM route runs at <b>${g1(small.dram.gb_s)} GB/s</b>, because it is not `+
   `going to DRAM at all: the 32 MB L3 holds the whole thing. Handing the data to the next shire then buys `+
@@ -327,10 +337,19 @@ CK.stackTable('media');
 (function(){
  const rows=D.intensity;
  const S=[['scp_over_dram',"own shire",'var(--c3)','scp'],['hop_over_dram',"next shire",'var(--c1)','hop']];
- const OTH=CS.filter(c=>c!==A2&&rows.some(r=>r.by_card&&r.by_card[c]));
- CK.legend('intlegend',S.map(s=>({key:s[0],label:s[1],mark:'dot',color:s[2]})).concat(
-  OTH.map(c=>({key:c,label:lab(c),mark:CK.card(c).mark,color:'var(--ink-2)'}))));
- CK.frame('intensity',{label:'Advantage over the DRAM route against vector adds per element',height:W=>W<600?320:340,
+ /* Colour is which route is compared with DRAM; the mark's shape is the card, as in section 3. */
+ const cards=CK.cardsIn([...new Set(rows.flatMap(r=>Object.keys(r.by_card||{[A2]:1})))]);
+ const rowOf=(r,c)=>r.by_card?r.by_card[c]||null:(c===A2?r:null);
+ const mark=(g,c,x,y,col)=>{const k=CK.card(c).mark,e=CK.cardMark(g,c,x,y,k==='ring'?6.5:k==='dot'?3.5:4,col);
+  if(k==='ring'){e.style.fill='none';e.style.strokeWidth='1.5';}
+  e.setAttribute('aria-hidden','true');return e;};
+ const lg=CK.legend('intlegend',S.map(s=>({key:s[0],label:s[1],mark:'dot',color:s[2]})));
+ if(cards.length>1) for(const c of cards){
+  const s=document.createElement('span'); s.className='ck-li';
+  const v=CK.el('svg',{viewBox:'0 0 18 12',width:18,height:12,'aria-hidden':'true'}); mark(v,c,9,6,'var(--ink-2)');
+  s.append(v,document.createTextNode(lab(c))); lg.el.appendChild(s);
+ }
+ CK.frame('intensity',{label:'Advantage over the DRAM route against vector adds per element, every card',height:W=>W<600?320:340,
   draw(f){
    const svg=f.svg,W=f.W,Hh=f.H,L=48,R=14,T=48,B=46,narrow=f.narrow;
    const x=CK.log(1,256,L,W-R), y=CK.log(1,40,Hh-B,T);
@@ -342,27 +361,29 @@ CK.stackTable('media');
    CK.el('line',{x1:L,x2:W-R,y1:T,y2:T,class:'ck-axis'},svg);
    for(const w of (narrow?[1,16,256]:[1,4,16,64,256])) CK.txt(svg,x(w),T-8,num(w/4),'tick','middle');
    CK.el('line',{x1:L,x2:W-R,y1:y(1),y2:y(1),style:'stroke:var(--ref);stroke-width:1.5;stroke-dasharray:5 4'},svg);
-   S.forEach(s=>{
-    CK.el('path',{d:CK.path(rows.map(r=>[r.work,r[s[0]]]),x,y),fill:'none',style:`stroke:${s[2]};stroke-width:2`},svg);
-    for(const r of rows){const c=CK.el('circle',{cx:x(r.work),cy:y(r[s[0]]),r:4,'aria-hidden':'true'},svg);c.style.fill=s[2];}
-    for(const c of OTH) for(const r of rows) if(r.by_card&&r.by_card[c])
-     cmark(svg,c,x(r.work),y(r.by_card[c][s[0]]),s[2]);
-   });
+   S.forEach(s=>cards.forEach((c,ci)=>{
+    const pts=rows.map(r=>[r.work,rowOf(r,c)]).filter(p=>p[1]).map(p=>[p[0],p[1][s[0]]]);
+    const ln=CK.el('path',{d:CK.path(pts,x,y),fill:'none'},svg); ln.style.stroke=s[2]; ln.style.strokeWidth=ci?'1.25':'2';
+    if(ci) ln.style.strokeDasharray='4 3';
+    for(const [a,b] of pts) mark(CK.el('g',{},svg),c,x(a),y(b),s[2]);
+   }));
    const nodes=[];
    for(const r of rows){
     const g=CK.el('g',{},svg), xc=x(r.work);
     CK.el('rect',{x:xc-14,y:T,width:28,height:Hh-B-T,class:'ck-hit'},g);
     CK.tip(f,g,`<b>${r.work} add${r.work>1?'s':''} per element</b> (${num(r.work/8)} flop per byte moved, ${num(r.work/4)} per byte read)<br>`+
-     S.map(s=>`${s[1]}: ${r[s[0]].toFixed(1)}× DRAM (${g1(r[s[3]].gb_s)} GB/s)`+
-      (OTH.length?`, ${lab(A2)}; `+OTH.filter(c=>r.by_card&&r.by_card[c]).map(c=>`${lab(c)} ${r.by_card[c][s[0]].toFixed(1)}×`).join(', '):'')).join('<br>'));
+     cards.map(c=>{const q=rowOf(r,c);if(!q)return null;
+      return `${lab(c)}: `+S.map(s=>`${s[1]} ${q[s[0]].toFixed(1)}× DRAM (${g1(q[s[3]].gb_s)} GB/s)`).join(', ');}).filter(Boolean).join('<br>'));
     nodes.push(g);
    }
    CK.keynav(f,nodes);
   }});
  /* a value per setting over every card: one number when the cards agree to the printed digit, else the range */
  const last=rows[rows.length-1], at=w=>{const r=rows.find(q=>q.work===w);
-  return rng(CS.filter(c=>r.by_card&&r.by_card[c]).map(c=>r.by_card[c].hop_over_dram).concat(r.by_card?[]:[r.hop_over_dram]),v=>v.toFixed(1));};
- $('intcap').textContent=`Lines and dots ${lab(A2)}${OTH.length?', '+andL(OTH.map(c=>`${CK.card(c).mark==='ring'?'rings':CK.card(c).mark==='diamond'?'diamonds':'marks'} ${lab(c)}`))+' (each point the mean of that card\u2019s passes); the text gives the range over the cards':''}, log axes. The dashed line is parity with DRAM. Each element is 4 bytes read `+
+  return rng(cards.map(c=>rowOf(r,c)).filter(Boolean).map(q=>q.hop_over_dram),v=>v.toFixed(1));};
+ $('intcap').textContent=`Log axes. The mark is the card`+
+  (cards.length>1?` (${cards.map(c=>`${lab(c)} ${CK.card(c).mark==='dot'?'filled':CK.card(c).mark==='ring'?'ring':CK.card(c).mark}`).join(', ')}; each point the mean of that card\u2019s passes); the text gives the range over the cards`:` (${lab(A2)})`)+
+  `. The dashed line is parity with DRAM. Each element is 4 bytes read `+
   'and 4 bytes written, so w adds per element are w/8 flops per byte moved; the top axis counts flops per byte read (w/4), the unit of the ridge points report.';
  $('inttext').innerHTML=
   `One add per element is pure data movement, and the hand-off is ${at(1)}× ahead. The lead holds to about four adds per element `+
@@ -439,8 +460,8 @@ CK.stackTable('media');
   (fitted.length?`An offset and its mirror hand the same pairs of shires the slab in opposite directions; they agree within `+
    `${rng(mir.map(v=>100*v),f1)}% (offsets ${W0.offset} and ${W0.mirror} differ most), a little more than the 2% the registered test allowed. `:'')+
   `Placement is not free in energy either. On a loaded mesh each hop costs 1.6–2.3 pJ per byte of random data `+
-  `(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#meaning">Heat per millimetre, §8</a>), about half of what a tensor `+
-  `load of that byte from the shire's own scratchpad costs. The hand-off's bytes cross ${f1(k(1).mean)} hops on average, so a physical `+
+  `(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#meaning">Heat per millimetre, §8</a>), about half of the `+
+  `${f1(POOLED.read['scp-local'].random.mean)} pJ a tensor load of a random byte from the shire's own scratchpad costs (section 2). The hand-off's bytes cross ${f1(k(1).mean)} hops on average, so a physical `+
   `neighbour should cost less (untested; section 7). This relay's slabs each hold a single value repeated, and such data costs less to `+
   `carry than random data.`;
 
@@ -541,9 +562,7 @@ CK.stackTable('media');
  upd();
  $('ringcap').textContent=
   `The map colours each shire by how many mesh hops the slab it reads at this offset has to travel (the stronger the blue, the farther); the arrows mark `+
-  `the longest hand-offs, drawn straight from source to destination because the route the data takes on the mesh was not measured. `+
-  `The scatter puts the relay's bandwidth at every offset against the longest hand-off (or, toggled, the mean): r = ${rr('longest')} `+
-  `against the longest${cs.length>1?` on the ${word(cs.length)} cards`:''}, ${rr('mean')} against the mean. `+
-  (cs.length>1?`${(t=>t[0].toUpperCase()+t.slice(1))(andL(cs.map(c=>`${mk(c)} ${lab(c)}`)))}, side by side at each offset; each point is the mean of that card's passes, and the dashed line is ${lab(A2)}'s least-squares line. `:'')+
-  `Consistent with the slowest pair setting the pace at each barrier.`;
+  `the longest hand-offs, drawn straight because the route on the mesh was not measured. `+
+  `The scatter puts the bandwidth at every offset against the longest hand-off or, toggled, the mean`+
+  (cs.length>1?`: ${andL(cs.map(c=>`${mk(c)} ${lab(c)}`))}, side by side at each offset, each the mean of that card's passes; the dashed line is ${lab(A2)}'s least-squares line.`:'.');
 })();

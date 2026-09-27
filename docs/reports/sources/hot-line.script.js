@@ -59,9 +59,12 @@ const POOLED={
  const lo=agree(edge.map(e=>String(e.prev.remote_minions+1))), hi=agree(edge.map(e=>String(e.req.remote_minions)));
  $('k3').textContent=edge.length?(lo===hi?hi:`${lo}–${hi}`):'—';
  const e0=edge[0];
+ /* where the requesters ran: the one-requester row's shire (context), hops from the line's home, shire 0 */
+ const rS=CTX.remote_atomic_latency_shire, LY=D.layout||{}, rH=rS!=null&&LY[rS]&&LY[0]?Math.abs(LY[rS][0]-LY[0][0])+Math.abs(LY[rS][1]-LY[0][1]):null;
+ const where=rS!=null?`requesters in shire ${rS}${rH!=null?`, ${word(rH)} hop${rH===1?'':'s'} from the line`:''}`:'';
  $('k3sub').textContent=e0&&RT?
   `${e0.prev.remote_minions} leave the host at ${pr(edge.map(e=>fr(e.prev)),1)} of its rate, ${e0.req.remote_minions} stop it, on all ${word(edge.length)} cards `+
-  `(the inequality in section 3 puts the edge at ${Math.ceil(RT/BANK)}); one shire has 32`:'';
+  `(${where?where+'; ':''}the inequality in section 3 puts the edge at ${Math.ceil(RT/BANK)}); one shire has 32`:'';
  $('k4').textContent=(c.nj_per_op/s.nj_per_op).toFixed(0)+'×';
 })();
 
@@ -208,7 +211,7 @@ const POOLED={
     return `<tr><td class="num">${(w/(CLOCK_MHZ*1e3)).toFixed(0)} ms</td><td class="num">${lohi(rs)}</td><td class="num">${(rem/1e6).toPrecision(2)} M</td></tr>`;}).join('')+'</tbody>';
   const other=h=>WN.filter(r=>r.home===h), np=Math.max(...WN.map(r=>r.n_passes||1));
   const dram=[...other('dramlocal:0'),...other('dramstream:0')], dstream=other('scpstream:0');
-  $('wincap').textContent=`Every launch at each window: ${word(np)} passes on each of ${CARDS.map(c=>CK.card(c).label).join(', ')}, with the hot line in the host's `+
+  $('wintabcap').textContent=`Every launch at each window: ${word(np)} passes on each of ${CARDS.map(c=>CK.card(c).label).join(', ')}, with the hot line in the host's `+
    `scratchpad and the host reading it. With the host reading DRAM instead the count is ${lohi(dstream)} at every window, and under a DRAM-homed hot line `+
    `${lohi(dram)}.`;
  } else if(CTX.window_independence){
@@ -224,6 +227,68 @@ const POOLED={
    (c0.per!=null?` (${n0(c0.per)} per minion)`:'')+`, with ten warm-up loads ${c10.txt}`+(c10.per!=null?` (${n0(c10.per)} per minion)`:'')+
    `, against ${c5.txt} after the usual five, in every pass on all ${word(CK.cardsIn(WU.map(r=>r.card)).length)} cards of the three-card check.`;
  }
+ /* "Stops, not slows": operations completed in the window, host against remote, log-log. The measured windows (the
+    table's rows: the hot line in the host's scratchpad and the host reading its own, each card's pass means), or the
+    hand-kept table of the first session where no measured one is at hand, plus the 21 two-second "starved" runs of
+    the 23 September reruns on aifoundry2 and aifoundry3 (context.window_stop_runs, analyze_hotline.py --stop-runs).
+    Cards as elsewhere on this page: the first card a filled dot, the others rings around it. */
+ const msOf=w=>w/(CLOCK_MHZ*1e3), wlab=ms=>ms>=1000?n0(ms/1000)+' s':n0(ms)+' ms';
+ const andL=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+ const mean=a=>a.reduce((s,v)=>s+v,0)/a.length;
+ const WROWS=WN&&WN.length?WN.filter(r=>r.home==='scplocal:0').map(r=>({ms:msOf(r.window_cycles),card:r.card,host:r.host_ops,
+    lo:r.host_ops_lo,hi:r.host_ops_hi,n:r.n_passes||1,remote:r.remote_ops}))
+   :(CTX.window_independence||[]).map(r=>({ms:msOf(r.window),card:SESSION,host:r.host_ops,lo:r.host_ops,hi:r.host_ops,n:1,remote:r.remote_ops}));
+ const STOPS=(CTX.window_stop_runs||[]).map(r=>({ms:msOf(r.window_cycles),card:r.card,host:r.host_ops,lo:r.host_ops,hi:r.host_ops,remote:r.remote_ops}));
+ if(WROWS.length&&STOPS.length){
+  const wms=[...new Set(WROWS.map(r=>r.ms))].sort((a,b)=>a-b), sms=[...new Set(STOPS.map(r=>r.ms))].sort((a,b)=>a-b);
+  const wcards=CK.cardsIn([...new Set(WROWS.map(r=>r.card))]), scards=CK.cardsIn([...new Set(STOPS.map(r=>r.card))]);
+  const col=(ms,rs,stop)=>({ms,rs,stop,host:mean(rs.map(r=>r.host)),remote:mean(rs.map(r=>r.remote))});
+  const WC=wms.map(ms=>col(ms,WROWS.filter(r=>r.ms===ms),false)), SC=sms.map(ms=>col(ms,STOPS.filter(r=>r.ms===ms),true)), COLS=WC.concat(SC);
+  const x0=COLS[0].ms, x1=COLS[COLS.length-1].ms, hostY0=WC[0].host, slowY1=hostY0*(x1/x0);
+  const allY=[].concat(...COLS.map(c=>c.rs.map(r=>r.host)),...COLS.map(c=>c.rs.map(r=>r.remote)),[slowY1]);
+  const ci=c=>Math.max(0,CARDS.indexOf(c));
+  CK.frame('wincht',{label:'Operations completed in the window, host against the remote atomics hammering it, every card, log scale on both axes',
+   height:300,
+   draw(f){
+    const svg=f.svg,W=f.W,H=f.H,L=54,R=14,T=20,B=38;
+    const x=CK.log(x0*0.8,x1*1.4,L,W-R), y=CK.log(Math.min(...allY)*0.15,Math.max(...allY)*1.5,H-B,T);   // room under the host's line for its label
+    CK.axes(f,{x,y,L,R,T,B,xl:'window',yl:'operations completed in it',xt:f.narrow?[5,100,2000]:[5,10,40,100,1000,2000],xfmt:wlab});
+    CK.el('path',{d:CK.path([[x0,hostY0],[x1,slowY1]],x,y),fill:'none',style:'stroke:var(--ref);stroke-width:1.5;stroke-dasharray:5 4'},svg);
+    CK.txt(svg,x(x1),y(slowY1)-6,'if it only slowed','lab','end');
+    /* the lines join the measured windows only (the mean over cards); the 2 s runs stand apart */
+    CK.el('path',{d:CK.path(WC.map(c=>[c.ms,c.remote]),x,y),fill:'none',style:'stroke:var(--c1);stroke-width:2'},svg);
+    CK.el('path',{d:CK.path(WC.map(c=>[c.ms,c.host]),x,y),fill:'none',style:'stroke:var(--ink-2);stroke-width:2'},svg);
+    const last=WC[WC.length-1];
+    CK.txt(svg,x(last.ms),y(last.remote)-16,'remote atomics','lab-strong','end').style.fill='var(--c1)';
+    CK.txt(svg,x(WC[0].ms)+10,y(WC[0].host)+20,'host shire’s own loads','lab-strong','start');
+    const nodes=[];
+    for(const c of COLS){
+     const g=CK.el('g',{},svg);
+     CK.el('rect',{x:x(c.ms)-12,y:T,width:24,height:H-B-T,class:'ck-hit'},g);
+     for(const [k,colr] of [['host','var(--ink-2)'],['remote','var(--c1)']])
+      for(const r of c.rs.slice().sort((p,q)=>ci(q.card)-ci(p.card))){
+       const st=cardStyle(ci(r.card)),e=CK.el('circle',{cx:x(r.ms),cy:y(r[k]),r:4+st.grow,'aria-hidden':'true'},g);
+       if(st.fill) e.style.fill=colr; else {e.style.fill='none';e.style.stroke=colr;e.style.strokeWidth='1.5';if(st.dash)e.style.strokeDasharray=st.dash;}
+      }
+     CK.tip(f,g,()=>`<b>${wlab(c.ms)} window</b>${c.stop?', the 23 September reruns':', the three-card check'}<br>`+
+      CK.cardsIn([...new Set(c.rs.map(r=>r.card))]).map(cd=>{const rs=c.rs.filter(r=>r.card===cd);
+       const lo=Math.min(...rs.map(r=>r.lo)),hi=Math.max(...rs.map(r=>r.hi)),rem=mean(rs.map(r=>r.remote));
+       return `${CK.card(cd).label}: host ${lo===hi?n0(lo):n0(lo)+'–'+n0(hi)} loads, remote ${(rem/1e6).toPrecision(rem>1e7?4:3)} M atomics `+
+        (c.stop?`(${word(rs.length)} run${rs.length>1?'s':''})`:`(mean of ${word(rs[0].n)} passes)`);}).join('<br>'));
+     nodes.push(g);
+    }
+    CK.keynav(f,nodes);
+   }});
+  const growth=(Math.max(...STOPS.map(r=>r.remote))/WC[0].remote).toFixed(0);
+  const hs=[].concat(...COLS.map(c=>c.rs.map(r=>r.lo)),...COLS.map(c=>c.rs.map(r=>r.hi))), hlo=Math.min(...hs), hhi=Math.max(...hs);
+  const np=Math.max(...WROWS.map(r=>r.n));
+  $('wincap').textContent=`Log–log. The ${andL(wms.map(wlab))} windows are ${WN&&WN.length?`the three-card check's (${word(np)} passes on each of ${andL(wcards.map(c=>CK.card(c).label))}; the table below)`:`the first session's, on ${CK.card(SESSION).label}`}, `+
+   `with the hot line in the host's scratchpad and the host reading its own; the 2 s windows are the ${word(STOPS.length)} such runs of the 23 September reruns on ${andL(scards.map(c=>CK.card(c).label))}. `+
+   `Marks: ${CK.cardsIn(wcards.concat(scards)).map(c=>`${markWord(ci(c))} ${CK.card(c).label}`).join(', ')}. `+
+   `From ${wlab(x0)} to ${wlab(x1)} (${n0(x1/x0)}× more time) the remote atomics completed rise ${growth}×, while the host shire's own loads stay at `+
+   `${hlo===hhi?n0(hlo):n0(hlo)+'–'+n0(hhi)} in every launch. The dashed line is not a measurement: `+
+   `it is what the host's own count would reach if it merely slowed down, growing with the window the way the pressure on it does.`;
+ } else $('winstops').hidden=true;
 })();
 
 /* ---------- section 3: the inequality, and the explorer that puts both sweeps on one load axis ---------- */
@@ -246,10 +311,11 @@ const RUNS=[...D.requesters.map(r=>({...r,ser:'req'})),...D.pace.map(r=>({...r,s
  const run=(ser,N,P)=>RUNS.filter(r=>r.ser===ser&&r.remote_minions===N&&r.pace===P);
  const N20=tested.includes(20)?20:below, r20=run('req',N20,0), p12=run('pace',NP,12000), p16=run('pace',NP,16000);
  const PL=D.pollers||[];
+ const rS=CTX.remote_atomic_latency_shire, LY=D.layout||{}, rH=rS!=null&&LY[rS]&&LY[0]?Math.abs(LY[rS][0]-LY[0][0])+Math.abs(LY[rS][1]-LY[0][1]):null;
  $('ineqtext').innerHTML=
   `Here <i>N</i> is the number of remote minions hammering the line, <i>P</i> the cycles each waits between atomics, `+
   `and <i>t</i> the measured ${n0(RT)}-cycle round trip. With <i>P</i> = 0 it puts the edge at ${edge} requesters`+
-  (above===edge&&below===edge-1?`, and that is where it is: ${below} requesters leave the host at ${pr(reqAt(below).map(frN),1)} of its rate alone `+
+  (above===edge&&below===edge-1?`, and that is where it is${rS!=null?`, for requesters in shire ${rS}${rH!=null?`, ${word(rH)} mesh hop${rH===1?'':'s'} from the line`:''}`:''}: ${below} requesters leave the host at ${pr(reqAt(below).map(frN),1)} of its rate alone `+
    `with as many minions, and ${edge} stop it (${pr(reqAt(edge).map(frN),2)})${stopEvery(edge)?' in every pass':''}, on all ${word(CARDS.length)} cards. `
    :`, between the ${below} and ${above} that were tested. `)+
   `It also prices section 5: for ${n0(NP)} requesters it needs <i>P</i> above about `+
@@ -656,8 +722,7 @@ if(CTX.errata) $('errata').innerHTML=CTX.errata.map(e=>
    CK.inside(fr,labs);
   }});
  $('nrgcap').textContent=`Log scale. Each line is a case's range over the ${word(nP)} pooled passes of the table's last column, the tick their mean, and the marks `+
-  `each card's own mean (${ecards.map(c=>`${CK.card(c).label} ${CK.card(c).mark==='dot'?'filled':CK.card(c).mark}`).join(', ')}). The contended line costs `+
-  `${f(C.mean)} nJ per atomic [${f(C.lo)}–${f(C.hi)}] and the spread one ${f(Sp.mean)} [${f(Sp.lo)}–${f(Sp.hi)}]: the ranges are far apart. `+
+  `each card's own mean (${ecards.map(c=>`${CK.card(c).label} ${CK.card(c).mark==='dot'?'filled':CK.card(c).mark}`).join(', ')}); the contended and spread ranges are far apart. `+
   `The reading-only row is grey and dashed because its power is inside the idle baseline's noise (the note above).`;
 })();
 

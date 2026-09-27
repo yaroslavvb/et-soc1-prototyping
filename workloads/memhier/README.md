@@ -69,7 +69,7 @@ simulator's timing is meaningless.
 
 ## Lab etiquette
 
-The card is shared. Check `uptime`, `who` and `ps` first. Every command here holds the device for under 10 s
+The card is shared. Check `et-who`, `who` and `uptime` first, ask before using it, and hold its lock for each run (`flock -n /run/lock/etsoc-shire0.lock timeout 10 <command>`; AGENT.md §5). Every command here holds the device for under 10 s
 (`--budget 8` stops launching after 8 s), and builds use `nice -j4`.
 
 On 18 September one energy run crashed the host runtime during the DRAM stream, and the card's master firmware then

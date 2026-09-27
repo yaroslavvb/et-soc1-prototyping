@@ -276,7 +276,9 @@ def v3_cards(raw, passes_json, out_path, model_json):
     copied to a scratch folder with its labels un-gzipped. The version-3 build's timed L1 hit reads 17 raw, not 10, so
     every latency is re-referenced to the pass's own L1 hit, as the reducer's recompute_latency.py --l1-ref does:
     OVERHEAD becomes 5 + (median raw L1 hit - 10), which leaves the time stamps raw. The refresh series' row
-    clusters are read after that shift (the reducer's extra_values.py reads P5b and P6r without it). The DRAM model
+    clusters are read after that shift (the reducer's extra_values.py reads P5b and P6r without it). Per home shire it keeps each
+    pass's L3 median (l3_by_slice) and the median of its lines' fastest DRAM loads (mem_by_home), for the page's
+    memory-shire leg. The DRAM model
     error uses the 19 September model as it stands (model_json: that session's summary.json, its constant and memory
     shire positions, not refitted), each line's fastest of three loads, as the reducer's MEM-P2 does."""
     import gzip
@@ -295,7 +297,7 @@ def v3_cards(raw, passes_json, out_path, model_json):
              "dram_med": [], "dram_hist": collections.Counter(), "ms_const": [], "period": [], "op_cycles": [],
              "rows": [0, 0, 0, 0], "closed_minus_open": [], "closed_mean": [], "open_mean": [],
              "pto": collections.defaultdict(lambda: [0, 0]), "model_err": collections.Counter(), "within3": [],
-             "locked": []}
+             "locked": [], "mem_by_home": collections.defaultdict(list)}
         for pk in meta["kept"][card]["x1"]:
             k = int(pk[1:])
             if info[k]["arena_bases"] != [hex(ARENA_BASE)]:
@@ -326,6 +328,8 @@ def v3_cards(raw, passes_json, out_path, model_json):
             for s, v in dec["l3_by_slice"].items():
                 C["l3_by_slice"][s].append(v["med"])
             C["dram_med"].append(dec["mem"]["med"])
+            for s_, v in dec["mem_by_home"].items():  # per home shire: the median of its lines' fastest DRAM loads
+                C["mem_by_home"][s_].append(v["fast_med"])
             C["dram_hist"].update(dict(dec["mem_hist"]))
             C["ms_const"].append(dec["ms_const"])
             C["period"].append(ref["period_cycles"])
@@ -361,6 +365,7 @@ def v3_cards(raw, passes_json, out_path, model_json):
                                 "slow_med": st.median(v for v in lat0 if v >= 220)})
         C["ladder"] = dict(C["ladder"])
         C["l3_by_slice"] = {s: {"med": v, "hops": g.hops(0, s)} for s, v in sorted(C["l3_by_slice"].items())}
+        C["mem_by_home"] = {s: v for s, v in sorted(C["mem_by_home"].items())}
         C["dram_hist"] = sorted(C["dram_hist"].items())
         C["pto"] = {d: v for d, v in sorted(C["pto"].items())}
         C["model_err"] = sorted(C["model_err"].items())

@@ -348,44 +348,92 @@ const GOV = (function () {
   return {select(r) { stop(); if (r.run !== st.run) { st.run = r.run; seg.set(r.run); selectRun(r.run, r.i); } else setIdx(r.i); }};
 })();
 
-/* ---------- the down-steps against the two thresholds ---------- */
+/* ---------- the governor's rule as a plane: die temperature x board power, shaded by the branch that fires,
+   with a card seg (top 12, item 4(b)) that moves the TDP line from aifoundry2's 65 W to aifoundry3's 0 W, where the
+   step-up region has no height left to draw. aifoundry3 pairs no die reading with its throttle-down log, so its
+   events show as a board-power rug instead of points on the plane. The cards and their settings are the three-card
+   check's readouts (D.v3.governor, 26 September) when present, else the 22 September readouts (D.cards.config); a card
+   with neither clock steps nor a governor log (aifoundry1's card 1) shows its plane and says why it has no points. */
 (function () {
   let mode = 'after';
+  const G3 = D.v3 && D.v3.governor, SP3 = D.cards.sptrace_aifoundry3;
+  const CFG = G3 ? Object.fromEntries(Object.keys(G3).map(c => [c, G3[c].config[0]])) : D.cards.config;
+  const cardIds = CK.cardsIn(CFG);
+  let cardId = cardIds[0];
   CK.seg('attrib-mode', {label: 'Read the sample', options: [['after', 'just after the step'], ['before', 'just before it']],
     value: mode, onChange: v => { mode = v; frame.redraw(); }});
-  const tip = (r, why) => `<b>Run ${r.run + 1} · ${r.values}</b>, ${r.f0}→${r.f1} MHz at ${f2(r.t)} s<br>` +
-    `just before: die ${f0(r.T_prev)} °C, board ${f1(r.P_prev)} W → ${r.why_prev}<br>` +
-    `just after: die ${f0(r.T)} °C, board ${f1(r.P)} W → ${r.why}<br>Selecting it replays the step in the chart above`;
+  CK.cardSeg('attrib-card', {cards: cardIds, bus: 'dvfs-attrib-card', value: cardId, onChange: v => { cardId = v; frame.redraw(); }});
+  const tip = r => `<b>Run ${r.run + 1} · ${r.values}</b>, ${r.f0}→${r.f1} MHz at ${f2(r.t)} s<br>` +
+    `just before: die ${f0(r.T_prev)} °C, board ${f1(r.P_prev)} W${r.why_prev ? ' → ' + r.why_prev : ' → neither test fires'}<br>` +
+    `just after: die ${f0(r.T)} °C, board ${f1(r.P)} W${r.why ? ' → ' + r.why : ' → neither test fires'}<br>Selecting it replays the step in the chart above`;
+  const cap = document.getElementById('attrib-cap');
   function draw(f) {
     const W = f.W, H = f.H, L = 44, R = 12, T = 26, B = 40;
     const x = CK.lin(62.5, 68.5, L, W - R), y = CK.lin(25, 95, H - B, T);
+    const cfg = CFG[cardId], cTC = cfg.temp_threshold_c, cTW = cfg.tdp_w;
+    const xTC = x(cTC + 0.5), yTWraw = y(cTW), yTW = Math.min(Math.max(yTWraw, T), H - B), offChart = yTWraw > H - B + 0.5;
+    // the three branches of rule(): thermal-down (right of xTC), power-down (below xTC, above the TDP line), step-up (below both)
+    CK.el('rect', {x: xTC, y: T, width: (W - R) - xTC, height: (H - B) - T, fill: 'var(--c7)', opacity: 0.12}, f.svg);
+    CK.el('rect', {x: L, y: T, width: xTC - L, height: yTW - T, fill: 'var(--c4)', opacity: 0.14}, f.svg);
+    if (!offChart) CK.el('rect', {x: L, y: yTW, width: xTC - L, height: (H - B) - yTW, fill: UPC, opacity: 0.12}, f.svg);
     CK.axes(f, {x, y, L, R, T, B, xt: [63, 64, 65, 66, 67, 68], yt: [30, 50, 70, 90],
       xl: 'die temperature on that sample, °C (whole degrees)', yl: 'board power on that sample, W'});
     const dash = a => CK.el('line', Object.assign({stroke: 'var(--bad)', 'stroke-width': 1.3, 'stroke-dasharray': '5 4'}, a), f.svg);
-    dash({x1: x(TC + 0.5), x2: x(TC + 0.5), y1: T, y2: H - B}); dash({x1: L, x2: W - R, y1: y(TW), y2: y(TW)});
-    CK.txt(f.svg, x(TC + 0.5) + 5, T + 12, 'thermal test fires →', 'lab');
-    CK.txt(f.svg, L + 4, y(TW) - 5, `power test fires above ${TW} W`, 'lab');
-    const pts = DOWN.map(r => mode === 'after' ? {r, T: r.T, P: r.P, why: r.why} : {r, T: r.T_prev, P: r.P_prev, why: r.why_prev});
-    const groups = {};
-    pts.forEach(p => (groups[p.T + '|' + Math.round(p.P / 2)] = groups[p.T + '|' + Math.round(p.P / 2)] || []).push(p));
-    Object.values(groups).forEach(g => g.forEach((p, k) => (p.dx = (k - (g.length - 1) / 2) * 0.22)));
-    pts.sort((a, b) => a.T + a.dx - (b.T + b.dx) || a.P - b.P);
-    const nodes = pts.map(p => {
-      const cx = x(p.T + p.dx), cy = y(p.P), c = CAUSE[p.why];
-      const node = c.m === 'box' ? CK.el('rect', {x: cx - 5.5, y: cy - 5.5, width: 11, height: 11, rx: 1.5, fill: c.c, stroke: 'var(--surface)', 'stroke-width': 1.5}, f.svg)
-        : c.m === 'ring' ? CK.el('circle', {cx, cy, r: 5.5, fill: 'var(--surface)', stroke: c.c, 'stroke-width': 2.2}, f.svg)
-        : CK.el('circle', {cx, cy, r: 6, fill: c.c, stroke: 'var(--surface)', 'stroke-width': 1.5}, f.svg);
-      CK.tip(f, node, tip(p.r));
-      node.style.cursor = 'pointer';
-      node.addEventListener('click', () => GOV.select(p.r));
-      return node;
-    });
-    CK.keynav(f, nodes, {onEnter: (n_, k) => GOV.select(pts[k].r)});
-    const cnt = tally(pts, 'why');
-    CK.legend('attrib-leg', Object.keys(CAUSE).filter(k => cnt[k]).map(k => ({key: k, label: `${k} (${cnt[k]})`, mark: CAUSE[k].m, color: CAUSE[k].c})));
+    dash({x1: xTC, x2: xTC, y1: T, y2: H - B});
+    CK.txt(f.svg, xTC + 5, T + 12, 'thermal test fires →', 'lab');
+    if (offChart) CK.txt(f.svg, L + 4, H - B - 6, `power test fires above ${cTW} W: always true here`, 'lab');
+    else { dash({x1: L, x2: W - R, y1: yTW, y2: yTW}); CK.txt(f.svg, L + 4, yTW - 5, `power test fires above ${cTW} W`, 'lab'); }
+    const nodes = [], legItems = [];
+    if (cardId === 'aifoundry2') {
+      const pts = TR.map(r => mode === 'after' ? {r, T: r.T, P: r.P, why: r.why} : {r, T: r.T_prev, P: r.P_prev, why: r.why_prev});
+      const groups = {};
+      pts.forEach(p => (groups[p.T + '|' + Math.round(p.P / 2)] = groups[p.T + '|' + Math.round(p.P / 2)] || []).push(p));
+      Object.values(groups).forEach(g => g.forEach((p, k) => (p.dx = (k - (g.length - 1) / 2) * 0.22)));
+      pts.sort((a, b) => a.T + a.dx - (b.T + b.dx) || a.P - b.P);
+      pts.forEach(p => {
+        const cx = x(p.T + p.dx), cy = y(p.P);
+        const node = p.r.dir === 'up'
+          ? CK.el('polygon', {points: `${cx},${cy - 6} ${cx + 6},${cy + 5} ${cx - 6},${cy + 5}`, fill: UPC, stroke: 'var(--surface)', 'stroke-width': 1.3}, f.svg)
+          : CAUSE[p.why].m === 'box' ? CK.el('rect', {x: cx - 5.5, y: cy - 5.5, width: 11, height: 11, rx: 1.5, fill: CAUSE[p.why].c, stroke: 'var(--surface)', 'stroke-width': 1.5}, f.svg)
+          : CAUSE[p.why].m === 'ring' ? CK.el('circle', {cx, cy, r: 5.5, fill: 'var(--surface)', stroke: CAUSE[p.why].c, 'stroke-width': 2.2}, f.svg)
+          : CK.el('circle', {cx, cy, r: 6, fill: CAUSE[p.why].c, stroke: 'var(--surface)', 'stroke-width': 1.5}, f.svg);
+        CK.tip(f, node, tip(p.r));
+        node.style.cursor = 'pointer';
+        node.addEventListener('click', () => GOV.select(p.r));
+        nodes.push(node);
+      });
+      CK.keynav(f, nodes, {onEnter: (n_, k) => GOV.select(pts[k].r)});
+      const cnt = tally(pts.filter(p => p.r.dir === 'down'), 'why'), nUp = pts.filter(p => p.r.dir === 'up').length;
+      Object.keys(CAUSE).filter(k => cnt[k]).forEach(k => legItems.push({mark: CAUSE[k].m, color: CAUSE[k].c, label: `${k} down (${cnt[k]})`}));
+      if (nUp) legItems.push({mark: 'up', color: UPC, label: `step up (${nUp})`});
+      if (cap) cap.innerHTML = 'Points within one whole degree are spread sideways so each is visible. Select a point ' +
+        '(click, tap or Enter) to replay its step in the chart above.';
+    } else if (cardId !== 'aifoundry3') {
+      // a card whose clock never left 600 MHz in the check and whose trace windows held no governor line
+      const lab = CK.card(cardId).label, h = (D.v3 && D.v3.clock_mhz[cardId]) || {}, n = Object.values(h).reduce((a, b) => a + b, 0);
+      CK.txt(f.svg, L + 6, H - B - 10, 'no step to place', 'lab');
+      if (cap) cap.innerHTML = `${lab} reads the same settings as aifoundry2 (${cTW} W, ${cTC} °C), so the plane is aifoundry2's. ` +
+        `The three-card check launched it warm and its clock read ${Object.keys(h).join(', ')} MHz in all ${num(n, 0)} samples, ` +
+        `and its trace windows held no governor line, so it has no step to place.`;
+    } else {
+      const pw = (SP3 && SP3.pwr_mw) || [], rx = W - R - 9;
+      pw.forEach(mw => {
+        const w = mw / 1000, cy = y(Math.min(95, Math.max(25, w)));
+        const node = CK.el('rect', {x: rx - 5, y: cy - 2, width: 10, height: 4, rx: 1, fill: 'var(--ref)'}, f.svg);
+        CK.tip(f, node, `<b>${cardId} down-event</b>: board ${f1(w)} W<br>die temperature not recorded by this trace`);
+        nodes.push(node);
+      });
+      CK.txt(f.svg, rx, T + 12, 'board W ↓', 'lab', 'middle');
+      CK.keynav(f, nodes);
+      legItems.push({mark: 'dash', color: 'var(--ref)', label: `${cardId} down-events, board power only (${pw.length})`});
+      if (cap) cap.innerHTML = `${CK.card(cardId).label}'s TDP reads 0 W (a boot service sets it), so the power test is always true and every launch logs a down-event ` +
+        `(${SP3 ? f0(SP3.down_events) : '?'} in the trace window of 22 September; the check's windows of 26 September held no governor line); its die temperature is not in that log, so the ` +
+        `${word(pw.length)} readings we have sit in a rug at the right, by board power alone.`;
+    }
+    legendHTML('attrib-leg', legItems);
   }
   const frame = CK.frame('attrib', {height: W => (W < 600 ? 300 : 320), minW: 280, maxW: 640,
-    label: 'Every down-step by the die temperature and board power on the chosen sample', draw});
+    label: "The governor's rule as a die-temperature by board-power plane, shaded by the branch that fires, with the selected card's own events", draw});
 })();
 
 /* ---------- the down-steps as a table ---------- */
@@ -411,9 +459,7 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
     `On aifoundry2 at 80 °C, leakage is ${V.leakR} W: ${V.idleShR} of an idle card and ${V.busyShR} of a ${V.busyW} W random-data matmul. ` +
     `The idle readings fix its slope, ${V.slope80} W/°C, but not its split from the fixed power, hence the ranges (the idle law, <a href="#what-that-costs">§5</a>). ` +
     `The three-card check's cooling cycles could not narrow the split: they allow ${V.kBusy} of a busy card, so leakage above 30% under load is not established. ` +
-    `At ${V.T3} °C, where aifoundry3 ran, the same law puts it at ${V.busy3R} of a busy card.`],
-  ['Leakage costs power, not correctness.', 'consistent, weakly tested',
-    `The matmul benchmark checks its outputs bit-exact against a host reference, and the relay checks every element. Every checked result was correct except two relay launches on aifoundry2 on 23 September, in one pass of the discarded first attempt at a cool-card rerun: both ran on a 65–66 °C die while the governor dropped the clock from 800 to 600 MHz inside the launch, and the relay’s launches on a hotter die (71–73 °C, four sessions), where leakage is higher, were all correct. Why the two failed is not established (<a href="#method-and-what-is-not-established">§8</a>). The power sessions’ launches were not compared with a reference (none raised the tensor unit’s error flag). The long idle before the 22 September sample (about ${f1(ic.hours_idle)} hours since our last recorded workload) cannot show errors either way: no checked result spans it, DRAM ECC is compiled off and the SRAM ECC interrupt sources are never enabled.`]];
+    `At ${V.T3} °C, where aifoundry3 ran, the same law puts it at ${V.busy3R} of a busy card.`]];
   const t = document.getElementById('verdict');
   t.innerHTML = '<thead><tr><th>What David Kanter said (paraphrased)</th><th>Verdict on the ET-SoC-1</th><th>Evidence</th></tr></thead><tbody>' +
     R.map(v => `<tr><td>${v[0]}</td><td class="lvl">${v[1]}</td><td class="small">${v[2]}</td></tr>`).join('') + '</tbody>';

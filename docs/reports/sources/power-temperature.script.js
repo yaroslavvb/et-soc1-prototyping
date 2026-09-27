@@ -72,7 +72,7 @@ put('rf-12s', andList(RFC.map((c, i) => (i ? `${pct(RF[c].frac_1s)} and ${pct(RF
     if (n < 3) return '';
     return e[n - 1] > 2 * e[n - 2] ? `: ${word(n - 1)} gave ${CK.fmt.range(e[0], e[n - 2], 2, 'W/°C')} (median ${num(median(e.slice(0, -1)), 2)}) and one ${num(e[n - 1], 2)}`
       : `: from ${num(e[0], 2)} to ${num(e[n - 1], 2)} W/°C`; };
-  put('busy-drift-a3', `On the second card, aifoundry3, the same runs at ${rng(a3)} °C, where the idle law's own slope is about ` +
+  put('busy-drift-a3', `On aifoundry3 the same runs at ${rng(a3)} °C, where the idle law's own slope is about ` +
     `${num(lawSlope((a3.temp_c[0] + a3.temp_c[1]) / 2), 2)} W/°C, gave ${num(a3.w_per_c, 2)} W/°C on average` +
     (a3.se > 0.1 * a3.w_per_c ? `, but its ${word(a3.runs)} runs scatter widely (standard error ${num(a3.se, 2)} W/°C)${each(a3)}.`
       : ` (${word(a3.runs)} runs, standard error ${num(a3.se, 2)} W/°C).`));
@@ -128,7 +128,7 @@ const M = [
  ['Power state, throttle residency, thresholds', 'card-wide · µs residency counters', 'DM_CMD_GET_MODULE_POWER_STATE, _RESIDENCY_*, _TEMPERATURE_THRESHOLDS, _STATIC_TDP_LEVEL', 'works_now', 'works now'],
  ['Device-wide bandwidth and utilisation', 'DDR, L2/L3, PCIe · 1 ms samples', 'MMST trace; a proxy for where memory energy goes', 'works_now', 'works now'],
  ['Energy per event', 'pJ per load, per multiply-add, per mesh hop · needs ≥10⁹ identical events/s for seconds', 'rail power above a same-temperature baseline ÷ event rate (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes">memory anatomy</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment</a>; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">the energy manual</a> does it for every instruction and byte)', 'works_now', 'works now'],
- ['Static against dynamic power', 'per rail', 'frequency sweep at fixed voltage: DM_CMD_SET_FREQUENCY with power management off. Changes the card for everyone; not run here', 'works_now', 'works now, with care'],
+ ['Static against dynamic power', 'per rail', 'frequency sweep at fixed voltage: DM_CMD_SET_FREQUENCY with power management off. Changes the card for everyone, which the lab leaves to its admin; not run here', 'research_only', 'lab admin only'],
  ['Instantaneous rail power', '3 rails · 1 mW · per pass', 'the SP already reads it each pass and discards it; a few assignments in thermal_pwr_mgmt.c', 'needs_fw_change', 'firmware'],
  ['Faster sampling', 'tens to hundreds of Hz', 'in the firmware source each pass makes ~96 I2C transactions, each followed by a hard-coded 1 ms wait, a floor of about 100 ms; the measured pass is longer. In the SP\'s own trace (three passes per card) it is 133 ms on aifoundry2 and 135 ms on aifoundry1-c1 with no telemetry client, 160 and 162 ms while ettelem samples at 10 Hz; on aifoundry3 224 and 266 ms, 1.7× as long, for reasons not established. Skip the 84-read snapshot and fix the wait', 'needs_fw_change', 'firmware'],
  ['Per-shire temperature; process detectors', '34 shires · 0.06 °C in hardware; ring-oscillator counts in µs windows', 'sampled continuously by the PVT controllers, never exported', 'needs_fw_change', 'firmware'],
@@ -408,6 +408,8 @@ driftOut();
 /* ---------- §2 bullet 4: the remainder at the load edges, board power filtered like the rails ---------- */
 const EDGE = {tau: 0, avg: false};
 const FT = FAST.t, FIDX = FAST.windows.map(([a, z]) => FT.map((t, i) => i).filter(i => FT[i] >= a && FT[i] < z));
+// a "fresh" 10 Hz sample: FAST.board actually changed from the sample before it (the service processor's own pass rate)
+const FRESH = FIDX.map(idx => idx.filter((i, j) => j > 0 && FAST.board[i] !== FAST.board[idx[j - 1]]));
 function boardPrime(idx, tau, avg) {
   let y = null, tp = null;
   return idx.map(i => {
@@ -435,6 +437,8 @@ function edgeFrame(id, w) {
     CK.axes(f, {x, y, L, R, T, B, xt, xfmt: v => v + ' s', yfmt: v => num(v, 0)});
     const z0 = CK.el('line', {x1: L, x2: W - R, y1: y(0), y2: y(0), 'stroke-width': 1}, f.svg); z0.style.stroke = 'var(--ink)';
     for (const g of GAPS) if (g >= a && g < z) CK.el('line', {x1: x(g), x2: x(g), y1: H - B, y2: H - B - 7, stroke: 'var(--ink-2)', 'stroke-width': 1.5}, f.svg);
+    const fresh = FRESH[w];
+    fresh.forEach(i => CK.el('line', {x1: x(FT[i]), x2: x(FT[i]), y1: H - B, y2: H - B - 4, stroke: 'var(--c1)', 'stroke-width': 1, opacity: 0.6}, f.svg));
     STEADY[w].forEach((v, j) => {
       const e = CK.el('line', {x1: L, x2: W - R, y1: y(v), y2: y(v), 'stroke-width': 1}, f.svg); e.style.stroke = 'var(--ref)'; e.style.strokeDasharray = '3 3';
       const lab = (j === 0) === (w === 0) ? 'idle' : 'matmul';
@@ -446,7 +450,9 @@ function edgeFrame(id, w) {
       e.style.stroke = color;
     };
     line(bp, 'var(--c1)', 1.5, 0.45, 'b'); line(idx.map(i => FAST.rails[i]), 'var(--c2)', 1.5, 0.45, 'r'); line(rem, 'var(--c5)', 2, 1, 'x');
-    edgeOut[w].set(`remainder from ${num(Math.min(...rem), 1)} to ${num(Math.max(...rem), 1)} W`);
+    const fDur = FT[idx[idx.length - 1]] - FT[idx[0]], fMs = fDur * 1000 / fresh.length;
+    edgeOut[w].set(`remainder from ${num(Math.min(...rem), 1)} to ${num(Math.max(...rem), 1)} W · ` +
+      `${num(fresh.length, 0)} new board readings (ticks) in ${num(fDur, 1)} s, one per ~${num(fMs, 0)} ms`);
     const cross = CK.el('line', {y1: T, y2: H - B, stroke: 'var(--ink-2)', 'stroke-width': 1, 'pointer-events': 'none', opacity: 0}, f.svg);
     const dot = CK.el('circle', {r: 4, 'pointer-events': 'none', opacity: 0}, f.svg); dot.style.fill = 'var(--c5)';
     let j = 0;
@@ -489,7 +495,8 @@ function setAvg(v, fromBtn) {
 }
 CK.legend('edge-leg', [{key: 'x', label: 'remainder (board − rails)', mark: 'line', color: 'var(--c5)'},
   {key: 'b', label: 'board power, as filtered', mark: 'line', color: 'var(--c1)'}, {key: 'r', label: 'the three rails', mark: 'line', color: 'var(--c2)'},
-  {key: 's', label: 'steady levels', mark: 'dash', color: 'var(--ref)'}]);
+  {key: 's', label: 'steady levels', mark: 'dash', color: 'var(--ref)'},
+  {key: 'f', label: 'tick: a fresh board reading (10 Hz log, slower true rate)', mark: 'line', color: 'var(--c1)'}]);
 const fEdges = [edgeFrame('edge-a', 0), edgeFrame('edge-b', 1)];
 function redrawEdges() { fEdges.forEach(f => f.redraw()); }
 { // the caption, from the same data
@@ -504,7 +511,8 @@ function redrawEdges() { fEdges.forEach(f => f.redraw()); }
     `it stops (${num(stopMin, 1)} W) and at each gap between launches (to ${num(Math.min(...gapMins), 1)} W). Filter board power the way the ` +
     `PMIC filters the rails, with any τ from ${num(taus[0], 1)} to ${num(taus[taus.length - 1], 1)} s, and it ` +
     (clean ? `steps cleanly between about ${num(lo, 0)} and ${num(hi, 0)} W, the steady levels on either side of the edges.`
-      : `stays within ${CK.fmt.range(Math.min(...filt), Math.max(...filt), 1, 'W')}.`) + ` The PMIC's own board average stays within ${CK.fmt.range(Math.min(...avg), Math.max(...avg), 1, 'W')}.`;
+      : `stays within ${CK.fmt.range(Math.min(...filt), Math.max(...filt), 1, 'W')}.`) + ` The PMIC's own board average stays within ${CK.fmt.range(Math.min(...avg), Math.max(...avg), 1, 'W')}.` +
+    ` The ticks under each panel mark the samples where the board reading actually changed; between them our 10 Hz log just repeats the last value (each panel's readout gives the count and rate).`;
 }
 
 /* ---------- §3: the per-shire voltage map ---------- */

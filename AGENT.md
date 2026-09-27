@@ -21,18 +21,25 @@ cards in the AI Foundry lab, and share what was learned. It became a measurement
 the chip's power and temperature, what every operation costs in joules, what the meters can and cannot see, and
 where the chip could beat a GPU.
 
-**Status on 2026-09-25:**
+**Status on 2026-09-27:**
 
 - **19 published measurement pages**: the hub,
   [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports), and the 18
-  pages it indexes, plus two pages about the lab machines. All are listed in [`docs/reports/MIRROR.md`](docs/reports/MIRROR.md).
+  pages it indexes, plus two pages about the lab machines and the review's TODO list. All are listed in
+  [`docs/reports/MIRROR.md`](docs/reports/MIRROR.md).
 - **The knowledge base** in [`docs/findings/`](docs/findings/README.md) traces every claim to its experiment and raw
-  file. It was validated twice (24 and 25 September).
-- **Version 3 of the claims check finished** on 26 September at 06:55: every claim of the pages re-tested on three
-  cards with pre-registered predictions ([`docs/reports/data/2026-09-25-claims-v3/`](docs/reports/data/2026-09-25-claims-v3/README.md),
-  results in its `results/`, code in [`tools/claims-v3/`](tools/claims-v3)), and the pages were updated with its three
-  cards. The gathers and scatters that ran after it (E48) are being reduced.
+  file. It was validated twice (24 and 25 September); the version-3 experiments (E35–E47), the gathers and scatters (E48)
+  and their three-card values were added on 26–27 September, while most topic files (10–19) still predate them.
+- **Version 3 of the claims check finished** on 26 September at 06:55: every page claim that needed new data
+  re-tested on three cards with pre-registered predictions ([`docs/reports/data/2026-09-25-claims-v3/`](docs/reports/data/2026-09-25-claims-v3/README.md),
+  results in its `results/`, code in [`tools/claims-v3/`](tools/claims-v3)), and the pages in this repository carry
+  its results: each tested claim says what the three cards showed (MIRROR.md's "Last check" says whether the live
+  pages have them yet). The gathers and scatters that ran on each of the three cards after
+  its campaign blocks (E48, 26 September 03:19–09:22) are reduced too (`results/gs.json`); no page carries them yet.
 - **The lab has four working cards** since 25 September (section 4). One of them overheats.
+- **The review of 26 September** added charts and folded each page's detail into collapsible sections; the page
+  changes it found and not yet made are in [`docs/reports/TODO.md`](docs/reports/TODO.md), whose first items are for
+  the owner.
 
 The live status is kept in [`docs/getting-started.md`](docs/getting-started.md), "Where things stand". Read it next.
 
@@ -88,8 +95,8 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
 | ID | What | File |
 |---|---|---|
 | R1–R14 | resources that existed before any measurement: manuals, RTL, firmware source, papers, the machines | [`01-resources.md`](docs/findings/01-resources.md) |
-| Q1–Q54 | the owner's requests and what each produced (Q44–Q54: 25–26 September) | [`02-requests.md`](docs/findings/02-requests.md) |
-| E1–E49 | experiments: command, time, card, raw files. E35–E47 are the version-3 three-card check (25–26 September; its plan, results and raw data are in `docs/reports/data/2026-09-25-claims-v3/`), E48 the gathers and scatters, E49 the card-free g3log race test | [`03-experiments.md`](docs/findings/03-experiments.md) |
+| Q1–Q57 | the owner's requests and what each produced (Q44–Q57: 25–27 September) | [`02-requests.md`](docs/findings/02-requests.md) |
+| E1–E49 | experiments: command, time, card, raw files. E35–E47 are the version-3 three-card check (25–26 September; its plan, results and raw data are in `docs/reports/data/2026-09-25-claims-v3/`), E48 the gathers and scatters on the same three cards (26 September), E49 the g3log race, reproduced without a card on 25 September, the fixed build checked on aifoundry3's card on 26 September | [`03-experiments.md`](docs/findings/03-experiments.md) |
 | A1–A19 | published artifacts: pages, images, tools, commits | [`04-artifacts.md`](docs/findings/04-artifacts.md) |
 
 - **To answer a question:** the "where to look" table → the topic file (10–20) → the number in
@@ -100,14 +107,21 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
   protocol, the four cards, the traps) and [`19-observability-and-the-unmetered.md`](docs/findings/19-observability-and-the-unmetered.md)
   (what the meters miss).
 - **The energy manual** ([`docs/energy-manual/`](docs/energy-manual/README.md), page
-  [et-soc1-energy-manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual)) is generated: its markdown and
-  page are rebuilt from `docs/reports/data/2026-09-23-energy-manual/manual.json` (04-artifacts.md, A16). Edit the
-  builders, never the markdown.
-- **Known stale spots (2026-09-26).** The findings files, README.md and the tool comments were corrected on
-  25 September, and the DVFS page and the energy manual (`00-structure.md`, `08-cards.md`) in the version-3 update of
-  26 September. `docs/reports/data/2026-09-25-claims-v3/firmware.md` (a dated record) still says aifoundry3's zero TDP
-  is flashed (a boot service sets it), and `tools/claims-v3/lib.sh` still says aifoundry3 has no system numpy (it has,
-  since 25 September). Trust 14-card-behaviour.md and this file.
+  [et-soc1-energy-manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual)) is mostly generated: sections
+  01–06, 08, 03a and 04a, two card lines of 00, and the page are rebuilt from
+  `docs/reports/data/2026-09-23-energy-manual/manual.json` (since 26 September built from the version-3 check's three
+  cards; 04-artifacts.md, A16). Edit the builders, never that markdown; the README, the rest of 00, 07 and 09 are
+  written by hand.
+- **Known stale spots (2026-09-27).** Where a page and `docs/findings/` differ, the page holds. The pages carry each
+  tested claim's three-card result (26 September; every claim with the items that test it:
+  `docs/reports/data/2026-09-25-claims-v3/results/pagemap.md`), and `05-claims.md` gives the three-card values in
+  "Version 3: the three-card check"; the topic files (10–19; 20-heat-per-mm.md has the third run) and README.md were
+  corrected on 25–27 September but not rewritten for the three cards (leakage at 80 °C, for one: 20–29 W on the pages, a best fit of 23.3 W in older
+  text). What the review of 26 September found and is not yet fixed is in [`docs/reports/TODO.md`](docs/reports/TODO.md)
+  (part A pages, part B the repository). A page that still says aifoundry1 cannot be used, blames `srcversion`, or
+  calls aifoundry3's zero TDP flashed or set by firmware is stale: a boot service sets it at every boot.
+  `docs/reports/data/2026-09-25-claims-v3/firmware.md` is a dated record, and `tools/claims-v3/lib.sh` still says
+  aifoundry3 has no system numpy (it has, since 25 September). Trust 14-card-behaviour.md and this file.
 
 ## 4. The machines
 
@@ -166,8 +180,9 @@ Each links to the full entry in [14-card-behaviour.md](docs/findings/14-card-beh
 - **Firmware 1.4.1 idles at 300 MHz**: idle brackets and bursts sit at different operating points on aifoundry1's
   card 0 (same section).
 - **The telemetry lies in specific ways**: whole-degree die readings, rails that are a PMIC running average
-  (τ ≈ 1.2 s), a 133 ms refresh on aifoundry2 and 250 ms on aifoundry3, and some workloads starve the meter: check
-  `took_ms` ([telemetry](docs/findings/14-card-behaviour.md#the-telemetry-and-what-each-number-really-is)).
+  (τ ≈ 1.2 s), a board value that changes once per service-processor pass (133 ms on aifoundry2, 135 on aifoundry1's
+  card 1, 224 on aifoundry3 with nothing polling; under ettelem at 10 Hz 156, 157 and 263 ms: E41), and some workloads
+  starve the meter: check `took_ms` ([telemetry](docs/findings/14-card-behaviour.md#the-telemetry-and-what-each-number-really-is)).
 - **Heat carries over between runs**: launch every run from the same die temperature, and budget three to eight
   times more wall-clock than card time ([protocol](docs/findings/14-card-behaviour.md#the-measurement-protocol-that-made-results-repeatable)).
 - **Cards are compared on switching power over idle**, never absolute watts
@@ -189,9 +204,9 @@ Each links to the full entry in [14-card-behaviour.md](docs/findings/14-card-beh
 **Build.** Standalone workloads (`workloads/<name>/`) build on the lab host itself, against its own `/opt/et`, and
 their host program has its kernel's path compiled in. Each workload's `README.md` gives its flags and its runs.
 
-- **While the campaign's queues run, never rebuild into a build directory their blocks use**: `build/<name>/` for
+- **While a `tools/claims-v3` queue runs, never rebuild into a build directory its blocks use**: `build/<name>/` for
   enercat, memhier, memprobe, nocbench, onchip, sparsity and sgemm, `build/enercat_v2/`, `build/enercat_gs/` (the
-  gathers-and-scatters queue that follows), `build/ettelem/`, `build/claims-v3-bin/`, `build/memprobe-data/`, and on
+  gathers and scatters, E48), `build/ettelem/`, `build/claims-v3-bin/`, `build/memprobe-data/`, and on
   aifoundry2 also `build/memprobe-v3/` and `build/sparsity_t2/` (most are named at the top of
   `tools/claims-v3/lib.sh`; `grep -oh 'build/[A-Za-z0-9_.-]*' tools/claims-v3/lib.sh tools/claims-v3/*/*.{sh,py} |
   sort -u` lists them all). The next block would run a different binary than its code hash records. Build into a
@@ -294,8 +309,7 @@ A page written for one person, or one with sensitive content, stays private and 
 visibility, repo file, deploy form, how it is built, and the private pages with the reason each is not mirrored.
 `python3 scripts/check-mirror.py` compares every public page with its file: through `spacesheep read` when a key is
 configured (and then also each page's visibility and slug against the account's listing), otherwise anonymously over
-HTTPS. It exits non-zero on any difference. On 2026-09-25 all 21 mirrored public pages were equal to their files,
-both ways.
+HTTPS. It exits non-zero on any difference. MIRROR.md's "Last check" records the latest run.
 
 ## 10. Where new lessons go
 
@@ -325,8 +339,8 @@ copy it here too.
 4. Find out where you are (section 4). On a lab machine, look without touching: `et-who`, `who`,
    `pgrep -af queue.sh`, and the tail of `build/claims-v3/queue-*.log` in the campaign's tree
    (`~/claude/et-soc1-prototyping` on aifoundry2, `~/nekko` on aifoundry1 and aifoundry3).
-5. Ask the owner what to work on, which machine and card you may use, and whether the campaign's queues must be left
-   alone (assume they must).
+5. Ask the owner what to work on, which machine and card you may use, and whether any running queue must be left
+   alone (assume it must).
 6. Ask a person for the steps only a person can do, when you reach them: the Tailscale approval, `spacesheep login`,
    a push.
 7. Run `python3 scripts/check-mirror.py` (read-only) to see that the published pages still match the repository.

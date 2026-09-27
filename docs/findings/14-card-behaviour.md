@@ -27,7 +27,8 @@ revision; this file is the current one.
 ## The clock governor is thermal first
 
 The [service processor](README.md#terms) runs a power-management task (`thermal_pwr_mgmt.c`, R3), once per
-management pass of about 133 ms on aifoundry2 (aifoundry3's readings change only about every 250 ms). While a kernel is running it steps the minion operating point **down** if the
+management pass: 133 ms on aifoundry2, 135 ms on aifoundry1's card 1 and 224 ms on aifoundry3 with nothing polling,
+longer while a sampler polls (E41; the table below). While a kernel is running it steps the minion operating point **down** if the
 die's whole-degree reading is above a software threshold (**65 °C**) *or* the board's average power is above the
 TDP level (**65 W**), and **up** otherwise. The thermal branch is checked first and wins. This is the firmware
 source at `353f20e`; the cards' own trace strings match an older build (R3), so details may differ on the card.
@@ -80,8 +81,8 @@ releases idle very differently: 26 W (1.4.1), 33–35 W (1.2.0 at 57–62 °C) a
 
 | Field | Meaning | Gotcha |
 |---|---|---|
-| `board_w` | board power, 10 mW steps | refreshed once per service-processor pass, about every 133 ms on aifoundry2; on aifoundry3 the value changes only about every 250 ms (why is not established); near-instantaneous otherwise |
-| `sp.minion_w`, `sram_w`, `noc_w` | per-rail power | **the PMIC's running average, roughly first-order with τ ≈ 1.15–1.22 s**: a step reaches 55–57% after 1 s, 83–84% after 2 s and about 94% after 3 s (E27, `catalogue.json` `rail_filter`, both cards), copied by the SP each pass (on aifoundry3 the copy changes about every 250 ms); not a moving average. Skip 2–3 s after any change before averaging. `ettelem sample --reset-ms` resets the statistics on a schedule, but whether that turns the average into a window mean is untested |
+| `board_w` | board power, 10 mW steps | refreshed once per service-processor pass, and a poller lengthens the pass: under ettelem at 10 Hz a new value every 156 ms on aifoundry2, 157 on aifoundry1's card 1 and 263 on aifoundry3; with nothing polling the pass is 133, 135 and 224 ms (E41, 26 September); near-instantaneous otherwise |
+| `sp.minion_w`, `sram_w`, `noc_w` | per-rail power | **the PMIC's running average, roughly first-order with τ ≈ 1.15–1.22 s**: a step reaches 55–57% after 1 s, 83–84% after 2 s and about 94% after 3 s (E27, `catalogue.json` `rail_filter`, both cards), copied by the SP each pass (so on aifoundry3 the copy changes only every 263 ms under ettelem); not a moving average. Skip 2–3 s after any change before averaging. `ettelem sample --reset-ms` resets the statistics on a schedule, and the reset also restarts the running average: with a reset every second, one second after a burst the rail has fallen 93% of the way on every card (E41) |
 | `temp_c.minshire[0]` | die temperature | **whole degrees**, and it is the *mean of 34 shire sensors*. Hot spots are hotter |
 | `die_mv.*` | on-die voltage per rail | the minion rail droops ~1 mV under 18 W more load: the regulator senses at the die |
 | `mhz.minion`, `mhz.noc`, `mhz.ddr` | clocks | the only reliable way to catch the governor |
@@ -93,7 +94,9 @@ releases idle very differently: 26 W (1.4.1), 33–35 W (1.2.0 at 57–62 °C) a
   second, but the reading changed 4.0 times a second (median gap between changes 255 and 258 ms), against 7.04 times a
   second (median gap 117 ms) in aifoundry2's matmul run (`docs/reports/data/2026-09-18-aifoundry2/power.csv`). The
   rail values in the ettelem logs show the same difference between the cards. A sample takes 22 ms on both cards, so
-  the cause is on the card, its SP loop or its PMIC; which is not established.
+  the cause is on the card. E41 (26 September) placed it in the SP's loop: with nothing polling, a pass takes 224 ms
+  on aifoundry3 against 133 ms on aifoundry2 and 135 ms on aifoundry1's card 1; why aifoundry3's loop is slower,
+  with the same firmware release as aifoundry2, is not established.
 - The management node is **single-opener**. A telemetry sampler excludes other management users for the whole
   session, so start it once and leave it running.
 - The three rails do not cover the memory shires or DRAM. Board minus rails is ~15 W idle and ~21 W under load.

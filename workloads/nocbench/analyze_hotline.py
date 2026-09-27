@@ -3,7 +3,10 @@
 
     D=docs/reports/data; DATA=$D/2026-09-22-hotline-aifoundry2; DATA3=$D/2026-09-22-hotline-aifoundry3
     analyze_hotline.py $DATA/sweep.jsonl $DATA3/sweep.jsonl --power $DATA/power.json --context $DATA/context.json \
-        --barrier $D/2026-09-18-nocbench-aifoundry2/barrier-chip1.jsonl --out $DATA/hotline.json
+        --barrier $D/2026-09-18-nocbench-aifoundry2/barrier-chip1.jsonl \
+        --stop-runs $D/2026-09-23-reruns-aifoundry2-warm/hotline-pass*/runs.jsonl \
+                    $D/2026-09-23-reruns-aifoundry3/hotline-pass*/runs.jsonl \
+        --out $DATA/hotline.json
 
 Nothing is fitted except the one-per-shire round trip against mesh hops. Every other number is a count of
 completed operations in a common, barrier-aligned window, or a ratio of two such counts. The host shire is the
@@ -16,6 +19,9 @@ computed from the sweeps; the chip-wide barrier is read from --barrier (NOCBENCH
 minion per shire); the errata text and the window table (whose 5, 40 and 100 ms runs are in no raw data file)
 are hand-kept in --context. 'layout' and 'empty' are marty1885's shire map from workloads/nocbench/analyze.py,
 and 'share_fit' fits each card's one-per-shire round trip (window / ops) against Manhattan hops from shire 0.
+'context.window_stop_runs' is computed, not hand-kept: --stop-runs takes the 23 September reruns' hotline-pass*
+runs.jsonl files (both cards) and pulls out every "starved" (host reading its own scratchpad while the other 31
+shires hammer a scratchpad word) record's window, the host shire's ops and the remote total, one entry per run.
 
 --v3 RAW (added 26 September 2026 for the three-card check): read the hot-line passes of the version-3 claims check
 instead of, or as well as, sweep files. RAW is docs/reports/data/2026-09-25-claims-v3/raw; every
@@ -35,7 +41,13 @@ aifoundry2 as before.
 
     D=docs/reports/data; DATA=$D/2026-09-22-hotline-aifoundry2
     analyze_hotline.py --v3 $D/2026-09-25-claims-v3/raw --power $DATA/power.json --context $DATA/context.json \
-        --barrier $D/2026-09-18-nocbench-aifoundry2/barrier-chip1.jsonl --out $DATA/hotline.json
+        --barrier $D/2026-09-18-nocbench-aifoundry2/barrier-chip1.jsonl \
+        --stop-runs $D/2026-09-23-reruns-aifoundry2-warm/hotline-pass*/runs.jsonl \
+                    $D/2026-09-23-reruns-aifoundry3/hotline-pass*/runs.jsonl \
+        --out $DATA/hotline.json
+
+--stop-runs is independent of --v3: the three-card check has no 2-second window, so the 21 two-second "starved"
+runs of the 23 September reruns (aifoundry2 and aifoundry3) stay the page's longest windows.
 """
 import argparse
 import collections
@@ -150,6 +162,25 @@ def collapse(rows):
     return [pass_mean(groups[k]) for k in order]
 
 
+def window_stop_runs(paths):
+    """Every 'starved' run in the given runs.jsonl files: the host shire's ops (s == 0) against the remote total,
+    tagged by card (the run directory's aifoundryN name)."""
+    out = []
+    for p in paths:
+        m = re.search(r"aifoundry\d", p)
+        card = m.group(0) if m else "?"
+        for line in open(p):
+            if not line.strip():
+                continue
+            d = json.loads(line)
+            if d.get("label") != "starved":
+                continue
+            h = next(s for s in d["shire"] if s["s"] == 0)
+            out.append({"card": card, "window_cycles": d["window_cycles"], "host_ops": h["ops"],
+                        "remote_ops": d["total_ops"] - h["ops"]})
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("sweeps", nargs="*")
@@ -157,6 +188,9 @@ def main():
     ap.add_argument("--power")
     ap.add_argument("--context", help="hand-kept context.json (errata, window_independence, note) to merge")
     ap.add_argument("--barrier", help="nocbench barrier-chip1.jsonl: the chip-wide barrier, one minion per shire")
+    ap.add_argument("--stop-runs", nargs="+", default=[],
+                    help="the 23 September reruns' hotline-pass*/runs.jsonl (both cards): every 'starved' run, "
+                         "for context.window_stop_runs")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     raw = load(a.sweeps) + (load_v3(a.v3) if a.v3 else [])
@@ -277,6 +311,8 @@ def main():
         c = json.load(open(a.context))
         # the hand-kept window table only when no measured windows ('win' rows) are at hand
         ctx.update({k: c[k] for k in ("window_independence", "errata") if k in c and not (k == "window_independence" and "windows" in out)})
+    if a.stop_runs:
+        ctx["window_stop_runs"] = window_stop_runs(a.stop_runs)
     wins = sorted({r["window_cycles"] for r in rows if r["group"] != "win"})
     ctx["window_cycles"] = wins[0] if len(wins) == 1 else wins
     if a.barrier:

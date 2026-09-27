@@ -241,7 +241,7 @@
       : (be[0] > capE ? 'but the ET is full at ' + r2s(capE) + '/s at this Q' : 'queries a second (host CPU: ' + (inR(bec[0]) ? range(bec[0], bec[1], r2s) + '/s' : 'never') + ')');
     // readout: what binds, and the scale of the step
     const fits = where === 'sram'
-      ? (e.chips === 1 ? 'fits one chip’s 72 MB of SRAM' : 'needs ' + fmtCount(e.chips) + ' chips’ SRAM, ' + fmtWr(e.chips * ET.idle_W.lo, e.chips * ET.idle_W.hi) + ' at rest')
+      ? (e.chips === 1 ? 'fits one chip’s scratchpads (72 MB usable)' : 'needs ' + fmtCount(e.chips) + ' chips’ scratchpads, ' + fmtWr(e.chips * ET.idle_W.lo, e.chips * ET.idle_W.hi) + ' at rest')
       : (e.chips === 1 ? 'fits one card’s 32 GB of DRAM' : 'needs ' + fmtCount(e.chips) + ' cards’ DRAM');
     const idleShare = S.etQ(lam, 0) > 0 ? (e.chips * ET.idle_W.lo / lam) / S.etQ(lam, 0) : 0;
     const qs = D.owner.query_energy_J;
@@ -251,7 +251,7 @@
       + (full ? '' : 'At ' + perS(lam) + ' the ET card’s idle is ' + (idleShare > 0.9999 ? 'over 99.99%' : pct(idleShare)) + ' of its energy per query. ')
       + (S.cpuOK ? 'The host CPU would spend ' + fmtJr(c[0], c[1]) + ' per query. ' : 'Too big for one host’s memory. ')
       + 'Scoring is ' + share(h[0] / qs[1], h[1] / qs[0]) + ' the H100 energy of the query’s own gradient and iHVP at 8B (' + fmtJr(qs[0], qs[1]) + ').');
-    capFrame.redraw(); rateFrame.redraw();
+    capFrame.redraw(); rateFrame.redraw(); s1qFrame.redraw();
   }
   function fmtW(w) { const u = unitFor(w, [[1e12, 'TW'], [1e9, 'GW'], [1e6, 'MW'], [1e3, 'kW'], [1, 'W']]); return sig(w / u[0]) + ' ' + u[1]; }
   function fmtWr(a, b) {
@@ -277,7 +277,7 @@
       CK.el('rect', {x: x(1e4), y: y0, width: x(1e18) - x(1e4), height: y1 - y0, rx: 3, style: 'fill:var(--grid)'}, g);
       for (let e10 = 4; e10 <= 18; e10 += 2) labs.push(CK.txt(g, x(Math.pow(10, e10)), 108, fmtBtick(Math.pow(10, e10)), 'tick', 'middle'));
       const refs = [
-        [ET.sram_usable_B.v, 'ET chip SRAM 72 MB', 'var(--c1)', 'top', 'end', false],
+        [ET.sram_usable_B.v, 'ET scratchpads, 72 MB usable', 'var(--c1)', 'top', 'end', false],
         [ET.dram_B.v, 'ET card DRAM 32 GB', 'var(--c1)', 'top', 'start', true],
         [HH.l2_pin_B.v, 'H100 L2 37.5 MB', 'var(--c2)', 'bot', 'end', false],
         [HH.hbm_B.v, 'H100 HBM 80 GB', 'var(--c2)', 'bot', 'start', true],
@@ -367,7 +367,109 @@
       CK.keynav(f, nodes);
     },
   });
+
+  /* S1's lead against queries per pass (the "Few queries per pass" bullet): mJ per query, ET against H100, as Q
+     grows, for the int8 and fp16 shards from D.s1.parity_*. Linked to the explorer's Q slider: a point sets it. */
+  const s1 = D.s1;
+  let s1qPrec = 'int8';
+  CK.legend('s1q-leg', [
+    {key: 'et', label: 'ET-SoC-1 card, idle charged', color: 'var(--c1)', mark: 'box'},
+    {key: 'h', label: 'H100 in the server, pass only', color: 'var(--c2)', mark: 'box'},
+  ]);
+  CK.seg('s1q-prec', {label: 'Shard', options: [['int8', 'int8, 65.5 MB'], ['fp16', 'fp16, 32 MB']], value: s1qPrec,
+    onChange: v => { s1qPrec = v; s1qFrame.redraw(); }});
+  const s1qFrame = CK.frame('s1q', {
+    label: 'Energy per query on a log scale against queries per pass, for the ET-SoC-1 and an H100, int8 and fp16 shards',
+    height: W => (W < 600 ? 280 : 300),
+    draw(f) {
+      const P = s1[s1qPrec === 'int8' ? 'parity_int8' : 'parity_fp16'], rows = P.table, qCross = P.Q;
+      const L = 60, R = 14, T = 20, B = 40;
+      const qs = rows.map(r => r.Q);
+      const x = CK.log(qs[0], qs[qs.length - 1], L, f.W - R);
+      const vals = rows.reduce((a, r) => a.concat(r.et_mJ_per_q, r.h100_mJ_per_q), []);
+      const lo = Math.pow(10, Math.floor(Math.log10(Math.min(...vals) * 0.85))), hi = Math.pow(10, Math.ceil(Math.log10(Math.max(...vals) * 1.15)));
+      const y = CK.log(lo, hi, f.H - B, T);
+      const xt = qs.filter((q, i) => !f.narrow || i % 2 === 0 || q === qs[qs.length - 1]);
+      CK.axes(f, {x, y, L, R, T, B, xt, yt: y.ticks(5), xfmt: v => num(v, 0), yfmt: v => fmtJ(v * 1e-3), xl: 'queries per pass, Q', yl: 'energy per query'});
+      if (qCross && qCross[0] != null && qCross[1] != null) {
+        const bx0 = Math.max(qs[0], qCross[0]), bx1 = Math.min(qs[qs.length - 1], qCross[1]);
+        if (bx1 >= bx0) {
+          const r = CK.el('rect', {x: x(bx0), y: T, width: Math.max(2, x(bx1) - x(bx0)), height: f.H - T - B, style: 'fill:var(--ref);fill-opacity:0.16'}, f.svg);
+          CK.tip(f, r, 'The lead is gone by Q ≈ ' + intf(qCross[0]) + '–' + intf(qCross[1]) + ' in this page’s model');
+        }
+      }
+      const band = (key, col, get) => {
+        const top = rows.map(r => [r.Q, get(r)[1]]), bot = rows.map(r => [r.Q, get(r)[0]]);
+        const d = top.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ')
+          + ' ' + bot.slice().reverse().map(p => 'L' + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ') + ' Z';
+        CK.el('path', {d, 'data-series': key, style: 'fill:' + col + ';fill-opacity:0.2;stroke:none'}, f.svg);
+      };
+      band('et', 'var(--c1)', r => r.et_mJ_per_q);
+      band('h', 'var(--c2)', r => r.h100_mJ_per_q);
+      const nodes = [];
+      const setQ = r => { const was = quiet; quiet = true; cQ.set(r.Q); quiet = was; recompute(); };
+      const dot = (r, key, col, get) => {
+        const v = get(r), cur = st.Q === r.Q, cx = x(r.Q), cy = y(Math.sqrt(v[0] * v[1]));
+        const d = CK.el('circle', {cx, cy, r: cur ? 7 : 5}, f.svg);
+        d.style.fill = col; d.style.stroke = cur ? 'var(--ink)' : 'var(--surface)'; d.style.strokeWidth = cur ? '2.5' : '1.5';
+        CK.tip(f, d, '<b>' + (key === 'et' ? 'ET-SoC-1' : 'H100') + '</b>, Q = ' + r.Q + ': ' + fmtJr(v[0] * 1e-3, v[1] * 1e-3) + ' per query' + (cur ? ' (the explorer’s Q)' : ''));
+        d.style.cursor = 'pointer';
+        d.addEventListener('click', () => setQ(r));
+        nodes.push(d);
+      };
+      rows.forEach(r => dot(r, 'et', 'var(--c1)', rr => rr.et_mJ_per_q));
+      rows.forEach(r => dot(r, 'h', 'var(--c2)', rr => rr.h100_mJ_per_q));
+      CK.keynav(f, nodes, {onEnter: (n, k) => setQ(rows[k % rows.length])});
+      CK.readout('s1q-read').set(qCross && qCross[0] != null
+        ? 'For the ' + (s1qPrec === 'int8' ? 'int8' : 'fp16') + ' shard, the ET’s lead over the H100 is gone by Q ≈ ' + intf(qCross[0]) + '–' + intf(qCross[1]) + ' queries per pass.'
+        : '');
+    },
+  });
   recompute();
+
+  /* ---------------------------------------------------------------- S3: scatter-add, measured (E48) */
+  /* updates per second against nJ per update, log-log, for each method and where its buckets live (D.model.et.gs,
+     from the energy manual's manual.json gs); the dashed line is the 10 G updates a second the page asked for */
+  (function s3chart() {
+    const G = ET.gs;
+    if (!G || !$('s3')) return;
+    const P = [
+      ['upd_l1', 'gather + fadd + scatter, buckets in the hart’s L1', 0], ['upd_l2', 'gather + fadd + scatter, buckets in the L2', 0],
+      ['upd_scp', 'gather + fadd + scatter, buckets in the own scratchpad', 0], ['upd_dram', 'gather + fadd + scatter, buckets in DRAM', 0],
+      ['famoadd_l', 'packed atomic famoaddl.pi, a table per shire', 1], ['famoadd_g', 'packed atomic famoaddg.pi, one table for the chip', 1],
+      ['amoadd_l', 'scalar atomic amoaddl.w, a table per shire', 2], ['amoadd_g', 'scalar atomic amoaddg.w, one table for the chip', 2],
+    ].filter(p => G[p[0]]);
+    const GR = [['gather, fadd.ps and scatter, private buckets', 'var(--c1)', 'dot'], ['packed atomic add (famoadd*.pi)', 'var(--c2)', 'dot'], ['scalar atomic add (amoadd*.w)', 'var(--c3)', 'dot'],
+      ['global atomics spread over 32 lines (before S3)', 'var(--ref)', 'dot']];
+    CK.legend('s3-leg', GR.map((g, i) => ({key: 'g' + i, label: g[0], color: g[1], mark: g[2]})));
+    const read = CK.readout('s3-read');
+    const nj = v => (v < 0.1 ? num(v, 3) : v < 10 ? num(v, 2) : num(v, 0)) + ' nJ';
+    const gps = v => (v >= 1e11 ? num(v / 1e9, 0) : v >= 1e10 ? num(v / 1e9, 1) : num(v / 1e9, 2)) + ' G/s';
+    read.set('Only the points right of the dashed line reach 10 G updates a second: every one keeps its buckets inside a shire.');
+    CK.frame('s3', {
+      label: 'Scatter-add on the ET-SoC-1: updates per second against nanojoules per update, log-log, by method and where the buckets live',
+      height: W => (W < 600 ? 300 : 320),
+      draw(f) {
+        const L = 56, R = 16, T = 24, B = 42, x = CK.log(1e8, 1e12, L, f.W - R), y = CK.log(0.01, 100, f.H - B, T);
+        CK.axes(f, {x, y, L, R, T, B, xt: [1e8, 1e9, 1e10, 1e11, 1e12], yt: [0.01, 0.1, 1, 10, 100], xfmt: v => (v >= 1e9 ? num(v / 1e9, 0) + ' G' : num(v / 1e6, 0) + ' M'),
+          yfmt: v => num(v), xl: 'updates per second over the chip (log)', yl: 'nJ per update, above idle (log)'});
+        const g = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+        CK.el('line', {x1: x(1e10), x2: x(1e10), y1: T, y2: f.H - B, style: 'stroke:var(--ink-2);stroke-width:1.2;stroke-dasharray:5 4'}, g);
+        CK.inside(f, [CK.txt(g, x(1e10) + 5, T + 10, '10 G updates/s', 'lab', 'start')]);
+        const nodes = [];
+        const pt = (v, e, col, html) => {
+          const gg = CK.el('g', {}, f.svg);
+          CK.el('circle', {cx: x(v), cy: y(e), r: 9, class: 'ck-hit'}, gg);
+          const c = CK.el('circle', {cx: x(v), cy: y(e), r: 5}, gg); c.style.fill = col; c.style.stroke = 'var(--surface)'; c.style.strokeWidth = '1.5';
+          CK.tip(f, gg, html); gg.addEventListener('focus', () => read.set(html)); nodes.push(gg);
+        };
+        P.forEach(([k, lab, gi]) => { const d = G[k]; pt(d.ops_per_s, d.nj, GR[gi][1], '<b>' + lab + '</b>: ' + gps(d.ops_per_s) + ' at ' + nj(d.nj) + ' per update [' + nj(d.lo) + '–' + nj(d.hi) + ']'); });
+        const A = ET.atomics_spread;
+        if (A) pt(A.ops_per_s, A.nj, 'var(--ref)', '<b>Global atomics spread over 32 lines</b> (the hot-line report, before S3): ' + gps(A.ops_per_s) + ' at ' + nj(A.nj));
+        CK.keynav(f, nodes);
+      },
+    });
+  })();
 
   /* ---------------------------------------------------------------- 3. S2: the atlas scan */
   const s2 = D.s2;
@@ -408,7 +510,7 @@
         CK.txt(f.svg, x(v) + 6, yb + 11, txt, 'lab', 'start').setAttribute('aria-hidden', 'true');
         const html = r.gpu
           ? '<b>A100, measured</b>: the scan took ' + fmtT(s2.a100_s) + ' (' + num(s2.a100_tflops_nominal) + ' TFLOP/s nominal); at 250–400 W that is ' + fmtJr(s2.a100_J[0], s2.a100_J[1]) + ' (power estimated)'
-          : '<b>' + r.label + '</b>: ' + fmtT(r.s) + ' and ' + fmtJ(r.J[0]) + ' at the matmul benchmark’s board power (estimate: the fraction of peak a persistent kernel sustains is unmeasured)';
+          : '<b>' + r.label + '</b>: ' + fmtT(r.s) + ' and ' + fmtJ(r.J[0]) + ' at its board power on random operands (aifoundry2, 80 °C; estimate: the fraction of peak a persistent kernel sustains is unmeasured)';
         CK.tip(f, bar, html); nodes.push(bar);
       });
       CK.keynav(f, nodes);

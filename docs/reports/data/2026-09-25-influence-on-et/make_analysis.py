@@ -17,6 +17,7 @@ below with its kind and source:
 The page's explorer recomputes the same model in the browser from the `model` block; the reference cases in `s1`,
 `duty` and `s2` are the explorer's model evaluated here, so the page's text and its chart agree.
 """
+import importlib.util
 import json
 import math
 import os
@@ -54,8 +55,14 @@ comb = man["catalogue"]["combined"]
 cards = man["catalogue"]["cards"]
 
 
+NCARDS = len(cards)
+WORDS = {2: "both cards", 3: "three cards"}
+ALLC = WORDS.get(NCARDS, f"{NCARDS} cards")
+
+
 def per_card_mean(key, field):
-    return sum(cards[c]["summary"][key][field]["mean"] for c in ("aifoundry2", "aifoundry3")) / 2
+    """the mean over every card of the catalogue (aifoundry2, aifoundry3 and, since 26 September, aifoundry1's card 1)"""
+    return sum(cards[c]["summary"][key][field]["mean"] for c in cards) / NCARDS
 
 
 sram_pj = comb["tload/scp/random"]            # pJ/B above idle, tensor load from the shire's own scratchpad
@@ -76,32 +83,56 @@ SWAR_INSTR_PER_256 = 14  # E: xor, a 12-instruction SWAR popcount per 32-bit lan
 hot_nj = man["reruns"]["hotline_nj_per_op"]["spread"]
 spread_rate = [x for x in man["sync"]["atomics"]["runs"] if x["label"] == "spread"][0]["ops_per_s"]
 
-# the 18 September matmul benchmark: peak rate and board power per precision (aifoundry2, 600 MHz)
+# the 18 September matmul benchmark: peak rate and board power per precision (aifoundry2, 600 MHz). The energy per op
+# above idle subtracts the idle just before each workload (idle_before() of scripts/mmbench-report-data.py, from the
+# run's power.csv and runs.jsonl: 30.61, 32.53 and 33.83 W for fp32, fp16 and int8; the die warmed over the session),
+# not results.json's single idle_w of 30.61 W, which the run's README marks as superseded for fp16 and int8.
 MM = "2026-09-18-aifoundry2/results.json"
 mm = load(MM)
 mm_idle = mm["idle_w"]
+_spec = importlib.util.spec_from_file_location("mmbench_report_data", os.path.join(ROOT, "scripts", "mmbench-report-data.py"))
+_mrd = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_mrd)
+_mm_dir = os.path.join(DATA, os.path.dirname(MM))
+_runs = [json.loads(l) for l in open(os.path.join(_mm_dir, "runs.jsonl"))]
+_samples = [(int(t), float(w)) for t, _, w in (l.strip().partition(",") for l in open(os.path.join(_mm_dir, "power.csv"))) if t.isdigit()]
+idle_before = {}
+_prev = None
+for row in mm["results"]:
+    rs = [x for x in _runs if x["workload"] == row["workload"]]
+    idle_before[row["workload"]] = row.get("idle_before_w", _mrd.idle_before(_samples, rs[0]["t_start_ms"], _prev))
+    _prev = rs[-1]["t_end_ms"]
 peak = {}
 for row in mm["results"]:
     if row["workload"] in ("fp32-tensor-L2", "fp16-tensor-L2", "int8-tensor-L2"):
         p = row["mode"]
-        peak[p] = {"ops_per_s": row["tflops"] * 1e12, "board_w": row["mean_w"],
-                   "pj_per_op_above_idle": (row["mean_w"] - mm_idle) / (row["tflops"] * 1e12) * 1e12}
+        peak[p] = {"ops_per_s": row["tflops"] * 1e12, "board_w": row["mean_w"], "idle_before_w": idle_before[row["workload"]],
+                   "pj_per_op_above_idle": (row["mean_w"] - idle_before[row["workload"]]) / (row["tflops"] * 1e12) * 1e12}
+# the tensor unit on random operands (the energy manual's tensor rows, V3-ABL-A: aifoundry2 at 80 C, four runs), for the
+# dense work and S2: gradients are random-like, and the matmul benchmark's operands are not
+tr = {x["config"]: x for x in man["tensor"]["rows"]}
+randn_board = {p: tr[p + "_randn"]["idle_w"] + tr[p + "_randn"]["over_idle_w"] for p in ("fp16", "fp32") if p + "_randn" in tr}
+randn_card = {p: tr[p + "_randn"].get("card", "aifoundry2") for p in randn_board}
+randn_T = {p: tr[p + "_randn"].get("launch_c") for p in randn_board}
 
 # the batch-1 1024x4096 fp32 layer in the scratchpads (sparsity report, aifoundry3): the S1 anchor
 SP = "2026-09-18-sparsity-aifoundry3/energy-b/results.json"
 sp = load(SP)["results"]["gemv-skip-0"]
-tree = [x for x in jsonl("2026-09-18-sparsity-aifoundry3/gemv-tree-dense.jsonl", "SPARSITY")
-        if abs(x["sparsity"]) < 1e-9][0]
 anchor = {
     "bytes": 1024 * 4096 * 4,
-    "t_s": tree["cycles_per_layer_mean"] / (tree["ghz"] * 1e9),
+    # the energy run's own rate at 600 MHz (layers per second of the host-reduced kernel whose joules are used), not the
+    # tree run's cycles over its host wall-time clock, a field meant for launches of 0.1 s or more
+    "t_s": 1 / sp["per_s"],
     "board_j": sp["j_per_unit"],
     "above_idle_j": sp["j_per_unit_above_idle"],
     "board_w": sp["mean_w"],
-    "source": f"docs/reports/data/{SP} (gemv-skip-0: board J per layer) and "
-              "docs/reports/data/2026-09-18-sparsity-aifoundry3/gemv-tree-dense.jsonl (cycles per layer)",
+    "source": f"docs/reports/data/{SP} (gemv-skip-0: board J per layer, and layers per second at 600 MHz for the time)",
 }
 anchor["model_above_idle_j"] = anchor["bytes"] * sram_pj["mean"] * 1e-12
+anchor["model_over_measured"] = anchor["model_above_idle_j"] / anchor["above_idle_j"] - 1
+anchor["t_us"] = anchor["t_s"] * 1e6
+anchor["tb_per_s"] = anchor["bytes"] / anchor["t_s"] / 1e12
+anchor["under_model_bw"] = 1 - anchor["bytes"] / anchor["t_s"] / sram_bw
 
 # chip-wide allreduce, 32 B, 1,024 minions (on-chip communication report, aifoundry2)
 xar = [x for x in jsonl("2026-09-18-nocbench-aifoundry2/xallreduce-c1.jsonl", "NOCBENCH") if x["minions"] == 1024][0]
@@ -109,17 +140,56 @@ allreduce_us = xar["cycles_per_iter"] / 600e6 * 1e6
 
 SRAM_USABLE = 32 * 2.25e6  # D: 2.5 MB scratchpad per shire, less the first 256 KB (offset 0 faulted); on-chip relay
 
+
+def gs_keys():
+    """S3, measured (26 September, E48 on three cards; the energy manual's §4.4 and §6): per element or update, both
+    harts of all 1,024 minions, "random" = random lines within 4 KB tiles; ops_per_s over the chip, nj per element or
+    update above idle (mean and lo-hi over every pass of every card), read from manual.json gs."""
+    G = man.get("gs")
+    if not G:
+        return None
+    K = G["configs"]
+    rows = {"gather_l1": ("fgw.ps", "dram-512B", "random", "a word gathered from the L1 (512 B table per hart)"),
+            "gather_l2": ("fgw.ps", "dram-4K", "random", "a word gathered from the L2 (4 KB per hart)"),
+            "gather_scp": ("fgw.ps", "scp-16K", "random", "a word gathered from the shire's own scratchpad (16 KB per hart)"),
+            "gather_dram": ("fgw.ps", "dram-256K", "random", "a word gathered from DRAM (256 KB per hart): a random DRAM read"),
+            "scatter_l2": ("fscw.ps", "dram-4K", "random", "a word scattered into the L2 (4 KB per hart)"),
+            "scatter_dram": ("fscw.ps", "dram-256K", "random", "a word scattered into DRAM (256 KB per hart)"),
+            "upd_l1": ("upd", "dram-512B", "random", "gather + fadd.ps + scatter, each hart's table in its L1 (512 B)"),
+            "upd_l2": ("upd", "dram-4K", "random", "gather + fadd.ps + scatter, each hart's table in the L2 (4 KB)"),
+            "upd_scp": ("upd", "scp-16K", "random", "gather + fadd.ps + scatter, each hart's table in the own scratchpad (16 KB)"),
+            "upd_dram": ("upd", "dram-256K", "random", "gather + fadd.ps + scatter, each hart's table in DRAM (256 KB)"),
+            "famoadd_l": ("famoaddl.pi", "shire-256K", "zeros", "packed atomic add famoaddl.pi, random words of a 256 KB table per shire"),
+            "famoadd_g": ("famoaddg.pi", "chip-8M", "zeros", "packed atomic add famoaddg.pi, random words of one 8 MB table for the chip"),
+            "amoadd_l": ("amoaddl.w", "shire-256K", "zeros", "scalar atomic add amoaddl.w on the same shire tables"),
+            "amoadd_g": ("amoaddg.w", "chip-8M", "zeros", "scalar atomic add amoaddg.w on the same chip table")}
+    out = {}
+    for key, (op, table, data, what) in rows.items():
+        e = K.get(f"gs/E/{op}/{table}/rand/{data}/h2/mff/n1024")
+        if not e or not e.get("pj_per_element"):
+            continue
+        c = e["pj_per_element"]
+        out[key] = {"ops_per_s": r(e["elements_per_s"]["mean"]), "nj": r(c["mean"] / 1000, 3), "lo": r(c["lo"] / 1000, 3), "hi": r(c["hi"] / 1000, 3),
+                    "k": "M", "src": f"{what}; E48, three passes on each of {WORDS.get(len(G['cards']), str(len(G['cards'])) + ' cards')} (manual.json gs)"}
+    over = [k for k in out if (k.startswith("upd") or "amoadd" in k) and out[k]["ops_per_s"] > 1e10]
+    out["over_10G"] = over
+    out["cards"] = G["cards"]
+    return out
+
 et = {
     "sram_usable_B": {"v": SRAM_USABLE, "k": "D", "src": "32 shires × 2.25 MB: each 2.5 MB scratchpad less the first 256 KB (on-chip relay report)"},
-    "sram_bw": {"v": r(sram_bw), "k": "M", "src": f"docs/reports/data/{MAN}: catalogue tensor loads from the shire's own scratchpad, random data, both cards"},
-    "sram_pj_B": {"v": r(sram_pj["mean"]), "lo": r(sram_pj["lo"]), "hi": r(sram_pj["hi"]), "k": "M", "src": "energy manual §4.1, above idle, random data, 3 passes on each card"},
+    "sram_bw": {"v": r(sram_bw), "k": "M", "src": f"docs/reports/data/{MAN}: catalogue tensor loads from the shire's own scratchpad, random data, {ALLC}"},
+    "sram_pj_B": {"v": r(sram_pj["mean"]), "lo": r(sram_pj["lo"]), "hi": r(sram_pj["hi"]), "k": "M", "src": f"energy manual §4.1, above idle, random data, three passes on each of {ALLC}"},
     "dram_B": {"v": 32e9, "k": "S", "src": "LPDDR4X, 32 GB per card"},
-    "dram_bw": {"v": r(dram_bw), "k": "M", "src": "energy manual §4.1, tensor loads from DRAM, both cards"},
+    "dram_bw": {"v": r(dram_bw), "k": "M", "src": f"energy manual §4.1, tensor loads from DRAM, {ALLC}"},
     "dram_pj_B": {"v": r(dram_pj["mean"]), "lo": r(dram_pj["lo"]), "hi": r(dram_pj["hi"]), "k": "M", "src": "energy manual §4.1, above idle, random data"},
     "idle_W": {"lo": r(idle_lo), "hi": r(idle_hi), "k": "M",
                "src": f"board power at rest: aifoundry3 {idle['aifoundry3']:.1f} W at {idle_T['aifoundry3']['T']:.0f} °C, aifoundry2 {idle['aifoundry2']:.1f} W at {idle_T['aifoundry2']['T']:.0f} °C (energy manual, cards block)"},
     "peak": {p: {"ops_per_s": r(v["ops_per_s"]), "board_w": r(v["board_w"]), "pj_op": r(v["pj_per_op_above_idle"]), "k": "M/D"} for p, v in peak.items()},
-    "peak_src": f"docs/reports/data/{MM}: matmul benchmark, tiles in L2, aifoundry2, 600 MHz; pJ per op above the run's {mm_idle:.1f} W idle (D)",
+    "peak_src": f"docs/reports/data/{MM}: matmul benchmark, tiles in L2, aifoundry2, 600 MHz; pJ per op above the idle just before each workload, "
+                + ", ".join(f"{peak[p]['idle_before_w']:.2f} W for {p}" for p in ("fp32", "fp16", "int8") if p in peak) + " (D)",
+    "tensor_randn_board_w": {p: r(v) for p, v in randn_board.items()} | {"k": "M", "T": {p: randn_T[p] for p in randn_board},
+                             "src": f"energy manual §3.2 (manual.json tensor.rows *_randn): TensorFMA on random operands, {randn_card.get('fp16', 'aifoundry2')} at {randn_T.get('fp16') or 80:.0f} °C, board power (idle plus the rise over it)"},
     "bit": {"ops_per_s": r(pi_rate * 256 / SWAR_INSTR_PER_256), "pj_op": r(pi_pj * SWAR_INSTR_PER_256 / 256), "k": "E",
             "src": f"no popcount instruction: SWAR on the vector unit, about {SWAR_INSTR_PER_256} packed-integer instructions per 256 bits (E) at the catalogue's measured {pi_rate/1e9:.0f} G instructions/s and {pi_pj:.1f} pJ each (M)"},
     "rows16": {"k": "E", "src": "a tensor op multiplies 16 rows of A; ops with fewer rows (one query per row) were measured only in fp32, at batch 1, where the pass stayed load-bound"},
@@ -127,6 +197,12 @@ et = {
     "launch_ms": {"lo": 0.2, "hi": 0.4, "k": "M", "src": "host kernel launch on aifoundry3 (sparse-compute report); a persistent kernel avoids it"},
     "allreduce_us": {"v": r(allreduce_us, 2), "k": "M", "src": "32 B TensorReduce + TensorBroadcast over 1,024 minions, aifoundry2 (on-chip communication report)"},
     "atomics_spread": {"ops_per_s": r(spread_rate, 3), "nj": r(hot_nj["mean"], 3), "k": "M", "src": "global atomics spread over 32 lines (hot-line report; energy from the energy manual's reruns)"},
+    "gs": gs_keys(),
+    "meter": {"refresh_ms": {c: r(v["sampler_10hz"], 3) for c, v in man.get("v3", {}).get("refresh_ms", {}).items()},
+              "refresh_ms_range": [r(min(v["sampler_10hz"] for v in man["v3"]["refresh_ms"].values()), 3), r(max(v["sampler_10hz"] for v in man["v3"]["refresh_ms"].values()), 3)] if man.get("v3", {}).get("refresh_ms") else None,
+              "rail_tau_s": {c: v["tau_s"] for c, v in (man["catalogue"].get("rail_filter") or {}).items() if v},
+              "rail_tau_range": [min(v["tau_s"] for v in man["catalogue"]["rail_filter"].values() if v), max(v["tau_s"] for v in man["catalogue"]["rail_filter"].values() if v)] if man["catalogue"].get("rail_filter") else None,
+              "k": "M", "src": "the board meter's new value per service-processor pass under a 10 Hz sampler, per card (the version-3 check, E41), and the rails' running average (the catalogue's rail filter): energy manual §9"},
     "pcie_Bps": {"v": 15.75e9, "k": "S", "src": "PCIe Gen4 x8, never timed on these cards"},
     "anchor": {k: (r(v) if isinstance(v, float) else v) for k, v in anchor.items()},
 }
@@ -315,13 +391,16 @@ a100_J = (250 * A["scan_s"], 400 * A["scan_s"])  # E: A100 board power while sca
 s2 = {"scan_flop": r(scanF, 3), "a100_s": A["scan_s"], "a100_tflops_nominal": r(scanF / A["scan_s"] / 1e12, 3),
       "a100_J": [r(a100_J[0], 2), r(a100_J[1], 2)], "a100_W": [250, 400],
       "et": []}
+# board power on random operands (the energy manual's tensor rows, aifoundry2 at 80 C): gradients are random-like
+bw_rand = lambda p: randn_board.get(p, peak[p]["board_w"])
 for prec, eff in [("fp16", 1.0), ("fp32", 1.0), ("fp32", 0.3), ("fp32", 0.1)]:
     t = scanF / (eff * peak[prec]["ops_per_s"])
-    s2["et"].append({"prec": prec, "eff": eff, "s": r(t, 3), "J": r(t * peak[prec]["board_w"], 3)})
-s2["breakeven_eff_fp32"] = [r(scanF / peak["fp32"]["ops_per_s"] * peak["fp32"]["board_w"] / a100_J[1], 2),
-                            r(scanF / peak["fp32"]["ops_per_s"] * peak["fp32"]["board_w"] / a100_J[0], 2)]
-s2["breakeven_eff_fp16"] = [r(scanF / peak["fp16"]["ops_per_s"] * peak["fp16"]["board_w"] / a100_J[1], 2),
-                            r(scanF / peak["fp16"]["ops_per_s"] * peak["fp16"]["board_w"] / a100_J[0], 2)]
+    s2["et"].append({"prec": prec, "eff": eff, "s": r(t, 3), "J": r(t * bw_rand(prec), 3)})
+s2["breakeven_eff_fp32"] = [r(scanF / peak["fp32"]["ops_per_s"] * bw_rand("fp32") / a100_J[1], 2),
+                            r(scanF / peak["fp32"]["ops_per_s"] * bw_rand("fp32") / a100_J[0], 2)]
+s2["breakeven_eff_fp16"] = [r(scanF / peak["fp16"]["ops_per_s"] * bw_rand("fp16") / a100_J[1], 2),
+                            r(scanF / peak["fp16"]["ops_per_s"] * bw_rand("fp16") / a100_J[0], 2)]
+s2["board_w_random"] = {p: r(bw_rand(p), 3) for p in ("fp16", "fp32")}
 s2["time_eff_needed"] = {p: r(scanF / peak[p]["ops_per_s"] / A["scan_s"], 2) for p in ("fp16", "fp32")}
 s2["atlas_bytes"] = {"weights_KB": r(A["P"] * 4 / 1e3, 3), "images_MB": r(A["N"] * 196 / 1e6, 3),
                      "queries_MB": r(A["Q"] * A["P"] * 4 / 1e6, 3)}
@@ -332,15 +411,17 @@ s2["cg_ms_per_iter"] = r(A["cg_20_s"] / 20 * 1e3, 3)
 et_fp16 = peak["fp16"]
 h_grad = 989.4e12 * 0.4
 dense = {"slower": [r(h_grad / et_fp16["ops_per_s"], 2), r(h_grad / (0.6 * et_fp16["ops_per_s"]), 2)],
-         "energy": [r(et_fp16["board_w"] / et_fp16["ops_per_s"] / (700 / h_grad), 2),
-                    r(et_fp16["board_w"] / (0.6 * et_fp16["ops_per_s"]) / (700 / h_grad), 2)],
-         "src": "ET fp16 at 60–100% of its measured 19.0 TFLOP/s and 59.3 W board (M/E) against an H100 at 40% of 989 TFLOP/s and 700 W (the owner's model, O/S)"}
+         "energy": [r(bw_rand("fp16") / et_fp16["ops_per_s"] / (700 / h_grad), 2),
+                    r(bw_rand("fp16") / (0.6 * et_fp16["ops_per_s"]) / (700 / h_grad), 2)],
+         "tflops": r(et_fp16["ops_per_s"] / 1e12, 3), "board_w": r(bw_rand("fp16"), 3), "T": randn_T.get("fp16"),
+         "src": f"ET fp16 at 60–100% of its measured {et_fp16['ops_per_s'] / 1e12:.1f} TFLOP/s (the matmul benchmark) at {bw_rand('fp16'):.1f} W of board power on random operands "
+                f"({randn_card.get('fp16', 'aifoundry2')}, {randn_T.get('fp16') or 80:.0f} °C; M/E) against an H100 at 40% of 989 TFLOP/s and 700 W (the owner's model, O/S)"}
 
 # ---------------------------------------------------------------- the pipeline at big-lab scale
 H = 3600.0
 pipeline = [
     {"key": "scan", "label": "Scan 10⁷ candidates by recomputing gradients", "h": 702, "per": "per batch of 100 queries", "fit": "no", "k": "O",
-     "why": "dense backprop, the bill itself; one ET card is 21–35× slower and spends 1.8–2.9× the energy"},
+     "why": f"dense backprop, the bill itself; one ET card is {dense['slower'][0]:.0f}–{dense['slower'][1]:.0f}× slower and spends {dense['energy'][0]:.1f}–{dense['energy'][1]:.1f}× the energy"},
     {"key": "build", "label": "Build a sketch index of 10⁷ gradients", "h": 1150, "per": "once per checkpoint", "fit": "no", "k": "O",
      "why": "dense backprop plus a projection; the sparse sketches would need 16 GB per sequence over a 15.75 GB/s link"},
     {"key": "valid", "label": "Validation retrains (LDS)", "h": 506, "per": "per method", "fit": "no", "k": "O", "why": "training runs"},
@@ -350,17 +431,18 @@ pipeline = [
     {"key": "astra", "label": "Iterative iHVP (ASTRA, 300 steps)", "h": 1.41, "per": "per query", "fit": "no", "k": "O", "why": "minibatch Hessian-vector products are gradients"},
     {"key": "qgrad", "label": "Query gradients, 100 queries", "h": 0.007, "per": "per batch", "fit": "no", "k": "O", "why": "dense backprop; an 8B model in fp16 does not fit one card's 32 GB comfortably, and there is no bf16"},
     {"key": "eigh", "label": "Eigendecompose the Kronecker factors", "h": 0.002, "per": "once per checkpoint", "fit": "no", "k": "O",
-     "why": "needs fp64 (the chip has none, and no hardware divide or square root); factors up to 14,336² (0.8 GB in fp32, 1.6 GB in fp64) exceed the 72 MB of SRAM"},
+     "why": "needs fp64 (the chip has none, and no hardware divide or square root); factors up to 14,336² (0.8 GB in fp32, 1.6 GB in fp64) exceed the chip's scratchpads (72 MB usable of 80 MB)"},
     {"key": "ihvp", "label": "EK-FAC iHVP (1.06 s)", "h": 1.06 / H, "per": "per query", "fit": "no", "k": "O",
      "why": "compute-bound matmuls against 108 GB of resident bases: 1,500 chips of SRAM to keep them on chip"},
     {"key": "lookup", "label": "Stream the whole 82 GB sketch index, 1 query", "h": 82e9 / 3.35e12 / H, "per": "per query", "fit": "no", "k": "S",
-     "why": "bandwidth-bound: the ET's DRAM gives 76 GB/s at 129 pJ/B above idle, 44× slower than HBM, and holds 32 GB"},
+     "why": f"bandwidth-bound: the ET's DRAM gives {dram_bw / 1e9:.0f} GB/s at {dram_pj['mean']:.0f} pJ/B above idle, {3.35e12 / dram_bw:.0f}× slower than HBM, and holds 32 GB"},
     {"key": "prefilter", "label": "Lexical prefilter (BM25/TF-IDF)", "h": 1.27e-3 / H, "per": "per query", "fit": "killed", "k": "X",
      "why": "ET-shaped (per-core document ownership, no atomics) but about 10⁻⁶ of the bill; the host CPU's inverted index does it"},
     {"key": "scatter", "label": "Scatter the gradients' sparse parts into sketches", "h": 0.01 * 702, "per": "per batch of 100 queries (at most 1% of the scan)", "fit": "killed", "k": "E",
-     "why": "the one ET-shaped step with real size, but the data is born in the GPU's backward pass (16 GB per sequence would have to cross a 15.75 GB/s link); GPUs keep the buckets in L2 or avoid the scatter; the chip's gather/scatter rate is unmeasured (S3)"},
+     "why": "the one ET-shaped step with real size, but the data is born in the GPU's backward pass (16 GB per sequence would have to cross a 15.75 GB/s link); GPUs keep the buckets in L2 or avoid the scatter; "
+            + (f"the chip's scatter-add, measured since (S3), reaches 10 G updates a second only while the buckets stay in a shire, and runs at {et['gs']['upd_dram']['ops_per_s'] / 1e9:.2f} G/s into DRAM" if et.get("gs") and et["gs"].get("upd_dram") else "the chip's gather/scatter rate is unmeasured (S3)")},
     {"key": "shard", "label": "Score a static 65 MB shard, 1 query (S1)", "h": s1["hbm_case"]["h100_us"] * 1e-6 / H, "per": "per query", "fit": "research", "k": "E",
-     "why": "the one physical edge: 4.2 pJ/B from the chip's own SRAM; no time win, and it needs a busy card"},
+     "why": f"the one physical edge: {sram_pj['mean']:.1f} pJ/B from the chip's own scratchpad; no time win, and it needs a busy card"},
     {"key": "topk", "label": "Select the top k (fused into scoring)", "h": 1e-6 / H, "per": "per query", "fit": "feature", "k": "E",
      "why": "10⁴–1.5×10⁵ heap inserts per query even at N = 10¹⁰: free in a GPU kernel's epilogue; kept only as part of S1"},
 ]
@@ -377,7 +459,7 @@ presets = [
 ]
 
 out = {
-    "generated": str(date(2026, 9, 25)),
+    "generated": str(date(2026, 9, 27)),
     "producer": "docs/reports/data/2026-09-25-influence-on-et/make_analysis.py",
     "kinds": {"M": "measured on an ET-SoC-1 lab card", "D": "derived: arithmetic on measured numbers", "S": "vendor spec",
               "X": "published by others", "O": "the influence-function report's owner (his measurements or cost model)",

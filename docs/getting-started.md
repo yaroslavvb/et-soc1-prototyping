@@ -8,7 +8,7 @@ This page covers everything needed to pick the work up somewhere else: clone, co
 rerun, and republish. Claude Code's memory for this project lives outside the repo, on each machine, so this
 page, [`AGENT.md`](../AGENT.md) (the entry point for an agent) and `CLAUDE.md` carry the context.
 
-## Where things stand (2026-09-26)
+## Where things stand (2026-09-27)
 
 The repository is the source of truth: every result, the experiment that produced it and the raw data are here,
 and `docs/findings/` traces each claim to its file. If a session is lost, resume from this page.
@@ -24,26 +24,42 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   `docs/lab-access.md`.
 - **Version 3 of the claims check is finished** (26 September, 06:55). Pre-registered in
   `docs/reports/data/2026-09-25-claims-v3/` (`PLAN3.md`, and `AMENDMENTS.md` A1–A5, each written before the data it
-  touches; C1 and C2 are post-data notes), with its code in `tools/claims-v3/`; it ran on aifoundry1's card 1,
-  aifoundry2 and aifoundry3 (E35–E47). The results are in `docs/reports/data/2026-09-25-claims-v3/results/` (one
-  `<exp>.json` per experiment, each item with its registered and all-cards outcome, and `pagemap.md`, every page claim
-  with the items that test it), the raw data in its `raw/`. The pages were updated on the three cards on 26 September:
-  each tested claim says what the three cards showed, each page carries a dated note, and the generators gained
-  version-3 options (`docs/findings/04-artifacts.md`, "Rebuilding the version-3 data"). The gathers and scatters that
-  ran after the campaign (E48, `tools/claims-v3/gs/`) are being reduced. To reduce again:
+  touches; C1 and C2 are post-data notes), with its code in `tools/claims-v3/`; its queues (`queue.sh` with
+  `schedule-<card>.txt`) ran unattended on aifoundry1's card 1, aifoundry2 and aifoundry3 (E35–E47). The results are
+  in `docs/reports/data/2026-09-25-claims-v3/results/` (one `<exp>.json` per experiment, each item with its registered
+  and all-cards outcome, and `pagemap.md`, every page claim with the items that test it), the raw data in its `raw/`.
+  The pages carry its results since 26 September: each tested claim says what the three cards showed, each page
+  carries a dated note, and the generators gained version-3 options (`docs/findings/04-artifacts.md`, "Rebuilding the
+  version-3 data"). On 27 September they were merged with the review's chart and collapsible-depth passes (below);
+  MIRROR.md's "Last check" says whether the live pages equal these files. The gathers and scatters that ran on each
+  of the three cards after its campaign blocks (E48, 26 September 03:19–09:22, `tools/claims-v3/gs/`) are reduced
+  (`results/gs.json`, `gs-full.json`) and registered; no page carries them yet (Q52 asks for them where they belong).
+  To reduce again:
   `tools/claims-v3/collect.sh <dir>` then `tools/claims-v3/reduce_all.sh <dir> <out>` (all-cards outcomes over the
   three campaign cards, `tools/claims-v3/campaign.py`, per amendment A4). Before any card work, check `et-who`: a
   queue stops at the next block boundary when `build/claims-v3/STOP` exists in its tree, and while one runs do not
   rebuild the binaries it uses or run `scripts/deploy-lab*.sh` against its host ([`AGENT.md`](../AGENT.md) §7).
 - **aifoundry3's host crash is understood** (25 September, late): a race in the runtime's logging set-up, reproduced
-  without a card (E49, `tools/g3log-race/`). Every host program now registers the log levels first in `main`; only
-  the gather/scatter build has been rebuilt with it so far. After the campaign, rebuild the other `build/<workload>`
-  directories on all three hosts (the campaign's binaries stay as registered until then).
+  without a card (E49, `tools/g3log-race/`). Every host program now registers the log levels first in `main`. On 26
+  September the fixed gather/scatter build ran 641 host processes on aifoundry3 with no crash (6.4 expected at the old
+  rate; E49), and aifoundry2's and aifoundry3's other host builds were rebuilt with the fix after their queues ended.
+  aifoundry1's `build/<workload>` directories are still to be rebuilt with it (its queues ended at 09:22 on
+  26 September).
+- **The visualization pass (26 September):** charts and controls on 13 pages, the chart toolkit's card registry (a
+  third card appears when its data does) and sortable tables; no number changed. Record:
+  `reports/data/2026-09-26-visualization-pass/` and `findings/04-artifacts.md`.
+- **The review of 26 September:** eight AI review agents read every published page and the repository for
+  inconsistencies, room to be more concise and charts worth adding. Repository-only fixes went in with its record;
+  its charts were built in the chart pass (26–27 September, 17 pages), and each page's detail was folded into
+  collapsible sections (27 September, 20 pages; both in `findings/04-artifacts.md`). The page changes still open wait
+  in [`reports/TODO.md`](reports/TODO.md), which starts with items for the owner (two public aifoundry1 pages and a
+  committed transcript name other people's home directories). On 26 September at 23:26, before the merge with the
+  version-3 pages, the live pages equalled their files (22 of 22, `check-mirror.py`).
 - **New pages, 25 September:** [Influence functions on the ET-SoC-1](https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions)
   (exploratory, no card run; `docs/reports/data/2026-09-25-influence-on-et/`),
   [What is broken on aifoundry1](https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting) and its
   [fix log](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix), and a report on the lab's problems for the lab lead,
-  which is private and not in the repository.
+  which is not in the repository (public since 26 September, the owner's decision; MIRROR.md).
 - **The repository pass of 25 September:** [`AGENT.md`](../AGENT.md) (the map and the rules for an agent starting
   from a clone), [`reports/MIRROR.md`](reports/MIRROR.md) (every published page with its space, file and
   visibility) and `scripts/check-mirror.py` (live equals repo). Lessons that had lived only in per-machine memory
@@ -77,14 +93,18 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   0.84 mV/W, and it is now the script's 0.87; the fit is described in `docs/energy-manual/04a-fine-grain.md` and in
   E30 of `docs/findings/03-experiments.md`). `docs/findings/04-artifacts.md` (A16) gives the whole rebuild in order.
 - **What the bars taught us:** pass-to-pass scatter on one card is 1–2%; the two cards differ by 5% with one
-  scale; small signals carry the widest bars because a 1–5 W signal rides on a 30 W idle that drifts: ±17% on
+  scale (on the version-3 full catalogue aifoundry3 and aifoundry1's card 1 are 0.976 and 0.967 of aifoundry2,
+  E46); small signals carry the widest bars because a 1–5 W signal rides on a 30 W idle that drifts: ±17% on
   the hot line, ±4–16% on the levels and rings, ±5.5% on the DRAM relay. On aifoundry2 every power burst needs a
   die above 68 °C or the governor moves the clock mid-burst (the firmware threshold is 65 °C, but on ettelem's
-  mean die reading the clock still stepped up at readings up to 67 °C in E10); the cool-card reruns of
+  mean die reading the clock still stepped up at readings up to 66 °C in E10); the cool-card reruns of
   23 September, at 64–66 °C, were discarded for that reason.
-- **The unmetered power** (board minus the three metered rails: 15 W of 32 W idle) fits as 18–20% delivery loss on
-  the minion rail, 5% on SRAM, 26–29% on the mesh and 68–73 pJ per DRAM byte off-rail, rms 0.30–0.35 W over
-  about 390 configuration means (1.1–1.3 W on the DRAM ones); the idle 15 W is not split. The memory shires' Moortec voltage monitor (`die_mv.ddr`) droops 0.87 mV per off-rail DRAM watt and
+- **The unmetered power** (board minus the three metered rails: 15 W of 32 W idle) fits, on the version-3 full
+  catalogue of 26 September, as 19%, 18% and 10% delivery loss on the minion rail (aifoundry2, aifoundry3,
+  aifoundry1's card 1), 29%, 29% and 20% on the mesh, 73, 73 and 82 pJ per DRAM byte off-rail and an SRAM term that
+  differs by card (3–4% on the first two, 54% on the third), rms 0.31–0.48 W over 392 configuration means per card
+  (1.0–1.2 W on the DRAM ones); the idle 12–18 W is not split (the 23 September fit on two cards: 18–20%, 5%, 26–29%,
+  68–73 pJ/B). The memory shires' Moortec voltage monitor (`die_mv.ddr`) droops 0.86 mV per off-rail DRAM watt and
   serves as a DRAM-activity meter (traffic with no DRAM access moves it too, by up to about 2 mV). What would meter more is the observability report's improvement ladder.
 - **Heat per millimetre** (`docs/findings/20-heat-per-mm.md`, page `docs/reports/2026-09-24-heat-per-mm.html`):
   `workloads/enercat/run_wire.py` (two runs, E31 and E32, both cards, `docs/reports/data/2026-09-24-wire*-aifoundry*`)
@@ -176,7 +196,8 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
     published at https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points.
   - Summaries of all of these are in [et-soc1-notes.md](et-soc1-notes.md).
 - **Next:**
-  - A real GEMM, tiling through the L2 scratchpad with cooperative tensor loads. FOSDEM reached 10.25 TFLOP/s this way.
+  - A real GEMM, tiling through the L2 scratchpad with cooperative tensor loads. (FOSDEM's 10.25 TFLOP/s came from
+    software-pipelining the tensor unit's inner loop, overlapping the next A-load with the current FMA.)
   - Hart 1 prefetching with `TensorLoadL2Scp`.
   - A vector-unit fp32 baseline.
   - Posting the results on Discord.
@@ -191,7 +212,7 @@ cd nekko
 scripts/clone-upstream.sh
 ```
 
-`clone-upstream.sh` puts et-platform, et-man (the manuals), core-et and et-testdrive in `external/`. Keep
+`clone-upstream.sh` puts et-platform, et-man (the manuals), core-et, et-testdrive and etTopoScan in `external/`. Keep
 et-platform's full history, because `scripts/deploy-lab-gpsdk.sh` exports an older gp-sdk from it.
 
 For the local simulator, run `scripts/create-vm.sh` on a Mac. On Ubuntu 24.04, run `scripts/provision-vm.sh`.
@@ -224,7 +245,7 @@ invite Roman sent. On the new machine:
 |---|---|---|
 | `aifoundry1` | 2 (`/dev/et0_*`, `/dev/et1_*`) | Working since 2026-09-25 15:02 (the driver's empty version string was fixed). Card 0 (firmware 1.4.1) **overheats: do not run sustained work on it**; it idles at 300 MHz. Card 1 (firmware 1.2.0) is fine and idles at 600 MHz, 33–35 W. Select a card with `ET_DEVICES=<n>` (this host only; `V3_DEVICE=<n>` in `tools/claims-v3`). Its `/opt/et` is a fork build; the disk is nearly full. |
 | `aifoundry2` | 1 | The main card for this work, and the git checkout (`~/claude/et-soc1-prototyping`). Firmware 1.3.1. Minion clock 600 MHz when the die is above 65 °C (up to 800 MHz below), 32 GB LPDDR4X, idle board power 27 W cold, 31 to 36 W after load. |
-| `aifoundry3` | 1 | Firmware 1.3.1, held at 600 MHz by a 0 W TDP that a boot service sets at every boot (not flashed). The die idles at 55–57 °C since the host changes of 25 Sep (51–54 °C before). Compare switching power over idle, not absolute watts. Its `libetrt.so` is a patched `-O3` build, and about one host launch in 100 built before 25 Sep's `registerRuntimeLogLevels()` fix crashes at 1.08 s (a g3log race in the runtime): repeat it. |
+| `aifoundry3` | 1 | Firmware 1.3.1, held at 600 MHz by a 0 W TDP that a boot service sets at every boot (not flashed). The die idles at 55–57 °C since the host changes of 25 Sep (53–54 °C before; amendment A5). Compare switching power over idle, not absolute watts. Its `libetrt.so` is a patched `-O3` build, and about one host launch in 100 built before 25 Sep's `registerRuntimeLogLevels()` fix crashes at 1.08 s (a g3log race in the runtime): repeat it. |
 
 See [findings/14-card-behaviour.md](findings/14-card-behaviour.md) for how the four cards and three hosts differ.
 
@@ -246,7 +267,8 @@ documents; see section 4. Admin work on the machines (accounts, drivers, resets)
   for the next user ([findings/14-card-behaviour.md](findings/14-card-behaviour.md), "Traps").
 - Keep disk and memory use small, and build with `nice` and `-j4`.
 - Others use the cards too: CI runners on aifoundry1 and aifoundry2 and a demo service on aifoundry3 can take a card
-  at any time, and the version-3 campaign's queues hold the cards for hours ("Where things stand").
+  at any time, and a `tools/claims-v3` queue holds a card for hours while it runs (the version-3 campaign's did on
+  25–26 September: "Where things stand").
 
 Why: the management node is single-opener, so one careless sampler blocks everyone; heat carries over from one run
 to the next, so someone else's run changes your die temperature and your power readings; and a hung card needs a
@@ -271,15 +293,18 @@ On a lab machine, with nothing to build:
 
 ```bash
 /opt/et/bin/it_test_code_loading                           # simulator: 3 tests pass in about 110 s
-timeout 10 /opt/et/bin/it_test_code_loading --mode=pcie    # the card: 3 tests pass in under 1 s
+et-who                                                     # nobody on the card? (and ask first: section 2)
+flock -n /run/lock/etsoc-shire0.lock timeout 10 /opt/et/bin/it_test_code_loading --mode=pcie   # the card: under 1 s
 ```
 
 marty1885's et-testdrive, from the laptop:
 
 ```bash
 rsync -a --exclude .git --exclude build external/et-testdrive/ aifoundry2:et-testdrive/
+ssh aifoundry2 et-who                                        # nobody on the card?
 ssh aifoundry2 'cd et-testdrive && cmake -B build -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev > /dev/null &&
-  nice cmake --build build -j4 > /dev/null && timeout 10 build/host/hello_host build/kernel/hello.elf | tail -3'
+  nice cmake --build build -j4 > /dev/null &&
+  flock -n /run/lock/etsoc-shire0.lock timeout 10 build/host/hello_host build/kernel/hello.elf | tail -3'
 ```
 
 It should print "Hello World from hart N" from all 64 harts of shire 0. Add `-DET_SYSEMU=ON` to the first
@@ -295,8 +320,9 @@ kernel faults at PC `0x40`. The deploy script sets this up:
 scripts/deploy-lab-gpsdk.sh aifoundry2       # from the laptop: sources, patched gp-sdk, nice -j4 build (~10 s)
 ssh aifoundry2
 cd ~/nekko
-make mmbench-check DEVICE=silicon            # exact-result check of every mode, about 1 s of card time
-make bench-power                             # about 1 min; every launcher is capped at 10 s on the card
+et-who                                       # nobody on the card? (and ask first: section 2)
+flock -n /run/lock/etsoc-shire0.lock make mmbench-check DEVICE=silicon   # every mode checked exactly; ~1 s of card time, timeout 10 per launch
+flock -n /run/lock/etsoc-shire0.lock make bench-power                    # about 1 min; every launcher is capped at 10 s on the card
 ```
 
 - **The kernel.** Hart 0 of each of the 1,024 minions runs back-to-back `tensor_fma` ops: 16×16×K tiles in fp32,
@@ -346,15 +372,16 @@ page's space, file and deploy form: [`reports/MIRROR.md`](reports/MIRROR.md).
 
 - **aifoundry2** (`~yaroslavvb`):
   - `~/claude/et-soc1-prototyping`: **the git checkout** the work is done in. The version-3
-    campaign runs from here, with its raw data in `build/claims-v3/aifoundry2/`.
+    campaign ran from here, with its raw data in `build/claims-v3/aifoundry2/` (committed under
+    `docs/reports/data/2026-09-25-claims-v3/raw/`).
   - `~/nekko`: the gp-sdk deploy tree (`scripts/deploy-lab-gpsdk.sh`; `MMBENCH_DIR` in `tools/claims-v3/lib.sh`),
     built. The 18 Sep runs are in `build/mmbench-power`, `build/memhier` (chases), `build/memhier-energy*` and
     `build/nocbench-data`. The outputs the reports use are committed under `docs/reports/data/`.
   - `~/et-testdrive`: built.
   - `~/et-hello`: scratch from the first session, superseded by `~/nekko`. Safe to delete.
-- **aifoundry3:** `~/nekko` (deployed for E20 onward; the campaign runs from it) and the `workloads/sgemm` build.
+- **aifoundry3:** `~/nekko` (deployed for E20 onward; the campaign ran from it) and the `workloads/sgemm` build.
   See [workloads/sgemm/README.md](../workloads/sgemm/README.md).
-- **aifoundry1:** `~/nekko` since 25 September (the campaign on card 1 runs from it; `ettelem` is built there
+- **aifoundry1:** `~/nekko` since 25 September (the campaign on card 1 ran from it; `ettelem` is built there
   against the host's own `/opt/et`, so it honours `ET_DEVICES`).
 
 The `~/nekko` trees on aifoundry1 and aifoundry3 are **rsynced copies without git**: edit in the checkout on
@@ -363,10 +390,11 @@ aifoundry2 (or a clone), then rsync the changed files. Their `.venv` or `pylib/`
 
 ## 7. Gotchas from the first session
 
-- **gp-sdk versus the lab install.** Three problems, all fixed by `patches/lab-gp-sdk-06605ab.patch`:
-  - The Erbium components are missing.
-  - The simulator runs without firmware and writes GBs of log.
-  - Kernels fault at PC `0x40` without `--emit-relocs`.
+- **gp-sdk versus the lab install.** Three problems:
+  - The Erbium components are missing: pinning gp-sdk to `06605ab`, the last version before it required them,
+    avoids this (`scripts/deploy-lab-gpsdk.sh`).
+  - The simulator runs without firmware and writes GBs of log (fixed by `patches/lab-gp-sdk-06605ab.patch`).
+  - Kernels fault at PC `0x40` without `--emit-relocs` (fixed by the same patch).
 - **`pkill -f <pattern>` over `ssh` kills your own session,** because the remote command line contains the
   pattern. Kill by PID instead.
 - **The Mac has no `timeout` by default.** Run capped commands on the lab machine.
@@ -415,6 +443,11 @@ standalone pages (the 18–19 September reports, the test drive, the spatial bri
 `--embed` run, refresh them with `scripts/paste-chartkit.py PAGE` (`--check` reports a stale copy); the memory-anatomy
 page gets it from its template. Edit a standalone page's prose in the HTML, outside those markers.
 
+Since 26 September most pages also carry the version-3 check's three cards, through options on the generators below
+(`--v3`, `--v3-rl`, `--wire3`, `--claims-v3`, `--cards`). The commands in this table are the one-card forms: run them
+as [`findings/04-artifacts.md`](findings/04-artifacts.md), "Rebuilding the version-3 data", and
+[`reports/MIRROR.md`](reports/MIRROR.md), "How each page is built", give them, or the three cards drop out of the page.
+
 | Report | Code | Measure (on a lab machine) | Raw data | Regenerate the page |
 |---|---|---|---|---|
 | Matmul efficiency, and the test drive's ladder | `kernels/mmbench`, `launchers/mmbench` | section 4 | `docs/reports/data/2026-09-18-aifoundry2` | `python3 scripts/mmbench-report-data.py DATA --manual docs/reports/data/2026-09-23-energy-manual/manual.json --embed HTML --ladder docs/report/index.html` |
@@ -427,7 +460,7 @@ page gets it from its template. Edit a standalone page's prose in the HTML, outs
 | Hot line, on-chip relay, heat per mm | `workloads/nocbench`, `workloads/onchip`, `workloads/enercat/run_wire.py` | the commands of E22–E25 and E31–E32 in `docs/findings/03-experiments.md` | `docs/reports/data/2026-09-22-hotline-*` (with the hand-kept `context.json`), `-onchip-*`, `2026-09-24-wire*` | the same entries (the hot line's `analyze_hotline.py` takes `--context` and `--barrier`), then `scripts/build-report.py` (the exact final commands are in [`reports/MIRROR.md`](reports/MIRROR.md), "How each page is built") |
 | Energy manual, catalogue | `workloads/enercat` | `run_catalogue.py DATA --passes 3` on each card (2.6 h each; keep the die warm on aifoundry2) | `docs/reports/data/2026-09-23-catalogue-aifoundry2`, `-aifoundry3`, `-aifoundry2-rows` | `analyze_catalogue.py A2 A3 A2_ROWS --out catalogue.json`, `fit_unmetered.py --out unmetered_fit.json --overwrite`, then `tools/ettelem/build_energy_manual.py`, `render_energy_manual.py`, `render_catalogue.py`, `scripts/build-report.py energy-manual manual.json HTML` (`docs/findings/04-artifacts.md`, A16, gives the full order) |
 | Energy manual, reruns | `tools/ettelem/run_reruns_warm.sh`, `run_rings_levels_power.sh` | 3 passes each of relay, hot line, rings, levels per card; preheat aifoundry2 | `docs/reports/data/2026-09-23-reruns-aifoundry2-warm`, `-aifoundry3` | `tools/ettelem/analyze_reruns.py DIRS --out reruns.json` (bursts off 600 MHz dropped) |
-| Limits of observability | `docs/reports/sources/limits-of-observability.*` | reads the firmware and the catalogue; no card time | `docs/reports/data/2026-09-23-energy-manual/` (`unmetered_fit.json`, `catalogue.json`, `manual.json`, `reruns.json` and the rerun directories it names), `docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json`, `2026-09-24-wire-energy/report.json`, `2026-09-21-horace-aifoundry2/model.json` and `report.json` | `python3 tools/ettelem/sync_hub_data.py` (writes the data file's computed blocks; `--check` exits 1 if they are stale; rerun it after regenerating any of those files), then `scripts/build-report.py limits-of-observability docs/reports/sources/limits-of-observability.data.json HTML` |
+| Limits of observability | `docs/reports/sources/limits-of-observability.*` | reads the firmware and the catalogue; no card time | `docs/reports/data/2026-09-23-energy-manual/` (`unmetered_fit.json`, `catalogue.json`, `manual.json`, `reruns.json` and the rerun directories it names), `docs/reports/data/2026-09-22-dvfs-aifoundry2/dvfs.json`, `2026-09-24-wire-energy/report.json`, `2026-09-21-horace-aifoundry2/model.json` and `report.json`, and the version-3 check's `plan3.json.gz`, `results/` and V3-CATFULL telemetry (`2026-09-25-claims-v3/`) | `python3 tools/ettelem/sync_hub_data.py` (writes the data file's computed blocks; `--check` exits 1 if they are stale; rerun it after regenerating any of those files), then `python3 scripts/build-report.py limits-of-observability docs/reports/sources/limits-of-observability.data.json HTML` |
 | Sparsity | `workloads/sparsity` | `run_lab.sh`, then `run_energy.py` twice, the second time with `--only` in reverse order (`workloads/sparsity/README.md`) | `docs/reports/data/2026-09-18-sparsity-aifoundry3` | `python3 workloads/sparsity/analyze.py DATA --later docs/reports/data/2026-09-22-horace-aifoundry3/horace3.json --embed HTML` |
 | Ridge points | `scripts/ridge-points.py` | nothing: derived from the four 2026-09-18 reports | their four data directories, and the energy manual's `manual.json` | `python3 scripts/ridge-points.py --embed HTML` (`docs/findings/04-artifacts.md`, A19, gives the input chain) |
 

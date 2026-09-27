@@ -160,7 +160,7 @@ comparison would be far closer. **That comparison was not run.**
   PCIe. Esperanto's 20 W is a chip figure.
 - **One card.** aifoundry3 switches about 8% less for the same work ([11](11-thermal-model.md)).
 - **The 800 MHz numbers come from seven short runs** in which the governor changed the clock within seconds
-  (E10). They agree with V²f to 5%, but deserve the dedicated run that `tools/ettelem/run_vf_cold.sh` was
+  (E10). They agree with V²f to within about 10%, but deserve the dedicated run that `tools/ettelem/run_vf_cold.sh` was
   written for and which has never been executed.
 - **Desktop chassis.** The card idles at 62–80 °C; in server airflow it would run cooler and leak less.
 

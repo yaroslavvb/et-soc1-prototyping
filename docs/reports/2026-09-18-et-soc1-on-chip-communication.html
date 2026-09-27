@@ -186,6 +186,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 </style>
 <script>
 /* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
@@ -685,9 +693,30 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 </script>
 <!-- chartkit:end -->
@@ -717,13 +746,22 @@ window.CK = (function () {
 
 <h2 id="where-the-shires-are-a-6-6-mesh">Where the shires are: a 6×6 mesh</h2>
 <p class="muted">Each square is one position on the mesh in <a href="https://github.com/marty1885/etTopoScan">marty1885</a>'s logical map (which appears to be the die turned a quarter), labelled with the logical shire ID the firmware uses. Colour is the measured TensorSend round-trip time from the selected shire (outlined), between minion 0 of each shire; stronger blue is slower. <i>Card</i> picks whose measurements: each of the three cards of the 26 September check (the median of its three passes) or the first session (aifoundry2, 18 September). Hover or focus a shire for its numbers; tap it, or press Enter on it, to measure from there. The four grey squares hold no compute shire: they are the master shire, the spare shire, and the PCIe and I/O shires, and they route traffic too. The datasheet's full 8 × 6 mesh adds eight memory shires, not shown: in this map's orientation the latency fit on aifoundry2 in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#the-memory-shire-leg-91-cycles-plus-12-per-hop">Anatomy of a memory access</a> (§4) places memory shires 0–3 above the top row and 4–7 below the bottom row, over the middle four columns (memory shire 2's own position is not pinned down by that fit).</p>
+<details class="more"><summary>What "Shade by" does</summary>
 <p class="small" id="mesh-shade-note"><i>Shade by</i> recolours the map with another of the page's shire-to-shire round trips, each on its own scale: TensorSend with 1 KB messages, the credit counter, or a flag passed through memory. The readout under the map gives that matrix's straight-line fit against mesh hops over all 496 shire pairs.</p>
+</details>
 <div class="ck-controls"><div id="mesh-card"></div><div id="mesh-shade"></div></div>
-<div class="controls"><button type="button" id="ring-btn" aria-pressed="false">Show a one-hop ring through all 32 shires</button><span id="mesh-status"></span></div>
-<p class="small" id="ring-note" hidden>The orange ring visits every compute shire and moves one hop at each step: 0 24 9 25 2 11 19 27 18 10 17 14 22 26 15 23 31 7 6 30 29 5 28 20 12 21 13 1 16 4 3 8, then back to 0.</p>
+<div class="controls"><span id="mesh-status"></span></div>
+<details class="more"><summary>Compare three chain orderings on the map</summary>
+<p class="small" id="ring-intro">A chain hands data from one shire to the next in some order, all the way round; the orange path is that order, and the darker dashed segment its longest step. Compare three orderings, on the same 32 compute shires the relay report chains:</p>
+<div class="ck-controls"><div id="ring-seg"></div></div>
+<p class="small" id="ring-note"></p>
+<p class="ck-readout" id="ring-read"></p>
+</details>
 <div class="card chart" id="mesh"></div>
 <p class="ck-readout" id="mesh-read"></p>
+<details class="more"><summary>How the map was checked</summary>
 <p class="small">Coordinates follow marty1885's map (x across, y down). On each of the three cards every round trip between two shires is 150 + 12.02 × (Manhattan distance on this grid) cycles, with a worst residual of 1.1–1.4 cycles over all 496 pairs in each of the nine passes (1.1 in the first session). In every pass on every card, all 12 restarts of a search from random layouts, without his map, found the same distances.</p>
+</details>
 
 <h2 id="latency-grows-with-distance-except-through-memory">Latency grows with distance, except through memory</h2>
 <p class="muted">Round-trip time between minion 0 of every pair of shires, against the number of mesh hops between them, for three ways to signal another core. TensorSend round trips rise by 20 ns per hop. Credit round trips rise by about 24 ns per hop on all three cards (234 + 24 ns per hop fitted, with a worst residual of 15 cycles; the first session's 246 + 20.4 ns fitted within 5), yet across shires they almost coincide with TensorSend's: the median pair differs by under a cycle, and 445 of the 496 by at most 15 cycles. A flag handoff through global atomics in memory, which is how a GPU passes a signal between SMs, lands on whichever shire's L3 slice holds the flag's line. It costs 610–1,150 ns (median 873 across shires on each card) whatever the distance: its slope against mesh hops is −2 cycles per hop, and at most +9 cycles (15 ns) per hop at 99% on each of the three cards. Points at 0 hops are pairs inside one shire.</p>
@@ -747,6 +785,7 @@ window.CK = (function () {
 
 <h2 id="every-primitive-against-a-gpu">Every primitive, against a GPU</h2>
 <p class="muted">Round trips at 600 MHz on ET-SoC-1; the three cards agree within a few cycles, the chip-wide barriers within 15 (26 September). GPU numbers are published measurements, at 1.41 GHz for the A100 and 1.755 GHz for the H800 (Hopper). The GPU column lists the closest equivalent where one exists.</p>
+<details class="more"><summary>The full comparison table, primitive by primitive</summary>
 <div class="table-wrap"><table class="prim" id="prim-table">
 <thead><tr><th>Primitive</th><th class="num">ET-SoC-1, measured</th><th>What it does</th><th>Closest GPU equivalent</th></tr></thead>
 <tbody>
@@ -758,12 +797,14 @@ window.CK = (function () {
 <tr><td class="lvl">Chip-wide barrier</td><td class="num">8.3 µs · 2.3 µs</td><td>Barrier of 32 shires built from FLB, global atomics and credits (8.3 µs), or from the hardware allreduce tree (2.3 µs).</td><td><code>grid.sync()</code>: 1.1–1.2 µs on A100.</td></tr>
 <tr><td class="lvl">Flag through memory atomics</td><td class="num">610–1,150 ns<br>(median 873 across shires)</td><td>Round trip: global atomic swap, then spinning on a global atomic read, on DRAM lines that live in L3. No measurable dependence on distance (at most 15 ns per hop).</td><td>This is the A100 pattern: ~330 ns round trip through L2, ~0.7 µs once a data fence is added.</td></tr>
 </tbody></table></div>
+</details>
 
 <h2 id="message-size-and-bandwidth">Message size and bandwidth</h2>
 <p class="muted">Time per message for a one-way stream of messages from one minion to another, against message size. The receiver posts a new receive as soon as the last one finishes. A message is up to 127 registers of 32 B, reusing registers once past f31. Each path has a fixed cost per message (40, 86, 135 and 224 cycles) plus a cost per register (2.3, 4.0, 3.0 and 4.6 cycles), on all three cards. The chart is aifoundry2's (26 September); the other two cards agree within 0.3%. 1 KB round trips between all 496 shire pairs add 12 cycles per hop up to 5 hops and 27–36 per hop beyond (the 1 KB view of the <a href="#latency-grows-with-distance-except-through-memory">distance chart</a>), so the sender seems to have a limited number of packets in flight.</p>
 <div class="ck-controls"><div id="size-mode"></div></div>
 <div id="size-legend"></div>
 <div class="card chart" id="size"></div>
+<details class="more"><summary>Per-link bandwidth, as a table</summary>
 <div class="table-wrap"><table class="compact" id="links-table">
 <thead><tr><th>Path</th><th class="num">One link,<br>1 KB messages</th><th class="num">One link,<br>4 KB messages</th></tr></thead>
 <tbody>
@@ -773,6 +814,7 @@ window.CK = (function () {
 <tr><td class="lvl">Mesh, 10 hops</td><td class="num">1.8 GB/s</td><td class="num">2.9 GB/s</td></tr>
 </tbody></table></div>
 <p class="small">Per-link numbers are 32 B × COUNT over the stream's time per message at 600 MHz; the three cards give the same to the digits shown. With every minion sending 1 KB messages at once, the whole chip moves 1.1–3.0 TB/s inside shires and 0.09–0.16 TB/s between them; those rates and the energy per byte of each ring are in <a href="#energy-per-byte-moved">Energy per byte moved</a>.</p>
+</details>
 
 <h2 id="reduction-trees">Reduction trees</h2>
 <p class="muted">Latency of one allreduce (TensorReduce up the tree, then TensorBroadcast back down) against the number of minions in the tree, for three sizes. Up to 32 minions the tree stays in one shire. Beyond that, each doubling adds a level between shires. Each level adds about one round trip between the minions it pairs: 68–71 cycles on the fast network (levels 0–2), 117 through the crossbar (levels 3–4), and 164–234 over the mesh (levels 5–9), where the slowest branch sets the pace (the first session's were 68, 114 and 156–235). The chart is aifoundry2's (26 September); the other two cards agree within 0.3%. The dashed line is the A100's <code>grid.sync()</code>, a barrier that moves no data.</p>
@@ -780,7 +822,7 @@ window.CK = (function () {
 <div class="card chart" id="tree"></div>
 
 <h2 id="energy-per-byte-moved">Energy per byte moved</h2>
-<p class="muted">Why does a byte cost 6–26× more once it crosses the shire boundary? Hart 0 of all 1,024 minions sends 1 KB messages (128 B where marked) around rings inside a shire, or to shires a fixed number of IDs away; the rows are sorted by mean mesh distance. The three panels share the rows: bytes moved per second over the whole chip, board power above the idle just before and after each configuration (18 September), and energy per byte. There a hollow dot is the 18 September mean (aifoundry2), with its two runs as ticks, and a filled dot the 26 September re-measurement with its range over passes, six on each of three cards (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">the energy manual, §5</a>); the 18 September values read 2–13% above the three-card mean (4–16% above aifoundry2's own passes). Inside a shire messaging costs 0.7–2.2 pJ per byte with 1 KB messages. With 128 B messages a shire ring costs more: 3.7 against 2.2 pJ/B (3.6 against 2.1 on aifoundry2, 3.4 against 2.1 on aifoundry3, 3.9 against 2.5 on aifoundry1's card 1), a difference of +1.3 to +1.5 pJ/B, above zero at 99% on every card. Over the mesh the cost fits 9.2 + 1.75 pJ per mean hop on the three cards together (9.1 + 1.8 on aifoundry2, 8.0 + 1.7 on aifoundry3 and 10.4 + 1.7 on aifoundry1's card 1; 10.0 + 1.9 in aifoundry2's two runs of 18 September), over the five 1 KB rings every card kept, mean distances of 1.6–4.7 hops. Grey rules are references: ET's own L2, remote-scratchpad (the mean over the zeros and random data its passes held) and DRAM reads at a steady 600 MHz (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">the energy manual, §4</a>), and the A100's L2 and HBM accesses (SC'25). The last row is bulk data for comparison: every minion streaming TensorLoads from the scratchpad 16 shire IDs away (5.1 pJ/B when that scratchpad holds zeros, 11.8 when it holds random data).</p>
+<p class="muted">Why does a byte cost 6–26× more once it crosses the shire boundary? Hart 0 of all 1,024 minions sends 1 KB messages (128 B where marked) around rings inside a shire, or to shires a fixed number of IDs away; the rows are sorted by mean mesh distance. The three panels share the rows: bytes moved per second over the whole chip, board power above the idle just before and after each configuration (18 September), and energy per byte. There a hollow dot is the 18 September mean (aifoundry2), with its two runs as ticks, and a filled dot the 26 September re-measurement with its range over passes, six on each of three cards (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">the energy manual, §5</a>); the 18 September values read 2–13% above the three-card mean (4–16% above aifoundry2's own passes). Inside a shire messaging costs 0.7–2.2 pJ per byte with 1 KB messages. With 128 B messages a shire ring costs more: 3.7 against 2.2 pJ/B (3.6 against 2.1 on aifoundry2, 3.4 against 2.1 on aifoundry3, 3.9 against 2.5 on aifoundry1's card 1), a difference of +1.3 to +1.5 pJ/B, above zero at 99% on every card. Over the mesh the cost fits 9.2 + 1.75 pJ per mean hop on the three cards together, over the five 1 KB rings every card kept, mean distances of 1.6–4.7 hops; the readout under the chart gives each card's fit. Grey rules are references: ET's own L2, remote-scratchpad (the mean over the zeros and random data its passes held) and DRAM reads at a steady 600 MHz (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">the energy manual, §4</a>), and the A100's L2 and HBM accesses (SC'25). The last row is bulk data for comparison: every minion streaming TensorLoads from the scratchpad 16 shire IDs away (5.1 pJ/B when that scratchpad holds zeros, 11.8 when it holds random data).</p>
 <div class="ck-controls"><div id="energy-mode"></div></div>
 <div id="energy-legend"></div>
 <div class="card chart" id="energy"></div>
@@ -804,7 +846,9 @@ window.CK = (function () {
 </tbody></table></div>
 <p class="small">The same cores spinning with no messages drew 2.71 W over idle (18 September), and 2.4–2.5 W on each of the three cards on 26 September (means of six passes). The two 18 September runs agree within 6% except for s and s+16 (13%), a ring that slows the service processor reading the meter on this card (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">hub, §4.1</a>). The s+16 row keeps aifoundry3's three passes of 23 September: the check dropped every s+16 burst on every card, because that ring slowed the meter's sampler to 63–141 ms a reading. The TensorLoad row pools nine passes whose scratchpads held zeros (5.10 [4.40–6.45] pJ/B) and nine that held random data (11.83 [9.53–14.43]).</p>
 </details>
+<details class="more"><summary>Why the shire-boundary step is bandwidth, not wires</summary>
 <p>Read these as the cost of messaging, not of wires. Rings inside a neighbourhood or a shire with 1 KB messages drew about as much power over idle as the same cores spinning with no messages (from 0.3 W more to 0.2 W less, the means of six passes on each of three cards, 26 September), and 1 KB rings across the mesh drew 0.4–1.2 W less, so these figures are mostly the cost of 1,024 cores kept busy by messaging, divided by the bytes they moved. The step at the shire boundary mostly mirrors the drop in bandwidth, not costlier wires. The per-hop slope, 1.75 pJ/B on the three cards together, falls inside the mesh's own cost measured with chosen bit patterns in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> (1.4–2.3 pJ per byte per hop on board power, from free links to a loaded mesh); the 8–10 pJ intercept is mostly the busy cores.</p>
+</details>
 
 <h2 id="what-the-numbers-say">What the numbers say</h2>
 <ol>
@@ -820,7 +864,9 @@ window.CK = (function () {
 <h2 id="a-trap-one-ready-flag-per-minion">A trap: one ready flag per minion</h2>
 <div class="note">
 <p>Before a sender may transmit, TensorSend waits for a "ready" message from its receiver. In the RTL (<code>dcache_reduce.v</code>, register <code>partner_ready_peer</code>), a point-to-point ready is a <b>single bit per minion, not one per partner</b>. If two different minions post their readies to the same sender before it has used them, one of them is lost. That receiver then waits forever, and so does its sender. The tree operations are safe: they keep one bit per tree level. The first cross-shire test here (aifoundry2, 18 September) ran two pairs through minion 0.0 without a barrier between them, and it hung the card; that is the one hang seen, and the test was not repeated. The stalled harts ignored the firmware's abort, and every later launch failed with <code>KernelLaunchCmIfaceMulticastFailed</code> until the chip was reset.</p>
+<details class="more"><summary>How the trap is avoided in this page's own probe</summary>
 <p>The simulator (<code>sys_emu</code>) tracks every partner separately, so it never shows the problem. <code>nocbench</code> now refuses any schedule where a minion could have two partners' readies outstanding. Pairs are separated by a chip-wide barrier, and rings only ever receive readies from the next minion. With that rule, TensorSend works across all 496 shire pairs.</p>
+</details>
 </div>
 
 <p class="muted">Which TensorSend layouts hang? One shire's 32 minions, one neighbourhood per row, and the messages of one step of four layouts. Solid edges are the neighbourhood's tree edges (68-cycle round trips), dashed ones go through the shire crossbar (114 cycles); a minion that would take readies from two partners in the same phase is outlined and marked. Costs are this page's measured round trips.</p>
@@ -833,17 +879,24 @@ window.CK = (function () {
 <ul>
   <li><b>1D chains at minion grain inside a shire, 2D arrays at shire grain over the mesh.</b> A one-way message costs about 34 cycles on a tree edge, 57 cycles elsewhere in the shire, and 75 + 6 cycles per hop between shires. To keep communication under a tenth of the time, a cell needs about 10× that much work per step: roughly 350–600 cycles inside a shire and 750–1,000 at a shire boundary. That sets the grain <i>k</i> ≈ 10·t<sub>msg</sub>/t<sub>cell</sub> cells per message for wavefront DP or lattice updates.</li>
   <li><b>In a 2D array, give each neighbour link its own minion.</b> Over TensorSend a minion may have only one partner's ready outstanding (see <a href="#a-trap-one-ready-flag-per-minion">the trap above</a>). At shire grain that is easy to respect: a shire has 32 minions, so no minion needs to send to or receive from two partners. Bulk tiles can go through the scratchpads instead (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a>). Inside a shire the layouts are, as drawn above:
+    <details class="more"><summary>The four layouts, safe or not</summary>
     <ul>
       <li>Safe: 1D rings (partners never change).</li>
       <li>Safe by the RTL rule, not run here: 2D in alternating phases (west pass, barrier, north pass, barrier; a 32-minion FLB plus credit barrier is 233 cycles against 68–114 per hop).</li>
       <li>Safe: the hardware trees (one ready bit per level; 444 cycles for a 32-minion reduce and broadcast).</li>
       <li>Hangs by the RTL rule, not run here (the one hang seen had two pairs through one minion): a naive 2D array whose cells take readies from two partners, until the chip is reset; <code>sys_emu</code> tracks partners separately and will not show it.</li>
-    </ul></li>
+    </ul></details></li>
   <li><b>Order chains by the map, not by shire ID.</b> Stepping through shires 0, 1, 2, … 31 averages 3.3 hops per boundary and up to 8 (3.5 and up to 10 if the ring closes from 31 back to 0). This ring through all 32 compute shires moves one hop at every step: 0 24 9 25 2 11 19 27 18 10 17 14 22 26 15 23 31 7 6 30 29 5 28 20 12 21 13 1 16 4 3 8, and back to 0.</li>
   <li><b>Send boundaries, load bulk.</b> Register-to-register messages suit small, latency-critical exchanges and in-network combines. Tiles that move between shires go faster through the scratchpads and L3: handing each stage's output to the next shire's scratchpad, instead of a round trip through DRAM, runs about 12× faster at about a thirteenth of the energy per byte (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a>).</li>
 </ul>
 
+<p class="small" id="grain-lead">The first rule as a calculator: pick a link, a message size and the work a cell does per step. A message's time is half the measured round trip at that size.</p>
+<div class="ck-controls"><div id="grain-link"></div><div id="grain-hops"></div></div>
+<div class="ck-controls"><div id="grain-size"></div><div id="grain-work"></div></div>
+<p class="ck-readout" id="grain-read"></p>
+
 <h2 id="how-it-was-measured">How it was measured</h2>
+<details class="more"><summary>How it was measured, in full</summary>
 <ul>
   <li><b>Round trips.</b> Hart 0 of two minions bounces COUNT registers back and forth with TensorSend and TensorRecv (or credits, or atomic flags) 200–4,000 times after a warm-up, timed with the minion cycle counter. Pairs run one at a time, with a chip-wide barrier between them. The receiver checks the data: after a MOVE both sides must hold the sender's pattern, and after ADD or MAX the value a host-side replay predicts. All 3,699 pair and stream measurements, all 40 tree and 4 barrier runs, and every ring launch of the energy runs passed, and all 3,699, 40 and 4 passed again in each of the nine passes of the 26 September check. For the shire matrix, minion 0 of each of the 32 shires met every other shire's minion 0 (496 pairs), and the same again with minion 31. The intra-shire matrix covers all 496 minion pairs of shires 0 and 24.</li>
   <li><b>Streams, rings, trees and barriers.</b> A stream sends N messages one way. A ring has every minion send to the next and receive from the previous, with neighbours alternating which comes first. Allreduces sum each minion's ID + 1 once with integer ADD, check the result, then time 500–1,000 more with integer MAX, which keeps the sum, and check it again. Barriers are timed over thousands of iterations.</li>
@@ -851,17 +904,24 @@ window.CK = (function () {
   <li><b>Energy.</b> On 18 September (aifoundry2, two runs in opposite orders), board power polled about 12 times a second, averaged over about 4 s of launches per configuration; the service processor's copy of the meter changes about every 130–165 ms on aifoundry2, depending on how it is polled, and about every 255 ms on aifoundry3. Measured again on 26 September (three passes a card): 126–135 ms polled by single commands, 156–157 ms under a 10 Hz sampler and 187 ms at 20 Hz on aifoundry2; 134–139, 157–159 and 188–189 ms on aifoundry1's card 1; 223–224, 263–264 and 320–322 ms on aifoundry3, the only card where the sampler's lengthening of the period is clear at 99%. The baseline is the median idle power in the 5 s gaps just before and after that configuration, because aifoundry2 was cooling after another user's matmul (die at 80 °C at the start of that session, 77–78 °C during the two runs used here) and its idle power drifted from 35.1 to 33.7 W over the session. The 26 September re-runs are the energy manual's, from the three-card check: six passes on each card at 600 MHz, each burst against idle readings taken before and after and corrected for the die's warming, with bursts dropped where the clock left 600 MHz or the meter's sampler slowed (every s+16 burst, so that row keeps aifoundry3's three passes of 23 September).</li>
   <li><b>Lab etiquette.</b> Every card run was its own process under <code>timeout 10</code>, on an otherwise idle card. The one hang (above) was cleared with a software reset of the chip (<code>DM_CMD_RESET_ETSOC</code>), and a health check passed before any further runs. The lab's rule, which we had not yet seen then, is to leave a hung card for the lab admin to power-cycle, because a software reset can itself hang a card.</li>
 </ul>
-<p class="small">Versions: published 18 September 2026; revised 24 September 2026 (energies per byte now the 23 September re-measurement; first published from aifoundry2's two runs as 0.8–2.3 pJ inside a shire and 13–20 pJ across the mesh, 10.0 + 1.9 pJ per hop; systolic guidance and map orientation corrected); 25 September (version 3): the mesh energy fit given per card; the spin comparison, the 128 B messages and the per-hop slope's uncertainty corrected; the clock results marked as one aifoundry2 session; the layouts never run marked as predicted from the RTL (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>); 26 September: the latencies, trees and barriers re-measured on three cards under a pre-registered plan (same record), the map and distance chart per card, and the numbers that moved corrected (the in-shire barrier, the 32-minion allreduce, the tree levels, the credit round trips, the flag range); the energies per byte re-measured on the same three cards, six passes each, and the mesh fit pooled (1.75 pJ/B per hop, no difference between the cards).</p>
+</details>
+
+<details class="more"><summary>Version history and provenance</summary>
+<p class="small">Versions: published 18 September 2026; 24 September, the energies per byte re-measured (first published from aifoundry2's two runs as 0.8–2.3 pJ inside a shire and 13–20 pJ across the mesh) and the systolic guidance and map orientation corrected; 25 September (version 3), the spin comparison, the 128 B messages and the per-hop slope's uncertainty corrected, and the layouts never run marked as predicted from the RTL; 26 September, the latencies, trees, barriers and energies re-measured on three cards under a pre-registered plan, with the in-shire barrier, the 32-minion allreduce, the tree levels, the credit round trips and the flag range corrected and the mesh energy fit pooled; 27 September, the chain-order comparison and the grain calculator added and the detail folded into collapsible sections. Record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>.</p>
+</details>
 
 <h2 id="caveats">Caveats</h2>
+<details class="more"><summary>Caveats, in full</summary>
 <ul>
-  <li><b>Three cards, one clock.</b> The logical-to-physical map can differ between cards when a different shire is fused off; it matched <a href="https://github.com/marty1885/etTopoScan">marty1885</a>'s card on all three cards measured here. All runs here were at 600 MHz. In the one memory-hierarchy session that ran at 800 MHz, a hop still took 20 ns, 16 cycles instead of 12; only aifoundry2 can repeat that, since aifoundry3's firmware pins 600 MHz.</li>
+  <li><b>Three cards, one clock.</b> The logical-to-physical map can differ between cards when a different shire is fused off; it matched <a href="https://github.com/marty1885/etTopoScan">marty1885</a>'s card on all three cards measured here. All runs here were at 600 MHz (the 800 MHz session is under <a href="#what-the-numbers-say">What the numbers say</a>).</li>
   <li><b>Energy is whole-card power above idle.</b> It includes the cores that issue the messages, busy or stalled, and the regulators' losses, so it overstates the cost of the wires: only the per-hop slope is close to the wires' own cost. The deltas are small (1.1–2.8 W on cards idling at 25–39 W), so treat each configuration's energy per byte as ±20%. The per-hop slope is 1.75 pJ/B per hop on the three cards together (1.73–1.78 on each; no two cards differ at 99%), 1.40–2.10 at 99% over the 18 passes, while one card's six passes pin it only to 1.31–2.25 (aifoundry2), 0.95–2.53 (aifoundry1's card 1) and 0.48–2.97 (aifoundry3).</li>
   <li><b>The GPU column is not our measurement.</b> The numbers come from several published microbenchmark studies with their own methods and clocks. No measured A100 small-vector device-wide reduction was found, so the comparison uses its <code>grid.sync()</code>.</li>
   <li><b>Hart 0 only.</b> Only hart 0 of a minion may issue tensor operations, so hart 1 was idle in these tests. Credits can also target hart 1, which was not measured.</li>
 </ul>
+</details>
 
 <h2 id="reproduce">Reproduce</h2>
+<details class="more"><summary>Reproduce this</summary>
 <pre><code># build on the lab machine (sources only, nice -j4)
 scripts/deploy-lab.sh aifoundry2 workloads/nocbench
 
@@ -881,6 +941,7 @@ python3 workloads/nocbench/analyze.py docs/reports/data/2026-09-18-nocbench-aifo
 <p class="small">Paths are relative to a checkout of <a href="https://github.com/yaroslavvb/et-soc1-prototyping">yaroslavvb/et-soc1-prototyping</a>;
 <code>scripts/deploy-lab.sh</code> copies the sources to <code>~/nekko</code> on the lab machine and builds there.
 The analysis step rewrites only this page's embedded data.</p>
+</details>
 
 <h2 id="related">Related reports</h2>
 <ul>
@@ -902,12 +963,14 @@ message on this page, demands before the tensor unit is the limit.</li>
 </ul>
 
 <h2 id="sources">Sources</h2>
+<details class="more"><summary>Sources, in full</summary>
 <ul class="small">
   <li>ET-SoC-1: <a href="https://github.com/aifoundry-org/et-man">ET Programmer's Reference Manual</a> §7 (atomics), §9.4 (TensorSend, TensorRecv, TensorReduce, TensorBroadcast), §10 (fast local barriers), §11 (credit counters); ET-SoC-1 Preliminary Datasheet §4 (8 × 6 mesh, 44 stops); <a href="https://github.com/openhwfoundation/core-et/tree/erbium">core-et</a> Neighborhood MAS §4.7 (fast local messaging network), ET-Link Specification §5.5 (messages), RTL <code>rtl/shire/minion/dcache/dcache_reduce.v</code>; <a href="https://github.com/aifoundry-org/et-platform">et-platform</a> <code>sw-sysemu/insns/tensors.cpp</code>; D. Ditzel et al., <a href="https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf">IEEE Micro 42(3), 2022</a> (570 mm², TSMC 7 nm).</li>
   <li>M. Chang (marty1885), <a href="https://clehaxze.tw/gemlog/2026/04-27-tnvestigating-the-et-soc-1-noc.gmi">Investigating the ET-SoC-1 NoC</a>, 2026 (the shire map, bandwidth and congestion tests), and <a href="https://github.com/marty1885/etTopoScan">etTopoScan</a>.</li>
   <li>A100 and Hopper (H100, H800): <a href="https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf">A100 whitepaper</a>; Luo et al., <a href="https://arxiv.org/abs/2501.12084">Dissecting the NVIDIA Hopper Architecture</a>, 2025 (A100 L2 near/far, H800 distributed shared memory latency and bandwidth); Chips and Cheese, <a href="https://chipsandcheese.com/p/nvidias-h100-funny-l2-and-tons-of-bandwidth">Nvidia's H100: Funny L2, and Tons of Bandwidth</a>, 2023 (atomic handoff between SMs); Burtchell &amp; Burtscher, <a href="https://userweb.cs.txstate.edu/~burtscher/papers/iiswc24b.pdf">Characterizing CUDA and OpenMP Synchronization Primitives</a>, IISWC 2024 (<code>__syncthreads</code>, <code>__threadfence</code>); Zhang et al., <a href="https://arxiv.org/abs/2004.05371">A Study of Single and Multi-device Synchronization Methods in Nvidia GPUs</a>, IPDPS 2020, and their <a href="https://github.com/neozhang307/doctoral_showcase_materials/blob/main/SC23_Poster_DoctorShowCase.pdf">SC23 poster</a> (<code>grid.sync()</code> on A100); Li et al., <a href="https://arxiv.org/abs/2609.01864">CREDIT</a>, HPEC 2026 (<code>cluster.sync()</code>); Vellaisamy et al., <a href="https://arxiv.org/abs/2504.11750">ISPASS 2025</a> (launch latency).</li>
   <li>Energy: Antepara et al., <a href="https://escholarship.org/uc/item/6189368s">Benchmark-driven Models for Energy Analysis and Attribution of GPU-Accelerated Supercomputing</a>, SC'25, table 3 (A100 4.71 pJ/bit for L2); W. J. Dally, Y. Turakhia, S. Han, <a href="https://doi.org/10.1145/3361682">Domain-Specific Hardware Accelerators</a>, CACM 2020 (~100 fJ/bit·mm on-chip wires). One hop is 3.72 mm (measured from the die plot in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#die">Heat per millimetre, §2</a>). Measured since, with the bits on the links chosen: 47–79 fJ per random bit·mm on board power, the meter used here, and 37–53 on the mesh rail alone (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#compare">Heat per millimetre, §7</a>).</li>
 </ul>
+</details>
 <p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
 
 <script>
@@ -1012,6 +1075,29 @@ message on this page, demands before the tensor unit is the limit.</li>
   const pairMap = m => { const o = {}; (m.pairs || []).forEach(p => { o[p[0] + "-" + p[1]] = p[2]; o[p[1] + "-" + p[0]] = p[2]; }); return o; };
   const hopsOf = (a, b) => Math.abs(LAYOUT[a][0] - LAYOUT[b][0]) + Math.abs(LAYOUT[a][1] - LAYOUT[b][1]);
   const RING = [0, 24, 9, 25, 2, 11, 19, 27, 18, 10, 17, 14, 22, 26, 15, 23, 31, 7, 6, 30, 29, 5, 28, 20, 12, 21, 13, 1, 16, 4, 3, 8];
+  // Chain-order comparison (#ring-seg): the same 32 compute shires, three orders to hand data round in. "ID order" and
+  // "every 3rd ID" step through shire IDs (which do not follow the mesh, as the relay report notes); the one-hop ring
+  // is marty1885's RING above, built so every step is exactly one mesh hop. Stats use the measured 32 B TensorSend
+  // pairwise matrix (M), not the hop-count fit, so the total and the worst step are both real numbers.
+  const idOrder = k => Array.from({ length: 32 }, (_, i) => (i * k) % 32);
+  const CHAINS = [
+    { key: "idorder", label: "ID order", order: idOrder(1) },
+    { key: "everyk", label: "every 3rd ID", order: idOrder(3) },
+    { key: "onehop", label: "one-hop ring", order: RING }
+  ];
+  function chainStats(order) {  // the selected card's 32 B matrix (M follows the Card control)
+    const Mg = M.ghz || GHZ, Mmap = pairMap(M);
+    const n = order.length, steps = [];
+    let total = 0, worstIdx = 0;
+    for (let i = 0; i < n; i++) {
+      const a = order[i], b = order[(i + 1) % n], h = hopsOf(a, b), key = a + "-" + b;
+      const ns = Mmap[key] != null ? Mmap[key] / Mg : null;
+      steps.push({ a, b, h, ns });
+      if (ns != null) total += ns;
+      if (h > steps[worstIdx].h) worstIdx = i;
+    }
+    return { steps, total, worstIdx };
+  }
   const median = v => { const s = v.slice().sort((a, b) => a - b), n = s.length; return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2; };
   const tw = t => (t.getComputedTextLength ? t.getComputedTextLength() : 0);
   const onFocusOrHover = (g, fn, off) => {
@@ -1035,7 +1121,7 @@ message on this page, demands before the tensor unit is the limit.</li>
     });
     return out;
   };
-  let SHADES = shadesFor(), shade = SHADES[0], src = 0, showRing = false;
+  let SHADES = shadesFor(), shade = SHADES[0], src = 0, chainKey = "idorder";
   const meshLabel = () => "Map of the 32 compute shires on the 6 by 6 mesh, shaded by the " + shade.long + " from the selected shire " + src + " (" + cardName() + ")";
   const meshF = CK.frame("mesh", {
     label: meshLabel(),
@@ -1086,9 +1172,13 @@ message on this page, demands before the tensor unit is the limit.</li>
           return k;
         }
       });
-      if (showRing) {
-        const pth = CK.el("path", { d: RING.map((s, i) => (i ? "L" : "M") + centres[s][0].toFixed(1) + " " + centres[s][1].toFixed(1)).join("") + "Z", "pointer-events": "none" }, f.svg);
+      {
+        const chain = CHAINS.find(c => c.key === chainKey) || CHAINS[0], order = chain.order, st = chainStats(order);
+        const pth = CK.el("path", { d: order.map((s, i) => (i ? "L" : "M") + centres[s][0].toFixed(1) + " " + centres[s][1].toFixed(1)).join("") + "Z", "pointer-events": "none" }, f.svg);
         pth.style.fill = "none"; pth.style.stroke = "var(--c2)"; pth.style.strokeWidth = "3"; pth.style.strokeLinejoin = "round";
+        const w = st.steps[st.worstIdx], p1 = centres[w.a], p2 = centres[w.b];
+        const seg = CK.el("line", { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], "pointer-events": "none" }, f.svg);
+        seg.style.stroke = "var(--ink)"; seg.style.strokeWidth = "4"; seg.style.strokeDasharray = "2 3"; seg.style.strokeLinecap = "round";
       }
       const ly = top + gw + 14, lw = Math.min(260, gw), steps = 13;
       for (let i = 0; i < steps; i++) {
@@ -1120,12 +1210,20 @@ message on this page, demands before the tensor unit is the limit.</li>
   CK.seg("mesh-shade", { label: "Shade by", value: shade.key, options: SHADES.map(o => [o.key, o.seg]),
     onChange: v => { shade = SHADES.filter(o => o.key === v)[0] || SHADES[0]; CK.hide(meshF); meshF.svg.setAttribute("aria-label", meshLabel()); meshF.redraw(); meshSay(); } });
   meshSay();
-  document.getElementById("ring-btn").addEventListener("click", function () {
-    showRing = !showRing;
-    this.setAttribute("aria-pressed", showRing ? "true" : "false");
-    document.getElementById("ring-note").hidden = !showRing;
-    meshF.redraw();
-  });
+  // The chain-order comparison: total and worst-step round trip, from the same measured pairwise matrix as #mesh.
+  const ringRead = CK.readout("ring-read");
+  function ringSay() {
+    const chain = CHAINS.find(c => c.key === chainKey) || CHAINS[0], st = chainStats(chain.order), w = st.steps[st.worstIdx];
+    const meanH = st.steps.reduce((s, x) => s + x.h, 0) / st.steps.length;
+    document.getElementById("ring-note").textContent = "The orange path visits every compute shire in " + chain.label + ": " +
+      chain.order.join(" ") + ", then back to " + chain.order[0] + ".";
+    ringRead.set("<b>" + chain.label + "</b>: " + num(meanH, 2) + " hops per step on average, worst " + w.h + (w.h === 1 ? " hop" : " hops") +
+      " (shire " + w.a + " → shire " + w.b + (w.ns != null ? ", measured round trip " + num(w.ns, 0) + " ns" : "") + "), the dark dashed segment. " +
+      "Total round trip round the chain, all 32 steps, from the measured 32 B pairwise matrix of " + cardName() + ": " + num(st.total, 0) + " ns.");
+  }
+  CK.seg("ring-seg", { label: "Chain order", value: chainKey, options: CHAINS.map(c => [c.key, c.label]),
+    onChange: v => { chainKey = v; CK.hide(meshF); meshF.redraw(); ringSay(); } });
+  ringSay();
 
   // ---------- 2. Latency against hops: 32 B (three ways to signal) or 1 KB (the knee) ----------
   let size = "32", hideFlag = false;
@@ -1240,7 +1338,7 @@ message on this page, demands before the tensor unit is the limit.</li>
   function setCard(v) {
     if (v === card) return;
     useCard(v); SHADES = shadesFor(); shade = SHADES.filter(o => o.key === shade.key)[0] || SHADES[0];
-    CK.hide(meshF); meshF.svg.setAttribute("aria-label", meshLabel()); meshF.redraw(); meshSay();
+    CK.hide(meshF); meshF.svg.setAttribute("aria-label", meshLabel()); meshF.redraw(); meshSay(); ringSay();
     distLegend(); CK.hide(distF); distF.redraw();
   }
   if (V3IDS.length) ["mesh-card", "dist-card"].forEach(id => CK.cardSeg(id, { cards: V3IDS.concat([FIRST]), value: card, onChange: setCard }));
@@ -1672,6 +1770,49 @@ message on this page, demands before the tensor unit is the limit.</li>
     const p = CK.el("path", { d: "M" + x + "," + y + " L" + (x - ux * s + px * s * 0.55) + "," + (y - uy * s + py * s * 0.55) + " L" + (x - ux * s - px * s * 0.55) + "," + (y - uy * s - py * s * 0.55) + "Z" }, g);
     p.style.fill = tree ? CK.color(0) : "var(--ink-2)";
   }
+
+  // ---------- 8. The grain calculator (What it means for systolic and wavefront designs) ----------
+  // A one-way message is half the measured round trip at its size (sizes.pingpong of the check's first card, L0): a
+  // tree edge (0.0-0.1), elsewhere in the shire (0.0-0.7), or between shires, between the 1-hop pair (0.0-8.0) and the
+  // 10-hop pair (0.0-31.0): below 1 KB the hops add linearly; from 1 KB up, 12 cycles per hop to the knee at 5 hops
+  // (the 32 B fit's slope) and the rest of the 10-hop pair's extra beyond it (the distance chart's 1 KB view).
+  // Communication fraction t_msg / (t_msg + t_cell), nothing overlapped; grain k = 10 t_msg / t_cell.
+  (function () {
+    const PP = (L0.sizes || {}).pingpong || {};
+    if (!document.getElementById("grain-read") || !PP["0.0-0.1"] || !PP["0.0-0.7"] || !PP["0.0-8.0"] || !PP["0.0-31.0"]) return;
+    const at = (key, regs) => {
+      const rows = PP[key]; let a = rows[0], b = rows[rows.length - 1];
+      for (let i = 0; i + 1 < rows.length; i++) if (rows[i].count <= regs && rows[i + 1].count >= regs) { a = rows[i]; b = rows[i + 1]; break; }
+      return b.count === a.count ? a.cycles : a.cycles + (b.cycles - a.cycles) * (regs - a.count) / (b.count - a.count);
+    };
+    const KNEE = 5, HOP = ((L0.matrices || {})["matrix-pingpong"] || {}).b || 12;
+    const H1 = hopsOf(0, 8), H10 = hopsOf(0, 31);
+    const rt = (link, regs, h) => {
+      if (link !== "mesh") return at(link === "tree" ? "0.0-0.1" : "0.0-0.7", regs);
+      const r1 = at("0.0-8.0", regs), r10 = at("0.0-31.0", regs);
+      if (regs < 32) return r1 + (r10 - r1) * (h - H1) / (H10 - H1);
+      const far = (r10 - r1 - HOP * (KNEE - H1)) / (H10 - KNEE);
+      return r1 + HOP * (Math.min(h, KNEE) - H1) + far * Math.max(0, h - KNEE);
+    };
+    const who = V3IDS.length ? CK.card(V3IDS[0]).label + "'s round trips, 26 September (median of three passes)" : "aifoundry2's round trips, 18 September";
+    let link = "mesh", hops = 3, regs = 1, work = 1000;
+    const read = CK.readout("grain-read");
+    const hopsCtl = CK.range("grain-hops", { label: "Mesh hops", stops: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], value: hops, fmt: v => String(v), onInput: v => { hops = v; say(); } });
+    CK.seg("grain-link", { label: "Link", value: link, options: [["tree", "tree edge"], ["other", "elsewhere in a shire"], ["mesh", "between shires"]],
+      onChange: v => { link = v; hopsCtl.el.style.display = v === "mesh" ? "" : "none"; say(); } });
+    CK.range("grain-size", { label: "Message", stops: [1, 2, 4, 8, 16, 32, 64, 127], value: regs, fmt: v => num(32 * v, 0) + " B", onInput: v => { regs = v; say(); } });
+    CK.range("grain-work", { label: "Work per cell per step", stops: [50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000], value: work, fmt: v => num(v, 0) + " cycles", onInput: v => { work = v; say(); } });
+    function say() {
+      const t = rt(link, regs, hops) / 2, frac = t / (t + work), k = 10 * t / work;
+      const where = link === "tree" ? "over a tree edge" : link === "other" ? "between two minions elsewhere in a shire" : "between shires " + hops + (hops === 1 ? " hop" : " hops") + " apart";
+      read.set("A one-way message of " + num(32 * regs, 0) + " B " + where + " takes about <b>" + num(t, 0) + " cycles</b> (" + num(ns(t), 0) + " ns)" +
+        (link === "mesh" && regs >= 32 && hops > KNEE ? ", past the knee that 1 KB messages meet at " + KNEE + " hops" : "") + ". " +
+        "With " + num(work, 0) + " cycles of work per cell per step and nothing overlapped, communication is <b>" + num(100 * frac, frac < 0.1 ? 1 : 0) + "%</b> of each step. " +
+        (k <= 1 ? "One cell per message already keeps it under a tenth." : "To keep it under a tenth, give each message the work of about <b>" + num(Math.ceil(k), 0) + " cells</b> (<i>k</i> ≈ 10·t<sub>msg</sub>/t<sub>cell</sub>).") +
+        " <span class=\"small\">From " + who + (link === "mesh" ? "; between the measured 1-hop and 10-hop pairs, hops are interpolated" : "") + ".</span>");
+    }
+    say();
+  })();
 
   // tables that become cards on a phone
   ["prim-table", "energy-table"].forEach(id => { if (document.getElementById(id)) CK.stackTable(id); });

@@ -28,7 +28,8 @@ whose 'host' is the card id (aifoundry2, aifoundry3, aifoundry1-c1). Such rows a
 and configuration (pass_means below: the mean over the passes), so every key above holds pass means; nothing is
 dropped here, because the V3-LAT reducer (tools/claims-v3/lat/reduce.py) kept every relay launch these passes
 recorded (checked 26 Sep; aifoundry3 lacks four launches whose host process crashed, exit 139). With such rows:
-  --cards a,b,c            the card order of 'cards' (the first card's rows are the rows' own fields); default sorted
+  --cards a,b,c            the card order of 'cards' (the first card's rows are the rows' own fields); default the chart
+                           kit's registry order (aifoundry2, aifoundry3, aifoundry1-c1, aifoundry1-c0), other cards after it, sorted
   repeats                  one row per sweep group and pass (key 'pass')
   offsets                  the 'offsets' group, the hand-off at every ring offset d = 1..31: per offset its mesh hops,
                            longest hand-off and by_card {card: {gb_s, stage_cycles, passes}}
@@ -48,6 +49,10 @@ import json
 import os
 
 import numpy as np
+
+
+# the chart kit's card registry order (docs/reports/sources/chartkit.js, CK.cards), so aifoundry2 is the first card
+CARD_ORDER = ["aifoundry2", "aifoundry3", "aifoundry1-c1", "aifoundry1-c0"]
 
 
 def load(paths):
@@ -277,14 +282,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("sweeps", nargs="+")
     ap.add_argument("--power")
-    ap.add_argument("--cards", help="comma-separated card order for 'cards' (default: sorted); the first card's rows "
+    ap.add_argument("--cards", help="comma-separated card order for 'cards' (default: the chart kit's registry order, "
+                                    "then the rest sorted); the first card's rows "
                                     "are the rows' own fields")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     raw = load(a.sweeps)
     rows = pass_means(raw)
     present = sorted({r["host"] for r in rows if "host" in r})
-    order = [c.strip() for c in a.cards.split(",")] if a.cards else []
+    order = [c.strip() for c in a.cards.split(",")] if a.cards else [c for c in CARD_ORDER if c in present]
     out = {"cards": [c for c in order if c in present] + [c for c in present if c not in order]}
     for grp, key in (("headline", "medium"), ("intensity", "work"), ("size", "stage_bytes"),
                      ("stages", "stages"), ("shires", "shires")):
