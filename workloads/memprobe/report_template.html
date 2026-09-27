@@ -844,6 +844,10 @@ error is 2 cycles² over 32 home/memory-shire pairs. The whole DRAM load is then
 cycles of jitter, though it keeps the timer glitches). The other ten lines are outliers: seven read about 128 cycles
 short (counter glitches the correction missed, §7), two are 44 and 71 cycles slow (probably refresh), and one is 29
 cycles fast.</p>
+<div class="chart-title" id="memleg-title">The memory-shire leg against distance from the home shire (one dot per home shire)</div>
+<div class="ck-controls"><span id="memleg-mode"></span></div>
+<div class="chart" id="memleg"></div>
+<p class="small" id="memleg-cap"></p>
 <div class="panels">
 <div>
 <div class="chart-title">Measured DRAM latency minus model, per line (fastest of 3 loads)</div>
@@ -1504,6 +1508,40 @@ CK.frame('l3', {label: 'L3 hit latency from shire 0 against hops to the home shi
   CK.keynav(f, nodes);
 }});
 
+/* ---------- 3a. the memory-shire leg against distance ---------- */
+(function () {
+  let mode = 'near';  // 'near': memory shires one hop outside the grid (the fit, §4); 'far': two hops out
+  const rows = [];
+  for (let h = 0; h < 32; h++) {
+    const l3m = D.l3[h], mb = D.memByHome[h];
+    if (!l3m || !mb) continue;
+    rows.push({h, hops1: hops(MESH[h], MSPOS[h & 7]), leg: mb.fast_med - l3m.med, n: Math.min(mb.n, l3m.n)});
+  }
+  const F = CK.frame('memleg', {label: 'The memory-shire leg (measured DRAM latency minus the L3 leg) against hops from the home shire to the memory shire', height: W => (W < 600 ? 270 : 300), draw: f => {
+    const off = mode === 'far' ? 1 : 0, c0 = D.msConst - 12 * off, L = 44, R = 12, T = 24, B = 38;
+    const byH = {};
+    for (const r of rows) (byH[r.hops1 + off] = byH[r.hops1 + off] || []).push(r);
+    const hs = Object.keys(byH).map(Number).sort((a, b) => a - b), maxH = hs[hs.length - 1];
+    const x = CK.lin(0, 9, L + 10, f.W - R - 10), y = CK.lin(95, 190, f.H - B, T);
+    CK.axes(f, {x, y, L, R, T, B, xt: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], yt: [100, 120, 140, 160, 180],
+      xl: `hops, memory shire ${off ? 'two' : 'one'} outside the grid`, yl: 'memory-shire leg, cycles'});
+    el('line', {x1: x(0), y1: y(c0), x2: x(maxH), y2: y(c0 + 12 * maxH), stroke: 'var(--ref)', 'stroke-width': 2, 'stroke-dasharray': '5 4', 'aria-hidden': 'true'}, f.svg);
+    txt(f.svg, x(f.narrow ? maxH * 0.45 : maxH * 0.75), y(c0 + 12 * (f.narrow ? maxH * 0.45 : maxH * 0.75)) - 12, `${c0} + 12 × hops`, 'lab', 'end');
+    const maxN = Math.max(...Object.values(byH).map(a => a.length)), step = Math.min(11, 0.85 * (x(1) - x(0)) / maxN), nodes = [];
+    for (const h of hs) byH[h].sort((a, b) => a.leg - b.leg || a.h - b.h).forEach((r, i, arr) => {
+      const g = el('g', {}, f.svg), cx = x(h) + (i - (arr.length - 1) / 2) * step;
+      el('circle', {cx, cy: y(r.leg), r: 5, fill: 'var(--c1)', stroke: 'var(--surface)', 'stroke-width': 1.5}, g);
+      hitRect(g, cx - 6, y(r.leg) - 8, 12, 16);
+      CK.tip(f, g, `Home shire <b>${r.h}</b>, memory shire ${r.h & 7}, ${h} hops<br>leg ${f1(r.leg)} cycles over ${r.n} lines<br>model ${c0 + 12 * h}`);
+      nodes.push(g);
+    });
+    CK.keynav(f, nodes);
+  }});
+  CK.seg('memleg-mode', {label: 'Memory shires sit', options: [['near', 'one hop outside the grid (the fit)'], ['far', 'two hops out (constant 79)']], value: mode,
+    onChange: v => { mode = v; F.redraw(); }});
+  $('memleg-cap').textContent = 'Each home shire’s DRAM latency (this section’s 1,500 lines) minus its own L3 hit latency (§3, from shire 0): what is left once the request reaches the L3 home shire. The dashed line is the fit; the two views are the same numbers relabelled, since 91 + 12×hops = 79 + 12×(hops + 1) — latency alone cannot tell how far outside the grid the memory shires really sit.';
+})();
+
 /* ---------- 4. model error, memory shire counters ---------- */
 CK.frame('modelerr', {label: 'Measured DRAM latency minus the model, per line', height: 210, draw: f => {
   const data = D.modelErr.filter(([e]) => e >= -6 && e <= 6), L = 44, R = 12, T = 26, B = 38;
@@ -1844,12 +1882,13 @@ CK.frame('modelerr', {label: 'Measured DRAM latency minus the model, per line', 
   const pats = [['l1', 'L1 hit', 'l1'], ['l2', 'L2 hit', 'l2'], ['l3near', 'L3 hit, own shire', 'l3'], ['l3far', 'L3 hit, ~5.6 hops', 'l3'],
     ['dram_seq', 'DRAM, sequential', 'dram'], ['dram_row', 'DRAM, row conflicts', 'dram']];
   const parts = [['minion', 'minion cores', 'c1'], ['sram', 'SRAM (L2/L3)', 'c2'], ['noc', 'NoC (mesh)', 'c3'], ['rest', 'rest (board − rails; mostly DDR)', 'c4']];
-  const M = D.manual, CARDS = ['aifoundry2', 'aifoundry3'];
-  // a level of the energy manual in words: per card where the two cards differ, else the mean and the range
+  const M = D.manual;
+  // a level of the energy manual in words: per card (in the registry's order) where the cards differ, else the mean and the range
   const manText = (k, name, fmt) => M[k].cards_differ
-    ? `${name} ${fmt(M[k].per_card.aifoundry2)} on aifoundry2 and ${fmt(M[k].per_card.aifoundry3)} on aifoundry3`
+    ? `${name} ` + CK.cardsIn(M[k].per_card).map(c => `${fmt(M[k].per_card[c])} on ${CK.card(c).label}`).join(' and ')
     : `${name} ${fmt(M[k].mean)} [${fmt(M[k].lo)}–${fmt(M[k].hi)}]`;
   let mode = 'pj';
+  const nCards = CK.cardsIn(M.dram.per_card).length;
   const legend = () => CK.legend('energy-legend', mode === 'byte'
     ? [{key: 'b', label: 'here, rail trace', mark: 'box', color: 'var(--c1)'}, {key: 'h', label: 'here, host log', mark: 'ring', color: 'var(--c1)'}, {key: 'm', label: 'energy manual: mean (each card’s where they differ) and range', mark: 'line', color: 'var(--ink)'}]
     : parts.map(([k, n, c]) => ({key: k, label: n, mark: 'box', color: `var(--${c})`})));
@@ -1857,7 +1896,7 @@ CK.frame('modelerr', {label: 'Measured DRAM latency minus the model, per line', 
     $('energy-title').textContent = mode === 'pj' ? 'Energy per load, split by rail (19 September, rail trace, two runs per pattern; superseded)'
       : mode === 'share' ? 'Where each load’s energy goes, as a share of the load' : 'Energy per byte of line moved, against the energy manual (log scale)';
     $('energy-cap').textContent = mode === 'byte'
-      ? `Manual: 1 KB tensor loads, two cards, host board power, over memory whose contents were not set (${manText('l2', 'L2', f2)}, ${manText('l3', 'L3 at mixed distances', f1)}, ${manText('dram', 'DRAM', f0)} pJ/B; a level whose two cards differ is given per card). Here: an 8-byte ld per 64-byte line, two runs on one card, the rail trace (bar) and the host log (ring). An L1 hit moves no line.`
+      ? `Manual: 1 KB tensor loads, ${nCards} cards, host board power, over memory whose contents were not set (${manText('l2', 'L2', f2)}, ${manText('l3', 'L3 at mixed distances', f1)}, ${manText('dram', 'DRAM', f0)} pJ/B; a level whose cards differ is given per card). Here: an 8-byte ld per 64-byte line, two runs on one card, the rail trace (bar) and the host log (ring). An L1 hit moves no line.`
       : mode === 'share' ? 'Each bar is one load’s energy on the rail trace (two runs per pattern), as 100%. The cores’ share falls level by level; the NoC rail appears at L3, and the unmetered rest takes two thirds of a DRAM load in these runs (@@man_offrail@@ of a DRAM byte in the energy manual, on its two cards).'
       : 'pJ per load above idle, one 8-byte ld; below L1 each brings a 64-byte line. The bars are the 19 September rail trace, the mean of two 6 s runs per pattern in one session; the energy manual has since measured every level on both cards (the third view).';
   };
@@ -1876,8 +1915,8 @@ CK.frame('modelerr', {label: 'Measured DRAM latency minus the model, per line', 
       const e = D.energy[k], y = T + i * rowH + 20;
       txt(f.svg, L, y - 6, name, 'lab-strong');
       if (mode === 'byte') {
-        const fm = v => v >= 20 ? f0(v) : f1(v), pcm = M[lvl].per_card;
-        const right = k === 'l1' ? 'moves no line' : `here ${f1(e.sp_total / 64)} / ${f1(e.host_total / 64)} · manual ${M[lvl].cards_differ ? CARDS.map(c => fm(pcm[c])).join(' / ') + ' by card' : fm(M[lvl].mean)}`;
+        const fm = v => v >= 20 ? f0(v) : f1(v), pcm = M[lvl].per_card, mcards = CK.cardsIn(pcm);
+        const right = k === 'l1' ? 'moves no line' : `here ${f1(e.sp_total / 64)} / ${f1(e.host_total / 64)} · manual ${M[lvl].cards_differ ? mcards.map(c => fm(pcm[c])).join(' / ') + ' by card' : fm(M[lvl].mean)}`;
         halo(txt(f.svg, W - R, y - 6, right, 'lab', 'end'));
         if (k === 'l1') return;
         const g = el('g', {}, f.svg), b = e.sp_total / 64, h = e.host_total / 64, m = M[lvl];
@@ -1886,12 +1925,16 @@ CK.frame('modelerr', {label: 'Measured DRAM latency minus the model, per line', 
         const yb = y + bh + 6;
         el('line', {x1: x(m.lo), x2: x(m.hi), y1: yb, y2: yb, stroke: 'var(--ink)', 'stroke-width': 1.5}, g);
         for (const v of [m.lo, m.hi]) el('line', {x1: x(v), x2: x(v), y1: yb - 4, y2: yb + 4, stroke: 'var(--ink)', 'stroke-width': 1.5}, g);
-        for (const v of m.cards_differ ? CARDS.map(c => m.per_card[c]) : [m.mean]) el('line', {x1: x(v), x2: x(v), y1: yb - 6, y2: yb + 6, stroke: 'var(--ink)', 'stroke-width': 3}, g);
+        (m.cards_differ ? mcards : ['pooled']).forEach(c => {
+          const v = c === 'pooled' ? m.mean : m.per_card[c], col = c === 'pooled' ? 'var(--ink)' : CK.card(c).color;
+          const e2 = el('line', {x1: x(v), x2: x(v), y1: yb - 6, y2: yb + 6, stroke: col, 'stroke-width': 3}, g);
+          void e2;
+        });
         hitRect(g, L, y - 2, W - L - R, bh + 16);
         CK.tip(f, g, `<b>${name}</b><br>here: ${f1(b)} pJ/B on the rail trace, ${f1(h)} on the host log (19 Sep, two runs, one card)<br>` +
           `energy manual, ${lvl.toUpperCase()}: ` + (m.cards_differ
-            ? `${f2(m.per_card.aifoundry2)} pJ/B on aifoundry2, ${f2(m.per_card.aifoundry3)} on aifoundry3 (the cards differ; ${m.n} passes, range ${f2(m.lo)}–${f2(m.hi)})`
-            : `${f2(m.mean)} pJ/B [${f2(m.lo)}–${f2(m.hi)}] over ${m.n} passes on two cards`));
+            ? mcards.map(c => `${f2(m.per_card[c])} pJ/B on ${CK.card(c).label}`).join(', ') + ` (the cards differ; ${m.n} passes, range ${f2(m.lo)}–${f2(m.hi)})`
+            : `${f2(m.mean)} pJ/B [${f2(m.lo)}–${f2(m.hi)}] over ${m.n} passes on ${mcards.length} card${mcards.length === 1 ? '' : 's'}`));
         nodes.push(g);
         return;
       }

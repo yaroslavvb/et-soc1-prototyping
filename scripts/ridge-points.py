@@ -126,10 +126,13 @@ def memhier_levels():
         mx, my = statistics.mean(xs), statistics.mean(ys)
         sxx = sum((x - mx) ** 2 for x in xs)
         slope = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / sxx if sxx > 0 else float("nan")
+        gbps_600 = statistics.median([r["bytes"] / r["wall_s"] / 1e9 for r in at600]) if at600 else None
+        # Every launch's minion clock (MHz, from the implied cycle count) and its bandwidth, so the page can plot
+        # each one against the level's own 600 MHz median (the elasticities above, drawn instead of just stated).
+        points = sorted([[round(r["implied_ghz"] * 1000, 1), round(r["bytes"] / r["wall_s"] / 1e9, 4)] for r in rs])
         out[cfg] = {"launches_600": len(at600), "launches": len(rs),
                     "bpc_minion": statistics.median(bpc) if bpc else None,
-                    "gbps_600": statistics.median([r["bytes"] / r["wall_s"] / 1e9 for r in at600]) if at600 else None,
-                    "harts": rs[0]["harts"], "clock_elasticity": slope}
+                    "gbps_600": gbps_600, "harts": rs[0]["harts"], "clock_elasticity": slope, "points": points}
     return out
 
 
@@ -323,6 +326,7 @@ def main():
         cfg = {"l3": "l3", "scp_remote": "scp-remote", "dram": "dram", "l2": "l2", "scp": "scp-local", "l1d": "l1"}.get(lv["key"])
         if cfg:
             lv["clock_elasticity"] = mh[cfg]["clock_elasticity"]
+            lv["clock_points"] = {"gbps_600": mh[cfg]["gbps_600"], "points": mh[cfg]["points"]}
         if lv["key"] in ("l3", "scp_remote"):
             e = mh[{"l3": "l3", "scp_remote": "scp-remote"}[lv["key"]]]["clock_elasticity"]
             f = DESIGN_MHZ / CLOCK_MHZ

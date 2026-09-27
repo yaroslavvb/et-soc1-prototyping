@@ -87,9 +87,29 @@ def eff_object(res, manual_path, run_dir):
         r = rows[cfg]
         randn[mode] = {"tflops": sig(2 * r["per_s"] / 1e12, 5), "board_w": sig(r["idle_w"] + r["over_idle_w"]),
                        "per_w": sig(2000 / r["pj_loaded"], 5), "idle_w": sig(r["idle_w"]), "cycles_per_op": round(r["cycles_per_op"])}
+    # The operand-and-card band: GFLOP/s per W of total board power (tensor.rows, aifoundry2, the same basis as
+    # "randn" above) at each of the three operand patterns, all three precisions; and, for fp32 only (the one
+    # precision tensor.bars measured on both cards), each card's energy per FLOP above idle (a different, marginal
+    # basis, since tensor.rows itself is aifoundry2-only) as a separate reading, not on the board-power scale.
+    bars = man["tensor"]["bars"]
+    OPERANDS = (("zeros", "zeros"), ("ones", "ones"), ("random", "randn"))
+    operand_band = {}
+    for mode in RANDN:
+        operand_band[mode] = {}
+        for op, suffix in OPERANDS:
+            r = rows[f"{mode}_{suffix}"]
+            entry = {"per_w": sig(2000 / r["pj_loaded"], 5), "tflops": sig(2 * r["per_s"] / 1e12, 5)}
+            b = bars.get(f"{mode}_{suffix}")
+            if b and len(b["per_card"]) > 1:
+                entry["per_w_marginal_by_card"] = {c: sig(2000 / v["mean"], 5) for c, v in b["per_card"].items()}
+            operand_band[mode][op] = entry
+    a100_per_w = {k: sig(A100_PEAK[k] * 1000 / A100_TDP["SXM4"], 5) for k in A100_PEAK}
     return {"run": {"source": os.path.join(run_dir, "results.json"), "rows": run},
             "randn": {"source": manual_path + " tensor.rows (" + ", ".join(RANDN.values()) + "); power at 80 C",
                       "rows": randn},
+            "operands": {"source": manual_path + " tensor.rows (board power, aifoundry2) and tensor.bars.per_card "
+                         "(energy above idle; fp32 only measured on both cards)",
+                         "rows": operand_band, "a100_per_w": a100_per_w},
             "a100": {"peak": {**A100_PEAK, "tf32": A100_TF32}, "tdp": {"SXM4": A100_TDP["SXM4"], "PCIe": A100_TDP["PCIe 40GB"]},
                      "measured": A100_MEASURED}}
 
