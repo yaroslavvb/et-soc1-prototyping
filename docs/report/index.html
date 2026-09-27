@@ -193,6 +193,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 </style>
 <script>
 /* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
@@ -692,9 +700,30 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 </script>
 <!-- chartkit:end -->
@@ -746,17 +775,21 @@ window.CK = (function () {
 <ol data-ss-id="what-i-did-ol-1" class="steps">
   <li data-ss-id="what-i-did-li-1"><strong>Development environment on macOS.</strong> The build expects Ubuntu 24.04. I used a Lima VM running Ubuntu 24.04
   natively on arm64, with 16 vCPUs and the repo mounted at the same path.
+  <details class="more"><summary>Two build-time notes</summary>
   <ul>
     <li>The ET RISC-V GCC (<code>aifoundry-org/riscv-gnu-toolchain</code>, branch <code>et</code>, GCC 15.2) has to be built from source,
     because the release tarball is x86-only. That takes about 7 minutes.</li>
     <li>The et-platform superbuild then takes about 2 minutes: firmware, <code>sys_emu</code>, runtime, and gp-sdk. Apart from fix 1 below, it needed no changes for arm64.</li>
-  </ul></li>
+  </ul>
+  </details></li>
   <li data-ss-id="what-i-did-li-2"><strong>Hello worlds on the simulator.</strong> Each run takes about 40 s, and about 37 s of that is simulated firmware booting 33 shires.
+    <details class="more"><summary>Three simulator checks</summary>
     <ul>
       <li><code>it_test_code_loading</code>, the README/CI hello world: <span class="pass">3/3 passed</span>.</li>
       <li>gp-sdk <code>hello_world_launcher</code> + <code>print.elf</code>: prints <code>HELLO WORLD!!!!</code>. This needed a fix, below.</li>
       <li>My own check-in kernel, where every hart writes one cache-line record: <span class="pass">2048/2048 harts</span> from 32 shires.</li>
-    </ul></li>
+    </ul>
+    </details></li>
   <li data-ss-id="what-i-did-li-3"><strong>A first workload on silicon.</strong> I wrote a small SGEMM in the style of
     <a href="https://github.com/marty1885/et-testdrive">marty1885/et-testdrive</a>, using just the runtime API and <code>et-common-libs</code>.
     That mattered because the lab machine's <code>/opt/et</code> is older and has no gp-sdk.
@@ -769,11 +802,13 @@ window.CK = (function () {
 <section data-ss-section="sgemm-on-the-card">
 <h2 data-ss-id="h2-sgemm-on-the-card">SGEMM on the card</h2>
 <p data-ss-id="sgemm-on-the-card-p-1">This computes <code>C = A·B</code> for n×n fp32 matrices, checked against a double-precision host reference.</p>
+<details class="more"><summary>How the kernel is written</summary>
 <ul data-ss-id="sgemm-on-the-card-ul-1">
   <li>The unit of work is a 1×16 strip of C, which is exactly one 64-byte cache line. The minion L1 caches aren't coherent and write back whole lines,
 so giving each hart whole lines is what makes the parallel result correct.</li>
   <li>The 16 accumulators stay in FP registers. The inner loop is 17 loads + 16 <code>fmadd.s</code> per step of k.</li>
 </ul>
+</details>
 <div class="table-wrap">
 <table data-ss-id="sgemm-on-the-card-table-1" id="sgemm-table">
   <thead><tr><th class="num">n</th><th class="num">Shires</th><th class="num">Harts</th><th class="num">Time per launch</th><th class="num">GFLOP/s</th><th class="num">Mismatches</th></tr></thead>
@@ -787,10 +822,12 @@ so giving each hart whole lines is what makes the parallel result correct.</li>
 </table>
 </div>
 <h3 id="ladder">How far from the chip's peak?</h3>
+<details class="more"><summary>About the FOSDEM comparison</summary>
 <p data-ss-id="sgemm-on-the-card-p-2" class="secondary">For scale, the FOSDEM 2026 talk
 <a href="https://archive.fosdem.org/2026/events/attachments/T3PSFN-zero_to_matmul_with_the_et-soc-1/slides/267107/zerotomat_asnyquu.pdf">“Zero to matmul with the ET-SoC-1”</a>
 (512×512 fp32, 650 MHz; its rungs are transcribed in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/et-soc1-notes.md">docs/et-soc1-notes.md</a>) climbed from a naive kernel to the tensor unit. The chart puts this page's scalar kernel (16 accumulators per hart) on the same log axis.
 The tensor-unit rung was reached the same day: 9.5 TFLOP/s in fp32 on aifoundry2 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">Matmul efficiency</a>), which is FOSDEM's 10.25 scaled to 600 MHz.</p>
+</details>
 <div class="ck-controls"><div id="ladder-order"></div></div>
 <div id="ladder-legend"></div>
 <div class="chart-card" id="ladder-chart"></div>
@@ -802,11 +839,13 @@ The tensor-unit rung was reached the same day: 9.5 TFLOP/s in fp32 on aifoundry2
 
 <div data-ss-id="things-worth-fixing-upstream-div-1" class="finding">
   <h3 data-ss-id="h3-1-fresh-et-platform-builds-fail-since-2026-08-05" id="fresh-et-platform-builds-fail-since-2026-08-05">1. Fresh et-platform builds fail since 2026-08-05 <span class="tag">build</span></h3>
-  <ul data-ss-id="things-worth-fixing-upstream-ul-1">
+  <details class="more"><summary>The symptom</summary>
+<ul data-ss-id="things-worth-fixing-upstream-ul-1">
     <li><code>ThirdParty()</code> pins easy_profiler to the <code>git describe</code> ref <code>v2.1.0-66-gcc0e154</code> but clones with <code>GIT_SHALLOW TRUE</code>.</li>
     <li>Upstream easy_profiler got new commits on 2026-08-05, so a depth-1 clone no longer contains <code>cc0e154</code>.</li>
     <li>The build dies with <code>fatal: invalid reference</code>.</li>
   </ul>
+</details>
   <p data-ss-id="things-worth-fixing-upstream-p-1">Fix: clone the third-party repos fully, or pin full SHAs.</p>
   <details data-ss-id="things-worth-fixing-upstream-details-1"><summary>Patch (1 line)</summary><pre data-ss-id="things-worth-fixing-upstream-pre-1"><code>diff --git a/cmake/ProjectFunctions.cmake b/cmake/ProjectFunctions.cmake
 index b237797..7f34554 100644
@@ -826,12 +865,14 @@ index b237797..7f34554 100644
 
 <div data-ss-id="things-worth-fixing-upstream-div-2" class="finding">
   <h3 data-ss-id="h3-2-gp-sdk-launchers-can-t-boot-the-simulator-gp-s" id="gp-sdk-launchers-can-t-boot-the-simulator">2. gp-sdk launchers can’t boot the simulator <span class="tag">gp-sdk</span></h3>
-  <ul data-ss-id="things-worth-fixing-upstream-ul-2">
+  <details class="more"><summary>The symptom</summary>
+<ul data-ss-id="things-worth-fixing-upstream-ul-2">
     <li><code>GenericLauncher</code> never tells <code>sys_emu</code> which firmware to preload: SP BL2 and the master/machine/worker minion images.</li>
     <li>With <code>--device_type=sysemu</code>, every gp-sdk launcher (<code>hello_world_launcher</code>, <code>saxpy_launcher</code>, …) boots the Service Processor on empty memory.</li>
     <li>It then loops on “Trapping to the same address” and writes gigabytes of log within minutes.</li>
     <li>The runtime’s own tests avoid this because <code>TestUtils.h</code> sets the paths.</li>
   </ul>
+</details>
   <p data-ss-id="things-worth-fixing-upstream-p-2">Fix: set them the same way, from the installed CMake packages.</p>
   <details data-ss-id="things-worth-fixing-upstream-details-2"><summary>Patch (GenericLauncher.cpp + CMake)</summary><pre data-ss-id="things-worth-fixing-upstream-pre-2"><code>diff --git a/gp-sdk/host/CMakeLists.txt b/gp-sdk/host/CMakeLists.txt
 index bffd6eb..df26535 100644
@@ -919,6 +960,7 @@ index 988aecb..2390811 100644
 </div>
 
 <h3 data-ss-id="h3-smaller-notes">Smaller notes</h3>
+<details class="more"><summary>Four smaller notes</summary>
 <ul data-ss-id="things-worth-fixing-upstream-ul-4">
   <li>Esperanto’s trace decoder <code>dt2json</code>, referenced in the gp-sdk docs, isn’t open source.
   A 60-line decoder on top of the header-only <code>et-trace</code> is enough to read kernel <code>et_printf</code> output.</li>
@@ -926,10 +968,12 @@ index 988aecb..2390811 100644
   <li>When the runtime starts <code>sys_emu</code>, it turns on the coherency, scratchpad, FLB, and tensor-store checkers by default. The errata checker is opt-in: <code>-vpurf_warn</code>.</li>
   <li>On the card, runtime init takes about 0.19 s. Peak host RSS is about 2 GB for the duration of a run, which comes from the runtime’s mapped buffers.</li>
 </ul>
+</details>
 </section>
 
 <section data-ss-section="reproduce">
 <h2 data-ss-id="h2-reproduce">Reproduce</h2>
+<details class="more"><summary>Reproduce this</summary>
 <p data-ss-id="reproduce-p-1" class="secondary">All commands run from a checkout of the <a href="https://github.com/yaroslavvb/et-soc1-prototyping">project repository</a>. The first two blocks use the Lima VM on the Mac (on a Linux machine with <code>/opt/et</code>, drop the <code>scripts/vm</code> prefix). The last block runs from the same checkout, on the Mac or on Linux: it copies the sources to aifoundry3, builds them there against its <code>/opt/et</code> and runs each table row as its own <code>timeout 10</code> process. The table is the host's “launch r: X ms, Y GFLOP/s” lines.</p>
 <pre data-ss-id="reproduce-pre-1"><code># one-time: Lima VM + toolchain + et-platform (~15 min)
 scripts/create-vm.sh
@@ -943,6 +987,7 @@ grep 'type A' build/sgemm/run/sysemu.log | grep -c ' S0:'   # 524,291 (150 MB lo
 # real card: copy sources, build on aifoundry3, run each table row with a hard cap
 scripts/deploy-lab.sh aifoundry3 workloads/sgemm
 ssh aifoundry3 'cd ~/nekko/build/sgemm &amp;&amp; for a in "-n 64 --shires 0x1" "-n 512 --shires 0x1" "-n 512" "-n 1024"; do timeout 10 host/sgemm_host $a --reps 3; done'</code></pre>
+</details>
 </section>
 
 <section data-ss-section="related">
@@ -959,12 +1004,14 @@ ssh aifoundry3 'cd ~/nekko/build/sgemm &amp;&amp; for a in "-n 64 --shires 0x1" 
 </section>
 
 <footer data-ss-id="footer-sources">
+<details class="more"><summary>Sources and version history</summary>
   <p>Sources: <a href="https://github.com/aifoundry-org/et-platform">et-platform</a> ·
   <a href="https://github.com/aifoundry-org/et-man">et-man</a> (PRM, errata) ·
   <a href="https://github.com/openhwfoundation/core-et/tree/erbium">core-et (erbium)</a> ·
   <a href="https://github.com/marty1885/et-testdrive">et-testdrive</a> (marty1885).</p>
   <p>All runs were on 18 September 2026. The laptop used et-platform <code>836a4ab</code>. aifoundry3 used its <code>/opt/et</code>: et-platform <code>353f20e</code> (December 2025), runtime 0.19.0, GCC 15.1; that card holds its minions at 600 MHz (aifoundry2's governor also uses 700 and 800 MHz).</p>
   <p>Versions: published 18 September 2026; revised 24 and 25 September 2026; 25 September (version 3): the clock and the gp-sdk build name their card (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>).</p>
+</details>
 </footer>
 <script type="application/json" id="ladder-data">{"fosdem":{"clock_mhz":650,"n":512,"rungs":[{"step":"Naive scalar, 1 hart","gflops":0.007,"name":"1 hart"},{"step":"Parallelise over mhartid, 512 harts. Fix the output race with L stores.","gflops":3.4,"name":"512 harts"},{"step":"Use all 2048 harts","gflops":13.1,"name":"2,048 harts"},{"step":"8-lane SIMD (fbc.ps broadcast A, flw.ps load B, fmadd.ps)","gflops":104.0,"name":"8-lane SIMD"},{"step":"Put A and B in L2 scratchpad instead of DRAM","gflops":312.0,"name":"operands in the L2 scratchpad"},{"step":"Register-block 2x16 outputs per hart. FMA share goes from 14% to 32%.","gflops":1640.0,"name":"2×16 register blocks"},{"step":"Register-block 4x32. FMA share is 63%.","gflops":2940.0,"name":"4×32 register blocks"},{"step":"Tensor unit: tensor_load A into L1Scp and B streamed, then tensor_fma (16x16 fp32), tensor_store. Hart 0 only.","gflops":7050.0,"name":"tensor unit"},{"step":"Software-pipeline: overlap the next A-load with the current FMA, double-buffering L1Scp","gflops":10250.0,"name":"software-pipelined tensor unit"}],"transcription":"docs/et-soc1-notes.md"},"tensor":{"gflops":9510.8,"clock_mhz":600,"source":"docs/reports/data/2026-09-18-aifoundry2/results.json (fp32-tensor-L2)"},"peak":{"gflops":9830.4,"clock_mhz":600,"minions":1024,"flop_per_minion_cycle":16}}</script>
 <script>

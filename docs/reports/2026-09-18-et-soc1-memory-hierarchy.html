@@ -170,6 +170,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 </style>
 <script>
 /* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
@@ -669,9 +677,30 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 </script>
 <!-- chartkit:end -->
@@ -710,17 +739,23 @@ window.CK = (function () {
 </ol></nav>
 
 <h2 id="load-latency-against-working-set-size">Load latency against working-set size</h2>
+<details class="more"><summary>How to read this chart</summary>
 <p class="muted">What does a load at each level cost at 600, 700 and 800 MHz, and which part of it speeds up with the minion clock? Only aifoundry2 can answer this: its governor moved the clock during this page's one session of chases (18 September), while aifoundry3's firmware pins 600 MHz. One hart follows a random pointer chain, so every load waits for the one before it; each step in the curve is a level of the hierarchy. On-chip levels are fixed in cycles, but L3 and DRAM loads also spend fixed time in the 400 MHz mesh and the DDR memory, so the lines are redrawn for the selected clock from two fits (<a href="#what-the-numbers-say">What the numbers say</a>, item 5). Circles are the chases as measured, each at its own clock; filled ones ran at the selected clock (none ran at 700 MHz). From 16 to 64 MB a chain mixes L3 and DRAM hits, and a dashed line joins the measured points. Grey marks are the A100's published pointer-chase plateaus.</p>
+</details>
 <div class="ck-controls"><div id="lat-clock"></div></div>
 <div id="lat-legend"></div>
 <div class="card chart" id="lat"></div>
 <p class="ck-readout" id="lat-read"></p>
+<details class="more"><summary>The latency split by clock</summary>
 <p class="small">Where the time goes at the selected clock: the part of each load that scales with the minion clock, and the fixed part that does not (L3 as chased from shire 0).</p>
 <div id="split-legend"></div>
 <div class="card chart" id="split"></div>
+</details>
 
 <h2 id="scratchpad-latency-across-the-mesh">Scratchpad latency across the mesh</h2>
+<details class="more"><summary>How to read these charts</summary>
 <p class="muted">How much does mesh distance cost a remote scratchpad load, and why does the L3 latency depend on the requesting shire? Chases ran from shires 0, 7, 24 and 31 to all 32 scratchpads, over a 64 KB chain so that every load misses L1. The scatter puts each load against the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#where-the-shires-are-a-6-6-mesh">mesh hops</a> between the two shires, with the model fitted to rows 0 and 31 (66 minion cycles + 56 ns + 20 ns per hop) at 600, 700 and 800 MHz; each point takes the colour of the nearest line. The map shades each shire by the load's time in nanoseconds, with the requesting shire outlined. <b>L3 average trip</b> shows instead how far each of the 32 L3 slices is from the requesting shire.</p>
+</details>
 <div class="ck-controls"><div id="scp-from"></div><div id="scp-mode"></div></div>
 <div id="scp-legend"></div>
 <div class="scp-views">
@@ -743,11 +778,15 @@ window.CK = (function () {
 <tr><td class="lvl">L3</td><td class="num" data-sort="159">159–169 cyc<br>265–282 ns</td><td class="num">0.98 TB/s</td><td class="num">10.5 pJ</td><td>1 MB slice per shire · 32 MB chip, shared</td><td>Latency depends on the requesting shire (<a href="#what-the-numbers-say">item 4</a>).</td></tr>
 <tr><td class="lvl">DRAM</td><td class="num" data-sort="287">287–297 cyc<br>479–495 ns</td><td class="num">76 GB/s</td><td class="num">122 pJ</td><td>32 GB LPDDR4X, 16 × 16-bit channels, 933 MHz DDR clock (3,733 MT/s)</td><td>About 64% of the 119 GB/s that 16 × 16-bit channels carry at the 3,733 MT/s implied by the 933 MHz DDR clock. The 128,000 MB/s the runtime reports is a placeholder constant in the service-processor firmware. At 800 MHz, which only aifoundry2's governor reaches, a load took 352–368 cycles, 440–460 ns.</td></tr>
 </tbody></table></div>
+<details class="more"><summary>Method notes for this table</summary>
 <p class="small">Bandwidth is bytes over wall time for the launches here that ran at 600 MHz. These runs have few launches at 600 MHz (L1 2 of 21, DRAM 3 of 14); the same probes re-run at a steady 600 MHz on 23 September (six passes, three on each of two cards, 9–11 launches per level per pass; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a>) agree within 1%. Energy per byte is from the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual, §4</a>: the same probes re-run at a steady 600 MHz on two cards, with the range over passes there. Where the two cards differ (L1, L2 and the local scratchpad) the column gives aifoundry2 / aifoundry3; the other rows agree between the cards within the scatter between passes and give the two-card mean. The L1 row is this probe's own loop (8 loads per iteration, one every 3.2 cycles, over a buffer it never wrote). The manual's catalogue unrolls the same 32 B vector loads (64 per iteration, one every 1.4 cycles) and reaches 14.2 TB/s at 0.54 pJ/B on random data, the figure the manual recommends; the comparison with the A100 below uses it, since the A100's L1 figures come from tuned microbenchmarks. It is card power above idle, so it includes the busy cores: about 2 W of the 9 W a DRAM stream adds.</p>
+</details>
+<details class="more"><summary>Energy per byte, by level (chart)</summary>
 <p class="small" id="en-lv-lead">The energy column drawn, one row per level: each card's mean energy per byte with its standard error over that card's passes, and in grey the range over every pass of every card, with a tick at their mean (the energy manual's re-runs at 600 MHz; logarithmic scale). Hover, tap or focus a mark for its numbers.</p>
 <div id="en-lv-legend"></div>
 <div class="card chart" id="en-lv"></div>
 <p class="ck-readout" id="en-lv-read"></p>
+</details>
 
 <h2 id="et-soc-1-against-the-a100-level-by-level">ET-SoC-1 against the A100, level by level</h2>
 <p class="muted">Each row puts the ET-SoC-1 value (blue) next to the A100's (grey) on a logarithmic scale. ET bandwidth and energy per byte are at 600 MHz. The ET scratchpad row is compared with the A100's shared memory, and ET's L3 with the far half of the A100's L2, the closest equivalents.</p>
@@ -773,6 +812,8 @@ window.CK = (function () {
 <h2 id="what-the-numbers-say">What the numbers say</h2>
 <ol>
   <li><b>Kernels get only 512 B of L1 per hart.</b> Before every launch the firmware puts the L1 in scratchpad mode (Programmer's Reference Manual, table 8.4), turning 3 KB of the 4 KB into the tensor unit's scratchpad. The chase's first knee sits exactly at 512 B. A user-mode kernel can switch to split mode, where hart 0 gets 2 KB, but the switch invalidates L1 lines without writing them back, so it was not tried on a shared card.</li>
+</ol>
+<ol start="2">
   <li><b>There is a 2 KB level between L1 and L2:</b> the L2's read buffer, an 8-entry fully associative cache per bank for clean lines. Working sets up to 2 KB hit it at 36 cycles, 11 fewer than the L2 array. That is the same 11-cycle difference the shire cache spec gives (10 vs 21 shire cycles).</li>
   <li><b>The L2 scratchpad is the L2 without the tags.</b> It has the same 47-cycle latency, goes through the read buffer and L1, streams at the same 4.0 B per minion-cycle, and at a steady 600 MHz costs about the same energy per byte, within 10% either way: on aifoundry2 the L2 costs 2.6 against the scratchpad's 2.4 pJ/B, on aifoundry3 2.4 against 2.6 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual §4</a>; the probes did not set the buffers' contents). The 4.3 against 2.8 pJ/B of this page's first runs (aifoundry2, two runs on 18 September) mostly came from the governor running the L2 runs at a higher clock; at a steady 600 MHz aifoundry2's L2 still costs 9% more than its scratchpad.</li>
   <li><b>Distance on the mesh is visible.</b> A remote scratchpad load costs 66 minion cycles plus 56 ns plus 20 ns per mesh hop: 186–366 ns at 600 MHz over 1–10 hops (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication</a> maps the hops). Row 31 → 0 reads 271 cycles against 220 for 0 → 31 only because aifoundry2's governor ran that row at 800 MHz. The L3 hides distance by spreading lines over all 32 shires, so 31 of every 32 L3 hits cross the mesh and pay the average trip from the requesting shire: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#l3-110-cycles-plus-12-per-hop">Anatomy of a memory access</a>'s 110 cycles + 12 per hop, averaged over the slices (4.2–5.0 hops), predicts 160–170 cycles, and the chases measured 159–169 (265–282 ns) at 600 MHz.</li>
@@ -781,6 +822,7 @@ window.CK = (function () {
 </ol>
 
 <h2 id="how-it-was-measured">How it was measured</h2>
+<details class="more"><summary>How it was measured, in detail</summary>
 <ul>
   <li><b>Latency.</b> One hart chases a random cyclic chain with one pointer per 64 B line, which no prefetcher can predict. After warm-up (two passes, at least 16,384 and at most 2<sup>19</sup> loads), 40,000 dependent loads are timed (20,000 in the placement and offset repeats) with the minion cycle counter. Each chase's final pointer is checked against a host-side walk of the same chain, and every one of the 227 chases passed. Chains up to 256 MB live in DRAM. Scratchpad chains are written into the target shire's scratchpad by the chasing hart.</li>
   <li><b>Bandwidth.</b> Hart 0 of all 1,024 minions streams 1 KB TensorLoads (tensor-unit loads into the L1 scratchpad, which bypass the L1 cache but go through the L2), two in flight, over private slices sized to hit L2 (8 KB per minion, 256 KB per shire), L3 (24 MB in total) or DRAM (256 MB), or over the local or a remote scratchpad. L1 bandwidth uses 32 B vector loads by both harts of every minion over a private 256 B buffer. Throughput is bytes over wall time; the tables use the launches that ran at 600 MHz.</li>
@@ -788,16 +830,20 @@ window.CK = (function () {
   <li><b>Lab etiquette.</b> Every card run was its own process under <code>timeout 10</code>, on an otherwise idle card.</li>
   <li><b>Versions.</b> 18 September: first published from one session on aifoundry2, with bandwidth averaged over launches at 600–800 MHz (L1 7.55, L2 2.80, local scratchpad 2.57, L3 1.03, remote scratchpad 0.98 TB/s), DRAM latency of ~440 ns (421–486 ns) over chases at both clocks, and the energy per byte measured here, the mean of two runs (L1 1.8, L2 4.3, local scratchpad 2.8, remote scratchpad 6.3, L3 10.8, DRAM 148 pJ/B). 24 September: bandwidth at 600 MHz, energy per byte from the energy manual, DRAM and L3 latency given per clock, and the apparent asymmetry of the scratchpad rows traced to the clock. 25 September (version 3): the energy per byte of L1, L2 and the local scratchpad given per card; the clock results marked as aifoundry2's, from one session; the scratchpad model's test limited to the rows it was not fitted to; the claim that the L3 model also fits shire 0 at 800 MHz, where no chase ran, removed; 600 MHz on 23 September described as held, not pinned, on aifoundry2; the cycle-counter caveat corrected (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>).</li>
 </ul>
+</details>
 
 <h2 id="caveats">Caveats</h2>
+<details class="more"><summary>Caveats in full</summary>
 <ul>
   <li><b>The A100 column is not our measurement.</b> Latency and bandwidth come from several published microbenchmark studies, which agree within a few percent. The energy numbers come from a single study (SC'25). Their method is close to ours but not identical.</li>
   <li><b>ET energy per byte is whole-card power above idle.</b> It includes the busy chip's floor, DRAM chips, regulators and PCIe, so it overstates the cost of the memory arrays themselves, most of all for DRAM. The probes read buffers whose contents they never set; the energy manual gives tensor loads on zeros and on random data separately.</li>
   <li><b>The clock was not pinned.</b> The card's own governor was left in charge (it is a shared machine) and moved the clock between 600 and 800 MHz. The tables use only the launches that ran at 600 MHz. In this page's first runs (aifoundry2, two runs on 18 September), averaged over all launches (0.62–0.74 GHz), the rates were 2–23% higher (Versions lists them); DRAM was 76 GB/s either way. The per-hart cycle counts of one launch differ by 1–5% (two-hart L1 streams) to 6–11% (one-hart DRAM streams) on both cards, because the harts finish at different times, so bandwidth uses wall time.</li>
   <li><b>Peak-rate microbenchmarks.</b> Real kernels mix levels, and bank conflicts, the mesh, and the DRAM controller's page policy will change the picture.</li>
 </ul>
+</details>
 
 <h2 id="reproduce">Reproduce</h2>
+<details class="more"><summary>Reproduce this</summary>
 <p class="small">Run from a checkout of <a href="https://github.com/yaroslavvb/et-soc1-prototyping">this repository</a>. <code>scripts/deploy-lab.sh</code> copies the workload into <code>~/nekko</code> on the lab machine and builds it there.</p>
 <pre><code># build on the lab machine
 scripts/deploy-lab.sh aifoundry2 workloads/memhier
@@ -812,6 +858,7 @@ python3 workloads/memhier/analyze.py docs/reports/data/2026-09-18-memhier-aifoun
 python3 scripts/ridge-points.py
 
 # energy per byte: the energy manual's re-runs, docs/reports/data/2026-09-23-energy-manual/reruns.json, levels_pj_per_byte</code></pre>
+</details>
 
 <h2 id="related">Related reports</h2>
 <ul>
@@ -824,6 +871,7 @@ python3 scripts/ridge-points.py
 </ul>
 
 <h2 id="sources">Sources</h2>
+<details class="more"><summary>Sources and citations</summary>
 <ul class="small">
   <li>ET-SoC-1: ET Programmer's Reference Manual (aifoundry-org/et-man): table 8.4 (L1 modes) and §15.3 (scratchpad addressing); CORE-ET Shire Cache Specification (openhwfoundation/core-et, Erbium branch, which documents a later configuration of the same design): latency table and read buffer; et-platform firmware source read at <code>353f20e</code> (<code>init_l1</code>, <code>system/layout.h</code>; the cards' own trace strings match an older build, from before et-platform commit <code>60b40c10f</code> of 24 September 2024).</li>
   <li><a href="https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf">NVIDIA A100 Tensor Core GPU architecture whitepaper</a> and <a href="https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/a100/pdf/nvidia-a100-datasheet-us-nvidia-1758950-r4-web.pdf">datasheet</a>.</li>
@@ -833,6 +881,7 @@ python3 scripts/ridge-points.py
   <li>Antepara et al., <a href="https://escholarship.org/uc/item/6189368s">Benchmark-driven Models for Energy Analysis and Attribution of GPU-Accelerated Supercomputing</a>, SC'25, table 3 (A100 per-level energy).</li>
   <li>BabelStream <a href="https://github.com/UoB-HPC/BabelStream/issues/137">A100-SXM4-80GB results</a>; O'Connor et al., Fine-Grained DRAM, MICRO 2017 (HBM2 ≈ 3.9 pJ/bit); SK hynix, IEDM 2023 (HBM2e ≈ 4.3 pJ/bit).</li>
 </ul>
+</details>
 <p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
 
 <script>

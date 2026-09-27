@@ -170,6 +170,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 </style>
 <script>
 /* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
@@ -669,9 +677,30 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 </script>
 <!-- chartkit:end -->
@@ -684,11 +713,13 @@ window.CK = (function () {
 
 <p class="lede">A tensor-unit matmul kernel on all 1,024 compute minions sustains <b>9.5 TFLOP/s in fp32</b>, <b>19.0 TFLOP/s with fp16 inputs</b> and <b>71.8 TOP/s in int8</b>. That is 91–97% of the tensor unit's peak at this clock, and every result is checked bit-exact against a host reference. The card draws 57–62 W doing it, against 30.6 W at idle with the die at 71&nbsp;°C. Compared with the A100's spec sheet (peak ÷ TDP), in this run the ET-SoC-1 is <b>3.4× more energy-efficient at full fp32 precision on these ±1/&#8288;±2 operands</b>. On random data, measured later with a variant of this loop that keeps both operands in the L1 scratchpad, it is about 2.9× on aifoundry2 at 80&nbsp;°C and 3.8× on aifoundry3, whose die ran at 56&nbsp;°C. At fp16 and int8 the A100's tensor cores win on efficiency in this run (2.4× and 1.3×, die at 71–77&nbsp;°C) and by a much wider margin on raw speed (16× and 8.7×).</p>
 
+<details class="more"><summary>Later measurements, on other operands</summary>
 <div class="card small later">
 <p><b>Later measurements.</b> These ±1/&#8288;±2 operands have all-zero mantissas, which draw little power. In <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment</a> the same TensorFMA draws 38 W on zeros, 47 W on ones and 63 W on random-normal values on aifoundry2 at 80&nbsp;°C (27, 35 and 50 W on aifoundry3, whose die ran at 56&nbsp;°C), and 51–53 W with only the signs or only the exponents random (these operands have both; two runs of each, on aifoundry2).</p>
 <p>On aifoundry2, a variant of this loop with both operands in the L1 scratchpad (546 cycles per op rather than 529), on random-normal data at 80&nbsp;°C, gives 144 GFLOP/s per W in fp32 and 301 in fp16 (two runs each; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">energy manual §3.2</a>); its idle is 36.3 W, against 30.6 W at 71&nbsp;°C here. So the A100's bf16 tensor cores (Horace He's measured 779 GFLOP/s per W) are 5.4× more efficient per FLOP than aifoundry2's fp32 and 2.6× more than its fp16 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power">Why is the ET-SoC-1 low power?</a>). On aifoundry3, whose die ran at 56&nbsp;°C with a 25 W idle, the same fp32 loop gives about 184 GFLOP/s per W, so the A100's lead there is 4.2× (its fp16 power was not measured). Against the A100's fp32 CUDA-core datasheet figure (19.5 TFLOPS at 400 W) this card is about 2.9× better on random data (3.8× for aifoundry3) and 3.4× on these operands.</p>
 <p>In int8 the energy manual's variant is more efficient than this loop even on random data: 1,360 GOP/s per W (63.1 TOP/s at 46.3 W, 80&nbsp;°C), which narrows the A100 int8 spec's lead from 1.34× to 1.15× (aifoundry2; one run of this loop against two of the variant). The difference is the kernel, not the operands. This loop streams both tiles from L2 at 280 cycles per op (7.3 B per minion-cycle, roughly 11 W at 2.5 pJ/B, an estimate), while that one keeps them in the L1 scratchpad (318 cycles per op).</p>
 </div>
+</details>
 
 <div class="kpis">
   <div class="card kpi"><div class="label">fp32 on the tensor unit</div><div class="value">168 <span class="unit">GFLOP/s per W</span></div><div class="sub">9.51 TFLOP/s at 56.6 W board power</div></div>
@@ -710,6 +741,7 @@ window.CK = (function () {
 </div>
 <p class="small" id="eff-sum">Needs JavaScript; the table below has the same figures.</p>
 
+<details class="more"><summary>The operand-and-card band, on other data</summary>
 <h3>The operand-and-card band</h3>
 <p class="muted">Does the verdict above hold on other data? Same axis, same units, at each of the three operand patterns the energy manual measured (zeros, the ±1/&#8288;±2 family and random-normal), for the tiles-in-L1 variant behind the "randn" series above.</p>
 <div id="eff-op-legend"></div>
@@ -719,7 +751,9 @@ window.CK = (function () {
 <div class="eff-row"><div class="eff-head"><b>int8</b></div><div id="eff-op-int8"></div><p class="eff-read ck-readout" id="eff-op-int8-read"></p></div>
 </div>
 <p class="small" id="eff-op-cap"></p>
+</details>
 
+<details class="more"><summary>A100 reference numbers, as a table</summary>
 <h3>A100 reference (NVIDIA A100 datasheet, dense)</h3>
 <div class="table-wrap"><table class="a100">
 <thead><tr><th>Precision</th><th class="num">A100 peak</th><th class="num">A100 per W (SXM4)</th><th class="num">ET per W</th><th class="num">ET ÷ A100 efficiency</th><th class="num">A100 ÷ ET speed</th></tr></thead>
@@ -730,6 +764,7 @@ window.CK = (function () {
 <tr><td>int8 tensor</td><td class="num">624 TOP/s</td><td class="num">1,560</td><td class="num">1,162</td><td class="num">0.75×</td><td class="num">8.7×</td></tr>
 </tbody></table></div>
 <p class="small">Per W is the A100 SXM4's datasheet peak divided by its 400 W TDP. The 250 W PCIe 40 GB card's per-watt figures are 1.6× higher (fp32 CUDA cores 78 GFLOP/s per W, so ET's lead there is 2.2×). ET per W is this benchmark's one run on aifoundry2, on ±1/&#8288;±2 operands. Both chips are 7 nm-class designs. The A100 sustains 1.4–1.8 TB/s from HBM (40 and 80 GB cards; 1.6–2.0 TB/s peak), about 20× the 76 GB/s this card streams from LPDDR4X (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory hierarchy</a>). That gap is what the DRAM-streaming row in Results below measures.</p>
+</details>
 
 <h2>Results</h2>
 <div class="table-wrap"><table>
@@ -741,14 +776,18 @@ window.CK = (function () {
 <tr><td>fp32 tensor, every tile from DRAM</td><td class="num">0.31 TFLOP/s</td><td class="num">3.2%</td><td class="num">43.4 W (42.5–44.4)</td><td class="num">7</td><td class="num">38</td><td>exact</td></tr>
 <tr><td>Idle (median of the last 7 s of the 8 s before the first workload, die at 71&nbsp;°C)</td><td class="num">–</td><td class="num">–</td><td class="num">30.6 W</td><td class="num">–</td><td class="num">–</td><td>–</td></tr>
 </tbody></table></div>
+<details class="more"><summary>How these numbers were computed</summary>
 <p class="small">"Per W" is GFLOP/s (GOP/s for int8) per watt. Above idle subtracts the idle measured just before each workload (30.6, 32.5, 33.8 and 35.2 W; the idle windows are shaded on the power chart): the die warmed from 71 to 77&nbsp;°C over the session, and its leakage with it. Peak at 600 MHz on 1,024 minions: 9.83 TFLOP/s fp32 (16 flop/cycle/minion), 19.66 fp16 (32), 78.6 TOP/s int8 (128). Measured op costs: 529 cycles per 16×16×16 fp32 or 16×16×32 fp16 op (512 ideal), and 280 cycles per 16×16×64 int8 op (256 ideal). Throughput is total work over the host-measured launch time. The minions' cycle counters agree with it to within 0.1% (implied clock 0.600 GHz). Launch-to-launch spread was below 0.03% in the L2 runs and 0.34% in the DRAM run.</p>
+</details>
 
 <h2>Board power during the benchmark</h2>
 <p class="muted">What does "per W above idle" subtract, and why does idle rise from one workload to the next? Board power was polled from the service processor about 8 times a second (the reading itself changes only about every 133–150 ms on aifoundry2, and about every 255 ms on aifoundry3). Shaded spans are the benchmark launches, about 12 s per workload, with idle gaps between them; the thin spikes just before each span are short calibration launches. Power creeps up within each span as the die warms: minion-shire temperature (the sensors' average) went from 71&nbsp;°C to 77&nbsp;°C, and the hottest sensor's high-water mark read 85&nbsp;°C afterwards. For the same reason the idle in each gap sits higher than the one before (the grey steps).</p>
 <div class="ck-controls"><div id="trace-pick"></div></div>
 <div class="card" id="trace"></div>
 <p class="ck-readout" id="trace-read"></p>
+<details class="more"><summary>How to read this chart</summary>
 <p class="small">Pick a workload to shade its two windows: the idle it is measured against (3.5 to 1.8 s before its first timed launch, orange) and the span its power is averaged over (from 1 s after its first launch to its end, blue). The dashed lines are those two means.</p>
+</details>
 
 <h2>How the benchmark works</h2>
 <ul>
@@ -759,9 +798,12 @@ window.CK = (function () {
   <li><b>Inputs and checking.</b> Inputs are random values from {−2, −1, 1, 2} (low-power operands; see Later measurements). They are never zero, so no multiply can be skipped, and they are exact in fp16 and fp32. The host checks each minion's C tile for exact equality with iters × Σ A·B, capping iteration counts so fp32 accumulation stays exact. Every launch passed with zero bad minions.</li>
   <li><b>Power.</b> Board power comes from the card's own telemetry (<code>DM_CMD_GET_MODULE_POWER</code> through <code>dev_mngt_service</code>, polled about 8 times a second; aifoundry2's reading changes about every 133–150 ms). It is averaged over the launch windows after skipping the first second. The idle row is the median of the last 7 s of the 8 s idle before the first workload; the above-idle column uses the idle just before each workload instead.</li>
 </ul>
+<details class="more"><summary>Version history</summary>
 <p class="small">Versions: published 18 September 2026; revised 24 September 2026 (per-workload idle, operand and A100 context, corrections) and 25 September 2026 (efficiency explorer, idle windows, corrections); 25 September (version 3): which card and how many runs each figure rests on, aifoundry3's values beside aifoundry2's in the later measurements, and the idle's leakage split as a range (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>).</p>
+</details>
 
 <h2>Caveats</h2>
+<details class="more"><summary>Caveats in full</summary>
 <ul>
   <li><b>The A100 figures are spec-sheet numbers, not measurements.</b> The one measured A100 matmul (Horace He: bf16 on random data, 257 TFLOPS under a 330 W limit) matches peak ÷ TDP, so the tensor-core ratios are a fair estimate; no A100 fp32 CUDA-core GEMM was measured.</li>
   <li><b>Board power includes the whole card.</b> Part of the 30.6 W idle does not change with temperature and the rest is die leakage, which grows with it: aifoundry2's idle rises about 0.65 W per °C at 80&nbsp;°C, but the data do not pin down how it splits (at 80&nbsp;°C the leakage is 20–29 W of 35.9 W, depending on the curve fitted). The idle law in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a>, fitted on aifoundry2, predicts 30.8 W at the 71&nbsp;°C this run started at and 34.0 W at 77&nbsp;°C. The above-idle column still carries the leakage added as the die warms within each run, so it is not the compute alone.</li>
@@ -769,6 +811,7 @@ window.CK = (function () {
   <li><b>Precision differs.</b> ET's fp32 tensor op is a full IEEE fp32 multiply-add, whose A100 equivalent is fp32 on CUDA cores; tf32 keeps only a 10-bit mantissa. ET's fp16 op accumulates in fp32 with round-toward-zero.</li>
   <li><b>Peak-rate microbenchmark.</b> This measures the matmul engine on cached tiles. A full GEMM also pays for moving data, and the DRAM row (0.31 TFLOP/s) is the no-reuse floor.</li>
 </ul>
+</details>
 
 <h2>Next steps</h2>
 <ul>
@@ -779,6 +822,7 @@ window.CK = (function () {
 </ul>
 
 <h2>Reproduce</h2>
+<details class="more"><summary>Reproduce this</summary>
 <pre><code># regenerate this page's numbers and charts from the committed data (no card)
 python3 scripts/mmbench-report-data.py docs/reports/data/2026-09-18-aifoundry2 \
     --manual docs/reports/data/2026-09-23-energy-manual/manual.json \
@@ -811,6 +855,7 @@ timeout 10 /opt/et/bin/it_test_code_loading --mode=pcie   # the card hello world
       <li>The old <code>riscv_helpers.cmake</code> uses CMake's plain <code>target_link_libraries</code> signature, which clashes with the keyword form this repository's <code>kernels/CMakeLists.txt</code> uses. I switched it to the keyword form, as upstream later did.</li>
     </ul></li>
 </ol>
+</details>
 
 
 <h2 id="related">Related reports</h2>

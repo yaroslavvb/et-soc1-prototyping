@@ -156,6 +156,14 @@ th.num { white-space: normal; }
   table.stack td:first-child { font-weight: 600; }
 }
 @media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
 </style>
 <script>
 /* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
@@ -655,9 +663,30 @@ window.CK = (function () {
   const dark = mm('(prefers-color-scheme: dark)');
   if (dark.addEventListener) dark.addEventListener('change', redrawAll);
 
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
   return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
     stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
-    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend};
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
 })();
 </script>
 <!-- chartkit:end -->
@@ -687,7 +716,9 @@ window.CK = (function () {
 <div class="table-wrap"><table id="tbl-peaks">
 <thead><tr><th>Compute path</th><th class="num">Per minion per cycle</th><th class="num">1,024 minions at 600 MHz</th><th class="num">At 1 GHz</th><th class="num">Best measured</th></tr></thead>
 <tbody id="t-peaks"></tbody></table></div>
+<details class="more"><summary>How the peaks compare with measurements</summary>
 <p class="small">Measured: the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">matmul report</a>'s tensor loop with tiles in L2, 529 cycles per fp32 or fp16 op and 280 per int8 op, against 512 and 256 ideal. Vector: the best published vector-unit matmul, 2.94 TFLOP/s at 650 MHz (FOSDEM 2026). The vendor's 836 TOPS int8 for a six-chip card (139 per chip) is the same 128 OP per cycle on all 1,088 minions at 1 GHz. <code>aifoundry3</code>'s firmware pins the minion clock at 600 MHz; <code>aifoundry2</code>'s governor runs it at up to 800 MHz, the top of the firmware's frequency table, when the die is cool. Every lab measurement on this page is at 600 MHz; only the section on <a href="#which-ridge-points-move-with-the-clock">which ridge points move with the clock</a> uses <code>aifoundry2</code>'s faster launches.</p>
+</details>
 
 <h2 id="ridge-points-by-level">Ridge points by level</h2>
 <p>Bandwidths are given per minion per minion-clock cycle, as a kernel running on all 1,024 minions sees them, and for the whole chip at 600 MHz. <i>Measured</i> is the median streaming rate of the earlier reports' probes with every minion reading its own data. Bytes per cycle come from the cycle counters, and GB/s from the 600 MHz launches only. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy report</a> uses the same launches. <i>Spec</i> is what the documented port and bank widths allow. Ridge = peak per minion-cycle ÷ bytes per minion-cycle.</p>
@@ -701,11 +732,13 @@ window.CK = (function () {
 <div id="roof-readout"></div>
 <p class="small">Pick where the data comes from, a precision and the operations the kernel does per byte it fetches; the readout gives the fastest it can run. Speed is capped by the lower of the compute ceiling (horizontal) and the bandwidth line of the level (diagonal); the dots are the ridge points, labelled for the selected precision. The clock buttons apply the model in <a href="#which-ridge-points-move-with-the-clock">which ridge points move with the clock</a>, measured on <code>aifoundry2</code> only: the ceilings and the bandwidths inside a shire scale with the minion clock, DRAM and PCIe stay fixed, and L3 and another shire's scratchpad span a wedge between rising as measured and staying fixed. TensorSend between shires is drawn fixed: it is NoC-bound, not measured against clock, and spans six shire-to-shire patterns. The rings are kernels measured at 600 MHz: the matmul benchmark with tiles in L2 (fp32, fp16, int8), the same fp32 loop with every tile from DRAM, and the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparsity report</a>'s batch-1 fp32 layer with its weights in the scratchpads; the two below the ceilings sit on their bandwidth lines. The int8 matmul sits above the measured own-shire line (<span id="int8-own-t">39</span> TOP/s at 16 OP per byte; it ran at <span id="int8-ran">72</span>) because every minion read the same 32 KB of tiles; it stays under the spec line. The tables below hold every number without the chart. <i>A100 roofs</i> overlays, dash-dotted, the A100's dense peaks (fp32 on the CUDA cores, fp16 and int8 on the tensor cores) and its three sustained bandwidths from <a href="#the-same-numbers-for-an-a100">the A100 table</a>, with its ridge points on the selected precision's ceiling; the A100 lines do not move with the clock buttons.</p>
 
+<details class="more"><summary>Measured bandwidth and ridge points, as a table</summary>
 <div class="chart-title">Measured bandwidth and ridge points</div>
 <div class="table-wrap"><table class="ridge measured">
 <thead><tr><th>Level</th><th class="num">fp32</th><th class="num">fp16</th><th class="num">int8</th><th class="num">Bandwidth</th></tr></thead>
 <tbody id="t-ridge"></tbody></table></div>
 <p class="small">Ridge points in FLOP (int8: OP) per byte at 600 MHz. Bandwidth: bytes per minion per cycle · the whole chip. For TensorSend rows, "bytes" are bytes one minion sends another.</p>
+</details>
 
 <ul>
 <li><b>Inside a minion, nothing binds.</b> The tensor unit reads its A operand from the L1 scratchpad at one request of at most 32 B per cycle. With B streamed through TenB, a full-size op keeps that port 50–75% busy. (In int8 with B also in the scratchpad it reaches 88%, and the op slows from 280 to 318 cycles.) fp32 and fp16 keep C in the vector registers, whose three 32 B read ports per cycle are sized for one three-operand instruction per cycle. int8 accumulates in the separate 1 KB TenC.</li>
@@ -716,17 +749,21 @@ window.CK = (function () {
 <li><b>TensorSend</b> moves data between minions' registers rather than fetching it, and each rate belongs to the pattern the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication report</a> measured: pairs, rings, or shire to shire. It is not the capacity of a link. Across the mesh, a shire manages only 3–5 GB/s, limited by how many packets a sender keeps in flight.</li>
 </ul>
 
+<details class="more"><summary>Spec bandwidths and ridge points, as a table</summary>
 <div class="chart-title">Spec bandwidth and ridge points</div>
 <div class="table-wrap"><table class="ridge" id="tbl-spec">
 <thead><tr><th>Level</th><th class="num">Bandwidth, spec</th><th class="num">Spec ridge, fp32 · fp16 · int8</th></tr></thead>
 <tbody id="t-spec"></tbody></table></div>
 <p class="small">The same levels at what the documented port and bank widths allow, in the same units.</p>
+</details>
 
 <h2 id="the-same-numbers-for-an-a100">The same numbers for an A100</h2>
 <div class="table-wrap"><table class="wide" id="tbl-a100">
 <thead><tr><th>Level</th><th class="num">Bandwidth, sustained</th><th class="num">fp32</th><th class="num">fp16 tensor</th><th class="num">int8 tensor</th></tr></thead>
 <tbody id="t-a100"></tbody></table></div>
+<details class="more"><summary>How the A100 numbers were computed</summary>
 <p class="small">Ridge points against sustained bandwidth, each ET-SoC-1 level next to its closest A100 counterpart. The A100's peaks are 19.5 TFLOP/s fp32 on the CUDA cores, 312 TFLOP/s fp16 and 624 TOP/s int8 on the tensor cores (dense). Its bandwidths are the sustained values in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/sources/2026-09-18-a100-memory-hierarchy.md"><code>docs/reports/sources/2026-09-18-a100-memory-hierarchy.md</code></a> (HBM2 1.40 TB/s). The ET-SoC-1's fp32 runs on its tensor unit.</p>
+</details>
 <p>The A100's tensor cores outrun its bandwidth by more, so on chip its fp16 and int8 ridge points are higher than the ET-SoC-1's. From DRAM the fp16 ridges are close (<span id="a-hbm16">223</span> against <span id="a-et16">259</span>). In int8 the ET-SoC-1 needs <span id="a-int8x">2.3</span>× more, and in IEEE fp32, which the A100 runs on its CUDA cores, about <span id="a-fp32x">9</span>× more (<span id="a-et32">130</span> against <span id="a-hbm32">14</span>). With fp32 inputs rounded to TF32 on its tensor cores (<span id="a-tf32">156</span> TFLOP/s dense), the A100's HBM ridge would be about <span id="a-hbmtf">111</span>.</p>
 
 <h2 id="which-ridge-points-move-with-the-clock">Which ridge points move with the clock</h2>
@@ -734,20 +771,26 @@ window.CK = (function () {
 <div class="table-wrap"><table>
 <thead><tr><th>fp32 ridge (FLOP/B)</th><th class="num">600 MHz</th><th class="num">800 MHz</th><th class="num">1,000 MHz</th></tr></thead>
 <tbody id="t-clock"></tbody></table></div>
+<details class="more"><summary>Method and caveats for the clock model</summary>
 <p class="small">fp16 is 2× and int8 8× every entry. 600 MHz is measured on both cards; the 800 MHz (the top of the firmware's table) and 1,000 MHz (the shire design clock) columns apply the clock scaling seen on <code>aifoundry2</code>. Only the minion clock changes. The NoC stays at the lab cards' 400 MHz and DDR at 933 MHz; at the NoC's 500 MHz design clock the L3 and remote-scratchpad ridges would be lower. For those two, the lower end assumes their bandwidth keeps rising with the clock as it did between 600 and about 740 MHz, and the upper end assumes it stays fixed. TensorSend inside a neighbourhood or a shire runs on the minion clock, so its ridges should hold at any clock; that is inferred from the clock domain, not measured, since TensorSend has only been run at 600 MHz. Between shires it crosses the 400 MHz NoC.</p>
+</details>
 
+<details class="more"><summary>Every launch, plotted against clock</summary>
 <div class="chart-title">Every launch's bandwidth, against its level's own 600 MHz median</div>
 <div id="clock-legend"></div>
 <div class="chart" id="clock-bw"></div>
 <p class="small">One dot per launch of the memory-hierarchy report's streaming probes on <code>aifoundry2</code> (18 September, both sessions), plotted at the minion clock its cycle counts imply. y = 1 is that level's own median GB/s at 600 MHz; a level whose bandwidth simply followed the clock would sit on the dashed line. L1, L2 and the own scratchpad (inside the shire, on the minion clock) track it; L3 and another shire's scratchpad (crossing the fixed-frequency NoC) rise more slowly; DRAM does not move at all.</p>
+</details>
 
 <h2 id="what-it-takes-to-reach-them">What it takes to reach them</h2>
 <h3 id="matrix-multiplication">Matrix multiplication</h3>
+<details class="more"><summary>How each reuse ridge is derived</summary>
 <ul>
 <li><b>One op.</b> A 16×16×K TensorFMA reads a 1 KB A tile from the L1 scratchpad and a 1 KB B tile streamed through TenB. It does 8,192 FLOP in fp32, 16,384 in fp16 or 32,768 OP in int8. With both tiles loaded fresh each time, that is 4, 8 or 16 per byte: exactly the own-shire ridge for fp32 and fp16, and half of it for int8. The matmul benchmark's <span id="mm-pct32">97</span>% and <span id="mm-pct8">91</span>% of peak came from one shared 32 KB tile pool (see <a href="#ridge-points-by-level">Own shire</a>), so they do not show that private tiles would keep the tensor unit busy. A kernel with its own tiles in the shire sits exactly at the fp32 and fp16 ridge, with no margin.</li>
 <li><b>The shire.</b> A shire's 32 register-resident C tiles form a 64 × 128 block. A block of m × n outputs held while K streams past does 2mnK operations for every e·K·(m + n) bytes it reads (e = bytes per element), an intensity of H/e with H = 2mn/(m + n), the harmonic mean of m and n. Here H = 85: 21, 43 and 85 operations per byte. That is well past the banks' spec ridge of 2, 4 and 16 if a cooperative TensorLoad reads each line once for every minion that needs it (A shared by the 8 minions of a neighbourhood, B across the 4 neighbourhoods: 384 B of bank reads per minion-op instead of 2 KB). It also beats the measured 10, 20 and 80 from L3 or another shire, with little to spare in int8, if each byte enters the shire once. Cooperative loads have not been measured on these cards, and they cannot read L3-homed addresses, so L3 data must first be captured by the shire's L2 or copied into its scratchpad.</li>
 <li><b>DRAM.</b> These figures assume each DRAM byte is read once for the whole chip. The block needs H ≥ e × ridge: about 520 in fp32 and fp16, and about 1,040 in int8. All 1,024 register tiles together form a 512 × 512 block (1 MB of C), which gives 128, 256 and 512 per byte. That is 99% of what fp32 and fp16 need and half of what int8 needs. Larger blocks have to keep C in the scratchpads and swap it through the registers. The 80 MB of scratchpad (the default partition) would hold C for a 4,500 × 4,500 fp32 block, but nobody has measured what the swapping costs. int8 is harder: its accumulator, TenC, cannot be loaded from memory, so partial sums would have to be added with vector instructions.</li>
 </ul>
+</details>
 
 <div class="chart-title">Reuse to speed: how the fraction of peak grows with the block or the batch</div>
 <div class="ck-controls"><div id="reuse-mode"></div><div id="reuse-prec"></div></div>
@@ -755,48 +798,69 @@ window.CK = (function () {
 <div id="reuse-legend"></div>
 <div id="c-reuse"></div>
 <div id="reuse-readout"></div>
+<details class="more"><summary>How to read this chart</summary>
 <p class="small" id="reuse-cap">Fraction of the tensor unit's peak at 600 MHz that the measured bandwidth of each level allows (the roofline above, read along one diagonal). <b>Blocked matmul</b>: x is H, the harmonic mean of the C block's sides (a square block's side); the intensity is H/e per byte. L3 and another shire's scratchpad are read by one shire, whose 32 register tiles hold at most a 64 × 128 block (H = 85), so their lines stop there; DRAM assumes each byte is read once for the whole chip, with C in all 1,024 minions' registers up to H = 512 and swapped through the scratchpads (unmeasured) up to about <span id="reuse-scpmax">4,580</span>. <b>Streaming weights</b>: x is the batch N; the weights give 2N/e operations per byte, and inside the own shire each op also loads a fresh activation tile, so that line flattens at N = 16. The ticks are the smallest compute-bound blocks and batches, as in the table below.</p>
+</details>
 
 <h3 id="inference-that-streams-its-weights">Inference that streams its weights</h3>
 <p>A layer that reads its weights once per batch of N inputs does 2N operations per weight, or 2N/e per byte (e = bytes per element). It is compute-bound when that reaches the ridge, so it needs N ≥ e × ridge / 2:</p>
 <div class="table-wrap"><table>
 <thead><tr><th>Weights come from</th><th class="num">fp32</th><th class="num">fp16</th><th class="num">int8</th></tr></thead>
 <tbody id="t-batch"></tbody></table></div>
+<details class="more"><summary>Caveats on the batch table</summary>
 <p class="small">These are the smallest batches that are compute-bound at the measured bandwidth. The own-shire row also counts the activations. A minion holds one 16×16 C tile, so each op loads a fresh activation tile as well as a weight tile. Its intensity therefore tops out at 4, 8 and 16 per byte at batch 16, and int8 never reaches its 32 OP/B own-shire ridge. The other rows assume the activations stay in the shire and each weight byte reaches the shire once. On A0 silicon, fp32 and fp16 ops of 1–4 rows with B from TenB must be padded to 5 rows (errata 1.29 type D).</p>
+</details>
+<details class="more"><summary>A worked example: the batch-1 GEMV</summary>
 <p>At batch 1 a layer does 0.5 FLOP per byte in fp32, so it is memory-bound at every level. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute#layer">sparsity report</a>'s batch-1 layer, with its weights in the scratchpads and its partial sums added by the host, ran at <span id="gemv-tf">1.24</span> TFLOP/s (<span id="gemv-us">6.8</span> µs per 1,024 × 4,096 layer: the row "Every row loaded, compute only" in that report's layer table). That is the scratchpad bandwidth times 0.5, within 1%. With the on-chip reduction the layer takes <span id="gemv-tree-us">7.3</span> µs, <span id="gemv-tree-tf">1.15</span> TFLOP/s.</p>
+</details>
 
 <h2 id="other-limits-that-act-like-ridge-points">Other limits that act like ridge points</h2>
 <ul>
 <li><b>A lone minion.</b> A minion keeps at most 4 line requests in flight, shared by its two TensorLoad paths, so its rate is 4 lines per round trip. Streaming its own data alone, one minion measured <span id="lim-l2">6.4</span> B per cycle from L2 or the scratchpad and <span id="lim-dram">1.4</span> from DRAM. This is not a hard ceiling: the int8 matmul loop drew <span id="demo-bpc2">7.3</span> B per cycle per minion. At the lone-minion DRAM rate (one launch on <code>aifoundry3</code>), it takes at least <span id="lim-n">90</span> minions streaming 1 KB loads at once to reach the chip's 76 GB/s from DRAM, and more once queueing raises the latency.</li>
+</ul>
+<details class="more"><summary>Three more limits: small loads, launch overhead, the vector unit</summary>
+<ul>
 <li><b>Small loads.</b> Every TensorLoad costs at least about <span id="lim-floor">45</span> cycles, even with every line masked off, and about <span id="lim-small">65</span> for up to 4 lines when all minions load at once. So loads of fewer than 4 lines cannot reach the 4 B per cycle streaming rate: a 1-line load gets about <span id="lim-1line">1.0</span> B per cycle. 4-line loads still reach <span id="lim-4line">3.9</span>.</li>
 <li><b>Kernel launch.</b> In the matmul runs, a launch from the host took <span id="lim-launch">0.43</span> ms (median; <span id="lim-launch-range">0.35–0.69</span> ms). That launch time, from one session on <code>aifoundry2</code>, is as long as <span id="lim-gflop">4.2</span> GFLOP takes at the fp32 peak, so a kernel with less work than that spends more time launching than computing.</li>
 <li><b>The vector unit's limit is not pinned down.</b> A <code>flw.ps</code> loads 32 B and an <code>fmadd.ps</code> does 16 FLOP, and a minion issues at most one instruction per cycle for its two harts together. So with I FLOP per loaded byte, at most a fraction 2I/(2I + 1) of the issue slots can be FMAs. Measured code stays well below that bound. With both harts doing nothing but loading, the energy manual's catalogue loop (64 loads per loop iteration) issued a <code>flw.ps</code> every <span id="l1-cyc">1.4</span> minion-cycles, almost as fast as it issued an integer <code>add</code>, so the L1 delivered at least <span id="l1-bpc">23</span> B per minion-cycle (<span id="l1-tbs">14.2</span> TB/s) and the load rate binds first only below about <span id="l1-ridge">0.69</span> FLOP per byte. The memory-hierarchy probe's loop (8 per iteration) issued one every <span id="l1-cyc-mh">3.2</span> cycles, <span id="l1-bpc-mh">10</span> B per minion-cycle: a limit of that loop, not of the L1. The best published vector matmul has 63% FMAs in its instruction mix, yet reaches only 4.4 FLOP per minion-cycle, 28% of peak: it issues about 0.44 instructions per cycle. The spec ridges against the L1 cache (0.5 FLOP/B, 32 B per cycle) and the registers (0.17, 96 B per cycle) are never reached.</li>
 </ul>
+</details>
 
 <h2 id="energy-balance-points">Energy balance points</h2>
 <p>Time is one budget and energy is another. Divide each level's energy per byte by the tensor unit's energy per FLOP, both measured as card power above idle. The result is the intensity at which moving the data costs as much energy as the arithmetic. On random-normal operands held in the L1 scratchpad, the fp32 tensor unit costs <span id="e-flop">2.89</span> pJ per FLOP above idle [<span id="e-flop-lo">2.62</span>–<span id="e-flop-hi">3.01</span>] and int8 <span id="e-int8">0.158</span> pJ per OP (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">energy manual §3.2</a>, at 600 MHz; int8 on <code>aifoundry2</code> only, two runs). The data matters as much as the level: on all-ones operands fp32 costs <span id="e-ones">1.11</span> pJ per FLOP and on zeros <span id="e-zeros">0.21</span>, so every balance point below moves by up to <span id="e-span">14</span>× with the operands.</p>
+<details class="more"><summary>Removing the cost of keeping the cores awake</summary>
 <p>Both sides include the cost of keeping the cores awake (about <span id="e-awake">1.5–2.1</span> W for the whole chip; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#a-core-that-is-awake">energy manual §2</a>), which a kernel doing both pays once. Taking it out of both lowers the random-data balance points from the shire's own scratchpad to DRAM by about <span id="e-awake-drop">9–29</span>% (TensorSend's by more, since this cost is most of its power over idle) and changes none of the conclusions below; on zeros it is most of the tensor unit's <span id="e-zeros2">0.21</span> pJ per FLOP.</p>
+</details>
 
 <div class="chart-title">Energy against time: does the arithmetic or the data movement cost more once a kernel is compute-bound?</div>
 <div class="ck-controls"><div id="eb-op"></div><div id="eb-ridge"></div></div>
 <div id="eb-legend"></div>
 <div id="c-ebal"></div>
 <div id="eb-readout"></div>
+<details class="more"><summary>How to read this chart</summary>
 <p class="small">One row per level, fp32 on the tensor unit. The circle is the energy balance point (byte energy ÷ FLOP energy, pooled over both cards) and the diamond the time ridge. The whisker spans both cards' 99% ranges (each card's three passes of byte energy, over the FLOP energy's range across the runs), and a verdict is drawn only where it clears the diamond, so that it holds on each card; the tooltips give each card's range. Where the circle lies left of the diamond, a kernel that is compute-bound spends more energy on arithmetic than on moving its data; right of it, the data costs more. The operand buttons change the FLOP energy and, for the shire's own scratchpad and DRAM, the byte energy too (TensorLoads on the same operands, §4.1; filled circles). The other levels' byte energies were measured on buffers that were never written (§4.2 and §5; hollow circles), so for them only the FLOP side follows the operands. On zeros the tensor unit costs little more than keeping the cores awake, so read those rows as a direction, not a value. The L1 row, which feeds only the vector unit, is in the table.</p>
+</details>
 
+<details class="more"><summary>The energy roofline chart</summary>
 <div class="chart-title">The energy roofline: pJ per FLOP against arithmetic intensity, E(I) = arithmetic + data/I</div>
 <div class="ck-controls" id="eroof-ctl"><div id="eroof-op"></div><div id="eroof-int"></div></div>
 <div id="eroof-legend"></div>
 <div id="c-eroof"></div>
 <div id="eroof-readout"></div>
 <p class="small" id="eroof-cap"></p>
+</details>
 
+<details class="more"><summary>All the energy figures, as a table</summary>
 <div class="table-wrap"><table class="wide" id="tbl-energy">
 <thead><tr><th>Where the bytes come from</th><th class="num">pJ/B</th><th class="num">fp32 balance</th><th class="num">int8 balance (aifoundry2)</th><th class="num">fp32 time ridge</th></tr></thead>
 <tbody id="t-energy"></tbody></table></div>
 <p class="small">Balance points and the time ridge are in FLOP (int8: OP) per byte. Energy per byte for memory is the energy manual's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-by-level">§4.2</a>: the same probes as the bandwidths above (1 KB TensorLoads), re-run at 600 MHz on both cards on 23 September. For TensorSend it is <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-between-cores-and-shires">§5</a>: 1 KB messages on both cards, and for the last row six shire-to-shire patterns. The own scratchpad and the L2 cache differ between the cards beyond noise, in opposite directions, so their rows give both, <code>aifoundry2</code> · <code>aifoundry3</code>, each balance point against its own card's FLOP energy. The int8 column is <code>aifoundry2</code>'s alone: its int8 energy (two runs) against its own byte energies. The L1 row is the manual's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-and-writes-measured-together">§4.1</a> catalogue on random data: a 32 B vector load (<code>flw.ps</code>) against the vector unit's <code>fmadd.ps</code> (<span id="e-vec">3.49</span> pJ per FLOP), since the tensor unit does not read through the L1 cache. Its time ridge uses the same loop's <span id="e-l1-tbs">14.2</span> TB/s; the memory-hierarchy probe's slower loop ran at <span id="e-l1-mh-tbs">6.2</span> TB/s and cost <span id="e-l1-mh-pj">0.86</span> pJ/B on <code>aifoundry2</code> and <span id="e-l1-mh-pj3">0.68</span> on <code>aifoundry3</code> (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-by-level">§4.2</a>).</p>
+</details>
 <p>On random-normal operands, every fp32 energy balance point lies below the matching time ridge point at the measured bandwidths. So a compute-bound kernel on random-like data spends more energy on arithmetic than on moving data. The operands can change this. On all-ones operands the balance points still lie below their time ridges, DRAM included (<span id="e-ones-dram">89</span> against <span id="e-dramr">130</span>, with the byte energy also measured on all-ones data), except L3 (<span id="e-ones-l3">9.4</span> against <span id="e-l3r">10</span>) and another shire's scratchpad, which are not clear of theirs (<a href="#energy-not-established">not established</a>). On zeros the tensor unit adds little more power than cores that are merely awake, and the shire's own scratchpad, the L2 cache, L3 and DRAM lie well above their time ridges, even with byte energies also measured on zeros (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-and-writes-measured-together">§4.1</a>: DRAM <span id="e-zeros-dram">434</span> against <span id="e-dramr2">130</span>, own scratchpad <span id="e-zeros-scp">9.6</span> against <span id="e-scpr">4.0</span>). For zero-heavy operands, moving the bytes costs more energy than the arithmetic even when the kernel is compute-bound. Treat the zeros figures as a direction, not a value.</p>
+<details class="more"><summary>Checking against random-data byte energies</summary>
 <p>The §4.2 probes read whatever the buffers held, not random data. On random data a TensorLoad costs <span id="e-rnd-scp">4.21</span> pJ/B from the shire's own scratchpad and <span id="e-rnd-dram">129</span> pJ/B from DRAM (§4.1), which puts those balance points at <span id="e-rnd-scp-b">1.5</span> and <span id="e-rnd-dram-b">45</span> FLOP/B. That does not change the conclusion: <span id="e-rnd-scp-b2">1.5</span> is below the shire banks' spec ridge of <span id="e-scp-spec">2</span>, and <span id="e-rnd-dram-b2">45</span> below DRAM's spec ridge of <span id="e-dram-spec">72–82</span>.</p>
+</details>
+<details class="more"><summary>Not established: comparisons too close to call</summary>
 <h3 id="energy-not-established">Not established</h3>
 <p>In these comparisons at least one card's 99% range reaches the ridge (the chart's tooltips give each card's range), so the page draws no verdict for them.</p>
 <ul>
@@ -804,20 +868,25 @@ window.CK = (function () {
 <li><b>All-ones operands.</b> L3 sits at its time ridge (<span data-bal="ones:l3">9.4</span> against <span data-ridge="measured:l3">10</span>), and another shire's scratchpad (<span data-bal="ones:scp_remote">6.0</span> against <span data-ridge="measured:scp_remote">10</span>) is not clear of it on <code>aifoundry2</code>. Against the spec ridges, the L2 cache (<span data-bal="ones:l2">2.2</span> against <span data-ridge="spec:l2">2.0</span>), another shire's scratchpad (<span data-bal="ones:scp_remote">6.0</span> against <span data-ridge="spec:scp_remote">3.0</span>) and DRAM (<span data-bal="ones:dram">89</span> against <span data-ridge="spec:dram">82</span>) overlap theirs; only the own scratchpad (<span data-bal="ones:scp">2.4</span> against <span data-ridge="spec:scp">2.0</span>) and L3 (<span data-bal="ones:l3">9.4</span> against <span data-ridge="spec:l3">3.0</span>) lie above theirs.</li>
 <li><b>Zeros.</b> TensorSend inside a shire (<span data-bal="zeros:xbar">10.0</span> against <span data-ridge="measured:xbar">8.8</span>) and between pairs (<span data-bal="zeros:fln">3.2</span> against <span data-ridge="measured:fln">3.3</span>) overlap their time ridges, as do another shire's scratchpad (<span data-bal="zeros:scp_remote">32</span> against <span data-ridge="measured:scp_remote">10</span>, not clear of it on <code>aifoundry2</code>) and TensorSend between shires over its six patterns (<span data-bal="zeros:xmesh">57–85</span> against <span data-ridge="measured:xmesh">63–112</span>).</li>
 </ul>
+</details>
 
 <h2 id="caveats">Caveats</h2>
+<details class="more"><summary>Caveats in full</summary>
 <ul>
 <li>The measured bandwidths are what the probes reached with 1 KB TensorLoads, two in flight. The spec values are what the documented port and bank widths allow. Neither is a proven ceiling. The spec figure for the mesh assumes one 64 B beat per NoC cycle per port.</li>
 <li>These are read ridge points. Writes were measured later (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-and-writes-measured-together">energy manual §4.1</a>, both cards): tensor stores reach <span id="w-scp">1.23</span> TB/s into the shire's own scratchpad, half the read rate, and <span id="w-dram">76</span> GB/s to DRAM, the same as reads; stores through the L1 reach DRAM at only <span id="w-st">27</span> GB/s. A kernel that writes as much as it reads needs more reuse than these tables show.</li>
 <li>The levels beyond the shire use the 600 MHz launches of the 18 September runs on <code>aifoundry2</code>, whose governor moved the clock; the 23 September reruns at 600 MHz (pinned on <code>aifoundry3</code>, held there on <code>aifoundry2</code> by a warm die) reproduce every level on both cards to within <span id="rerun-dev">0.3</span>%. <code>aifoundry3</code> also supplied the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparsity report</a>'s TensorLoad-size and batch-1 measurements.</li>
 <li>The port widths come from the documentation and RTL of core-et's Erbium branch (commit <code>b38a1a3</code>): the same Minion core lineage in a later MCU-class configuration, not the taped-out ET-SoC-1. A0 silicon may differ in details.</li>
 </ul>
+</details>
 
 <h2 id="reproduce">Reproduce</h2>
+<details class="more"><summary>Reproduce this</summary>
 <pre><code>python3 scripts/ridge-points.py --embed docs/reports/2026-09-18-et-soc1-ridge-points.html
 python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.html</code></pre>
 <p class="small">The script reads the raw data of the earlier reports (<code>docs/reports/data/</code>), the 23 September reruns of the memory probes, the on-chip communication report's embedded JSON and the energy manual's data (<code>docs/reports/data/2026-09-23-energy-manual/manual.json</code>). It prints the numbers behind the tables, the charts and the figures in the text, and writes the tables' and charts' data into this page. The spec constants in the script each name their source. Its inputs rebuild from committed data with the commands in <code>docs/findings/04-artifacts.md</code> (A19); only the raw probe and matmul runs needed a card. The second command pastes in the shared chart toolkit the charts are drawn with.</p>
 <p class="small"><b>Versions.</b> First published 24 September with energy balance points from the 18 September memory-hierarchy energies (clock free) and 1.88 pJ per FLOP on small-integer operands. Recomputed the same day from the energy manual, which moved the DRAM balance point from 79 to 42 FLOP/B and the L2 cache's below its spec ridge. Revised 25 September: the L1 row now sets a vector load against the vector unit's <code>fmadd.ps</code> (balance 0.15, was 0.27 against the tensor unit); the energy conclusion is stated for random-normal operands, with the reversal on zeros; the rerun check reads the passes the energy manual pools (0.3%, was 0.2%); the vector unit's L1 load rate is the energy manual catalogue loop's <span id="v-l1-bpc">23</span> B per minion-cycle (below about <span id="v-l1-ridge">0.69</span> FLOP per byte the load rate binds, was <span id="v-l1-ridge-mh">1.6</span> from the memory-hierarchy probe's slower loop at <span id="v-l1-bpc-mh">10</span> B); and the page gained interactive roofline, energy and reuse charts. <b>25 September (version 3):</b> checked claim by claim against both cards (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>); a figure with no card named holds on both. The own scratchpad's and L2 cache's energy per byte are now per card, the int8 balance points use <code>aifoundry2</code>'s own byte energies (DRAM 777, was 771), and an energy verdict needs both cards' 99% ranges to clear the ridge, which moves L3 at the spec rates (was "lies above") and nine other comparisons the chart drew to <a href="#energy-not-established">Not established</a>; the all-ones DRAM comparison uses bytes measured on all-ones data (89, was 109).</p>
+</details>
 
 <h2 id="related">Related reports</h2>
 <ul>
@@ -831,6 +900,7 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
 </ul>
 
 <h2 id="sources">Sources</h2>
+<details class="more"><summary>Sources and citations</summary>
 <ol class="small">
 <li>Minion VPU Specification (<a href="https://github.com/openhwfoundation/core-et/tree/erbium">core-et</a> docs, Erbium branch): §2 (8 lanes, one FMA unit and two int8 units per lane), §2.2.2 (register-file ports), §2.2.3.8 Table 6 (four int8 products per integer unit), §2.3.6.1 (tensor micro-op sequencing). ET Programmer's Reference Manual (<a href="https://github.com/aifoundry-org/et-man">aifoundry-org/et-man</a>): §8.3.1 (L1 scratchpad mode), §9.1–9.4 (tensor op shapes and operands).</li>
 <li>CORE-ET Shire Cache Specification: §1 (4 banks, one 64 B line per cycle each; 512-bit NoC ports), §1.4.3 (L3 lines interleaved over all shires), §2.3–2.4 (four ports to the L3 mesh). CORE-ET Neighborhood MAS: §4.3–4.7 (neighbourhood buses, fast local network), Table 6 (shire and minion clocks). Minion DCache Description: §2.3.1 (256-bit scratchpad read port to the vector unit), §3.2 (L1 ports), §3.9.6 (TensorLoad requests in flight). CORE-ET Minion Shire Description: Table 2 (1 GHz shire and 500 MHz NoC design clocks). All in <a href="https://github.com/openhwfoundation/core-et/tree/erbium">core-et</a>.</li>
@@ -839,6 +909,7 @@ python3 scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-ridge-points.h
 <li>P. Cawley, <a href="https://archive.fosdem.org/2026/events/attachments/T3PSFN-zero_to_matmul_with_the_et-soc-1/slides/267107/zerotomat_asnyquu.pdf">"Zero to matmul with the ET-SoC-1"</a>, FOSDEM 2026 (vector-unit matmul, 2.94 TFLOP/s at 650 MHz). M. Chang (<a href="https://github.com/marty1885/etTopoScan">marty1885</a>), <a href="https://clehaxze.tw/gemlog/2026/04-27-tnvestigating-the-et-soc-1-noc.gmi">"Investigating the ET-SoC-1 NoC"</a>, 2026, also on the AI Foundry blog (about 88 GB/s from DRAM, calculated from the best rate against a single memory shire).</li>
 <li>A100: <a href="https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/a100/pdf/nvidia-a100-datasheet-us-nvidia-1758950-r4-web.pdf">NVIDIA A100 datasheet</a> (dense peaks, TF32 156 TFLOP/s); <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/sources/2026-09-18-a100-memory-hierarchy.md"><code>docs/reports/sources/2026-09-18-a100-memory-hierarchy.md</code></a> (sustained shared-memory, L2 and HBM bandwidth).</li>
 </ol>
+</details>
 
 <p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
 <script>
