@@ -79,6 +79,7 @@ approximation), dotted with the training example's gradient. A <i>scan</i> recom
 against an <i>index</i>. <i>Recall then rerank</i>: take the top k′ from the sketches, then score those exactly. <i>Q</i> is the
 number of queries scored in one pass over the data.</p></details>
 
+<details class="more"><summary>What the M/D/S/X/O/E evidence tags mean</summary>
 <div class="card small" id="evidence-box"><b>How to read the numbers.</b> Every figure carries a tag.
 <dl class="evkey">
 <dt><span class="ev m">M</span></dt><dd>measured on an ET-SoC-1 lab card, in the linked reports. As in the rest of the set, a measured
@@ -91,6 +92,7 @@ statement that names no card holds on both; a named card means that card only.</
 </dl>
 <p style="margin:8px 0 0">The numbers are computed by <code>docs/reports/data/2026-09-25-influence-on-et/make_analysis.py</code>, which reads the
 measured ones from the repository's data files and states the rest with their sources.</p></div>
+</details>
 
 <h2>1. Where the cost of influence functions goes</h2>
 <p>The author's report splits the work into four phases paid on different schedules: fit the curvature once per checkpoint,
@@ -114,6 +116,7 @@ H100 pass <span class="ev e">E</span>) and top-k (1 µs in a kernel epilogue <sp
 <div class="table-wrap"><table id="pipe-table"><thead><tr><th>Step</th><th>Paid</th><th class="num">H100-hours</th><th>On the ET-SoC-1</th></tr></thead><tbody></tbody></table></div>
 </details>
 
+<details class="more"><summary>Finding the most influential examples: why selection alone is worth nothing</summary>
 <h3>Finding the most influential examples</h3>
 <p>Selecting the top k of N scores takes about k(1 + ln N/k) heap inserts: <span data-d="topk_inserts.inserts" data-f="sci">1.3×10⁵–1.5×10⁵</span>
 per query for k = 10⁴ at N = 10⁹–10¹⁰ <span class="ev">D</span>. A GPU does that in the epilogue of the scoring kernel, or with a radix
@@ -125,7 +128,9 @@ merged on 14 September, a sketch index gives the top k′ = 10³–10⁴, then e
 at 70B that rerank is about 6 H100-hours per query <span class="ev e">E</span>, over 99.9% of a query's energy. Selection is the one
 step of "find the most influential examples" that the chip is shaped for, and it is worth nothing on its own. It survives
 only folded into S1.</p>
+</details>
 
+<details class="more"><summary>What "sparse-friendly" buys here: less than the phrase suggests</summary>
 <h3>What "sparse-friendly" buys here</h3>
 <p>Less than the phrase suggests. The silicon turns zeros into saved power, never saved time: a 16×16×16 fp32 TensorFMA takes 546
 cycles at any fraction of zeros, and a multiply-add on zeros costs 0.42 pJ against 6.0 pJ on random data on aifoundry2
@@ -140,6 +145,7 @@ backward pass and would have to cross a 15.75 GB/s host link <span class="ev">S<
 influence work is elsewhere: in the scores, which are heavy-tailed (a few "loud" examples dominate), and in sparse sketches
 (CountSketch, SJLT), which are scatter-adds. The first is top-k selection, above. The second is K3 below, which waits on the
 gather/scatter measurement S3.</p>
+</details>
 
 <h2>2. Explorer: an influence index against the chip</h2>
 <div class="explorer">
@@ -202,7 +208,7 @@ per query, and the threshold is shared through the TensorReduce tree.</dd>
 path through L2 and L1) <span class="ev">X</span>; the H100 is charged the lower figures <span class="ev e">E</span>. The shard never
 leaves the chip, the maximum is combined in the tree for free, and every minion runs its own heap code.</dd>
 <dt>Where it wins (all of these)</dt>
-<dd><ul>
+<dd><details class="more"><summary>All five conditions, in full</summary><ul>
 <li>The shard is static. A per-query shortlist has to be fetched first: 64 MB from the card's DRAM takes
 <span data-d="kills.k1.ms" data-dp="2">0.84</span> ms and <span data-d="kills.k1.mJ" data-dp="0">29–39</span> mJ of board energy
 <span class="ev">D</span>, over PCIe <span data-d="kills.k1.pcie_ms" data-dp="1">4.1</span> ms <span class="ev">S</span>,
@@ -222,7 +228,7 @@ it by 1,024.</li>
 second against an H100 already in the server that reads a 65 MB shard from HBM, <span data-d="duty.l2_case.vs_h100_qps" data-f="r2">12,000–20,000</span>
 against one that pins a 37.5 MB shard in L2, or <span data-d="duty.breakeven_vs_cpu_qps" data-f="r2">390–5,000</span> against the host
 CPU <span class="ev e">E</span>.</li>
-</ul></dd>
+</ul></details></dd>
 <dt>ET-SoC-1 against an H100 <span class="ev e">E</span></dt>
 <dd>A 65.5 MB int8 shard, one query: the ET reads it in <span data-d="s1.hbm_case.et_us" data-dp="1">28.4</span> µs for
 <span data-d="s1.hbm_case.et_mJ" data-dp="2">1.01–1.32</span> mJ of board energy, idle included, bound by SRAM bandwidth; an
@@ -232,13 +238,13 @@ for <span data-d="s1.hbm_case.h100_mJ" data-dp="1">8.3–9.0</span> mJ. For a 37
 <span data-d="s1.l2_case.lead" data-dp="1">2.6–3.9</span>× <span class="ev e">E</span>. No time win, and no capacity win: 72 MB per chip against
 50 MB of L2 and 80 GB of HBM.</dd>
 <dt>Weakest assumption</dt>
-<dd>That the card is busy. An interactive attribution tool runs at well under 10 queries a second, since each query costs about
+<dd><details class="more"><summary>The three weakest assumptions, in full</summary><p>That the card is busy. An interactive attribution tool runs at well under 10 queries a second, since each query costs about
 1.3 H100-seconds of gradient and iHVP at 8B <span class="ev">O</span>; at 1–10 queries a second the card at rest costs 2.5–36 J
 per query, and the cheapest scorer is the host CPU that is already on. The second weakest is the H100's energy for a microsecond-scale kernel,
 which sets the whole lead and has not been measured by anyone here. The third is the cost of tensor ops with fewer than 16
 rows (one per query): measured only in fp32 at batch 1, where the pass stayed load-bound. If every op costs a full 16 rows, one
 query takes <span data-d="s1.hbm_case_rows16.et_us" data-dp="1">29.2</span> µs and <span data-d="s1.hbm_case_rows16.et_mJ" data-dp="1">1.6–2.0</span> mJ,
-and the lead is <span data-d="s1.hbm_case_rows16.lead" data-dp="1">4.2–5.5</span>×.</dd>
+and the lead is <span data-d="s1.hbm_case_rows16.lead" data-dp="1">4.2–5.5</span>×.</p></details></dd>
 <dt>Value to a big lab</dt>
 <dd>None: the step is about 10⁻⁹ of an amortized query, and <span data-d="duty.step_share_of_query" data-f="sci">9.1×10⁻⁶–2×10⁻⁵</span>
 of even the query's own gradient and iHVP (<span data-d="duty.query_side_J" data-dp="0">459–917</span> J at 8B <span class="ev e">E</span>).
@@ -252,6 +258,7 @@ Worth running as the cleanest demonstration of the chip's per-SRAM-byte advantag
 <p class="ck-readout" id="s1q-read"></p>
 <p class="small">Board energy per query for the 65.5 MB int8 shard and the 32 MB fp16 one, at the pass sizes actually run (this page's model). Where the bands cross is the parity Q quoted above; press Enter on a point to try that Q in the explorer above.</p>
 
+<details class="more"><summary>S2 in full: the MNIST-sized pipeline case, against the measured A100</summary>
 <h3>S2. An MNIST-sized influence pipeline run entirely on one chip</h3>
 <dl class="cand">
 <dt>The step</dt>
@@ -280,6 +287,7 @@ path answers a query in 6 ms. Weakest assumption: at least 1 TFLOP/s sustained i
 atlas's curvature is fp64, so fp32 factors on the chip would have to be checked against it. Value: a demonstrator, and a
 joule-per-phase answer to the author's open question on energy per attribution at MNIST scale; NVML can give the GPU side
 of that too.</p>
+</details>
 
 <h3>S3 (a measurement, not a candidate). Gather, scatter and scatter-add rates</h3>
 <p>No influence use survives on its own (K3 below), but every sparse or irregular idea on this chip
@@ -294,6 +302,7 @@ runs settles it.</p>
 board power (aifoundry2 <span class="ev m">M</span>), against an H100's 396 TFLOP/s at 40% of peak for 700 W <span class="ev">O</span>
 <span class="ev">S</span>, with no bf16, no fp64, no hardware divide or square root, 32 GB of DRAM at 76 GB/s and an untimed host
 link. The candidates that looked ET-shaped die for other reasons.</p>
+<details class="more"><summary>Why each candidate (K1–K9) doesn't work, in full</summary>
 <div class="table-wrap"><table id="k-table"><thead><tr><th>Candidate</th><th>Why it dies</th></tr></thead><tbody>
 <tr><td><b>K1.</b> Rerank a per-query shortlist in SRAM</td><td>The shortlist differs per query, so it must be fetched first: 64 MB is <span data-d="kills.k1.ms" data-dp="2">0.84</span> ms and <span data-d="kills.k1.mJ" data-dp="0">29–39</span> mJ from the card's DRAM <span class="ev">D</span>, <span data-d="kills.k1.pcie_ms" data-dp="1">4.1</span> ms over PCIe <span class="ev">S</span>, <span data-d="kills.k1.x_pass" data-dp="0">30–140</span>× the <span data-d="s1.hbm_case.et_us" data-dp="0">28</span> µs pass. An H100 reads it from HBM in about <span data-d="kills.k1.h100_us" data-dp="0">21</span> µs. Only a static shard stays resident (S1).</td></tr>
 <tr><td><b>K2.</b> Many-query top-k with the hardware threshold, on its own</td><td>Selection is 10⁴–1.5×10⁵ inserts per query, free on a GPU; the state does not fit as first sized (1,000 queries × 10⁴ entries is 80 MB, over the 72 MB usable, and even 16 queries need 1.3 GB if every minion keeps its own heaps). Kept inside S1.</td></tr>
@@ -305,9 +314,11 @@ link. The candidates that looked ET-shaped die for other reasons.</p>
 <tr><td><b>K8.</b> Fine-tuning-scale attribution (LESS, QLESS)</td><td>Queries come in batches: the whole 2.7×10⁵ × 8,192 score matrix at Q = 100 is 4.4×10¹⁴ operations, 0.2–0.4 s of H100 int8 <span class="ev e">E</span>. Held resident it needs 31 chips in int8 or 4 at 1 bit.</td></tr>
 <tr><td><b>K9.</b> The dense steps: the scan, curvature statistics, eigendecompositions, the EK-FAC iHVP, iterative iHVPs, the exact rerank, batched scoring, scans from DRAM or flash, graph and IVF indexes, projections, zero-skip as a speed lever, mixture-of-experts gradients, validation retrains</td><td>21–35× slower and 1.8–2.9× the energy on dense work <span class="ev">D</span>; eigendecompositions need fp64; the EK-FAC state (108 GB) would take about 1,500 chips of SRAM; streaming an index is bandwidth-bound and the chip's DRAM is 44× slower than HBM and 3–5× dearer per byte at board level; zeros save power, not time.</td></tr>
 </tbody></table></div>
+</details>
 
 <h2>5. The first experiment on a lab card</h2>
 <p>One new kernel settles S1, in one to two days of work. Nothing below has been run.</p>
+<details class="more"><summary>The experiment plan, step by step</summary>
 <ol>
 <li><b>Prerequisite, about an hour.</b> Time the host link (host-to-device and back, 4 KB to 1 GB, with the <code>workloads/memhier</code>
 host; PCIe Gen4 x8 is 15.75 GB/s by spec and has never been timed), the round trip of a persistent kernel waiting on a
@@ -339,8 +350,10 @@ gradients; kill the speed story above 0.231 s and the energy story above the A10
 against 14 ms. And <b>S3</b>, independent of both: add the gather and scatter patterns to <code>workloads/enercat</code> (rate and
 picojoules per element from L1, L2 and scratchpad, zeros and random data), then a scatter-add probe only if the rate reaches
 10 G updates a second.</p>
+</details>
 
 <h2>6. Method and caveats</h2>
+<details class="more"><summary>Method and caveats in full</summary>
 <ul>
 <li><b>The ET model.</b> One pass reads B = N·k·bytes of codes and does 2QNk operations (QNk bit compares at 1 bit). Chips =
 ⌈B / 72 MB⌉ in SRAM (⌈B / 32 GB⌉ in DRAM). A minion's 3 KB L1 scratchpad cannot hold a query, so every minion also reads the
@@ -392,8 +405,10 @@ computed K1, K4, K5 and K7 from the same model.</li>
 <code>python3 scripts/build-report.py influence-on-et docs/reports/data/2026-09-25-influence-on-et/analysis.json docs/reports/2026-09-25-influence-on-et.html</code>.</li>
 <li><b>Versions.</b> 25 September 2026: first version, desk analysis; no card was touched.</li>
 </ul>
+</details>
 
 <h2>7. Sources</h2>
+<details class="more"><summary>Full source list</summary>
 <ul>
 <li>This set: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">the energy manual</a> (§4.1 bytes by level, §3 per
 instruction, idle), <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparse compute</a> (546 cycles at any zero
@@ -427,6 +442,7 @@ GPU-Accelerated Supercomputing</a>, SC'25 (A100 energy per bit by level); <a hre
 C++ Programming Guide 12.4</a> (popc throughput); Luo et al., <a href="https://arxiv.org/abs/2402.13499">Benchmarking and Dissecting
 the Nvidia Hopper GPU Architecture</a> (no binary tensor cores on Hopper).</li>
 </ul>
+</details>
 
 <h2 id="related">8. Related reports</h2>
 <ul>
