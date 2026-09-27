@@ -318,6 +318,16 @@ def main():
     if a.barrier:
         ctx["barrier_source"] = (f"{os.path.relpath(a.barrier)}: NOCBENCH cycles_per_iter_max {b['cycles_per_iter_max']}, "
                                  f"{b['participants']} participants ({b['per_shire']} per shire)")
+    # the same barrier re-measured on every card in the version-3 check (V3-LAT, results/lat.json beside the raw
+    # directory: LAT-N4, every kept pass), with one minion per shire and with all 1,024
+    lat_p = os.path.join(os.path.dirname(os.path.normpath(a.v3)), "results", "lat.json") if a.v3 else None
+    if lat_p and os.path.exists(lat_p):
+        n4 = next(i for i in json.load(open(lat_p))["items"] if i["item"] == "LAT-N4")
+        order = [c for c in out["cards"] if c in n4["per_card"]] + sorted(c for c in n4["per_card"] if c not in out["cards"])
+        ctx["barrier_chip_v3"] = {k: {c: [x for p in n4["per_card"][c]["passes"] if p.get("kept", True)
+                                          for x in p["chip_barrier"][name]] for c in order}
+                                  for k, name in (("one_per_shire", "barrier-chip1"), ("all", "barrier-chip32"))}
+        ctx["barrier_chip_v3"]["source"] = f"{os.path.relpath(lat_p)}: LAT-N4 chip_barrier, every kept pass per card"
     if a.context:
         ctx["note"] = json.load(open(a.context)).get("note")
         if "windows" in out:

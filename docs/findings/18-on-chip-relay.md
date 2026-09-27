@@ -8,7 +8,8 @@ approach of putting the intermediate in main memory?
 
 **Answer:** yes, and by a lot. A chain of stages that hands each stage's output to the next shire's
 [scratchpad](README.md#terms) (the next shire in ID order, 3.5 mesh hops away on average) instead of writing it to
-DRAM runs **12.3× faster** and uses **12× less energy per byte**, the three routes drawing within about a watt of each other. Keeping the output in the
+DRAM runs **12.3× faster** and uses **12× less energy per byte** (on three cards in version 3: 12.2–12.4× faster and
+13× less energy), the three routes drawing within about a watt of each other. Keeping the output in the
 shire's own scratchpad is **30.7×**. The advantage appears only once the working set outgrows the 32 MB L3.
 
 Evidence: [E24, E25](03-experiments.md). Published as [A14](04-artifacts.md).
@@ -33,6 +34,17 @@ run three ways, and only the destination of a stage's output differs.
 12× and 26×. They are in line with the energy manual's levels, re-measured at 600 MHz on both cards (E29):
 122 [117–129] pJ/B from DRAM, 2.5 from the own scratchpad, 6.7 from another shire's. The 18 September
 memory-hierarchy report printed 148 / 2.8 / 6.3, a mean of two runs taken at mixed clocks.
+
+**Version 3 (26 September, three cards; the figures to quote).** The version-3 check re-ran every relay sweep three
+times on aifoundry2, aifoundry3 and aifoundry1-c1 (E36; aifoundry3 kept two passes) and the relay's energy six times
+on each card (E43, item RL-d). The next shire runs 12.42, 12.25 and 12.42× faster than DRAM and the own scratchpad
+31.18, 30.78 and 31.19× (pass means per card; `results/lat.json`, LAT-R). Pooled over the 18 energy passes the relay
+costs **116.2 [104.5–135.3] pJ/B through DRAM, 8.92 [7.63–10.18] to the next shire and 4.34 [3.75–5.07] in the own
+scratchpad: 13× and 27×**; DRAM over the next shire is 12.9, 13.0 and 13.1× on the three cards
+(`docs/reports/data/2026-09-23-energy-manual/reruns.json`, `relay_pj_per_byte`). The levels, re-measured the same way:
+115 [89–141] pJ/B from DRAM, the own scratchpad 2.25 full of zeros and 4.4 full of random data, another shire's 5.1
+and 11.8 (`levels_pj_per_byte`, `levels_by_contents_pj_per_byte`). The published page (A14) carries these; the E29
+figures above are history.
 
 **All three draw within about a watt of each other** while moving 49.7, 594 and 1,503 GB/s (the own scratchpad
 about 0.5–0.8 W more than DRAM; the next shire and DRAM could not be told apart): DRAM spends about the same watts

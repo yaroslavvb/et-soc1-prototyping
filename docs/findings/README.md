@@ -70,16 +70,21 @@ Read [Terms](#terms) first.
    (in ID order, 3.5 mesh hops away on average) instead of DRAM runs **12.3× faster at a twelfth of the energy per
    byte** (the three routes draw within about a watt of each other); keeping it in the shire's own scratchpad is 30.7×. The catch is a sharp one: below
    the 32 MB L3 the cache already does the job and you gain nothing. → [18-on-chip-relay.md](18-on-chip-relay.md)
-10. **What the bars say.** Re-running every table and repeating it on the second card puts a bar on every
-   entry: ±6% in the median for the catalogue, mostly the 5% between the cards; ±17% on the hot line, where a
-   1.2 W signal (1.19 W pooled) rides on a drifting 30 W idle; ±5–7% on the awake core and ±5.5% on the DRAM relay. Two traps
+10. **What the bars say.** Re-running every table on three cards (26 September) puts a bar on every entry: ±7% in
+   the median for the catalogue (±6% over two cards on 23 September), most of it the difference between the cards
+   (in the median entry aifoundry3 is 0.972 of aifoundry2 and aifoundry1's card 1 0.962); ±17% on the hot line, where
+   a 1.2 W signal (1.19 W pooled) rides on a drifting 30 W idle; ±13–15% on the relay, mostly aifoundry1's card 1
+   reading 17–21% above the other two. Two traps
    found on the way: aifoundry2's governor lifts the clock mid-burst below 68 °C, and rings between shires s and
    s+16 starve the service processor that reads the meter. → [../energy-manual/09-method.md](../energy-manual/09-method.md)
 11. **What the meters miss.** Half of idle is on no rail sensor, as is about a sixth of what an arithmetic workload
-   adds and 60–75% of what DRAM traffic adds (70% of a DRAM read). Fitted over some 390 configuration means per
-   card, the part above idle is 18–20% delivery loss on the minion rail, 5% on SRAM, 26–29% on the mesh and about
-   70 pJ per DRAM byte off-rail, to 0.30–0.35 W rms (1.1–1.3 W on the DRAM configurations); the idle 15 W is not
-   split (`tools/ettelem/fit_unmetered.py` writes the fit). And the memory shires' Moortec voltage monitor droops
+   adds and 60–75% of what DRAM traffic adds (70% of a DRAM read). Fitted over 392 configuration means per
+   card on three cards (26 September), the part above idle is 19%, 18% and 10% delivery loss on the minion rail
+   (aifoundry2, aifoundry3, aifoundry1's card 1), 29%, 29% and 20% on the mesh, 73, 73 and 82 pJ per DRAM byte
+   off-rail and an SRAM term that differs by card (3–4% on the first two, 54% on the third), to 0.31–0.48 W rms
+   (1.0–1.2 W on the DRAM configurations); the idle 12–18 W is not split (`tools/ettelem/fit_unmetered.py` writes the
+   fit; the two-card fit of 23 September gave 18–20%, 5%, 26–29% and about 70 pJ/B). And the memory shires' Moortec
+   voltage monitor droops
    0.87 mV per off-rail DRAM watt, a DRAM meter that was in every telemetry file all along (traffic with no DRAM
    access moves it too, by up to about 2 mV).
    → [19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md)
@@ -105,7 +110,8 @@ Read [Terms](#terms) first.
 15. **Gathers and scatters.** On each of the three cards a word gather runs at 452 G elements/s from L1 (12.8 pJ
    each), 27 G/s from L2 or the own scratchpad (about 360 pJ) and 1.2 G/s from DRAM (9.8 nJ, the DRAM's 76 GB/s of
    whole lines); a scatter keeps pace from L1 and falls to 0.42 G/s from DRAM. All 159 verify launches per card were
-   exact. Not on a page yet. → [03-experiments.md](03-experiments.md), E48
+   exact. On the pages since 27 September: the energy manual (§3.1, §4.3, §4.4, §6), memory hierarchy ("Irregular
+   access"), influence functions (S3) and the hub's chart of events. → [03-experiments.md](03-experiments.md), E48
 
 ## Terms
 

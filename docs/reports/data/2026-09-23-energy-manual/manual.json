@@ -2152,10 +2152,101 @@
     }
    ]
   },
-  "barrier_cycles_chip": 5018,
+  "barrier_cycles_chip": 5007,
   "barrier_participants": 1024,
-  "barrier_source": "docs/reports/data/2026-09-18-nocbench-aifoundry2/barrier-chip32.jsonl: NOCBENCH cycles_per_iter_mean 5017.72",
+  "barrier_source": "docs/reports/data/2026-09-25-claims-v3/results/lat.json: LAT-N4 barrier-chip32, the mean of every kept pass on 3 cards",
+  "barrier_cycles_chip_18sep": 5018,
+  "barrier_source_18sep": "docs/reports/data/2026-09-18-nocbench-aifoundry2/barrier-chip32.jsonl: NOCBENCH cycles_per_iter_mean 5017.72",
+  "v3": {
+   "shire_barrier": {
+    "aifoundry2": [
+     232.54,
+     232.53,
+     232.55,
+     232.53,
+     232.54,
+     232.53
+    ],
+    "aifoundry3": [
+     232.56,
+     232.56,
+     232.56,
+     232.56,
+     232.56,
+     232.56
+    ],
+    "aifoundry1-c1": [
+     232.62,
+     232.62,
+     232.63,
+     232.61,
+     232.65,
+     232.62
+    ]
+   },
+   "allreduce32": {
+    "aifoundry2": [
+     444.2,
+     444.19,
+     444.06
+    ],
+    "aifoundry3": [
+     444.16,
+     444.2,
+     444.06
+    ],
+    "aifoundry1-c1": [
+     444.12,
+     444.19,
+     444.31
+    ]
+   },
+   "chip_barrier_one_per_shire": {
+    "aifoundry2": [
+     4990.83,
+     4990.11,
+     4990.42
+    ],
+    "aifoundry3": [
+     4988.12,
+     4987.84,
+     4988.07
+    ],
+    "aifoundry1-c1": [
+     4978.06,
+     4975.51,
+     4975.95
+    ]
+   },
+   "chip_barrier_all": {
+    "aifoundry2": [
+     5012.71,
+     5012.33,
+     5012.49
+    ],
+    "aifoundry3": [
+     5010.14,
+     5010.26,
+     5009.97
+    ],
+    "aifoundry1-c1": [
+     4999.55,
+     4998.14,
+     4998.51
+    ]
+   },
+   "outcomes": {
+    "LAT-N1": "FAIL",
+    "LAT-N4": "FAIL"
+   },
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/lat.json: LAT-N1 (shire_barrier, allreduce32) and LAT-N4 (chip_barrier), every kept pass per card"
+  },
   "remote_atomic_latency_cycles": 216.2,
+  "remote_atomic_latency_by_card": {
+   "aifoundry2": 216.2,
+   "aifoundry3": 216.3,
+   "aifoundry1-c1": 216.6
+  },
   "bank_service_cycles": 10.0,
   "source": "docs/reports/data/2026-09-22-hotline-aifoundry2/hotline.json"
  },
@@ -142288,6 +142379,44 @@
     "passes": 3
    }
   },
+  "sp_pass_ms": {
+   "aifoundry2": {
+    "quiet": [
+     133.2,
+     133.2,
+     133.2
+    ],
+    "sampled": [
+     159.51,
+     161.2,
+     158.78
+    ]
+   },
+   "aifoundry3": {
+    "quiet": [
+     224.07,
+     224.5,
+     224.2
+    ],
+    "sampled": [
+     266.47,
+     266.11,
+     265.9
+    ]
+   },
+   "aifoundry1-c1": {
+    "quiet": [
+     134.8,
+     134.8,
+     134.8
+    ],
+    "sampled": [
+     162.4,
+     162.4,
+     162.4
+    ]
+   }
+  },
   "card_state": {
    "aifoundry1-c1": {
     "tdp_w": 65,
@@ -143556,7 +143685,8 @@
       }
      }
     },
-    "catalogue_aifoundry3_over_aifoundry2": 0.95
+    "catalogue_v3_aifoundry3_over_aifoundry2": 0.972,
+    "catalogue_23sep_aifoundry3_over_aifoundry2": 0.95
    }
   },
   "configs": {

@@ -27,6 +27,7 @@ before `</body>`. Private pages are listed but not mirrored.
 
 | Page | Space | Visibility | Repo file | Deploy |
 |---|---|---|---|---|
+| [The ET-SoC-1, interactively](https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram) (27 Sep, the interactive chip schematic; linked at the top of the hub) | `6cfdea5c-a598-438e-bd1a-613093ede523` | public | `docs/reports/2026-09-27-et-soc1-chip-diagram.html` | file |
 | [Limits of observability · ET-SoC-1 reports hub](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2) | `2ea37420-67b9-484e-9d4c-581e8a9f0323` | public | `docs/reports/2026-09-20-et-soc1-limits-of-observability.html` | file |
 | [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15) | `cc3cb1d6-51cf-420b-a165-7d8629904d97` | public | `docs/reports/2026-09-23-energy-manual.html` | file |
 | [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) (A17) | `5602ff62-878f-4db6-b703-02061000d9ce` | public | `docs/reports/2026-09-24-heat-per-mm.html` | file |
@@ -62,6 +63,7 @@ before `</body>`. Private pages are listed but not mirrored.
 | [Lab machine accounts](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-accounts) (18 Sep) | `5bcb11cb-7e1f-4cf2-bde3-c375c904b3a9` | public | not mirrored | A standalone copy of an older [`docs/lab-access.md`](../lab-access.md) with `scripts/add-lab-user.sh` built in, written by hand on 18 September. The machines' login banners link it. It is older than `lab-access.md`, which is the current text. |
 | [What trips people up on the AI Foundry lab](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman) (25 Sep, the lab problems report for the lab lead) | `6c75b258-53fe-45fe-b2cf-11f8572ac2c3` | public | not mirrored | Written for the lab lead; public since the owner confirmed it on 26 September. Its source stays out of this repository (`38f6b02`; `docs/reports/2026-09-25-lab-problems.html` is gitignored). |
 | [AI Foundry Discord map](https://spacesheep.dev/@yaroslavvb/aifoundry-discord-map) | `c6433479-e2a7-4c9d-bcef-b45bbd1709fd` | public | not mirrored | Not part of this line of work; listed because its slug starts like this set's. Public (the owner, 26 September). |
+| [Influence functions: Hessians, cost, sketching, and weak factoring](https://spacesheep.dev/@yaroslavvb/influence-functions-hessians-sketching-weak-factoring) (18 Sep, the influence-functions technical report) | `44996c6f-fab6-4d48-950d-8ee09c3f4ee7` | public | not mirrored | The report that [Influence functions on the ET-SoC-1](https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions) starts from: that page links it three times (`sources/influence-on-et.body.html`), and `data/2026-09-25-influence-on-et/README.md` once. Its source belongs to the influence-functions work, not this repository; listed so that `check-mirror.py` checks it stays public (public on 27 September, `spacesheep list`). |
 
 ### Private: listed, not mirrored
 
@@ -83,6 +85,7 @@ once for mathjax-full).
 
 | Page | Source | Final build step (from the repository root) | Earlier steps |
 |---|---|---|---|
+| Chip diagram (27 Sep) | `sources/chip-diagram.*` | `python3 docs/reports/data/2026-09-27-chip-diagram/build_facts.py` (writes `facts.json` from the sourced research files beside it), then `python3 scripts/build-report.py chip-diagram docs/reports/data/2026-09-27-chip-diagram/facts.json docs/reports/2026-09-27-et-soc1-chip-diagram.html` | none |
 | Hub (A2) | `sources/limits-of-observability.*` (text and data) | `python3 tools/ettelem/sync_hub_data.py`, then `python3 scripts/build-report.py limits-of-observability docs/reports/sources/limits-of-observability.data.json docs/reports/2026-09-20-et-soc1-limits-of-observability.html` | rerun `sync_hub_data.py` after regenerating any file it reads (`--check` exits 1 if stale) |
 | Energy manual (A15) | `sources/energy-manual.*` | `python3 scripts/build-report.py energy-manual docs/reports/data/2026-09-23-energy-manual/manual.json docs/reports/2026-09-23-energy-manual.html` | 04-artifacts.md A16, "Rebuilding the energy data, in order" |
 | Heat per mm (A17) | `sources/heat-per-mm.*` | `python3 scripts/build-report.py heat-per-mm docs/reports/data/2026-09-24-wire-energy/report.json docs/reports/2026-09-24-heat-per-mm.html` | 04-artifacts.md A18: `analyze_wire.py` (24 September runs), `analyze_wire_v3.py` (the version-3 check's passes, `wire3.json`), then `build_wire_report.py --wire ... --wire3 ...` |
@@ -127,6 +130,10 @@ python3 scripts/check-mirror.py --only "$SLUG"
   after every deploy.
 - Commit the page file and this file together with the deploy, so the repository and the live page never disagree
   for long.
+- Push before you deploy. The pages link files on GitHub by `tree/main` and `blob/main` addresses (the version-3
+  check's `raw/` and `results/`, `results/gs.json`, `results/tel.json`, `workloads/enercat/analyze_wire_v3.py`, …), and
+  a link to a path that exists only on a branch answers 404. Merge or push the branch to `main` first; for any path a
+  page links, `git ls-tree origin/main <path>` must list it.
 
 ## Checking that live equals repo
 

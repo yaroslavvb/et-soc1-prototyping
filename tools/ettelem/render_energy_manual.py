@@ -729,15 +729,30 @@ def main():
     hot6 = (RR.get("hotline_over_idle_w") or {}).get("contended")
     stall_w = hot6["mean"] if hot6 else at["contended"]["over_idle_w"]   # 1,024 minions stalled, W over idle
     sprm = hn["spread"]["mean"] if "spread" in hn else at["spread"]["nj_per_op"]
+    # the version-3 check's latencies on three cards (sync.v3, V3-LAT: every kept pass per card), and the remote
+    # atomic's round trip per card (the hot line's passes)
+    sv, ra = sy["v3"], sy["remote_atomic_latency_by_card"]
+    lat_all = lambda o: [x for h in order(o) for x in o[h]]  # noqa: E731
+    lat_mean = lambda o: sum(lat_all(o)) / len(lat_all(o))  # noqa: E731
+    def lat_txt(lo, hi, n):
+        a, b = (f"{lo:,.{n}f}", f"{hi:,.{n}f}")
+        return a if a == b else f"{a}–{b}"
+    lat_rng = lambda o, n: lat_txt(min(lat_all(o)), max(lat_all(o)), n)  # noqa: E731
+    lat_pc = lambda o, n: " · ".join(f"{SHORT.get(h, h)}: {lat_txt(min(o[h]), max(o[h]), n)}" for h in order(o))  # noqa: E731
+    cards_txt = lambda o: ("all three cards" if len(o) == 3 else and_list(name(h) for h in order(o)))  # noqa: E731
+    def lat_n(o, k=1):   # k values a pass (the shire barrier: two variants)
+        ns = {len(o[h]) // k for h in o}
+        each = "the three cards" if len(o) == 3 else and_list(name(h) for h in order(o))
+        return (f"{WORD[ns.pop()]} passes on each of " if len(ns) == 1 else "every pass on ") + each
     s = ["# 6. Synchronisation\n",
          BARS + (f" The hot line was measured on 22 September on aifoundry2 and re-run on 23 September, three warm passes on aifoundry2 and {WORD[hn['contended']['per_card']['aifoundry3']['n']]} on aifoundry3 (n = {hn['contended']['n']}); the first session alone (aifoundry2, 22 September, one run) gave {f(at['contended']['nj_per_op'], 1)} and {f(at['spread']['nj_per_op'], 2)} nJ." if hn else "") + "\n",
          "| Event | Energy | per card | Time | Note |", "|---|---|---|---|---|",
          f"| Global atomic, one line, 1,024 requesters | {con[0]} | {con[1]} | {at['contended']['cycles_per_op']:.0f} cycles each at the bank | the bank serialises and every requester waits its turn; the host shire's own loads stop |",
          f"| Global atomic, 32 lines, one per shire | {spr[0]} | {spr[1]} | {at['spread']['cycles_per_op']:.2f} cycles each, aggregate | the same instruction, {f(conm/sprm,0)}× cheaper |",
-         f"| Uncontended remote atomic round trip | — | | {sy['remote_atomic_latency_cycles']:.0f} cycles | E22; the same on both cards |",
-         f"| Chip-wide barrier, {sy.get('barrier_participants', 1024):,} minions | ≈ {f(stall_w*sy['barrier_cycles_chip']/0.6e9*1e6, 0)} µJ of waiting | | {sy['barrier_cycles_chip']:,} cycles | derived: 1,024 minions stalled at {f(stall_w/1024*1e3, 1)} mW (§2) for the barrier's length, which is one run on aifoundry2 (18 September); the 32 atomics and 32 credit stores are negligible beside it |",
-         "| FLB (fast local barrier) + credit barrier, one shire | — | | 237 cycles | [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication), aifoundry2, 18 September |",
-         "| TensorReduce (the hardware reduction tree) + broadcast, 32 minions | — | | 432 cycles | [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication), aifoundry2, 18 September |",
+         f"| Uncontended remote atomic round trip | — | {lat_pc({h: [v] for h, v in ra.items()}, 1)} | {sy['remote_atomic_latency_cycles']:.0f} cycles | E22; the same on {cards_txt(ra)} ([One hot line stops a shire](https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line), 26 September) |",
+         f"| Chip-wide barrier, {sy.get('barrier_participants', 1024):,} minions | ≈ {f(stall_w*sy['barrier_cycles_chip']/0.6e9*1e6, 0)} µJ of waiting | {lat_pc(sv['chip_barrier_all'], 0)} | {lat_rng(sv['chip_barrier_all'], 0)} cycles | derived: 1,024 minions stalled at {f(stall_w/1024*1e3, 1)} mW (§2) for the barrier's length, {sy['barrier_cycles_chip']:,} cycles, the mean of {lat_n(sv['chip_barrier_all'])} (the version-3 check, V3-LAT, 26 September); with one minion per shire {lat_rng(sv['chip_barrier_one_per_shire'], 0)} cycles; one run on aifoundry2 on 18 September gave {sy['barrier_cycles_chip_18sep']:,}; the 32 atomics and 32 credit stores are negligible beside it |",
+         f"| FLB (fast local barrier) + credit barrier, one shire | — | {lat_pc(sv['shire_barrier'], 1)} | {lat_mean(sv['shire_barrier']):.0f} cycles | [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication), {lat_n(sv['shire_barrier'], 2)} (V3-LAT, 26 September; 237 on aifoundry2 on 18 September) |",
+         f"| TensorReduce (the hardware reduction tree) + broadcast, 32 minions | — | {lat_pc(sv['allreduce32'], 1)} | {lat_mean(sv['allreduce32']):.0f} cycles | [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication), {lat_n(sv['allreduce32'])} (V3-LAT, 26 September; 432 on aifoundry2 on 18 September) |",
          ] + (gs_6(m) if m.get("gs") else []) + [
          "", f"**What the table says.** A contended atomic costs {f(conm/sprm,0)}× the same atomic spread over 32 lines, and its cost is not on the requesters: the shire that hosts the line keeps its share of the atomic, but its own other loads stop ([One hot line stops a shire](https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line), docs/findings/17-hot-line.md). Waiting itself is cheap — a stalled minion draws about {f(stall_w/1024*1e3, 1)} mW, less than a spinning one ({f(stat('spin/zeros/h1', 'over_idle_w')/1024*1e3, 1)} mW, section 2) — so a barrier's energy is small next to the leakage the card burns while it lasts.\n",
          f"The contended row's bar is wide mostly because of the first session: the whole chip stalled drew {f(at['contended']['over_idle_w'], 1)} W over idle in it, against {f((hot6['n']*hot6['mean']-at['contended']['over_idle_w'])/(hot6['n']-1), 2) if hot6 else f(conm*at['contended']['ops_per_s']*1e-9, 1)} W in the mean of the passes since, and the per-operation figure divides that small number by a rate the bank fixes at one per 10 cycles.\n",

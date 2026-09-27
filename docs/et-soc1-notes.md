@@ -112,10 +112,10 @@ Between shires, every latency is a + b x (Manhattan distance on that map), and e
 |---|---|---|
 | TensorSend/Recv, 32 B | 68 cycles on a tree edge; 114 elsewhere in the shire; 150 + 12/hop between shires | Tree edges in each neighbourhood: 0-1, 0-2, 0-4, 2-3, 4-5, 4-6, 6-7 (the fast local network). Each extra 32 B register costs 2.3-4.6 cycles. |
 | Combine on receive (FADD/FMAX/IADD/IMAX) | +0 cycles | |
-| TensorReduce + TensorBroadcast | 432 cycles for 32 minions; 1,368 for 1,024 | All 32 shires can reduce in parallel with no slowdown. |
+| TensorReduce + TensorBroadcast | 444 cycles for 32 minions; 1,393 for 1,024 (three cards, 26 September; 18 September's 432 and 1,368 are superseded) | All 32 shires can reduce in parallel with no slowdown. |
 | Credits (CREDINC store + FCC wait) | 120 cycles in a shire (blocking); 148 + 12/hop across shires (polled) | |
-| FLB + credit barrier, 32 minions | 237 cycles | |
-| Chip barrier from global atomics + credits | ~5,000 cycles | The allreduce tree is 3.7x faster. |
+| FLB + credit barrier, 32 minions | 233 cycles (three cards, 26 September; 237 on 18 September, superseded) | |
+| Chip barrier from global atomics + credits | ~5,000 cycles | The 1,024-minion allreduce tree is 3.6x faster. |
 | Flag through global atomics (GPU-style) | 355-690 cycles | Depends on where the flag's L3 line lives, not on distance. |
 | Aggregate bandwidth, 1 KB messages | 3.0 TB/s on tree-edge pairs; 1.1 TB/s in shire rings; 0.09-0.16 TB/s across the mesh | TensorLoad from a remote scratchpad does 0.96 TB/s at 600 MHz. |
 | Energy per byte | 0.67 pJ on pairs, 2.1 in a neighbourhood or shire ring, 9.3 + 1.7 pJ/B per mean hop across the mesh (r² 0.95) | Card power above local idle, re-measured on two cards on 23 September (the energy manual, §5); the 18 September run gave 0.8, 2.3 and ~10 + 1.9 (superseded). |

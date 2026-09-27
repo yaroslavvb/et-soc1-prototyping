@@ -149,12 +149,20 @@ details.more[open]>summary{margin-bottom:6px}
 <p class="byline">25 September 2026, 15:00–15:11 PDT · done with administrator access at the owner's request · follows <a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting">What is broken on aifoundry1</a></p>
 <p class="lede"><b>Both ET-SoC-1 cards in aifoundry1 answer again.</b> The <code>et_soc1</code> kernel module was rebuilt by DKMS from the fixed driver source that was already on the machine (et-platform <code>353f20e</code>), for all three kernels in <code>/boot</code>, and reloaded. It now reports version <code>0.20.0</code> and srcversion <code>47D26A305A0428B29FB7FC4</code>, the same as aifoundry2 and aifoundry3, and a read-only management query succeeds on both cards. The interrupted 24 September kernel update was finished as well, after freeing space on the nearly full root file system. The machine was not rebooted, and no running user work was touched.</p>
 
+<p class="small" id="update-27-sep" style="border:1px solid var(--warn);background:var(--warn-soft);border-radius:8px;padding:8px 12px"><b>Update, 27 September 2026.</b> Card 1 has since run real work: the whole
+three-card version-3 check (25–26 September, as aifoundry1-c1) and the gathers and scatters after it (E48, 26 September
+06:57–09:22). Card 0 cannot hold a load: in about ten minutes of short smoke launches on 25 September its die reached
+98–102&nbsp;°C, and after the last one it read 115–117&nbsp;°C with nothing running, drawing 66–71&nbsp;W at 600&nbsp;MHz, until
+its firmware dropped it to 300&nbsp;MHz and it cooled. Its cooling (a fan, heat sink or airflow) is at fault, which its
+300&nbsp;MHz idle normally hides; it takes no sustained work and was left out of the check (amendment A4 of the
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md">check's record</a>).</p>
+
 <div class="card">
 <dl class="glance">
   <dt>Cards</dt><dd>Both answer: <code>dev_mngt_service -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS</code> succeeds on card 0 and card 1; each card's management queue counted its first command.</dd>
   <dt>Driver</dt><dd><code>et_soc1</code> <code>[0.20.0] 47D26A305A0428B29FB7FC4</code> loaded now and installed for 7.0.0-30, -31 and -34; loaded at boot by <code>/etc/modules-load.d/et_soc1.conf</code>.</dd>
   <dt>Kernel update</dt><dd><code>linux-image-7.0.0-34</code> fully installed: initramfs (with ZFS) written, GRUB updated; the next boot starts 7.0.0-34, whose <code>et_soc1</code> is the fixed one.</dd>
-  <dt>Still open</dt><dd>The pool is 95% full: 6.4 GB free after clearing caches, the rest is user data (<a href="#the-disk">who should delete what</a>); card et0's PCIe link still logs ~1 corrected error per second; the two cards run different firmware; the next boot is untested.</dd>
+  <dt>Still open</dt><dd>The pool is 95% full: 6.4 GB free after clearing caches, the rest is user data (<a href="#the-disk">who should delete what</a>); card et0's PCIe link still counts ~1 corrected error per second (its kernel log is rate-limited since 25 September); the two cards run different firmware; the next boot is untested; card 0 overheats under load (<a href="#update-27-sep">update of 27 September</a>).</dd>
 </dl>
 </div>
 </section>
@@ -170,7 +178,8 @@ details.more[open]>summary{margin-bottom:6px}
 <tr><th scope="row">PMIC firmware</th><td>1.6.1</td><td>1.3.0</td><td>1.5.0</td></tr>
 <tr><th scope="row">Master / worker / machine minion</th><td>0.24.0</td><td>0.22.0</td><td>0.23.0</td></tr>
 </tbody></table></div>
-<p><b>The two cards in aifoundry1 run different firmware</b>, and neither matches the lab's other two cards: card 0 is one release newer than aifoundry2/3, card 1 one older. Anything measured on these cards should record which card and firmware it ran on. Only the management path has been exercised; no kernel has been launched on either card yet.</p>
+<p><b>The two cards in aifoundry1 run different firmware</b>, and neither matches the lab's other two cards: card 0 is one release newer than aifoundry2/3, card 1 one older. Anything measured on these cards should record which card and firmware it ran on. At 15:02 only the management path had been exercised. Since then card 1 has run the three-card check and card 0 has
+been found to overheat under load (<a href="#update-27-sep">update of 27 September</a>).</p>
 </section>
 
 <section>
@@ -195,8 +204,11 @@ details.more[open]>summary{margin-bottom:6px}
 <section>
 <h2 id="still-open">3. Still open</h2>
 <ul>
+<li><b>Card 0 overheats under load</b> (found on 25 September after this fix; <a href="#update-27-sep">update above</a>):
+98–102&nbsp;°C in short smoke launches and 115–117&nbsp;°C idle afterwards. Its fan, heat sink and airflow need checking; until
+then it takes no sustained work.</li>
 <li><b>The disk</b>: see <a href="#the-disk">section 4</a>. After clearing caches there is 6.4 GB free; the rest of the pool is user data whose owners have to decide.</li>
-<li><b>Card et0's PCIe link</b> still logs about one corrected receive error per second at root port 00:01.0 (<a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting#4-a-separate-problem-card-et0-s-pcie-link">troubleshooting report, section 4</a>). It does not stop the card; a reseat at the next maintenance window is the fix.</li>
+<li><b>Card et0's PCIe link</b> still counts about one corrected receive error per second at root port 00:01.0; since 25 September its kernel log is rate-limited, and the error counters still count (<a href="https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting#4-a-separate-problem-card-et0-s-pcie-link">troubleshooting report, section 4</a>). It does not stop the card; a reseat at the next maintenance window is the fix.</li>
 <li><b>The next boot is untested.</b> It will start 7.0.0-34 with a freshly written initramfs, as aifoundry2 and aifoundry3 are set to. <code>et_soc1</code> for that kernel is the fixed build and loads from <code>modules-load.d</code>. After the reboot: <code>cat /sys/module/et_soc1/version</code> should print <code>0.20.0</code>.</li>
 <li><b>Different firmware on the two cards</b> (section 1). Whether to bring them to one release is for the lab to decide.</li>
 <li><b>An older <code>esperanto</code> DKMS driver</b> is still registered for 23 kernels (not loaded). It is harmless but can be removed (<code>dkms remove esperanto/0.20.0 --all</code>, and <code>/etc/udev/rules.d/50-esperanto.rules</code>) as a separate change.</li>

@@ -158,9 +158,10 @@ by <span id="dram-rest"></span> W and the minion rail by only <span id="dram-mnn
 load moved the remainder on every card, by 4.6 W on aifoundry3, 4.9–7.6 W on aifoundry2 and 5.6–7.8 W on aifoundry1-c1, and
 the minion rail by what the die's temperature did: 0.03–0.08 W on aifoundry2 and aifoundry3 where the die stayed put,
 0.7–0.8 W on aifoundry2 where it warmed 1.4–1.8 °C, and −0.4 to −0.8 W on aifoundry1-c1, whose die cooled 0.9–1.8 °C. The
-matmul moved the minion rail by 16–22 W on aifoundry2, 15–18 W on aifoundry3 and 15–21 W on aifoundry1-c1. Both cards
-show the same for DRAM traffic: in the energy catalogue, 76 GB/s DRAM streams move the remainder by about 5 W and the
-minion rail by under 0.2 W on each
+matmul moved the minion rail by 16–22 W on aifoundry2, 15–18 W on aifoundry3 and 15–21 W on aifoundry1-c1. Every card
+shows the same for DRAM traffic: in the energy catalogue (three passes on each of the three cards), its 76 GB/s DRAM
+streams (tensor loads and stores, 1 KB row walks) move the remainder by 4.4–7.0 W on aifoundry2 and aifoundry3 and
+5.9–8.1 W on aifoundry1-c1, and the minion rail by at most a quarter of a watt either way
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits
 of observability, §4.2</a>).</li>
 </ul>
@@ -314,7 +315,8 @@ the refresh period per card (156 and 263 ms, not 133 ms), the idle law led by it
 faster per degree than idle removed. 26 September (version 4), the three-card check: the busy slope corrected (0.8 W/°C was
 this session's; the repeats give 0.9–1.1 on aifoundry2), the refresh period, SP pass and trace span per card, and the voltage
 map's offset hypothesis and the lows' "droops the polling misses" withdrawn. 27 September: the review of 26 September (the
-resting temperatures, the frequency sweep marked lab admin only, the cards named), fresh readings ticked in the edge charts,
+resting temperatures, the frequency sweep marked lab admin only, the cards named; the catalogue's DRAM streams on three
+cards), fresh readings ticked in the edge charts,
 and detail folded into sections.</p>
 </details>
 

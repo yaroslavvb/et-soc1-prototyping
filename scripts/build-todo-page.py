@@ -1,10 +1,25 @@
 #!/usr/bin/env python3
 """Build docs/reports/TODO.md into a standalone HTML page for spacesheep (needs `pip install markdown`)."""
-import html, re, sys, markdown
+import html, os, posixpath, re, sys, markdown
 
 src = sys.argv[1] if len(sys.argv) > 1 else "docs/reports/TODO.md"
 out = sys.argv[2] if len(sys.argv) > 2 else "docs/reports/2026-09-26-review-todo.html"
 text = open(src, encoding="utf-8").read()
+# Relative links (to other files in the repository) would resolve against the space's own origin once published, so
+# they point at the file on GitHub instead: resolved from TODO.md's directory, then /blob/main/ (/tree/main/ for a
+# directory, written with a trailing slash).
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+GH = "https://github.com/yaroslavvb/et-soc1-prototyping"
+here = os.path.relpath(os.path.dirname(os.path.abspath(src)), REPO).replace(os.sep, "/")
+def gh_link(m):
+    target = m.group(1)
+    if re.match(r"^([a-z][a-z0-9+.-]*:|#|/)", target, re.I):
+        return m.group(0)
+    path, _, frag = target.partition("#")
+    rel = posixpath.normpath(posixpath.join(here, path))
+    kind = "tree" if path.endswith("/") else "blob"
+    return f"]({GH}/{kind}/main/{rel}{'/' if kind == 'tree' else ''}{'#' + frag if frag else ''})"
+text = re.sub(r"\]\(([^)\s]+)\)", gh_link, text)
 text = re.sub(r"^(\s*)- \[ \] ", r"\1- ☐ ", text, flags=re.M)
 text = re.sub(r"^(\s*)- \[x\] ", r"\1- ☑ ", text, flags=re.M)
 body = markdown.markdown(text, extensions=["extra", "sane_lists", "toc"])

@@ -204,7 +204,7 @@ same clock and the same 9.2 TFLOPS, a matmul on aifoundry2's card draws <b>38 W 
 values</b> (aifoundry3's card, launched 25 °C cooler, draws 27, 35 and 50 W, in the same order). It heats the die roughly in
 proportion to the watts above idle (12 and 30 W): <b>27 and 76 thousandths of a degree per trillion FLOPs</b> on ones and
 random values (21 and 70 on aifoundry3), with random data heating 8 to 26% more per watt than ones. On zeros (2 W above idle
-on both cards) the whole-degree reading moves by at most one step during a run, so the rise is not resolved: below about
+on both cards in the sessions of 20–22 September; 0.8 to 1.9 W on the three cards on 26 September) the whole-degree reading moves by at most one step during a run, so the rise is not resolved: below about
 1 °C (0.1 to 0.3 °C by the recovered curve and the thermal network). It follows the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparse compute
 report</a>, whose first two runs, on aifoundry3, found that zeros save most of the tensor unit's power but no cycles (re-measured on
 three cards on 26 September: 86, 93 and 92% of the power above idle saved on aifoundry2, aifoundry3 and aifoundry1-c1, at the
@@ -280,7 +280,7 @@ rate; the W column is the launch-temperature value.</p>
 <ul>
 <li><b>The runs cluster by kind, tightly.</b> Random normal draws 63.40 W with a run-to-run spread of 0.08 W over five
 different random matrices; zeros 38.29 ± 0.03 W; ones 46.73 ± 0.07 W. The rises of those three repeat to 0.03 °C (on
-aifoundry3 to 0.05 to 0.2 °C). They form three groups, 7 to 15 W apart on both cards: zeros alone, 2 W above idle; ones, π
+aifoundry3 to 0.05 to 0.2 °C). They form three groups, 7 to 15 W apart on both cards (aifoundry2 and aifoundry3, 20–22 September): zeros alone, 2 W above idle; ones, π
 and the half-zero random matrix within a watt of each other (46 to 47 W, +1.7 to +1.8 °C); random uniform and random normal
 within about 2 W (61.3 against 63.4 W, a gap aifoundry2 resolves and aifoundry3 does not).</li>
 <li><b>Heating per FLOP follows power over idle, roughly, not total power.</b> Just before each launch the idle card draws
@@ -350,8 +350,9 @@ random-data ops match software bit for bit. Three things in the RTL decide the a
 <li><b>Zero gating.</b> On an accumulate pass, <code>vpu_ctrl.v</code> withholds the valid bit from a lane whose A or B
 operand word is zero (<code>ex_fma_gate_mask</code>; the manual's pseudo-code says the same, <code>if (a != 0 &amp;&amp; b != 0)</code>).
 The unit's pipeline registers are enabled by their stage's valid bit, so a gated lane clocks no register and flips no net.
-That is the zeros case: in the simulation nothing in the unit moves, and on both cards a zeros matmul costs only 2 W over
-idle.</li>
+That is the zeros case: in the simulation nothing in the unit moves, and a zeros matmul costs only about 2 W over
+idle (aifoundry2 and aifoundry3, 20–22 September; 1.9, 0.8 and 1.2 W on aifoundry2, aifoundry3 and aifoundry1-c1 on
+26 September).</li>
 <li><b>Clocked registers.</b> A valid multiply-add clocks about 600 register bits per lane on its way down the pipe,
 whether or not the data changed. That is what a constant costs: ones and π clock the
 registers and toggle almost nothing. (The checkerboard keeps a quarter of its lanes: a product needs both operands nonzero.)</li>
@@ -627,7 +628,7 @@ settled after the night of 20–21 September (a single reading). Driven by the m
 </details>
 <details class="more"><summary>Leakage against temperature, and degrees added per kind of flip</summary>
 <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:14px">
-  <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Leakage: idle board power against die temperature, all sessions, with the fitted exponential (tabulated, with the second card, in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">energy manual, §1</a>)</div><div class="chart" id="leak"></div></div>
+  <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Leakage: idle board power against die temperature, all sessions, with the fitted exponential (tabulated, with the other cards, in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">energy manual, §1</a>)</div><div class="chart" id="leak"></div></div>
   <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Heat: degrees per watt after a step of switching power</div><div class="chart" id="step"></div></div>
 </div>
 <p><b>Leakage is what makes temperature so sensitive to flips here</b>, whatever its share of the 36 W idle (20 to 29 W at
@@ -723,7 +724,7 @@ resolved.</p>
 tiles alone (aifoundry2, 21 September, two runs each). The three-card check re-ran six of them on 26 September, four runs
 each. On aifoundry2 Hadamard, butterfly and kaleidoscope came within 0.5 W of their first values (−0.1, 0.0 and −0.5 W), though
 four runs are too few to confirm Hadamard and kaleidoscope to the registered ±1 W; on aifoundry3 they read 0.6 to 1.2 W below
-the model scaled by that card's 0.924.</li>
+the model scaled by 0.924, that card's factor of 22 September (the registered test).</li>
 <li><b>Structure in the values buys nothing.</b> Kaleidoscope products, the DCT, circulant and rank-1 matrices are dense, and
 they cost what random normal costs (63 to 64 W): their mantissa bits are just as busy. Re-run on three cards, kaleidoscope
 products again cost what random normal costs: 63.5 against 63.6 W on aifoundry2, 50.3 against 50.4 W on aifoundry3 and 77.8
@@ -741,7 +742,7 @@ aifoundry1-c1, and within 0.2 W of ones on each; four runs confirm the equality 
 intervals on the other two reach −1.1 and −1.4 W). In practice: mask with a select, not by
 multiplying by zero, because x · 0 is −0.0 for every negative x.</li>
 <li><b>The worst miss</b> is the DFT pair, 2.8 W low, and it repeats: re-run on 26 September it read 2.7 W above the model on
-aifoundry2, 2.5 W above it on aifoundry1-c1 and 1.7 W above the model scaled by 0.924 on aifoundry3. Its products cancel
+aifoundry2, 2.5 W above it on aifoundry1-c1 and 1.7 W above the model scaled by that 0.924 on aifoundry3. Its products cancel
 almost exactly; why that costs more than the counted toggles say is not known (glitching in near-cancelling sums, which a
 zero-delay simulation cannot see, is one candidate).</li>
 </ul>
@@ -954,7 +955,7 @@ costs and unmeasured causes narrowed. 26 September (version 4), the three-card c
 the temperature test, the idle cycles and each card's refit; the DFT pair's explanation withdrawn; the model's out-of-sample
 error on the check's patterns, 0.9 to 1.0 W, set beside 0.5 W; post-data note C2's two readings of the launch temperature.
 27 September: the review of 26 September (aifoundry3's clock set by a boot service, not its firmware; the idle law's bins;
-aifoundry3's watts at launch; the ten-minute errors), a chart of seconds to 90 °C, and detail folded into sections.</p>
+aifoundry3's watts at launch; the ten-minute errors; the 2 W of zeros dated to 20–22 September; 0.924 named as the registered test's factor), a chart of seconds to 90 °C, and detail folded into sections.</p>
 </details>
 
 <h2 id="related">12. Related reports</h2>

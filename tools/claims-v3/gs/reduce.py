@@ -28,8 +28,9 @@ Items:
   GS-CHECK    tested    every C launch passes on every card (the verify launches are what detects erratum 1.3's skipped
                         elements), and every launch of every used E and R block ends with gsc_progress = 0 on every
                         hart and ok (a sanity check: a skipped element leaves gsc_progress at 0)
-  GS-CARD     reported  each card's median ratio to aifoundry2 over configurations (pJ/element, elements/s); the
-                        catalogue's aifoundry3/aifoundry2 0.950 beside
+  GS-CARD     reported  each card's median ratio to aifoundry2 over configurations (pJ/element, elements/s); beside
+                        it the energy catalogue's aifoundry3/aifoundry2 median: 0.972 for the version-3 catalogue
+                        (V3-CATFULL, 26 Sep, the one the pages use) and 0.950 for the 23 September one it replaced
 """
 import argparse
 import json
@@ -46,7 +47,10 @@ EXPECTED = ["aifoundry2", "aifoundry3", "aifoundry1-c1"]
 MIN_PASSES = 3
 MH_BOUND = 1024 * 2 / 51.5 * 0.6e9     # 2 miss handlers, one line per 51.5 cycles per handler (design 1.5)
 DRAM_LINE_BPS = 76e9
-CATALOGUE_GAP = 0.950
+# the energy catalogue's aifoundry3/aifoundry2 median ratio, for GS-CARD: the version-3 catalogue (V3-CATFULL, 26 Sep;
+# manual.json catalogue.cross_cards.aifoundry3.median, 0.9716 over 392 entries) and the 23 September one it replaced
+CATALOGUE_V3_A3_A2 = 0.972
+CATALOGUE_23SEP_A3_A2 = 0.950
 
 C = lambda op, tgt, pat="rand", data="random", h=2, m="ff", n="n1024", s="E": f"gs/{s}/{op}/{tgt}/{pat}/{data}/h{h}/m{m}/{n}"
 L1 = C("fgw.ps", "dram-512B")
@@ -223,7 +227,9 @@ def main():
     items["GS-CHECK"] = {"kind": "TESTED", "per_card": pc, **over_cards(pc, expected)}
 
     # GS-CARD (reported)
-    items["GS-CARD"] = {"kind": "REPORTED", "ratios": gs["cross_card"], "catalogue_aifoundry3_over_aifoundry2": CATALOGUE_GAP}
+    items["GS-CARD"] = {"kind": "REPORTED", "ratios": gs["cross_card"],
+                        "catalogue_v3_aifoundry3_over_aifoundry2": CATALOGUE_V3_A3_A2,
+                        "catalogue_23sep_aifoundry3_over_aifoundry2": CATALOGUE_23SEP_A3_A2}
 
     out = {"exp": "V3-GS", "experiment": "E48", "data": os.path.abspath(a.data), "cards": expected,
            "passes": {c: {"E": gs["cards"].get(c, {}).get("passes_E", []), "R": gs["cards"].get(c, {}).get("passes_R", [])} for c in expected},

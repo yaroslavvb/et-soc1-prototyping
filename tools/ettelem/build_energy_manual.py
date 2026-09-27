@@ -46,6 +46,7 @@ ABLA_RUNS = f"{V3}/abla.runs.json"                 # V3-ABL-A: the tensor unit, 
 # E48 (V3-GS, 26 September 2026): gathers, scatters and packed atomics on the same three cards, after the campaign
 # (tools/claims-v3/gs/reduce.py): gs.json holds the items, gs-full.json every configuration's pass values per card
 GS, GS_FULL = f"{V3}/gs.json", f"{V3}/gs-full.json"
+LAT = f"{V3}/lat.json"                             # V3-LAT: the latencies on three cards (the sync table)
 CARD_ORDER = ["aifoundry2", "aifoundry3", "aifoundry1-c1", "aifoundry1-c0"]   # the pages' card registry order
 
 
@@ -186,6 +187,16 @@ def v3_block(m):
                              "sampler_10hz_range": [min(p["P_H"] for p in v["passes"]), max(p["P_H"] for p in v["passes"])],
                              "light_poller": [min(p["P_L"] for p in v["passes"]), max(p["P_L"] for p in v["passes"])],
                              "lengthens": v["interval"], "passes": len(v["passes"])} for c, v in ts["per_card"].items()}
+    # the service processor's own pass in its stats trace (TEL-P1/P3 on aifoundry2 and aifoundry1-c1, TEL-P5 on
+    # aifoundry3), quiet and under the 10 Hz sampler, per pass: the sampler lengthens it on every card
+    sp = {}
+    for name, key, field in (("TEL-P1", "quiet", "Q_ms"), ("TEL-P3", "sampled", "E10_ms"),
+                             ("TEL-P5", "quiet", "Q_ms"), ("TEL-P5", "sampled", "E10_ms")):
+        for c, v in next(i for i in tel["items"] if i["item"] == name)["per_card"].items():
+            vals = [p[field] for p in (v.get("passes") or []) if p.get(field) is not None]
+            if vals:
+                sp.setdefault(c, {}).setdefault(key, vals)
+    out["sp_pass_ms"] = {c: {k: sp[c][k] for k in ("quiet", "sampled")} for c in out["refresh_ms"] if c in sp}
 
     # ---- rings, levels and the relay (V3-RL): the items the manual quotes
     rl = j(f"{V3}/rl.json")
@@ -491,13 +502,32 @@ def main():
 
     # --- 6. synchronisation --------------------------------------------------------------------------------
     hot = j(HOT)
-    # the chip-wide barrier with all 1,024 minions taking part (nocbench, 18 September); barrier-chip1.jsonl is the
-    # same barrier with one minion per shire (4,995 cycles), which the hot-line page quotes
+    # the chip-wide barrier with all 1,024 minions taking part (nocbench, 18 September, one run on aifoundry2; kept as
+    # history); barrier-chip1.jsonl is the same barrier with one minion per shire (4,995 cycles)
     bar = json.loads(open(BARRIER).read().split(" ", 1)[1])
-    out["sync"] = {"atomics": hot["power"], "barrier_cycles_chip": int(round(bar["cycles_per_iter_mean"])),
+    # the version-3 check's latencies on three cards (V3-LAT, 26 September, results/lat.json), every kept pass: the
+    # in-shire FLB + credit barrier (both variants) and the 32-minion TensorReduce + broadcast (LAT-N1), and the
+    # chip-wide barrier with one minion per shire and with all 1,024 (LAT-N4). The table gives these; the barrier's
+    # waiting energy takes its length from the all-minion passes' mean over the three cards.
+    lat = {i["item"]: i for i in j(LAT)["items"]}
+    def lat_cards(name, get):
+        pc = lat[name]["per_card"]
+        return {c: [round(float(x), 3) for p in pc[c]["passes"] if p.get("kept", True) for x in get(p)] for c in in_order(pc)}
+    v3s = {"shire_barrier": lat_cards("LAT-N1", lambda p: p["shire_barrier"]["barrier-shire1"] + p["shire_barrier"]["barrier-shire32"]),
+           "allreduce32": lat_cards("LAT-N1", lambda p: p["allreduce32"]),
+           "chip_barrier_one_per_shire": lat_cards("LAT-N4", lambda p: p["chip_barrier"]["barrier-chip1"]),
+           "chip_barrier_all": lat_cards("LAT-N4", lambda p: p["chip_barrier"]["barrier-chip32"]),
+           "outcomes": {k: lat[k]["all_cards"]["outcome"] for k in ("LAT-N1", "LAT-N4")},
+           "source": f"{LAT}: LAT-N1 (shire_barrier, allreduce32) and LAT-N4 (chip_barrier), every kept pass per card"}
+    allb = [x for v in v3s["chip_barrier_all"].values() for x in v]
+    out["sync"] = {"atomics": hot["power"], "barrier_cycles_chip": int(round(statistics.fmean(allb))),
                    "barrier_participants": bar["participants"],
-                   "barrier_source": f"{BARRIER}: NOCBENCH cycles_per_iter_mean {bar['cycles_per_iter_mean']}",
+                   "barrier_source": f"{LAT}: LAT-N4 barrier-chip32, the mean of every kept pass on {len(v3s['chip_barrier_all'])} cards",
+                   "barrier_cycles_chip_18sep": int(round(bar["cycles_per_iter_mean"])),
+                   "barrier_source_18sep": f"{BARRIER}: NOCBENCH cycles_per_iter_mean {bar['cycles_per_iter_mean']}",
+                   "v3": v3s,
                    "remote_atomic_latency_cycles": hot["context"]["remote_atomic_latency_cycles"],
+                   "remote_atomic_latency_by_card": hot["context"].get("remote_atomic_latency_by_card"),
                    "bank_service_cycles": hot["context"]["bank_service_cycles"], "source": HOT}
 
     # --- 3/4 continued: the instruction catalogue and the write paths, from enercat ----------------------

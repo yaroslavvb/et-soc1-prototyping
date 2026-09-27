@@ -62,6 +62,10 @@ const V3 = D.v3;
 const orList = vs => { const u = [...new Set([...vs].sort((a, b) => Math.abs(a) - Math.abs(b)).map(v => sgn(v, 1).replace(/\.0$/, '')))]; return u.length <= 2 ? u.join(' or ') : srange(vs); };
 const median = vs => { const s = [...vs].sort((a, b) => a - b), n = s.length; return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2; };
 const cardLab = c => CK.card(c).label;
+// A card's cooling-cycle offset from the idle law on the basis the text and the energy manual use: each cycle's mean over
+// its whole-degree bins, then the mean over the cycles (V3.idle.a for IDLE-a, V3.idle.b for aifoundry2's IDLE-b). The
+// per-cycle figures in D.idle_sessions weight every sample alike instead, so they lean to each cycle's cool end.
+const binOff = c => { const I = (D.v3 && D.v3.idle) || {}; return (I.a && I.a[c] && I.a[c].offset_W) || (I.b && I.b[c] && I.b[c].cycle_offset_W) || null; };
 (function () {
   const W3 = V3.wakeup, ids = CK.cardsIn(W3), probes = ids.flatMap(c => W3[c].probes.map(p => Object.assign({card: c}, p)));
   const lv = (p, n) => p.levels.find(l => l.level === n).paired_delta_cycles;
@@ -86,6 +90,12 @@ const cardLab = c => CK.card(c).label;
   V.passQ = `${q('aifoundry2')} ms on aifoundry2 (${q('aifoundry3')} ms on aifoundry3)`;
   V.passE = `${e('aifoundry2')} and ${e('aifoundry3')} ms`;
   V.passE2 = e('aifoundry2');
+  /* the board value's refresh the stream shows under the same sampler (TEL-S, the mean over the passes), and how much
+     longer the SP trace's own pass under the sampler runs than that refresh, per card: the two methods differ */
+  const mh = c => rf[c].P_H.reduce((a, b) => a + b, 0) / rf[c].P_H.length;
+  V.refH = `${f0(mh('aifoundry2'))} and ${f0(mh('aifoundry3'))} ms`;
+  const dd = cs.filter(c => rf[c]).map(c => median(sp[c].e10_ms) - mh(c));
+  V.methodDiff = range(Math.min(...dd), Math.max(...dd), 0);
   V.passAll = cs.map(c => `${q(c)} ms on ${cardLab(c)}`).join(', ');
   V.passAllE = cs.map(c => `${e(c)}`).join(', ') + ' ms';
   const rr = (c, k) => range(Math.min(...rf[c][k]), Math.max(...rf[c][k]), 0);
@@ -762,8 +772,13 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
       `<td class="num">${num(r.n, 0)}</td><td class="num">${sgn(r.offset_W, 2)}</td></tr>`).join('') +
     CK.cardsIn(IS).map(c => `<tr><td colspan="3"><b>${c}: mean of ${IS[c].sessions} sessions</b> ` +
       `(range ${sgn(IS[c].min_W, 2)} to ${sgn(IS[c].max_W, 2)})</td><td class="num"><b>${sgn(IS[c].mean_W, 2)}</b></td></tr>`).join('') +
-    CK.cardsIn(IS3).map(c => `<tr><td colspan="3"><b>${cardLab(c)}: mean of its ${word(IS3[c].sessions)} cooling cycles, 26 September</b> ` +
-      `(range ${sgn(IS3[c].min_W, 2)} to ${sgn(IS3[c].max_W, 2)})</td><td class="num"><b>${sgn(IS3[c].mean_W, 2)}</b></td></tr>`).join('') + '</tbody>';
+    CK.cardsIn(IS3).map(c => { const bo = binOff(c);
+      return bo ? `<tr><td colspan="3"><b>${cardLab(c)}: its ${word(IS3[c].sessions)} cooling cycles, 26 September, mean over whole-degree bins</b> ` +
+        `(99% interval ${sgn(bo.ci99[0], 2)} to ${sgn(bo.ci99[1], 2)}; the figure the text and the energy manual give). Weighted by sample, as in the ` +
+        `rows above, which leans to each cycle's cool end: mean ${sgn(IS3[c].mean_W, 2)} (range ${sgn(IS3[c].min_W, 2)} to ${sgn(IS3[c].max_W, 2)})</td>` +
+        `<td class="num"><b>${sgn(bo.mean, 2)}</b></td></tr>`
+      : `<tr><td colspan="3"><b>${cardLab(c)}: mean of its ${word(IS3[c].sessions)} cooling cycles, 26 September, weighted by sample</b> ` +
+        `(range ${sgn(IS3[c].min_W, 2)} to ${sgn(IS3[c].max_W, 2)})</td><td class="num"><b>${sgn(IS3[c].mean_W, 2)}</b></td></tr>`; }).join('') + '</tbody>';
   // the prose around the chart
   const groups = []; for (const t of fitT) { const g = groups[groups.length - 1]; if (g && t === g[1] + 1) g[1] = t; else groups.push([t, t]); }
   V.fitT = groups.map(g => range(g[0], g[1], 0)).join(' and ');
@@ -868,8 +883,10 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
       const lab = CK.txt(g, L, y0 + 15, '', 'lab');
       Object.assign(lab.style, {paintOrder: 'stroke', stroke: 'var(--page)', strokeWidth: '4px', strokeLinejoin: 'round'});   // a halo over the grid
       const b = CK.el('tspan', {class: 'lab-strong'}, lab); b.textContent = c.label;
+      const bo = r.v3 ? binOff(r.card) : null;
       CK.el('tspan', {}, lab).textContent = ` · ${r.n} ${f.narrow && r.v3 ? 'cycles' : what(r)}${r.v3 && !f.narrow ? ', 26 Sep' : ''} · ` +
-        (f.narrow && r.sd != null ? `${sgn(r.mean, 2)} ± ${f2(r.sd)} W` : msd(r));
+        (r.v3 ? (f.narrow ? `by sample ${sgn(r.mean, 2)} W` : `by sample ${sgn(r.mean, 2)} W` + (bo ? ` (by bin ${sgn(bo.mean, 2)})` : ''))
+          : f.narrow && r.sd != null ? `${sgn(r.mean, 2)} ± ${f2(r.sd)} W` : msd(r));
       const yc = y0 + LABH + (-l.lo) * STEP + STEP / 2;
       for (const p of l.pts) {
         const q = p.q, m = CK.cardMark(g, r.card, p.px, yc + p.lane * STEP, R);
@@ -887,8 +904,10 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
       const lo = r.sd == null ? x(r.mean) - 6 : Math.min(x(r.mean - r.sd), x(r.mean) - 6), hi = r.sd == null ? x(r.mean) + 6 : Math.max(x(r.mean + r.sd), x(r.mean) + 6);
       CK.el('rect', {class: 'ck-hit', x: lo - 4, y: ym - 10, width: hi - lo + 8, height: 20}, mg);
       CK.el('rect', {x: x(r.mean) - 2, y: ym - 8, width: 4, height: 16, rx: 1, fill: c.color}, mg);
-      CK.tip(f, mg, `<b>${c.label}: ${r.n} ${what(r)}</b><br>${msd(r)}<br>` +
-        `range ${sgn(r.min, 2)} to ${sgn(r.max, 2)} W<br>die ${tempR(r.T)}; ${dayList(r.days)}`);
+      const bt = r.v3 ? binOff(r.card) : null;
+      CK.tip(f, mg, `<b>${c.label}: ${r.n} ${what(r)}</b><br>${r.v3 ? 'weighted by sample: ' : ''}${msd(r)}<br>` +
+        `range ${sgn(r.min, 2)} to ${sgn(r.max, 2)} W<br>die ${tempR(r.T)}; ${dayList(r.days)}` +
+        (bt ? `<br>mean over whole-degree bins (the text's and the energy manual's figure): <b>${sgn(bt.mean, 2)} W</b>` : ''));
       mg._row = ri; mg._x = x(r.mean); nodes.push(mg);
       y0 += l.h;
     });
@@ -903,8 +922,14 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
   }
   CK.frame('offstrip', {height, minW: 280, maxW: 640, draw,
     label: 'Idle offset from the aifoundry2 idle law, one mark per session or cooling cycle, one row per card and campaign, with each row’s mean ± sd'});
-  document.getElementById('off-sum').innerHTML = ROWS.map(r => `${CK.card(r.card).label}: ${word(r.n)} ${what(r)} ` +
-    `(${dayList(r.days)}, die ${tempR(r.T)}), ${sgn(r.min, 2)} to ${sgn(r.max, 2)} W, ${msd(r)}`).join('; ') + '.';
+  document.getElementById('off-sum').innerHTML = ROWS.map(r => { const bo = r.v3 ? binOff(r.card) : null;
+    return `${CK.card(r.card).label}: ${word(r.n)} ${what(r)} (${dayList(r.days)}, die ${tempR(r.T)}), ${sgn(r.min, 2)} to ${sgn(r.max, 2)} W, ` +
+      (r.v3 ? `weighted by sample ${msd(r)}` + (bo ? `; over whole-degree bins ${sgn(bo.mean, 2)} W` : '') : msd(r)); }).join('; ') + '.';
+  const bh = ROWS.filter(r => r.v3 && binOff(r.card));
+  if (bh.length) document.getElementById('off-basis').textContent = ` Each mark weights its idle samples alike, and a cooling cycle spends ` +
+    `most of its 15 minutes near its cool end, so a cycle's mark sits below the mean over its whole-degree bins, which is the ` +
+    `figure this section's text and the energy manual give: ${bh.map(r => `${sgn(binOff(r.card).mean, 2)} W on ${CK.card(r.card).label} ` +
+    `(${sgn(r.mean, 2)} by sample)`).join('; ')}.`;
 })();
 
 /* ---------- §6: the second card, in one paragraph ---------- */

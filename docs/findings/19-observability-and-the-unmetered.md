@@ -14,8 +14,9 @@ is the on-die management core that reads it.
 A PMIC on the board measures the 12 V input and, over PMBus, the three regulators that feed the minion cores,
 the SRAM arrays and the mesh: for each, voltage, current and power on both sides, and temperature, as
 a current value, a minimum and maximum since reset, and a running average — 84 numbers the service processor reads
-every loop pass, about every 133 ms on aifoundry2 (aifoundry3's readings change only about every 250 ms, for a reason
-not established). It forwards the PMIC's own running average of each **output-side power** (roughly first-order: a
+every loop pass: with nothing polling about every 133 ms on aifoundry2, 135 ms on aifoundry1's card 1 and 224 ms on
+aifoundry3, and 156, 158 and 263 ms while ettelem samples at 10 Hz (E41; why aifoundry3's pass is longer is not
+established). It forwards the PMIC's own running average of each **output-side power** (roughly first-order: a
 step reaches 55–57% after 1 s and 83–84% after 2 s, τ ≈ 1.15–1.22 s, measured over 242 and 229 bursts in
 `catalogue.json` `rail_filter`; the SP does no filtering of its own) with its
 min and max, and the input power; `ettelem` samples them at 10 Hz. The other rails — DDR core 0.8 V, VDDQ 1.1 V, VDDQLP, PCIe logic, PCIe/PShire, IO shire,

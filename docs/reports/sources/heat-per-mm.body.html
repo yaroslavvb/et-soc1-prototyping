@@ -127,8 +127,9 @@ the wires), blocks of N bytes alternately all-zero and all-one, and one random 6
 two flits differ). The second run makes every line on the chip unique and <i>P</i> and 1−<i>P</i> exact bitwise
 complements, and adds reader–target pairs chosen so that no two flows share a link.</li>
 <li><b>Two meters.</b> Board power (10 mW steps; under the 10 Hz sampler used here its value changes about every 156 ms
-on aifoundry2 and 158 ms on aifoundry1 card 1, and every 263 ms on aifoundry3, where a slower poll sees 224 ms: there the
-sampler itself lengthens the period, as the three-card check measured; the
+on aifoundry2 and 158 ms on aifoundry1 card 1, and every 263 ms on aifoundry3, where a light poller sees it change every
+223–224 ms: the three-card check resolves the sampler's lengthening of that refresh at 99% only there, while the service
+processor's own pass, timed in its trace, lengthens under the sampler on every card; the
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">observability report</a> has the meter chain) and the mesh rail, which feeds the routers and links at 0.485 V and 400 MHz. For board power each 3 s burst is measured against
 idle on both sides and corrected for the extra leakage of a burst that ran warmer. The mesh rail is read over the burst's
 last 0.6 s against the idle before it, without a leakage correction (about 2%, roughly cancelling a 2.5% under-correction

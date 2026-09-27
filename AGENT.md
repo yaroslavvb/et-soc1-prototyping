@@ -35,8 +35,11 @@ where the chip could beat a GPU.
   results in its `results/`, code in [`tools/claims-v3/`](tools/claims-v3)), and the pages in this repository carry
   its results: each tested claim says what the three cards showed (MIRROR.md's "Last check" says whether the live
   pages have them yet). The gathers and scatters that ran on each of the three cards after
-  its campaign blocks (E48, 26 September 03:19–09:22) are reduced too (`results/gs.json`); no page carries them yet.
-- **The lab has four working cards** since 25 September (section 4). One of them overheats.
+  its campaign blocks (E48, 26 September 03:19–09:22) are reduced too (`results/gs.json`) and, since 27 September, on
+  the energy manual (§3.1, §4.3, §4.4, §6), memory hierarchy ("Irregular access"), influence functions (S3) and the
+  hub's chart of events (03-experiments.md, E48, "Report").
+- **Four cards answer, three are usable for measurement** since 25 September (section 4): aifoundry1's card 0 overheats
+  (amendment A4) and takes no sustained work.
 - **The review of 26 September** added charts and folded each page's detail into collapsible sections; the page
   changes it found and not yet made are in [`docs/reports/TODO.md`](docs/reports/TODO.md), whose first items are for
   the owner.
@@ -181,7 +184,7 @@ Each links to the full entry in [14-card-behaviour.md](docs/findings/14-card-beh
   card 0 (same section).
 - **The telemetry lies in specific ways**: whole-degree die readings, rails that are a PMIC running average
   (τ ≈ 1.2 s), a board value that changes once per service-processor pass (133 ms on aifoundry2, 135 on aifoundry1's
-  card 1, 224 on aifoundry3 with nothing polling; under ettelem at 10 Hz 156, 157 and 263 ms: E41), and some workloads
+  card 1, 224 on aifoundry3 with nothing polling; under ettelem at 10 Hz 156, 158 and 263 ms: E41), and some workloads
   starve the meter: check `took_ms` ([telemetry](docs/findings/14-card-behaviour.md#the-telemetry-and-what-each-number-really-is)).
 - **Heat carries over between runs**: launch every run from the same die temperature, and budget three to eight
   times more wall-clock than card time ([protocol](docs/findings/14-card-behaviour.md#the-measurement-protocol-that-made-results-repeatable)).

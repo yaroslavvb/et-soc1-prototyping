@@ -42,7 +42,8 @@ the page without anyone copying numbers.
                       catalogue, tensor bars and reruns, on three cards since 26 September; the wires from Heat per
                       millimetre's third run; the hot line and the flips as before; since 27 September E48's gathered and
                       scattered elements and packed atomic adds, manual.json gs); its meter block
-                      takes the service processor's pass per card from the version-3 campaign (meter())
+                      takes the board value's refresh and the service processor's pass per card from the
+                      version-3 campaign (meter())
   claims_status       the claims check's verdicts per page, and the cards behind each claim, for §1's scoreboard: one
                       series per entry of CLAIM_SERIES (the claims after the campaign of 25-26 Sep, each tested claim
                       with its outcome on the campaign's cards, and the version-3 plan before any campaign run)
@@ -72,7 +73,7 @@ HORACE = os.path.join(D, "2026-09-21-horace-aifoundry2")
 PAGES = "https://spacesheep.dev/@yaroslavvb/"
 
 # The meter's own constants, as the ladder rows 'Board power' and 'Rail power' quote them: the board reading in 10 mW
-# steps and the rails in 1 mW, a new value per service-processor pass. The pass comes from meter(), below.
+# steps and the rails in 1 mW, a new value per service-processor pass. The refresh comes from meter(), below.
 LSB = {"board_lsb_w": 0.010, "rail_lsb_w": 0.001}
 CLAIMS_V3 = os.path.join(D, "2026-09-25-claims-v3")
 TEL_V3 = os.path.join(CLAIMS_V3, "results", "tel.json")
@@ -372,13 +373,17 @@ def idle_ddr_vs_temp(bursts, paths, fu):
 
 # ---------------------------------------------------------------- the meter's refresh (version 3)
 def meter(tel):
-    """One reading of the meter: its steps (LSB) and the service processor's pass per card, from the version-3
-    campaign's V3-TEL (E41, results/tel.json): the SP stats trace's pass interval with no sampler running (the quiet
-    arm, Q) and while ettelem samples at 10 Hz (the E10 arm), three passes per card. TEL-P1 and TEL-P3 give them for
-    aifoundry2 (tested) and aifoundry1-c1 (reported), TEL-P5 for aifoundry3 (tested) and again for aifoundry1-c1 (the
-    two must agree). The page states the medians over the passes; pass_s (aifoundry2 under ettelem's 10 Hz, as every
-    power page sampled) sets one reading's energy step, and the keys pass_s_a3 and sp_pass_s_quiet_a2 are the ones
-    the page reads."""
+    """One reading of the meter: its steps (LSB), how often a new board value arrives, and the service processor's
+    pass per card, from the version-3 campaign's V3-TEL (E41, results/tel.json), three passes per card.
+      - The board value's refresh (TEL-S, found by phase-folding the board-power stream): under ettelem at 10 Hz (P_H),
+        as every power page sampled, and under a light one-command poller (P_L). pass_s, pass_s_a3 and pass_s_a1c1
+        are P_H's means over the passes (as the power page and the energy manual state it): pass_s sets one reading's
+        energy step. board_refresh_ms keeps every pass.
+      - The SP stats trace's own pass interval with no sampler running (the quiet arm, Q) and while ettelem samples at
+        10 Hz (the E10 arm): TEL-P1 and TEL-P3 give them for aifoundry2 (tested) and aifoundry1-c1 (reported), TEL-P5
+        for aifoundry3 (tested) and again for aifoundry1-c1 (the two must agree). sp_pass_ms keeps every pass, the
+        sp_pass_s_* keys the medians. The trace's pass under the sampler runs 3-5 ms longer than the refresh the
+        stream shows (the two methods differ)."""
     it = {x["item"]: x for x in tel["items"]} if isinstance(tel["items"], list) else tel["items"]
     per = {}
     for name, key, field in (("TEL-P1", "quiet_ms", "Q_ms"), ("TEL-P3", "sampled_ms", "E10_ms"),
@@ -394,12 +399,20 @@ def meter(tel):
         per[c] = {k: per[c][k] for k in ("quiet_ms", "sampled_ms") if k in per[c]}
     per = {c: per[c] for c in sorted(per, key=lambda c: (CARD_ORDER.index(c) if c in CARD_ORDER else len(CARD_ORDER), c))}
     s = lambda c, k: r3(statistics.median(per[c][k]) / 1000)  # noqa: E731
-    return {**LSB, "pass_s": s("aifoundry2", "sampled_ms"), "pass_s_a3": s("aifoundry3", "sampled_ms"),
-            "pass_s_a1c1": s("aifoundry1-c1", "sampled_ms"), "sp_pass_s_quiet_a2": s("aifoundry2", "quiet_ms"),
+    ref = {c: {"sampler_10hz_ms": [p["P_H"] for p in v["passes"]], "light_poller_ms": [p["P_L"] for p in v["passes"]]}
+           for c, v in it["TEL-S"]["per_card"].items() if v.get("passes")}
+    ref = {c: ref[c] for c in sorted(ref, key=lambda c: (CARD_ORDER.index(c) if c in CARD_ORDER else len(CARD_ORDER), c))}
+    b = lambda c: r3(statistics.fmean(ref[c]["sampler_10hz_ms"]) / 1000)  # noqa: E731
+    return {**LSB, "pass_s": b("aifoundry2"), "pass_s_a3": b("aifoundry3"), "pass_s_a1c1": b("aifoundry1-c1"),
+            "board_refresh_ms": ref,
+            "sp_pass_s_sampled_a2": s("aifoundry2", "sampled_ms"), "sp_pass_s_sampled_a3": s("aifoundry3", "sampled_ms"),
+            "sp_pass_s_sampled_a1c1": s("aifoundry1-c1", "sampled_ms"), "sp_pass_s_quiet_a2": s("aifoundry2", "quiet_ms"),
             "sp_pass_s_quiet_a3": s("aifoundry3", "quiet_ms"), "sp_pass_s_quiet_a1c1": s("aifoundry1-c1", "quiet_ms"),
             "sp_pass_ms": per,
-            "source": "results/tel.json of the version-3 campaign (TEL-P1, TEL-P3, TEL-P5): the SP stats trace's pass, "
-                      "per pass, quiet and under ettelem at 10 Hz; the medians over the passes"}
+            "source": "results/tel.json of the version-3 campaign: the board value's refresh (TEL-S, phase-folding the "
+                      "board-power stream, per pass, under ettelem at 10 Hz and a light poller; pass_s* are the means over "
+                      "the passes), and the SP stats trace's own pass (TEL-P1, TEL-P3, TEL-P5, per pass, quiet and under "
+                      "ettelem at 10 Hz; sp_pass_s* are the medians over the passes)"}
 
 
 # ---------------------------------------------------------------- energy events
@@ -571,7 +584,7 @@ def energy_events(man, reruns, wire, model, hrep, tel):
     for k, lab in (("pair", "a byte messaged to the other minion of a pair"), ("neigh", "a byte messaged around a neighbourhood"),
                    ("shire", "a byte messaged around a shire"), ("xshire1", "a byte messaged to the next shire by ID")):
         add("msg", "m-" + k, lab, "byte", src_m, {"any": {**pooled(rg[k], 1e-12), "rate": r3sig(rl[k])}})
-    src_r = {"url": PAGES + "et-soc1-on-chip-relay#the-same-watts-a-thirtieth-of-the-work", "label": "Hand it to the next shire, §2"}
+    src_r = {"url": PAGES + "et-soc1-on-chip-relay#power-within-a-watt-a-thirtieth-of-the-work", "label": "Hand it to the next shire, §2"}
     for k, lab in (("dram", "a byte relayed through DRAM"), ("hop", "a byte handed to the next shire's scratchpad"), ("scp", "a byte kept in the shire's own scratchpad")):
         add("msg", "r-" + k, lab, "byte", src_r, {"any": {**pooled(reruns["relay_pj_per_byte"][k], 1e-12), "rate": r3sig(rel[k])}})
 
@@ -602,7 +615,7 @@ def energy_events(man, reruns, wire, model, hrep, tel):
 
 
 ENERGY_EVENTS_SOURCE = ("tools/ettelem/sync_hub_data.py from manual.json (its gs block: E48's gathers, scatters and packed atomics), reruns.json and its rerun passes (V3-RL and the 23 September directories), the wire report.json, "
-                        "the Horace model.json / report.json, and the version-3 campaign's tel.json (the meter's pass)")
+                        "the Horace model.json / report.json, and the version-3 campaign's tel.json (the meter's refresh and the SP's pass)")
 
 
 # ---------------------------------------------------------------- the claims check, per page
@@ -689,6 +702,9 @@ def claims_series(s):
                 k = card_set("+".join(sorted(cards | (set(k.split("+")) - {"none"} if keep else set()))))
         v = VERDICT_ALIAS.get(v, v)
         p["verdict"][v] = p["verdict"].get(v, 0) + 1
+        if c["id"] in over:   # the claims the campaign tested, by the same rule: what each page's own note counts
+            t = p.setdefault("tested", {})
+            t[v] = t.get(v, 0) + 1
         p["cards"][k] = p["cards"].get(k, 0) + 1
     if over and tested != len(over):
         sys.exit(f"{s['overlay']}: {len(over) - tested} tested claims are not in {s['file']}")
@@ -701,6 +717,8 @@ def claims_series(s):
     rank = lambda k: (k.count("+") * -1 if k != "none" else 1, [CARD_ORDER.index(c) if c in CARD_ORDER else 9 for c in k.split("+")], k)  # noqa: E731
     for p in pages.values():
         p["verdict"] = {k: p["verdict"][k] for k in sorted(p["verdict"], key=lambda k: (order.index(k) if k in order else len(order), k))}
+        if "tested" in p:
+            p["tested"] = {k: p["tested"][k] for k in sorted(p["tested"], key=lambda k: (order.index(k) if k in order else len(order), k))}
         p["cards"] = {k: p["cards"][k] for k in sorted(p["cards"], key=rank)}
     src_txt = os.path.relpath(s["file"], ROOT) + f" (claims[].page, .cards, .{s['verdict']})"
     if over:
@@ -775,6 +793,15 @@ def main():
     hub = json.loads(text)
     new = build(hub, only)
     out = dumps(new) + "\n"
+    # Each index row's v3_note (hand-kept: the counts the page's own "Checked on three cards" note gives, by the page's
+    # reading) must cover exactly the claims the campaign tested on that page, which the scoreboard counts by V3_ORDER.
+    after = next((s_ for s_ in new.get("claims_status", {}).get("series", []) if s_.get("tested")), None)
+    for r in new.get("reports", []):
+        slug = r["url"].split("#")[0].rstrip("/").split("/")[-1]
+        if r.get("v3_note") and after:
+            got, want = sum(n for n, _ in r["v3_note"]), sum(after["pages"].get(slug, {}).get("tested", {}).values())
+            if got != want:
+                sys.exit(f"{os.path.relpath(a.hub, ROOT)}: reports[{slug}].v3_note counts {got} claims; the campaign tested {want} there")
     if a.check:
         if out == text:
             print(f"{os.path.relpath(a.hub, ROOT)}: up to date" + ("" if set(only) == set(BLOCKS) else f" ({', '.join(only)})"))
@@ -793,7 +820,7 @@ def main():
         msg.append(f"fit rms {rms} W, droop {P['droop']['mv_per_dram_offrail_w']:.4f} mV/W, rail filter tau {tau} s ({', '.join(CARDS)})")
     if "energy_events" in only or "meter" in only:
         M = new["energy_events"]["meter"]
-        msg.append(f"{len(new['energy_events']['events'])} energy events, SP pass {M['pass_s']}/{M['pass_s_a3']}/{M['pass_s_a1c1']} s sampled")
+        msg.append(f"{len(new['energy_events']['events'])} energy events, board refresh {M['pass_s']}/{M['pass_s_a3']}/{M['pass_s_a1c1']} s sampled")
     if "claims_status" in only:
         msg.append("claims status for " + ", ".join(f"{len(s['pages'])} pages ({s['id']})" for s in new["claims_status"]["series"]))
     print(f"wrote {os.path.relpath(a.hub, ROOT)}: " + "; ".join(msg))

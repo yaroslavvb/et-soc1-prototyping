@@ -33,7 +33,9 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   version-3 data"). On 27 September they were merged with the review's chart and collapsible-depth passes (below);
   MIRROR.md's "Last check" says whether the live pages equal these files. The gathers and scatters that ran on each
   of the three cards after its campaign blocks (E48, 26 September 03:19–09:22, `tools/claims-v3/gs/`) are reduced
-  (`results/gs.json`, `gs-full.json`) and registered; no page carries them yet (Q52 asks for them where they belong).
+  (`results/gs.json`, `gs-full.json`) and registered, and since 27 September they are on the energy manual (§3.1,
+  §4.3, §4.4, §6), memory hierarchy ("Irregular access"), influence functions (S3) and the hub's chart of events (Q52;
+  03-experiments.md, E48, "Report").
   To reduce again:
   `tools/claims-v3/collect.sh <dir>` then `tools/claims-v3/reduce_all.sh <dir> <out>` (all-cards outcomes over the
   three campaign cards, `tools/claims-v3/campaign.py`, per amendment A4). Before any card work, check `et-who`: a
@@ -329,7 +331,7 @@ flock -n /run/lock/etsoc-shire0.lock make bench-power                    # about
   fp16→fp32 or int8→int32. A is double-buffered in the L1 scratchpad, and B streams through TenB.
 - **Checking.** The host checks every minion's result exactly against its own computation.
 - **Power.** `scripts/et-power-log.sh` samples board power from the service processor about 8 times a second (a new
-  reading about every 133 ms on aifoundry2; aifoundry3's changes only about every 250 ms).
+  reading about every 133 ms on aifoundry2 and 224 ms on aifoundry3; 156 and 263 ms while ettelem samples at 10 Hz, E41).
   `scripts/mmbench-power.py` averages it over each workload's launch windows.
 - **Output.** `build/mmbench-power/`: `power.csv`, `runs.jsonl` and `results.json`.
 

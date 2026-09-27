@@ -109,17 +109,20 @@ this list differ, the page holds.
   `package.json`: run `npm ci` once at the repo root): the publishing host blocks external scripts, so a runtime MathJax from a CDN leaves every
   equation as raw TeX. After any `spacesheep deploy`, re-check that the space is still public: folder deploys have
   changed visibility in both directions (`docs/reports/MIRROR.md`).
-- `docs/reports/2026-09-22-dvfs-leakage.html` checks six claims about DVFS loops and leakage suppression, from a
+- `docs/reports/2026-09-22-dvfs-leakage.html` checks five claims about DVFS loops and leakage suppression, from a
   conversation with David Kanter (MLCommons) on 20 September 2026 (private notes), against this chip: the governor
   reads a measured PMIC wattage rather than estimating power from activity counters, and from a cool die it hunts
   across the 65 °C threshold, which has no dead band (36 transitions analysed, `tools/ettelem/analyze_dvfs.py`); the
   open (Erbium) RTL's per-minion sleep controls are tied off and no firmware drives them; a wake-up probe finds no
-  array power gating (`gen_ops.py wakeup`); and leakage is 31–45% of a busy card (55–80% of an idle one) against his 5–30%. The governor was
+  array power gating (`gen_ops.py wakeup`); and leakage is 55–80% of an idle card against his 5–30% (the idle law's
+  readings put it at 31–45% of a busy one, but the three-card check could not establish that it exceeds 30% under
+  load). The governor was
   read at et-platform `353f20e`; the cards' own trace strings match an older firmware build. It now also covers the three lab machines: aifoundry3's service processor reports a
   static TDP of **0 W** (the driver reports 65 W on every machine), which makes the governor's step-up test
   unreachable and holds that card at 600 MHz for as long as its TDP stays at zero (a boot service sets it at every boot; corrected
-  25 Sep 2026), and aifoundry1's two cards could not be opened until 25 Sep 2026 (an empty module version string, not the
-  `srcversion` difference the page names; 14-card-behaviour.md). Public space (the user's choice)
+  25 Sep 2026), and aifoundry1's two cards could not be opened until 25 Sep 2026 (an empty module version string, not a
+  `srcversion` difference; 14-card-behaviour.md); its card 1 then joined the three-card check, and its card 0
+  overheats. Public space (the user's choice)
   https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage, uuid `171dcd4a-5b6d-49d3-aca0-db4980fabfa5`.
   Read a card's governor inputs with `tools/etcfg` (driver ioctl) and `build/ettelem/ettelem config`
   (service processor); both are read-only.
@@ -152,12 +155,15 @@ this list differ, the page holds.
   it leakage), an awake minion (2 mW), every instruction on zeros/constant/random data (integer add 6 pJ on zeros and 9 on
   random, float add 23, 8-lane FMA 27 on zeros and 56 on random), bytes at every level (L1 0.5 pJ/B, own scratchpad 2-8, DRAM 90-140,
   the L1 write-back path to DRAM 240-330), bytes between shires, synchronisation, worked compositions, and the
-  second card at 0.95× the first over 56 entries. Measured by the new `workloads/enercat` (`run_enercat.sh`,
+  second card at 0.95× the first over 56 entries (the first edition, two cards). Measured by the new
+  `workloads/enercat` (`run_enercat.sh`,
   `analyze_enercat.py`); every table is assembled from its data file by `tools/ettelem/build_energy_manual.py`
   and the pages rendered by `render_energy_manual.py`, so no number is typed by hand. The second edition
   (`workloads/enercat/run_catalogue.py`) measures every one of the 161 instructions the silicon executes in U-mode
   three times in shuffled order on both working cards (pass-to-pass error 1.9% median, second card 0.95× over 386
-  configurations), and separates a memory access into its parts: one mesh hop is 0.6–0.7 pJ/B on zeros and 1.7–1.9 on
+  configurations on 23 September; since 26 September the catalogue is re-measured on three cards, and in the median
+  entry aifoundry3 is 0.97× and aifoundry1's card 1 0.96× aifoundry2 over 392), and separates a memory access into its
+  parts: one mesh hop is 0.6–0.7 pJ/B on zeros and 1.7–1.9 on
   random data fitted over 1–8 hops (2.2–2.4 over 1–6 hops, in line with heat per millimetre; the three cards' ranges since 26 September; the difference is bits that
   change between flits plus ones carried), a 64 B line fill into the L1 is about 100-205 pJ (zeros to random data), the DRAM row
   pattern makes no difference, the SRAM rail leaks 1.6 W at 67 °C rising to 2.6 W at 82 °C, and each class of

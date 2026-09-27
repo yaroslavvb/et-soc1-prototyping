@@ -87,7 +87,8 @@ Horace experiment</a>'s model of power from the bits the multiply-add unit clock
 once per pass of the device-management task. (The cards run an older build of this governor, of about mid-May 2024 by
 their firmware revisions; <a href="#method-and-what-is-not-established">§8</a> says what differs.) Reduced to its logic:</p>
 <pre><code>once per device-management pass: every <span data-v="passQ"></span>,
-<span data-v="passE"></span> while a 10 Hz telemetry sampler queries the card
+<span data-v="passE"></span> while a 10 Hz telemetry sampler queries the card, in the SP's own trace
+(the board value changes every <span data-v="refH"></span> in the sampler's stream, §7: the two methods differ by <span data-v="methodDiff"></span> ms)
 (each I2C sensor read waits 1 ms, then the pass sleeps DM_TASK_DELAY_MS = 10 ms):
     T   = pvt_get_minion_avg_temperature()          // on-die thermal sensor, whole degrees
     P   = pmic_read_average_soc_power()             // MEASURED board power, from the PMIC over I2C
@@ -392,7 +393,7 @@ the idle, <span data-v="unsensed"></span> W, is on no rail sensor (<a href="http
   under each row is that row's mean ± one standard deviation. The first rows are the sessions of 21–24 September; the last
   are the three-card check's cooling cycles of 26 September, 15 minutes each from 88–90 °C, whose single figure averages a
   gap that grows with temperature on aifoundry3 and aifoundry1's card 1 (the law chart's second button shows it degree by
-  degree). Zero is the law fitted on aifoundry2.</p>
+  degree).<span id="off-basis"></span> Zero is the law fitted on aifoundry2.</p>
   <div id="off-leg"></div>
   <div class="chart" id="offstrip"></div>
   <p class="small" id="off-sum"></p>
@@ -576,7 +577,7 @@ the leakage shares as ranges; aifoundry3's idle offset over sixteen sessions; "e
 26 September (version 4), the three-card check: the wake-up probe on three cards, the governor's settings read from the check,
 aifoundry3's zero TDP set by a boot service, not flashed, the pass period per card, the idle law against the cooling cycles,
 and the busy leakage share no longer said to exceed 30%. 27 September: the review of 26 September (aifoundry3's resting
-temperatures; §6 and the open questions on three cards; verdict row 6 cut), the governor plane per card, and detail folded
+temperatures; §6 and the open questions on three cards; verdict row 6 cut; the cooling cycles' offsets given over whole-degree bins, as in the energy manual, with the by-sample figure beside them), the governor plane per card, and detail folded
 into sections.</p>
 </details>
 

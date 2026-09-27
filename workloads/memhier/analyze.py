@@ -19,7 +19,7 @@ docs/reports/data/2026-09-25-claims-v3/raw it also embeds v3: each card's chases
 (26 September, 600 MHz, the passes V3-LAT kept; see v3_curves), which the latency chart draws beside this session's.
 It also embeds gs, E48's gathers and scatters on the same three cards (26 September), as the energy manual's manual.json
 pools them (--manual, by default docs/reports/data/2026-09-23-energy-manual/manual.json), for the "Irregular access"
-section.
+section, with gs.stream: each level read contiguously per 4 B, the energy manual's own reference for that table.
 """
 import argparse
 import glob
@@ -344,7 +344,8 @@ def main():
     # harts of 1,024 minions), the 32 B-block gather and the verdicts; per card mean and standard error, pooled mean and
     # lo-hi over every pass of every card.
     if args.manual and args.manual != "none" and os.path.exists(args.manual):
-        G = json.load(open(args.manual)).get("gs")
+        MJ = json.load(open(args.manual))
+        G = MJ.get("gs")
         if G:
             K = G["configs"]
             want = {c for lv in G["levels"] for c in lv["cols"].values()}
@@ -361,7 +362,28 @@ def main():
                 "items": {k: {q: v[q] for q in ("outcome", "outcomes", "range", "bound_elements_per_s", "per_card") if q in v}
                           for k, v in G["items"].items() if k in ("GS-L1", "GS-MH", "GS-UC", "GS-DRAM", "GS-CHECK")},
                 "dropped": G["dropped"], "source": G["source"]}
-            print(f"gathers and scatters (E48): {len(data['gs']['configs'])} configurations from {args.manual}")
+            # Each level read contiguously, per 4 B: the energy manual's own reference for its section 4.4 table (its
+            # gsStream: gs.levels[].stream names the source), so both pages print the same column. "cat" is a catalogue
+            # entry (flw.ps per 32 B instruction, or pJ/B), "lv" reruns levels_pj_per_byte, "lvc" the same levels read
+            # with random contents (levels_by_contents_pj_per_byte.random). Where the spec sheet's probe differs (the L1
+            # and DRAM), this is the manual's vector load and tensor load of random data, not energy_levels.
+            CB, RRM = MJ.get("catalogue", {}).get("combined", {}), MJ.get("reruns", {})
+            stream = {}
+            for lv in G["levels"]:
+                if not lv.get("stream"):
+                    continue
+                src, key = lv["stream"]
+                if src == "cat":
+                    c, k = CB.get(key), (4 / 32 if key.startswith("flw.ps") else 4)
+                elif src == "lv":
+                    c, k = RRM.get("levels_pj_per_byte", {}).get(key), 4
+                else:
+                    c, k = RRM.get("levels_by_contents_pj_per_byte", {}).get("random", {}).get(key), 4
+                if c:
+                    stream[lv["key"]] = {"pj_per_4B": c["mean"] * k, "source": [src, key]}
+            data["gs"]["stream"] = stream
+            print(f"gathers and scatters (E48): {len(data['gs']['configs'])} configurations from {args.manual}; streamed per 4 B: " +
+                  ", ".join(f"{k} {v['pj_per_4B']:.2f} pJ" for k, v in stream.items()))
     if args.embed:
         html = open(args.embed).read()
         pat = re.compile(r'(<script type="application/json" id="memhier-data">)(.*?)(</script>)', re.S)

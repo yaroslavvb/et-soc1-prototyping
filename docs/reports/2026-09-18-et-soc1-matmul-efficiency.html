@@ -1155,7 +1155,7 @@ timeout 10 /opt/et/bin/it_test_code_loading --mode=pcie   # the card hello world
     }
     MODES.forEach(function (mode) {
       reads[mode] = CK.readout("eff-op-" + mode + "-read");
-      frames[mode] = CK.frame("eff-op-" + mode, { height: 108 + 11 * BCARDS.length, minW: 300, maxW: 880,
+      frames[mode] = CK.frame("eff-op-" + mode, { height: 108 + 11 * BCARDS.length, minW: 280, maxW: 880,
         label: mode + " efficiency by operand, log axis from 5 to 3,000 " + UNIT[mode], draw: drawRow(mode) });
     });
     document.getElementById("eff-op-cap").textContent = "Board power (tensor.rows, aifoundry2, the same basis as the “randn” series above) at each operand pattern; the diamond is the A100 SXM4 datasheet's peak ÷ TDP. Under each row, one line per card on the same basis, from zeros to random-normal (hover a mark for its pattern; the energy manual's four runs per card and pattern, 26 September; the throughput is the same on every card, the power is each card's own, at about 80 °C on aifoundry2 and aifoundry1 card 1 and 57–58 °C on aifoundry3, whose idle is lowest). Each card's power above idle carries amendment C2's launch-temperature offset, up to about 1.7 W (on aifoundry3).";

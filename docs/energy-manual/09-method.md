@@ -4,9 +4,10 @@
 
 1. **Board power** is the PMIC's reading through the management interface, 10 mW resolution, sampled at 10 Hz by
    `tools/ettelem`; under that sampling it takes a new value about every 156 ms on aifoundry2, 158 ms on aifoundry1's
-   card 1 and 263 ms on aifoundry3 (the version-3 check, three passes each; the service processor's own pass, read with
-   a lighter poller, is 126–135, 134–139 and 223–224 ms, and the 10 Hz sampler lengthens it measurably only on
-   aifoundry3). The three rail figures (minions, SRAM, mesh) are the PMIC's own running averages (roughly first-order,
+   card 1 and 263 ms on aifoundry3 (the version-3 check, three passes each; the board value's refresh seen by a light
+   poller is 126–135, 134–139 and 223–224 ms, and that the 10 Hz sampler lengthens this refresh is resolved at 99% only
+   on aifoundry3; the service processor's own pass, timed in its trace, lengthens under the sampler on every card: from
+   133 to 160 ms on aifoundry2, 135 to 162 ms on aifoundry1's card 1 and 224 to 266 ms on aifoundry3). The three rail figures (minions, SRAM, mesh) are the PMIC's own running averages (roughly first-order,
    time constant 1.13 s on aifoundry2, 1.24 s on aifoundry3 and 1.15 s on aifoundry1's card 1), which the service
    processor reports; together
    they account for about half of board power, and the rest — PCIe, the DDR PHY, the IO shire, the regulators'

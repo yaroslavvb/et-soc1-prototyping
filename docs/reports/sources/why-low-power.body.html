@@ -10,8 +10,8 @@ of about 19 between int8 and fp32 held on every card; the integer loop's cost an
 the leakage split was not re-tested. The 21 September session's numbers stay, labelled as its own
 (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">the record</a>).</div>
 
-<p class="lede">An A100 draws 330 to 400 W under a matrix multiply. This card draws 38 to 64 W at 80 °C (the second card,
-aifoundry3, 27 to 50 W at 56 °C), and Esperanto advertised the chip at under 20 W. Both chips are TSMC 7 nm. Esperanto's own explanation is one line,
+<p class="lede">An A100 draws 330 to 400 W under a matrix multiply. This card, aifoundry2, draws 38 to 64 W at 80 °C (aifoundry3,
+27 to 50 W at 56 °C), and Esperanto advertised the chip at under 20 W. Both chips are TSMC 7 nm. Esperanto's own explanation is one line,
 \(P = C_\mathrm{dynamic}\,V^{2}f + P_\mathrm{leakage}\), with every term pushed down. This report measures each term on a
 real card and takes them away one at a time.</p>
 <p class="lede">The short answer: <b>the ET-SoC-1 is low power mostly because it runs at 0.52 V and 600 MHz where an A100 runs
@@ -29,7 +29,7 @@ wake-up test), so they still leak.</p>
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">Switching power, same capacitance</div><div class="val">5–6× less</div><div class="sub">0.52 V and 600 MHz against about 0.85 V and 1,160–1,410 MHz: V² gives 2.7×, the clock 1.9–2.35×</div></div>
-  <div class="card kpi"><div class="lab">A core spinning in an integer loop</div><div class="val">0.4–1.5 mW</div><div class="sub">by card, 26 September: 1,024 minions add 1.5 W on this card (1.46 W on 21 September), 0.4 W on aifoundry3 and 0.7 W on aifoundry1-c1; a tensor op on zeros 1.9, 0.8 and 1.2 W; random fp32 27.2, 24.7 and 27.8 W, as registered (at the die temperature of each launch, over the two readings of post-data note C2: the loop 0.8–1.6, 1.3–1.9 and 0.0–0.8 W, zeros 1.1–1.9, 1.7–2.2 and 0.4–1.2 W, random 26.5–27.2, 25.7–26.3 and 27.1–27.9 W). The energy manual's faster addi loop costs 2.1 mW per minion</div></div>
+  <div class="card kpi"><div class="lab">A core spinning in an integer loop</div><div class="val">0.4–1.5 mW</div><div class="sub">by card, 26 September: 1,024 minions add 1.5 W on this card (1.46 W on 21 September), 0.4 W on aifoundry3 and 0.7 W on aifoundry1-c1; a tensor op on zeros 1.9, 0.8 and 1.2 W; random fp32 27.2, 24.7 and 27.8 W, as registered (at the die temperature of each launch, over the two readings of post-data note C2: the loop 0.8–1.6, 1.3–1.9 and 0.0–0.8 W, zeros 1.1–1.9, 1.7–2.2 and 0.4–1.2 W, random 26.5–27.2, 25.7–26.3 and 27.1–27.9 W). The energy manual's faster addi loop costs about 1.9 mW per minion on one hart (1.9–2.0 W for 1,024 minions on the three cards) and 3.0 mW on both</div></div>
   <div class="card kpi"><div class="lab">Leakage at 80 °C</div><div class="val">+0.65 W per °C</div><div class="sub">the measured slope of idle power; of the 36 W idle, 20–29 W is leakage (23 W in the best fit), a split the idle data do not pin down (this card, one session; not re-tested on three cards)</div></div>
   <div class="card kpi"><div class="lab">Energy per multiply-add, over idle</div><div class="val">0.32 · 2.7 · 6.0 pJ</div><div class="sub">int8 · fp16 · fp32 on random data. The chip was built for the first. Held on three cards on 26 September: 0.31 · 2.7 · 5.9 pJ here, 0.26 · 2.4 · 5.4 on aifoundry3, 0.31 · 2.7 · 6.1 on aifoundry1-c1</div></div>
   <div class="card kpi"><div class="lab">Dense matmul, per FLOP at the board</div><div class="val">3.3–7.0 vs 1.3 pJ</div><div class="sub">fp16–fp32 on this card (26 September: 2.6–5.5 pJ on aifoundry3, 4.1–8.5 pJ on aifoundry1-c1) against the A100's bf16 tensor cores: low power is not low energy per FLOP</div></div>
@@ -178,8 +178,8 @@ second table). At the die temperature of each launch the loop adds 0.8–1.6 W o
 registered item computes, only this card's excludes zero, and only if the launches came on a downward step of the reading
 (1.6 W [0.6, 2.5]; 0.8 W [−0.1, 1.7] if the reading is the die temperature). That loop, four adds and a branch, issues about 0.3 instructions per cycle on
 hart 0; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#a-core-that-is-awake">energy manual's</a>
-tighter addi loop draws 2.1 mW per minion on one hart and 3.4 mW on both, and a nop or a fence costs 4.5–5.3 pJ per issue
-slot. Esperanto's claim that RISC-V compatibility costs little is
+tighter addi loop draws about 1.9 mW per minion on one hart (1.87 mW on this card; 1.9–2.0 W for 1,024 minions on each of
+the three cards) and 3.0 mW on both, and with both harts a nop or a fence costs 4.4–5.1 pJ per issue slot. Esperanto's claim that RISC-V compatibility costs little is
 borne out. A fully gated TensorFMA (zeros) costs 1.9 W for all cores on this card (1.9, 0.8 and 1.2 W on the three cards on
 26 September; 1.1–1.9, 1.7–2.2 and 0.4–1.2 W at the die temperature of each launch); presumably the integer pipeline sleeps
 during a tensor instruction.</li>
@@ -350,7 +350,7 @@ the leakage headline became the measured slope with the split as a range; this p
 manual's. 26 September (version 4), the three-card check: its values beside the tested claims, the linearity in active cores
 and the integer loop per card, and post-data note C2's two readings of the launch temperature. 27 September: the review of
 26 September (aifoundry3's clock set by a boot service; "brackets" corrected; the integer loop's floor; the idle law's bins;
-the energy manual's three-card values), a capacitance ladder, and detail folded into sections.</li>
+the energy manual's three-card values, including its addi loop and issue-slot costs), a capacitance ladder, and detail folded into sections.</li>
 </ul>
 </details>
 

@@ -1156,8 +1156,14 @@ below 0.924 × the flip model, its DFT pair 1.67 [1.45–1.90] W above (predicte
 fp16) and 318.00 (int8); a2's nine EM4 patterns within 2% of 21 Sep.
 **Caveats:** corrected intervals use t = 16.05 at 4 runs (5.84 at plain 99%), so T1's equivalence and a2's T4
 equivalences fail on width, points within 0.51 W of zero; on a3 all three non-DFT intervals lie below zero. a3
-launches 23 °C cooler, so its lower values are the card at its temperature (E40 could not separate the two). a1c1
-takes a2's leakage slope, its own unmeasured, and idled at 50.15 W before launch (a2 36.34, a3 25.78).
+launches 23 °C cooler, and the registered values carry each card's launch-temperature offset (post-data note C2,
+revised, in `docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md`): the switching metric is referenced to a fixed
+launch (80.9 °C a2 and a1c1, 55.8 °C a3), so at the die temperature of each launch a2 reads 0.62 W high to 0.15 W low,
+a3 0.91–1.43 W low and a1c1 0.73 W high to 0.05 W low over the note's two readings of the whole-degree launch
+temperature. Most of a3's lower values is that offset, not the card: at the same die temperature a3 switches
+0.958–0.969 of a2 over the Horace patterns (registered 0.895; E46's independent catalogue 0.972). E40 could not
+separate card and temperature. a1c1 takes a2's leakage slope, its own unmeasured, and idled at 50.15 W before launch
+(a2 36.34, a3 25.78).
 **Report:** [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4); [Why is the ET-SoC-1 low power?](https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power) (A5); [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15); [The ET-SoC-1's DVFS loop](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) (A11); [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2); [Ridge points](https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points) (A19).
 
 ## E39 — Sparse-compute energy and TenB streaming, strict start (2026-09-25 21:39 – 09-26 05:07, three cards)
@@ -1187,9 +1193,14 @@ inside 0.80–0.92 (`[item=ABLB-3ab]`); slope of power on the useful-slot fracti
 (gemv-dense-0 − dense-90) +1.66 [0.65–2.68] / +1.59 [1.05–2.14] / +1.75 [0.72–2.78] W (`[item=ABLB-3f]`); fma on zeros
 over the integer loop +0.87 [−0.87–2.62] / +0.69 [0.08–1.29] / +0.67 [0.04–1.31] W (`[item=ABLB-3g]`).
 **Caveats:** three blocks give df 2 (t = 9.925); int8 ones' TenB cost and the gating alone miss their predicted bands
-(+3 to +8, +0.3 to +1.5 W), though the rule tests only the sign. "The difference is the kernel" is undecided: the
-reducer ran without V3-MMB's values (`[item=ABLB-2b].kernel_clause`). a3 runs 23 °C cooler than a2 and a1c1, so its
-values are that card at that temperature. a1c1 idled at 50.17 W before launch (a2 36.38, a3 25.77).
+(+3 to +8, +0.3 to +1.5 W), though the rule tests only the sign. "The difference is the kernel" is kept: the first
+reduction ran without V3-MMB's values and left it pending; the second, with them (AMENDMENTS.md, "Implementation note
+(26 Sep 2026, after the first reduction)"), finds mmbench int8 over idle above this int8 random in the L1 by +18.02
+[16.98–19.06] W on a2 and +18.03 [17.39–18.67] W on a3, over the clause's 10 W (`[item=ABLB-2b].kernel_clause`). a3
+runs 23 °C cooler than a2 and a1c1, and the values carry each card's launch-temperature offset (post-data note C2,
+revised): at the die temperature of each launch a2 reads 0.49 W high to 0.29 W low, a3 0.81–1.34 W low and a1c1 0.73 W
+high to 0.05 W low, so most of a3's lower values is the reduction's fixed reference, not the card. a1c1 idled at 50.17
+W before launch (a2 36.38, a3 25.77).
 **Report:** [Sparse compute](https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute); [Matmul efficiency](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency); [The Horace experiment](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment) (A4); [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2).
 
 ## E40 — The card or its temperature? Switching power at two launch temperatures on each card (2026-09-25 21:46 – 09-26 06:03, three cards)
@@ -1308,8 +1319,15 @@ and 3.7–4.7 (random) pJ/B. A2.rl: a1c1 counts busy samples for its 600 MHz rul
 `p4.attempt-1790422676`; reduced to `V3/results/rl.json` (`.log`).
 **Result:** registered: 18 of 30 parts PASS (RL-a to RL-d, RL-g, RL-h, X3 (a) pair and the five 1 KB cross-shire
 rings, X3 (e) inside-shire rings); CARD-DIFFERENT X3 (a) shire-c4 and xshire1-c4, both (d) spin bands, (e) scp-remote;
-FAIL RL-f and X3 (a) neigh and shire; INSUFFICIENT X3 (a) xshire16 and the three X4 rows. All cards: relay DRAM and
-RL-h CARD-DIFFERENT (a1c1), RL-f INSUFFICIENT, the rest the same. Per card, mean [99%], 6 passes
+FAIL RL-f, X3 (a) neigh and shire, and the three X4 rows (ranges overlap: no verdict); INSUFFICIENT X3 (a) xshire16.
+All cards: relay DRAM and RL-h CARD-DIFFERENT (a1c1), the rest the same (RL-f FAIL: a1c1's own-scratchpad relay 4.86
+[4.62–5.09] pJ/B against its own catalogue's low edge 5.04, at the edge like a2's 4.05 against 4.37 and a3's 4.11
+against 4.30). These are the second reduction's outcomes (AMENDMENTS.md, "Implementation note (26 Sep 2026, after the
+first reduction)"): the first ran RL-f and RL-X4 without a1c1's low edge and E38's FLOP side and left RL-f
+INSUFFICIENT on all cards and the X4 rows INSUFFICIENT. X4 balance points, FLOP/B, a2 / a3 / a1c1: L3 random 3.97 /
+4.63 / 6.08 and another shire's scratchpad 2.52 / 2.79 / 3.19 against the spec ridge 3.0, the in-shire TensorSend
+ring on zeros 10.43 / 25.45 / 19.66 against the measured 8.78; a2's interval overlaps its ridge in all three
+(`[item=RL-X4, part=<part>].per_card.<card>.balance_point`, `.balance_ci`). Per card, mean [99%], 6 passes
 (`.items[item=<id>, part=<part>].per_card.<card>.mean`, `.ci99`): ring slope a2 1.78 [1.31–2.25], a3 1.73 [0.48–2.97],
 a1c1 1.74 [0.95–2.53] pJ/B per hop, pooled 1.753 (predicted a2 2.3, a3 1.3); relay DRAM ÷ next shire 12.9, 13.0, 13.1×
 (pooled 12.97; predicted 11.2, 13.5); relay through DRAM 111.3, 107.5, 129.9 pJ/B; L1 level 0.77, 0.75, 0.72 pJ/B,
@@ -1320,7 +1338,7 @@ leaving-the-shire step 5.17 [3.35–6.99] pJ/B. Spin − ring: pair 0.45, 0.32, 
 **Caveats:** the s ↔ s+16 ring starved the sampler on every card in every pass (median 63–141 ms; aifoundry3 had
 stayed at 22 ms in E29), so its 18 bursts were dropped (`dropped_bursts`). RL-g's scratchpad parts mix the two
 contents and pass through their width; RL-h is the test (the prefill covers 87.5% of the bytes read). RL-f and RL-X4
-were reduced without the catfull low edge and the V3-ABL-A FLOP side (`low_edge_source`, `flop_source` null). Dies at
+take their inputs from `V3/results/inputs/` (`low_edge_source`, `flop_source`), since the second reduction. Dies at
 block start and end: a2 71–77 °C, a3 55–59 °C, a1c1 60–66 °C, all idling at 600 MHz, with aifoundry2's leakage law on
 every card.
 **Report:** [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication); [Memory hierarchy](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy); [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15); [Ridge points](https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points) (A19); [Hand it to the next shire](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay) (A14).

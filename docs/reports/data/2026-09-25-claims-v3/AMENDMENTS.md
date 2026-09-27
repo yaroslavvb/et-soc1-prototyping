@@ -931,6 +931,7 @@ its own launch temperature; aifoundry1-c1's is 1.009 and 1.004. The at-launch 0.
 independent catalogue ratio (median 0.972, E46), so most of aifoundry3's apparent 10% deficit in V3-ABL-A is the
 reference offset, and the cards differ by about 3%. The model scales (the aifoundry2 flip model's prediction to each
 card) move from 1.000 / 0.883 / 0.995 to 0.956 / 0.926 / 0.959 (aifoundry2 / aifoundry3 / aifoundry1-c1).
+[The registered 1.000 / 0.883 are superseded: see the correction after the revision below.]
 
 **C2, revised the same day (review of the offsets).** The launch temperatures above are the die sensor's whole-degree
 readings, while the references (80.9 C, 55.8 C) are thermal-model temperatures at the 21 and 22 September launches, which
@@ -942,3 +943,7 @@ model scale is 0.994, matching its 21 September fit, which favours it; the whole
 conclusion holds under both: at the same die temperature aifoundry3 switches 0.958-0.969 of aifoundry2 (registered 0.895;
 the catalogue's independent 0.972), and aifoundry1-c1 1.004 of it (registered 1.009). Model scales: registered
 0.986 / 0.882 / 0.995; at launch 0.956-0.994 / 0.926-0.952 / 0.959-0.997. Pages state the range.
+Correction (27 Sep 2026, review): these registered model scales supersede the first paragraph's 1.000 / 0.883 /
+0.995. The registered scales are the per-card least-squares fits (`cards-v3.json` in
+`docs/reports/data/2026-09-21-horace-aifoundry2/`, `fit.<card>.scale`: 0.98599, 0.88247, 0.99478); the 1.000 was
+aifoundry2's entry in `scale`, 1 by definition (the reference card), and 0.883 misrounded 0.8825.

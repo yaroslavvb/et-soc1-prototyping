@@ -158,7 +158,10 @@ comparison would be far closer. **That comparison was not run.**
 - **Everything here is board power**, including LPDDR4x, regulators (about 7 W of the 28 W under random data is
   on no rail sensor, some 4 W of it regulator delivery loss; see [19](19-observability-and-the-unmetered.md)) and
   PCIe. Esperanto's 20 W is a chip figure.
-- **One card.** aifoundry3 switches about 8% less for the same work ([11](11-thermal-model.md)).
+- **Mostly one card.** aifoundry3 switched about 8% less than aifoundry2 for the same work in the 22 September session
+  ([11](11-thermal-model.md)); in the three-card check (E38, 26 September) 10% less as registered and 3–4% less
+  (0.958–0.969) at the same die temperature (AMENDMENTS.md, post-data note C2; the Horace experiment, §10), while
+  aifoundry1-c1 switched 0.4% more (1.004).
 - **The 800 MHz numbers come from seven short runs** in which the governor changed the clock within seconds
   (E10). They agree with V²f to within about 10%, but deserve the dedicated run that `tools/ettelem/run_vf_cold.sh` was
   written for and which has never been executed.

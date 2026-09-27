@@ -298,8 +298,8 @@ LAD = (function () {
   setHTML('ev-note', `σ defaults to 0.2 W, about the idle law's rms (${num(M.idle_law_rms_w, 3)} W): the uncertainty of a baseline predicted from temperature. The hot line's contended atomic, about ${num(hot.e[0] * hot.rate, 1)} W over idle, carries a bar of ${sgn(100 * (hot.e[1] / hot.e[0] - 1), 0)}% to ${sgn(100 * (hot.e[2] / hot.e[0] - 1), 0)}%, about that size. ` +
     `A burst bracketed by idle measured just before and after does better than σ = 0.2 W on one card; the bars are the range over every pass on every card measured, so they include the difference between the cards ` +
     `(${esc(ring.label)}: ${sgn(100 * (ring.v.any.e[1] / ring.v.any.e[0] - 1), 0)}% to ${sgn(100 * (ring.v.any.e[2] / ring.v.any.e[0] - 1), 0)}%${Object.keys(ring.v.any.cards || {}).length > 1 ? `, with ${andList(CK.cardsIn(ring.v.any.cards).map(c => `${J(ring.v.any.cards[c])} on ${c}`))}` : ''}); the flips and the wires were priced by fits over many bursts. ` +
-    `Each event's rate is ${esc(E.rate_rule.split(':')[0])} (each event's tip names its source). The band is one reading's step on aifoundry2 while ettelem samples, 1 mW × about ${num(1000 * M.pass_s, 0)} ms on a rail and 10 mW × ${num(1000 * M.pass_s, 0)} ms on the board ` +
-    `(the other cards' refresh is in §4.1); the rail's own average spreads a single event over about a second.`);
+    `Each event's rate is ${esc(E.rate_rule.split(':')[0])} (each event's tip names its source). The band is one reading's step on aifoundry2 while ettelem samples, 1 mW × about ${num(1000 * M.pass_s, 0)} ms on a rail and 10 mW × ${num(1000 * M.pass_s, 0)} ms on the board, one new board value ` +
+    `(${num(1000 * M.pass_s_a1c1, 0)} ms on aifoundry1-c1 and ${num(1000 * M.pass_s_a3, 0)} ms on aifoundry3, §4.1); the rail's own average spreads a single event over about a second.`);
   upd();
 })();
 
@@ -679,10 +679,13 @@ function fitOf(card, line) {
   const st = {card: CARDS[0]};
   CK.cardSeg('chain-ctl', {cards: CARDS, bus: 'chain-card', value: st.card, onChange: v => { st.card = v; fr.redraw(); }});
   const read = CK.readout('chain-read');
-  /* the SP's pass per card, the medians of the version-3 campaign's three passes (energy_events.meter.sp_pass_ms):
-     under ettelem's 10 Hz sampling, and in the SP's own trace with no sampler running */
-  const SPM = M.sp_pass_ms || {}, medOf = a => (a && a.length ? med(a) : null);
-  const passMs = c => medOf((SPM[c] || {}).sampled_ms) || 1000 * (c === 'aifoundry2' ? M.pass_s : M.pass_s_a3);
+  /* per card, from the version-3 campaign's three passes: how often a new board value arrives while ettelem samples at
+     10 Hz (energy_events.meter.board_refresh_ms, phase-folding the board-power stream; the mean over the passes), and
+     the SP's own pass in its trace, under the sampler and with no sampler running (sp_pass_ms; the medians) */
+  const SPM = M.sp_pass_ms || {}, BR = M.board_refresh_ms || {}, medOf = a => (a && a.length ? med(a) : null);
+  const meanOf = a => (a && a.length ? a.reduce((x, y) => x + y, 0) / a.length : null);
+  const refMs = c => meanOf((BR[c] || {}).sampler_10hz_ms) || 1000 * ({aifoundry2: M.pass_s, aifoundry3: M.pass_s_a3, 'aifoundry1-c1': M.pass_s_a1c1}[c] || M.pass_s);
+  const passMs = c => medOf((SPM[c] || {}).sampled_ms);
   const quietMs = c => medOf((SPM[c] || {}).quiet_ms);
   const ROWS = [
     {key: 'in', lines: ['12 V input', 'from the power supply'],
@@ -692,7 +695,9 @@ function fitOf(card, line) {
     {key: 'pmic', lines: ['PMIC', `${nMods} × ${nVals} × ${nRead} = ${nNum} numbers`, 'V, I, W ×2 sides, °C'],
       desc: () => `${nMods} regulator modules × ${nVals} values (voltage, current and power on both sides of the regulator, and its temperature) × ${nRead} readings (current, min, max, running average) = ${nNum} numbers; only 4 leave it each pass.`},
     {key: 'sp', lines: ['SP loop', 'rereads all 84 each pass', 'forwards the averages'],
-      desc: c => `On ${c} a pass refreshes about every ${num(passMs(c), 0)} ms while ettelem samples${quietMs(c) ? ` (${num(quietMs(c), 0)} ms without it)` : ''}; it forwards each rail's average power, its min and max, and the 12 V input power.`},
+      desc: c => `On ${c} a new board value arrives about every ${num(refMs(c), 0)} ms while ettelem samples, one per pass` +
+        (passMs(c) ? `; the SP's own trace, a second method (§4.1), times that pass at ${num(passMs(c), 0)} ms under the sampler${quietMs(c) ? ` and ${num(quietMs(c), 0)} ms with no sampler running` : ''}` : '') +
+        `. Each pass forwards each rail's average power, its min and max, and the 12 V input power.`},
     {key: 'ettelem', lines: ['ettelem', 'samples at 10 Hz'],
       desc: c => `${SA[c].bursts} catalogue bursts on ${c}; in ${SA[c].over_60ms ? word(SA[c].over_60ms) : 'none'} of them did the median sample take over 60 ms, and the longest single sample of a DRAM-read burst took ${num(SA[c].read_max_ms, 0)} ms (the strips of “The meter starved by the workload”, above).`},
   ];
@@ -1176,7 +1181,11 @@ function cardsOfText(str) {
           x0 += v;
         });
         CK.txt(g0, x(x0 * scale) + 5, yb + bh - 2, endTxt(p, s), 'tick');
-        const tip = `<b>${esc(r.title)}</b>${S > 1 ? ' · ' + esc(s.short) : ''}: ${num(tot, 0)} claims<br>` + cs.filter(c => n[c.key]).map(c => phrase(c.key, n[c.key], tot)).join('<br>') +
+        /* the claims the campaign tested on this page, by this chart's rule (p.tested) beside the page's own note (r.v3_note) */
+        const tt = p.tested, tn = tt ? Object.values(tt).reduce((a, b) => a + b, 0) : 0;
+        const vs = tt ? `<br><span class="small">The ${num(tn, 0)} the campaign tested, by this chart's rule: ${Object.keys(tt).map(k => `${num(tt[k], 0)} ${esc(VLAB[k] || k)}`).join(', ')}` +
+          (r.v3_note ? `; by the page's own note: ${r.v3_note.map(([k, w]) => `${num(k, 0)} ${esc(w)}`).join(', ')}` : '') + '</span>' : '';
+        const tip = `<b>${esc(r.title)}</b>${S > 1 ? ' · ' + esc(s.short) : ''}: ${num(tot, 0)} claims<br>` + cs.filter(c => n[c.key]).map(c => phrase(c.key, n[c.key], tot)).join('<br>') + vs +
           `<br><span class="small">${r.slug === HUB ? 'this page' : 'click or Enter: open the page'}</span>`;
         CK.tip(f, g, tip, {role: 'link'});
         g.addEventListener('pointerdown', ev => { g._touch = ev.pointerType === 'touch'; g._go = f.pinned !== g; });  /* after the tip's own handler: a second tap opens */

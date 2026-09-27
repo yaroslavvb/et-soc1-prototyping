@@ -15,11 +15,12 @@ and the fixes of the three hosts that day, and the version-3 campaign's amendmen
 Everything here was learned by getting it wrong first. If you are about to measure power or temperature on an
 ET-SoC-1, read this before designing the experiment.
 
-**Updated 2026-09-25.** The lab now has **four working cards on three firmware releases**, not two. Two statements
-made here before that date were wrong and are corrected below: aifoundry1's cards were refused because of an empty
-driver version string, not a `srcversion` mismatch; and aifoundry3's zero TDP is set by a boot service at every boot,
-not flashed. Older files (05-claims.md, 03-experiments.md E21, 16-dvfs-and-leakage.md, the DVFS page, and the
-others listed in [AGENT.md](../../AGENT.md), "Known stale spots") still carry the old wording until their next
+**Updated 2026-09-25.** The lab now has **four cards that answer, on three firmware releases**, not two; **three are
+usable for measurement**, because aifoundry1's card 0 overheats under load (amendment A4, section below). Two
+statements made here before that date were wrong and are corrected below: aifoundry1's cards were refused because of
+an empty driver version string, not a `srcversion` mismatch; and aifoundry3's zero TDP is set by a boot service at
+every boot, not flashed. Older files (05-claims.md, 03-experiments.md E21, 16-dvfs-and-leakage.md, the DVFS page, and
+the others listed in [AGENT.md](../../AGENT.md), "Known stale spots") still carry the old wording until their next
 revision; this file is the current one.
 
 ---
@@ -81,7 +82,7 @@ releases idle very differently: 26 W (1.4.1), 33–35 W (1.2.0 at 57–62 °C) a
 
 | Field | Meaning | Gotcha |
 |---|---|---|
-| `board_w` | board power, 10 mW steps | refreshed once per service-processor pass, and a poller lengthens the pass: under ettelem at 10 Hz a new value every 156 ms on aifoundry2, 157 on aifoundry1's card 1 and 263 on aifoundry3; with nothing polling the pass is 133, 135 and 224 ms (E41, 26 September); near-instantaneous otherwise |
+| `board_w` | board power, 10 mW steps | refreshed once per service-processor pass, and a poller lengthens the pass: under ettelem at 10 Hz a new value every 156 ms on aifoundry2, 158 on aifoundry1's card 1 and 263 on aifoundry3; with nothing polling the pass is 133, 135 and 224 ms (E41, 26 September); near-instantaneous otherwise |
 | `sp.minion_w`, `sram_w`, `noc_w` | per-rail power | **the PMIC's running average, roughly first-order with τ ≈ 1.15–1.22 s**: a step reaches 55–57% after 1 s, 83–84% after 2 s and about 94% after 3 s (E27, `catalogue.json` `rail_filter`, both cards), copied by the SP each pass (so on aifoundry3 the copy changes only every 263 ms under ettelem); not a moving average. Skip 2–3 s after any change before averaging. `ettelem sample --reset-ms` resets the statistics on a schedule, and the reset also restarts the running average: with a reset every second, one second after a burst the rail has fallen 93% of the way on every card (E41) |
 | `temp_c.minshire[0]` | die temperature | **whole degrees**, and it is the *mean of 34 shire sensors*. Hot spots are hotter |
 | `die_mv.*` | on-die voltage per rail | the minion rail droops ~1 mV under 18 W more load: the regulator senses at the die |
@@ -136,8 +137,9 @@ Approach times were 12–120 s (median 63 s) for 7-second runs, and up to seven 
 
 ## The lab machines and their four cards are not interchangeable
 
-Updated 2026-09-25: aifoundry1's two cards work since 15:02 that day, so there are four cards on three firmware
-releases. Before using a card for anything comparative, read its governor configuration. Two read-only commands:
+Updated 2026-09-25: aifoundry1's two cards answer since 15:02 that day, so there are four cards on three firmware
+releases; three are usable for measurement, since aifoundry1's card 0 overheats and takes nothing sustained (amendment
+A4). Before using a card for anything comparative, read its governor configuration. Two read-only commands:
 
 ```
 gcc -O2 -I/opt/et/include -o etcfg tools/etcfg/etcfg.c && ./etcfg   # the driver's view: TDP, boot clock, shire mask, cache sizes

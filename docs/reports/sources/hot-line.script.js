@@ -727,7 +727,10 @@ if(CTX.errata) $('errata').innerHTML=CTX.errata.map(e=>
 })();
 
 /* ---------- section 7: the barrier, and one requester per shire (the three-card check's pollers) ---------- */
-$('bar1').textContent=CTX.barrier_cycles_chip?n0(CTX.barrier_cycles_chip):'about 5,000';
+/* the chip barrier with one minion per shire: the version-3 check's passes on every card (context.barrier_chip_v3, LAT-N4),
+   else the 18 September run on aifoundry2 */
+(function(){const B=(CTX.barrier_chip_v3||{}).one_per_shire, cs=B?Object.keys(B):[], all=cs.flatMap(c=>B[c]);
+ $('bar1').textContent=all.length?`${n0(Math.min(...all))}–${n0(Math.max(...all))} on ${cs.length===3?'three cards':cs.map(c=>CK.card(c).label).join(' and ')}`:CTX.barrier_cycles_chip?n0(CTX.barrier_cycles_chip):'about 5,000';})();
 (function(){
  const PL=perCard(c=>(D.pollers||[]).find(r=>r.card===c)), el=$('pollers');
  if(!el)return;

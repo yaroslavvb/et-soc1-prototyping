@@ -130,7 +130,7 @@ const M = [
  ['Energy per event', 'pJ per load, per multiply-add, per mesh hop · needs ≥10⁹ identical events/s for seconds', 'rail power above a same-temperature baseline ÷ event rate (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes">memory anatomy</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">the Horace experiment</a>; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">the energy manual</a> does it for every instruction and byte)', 'works_now', 'works now'],
  ['Static against dynamic power', 'per rail', 'frequency sweep at fixed voltage: DM_CMD_SET_FREQUENCY with power management off. Changes the card for everyone, which the lab leaves to its admin; not run here', 'research_only', 'lab admin only'],
  ['Instantaneous rail power', '3 rails · 1 mW · per pass', 'the SP already reads it each pass and discards it; a few assignments in thermal_pwr_mgmt.c', 'needs_fw_change', 'firmware'],
- ['Faster sampling', 'tens to hundreds of Hz', 'in the firmware source each pass makes ~96 I2C transactions, each followed by a hard-coded 1 ms wait, a floor of about 100 ms; the measured pass is longer. In the SP\'s own trace (three passes per card) it is 133 ms on aifoundry2 and 135 ms on aifoundry1-c1 with no telemetry client, 160 and 162 ms while ettelem samples at 10 Hz; on aifoundry3 224 and 266 ms, 1.7× as long, for reasons not established. Skip the 84-read snapshot and fix the wait', 'needs_fw_change', 'firmware'],
+ ['Faster sampling', 'tens to hundreds of Hz', 'in the firmware source each pass makes ~96 I2C transactions, each followed by a hard-coded 1 ms wait, a floor of about 100 ms; the measured pass is longer. In the SP\'s own trace (three passes per card) it is 133 ms on aifoundry2 and 135 ms on aifoundry1-c1 with no telemetry client, 160 and 162 ms while ettelem samples at 10 Hz; on aifoundry3 224 and 266 ms, 1.7× as long, for reasons not established. Under the sampler the board-power stream shows a new value 3–5 ms sooner than the trace\'s pass (156, 158 and 263 ms, the lede): the two methods differ by that much. Skip the 84-read snapshot and fix the wait', 'needs_fw_change', 'firmware'],
  ['Per-shire temperature; process detectors', '34 shires · 0.06 °C in hardware; ring-oscillator counts in µs windows', 'sampled continuously by the PVT controllers, never exported', 'needs_fw_change', 'firmware'],
  ['DDR, PCIe, Maxion, IO rails', '—', 'regulators with set-points but no current sense: only "board minus three rails"', 'impossible_on_silicon', 'no sensor'],
  ['Board power at kHz', 'whole card · ~1 ms', 'scope on the hot-swap controller\'s current-monitor pin, or a PCIe riser with a shunt', 'needs_tooling', 'hardware'],
@@ -352,7 +352,7 @@ function driftOut() {
 const GH = 24;  // a group's title line
 const driftH = W => { const rowH = W < 600 ? 56 : 38; return 44 + GROUPS.length * GH + rowH * Math.max(1, DROWS.length) + 38; };
 fDrift = CK.frame('drift', {label: 'Busy drift per card, in the strict runs and in the load step’s repeats: the mean slope with ±2 standard errors, against the matmul fit and the idle law',
-  height: driftH, draw: f => {
+  height: driftH, minW: 280, draw: f => {
     const nar = f.narrow, rowH = nar ? 56 : 38, L = nar ? 12 : 250, R = 52, T = 44, B = 38, yb = f.H - B;
     const refs = driftRefs();
     const vals = DROWS.flatMap(r => [r.v.w_per_c - two(r), r.v.w_per_c + two(r)].concat(r.v.each && r.g.key === 'v3' ? r.v.each : [])).concat(refs.map(q => q.v));

@@ -107,7 +107,7 @@ stalled in a load instruction that does not return. Nothing reports an error; th
 
 <details class="more"><summary>A caveat: one session where the clock moved</summary>
 <p>The stop was measured with the minion clock steady at 600 MHz. In one session on aifoundry2, whose governor
-can move the clock (aifoundry3's firmware holds it at 600 MHz), the ten 2-second runs in which the clock moved
+can move the clock (a boot service holds aifoundry3 at 600 MHz by setting its TDP to 0 W at every boot), the ten 2-second runs in which the clock moved
 between 600, 700 and 800 MHz let the host's loads through at 1–7% of their rate with nobody hammering, while
 the two that stayed at 600 MHz stopped
 at 384. One session does not establish that the clock is the cause, nor whether its level or its change would
@@ -297,7 +297,7 @@ python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifo
 <p class="small">The errata text, quoted by hand from the errata document, comes from <code>context.json</code>.
 The window table is measured in the three-card passes (<code>analyze_hotline.py --v3</code>; each card's row of a
 configuration is the mean of its passes), and the chart's 2-second windows are the 23 September reruns' starved runs
-(<code>--stop-runs</code>). The barrier is read from the 18 September nocbench run; the round trip and the bank's 10
+(<code>--stop-runs</code>). The barrier with one minion per shire is the three-card check's (<code>results/lat.json</code>, LAT-N4, three passes on each card; the 18 September nocbench run on aifoundry2 gave 4,995 cycles); the round trip and the bank's 10
 cycles are computed from the sweep. Versions: first published 22 September 2026; 24 September, the threshold given as
 a range; 25 September, the bank rule necessary but not sufficient and the chip barrier 4,995 cycles, not 4,997, then
 (version 3) the stop stated for a steady 600 MHz clock and the loads that get through counted with their warm-up;
@@ -314,7 +314,7 @@ companion: share data between shires through a slab of scratchpad instead of one
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#synchronisation">The ET-SoC-1 energy
 manual, section 6</a> — these energies re-measured on aifoundry2 and aifoundry3, with ranges.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">On-chip
-communication</a> — the chip-wide barrier on aifoundry2 (8.3 µs from global atomics and credits, 2.3 µs on the
+communication</a> — the chip-wide barrier on three cards (8.3 µs from global atomics and credits, 2.3 µs on the
 hardware tree)
 and the reduction trees that can replace one global counter.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#l3-110-cycles-plus-12-per-hop">Anatomy of
