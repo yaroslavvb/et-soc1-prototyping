@@ -87,7 +87,7 @@ once for mathjax-full).
 | Page | Source | Final build step (from the repository root) | Earlier steps |
 |---|---|---|---|
 | Chip diagram (27 Sep) | `sources/chip-diagram.*` | `python3 docs/reports/data/2026-09-27-chip-diagram/build_facts.py` (writes `facts.json` from the sourced research files beside it; it reads the hub's data and `2026-09-27-pcie/pcie.json`), then `python3 scripts/build-report.py chip-diagram docs/reports/data/2026-09-27-chip-diagram/facts.json docs/reports/2026-09-27-et-soc1-chip-diagram.html` | none |
-| Over the PCIe link (27 Sep; not yet deployed: publish it, public, before the chip diagram and the hub that link it) | `sources/pcie-link.*` | `python3 scripts/build-report.py pcie-link docs/reports/data/2026-09-27-pcie/pcie.json docs/reports/2026-09-27-et-soc1-pcie-link.html` | `python3 workloads/pciebench/reduce_pcie.py docs/reports/data/2026-09-27-pcie/raw --prereg docs/reports/data/2026-09-27-pcie/PREREG.md --out docs/reports/data/2026-09-27-pcie/pcie.json --md docs/reports/data/2026-09-27-pcie/results.md`; then the chip diagram's `research/build_facts_v2.py` and `build_facts.py`, which read `pcie.json` |
+| Over the PCIe link (27 Sep) | `sources/pcie-link.*` | `python3 scripts/build-report.py pcie-link docs/reports/data/2026-09-27-pcie/pcie.json docs/reports/2026-09-27-et-soc1-pcie-link.html` | `python3 workloads/pciebench/reduce_pcie.py docs/reports/data/2026-09-27-pcie/raw --prereg docs/reports/data/2026-09-27-pcie/PREREG.md --out docs/reports/data/2026-09-27-pcie/pcie.json --md docs/reports/data/2026-09-27-pcie/results.md`; then the chip diagram's `research/build_facts_v2.py` and `build_facts.py`, which read `pcie.json` |
 | Hub (A2) | `sources/limits-of-observability.*` (text and data) | `python3 tools/ettelem/sync_hub_data.py`, then `python3 scripts/build-report.py limits-of-observability docs/reports/sources/limits-of-observability.data.json docs/reports/2026-09-20-et-soc1-limits-of-observability.html` | rerun `sync_hub_data.py` after regenerating any file it reads (`--check` exits 1 if stale) |
 | Energy manual (A15) | `sources/energy-manual.*` | `python3 scripts/build-report.py energy-manual docs/reports/data/2026-09-23-energy-manual/manual.json docs/reports/2026-09-23-energy-manual.html` | 04-artifacts.md A16, "Rebuilding the energy data, in order" |
 | Heat per mm (A17) | `sources/heat-per-mm.*` | `python3 scripts/build-report.py heat-per-mm docs/reports/data/2026-09-24-wire-energy/report.json docs/reports/2026-09-24-heat-per-mm.html` | 04-artifacts.md A18: `analyze_wire.py` (24 September runs), `analyze_wire_v3.py` (the version-3 check's passes, `wire3.json`), then `build_wire_report.py --wire ... --wire3 ...` |
@@ -157,7 +157,10 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Last check: 2026-09-27, 14:40 PDT**, after deploying the merge (the version-3 three-card results, the review's chart
+**Last check: 2026-09-27, 18:20 PDT**, after the chip diagram v2, the new PCIe page and the hub: 24 of 24 mirrored public pages
+equal to their files, no warnings, exit 0.
+
+**Earlier check: 2026-09-27, 14:40 PDT**, after deploying the merge (the version-3 three-card results, the review's chart
 and collapsible-depth passes, E48, the in-depth audit's fixes) and the new chip diagram, through the CLI: 23 of 23
 mirrored public pages equal to their files, no warnings, exit 0.
 
