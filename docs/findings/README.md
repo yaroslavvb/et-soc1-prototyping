@@ -127,6 +127,16 @@ Read [Terms](#terms) first.
    raises the clock, and nothing on those three cards limits the die's temperature (a 90–103 °C mean on aifoundry2,
    26 September). aifoundry2's Master Minion hung that night and waits for the lab admin.
    → [03-experiments.md](03-experiments.md), E51; [14-card-behaviour.md](14-card-behaviour.md)
+18. **Where the work sits changed the time to the thermal trip on aifoundry3; on card 1, short bursts PASS and the
+   primary sustained test is INSUFFICIENT** (development on aifoundry3, 27 September; frozen validation on
+   aifoundry1's card 1, 27–28 September). The same 512 minions on the 16 perimeter shires took 1.62
+   [1.51–1.73] times as long as on the 16 interior shires to bring the mean from 61 to 66 °C on aifoundry3, in 9 of 9
+   blocks, at equal power; spread over all 32 shires (16 minions each) they took about 1.4 times as long. Half power
+   (256 minions) never reached 66 °C there. On card 1 the frozen prediction held in short bursts (one 7 s launch from
+   64 °C: 2.04 [1.73–2.42] times as long, 5 of 5 blocks, PLACE-tS PASS) and the primary sustained test was
+   INSUFFICIENT (PLACE-t: 7 of its 10 runs, 10 of all 15 Tier L runs, did not reach 66 °C within the 150 s cap; the two
+   blocks that decided went the predicted way). By the frozen table no theory survived on card 1 and none was refuted.
+   → [03-experiments.md](03-experiments.md), E52; [`reports/data/2026-09-28-heat-placement/`](../reports/data/2026-09-28-heat-placement/README.md)
 
 ## Terms
 
@@ -182,8 +192,8 @@ Four kinds of thing have IDs, and every claim cites them:
 | Prefix | Meaning | File |
 |---|---|---|
 | **R1–R14** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
-| **Q1–Q57** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E51** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 the DV2 development night on aifoundry2, 28 September, development only) | [03-experiments.md](03-experiments.md) |
+| **Q1–Q60** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
+| **E1–E52** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 the DV2 development night on aifoundry2, 28 September, development only; E52 the heat placement, 27–28 September, development and a frozen validation) | [03-experiments.md](03-experiments.md) |
 | **A1–A19** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused) | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":

@@ -1,0 +1,10 @@
+{
+ "_what": "R2 on aifoundry3 (DESIGN2 §5.2-5.3), written 27 Sep 2026 before R2's first block from P1 (reduce.py --p1 on R1b 1601-1603 and R1c 1101-1103, 1201-1203; all ok, no void run or block). Edit before an R2 block runs, never after (§5.5); the one later edit allowed is dropping block types from 'types'. Every other key keeps its default (target_S 68, target_L_over 2, target_L8_over 2, chain cap 150 s, kappa gate 0.90, the void limits).",
+ "_D-L16": "S_L 61, set from p1601 (UNI32@16 at 60: 103.4 and 106.3 s, median 104.9 s > 100: raise by 1). R1c at 61 confirms it: UNI32@16 t66 84.1, 78.8, 75.6 s (median 78.8 s, in 40-100), no L16 run censored; S_L stays 61.",
+ "_D-S": "Tier S (S_S 64, R1c 1101-1103): 0 of 6 INT16@32/PER16@32 runs censored at 7 s: PLACE-tS stays a candidate. S kept (P1: PLACE-tS, CONC and MAP reachable at n_max 12).",
+ "_D-L8": "S_L8 64, set from p1602 (CEN8 x2 and W8b at 63 all censored at 150 s: raise by 1, the top of 61-64). The by-hand G0 check says the 256-minion steady state lies below 62 C, which D-L8 would count as a drop by itself; owner-side decision (27 Sep): run ONE L8 block (2301) at S_L8 64 first, so that L8/G8 are dropped only on D-L8's literal condition. After 2301 (dev/dl8_check.py): any censored measured L8 run at 64 -> L8 and G8 dropped ('types' becomes [S, L16]; R2 continues with 2204-2206, three more L16 blocks, §5.2); none censored -> L8 and G8 kept at 64 (R2 continues with 2302-2303 and 2401-2403; a CEN8 median above 100 s is reported, since 64 is the top of the range).",
+ "S_L": 61,
+ "S_L8": 64,
+ "_D-L8-result": "p2301 (L8 at S_L8 64, 20:18-20:36 27 Sep, ok, no void run; dl8_check.py): INT16@16, PER16@16, CEN8, EDGE8 and MEM8 all censored at 150 s (sw_W 4.9-5.3 W); UNI32@16 t66 21.3 s. D-L8's condition holds: L8 and G8 DROPPED; 'types' edited to [S, L16] after 2301 (the one allowed edit); R2 continues with 2204-2206.",
+ "types": ["S", "L16"]
+}

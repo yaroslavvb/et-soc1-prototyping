@@ -1,0 +1,17 @@
+# aifoundry3, heat placement R2 (DESIGN2 §5.2-5.3), params-r2-aifoundry3.json (27 Sep: S_L 61, S_L8 64). Run with
+#   setsid nohup tools/claims-v3/hp/run_queue.sh tools/claims-v3/schedule-hp-aifoundry3-r2.txt > build/claims-v3/queue-hp-aifoundry3-r2.log 2>&1 < /dev/null &
+# First ONE L8 block at S_L8 = 64 (owner-side decision, 27 Sep): D-L8's literal condition ("even S_L8 = 64 gives a
+# censored run") is met or not before L8/G8 are dropped. It is a session's first block (two CAL runs; the first may
+# miss its 66 C preheat target from the 54 C rest, as p1602's did, and only measured runs are re-run).
+# Then dl8_check (the D-L8 rule on 2301) decides the rest of R2, written into this file after 2301 (queue.sh skips a
+# finished pass): L8/G8 dropped -> 'types' [S, L16] in params-r2, then hp 2204, 2205, 2206 (three more L16 blocks,
+# §5.2; k = 4-6 finish the six Williams sequences R1c's 1201-1203 began); kept -> hp 2302, 2303, 2401, 2402, 2403.
+hp 2301
+# D-L8 on 2301 (27 Sep 20:37): 5 of 6 measured runs censored at S_L8 = 64 -> L8 and G8 dropped (params-r2 types [S, L16]);
+# three more L16 blocks (queue.sh skips the finished 2301)
+hp 2204
+sleep 300
+hp 2205
+sleep 300
+hp 2206
+end

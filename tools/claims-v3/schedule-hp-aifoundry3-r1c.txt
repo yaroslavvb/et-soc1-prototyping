@@ -1,0 +1,14 @@
+# aifoundry3, heat placement R1c (DESIGN2 §5.2): 3 S + 3 L16 blocks, after D-L16/D-L8 have set params-r1-aifoundry3.json
+# (27 Sep: S_L 61, S_L8 64). Each S block follows its L16 block with no pause: from the 54 C rest, 30 ALL24 preheat
+# bursts reach only 65 C, so an S block's CAL (target 68) started after a 300 s rest misses its edge (p1603).
+# Then P1 (reduce.py --p1) -> params-r2-aifoundry3.json -> R2 (2301-2303 L8, 2401-2403 G8, or 2204-2206 more L16) ->
+# R3 (3101.., 3201.., 3301.., 3401..: 3 blocks per kept type) -> P3 (reduce.py --p3) -> prereg.py --val.
+hp 1201
+hp 1101
+sleep 300
+hp 1202
+hp 1102
+sleep 300
+hp 1203
+hp 1103
+end

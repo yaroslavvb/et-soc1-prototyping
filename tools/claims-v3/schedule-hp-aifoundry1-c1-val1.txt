@@ -1,0 +1,17 @@
+# aifoundry1 card 1, heat placement VALIDATION, session 1 of 2 (DESIGN2 §6.1; README "The lock"). Registered in PREREG
+# (P3): n_val L16 5, S 5 (L8 and G8 dropped by D-L8, departure 36). Priority L16 > S, interleaved across the two sessions;
+# queue entries <= 25 min (L16 ~7 min, S ~10 min on card 1), >= 15 min apart (sleep 900). Session 2
+# (schedule-hp-aifoundry1-c1-val2.txt: 9103 9204 9104 9205 9105) starts >= 4 h after this session ends.
+# Start (after et-who and who), only with the PREREG sha256 recorded outside the tree:
+#   HP_PREREG_SHA256=<sha> V3_DEVICE=1 setsid nohup tools/claims-v3/hp/run_queue.sh tools/claims-v3/schedule-hp-aifoundry1-c1-val1.txt > build/claims-v3/queue-hp-aifoundry1-c1-val1.log 2>&1 < /dev/null &
+# No spare blocks are queued: a void or incomplete block is reported (departure 24 would use a later block of the type).
+hp 9201
+sleep 900
+hp 9101
+sleep 900
+hp 9202
+sleep 900
+hp 9102
+sleep 900
+hp 9203
+end
