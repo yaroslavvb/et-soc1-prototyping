@@ -68,18 +68,18 @@ svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
   const defs = E('defs', {}, svg);
   const f = E('filter', {id: 'co-sh', x: '-10%', y: '-20%', width: '120%', height: '160%'}, defs);
   E('feDropShadow', {dx: 0, dy: 2, stdDeviation: 3, 'flood-color': '#000'}, f);
-  // the rail bands: a pattern and a text label, never a colour alone (DESIGN.md §3)
-  const pat = (id, w, h, draw, rot) => { const p = E('pattern', {id, width: w, height: h, patternUnits: 'userSpaceOnUse', patternTransform: rot ? `rotate(${rot})` : null}, defs); draw(p); };
-  pat('pat-lv', 16, 16, p => S(E('line', {x1: 0, y1: 0, x2: 0, y2: 16}, p), {stroke: 'var(--ink-2)', strokeWidth: 2, strokeOpacity: 0.22}), 45);
-  pat('pat-hv', 16, 16, p => S(E('circle', {cx: 8, cy: 8, r: 2}, p), {fill: 'var(--ink-2)', fillOpacity: 0.3}));
-  pat('pat-mesh', 16, 12, p => S(E('line', {x1: 0, y1: 6, x2: 16, y2: 6}, p), {stroke: 'var(--ink-2)', strokeWidth: 1.5, strokeOpacity: 0.25}));
-  pat('pat-ddr', 12, 16, p => S(E('line', {x1: 6, y1: 0, x2: 6, y2: 16}, p), {stroke: 'var(--ink-2)', strokeWidth: 1.5, strokeOpacity: 0.25}));
-  pat('pat-hatch', 10, 10, p => S(E('line', {x1: 0, y1: 0, x2: 0, y2: 10}, p), {stroke: 'var(--ink-2)', strokeWidth: 1.5, strokeOpacity: 0.3}), 135);
+  // (the rail bands are light tints, BAND_FILL below: no patterns behind text)
   E('marker', {id: 'arr', viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse'}, defs)
     .appendChild(S(E('path', {d: 'M0,0 L10,5 L0,10 z'}), {fill: 'var(--ink-2)'}));
   E('marker', {id: 'arr2', viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto-start-reverse'}, defs)
     .appendChild(S(E('path', {d: 'M0,0 L10,5 L0,10 z'}), {fill: 'var(--c2)'}));
 }
+/* the rail bands: a light tint and a text label; the label, not the colour, names the band (DESIGN.md §3). Tints in
+   hues the part colours do not use, since 28 Sep: the earlier stripes and dots behind the labels made text hard to read.
+   The keys keep their old pattern names ('pat-…'): data-band on each tinted shape tells the legend which bands a view has. */
+const BAND_FILL = {'pat-lv': 'color-mix(in srgb, var(--c7) 9%, transparent)', 'pat-hv': 'color-mix(in srgb, var(--ref) 12%, transparent)',
+  'pat-mesh': 'color-mix(in srgb, var(--c4) 10%, transparent)', 'pat-ddr': 'color-mix(in srgb, var(--c5) 8%, transparent)',
+  'pat-hatch': 'color-mix(in srgb, var(--ink-2) 13%, transparent)'};
 const MAXD = 7;
 const LAYERS = [], FX = [], AP = [];
 for (let i = 0; i < MAXD; i++) {
@@ -257,7 +257,7 @@ function fitTexts(L) {
     });
   });
 }
-/* Every label knocks out what runs under it (a trail, a lit ring, a wire, a rail band's hatching) in the colour of what
+/* Every label knocks out what runs under it (a trail, a lit ring, a wire, a rail band's tint) in the colour of what
    it sits on, so it reads cleanly; where nothing runs under it the knockout is invisible (CSS: #mem .lay text). A part
    sets that colour for its labels (boxShape, --kb); a label on an opaque shape (a gate, a card) takes the shape's */
 const KB_CLS = {gate: 'var(--surface)', ch: 'var(--surface)', bub: 'var(--surface)', 'co-box': 'var(--surface)'};
@@ -583,7 +583,7 @@ function frame(L, o) {
 /* a rail band: a pattern and a label (DESIGN.md §3) */
 function railBand(parent, x, y, w, h, pat, label, key, fids) {
   const g = key ? comp(parent, key, {}, label + ': details') : E('g', {}, parent);
-  S(E('rect', {class: 'shape', x, y, width: w, height: h, rx: 10}, g), {fill: `url(#${pat})`, stroke: 'var(--ink-2)', strokeOpacity: 0.35, strokeWidth: 1.25, strokeDasharray: '4 6'});
+  S(E('rect', {class: 'shape', x, y, width: w, height: h, rx: 10, 'data-band': pat}, g), {fill: BAND_FILL[pat], stroke: 'var(--ink-2)', strokeOpacity: 0.35, strokeWidth: 1.25, strokeDasharray: '4 6'});
   if (key) { E('rect', {class: 'ring', x: x - 5, y: y - 5, width: w + 10, height: h + 10, rx: 14}, g); g._box = {x, y, w, h}; }
   return g;
 }
@@ -2290,11 +2290,11 @@ const STG = ['ag', 'ad', 'rqa', 'tap', 'ta', 'ta0', 'ta1', 'te', 'tc', 'dap', 'd
 function buildL2Bank(L, ap, inst) {
   frame(L, {title: `Bank ${inst.bank} (PA[7:6]) · one of four`, sub: 'an independent L2 cache: its own request queue, pipeline and ports',
     tags: [['unknown', '? read-buffer storage, prefetcher · asked'], ['documented', 'documented']]});
-  const gq = part(L, 'reqq', -150, 14, 400, 186, COL.logic, 'request queue', {sub: [{t: `${nt('l2_reqq')} · ${nt('l2_reqq21')} for the L3 (hatched)`, f: nf('l2_reqq')}]});
+  const gq = part(L, 'reqq', -150, 14, 400, 186, COL.logic, 'request queue', {sub: [{t: `${nt('l2_reqq')} · ${nt('l2_reqq21')} for the L3 (grey)`, f: nf('l2_reqq')}]});
   ap.q = [];
   for (let i = 0; i < 64; i++) {
     const x = -138 + (i % 16) * 24, y = 88 + Math.floor(i / 16) * 26, l3 = i >= 43;
-    ap.q.push(S(E('rect', {x, y, width: 20, height: 20, rx: 3, 'pointer-events': 'none'}, gq), {fill: l3 ? 'url(#pat-hatch)' : 'var(--c1)', fillOpacity: l3 ? 1 : 0.15, stroke: 'var(--c1)', strokeWidth: 1}));
+    ap.q.push(S(E('rect', {x, y, width: 20, height: 20, rx: 3, 'pointer-events': 'none', 'data-band': l3 ? 'pat-hatch' : null}, gq), {fill: l3 ? BAND_FILL['pat-hatch'] : 'var(--c1)', fillOpacity: l3 ? 1 : 0.15, stroke: 'var(--c1)', strokeWidth: 1}));
   }
   part(L, 'arb', 266, 14, 200, 86, COL.logic, 'arbitration', {sub: ['per sub-bank, L3 first', 'busy ones masked']});
   part(L, 'order', 266, 114, 200, 86, COL.logic, 'ordering', {sub: ['per-address lists']});
@@ -3252,11 +3252,11 @@ function buildL3Bank(L, ap, inst) {
   frame(L, {title: `Bank ${inst.bank} of home shire ${inst.home}`, sub: 'the same bank as the L2\'s: its L3-slave side serves the other shires', subf: 'l3:l3.ports l3:l3.reqq',
     tags: [['documented', 'documented']]});
   part(L, 'l3fifo', -150, 14, 220, 186, COL.xing, 'L3-slave FIFO', {sub: ['from the port,', 'one request a cycle']});
-  const gq = part(L, 'reqq', 86, 14, 400, 186, COL.logic, 'request queue', {sub: [{t: `64 entries · ${nt('l3_reqq21')} for L3 (hatched)`, f: nf('l3_reqq21')}]});
+  const gq = part(L, 'reqq', 86, 14, 400, 186, COL.logic, 'request queue', {sub: [{t: `64 entries · ${nt('l3_reqq21')} for L3 (grey)`, f: nf('l3_reqq21')}]});
   ap.q = [];
   for (let i = 0; i < 64; i++) {
     const x = 98 + (i % 16) * 24, y = 88 + Math.floor(i / 16) * 26, l3 = i >= 43;
-    ap.q.push(S(E('rect', {x, y, width: 20, height: 20, rx: 3, 'pointer-events': 'none'}, gq), {fill: l3 ? 'url(#pat-hatch)' : 'var(--c1)', fillOpacity: l3 ? 1 : 0.15, stroke: 'var(--c1)', strokeWidth: 1}));
+    ap.q.push(S(E('rect', {x, y, width: 20, height: 20, rx: 3, 'pointer-events': 'none', 'data-band': l3 ? 'pat-hatch' : null}, gq), {fill: l3 ? BAND_FILL['pat-hatch'] : 'var(--c1)', fillOpacity: l3 ? 1 : 0.15, stroke: 'var(--c1)', strokeWidth: 1}));
   }
   part(L, 'arb', 502, 14, 190, 186, COL.logic, 'arbitration', {sub: [{t: 'per sub-bank:', f: 'l3:l3.priority'}, {t: 'L3-slave first', f: 'l3:l3.priority'}]});
   const gr = part(L, 'rbuf', 708, 14, 180, 186, COL.logic, 'read buffer', {fo: 0.02, sub: ['8 lines:', 'L3 reads', 'never use it']});
@@ -3414,7 +3414,7 @@ const L3P = SCENES.l3.parts = {
     what: `${n('l3_slice')}: ${n('l3_lines')}. In mode M0 (the cards' mode) the L3 is sets 768–1023 of every sub-bank, base 0x300; the firmware computes it as scratchpad size + L2 size.`}),
   floor: () => ({kick: 'L3 · home shire', title: 'The slice\'s floorplan', badge: [['unknown', 'asked']], facts: 'floor', what: `Where the four banks, and so the L3 slice's quarters, sit in the shire tile (a hop, ${n('l3_hopmm')}, across) against the mesh stop and the four L3-slave ports is not documented: the drawing is logical.`}),
   l3fifo: () => ({kick: 'L3 · home bank', title: 'L3-slave FIFO', badge: [['documented', 'spec']], facts: 'reqq', what: 'Requests from other shires, converted from AXI to ET-Link, wait here for a request-queue entry: two entries can be allocated each cycle, one for a neighbourhood request and one for an L3 request.'}),
-  reqq: () => ({kick: 'L3 · home bank', title: 'Request queue', badge: [['documented', 'spec']], facts: 'reqq', what: `The bank's ${n('l2_reqq')}, with up to ${n('l3_reqq21')} reserved for L3-slave requests (hatched).`}),
+  reqq: () => ({kick: 'L3 · home bank', title: 'Request queue', badge: [['documented', 'spec']], facts: 'reqq', what: `The bank's ${n('l2_reqq')}, with up to ${n('l3_reqq21')} reserved for L3-slave requests (grey).`}),
   arb: () => ({kick: 'L3 · home bank', title: 'Arbitration', badge: [['documented', 'spec']], facts: 'priority', what: 'Per sub-bank, three steps: round-robin, then L3-slave requests before the shire\'s own, then busy sub-banks masked.'}),
   rbuf: () => ({kick: 'L3 · home bank', title: 'The read buffer: not for the L3', badge: [['documented', 'spec']], facts: 'rbuf', what: 'L3 reads never use the bank\'s 8-entry read buffer: every L3 hit reads the tag, tag-state and data macros. L2 and scratchpad reads can be served from it.'}),
   atomic: () => ({kick: 'L3 · home bank', title: 'The atomic block', badge: [['documented', 'spec and measured']], facts: 'atomic',
@@ -3770,7 +3770,7 @@ function buildScpBank(L, ap, inst) {
     const g = part(L, 'subbanks', x, 202, w, 268, COL.store, `sub-bank ${s}`, {ctx: {i: s}, fo: 0.06, sub: [`PA[9:8] = ${s}`]});
     // the tag macros, idle for a scratchpad access
     [[x + 10, 34, 'tag'], [x + 48, 30, 'state']].forEach(([mx, mw, lab]) => {
-      S(E('rect', {x: mx, y: 262, width: mw, height: 196, rx: 3, 'pointer-events': 'none'}, g), {fill: 'url(#pat-hatch)', stroke: 'var(--ink-2)', strokeWidth: 1.25, strokeDasharray: '4 4'});
+      S(E('rect', {x: mx, y: 262, width: mw, height: 196, rx: 3, 'pointer-events': 'none', 'data-band': 'pat-hatch'}, g), {fill: BAND_FILL['pat-hatch'], stroke: 'var(--ink-2)', strokeWidth: 1.25, strokeDasharray: '4 4'});
     });
     const px = [];
     for (let p = 0; p < 4; p++) {
@@ -3791,7 +3791,7 @@ function buildScpBank(L, ap, inst) {
   ap.stg = {};
   STG.forEach((s, i) => {
     const x = -150 + i * 82, tag = i >= 3 && i <= 8, ram = i >= 9 && i <= 12;
-    S(E('rect', {x, y: 494, width: 74, height: 46, rx: 5}, gpp), {fill: tag ? 'url(#pat-hatch)' : ram ? 'var(--c3)' : 'var(--c1)', fillOpacity: tag ? 1 : 0.14, stroke: tag ? 'var(--ink-2)' : ram ? 'var(--c3)' : 'var(--c1)', strokeWidth: 1.5, strokeDasharray: tag ? '4 4' : null});
+    S(E('rect', {x, y: 494, width: 74, height: 46, rx: 5, 'data-band': tag ? 'pat-hatch' : null}, gpp), {fill: tag ? BAND_FILL['pat-hatch'] : ram ? 'var(--c3)' : 'var(--c1)', fillOpacity: tag ? 1 : 0.14, stroke: tag ? 'var(--ink-2)' : ram ? 'var(--c3)' : 'var(--c1)', strokeWidth: 1.5, strokeDasharray: tag ? '4 4' : null});
     T(gpp, x + 37, 523, s, 't-mono', 'middle', 'scp:scp.pipe-stages');
     ap.stg[s] = {x, y: 494, w: 74, h: 46};
   });
@@ -3942,7 +3942,7 @@ const SP = SCENES.scp.parts = {
   rbuf: () => ({kick: 'Scratchpad · bank', title: 'Read buffer', badge: [['documented', 'spec and measured']], facts: 'rbuf', what: `Scratchpad reads install into the bank's 8-entry read buffer, remote ones included; a repeat read of a clean line is served without the panels: ${n('scp_rb36')} against ${n('lad_scp_lat')}.`}),
   atomic: () => ({kick: 'Scratchpad · bank', title: 'The atomic block', badge: [['documented', 'measured']], facts: 'atomic', what: `A global atomic on a scratchpad word is done by its home bank after it arrives on the L3-slave port: read, ALU, write, the sub-bank busy throughout; ${n('scp_atomic')} each. An uncontended remote atomic takes ${n('l3_atom216')}.`}),
   subbanks: ctx => ({kick: 'Scratchpad · bank', title: `Sub-bank ${ctx.i != null ? ctx.i : ''}`, badge: [['documented', 'spec, derived']], facts: 'sub',
-    what: 'PA[9:8]. For a scratchpad line only its four data panels are clocked; the tag and tag-state panels stay idle (hatched). The shaded top of each panel is the scratchpad\'s rows 0–2,559.'}),
+    what: 'PA[9:8]. For a scratchpad line only its four data panels are clocked; the tag and tag-state panels stay idle (grey). The shaded top of each panel is the scratchpad\'s rows 0–2,559.'}),
   data: () => ({kick: 'Scratchpad · bank', title: `Data panel ${IS().panel}`, badge: [['documented', 'spec'], ['unknown', 'the geometry, the bitcell']], facts: 'panel', what: `A full 64-byte read raises one row in each of the four panels of one sub-bank and senses ${n('scp_576')}; the other 15 sub-banks stay idle.`,
     act: `<button type="button" class="st-btn" data-act="zoom" data-to="panel">Zoom into the panel</button>`}),
   pipe: () => ({kick: 'Scratchpad · bank', title: 'No tags, and as fast as an L2 hit', badge: [['documented', 'spec, measured'], ['derived', 'why']], facts: 'pipe',
@@ -4117,7 +4117,7 @@ SCENES.scp.tour = [
   {access: 'own-load'},
   {name: 'No tags', path: ['chip', 'shire', 'bank'], panel: 'pipe', hi: ['pipe', 'subbanks'],
     cap: () => 'No tags, no misses, no victims: yet exactly as fast as an L2 hit, because the tag stages still elapse',
-    sub: () => 'The tag and tag-state reads are squashed (hatched); only the four data panels of one sub-bank are clocked.'},
+    sub: () => 'The tag and tag-state reads are squashed (grey); only the four data panels of one sub-bank are clocked.'},
   {name: 'Vmin', path: ['chip', 'shire', 'bank', 'panel', 'vmin'], panel: 'why', hi: ['why', 'railMin', 'railSram', 'rm'],
     cap: () => `The panels' lowest Vmin is ${n('scp_vmin')}; the minion rail runs at ${n('l1_v')} within ${n('l1_vlim')}: our reading of why the L1 is latches`,
     sub: () => 'An argument from these macros\' listed Vmin, not a proof; the documents never say why: it is the first ask.'},
@@ -4200,9 +4200,9 @@ function buildMS(L, ap, inst) {
     ['CA[5:0]', 'DQ[15:0]', 'DQS'].forEach((t, i) => { const yy = y + 110 + i * 56; S(E('line', {x1: 970, y1: yy, x2: 988, y2: yy, 'pointer-events': 'none'}, g), {stroke: 'var(--c3)', strokeWidth: 3}); T(g, 1033, yy + 6, t, 't-sm', 'middle', 'dram:dram.topo.phy'); });
     ap.die[k] = {x: 1033, y: y + 150, box: {x: 988, y, w: 90, h: 276}};
   }
-  // the hatched bar: the memory shire's time, not split
+  // the grey bar: the memory shire's time, not split
   const gl = comp(L, 'lat63', {}, 'The L3 home\'s miss path and the memory shire, at most about 63 cycles of a load: not split, asked');
-  S(E('rect', {x: -140, y: 606, width: 1218, height: 50, rx: 6}, gl), {fill: 'url(#pat-hatch)', stroke: 'var(--warn)', strokeWidth: 2, strokeDasharray: '8 6'});
+  S(E('rect', {x: -140, y: 606, width: 1218, height: 50, rx: 6, 'data-band': 'pat-hatch'}, gl), {fill: BAND_FILL['pat-hatch'], stroke: 'var(--warn)', strokeWidth: 2, strokeDasharray: '8 6'});
   T(gl, -124, 638, `the L3 home's miss path and this memory shire: ${nt('dr_ms63s')} · how it splits: asked`, 't-smb halo', 'start', nf('dr_ms63') + ' dram:dram.lat.ms-internal');
   gl._box = {x: -140, y: 606, w: 1218, h: 50}; E('rect', {class: 'ring', x: -145, y: 601, width: 1228, height: 60, rx: 10}, gl);
   T(L, -140, 684, `the DRAM's own timing: ${nt('dr_share')}; the constant past an L3 hit: ${nt('l3_dram91')}`, 't-sm', 'start', nf('dr_share') + ' ' + nf('l3_dram91'));
@@ -4764,18 +4764,11 @@ window.addEventListener('resize', () => { clearTimeout(fitHeadT); fitHeadT = set
 let fitHeadT = 0;
 /* the legend: the three badges, the part colours, and the rail bands this level draws */
 const BANDS = {'pat-lv': 'minion rail (LV region)', 'pat-hv': 'Shire Channel (HV; its logic\'s rail: asked)', 'pat-mesh': 'mesh rail',
-  'pat-ddr': 'VDD_DDR (memory shires)', 'pat-hatch': 'hatched: idle, or not split (asked)'};
-const BAND_SW = {'pat-lv': '<pattern id="lg-lv" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke="var(--ink-2)" stroke-width="1.5"/></pattern>',
-  'pat-hv': '<pattern id="lg-hv" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="var(--ink-2)"/></pattern>',
-  'pat-mesh': '<pattern id="lg-mesh" width="5" height="4" patternUnits="userSpaceOnUse"><line x1="0" y1="2" x2="5" y2="2" stroke="var(--ink-2)" stroke-width="1.2"/></pattern>',
-  'pat-ddr': '<pattern id="lg-ddr" width="4" height="5" patternUnits="userSpaceOnUse"><line x1="2" y1="0" x2="2" y2="5" stroke="var(--ink-2)" stroke-width="1.2"/></pattern>',
-  'pat-hatch': '<pattern id="lg-hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(135)"><line x1="0" y1="0" x2="0" y2="4" stroke="var(--ink-2)" stroke-width="1.2"/></pattern>'};
+  'pat-ddr': 'VDD_DDR (memory shires)', 'pat-hatch': 'grey: idle, or not split (asked)'};
 function legendUI() {
   const used = new Set();
-  [LAYERS[0], LAYERS[Z.path.length - 1]].forEach(L => L && L.querySelectorAll('[style*="pat-"], [fill*="pat-"]').forEach(e => {
-    const m = /#(pat-[a-z]+)/.exec((e.getAttribute('style') || '') + ' ' + (e.getAttribute('fill') || '')); if (m) used.add(m[1]);
-  }));
-  const bands = Object.keys(BANDS).filter(k => used.has(k)).map(k => `<span><svg width="16" height="12" aria-hidden="true"><defs>${BAND_SW[k]}</defs><rect width="16" height="12" rx="2" fill="url(#lg-${k.slice(4)})" stroke="var(--ink-2)"/></svg>${esc(BANDS[k])}</span>`).join('');
+  [LAYERS[0], LAYERS[Z.path.length - 1]].forEach(L => L && L.querySelectorAll('[data-band]').forEach(e => used.add(e.getAttribute('data-band'))));
+  const bands = Object.keys(BANDS).filter(k => used.has(k)).map(k => `<span><svg width="16" height="12" aria-hidden="true"><rect width="16" height="12" rx="2" style="fill:${BAND_FILL[k].replace(/(\d+)%/, (m, v) => 2 * v + '%')}" stroke="var(--ink-2)"/></svg>${esc(BANDS[k])}</span>`).join('');
   const html = '<span><span class="kd spec">documented</span></span><span><span class="kd generic">generic</span></span><span><span class="kd unknown">unknown · asked</span></span>'
     + '<span><i style="border-color:var(--c1);background:color-mix(in srgb,var(--c1) 14%,transparent)"></i>logic</span><span><i style="border-color:var(--c3);background:color-mix(in srgb,var(--c3) 14%,transparent)"></i>storage</span>'
     + '<span><i style="border-color:var(--c4)"></i>interconnect</span><span><i style="border-color:var(--c5)"></i>crossing</span>' + bands;

@@ -4667,9 +4667,9 @@
    "status": "impossible_on_silicon",
    "what": "Current sensing below the regulators",
    "done": false,
-   "adds": "Nothing on the die or the board measures the current of the DDR, VDDQ, PCIe, IO or Maxion rails; splitting them means shunts on the board. The memory-levels page leaves its DRAM ledger's energy cells hatched for this reason: the off-rail 73 pJ/B, split between the memory shires' logic, the PHY's I/O, the DRAM core and the DRAM's own I/O, and refresh energy, which is part of idle.",
+   "adds": "Nothing on the die or the board measures the current of the DDR, VDDQ, PCIe, IO or Maxion rails; splitting them means shunts on the board. The memory-levels page leaves its DRAM ledger's energy cells grey for this reason: the off-rail 73 pJ/B, split between the memory shires' logic, the PHY's I/O, the DRAM core and the DRAM's own I/O, and refresh energy, which is part of idle.",
    "cost": "board rework: not for a shared card",
-   "effect": "The last {{idle_unsensed}} of idle, and the DRAM term's split, stay inferred. Memory levels: those hatched cells stay open.",
+   "effect": "The last {{idle_unsensed}} of idle, and the DRAM term's split, stay inferred. Memory levels: those grey cells stay open.",
    "levels": [
     ["dram/load", "the DRAM load's energy ledger"]
    ]
@@ -4755,7 +4755,7 @@
    "done": false,
    "adds": "Two things below the memory shire's mesh port are inferred: the DRAM address map past the memory-shire bits (PA[9] the channel, PA[12:10] the bank, PA[34:18] the row; decoded from ADDRMAP values in the firmware source and a tool comment, fact L50), and how much of a DRAM load's latency the DRAM itself takes against the memory shire's queue, controller, PHY and clock crossings (fact lat-dram-chip). A memory-shire description with its pipeline latencies, or each controller's programmed ADDRMAP and DRAMTMG registers read back by the service processor (its driver already reads controller registers, mem_controller.c ms_read_ddrc_reg), settles both. The errata cite Synopsys's uMCTL2 Databook v3.50a (pdf p.88); the register values are the realistic ask. A build that boots the DRAM at 800 or 1,066 MHz instead of 933 (mem_controller.c:643) would split the latency by experiment. The memory-levels page (28 September) takes the row bits as measured and PA[9] as documented; the bank bits stay rung 33's. PA[9], the channel, is the memory shire's reset value (ms_regs.h:160), and the anatomy page's one-bit flips (§5), repeated on the three cards in the version-3 check, show which bits change the row. It asks the rest: how the up-to-63 cycles beyond the DRAM's own timing split between the L3 home's miss path and To_Sys crossings (about 12 cycles by the spec) and the memory shire's port and clock crossing, the controller's queues and the PHY; which traffic goes to each controller's two AXI ports; when a global atomic on a DRAM address is done in the memory shire's atomic unit rather than at the L3 home; the controller's total CAM depth; and where the memory shire's clock crossing sits.",
    "cost": "an email; or a service-processor command in a signed build",
-   "effect": "Chip diagram: the memory shire's address map and the DRAM chip's share of a load become documented or measured instead of inferred. Memory levels: the hatched bar at the memory-shire scale, split between the L3 home and the memory shire; the controller's ports, CAM and atomic unit drawn from the design instead of from the init code.",
+   "effect": "Chip diagram: the memory shire's address map and the DRAM chip's share of a load become documented or measured instead of inferred. Memory levels: the grey bar at the memory-shire scale, split between the L3 home and the memory shire; the controller's ports, CAM and atomic unit drawn from the design instead of from the init code.",
    "diagram": "the memory shire and its DRAM",
    "levels": [
     ["dram/ms", "the memory shire"],

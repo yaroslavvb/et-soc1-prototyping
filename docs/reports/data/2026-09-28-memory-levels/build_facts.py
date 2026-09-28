@@ -1370,7 +1370,7 @@ ASKS = [
                  "are measured by one-bit flips on 3 cards; the bank bits PA[12:10] come from the programmed ADDRMAP, rung 33). Also: which traffic goes to each controller's two AXI ports; when a "
                  "global atomic on a DRAM address is done in the memory shire's atomic unit rather than at the L3 home; the "
                  "controller's total CAM depth; and where the memory shire's clock crossing sits.",
-     'settles': "The hatched bar at the memory-shire scale, split between the L3 home and the memory shire; the controller's "
+     'settles': "The grey bar at the memory-shire scale, split between the L3 home and the memory shire; the controller's "
                 "ports, CAM and atomic unit drawn from the design instead of from the init code.",
      'facts': ['dram:dram.lat.ms-internal', 'dram:dram.u-ports', 'dram:dram.u-atomic', 'dram:dram.u-cam', 'dram:dram.u-ms-clock'],
      'also': ['exp-dram-rows', 'ask-cache-latency'], 'l3_asks': []},
@@ -1382,7 +1382,7 @@ ASKS = [
     {'id': 'rung20', 'extends': ['rung20'], 'title': 'Current sensing below the regulators (not possible on silicon)',
      'question': "The DRAM's off-rail 73 pJ/B, split between the memory shire's logic, PHY I/O, DRAM core and DRAM I/O, and "
                  "refresh energy stay unmeasurable on the card.",
-     'settles': "The DRAM ledger's hatched energy cells; they stay open.",
+     'settles': "The DRAM ledger's grey energy cells; they stay open.",
      'facts': ['dram:dram.e.split-unknown', 'dram:dram.seq.refresh.04'], 'also': [], 'l3_asks': []},
 ]
 LVL_OF = lambda k: k.split(':')[0]
