@@ -21,10 +21,15 @@
    log scale; a flow's packet rides the zoom from one scale to the next. F presents: full screen where the frame
    allows it, else the stage fills the frame and offers F11 and a presenter window (a copy of the page in a window of
    its own). With reduced motion nothing animates: each stage draws its end state.
-   Keys: 1-9 and 0 flows, Left/Right (and PageUp/PageDown) stages, crossing to the next tour slide at a flow's ends;
-   Shift+Left/Right tour slides; Space pauses; + and - zoom; Enter on a part zooms in; Backspace zooms out; C follow;
-   F present; P panel; D light and dark; T tour; Q or Esc end the tour. URL flags: ?theme=light|dark, ?panel=off,
-   ?flow=1..9|0. */
+   Keys: 1-9 and 0 flows (in the tour, that flow's slide), Left/Right (and PageUp/PageDown) stages, crossing to the
+   next tour slide at a flow's ends; Shift+Left/Right tour slides; Space pauses; + and - zoom (a second press while the
+   camera moves goes on from its target); Enter on a part zooms in; Backspace zooms out; C follow; F present; P panel;
+   D light and dark; T tour (it picks up where it was left); Q ends the tour; Esc leaves presenting, never the tour.
+   URL flags: ?theme=light|dark, ?panel=off, ?flow=1..9|0, ?tour=1.
+
+   Third version (27 September, for presenting): one drawing system (stroke weights, corner radii, type weights), --c2
+   kept for what moves; a semantic zoom whose labels never swell and whose camera can be redirected mid-move; the
+   stage's line as the caption; presenting mode (the tour, F) without the reader's instructions. */
 (function () {
 'use strict';
 /* the page's own HTML, before the script changes it: the presenter window is written from it when the server's copy
@@ -39,18 +44,36 @@ let REDUCED = !!CK.reduced;
 try { const mq = matchMedia('(prefers-reduced-motion: reduce)'); mq.addEventListener('change', e => { REDUCED = e.matches; }); } catch (_) { /* old browser */ }
 const fnum = (v, dp) => CK.fmt.num(v, dp);
 const V = k => { if (!N[k]) throw new Error('no number ' + k); return N[k].v; };
-/* a number from D.num, with its fact attached */
+/* how a number's text is shown: a multiplier with the sign × (the facts write 12.4x), nothing else changes */
+const disp = t => String(t).replace(/(\d)x(?=$|[\s,;.)])/g, '$1×');
+/* a number from D.num, with its fact attached; a unit after it never wraps onto the next line */
 function n(k, unit) {
   const x = N[k]; if (!x) { console.error('no number ' + k); return '?'; }
-  return `<span class="num" data-f="${x.f}">${esc(x.t)}${unit ? ' ' + esc(unit) : ''}</span>`;
+  return `<span class="num" data-f="${x.f}">${esc(disp(x.t))}${unit ? '\u00a0' + esc(unit) : ''}</span>`;
 }
 /* a number the page computes, citing the facts it comes from */
-const cn = (v, fids, dp, unit) => `<span class="num" data-f="${fids}">${fnum(v, dp)}${unit ? ' ' + unit : ''}</span>`;
+const cn = (v, fids, dp, unit) => `<span class="num" data-f="${fids}">${fnum(v, dp)}${unit ? '\u00a0' + unit : ''}</span>`;
+/* an arrow in text, in a font that draws it (outside tags only) */
+const ARW = html => String(html).replace(/(<[^>]*>)|([←→↑↓])/g, (m, tag, a) => tag || `<span class="arr">${a}</span>`);
 const S = (node, o) => { for (const k in o) if (o[k] != null) node.style[k] = o[k]; return node; };
 const E = (tag, attrs, parent) => CK.el(tag, attrs, parent);
 function T(parent, x, y, str, cls, anchor, fids) {
   const t = E('text', {x, y, class: cls, 'text-anchor': anchor || 'start'}, parent);
-  t.textContent = str; if (fids) t.setAttribute('data-f', fids);
+  const s = String(str);
+  if (/[←→↑↓]/.test(s)) s.split(/([←→↑↓])/).forEach(p => { if (!p) return; if (/[←→↑↓]/.test(p)) E('tspan', {class: 'arr'}, t).textContent = p; else t.appendChild(document.createTextNode(p)); });
+  else t.textContent = s;
+  if (fids) t.setAttribute('data-f', fids);
+  return t;
+}
+/* lines of SVG text, each under the last at 1.2 times its font's size (the size a short screen sets larger); a line
+   may be {t, c, f}: its own class (size, weight) and source */
+function T2(parent, x, y, lines, cls, anchor, fids, lh) {
+  const t = E('text', {x, y, class: cls, 'text-anchor': anchor || 'start'}, parent);
+  lines.forEach((ln, i) => {
+    const L = typeof ln === 'string' ? {t: ln} : ln, sp = E('tspan', {x, dy: i ? (lh || 1.2) + 'em' : 0}, t);
+    sp.textContent = L.t; if (L.c) sp.setAttribute('class', L.c); if (L.f) sp.setAttribute('data-f', L.f);
+  });
+  if (fids) t.setAttribute('data-f', fids);
   return t;
 }
 const ns = cyc => cyc * 1000 / V('mhz');   // minion cycles at 600 MHz to ns
@@ -59,9 +82,12 @@ const ns = cyc => cyc * 1000 / V('mhz');   // minion cycles at 600 MHz to ns
 const MM = 30;                                         // SVG units per mm
 const TILE = V('grid_mm') / 6 * MM, STRIP = V('strip_mm') * MM;
 const DW = 2 * STRIP + 6 * TILE, DH = 6 * TILE, INS = 5;
-const VB = {x: -190, y: -84, w: 1300, h: 792};
-const SF = {x: 110, y: -36, w: 700, h: 700};          // where a shire is drawn when zoomed in
-const MF = {x: -110, y: -70, w: 1140, h: 760};         // where a minion is drawn when zoomed in
+/* the drawing's frame: the die with its packages and the host, and right of them a column for the flows' charts (a
+   frame 100 units wider than the die's needs costs the drawing under 2% at 1920 x 1080 and nothing at 1280 x 720,
+   where the height sets its scale) */
+const VB = {x: -190, y: -84, w: 1400, h: 792};
+const SF = {x: 160, y: -36, w: 700, h: 700};          // where a shire is drawn when zoomed in (centred in the frame)
+const MF = {x: -60, y: -70, w: 1140, h: 760};          // where a minion is drawn when zoomed in
 const COL = {cshire: 'var(--c1)', master: 'var(--c7)', pcie: 'var(--c4)', io: 'var(--c5)', memshire: 'var(--c3)'};
 
 const CELLS = [], BYLOG = {}, BYDIE = {}, SH = {}, MSC = {};
@@ -96,6 +122,22 @@ function route(a, b) { return xy(a, b, true) || xy(a, b, false) || [a, b]; }
 /* a path through several stops, each leg on its own route */
 function via(...cs) { let out = [cs[0]]; for (let i = 1; i < cs.length; i++) out = out.concat(route(cs[i - 1], cs[i]).slice(1)); return out; }
 const pts = cells => cells.map(c => ({x: c.sx, y: c.sy}));
+/* a reply's lane: its route moved d units to the right of its direction of travel, so that a reply running back
+   along a request's mesh line takes its own side of it and the two never overprint; from (a point on the request's
+   line), a short step across to the lane */
+function lane(P, d, from) {
+  const Q = P.filter((p, i) => !i || Math.hypot(p.x - P[i - 1].x, p.y - P[i - 1].y) > 0.5);
+  if (Q.length < 2) return from ? [from].concat(Q) : Q;
+  const nr = (a, b) => { const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy); return {x: -dy / L, y: dx / L}; };
+  const out = Q.map((p, i) => {
+    const n0 = i > 0 ? nr(Q[i - 1], p) : null, n1 = i < Q.length - 1 ? nr(p, Q[i + 1]) : null;
+    if (!n0) return {x: p.x + n1.x * d, y: p.y + n1.y * d};
+    if (!n1 || Math.abs(n0.x * n1.x + n0.y * n1.y) > 0.99) return {x: p.x + n0.x * d, y: p.y + n0.y * d};
+    return {x: p.x + (n0.x + n1.x) * d, y: p.y + (n0.y + n1.y) * d};   // a right-angle turn: the corner of both lanes
+  });
+  return from ? [from].concat(out) : out;
+}
+const LANE = 9;
 const cellName = c => !c ? 'the die edge' : c.type === 'cshire' ? 'shire ' + c.id : c.type === 'memshire' ? 'memory shire ' + c.id
   : c.type === 'master' ? (c.r === 0 ? 'master shire' : 'spare shire') : c.type === 'pcie' ? 'PCIe shire' : c.type === 'io' ? 'I/O shire' : 'grey cell';
 
@@ -103,6 +145,8 @@ const cellName = c => !c ? 'the die edge' : c.type === 'cshire' ? 'shire ' + c.i
 const svg = $('chip');
 svg.setAttribute('viewBox', `${VB.x} ${VB.y} ${VB.w} ${VB.h}`);
 svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+/* the callouts' soft shadow (its strength is set by the theme, CSS #co-sh feDropShadow) */
+{ const f = E('filter', {id: 'co-sh', x: '-10%', y: '-20%', width: '120%', height: '160%'}, E('defs', {}, svg)); E('feDropShadow', {dx: 0, dy: 2, stdDeviation: 3, 'flood-color': '#000'}, f); }
 const LAYERS = [0, 1, 2].map(i => E('g', {class: 'lay', 'data-level': i}, svg));
 LAYERS[1].style.display = 'none'; LAYERS[2].style.display = 'none';
 LAYERS[1].style.opacity = 0; LAYERS[2].style.opacity = 0;   // hidden views start transparent: a zoom fades them in
@@ -114,12 +158,17 @@ function comp(parent, key, ctx, label) {
   g._key = key; g._ctx = ctx || {};
   return g;
 }
+/* One drawing system: outlines of components 2 units (frames and the die 2.5, sub-structure 1.25), corners of 6 units
+   (frames 14, the die 10); interconnect at rest thinner than a moving trail (6). o.quiet: no outline until hover or focus */
 function boxShape(g, x, y, w, h, col, o) {
   o = o || {};
-  S(E('rect', {class: 'shape', x, y, width: w, height: h, rx: o.rx == null ? 10 : o.rx}, g),
-    {fill: o.fill || col, fillOpacity: o.fo == null ? 0.12 : o.fo, stroke: col, strokeWidth: o.sw || 2.5, strokeDasharray: o.dash ? '10 7' : null});
-  E('rect', {class: 'ring', x: x - 5, y: y - 5, width: w + 10, height: h + 10, rx: (o.rx == null ? 10 : o.rx) + 4}, g);
+  const rx = o.rx == null ? 6 : o.rx;
+  S(E('rect', {class: 'shape' + (o.quiet ? ' quiet' : ''), x, y, width: w, height: h, rx}, g),
+    {fill: o.fill || col, fillOpacity: o.fo == null ? 0.12 : o.fo, stroke: col, strokeWidth: o.sw || 2, strokeDasharray: o.dash ? '8 6' : null});
+  E('rect', {class: 'ring', x: x - 5, y: y - 5, width: w + 10, height: h + 10, rx: rx + 4}, g);
 }
+/* a mesh link or a link to a neighbour: one colour and width everywhere (CSS .mlink) */
+const mlink = (parent, x1, y1, x2, y2) => E('line', {class: 'mlink', x1, y1, x2, y2}, parent);
 
 function buildChip() {
   const L = LAYERS[0];
@@ -132,29 +181,28 @@ function buildChip() {
     const g = comp(L, 'dram', {ms}, `LPDDR4X package, drawn beside memory shires ${ms[0]} and ${ms[1]} (pairing inferred): details`);
     ms.forEach(m => { const c = MSC[m];
       [-14, 14].forEach((dy, k) => {
-        S(E('line', {x1: west ? x + w : DW, x2: west ? 0 : x, y1: c.sy + dy, y2: c.sy + dy}, g), {stroke: 'var(--c3)', strokeWidth: 3.5});
+        S(E('line', {x1: west ? x + w : DW, x2: west ? 0 : x, y1: c.sy + dy, y2: c.sy + dy}, g), {stroke: 'var(--c3)', strokeWidth: 2.5});
         PKG[m + ':' + k] = {x: west ? x + w - 6 : x + 6, y: c.sy + dy};
       });
       PKG[m] = {x: x + w / 2, y: c.sy};
     });
-    boxShape(g, x, y, w, h, 'var(--c3)', {fo: 0.16, sw: 3, dash: true});
+    boxShape(g, x, y, w, h, 'var(--c3)', {fo: 0.16, dash: true});
     const cx = x + w / 2, cy = y + h / 2;
     T(g, cx, cy - 16, 'LPDDR4X', 't-labb', 'middle', 'dram.pkg-pairing');
-    T(g, cx, cy + 10, 'four 16-bit', 't-sm', 'middle', 'L47');
-    T(g, cx, cy + 31, 'channels', 't-sm', 'middle', 'L47');
+    T2(g, cx, cy + 10, ['four 16-bit', 'channels'], 't-sm t-fit', 'middle', 'L47');
   });
   AP[0].pkg = PKG;
-  // the die: its outline is the component "chip"
+  // the die: its outline is the component "chip", a quiet frame; its caption is a figure caption, not a title
   const gd = comp(L, 'chip', {}, 'The ET-SoC-1 die: details');
-  S(E('rect', {class: 'shape', x: 0, y: 0, width: DW, height: DH, rx: 16}, gd), {fill: 'var(--surface)', stroke: 'var(--ink-2)', strokeWidth: 3});
-  E('rect', {class: 'ring', x: -6, y: -6, width: DW + 12, height: DH + 12, rx: 20}, gd);
-  T(gd, 0, -24, `ET-SoC-1 · ${N.die_mm2.t} mm² · TSMC ${N.process.t}`, 't-mid', 'start', 'chip.die-area chip.process');
+  S(E('rect', {class: 'shape', x: 0, y: 0, width: DW, height: DH, rx: 10}, gd), {fill: 'var(--surface)', stroke: 'color-mix(in srgb, var(--ink-2) 55%, var(--surface))', strokeWidth: 2.5});
+  E('rect', {class: 'ring', x: -6, y: -6, width: DW + 12, height: DH + 12, rx: 14}, gd);
+  T(gd, 0, -22, `ET-SoC-1 · ${N.die_mm2.t} mm² · TSMC ${N.process.t}`, 't-dcap', 'start', 'chip.die-area chip.process');
   // the host and the PCIe link (from the PCIe shire's top edge), now timed on three cards
   const pc = CELLS.find(c => c.type === 'pcie'), hx = 950, hy = -74, hw = 150, hh = 92, ly = -30;
   const gh = comp(L, 'host', {}, 'The host and the PCIe link: details');
-  S(E('path', {d: `M${pc.sx},${pc.y + INS} V${ly} H${hx}`, fill: 'none'}, gh), {stroke: 'var(--c4)', strokeWidth: 6, strokeLinejoin: 'round'});
-  boxShape(gh, hx, hy, hw, hh, 'var(--ink-2)', {fo: 0.08});
-  T(gh, hx + hw / 2, hy + 54, 'Host', 't-mid', 'middle');
+  S(E('path', {d: `M${pc.sx},${pc.y + INS} V${ly} H${hx}`, fill: 'none'}, gh), {stroke: 'var(--c4)', strokeWidth: 4, strokeLinejoin: 'round'});
+  boxShape(gh, hx, hy, hw, hh, 'var(--ink-2)', {fo: 0});
+  T(gh, hx + hw / 2, hy + 54, 'Host', 't-mid', 'middle').style.fontSize = '22px';
   T(gh, hx - 14, ly - 12, `PCIe Gen4 x8 · ${N.pcie_h2d.t} GB/s to the card`, 't-sm halo', 'end', 'pcie.h2d pcie.negotiated');
   AP[0].host = [{x: hx + 4, y: ly}, {x: pc.sx, y: ly}, {x: pc.sx, y: pc.sy}];
   AP[0].hostBox = {x: hx, y: hy, w: hw, h: hh, ly};
@@ -162,10 +210,9 @@ function buildChip() {
   const LG = E('g', {class: 'dimmable links', 'pointer-events': 'none'}, L);
   AP[0].links = LG;
   CELLS.forEach(a => CELLS.forEach(b => {
-    if (a !== b && hops(a, b) === 1 && (a.lx < b.lx || a.ly < b.ly))
-      S(E('line', {x1: a.sx, y1: a.sy, x2: b.sx, y2: b.sy}, LG), {stroke: 'var(--axis)', strokeWidth: 4, strokeLinecap: 'round'});
+    if (a !== b && hops(a, b) === 1 && (a.lx < b.lx || a.ly < b.ly)) mlink(LG, a.sx, a.sy, b.sx, b.sy);
   }));
-  CELLS.forEach(c => S(E('circle', {cx: c.sx, cy: c.sy, r: 6.5}, LG), {fill: 'var(--ink-2)'}));
+  CELLS.forEach(c => E('circle', {class: 'mstop', cx: c.sx, cy: c.sy, r: 5}, LG));
   // the tiles: the four cells without a compute shire are named by the firmware's map (fact fw.grey-cells)
   CELLS.forEach(c => {
     const g = comp(L, c.type, {cell: c}, tileLabel(c)); c.g = g;
@@ -177,13 +224,17 @@ function buildChip() {
     else if (c.type === 'pcie') T(g, x0, y0 + 30, 'PCIe', 't-labb halo-s');
     else if (c.type === 'io') { T(g, x0, y0 + 27, 'I/O', 't-labb halo-s'); T(g, x0, y0 + 50, 'Maxions', 't-sm halo-s'); }
   });
-  // the mesh as a component, and a button for what is inferred and what would settle it
+  // the mesh as a component, and a key for what is dashed (inferred) that opens what would settle it: plain labels
+  // under the die, outlined only on hover or focus
   const gm = comp(L, 'mesh', {}, 'The mesh: details');
-  boxShape(gm, 0, DH + 9, 292, 30, 'var(--ink-2)', {fo: 0.06, rx: 15});
-  T(gm, 14, DH + 31, `The mesh: ${N.grid86.t}, ${N.stops.t} stops`, 't-labb', 'start', 'mesh.grid');
+  boxShape(gm, 0, DH + 8, 262, 30, 'var(--ink-2)', {fo: 0, quiet: true});
+  T(gm, 10, DH + 29, `The mesh: ${N.grid86.t}, ${N.stops.t} stops`, 't-sm', 'start', 'mesh.grid');
   const gi = comp(L, 'inferred', {}, 'What the drawing infers, and what would settle it: details');
-  boxShape(gi, DW - 372, DH + 9, 372, 30, 'var(--c1)', {fo: 0.07, rx: 15});
-  T(gi, DW - 186, DH + 30, 'Dashed: inferred · what would settle it ›', 't-sm', 'middle').style.fill = 'var(--ink)';
+  boxShape(gi, DW - 350, DH + 8, 350, 30, 'var(--ink-2)', {fo: 0, quiet: true});
+  S(E('line', {x1: DW - 338, y1: DH + 23, x2: DW - 302, y2: DH + 23}, gi), {stroke: 'var(--c3)', strokeWidth: 2.5, strokeDasharray: '8 6'});
+  const ti = T(gi, DW - 10, DH + 29, 'inferred · what would settle it ›', 't-sm', 'end');
+  // the dashed sample sits just left of its words (measured once drawn)
+  try { const tl = ti.getComputedTextLength(); if (tl > 0) { const sl = gi.querySelector('line'); sl.setAttribute('x2', DW - 10 - tl - 10); sl.setAttribute('x1', DW - 10 - tl - 46); } } catch (_) { /* not rendered */ }
   FX[0] = E('g', {class: 'fx', 'pointer-events': 'none'}, L);
 }
 function tileLabel(c) {
@@ -198,29 +249,30 @@ function buildShire(sid) {
   const L = LAYERS[1]; L.textContent = ''; AP[1] = {min: {}, minG: {}, bank: [], lane: [], nbx: []};
   const P = AP[1], cell = SH[sid], X = SF.x, Y = SF.y, W = SF.w;
   P.sid = sid;
+  // an opaque backdrop the size of the frame: while the camera zooms, nothing of the view behind shows through
+  S(E('rect', {class: 'zbd', x: X, y: Y, width: W, height: W, rx: 14, 'pointer-events': 'none'}, L), {fill: 'var(--page)'});
   const fr = E('g', {}, L);
-  S(E('rect', {x: X, y: Y, width: W, height: W, rx: 22}, fr), {fill: 'var(--c1)', fillOpacity: 0.05, stroke: 'var(--c1)', strokeWidth: 3});
+  S(E('rect', {x: X, y: Y, width: W, height: W, rx: 14}, fr), {fill: 'var(--c1)', fillOpacity: 0.05, stroke: 'var(--c1)', strokeWidth: 2.5});
   T(fr, X + 22, Y + 40, `Shire ${sid}`, 't-big');
   T(fr, X + W - 22, Y + 38, `map (${cell.lx}, ${cell.ly}) · ${N.per_shire.t}`, 't-sm', 'end', 'mesh.logical-map shire.composition');
   // mesh neighbours, in die orientation
   const nb = [[-1, 0, 'N'], [1, 0, 'S'], [0, -1, 'W'], [0, 1, 'E']].map(([dr, dc, s]) => [BYDIE[(cell.r + dr) + ',' + (cell.c + dc)], s]);
   P.edge = {};
   nb.forEach(([c, s]) => {
-    const st = {stroke: 'var(--axis)', strokeWidth: 5, strokeLinecap: 'round'};
     const lab = c ? cellName(c) : 'die edge';
-    if (s === 'N') { if (c) S(E('line', {x1: X + W / 2, y1: Y, x2: X + W / 2, y2: Y - 24}, fr), st); T(fr, X + W / 2 + 12, Y - 18, (c ? '↑ ' : '') + lab, 't-sm'); P.edge.N = {x: X + W / 2, y: Y - 24}; }
-    if (s === 'S') { if (c) S(E('line', {x1: X + W / 2, y1: Y + W, x2: X + W / 2, y2: Y + W + 24}, fr), st); T(fr, X + W / 2 + 12, Y + W + 30, (c ? '↓ ' : '') + lab, 't-sm'); P.edge.S = {x: X + W / 2, y: Y + W + 24}; }
-    if (s === 'W') { if (c) S(E('line', {x1: X, y1: Y + W / 2, x2: X - 24, y2: Y + W / 2}, fr), st); T(fr, X - 30, Y + W / 2 + 6, lab + (c ? ' ←' : ''), 't-sm', 'end'); P.edge.W = {x: X - 24, y: Y + W / 2}; }
-    if (s === 'E') { if (c) S(E('line', {x1: X + W, y1: Y + W / 2, x2: X + W + 24, y2: Y + W / 2}, fr), st); T(fr, X + W + 30, Y + W / 2 + 6, (c ? '→ ' : '') + lab, 't-sm'); P.edge.E = {x: X + W + 24, y: Y + W / 2}; }
+    if (s === 'N') { if (c) mlink(fr, X + W / 2, Y, X + W / 2, Y - 24); T(fr, X + W / 2 + 12, Y - 18, (c ? '↑ ' : '') + lab, 't-sm'); P.edge.N = {x: X + W / 2, y: Y - 24}; }
+    if (s === 'S') { if (c) mlink(fr, X + W / 2, Y + W, X + W / 2, Y + W + 24); T(fr, X + W / 2 + 12, Y + W + 30, (c ? '↓ ' : '') + lab, 't-sm'); P.edge.S = {x: X + W / 2, y: Y + W + 24}; }
+    if (s === 'W') { if (c) mlink(fr, X, Y + W / 2, X - 24, Y + W / 2); T(fr, X - 30, Y + W / 2 + 6, lab + (c ? ' ←' : ''), 't-sm', 'end'); P.edge.W = {x: X - 24, y: Y + W / 2}; }
+    if (s === 'E') { if (c) mlink(fr, X + W, Y + W / 2, X + W + 24, Y + W / 2); T(fr, X + W + 30, Y + W / 2 + 6, (c ? '→ ' : '') + lab, 't-sm'); P.edge.E = {x: X + W + 24, y: Y + W / 2}; }
   });
   // key, in the left margin
   const kx = VB.x + 14, ky = Y + 440;
   T(fr, kx, ky, 'Key', 't-labb');
-  S(E('line', {x1: kx, y1: ky + 24, x2: kx + 36, y2: ky + 24}, fr), {stroke: 'var(--c4)', strokeWidth: 6, strokeLinecap: 'round'});
-  T(fr, kx + 46, ky + 30, 'fast local', 't-sm'); T(fr, kx + 46, ky + 50, 'network edge', 't-sm');
-  S(E('line', {x1: kx + 18, y1: ky + 70, x2: kx + 18, y2: ky + 104}, fr), {stroke: 'var(--ink-2)', strokeWidth: 4});
-  T(fr, kx + 46, ky + 86, 'ET-Link to', 't-sm'); T(fr, kx + 46, ky + 106, 'the shire cache', 't-sm');
-  T(fr, kx, ky + 150, 'Block diagram,', 't-sm'); T(fr, kx, ky + 170, 'not a floorplan', 't-sm', 'start', 'L114');
+  S(E('line', {x1: kx, y1: ky + 24, x2: kx + 36, y2: ky + 24}, fr), {stroke: 'var(--c4)', strokeWidth: 5, strokeLinecap: 'round'});
+  T2(fr, kx + 46, ky + 30, ['fast local', 'network edge'], 't-sm');
+  S(E('line', {x1: kx + 18, y1: ky + 70, x2: kx + 18, y2: ky + 104}, fr), {stroke: 'var(--ink-2)', strokeWidth: 2.5});
+  T2(fr, kx + 46, ky + 86, ['ET-Link to', 'the shire cache'], 't-sm');
+  T2(fr, kx, ky + 150, ['Block diagram,', 'not a floorplan'], 't-sm', 'start', 'L114');
   // mesh stop
   const gs = comp(L, 'meshstop', {sid}, 'Mesh stop: details');
   boxShape(gs, X + 20, Y + 58, W - 40, 62, 'var(--ink-2)', {fo: 0.07});
@@ -228,29 +280,31 @@ function buildShire(sid) {
   T(gs, X + 180, Y + 97, 'lane = PA[7:6]', 't-sm', 'start', 'L103');
   for (let i = 0; i < 4; i++) {
     const lx = X + W - 40 - (4 - i) * 58 + 6;
-    S(E('rect', {x: lx, y: Y + 68, width: 48, height: 42, rx: 6}, gs), {fill: 'var(--page)', stroke: 'var(--ink-2)', strokeWidth: 2});
+    S(E('rect', {x: lx, y: Y + 68, width: 48, height: 42, rx: 4}, gs), {fill: 'var(--page)', stroke: 'var(--ink-2)', strokeWidth: 1.25});
     T(gs, lx + 24, Y + 96, String(i), 't-labb', 'middle', 'L103');
     P.lane[i] = {x: lx + 24, y: Y + 89};
   }
   P.stop = {x: X + W / 2, y: Y + 58};
-  // four banks and the UC block
+  // four banks and the UC block; each bank's four sub-banks drawn between its title and its label
   const bw = (500 - 3 * 10) / 4;
   for (let i = 0; i < 4; i++) {
     const bx = X + 20 + i * (bw + 10), by = Y + 134;
     const g = comp(L, 'banks', {bank: i}, `Shire cache bank ${i}: details`);
     boxShape(g, bx, by, bw, 108, 'var(--c1)', {fo: 0.1});
-    for (let k = 1; k < 4; k++) S(E('line', {x1: bx + k * bw / 4, y1: by + 52, x2: bx + k * bw / 4, y2: by + 100}, g), {stroke: 'var(--c1)', strokeOpacity: 0.5, strokeWidth: 2});
+    const sw4 = (bw - 20 - 3 * 4) / 4;
+    for (let k = 0; k < 4; k++) S(E('rect', {x: bx + 10 + k * (sw4 + 4), y: by + 42, width: sw4, height: 26, rx: 3}, g), {fill: 'var(--c1)', fillOpacity: 0.12, stroke: 'var(--c1)', strokeOpacity: 0.7, strokeWidth: 1.25});
     T(g, bx + 10, by + 30, `Bank ${i}`, 't-labb');
-    T(g, bx + bw / 2, by + 84, '4 sub-banks', 't-sm halo-s', 'middle', 'shire.cache-geometry');
+    T(g, bx + bw / 2, by + 94, '4 sub-banks', 't-sm t-fit', 'middle', 'shire.cache-geometry');
     P.bank[i] = {x: bx + bw / 2, y: by + 54, box: {x: bx, y: by, w: bw, h: 108}};
   }
   const gu = comp(L, 'uc', {}, 'UC block: barriers, credits and atomics: details');
   boxShape(gu, X + 530, Y + 134, W - 550, 108, 'var(--c7)', {fo: 0.1});
   T(gu, X + 544, Y + 164, 'UC block', 't-labb');
-  T(gu, X + 544, Y + 190, 'barriers,', 't-sm'); T(gu, X + 544, Y + 210, 'credits, atomics', 't-sm');
+  T2(gu, X + 544, Y + 190, ['barriers,', 'credits, atomics'], 't-sm t-fit');
   P.uc = {x: X + 530 + (W - 550) / 2, y: Y + 188};
   // the 4 MB in mode M0: scratchpad, L3 slice, L2
-  const parts = [['scp', V('scp_mb'), 'Scratchpad', N.scp_mb.t, 'var(--c4)'], ['l3', V('l3_mb'), 'L3 slice', N.l3_mb.t, 'var(--c3)'], ['l2', V('l2_kb') / 1024, 'L2', N.l2_kb.t, 'var(--c2)']];
+  // (the flows' colour, --c2, is kept for what moves: the L2 is --c5, which no part of a shire uses)
+  const parts = [['scp', V('scp_mb'), 'Scratchpad', N.scp_mb.t, 'var(--c4)'], ['l3', V('l3_mb'), 'L3 slice', N.l3_mb.t, 'var(--c3)'], ['l2', V('l2_kb') / 1024, 'L2', N.l2_kb.t, 'var(--c5)']];
   // widths in proportion to the sizes, except the L2, drawn wider (104 units) so that its label fits
   const L2W = 104, rest = parts.filter(p => p[0] !== 'l2').reduce((s, p) => s + p[1], 0);
   let px = X + 20;
@@ -258,12 +312,11 @@ function buildShire(sid) {
     const w = k === 'l2' ? L2W : (500 - L2W) * mb / rest, g = comp(L, k, {sid}, `${nm}, ${t}: details`);
     boxShape(g, px, Y + 252, w - 4, 46, col, {fo: 0.2, rx: 6});
     if (w > 200) T(g, px + 10, Y + 282, `${nm} · ${t}`, 't-labb', 'start', 'shire.partition-m0');
-    else { T(g, px + 8, Y + 271, nm, 't-labb'); T(g, px + 8, Y + 292, t, 't-sm', 'start', 'shire.partition-m0').style.fontSize = '18px'; }
+    else T2(g, px + 8, Y + 271, [{t: nm, c: 't-labb'}, {t, c: 't-sm', f: 'shire.partition-m0'}], '', 'start', null, 1.05);
     P[k] = {x: px + w / 2, y: Y + 275};
     px += w;
   });
-  T(fr, X + 530, Y + 272, 'mode M0 split', 't-sm', 'start', 'shire.partition-m0 shire.partition-measured');
-  T(fr, X + 530, Y + 292, 'L2 not to scale', 't-sm', 'start', 'shire.partition-m0');
+  T2(fr, X + 530, Y + 272, ['mode M0 split', 'L2 not to scale'], 't-sm', 'start', 'shire.partition-m0 shire.partition-measured');
   // crossbar
   const gx = comp(L, 'xbar', {}, 'Crossbar: details');
   boxShape(gx, X + 20, Y + 308, W - 40, 30, 'var(--ink-2)', {fo: 0.07, rx: 6});
@@ -277,9 +330,9 @@ function buildShire(sid) {
     const G = E('g', {}, L);
     const gn = comp(G, 'neigh', {nb: k}, `Neighbourhood ${k}: details`);
     boxShape(gn, nx, ny, nw, nh, 'var(--c1)', {fo: 0.05});
-    T(gn, nx + nw / 2, ny + 28, `Neighbourhood ${k}`, 't-sm', 'middle');
+    T(gn, nx + nw / 2, ny + 28, `Neighbourhood ${k}`, 't-sm t-fit', 'middle');
     // link up to the crossbar through the neighbourhood channel
-    S(E('line', {x1: nx + nw / 2, y1: ny, x2: nx + nw / 2, y2: Y + 338}, G), {stroke: 'var(--ink-2)', strokeWidth: 4});
+    S(E('line', {x1: nx + nw / 2, y1: ny, x2: nx + nw / 2, y2: Y + 338}, G), {stroke: 'var(--ink-2)', strokeWidth: 2.5});
     const pos = {};
     [LEFT, RIGHT].forEach((col, ci) => col.forEach((m, ri) => {
       pos[m] = {x: nx + 8 + ci * 74, y: ny + 46 + ri * 70, w: 66, h: 44};
@@ -290,11 +343,15 @@ function buildShire(sid) {
       T(g, p.x + p.w / 2, p.y + 30, 'M' + m, 't-labb', 'middle');
       P.min[k + ':' + m] = p; P.minG[k + ':' + m] = g;
     }
-    // tree edges of the fast local network, drawn over the minions' edges (fact L115)
+    // tree edges of the fast local network, drawn over the minions' edges (fact L115); each edge's ends are kept, so
+    // that the allreduce (flow 0) recolours the edge itself
+    P.fe = P.fe || {};
     LAY.neighbourhood_floorplan.fast_tree_edges.forEach(([a, b]) => {
       const A = pos[a], B = pos[b], hz = A.y === B.y, s1 = A.x < B.x || A.y < B.y ? A : B, s2 = s1 === A ? B : A;
       const q = hz ? {x1: s1.x + s1.w - 10, y1: s1.y + s1.h / 2, x2: s2.x + 10, y2: s2.y + s2.h / 2} : {x1: s1.x + s1.w / 2, y1: s1.y + s1.h - 9, x2: s2.x + s2.w / 2, y2: s2.y + 9};
-      S(E('line', Object.assign(q, {'pointer-events': 'none'}), G), {stroke: 'var(--c4)', strokeWidth: 7, strokeLinecap: 'round'});
+      const pa = s1 === A ? {x: q.x1, y: q.y1} : {x: q.x2, y: q.y2}, pb = s1 === A ? {x: q.x2, y: q.y2} : {x: q.x1, y: q.y1};
+      P.fe[k + ':' + a + '-' + b] = [pa, pb]; P.fe[k + ':' + b + '-' + a] = [pb, pa];
+      S(E('line', Object.assign(q, {class: 'fln-e', 'pointer-events': 'none'}), G), {stroke: 'var(--c4)', strokeWidth: 5, strokeLinecap: 'round'});
     });
     P['ch' + k] = {x: nx + nw / 2, y: ny + 6};
     P.nbx[k] = {x: nx, y: ny, w: nw, h: nh};
@@ -306,23 +363,25 @@ function buildShire(sid) {
 function buildMinion(sid, nb, mi) {
   const L = LAYERS[2]; L.textContent = ''; AP[2] = {regs: [[], []], units: [], scp: []};
   const P = AP[2], X = MF.x, Y = MF.y, W = MF.w, H = MF.h, h0 = sid * 64 + (nb * 8 + mi) * 2;
+  S(E('rect', {class: 'zbd', x: X, y: Y, width: W, height: H, rx: 14, 'pointer-events': 'none'}, L), {fill: 'var(--page)'});
   const fr = E('g', {}, L);
-  S(E('rect', {x: X, y: Y, width: W, height: H, rx: 24}, fr), {fill: 'var(--c1)', fillOpacity: 0.04, stroke: 'var(--c1)', strokeWidth: 3});
+  S(E('rect', {x: X, y: Y, width: W, height: H, rx: 14}, fr), {fill: 'var(--c1)', fillOpacity: 0.04, stroke: 'var(--c1)', strokeWidth: 2.5});
   T(fr, X + 24, Y + 44, `Minion ${mi} · neighbourhood ${nb} · shire ${sid}`, 't-big');
-  T(fr, X + W - 24, Y + 42, `harts ${h0} and ${h0 + 1}`, 't-lab', 'end', 'chip.harts');
+  T(fr, X + W - 24, Y + 42, `harts ${h0} and ${h0 + 1}`, 't-lab m-harts', 'end', 'chip.harts');   // hidden while a flow's note sits there
   // two harts
   [0, 1].forEach(t => {
     const hy = Y + 70 + t * 240, g = comp(L, 'hart', {t}, `Hart ${t}: details`);
     boxShape(g, X + 24, hy, 320, 228, 'var(--c1)', {fo: 0.08});
     T(g, X + 40, hy + 34, `Hart ${t}`, 't-mid');
     if (t === 0) T(g, X + 40, hy + 62, 'issues every tensor instruction', 't-sm', 'start', 'minion.tensor-hart0');
-    else { T(g, X + 40, hy + 60, 'tensor: only TensorLoadL2Scp,', 't-sm', 'start', 'minion.tensor-hart0'); T(g, X + 40, hy + 81, 'TensorWait and tensor_coop', 't-sm', 'start', 'minion.tensor-hart0'); }
+    else T2(g, X + 40, hy + 60, ['tensor: only TensorLoadL2Scp,', 'TensorWait and tensor_coop'], 't-sm', 'start', 'minion.tensor-hart0');
     for (let i = 0; i < 32; i++) {
       const rx = X + 40 + (i % 8) * 36, ry = hy + 94 + Math.floor(i / 8) * 25;
-      P.regs[t].push(S(E('rect', {x: rx, y: ry, width: 32, height: 21, rx: 3, 'pointer-events': 'none'}, g), {fill: 'var(--c1)', fillOpacity: 0.25, stroke: 'var(--c1)', strokeWidth: 1}));
+      P.regs[t].push(S(E('rect', {x: rx, y: ry, width: 32, height: 21, rx: 3, 'pointer-events': 'none'}, g), {fill: 'var(--c1)', fillOpacity: 0.25, stroke: 'var(--c1)', strokeWidth: 1.25}));
     }
     T(g, X + 40, hy + 214, `f0–f31, ${N.vreg256.t}`, 't-sm', 'start', 'minion.vpu');
     P['hart' + t] = {x: X + 184, y: hy + 130};
+    P['hart' + t + 'e'] = {x: X + 344, y: hy + 44};   // the box's right edge, beside its name: where a request leaves it
   });
   // integer pipeline (the core itself)
   const gi = comp(L, 'minion', {}, 'The minion core: details');
@@ -341,57 +400,51 @@ function buildMinion(sid, nb, mi) {
     T(gv, lx + lw / 2, Y + 230, String(l), 't-sm', 'middle');
     UN.forEach((u, k) => {
       const uy = Y + 238 + k * 46;
-      P.units[k].push(S(E('rect', {x: lx, y: uy, width: lw, height: 40, rx: 4, 'pointer-events': 'none'}, gv), {fill: 'var(--c3)', fillOpacity: k < 3 ? 0.3 : 0.14, stroke: 'var(--c3)', strokeWidth: 1.2}));
-      T(gv, lx + lw / 2, uy + 26, u, 't-sm', 'middle');
+      P.units[k].push(S(E('rect', {x: lx, y: uy, width: lw, height: 40, rx: 4, 'pointer-events': 'none'}, gv), {fill: 'var(--c3)', fillOpacity: k < 3 ? 0.3 : 0.14, stroke: 'var(--c3)', strokeWidth: 1.25}));
+      T(gv, lx + lw / 2, uy + 26, u, 't-unit', 'middle');
     });
   }
   P.laneX = l => X + 376 + l * (lw + 6) + lw / 2; P.unitY = k => Y + 238 + k * 46 + 20;
-  T(gv, X + 380, Y + 486, 'FMA · 2× int8 MA · integer · transcendental', 't-sm', 'start', 'minion.vpu');
-  T(gv, X + 380, Y + 510, `peak ${N.vecpeak.t} per cycle, fp32,`, 't-labb', 'start', 'minion.vec-peak');
-  T(gv, X + 380, Y + 531, 'the same for vector and tensor', 't-sm', 'start', 'minion.vec-peak');
+  T2(gv, X + 380, Y + 482, [{t: 'FMA · 2× int8 MA · integer · transcendental', c: 't-sm t-fit', f: 'minion.vpu'}, {t: `peak ${N.vecpeak.t} per cycle, fp32,`, c: 't-labb', f: 'minion.vec-peak'},
+    {t: 'the same for vector and tensor', c: 't-sm', f: 'minion.vec-peak'}], '', 'start', null, 1.1);
   P.vpu = {x: X + 569, y: Y + 350};
-  // the tensor sequencer: state machines in the VPU that run TensorFMA and TensorIMA on the lanes (fact minion.vec-peak)
+  // the tensor sequencer: state machines in the VPU that run TensorFMA and TensorIMA on the lanes (fact minion.vec-peak).
+  // The tensor path is one colour, --c7, like the L1 tensor scratchpad; --c2 is kept for what moves
   const gt = comp(L, 'tensor', {}, 'Tensor sequencer: details');
   const tx = X + 794, tw = W - 24 - 794;
-  boxShape(gt, tx, Y + 70, tw, 468, 'var(--c2)', {fo: 0.07});
+  boxShape(gt, tx, Y + 70, tw, 468, 'var(--c7)', {fo: 0.07});
   T(gt, tx + 16, Y + 104, 'Tensor sequencer', 't-mid', 'start', 'minion.vec-peak');
-  S(E('rect', {x: tx + 16, y: Y + 118, width: tw - 32, height: 100, rx: 8, 'pointer-events': 'none'}, gt), {fill: 'var(--c2)', fillOpacity: 0.16, stroke: 'var(--c2)', strokeWidth: 2});
+  S(E('rect', {x: tx + 16, y: Y + 118, width: tw - 32, height: 100, rx: 6, 'pointer-events': 'none'}, gt), {fill: 'var(--c7)', fillOpacity: 0.12, stroke: 'var(--c7)', strokeWidth: 1.25});
   T(gt, tx + 30, Y + 148, 'TensorFMA · TensorIMA', 't-labb');
   T(gt, tx + 30, Y + 174, 'C += A · B', 't-sm');
   T(gt, tx + 30, Y + 198, N.tshape.t, 't-sm', 'start', 'minion.tensor-shape');
   P.seq = {x: tx + tw / 2, y: Y + 168};
   // the arrow into the lanes: the tensor work runs there
   const ay = Y + 250;
-  P.arrow = S(E('line', {x1: tx + 46, y1: ay, x2: X + 774, y2: ay, 'pointer-events': 'none'}, gt), {stroke: 'var(--c2)', strokeWidth: 6, strokeLinecap: 'round'});
-  S(E('polygon', {points: `${X + 760},${ay} ${X + 778},${ay - 11} ${X + 778},${ay + 11}`, 'pointer-events': 'none'}, gt), {fill: 'var(--c2)'});
+  P.arrow = S(E('line', {x1: tx + 46, y1: ay, x2: X + 774, y2: ay, 'pointer-events': 'none'}, gt), {stroke: 'var(--c7)', strokeWidth: 4, strokeLinecap: 'round'});
+  S(E('polygon', {points: `${X + 760},${ay} ${X + 778},${ay - 10} ${X + 778},${ay + 10}`, 'pointer-events': 'none'}, gt), {fill: 'var(--c7)'});
   T(gt, tx + 56, ay + 6, 'runs on the 8 VPU lanes', 't-sm', 'start', 'minion.vec-peak');
   [['TenB', 0, '(logical)'], ['TenC', 1, '']].forEach(([nm, i, q]) => {
     const bx = tx + 16 + i * ((tw - 32) / 2 + 4), bwid = (tw - 40) / 2;
-    S(E('rect', {x: bx, y: Y + 286, width: bwid, height: 84, rx: 8, 'pointer-events': 'none'}, gt), {fill: 'var(--c2)', fillOpacity: 0.1, stroke: 'var(--c2)', strokeWidth: 1.5});
-    T(gt, bx + 12, Y + 314, nm, 't-labb');
-    T(gt, bx + 12, Y + 338, N.tenb.t, 't-sm', 'start', 'minion.tenb-tenc');
-    if (q) T(gt, bx + 12, Y + 360, q, 't-sm', 'start', 'minion.tenb-tenc');
+    S(E('rect', {x: bx, y: Y + 286, width: bwid, height: 84, rx: 6, 'pointer-events': 'none'}, gt), {fill: 'var(--c7)', fillOpacity: 0.08, stroke: 'var(--c7)', strokeWidth: 1.25});
+    T2(gt, bx + 12, Y + 314, [{t: nm, c: 't-labb'}, {t: N.tenb.t, c: 't-sm', f: 'minion.tenb-tenc'}].concat(q ? [{t: q, c: 't-sm', f: 'minion.tenb-tenc'}] : []), '', 'start', null, 1.12);
     P[nm.toLowerCase()] = {x: bx, y: Y + 286, w: bwid, h: 84};
   });
-  T(gt, tx + 16, Y + 402, 'tensor peak per cycle,', 't-sm');
-  T(gt, tx + 16, Y + 423, 'on those lanes:', 't-sm');
-  T(gt, tx + 16, Y + 450, `${N.peak32.t} · ${N.peak16.t}`, 't-labb', 'start', 'mm-peak');
-  T(gt, tx + 16, Y + 474, `${N.peak8.t} ops`, 't-labb', 'start', 'mm-peak');
-  T(gt, tx + 16, Y + 504, `chip: ${N.tflops.t} TFLOP/s fp32`, 't-sm', 'start', 'mm-rate');
-  T(gt, tx + 16, Y + 527, 'measured, three cards', 't-sm', 'start', 'mm-rate');
+  T2(gt, tx + 16, Y + 396, [{t: 'tensor peak per cycle,', c: 't-sm'}, {t: 'on those lanes:', c: 't-sm'}, {t: `${N.peak32.t} · ${N.peak16.t}`, c: 't-labb', f: 'mm-peak'},
+    {t: `${N.peak8.t} ops`, c: 't-labb', f: 'mm-peak'}, {t: `chip: ${N.tflops.t} TFLOP/s fp32`, c: 't-sm', f: 'mm-rate'}, {t: 'measured, three cards', c: 't-sm', f: 'mm-rate'}], '', 'start', null, 1.16);
   P.tensor = {x: tx + tw / 2, y: Y + 170};
   // L1 data cache: 16 sets, as the firmware leaves them (sets 0-11 tensor scratchpad, 12-13 hart 0, 14-15 hart 1)
   const gl = comp(L, 'l1d', {}, 'L1 data cache: details');
   boxShape(gl, X + 24, Y + 552, 750, 186, 'var(--c1)', {fo: 0.06});
   T(gl, X + 40, Y + 584, `L1 data cache · ${N.l1_kb.t} · as the firmware sets it`, 't-labb', 'start', 'minion.l1d minion.l1-firmware');
   const sw = (750 - 32 - 15 * 4) / 16, sx = k => X + 40 + k * (sw + 4), sy = Y + 600;
-  for (let k = 12; k < 16; k++) S(E('rect', {x: sx(k), y: sy, width: sw, height: 64, rx: 4, 'pointer-events': 'none'}, gl), {fill: 'var(--c1)', fillOpacity: k < 14 ? 0.35 : 0.18, stroke: 'var(--c1)', strokeWidth: 1.5});
-  T(gl, sx(12), sy + 90, 'hart 0', 't-sm', 'start', 'minion.l1-modes'); T(gl, sx(12), sy + 112, N.l1_hart.t, 't-sm', 'start', 'minion.l1-firmware');
-  T(gl, sx(14), sy + 90, 'hart 1', 't-sm', 'start', 'minion.l1-modes'); T(gl, sx(14), sy + 112, N.l1_hart.t, 't-sm', 'start', 'minion.l1-firmware');
+  for (let k = 12; k < 16; k++) S(E('rect', {x: sx(k), y: sy, width: sw, height: 64, rx: 4, 'pointer-events': 'none'}, gl), {fill: 'var(--c1)', fillOpacity: k < 14 ? 0.35 : 0.18, stroke: 'var(--c1)', strokeWidth: 1.25});
+  T2(gl, sx(12), sy + 90, ['hart 0', N.l1_hart.t], 't-sm', 'start', 'minion.l1-modes minion.l1-firmware');
+  T2(gl, sx(14), sy + 90, ['hart 1', N.l1_hart.t], 't-sm', 'start', 'minion.l1-modes minion.l1-firmware');
   const gp = comp(L, 'l1scp', {}, 'L1 tensor scratchpad: details');
-  S(E('rect', {class: 'shape', x: sx(0) - 3, y: sy - 3, width: sx(11) + sw - sx(0) + 6, height: 70, rx: 6}, gp), {fill: 'transparent', stroke: 'var(--c7)', strokeWidth: 2.5});
+  S(E('rect', {class: 'shape', x: sx(0) - 3, y: sy - 3, width: sx(11) + sw - sx(0) + 6, height: 70, rx: 6}, gp), {fill: 'transparent', stroke: 'var(--c7)', strokeWidth: 2});
   E('rect', {class: 'ring', x: sx(0) - 8, y: sy - 8, width: sx(11) + sw - sx(0) + 16, height: 80, rx: 9}, gp);
-  for (let k = 0; k < 12; k++) S(E('rect', {x: sx(k), y: sy, width: sw, height: 64, rx: 4}, gp), {fill: 'var(--c7)', fillOpacity: 0.25, stroke: 'var(--c7)', strokeWidth: 1.5});
+  for (let k = 0; k < 12; k++) S(E('rect', {x: sx(k), y: sy, width: sw, height: 64, rx: 4}, gp), {fill: 'var(--c7)', fillOpacity: 0.25, stroke: 'var(--c7)', strokeWidth: 1.25});
   T(gp, sx(0), sy + 90, `${N.sets011.t}: tensor scratchpad, ${N.l1_scp.t}`, 't-sm', 'start', 'minion.l1-modes');
   P.scpBox = {x: sx(0), y: sy, w: sx(11) + sw - sx(0), h: 64};
   P.l1h0 = {x: sx(12) + sw + 2, y: sy + 32};
@@ -399,13 +452,13 @@ function buildMinion(sid, nb, mi) {
   const ge = comp(L, 'etlink', {}, 'ET-Link port: details');
   boxShape(ge, tx, Y + 552, tw, 96, 'var(--ink-2)', {fo: 0.07});
   T(ge, tx + 16, Y + 582, 'ET-Link port', 't-labb');
-  T(ge, tx + 16, Y + 607, `to the shire cache: ${N.etl_min.t},`, 't-sm', 'start', 'minion.etlink-width');
-  T(ge, tx + 16, Y + 630, `onto a shared ${N.etl512.t.replace(' ET-Link bus', '')} bus`, 't-sm', 'start', 'shire.neigh-link');
+  T2(ge, tx + 16, Y + 607, [`to the shire cache: ${N.etl_min.t},`, `onto a shared ${N.etl512.t.replace(' ET-Link bus', '')} bus`], 't-sm', 'start', 'minion.etlink-width shire.neigh-link');
   P.etl = {x: tx + tw - 110, y: Y + 580};
+  P.etlPort = {x: tx, y: Y + 600};   // the port's edge, where a request leaves the minion (over no text)
   const gf = comp(L, 'fln', {}, 'Fast local network: details');
   boxShape(gf, tx, Y + 658, tw, 80, 'var(--c4)', {fo: 0.1});
   T(gf, tx + 16, Y + 690, 'Fast local network', 't-labb');
-  T(gf, tx + 16, Y + 716, `${N.ts_fln.t} round trip on tree edges`, 't-sm', 'start', 'ts-rt-fln');
+  T(gf, tx + 16, Y + 716, `${N.ts_fln.t} round trip on tree edges`, 't-sm t-fit', 'start', 'ts-rt-fln');
   P.fln = {x: tx + tw - 110, y: Y + 700};
   FX[2] = E('g', {class: 'fx', 'pointer-events': 'none'}, L);
 }
@@ -417,26 +470,26 @@ function buildPip() {
   S(E('rect', {x: VB.x, y: VB.y, width: VB.w, height: VB.h}, s), {fill: 'var(--page)'});
   [[0, 1], [2, 3], [4, 5], [6, 7]].forEach(ms => {
     const a = MSC[ms[0]], b = MSC[ms[1]], west = a.c === 0, x = west ? -150 : DW + 40;
-    S(E('rect', {x, y: a.y + 8, width: 110, height: b.y + b.h - 16 - a.y, rx: 10}, s), {fill: 'var(--c3)', fillOpacity: 0.16, stroke: 'var(--c3)', strokeWidth: 5, strokeDasharray: '12 8'});
+    S(E('rect', {x, y: a.y + 8, width: 110, height: b.y + b.h - 16 - a.y, rx: 6}, s), {fill: 'var(--c3)', fillOpacity: 0.16, stroke: 'var(--c3)', strokeWidth: 3, strokeDasharray: '10 8'});
   });
-  S(E('rect', {x: 0, y: 0, width: DW, height: DH, rx: 16}, s), {fill: 'var(--surface)', stroke: 'var(--ink-2)', strokeWidth: 5});
+  S(E('rect', {x: 0, y: 0, width: DW, height: DH, rx: 10}, s), {fill: 'var(--surface)', stroke: 'color-mix(in srgb, var(--ink-2) 55%, var(--surface))', strokeWidth: 3});
   const hb = AP[0].hostBox, pc = CELLS.find(c => c.type === 'pcie');
-  S(E('path', {d: `M${pc.sx},${pc.y + INS} V${hb.ly} H${hb.x}`, fill: 'none'}, s), {stroke: 'var(--c4)', strokeWidth: 8});
-  S(E('rect', {x: hb.x, y: hb.y, width: hb.w, height: hb.h, rx: 10}, s), {fill: 'var(--ink-2)', fillOpacity: 0.1, stroke: 'var(--ink-2)', strokeWidth: 5});
+  S(E('path', {d: `M${pc.sx},${pc.y + INS} V${hb.ly} H${hb.x}`, fill: 'none'}, s), {stroke: 'var(--c4)', strokeWidth: 5});
+  S(E('rect', {x: hb.x, y: hb.y, width: hb.w, height: hb.h, rx: 6}, s), {fill: 'none', stroke: 'var(--ink-2)', strokeWidth: 3});
   CELLS.forEach(a => CELLS.forEach(b => {
-    if (a !== b && hops(a, b) === 1 && (a.lx < b.lx || a.ly < b.ly)) S(E('line', {x1: a.sx, y1: a.sy, x2: b.sx, y2: b.sy}, s), {stroke: 'var(--axis)', strokeWidth: 6});
+    if (a !== b && hops(a, b) === 1 && (a.lx < b.lx || a.ly < b.ly)) mlink(s, a.sx, a.sy, b.sx, b.sy);
   }));
   CELLS.forEach(c => {
-    PIP.tiles[c.r + ',' + c.c] = S(E('rect', {class: 'pt', x: c.x + INS, y: c.y + INS, width: c.w - 2 * INS, height: c.h - 2 * INS, rx: 10}, s),
-      {fill: COL[c.type], fillOpacity: 0.16, stroke: COL[c.type], strokeWidth: 5});
+    PIP.tiles[c.r + ',' + c.c] = S(E('rect', {class: 'pt', x: c.x + INS, y: c.y + INS, width: c.w - 2 * INS, height: c.h - 2 * INS, rx: 6}, s),
+      {fill: COL[c.type], fillOpacity: 0.16, stroke: COL[c.type], strokeWidth: 3});
   });
   PIP.fx = E('g', {class: 'fx'}, s);
 }
 
 /* ================= the animation clock: everything that moves runs on it, and Space stops it ================= */
-const CLK = {t: 0, on: true, last: 0, jobs: new Set()};
+const CLK = {t: 0, on: true, last: 0, dt: 0, jobs: new Set()};
 (function loop(now) {
-  const dt = CLK.last ? Math.min(80, now - CLK.last) : 0; CLK.last = now;
+  const dt = CLK.last ? Math.min(80, now - CLK.last) : 0; CLK.last = now; CLK.dt = dt;   // dt: this frame, paused or not
   if (CLK.on) CLK.t += dt;
   CLK.jobs.forEach(j => { try { j(); } catch (e) { CLK.jobs.delete(j); console.error(e); } });
   requestAnimationFrame(loop);
@@ -469,21 +522,54 @@ function anim(tok, ms, fn) {
 }
 function every(tok, fn) { const j = () => { if (tok.dead) CLK.jobs.delete(j); else fn(CLK.t); }; CLK.jobs.add(j); }
 const quiet = p => p.catch(e => { if (e !== CANCEL) console.error(e); });
-/* an element fading in on the clock (a callout, a label): nothing pops */
-function fadeIn(el, ms) {
-  if (!el || REDUCED || !CLK.on) return el;   // paused (a stage's end state): shown at once
-  el.style.opacity = 0; const t0 = CLK.t, d = ms || 380;
-  const j = () => { const p = Math.min(1, (CLK.t - t0) / d); el.style.opacity = p; if (p >= 1 || !el.isConnected) CLK.jobs.delete(j); };
+/* the token whose earlier stages are being drawn as end states (runFrom): what they draw appears at once, so that a
+   chart or a callout that stays from stage to stage does not blink when the reader steps */
+let FFTOK = null, FFEND = 0;
+const noFade = () => !!(FFTOK && FFTOK.ff && !FFTOK.dead);
+const easeOut = p => 1 - (1 - p) * (1 - p);
+/* an element fading in on the clock (a callout, a label), with an ease out and, given rise, a short rise: nothing pops.
+   At the end its inline opacity is cleared, so that the zoom's label fade (CSS) applies to it */
+function fadeIn(el, ms, rise) {
+  if (el && noFade()) el._ffAt = performance.now();   // drawn as an end state (see fadeOut)
+  if (!el || REDUCED || !CLK.on || noFade()) return el;   // paused, or a stage's end state: shown at once
+  el.style.opacity = 0; const t0 = CLK.t, d = ms || 320;
+  const j = () => {
+    const p = Math.min(1, (CLK.t - t0) / d), e = easeOut(p);
+    el.style.opacity = e; if (rise) el.setAttribute('transform', `translate(0,${(rise * (1 - e)).toFixed(2)})`);
+    if (p >= 1 || !el.isConnected) { CLK.jobs.delete(j); el.style.opacity = ''; if (rise) el.removeAttribute('transform'); }
+  };
   CLK.jobs.add(j);
   return el;
+}
+/* an element fading out, then removed (a callout that a stage replaces) */
+function fadeOut(el, ms) {
+  if (!el) return;
+  // drawn as a skipped stage's end state a moment ago (the reader stepped on): it goes at once, never flashes
+  if (REDUCED || !CLK.on || noFade() || !el.isConnected || (el._ffAt && performance.now() - el._ffAt < 250) || performance.now() - FFEND < 250) { el.remove(); return; }
+  const t0 = CLK.t, d = ms || 180, o0 = +(el.style.opacity || 1);
+  el.style.pointerEvents = 'none';
+  const j = () => { const p = Math.min(1, (CLK.t - t0) / d); el.style.opacity = (o0 * (1 - p)).toFixed(3); if (p >= 1 || !el.isConnected) { CLK.jobs.delete(j); el.remove(); } };
+  CLK.jobs.add(j);
+}
+/* a packet grows in from 0.4 of its size (180 ms, ease out) */
+function popIn(el) {
+  if (REDUCED || !CLK.on || noFade()) return;
+  const t0 = CLK.t, d = 180;
+  el.setAttribute('transform', 'scale(0.4)'); el.style.opacity = 0;
+  const j = () => {
+    const p = Math.min(1, (CLK.t - t0) / d), e = easeOut(p);
+    el.setAttribute('transform', `scale(${(0.4 + 0.6 * e).toFixed(3)})`); el.style.opacity = e.toFixed(3);
+    if (p >= 1 || !el.isConnected) { CLK.jobs.delete(j); el.removeAttribute('transform'); el.style.opacity = ''; }
+  };
+  CLK.jobs.add(j);
 }
 
 /* ================= the camera ================= */
 const Z = {level: 0, sid: null, nb: 0, mi: 0};
-let LASTSID = 13, LASTNB = 0, LASTMI = 0;
+let LASTSID = 0, LASTNB = 0, LASTMI = 0;
 const lerp = (a, b, t) => a + (b - a) * t;
 const lerpR = (A, B, t) => ({x: lerp(A.x, B.x, t), y: lerp(A.y, B.y, t), w: lerp(A.w, B.w, t), h: lerp(A.h, B.h, t)});
-const easeIO = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+/* a sine in and out, for what eases in the view (a trail, a glow): its top speed is 1.57 times its mean */
 const easeS = t => 0.5 - 0.5 * Math.cos(Math.PI * t);
 const band = (t, a, b) => Math.max(0, Math.min(1, (t - a) / (b - a)));
 const rmap = (A, B) => { const k = B.w / A.w; return [k, B.x - k * A.x, B.y - k * A.y]; };
@@ -491,113 +577,317 @@ const setT = (g, m) => { if (m) g.setAttribute('transform', `matrix(${m[0]},0,0,
 /* a pure zoom: the frame's width moves geometrically (a steady rate on a log scale) and its place with it, so the
    point where the two frames coincide stays put */
 const zoomR = (A, B, e) => { const w = A.w * Math.pow(B.w / A.w, e); return lerpR(A, B, (w - A.w) / (B.w - A.w)); };
-/* a tween on real time (the reader's own zoom) or on the animation clock (a flow's or the tour's camera, which Space
-   stops); a dead token finishes it at once */
-function tween(ms, fn, clk) {
-  return new Promise(res => {
-    let done = false;
-    const fin = () => { if (!done) { done = true; fn(1); res(); } };
-    if (REDUCED || ms <= 0) return fin();
-    if (clk) {
-      const t0 = CLK.t, j = () => { if (clk.dead) { CLK.jobs.delete(j); fin(); return; } const p = Math.min(1, (CLK.t - t0) / ms); if (p >= 1) { CLK.jobs.delete(j); fin(); } else fn(p); };
-      CLK.jobs.add(j); return;
-    }
-    const t0 = performance.now();
-    const f = now => { if (done) return; const p = Math.min(1, (now - t0) / ms); if (p >= 1) fin(); else { fn(p); requestAnimationFrame(f); } };
-    requestAnimationFrame(f);
-    setTimeout(fin, ms + 800);   // a hidden tab gets no frames
-  });
-}
 const tileRect = sid => { const c = SH[sid]; return {x: c.x + INS, y: c.y + INS, w: c.w - 2 * INS, h: c.h - 2 * INS}; };
 const minRect = (nb, mi) => { const p = AP[1].min[nb + ':' + mi]; return {x: p.x, y: p.y, w: p.w, h: p.h}; };
 /* a point of an inner view in its parent's coordinates: where a packet sits once the zoom has shrunk its view */
 const mapOut = (A, B, p) => ({x: A.x + (p.x - B.x) * A.w / B.w, y: A.y + (p.y - B.y) * A.w / B.w});
 const outOfMinion = (p, nb, mi) => mapOut(minRect(nb, mi), MF, p);
 const outOfShire = (p, sid) => mapOut(tileRect(sid), SF, p);
-async function zoomStep(dir, A, ms, efn, clk, carry) {
-  const lo = dir > 0 ? Z.level : Z.level - 1, outer = LAYERS[lo], inner = LAYERS[lo + 1], B = lo === 0 ? SF : MF;
-  // the zoom's first frame goes on before either view is shown: a view un-hidden at full size and full opacity would
-  // be painted for one frame (the next animation job may run only after a paint)
-  const frame = e => {
-    const R = zoomR(A, B, e), Mo = rmap(A, R), Mi = rmap(B, R);
-    setT(outer, Mo); setT(inner, Mi);
-    outer.style.opacity = 1 - band(e, 0.3, 0.85); inner.style.opacity = band(e, 0.12, 0.7);
-    return [Mo, Mi];
+/* While the camera moves between a view and the one inside it, the outer view is scaled up: its strokes keep their
+   width on the screen (mesh links, the fast network's edges never swell into bars). */
+function strokeKeeper(layer) {
+  const list = [];
+  layer.querySelectorAll('line, rect, path, circle, polygon').forEach(el => {
+    const cs = getComputedStyle(el); if (!cs.stroke || cs.stroke === 'none') return;
+    const w = parseFloat(cs.strokeWidth); if (w > 0) list.push([el, w, el.style.strokeWidth]);
+  });
+  let last = 1;
+  return {
+    set: k => { k = Math.max(1, k); if (Math.abs(k - last) < 0.004) return; last = k; list.forEach(([el, w]) => { el.style.strokeWidth = (w / k).toFixed(3) + 'px'; }); },
+    done: () => list.forEach(([el, , s0]) => { el.style.strokeWidth = s0; }),
   };
-  if (ms > 0 && !REDUCED) frame(dir > 0 ? 0 : 1);
-  outer.style.display = ''; inner.style.display = '';
-  LAYERS.forEach(l => l.classList.add('busy'));
+}
+/* the zoom's context: every part of a view but the target (the tile or the minion being entered or left, which stays
+   as the frame), the fx group (a flow's drawing) and the backdrop excepted. Without a target, every part */
+function ctxList(layer, tgt) {
+  const out = [], take = s => { if (s !== tgt && !s.classList.contains('fx') && !s.classList.contains('zbd')) out.push(s); };
+  if (!tgt) { [...layer.children].forEach(take); return out; }
+  let el = tgt;
+  while (el && el !== layer && el.parentNode) {
+    const p = el.parentNode;
+    [...p.children].forEach(s => { if (s !== el) take(s); });
+    el = p;
+  }
+  return out;
+}
+function ctxClear(layer) {
+  layer.querySelectorAll('.zdim, .ztgt, .zhi').forEach(e => e.classList.remove('zdim', 'ztgt', 'zhi'));
+  layer.classList.remove('zsat');
+  ['--lab', '--ctx', '--sat', '--ctxh', '--tgt', '--tsat'].forEach(k => layer.style.removeProperty(k));
+}
+/* how set back a view looks: a tour step's highlight (CSS #chip.dimming) and a flow's (#chip.fdim), opacity and
+   saturation; a zoom out that ends on such a view ends at that look, so that nothing brightens and dims again */
+const isDark = () => { const t = document.documentElement.dataset.theme; if (t === 'dark' || t === 'light') return t === 'dark'; try { return matchMedia('(prefers-color-scheme: dark)').matches; } catch (_) { return false; } };
+const FULL = {o: 1, s: 1};
+const DIMLOOK = {dimming: () => ({o: isDark() ? 0.45 : 0.35, s: 0.15}), fdim: () => ({o: isDark() ? 0.6 : 0.55, s: 0.3})};
+/* how an element looks now, a transition in flight included: a zoom starts from exactly what is on the screen */
+function lookOf(el) {
+  if (!el) return FULL;
+  const cs = getComputedStyle(el), o = parseFloat(cs.opacity), m = /saturate\(([\d.]+)\)/.exec(cs.filter || '');
+  return {o: o >= 0 && o <= 1 ? o : 1, s: m ? Math.min(1, +m[1]) : 1};
+}
+const CTX_LOW = 0.3;
+/* the step in flight between two views, left partway by a newer request: the next plan goes on from there */
+let CUR = null;
+/* One zoom segment between LAYERS[lo] (the outer view) and LAYERS[lo + 1] (the inner one): e = 0 shows the outer view,
+   e = 1 the inner. A semantic zoom, the same both ways:
+   - the outer view's labels go first (none is ever seen blown up), and its context is set back (to 0.3) while the
+     target grows into the frame; the target itself comes up to full strength;
+   - the inner view, on an opaque backdrop the size of its frame, comes in over the target early (e 0.10-0.32), so
+     that the tile turns into the view inside it and no frame is ever empty;
+   - the outer view's context stays, set back, until the zoom has pushed it off the screen (e 0.86-1);
+   - the inner view's labels come last, once they are readable (e 0.62-0.88).
+   A view the camera only passes through (sg.midOut, sg.midIn: the shire on the way from the chip to a minion) shows
+   no labels and keeps its context set back, so that it does not flicker up at the camera's top speed. A view the
+   camera rests at starts from how it looks (a tour step's or a flow's dimming, measured) or ends at the look it will
+   have (sg.end), so that nothing brightens for a moment. */
+function segOpen(sg, req) {
+  const lo = sg.lo, outer = LAYERS[lo], inner = LAYERS[lo + 1], B = lo === 0 ? SF : MF;
+  const A = lo === 0 ? tileRect(Z.sid) : minRect(Z.nb, Z.mi);
+  const tgt = lo === 0 ? (SH[Z.sid] && SH[Z.sid].g) : (AP[1].minG && AP[1].minG[Z.nb + ':' + Z.mi]);
+  const P = {midOut: !!sg.midOut, midIn: !!sg.midIn};
+  let rest = FULL, tRest = FULL, his = [];
+  const sibs = ctxList(outer, tgt);
+  if (P.midOut) rest = tRest = {o: CTX_LOW, s: 1};
+  else if (sg.dir > 0) {
+    // the view the camera leaves, as it looks now (measured before any of the zoom's marks go on)
+    const looks = sibs.map(lookOf);
+    rest = looks.reduce((m, l) => (l.o < m.o ? l : m), FULL);
+    tRest = lookOf(tgt);
+    his = sibs.filter((s, i) => looks[i].o > rest.o + 0.1);
+    clearDim();
+  } else rest = tRest = sg.end || FULL;
+  ctxClear(outer); ctxClear(inner);
+  sibs.forEach(s => s.classList.add('zdim')); his.forEach(s => s.classList.add('zhi'));
+  if (tgt) tgt.classList.add('ztgt');
+  if (P.midIn) ctxList(inner, null).forEach(s => s.classList.add('zdim'));
+  const keep = strokeKeeper(outer);
   // a flow's packet rides the zoom at its own size, above both views, so that it never fades out between two legs
   let cg = null, p0 = null, inOuter = false;
-  if (carry && carry.isConnected && ms > 0 && !REDUCED) {
+  const carry = req.o.carry;
+  if (carry && carry.isConnected && !REDUCED && !(req.o.total === 0)) {
     const li = LAYERS.indexOf(carry.closest('.lay')), m = /translate\(([-\d.]+),([-\d.]+)\)/.exec(carry.getAttribute('transform') || '');
     if (m && (li === lo || li === lo + 1)) { p0 = {x: +m[1], y: +m[2]}; inOuter = li === lo; cg = carry.cloneNode(true); svg.appendChild(cg); carry.style.visibility = 'hidden'; }
   }
-  try {
-    await tween(ms, p => {
-      const s = efn(p), [Mo, Mi] = frame(dir > 0 ? s : 1 - s);
-      if (cg) { const M = inOuter ? Mo : Mi; at(cg, {x: M[0] * p0.x + M[1], y: M[0] * p0.y + M[2]}); }
-    }, clk);
-  } finally { if (cg) { cg.remove(); carry.style.visibility = ''; } }
-  LAYERS.forEach(l => l.classList.remove('busy'));
-  if (dir > 0) { outer.style.display = 'none'; setT(inner, null); inner.style.opacity = 1; Z.level = lo + 1; }
-  else { inner.style.display = 'none'; setT(outer, null); outer.style.opacity = 1; Z.level = lo; }
-  scaleUI();
+  const frame = e => {
+    const R = zoomR(A, B, e), Mo = rmap(A, R), Mi = rmap(B, R);
+    setT(outer, Mo); setT(inner, Mi);
+    const oo = 1 - band(e, 0.86, 1), k = easeS(band(e, 0, 0.3)), so = outer.style;
+    so.opacity = oo; so.visibility = oo > 0 ? '' : 'hidden';
+    inner.style.opacity = band(e, 0.1, 0.32);
+    so.setProperty('--lab', P.midOut ? '0' : (1 - band(e, 0.02, 0.2)).toFixed(3));
+    so.setProperty('--ctx', lerp(rest.o, CTX_LOW, k).toFixed(3));
+    so.setProperty('--sat', lerp(rest.s, 1, k).toFixed(3));
+    so.setProperty('--ctxh', lerp(1, CTX_LOW, k).toFixed(3));
+    so.setProperty('--tgt', lerp(tRest.o, 1, k).toFixed(3));
+    so.setProperty('--tsat', lerp(tRest.s, 1, k).toFixed(3));
+    outer.classList.toggle('zsat', (rest.s < 0.999 || tRest.s < 0.999) && k < 0.999);
+    inner.style.setProperty('--lab', P.midIn ? '0' : band(e, 0.62, 0.88).toFixed(3));
+    inner.style.setProperty('--ctx', String(CTX_LOW));
+    if (oo > 0) keep.set(Mo[0]);
+    if (cg) { const M = inOuter ? Mo : Mi; at(cg, {x: M[0] * p0.x + M[1], y: M[0] * p0.y + M[2]}); }
+  };
+  // the first frame goes on before either view is shown: a view un-hidden at full size and full opacity would be
+  // painted for one frame
+  frame(sg.e0);
+  outer.style.display = ''; inner.style.display = '';
+  LAYERS.forEach(l => l.classList.add('busy'));
+  outer.classList.add('zout');
+  return {
+    lo, P, frame,
+    /* a plan redirected mid-step: what the views on either side are now (only the flags change) */
+    update: s => { P.midOut = !!s.midOut; P.midIn = !!s.midIn; },
+    close: (e1, last, arrive) => {
+      frame(e1);
+      if (cg) { cg.remove(); carry.style.visibility = ''; }
+      keep.done();
+      outer.classList.remove('zout'); outer.style.visibility = '';
+      const inIn = e1 >= 1, here = inIn ? inner : outer, gone = inIn ? outer : inner;
+      gone.style.display = 'none'; ctxClear(gone);
+      setT(here, null); here.style.opacity = 1;
+      Z.level = inIn ? lo + 1 : lo;
+      // the view the camera rests at loses the zoom's marks (the dimming that the step puts on arrives in the same
+      // frame, arrive()); a view passed through keeps them for the next step
+      if (last) { if (arrive) arrive(); ctxClear(here); LAYERS.forEach(l => l.classList.remove('busy')); }
+      scaleUI();
+    },
+  };
 }
-/* the zooms from the current view to t: out while the view is deeper than the target or beside it, then in; each
-   step's length on the log scale (a tile to a shire's frame, a minion's box to a minion's frame) */
+/* the zooms from a view s to a view t: out while s is deeper than the target or beside it, then in; each step's length
+   on the log scale (a tile to a shire's frame, a minion's box to a minion's frame) */
 const LOGT = Math.log(SF.w / (TILE - 2 * INS)), LOGM = Math.log(MF.w / 66);
-function planChain(t) {
-  const out = []; let lv = Z.level; const sid = Z.sid, nb = Z.nb, mi = Z.mi;
-  while (lv > 0 && (lv > t.level || sid !== t.sid || (lv === 2 && (nb !== t.nb || mi !== t.mi)))) { out.push({dir: -1, L: lv === 2 ? LOGM : LOGT}); lv--; }
-  while (lv < t.level) { out.push({dir: 1, L: lv === 0 ? LOGT : LOGM}); lv++; }
+function viewsTo(s, t) {
+  const out = [s]; let v = s;
+  while (v.level > 0 && (v.level > t.level || v.sid !== t.sid || (v.level === 2 && (v.nb !== t.nb || v.mi !== t.mi)))) { v = Object.assign({}, v, {level: v.level - 1}); out.push(v); }
+  while (v.level < t.level) { v = {level: v.level + 1, sid: t.sid, nb: t.nb, mi: t.mi}; out.push(v); }
   return out;
 }
-/* one ease-in-out over a whole chain of zooms: each step gets its slice of the curve, so a zoom from the chip to a
-   minion accelerates once and slows once, with no stop at the shire */
-function chainSegs(plan, per) {
-  const tot = plan.reduce((s, x) => s + x.L, 0), Tt = per * tot;
-  const inv = f => { let lo = 0, hi = 1; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (easeIO(m) < f) lo = m; else hi = m; } return (lo + hi) / 2; };
-  let acc = 0;
-  return plan.map(st => {
-    const f0 = acc / tot, f1 = (acc + st.L) / tot; acc += st.L;
-    const t0 = inv(f0), t1 = inv(f1);
-    return {ms: Tt * (t1 - t0), efn: p => Math.max(0, Math.min(1, (easeIO(t0 + p * (t1 - t0)) - f0) / (f1 - f0)))};
+const costOfViews = vs => { let c = 0; for (let i = 1; i < vs.length; i++) c += Math.min(vs[i].level, vs[i - 1].level) === 0 ? LOGT : LOGM; return c; };
+/* The camera's curve: one ease over the whole move, so that a zoom from the chip to a minion accelerates once and
+   slows once, with no stop at the shire. A cubic whose start speed is m (0: from rest, its top speed 1.5 times the
+   mean; a move redirected on its way starts at the speed it had) and whose end speed is 0. */
+const herm = (u, m) => m * (u * u * u - 2 * u * u + u) + 3 * u * u - 2 * u * u * u;
+const hermD = (u, m) => m * (3 * u * u - 4 * u + 1) + 6 * u - 6 * u * u;
+/* a move's length: per ms for each unit of log scale, but a long move (the chip to a minion and further) is
+   compressed, so that no move takes much more than 1.7 s (2.5 s from a minion to one in another shire) */
+const moveMs = (cost, per) => { const t = per * cost; return cost <= 3 ? t : per * 3 + (t - per * 3) * 0.32; };
+/* a timeline on real time (the reader's own zoom) or on the animation clock (a flow's or the tour's camera, which
+   Space stops); fn(t) runs at once for t = 0, then every frame. stop() true: a newer request came in; the timeline
+   stops where it is and resolves false. A clock timeline whose token died goes on in real time, so that a stopped
+   flow never leaves the camera halfway. */
+function timeline(T, fn, clk, stop) {
+  return new Promise(res => {
+    let done = false;
+    const fin = ok => { if (!done) { done = true; res(ok); } };
+    const step = t => { try { fn(t); } catch (e) { console.error(e); fin(true); return true; } return false; };
+    if (REDUCED || T <= 0) { step(T); return fin(true); }
+    if (step(0)) return;
+    if (clk) {
+      let acc = 0;
+      const j = () => {
+        if (done) { CLK.jobs.delete(j); return; }
+        if (stop()) { CLK.jobs.delete(j); fin(false); return; }
+        if (CLK.on || clk.dead) acc += CLK.dt;
+        const t = Math.min(T, acc);
+        if (step(t) || t >= T) { CLK.jobs.delete(j); fin(true); }
+      };
+      CLK.jobs.add(j); return;
+    }
+    // from the last frame's time, so that the first frame of a move (or of a redirected one) is a whole frame's step
+    const t0 = CLK.last && performance.now() - CLK.last < 100 ? CLK.last : performance.now();
+    const f = now => {
+      if (done) return;
+      if (stop()) { fin(false); return; }
+      const t = Math.min(T, Math.max(0, now - t0));
+      if (step(t) || t >= T) fin(true); else requestAnimationFrame(f);
+    };
+    requestAnimationFrame(f);
+    setTimeout(() => { if (!done && !stop()) { step(T); fin(true); } }, T + 800);   // a hidden tab gets no frames
   });
 }
-/* The camera follows the latest request only: rapid presses never queue a chain of animations. goTo() resolves
-   once the view reaches the latest target. o.clk: a token whose clock (the pausable one) drives the move;
-   o.ms: milliseconds per unit of log scale (0 for a cut); o.keepFx: a flow's drawing rides the zoom. */
+/* The camera follows the latest request only: rapid presses never queue a chain of animations, and a request that
+   comes in during a move redirects it from where it is, forwards or back, at the speed it had (a reversal slows to a
+   stop first, 130 ms), with no jump. goTo() resolves once the view reaches the latest target. o.clk: a token whose
+   clock (the pausable one) drives the move; o.ms: milliseconds per unit of log scale (0 for a cut); o.total: the whole
+   move's length instead; o.keepFx: a flow's drawing rides it; o.carry: a flow's packet rides it; o.c1: the look the
+   view ends at when the move ends on a zoom out (a step that dims it); o.arrive: run in the frame the camera
+   arrives in (a step's highlight, so that it lands with no flash); o.atChip: the camera rests its eye on the chip
+   halfway through an out-and-in move and this runs there (a flow's establishing shot). */
 let ZT = null, ZW = false, ZWAIT = [], ZN = 0;
 const zkey = () => Z.level + ':' + Z.sid + ':' + Z.nb + ':' + Z.mi;
+/* where the camera is going, else where it is: + and - step from there, so that a second press is never lost */
+const zNow = () => (ZT ? ZT.t : Z);
 function goTo(t, o) {
   o = o || {};
-  const tt = {level: t.level || 0, sid: t.sid == null ? (Z.sid == null ? LASTSID : Z.sid) : t.sid, nb: t.nb || 0, mi: t.mi || 0};
+  const z = zNow();
+  const tt = {level: t.level || 0, sid: t.sid == null ? (z.sid == null ? LASTSID : z.sid) : t.sid, nb: t.nb || 0, mi: t.mi || 0};
+  // the same target again while the camera is on its way there (a stage stepped mid-move): the move goes on as it is
+  const same = ZW && ZT && ZT.t.level === tt.level && (tt.level < 1 || ZT.t.sid === tt.sid) && (tt.level < 2 || (ZT.t.nb === tt.nb && ZT.t.mi === tt.mi));
+  if (same && !o.total && o.ms !== 0) { if (o.focus) ZT.o.focus = true; ['arrive', 'c1'].forEach(k => { if (o[k]) ZT.o[k] = o[k]; }); return new Promise(res => ZWAIT.push(res)); }
   ZT = {t: tt, o, n: ++ZN};
   return new Promise(res => { ZWAIT.push(res); if (!ZW) { ZW = true; zoomWorker(); } });
 }
+/* the plan: the segments from the view shown, or from partway through the step in flight (forwards or back, whichever
+   is shorter), to the target; which views are only passed through */
+function planTo(t, o) {
+  const segs = [], cur = {level: Z.level, sid: Z.sid, nb: Z.nb, mi: Z.mi};
+  let vs;
+  if (CUR) {
+    const Ls = CUR.lo === 0 ? LOGT : LOGM;
+    const vIn = {level: CUR.lo + 1, sid: Z.sid, nb: Z.nb, mi: Z.mi}, vOut = {level: CUR.lo, sid: Z.sid, nb: Z.nb, mi: Z.mi};
+    const pin = viewsTo(vIn, t), pout = viewsTo(vOut, t);
+    const cin = (1 - CUR.e) * Ls + costOfViews(pin), cout = CUR.e * Ls + costOfViews(pout);
+    const fwd = cin < cout - 1e-9 || (Math.abs(cin - cout) < 1e-9 && CUR.dir > 0);
+    segs.push({part: true, lo: CUR.lo, dir: fwd ? 1 : -1, e0: CUR.e, e1: fwd ? 1 : 0, L: Math.max(1e-3, fwd ? (1 - CUR.e) * Ls : CUR.e * Ls)});
+    vs = fwd ? pin : pout;
+  } else vs = viewsTo(cur, t);
+  for (let i = 1; i < vs.length; i++) {
+    const a = vs[i - 1], b = vs[i], dir = b.level > a.level ? 1 : -1, lo = Math.min(a.level, b.level), inn = dir > 0 ? b : a;
+    segs.push({lo, dir, e0: dir > 0 ? 0 : 1, e1: dir > 0 ? 1 : 0, L: lo === 0 ? LOGT : LOGM, sid: inn.sid, nb: inn.nb, mi: inn.mi});
+  }
+  segs.forEach((s, i) => {
+    // the outer view sits at e = 0: where a zoom in starts, or where a zoom out ends
+    const startMid = i > 0, endMid = i < segs.length - 1;
+    s.midOut = s.dir > 0 ? startMid : endMid;
+    s.midIn = s.dir > 0 ? endMid : startMid;
+    // the establishing shot rests its eye on the chip: the chip is shown there, set back, not passed through
+    if (o.atChip && s.lo === 0) s.midOut = false;
+    if (s.dir < 0 && !s.midOut) s.end = i === segs.length - 1 ? (o.c1 || FULL) : (o.chipEnd || FULL);
+  });
+  return segs;
+}
 async function zoomWorker() {
   const from = {level: Z.level, sid: Z.sid, nb: Z.nb, mi: Z.mi}, fromKey = zkey(), hadFocus = svg.contains(document.activeElement);
-  let wantFocus = false, plan = [], sg = [], pi = 0, planN = -1;
+  let wantFocus = false;
   try {
-    for (let guard = 0; ZT && guard < 16; guard++) {
-      if (ZT.o.focus) wantFocus = true;
-      if (ZT.n !== planN || pi >= plan.length) {
-        const rush = planN !== -1 && ZT.n !== planN;   // a newer request came in on the way: hurry
-        plan = planChain(ZT.t); pi = 0; planN = ZT.n;
-        if (!plan.length) break;
-        const per = ZT.o.ms != null ? ZT.o.ms : ZT.o.clk ? 760 : 430;
-        sg = chainSegs(plan, per * (rush ? 0.5 : 1));
+    for (let guard = 0; ZT && guard < 40; guard++) {
+      const req = ZT, t = req.t, stop = () => ZT !== req, clk = req.o.clk || null;
+      if (req.o.focus) wantFocus = true;
+      // turned back while moving: slow to a stop first (130 ms), then plan from rest
+      if (CUR && CUR.ctl && Math.abs(CUR.v) > 2e-4 && !REDUCED && req.o.total !== 0 && req.o.ms !== 0) {
+        const probe = planTo(t, req.o)[0];
+        if (probe && probe.part && probe.dir * CUR.v < 0) {
+          const Ls = CUR.lo === 0 ? LOGT : LOGM, v = CUR.v, e0 = CUR.e, Tc = 130, c = CUR;
+          const ok = await timeline(Tc, tt => { const q = tt / Tc, e = Math.max(0, Math.min(1, e0 + v * Tc * (q - q * q / 2) / Ls)); c.ctl.frame(e); c.e = e; }, clk, stop);
+          c.v = 0;
+          if (!ok) continue;
+        }
       }
-      const st = plan[pi], s = sg[pi], clk = ZT.o.clk || null, t = ZT.t, carry = ZT.o.carry || null;
-      if (!ZT.o.keepFx) clearFx(); else clearDim();
-      if (st.dir < 0) await zoomStep(-1, Z.level === 2 ? minRect(Z.nb, Z.mi) : tileRect(Z.sid), s.ms, s.efn, clk, carry);
-      else if (Z.level === 0) { buildShire(t.sid); Z.sid = t.sid; LASTSID = t.sid; await zoomStep(1, tileRect(t.sid), s.ms, s.efn, clk, carry); }
-      else { buildMinion(t.sid, t.nb, t.mi); Z.nb = t.nb; Z.mi = t.mi; LASTNB = t.nb; LASTMI = t.mi; await zoomStep(1, minRect(t.nb, t.mi), s.ms, s.efn, clk, carry); }
-      pi++;
+      // a step left at its very end (a turn-back slowed to a stop there): the camera is at that view
+      if (CUR && CUR.ctl && (CUR.e <= 1e-3 || CUR.e >= 1 - 1e-3)) { CUR.ctl.close(CUR.e < 0.5 ? 0 : 1, true, null); CUR = null; }
+      const segs = planTo(t, req.o);
+      if (!segs.length) { if (ZT === req) ZT = null; break; }
+      if (!req.o.keepFx) clearFx(true); else clearDim();
+      const cost = segs.reduce((s, x) => s + x.L, 0);
+      let T = req.o.total != null ? req.o.total : moveMs(cost, req.o.ms != null ? req.o.ms : 480);
+      // going on the same way: start at the speed the camera has
+      let m = 0;
+      if (segs[0].part && CUR) {
+        const v = segs[0].dir * CUR.v;
+        if (v > 1e-5 && T > 0) { m = v * T / cost; if (m > 2.5) { T = 2.5 * cost / v; m = 2.5; } }
+      }
+      // the views the move enters are built before it starts, where they are not on the screen (no build mid-move)
+      const built = {};
+      segs.forEach(s => {
+        if (s.part || s.dir < 0) return;
+        const L = LAYERS[s.lo + 1];
+        if (L.style.display !== 'none') return;
+        if (s.lo === 0 && !built[1]) { buildShire(s.sid); built[1] = s.sid; }
+        else if (s.lo === 1 && !built[2] && (built[1] === s.sid || (Z.level >= 1 && Z.sid === s.sid && !built[1]))) { buildMinion(s.sid, s.nb, s.mi); built[2] = s.sid + ':' + s.nb + ':' + s.mi; }
+      });
+      let a = 0; segs.forEach(s => { s.a = a; a += s.L; s.b = a; });
+      if (segs[0].part && CUR && CUR.ctl) CUR.ctl.update(segs[0]);
+      let ci = 0, ctl = segs[0].part && CUR ? CUR.ctl : null;
+      const openSeg = s => {
+        if (s.dir > 0) {
+          if (s.lo === 0) { if (built[1] !== s.sid) buildShire(s.sid); built[1] = null; Z.sid = s.sid; LASTSID = s.sid; }
+          else { const key = s.sid + ':' + s.nb + ':' + s.mi; if (built[2] !== key) buildMinion(s.sid, s.nb, s.mi); built[2] = null; Z.nb = s.nb; Z.mi = s.mi; LASTNB = s.nb; LASTMI = s.mi; }
+        }
+        return segOpen(s, req);
+      };
+      const drive = tt => {
+        const u = T > 0 ? Math.min(1, tt / T) : 1, d = cost * herm(u, m);
+        while (ci < segs.length) {
+          const s = segs[ci];
+          if (!ctl) ctl = openSeg(s);
+          if (u < 1 && d < s.b - 1e-9) break;
+          const last = ci === segs.length - 1;
+          ctl.close(s.e1, last, last ? req.o.arrive : null);
+          ctl = null; ci++; CUR = null;
+          if (!last && Z.level === 0 && req.o.atChip && !req.atChipDone) { req.atChipDone = true; req.o.atChip(); }
+        }
+        if (ci < segs.length && ctl) {
+          const s = segs[ci], p = s.b > s.a ? Math.max(0, (d - s.a) / (s.b - s.a)) : 1, e = s.e0 + (s.e1 - s.e0) * p;
+          ctl.frame(e);
+          CUR = {lo: s.lo, e, dir: s.e1 > s.e0 ? 1 : -1, v: (s.e1 > s.e0 ? 1 : -1) * cost * hermD(u, m) / Math.max(1, T), ctl};
+        }
+      };
+      const ok = await timeline(T, drive, clk, stop);
+      if (ok && ZT === req) ZT = null;
     }
   } catch (e) { console.error(e); }
   ZT = null; ZW = false;
+  if (CUR) { try { CUR.ctl.close(CUR.e >= 0.5 ? 1 : 0, true, null); } catch (e) { console.error(e); } CUR = null; }
   if (fromKey !== zkey()) {
     select(null); scaleUI();
     // a "Zoom into" button in the panel has done its job
@@ -624,42 +914,50 @@ function userNav(t) {
   const k = FL.k, done = FL.done;
   if (k) { FL.tok.dead = true; if (FOLLOW) setFollow(false, true); }
   return goTo(t, {focus: svg.contains(document.activeElement)}).then(() => {
-    if (!k || FL.k !== k) return;
+    if (!k || FL.k !== k || ZW) return;
     if (done) startFlow(k, FL.i, {still: true, keep: true, done: true});
     else restartStage();
   });
 }
-/* where the scale control goes: the shire shown, else the one selected, else the last one visited */
+/* where the scale control goes: the shire shown (or being zoomed to), else the one selected, else the last one visited */
 /* where the flow is, when a flow is on and its stage is inside a shire */
 function flowAim() {
   if (!FL.k || !FL.ctx) return null;
   try { const w = FLOWS[FL.k].stages[FL.i].where(FL.ctx); return w.sid != null && SH[w.sid] ? w : null; } catch (_) { return null; }
 }
 function aimShire() {
-  if (Z.level >= 1) return Z.sid;
+  const z = zNow();
+  if (z.level >= 1) return z.sid;
   if (SEL && SEL._key === 'cshire') return SEL._ctx.cell.id;
   const w = flowAim(); if (w) return w.sid;
   return LASTSID;
 }
 function aimMinion(sid) {
-  if (Z.level === 2 && Z.sid === sid) return [Z.nb, Z.mi];
+  const z = zNow();
+  if (z.level === 2 && z.sid === sid) return [z.nb, z.mi];
   if (SEL && SEL._key === 'minion' && SEL._ctx.mi != null) return [SEL._ctx.nb, SEL._ctx.mi];
   const w = flowAim(); if (w && w.sid === sid && w.level === 2) return [w.nb, w.mi];
   return [LASTNB, LASTMI];
 }
 function scaleTo(level) {
-  if (level <= 0) return userNav({level: 0});
+  if (level < 0 || level > 2) return;
+  if (level === 0) return userNav({level: 0});
   const sid = aimShire();
   if (level === 1) return userNav({level: 1, sid});
   const [nb, mi] = aimMinion(sid);
   return userNav({level: 2, sid, nb, mi});
 }
+const zoomBy = d => scaleTo(zNow().level + d);
+/* a button that has nothing to do (the last stage's Next, + at a minion): marked disabled (aria-disabled, dimmed) but
+   kept focusable, so that the keyboard's focus never falls to the page and a repeated Enter does nothing */
+function setDis(b, dis) { b.setAttribute('aria-disabled', String(!!dis)); b.classList.toggle('dis', !!dis); }
+const isDis = b => b.getAttribute('aria-disabled') === 'true';
 function scaleUI() {
-  const sid = aimShire(), [nb, mi] = aimMinion(sid);
-  [0, 1, 2].forEach(l => $('z-' + l).setAttribute('aria-pressed', String(Z.level === l)));
+  const sid = aimShire(), [nb, mi] = aimMinion(sid), lv = zNow().level;
+  [0, 1, 2].forEach(l => $('z-' + l).setAttribute('aria-pressed', String(lv === l)));
   $('z-1').textContent = `Shire ${sid}`; $('z-1').title = `Shire ${sid} (${Z.level === 1 ? 'shown' : 'zoom in'})`;
   $('z-2').textContent = `Minion ${mi}`; $('z-2').title = `Minion ${mi} of neighbourhood ${nb}, shire ${sid}`;
-  $('z-in').disabled = Z.level >= 2; $('z-out').disabled = Z.level <= 0;
+  setDis($('z-in'), lv >= 2); setDis($('z-out'), lv <= 0);
   $('cap-scale').textContent = Z.level === 0 ? 'Scale: the chip' : Z.level === 1 ? `Scale: shire ${Z.sid}` : `Scale: minion ${Z.mi}, neighbourhood ${Z.nb}, shire ${Z.sid}`;
 }
 
@@ -696,7 +994,7 @@ function topPage(ids) {
   if (!u) return '';
   const on = ids.map(i => F[i]).filter(x => x && x.url && x.url.split('#')[0] === u), f = on[0];
   const lead = on.some(x => x.kind === 'measured') ? 'Measured and explained in' : 'More in';
-  return `<p class="pn-what">${lead} <a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.page)} ↗</a>.</p>`;
+  return `<p class="pn-what pn-more">${lead} <a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.page)} ↗</a>.</p>`;
 }
 /* what the drawing infers about a part, what would settle it, and the hub's row that asks for it */
 const askLinks = a => [a.hub_anchor].concat(a.also || []).filter(Boolean)
@@ -715,11 +1013,11 @@ function askHtml(a) {
 function asksBlock(key, open) {
   const as = ASKS.filter(a => a.comps.includes(key)); if (!as.length) return '';
   const nOpen = as.filter(a => askState(a) !== 'settled').length;
-  return `<details class="asks"${open === false ? '' : ' open'}><summary>${nOpen ? `Inferred or open here, and what would settle it (${nOpen})` : 'Settled here'}</summary>${as.map(askHtml).join('')}</details>`;
+  return `<details class="asks"${open ? ' open' : ''}><summary>${nOpen ? `Inferred or open here, and what would settle it (${nOpen})` : 'Settled here'}</summary>${as.map(askHtml).join('')}</details>`;
 }
 /* the panel is not a live region (it holds whole fact lists); a short line announces what it now shows */
 function panel(html) {
-  hideTip(); const b = $('pn-body'); b.innerHTML = html; b.scrollTop = 0;
+  hideTip(); const b = $('pn-body'); b.innerHTML = ARW(html); b.scrollTop = 0;
   const k = b.querySelector('.pn-kick'), t = b.querySelector('.pn-title');
   $('pn-live').textContent = (k ? k.textContent + ': ' : '') + (t ? t.textContent : '');
 }
@@ -827,7 +1125,7 @@ const COMPS = {
     what: `Joins the minions of a neighbourhood along the reduction tree (${n('edges')}). A ${n('b32')} TensorSend round trip takes ${n('ts_fln')} on these edges. The hardware allreduce (TensorReduce and TensorBroadcast) climbs this tree, then the crossbar and the mesh: ${n('ar1024')} over all ${n('n1024')} minions.`,
     kpis: [K('ts_fln', 'round trip, tree edge'), kpi(n('ar1024'), `allreduce over ${n('n1024')} minions`)]}),
   inferred: () => ({kick: 'What the drawing infers', title: 'Dashed, inferred, and what would settle it',
-    what: `Most of the layout is now fixed by measurement and by the firmware: the measured map of the shires equals the firmware's NoC-spec map once its boot-time renaming is applied (${n('fw_pairs')} pair distances), which also names the four grey cells and agrees with the memory shires' fit. Still inferred: the LPDDR4X pairing (dashed), the die's east-west handedness, the routes' turning order, the inside of a shire, and the sizes. Each item says what would settle it and links to the row that asks for it on the hub, whose list collects everything to ask AI Foundry for.`,
+    what: `Most of the layout is now fixed by measurement and by the firmware: the measured map of the shires equals the firmware's NoC-spec map once its boot-time renaming is applied (${n('fw_pairs')} pair distances), which also names the four cells without a compute shire and agrees with the memory shires' fit. Still inferred: the LPDDR4X pairing (dashed), the die's east-west handedness, the routes' turning order, the inside of a shire, and the sizes. Each item says what would settle it and links to the row that asks for it on the hub, whose list collects everything to ask AI Foundry for.`,
     kpis: [kpi(String(ASKS.filter(a => askState(a) !== 'settled').length), 'open items'), kpi(String(new Set(ASKS.flatMap(a => [a.hub_anchor].concat(a.also || [])).filter(Boolean)).size), 'asks on the hub')],
     act: `<a class="st-btn" href="${HUB}#ask-noc-docs" target="_blank" rel="noopener">The hub's list of asks ↗</a>`,
     all: true}),
@@ -836,7 +1134,7 @@ function showComp(key, ctx) {
   const d = COMPS[key](ctx || {}), ids = COMPF[key] || [];
   panel(`<p class="pn-kick">${esc(d.kick)}</p><p class="pn-title">${esc(d.title)}</p><p class="pn-what">${d.what}</p>`
     + (d.kpis ? `<div class="pn-kpis">${d.kpis.join('')}</div>` : '') + (d.act ? `<div class="pn-act">${d.act}</div>` : '')
-    + (d.all ? ASKS.map(askHtml).join('') : asksBlock(key, !TOUR))
+    + (d.all ? ASKS.map(askHtml).join('') : asksBlock(key, false))
     + topPage(ids) + (ids.length ? factsBlock(key) : ''));
 }
 function zoomInto(g) {
@@ -884,27 +1182,37 @@ function showTip(elm) {
   tip.style.left = x + 'px'; tip.style.top = y + 'px';
 }
 const hideTip = () => { tip.style.display = 'none'; };
-/* while presenting, the stage caption shows no source tooltips (a pointer left on it would cover the die) */
-const tipOK = t => !(TOUR && t.closest('#cap, #cap-sub'));
+/* while presenting, a pointer left on the stage shows no source tooltips (they would cover the die); the keyboard's
+   focus still shows them. The pointer itself hides after 2 s without moving (CSS #stage.present.idle). */
+const tipOK = t => !($('stage').classList.contains('present') && $('stage').contains(t));
+let idleT = 0;
+document.addEventListener('pointermove', () => {
+  const st = $('stage'); st.classList.remove('idle'); clearTimeout(idleT);
+  idleT = setTimeout(() => { if (st.classList.contains('present')) st.classList.add('idle'); }, 2000);
+}, {passive: true});
 document.addEventListener('pointerover', e => { const t = e.target.closest && e.target.closest('[data-f]'); if (t && tipOK(t)) showTip(t); else hideTip(); });
 document.addEventListener('focusin', e => { const t = e.target.closest && e.target.closest('[data-f]'); if (t) showTip(t); else hideTip(); });
 document.addEventListener('focusout', hideTip);
 window.addEventListener('scroll', hideTip, {passive: true});
 
 /* ================= drawing a flow ================= */
-function packet(fx, col, r) {
+/* a packet: drawn under its drawing's callouts (their text is never covered), growing in */
+function packet(fx, col, r, still) {
   r = r || 11;
-  const g = E('g', {class: 'pk'}, fx);
-  S(E('circle', {r: r + 8}, g), {fill: col, fillOpacity: 0.28});
-  S(E('circle', {r}, g), {fill: col, stroke: 'var(--page)', strokeWidth: 3});
+  const g = E('g', {class: 'pk'}, fx), inner = E('g', {}, g);
+  S(E('circle', {r: r + 7}, inner), {fill: col, fillOpacity: 0.26});
+  S(E('circle', {r}, inner), {fill: col, stroke: 'var(--page)', strokeWidth: 2.5});
+  const co = fx.querySelector(':scope > .co'); if (co) fx.insertBefore(g, co);
+  if (!still) popIn(inner);
   return g;
 }
 const at = (g, p) => g.setAttribute('transform', `translate(${p.x.toFixed(1)},${p.y.toFixed(1)})`);
 /* move a packet along a polyline with an ease in and out. o.even: the same time for every segment (a mesh hop costs
-   the same everywhere), else a steady speed along the length. o.trail: false for none; o.onSeg(i, n) per segment */
+   the same everywhere), else a steady speed along the length. o.trail: false for none; o.onSeg(i, n) per segment;
+   o.w, o.op, o.dash (true: dotted, or a dash pattern): the trail's width (6, an active trail), opacity and dashes */
 async function travel(tok, fx, pk, P, ms, o) {
   o = o || {};
-  const trail = o.trail === false ? null : S(E('path', {class: 'trail', fill: 'none'}, fx), {stroke: o.col || 'var(--c2)', strokeWidth: o.w || 7, strokeLinecap: 'round', strokeLinejoin: 'round', strokeOpacity: 0.75, strokeDasharray: o.dash ? '2 13' : null});
+  const trail = o.trail === false ? null : S(E('path', {class: 'trail', fill: 'none'}, fx), {stroke: o.col || 'var(--c2)', strokeWidth: o.w || 6, strokeLinecap: 'round', strokeLinejoin: 'round', strokeOpacity: o.op || 0.75, strokeDasharray: o.dash ? (o.dash === true ? '2 13' : o.dash) : null});
   if (trail) fx.insertBefore(trail, fx.firstChild);
   const nseg = Math.max(1, P.length - 1), cum = [0];
   for (let i = 1; i < P.length; i++) cum.push(cum[i - 1] + (o.even ? 1 : Math.hypot(P[i].x - P[i - 1].x, P[i].y - P[i - 1].y)));
@@ -923,20 +1231,23 @@ async function travel(tok, fx, pk, P, ms, o) {
   await anim(tok, ms, step);
   return trail;
 }
-/* A labelled box. With o.cell it sits beside that tile (o.side 'l' or 'r') in the band below the tiles' id labels,
-   so that it covers no tile's number; otherwise it sits on side o.side of (x, y) ('c': centred on it). It goes under
-   the packets, and it fades in. */
+/* A labelled box: a light card with a thin border, a short accent bar in its colour and, when it points at a place
+   (o.cell, o.lead), a thin leader ending in a dot on that place. With o.cell it sits beside that tile (o.side 'l' or
+   'r') in the band below the tiles' id labels, so that it covers no tile's number; with o.tl or o.tr, (x, y) is its
+   top-left or top-right corner; otherwise it sits on side o.side of (x, y) ('c': centred on it). It lies above the
+   packets of its drawing (packet() inserts them under it), and it fades in. */
 function callout(fx, x, y, lines, o) {
   o = o || {};
-  const g = E('g', {class: 'co'}, fx), fs = o.fs || 24, lh = fs * 1.28, pad = 11;
-  const pk1 = [...fx.children].find(c => c.classList && c.classList.contains('pk')); if (pk1) fx.insertBefore(g, pk1);
-  const box = S(E('rect', {class: 'co-box', rx: 9}, g), {stroke: o.col || 'var(--c2)'});
+  const col = o.col || 'var(--c2)', fs = o.fs || 22, lh = fs * 1.28, pad = 11, acc = 9;
+  const g = E('g', {class: 'co'}, fx), lead = E('g', {class: 'co-lead'}, g);
+  const box = S(E('rect', {class: 'co-box', rx: 6, filter: 'url(#co-sh)'}, g), {stroke: `color-mix(in srgb, ${col} 55%, var(--surface))`});
+  const bar = S(E('rect', {class: 'co-acc', rx: 2, width: 4}, g), {fill: col});
   const tx = lines.map((ln, i) => {
     const Lx = typeof ln === 'string' ? {t: ln} : ln, t = T(g, 0, 0, Lx.t, 'co-t' + (i === 0 ? ' b' : ''), 'start', Lx.f);
     t.style.fontSize = fs + 'px'; return t;
   });
   let w = 0; tx.forEach(t => { let tw = 0; try { tw = t.getComputedTextLength(); } catch (_) { /* not rendered */ } w = Math.max(w, tw || t.textContent.length * fs * 0.55); });
-  const bw = w + 2 * pad, bh = lines.length * lh + pad;
+  const bw = w + 2 * pad + acc, bh = lines.length * lh + pad;
   let bx = o.side === 'l' ? x - 20 - bw : (o.side === 'u' || o.side === 'd' || o.side === 'c') ? x - bw / 2 : x + 20;
   let by = o.side === 'u' ? y - 20 - bh : o.side === 'd' ? y + 20 : y - bh / 2;
   if (o.cell) {
@@ -944,35 +1255,72 @@ function callout(fx, x, y, lines, o) {
     bx = o.side === 'l' ? c.x + 6 - bw : c.x + c.w - 6;
     by = Math.min(c.y + 58, c.y + c.h + 12 - bh);
   }
+  if (o.tl) { bx = x; by = y; } else if (o.tr) { bx = x - bw; by = y; }
   bx = Math.max(VB.x + 4, Math.min(VB.x + VB.w - 4 - bw, bx)); by = Math.max(VB.y + 4, Math.min(VB.y + VB.h - 4 - bh, by));
   box.setAttribute('x', bx); box.setAttribute('y', by); box.setAttribute('width', bw); box.setAttribute('height', bh);
-  tx.forEach((t, i) => { t.setAttribute('x', bx + pad); t.setAttribute('y', by + pad / 2 + (i + 1) * lh - lh * 0.24); });
-  return fadeIn(g);
+  bar.setAttribute('x', bx + 5); bar.setAttribute('y', by + 6); bar.setAttribute('height', Math.max(4, bh - 12));
+  tx.forEach((t, i) => { t.setAttribute('x', bx + acc + pad - 2); t.setAttribute('y', by + pad / 2 + (i + 1) * lh - lh * 0.24); });
+  if (o.lead || o.cell) {
+    const qx = Math.max(bx, Math.min(bx + bw, x)), qy = Math.max(by, Math.min(by + bh, y));
+    if (Math.hypot(qx - x, qy - y) > 8) {
+      S(E('line', {x1: qx, y1: qy, x2: x, y2: y}, lead), {stroke: col, strokeWidth: 1.5});
+      S(E('circle', {cx: x, cy: y, r: 4}, lead), {fill: col});
+    }
+  }
+  g._box = {x: bx, y: by, w: bw, h: bh};
+  return fadeIn(g, 300, o.tl || o.tr ? 0 : 6);
 }
 function pulse(tok, fx, p, ms, col, r1) {
   if (REDUCED || tok.ff) return wait(tok, tok.ff ? 0 : Math.min(ms, 600));
-  const c = S(E('circle', {cx: p.x, cy: p.y, r: 8}, fx), {fill: 'none', stroke: col || 'var(--c2)', strokeWidth: 5});
+  const c = S(E('circle', {cx: p.x, cy: p.y, r: 8}, fx), {fill: 'none', stroke: col || 'var(--c2)', strokeWidth: 4});
   return anim(tok, ms, q => { const e = easeS(q); c.setAttribute('r', 8 + (r1 || 46) * e); c.style.strokeOpacity = 1 - e * 0.85; }).then(() => c.remove(), e => { c.remove(); throw e; });
+}
+/* where the flow is about to happen, on the die: the tile itself glows and its outline swells, twice */
+function pulseTile(tok, cell, ms) {
+  ms = ms || 900;
+  if (REDUCED || tok.ff || !cell) return Promise.resolve();
+  const r = S(E('rect', {class: 'glow', x: cell.x + INS, y: cell.y + INS, width: cell.w - 2 * INS, height: cell.h - 2 * INS, rx: 6, 'pointer-events': 'none'}, FX[0]),
+    {fill: 'var(--c2)', fillOpacity: 0, stroke: 'var(--c2)', strokeOpacity: 0, strokeWidth: 3});
+  FX[0].insertBefore(r, FX[0].firstChild);
+  return anim(tok, ms, q => { const v = Math.pow(Math.sin(Math.PI * 2 * q), 2); r.style.fillOpacity = (0.34 * v).toFixed(3); r.style.strokeOpacity = v.toFixed(3); r.style.strokeWidth = (3 + 7 * v).toFixed(2); })
+    .then(() => r.remove(), e => { r.remove(); throw e; });
 }
 function ring(tok, fx, p, ms, col, label) {
   const R = 40, C = 2 * Math.PI * R;
-  const bg = S(E('circle', {cx: p.x, cy: p.y, r: R}, fx), {fill: 'var(--surface)', fillOpacity: 0.85, stroke: 'var(--grid)', strokeWidth: 8});
-  const c = S(E('circle', {cx: p.x, cy: p.y, r: R, transform: `rotate(-90 ${p.x} ${p.y})`}, fx), {fill: 'none', stroke: col || 'var(--c2)', strokeWidth: 8, strokeDasharray: `0 ${C}`});
+  const bg = S(E('circle', {cx: p.x, cy: p.y, r: R}, fx), {fill: 'var(--surface)', fillOpacity: 0.85, stroke: 'var(--grid)', strokeWidth: 7});
+  const c = S(E('circle', {cx: p.x, cy: p.y, r: R, transform: `rotate(-90 ${p.x} ${p.y})`}, fx), {fill: 'none', stroke: col || 'var(--c2)', strokeWidth: 7, strokeDasharray: `0 ${C}`});
   const t = label ? T(fx, p.x, p.y + 8, label, 't-labb', 'middle') : null;
   return anim(tok, ms, q => { c.style.strokeDasharray = `${C * easeS(q)} ${C}`; }).then(() => [bg, c, t]);
 }
 function clearDim() {
-  svg.classList.remove('dimming', 'fdim'); svg.querySelectorAll('.hi').forEach(e => e.classList.remove('hi'));
+  svg.classList.remove('dimming', 'fdim', 'mesh-on'); svg.querySelectorAll('.hi').forEach(e => e.classList.remove('hi'));
   if (PIP.svg) PIP.svg.querySelectorAll('.hi').forEach(e => e.classList.remove('hi'));
   if (SEL) SEL._hiSel = false;
 }
-function clearFx() { FX.forEach(f => { if (f) f.textContent = ''; }); if (PIP.fx) PIP.fx.textContent = ''; clearDim(); }
+/* the glows drawn inside the tiles (glowTiles) */
+const clearGlow = soft => svg.querySelectorAll('.lay .comp > .glow').forEach(g => { if (soft) fadeOut(g, 260); else g.remove(); });
+/* a flow's drawing goes: at once, or (soft: the tour moving on, another flow) fading out over a quarter second */
+function clearFx(soft) {
+  FX.forEach((f, i) => {
+    if (!f) return;
+    if (soft && f.firstChild && LAYERS[i].style.display !== 'none' && CLK.on && !REDUCED) {
+      const g = E('g', {class: 'fxold', 'pointer-events': 'none'}, f.parentNode);
+      while (f.firstChild) g.appendChild(f.firstChild);
+      fadeOut(g, 260);
+    } else f.textContent = '';
+  });
+  if (PIP.fx) PIP.fx.textContent = ''; clearGlow(soft); clearDim();
+}
 function hiCells(cells, dimOthers) {
   cells.forEach(c => { if (!c) return; if (c.g) c.g.classList.add('hi'); const t = PIP.tiles[c.r + ',' + c.c]; if (t) t.classList.add('hi'); });
-  if (dimOthers) svg.classList.add('fdim');
+  // a stage drawn in the small picture of the die leaves the view the reader chose undimmed
+  if (dimOthers && !(FL.ctx && FL.ctx.pip)) svg.classList.add('fdim');
 }
-/* bars on the stage, in the free band right of the die, with 19-20 unit text */
-const BAND = {x: 932, y: 40, w: 172};
+/* the LPDDR4X package drawn beside memory shire m, lit with it */
+function hiPkg(m) { LAYERS[0].querySelectorAll('.comp[data-comp="dram"]').forEach(g => { if (g._ctx.ms && g._ctx.ms.includes(m)) g.classList.add('hi'); }); }
+/* bars on the stage, in the column right of the die (44 units clear of the packages), with 20-22 unit text; text on a
+   bar has no halo */
+const BAND = {x: 966, y: 40, w: 230};
 function bandChart(fx, title, rows, o) {
   o = o || {};
   const g = E('g', {class: 'band'}, fx);
@@ -980,17 +1328,48 @@ function bandChart(fx, title, rows, o) {
   if (title) { T(g, BAND.x, y + 22, title, 't-labb halo'); y += 30; }
   if (o.note) { T(g, BAND.x, y + 18, o.note, 't-sm halo'); y += 26; }
   if (o.note2) { T(g, BAND.x, y + 18, o.note2, 't-sm halo'); y += 26; }
+  // each row in its own group (a stage can bring a row in, or mark the one it is about); the bar's strength is the
+  // theme's (CSS .bbar), its track a grey the bar stands out from in both themes
   const out = rows.map(r => {
-    T(g, BAND.x, y + 20, r.name, 't-lab halo', 'start', r.f).style.fontSize = '19px';
-    S(E('rect', {x: BAND.x, y: y + 27, width: BAND.w, height: 30, rx: 5}, g), {fill: 'var(--grid)'});
-    const bar = S(E('rect', {x: BAND.x, y: y + 27, width: 0, height: 30, rx: 5}, g), {fill: `color-mix(in srgb, ${r.col || 'var(--c2)'} 55%, transparent)`});
-    const val = T(g, BAND.x + 7, y + 49, r.val || '', 't-labb', 'start', r.f);
-    const row = {bar, val, y: y + 27, set: q => bar.setAttribute('width', (Math.max(0, Math.min(1, q)) * BAND.w).toFixed(1))};
+    const rg = E('g', {class: 'brow'}, g);
+    const nm = T(rg, BAND.x, y + 20, r.name, 't-lab halo', 'start', r.f);
+    E('rect', {class: 'btrack', x: BAND.x, y: y + 27, width: BAND.w, height: 30, rx: 4}, rg);
+    const bar = S(E('rect', {class: 'bbar', x: BAND.x, y: y + 27, width: 0, height: 30, rx: 4}, rg), {fill: r.col || 'var(--c2)'});
+    const val = T(rg, BAND.x + 7, y + 49, r.val || '', 't-labb', 'start', r.f);
+    const row = {g: rg, nm, bar, val, y: y + 27, set: q => bar.setAttribute('width', (Math.max(0, Math.min(1, q)) * BAND.w).toFixed(1))};
     y += 68;
     return row;
   });
-  fadeIn(g);
+  if (!o.still) fadeIn(g);
   return {g, rows: out, bottom: y};
+}
+/* grouped bars: per group (a card) its name and one thin bar per series, the series' colours keyed once at the top */
+function bandGroups(fx, title, series, groups, o) {
+  o = o || {};
+  const g = E('g', {class: 'band'}, fx);
+  let y = o.y == null ? BAND.y : o.y;
+  T(g, BAND.x, y + 22, title, 't-labb halo'); y += 32;
+  let kx = BAND.x;
+  series.forEach(sr => {
+    S(E('rect', {class: 'bbar', x: kx, y: y + 3, width: 16, height: 16, rx: 3}, g), {fill: sr.col});
+    const t = T(g, kx + 22, y + 17, sr.name, 'bkey halo');
+    let tw = 0; try { tw = t.getComputedTextLength(); } catch (_) { /* not rendered */ } kx += 22 + (tw || sr.name.length * 9) + 18;
+  });
+  y += 30;
+  const bars = [];
+  groups.forEach(gr => {
+    T(g, BAND.x, y + 19, gr.name, 't-lab halo', 'start', gr.f); y += 26;
+    gr.vals.forEach((v, i) => {
+      E('rect', {class: 'btrack', x: BAND.x, y, width: BAND.w, height: 25, rx: 4}, g);
+      const bar = S(E('rect', {class: 'bbar', x: BAND.x, y, width: 0, height: 25, rx: 4}, g), {fill: series[i].col});
+      T(g, BAND.x + 7, y + 19, v.t, 't-sm', 'start', v.f).style.fill = 'var(--ink)';
+      bars.push({bar, q: v.q, set: q => bar.setAttribute('width', (Math.max(0, Math.min(1, q)) * BAND.w).toFixed(1))});
+      y += 29;
+    });
+    y += 10;
+  });
+  fadeIn(g);
+  return {g, bars, bottom: y};
 }
 /* a few lines of text in the band right of the die (a number too long for a callout's place) */
 function bandText(fx, title, lines, y) {
@@ -1002,24 +1381,39 @@ function bandText(fx, title, lines, y) {
 /* a stream drawn as a pipe under its packets */
 function pipe(fx, P, col, dash) {
   const d = 'M' + P.map(p => `${p.x},${p.y}`).join(' L');
-  const e = S(E('path', {d, fill: 'none'}, fx), {stroke: col, strokeWidth: 9, strokeOpacity: 0.35, strokeLinecap: 'round', strokeLinejoin: 'round', strokeDasharray: dash ? '3 14' : null});
+  const e = S(E('path', {d, fill: 'none'}, fx), {stroke: col, strokeWidth: 8, strokeOpacity: 0.42, strokeLinecap: 'round', strokeLinejoin: 'round', strokeDasharray: dash ? '3 14' : null});
   fx.insertBefore(e, fx.firstChild);
   return e;
 }
-/* a translucent glow over each compute tile, pulsing on the clock with amplitude amp (0 to 1) */
+/* A glow over each compute tile, breathing on the clock with amplitude amp (0 to 1). Every tile has the same phase:
+   the data are board watts, not a measured heat per shire, so no tile may look hotter than another. On the die it is
+   drawn inside each tile, right over its outline and under its number (which stays --ink); in the small picture of
+   the die, under everything. At most 0.38 opaque (0.55 on a dark page). */
 function glowTiles(tok, fx, amp, col, shires) {
-  const gs = (shires || Object.values(SH)).map(c => S(E('rect', {x: c.x + INS + 4, y: c.y + INS + 4, width: c.w - 2 * INS - 8, height: c.h - 2 * INS - 8, rx: 8}, fx), {fill: col || 'var(--c2)', fillOpacity: 0}));
-  fx.querySelectorAll('.pk').forEach(p => fx.appendChild(p));
+  const inTiles = fx === FX[0];
+  const gs = (shires || Object.values(SH)).map(c => {
+    const r = S(E('rect', {class: 'glow', x: c.x + INS + 3, y: c.y + INS + 3, width: c.w - 2 * INS - 6, height: c.h - 2 * INS - 6, rx: 4, 'pointer-events': 'none'}, fx), {fill: col || 'var(--c2)', fillOpacity: 0});
+    const sh = inTiles && c.g && c.g.querySelector('.shape');
+    if (sh) c.g.insertBefore(r, sh.nextSibling); else fx.insertBefore(r, fx.firstChild);
+    return r;
+  });
   const st = {amp};
-  // with reduced motion the glow holds still: the amplitude still follows st.amp, nothing oscillates
-  const draw = t => gs.forEach((r, i) => { r.style.fillOpacity = (st.amp * (0.32 + (REDUCED ? 0 : 0.22 * Math.sin(t / 260 + i * 1.7)))).toFixed(3); });
-  if (REDUCED || tok.ff) draw(0);
+  // with reduced motion, or drawn as a stage's end state, the glow holds still: the amplitude still follows st.amp
+  const still = REDUCED || tok.ff;
+  // on a dark page the same tint reads as a muddy maroon: it is set stronger there (a warm orange)
+  const k = isDark() ? 1.45 : 1;
+  const draw = t => {
+    if (!gs.length || !gs[0].isConnected) return;
+    const v = (k * Math.min(0.38, Math.max(0, st.amp) * (REDUCED ? 0.30 : 0.30 + 0.08 * Math.sin(t / 400)))).toFixed(3);
+    gs.forEach(r => { r.style.fillOpacity = v; });
+  };
+  draw(still ? -400 * Math.PI : CLK.t);
   every(tok, draw);
   return st;
 }
 
 /* ================= flows: each a list of stages ================= */
-const ST = {rq: 0, pa: null, gs: 'g', sid: 13};
+const ST = {rq: 0, pa: null, gs: 'g', sid: 0};
 const P40 = 2 ** 32;
 function mkPA(home, salt) { return 0x80 * P40 + salt * 2048 + home * 64; }   // a DRAM line (region 0x80_0000_0000) homed in L3 slice `home`
 ST.pa = mkPA(13, 0x2468A);
@@ -1039,26 +1433,34 @@ function atView(w) {
   if (w.level === 0) return true;
   return Z.sid === w.sid && (w.level === 1 || (Z.nb === w.nb && Z.mi === w.mi));
 }
-/* the flow's camera: on the animation clock, so that Space stops it too; a cut when drawing an end state */
-async function cam(tok, w, cut) {
+/* the flow's camera: on the animation clock, so that Space stops it too. Drawing an end state (paused, or stepping
+   back) it still moves, on real time and quickly (600 ms), never a cut: the audience keeps the place */
+async function cam(tok, w, cut, o) {
   if (!FOLLOW || atView(w)) return;
-  await goTo(w, {clk: tok, keepFx: true, ms: (cut || tok.ff) ? 0 : undefined, carry: FL.ctx && FL.ctx.tok === tok ? FL.ctx.pk : null});
+  const quick = cut || tok.ff;
+  await goTo(w, Object.assign({clk: quick ? null : tok, keepFx: true, total: quick ? 600 : undefined, carry: FL.ctx && FL.ctx.tok === tok ? FL.ctx.pk : null}, o || {}));
   alive(tok);
 }
-function pipOn() { PIP.el.hidden = false; $('pip-cap').textContent = `Flow ${ORDER.indexOf(FL.k) + 1}, stage ${FL.i + 1}, on the die · click for the chip`; }
-function pipOff() { PIP.el.hidden = true; }
-/* the flow's packet, in this drawing: the one it has if it is already here, else a new one at p */
+/* the look a stage on the die gives it (most set the rest of the die back, CSS #chip.fdim): a zoom out to it ends there */
+const stageLook = (st, w) => (w.level === 0 && st.dim !== false ? DIMLOOK.fdim() : null);
+function pipOn() { PIP.el.hidden = false; $('pip-cap').textContent = `Flow ${KEYOF[FL.k]}, stage ${FL.i + 1}, on the die · click to return`; }
+function pipOff() { if (document.activeElement === PIP.el) $('btn-follow').focus({preventScroll: true}); PIP.el.hidden = true; }
+/* the flow's packet, in this drawing: the one it has if it is already here, else a new one at p. A packet that the
+   zoom carried from the last view (it rode the zoom in place) is taken over as it is, with no second grow-in */
 function pkIn(c, fx, p, col, r) {
-  if (!c.pk || c.pk.parentNode !== fx) { c.pk = packet(fx, col || 'var(--c2)', r || 12); if (p) at(c.pk, p); }
+  if (!c.pk || c.pk.parentNode !== fx) { const had = !!c.pk && !c.pip; c.pk = packet(fx, col || 'var(--c2)', r || 12, had); if (p) at(c.pk, p); }
   return c.pk;
 }
 function sayAt(c, fx, x, y, lines, o) { unsay(c); c.co = callout(fx, x, y, lines, o); return c.co; }
-function unsay(c) { if (c.co) { c.co.remove(); c.co = null; } }
+function unsay(c) { if (c.co) { fadeOut(c.co); c.co = null; } }
+/* a flow's kicker: its number and name, and the tour step when touring */
+const flowKick = k => (TOUR ? `Tour ${TOUR.i + 1} / ${STEPS.length} · ` : '') + `Flow ${KEYOF[k]} · ${FLOWS[k].title}`;
 function startFlow(k, i, o) {
   o = o || {};
   const def = FLOWS[k]; i = Math.max(0, Math.min(def.stages.length - 1, i || 0));
   const prev = (o.keep && FL.ctx && FL.ctx.k === k) ? FL.ctx.pick : null;
-  FL.tok.dead = true; clearFx(); pipOff();
+  // another flow: the last one's drawing fades as this one starts; the same flow redrawn: at once
+  FL.tok.dead = true; clearFx(FL.k !== k && !o.still); pipOff();
   const tok = {dead: false, k, ff: false, endDone: !!o.done};
   Object.assign(FL, {k, i, tok, done: false, still: !!o.still});
   LASTFLOW = k;
@@ -1066,34 +1468,34 @@ function startFlow(k, i, o) {
   document.querySelectorAll('[data-flow]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.flow === k)));
   const ctx = FL.ctx = {k, tok, pick: prev || (def.pick ? def.pick() : {})};
   def.setup(ctx);
-  if (!TOUR) { setKick(`Flow ${KEYOF[k]} · ${def.title}`); setCap(def.cap()); dots(-1); CAPFLOW = true; }
+  setKick(flowKick(k)); if (!TOUR) { dots(-1); CAPFLOW = true; }
+  flowCapSize(k, ctx);
   renderBar(); playBtn();
   quiet(runFrom(tok, ctx, i, !!o.still, !!o.intro));
 }
 async function runFrom(tok, ctx, i, still, intro) {
   const sts = FLOWS[ctx.k].stages, w = sts[i].where(ctx);
-  // the stage bar, the sub-caption and the legs table show the stage at once, before the camera moves to it
+  // the stage bar, the caption and the legs table show the stage at once, before the camera moves to it
   showStage(ctx, i);
-  // an establishing shot: a flow that starts inside a shire or a minion first shows where it is on the die
-  if (intro && FOLLOW && i === 0 && w.level > 0 && !still && !REDUCED && !(Z.level === 0 && !ZW)) {
-    await cam(tok, {level: 0});
+  // an establishing shot, for a flow that starts inside a shire the camera is not in: the camera goes to the chip, the
+  // shire lights up and pulses, and the zoom in starts while it pulses (its dimming carries on into the zoom). From
+  // inside that shire already, the camera goes straight there.
+  // From inside another shire it is one move, out and in, that rests its eye on the chip while the shire pulses.
+  if (intro && FOLLOW && i === 0 && w.level > 0 && w.sid != null && !still && !REDUCED && !(Z.level >= 1 && Z.sid === w.sid && !ZW)) {
+    const lit = () => { if (tok.dead) return; hiCells([SH[w.sid]], true); quiet(pulseTile(tok, SH[w.sid], 1000)); };
+    if (Z.level > 0 || ZW) await cam(tok, w, false, {atChip: lit, chipEnd: DIMLOOK.fdim()});
+    else { lit(); await wait(tok, 480); if (FOLLOW) await cam(tok, w, false); }
   }
-  if (intro && FOLLOW && i === 0 && w.level > 0 && !still && !REDUCED && Z.level === 0) {
-    hiCells([SH[w.sid]], true);
-    const p = {x: SH[w.sid].sx, y: SH[w.sid].sy};
-    await pulse(tok, FX[0], p, 1100, 'var(--c2)', 60);
-    clearDim();
-  }
-  if (FOLLOW) await cam(tok, w, still);
-  // the stages before i: their end states, drawn at once where the camera can show them
-  tok.ff = true;
+  if (FOLLOW) await cam(tok, w, still, {c1: stageLook(sts[i], w)});
+  // the stages before i: their end states, drawn at once where the camera can show them (nothing fades in)
+  tok.ff = true; FFTOK = tok;
   for (let j = 0; j < i; j++) {
     const sj = sts[j], wj = sj.where(ctx);
     ctx.stage = j;
     if (atView(wj)) { ctx.fx = FX[wj.level]; ctx.pip = false; await sj.run(tok, ctx); }
     else if (wj.level === 0) { ctx.fx = PIP.fx; ctx.pip = true; await sj.run(tok, ctx); }
   }
-  tok.ff = false;
+  tok.ff = false; if (i > 0) FFEND = performance.now();
   for (let j = i; j < sts.length; j++) {
     if (j !== i) showStage(ctx, j);
     scaleUI();
@@ -1109,17 +1511,19 @@ async function runFrom(tok, ctx, i, still, intro) {
   }
   if (FL.tok === tok) { FL.done = true; renderBar(); playBtn(); }
 }
-/* stage j is now the flow's: the bar marks it, the sub-caption says it, the legs table lights its row, and a screen
-   reader hears its name */
+/* a stage's line, as the large caption: its "Leg 3 of 6 · " goes (the stage bar says it) */
+const stageLine = html => { const s = String(html || '').replace(/^Leg \d+ of \d+ · /, ''); return s.charAt(0).toUpperCase() + s.slice(1); };
+/* stage j is now the flow's: the bar marks it, the large caption says what happens in it (the flow's claim is the line
+   under it), the legs table lights its row, and a screen reader hears its name */
 function showStage(ctx, j) {
   const sts = FLOWS[ctx.k].stages;
-  FL.i = j; renderBar(); sub(sts[j].say ? sts[j].say(ctx) : ''); leg(j);
+  FL.i = j; renderBar(); setCap(stageLine(sts[j].say ? sts[j].say(ctx) : '')); sub(CAPS[ctx.k]()); leg(j);
   $('st-live').textContent = `Stage ${j + 1} of ${sts.length}: ${sts[j].name}`;
 }
 async function playStage(tok, ctx, j) {
   const st = FLOWS[ctx.k].stages[j], w = st.where(ctx);
   ctx.stage = j; leg(j);
-  if (FOLLOW) await cam(tok, w);
+  if (FOLLOW) await cam(tok, w, false, {c1: stageLook(st, w)});
   alive(tok);
   if (atView(w)) { pipOff(); ctx.fx = FX[w.level]; ctx.pip = false; return st.run(tok, ctx); }
   if (w.level === 0) { ctx.fx = PIP.fx; ctx.pip = true; pipOn(); return st.run(tok, ctx); }
@@ -1143,9 +1547,9 @@ async function markStage(tok, ctx, st, w) {
   }
   await wait(tok, st.dur || 2400);
 }
-function killFlow() { FL.tok.dead = true; clearFx(); pipOff(); }
-function stopFlow(keepCap) {
-  killFlow(); FL.k = null; FL.done = false; FL.still = false;
+function killFlow(soft) { FL.tok.dead = true; clearFx(soft); pipOff(); }
+function stopFlow(keepCap, soft) {
+  killFlow(soft); FL.k = null; FL.done = false; FL.still = false;
   document.querySelectorAll('[data-flow]').forEach(b => b.setAttribute('aria-pressed', 'false'));
   renderBar(); playBtn();
   if (!TOUR && CAPFLOW && !keepCap) resetCap();
@@ -1165,16 +1569,20 @@ function goStage(i) {
   startFlow(FL.k, i, {still: !CLK.on || FL.still, keep: true});
   return true;
 }
-function sub(html) { $('cap-sub').innerHTML = html; }
-const legRows = rows => `<table class="legs"><thead><tr><th>Leg</th><th>What happens</th><th class="num">cycles</th><th class="num">pJ/B</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="todo" data-leg="${i}"><td>${r[0]}</td><td>${r[1]}</td><td class="num">${r[2] || ''}</td><td class="num">${r[3] || ''}</td></tr>`).join('')}</tbody></table>`;
+function sub(html) { const e = $('cap-sub'); e.innerHTML = glue(html); e.classList.remove('hint'); }
+/* a flow's legs: a numeric column only where some row has a number in it (an empty column still takes width) */
+const legRows = rows => {
+  const cols = [[2, 'cycles'], [3, 'pJ/B']].filter(([k]) => rows.some(r => r[k]));
+  return `<table class="legs"><thead><tr><th>Leg</th><th>What happens</th>${cols.map(([, h]) => `<th class="num">${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r, i) => `<tr class="todo" data-leg="${i}"><td>${r[0]}</td><td>${r[1]}</td>${cols.map(([k]) => `<td class="num">${r[k] || ''}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+};
 function leg(i) {
   let on = null;
   document.querySelectorAll('#pn-body tr[data-leg]').forEach(tr => { const k = +tr.dataset.leg; tr.className = k < i ? '' : k === i ? 'on' : 'todo'; if (k === i) on = tr; });
   if (on) pnReveal(on);
 }
 function flowPanel(k, head, body) {
-  panel(`<p class="pn-kick">Flow ${ORDER.indexOf(k) + 1} of ${ORDER.length} · key ${KEYOF[k]}</p><p class="pn-title">${esc(head)}</p>${body}`
-    + asksBlock('flow:' + k, !TOUR) + topPage(COMPF['flow' + k]) + factsBlock('flow' + k, 'The facts this flow uses'));
+  panel(`<p class="pn-kick">Flow ${ORDER.indexOf(k) + 1} of ${ORDER.length}<span class="pn-key"> · key ${KEYOF[k]}</span></p><p class="pn-title">${esc(head)}</p>${body}`
+    + asksBlock('flow:' + k, false) + topPage(COMPF['flow' + k]) + factsBlock('flow' + k, 'The facts this flow uses'));
 }
 const shireOfCamera = () => (Z.level >= 1 && SH[Z.sid] ? Z.sid : null);
 /* the requester of flows 1 and 2: the shire the camera shows, unless the address's L3 home is that shire or next to it
@@ -1212,7 +1620,7 @@ FLOWS.A = {
         [`L3 home, shire ${a.home}`, `${cn(h1, 'mesh.logical-map', 0)} ${hopw(h1)}: a hit would be ${n('lat_l3_a')} + ${n('l3_b12')}×${h1}`, cn(l3, 'l3.latency addr.load-model', 0), n('e_l3')],
         [`memory shire ${a.ms}`, `${cn(h2, 'mesh.logical-map L40', 0)} ${hopw(h2)} on: + ${n('lat_ms_a')} + ${n('lat_ms_b')}×${h2}`, cn(tot, 'addr.load-model L45', 0), ''],
         [`LPDDR4X, channel ${a.ch}`, `bank ${a.db}: ${n('lat_dram_chip')} cycles are the DRAM chip (inferred)`, '', n('e_dram')],
-        [`back to shire ${rq}`, `the model's total; the data comes back through the L3 home, ${src('as the shire cache specification has it', 'sc.l3-miss')}, each leg drawn x first; a typical measured load takes ${n('lat_dram')}`, cn(tot, 'addr.load-model L45', 0), ''],
+        [`back to shire ${rq}`, `${src('back through the L3 home', 'sc.l3-miss')}: the model's total; typical, measured: ${n('lat_dram')}`, cn(tot, 'addr.load-model L45', 0), ''],
       ]));
   },
   stages: [
@@ -1220,15 +1628,17 @@ FLOWS.A = {
       mark: () => [{t: `L1: miss (a hit: ${N.lat_l1.t} cycles)`, f: 'lat-l1'}],
       say: c => `Leg 1 of 6 · hart 0 of minion ${c.mi} looks in its L1 data cache: a miss (a hit takes ${n('lat_l1')} cycles)`,
       run: async (tok, c) => {
-        const P2 = AP[2], fx = c.fx, pk = pkIn(c, fx, P2.hart0);
-        at(pk, P2.hart0);
-        const gx = MF.x + 354, gy = MF.y + 545;   // the gap right of the harts, then along the L1's top edge
-        await travel(tok, fx, pk, [P2.hart0, {x: gx, y: P2.hart0.y}, {x: gx, y: gy}, {x: P2.l1h0.x, y: gy}, P2.l1h0], 1700);
+        const P2 = AP[2], fx = c.fx, h0 = P2.hart0e, pk = pkIn(c, fx, h0);
+        at(pk, h0);
+        // from hart 0's edge down the gutter between the harts and the vector unit, along the gutter above the L1
+        const gx = MF.x + 354, gy = MF.y + 545;
+        await travel(tok, fx, pk, [h0, {x: gx, y: h0.y}, {x: gx, y: gy}, {x: P2.l1h0.x, y: gy}, P2.l1h0], 1700, {w: 4});
         const sb = P2.scpBox;   // over the tensor-scratchpad sets, which a load does not use: no label is covered
         sayAt(c, fx, sb.x + sb.w / 2, sb.y + sb.h / 2, [{t: 'L1: miss'}, {t: `a hit takes ${N.lat_l1.t} cycles`, f: 'lat-l1'}], {side: 'c', fs: 21});
         await wait(tok, 2300);
-        await travel(tok, fx, pk, [P2.l1h0, {x: P2.etl.x, y: P2.l1h0.y}, P2.etl], 1400);
-        c.last = {level: 2, p: P2.etl};
+        const pe = P2.etlPort;   // out along the same corridor to the ET-Link port's edge
+        await travel(tok, fx, pk, [P2.l1h0, {x: P2.l1h0.x, y: gy}, {x: pe.x - 10, y: gy}, {x: pe.x - 10, y: pe.y}, pe], 1400, {w: 4});
+        c.last = {level: 2, p: pe};
       }},
     {name: 'L2 bank', where: c => ({level: 1, sid: c.rq}),
       mark: c => [{t: `L2 bank ${c.a.bank}: miss (a hit: ${N.lat_l2.t} cycles)`, f: 'lat-l2'}],
@@ -1250,7 +1660,7 @@ FLOWS.A = {
       run: async (tok, c) => {
         const fx = c.fx, s0 = {x: c.rc.sx, y: c.rc.sy};
         hiCells([c.rc, c.hc, c.mc], true);
-        const pk = pkIn(c, fx, s0, 'var(--c2)', 13);
+        const pk = pkIn(c, fx, s0, 'var(--c2)', 12);
         if (c.last && c.last.level === 1 && !c.pip) { const q = outOfShire(c.last.p, c.rq); at(pk, q); await travel(tok, fx, pk, [q, s0], 800, {trail: false}); }
         else at(pk, s0);
         c.last = null;
@@ -1263,7 +1673,7 @@ FLOWS.A = {
       say: c => `Leg 4 of 6 · on to memory shire ${c.a.ms} (PA[8:6]), ${c.h2} ${hopw(c.h2)}: + ${n('lat_ms_a')} + ${n('lat_ms_b')} × ${c.h2} cycles`,
       run: async (tok, c) => {
         const fx = c.fx; hiCells([c.rc, c.hc, c.mc], true); unsay(c);
-        const pk = pkIn(c, fx, {x: c.hc.sx, y: c.hc.sy}, 'var(--c2)', 13);
+        const pk = pkIn(c, fx, {x: c.hc.sx, y: c.hc.sy}, 'var(--c2)', 12);
         const P = pts(c.r2);
         await travel(tok, fx, pk, P, HOP_MS * Math.max(1, c.h2), {even: true, onSeg: hopper(c, fx, P)});
         hopClear(c);
@@ -1272,19 +1682,22 @@ FLOWS.A = {
     {name: 'DRAM', where: () => ({level: 0}),
       say: c => `Leg 5 of 6 · channel ${c.a.ch} (PA[9]), bank ${c.a.db} (PA[12:10]): ${n('lat_dram_chip')} cycles of the load are the DRAM chip itself`,
       run: async (tok, c) => {
-        const fx = c.fx; hiCells([c.rc, c.hc, c.mc], true); unsay(c);
-        const pc = AP[0].pkg[c.a.ms + ':' + c.a.ch], pk = pkIn(c, fx, {x: c.mc.sx, y: c.mc.sy}, 'var(--c2)', 13);
+        const fx = c.fx; hiCells([c.rc, c.hc, c.mc], true); hiPkg(c.a.ms); unsay(c);
+        const pc = AP[0].pkg[c.a.ms + ':' + c.a.ch], pk = pkIn(c, fx, {x: c.mc.sx, y: c.mc.sy}, 'var(--c2)', 12);
         await travel(tok, fx, pk, [{x: c.mc.sx, y: c.mc.sy}, {x: c.mc.sx, y: pc.y}, pc], 1400);
-        sayAt(c, fx, pc.x, pc.y, [{t: `channel ${c.a.ch}, bank ${c.a.db}`}, {t: `${N.lat_dram_chip.t} cycles in DRAM`, f: 'lat-dram-chip'}], {side: 'd', fs: 22});
+        const east = c.mc.c === 7, lines = [{t: `channel ${c.a.ch}, bank ${c.a.db}`}, {t: `${N.lat_dram_chip.t} cycles in DRAM`, f: 'lat-dram-chip'}];
+        if (east) sayAt(c, fx, DW + 150, pc.y, lines, {side: 'r', fs: 22}); else sayAt(c, fx, pc.x, pc.y, lines, {side: 'd', fs: 22});
       }},
     {name: 'Back', where: () => ({level: 0}),
       say: c => `Leg 6 of 6 · back to shire ${c.rq} through the L3 home: ${cn(c.tot, 'addr.load-model L45', 0)} cycles (${cn(ns(c.tot), 'addr.load-model op-600', 0)} ns) by the model; a typical measured DRAM load takes ${n('lat_dram')} (${n('lat_dram_ns')})`,
       run: async (tok, c) => {
-        const fx = c.fx; hiCells([c.rc, c.hc, c.mc], true); unsay(c);
-        const pc = AP[0].pkg[c.a.ms + ':' + c.a.ch], pk = pkIn(c, fx, pc, 'var(--c2)', 13);
-        const back = [pc, {x: c.mc.sx, y: pc.y}].concat(pts(via(c.mc, c.hc, c.rc)));
-        await travel(tok, fx, pk, back, HOP_MS * (c.h1 + c.h2 + 1), {col: 'var(--c7)', even: true});   // a reply: its colour, not a dash
-        sayAt(c, fx, c.rc.sx, c.rc.sy, [{t: `${fnum(c.tot)} cycles, by the model`, f: 'addr.load-model'}, {t: `${N.lat_dram.t} typical, measured`, f: 'lat-dram-typical'}], {cell: c.rc, side: side(c.rc), fs: 21});
+        const fx = c.fx; hiCells([c.rc, c.hc, c.mc], true); hiPkg(c.a.ms); unsay(c);
+        const pc = AP[0].pkg[c.a.ms + ':' + c.a.ch], pk = pkIn(c, fx, pc, 'var(--c2)', 12);
+        // a reply: its colour and its own lane beside the request's line, not a dash
+        const back = lane([{x: c.mc.sx, y: pc.y}].concat(pts(via(c.mc, c.hc, c.rc))), LANE, pc);
+        await travel(tok, fx, pk, back, HOP_MS * (c.h1 + c.h2 + 1), {col: 'var(--c7)', even: true});
+        quiet(pulse(tok, fx, back[back.length - 1], 900, 'var(--c7)', 34));
+        c.res = bandText(fx, 'The whole load', [{t: `${fnum(c.tot)} cycles`, b: 1, f: 'addr.load-model'}, {t: `by the model, ${fnum(ns(c.tot))} ns`, f: 'addr.load-model op-600'}, {t: `${N.lat_dram.t} typical, measured`, f: 'lat-dram-typical'}]);
         leg(6);
       }},
   ],
@@ -1321,7 +1734,7 @@ FLOWS.B = {
     name: nm, where: () => ({level: 0}), say: c => c.LV[i].say,
     run: async (tok, c) => {
       const fx = c.fx, l = c.LV[i];
-      hiCells([c.rc, c.hc, c.mc], true);
+      hiCells([c.rc, c.hc, c.mc], true); if (l.dram) hiPkg(c.a.ms);
       if (i === 0) pnReveal($('lad'));
       if (!c.ch || c.ch.g.parentNode !== fx) c.ch = bandChart(fx, 'Latency, cycles', c.LV.map(v => ({name: v.sn, val: v.sv, f: 'lat-l1 lat-l2 l3.latency addr.load-model lat-scp-remote'})));
       fx.querySelectorAll(':scope > path.trail').forEach(p => p.remove());
@@ -1330,9 +1743,11 @@ FLOWS.B = {
       const grow = anim(tok, dur, q => { const e = easeS(q); if (bar) bar.style.width = (100 * e * l.cyc / c.max).toFixed(2) + '%'; c.ch.rows[i].set(e * l.cyc / c.max); });
       if (!l.path) await Promise.all([grow, pulse(tok, fx, {x: c.rc.sx, y: c.rc.sy}, Math.max(dur, 900), 'var(--c2)', 20 + 30 * l.cyc / 47)]);
       else {
-        const out = pts(l.path).concat(l.dram ? [{x: c.mc.sx, y: c.pkg.y}, c.pkg, {x: c.mc.sx, y: c.pkg.y}] : []), ret = pts(l.back).slice(1);
-        const pk = packet(fx, 'var(--c2)', 11);
-        await Promise.all([grow, travel(tok, fx, pk, out.concat(ret), dur, {w: 5, even: true})]);
+        const out = pts(l.path).concat(l.dram ? [{x: c.mc.sx, y: c.pkg.y}, c.pkg] : []);
+        const ret = lane((l.dram ? [{x: c.mc.sx, y: c.pkg.y}] : []).concat(pts(l.back)), LANE, out[out.length - 1]);
+        const pk = packet(fx, 'var(--c2)', 11), nO = out.length - 1, nR = ret.length - 1, dO = dur * nO / (nO + nR);
+        const trip = async () => { await travel(tok, fx, pk, out, dO, {w: 5, even: true}); await travel(tok, fx, pk, ret, dur - dO, {w: 5, even: true, col: 'var(--c7)'}); };
+        await Promise.all([grow, trip()]);
         pk.remove();
       }
       if (trk) trk.classList.add('done');
@@ -1361,13 +1776,13 @@ FLOWS.C = {
       [bg, rc2, lt].forEach(e => e && e.remove());
       const pk = packet(fx, 'var(--c2)', 12);
       await travel(tok, fx, pk, pts(route(A, B)), Math.max(1000, 480 * h), {even: true});
-      await travel(tok, fx, pk, pts(route(B, A)), Math.max(1000, 480 * h), {col: 'var(--c7)', even: true});
+      await travel(tok, fx, pk, lane(pts(route(B, A)), LANE, {x: B.sx, y: B.sy}), Math.max(1000, 480 * h), {col: 'var(--c7)', even: true});
       callout(fx, B.sx, B.sy, [{t: `${fnum(cyc)} cycles round trip`, f: 'ts-rt-mesh'}, {t: `${h} ${hopw(h)}, ${fnum(ns(cyc))} ns`, f: 'ts-rt-mesh op-600'}], {cell: B, side: B.c <= 3 ? 'r' : 'l', fs: 21});
     }})),
 };
 
-/* ---- 4. the relay: hand a slab to the next shire, or round-trip it through DRAM. One line of the slab is drawn on
-   its DRAM path, through its L3 home (shire 16) and memory shire 0, as a load goes (fact addr.load-path) ---- */
+/* ---- 4. the relay: hand a block of results to the next shire, or round-trip it through DRAM. One line of it is
+   drawn on its DRAM path, through its L3 home (shire 16) and memory shire 0, as a load goes (fact addr.load-path) ---- */
 FLOWS.D = {
   title: 'Relay',
   cap: () => CAPS.D(),
@@ -1378,37 +1793,69 @@ FLOWS.D = {
     Object.assign(c, {A, B, HOME, mc, pkg, h, direct: pts(directC), bars, emax: V('rl_e_dram'), bmax: V('rl_bw_own'),
       loop: pts(via(A, HOME, mc)).concat([{x: mc.sx, y: pkg.y}, pkg, {x: mc.sx, y: pkg.y}]).concat(pts(via(mc, HOME, B)))});
     flowPanel('D', 'The relay: next shire or DRAM',
-      `<p class="pn-what">A pipeline stage hands its output to the next stage. Through DRAM it writes the slab out and the next shire reads it back, each line through its L3 home and memory shire (one line is drawn, homed in ${src('shire 16, served by memory shire 0', 'l3.home L43 addr.load-path')}); on chip it writes straight into the next shire's scratchpad (shire 0 to shire 1 here, ${cn(h, 'mesh.logical-map', 0)} ${hopw(h)}).</p>`
+      `<p class="pn-what">A pipeline stage hands its output to the next stage. Through DRAM it writes its output out and the next shire reads it back, each line through its L3 home and memory shire (one line is drawn, homed in ${src('shire 16, served by memory shire 0', 'l3.home L43 addr.load-path')}); on chip it writes straight into the next shire's scratchpad (shire 0 to shire 1 here, ${cn(h, 'mesh.logical-map', 0)} ${hopw(h)}).</p>`
       + `<p class="pn-h">Energy per byte (write + read)</p><div class="lad">${bars.map(b => `<div class="nm">${b[0]}</div><div class="tr"><u style="width:${(100 * V(b[1]) / c.emax).toFixed(1)}%;background:color-mix(in srgb,${b[3]} 50%,transparent)"></u><s>${n(b[1], 'pJ/B')}</s></div>`).join('')}</div>`
       + `<p class="pn-h">Bandwidth, ${n('rl_stages')} on ${n('n1024')} minions</p><div class="lad">${bars.map(b => `<div class="nm">${b[0]}</div><div class="tr"><u style="width:${(100 * V(b[2]) / c.bmax).toFixed(1)}%;background:color-mix(in srgb,${b[3]} 50%,transparent)"></u><s>${n(b[2], 'GB/s')}</s></div>`).join('')}</div>`
       + `<p class="pn-what">Next shire against DRAM: ${n('rl_x')} less energy per byte on the three cards, and ${n('rl_speed')} the bandwidth. The dots on the die are drawn at those relative rates.</p>`);
   },
   stages: [
     {name: 'Two ways', where: () => ({level: 0}),
-      say: () => `Two ways to hand a slab to the next shire: straight into its scratchpad, or out to DRAM and back`,
-      run: async (tok, c) => { relayDraw(c); await wait(tok, 900); }},
+      say: () => `Two ways to hand a block of results to the next shire: straight into its scratchpad, or out to DRAM and back`,
+      run: async (tok, c) => { relayDraw(tok, c, 0); await wait(tok, 900); }},
     {name: 'Through DRAM', where: () => ({level: 0}), hold: 0,
       say: () => `Through DRAM: ${n('rl_e_dram')} pJ/B at ${n('rl_bw_dram')} GB/s, every line to its L3 home and memory shire and back`,
-      run: async (tok, c) => { relayDraw(c); relayStream(tok, c, 'dram'); await wait(tok, 7000); }},
+      run: async (tok, c) => { relayDraw(tok, c, 1); relayStream(tok, c, 'dram'); await wait(tok, 7000); }},
     {name: 'To the next shire', where: () => ({level: 0}), hold: 0,
       say: () => `To the next shire: ${n('rl_e_next')} pJ/B at ${n('rl_bw_next')} GB/s, straight into its scratchpad`,
-      run: async (tok, c) => { relayDraw(c); relayStream(tok, c, 'next'); await wait(tok, 7000); }},
+      run: async (tok, c) => { relayDraw(tok, c, 2); relayStream(tok, c, 'next'); await wait(tok, 7000); }},
     {name: 'Side by side', where: () => ({level: 0}),
       say: () => `Next shire: ${n('rl_e_next')} pJ/B at ${n('rl_bw_next')} GB/s · through DRAM: ${n('rl_e_dram')} pJ/B at ${n('rl_bw_dram')} GB/s · ${n('rl_13th')} of the energy`,
-      run: async (tok, c) => { relayDraw(c); relayStream(tok, c, 'both'); await wait(tok, 1e12); }},
+      run: async (tok, c) => { relayDraw(tok, c, 3); relayStream(tok, c, 'both'); await wait(tok, 1e12); }},
   ],
 };
-function relayDraw(c) {
+/* The relay, built up: stage 1 draws the two routes; stage 2 labels the DRAM route and brings in its bars; stage 3 the
+   next shire's; stage 4 both, and the own scratchpad for scale. A counter under the charts counts the blocks each way
+   delivers: side by side, about twelve to one. */
+function relayDraw(tok, c, k) {
   const fx = c.fx;
-  hiCells([c.A, c.B, c.HOME, c.mc], true);
-  if (c.drawn && c.drawn.parentNode === fx) return;
-  const g = c.drawn = E('g', {}, fx);
-  pipe(g, c.direct, 'var(--c3)'); pipe(g, c.loop, 'var(--c2)');
-  callout(g, c.B.sx, c.B.sy, [{t: 'next shire'}, {t: `${N.rl_e_next.t} pJ/B`, f: 'relay-energy'}], {cell: c.B, side: 'r', col: 'var(--c3)', fs: 21});
-  callout(g, c.HOME.sx, c.HOME.sy, [{t: 'through DRAM'}, {t: `${N.rl_e_dram.t} pJ/B`, f: 'relay-energy'}], {cell: c.HOME, side: 'r', col: 'var(--c2)', fs: 21});
-  const ce = bandChart(g, 'pJ per byte', c.bars.map(b => ({name: b[0].replace('in the own', 'own'), val: N[b[1]].t, col: b[3], f: 'relay-energy'})));
-  const cb = bandChart(g, 'GB/s', c.bars.map(b => ({name: b[0].replace('in the own', 'own'), val: N[b[2]].t, col: b[3], f: 'relay-bw'})), {y: ce.bottom + 14});
-  c.bars.forEach((b, i) => { ce.rows[i].set(V(b[1]) / c.emax); cb.rows[i].set(V(b[2]) / c.bmax); });
+  hiCells([c.A, c.B, c.HOME, c.mc], true); hiPkg(c.mc.id);
+  if (!c.drawn || c.drawn.parentNode !== fx) {
+    // the pipes under the streams' packets; the callouts and the charts above them (a group of class co)
+    const g = c.drawn = E('g', {}, fx); fx.insertBefore(g, fx.firstChild);
+    pipe(g, c.direct, 'var(--c3)'); pipe(g, c.loop, 'var(--c2)');
+    c.top = E('g', {class: 'co'}, fx);
+    c.coD = c.coN = c.cnt = c.ce = c.cb = null; c.shown = [false, false, false];
+  }
+  if (k >= 1 && !c.coD) c.coD = callout(c.top, c.HOME.sx, c.HOME.sy, [{t: 'through DRAM'}, {t: `${N.rl_e_dram.t} pJ/B`, f: 'relay-energy'}], {cell: c.HOME, side: 'r', col: 'var(--c2)', fs: 21});
+  if (k >= 2 && !c.coN) c.coN = callout(c.top, c.B.sx, c.B.sy, [{t: 'next shire'}, {t: `${N.rl_e_next.t} pJ/B`, f: 'relay-energy'}], {cell: c.B, side: 'r', col: 'var(--c3)', fs: 21});
+  // the charts hold the rows shown so far (DRAM's, then the next shire's, then the own scratchpad's), drawn again
+  // when a row comes in: the rows already there hold still, the new one fades in and grows
+  const want = [k >= 1, k >= 2, k >= 3].map((w, i) => w || c.shown[i]);
+  if (want.some((w, i) => w !== c.shown[i]) || (k >= 1 && !c.ce)) {
+    const nm = b => b[0].replace('in the own', 'own'), idx = [0, 1, 2].filter(i => want[i]), fresh = idx.filter(i => !c.shown[i]);
+    [c.ce, c.cb].forEach(ch => { if (ch && ch.g.parentNode) ch.g.remove(); });
+    if (c.cnt && c.cnt.g.parentNode) c.cnt.g.remove();
+    const still = !!c.ce;
+    c.ce = bandChart(c.top, 'pJ per byte', idx.map(i => c.bars[i]).map(b => ({name: nm(b), val: N[b[1]].t, col: b[3], f: 'relay-energy'})), {still});
+    c.cb = bandChart(c.top, 'GB/s', idx.map(i => c.bars[i]).map(b => ({name: nm(b), val: N[b[2]].t, col: b[3], f: 'relay-bw'})), {y: c.ce.bottom + 14, still});
+    idx.forEach((i, j) => [[c.ce, V(c.bars[i][1]) / c.emax], [c.cb, V(c.bars[i][2]) / c.bmax]].forEach(([ch, q]) => {
+      const r = ch.rows[j];
+      if (fresh.includes(i) && still) { fadeIn(r.g, 300); quiet(anim(tok, 900, p => r.set(easeS(p) * q))); }
+      else if (fresh.includes(i)) quiet(anim(tok, 900, p => r.set(easeS(p) * q)));
+      else r.set(q);
+    }));
+    want.forEach((w, i) => { c.shown[i] = w; });
+    // the counter: dots delivered to the next shire, each way, as drawn at the measured rates
+    const cg = E('g', {class: 'band'}, c.top), y0 = c.cb.bottom + 8, n0 = c.cnt ? c.cnt.n : {next: 0, dram: 0};
+    T(cg, BAND.x, y0 + 22, 'Dots delivered, as drawn', 't-labb halo');
+    const l1 = T(cg, BAND.x, y0 + 50, '', 't-lab halo'), l2 = T(cg, BAND.x, y0 + 76, '', 't-lab halo');
+    c.cnt = {g: cg, n: n0, show: () => {
+      const q = c.cnt.n, ls = [c.shown[1] ? `next shire: ${q.next}` : null, `through DRAM: ${q.dram}`].filter(Boolean);
+      l1.textContent = ls[0] || ''; l2.textContent = ls[1] || '';
+    }};
+    if (!still) fadeIn(cg);
+  }
+  if (c.cnt) c.cnt.show();
 }
 function relayStream(tok, c, which) {
   if (REDUCED) return;
@@ -1416,13 +1863,14 @@ function relayStream(tok, c, which) {
   Object.values(c.streams).forEach(s => { s.stop = true; });
   const EMIT = 380, SLOW = V('rl_bw_next') / V('rl_bw_dram'), fx = c.fx, t0 = CLK.t, st = {stop: false};
   c.streams[which] = st;
-  const shoot = (P, col, ms) => { const pk = packet(fx, col, 12); quiet(travel(tok, fx, pk, P, ms, {trail: false, linear: true}).then(() => pk.remove(), e => { pk.remove(); throw e; })); };
+  if (c.cnt) { c.cnt.n = {next: 0, dram: 0}; c.cnt.show(); }   // each stage counts from zero
+  const shoot = (P, col, ms, k) => { const pk = packet(fx, col, 12); quiet(travel(tok, fx, pk, P, ms, {trail: false, linear: true}).then(() => { pk.remove(); if (c.cnt && !st.stop) { c.cnt.n[k]++; c.cnt.show(); } }, e => { pk.remove(); throw e; })); };
   let nextD = 0, nextM = 0;
   every(tok, t => {
     if (st.stop) return;
     const dt = t - t0;
-    if (which !== 'dram') while (nextD <= dt) { shoot(c.direct, 'var(--c3)', 260 * c.h); nextD += EMIT; }
-    if (which !== 'next') while (nextM <= dt) { shoot(c.loop, 'var(--c2)', 190 * (c.loop.length - 1)); nextM += EMIT * SLOW; }
+    if (which !== 'dram') while (nextD <= dt) { shoot(c.direct, 'var(--c3)', 700 * c.h, 'next'); nextD += EMIT; }
+    if (which !== 'next') while (nextM <= dt) { shoot(c.loop, 'var(--c2)', 190 * (c.loop.length - 1), 'dram'); nextM += EMIT * SLOW; }
   });
 }
 
@@ -1436,7 +1884,7 @@ FLOWS.E = {
     const LN = [['L1', 'l1'], ['L2', 'l2'], ['own scratchpad', 'sp'], ['scratchpad 2 hops', 'rs'], ['DRAM', 'dr']].map(([nm, k]) => ({nm, k, c: V(p + k + '_c'), r: p + k + '_r', e: p + k + '_e'}));
     Object.assign(c, {rq, far, g, p, LN, SCALE: 0.9, lanes: {}});
     flowPanel('E', g ? 'Gathers (E48)' : 'Scatters (E48)',
-      `<p class="pn-what">Both harts of ${n('n1024')} minions run the ${n('gs_8')} (${g ? 'fgw.ps' : 'its scatter twin, fscw.ps'}) on scattered lines of a table that fits one level: ${src('each visit\'s 64 elements fall on the 64 lines of one 4 KB tile, the tiles walked in scrambled order', 'gs-g-dram-256K gs-s-dram-256K')}. The bars run at the measured cycles per instruction and count the instructions each lane has done.</p>`
+      `<p class="pn-what">Both harts of ${n('n1024')} minions run the ${n('gs_8')} (${g ? 'fgw.ps' : 'its scatter twin, fscw.ps'}) on scattered lines of a table that fits one level: ${src('each visit\'s 64 elements fall on the 64 lines of one 4 KB tile, the tiles walked in scrambled order', 'gs-g-dram-256K gs-s-dram-256K')}. The lanes run at the measured cycles per instruction and count the instructions each has done; the bars are on a log scale, against the leader.</p>`
       + `<div class="pn-act"><button type="button" class="st-btn" data-act="gs" aria-pressed="${g}">Gathers</button><button type="button" class="st-btn" data-act="gs" aria-pressed="${!g}">Scatters</button></div>`
       + `<div class="lad" id="race">${LN.map((l, i) => `<div class="nm">${l.nm}</div><div class="tr" data-i="${i}"><u></u><s></s></div>`).join('')}</div>`
       + `<table class="legs"><thead><tr><th>Table in</th><th class="num">G el./s</th><th class="num">pJ/element</th><th class="num">cycles/instr.</th></tr></thead><tbody>${LN.map((l, i) => `<tr data-leg="${i}" class="todo"><td>${l.nm}</td><td class="num">${n(l.r)}</td><td class="num">${n(l.e)}</td><td class="num">${n(p + l.k + '_c')}</td></tr>`).join('')}</tbody></table>`
@@ -1454,23 +1902,33 @@ function gsStage(tok, c, i) {
   hiCells([c.rq, c.far].concat(Object.values(MSC)), true);
   if (!c.ch || c.ch.g.parentNode !== fx) {
     const SN = {l1: 'L1', l2: 'L2', sp: 'own scratchpad', rs: '2 hops away', dr: 'DRAM'};
-    c.ch = bandChart(fx, g ? 'Gathers done' : 'Scatters done', c.LN.map(l => ({name: SN[l.k], val: '', f: key})), {note: 'count · cycles each'});
-    c.ch.rows.forEach((r, j) => { const y = +r.val.getAttribute('y'); T(c.ch.g, BAND.x + BAND.w - 7, y, N[c.p + c.LN[j].k + '_c'].t, 't-sm halo', 'end', 'gs-' + (g ? 'g' : 's') + '-dram-256K').style.fontSize = '18px'; });
-    callout(fx, c.rq.x + INS, c.rq.y + 30, [{t: `shire 0 ${g ? 'gathers' : 'scatters'}`}, {t: `L1: ${N[c.p + 'l1_r'].t} G el./s`, f: key}], {side: 'l', fs: 21});   // left of shire 0: the die's empty corner and the margin
+    c.ch = bandChart(fx, g ? 'Gathers done' : 'Scatters done', c.LN.map(l => ({name: SN[l.k], val: '', f: key})), {note: 'done (log scale) · cycles each'});
+    c.ch.rows.forEach((r, j) => { const y = +r.val.getAttribute('y'); T(r.g, BAND.x + BAND.w - 7, y, `${N[c.p + c.LN[j].k + '_c'].t} cyc`, 't-sm', 'end', 'gs-' + (g ? 'g' : 's') + '-dram-256K').style.fill = 'var(--ink)'; });
     c.trs = c.LN.map((l, j) => document.querySelector(`#race .tr[data-i="${j}"]`));
     c.toRq = g ? pts(route(c.far, c.rq)) : pts(route(c.rq, c.far));
     pnReveal($('race'));
+    // A count race on a log scale: each running lane's bar is log(1 + done) against the leader's, so a lane a hundred
+    // times slower still shows (no bar restarts with every instruction). A lane drawn while paused shows its speed
+    // instead, dimmed: the same log scale of instructions per unit time, the fastest lane full.
+    const cmin = Math.min(...c.LN.map(l => l.c)), cmax = Math.max(...c.LN.map(l => l.c)), spd = l => Math.log10(10 * cmax / l.c) / Math.log10(10 * cmax / cmin);
     every(tok, t => {
-      Object.keys(c.lanes).forEach(jj => {
-        const j = +jj, l = c.LN[j], tr = c.trs[j];
+      const ks = Object.keys(c.lanes).map(Number), done = {};
+      ks.forEach(j => {
         if (c.lanes[j] === null && CLK.on && !REDUCED) c.lanes[j] = t;   // drawn while paused: it starts with the clock
-        const still = REDUCED || c.lanes[j] === null;
-        const dur = l.c * c.SCALE, dt = still ? 0 : t - c.lanes[j], done = Math.floor(dt / dur), fr = (dt % dur) / dur;
-        c.ch.rows[j].set(still ? 1 : fr); c.ch.rows[j].val.textContent = still ? '' : fnum(done, 0);
-        if (tr) { tr.querySelector('u').style.width = (100 * (still ? 1 : fr)).toFixed(1) + '%'; tr.querySelector('s').textContent = still ? `${N[c.p + l.k + '_c'].t} cycles each` : `${fnum(done, 0)} done`; }
+        done[j] = REDUCED || c.lanes[j] === null ? null : Math.floor((t - c.lanes[j]) / (c.LN[j].c * c.SCALE));
+      });
+      const lead = Math.max(1, ...ks.map(j => done[j] || 0));
+      ks.forEach(j => {
+        const l = c.LN[j], tr = c.trs[j], still = done[j] === null, q = still ? spd(l) : Math.log10(1 + done[j]) / Math.log10(1 + lead);
+        c.ch.rows[j].set(q); c.ch.rows[j].bar.style.opacity = still ? 0.4 : '';
+        c.ch.rows[j].val.textContent = still ? '' : `${fnum(done[j], 0)} done`;
+        if (tr) { const u = tr.querySelector('u'); u.style.width = (100 * q).toFixed(1) + '%'; u.style.opacity = still ? 0.4 : ''; tr.querySelector('s').textContent = still ? `${N[c.p + l.k + '_c'].t} cycles each` : `${fnum(done[j], 0)} done`; }
       });
     });
   }
+  // the stage's level is the chart's marked row (the caption has its numbers); the partner two hops away is named
+  c.ch.rows.forEach((r, j) => { const on = i < 5 && j === i; r.nm.style.fontWeight = on ? '700' : ''; r.nm.style.fill = on ? 'var(--ink)' : ''; });
+  if (i >= 3 && (!c.farTag || c.farTag.parentNode !== fx)) c.farTag = callout(fx, c.far.sx, c.far.sy, [{t: `shire ${c.far.id}: 2 hops`, f: 'mesh.logical-map'}], {cell: c.far, side: side(c.far), fs: 20, col: 'var(--c4)'});
   const now = CLK.on ? CLK.t : null;
   if (i < 5) c.lanes[i] = now;
   else c.LN.forEach((l, j) => { c.lanes[j] = now; });   // the race: every lane from the same moment
@@ -1501,7 +1959,7 @@ FLOWS.F = {
         ['into DRAM', `lines rotate over the ${n('ms8')} memory shires (PA[8:6]); the path from the PCIe shire is not established`, '', ''],
         ['launch', `an empty kernel on ${n('cshires')} shires: ${n('pcie_b2b', 'µs')} each when queued, the card's own cost; one launch waited for takes ${n('pcie_launch', 'µs')}, the extra ${n('pcie_wait_rng')} mostly the runtime's ${n('poll500')} idle poll`, '', ''],
         ['small copies', `a lone 4 KB copy: ${n('pcie_4k', 'µs')}, the runtime's polling (${n('poll50')} in flight, ${n('poll500')} idle)`, '', ''],
-      ]).replace('<th class="num">cycles</th><th class="num">pJ/B</th>', '<th class="num"></th><th class="num"></th>')
+      ])
       + `<p class="pn-what small">Values are per card: aifoundry2 / aifoundry3 / aifoundry1 card 1, where three are given.</p>`);
   },
   stages: [
@@ -1538,16 +1996,18 @@ FLOWS.F = {
         if (c.ch && c.ch.g.parentNode) c.ch.g.remove();
         const legs1 = [];
         for (let m = 0; m < 8; m++) {
-          const mc = MSC[m], pkg = AP[0].pkg[m + ':' + (m % 2)], pk = packet(fx, 'var(--c3)', 10);
-          legs1.push(quiet(travel(tok, fx, pk, pts(route(c.pc, mc)).concat([{x: mc.sx, y: pkg.y}, pkg]), 2600, {col: 'var(--c3)', w: 5, dash: true})));
+          // inferred paths (dashed), kept a quiet suggestion under the text: thin, faint, small packets
+          const mc = MSC[m], pkg = AP[0].pkg[m + ':' + (m % 2)], pk = packet(fx, 'var(--c3)', 8);
+          legs1.push(quiet(travel(tok, fx, pk, pts(route(c.pc, mc)).concat([{x: mc.sx, y: pkg.y}, pkg]), 2600, {col: 'var(--c3)', w: 3, op: 0.5, dash: '6 8'})));
           await wait(tok, 200);
         }
         await Promise.all(legs1);
       }},
     {name: 'Launch', where: () => ({level: 0}),
-      say: () => `The launch goes to the master shire (${n('master_id')}), whose firmware starts the ${n('cshires')} compute shires: queued, an empty kernel costs the card ${n('pcie_b2b_rng')}; waited for, ${n('pcie_launch_rng')}, most of it the host's ${n('poll500')} idle poll`,
+      say: () => `The master shire (${n('master_id')}) starts the kernel on all ${n('cshires')} shires: ${n('pcie_b2b_rng')} each when queued; ${n('pcie_launch_rng')} when waited for, mostly the host's ${n('poll500')} poll`,
       run: async (tok, c) => {
         const fx = c.fx; hiCells([c.master, c.pc], true); unsay(c);
+        if (c.hs) Object.values(c.hs).forEach(h => { h.stop = true; });   // the copies are done: the launch alone
         await travel(tok, fx, packet(fx, 'var(--c7)', 12), AP[0].host.slice(0, 2).concat(pts(route(c.pc, c.master))), 2200, {col: 'var(--c7)'});
         hiCells(Object.values(SH));
         const ps = Object.values(SH).map(x => pulse(tok, fx, {x: x.sx, y: x.sy}, 1500, 'var(--c1)', 40));
@@ -1556,9 +2016,13 @@ FLOWS.F = {
         c.bt = bandText(fx, 'An empty kernel', [{t: 'queued, each:'}, {t: N.pcie_b2b_rng.t, b: 1, f: 'pcie.launch'}, {t: "the card's own cost"}, {t: 'one, waited for:'}, {t: N.pcie_launch_rng.t, b: 1, f: 'pcie.launch'}, {t: 'mostly host polling', f: 'pcie.poll'}], 90);
       }},
     {name: 'Small copies', where: () => ({level: 0}),
-      say: () => `A lone 4 KB copy takes ${n('pcie_4k', 'µs')}: the runtime's thread polls for completions every ${n('poll50')} while commands are in flight and every ${n('poll500')} when none are, so small copies wait on the host, not the link`,
+      say: () => `A lone 4 KB copy takes ${n('pcie_4k_rng')}: it waits on the host's poll (every ${n('poll50')} busy, ${n('poll500')} idle), not on the link`,
       run: async (tok, c) => {
-        const fx = c.fx; hiCells([c.pc], true); unsay(c);
+        const fx = c.fx; unsay(c);
+        if (c.hs) Object.values(c.hs).forEach(h => { h.stop = true; });
+        // the launch and the DRAM paths go: only the host link and the polling stay
+        [...fx.children].forEach(el => { if (el !== c.bt) fadeOut(el, 320); });
+        clearDim(); hiCells([c.pc], true);
         const hb = AP[0].hostBox, hc = {x: hb.x + hb.w / 2, y: hb.y + 24};
         const pk = packet(fx, 'var(--c4)', 9);
         await travel(tok, fx, pk, AP[0].host, 900, {trail: false});
@@ -1610,24 +2074,25 @@ function scpSlots(c, fx) {
   c.slots = {g, cells, at: i => ({x: b.x + (i % cols) * w + w / 2, y: b.y + Math.floor(i / cols) * h + h / 2})};
   return c.slots;
 }
-async function streamRows(tok, c, fx, from, dest, ms, col, fill) {
+async function streamRows(tok, c, fx, from, dest, ms, col, fill, via) {
   const ps = [];
   for (let r = 0; r < 16; r++) {
     const pk = packet(fx, col, 6), to = dest(r);
-    const p = travel(tok, fx, pk, [from, to], ms, {trail: false}).then(() => { pk.remove(); fill(r); }, e => { pk.remove(); throw e; });
+    const p = travel(tok, fx, pk, [from].concat(via ? via(to) : [], [to]), ms, {trail: false}).then(() => { pk.remove(); fill(r); }, e => { pk.remove(); throw e; });
     p.catch(() => {});   // handled: a stage cancelled mid-loop leaves the rows already sent without a waiter
     ps.push(p);
     await wait(tok, 110);
   }
   await Promise.all(ps);
 }
-/* a note in the minion view, over hart 1's register grid (hart 1 issues no tensor instruction in flows 7 and 8): it
-   covers no title or label */
-const NOTE_AT = () => ({x: MF.x + 184, y: MF.y + 452});
+/* a note in the minion view, at the right end of the frame's header (the harts' numbers there are hidden while it
+   shows, CSS .m-harts): it covers no drawn part */
+const NOTE_AT = () => ({x: MF.x + MF.w - 20, y: MF.y + 7});
 function note(c, fx, lines, col) {
   if (c.cnt && c.cnt.parentNode) c.cnt.remove();
   const p = NOTE_AT();
-  c.cnt = callout(fx, p.x, p.y, lines, {side: 'c', fs: 19, col: col || 'var(--c7)'});
+  c.cnt = callout(fx, p.x, p.y, lines, {tr: true, fs: 18, col: col || 'var(--c7)'});
+  c.cnt.classList.add('note');
   return c.cnt;
 }
 async function flashLanes(tok, ms, rows) {
@@ -1645,14 +2110,14 @@ FLOWS.G = {
     flowPanel('G', 'A matmul on the tensor unit',
       `<p class="pn-what">One 16×16×16 fp32 step of a matmul, as the benchmark that sustains ${n('tflops')} TFLOP/s runs it on every minion: hart 0 loads a tile of A (16 lines, 1 KB) into the L1 scratchpad, streams B through TenB, and issues TensorFMA, which the vector unit's lanes run. The next A loads while the FMA runs.</p>`
       + legRows([
-        ['TensorLoad A', `16 lines from the L2: ${n('tl_l2')} cycles (three cards)`, n('tl_l2'), ''],
+        ['TensorLoad A', '16 lines from the L2, three cards', n('tl_l2'), ''],
         ['B through TenB', 'streamed with a paired load, into TenB', '', ''],
-        ['TensorFMA', `with B in TenB: ${n('tfma_tenb')} cycles (${n('tfma546')} with B in the L1 scratchpad)`, n('tfma_tenb'), ''],
-        ['the next A', `loaded during the FMA: ${n('mm_op')} cycles per op, no more than the FMA`, n('mm_op'), ''],
-        ['32 minions', `every minion of the shire, from its L2; all ${n('n1024')} loading: ${n('tl_all_l2')} cycles per load`, '', ''],
+        ['TensorFMA', `with B in TenB (${n('tfma546')} with B in the L1 scratchpad)`, n('tfma_tenb'), ''],
+        ['the next A', 'loaded during the FMA: an op takes no longer than the FMA', n('mm_op'), ''],
+        ['32 minions', `each loads from the shire's L2; the cycles with all ${n('n1024')} loading`, n('tl_all_l2'), ''],
         ['1,024 minions', `${n('tflops')} TFLOP/s fp32, against a peak of ${n('peak_tf32')}`, '', ''],
-        ['fed from DRAM', `tiles in DRAM: ${n('mm_dram_tf')} TFLOP/s; a 16-line load with all minions loading: ${n('tl_all_dr')} cycles`, n('mm_dram_op'), ''],
-      ]).replace('<th class="num">pJ/B</th>', '<th class="num"></th>')
+        ['fed from DRAM', `${n('mm_dram_tf')} TFLOP/s; a load with all loading: ${n('tl_all_dr')} cycles; per op:`, n('mm_dram_op'), ''],
+      ])
       + `<p class="pn-what small">Whether the loads hide behind the FMA was measured by the benchmark's own rate: it reloads A before every FMA and still runs at the FMA's speed. A version that waits for each load was never run.</p>`);
   },
   stages: [
@@ -1663,7 +2128,7 @@ FLOWS.G = {
         const P2 = AP[2], fx = c.fx, sl = scpSlots(c, fx);
         note(c, fx, [{t: 'TensorLoad A: 16 lines'}]);
         await pulse(tok, fx, P2.hart0, 900, 'var(--c2)', 40);
-        await streamRows(tok, c, fx, P2.etl, r => sl.at(r), 1200, 'var(--c7)', r => { sl.cells[r].style.fillOpacity = 0.75; });
+        await streamRows(tok, c, fx, P2.etlPort, r => sl.at(r), 1200, 'var(--c7)', r => { sl.cells[r].style.fillOpacity = 0.75; });
         note(c, fx, [{t: 'A in the L1 scratchpad'}, {t: `${N.tl_l2.t} cycles from the L2`, f: 'tl.one'}]);
       }},
     {name: 'B via TenB', where: c => ({level: 2, sid: c.sid, nb: c.nb, mi: c.mi}),
@@ -1671,10 +2136,13 @@ FLOWS.G = {
       say: () => `A paired TensorLoad streams the 16 rows of B into TenB, next to the lanes; the benchmark does this for every op`,
       run: async (tok, c) => {
         const P2 = AP[2], fx = c.fx, tb = P2.tenb, sl = scpSlots(c, fx); sl.cells.slice(0, 16).forEach(r => { r.style.fillOpacity = 0.75; });
-        const rx0 = tb.x + tb.w - 64, cw = 14, rh = 17, cell = r => ({x: rx0 + (r % 4) * cw, y: tb.y + 8 + Math.floor(r / 4) * rh});   // a 4 x 4 block right of TenB's labels
+        const cw = 13, rh = 17, rx0 = tb.x + tb.w - 4 * cw - 5, cell = r => ({x: rx0 + (r % 4) * cw, y: tb.y + 9 + Math.floor(r / 4) * rh});   // a 4 x 4 block right of TenB's labels
         if (!c.tbRows || c.tbRows[0].parentNode !== fx) c.tbRows = Array.from({length: 16}, (_, r) => S(E('rect', {x: cell(r).x, y: cell(r).y, width: cw - 3, height: rh - 3, rx: 2}, fx), {fill: 'var(--c2)', fillOpacity: 0}));
         note(c, fx, [{t: 'B: 16 rows through TenB'}]);
-        await streamRows(tok, c, fx, P2.etl, r => ({x: cell(r).x + cw / 2, y: cell(r).y + rh / 2}), 1100, 'var(--c2)', r => { c.tbRows[r].style.fillOpacity = 0.8; });
+        // out of the port to the frame's right gutter, up it, and in above TenB: over no text
+        const gR = MF.x + MF.w - 12, gT = MF.y + 274;
+        await streamRows(tok, c, fx, P2.etl, r => ({x: cell(r).x + cw / 2, y: cell(r).y + rh / 2}), 1500, 'var(--c2)', r => { c.tbRows[r].style.fillOpacity = 0.8; },
+          to => [{x: gR, y: P2.etl.y}, {x: gR, y: gT}, {x: to.x, y: gT}]);
       }},
     {name: 'TensorFMA', where: c => ({level: 2, sid: c.sid, nb: c.nb, mi: c.mi}),
       mark: () => [{t: `TensorFMA: ${N.tfma_tenb.t} cycles`, f: 'tfma.tenb'}],
@@ -1693,7 +2161,7 @@ FLOWS.G = {
         const P2 = AP[2], fx = c.fx, sl = scpSlots(c, fx); unsay(c);
         sl.cells.slice(0, 16).forEach(r => { r.style.fillOpacity = 0.75; });
         note(c, fx, [{t: 'next A loads during the FMA'}]);
-        await Promise.all([flashLanes(tok, 4600, [0]), streamRows(tok, c, fx, P2.etl, r => sl.at(16 + r), 1200, 'var(--c7)', r => { sl.cells[16 + r].style.fillOpacity = 0.45; })]);
+        await Promise.all([flashLanes(tok, 4600, [0]), streamRows(tok, c, fx, P2.etlPort, r => sl.at(16 + r), 1200, 'var(--c7)', r => { sl.cells[16 + r].style.fillOpacity = 0.45; })]);
         note(c, fx, [{t: `${N.mm_op.t} cycles per op`, f: 'mm.reload'}, {t: 'the load is hidden'}]);
       }},
     {name: '32 minions', where: c => ({level: 1, sid: c.sid}),
@@ -1705,21 +2173,27 @@ FLOWS.G = {
           at(pk, B); return wait(tok, (i % 8) * 90).then(() => travel(tok, fx, pk, [B, {x: B.x, y: P1.xbarY}, {x: P1['ch' + k[0]].x, y: P1.xbarY}, q], 1500, {trail: false})).then(() => pk.remove(), e => { pk.remove(); throw e; }); });
         await Promise.all(ps);
         await Promise.all(keys.map(k => { const m = P1.min[k]; return pulse(tok, fx, {x: m.x + m.w / 2, y: m.y + m.h / 2}, 1300, 'var(--c2)', 26); }));
+        // every minion stays lit: all 32 have their tiles (a glow inside each box, under its name)
+        keys.forEach(k => { const g = P1.minG[k], sh = g && g.querySelector('.shape'), m = P1.min[k]; if (!sh) return;
+          const r = S(E('rect', {class: 'glow', x: m.x + 3, y: m.y + 3, width: m.w - 6, height: m.h - 6, rx: 4, 'pointer-events': 'none'}, g), {fill: 'var(--c2)', fillOpacity: isDark() ? 0.42 : 0.3});
+          g.insertBefore(r, sh.nextSibling); fadeIn(r, 400); });
         sayAt(c, fx, SF.x + SF.w, SF.y + 250, [{t: '32 minions, each its own tiles'}, {t: `all 1,024 loading: ${N.tl_all_l2.t} cycles`, f: 'tl.all'}, {t: 'per 16-line load from the L2'}], {side: 'r', fs: 20});
       }},
-    {name: '1,024 minions', where: () => ({level: 0}),
+    {name: '1,024 minions', where: () => ({level: 0}), dim: false,
       say: () => `All ${n('n1024')} minions: ${n('tflops')} TFLOP/s fp32 on all three cards, against a peak of ${n('peak_tf32')} at ${n('mhz')}`,
       run: async (tok, c) => {
         const fx = c.fx; hiCells(Object.values(SH), false);
-        glowTiles(tok, fx, 1, 'var(--c2)');
+        c.glow = glowTiles(tok, fx, 1, 'var(--c2)'); c.glowFx = fx;
         await wait(tok, 900);
-        callout(fx, DW / 2, DH / 2, [{t: `${N.tflops.t} TFLOP/s fp32`, f: 'mm-rate'}, {t: `peak ${N.peak_tf32.t}`, f: 'mm-peak'}, {t: `${N.mm_op.t} cycles per op`, f: 'mm.reload'}], {side: 'u', fs: 24});
+        c.co6 = callout(fx, DW / 2, DH / 2, [{t: `${N.tflops.t} TFLOP/s fp32`, f: 'mm-rate'}, {t: `peak ${N.peak_tf32.t}`, f: 'mm-peak'}, {t: `${N.mm_op.t} cycles per op`, f: 'mm.reload'}], {side: 'u', fs: 24});
       }},
     {name: 'From DRAM', where: () => ({level: 0}),
       say: () => `Tiles too big for the L2: every load comes from DRAM, ${n('tl_all_dr')} cycles per 16-line load with all minions loading, and the matmul falls to ${n('mm_dram_tf')} TFLOP/s`,
       run: async (tok, c) => {
         const fx = c.fx; hiCells(Object.values(SH).concat(Object.values(MSC)), true);
-        glowTiles(tok, fx, 0.12, 'var(--c2)');
+        // the rate falls: stage 6's callout goes and its glow dims where it is (no second glow on top)
+        if (c.co6) { fadeOut(c.co6); c.co6 = null; }
+        if (c.glow && c.glowFx === fx) c.glow.amp = 0.12; else { c.glow = glowTiles(tok, fx, 0.12, 'var(--c2)'); c.glowFx = fx; }
         if (!REDUCED) {
           const t0 = CLK.t; let nx = 0;
           // each line from its memory shire through its L3 home to the loading shire, as an L2 miss returns (fact sc.l3-miss)
@@ -1750,12 +2224,12 @@ const wAmp = k => (V(k) - V('w_idle')) / (V('w_randn') - V('w_idle'));
 function raceChart(tok, c, rows, title) {
   const fx = c.fx, g = E('g', {class: 'band'}, fx), X0 = BAND.x, W = BAND.w, TMAX = 602, SPEED = 50;   // s of card time per s shown
   T(g, X0, BAND.y + 22, title, 't-labb halo');
-  T(g, X0, BAND.y + 46, 'time to 90 °C;', 't-sm halo'); T(g, X0, BAND.y + 66, `1 s here is ${SPEED} s`, 't-sm halo');
+  T2(g, X0, BAND.y + 46, ['time to 90 °C;', `1 s here is ${SPEED} s`], 't-sm halo');
   const bars = rows.map((r, i) => {
     const y = BAND.y + 80 + i * 64;
-    T(g, X0, y + 18, r.name, 't-lab halo', 'start', r.f).style.fontSize = '19px';
-    S(E('rect', {x: X0, y: y + 25, width: W, height: 26, rx: 5}, g), {fill: 'var(--grid)'});
-    const bar = S(E('rect', {x: X0, y: y + 25, width: 0, height: 26, rx: 5}, g), {fill: `color-mix(in srgb, ${r.col} 60%, transparent)`});
+    T(g, X0, y + 18, r.name, 't-lab halo', 'start', r.f);
+    E('rect', {class: 'btrack', x: X0, y: y + 25, width: W, height: 26, rx: 5}, g);
+    const bar = S(E('rect', {class: 'bbar', x: X0, y: y + 25, width: 0, height: 26, rx: 5}, g), {fill: r.col});
     const lab = T(g, X0 + 6, y + 44, '', 't-labb', 'start', r.f);
     return {bar, lab, r};
   });
@@ -1781,20 +2255,21 @@ FLOWS.H = {
         ['random', `${n('w_randn', 'W')}, from ${n('w_idle', 'W')} idle`, '', ''],
         ['why', `bits that flip: ${n('e_mac32')} pJ per fp32 multiply-add on random data, ${n('e_mac32z')} on zeros, above idle`, '', ''],
         ['three cards', `above zeros: ones ${n('w_ones_d', 'W')}, random ${n('w_rand_d', 'W')}`, '', ''],
-        ['the heat race', `80 to 90 °C: random ${n('race_rand', 's')}, ones ${n('race_ones', 's')}, zeros never (${n('race_zero', 's')} runs)`, '', ''],
+        ['the heat race', `from ${n('race_t0')} to 90 °C: random ${n('race_rand', 's')}, ones ${n('race_ones', 's')}, zeros never (${n('race_zero', 's')} runs)`, '', ''],
         ['fewer minions', `random data on 768 minions: ${n('race_768', 's')}; on 128: ${n('race_128')}`, '', ''],
-      ]).replace('<th class="num">cycles</th><th class="num">pJ/B</th>', '<th class="num"></th><th class="num"></th>')
+      ])
       + `<p class="pn-what small">The watts and the heat race are aifoundry2's (the heat race on one card only); the differences above zeros are on all three cards. A hotter die also leaks more: ${n('leak80')} at 80 °C.</p>`);
   },
   stages: [
-    ...WPAT.map(([nm, k], i) => ({name: nm[0].toUpperCase() + nm.slice(1), where: () => ({level: 0}),
+    ...WPAT.map(([nm, k], i) => ({name: nm[0].toUpperCase() + nm.slice(1), where: () => ({level: 0}), dim: false,
       say: () => i === 0 ? `Zeros: ${n('w_zeros', 'W')} at the board (at the launch temperature), hardly above the ${n('w_idle', 'W')} idle, at ${n('w_tflops')} TFLOP/s`
         : i === 1 ? `Ones: ${n('w_ones', 'W')}, the same ${n('w_tflops')} TFLOP/s` : `Random data: ${n('w_randn', 'W')}, the same instructions and the same ${n('w_tflops')} TFLOP/s`,
       run: async (tok, c) => {
         const fx = c.fx;
         if (c.glow && c.glowFx === fx) c.glow.amp = wAmp(k); else { c.glow = glowTiles(tok, fx, wAmp(k), 'var(--c2)'); c.glowFx = fx; }
         wattChart(c, i + 1);
-        if (i === 0) callout(fx, DW / 2, DH + 10, [{t: `${N.w_tflops.t} TFLOP/s on every data set`, f: 'mm.w-data'}], {side: 'u', fs: 21});
+        // under the chart's three rows (it grows by a row a stage), in the band column: it covers no tile
+        if (i === 0) c.coT = callout(fx, BAND.x, BAND.y + 30 + 52 + 3 * 68 + 18, [{t: `${N.w_tflops.t} TFLOP/s`, f: 'mm.w-data'}, {t: 'on every data set'}], {tl: true, fs: 21});
         await wait(tok, 1500);
       }})),
     {name: 'Why: bits flip', where: c => ({level: 2, sid: c.sid, nb: 0, mi: 0}),
@@ -1813,28 +2288,31 @@ FLOWS.H = {
         } finally { cells.forEach((r, i) => { r.style.fillOpacity = orig[i]; }); }
         note(c, fx, [{t: `${N.e_mac32.t} pJ per MAC, random`, f: 'e-tfma-fp32'}, {t: `${N.e_mac32z.t} pJ on zeros`, f: 'e-tfma-fp32-zeros'}], 'var(--c2)');
       }},
-    {name: 'Three cards', where: () => ({level: 0}),
+    {name: 'Three cards', where: () => ({level: 0}), dim: false,
       say: () => `On all three cards: ones cost ${n('w_ones_d', 'W')} more than zeros and random data ${n('w_rand_d', 'W')} more, at the board`,
       run: async (tok, c) => {
         const fx = c.fx; if (c.wc && c.wc.g.parentNode) c.wc.g.remove(); c.wcN = 0;
-        c.glow = glowTiles(tok, fx, 1, 'var(--c2)'); c.glowFx = fx;
-        const rows = [['random, a2', 'w_rd_a2'], ['random, a3', 'w_rd_a3'], ['random, a1c1', 'w_rd_a1'], ['ones, a2', 'w_od_a2'], ['ones, a3', 'w_od_a3'], ['ones, a1c1', 'w_od_a1']];
-        const ch = bandChart(fx, 'W above zeros', rows.map(r => ({name: r[0], val: N[r[1]].t, f: 'mm.w-3cards', col: r[0].startsWith('r') ? 'var(--c2)' : 'var(--c4)'})), {y: 10});
-        await anim(tok, 1600, q => ch.rows.forEach((r, i) => r.set(easeS(q) * V(rows[i][1]) / 30)));
+        if (c.coT) { fadeOut(c.coT); c.coT = null; }
+        if (c.glow && c.glowFx === fx) c.glow.amp = 1; else { c.glow = glowTiles(tok, fx, 1, 'var(--c2)'); c.glowFx = fx; }
+        // grouped by card (CARDNAME): ones and random data side by side, keyed once
+        const G = [['a2', 'w_od_a2', 'w_rd_a2'], ['a3', 'w_od_a3', 'w_rd_a3'], ['a1c1', 'w_od_a1', 'w_rd_a1']];
+        const ch = bandGroups(fx, 'Watts above zeros', [{name: 'ones', col: 'var(--c4)'}, {name: 'random', col: 'var(--c2)'}],
+          G.map(([cd, ko, kr]) => ({name: CARDNAME[cd], vals: [ko, kr].map(k => ({t: `${N[k].t} W`, f: 'mm.w-3cards', q: V(k) / 30}))})), {y: 30});
+        await anim(tok, 1600, q => ch.bars.forEach(b => b.set(easeS(q) * b.q)));
       }},
-    {name: 'The heat race', where: () => ({level: 0}),
-      say: () => `The heat race on aifoundry2, from 80 °C to the 90 °C cap: random data gets there in ${n('race_rand', 's')}, ones in ${n('race_ones', 's')}, zeros never in a ${n('race_zero', 's')} run`,
+    {name: 'The heat race', where: () => ({level: 0}), dim: false,
+      say: () => `The heat race on aifoundry2, from ${n('race_t0')} to the 90 °C cap: random data gets there in ${n('race_rand', 's')}, ones in ${n('race_ones', 's')}, zeros never in a ${n('race_zero', 's')} run`,
       run: async (tok, c) => {
-        const fx = c.fx; fx.textContent = ''; c.glow = null; c.wc = null;
+        const fx = c.fx; fx.textContent = ''; clearGlow(); c.glow = null; c.wc = null; c.coT = null;
         const warm = glowTiles(tok, fx, 0.2, 'var(--c2)');
         const rows = [{name: 'random', cap: V('race_rand'), txt: N.race_rand.t, f: 'heat.race', col: 'var(--c2)'}, {name: 'ones', cap: V('race_ones'), txt: N.race_ones.t, f: 'heat.race', col: 'var(--c4)'}, {name: 'zeros', cap: null, txt: `never, ${N.race_zero.t} s`, f: 'heat.race', col: 'var(--c1)'}];
         const t0 = CLK.t; if (REDUCED) warm.amp = 1; else every(tok, t => { warm.amp = Math.min(1, 0.2 + (t - t0) / 1600); });
         await raceChart(tok, c, rows, 'All 1,024 minions');
       }},
-    {name: 'Fewer minions', where: () => ({level: 0}),
+    {name: 'Fewer minions', where: () => ({level: 0}), dim: false,
       say: () => `Random data on fewer minions per shire buys time: 768 minions ${n('race_768', 's')}, 512 ${n('race_512', 's')}, 384 ${n('race_384', 's')}, 256 ${n('race_256', 's')}, and 128 never`,
       run: async (tok, c) => {
-        const fx = c.fx; fx.textContent = '';
+        const fx = c.fx; fx.textContent = ''; clearGlow(); c.glow = null; c.coT = null;
         glowTiles(tok, fx, 0.55, 'var(--c2)');
         const rows = [['768', 'race_768'], ['512', 'race_512'], ['384', 'race_384'], ['256', 'race_256'], ['128', 'race_128']].map(([m, k]) => ({name: `${m} minions`, cap: N[k].t === 'never' ? null : V(k), txt: N[k].t === 'never' ? `never, ${N.race_zero.t} s` : N[k].t, f: 'heat.fewer', col: 'var(--c2)'}));
         await raceChart(tok, c, rows, 'Random data');
@@ -1857,7 +2335,7 @@ FLOWS.I = {
         ['21 requesters', `21 minions of one other shire hammer a word in the host: the host keeps ${n('hot21')}% of its rate`, '', ''],
         ['22 requesters', `the host stops: ${n('hot22')}`, '', ''],
         ['spread it', `over 32 lines, one per shire: ${n('hot031')} per atomic, ${n('hot1919')}, ${n('hot32x')}; ${n('hot_nj')} against ${n('hot_nj_s')} each, ${n('hot17x')}`, '', ''],
-      ]).replace('<th class="num">cycles</th><th class="num">pJ/B</th>', '<th class="num"></th><th class="num"></th>')
+      ])
       + `<p class="pn-what small">Values are aifoundry2 / aifoundry3 / aifoundry1 card 1 where three are given.</p>`);
   },
   stages: [
@@ -1865,16 +2343,18 @@ FLOWS.I = {
       say: () => `Every minion hammers one global atomic in shire 0: its bank retires one every ${n('hot10')}, about ${n('hot60')} for the whole chip`,
       run: async (tok, c) => {
         const fx = c.fx; hiCells([c.host], true);
-        callout(fx, c.host.sx, c.host.sy, [{t: 'one line in shire 0'}, {t: `an atomic every ${N.hot10.t}`, f: 'hot-cost'}], {cell: c.host, side: 'r', fs: 21});
+        // right of the die, under the host: the packets converge on shire 0 under no text
+        c.co1 = callout(fx, VB.x + VB.w - 4, 26, [{t: 'one line in shire 0'}, {t: `an atomic every ${N.hot10.t}`, f: 'hot-cost'}], {tr: true, fs: 21});
         hotStream(tok, c, Object.values(SH).filter(s => s !== c.host), () => c.host, 150);
         await wait(tok, 6500);
       }},
-    {name: 'Fair shares', where: () => ({level: 0}),
+    {name: 'Fair shares', where: () => ({level: 0}), dim: false,
       say: () => `The atomic is fair: with all 32 shires at it, the host shire gets ${n('hot_host')} of an even share and the lowest shire ${n('hot_min')}`,
       run: async (tok, c) => {
         const fx = c.fx; hiCells(Object.values(SH), false);
         if (!c.hs1) hotStream(tok, c, Object.values(SH).filter(s => s !== c.host), () => c.host, 150);
-        const ch = bandChart(fx, 'Shares', [{name: 'host shire', val: N.hot_host_rng.t, f: 'hot.fair'}, {name: 'lowest shire', val: N.hot_min_rng.t, f: 'hot.fair'}], {note: '1 = even, three cards'});
+        const b = c.co1 && c.co1.parentNode === fx ? c.co1._box : null;
+        const ch = c.shares = bandChart(fx, 'Shares', [{name: 'host shire', val: N.hot_host_rng.t, f: 'hot.fair'}, {name: 'lowest shire', val: N.hot_min_rng.t, f: 'hot.fair'}], {note: '1 = even, three cards', y: b ? b.y + b.h + 16 : BAND.y + 90});
         ch.rows[0].set(V('hot_host') / 1.2); ch.rows[1].set(V('hot_min') / 1.2);
         await wait(tok, 1200);
       }},
@@ -1890,20 +2370,21 @@ FLOWS.I = {
       mark: () => [{t: `22: ${N.hot22.t}`, f: 'hot.cliff'}],
       say: () => `22 requesters: the bank's queue is full, and the host shire's own loads stop: ${n('hot22')} of its rate`,
       run: async (tok, c) => {
-        const fx = c.fx; remoteAtomics(tok, c, 22); hostLoads(tok, c, 0);
-        const B = AP[1].bank[0];
-        await wait(tok, 1800);
-        sayAt(c, fx, B.x, B.y + 40, [{t: 'the host stops'}, {t: `${N.hot22.t} of its rate`, f: 'hot.cliff'}], {side: 'r', fs: 21, col: 'var(--bad)'});
-        await wait(tok, 1e3);
+        // one message says it: the host's loads stop (hostLoads' own callout, in --bad)
+        remoteAtomics(tok, c, 22); hostLoads(tok, c, 0);
+        await wait(tok, 2800);
       }},
-    {name: 'Spread it', where: () => ({level: 0}),
+    {name: 'Spread it', where: () => ({level: 0}), dim: false,
       say: () => `Spread over 32 lines, one per shire: ${n('hot031')} per atomic and ${n('hot1919')}, ${n('hot32x')} the rate, at ${n('hot_nj_s')} each against ${n('hot_nj')}: ${n('hot17x')} less energy`,
       run: async (tok, c) => {
         const fx = c.fx; hiCells(Object.values(SH), false);
+        // this stage's message replaces stage 1's callout and stage 2's shares
+        if (c.co1) { fadeOut(c.co1); c.co1 = null; }
+        if (c.shares && c.shares.g.parentNode) { fadeOut(c.shares.g); c.shares = null; }
         const all = Object.values(SH);
         hotStream(tok, c, all, s => all[(all.indexOf(s) + 1 + Math.floor(Math.random() * 31)) % 32], 30);
         await wait(tok, 1200);
-        callout(fx, DW / 2, DH / 2, [{t: `${N.hot1919.t}: ${N.hot32x.t}`, f: 'hot-cost'}, {t: `${N.hot_nj_s.t} per atomic, not ${N.hot_nj.t}`, f: 'hot-energy'}], {side: 'u', fs: 24});
+        callout(fx, DW / 2, DH / 2, [{t: `${N.hot1919.t}: ${disp(N.hot32x.t)}`, f: 'hot-cost'}, {t: `${N.hot_nj_s.t} per atomic, not ${N.hot_nj.t}`, f: 'hot-energy'}], {side: 'u', fs: 24});
         await wait(tok, 1e12);
       }},
   ],
@@ -1932,15 +2413,19 @@ function hostLoads(tok, c, rate) {
     });
   }
   c.hl.rate = rate;
-  if (rate <= 0 && !c.hl.pile) {   // stopped: the host's loads wait at the banks and none gets through
+  if (rate <= 0 && !c.hl.pile) {
+    // stopped: the host's loads wait in a row between the neighbourhoods and the crossbar, and none gets through; the
+    // hot bank's queue is full of the remote atomics (drawn in its sub-bank row only)
     c.hl.q.forEach(pk => pk.remove()); c.hl.q = [];
-    c.hl.pile = E('g', {}, fx);
-    keys.forEach((k, i) => { const B = P1.bank[i % 4], pk = packet(c.hl.pile, 'var(--c1)', 7); at(pk, {x: B.box.x + 16 + Math.floor(i / 4) * 17, y: B.box.y + B.box.h - 14}); });
-    fadeIn(c.hl.pile);
+    const pile = c.hl.pile = E('g', {}, fx), x0 = SF.x + 40, x1 = SF.x + SF.w - 40, y = SF.y + 345;
+    keys.forEach((k, i) => at(packet(pile, 'var(--c1)', 5, true), {x: x0 + (x1 - x0) * i / (keys.length - 1), y}));
+    const B = P1.bank[0].box, nq = Math.floor((B.w - 20) / 14);
+    for (let i = 0; i < nq; i++) at(packet(pile, 'var(--c7)', 5, true), {x: B.x + 17 + i * 14, y: B.y + 55});
+    fadeIn(pile);
   }
   if (c.hlab && c.hlab.parentNode) c.hlab.remove();
   const L1 = rate > 0 ? (c.remN ? [{t: "the host's loads"}, {t: `${N.hot21.t}%`, f: 'hot.cliff'}, {t: 'of their rate alone'}] : [{t: "the host's loads"}, {t: 'their rate alone'}]) : [{t: "the host's loads stop"}, {t: `${N.hot22.t} of their rate`, f: 'hot.cliff'}];
-  c.hlab = callout(fx, SF.x + SF.w, SF.y + 160, L1, {side: 'r', fs: 20, col: 'var(--c1)'});
+  c.hlab = callout(fx, SF.x + SF.w, SF.y + 160, L1, {side: 'r', fs: 20, col: rate > 0 ? 'var(--c1)' : 'var(--bad)'});
 }
 function remoteAtomics(tok, c, nreq) {
   c.remN = nreq;
@@ -1966,7 +2451,7 @@ FLOWS.J = {
         ['levels 5-9', `over the mesh: ${n('lv_mesh')} cycles per level`, '', ''],
         ['back down', `TensorBroadcast: all ${n('n1024')} minions have the sum after ${n('ar1024')} (${n('ar_us')})`, '', ''],
         ['against a barrier', `a chip barrier from global atomics and credits: ${n('chipbar')} cycles (${n('chipbar_us')})`, '', ''],
-      ]).replace('<th class="num">cycles</th><th class="num">pJ/B</th>', '<th class="num"></th><th class="num"></th>')
+      ])
       + `<p class="pn-what small">One shire's 32 minions reduce in ${n('ar32')}; the per-level costs are from the on-chip communication page's ladder. The tree is the benchmark's (nocbench); the mesh legs are drawn x first like every route here.</p>`);
   },
   stages: [
@@ -1975,12 +2460,14 @@ FLOWS.J = {
       say: () => `Levels 0-2, inside each neighbourhood along the fast network's tree edges: 1→0, 3→2, 5→4, 7→6, then 2→0 and 6→4, then 4→0, ${n('lv_fln')} per level`,
       run: async (tok, c) => {
         const P1 = AP[1], fx = c.fx, mc = (nb, m) => { const p = P1.min[nb + ':' + m]; return {x: p.x + p.w / 2, y: p.y + p.h / 2}; };
-        // the partial sums' trails in the flow's own colour, over the orange tree edges they follow, so that the end
-        // state shows which edges levels 0-2 used
+        // each partial sum moves on the tree edge itself, from child to parent: the trail recolours the amber edge in
+        // the flow's colour (no second line beside it), and the small packet stays off the minions' names. The end state
+        // shows which edges levels 0-2 used.
+        const edge = (nb, a, b) => P1.fe[nb + ':' + a + '-' + b] || [mc(nb, a), mc(nb, b)];
         for (let h = 0; h < 3; h++) {
           const moves = [];
-          for (let nb = 0; nb < 4; nb++) for (let m = 1; m < 8; m++) if (lsb(m) === h) moves.push([mc(nb, m), mc(nb, m - (1 << h))]);
-          await Promise.all(moves.map(([a, b]) => { const pk = packet(fx, 'var(--c2)', 8); at(pk, a); return travel(tok, fx, pk, [a, b], 1300, {w: 6, col: 'var(--c2)'}).then(() => pk.remove(), e => { pk.remove(); throw e; }); }));
+          for (let nb = 0; nb < 4; nb++) for (let m = 1; m < 8; m++) if (lsb(m) === h) moves.push(edge(nb, m, m - (1 << h)));
+          await Promise.all(moves.map(([a, b]) => { const pk = packet(fx, 'var(--c2)', 7); at(pk, a); return travel(tok, fx, pk, [a, b], 1300, {w: 6, op: 1, col: 'var(--c2)'}).then(() => pk.remove(), e => { pk.remove(); throw e; }); }));
           await wait(tok, 350);
         }
         for (let nb = 0; nb < 4; nb++) pulse(tok, fx, mc(nb, 0), 1100, 'var(--c2)', 30).catch(() => {});
@@ -1991,14 +2478,15 @@ FLOWS.J = {
       say: () => `Levels 3-4, across the crossbar: neighbourhood 1 → 0 and 3 → 2, then 2 → 0, ${n('lv_xbar')} cycles per level`,
       run: async (tok, c) => {
         const P1 = AP[1], fx = c.fx, m0 = nb => { const p = P1.min[nb + ':0']; return {x: p.x + p.w / 2, y: p.y + p.h / 2}; };
-        const legXb = (a, b) => { const A = m0(a), B = m0(b); return [A, {x: P1['ch' + a].x, y: A.y}, {x: P1['ch' + a].x, y: P1.xbarY}, {x: P1['ch' + b].x, y: P1.xbarY}, {x: P1['ch' + b].x, y: B.y}, B]; };
+        const xy2 = P1.xbarY - 15;   // along the crossbar's upper edge, over no text
+        const legXb = (a, b) => { const A = m0(a), B = m0(b); return [A, {x: P1['ch' + a].x, y: A.y}, {x: P1['ch' + a].x, y: xy2}, {x: P1['ch' + b].x, y: xy2}, {x: P1['ch' + b].x, y: B.y}, B]; };
         for (const lv of [[[1, 0], [3, 2]], [[2, 0]]]) {
           await Promise.all(lv.map(([a, b]) => { const pk = packet(fx, 'var(--c1)', 9); return travel(tok, fx, pk, legXb(a, b), 1900, {w: 5, col: 'var(--c1)'}).then(() => pk.remove(), e => { pk.remove(); throw e; }); }));
           await wait(tok, 350);
         }
         await pulse(tok, fx, m0(0), 1200, 'var(--c2)', 40);
       }},
-    {name: 'Levels 5-9', where: () => ({level: 0}),
+    {name: 'Levels 5-9', where: () => ({level: 0}), dim: false,
       say: () => `Levels 5-9, over the mesh: odd shires to the even one below, then by 2, 4, 8 and 16, into shire 0, ${n('lv_mesh')} cycles per level`,
       run: async (tok, c) => {
         const fx = c.fx; hiCells(Object.values(SH), false);
@@ -2010,7 +2498,7 @@ FLOWS.J = {
         }
         await pulse(tok, fx, {x: SH[0].sx, y: SH[0].sy}, 1300, 'var(--c2)', 60);
       }},
-    {name: 'Back down', where: () => ({level: 0}),
+    {name: 'Back down', where: () => ({level: 0}), dim: false,
       say: () => `TensorBroadcast takes the sum back down the same tree: all ${n('n1024')} minions have it after ${n('ar1024')} (${n('ar_us')}), on all three cards`,
       run: async (tok, c) => {
         const fx = c.fx; fx.querySelectorAll('path.trail').forEach(p => { p.style.strokeOpacity = 0.25; });
@@ -2021,7 +2509,7 @@ FLOWS.J = {
         await Promise.all(Object.values(SH).map(s => pulse(tok, fx, {x: s.sx, y: s.sy}, 1200, 'var(--c2)', 36)));
         callout(fx, DW / 2, DH / 2, [{t: `${N.ar1024.t}, up and down`, f: 'sync-allreduce1024'}, {t: `${N.ar_us.t} for all 1,024 minions`, f: 'sync-allreduce1024'}], {side: 'u', fs: 24});
       }},
-    {name: 'Against a barrier', where: () => ({level: 0}),
+    {name: 'Against a barrier', where: () => ({level: 0}), dim: false,
       say: () => `A chip barrier built from global atomics and credits takes ${n('chipbar')} cycles (${n('chipbar_us')}): the hardware tree reduces and broadcasts in about a quarter of that`,
       run: async (tok, c) => {
         const fx = c.fx;
@@ -2040,56 +2528,101 @@ const ACTS = {
 $('pn-body').addEventListener('change', e => { if (e.target.dataset.sel === 'rq') { ST.rq = +e.target.value; if (FL.ctx && FL.ctx.k === 'A') FL.ctx.pick.rq = ST.rq; startFlow('A', 0, {keep: true, intro: true}); } });
 
 /* ================= captions and the tour ================= */
+/* each flow's claim: the line under the caption while its stages play (the caption itself says what each stage does) */
 const CAPS = {
   A: () => `A load that misses everywhere pays the mesh twice, to its L3 home and on to a memory shire: about ${n('lat_dram')} cycles, ${n('lat_dram_chip')} of them in the DRAM chip.`,
-  B: () => `The latency ladder: ${n('lat_l1')} cycles in L1, ${n('lat_l2')} in L2, ${n('lat_l3_a')} + ${n('lat_l3_b')} in L3, about ${n('lat_dram')} in DRAM.`,
+  B: () => `The latency ladder: ${n('lat_l1')} cycles in L1, ${n('lat_l2')} in L2, ${n('lat_l3_a')} cycles plus ${n('l3_b12')} per mesh hop in L3, about ${n('lat_dram')} in DRAM.`,
   C: () => `TensorSend moves registers from a hart to a minion anywhere on the chip: between shires, ${n('ts_a')} cycles plus ${n('ts_b')} per hop, round trip, on all three cards.`,
   D: () => `Handing a result to the next shire costs ${n('rl_e_next')} pJ per byte against ${n('rl_e_dram')} through DRAM: ${n('rl_13th')} of the energy, at ${n('rl_speed')} the bandwidth.`,
   E: () => `Gathers from scattered lines: ${n('g_l1_r')} G elements/s from L1, but only ${n('g_dr_r')} G from DRAM, at ${n('g_dr_e')} pJ each.`,
-  F: () => `The host link, timed on three cards: ${n('pcie_h2d')} GB/s to the card by DMA, ${n('pcie_stg_rng')} GB/s the way a program copies; an empty kernel costs the card ${n('pcie_b2b_rng')}, a lone launch waited for ${n('pcie_launch_rng')}, mostly the host's polling.`,
-  G: () => `A matmul step on the tensor unit: TensorLoad brings A in ${n('tl_l2')} cycles, TensorFMA takes ${n('tfma_tenb')}, the next load hides behind it: ${n('tflops')} TFLOP/s on ${n('n1024')}.`,
-  H: () => `The same matmul at the same ${n('w_tflops')} TFLOP/s draws ${n('w_zeros')} W on zeros and ${n('w_randn')} W on random data at the board, and random data reaches 90 °C in ${n('race_rand')} s.`,
+  F: () => `The host link on three cards: ${n('pcie_h2d')} GB/s to the card by DMA, ${n('pcie_stg_rng')} GB/s as a program copies; a kernel launch costs ${n('pcie_b2b_rng')} queued, ${n('pcie_launch_rng')} waited for.`,
+  G: () => `A matmul step on the tensor unit: TensorLoad brings A in ${n('tl_l2')} cycles, TensorFMA takes ${n('tfma_tenb')} cycles and hides the next load: ${n('tflops')} TFLOP/s on ${n('n1024')} minions.`,
+  H: () => `The same matmul, ${n('w_tflops')} TFLOP/s timed from the host (${n('tflops')} on the device), draws ${n('w_zeros', 'W')} on zeros and ${n('w_randn', 'W')} on random data at the board; random data reaches 90 °C in ${n('race_rand', 's')}.`,
   I: () => `One hot line: the atomic is fair to every shire, but 22 requesters stop its home shire's own traffic dead, while 21 leave it ${n('hot21r')} of its rate.`,
-  J: () => `The allreduce tree: ten levels up with TensorReduce and back down with TensorBroadcast, ${n('ar1024')} for all ${n('n1024')}, a quarter of a software barrier.`,
+  J: () => `The allreduce tree: ten levels up with TensorReduce and back down with TensorBroadcast, ${n('ar1024')} for all ${n('n1024')} minions, about a quarter of a software barrier.`,
 };
 const compG = (key, i) => LAYERS[Z.level].querySelectorAll(`.comp[data-comp="${key}"]`)[i || 0] || null;
+/* the facts behind the tour's last slide: how many are measured, specified, derived and inferred */
+const kindN = k => Object.values(F).filter(f => f.kind === k).length;
 const STEPS = [
-  {cap: () => `The ET-SoC-1 has ${n('cores')} RISC-V cores on a ${n('die_mm2')} mm² die: ${n('minions')} minions in ${n('shires')} shires, ${n('maxions')} and a service processor.`,
-    view: {level: 0}, panel: ['chip'], sub: () => 'Every part is clickable. Dashed: inferred (the LPDDR4X pairing); the button under the die lists what would settle each inferred part.'},
-  {cap: () => `${n('cshires')} compute shires of ${n('per_shire')} run the kernels; the master shire (${n('master_id')}) schedules them and a spare (${n('spare_id')}) waits for yield recovery.`,
-    view: {level: 0}, hi: ['cshire', 'master'], panel: ['cshire', () => ({cell: SH[13]})], sel: () => SH[13].g, sub: () => `Placed by measured distances, all ${n('pairs496')} shire pairs; the firmware's NoC-spec map agrees in ${n('fw_pairs')} pair distances. Shire 13 is ringed.`},
-  {cap: () => `An ${n('grid86')} mesh of ${n('stops')} stops joins them. Each hop adds ${n('hop_cyc')} (${n('hop_ns')}) to a round trip and is about ${n('hop_mm')} of wire.`,
-    view: {level: 0}, hi: ['mesh', 'links'], panel: ['mesh'], sel: () => compG('mesh'), sub: () => 'Routes are shortest paths; the flows draw each leg x first (the order was not measured).'},
-  {cap: () => `${n('memshires')} memory shires drive ${n('channels')} LPDDR4X channels (${n('dram_gb')}), ${n('dram_peak')} GB/s peak at this clock; the chip streams ${n('dram_bw')} GB/s.`,
-    view: {level: 0}, hi: ['memshire', 'dram'], panel: ['dram', () => ({ms: [0, 1]})], sel: () => compG('dram'), sub: () => `Their places come from a fit on aifoundry2 that holds for ${n('ms_fit')} of DRAM loads, within ±3 cycles, on all three cards; the firmware's map agrees on the seven the fit places on its own.`},
-  {cap: () => `Inside a shire, ${n('neigh')} of ${n('per_neigh')} share ${n('cache_mb')} of SRAM: ${n('scp_mb')} scratchpad, ${n('l2_kb')} L2 and a ${n('l3_mb')} slice of the L3.`,
-    view: {level: 1, sid: 13}, panel: ['banks', () => ({})], sub: () => `Orange links: the fast local network's tree edges, ${n('ts_fln')} round trip against ${n('ts_xbar')} for other pairs.`},
-  {cap: () => `A minion has ${n('harts')} and a vector unit whose ${n('lanes_n')} lanes also run the tensor instructions. ${n('n1024')} minions sustain ${n('tflops')} TFLOP/s fp32 at ${n('mhz')}.`,
-    view: {level: 2, sid: 13, nb: 0, mi: 0}, panel: ['tensor'], sel: () => compG('tensor'), sub: () => `The firmware turns ${n('l1_scp')} of the ${n('l1_kb')} L1 into the tensor scratchpad and leaves each hart ${n('l1_hart')}.`},
+  {name: 'Chip', cap: () => `The ET-SoC-1 has ${n('cores')} RISC-V cores on a ${n('die_mm2')} mm² die: ${n('minions')} minions in ${n('shires')} shires, ${n('maxions')} and a service processor.`,
+    view: {level: 0}, panel: ['chip'], sub: () => `Dashed outlines are ${src('inferred', 'dram.pkg-pairing')}: which two memory shires share each LPDDR4X package.`},
+  {name: 'Shires', cap: () => `${n('cshires')} compute shires of ${n('per_shire')} run the kernels; the master shire (${n('master_id')}) schedules them and a spare (${n('spare_id')}) waits for yield recovery.`,
+    view: {level: 0}, hi: ['cshire', 'master'], panel: ['cshire', () => ({cell: SH[0]})], sel: () => SH[0].g, sub: () => `Placed by measured distances, all ${n('pairs496')} shire pairs; the firmware's NoC-spec map agrees in ${n('fw_pairs')} pair distances. Shire 0, ringed, is the one we open next.`},
+  {name: 'Mesh', cap: () => `An ${n('grid86')} mesh of ${n('stops')} stops joins them. Each hop adds ${n('hop_cyc')} (${n('hop_ns')}) to a round trip and is about ${n('hop_mm')} of wire.`,
+    view: {level: 0}, hi: ['mesh', 'links'], cls: 'mesh-on', panel: ['mesh'], sub: () => `${src("The grid's four corners are empty", 'mesh.grid')}. Routes are shortest paths; the flows draw each leg x first (the order was not measured).`},
+  {name: 'Memory', cap: () => `${n('memshires')} memory shires drive ${n('channels')} LPDDR4X channels (${n('dram_gb')}), ${n('dram_peak')} GB/s peak at ${n('mts')} MT/s; the chip streams ${n('dram_bw')} GB/s.`,
+    view: {level: 0}, hi: ['memshire', 'dram'], panel: ['dram', () => ({ms: [0, 1]})], sub: () => `Placed by a fit of DRAM latencies on aifoundry2, within ±3 cycles for ${n('ms_fit')} of loads on all three cards; the firmware's map agrees on the seven the fit places alone.`},
+  {name: 'Shire', cap: () => `Inside a shire, ${n('neigh')} of ${n('per_neigh')} share ${n('cache_mb')} of SRAM: ${n('scp_mb')} scratchpad, ${n('l2_kb')} L2 and a ${n('l3_mb')} slice of the L3.`,
+    view: {level: 1, sid: 0}, panel: ['banks', () => ({})], sub: () => `Amber links: the fast local network's tree edges, ${n('ts_fln')} round trip against ${n('ts_xbar', 'cycles')} for other pairs.`},
+  {name: 'Minion', cap: () => `A minion has ${n('harts')} and a vector unit whose ${n('lanes_n')} lanes also run the tensor instructions. ${n('n1024')} minions sustain ${n('tflops')} TFLOP/s fp32 at ${n('mhz')}.`,
+    view: {level: 2, sid: 0, nb: 0, mi: 0}, panel: ['tensor'], sel: () => compG('tensor'), sub: () => `The firmware turns ${n('l1_scp')} of the ${n('l1_kb')} L1 into the tensor scratchpad and leaves each hart ${n('l1_hart')}.`},
   {flow: 'A'}, {flow: 'B'}, {flow: 'C'}, {flow: 'D'}, {flow: 'E'}, {flow: 'F'}, {flow: 'G'}, {flow: 'H'}, {flow: 'I'}, {flow: 'J'},
+  {name: 'Summary', cap: () => `Every number on this diagram has a source: ${Object.keys(F).length} facts, ${kindN('measured')} of them measured on the lab's cards, ${kindN('spec')} from the specification, ${kindN('derived')} derived and ${kindN('inferred')} inferred.`,
+    view: {level: 0}, hi: [], panel: ['chip'], draw: tok => factSplit(tok), sub: () => 'Each inferred part says what would settle it; the facts, their sources and the asks are listed under the diagram.'},
 ];
-let TOUR = null;
-function setCap(html) { hideTip(); $('cap').innerHTML = `<span class="cap-in">${html}</span>`; fitCap(); }
+let TOUR = null, TLAST = 0;
+/* the last slide: the facts behind the diagram as one bar, by kind, over the die (set back) */
+function factSplit(tok) {
+  const fx = FX[0]; if (!fx) return;
+  const tot = Object.keys(F).length, W = 660, H = 200, x = DW / 2 - W / 2, y = DH / 2 - H / 2 - 20, bw = W - 56, by = y + 76;
+  const g = E('g', {class: 'band'}, fx);
+  S(E('rect', {class: 'co-box', x, y, width: W, height: H, rx: 12, filter: 'url(#co-sh)'}, g), {stroke: 'var(--border)'});
+  T(g, x + 28, y + 48, `${tot} facts, each with its source`, 't-big');
+  const K = [['measured', 'var(--ok)', 'measured'], ['spec', 'var(--c1)', 'specified'], ['derived', 'var(--c7)', 'derived'], ['inferred', 'var(--warn)', 'inferred']];
+  let bx = x + 28, lx = x + 28;
+  const segs = K.map(([k, col, lab]) => {
+    const w = bw * kindN(k) / tot, r = S(E('rect', {class: 'bbar', x: bx, y: by, width: 0, height: 46, rx: 3}, g), {fill: col});
+    const seg = {r, x: bx, w: Math.max(2, w - 3)}; bx += w;
+    S(E('rect', {class: 'bbar', x: lx, y: y + 146, width: 16, height: 16, rx: 3}, g), {fill: col});
+    const t = T(g, lx + 22, y + 160, `${kindN(k)} ${lab}`, 't-lab');
+    let tw = 0; try { tw = t.getComputedTextLength(); } catch (_) { /* not rendered */ } lx += 22 + (tw || 110) + 26;
+    return seg;
+  });
+  fadeIn(g, 300);
+  // grown in on the clock; paused, drawn whole
+  quiet(anim(CLK.on ? tok : {dead: false, ff: true}, 1400, q => segs.forEach((sg, i) => sg.r.setAttribute('width', (sg.w * easeS(Math.max(0, Math.min(1, q * 1.6 - i * 0.2)))).toFixed(1)))));
+}
+/* a number and its unit never part at a line's end (the templates write "12.46 GB/s" with a plain space) */
+const UNITS = '(?:W|s|cycles?|GB/s|TB/s|pJ|pJ/B|ns|µs|°C|TFLOP/s|TOP/s|MB|KB|G|M/s|mm|hops?|minions|shires|lines)(?![\\w/])';
+const GLUE1 = new RegExp('</span> (?=' + UNITS + ')', 'g'), GLUE2 = new RegExp('(\\d) (?=' + UNITS + ')', 'g');
+const glue = html => ARW(String(html).replace(GLUE1, '</span>\u00a0').replace(GLUE2, '$1\u00a0'));
+function setCap(html) { hideTip(); $('cap').innerHTML = `<span class="cap-in">${glue(html)}</span>`; fitCap(); }
+/* the caption fits two lines: a long one is set smaller. A flow's stages share one size (the smallest any of them
+   needs), so that the caption does not change size while the presenter steps */
+let CAPCAP = null;
+const capKey = () => innerWidth + 'x' + innerHeight + ($('stage').classList.contains('nopanel') ? 'n' : '') + ($('stage').classList.contains('present') ? 'p' : '');
 function fitCap() {
   const c = $('cap'); c.style.fontSize = ''; c.style.height = '';
-  if (window.matchMedia('(max-width: 899px)').matches) return;
+  if (window.matchMedia('(max-width: 899px)').matches) return 0;
   const base = parseFloat(getComputedStyle(c).fontSize), h = Math.round(base * 2.56);
   c.style.height = h + 'px';
   let fs = base;
+  if (FL.k && CAPCAP && CAPCAP.k === FL.k && CAPCAP.key === capKey() && CAPCAP.fs < base) { fs = CAPCAP.fs; c.style.fontSize = fs + 'px'; }
   while (c.scrollHeight > h + 1 && fs > 13) { fs -= 1; c.style.fontSize = fs + 'px'; }
+  return fs;
+}
+function flowCapSize(k, ctx) {
+  CAPCAP = null;
+  const sts = FLOWS[k].stages, c = $('cap'), keep = c.innerHTML;
+  let m = Infinity;
+  try { sts.forEach(st => { c.innerHTML = `<span class="cap-in">${glue(stageLine(st.say ? st.say(ctx) : ''))}</span>`; const f = fitCap(); if (f) m = Math.min(m, f); }); } catch (e) { console.error(e); }
+  c.innerHTML = keep;
+  if (isFinite(m)) CAPCAP = {k, key: capKey(), fs: m};
 }
 let fitT = 0;
 window.addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(fitCap, 120); });
-function setKick(t) { $('cap-k').textContent = t; }
+function setKick(t) { $('cap-k').innerHTML = ARW(esc(t)); }
 /* the index of the button in box that has the focus (-1 for none): a rebuilt row of buttons gives it back */
 const focusIn = box => { const a = document.activeElement; return a && box.contains(a) ? [...box.querySelectorAll('button')].indexOf(a) : -1; };
 const refocus = (box, k) => { if (k < 0) return; const b = box.querySelectorAll('button')[k]; if (b) b.focus({preventScroll: true}); };
+/* the tour's progress: a small dot per step beside the kicker (a click jumps to it) */
 function dots(i) {
   const d = $('dots'), had = focusIn(d); d.textContent = '';
   if (i < 0) return;
   STEPS.forEach((s, k) => {
     const b = document.createElement('button'); b.type = 'button'; b.className = k < i ? 'past' : k === i ? 'on' : '';
-    const nm = s.flow ? `flow ${KEYOF[s.flow]}, ${FLOWS[s.flow].title}` : `slide ${k + 1}`;
+    const nm = s.flow ? `flow ${KEYOF[s.flow]}, ${FLOWS[s.flow].title}` : s.name;
     b.setAttribute('aria-label', `Tour step ${k + 1}: ${nm}`); b.title = `Step ${k + 1}: ${nm}`;
     if (k === i) b.setAttribute('aria-current', 'step');
     b.addEventListener('click', () => tourGo(k));
@@ -2101,82 +2634,122 @@ function highlight(keys) {
   svg.classList.add('dimming');
   keys.forEach(k => { if (k === 'links') AP[0].links.classList.add('hi'); else LAYERS[0].querySelectorAll(`.comp[data-comp="${k}"]`).forEach(g => g.classList.add('hi')); });
 }
-async function tourGo(i) {
+/* o.back: stepping back into a flow's step shows its last stage's end state, with no establishing shot */
+async function tourGo(i, o) {
   if (!TOUR) return;
-  i = Math.max(0, Math.min(STEPS.length - 1, i)); TOUR.i = i;
+  o = o || {};
+  i = Math.max(0, Math.min(STEPS.length - 1, i)); TOUR.i = i; TLAST = i;
   const s = STEPS[i];
   if (TOUR.tok) TOUR.tok.dead = true;
   const tok = TOUR.tok = {dead: false};
   select(null);
-  setKick(`Tour · step ${i + 1} of ${STEPS.length}`); dots(i);
+  dots(i);
   // presenting: every tour step starts with the camera following, whatever the reader did before
   if (!FOLLOW) { FOLLOW = true; FOLLOW_AUTO = false; $('btn-follow').setAttribute('aria-pressed', 'true'); }
-  if (s.flow) { setCap(CAPS[s.flow]()); sub(''); startFlow(s.flow, 0, {intro: true}); return; }
-  stopFlow(true);
+  if (s.flow) {
+    if (o.back) startFlow(s.flow, FLOWS[s.flow].stages.length - 1, {still: true, done: true});
+    else startFlow(s.flow, 0, {intro: true});
+    return;
+  }
+  // the last step's drawing fades; the dimming goes with the camera (the zoom starts from how the die looks now)
+  stopFlow(true, true);
+  setKick(`Tour ${i + 1} / ${STEPS.length} · ${s.name}`);
   setCap(s.cap()); sub(s.sub ? s.sub() : '');
   if (s.panel) showComp(s.panel[0], s.panel[1] ? s.panel[1]() : {});   // the panel changes with the caption, not after the zoom
   renderBar(); playBtn();
-  await goTo(s.view, {clk: tok, ms: CLK.on ? undefined : 0});
+  // the highlight goes on in the frame the camera arrives in (a zoom out ends at its look), else it fades in (CSS)
+  let lit = false;
+  const light = () => { if (lit || !TOUR || TOUR.i !== i || tok.dead) return; lit = true; if (s.hi) highlight(s.hi); if (s.cls) svg.classList.add(s.cls); if (s.draw) s.draw(tok); };
+  await goTo(s.view, Object.assign(CLK.on ? {clk: tok} : {total: 600}, {c1: s.hi ? DIMLOOK.dimming() : null, arrive: light}));
   if (!TOUR || TOUR.i !== i || tok.dead) return;
-  if (s.hi) highlight(s.hi);
+  light();
   if (s.sel) { const g = s.sel(); if (g) select(g); }
 }
-/* presenting: the tour turns on larger panel text and hides the reference lists (CSS #stage.present) */
+/* presenting (the tour, full screen, or the stage filling the frame): larger panel text, no reference lists, no dotted
+   numbers, no reader's instructions (CSS #stage.present) */
+function presentClass() {
+  const st = $('stage'), was = st.classList.contains('present'), on = !!TOUR || PRES || !!fsEl();
+  st.classList.toggle('present', on);
+  panelAuto();
+  // the caption shown before anything plays: the reader's instructions, or while presenting a title
+  if (was !== on && !TOUR && !FL.k && !CAPFLOW) resetCap();
+}
 function startTour(at) {
   TOUR = {i: 0}; $('btn-tour').textContent = 'End tour'; $('btn-tour').classList.add('on');
-  $('stage').classList.add('present');
+  presentClass();
   tourGo(at || 0);
 }
 function endTour() {
   if (!TOUR) return;
   if (TOUR.tok) TOUR.tok.dead = true;
+  TLAST = TOUR.i;
   TOUR = null; $('btn-tour').textContent = 'Tour'; $('btn-tour').classList.remove('on');
-  $('stage').classList.remove('present');
+  presentClass();
   dots(-1); clearDim();
-  if (flowOn() || FL.k) { const k = FL.k; setKick(`Flow ${KEYOF[k]} · ${FLOWS[k].title}`); CAPFLOW = true; renderBar(); playBtn(); }
+  if (flowOn() || FL.k) { setKick(flowKick(FL.k)); CAPFLOW = true; renderBar(); playBtn(); }
   else resetCap();
 }
+/* T and the Tour button: the tour picks up where it was left (from the start once it had reached its end) */
+const toggleTour = () => { if (TOUR) { endTour(); stopFlow(); } else startTour(TLAST >= STEPS.length - 1 ? 0 : TLAST); };
 const HINT = 'Space pauses · ← → stages · + − zoom · double-click zooms in · F presents · P panel · C follow · T tour';
 function resetCap() {
   CAPFLOW = false;
+  if ($('stage').classList.contains('present')) {
+    setKick('ET-SoC-1'); setCap(STEPS[0].cap()); sub(STEPS[0].sub()); renderBar(); return;
+  }
   setKick('Explore');
-  setCap(`Click any part of the chip, zoom with the scale control under the drawing, pick one of ten flows, or press Tour to step through it all in ${STEPS.length} steps.`);
-  sub(HINT); renderBar();
+  setCap(`Click any part of the chip, zoom with the scale control, pick one of ten flows, or press Tour to step through it all in ${STEPS.length} steps.`);
+  sub(HINT); $('cap-sub').classList.add('hint'); renderBar();
 }
-/* the stage bar: the active flow's stages, the current one marked; each is a button */
+/* the stage bar: the active flow's stages, the current one marked; in the tour on a still step, the tour's still
+   steps (Chip, Shires, ... Summary); each is a button */
 function renderBar() {
   const ol = $('stages'), had = focusIn(ol); ol.textContent = '';
   const k = FL.k;
   $('stage').classList.toggle('playing', flowOn() && CLK.on && !FL.still);
+  const chip = (num, name, cls, title, go) => {
+    const li = document.createElement('li'), b = document.createElement('button');
+    if (/\bon\b/.test(cls)) { li.className = 'on'; b.setAttribute('aria-current', 'step'); }
+    b.type = 'button'; b.className = 'stg' + cls;
+    b.innerHTML = `<span class="sn">${num}</span><span class="st">${ARW(esc(name))}</span>`;
+    b.title = title; b.setAttribute('aria-label', title);
+    b.addEventListener('click', go);
+    li.appendChild(b); ol.appendChild(li);
+  };
   if (!k) {
-    const li = document.createElement('li'); li.className = 'stg-hint';
-    li.textContent = TOUR ? `Tour step ${TOUR.i + 1} of ${STEPS.length}: the arrows step, Shift with an arrow jumps a step` : 'Pick a flow above (keys 1 to 9 and 0) to see its stages here, or press Tour';
-    ol.appendChild(li);
-    $('btn-prev').disabled = TOUR ? TOUR.i === 0 : !LASTFLOW; $('btn-next').disabled = !!TOUR && TOUR.i === STEPS.length - 1;
+    if (TOUR) {
+      // the still steps by name; the ten flows between them as one chip (their stages show here when they play)
+      STEPS.forEach((s, j) => {
+        if (s.flow) {
+          if (STEPS[j - 1] && STEPS[j - 1].flow) return;
+          let e = j; while (STEPS[e + 1] && STEPS[e + 1].flow) e++;
+          chip(`${j + 1}–${e + 1}`, 'Flows', e < TOUR.i ? ' past' : '', `Tour steps ${j + 1} to ${e + 1}: the ten flows`, () => tourGo(j));
+        } else chip(j + 1, s.name, j < TOUR.i ? ' past' : j === TOUR.i ? ' on' : '', `Tour step ${j + 1} of ${STEPS.length}: ${s.name}. The arrows step; Shift with an arrow jumps a step`, () => tourGo(j));
+        ol.lastChild.classList.add('tchip');
+      });
+    } else {
+      const li = document.createElement('li'); li.className = 'stg-hint';
+      li.textContent = 'Pick a flow above (keys 1 to 9 and 0) to see its stages here, or press Tour';
+      ol.appendChild(li);
+    }
+    refocus(ol, had);
+    setDis($('btn-prev'), TOUR ? TOUR.i === 0 : !LASTFLOW); setDis($('btn-next'), !!TOUR && TOUR.i === STEPS.length - 1);
     return;
   }
   const sts = FLOWS[k].stages;
-  sts.forEach((s, i) => {
-    const li = document.createElement('li'), b = document.createElement('button');
-    if (i === FL.i) li.className = 'on';
-    b.type = 'button'; b.className = 'stg' + (i < FL.i ? ' past' : i === FL.i ? ' on' : '');
-    if (i === FL.i) b.setAttribute('aria-current', 'step');
-    b.innerHTML = `<span class="sn">${i + 1}</span><span class="st">${esc(s.name)}</span>`;
-    b.title = `Stage ${i + 1} of ${sts.length}: ${s.name}`;
-    b.setAttribute('aria-label', `Stage ${i + 1} of ${sts.length}: ${s.name}`);
-    b.addEventListener('click', () => goStage(i));
-    li.appendChild(b); ol.appendChild(li);
-  });
+  sts.forEach((s, i) => chip(i + 1, s.name, i < FL.i ? ' past' : i === FL.i ? ' on' : '', `Stage ${i + 1} of ${sts.length}: ${s.name}`, () => goStage(i)));
   refocus(ol, had);
-  $('btn-prev').disabled = FL.i === 0 && !(TOUR && TOUR.i > 0);
-  $('btn-next').disabled = FL.i === sts.length - 1 && !(TOUR && TOUR.i < STEPS.length - 1);
+  setDis($('btn-prev'), FL.i === 0 && !(TOUR && TOUR.i > 0));
+  setDis($('btn-next'), FL.i === sts.length - 1 && !(TOUR && TOUR.i < STEPS.length - 1));
 }
-/* the Play button: Pause while a flow plays, Play when paused, Replay after */
+/* the Play button: Pause while a flow plays, Play when paused, Replay after; on a still tour step nothing plays, and
+   it is hidden (Space still pauses the camera) */
 function playBtn() {
   const b = $('btn-play'), still = !!TOUR && !STEPS[TOUR.i].flow;
   const t = FL.k ? (FL.done ? 'Replay' : (CLK.on && !FL.still ? 'Pause' : 'Play')) : still ? (CLK.on ? 'Pause' : 'Play') : LASTFLOW ? 'Replay' : 'Play';
   b.textContent = t;
   b.disabled = !FL.k && !LASTFLOW && !still;
+  b.classList.toggle('void', still);   // on a still tour slide nothing plays: while presenting it takes no room
   b.setAttribute('aria-label', t + ' (Space)');
   $('stage').classList.toggle('playing', flowOn() && CLK.on && !FL.still);
 }
@@ -2189,12 +2762,15 @@ function playPause() {
     return;
   }
   if (FL.done) { startFlow(FL.k, 0, {intro: true, keep: true}); return; }
+  // after the reader's own zoom, going on follows the flow again (as stepping does)
+  const refollow = () => { if (FOLLOW_AUTO) { FOLLOW = true; FOLLOW_AUTO = false; $('btn-follow').setAttribute('aria-pressed', 'true'); return true; } return false; };
   if (FL.still) {
-    CLK.on = true;
+    CLK.on = true; refollow();
     if (FL.i < FLOWS[FL.k].stages.length - 1) startFlow(FL.k, FL.i + 1, {keep: true});
     else { FL.still = false; FL.done = true; renderBar(); playBtn(); }
     return;
   }
+  if (!CLK.on && refollow()) { CLK.on = true; restartStage(); playBtn(); renderBar(); return; }
   CLK.on = !CLK.on; playBtn(); renderBar();
 }
 /* ---- presenting: full screen where the frame allows it, else the stage fills the frame ---- */
@@ -2220,14 +2796,14 @@ function present() {
 }
 function setPres(on, blocked) {
   PRES = on; document.documentElement.classList.toggle('et-pres', on); $('stage').classList.toggle('pres', on);
-  fsLabel();
+  fsLabel(); kbdHint();
   if (on && blocked) toast(`<p><b>Presenting inside the page's frame.</b> The frame does not allow full screen here.</p>`
     + `<p>For the whole screen, press <kbd>F11</kbd> (on a Mac <kbd>Ctrl</kbd>+<kbd>⌘</kbd>+<kbd>F</kbd>), or open the page in a window of its own, where <kbd>F</kbd> goes full screen. <kbd>Esc</kbd> or <kbd>F</kbd> leaves.</p>`
     + `<div class="tb"><button type="button" class="st-btn primary" data-t="win">Open a presenter window</button><button type="button" class="st-btn" data-t="ok">Stay in the frame</button></div>`, 14000);
   else hideToast();
   setTimeout(() => { fitCap(); }, 80);
 }
-const fsLabel = () => { $('btn-fs').textContent = (fsEl() || PRES) ? 'Exit' : 'Present'; setTimeout(fitCap, 80); };
+const fsLabel = () => { $('btn-fs').textContent = (fsEl() || PRES) ? 'Exit' : 'Present'; presentClass(); setTimeout(fitCap, 80); };
 document.addEventListener('fullscreenchange', fsLabel); document.addEventListener('webkitfullscreenchange', fsLabel);
 /* a copy of this page in a window of its own (a top-level window may go full screen). It is written from the
    server's copy of the page when it can be fetched, else from the page as it was loaded. */
@@ -2263,11 +2839,20 @@ document.querySelectorAll('.skip a').forEach(a => a.addEventListener('click', e 
   if (f) f.focus({preventScroll: true});
 }));
 /* hide the details panel so that the die takes the whole width (P, the Panel button, ?panel=off) */
-function togglePanel(show) {
-  const st = $('stage'), hide = show === undefined ? !st.classList.contains('nopanel') : !show;
+let PANEL = null;   // true or false once set by P, the Panel button or ?panel=off; null: automatic
+const shortScreen = () => { try { return matchMedia('(max-height: 780px) and (min-width: 900px)').matches; } catch (_) { return false; } };
+function panelAuto() {
+  const st = $('stage'), hide = PANEL === null ? st.classList.contains('present') && shortScreen() : !PANEL;
+  if (st.classList.contains('nopanel') === hide) return;
   st.classList.toggle('nopanel', hide); $('btn-panel').setAttribute('aria-pressed', String(!hide));
   setTimeout(fitCap, 60);
 }
+function togglePanel(show) {
+  const st = $('stage');
+  PANEL = show === undefined ? st.classList.contains('nopanel') : !!show;
+  panelAuto();
+}
+window.addEventListener('resize', () => { if (PANEL === null) panelAuto(); });
 /* light or dark whatever the system says (D, ?theme=light|dark); the template's tokens follow data-theme */
 function setTheme(t) { if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; }
 function toggleTheme() {
@@ -2279,7 +2864,7 @@ function next(whole) {
   if (TOUR) {
     const s = STEPS[TOUR.i];
     if (!whole && s.flow && FL.k === s.flow && goStage(FL.i + 1)) return;
-    if (TOUR.i >= STEPS.length - 1) { sub('End of the tour: Q or End tour leaves it; the Left arrow steps back.'); return; }
+    if (TOUR.i >= STEPS.length - 1) return;   // the last step: Q or End tour leaves the tour
     tourGo(TOUR.i + 1); return;
   }
   if (FL.k) { goStage(FL.i + 1); return; }
@@ -2291,32 +2876,42 @@ function prev(whole) {
   if (TOUR) {
     const s = STEPS[TOUR.i];
     if (!whole && s.flow && FL.k === s.flow && goStage(FL.i - 1)) return;
-    if (TOUR.i > 0) tourGo(TOUR.i - 1);
+    // back from a step's start: the previous step as it ended (a flow's last stage, drawn still), no establishing shot
+    if (TOUR.i > 0) tourGo(TOUR.i - 1, {back: !whole});
     return;
   }
   if (FL.k) { goStage(FL.i - 1); return; }
   // no flow on the stage: back to the last one played, at its last stage's end state; Left never starts the tour
   if (LASTFLOW) startFlow(LASTFLOW, FLOWS[LASTFLOW].stages.length - 1, {still: true, done: true});
 }
+/* Esc: leaves presenting inside the frame (full screen leaves by itself); it never ends the tour (Q and End tour do),
+   so that a press meant for the full screen does not lose the presenter's place */
 function back() {
   if (PRES) { setPres(false); return; }
-  if (TOUR) { endTour(); stopFlow(); return; }
+  if (TOUR || fsEl()) return;
   if (FL.k) { stopFlow(); return; }
-  if (Z.level) scaleTo(Z.level - 1);
+  if (zNow().level) zoomBy(-1);
 }
-document.querySelectorAll('[data-flow]').forEach(b => b.addEventListener('click', () => { if (TOUR) endTour(); if (FOLLOW_AUTO) setFollow(true); startFlow(b.dataset.flow, 0, {intro: true}); }));
+/* a flow's button or key: in the tour, its tour step (the tour goes on from there); else the flow on its own */
+function pickFlow(k) {
+  const j = STEPS.findIndex(s => s.flow === k);
+  if (TOUR && j >= 0) { tourGo(j); return; }
+  if (FOLLOW_AUTO) setFollow(true);
+  startFlow(k, 0, {intro: true});
+}
+document.querySelectorAll('[data-flow]').forEach(b => b.addEventListener('click', () => pickFlow(b.dataset.flow)));
 /* a mouse click leaves no focus on a button, a summary or a fact in the stage, so that Space then pauses (the keyboard
    keeps its focus) */
 $('stage').addEventListener('click', e => { const b = e.target.closest && e.target.closest('button, summary, li.fact'); if (b && e.detail > 0) b.blur(); });
 $('btn-play').addEventListener('click', playPause);
-$('btn-tour').addEventListener('click', () => { if (TOUR) { endTour(); stopFlow(); } else startTour(0); });
+$('btn-tour').addEventListener('click', toggleTour);
 $('btn-fs').addEventListener('click', present);
 $('btn-panel').addEventListener('click', () => togglePanel());
-$('btn-next').addEventListener('click', () => next(false));
-$('btn-prev').addEventListener('click', () => prev(false));
+$('btn-next').addEventListener('click', e => { if (!isDis(e.currentTarget)) next(false); });
+$('btn-prev').addEventListener('click', e => { if (!isDis(e.currentTarget)) prev(false); });
 $('btn-follow').addEventListener('click', () => setFollow(!FOLLOW));
-$('z-in').addEventListener('click', () => scaleTo(Z.level + 1));
-$('z-out').addEventListener('click', () => scaleTo(Z.level - 1));
+$('z-in').addEventListener('click', e => { if (!isDis(e.currentTarget)) zoomBy(1); });
+$('z-out').addEventListener('click', e => { if (!isDis(e.currentTarget)) zoomBy(-1); });
 [0, 1, 2].forEach(l => $('z-' + l).addEventListener('click', () => scaleTo(l)));
 PIP.el.addEventListener('click', () => { setFollow(true); });
 PIP.el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFollow(true); } });
@@ -2338,6 +2933,7 @@ document.addEventListener('keydown', e => {
   const inStage = inView && ($('stage').contains(tg) || tg === document.body || tg === document.documentElement);
   if (!inStage) return;
   const onControl = tg.closest && tg.closest('button, a, li.fact, summary, [role="button"]:not(.comp)');
+  const presenting = !!TOUR || PRES || !!fsEl();
   switch (e.key) {
     case 'ArrowRight': case 'PageDown': e.preventDefault(); next(e.shiftKey); break;
     case 'ArrowLeft': case 'PageUp': e.preventDefault(); prev(e.shiftKey); break;
@@ -2346,6 +2942,8 @@ document.addEventListener('keydown', e => {
       // flow's own button, a stage button, and, while a flow plays, a summary or a fact in the panel
       const fb = tg.closest && tg.closest('[data-flow]');
       const pause = (fb && FL.k && fb.dataset.flow === FL.k) || (tg.closest && tg.closest('.stg')) || (flowOn() && tg.closest && tg.closest('#pn-body summary, #pn-body li.fact'));
+      // a link does not activate on Space: on the skip links it would scroll the page
+      if (tg.closest && tg.closest('.skip a')) { e.preventDefault(); return; }
       if (onControl && !pause) return;
       e.preventDefault(); SPACE_EATEN = true; playPause(); break;
     }
@@ -2353,17 +2951,22 @@ document.addEventListener('keydown', e => {
     case 'p': case 'P': e.preventDefault(); togglePanel(); break;
     case 'd': case 'D': e.preventDefault(); toggleTheme(); break;
     case 'c': case 'C': e.preventDefault(); setFollow(!FOLLOW); break;
-    case 't': case 'T': e.preventDefault(); if (TOUR) { endTour(); stopFlow(); } else startTour(0); break;
+    case 't': case 'T': e.preventDefault(); toggleTour(); break;
     case 'q': case 'Q': if (TOUR) { e.preventDefault(); endTour(); stopFlow(); } break;
-    case '+': case '=': e.preventDefault(); scaleTo(Z.level + 1); break;
-    case '-': case '_': e.preventDefault(); scaleTo(Z.level - 1); break;
+    case '+': case '=': e.preventDefault(); zoomBy(1); break;
+    case '-': case '_': e.preventDefault(); zoomBy(-1); break;
     case 'Escape': back(); break;
-    case 'Backspace': if (Z.level) { e.preventDefault(); scaleTo(Z.level - 1); } break;
-    case 'Home': if (FL.k) { e.preventDefault(); goStage(0); } break;
-    case 'End': if (FL.k) { e.preventDefault(); goStage(FLOWS[FL.k].stages.length - 1); } break;
+    case 'Backspace': if (zNow().level) { e.preventDefault(); zoomBy(-1); } break;
+    case 'Home': if (FL.k) { e.preventDefault(); goStage(0); } else if (TOUR) { e.preventDefault(); tourGo(0); } else if (presenting) e.preventDefault(); break;
+    case 'End': if (FL.k) { e.preventDefault(); goStage(FLOWS[FL.k].stages.length - 1); } else if (TOUR) { e.preventDefault(); tourGo(STEPS.length - 1); } else if (presenting) e.preventDefault(); break;
+    // a presenter's clicker: F5 (and Shift+F5) is its "start the slideshow" button, never a reload mid-talk; some send
+    // Up and Down for back and forward
+    case 'F5': if (presenting) { e.preventDefault(); if (!TOUR) startTour(TLAST >= STEPS.length - 1 ? 0 : TLAST); } break;
+    case 'ArrowDown': if (presenting) { e.preventDefault(); next(e.shiftKey); } break;
+    case 'ArrowUp': if (presenting) { e.preventDefault(); prev(e.shiftKey); } break;
     default: {
       const i = '1234567890'.indexOf(e.key);
-      if (i >= 0 && e.key.length === 1) { if (TOUR) endTour(); if (FOLLOW_AUTO) setFollow(true); startFlow(ORDER[i], 0, {intro: true}); }
+      if (i >= 0 && e.key.length === 1) pickFlow(ORDER[i]);
     }
   }
 });
@@ -2381,10 +2984,10 @@ function prose() {
   const mc = k => meas.filter(f => f.cards.length === k).length;
   const lk = id => `<a href="#facts" data-f="${id}" class="num">${id}</a>`;
   const SETTLED = f => /^(Superseded|Settled) 27 Sep/.test(f.note || '');   // an inferred fact the firmware's map has since settled (build_facts.py, AMEND)
-  $('honest-text').innerHTML = `<p>The page rests on ${fs.length} facts: <b>${meas.length} measured</b>, ${of('spec').length} from the specification (the datasheet, the Programmer's Reference Manual, the core-et documents and the firmware and runtime source), ${of('derived').length} derived from others and <b>${of('inferred').length} inferred</b>. Of the measured facts, ${mc(3)} hold on all three lab cards (aifoundry2, aifoundry3 and aifoundry1 card 1), ${mc(2)} on two and ${mc(1)} on one, mostly aifoundry2${mc(0) ? `; ${mc(0)} name no card` : ''}. Every table here is at ${n('mhz')}, where a warm card sits.</p>`
+  $('honest-text').innerHTML = `<p>The page rests on ${fs.length} facts: <b>${meas.length} measured</b>, ${of('spec').length} from the specification (the datasheet, the Programmer's Reference Manual, the core-et documents and the firmware and runtime source), ${of('derived').length} derived from others and <b>${of('inferred').length} inferred</b>. Of the measured facts, ${mc(3)} hold on all three lab cards (aifoundry2, aifoundry3 and aifoundry1 card 1), ${mc(2)} on two and ${mc(1)} on one, mostly aifoundry2${mc(0) ? `; ${mc(0)} ${mc(0) === 1 ? 'names' : 'name'} no card` : ''}. Every table here is at ${n('mhz')}, where a warm card sits.</p>`
     + `<p>What the drawing assumes, and what the second version (27 September) settled:</p><ul>`
     + `<li><b>Where the compute shires are</b> is measured: all ${n('pairs496')} shire pairs fit a constant plus ${n('hop_cyc')} per hop of Manhattan distance on the logical map (${lk('mesh.shortest-paths')}). <b>How that map sits on the die</b> was inferred (${lk('mesh.orientation')}, ${lk('L33')}, ${lk('L34')}); it is now the firmware's own: the "default Shire Virtual ID Map, based on the NOC spec", renamed as the boot firmware renames the shires, matches the measured map in ${n('fw_pairs')} pair distances with no rotation or mirror (${lk('fw.map-match')}; fact ${lk('L37')}, which compared the map before the renaming, is superseded). Still open: whether the silicon has this handedness or the published die plot's, its mirror (${lk('die.handedness')}, ${lk('L24')}).</li>`
-    + `<li><b>The four grey cells</b>: the firmware's maps name them, the master (shire 32) in the north cell, the spare (33) in the south one, PCIe and then I/O east of the master (${lk('fw.grey-cells')}). They are drawn solid now; timing a counter read on shire 32 from every compute shire would confirm the master's cell on the cards.</li>`
+    + `<li><b>The four cells without a compute shire</b>: the firmware's maps name them, the master (shire 32) in the north cell, the spare (33) in the south one, PCIe and then I/O east of the master (${lk('fw.grey-cells')}). They are drawn solid now; timing a counter read on shire 32 from every compute shire would confirm the master's cell on the cards.</li>`
     + `<li><b>The memory shires' places</b> come from a fit of DRAM latencies on one card, aifoundry2 (${lk('L40')}), within ±3 cycles for ${n('ms_fit')} of loads on all three cards (${lk('ms-fit-3cards')}). The firmware's map puts the 7 memory shires the fit places on its own in the same places, if its mcN is the memory shire that PA[8:6] = N selects; memory shire 2, a tie in the fit, then has one cell left in both (${lk('fw.memshires')}, ${lk('ms2-forced')}), so the map confirms the frame, not memory shire 2 on its own. Timing a counter read on each memory shire would place it directly.</li>`
     + `<li><b>Which two memory shires share each LPDDR4X package</b> is not documented; the drawing pairs neighbours (${lk('dram.pkg-pairing')}, ${lk('L23')}). The packages are dashed: the card's schematic settles it.</li>`
     + `<li><b>Routes</b>: every leg, a reply included, is drawn on its own route, x first, then y, on the logical map; where x first would cross an empty corner of the grid (some legs from a memory shire), y first. The mesh's routing order was never measured (${lk('L104')}); only the hop count is.</li>`
@@ -2419,6 +3022,7 @@ try {
   setTheme(q.get('theme'));
   if (q.get('panel') === 'off') togglePanel(false);
   const f = q.get('flow'); if (f && '1234567890'.includes(f) && f.length === 1) startFlow(ORDER['1234567890'.indexOf(f)], 0, {intro: true});
+  else if (q.get('tour') === '1') startTour(0);
 } catch (_) { /* no URL flags */ }
 if (window.__ET_PRESENTER) { setTimeout(() => toast('<p><b>Presenter window.</b> Press <kbd>F</kbd> for full screen; <kbd>T</kbd> starts the tour.</p>', 9000), 300); }
 fitCap();
