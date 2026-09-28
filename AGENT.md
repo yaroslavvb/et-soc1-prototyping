@@ -83,7 +83,7 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
 | ID | What | File |
 |---|---|---|
 | R1–R14 | resources that existed before any measurement: manuals, RTL, firmware source, papers, the machines | [`01-resources.md`](docs/findings/01-resources.md) |
-| Q1–Q61 | the owner's requests and what each produced (Q44–Q61: 25–28 September) | [`02-requests.md`](docs/findings/02-requests.md) |
+| Q1–Q62 | the owner's requests and what each produced (Q44–Q62: 25–28 September) | [`02-requests.md`](docs/findings/02-requests.md) |
 | E1–E53 | experiments: command, time, card, raw files. E35–E47 are the version-3 three-card check (25–26 September; its plan, results and raw data are in `docs/reports/data/2026-09-25-claims-v3/`), E48 the gathers and scatters on the same three cards (26 September), E49 the g3log race, reproduced without a card on 25 September, the fixed build checked on aifoundry3's card on 26 September, E50 the host link on the three cards (27 September), E51 the DV2 development night on aifoundry2 (28 September, development only), E52 the heat placement (27–28 September, development and a frozen validation), E53 the overheating experiments (28 September, pre-registered, aifoundry3 and aifoundry1's card 1) | [`03-experiments.md`](docs/findings/03-experiments.md) |
 | A1–A19 | published artifacts: pages, images, tools, commits | [`04-artifacts.md`](docs/findings/04-artifacts.md) |
 

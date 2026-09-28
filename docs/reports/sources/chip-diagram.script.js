@@ -21,11 +21,11 @@
    log scale; a flow's packet rides the zoom from one scale to the next. F presents: full screen where the frame
    allows it, else the stage fills the frame and offers F11 and a presenter window (a copy of the page in a window of
    its own). With reduced motion nothing animates: each stage draws its end state.
-   Keys: 1-9 and 0 flows (in the tour, that flow's slide), Left/Right (and PageUp/PageDown) stages, crossing to the
+   Keys: 1-9 and 0 flows (in the tour, that flow's slide), B the broadcast (no tour slide: it ends the tour), Left/Right (and PageUp/PageDown) stages, crossing to the
    next tour slide at a flow's ends; Shift+Left/Right tour slides; Space pauses; + and - zoom (a second press while the
    camera moves goes on from its target); Enter on a part zooms in; Backspace zooms out; C follow; F present; P panel;
    D light and dark; T tour (it picks up where it was left); Q ends the tour; Esc leaves presenting, never the tour.
-   URL flags: ?theme=light|dark, ?panel=off, ?flow=1..9|0, ?tour=1.
+   URL flags: ?theme=light|dark, ?panel=off, ?flow=1..9|0|b, ?tour=1.
 
    Third version (27 September, for presenting): one drawing system (stroke weights, corner radii, type weights), --c2
    kept for what moves; a semantic zoom whose labels never swell and whose camera can be redirected mid-move; the
@@ -1399,8 +1399,8 @@ async function travel(tok, fx, pk, P, ms, o) {
 /* A labelled box: a light card with a thin border, a short accent bar in its colour and, when it points at a place
    (o.cell, o.lead), a thin leader ending in a dot on that place. With o.cell it sits beside that tile (o.side 'l' or
    'r') in the band below the tiles' id labels, so that it covers no tile's number; with o.tl or o.tr, (x, y) is its
-   top-left or top-right corner; otherwise it sits on side o.side of (x, y) ('c': centred on it). It lies above the
-   packets of its drawing (packet() inserts them under it), and it fades in. */
+   top-left or top-right corner; otherwise it sits on side o.side of (x, y) ('c': centred on it). o.minW: at least
+   this wide. It lies above the packets of its drawing (packet() inserts them under it), and it fades in. */
 const fxLevel = fx => { const L = fx && fx.closest && fx.closest('.lay'); return L ? +L.dataset.level : 0; };
 function callout(fx, x, y, lines, o) {
   o = o || {};
@@ -1416,7 +1416,7 @@ function callout(fx, x, y, lines, o) {
     t.style.fontSize = fs + 'px'; return t;
   });
   let w = 0; tx.forEach(t => { let tw = 0; try { tw = t.getComputedTextLength(); } catch (_) { /* not rendered */ } w = Math.max(w, tw || t.textContent.length * fs * 0.55); });
-  const bw = w + 2 * pad + acc, bh = lines.length * lh + pad;
+  const bw = Math.max(w + 2 * pad + acc, o.minW || 0), bh = lines.length * lh + pad;
   let bx = o.side === 'l' ? x - 20 - bw : (o.side === 'u' || o.side === 'd' || o.side === 'c') ? x - bw / 2 : x + 20;
   let by = o.side === 'u' ? y - 20 - bh : o.side === 'd' ? y + 20 : y - bh / 2;
   if (o.cell) {
@@ -1596,7 +1596,9 @@ function decode(pa) {
 }
 function hex(pa) { const s = pa.toString(16).padStart(10, '0'); return '0x' + s.slice(0, 2) + '_' + s.slice(2, 6) + '_' + s.slice(6); }
 const hopw = h => h === 1 ? 'hop' : 'hops';
-const FLOWS = {}, ORDER = 'ABCDEFGHIJ', KEYOF = {A: '1', B: '2', C: '3', D: '4', E: '5', F: '6', G: '7', H: '8', I: '9', J: '0'};
+/* the flows by their internal letter, in the flow bar's order; the key that plays each (B, the broadcast, is K here:
+   the letter B is the ladder's) */
+const FLOWS = {}, ORDER = 'ABCDEFGHIJK', KEYOF = {A: '1', B: '2', C: '3', D: '4', E: '5', F: '6', G: '7', H: '8', I: '9', J: '0', K: 'B'};
 const FL = {k: null, i: 0, tok: {dead: true}, ctx: null, done: false, still: false};
 let FOLLOW = true, FOLLOW_AUTO = false, LASTFLOW = null, CAPFLOW = false;
 const flowOn = () => !!FL.k && !FL.done;
@@ -2696,6 +2698,322 @@ FLOWS.J = {
   ],
 };
 
+/* ---- B. one value to every minion (28 September 2026, the owner's request from the page's Talk tab; not in the
+   tour). The ways the chip offers, each with what it costs where that was measured: the hardware tree (TensorBroadcast
+   down the allreduce's tree: the minion that holds the value, the die, a shire, then its measured time); a relay from
+   shire to shire against every shire reading DRAM; one line in memory that every minion loads (the die, then the
+   line's home shire); and the multicast that every kernel launch already makes. What was not measured is said where it
+   would be drawn: the tree's broadcast half on its own, the tree's energy, a relay's time to every shire, every minion
+   loading one line at once, and the launch's multicast apart from the rest of a launch. ---- */
+/* a minion of the shire view lit, a glow inside its box under its name (as flow 7 lights its 32 minions) */
+function minGlow(k) {
+  const P1 = AP[1], g = P1.minG && P1.minG[k], sh = g && g.querySelector('.shape'), m = P1.min[k];
+  if (!sh || g.querySelector(':scope > .glow')) return;
+  const r = S(E('rect', {class: 'glow', x: m.x + 3, y: m.y + 3, width: m.w - 6, height: m.h - 6, rx: 4, 'pointer-events': 'none'}, g), {fill: 'var(--c2)', fillOpacity: isDark() ? 0.42 : 0.3});
+  g.insertBefore(r, sh.nextSibling); fadeIn(r, 300);
+}
+/* each way's energy per byte where it was measured, per shire the byte reaches: the rows come in stage by stage (the
+   rows already shown hold still, a new one fades in and grows) */
+const BC_E = [['relay', 'relay hand-off', 'rl_e_next', 'relay-energy', 'var(--c3)'], ['l3', 'L3 read, mesh', 'e_l3', 'e-l3', 'var(--c1)'], ['dram', 'DRAM read', 'e_dram', 'e-dram', 'var(--c2)']];
+function bcEnergy(tok, c, keys, o) {
+  o = o || {};
+  const fx = c.fx, want = BC_E.filter(r => keys.includes(r[0])), key = want.map(r => r[0]).join();
+  const here = c.ech && c.ech.g.parentNode === fx;
+  if (here && c.echK === key) return c.ech;
+  const had = here ? c.echK.split(',') : [];
+  if (c.ech && c.ech.g.parentNode) c.ech.g.remove();
+  const still = had.length > 0;
+  c.ech = bandChart(fx, 'pJ per byte', want.map(r => ({name: r[1], val: N[r[2]].t, f: r[3], col: r[4]})), {note: 'each shire it reaches', note2: o.note2, y: o.y, still});
+  c.echK = key;
+  want.forEach((r, i) => {
+    const row = c.ech.rows[i], q = V(r[2]) / V('e_dram');
+    if (had.includes(r[0])) row.set(q);
+    else { if (still) fadeIn(row.g, 300); quiet(anim(tok, 900, p => row.set(easeS(p) * q))); }
+  });
+  return c.ech;
+}
+/* every shire reading its own copy from DRAM: lines from the memory shires through their L3 homes (fact sc.l3-miss),
+   until a later stage stops it */
+function bcDram(tok, c) {
+  const st = c.ds = {stop: false};
+  if (REDUCED) return;
+  const fx = c.fx, t0 = CLK.t; let nx = 0;
+  every(tok, t => { if (st.stop || !CLK.on) return; while (nx <= t - t0) {
+    const s = c.all[Math.floor(Math.random() * 32)], home = Math.floor(Math.random() * 32), m = MSC[home % 8], pk = packet(fx, 'var(--c2)', 7), P = pts(via(m, SH[home], s));
+    quiet(travel(tok, fx, pk, P, 280 * Math.max(4, P.length - 1), {trail: false, even: true, linear: true}).then(() => pk.remove(), e => { pk.remove(); throw e; }));
+    nx += 170; } });
+}
+/* a packet from a to b and back, the reply its own packet on its own lane (the reply colour), removed at the end */
+async function bcTrip(tok, fx, a, b, ms, col) {
+  const P = pts(route(a, b)), q = packet(fx, col || 'var(--c2)', 7); at(q, P[0]);
+  try { await travel(tok, fx, q, P, ms, {trail: false, even: true}); } finally { q.remove(); }
+  const back = lane(pts(route(b, a)), LANE, {x: b.sx, y: b.sy}), r = packet(fx, 'var(--c7)', 7); at(r, back[0]);
+  try { await travel(tok, fx, r, back, ms, {trail: false, even: true}); } finally { r.remove(); }
+}
+/* On a phone the text must read at 11 px or more: a callout of the chip or a shire at 21 (the callout enlarges it by
+   the scale), a minion's note larger still and one line (a minion's view is drawn small there) */
+const bcFs = fs => (PH ? 21 : fs);
+function bcNote(c, fx, lines, one) {
+  if (!PH) return note(c, fx, lines, 'var(--c2)');
+  if (c.cnt && c.cnt.parentNode) c.cnt.remove();
+  const p = NOTE_AT();
+  c.cnt = callout(fx, p.x, p.y, [one], {tr: true, fs: 34, col: 'var(--c2)'});
+  c.cnt.classList.add('note');
+  return c.cnt;
+}
+/* a callout over the middle of the die, its top just under row 1's tile numbers and at least 340 units wide (centred
+   on the die, it then covers the numbers of columns 3 to 5 whole and leaves those of columns 2 and 6), so that it hides
+   a tile's number whole or not at all; on a phone, where its text is larger, it spans columns 2 to 5 */
+function bcMid(fx, lines, fs) {
+  if (!PH) return callout(fx, DW / 2, TILE + 30, lines, {side: 'd', fs, minW: 340});
+  return callout(fx, STRIP + TILE + INS, TILE + 50, lines, {tl: true, fs: 21, minW: 4 * TILE - 2 * INS});
+}
+/* on a phone, whose view of a shire is its frame's width (no room beside it), a callout across the frame over a whole
+   row of parts (from y): it hides their labels whole */
+const bcWide = (fx, y, lines) => callout(fx, SF.x + 16, y, lines, {tl: true, fs: 21, minW: SF.w - 32});
+FLOWS.K = {
+  title: 'Broadcast',
+  cap: () => CAPS.K(),
+  setup(c) {
+    const all = Object.values(SH);
+    // the tree's mesh levels, top down: at level 5 + h each shire whose ID has bit h as its lowest set bit receives
+    // from the shire with that bit cleared (fact ar.tree)
+    const lv = [4, 3, 2, 1, 0].map(h => all.filter(s => s.id && lsb(s.id) === h).map(s => [SH[s.id - (1 << h)], s]));
+    // the relay: shire to shire in ID order, each hand-off on its own route (the relay hands a slab to the next shire)
+    const chain = [];
+    for (let i = 1; i < 32; i++) chain.push(pts(route(SH[i - 1], SH[i])));
+    Object.assign(c, {all, root: SH[0], lv, chain, master: CELLS.find(x => x.type === 'master' && x.r === 0), pc: CELLS.find(x => x.type === 'pcie')});
+    flowPanel('K', 'One value to every minion',
+      `<p class="pn-what">How one value, 32 B or 1 KB, gets from minion 0 of shire 0 to all ${n('n1024')} minions, and what each way costs. The chip offers four: the hardware tree (TensorBroadcast), a relay from shire to shire, one line in memory that every minion loads, and the multicast every kernel launch already makes.</p>`
+      + legRows([
+        ['the value', `hart 0's ${n('vregs')}: 32 B fills one, 1 KB all of them; ${src('only hart 0 issues tensor instructions', 'minion.tensor-hart0')}`, '', ''],
+        ['tree: mesh', `${src('TensorBroadcast', 'bc.tensorbroadcast')} down the allreduce's tree, levels 9 to 5 between shires: ${n('lv_mesh')} cycles a level, up and down`, '', ''],
+        ['tree: shire', `levels 4 and 3 through the crossbar, ${n('lv_xbar')} cycles a level; 2 to 0 on the tree edges, ${n('lv_fln')}; in every shire at once`, '', ''],
+        ['tree, timed', `with the reduction, 32 B: ${n('ar32')} (${n('ar32_us')}) over 32 minions, ${n('ar1024')} (${n('ar_us')}) over ${n('n1024')}; 1 KB: ${n('bc_1k32')} (${n('bc_1k32_us')}) and ${n('bc_1k', 'cycles')} (${n('bc_1k_us')})`, '', ''],
+        ['relay or DRAM', `a hand-off to the next shire ${n('rl_e_next', 'pJ/B')}, write and read, ${n('rl_13th')} of a DRAM round trip; every shire reading DRAM ${n('e_dram', 'pJ/B')} each, the chip's ${n('dram_bw', 'GB/s')} shared`, '', ''],
+        ['one line', `every minion loads one line from its L3 home: one load ${n('lat_l3_a')} + ${n('l3_b12')} cycles a hop; ${src('one request per shire at a time', 'bc.one-request')}; ${n('e_l3', 'pJ/B')} over the mesh`, '', ''],
+        ['at its home', `the line's bank: an atomic every ${n('hot10')}; 31 requesters, one a shire, left the home's reader at ${n('bc_poll')}; 22 from one shire hammering it stop the home's loads (${n('hot22')})`, '', ''],
+        ['the launch', `${src('one 64-byte message, one ESR broadcast, every hart reads it, one atomic a shire', 'bc.launch-multicast bc.esr-ipi')}: an empty kernel ${n('pcie_b2b_rng')} queued on 32 shires, ${n('bc_l1')} on one`, '', ''],
+        ['compared', `to all ${n('n1024')}: the tree ${n('ar_us')} (32 B) or ${n('bc_1k_us')} (1 KB); a chip barrier alone ${n('chipbar_us2')}; a queued launch ${n('pcie_b2b_rng')}`, '', ''],
+      ])
+      + `<p class="pn-what small"><b>Not measured:</b> the tree's broadcast half on its own (it was timed only with the reduction) and the tree's energy (${src('fact bc.half', 'bc.half')}); how long a relay takes to reach every shire (the relay moved 1 MB slabs down a pipeline); every minion loading one line at once (the hot-line runs used atomics); the launch's multicast apart from the rest of a launch, and its energy (${src('fact bc.launch-31', 'bc.launch-31')}).</p>`
+      + `<p class="pn-what small">The tree's mesh legs, the relay's hand-offs and the reads are drawn x first, like every route here. The interrupt that starts a launch is drawn at each shire, not along a route: its path over the mesh is not documented.</p>`);
+  },
+  stages: [
+    {name: 'The value', where: () => ({level: 2, sid: 0, nb: 0, mi: 0}),
+      mark: () => [{t: '32 B in f0; 1 KB in f0–f31', f: 'minion.vpu-regs'}],
+      say: () => `The value sits in hart 0's vector registers, minion 0 of shire 0: ${src('32 B fills one register, 1 KB all 32', 'minion.vpu-regs')}. ${src('Only hart 0 may issue TensorBroadcast', 'minion.tensor-hart0')}; its first step goes to ${n('bc_512')}, in shire 16`,
+      run: async (tok, c) => {
+        const P2 = AP[2], fx = c.fx;
+        bcNote(c, fx, [{t: 'the value: 32 B in f0', f: 'minion.vpu-regs'}], {t: 'the value: 32 B in f0', f: 'minion.vpu-regs'});
+        // the registers that hold it, lit over hart 0's own (f0 for 32 B, then all 32 for 1 KB)
+        const lit = P2.regs[0].map(r => S(E('rect', {x: r.getAttribute('x'), y: r.getAttribute('y'), width: 32, height: 21, rx: 3}, fx), {fill: 'var(--c2)', fillOpacity: 0}));
+        await pulse(tok, fx, P2.hart0, 900, 'var(--c2)', 40);
+        await anim(tok, 500, q => { lit[0].style.fillOpacity = (0.85 * easeOut(q)).toFixed(3); });
+        await wait(tok, 1200);
+        bcNote(c, fx, [{t: '1 KB: all 32, f0–f31', f: 'minion.vpu-regs'}], {t: '1 KB: all 32, f0–f31', f: 'minion.vpu-regs'});
+        await anim(tok, 1300, q => lit.forEach((r, i) => { if (i) r.style.fillOpacity = (0.85 * band(q * 1.6, i / 32, i / 32 + 0.25)).toFixed(3); }));
+        await wait(tok, 700);
+        // hart 0's first TensorBroadcast: out through the ET-Link port, over the gutters (no label is crossed)
+        const h0 = P2.hart0e, pe = P2.etlPort, gx = MF.x + 354, gy = MF.y + 545, pk = pkIn(c, fx, h0);
+        at(pk, h0);
+        await travel(tok, fx, pk, [h0, {x: gx, y: h0.y}, {x: gx, y: gy}, {x: pe.x - 10, y: gy}, {x: pe.x - 10, y: pe.y}, pe], 1600, {w: 4});
+        bcNote(c, fx, [{t: 'TensorBroadcast, step 1:'}, {t: `to ${N.bc_512.t}, shire 16`, f: 'bc.tensorbroadcast'}], {t: 'step 1: to shire 16', f: 'bc.tensorbroadcast'});
+      }},
+    {name: 'Tree: mesh', where: () => ({level: 0}),
+      say: () => `${src('TensorBroadcast', 'bc.tensorbroadcast')} down the allreduce's tree: levels 9 to 5 cross the mesh, shire 0 to 16, then to 8 and 24, and on by 4, 2 and 1, until minion 0 of every shire has the value`,
+      run: async (tok, c) => {
+        const fx = c.fx, r0 = {x: c.root.sx, y: c.root.sy};
+        hiCells([c.root], true);
+        const first = pkIn(c, fx, r0, 'var(--c2)', 10); at(first, r0);
+        for (let i = 0; i < 5; i++) {
+          // the level under the die (on a phone the caption says it: no room there)
+          const lab = PH ? null : T(fx, DW / 2, DH + 32, `level ${9 - i}`, 't-labb halo', 'middle');
+          await Promise.all(c.lv[i].map(([a, b]) => {
+            const pk = i === 0 ? first : packet(fx, 'var(--c2)', 9);
+            if (i) at(pk, {x: a.sx, y: a.sy});
+            return travel(tok, fx, pk, pts(route(a, b)), 600 + 240 * hops(a, b), {w: 4, even: true}).then(() => { pk.remove(); hiCells([b]); }, e => { pk.remove(); throw e; });
+          }));
+          if (lab) lab.remove();
+          await wait(tok, 250);
+        }
+        c.pk = null;
+        c.lvT = bandText(fx, 'Levels 9 to 5', [{t: 'cross the mesh:', f: 'ar.tree'}, {t: `${N.lv_mesh.t} cycles`, b: 1, f: 'sync.tree-levels'}, {t: 'a level, up and down,'}, {t: 'in the allreduce'}]);
+      }},
+    {name: 'Tree: shire', where: () => ({level: 1, sid: 0}),
+      mark: () => [{t: 'levels 4 to 0, every shire', f: 'ar.tree'}],
+      say: () => `In every shire at once: levels 4 and 3 cross the crossbar (neighbourhood 0 to 2, then 0 to 1 and 2 to 3), levels 2 to 0 run down ${src("the fast network's edges", 'neigh.fln-edges')}: 0→4, then 0→2 and 4→6, then to each odd minion`,
+      run: async (tok, c) => {
+        const P1 = AP[1], fx = c.fx, mc = k => { const p = P1.min[k]; return {x: p.x + p.w / 2, y: p.y + p.h / 2}; };
+        minGlow('0:0');
+        await pulse(tok, fx, mc('0:0'), 900, 'var(--c2)', 34);
+        // levels 4 and 3: minion 0 of neighbourhood 0 to minion 0 of neighbourhood 2 (the shire's minion 16), then 0 to
+        // 1 and 2 to 3 (minions 8 and 24), along the crossbar's upper edge; no trail stays (it would cross the
+        // neighbourhoods' names and the crossbar's): the minions they reach stay lit
+        const yx = P1.xbarY - 15;
+        const legXb = (a, b) => { const A = mc(a + ':0'), B = mc(b + ':0'); return [A, {x: P1['ch' + a].x, y: A.y}, {x: P1['ch' + a].x, y: yx}, {x: P1['ch' + b].x, y: yx}, {x: P1['ch' + b].x, y: B.y}, B]; };
+        for (const lvl of [[[0, 2]], [[0, 1], [2, 3]]]) {
+          await Promise.all(lvl.map(([a, b]) => { const pk = packet(fx, 'var(--c2)', 9); return travel(tok, fx, pk, legXb(a, b), 1700, {trail: false}).then(() => { pk.remove(); minGlow(b + ':0'); }, e => { pk.remove(); throw e; }); }));
+          await wait(tok, 300);
+        }
+        // levels 2 to 0 in every neighbourhood: the value runs down the fast network's tree edges, which take its colour
+        const edge = (nb, a, b) => P1.fe[nb + ':' + a + '-' + b] || [mc(nb + ':' + a), mc(nb + ':' + b)];
+        for (let h = 2; h >= 0; h--) {
+          const moves = [];
+          for (let nb = 0; nb < 4; nb++) for (let m = 1; m < 8; m++) if (lsb(m) === h) moves.push([nb + ':' + m, edge(nb, m - (1 << h), m)]);
+          await Promise.all(moves.map(([k, [a, b]]) => { const pk = packet(fx, 'var(--c2)', 7); at(pk, a); return travel(tok, fx, pk, [a, b], 1200, {w: 6, op: 1}).then(() => { pk.remove(); minGlow(k); }, e => { pk.remove(); throw e; }); }));
+          await wait(tok, 300);
+        }
+        const lines = [{t: 'levels 4–3: crossbar', f: 'ar.tree'}, {t: `${N.lv_xbar.t} cycles a level`, f: 'sync.tree-levels'}, {t: 'levels 2–0: tree edges', f: 'neigh.fln-edges'}, {t: `${N.lv_fln.t} a level`, f: 'sync.tree-levels'}, {t: 'allreduce, up and down'}];
+        // right of the frame; on a phone across the row of banks, which this stage does not use
+        if (PH) bcWide(fx, SF.y + 132, [{t: `levels 4–3: the crossbar, ${N.lv_xbar.t} cycles a level`, f: 'ar.tree sync.tree-levels'},
+          {t: `levels 2–0: the tree edges, ${N.lv_fln.t} a level`, f: 'neigh.fln-edges sync.tree-levels'}, {t: 'in the allreduce, up and down'}]);
+        else callout(fx, SF.x + SF.w, SF.y + 470, lines, {side: 'r', fs: 20});
+      }},
+    {name: 'Tree, timed', where: () => ({level: 0}), dim: false,
+      say: () => `Timed with the reduction, on three cards: all ${n('n1024')} minions have 32 B after ${n('ar1024')} (${n('ar_us')}) and 1 KB after ${n('bc_1k', 'cycles')} (${n('bc_1k_us')}); ${src('the broadcast half alone was never timed', 'bc.half')}`,
+      run: async (tok, c) => {
+        const fx = c.fx; clearDim(); hiCells(c.all, false);
+        if (c.lvT) { fadeOut(c.lvT); c.lvT = null; }
+        // the tree's legs stay, set back
+        fx.querySelectorAll(':scope > path.trail').forEach(p => { p.style.strokeOpacity = 0.3; });
+        const rows = [['32 minions, 32 B', 'ar32', 'sync-allreduce32'], ['1,024 minions, 32 B', 'ar1024', 'sync-allreduce1024'], ['32 minions, 1 KB', 'bc_1k32', 'bc.allreduce-1kb'], ['1,024 minions, 1 KB', 'bc_1k', 'bc.allreduce-1kb']];
+        const ch = bandChart(fx, 'Allreduce, cycles', rows.map(r => ({name: r[0], val: N[r[1]].t.replace(/ cycles$/, ''), f: r[2]})), {note: 'up and down,', note2: 'three cards'});
+        await Promise.all([anim(tok, 1600, q => ch.rows.forEach((r, i) => r.set(easeS(q) * V(rows[i][1]) / V('bc_1k')))),
+          Promise.all(c.all.map(s => pulse(tok, fx, {x: s.sx, y: s.sy}, 1200, 'var(--c2)', 30)))]);
+        bcMid(fx, [{t: `all 1,024: ${N.ar_us.t} for 32 B`, f: 'sync-allreduce1024'}, {t: `${N.bc_1k_us.t} for 1 KB`, f: 'bc.allreduce-1kb'}, {t: 'with the reduction; the'}, {t: 'broadcast alone: not timed', f: 'bc.half'}], 23);
+      }},
+    {name: 'Relay or DRAM', where: () => ({level: 0}),
+      say: () => `A buffer in memory, handed shire to shire: each hand-off costs ${n('rl_e_next', 'pJ/B')}. If every shire reads its own copy from DRAM instead, each pays ${n('e_dram', 'pJ/B')}, and all share the chip's ${n('dram_bw', 'GB/s')}`,
+      run: async (tok, c) => {
+        const fx = c.fx;
+        if (c.ds) c.ds.stop = true;
+        [...fx.children].forEach(el => fadeOut(el, 320)); c.ech = null; c.lvT = null;
+        clearDim(); hiCells([c.root], true);
+        bcEnergy(tok, c, ['relay', 'dram'], {note2: 'relay time: not timed'});
+        // the relay: the value handed from shire to shire in ID order, one hand-off after another
+        const pk = packet(fx, 'var(--c3)', 10); at(pk, {x: c.root.sx, y: c.root.sy});
+        for (let i = 0; i < 31; i++) {
+          const P = c.chain[i];
+          await travel(tok, fx, pk, P, 70 * Math.max(1, P.length - 1), {w: 3, col: 'var(--c3)', op: 0.5, even: true});
+          hiCells([SH[i + 1]]);
+        }
+        pk.remove();
+        await wait(tok, 600);
+        // every shire reading its own copy from DRAM, through the lines' L3 homes
+        hiCells(Object.values(MSC)); [0, 2, 4, 6].forEach(hiPkg);
+        bcDram(tok, c);
+        await wait(tok, 4500);
+      }},
+    {name: 'One line', where: () => ({level: 0}),
+      say: () => `One line that every minion loads from its home, shire 0's L3 slice: ${src('a shire sends one request for a line at a time', 'bc.one-request')}, so the home serves 32; one load from h hops takes ${n('lat_l3_a')} + ${n('l3_b12')}×h cycles`,
+      run: async (tok, c) => {
+        const fx = c.fx, home = c.root;
+        if (c.ds) c.ds.stop = true;
+        const keep = c.ech && c.ech.g.parentNode === fx ? c.ech.g : null;
+        [...fx.children].forEach(el => { if (el !== keep) fadeOut(el, 320); });
+        clearDim(); hiCells([home], true);
+        bcEnergy(tok, c, ['relay', 'l3', 'dram'], {note2: 'relay time: not timed'});
+        callout(fx, home.sx, home.sy, [{t: "home: shire 0's L3", f: 'l3.home'}, {t: 'one request a shire', f: 'bc.one-request'}], {cell: home, side: 'r', fs: bcFs(20)});
+        await pulse(tok, fx, {x: home.sx, y: home.sy}, 900, 'var(--c2)', 40);
+        // one request from each other shire, and the line back on its own lane
+        await Promise.all(c.all.filter(s => s !== home).map((s, i) => wait(tok, (i % 8) * 80)
+          .then(() => bcTrip(tok, fx, s, home, 240 * Math.max(1, hops(s, home))))
+          .then(() => hiCells([s]))));
+        bandText(fx, 'One load, h hops', [{t: `${N.lat_l3_a.t} + ${N.l3_b12.t} × h`, b: 1, f: 'l3.latency'}, {t: 'cycles; all 1,024'}, {t: 'at once: not timed'}], c.ech.bottom + 10);
+      }},
+    {name: 'At its home', where: () => ({level: 1, sid: 0}),
+      mark: () => [{t: `the line's bank: an atomic every ${N.hot10.t}`, f: 'hot-cost'}],
+      say: () => `At the home, the line's bank retires one atomic every ${n('hot10')}: 31 requesters, one a shire, left the home's own reader at ${n('bc_poll')} of its rate, but 22 from one shire hammering it stop the home's loads (flow 9)`,
+      run: async (tok, c) => {
+        const P1 = AP[1], fx = c.fx, B = P1.bank[0], ln = P1.lane[0], yb = B.box.y - 8, top = {x: ln.x, y: SF.y - 40};
+        // the tree of stage 3 (the same shire, drawn here as its end state when the reader steps) goes
+        [...fx.children].forEach(el => fadeOut(el, 260)); clearGlow(true);
+        // from the mesh down the line's lane to its bank, and back up beside it
+        const inP = [top, ln, {x: ln.x, y: yb}, {x: B.x, y: yb}, B], outP = inP.slice().reverse().map(p => ({x: p.x + 9, y: p.y}));
+        // (on a phone short: clear of the north edge's name)
+        callout(fx, top.x, top.y + 12, [{t: PH ? 'from 31 shires' : 'from 31 shires, one each', f: 'bc.one-request'}], {side: 'r', fs: bcFs(19)});
+        // right of the frame beside the bank; on a phone across the neighbourhoods' lower rows (the next callout takes its
+        // place there), the banks being this stage's
+        const NB2 = SF.y + 352 + 46 + 2 * 70 - 8;
+        if (PH) sayAt(c, fx, SF.x + 16, NB2, [{t: `the line's bank: one atomic every ${N.hot10.t}`, f: 'hot-cost'}, {t: 'loads by every minion at once: not measured'}], {tl: true, fs: 21, minW: SF.w - 32});
+        else callout(fx, SF.x + SF.w, B.y, [{t: "the line's bank:"}, {t: 'one atomic every'}, {t: N.hot10.t, f: 'hot-cost'}, {t: 'loads by every minion'}, {t: 'at once: not measured'}], {side: 'r', fs: 20});
+        // the line's bank lit (a glow inside its box, under its name), and its lane outlined (a line across the lane's
+        // number would cross the label)
+        const bk = [...LAYERS[1].querySelectorAll('.comp[data-comp="banks"]')].find(g => g._ctx.bank === 0), bsh = bk && bk.querySelector('.shape');
+        if (bsh && !bk.querySelector(':scope > .glow')) { const r = S(E('rect', {class: 'glow', x: B.box.x + 3, y: B.box.y + 3, width: B.box.w - 6, height: B.box.h - 6, rx: 4, 'pointer-events': 'none'}, bk), {fill: 'var(--c2)', fillOpacity: isDark() ? 0.42 : 0.3}); bk.insertBefore(r, bsh.nextSibling); fadeIn(r, 300); }
+        S(E('rect', {x: ln.x - 27, y: ln.y - 24, width: 54, height: 48, rx: 6}, fx), {fill: 'none', stroke: 'var(--c2)', strokeWidth: 3.5});
+        const trips = [];
+        for (let i = 0; i < 31; i++) {
+          const q = packet(fx, 'var(--c2)', 6);
+          const p = travel(tok, fx, q, inP, 1000, {trail: false}).then(() => { q.remove(); const r = packet(fx, 'var(--c7)', 6); return travel(tok, fx, r, outP, 900, {trail: false}).then(() => r.remove(), e => { r.remove(); throw e; }); }, e => { q.remove(); throw e; });
+          p.catch(() => {});
+          trips.push(p);
+          await wait(tok, 60);
+        }
+        await Promise.all(trips);
+        // the home's own minions read the line too, through the crossbar
+        const keys = Object.keys(P1.min);
+        await Promise.all(keys.map((k, i) => wait(tok, (i % 8) * 50).then(async () => {
+          const m = P1.min[k], q0 = {x: m.x + m.w / 2, y: m.y + m.h / 2}, ch = P1['ch' + k[0]];
+          const P = [q0, {x: ch.x, y: q0.y}, {x: ch.x, y: P1.xbarY}, {x: B.x, y: P1.xbarY}, {x: B.x, y: B.box.y + B.box.h}];
+          const q = packet(fx, 'var(--c1)', 6); at(q, q0);
+          try { await travel(tok, fx, q, P, 900, {trail: false}); } finally { q.remove(); }
+          const r = packet(fx, 'var(--c7)', 6);
+          try { await travel(tok, fx, r, P.slice().reverse(), 900, {trail: false}); } finally { r.remove(); }
+        })));
+        if (PH) sayAt(c, fx, SF.x + 16, NB2, [{t: '31 requesters, one in each shire:', f: 'bc.pollers'}, {t: `the home's own reader kept ${N.bc_poll.t}`, f: 'bc.pollers'},
+          {t: '22 from one shire, hammering it:'}, {t: `the home's loads fall to ${N.hot22.t}`, f: 'hot.cliff'}], {tl: true, fs: 21, minW: SF.w - 32});
+        else callout(fx, SF.x + SF.w, SF.y + 440, [{t: 'one per shire, 31 in all:', f: 'bc.pollers'}, {t: `the home's reader: ${N.bc_poll.t}`, f: 'bc.pollers'}, {t: '22 from one shire,'}, {t: `hammering: loads at ${N.hot22.t}`, f: 'hot.cliff'}], {side: 'r', fs: 20});
+      }},
+    {name: 'The launch', where: () => ({level: 0}),
+      say: () => `Every kernel launch is a broadcast: the master shire writes ${src('a 64-byte message', 'bc.launch-multicast')} into its scratchpad, ${src('one ESR broadcast', 'bc.esr-ipi')} interrupts every hart, all of them read it, and each shire answers with a global atomic`,
+      run: async (tok, c) => {
+        const fx = c.fx, m = c.master, mp = {x: m.sx, y: m.sy};
+        if (c.ds) c.ds.stop = true;
+        [...fx.children].forEach(el => fadeOut(el, 320)); c.ech = null;
+        clearDim(); hiCells([m, c.pc], true);
+        // the launch command from the host, over PCIe to the master shire
+        await travel(tok, fx, packet(fx, 'var(--c4)', 11), AP[0].host.slice(0, 2).concat(pts(route(c.pc, m))), 1800, {col: 'var(--c4)'});
+        await pulse(tok, fx, mp, 900, 'var(--c7)', 40);
+        // (two lines: a taller callout beside a top-row cell would cover its neighbours' numbers)
+        callout(fx, mp.x, mp.y, [{t: 'one 64-byte line, in the', f: 'bc.launch-multicast'}, {t: "master's scratchpad"}], {cell: m, side: 'l', fs: bcFs(20)});
+        // one ESR broadcast raises the interrupt on every hart of every shire in the mask: its path over the mesh is not
+        // documented, so it is drawn at each shire, not along a route
+        hiCells(c.all);
+        await Promise.all(c.all.map(s => pulse(tok, fx, {x: s.sx, y: s.sy}, 1100, 'var(--c7)', 32)));
+        // every shire's harts read the message from the master's scratchpad; the last of each shire clears the shire's
+        // bit of the mask beside it with a global atomic (the small packet)
+        await Promise.all(c.all.map((s, i) => wait(tok, (i % 8) * 60).then(async () => {
+          const ms = 200 * Math.max(1, hops(s, m));
+          await bcTrip(tok, fx, s, m, ms);
+          const P = pts(route(s, m)), a = packet(fx, 'var(--c5)', 5); at(a, P[0]);
+          try { await travel(tok, fx, a, P, ms, {trail: false, even: true}); } finally { a.remove(); }
+        })));
+        const [bg, rc, lt] = await ring(tok, fx, mp, 1400, 'var(--c7)', 'poll');
+        [bg, rc, lt].forEach(e => e && e.remove());
+        bandText(fx, 'An empty kernel', [{t: 'queued, on 32 shires:'}, {t: N.pcie_b2b_rng.t, b: 1, f: 'pcie.launch'}, {t: 'on one shire:'}, {t: `${N.bc_l1.t} µs`, b: 1, f: 'bc.launch-31'},
+          {t: 'the other 31 add'}, {t: N.bc_l31.t, b: 1, f: 'bc.launch-31'}, {t: 'waited for, alone:'}, {t: N.pcie_launch_rng.t, b: 1, f: 'pcie.launch'}, {t: 'the multicast alone'}, {t: 'was not timed', f: 'bc.launch-31'}], BAND.y);
+      }},
+    {name: 'Compared', where: () => ({level: 0}), dim: false,
+      say: () => `To all ${n('n1024')} minions: the tree ${n('ar_us')} for 32 B and ${n('bc_1k_us')} for 1 KB, a chip barrier alone ${n('chipbar_us2')}, a queued launch ${n('pcie_b2b_rng')}; a relay's and a shared line's time, and the tree's energy, were not measured`,
+      run: async (tok, c) => {
+        const fx = c.fx;
+        if (c.ds) c.ds.stop = true;
+        [...fx.children].forEach(el => fadeOut(el, 320)); c.ech = null;
+        clearDim(); hiCells(c.all, false);
+        // the time to reach all 1,024 minions (a log scale, 1 µs to 1 ms), and each way's energy per byte where measured
+        const L = [['tree, 32 B', 'ar_us', 'sync-allreduce1024', 'var(--c2)'], ['tree, 1 KB', 'bc_1k_us', 'bc.allreduce-1kb', 'var(--c2)'], ['chip barrier', 'chipbar_us2', 'sync-chip-barrier', 'var(--c7)'], ['kernel launch', 'pcie_b2b_rng', 'pcie.launch', 'var(--c4)']];
+        // (on a phone the charts fold under the die, as large as the taller one allows: that one keeps no note there, the
+        // scale in its title, and the caption says what was not measured)
+        const lc = bandChart(fx, PH ? 'To all 1,024, µs, log' : 'To all 1,024, µs', L.map(r => ({name: r[0], val: N[r[1]].t, f: r[2], col: r[3]})), PH ? {} : {note: 'log scale, to 1 ms', note2: 'relay, line: not timed'});
+        const ec = bandChart(fx, 'pJ per byte', BC_E.map(r => ({name: r[1], val: N[r[2]].t, f: r[3], col: r[4]})), {note: 'each shire it reaches', note2: PH ? null : 'tree, launch: none', y: lc.bottom + 14});
+        await anim(tok, 1600, q => { const e = easeS(q); lc.rows.forEach((r, i) => r.set(e * Math.log10(V(L[i][1])) / 3)); ec.rows.forEach((r, i) => r.set(e * V(BC_E[i][2]) / V('e_dram'))); });
+        bcMid(fx, [{t: 'In a kernel, the tree:'}, {t: `${N.ar_us.t} to every minion`, f: 'sync-allreduce1024'}, {t: 'Data in memory: one read'}, {t: 'a shire, hand-offs on chip,', f: 'bc.one-request relay-energy'}, {t: 'and never a polled line', f: 'hot.cliff'}], 23);
+      }},
+  ],
+};
+
 const ACTS = {
   replay: () => { if (FL.k || LASTFLOW) startFlow(FL.k || LASTFLOW, 0, {intro: true}); },
   newpa: () => { ST.pa = mkPA(Math.floor(Math.random() * 32), Math.floor(Math.random() * 2 ** 20)); startFlow('A', 0, {keep: true}); },
@@ -2716,6 +3034,7 @@ const CAPS = {
   H: () => `The same matmul, ${n('w_tflops')} TFLOP/s timed from the host (${n('tflops')} on the device), draws ${n('w_zeros', 'W')} on zeros and ${n('w_randn', 'W')} on random data at the board; random data reaches 90 °C in ${n('race_rand', 's')}.`,
   I: () => `One hot line: the atomic is fair to every shire, but 22 requesters stop its home shire's own traffic dead, while 21 leave it ${n('hot21r')} of its rate.`,
   J: () => `The allreduce tree: ten levels up with TensorReduce and back down with TensorBroadcast, ${n('ar1024')} for all ${n('n1024')} minions, about a quarter of a software barrier.`,
+  K: () => `One value to all ${n('n1024')} minions, four ways: the hardware tree, within an allreduce's ${n('ar_us')}; a relay from shire to shire; one line that every minion loads; and the multicast every kernel launch makes, ${n('pcie_b2b_rng')} a queued launch.`,
 };
 const compG = (key, i) => LAYERS[Z.level].querySelectorAll(`.comp[data-comp="${key}"]`)[i || 0] || null;
 /* the facts behind the tour's last slide: how many are measured, specified, derived and inferred */
@@ -2875,7 +3194,7 @@ function resetCap() {
     setKick('ET-SoC-1'); setCap(STEPS[0].cap()); sub(STEPS[0].sub()); renderBar(); return;
   }
   setKick('Explore');
-  setCap(`${TOUCH ? 'Tap' : 'Click'} any part of the chip, zoom with the scale control, pick one of ten flows, or press Tour to step through it all in ${STEPS.length} steps.`);
+  setCap(`${TOUCH ? 'Tap' : 'Click'} any part of the chip, zoom with the scale control, pick one of eleven flows, or press Tour to step through it all in ${STEPS.length} steps.`);
   sub(HINT); $('cap-sub').classList.add('hint'); renderBar();
 }
 /* the stage bar: the active flow's stages, the current one marked; in the tour on a still step, the tour's still
@@ -2906,7 +3225,7 @@ function renderBar() {
       });
     } else {
       const li = document.createElement('li'); li.className = 'stg-hint';
-      li.textContent = TOUCH ? 'Pick a flow above to see its stages here, or press Tour' : 'Pick a flow above (keys 1 to 9 and 0) to see its stages here, or press Tour';
+      li.textContent = TOUCH ? 'Pick a flow above to see its stages here, or press Tour' : 'Pick a flow above (keys 1 to 9, 0 and B) to see its stages here, or press Tour';
       ol.appendChild(li);
     }
     refocus(ol, had);
@@ -3074,6 +3393,8 @@ function back() {
 function pickFlow(k) {
   const j = STEPS.findIndex(s => s.flow === k);
   if (TOUR && j >= 0) { tourGo(j); return; }
+  // a flow the tour does not step through (B, the broadcast): the tour ends and the flow plays on its own
+  if (TOUR) endTour();
   if (FOLLOW_AUTO) setFollow(true);
   startFlow(k, 0, {intro: true});
 }
@@ -3131,6 +3452,7 @@ document.addEventListener('keydown', e => {
     case 'c': case 'C': e.preventDefault(); setFollow(!FOLLOW); break;
     case 't': case 'T': e.preventDefault(); toggleTour(); break;
     case 'q': case 'Q': if (TOUR) { e.preventDefault(); endTour(); stopFlow(); } break;
+    case 'b': case 'B': e.preventDefault(); pickFlow('K'); break;
     case '+': case '=': e.preventDefault(); zoomBy(1); break;
     case '-': case '_': e.preventDefault(); zoomBy(-1); break;
     case 'Escape': back(); break;
@@ -3155,7 +3477,7 @@ function prose() {
     `<p><b>The chip.</b> The ET-SoC-1 has ${n('cores')} RISC-V cores on a ${n('die_mm2')} mm² die in TSMC ${n('process')}: ${n('minions')} minions in ${n('shires')} shires, ${n('maxions')} and a service processor. The diagram draws the die (width and height from a published die plot) with ${n('cshires')} compute shires, the master (${n('master_id')}) and spare (${n('spare_id')}) shires, the PCIe and I/O shires, and ${n('memshires').toLowerCase()} memory shires, on an ${n('grid86')} mesh of ${n('stops')} stops. The compute shires sit where measured distances put them, and the firmware's NoC-spec map, once its boot-time renaming is applied, puts every one in the same cell (${n('fw_pairs')} pair distances). Each mesh hop adds ${n('hop_cyc')} (${n('hop_ns')}) to a round trip and is about ${n('hop_mm')} of wire. Off the die, four LPDDR4X packages hold ${n('channels')} channels of ${n('ch_bits')}, ${n('dram_gb')}; the chip streams ${n('dram_bw')} GB/s from them against ${n('dram_peak')} GB/s peak at their ${n('mts')} MT/s. The host links through the PCIe shire: Gen4 x8, trained at ${n('pcie_neg')} on every card, ${n('pcie_h2d')} GB/s to the card by DMA. The fp32 matmul at ${n('tflops')} TFLOP/s draws ${n('mmw')} at the board on the three cards, ${n('perw')} GFLOP/s per watt.</p>`,
     `<p><b>A shire.</b> ${n('neigh')} of ${n('per_neigh')} share ${n('cache_mb')} of SRAM in ${n('banks')}. The cards run mode M0: ${n('scp_mb')} of scratchpad that any shire can address, ${n('l2_kb')} of L2 private to the shire, and a ${n('l3_mb')} slice of the chip's ${n('l3_chip')} L3. The shire meets the mesh at one stop, and inside a neighbourhood minions talk fastest along the tree edges of the fast local network (${n('ts_fln')} round trip, against ${n('ts_xbar')} cycles for other pairs).</p>`,
     `<p><b>A minion.</b> ${n('harts')}, in-order and single-issue, a vector unit of ${n('lanes')} and a ${n('l1_kb')} L1 data cache, of which the firmware makes ${n('l1_scp')} a tensor scratchpad and leaves each hart ${n('l1_hart')}. The tensor instructions are no separate unit: state machines in the vector unit run them on its lanes' FMA and int8 multiply-add units, so the tensor peak (${n('peak32')}, ${n('peak16')} or ${n('peak8')} operations per cycle) is the lanes' peak. On ${n('n1024')} minions at ${n('mhz')} they sustain ${n('tflops')} TFLOP/s fp32.</p>`,
-    `<p><b>The flows.</b> (1) A load that misses every cache: ${n('lat_l1')} cycles would have been an L1 hit and ${n('lat_l2')} an L2 hit; the L3 home is PA[10:6] and costs ${n('lat_l3_a')} + ${n('lat_l3_b')}; the memory shire is PA[8:6] and adds ${n('lat_ms_a')} + ${n('lat_ms_b')} cycles per hop; a typical DRAM load takes ${n('lat_dram')}, of which ${n('lat_dram_chip')} are the DRAM chip. (2) The ladder adds the read buffer (${n('lat_rb')}), the own scratchpad (${n('lat_scp')}) and another shire's scratchpad (${n('lat_rs_a')} + ${n('lat_rs_b')} per hop). (3) TensorSend: ${n('ts_a')} cycles plus ${n('ts_b')} per hop, round trip. (4) The relay: ${n('rl_e_next')} pJ/B to the next shire against ${n('rl_e_dram')} through DRAM (${n('rl_x')} less). (5) Gathers from scattered lines: ${n('g_l1_r')}, ${n('g_l2_r')}, ${n('g_rs_r')} and ${n('g_dr_r')} G elements/s from L1, L2, a scratchpad two hops away and DRAM. (6) The host over PCIe, timed on three cards: ${n('pcie_h2d')} GB/s to the card and ${n('pcie_d2h')} back by DMA (${n('pcie_h2d_pct')} and ${n('pcie_d2h_pct')} of the link), ${n('pcie_stg_rng')} GB/s for a program's staged copies; an empty kernel costs the card ${n('pcie_b2b_rng')} queued, while one launch waited for takes ${n('pcie_launch_rng')}, most of it the runtime's ${n('poll500')} idle poll. (7) A matmul step: TensorLoad ${n('tl_l2')} cycles, TensorFMA ${n('tfma_tenb')}, ${n('mm_op')} per op with the next load hidden. (8) The Horace runs of the matmul (${n('w_tflops')} TFLOP/s, timed from the host) on zeros, ones and random data: ${n('w_zeros')}, ${n('w_ones')} and ${n('w_randn')} W at the board at the launch temperature; random data reaches 90 °C in ${n('race_rand')} s, zeros never. (9) One hot line: fair shares (${n('hot_host')} for the host shire), and 22 requesters stop the host shire's own loads (${n('hot22')}). (0) The allreduce tree: ${n('ar1024')} for all ${n('n1024')} minions, against ${n('chipbar')} cycles for a chip barrier.</p>`,
+    `<p><b>The flows.</b> (1) A load that misses every cache: ${n('lat_l1')} cycles would have been an L1 hit and ${n('lat_l2')} an L2 hit; the L3 home is PA[10:6] and costs ${n('lat_l3_a')} + ${n('lat_l3_b')}; the memory shire is PA[8:6] and adds ${n('lat_ms_a')} + ${n('lat_ms_b')} cycles per hop; a typical DRAM load takes ${n('lat_dram')}, of which ${n('lat_dram_chip')} are the DRAM chip. (2) The ladder adds the read buffer (${n('lat_rb')}), the own scratchpad (${n('lat_scp')}) and another shire's scratchpad (${n('lat_rs_a')} + ${n('lat_rs_b')} per hop). (3) TensorSend: ${n('ts_a')} cycles plus ${n('ts_b')} per hop, round trip. (4) The relay: ${n('rl_e_next')} pJ/B to the next shire against ${n('rl_e_dram')} through DRAM (${n('rl_x')} less). (5) Gathers from scattered lines: ${n('g_l1_r')}, ${n('g_l2_r')}, ${n('g_rs_r')} and ${n('g_dr_r')} G elements/s from L1, L2, a scratchpad two hops away and DRAM. (6) The host over PCIe, timed on three cards: ${n('pcie_h2d')} GB/s to the card and ${n('pcie_d2h')} back by DMA (${n('pcie_h2d_pct')} and ${n('pcie_d2h_pct')} of the link), ${n('pcie_stg_rng')} GB/s for a program's staged copies; an empty kernel costs the card ${n('pcie_b2b_rng')} queued, while one launch waited for takes ${n('pcie_launch_rng')}, most of it the runtime's ${n('poll500')} idle poll. (7) A matmul step: TensorLoad ${n('tl_l2')} cycles, TensorFMA ${n('tfma_tenb')}, ${n('mm_op')} per op with the next load hidden. (8) The Horace runs of the matmul (${n('w_tflops')} TFLOP/s, timed from the host) on zeros, ones and random data: ${n('w_zeros')}, ${n('w_ones')} and ${n('w_randn')} W at the board at the launch temperature; random data reaches 90 °C in ${n('race_rand')} s, zeros never. (9) One hot line: fair shares (${n('hot_host')} for the host shire), and 22 requesters stop the host shire's own loads (${n('hot22')}). (0) The allreduce tree: ${n('ar1024')} for all ${n('n1024')} minions, against ${n('chipbar')} cycles for a chip barrier. (B) One value to every minion, four ways: the hardware tree (TensorBroadcast down the allreduce's tree) has it everywhere within the allreduce's ${n('ar1024')} (${n('ar_us')}) for 32 B and ${n('bc_1k', 'cycles')} (${n('bc_1k_us')}) for 1 KB, the broadcast half never timed alone; a relay hands a buffer from shire to shire at ${n('rl_e_next')} pJ/B a hand-off, where every shire reading its own copy from DRAM pays ${n('e_dram')} pJ per byte; one line that every minion loads costs each shire one request to its home, but hammered with atomics it is the hot line of flow 9; and every kernel launch is itself a broadcast of one 64-byte message, ${n('pcie_b2b_rng')} for an empty kernel queued on 32 shires.</p>`,
   ].join('');
   // what is measured, specified, derived and inferred
   const fs = Object.values(F), of = k => fs.filter(f => f.kind === k), meas = of('measured');
@@ -3174,7 +3496,8 @@ function prose() {
     + `<li><b>Sizes</b>: the die's width and height and the tile pitch are pixel estimates on one vendor die plot scaled to ${n('die_mm2')} mm² (${lk('chip.die-dims')}, ${lk('chip.hop-pitch')}).</li>`
     + `<li><b>The host link</b> is measured now, on three cards (${lk('pcie.h2d')}, ${lk('pcie.d2h')}, ${lk('pcie.staged')}, ${lk('pcie.launch')}); which way the host's writes reach DRAM (through the L3 homes or straight to the memory shires) is not established.</li>`
     + `<li><b>Gathers and scatters</b> (E48) were reduced on 27 September and have no published page yet; the heat race of flow 8 is one card's (aifoundry2).</li>`
-    + `<li><b>What was measured for this version.</b> Only the host link was measured anew (27 September, three cards: ${lk('pcie.h2d')}). Flows 7, 8, 9 and 0 draw measurements already in the repository: the matmul benchmark and the tensor-load timings, the Horace runs of the same matmul on different data, the hot-line passes and the allreduce ladder, each fact with its data file.</li></ul>`
+    + `<li><b>What was measured for this version.</b> Only the host link was measured anew (27 September, three cards: ${lk('pcie.h2d')}). Flows 7, 8, 9 and 0 draw measurements already in the repository: the matmul benchmark and the tensor-load timings, the Horace runs of the same matmul on different data, the hot-line passes and the allreduce ladder, each fact with its data file.</li>`
+    + `<li><b>The broadcast (flow B, 28 September)</b> measures nothing new either: it draws the allreduce ladder (its 1 KB rows read from the version-3 raw files, ${lk('bc.allreduce-1kb')}), the relay, the hot line's passes and the launch timings, with the firmware source for the launch's own multicast (${lk('bc.launch-multicast')}). What was not measured is said on its stages: the tree's broadcast half on its own and the tree's energy (${lk('bc.half')}), a relay's time to reach every shire, every minion loading one line at once (${lk('bc.one-request')}), and the launch's multicast apart from the rest of a launch (${lk('bc.launch-31')}).</li></ul>`
     + `<p>The inferred facts still open:</p><ul>${of('inferred').filter(f => !SETTLED(f)).map(f => `<li>${esc(f.statement)} <span class="small">(${lk(f.id)})</span></li>`).join('')}</ul>`
     + `<p>Inferred before 27 September and settled since by the firmware's map (each fact's note says what is left):</p><ul>${of('inferred').filter(SETTLED).map(f => `<li>${esc(f.statement)} <span class="small">(${lk(f.id)}: ${esc(f.note)})</span></li>`).join('')}</ul>`;
   // the asks: what would settle each inferred part, and the hub's row that asks for it
@@ -3237,6 +3560,7 @@ try {
   setTheme(q.get('theme'));
   if (q.get('panel') === 'off') togglePanel(false);
   const f = q.get('flow'); if (f && '1234567890'.includes(f) && f.length === 1) startFlow(ORDER['1234567890'.indexOf(f)], 0, {intro: true});
+  else if (f && f.toLowerCase() === 'b') startFlow('K', 0, {intro: true});
   else if (q.get('tour') === '1') startTour(0);
 } catch (_) { /* no URL flags */ }
 if (window.__ET_PRESENTER) { setTimeout(() => toast('<p><b>Presenter window.</b> Press <kbd>F</kbd> for full screen; <kbd>T</kbd> starts the tour.</p>', 9000), 300); }

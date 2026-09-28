@@ -43,7 +43,7 @@ asks = [
   "what_settles_it": "The dev card's schematic: ET-PCIe-Dev-Card-V3.pdf p.1 links 'Schematic 09/27/2022', 'Board File V3.2' and the V3 schematic changes, none in external/et-man. Its block diagram (pdf p.4) and datasheet Fig. 2-6 both draw each LPDDR4X beside two neighbouring memory shires but number neither; the datasheet (pdf p.30) says only two memory shires per 64-bit device. No experiment identifies the package from software.",
   "ask": "document", "ask_detail": "card schematic and board file (AI Foundry)",
   "hub_anchor": "ask-card-schematic", "hub_url": HUB + "ask-card-schematic", "also": []},
- {"part": "the mesh's routing order (every route the ten flows draw)",
+ {"part": "the mesh's routing order (every route the eleven flows draw)",
   "comps": ["mesh"], "facts": ["L104", "mesh.xy-assumption", "mesh.shortest-paths", "L105"],
   "what_is_inferred": "Whether a request turns x first or y first (the diagram draws x first; y first where x first crosses an empty corner); also the router-to-router flit width (L105 note).",
   "what_settles_it": "Documents: the NoC configuration's generated reference manual (noc/reference_manual/noc_reference_manual.htlm, named at core-et rtl/inc/debug_defines.vh:831-832), the Main NoC documentation linked from CORE-ET Minion Shire Description §3.3 (pdf p.11, link missing), and the 'NOC spec' (noc_reconfigure.h:76, 84). Experiment: tensor-load streams that share a link under x-first routing but not y-first (and the mirror), several readers per stream; a throughput drop in one set only gives the order. Interface: the routers' VC-status registers (noc_esr.h RIVCS/ROVCS), SP-only.",

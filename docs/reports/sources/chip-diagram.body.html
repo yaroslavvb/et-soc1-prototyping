@@ -408,6 +408,18 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   .t-dcap{font-size:22px}
   #chip .bkey{font-size:21px}
 }
+/* eleven flow buttons (the broadcast, 28 September) on one header row wherever ten fitted: 900-1450 wide the flow
+   buttons a little smaller and tighter still, 1451-1760 wide (the full title) the "Flows" label goes and they are
+   tighter */
+@media (min-width:900px) and (max-width:1450px){
+  .st-head .st-row{gap:3px}
+  .st-head .st-row .st-btn{padding-left:6px;padding-right:6px;font-size:clamp(.78rem,.3vw + .62rem,1rem)}
+  .st-head .st-row .st-btn .k{margin-right:3px}
+}
+@media (min-width:1451px) and (max-width:1760px){
+  .st-row .lab2{display:none}
+  .st-head .st-row .st-btn{padding-left:9px;padding-right:9px}
+}
 </style>
 
 <section id="stage" aria-label="Interactive schematic of the ET-SoC-1">
@@ -426,6 +438,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
     <button type="button" class="st-btn" data-flow="H" aria-pressed="false" title="The same matmul on different data: watts and heat (key 8)"><span class="k">8</span>Data<svg class="ar" viewBox="0 0 16 10" aria-hidden="true"><path d="M1.5 5h12M9.5 1.5 13.5 5l-4 3.5"/></svg><span class="vh"> to </span>watts</button>
     <button type="button" class="st-btn" data-flow="I" aria-pressed="false" title="One hot line stops a shire (key 9)"><span class="k">9</span>Hot line</button>
     <button type="button" class="st-btn" data-flow="J" aria-pressed="false" title="The allreduce tree (key 0)"><span class="k">0</span>Allreduce</button>
+    <button type="button" class="st-btn" data-flow="K" aria-pressed="false" title="One value to every minion: the ways to broadcast, and what each costs (key B)"><span class="k">B</span>Broadcast</button>
   </div>
 </div>
 <div class="st-body">
@@ -482,10 +495,10 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 <div id="srctip" role="tooltip"></div>
 </section>
 <div class="prose">
-<p class="byline">27 September 2026, second version the same day · every number is a fact with a source: a repository file and field, a manual page, or a source line · the chip's facts: <a href="#facts">the table below</a>, built in the repository's docs/reports/data/2026-09-27-chip-diagram · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="byline">27 September 2026, second version the same day, the broadcast flow 28 September · every number is a fact with a source: a repository file and field, a manual page, or a source line · the chip's facts: <a href="#facts">the table below</a>, built in the repository's docs/reports/data/2026-09-27-chip-diagram · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">A schematic of Esperanto's ET-SoC-1 that you can click through: the die with its mesh of shires, a shire with its
-cache and minions, a minion with its vector unit, whose lanes also run the tensor instructions. Ten animated flows show where data goes and what it costs,
+cache and minions, a minion with its vector unit, whose lanes also run the tensor instructions. Eleven animated flows show where data goes and what it costs,
 with the latency, bandwidth, energy and heat measured on the lab's cards, the host link included. A tour steps through it all.</p>
 
 <h2 id="use">How to use it</h2>
@@ -495,9 +508,10 @@ a link to the report that measured them, and, where the drawing infers something
 number to see its source; from the keyboard, Tab to a fact in the details list.</li>
 <li><b>Zoom</b> with the scale control under the details (−, Chip, Shire, Minion, +, or the + and − keys): it is always there, so you can go back in as well as out; a second press while the camera moves goes on to the next scale. A double click, a second click, or Enter on a shire or
 a minion zooms into it; Backspace zooms out.</li>
-<li><b>Flows</b> 1 to 9 and 0 animate a load that misses to DRAM, the latency ladder, TensorSend across the mesh, the
+<li><b>Flows</b> 1 to 9, 0 and B animate a load that misses to DRAM, the latency ladder, TensorSend across the mesh, the
 relay against DRAM, gathers and scatters, the host over PCIe (timed on three cards), a matmul on the tensor unit, the
-same matmul's watts and heat on different data, one hot line stopping a shire, and the allreduce tree. Each flow is a
+same matmul's watts and heat on different data, one hot line stopping a shire, the allreduce tree, and one value
+broadcast to every minion four ways (B, which the tour leaves out). Each flow is a
 row of <b>stages</b> under the drawing: click one, or step with the Left and Right arrows. <b>Space</b> pauses
 everything that moves, the camera included; stepping while paused shows each stage's end state.</li>
 <li><b>Follow</b> (C): the camera follows the flow from scale to scale. Turn it off, or zoom yourself, and the camera

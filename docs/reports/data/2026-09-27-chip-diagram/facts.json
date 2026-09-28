@@ -9,14 +9,14 @@
    "research/asks.json",
    "../../sources/limits-of-observability.data.json (the hub rows the asks link to)"
   ],
-  "n_facts": 282,
+  "n_facts": 290,
   "kinds": {
-   "derived": 21,
-   "measured": 153,
-   "spec": 95,
+   "derived": 23,
+   "measured": 155,
+   "spec": 99,
    "inferred": 13
   },
-  "n_num": 264,
+  "n_num": 274,
   "et_platform_head": "836a4ab"
  },
  "facts": {
@@ -954,6 +954,154 @@
    "page": "On-chip communication",
    "cards": [],
    "set": "v2"
+  },
+  "bc.allreduce-1kb": {
+   "id": "bc.allreduce-1kb",
+   "component": "neigh",
+   "topic": "sync",
+   "statement": "The same hardware allreduce with 1 KB (32 vector registers) instead of 32 B: 1,354 cycles over a shire's 32 minions (1,354.05-1,354.16 in every pass on the three cards, 2.26 µs) and 3,236-3,244 cycles over all 1,024 minions (each card's median over three passes: aifoundry2 3,236.33, aifoundry3 3,243.35, aifoundry1-c1 3,244.27; 5.4 µs at 600 MHz), against 444 and 1,393 cycles for 32 B.",
+   "value": 3244,
+   "unit": "cycles, 1 KB to all 1,024 minions (aifoundry1-c1)",
+   "source": "docs/reports/data/2026-09-25-claims-v3/raw/<card>/lat/p*/noc/allreduce-c32.jsonl and xallreduce-c32.jsonl (E36; count 32; cycles_per_iter of the one-tree rows at 32 and 1,024 minions), read in build_facts.py; the on-chip communication page's chart shows the same medians (its embedded nocbench-data .v3.cards.<card>.allreduce[\"32\"], analyze.py merge_passes)",
+   "kind": "measured",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "note": "The claims ledger lists the 32 B allreduces of the same passes (05-claims.md, \"Barriers and allreduces\"); the 1 KB rows are in the same raw files.",
+   "range": null,
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
+   "page": "On-chip communication",
+   "cards": [
+    "a2",
+    "a3",
+    "a1c1"
+   ],
+   "set": "page"
+  },
+  "bc.esr-ipi": {
+   "id": "bc.esr-ipi",
+   "component": "master",
+   "topic": "sync",
+   "statement": "ESR broadcast: one request writes the same system register in every shire of a mask (32 bits for the compute shires, 8 for the memory shires): software writes the value to the broadcast data register, then the target register and the masks to a broadcast request register. A shire's IPI_TRIGGER register takes a 64-bit mask of its harts and interrupts each hart whose bit is set; the firmware's broadcast system call writes the first two.",
+   "value": 32,
+   "unit": "shires in one request",
+   "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.511 (§15.4.2 ESR Broadcast, Table 15-85, Figure 15-1, Table 15-86) and p.336 (§13.1 IPI_TRIGGER, Table 13-1); external/et-platform/device-minion-runtime/src/MachineMinion/src/trap_handler.S:83-97 (SYSCALL_BROADCAST_INT writes ESR_SHIRE_BROADCAST0, then BROADCAST1 with the shire mask)",
+   "kind": "spec",
+   "card": null,
+   "note": null,
+   "range": null,
+   "url": null,
+   "page": null,
+   "cards": [],
+   "set": "page"
+  },
+  "bc.half": {
+   "id": "bc.half",
+   "component": "neigh",
+   "topic": "sync",
+   "statement": "The broadcast half of the tree was never timed on its own: nocbench times TensorReduce up the tree and TensorBroadcast back down as one operation, one cycle count around both, so the broadcast is part of the allreduce's 444 cycles over 32 minions and 1,393 over 1,024 (32 B). Neither half's energy was measured: the energy manual's synchronisation table gives none for the tree.",
+   "value": null,
+   "unit": null,
+   "source": "workloads/nocbench/kernel/nocbench.c:279-288 (tree(): TensorReduce for levels 0..top, then TensorBroadcast top..0) and :529-534 (one cycle count around the repeated tree); docs/energy-manual/06-synchronisation.md:12 (TensorReduce + broadcast: energy '—')",
+   "kind": "derived",
+   "card": null,
+   "note": null,
+   "range": null,
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
+   "page": "On-chip communication",
+   "cards": [],
+   "set": "page"
+  },
+  "bc.launch-31": {
+   "id": "bc.launch-31",
+   "component": "master",
+   "topic": "latency",
+   "statement": "Queued back to back, an empty kernel costs the card 103.6 / 103.7 / 104.1 µs on all 32 shires and 91.2 / 92.2 / 92.4 µs on one (aifoundry2 / aifoundry3 / aifoundry1-c1): the other 31 shires add 12.4 / 11.4 / 11.6 µs (11.4-12.4 µs), the rest the same for one shire or 32. Which part of that is the launch's multicast (the interrupt, every hart reading the message, the shires' acknowledging atomics) and which the kernel's own start and finish was not measured.",
+   "value": 12.4,
+   "unit": "µs for the other 31 shires (aifoundry2)",
+   "source": "docs/reports/data/2026-09-27-pcie/pcie.json launch.<card>.b2b_us.\"32\".mean and .\"1\".mean (E50), the difference computed in build_facts.py; the Over the PCIe link page's launch note (docs/reports/sources/pcie-link.script.js:241-243)",
+   "kind": "derived",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "note": null,
+   "range": null,
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link",
+   "page": "Over the PCIe link",
+   "cards": [
+    "a2",
+    "a3",
+    "a1c1"
+   ],
+   "set": "page"
+  },
+  "bc.launch-multicast": {
+   "id": "bc.launch-multicast",
+   "component": "master",
+   "topic": "sync",
+   "statement": "Every kernel launch is a broadcast. The master shire's firmware copies the 64-byte launch message into a buffer in its own scratchpad and evicts it to the L2, raises the interrupt on all 64 harts of every shire in the kernel's mask with one ESR broadcast, and polls a shire mask beside the buffer: each hart evicts its stale L1 copy and reads the message, and the last of a shire's 64 harts clears that shire's bit with a global atomic AND. The launch goes on once every bit is clear.",
+   "value": 64,
+   "unit": "bytes, one line",
+   "source": "external/et-platform/device-minion-runtime/src/MasterMinion/src/services/cm_iface.c:75-83 (broadcast_ipi_trigger), :270-367 (CM_Iface_Multicast_Send: ETSOC_MEM_COPY_AND_EVICT to the L2 at :318, the interrupt at :322, the poll on the shire mask to :336); src/MasterMinion/src/workers/kw.c:931-933 (the launch: 'Blocking call that blocks till all shires ack command'); src/WorkerMinion/src/mm_to_cm_iface.c:60-73 (notify_mm: the 64th hart clears its shire's bit with atomic_and_global_64), :122-128 (ETSOC_MEM_EVICT before the read); et-common-libs/include/system/layout.h:51, 112-118 (a 64-byte buffer and its control line in the master shire's scratchpad); et-platform 836a4ab",
+   "kind": "spec",
+   "card": null,
+   "note": null,
+   "range": null,
+   "url": null,
+   "page": null,
+   "cards": [],
+   "set": "page"
+  },
+  "bc.one-request": {
+   "id": "bc.one-request",
+   "component": "l2",
+   "topic": "interconnect",
+   "statement": "Inside a shire, requests to one line are kept in order, and 'Two requests to the mesh will never have the same address outstanding': when every minion of a shire loads one line homed in another shire, the shire has at most one request for it on the mesh at a time. The L2's 8-entry read buffer is there for 'multiple readers of the same cache line', its hits 'serviced once per clock'; L3 reads at the home do not use it.",
+   "value": 1,
+   "unit": "mesh request per line and shire at a time",
+   "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf, pdf p.36 (§2.6.1 Reqq Request Ordering, rule 1a), p.9 (the Read buffer) and p.40 (§2.8: 'L3 reads do not use the Read buffer')",
+   "kind": "spec",
+   "card": null,
+   "note": "That the shire's other minions then find the line in its L2 follows from the fill; loads of one line by every minion at once were not measured.",
+   "range": null,
+   "url": null,
+   "page": null,
+   "cards": [],
+   "set": "page"
+  },
+  "bc.pollers": {
+   "id": "bc.pollers",
+   "component": "uc",
+   "topic": "sync",
+   "statement": "31 minions, one in each other shire, hammering one global atomic homed in shire 0 kept its bank retiring one every 10.00 cycles, while shire 0's one minion reading its own scratchpad kept 100% of its rate alone, in three passes on each of the three cards (the prediction was 1% or less). Whether they would stop a shire whose 32 minions all read was not tested. Each shire's leader polling one counter hung the relay's first barrier (one development run).",
+   "value": 100,
+   "unit": "% of the reader's rate alone",
+   "source": "docs/reports/data/2026-09-22-hotline-aifoundry2/hotline.json: pollers[card=<card>, home=\"scplocal:0\"].remote_cycles_per_atomic (9.9993), .frac_of_alone_n (0.99998-0.99999); docs/reports/data/2026-09-25-claims-v3/results/lat.json [item=LAT-H].per_card.<card>.sub.P5_pollers (host_over_alone1 1.0 in every pass); docs/findings/17-hot-line.md:137-145; docs/findings/18-on-chip-relay.md:149-152",
+   "kind": "measured",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "note": null,
+   "range": null,
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line",
+   "page": "One hot line stops a shire",
+   "cards": [
+    "a2",
+    "a3",
+    "a1c1"
+   ],
+   "set": "page"
+  },
+  "bc.tensorbroadcast": {
+   "id": "bc.tensorbroadcast",
+   "component": "neigh",
+   "topic": "sync",
+   "statement": "TensorBroadcast sends COUNT vector registers of 32 bytes down a fully balanced binary tree: at node height HEIGHT a hart whose mhartid is a multiple of 2^(HEIGHT+2) sends to hart mhartid + 2^(HEIGHT+1), and with FUNCT = MOVE every hart ends with the root's value. N harts take log2 N steps, HEIGHT from log2(N) - 1 down to 0, and each step waits for both of its harts, their vector registers stalled until the data has moved. Hart 0 of minion m is hart 2m, so a broadcast from minion 0 to all 1,024 minions takes ten steps, the first to minion 512, minion 0 of shire 16.",
+   "value": 10,
+   "unit": "steps for 1,024 minions",
+   "source": "external/et-man/ET Programmer's Reference Manual.pdf, pdf p.320-322 (§9.4, TensorBroadcast: 'performed in a fully-balanced binary-tree fashion', the sender and receiver rule, 'a sequence of log2N TensorBroadcast operations', 'effectively implementing a broadcast of A0', the stall notes); workloads/nocbench/kernel/nocbench.c:279-288 (the benchmark's tree: TensorBroadcast with MOVE from the top level down); workloads/nocbench/README.md (the target is a minion ID, shire * 32 + minion, and the partner is hart 2 * ID)",
+   "kind": "spec",
+   "card": null,
+   "note": null,
+   "range": null,
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
+   "page": "On-chip communication",
+   "cards": [],
+   "set": "page"
   },
   "board.card": {
    "id": "board.card",
@@ -6649,6 +6797,68 @@
    "f": "sync-chip-barrier",
    "src_t": "about 8.3 us"
   },
+  "ar32_us": {
+   "v": 0.74,
+   "t": "0.74 µs",
+   "u": "",
+   "f": "sync-allreduce32",
+   "src_t": "0.74 us"
+  },
+  "chipbar_us2": {
+   "v": 8.3,
+   "t": "8.3 µs",
+   "u": "",
+   "f": "sync-chip-barrier",
+   "src_t": "8.3 us"
+  },
+  "bc_1k": {
+   "v": 3244.27,
+   "t": "3,236–3,244",
+   "u": "cycles",
+   "f": "bc.allreduce-1kb"
+  },
+  "bc_1k_us": {
+   "v": 5.4,
+   "t": "5.4 µs",
+   "u": "",
+   "f": "bc.allreduce-1kb"
+  },
+  "bc_1k32": {
+   "v": 1354.12,
+   "t": "1,354 cycles",
+   "u": "",
+   "f": "bc.allreduce-1kb"
+  },
+  "bc_1k32_us": {
+   "v": 2.26,
+   "t": "2.26 µs",
+   "u": "",
+   "f": "bc.allreduce-1kb"
+  },
+  "bc_l1": {
+   "v": 92.4,
+   "t": "91.2 / 92.2 / 92.4",
+   "u": "µs",
+   "f": "bc.launch-31"
+  },
+  "bc_l31": {
+   "v": 12.4,
+   "t": "11.4–12.4 µs",
+   "u": "",
+   "f": "bc.launch-31"
+  },
+  "bc_poll": {
+   "v": 100,
+   "t": "100%",
+   "u": "",
+   "f": "bc.pollers"
+  },
+  "bc_512": {
+   "v": 512,
+   "t": "minion 512",
+   "u": "",
+   "f": "bc.tensorbroadcast"
+  },
   "pcie_neg": {
    "v": 16.0,
    "t": "16.0 GT/s x8",
@@ -7524,6 +7734,39 @@
    "sync.flb",
    "sync.fcc",
    "ts-rt-fln"
+  ],
+  "flowK": [
+   "minion.vpu-regs",
+   "minion.tensor-hart0",
+   "bc.tensorbroadcast",
+   "ar.tree",
+   "neigh.fln-edges",
+   "sync.tree-levels",
+   "sync-allreduce32",
+   "sync-allreduce1024",
+   "bc.allreduce-1kb",
+   "bc.half",
+   "ts-e-pair",
+   "relay-energy",
+   "relay-13x",
+   "relay-bw",
+   "e-dram",
+   "bw-dram",
+   "l3.home",
+   "l3.latency",
+   "bc.one-request",
+   "e-l3",
+   "hot-cost",
+   "bc.pollers",
+   "hot.cliff",
+   "mem.global-atomic",
+   "bc.esr-ipi",
+   "bc.launch-multicast",
+   "bc.launch-31",
+   "pcie.launch",
+   "pcie.poll",
+   "sync-chip-barrier",
+   "L104"
   ]
  },
  "layout": {
@@ -8040,7 +8283,7 @@
    "also": []
   },
   {
-   "part": "the mesh's routing order (every route the ten flows draw)",
+   "part": "the mesh's routing order (every route the eleven flows draw)",
    "comps": [
     "mesh"
    ],
