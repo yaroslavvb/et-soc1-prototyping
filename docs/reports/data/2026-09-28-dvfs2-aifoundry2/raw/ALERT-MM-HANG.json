@@ -1,0 +1,15 @@
+{
+ "kind": "MM-HANG",
+ "t_ms": 1790589200632,
+ "pass": 6041,
+ "card": "aifoundry2",
+ "why": "aifoundry2's compute side stopped taking work at 02:50:53 PDT, 28 Sep. In the continuation NAT session p6041 (the ADD run's lifts, UNI32@4, 7 s, sparsity_host): lift 1 ran normally (800 MHz, device held 7.46 s); lift 2, launched 0.6 s later while the governor's idle reset (800 -> 600 MHz) was due, never started its kernel (board power stayed at the 26 W idle, the clock stayed at 600): 'kernel did not finish within 6 s, aborting the stream', then the process was stopped by timeout 10 (rc 124); lifts 3 and 4 failed at runtime creation: 'Couldn't use the HPSQ. Perhaps the Master Minion is hanged?' (rc 1). The session aborted (3 heater failures) and the DV2 queue was stopped (build/claims-v3/STOP). The service processor answers normally (Z1 at 02:52: 600 MHz, 25.9 W idle, 60 C, threshold 65). No reset was attempted (card rules): the Master Minion needs the lab admin. Until then no kernel can run on aifoundry2.",
+ "evidence": [
+  "build/claims-v3/aifoundry2/dv2/p6041/launches.jsonl",
+  "p6041/heater-1-pre.out.gz",
+  "p6041/tel-1.jsonl.gz",
+  "p1111/z1.json"
+ ],
+ "no_reset": true,
+ "queue_stopped": true
+}

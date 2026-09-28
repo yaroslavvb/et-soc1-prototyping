@@ -225,8 +225,22 @@ within about a second (seven cool-start runs on one morning, a demonstration:
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#the-speed-effect-appears-on-a-cool-die">the Horace
 experiment, §6</a>; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">the DVFS report</a> reads the
 governor and classifies every clock change). aifoundry3 never leaves 600 MHz: a boot service sets its power limit to 0 W
-at every boot, so its governor only ever steps down. aifoundry1-c1, launched warm in the three-card check, read 600 MHz
-throughout.</li>
+at every boot, so its governor can only ask to step down, which at the bottom point changes nothing. aifoundry1-c1 read
+600 MHz throughout the three-card check (318,667 samples), although it ran busy at 45–65 W and at a die of 64 °C or less
+in 9,461 of them: its governor does not raise the clock.</li>
+<li><b>Nothing on the card limits the die's temperature.</b> In the three-card check aifoundry2's mean reading passed
+90 °C in eight of its telemetry files (12,176 samples), every one at 600 MHz. The hottest was the energy catalogue's hot
+pass 11 on 26 September (02:26–02:31 PDT), which heats the die to at least 88 °C before each configuration and has no
+upper stop: its mean read 90–103 °C (above 90 °C in 2,565 of 2,567 samples), the hottest sensor up to 106 °C and the
+board up to 86.9 W (83.6 W at the first 103 °C reading), and the clock never moved and no safe state came. That is above
+the 90 °C at which this work's long runs stop. The firmware's one hardware trip, a PMIC alarm at 75 °C or 75 W meant to
+force a 300 MHz safe state, takes its temperature from the PMIC, not from the die's sensors. The service processor reads
+that temperature only when it starts or resets its statistics, and the firmware notes that the PMIC reports it as 0
+(the statistic read 0 on all three cards throughout the check; between resets the firmware feeds it a hard-coded 0, so
+the samples show nothing more). The evidence that nothing acts is the telemetry above, 103 °C at 600 MHz with no safe
+state. The host's <code>pmic</code> temperature field is the minion-shire mean again
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief#bottleneck">the spatial brief</a>). At the
+bottom operating point only the runners' own caps stand between a workload and the die's temperature.</li>
 </ul>
 
 <h2 id="the-per-shire-voltage-map">3. The per-shire voltage map</h2>
@@ -322,7 +336,7 @@ slopes (MMB-T/P1) into this page's data for the busy-drift chart. Every sensor a
 command returns, the governor) was read at et-platform <code>353f20e</code>. The cards' own trace strings match an older
 build, from before et-platform commit <code>60b40c10f</code> (24 September 2024), which rewrote the governor, so the
 governor details may differ on the card (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">the
-DVFS report</a>). The measurements do not depend on it.</p>
+DVFS report</a>). The cards' own build (BL2 0.20.0 of release 1.3.1, et-platform <code>ffca4cbb4</code>) was read on 27 September: its thermal response is a blocking loop of steps about 0.4 s apart that also acts on an idle card, and a climb goes to the top point in one call (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">the DVFS report</a>). The measurements do not depend on it.</p>
 </details>
 <details class="more"><summary>Version history</summary>
 <p class="small"><b>Versions.</b> 20 September 2026: first edition. 21 September: §2's governor bullet corrected (it
@@ -339,7 +353,10 @@ resting temperatures, the frequency sweep marked lab admin only, the cards named
 cards), fresh readings ticked in the edge charts,
 and detail folded into sections. Later on 27 September: a chart of the service processor's pass under each way of polling
 (§1, the three-card check), and in §3 the voltage map's capture and card selectors (20 September, and each card idle and
-under load on 26 September) and a chart of the offset test (each shire idle against load).</p>
+under load on 26 September) and a chart of the offset test (each shire idle against load). 28 September, after a review
+of the governor pages: aifoundry1-c1 was not "launched warm" (its governor never raised the clock); aifoundry3's governor
+can only ask to step down; a new item in §2, nothing on the card limits the die's temperature (aifoundry2's 90–103 °C
+catalogue pass of 26 September); the cards' own firmware build noted.</p>
 </details>
 
 <h2>Related reports</h2>

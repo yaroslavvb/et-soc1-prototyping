@@ -242,7 +242,7 @@ interpolated), and 64 W on random fp32, above it; the curve is chip power at its
 <h3>Leakage and temperature</h3>
 <ul>
 <li>Idle board power follows \(12.6\,\mathrm{W} + 23.3\,\mathrm{W}\,e^{(T-80\,^\circ\mathrm{C})/36\,^\circ\mathrm{C}}\), to 0.2 W rms
-over one day's idle bins at 64–67 and 81–88 °C (none between). Its slope, 0.65 W per degree at 80 °C, is well fixed; its split
+over one day's idle samples, which lie at 64–67 and 81–88 °C (none between). Its slope, 0.65 W per degree at 80 °C, is well fixed; its split
 is not (20 to 29 W of leakage at 80 °C). The law, its checks and its split are in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-that-costs">the DVFS
 report, §5</a> and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">the energy manual,
 §1</a>. The three-card check's idle cycles found this card within 0.1 W of it from 68 to 82 °C, aifoundry3 0.7 to 1.8 W above
@@ -287,8 +287,9 @@ of its three runs that caught a reading there agree to 0.3 W. Board power update
 sampler runs, and one telemetry sample reads its fields over about 22 ms. They agree with V²f to within about
 <span id="vf-dev2"></span>, and deserve a dedicated run from a cool die (<code>tools/ettelem/run_vf_cold.sh</code> is written
 for it), which only hours idle in a cool room give (next item). They are also one card's: aifoundry3 stays at 600 MHz (a boot
-service sets its TDP to 0 W; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">the DVFS report, section 3</a>), and the
-three-card check launched aifoundry1-c1 warm, so neither repeats this check.</li>
+service sets its TDP to 0 W; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">the DVFS report, section 3</a>), and
+aifoundry1-c1's governor does not raise its clock: it read 600 MHz throughout the three-card check, although it ran busy
+at 45–65 W and at a die of 64 °C or less in 9,461 samples. So neither repeats this check.</li>
 <li>The card sits in a desktop chassis: left alone it read 62 °C after the night of 20–21 September and 73 °C after
 20.6 hours on a warmer 22 September (one reading each), and every run here launched at 80 °C. In a server airflow it would
 presumably run cooler and leak less.</li>
@@ -337,7 +338,7 @@ cool-start telemetry in <code>cold1/</code> and <code>cold2/</code>; the script 
 <code>model.json</code> (the idle law and the flip model). Notes and quotes: <code>docs/research/why-low-power.md</code>,
 written on 20–21 September; where its measured numbers differ, this page supersedes them.</li>
 <li>Firmware: the governor's source was read at et-platform <code>353f20e</code>; the card's own trace strings match an
-older build (before et-platform commit <code>60b40c10f</code>, 24 September 2024). The three operating points show in this
+older build (before et-platform commit <code>60b40c10f</code>, 24 September 2024). The cards' own build (BL2 0.20.0 of release 1.3.1, et-platform <code>ffca4cbb4</code>) was read on 27 September: its thermal response is a blocking loop of steps about 0.4 s apart that also acts on an idle card, and a climb goes to the top point in one call (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">the DVFS report</a>). The three operating points show in this
 card's telemetry.</li>
 <li>D. Ditzel et al., "Accelerating ML Recommendation with over a Thousand RISC-V/Tensor Processors on Esperanto's ET-SoC-1
 Chip", <a href="https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf">Hot Chips 33 slides</a>, 2021,
@@ -352,7 +353,9 @@ the leakage headline became the measured slope with the split as a range; this p
 manual's. 26 September (version 4), the three-card check: its values beside the tested claims, the linearity in active cores
 and the integer loop per card, and post-data note C2's two readings of the launch temperature. 27 September: the review of
 26 September (aifoundry3's clock set by a boot service; "brackets" corrected; the integer loop's floor; the idle law's bins;
-the energy manual's three-card values, including its addi loop and issue-slot costs), a capacitance ladder, and detail folded into sections.</li>
+the energy manual's three-card values, including its addi loop and issue-slot costs), a capacitance ladder, and detail folded into sections.
+28 September, after a review of the governor pages: aifoundry1-c1 was not "launched warm" (its governor never raised the
+clock); the idle law's 0.2 W rms is per sample, not over bins; the cards' own firmware build noted.</li>
 </ul>
 </details>
 

@@ -1,0 +1,29 @@
+{
+ "_what": "DV2's night on aifoundry2 (PREREG-DEV \u00a74, 27-28 Sep 2026, local time PDT). block.sh reads it: Z1 pass 1001 + k runs at z1_first + k x z1_period_s (a slot more than 5 min past is skipped, an early pass waits for it); the smoke (4001) not before smoke_at; C1m (5001) starts only between c1m_after and c1m_start_by and ends by c1m_end_by; a NAT session starts only between nat_start_after and nat_start_by; nothing of DV2 runs on the card after end_by.",
+ "day": "2026-09-28",
+ "z1_first": "00:40",
+ "z1_period_s": 600,
+ "smoke_at": "02:30",
+ "c1m_after": "02:30",
+ "c1m_start_by": "03:00",
+ "nat_start_after": "01:05",
+ "nat_start_by": "07:00",
+ "end_by": "08:00",
+ "c1m_end_by": "04:05",
+ "_deviation": "28 Sep 01:04 PDT (orchestrator, logged in dev-log.jsonl): nat_start_after 02:30 -> 01:05. The 02:30 value waited for PREREG-DEV row 3 (the T4 dry tests), which finished before 00:30 (93/93); Z1 read 64 at 01:00, the first cool window. PREREG-DEV row 6's rule (the first Z1 reading <= 64, probe ALIVE) is unchanged.",
+ "z1b_first": "02:32",
+ "z1b_period_s": 120,
+ "nat1_off": true,
+ "nat_cool_max": 60,
+ "_deviation_n2_n4": "28 Sep 01:45 PDT (orchestrator, dev-log.jsonl): N2 the dense watch, Z1 passes 11xx at z1b_first + 2 min x (p - 1101) after C1m; N4 NAT-1 is off (it cannot climb at S = 65, p6035) and a NAT session starts only at a Z1 reading <= 62 (NAT-2 or better); p6035 (NAT-1) does not use up the night's one session.",
+ "dev1_fixed": [
+  192,
+  4
+ ],
+ "dev2_launch_s": 8,
+ "nat_sessions_max": 2,
+ "_deviation_n5": "28 Sep 02:22 PDT (orchestrator, dev-log.jsonl): one continuation NAT session (NAT-4/3 only: a Z1 reading <= 61) with session p6038's final DEV-1 candidate (192, 4) fixed and DEV-2's 8 s launches from its start, so that >= 4 T-blocks run under the final candidate (PREREG-DEV readiness); p6038's 60 min cap and the worst-case block fit allow only blocks 2-3 under it. Restricted at 02:32 to NAT-4 (a Z1 reading <= 60; the branch command reads WARM for NAT-3/2) so that the continuation's blocks share p6038's branch and geometry (S 62) and the validation's (val.json nat_branches).",
+ "nat_branches": [
+  "NAT-4"
+ ]
+}

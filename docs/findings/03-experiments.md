@@ -2,16 +2,20 @@
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E50**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E51**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
 check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
 same three cards after each card's campaign blocks (26 September), E49 a card-free test of the runtime's log-level race,
-and E50 the host link and the launch path timed on the three cards (27 September).
+E50 the host link and the launch path timed on the three cards (27 September), and E51 the DV2 development night on
+aifoundry2 (28 September: what the governor compares, placement against the first throttle; **development data, not
+validated**).
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
 (aifoundry2, aifoundry3 or both; E35–E46, E48 and E50 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
 source at `353f20e`; the cards' own trace strings match an older build (before et-platform commit `60b40c10f`, 24 Sep
-2024; both cards report release 1.3.1), so which commit the cards run is not established (R3). Unless an entry says
+2024; both cards report release 1.3.1), so which commit the cards run is not established (R3). Since 27 September
+the cards' own builds have been read too (BL2 0.20.0 for release 1.3.1, 0.18.0 for 1.2.0), and E51's development data
+fit 0.20.0's governor ([14-card-behaviour.md](14-card-behaviour.md), "The clock governor, by firmware build"). Unless an entry says
 otherwise, the minion clock was a steady **600 MHz** at **516–518 mV** on aifoundry2 (521–523 mV on aifoundry3),
 verified in every telemetry sample of the session. Times are the lab machines' local time (UTC−7), from the first and
 last recorded sample.
@@ -372,19 +376,27 @@ single-hart probe, five minutes before the sample. `analyze_dvfs.py --since` com
 timestamps (`dvfs.json` `idle_check.hours_idle`). Sampled `ettelem sample --seconds 60 --every-ms 200`, with no
 workload during the sample.
 **Raw data:** `docs/reports/data/2026-09-22-dvfs-aifoundry2/idle_20h.jsonl.gz` (300 samples).
-**Command** (the DVFS report's data and page, from the repo root; no card). The three steps go together: the second
-adds the three-machine block (`cards`) that the page's sections 3 and 6 need, `analyze_dvfs.py` keeps an existing
-`cards` block when it rewrites the file, and `build-report.py` refuses to build the page without one.
+**Command** (the DVFS report's data and page, from the repo root; no card; the same as the page's "Reproduce this").
+The steps go together: `build_cards_data.py` adds the three-machine block (`cards`) that the page's sections 3 and 6
+need, `build_dv2_data.py` (since 28 September) adds E51's development block (`dv2`), `analyze_dvfs.py` keeps an
+existing `cards` block when it rewrites the file, and `build-report.py` refuses to build the page without either.
+**Correction (28 September):** the command given here until then left out `--cool-passes`, `--idle-sessions` and
+`--v3`; `analyze_dvfs.py` then silently drops `governor_days`, `idle_sessions` and `v3`, which feed the page's reset
+and boundary counts, its two-day timings, its session table and every version-3 number.
 ```
 D=docs/reports/data; H=$D/2026-09-21-horace-aifoundry2; A3=$D/2026-09-22-horace-aifoundry3; C=$D/2026-09-22-cards
+R2=$D/2026-09-23-reruns-aifoundry2
 python3 tools/ettelem/analyze_dvfs.py --cold $H/cold1 $H/cold2 --wakeup $D/2026-09-22-dvfs-aifoundry2/wakeup \
     --idle $D/2026-09-22-dvfs-aifoundry2/idle_20h.jsonl.gz --since $H/long2/runs.jsonl.gz \
     --model $H/model.json --ablation $H/ablation.json --sptrace $C/sptrace-aifoundry3.bin \
+    --cool-passes $R2/hotline-pass2 $R2/hotline-pass3 $R2/hotline-pass4 $R2/relay-pass1 $R2/relay-pass2 $R2/relay-pass4 \
+    --idle-sessions $H $D/2026-09-2[234]-* --v3 $D/2026-09-25-claims-v3 \
     --out $D/2026-09-22-dvfs-aifoundry2/dvfs.json
 python3 tools/ettelem/build_cards_data.py --cards $A3/cards.json --transfer $A3/transfer.json \
     --leak $A3/leakage_crosscard.json --config $C/config.json --driver $C/driver_config.json \
     --sptrace $C/sptrace-aifoundry3.bin --out $C/cards-report.json \
     --merge $D/2026-09-22-dvfs-aifoundry2/dvfs.json
+python3 tools/ettelem/build_dv2_data.py --data $D/2026-09-28-dvfs2-aifoundry2 --merge $D/2026-09-22-dvfs-aifoundry2/dvfs.json
 python3 scripts/build-report.py dvfs-leakage $D/2026-09-22-dvfs-aifoundry2/dvfs.json docs/reports/2026-09-22-dvfs-leakage.html
 ```
 **Result:** 31.79 ± 0.04 W at 73.0 °C, 600 MHz, 518 mV; minion rail 11.05 W, SRAM 2.00 W, mesh 3.64 W,
@@ -1576,6 +1588,98 @@ process held a card for more than 2.1 s, but the card's lock was held for a whol
 (`hosts.<card>.run_times_ms`), longer than the lab's 10 s rule for holding a device, which each process kept.
 **Artifact:** the page "Over the PCIe link" (`docs/reports/2026-09-27-et-soc1-pcie-link.html`, not yet published)
 and the chip diagram's PCIe shire, Host panel and flow 6.
+
+## E51 — DV2: what the governor compares, and whether placement delays the throttle (2026-09-28, 00:33–02:54 PDT, aifoundry2; one read-only query of aifoundry3) — development, not validated
+
+**Question (Q59):** does the clock governor act on the mean of the 34 minion-shire sensors or on the hottest shire;
+can the same work run longer at 800 MHz before the first throttle when it is placed elsewhere on the chip; and which
+firmware build's governor do the cards run?
+**Method:** the owner's method: theories and predictions first, all iteration on one development card, then a frozen
+test on a later session. Before any card work (27 September, about 22:00–23:55 PDT, in the session's notes): a review
+of what the pages say about the governor, a reading of the governor at every firmware build the cards run
+([14-card-behaviour.md](14-card-behaviour.md), "The clock governor, by firmware build"), a design with eight theories
+(TH1–TH8), a critique and a development plan (PREREG-DEV). The tools are `tools/claims-v3/dv2/` (`block.sh` under
+`queue.sh`; `README.md` has the rules), with `ettelem-dv2`, which adds the read-only throttle-residency and uptime
+queries. What ran:
+
+| Time (PDT) | Card | Pass | What |
+|---|---|---|---|
+| 00:33 | aifoundry3 | Z2 (`z2.sh`) | read-only: uptime, throttle residencies, configuration, trace ring (about 1 s) |
+| 00:40–02:54 | aifoundry2 | Z1, p1001–p1012, p1101–p1112 | 21 read-only watch cycles, 10 minutes apart and every 2 minutes from 02:32: a 1 s sample, the SP trace ring, residencies, uptime. Three 10-minute slots did not run: 01:40 (p1007: the night stop that ended p6035 was still set) and 02:10, 02:20 (p1010, p1011: p6038 held the card) |
+| 01:30–01:38 | aifoundry2 | p6035 | a session from a 64 °C rest (probe, smoke, one block); ended early: from the falling 65 °C edge none of 4 runs reached 800 MHz |
+| 02:00–02:25 | aifoundry2 | p6038 | a session from a 60 °C rest: probe, smoke, three blocks of placement runs, two runs with a periodic statistics reset, two ADD runs |
+| 02:30 | aifoundry2 | p4001 | one 2 s smoke launch |
+| 02:50–02:51 | aifoundry2 | p6041 | a continuation session from 59 °C: probe, smoke, then the Master Minion hung (below) |
+
+A placement run lifts the clock with 7 s heater launches (each a 20,000-iteration calibration kernel, then a stream of
+kernels of about 0.4 s) of 4 minions on each of 32 shires while the mean reads below 63 °C,
+waits for the mean's falling 63 → 62 °C edge, resets the peak-hold statistics once, and launches one 8 s random-data
+heater on 192 minions, either 12 per shire on 16 interior shires (INT16@12) or on 16 perimeter shires (PER16@12), with
+others as controls; the heater stops 2 s after the first 800 → 700 MHz step. Telemetry at 10 Hz throughout. The
+session's own watcher stops heating at a mean or hottest sensor of 90 °C and ends a run at a mean of 80 °C, a hottest
+sensor of 85 °C or 73 W; after every heating run the clock had to read 600 MHz within 3 s of the kernel's end. No
+threshold, TDP, clock, voltage or log level was set, and no card was reset. aifoundry1 was not touched.
+**Raw data:** [`docs/reports/data/2026-09-28-dvfs2-aifoundry2/`](../reports/data/2026-09-28-dvfs2-aifoundry2/):
+`raw/` (every pass: telemetry, SP trace-ring dumps, launches, runs with their observables, the decision log
+`dev-log.jsonl` and `ALERT-MM-HANG.json`), `reductions/dv2-dev.json` (`tools/claims-v3/dv2/reduce_dv2.py --dev`),
+`reductions/dev-idle.json` (`tools/claims-v3/dv2v/reduce_val.py --dev`), `dv2.json` (`tools/ettelem/build_dv2_data.py`,
+for the DVFS page), the night's queue log `queue-dv2-aifoundry2.log`, `incident/` (the card's error events from the
+host's kernel log, with `kernel_events.py` mapping their boot-relative stamps to wall time) and the frozen validation
+plan `plan/PREREG-VAL.md`. aifoundry3's Z2 output is still on
+aifoundry3 (`~/nekko/build/claims-v3/aifoundry3/dv2/z2-20260928T003343/z2.json`).
+**Result (development: the night chose parameters and rules and tests nothing):**
+- *The mean, not the hottest shire (TH1).* In 12 of 12 placement runs the clock held 800 MHz for at least a second
+  after the hottest sensor read 67 °C or more (up to 69 °C, the threshold + 4). In the 5 runs where the hottest sensor
+  reached 66 °C at least 1.5 s before the mean did, 4 stepped down 0.1–0.2 s after the host's mean first read 66 °C and
+  none within −0.3…+0.6 s of the hottest sensor reaching 66 °C (all 3.3–5.7 s after it); the fifth stepped 0.9 s before
+  the host's mean read 66. At 01:00:00 on the idle card the mean read 64 °C and the hottest sensor 66 °C, and the
+  governor stayed out of its thermal state. A frozen rule needs at least 6 such runs over 3 blocks: insufficient as a
+  count, but every one points to the mean.
+- *The cards run the 0.20.0 governor (TH2).* Every thermal episode shorter than a minute lasted k × 0.4053 s to
+  within 1.43 ms (17 of 17, k = 0–3; 16 on the idle card, 1 at a session start), the blocking loop's period; 18 of the night's 20 thermal entries came after the
+  SP's own idle line, so the thermal branch acts on an idle card; 57 of 57 climbs showed at most one 700 MHz sample (33
+  none), the one-call climb; 26 of 26 descents stayed 0.3–0.7 s at 700 MHz (median 0.5 s), one loop period.
+- *No hysteresis (TH3).* All 20 entry lines printed 66 °C and all 20 exit lines 65 °C; at each of 7 crossings of the
+  line the governor flickered in and out for up to 3.6 s. Of 82 up-steps while hunting, 82 came from a reading of 66 °C
+  or less, 79 from 65 or less, none from 67 or more.
+- *Latency (TH4).* Launch to the first 800 MHz sample: median 0.9 s, at most 1.11 s (14 launches). Kernel end to
+  600 MHz with no thermal episode: 0.00–1.15 s (9 runs).
+- *Placement (TH5, the owner's second question).* At 192 minions from 62 °C, the interior placement held 800 MHz for
+  3.60 and 3.90 s before the first down-step, the perimeter for 5.00 s and, in the second block, beyond its kernel's
+  end (at least 6.95 s): 1.4 and at least 1.8 times as long (`raw/p6038/runs.jsonl`, `obs.trip_s`). Over the two
+  blocks the mean log ratio, 0.45, lies above the band the theory predicted from aifoundry3's heat-placement couplings
+  (0.28 ± 0.10; `reductions/dev-idle.json`, item G4; its inputs are frozen as numbers in `plan/prereg-val.json`, but
+  aifoundry3's placement runs behind them are not yet in the repository), so TH5's size is not supported in
+  development; it is reported, not registered. Whether the perimeter lasts longer at all (a sign test) is registered.
+- *Recovery (TH7).* Each of the 20 exits (19 on the idle card, 1 at a session start) was followed by the SP's own
+  idle line, 17 one pass later (0.119–0.131 s).
+- *The card states (TH8).* aifoundry2's throttle residencies at 00:40: thermal-down 747,342 s, 8.65 of its 9.23 days of
+  uptime (one stay of 2.1 days), power-up 23.05 s (`raw/p1001/z1.json`). aifoundry3's at 00:33: power-up, power-down,
+  thermal-down and power-safe all 0 after 2 days 8 hours, although it had been heated past 66 °C the evening before, as
+  the zero-TDP latch predicts (one reading).
+- *The card itself.* aifoundry2's idle reading swung between 59 and 72 °C on a 10–30 minute scale, idle power with it
+  (25.7 W at 59 °C, 31.1 W at 72 °C). The host's ACPI zones read a constant 16.8 and 27.8 °C (probably not live
+  readings), its drive 43–47 °C and its CPU package 37–59 °C (`raw/host-sensors.jsonl.gz`, 139 readings,
+  00:34–02:52); what drives the swing is not established.
+**The incident:** at 02:50:53 PDT aifoundry2's Master Minion hung in p6041. Lift 2 was launched 0.6 s after lift 1
+ended, with the clock still at 800 MHz; the host read the idle reset's 600 MHz at 02:50:53.725, and 21 ms later lift 2's
+14 ms calibration kernel ran, returned ok and measured 0.77 GHz (between the two points); the next kernel, the first of
+the stream, never completed, and the next two launches failed with "Couldn't use the HPSQ. Perhaps the Master Minion
+is hanged?". The host's kernel log has an SP runtime-error event, the counter's sixth, at 02:50:57.6 ± 0.07 s
+(`incident/kernel_events.py`; the first five, on 20, 22 and 25 September, did not stop the card). The service
+processor still answers. No reset was
+attempted; the lab admin must restore it, and until then no kernel can run on aifoundry2
+([14-card-behaviour.md](14-card-behaviour.md), "aifoundry2 cannot run kernels"). The cause is not established.
+**Validation:** `plan/PREREG-VAL.md` is frozen (SHA-256 `e150ce16…`) and has **not run**: it needs the owner's OK to
+validate on a later session of the same card, and aifoundry2's Master Minion restored. It registers the placement and
+trigger items, the host bands, the latencies, the sign test and six idle items, with a named deviation: two blocks under
+the final placement where the readiness rule asked for four. The validation's own heater is the one that was running
+at the hang, a stated risk; a schedule with no heating is provided.
+**Caveats:** one card, one night; the host samples at 10 Hz and reads whole degrees; at the SP's INFO log level with a
+sampler running, the trace ring holds less than a second, so the SP-line items were not registered; the placement
+prediction's couplings are aifoundry3's, since the calibration pass on aifoundry2 did not run.
+**Artifact:** the DVFS page (A11), [14-card-behaviour.md](14-card-behaviour.md),
+[16-dvfs-and-leakage.md](16-dvfs-and-leakage.md), and the rows marked E51 in [05-claims.md](05-claims.md).
 
 ## A note on E10, re-analysed for Q20
 

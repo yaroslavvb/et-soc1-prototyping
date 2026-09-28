@@ -5,7 +5,9 @@
 and [The ET-SoC-1's DVFS loop](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage) (A11) · numbers and sources: [05-claims.md](05-claims.md)
 
 **Sources:** E5, E6 (telemetry and rails), E9 (the protocol), E10 (the governor), E12 (long runs), E20 and E21 (the
-second card, the three machines), E27 and E29 (the rails' filter, the meter traps), R3 (the firmware policy). For
+second card, the three machines), E27 and E29 (the rails' filter, the meter traps), R3 (the firmware policy, and since
+27 September the cards' own firmware builds), E35–E46 (the three-card check's raw telemetry), E51 (the DV2 development
+night of 28 September, **development data, not validated**). For
 25 September: the aifoundry1 investigation and fix ([troubleshooting report](https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting),
 [fix log](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix), evidence in
 [`docs/reports/data/2026-09-25-aifoundry1/`](../reports/data/2026-09-25-aifoundry1/README.md)), the read-only audit
@@ -23,17 +25,57 @@ every boot, not flashed. Older files (05-claims.md, 03-experiments.md E21, 16-dv
 the others listed in [AGENT.md](../../AGENT.md), "Known stale spots") still carry the old wording until their next
 revision; this file is the current one.
 
+**Updated 2026-09-28.** Four changes. (1) The cards do not run the governor source this file first described: the
+section after the next gives the governor of each firmware build, and aifoundry2's behaviour fits its own build's
+(E51, development). (2) aifoundry3's governor is latched and aifoundry1's card 1's does not raise the clock (the card
+table). (3) Nothing on aifoundry2, aifoundry3 or aifoundry1's card 1 limits the die's temperature (card 0 may be an
+exception): aifoundry2 ran a whole catalogue pass at a 90–103 °C mean with nothing acting (section below). (4) **aifoundry2 cannot run kernels:** its Master Minion hung at 02:50:53 PDT on
+28 September and needs the lab admin (next section).
+
+## aifoundry2 cannot run kernels until the lab admin restores it (since 28 September, 02:50 PDT)
+
+- **What happened.** In E51's development pass p6041 the ADD run's lifts heat with `sparsity_host` (random fp32
+  data, 4 minions per shire on 32 shires). A lift is not one long kernel: it is a 20,000-iteration calibration kernel
+  and then a stream of short kernels for about 7 s (lift 1: 19 kernels of 0.37–0.49 s). Lift 1 ran normally (the clock
+  climbed to 800 MHz, the device held 7.46 s). Lift 2 was launched 0.6 s after lift 1 ended, with the clock still at
+  800 MHz; the host read the governor's idle reset to 600 MHz at 02:50:53.725, 0.13 s after the launch. Lift 2's
+  calibration kernel then ran, 21 ms after that reading (02:50:53.746, 14 ms), returned ok and measured 0.77 GHz,
+  between the two points. The next kernel, the first of the stream, never completed: board power fell back to the
+  26 W idle and the clock stayed at 600 MHz, the host reported "kernel did not finish within 6 s, aborting the
+  stream", and `timeout 10` stopped it (rc 124). The next two launches failed at runtime creation: "Couldn't use the
+  HPSQ. Perhaps the Master Minion is hanged?" (rc 1). The host's kernel log has an SP runtime-error event at
+  02:50:57.6 ± 0.07 s, 3.9 s after the calibration kernel ended ("ET 0000:02:00.0: Error Event Detected, Level
+  Critical, SP Runtime Error, Runtime Error Count Beyond Threshold: 6"; the stamp mapped to wall time by
+  `incident/kernel_events.py`, where dmesg -T prints 02:51:07). It is that counter's sixth; the first five (20, 22 and
+  25 September) did not stop the card, so the event need not be the hang's.
+- **What still works.** The service processor answers: at 02:52 and 02:54 it read 600 MHz, 25.9 W idle, 60 °C and a
+  threshold of 65 °C. Telemetry and read-only management queries work; nothing that launches a kernel does.
+- **Needs the lab admin.** No reset was attempted (the card rules: never reset a card yourself). Until the Master
+  Minion is restored, no kernel can run on aifoundry2, and the DV2 validation (frozen, not run) waits for it.
+- **Cause: not established.** The night's 43 launches before it, which all ran (probes, smokes, runs, and lifts
+  launched 0.52–0.58 s after the previous one ended, four times), with 57 climbs and 26 full descents of the clock, did not hang
+  (`raw/p*/launches.jsonl`). That this launch met the 800 → 600 MHz idle reset is a hypothesis, not a finding. After the
+  restore, record the SP's uptime and throttle residencies before any launch.
+- **Evidence:** `docs/reports/data/2026-09-28-dvfs2-aifoundry2/raw/ALERT-MM-HANG.json` and `raw/p6041/`
+  (`launches.jsonl`, `heater-1-pre.out.gz`, `tel-1.jsonl.gz`), the later read-only watch cycles `raw/p1111/z1.json`
+  and `raw/p1112/z1.json`, `incident/` (the kernel log's error events, `kernel_events.py`) and `dv2.json` `incident`.
+
 ---
 
 ## The clock governor is thermal first
 
 The [service processor](README.md#terms) runs a power-management task (`thermal_pwr_mgmt.c`, R3), once per
 management pass: 133 ms on aifoundry2, 135 ms on aifoundry1's card 1 and 224 ms on aifoundry3 with nothing polling,
-longer while a sampler polls (E41; the table below). While a kernel is running it steps the minion operating point **down** if the
-die's whole-degree reading is above a software threshold (**65 °C**) *or* the board's average power is above the
-TDP level (**65 W**), and **up** otherwise. The thermal branch is checked first and wins. This is the firmware
-source at `353f20e`; the cards' own trace strings match an older build (R3), so details may differ on the card.
-[16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) has the loop in detail.
+longer while a sampler polls (E41; the table below). It steps the minion operating point **down** when the die's
+reading is above a software threshold (**65 °C**) or the board's power is above the TDP level (**65 W**), and **up**
+when a kernel runs and neither is. The thermal branch is checked first and wins. The reading it compares is one
+number in every firmware build: the integer mean of the **34 minion-shire sensors**, each truncated to a whole degree
+(the I/O shire's sensor is not in it), tested as `mean > 65`. No build has a per-sensor or hottest-sensor path to the
+clock. E51's development runs agree: in 12 of 12 runs the clock held 800 MHz for at least a second after the hottest
+sensor read 67 °C or more, and on an idle card whose mean read 64 °C while the hottest sensor read 66 °C the governor
+stayed out of its thermal state (development, not validated). How the governor responds beyond that depends on the
+build, and the cards do not run the `353f20e` source this file first described: see "The clock governor, by firmware
+build" below. [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) has the `353f20e` loop in detail.
 
 This card's operating points, read from telemetry (E10):
 
@@ -45,7 +87,11 @@ This card's operating points, read from telemetry (E10):
 
 **Consequence:** a card that has been busy usually idles above 65 °C (72–80 °C on 20–22 September; about 65 °C on
 23 September, when the governor did intervene) and therefore runs *everything* at 600 MHz, whatever the power — which is why an earlier version of this work
-concluded, wrongly, that "the clock never moves". It moves only from a cool die.
+concluded, wrongly, that "the clock never moves". It moves only from a cool die. aifoundry2's rest is not steady: on
+the night of 28 September its idle reading swung between 59 and 72 °C on a 10–30 minute scale (72, 70, 64, 67, 69,
+64 °C at 00:40–01:30 PDT, 59–62 °C from 02:30), with idle power following at about 0.4 W per °C (25.7 W at 59 °C,
+31.1 W at 72 °C). The host's ACPI zones read a constant 16.8 and 27.8 °C (probably not live readings), its drive
+43–47 °C and its CPU package 37–59 °C. What drives the swing is not established (E51, development).
 
 From a 62–63 °C die, after a night idle (E10):
 
@@ -75,6 +121,77 @@ launches 1 s apart, 10 Hz telemetry) the first launch after such an idle showed 
 
 Firmware 1.2.0 (aifoundry1's card 1) and 1.3.1 (aifoundry2 and aifoundry3) idle at 600 MHz. At 600 MHz the three
 releases idle very differently: 26 W (1.4.1), 33–35 W (1.2.0 at 57–62 °C) and 32 W (1.3.1, aifoundry2 at 74 °C).
+
+## The clock governor, by firmware build
+
+The pages first described the governor at et-platform `353f20e` (R3). The cards run older builds, read on
+27 September in the same clone (`external/et-platform`, `device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c`
+at each commit). The table is read from source; the entries marked *seen* have card evidence.
+
+| | `353f20e` (= `836a4ab`) | BL2 0.20.0: release 1.3.1, aifoundry2 and aifoundry3 (closest public source `ffca4cbb4` = `cafe03fc3^`, 17 May 2024) | BL2 0.18.0: release 1.2.0, aifoundry1's card 1 (closest `da192816a`, 27 March 2024) |
+|---|---|---|---|
+| When the thermal test acts | only while a kernel runs | **always, busy or idle** (*seen*: 18 of the 20 thermal entries of E51's night came after the SP's own idle line) | as 0.20.0 |
+| Thermal response | one table point down per pass | **a blocking loop**: one point down, sleep 1,000 ticks (about 0.40 s), read the mean again, repeat while it is above 65; meanwhile the power branch, the idle reset included, cannot act (*seen*: 17 of 17 idle episodes under 60 s lasted k × 0.4053 s to within 1.4 ms, k = 0–3, E51; E10's down-steps paired 0.4–0.5 s apart) | as 0.20.0 |
+| Leaving the thermal state | — | at a mean of 65 or less, to the boot point (600 MHz); on the next pass a busy card under the TDP **climbs to the top point in one call** (*seen*: 57 of 57 climbs showed at most one 700 MHz sample, E51) | as 0.20.0 |
+| Power test | the PMIC's average | the PMIC's **instantaneous** reading; the loops exit on the average, the power-down loop at under 1.05 × TDP or at 300 MHz | as 0.20.0 |
+| Operating points | the flash VMIN table (600, 700, 800 MHz on aifoundry2) | the same table | **fixed 50 MHz steps between 300 and 700 MHz**, the voltage computed from the boot point |
+| Hysteresis | none | none: in above 65, out at 65 (*seen*: all 20 entry lines of E51 printed 66, all 20 exit lines 65) | none |
+| The PMIC alarm (75 °C, 75 W) | a 300 MHz safe state | a safe state that never ends and sets the frequency register but not the PLL (source only) | a real 300 MHz safe state |
+
+aifoundry1's card 0 runs release 1.4.1 (BL2 0.21.2), whose governor acts only while a kernel runs (the card table).
+What each card shows:
+
+- **aifoundry2 behaves as 0.20.0 predicts.** Its SP's throttle residency (a read-only management query, E51) put it in
+  the thermal state for 747,342 s, 8.65 of its 9.23 days of uptime, with one stay of 2.1 days: whenever its rest is above
+  65 °C it sits in the thermal loop at 600 MHz, and its idle reset waits. Every idle exit (20 of 20) was followed by the
+  SP's own idle line, 17 of them one pass later (0.119–0.131 s). (E51, development; the frozen validation has not run.)
+- **aifoundry3's governor is latched.** Under 0.20.0 its boot-time TDP of 0 W sends the first kernel after boot into a
+  power-down loop that can never exit (the exit needs an average under 1.05 × 0 W, or 300 MHz, and the clock is already
+  at the bottom point), so the power task spins; the first time the mean then passes 65 °C the thermal state is set and
+  nothing clears it, and no governor line is ever logged again. That fits the record: 26 throttle-down and 27 idle lines
+  in one window on 22 September, none in any version-3 dump (E41, TEL-G), and E51's one read-only query of its residencies
+  on 28 September: power-up, power-down, thermal-down and power-safe all 0 after 2 days 8 hours of uptime, although the
+  heat-placement runs of 27 September had taken its die past 66 °C (development, one reading). Its clock cannot move at
+  any temperature, and a reset by the lab admin would return it to live DVFS until its boot service runs again.
+- **aifoundry1's card 1 does not raise its clock.** In the three-card check it read 600 MHz in all 318,667 samples,
+  and the SP's own minimum and maximum of the clock read 600/600 in every one (a statistics reset does not clear them,
+  so they reach back before the check), although 9,461 of them were busy at 45–65 W at a die of 64 °C or less (its 65
+  blocks started at 56–69 °C, median 62 °C) and its mean reached 88 °C. E48's gathers-and-scatters passes, filed in the
+  same tree, are not counted (with them: 359,687 and 11,612). A live 0.18.0
+  governor would have stepped to 650 MHz or 550 MHz there. Active power management switched off, or a latched state,
+  would each explain it; they are not told apart (the power-up residency since boot would narrow it).
+
+## Nothing limits the die's temperature (aifoundry2, aifoundry3, aifoundry1's card 1)
+
+The one hardware trip in the firmware is a PMIC alarm at 75 °C or 75 W (`TEMP_THRESHOLD_HW_CATASTROPHIC`,
+`POWER_THRESHOLD_HW_CATASTROPHIC`), written into the PMIC as its own alarm thresholds. It takes its temperature from
+the PMIC, not from the die's sensors. The SP reads the PMIC's system temperature only when it starts or resets its
+statistics (`thermal_pwr_mgmt.c:2995–3001` at `ffca4cbb4`, under the note "PMIC is currently reporting system
+temperature as 0") and feeds that statistic's minimum and maximum a literal 0 on every other pass (`:663–664`), so
+`sp.system_c` is not a per-sample reading of the PMIC: it read 0 on all three cards throughout the check, which says
+only that the PMIC gave 0 at each reset. The evidence that nothing acts is the telemetry below. The host field
+`temp_c.pmic` is the minion-shire mean again, not a PMIC reading. So at the bottom operating point nothing on aifoundry2, aifoundry3 or aifoundry1's card 1 acts on the
+die's temperature:
+
+- **aifoundry2 ran a whole catalogue pass at a 90–103 °C mean.** The version-3 catalogue's hot pass 11
+  (`docs/reports/data/2026-09-25-claims-v3/raw/aifoundry2/cat/p11/`, 26 September, 02:26–02:31 PDT) heats the die to at
+  least 88 °C before each configuration and has no upper stop, and its launches ran from 91 to 102 °C with no heater
+  (`run.log`). Its mean read above 90 °C in 2,565 of 2,567 samples and peaked at 103 °C, with the hottest sensor at
+  106 °C, the I/O shire at 101–102 °C and the board at up to 86.9 W (83.6 W at the first 103 °C reading), all at
+  600 MHz, with no safe state. That is above the 90 °C at which this work's long runs stop (the owner's rule), and
+  nothing tripped. In all, aifoundry2's mean passed 90 °C in eight version-3 telemetry files (12,176 samples: catalogue
+  passes 6, 9 and 11, full-catalogue passes 22 and 31, the matmul benchmark's thermal passes 3 and 4, and X5's pass 3),
+  every one at 600 MHz.
+- **The one possible exception is aifoundry1's card 0** (release 1.4.1, not in the campaign): it read 115–117 °C after
+  its smoke blocks of 25 September before it dropped to 300 MHz (the section on that card below); whether its PMIC's
+  safe state or 1.4.1's idle point did that is not established.
+
+The only guard is the runners' own cap: stop at a mean of 90 °C (`tools/ettelem/run_horace_long.sh`, the DV2 watcher).
+A runner that holds a temperature needs an upper stop too; the version-3 catalogue runner
+(`tools/claims-v3/cat/run_catalogue_t10.py`) has none. The counts here: `python3 tools/claims-v3/dv2/recount_v3.py
+over90` (every telemetry file whose mean passed 90 °C), `… pass` (catalogue pass 11), `… systemc` (`sp.system_c`) and
+`… cool-busy` (aifoundry1's card 1, above), each over the three-card check's passes only (E48's `gs/` passes, filed in the
+same tree, come in with `--with-gs`), so they equal the DVFS page's counts (`dvfs.json` `v3.sp_readouts`).
 
 ## The telemetry, and what each number really is
 
@@ -154,7 +271,7 @@ check first that nobody holds the card (`et-who`).
 | Firmware release (BL / PMIC / minion) | 1.3.1 (0.20.0 / 1.5.0 / 0.23.0) | 1.3.1 (the same) | 1.4.1 (0.21.2 / 1.6.1 / 0.24.0) | 1.2.0 (0.18.0 / 1.3.0 / 0.22.0) |
 | TDP the driver reports | 65 W | 65 W | 65 W | 65 W |
 | **TDP the firmware uses** | **65 W** | **0 W**, set at every boot (below) | 65 W | 65 W |
-| Clock | firmware DVFS: 600, 700 or 800 MHz; above 600 only below about 68 °C. In this chassis the die never read below 65 °C in the version-3 campaign (336,070 samples, 25–26 Sep), so it runs at 600 MHz unless it starts cold | **600 MHz** (NoC 400), never seen higher (10 Hz telemetry); no throttle or idle event in its trace since 25 Sep (E41 TEL-G), so it appears to make no thermal step either (27 Sep) | firmware DVFS; **idles at 300 MHz** (`low_power`); its 0.21.x governor acts only while a kernel runs (firmware source, 27 Sep) | **600 MHz in all 359,657 samples of 25–26 Sep**, below 65 °C and up to 88 °C: DVFS appears off (27 Sep; asked the lab) |
+| Clock | firmware DVFS: 600, 700 or 800 MHz; above 600 only below about 68 °C. In this chassis the die never read below 65 °C in the version-3 campaign (336,070 samples, 25–26 Sep), so it runs at 600 MHz unless it starts cold | **600 MHz** (NoC 400), never seen higher (10 Hz telemetry); its governor is latched by the zero TDP: no governor line in its trace since 25 Sep (E41 TEL-G), and its throttle residencies all 0 after 2 d 8 h up (28 Sep; E51, development); it makes no thermal step at any temperature | firmware DVFS; **idles at 300 MHz** (`low_power`); its 0.21.x governor acts only while a kernel runs (firmware source, 27 Sep) | **600 MHz in all 318,667 samples of the three-card check (25–26 Sep)**, and in the SP's own minimum and maximum, although 9,461 were busy at 45–65 W at 64 °C or less and the mean reached 88 °C: its governor does not raise the clock (active power management off, or latched; asked the lab). Its build steps 50 MHz between 300 and 700 MHz, so it could never reach 800 |
 | Idle | 31–36 W at 73–80 °C (27 W cold) | 23.6 W at 50 °C (25.1 W at 56 °C under the runs); the die idles at 55–57 °C since the host changes of 25 Sep | 18.6–18.8 W at 300 MHz; 26 W at 600 MHz | 33–35 W at 600 MHz and 57–62 °C |
 | Use it for | the main card | compare switching power over idle, never absolute watts | **nothing sustained: it overheats** (below) | anything; it peaked near 71 °C under the campaign's smoke blocks |
 | Version-3 campaign | yes | yes | excluded (amendment A4) | yes |
@@ -173,7 +290,9 @@ step-up test is `<`. At a TDP of zero the first is always true and the second ne
 throttle-down at every kernel start, and nothing can ever step it up. The card's own log says so: `Power throttle
 down event, current pwr 35380  tdp level: 0`, 26 times in one 8 KB window, alternating with idle events, with no
 step-up event at all. A second reading agrees: `get_power_state()` classifies a card as `MAX_POWER` exactly when
-power exceeds the TDP, and aifoundry3 reports `max_power` while drawing 23 W.
+power exceeds the TDP, and aifoundry3 reports `max_power` while drawing 23 W. Since 25 September it logs nothing at
+all: under its own 0.20.0 build the zero TDP leaves the power task in a loop that cannot exit, and the first mean
+above 65 °C then latches the thermal state for good ("The clock governor, by firmware build", above).
 
 **Correction (2026-09-25): the zero is not flashed.** Until then this file said the TDP was flashed. A boot
 service on aifoundry3, `et-board-clock-guard.service` (in place since 2026-07-23, noting that the card is unreliable
@@ -358,4 +477,5 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
   improvement ladder.
 - [11-thermal-model.md](11-thermal-model.md): the thermal network and the step-time trick for the whole-degree
   sensor.
-- [03-experiments.md](03-experiments.md): the standard protocol and every session's command.
+- [03-experiments.md](03-experiments.md): the standard protocol and every session's command; E51 is the DV2
+  development night of 28 September (the governor's build, the mean against the hottest sensor, the Master Minion hang).

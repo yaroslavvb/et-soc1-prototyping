@@ -2,9 +2,9 @@
 
 The work in this directory was driven by a sequence of requests from the repo owner. Q1–Q42 come from one long
 session on aifoundry2 (18–24 September 2026); Q43 comes from a separate session and is listed in the order it was
-recorded; Q44–Q58 are the requests of 25–27 September, in the order of their first commit. Each is recorded here
+recorded; Q44–Q59 are the requests of 25–27 September, in the order of their first commit. Each is recorded here
 because scope decisions explain why some questions were answered thoroughly and others were left open. Cite as
-**Q1**...**Q58**.
+**Q1**...**Q59**.
 
 | ID | Date | Request (condensed) | Produced |
 |---|---|---|---|
@@ -66,6 +66,7 @@ because scope decisions explain why some questions were answered thoroughly and 
 | Q56 | 09-26 | *(mid-task, Q55)* The pages are too long to scroll: "the important things should show, and more detail hidden under collapsibles" | `details.more` and `CK.reveal` in the toolkit, and the detail of 20 pages folded (`51720f3`–`a7478c9`, recorded in `0dfe668`); [04-artifacts.md](04-artifacts.md), "Collapsible depth" |
 | Q57 | 09-27 | Make sure the verification campaign is complete and the documents are updated accordingly (the live hub still showed "Status before the version-3 campaign") | The review's branch (Q55, Q56) merged into the version-3 pages; E48 registered; the status in `AGENT.md`, `getting-started.md` and this directory; E48 (gathers and scatters) inserted in the energy manual, the memory hierarchy, the influence page and the hub (Q52) |
 | Q58 | 09-27 | Feedback on the interactive chip diagram (published that day, `83c3bf9`): measure the PCIe link it called "not measured", on a page of its own if need be; make the flows' camera smooth; make F work inside spacesheep (and tell spacesheep); Space must pause the zoom too, with a control to step and scrub the stages; say what each inferred or dashed part needs, and collect in the hub's limits of observability everything to ask the team for; let the reader zoom back in; find and add what is not visualized yet | E50 (the host link on three cards) and its page "Over the PCIe link" (`docs/reports/2026-09-27-et-soc1-pcie-link.html`, not yet published); the diagram's second version (the stage bar, the scale control, the paused camera, four new flows from data already in the repository, the asks: `docs/reports/data/2026-09-27-chip-diagram/research/asks.json`); the hub's rungs 21–36 ([04-artifacts.md](04-artifacts.md), "Pages added on 27 September") |
+| Q59 | 09-27 | (21:50 PDT) Go over DVFS, come up with another set of experiments on the connection between DVFS and heat, and update the pages. The questions behind it: does the clock governor act on the average temperature or on one hot shire, and can the same computation run longer before throttling in some parts of the chip? | A review of what the pages say about the governor (findings B1–B12), the governor read at every firmware build the cards run, a design with eight theories, its critique and a development plan, all before card work (27 September, in the session's notes); the DV2 tools (`tools/claims-v3/dv2/`); E51, the development night on aifoundry2 (28 September, 00:33–02:54 PDT: development, not validated), which ended when aifoundry2's Master Minion hung (it needs the lab admin); a frozen validation plan, not run (it waits for the owner's OK and the restored card: `docs/reports/data/2026-09-28-dvfs2-aifoundry2/plan/PREREG-VAL.md`); the page corrections of 28 September (the DVFS page; aifoundry1's card 1 was never "launched warm" on the Horace, why-low-power and power pages; the 90–103 °C catalogue pass on the power page and the energy manual; the idle law's rms basis), and [14-card-behaviour.md](14-card-behaviour.md), [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) and [01-resources.md](01-resources.md) R3 brought up to date |
 
 ## Scope decisions worth remembering
 

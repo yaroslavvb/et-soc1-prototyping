@@ -14,7 +14,8 @@ the repo root, with
 In a git worktree without its own node_modules, set NODE_PATH to a checkout's node_modules.
 
 A page whose script needs a block that a separate step adds to its data refuses to build without it (REQUIRED below:
-dvfs-leakage needs `cards`, which tools/ettelem/build_cards_data.py --merge writes into dvfs.json)."""
+dvfs-leakage needs `cards`, which tools/ettelem/build_cards_data.py --merge writes into dvfs.json, and `dv2`, which
+tools/ettelem/build_dv2_data.py --merge writes)."""
 import json
 import os
 import re
@@ -28,7 +29,9 @@ meta = json.load(open(os.path.join(S, name + ".meta.json")))
 # then throws in the reader's browser and leaves whole sections empty.
 REQUIRED = {
     "dvfs-leakage": {"cards": "run tools/ettelem/build_cards_data.py ... --merge <dvfs.json> after analyze_dvfs.py "
-                              "(the full chain is in the page's Method section and docs/getting-started.md)"},
+                              "(the full chain is in the page's Method section and docs/getting-started.md)",
+                     "dv2": "run tools/ettelem/build_dv2_data.py --data docs/reports/data/2026-09-28-dvfs2-aifoundry2 "
+                            "--merge <dvfs.json> after build_cards_data.py (the page's 'Reproduce this')"},
 }
 data = json.load(open(data_path))
 missing = [f"no '{k}' block: {how}" for k, how in REQUIRED.get(name, {}).items() if k not in data]

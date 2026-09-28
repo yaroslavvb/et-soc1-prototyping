@@ -14,9 +14,8 @@ set -u
 V3_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 cd "$V3_ROOT"
 export LD_LIBRARY_PATH=/opt/et/lib
-# Since 25 Sep every host has the system python3-numpy 1.26.4 and the venv module. The two lines below are kept for
-# older checkouts: a tree-local .venv/ (made when aifoundry3 had no system numpy) and pylib/ (numpy unpacked on
-# aifoundry1, which then had no venv module) are used if present.
+# aifoundry3 has no system numpy: a user-level virtual environment in the tree (numpy 1.26.4, as on aifoundry2);
+# aifoundry1 has no venv module either: the same numpy unpacked in pylib/
 [ -x "$V3_ROOT/.venv/bin/python3" ] && export PATH="$V3_ROOT/.venv/bin:$PATH"
 [ -d "$V3_ROOT/pylib/numpy" ] && export PYTHONPATH="$V3_ROOT/pylib${PYTHONPATH:+:$PYTHONPATH}"
 CARD=$(hostname)                      # aifoundry2 | aifoundry3 | aifoundry1-c0 | aifoundry1-c1
