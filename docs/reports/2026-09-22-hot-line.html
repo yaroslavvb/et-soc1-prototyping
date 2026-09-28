@@ -190,14 +190,14 @@ What that shire loses is something else entirely: with the clock steady at 600 M
 leave it at 96% of its rate, 22 stop it, fewer than the 32 minions a shire has. It reproduces on all three cards we
 could run it on (aifoundry2, aifoundry3 and aifoundry1 card 1), in three passes on each.</p>
 
-<p class="small" id="v3-note"><b>Checked on three cards (26 September 2026):</b> 17 of this page's claims were
+<p class="small" id="v3-note"><b>Checked on three cards (26 September 2026):</b> this page's claims were
 re-measured under a pre-registered plan, in three passes on each of aifoundry2, aifoundry3 (both firmware 1.3.1;
 aifoundry3 held at 600 MHz) and aifoundry1 card 1 (firmware 1.2.0), and the sweeps' tables and charts now show those
-passes. Fourteen held, several with sharper numbers: the edge is exactly where section 3's inequality puts it, 22
-requesters, and the pacing knee just above its 9,704 cycles. One did not: 31 requesters, one per shire, saturate the
-line's bank but did not stop the one minion of its shire that was reading (section 7, corrected). One was qualified (the reading-only rate in
-section 6), and one, the bus error of section 8, was not repeated. The cards agree throughout, except one aifoundry2
-launch in section 1. Record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>.</p>
+passes. Several held with sharper numbers: the edge is exactly where section 3's inequality puts it, 22
+requesters, and the pacing knee just above its 9,704 cycles. The one that did not: 31 requesters, one per shire,
+saturate the line's bank but did not stop the one minion of its shire that was reading (section 7, corrected). The
+reading-only rate in section 6 was qualified, and the bus error of section 8 was not repeated. The cards agree
+throughout, except one aifoundry2 launch in section 1. <span class="v3-counts" data-v3-counts="et-soc1-hot-line">Of 17 claims tested here, this page counts 14 held, 1 did not hold (corrected), 1 qualified and 1 not repeated; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#claims-cap">hub’s scoreboard</a>, 17 “a test behind it failed”.</span> Record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>.</p>
 
 <details class="terms"><summary>Terms used on this page</summary>
 <p class="small">Minions are the chip's small in-order RISC-V cores, 32 to a shire, and each shire's 4 MB of SRAM,
@@ -229,15 +229,12 @@ it completed inside it. A shire's share is its count divided by what an even spl
 <p class="small" id="faircap"></p>
 
 <details class="more"><summary>Why shares spread out with one minion per shire</summary>
-<p>Moving the line's home to shire 7, 15 or 31 changes nothing, so shire 0 is not special. (One of the 36 launches
-of this sweep with 32 minions per shire spread wider: on aifoundry2, line in shire 7, its first pass gave shares of 0.994–1.046
-(shires 27–31 highest) and 9.92 cycles per atomic; that card's other two passes, and the other cards, stayed within
-0.999–1.003. The table's aifoundry2 row for shire 7 is the mean of the three.) The one case where
-shares do spread out is the opposite of starvation. With a single minion per shire the bank still retires one
+<p>Moving the line's home to shire 7, 15 or 31 changes nothing, so shire 0 is not special (one aifoundry2 pass
+with the line in shire 7 spread to 0.994–1.046; its other passes and the other cards stayed within 0.999–1.003).
+Shares spread out in one case only, the opposite of starvation. With a single minion per shire the bank still retires one
 atomic every 10 cycles, but each shire has only one request in the queue, so the time a request spends crossing
 the mesh decides how often each shire gets its turn. Shares fall step by step with distance from the line, and
-<b>the host shire comes first</b> because its request crosses no mesh links at all. The map above shows the
-rings.</p>
+<b>the host shire comes first</b> because its request crosses no mesh links at all.</p>
 </details>
 
 <details class="more"><summary>The table, shire by shire</summary>
@@ -286,14 +283,11 @@ the 23 September passes on the two cards. <span id="warmtext"></span> The 32 min
 stalled in a load instruction that does not return. Nothing reports an error; the kernel finishes when the hammering stops.</p>
 
 <details class="more"><summary>A caveat: one session where the clock moved</summary>
-<p>The stop was measured with the minion clock steady at 600 MHz. In one session on aifoundry2, whose governor
-can move the clock (a boot service holds aifoundry3 at 600 MHz by setting its TDP to 0 W at every boot), the ten 2-second runs in which the clock moved
-between 600, 700 and 800 MHz let the host's loads through at 1–7% of their rate with nobody hammering, while
-the two that stayed at 600 MHz stopped
-at 384. One session does not establish that the clock is the cause, nor whether its level or its change would
-be. That session, the
+<p>The stop holds at a steady 600 MHz. In one aifoundry2 session (the
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-23-reruns-aifoundry2">first
-rerun attempt of 23 September</a>, was discarded for the energy figures because its clock moved.</p>
+rerun attempt of 23 September</a>, discarded for the energy figures) the ten 2-second runs whose clock moved between
+600 and 800 MHz let the host's loads through at 1–7% of their rate, while the two at 600 MHz stopped at 384; one
+session does not establish that the clock is the cause.</p>
 </details>
 
 <h2 id="the-threshold-is-the-bank-going-saturated">3. The threshold is the bank going saturated</h2>
@@ -320,7 +314,7 @@ requests stop getting resources. One inequality says when:</p>
 <p class="small" id="reqcap"></p>
 
 <h2 id="esperanto-knew-two-errata-describe-it">4. Esperanto knew: two errata describe it</h2>
-<p>This is not a discovery so much as a demonstration. Two entries in Esperanto's
+<p>Two entries in Esperanto's
 <a href="https://github.com/aifoundry-org/et-man">ET-SoC-1 errata</a> describe it (numbered 4.1 and 4.2 in the
 document's body, 3.1 and 3.2 in its table of contents), and both are marked <i>Postponed</i>:</p>
 
@@ -478,12 +472,12 @@ python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifo
 The window table is measured in the three-card passes (<code>analyze_hotline.py --v3</code>; each card's row of a
 configuration is the mean of its passes), and the chart's 2-second windows are the 23 September reruns' starved runs
 (<code>--stop-runs</code>). The barrier with one minion per shire is the three-card check's (<code>results/lat.json</code>, LAT-N4, three passes on each card; the 18 September nocbench run on aifoundry2 gave 4,995 cycles); the round trip and the bank's 10
-cycles are computed from the sweep. Versions: first published 22 September 2026; 24 September, the threshold given as
-a range; 25 September, the bank rule necessary but not sufficient and the chip barrier 4,995 cycles, not 4,997, then
-(version 3) the stop stated for a steady 600 MHz clock and the loads that get through counted with their warm-up;
-26 September, the sweeps re-measured in three passes on three cards (the edge at 22 requesters, the knee just above
-9,704 cycles) and the claim about one requester per shire corrected; 27 September, the window lengths drawn as a
-chart and the detail folded into collapsible sections. Record:
+cycles are computed from the sweep. Versions (one line per date; every wording is in
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/commits/main/docs/reports/sources/hot-line.body.html">the source's history</a>):
+22 September, first published; 24 September, the threshold a range; 25 September, the bank rule necessary but not
+sufficient, the chip barrier 4,995 cycles, not 4,997, and the stop stated for a steady 600 MHz clock; 26 September, three
+passes on three cards (the edge at 22 requesters, the knee just above 9,704 cycles), and the claim about one requester
+per shire corrected; 27 September, charts; 28 September, repeats cut and the note's counts given by both rules. Record:
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3/</code></a>.</p>
 </details>
 
@@ -504,9 +498,6 @@ hop.</li>
 whose 2,048 harts take their work from one global atomic counter.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature</a> — the
 per-shire temperature sensors that could tell whether a hot line heats its shire.</li>
-<li><a href="https://spacesheep.dev/@yaroslavvb/2026-09-22-et-soc1-l2-mainline-starvation">L2 mainline
-starvation</a> — the same-day argument from Ivan's report, now a pointer here; its 6% and its reading of
-<code>l3_yield</code> as the lever did not hold.</li>
 </ul>
 </main>
 
@@ -1199,18 +1190,13 @@ const POOLED={
  const host=agree(perCard(c=>D.fairness.find(r=>r.card===c&&r.home==='0'&&r.per_shire===32)).map(r=>f3(r.host_share)));
  /* Ivan's case: one scratchpad word in shire 0, every minion hammering (the placement rows) */
  const ivan=perCard(c=>D.placement.find(r=>r.card===c&&r.home==='scp:0'));
- /* section 3's round trip: one requester, the bank idle, from this shire */
- const rtS=CTX.remote_atomic_latency_shire, rtH=rtS!=null&&LAY[rtS]?hopsOf(rtS):null;
- const rtNote=RT&&rtH!=null?`; section 3's ${n0(RT)} cycles is the uncontended round trip of a single requester in shire ${rtS}, ${rtH} hop${rtH===1?'':'s'} away`:'';
  $('faircap').textContent=
   `The map colours each shire by its share (towards blue above an even split, towards orange below; shire 0, outlined, holds the line). `+
   `The scatter plots the same shares against mesh hops from shire 0: ${CARDS.map((c,i)=>`${['dots','rings','dashed rings'][Math.min(i,2)]} ${CK.card(c).label}`).join(', ')}; each is the mean of the card's passes. `+
   `With one minion per shire the dashed curve is ${num(F.harmonic_mean_cycles,0)}/(${num(F.round_trip_cycles_0_hops,0)} + ${num(F.cycles_per_hop,1)} × hops): `+
-  `a request's round trip, ${num(F.round_trip_cycles_0_hops,0)} cycles plus ${num(F.cycles_per_hop,1)} per hop, sets how often a shire gets its turn, and the curve fits every shire `+
+  `a request's round trip under the saturated bank sets how often a shire gets its turn, and the curve fits every shire `+
   `within ${F.max_share_error} on ${CARDS[0]} (${CARDS.slice(1).map(c=>`${fit[c].max_share_error} on ${CK.card(c).label}`).join(', ')}), from ${f3(Math.max(...at(0)))} at 0 hops to ${f3(Math.min(...at(far)))} at ${far}. `+
-  `That round trip is taken under the saturated bank, so it includes the queueing${rtNote}. `+
   `With every minion taking part the whole chip lands within ${f3(Math.min(...full))}–${f3(Math.max(...full))} on all ${word(CARDS.length)} cards and the host shire is at ${host}: the map goes flat. `+
-  `A hovered or focused shire is joined to shire 0 by a straight line, not by its route (the mesh's routing order was not measured). `+
   (ivan.length?`The same holds for Ivan's exact case, a scratchpad word in shire 0: host share ${agree(ivan.map(r=>f3(r.host_share)))}, `+
    `every shire ${f3(Math.min(...ivan.map(r=>r.min_share)))}–${f3(Math.max(...ivan.map(r=>r.max_share)))}.`:'');
 })();
@@ -1761,9 +1747,8 @@ if(CTX.errata) $('errata').innerHTML=CTX.errata.map(e=>
    CK.keynav(fr,nodes);
    CK.inside(fr,labs);
   }});
- $('nrgcap').textContent=`Log scale. Each line is a case's range over the ${word(nP)} pooled passes of the table's last column, the tick their mean, and the marks `+
-  `each card's own mean (${ecards.map(c=>`${CK.card(c).label} ${CK.card(c).mark==='dot'?'filled':CK.card(c).mark}`).join(', ')}); the contended and spread ranges are far apart. `+
-  `The reading-only row is grey and dashed because its power is inside the idle baseline's noise (the note above).`;
+ $('nrgcap').textContent=`Log scale: each case's range over the ${word(nP)} pooled passes, the tick their mean, the marks each card's mean `+
+  `(${ecards.map(c=>`${CK.card(c).label} ${CK.card(c).mark==='dot'?'filled':CK.card(c).mark}`).join(', ')}). The reading-only row is grey: its power is within the idle baseline's noise.`;
 })();
 
 /* ---------- section 7: the barrier, and one requester per shire (the three-card check's pollers) ---------- */

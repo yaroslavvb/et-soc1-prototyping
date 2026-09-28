@@ -118,8 +118,10 @@ over the 0.9 V literature is mostly V². Only mesh-rail numbers are V²-scaled: 
 
 Blocks of 16–128 bytes cost the same and 256-byte blocks cost more, as the shire's four mesh lanes predict (a line
 goes to lane PA[7:6], so consecutive lines on one lane are 256 bytes apart), and a flit carries at least a 64-byte
-line. The 256-byte excess is 69% of a full flip per hop on board power and 54% on the mesh rail, and it does not fall
-as more links are shared; why it falls short is open.
+line. On the mesh rail the 256-byte excess is 55% (aifoundry2) and 53% (aifoundry3) of a full flip per hop; on board
+power 67% and 71%, not resolved from a full flip (the pooled 54% and 69% of the first write-up). It does not fall as
+more links are shared (0.35 pJ/B per hop from one to three hops, 0.45 from three to six, on the mesh rail); why it
+falls short of a full flip is open.
 
 ## Things that bit us
 
@@ -136,15 +138,17 @@ as more links are shared; why it falls short is open.
 ## Not established
 
 - **Router against wire.** Every hop is one router plus one pitch of link; the data cannot split them. The x-only and
-  y-only sets agree only to about 10% and differ in link sharing, so they do not test it.
+  y-only sets differ in link sharing as well as in direction, so they cannot separate router from wire either.
 - **Which circuit makes ones cost.** Resting-at-zero logic and precharged structures both fit; slowing the flows at a
   fixed distance would tell them apart.
 - **The meters.** The mesh rail's gain has not been checked independently. Board-power coefficients move 4–9% with the
   leakage correction; the mesh-rail ones do not move.
 - **The fixed part may be partly per second rather than per hop.** Bandwidth per reader falls with distance. On the
   mesh rail at most 27% of the free-link fixed part and 18% of the loaded one could be per second. On board power,
-  whose one-hop energy also holds the scratchpad read and the cores, the same bound is 98% and 58%, so it cannot rule
-  out that most of the board's fixed part is per second. The data-dependent part is immune.
+  whose one-hop energy also holds the scratchpad read and the cores, the same bound for the link-disjoint part is 84%
+  on aifoundry2, 93% on aifoundry3 and 104% on aifoundry1's card 1, poorly determined (upper 99% bounds 118–137%;
+  E42), and 56% for the loaded one (98% and 58% in the first write-up), so it cannot rule out that most of the
+  board's fixed part is per second. The data-dependent part is immune.
 - **Voltage scaling** assumes full-swing links at constant capacitance; whether the links are low-swing is not known.
 - **Ten hops is an extrapolation** from one to six.
 

@@ -211,10 +211,6 @@ const semiList=a=>a.length<2?a.join(''):a.slice(0,-1).join('; ')+'; and '+a[a.le
  /* section 3's operating point: the minion rail over the catalogue's bursts, each card's median reading (catalogue.rail_mv) */
  const RMV=D.catalogue.rail_mv||{}, rmv=CK.cardsIn(RMV).map(h=>RMV[h].minion/1000);
  if(rmv.length){const lo=Math.min(...rmv).toFixed(2), hi=Math.max(...rmv).toFixed(2); $('instrmv').textContent=`${lo===hi?lo:lo+'–'+hi} V on the minion rail (each card's median reading over the catalogue; section 8 gives them)`;}
- /* section 10: the relay against the DRAM round trip, per card (reruns.relay_pj_per_byte) */
- const rr=RR.relay_pj_per_byte||{};
- if(rr.dram&&rr.hop){const rh=CK.cardsIn(rr.dram.per_card).filter(h=>rr.hop.per_card[h]);
-  $('relayrel').textContent=`about a ${Math.round(rr.dram.mean/rr.hop.mean)===13?'thirteenth':Math.round(rr.dram.mean/rr.hop.mean)===12?'twelfth':'1/'+f0(rr.dram.mean/rr.hop.mean)} of the energy`;}
  /* the lede's round numbers, from the catalogue's pooled means: the awake core, three instructions, three byte paths */
  const cm=k=>(cb(k)||{}).mean, sp1=S2['spin/zeros/h1'], rngB=ks=>{const v=ks.map(cm).filter(x=>x!=null); return [Math.min(...v),Math.max(...v)];};
  const r5=(v,up)=>Math.round(v/5)*5, sc=rngB(['tload/scp/zeros','tload/scp/random','tstore/scp/zeros','tstore/scp/random']), dr=rngB(['tload/dram/zeros','tload/dram/random','tstore/dram/zeros','tstore/dram/random']), ws=rngB(['st_stream/dram/zeros','st_stream/dram/random']);
@@ -265,10 +261,7 @@ const semiList=a=>a.length<2?a.join(''):a.slice(0,-1).join('; ')+'; and '+a[a.le
    semiList([].concat(L2?[`${LAWCARD} ${sgw(L2.mean)} W [${sgw(L2.ci99[0])}, ${sgw(L2.ci99[1])}] from the law at ${L2.T[0]}–${L2.T[1]} °C`]:[],
     CK.cardsIn(LRv).filter(h=>h!==LAWCARD).map(h=>`${cname(h)} ${sgw(LRv[h].mean)} W [${sgw(LRv[h].ci99[0])}, ${sgw(LRv[h].ci99[1])}] at ${LRv[h].T[0]}–${LRv[h].T[1]} °C, the gap growing ${LRv[h].slope_w_per_c.mean<0.1?f3(LRv[h].slope_w_per_c.mean):f2(LRv[h].slope_w_per_c.mean)} W per °C`)))+
    ` (the mean over the cycles and its 99% interval); section 7.1 prices each card with its own law.`:'';
- const lf=t=>PF.leak_frac[String(t)].map(v=>Math.round(100*v)).join('–')+'%';
- const share=PF?` Leakage share on ${LAWCARD} over the e-foldings that fit (${PF.T_L_window_c[0]}–${PF.T_L_window_c[1]} °C): ${lf(60)} at 60 °C, ${lf(80)} at 80 °C, ${lf(90)} at 90 °C (${Math.round(100*R.curve.find(c=>c.T===60).leak_frac)}%, ${Math.round(100*R.curve.find(c=>c.T===80).leak_frac)}% and ${Math.round(100*R.curve.find(c=>c.T===90).leak_frac)}% at the best fit).`:
-  ` Leakage share: ${Math.round(100*R.curve.find(c=>c.T===60).leak_frac)}% at 60 °C, ${Math.round(100*R.curve.find(c=>c.T===80).leak_frac)}% at 80 °C, ${Math.round(100*R.curve.find(c=>c.T===90).leak_frac)}% at 90 °C.`;
- $('idlecap').textContent=`Line: the law fitted on 21 September, P = ${f1(R.P_fix_w)} W + ${f1(R.A_leak_80_w)} W·e^((T−80)/${f0(R.T_L_c)}), whose slope at 80 °C is ${f2(R.lambda_80_w_per_c)} W per °C. Grey dots: the whole-degree idle bins of that session on ${LAWCARD} the law was fitted to, ${andList(runs.map(r=>r[0]===r[1]?`${r[0]}`:`${r[0]}–${r[1]}`))} °C${runs.length>1?`, none between, so the law is interpolated from ${runs[0][1]} to ${runs[1][0]} °C`:''}.${v3cap}${share}`;
+ $('idlecap').textContent=`Line: the law of the text above, at its best fit. Grey dots: the whole-degree idle bins of that session on ${LAWCARD} the law was fitted to, ${andList(runs.map(r=>r[0]===r[1]?`${r[0]}`:`${r[0]}–${r[1]}`))} °C${runs.length>1?`, none between, so the law is interpolated from ${runs[0][1]} to ${runs[1][0]} °C`:''}.${v3cap}`;
  /* the rail split at 73 °C: aifoundry2 on 22 September, and each card's 73 °C bin in the version-3 idle cycles (v3.idle.split_73c) */
  const SP=VI.split_73c||{}, sc=CK.cardsIn(SP), OUT=VI.outcomes||{};
  const rows=[['Minions','minion'],['SRAM: L2, L3, scratchpad','sram'],['Mesh','noc'],['No rail sensor: PCIe, DDR PHY, IO shire, regulators','unsensed']];
@@ -721,15 +714,14 @@ const semiList=a=>a.length<2?a.join(''):a.slice(0,-1).join('; ')+'; and '+a[a.le
   const LV=[['l1','L1 hits','256 B per hart, 2,048 harts'],['l2','L2','256 KB per shire (L2 is 512 KB)'],['l3','L3','768 KB per shire, 24 MB in all (L3 is 32 MB)'],['dram','DRAM','256 MB in all'],['scp-local','own scratchpad','2 MB of the shire’s own L2 scratchpad'],['scp-remote','remote scratchpad',`2 MB of the scratchpad 16 shire IDs away (${MH.xshire16?f1(MH.xshire16.mean):'about 2'} mesh hops on average)`]];
   /* the scratchpad levels are prefilled in the version-3 passes (zeros on odd passes, random data on even ones): one row per contents */
   const BYC=new Set(['scp-local','scp-remote']), CT=[['zeros','zeros'],['random','random data']];
-  const l1c=cb('flw.ps/random/h2',1/32), gh=D.memory_reads.rows.map(r=>r.implied_ghz).filter(v=>v!=null);
+  const l1c=cb('flw.ps/random/h2',1/32);
   /* the level's L1 loop against the catalogue's L1 row, per card */
   const l1pc=l1c&&lv.l1?CK.cardsIn(lv.l1.per_card).filter(h=>l1c.per_card[h]).map(h=>[h,f0(100*(lv.l1.per_card[h].mean/l1c.per_card[h].mean-1)),f2(l1c.per_card[h].mean)]):[];
   /* The two L1 loops: memhier.c's (8 flw.ps per loop iteration; minion-cycles per load from its 18 September row, B per cycle being
      clock-independent in the minion's domain, and the 23 September reruns reproduce it) and the catalogue's (enercat.c's RUN
      macro, 64 per iteration; every card's issue rate). */
   const mh1=D.memory_reads.rows.find(r=>r.level==='l1'), cycMH=mh1&&mh1.implied_ghz?32/(mh1.gb_s/(mh1.implied_ghz*1024)):null,
-   fl2=CARDS.map(h=>SUMM(h)['flw.ps/random/h2']).filter(Boolean), cycCat=fl2.length?1/(2*fl2.reduce((a,e)=>a+e.ops_per_cycle_per_hart.mean,0)/fl2.length):null,
-   tbsCat=SA['flw.ps/random/h2']?SA['flw.ps/random/h2'].ops_per_s.mean*32/1e12:null;
+   fl2=CARDS.map(h=>SUMM(h)['flw.ps/random/h2']).filter(Boolean), cycCat=fl2.length?1/(2*fl2.reduce((a,e)=>a+e.ops_per_cycle_per_hart.mean,0)/fl2.length):null;
   $('memold').innerHTML='<thead><tr><th>Level</th><th>Working set</th><th class="num">pJ/B</th><th class="num">per card</th></tr></thead><tbody>'+
    LV.map(r=>{if(!lv[r[0]])return ''; if(BYC.has(r[0])&&CT.every(([o])=>LB[o]&&LB[o][r[0]]))
      return CT.map(([o,ol])=>`<tr><td>${r[1]}, ${ol}</td><td class="small">${r[2]}, prefilled with ${ol}</td><td class="num">${bt(LB[o][r[0]],fs)}</td><td class="num small">${pcs(LB[o][r[0]],fs)}</td></tr>`).join('');
@@ -737,9 +729,9 @@ const semiList=a=>a.length<2?a.join(''):a.slice(0,-1).join('; ')+'; and '+a[a.le
   const PP=(RR.passes_per_card||{}).levels||{}, pph=CK.cardsIn(PP), npp=[...new Set(pph.map(h=>PP[h].length))];
   const RLo=(V3.rl||{}), SBC=RLo.scp_by_contents||{};
   const band=(h,o)=>SBC[h]&&SBC[h][o]?SBC[h][o].mean:null, inb=h=>band(h,'zeros')>=1.7&&band(h,'zeros')<=2.3&&band(h,'random')>=3.7&&band(h,'random')<=4.7;
-  const sin=CK.cardsIn(SBC).filter(inb), sout=CK.cardsIn(SBC).filter(h=>!inb(h));
+  const sout=CK.cardsIn(SBC).filter(h=>!inb(h));
   const l2=lv.l2, l3=lv.l3, rspan=c=>c?`${fs(c.lo)}–${fs(c.hi)}`:'—';
-  $('memoldnote').innerHTML=`L1: both harts of every minion re-reading a private 256 B buffer with 32 B vector loads, in the memory-hierarchy probe's own loop (contents not set). It issued a load every ${cycMH?f1(cycMH):'3'} minion-cycles against the catalogue's ${cycCat?f1(cycCat):'1.4'}, and reads ${l1pc.length?`${f0(Math.min(...l1pc.map(x=>+x[1])))}–${f0(Math.max(...l1pc.map(x=>+x[1])))}% above section 4.1's L1 row (${andList(l1pc.map(x=>x[2]))} pJ/B on random data on ${andList(l1pc.map(x=>cname(x[0])))})`:`${l1c&&lv.l1?f0(100*(lv.l1.mean/l1c.mean-1))+'%':'well'} above section 4.1's L1 row (${l1c?f2(l1c.mean):'—'} pJ/B on random data)`}, which is the figure to use. Other levels: hart 0 of every minion streaming 1 KB tensor loads (they skip the L1) over a working set sized to the level. The L2, L3 and DRAM buffers' contents are not set, so those rows do not match section 4.1's zeros and random columns (DRAM is within noise of the random row), and the L2 and L3 move a lot between passes (${rspan(l2)} and ${rspan(l3)} pJ/B). The version-3 passes fill the scratchpads with zeros or random data, and the own scratchpad follows the fill: ${sin.length?`inside the registered bands (1.7–2.3 and 3.7–4.7 pJ/B) on ${andList(sin.map(cname))}${sout.length?`, above them on ${andList(sout.map(h=>`${cname(h)} (${f2(band(h,'zeros'))} and ${f2(band(h,'random'))})`))}`:''}; `:''}no pair of cards differs on the L1 or the own scratchpad (99%). ${pph.length?`${(w=>w[0].toUpperCase()+w.slice(1))(String(npp.length===1?(WORD[npp[0]]||npp[0]):'Several'))} passes on each of ${WORD[pph.length]||pph.length} cards`:'Passes'} at 600 MHz (n = ${lv.dram.n}; 26 September), replacing 23 September's unfilled passes and the 18 September run (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a>), whose clock the governor moved (${gh.length?f2(Math.min(...gh))+'–'+f2(Math.max(...gh)):'0.6–0.7'} GHz).`;
+  $('memoldnote').innerHTML=`L1: both harts of every minion re-reading a private 256 B buffer with 32 B vector loads, in the memory-hierarchy probe's own loop (a load every ${cycMH?f1(cycMH):'3'} minion-cycles against the catalogue's ${cycCat?f1(cycCat):'1.4'}; contents not set); it reads ${l1pc.length?`${f0(Math.min(...l1pc.map(x=>+x[1])))}–${f0(Math.max(...l1pc.map(x=>+x[1])))}% above section 4.1's L1 row (${andList(l1pc.map(x=>x[2]))} pJ/B on random data on ${andList(l1pc.map(x=>cname(x[0])))})`:`${l1c&&lv.l1?f0(100*(lv.l1.mean/l1c.mean-1))+'%':'well'} above section 4.1's L1 row (${l1c?f2(l1c.mean):'—'} pJ/B on random data)`}, which is the figure to use. Other levels: hart 0 of every minion streaming 1 KB tensor loads (they skip the L1) over a working set sized to the level. The L2, L3 and DRAM buffers' contents are not set, so those rows do not match section 4.1's zeros and random columns, and the L2 and L3 move a lot between passes (${rspan(l2)} and ${rspan(l3)} pJ/B). The own scratchpad, filled with zeros or random data, follows the fill${sout.length?` (above the registered bands on ${andList(sout.map(cname))})`:''}; no pair of cards differs on the L1 or the own scratchpad (99%). ${pph.length?`${(w=>w[0].toUpperCase()+w.slice(1))(String(npp.length===1?(WORD[npp[0]]||npp[0]):'Several'))} passes on each of ${WORD[pph.length]||pph.length} cards`:'Passes'} at 600 MHz (n = ${lv.dram.n}; 26 September), replacing the 23 and 18 September runs (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a>).`;
  }
 })();
 
@@ -1597,8 +1589,7 @@ const gsStream=l=>{if(!l.stream)return null; const [k,key]=l.stream;
   `The range is used rather than a standard error because about half of a catalogue entry's bar is the difference between the cards (in the median entry the spread of the card means is ${f0(100*share)}% of the range), which a standard error of the pooled sample would understate; pass-to-pass scatter on one card is 1–2% for most entries (the median standard error is ${andList(rh.map(h=>`${f1(REP[h].median)}%`))} on ${andList(rh.map(cname))}). `+
   (clk?`The bars leave out a change of operating point, and on 26 September none was needed: every idle and busy sample of the catalogue was at 600 MHz on every card. `:`The bars leave out a change of operating point: bursts whose busy samples left 600 MHz are dropped. `)+
   `They do carry the drift of the idle between the two stretches that bracket each burst, which every "over idle" figure inherits; the idle law enters only through the leakage correction. `+
-  (hn?`The hot line, the smallest signal (about ${f1(HOT?HOT.mean:1.2)} W over idle), carries one of the widest bars, ±${f0(100*hwOf(hn))}%, mostly its first session's ${f1(at.contended.over_idle_w)} W against 1.0–1.2 W since; `:'')+
-  `the awake core (±${rng(aw)}%) and the relay (±${rng(rl)}%, mostly aifoundry1 card 1 against the others) are wider than a typical catalogue entry (the median instruction's range is ±${f1(100*med(instr))}%, section 3.1).`;
+  `The awake core (±${rng(aw)}%) and the relay (±${rng(rl)}%, mostly aifoundry1 card 1 against the others) are wider than a typical catalogue entry (the median instruction's range is ±${f1(100*med(instr))}%, section 3.1).`;
 })();
 
 /* ---------- contents: every h2 and h3, with its section number; runs before the template adds its # links ---------- */

@@ -23,18 +23,26 @@ min and max, and the input power; `ettelem` samples them at 10 Hz. The other rai
 Maxion — have set points in the PMIC and no telemetry. So one number for the card, three for its inside, and at
 idle at 73 °C the difference is 15.1 W of 31.8 (47%).
 
-## The unmetered remainder, attributed (E30)
+## The unmetered remainder, attributed (E30; three cards since E46)
 
 Fitted over the catalogue's configurations (the mean of each configuration's passes) as a fraction of each rail's
-watts plus a cost per DRAM byte, no intercept:
+watts plus a cost per DRAM byte, no intercept. Since 26 September the fit runs over E46's catalogue, three passes on
+each of three cards, and these are the figures to quote (the hub's §4.2 table; `limits-of-observability.data.json`
+`power.fit` and `power.checks.fit`, robust HC3 standard errors, written by `tools/ettelem/sync_hub_data.py` with
+`fit_unmetered.py`):
 
-| unmetered W = | aifoundry2 | aifoundry3 |
-|---|---|---|
-| × minion-rail W | 0.196 ± 0.003 | 0.177 ± 0.002 |
-| × SRAM-rail W | 0.050 ± 0.017 | 0.064 ± 0.014 |
-| × NoC-rail W | 0.286 ± 0.021 | 0.264 ± 0.019 |
-| per DRAM byte | 72.9 ± 1.6 pJ | 68.1 ± 1.4 pJ |
-| residual rms, configuration means | 0.35 W over 392 (1.1 W on the 17 DRAM configurations) | 0.30 W over 386 (1.3 W on the 11 DRAM configurations) |
+| unmetered W = | aifoundry2 | aifoundry3 | aifoundry1-c1 |
+|---|---|---|---|
+| × minion-rail W | 0.188 ± 0.002 | 0.181 ± 0.002 | 0.102 ± 0.005 |
+| × SRAM-rail W | 0.034 ± 0.012 | 0.043 ± 0.011 | 0.540 ± 0.020 |
+| × NoC-rail W | 0.291 ± 0.016 | 0.294 ± 0.016 | 0.205 ± 0.025 |
+| per DRAM byte | 72.7 ± 4.4 pJ | 72.7 ± 4.5 pJ | 81.6 ± 3.9 pJ |
+| residual rms, configuration means | 0.33 W over 392 (1.0 W on the 17 DRAM configurations) | 0.31 W over 392 (1.0 W on the 17 DRAM configurations) | 0.48 W over 392 (1.2 W on the 17 DRAM configurations) |
+
+aifoundry1's card 1 differs: its unmetered power follows the SRAM rail more than the minion rail, for a reason not
+measured (it runs the older firmware and a higher SRAM-rail voltage). E30's fit of 23 September, over the two cards'
+catalogue then, gave 0.196, 0.050, 0.286 and 72.9 pJ/B on aifoundry2 (rms 0.35 W over 392) and 0.177, 0.064, 0.264
+and 68.1 pJ/B on aifoundry3 (0.30 W over 386); the text below was written from it.
 
 An instruction's unmetered energy is the minion regulator's delivery loss; a DRAM byte's is about 70 pJ in the
 PHY, the I/O rail and the chips (a byte written through the L1 costs twice that, the line being read first);
@@ -53,37 +61,48 @@ data sits above and zeros and constants below. And the 18–20% delivery loss ho
 can be trusted: the rails are scaled by 1/0.94 for their filter, and each 1% of rail scale moves the minion
 coefficient by about 1.2 points, which the fit cannot pin.
 
-So half of idle is on no rail sensor, as is about a sixth of what an arithmetic workload adds (median 17% of an
-instruction's watts on aifoundry2, 15% on aifoundry3) and three fifths to three quarters of what DRAM traffic adds
-(median 69% and 65%; about 70% of a tensor load from DRAM).
+So half of idle is on no rail sensor, as is between an eighth and a sixth of what an arithmetic workload adds
+(median 16% of an instruction's watts on aifoundry2, 15% on aifoundry3 and 12% on aifoundry1's card 1, over E46's
+catalogue; 17% and 15% over E30's) and about seven tenths of what DRAM traffic adds (70%, 73% and 72%; 69% and 65%
+over E30's). The minion regulator's delivery loss comes out at 19%, 18% and 10% of what that rail delivers.
 
 ## A droop meter for DRAM (E30)
 
 The die's Moortec PVT subsystem (5 controllers; 35 live temperature sensors at 0.061 °C; 125 voltage-monitor
 points at 14 bits; 35 process detectors, configured with measurement disabled; 2 external analog inputs with a
 stub reader) measures no current. But the host already receives the memory shires' reading of the 0.8 V DDR
-rail every 133 ms on aifoundry2 (`DM_CMD_GET_ASIC_VOLTAGE`, `ettelem`'s `die_mv.ddr`, 767 mV at idle against an
-800 mV set point), and across 386 configurations it droops **0.87 mV per watt of off-rail DRAM power** (rms
-0.37 mV; 0.029 mV per watt of anything else): 1 mV ≈ 1.2 W of DRAM, calibrated against the fit above. It responds
+rail every service-processor pass (`DM_CMD_GET_ASIC_VOLTAGE`, `ettelem`'s `die_mv.ddr`, 767 mV at idle against an
+800 mV set point on aifoundry2 and aifoundry3, 764 on aifoundry1's card 1), and it droops in proportion to the
+off-rail DRAM power of the fit above. Over E46's catalogue (392 configurations per card) the slope is **0.86, 0.87 and
+1.00 mV per watt of off-rail DRAM power** on aifoundry2, aifoundry3 and aifoundry1's card 1 (rms 0.35, 0.37 and
+0.26 mV; 0.034, 0.024 and 0.099 mV per watt of anything else): 1 mV ≈ 1.0–1.2 W of DRAM (the hub's §4.3,
+`power.checks.droop`). E30's first calibration, on aifoundry2's 23 September catalogue, gave 0.87 mV/W over 386
+configurations (rms 0.37 mV; 0.029 mV per watt of anything else). It responds
 mostly to DRAM traffic, but not only: traffic with no DRAM access (mesh, scratchpad, L3 reads through the mesh)
 droops it by up to about 2 mV (2.2 mV for the L3 reads), which it would read as up to about 2 W of DRAM. So it
 separates DRAM from arithmetic in a mixed burst, but not from mesh traffic, and its idle reading moves by about 1 mV
-between 71 and 77 °C. The minion rail sags 0.070 mV per watt the cores draw. (These are the numbers
-`tools/ettelem/fit_unmetered.py` writes; the inline fit first published said 0.84 mV/W and rms 0.36 mV.) The [Power and temperature](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature) report (§3)
+between 71 and 77 °C. The minion rail sags 0.053, 0.061 and 0.028 mV per watt the cores draw on the three cards
+(E46; 0.070 in E30, 0.137 on aifoundry3's own telemetry then). (E30's are the numbers `tools/ettelem/fit_unmetered.py`
+wrote on 25 September; the inline fit first published said 0.84 mV/W and rms 0.36 mV.) The [Power and temperature](https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature) report (§3)
 maps each shire's rails at idle from the SP's DEBUG trace; calibrated per shire, that map would be a spatial current
 meter for the metered rails. The [spatial temperature brief](https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief) covers what the
 same sensors could do for temperature.
 
-## The bars (E29)
+## The bars (E29; three cards since E43 and E46)
 
-Every entry of the manual is now mean [lo–hi] over every pass on every card, with each card's mean ± se
-beside it: the catalogue's 3 shuffled passes × 2 cards for instructions and bytes (±6% median, mostly the 5%
-between cards); the relay (n = 8), the hot line (n = 7), the rings and the levels (n = 6) re-run
-three times per card with the die held warm on aifoundry2. Relay through DRAM 105.7 [99.5–111.0] pJ/B,
-next shire 8.6 [7.8–9.2]; contended atomic 19.8 [16.9–23.6] nJ; DRAM by plain loads
-122 [117–129] pJ/B at 600 MHz on both cards. The widest bars are the smallest signals: the hot line (a 1.4 W
-signal on a drifting 30 W idle) is ±17%, the remote scratchpad ±16%; the DRAM relay is ±5.5% and the awake core
-±5–7%, no wider than the catalogue.
+Every entry of the manual is mean [lo–hi] over every pass on every card, with each card's mean ± se beside it.
+Since 26 September (the manual's §9): the catalogue is three shuffled passes on each of three cards (n = 9, E46); the
+rings, the levels and the relay six passes on each card (n = 18, E43); the tensor rows four runs per card (n = 12,
+E38); the hot line is still E29's (n = 7, aifoundry2 and aifoundry3). About half of a catalogue entry's bar is the
+difference between the cards; pass-to-pass scatter on one card is 1–2% for most entries. Relay through DRAM
+116.2 [104.5–135.3] pJ/B, next shire 8.9 [7.6–10.2]; contended atomic 19.8 [16.9–23.6] nJ; DRAM by plain loads
+114.6 [89.0–141.3] pJ/B at 600 MHz (`manual.json` `.reruns`). The widest bars are the levels between L2 and the remote
+scratchpad (±45–59% of the mean, half the range; the L2 and L3 rows move a lot from pass to pass) and the hot line (a
+1.2 W signal on a drifting idle, ±17%); the DRAM relay is ±13%.
+
+E29 (23 September, two cards, the die held warm on aifoundry2) had given the relay (n = 8) through DRAM 105.7
+[99.5–111.0] pJ/B and next shire 8.6 [7.8–9.2], DRAM by plain loads 122 [117–129] pJ/B, the remote scratchpad ±16%, the
+DRAM relay ±5.5% and the awake core ±5–7%, with the catalogue at ±6% median (mostly the 5% between the two cards).
 
 Two instrument limits found on the way, both now handled by `tools/ettelem/analyze_reruns.py`:
 

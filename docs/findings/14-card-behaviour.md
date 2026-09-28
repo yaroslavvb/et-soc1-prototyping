@@ -400,7 +400,10 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
   share a line.
 - **Only hart 0 of a minion may issue tensor ops**, except `TensorLoadL2Scp`/`TensorWait`.
 - **Never let a minion receive readies from two `TensorSend` partners at once** — one ready bit per minion, not
-  per partner. On silicon this hangs the hart permanently and the card needs a power cycle; `sys_emu` does not
+  per partner. By the RTL rule a lost ready leaves that receiver, and its sender, waiting until the chip is reset.
+  Seen once on silicon (aifoundry2, 18 September, two pairs through one minion with no barrier between them; not
+  repeated): the stalled harts ignored the firmware's abort, and every later launch failed with
+  `KernelLaunchCmIfaceMulticastFailed` until the chip was reset. `sys_emu` tracks partners separately and does not
   catch it.
 - **The environment is not stationary.** Mid-session the lab's airflow changed and the die fell 12 °C under an
   unchanged workload. Record enough telemetry to notice. Other users are part of the environment too

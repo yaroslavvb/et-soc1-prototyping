@@ -52,7 +52,7 @@ esperanto-tools-libs; a copy back runs the DMA first, then copies out), so the h
 the other. The staged rate is then close to what the two in series give,
 1&nbsp;/&nbsp;(1/DMA&nbsp;+&nbsp;1/memcpy), with the host's memcpy measured by the same program on the same host.
 That is why the cards stage at different rates over the same link: the hosts' own memcpy of 256 MB runs at
-<span id="hostcopy"></span>.</p>
+<span id="hostcopy"></span>. <span id="hostmem"></span></p>
 <p>Put each card's staged rate against its host's memcpy, and every card lands on the curve of the two copies in
 series; the drop from the DMA-only tick above it to the point is what the bounce copy costs:</p>
 <div class="chart-title">A program's copy is two copies in series: the staged rate against the host's memcpy, 256 MB</div>
@@ -128,8 +128,8 @@ buffer, but a program cannot use it to deliver data; the staged figures are the 
 <li><b>One host per card.</b> The cards sit in different hosts (<span id="hostlist"></span>), with different
 runtime builds (aifoundry2 the stock build, aifoundry3 a patched one, aifoundry1 a fork:
 <code>docs/findings/14-card-behaviour.md</code>), all with the IOMMU in translated mode (<code>hosts.txt</code> in the
-data). Why aifoundry3's host copies memory at about half the others' rate (its memory configuration?) was not
-established; reading it needs root. The DMA-only figures agree across them; the staged ones follow each host's memcpy, and the latency
+data). aifoundry3's host copies memory at about half the others' rate, and it is the one host whose memory runs
+on a single channel (section 2). The DMA-only figures agree across them; the staged ones follow each host's memcpy, and the latency
 figures follow each build's polling constants.</li>
 <li><b>Unexplained:</b> <span id="d2hdrop"></span> A 256 MB copy is two 128 MB DMA elements in one command on one
 channel; why card-to-host dips in the middle sizes was not established.</li>
@@ -174,7 +174,7 @@ python3 scripts/build-report.py pcie-link docs/reports/data/2026-09-27-pcie/pcie
 </details>
 
 <details class="more"><summary>Version history and provenance</summary>
-<p class="small">First written 27 September 2026, from the runs of that afternoon; later that day, the staged path drawn against the hosts' memcpy (section 2) and the time of one launch or small copy split into its queued cost and the wait for the response thread (section 4). Every number on this page is
+<p class="small">First written 27 September 2026, from the runs of that afternoon; later that day, the staged path drawn against the hosts' memcpy (section 2) and the time of one launch or small copy split into its queued cost and the wait for the response thread (section 4); 28 September, the hosts' memory channels (section 2), read as a user the night before, where the page had said reading them needs root. Every number on this page is
 computed by its script from <code>docs/reports/data/2026-09-27-pcie/pcie.json</code>, except the link figure's
 arithmetic (16 GT/s × 8 lanes × 128/130 ÷ 8, also in the data) and the runtime's and firmware's constants, which
 are cited to their source files above.</p>

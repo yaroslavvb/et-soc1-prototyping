@@ -112,7 +112,7 @@ const markWord=c=>({dot:'dots',ring:'rings',diamond:'diamonds',box:'squares'})[C
    CK.txt(svg,X(dw/2),Y(0)-8,`≈ ${f1(dw)} × ${f1(dh)} mm, ${IN.die_mm2.value} mm²`,'lab','middle');
    CK.keynav(f,tiles);
   }});
- setText('meshcap',`8 × 6 mesh stops: 34 minion shires (blue) — the 32 compute shires (1,024 minions) that the other reports count, plus the master shire, which runs the firmware, and a spare — the PCIe and I/O shires (pink, top row), and four memory shires with their LPDDR4x PHYs down each side (amber); the corners are empty. The 6 × 6 grid of the other reports is the inner six columns. Dots are mesh stops, lines the links between neighbours. Tiles are drawn at the ${f2(px)} mm period, so the grid looks slightly wider than the 86% its outlines span. Hover, tap or tab to a tile.`);
+ setText('meshcap',`8 × 6 mesh stops: 34 minion shires (blue: the 32 compute shires, the master and a spare), the PCIe and I/O shires (pink, top row), and four memory shires with their LPDDR4x PHYs down each side (amber); the corners are empty. The 6 × 6 grid of the other reports is the inner six columns. Dots are mesh stops, lines the links between neighbours. Tiles are drawn at the ${f2(px)} mm period, so the grid looks slightly wider than the 86% its outlines span. Hover, tap or tab to a tile.`);
 })();
 
 /* ---------- 4. energy against distance: all cards pooled, or one card (its means, ± one standard error) ---------- */
@@ -150,6 +150,62 @@ const markWord=c=>({dot:'dots',ring:'rings',diamond:'diamonds',box:'squares'})[C
  CK.seg('distbtn',{label:'Meter',options:METERS,value:key,onChange:v=>{key=v;f.redraw();cap();}});
  if(CARDS.length){const cs=CK.cardSeg('distcard',{cards:CARDS,pooled:true,onChange:v=>{card=v;f.redraw();cap();}}); if(cs.value!==card){card=cs.value;f.redraw();}}
  cap();
+})();
+
+/* ---------- 4b. what each further hop adds, step by step, beside the share of link-hops on shared links ----------
+   For every card, the step from a to b hops on the loaded mesh (the all-pairs traffic of sections 4 and 5, W_.configs
+   wu/*), mesh rail, per hop of the step and in fJ per bit: the data-dependent part (random minus zeros) and the rest
+   (zeros). Below, the share of link-hops on shared links at each step's far end (W_.checks.link_sharing,
+   dimension-ordered routing), the same figures the text of section 4 quotes. */
+(function(){
+ const C=W_.configs, LS=(W_.checks||{}).link_sharing||{};
+ if(!document.getElementById('incr'))return;
+ const vc=(cfg,h)=>C[cfg]&&C[cfg][NK]&&C[cfg][NK].per_card[h]?C[cfg][NK].per_card[h].mean:null;
+ const STEPS=[[1,2],[2,3],[3,4],[4,6]];
+ const HS=CARDS.filter(h=>STEPS.every(st=>st.every(d=>vc(`wu/p0.5/hop${d}`,h)!=null&&vc(`wu/p0/hop${d}`,h)!=null)));
+ const share=d=>LS[`wu/p0.5/hop${d}`]?LS[`wu/p0.5/hop${d}`].shared_link_hop_fraction:null;
+ if(!HS.length||STEPS.some(([a,b])=>share(a)==null||share(b)==null))return;
+ const part=(h,d,k)=>1000/8*(k==='data'?vc(`wu/p0.5/hop${d}`,h)-vc(`wu/p0/hop${d}`,h):vc(`wu/p0/hop${d}`,h));   // fJ per bit
+ const inc=(h,[a,b],k)=>(part(h,b,k)-part(h,a,k))/(b-a);
+ const PARTS=[['data','the data-dependent part (random minus zeros)','var(--c1)'],['rest','the rest (zeros)','var(--c2)']];
+ const stepLab=([a,b])=>b-a>1?`${a}→${b} hops, per hop`:`${a}→${b} hops`;
+ const pct=v=>`${f0(100*v)}%`;
+ CK.legend('incr-leg',PARTS.map(([k,l,c])=>({key:k,label:l,mark:'dot',color:c}))
+  .concat(CK.cardLegend(HS).map(o=>Object.assign({},o,{color:'var(--ink-2)'})),[{key:'sh',label:'link-hops on shared links, at the step’s far end',mark:'box',color:'var(--muted)'}]));
+ const f=CK.frame('incr',{label:'What each further hop adds on the loaded mesh, per card, beside the share of link-hops on shared links',height:W=>W<600?360:330,draw(f){
+  const L=f.narrow?40:50, R=f.narrow?8:16, T=24, B=36, sh=f.narrow?70:64, gap=30, yb=f.H-B-sh-gap;
+  const vals=HS.flatMap(h=>STEPS.flatMap(st=>PARTS.map(([k])=>inc(h,st,k))));
+  const y=CK.lin(Math.min(0,...vals)*1.15,Math.max(...vals)*1.12,yb,T), y2=CK.lin(0,1,f.H-B,f.H-B-sh);
+  const cw=(f.W-L-R)/STEPS.length, cx=i=>L+cw*(i+0.5), nodes=[];
+  const labs=y.ticks(4).map(t=>{CK.el('line',{x1:L,x2:f.W-R,y1:y(t),y2:y(t),class:'grid-line'},f.svg); return CK.txt(f.svg,L-6,y(t)+4,CK.fmt.num(t),'tick','end');});
+  CK.el('line',{x1:L,x2:f.W-R,y1:y(0),y2:y(0),class:'ck-axis'},f.svg);
+  labs.push(CK.txt(f.svg,2,T-10,'fJ per bit added per hop, mesh rail','lab'));
+  labs.push(CK.txt(f.svg,2,f.H-B-sh-10,'link-hops on shared links','lab'));
+  CK.el('line',{x1:L,x2:f.W-R,y1:f.H-B,y2:f.H-B,class:'ck-axis'},f.svg);
+  STEPS.forEach((st,i)=>{
+   const g=CK.el('g',{},f.svg), x0=cx(i);
+   CK.el('rect',{x:x0-cw/2+2,y:T,width:cw-4,height:f.H-B-T,class:'ck-hit'},g);
+   PARTS.forEach(([k,,col],pi)=>{
+    const xo=x0+(pi?1:-1)*Math.min(22,cw/5), ms=HS.map(h=>inc(h,st,k)), m=meanOf(ms);
+    CK.el('line',{x1:xo-10,x2:xo+10,y1:y(m),y2:y(m),stroke:col,'stroke-width':2.5},g);
+    HS.forEach((h,j)=>CK.cardMark(g,h,xo+(j-(HS.length-1)/2)*5,y(ms[j]),3.5,col));});
+   const bw=Math.min(46,cw*0.5), s1=share(st[1]);
+   CK.el('rect',{x:x0-bw/2,y:y2(s1),width:bw,height:y2(0)-y2(s1),fill:'var(--muted)'},g);
+   labs.push(CK.txt(f.svg,x0,y2(s1)-4,pct(s1),'tick','middle'));
+   labs.push(CK.txt(f.svg,x0,f.H-B+16,f.narrow?`${st[0]}→${st[1]}`:stepLab(st),'tick','middle'));
+   CK.tip(f,g,`<b>${stepLab(st)}</b>, loaded mesh, mesh rail, fJ per bit added per hop<br>`+
+    PARTS.map(([k,l])=>`${l}: `+HS.map(h=>`${CK.card(h).label} ${f0(inc(h,st,k))}`).join(', ')).join('<br>')+
+    `<br>link-hops on shared links: ${pct(share(st[0]))} at ${st[0]} hop${st[0]>1?'s':''}, ${pct(s1)} at ${st[1]}`);
+   nodes.push(g);});
+  if(f.narrow)labs.push(CK.txt(f.svg,(L+f.W-R)/2,f.H-6,'step, hops','lab','middle'));
+  CK.inside(f,labs);
+  CK.keynav(f,nodes);
+ }});
+ const r=(k,sel)=>{const v=HS.flatMap(h=>sel.map(st=>inc(h,st,k)));return [Math.min(...v),Math.max(...v)];}, sp=([a,b])=>f0(a)===f0(b)?f0(a):`${f0(a)} to ${f0(b)}`;
+ const oth=STEPS.filter(st=>st[0]!==3);
+ setText('incrcap',`Each mark is one card's mean over its passes, in its card's shape; the bar across them is their mean. The step from three to four hops adds ${sp(r('rest',[[3,4]]))} fJ per bit to the rest against ${sp(r('rest',oth))} for the other steps, `+
+  `and ${sp(r('data',[[3,4]]))} to the data-dependent part, against ${sp(r('data',oth))} for the other steps; the share of link-hops on shared links jumps from ${pct(share(3))} to ${pct(share(4))} at the same step. `+
+  `The link-disjoint flows of section 6 show no such step (the text above gives the test). Hover, tap or tab to a step for every card's values.`);
 })();
 
 /* ---------- 5. what a bit costs per hop: ones and differences ---------- */
@@ -423,7 +479,7 @@ const MAPBUS=CK.bus('heat-map-d');
    rows.map(r=>`<tr><td>${r[0]}</td><td class="num">${cell(a,r[1])}</td><td class="num">${cell(b,r[1])}</td></tr>`).join('')+'</tbody></table>');}
  fix();
  const sx=dd=>LS[`wu/p0.5/hop${dd}`];
- setText('mapcap',`The map is the logical 6 × 6 grid of the 32 compute shires (the coordinates of <a href="#die">§2</a>), and each arrow a directed link that carries data from a target's scratchpad to its reader. Routes are drawn dimension-ordered, as the analysis assumes; the chip's routing order is not measured, so the map can route y first too, and the shares hardly change (3 hops: ${f0(100*sx(3).shared_link_hop_fraction)}% x first, ${f0(100*sx(3).shared_link_hop_fraction_yx)}% y first; 6 hops: ${f0(100*sx(6).shared_link_hop_fraction)}% and ${f0(100*sx(6).shared_link_hop_fraction_yx)}%). The own-links pairs use only straight paths, so both orders give the same routes. That set also has fewer flows at long distances (${LS['wsep/p0.5/hop4'].flows} against ${LS['wu/p0.5/hop4'].flows} at four hops), so the energy gap between the sets is not sharing alone. Hover, tap or tab to a reader shire to see its route, or to a link to list its flows.`);
+ setText('mapcap',`The map is the logical 6 × 6 grid of the 32 compute shires (the coordinates of <a href="#die">§2</a>), and each arrow a directed link that carries data from a target's scratchpad to its reader. Routes are drawn dimension-ordered, as the analysis assumes; the chip's routing order is not measured, so the map can route y first too, and the shares hardly change (3 hops: ${f0(100*sx(3).shared_link_hop_fraction)}% x first, ${f0(100*sx(3).shared_link_hop_fraction_yx)}% y first; 6 hops: ${f0(100*sx(6).shared_link_hop_fraction)}% and ${f0(100*sx(6).shared_link_hop_fraction_yx)}%). The own-links pairs use only straight paths, so both orders give the same routes (the table beside the map gives each set's flows). Hover, tap or tab to a reader shire to see its route, or to a link to list its flows.`);
 })();
 
 /* ---------- 8. price a transfer: two shires on the logical map, a payload and its data ----------
@@ -823,7 +879,7 @@ const MAPBUS=CK.bus('heat-map-d');
   `On the mesh rail the data-dependent energy is zero at <i>d</i> = 0 (${cvS('P10',cvH('P10'),100,f1)}% of its one-hop value on the ${nw(cvH('P10').length)} cards: the shire's own scratchpad does not use the mesh) and grows with every hop out to 6, by ${span(incD,f0)} fJ per bit per hop. `+
   `On this loaded mesh the step from three to four hops is larger, most clearly in the data-independent part (${span(incZ34,f0)} fJ per bit against ${span(incZ,f0)} for the other steps). On the mesh rail the four-hop point sits above the straight line through the others by `+
   `${offJoin([['P7a','random data'],['P7b','zeros'],['P7c','all ones']])}; on board power by ${offJoin([['P7d','all ones'],['P7e','random data'],['P7f','zeros']])}. `+
-  `The step comes at the same distance as a jump in link sharing, from ${pc(sh('wu/p0.5/hop3'))} to ${pc(sh('wu/p0.5/hop4'))} of link-hops on shared links, and the link-disjoint flows of section 6 do not show it: on the mesh rail the loaded set's four-hop point sits further above its line than theirs by ${p15('0.5')}, and by ${p15('0')}; whether sharing itself causes it these runs cannot say (<a href="#limits">§10</a>). `+
+  `The step comes at the same distance as a jump in link sharing, from ${pc(sh('wu/p0.5/hop3'))} to ${pc(sh('wu/p0.5/hop4'))} of link-hops on shared links, and the link-disjoint flows of section 6 do not show it: on the mesh rail the loaded set's four-hop point sits further above its line than theirs by ${p15('0.5')}, and by ${p15('0')}; whether sharing itself causes it these runs cannot say, since the link-disjoint set also differs in its straight paths and its one reader per target. `+
   `With link-disjoint flows the mesh rail grows linearly: the four-hop point sits within ±3% of the line through the others for random data ${q14a.on} (${q14a.off}% off), and within ±4% of it for zeros ${q14b.on} (${q14b.off}% off), each whole 99% interval inside the band${out14.length?'; '+out14.join('; '):''}. `+
   `Leaving the shire adds a step of its own (the mesh-stop crossings) whose size depends on the data and the meter: for random data ${cvL('P9',exC,1,f1)} hops' worth on board power and ${cvL('P8',exC,1,f2)} of a hop on the mesh rail on ${list(exC.map(lab))}`+
   (exU.length?` (on ${list(exU.map(lab))} ${exNone?'neither is resolved from zero':'not both are resolved'}: ${list(exU.map(h=>`${cvI('P9',h,1,f2)} and ${cvI('P8',h,1,f2)} hops`))})`:'')+
@@ -957,9 +1013,6 @@ const MAPBUS=CK.bus('heat-map-d');
  setText('persectext',`Even if all of the one-hop zeros energy were cost per second, on the mesh rail it would explain at most ${pc(psb('wsep',NK))} of the link-disjoint fixed part and ${pc(psb('wu',NK))} of the loaded one. On board power, whose one-hop energy also includes the scratchpad read and the cores, the same bound is `+
   (p13.length?`${byCard(p13.map(h=>pc(cvC('P13',h).mean)),p13)} for the link-disjoint part, poorly determined (upper 99% bounds ${span(p13hi,f0)}%),`:`about ${Math.round(10*psb('wsep',BK))*10}% for the link-disjoint part, poorly determined,`)+
   ` and ${pc(psb('wu',BK))} for the loaded one, so it cannot rule out that most of the board's fixed part is per second.`);
- // what these runs leave open, with the numbers that make it open
- setText('opentext',
-  `Whether link sharing itself causes the loaded mesh's larger step between three and four hops (<a href="#distance">§4</a>), since the link-disjoint set also differs in its straight paths and its one reader per target; and whether the 256 B blocks cost less than a full flip on board power, as they do on the mesh rail (<a href="#lanes">§9</a>). The numbers are in those sections.`);
  const dr=(H_.dropped.aifoundry2||[]).filter(x=>x.why==='service processor starved');
  if(dr.length){
   const a3max=Math.max(...['waxis/y/hop3/p0','waxis/y/hop3/p0.5'].map(c=>HC[c]&&HC[c].took_ms_max&&HC[c].took_ms_max.aifoundry3||0));

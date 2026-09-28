@@ -21,30 +21,14 @@ cards in the AI Foundry lab, and share what was learned. It became a measurement
 the chip's power and temperature, what every operation costs in joules, what the meters can and cannot see, and
 where the chip could beat a GPU.
 
-**Status on 2026-09-27:**
-
-- **19 published measurement pages**: the hub,
-  [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports), and the 18
-  pages it indexes, plus two pages about the lab machines and the review's TODO list. All are listed in
-  [`docs/reports/MIRROR.md`](docs/reports/MIRROR.md).
-- **The knowledge base** in [`docs/findings/`](docs/findings/README.md) traces every claim to its experiment and raw
-  file. It was validated twice (24 and 25 September); the version-3 experiments (E35–E47), the gathers and scatters (E48)
-  and their three-card values were added on 26–27 September, while most topic files (10–19) still predate them.
-- **Version 3 of the claims check finished** on 26 September at 06:55: every page claim that needed new data
-  re-tested on three cards with pre-registered predictions ([`docs/reports/data/2026-09-25-claims-v3/`](docs/reports/data/2026-09-25-claims-v3/README.md),
-  results in its `results/`, code in [`tools/claims-v3/`](tools/claims-v3)), and the pages in this repository carry
-  its results: each tested claim says what the three cards showed (MIRROR.md's "Last check" says whether the live
-  pages have them yet). The gathers and scatters that ran on each of the three cards after
-  its campaign blocks (E48, 26 September 03:19–09:22) are reduced too (`results/gs.json`) and, since 27 September, on
-  the energy manual (§3.1, §4.3, §4.4, §6), memory hierarchy ("Irregular access"), influence functions (S3) and the
-  hub's chart of events (03-experiments.md, E48, "Report").
-- **Four cards answer, three are usable for measurement** since 25 September (section 4): aifoundry1's card 0 overheats
-  (amendment A4) and takes no sustained work.
-- **The review of 26 September** added charts and folded each page's detail into collapsible sections; the page
-  changes it found and not yet made are in [`docs/reports/TODO.md`](docs/reports/TODO.md), whose first items are for
-  the owner.
-
-The live status is kept in [`docs/getting-started.md`](docs/getting-started.md), "Where things stand". Read it next.
+**Where it stands** is kept in one place, [`docs/getting-started.md`](docs/getting-started.md), "Where things
+stand": read it next. The published pages (the hub,
+[Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports), and the pages
+it indexes, plus the lab-machine pages) are listed with their spaces, files and builds in
+[`docs/reports/MIRROR.md`](docs/reports/MIRROR.md), whose "Last check" says whether the live pages equal their files;
+the page changes waiting for the next pass, the owner's items first, are in
+[`docs/reports/TODO.md`](docs/reports/TODO.md). Which cards work is in §4 below, and the knowledge base's known stale
+spots in §3.
 
 ## 2. Repository map
 

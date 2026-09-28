@@ -38,10 +38,10 @@ details.terms p{margin:6px 0 0}
 </style>
 <h1>Heat per millimetre</h1>
 <p class="byline">24 September 2026, re-measured on three cards 26 September · aifoundry2, aifoundry3 and aifoundry1 card 1 · data, tools and every source in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">yaroslavvb/et-soc1-prototyping</a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
-<p class="small card" id="v3note"><b>Checked on three cards (26 September 2026).</b> 17 of this page's claims were re-measured
-under a pre-registered plan, in six new passes on each of aifoundry2, aifoundry3 and aifoundry1 card 1: 8 held on every
-card, 1 was corrected (all ones' excess over random data on board power, which no card resolved from zero), and 8 differ
-by card, as the text says where they appear. Every figure those passes cover now comes from them; the record is in
+<p class="small card" id="v3note"><b>Checked on three cards (26 September 2026).</b> This page's claims were re-measured
+under a pre-registered plan, in six new passes on each of aifoundry2, aifoundry3 and aifoundry1 card 1.
+<span class="v3-counts" data-v3-counts="et-soc1-heat-per-mm">Of 17 claims tested here, this page counts 8 held, 1 corrected and 8 differ by card; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#claims-cap">hub’s scoreboard</a>, 7 “proven on the cards”, 1 “a test behind it failed”, 8 “differs by card” and 1 “within noise”.</span> The correction is all ones' excess over random data on board power, which no card resolved
+from zero; where the cards differ, the text says so. Every figure those passes cover now comes from them; the record is in
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>.</p>
 
 <p class="lede">Bill Dally's rule of thumb for on-chip communication is <b>"~100 fJ/b-mm"</b>: the heat of carrying one bit
@@ -156,6 +156,11 @@ measured it; where the cards differ, the text names them, and what these runs le
 <p class="small" id="distcap">Density of ones <i>P</i> runs from the faintest line (all zeros) to the strongest (all ones); bars are
 the range over every pass of every card. Hover, tap or tab to a point.</p></details>
 <p id="disttext"></p>
+<div class="chart-title">What each further hop adds on the loaded mesh, step by step, beside how much of its traffic shares links</div>
+<div id="incr-leg"></div>
+<div id="incr"></div>
+<details class="more"><summary>How to read the chart</summary>
+<p class="small" id="incrcap"></p></details>
 
 <h2 id="ones">5. Ones cost energy, not just flips</h2>
 <div class="chart-title">Cost of one hop against the density of ones in the data</div>
@@ -291,7 +296,6 @@ of ones held in the mesh would still look per-hop.</li>
 crash that stopped it between the two runs, and a stray write the card never reported (no measurement here comes from
 those launches) are in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">observability
 report (§4.1; the stray write in §3)</a>.</li>
-<li><b>Not resolved by these runs.</b> <span id="opentext"></span></li>
 <li><b>Voltage scaling</b> assumes full-swing CMOS at constant capacitance; whether the links are low-swing is not known.
 Gate capacitance is somewhat lower near threshold, so constant-C scaling slightly understates the 0.9 V figure for
 full-swing links; low-swing links would make it overstate.</li>
@@ -321,17 +325,14 @@ the measurements reproduced, and its corrections are applied here.</li>
 </ul></details>
 <details class="more"><summary>Version history</summary>
 <p class="small"><b>Versions.</b> 24 September 2026: first published, and corrected the same day after a review.
-25 September, after a second review: the per-second bound on the fixed per-hop cost is given for each meter (on board
-power it rules little out), the block patterns fall below the two-term model, and the 0.9 V figure counting the fixed
-part is stated. 25 September (version 3): every claim checked against both cards' passes
-(<code>docs/reports/data/2026-09-25-claims-v3/</code>); differences the passes do not resolve are no longer findings,
-the 16–128 B blocks' shortfall is dropped, and the regulator's loss is no longer said to grow with load. 26 September
-(version 4): the three-card check's third run is the basis of every figure its configurations give; all ones' excess
-over random data on board power is corrected (no card resolves it from zero), and board power's split of the
-free-link cost and of the contention excess (§5, §6) and the four-hop step's absence with link-disjoint flows (§4) are
-now resolved. 27 September: the lede's contention figure compares like with like over one to four hops (it had mixed
-two bases); later that day, a chart of what sharing links adds on each card (§6), and the regulator's loss of §10 given
-per card from the fit on the three cards' catalogue (it quoted the 23 September fit on two cards). Every earlier wording is in the repository's history of <code>docs/reports/sources/heat-per-mm.*</code>.</p></details>
+25 September: after a second review, the per-second bound on the fixed per-hop cost given per meter and the block
+patterns placed below the two-term model; then version 3, every claim checked against both cards' passes (unresolved
+differences no longer findings; the 16–128 B blocks' shortfall dropped; the regulator's loss no longer said to grow with
+load). 26 September (version 4): the three-card check's third run is the basis of every figure it covers; all ones'
+excess over random data on board power is not resolved from zero on any card. 27 September: the lede's contention figure
+compares like with like over one to four hops (it had mixed two bases); the regulator's loss given per card. 28 September:
+the review's cuts, and a chart of what each further hop adds beside the link-sharing share (§4). Every earlier
+wording is in the repository's history of <code>docs/reports/sources/heat-per-mm.*</code>.</p></details>
 
 <h2 id="related">12. Related reports</h2>
 <ul>

@@ -117,13 +117,12 @@ CK.stackTable('media');
    });
    CK.keynav(f,nodes);
   }});
- const w=p.media.map(m=>m.over_idle_w), dr=med('dram'), q=POOLED.relay;
+ const q=POOLED.relay;
  $('samewcap').textContent=
   `Watts and GB/s are from one power session on ${A2}: board power over an idle of ${f2(p.idle.board_w)} W, and the rate while the kernel runs, `+
   `from the cycle counter, during those bursts (the headline runs in the table above ran at ${MED.map(m=>g1(H[m[0]].gb_s)).join(', ')} GB/s). `+
   `Energy per byte pools the three-card check's ${q.dram.n} passes, ${word(q.dram.per_card[A2].n)} per card (26 September): the bar is the mean, the whisker the range, `+
-  `the marks each card's mean (${andL(CS.filter(c=>q.dram.per_card[c]).map(c=>({dot:'dot',ring:'ring',diamond:'diamond'}[CK.card(c).mark]||'mark')+' '+lab(c)))}), the tick this session, which is not pooled. The power moves by ${f1(Math.max(...w)-Math.min(...w))} W while the work grows `+
-  `${f0(med('hop').bytes_per_s/dr.bytes_per_s)}× and ${f0(med('scp').bytes_per_s/dr.bytes_per_s)}×.`;
+  `the marks each card's mean (${andL(CS.filter(c=>q.dram.per_card[c]).map(c=>({dot:'dot',ring:'ring',diamond:'diamond'}[CK.card(c).mark]||'mark')+' '+lab(c)))}), the tick this session, which is not pooled.`;
 })();
 
 /* ---------- section 2: power ---------- */
@@ -561,8 +560,7 @@ CK.stackTable('media');
  function segSet(){offCtl.set(off);}
  upd();
  $('ringcap').textContent=
-  `The map colours each shire by how many mesh hops the slab it reads at this offset has to travel (the stronger the blue, the farther); the arrows mark `+
-  `the longest hand-offs, drawn straight because the route on the mesh was not measured. `+
-  `The scatter puts the bandwidth at every offset against the longest hand-off or, toggled, the mean`+
-  (cs.length>1?`: ${andL(cs.map(c=>`${mk(c)} ${lab(c)}`))}, side by side at each offset, each the mean of that card's passes; the dashed line is ${lab(A2)}'s least-squares line.`:'.');
+  `The map colours each shire by the mesh hops its slab travels at this offset (darker blue, farther); arrows mark the longest hand-offs, drawn straight `+
+  `(the route was not measured). The scatter: bandwidth at every offset against the longest hand-off or, toggled, the mean`+
+  (cs.length>1?`; ${andL(cs.map(c=>`${mk(c)} ${lab(c)}`))}, each that card's pass mean; dashed, ${lab(A2)}'s least-squares line.`:'.');
 })();

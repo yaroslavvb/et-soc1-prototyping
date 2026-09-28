@@ -31,7 +31,8 @@ heat    T(t)   = 22.8 °C + Σ_k x_k(t),    τ_k · dx_k/dt = R_k · P(t) − x_
 | R_k (°C/W) | 0.106 | 0.050 | 0.234 | 0.136 | **0.860** | 0.081 | **1.47** |
 
 22.8 °C is the fitted intercept of the main session, not the room temperature; each session has its own (the
-afternoon's is 28.0 °C).
+afternoon's is 28.0 °C). Whatever it stands for, a warmer room or worse airflow, each degree of it takes
+0.68 W (1/1.47) off the flip budget of [12-heat-management.md](12-heat-management.md) (Horace §8).
 
 The power line has a fixed part, leakage that grows exponentially with die temperature, the tensor state
 machines of the active [minions](README.md#terms), and one energy per kind of flip. The heat line is a Foster chain: RC stages in
@@ -83,7 +84,8 @@ The held-out runs include four patterns and two core counts the thermal fit had 
 
 - **Out to a few minutes it predicts about as well as it fits.** The big misses trace back to power, not heat:
   the DFT pair's power is 2.8 W low, and near this card's flip budget a watt of error is tens of seconds.
-- **At ten minutes it runs hot,** by 3 to 5 °C on low-power runs.
+- **At ten minutes it runs hot,** by 3.6 to 5.2 °C on the four runs near the flip budget (zeros +0.7 °C; 3.8 °C
+  rms against 2.5 °C in the fit).
 - **The slow stages are not pinned down.** Between the half fit and the full fit the fast stages and the
   leakage barely move (0.10 and 0.05 °C/W at 1.5 and 4 s in both fits; 24.4 against 23.3 W of leakage at 80 °C),
   but the 400 s stage goes from 0.60 to 0.86 °C/W, the 1,000 s stage from 0.38 to nothing, and the
@@ -94,7 +96,9 @@ The held-out runs include four patterns and two core counts the thermal fit had 
 ## Two consequences worth knowing on their own
 
 **Leakage is the biggest single item on an idle card** and it is what makes temperature so sensitive to flips
-here: 23 of the 36 W an idle card draws at 80 °C, growing 0.65 W per °C.
+here: 20 to 29 W of the 36 W an idle card draws at 80 °C (23.3 W, two thirds, in the best fit), growing 0.65 W per
+°C. The idle readings fix the slope, not the split from the fixed power, hence the range (aifoundry2, one day's
+sessions; the three-card check's long idle passes, which would have re-tested the split, were not run).
 
 **That closes a loop.** A watt of switching raises the die, the higher die leaks more, which raises it
 further. Open loop the network gives 1.2 °C per sustained watt after ten minutes; with leakage feeding back it
@@ -131,8 +135,19 @@ aifoundry2.
   50–57 °C, it predicts aifoundry3's idle power to **+0.73 W** out of 25 W (the mean of the four temperature bins;
   the 50 °C bin is 22 samples of pre-session idle; with the model's own idle rule it is +0.69 W over 55–57 °C;
   `tools/ettelem/transfer_cards.py`).
-- **The thermal network does not transfer.** It never claimed to: 1.47 °C/W is one card in one chassis, and
-  aifoundry3 sheds heat visibly faster. Nothing in this section uses it.
+- **The thermal network does not transfer.** 1.47 °C/W is one card in one chassis; aifoundry3 sheds heat visibly
+  faster, and its own fit to its 13-minute session already needs more stages. No other card's cooling over minutes
+  was measured, so the heat predictions (time to 90 °C, end temperatures) need each card's own network, fitted from
+  long runs on it. Nothing in this section uses it.
+
+**Version 3 (26 September, three cards; the Horace page's section 10).** The shape of the data-dependence held on all
+three cards: the registered steps (ones over zeros, random over zeros, the bit-field ladder, operand order) held on
+aifoundry2 and aifoundry3 and read within 1.4 W of aifoundry2's on aifoundry1's card 1. The absolute scale (0.88 to
+0.99 as registered) and the idle power belong to the card at its temperature, and **the idle law does not transfer**:
+aifoundry3 idles 1.01 W above aifoundry2's law over 55–84 °C and aifoundry1's card 1 10.07 W above it (E44; the rows
+in [05-claims.md](05-claims.md), "Version 3"). So a new card needs one random-data matmul at the temperature it will
+run at, to calibrate the scale (0.8 W rms on the other patterns), and its own idle measured; then the power
+predictions apply. Whether the scale is the card or its temperature was not separated (E40).
 
 So: the *shape* of the data-dependence belongs to the design, and the *scale* and the *idle offset* belong to
 the card.

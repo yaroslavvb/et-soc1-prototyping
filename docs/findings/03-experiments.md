@@ -76,7 +76,7 @@ the page does not use it.
 **Caveats:** timing is load-to-use with one load in flight; the energy figures come from the rails' running
 averages, copied once per service-processor pass (133 ms on aifoundry2 with nothing polling, 156 ms under ettelem at
 10 Hz: E41), not from a per-access measurement. The energy manual re-measured the levels at a pinned
-600 MHz on both cards (E29); quote those.
+600 MHz on both cards (E29) and on three cards (E43, 26 September); quote E43's.
 **Report:** [Anatomy of a memory access](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy) (A1).
 
 ## E2 — The `hpmcounter3` carry bug, reproduced in RTL (2026-09-20)
@@ -853,7 +853,11 @@ per watt of anything else, rms 0.37 mV over 386 configurations; 767 mV at idle a
 every telemetry file all along. It responds mostly to DRAM traffic, not only: heavy mesh and scratchpad traffic with
 no DRAM access droops it by up to about 2 mV (2.2 mV for L3 reads through the mesh), which it would read as up to
 about 2 W of DRAM, and its idle reading moves by about 1 mV between 71 and 77 °C. The minion rail sags 0.070 mV per
-watt the cores draw.
+watt the cores draw. Since 26 September both are refitted over E46's catalogue on three cards (the hub's §4.2–4.3;
+`limits-of-observability.data.json` `power.fit`, `power.checks.droop`): 0.188, 0.034, 0.291 and 72.7 pJ/B on
+aifoundry2, 0.181, 0.043, 0.294 and 72.7 on aifoundry3, 0.102, 0.540, 0.205 and 81.6 on aifoundry1's card 1; droop
+0.86, 0.87 and 1.00 mV per off-rail DRAM watt, minion IR drop 0.053, 0.061 and 0.028 mV/W. Quote those
+([19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md)).
 **What it does not do:** none of the Moortec sensors measures current, so none meters the DDR, VDDQ, PCIe, IO or
 Maxion rails; the droop is a calibrated proxy, not independent of the board meter; the idle 12–16 W (12–13 W on
 aifoundry3 at 51–56 °C, 14–16 W on aifoundry2 at 66–82 °C) stays unsplit, and the fit's rms says nothing about it.
@@ -1000,8 +1004,11 @@ a 1,024-minion allreduce of 32 B 1,368 cycles (2.28 µs); the chip barrier is 4,
 and 5,018 with all 1,024 (`barrier-chip{1,32}.jsonl`). Energy: the re-measured rings of 23 September (E29) give
 0.67 pJ/B on pairs, 2.1 in a neighbourhood or a shire ring, and 9.3 + 1.7 pJ/B per mean hop across the mesh
 (r² 0.95, the two cards pooled, which mixes a card difference: 7.6 + 2.3 on aifoundry2 and 10.2 + 1.3 on aifoundry3,
-the slope known to about ±50%; `reruns.mesh_fit` at `299fac8`; E43 re-measured the rings on three cards); the
-18 September runs gave 0.8, 2.3 and 10.0 + 1.9 and are superseded.
+the slope known to about ±50%; `reruns.mesh_fit` at `299fac8`); the 18 September runs gave 0.8, 2.3 and 10.0 + 1.9
+and are superseded. E43 re-measured the rings on three cards, six passes each: 0.69 pJ/B on pairs, 2.2 in a
+neighbourhood or a shire ring (`manual.json` `.reruns.rings_pj_per_byte`), and 9.2 + 1.75 pJ/B per mean hop, the slope
+the same on each card (1.73–1.78; the on-chip communication page); quote those. E36 re-measured the cycles: the shire
+barrier is 233 cycles and the 32-minion allreduce 444 on each of three cards (the page's corrections).
 **Caveats:** one card, at 600 MHz throughout (`clock.csv`); the 18 September energies read 2–20% (median 10%) above
 the reruns.
 **Report:** [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication).

@@ -98,7 +98,7 @@ The sources of `et-who`, `et-lab-health`, `et-lab-manifest` and the login banner
 
 ## Sharing the cards
 
-The cards are shared. The rules are in [getting-started.md](getting-started.md) §2 ("Etiquette"), and
+The cards are shared. The rules, each with its reason, are in [AGENT.md](../AGENT.md) §5, and
 [`CLAUDE.md`](../CLAUDE.md) repeats them for agents. In short: ask before using a machine, look with `et-who` first,
 never hold a device for more than 10 s, stop tools with Ctrl-C or a plain `kill` (never `kill -9`, which poisons the
 card's management queue), and never reset a card yourself. Other users include CI runners on aifoundry1 and

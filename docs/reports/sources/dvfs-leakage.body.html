@@ -53,9 +53,9 @@ at <span data-v="busyShR"></span> of a card running a random-data matmul, but wh
 could not settle. And on aifoundry3 a boot service sets the firmware's power limit to 0 W (the other cards' is 65 W), which
 pins it at 600 MHz while the driver still reports 65 W.</p>
 
-<div class="card" style="margin:18px 0 8px"><b>Checked on three cards (26 September 2026).</b> 28 of this page's claims were
+<div class="card" style="margin:18px 0 8px"><b>Checked on three cards (26 September 2026).</b> This page's claims were
 re-measured under a pre-registered plan on aifoundry2, aifoundry3 and aifoundry1's card 1 (firmware 1.2.0; the other two run
-1.3.1): 9 held, 5 were corrected, 12 differ by card and 2 could not be confirmed. No card shows a cache wake-up; the governor
+1.3.1). <span class="v3-counts" data-v3-counts="et-soc1-dvfs-leakage">Of 28 claims tested here: 9 held, 5 corrected, 12 differ by card and 2 not confirmed, as the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#claims-cap">hub’s scoreboard</a> counts them.</span> No card shows a cache wake-up; the governor
 settings read as stated, but the log lines that showed aifoundry3's throttling on 22 September did not appear again; the idle
 law predicts aifoundry2's idle to a tenth of a watt, while aifoundry3's offset from it grows with temperature and aifoundry1's
 card 1 sits 8–13 W above it; and leakage above 30% of a busy card is not established. The 21–24 September numbers stay,
@@ -460,19 +460,16 @@ window, so its bins are the check's.</p>
 </details>
 </details>
 
-<p>Kanter noted that parts which clock lower and use slower transistors leak less; this card, at idle, leaks more than his
-5–30% whatever the split (the lede and the table above). <span data-v="kcyc"></span>
-Three things plausibly make the share high, and only the third is the chip's own: (1) it runs at 0.52 V rather than the 0.4 V
-Esperanto designed for; (2) aifoundry2's desktop chassis rests it at 62–74 °C (and on the night of 27–28 September
-anywhere between <span data-v="restR"></span> °C, swinging within half an hour, §8), and these shares are quoted at 80 °C;
+<p><span data-v="kcyc"></span>
+Three things plausibly make the leakage share high (above Kanter's 5–30% at idle, whatever the split), and only the third is the chip's own: (1) it runs at 0.52 V rather than the 0.4 V
+Esperanto designed for; (2) aifoundry2's desktop chassis rests it at 62–74 °C (§8 for one night's swing), and these shares are quoted at 80 °C;
 server airflow would keep it cooler, and at <span data-v="T3"></span> °C, where aifoundry3 ran in another machine, the
 same law puts leakage at <span data-v="busy3R"></span> of a busy card; (3) it carries 128 MB of shire SRAM (Esperanto
 quotes over 160 MB on die, at Hot Chips 33) with no array power gating in play. Only (2) has data behind it here;
-(1) and (3) are reasoning, since no run varies the voltage alone or gates the SRAM. The voltage has moved only with the
-clock: the idle card drew 35.0 W at 0.62 V and 800 MHz against 28.1 W at 0.52 V and 600 MHz, both at 63–68 °C
-(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power#voltage-and-clock">Why is the ET-SoC-1 low power?,
-Voltage and clock</a>; <code>vf.json</code> in the Horace experiment's data), and how much of those 6.9 W is leakage and how
-much is clocking was not measured. The law above is aifoundry2's; the energy manual refits it for aifoundry3 and
+(1) and (3) are reasoning, since no run varies the voltage alone or gates the SRAM (the voltage has moved only with the
+clock, and how much of that step is leakage was not measured:
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power#voltage-and-clock">Why is the ET-SoC-1 low power?,
+Voltage and clock</a>). The law above is aifoundry2's; the energy manual refits it for aifoundry3 and
 aifoundry1's card 1 from the check's cooling cycles
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#composition-where-a-workload-s-joules-go">its §7</a>).</p>
 
@@ -696,12 +693,9 @@ sleep pins" is a statement about the open release and this firmware, corroborate
 about the silicon's chip-level netlist.</li>
 <li>The 36 transitions come from aifoundry2's cool-start runs of 21 September, in
 <code>docs/reports/data/2026-09-21-horace-aifoundry2/cold1</code> and <code>cold2</code>. The timings quoted over two
-days add the six cool passes of 23 September (the first, discarded attempt at E29's reruns, in
-<code>docs/reports/data/2026-09-23-reruns-aifoundry2/</code>: <code>hotline-pass2</code>–<code>4</code>,
-<code>relay-pass1</code>, <code>2</code> and <code>4</code>); a block of launches is a run of launches less than 2 s
-apart. The classification into
-thermal, thermal+power, power and unattributed is mechanical, in <code>tools/ettelem/analyze_dvfs.py</code>;
-nothing is fitted. The split depends on which sample is read: <span data-v="prevnote"></span>, because the board meter lags
+days add six cool passes of 23 September (<code>docs/reports/data/2026-09-23-reruns-aifoundry2/</code>, the discarded
+first attempt at E29); a block is launches less than 2 s apart. <code>tools/ettelem/analyze_dvfs.py</code> classifies the
+steps mechanically; nothing is fitted. The split depends on which sample is read: <span data-v="prevnote"></span>, because the board meter lags
 the clock by <span data-v="meterLag"></span>. Either way the power branch never fired alone on aifoundry2.</li>
 <li>The wake-up probe is <code>gen_ops.py wakeup</code> in <code>workloads/memprobe</code>, one hart, 20
 repeats, raw results in <code>docs/reports/data/2026-09-22-dvfs-aifoundry2/wakeup/</code>. It can only detect a
@@ -785,25 +779,16 @@ block its options would not rebuild; <code>build-report.py</code> refuses data w
 <code>dv2</code> blocks.</p>
 </details>
 <details class="more"><summary>Version history</summary>
-<p class="small">Versions. 22 September 2026: first published for aifoundry2, then the three-machine comparison and the
-second card. 24 September: after a review, the governor's pass period (about 133 ms, not 10 ms), the hunting mechanism (the
-thermal threshold, not the power guardband), the open RTL read as Erbium, not the chip, and seven down-steps unattributed.
-25 September: the rule's frequency check nested inside the thermal test, as in the source, and the DRAM wake-up counts
-corrected. 25 September (version 3), every claim checked for card and runs
-(<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">record</a>):
-the leakage shares as ranges; aifoundry3's idle offset over sixteen sessions; "every result checked was correct" withdrawn.
-26 September (version 4), the three-card check: the wake-up probe on three cards, the governor's settings read from the check,
-aifoundry3's zero TDP set by a boot service, not flashed, the pass period per card, the idle law against the cooling cycles,
-and the busy leakage share no longer said to exceed 30%. 27 September: the review of 26 September (aifoundry3's resting
-temperatures; §6 and the open questions on three cards; verdict row 6 cut; the cooling cycles' offsets given over whole-degree bins, as in the energy manual, with the by-sample figure beside them), the governor plane per card, and detail folded
-into sections. 28 September: §1 rewritten for the governor the cards run (0.20.0: the mean of 34 whole-degree sensors, the
-blocking thermal loop, the exit to the boot point and the one-call climb), with its source lines; §2's hunting and
-unattributed steps explained by it (run 7's two-step drop read as the power loop, run 2's one-step drop as that loop or a
-thermal episode of zero steps); aifoundry3's zero power limit read as stopping its governor, and aifoundry1's card 1's
-governor as inactive (§3, §9); no firmware temperature limit at the lowest point (the service processor reads the PMIC's
-temperature only at a statistics reset, so the telemetry, not that statistic, is the evidence); the idle law's two rms figures told apart;
-and a new §8, the development night of 27–28 September on which trigger and placement, with the frozen validation plan and
-the Master Minion hang (Method became §9).</p>
+<p class="small">Versions. 22 September 2026: first published for aifoundry2, then the three-machine comparison. 24 September:
+the governor's pass is about 133 ms, not 10 ms; it hunts on the thermal threshold, not the power guardband; the open RTL is
+Erbium, not the chip; seven down-steps are unattributed. 25 September: the rule's frequency check sits inside the thermal
+test, and the DRAM wake-up counts corrected; then version 3: the leakage shares as ranges, and "every result checked was
+correct" withdrawn. 26 September (version 4), the three-card check: aifoundry3's zero TDP is set by a boot service, not
+flashed; the busy leakage share is no longer said to exceed 30%. 27 September: the review's fixes (verdict row 6 cut) and
+charts. 28 September: §1 rewritten for the governor the cards run (firmware 0.20.0), with §2's steps explained by it;
+aifoundry3's zero limit stops its governor and aifoundry1's card 1's governor is inactive; no firmware temperature limit
+at the lowest point; a new §8, the night of 27–28 September; later, the review's cuts. What each version changed in full: this page's history in
+the <a href="https://github.com/yaroslavvb/et-soc1-prototyping/commits/main/docs/reports/sources/dvfs-leakage.body.html">repository</a>.</p>
 </details>
 
 <h2 id="related-reports">Related reports</h2>

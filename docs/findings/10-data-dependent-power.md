@@ -15,17 +15,18 @@ Every run below does **identical arithmetic**: [hart](README.md#terms) 0 of each
 [L1 scratchpad](README.md#terms), at 546.001 cycles per op, 600 MHz, 9.18 TFLOPS. The
 clock and the core voltage never move. Only the numbers in A and B differ.
 
-Board power is quoted at the launch temperature (80 °C), corrected for the leakage the run's own heating adds
-during seconds 1–3. "Rise" is the de-quantised temperature gain over a 7.3 s run (see
+Board power is quoted at the launch temperature (81 °C as the sensor reads it; the thermal network puts the 46
+launches at 80.96 °C), corrected for the leakage the run's own heating adds during seconds 1–3. "Rise" is the de-quantised temperature gain over a 7.3 s run (see
 [14-card-behaviour.md](14-card-behaviour.md) for why the raw sensor cannot give this directly). The three coolest
-patterns move the whole-degree reading by at most one degree, so their rise is only bounded (below about 0.5 °C,
-under 8 m°C per 10¹² FLOPs), as in the published report.
+patterns move the whole-degree reading by at most one step, so their rise is only bounded: below about 1 °C, under
+15 m°C per 10¹² FLOPs, as in the published report (the recovered curve and the thermal network put it at 0.1 to
+0.3 °C). The table is `report.json`, the page's data (the pJ columns round as the page does).
 
-| Operands (A and B) | Runs | Board W at 80 °C | ± sd | Rise in 7 s | m°C per 10¹² FLOPs | pJ/FLOP, run average | pJ/FLOP over idle, run average |
+| Operands (A and B) | Runs | Board W at launch (81 °C) | ± sd | Rise in 7 s | m°C per 10¹² FLOPs | pJ/FLOP, run average | pJ/FLOP over idle, run average |
 |---|---|---|---|---|---|---|---|
-| zeros | 5 | **38.29** | 0.03 | < 0.5 °C | < 8 | 4.17 | 0.22 |
-| checkerboard 1,0,1,0 | 2 | 40.94 | 0.04 | < 0.5 | < 8 | 4.47 | 0.51 |
-| random normal, 75% zeroed | 2 | 41.04 | 0.05 | < 0.5 | < 8 | 4.49 | 0.55 |
+| zeros | 5 | **38.29** | 0.03 | < 1 °C | < 15 | 4.17 | 0.22 |
+| checkerboard 1,0,1,0 | 2 | 40.94 | 0.04 | < 1 | < 15 | 4.47 | 0.52 |
+| random normal, 75% zeroed | 2 | 41.04 | 0.05 | < 1 | < 15 | 4.50 | 0.55 |
 | ternary −1, 0, 1 | 2 | 45.70 | 0.22 | +1.40 | 20.6 | 5.07 | 1.12 |
 | random normal, 50% zeroed | 5 | 46.13 | 0.32 | +1.73 | 25.6 | 5.13 | 1.18 |
 | **ones** | 5 | **46.73** | 0.07 | +1.81 | 26.8 | 5.21 | 1.26 |
@@ -33,7 +34,7 @@ under 8 m°C per 10¹² FLOPs), as in the published report.
 | random sign, ±1 | 2 | 51.41 | 0.15 | +2.80 | 41.2 | 5.78 | 1.83 |
 | random exponent, 2^k | 2 | 52.60 | 0.00 | +2.88 | 42.5 | 5.93 | 1.97 |
 | A random, B ones | 2 | 54.29 | 0.10 | +2.87 | 42.5 | 6.13 | 2.19 |
-| A ones, B random | 2 | 57.93 | 0.22 | +3.69 | 54.7 | 6.57 | 2.62 |
+| A ones, B random | 2 | 57.93 | 0.21 | +3.69 | 54.7 | 6.57 | 2.62 |
 | random mantissa, [1,2) | 2 | 60.41 | 0.19 | +4.08 | 60.5 | 6.85 | 2.90 |
 | random uniform [0,1) | 5 | 61.29 | 0.04 | +4.74 | 70.0 | 7.01 | 3.05 |
 | **random normal** | 5 | **63.40** | 0.08 | +5.15 | 75.9 | 7.27 | 3.31 |
@@ -49,9 +50,11 @@ same basis.
 
 - **The runs cluster by kind, tightly.** Random normal repeats to 0.08 W across five *different* random
   matrices; zeros to 0.03 W. The run-to-run spread is far smaller than the gap between kinds.
-- **Heating follows power over idle, not total power.** Zeros add 2.0 W to an idle card and the die's
-  rise stays below what the sensor resolves (the thermal network driven by the measured power puts it at 0.3 °C).
-  Random normal adds 27 W and gains 5.2 °C. Hence about 5 against 76 m°C per trillion FLOPs, while total energy per FLOP only moves from 4.2 to 7.3 pJ.
+- **Heating follows power over idle, roughly, not total power.** Averaged over the run, with the leakage its own
+  heating adds, zeros add 2.0 W to the idle card and the die's rise stays below what the sensor resolves (0.1 to
+  0.3 °C by the recovered curve and the thermal network: 1 to 5 m°C per trillion FLOPs); ones add 11.6 W, 27 m°C;
+  random normal adds 30.4 W and gains 5.2 °C, 76 m°C. (At the launch temperature the three add 2.0, 10.5 and
+  27.1 W.) Total energy per FLOP only moves from 4.2 to 7.3 pJ.
 - **Over the idle card the data decides a factor of 14–15** in energy per FLOP (0.22 against 2.95 pJ at 80 °C,
   3.31 on the run average).
 - **Which bits are random matters.** Random signs alone cost 51.4 W, random exponents alone 52.6 W, random
@@ -61,7 +64,9 @@ same basis.
   board; the minion rail accounts for 21.5 W, SRAM and mesh for 1.0 W between them, and about 7 W is on no rail
   sensor: by the later attribution ([19-observability-and-the-unmetered.md](19-observability-and-the-unmetered.md),
   E30) about 4.4 W of it is regulator delivery loss: 4.2 W on the minion regulator (19.6% of the 21.5 W it
-  delivered) and 0.2 W on the SRAM and mesh regulators. The remaining ~2.6 W is not attributed.
+  delivered) and 0.2 W on the SRAM and mesh regulators. The remaining ~2.6 W is not attributed. On aifoundry3
+  (22 September) the same difference is 25.9 W: 20.5 W on the minion rail (79%, against aifoundry2's 73%), 0.5 W on
+  the SRAM and mesh rails, 4.9 W on no sensor (`horace3.json` of each card, `rails_late` and `p_late`).
 
 ## Why: three mechanisms, all visible in the RTL
 

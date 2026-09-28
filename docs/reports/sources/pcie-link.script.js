@@ -96,6 +96,16 @@ const VERD={PASS:'var(--ok)',FAIL:'var(--bad)',INCONCLUSIVE:'var(--warn)'};
  const h=D.hosts[CS[0]];
  $('chunk').textContent=`${num(h.dma_max_elem_bytes/1048576,0)} MB (the driver's DMA element; ${num(h.dma_max_elem_count,0)} elements a command, a ${h.cma} bounce buffer)`;
  $('hostcopy').textContent=andL(CS.map(c=>`${g1(D.hostcopy[c].find(e=>e.bytes===BIG).gbs.mean)} GB/s on ${lab(c)}`));
+ /* the hosts' memory layout (hosts.txt's addendum, read as a user on 27 September): the slow memcpy is a single channel */
+ const HM=D.hostmem||{}, hm=CS.filter(c=>HM[c]);
+ if(hm.length){const W={1:'one',2:'two',3:'three',4:'four'}, w=n=>W[n]||num(n,0);
+  const one=hm.filter(c=>HM[c].channels===1), ord=one.concat(hm.filter(c=>HM[c].channels!==1));
+  /* the slowest host memcpy (256 MB), from the data; the layout is named as consistent with it only when the one
+     single-channel host is that host (no run isolated the channel count as the cause) */
+  const mc=c=>D.hostcopy[c].find(e=>e.bytes===BIG).gbs.mean, slow=CS.reduce((a,c)=>mc(c)<mc(a)?c:a);
+  const say=c=>{const m=HM[c];return `${m.host} has ${w(m.modules)} ${m.speed.join('/')} module${m.modules===1?'':'s'} on ${m.channels===1?'a single memory channel':w(m.channels)+' channels'}`;};
+  $('hostmem').textContent=(one.length===1&&one[0]===slow?`The hosts' memory is consistent with ${HM[slow].host}'s memcpy being the slowest: `:`The hosts' memory: `)+
+   andL(ord.map(say))+` (the BIOS's memory table as udev exports it, read as a user on 27 September; hosts.txt in the data).`;}
  const t=$('stagetable'), rows=[];
  for(const c of CS) for(const dir of ['h2d','d2h']){
   const dma=bwAt(c,dir,'dma',BIG), stg=bwAt(c,dir,'staged',BIG), mc=D.hostcopy[c].find(e=>e.bytes===BIG).gbs;

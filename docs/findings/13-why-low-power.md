@@ -14,15 +14,21 @@ An A100 draws 330–400 W under a matmul. This card draws 38–64 W, and Esperan
 
 - It runs at 0.52 V and 600 MHz where a GPU runs near 0.85 V and 1,160–1,410 MHz: a factor of 5 to 6 in switching
   power for the same capacitance.
-- Whatever is not computing is clock-gated: it stops switching but still leaks; nothing is power-gated
-  ([16](16-dvfs-and-leakage.md)).
+- Whatever is not computing is clock-gated: it stops switching but still leaks (an integer loop on all 1,024
+  minions adds 1.5 W on aifoundry2, and 0.4 and 0.7 W on aifoundry3 and aifoundry1's card 1 as registered, within the
+  launch-temperature offset; 0.0–1.9 W on the three cards at each launch's die temperature; E38, post-data note C2).
+  Nothing on these three cards is power-gated: the open RTL's per-minion sleep ports are tied off, no firmware line
+  drives them, and no cache level shows a wake-up; whether the taped-out chip could gate its arrays is not
+  established ([16](16-dvfs-and-leakage.md)).
 - It does 14 to 28 times fewer FLOPs per second (fp16 or fp32 here, against the A100's bf16).
 - It is **not** more efficient per FLOP at dense matmul: 7.0 pJ per FLOP in fp32 and 3.3 pJ in fp16, against the
   A100's 1.28 in bf16, so the A100's tensor cores are 5.4× and 2.6× better. Only against the A100's fp32 CUDA-core
   datasheet figure (19.5 TFLOPS at 400 W) is this card better: about 2.9× on random data and 3.4× on the matmul
   benchmark's ±1/±2 operands ([matmul efficiency](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency), R4),
   a comparison of this card's measurement with the A100's datasheet.
-- Leakage, the term Esperanto's slide leaves without a number, is the largest single item on this card.
+- Leakage, the term Esperanto's slide leaves without a number, is the largest item of this card's idle: 20 to 29 W
+  of the 36 W at 80 °C (23 W in the best fit; aifoundry2, one session, a split the idle data do not pin down and the
+  three-card check could not narrow).
 
 ---
 
@@ -102,9 +108,12 @@ switching power for 1.33× the clock**, where V²f predicts 1.91×: within about
 writes these values (`vf.json`) from the cool-start telemetry, with each window stated. Energy per operation rises
 1.5–1.6× for 33% more speed. Idle pays too: 35.0 W at 0.62 V against 28.1 W at 0.52 V, both at 63–68 °C.
 
-**Leakage.** Idle board power follows 12.6 W + 23.3 W · e^((T−80)/36) from 64 to 88 °C, to 0.2 W. At 80 °C
-that is 23 W of leakage in a 36 W idle. It is the term that keeps the measured card far from Esperanto's
-headline, and a cooler die or the 0.4 V point would cut it on both counts.
+**Leakage.** Idle board power follows 12.6 W + 23.3 W · e^((T−80)/36) from 64 to 88 °C, to 0.2 W, in its best-fit
+split. Its slope, 0.65 W per °C at 80 °C, is well fixed; the split is not: 20 to 29 W of the 36 W idle at 80 °C is
+leakage (23 W in the best fit; aifoundry2, one day's idle samples at 64–67 and 81–88 °C). The three-card check's idle
+cycles (E44) found aifoundry2 within 0.1 W of this law from 68 to 82 °C, aifoundry3 0.7 to 1.8 W above it and
+aifoundry1's card 1 7.6 to 13.4 W above it: the law is aifoundry2's. It is the term that keeps the measured card
+far from Esperanto's headline, and a cooler die or the 0.4 V point would cut it on both counts.
 
 **Memory.** Streaming tensors from LPDDR4x at 75 GB/s adds 10.7 W: 142 pJ per byte (**18 pJ per bit**) end to
 end (DRAM, PHY, controller, mesh, cache fills), on a buffer whose contents were never set. The energy manual's

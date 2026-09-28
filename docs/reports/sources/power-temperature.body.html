@@ -29,9 +29,9 @@ aifoundry3. The die idled at 72 °C here (62–74 °C on other days; aifoundry3 
 load differs from idle before it by what the die's temperature did: 5 W higher here, with the die 9 °C warmer. So every
 energy comparison on this card has to control for heat.</p>
 
-<div class="card" style="margin:18px 0 8px"><b>Checked on three cards (26 September 2026).</b> 30 of this page's claims were
+<div class="card" style="margin:18px 0 8px"><b>Checked on three cards (26 September 2026).</b> This page's claims were
 re-measured under a pre-registered plan on aifoundry2, aifoundry3 and aifoundry1-c1 (four repeats of §2's load step and three
-of the meter and voltage-map tests on each card): 6 held, 9 were corrected, 13 differ by card and 2 could not be confirmed. The
+of the meter and voltage-map tests on each card). <span class="v3-counts" data-v3-counts="et-soc1-power-temperature">Of 30 claims tested here, this page counts 6 held, 9 corrected, 13 differ by card and 2 not confirmed; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#claims-cap">hub’s scoreboard</a>, 1 “a test behind it failed”, 21 “differs by card” and 8 “fewer than three repeats”.</span> The
 main correction is the busy slope: this session's 0.8 W/°C is the low end on aifoundry2, where the repeats gave 0.9–1.1; and
 the idle voltage map is not a per-monitor offset to subtract. The 20 September numbers stay, labelled as that session's
 (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">the record</a>).</div>
@@ -39,18 +39,15 @@ the idle voltage map is not a per-monitor offset to subtract. The 20 September n
 <div class="card" style="margin:18px 0 8px"><b>Later measurements.</b> Idle power on aifoundry2 follows a fitted law,
 P<sub>idle</sub> = <span id="law-fix"></span> W + <span id="law-a"></span> W·e<sup>(T−80)/<span id="law-tl"></span></sup>
 (T the die temperature in °C), fitted to idle readings at <span id="law-trange"></span> °C and not re-measured by the
-three-card check: it rises <span id="law-slope80"></span> W per °C at 80 °C, and e-folding temperatures from 30 to 45 °C
-fit as well, putting 20–29 W of the <span id="law-80"></span> W at 80 °C in leakage
-(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-that-costs">the DVFS report, §5</a>;
+three-card check (its slope and leakage share:
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-that-costs">the DVFS report, §5</a>;
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">the energy manual, §1</a>). §2 compares
-this page's readings with it. The unmetered remainder is attributed in
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits of
-observability, §4.2</a>.</div>
+this page's readings with it.</div>
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">Idle</div><div class="val">31.2 W</div><div class="sub">aifoundry2 at 72 °C die; 16 W on the three measured rails, 15 W elsewhere (12–13 W on aifoundry3, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits §4.2</a>)</div></div>
   <div class="card kpi"><div class="lab">Power slope under load</div><div class="val">0.6–1.2 W/°C</div><div class="sub">board, the same matmul, four load steps per card: 0.90–1.12 on aifoundry2 (81–97 °C), 0.56–0.66 on aifoundry3 (61–70 °C), 1.10–1.16 on aifoundry1-c1 (73–83 °C); about half on the minion rail on all three. An idle card: 0.65 W/°C at 80 °C</div></div>
-  <div class="card kpi"><div class="lab">Finest power record</div><div class="val">10 mW · 156 ms</div><div class="sub">board power, fresh each service-processor pass (156–263 ms, by card: the lede); the rails read to 1 mW but are the PMIC's running average (§2)</div></div>
+  <div class="card kpi"><div class="lab">Finest power record</div><div class="val">10 mW · 156 ms</div><div class="sub">board power on aifoundry2, fresh each service-processor pass (every card: §1); the rails read to 1 mW but are the PMIC's running average (§2)</div></div>
   <div class="card kpi"><div class="lab">Finest voltage map</div><div class="val">34 shires</div><div class="sub">3 rails each, 1 mV, with hardware low/high, from a user account; captured on all three cards</div></div>
 </div>
 
@@ -179,7 +176,7 @@ of observability, §4.2</a>).</li>
 <details class="more"><summary>Why the remainder briefly looks wrong at each load edge, with the edge charts</summary>
 <ul class="findings">
 <li><b>Why the remainder sometimes looks too small, or the rails seem to exceed the step.</b> Board power is a fresh
-reading at every service-processor pass (about every 156 ms here). The rail figures are the PMIC's own running averages,
+reading at every service-processor pass. The rail figures are the PMIC's own running averages,
 which the service processor copies each pass, roughly first-order with τ ≈ <span id="rf-tau"></span>: a step reaches
 <span id="rf-12s"></span> (medians over <span id="rf-n"></span>;
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">Limits of observability, §4.1</a>). So board minus rails swings at every load edge until the rails catch up.
@@ -339,24 +336,15 @@ governor details may differ on the card (<a href="https://spacesheep.dev/@yarosl
 DVFS report</a>). The cards' own build (BL2 0.20.0 of release 1.3.1, et-platform <code>ffca4cbb4</code>) was read on 27 September: its thermal response is a blocking loop of steps about 0.4 s apart that also acts on an idle card, and a climb goes to the top point in one call (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">the DVFS report</a>). The measurements do not depend on it.</p>
 </details>
 <details class="more"><summary>Version history</summary>
-<p class="small"><b>Versions.</b> 20 September 2026: first edition. 21 September: §2's governor bullet corrected (it
-first said the governor never acts). 24 September: the rail averaging described from the firmware (first described as a
-2 s moving average), and the transients re-read from the data. 25 September: the summary and the map rebuilt by committed
-tools from the recovered raw records, and the rail filter's step figures replaced by the measured ones. 25 September
-(version 3), every claim checked against both cards
-(<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">record</a>):
-the refresh period per card (156 and 263 ms, not 133 ms), the idle law led by its slope, and the clause that busy power climbs
-faster per degree than idle removed. 26 September (version 4), the three-card check: the busy slope corrected (0.8 W/°C was
-this session's; the repeats give 0.9–1.1 on aifoundry2), the refresh period, SP pass and trace span per card, and the voltage
-map's offset hypothesis and the lows' "droops the polling misses" withdrawn. 27 September: the review of 26 September (the
-resting temperatures, the frequency sweep marked lab admin only, the cards named; the catalogue's DRAM streams on three
-cards), fresh readings ticked in the edge charts,
-and detail folded into sections. Later on 27 September: a chart of the service processor's pass under each way of polling
-(§1, the three-card check), and in §3 the voltage map's capture and card selectors (20 September, and each card idle and
-under load on 26 September) and a chart of the offset test (each shire idle against load). 28 September, after a review
-of the governor pages: aifoundry1-c1 was not "launched warm" (its governor never raised the clock); aifoundry3's governor
-can only ask to step down; a new item in §2, nothing on the card limits the die's temperature (aifoundry2's 90–103 °C
-catalogue pass of 26 September); the cards' own firmware build noted.</p>
+<p class="small"><b>Versions.</b> 20 September 2026: first edition. 21 September: the governor does act (§2; it first
+said it never does). 24 September: the rails are the PMIC's running average, not a 2 s moving average. 25 September:
+rebuilt by committed tools from the recovered raw records; the refresh period is per card (156 and 263 ms, not 133 ms),
+and the clause that busy power climbs faster per degree than idle is withdrawn. 26 September: the three-card check (the
+busy slope is 0.9–1.1 W/°C on aifoundry2, this session's 0.8 its low end; the voltage map's offset idea and the lows'
+"droops the polling misses" withdrawn). 27 September: the review's fixes and charts. 28 September: aifoundry1-c1's
+governor never raises the clock, aifoundry3's can only ask to step down, and nothing on the card limits the die's
+temperature (§2); later, the review's cuts. What each version changed in full: this page's history in the
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/commits/main/docs/reports/sources/power-temperature.body.html">repository</a>.</p>
 </details>
 
 <h2>Related reports</h2>

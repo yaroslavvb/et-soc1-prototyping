@@ -332,7 +332,7 @@ One DFI clock is 1.071 ns; one tCK is half that. Decoding is by the research age
 - No automatic ZQ (ZQCTL0.dis_auto_zq=1).
 - The DFI controller-update is automatic every 64-255 × 1024 clocks. It can cause rare latency blips.
 
-**Rough DRAM-side budget for a closed-bank read:** tRCD + RL + burst (2 × BL16 = 64 B) ≈ 18 + 19 + 8.6 ≈ **46 ns** at the pins. That is out of the ~440 ns measured load-to-use. So roughly 390 ns is NoC, shire cache (L2 miss + L3 miss handling), memshire queues and PHY.
+**Rough DRAM-side budget for a closed-bank read:** tRCD + RL + burst (2 × BL16 = 64 B) ≈ 18 + 19 + 8.6 ≈ **46 ns** at the pins. That is out of 479–495 ns (287–297 cycles) measured load-to-use at 600 MHz, the same on three cards on 26 September (the ~440 ns first quoted here came from chases the governor ran at 800 MHz). So roughly 435–450 ns is NoC, shire cache (L2 miss + L3 miss handling), memshire queues and PHY. The memory anatomy page splits it: 110 + 12 cycles per hop to the L3 home shire, then 91 + 12 per hop to the memory shire, and of those 91 cycles (152 ns) about 28 (47 ns) are the DRAM chip, which matches this budget.
 
 Adjustments:
 - A row conflict adds tRP ≈ 18 ns.

@@ -165,8 +165,8 @@ in the server anyway (the H100 computes each query's gradient and iHVP, about 1.
 <div id="x-read"></div>
 <p class="small">Bands span the estimates' ranges: the ET card at rest draws <span data-d="model.et.idle_W.range" data-dp="1">25.1–36.3</span> W <span class="ev m">M</span> (aifoundry3 cool,
 aifoundry2 hot; the third card measured, aifoundry1's card 1, draws more at rest, <span data-d="model.et.idle_W_other.aifoundry1-c1.lo" data-dp="0">32</span>–<span data-d="model.et.idle_W_other.aifoundry1-c1.hi" data-dp="0">50</span> W
-at <span data-d="model.et.idle_W_other.aifoundry1-c1.T.0" data-dp="0">56</span>–<span data-d="model.et.idle_W_other.aifoundry1-c1.T.1" data-dp="0">81</span> °C, which would only raise the ET's band); the H100 60–90 W at rest <span class="ev e">E</span> and 105 pJ per byte from HBM or 38 from L2
-(an A100's levels alone, <span class="ev">X</span>); the host CPU 40–200 W while it scores <span class="ev e">E</span>. A band stops where its device is
+at <span data-d="model.et.idle_W_other.aifoundry1-c1.T.0" data-dp="0">56</span>–<span data-d="model.et.idle_W_other.aifoundry1-c1.T.1" data-dp="0">81</span> °C, which would only raise the ET's band); the H100 60–90 W at rest and 105 pJ per byte from HBM or 38 from L2
+<span class="ev e">E</span>; the host CPU 40–200 W while it scores <span class="ev e">E</span>. A band stops where its device is
 full at this Q; beyond it, more chips or a larger Q are needed. The shaded column is where the ET breaks even with the H100.
 Everything here is a model (<a href="#method-and-caveats">section 6</a>); only the ET's per-byte cost and bandwidth are
 measured.</p>
@@ -192,8 +192,8 @@ per query, and the threshold is shared through the TensorReduce tree.</dd>
 <dt>Why this chip</dt>
 <dd>Its one measured physical edge on this kind of work: a byte read by a tensor load from the shire's own scratchpad costs
 <span data-d="model.et.sram_pj_B.v" data-dp="1">4.2</span> pJ above idle at <span data-d="model.et.sram_bw.v" data-s="1e-12" data-dp="2">2.46</span> TB/s
-<span class="ev m">M</span>, against 105 pJ for an A100's HBM level alone and 38 pJ for its L2 level alone (155 and 50 counting the
-path through L2 and L1) <span class="ev">X</span>; the H100 is charged the lower figures <span class="ev e">E</span>. The shard never
+<span class="ev m">M</span>, against the 105 pJ from HBM and 38 pJ from L2 this page charges an H100 (<a href="#method-and-caveats">section 6</a>)
+<span class="ev e">E</span>. The shard never
 leaves the chip, the maximum is combined in the tree for free, and every minion runs its own heap code.</dd>
 <dt>Where it wins (all of these)</dt>
 <dd><details class="more"><summary>All five conditions, in full</summary><ul>
@@ -228,8 +228,7 @@ for <span data-d="s1.hbm_case.h100_mJ" data-dp="1">8.3–9.0</span> mJ. For a 37
 <dt>Weakest assumption</dt>
 <dd><details class="more"><summary>The three weakest assumptions, in full</summary><p>That the card is busy. An interactive attribution tool runs at well under 10 queries a second, since each query costs about
 1.3 H100-seconds of gradient and iHVP at 8B <span class="ev">O</span>; at 1–10 queries a second the card at rest costs 2.5–36 J
-per query, and the cheapest scorer is the host CPU that is already on. The second weakest is the H100's energy for a microsecond-scale kernel,
-which sets the whole lead and has not been measured by anyone here. The third is the cost of tensor ops with fewer than 16
+per query, and the cheapest scorer is the host CPU that is already on. The second weakest is the H100's energy for a microsecond-scale kernel (How sure, above). The third is the cost of tensor ops with fewer than 16
 rows (one per query): measured only in fp32 at batch 1, where the pass stayed load-bound. If every op costs a full 16 rows, one
 query takes <span data-d="s1.hbm_case_rows16.et_us" data-dp="1">29.2</span> µs and <span data-d="s1.hbm_case_rows16.et_mJ" data-dp="1">1.6–2.0</span> mJ,
 and the lead is <span data-d="s1.hbm_case_rows16.lead" data-dp="1">4.2–5.5</span>×.</p></details></dd>
@@ -432,7 +431,8 @@ moved to the data README. Later on 27 September: the host link as measured (E50)
 size nearest K1's), S2's host launch, section 4 and the first experiment's
 prerequisite; the idle-to-pass ratio taken on the same card (it had paired one card's idle with the other's pass: 19,000–36,000,
 now 25,000–27,000); the verdict chart in section 5, which marks that the model leaves out the fused top-k; S3's chart in the
-energy manual's colours.</li>
+energy manual's colours. 28 September: the caveat that the H100's energies are an A100's per-byte
+figures is given once in "How sure" and once in section 6.</li>
 </ul>
 </details>
 

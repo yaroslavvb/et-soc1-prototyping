@@ -2,9 +2,9 @@
 <h1>Why is the ET-SoC-1 low power?</h1>
 <p class="byline">21 September 2026, checked on three cards on 26 September · aifoundry2's card, with aifoundry3's and aifoundry1-c1's (card 1 of aifoundry1) values where the same measurement exists · A100 figures from NVIDIA's datasheet and Horace He's matmul measurements; Esperanto's design argument from Hot Chips 33 and IEEE Micro · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
-<div class="card" style="margin:18px 0 8px"><b>Checked on three cards (26 September 2026).</b> 20 of this page's claims were
+<div class="card" style="margin:18px 0 8px"><b>Checked on three cards (26 September 2026).</b> This page's claims were
 re-measured under a pre-registered plan on aifoundry2, aifoundry3 and aifoundry1-c1 (the ablation configurations, four runs each
-per card): 6 held, 2 were corrected, 8 differ by card and 4 could not be confirmed. The energy per multiply-add and its factor
+per card). <span class="v3-counts" data-v3-counts="et-soc1-why-low-power">Of 20 claims tested here: 6 held, 2 corrected, 8 differ by card and 4 not confirmed, as the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#claims-cap">hub’s scoreboard</a> counts them.</span> The energy per multiply-add and its factor
 of about 19 between int8 and fp32 held on every card; the integer loop's cost and the linearity in active cores differ by card
 (the loop's difference lies within the reduction's launch-temperature offset, post-data note C2: section 4);
 the leakage split was not narrowed (the check's long idle passes, which would have re-fitted it, did not run, and its
@@ -18,13 +18,12 @@ DVFS report, §5</a>). The 21 September session's numbers stay, labelled as its 
 real card and takes them away one at a time.</p>
 <p class="lede">The short answer: <b>the ET-SoC-1 is low power mostly because it runs at 0.52 V and 600 MHz where an A100 runs
 near 0.85 V and 1,160–1,410 MHz (a factor of 5 to 6 in switching power for the same capacitance), because whatever is not
-computing is clock-gated (an integer loop on all 1,024 cores, which Esperanto calls minions, costs 1.5 W on this card; the
-three-card check measured 0.4 and 0.7 W on aifoundry3 and aifoundry1-c1, and 0.0 to 1.9 W on the three cards at the die
-temperature of each launch), and because it
+computing is clock-gated (an integer loop on all 1,024 cores, which Esperanto calls minions, costs 1.5 W on this card,
+and 0.4 and 0.7 W on aifoundry3 and aifoundry1-c1 as registered, within the launch-temperature offset; 0.0 to 1.9 W on the
+three cards at each launch's die temperature, section 3), and because it
 does 14 to 28 times fewer FLOPs per second (fp16 or fp32 here, against the A100's bf16).</b> It is not more efficient per
-FLOP at dense matmul: the A100 spends 1.3 pJ per bf16 FLOP at the board, this card 3.3 pJ in fp16 and 7.0 pJ in fp32 (on 26 September
-3.3 and 6.9 pJ here, 2.6 and 5.5 pJ on aifoundry3 at its cooler 56 °C, and 4.1 and 8.5 pJ on aifoundry1-c1, whose idle is
-14 W higher). And the term Esperanto's slide leaves
+FLOP at dense matmul: the A100 spends 1.3 pJ per bf16 FLOP at the board, this card 3.3 pJ in fp16 and 7.0 pJ in fp32 (the
+other cards: the figures below). And the term Esperanto's slide leaves
 without a number, leakage, grows 0.65 W per degree at 80 °C and is the largest single item of the idle card: about 20 to
 29 W of its 36 W at 80 °C (this card, one session; the three-card check could not narrow the split). Clock gating stops idle circuits switching, but no power gating was found on any of the
 three cards (a wake-up test, three probes per card), so they still leak.</p>
@@ -55,8 +54,6 @@ power and thermal models are used here; more in the
 <details><summary>The comparison as a table, with sources and notes</summary>
 <div class="table-wrap wide"><table id="cmp"></table></div>
 </details>
-<p>Per FLOP, the A100's bf16 tensor cores win by 5.4× against this card's fp32 and 2.6× against its fp16 (on 26 September
-4.3× against aifoundry3's fp32, from its cooler launch, and 6.6× against aifoundry1-c1's).</p>
 <details class="more"><summary>The other A100 baseline: fp32 CUDA cores instead of tensor cores</summary>
 <p>Against the A100's fp32 CUDA-core datasheet figure instead (19.5 TFLOPS at 400 W, 20.5 pJ per FLOP, no tensor cores),
 this card's 7.0 pJ is about 2.9× better; the
@@ -94,8 +91,8 @@ effective capacitance. This card's fp32 matmul switches 27.6 W (<a href="#ablati
 <p>So of the 8.8× lower switching power, most is the operating point: 6.3× at the A100's maximum clock (2.7× from V²,
 2.35× from the clock), about 5.2–5.5× at the 1,160–1,230 MHz its capped random-data run implies. The rest, 1.4–1.7×, is
 switching less capacitance per cycle.</p>
-<p>Everything idle is clock-gated to nearly no switching power (an integer loop on every minion adds 1.5 W on this card,
-0.4 and 0.7 W on aifoundry3 and aifoundry1-c1; 0.0 to 1.9 W at the die temperature of each launch). What the card does not have is efficiency per FLOP on dense
+<p>Everything idle is clock-gated to nearly no switching power (an integer loop on every minion adds 1.5 W on this card;
+<a href="#ablations">section 4</a> gives every card). What the card does not have is efficiency per FLOP on dense
 floating-point matmul: its fp32 multiply-adds switch nine times more
 capacitance per FLOP than the A100's bf16 tensor cores do (four times in fp16), and at 9 TFLOPS its idle floor is spread
 over very little work. On the workload it was designed for, int8 with sparse memory access, the arithmetic is 19 times
@@ -135,10 +132,9 @@ alone reads 22 W under int8 random data at the end of a 7 s run (about 83 °C), 
 switches 27 mW per core (24.1 to 27.2 mW on the three cards).</li>
 <li><b>Voltage and clock: this card is not at the advertised point.</b> Its lowest operating point is 0.52 V at 600 MHz.
 While the die reads 65 °C or less (whole degrees) and board power is under 65 W, this card's TDP setting lets the firmware
-step it up through 0.57 V at 700 MHz to 0.62 V at 800 MHz (a boot service sets aifoundry3's TDP to 0 W, which holds that card
-at 600 MHz)
-(see <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-measured">the DVFS loop, and the
-leakage</a>). Esperanto's "about 0.4 V, 20 W" is a different operating point from anything this card's firmware uses.</li>
+step it up through 0.57 V at 700 MHz to 0.62 V at 800 MHz
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-measured">the DVFS loop, and the
+leakage</a>, which also says why the other two cards stay at 600 MHz). Esperanto's "about 0.4 V, 20 W" is a different operating point from anything this card's firmware uses.</li>
 </ul>
 <div class="chart-title">The capacitance ladder: effective switched capacitance per minion for every one of the 30 ablation
 configurations (grey: this card, 21 September), against Esperanto's 0.040 nF target. Card marks: the twelve the three-card check
@@ -214,17 +210,13 @@ over int8 18.9 [18.3, 19.5], 20.5 [19.0, 22.0] and 19.6 [17.9, 21.5] times. The 
 <details class="more"><summary>The voltage and clock findings, with every number</summary>
 <ul>
 <li><b>The card has three operating points (600, 700 and 800 MHz); on random data the two ends differ about as CV²f
-says.</b> This is aifoundry2 alone, in the seven cool-start runs of one morning (21 September); aifoundry3 stays at
-600 MHz. From a cool die
+says.</b> This is aifoundry2 alone, in the seven cool-start runs of one morning (21 September; see Caveats). From a cool die
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-measured">the firmware's clock governor runs
 kernels at 800 MHz</a> and 0.62 V; past 65 °C, or 65 W at the board, it steps back down to 600 MHz and 0.52 V. Random fp32,
 at nearly the same die temperature (<span id="vf-T"></span> °C), draws <span id="vf-r8"></span> W over idle at 800 MHz
 against <span id="vf-r6"></span> W at 600 MHz: <b><span id="vf-rr"></span>× the switching power for 1.33× the clock</b>,
 where V²f predicts <span id="vf-pred"></span>×. Ones give <span id="vf-ro"></span>× (<span id="vf-o8"></span> against <span id="vf-o6"></span> W; their two runs'
-800 MHz readings agree to 0.2 W). Both are single highest readings over idle levels that move with the die temperature (the
-600 MHz idle alone by about <span id="vf-slope"></span> W per degree at 64–66 °C), so random data's
-<span id="vf-devr"></span> and ones' <span id="vf-devo"></span> above V²f are as close as these runs can test it. Zeros cannot
-test it: their two runs switch 4.0 and 4.5 W at 800 MHz, and the 600 MHz figure, <span id="vf-z6"></span> W, comes from
+800 MHz readings agree to 0.2 W). Zeros cannot test it: their two runs switch 4.0 and 4.5 W at 800 MHz, and the 600 MHz figure, <span id="vf-z6"></span> W, comes from
 the 80 °C session, since from a cool die zeros barely left 800 MHz. Energy per operation rises about
 <span id="vf-epo"></span>× for 33% more speed.</li>
 <li><b>Idle pays for voltage too:</b> <span id="vf-i8"></span> W at 0.62 V (two half-second stretches) against
@@ -241,18 +233,17 @@ interpolated), and 64 W on random fp32, above it; the curve is chip power at its
 <details class="more"><summary>Leakage and temperature, with the idle law and the thermal budget</summary>
 <h3>Leakage and temperature</h3>
 <ul>
-<li>Idle board power follows \(12.6\,\mathrm{W} + 23.3\,\mathrm{W}\,e^{(T-80\,^\circ\mathrm{C})/36\,^\circ\mathrm{C}}\), to 0.2 W rms
-over one day's idle samples, which lie at 64–67 and 81–88 °C (none between). Its slope, 0.65 W per degree at 80 °C, is well fixed; its split
-is not (20 to 29 W of leakage at 80 °C). The law, its checks and its split are in <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-that-costs">the DVFS
-report, §5</a> and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">the energy manual,
-§1</a>. The three-card check's idle cycles found this card within 0.1 W of it from 68 to 82 °C, aifoundry3 0.7 to 1.8 W above
-it and aifoundry1-c1 7.6 to 13.4 W above it.</li>
+<li>Idle board power follows a law fitted to this card's idle readings: 0.65 W more per degree at 80 °C, with 20 to 29 W of
+the idle at 80 °C in leakage. The law, its checks on three cards and its split are in
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-that-costs">the DVFS report, §5</a> and
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">the energy manual, §1</a>.</li>
 <li>This is the term that keeps the measured card from Esperanto's headline. The minion, SRAM and NoC rails alone read
 22 W with every multiply-add gated, at 80 °C (13.9 W on aifoundry3 at 56 °C). A cooler die and the 0.4 V operating point would both cut it: leakage falls
 exponentially with temperature and steeply with voltage.</li>
-<li>It also makes the card thermally fragile: each degree adds <span id="lg-lam"></span> W at 80 °C, a loop gain of
-<span id="lg-gain"></span> on this card's cooling, which <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">the
-Horace experiment, section 8</a>, turns into a budget of about 3 W of sustained switching in 21 September's room.</li>
+<li>It also makes the card thermally fragile: leakage feeds its own heat back, which leaves a budget of about 3 W of
+sustained switching on this card's cooling
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-model-from-flips-to-temperature">the Horace
+experiment, section 8</a>).</li>
 </ul>
 </details>
 
@@ -278,18 +269,18 @@ power, cost and capacity, and gets bandwidth back by using six chips per card.</
 <li>No A100 was measured here. Its numbers are the datasheet's and Horace He's (one GPU, bf16 8192³ matmul, a 330 W
 limit). Its core voltage is not published; 0.85 V is an assumption, and the table gives the range. Nor is its clock under
 the 330 W cap: 1,410 MHz is an upper bound.</li>
-<li>Everything is board power, which includes LPDDR4x, regulators and PCIe; what the rails do not meter is in
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits of
-observability, section 4.2</a>. Esperanto's 20 W is a chip figure at an operating point this card's firmware does not offer.</li>
+<li>Everything is board power, LPDDR4x, regulators and PCIe included
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits of
+observability, section 4.2</a>).</li>
 <li>The 800 MHz figures come from seven short runs on one morning in which the governor changed the clock within seconds.
 Each is the highest board reading before the governor stepped down; random data held 800 MHz for at most 0.3 s, and the two
-of its three runs that caught a reading there agree to 0.3 W. Board power updates about every 156 ms on this card while the
-sampler runs, and one telemetry sample reads its fields over about 22 ms. They agree with V²f to within about
-<span id="vf-dev2"></span>, and deserve a dedicated run from a cool die (<code>tools/ettelem/run_vf_cold.sh</code> is written
+of its three runs that caught a reading there agree to 0.3 W. Each is a single highest reading over an idle level that moves
+with the die temperature (the 600 MHz idle alone by about <span id="vf-slope"></span> W per degree at 64–66 °C), so random
+data's <span id="vf-devr"></span> and ones' <span id="vf-devo"></span> above V²f are as close as these runs can test it.
+They deserve a dedicated run from a cool die (<code>tools/ettelem/run_vf_cold.sh</code> is written
 for it), which only hours idle in a cool room give (next item). They are also one card's: aifoundry3 stays at 600 MHz (a boot
-service sets its TDP to 0 W; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">the DVFS report, section 3</a>), and
-aifoundry1-c1's governor does not raise its clock: it read 600 MHz throughout the three-card check, although it ran busy
-at 45–65 W and at a die of 64 °C or less in 9,461 samples. So neither repeats this check.</li>
+service sets its TDP to 0 W), and aifoundry1-c1's governor does not raise its clock, even busy on a die of 64 °C or less
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">the DVFS report, section 3</a>).</li>
 <li>The card sits in a desktop chassis: left alone it read 62 °C after the night of 20–21 September and 73 °C after
 20.6 hours on a warmer 22 September (one reading each), and every run here launched at 80 °C. In a server airflow it would
 presumably run cooler and leak less.</li>
@@ -302,12 +293,8 @@ temperatures on each card could not say whether the rest is the card or its temp
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment#a-second-card-and-what-transfers">the Horace
 experiment, section 10</a>; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-the-second-card-says-about-the-model">the DVFS report, section 6</a>),
 so the capacitances here are this card's at 80 °C; where the others ran the same measurement their values are given beside
-them. Every card's registered switching values carry that offset: the loaded power is moved to a fixed reference (80.9 °C;
-55.8 °C for aifoundry3) and the idle is read at the actual launch, whose die temperature the whole-degree reading (80.1, 57.4
-and 80.0 °C on average) gives only to within a degree. The references were taken at launches on a downward step of the
-reading; if these launches were too, aifoundry2's values read 0.15 W low, aifoundry3's 1.43 W low and aifoundry1-c1's 0.05 W
-low, and if the reading is the die temperature, 0.62 W high, 0.91 W low and 0.73 W high. It matters most for the smallest
-values, the integer loop and zeros.</li>
+them. Every card's registered switching values carry that launch-temperature offset; section 3's second table gives its size,
+which matters most for the smallest values, the integer loop and zeros.</li>
 </ul>
 </details>
 
@@ -333,8 +320,7 @@ different leakage slopes, 0.68 W per degree here and 0.81 there.</li>
 Horace experiment from the data kept in the repository. Measurements used
 <code>tools/ettelem</code>, <code>workloads/sparsity</code> and the RTL flip counts of <code>rtl-sim/fma_toggle</code>.</li>
 <li>Data, all in <code>docs/reports/data/2026-09-21-horace-aifoundry2/</code>: <code>ablation.json</code> and
-<code>ablation.txt</code> (every configuration's runs), <code>vf.json</code> (the 600 against 800 MHz operating points, written by <code>tools/ettelem/build_vf.py</code> from the
-cool-start telemetry in <code>cold1/</code> and <code>cold2/</code>; the script states its windows) and
+<code>ablation.txt</code> (every configuration's runs), <code>vf.json</code> (the two operating points, from <code>tools/ettelem/build_vf.py</code>) and
 <code>model.json</code> (the idle law and the flip model). Notes and quotes: <code>docs/research/why-low-power.md</code>,
 written on 20–21 September; where its measured numbers differ, this page supersedes them.</li>
 <li>Firmware: the governor's source was read at et-platform <code>353f20e</code>; the card's own trace strings match an
@@ -347,15 +333,12 @@ and <a href="https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro
 H. He, <a href="https://www.thonking.ai/p/strangely-matrix-multiplications">"Strangely, Matrix Multiplications on GPUs Run Faster When Given 'Predictable' Data!"</a>, 2024.</li>
 <li>Versions. 21 September 2026: first published. 24 September: corrected after review (the card's three operating
 points, the A100's clock under its cap, the fp16 comparison, the thermal budget's dependence on the day). 25 September: the
-800 MHz points rebuilt with stated windows, and the V²f check restated on random data. 25 September (version 3), every claim
-checked against both cards (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">record</a>):
-the leakage headline became the measured slope with the split as a range; this page's energies per byte replaced by the energy
-manual's. 26 September (version 4), the three-card check: its values beside the tested claims, the linearity in active cores
-and the integer loop per card, and post-data note C2's two readings of the launch temperature. 27 September: the review of
-26 September (aifoundry3's clock set by a boot service; "brackets" corrected; the integer loop's floor; the idle law's bins;
-the energy manual's three-card values, including its addi loop and issue-slot costs), a capacitance ladder, and detail folded into sections.
-28 September, after a review of the governor pages: aifoundry1-c1 was not "launched warm" (its governor never raised the
-clock); the idle law's 0.2 W rms is per sample, not over bins; the cards' own firmware build noted.</li>
+V²f check restated on random data; then version 3, every claim checked against both cards (the leakage headline became the
+measured slope with the split as a range; the energies per byte are the energy manual's). 26 September (version 4): the
+three-card check's values beside the tested claims; the linearity in active cores and the integer loop per card. 27 September:
+the review's fixes ("brackets" corrected; the integer loop's floor) and a capacitance ladder. 28 September: aifoundry1-c1's
+governor never raised the clock; later, the review's cuts. What each version changed in full: this page's history in the
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/commits/main/docs/reports/sources/why-low-power.body.html">repository</a>.</li>
 </ul>
 </details>
 

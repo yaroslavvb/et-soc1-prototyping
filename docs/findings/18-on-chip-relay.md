@@ -105,14 +105,21 @@ report, the next shire by ID is 1–10 mesh hops away (3.5 on average), and 2, 4
 | Longest hand-off, hops | 10 | 7 | 8 | 7 | 6 |
 | GB/s, aifoundry2 / aifoundry3 | 593 / 593 | 703 / 703 | 652 / 652 | 686 / 686 | 733 / 727 |
 
-Across the five offsets the bandwidth runs from 593 to 733 GB/s, up to a quarter (1.24×), in the same order on both
-cards. It does not follow the mean distance (1.6 to 4.5 hops; r = −0.32 and −0.30). It falls with the longest
-hand-off in the ring: 10, 8, 7 and 6 hops give 593, 652, 686–703 and 733 GB/s (r = −0.99 on both cards). That is
-what one would expect when every stage waits at a barrier for its slowest shire, but five offsets are a correlation,
-not a test. Transfers are 32 KB per minion and pipelined, yet the mesh distance still shows: the stage time grows
-about 3,200–3,300 cycles for each hop of the longest hand-off. The practical consequence is to **keep the longest
-hand-off short**: in this sweep the ID ring used for the headline, with its 10-hop pair, was the slowest, about a
-fifth below the best offset.
+Across these five offsets (22 September, two cards) the bandwidth runs from 593 to 733 GB/s, up to a quarter
+(1.24×), in the same order on both cards, and falls with the longest hand-off in the ring (r = −0.99 on both cards).
+
+**Version 3 (26 September, all 31 offsets on three cards; the figures to quote, and the page's).** The bandwidth runs
+from 592 to 741 GB/s, and the three cards agree within 0.7% at every offset. It does not follow the mean distance
+(1.6 to 4.7 hops): r = 0.10 against it (the five offsets above had given −0.32 and −0.30). It falls with the longest
+hand-off: 10, 9, 8, 7 and 6 hops give 592–593, 618–631, 648–664, 684–704 and 721–741 GB/s, r = −0.99 on every card
+(Spearman ρ −0.963 against the longest hand-off, permutation p 0 in 100,000 shuffles on aifoundry2 and aifoundry1's
+card 1; E36, LAT-R). That was a prediction: the line fitted on 22 September to the five offsets put the eleven ring
+geometries not tried then within 0.7% of where they landed, on every card, where the registered test allowed 5%.
+Transfers are 32 KB per minion and pipelined, yet the mesh distance still shows: the stage time grows about
+3,200–3,210 cycles for each hop of the longest hand-off (99% interval 3,000–3,410 on every card). The practical
+consequence is to **keep the longest hand-off short**: the ID ring used for the headline, with its 10-hop pair, costs
+20% of the bandwidth of the best offset (21), on every card. An offset and its mirror (d and 32 − d) hand the same
+pairs the slab in opposite directions; they agree within 2.6–2.7%, a little more than the registered 2%.
 
 It does cost energy: on a loaded mesh each hop adds about 1.5–2.2 pJ per byte of random data
 ([20-heat-per-mm.md](20-heat-per-mm.md)), about half of a tensor load of that byte from the shire's own scratchpad
@@ -128,9 +135,11 @@ shire writes another reads with no coherence problem at all. That is the whole m
 The register-to-register path (`TensorSend`/`TensorRecv`) is the more obvious "systolic" choice and it is
 immune to the shire-cache contention in [17-hot-line.md](17-hot-line.md), because it never touches the shire
 cache. It was **not** used here, for a reason recorded in R12: the hardware keeps one partner-ready flag per
-minion rather than one per partner, so a two-dimensional array where a cell receives from both north and west
-**hangs a hart permanently and needs a power cycle**. One-dimensional rings and alternating phases are safe,
-but the relay at shire granularity gets the same benefit over a path that cannot hang.
+minion rather than one per partner, so a minion that takes readies from two partners at once (a cell of a
+two-dimensional array receiving from both north and west) **can hang until the chip is reset**, as read from the RTL
+and seen once, on aifoundry2 (the on-chip communication page's trap). One-dimensional rings, one minion per link, and
+directions taken in barrier-separated phases are safe; the relay at shire granularity gets the same benefit over a
+path with no ready-flag handshake.
 
 ## Things that bit us
 

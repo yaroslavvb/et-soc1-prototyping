@@ -63,17 +63,23 @@ Options, cheapest first:
 
 Measured with `workloads/memhier`. The full write-up, including the A100 comparison, is
 `docs/reports/2026-09-18-et-soc1-memory-hierarchy.html`. Latencies are load-to-use, one dependent chain, at 600 MHz.
-Bandwidths are from the launches that ran at 600 MHz; energies are the energy manual's (§4: 23 September, a pinned
-600 MHz, both cards).
+Bandwidths are from the launches that ran at 600 MHz; energies are the energy manual's (§4: 26 September, a steady
+600 MHz, six passes on each of three cards, E43; `manual.json` `.reruns`). Every latency held to within a cycle on
+aifoundry2, aifoundry3 and aifoundry1's card 1 on 26 September (E36, three passes each).
 
 | Level | Size | Latency | Chip bandwidth at 600 MHz | Energy (card, above idle) |
 |---|---|---|---|---|
-| L1 data cache | **512 B per hart** (firmware sets scratchpad mode) | 5.25 cycles | 6.2 TB/s | 0.77 pJ/B |
+| L1 data cache | **512 B per hart** (firmware sets scratchpad mode) | 5.25 cycles | 6.2 TB/s | 0.75 pJ/B [0.62–0.88] |
 | L2 read buffer | 8 lines x 4 banks = 2 KB | 36 cycles | – | – |
-| L2 | 512 KB per shire, private | 47 cycles | 2.45 TB/s | 2.51 pJ/B |
-| L2 scratchpad, own / another shire's | 2.5 MB per shire | 47 local; 112–220 remote | 2.46 / 0.96 TB/s | 2.52 / 6.65 pJ/B |
-| L3 | 1 MB per shire, 32 MB shared | 159–169 cycles (265–282 ns) | 0.98 TB/s | 10.5 pJ/B |
-| DRAM | 32 GB LPDDR4X | 287–297 cycles, about 490 ns | 76 GB/s | 122 pJ/B [117–129] |
+| L2 | 512 KB per shire, private | 47 cycles | 2.45 TB/s | 3.1 pJ/B [1.4–5.0] |
+| L2 scratchpad, own / another shire's | 2.5 MB per shire | 47 local; 112–220 remote | 2.46 / 0.96 TB/s | 2.3 / 4.4 own, 5.1 / 11.8 another's (full of zeros / of random data) |
+| L3 | 1 MB per shire, 32 MB shared | 159–169 cycles (265–282 ns) | 0.98 TB/s | 14.7 pJ/B [7.1–20.5] |
+| DRAM | 32 GB LPDDR4X | 287–297 cycles, about 490 ns | 76 GB/s | 115 pJ/B [89–141] |
+
+The energy ranges are over every pass on the three cards; the L2 and L3 rows move a lot from pass to pass, and no two
+cards differ beyond that scatter at any level except aifoundry1's card 1's own scratchpad (2.5 / 5.0 against 2.1 / 4.0
+pJ/B). The energy manual of 23 September (E29, two cards)
+had given L1 0.77, L2 2.51, scratchpads 2.52 / 6.65, L3 10.5 and DRAM 122 [117–129] pJ/B.
 
 **Superseded.** The 18 September report first printed bandwidths averaged over launches at 600–800 MHz (L1 7.6,
 L2 2.8, own scratchpad 2.6, L3 1.0, another shire's scratchpad 1.0 TB/s) and energies measured with the clock free
@@ -85,12 +91,16 @@ What this means for kernels:
   gives hart 0 sets 12–13 and hart 1 sets 14–15, and sets 0–11 become the 3 KB tensor scratchpad (PRM table 8.4).
   Hart 1 also pays +3 cycles on every L1 miss.
 - **Stage shared data in the L2 scratchpad.** It is as fast as L2 (47 cycles), it is L1-cacheable, and at a pinned
-  600 MHz it costs the same energy per byte (2.52 against 2.51 pJ/B; the third less once measured was a clock effect). Format 0 addressing: `0x80000000 + (shire << 23) + offset`, where shire `0x7F` means the
+  600 MHz it costs about the same energy per byte: pass by pass, the L2 minus the scratchpad included zero on each of
+  three cards (26 September; the scratchpad full of zeros or random data read 2.1–2.5 and 4.0–5.0 pJ/B, the L2 2.6–3.9;
+  the third less once measured was a clock effect). Format 0 addressing: `0x80000000 + (shire << 23) + offset`, where shire `0x7F` means the
   local shire. Only the master shire's scratchpad is used by the firmware.
 - **A mesh hop costs 20 ns round trip** (12 minion cycles at 600 MHz, 16 at 800), the same in both directions; the
   18 September scratchpad rows that looked asymmetric ran at different clocks (row 0 at 600 MHz, row 31 at 800).
-- **Count on the clock varying.** The card runs a "managed power" DVFS governor (65 W TDP) that moves the minion clock
-  between 600 and 800 MHz (three points: 600, 700, 800) under load. On-chip latencies are fixed in cycles; L3 and DRAM latencies are fixed in ns.
+- **Count on the clock varying, on aifoundry2.** Its firmware's "managed power" DVFS governor (65 W TDP) moves the
+  minion clock between 600 and 800 MHz (three points: 600, 700, 800) on a die below about 65 °C. aifoundry3 is held at
+  600 MHz (a boot service sets a 0 W TDP at every boot, which latches its governor), and aifoundry1's card 1 read
+  600 MHz in every sample since 25 September ([14-card-behaviour.md](findings/14-card-behaviour.md)). On-chip latencies are fixed in cycles; L3 and DRAM latencies are fixed in ns.
   Time with wall clock as well as `hpmcounter3`.
 - **Avoid concurrent PMU reads.** When both harts read `hpmcounter3` at once, one can get a wrong value (erratum 1.23).
 
@@ -163,16 +173,19 @@ Cycles at 600 MHz, load-to-use, one load at a time.
 |---|---|---|
 | L1 hit / L2 hit | 5 / 48 cycles (37 when the line is still in the bank's 8-entry read buffer) | `evict_va` the line to a level, time one load |
 | L3 hit | 110 + 12 x hops(requester, home shire); home = PA[10:6] | 1,500 lines, all within ±4 cycles but 2 |
-| DRAM leg past L3 | 91 + 12 x hops(home shire, memory shire); memory shire = PA[8:6]. Of the 91, about 25 are the DRAM chip (activate 11 + read and burst 14; the rows had closed) and about 66 the memory shire | memory shires 0-3 sit one step off the north edge at x = 1-4, 4-7 off the south edge, in marty1885's logical map (on the die and in the firmware's naming: 0-3 west, 4-7 east); syscall 10's read counters confirm PA[8:6] |
-| Row state | open-row hit saves 11 cycles (tRCD); same bank, other row: +40 cycles; rows = PA[18+], bank PA[12:10], column PA[17:13] | two back-to-back loads, one address bit flipped |
-| Refresh | every 2,325 cycles = 3.88 us; a load caught in it waits up to 210 cycles; it closes the open row | 19,000 DRAM loads at random phases |
-| Energy per load (8-byte ld; a 64 B line moved below L1), above idle | L1 46 pJ, L2 183, L3 local 541, +59 per hop, DRAM 5.1 nJ (67% off the metered rails, mostly DDR; 18% mesh); superseded for DRAM by the energy manual's 122 pJ/B, 7.8 nJ per 64 B line | 1,024 minions; minion/SRAM/NoC rails from the service processor's stats trace, whose rise above idle is 14–20% smaller than the host log's |
+| DRAM leg past L3 | 91 + 12 x hops(home shire, memory shire); memory shire = PA[8:6]. Of the 91, about 28 are the DRAM chip (activate 11, the 19.3 ns read latency and two BL16 bursts, 17 cycles together; the rows had closed) and at most ~63 the memory shire. On three cards (26 Sep) the constant reads 90-91 and the slope 11.99 | memory shires 0-3 sit one step off the north edge at x = 1-4, 4-7 off the south edge, in marty1885's logical map (on the die and in the firmware's naming: 0-3 west, 4-7 east); syscall 10's read counters confirm PA[8:6] |
+| Row state | open-row hit saves 11 cycles (tRCD); same bank, other row: +38 cycles (36.5-37.4 on three cards); rows = PA[18+], bank PA[12:10], column PA[17:13] | two back-to-back loads, one address bit flipped |
+| Refresh | every 2,325 cycles = 3.88 us; a load caught in it waits up to 208 cycles (208-209 on three cards); it closes the open row | 19,000 DRAM loads at random phases |
+| Energy per load (8-byte ld; a 64 B line moved below L1), above idle | L1 46 pJ, L2 183, L3 local 541, +59 per hop, DRAM 5.1 nJ (67% off the metered rails, mostly DDR; 18% mesh); superseded for DRAM by the energy manual's 115 pJ/B on three cards (E43), 7.3 nJ per 64 B line, with 68-70% of a DRAM tensor load off the metered rails | 1,024 minions; minion/SRAM/NoC rails from the service processor's stats trace, whose rise above idle is 14–20% smaller than the host log's |
 
 Things to know when measuring:
 - **`hpmcounter3` reads 128 short when its low 7 bits are 0-10.** The carry into bit 7 lands 11 cycles late: the PMU's 12
   counters share one adder that folds 7-bit pre-counter overflows into the post-counters round-robin, and reads ignore the
   pending overflow (`rtl-sim/pmu_carry` reproduces it from the original RTL). Add 128
   (`fixcyc()` in `workloads/memprobe/kernel/memprobe.c`); the firmware's four-reads workaround does not fix it. The
+  window is not fixed: on three cards (26 Sep) no single window fitted every pair in 11 of 15 launches, and about 1
+  timed interval in 70 (0-5% per launch) was still +-128 off after the correction, so drop those or take the median of
+  repeated loads. The
   `cycle` CSR traps in U-mode.
 - **`evict_va` is asynchronous.** Fence and wait a few hundred cycles before timing. Level codes name where the line is
   left (1 L2, 2 L3, 3 memory; 0 does nothing). Evicts from many minions serialise in the shire cache.
@@ -203,7 +216,11 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
   is 0.95 at 80 °C and passes one at 82 °C. From an 80 °C start random fp32 data reaches 90 °C in 19 to 26 s, ones in 107 to 167 s,
   random data on 256 of 1,024 cores in about 5 minutes; zeros cool. `tools/ettelem/flip_thermal_model.py` fits all of this and
   `tools/ettelem/predict_heat.py` applies it to custom operand tiles. Held-out runs (`validate_flip_model.py`): time to 90 °C within
-  9% in the median, 23% at worst on later runs of the same session (7% and 65% on a different afternoon); ten-minute end temperatures 3 to 5 °C hot, because the stages beyond a minute are poorly pinned down.
+  9% in the median, 23% at worst on later runs of the same session (7% and 65% in a separate session that afternoon);
+  ten-minute end temperatures 3.6 to 5.2 °C hot on the four runs near the flip budget (zeros +0.7 °C), because the
+  stages beyond a minute are poorly pinned down. All of it is aifoundry2's: on three cards the flip energies carried
+  over up to one scale per card, the idle law did not (aifoundry1's card 1 idles 7.6 to 13.4 W above it), and no
+  other card's cooling over minutes was measured.
 - **The clock governor reads a power meter, not activity counters,** and its temperature test has no dead band,
   so from a cool die it hunts across the 65 °C threshold (the clock changed 7 times in 2.4 s of one run). In the
   et-platform source at `353f20e` the ±5% power-guardband macros in `thermal_pwr_mgmt.c` are defined and never used;
@@ -252,7 +269,9 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
 | Host over PCIe Gen4 x8 | not measured (15.75 GB/s) | (624 / 1,248 / 4,993) |
 
 - One full TensorFMA loads 2 KB (A + B) for 8,192 fp32 FLOP: 4 FLOP/B, exactly the own-shire ridge for fp32 and fp16 and
-  half of it for int8. The matmul benchmark's 97% / 91% used one shared 32 KB tile pool, so private tiles are unproven.
+  half of it for int8. The matmul benchmark's 97% / 91% used one shared 32 KB tile pool; with private tiles in each
+  shire the same loop ran fp32 and fp16 at 529 cycles per op on all three cards, as fast as shared (26 Sep, E37), and
+  int8 drew 4.0 B per cycle (512 cycles per op), on the own-shire line.
 - A C block held while K streams has intensity H/e (H = harmonic mean of its sides, e = bytes per element). A shire's 32
   register tiles (64x128, H = 85) clear the L3 ridge; from DRAM a block needs H of about 520 (fp32, fp16) or 1,040
   (int8), and the chip's 1,024 register tiles (512x512) fall just short.

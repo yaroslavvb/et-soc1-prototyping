@@ -734,10 +734,10 @@ aifoundry1's card 1 in the three-card check, 223–322 ms on aifoundry3, slower 
 energy number is an average over billions of identical loads.</p>
 
 <p class="small card"><b>Checked on three cards (26 September 2026).</b> This page's measurements are from one card,
-aifoundry2, most of them from one launch of each probe on 19 September. On 26 September 66 of its claims were
+aifoundry2, most of them from one launch of each probe on 19 September. On 26 September its claims were
 re-measured under a pre-registered plan, five passes of every latency probe on each of aifoundry2, aifoundry3 and
-aifoundry1's card 1: 49 held on all three cards, 11 were corrected, 5 differ by card
-and 1 could not be confirmed (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">the record</a>).
+aifoundry1's card 1 (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">the record</a>).
+<span class="v3-counts" data-v3-counts="et-soc1-memory-anatomy">Of 66 claims tested here, this page counts 49 held, 11 corrected, 5 differ by card and 1 not confirmed; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#claims-cap">hub’s scoreboard</a>, 22 “proven on the cards”, 35 “a test behind it failed”, 8 “differs by card” and 1 “fewer than three repeats”.</span>
 The charts in §2–4 put each card's latencies beside the 19 September session's. The registered test of the row-state
 claims in §5 read one series without the later build's 7-cycle timer offset and failed; re-referenced to each pass's
 own L1 hit, as everything else here is, those claims hold on every card (§5).</p>
@@ -745,7 +745,8 @@ own L1 hit, as everything else here is, those claims hold on every card (§5).</
 <p class="small card"><b>Later energy measurements.</b> The energies in §6 are superseded by later
 measurements on three cards, with zeros and with random data: the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual</a>
 (§4) and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a>. The manual puts a
-DRAM read at 115 pJ per byte, against 79 in this page's two runs per pattern, and on random data both
+DRAM read at 115 pJ per byte [89–141; 95 on zeros, 133 on random
+data], against 79 in this page's two runs per pattern (92 on the host log, §6), and on random data both
 put a mesh hop at about twice this page's 0.9 pJ per byte (1.7–1.9 pJ/B per hop in the manual's wire fit,
 card by card).</p>
 </details>
@@ -867,10 +868,9 @@ and at least one refresh earlier): 115 of 128 land within ±6 cycles of the §4 
 (110–122 per pass on the three cards), and the rest are slower.</p>
 </details>
 <details class="more"><summary>Cross-check against the pointer-chase report</summary>
-<p>The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy report</a>'s pointer
-chase agrees: its DRAM chases took 287–297 cycles (479–495 ns) at 600 MHz on the same card the day before, and
-287–297 again on three cards on 26 September. Every load on this page, and every pass of the three-card check, ran at
-a steady 600 MHz (the refresh period in §5, 2,325 cycles in every pass, matches the DRAM's refresh interval only at
+<p>The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">memory-hierarchy report</a>'s DRAM
+chases agree: 287–297 cycles at 600 MHz, on this card the day before and on three cards on 26 September. Every load
+here ran at a steady 600 MHz (§5's refresh period, 2,325 cycles in every pass, fits the DRAM's refresh interval only at
 that clock).</p>
 </details>
 
@@ -1121,11 +1121,7 @@ sequential pattern probably re-activates rows on almost every access too.</li>
 <li>The host's board-power log reads 14–25% higher than the trace in every one of the 12 runs,
 from the edges of each window: the trace is the power-management controller's running average (τ ≈ 1.13 s on aifoundry2, 1.24 s on aifoundry3 and 1.15 s on aifoundry1's card 1;
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">hub §4.1</a>), so its baseline
-reads high and its run average low. The table gives both; the split uses the trace so the parts add up. For DRAM use
-the energy manual (the note at the top): 115 pJ/B [89–141], 95 on zeros
-and 133 on random data, against 79 here on the trace and 92 on the host log. For a
-mesh hop use <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a>, not this page's
-~0.9 pJ/B.</li>
+reads high and its run average low. The table gives both; the split uses the trace so the parts add up.</li>
 </details>
 </ul>
 
@@ -1175,10 +1171,8 @@ table lists every instrument that turned out to work, at its finest granularity,
 <h2 id="what-would-split-it-further">9. What would split it further</h2>
 <details class="more"><summary>Ideas for going further</summary>
 <ul>
-<li><b>Clock domains.</b> Set the minion and NoC clocks separately (<code>DM_CMD_SET_FREQUENCY -f minion,noc</code>,
-with DVFS off) and rerun §3–4. Each stage's cycles then split into minion-clock, NoC-clock and fixed-time parts: so
-far only the 110-cycle L3 constant is split (§3), and the memory shire's 91 cycles (at most ~63 its own) not at all.
-It changes a shared card's state, so it waits for approval and a quiet card.</li>
+<li><b>Clock domains.</b> Rerunning §3–4 with the minion and NoC clocks set apart would split each stage's cycles by
+clock (so far only the L3's 110 is split, §3); it changes a shared card's state, so it waits for approval.</li>
 <li><b>Static against dynamic energy.</b> The same frequency sweep at fixed voltage gives each rail's
 C·V²·f slope. The <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">DVFS report</a> has since
 approached static power another way, with a law for idle power in temperature fitted on this card: idle power rises
@@ -1244,7 +1238,7 @@ a slope and a range. 26 September (version 4): the latencies re-checked on three
 row conflict (about +38 cycles, not +40) and the evict ladder's open-row split corrected; the board-power period given
 per card; the energy manual's figures (the note on energy, the DRAM figure at the top, §6 and the energy chart) are
 its version-3 values from three cards. The record is
-<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>. 27 September: the DRAM chip's share of a load is about 28 cycles (a 64-byte line is two bursts; was 25–28) and the memory shire's at most ~63; the explorer's row-conflict and refresh waits are the three-card values (38 and 208 cycles, were 40 and 210); the memory-shire leg charted per card; detail folded into collapsible sections. 27 September, later: why every fourth load of the locked loop is slow, charted with a model that takes four numbers from the refresh series (the slow load's extra time is the refresh period minus four open turns, within a cycle in every series; the page had said that none of this session's slow loads landed inside the refresh); the bit chart's row-conflict label reads the measured +38.5 cycles (was rounded to +40); the no-fence loads' median excess over the §4 model is 60 cycles (was 58); the board value's refresh in the three-card check includes its 20 Hz sampler (126–189 and 223–322 ms; was 126–159 and 223–264). 28 September: a link to the companion page, Anatomy of a memory access, interactively, under the title, and from §2–§6 and §9 to its diagram of each level and to the hub's asks.</p>
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>. 27 September: the DRAM chip's share of a load is about 28 cycles (a 64-byte line is two bursts; was 25–28) and the memory shire's at most ~63; the explorer's row-conflict and refresh waits are the three-card values (38 and 208 cycles, were 40 and 210); the memory-shire leg charted per card; detail folded into collapsible sections. 27 September, later: why every fourth load of the locked loop is slow, charted with a model that takes four numbers from the refresh series (the slow load's extra time is the refresh period minus four open turns, within a cycle in every series; the page had said that none of this session's slow loads landed inside the refresh); the bit chart's row-conflict label reads the measured +38.5 cycles (was rounded to +40); the no-fence loads' median excess over the §4 model is 60 cycles (was 58); the board value's refresh in the three-card check includes its 20 Hz sampler (126–189 and 223–322 ms; was 126–159 and 223–264). 28 September: a link to the companion page, Anatomy of a memory access, interactively, under the title, and from §2–§6 and §9 to its diagram of each level and to the hub's asks Later that day, the review's cuts (§6's host-log note, §9's clock-domain idea, §2's cross-check; the DRAM figures said once, in the energy note at the top); the note's counts given by both rules.</p>
 </details>
 
 <h2 id="related">Related reports</h2>

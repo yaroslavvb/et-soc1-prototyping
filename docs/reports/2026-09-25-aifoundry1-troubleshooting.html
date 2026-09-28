@@ -151,7 +151,7 @@ details.more[open]>summary{margin-bottom:6px}
 scatters after it; card 0 overheats under load (98–102&nbsp;°C in short smoke launches, 115–117&nbsp;°C idle afterwards) and
 takes no sustained work.</p>
 <p class="byline">25 September 2026 · an answer to Roman’s question “Can someone try to see exactly what is broken on 1?” · read-only checks on aifoundry1, 2 and 3; no card was opened</p>
-<p class="lede">The cards are refused by software, not by hardware. Both ET-SoC-1 cards in aifoundry1 are on the bus, bound to the ET driver, and have their device nodes, which the driver creates only after each card’s firmware reports ready. What fails is a version check. The <code>et_soc1</code> kernel module that DKMS builds on aifoundry1 has an <strong>empty version string</strong>: <code>/sys/module/et_soc1/version</code> holds only a newline, where aifoundry2 and aifoundry3 read <code>0.20.0</code>. Every ET program (<code>dev_mngt_service</code>, <code>et-powertop</code>, programs built on the runtime, our tools) contains et-platform’s deviceLayer, which opens <code>/dev/etN_mgmt</code>, reads that version, finds no x.y.z and throws <code>Error unable to evaluate compatibility!</code> before a single command reaches the card. The version is empty because aifoundry1’s DKMS source, <code>/usr/src/et-soc1-0.20.0</code>, holds an exact copy of the driver files of et-platform commit <code>09531e5c1</code> (21 October 2025), whose Makefile has a one-character typo, <code>$(ET_MODULE_VERSION=)</code>. Upstream fixed it five days later in <code>78ed9b0d6</code>, and aifoundry2 and aifoundry3 build from the fixed tree. DKMS has rebuilt the broken module for every new kernel since, including <code>7.0.0-34</code>, installed on 24 September, so a reboot will not help, whichever kernel it boots. The fix needs root and takes a few minutes: point DKMS at the fixed source that is already on the machine (<code>/usr/src/et-platform</code>, commit <code>353f20e</code>) and reload the module. We are highly confident in this cause. Rebuilding both modules from source reproduces their version and <code>srcversion</code>, and the installed aifoundry1 and aifoundry2 modules have identical code and data: they differ only in the module-info strings, the build ID, symbol offsets and each host’s signature. What we cannot know until the fix is in is which firmware the cards run and whether they answer, because no command has reached either card this boot.</p>
+<p class="lede">The cards are refused by software, not by hardware. Both ET-SoC-1 cards in aifoundry1 are on the bus, bound to the ET driver, and have their device nodes. What fails is a version check: the <code>et_soc1</code> kernel module that DKMS builds on aifoundry1 has an <strong>empty version string</strong> (<code>/sys/module/et_soc1/version</code> holds only a newline, where aifoundry2 and aifoundry3 read <code>0.20.0</code>), so et-platform’s deviceLayer, inside every ET program, throws <code>Error unable to evaluate compatibility!</code> before a single command reaches a card. The cause is a one-character Makefile typo, <code>$(ET_MODULE_VERSION=)</code>, in the stale driver copy DKMS builds from (<a href="#3-evidence">section 3</a>), so a reboot will not help. What we cannot know until the fix is in is which firmware the cards run and whether they answer.</p>
 
 <div class="card">
 <dl class="glance">
@@ -173,6 +173,7 @@ takes no sustained work.</p>
 <h2 id="1-the-fix-needs-root-on-aifoundry1">1. The fix (needs root on aifoundry1)</h2>
 <p>This rebuilds only the <code>et_soc1</code> kernel module. Leave <code>/opt/et</code> alone: <code>libDM.so</code> and <code>dev_mngt_service</code> are byte-identical to the working machines. Run everything in one root shell (<code>sudo -i</code>), because later steps use the backup directory <code>$B</code> set in step 2. Keep steps 3 to 5 together: between them no <code>et-soc1</code> module is on disk, so do not reboot in the middle.</p>
 
+<details class="more"><summary>The seven steps, with their commands</summary>
 <ol class="steps">
 <li><b>Check that nobody is using the cards, and pause CI.</b>
 <p>Another user has been logged in since 18 September but holds no card: the module’s reference count is 0. The GitHub Actions runner for <code>aifoundry1-et-soc1</code> runs as root; once the cards open, its jobs will be able to use them.</p>
@@ -233,6 +234,7 @@ ls -l /dev/et*                                  # four nodes, crw-rw-rw-</code><
 systemctl start actions.runner.nekkoai-hf-hackathon.aifoundry1-et-soc1.service</code></pre></div>
 </li>
 </ol>
+</details>
 
 <details class="more"><summary>Rollback</summary>
 <h3>Rollback</h3>

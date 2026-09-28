@@ -62,6 +62,7 @@ import json
 import os
 import re
 import statistics
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -877,7 +878,12 @@ def main():
                 sys.exit(f"{os.path.relpath(a.hub, ROOT)}: reports[{slug}].v3_note counts {got} claims; the campaign tested {want} there")
     if a.check:
         if out == text:
-            print(f"{os.path.relpath(a.hub, ROOT)}: up to date" + ("" if set(only) == set(BLOCKS) else f" ({', '.join(only)})"))
+            print(f"{os.path.relpath(a.hub, ROOT)}: up to date" + ("" if set(only) == set(BLOCKS) else f" ({', '.join(only)})"), flush=True)
+            # the pages' "Checked on three cards" notes carry counts from this file (v3_counts.py): stale notes fail too
+            rc = subprocess.run([sys.executable, os.path.join(ROOT, "tools/ettelem/v3_counts.py"), "--check",
+                                 "--hub", a.hub]).returncode
+            if rc:
+                sys.exit("  the page notes' counts are stale: run python3 tools/ettelem/v3_counts.py, then rebuild those pages")
             return
         stale = [f"power.{k}" for k in new["power"] if new["power"].get(k) != hub.get("power", {}).get(k)]
         stale += [k for k in ("energy_events", "claims_status", "carry", "pcie") if new.get(k) != hub.get(k)]
@@ -901,6 +907,7 @@ def main():
     if "claims_status" in only:
         msg.append("claims status for " + ", ".join(f"{len(s['pages'])} pages ({s['id']})" for s in new["claims_status"]["series"]))
     print(f"wrote {os.path.relpath(a.hub, ROOT)}: " + "; ".join(msg))
+    print("next: python3 tools/ettelem/v3_counts.py (the page notes' counts), then the page builds")
 
 
 if __name__ == "__main__":

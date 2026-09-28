@@ -186,9 +186,9 @@ details.more[open] > summary { margin-bottom: 6px; }
 <h1>The Horace experiment: the same matmul draws 38 to 63 W depending on the data</h1>
 <p class="byline">20–22 September 2026, checked on three cards on 26 September · aifoundry2 (sections 1–9); aifoundry3 and card 1 of aifoundry1 (aifoundry1-c1) in section 10 and beside the claims the check re-measured · fp32 TensorFMA on all 1,024 minions · <code>workloads/sparsity</code>, <code>tools/ettelem</code>, <code>rtl-sim/fma_toggle</code> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
-<div class="card" style="margin:18px 0 8px"><b>Checked on three cards (26 September 2026).</b> 39 of this page's claims were
-re-measured under a pre-registered plan on aifoundry2, aifoundry3 and aifoundry1-c1 (four runs of each pattern per card): 12 held,
-22 were corrected or narrowed, 2 differ by card and 3 could not be confirmed. The pattern-to-pattern steps held on aifoundry2 and aifoundry3 and read the same on aifoundry1-c1;
+<div class="card" style="margin:18px 0 8px"><b>Checked on three cards (26 September 2026).</b> This page's claims were
+re-measured under a pre-registered plan on aifoundry2, aifoundry3 and aifoundry1-c1 (four runs of each pattern per card).
+<span class="v3-counts" data-v3-counts="et-soc1-horace-experiment">Of 39 claims tested here: 12 held, 22 corrected or narrowed, 2 differ by card and 3 not confirmed, as the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#claims-cap">hub’s scoreboard</a> counts them.</span> The pattern-to-pattern steps held on aifoundry2 and aifoundry3 and read the same on aifoundry1-c1;
 the flip model's out-of-sample error on the check's patterns is 0.9 to 1.0 W rather than 0.5 W, and a test at two launch
 temperatures could not say whether aifoundry3's lower switching power is the card or its cooler die (section 10). Most of
 that deficit, 10% as registered, comes from the reduction's fixed reference temperature: at the same die temperature
@@ -201,39 +201,30 @@ earlier sessions' numbers stay, labelled as theirs (<a href="https://github.com/
 predictable data flips fewer transistors, draws less power, and a power-limited GPU then clocks higher. On this chip the
 whole chain can be taken apart, because the RTL (the Verilog source) of its core family's multiply-add unit is open. At the
 same clock and the same 9.2 TFLOPS, a matmul on aifoundry2's card draws <b>38 W on zeros, 47 W on ones and 63 W on random
-values</b> (aifoundry3's card, launched 25 °C cooler, draws 27, 35 and 50 W, in the same order). It heats the die roughly in
+values</b> (the other cards' watts are in the figures below). It heats the die roughly in
 proportion to the watts above idle (12 and 30 W): <b>27 and 76 thousandths of a degree per trillion FLOPs</b> on ones and
-random values (21 and 70 on aifoundry3), with random data heating 8 to 26% more per watt than ones. On zeros (2 W above idle
-on both cards in the sessions of 20–22 September; 0.8 to 1.9 W on the three cards on 26 September) the whole-degree reading moves by at most one step during a run, so the rise is not resolved: below about
-1 °C (0.1 to 0.3 °C by the recovered curve and the thermal network). It follows the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparse compute
-report</a>, whose first two runs, on aifoundry3, found that zeros save most of the tensor unit's power but no cycles (re-measured on
-three cards on 26 September: 86, 93 and 92% of the power above idle saved on aifoundry2, aifoundry3 and aifoundry1-c1, at the
-same cycles per op).</p>
+random values. Zeros, 2 W above idle, move the whole-degree reading by at most one step, so their rise is not resolved
+(<a href="#same-flops-different-heat">section 1</a>). It follows the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">sparse compute
+report</a>, whose first two runs, on aifoundry3, found that zeros save most of the tensor unit's power but no cycles.</p>
 
 <p class="lede">Simulating that RTL (core-et's Erbium branch: the same Minion core lineage in a later configuration, not the
 taped-out netlist) on the operands the card ran explains the watts: register bits clocked and nets toggled predict the board
 power of 14 patterns to <b>0.5 W rms</b> in aifoundry2's session of 21 September, each predicted by a fit that left it out
-(refitted on each card's runs of 26 September, whose 14 patterns include six structured matrices: 0.9 to 1.0 W rms, the DFT
-pair worst); six of them had been predicted from the
-previous day's data before they first ran in the session of 21 September, to 1.3 W rms. A thermal network fitted to the
+(0.9 to 1.0 W on each card's patterns of 26 September). A thermal network fitted to the
 same session then turns watts into the temperature curve to about <b>0.3 °C</b> rms, which is what the sensor's rounding to
-whole degrees alone would leave (two stages on aifoundry2; aifoundry3's own network reaches the same floor with more).
+whole degrees alone would leave.
 Horace's speed effect itself needs a die cool enough for the governor to raise the clock; section 6 shows it in a
-demonstration of seven runs on aifoundry2, whose TDP setting lets the clock rise (a boot service sets aifoundry3's to 0 W).</p>
+demonstration of seven runs on aifoundry2, the only card measured here whose governor raised the clock.</p>
 
 <p class="lede"><b>Run for minutes instead of seconds, only zeros hold a steady temperature at full load</b> (aifoundry2, one
 four-hour session): random data takes the die from 80 to 90 °C in 19 to 26 s (four runs), ones in about two minutes (three
 runs). A three-line model (flip rates to watts, leakage that grows with temperature, a thermal network) predicts those times
-from the flip counts. On the twelve later runs of that session, which it was not fitted to, the time to 90 °C is off by 9% in
-the median and 23% at worst (the seven runs that reached it); at ten minutes it runs 3.6 to 5.2 °C hot on workloads near the card's flip budget. It priced 14 structured matrices, from Hadamard
-to kaleidoscope, to 0.9 W rms before they ran (aifoundry2, two runs each; section 9 gives the three-card re-run of six). On two
-more cards the power model needs at most one factor: 0.99 on aifoundry1-c1, which launches at aifoundry2's 80 °C, and 0.88 on
-aifoundry3 (0.92 in its first session), whose runs launch at 57 °C; a calibration on random data recovers it. Those factors
-are the check's registered reduction, which moves each run's power to a fixed reference temperature but reads its idle at
-the actual launch. At each run's own launch temperature (post-data note C2) they are 0.99, 0.95 and 1.00 on aifoundry2,
-aifoundry3 and aifoundry1-c1 if the launches came on a downward step of the whole-degree die reading, as the references'
-did, and 0.96, 0.93 and 0.96 if the reading is the die temperature; the reading cannot tell which. A test at two launch temperatures on each card could not say whether aifoundry3's
-factor is the card or its cooler die. The thermal network is aifoundry2's alone: no other card's cooling over minutes was measured.</p>
+from the flip counts, on runs it was not fitted to, to within a quarter; at ten minutes it runs a few degrees hot near the
+card's flip budget. It priced 14 structured matrices, from Hadamard to kaleidoscope, before they ran. On two more cards the
+power model needs at most one scale factor, which a random-data run calibrates: 0.88 to 0.99 as registered, 0.93 to 1.00 at
+the same die temperature; whether aifoundry3's is the card or its cooler die the check could not say
+(<a href="#a-second-card-and-what-transfers">section 10</a>). The thermal network is aifoundry2's alone: no other card's
+cooling over minutes was measured.</p>
 
 <div class="kpis" id="kpis"></div>
 
@@ -318,7 +309,7 @@ pattern runs, measured from the drift of power within the hot 7 s runs (82–86 
 1.1 [1.0, 1.2] on aifoundry1-c1 and 0.6 [0.5, 0.7] on aifoundry3); the idle law's slope is 0.65 W/°C at
 80 °C (<a href="#a-model-from-flips-to-temperature">section 8</a>). And on aifoundry2 the firmware's clock governor has a
 65 °C threshold: below it a busy card is clocked up to 800 MHz at 0.62 V, above it the card is held at 600 MHz and 0.52 V
-(<a href="#the-speed-effect-appears-on-a-cool-die">section 6</a>; aifoundry3 stays at 600 MHz, <a href="#a-second-card-and-what-transfers">section 10</a>). So every run starts from the same thermal state, well above
+(<a href="#the-speed-effect-appears-on-a-cool-die">section 6</a>). So every run starts from the same thermal state, well above
 that threshold:</p>
 <details class="more"><summary>The protocol steps, the checks, and the sensor's quantisation</summary>
 <ol>
@@ -458,9 +449,9 @@ simulated die has gained: leakage, measured from the drift of power within the h
 than a degree, this thermal estimate agrees with the electrical one to <span id="hot-rms"></span> W rms, with a slope of
 <span id="hot-slope"></span> between them (on aifoundry3, with its own network, 2.6 W rms and a slope of 0.93, the thermal
 estimate reading about a tenth low): <b>the temperature rise is roughly proportional to the power, and the power follows the
-counted flips.</b> Roughly, because random data heat 8% (aifoundry2) and 26% (aifoundry3) more per board watt than ones
-(<a href="#same-flops-different-heat">section 1</a>). The three coolest patterns (2 to 5 W over idle) are left out: the
-sensor does not resolve their rise (section 1's table).</p>
+counted flips.</b> Roughly: random data heat more per board watt than ones
+(<a href="#same-flops-different-heat">section 1</a>). The three coolest patterns, whose rise the sensor does not resolve, are
+left out.</p>
 </details>
 
 <h2 id="where-the-model-is-off-and-why">5. Where the model is off, and why</h2>
@@ -468,46 +459,42 @@ sensor does not resolve their rise (section 1's table).</p>
 <li><b>Most of the power is not flips of this computation.</b> Of random normal's 63.4 W, 38.6 W is the model's constant:
 what the card draws at 80 °C with every multiply-add gated (each card's refit of 26 September puts it at 38.3 W on aifoundry2,
 51.3 W on aifoundry1-c1 at the same temperature and 26.6 W on aifoundry3 at 55.8 °C). Idle is 36.3 W of it: leakage, always-on clocks, DDR, PCIe and regulator losses. The other
-2 W is what a fully gated tensor op costs (on 26 September 1.9 W on aifoundry2, 1.2 W on aifoundry1-c1 and 0.8 W on
-aifoundry3 as registered; 1.1–1.9, 0.4–1.2 and 1.7–2.2 W at each run's own launch temperature, over the two readings of
-post-data note C2, section 10); by the RTL, it is the 1,024 tensor state machines stepping through
-gated micro-ops.</li>
-<li><b>Register clocking is switching that the data does not control,</b> except by being zero. A constant costs 8.4 W over
-zeros with almost no net toggles. "Proportional to flips" holds only once clock edges delivered to registers count as flips.</li>
+2 W is what a fully gated tensor op costs (the zeros of <a href="#from-flips-to-watts">section 3</a>); by the RTL, it is
+the 1,024 tensor state machines stepping through gated micro-ops.</li>
+<li><b>Register clocking is switching that the data does not control,</b> except by being zero (section 3's constant).
+"Proportional to flips" holds only once clock edges delivered to registers count as flips.</li>
 <li><b>A counted toggle is not a fixed charge.</b> The fitted energies differ 25-fold between the multiplier tree and the
-rest of the unit (16- to 17-fold in each card's refit of 26 September). RTL net counts stand in for capacitance only within blocks of similar structure; a netlist with extracted
+rest of the unit. RTL net counts stand in for capacitance only within blocks of similar structure; a netlist with extracted
 capacitances would replace three fitted numbers with none. The zero-delay simulation also has no glitches. Real carry-save
 trees glitch, more so on random data, and the fitted energies absorb the average.</li>
 <li><b>Leakage feeds back.</b> On aifoundry2 (21 September) random normal reads 65.8 W in seconds 1 to 3 and 68.0 W in the last two seconds of the same
 run: +<span id="lf-dP"></span> W as its own heating lifts the reading another <span id="lf-dT"></span> °C between those
 windows (<span id="lf-all"></span> °C over the whole run). The model's watts are at the launch temperature, and the chain adds 0.81 W per simulated
 degree. Without that term it would under-predict the hot patterns' rise by about a tenth.</li>
-<li><b>The sensor.</b> One whole-degree number stands for the mean of 34 sensors. The thermal fit's residual is the rounding.
-The launch temperature is known to a few tenths of a degree in absolute terms, the same for every run, which matters only
+<li><b>The sensor.</b> One whole-degree number stands for the mean of 34 sensors. The launch temperature is known to a few tenths of a degree in absolute terms, the same for every run, which matters only
 for the three coolest patterns. The hot spots are the multiply-add units, not the sensors, so the junctions that leak are
 presumably hotter than the reading. The sensors' peak-hold high puts the hottest of the 34 at 2–4 °C above their mean at
 each rise (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">the spatial brief</a>), but
 nothing on the card measures a junction inside a shire.</li>
-<li><b>Board power is not die power.</b> About 7 of random normal's 30 W over zeros are on no rail sensor (4.9 of 26 W on
-aifoundry3). By the later
+<li><b>Board power is not die power.</b> Of the 7 W of random normal's excess that is on no rail sensor (section 1), by the later
 attribution (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits
 of observability, §4.2</a>) about 4.4 W of that is consistent with regulator delivery loss, which would never reach the die, and the rest is
 not attributed. The network was fitted to board power, so it absorbs whatever does not heat the die as fewer °C per W. It
 would not transfer to a workload that loads a different rail.</li>
-<li><b>What is left,</b> on aifoundry2. Power: 0.5 W rms out of sample, 0.9 W at worst (0.9 to 1.0 W rms on the check's patterns of
-26 September, <a href="#from-flips-to-watts">section 3</a>). Rise: 0.33 °C rms from the RTL alone
+<li><b>What is left,</b> on aifoundry2. Power: 0.5 W rms out of sample, 0.9 W at worst
+(<a href="#from-flips-to-watts">section 3</a>). Rise: 0.33 °C rms from the RTL alone
 against 0.30 °C from the measured power, both fit residuals of this session (aifoundry3, with its own refit and network: 0.35
 against 0.32 °C). So almost all of the temperature error belongs to the thermal step and the sensor, not to the flips.</li>
 </ol>
 
 <h2 id="the-speed-effect-appears-on-a-cool-die">6. The speed effect on a cool die: a demonstration</h2>
 <p>This section is one card, aifoundry2, and seven runs on the morning of 21 September: two of zeros, two of ones and three
-of random normal, in two short sessions; aifoundry3 cannot repeat it (below). On aifoundry2 the firmware's governor
+of random normal, in two short sessions. On aifoundry2 the firmware's governor
 steps the clock down while the whole-degree die reading is above 65 °C or board power is above
 65 W (its TDP setting, the board power limit), so it holds 600 MHz at 0.52 V on a hot die and lifts a cooler busy card to 700–800 MHz
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-loop-as-built">The DVFS loop and its leakage, §1–§2</a>).
 Every run on 20 September started above 72 °C, so the thermal test held 600 MHz throughout, even at 70 W. After the night of
-20–21 September idle the die read 62 °C (one reading), and the same kernels behaved differently:</p>
+20–21 September idle the die read 62 °C, and the same kernels behaved differently:</p>
 <div class="chart-title">Minion clock during 7 s runs started from a cool die (62–64 °C): aifoundry2, seven runs on 21 September</div>
 <div class="chart" id="cold"></div>
 <details class="more"><summary>The seven runs, as a table and in words</summary>
@@ -528,8 +515,8 @@ then allows a higher clock. Here the limit that bites first is thermal rather th
 that starts below 65 °C. A card that has been busy idles above that (72 °C on 20 September; the runs of
 <a href="#same-flops-different-heat">section 1</a> were held at 80 °C), runs everything at 600 MHz, and shows the effect
 as heat instead of speed. Nor are the seven runs a controlled experiment: their start temperatures differ
-by up to 2 °C, and a die that has just run does not return to 62 °C for hours. aifoundry3 cannot show the effect at all: it
-stays at 600 MHz (<a href="#a-second-card-and-what-transfers">section 10</a>). Nor can aifoundry1-c1, although it has aifoundry2's governor settings (65 W,
+by up to 2 °C, and a die that has just run does not return to 62 °C for hours. aifoundry3 cannot show the effect at all
+(its clock is pinned: <a href="#a-second-card-and-what-transfers">section 10</a>). Nor can aifoundry1-c1, although it has aifoundry2's governor settings (65 W,
 65 °C): its governor does not raise the clock. The three-card check ran it cool, busy and under 65 W in 9,461 samples
 (die at 64 °C or less, board at 45–65 W), where aifoundry2's governor steps up, and it read 600 MHz in all 318,667, as did
 the service processor's own minimum and maximum of the clock, which a statistics reset does not clear.</p>
@@ -619,31 +606,26 @@ resistance <span class="math-inline"><svg style="vertical-align: -0.357ex;" xmln
 <tr><td class="num"><b>sum</b></td><td class="num"><b>1.47</b></td></tr>
 </tbody></table></div>
 </div>
-<p>The power line has a fixed part, leakage that grows exponentially with die temperature, the tensor state machines of the
-active minions, and an energy for each kind of flip. It was fitted to every 10 Hz sample of five hours of sessions: the
-leakage to the idle samples (rms error 0.20 W over those samples, which lie at 64–67 and 81–88 °C, none between; aifoundry2, one day's sessions, not re-tested: the three-card
-check's long idle passes were not run), then the flip energies to the busy samples (0.49 W). The idle
-samples fix the leakage's slope, 0.65 W per °C at 80 °C, but not how the idle power splits between the fixed part and the
-exponential: a temperature scale anywhere from 30 to 45 °C in the exponent (the fit above uses 36 °C) fits them as well, with 20 to 29 W of
-leakage at 80 °C and 16 to 7 W fixed. The flip
-energies are close to <a href="#from-flips-to-watts">section 3</a>'s, which used only seconds 1 to 3 of 46 short runs: 3.18
-against 2.96 fJ per register bit and 0.80 against 0.78 fJ per other toggle; the operand-word energy is the loosest (15.5
-against 12.5 fJ). These are the values the predictor and the
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">energy manual</a> use.
-The heat line is the thermal network of <a href="#from-watts-to-degrees">section 4</a> with its slow stages now visible; one more number pins the slowest of them, the 62 °C at 26.7 W where this card had
-settled after the night of 20–21 September (a single reading). Driven by the measured power it follows the sensor to 0.63 °C rms over the five hours.</p>
+<p>It was fitted in three stages to every 10 Hz sample of five hours of aifoundry2's sessions of 21 September: the leakage
+to the idle samples (64–67 and 81–88 °C, none between; not re-tested, since the three-card check's long idle passes were not
+run), the flip energies to the busy samples, then the thermal network of <a href="#from-watts-to-degrees">section 4</a> with
+its slow stages now visible, the slowest pinned by one reading, <b>62 °C at 26.7 W</b>, where this card had settled after
+the night of 20–21 September. The idle samples fix the leakage's slope, 0.65 W per °C at 80 °C, but not how idle power
+splits between the fixed part and the exponential: a temperature scale from 30 to 45 °C (36 °C above) fits as well, with 20
+to 29 W of leakage at 80 °C. The flip energies are close to <a href="#from-flips-to-watts">section 3</a>'s, and are the ones
+the predictor and the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-tensor-unit-per-multiply-add">energy
+manual</a> use. Each stage's residual and the controls on overfitting are in the knowledge base's
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/11-thermal-model.md">thermal-model
+file</a>.</p>
 </details>
 <details class="more"><summary>Leakage against temperature, and degrees added per kind of flip</summary>
 <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:14px">
   <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Leakage: idle board power against die temperature, all sessions, with the fitted exponential (tabulated, with the other cards, in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#the-card-at-rest">energy manual, §1</a>)</div><div class="chart" id="leak"></div></div>
   <div style="flex:1 1 380px;max-width:460px"><div class="chart-title">Heat: degrees per watt after a step of switching power</div><div class="chart" id="step"></div></div>
 </div>
-<p><b>Leakage is what makes temperature so sensitive to flips here</b>, whatever its share of the 36 W idle (20 to 29 W at
-80 °C, above; two thirds in the best fit; aifoundry2, one session: the check's long idle passes, which would have re-tested the
-split and the slope, were not run). Each degree adds <span id="lg-lam"></span> W at 80 °C, and each watt adds
-<span id="lg-10m"></span> °C through the network after ten minutes, <span id="lg-R"></span> °C once settled. (0.65 W/°C is the slope of the idle law. <a href="#strict-temperature-control">Sections 2</a> and
-<a href="#from-watts-to-degrees">4</a> use 0.81 W per degree, the drift of busy power inside the hot 7 s runs: a different
-measurement, a quarter higher.) Closed on
+<p><b>Leakage is what makes temperature so sensitive to flips here</b>, whatever its share of the 36 W idle (above). Each degree adds <span id="lg-lam"></span> W at 80 °C, and each watt adds
+<span id="lg-10m"></span> °C through the network after ten minutes, <span id="lg-R"></span> °C once settled (the idle
+law's slope; <a href="#strict-temperature-control">section 2</a> sets it beside the busy drift). Closed on
 itself, that loop has a gain of <span id="lg-gain"></span> at 80 °C: a watt of switching held for ten minutes raises the die by
 <span id="lg-10c"></span> °C, not <span id="lg-10m2"></span>, and the gain passes one at 82 °C. The table turns that into degrees per kind of flip for the random fp32 matmul.</p>
 <div class="table-wrap wide"><table id="perflip"></table></div>
@@ -694,7 +676,7 @@ on 256 minions) cooled, 3.4 W (random on 128 minions) sat at 81 to
 82 °C for ten minutes, 4.2 W (the checkerboard) crept to 87 °C. In flips, 3.1 W is about 10¹⁵ clocked register bits per
 second, or a full-load random matmul 11% of the time.</p>
 <p>The budget belongs to this card, this desktop chassis and that day's room. The model's ambient is 22.8 °C, and every
-degree warmer takes 0.68 W off the budget. On 22 September the same card idled at 73 °C instead of 62 °C. By these
+degree warmer takes 0.68 W off the budget. On 22 September the same card idled at 73 °C instead. By these
 equations that is a room about 3.5 °C warmer, or airflow worse by the same measure, and a budget of 0.3 to 0.7 W; the
 ambient slider of the <a href="#price-a-workload">pricer in section 9</a> redraws the chart above for any
 room. Whether the flip energies belong to the chip design is the question of
@@ -790,8 +772,8 @@ hot near the budget; from a generic idle start it runs slow when the heatsink wa
 <p>Everything to this point is aifoundry2's card. Two more cards have run the same 7 s protocol. aifoundry3's ran it on
 22 September, in one 13-minute session; on 26 September the three-card check re-ran eight of the operand patterns, four runs
 each, on aifoundry2, aifoundry3 and card 1 of aifoundry1 (aifoundry1-c1; card 0 was left out because its cooling cannot hold
-a load). The two newcomers differ from aifoundry2 in useful ways. aifoundry3 idles cool (51 °C before its first session;
-aifoundry2 62 °C after one cool night, 73 °C after 20.6 hours idle on 22 September), too cool to hold at 80 °C between runs, so
+a load). The two newcomers differ from aifoundry2 in useful ways. aifoundry3 idles cool (51 °C before its first session,
+against aifoundry2's 62 to 73 °C), too cool to hold at 80 °C between runs, so
 its runs launch at 55 to 58 °C; and it stays pinned at 600 MHz, because a boot service sets its TDP to 0 W at every boot, so the governor can
 only step down
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#the-same-firmware-on-three-cards">The ET-SoC-1's DVFS
@@ -849,8 +831,7 @@ die temperature). Whatever aifoundry3's factor is — silicon, package, the boar
 regulator's efficiency at that load, or its cooler die — one number captures it at one temperature, to 0.6 W rms (0.5 W at
 the same die temperature).</p>
 
-<p>The idle law transfers only in part. Fitted here to aifoundry2's idle readings at 64–67 and 81–88 °C (none between; it also passes through the
-62 °C overnight point) and extrapolated 7 to 14 °C below that onto aifoundry3, which idled at 50 to 57 °C in its first
+<p>The idle law transfers only in part. Fitted to aifoundry2's idle readings (section 8) and extrapolated 7 to 14 °C below that onto aifoundry3, which idled at 50 to 57 °C in its first
 session, it predicted that card's idle power to <span id="leakoff"></span> (the mean of the four temperature bins below) out of
 25 W; over that card's 16 sessions the offset was +0.6 W on average
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-that-costs">the DVFS report, §5</a>). The offset depends
@@ -877,8 +858,8 @@ interval. 26 September, three cycles per card (V3-IDLE items IDLE-a and IDLE-b).
 <p><b>What this means if you have more than one of these cards.</b> The shape of the data-dependence — which operand patterns
 cost what, relative to each other — held on all three cards: the check's registered steps (ones over zeros, random over zeros,
 section 1's bit-field ladder and operand order) held on aifoundry2 and aifoundry3 and read within 1.4 W of aifoundry2's on
-aifoundry1-c1. The absolute scale (0.88 to 0.99 here as registered; at the same die temperature 0.95 to 1.00 if the launches
-came on a downward step of the reading, 0.93 to 0.96 if the reading is the die temperature) and the idle power (25.8 to 50.1 W under these runs) belong to the card at
+aifoundry1-c1. The absolute scale (0.88 to 0.99 here as registered, 0.93 to 1.00 at the same die temperature over both
+readings above) and the idle power (25.8 to 50.1 W under these runs) belong to the card at
 its temperature. A single random-data matmul on a new card, at the temperature it will run at, calibrates the scale (to 0.8 W
 rms on the other patterns here), and its idle must be measured, because the idle law does not transfer; after that the power
 predictions of <a href="#from-flips-to-watts">sections 3</a> and <a href="#custom-workloads-structured-matrices">9</a> apply to
@@ -934,8 +915,8 @@ touches the file when the sensor reads 90 °C (or board power 73 W, or telemetry
 launches. The 10-second etiquette limit was waived by the card's user for these sessions; between runs the runner waits while
 anyone else has the card open.</li>
 <li>Flips-to-temperature model: <code>tools/ettelem/flip_thermal_model.py</code>, fitted to the long session up to the cooling
-change, the strict session and the idle samples of the cool starts, with the overnight idle point (62 °C, 26.7 W) as the anchor
-for the slowest stage. Per-run predictions start from the network state that the measured power history leaves at launch.
+change, the strict session and the idle samples of the cool starts, with the overnight idle point as the anchor
+for the slowest stage (section 8). Per-run predictions start from the network state that the measured power history leaves at launch.
 <code>tools/ettelem/validate_flip_model.py</code> tests a frozen model on sessions or parts of sessions it was not fitted to,
 fitting nothing: it estimates the state at each launch causally and reports predicted against measured.</li>
 <li>Predictor: <code>tools/ettelem/predict_heat.py</code> prices tiles (<code>--tiles</code>, replayed through the RTL bench,
@@ -961,20 +942,15 @@ correcting for its hotter die. <a href="#a-second-card-and-what-transfers">Secti
 <code>transfer.json</code> and <code>leakage_crosscard.json</code>, written by <code>tools/ettelem/transfer_cards.py</code>).</p>
 <p class="small">Versions. 20 September: uncontrolled and 80 °C-start runs, which said the clock never moves (corrected in
 <a href="#the-speed-effect-appears-on-a-cool-die">section 6</a>). 21 September: strict protocol, RTL model, cool starts, long
-runs, structured matrices. 22 September: second card. 25 September: the second card's calibration statistics restated;
-interactive views. 25 September (version 3), every claim checked against both cards
-(<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">record</a>): the
-cool-die speed effect made a demonstration of seven runs; the leakage split given as a range; exact proportionality, equal
-costs and unmeasured causes narrowed. 26 September (version 4), the three-card check: section 10 rebuilt on three cards, with
-the temperature test, the idle cycles and each card's refit; the DFT pair's explanation withdrawn; the model's out-of-sample
-error on the check's patterns, 0.9 to 1.0 W, set beside 0.5 W; post-data note C2's two readings of the launch temperature.
-27 September: the review of 26 September (aifoundry3's clock set by a boot service, not its firmware; the idle law's bins;
-aifoundry3's watts at launch; the ten-minute errors; the 2 W of zeros dated to 20–22 September; 0.924 named as the registered test's factor), a chart of seconds to 90 °C, and detail folded into sections. Later on
-27 September: a chart of the two-temperature test (V3-X5: switching power at the hot launch minus the cool one, per card
-and pattern, with its interval). 28 September, after a review of the governor pages: aifoundry1-c1 was not "launched warm"
-(its governor never raised the clock, cool and busy included); the idle law's 0.20 W rms is per sample, not over bins;
-the hottest sensor's lead over the mean set beside "no hot spot"; the three-card check's 103 °C mean and the cards' own
-firmware build noted.</p>
+runs, structured matrices. 22 September: second card. 25 September: version 3, every claim checked against both cards (the
+cool-die speed effect a demonstration of seven runs; the leakage split a range). 26 September (version 4), the three-card
+check: section 10 rebuilt on three cards; the DFT pair's explanation withdrawn; the out-of-sample error on the check's
+patterns, 0.9 to 1.0 W, set beside 0.5 W; post-data note C2's two readings of the launch temperature. 27 September: the
+review's fixes (aifoundry3's clock set by a boot service, not its firmware) and charts. 28 September: aifoundry1-c1's governor
+never raised the clock; the idle law's 0.20 W rms is per sample; later, the review's cuts (the model's fit details now in
+the knowledge base). What each version changed in full: this page's history in the
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/commits/main/docs/reports/sources/horace-experiment.body.html">repository</a>
+and <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/04-artifacts.md">04-artifacts.md</a> (A4).</p>
 </details>
 
 <h2 id="related">12. Related reports</h2>

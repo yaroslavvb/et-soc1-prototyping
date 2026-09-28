@@ -9,6 +9,9 @@ predictions stated before the runs (docs/reports/data/2026-09-27-pcie/PREREG.md)
 raw/<card>/r<k>/{info,bw,lat,launch,conc,hostcopy}.out: lines "PCIE {json}" (host/main.cpp). Runs r1.. are the
 schedule; r0 and pilot* are pilots and are left out. The unit of replication is the run: a run's value for a cell
 is the median of its repeats, a card's value is the mean over its runs with a 99% t-interval (PREREG.md).
+A run whose run.json says it waited for the card lock between sub-tests (lock_waits > 0: another process used the card
+between two of its processes) is kept but flagged: hosts.<card>.lock_waited_runs, a warning here and a line in the
+results; the runs of 27 September held the lock throughout and have no such field.
 Sizes are binary (1 MB = 2^20 B), bandwidths decimal (GB/s = 1e9 B/s).
 """
 import argparse
@@ -114,6 +117,28 @@ def half_size(curve, big):
     return math.log2(s0) + frac * (math.log2(s1) - math.log2(s0))
 
 
+def host_memory(path, cards):
+    """{card: {host, modules, channels, gib, speed}} from the addendum lines of hosts.txt, e.g.
+    'aifoundry3  ChannelA-DIMM0 empty | ChannelA-DIMM1 32 GiB DDR4-2666 | ... -> SINGLE channel, 32 GiB'. A card's host
+    is its name before any '-cN'. {} when the file or its addendum is missing."""
+    if not os.path.exists(path):
+        return {}
+    out = {}
+    for line in open(path):
+        m = re.match(r"^(aifoundry\d+)\s+(Channel\S+ .*?)\s+->", line)
+        if not m:
+            continue
+        slots = [x.strip() for x in m.group(2).split("|")]
+        full = [re.match(r"Channel(\w)-DIMM\d+ (\d+) GiB (\S+)", x) for x in slots]
+        full = [f for f in full if f]
+        for c in cards:
+            if c.split("-c")[0] == m.group(1):
+                out[c] = {"host": m.group(1), "modules": len(full), "channels": len({f.group(1) for f in full}),
+                          "gib": sum(int(f.group(2)) for f in full), "speed": sorted({f.group(3) for f in full}),
+                          "slots": len(slots)}
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("raw")
@@ -148,6 +173,11 @@ def main():
             run = json.load(open(os.path.join(d, "run.json")))
             host["run_times_ms"].append([run["t0_ms"], run["t1_ms"]])
             host["exit_codes"][str(k)] = run["exit"]
+            if run.get("lock_waits"):
+                host.setdefault("lock_waited_runs", {})[str(k)] = run["lock_waits"]
+                print(f"warning: {card} r{k} waited {run['lock_waits']} time(s) for the card lock between sub-tests "
+                      "(another process used the card in between); kept, flagged in hosts.<card>.lock_waited_runs",
+                      file=sys.stderr)
             pair = []
             for f in ("pre.json", "post.json"):
                 try:
@@ -362,6 +392,11 @@ def main():
             "peak_dma_gbs": {dr: max(((e["bytes"], e["gbs"]["mean"]) for e in D["bw"][c][dr]["dma"]), key=lambda t: t[1])
                              for dr in ("h2d", "d2h")},
         }
+    # The hosts' memory layout, read as a user on 27 September 22:18 (hosts.txt beside raw/, its addendum; udev's copy of
+    # the DMI memory-device table): which channels hold a module, and at what speed. It explains the hosts' memcpy.
+    hm = host_memory(os.path.join(os.path.dirname(os.path.abspath(a.raw)), "hosts.txt"), D["cards"])
+    if hm:
+        D["hostmem"] = hm
     json.dump(D, open(a.out, "w"), indent=1)
     print("wrote", a.out)
 
@@ -386,6 +421,10 @@ def main():
                 cells[0] = f"h2d {p['across_cards']['h2d']['verdict']}, d2h {p['across_cards']['d2h']['verdict']}: " + cells[0]
             L.append(f"| {p['id']} | {p['text']} | {p['prediction']} | " + " | ".join(cells) + " |")
         L += ["", "P5 is judged on log2(bytes): 17 = 128 KB, 22 = 4 MB."]
+        waited = {c: D["hosts"][c]["lock_waited_runs"] for c in D["cards"] if D["hosts"][c].get("lock_waited_runs")}
+        if waited:
+            L += ["", "Runs that waited for the card lock between sub-tests (kept; another process used the card in "
+                  "between): " + "; ".join(f"{c} " + ", ".join(f"r{k} ({n})" for k, n in w.items()) for c, w in waited.items()) + "."]
         open(a.md, "w").write("\n".join(L) + "\n")
         print("wrote", a.md)
 

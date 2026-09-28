@@ -8,8 +8,9 @@ shire 0's scratchpad, *"shire 0 got 6% of its fair share and finished only after
 cache short-changing whoever owns the line?
 
 **Answer:** no. The atomic is shared to within half a percent (every shire between 0.998 and 1.004 of an even
-split), including with the host shire. But the host shire loses its **own** memory path completely, for as long as
-the hammering lasts.
+split), including with the host shire. But with the clock steady at 600 MHz the host shire loses its **own** memory
+path completely, for as long as the hammering lasts. It reproduces on all three cards it ran on (aifoundry2, aifoundry3
+and aifoundry1's card 1), three passes each (E36, `LAT-H`).
 
 Evidence: [E22, E23](03-experiments.md). Published as [A13](04-artifacts.md). A [shire](README.md#terms) is 32
 minions and their shared 4 MB of SRAM; a global atomic (`amoaddg`) is performed at the shire cache that homes the
@@ -50,9 +51,14 @@ while the other 31 shires hammer a line that lives in that same shire cache:
 | DRAM | L3 slice of the same shire | 822,066 | 192 | 0.023% |
 
 **These are stops, not slow-downs.** The host shire's count is the same number for windows of 5, 10, 40 and
-100 ms — 384 operations while the mesh retires six million atomics. Twelve loads per minion get through during
-the ramp-up and then nothing. Thirty-two minions, a thirty-second of the chip, sit in a load that does not
-return, and nothing reports an error.
+100 ms — 384 operations while the mesh retires six million atomics. About seventeen loads per minion get through,
+five warm-up loads before the window opens and twelve inside it, and then nothing. Thirty-two minions, a thirty-second
+of the chip, sit in a load that does not return, and nothing reports an error.
+
+The stop holds at a steady 600 MHz. In one aifoundry2 session (the first rerun attempt of 23 September, discarded for
+the energy figures) the ten 2-second runs whose clock moved between 600 and 800 MHz let the host's loads through at
+1–7% of their rate, while the two at 600 MHz stopped at 384; one session does not establish that the clock is the
+cause.
 
 ## The threshold is a cliff, and one other shire clears it
 
@@ -90,8 +96,8 @@ Erratum 4.1 says it does not when the host and the mesh want the same address. T
 addresses, which is what the yield was built for. But erratum 4.2 says the yield has no sub-bank granularity, so a
 host request to the sub-bank the hot line saturates can still be skipped indefinitely, and each host minion's stream
 reaches that sub-bank sooner or later. It was not tested. **Does it hold for a DRAM-backed line rather than
-scratchpad?** Yes, and slightly worse: 192
-operations instead of 384. The erratum's title says "SCP address" but the behaviour is not specific to the
+scratchpad?** Yes, and slightly worse: 192–240 of the host's loads get through instead of 384, at every window from 5
+to 100 ms and on all three cards. The erratum's title says "SCP address" but the behaviour is not specific to the
 scratchpad.
 
 `l3_yield` was **not** set here: it is a shire-cache configuration register on a shared lab card, and the errata
@@ -130,12 +136,14 @@ over idle, which says plainly that waiting is cheap and what contention destroys
 
 - **One global atomic per shire, never per minion, and never spin on the line.** At 32 participants a barrier's
   arrivals serialise in 320 cycles, against a chip-wide barrier of about 5,000 cycles (4,995 with one minion per
-  shire): six percent. But 31 shires polling one line are already past the threshold above, so wait on a per-shire
-  flag or a credit instead: the relay's first barrier, with every shire's leader polling one counter, hung
-  ([18-on-chip-relay.md](18-on-chip-relay.md)). At 1,024 participants the arrivals alone take 10,240 cycles, twice
+  shire): six percent. But 31 shires hammering one line already saturate its bank: in the three-card check (E36,
+  `P5_pollers`), 31 minions, one in each other shire, held it at 10.00 cycles per atomic. They did not stop the host
+  shire's one reading minion (100% of its rate alone, every pass on all three cards); whether they would stop a shire
+  whose 32 minions all read was not tested. Wait on a per-shire flag or a credit instead: the relay's first barrier, with every shire's leader polling one counter, hung in the one
+  development run we made, on a card not recorded ([18-on-chip-relay.md](18-on-chip-relay.md)). At 1,024 participants the arrivals alone take 10,240 cycles, twice
   the whole barrier, with the hosting shire stopped throughout.
 - **Keep hot shared lines out of shires that compute.** The cost is not paid by the code touching the line.
-  It is paid by whatever else lives in that shire, and it is total.
+  It is paid by whatever else lives in that shire, and at a steady 600 MHz it is total.
 - **Keep N × 10 cycles below P + 216** (N remote requesters, each waiting P cycles between atomics; 216 cycles is the
   uncontended round trip): with no pause, at most 21 remote requesters; for 992, P ≥ 10,000 unsaturates the
   bank (host 54%) and P ≈ 16,000 gives the host 95%. The rule is necessary, not sufficient: one shire's 20

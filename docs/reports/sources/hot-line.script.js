@@ -159,18 +159,13 @@ const POOLED={
  const host=agree(perCard(c=>D.fairness.find(r=>r.card===c&&r.home==='0'&&r.per_shire===32)).map(r=>f3(r.host_share)));
  /* Ivan's case: one scratchpad word in shire 0, every minion hammering (the placement rows) */
  const ivan=perCard(c=>D.placement.find(r=>r.card===c&&r.home==='scp:0'));
- /* section 3's round trip: one requester, the bank idle, from this shire */
- const rtS=CTX.remote_atomic_latency_shire, rtH=rtS!=null&&LAY[rtS]?hopsOf(rtS):null;
- const rtNote=RT&&rtH!=null?`; section 3's ${n0(RT)} cycles is the uncontended round trip of a single requester in shire ${rtS}, ${rtH} hop${rtH===1?'':'s'} away`:'';
  $('faircap').textContent=
   `The map colours each shire by its share (towards blue above an even split, towards orange below; shire 0, outlined, holds the line). `+
   `The scatter plots the same shares against mesh hops from shire 0: ${CARDS.map((c,i)=>`${['dots','rings','dashed rings'][Math.min(i,2)]} ${CK.card(c).label}`).join(', ')}; each is the mean of the card's passes. `+
   `With one minion per shire the dashed curve is ${num(F.harmonic_mean_cycles,0)}/(${num(F.round_trip_cycles_0_hops,0)} + ${num(F.cycles_per_hop,1)} × hops): `+
-  `a request's round trip, ${num(F.round_trip_cycles_0_hops,0)} cycles plus ${num(F.cycles_per_hop,1)} per hop, sets how often a shire gets its turn, and the curve fits every shire `+
+  `a request's round trip under the saturated bank sets how often a shire gets its turn, and the curve fits every shire `+
   `within ${F.max_share_error} on ${CARDS[0]} (${CARDS.slice(1).map(c=>`${fit[c].max_share_error} on ${CK.card(c).label}`).join(', ')}), from ${f3(Math.max(...at(0)))} at 0 hops to ${f3(Math.min(...at(far)))} at ${far}. `+
-  `That round trip is taken under the saturated bank, so it includes the queueing${rtNote}. `+
   `With every minion taking part the whole chip lands within ${f3(Math.min(...full))}–${f3(Math.max(...full))} on all ${word(CARDS.length)} cards and the host shire is at ${host}: the map goes flat. `+
-  `A hovered or focused shire is joined to shire 0 by a straight line, not by its route (the mesh's routing order was not measured). `+
   (ivan.length?`The same holds for Ivan's exact case, a scratchpad word in shire 0: host share ${agree(ivan.map(r=>f3(r.host_share)))}, `+
    `every shire ${f3(Math.min(...ivan.map(r=>r.min_share)))}–${f3(Math.max(...ivan.map(r=>r.max_share)))}.`:'');
 })();
@@ -721,9 +716,8 @@ if(CTX.errata) $('errata').innerHTML=CTX.errata.map(e=>
    CK.keynav(fr,nodes);
    CK.inside(fr,labs);
   }});
- $('nrgcap').textContent=`Log scale. Each line is a case's range over the ${word(nP)} pooled passes of the table's last column, the tick their mean, and the marks `+
-  `each card's own mean (${ecards.map(c=>`${CK.card(c).label} ${CK.card(c).mark==='dot'?'filled':CK.card(c).mark}`).join(', ')}); the contended and spread ranges are far apart. `+
-  `The reading-only row is grey and dashed because its power is inside the idle baseline's noise (the note above).`;
+ $('nrgcap').textContent=`Log scale: each case's range over the ${word(nP)} pooled passes, the tick their mean, the marks each card's mean `+
+  `(${ecards.map(c=>`${CK.card(c).label} ${CK.card(c).mark==='dot'?'filled':CK.card(c).mark}`).join(', ')}). The reading-only row is grey: its power is within the idle baseline's noise.`;
 })();
 
 /* ---------- section 7: the barrier, and one requester per shire (the three-card check's pollers) ---------- */

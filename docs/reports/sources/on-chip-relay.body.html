@@ -13,13 +13,14 @@ own scratchpad is 30.8–31.2 times faster. Both hold on all three cards (<span 
 repeat (<span id="l-rep"></span>). Both also need the data to outgrow the 32 MB L3: below that, the hand-off wins
 at most 1.4–1.5× and the shire's own scratchpad 1.3–3.2×.</p>
 
-<p class="small" id="v3-note"><b>Checked on three cards (26 September 2026):</b> nine of this page's claims were
+<p class="small" id="v3-note"><b>Checked on three cards (26 September 2026):</b> this page's claims were
 re-measured under a pre-registered plan, every sweep three times on aifoundry2, aifoundry3 and aifoundry1 card 1,
-and the sweep figures here are now the means of those passes (one sweep per card before). Seven held, and section 5
-now covers all 31 ring offsets (the line fitted to the first five predicted the other eleven ring geometries within
-0.7% on every card); two were corrected: the single-stage advantage (14.3–14.8×, not 15.3×) and the own scratchpad's
-read energy, no longer split by card. The energies per byte are now that check's too (six passes on each card). aifoundry3 lost four of its 351 relay launches to a host-process crash, so the
-registered test of section 5 is complete on the other two cards only. Record:
+and the sweep figures here are now the means of those passes (one sweep per card before). Section 5 now covers all
+31 ring offsets (the line fitted to the first five predicted the other eleven ring geometries within 0.7% on every
+card). Corrected: the single-stage advantage (14.3–14.8×, not 15.3×) and the own scratchpad's read energy, no longer
+split by card. The energies per byte are now that check's too (six passes on each card). aifoundry3 lost four of its
+351 relay launches to a host-process crash, so the registered test of section 5 is complete on the other two cards
+only. <span class="v3-counts" data-v3-counts="et-soc1-on-chip-relay">Of 9 claims tested here, this page counts 7 held and 2 corrected; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#claims-cap">hub’s scoreboard</a>, 1 “proven on the cards” and 8 “fewer than three repeats”.</span> Record:
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>.</p>
 
 <details class="terms"><summary>Terms used on this page</summary>
@@ -34,7 +35,7 @@ between neighbouring mesh stops, 3.72 mm. More in the
 <div class="kpis">
   <div class="card kpi"><div class="lab">Passing each stage to the next shire</div><div class="val" id="k1"></div><div class="sub">against writing it to DRAM and reading it back</div></div>
   <div class="card kpi"><div class="lab">Keeping it in the shire's own scratchpad</div><div class="val" id="k2"></div><div class="sub">no data crosses a shire at all</div></div>
-  <div class="card kpi"><div class="lab">Energy per byte, next shire vs DRAM</div><div class="val" id="k3"></div><div class="sub">with the watts over idle within about 1 W of each other</div></div>
+  <div class="card kpi"><div class="lab">Energy per byte, next shire vs DRAM</div><div class="val" id="k3"></div><div class="sub">pooled over the three cards' passes</div></div>
   <div class="card kpi"><div class="lab">Where the advantage appears</div><div class="val" id="k4"></div><div class="sub">of live intermediate data: it has to outgrow the 32 MB L3</div></div>
 </div>
 
@@ -127,8 +128,7 @@ most of the same job for free:</p>
 <ul>
 <li><b>Any chain of passes over data that outgrows the L3.</b> Multi-stage filters, iterated stencils, a deep
 and narrow network, a stream that several kernels touch in turn. The standard shape writes the intermediate
-to memory between stages, which on this chip runs at 48 GB/s of reads and writes. The intermediate does not
-have to go there.</li>
+to memory between stages, which on this chip runs at 48 GB/s of reads and writes.</li>
 <li><b>The unit that matters is the shire, not the minion.</b> Its scratchpad is 2.5 MB, addressable by every
 other shire, and written by a tensor store that bypasses both caches, so what one shire writes another reads
 with no coherence problem at all.</li>
@@ -136,10 +136,9 @@ with no coherence problem at all.</li>
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">on-chip
 communication</a>). At 1 MB per shire a DRAM stage is <span id="stagecyc"></span>, so the barrier is under a fifth of even the fastest case. From four stages to
 thirty-two the advantage is flat (12.0–12.8× on the three cards); with one or two stages it is larger (14.3–14.8×
-and 13.3–13.8×), where the DRAM route reaches only 39–41 and 43–44 GB/s. Build the barrier with one atomic per shire and a credit release, so
-that nobody spins on a shared counter: the first version of this relay had every shire's leader poll one
-counter, which is <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">the hot line</a> of the
-companion report, and the barrier hung in the one development run we made (card not recorded).</li>
+and 13.3–13.8×), where the DRAM route reaches only 39–41 and 43–44 GB/s. Build the barrier with one atomic per shire and a credit release, never
+one counter every shire polls (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">the hot line</a>): this
+relay's first barrier did that and hung in its one development run (card not recorded).</li>
 <li><b>Inside a shire, use the register path, one partner at a time.</b> <code>TensorSend</code>/<code>TensorRecv</code>
 is immune to shire-cache contention, but a minion that takes readies from two partners at once can hang until the
 chip is reset, as read from the RTL and seen once, on aifoundry2
@@ -208,14 +207,13 @@ python3 tools/ettelem/analyze_reruns.py docs/reports/data/2026-09-23-reruns-aifo
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry2">docs/reports/data/2026-09-22-onchip-aifoundry2</a>
 and <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-22-onchip-aifoundry3">…-aifoundry3</a> (22 September), and the
 three-card passes under <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3/raw">docs/reports/data/2026-09-25-claims-v3/raw/&lt;card&gt;/lat/p*/rl/</a>.
-Versions: first published 22 September 2026; 24 September, the “next shire” is the next by ID, not a mesh
-neighbour, and the flops-per-byte unit of section 4 corrected; 25 September, the ring offset moves the bandwidth by
-up to a quarter, following the longest hand-off (it had said distance made no measurable difference), then (version
-3) “the same power” replaced by what the passes show (within about a watt, the own scratchpad drawing more than
-DRAM); 26 September, every sweep figure the mean of three passes on each of three cards, section 5 over all 31 ring
-offsets, the one-stage advantage corrected (14.3–14.8×, not 15.3×), the own-scratchpad read energy no longer split
-by card and the energies per byte the three-card check's; 27 September, the size and intensity charts drawn per card, the power chart moved into section 2 and the
-detail folded into collapsible sections. Record:
+Versions (one line per date; every wording is in
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/commits/main/docs/reports/sources/on-chip-relay.body.html">the source's history</a>):
+22 September, first published; 24 September, the “next shire” is the next by ID, not a mesh neighbour, and section
+4's flops-per-byte unit corrected; 25 September, the ring offset moves the bandwidth by up to a quarter (it had said
+distance made no measurable difference), and “the same power” replaced by what the passes show; 26 September, three
+passes on three cards, the one-stage advantage corrected (14.3–14.8×, not 15.3×) and the own-scratchpad read energy no
+longer split by card; 27 September, charts; 28 September, repeats cut and the note's counts given by both rules. Record:
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>.</p>
 </details>
 

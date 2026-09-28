@@ -89,71 +89,15 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   from a clone), [`reports/MIRROR.md`](reports/MIRROR.md) (every published page with its space, file and
   visibility) and `scripts/check-mirror.py` (live equals repo). Lessons that had lived only in per-machine memory
   moved into `findings/14-card-behaviour.md`, `lab-access.md`, this page and `findings/04-artifacts.md`.
-- **Reports (all public on spacesheep.dev; the hub is the observability report):**
-  [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (second edition:
-  the meter chain, the unmetered remainder attributed, the improvement ladder, the index of every measurement
-  report) · [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (third edition: every
-  entry with a confidence bar from repeated passes, on three cards since 26 September) · [DVFS and leakage](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage)
-  · [Spatial temperature brief](https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief) · [Horace](https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment)
-  · [Why low power](https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power) · [Hot line](https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line)
-  · [On-chip relay](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay) · [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm)
-  (the mesh's wire energy per bit·mm against Dally's ~100 fJ/b-mm) · and the 18–20 September reports below.
-  Every space the hub links is public (Q40). Every page, its space uuid, its repo file and its visibility are in
-  [`reports/MIRROR.md`](reports/MIRROR.md), and `python3 scripts/check-mirror.py` checks that each live page equals
-  its file. Deploy with `spacesheep deploy <dir> --space <uuid>` from a directory of its own holding `index.html`
-  (the Horace experiment always as its folder with the GIFs), and delete `.spacesheep.json` afterwards (MIRROR.md,
-  "Deploying one page"; the history is in `docs/findings/04-artifacts.md`).
-- **The energy manual** (`docs/energy-manual/*.md`, page `docs/reports/2026-09-23-energy-manual.html`) is built
-  by `tools/ettelem/build_energy_manual.py` → `manual.json` → `render_energy_manual.py` (sections 1–8),
-  `render_catalogue.py` (3a, 4a) and `scripts/build-report.py energy-manual`. Its data: the catalogue (since
-  26 September the version-3 full catalogue on three cards, V3-CATFULL, reduced by `tools/claims-v3/catfull/reduce.py
-  --catalogue-out`; the 23 September catalogue, `workloads/enercat/run_catalogue.py`, 386 configurations × 3 shuffled
-  passes on aifoundry2 and aifoundry3, `docs/reports/data/2026-09-23-catalogue-*`, reduced by
-  `workloads/enercat/analyze_catalogue.py`, is kept as `catalogue-23sep.json`), the reruns of
-  the relay, hot line, rings and levels (`tools/ettelem/run_reruns_warm.sh`, `run_rings_levels_power.sh`,
-  `docs/reports/data/2026-09-23-reruns-*`, pooled by `tools/ettelem/analyze_reruns.py`, which since 26 September
-  takes the relay, rings and levels from the version-3 passes with `--v3-rl`), and the unmetered-power
-  attribution (`docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json`, written by
-  `tools/ettelem/fit_unmetered.py --overwrite`; until 25 September the droop block was the first, inline fit's,
-  0.84 mV/W, and it is now the script's 0.87; the fit is described in `docs/energy-manual/04a-fine-grain.md` and in
-  E30 of `docs/findings/03-experiments.md`). `docs/findings/04-artifacts.md` (A16) gives the whole rebuild in order.
-- **What the bars taught us:** pass-to-pass scatter on one card is 1–2%; the two cards differ by 5% with one
-  scale (on the version-3 full catalogue aifoundry3 and aifoundry1's card 1 are 0.976 and 0.967 of aifoundry2,
-  E46); small signals carry the widest bars because a 1–5 W signal rides on a 30 W idle that drifts: ±17% on
-  the hot line, ±4–16% on the levels and rings, ±5.5% on the DRAM relay. On aifoundry2 every power burst needs a
-  die above 68 °C or the governor moves the clock mid-burst (the firmware threshold is 65 °C, but on ettelem's
-  mean die reading the clock still stepped up at readings up to 66 °C in E10); the cool-card reruns of
-  23 September, at 64–66 °C, were discarded for that reason.
-- **The unmetered power** (board minus the three metered rails: 15 W of 32 W idle) fits, on the version-3 full
-  catalogue of 26 September, as 19%, 18% and 10% delivery loss on the minion rail (aifoundry2, aifoundry3,
-  aifoundry1's card 1), 29%, 29% and 20% on the mesh, 73, 73 and 82 pJ per DRAM byte off-rail and an SRAM term that
-  differs by card (3–4% on the first two, 54% on the third), rms 0.31–0.48 W over 392 configuration means per card
-  (1.0–1.2 W on the DRAM ones); the idle 12–18 W is not split (the 23 September fit on two cards: 18–20%, 5%, 26–29%,
-  68–73 pJ/B). The memory shires' Moortec voltage monitor (`die_mv.ddr`) droops 0.86 mV per off-rail DRAM watt and
-  serves as a DRAM-activity meter (traffic with no DRAM access moves it too, by up to about 2 mV). What would meter more is the observability report's improvement ladder.
-- **Heat per millimetre** (`docs/findings/20-heat-per-mm.md`, page `docs/reports/2026-09-24-heat-per-mm.html`):
-  `workloads/enercat/run_wire.py` (two runs, E31 and E32, both cards, `docs/reports/data/2026-09-24-wire*-aifoundry*`)
-  → `workloads/enercat/analyze_wire.py` → `wire.json`, and the version-3 check's passes on three cards →
-  `workloads/enercat/analyze_wire_v3.py` → `wire3.json`; both → `tools/ettelem/build_wire_report.py --wire --wire3` →
-  `report.json` → `scripts/build-report.py heat-per-mm`. A random bit costs 36 fJ per mm on the mesh rail with free links, 50 on a
-  loaded mesh (47 and 73 on board power); ones carried cost energy, not just bit changes. An adversarial review
-  by a workflow of six AI agents checked it before publication (`docs/reports/data/2026-09-24-wire-energy/review/`).
-- **New traps (24 September):** a sampler killed mid-request poisons the management queue until one
-  `dev_mngt_service` call drains it; loads between shires in the same column three hops apart starve the meter on
-  aifoundry2; a memory pattern with no buffer writes to physical address 0 and nothing reports it. All three are in
-  `docs/findings/14-card-behaviour.md`, "Traps".
-- **The review of 24 September:** every page of the published set was checked for consistency, cross-links,
-  suspicious claims and readability by a workflow of AI agents (the record is in `docs/findings/04-artifacts.md`,
-  "The 24 September review"). The notes of the conversation with David Kanter are now private and
-  unlinked; the two briefs of 22 September are imported into `docs/reports/`; deploy the Horace experiment only as
-  its folder with the GIFs.
-- **The validation of 25 September:** every card-free analysis was rerun (nearly all reproduce byte for byte), every
-  number with no producer script got one, the claims were rechecked against the data, repeated explanations were cut
-  to one canonical page each, and the pages gained interactive charts built on a shared chart toolkit
-  (`docs/reports/sources/chartkit.js`). The L2 mainline-starvation brief is now a pointer page. The raw SP trace dumps
-  and load log of 20 September were recovered and committed. The page checker had missed errors thrown while a page
-  loads; it is fixed. The record is `docs/findings/04-artifacts.md`, "The 25 September validation", and
-  `docs/reports/data/2026-09-24-report-review/`.
+- **The pages and the results.** Every published page with its code and raw data is in the
+  [README](../README.md#the-published-pages)'s table; its space, visibility and build command in
+  [`reports/MIRROR.md`](reports/MIRROR.md), which also says how to deploy one page (`python3 scripts/check-mirror.py`
+  checks that each live page equals its file). Every space the hub links is public (Q40). The results, with every
+  number traced to its experiment and raw file: [`findings/README.md`](findings/README.md) and
+  [`findings/05-claims.md`](findings/05-claims.md) (the energy manual's bars and the unmetered attribution in
+  `findings/19-observability-and-the-unmetered.md`, heat per millimetre in `findings/20-heat-per-mm.md`, the traps in
+  `findings/14-card-behaviour.md`). The energy manual's rebuild, in order: `findings/04-artifacts.md`, A16; the
+  reviews and validations of 24–26 September: `findings/04-artifacts.md` and `reports/data/2026-09-24-report-review/`.
 - **Next:** the ladder's first undone rungs — deconvolving the rails' filter (τ ≈ 1.15–1.22 s, measured), calibrating the per-shire
   IR-drop map from the SP DEBUG trace into a spatial current map, and a PCIe riser with shunts for millisecond
   board power. The earlier "next" items below (a real GEMM, prefetching, Discord) still stand.
@@ -163,63 +107,15 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
 - **Goal.** Roman Shaposhnik (AI Foundry / AINekko) invited us to prototype a workload on the ET-SoC-1, first
   on the `sys_emu` simulator and then on the real cards in their lab. He would like the experience shared on the
   AI Foundry Discord. The long-term workload has not been picked yet.
-- **Done:**
-  - The local simulator environment: Lima VM, `make run-hello`. See the [README](../README.md).
-  - The hello worlds, on the simulator and on a card.
-  - `workloads/sgemm` on aifoundry3: scalar fp32, 127 GFLOP/s.
-  - The tensor-unit matmul energy benchmark on aifoundry2 (`kernels/mmbench`). Results:
-    - fp32: 9.5 TFLOP/s, 168 GFLOP/s per W, 3.4× the A100's fp32 CUDA-core efficiency by spec sheet on the
-      benchmark's ±1/±2 operands (about 2.9× on random data at 80 °C; not its tensor cores, see
-      [findings/13-why-low-power.md](findings/13-why-low-power.md)).
-    - fp16: 19.0 TFLOP/s, 321 GFLOP/s per W.
-    - int8: 71.8 TOP/s, 1,162 GOP/s per W.
-  - The report is [docs/reports/2026-09-18-et-soc1-matmul-efficiency.html](reports/2026-09-18-et-soc1-matmul-efficiency.html),
-    published at https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency. Its raw data is in
-    `docs/reports/data/2026-09-18-aifoundry2/`.
-  - The memory hierarchy on aifoundry2 (`workloads/memhier`): each level's latency, bandwidth and energy per byte.
-    Report: [docs/reports/2026-09-18-et-soc1-memory-hierarchy.html](reports/2026-09-18-et-soc1-memory-hierarchy.html).
-  - On-chip communication on aifoundry2 (`workloads/nocbench`): the 6x6 shire mesh, TensorSend/Recv, reduction trees,
-    credits and barriers. Report: [docs/reports/2026-09-18-et-soc1-on-chip-communication.html](reports/2026-09-18-et-soc1-on-chip-communication.html).
-  - Sparsity on aifoundry3 (`workloads/sparsity`): tensor-unit zero-skip saves energy but no cycles, masked TensorLoads
-    save time except when the whole chip saturates DRAM, and a batch-1 sparse layer runs in 7.5 us dense and 2.1 us at
-    99% zeros. The report also ranks scenarios where the chip could beat an A100. Report:
-    [docs/reports/2026-09-18-et-soc1-sparsity.html](reports/2026-09-18-et-soc1-sparsity.html), published at
-    https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute.
-  - One memory access taken apart on aifoundry2 (`workloads/memprobe`): L3 = 110 + 12/hop, DRAM adds 91 + 12/hop to the
-    memory shire, rows/banks/refresh, and energy per load by rail. Report:
-    [docs/reports/2026-09-19-et-soc1-memory-anatomy.html](reports/2026-09-19-et-soc1-memory-anatomy.html).
-  - The observability survey: what the card, the simulator and the RTL each let you see, and the firmware-signing caveat on
-    making more visible. Report: [docs/reports/2026-09-20-et-soc1-limits-of-observability.html](reports/2026-09-20-et-soc1-limits-of-observability.html).
-  - Tooling from the survey (2026-09-20): device flame graphs (`workloads/traceprof`, `scripts/trace-flamegraph.py`); the
-    `hpmcounter3` late carry root-caused in the original RTL under Verilator (`rtl-sim/pmu_carry`; Verilator 5.042 is built in
-    `~/.local/verilator` on aifoundry2, with `libfl-dev` and `help2man` unpacked under `~/.local/debs`); and a counter-configure
-    syscall for the minion firmware, verified in `sys_emu` (`patches/0003`, `scripts/build-minion-fw.sh`, `workloads/pmcsel`).
-    No firmware was flashed: the boot chain checks signatures and the open tree has no signing key, so that waits for a
-    signed build or word from the lab on how the card is provisioned.
-  - Power and temperature (2026-09-20, `tools/ettelem`): board power under load rose about 0.8 W per °C in the load
-    step (E5; the first, uncontrolled Horace session fitted 0.78, E7; an idle card's leakage slope is 0.65 W/°C at
-    80 °C, E17), and the card idles 5 W higher
-    after a load than before it, so baselines must be taken at the same die temperature. Reports:
-    [power and temperature](reports/2026-09-20-et-soc1-power-temperature.html) and the
-    [Horace experiment](reports/2026-09-20-horace-experiment.html) (20–22 September: data-dependent matmul power with every
-    run launched from the same die temperature, zeros 38 W, ones 47 W, random 63 W; heating per FLOP; a power model from RTL toggle
-    counts, `rtl-sim/fma_toggle`; ten-minute runs; a model from flip rates to die temperature, `tools/ettelem/flip_thermal_model.py`;
-    structured matrices priced before they ran; `tools/ettelem/predict_heat.py` for custom workloads; and the same experiment
-    on aifoundry3) and
-    [why the chip is low power](reports/2026-09-21-why-low-power.html) (C V² f + leakage measured term by term, against an A100).
-  - On this card in this chassis, nothing but zeros can run at full load for long: from 80 °C, random fp32 data reaches 90 °C in
-    about 20 s and ones in about two minutes, because leakage (23 W at 80 °C, +0.65 W per °C) feeds back through 1.5 °C per W of
-    thermal resistance. Sustained switching power above about 3 W has no equilibrium. Runs longer than a few seconds need a
-    temperature cap: `tools/ettelem/run_horace_long.sh` stops a run at 90 °C through the host's `--stop-file`. Never edit a runner
-    script while it is running; bash reads it as it goes.
-  - The clock governor is thermal first: above 65 °C the card sits at 600 MHz and 0.52 V whatever the power, below it a busy card
-    steps up through 700 MHz (0.57 V) to 800 MHz (0.62 V). A card that has idled overnight (62 °C, 27 W) therefore behaves differently from one in use (72 to
-    80 °C, 31 to 36 W). Check `mhz` in `ettelem sample` before comparing anything.
-  - Ridge points, derived from the above with no new runs: the FLOPs per byte a kernel needs from each memory level
-    to be compute-bound (fp32 on the tensor unit: 4 from its own shire, 10 from L3 or another shire, 130 from DRAM).
-    Report: [docs/reports/2026-09-18-et-soc1-ridge-points.html](reports/2026-09-18-et-soc1-ridge-points.html),
-    published at https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points.
-  - Summaries of all of these are in [et-soc1-notes.md](et-soc1-notes.md).
+- **Done** (18–21 September): the simulator environment and the hello worlds (the README's Setup and Run),
+  `workloads/sgemm` on aifoundry3 (scalar fp32, 127 GFLOP/s), and the first measurement pages (matmul efficiency,
+  memory hierarchy, on-chip communication, sparse compute, memory anatomy, the observability survey and its tools,
+  power and temperature, the Horace experiment, why low power, ridge points): each is a row of the README's table, its
+  numbers (re-measured on three cards on 26 September) are in [findings/05-claims.md](findings/05-claims.md), their
+  summaries in [et-soc1-notes.md](et-soc1-notes.md), and what they taught about running a card (the thermal-first
+  governor, heat that carries over, a temperature cap on long runs, never editing a running script) in
+  [findings/14-card-behaviour.md](findings/14-card-behaviour.md). Why no firmware was flashed for the counter
+  syscall: `patches/README.md`; where Verilator is built on aifoundry2: `rtl-sim/pmu_carry/README.md`.
 - **Next:**
   - A real GEMM, tiling through the L2 scratchpad with cooperative tensor loads. (FOSDEM's 10.25 TFLOP/s came from
     software-pipelining the tensor unit's inner loop, overlapping the next A-load with the current FMA.)
@@ -246,33 +142,20 @@ The [README](../README.md) has the details. The lab machines don't need any of t
 ## 2. Connect to the lab machines
 
 The lab machines are on AI Foundry's Tailscale tailnet. We are a member as `yaroslavvb@gmail.com`, through the
-invite Roman sent. On the new machine:
-
-1. Install Tailscale, sign in with that account, and check that the machines show up:
-   `tailscale status | grep aifoundry`.
-2. Logins use Tailscale SSH, so there are no keys or passwords. Our account is `yaroslavvb` on every machine.
-   If your local username is different, add this to `~/.ssh/config`:
-
-   ```
-   Host aifoundry1 aifoundry2 aifoundry3
-       User yaroslavvb
-   ```
-3. Run `ssh aifoundry2 true`. Tailscale SSH is in check mode: it prints a `login.tailscale.com` URL that a person
-   must approve in a browser signed in to the tailnet, while the `ssh` waits. One approval lasts about 12 hours.
-   An agent cannot approve it: it hands the URL to a person. If the URL answers 404, sign out of
-   login.tailscale.com and back in, then `ssh` again ([lab-access.md](lab-access.md), "How access works").
-4. From aifoundry2 to the other two, give each machine's full tailnet name as its `HostName` in `~/.ssh/config`:
-   aifoundry2 resolves the short names over the LAN first ([lab-access.md](lab-access.md)).
+invite Roman sent. On a new machine, install Tailscale, sign in with that account, and check that the machines show up (`tailscale status | grep
+aifoundry`). Logins are Tailscale SSH, with no keys or passwords, as user `yaroslavvb` on every machine (if your local
+name differs, add `User yaroslavvb` for `Host aifoundry1 aifoundry2 aifoundry3` in `~/.ssh/config`). Check mode, the
+URL a person must approve (an agent hands it over and waits), the 404 fix and the full tailnet names to use from
+aifoundry2 are in [lab-access.md](lab-access.md), "How access works" and "First login".
 
 `/opt/et/bin` is on PATH in login shells on every machine since 25 September; nothing to add to `.bashrc`.
 
-| Machine | Cards | Notes |
-|---|---|---|
-| `aifoundry1` | 2 (`/dev/et0_*`, `/dev/et1_*`) | Working since 2026-09-25 15:02 (the driver's empty version string was fixed). Card 0 (firmware 1.4.1) **overheats: do not run sustained work on it**; it idles at 300 MHz. Card 1 (firmware 1.2.0) is fine and idles at 600 MHz, 33–35 W. Select a card with `ET_DEVICES=<n>` (this host only; `V3_DEVICE=<n>` in `tools/claims-v3`). Its `/opt/et` is a fork build; the disk is nearly full. |
-| `aifoundry2` | 1 | The main card for this work, and the git checkout (`~/claude/et-soc1-prototyping`). Firmware 1.3.1. Minion clock 600 MHz when the die is above 65 °C (up to 800 MHz below), 32 GB LPDDR4X, idle board power 27 W cold, 31 to 36 W after load. |
-| `aifoundry3` | 1 | Firmware 1.3.1, held at 600 MHz by a 0 W TDP that a boot service sets at every boot (not flashed). The die idles at 55–57 °C since the host changes of 25 Sep (53–54 °C before; amendment A5). Compare switching power over idle, not absolute watts. Its `libetrt.so` is a patched `-O3` build, and about one host launch in 100 built before 25 Sep's `registerRuntimeLogLevels()` fix crashes at 1.08 s (a g3log race in the runtime): repeat it. |
-
-See [findings/14-card-behaviour.md](findings/14-card-behaviour.md) for how the four cards and three hosts differ.
+Four cards on three machines: aifoundry2 (the main card and the git checkout, `~/claude/et-soc1-prototyping`),
+aifoundry3 (held at 600 MHz; compare switching power over idle, never absolute watts) and aifoundry1's two cards
+(select one with `ET_DEVICES=<n>`; **card 0 overheats: no sustained work on it**). Their firmware, clock policy, idle
+power and quirks, and how the hosts differ: AGENT.md §4 and
+[findings/14-card-behaviour.md](findings/14-card-behaviour.md), "The lab machines and their four cards are not
+interchangeable".
 
 All three are x86_64 Ubuntu 24.04 with RISC-V GCC 15.1 and `sys_emu` in `/opt/et`, but not the same runtime:
 aifoundry2 has et-platform `353f20e` (Dec 2025, runtime 0.19.0), aifoundry3 the same with a patched `libetrt.so`, and
@@ -280,27 +163,13 @@ aifoundry1 a fork build whose device layer takes `ET_DEVICES` (§9). All are old
 documents; see section 4. Admin work on the machines (accounts, drivers, resets) is for the lab admin;
 [docs/lab-access.md](lab-access.md) covers accounts for other people.
 
-**Etiquette.** The cards are shared, and these are the user's rules, also in `CLAUDE.md`:
-
-- Ask which machine to use (on aifoundry1, which card), and stay off machines other sessions are using.
-- Look before touching a card: `et-who` lists every user's holders of the device nodes and the card locks (or
-  `fuser -v /dev/et*`); also `who` and `uptime`. The old check, the use count in `lsmod | grep et_soc1`, cannot tell
-  which of aifoundry1's two cards is held. Hold the card's lock for your run:
-  `flock -n /run/lock/etsoc-shire<N>.lock <command>`.
-- Never hold a device for more than 10 s. Use `timeout 10`.
-- Stop tools and samplers with Ctrl-C or a plain `kill`, never `kill -9`: it poisons the card's management queue
-  for the next user ([findings/14-card-behaviour.md](findings/14-card-behaviour.md), "Traps").
-- Keep disk and memory use small, and build with `nice` and `-j4`.
-- Others use the cards too: CI runners on aifoundry1 and aifoundry2 and a demo service on aifoundry3 can take a card
-  at any time, and a `tools/claims-v3` queue holds a card for hours while it runs (the version-3 campaign's did on
-  25–26 September: "Where things stand").
-
-Why: the management node is single-opener, so one careless sampler blocks everyone; heat carries over from one run
-to the next, so someone else's run changes your die temperature and your power readings; and a hung card needs a
-power cycle that only the lab admin can do.
-
-Only one process at a time can open a card's management node (`/dev/et0_mgmt`). While someone runs `et-powertop`,
-`dev_mngt_service`, et-testdrive and the power logger all fail with "Device or resource busy".
+**Etiquette.** The cards are shared. The owner's rules, each with the reason behind it, are in
+[AGENT.md](../AGENT.md) §5 and, in short, in `CLAUDE.md`: ask which machine (and card) to use; look first (`et-who`,
+`who`, `uptime`) and hold the card's lock (`flock -n /run/lock/etsoc-shire<N>.lock <command>`); never hold a device
+for more than 10 s (`timeout 10`); stop tools with Ctrl-C or a plain `kill`, never `kill -9`; keep builds small
+(`nice`, `-j4`); never reset a card. The management node is single-opener: while someone runs `et-powertop`,
+`dev_mngt_service`, et-testdrive and the power logger fail with "Device or resource busy". Others use the cards too: CI runners on aifoundry1 and aifoundry2, a demo service
+on aifoundry3, and `tools/claims-v3` queues that hold a card for hours.
 
 **Lab norms from the AI Foundry Discord** (#community-lab, read on 2026-09-18):
 
@@ -373,25 +242,10 @@ scripts/paste-chartkit.py docs/reports/2026-09-18-et-soc1-matmul-efficiency.html
 ```
 
 This prints the table numbers, % of peak and A100 ratios, and refreshes the power chart. The prose and tables
-in the HTML are hand-written, so edit them to match. To publish, use the spacesheep CLI. Sign in once per machine
-with `spacesheep login`, which asks a person to approve it in the browser. **Check the CLI's version**
-(`spacesheep --version`): the pages up to 25 September were deployed with spacesheep CLI 1.5.1, a GitHub build,
-while npm's latest was 1.2.1. On the evening of 25 September npm's latest became 1.9.1 (`npm install -g spacesheep`),
-and aifoundry2's CLI (Node 24 in `~/.local/node`) was updated to it; `scripts/check-mirror.py` reads the pages back
-the same with 1.5.1 and 1.9.1. Avoid an older one, such as a stale `npx` cache. The key lives in
-`~/.config/spacesheep/`: never copy it into the repository.
-
-```bash
-D=$(mktemp -d); cp docs/reports/2026-09-18-et-soc1-matmul-efficiency.html "$D/index.html"
-spacesheep deploy "$D" --space 590752c1-17a8-4f5d-97ef-bcf33fd6a3e7 -m "<what changed>"; rm -rf "$D"
-spacesheep list | grep et-soc1                 # the visibility column must still say public (Q40)
-python3 scripts/check-mirror.py --only et-soc1-matmul-efficiency   # live equals repo
-```
-
-Always pass `--space`. Without it the CLI creates a new space. Deploy from a directory of its own: the CLI writes a
-`.spacesheep.json` pin file into the deployed directory (gitignored), and a stale one once published a page over
-another. The older test-drive write-up in `docs/report/` is space `16732875-c03e-434d-a643-7a432586c7f7`. Every
-page's space, file and deploy form: [`reports/MIRROR.md`](reports/MIRROR.md).
+in the HTML are hand-written, so edit them to match. To publish, follow [`reports/MIRROR.md`](reports/MIRROR.md),
+"Deploying one page" (the matmul page is space `590752c1-17a8-4f5d-97ef-bcf33fd6a3e7`): `spacesheep login` once per
+machine needs a person to approve it in the browser, and AGENT.md §8 says which CLI versions read the pages back the
+same. The key lives in `~/.config/spacesheep/`: never copy it into the repository.
 
 ## 6. What is already on the lab machines
 

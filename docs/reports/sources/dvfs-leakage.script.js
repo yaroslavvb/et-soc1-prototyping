@@ -1086,7 +1086,6 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
   const zm = Z.map(c => c.mean), lo = Z.find(c => c.mean === Math.min(...zm)), hi = Z.find(c => c.mean === Math.max(...zm));
   const cr = L.crossings, res = N.residency, good = res.vs_episodes.filter(x => Math.abs(x.diff_ms) < 5), bad = res.vs_episodes.filter(x => Math.abs(x.diff_ms) >= 5);
   const hs = N.host_sensors, dd = us => us / 86400e6;
-  V.restR = range(Math.min(...zm), Math.max(...zm), 0, ' and ');
   V.tdDays = f2(dd(res.thermal_down.cumulative_us)); V.upDays = f2(res.uptime_days);
   V.restText = `Watched through the night with no work of ours, aifoundry2's idle mean moved between ${Math.min(...zm)} and ${Math.max(...zm)} °C ` +
     `within 10 to 30 minutes, and idle power followed it: ${f1(lo.board_w)} W at ${lo.mean} °C, ${f1(hi.board_w)} W at ${hi.mean} °C. What drives the ` +

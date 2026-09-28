@@ -46,9 +46,10 @@ Three things fall out of this table:
   the cores (20.4 W) lasts 35 s instead of 19–26, half (13.6 W) 84 s, three eighths (10.2 W) 119 s, a quarter
   (6.8 W) 276–315 s, and an eighth (3.4 W) never reaches 90 °C. What sets the time is the switching power, not where
   it comes from (next point).
-- **Equal flip power gives equal heating regardless of where the flips come from.** Ones on all 1,024 cores
-  (10.7 W, almost entirely register clocking) and random data on 384 cores (10.2 W, mostly data toggles) reach
-  90 °C in 107–167 s and 119 s. The die does not care which transistors moved.
+- **Equal flip power, similar heating, wherever the flips come from.** By the flip counts (the model's watts, not a
+  measurement), ones on all 1,024 cores switch 10.7 W, almost entirely register clocking, and random data on 384
+  cores 10.2 W, mostly data toggles; they reach 90 °C in 107–167 s (three runs) and 119 s (one run), with curves that
+  overlap. That is consistent with the die not caring which transistors moved, not a test of it.
 - **The same workload does not always take the same time.** Ones needed 107 s after a hot predecessor and
   162–167 s after a ten-minute zeros run. Every run starts at the same *reading*, but the heatsink behind it
   does not start in the same state, and over minutes that matters. This is the single largest source of
@@ -68,9 +69,12 @@ rising at the end.
 In flips, 3.1 W is roughly **10¹⁵ clocked register bits per second**, or a full-load random-data matmul run
 **11% of the time**.
 
-> The 1.47 °C/W behind this is **this card in this desktop chassis**, which idles at 62–80 °C. In server
-> airflow the budget would be larger. The flip energies and the leakage belong to the chip design, up to a
-> per-card scale of about 8% ([11-thermal-model.md](11-thermal-model.md)); the thermal resistance does not.
+> The 1.47 °C/W behind this is **this card in this desktop chassis**, which idles at 62–80 °C, **and that day's
+> room**: the model's ambient is 22.8 °C, and each degree warmer takes 0.68 W (1/1.47) off the budget. In server
+> airflow the budget would be larger. On three cards (26 September; E38, E40, E44) the flip energies carried over up to
+> one scale factor per card (0.88 to 0.99 as registered), which the check could not separate from the die
+> temperature; the idle law, and so the leakage, did not (aifoundry1's card 1 idles 7.6 to 13.4 W above it; the
+> Horace page, §10, and [11-thermal-model.md](11-thermal-model.md)); nor does the thermal resistance.
 
 ## Pricing a workload before running it
 

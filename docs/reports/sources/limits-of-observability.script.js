@@ -307,10 +307,9 @@ LAD = (function () {
   const hot = EV.find(x => x.id === 's-contended').v.any;
   const ring = EV.find(x => x.id === 'm-xshire1');
   setHTML('ev-note', `σ defaults to 0.2 W, about the idle law's rms per idle sample (${num(M.idle_law_rms_w, 3)} W): the uncertainty of a baseline predicted from temperature. The hot line's contended atomic, about ${num(hot.e[0] * hot.rate, 1)} W over idle, carries a bar of ${sgn(100 * (hot.e[1] / hot.e[0] - 1), 0)}% to ${sgn(100 * (hot.e[2] / hot.e[0] - 1), 0)}%, about that size. ` +
-    `A burst bracketed by idle measured just before and after does better than σ = 0.2 W on one card; the bars are the range over every pass on every card measured, so they include the difference between the cards ` +
+    `The bars are the range over every pass on every card measured, so they include the difference between the cards ` +
     `(${esc(ring.label)}: ${sgn(100 * (ring.v.any.e[1] / ring.v.any.e[0] - 1), 0)}% to ${sgn(100 * (ring.v.any.e[2] / ring.v.any.e[0] - 1), 0)}%${Object.keys(ring.v.any.cards || {}).length > 1 ? `, with ${andList(CK.cardsIn(ring.v.any.cards).map(c => `${J(ring.v.any.cards[c])} on ${c}`))}` : ''}); the flips and the wires were priced by fits over many bursts. ` +
-    `Each event's rate is ${esc(E.rate_rule.split(':')[0])} (each event's tip names its source). The band is one reading's step on aifoundry2 while ettelem samples, 1 mW × about ${num(1000 * M.pass_s, 0)} ms on a rail and 10 mW × ${num(1000 * M.pass_s, 0)} ms on the board, one new board value ` +
-    `(${num(1000 * M.pass_s_a1c1, 0)} ms on aifoundry1-c1 and ${num(1000 * M.pass_s_a3, 0)} ms on aifoundry3, §4.1); the rail's own average spreads a single event over about a second.`);
+    `The band is one reading's step on aifoundry2, 1 mW on a rail and 10 mW on the board for one pass (§4.1); the rail's own average spreads a single event over about a second.`);
   upd();
 })();
 
@@ -368,17 +367,10 @@ function fitOf(card, line) {
   setHTML('ring-v3', rv3.length ? `In the version-3 campaign's reruns the ring starved the sampler on ${rv3.length === CARDS.length ? `all ${WORD[rv3.length]} cards` : andList(rv3)}, ` +
     `in ${rv3.every(c => RV3[c].length === nv3[c]) ? `every pass (${andList([...new Set(rv3.map(c => word(nv3[c])))])} on each card)` : andList(rv3.map(c => `${word(RV3[c].length)} of ${word(nv3[c])} passes on ${c}`))}` +
     (fb ? `, so the energy manual keeps ${andList(fb.cards)}'s passes of 23 September for it.` : '.') : '');
-  /* DRAM reads: per card, the sampler's latency over the DRAM-read bursts, the slowest bursts' stale NoC reading, and
-     those bursts' board watts over aifoundry2's against every catalogue entry's */
-  const REF = CARDS[0], slow = CARDS.flatMap(c => SA[c].slow.map(b => b.noc_w - b.noc_other_passes_w)), RO = SA['reads_over_' + REF] || {}, AO = SA['all_over_' + REF] || {};
-  setHTML('sampler-dram', `DRAM reads slow it too: over a burst of tensor loads or row walks from DRAM, the median sample takes up to ` +
+  /* DRAM reads: per card, the sampler's median latency over the DRAM-read bursts against every other burst */
+  setHTML('sampler-dram', `DRAM reads slow it too: over a burst of tensor loads or row walks from DRAM the median sample takes up to ` +
     andList(CARDS.map((c, i) => `${num(SA[c].read_median_ms[1], 0)}${i ? '' : ' ms'} on ${c}`)) +
-    ` (the longest single sample ${andList(CARDS.map(c => num(SA[c].read_max_ms, 0)))} ms, in that order), against ${rng(...mm(CARDS.flatMap(c => SA[c].other_median_ms)), 0, 'ms')} in every other burst. ` +
-    `The catalogue keeps those bursts. In the slowest of them (a median over 60 ms: ` +
-    andList(CARDS.map(c => SA[c].over_60ms ? `${word(SA[c].over_60ms)} of ${c}'s ${num(SA[c].bursts, 0)}` : `none of ${c}'s`)) + `) the rails' readings are stale` +
-    (slow.length ? `: the NoC rail reads ${slow.every(v => v < 0) ? `${rng(...mm(slow.map(v => -v)), 1)} W below` : `from ${f(-Math.min(...slow), 1)} W below to ${f(Math.max(...slow), 1)} W above`} the same configuration's other passes` : '') + '. ' +
-    `Their board watts over ${REF}'s are ` + andList(CK.cardsIn(RO).map(c => `${rng(...RO[c], 2)} on ${c}`)) +
-    `, against ${andList(CK.cardsIn(AO).map(c => `${rng(...AO[c].p10_p90, 2)}`))} over the middle 80% of the catalogue's entries.`);
+    `, against ${rng(...mm(CARDS.flatMap(c => SA[c].other_median_ms)), 0, 'ms')} in every other burst; the catalogue keeps those bursts.`);
   setHTML('idle-unsensed', `${f(I.unsensed_w, 1)} W of the ${f(I.board_w, 1)} W the board draws at ${num(I.die_c, 0)} °C on aifoundry2 (one 60 s window), about half`);
   /* the other cards' idle over the catalogue's idle gaps, with the share as a plain fraction */
   setHTML('idle-unsensed-a3', 'Over the catalogue\'s idle gaps it is about ' + andList(CARDS.slice(1).map(c => { const u = IU[c], sh = (u.w[0] / u.board_w[0] + u.w[1] / u.board_w[1]) / 2;
@@ -437,9 +429,7 @@ function fitOf(card, line) {
     `${rng(...mm(rd.map(p => r0(p.pj))), 0)} on random data, per configuration), on top of the ${rng(...mm(off.map(p => r0(p.tot - p.pj))), 0)} pJ the mesh, the SRAM and the delivery losses take on the way: ` +
     `together ${rng(...mm(tl.map(p => r0(p.tot))), 0)} pJ per byte for tensor loads from DRAM, zeros to random data. A byte written through the L1 costs about twice that off-rail (${rng(...mm(offSt.map(r0)), 0)} pJ), ` +
     `because the line is read from DRAM before it is written. <b>And the NoC coefficient is not all regulator</b>: ${rng(...mm(cm('noc').map(v => r0(100 * v))), 0)}% is more than a delivery loss would take; ` +
-    `the likely rest, not measured, is the memory shires' own logic, on an unmetered rail, which works whenever the mesh moves bytes to them. What the fit cannot say is how the idle ${TOK.idle_unsensed} (` +
-    andList(CARDS.map(c => `${rng(r0(IU[c].w[0]), r0(IU[c].w[1]), 0, 'W')} on ${c} at ${rng(r0(IU[c].die_c[0]), r0(IU[c].die_c[1]), 0, '°C')}`)) + ') ' +
-    `splits between DDR refresh and PHY, PCIe, the IO shire, Maxion and the regulators' own draw, nor how the DRAM term splits below the regulator.`);
+    `the likely rest, not measured, is the memory shires' own logic, on an unmetered rail, which works whenever the mesh moves bytes to them.`);
 
   /* §5's paragraph */
   const dUn = all.filter(p => full(p) || p.k === 'st').map(p => p.un), c2 = F.aifoundry2.coef;
@@ -452,9 +442,8 @@ function fitOf(card, line) {
   /* ---------- V1: where a workload's watts go ---------- */
   const shareV = (c, k) => med(fit[c].pts.filter(p => k(p)).map(p => p.un / p.over)), share = (c, k) => pct(shareV(c, k));
   setHTML('v1-cap', `Of what each configuration adds above idle, how much is on no sensor, and does the four-term fit account for it? The scatter: every catalogue configuration's unmetered watts ` +
-    `(board over idle less the three rails) against what the fit gives it; filled dots ran on random data, open ones on zeros or constants. The first bar: the idle card at ${num(I.die_c, 0)} °C on aifoundry2 ` +
-    `(${f(I.board_w, 2)} W, the mean of one 60 s window after ${num(I.hours, 1)} h idle): ${f(I.unsensed_w, 1)} W of it is on no sensor ` +
-    `and cannot be split further. The second bar: the chosen configuration's watts over idle, the three rails and then the fit's delivery loss and DRAM term, with the measured total as a tick. ` +
+    `(board over idle less the three rails) against what the fit gives it; filled dots ran on random data, open ones on zeros or constants. The first bar: the idle card at ${num(I.die_c, 0)} °C on aifoundry2, ${f(I.unsensed_w, 1)} W of it on no sensor, ` +
+    `which cannot be split further. The second bar: the chosen configuration's watts over idle, the three rails and then the fit's delivery loss and DRAM term, with the measured total as a tick. ` +
     `Above idle, ${(() => { const ins = CARDS.map(c => shareV(c, p => p.k === 'instr')), w = [...new Set(ins.slice().sort((a, b) => b - a).map(fracWord))];
       return `${w.length === 1 ? `about ${w[0]}` : `between ${w[w.length - 1]} and ${w[0]}`} of an instruction's watts are on no sensor (median ${perCard(ins.map(v => pct(v)), '')})`; })()} ` +
     `and about ${fracWord(med(CARDS.map(c => shareV(c, p => p.g > 0))))} of DRAM traffic's (${andList(CARDS.map(c => share(c, p => p.g > 0)))}). Hover, tap or tab to a point to break it down; arrows step through the points in residual order.`);
