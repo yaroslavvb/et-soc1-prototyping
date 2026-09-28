@@ -1,0 +1,44 @@
+SET INFO_kind='SMOKE'
+SET INFO_k='1'
+SET P_abs_stop_c='88'
+SET P_cap_high_c='86'
+SET P_cap_mean_c='85'
+SET P_cap_board_w='78'
+SET P_hard_board_w='82'
+SET P_cap_consecutive='2'
+SET P_soft_release_c='1'
+SET P_soft_release_w='2'
+SET P_guard_gate_c='85'
+SET P_guard_stop_c='90'
+SET P_guard_stale_s='10'
+SET P_guard_max_s='2700'
+SET P_guard_refresh_s='1500'
+SET P_sampler_stale_s='3'
+SET P_chain_cap_s='150'
+SET P_chain_gap_s='15'
+SET P_reset_ms='1000'
+SET P_heat_mask='0xffffffff'
+SET P_heat_all32='32'
+SET P_heat_all24='24'
+SET P_heat_s='2'
+SET P_all24_above_c='999'
+SET P1_preheat_c='62'
+SET P1_preheat_per_shire='24'
+SET P1_condition_s='60'
+SET P1_launch_s='4'
+SET P1_tail_s='15'
+COND IDLE - 0
+COND ONE-C 0x00004000 32
+COND ONE-NE 0x10000000 32
+COND B4C 0x00606000 32
+SET P2_cool_wait_s='60'
+SET P2_tail_s='360'
+SET P2_tail_battery_at_c='65'
+SET P2_followup_repeats='3'
+BAND B0 - - - 3 0 58 600
+BAND B1 65 69 67 3 0 - 0
+BAND B2 72 76 74 3 0 - 0
+BAND B3 78 81 80 4 0 - 0
+BAND B4 82 84 83 4 1 - 0
+SET P2_rjit='--n 19000 --jitter 3000 --start 0x1000 --seed 101'
+SET P2_rlocked='--n 24000 --start 0x1000'

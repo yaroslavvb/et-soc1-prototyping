@@ -1,0 +1,234 @@
+{
+ "amendments": [
+  {
+   "n": 1,
+   "replaces": "8d620b64dc60239a104c59e3d9bd8c42cf1b4adb9e482460499dedc836f36661"
+  },
+  {
+   "n": 2,
+   "replaces": "067a32b41014fdc65d0880008d090d022075b812c63e360d8dc831c4222ad22e"
+  }
+ ],
+ "binaries": {
+  "aifoundry1-c1": {
+   "ettelem": "8008f96f056ae1c224c33ccce38070a67882a664620d637b8833d378b2167325",
+   "heater": "1641d27764478465cc054ca24c38b678bbe8616c3cc1bce9f47a93ee389d2bf6",
+   "heater_kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+   "memprobe": "0b1e4bc024bce33aa8909341f2a6323c66523ce5affbdd04ce7e78ec68af876d",
+   "memprobe_kernel": "55c6dbab43929eb00e0422f73bb2bbc0f24cb891b2c2632125d211e790b0ff20",
+   "mmbench": "a071fcef900bc3f3e59a609a369884ca0ce6b35eeb24195d8a119e89861ebf76",
+   "mmbench_kernel": "5b2b25a98440543848dbac9ec1b4ef5e3209c9994fcf3ba5e68741836367b0d3",
+   "onchip": "c281c327de81bfe55cbed4c1a5e5ff9864d57a4585a954bc49ff7e020e4b295f",
+   "onchip_kernel": "b4630d14c9628928407bae59b280cfd79d9e2148b0aa5568492aeab892c27bb3"
+  },
+  "aifoundry3": {
+   "ettelem": "16037641ab75bdbe1209f323641e269c9b897468091243173bfaaaf0b21686e2",
+   "heater": "20e760c20e9b99c789ef96f1e4e950d51f534410275bfb933c2aaf96d1090fd0",
+   "heater_kernel": "d521e43248d00b4da455ada7020741f39b8940e52bbbce05380beccedcd17d19",
+   "memprobe": "35762434ae2434532935a0a230dd22faf0348ce8aafef83dc22fbe52f3f41380",
+   "memprobe_kernel": "180eb2acb032f955002f1eb64927d0f4876f714eec05bdfb91d675d2bb1408a0",
+   "mmbench": "8ba18ee8759e6631c7c8a329df22fd6b6dfbb92aea09b05a86d4cd898e402f76",
+   "mmbench_kernel": "3c91a87faa2406c2e4bacb9a65c57329695761b08e35560d705ceb2f35fc63cb",
+   "onchip": "ea8d8282a9747711a3f5ba2c4a17444076c8f69c448c84c1c7474ebb7b279bd7",
+   "onchip_kernel": "f8da0d8bf3ceb4140e09ac9ca5517d947e73baf4f981637c4af551806f9b6499"
+  }
+ },
+ "files": {
+  "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+  "tools/claims-v3/oh/battery.txt": "f18c415cceb530cf3b26c468b42e21149fb812734322e117d5bfe811232da9d7",
+  "tools/claims-v3/oh/block.sh": "9909206ab2a40dbff211622d4f688982b6808720f21edd80f5227a7fe5210a32",
+  "tools/claims-v3/oh/ohlib.py": "12628e24d2416d48779c19f4ab85f6a6f975fd622017f0b049d890932aa5b35c",
+  "tools/claims-v3/oh/ohlib.sh": "49282a84be0bc2fe8c7e60b22cd53d26c583a48dabb4b5e7593e21228df0732f",
+  "tools/claims-v3/oh/params-oh.json": "3087a44b68c9be2b7792b01a9ec5796a41bb6a09043ddec691173b55ff1fae38",
+  "tools/claims-v3/oh/reduce.py": "915c9a13d2bc81fcbb222231d23d9c50fb75b4fc3dd55172241c5ac7969e9a6f",
+  "tools/claims-v3/oh/run_queue.sh": "7d427103080f0613d84bae4fb26a46f7307f0cfbae5ac6e7e5735ed2b6bee1ff",
+  "tools/claims-v3/oh/schedule-aifoundry1-c1.txt": "165c235fde7200edf7ea24b339bf9d3ec13833a70efe1e0ce8785c2c63b279d9",
+  "tools/claims-v3/oh/schedule-aifoundry3.txt": "20731e7297d402804dbd9c8760d0d0cdae5a1937658d02710699c7ede94bab6a",
+  "tools/claims-v3/queue.sh": "4b63600429614c2379ce6e63e0cfc4fe518e8069bfa3a01b594b663facd924e9",
+  "workloads/memprobe/gen_ops.py": "379e1522c16f5cc9884263c83e29d63084989fdbe996d6a80db35e3502ac89b3"
+ },
+ "items": {
+  "OH1-a": "every 1 s analysis window (10 s after the condition starts to its end), every condition, both cards: hottest sensor minus mean <= +4 C. FAIL if any window >= +5.",
+  "OH1-b": "per block, median dhot of ONE-C <= that of B4C. PASS in >= 2 of 3 blocks on aifoundry3 and 2 of 2 on card 1; otherwise FAIL.",
+  "OH1-c": "per card, pooled over its blocks: |median dhot(condition) - median dhot(IDLE)| <= 1 C, for ONE-C, ONE-NE and B4C separately.",
+  "OH2-a": "0 wrong results, 0 tensor-error CSRs and 0 not-ok among all checked launches in every band on both cards. With N checked launches in a band and 0 failures the page quotes the 95 % upper bound 3/N per launch.",
+  "OH2-b": "for each kernel metric (fma cycles per op and gemv cycles per layer per sweep point; mmbench and relay cycles_max): |median over launches whose die mean read 80-85 C / median over the rest band B0 - 1| <= 0.1 % -> PASS; otherwise, if the hot median lies inside the rest band's [min, max] -> PASS (within noise); otherwise FAIL.",
+  "OH2-c": "the heater's implied clock (cycles / host wall time of its 0.5 s launches), median per 5 C band of the die mean, lies in 0.5994-0.5995 GHz in every band.",
+  "OH2-d": "1 s windows inside a heater (ALL32/ALL24) launch: max dhot <= +4 in every band (60-70, 70-80, 80-85); median(80-85) - median(60-70) is 0 or +1 C.",
+  "OH2-e": "memprobe's refresh period (the jittered series, computed as V3's MEM-P5) at the hot band = 2,325.4 +- 0.1 minion cycles on both cards.",
+  "OH3-a": "idle samples (>= 5 s after any launch, 600 MHz) of the OH blocks: the median board power per whole degree (>= 20 samples) between 60 and 84 C is within +-1.5 W of the card's E44 law (aifoundry3 15.45 + 21.89 e^((T-80)/30); card 1 18.45 + 30.50 e^((T-80)/30)).",
+  "OH3-b": "refitting P_fix + A e^((T-80)/T_L) on E44's T_L grid to those bins gives a doubling interval T_L ln 2 of 17-25 C."
+ },
+ "params": {
+  "_what": "OH (the effect of overheating, E53): every cap, band, condition and order the blocks use. Fixed before any card block; PREREG.md hashes this file.",
+  "caps": {
+   "abs_stop_c": 88,
+   "cap_board_w": 78,
+   "cap_consecutive": 2,
+   "cap_high_c": 86,
+   "cap_mean_c": 85,
+   "guard_gate_c": 85,
+   "guard_max_s": 2700,
+   "guard_refresh_s": 1500,
+   "guard_stale_s": 10,
+   "guard_stop_c": 90,
+   "hard_board_w": 82,
+   "sampler_stale_s": 3,
+   "soft_release_c": 1,
+   "soft_release_w": 2
+  },
+  "cards": [
+   "aifoundry3",
+   "aifoundry1-c1"
+  ],
+  "chain": {
+   "cap_s": 150,
+   "gap_s": 15
+  },
+  "heater": {
+   "all24_above_c": {
+    "aifoundry1-c1": 75,
+    "aifoundry3": 999
+   },
+   "mask": "0xffffffff",
+   "per_shire_all24": 24,
+   "per_shire_all32": 32,
+   "seconds": 2
+  },
+  "oh1": {
+   "analysis_skip_s": 10,
+   "blocks": {
+    "aifoundry1-c1": 2,
+    "aifoundry3": 3
+   },
+   "condition_s": 60,
+   "conditions": {
+    "B4C": {
+     "mask": "0x00606000",
+     "per_shire": 32,
+     "shires": [
+      13,
+      14,
+      21,
+      22
+     ],
+     "where": "S13 S14 S21 S22, the central 2x2 block (E51's B4C@32)"
+    },
+    "IDLE": {
+     "mask": null,
+     "per_shire": 0,
+     "shires": []
+    },
+    "ONE-C": {
+     "mask": "0x00004000",
+     "per_shire": 32,
+     "shires": [
+      14
+     ],
+     "where": "S14, grid row 3 column c3 (central)"
+    },
+    "ONE-NE": {
+     "mask": "0x10000000",
+     "per_shire": 32,
+     "shires": [
+      28
+     ],
+     "where": "S28, grid row 1 column c6 (next to the I/O corner)"
+    }
+   },
+   "launch_s": 4,
+   "preheat_c": 62,
+   "preheat_per_shire": 24,
+   "tail_s": 15,
+   "williams_rows": [
+    [
+     "IDLE",
+     "ONE-C",
+     "B4C",
+     "ONE-NE"
+    ],
+    [
+     "ONE-C",
+     "ONE-NE",
+     "IDLE",
+     "B4C"
+    ],
+    [
+     "ONE-NE",
+     "B4C",
+     "ONE-C",
+     "IDLE"
+    ],
+    [
+     "B4C",
+     "IDLE",
+     "ONE-NE",
+     "ONE-C"
+    ]
+   ]
+  },
+  "oh2": {
+   "band_heat_s": 300,
+   "bands": [
+    {
+     "batteries": 3,
+     "hi": null,
+     "lo": null,
+     "name": "B0",
+     "rest_max_c": {
+      "aifoundry1-c1": 63,
+      "aifoundry3": 58
+     },
+     "rest_wait_s": 600
+    },
+    {
+     "batteries": 3,
+     "hi": 69,
+     "lo": 65,
+     "name": "B1",
+     "target": 67
+    },
+    {
+     "batteries": 3,
+     "hi": 76,
+     "lo": 72,
+     "name": "B2",
+     "target": 74
+    },
+    {
+     "batteries": 4,
+     "hi": 81,
+     "lo": 78,
+     "name": "B3",
+     "target": 80
+    },
+    {
+     "batteries": 4,
+     "hi": 84,
+     "lo": 82,
+     "name": "B4",
+     "refresh": true,
+     "target": 82
+    }
+   ],
+   "cool_wait_s": 60,
+   "followup_repeats": 3,
+   "hold_heat_s": 30,
+   "refresh": {
+    "jit": {
+     "jitter": 3000,
+     "n": 19000,
+     "seed": 101,
+     "start": "0x1000"
+    },
+    "locked": {
+     "n": 24000,
+     "start": "0x1000"
+    }
+   },
+   "tail_battery_at_c": 65,
+   "tail_s": 360
+  },
+  "reset_ms": 1000
+ }
+}

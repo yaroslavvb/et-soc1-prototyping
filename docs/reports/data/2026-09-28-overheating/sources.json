@@ -1,0 +1,504 @@
+{
+ "note": "The page's sources, one entry per document. group 'outside' = published by someone else (fetched 28 September 2026 by the research tracks); group 'et' = the ET-SoC-1's own firmware, manuals and design documents (upstream repositories at the commits named). 'used' names the pages, sections, tables or lines the page relies on; 'flag' marks a source read only second-hand ('secondary': a press or forum report of a vendor statement; 'index only': read through a search engine's copy; 'abstract only'; 'mirror': a third-party copy of a vendor document). The page numbers each group in order of first citation; build_overheat_data.py refuses to build if the page cites a key that is not here.",
+ "sources": [
+  {
+   "key": "intel-atom",
+   "group": "outside",
+   "cite": "Intel, Atom Processor S1200 Product Family for Microserver: Thermal and Mechanical Design Guidelines, doc. 328196-001, Nov 2012",
+   "url": "https://www.intel.cn/content/dam/www/public/us/en/documents/product-briefs/atom-s1200-thermal-guidelines.pdf",
+   "used": "§3.1 Tj,max defined as the maximum temperature on the die-active surface (p. 18); Table 3-1 Tj,max 90–102 °C by SKU, 6.0 W at 90 °C or 6.3 W at 102 °C (p. 19); §3.2.2 THERMTRIP near 125 °C, power must be removed (p. 21); §3.2.9 THERMTRIP individually calibrated (p. 25); §3.2.2 ('If Intel Thermal Monitor automatic mode is disabled, the processor operates out of specification', p. 21)"
+  },
+  {
+   "key": "intel-peci",
+   "group": "outside",
+   "cite": "M. Berktold, T. Tian (Intel), CPU Monitoring With DTS/PECI, white paper 322683, Sep 2010",
+   "url": "https://hww.ru/wp/wp-content/uploads/2020/06/cpu-monitoring-dts-peci-paper.pdf",
+   "used": "THERMTRIP 'a point beyond which permanent silicon damage may occur' (p. 4); PECI reports the highest of all sensors (p. 7); calibration pushed to the high side (p. 8); fan failure reaches THERMTRIP (p. 10)",
+   "flag": "mirror (Intel's own URL refused the fetch)"
+  },
+  {
+   "key": "intel-dts",
+   "group": "outside",
+   "cite": "Intel, 13th Generation Intel Core Processors Datasheet, Vol. 1 of 2, doc. 743844 rev. 015, 'Digital Thermal Sensor'",
+   "url": "https://edc.intel.com/content/www/us/en/design/products/platforms/details/raptor-lake-s/13th-generation-core-processors-datasheet-volume-1-of-2/015/digital-thermal-sensor/",
+   "used": "DTS error within ±5 °C; PECI's 256 ms average of the hottest DTS, for fan control, 'may not be a good indicator' of throttle activation"
+  },
+  {
+   "key": "intel-atm",
+   "group": "outside",
+   "cite": "Intel, 13th Generation Intel Core Processors Datasheet, Vol. 1 of 2, rev. 015, 'Adaptive Thermal Monitor'",
+   "url": "https://edc.intel.com/content/www/us/en/design/products/platforms/details/raptor-lake-s/13th-generation-core-processors-datasheet-volume-1-of-2/015/adaptive-thermal-monitor/",
+   "used": "activated when the package temperature 'monitored by any Digital Thermal Sensor' meets its maximum; the averaged (EWMA) loop is 'in addition, and not instead of' TjMAX; clock modulation"
+  },
+  {
+   "key": "intel-thermtrip",
+   "group": "outside",
+   "cite": "Intel, Core Ultra Processor Datasheet (Meteor Lake U/P), Vol. 1 of 2, rev. 003, 'THERMTRIP# Signal'",
+   "url": "https://edc.intel.com/content/www/us/en/design/products/platforms/details/meteor-lake-u-p/core-ultra-processor-datasheet-volume-1-of-2/003/thermtrip-signal/",
+   "used": "shuts down 'when the silicon has reached an elevated temperature that risks physical damage to the product'"
+  },
+  {
+   "key": "intel-13900k",
+   "group": "outside",
+   "cite": "Intel, Core i9-13900K specifications",
+   "url": "https://www.intel.com/content/www/us/en/products/sku/230496/intel-core-i913900k-processor-36m-cache-up-to-5-80-ghz/specifications.html",
+   "used": "TJUNCTION 100 °C"
+  },
+  {
+   "key": "amd-bkdg",
+   "group": "outside",
+   "cite": "AMD, BIOS and Kernel Developer's Guide for AMD Family 15h Models 70h–7Fh, 55072 rev. 3.09, Jun 2018",
+   "url": "https://www.amd.com/content/dam/amd/en/documents/archived-tech-docs/programmer-references/55072_AMD_Family_15h_Models_70h-7Fh_BKDG.pdf",
+   "used": "§2.10.1 Tctl (p. 143); §2.10.3.1 HTC with hysteresis (pp. 144–145); §2.10.3.3 THERMTRIP gates the clocks, S5, 'a cold reset is required' (pp. 145–146)"
+  },
+  {
+   "key": "amd-ryzen95",
+   "group": "outside",
+   "cite": "AMD Ryzen (official account), post on X, Nov 2022: 'Ryzen 7000 Series is designed for a lifetime at 95°C'",
+   "url": "https://x.com/AMDRyzen/status/1592947905647845376",
+   "used": "the quoted sentence",
+   "flag": "index only"
+  },
+  {
+   "key": "amd-rx5700",
+   "group": "outside",
+   "cite": "N. Mott, 'AMD Explains Why 110-Degree Operating Temps Are \"in Spec\" for RX 5700', Tom's Hardware, 13 Aug 2019, quoting AMD's Radeon community blog of 12 Aug 2019",
+   "url": "https://www.tomshardware.com/news/amd-rx-5700-graphics-card-thermal-management,40144.html",
+   "used": "clocks ramp 'until any one of the many available sensors hits the hotspot or Junction temperature of 110 degrees'; the old scheme was 'a single sensor … in the vicinity of the legacy thermal diode' with 'a conservative, worst case throttling temperature for the entire die'",
+   "flag": "secondary (AMD's blog now redirects)"
+  },
+  {
+   "key": "nvidia-smi",
+   "group": "outside",
+   "cite": "NVIDIA, nvidia-smi documentation: temperature fields and clock event reasons",
+   "url": "https://docs.nvidia.com/deploy/nvidia-smi/index.html",
+   "used": "Shutdown, Slowdown ('by a factor of 2 or more') and Max Operating temperatures; 'GPU Current Temp' is not defined as a sensor or an aggregate"
+  },
+  {
+   "key": "jetson",
+   "group": "outside",
+   "cite": "NVIDIA, Jetson Linux Developer Guide r36.4.3, 'Jetson Orin Nano, Orin NX and AGX Orin Series' (platform power and performance)",
+   "url": "https://docs.nvidia.com/jetson/archives/r36.4.3/DeveloperGuide/SD/PlatformPowerAndPerformance/JetsonOrinNanoSeriesJetsonOrinNxSeriesAndJetsonAgxOrinSeries.html",
+   "used": "'Sensors and Sensor Groups' (a group reports the maximum of its sensors); 'Thermal Specifications' (software throttle 99, hardware throttle 103, software shutdown 104.5, hardware shutdown 105 °C); 'Hardware Thermal Shutdown' (the final failsafe)"
+  },
+  {
+   "key": "versal",
+   "group": "outside",
+   "cite": "AMD, Versal AI Core Series Data Sheet: DC and AC Switching Characteristics (DS957), 'Recommended Operating Conditions'",
+   "url": "https://docs.amd.com/r/en-US/ds957-versal-ai-core/Recommended-Operating-Conditions",
+   "used": "Table 1 (Tj 0–100 °C extended, −40–100 °C industrial) and note 16 (100–110 °C for at most 3% of the device's lifetime)"
+  },
+  {
+   "key": "xq-versal",
+   "group": "outside",
+   "cite": "AMD, XQ Defense-Grade Versal Portfolio product brief",
+   "url": "https://www.amd.com/content/dam/amd/en/documents/products/adaptive-socs-and-fpgas/product-briefs/amd-xq-versal-product-brief.pdf",
+   "used": "M grade −55 to +125 °C"
+  },
+  {
+   "key": "nxp-consumer",
+   "group": "outside",
+   "cite": "NXP, i.MX 8M Plus Applications Processor Datasheet for Consumer Products, IMX8MPCEC rev. 2.1, Jul 2023",
+   "url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/5783/IMX8MPCEC.pdf",
+   "used": "Table 12 (Tj 0 to +95 °C) and note 3 (power-on hours fall if the junction temperature rises), p. 25"
+  },
+  {
+   "key": "nxp-industrial",
+   "group": "outside",
+   "cite": "NXP, i.MX 8M Plus Applications Processor Datasheet for Industrial Products, IMX8MPIEC rev. 1, Aug 2021",
+   "url": "https://community.nxp.com/pwmxy87654/attachments/pwmxy87654/imx-processors/216087/2/IMX8MPIEC_ProcessorDataSheet.pdf",
+   "used": "Table 12 (Tj −40 to +105 °C), p. 25"
+  },
+  {
+   "key": "ti-lifetime",
+   "group": "outside",
+   "cite": "A. Webber (TI), Calculating Useful Lifetimes of Embedded Processors, SPRABX4B, rev. Mar 2020",
+   "url": "https://www.ti.com/lit/an/sprabx4b/sprabx4b.pdf",
+   "used": "§1 (10 years at 105 °C Tj); §3–4 (electromigration the critical wear-out mechanism; lifetime 'approximately halves' per 10 °C 'with slippage at higher temperatures'); §4.1 (0.7 eV; 90 instead of 105 °C doubles life); §4.2 Table 1 (0.50, 0.40, 0.30, 0.20 of the life at 110, 115, 120, 125 °C)"
+  },
+  {
+   "key": "jesd47",
+   "group": "outside",
+   "cite": "JEDEC, JESD47I, Stress-Test-Driven Qualification of Integrated Circuits, Jul 2012",
+   "url": "https://www.guerrilla-rf.com/includes/pdfs/general/JESD47I.pdf",
+   "used": "Table 1: HTOL at Tj ≥ 125 °C and Vcc ≥ Vcc max for 1,000 h, 3 lots × 77 units, 0 failures; HTSL ≥ 150 °C for 1,000 h; note a (Arrhenius, 0.7 eV: 1,000 h at 125 °C equal to about 9 years at 55 °C, AF 78.6); note c (hot carriers tested cold, Tj ≤ 50 °C); Table 2 (temperature cycling, condition B −55 to +125 °C, 700 cycles, 0 failures); Annex A (solder joints limit life under temperature cycling; Coffin-Manson ΔT^n with n = 2; a desktop's use condition: ΔT 40 °C, 2,000 cycles in 5 years)",
+   "flag": "mirror"
+  },
+  {
+   "key": "aecq100",
+   "group": "outside",
+   "cite": "Automotive Electronics Council, AEC-Q100 Rev J, base document",
+   "url": "http://www.aecouncil.com/Documents/AEC_Q100_Rev_J_Base_Document.pdf",
+   "used": "Table 1 (grades by ambient: 0 to +150, 1 to +125, 2 to +105, 3 to +85 °C); Table 2 group B (HTOL at the grade's temperature)"
+  },
+  {
+   "key": "tsmc-n7-auto",
+   "group": "outside",
+   "cite": "TSMC, 'TSMC Delivers World-first 7nm Automotive Design Enablement Platform', press release, 28 May 2020",
+   "url": "https://pr.tsmc.com/english/news/2715",
+   "used": "7 nm standard-cell, GPIO and SRAM foundation IP passed AEC-Q100 Grade 1"
+  },
+  {
+   "key": "renesas",
+   "group": "outside",
+   "cite": "Renesas, Semiconductor Reliability Handbook, rev. 2.50, Jan 2017",
+   "url": "https://www.renesas.com/en/document/grl/semiconductor-reliability-handbook",
+   "used": "§3.2.1 TDDB (pp. 48–49); §3.2.2 hot carriers, worse when cold, 'lower temperatures do not necessarily lead to accelerated degradation' at low voltage (p. 52); §3.2.3 NBTI recovers when the bias is removed (pp. 53–54); §3.2.4 electromigration (pp. 54–55); p. 160 (high-temperature acceleration can switch on other failure modes, e.g. the glass transition of plastics)"
+  },
+  {
+   "key": "ramp",
+   "group": "outside",
+   "cite": "J. Srinivasan, S. V. Adve, P. Bose, J. A. Rivers, 'The Case for Lifetime Reliability-Aware Microprocessors' (RAMP), ISCA 2004",
+   "url": "http://rsim.cs.illinois.edu/Pubs/srinivasan_isca04.pdf",
+   "used": "§1 (temperature 'exponentially accelerates wear-out'); §3 (the mechanisms, applied to each structure); §3.1 (Black's equation, copper Ea 0.9 eV, n 1.1); §3.4 (thermal cycling: 'Damage accumulates every time there is a cycle in temperature', most at the package and die interface, e.g. solder joints; large cycles such as power-up and power-down; Coffin-Manson, exponent 2.35 for the package); §3.5 (a series failure system: the first structure to fail fails the processor); §3.7 (MTTF about 30 years)"
+  },
+  {
+   "key": "babu-review",
+   "group": "outside",
+   "cite": "S. J. Babu, F. Hu, L. Zhu, S. Singhal, X. Guo, 'Extending Silicon Lifetime: A Review of Design Techniques for Reliable Integrated Circuits', arXiv:2503.21165, 2025",
+   "url": "https://arxiv.org/pdf/2503.21165",
+   "used": "the electromigration section, Black's equation (Eq. 3): Ea 'for atom diffusion (0.8–1.2 eV for Cu)'",
+   "flag": "preprint"
+  },
+  {
+   "key": "black",
+   "group": "outside",
+   "cite": "J. R. Black, 'Electromigration — A brief survey and some recent results', IEEE Trans. Electron Devices 16(4):338–347, 1969",
+   "url": "https://doi.org/10.1109/T-ED.1969.16754",
+   "used": "abstract: gradients of temperature or current density 'foreshorten conductor life'",
+   "flag": "abstract only"
+  },
+  {
+   "key": "kaczer-bti",
+   "group": "outside",
+   "cite": "B. Kaczer, T. Grasser, J. Franco et al., 'Recent Trends in Bias Temperature Instability', ch. 2 in Bias Temperature Instability for Devices and Circuits, Springer 2014",
+   "url": "https://www.iue.tuwien.ac.at/pdf/ib_2015/BC2015_grasser_1.pdf",
+   "used": "§1: BTI's name 'is derived from the phenomenon being strongly accelerated by temperature T and gate bias VG'; §2–3, Fig. 2.1: a recoverable and a permanent component"
+  },
+  {
+   "key": "sobas",
+   "group": "outside",
+   "cite": "J. Sobas, F. Marc, 'Degradation Measurement and Modelling under Ageing in a 16 nm FinFET FPGA', Micromachines 15(1):19, 2024",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11154273/",
+   "used": "§3.2, §5.4, §6: 0–1% ring-oscillator slow-down after 8,000 h, slightly above 2% at 115 °C and 1.15 × nominal voltage"
+  },
+  {
+   "key": "pecht",
+   "group": "outside",
+   "cite": "M. Pecht, P. Lall, E. Hakim, 'The influence of temperature on integrated circuit failure mechanisms', Quality and Reliability Engineering International 8(3):167–176, 1992",
+   "url": "https://doi.org/10.1002/qre.4680080304",
+   "used": "abstract: whether 'a steady state temperature, temperature change, rate of temperature change or spatial temperature gradient induced failure' has generally not been quantified; 'no simple expression can adequately describe temperature as a failure accelerator'",
+   "flag": "abstract only (read through OpenAlex)"
+  },
+  {
+   "key": "jstd020",
+   "group": "outside",
+   "cite": "IPC/JEDEC J-STD-020D, Table 5-2 and notes, as reproduced by Diodes Inc., Feb 2019",
+   "url": "https://www.diodes.com/assets/sre/reflow.pdf",
+   "used": "lead-free reflow peak 260 °C"
+  },
+  {
+   "key": "sac305",
+   "group": "outside",
+   "cite": "AIM Solder, SAC305 Lead-Free Solder Alloy technical data sheet",
+   "url": "https://aimsolder.com/sites/default/files/alloy_sac305_tds.pdf",
+   "used": "solidus 217 °C, liquidus 220 °C"
+  },
+  {
+   "key": "kim-leakage",
+   "group": "outside",
+   "cite": "N. S. Kim et al., 'Leakage Current: Moore's Law Meets Static Power', IEEE Computer 36(12):68–75, 2003",
+   "url": "https://tnm.engin.umich.edu/wp-content/uploads/sites/353/2017/12/2003.12.Leakage-Current-Moores-Law-Meetings-Static-Power_Computer.pdf",
+   "used": "p. 70 (subthreshold leakage exponential in the thermal voltage; 'possibly causing thermal runaway'); pp. 72–73 (gate leakage barely depends on temperature)"
+  },
+  {
+   "key": "vassighi",
+   "group": "outside",
+   "cite": "A. Vassighi, M. Sachdev, 'Thermal runaway in integrated circuits', IEEE Trans. Device and Materials Reliability 6(2):300–305, 2006",
+   "url": "https://doi.org/10.1109/TDMR.2006.876577",
+   "used": "abstract: leakage raises the junction temperature, which raises leakage, 'possibly the thermal runaway'",
+   "flag": "abstract only"
+  },
+  {
+   "key": "wp221",
+   "group": "outside",
+   "cite": "M. Klein (Xilinx), 'Static Power and the Importance of Realistic Junction Temperature Analysis', WP221 v1.0, Mar 2005",
+   "url": "https://docs.amd.com/api/khub/documents/0VCf6OQkt9tZQNzX6yfZtA/content",
+   "used": "pp. 4–5, Figs. 2–3: source-to-drain leakage ×5 from 25 to 85 °C in a 90 nm FPGA; gate leakage dominates cold; p. 2 (thermal runaway)"
+  },
+  {
+   "key": "dasdan",
+   "group": "outside",
+   "cite": "A. Dasdan, I. Hom, 'Handling Inverted Temperature Dependence in Static Timing Analysis', ACM TODAES 11(2):306–324, 2006",
+   "url": "http://ziyang.eecs.umich.edu/~dickrp//talp/papers/dasdan-temperature.pdf",
+   "used": "abstract (inversion 'will worsen as supply voltages decrease'; it makes hold violations harder to find); §1.1 (a 90 nm library's crossover near 1.12 V, Figs. 1–2); §2, Eqs. 2–4 (mobility against threshold voltage)"
+  },
+  {
+   "key": "salamin",
+   "group": "outside",
+   "cite": "S. Salamin, V. M. van Santen, M. Rapp, J. Henkel, H. Amrouch, 'Minimizing Excess Timing Guard Banding Under Transistor Self-Heating Through Biasing at Zero-Temperature Coefficient', IEEE Access 9, 2021",
+   "url": "https://ieeexplore.ieee.org/document/9350273/",
+   "used": "§II (130 nm Intel ZTC 0.783–0.866 V; 65 nm 0.9 V, as cited); §III, Fig. 3 (FinFET channel self-heating); §IV-A, Fig. 4 (7 nm ASAP7 cells: ZTC 0.49–0.55 V, nominal 0.7 V); §IV-C, Fig. 6 (a whole 7 nm processor: 0.53 V); §V-C, Fig. 9 (ring oscillator 0.5 V). Simulation with an academic predictive kit"
+  },
+  {
+   "key": "lee-pedram",
+   "group": "outside",
+   "cite": "W. Lee, Y. Wang, T. Cui, S. Nazarian, M. Pedram, 'Dynamic Thermal Management for FinFET-Based Circuits Exploiting the Temperature Effect Inversion Phenomenon', ISLPED 2014",
+   "url": "https://mpedram.com/Papers/DTM-FinFET-TempEffeInv-islped14.pdf",
+   "used": "abstract, §2, Fig. 1: in 20–10 nm FinFET models hot is faster at every supply voltage simulated (0.3–0.9 V); worst-case delay at the lowest temperature; §3 Eq. 2 (leakage model). Simulation"
+  },
+  {
+   "key": "han-tip",
+   "group": "outside",
+   "cite": "K. Han, S. Lee, J. Lee, W. Lee, 'TIP: A Temperature Effect Inversion-Aware Ultra-Low Power System-on-Chip Platform', ISLPED 2019",
+   "url": "https://doi.org/10.1109/ISLPED.2019.8824925",
+   "used": "abstract: a 28 nm FD-SOI chip needed 0.48 V at 25 °C and 0.44 V at 80 °C for the same 50 MHz; wire delay rises with temperature at any voltage",
+   "flag": "abstract only"
+  },
+  {
+   "key": "zu-tistates",
+   "group": "outside",
+   "cite": "Y. Zu, W. Huang, I. Paul, V. J. Reddi, 'Ti-states: Processor Power Management in the Temperature Inversion Region', MICRO-49, 2016",
+   "url": "https://ieeexplore.ieee.org/document/7783758/",
+   "used": "abstract: on an AMD A10-8700P the margin inversion adds when warm allowed more than 5% lower supply voltage",
+   "flag": "abstract only"
+  },
+  {
+   "key": "pratap",
+   "group": "outside",
+   "cite": "R. Pratap, S. Mall, Upma, 'Effect of Temperature Inversion on Lower Nodes', Embedded Computing Design, 28 Oct 2020",
+   "url": "https://embeddedcomputing.com/technology/analog-and-power/power-semiconductors-wireless-charging/effect-of-temperature-inversion-on-lower-nodes",
+   "used": "at 16/7 nm the setup-critical corner is slow process, low voltage, low temperature",
+   "flag": "industry article"
+  },
+  {
+   "key": "vonglasow",
+   "group": "outside",
+   "cite": "A. von Glasow, A. H. Fischer, G. Steinlesberger (Infineon), 'Using the Temperature Coefficient of the Resistance (TCR) as Early Reliability Indicator for Stressvoiding Risks in Cu Interconnects', IRPS 2003",
+   "url": "http://congres.cran.univ-lorraine.fr/2003/IRPS%202003/papers/2D_4.PDF",
+   "used": "TCR figures: copper lines 3.1–4.0 × 10⁻³ per K; lower in narrow lines"
+  },
+  {
+   "key": "skadron",
+   "group": "outside",
+   "cite": "K. Skadron, M. R. Stan, W. Huang, S. Velusamy, K. Sankaranarayanan, D. Tarjan, 'Temperature-Aware Microarchitecture', ISCA 2003",
+   "url": "https://www.cs.virginia.edu/~skadron/Papers/hotspot_isca03.pdf",
+   "used": "§1 (localized heating is faster than chip-wide heating, hundreds of microseconds to milliseconds; a clock-stop trigger works 'as long as' it is based on the hottest temperature); §2 (average power 'does not track temperature reliably'); §4 (a comparator for each sensor); §4.2 (sensors away from the hot spot lower the emergency threshold; per-sensor moving averages); §5.2 (heat sink time constant: minutes)"
+  },
+  {
+   "key": "skadron-tr",
+   "group": "outside",
+   "cite": "K. Skadron et al., 'Temperature-Aware Microarchitecture: Extended Discussion and Results', U. Virginia TR CS-2003-08",
+   "url": "https://www.cs.virginia.edu/~skadron/Papers/hotspot_tr2003_08.pdf",
+   "used": "§4.1 (p. 17): 'Garrett and Stan [17] report an 18% variation over the range 0-100' (of frequency, through carrier mobility); 'the standard practice of designing the nominal operating frequency for the maximum allowed operating temperature'"
+  },
+  {
+   "key": "rotem",
+   "group": "outside",
+   "cite": "E. Rotem, J. Hermerding, A. Cohen, H. Cain (Intel), 'Temperature measurement in the Intel Core Duo Processor', THERMINIC 2006; arXiv:0709.1861",
+   "url": "https://arxiv.org/abs/0709.1861",
+   "used": "p. 1 (1.5 °C of accuracy is worth 1 W on mobile, 1 °C 2 W on desktops); p. 2 (up to about 10 °C between the diode and the hot spot; performance and reliability limited by the hottest location); pp. 3–4, Figs. 3–5 (the hot spot moves with the workload); p. 5 (a fixed offset costs 3–7%; without it some workloads 'risk functional issues or reliability degradation'); p. 5 ('Functionality, electrical specifications and reliability commitments are guaranteed at maximum Tj as measured by the DTS')"
+  },
+  {
+   "key": "memik",
+   "group": "outside",
+   "cite": "S. O. Memik, R. Mukherjee, M. Ni, J. Long, 'Optimizing Thermal Sensor Allocation for Microprocessors', IEEE TCAD 27(3):516–527, 2008",
+   "url": "http://eecs.northwestern.edu/~jlo198/Site/Publications_files/ThermalMonitoringSC_TCAD.pdf",
+   "used": "abstract, §VI.B: a uniform 4×4 sensor grid under-reads the per-core maximum by up to 10.48 °C (simulation)"
+  },
+  {
+   "key": "hotgauge",
+   "group": "outside",
+   "cite": "A. Hankin, D. Werner, M. Amiraski, J. Sebot, K. Vaidyanathan, M. Hempstead, 'HotGauge: A Methodology for Characterizing Advanced Hotspots in Modern and Next Generation Processors', IISWC 2021",
+   "url": "https://bpb-us-e1.wpmucdn.com/sites.tufts.edu/dist/7/3034/files/2021/11/HotGauge_IISWC_2021.pdf",
+   "used": "abstract (the first hotspot 0.2 ms after a workload starts); Fig. 1 (units above 120 °C while units 200 µm away are 30 °C cooler; simulated 7 nm client CPU); §III (the maximum localized temperature differential can cause timing violations)"
+  },
+  {
+   "key": "power9",
+   "group": "outside",
+   "cite": "IBM, POWER9 Processor User's Manual, OpenPOWER Version 2.1, 10 Oct 2019",
+   "url": "https://wiki.raptorcs.com/w/images/c/ce/POWER9_um_OpenPOWER_v21_10OCT2019_pub.pdf",
+   "used": "p. 31 (DTS ±5 °C; no automated hardware over-temperature protection); §23.5.2.2 DTS (p. 305)"
+  },
+  {
+   "key": "occ",
+   "group": "outside",
+   "cite": "OpenPOWER On-Chip Controller firmware, open-power/occ at 3515ab0e78eb, src/occ_405/amec",
+   "url": "https://github.com/open-power/occ/tree/3515ab0e78eb56755db269915ef362e74461c774/src/occ_405/amec",
+   "used": "amec_controller.c lines 93–98 ('TEMPPROCTHRM sensor, which is hottest core temperature'); amec_health.c 984–990 (over-temperature check on the same sensor); amec_sensors_core.c 296–317 (invalid DTS discarded), 386–416 (each core's temperature is a weighted average of its two core DTS readings and its quad's DTS); amec_slave_smh.c 532–533 (TEMPPROCAVG kept beside it)"
+  },
+  {
+   "key": "gaudi",
+   "group": "outside",
+   "cite": "Intel Gaudi documentation 1.24.0, 'System Management Interface Tool (hl-smi)'",
+   "url": "https://docs.habana.ai/en/latest/Management_and_Monitoring/Embedded_System_Tools_Guide/System_Management_Interface_Tool.html",
+   "used": "temperature.aip: 'Maximum temperature read from the four available temperature sensors on the SoC' (what the tool reports; the document does not say what the throttle compares); stats.violation.thermal counts the time spent throttling"
+  },
+  {
+   "key": "amdgpu",
+   "group": "outside",
+   "cite": "Linux kernel, drivers/gpu/drm/amd/pm/amdgpu_pm.c at 72d3fcf802c4",
+   "url": "https://github.com/torvalds/linux/blob/72d3fcf802c45d00b300f25b848a93c3a2bd7c7e/drivers/gpu/drm/amd/pm/amdgpu_pm.c",
+   "used": "channel labels edge/junction/mem (lines 84–86); junction read from the hotspot sensor (2860–2862); the edge channel hidden on graphics IP 9.4.3, the MI300 family (3888–3897). These lines label and expose what the driver reports; they do not say what the firmware's throttle compares"
+  },
+  {
+   "key": "amd-cpu-avg",
+   "group": "outside",
+   "cite": "AMD statement on Ryzen Master temperature reporting (Precision Boost 2), quoted in the Tom's Hardware forum thread 'Idle temperature discrepancies between Ryzen Master, CAM and HWiNFO', 17 Aug 2019",
+   "url": "https://forums.tomshardware.com/threads/idle-temperature-discrepancies-between-ryzen-master-cam-and-hwinfo.3513445/",
+   "used": "'a short-duration rolling average of all temp sensors in the chip … the same model our own Precision Boost 2 algorithm uses'",
+   "flag": "secondary (the AMD post it cites could not be retrieved)"
+  },
+  {
+   "key": "tomshw-5070ti",
+   "group": "outside",
+   "cite": "H. Nasir, 'Hotspot temperature sensor on Nvidia's Blackwell gaming GPUs is still accessible … RTX 5070 Ti caught throttling at 107°C over poor TIM application', Tom's Hardware, 11 Jul 2026",
+   "url": "https://www.tomshardware.com/pc-components/gpus/hotspot-temperature-sensor-on-nvidias-blackwell-gaming-gpus-is-still-accessible-if-you-have-access-to-nvidias-internal-mods-tool-nvidia-rtx-5070-ti-caught-throttling-at-107-c-over-poor-tim-application",
+   "used": "hotspot 107 °C and throttling while the reported temperature read 67–68 °C",
+   "flag": "secondary"
+  },
+  {
+   "key": "techspot-7900",
+   "group": "outside",
+   "cite": "R. Thubron, 'AMD confirms Radeon RX 7900 XTX temperature issue is related to cards' thermal solution', TechSpot, 4 Jan 2023",
+   "url": "https://www.techspot.com/news/97158-adm-confirms-radeon-rx-7900-xtx-temperature-issue.html",
+   "used": "hotspot 'as high as 110C' with throttling, traced to the vapor chamber",
+   "flag": "secondary"
+  },
+  {
+   "key": "hauschildt",
+   "group": "outside",
+   "cite": "M. Hauschildt et al., 'Statistical Analysis of Electromigration Lifetimes for Cu Interconnects', AIP Conf. Proc. 817, 2006",
+   "url": "https://www.osti.gov/etdeweb/biblio/20798174",
+   "used": "abstract: lognormal electromigration lifetimes",
+   "flag": "abstract only"
+  },
+  {
+   "key": "micron-lpddr4x",
+   "group": "outside",
+   "cite": "Micron, Automotive LPDDR4/LPDDR4X SDRAM MT53E1G16D1, MT53E1G32D2, MT53E2G32D4, rev. F 12/2020",
+   "url": "https://www.farnell.com/datasheets/3681594.pdf",
+   "used": "Table 8 note 2 (no self-refresh above 105 °C, p. 30); Tables 31–32 MR4 and notes (2× and 4× refresh above 85 °C; 'may not operate properly' past the limit, p. 52); pp. 199–200 and Table 132 (the read interval rule: gradient × (interval + tTSI + response) ≤ 2 °C); Table 154 (case-temperature grades: standard ≤ 85, elevated 85–95, automotive 95–105, ultra 105–125 °C, p. 222)"
+  },
+  {
+   "key": "samsung-lpddr4",
+   "group": "outside",
+   "cite": "Samsung, 16Gb LPDDR4 SDRAM K4F6E3S4HM data sheet, rev. 1.0, Jan 2018",
+   "url": "https://community.nxp.com/pwmxy87654/attachments/pwmxy87654/imx-processors/188157/2/1-K4F2E304HN_R00_history.pdf",
+   "used": "the MR4 refresh-rate table and notes 1–4; Table 19 (−25 to 85 °C operating); Table 63 (refresh window 32 / 16 / 8 ms, tREFI 3.904 µs)"
+  },
+  {
+   "key": "liu-retention",
+   "group": "outside",
+   "cite": "J. Liu, B. Jaiyen, Y. Kim, C. Wilkerson, O. Mutlu, 'An Experimental Study of Data Retention Behavior in Modern DRAM Devices', ISCA 2013",
+   "url": "https://users.ece.cmu.edu/~omutlu/pub/dram-retention-time-characterization_isca13.pdf",
+   "used": "§4.1, Fig. 7b: across 248 DDR3 chips, each +10 °C cut retention time by 39.2% (typical cells) and 46.5% (worst cells)"
+  },
+  {
+   "key": "ti-latchup",
+   "group": "outside",
+   "cite": "Texas Instruments, 'Latch-Up', white paper SCAA124, Apr 2015",
+   "url": "https://www.ti.com/lit/wp/scaa124/scaa124.pdf",
+   "used": "§1.1 (latch-up persists until the supply is removed and may be destructive); §1.2 (higher temperature lowers the immunity)"
+  },
+  {
+   "key": "jesd78",
+   "group": "outside",
+   "cite": "M. Johnson (JESD78 working group), 'Do you really know how to do JESD78 latch-up testing?', US International ESD Workshop, Mar 2023",
+   "url": "https://www.esdindustrycouncil.org/ic/en/shared/lup-user-guide-iew-2023.pdf",
+   "used": "slide 7: latch-up 'can occur anywhere on the die' and the 'highest Tj on the die during field operation (Tjmax) should be used'"
+  },
+  {
+   "key": "adi-pll",
+   "group": "outside",
+   "cite": "Analog Devices, US Patent 9,413,366 B2, 'Apparatus and methods for phase-locked loops with temperature compensated calibration voltage', 9 Aug 2016",
+   "url": "https://patents.google.com/patent/US9413366B2/en",
+   "used": "background: a VCO's frequency moves with temperature and 'the PLL may lose lock'"
+  },
+  {
+   "key": "gul-sram",
+   "group": "outside",
+   "cite": "W. Gul, M. Shams, D. Al-Khalili, 'SRAM Cell Design Challenges in Modern Deep Sub-Micron Technologies: An Overview', Micromachines 13(8):1332, 2022",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9416021/",
+   "used": "leakage 'more dominant at high temperatures'; better SRAM behaviour cold (Ion/Ioff)"
+  },
+  {
+   "key": "pedroso-hold",
+   "group": "outside",
+   "cite": "P. Pedroso, L.-W. Wang, M. R. Guthaus, 'An Open-Source Flow for Single-Phase, Edge-Triggered to Two-Phase, Non-Overlapping Clocking Conversion', arXiv 2605.05374",
+   "url": "https://arxiv.org/pdf/2605.05374",
+   "used": "§2.1: setup violations can be cured by a slower clock, hold violations cannot",
+   "flag": "preprint"
+  },
+  {
+   "key": "ditzel-hc33",
+   "group": "outside",
+   "cite": "D. Ditzel (Esperanto), 'Accelerating ML Recommendation with over a Thousand RISC-V/Tensor Processors on Esperanto's ET-SoC-1 Chip', Hot Chips 33, 2021",
+   "url": "https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf",
+   "used": "slides 2, 5, 20: TSMC 7 nm, 570 mm²; the low-voltage design point (0.425 V at 1 GHz per core)"
+  },
+  {
+   "key": "et-thermal-h",
+   "group": "et",
+   "cite": "et-platform, device-bootloaders/src/ServiceProcessorBL2/include/thermal_pwr_mgmt.h, at ffca4cbb4 ('Close development of version 0.20.0', 17 May 2024: the cards' BL2 0.20.0)",
+   "url": "https://github.com/aifoundry-org/et-platform/blob/ffca4cbb436713cffcbc5028fc9a86529dc86c7c/device-bootloaders/src/ServiceProcessorBL2/include/thermal_pwr_mgmt.h",
+   "used": "lines 31–32 (DEF_SYS_TEMP_VALUE 52, 'Expected average temperature', under '// Default Reset values': a value variables are initialised with); 43–46 (TEMP_THRESHOLD_SW_MANAGED 65, 'early indication temperature threshold'); 51 and 59 ('Following M.2 spec'); 66 (SAFE_STATE_FREQUENCY 300); 83–87 (the loop period, 'needs to be characterized in Silicon')"
+  },
+  {
+   "key": "et-thermal-c",
+   "group": "et",
+   "cite": "et-platform, device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c, at ffca4cbb4",
+   "url": "https://github.com/aifoundry-org/et-platform/blob/ffca4cbb436713cffcbc5028fc9a86529dc86c7c/device-bootloaders/src/ServiceProcessorBL2/services/thermal_pwr_mgmt.c",
+   "used": "656–679 (reads the minion mean; 'temperature > … sw_temperature_c'); 663–664 (a TODO: the system-temperature statistic's minimum and maximum fed a literal 0 on every pass); 2995 ('PMIC is currently reporting system temperature as 0'); 2289–2383 (the throttle loop: one point down while the mean exceeds 65); 2001–2034 (the safe state: it programs the minion PLL only when the voltage lookup at 2010 fails (2016–2019); on success it writes only the frequency register (2034)); 1345–1348 (max_temp returned, never assigned); 2376–2378 (the only sender of the throttle-time event runs in the safe state, which returns before it, so the driver's thermal counters cannot move)"
+  },
+  {
+   "key": "et-pvt",
+   "group": "et",
+   "cite": "et-platform, device-bootloaders/src/ServiceProcessorBL2/driver/pvt_controller.c and include/bl2_pvt_controller.h, at ffca4cbb4",
+   "url": "https://github.com/aifoundry-org/et-platform/blob/ffca4cbb436713cffcbc5028fc9a86529dc86c7c/device-bootloaders/src/ServiceProcessorBL2/driver/pvt_controller.c",
+   "used": "pvt_controller.c 1279–1306 (the integer mean of the 34 minion-shire sensors, faulted samples skipped); 572–590 (generic conversion, truncated to whole degrees); 699–735 (process-detector reads, no caller); bl2_pvt_controller.h 100–102 (RUN_1 mode, 'doesn't need calibration'), 127 (process detectors: MEASUREMENT_DISABLED)"
+  },
+  {
+   "key": "et-pmic",
+   "group": "et",
+   "cite": "et-platform, device-bootloaders/src/ServiceProcessorBL2/include/bl2_pmic_controller.h and driver/pmic_controller.c, at ffca4cbb4",
+   "url": "https://github.com/aifoundry-org/et-platform/blob/ffca4cbb436713cffcbc5028fc9a86529dc86c7c/device-bootloaders/src/ServiceProcessorBL2/include/bl2_pmic_controller.h",
+   "used": "bl2_pmic_controller.h 261–282 (the PMIC's hardware alarms: 75 W, 75 °C, settable 55–75 °C, on the PMIC's own 'system temperature'); pmic_controller.c 699–731 (the interrupt: safe state and a fatal event to the host)"
+  },
+  {
+   "key": "et-ddr",
+   "group": "et",
+   "cite": "et-platform, etsoc-hal/src/memshire_ddr_init_functions.c, at 836a4ab60",
+   "url": "https://github.com/aifoundry-org/et-platform/blob/836a4ab600e93c3059bb58c898edbc37744cd8d0/etsoc-hal/src/memshire_ddr_init_functions.c",
+   "used": "4441–4443 (RFSHTMG 0x80710106: 3,616 DFI clocks between refreshes); 4686–4688 (DERATEEN, DERATEINT, DERATECTL commented out: 'FUTURE derate is not needed for bring-up')"
+  },
+  {
+   "key": "et-pll",
+   "group": "et",
+   "cite": "et-platform, device-bootloaders/src/ServiceProcessorBL2/driver/io_pll.c, at 836a4ab60",
+   "url": "https://github.com/aifoundry-org/et-platform/blob/836a4ab600e93c3059bb58c898edbc37744cd8d0/device-bootloaders/src/ServiceProcessorBL2/driver/io_pll.c",
+   "used": "971–1006: the service processor counts each PLL's lock-loss interrupts and logs them"
+  },
+  {
+   "key": "et-datasheet",
+   "group": "et",
+   "cite": "Esperanto, ET Preliminary Datasheet Rev 1.0 (aifoundry-org/et-man)",
+   "url": "https://github.com/aifoundry-org/et-man",
+   "used": "§8.1 Absolute Maximum Ratings, §8.2 Recommended Operating Conditions and §9.1 Package Thermal Information: 'This information will be included in a future release of this document' (pp. 31–32)"
+  },
+  {
+   "key": "et-prm",
+   "group": "et",
+   "cite": "Esperanto, ET Programmer's Reference Manual (aifoundry-org/et-man)",
+   "url": "https://github.com/aifoundry-org/et-man",
+   "used": "§1.6 and Fig. 1-3 (pp. 17–18: 36 process detectors and 36 temperature sensors, one per minion, PCIe and I/O tile, none in the memory shires); Table 15-37 (p. 400: the PVT blocks reachable only by the service processor); Table 15-48 (p. 427: per-sensor thermal calibration fuses)"
+  },
+  {
+   "key": "et-dll",
+   "group": "et",
+   "cite": "Esperanto, 'Minion Shire DLL Delay Control' (openhwfoundation/core-et, docs)",
+   "url": "https://github.com/openhwfoundation/core-et",
+   "used": "§1: the clock-distribution delay 'may change depending on voltage, temperature, process'; §6: the standard-cell library ts07… (TSMC 7 nm)"
+  }
+ ]
+}

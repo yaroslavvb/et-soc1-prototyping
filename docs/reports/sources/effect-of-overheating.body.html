@@ -1,0 +1,550 @@
+<style>
+.answers { margin: 14px 0 10px; }
+.answers .ans-title { margin: 0 0 8px; font-size: 1.1rem; }
+.answers dl { margin: 0; }
+.answers dt { font-weight: 650; margin: 12px 0 2px; }
+.answers dt:first-child { margin-top: 0; }
+.answers dd { margin: 0 0 0 0; color: var(--ink); }
+.answers dd .more-link { white-space: nowrap; }
+.cite { font-size: 0.8em; color: var(--ink-2); white-space: nowrap; }
+.cite a { text-decoration: none; }
+.cite a:hover, .cite a:focus-visible { text-decoration: underline; }
+.kind { display: inline-block; font-size: 0.72rem; font-weight: 600; color: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 0 7px; margin-left: 4px; white-space: nowrap; vertical-align: 1px; }
+.word { font-weight: 650; white-space: nowrap; }
+.word.pass { color: var(--ok); } .word.fail { color: var(--bad); } .word.insufficient { color: var(--warn); }
+.word.nt { color: var(--muted); font-weight: 600; }
+blockquote.owner { margin: 12px 0; padding: 8px 14px; border-left: 3px solid var(--axis); color: var(--ink-2); font-size: 0.95rem; }
+ol.srcs { padding-left: 2.4em; font-size: 0.86rem; }
+ol.srcs li { margin: 6px 0; overflow-wrap: anywhere; }
+ol.srcs li .used { color: var(--ink-2); }
+ol.srcs li .flag { color: var(--warn); font-weight: 600; }
+ol.srcs.et { list-style: none; padding-left: 0.4em; }
+ol.srcs li:target { background: var(--code-bg); border-radius: 6px; }
+.heat-table td.cellv { text-align: center; font-variant-numeric: tabular-nums; min-width: 64px; }
+.heat-table td.cellv small { display: block; font-size: 0.72rem; }
+@media (max-width: 599px) { .heat-table { font-size: 0.72rem; } .heat-table th, .heat-table td { padding: 5px 2px; }
+  .heat-table td.cellv { min-width: 0; } .heat-table td.cellv small { font-size: 0.66rem; } }
+.note-illus { border-left: 3px solid var(--c4); padding: 4px 10px; font-size: 0.85rem; color: var(--ink-2); margin: 6px 0; }
+.lead-in { font-weight: 650; }
+</style>
+
+<h1>The effect of overheating</h1>
+<p class="byline">28 September 2026 · outside research (<span data-v="nOut"></span> sources), checked on the ET-SoC-1: its
+firmware source, the record of four cards, and two pre-registered experiments run the same day on aifoundry3 and
+aifoundry1 card 1 (E53) · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+
+<p class="lede">What temperature a processor is built to run at, why its limits sit where they do, whether a limit
+should watch the average of the die or its hottest spot, what heat does to how fast transistors switch, and why a chip
+that overheats can stop working and then work again once it cools. The outside literature answers each question
+first; the ET-SoC-1's firmware and our own measurements then say how the chip on our cards compares.</p>
+
+<blockquote class="owner">The owner's request (28 September, lightly edited): “comprehensive outside research on the
+behavior of throttling and overheating … what are the typical operating requirements for processors like the Esperanto
+chip, why the temperature limits are what they are … the average versus highest temperature. Should we limit the
+highest temperature versus the average? I assumed the individual regional temperature is more important … when you're
+overheating, does it affect the transistor flipping speed? … [the lab lead] said in a meeting that they could get the
+Esperanto chip to like 120 Celsius and it stops working, but when it goes down it's fine again, so it's surprisingly
+resilient. I want to know more about that effect: why do things stop working when they overheat and then start working
+again.”</blockquote>
+
+<div class="card answers" id="the-answers">
+<p class="ans-title" id="answers"><b>The answers</b></p>
+<dl>
+<dt>What temperatures are processors built for, and why?</dt>
+<dd>Limits are set on the hottest point of the die, the “junction”. Consumer and data-centre chips throttle at about
+95–105 °C (desktop CPUs 95–100 °C, a GPU's hottest sensor 110 °C, NVIDIA's Jetson Orin 99 °C) and switch themselves off
+at about 105–125 °C; industrial, military and automotive grades are rated to 105–125 °C and beyond. The throttle point is the
+temperature up to which the vendor guarantees the chip's timing, electrical specifications and lifetime, and the throttle
+keeps the die inside it; the shutdown point is where damage becomes possible. The ET-SoC-1's datasheet publishes no limit,
+and the temperature its timing was signed off at is not published either. On the firmware build of aifoundry2 the clock
+slows when the <i>average</i> of the sensors passes <span data-v="fwThr"></span> °C, and at the lowest clock nothing else
+acts; the other cards run other builds (section 1.3). <a class="more-link" href="#limits">Section 1</a></dd>
+<dt>Should a limit watch the average or the hottest spot?</dt>
+<dd>The hottest spot: your assumption is right, above all for wear-out, which the hottest region decides. Every hard
+limit documented in this survey acts on the hottest sensor (IBM's, on the hottest core); averages appear beside it, in
+fan control and in AMD's boost decisions. Timing is a weaker argument on this chip: at the ET's low core voltage heat
+barely slows its transistors and may speed them up (section 3). The ET-SoC-1 is the one chip in this survey whose
+throttle compares an average. On this chip that costs little: <span data-v="ansGap"></span>
+<a class="more-link" href="#average-or-hottest">Section 2</a></dd>
+<dt>Does heat change how fast transistors switch?</dt>
+<dd>Yes, in both directions. Heat slows the electrons (lower mobility) but makes transistors turn on more easily (lower
+threshold voltage). At a high supply voltage the first wins and a hot chip is slower; at a low one the second wins and a
+hot chip is <i>faster</i>. The ET-SoC-1's cores run at about <span data-v="ansRail"></span>, close to where the two cancel
+for 7 nm in simulation, so heat should barely change them. And a chip's clock comes from an oscillator, not from its
+transistors: heat changes how much timing slack each path has, not how much work a cycle does. <span data-v="ansCycles"></span>
+<a class="more-link" href="#switching-speed">Section 3</a></dd>
+<dt>Why does a hot chip stop working, and work again when it cools?</dt>
+<dd>Because most of what heat does depends on the temperature <i>now</i>: leakage current, timing slack, how long a
+memory cell holds its charge, whether a clock oscillator stays in range. Past some point one of these fails, and when
+the temperature falls it comes back. Protective shutdowns are designed the same way: they switch the chip off before
+any damage. What does not come back is damage: wear-out, which accumulates slowly and invisibly with time spent hot, and
+fatigue of the package, which grows with every large temperature swing. A cracked joint can even fail hot and work cool,
+so recovering on cooling does not by itself prove that nothing was harmed.
+<a class="more-link" href="#stop-and-recover">Section 4</a></dd>
+<dt>Is recovering from 120 °C surprising?</dt>
+<dd>No. The standard qualification test runs chips for 1,000 hours at a junction of at least 125 °C, and none of 231
+may fail. Our own <span data-v="ansCard0"></span> What stopped the lab's card near 120 °C is not recorded; the
+most likely candidate, untested, is power <span class="kind">inference</span>: <span data-v="ansPower"></span> <a class="more-link" href="#the-120-c-story">Section 4.4</a></dd>
+<dt>So what does heat cost?</dt>
+<dd>Lifetime, fatigue and power. At the activation energies usually assumed for wear-out (0.7–0.9 eV), an hour at 117 °C
+ages a chip as much as <span data-v="ansHour"></span> hours at 65 °C; one swing from room temperature to 120 °C and back
+fatigues the package's joints <span data-v="ansCycle"></span> times as much as one to 65 °C; and on these cards the leakage
+part of idle power doubles every <span data-v="ansDouble"></span> °C. <a class="more-link" href="#cost">Section 5</a></dd>
+</dl>
+</div>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">The hottest sensor when the mean reads <span data-v="fwAct"></span> °C, the first reading the 0.20.0 rule acts on</div><div class="val" data-v="k1"></div><div class="sub" data-v="k1s"></div></div>
+  <div class="card kpi"><div class="lab">The largest gap, hottest sensor over the mean, in any 1 s window</div><div class="val" data-v="k2"></div><div class="sub" data-v="k2s"></div></div>
+  <div class="card kpi"><div class="lab">Wrong results among exact-checked launches, hot and cool</div><div class="val" data-v="k3"></div><div class="sub" data-v="k3s"></div></div>
+  <div class="card kpi"><div class="lab">Work per clock cycle, hot against rest</div><div class="val" data-v="k4"></div><div class="sub" data-v="k4s"></div></div>
+</div>
+
+<details class="terms"><summary>Terms and labels used on this page</summary>
+<p class="small"><i>Junction temperature</i> (Tj): the temperature of the transistors, on the die, as opposed to the case or the
+air. The ET-SoC-1 has one temperature sensor in each of its 34 minion <i>shires</i> (tiles of 32 cores, about 3.7 mm on a
+side) and one in the I/O shire. <i>The mean</i> is the whole-degree average of the 34 shire sensors, each first cut to a
+whole degree; the 0.20.0 firmware compares it with 65 °C and first acts when it reads 66. <i>The hottest sensor</i> is the host's
+peak-hold of the highest single sensor; the experiments here reset it every second, so it is the hottest sensor in
+that second (which shire it was is not reported). <i>The gap</i> is the hottest sensor minus the mean. Numbers carry
+their kind: <span class="kind">measured</span> on our cards, <span class="kind">from source</span> read from the ET firmware
+or manuals, <span class="kind">derived</span> arithmetic on cited numbers, <span class="kind">external</span> a published
+figure, <span class="kind">inference</span> reasoning no source states. Citations in brackets link to the numbered
+list at the end; [E1] and so on are the ET-SoC-1's own documents.</p>
+</details>
+
+<h2 id="limits">1. What the limits are, and why they sit where they do</h2>
+<p><b>Answer.</b> Processors are rated by the hottest point on the die. Vendors publish a ladder rather than one number:
+a throttle point where the chip slows itself, then a harder clamp, then a shutdown. The throttle point is the
+temperature up to which the chip's timing, its electrical specifications and its lifetime budget are guaranteed; the
+shutdown point is where damage becomes possible.</p>
+
+<h3 id="typical-ratings">1.1 Typical ratings</h3>
+<p>Every vendor defines the limit on the silicon itself: Intel's Tj,max is “the maximum temperature on the
+processor-die-active surface” <span class="cite" data-s="intel-atom"></span>. Typical figures:</p>
+<ul>
+<li><b>Consumer and commercial parts</b>: a junction range of 0 to 95 °C (NXP's i.MX 8M Plus
+<span class="cite" data-s="nxp-consumer"></span>). <b>Industrial</b>: −40 to 105 °C
+<span class="cite" data-s="nxp-industrial"></span>. <b>Military</b>: −55 to 125 °C <span class="cite" data-s="xq-versal"></span>.
+<b>Automotive</b> grades are set by the <i>ambient</i> temperature: up to 85, 105, 125 or 150 °C
+<span class="cite" data-s="aecq100"></span>.</li>
+<li><b>Desktop CPUs</b> throttle at 95–100 °C: AMD's Ryzen 7000 is “designed for a lifetime at 95°C”
+<span class="cite" data-s="amd-ryzen95"></span>, Intel's Core i9-13900K lists 100 °C <span class="cite" data-s="intel-13900k"></span>.
+<b>GPUs</b> let the hottest of many sensors reach 110 °C <span class="cite" data-s="amd-rx5700"></span>. NVIDIA's
+<b>Jetson Orin</b> throttles in software at 99 °C, in hardware at 103 °C, and shuts down at 104.5 and 105 °C
+<span class="cite" data-s="jetson"></span>.</li>
+<li><b>A 7 nm accelerator</b> like the ET-SoC-1: AMD's Versal AI Core, also made at TSMC 7 nm, is rated 0 to 100 °C and may
+spend at most 3% of its life at 100–110 °C <span class="cite" data-s="versal"></span>. TI designs its embedded processors
+for ten years at 105 °C, always on <span class="cite" data-s="ti-lifetime"></span>.</li>
+<li><b>The DRAM</b> beside the chip has its own, lower limit: standard LPDDR4X is rated to 85 °C on its case, and above that
+it must be refreshed two or four times as often <span class="cite" data-s="micron-lpddr4x,samsung-lpddr4"></span>.</li>
+</ul>
+
+<div class="chart-title" id="ladder-title">The ladder of limits: where each design throttles, is rated and shuts down, and where the ET-SoC-1 has been</div>
+<div id="ladleg"></div>
+<div class="chart" id="ladder"></div>
+<p class="small" id="ladcap"></p>
+
+<h3 id="why-each-rung">1.2 Why each rung sits where it does</h3>
+<ul>
+<li><b>The throttle point is the guaranteed operating limit.</b> Vendors guarantee function, timing and lifetime up to
+Tj,max, and the throttle keeps the die inside it. Intel's Core Duo engineers: “Functionality, electrical specifications and reliability
+commitments are guaranteed at maximum Tj as measured by the DTS” <span class="cite" data-s="rotem"></span>, and with its
+thermal monitor switched off “the processor operates out of specification” <span class="cite" data-s="intel-atom"></span>.
+Designers close timing there: Skadron and colleagues describe “the standard practice of designing the nominal operating
+frequency for the maximum allowed operating temperature” <span class="cite" data-s="skadron-tr"></span>. The same
+temperature sets the lifetime budget: AMD designs for a lifetime at 95 °C <span class="cite" data-s="amd-ryzen95"></span>,
+TI for ten years at 105 °C <span class="cite" data-s="ti-lifetime"></span>, and Versal allows 3% of its life above
+100 °C <span class="cite" data-s="versal"></span>. The package and cooler are sized for typical work, with the throttle
+catching the rest <span class="cite" data-s="skadron"></span>; running cooler also saves leakage power: Intel lists the
+same Atom at 6.0 W with a 90 °C limit or 6.3 W at 102 °C <span class="cite" data-s="intel-atom"></span>. For the ET-SoC-1,
+the temperature its timing was signed off at is not published, and nothing published ties its 65 °C to either
+guarantee (section 1.3).</li>
+<li><b>The shutdown point is where damage becomes possible.</b> Intel's THERMTRIP marks “a point beyond which permanent
+silicon damage may occur” <span class="cite" data-s="intel-peci"></span>, near 125 °C and calibrated per part
+<span class="cite" data-s="intel-atom"></span>. It is for failures of the cooling, not for normal work: a fan failure
+“will eventually reach THERMTRIP# and shut down” <span class="cite" data-s="intel-peci"></span>, and Jetson calls its
+hardware trip “the final failsafe” <span class="cite" data-s="jetson"></span>. AMD's needs “a cold reset” to leave it
+<span class="cite" data-s="amd-bkdg"></span>.</li>
+<li><b>Qualification sits above both.</b> JEDEC's standard test runs parts powered for 1,000 hours at a junction of at
+least 125 °C and the maximum supply voltage, and none of 231 may fail; storage is tested at 150 °C
+<span class="cite" data-s="jesd47"></span>. TSMC's 7 nm foundation IP passed the automotive grade-1 tests (ambient up to
+125 °C) <span class="cite" data-s="tsmc-n7-auto"></span>.</li>
+<li><b>Guard bands</b> separate the reading from the true hot spot: sensor error (Intel specifies ±5 °C
+<span class="cite" data-s="intel-dts"></span>), a sensor that is not on the hottest transistors (“the temperature
+observed by the sensor may be cooler by some spatial-gradient factor” <span class="cite" data-s="skadron"></span>),
+and the heating possible between two readings (Micron's rule for its DRAM: gradient × delay ≤ 2 °C
+<span class="cite" data-s="micron-lpddr4x"></span>). Calibration pushes the error to the safe side
+<span class="cite" data-s="intel-peci"></span>.</li>
+</ul>
+
+<h3 id="limits-on-the-et-soc-1">1.3 The ET-SoC-1's limits</h3>
+<p>Esperanto's preliminary datasheet leaves the absolute maximum ratings, the operating conditions and the package's
+thermal data “for a future release” <span class="cite" data-s="et-datasheet"></span>. The only limits are in the service
+processor's firmware, and the four cards run three builds of it: <span data-v="fwBuilds"></span> What the 0.20.0 build
+does <span class="kind">from source</span>:</p>
+<ul>
+<li>Slow the clock one step at a time while <b>the mean of the <span data-v="fwSensors"></span> shire sensors</b> exceeds
+<span data-v="fwThr"></span> °C, an “early indication temperature threshold” <span class="cite" data-s="et-thermal-h,et-thermal-c,et-pvt"></span>.
+It can only step down to the lowest operating point, 600 MHz on these cards, and stops there. <span data-v="fwGov"></span></li>
+<li>A hardware alarm in the power-management chip (PMIC) at <span data-v="fwPmic"></span> °C and 75 W, which reports a fatal
+event <span class="cite" data-s="et-pmic"></span>. On 0.20.0 its handler would set the clock's frequency register to
+<span data-v="fwSafe"></span> MHz but, per the source, would not reprogram the clock's PLL: it does that only when the
+voltage lookup before it fails <span class="cite" data-s="et-thermal-c"></span> (the 0.18.0 build has a real 300 MHz safe
+state: <code>docs/findings/14-card-behaviour.md</code>). Its temperature input is the PMIC's own “system temperature”, not
+the die, and the source notes that the PMIC “is currently reporting system temperature as 0”
+<span class="cite" data-s="et-thermal-c"></span>: <span data-v="sysC"></span> Its 75 W threshold did not act either:
+<span data-v="pmicW"></span></li>
+<li>No shutdown: nothing in the service processor's firmware switches the die off on temperature. The 52 °C in its header,
+labelled “Expected average temperature”, is one of the default reset values that variables start from
+<span class="cite" data-s="et-thermal-h"></span>, not a limit.</li>
+</ul>
+<p>So the ET's 65 °C is a product-envelope setting, not a known silicon limit. On the 0.20.0 and 0.18.0 cards, once the
+clock is at 600 MHz, the die's temperature is limited only by its cooling; card 0's drop to 300 MHz is the one exception
+on record. The highest readings on record <span class="kind">measured</span>: <span data-v="peaksText"></span></p>
+
+<h2 id="average-or-hottest">2. Average or hottest: which temperature a limit should watch</h2>
+<p><b>Answer.</b> The hottest calibrated sensor, lightly smoothed in time; not the average over the die. Wear-out is decided
+by the hottest region, every hard limit documented in this survey acts on the hottest sensor or core, and an average hides
+concentrated heat. Timing follows the hottest region only where heat slows the circuit (above the crossover voltage, and
+on wires); at the ET's low core voltage that argument is weak or reversed (section 3). On the ET-SoC-1 the difference is
+small, because its hot spots, as far as its sensors can see, are only a few degrees above the mean.</p>
+
+<h3 id="why-the-hot-spot-decides">2.1 Why the hot spot decides</h3>
+<ul>
+<li><b>Failure is local, and exponential in temperature.</b> Reliability engineers treat a processor as a chain: “the
+first instance of any structure failing due to any failure mechanism causes the entire processor to fail”, and each
+structure's wear rate follows its own temperature <span class="cite" data-s="ramp"></span>. Electromigration life depends on
+the local wire temperature, and temperature gradients themselves “foreshorten conductor life”
+<span class="cite" data-s="black"></span>. JEDEC's latch-up group: the “highest Tj on the die … should be used”
+<span class="cite" data-s="jesd78"></span>.</li>
+<li><b>How much the gap matters</b> <span class="kind">derived</span>. Summing wear rates over many regions behaves like a
+“soft maximum” of their temperatures with a width of kT²/Ea, <span data-v="softmax"></span> °C at 90 °C for a 0.9 eV
+mechanism. Gaps much smaller than that make the mean and the maximum agree; larger gaps make the hottest region decide.
+With one of 34 regions hotter by 3, 10, 30 or 45 °C, the effective temperature is <span data-v="teff"></span>. Wear-out
+is not a constant rate, though: qualification targets a small failure fraction, deep in the tail of the lifetime
+distribution, and there <span data-v="tail"></span></li>
+<li><b>Hot spots form fast.</b> Localized heating “occurs much faster than chip-wide heating”, over hundreds of
+microseconds to milliseconds <span class="cite" data-s="skadron"></span>; in a simulated 7 nm CPU the first hot spot formed
+0.2 ms after a workload started, and units above 120 °C sat 200 µm from units 30 °C cooler
+<span class="cite" data-s="hotgauge"></span>.</li>
+</ul>
+
+<h3 id="what-vendors-do">2.2 What vendors do</h3>
+<div class="table-wrap wide"><table class="stack" id="vendtable">
+<thead><tr><th>Chip</th><th>What is limited or reported</th><th>Where averages are used</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>Intel Core (12th–14th gen)</td><td>“any Digital Thermal Sensor” at TjMAX starts the thermal control circuit</td><td>a 256 ms average of the <i>hottest</i> sensor, for fan control; an averaged loop below TjMAX “in addition, and not instead of” it</td><td><span class="cite" data-s="intel-atm,intel-dts"></span></td></tr>
+<tr><td>AMD Radeon RX 5700 (GPU)</td><td>“any one of the many available sensors” at 110 °C, replacing one sensor near the old diode</td><td>—</td><td><span class="cite" data-s="amd-rx5700"></span> (secondary)</td></tr>
+<tr><td>AMD Instinct MI300 (Linux driver)</td><td><i>reported only</i>: the driver exposes limits on the junction (hotspot) and memory channels, and on MI300 hides the edge channel; what the throttle compares is not in these lines</td><td>—</td><td><span class="cite" data-s="amdgpu"></span></td></tr>
+<tr><td>AMD Ryzen (CPU)</td><td>the hard limit: not found in an AMD document</td><td>boost decisions on “a short-duration rolling average of all temp sensors”</td><td><span class="cite" data-s="amd-cpu-avg"></span> (secondary)</td></tr>
+<tr><td>IBM POWER9</td><td>firmware only, like the ET: its controller uses “the hottest core temperature”, each core's value being a weighted average of the sensors in and beside that core</td><td>a chip average is kept, but it is not the control input</td><td><span class="cite" data-s="power9,occ"></span></td></tr>
+<tr><td>Intel Gaudi (accelerator)</td><td><i>reported only</i>: the monitoring tool's “maximum temperature read from the four available temperature sensors”; what the throttle compares is not stated</td><td>—</td><td><span class="cite" data-s="gaudi"></span></td></tr>
+<tr><td>NVIDIA Jetson Orin</td><td>each sensor group reports “the maximum of all the sensors in the group”</td><td>a weighted average only for the fan's target</td><td><span class="cite" data-s="jetson"></span></td></tr>
+<tr><td><b>ET-SoC-1</b> (firmware <span data-v="fwBuild2"></span>)</td><td><b>the whole-degree mean of the <span data-v="fwSensors2"></span> shire sensors</b>; no hottest-sensor path; calibration fuses not read</td><td>—</td><td><span class="cite" data-s="et-pvt,et-thermal-c,et-prm"></span></td></tr>
+</tbody></table></div>
+<p>So the hard limits documented here (Intel, the RX 5700, POWER9, Jetson) all act on the hottest sensor or core; AMD's
+Ryzen also uses an average of all its sensors, for boost. Where sources disagree: AMD's CPU note says its boost loop uses an
+average of all sensors while its GPU note throttles on any one sensor; the two fit if the average drives the boost and a maximum the hard limit, but no AMD document found says
+what the Ryzen hard limit compares. NVIDIA does not say what its “GPU Current Temp” is <span class="cite" data-s="nvidia-smi"></span>.</p>
+
+<h3 id="what-goes-wrong-with-an-average">2.3 What goes wrong with an average</h3>
+<ul>
+<li><b>It hides concentrated heat.</b> If one of 34 regions heats and the rest do not, a 1 °C rise of the mean can hide up
+to a <span data-v="dilution"></span> °C rise in that region <span class="kind">derived</span>, an upper bound, since heat
+spreads sideways.</li>
+<li><b>It forces a guard band on every workload, and fails beyond it.</b> Intel, on its older single-diode design: the
+hot spot ran up to about 10 °C above the diode; a fixed offset cost 3–7% of performance, and without one “some of the
+workloads will run at high max Tj and therefore risk functional issues or reliability degradation”
+<span class="cite" data-s="rotem"></span>. A uniform 4 × 4 sensor grid under-read the maximum by up to 10.5 °C in simulation
+<span class="cite" data-s="memik"></span>.</li>
+<li><b>Cooling faults show up at the hot spot first.</b> A GPU with dried thermal paste reported 67–68 °C while its
+hot spot reached 107 °C and throttled; in another, a vapor chamber short of fluid drove the hot spot to 110 °C
+<span class="cite" data-s="tomshw-5070ti,techspot-7900"></span> (both secondary). In both the limit that acted was the one
+on the hot spot.</li>
+<li><b>When an average is fine:</b> in slow loops whose physics really is averaged (fan speed, heat-sink sizing, boost),
+as a per-sensor filter in time to suppress noise, and as a spatial mean only with a guard band equal to the worst gap
+plus sensor error <span class="cite" data-s="intel-dts,skadron,rotem"></span>.</li>
+</ul>
+
+<h3 id="the-gap-on-the-et-soc-1">2.4 The gap on the ET-SoC-1</h3>
+<p>The host cannot read one shire's temperature: it sees the mean, the highest and lowest single reading (anonymous
+peak-holds) and the I/O shire's sensor <span class="cite" data-s="et-pvt"></span>. E53 reset the peak-hold every second, so
+each 1 s window gives the hottest sensor in that second. <b>OH-1</b> put the most concentrated load the heater can make, one
+shire at full load (32 cores, <span data-v="shireW"></span>), in the centre and by the I/O corner, against a central 2 × 2 block and idle;
+<b>OH-2</b> heated the whole chip from rest to <span data-v="ohMaxA3"></span> °C <span class="kind">measured</span>.</p>
+<ul>
+<li><b>At the 0.20.0 rule's decision point</b>: <span data-v="near65"></span></li>
+<li><b>Concentrating the load does not widen the gap</b>: <span data-v="gapLoad"></span></li>
+<li><b>The gap grows a little with temperature</b>: <span data-v="gapTemp"></span></li>
+<li><b>The worst cases on record</b>: <span data-v="gapWorst"></span></li>
+</ul>
+<div class="ck-controls"><div id="gapcard"></div></div>
+<div class="chart-title">How far the hottest sensor leads the mean, by load: share of 1 s windows at each gap</div>
+<div class="chart" id="gapload"></div>
+<p class="small" id="gaploadcap"></p>
+<div class="chart-title">The same under the whole-chip heater and its rests, by the die's mean temperature</div>
+<div class="chart" id="gaptemp"></div>
+<p class="small" id="gaptempcap"></p>
+<p><b>What this means for the ET</b> <span class="kind">inference</span>. For every load tried, <code>mean &gt; 65</code> behaves like
+“the hottest sensor reads about <span data-v="hot66"></span> °C”: the choice of the mean costs <span data-v="cost"></span> of margin, not safety
+(DV2's runs on aifoundry2, the card where the rule does act, had gaps of the same size: the last item above). The chip's low power
+density is the likely reason the gap is small: <span data-v="density"></span> What the sensors cannot say is how hot it
+gets <i>inside</i> a 3.7 mm tile: there is one sensor per tile, in one corner <span class="cite" data-s="et-prm"></span>, and
+the literature's sensor-to-hot-spot offsets are 3–10 °C on denser chips <span class="cite" data-s="rotem,memik"></span>. The
+bigger gaps are elsewhere: on the 0.20.0 and 0.18.0 builds nothing acts at 600 MHz, and no temperature is measured in the
+memory shires or the DRAM (section 4.2).</p>
+
+<h2 id="switching-speed">3. Does heat change how fast transistors switch?</h2>
+<p><b>Answer.</b> Yes, in both directions, and which way depends on the supply voltage. But in a clocked chip the clock
+does not follow: heat changes each path's timing <i>margin</i>, not the work done per cycle, until a margin runs out.</p>
+<ul>
+<li><b>Two effects pull against each other.</b> Heat lowers the carriers' mobility (less current: slower) and lowers the
+threshold voltage (more overdrive: faster). “At high voltages, higher temperature increases the delay but at low
+voltages, higher temperature decreases the delay”; the voltage where they cancel is the crossover or
+zero-temperature-coefficient (ZTC) voltage <span class="cite" data-s="dasdan"></span>. This <i>temperature inversion</i>
+“will worsen as supply voltages decrease” <span class="cite" data-s="dasdan"></span>.</li>
+<li><b>Where the crossover lies.</b> About 1.12 V in a 90 nm library <span class="cite" data-s="dasdan"></span>; in a 7 nm
+FinFET kit 0.49–0.55 V for single cells and about 0.53 V for a whole processor, with 0.7 V nominal (simulated)
+<span class="cite" data-s="salamin"></span>. <b>Disagreement:</b> another simulation of 20–10 nm FinFETs finds hot faster at
+<i>every</i> voltage from 0.3 to 0.9 V <span class="cite" data-s="lee-pedram"></span>. On silicon, a 28 nm chip needed 0.48 V
+at 25 °C but only 0.44 V at 80 °C for the same 50 MHz <span class="cite" data-s="han-tip"></span>, and an AMD processor used
+the extra margin when warm to run more than 5% lower in voltage <span class="cite" data-s="zu-tistates"></span>. TSMC's N7
+crossover is not public. Skadron and colleagues (2003) tie clock frequency linearly to temperature through carrier
+mobility and cite Garrett and Stan: “an 18% variation over the range 0-100” <span class="cite" data-s="skadron-tr"></span>.</li>
+<li><b>Wires go the other way at any voltage.</b> Copper's resistance rises 0.3–0.4% per degree
+<span class="cite" data-s="vonglasow"></span>, so wire-heavy paths slow when hot even where transistors speed up
+<span class="cite" data-s="han-tip"></span>.</li>
+<li><b>Consequences for design.</b> With inversion the slowest corner is the <i>cold</i> one (at 16 and 7 nm: slow process,
+low voltage, low temperature <span class="cite" data-s="pratap"></span>), and the hot, fast corner is where <i>hold</i>
+violations appear: a new value arrives before the previous one was captured. A slower clock cures a setup violation but
+not a hold violation <span class="cite" data-s="pedroso-hold"></span>.</li>
+</ul>
+
+<div class="chart-title">How a logic gate's delay moves with temperature at the ET-SoC-1's rail voltages (an illustration)</div>
+<div class="ck-controls"><div id="invcard"></div></div>
+<div id="invleg"></div>
+<div class="chart" id="inversion"></div>
+<p class="note-illus" id="invnote"></p>
+
+<h3 id="the-et-soc-1s-voltages">3.1 Where the ET-SoC-1 sits</h3>
+<p>Esperanto designed the chip to run at low voltage: its cores are built for about 0.4 V
+<span class="cite" data-s="ditzel-hc33"></span>. On our cards at 600 MHz <span class="kind">measured</span>: <span data-v="railsText"></span>
+Against the simulated 7 nm crossover <span class="kind">inference</span>: the cores at 600 MHz sit at it, so heat should
+barely change their gate delay and, if anything, shorten it; the mesh sits just below it (slightly faster hot); the SRAM
+rail and the 800 MHz point sit above it (slower hot), and so do the wires.</p>
+
+<h3 id="what-the-cards-show">3.2 What the cards show</h3>
+<ul>
+<li><b>The same work per cycle, hot or cool</b> <span class="kind">measured</span>: <span data-v="cyclesText"></span></li>
+<li><b>The clock does not drift</b>: <span data-v="clockText"></span></li>
+<li><b>Heat does not starve the supply</b>: <span data-v="droopText"></span></li>
+<li><b>The only failures on record were at clock changes, not heat</b>: <span data-v="dvfsFail"></span></li>
+</ul>
+<p><b>What could not be measured.</b> Whether the ET's own transistors get faster or slower when hot needs one of its
+on-chip speed monitors. It has one ring-oscillator process detector beside each temperature sensor
+<span class="cite" data-s="et-prm"></span>, but the firmware configures them as measurement-disabled and nothing reads them,
+and only the service processor can reach them <span class="cite" data-s="et-pvt,et-prm"></span>: a firmware build is needed.
+The design documents say the clock-distribution delay “may change depending on voltage, temperature, process”
+<span class="cite" data-s="et-dll"></span>. E53 registered its prediction before any data: on the core rail a detector's count
+changes by less than ±2% between 55 and 85 °C, more likely up (faster) than down; on a rail at 0.70 V or more it falls,
+by less than 5%.</p>
+
+<h2 id="stop-and-recover">4. Why a hot chip stops working, and works again when it cools</h2>
+<p><b>Answer.</b> Almost everything heat does is a function of the temperature <i>now</i>. Mobility, threshold voltage,
+leakage, how long a memory cell keeps its charge and an oscillator's frequency all return to their old values when the
+temperature does. A failure caused only by their values at that moment (a <i>parametric</i> failure) disappears on
+cooling; a protective shutdown is designed to be reversible; some states need a reset. What stays is damage: wear-out, a
+destructive latch-up, and fatigue of the package, whose cracks can open when hot and close when cool, so a fault that comes
+and goes with temperature is not always harmless.</p>
+
+<h3 id="mechanisms">4.1 The mechanisms, and which ones reverse</h3>
+<div class="table-wrap wide"><table class="stack" id="mechtable">
+<thead><tr><th>What fails</th><th>Why heat triggers it</th><th>Recovers when cooled?</th><th>On the ET-SoC-1</th></tr></thead>
+<tbody>
+<tr><td>Setup timing</td><td>a path gets slower than the clock period: above the crossover voltage, and on wires <span class="cite" data-s="dasdan,vonglasow"></span></td><td>yes</td><td>not predicted for the cores at <span data-v="ansRail2"></span>; possible on the SRAM rail and I/O (inference)</td></tr>
+<tr><td>Hold timing</td><td>below the crossover a short path gets <i>faster</i> than the hold window <span class="cite" data-s="dasdan"></span></td><td>yes, but a slower clock does not help <span class="cite" data-s="pedroso-hold"></span></td><td>hot is the cores' and mesh's fast corner (inference)</td></tr>
+<tr><td>SRAM margins</td><td>leakage of the cell's off transistors rises exponentially <span class="cite" data-s="gul-sram,wp221"></span></td><td>yes; a flipped bit stays wrong</td><td>no errors seen (section 4.3)</td></tr>
+<tr><td>DRAM retention</td><td>cells leak faster: retention time −39% to −47% per +10 °C <span class="cite" data-s="liu-retention"></span></td><td>yes; lost data stays lost</td><td>no temperature read, refresh fixed at 1× (section 4.2)</td></tr>
+<tr><td>Power delivery</td><td>leakage current adds to the load <span class="cite" data-s="kim-leakage"></span>; a regulator or the board input could then reach its limit <span class="kind">inference</span></td><td>yes, once the supply recovers (inference)</td><td>the leading candidate for a stop near 120 °C (section 4.4)</td></tr>
+<tr><td>Clock (PLL) lock</td><td>an oscillator's frequency drifts out of its tuning range: “the PLL may lose lock” <span class="cite" data-s="adi-pll"></span></td><td>yes, after it relocks</td><td>the service processor counts lock losses <span class="cite" data-s="et-pll"></span></td></tr>
+<tr><td>Latch-up</td><td>a parasitic thyristor triggers more easily when hot <span class="cite" data-s="ti-latchup"></span></td><td>only after a power cycle; can be destructive</td><td>not seen</td></tr>
+<tr><td>Package and joints (thermo-mechanical)</td><td>every large temperature swing fatigues the package, most at the solder joints <span class="cite" data-s="ramp,jesd47"></span>; temperature change, its rate and spatial gradients are possible drivers of failure beside the steady temperature <span class="cite" data-s="pecht"></span></td><td>the symptom sometimes (a crack that opens hot can close cool: inference); the damage never</td><td>not known; each excursion to 110–120 °C and back is a large cycle (section 5.1)</td></tr>
+<tr><td>Protective trip</td><td>designed shutdown before damage <span class="cite" data-s="intel-thermtrip,amd-bkdg,jetson"></span></td><td>yes, after cooling and a reset</td><td>only the PMIC alarm, on a reading that is not the die (section 1.3)</td></tr>
+<tr><td>Wear-out</td><td>electromigration, oxide breakdown, the permanent part of BTI accumulate faster when hot <span class="cite" data-s="ramp,kaczer-bti,jesd47"></span></td><td><b>no</b>; part of BTI recovers slowly <span class="cite" data-s="kaczer-bti,renesas"></span></td><td>design life and qualification not published</td></tr>
+</tbody></table></div>
+
+<div class="chart-title">What heat does, by temperature, and whether it undoes itself</div>
+<div id="mechleg"></div>
+<div class="chart" id="mechchart"></div>
+<p class="small" id="mechcap"></p>
+
+<h3 id="the-dram">4.2 The DRAM: no thermometer, no derating</h3>
+<p>No temperature is measured in the memory shires or the DRAM <span class="cite" data-s="et-prm"></span>; the LPDDR4X's own
+temperature register is never read, and the memory controllers' temperature derating is commented out: “FUTURE derate is
+not needed for bring-up” <span class="cite" data-s="et-ddr"></span> <span class="kind">from source</span>. Refresh is fixed at
+<span data-v="fwRefresh"></span>. <span data-v="refreshText"></span> So if the DRAM packages ever passed 85 °C, weak cells
+could lose data at the fixed rate, and nothing on the card would notice <span class="kind">inference</span>; whether they
+get that hot when the die is at 110–120 °C is unknown.</p>
+
+<h3 id="correct-results-hot">4.3 Did the ET-SoC-1 compute anything wrong when hot?</h3>
+<p><span data-v="corrText"></span></p>
+<div class="chart-title">Exact-checked launches by die temperature and card: the record before E53, and E53</div>
+<div class="table-wrap"><table class="heat-table" id="corrtable"></table></div>
+<p class="small" id="corrcap"></p>
+
+<h3 id="the-120-c-story">4.4 The 120 °C story</h3>
+<p>The lab lead said in a meeting that an ET-SoC-1 was taken to about 120 °C, stopped working, and was fine again once it
+cooled. That episode is not recorded in this repository: which card, what “stopped” meant (a hang, wrong results, a
+lost PCIe link, a power trip) and whether a reset was needed are open questions. What the repository does record:</p>
+<ul>
+<li><b>Our own card that went there</b> <span class="kind">measured</span>: <span data-v="card0Text"></span></li>
+<li><b>Why recovering is expected.</b> 120 °C is inside the envelope a normal part is qualified in: 1,000 hours powered at
+125 °C or more with no failures allowed <span class="cite" data-s="jesd47"></span>, military and automotive ratings to
+125 °C <span class="cite" data-s="xq-versal,aecq100"></span>, and below Intel's trip point near 125 °C
+<span class="cite" data-s="intel-atom"></span>. Stopping there and recovering when cool is most consistent with a parametric
+failure or a protection action; an intermittent mechanical fault, such as a cracked joint or bump that opens only when hot,
+cannot be excluded without the episode's record, and every such excursion is a large thermal cycle (section 5.1). The
+cost is lifetime: by TI's table, a processor designed for 105 °C gets
+30% of its life if run continuously at 120 °C <span class="cite" data-s="ti-lifetime"></span>.</li>
+<li><b>What could have stopped it</b>, ranked, none tested <span class="kind">inference</span>:
+<ol>
+<li><i>Power.</i> <span data-v="powerText"></span></li>
+<li><i>A protection action</i> on newer firmware: card 0's drop to 300 MHz after 115–117 °C (on 1.4.1, by its idle point or
+its PMIC's safe state: not established), or a PMIC fatal event <span class="cite" data-s="et-pmic"></span>.</li>
+<li><i>The PCIe link.</i> <span data-v="pcieText"></span></li>
+<li><i>DRAM retention</i> at the fixed 1× refresh, if the DRAM passed 85 °C (section 4.2).</li>
+<li><i>A hold-time or SRAM failure</i> in the low-voltage logic, which a slower clock would not cure.</li>
+<li><i>A clock losing lock</i>; the service processor counts these <span class="cite" data-s="et-pll"></span>.</li>
+<li><i>A joint or bump that opens when hot</i> (thermo-mechanical, section 4.1): the one cause on this list that is damage.</li>
+</ol></li>
+<li><b>What to record next time</b>: board power and rail currents up to the stop, the clock, the PMIC events, the PLL
+lock-loss counters, the PCIe link's error counters and whether it dropped, the mean and the hottest sensor, and whether the
+card came back by itself or needed a reset.</li>
+</ul>
+
+<h2 id="cost">5. What heat costs: lifetime, fatigue and leakage</h2>
+<h3 id="lifetime">5.1 Lifetime</h3>
+<p>Wear-out mechanisms follow the Arrhenius law: the rate grows as exp(−Ea/kT), so each mechanism's activation energy Ea sets
+how steeply heat shortens life <span class="cite" data-s="jesd47,ti-lifetime"></span>. Electromigration in copper: 0.9 eV in
+the RAMP model <span class="cite" data-s="ramp"></span> and 0.8–1.2 eV in a recent review <span class="cite" data-s="babu-review"></span>,
+the mechanism TI calls critical for its processors <span class="cite" data-s="ti-lifetime"></span>; 0.7 eV is JEDEC's and TI's
+working value <span class="cite" data-s="jesd47,ti-lifetime"></span>; gate-oxide breakdown is driven more by voltage
+<span class="cite" data-s="renesas,ramp"></span>; bias-temperature instability is accelerated by temperature and gate bias, and
+part of it recovers when the bias is removed <span class="cite" data-s="kaczer-bti,renesas"></span>; hot-carrier damage has
+been worst <i>cold</i>, and JEDEC tests it at 50 °C or below <span class="cite" data-s="jesd47,renesas"></span>, but at the
+reduced supply voltages of leading-edge devices “lower temperatures do not necessarily lead to accelerated degradation”
+<span class="cite" data-s="renesas"></span>, which is the ET's regime. Measured on a 16 nm FinFET FPGA, ageing
+slowed ring oscillators by 0–1% after 8,000 hours, a little over 2% at 115 °C and 1.15 × the nominal voltage
+<span class="cite" data-s="sobas"></span>.</p>
+<div class="chart-title">How much faster a chip wears out than at the ET-SoC-1's 65 °C threshold, by activation energy</div>
+<div id="arrleg"></div>
+<div class="chart" id="arrhenius"></div>
+<p class="small" id="arrcap"></p>
+<p><span data-v="arrText"></span> <span data-v="halving"></span> TI writes the rule “with slippage at higher temperatures”
+<span class="cite" data-s="ti-lifetime"></span>, and Pecht and colleagues warn that “no simple expression can adequately
+describe temperature as a failure accelerator” <span class="cite" data-s="pecht"></span>. Far above any of this, solder melts
+at 217 °C and reflow peaks at 260 °C <span class="cite" data-s="sac305,jstd020"></span>. Esperanto's design life and
+qualification temperature are not published.</p>
+<p><b>Swings count, not only heat.</b> Packages also fail by fatigue: “Damage accumulates every time there is a cycle in
+temperature”, most at the solder joints between the die and the package, and the large cycles are power-ups, power-downs
+and low-power modes <span class="cite" data-s="ramp"></span>. Pecht and colleagues name temperature change, its rate and spatial
+gradients beside the steady temperature as possible drivers of failure, and note that which one drives a given mechanism
+has generally not been quantified <span class="cite" data-s="pecht"></span>. <span data-v="cycleText"></span></p>
+
+<h3 id="leakage">5.2 Leakage, and whether it can run away</h3>
+<p>Subthreshold leakage grows exponentially with temperature, while gate leakage barely moves
+<span class="cite" data-s="kim-leakage"></span>; in a 90 nm FPGA it rose five-fold from 25 to 85 °C <span class="cite" data-s="wp221"></span>,
+a doubling every <span data-v="wp221"></span> °C <span class="kind">derived</span>. Because leakage heats the die and heat raises
+leakage, the loop can run away if the cooling cannot keep up <span class="cite" data-s="kim-leakage,vassighi"></span>.</p>
+<div class="chart-title">Idle board power against the die's mean temperature: the September laws, E53's idle stretches, and card 0</div>
+<div id="idleleg"></div>
+<div class="chart" id="idle"></div>
+<p class="small" id="idlecap"></p>
+<p><span data-v="idleText"></span> <span data-v="runawayText"></span></p>
+
+<h2 id="et-soc1">6. What this means for the ET-SoC-1</h2>
+<div class="table-wrap wide"><table class="stack" id="practable">
+<thead><tr><th>Question</th><th>The ET-SoC-1 as found</th><th>Common practice</th></tr></thead>
+<tbody>
+<tr><td>What the throttle compares</td><td>on 0.20.0, the mean of 34 whole-degree sensors (costs <span data-v="cost2"></span> here); it acts on aifoundry2, is latched on aifoundry3, and card 1's 0.18.0 build never moves its clock</td><td>the hottest calibrated sensor, with a time-averaged loop on top <span class="cite" data-s="intel-atm,occ"></span></td></tr>
+<tr><td>Sensor calibration</td><td>generic conversion; the per-sensor calibration fuses are not read <span class="cite" data-s="et-pvt,et-prm"></span></td><td>each sensor calibrated at test, error pushed to the safe side <span class="cite" data-s="intel-peci"></span></td></tr>
+<tr><td>What happens at the lowest clock</td><td>on the 0.20.0 and 0.18.0 builds, nothing: a die at 600 MHz can heat without limit; card 0 (1.4.1) did drop to 300 MHz after 115–117 °C</td><td>clock modulation, harder clamps, then shutdown <span class="cite" data-s="intel-atm,jetson"></span></td></tr>
+<tr><td>A hardware trip</td><td>a PMIC alarm on a reading that is not the die and reads 0; on 0.20.0 its handler does not reprogram the PLL, and its 75 W threshold did not act at <span data-v="a2W"></span> W</td><td>a per-part calibrated trip on the die, near 105–125 °C <span class="cite" data-s="intel-atom,jetson"></span></td></tr>
+<tr><td>The DRAM</td><td>no temperature, derating off, refresh fixed at 1×</td><td>read the DRAM's own sensor; refresh 2× or 4× above 85 °C <span class="cite" data-s="micron-lpddr4x"></span></td></tr>
+<tr><td>What the host can see</td><td>the mean, anonymous peak-holds; the driver's thermal counters never move on the 0.20.0 build <span class="cite" data-s="et-thermal-c"></span></td><td>per-sensor readings and throttle counters <span class="cite" data-s="nvidia-smi,gaudi"></span></td></tr>
+</tbody></table></div>
+<p><b>What would match practice</b> <span class="kind">inference, not tested</span>: a hard limit on the hottest calibrated
+sensor, smoothed over a few readings, with a margin for what one sensor per tile cannot see; an action below 600 MHz
+(clock gating or duty cycling, then shutdown); DRAM temperature polling and derating; and the mean kept as the DVFS loop's
+input, the role Intel and IBM give their averages. The measured gap says the first matters less on this chip than the
+second and third.</p>
+<p><b>Asks</b> (not answerable from the repository): the lab lead's ~120 °C episode (which card and firmware, what stopped,
+whether a reset was needed, whether power and the PCIe link were logged); card 0's own record from 25 September; the DRAM part and its
+temperature grade; what the PMIC's “system temperature” measures and whether the PMIC power-cycles the board; Esperanto's
+Tj max, qualification and design life; and a firmware build that enables a process-detector delay chain, if the
+transistor-speed question should be measured.</p>
+
+<h2 id="experiments">7. The experiments on the cards (E53)</h2>
+<p><span data-v="expIntro"></span></p>
+<div class="table-wrap wide"><table class="stack" id="vtable"></table></div>
+<p class="small" data-v="vNote"></p>
+<details class="more"><summary>How it ran: the freeze, two stopped attempts and their amendments, and the card time</summary>
+<ol>
+<li><b>The freeze.</b> <span data-v="freeze"></span></li>
+<li><b>Amendment 1.</b> <span data-v="am1"></span></li>
+<li><b>Amendment 2.</b> <span data-v="am2"></span></li>
+<li><b>Card time.</b> <span data-v="cardTime"></span></li>
+<li><b>The rules.</b> <span data-v="rules"></span></li>
+</ol>
+<div class="table-wrap"><table id="blocktable"></table></div>
+</details>
+
+<h2 id="method">8. Method, data and how to reproduce</h2>
+<details class="more"><summary>What each number is, and its limits</summary>
+<ul>
+<li><b>Outside research.</b> Four research tracks (limits; average against maximum; speed, failure and recovery; the
+ET-SoC-1's firmware, manuals and data) read the sources below on 28 September 2026. Each outside claim cites the document
+it is from; a source read only through a press report or a search engine's copy is flagged in the list.</li>
+<li><b>ET numbers.</b> Every number from our cards comes from <code>overheat.json</code>, which
+<code>build_overheat_data.py</code> writes from E53's reductions, from analyses of the existing record
+(<code>scripts/</code>, outputs in <code>analysis/</code>) and from arithmetic on cited inputs (<code>scripts/derived.py</code>).
+Numbers read from the firmware or manuals cite the file and line.</li>
+<li><b>Whole degrees.</b> Every die temperature is the host's whole-degree reading; each sensor is truncated before the
+mean, so both the mean and the gap carry up to a degree of rounding.</li>
+<li><b>The illustration.</b> The delay curves of section 3 come from a textbook model with chosen parameters, not from
+this chip or TSMC's process; they show the shape of temperature inversion only.</li>
+<li><b>The record.</b> <span data-v="methodRecord"></span></li>
+</ul>
+</details>
+<p><b>Data.</b> Everything is in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-28-overheating">docs/reports/data/2026-09-28-overheating</a>:
+E53's raw blocks (<code>raw/</code>), reductions (<code>reductions/</code>), the analyses of the existing record
+(<code>scripts/</code>, <code>analysis/</code>), the source list (<code>sources.json</code>) and this page's data
+(<code>overheat.json</code>). The tools are <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/tools/claims-v3/oh">tools/claims-v3/oh</a>,
+with the frozen predictions in <code>prereg/PREREG.md</code>.</p>
+<pre><code>V=docs/reports/data/2026-09-28-overheating
+python3 tools/claims-v3/oh/reduce.py --all --data $V/raw --out $V/reductions     # E53's registered verdicts
+python3 $V/extras.py                                                              # its descriptive numbers
+for s in max_temps correct_vs_temp timing_vs_temp hot_minus_mean idle_vs_temp runaway events_vs_temp derived; do
+  python3 $V/scripts/$s.py > $V/analysis/$s.txt; done                             # the existing record, and arithmetic
+python3 $V/build_overheat_data.py                                                 # overheat.json
+python3 scripts/build-report.py effect-of-overheating $V/overheat.json docs/reports/2026-09-28-effect-of-overheating.html</code></pre>
+
+<h2 id="sources">Sources</h2>
+<p class="small">Outside sources, numbered in the order the page first cites them; all fetched on 28 September 2026. Each
+entry names what the page uses from it.</p>
+<ol class="srcs" id="srclist"></ol>
+<p class="small">The ET-SoC-1's own documents (firmware at the commits named, in <a href="https://github.com/aifoundry-org/et-platform">aifoundry-org/et-platform</a>; manuals in <a href="https://github.com/aifoundry-org/et-man">aifoundry-org/et-man</a>):</p>
+<ol class="srcs et" id="etsrclist"></ol>
+
+<h2 id="related-reports">Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a> — the governor on the cards' firmware, and leakage at 80 °C.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-placement">Where the work sits</a> — placement and the time to the thermal trip (E52).</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature</a> — the 35 sensors, and why the host sees one mean.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power">Why the chip is low power</a> — the low-voltage design point.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a> — the hub: every report, and what the meters cannot see.</li>
+<li><a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/findings">docs/findings/</a> — the knowledge base: this is experiment E53.</li>
+</ul>
+</main>
