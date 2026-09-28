@@ -9,21 +9,27 @@
 
 The run directory holds power.csv, runs.jsonl and results.json. The script prints each
 workload's throughput, % of peak at the measured clock, board power, efficiency, and ratios
-to the A100 spec sheet (dense peak / TDP). Those are the numbers in the report's tables and
-prose, which are written by hand. --embed replaces the JSON inside the report's
+to the A100 spec sheet (dense peak / TDP): for the 2026-09-18 run, the report's first-run note and power
+chart. The report's tables and prose, written by hand, quote the three-card summary that --v3 (the default)
+prints after them. --embed replaces the JSON inside the report's
 <script type="application/json" id="trace-data"> tag and nothing else: the power trace, each
 workload's windows (launches, the idle window before it, the settle second, its mean power and
 throughput) for the idle-window chart, and, with --manual, an "eff" object for the efficiency
-explorer: this run's GFLOP/s per W, the energy manual's random-normal variant (2000 / pj_loaded of
+explorer: this run's GFLOP/s per W ("run": the first run, 18 September, which the page quotes as one note since
+28 September), the energy manual's random-normal variant (2000 / pj_loaded of
 tensor.rows fp32_randn, fp16_randn, int8_randn), the operand-and-card band (the same variant on zeros, ones and
 random data, aifoundry2's from tensor.rows and every card's from tensor.per_card_rows, all on board power) and the
 A100 constants below.
 
 --v3 MMB_JSON (default: the version-3 check's docs/reports/data/2026-09-25-claims-v3/results/mmb.json; "none" leaves
-it out) adds a "v3" object for the three-card chart: for each card and workload the pass-mean throughput (MMB-b; the
-DRAM workload's is the middle of MMB-a's launch range, which spans 0.6%), board power, the idle just before the
+it out) adds a "v3" object, since 28 September the source of the page's energies (the three-card chart, and the
+explorer's ±1/±2 series per card): for each card and workload the pass-mean throughput (MMB-b; the
+DRAM workload's is the middle of MMB-a's launch range, which spans 0.6%), the lowest and highest pass mean of cycles
+per op (MMB-a), board power, the idle just before the
 workload and the power above it with its 99% interval over the four passes (MMB-c), the die temperature, and
-GFLOP/s per W of board power (MMB-d for the tiles-in-L2 workloads; throughput over board power for DRAM).
+GFLOP/s per W of board power (MMB-d for the tiles-in-L2 workloads; throughput over board power for DRAM). It also
+prints the three-card values the page's text and tables quote (v3_summary(): each quantity's lowest and highest card,
+and each card's ratios to the A100 datasheet).
 
 --ladder TESTDRIVE_HTML writes the test drive's performance ladder (<script id="ladder-data">):
 the FOSDEM 2026 rungs parsed from docs/et-soc1-notes.md, this run's fp32 tensor-unit rate and the
@@ -154,13 +160,53 @@ def v3_object(path):
             d = d_items.get(c, {}).get(w)
             per_w = ({"mean": sig(d["mean"], 5), "lo": sig(d["ci99"][0], 5), "hi": sig(d["ci99"][1], 5)} if d
                      else {"mean": sig(tf * 1000 / cc["board_w"], 5)})
+            cyc = a_items.get(c, {}).get(w, {}).get("cycles_per_op_mean_based")
             rows[w] = {"tflops": sig(tf, 5), "tflops_basis": tf_basis, "board_w": sig(cc["board_w"], 5),
                        "idle_w": sig(cc["idle_before_w"], 5),
                        "above_w": {"mean": sig(cc["mean"], 5), "lo": sig(cc["ci99"][0], 5), "hi": sig(cc["ci99"][1], 5),
                                    "n": cc["n"]},
                        "die_c": sig(cc["die_c_mean"], 3), "die_c_start": cc.get("die_c_start"), "per_w": per_w}
+            if cyc:   # MMB-a: the lowest and highest pass mean of cycles per op (the DRAM workload's spread is its own)
+                rows[w]["cycles_per_op"] = [sig(cyc[0], 6), sig(cyc[1], 6)]
         out["cards"][c] = rows
     return out
+
+
+def v3_summary(v3, minions, ghz):
+    """Print the three-card values the page's text and tables quote: per workload, each quantity's lowest and highest
+    card (throughput, % of peak, board power, power above idle, the idle before, the die, GFLOP/s per W of board
+    power and above idle), each card's ratio to the A100 SXM4 datasheet's per-W figures, and the idle's share of the
+    board power. The A100's per W is peak / TDP (A100_PEAK, A100_TF32, A100_TDP)."""
+    cards = list(v3["cards"])
+    a100 = {"fp32 CUDA": A100_PEAK["fp32"], "tf32": A100_TF32, "fp16": A100_PEAK["fp16"], "int8": A100_PEAK["int8"]}
+    span = lambda xs, f: f"{f(min(xs))}-{f(max(xs))}"
+    print(f"\nthe three-card check ({', '.join(cards)}; {v3['source']}):")
+    for w in WORKLOADS:
+        rs = {c: v3["cards"][c][w] for c in cards if w in v3["cards"][c]}
+        if not rs:
+            continue
+        mode = w.split("-")[0]
+        peak = PEAK_PER_MINION_CYCLE[mode] * minions * ghz / 1000
+        tf = [r["tflops"] for r in rs.values()]
+        above_pw = {c: r["tflops"] * 1000 / r["above_w"]["mean"] for c, r in rs.items()}
+        print(f"  {w:18s} {span(tf, lambda v: f'{v:.4g}')} T/s ({span([100 * v / peak for v in tf], lambda v: f'{v:.2f}')}% of {peak:.2f}); "
+              f"board {span([r['board_w'] for r in rs.values()], lambda v: f'{v:.2f}')} W, above idle "
+              f"{span([r['above_w']['mean'] for r in rs.values()], lambda v: f'{v:.2f}')} W, idle before "
+              f"{span([r['idle_w'] for r in rs.values()], lambda v: f'{v:.2f}')} W, die {span([r['die_c'] for r in rs.values()], lambda v: f'{v:.1f}')} C; "
+              f"per W {span([r['per_w']['mean'] for r in rs.values()], lambda v: f'{v:.1f}')}, above idle "
+              f"{span(list(above_pw.values()), lambda v: f'{v:.1f}')}; idle share of board "
+              f"{span([r['idle_w'] / r['board_w'] for r in rs.values()], lambda v: f'{v:.3f}')}")
+        for c, r in rs.items():
+            line = f"    {c:14s} per W {r['per_w']['mean']:.1f}, above idle {above_pw[c]:.1f}"
+            if w.endswith("-L2"):
+                for name, pk in a100.items():
+                    if (mode == "fp32") == name.startswith(("fp32", "tf32")) and (mode == "fp32" or name == mode):
+                        for tdp_name, tdp in A100_TDP.items():
+                            line += f"  ET/A100 {name} {tdp_name} {r['per_w']['mean'] / (pk * 1000 / tdp):.3f}"
+                line += f"  A100 speed {(A100_PEAK[mode] if mode != 'fp32' else A100_PEAK['fp32']) / r['tflops']:.2f}x"
+                if mode == "fp32":
+                    line += f" (tf32 {A100_TF32 / r['tflops']:.2f}x)"
+            print(line)
 
 
 def ladder_object(res, ghz, minions):
@@ -261,6 +307,7 @@ def main():
         data["eff"] = eff_object(res, args.manual, d)
     if args.v3 and args.v3 != "none" and os.path.exists(args.v3):
         data["v3"] = v3_object(args.v3)
+        v3_summary(data["v3"], minions, ghz)
     if args.embed:
         embed(args.embed, "trace-data", data)
         print(f"embedded {len(data['trace'])} power samples and {len(windows)} windows"

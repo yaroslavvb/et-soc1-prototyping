@@ -740,21 +740,14 @@ aifoundry1's card 1 (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/
 <span class="v3-counts" data-v3-counts="et-soc1-memory-anatomy">Of 66 claims tested here, this page counts 49 held, 11 corrected, 5 differ by card and 1 not confirmed; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#claims-cap">hub’s scoreboard</a>, 22 “proven on the cards”, 35 “a test behind it failed”, 8 “differs by card” and 1 “fewer than three repeats”.</span>
 The charts in §2–4 put each card's latencies beside the 19 September session's. The registered test of the row-state
 claims in §5 read one series without the later build's 7-cycle timer offset and failed; re-referenced to each pass's
-own L1 hit, as everything else here is, those claims hold on every card (§5).</p>
-<details class="more"><summary>Later energy measurements, superseding §6's numbers</summary>
-<p class="small card"><b>Later energy measurements.</b> The energies in §6 are superseded by later
-measurements on @@man_n@@ cards, with zeros and with random data: the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual</a>
-(§4) and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a>. The manual puts a
-DRAM read at @@man_dram@@ pJ per byte [@@man_dram_lo@@–@@man_dram_hi@@; @@man_zeros@@ on zeros, @@man_random@@ on random
-data], against @@here_pjb@@ in this page's two runs per pattern (@@here_host_pjb@@ on the host log, §6), and on random data both
-put a mesh hop at about twice this page's @@hop_pjb@@ pJ per byte (@@man_hop@@ pJ/B per hop in the manual's wire fit,
-card by card).</p>
-</details>
+own L1 hit, as everything else here is, those claims hold on every card (§5). The energies (the explorer in §1, §6
+and the DRAM figure below) are the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy
+manual</a>'s (§4), measured in the same check on the @@man_n@@ cards at @@man_mhz@@ MHz (@@man_date@@).</p>
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">A DRAM load, typical</div><div class="val">299 cycles</div><div class="sub">500 ns at 600 MHz: median of 4,500 loads from shire 0 to random lines; @@v3_dram_med@@ in each of the @@v3_n_passes@@ passes on three cards (26 Sep).</div></div>
   <div class="card kpi"><div class="lab">Each mesh hop, round trip</div><div class="val">12 cycles</div><div class="sub">Paid twice on a DRAM load: to the L3 home shire, then on to the memory shire. Fitted slope 11.99 on each of three cards (26 Sep).</div></div>
-  <div class="card kpi"><div class="lab">A DRAM byte's energy, unmetered</div><div class="val">@@man_offrail_kpi@@</div><div class="sub">on no metered rail, mostly the DDR side: the energy manual's DRAM tensor loads on @@man_offrail_cards@@ (@@man_offrail@@). This page's two runs gave @@dram_rest_pct@@ (mesh @@dram_noc_pct@@, SRAM @@dram_sram_pct@@, cores @@dram_minion_pct@@) and a total of @@dram_nj@@ nJ per load on the rail trace (@@dram_host_nj@@ on the host log), superseded by the manual's @@man_dram@@ pJ/B, @@man_dram_line_nj@@ nJ per 64-byte line.</div></div>
+  <div class="card kpi"><div class="lab">A DRAM byte's energy, unmetered</div><div class="val">@@man_offrail_kpi@@</div><div class="sub">on no metered rail, mostly the DDR side: the energy manual's DRAM tensor loads on @@man_offrail_cards@@ (@@man_offrail@@; mesh @@dram_noc@@, SRAM @@dram_sram@@, cores @@dram_min@@). A DRAM read: @@e_dram@@ pJ per byte, @@e_dram_line@@ per 64-byte line (@@man_mhz@@ MHz, @@man_date_short@@).</div></div>
   <div class="card kpi"><div class="lab">Latency model</div><div class="val">±3 cycles</div><div class="sub">for 1,450 of 1,500 random lines (±5 for 1,490), from address bits alone, with its constants fitted to those lines; left as fitted, @@v3_within3@@ of lines on each of three cards (26 Sep).</div></div>
 </div>
 
@@ -777,8 +770,9 @@ which is within ±3 cycles for 97% of lines (the fastest of three loads of each 
 loads). The strip under the bar puts the path among the loads actually measured: for every home shire the model sits
 within @@home_dev_max@@ of the measured median, as it should, since it was fitted to those loads, and, with the
 memory shires placed one hop outside the grid, the memory shire's position adds @@ms_leg@@ cycles. Energy is the
-19 September measured average of two runs for that level (for L3, a straight line through the own-shire and far-home
-averages, scaled by the hop count), since superseded (§6). All loads were timed from shire 0; for other requesting
+energy manual's for that level (§6): the mean over every pass on @@man_n@@ cards at @@man_mhz@@ MHz (@@man_date@@), above
+idle, per 64 bytes read (one line from the L2, the L3 or DRAM; two 32-byte vector loads from the L1), with each card's
+beside it. The L3's is at the mixed distances of its run, and the cells give what each mesh hop adds. All loads were timed from shire 0; for other requesting
 shires the explorer assumes the same 12 cycles per hop, which the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip
 communication report</a> measured between every pair of shires on the same card. The three-card check (26 September)
 timed the same kind of loads from shires 7, 24 and 31 as well, and the model held from each of them on every card: L3
@@ -1075,53 +1069,82 @@ check 0–3 of 300 per pass on aifoundry2 and aifoundry1's card 1, but 2–9 on 
 href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#l2">the L2</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#l3">the L3</a> and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#scp">the scratchpad</a>, the 2.5 MB of each
 shire's cache that software manages. Which cell they use is asked of the team (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#ask-not-sram">the hub's
 rung 37</a>): the documents call them SRAM, and the lab lead says the chip is not using SRAM.</p>
-<details class="more"><summary>How energy was split by rail</summary>
-<p>On 19 September, hart 0 of all 1,024 minions walked a working set sized to hit exactly one level, with no evicts
-(sized by design and checked only by the load rates: no counter a user-mode kernel can read reports L2 or L3 hits
-and misses). The loop was the same six-instruction body for every level, run for 6 s per pattern, twice each, in one
-session. Power above the level just before
-each run, divided by the load rate, gives energy per load. The split comes from the service processor's trace:
-<b>minion cores</b>, <b>SRAM</b> (the L2/L3/scratchpad arrays), <b>NoC</b> (the mesh), and the <b>rest</b> =
-board total − those three rails. The rest is mostly the memory shires, DRAM, PHY and I/O. It also holds the
-regulators' delivery losses on the three metered rails (18–20% of the minion rail's power; <a
+<p>What a byte read from each level costs above idle, at @@man_mhz@@ MHz on @@man_n@@ cards (the <a
+href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">energy manual, §4</a>,
+@@man_date@@): an L1 hit @@e_l1@@ pJ (32-byte vector loads, random data), the L2 @@e_l2@@, the shire's own scratchpad
+@@e_scp0@@ holding zeros and @@e_scp1@@ holding random data, the L3 @@e_l3@@, another shire's scratchpad @@e_rscp0@@ and
+@@e_rscp1@@, and DRAM @@e_dram@@. A 64-byte line costs @@e_l2_line@@ from the L2, @@e_l3_line@@ from the L3 and @@e_dram_line@@
+from DRAM. The chart splits each way of reading a level between the four places the energy goes.</p>
+<details class="more"><summary>How the energy was measured</summary>
+<p>Both sets of numbers are the version-3 check's (@@man_date@@), at a steady @@man_mhz@@ MHz on each of aifoundry2,
+aifoundry3 and aifoundry1's card 1, every burst against the idle on either side of it and corrected for the die's
+warming. <b>The levels</b> (the paragraph above, the explorer in §1 and the second table): hart 0 of every minion
+streaming 1 KB tensor loads, which skip the L1 but are cached in the L2 and L3, over a working set sized to one level
+(sized by design: no counter a user-mode kernel can read reports L2 or L3 hits and misses), @@lv_passes@@ passes on each
+card. The contents of the L2, L3 and DRAM buffers were not set; the scratchpads were filled with zeros or random data
+before they were read. The L1's figure is the catalogue's vector loads, next. <b>The paths</b> (the chart and the first table) are
+the manual's catalogue, @@cat_passes@@ passes on each card, each with zeros and with random data in the memory it reads:
+both harts of every minion re-reading the L1 with 32-byte vector loads, and 1 KB tensor loads from the shire's own
+scratchpad, from the L3 (a working set that fits it, its lines homed across the chip, so read through the mesh), from
+the scratchpads of shires exactly @@hop_list@@ mesh hops away, and from DRAM. The split comes from the service
+processor's trace of the three metered rails, <b>minion cores</b>, <b>SRAM</b> (the L2/L3/scratchpad arrays) and
+<b>NoC</b> (the mesh), read at the end of each burst and corrected for how far the power-management controller's
+running average had risen; the <b>rest</b> = board power − those three rails. The rest is mostly the memory shires,
+DRAM, PHY and I/O. It also holds the regulators' delivery losses on the three metered rails (@@deliv_loss@@ of the minion
+rail's power, by card; <a
 href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">hub
 §4.2</a>).</p>
+<p><b>First measured</b> here, on 19 September on aifoundry2 alone: hart 0 of all 1,024 minions walked a working set
+sized to one level with 8-byte loads, one per 64-byte line below the L1, in the same six-instruction loop for every
+level, for 6 s per pattern and twice each, and the power above the level just before each run was split by the same
+trace. What they showed about the meters: the host's board-power log read @@host_excess@@ higher than
+the trace in every one of the @@power_runs@@ runs, from the edges of each window, because the trace is the
+power-management controller's running average (τ ≈ @@man_tau@@; <a
+href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">hub §4.1</a>): its baseline reads
+high and its run average low.</p>
 </details>
 <div class="chart-title" id="energy-title"></div>
-<div class="ck-controls"><span id="energy-mode"></span></div>
+<div class="ck-controls"><span id="energy-mode"></span><span id="energy-card"></span><span id="energy-data"></span></div>
 <div id="energy-legend"></div>
 <div class="chart" id="energy"></div>
 <p class="fn" id="energy-cap"></p>
-<details><summary>The numbers: energy per load by rail, both board totals, cycles and loads per second</summary>
+<details><summary>The numbers: each path by rail on the chosen card, and every level on each card</summary>
 <div class="table-wrap"><table id="energy-table"></table></div>
-<p class="fn">pJ per load (one 8-byte <code>ld</code>, which below L1 moves a 64-byte line) above idle, mean of two
-6 s runs on 19 September; superseded by the energy manual. The load and stall energy of the cores is included, so
-these are what a load cost in this loop. "Rest" is
-the board total minus the three rails, mostly the DDR side. An L1 hit moves no line; per byte the <code>ld</code>
-returns it costs 46/8 ≈ 5.7 pJ. Cycles per load are the mean minion's and the slowest minion's; the slowest sets the
-load rate, which is why row conflicts read fewer cycles per load than the sequential pattern but move fewer loads per
-second.</p>
+<p class="fn" id="energy-table-cap"></p>
+<div class="table-wrap"><table id="levels-table"></table></div>
+<p class="fn">pJ per byte above idle at @@man_mhz@@ MHz (@@man_date@@): the mean over every pass on every card, the range those
+passes spanned, and each card's mean. The levels are hart 0 of every minion streaming 1 KB tensor loads
+(@@lv_passes@@ passes on each card); the rows with the data named are the catalogue's (@@cat_passes@@ passes on each card:
+the L1 by 32-byte vector loads, the L3 through the mesh and DRAM by 1 KB tensor loads). From the energy manual,
+§4.1–4.3.</p>
 </details>
-<p>What these two runs per pattern showed, all since superseded by the energy manual's values for every level on @@man_n@@
-cards:</p>
+<p>What these measurements show:</p>
 <ul>
-<li><b>An L2 hit is mostly SRAM:</b> 112 of 183 pJ, 1.76 pJ per byte. The core's share read 41 pJ on an L1 hit and
-64 pJ on an L2 hit.</li>
-<li><b>An L3 hit costs 3× an L2 hit even locally.</b> SRAM goes to 306 pJ, for the L2 miss, the L3 read and the L2
-fill, and the NoC rail appears at 120 pJ.</li>
-<li><b>Each mesh hop costs about 59 pJ per load (per 64-byte line moved)</b>, 47 pJ of it on the NoC rail: going
-from a local to a far home (5.6 hops on average) adds 333 pJ. That is ~0.9 pJ per byte per hop.</li>
-<details class="more"><summary>More: the DRAM load, and the host log against the trace</summary>
-<li><b>A DRAM load costs ~5.1 nJ, and two thirds of it, 3.4 nJ = 53 pJ per byte, is off the metered rails, mostly
-on the DDR side.</b> The mesh
-adds 0.9 nJ, because the request crosses the chip twice. The DRAM row itself could not be isolated: between a
-pattern that conflicts on every access and a sequential one no difference was detectable (4.8–4.9 nJ per load in
-the row-conflict pattern's two runs, against 5.0–5.1 in the sequential pattern's two). With 1,024 streams interleaved, the
-sequential pattern probably re-activates rows on almost every access too.</li>
-<li>The host's board-power log reads @@host_excess@@ higher than the trace in every one of the @@power_runs@@ runs,
-from the edges of each window: the trace is the power-management controller's running average (τ ≈ @@man_tau@@;
-<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">hub §4.1</a>), so its baseline
-reads high and its run average low. The table gives both; the split uses the trace so the parts add up.</li>
+<li><b>An L2 read is mostly SRAM.</b> Reading the shire's own scratchpad, the L2's SRAM without the tag check, puts
+@@scp_sram@@ of the power on the SRAM rail on @@scp_cards@@, and the cores take @@scp_min@@ (they carry @@l1_min@@ of an L1
+hit's). On @@odd_card@@ the SRAM rail carries @@scp_sram_odd@@ and no metered rail @@scp_rest_odd@@, against @@scp_rest@@ on
+the others: on that card the power on no metered rail rises @@unm_sram_odd@@ W with each watt on the SRAM rail, against
+@@unm_sram@@ W on the others (the energy manual's fit of the unmetered power). The L2 itself costs @@e_l2@@ pJ per byte
+[@@e_l2_range@@ over its passes], @@e_l2_line@@ per 64-byte line.</li>
+<li><b>An L3 byte costs @@l3_x_l2@@× an L2 byte</b> (@@e_l3@@ against @@e_l2@@ pJ/B), @@e_l3_line@@ per line. Read through the
+mesh by tensor loads, the L3 puts @@l3_sram@@ of the power on the SRAM rail, for the L2 miss, the L3 read and the L2
+fill, and @@l3_noc@@ on the mesh; random data cost @@l3_rz@@× zeros (@@l3_cards@@).</li>
+<li><b>Each mesh hop adds @@hop_r@@ pJ per byte on random data and @@hop_z@@ on zeros</b>, @@hop_r_line@@ and
+@@hop_z_line@@ pJ per 64-byte line: the mean of the manual's straight lines through another shire's scratchpad at
+@@hop_fit@@ hops (@@hop_r_span@@ and @@hop_z_span@@ card by card; <a
+href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> splits it into bits that flip
+and ones carried). The mesh rail's share of the power grows with the distance: @@noc_hops@@ at @@hop_list@@ hops.</li>
+<details class="more"><summary>More: the DRAM read and its rows</summary>
+<li><b>A DRAM read costs @@e_dram@@ pJ per byte [@@e_dram_range@@], @@e_dram_line@@ per 64-byte line</b> (@@e_dram_cards@@);
+tensor loads from DRAM cost @@e_dram0@@ on zeros and @@e_dram1@@ on random data. @@man_offrail@@ of a DRAM read's power is on
+no metered rail, mostly on the DDR side: the manual's fit of the unmetered power puts @@unm_dram@@ in the DDR PHY, the I/O
+rail and the DRAM chips. The mesh rail carries @@dram_noc@@, because the request crosses the chip twice, the SRAM rail
+@@dram_sram@@ and the cores @@dram_min@@.</li>
+<li><b>The DRAM row pattern does not change the energy.</b> The manual's row walks, 1 KB tensor loads by
+@@rows_harts@@ harts, one per shire, each over a region of its own, together far larger than the L3, cost
+@@rows_rowhit@@ pJ/B when every access finds its row open, @@rows_rowmiss@@ when every visit to a bank opens a new row and
+@@rows_seq@@ streaming, on random data; no pattern differs from the others at 99% on any of the @@man_n@@ cards (<a
+href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#finer-grain-wires-lines-rows-and-the-leakage-of-the-arrays">§4.3</a>).</li>
 </details>
 </ul>
 
@@ -1203,6 +1226,7 @@ python3 workloads/memprobe/analyze.py --data $D --out $D/summary.json
 V=docs/reports/data/2026-09-25-claims-v3
 python3 workloads/memprobe/analyze.py --v3 $V/raw --v3-passes $V/results/mem.passes.json \
     --out docs/reports/data/2026-09-26-memprobe-3cards/cards.json
+# the page; §1's and §6's energies are the energy manual's, read from its manual.json (build_report.py's docstring lists the fields)
 python3 workloads/memprobe/build_report.py $D/summary.json docs/reports/data/2026-09-23-energy-manual/manual.json \
     docs/reports/2026-09-19-et-soc1-memory-anatomy.html</code></pre>
 <details><summary>Card runs (each under <code>timeout 10</code>)</summary>
@@ -1238,7 +1262,7 @@ a slope and a range. 26 September (version 4): the latencies re-checked on three
 row conflict (about +38 cycles, not +40) and the evict ladder's open-row split corrected; the board-power period given
 per card; the energy manual's figures (the note on energy, the DRAM figure at the top, §6 and the energy chart) are
 its version-3 values from three cards. The record is
-<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>. 27 September: the DRAM chip's share of a load is about 28 cycles (a 64-byte line is two bursts; was 25–28) and the memory shire's at most ~63; the explorer's row-conflict and refresh waits are the three-card values (38 and 208 cycles, were 40 and 210); the memory-shire leg charted per card; detail folded into collapsible sections. 27 September, later: why every fourth load of the locked loop is slow, charted with a model that takes four numbers from the refresh series (the slow load's extra time is the refresh period minus four open turns, within a cycle in every series; the page had said that none of this session's slow loads landed inside the refresh); the bit chart's row-conflict label reads the measured +38.5 cycles (was rounded to +40); the no-fence loads' median excess over the §4 model is @@nf_resid@@ cycles (was 58); the board value's refresh in the three-card check includes its 20 Hz sampler (126–189 and 223–322 ms; was 126–159 and 223–264). 28 September: a link to the companion page, Anatomy of a memory access, interactively, under the title, and from §2–§6 and §9 to its diagram of each level and to the hub's asks Later that day, the review's cuts (§6's host-log note, §9's clock-domain idea, §2's cross-check; the DRAM figures said once, in the energy note at the top); the note's counts given by both rules.</p>
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>. 27 September: the DRAM chip's share of a load is about 28 cycles (a 64-byte line is two bursts; was 25–28) and the memory shire's at most ~63; the explorer's row-conflict and refresh waits are the three-card values (38 and 208 cycles, were 40 and 210); the memory-shire leg charted per card; detail folded into collapsible sections. 27 September, later: why every fourth load of the locked loop is slow, charted with a model that takes four numbers from the refresh series (the slow load's extra time is the refresh period minus four open turns, within a cycle in every series; the page had said that none of this session's slow loads landed inside the refresh); the bit chart's row-conflict label reads the measured +38.5 cycles (was rounded to +40); the no-fence loads' median excess over the §4 model is @@nf_resid@@ cycles (was 58); the board value's refresh in the three-card check includes its 20 Hz sampler (126–189 and 223–322 ms; was 126–159 and 223–264). 28 September: a link to the companion page, Anatomy of a memory access, interactively, under the title, and from §2–§6 and §9 to its diagram of each level and to the hub's asks Later that day, the review's cuts (§6's host-log note, §9's clock-domain idea, §2's cross-check; the DRAM figures said once, in the energy note at the top); the note's counts given by both rules. 28 September, later: the energy manual's three-card values replace the 19 September runs on the page itself: §6 gives every level on each card and splits each way of reading a level between the rails, card by card and with zeros or random data; the explorer's energy is the manual's level; the DRAM figure at the top and the regulators' delivery loss (@@deliv_loss@@ by card, was 18–20%) are the three cards'. The 19 September runs are kept as a note on how they were measured, in §6.</p>
 </details>
 
 <h2 id="related">Related reports</h2>
@@ -1252,8 +1276,8 @@ and the bandwidth of every level, measured the day before this page.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the shire
 map used here, and 20 ns per mesh hop measured between every pair of shires on aifoundry2.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#bytes-through-the-memory-hierarchy">The energy
-manual, §4</a> — energy per byte at every level of the hierarchy, with ranges over repeated runs on @@man_n@@ cards; it
-supersedes the energies in §6.</li>
+manual, §4</a> — energy per byte at every level of the hierarchy, with ranges over repeated runs on @@man_n@@ cards, and
+each path by rail: the source of the energies in §1 and §6, with the writes, gathers and scatters this page leaves out.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> — the energy of one
 mesh hop, split into bits that flip and ones carried.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a> — uses the
@@ -1407,13 +1431,10 @@ function parts() {
   if (st.dstate === 'refresh') P.push(['wait for refresh (worst case)', 208, 'c7']);
   return {P, h1, h2, ms};
 }
-function energyOf(h1) {
-  const E = D.energy;
-  if (st.lvl === 'L1') return E.l1.sp_total;
-  if (st.lvl === 'L2') return E.l2.sp_total;
-  if (st.lvl === 'L3') return E.l3near.sp_total + D.hopPj * h1;
-  return E.dram_seq.sp_total;
-}
+/* Energy: the energy manual's level (D.levels, pJ per byte, three cards; §6), given per 64 bytes read. */
+const LVKEY = {L1: 'l1', L2: 'l2', L3: 'l3', DRAM: 'dram'};
+const pjbF = (v, like) => CK.fmt.num(v, (like == null ? v : like) < 10 ? 2 : 1);  // as the energy manual prints pJ/B
+const eF = pj => (pj < 500 ? f0(pj) + ' pJ' : CK.fmt.num(pj / 1000, pj < 1000 ? 2 : 1) + ' nJ');
 const readout = CK.readout('readout');
 function drawMesh(f) {
   const cw = Math.floor(Math.min(56, (f.W - 8) / 6)), x0 = Math.round((f.W - 6 * cw) / 2), y0 = 4;
@@ -1562,20 +1583,18 @@ function drawStrip(f) {
   $('strip-title').textContent = 'Where this path sits among the 32 home shires’ measured L3 hits from shire 0';
 }
 function drawReadout() {
-  const {P, h1, h2, ms} = parts(), total = P.reduce((a, p) => a + p[1], 0), E = energyOf(h1);
-  readout.set(`<span class="big">${total} cycles</span> · ${f0(total * CYC_NS)} ns · <span class="big">${CK.fmt.num(E / 1000, E >= 1000 ? 1 : 2)} nJ</span> per load ` +
-    `<span class="small">(19 Sep rail-trace average of two runs${st.lvl === 'DRAM' ? ', over all paths' : st.lvl === 'L3' ? ', a straight line in the hop count' : ''}; superseded, see §6)</span>`);
+  const {P, h1, h2, ms} = parts(), total = P.reduce((a, p) => a + p[1], 0), L = D.levels, lv = L[LVKEY[st.lvl]];
+  readout.set(`<span class="big">${total} cycles</span> · ${f0(total * CYC_NS)} ns · <span class="big">${eF(64 * lv.mean)}</span> per 64 bytes ` +
+    `<span class="small">(the energy manual's mean over @@man_n@@ cards at @@man_mhz@@ MHz${st.lvl === 'L1' ? ': two 32-byte vector loads' : st.lvl === 'L3' ? ', at the mixed distances of its run' : ''}; §6)</span>`);
   const cells = [['Requesting shire', `${st.req}`]];
   if (st.lvl === 'L3' || st.lvl === 'DRAM') cells.push(['L3 home shire', `${st.home} · ${h1} hops`]);
   if (st.lvl === 'DRAM') cells.push(['Memory shire', `M${ms} · ${h2} hops from home`]);
-  const E0 = D.energy, RAILS = ['minion', 'sram', 'noc', 'rest'];
-  // Mean hop count of the far-home pattern, and each rail's energy per hop (the far-home increase over it).
-  const farHops = (E0.l3far.sp_total - E0.l3near.sp_total) / D.hopPj;
-  const perHop = k => (E0.l3far[k] - E0.l3near[k]) / farHops;
-  let en = st.lvl === 'L1' ? E0.l1 : st.lvl === 'L2' ? E0.l2 : st.lvl === 'L3' ? E0.l3near : E0.dram_seq;
-  if (st.lvl === 'L3') en = Object.fromEntries(RAILS.map(k => [k, E0.l3near[k] + perHop(k) * h1]));
-  cells.push(['Energy per load by rail (19 Sep, two runs; superseded): cores / SRAM / NoC / rest', RAILS.map(k => f0(en[k])).join(' / ') + ' pJ', 'full']);
-  if (st.lvl === 'L3') cells.push(['Mesh energy', `+${f0(D.hopPj)} pJ per hop, ${f0(perHop('noc'))} of it NoC`]);
+  cells.push([`Energy per byte: the mean [range over ${lv.n} passes], and each card's`,
+    `${pjbF(lv.mean)} pJ/B [${pjbF(lv.lo, lv.mean)}–${pjbF(lv.hi, lv.mean)}] · ` + CK.cardsIn(lv.per_card).map(c => `${CK.card(c).short} ${pjbF(lv.per_card[c], lv.mean)}`).join(' · '), 'full']);
+  if (st.lvl === 'L1') cells.push(['On zeros', `${pjbF(L.l1_zeros.mean)} pJ/B, ${eF(64 * L.l1_zeros.mean)} per 64 bytes`, 'full']);
+  if (st.lvl === 'L2') cells.push(['The same SRAM, read as the own scratchpad', `${pjbF(L.scp_zeros.mean)} pJ/B holding zeros, ${pjbF(L.scp_random.mean)} holding random data`, 'full']);
+  if (st.lvl === 'L3') cells.push(['Each mesh hop adds, per 64-byte line', `${f0(64 * D.hop.random.mean)} pJ on random data, ${f0(64 * D.hop.zeros.mean)} on zeros`, 'full']);
+  if (st.lvl === 'DRAM') cells.push(['Tensor loads: zeros / random data', `${pjbF(L.dram_zeros.mean)} / ${pjbF(L.dram_random.mean)} pJ/B`], ['On no metered rail', '@@man_offrail@@, by card']);
   $('cells').innerHTML = cells.map(([k, v, cls]) => `<div class="card${cls ? ' ' + cls : ''}"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
   $('strip-cap').textContent = st.lvl === 'DRAM'
     ? 'Model fitted to these loads (one constant and eight memory shire positions); measured values are the median over each home’s lines of the fastest of three loads.'
@@ -2212,91 +2231,93 @@ CK.seg('modelerr-src', {label: 'Show', options: SRC, value: errsrc, onChange: v 
   CK.sortTable(t1); CK.sortTable(t2);
 })();
 
-/* ---------- 6. energy ---------- */
+/* ---------- 6. energy: the energy manual's read paths split by rail (D.paths), and every level (D.levels) ---------- */
 (function () {
-  const pats = [['l1', 'L1 hit', 'l1'], ['l2', 'L2 hit', 'l2'], ['l3near', 'L3 hit, own shire', 'l3'], ['l3far', 'L3 hit, ~5.6 hops', 'l3'],
-    ['dram_seq', 'DRAM, sequential', 'dram'], ['dram_row', 'DRAM, row conflicts', 'dram']];
-  const parts = [['minion', 'minion cores', 'c1'], ['sram', 'SRAM (L2/L3)', 'c2'], ['noc', 'NoC (mesh)', 'c3'], ['rest', 'rest (board − rails; mostly DDR)', 'c4']];
-  const M = D.manual, CARDS = CK.cardsIn(M.cards), NC = ['no', 'one', 'two', 'three', 'four', 'five'][CARDS.length] || CARDS.length;
-  const byCard = (pc, fmt) => CARDS.map(c => `${fmt(pc[c])} on ${CK.card(c).label}`).join(', ');
-  // a level of the energy manual in words: per card where any two cards differ, else the mean and the range
-  const manText = (k, name, fmt) => M[k].cards_differ
-    ? `${name} ${byCard(M[k].per_card, fmt)}`
-    : `${name} ${fmt(M[k].mean)} [${fmt(M[k].lo)}–${fmt(M[k].hi)}]`;
-  let mode = 'pj';
-  const legend = () => CK.legend('energy-legend', mode === 'byte'
-    ? [{key: 'b', label: 'here, rail trace', mark: 'box', color: 'var(--c1)'}, {key: 'h', label: 'here, host log', mark: 'ring', color: 'var(--c1)'}, {key: 'm', label: 'energy manual: mean (each card’s where they differ) and range', mark: 'line', color: 'var(--ink)'}]
-    : parts.map(([k, n, c]) => ({key: k, label: n, mark: 'box', color: `var(--${c})`})));
-  const texts = () => {
-    $('energy-title').textContent = mode === 'pj' ? 'Energy per load, split by rail (19 September, rail trace, two runs per pattern; superseded)'
-      : mode === 'share' ? 'Where each load’s energy goes, as a share of the load' : 'Energy per byte of line moved, against the energy manual (log scale)';
-    $('energy-cap').textContent = mode === 'byte'
-      ? `Manual: 1 KB tensor loads, ${NC} cards, host board power, over memory whose contents were not set (${manText('l2', 'L2', f2)}, ${manText('l3', 'L3 at mixed distances', f1)}, ${manText('dram', 'DRAM', f0)} pJ/B; a level whose cards differ is given per card). Here: an 8-byte ld per 64-byte line, two runs on one card, the rail trace (bar) and the host log (ring). An L1 hit moves no line.`
-      : mode === 'share' ? 'Each bar is one load’s energy on the rail trace (two runs per pattern), as 100%. The cores’ share falls level by level; the NoC rail appears at L3, and the unmetered rest takes two thirds of a DRAM load in these runs (@@man_offrail@@ of a DRAM byte in the energy manual, on its @@man_n@@ cards).'
-      : `pJ per load above idle, one 8-byte ld; below L1 each brings a 64-byte line. The bars are the 19 September rail trace, the mean of two 6 s runs per pattern in one session; the energy manual has since measured every level on ${NC} cards (the third view).`;
+  const CARDS = CK.cardsIn(D.cards), P = D.paths, L = D.levels;
+  const hopPath = k => { const h = P[k].hops; return [k, `another shire’s scratchpad, ${h} hop${h > 1 ? 's' : ''}`, `1 KB tensor loads from the scratchpad of a shire exactly ${h} mesh hop${h > 1 ? 's' : ''} away`]; };
+  const PATHS = [['l1', 'L1 hit', 'both harts of every minion re-reading the L1 with 32-byte vector loads (flw.ps)'],
+    ['scp', 'own scratchpad', 'the L2’s SRAM without the tag check: 1 KB tensor loads by hart 0 of every minion'],
+    ['l3', 'L3, through the mesh', '1 KB tensor loads over a working set that fits the L3, its lines homed across the chip'],
+    ...Object.keys(P).filter(k => /^hop\d+$/.test(k)).map(hopPath),
+    ['dram', 'DRAM', '1 KB tensor loads from DRAM']];
+  const RAILSC = [['minion', 'minion cores', 'c1'], ['sram', 'SRAM (L2/L3/scratchpad)', 'c2'], ['noc', 'NoC (mesh)', 'c3'], ['rest', 'rest (board − rails; mostly DDR)', 'c4']];
+  const DATA = [['random', 'random data'], ['zeros', 'zeros']];
+  let mode = 'pj', card = CARDS[0], data = 'random';
+  const dname = () => DATA.find(d => d[0] === data)[1];
+  // One path on the chosen card and data: its energy per 64 bytes, split in the shares of its power over idle that each
+  // rail carried (the rest: board power less the three metered rails).
+  const split = k => {
+    const r = P[k].cards[card][data], w = Object.assign({}, r.rails, {rest: r.w - r.rails.minion - r.rails.sram - r.rails.noc});
+    const e = {}; for (const [p] of RAILSC) e[p] = 64 * r.pjb * w[p] / r.w;
+    return {r, w, e, tot: 64 * r.pjb};
   };
-  const F = CK.frame('energy', {label: 'Energy per load by level and rail', height: W => pats.length * 56 + 54, draw: f => {
-    const L = 8, R = 12, T = 8, rowH = 56, bh = 22, W = f.W, nodes = [];
-    const axisY = T + pats.length * rowH + 6;
-    let x;
-    if (mode === 'pj') x = CK.lin(0, 5200, L, W - R);
-    else if (mode === 'share') x = CK.lin(0, 1, L, W - R);
-    else x = CK.log(1, 200, L, W - R);
-    const ticks = mode === 'pj' ? (W < 480 ? [0, 2500, 5000] : [0, 1000, 2000, 3000, 4000, 5000]) : mode === 'share' ? [0, 0.25, 0.5, 0.75, 1] : [1, 2, 5, 10, 20, 50, 100, 200];
+  // one scale for every card and operand set, so that switching compares them
+  const top = Math.max(...PATHS.flatMap(([k]) => CARDS.flatMap(c => DATA.map(([d]) => 64 * P[k].cards[c][d].pjb))));
+  const legend = () => CK.legend('energy-legend', RAILSC.map(([k, n, c]) => ({key: k, label: n, mark: 'box', color: `var(--${c})`})));
+  const texts = () => {
+    const cl = CK.card(card).label, dr = split('dram'), pos = Object.values(dr.e).reduce((a, v) => a + Math.max(0, v), 0);
+    $('energy-title').textContent = (mode === 'pj' ? 'Energy per 64 bytes read, split by rail' : 'Where each path’s energy goes, as a share') + `: ${cl}, ${dname()}`;
+    $('energy-cap').textContent = mode === 'pj'
+      ? `pJ per 64 bytes read above idle: each path’s energy per byte on ${cl} with ${dname()} in the memory it reads (the mean of its ${P.l1.cards[card][data].n} passes at @@man_mhz@@ MHz, @@man_date@@; the energy manual’s catalogue, §4.1 and §4.3), split in the shares of its power over idle that each rail carried. The rest is board power less the three rails. Hover, tap or focus a segment for its numbers.`
+      : `Each bar is one path’s power over idle on ${cl}, as 100%. The cores’ share falls level by level; the mesh rail appears once the bytes cross the mesh and grows with each hop, and ${pc(Math.max(0, dr.e.rest) / pos)} of a DRAM read is on no metered rail (@@man_offrail@@ on the @@man_n@@ cards, random data).`;
+  };
+  const niceStep = v => { const p = Math.pow(10, Math.floor(Math.log10(v))), m = v / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p; };
+  const F = CK.frame('energy', {label: 'Energy per 64 bytes read by memory path and rail', height: W => PATHS.length * 56 + 54, draw: f => {
+    const Lm = 8, R = 12, T = 8, rowH = 56, bh = 22, W = f.W, nodes = [];
+    const axisY = T + PATHS.length * rowH + 6;
+    const step = niceStep(top / (W < 480 ? 2 : 4)), xmax = Math.ceil(top / step) * step;
+    const x = mode === 'pj' ? CK.lin(0, xmax, Lm, W - R) : CK.lin(0, 1, Lm, W - R);
+    const ticks = mode === 'pj' ? Array.from({length: Math.round(xmax / step) + 1}, (_, i) => i * step) : [0, 0.25, 0.5, 0.75, 1];
     const g0 = el('g', {'aria-hidden': 'true'}, f.svg);
     for (const t of ticks) { el('line', {x1: x(t), x2: x(t), y1: T, y2: axisY, class: 'grid-line'}, g0); txt(g0, x(t), axisY + 16, mode === 'share' ? pc(t) : f0(t), 'tick', t === ticks[0] ? 'start' : t === ticks[ticks.length - 1] ? 'end' : 'middle'); }
-    txt(g0, (L + W - R) / 2, axisY + 34, mode === 'pj' ? 'pJ per load' : mode === 'share' ? 'share of the load’s energy (rail trace)' : 'pJ per byte of line moved', 'lab', 'middle');
-    pats.forEach(([k, name, lvl], i) => {
-      const e = D.energy[k], y = T + i * rowH + 20;
-      txt(f.svg, L, y - 6, name, 'lab-strong');
-      if (mode === 'byte') {
-        const fm = v => v >= 20 ? f0(v) : f1(v), pcm = M[lvl].per_card, mcards = CK.cardsIn(pcm);
-        const right = k === 'l1' ? 'moves no line' : `here ${f1(e.sp_total / 64)} / ${f1(e.host_total / 64)} · manual ${M[lvl].cards_differ ? mcards.map(c => fm(pcm[c])).join(' / ') + ' by card' : fm(M[lvl].mean)}`;
-        halo(txt(f.svg, W - R, y - 6, right, 'lab', 'end'));
-        if (k === 'l1') return;
-        const g = el('g', {}, f.svg), b = e.sp_total / 64, h = e.host_total / 64, m = M[lvl];
-        el('rect', {x: x(1), y, width: Math.max(1, x(b) - x(1)), height: bh, rx: 3, fill: 'var(--c1)'}, g);
-        el('circle', {cx: x(h), cy: y + bh / 2, r: 5, fill: 'var(--surface)', stroke: 'var(--c1)', 'stroke-width': 2}, g);
-        const yb = y + bh + 6;
-        el('line', {x1: x(m.lo), x2: x(m.hi), y1: yb, y2: yb, stroke: 'var(--ink)', 'stroke-width': 1.5}, g);
-        for (const v of [m.lo, m.hi]) el('line', {x1: x(v), x2: x(v), y1: yb - 4, y2: yb + 4, stroke: 'var(--ink)', 'stroke-width': 1.5}, g);
-        (m.cards_differ ? mcards : ['pooled']).forEach(c => {
-          const v = c === 'pooled' ? m.mean : m.per_card[c], col = c === 'pooled' ? 'var(--ink)' : CK.card(c).color;
-          const e2 = el('line', {x1: x(v), x2: x(v), y1: yb - 6, y2: yb + 6, stroke: col, 'stroke-width': 3}, g);
-          void e2;
-        });
-        hitRect(g, L, y - 2, W - L - R, bh + 16);
-        CK.tip(f, g, `<b>${name}</b><br>here: ${f1(b)} pJ/B on the rail trace, ${f1(h)} on the host log (19 Sep, two runs, one card)<br>` +
-          `energy manual, ${lvl.toUpperCase()}: ` + (m.cards_differ
-            ? `${byCard(m.per_card, f2)} pJ/B (the cards differ; ${m.n} passes, range ${f2(m.lo)}–${f2(m.hi)})`
-            : `${f2(m.mean)} pJ/B [${f2(m.lo)}–${f2(m.hi)}] over ${m.n} passes on ${NC} cards`));
-        nodes.push(g);
-        return;
-      }
+    txt(g0, (Lm + W - R) / 2, axisY + 34, mode === 'pj' ? 'pJ per 64 bytes read' : 'share of the path’s power over idle', 'lab', 'middle');
+    PATHS.forEach(([k, name, what], i) => {
+      const {r, w, e, tot} = split(k), y = T + i * rowH + 20;
+      txt(f.svg, Lm, y - 6, name, 'lab-strong');
+      const pos = RAILSC.reduce((a, [p]) => a + Math.max(0, e[p]), 0);
+      halo(txt(f.svg, W - R, y - 6, mode === 'pj' ? eF(tot) : `${pjbF(r.pjb)} pJ/B`, 'lab', 'end'));
       let acc = 0;
-      const tot = e.sp_total;
-      if (mode === 'pj') halo(txt(f.svg, W - R, y - 6, f0(tot) + ' pJ', 'lab', 'end'));
-      for (const [pk, pn, col] of parts) {
-        const v = Math.max(0, e[pk]); if (!v) continue;
-        const a = mode === 'share' ? acc / tot : acc, b = mode === 'share' ? (acc + v) / tot : acc + v;
-        const g = el('g', {}, f.svg), w = Math.max(1.5, x(b) - x(a) - 2);
-        el('rect', {x: x(a), y, width: w, height: bh, rx: 3, fill: `var(--${col})`}, g);
-        if (mode === 'share' && w > 34) txt(g, x(a) + w / 2, y + 15, pc(v / tot), 'lab-strong', 'middle').style.fill = inkOn(`var(--${col})`);
-        hitRect(g, x(a), y - 4, Math.max(w, 10), bh + 8);
-        CK.tip(f, g, `<b>${name}</b> · ${pn}<br>${f0(v)} pJ per load (${pc(v / tot)} of ${f0(tot)})<br>${f2(e.watts[pk] ?? 0)} W above idle`);
+      for (const [pk, pn, col] of RAILSC) {
+        const v = e[pk]; if (!(v > 0)) continue;
+        const a = mode === 'share' ? acc / pos : acc, b = mode === 'share' ? (acc + v) / pos : acc + v;
+        const g = el('g', {}, f.svg), wd = Math.max(1.5, x(b) - x(a) - 2);
+        el('rect', {x: x(a), y, width: wd, height: bh, rx: 3, fill: `var(--${col})`}, g);
+        if (mode === 'share' && wd > 34) txt(g, x(a) + wd / 2, y + 15, pc(w[pk] / r.w), 'lab-strong', 'middle').style.fill = inkOn(`var(--${col})`);
+        hitRect(g, x(a), y - 4, Math.max(wd, 10), bh + 8);
+        CK.tip(f, g, `<b>${name}</b> · ${pn}<br>${what}<br>${f0(v)} pJ per 64 bytes, ${pc(w[pk] / r.w)} of the path’s ${f2(r.w)} W over idle (${f2(w[pk])} W)<br>${CK.card(card).label}, ${dname()}; the path ${pjbF(r.pjb)} pJ/B at ${f0(r.gbs)} GB/s`);
         nodes.push(g);
         acc += v;
       }
     });
     CK.keynav(f, nodes);
   }});
-  CK.seg('energy-mode', {label: 'Show', options: [['pj', 'pJ per load'], ['share', 'share of each load'], ['byte', 'pJ per byte, against the energy manual']], value: mode,
-    onChange: v => { mode = v; legend(); texts(); F.redraw(); }});
-  legend(); texts();
-  const t = $('energy-table');
-  t.innerHTML = '<thead><tr><th>Pattern (1,024 minions)</th><th class="num">cycles/load (mean / slowest minion)</th><th class="num">loads/s</th><th class="num">cores</th><th class="num">SRAM</th><th class="num">NoC</th><th class="num">rest</th><th class="num">total (trace)</th><th class="num">total (host log)</th><th class="num">pJ per byte of line (trace / host)</th></tr></thead><tbody>' +
-    pats.map(([k, n]) => { const e = D.energy[k]; return `<tr><td>${n}</td><td class="num" data-sort="${e.cpl}">${f1(e.cpl)} / ${f1(e.cpl_slow)}</td><td class="num">${f2(e.rate / 1e9)} G</td><td class="num">${f0(e.minion)}</td><td class="num">${f0(e.sram)}</td><td class="num">${f0(e.noc)}</td><td class="num">${f0(e.rest)}</td><td class="num"><b>${f0(e.sp_total)}</b></td><td class="num">${f0(e.host_total)}</td><td class="num">${k === 'l1' ? '—' : f1(e.sp_total / 64) + ' / ' + f1(e.host_total / 64)}</td></tr>`; }).join('') + '</tbody>';
-  CK.stackTable(t); CK.sortTable(t);
+  const table = () => {
+    const t = $('energy-table'), cl = CK.card(card).label;
+    const cell = (v, s) => `<td class="num" data-sort="${v}">${f0(v)}<br><span class="small">${pc(s)}</span></td>`;
+    t.innerHTML = `<thead><tr><th>Path (${cl}, ${dname()})</th><th class="num">GB/s</th><th class="num">W over idle</th><th class="num">pJ/B</th><th class="num">cores</th><th class="num">SRAM</th><th class="num">NoC</th><th class="num">rest</th><th class="num">pJ per 64 bytes</th></tr></thead><tbody>` +
+      PATHS.map(([k, name]) => { const {r, w, e, tot} = split(k); return `<tr><td>${name}</td><td class="num" data-sort="${r.gbs}">${f0(r.gbs)}</td><td class="num">${f2(r.w)}</td><td class="num" data-sort="${r.pjb}">${pjbF(r.pjb)}</td>` +
+        RAILSC.map(([p]) => cell(e[p], w[p] / r.w)).join('') + `<td class="num" data-sort="${tot}"><b>${f0(tot)}</b></td></tr>`; }).join('') + '</tbody>';
+    $('energy-table-cap').textContent = `The chart’s numbers: each path on ${cl} with ${dname()}, the mean of its passes. The rail columns are pJ per 64 bytes read and, below, the rail’s share of the power over idle; a share below zero is a rail that read a little under its idle level. The chart’s controls choose the card and the data.`;
+    CK.stackTable(t); CK.sortTable(t);
+  };
+  const redraw = () => { legend(); texts(); table(); F.redraw(); };
+  CK.seg('energy-mode', {label: 'Show', options: [['pj', 'pJ per 64 bytes'], ['share', 'share of each path']], value: mode, onChange: v => { mode = v; redraw(); }});
+  CK.seg('energy-card', {label: 'Card', options: CARDS.map(c => [c, CK.card(c).label]), value: card, onChange: v => { card = v; redraw(); }});
+  CK.seg('energy-data', {label: 'Data', options: DATA, value: data, onChange: v => { data = v; redraw(); }});
+  legend(); texts(); table();
+  // every level on each card: the energy manual's levels, and the catalogue's rows with the data named
+  const m16 = Object.keys(MESH).map(Number).filter(s => s < 32), h16 = m16.reduce((a, s) => a + hops(MESH[s], MESH[(s + 16) % 32]), 0) / m16.length;
+  const LV = [['l1', 'L1 hit, 32-byte vector loads: random data'], ['l1_zeros', 'L1 hit: zeros'], ['l2', 'L2 (its contents not set)'],
+    ['scp_zeros', 'own scratchpad: zeros'], ['scp_random', 'own scratchpad: random data'], ['l3', 'L3 (its contents not set)'],
+    ['l3_zeros', 'L3 through the mesh: zeros'], ['l3_random', 'L3 through the mesh: random data'],
+    ['rscp_zeros', `the scratchpad 16 shire IDs away (${CK.fmt.num(h16, 1)} hops on average): zeros`], ['rscp_random', 'the same: random data'],
+    ['dram', 'DRAM (its contents not set)'], ['dram_zeros', 'DRAM tensor loads: zeros'], ['dram_random', 'DRAM tensor loads: random data']];
+  const lt = $('levels-table'), LC = CK.cardsIn(L.l2.per_card);
+  lt.innerHTML = `<thead><tr><th>Level</th><th class="num">pJ/B, mean [range]</th><th class="num">passes</th><th class="num">per 64 bytes</th>` +
+    LC.map(c => `<th class="num">${CK.card(c).label}</th>`).join('') + '</tr></thead><tbody>' +
+    LV.filter(([k]) => L[k]).map(([k, name]) => { const v = L[k]; return `<tr><td>${name}</td><td class="num" data-sort="${v.mean}"><b>${pjbF(v.mean)}</b> [${pjbF(v.lo, v.mean)}–${pjbF(v.hi, v.mean)}]</td><td class="num">${v.n}</td><td class="num" data-sort="${64 * v.mean}">${eF(64 * v.mean)}</td>` +
+      LC.map(c => `<td class="num">${v.per_card[c] == null ? '—' : pjbF(v.per_card[c], v.mean)}</td>`).join('') + '</tr>'; }).join('') + '</tbody>';
+  CK.stackTable(lt); CK.sortTable(lt);
 })();
 
 /* ---------- 7. timer ---------- */
