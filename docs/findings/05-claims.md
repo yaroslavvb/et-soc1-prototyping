@@ -515,6 +515,23 @@ figures pool a2 and a3 only (`GSF.combined_catalogue`, the README's rule for row
 | One minion against the chip | one minion's rate (both harts) × 1,024 predicts the chip's within 2%: L1 451 against 452 G/s, L2 27.9 against 27.4, a scratchpad 2 hops away 10.1 against 10.2 | M | E48 | `GSF`, `.combined["gs/R/fgw.ps/<table>/rand/random/h2/mff/nM1"]` against `gs/E/…/n1024` |
 | A gap | the word gather from 64 KB per hart has energy on aifoundry3 only (9.2 nJ): on aifoundry2 and aifoundry1's card 1 every energy burst of it was dropped by the pre-registered clock rule (one launch per burst at an implied 0.594 GHz, just under 0.595–0.605; telemetry 600 MHz); the rule was not relaxed | M | E48 | `GSF`, `.cards.<card>.dropped` |
 
+## The host link (E50, 27 Sep, three cards)
+
+aifoundry2 / aifoundry3 / aifoundry1-c1, each the mean of five runs (a run's value is the median of its repeats).
+`PCIE` means `docs/reports/data/2026-09-27-pcie/pcie.json`.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| Negotiated link | **16.0 GT/s x8** on every card in every run: 15.75 GB/s per direction after 128b/130b coding | M | E50 | `PCIE` `hosts.<card>.link_speed`, `.link_width`; `meta.link_gbs` |
+| Host to card, DMA-only, 256 MB | **12.47 / 12.60 / 12.46 GB/s** (79–80% of the link figure) | M | E50, P1 | `PCIE` `bw.<card>.h2d.dma[bytes=268435456].gbs` |
+| Card to host, DMA-only, 256 MB | **10.54 / 10.41 / 10.41 GB/s**; fastest at 16 MB (11.75 / 10.99 / 10.69), slowest above it at 64 MB | M | E50, P2, P3 (failed: the slower direction) | `PCIE` `bw.<card>.d2h.dma[]` |
+| A program's staged copy, 256 MB | to the card **7.15 / 5.20 / 7.79 GB/s**, back 6.53 / 4.78 / 6.97; 98–100% of 1/(1/DMA + 1/memcpy) with the hosts' memcpy at 17.4 / 9.2 / 21.4 GB/s | M, D | E50, P4a, P4b (failed on aifoundry3) | `PCIE` `bw.<card>.<dir>.staged[]`, `hostcopy.<card>[]` |
+| Half the DMA-only rate (n½), to the card | **2.0 / 2.1 / 2.2 MB** per copy | M | E50, P5 | `PCIE` `n_half_log2.<card>.h2d_dma` |
+| Empty kernel on 32 shires | launched and waited for **566 / 556 / 565 µs**; queued, **103.6 / 103.7 / 104.1 µs** each; the difference 463 / 452 / 461 µs, mostly the runtime's 500 µs idle poll (`ResponseReceiver.cpp:21-22`) | M, R | E50, P8, P9a, P9b | `PCIE` `launch.<card>.single_us."32"`, `.b2b_us."32"`, `predictions[id=P9b]` |
+| A 4 KB copy after a random 0–1 ms gap | **377 / 379 / 411 µs** on average (the four variants) | M | E50 | `PCIE` `lat.<card>.sporadic.<variant>.mean_us` |
+| Two host-to-card DMA commands in flight against one at a time | **0.49** on every card (both directions at once: 1.35–1.38 times the faster one) | M | E50, P11 (failed: registered with two in flight), P12 | `PCIE` `derived.<card>.h2d_two_in_flight_over_one`, `.duplex_ser_over_faster_ser` |
+| The predictions | 31 verdicts passed, 8 failed (P3, P4a, P4b, P11), 5 inconclusive (P6, P7: the back-to-back round trips, which kept a fixed variant order) | P→M | E50 | `docs/reports/data/2026-09-27-pcie/PREREG.md`; `PCIE` `predictions[]` |
+
 ## Ridge points (derived; no card time)
 
 Peak compute divided by each level's measured bandwidth, at 600 MHz on 1,024 minions. Kind `D`: arithmetic on
@@ -529,7 +546,7 @@ Values are FLOP (int8: OP) per byte fetched, fp32 / fp16 / int8.
 | Ridge, own shire (L2 or L2 scratchpad) | **4 / 8 / 32** at 4.0 B per minion-cycle (2.46 TB/s); 2 / 4 / 16 at the banks' 256 B per shire-cycle | D | memory-hierarchy streaming probes | `docs/reports/data/2026-09-18-memhier-aifoundry2/energy*/runs.jsonl`, configs `l2`, `scp-local` |
 | Ridge, L3 or another shire's scratchpad | **10 / 20 / 80** at 0.96–0.98 TB/s | D | same, configs `l3`, `scp-remote`, 600 MHz launches only | same file, `implied_ghz` 0.59–0.61 |
 | Ridge, DRAM | **130 / 259 / 1,036** at 76 GB/s | D | same, config `dram`; 76 GB/s on both cards in the 23 September reruns (the sparsity report's shorter probe read 72 on aifoundry3) | same file; `docs/reports/data/2026-09-18-sparsity-aifoundry3/tload-dram-all.jsonl` |
-| Ridge, host over PCIe Gen4 x8 | **624 / 1,248 / 4,993** at 15.75 GB/s | A | datasheet §1; never measured | — |
+| Ridge, host over PCIe Gen4 x8 | **624 / 1,248 / 4,993** at 15.75 GB/s, the link figure; at the host-to-device DMA rate measured on 27 September (12.46–12.60 GB/s, E50), **780–789 / 1,560–1,578 / 6,242–6,314** | X; D on E50 | the link figure: 16 GT/s × 8 lanes × 128/130 ÷ 8 (datasheet §1: Gen4 x8); the measured rate: E50 (the ridge page still quotes only the link figure) | `docs/reports/data/2026-09-27-pcie/pcie.json`, `bw.<card>.h2d.dma[bytes=268435456].gbs.mean`; the chip diagram's fact `ridge.levels` (`docs/reports/data/2026-09-27-chip-diagram/build_facts.py`) |
 | Intensity of one full-size TensorFMA | **4 / 8 / 16** per byte (2 KB of A and B per op) | D | PRM ch. 9 | `scripts/ridge-points.py`, `OP_BYTES` |
 | Smallest DRAM-resident C block that is compute-bound | about **520 × 520** (fp32, fp16), **1,040 × 1,040** (int8) | D | H/e ≥ ridge, H the harmonic mean of the block's sides, e = bytes per element | the report's "What it takes to reach them" |
 | Energy balance, fp32: FLOP per byte at which moving a byte costs as much energy as the arithmetic | L1 0.15 (`flw.ps` against `fmadd.ps`, random data), own shire 0.87, other shire 2.3, L3 3.6, DRAM **42** (random fp32 at 2.89 pJ per FLOP over idle; on all-zero operands, 0.21 pJ, mostly the awake-core floor, every level from the shire outward lies above its time ridge) | D | energy manual §3.2 (tensor unit), §4.1 (the L1 row), §4.2 (levels) | `docs/reports/data/2026-09-23-energy-manual/manual.json` (`tensor.bars`, reruns; `catalogue.combined`: `flw.ps/random/h2`, `fmadd.ps/random/h2`, `tload/*`); the page's `ridge-data` `energy` |

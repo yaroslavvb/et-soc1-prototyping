@@ -1,0 +1,174 @@
+<h1>Over the PCIe link: what the host gets</h1>
+<p class="byline">27 September 2026 · three ET-SoC-1 cards, aifoundry2, aifoundry3 and aifoundry1 card 1, five runs on each, 12 minutes apart · a new probe, <code>workloads/pciebench</code>, through the runtime API only · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+
+<p class="lede">Every ET-SoC-1 page so far measured the chip from the inside. This one times the way in: the
+PCIe Gen4 x8 link between the host and the card, <span id="l-spec"></span> per direction by its line rate
+(16 GT/s on 8 lanes with 128b/130b coding), which had never been timed on these cards. <b>A large copy crosses it at <span id="l-h2d"></span> from host to card and
+<span id="l-d2h"></span> back, the same on all three cards to within <span id="l-agree"></span>. A program gets less
+(<span id="l-staged"></span>), because the runtime first copies its buffer into a bounce buffer with the host's own
+memcpy. A 4 KB copy issued now and then takes <span id="l-rt"></span> on average from issue to completion, and
+an empty kernel <span id="l-launch"></span>; most of that is the runtime polling for the answer, not the card.</b> The numbers were predicted before the runs: <span id="l-verdicts"></span>.</p>
+
+<details class="terms"><summary>Terms used on this page</summary>
+<p class="small"><i>H2D</i> is host to device (the card reads host memory over the link), <i>D2H</i> device to host.
+<i>Staged</i> is the path every program takes: <code>memcpyHostToDevice</code> copies the user's buffer into a
+DMA-able <i>bounce buffer</i> (CMA memory the driver pins), then the card's PCIe DMA engine moves that buffer; D2H
+does the same in reverse. <i>DMA-only</i> runs the same DMA commands with the bounce copy replaced by a no-op,
+through the API's own <code>cmaCopyFunction</code> argument: the bytes still cross the link, but the host copy is
+gone, which is what pinned memory buys on a GPU (its bytes are not delivered, so it is for timing only). Sizes are
+binary (1 MB = 2<sup>20</sup> B); bandwidth is decimal (1 GB/s = 10<sup>9</sup> B/s), as the link figure is. A
+<i>shire</i> is a group of 32 cores; the chip runs kernels on 32 of them.</p>
+</details>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">Host to card, DMA-only, 256 MB</div><div class="val" id="k1"></div><div class="sub" id="k1s"></div></div>
+  <div class="card kpi"><div class="lab">Card to host, DMA-only, 256 MB</div><div class="val" id="k2"></div><div class="sub" id="k2s"></div></div>
+  <div class="card kpi"><div class="lab">Host to card, as a program copies, 256 MB</div><div class="val" id="k3"></div><div class="sub">staged through the bounce buffer; set by the host's memcpy</div></div>
+  <div class="card kpi"><div class="lab">An empty kernel, launch to completion</div><div class="val" id="k4"></div><div class="sub" id="k4s"></div></div>
+</div>
+
+<h2 id="bandwidth-against-size">1. Bandwidth against transfer size</h2>
+<p>Each run copies every size from 4 KB to 256 MB, doubling, in both directions and both ways (staged and
+DMA-only), the four variants in a random order in every repeat; the card's value is the mean of its five runs'
+medians. The DMA-only line is the link and the card's DMA engine alone. It passes half its large-copy rate at
+<span id="nhalf"></span> and 90% of it at <span id="n90"></span>. Smaller copies use the link less and less, because
+each one also pays a fixed cost of a tenth of a millisecond or more (section 3).</p>
+<div class="chart-title">Copy bandwidth against size, three cards; the dashed line is the link's figure</div>
+<div class="ck-controls"><div id="bwdir"></div><div id="bwpath"></div></div>
+<div id="bwlegend"></div>
+<div class="chart" id="bwchart"></div>
+<p class="small" id="bwnote"></p>
+
+<details class="more"><summary>The DMA-only values at every size, per card</summary>
+<p class="small">GB/s, the mean of five runs; each value's 99% interval is in the chart's tooltip and in <code>pcie.json</code>.</p>
+<div class="table-wrap"><table id="bwtable"></table></div>
+</details>
+
+<h2 id="the-staged-path">2. What the bounce copy costs</h2>
+<p>A program has no pinned-memory call in this runtime: every copy of user memory is staged. For a large copy the
+runtime fills the bounce buffer in chunks of up to <span id="chunk"></span> with a plain memcpy on its thread pool
+and enables the DMA command only when all of its chunks are copied (<code>MemcpyH2DAction.cpp</code> in
+esperanto-tools-libs; a copy back runs the DMA first, then copies out), so the host copy and the DMA run one after
+the other. The staged rate is then close to what the two in series give,
+1&nbsp;/&nbsp;(1/DMA&nbsp;+&nbsp;1/memcpy), with the host's memcpy measured by the same program on the same host.
+That is why the cards stage at different rates over the same link: the hosts' own memcpy of 256 MB runs at
+<span id="hostcopy"></span>.</p>
+<div class="table-wrap"><table id="stagetable"></table></div>
+
+<h2 id="small-copies">3. Small copies: the runtime's polling sets the latency</h2>
+<p>A 4 KB copy spends well under a microsecond on the wire. From issue to completion, after a random idle gap, 98% of them took
+<span id="rtspan"></span> (every card pooled), and the spread is not noise. The runtime's response thread polls the card's completion queue; it
+sleeps <b>50&nbsp;µs</b> between polls while commands are in flight and <b>500&nbsp;µs</b> when none are
+(<code>ResponseReceiver.cpp</code> in esperanto-tools-libs, the constants
+<code>kResponsePollingIntervalWithEventsOnFly</code> and <code>kResponsePollingIntervalNoEventsOnFly</code>).
+A copy issued while it is in the long sleep waits for that sleep to end. The chart pools every 4 KB copy of the
+five runs: back to back (issued as soon as the previous one returned), or after a random idle gap of 0 to 1&nbsp;ms,
+as a program that copies now and then would.</p>
+<div class="chart-title">4 KB copies, issue to completion: how many took how long (20 µs bins)</div>
+<div class="ck-controls"><div id="hcard"></div><div id="hkind"></div></div>
+<div class="chart" id="hist"></div>
+<p class="small" id="histnote"></p>
+<div class="table-wrap"><table id="lattable"></table></div>
+<p class="small" id="latnote"></p>
+
+<h2 id="launching-a-kernel">4. Starting a kernel</h2>
+<p>The probe's kernel does nothing: each hart enters, returns 0 and goes back to the firmware. One launch, waited
+for, measures the whole path: the command through the submission queue, the master shire's dispatch to the compute
+shires, their start and return, the completion back to the host, and the runtime noticing it. A hundred launches
+queued at once, each with the device-side barrier, measure the card's side alone, because the host's polling then
+overlaps the work.</p>
+<div class="table-wrap"><table id="launchtable"></table></div>
+<p class="small" id="launchnote"></p>
+
+<h2 id="several-at-once">5. Several transfers at once</h2>
+<p>Each stream here moves two 64 MB copies, DMA-only. Without a barrier the runtime sends both commands at once and
+the card's DMA worker gives each its own channel (it has four read and four write channels, one command per
+channel: <code>pcie_dma.h</code>, <code>dmaw.c</code> in the firmware); with the barrier flag on every copy, one
+command of the stream runs at a time. The pilot run found the surprise this section is built around: <b>two H2D
+commands in flight move less than one.</b></p>
+<div class="chart-title">Aggregate bandwidth by configuration, DMA-only, three cards</div>
+<div id="cclegend"></div>
+<div class="chart" id="ccchart"></div>
+<p class="small" id="ccnote"></p>
+
+<h2 id="predictions">6. The predictions, and how they fared</h2>
+<p>The predictions were written down before any timed transfer (<code>docs/reports/data/2026-09-27-pcie/PREREG.md</code>,
+its sha256 in the data), from the link's figure, what GPUs achieve on such links, and the runtime's source. A
+prediction passes on a card when that card's 99% interval over its five runs lies inside the predicted range, fails
+when it lies wholly outside, and is inconclusive otherwise.</p>
+<div class="table-wrap wide"><table id="predtable" class="stack"></table></div>
+<p id="predwhy"></p>
+<p class="small" id="prednote"></p>
+
+<h2 id="caveats">7. What this does and does not show</h2>
+<ul>
+<li><b>The runtime API, not the raw link.</b> Every number is what a program gets through <code>libetrt</code>:
+its command queues, its bounce buffer and its polling are part of each figure. The DMA-only figures remove only
+the bounce copy. The link's own protocol efficiency (payload size, the IOMMU, read completions) cannot be separated
+from the DMA engine's without a PCIe analyser or root access to the configuration space; the maximum payload size
+was not readable as a normal user.</li>
+<li><b>DMA-only is a stand-in for pinned memory.</b> It moves the same bytes over the link from the same bounce
+buffer, but a program cannot use it to deliver data; the staged figures are the ones a program gets today.</li>
+<li><b>One host per card.</b> The cards sit in different hosts (<span id="hostlist"></span>), with different
+runtime builds (aifoundry2 the stock build, aifoundry3 a patched one, aifoundry1 a fork:
+<code>docs/findings/14-card-behaviour.md</code>), all with the IOMMU in translated mode (<code>hosts.txt</code> in the
+data). Why aifoundry3's host copies memory at about half the others' rate (its memory configuration?) was not
+established; reading it needs root. The DMA-only figures agree across them; the staged ones follow each host's memcpy, and the latency
+figures follow each build's polling constants.</li>
+<li><b>Unexplained:</b> <span id="d2hdrop"></span> A 256 MB copy is two 128 MB DMA elements in one command on one
+channel; why card-to-host dips in the middle sizes was not established.</li>
+<li><b>The card's clock.</b> The telemetry before and after every run found <span id="dierange"></span>.
+Launch latency runs on the master shire's firmware and may change with its clock; the transfer rates were not
+tested at another clock. <span id="clocknote"></span></li>
+<li><b>Five runs per card in one afternoon</b> (<span id="window"></span>); no process held a card longer than
+<span id="elapsed"></span>, but the card's lock, taken for a whole run of six processes, was held for up to
+<span id="lockheld"></span>: longer than the lab's rule of 10 s for holding a device, which each process kept. Pilot runs before the schedule (one on each card, two on aifoundry2) are kept in the raw data and left out
+of every figure; they changed the probe in two ways, described in the method.</li>
+</ul>
+
+<details class="more"><summary>Method, and how to reproduce it</summary>
+<p><b>The probe.</b> <code>workloads/pciebench</code> is a standalone host program and an empty device kernel in the
+et-testdrive style, using only the runtime API. One test per process, each under <code>timeout 10</code> with an
+8.5 s budget and the card's lock held for the whole run: <code>info</code> (device properties, DMA limits, the
+negotiated link from sysfs), <code>bw</code> (the sweep, with a 1 MB there-and-back data check on the staged path,
+which passed in every run: <span id="verify"></span>), <code>lat</code> (64 B and 4 KB round trips back to back and
+after random gaps, 200 pipelined 4 KB copies, an idle-stream wait), <code>launch</code> (150 single launches and three
+batches of 100 per shire mask, twice), <code>conc</code> (eight configurations, three trials) and
+<code>hostcopy</code> (the host's memcpy, no card). A telemetry sample before and after each run records the die
+temperature and clocks.</p>
+<p><b>What the pilots changed.</b> The first pilot on aifoundry2 ran the four copy variants in a fixed order, and
+each variant locked onto one of the runtime's two polling modes (one variant always about 0.11 ms, the next always
+about 0.58 ms at the same size: the round-trip medians in <code>raw/aifoundry2/pilot1/lat.out</code>). The schedule's
+probe shuffles the order in every repeat of the bandwidth sweep, and adds 4 KB copies after random gaps, also
+shuffled. Its back-to-back round trips (section 3's table, and predictions P6 and P7) kept the fixed order, host to
+card staged, then DMA-only, then card to host staged and DMA-only (<code>workloads/pciebench/host/main.cpp</code>,
+<code>testLat</code>), so they can still lock each variant onto one mode. The same pilot showed two queued H2D commands at half the rate of one, so the concurrency test gained
+the barrier configurations (the /ser rows). Neither change touched a prediction.</p>
+<p><b>Reduction.</b> <code>workloads/pciebench/reduce_pcie.py</code>: a run's value for a cell is the median of its
+repeats, a card's value the mean over its five runs with a 99% t-interval (t = 4.604 for five runs).</p>
+<pre><code>cmake -S workloads/pciebench -B build/pciebench -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev && nice cmake --build build/pciebench -j4
+TREE=$PWD workloads/pciebench/run_pcie.sh 1            # one run on this host's card (V3_DEVICE=1 on aifoundry1)
+workloads/pciebench/schedule.sh 1 5                     # from aifoundry2: five rounds on the three cards
+python3 workloads/pciebench/reduce_pcie.py docs/reports/data/2026-09-27-pcie/raw \
+    --prereg docs/reports/data/2026-09-27-pcie/PREREG.md \
+    --out docs/reports/data/2026-09-27-pcie/pcie.json --md docs/reports/data/2026-09-27-pcie/results.md
+python3 scripts/build-report.py pcie-link docs/reports/data/2026-09-27-pcie/pcie.json \
+    docs/reports/2026-09-27-et-soc1-pcie-link.html</code></pre>
+<p class="small">Data: <code>docs/reports/data/2026-09-27-pcie/</code> (its README lists every file).</p>
+</details>
+
+<details class="more"><summary>Version history and provenance</summary>
+<p class="small">First written 27 September 2026, from the runs of that afternoon. Every number on this page is
+computed by its script from <code>docs/reports/data/2026-09-27-pcie/pcie.json</code>, except the link figure's
+arithmetic (16 GT/s × 8 lanes × 128/130 ÷ 8, also in the data) and the runtime's and firmware's constants, which
+are cited to their source files above.</p>
+</details>
+
+<h2 id="related-reports">8. Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram">The ET-SoC-1, interactively</a> — the chip schematic whose host flow these numbers fill in.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — the card's DRAM and caches, for scale against the link.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a> — the roofline, whose host-link ridge still uses the link's figure, not these measured rates.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a> — the hub: every report, and what the meters cannot see.</li>
+<li><a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/findings">docs/findings/</a> — the findings index and the experiment register.</li>
+</ul>

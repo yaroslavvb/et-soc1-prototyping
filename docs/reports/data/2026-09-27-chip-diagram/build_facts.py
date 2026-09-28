@@ -11,11 +11,22 @@ Inputs, in research/ next to this script (copied from the session that made them
 Each fact has a source (a repo file with line or field, a manual PDF page, or a source file:line) and a kind
 (measured, spec, derived, inferred). The builders read the repository directly; they are kept in research/ as a record.
 
+The second version (27 Sep, the owner's feedback) adds two inputs, also in research/:
+  facts-v2.json      27 facts read from the data files by build_facts_v2.py: the PCIe link and the launch path timed on
+                     three cards (docs/reports/data/2026-09-27-pcie), the firmware's shire map against the measured one
+                     (firmware_map.json), the tensor unit's data flow, the same matmul's watts and heat by data, the hot
+                     line and the allreduce tree; with the rows of printed numbers they need (num), added to N below
+  asks.json          what would settle each inferred part and the hub's row that asks for it (make_asks.py); the rows'
+                     titles are read from docs/reports/sources/limits-of-observability.data.json (.improvements)
+
 The page's review (27 Sep) added, here and not in research/: ADD, six facts written for the page, each with its
 source (board watts of the three-card matmul, the tensor instructions running on the vector lanes, a minion's 256-bit
 ET-Link width, the memory-shire fit's three-card check, why memory shire 2 has one place left, and the LPDDR4X pairing
-as inferred); AMEND, the pooled cycles per instruction of DRAM scatters; CARDS, card coverage set by hand where the
-card string's aside names a card that was not measured.
+as inferred); AMEND, the pooled cycles per instruction of DRAM scatters, and after the second version's review the
+PCIe facts (bw-pcie and pcie.link say the link was timed; ridge.levels gives the PCIe ridge at the measured DMA rate,
+computed here from ../2026-09-27-pcie/pcie.json) and the notes of the layout facts the firmware's map settled (L32,
+L33, L34, mesh.orientation, L37); CARDS, card coverage set by hand where the card string's aside names a card that
+was not measured.
 
 Output, facts.json:
   facts  the facts the page uses, by id, with one page link field (`url`, a spacesheep URL, or null), the lab cards
@@ -26,6 +37,7 @@ Output, facts.json:
          of its numbers rounds from the statement's, and keeps the statement's text as `src_t`
   comp   the facts each component's and each flow's details panel lists
   layout layout.json as is
+  asks   research/asks.json as is; rungs: the hub rows they link to ({id: {rung, what, status}})
 """
 import json
 import os
@@ -41,6 +53,22 @@ for fn, tag in (('facts-arch.json', 'arch'), ('facts-layout.json', 'layout'), ('
         f['set'] = tag
         ALL[f['id']] = f
 layout = json.load(open(os.path.join(R, 'layout.json')))
+# the second version (27 Sep): facts read from the data files by research/build_facts_v2.py (PCIe timed on three
+# cards, the firmware's shire map, the tensor data flow, watts and heat by data, the hot line, the allreduce tree)
+V2 = json.load(open(os.path.join(R, 'facts-v2.json')))
+for f in V2['facts']:
+    assert f['id'] not in ALL, 'duplicate fact id ' + f['id']
+    f['set'] = 'v2'
+    ALL[f['id']] = f
+# what would settle each inferred or dashed part, and the hub's ask it links to (research/make_asks.py); the ask's
+# title is read from the hub's own data so that the link text matches the row it lands on
+ASKS = json.load(open(os.path.join(R, 'asks.json')))
+HUBD = json.load(open(os.path.join(HERE, '..', '..', 'sources', 'limits-of-observability.data.json')))
+RUNGS = {r['id']: {'rung': r['rung'], 'what': r['what'], 'status': r['status']} for r in HUBD['improvements'] if r.get('id')}
+for a in ASKS:
+    for k in [a.get('hub_anchor')] + a.get('also', []):
+        if k and k not in RUNGS:
+            raise SystemExit(f'ask {a["part"]}: no hub row {k}')
 
 # ---- facts written for this page in its review (27 Sep 2026), each with its source. Kinds as in the research files.
 MATMUL = 'https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency'
@@ -110,8 +138,58 @@ for f in ADD:
     f['set'] = 'page'
     ALL[f['id']] = f
 
-# ---- amendments to research facts (27 Sep review): the pooled figure the page prints, with its source
+# ---- the host link's ridge point at the measured DMA rate (27 Sep review): the fp32 peak (1,024 minions x 16 FLOP x
+# 600 MHz: facts chip-minions, minion.vec-peak, op-600) over each card's measured host-to-device DMA rate, 256 MB
+PCIE = json.load(open(os.path.join(HERE, '..', '2026-09-27-pcie', 'pcie.json')))
+PEAK32 = 1024 * 16 * 600e6
+H2D_DMA = [next(e for e in PCIE['bw'][c]['h2d']['dma'] if e['bytes'] == 268435456)['gbs']['mean'] for c in PCIE['cards']]
+RIDGE_DMA = f'{PEAK32 / (max(H2D_DMA) * 1e9):,.0f}-{PEAK32 / (min(H2D_DMA) * 1e9):,.0f}'
+H2D_RNG = f'{min(H2D_DMA):.2f}-{max(H2D_DMA):.2f}'
+
+# ---- amendments to research facts (27 Sep review): the pooled figure the page prints, with its source. Keys: find and
+# statement (a replacement in the statement), source (appended), and note, unit, kind (replaced)
 AMEND = {
+    # the link was timed on 27 September: the spec facts no longer say it never was, and stay the link's figure only
+    'bw-pcie': {'find': 'host transfers have not been timed on these cards.',
+                'statement': 'the transfers were timed on three cards on 27 September (facts pcie.h2d and pcie.d2h give '
+                             'the measured rates).',
+                'source': '; docs/reports/data/2026-09-27-pcie/pcie.json (27 Sep)',
+                'note': 'The link figure, not a measurement: measured on 27 September (facts pcie.h2d, pcie.d2h). The '
+                        'ridge row of 05-claims.md that called it never measured predates that.'},
+    'pcie.link': {'find': 'host transfer bandwidth was never measured here.',
+                  'statement': 'the transfers were timed on three cards on 27 September (facts pcie.negotiated, pcie.h2d).',
+                  'source': '; docs/reports/data/2026-09-27-pcie/pcie.json (27 Sep)',
+                  'unit': 'GB/s (link figure)'},
+    # the PCIe ridge: 624 is the link figure's; the measured DMA rate gives its own (computed above from pcie.json)
+    'ridge.levels': {'find': 'PCIe 624 (unmeasured link).',
+                     'statement': f'PCIe 624 at the link figure of 15.75 GB/s; at the measured host-to-device DMA rate '
+                                  f'({H2D_RNG} GB/s, fact pcie.h2d) the PCIe ridge is {RIDGE_DMA}.',
+                     'source': '; the measured-DMA ridge computed in build_facts.py: 1,024 minions x 16 FLOP x 600 MHz '
+                               '(facts chip-minions, minion.vec-peak, op-600) over docs/reports/data/2026-09-27-pcie/'
+                               'pcie.json bw.<card>.h2d.dma[bytes=268435456].gbs.mean'},
+    # the die view and the grey cells, inferred before 27 September, now follow the firmware's map (except handedness)
+    'L32': {'find': '(0,4) and (0,5) are the I/O and PCIe shires',
+            'statement': '(0,4) and (0,5) are the I/O and PCIe shires, in some order',
+            'source': '; superseded 27 Sep by fw.grey-cells',
+            'note': 'Superseded 27 Sep: the firmware\'s maps name the four cells (fact fw.grey-cells): (0,3) the master '
+                    '(shire 32), (5,3) the spare (33), (0,4) the PCIe shire and (0,5) the I/O shire, the order of PRM '
+                    'Fig. 1-3. Timing a counter read on shire 32 would confirm the master\'s cell on the cards.'},
+    'L33': {'source': '; settled 27 Sep by fw.map-match except the handedness (die.handedness)',
+            'note': 'Settled 27 Sep except the east-west handedness: the firmware\'s NoC-spec map, renamed as the boot '
+                    'firmware renames the shires, equals the measured map in every pair distance with no rotation or '
+                    'mirror (fact fw.map-match); which handedness the silicon has is open (fact die.handedness). '
+                    'Distances alone cannot tell a rotation from a reflection.'},
+    'L34': {'source': '; settled 27 Sep by fw.map-match except the handedness (die.handedness)',
+            'note': 'Settled 27 Sep except the east-west handedness: this view is the firmware\'s NoC-spec map after '
+                    'the boot-time renaming (fact fw.map-match), and the firmware names the grey cells (fw.grey-cells). '
+                    'Memory shire 2\'s row is still a tie-break of the fit (L42, ms2-forced).'},
+    'mesh.orientation': {'source': '; settled 27 Sep by fw.map-match except the handedness (die.handedness)',
+                         'note': 'Settled 27 Sep except the east-west handedness (facts fw.map-match, die.handedness).'},
+    'L37': {'find': 'It does NOT match the measured map:',
+            'statement': 'As written it does not match the measured map:',
+            'source': '; superseded 27 Sep by fw.map-match (the map after the boot firmware renames the shires)',
+            'note': 'Superseded: this compares the map before NOC_Remap_Shires renames the shires at boot; after the '
+                    'renaming it matches all 496 pair distances (fact fw.map-match).'},
     'gs-s-dram-256K': {
         'find': '24,599 cycles per instruction per hart.',
         'statement': '24,584 cycles per instruction per hart (median, pooled over the 9 passes; per card 24,599 on '
@@ -121,9 +199,15 @@ AMEND = {
 }
 for fid, a in AMEND.items():
     f = ALL[fid]
-    assert a['find'] in f['statement'], fid
-    f['statement'] = f['statement'].replace(a['find'], a['statement'])
+    if 'find' in a:
+        assert a['find'] in f['statement'], fid
+        f['statement'] = f['statement'].replace(a['find'], a['statement'])
     f['source'] += a['source']
+    for k in ('note', 'unit', 'kind'):
+        if k in a:
+            f[k] = a[k]
+# the measured range the ridge amendment quotes is the one fact pcie.h2d gives
+assert H2D_RNG in ALL['pcie.h2d']['statement'], H2D_RNG
 
 # ---- card coverage set by hand where the card string's aside names a card that was not measured, or the number the
 # page prints covers fewer cards than the fact (27 Sep review). Value: (cards, text shown for them)
@@ -360,7 +444,25 @@ N = [
     ('die_h', 'chip.die-dims', 22.2, '22.1-22.2 mm', ''),
     ('strip_mm', 'L09', 1.76, '1.76 mm', ''),
     ('grid_mm', 'L08', 22.2, '22.2 mm', ''),
+    # the second version's flows (27 Sep): numbers from research facts that the new flows print
+    ('peak_tf32', 'mm-peak', 9.83, '9.83 TFLOP/s', ''),
+    ('tfma546', 'minion.tensorfma-546', 546, '546 cycles', ''),
+    ('e_mac32z', 'e-tfma-fp32-zeros', 0.273, '0.273', 'pJ per multiply-add'),
+    ('hot60', 'hot-cost', 60, '60 M/s', ''),
+    ('hot031', 'hot-cost', 0.31, '0.31 cycles', ''),
+    ('hot1919', 'hot-cost', 1919, '1,919 M/s', ''),
+    ('hot32x', 'hot-cost', 32, '32x', '', '32×'),
+    ('hot_nj', 'hot-energy', 19.8, '19.8 nJ', ''),
+    ('hot_nj_s', 'hot-energy', 1.16, '1.16 nJ', ''),
+    ('hot17x', 'hot-energy', 17, '17x', '', '17×'),
+    ('lv_fln', 'sync.tree-levels', 71, '68-71 cycles', ''),
+    ('lv_xbar', 'sync.tree-levels', 117, '117', ''),
+    ('lv_mesh', 'sync.tree-levels', 234, '164-234', ''),
+    ('ar32', 'sync-allreduce32', 444, '444 cycles', ''),
+    ('ar_us', 'sync-allreduce1024', 2.3, '2.3 us', '', '2.3 µs'),
+    ('chipbar_us', 'sync-chip-barrier', 8.3, 'about 8.3 us', '', 'about 8.3 µs'),
 ]
+N += [tuple(r) for r in V2['num']]
 DASH = str.maketrans({'–': '-', '‑': '-', '−': '-', ' ': ' ', 'µ': 'u', 'μ': 'u'})
 NUMS = re.compile(r'\d[\d,]*(?:\.\d+)?')
 
@@ -397,28 +499,31 @@ for row in N:
 COMP = {
     'chip': ['chip.cores-total', 'chip.minion-shires', 'chip.compute-array', 'chip.cm-shire-mask', 'chip.die-area',
              'chip.process', 'chip.die-dims', 'chip.sram-total', 'op-600', 'clock.minion-opps', 'mm-rate',
-             'mm-board-w', 'mm-perw', 'power.idle', 'chip.die-revision', 'chip.advertised-range'],
+             'mm-board-w', 'mm-perw', 'power.idle', 'chip.die-revision', 'chip.advertised-range', 'die.handedness', 'fw.map-match'],
     'cshire': ['shire.composition', 'chip.compute-array', 'shire.partition-m0', 'shire.partition-measured',
                'mesh.single-attach', 'L11', 'chip.hop-pitch', 'sync-shire-barrier', 'L123', 'L121'],
-    'master': ['chip.master-shire-id', 'chip.spare-shire-id', 'L26', 'L31', 'L32', 'chip.compute-array', 'chip.cm-shire-mask'],
-    'pcie': ['chip.pcie-shire', 'L28', 'pcie.link', 'bw-pcie', 'addr.regions', 'L24', 'L32', 'L25'],
-    'io': ['chip.io-shire', 'L29', 'chip.maxions', 'chip.service-processor', 'volt.other', 'L24', 'L32', 'L25'],
+    'master': ['fw.grey-cells', 'fw.map-match', 'chip.master-shire-id', 'chip.spare-shire-id', 'L26', 'L31', 'L32', 'chip.compute-array',
+               'chip.cm-shire-mask', 'die.handedness'],
+    'pcie': ['pcie.negotiated', 'pcie.h2d', 'pcie.d2h', 'pcie.staged', 'pcie.conc', 'pcie.nhalf', 'fw.grey-cells', 'chip.pcie-shire',
+             'L28', 'pcie.link', 'bw-pcie', 'addr.regions', 'L24', 'die.handedness', 'L25'],
+    'io': ['chip.io-shire', 'L29', 'chip.maxions', 'chip.service-processor', 'volt.other', 'L24', 'L32', 'L25', 'fw.grey-cells', 'die.handedness'],
     'memshire': ['chip.memshires', 'L40', 'ms-fit-3cards', 'L41', 'L43', 'L42', 'ms2-forced', 'mesh.grid', 'L44', 'L46', 'L48', 'dram.memshire-select',
-                 'dram.controller-policy', 'L47', 'dram.counters', 'L25'],
+                 'dram.controller-policy', 'L47', 'dram.counters', 'L25', 'fw.memshires'],
     'dram': ['dram.channels', 'dram.capacity', 'dram.rate-datasheet', 'dram.rate-card', 'dram.peak-card', 'bw-dram',
              'lat-dram', 'lat-dram-typical', 'lat-dram-chip', 'dram.row-bits', 'lat-dram-rowconflict', 'lat-dram-refresh',
              'e-dram', 'e-dram-tload', 'dram.unmetered', 'dram.placeholder', 'L47', 'dram.pkg-pairing', 'L23'],
     'mesh': ['mesh.grid', 'mesh.logical-map', 'mesh.empty-cells', 'mesh.orientation', 'L34', 'mesh-hop-lat', 'L72',
              'mesh.shortest-paths', 'L104', 'chip.hop-pitch', 'mesh.clock', 'mesh.voltage', 'L102', 'L105',
-             'mesh.1kb-knee', 'mesh-hop-ring', 'mesh-bit-mm-free', 'mesh-bit-mm-loaded', 'L91', 'mesh.no-counters'],
-    'host': ['pcie.link', 'bw-pcie', 'board.card', 'board.meters', 'ridge.levels'],
+             'mesh.1kb-knee', 'mesh-hop-ring', 'mesh-bit-mm-free', 'mesh-bit-mm-loaded', 'L91', 'mesh.no-counters', 'fw.map-match', 'die.handedness'],
+    'host': ['pcie.negotiated', 'pcie.h2d', 'pcie.d2h', 'pcie.staged', 'pcie.small', 'pcie.poll', 'pcie.launch', 'pcie.conc',
+             'pcie.link', 'bw-pcie', 'board.card', 'board.meters', 'ridge.levels'],
     # shire level
     'meshstop': ['mesh.single-attach', 'L103', 'mesh.port-width', 'L114', 'mesh-hop-lat', 'L91'],
     'banks': ['shire.cache-geometry', 'L111', 'shire.partition-m0', 'shire.other-modes', 'shire.bank-queues',
               'shire.sc-latency-spec', 'l2.decode', 'l3.bank', 'volt.sram', 'sram-idle'],
     'l2': ['l2.private', 'lat-l2', 'lat-rb', 'l2.read-buffer', 'bw-l2', 'shire.l2-bw-spec', 'e-l2', 'l2.decode', 'l2.latency'],
     'l3': ['l3.capacity', 'l3.home', 'l3.latency', 'lat-l3-hop', 'lat-l3-avg', 'L79', 'L80', 'bw-l3', 'e-l3', 'l3.bank',
-           'l3.writearound', 'mem.global-atomic', 'sync.flag-memory'],
+           'l3.writearound', 'mem.global-atomic', 'sync.flag-memory', 'sc.l3-miss'],
     'scp': ['scp.size', 'lat-scp-own', 'bw-scp-own', 'e-scp-own-zeros', 'e-scp-own-rand', 'lat-scp-remote',
             'bw-scp-remote', 'e-scp-remote-zeros', 'e-scp-remote-rand', 'scp.format0', 'scp.format1', 'scp.offset0'],
     'uc': ['shire.composition', 'sync.flb', 'sync.fcc', 'sync-shire-barrier', 'sync-chip-barrier', 'ts-credit',
@@ -445,7 +550,7 @@ COMP = {
     # flows
     'flowA': ['addr.load-path', 'addr.load-model', 'L45', 'l2.decode', 'l3.home', 'dram.memshire-select', 'L43',
               'dram.row-bits', 'L50', 'lat-l1', 'lat-l2', 'l3.latency', 'dram.leg', 'lat-dram-typical', 'lat-dram',
-              'L46', 'lat-dram-chip', 'e-l1', 'e-l2', 'e-l3', 'e-dram', 'mesh-hop-lat', 'L104', 'mesh.memshire-positions'],
+              'L46', 'lat-dram-chip', 'e-l1', 'e-l2', 'e-l3', 'e-dram', 'mesh-hop-lat', 'L104', 'mesh.memshire-positions', 'sc.l3-miss'],
     'flowB': ['lat-l1', 'lat-rb', 'lat-l2', 'lat-scp-own', 'lat-scp-remote', 'lat-l3-hop', 'l3.latency', 'lat-l3-avg',
               'dram.leg', 'lat-dram-typical', 'lat-dram', 'bw-l1', 'bw-l2', 'bw-scp-own', 'bw-scp-remote', 'bw-l3',
               'bw-dram', 'e-l1', 'e-l2', 'e-scp-own-zeros', 'e-scp-own-rand', 'e-scp-remote-zeros',
@@ -457,8 +562,18 @@ COMP = {
     'flowE': ['gs-g-dram-512B', 'gs-g-dram-4K', 'gs-g-scp-16K', 'gs-g-rscp-16K', 'gs-g-dram-256K', 'gs-s-dram-512B',
               'gs-s-dram-4K', 'gs-s-scp-16K', 'gs-s-rscp-16K', 'gs-s-dram-256K', 'gs-mh', 'gs-dram', 'gs-l1', 'gs-uc',
               'gs-add', 'gs-card'],
-    'flowF': ['pcie.link', 'bw-pcie', 'chip.pcie-shire', 'addr.regions', 'addr.dram-region', 'dram.memshire-select',
-              'chip.master-shire-id', 'chip.cm-shire-mask', 'L32', 'ridge.levels', 'L104'],
+    'flowF': ['pcie.negotiated', 'pcie.h2d', 'pcie.d2h', 'pcie.staged', 'pcie.nhalf', 'pcie.small', 'pcie.poll', 'pcie.launch',
+              'pcie.conc', 'bw-pcie', 'chip.pcie-shire', 'addr.regions', 'addr.dram-region', 'dram.memshire-select',
+              'fw.grey-cells', 'chip.master-shire-id', 'chip.cm-shire-mask', 'L104'],
+    # the second version's flows (27 Sep): 7 the matmul's data flow, 8 data sets the watts, 9 the hot line, 0 the allreduce
+    'flowG': ['minion.tensorload', 'tl.one', 'tl.all', 'minion.tensorfma-546', 'tfma.tenb', 'mm.reload', 'minion.tensor-hart0',
+              'minion.vec-peak', 'mm-peak', 'mm-rate', 'neigh.coop-tload', 'minion.tensor-cache-path', 'mm.dram', 'e-scp-tload',
+              'e-dram-tload', 'e-tfma-fp32'],
+    'flowH': ['mm.w-data', 'mm.w-3cards', 'e-tfma-fp32', 'e-tfma-fp32-zeros', 'heat.race', 'heat.fewer', 'heat.leak',
+              'mm-board-w', 'power.idle', 'board.meters', 'mm-rate'],
+    'flowI': ['hot.fair', 'hot-cost', 'hot.cliff', 'hot-edge', 'hot-energy', 'mem.global-atomic', 'L43', 'l3.home'],
+    'flowJ': ['ar.tree', 'neigh.fln-edges', 'sync.tree-levels', 'sync-allreduce32', 'sync-allreduce1024', 'sync-shire-barrier',
+              'sync-chip-barrier', 'sync.flb', 'sync.fcc', 'ts-rt-fln'],
 }
 used = set(v['f'] for v in num.values())
 for k, ids in COMP.items():
@@ -469,20 +584,26 @@ for k, ids in COMP.items():
 # facts the honest note and the text cite by id
 NOTE = ['mesh.orientation', 'L33', 'L34', 'L32', 'L24', 'L42', 'L40', 'L104', 'mesh.xy-assumption', 'mesh.shortest-paths',
         'chip.die-dims', 'L114', 'chip.hop-pitch', 'addr.load-model', 'L37', 'chip.io-shire', 'L47', 'L23', 'dram.pkg-pairing',
-        'ms-fit-3cards', 'ms2-forced', 'mesh.grid']
+        'ms-fit-3cards', 'ms2-forced', 'mesh.grid', 'fw.map-match', 'fw.grey-cells', 'fw.memshires', 'die.handedness',
+        'sc.l3-miss']
 for i in NOTE:
     assert i in ALL, i
 used.update(NOTE)
 
+for a in ASKS:
+    for i in a['facts']:
+        assert i in ALL, (a['part'], i)
+    used.update(a['facts'])
 facts = {i: norm(ALL[i]) for i in sorted(used)}
 kinds = {}
 for f in facts.values():
     kinds[f['kind']] = kinds.get(f['kind'], 0) + 1
 out = {
     'meta': {'built_from': ['research/facts-arch.json', 'research/facts-layout.json', 'research/facts-numbers.json',
-                            'research/layout.json'],
+                            'research/facts-v2.json', 'research/layout.json', 'research/asks.json',
+                            '../../sources/limits-of-observability.data.json (the hub rows the asks link to)'],
              'n_facts': len(facts), 'kinds': kinds, 'n_num': len(num), 'et_platform_head': '836a4ab'},
-    'facts': facts, 'num': num, 'comp': COMP, 'layout': layout,
+    'facts': facts, 'num': num, 'comp': COMP, 'layout': layout, 'asks': ASKS, 'rungs': RUNGS,
 }
 p = os.path.join(HERE, 'facts.json')
 json.dump(out, open(p, 'w'), indent=1, ensure_ascii=False)

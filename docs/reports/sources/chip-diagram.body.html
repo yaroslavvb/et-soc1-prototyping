@@ -2,14 +2,18 @@
 main{max-width:none;padding:0}
 .prose{max-width:940px;margin:0 auto;padding:28px 16px 72px}
 /* ---- the stage: one screen at 1920x1080 and 1280x720, nothing inside it scrolls but the details list ---- */
-#stage{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:8px;height:100vh;height:100dvh;min-height:560px;
+#stage{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:7px;height:100vh;height:100dvh;min-height:560px;
   padding:10px 16px;background:var(--page);color:var(--ink);overflow:hidden;position:relative}
 #stage:fullscreen{width:100vw;height:100vh}
 #stage::backdrop{background:var(--page)}
+/* presenting inside the page's frame (the frame may forbid full screen): the stage covers the frame */
+html.et-pres,html.et-pres body{overflow:hidden}
+#stage.pres{position:fixed;inset:0;z-index:2147483000;height:100vh;height:100dvh;width:100vw}
+html.et-pres [data-ss-ui]{display:none!important}
 .st-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;min-width:0}
 .st-title{display:flex;align-items:baseline;gap:2px 14px;flex-wrap:wrap;min-width:0;margin-right:auto}
 .st-title h1{font-size:clamp(1.15rem,.7vw + .85rem,1.75rem);margin:0;white-space:nowrap}
-.st-sub{color:var(--ink-2);font-size:clamp(.8rem,.3vw + .68rem,1.02rem)}
+.st-title .t-short{display:none}
 .st-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .st-row .lab2{color:var(--ink-2);font-size:clamp(.78rem,.3vw + .66rem,.98rem);margin-right:2px}
 .st-btn{font:inherit;font-size:clamp(.8rem,.32vw + .66rem,1.05rem);background:var(--surface);color:var(--ink);border:1px solid var(--border);
@@ -22,11 +26,29 @@ main{max-width:none;padding:0}
 .st-btn:disabled{opacity:.4;cursor:default}
 .st-btn .k{display:inline-block;margin-right:6px;font-weight:750;color:color-mix(in srgb,var(--c2) 70%,var(--ink))}
 .st-btn[aria-pressed="true"] .k{color:inherit}
-.w-play{min-width:5.2em}.w-tour{min-width:6.4em}.w-fs{min-width:8.6em}
-.st-btn:focus-visible,.pn button:focus-visible,.pn a:focus-visible,.pn select:focus-visible,.crumb:focus-visible{outline:3px solid var(--c1);outline-offset:2px}
+.st-btn.new::after{content:"new";margin-left:6px;font-size:.72em;font-weight:700;color:color-mix(in srgb,var(--c3) 70%,var(--ink))}
+.st-btn[aria-pressed="true"].new::after{color:inherit}
+.w-play{min-width:5.2em}.w-tour{min-width:6.4em}.w-fs{min-width:6.6em}
+.st-btn:focus-visible,.pn button:focus-visible,.pn a:focus-visible,.pn select:focus-visible,.pn summary:focus-visible,.zc button:focus-visible,.stg:focus-visible,.pip:focus-visible,.toast button:focus-visible{outline:3px solid var(--c1);outline-offset:2px}
 .st-body{display:grid;grid-template-columns:minmax(0,1fr) clamp(300px,24vw,470px);gap:14px;min-height:0;min-width:0}
-.st-svg{position:relative;min-height:0;min-width:0}
+.st-view{position:relative;min-height:0;min-width:0}
+.st-svg{position:relative;height:100%;min-height:0;min-width:0}
 #chip{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
+/* ---- the scale control: always there, under the drawing (it replaces the old path of links) ---- */
+.zc{display:flex;flex-wrap:wrap;align-items:center;gap:3px}
+.zc button{font:inherit;font-size:clamp(.76rem,.25vw + .66rem,.98rem);min-height:30px;padding:2px 9px;border-radius:8px;cursor:pointer;
+  background:var(--surface);color:var(--ink);border:1px solid var(--border);line-height:1.15;white-space:nowrap}
+.zc button:hover{border-color:var(--ink-2)}
+.zc button[aria-pressed="true"]{background:var(--ink);color:var(--page);border-color:var(--ink)}
+.zc button.pm{font-size:1.1em;font-weight:700;min-width:2.1em}
+.zc button:disabled{opacity:.35;cursor:default}
+/* ---- the small picture of the die: a flow's stage on the die while the camera is inside a shire or a minion ---- */
+.pip{position:absolute;top:4px;right:4px;z-index:3;width:clamp(190px,26%,360px);border-radius:10px;overflow:hidden;cursor:pointer;
+  background:var(--surface);border:2px solid var(--c1);box-shadow:0 4px 18px rgba(0,0,0,.16)}
+.pip[hidden]{display:none}
+.pip svg{display:block;width:100%;height:auto}
+.pip .pip-cap{display:block;font-size:.78rem;color:var(--ink-2);padding:2px 8px 4px;border-top:1px solid var(--border)}
+.pip .co,.pip .band,.pip text{display:none}
 /* ---- the details panel: a scrolling list above a fixed legend ---- */
 .pn{display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;
   font-size:clamp(.84rem,.32vw + .72rem,1.05rem);line-height:1.45}
@@ -51,6 +73,16 @@ main{max-width:none;padding:0}
 .pn li.fact:hover{background:var(--page)}
 .pn .meta{display:flex;flex-wrap:wrap;gap:3px 8px;align-items:center;margin-top:3px;font-size:.86em;color:var(--ink-2)}
 .pn .fid{color:var(--ink-2);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+/* what is inferred here, and what would settle it (the hub's asks) */
+.pn details.asks{margin:8px 0;border:1.5px dashed color-mix(in srgb,var(--warn) 70%,var(--ink-2));border-radius:8px;padding:4px 10px;background:var(--page)}
+.pn details.asks>summary{font-size:.9em;font-weight:650;color:var(--ink);padding:3px 0}
+.pn .ask{border-top:1px solid var(--grid);padding:6px 0;font-size:.9em}
+.pn .ask p{margin:2px 0}
+.pn .ask .ask-h{font-weight:650}
+.pn .ask.settled .ask-h{color:var(--ok)}
+.pn .ask.nearly .ask-h,.pn .ask.confirm .ask-h{color:var(--c1)}
+.pn .ask .ask-s{color:var(--ink-2);overflow-wrap:anywhere}
+.pn .ask-l a{white-space:normal}
 .kd{display:inline-block;font-size:.8em;font-weight:650;padding:0 7px;border-radius:999px;border:1.5px solid;white-space:nowrap;line-height:1.5}
 .kd.measured{color:var(--ok);border-color:var(--ok)}
 .kd.spec{color:var(--c1);border-color:var(--c1)}
@@ -70,27 +102,48 @@ main{max-width:none;padding:0}
 .lad .tr.done u{background:color-mix(in srgb,var(--c2) 38%,transparent)}
 .lad .tr.pale u{background:color-mix(in srgb,var(--c3) 45%,transparent)}
 .lad .tr s{position:absolute;left:6px;right:6px;top:0;line-height:1.6em;text-decoration:none;font-weight:650;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* ---- caption bar ---- */
-.st-cap{display:grid;grid-template-columns:minmax(8.5em,13em) minmax(0,1fr) auto;align-items:center;gap:6px 18px;border-top:1px solid var(--border);padding-top:8px;min-width:0}
+/* ---- the stage bar: the active flow's stages, under the drawing ---- */
+.st-bar{display:flex;align-items:center;gap:6px 8px;min-width:0;border-top:1px solid var(--border);padding-top:7px}
+.st-bar .st-btn{min-height:32px}
+.stages{list-style:none;margin:0;padding:0;display:flex;gap:4px;flex:1 1 auto;min-width:0}
+.stages li{flex:1 1 0;min-width:0;margin:0;display:flex}
+.stages li.stg-hint{flex:1 1 auto;color:var(--ink-2);font-size:clamp(.8rem,.3vw + .68rem,1rem);align-items:center;padding:0 6px}
+.stg{font:inherit;font-size:clamp(.74rem,.27vw + .63rem,.98rem);flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:6px;position:relative;overflow:hidden;
+  background:var(--surface);color:var(--ink-2);border:1px solid var(--border);border-radius:8px;padding:3px 8px;min-height:32px;cursor:pointer;text-align:left}
+.stg:hover{border-color:var(--ink-2);color:var(--ink)}
+.stg .sn{flex:none;font-weight:750;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.stg .st{min-width:0;overflow:hidden;line-height:1.1;overflow-wrap:break-word;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
+.stg.past{background:color-mix(in srgb,var(--c2) 10%,var(--surface));color:var(--ink)}
+.stg.on{background:color-mix(in srgb,var(--c2) 24%,var(--surface));border-color:color-mix(in srgb,var(--c2) 75%,var(--ink));color:var(--ink);font-weight:650}
+.stg.on .sn{color:var(--ink)}
+.stg.on::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--c2);opacity:.9}
+#stage.playing .stg.on::after{animation:stgrun 1.6s ease-in-out infinite}
+@keyframes stgrun{0%{transform:scaleX(.15);transform-origin:left}50%{transform:scaleX(1);transform-origin:left}100%{transform:scaleX(.15);transform-origin:right}}
+@media (prefers-reduced-motion: reduce){#stage.playing .stg.on::after{animation:none}}
+.bar-sep{flex:none;width:1px;align-self:stretch;background:var(--border);margin:0 2px}
+/* ---- caption ---- */
+.st-cap{display:grid;grid-template-columns:minmax(19.5em,22em) minmax(0,1fr);align-items:center;gap:6px 18px;min-width:0}
 .cap-k{font-size:clamp(.78rem,.3vw + .66rem,1rem);color:var(--ink-2);min-width:0}
-#cap-k{color:var(--ink);font-weight:650;margin-top:2px}
-.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:0 2px}
-.crumb{font:inherit;background:none;border:0;color:var(--c1);cursor:pointer;padding:1px 3px;border-radius:4px;text-decoration:underline;text-underline-offset:2px}
-.crumb[aria-current="true"]{color:var(--ink-2);text-decoration:none;cursor:default}
-.crumbs .sep{color:var(--muted)}
+#cap-k{color:var(--ink);font-weight:650;margin-top:4px}
 .dots{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;min-height:10px}
-.dots i{width:10px;height:10px;border-radius:50%;background:var(--grid);display:block}
-.dots i.past{background:var(--ink-2)}
-.dots i.on{background:var(--c2);box-shadow:0 0 0 2px color-mix(in srgb,var(--c2) 35%,transparent)}
+.dots button{width:12px;height:12px;border-radius:50%;background:var(--grid);display:block;border:0;padding:0;cursor:pointer}
+.dots button.past{background:var(--ink-2)}
+.dots button.on{background:var(--c2);box-shadow:0 0 0 2px color-mix(in srgb,var(--c2) 35%,transparent)}
+.dots button:focus-visible{outline:2px solid var(--c1);outline-offset:2px}
 .cap-txt{min-width:0}
 #cap{margin:0;font-size:clamp(17px,.95vw + 11px,32px);line-height:1.25;min-height:2.5em;display:flex;align-items:center;font-weight:560;overflow:hidden}
 #cap .cap-in{display:block;text-wrap:balance}
 /* the sub-caption wraps to a second line rather than losing its end (two lines are kept free, so the die never jumps) */
 #cap-sub{margin:2px 0 0;font-size:clamp(13px,.5vw + 8.5px,19px);line-height:1.3;min-height:2.6em;color:var(--ink-2);overflow:hidden;
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
-.cap-nav{display:flex;gap:6px}
-.cap-nav .st-btn{min-width:2.8em;font-size:1.15em}
 .num[data-f]{text-decoration:underline dotted var(--muted);text-underline-offset:3px;cursor:help}
+/* ---- a note over the stage (presenting inside the frame, a blocked window) ---- */
+.toast{position:absolute;left:50%;top:56px;transform:translateX(-50%);z-index:6;max-width:min(720px,calc(100% - 24px));background:var(--surface);color:var(--ink);
+  border:1.5px solid var(--c1);border-radius:10px;padding:10px 14px;box-shadow:0 8px 28px rgba(0,0,0,.2);font-size:clamp(.85rem,.3vw + .72rem,1.05rem);line-height:1.4}
+.toast[hidden]{display:none}
+.toast p{margin:0 0 6px}
+.toast .tb{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.toast kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--border);border-radius:4px;padding:0 5px;background:var(--page)}
 /* ---- legend ---- */
 .lg{display:flex;flex-wrap:wrap;gap:2px 12px;font-size:.8em;color:var(--ink-2)}
 .lg span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
@@ -98,11 +151,11 @@ main{max-width:none;padding:0}
 .lg i.line{height:0;border-width:3px 0 0;width:16px;border-radius:0}
 .lg i.dash{border-style:dashed;background:none}
 /* ---- source tooltip ---- */
-#srctip{position:fixed;z-index:50;pointer-events:none;display:none;max-width:min(460px,calc(100vw - 16px));background:var(--surface);color:var(--ink);
+#srctip{position:fixed;z-index:2147483600;pointer-events:none;display:none;max-width:min(460px,calc(100vw - 16px));background:var(--surface);color:var(--ink);
   border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.84rem;line-height:1.4;box-shadow:0 6px 22px rgba(0,0,0,.18)}
 #srctip .s{color:var(--ink-2);display:block;margin-top:4px;overflow-wrap:anywhere}
 /* ---- the SVG ---- */
-#chip text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+#chip text,#pipsvg text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 #chip .comp{cursor:pointer}
 #chip .comp:focus{outline:none}
 #chip .ring{fill:none;stroke:var(--ink);stroke-width:5;opacity:0;pointer-events:none}
@@ -117,12 +170,14 @@ main{max-width:none;padding:0}
 :root[data-theme="dark"] #chip.fdim .dimmable:not(.hi){opacity:.55}
 #chip .hi .shape{stroke-width:5}
 #chip .lay.busy{pointer-events:none}
+#pipsvg .pt.hi{stroke-width:9}
 .t-id{font-size:36px;font-weight:750;fill:var(--ink)}
 .t-lab{font-size:20px;fill:var(--ink-2)}
 .t-labb{font-size:20px;font-weight:650;fill:var(--ink)}
 .t-big{font-size:30px;font-weight:750;fill:var(--ink)}
 .t-mid{font-size:24px;font-weight:650;fill:var(--ink)}
 .t-sm{font-size:17px;fill:var(--ink-2)}
+.t-link{font-size:17px;fill:var(--c1);text-decoration:underline}
 .halo{paint-order:stroke;stroke:var(--page);stroke-width:6px;stroke-linejoin:round}
 .halo-s{paint-order:stroke;stroke:var(--surface);stroke-width:6px;stroke-linejoin:round}
 .co-box{fill:var(--surface);stroke-width:3}
@@ -138,26 +193,44 @@ main{max-width:none;padding:0}
 #stage.nopanel .st-body{grid-template-columns:minmax(0,1fr)}
 #stage.nopanel .pn{display:none}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+/* skip links for the keyboard: hidden until focused, then over the stage's top-left corner */
+.skip{position:absolute;left:16px;top:6px;z-index:7;display:flex;gap:6px}
+.skip a{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;background:var(--surface);color:var(--ink);
+  border:2px solid var(--c1);border-radius:8px;padding:4px 10px;font-size:.95rem}
+.skip a:focus{position:static;width:auto;height:auto;clip-path:none;overflow:visible}
+/* in a frame that has not been clicked yet, the keys go to the host page: a hint says so (hidden once focused) */
+.kbd-hint{position:absolute;left:4px;top:4px;z-index:4;max-width:min(430px,70%);background:var(--surface);color:var(--ink);border:1.5px solid var(--c1);
+  border-radius:8px;padding:4px 10px;font-size:clamp(.78rem,.25vw + .68rem,.95rem);line-height:1.3;box-shadow:0 3px 12px rgba(0,0,0,.14);cursor:pointer}
+.kbd-hint[hidden]{display:none}
+.kbd-hint kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--border);border-radius:4px;padding:0 4px;background:var(--page)}
 #facttab{table-layout:fixed}
 #facttab td{overflow-wrap:anywhere}
 #facttab th:nth-child(1){width:11%}#facttab th:nth-child(2){width:44%}#facttab th:nth-child(3){width:10%}#facttab th:nth-child(4){width:10%}#facttab th:nth-child(5){width:25%}
+#asktab td{overflow-wrap:anywhere}
 /* ---- narrow windows and phones: the stage stacks and the page scrolls ---- */
 @media (max-width:899px){
   #stage{display:flex;flex-direction:column;height:auto;min-height:0;overflow:visible;gap:8px}
   .st-body{display:contents}
-  .st-head{order:0}.st-svg{order:1}.st-cap{order:2}.pn{order:3}
+  .st-head{order:0}.st-view{order:1}.st-bar{order:2}.st-cap{order:3}.pn{order:4}
+  .st-btn.new::after,.st-row .lab2{display:none}
+  .st-head .st-btn{padding:3px 9px;min-height:32px}
   /* the drawing keeps a readable size and scrolls sideways inside its own box */
   .st-svg{overflow-x:auto;-webkit-overflow-scrolling:touch}
   #chip{height:auto;aspect-ratio:1300/792;min-width:720px}
-  /* full screen on a narrow screen: the drawing fits the space left, the panel scrolls below it */
-  #stage:fullscreen{height:100vh;overflow:hidden}
-  #stage:fullscreen .st-svg{flex:1 1 auto;min-height:0;overflow:hidden}
-  #stage:fullscreen #chip{height:100%;min-width:0;aspect-ratio:auto}
-  #stage:fullscreen .pn{flex:0 1 30vh;min-height:0}
-  #stage:fullscreen .pn-scroll{max-height:none}
+  .pip{width:44%}
+  .st-bar{flex-wrap:wrap}
+  .stages{flex:1 1 100%;order:5;flex-wrap:wrap}
+  .stages li{flex:1 1 30%}
+  .bar-sep{display:none}
+  /* full screen or presenting on a narrow screen: the drawing fits the space left, the panel scrolls below it */
+  #stage:fullscreen,#stage.pres{height:100vh;overflow:hidden}
+  #stage:fullscreen .st-view,#stage.pres .st-view{flex:1 1 auto;min-height:0}
+  #stage:fullscreen .st-svg,#stage.pres .st-svg{overflow:hidden}
+  #stage:fullscreen #chip,#stage.pres #chip{height:100%;min-width:0;aspect-ratio:auto}
+  #stage:fullscreen .pn,#stage.pres .pn{flex:0 1 26vh;min-height:0}
+  #stage:fullscreen .pn-scroll,#stage.pres .pn-scroll{max-height:none}
   .pn-scroll{max-height:70vh}
-  .st-cap{grid-template-columns:minmax(0,1fr) auto}
-  .cap-txt{grid-column:1/-1;grid-row:1}
+  .st-cap{grid-template-columns:minmax(0,1fr)}
   #cap{min-height:0}
   #cap-sub{white-space:normal}
 }
@@ -167,18 +240,33 @@ main{max-width:none;padding:0}
   .st-row{gap:4px}
   .st-btn{padding:3px 8px}
   .st-btn .k{margin-right:4px}
-  .w-play{min-width:4.6em}.w-tour{min-width:5.6em}.w-fs{min-width:7.4em}
+  .st-btn.new::after{display:none}
+  .w-play{min-width:4.6em}.w-tour{min-width:5.2em}.w-fs{min-width:5.8em}
+  .st-row .lab2{display:none}
+  .st-title .t-long{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .st-title .t-short{display:inline}
+}
+/* 900-1199 wide: the stage bar shows every stage's number and the current stage's name (the names are in each
+   button's title and label) */
+@media (min-width:900px) and (max-width:1199px){
+  .stages li:not(.on){flex:0 0 auto}
+  .stages li:not(.on) .stg .st{display:none}
+  .stages li.on{flex:1 1 auto}
 }
 @media (max-height:780px) and (min-width:900px){
   #stage{gap:5px;padding-top:6px;padding-bottom:6px}
-  .st-btn{min-height:30px;padding:2px 10px}
-  .st-sub,.st-row .lab2{display:none}
+  .st-btn{min-height:30px;padding:2px 9px}
+  .st-bar .st-btn,.stg{min-height:29px}
+  .st-bar{padding-top:5px}
+  #cap{font-size:clamp(16px,.8vw + 10px,26px)}
+  #cap-sub{font-size:clamp(12.5px,.45vw + 8px,17px)}
 }
 </style>
 
 <section id="stage" aria-label="Interactive schematic of the ET-SoC-1">
+<nav class="skip" aria-label="Skip links"><a href="#bar">Skip to playback</a><a href="#z-0">Skip to the scale control</a><a href="#pn-body">Skip to the details</a></nav>
 <div class="st-head">
-  <div class="st-title"><h1>The ET-SoC-1, interactively</h1></div>
+  <div class="st-title"><h1><span class="t-long">The ET-SoC-1, interactively</span><span class="t-short" aria-hidden="true">ET-SoC-1</span></h1></div>
   <div class="st-row" role="group" aria-label="Data flows">
     <span class="lab2">Flows</span>
     <button type="button" class="st-btn" data-flow="A" aria-pressed="false" title="A load that misses to DRAM (key 1)"><span class="k">1</span>Load&#8202;&#8594;&#8202;DRAM</button>
@@ -186,16 +274,19 @@ main{max-width:none;padding:0}
     <button type="button" class="st-btn" data-flow="C" aria-pressed="false" title="TensorSend between shires (key 3)"><span class="k">3</span>TensorSend</button>
     <button type="button" class="st-btn" data-flow="D" aria-pressed="false" title="The relay against DRAM (key 4)"><span class="k">4</span>Relay</button>
     <button type="button" class="st-btn" data-flow="E" aria-pressed="false" title="Gathers and scatters, E48 (key 5)"><span class="k">5</span>Gathers</button>
-    <button type="button" class="st-btn" data-flow="F" aria-pressed="false" title="The host pushes work over PCIe (key 6)"><span class="k">6</span>Host&#8202;/&#8202;PCIe</button>
-  </div>
-  <div class="st-row">
-    <button type="button" class="st-btn w-play" id="btn-play" title="Space">Pause</button>
-    <button type="button" class="st-btn primary w-tour" id="btn-tour" title="Right and Left arrows step; Q ends">Tour</button>
-    <button type="button" class="st-btn w-fs" id="btn-fs" title="F">Full screen</button>
+    <button type="button" class="st-btn" data-flow="F" aria-pressed="false" title="The host over PCIe, timed on three cards (key 6)"><span class="k">6</span>Host&#8202;/&#8202;PCIe</button>
+    <button type="button" class="st-btn new" data-flow="G" aria-pressed="false" title="A matmul on the tensor unit (key 7)"><span class="k">7</span>Matmul</button>
+    <button type="button" class="st-btn new" data-flow="H" aria-pressed="false" title="The same matmul on different data: watts and heat (key 8)"><span class="k">8</span>Data&#8202;&#8594;&#8202;watts</button>
+    <button type="button" class="st-btn new" data-flow="I" aria-pressed="false" title="One hot line stops a shire (key 9)"><span class="k">9</span>Hot line</button>
+    <button type="button" class="st-btn new" data-flow="J" aria-pressed="false" title="The allreduce tree (key 0)"><span class="k">0</span>Allreduce</button>
   </div>
 </div>
 <div class="st-body">
-  <div class="st-svg" id="svgwrap"><svg id="chip" role="group" aria-label="Schematic of the ET-SoC-1 die. Every part is a button: Tab to it and press Enter for its details; Enter again zooms into a shire or a minion." xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <div class="st-view">
+    <div class="st-svg" id="svgwrap"><svg id="chip" role="group" aria-label="Schematic of the ET-SoC-1 die. Every part is a button: Tab to it and press Space for its details, Enter to zoom into a shire or a minion." xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="kbd-hint" id="kbd-hint" hidden>Click the diagram once: then <kbd>F</kbd> presents, <kbd>Space</kbd> pauses and the arrows step</div>
+    <div class="pip" id="pip" hidden role="button" tabindex="0" aria-label="The flow's stage on the die: go to the chip scale"><svg id="pipsvg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg><span class="pip-cap" id="pip-cap">On the die · click for the chip scale</span></div>
+  </div>
   <aside class="pn" id="panel" aria-label="Details">
     <p id="pn-live" class="vh" aria-live="polite"></p>
     <div class="pn-scroll" id="pn-body" tabindex="-1"><p class="pn-kick">Details</p><p class="pn-title">The ET-SoC-1</p><p class="pn-what">Click any part of the chip for its numbers and sources.</p></div>
@@ -206,51 +297,73 @@ main{max-width:none;padding:0}
       <span><i style="border-color:var(--c5)"></i>I/O (Maxions)</span>
       <span><i style="border-color:var(--c3)"></i>memory shire, LPDDR4X</span>
       <span><i class="line" style="border-color:var(--axis)"></i>mesh link</span>
-      <span><i class="dash" style="border-color:var(--ink-2)"></i>dashed: identity or place inferred</span>
-      <span>every die position assumes the inferred orientation</span>
+      <span><i class="dash" style="border-color:var(--ink-2)"></i>dashed: inferred</span>
     </div>
   </aside>
 </div>
+<div class="st-bar" id="bar" role="group" aria-label="Playback">
+  <button type="button" class="st-btn w-play" id="btn-play" title="Space">Play</button>
+  <button type="button" class="st-btn" id="btn-prev" aria-label="Previous stage (Left arrow)" title="Previous stage (Left arrow)">&#8592;</button>
+  <ol class="stages" id="stages" aria-label="Stages of the flow"></ol>
+  <button type="button" class="st-btn" id="btn-next" aria-label="Next stage (Right arrow)" title="Next stage (Right arrow)">&#8594;</button>
+  <button type="button" class="st-btn" id="btn-follow" aria-pressed="true" title="The camera follows the flow (C)">Follow</button>
+  <span class="bar-sep" aria-hidden="true"></span>
+  <button type="button" class="st-btn primary w-tour" id="btn-tour" title="T; Shift+arrows step the tour; Q ends it">Tour</button>
+  <button type="button" class="st-btn w-fs" id="btn-fs" title="F: full screen, or the stage fills the frame">Present</button>
+  <button type="button" class="st-btn" id="btn-panel" aria-pressed="true" title="P: hide or show the details panel">Panel</button>
+</div>
 <div class="st-cap">
   <div class="cap-k">
-    <nav class="crumbs" id="crumbs" aria-label="Zoom level"><span class="crumb" aria-current="true">ET-SoC-1</span></nav>
+    <div class="zc" role="group" aria-label="Scale: zoom out, chip, shire, minion, zoom in">
+      <button type="button" class="pm" id="z-out" aria-label="Zoom out (minus key)" title="Zoom out (−, Backspace)">&#8722;</button>
+      <button type="button" data-z="0" id="z-0" aria-pressed="true" title="The whole chip">Chip</button>
+      <button type="button" data-z="1" id="z-1" aria-pressed="false" title="A shire">Shire</button>
+      <button type="button" data-z="2" id="z-2" aria-pressed="false" title="A minion">Minion</button>
+      <button type="button" class="pm" id="z-in" aria-label="Zoom in (plus key)" title="Zoom in (+)">+</button>
+    </div>
+    <div class="vh" id="cap-scale" aria-live="polite">Scale: the chip</div>
     <div id="cap-k" aria-live="polite">Explore</div>
-    <div class="dots" id="dots" aria-hidden="true"></div>
+    <div class="dots" id="dots" role="group" aria-label="Tour steps"></div>
   </div>
   <div class="cap-txt">
-    <p id="cap" aria-live="polite">Click any part of the chip, pick a data flow, or press Tour to step through it in 12 steps.</p>
-    <p id="cap-sub">Space pauses · F full screen · P hides the panel · Q ends the tour · Backspace zooms out</p>
-  </div>
-  <div class="cap-nav">
-    <button type="button" class="st-btn" id="btn-panel" aria-pressed="true" title="P: hide or show the details panel">Panel</button>
-    <button type="button" class="st-btn" id="btn-prev" aria-label="Previous step (Left arrow)" title="Left arrow">&#8592;</button>
-    <button type="button" class="st-btn" id="btn-next" aria-label="Next step (Right arrow)" title="Right arrow">&#8594;</button>
+    <p id="cap" aria-live="polite">Click any part of the chip, pick a data flow, or press Tour to step through it.</p>
+    <p id="st-live" class="vh" aria-live="polite">No flow is playing.</p>
+    <p id="cap-sub">Space pauses · ← → stages · + − zoom · F presents · P panel · C follow</p>
   </div>
 </div>
+<div class="toast" id="toast" role="status" hidden></div>
 <div id="srctip" role="tooltip"></div>
 </section>
 <div class="prose">
-<p class="byline">27 September 2026 · every number is a fact with a source: a repository file and field, a manual page, or a source line · the chip's facts: <a href="#facts">the table below</a>, built in the repository's docs/reports/data/2026-09-27-chip-diagram · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="byline">27 September 2026, second version the same day · every number is a fact with a source: a repository file and field, a manual page, or a source line · the chip's facts: <a href="#facts">the table below</a>, built in the repository's docs/reports/data/2026-09-27-chip-diagram · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">A schematic of Esperanto's ET-SoC-1 that you can click through: the die with its mesh of shires, a shire with its
-cache and minions, a minion with its vector unit, whose lanes also run the tensor instructions. Six animated flows show where data goes and what it costs,
-with the latency, bandwidth and energy measured on the lab's cards. A tour steps through it all in twelve steps.</p>
+cache and minions, a minion with its vector unit, whose lanes also run the tensor instructions. Ten animated flows show where data goes and what it costs,
+with the latency, bandwidth, energy and heat measured on the lab's cards, the host link included. A tour steps through it all.</p>
 
 <h2 id="use">How to use it</h2>
 <ul>
-<li><b>Click</b> any part (or Tab to it and press Enter) for what it is, its numbers with their units and card coverage,
-and a link to the report that measured them. Point at a number to see its source; from the keyboard, Tab to a fact in
-the details list. <b>Click again</b> (or Enter again) on a shire or a minion to zoom in; the path under the diagram,
-or Backspace, zooms out.</li>
-<li><b>Flows</b> 1 to 6 animate a load that misses to DRAM, the latency ladder, TensorSend across the mesh, the relay
-against DRAM, gathers and scatters, and the host pushing work over PCIe. Space pauses and resumes; the details panel
-shows each leg's numbers.</li>
-<li><b>Tour</b> steps through twelve slides: Right and Left arrows, PageDown and PageUp (a clicker) or the arrow
-buttons move, Space pauses a flow, F goes full screen, Q or End tour ends the tour (in full screen, Esc
-usually leaves full screen instead). The tour enlarges the panel's text and hides its fact lists.</li>
-<li><b>For a projector</b>: P (or the Panel button) hides the details panel so that the die takes the whole width, and
-D switches between light and dark. The same from the address: <code>?theme=light</code>, <code>?panel=off</code>. The
-stage fits one screen from 1280 × 720 up; on a narrow screen the drawing scrolls sideways.</li>
+<li><b>Click</b> any part (or Tab to it and press Space) for what it is, its numbers with their units and card coverage,
+a link to the report that measured them, and, where the drawing infers something, what would settle it. Point at a
+number to see its source; from the keyboard, Tab to a fact in the details list.</li>
+<li><b>Zoom</b> with the scale control under the drawing (−, Chip, Shire, Minion, +, or the + and − keys): it is always there, so you can go back in as well as out. A double click, a second click, or Enter on a shire or
+a minion zooms into it; Backspace zooms out.</li>
+<li><b>Flows</b> 1 to 9 and 0 animate a load that misses to DRAM, the latency ladder, TensorSend across the mesh, the
+relay against DRAM, gathers and scatters, the host over PCIe (timed on three cards), a matmul on the tensor unit, the
+same matmul's watts and heat on different data, one hot line stopping a shire, and the allreduce tree. Each flow is a
+row of <b>stages</b> under the drawing: click one, or step with the Left and Right arrows. <b>Space</b> pauses
+everything that moves, the camera included; stepping while paused shows each stage's end state.</li>
+<li><b>Follow</b> (C): the camera follows the flow from scale to scale. Turn it off, or zoom yourself, and the camera
+stays: a stage on the die then plays in a small picture of the die in the corner, and a stage inside a shire or a minion
+marks its place. Stepping turns following back on after your own zoom.</li>
+<li><b>Tour</b> (T) steps through sixteen slides: the arrows (or a clicker's PageDown and PageUp) step the stages of
+each flow and move on at its ends; Shift with an arrow, or a click on a dot, jumps a whole slide; Q ends the tour. The
+tour enlarges the panel's text and hides its fact lists.</li>
+<li><b>Presenting</b>: F (or Present) goes full screen. Where the page's frame forbids that, the stage fills the frame
+instead and offers the browser's own full screen (F11) and a presenter window, a copy of this page in a window of its
+own where F works. P hides the details panel, D switches light and dark. The same from the address:
+<code>?theme=light</code>, <code>?panel=off</code>, <code>?flow=7</code>. The stage fits one screen from 1280 × 720
+up; on a narrow screen the drawing scrolls sideways.</li>
 </ul>
 
 <h2 id="summary">What the diagram shows</h2>
@@ -259,6 +372,12 @@ stage fits one screen from 1280 × 720 up; on a narrow screen the drawing scroll
 <h2 id="honest">What is measured, what is specified, what is inferred</h2>
 <div id="honest-text"><p>The count of facts by kind is written when the page's script runs.</p></div>
 
+<h2 id="asks">What would settle the rest: the asks</h2>
+<p>Every part the drawing infers, what would settle it, and the row on the hub's improvement ladder that asks for it
+(a document to request from AI Foundry, an experiment on the cards, or an interface). The hub collects them with
+everything else the instruments cannot see.</p>
+<div class="table-wrap wide"><table id="asktab" class="stack"><thead><tr><th>Part</th><th>What is inferred</th><th>What would settle it</th><th>Ask</th></tr></thead><tbody></tbody></table></div>
+
 <h2 id="facts">Every fact on this page</h2>
 <p>The facts behind the diagram, the panels and the captions, with their kind, the cards they were measured on and their
 source. Sort by any column or filter the rows.</p>
@@ -266,22 +385,29 @@ source. Sort by any column or filter the rows.</p>
 
 <h2 id="related">Related reports</h2>
 <ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link">Over the PCIe link</a> — the host link timed on three
+cards on 27 September: copy bandwidth from 4 KB to 256 MB, staged and DMA-only, small copies and the runtime's polling,
+kernel launches.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the measured
 map of the 32 compute shires and what messages cost inside a neighbourhood, a shire and across the mesh.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy">Anatomy of a memory access</a> — one load traced
 from L1 to DRAM; the memory-shire fit the diagram places the memory shires by.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — latency, bandwidth and
 energy at every level.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">The Horace experiment</a> — the same matmul on different
+data: the watts, the heat and the tensor unit's timings.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">One hot line stops a shire</a> — a contended atomic is
+fair, and stops its home shire's own traffic at 22 requesters.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> — the die's dimensions, the
 tile pitch and what a bit costs per millimetre of mesh.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a> — the relay against a
 round trip through DRAM.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The energy manual</a> — what each instruction, level
 and message costs.</li>
-<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-ridge-points">Ridge points</a> — the compute ceilings and the
-arithmetic intensity each level needs.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">Matmul efficiency</a> — the tensor matmul on
+all 1,024 minions against its peak.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a> — the hub:
-every report, and what the instruments cannot see.</li>
+every report, what the instruments cannot see, and the asks.</li>
 </ul>
 <p class="small"><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports">← All ET-SoC-1 measurement reports</a></p>
 </div>

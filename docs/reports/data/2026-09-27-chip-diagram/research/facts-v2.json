@@ -1,0 +1,812 @@
+{
+ "about": "Facts for the chip diagram's second version (27 September 2026), read from the repository's data files.",
+ "facts": [
+  {
+   "id": "pcie.negotiated",
+   "component": "pcie",
+   "topic": "interconnect",
+   "kind": "measured",
+   "statement": "The link trained at 16.0 GT/s x8 on all three cards in every run (sysfs current_link_speed and current_link_width): PCIe Gen4 x8, 15.75 GB/s per direction after 128b/130b coding.",
+   "value": 16.0,
+   "unit": "GT/s",
+   "source": "docs/reports/data/2026-09-27-pcie/pcie.json: hosts.<card>.link_speed, .link_width; meta.link_gbs; docs/reports/data/2026-09-27-pcie/hosts.txt",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "Over the PCIe link",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link",
+   "note": null
+  },
+  {
+   "id": "pcie.h2d",
+   "component": "pcie",
+   "topic": "bandwidth",
+   "kind": "measured",
+   "statement": "Host to device, DMA only (the runtime's host-side copy replaced by a no-op, the analogue of pinned memory), 256 MB per copy: 12.47 [12.39, 12.55] GB/s on aifoundry2, 12.60 [12.55, 12.65] GB/s on aifoundry3, 12.46 [12.41, 12.50] GB/s on aifoundry1-c1 (mean of 5 runs [99% interval]): 12.46-12.60 GB/s, 79-80% of the link's 15.75 GB/s.",
+   "value": 12.47,
+   "unit": "GB/s (aifoundry2)",
+   "source": "docs/reports/data/2026-09-27-pcie/pcie.json: bw.<card>.h2d.dma[bytes=268435456].gbs (mean, lo, hi)",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "Over the PCIe link",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link",
+   "note": null
+  },
+  {
+   "id": "pcie.d2h",
+   "component": "pcie",
+   "topic": "bandwidth",
+   "kind": "measured",
+   "statement": "Device to host, DMA only, 256 MB per copy: 10.54 [10.43, 10.64] GB/s on aifoundry2, 10.41 [10.30, 10.52] GB/s on aifoundry3, 10.41 [10.38, 10.45] GB/s on aifoundry1-c1: 10.41-10.54 GB/s, 66-67% of the link figure, slower than host to device. The fastest device-to-host size is 16 MB on aifoundry2 (11.75 GB/s), 16 MB on aifoundry3 (10.99 GB/s), 16 MB on aifoundry1-c1 (10.69 GB/s).",
+   "value": 10.54,
+   "unit": "GB/s (aifoundry2)",
+   "source": "docs/reports/data/2026-09-27-pcie/pcie.json: bw.<card>.d2h.dma[bytes=268435456].gbs; the size of the largest bw.<card>.d2h.dma[].gbs.mean",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "Over the PCIe link",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link",
+   "note": null
+  },
+  {
+   "id": "pcie.staged",
+   "component": "pcie",
+   "topic": "bandwidth",
+   "kind": "measured",
+   "statement": "The path a program takes, the runtime's staged copy (a host memcpy into a CMA bounce buffer, then the DMA), 256 MB: host to device 7.15 / 5.20 / 7.79 GB/s (5.20-7.79), device to host 6.53 / 4.78 / 6.97 GB/s (aifoundry2 / aifoundry3 / aifoundry1-c1). The hosts' own memcpy runs at 17.4 / 9.2 / 21.4 GB/s, and each staged rate is 98-100% of 1/(1/DMA + 1/memcpy): the runtime copies and then transfers, one after the other, so a slow host memcpy (aifoundry3's) cuts the staged rate on the same link to 0.67-0.73 of the other hosts' (host to device).",
+   "value": 7.15,
+   "unit": "GB/s (aifoundry2, host to device)",
+   "source": "docs/reports/data/2026-09-27-pcie/pcie.json: bw.<card>.<h2d|d2h>.staged[bytes=268435456].gbs.mean, hostcopy.<card>[bytes=268435456].gbs.mean; the ratio computed here",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "Over the PCIe link",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link",
+   "note": null
+  },
+  {
+   "id": "pcie.nhalf",
+   "component": "pcie",
+   "topic": "bandwidth",
+   "kind": "measured",
+   "statement": "A DMA-only host-to-device copy reaches half its 256 MB rate at 2.0 / 2.1 / 2.2 MB per copy (aifoundry2 / aifoundry3 / aifoundry1-c1; n½, from the mean over five runs of log2 of the size): smaller copies are dominated by the per-command time.",
+   "value": 2.0,
+   "unit": "MB (aifoundry2)",
+   "source": "docs/reports/data/2026-09-27-pcie/pcie.json: n_half_log2.<card>.h2d_dma.mean (log2 bytes)",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "Over the PCIe link",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link",
+   "note": null
+  },
+  {
+   "id": "pcie.small",
+   "component": "pcie",
+   "topic": "latency",
+   "kind": "measured",
+   "statement": "A 4 KB copy issued after a random 0-1 ms gap takes 377 / 379 / 411 µs on average (377-411 µs; aifoundry2 / aifoundry3 / aifoundry1-c1; the mean over the four copy variants), while 200 queued 4 KB copies take 38 / 13 / 30 µs each (host to device, staged) and a wait on an idle stream 2.6 / 0.4 / 2.3 µs. The time of a lone small copy is the runtime's response polling, not the link.",
+   "value": 377,
+   "unit": "µs (aifoundry2)",
+   "source": "docs/reports/data/2026-09-27-pcie/pcie.json: lat.<card>.sporadic.<variant>.mean_us.mean (averaged over the four), lat.<card>.pipelined_us_per_copy.h2d_staged.mean, lat.<card>.idle_wait_us.mean",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "Over the PCIe link",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link",
+   "note": null
+  },
+  {
+   "id": "pcie.poll",
+   "component": "host",
+   "topic": "latency",
+   "kind": "spec",
+   "statement": "The runtime's response thread polls the device's completion queue, sleeping 50 µs between polls while commands are in flight and 500 µs when none are.",
+   "value": 50,
+   "unit": "µs",
+   "source": "external/et-platform/esperanto-tools-libs/src/ResponseReceiver.cpp:21-22 (kResponsePollingIntervalWithEventsOnFly = 50us, kResponsePollingIntervalNoEventsOnFly = 500us), :62-63",
+   "card": null,
+   "page": "Over the PCIe link",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link",
+   "note": "aifoundry3 runs a patched libetrt.so and aifoundry1 a fork build, so their constants may differ (PREREG.md)."
+  },
+  {
+   "id": "pcie.launch",
+   "component": "host",
+   "topic": "latency",
+   "kind": "measured",
+   "statement": "An empty kernel on all 32 compute shires, launched and waited for: 566 / 556 / 565 µs (556-566 µs) from launch to completion (aifoundry2 / aifoundry3 / aifoundry1-c1); 100 launches queued back to back: 103.6 / 103.7 / 104.1 µs each (103.6-104.1 µs) on 32 shires and 91.2 / 92.2 / 92.4 on one shire. The card's own cost is the queued figure: a lone launch waited for adds 463 / 452 / 461 µs (452-463 µs, each run's difference), most of the runtime's 500 µs idle poll (fact pcie.poll), and a one-shire lone launch takes the same 566 / 556 / 565 µs.",
+   "value": 566,
+   "unit": "µs (aifoundry2)",
+   "source": "docs/reports/data/2026-09-27-pcie/pcie.json: launch.<card>.single_us.\"32\".mean, launch.<card>.b2b_us.\"32\".mean, .b2b_us.\"1\".mean, .single_us.\"1\".mean; predictions[id=P9b].per_card.<card>.value.mean (launch to completion minus back-to-back, per run)",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "Over the PCIe link",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link",
+   "note": null
+  },
+  {
+   "id": "pcie.conc",
+   "component": "pcie",
+   "topic": "bandwidth",
+   "kind": "measured",
+   "statement": "Two host-to-device commands in flight on one stream move 6.09 / 6.09 / 6.03 GB/s (aifoundry2 / aifoundry3 / aifoundry1-c1), half the 12.39 / 12.48 / 12.28 GB/s of one command at a time (two streams: 5.96 / 6.00 / 5.96 GB/s in total); both directions at once, one command each at a time, move 16.97 / 16.89 / 16.92 GB/s together (2 × 64 MB per stream, DMA only).",
+   "value": 16.97,
+   "unit": "GB/s (aifoundry2, both directions)",
+   "source": "docs/reports/data/2026-09-27-pcie/pcie.json: conc.<card>.dma.h2d.agg_gbs.mean (no barrier: both commands of the stream in flight), .\"h2d/ser\" (a barrier on every copy), .\"2xh2d\", .\"h2d+d2h/ser\"",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "Over the PCIe link",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link",
+   "note": null
+  },
+  {
+   "id": "fw.map-match",
+   "component": "mesh",
+   "topic": "placement",
+   "kind": "derived",
+   "statement": "Renamed as the boot firmware renames the shires (NOC_Remap_Shires with its 'No displacement' table, used when no shire is fused off), the firmware's 'default Shire Virtual ID Map, based on the NOC spec' matches the measured map: 496 of 496 pair distances and 32 of 32 cells, with no rotation or mirror. As written, before the renaming, only 111 of 496 pair distances agree (fact L37).",
+   "value": 496,
+   "unit": "pair distances",
+   "source": "docs/reports/data/2026-09-27-chip-diagram/research/firmware_map.json: comment_map_after_remap.pair_distances_equal, .best_symmetry, comment_map_as_written; firmware_map.py beside it; external/et-platform/device-bootloaders/src/ServiceProcessorBL2/include/noc_reconfigure.h:76-82, 398-405; ServiceProcessorBL2/common/main.c:275-286",
+   "card": null,
+   "page": null,
+   "url": null,
+   "note": null
+  },
+  {
+   "id": "fw.grey-cells",
+   "component": "master",
+   "topic": "placement",
+   "kind": "spec",
+   "statement": "In the firmware's maps the four cells that hold no compute shire are: logical (0, 3), shire 32, the master; (5, 3), shire 33, the spare; (0, 4), the PCIe shire ('pcie0' in the bridge map); and (0, 5), the I/O shire ('io0'). On this die view that puts the master in the north cell and the spare in the south one, with PCIe then I/O east of the master.",
+   "value": null,
+   "unit": null,
+   "source": "docs/reports/data/2026-09-27-chip-diagram/research/firmware_map.json: grey_cells; external/et-platform/device-bootloaders/src/ServiceProcessorBL2/include/noc_reconfigure.h:76-90",
+   "card": null,
+   "page": null,
+   "url": null,
+   "note": "To confirm on the cards: time a counter read on shire 32 from each compute shire (the hub's rung exp-mesh-stops)."
+  },
+  {
+   "id": "fw.memshires",
+   "component": "memory shire",
+   "topic": "placement",
+   "kind": "spec",
+   "statement": "The firmware's map puts memory shires mc0-mc3 at logical rows 1-4 on the west (y = -1) and mc4-mc7 at rows 1-4 on the east (y = 6): the DRAM-latency fit's places for the 7 memory shires the fit places on its own, provided the firmware's mcN is the memory shire that PA[8:6] = N selects. With those 7 in place, memory shire 2 has one cell left in the firmware's map as in the fit (fact ms2-forced): the map confirms the frame, not memory shire 2's place independently.",
+   "value": 7,
+   "unit": "memory shires agreeing independently",
+   "source": "docs/reports/data/2026-09-27-chip-diagram/research/firmware_map.json: memshires.firmware_rows, .fit_positions, .agree; noc_reconfigure.h:76-82; docs/reports/data/2026-09-27-chip-diagram/research/layout.json memshires[].tie_break",
+   "card": null,
+   "page": null,
+   "url": null,
+   "note": "Timing a counter read on each memory shire from every compute shire (the hub's rung exp-mesh-stops) would place memory shire 2 directly."
+  },
+  {
+   "id": "die.handedness",
+   "component": "chip",
+   "topic": "placement",
+   "kind": "inferred",
+   "statement": "The die view follows the firmware's NoC-spec drawing and the Programmer's Reference Manual's Fig. 1-3: memory shires 0-3 on the west, PCIe then I/O at the east end of the top row. The published die plot draws I/O then PCIe, its mirror image; no document in the open drop says which handedness the silicon has.",
+   "value": null,
+   "unit": null,
+   "source": "docs/reports/data/2026-09-27-chip-diagram/research/firmware_map.json; fact L24 (PRM Fig. 1-3 against the die plot)",
+   "card": null,
+   "page": null,
+   "url": null,
+   "note": null
+  },
+  {
+   "id": "sc.l3-miss",
+   "component": "l3",
+   "topic": "path",
+   "kind": "spec",
+   "statement": "An L3 read from another shire enters the home shire's cache through its L3 slave port and moves down the pipeline as L3_Read and L3_Fill: a miss goes out the to_sys mesh port to memory, the data comes back as the L3 fill, and the home answers the requester. The order memory shire, L3 home, requester is the specification's; which way each leg turns on the mesh is not documented.",
+   "value": null,
+   "unit": null,
+   "source": "external/core-et/docs/CORE-ET-Shire-Cache-Specification.pdf, pdf p.55 (§3.2.2 'L3 REQ_Read': 'They are received from the L3_slave and move down the pipeline as L3_Read and L3_Fill. Misses and victims are directed to the to_sys mesh port.', Figure 14)",
+   "card": null,
+   "page": null,
+   "url": null,
+   "note": null
+  },
+  {
+   "id": "tl.one",
+   "component": "l1scp",
+   "topic": "latency",
+   "kind": "measured",
+   "statement": "One minion's TensorLoad of 16 lines (1 KB) into its L1 scratchpad: 160.4 cycles from the L2 and 160.1 from the own scratchpad, on all three cards; 4 lines from the L2 take 41.9 cycles. From DRAM, 16 lines take 748-751 cycles on passes 2 and 3 and 1,132-1,133 on the first pass.",
+   "value": 160.4,
+   "unit": "cycles",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/lat.json: [item=LAT-S2].per_card.<card>.pass_means.l216, .scp16, .l24 (mean); .passes[].dram16",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "The Horace experiment",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment",
+   "note": null
+  },
+  {
+   "id": "tl.all",
+   "component": "l1scp",
+   "topic": "bandwidth",
+   "kind": "measured",
+   "statement": "All 1,024 minions tensor-loading at once: 256.0 cycles per 16-line load from the L2, and 7,994-8,037 cycles from DRAM (aifoundry2 / aifoundry3 / aifoundry1-c1: 8,037 / 7,994 / 8,021), where the memory shires set the pace.",
+   "value": 256.0,
+   "unit": "cycles",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/lat.json: [item=LAT-S3].per_card.<card>.pass_means.l2_n200000, .dram_all16 (mean)",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "The Horace experiment",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment",
+   "note": null
+  },
+  {
+   "id": "tfma.tenb",
+   "component": "tensor",
+   "topic": "latency",
+   "kind": "measured",
+   "statement": "A 16×16×16 fp32 TensorFMA with B streamed through TenB instead of held in the L1 scratchpad: 529.05-529.09 cycles on all three cards (A in the L1 scratchpad).",
+   "value": 529.05,
+   "unit": "cycles",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/lat.json: [item=LAT-S1].per_card.<card>.passes[].\"529.1\" (each pass's interval)",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "The Horace experiment",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment",
+   "note": null
+  },
+  {
+   "id": "mm.reload",
+   "component": "tensor",
+   "topic": "compute",
+   "kind": "derived",
+   "statement": "The matmul benchmark loads a new A (16 lines from the shire's L2 into one of two L1-scratchpad buffers) and streams B through TenB before every TensorFMA, issuing the next op's loads while the current FMA runs, and it takes 529.001 cycles per op on all three cards: no more than the TensorFMA alone with B through TenB (529.05-529.09 cycles), so the next A's load of about 160 cycles is hidden behind the FMA.",
+   "value": 529.001,
+   "unit": "cycles per op",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json: [item=MMB-a].per_card.<card>.\"fp32-tensor-L2\".cycles_per_op_mean_based; docs/reports/data/2026-09-25-claims-v3/results/lat.json: [item=LAT-S1] \"529.1\"; kernels/mmbench/mmbench.cc:3-9, 78-86",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "Matmul efficiency",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency",
+   "note": "A version that waits for each load before its FMA was never run; 160 + 529 cycles for it would be a derived figure, not a measured one."
+  },
+  {
+   "id": "mm.dram",
+   "component": "tensor",
+   "topic": "compute",
+   "kind": "measured",
+   "statement": "The same benchmark with 64 private tiles per minion, so that every load comes from DRAM: 15,042-15,663 cycles per op and 0.309-0.312 TFLOP/s on the three cards, about 30 times slower than with the tiles in the L2.",
+   "value": 0.31,
+   "unit": "TFLOP/s",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json: [item=MMB-a].per_card.<card>.\"fp32-tensor-DRAM\".cycles_per_op_mean_based, .info_tflops_range; tools/claims-v3/mmb/mmbench_power_v3.py:65",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "Matmul efficiency",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency",
+   "note": null
+  },
+  {
+   "id": "mm.w-data",
+   "component": "board",
+   "topic": "power",
+   "kind": "derived",
+   "statement": "The Horace runs of the fp32 matmul, 9.18 TFLOP/s on every data set (timed from the host over the whole run, its launches included), launched at 80.6-81.0 °C on aifoundry2: 38.29 W on zeros, 46.73 W on ones and 63.40 W on random data, the board's power at the launch temperature: its reading in seconds 1-3 of the run (38.29, 47.56 and 65.80 W) less the leakage that the run's own heating had added by then, at the fitted leakage slope. Idle before each run: 36.3 W.",
+   "value": 63.4,
+   "unit": "W at the launch temperature (random data)",
+   "source": "docs/reports/data/2026-09-21-horace-aifoundry2/horace3.json: patterns.<zeros|ones|randn>.p80, .p_early, .p_before, .tflops, .start_temp; tools/ettelem/analyze_horace_strict.py:105-116 (tflops over t_start of the first launch to t_end of the last), :141 and :275 (p80 = p_early - leak x (t_early - launch temperature))",
+   "card": "aifoundry2",
+   "page": "The Horace experiment",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment",
+   "note": "Leakage-corrected, not a raw board reading: the raw mean board power over the random-data runs was 66.73 W."
+  },
+  {
+   "id": "mm.w-3cards",
+   "component": "board",
+   "topic": "power",
+   "kind": "measured",
+   "statement": "The same matmul on the three cards (ABL-T8, watts above zeros at the board): ones 8.52 [7.70, 9.34], 8.09 [7.33, 8.86], 9.00 [7.33, 10.66] W and random data 25.33 [24.49, 26.17], 23.91 [23.51, 24.30], 26.66 [24.85, 28.48] W (aifoundry2 / aifoundry3 / aifoundry1-c1; 99% intervals): ones cost 8.1-9.0 W more than zeros and random data 23.9-26.7 W more. The registered test passed on aifoundry2 and aifoundry3; aifoundry1-c1 is reported against aifoundry2's registered values.",
+   "value": 25.33,
+   "unit": "W (aifoundry2, random - zeros)",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/abla.json: [item=ABL-T8].per_card.<card>.subtests[].ci (point, lo, hi); aifoundry1-c1: .per_card.aifoundry1-c1.vs_aifoundry2_values.subtests[]; .all_cards.per_card (outcomes)",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "The Horace experiment",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment",
+   "note": null
+  },
+  {
+   "id": "heat.race",
+   "component": "board",
+   "topic": "thermal",
+   "kind": "measured",
+   "statement": "From a launch at 80.9-81.7 °C to the firmware's 90 °C cap on aifoundry2, the same matmul on all 1,024 minions: random data 19.1-26.3 s (4 runs), ones 107.1-166.9 s (3 runs); zeros never reached the cap in 602 s (3 runs).",
+   "value": 19.1,
+   "unit": "s (random data)",
+   "source": "docs/reports/data/2026-09-21-horace-aifoundry2/long.json: runs[] with minions = 1024 and values = randn, ones, zeros: .dur, .reason (cap: reached 90 °C; time: the run ended first), .t_before",
+   "card": "aifoundry2",
+   "page": "The Horace experiment",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment",
+   "note": "One card: the three-card version (E47) was registered and not run."
+  },
+  {
+   "id": "heat.fewer",
+   "component": "board",
+   "topic": "thermal",
+   "kind": "measured",
+   "statement": "Random data on fewer minions, the same launch and cap on aifoundry2: 768 minions 35.4 s, 512 minions 84.1 s, 384 minions 118.9 s, 256 minions 276.3-314.9 s, 128 never (602 s).",
+   "value": null,
+   "unit": "s",
+   "source": "docs/reports/data/2026-09-21-horace-aifoundry2/long.json: runs[] with values = randn and minions = 768, 512, 384, 256, 128: .dur, .reason",
+   "card": "aifoundry2",
+   "page": "The Horace experiment",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment",
+   "note": null
+  },
+  {
+   "id": "heat.leak",
+   "component": "board",
+   "topic": "thermal",
+   "kind": "derived",
+   "statement": "At 80 °C the card's idle power rises 0.65 W per °C (the fitted leakage law's slope, aifoundry2): a hotter die leaks more, which heats it further.",
+   "value": 0.65,
+   "unit": "W/°C",
+   "source": "docs/reports/data/2026-09-21-horace-aifoundry2/model.json: power.lambda_at_80",
+   "card": "aifoundry2",
+   "page": "The Horace experiment",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment",
+   "note": null
+  },
+  {
+   "id": "hot.fair",
+   "component": "uc",
+   "topic": "sync",
+   "kind": "measured",
+   "statement": "All 32 shires hammering one global atomic homed in shire 0 (32 minions each): every shire gets an even share, the host shire 1.004 / 1.004 / 1.004 of it (1.004) and the lowest 0.998 / 0.998 / 0.999 (0.998-0.999; aifoundry2 / aifoundry3 / aifoundry1-c1), at 10.00 cycles per atomic.",
+   "value": 1.004,
+   "unit": "of an even share",
+   "source": "docs/reports/data/2026-09-22-hotline-aifoundry2/hotline.json: fairness[card=<card>, home=\"0\", per_shire=32].host_share, .min_share, .cycles_per_op",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "One hot line stops a shire",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line",
+   "note": null
+  },
+  {
+   "id": "hot.cliff",
+   "component": "uc",
+   "topic": "sync",
+   "kind": "measured",
+   "statement": "The host shire's minions read their own scratchpad while the same number of minions in one other shire hammer one scratchpad word in the host shire: with 21 of each the host keeps 95.6 / 95.7 / 95.6% of its rate alone (aifoundry2 / aifoundry3 / aifoundry1-c1, mean of 3 passes; 95.5-95.7% over every pass), and with 22, 23 or 24 it stops: 0.02% on every card. An uncontended remote atomic takes 216.2 / 216.3 / 216.6 cycles round trip.",
+   "value": 95.6,
+   "unit": "% of the rate alone (21 requesters, aifoundry2)",
+   "source": "docs/reports/data/2026-09-25-claims-v3/results/lat.json: [item=LAT-H].per_card.<card>.sub.P2_edge.passes[].host_over_aloneN (keys 21-24); docs/reports/data/2026-09-22-hotline-aifoundry2/hotline.json: context.remote_atomic_latency_by_card",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "page": "One hot line stops a shire",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line",
+   "note": null
+  },
+  {
+   "id": "ar.tree",
+   "component": "neigh",
+   "topic": "sync",
+   "kind": "spec",
+   "statement": "The allreduce benchmark's tree: at level h, a minion whose ID has bit h as its lowest set bit sends its partial sum to the minion with that bit cleared (TensorReduce), levels 0 to 9, and the result comes back down the same tree (TensorBroadcast). Levels 0-2 join a neighbourhood's 8 minions along the fast network's edges, levels 3-4 its 4 neighbourhoods, levels 5-9 the 32 shires, rooted at minion 0 of shire 0.",
+   "value": 10,
+   "unit": "levels",
+   "source": "workloads/nocbench/kernel/nocbench.c:279-288 (tree: TensorReduce for levels 0..top, TensorBroadcast back), :516-521 ('Minion m receives at levels below ctz(m) and sends at ctz(m); the root (m = 0) receives at every level'); fact neigh.fln-edges for the tree edges",
+   "card": null,
+   "page": "On-chip communication",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication",
+   "note": null
+  }
+ ],
+ "num": [
+  [
+   "pcie_neg",
+   "pcie.negotiated",
+   16.0,
+   "16.0 GT/s x8",
+   ""
+  ],
+  [
+   "pcie_link",
+   "pcie.negotiated",
+   15.75,
+   "15.75 GB/s",
+   ""
+  ],
+  [
+   "pcie_h2d",
+   "pcie.h2d",
+   12.6,
+   "12.46-12.60",
+   "GB/s"
+  ],
+  [
+   "pcie_h2d_pct",
+   "pcie.h2d",
+   80,
+   "79-80%",
+   ""
+  ],
+  [
+   "pcie_d2h",
+   "pcie.d2h",
+   10.54,
+   "10.41-10.54",
+   "GB/s"
+  ],
+  [
+   "pcie_d2h_pct",
+   "pcie.d2h",
+   67,
+   "66-67%",
+   ""
+  ],
+  [
+   "pcie_stg_h",
+   "pcie.staged",
+   7.15,
+   "7.15 / 5.20 / 7.79",
+   "GB/s"
+  ],
+  [
+   "pcie_stg_rng",
+   "pcie.staged",
+   7.79,
+   "5.20-7.79",
+   "GB/s"
+  ],
+  [
+   "pcie_memcpy",
+   "pcie.staged",
+   17.4,
+   "17.4 / 9.2 / 21.4",
+   "GB/s"
+  ],
+  [
+   "pcie_nhalf",
+   "pcie.nhalf",
+   2.0,
+   "2.0 / 2.1 / 2.2",
+   "MB"
+  ],
+  [
+   "pcie_4k_rng",
+   "pcie.small",
+   411,
+   "377-411 µs",
+   ""
+  ],
+  [
+   "pcie_4k",
+   "pcie.small",
+   411,
+   "377 / 379 / 411",
+   ""
+  ],
+  [
+   "pcie_q",
+   "pcie.small",
+   38,
+   "38 / 13 / 30",
+   ""
+  ],
+  [
+   "poll50",
+   "pcie.poll",
+   50,
+   "50 µs",
+   ""
+  ],
+  [
+   "poll500",
+   "pcie.poll",
+   500,
+   "500 µs",
+   ""
+  ],
+  [
+   "pcie_launch",
+   "pcie.launch",
+   566,
+   "566 / 556 / 565",
+   ""
+  ],
+  [
+   "pcie_launch_rng",
+   "pcie.launch",
+   566,
+   "556-566 µs",
+   ""
+  ],
+  [
+   "pcie_b2b_rng",
+   "pcie.launch",
+   104.1,
+   "103.6-104.1 µs",
+   ""
+  ],
+  [
+   "pcie_b2b",
+   "pcie.launch",
+   103.6,
+   "103.6 / 103.7 / 104.1",
+   ""
+  ],
+  [
+   "pcie_wait_rng",
+   "pcie.launch",
+   463,
+   "452-463 µs",
+   ""
+  ],
+  [
+   "pcie_two",
+   "pcie.conc",
+   6.09,
+   "6.09 / 6.09 / 6.03",
+   "GB/s"
+  ],
+  [
+   "pcie_ser",
+   "pcie.conc",
+   12.39,
+   "12.39 / 12.48 / 12.28",
+   "GB/s"
+  ],
+  [
+   "pcie_dup",
+   "pcie.conc",
+   16.97,
+   "16.97 / 16.89 / 16.92",
+   "GB/s"
+  ],
+  [
+   "fw_pairs",
+   "fw.map-match",
+   496,
+   "496 of 496",
+   ""
+  ],
+  [
+   "tl_l2",
+   "tl.one",
+   160.4,
+   "160.4",
+   "cycles"
+  ],
+  [
+   "tl_dram",
+   "tl.one",
+   751,
+   "748-751",
+   "cycles"
+  ],
+  [
+   "tl_all_l2",
+   "tl.all",
+   256.0,
+   "256.0",
+   "cycles"
+  ],
+  [
+   "tl_all_dr",
+   "tl.all",
+   8037,
+   "7,994-8,037",
+   "cycles"
+  ],
+  [
+   "tfma_tenb",
+   "tfma.tenb",
+   529.05,
+   "529.05-529.09",
+   "cycles"
+  ],
+  [
+   "mm_op",
+   "mm.reload",
+   529.001,
+   "529.001",
+   "cycles per op"
+  ],
+  [
+   "mm_dram_op",
+   "mm.dram",
+   15663,
+   "15,042-15,663",
+   "cycles per op"
+  ],
+  [
+   "mm_dram_tf",
+   "mm.dram",
+   0.312,
+   "0.309-0.312",
+   "TFLOP/s"
+  ],
+  [
+   "w_zeros",
+   "mm.w-data",
+   38.29,
+   "38.29",
+   "W"
+  ],
+  [
+   "w_ones",
+   "mm.w-data",
+   46.73,
+   "46.73",
+   "W"
+  ],
+  [
+   "w_randn",
+   "mm.w-data",
+   63.4,
+   "63.40",
+   "W"
+  ],
+  [
+   "w_idle",
+   "mm.w-data",
+   36.3,
+   "36.3",
+   "W"
+  ],
+  [
+   "w_tflops",
+   "mm.w-data",
+   9.18,
+   "9.18",
+   "TFLOP/s"
+  ],
+  [
+   "w_od_a2",
+   "mm.w-3cards",
+   8.52,
+   "8.52",
+   "W"
+  ],
+  [
+   "w_od_a3",
+   "mm.w-3cards",
+   8.09,
+   "8.09",
+   "W"
+  ],
+  [
+   "w_od_a1",
+   "mm.w-3cards",
+   9.0,
+   "9.00",
+   "W"
+  ],
+  [
+   "w_rd_a2",
+   "mm.w-3cards",
+   25.33,
+   "25.33",
+   "W"
+  ],
+  [
+   "w_rd_a3",
+   "mm.w-3cards",
+   23.91,
+   "23.91",
+   "W"
+  ],
+  [
+   "w_rd_a1",
+   "mm.w-3cards",
+   26.66,
+   "26.66",
+   "W"
+  ],
+  [
+   "w_ones_d",
+   "mm.w-3cards",
+   8.5,
+   "8.1-9.0",
+   "W"
+  ],
+  [
+   "w_rand_d",
+   "mm.w-3cards",
+   25.3,
+   "23.9-26.7",
+   "W"
+  ],
+  [
+   "race_rand",
+   "heat.race",
+   19.1,
+   "19.1-26.3",
+   "s"
+  ],
+  [
+   "race_ones",
+   "heat.race",
+   107.1,
+   "107.1-166.9",
+   "s"
+  ],
+  [
+   "race_zero",
+   "heat.race",
+   602,
+   "602",
+   "s"
+  ],
+  [
+   "race_768",
+   "heat.fewer",
+   35.4,
+   "35.4",
+   ""
+  ],
+  [
+   "race_512",
+   "heat.fewer",
+   84.1,
+   "84.1",
+   ""
+  ],
+  [
+   "race_384",
+   "heat.fewer",
+   118.9,
+   "118.9",
+   ""
+  ],
+  [
+   "race_256",
+   "heat.fewer",
+   276.3,
+   "276.3-314.9",
+   ""
+  ],
+  [
+   "race_128",
+   "heat.fewer",
+   601.7,
+   "never",
+   ""
+  ],
+  [
+   "leak80",
+   "heat.leak",
+   0.65,
+   "0.65 W per °C",
+   ""
+  ],
+  [
+   "hot_host",
+   "hot.fair",
+   1.004,
+   "1.004 / 1.004 / 1.004",
+   ""
+  ],
+  [
+   "hot_host_rng",
+   "hot.fair",
+   1.004,
+   "1.004",
+   ""
+  ],
+  [
+   "hot_min_rng",
+   "hot.fair",
+   0.998,
+   "0.998-0.999",
+   ""
+  ],
+  [
+   "hot_min",
+   "hot.fair",
+   0.998,
+   "0.998 / 0.998 / 0.999",
+   ""
+  ],
+  [
+   "hot21",
+   "hot.cliff",
+   95.6,
+   "95.6 / 95.7 / 95.6",
+   "%"
+  ],
+  [
+   "hot21r",
+   "hot.cliff",
+   95.7,
+   "95.5-95.7%",
+   ""
+  ],
+  [
+   "hot22",
+   "hot.cliff",
+   0.02,
+   "0.02%",
+   ""
+  ]
+ ]
+}

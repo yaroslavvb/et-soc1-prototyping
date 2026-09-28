@@ -2,9 +2,9 @@
 
 The work in this directory was driven by a sequence of requests from the repo owner. Q1–Q42 come from one long
 session on aifoundry2 (18–24 September 2026); Q43 comes from a separate session and is listed in the order it was
-recorded; Q44–Q57 are the requests of 25–27 September, in the order of their first commit. Each is recorded here
+recorded; Q44–Q58 are the requests of 25–27 September, in the order of their first commit. Each is recorded here
 because scope decisions explain why some questions were answered thoroughly and others were left open. Cite as
-**Q1**...**Q57**.
+**Q1**...**Q58**.
 
 | ID | Date | Request (condensed) | Produced |
 |---|---|---|---|
@@ -65,6 +65,7 @@ because scope decisions explain why some questions were answered thoroughly and 
 | Q55 | 09-26 | Go through the repository and the pages the hub indexes: fix inconsistencies, find chances for compelling visualizations and for being more concise; mark anything that needs a page update as a TODO for the next pass | The review of eight AI agents: the repository fixes and [`../reports/TODO.md`](../reports/TODO.md) (`aadd1f5`); its chart items built in the chart pass, 17 pages (`6f207ce`–`974d120`, recorded in `4f748a1`); [04-artifacts.md](04-artifacts.md), "The chart pass" |
 | Q56 | 09-26 | *(mid-task, Q55)* The pages are too long to scroll: "the important things should show, and more detail hidden under collapsibles" | `details.more` and `CK.reveal` in the toolkit, and the detail of 20 pages folded (`51720f3`–`a7478c9`, recorded in `0dfe668`); [04-artifacts.md](04-artifacts.md), "Collapsible depth" |
 | Q57 | 09-27 | Make sure the verification campaign is complete and the documents are updated accordingly (the live hub still showed "Status before the version-3 campaign") | The review's branch (Q55, Q56) merged into the version-3 pages; E48 registered; the status in `AGENT.md`, `getting-started.md` and this directory; E48 (gathers and scatters) inserted in the energy manual, the memory hierarchy, the influence page and the hub (Q52) |
+| Q58 | 09-27 | Feedback on the interactive chip diagram (published that day, `83c3bf9`): measure the PCIe link it called "not measured", on a page of its own if need be; make the flows' camera smooth; make F work inside spacesheep (and tell spacesheep); Space must pause the zoom too, with a control to step and scrub the stages; say what each inferred or dashed part needs, and collect in the hub's limits of observability everything to ask the team for; let the reader zoom back in; find and add what is not visualized yet | E50 (the host link on three cards) and its page "Over the PCIe link" (`docs/reports/2026-09-27-et-soc1-pcie-link.html`, not yet published); the diagram's second version (the stage bar, the scale control, the paused camera, four new flows from data already in the repository, the asks: `docs/reports/data/2026-09-27-chip-diagram/research/asks.json`); the hub's rungs 21–36 ([04-artifacts.md](04-artifacts.md), "Pages added on 27 September") |
 
 ## Scope decisions worth remembering
 

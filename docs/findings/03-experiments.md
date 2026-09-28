@@ -2,13 +2,14 @@
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E49**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E50**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
 check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
-same three cards after each card's campaign blocks (26 September), and E49 a card-free test of the runtime's log-level race.
+same three cards after each card's campaign blocks (26 September), E49 a card-free test of the runtime's log-level race,
+and E50 the host link and the launch path timed on the three cards (27 September).
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
-(aifoundry2, aifoundry3 or both; E35–E46 and E48 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
+(aifoundry2, aifoundry3 or both; E35–E46, E48 and E50 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
 source at `353f20e`; the cards' own trace strings match an older build (before et-platform commit `60b40c10f`, 24 Sep
 2024; both cards report release 1.3.1), so which commit the cards run is not established (R3). Unless an entry says
 otherwise, the minion clock was a steady **600 MHz** at **516–518 mV** on aifoundry2 (521–523 mV on aifoundry3),
@@ -1538,6 +1539,43 @@ gather/scatter host (E48) is the first card program built with it.
 04:48–06:13) with no crash and no core dump, where the unfixed binaries' rate of about 1 in 100 predicts 6.4
 (Poisson chance of none: 0.2%). aifoundry2's and aifoundry3's other host builds were rebuilt with the fix once
 their queues had ended.
+
+## E50 — The host link and the launch path on three cards (2026-09-27, 14:24–15:13 PDT, three cards)
+
+**Question (Q58):** what does the PCIe Gen4 x8 link between the host and the card deliver through the runtime API,
+which the chip diagram quoted only by its figure (15.75 GB/s per direction, "not measured"), and what does a copy
+or an empty kernel cost from issue to completion?
+**Method:** a new probe, `workloads/pciebench` (a host program and an empty kernel, runtime API only), run by
+`workloads/pciebench/run_pcie.sh` under `tools/claims-v3/lib.sh`'s checks, five runs per card 12 minutes apart
+(`schedule.sh 1 5` from aifoundry2), each run six processes under `timeout 10` with the card's lock held:
+`info`, `bw` (4 KB to 256 MB, host to card and back, staged and DMA-only, the four variants shuffled every repeat),
+`lat` (64 B and 4 KB round trips back to back in a fixed order, 4 KB copies after random 0–1 ms gaps in a shuffled
+order, 200 queued copies, an idle-stream wait), `launch` (an empty kernel on 32 and on 1 shire, waited for and
+queued), `conc` (two copies in flight, two streams, both directions, with and without a barrier) and `hostcopy`.
+Thirteen predictions (P1–P13) were written before any timed transfer (`PREREG.md`, sha256 `7695bf0a…`, 14:19);
+a pilot on aifoundry2 (14:21) and one on each card (14:23–14:24) are kept and left out. Reduced by
+`workloads/pciebench/reduce_pcie.py`: a run's value is the median of its repeats, a card's the mean of its five
+runs with a 99% t-interval.
+**Result** (`docs/reports/data/2026-09-27-pcie/pcie.json`; aifoundry2 / aifoundry3 / aifoundry1-c1): the link
+trained at 16.0 GT/s x8 on every card in every run. DMA-only, 256 MB: host to card 12.47 / 12.60 / 12.46 GB/s
+(79–80% of 15.75), card to host 10.54 / 10.41 / 10.41 GB/s. A program's staged copy: 7.15 / 5.20 / 7.79 GB/s to the
+card, 98–100% of 1/(1/DMA + 1/memcpy) with the hosts' own memcpy at 17.4 / 9.2 / 21.4 GB/s: the runtime copies,
+then transfers. n½ (DMA-only, to the card) 2.0–2.2 MB. An empty kernel on 32 shires: 566 / 556 / 565 µs launched and
+waited for, 103.6 / 103.7 / 104.1 µs each queued; the difference, 463 / 452 / 461 µs, is mostly the runtime's
+500 µs idle poll (`ResponseReceiver.cpp:21-22`). A 4 KB copy after a random gap: 377 / 379 / 411 µs on average.
+Two host-to-card DMA commands in flight move 0.49 times one at a time on every card; both directions at once,
+1.35–1.38 times the faster one. Predictions: 31 verdicts passed, 8 failed (P3: card to host is the slower
+direction; P4a/P4b on aifoundry3, whose memcpy is slower than the link; P11, the registered configuration kept two
+commands in flight), 5 inconclusive (P6, P7).
+**Caveats:** the runtime differs by host (stock, patched, fork), so the latency figures follow each build; the
+DMA-only figures agree across cards within 0.8%. The back-to-back round trips (section 3's table, P6, P7) kept a
+fixed variant order, so each variant's time reflects its place in that order's polling mode. Why two concurrent
+host-to-card DMA commands halve the rate, why card to host dips at 64 MB, and why aifoundry3's host memcpy is about
+half the others' were not established (the hub's rungs ask-pcie-dma, ask-lab-root and exp-pcie-concurrency). No
+process held a card for more than 2.1 s, but the card's lock was held for a whole run of six processes, 12.8–14.9 s
+(`hosts.<card>.run_times_ms`), longer than the lab's 10 s rule for holding a device, which each process kept.
+**Artifact:** the page "Over the PCIe link" (`docs/reports/2026-09-27-et-soc1-pcie-link.html`, not yet published)
+and the chip diagram's PCIe shire, Host panel and flow 6.
 
 ## A note on E10, re-analysed for Q20
 

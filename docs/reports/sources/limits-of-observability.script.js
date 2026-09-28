@@ -1,4 +1,6 @@
-const STATUS = {works_now: 'works now', needs_tooling: 'tooling', needs_fw_change: 'firmware', research_only: 'research', impossible_on_silicon: 'not on silicon'};
+const STATUS = {works_now: 'works now', needs_tooling: 'tooling', needs_fw_change: 'firmware', research_only: 'research', impossible_on_silicon: 'not on silicon', ask_team: 'ask the team'};
+/* 'ask the team' is used only by §5's rungs (documents and interfaces to ask AI Foundry for); §2's instruments never carry it */
+const LADDER_STATUS = Object.keys(STATUS).filter(s => s !== 'ask_team');
 const CHECK = {confirmed: 'confirmed by two reviewing agents', disputed: 'reviewing agents corrected details; the row reflects them', unverified: 'not reviewed', changed: 'rewritten after review', refuted: 'refuted'};
 const CHECK_SYM = {confirmed: '✓', disputed: '±', unverified: '·', changed: '†', refuted: '✗'};
 const REPO = 'https://github.com/yaroslavvb/et-soc1-prototyping/';
@@ -176,7 +178,7 @@ const GRAN = (function () {
   }
   function dim() { groups.forEach((g, i) => { g.style.opacity = filter === 'all' || rows[i].status === filter ? 1 : 0.15; }); }
   fr = CK.frame('gran', {height: W => T + rows.length * rowH(W) + B, minW: 300, maxW: 1288, label: 'Time resolution of each instrument', draw});
-  document.getElementById('gran-leg').innerHTML = Object.keys(STATUS).map(chip).join(' ') +
+  document.getElementById('gran-leg').innerHTML = LADDER_STATUS.map(chip).join(' ') +
     ' <span class="small">· rows without a single time step (per-launch counts, whole-program traces, one-shot dumps, RTL simulation, per-shire attribution) are in the table only</span>';
   return {filter(k) { filter = k; dim(); }};
 })();
@@ -841,12 +843,15 @@ function fitOf(card, line) {
 (function () {
   let filter = 'all';
   const fbox = document.getElementById('impfilters'), t = document.getElementById('imptab');
-  const opts = [['all', 'all rungs'], ['done', 'done'], ['works_now', 'works now'], ['needs_tooling', 'tooling or lab hardware'], ['needs_fw_change', 'firmware'], ['research_only', 'research'], ['impossible_on_silicon', 'not on silicon']];
+  const opts = [['all', 'all rungs'], ['done', 'done'], ['works_now', 'works now'], ['needs_tooling', 'tooling or lab hardware'], ['needs_fw_change', 'firmware'], ['research_only', 'research'], ['impossible_on_silicon', 'not on silicon'], ['ask_team', 'ask the team']];
   let group = null;
+  /* a rung with an id is a link target (the chip diagram links its dashed parts to #ask-… and #exp-… rows); r.diagram
+     names the part of the chip diagram the rung would settle */
   t.innerHTML = '<thead><tr><th style="width:23%">Rung</th><th style="width:28%">What it adds</th><th style="width:15%">Cost</th><th style="width:24%">What changes in the numbers</th><th style="width:10%">Status</th></tr></thead><tbody>' +
     D.improvements.map((r, i) => { const g = r.group !== group ? `<tr class="grp"><td colspan="5"><b>${esc(r.group)}</b></td></tr>` : ''; group = r.group;
       const cap = !r.adds || /\.$/.test(r.adds), see = r.row ? `${r.adds ? ' ' : ''}<a href="#${ladId(r.row)}" class="seerow" data-row="${esc(r.row)}">${cap ? 'See' : 'see'} §2: ${esc(r.row)}</a>` : '';
-      return g + `<tr data-i="${i}"><td class="lvl">${r.rung}. ${esc(r.what)}${r.done ? ' <span class="verif confirmed">done</span>' : ''}</td><td>${esc(fill(r.adds))}${see}</td><td class="small">${esc(r.cost)}</td><td>${esc(fill(r.effect))}</td><td class="inl">${chip(r.status)}</td></tr>`; }).join('') + '</tbody>';
+      const dg = r.diagram ? ` <a href="${PAGES}et-soc1-chip-diagram#honest">Chip diagram: ${esc(r.diagram)}</a>.` : '';
+      return g + `<tr data-i="${i}"${r.id ? ` id="${esc(r.id)}"` : ''}><td class="lvl">${r.rung}. ${esc(r.what)}${r.done ? ' <span class="verif confirmed">done</span>' : ''}</td><td>${esc(fill(r.adds))}${see}${dg}</td><td class="small">${esc(r.cost)}</td><td>${esc(fill(r.effect))}</td><td class="inl">${chip(r.status)}</td></tr>`; }).join('') + '</tbody>';
   t.querySelectorAll('a.seerow').forEach(a => a.addEventListener('click', ev => { ev.preventDefault(); goRow(a.dataset.row); }));
   CK.stackTable(t);
   const sorter = sortGrouped(t, {filter: true, filterLabel: 'Filter rungs', noun: 'rungs'});
@@ -857,6 +862,16 @@ function fitOf(card, line) {
     t.querySelectorAll('tr[data-i]').forEach(tr => { const r = D.improvements[+tr.dataset.i]; tr.classList.toggle('st-off', !(filter === 'all' || (filter === 'done' ? r.done : r.status === filter))); });
     sorter.fix();
   }; });
+  /* a link to a rung (#ask-noc-docs, from the chip diagram) shows every rung, then centres and flashes that row */
+  const goRung = () => {
+    const id = decodeURIComponent(location.hash.slice(1)), tr = id && t.querySelector(`tr[data-i][id="${id.replace(/["\\]/g, '')}"]`);
+    if (!tr) return;
+    if (tr.classList.contains('st-off')) fbox.querySelector('button[data-k="all"]').click();
+    tr.scrollIntoView({block: 'center', behavior: CK.reduced ? 'auto' : 'smooth'});
+    tr.classList.add('flash'); setTimeout(() => tr.classList.remove('flash'), 1800);
+  };
+  addEventListener('hashchange', goRung);
+  if (document.readyState === 'complete') goRung(); else addEventListener('load', goRung);
 })();
 
 /* ---------- the sessions table (§7) ---------- */

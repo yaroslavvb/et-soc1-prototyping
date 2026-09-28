@@ -196,6 +196,19 @@ None has an A-number yet.
 | aifoundry1 is fixed: the fix log, and who should delete what on the nearly full disk (`7aded23`, `f44baa4`) | `docs/reports/2026-09-25-aifoundry1-fix.html` (standalone) | [aifoundry1-fix](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix) `31e35ba7-36f4-486e-b6f3-687f7c7ad3a0` | public |
 | A report on the lab's problems, for the lab lead | none: kept out of this public repository (`38f6b02`) | `6c75b258-53fe-45fe-b2cf-11f8572ac2c3` (MIRROR.md, "Public, not mirrored") | public since 26 September (the owner's decision); not mirrored |
 
+## Pages added on 27 September
+
+No A-number yet. The build commands are in [`../reports/MIRROR.md`](../reports/MIRROR.md), "How each page is built".
+
+| Page | Source in this repository | Space | Visibility (2026-09-27) |
+|---|---|---|---|
+| The ET-SoC-1, interactively: an animated chip schematic with clickable parts, flows and a presenting tour; every number a sourced fact (`83c3bf9`). **Second version** (Q58, not yet deployed): a stage bar with the Left and Right arrows, Space pausing the camera too, the scale control for zooming back in, the PCIe link as measured in E50, the die view taken from the firmware's NoC-spec map, four new flows (the matmul's data flow, watts by data, the hot line, the allreduce tree) drawn from measurements already in the repository, and for each inferred or dashed part what would settle it, linked to the hub's rungs 21–36 | `docs/reports/sources/chip-diagram.*`, `docs/reports/data/2026-09-27-chip-diagram/` (`build_facts.py`, `research/`) | [et-soc1-chip-diagram](https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram) `6cfdea5c-a598-438e-bd1a-613093ede523` | public (the first version) |
+| Over the PCIe link: what the host gets. The host link through the runtime on three cards: bandwidth from 4 KB to 256 MB, staged and DMA-only, small copies and the runtime's polling, launches, several transfers at once, against predictions written before the runs (E50) | `docs/reports/sources/pcie-link.*`, `docs/reports/data/2026-09-27-pcie/pcie.json` (`workloads/pciebench/reduce_pcie.py`) | not yet deployed; the diagram and the hub link `et-soc1-pcie-link`, so it must be published first and public | — |
+
+The hub (A2) gained §5's rungs 21–36 the same day: the documents, interfaces and readings to ask AI Foundry (Ainekko)
+and the lab for, and the experiments on the cards, that would settle what the chip diagram infers and what the PCIe
+page left open (`docs/reports/sources/limits-of-observability.data.json`, `.improvements`, rows with an `id`).
+
 ## The visualization pass (26 September)
 
 Charts and controls added to 13 pages (and a link on the L2 brief), with the toolkit's card registry and sortable tables; every new chart takes

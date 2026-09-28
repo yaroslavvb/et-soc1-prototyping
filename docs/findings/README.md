@@ -112,6 +112,12 @@ Read [Terms](#terms) first.
    whole lines); a scatter keeps pace from L1 and falls to 0.42 G/s from DRAM. All 159 verify launches per card were
    exact. On the pages since 27 September: the energy manual (§3.1, §4.3, §4.4, §6), memory hierarchy ("Irregular
    access"), influence functions (S3) and the hub's chart of events. → [03-experiments.md](03-experiments.md), E48
+16. **The host link.** Through the runtime, the PCIe Gen4 x8 link moves 12.46–12.60 GB/s from host to card and
+   10.41–10.54 GB/s back by DMA alone on each of the three cards (79–80% and 66–67% of its 15.75 GB/s); a program's
+   staged copies get 5.20–7.79 GB/s, set by each host's memcpy. An empty kernel costs the card about 104 µs queued,
+   but 556–566 µs launched and waited for, most of it the runtime's 500 µs idle poll; two host-to-card DMA commands
+   at once move half as much as one, for reasons not established. → [03-experiments.md](03-experiments.md), E50;
+   [05-claims.md](05-claims.md), "The host link"
 
 ## Terms
 
@@ -168,7 +174,7 @@ Four kinds of thing have IDs, and every claim cites them:
 |---|---|---|
 | **R1–R14** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
 | **Q1–Q57** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E49** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September) | [03-experiments.md](03-experiments.md) |
+| **E1–E50** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September) | [03-experiments.md](03-experiments.md) |
 | **A1–A19** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused) | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":
