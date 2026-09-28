@@ -157,7 +157,11 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Last check: 2026-09-27, 18:20 PDT**, after the chip diagram v2, the new PCIe page and the hub: 24 of 24 mirrored public pages
+**Last check: 2026-09-27, 22:05 PDT**, after deploying the page pass (`b083d80`: correctness fixes and new charts on 18
+pages): 24 of 24 mirrored public pages equal to their files, no warnings, exit 0 (the testdrive page needed a second
+deploy: the first one returned no confirmation and the check found the old page).
+
+**Earlier check: 2026-09-27, 18:20 PDT**, after the chip diagram v2, the new PCIe page and the hub: 24 of 24 mirrored public pages
 equal to their files, no warnings, exit 0.
 
 **Earlier check: 2026-09-27, 14:40 PDT**, after deploying the merge (the version-3 three-card results, the review's chart
