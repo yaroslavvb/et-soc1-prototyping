@@ -967,7 +967,7 @@ index 988aecb..2390811 100644
   A 60-line decoder on top of the header-only <code>et-trace</code> is enough to read kernel <code>et_printf</code> output.</li>
   <li><code>GenericLauncher::loadKernel()</code> leaves <code>std::cout</code> in hex mode. My first “800/800 harts” result was really 2048/2048: 800 is 2,048 in hex.</li>
   <li>When the runtime starts <code>sys_emu</code>, it turns on the coherency, scratchpad, FLB, and tensor-store checkers by default. The errata checker is opt-in: <code>-vpurf_warn</code>.</li>
-  <li>On the card, runtime init (opening the device) takes 0.13–0.14 s on aifoundry2 and aifoundry1 card 1 and 0.18 s on aifoundry3 in the three-card check (about 0.19 s in the first session). Peak host RSS is about 2.1 GB on all three cards for the duration of a run, which comes from the runtime’s mapped buffers.</li>
+  <li>On the card, runtime init (opening the device) takes 0.13–0.14 s on aifoundry2 and aifoundry1 card 1 and 0.18 s on aifoundry3 in the three-card check (about 0.19 s in the first session). Peak host RSS is about 2.2 GB (2.0 GiB) on all three cards for the duration of a run, which comes from the runtime’s mapped buffers.</li>
 </ul>
 </details>
 </section>

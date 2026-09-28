@@ -47,6 +47,11 @@ the page without anyone copying numbers.
   claims_status       the claims check's verdicts per page, and the cards behind each claim, for §1's scoreboard: one
                       series per entry of CLAIM_SERIES (the claims after the campaign of 25-26 Sep, each tested claim
                       with its outcome on the campaign's cards, and the version-3 plan before any campaign run)
+  carry               the cycle counter's late carry (§3's figure): the RTL's constants (CARRY_RTL, from rtl-sim/pmu_carry),
+                      and per card the version-3 campaign's raw read pairs (MEM-R1: how many pairs 10 cycles apart read
+                      128 off) and fixcyc()'s leftover per corrected launch (MEM-R3), from results/mem.json
+  pcie                the host link per card (E50, docs/reports/data/2026-09-27-pcie/pcie.json), for the tokens of §1's
+                      index row "Over the PCIe link"
 
 Deterministic: the same inputs give the same file, byte for byte.
 """
@@ -77,6 +82,8 @@ PAGES = "https://spacesheep.dev/@yaroslavvb/"
 LSB = {"board_lsb_w": 0.010, "rail_lsb_w": 0.001}
 CLAIMS_V3 = os.path.join(D, "2026-09-25-claims-v3")
 TEL_V3 = os.path.join(CLAIMS_V3, "results", "tel.json")
+MEM_V3 = os.path.join(CLAIMS_V3, "results", "mem.json")
+PCIE = os.path.join(D, "2026-09-27-pcie", "pcie.json")
 RAW_V3 = os.path.join(CLAIMS_V3, "raw")    # V3-CATFULL telemetry: <card>/catfull/p<pass><part>/telemetry.jsonl.gz
 
 
@@ -618,6 +625,68 @@ ENERGY_EVENTS_SOURCE = ("tools/ettelem/sync_hub_data.py from manual.json (its gs
                         "the Horace model.json / report.json, and the version-3 campaign's tel.json (the meter's refresh and the SP's pass)")
 
 
+# ---------------------------------------------------------------- the host link (E50), for §1's index row
+def card_order(cards):
+    return sorted(cards, key=lambda c: (CARD_ORDER.index(c) if c in CARD_ORDER else len(CARD_ORDER), c))
+
+
+def pcie_block(p):
+    """E50 on each card (docs/reports/data/2026-09-27-pcie/pcie.json, the PCIe page's data): the largest copy's rate
+    (256 MB) host to card and back with the DMA alone, host to card as a program copies it (staged), an empty kernel on
+    32 shires launched and waited for and each queued, and two host-to-card DMA commands in flight over one. Each value
+    is the mean over the card's five runs (reduce_pcie.py). The index row "Over the PCIe link" quotes them as tokens."""
+    top = lambda rows: max(rows, key=lambda r: r["bytes"])  # noqa: E731
+    per = {}
+    for c in card_order(p["cards"]):
+        bw = p["bw"][c]
+        per[c] = {"h2d_dma_gbs": r3(top(bw["h2d"]["dma"])["gbs"]["mean"]), "d2h_dma_gbs": r3(top(bw["d2h"]["dma"])["gbs"]["mean"]),
+                  "h2d_staged_gbs": r3(top(bw["h2d"]["staged"])["gbs"]["mean"]),
+                  "launch_wait_us": r3(p["launch"][c]["single_us"]["32"]["mean"]), "launch_queued_us": r3(p["launch"][c]["b2b_us"]["32"]["mean"]),
+                  "two_h2d_over_one": r3(p["derived"][c]["h2d_two_in_flight_over_one"]["mean"])}
+    return {"link_gbs": r3(p["meta"]["link_gbs"]), "bytes": top(p["bw"][p["cards"][0]]["h2d"]["dma"])["bytes"], "per_card": per,
+            "source": os.path.relpath(PCIE, ROOT) + " (E50): bw.<card>.{h2d,d2h}.{dma,staged}[largest].gbs.mean, "
+                      "launch.<card>.single_us['32'] and b2b_us['32'], derived.<card>.h2d_two_in_flight_over_one; means over five runs"}
+
+
+# ---------------------------------------------------------------- the cycle counter's late carry (§3's figure)
+# The RTL's constants (E2: rtl-sim/pmu_carry runs core-et's neigh_pmu.v unmodified under Verilator; its README.md):
+# twelve counters per neighbourhood share one adder, each a 7-bit pre-counter and a 57-bit post-counter; the adder's
+# index advances one counter a cycle while any carry is pending and stops just past the counter it served, so in the
+# simulation a read comes back 128 short for 12 cycles after each wrap (low bits 0-11). On aifoundry2's card on 19
+# September the short reads were low bits 0-10 (E1, 11 reads), which fixcyc() (workloads/memprobe/kernel/memprobe.c)
+# corrects: it adds 128 to a read whose low 7 bits are below 11.
+CARRY_RTL = {"counters": 12, "pre_bits": 7, "post_bits": 57, "sim_short_reads": 12, "card_short_reads_19sep": 11, "fixcyc_below": 11,
+             "source": "rtl-sim/pmu_carry (E2; README.md: 12 counters, a 7-bit pre-counter and a 57-bit post-counter each, one shared "
+                       "adder whose index cnt_idx advances while any carry is pending; 12 short reads per wrap in simulation); the card's 11 "
+                       "(low bits 0-10) from E1 on 19 September; fixcyc() in workloads/memprobe/kernel/memprobe.c adds 128 below 11"}
+
+
+def carry_block(mem):
+    """The version-3 campaign's test of the late carry on every card (E35, results/mem.json): MEM-R1's raw read pairs
+    10 cycles apart (every t_raw and t_rawodd launch: how many pairs differ by 10, 138 and -118), and MEM-R3's corrected
+    stamps (every t_glitch launch: the share of 10-cycle intervals that fixcyc() leaves off by 128, and the window's
+    last short value e where one fits)."""
+    items = mem if isinstance(mem, list) else mem["items"]
+    it = {x["item"]: x for x in items} if isinstance(items, list) else items
+    r1, r3_ = it["MEM-R1"], it["MEM-R3"]
+    per = {}
+    for c in card_order(set(r1["per_card"]) & set(r3_["per_card"])):
+        v1, v3 = r1["per_card"][c], r3_["per_card"][c]
+        raw = []
+        for k in sorted(v1.get("diffs") or {}):
+            d = {int(x): n for x, n in v1["diffs"][k].items()}
+            gap = max(d, key=d.get)  # the pairs' spacing: the difference most pairs read
+            raw.append({"launch": k, "pairs": sum(d.values()), "gap": gap, "plus": sum(n for x, n in d.items() if x > gap),
+                        "minus": sum(n for x, n in d.items() if x < gap)})
+        fixed = [{"launch": k, "e": v.get("e"), "frac": v.get("off128_frac")} for k, v in sorted((v3.get("launches") or {}).items())]
+        nofit = sum(1 for x in v1.get("exceptions", []) if "no single window" in x)
+        per[c] = {"raw": raw, "fixed": fixed, "raw_launches_no_window": nofit}
+    return {"rtl": CARRY_RTL, "per_card": per,
+            "outcome": {"MEM-R1": r1.get("all_cards", {}).get("outcome"), "MEM-R3": r3_.get("all_cards", {}).get("outcome")},
+            "source": os.path.relpath(MEM_V3, ROOT) + ": [item=MEM-R1].per_card.<card>.diffs and .exceptions, "
+                      "[item=MEM-R3].per_card.<card>.launches (E35); the RTL constants: CARRY_RTL in tools/ettelem/sync_hub_data.py"}
+
+
 # ---------------------------------------------------------------- the claims check, per page
 def card_set(cards):
     """claims[].cards (a word, or card names joined by +, commas or spaces) as a key: card ids in registry order joined
@@ -757,7 +826,7 @@ def dumps(obj, ind=0):
 
 # "meter" is energy_events.meter alone (it reads the campaign's tel.json and the Horace model, not the energy manual):
 # --only meter refreshes it while the energy manual's files are being regenerated. Every other name is a whole block.
-BLOCKS = ("power", "energy_events", "meter", "claims_status")
+BLOCKS = ("power", "energy_events", "meter", "claims_status", "carry", "pcie")
 
 
 def build(hub, only=BLOCKS):
@@ -775,6 +844,10 @@ def build(hub, only=BLOCKS):
         E["source"] = ENERGY_EVENTS_SOURCE
     if "claims_status" in only:
         new["claims_status"] = claims_status()
+    if "carry" in only:
+        new["carry"] = carry_block(load(MEM_V3))
+    if "pcie" in only:
+        new["pcie"] = pcie_block(load(PCIE))
     return new
 
 
@@ -807,7 +880,7 @@ def main():
             print(f"{os.path.relpath(a.hub, ROOT)}: up to date" + ("" if set(only) == set(BLOCKS) else f" ({', '.join(only)})"))
             return
         stale = [f"power.{k}" for k in new["power"] if new["power"].get(k) != hub.get("power", {}).get(k)]
-        stale += [k for k in ("energy_events", "claims_status") if new.get(k) != hub.get(k)]
+        stale += [k for k in ("energy_events", "claims_status", "carry", "pcie") if new.get(k) != hub.get(k)]
         sys.exit(f"{os.path.relpath(a.hub, ROOT)} is stale: " + (", ".join(stale) if stale else "formatting only") +
                  "\n  run python3 tools/ettelem/sync_hub_data.py, then rebuild the page")
     with open(a.hub, "w") as fh:
@@ -821,6 +894,10 @@ def main():
     if "energy_events" in only or "meter" in only:
         M = new["energy_events"]["meter"]
         msg.append(f"{len(new['energy_events']['events'])} energy events, board refresh {M['pass_s']}/{M['pass_s_a3']}/{M['pass_s_a1c1']} s sampled")
+    if "carry" in only:
+        msg.append("the late carry on " + ", ".join(new["carry"]["per_card"]))
+    if "pcie" in only:
+        msg.append("the host link on " + ", ".join(new["pcie"]["per_card"]))
     if "claims_status" in only:
         msg.append("claims status for " + ", ".join(f"{len(s['pages'])} pages ({s['id']})" for s in new["claims_status"]["series"]))
     print(f"wrote {os.path.relpath(a.hub, ROOT)}: " + "; ".join(msg))

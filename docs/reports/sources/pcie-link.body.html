@@ -53,7 +53,15 @@ the other. The staged rate is then close to what the two in series give,
 1&nbsp;/&nbsp;(1/DMA&nbsp;+&nbsp;1/memcpy), with the host's memcpy measured by the same program on the same host.
 That is why the cards stage at different rates over the same link: the hosts' own memcpy of 256 MB runs at
 <span id="hostcopy"></span>.</p>
+<p>Put each card's staged rate against its host's memcpy, and every card lands on the curve of the two copies in
+series; the drop from the DMA-only tick above it to the point is what the bounce copy costs:</p>
+<div class="chart-title">A program's copy is two copies in series: the staged rate against the host's memcpy, 256 MB</div>
+<div id="serlegend"></div>
+<div class="chart" id="serchart"></div>
+<p class="small" id="sernote"></p>
+<details class="more"><summary>The table, card by card</summary>
 <div class="table-wrap"><table id="stagetable"></table></div>
+</details>
 
 <h2 id="small-copies">3. Small copies: the runtime's polling sets the latency</h2>
 <p>A 4 KB copy spends well under a microsecond on the wire. From issue to completion, after a random idle gap, 98% of them took
@@ -77,7 +85,15 @@ for, measures the whole path: the command through the submission queue, the mast
 shires, their start and return, the completion back to the host, and the runtime noticing it. A hundred launches
 queued at once, each with the device-side barrier, measure the card's side alone, because the host's polling then
 overlaps the work.</p>
+<p>Set the two side by side, for a launch and for a small copy issued now and then, and most of the time of one
+operation is the wait for the runtime's response thread to wake, not the work:</p>
+<div class="chart-title">Where the time of one operation goes: its cost when queued, and the wait for the response thread</div>
+<div id="waitlegend"></div>
+<div class="chart" id="waitchart"></div>
+<p class="small" id="waitnote"></p>
+<details class="more"><summary>The launch table</summary>
 <div class="table-wrap"><table id="launchtable"></table></div>
+</details>
 <p class="small" id="launchnote"></p>
 
 <h2 id="several-at-once">5. Several transfers at once</h2>
@@ -158,7 +174,7 @@ python3 scripts/build-report.py pcie-link docs/reports/data/2026-09-27-pcie/pcie
 </details>
 
 <details class="more"><summary>Version history and provenance</summary>
-<p class="small">First written 27 September 2026, from the runs of that afternoon. Every number on this page is
+<p class="small">First written 27 September 2026, from the runs of that afternoon; later that day, the staged path drawn against the hosts' memcpy (section 2) and the time of one launch or small copy split into its queued cost and the wait for the response thread (section 4). Every number on this page is
 computed by its script from <code>docs/reports/data/2026-09-27-pcie/pcie.json</code>, except the link figure's
 arithmetic (16 GT/s × 8 lanes × 128/130 ÷ 8, also in the data) and the runtime's and firmware's constants, which
 are cited to their source files above.</p>

@@ -10,6 +10,8 @@ refits with its e-folding held (rest.profile over a window of e-foldings on aifo
 card's own law on its version-3 idle bins). Two more things are derived here rather than read: the mean mesh distance of each ring, from marty1885's shire map in
 workloads/nocbench/analyze.py, and the median and largest leakage correction over the catalogue's bursts. The `gs`
 block (E48, gathers, scatters and packed atomics on three cards) pools gs-full.json's pass values the catalogue's way.
+The `wire_ref` block copies Heat per millimetre's per-hop figures from its report.json (build_wire_report.py), so
+sections 4.3 and 5 quote that page's current numbers: rebuild report.json before this script.
 """
 import argparse
 import csv
@@ -47,6 +49,8 @@ ABLA_RUNS = f"{V3}/abla.runs.json"                 # V3-ABL-A: the tensor unit, 
 # (tools/claims-v3/gs/reduce.py): gs.json holds the items, gs-full.json every configuration's pass values per card
 GS, GS_FULL = f"{V3}/gs.json", f"{V3}/gs-full.json"
 LAT = f"{V3}/lat.json"                             # V3-LAT: the latencies on three cards (the sync table)
+# Heat per millimetre's data (tools/ettelem/build_wire_report.py): the per-hop figures section 4.3 points readers to
+WIRE = f"{D}/2026-09-24-wire-energy/report.json"
 CARD_ORDER = ["aifoundry2", "aifoundry3", "aifoundry1-c1", "aifoundry1-c0"]   # the pages' card registry order
 
 
@@ -680,6 +684,23 @@ def main():
     # --- 3.1, 4.3, 4.4, 6: gathers, scatters and packed atomics (E48, three cards, 26 September) ---------------------
     if os.path.exists(GS) and os.path.exists(GS_FULL):
         out["gs"] = gs_block()
+
+    # --- 4.3 and 5: the wire figures of Heat per millimetre that the manual quotes (its report.json, read as it is) ---
+    # a random bit per mm (fJ, data-dependent and fixed together) and the same as pJ per byte per hop, on the loaded mesh
+    # (all pairs, 1-6 hops) and on free links (link-disjoint pairs, 1-4 hops), for both meters: the third run's pooled
+    # means over three cards
+    if os.path.exists(WIRE):
+        w = j(WIRE)
+        hop = w["inputs"]["hop_mm"]["value"]
+        ref = {"hop_mm": hop, "source": WIRE + " (headline.<set>/<meter>.random_bit_total, inputs.hop_mm)"}
+        for s in ("loaded", "uncontended"):
+            for mk, name in (("noc_rail", "noc_rail"), ("board", "board")):
+                h = w["headline"].get(f"{s}/{mk}")
+                if h and "random_bit_total" in h:
+                    fj = h["random_bit_total"]["mean"]
+                    ref[f"{s}/{name}"] = {"fj_per_bit_mm": fj, "pj_per_byte_hop": fj * 8 * hop / 1000,
+                                          "hops": h.get("hops")}
+        out["wire_ref"] = ref
 
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     json.dump(out, open(a.out, "w"), indent=1)

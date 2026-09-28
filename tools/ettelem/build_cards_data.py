@@ -134,12 +134,18 @@ def v3_block(res, model, toggles, history):
     # the temperature arm: hot - cool switching per card and pattern, the registered 99.75% interval
     x5 = J("x5.json")[0]
     out["x5"] = {"verdict": x5["verdict"], "all_cards": x5["all_cards"]["verdict"], "per_card": {}}
+    # the registered test, its interval level and its band (27 September 2026: for the page's chart of this block)
+    band = re.search(r"inside \+-([\d.]+) W", x5["test"])
+    alphas = {t["ci_hot_minus_cool"]["alpha"] for pc in x5["per_card"].values() for t in pc["tests"].values()}
+    out["x5"].update(test=x5["test"], band_w=float(band.group(1)) if band else None,
+                     level=(1 - alphas.pop()) if len(alphas) == 1 else None)
     for c, pc in x5["per_card"].items():
         lt = pc["launch_temperatures"]
         out["x5"]["per_card"][c] = {
             "outcome": pc["outcome"],
             "launch": {arm: {"target": v["target_c"], "reading": v["measured_launch_c"]["mean"]} for arm, v in lt.items()},
-            "hot_minus_cool": {p: {k: t["ci_hot_minus_cool"][k] for k in ("point", "lo", "hi", "values_x", "values_y")}
+            "hot_minus_cool": {p: dict({k: t["ci_hot_minus_cool"][k] for k in ("point", "lo", "hi", "values_x", "values_y")},
+                                       in_decision=t.get("in_decision"))
                                for p, t in pc["tests"].items()},
             "own_launch": {p: {k: v for k, v in list(dg.values())[0].items() if k in ("point", "lo", "hi")}
                            for p, dg in pc.get("diagnostics", {}).items()}}

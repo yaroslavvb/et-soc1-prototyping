@@ -48,8 +48,24 @@
    "idle_W": {
     "lo": 25.13,
     "hi": 36.33,
+    "range": [
+     25.13,
+     36.33
+    ],
     "k": "M",
     "src": "board power at rest: aifoundry3 25.1 W at 56 °C, aifoundry2 36.3 W at 81 °C (energy manual, cards block)"
+   },
+   "idle_W_other": {
+    "aifoundry1-c1": {
+     "lo": 32.2,
+     "hi": 49.9,
+     "T": [
+      56,
+      81
+     ]
+    },
+    "k": "M",
+    "src": "board power at rest over the die temperatures of the version-3 campaign's idle cycles (energy manual, manual.json v3.idle.bins); not in the model's range"
    },
    "peak": {
     "fp32": {
@@ -98,10 +114,16 @@
     "src": "the L1 in scratchpad mode: sets 0–11, 3 KB per minion (memory-hierarchy report); a 4,096-coordinate int8 query (4 KB) does not fit, so every minion re-reads the query tiles for each tile of 16 codes it holds (E)"
    },
    "launch_ms": {
-    "lo": 0.2,
-    "hi": 0.4,
+    "range": [
+     0.556,
+     0.566
+    ],
+    "b2b": [
+     0.104,
+     0.104
+    ],
     "k": "M",
-    "src": "host kernel launch on aifoundry3 (sparse-compute report); a persistent kernel avoids it"
+    "src": "docs/reports/data/2026-09-27-pcie/pcie.json (E50, 27 September): an empty kernel on 32 shires launched from the host and waited for (launch.<card>.single_us[32]), and each further launch queued back to back (b2b_us[32]); the range over the cards of each card's mean over five runs. A persistent kernel avoids it"
    },
    "allreduce_us": {
     "v": 2.3,
@@ -265,7 +287,29 @@
    "pcie_Bps": {
     "v": 15750000000.0,
     "k": "S",
-    "src": "PCIe Gen4 x8, never timed on these cards"
+    "src": "PCIe Gen4 x8 by its line rate (16 GT/s, 8 lanes, 128b/130b)"
+   },
+   "pcie": {
+    "dma_Bps": [
+     12460000000.0,
+     12600000000.0
+    ],
+    "staged_Bps": [
+     5204000000.0,
+     7791000000.0
+    ],
+    "launch_wait_us": [
+     556.0,
+     566.0
+    ],
+    "copy_MB": 256.0,
+    "cards": [
+     "aifoundry2",
+     "aifoundry3",
+     "aifoundry1-c1"
+    ],
+    "k": "M",
+    "src": "docs/reports/data/2026-09-27-pcie/pcie.json (E50, 27 September): host to card, 256 MB, DMA alone and staged as a program copies, and an empty kernel on 32 shires launched and waited for; the range over the cards of each card's mean over five runs"
    },
    "anchor": {
     "bytes": 16777216,
@@ -921,8 +965,8 @@
    1.34
   ],
   "ratio_idle_to_active": [
-   19000.0,
-   36000.0
+   25000.0,
+   27000.0
   ],
   "hbm_case": {
    "chips": 1,
@@ -987,11 +1031,27 @@
     30.0,
     39.0
    ],
-   "pcie_ms": 4.1,
+   "pcie_Bps": [
+    11770000000.0,
+    11920000000.0
+   ],
+   "pcie_staged_Bps": [
+    5322000000.0,
+    7596000000.0
+   ],
+   "pcie_copy_MiB": 64.0,
+   "pcie_ms": [
+    5.37,
+    5.44
+   ],
+   "pcie_staged_ms": [
+    8.43,
+    12.0
+   ],
    "h100_us": 21.0,
    "x_pass": [
     30.0,
-    140.0
+    190.0
    ]
   },
   "k4": {
@@ -1133,7 +1193,7 @@
    "per": "once per checkpoint",
    "fit": "no",
    "k": "O",
-   "why": "dense backprop plus a projection; the sparse sketches would need 16 GB per sequence over a 15.75 GB/s link",
+   "why": "dense backprop plus a projection; the sparse sketches would need 16 GB per sequence over a link measured at 12.5–12.6 GB/s",
    "J": 2900000000.0
   },
   {
@@ -1233,7 +1293,7 @@
    "per": "per batch of 100 queries (at most 1% of the scan)",
    "fit": "killed",
    "k": "E",
-   "why": "the one ET-shaped step with real size, but the data is born in the GPU's backward pass (16 GB per sequence would have to cross a 15.75 GB/s link); GPUs keep the buckets in L2 or avoid the scatter; the chip's scatter-add, measured since (S3), reaches 10 G updates a second only while the buckets stay in a shire, and runs at 0.42 G/s into DRAM",
+   "why": "the one ET-shaped step with real size, but the data is born in the GPU's backward pass (16 GB per sequence would have to cross a link measured at 12.5–12.6 GB/s); GPUs keep the buckets in L2 or avoid the scatter; the chip's scatter-add, measured since (S3), reaches 10 G updates a second only while the buckets stay in a shire, and runs at 0.42 G/s into DRAM",
    "J": 17700000.0
   },
   {
@@ -1309,6 +1369,15 @@
    "where": "dram"
   }
  ],
+ "experiment": {
+  "pass_us": 40,
+  "pass_mJ": 1.5,
+  "topk_max": 0.2,
+  "kill_mJ": 3.0,
+  "kill_gpu_within": 3,
+  "k": "E",
+  "src": "this page's pass and kill rule for the first experiment (section 5), set before any run"
+ },
  "topk_inserts": {
   "N": [
    1000000000.0,

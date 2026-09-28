@@ -366,6 +366,16 @@
    ]
   },
   {
+   "group": "Synthesis: the set's measurements in one picture",
+   "title": "The ET-SoC-1, interactively",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram",
+   "date": "27 Sep",
+   "what": "An interactive, animated schematic for presenting: the die with its mesh of shires, a shire and a minion, and data flows played stage by stage (a load to DRAM, TensorSend, the relay, gathers and scatters, the host over PCIe, a matmul and its watts, one hot line, the allreduce tree) with the latency, bandwidth, energy and heat measured on the three cards, each number with its source. What it still infers is <a href=\"#improve\">§5</a>'s rungs 21–36, and each dashed part links to its rung.",
+   "instruments": "none: a synthesis of the set's measurements, the manuals, the firmware source and the RTL",
+   "short": "Chip diagram",
+   "pub": "2026-09-27"
+  },
+  {
    "group": "Energy and power",
    "title": "Heat per millimetre",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm",
@@ -459,6 +469,16 @@
     [13, "differ by card"],
     [2, "not confirmed"]
    ]
+  },
+  {
+   "group": "Contention and moving data",
+   "title": "Over the PCIe link",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link",
+   "date": "27 Sep",
+   "what": "The host link, timed through the runtime API on the three cards, five runs each, against predictions registered before the runs (E50): a 256 MB copy crosses at {{pcie_h2d}} GB/s from host to card with the DMA alone ({{pcie_eff}} of Gen4 x8's {{pcie_link}} GB/s) and {{pcie_d2h}} GB/s back; a program's own copy, staged through a bounce buffer by the host's memcpy, gets {{pcie_staged}} GB/s; an empty kernel takes {{pcie_wait}} µs launched and waited for, and about {{pcie_queued}} µs each when queued; two host-to-card DMA commands in flight move {{pcie_two}} times as much as one at a time.",
+   "instruments": "host wall clock through the runtime API (workloads/pciebench); die temperature and clocks before and after each run",
+   "short": "PCIe link",
+   "pub": "2026-09-27"
   },
   {
    "group": "Contention and moving data",
@@ -5356,6 +5376,33 @@
      "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions"
     }
    ]
+  },
+  {
+   "id": "E50",
+   "when": "27 Sep, 14:24–15:13",
+   "card": "aifoundry2, aifoundry3, aifoundry1-c1",
+   "what": "The host link and the launch path: copies of 4 KB to 256 MB each way, staged and DMA-only, small-copy round trips, empty-kernel launches and two transfers at once, through the runtime API; five runs per card 12 minutes apart, against thirteen predictions registered before any timed transfer",
+   "instruments": "host wall clock through the runtime API (workloads/pciebench); die temperature, clocks and power before and after each run",
+   "data": [
+    {
+     "path": "docs/reports/data/2026-09-27-pcie/raw/",
+     "note": "<card>/r1–r5, one run each; r0 and pilot1 are pilots, left out"
+    },
+    {
+     "path": "docs/reports/data/2026-09-27-pcie/pcie.json",
+     "note": "the reduction; PREREG.md beside it holds the predictions"
+    }
+   ],
+   "reports": [
+    {
+     "title": "Over the PCIe link",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link"
+    },
+    {
+     "title": "The ET-SoC-1, interactively (the PCIe shire, the Host panel, flow 6)",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram"
+    }
+   ]
   }
  ],
  "energy_events": {
@@ -7417,5 +7464,360 @@
    }
   ],
   "source": "tools/ettelem/sync_hub_data.py claims_status(), from the files in its CLAIM_SERIES"
+ },
+ "carry": {
+  "rtl": {
+   "counters": 12,
+   "pre_bits": 7,
+   "post_bits": 57,
+   "sim_short_reads": 12,
+   "card_short_reads_19sep": 11,
+   "fixcyc_below": 11,
+   "source": "rtl-sim/pmu_carry (E2; README.md: 12 counters, a 7-bit pre-counter and a 57-bit post-counter each, one shared adder whose index cnt_idx advances while any carry is pending; 12 short reads per wrap in simulation); the card's 11 (low bits 0-10) from E1 on 19 September; fixcyc() in workloads/memprobe/kernel/memprobe.c adds 128 below 11"
+  },
+  "per_card": {
+   "aifoundry2": {
+    "raw": [
+     {
+      "launch": "p1/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 322,
+      "minus": 286
+     },
+     {
+      "launch": "p1/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 317,
+      "minus": 308
+     },
+     {
+      "launch": "p2/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 304,
+      "minus": 285
+     },
+     {
+      "launch": "p2/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 320,
+      "minus": 295
+     },
+     {
+      "launch": "p3/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 300,
+      "minus": 303
+     },
+     {
+      "launch": "p3/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 319,
+      "minus": 290
+     },
+     {
+      "launch": "p4/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 320,
+      "minus": 317
+     },
+     {
+      "launch": "p4/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 303,
+      "minus": 327
+     },
+     {
+      "launch": "p5/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 307,
+      "minus": 301
+     },
+     {
+      "launch": "p5/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 308,
+      "minus": 325
+     }
+    ],
+    "fixed": [
+     {
+      "launch": "p1",
+      "e": 10,
+      "frac": 0.0
+     },
+     {
+      "launch": "p2",
+      "e": 10,
+      "frac": 0.0
+     },
+     {
+      "launch": "p3",
+      "e": 10,
+      "frac": 0.0
+     },
+     {
+      "launch": "p4",
+      "e": 10,
+      "frac": 0.0
+     },
+     {
+      "launch": "p5",
+      "e": null,
+      "frac": 0.02125
+     }
+    ],
+    "raw_launches_no_window": 7
+   },
+   "aifoundry3": {
+    "raw": [
+     {
+      "launch": "p1/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 302,
+      "minus": 296
+     },
+     {
+      "launch": "p1/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 294,
+      "minus": 296
+     },
+     {
+      "launch": "p2/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 256,
+      "minus": 256
+     },
+     {
+      "launch": "p2/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 300,
+      "minus": 254
+     },
+     {
+      "launch": "p3/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 258,
+      "minus": 255
+     },
+     {
+      "launch": "p3/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 275,
+      "minus": 313
+     },
+     {
+      "launch": "p4/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 240,
+      "minus": 257
+     },
+     {
+      "launch": "p4/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 246,
+      "minus": 291
+     },
+     {
+      "launch": "p5/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 304,
+      "minus": 288
+     },
+     {
+      "launch": "p5/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 208,
+      "minus": 309
+     }
+    ],
+    "fixed": [
+     {
+      "launch": "p1",
+      "e": null,
+      "frac": 0.02375
+     },
+     {
+      "launch": "p2",
+      "e": null,
+      "frac": 0.017
+     },
+     {
+      "launch": "p3",
+      "e": null,
+      "frac": 0.0465
+     },
+     {
+      "launch": "p4",
+      "e": null,
+      "frac": 0.03025
+     },
+     {
+      "launch": "p5",
+      "e": null,
+      "frac": 0.017
+     }
+    ],
+    "raw_launches_no_window": 10
+   },
+   "aifoundry1-c1": {
+    "raw": [
+     {
+      "launch": "p1/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 309,
+      "minus": 289
+     },
+     {
+      "launch": "p1/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 304,
+      "minus": 320
+     },
+     {
+      "launch": "p2/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 320,
+      "minus": 317
+     },
+     {
+      "launch": "p2/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 291,
+      "minus": 318
+     },
+     {
+      "launch": "p3/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 289,
+      "minus": 300
+     },
+     {
+      "launch": "p3/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 308,
+      "minus": 307
+     },
+     {
+      "launch": "p4/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 300,
+      "minus": 287
+     },
+     {
+      "launch": "p4/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 323,
+      "minus": 294
+     },
+     {
+      "launch": "p5/t_raw",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 266,
+      "minus": 317
+     },
+     {
+      "launch": "p5/t_rawodd",
+      "pairs": 4000,
+      "gap": 10,
+      "plus": 318,
+      "minus": 295
+     }
+    ],
+    "fixed": [
+     {
+      "launch": "p1",
+      "e": null,
+      "frac": 0.0065
+     },
+     {
+      "launch": "p2",
+      "e": null,
+      "frac": 0.008
+     },
+     {
+      "launch": "p3",
+      "e": null,
+      "frac": 0.0065
+     },
+     {
+      "launch": "p4",
+      "e": 10,
+      "frac": 0.0
+     },
+     {
+      "launch": "p5",
+      "e": null,
+      "frac": 0.00125
+     }
+    ],
+    "raw_launches_no_window": 9
+   }
+  },
+  "outcome": {
+   "MEM-R1": "FAIL",
+   "MEM-R3": "FAIL"
+  },
+  "source": "docs/reports/data/2026-09-25-claims-v3/results/mem.json: [item=MEM-R1].per_card.<card>.diffs and .exceptions, [item=MEM-R3].per_card.<card>.launches (E35); the RTL constants: CARRY_RTL in tools/ettelem/sync_hub_data.py"
+ },
+ "pcie": {
+  "link_gbs": 15.754,
+  "bytes": 268435456,
+  "per_card": {
+   "aifoundry2": {
+    "h2d_dma_gbs": 12.473,
+    "d2h_dma_gbs": 10.535,
+    "h2d_staged_gbs": 7.147,
+    "launch_wait_us": 566.266,
+    "launch_queued_us": 103.573,
+    "two_h2d_over_one": 0.492
+   },
+   "aifoundry3": {
+    "h2d_dma_gbs": 12.599,
+    "d2h_dma_gbs": 10.407,
+    "h2d_staged_gbs": 5.204,
+    "launch_wait_us": 555.716,
+    "launch_queued_us": 103.653,
+    "two_h2d_over_one": 0.488
+   },
+   "aifoundry1-c1": {
+    "h2d_dma_gbs": 12.456,
+    "d2h_dma_gbs": 10.415,
+    "h2d_staged_gbs": 7.791,
+    "launch_wait_us": 565.033,
+    "launch_queued_us": 104.062,
+    "two_h2d_over_one": 0.491
+   }
+  },
+  "source": "docs/reports/data/2026-09-27-pcie/pcie.json (E50): bw.<card>.{h2d,d2h}.{dma,staged}[largest].gbs.mean, launch.<card>.single_us['32'] and b2b_us['32'], derived.<card>.h2d_two_in_flight_over_one; means over five runs"
  }
 }

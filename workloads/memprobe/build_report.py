@@ -83,7 +83,9 @@ def v3_data(path):
                      "l3": {s: dict(mm(x["med"]), hops=x["hops"]) for s, x in c["l3_by_slice"].items()},
                      "memByHome": {s: mm(v) for s, v in c.get("mem_by_home", {}).items()},
                      "dramMed": c["dram_med"], "modelErr": c["model_err"],
-                     "within3": [sum(a for a, _ in c["within3"]), sum(n for _, n in c["within3"])]}
+                     "within3": [sum(a for a, _ in c["within3"]), sum(n for _, n in c["within3"])],
+                     # each pass's locked loop (§5's lock chart): its refresh period beside it
+                     "locked": [dict(x, R=r) for x, r in zip(c["locked"], c["period"])]}
     return v3, out
 
 
@@ -142,6 +144,11 @@ def main():
         "timer": s["timer"],
         "manual": manual,
         "v3": v3,
+        # §5's lock chart. The model has four inputs, all this session's refresh series (analyze.py refresh()): the
+        # refresh period, the locked loop's open-row load, the activate a refresh adds (the closed- minus the open-row
+        # cluster) and the longest wait for a refresh (the slowest load over the closed-row median).
+        "lock": {"R": ref["period_cycles"], "open": ref["locked"]["open_med"], "act": ref["closed_minus_open"],
+                 "wait": ref["max_wait"], "locked": ref["locked"]},
     }
 
     # ---- numbers quoted in the prose ----
@@ -152,7 +159,6 @@ def main():
              rows_ref_hit=num(a[2]), rows_ref_n=num(a[3]), rows_ref_pct=pct(a[2] / a[3]))
     T["op_cycles"] = num(round(ref["op_cycles"], -1))
     T["probe_ovh"] = num(round(2 * ref["op_cycles"], -1))
-    T["loop_outside"] = num(round(4 * ref["op_cycles"], -1))
     T["in_refresh_pct"] = pct(ref["in_refresh"])
     pto = {p["delay"]: p for p in s["pagetimeout"]}
     for d in (0, 1000, 1500):
@@ -178,6 +184,7 @@ def main():
     for key, grp in (("nd_open_common", common), ("nd_open_rare", rare)):
         T[key] = f"{sum(nd[str(m)]['fast'] for m in grp)} of {sum(nd[str(m)]['n'] for m in grp)}"
     T["nd_slow_med"] = num(s["ladder_slow"]["nodelay:3"]["resid_med"])
+    T["nf_resid"] = num(s["ladder_slow"]["nofence:3"]["resid_med"])  # every no-fence load over the §4 model, median
     T["nf_m0"] = num(lm["nofence:3"]["0"]["resid_med"])
     T["nf_far"] = span(lm["nofence:3"]["3"]["resid_med"], lm["nofence:3"]["7"]["resid_med"])
     ml = dec["model_err_loads"]
@@ -252,12 +259,31 @@ def main():
     T["v3_rows_ref_pct"] = span(*[f(100 * r[2] / r[3] for r in rows.values()) for f in (min, max)]) + "%"
     T["v3_closed_open"] = "–".join(f"{f(allp(lambda c: c['closed_minus_open'])):.1f}" for f in (min, max))
     lk = allp(lambda c: c["locked"])
-    T["v3_locked_period"] = span(min(x["period_med"] for x in lk), max(x["period_med"] for x in lk))
     T["v3_locked_slow"] = "–".join(f"{f(100 * x['slow'] / x['n'] for x in lk):.1f}" for f in (min, max)) + "%"
     T["v3_locked_inref"] = f"{sum(x['in_refresh'] for x in lk):,} of {sum(x['slow'] for x in lk):,}"
     T["v3_locked_slow_med"] = span(min(x["slow_med"] for x in lk), max(x["slow_med"] for x in lk))
     T["v3_locked_max"] = num(max(x["max"] for x in lk))
     T["v3_op_cycles"] = span(*[f(allp(lambda c: c["op_cycles"])) for f in (min, max)])
+
+    # ---- §5's lock: four turns of the locked loop whose loads find the row open fall short of the refresh period,
+    # and the slow load (the first after each refresh) makes up the difference: slow - open = R - 4 x open turn ----
+    lk19, R = ref["locked"], ref["period_cycles"]
+    T["lock_p"], T["lock_open"], T["lock_slow"] = num(lk19["period_open_med"]), num(lk19["open_med"]), num(lk19["slow_med"])
+    T["lock_4p"] = num(4 * lk19["period_open_med"])
+    T["lock_short"] = num(R - 4 * lk19["period_open_med"], 1)
+    T["lock_act"] = num(ref["closed_minus_open"], 1)
+    T["lock_rest"] = num(lk19["slow_med"] - lk19["open_med"] - ref["closed_minus_open"])
+    T["lock_max"] = num(lk19["max"])
+    T["lock_every4"] = f"{lk19['every4']:,} of {lk19['gaps']:,}"
+    v3l = [dict(x, R=r) for c in cards for x, r in zip(C3[c]["locked"], C3[c]["period"])]
+    T["v3_lock_p"] = span(*[f(x["period_open_med"] for x in v3l) for f in (min, max)])
+    T["v3_lock_short"] = span(*[f(x["R"] - 4 * x["period_open_med"] for x in v3l) for f in (min, max)])
+    T["v3_lock_extra"] = span(*[f(x["slow_med"] - x["open_med"] for x in v3l) for f in (min, max)])
+    T["v3_lock_every4"] = "–".join(f"{f(100 * x['every4'] / x['gaps'] for x in v3l):.1f}" for f in (min, max)) + "%"
+    fit = max(abs((x["slow_med"] - x["open_med"]) - (x["R"] - 4 * x["period_open_med"])) for x in v3l + [dict(lk19, R=R)])
+    if fit >= 1:  # the prose says the law holds within a cycle in every series
+        raise SystemExit(f"slow - open no longer equals R - 4 x the open turn within a cycle: {fit}")
+    T["lock_fit"] = num(fit, 1)
 
     tpl = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "report_template.html")).read()
     out = re.sub(r"@@(\w+)@@", lambda m: T[m.group(1)], tpl)

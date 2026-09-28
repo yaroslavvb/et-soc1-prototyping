@@ -113,6 +113,7 @@ table#links-table { min-width: 0; }
 @media (max-width: 599px) { table.stack td, table.stack td.lvl { min-width: 0; white-space: normal; } }
 .hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
 h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
+.chart-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
 </style>
 <!-- chartkit:begin -->
 <!-- pasted by scripts/paste-chartkit.py from docs/reports/sources/{chartkit.js, report.template.html}; do not edit here -->
@@ -785,6 +786,11 @@ window.CK = (function () {
 
 <h2 id="every-primitive-against-a-gpu">Every primitive, against a GPU</h2>
 <p class="muted">Round trips at 600 MHz on ET-SoC-1; the three cards agree within a few cycles, the chip-wide barriers within 15 (26 September). GPU numbers are published measurements, at 1.41 GHz for the A100 and 1.755 GHz for the H800 (Hopper). The GPU column lists the closest equivalent where one exists.</p>
+<p>Drawn on one time axis, the ET-SoC-1's messages between cores land where an A100's handoff through L2 does, while each of its barriers is slower than the GPU's nearest equivalent:</p>
+<div class="chart-title">Every primitive on one time axis: the ET-SoC-1 measured on three cards, against the closest published GPU figure</div>
+<div id="prim-legend"></div>
+<div class="card chart" id="prim-chart"></div>
+<p class="small" id="prim-note"></p>
 <details class="more"><summary>The full comparison table, primitive by primitive</summary>
 <div class="table-wrap"><table class="prim" id="prim-table">
 <thead><tr><th>Primitive</th><th class="num">ET-SoC-1, measured</th><th>What it does</th><th>Closest GPU equivalent</th></tr></thead>
@@ -877,7 +883,7 @@ window.CK = (function () {
 
 <h2 id="what-it-means-for-systolic-and-wavefront-designs">What it means for systolic and wavefront designs</h2>
 <ul>
-  <li><b>1D chains at minion grain inside a shire, 2D arrays at shire grain over the mesh.</b> A one-way message costs about 34 cycles on a tree edge, 57 cycles elsewhere in the shire, and 75 + 6 cycles per hop between shires. To keep communication under a tenth of the time, a cell needs about 10× that much work per step: roughly 350–600 cycles inside a shire and 750–1,000 at a shire boundary. That sets the grain <i>k</i> ≈ 10·t<sub>msg</sub>/t<sub>cell</sub> cells per message for wavefront DP or lattice updates.</li>
+  <li><b>1D chains at minion grain inside a shire, 2D arrays at shire grain over the mesh.</b> A one-way message costs about 34 cycles on a tree edge, 57 cycles elsewhere in the shire, and 75 + 6 cycles per hop between shires. To keep communication under a tenth of the time, a cell needs about 10× that much work per step: roughly 350–600 cycles inside a shire and 800–1,350 between shires one to ten hops apart. That sets the grain <i>k</i> ≈ 10·t<sub>msg</sub>/t<sub>cell</sub> cells per message for wavefront DP or lattice updates.</li>
   <li><b>In a 2D array, give each neighbour link its own minion.</b> Over TensorSend a minion may have only one partner's ready outstanding (see <a href="#a-trap-one-ready-flag-per-minion">the trap above</a>). At shire grain that is easy to respect: a shire has 32 minions, so no minion needs to send to or receive from two partners. Bulk tiles can go through the scratchpads instead (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">Hand it to the next shire</a>). Inside a shire the layouts are, as drawn above:
     <details class="more"><summary>The four layouts, safe or not</summary>
     <ul>
@@ -907,7 +913,7 @@ window.CK = (function () {
 </details>
 
 <details class="more"><summary>Version history and provenance</summary>
-<p class="small">Versions: published 18 September 2026; 24 September, the energies per byte re-measured (first published from aifoundry2's two runs as 0.8–2.3 pJ inside a shire and 13–20 pJ across the mesh) and the systolic guidance and map orientation corrected; 25 September (version 3), the spin comparison, the 128 B messages and the per-hop slope's uncertainty corrected, and the layouts never run marked as predicted from the RTL; 26 September, the latencies, trees, barriers and energies re-measured on three cards under a pre-registered plan, with the in-shire barrier, the 32-minion allreduce, the tree levels, the credit round trips and the flag range corrected and the mesh energy fit pooled; 27 September, the chain-order comparison and the grain calculator added and the detail folded into collapsible sections. Record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>.</p>
+<p class="small">Versions: published 18 September 2026; 24 September, the energies per byte re-measured (first published from aifoundry2's two runs as 0.8–2.3 pJ inside a shire and 13–20 pJ across the mesh) and the systolic guidance and map orientation corrected; 25 September (version 3), the spin comparison, the 128 B messages and the per-hop slope's uncertainty corrected, and the layouts never run marked as predicted from the RTL; 26 September, the latencies, trees, barriers and energies re-measured on three cards under a pre-registered plan, with the in-shire barrier, the 32-minion allreduce, the tree levels, the credit round trips and the flag range corrected and the mesh energy fit pooled; 27 September, the chain-order comparison and the grain calculator added and the detail folded into collapsible sections; then every primitive drawn on one time axis against the published GPU figures, and the work a cell needs between shires corrected to 800–1,350 cycles at one to ten hops (it said 750–1,000 at a shire boundary; 750 is the zero-hop value, which no pair of shires has). Record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3"><code>docs/reports/data/2026-09-25-claims-v3</code></a>.</p>
 </details>
 
 <h2 id="caveats">Caveats</h2>
@@ -1812,6 +1818,122 @@ message on this page, demands before the tensor unit is the limit.</li>
         " <span class=\"small\">From " + who + (link === "mesh" ? "; between the measured 1-hop and 10-hop pairs, hops are interpolated" : "") + ".</span>");
     }
     say();
+  })();
+
+  // ---------- 4b. Every primitive against a GPU, on one time axis ----------
+  // The ET-SoC-1 values are the check's measurements (each card's median over its three passes; drawn at the first
+  // card's value, every card's in the tooltip): TensorSend round trips on a tree edge, elsewhere in the shire and
+  // across 1 and 10 mesh hops (primitives.tree_hop, other_hop; classes.pingpong); credit round trips, polled, from the same pairs (classes.fcc); the
+  // flag through global atomics over all 496 shire pairs (matrix-flag); the shire barrier with all 32 shires at once
+  // (barrier-shire32); the chip-wide barrier of 32 shires, one minion each, from global atomics and credits (barrier-chip1); and
+  // the 1,024-minion allreduce of 32 B on the hardware tree (allreduce, 1 register). The GPU values are the published
+  // figures of the comparison table below, with their sources in Sources; they are not measured here.
+  (function () {
+    if (!document.getElementById("prim-chart") || !V3IDS.length) return;
+    const GPU = {                                    // ns; [lo, hi] for a published range
+      handoff: [330, 330],    // A100: flag handoff through an L2 atomic, 166 ns one way (~330 ns round trip; Chips and Cheese)
+      dsm: [103, 121],        // H800: a remote read of another SM's shared memory, inside a cluster (Luo et al.)
+      fence: [700, 700],      // A100: the same handoff once a data fence is added (~0.7 µs; the table)
+      sync: [16, 60],         // __syncthreads(), within one SM (Burtchell & Burtscher)
+      grid: [1100, 1200]      // A100 grid.sync(), no data moved (Zhang et al.); GRID_SYNC_US is its SC23 poster value
+    };
+    const cls = (c, kind, pair) => (((V3[c].classes || {})[kind] || []).find(r => r.pair === pair) || {}).rtt_cycles;
+    const clsAll = (c, kind) => ((V3[c].classes || {})[kind] || []).map(r => r.rtt_cycles);
+    const bar = (c, name) => ((V3[c].barriers || []).find(b => b.name === name) || {}).cycles;
+    const tree = c => (((V3[c].allreduce || {})["1"] || []).find(q => q.minions === 1024) || {}).cycles;
+    const flag = c => ((V3[c].matrices || {})["matrix-flag"] || { pairs: [] }).pairs.map(p => p[2]);
+    const med = v => { const s = v.slice().sort((a, b) => a - b), n = s.length; return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2; };
+    // one ET item: a value (cycles) or a range per card; lo/hi/at in ns for the first card
+    const et = (label, get) => {
+      const per = V3IDS.map(c => ({ c, v: get(c) })).filter(o => o.v != null && (Array.isArray(o.v) ? o.v.every(isFinite) : isFinite(o.v)));
+      if (!per.length) return null;
+      const v0 = per[0].v, lo = Array.isArray(v0) ? v0[0] : v0, hi = Array.isArray(v0) ? v0[1] : v0, at = Array.isArray(v0) ? v0[2] : v0;
+      return { who: "et", label, lo: ns(lo), hi: ns(hi), at: ns(at), per };
+    };
+    const gpu = (label, r, at) => ({ who: "gpu", label, lo: r[0], hi: r[1], at: at == null ? (r[0] + r[1]) / 2 : at });
+    const ROWS = [
+      { label: "Pass 32 B to another core and back", short: "message round trip", items: [
+        et("TensorSend, tree edge", c => (V3[c].primitives || {}).tree_hop),
+        et("TensorSend, elsewhere in the shire", c => (V3[c].primitives || {}).other_hop),
+        et("TensorSend, 1 to 10 mesh hops", c => { const a = cls(c, "pingpong", "0.0-8.0"), b = cls(c, "pingpong", "0.0-31.0"); return a && b ? [a, b, a] : null; }),
+        gpu("A100: handoff through an L2 atomic", GPU.handoff),
+        gpu("H800: read another SM's shared memory (cluster only)", GPU.dsm)] },
+      { label: "Signal another core and see it", short: "signal", items: [
+        et("credit counter, polled, in a shire to 10 hops", c => { const v = clsAll(c, "fcc"); return v.length ? [Math.min(...v), Math.max(...v), Math.min(...v)] : null; }),
+        et("flag through global atomics, 496 shire pairs (median)", c => { const v = flag(c); return v.length ? [Math.min(...v), Math.max(...v), med(v)] : null; }),
+        gpu("A100: flag through L2", GPU.handoff),
+        gpu("A100: the same with a data fence", GPU.fence)] },
+      { label: "Barrier of one shire / one SM", short: "local barrier", items: [
+        et("FLB + credits, 32 minions (all 32 shires at once)", c => bar(c, "barrier-shire32")),
+        gpu("__syncthreads(), one SM", GPU.sync)] },
+      { label: "Synchronise the whole chip", short: "chip-wide", items: [
+        et("hardware tree: allreduce of 32 B over 1,024 minions", c => tree(c)),
+        et("barrier of 32 shires from global atomics and credits", c => bar(c, "barrier-chip1")),
+        gpu("A100 grid.sync(), no data", GPU.grid, GRID_SYNC_US * 1000)] }
+    ].map(r => Object.assign(r, { items: r.items.filter(Boolean) })).filter(r => r.items.length);
+    const ET_C = "var(--c7)", GPU_C = "var(--ref)";
+    CK.legend("prim-legend", [{ key: "et", label: "ET-SoC-1, measured (" + V3IDS.map(c => CK.card(c).label).join(", ") + ")", mark: "dot", color: ET_C },
+      { key: "gpu", label: "GPU, published (closest equivalent)", mark: "ring", color: GPU_C }]);
+    const nItems = ROWS.reduce((s, r) => s + r.items.length, 0);
+    CK.frame("prim-chart", {
+      label: "Latency of each communication and synchronisation primitive, ET-SoC-1 against GPU, log scale",
+      height: W => (W < 600 ? 34 : 26) * nItems + (W < 600 ? 34 : 30) * ROWS.length + 60, minW: 280,
+      draw: f => {
+        const narrow = f.narrow, L = narrow ? 8 : 286, R = 16, T = 20, B = 40, ih = narrow ? 34 : 26, rh = narrow ? 34 : 30;
+        const x = CK.log(10, 20000, L, f.W - R), g = CK.el("g", {}, f.svg), nodes = [], labs = [];
+        CK.axes(f, { x, y: CK.lin(0, 1, f.H - B, T), L, R, T, B, yt: [], yfmt: () => "", xt: narrow ? [10, 100, 1000, 10000] : [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000],
+          xfmt: v => v >= 1000 ? num(v / 1000, 0) + " µs" : num(v, 0) + " ns", xl: "round trip or barrier time (log scale)" });
+        let yy = T;
+        ROWS.forEach(r => {
+          labs.push(CK.txt(g, narrow ? L : 4, yy + rh - 10, r.label, "lab-strong"));
+          yy += rh;
+          r.items.forEach(it => {
+            const cy = yy + (narrow ? ih - 9 : ih / 2), n = CK.el("g", { "data-series": it.who }, g), col = it.who === "et" ? ET_C : GPU_C;
+            CK.el("rect", { x: narrow ? 0 : 0, y: yy, width: f.W, height: ih, class: "ck-hit" }, n);
+            if (narrow) labs.push(CK.txt(n, L, yy + 11, it.label, "tick"));
+            else labs.push(CK.txt(n, L - 10, cy + 4, it.label, "tick", "end"));
+            const span = it.hi > it.lo * 1.02;
+            if (span) {
+              const ln = CK.el("line", { x1: x(it.lo), x2: x(it.hi), y1: cy, y2: cy, "stroke-width": 3, "stroke-linecap": "round", "aria-hidden": "true" }, n);
+              ln.style.stroke = col; if (it.who === "gpu") ln.style.strokeDasharray = "4 3";
+            }
+            // ET: one dot (a range's low end or median); GPU: a ring, or a ring at each end of a published range
+            (it.who === "gpu" && span ? [it.lo, it.hi] : [it.at]).forEach(v => {
+              const m = CK.el("circle", { cx: x(v), cy, r: 5, "aria-hidden": "true" }, n);
+              if (it.who === "et") m.style.fill = col; else { m.style.fill = "var(--surface)"; m.style.stroke = col; m.style.strokeWidth = "2"; }
+            });
+            const rng = (a, b, u) => Math.abs(b - a) < 0.5 ? num(a, 0) + u : num(a, 0) + "–" + num(b, 0) + u;
+            const fmtNs = v => v >= 1000 ? num(v / 1000, 2) + " µs" : num(v, 0) + " ns";
+            let tip = "<b>" + it.label + "</b><br>";
+            if (it.who === "et") tip += it.per.map(o => CK.card(o.c).label + ": " + (Array.isArray(o.v) ? rng(o.v[0], o.v[1], " cycles") + (o.v[2] !== o.v[0] ? ", median " + num(o.v[2], 0) : "") : num(o.v, 0) + " cycles")).join("<br>") +
+              "<br>" + (it.hi > it.lo * 1.02 ? fmtNs(it.lo) + " to " + fmtNs(it.hi) : fmtNs(it.at)) + " at 600 MHz (median of three passes on each card)";
+            else tip += (it.hi > it.lo * 1.02 ? fmtNs(it.lo) + " to " + fmtNs(it.hi) : "about " + fmtNs(it.at)) + ", a published measurement (Sources), not ours";
+            CK.tip(f, n, tip);
+            nodes.push(n);
+            yy += ih;
+          });
+        });
+        CK.inside(f, labs);
+        CK.keynav(f, nodes);
+      }
+    });
+    // the caption, from the same values
+    const msg = ROWS[0].items.filter(q => q.who === "et"), sig = ROWS[1].items, loc = ROWS[2].items, chip = ROWS[3].items;
+    const fl = sig.find(q => /global atomics/.test(q.label)), trees = chip.find(q => /tree/.test(q.label)), atom = chip.find(q => /atomics and credits/.test(q.label));
+    const us = v => num(v / 1000, v >= 10000 ? 0 : 1) + " µs", nsf = v => num(v, 0) + " ns", nsr = (a, b) => num(a, 0) + "–" + num(b, 0) + " ns";
+    const WORDS = ["no", "one", "two", "three", "four", "five"];
+    const lo = Math.min(...msg.map(q => q.lo)), hi = Math.max(...msg.map(q => q.hi)), ho = GPU.handoff[0], gs = GRID_SYNC_US * 1000;
+    const spread = Math.max(...[].concat(...ROWS.map(r => r.items.filter(q => q.who === "et").map(q => {
+      const vals = q.per.map(o => Array.isArray(o.v) ? o.v[2] : o.v); return Math.max(...vals) - Math.min(...vals); }))));
+    document.getElementById("prim-note").textContent =
+      "Log scale. Filled marks are this page's measurements at 600 MHz, drawn at " + CK.card(V3IDS[0]).label + "'s values (every card's in the tooltip; the " + (WORDS[V3IDS.length] || V3IDS.length) +
+      " cards differ by at most " + num(Math.ceil(spread), 0) + " cycles on any of them); a bar is a range, from a tree edge to ten hops or over every shire pair. " +
+      "Hollow marks are the published GPU figures of the table below, not measured here (a pair of rings is a published range). A message between two cores takes " + nsr(lo, hi) +
+      " round trip, from a tree edge to ten hops, around the A100's " + nsf(ho) + " handoff through L2" + (fl ? "; a flag through memory atomics takes " + nsr(fl.lo, fl.hi) +
+      " (median " + nsf(fl.at) + ", " + num(fl.at / ho, 1) + "× the A100's)" : "") + ". " +
+      (loc.length > 1 ? "A shire's barrier takes " + nsf(loc[0].at) + " against " + nsr(GPU.sync[0], GPU.sync[1]) + " for __syncthreads(). " : "") +
+      (trees && atom ? "Across the chip, the hardware tree synchronises in " + us(trees.at) + " while it moves 32 B, " + num(trees.at / gs, 1) + "× a grid.sync() that moves nothing, and a barrier of 32 shires from atomics and credits takes " +
+        us(atom.at) + ", " + num(atom.at / gs, 1) + "×." : "");
   })();
 
   // tables that become cards on a phone

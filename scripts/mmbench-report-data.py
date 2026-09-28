@@ -19,6 +19,12 @@ tensor.rows fp32_randn, fp16_randn, int8_randn), the operand-and-card band (the 
 random data, aifoundry2's from tensor.rows and every card's from tensor.per_card_rows, all on board power) and the
 A100 constants below.
 
+--v3 MMB_JSON (default: the version-3 check's docs/reports/data/2026-09-25-claims-v3/results/mmb.json; "none" leaves
+it out) adds a "v3" object for the three-card chart: for each card and workload the pass-mean throughput (MMB-b; the
+DRAM workload's is the middle of MMB-a's launch range, which spans 0.6%), board power, the idle just before the
+workload and the power above it with its 99% interval over the four passes (MMB-c), the die temperature, and
+GFLOP/s per W of board power (MMB-d for the tiles-in-L2 workloads; throughput over board power for DRAM).
+
 --ladder TESTDRIVE_HTML writes the test drive's performance ladder (<script id="ladder-data">):
 the FOSDEM 2026 rungs parsed from docs/et-soc1-notes.md, this run's fp32 tensor-unit rate and the
 fp32 peak at the reported clock. The test drive's own SGEMM rows are read from its table by the page.
@@ -121,6 +127,42 @@ def eff_object(res, manual_path, run_dir):
                      "measured": A100_MEASURED}}
 
 
+V3_MMB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "reports", "data", "2026-09-25-claims-v3",
+                      "results", "mmb.json")
+WORKLOADS = ("fp32-tensor-L2", "fp16-tensor-L2", "int8-tensor-L2", "fp32-tensor-DRAM")
+
+
+def v3_object(path):
+    """The version-3 check's matmul values per card (items MMB-a to MMB-d of mmb.json), for the three-card chart."""
+    m = json.load(open(path))
+    it = {x["item"]: x for x in m["items"]}
+    c_items, b_items, a_items, d_items = (it[k]["per_card"] for k in ("MMB-c", "MMB-b", "MMB-a", "MMB-d"))
+    cards = [c for c in m["cards"]["all"] if c in c_items]
+    out = {"source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json (items MMB-a to MMB-d; four passes per card)",
+           "passes": {c: len(m["passes"].get(c, [])) for c in cards}, "cards": {}}
+    for c in cards:
+        rows = {}
+        for w in WORKLOADS:
+            cc = c_items[c].get(w)
+            if not cc:
+                continue
+            b = b_items.get(c, {}).get(w)
+            if b and b.get("tflops_pass_values"):
+                tf, tf_basis = statistics.mean(b["tflops_pass_values"]), "pass mean"
+            else:
+                tf, tf_basis = statistics.mean(a_items[c][w]["info_tflops_range"]), "middle of the launch range"
+            d = d_items.get(c, {}).get(w)
+            per_w = ({"mean": sig(d["mean"], 5), "lo": sig(d["ci99"][0], 5), "hi": sig(d["ci99"][1], 5)} if d
+                     else {"mean": sig(tf * 1000 / cc["board_w"], 5)})
+            rows[w] = {"tflops": sig(tf, 5), "tflops_basis": tf_basis, "board_w": sig(cc["board_w"], 5),
+                       "idle_w": sig(cc["idle_before_w"], 5),
+                       "above_w": {"mean": sig(cc["mean"], 5), "lo": sig(cc["ci99"][0], 5), "hi": sig(cc["ci99"][1], 5),
+                                   "n": cc["n"]},
+                       "die_c": sig(cc["die_c_mean"], 3), "die_c_start": cc.get("die_c_start"), "per_w": per_w}
+        out["cards"][c] = rows
+    return out
+
+
 def ladder_object(res, ghz, minions):
     """The test drive's ladder: FOSDEM rungs from docs/et-soc1-notes.md, this run's fp32 tensor rate, the fp32 peak."""
     notes = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "et-soc1-notes.md")).read()
@@ -162,6 +204,8 @@ def main():
     p.add_argument("--embed", metavar="REPORT_HTML", help="replace the trace-data JSON in this report")
     p.add_argument("--manual", metavar="MANUAL_JSON", help="energy manual data: adds the efficiency explorer's 'eff' object")
     p.add_argument("--ladder", metavar="TESTDRIVE_HTML", help="replace the ladder-data JSON in the test drive")
+    p.add_argument("--v3", metavar="MMB_JSON", default=V3_MMB,
+                   help="the version-3 check's mmb.json (default: the committed one); 'none' leaves the three-card data out")
     args = p.parse_args()
     d = args.run_dir
 
@@ -215,10 +259,12 @@ def main():
     data = {"trace": [[sec(t), round(w, 2)] for t, w in samples], "windows": windows, "idle_w": round(res["idle_w"], 2)}
     if args.manual:
         data["eff"] = eff_object(res, args.manual, d)
+    if args.v3 and args.v3 != "none" and os.path.exists(args.v3):
+        data["v3"] = v3_object(args.v3)
     if args.embed:
         embed(args.embed, "trace-data", data)
         print(f"embedded {len(data['trace'])} power samples and {len(windows)} windows"
-              f"{' and the efficiency data' if args.manual else ''} into {args.embed}")
+              f"{' and the efficiency data' if args.manual else ''}{' and the three-card data' if 'v3' in data else ''} into {args.embed}")
     if args.ladder:
         embed(args.ladder, "ladder-data", ladder_object(res, ghz, minions))
         print(f"embedded the performance ladder into {args.ladder}")

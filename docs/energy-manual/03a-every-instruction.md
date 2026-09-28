@@ -1,6 +1,6 @@
 # 3.1 Every instruction
 
-Energy per instruction retired, above idle, at 600 MHz and 0.52 V, with both harts of all 1,024 minions issuing it back to back. **Every figure is the mean over nine measurements — three passes in shuffled order on each of three cards (26 September) — and the bracket after it is the confidence bar: the range those nine spanned.** The per-card columns give each card's own mean with its pass-to-pass standard error. Operands: zeros, and random values in [0.5, 2) (random 32-bit words for integer ops).
+Energy per instruction retired, above idle, at 600 MHz and 0.50–0.52 V on the minion rail, with both harts of all 1,024 minions issuing it back to back. **Every figure is the mean over nine measurements — three passes in shuffled order on each of three cards (26 September) — and the bracket after it is the confidence bar: the range those nine spanned.** The per-card columns give each card's own mean with its pass-to-pass standard error. Operands: zeros, and random values in [0.5, 2) (random 32-bit words for integer ops).
 
 Over the whole catalogue the bar is ±7.4% of the value in the median and ±14.7% at the 90th percentile; about half of it is the difference between the cards: aifoundry3 runs 0.972× and aifoundry1 card 1 runs 0.962× aifoundry2 in the median, each at its own die temperature ([8](08-cards.md)).
 

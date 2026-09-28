@@ -26,8 +26,8 @@
 </style>
 <h1>Influence functions on the ET-SoC-1: one small step fits, none of the bill does</h1>
 <p class="byline">25 September 2026 · <span class="marker">exploratory: estimates, not measurements</span> · desk analysis built on
-numbers measured on the lab's cards (aifoundry2 and aifoundry3; the energy manual's catalogue and the gather/scatter rates
-also on aifoundry1's card 1); no card was run for this page · H100 and A100 figures are spec, published or
+numbers measured on the lab's cards (aifoundry2 and aifoundry3; the energy manual's catalogue, the gather/scatter rates
+and the host link also on aifoundry1's card 1); no card was run for this page · H100 and A100 figures are spec, published or
 estimated, as tagged · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">The question, from the author of the
@@ -52,13 +52,13 @@ byte measured on an A100; nobody has measured what an H100 spends on a 20 µs ke
 The verdict on value does not hang on either. The steps that survive are under a millionth of an amortized query; the
 one ET-shaped step with real size, scattering a gradient's sparse parts into a sketch, happens where the gradient is born, on
 the GPU.
-And S1's lead needs the card busy: at one query a second, its 25–36 W at rest cost 25–36 J per query, about
-<span data-d="duty.ratio_idle_to_active" data-f="int">19,000–36,000</span> times the pass itself. It breaks even with an
+And S1's lead needs the card busy: at one query a second, its <span data-d="model.et.idle_W.range" data-dp="0">25–36</span> W at rest cost <span data-d="duty.et_idle_per_query_J_at_1qps" data-dp="0">25–36</span> J per query, about
+<span data-d="duty.ratio_idle_to_active" data-f="int">25,000–27,000</span> times the pass itself (the same card's idle on both sides). It breaks even with an
 H100 that is in the server anyway only above <span data-d="duty.breakeven_vs_h100_qps" data-f="r2">2,900–20,000</span>
 queries a second, rates at which queries batch and the lead goes.</p>
 <p><b>What would settle it.</b> One new kernel on a lab card (<a href="#the-first-experiment-on-a-lab-card">section 5</a>): score a
 static 65 MB int8 shard at 1 to 64 queries per pass with a fused top-k, next to the same scoring metered on a GPU. S1 is
-dead if one query costs 3 mJ or more of board energy, or if the GPU comes within 3×.</p>
+dead if one query costs <span data-d="experiment.kill_mJ" data-dp="0">3</span> mJ or more of board energy, or if the GPU comes within <span data-d="experiment.kill_gpu_within" data-dp="0">3</span>×.</p>
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">Share of an amortized query that S1 touches</div><div class="val">about 10⁻⁹</div><div class="sub">the author's 8B model: 8.4 H100-hours per query, against about 23 µs of H100 time to score a shard</div></div>
@@ -86,7 +86,7 @@ number of queries scored in one pass over the data.</p></details>
 <dl class="evkey">
 <dt><span class="ev m">M</span></dt><dd>measured on an ET-SoC-1 lab card, in the linked reports. A measured statement that names no
 card holds on both aifoundry2 and aifoundry3 (the rule in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#method">hub's §8</a>);
-the gathers, scatters and packed atomics (E48) were measured on all three cards, aifoundry1's card 1 as well. A named
+the gathers, scatters and packed atomics (E48) and the host link (E50) were measured on all three cards, aifoundry1's card 1 as well. A named
 card means that card only.</dd>
 <dt><span class="ev">D</span></dt><dd>derived: arithmetic on measured numbers, nothing new measured.</dd>
 <dt><span class="ev">S</span></dt><dd>vendor spec: datasheets and programmer's manuals.</dd>
@@ -163,8 +163,9 @@ in the server anyway (the H100 computes each query's gradient and iHVP, about 1.
 <div id="rate-leg"></div>
 <div class="chart" id="rate"></div>
 <div id="x-read"></div>
-<p class="small">Bands span the estimates' ranges: the ET card at rest draws 25.1–36.3 W <span class="ev m">M</span> (aifoundry3 cool,
-aifoundry2 hot); the H100 60–90 W at rest <span class="ev e">E</span> and 105 pJ per byte from HBM or 38 from L2
+<p class="small">Bands span the estimates' ranges: the ET card at rest draws <span data-d="model.et.idle_W.range" data-dp="1">25.1–36.3</span> W <span class="ev m">M</span> (aifoundry3 cool,
+aifoundry2 hot; the third card measured, aifoundry1's card 1, draws more at rest, <span data-d="model.et.idle_W_other.aifoundry1-c1.lo" data-dp="0">32</span>–<span data-d="model.et.idle_W_other.aifoundry1-c1.hi" data-dp="0">50</span> W
+at <span data-d="model.et.idle_W_other.aifoundry1-c1.T.0" data-dp="0">56</span>–<span data-d="model.et.idle_W_other.aifoundry1-c1.T.1" data-dp="0">81</span> °C, which would only raise the ET's band); the H100 60–90 W at rest <span class="ev e">E</span> and 105 pJ per byte from HBM or 38 from L2
 (an A100's levels alone, <span class="ev">X</span>); the host CPU 40–200 W while it scores <span class="ev e">E</span>. A band stops where its device is
 full at this Q; beyond it, more chips or a larger Q are needed. The shaded column is where the ET breaks even with the H100.
 Everything here is a model (<a href="#method-and-caveats">section 6</a>); only the ET's per-byte cost and bandwidth are
@@ -197,9 +198,9 @@ leaves the chip, the maximum is combined in the tree for free, and every minion 
 <dt>Where it wins (all of these)</dt>
 <dd><details class="more"><summary>All five conditions, in full</summary><ul>
 <li>The shard is static. A per-query shortlist has to be fetched first: 64 MB from the card's DRAM takes
-<span data-d="kills.k1.ms" data-dp="2">0.84</span> ms and <span data-d="kills.k1.mJ" data-dp="0">29–39</span> mJ of board energy
-<span class="ev">D</span>, over PCIe <span data-d="kills.k1.pcie_ms" data-dp="1">4.1</span> ms <span class="ev">S</span>,
-<span data-d="kills.k1.x_pass" data-dp="0">30–140</span>× the <span data-d="s1.hbm_case.et_us" data-dp="0">28</span> µs scoring pass (K1).</li>
+<span data-d="kills.k1.ms" data-dp="2">0.84</span> ms and <span data-d="kills.k1.mJ" data-dp="0">30–39</span> mJ of board energy
+<span class="ev">D</span>, over PCIe <span data-d="kills.k1.pcie_ms" data-dp="1">5.4</span> ms at the <span data-d="kills.k1.pcie_Bps" data-s="1e-9" data-dp="1">11.8–11.9</span> GB/s the link was measured to move for a <span data-d="kills.k1.pcie_copy_MiB" data-dp="0">64</span> MiB copy, or <span data-d="kills.k1.pcie_staged_ms" data-dp="1">8.4–12.0</span> ms as a program's staged copy <span class="ev m">M</span>,
+<span data-d="kills.k1.x_pass" data-dp="0">30–190</span>× the <span data-d="s1.hbm_case.et_us" data-dp="0">28</span> µs scoring pass (K1).</li>
 <li>It fits 72 MB: at k = 4,096 that is <span data-d="s1.capacity_codes_k4096.int8" data-f="int">17,578</span> int8 codes,
 <span data-d="s1.capacity_codes_k4096.fp16" data-f="int">8,789</span> in fp16 or <span data-d="s1.capacity_codes_k4096.bit" data-f="int">140,625</span>
 at 1 bit <span class="ev">D</span>; at the 3 million dimensions reported for one Anthropic index (secondhand <span class="ev">O</span>)
@@ -250,7 +251,8 @@ and the lead is <span data-d="s1.hbm_case_rows16.lead" data-dp="1">4.2–5.5</sp
 logits, top-10 per query, with K-FAC or iterative solves. Weights <span data-d="s2.atlas_bytes.weights_KB" data-dp="0">136</span> KB,
 images <span data-d="s2.atlas_bytes.images_MB" data-dp="1">11.8</span> MB in uint8 at 14×14, queries
 <span data-d="s2.atlas_bytes.queries_MB" data-dp="1">13.6</span> MB in fp32: everything fits the scratchpads, and a persistent
-kernel avoids the 0.2–0.4 ms host launch <span class="ev m">M</span>.</dd>
+kernel avoids the <span data-d="model.et.launch_ms.range" data-dp="2">0.56–0.57</span> ms an empty kernel takes to be launched from the host and waited for
+(<span data-d="model.et.launch_ms.b2b" data-dp="2">0.10</span> ms each when launches queue back to back; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link">E50</a>, three cards) <span class="ev m">M</span>.</dd>
 <dt>ET-SoC-1 against the measured A100</dt>
 <dd>The atlas's scan was measured at <span data-d="s2.a100_s" data-dp="3">0.231</span> s on an A100 <span class="ev">O</span>:
 <span data-d="s2.scan_flop" data-f="sci">4.1×10¹²</span> nominal FLOP, <span data-d="s2.a100_tflops_nominal" data-dp="1">17.8</span> TFLOP/s.
@@ -273,7 +275,7 @@ joule-per-phase answer to the author's open question on energy per attribution a
 of that too.</p>
 </details>
 
-<h3>S3 (a measurement, now made). Gather, scatter and scatter-add rates</h3>
+<h3 id="s3-measured">S3 (a measurement, now made). Gather, scatter and scatter-add rates</h3>
 <p>No influence use survives on its own (K3 below), but every sparse or irregular idea on this chip waited on one
 primitive: the vector unit's gathers and scatters (<code>fgw.ps</code>, <code>fscw.ps</code> and their variants), which
 read or write eight elements at eight addresses per instruction. They were measured on 26 September on three cards (E48;
@@ -311,17 +313,19 @@ nothing that updates DRAM or the home L3 comes near it.</p>
 <div class="chart" id="s3"></div>
 <p class="ck-readout" id="s3-read"></p>
 <p class="small">Both harts of all 1,024 minions (E48, three passes on each of three cards <span class="ev m">M</span>); the energy is
-card power above idle over the update rate. The dashed line is the 10 G updates a second this page asked for. The grey point is
-the hot-line report's global atomics spread over 32 lines, the one rate this page had before S3.</p>
+card power above idle over the update rate. The dashed line is the 10 G updates a second this page asked for. The ring is
+the hot-line report's global atomics spread over 32 lines, the one rate this page had before S3. The energy manual draws the
+same rows in the same colours, with the hot line's contended line, lines of constant power and each card on its own
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#synchronisation">section 6</a>).</p>
 
 <h2>4. What does not fit, and why</h2>
 <p>Everything that makes up the bill is dense arithmetic on gradients: one ET card does fp16 at <span data-d="dense.tflops" data-dp="1">19.0</span> TFLOP/s for <span data-d="dense.board_w" data-dp="1">60.8</span> W of
 board power on random operands (aifoundry2, 80 °C <span class="ev m">M</span>), against an H100's 396 TFLOP/s at 40% of peak for 700 W <span class="ev">O</span>
-<span class="ev">S</span>, with no bf16, no fp64, no hardware divide or square root, 32 GB of DRAM at 76 GB/s and an untimed host
-link. The candidates that looked ET-shaped die for other reasons.</p>
+<span class="ev">S</span>, with no bf16, no fp64, no hardware divide or square root, 32 GB of DRAM at 76 GB/s and a host link that moves <span data-d="model.et.pcie.dma_Bps" data-s="1e-9" data-dp="1">12.5–12.6</span> GB/s to the card
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link">E50</a> <span class="ev m">M</span>). The candidates that looked ET-shaped die for other reasons.</p>
 <details class="more"><summary>Why each candidate (K1–K9) doesn't work, in full</summary>
 <div class="table-wrap"><table id="k-table"><thead><tr><th>Candidate</th><th>Why it dies</th></tr></thead><tbody>
-<tr><td><b>K1.</b> Rerank a per-query shortlist in SRAM</td><td>The shortlist differs per query, so it must be fetched first: 64 MB is <span data-d="kills.k1.ms" data-dp="2">0.84</span> ms and <span data-d="kills.k1.mJ" data-dp="0">29–39</span> mJ from the card's DRAM <span class="ev">D</span>, <span data-d="kills.k1.pcie_ms" data-dp="1">4.1</span> ms over PCIe <span class="ev">S</span>, <span data-d="kills.k1.x_pass" data-dp="0">30–140</span>× the <span data-d="s1.hbm_case.et_us" data-dp="0">28</span> µs pass. An H100 reads it from HBM in about <span data-d="kills.k1.h100_us" data-dp="0">21</span> µs. Only a static shard stays resident (S1).</td></tr>
+<tr><td><b>K1.</b> Rerank a per-query shortlist in SRAM</td><td>The shortlist differs per query, so it must be fetched first: 64 MB is <span data-d="kills.k1.ms" data-dp="2">0.84</span> ms and <span data-d="kills.k1.mJ" data-dp="0">30–39</span> mJ from the card's DRAM <span class="ev">D</span>, <span data-d="kills.k1.pcie_ms" data-dp="1">5.4</span> ms over PCIe at the rate the link was measured to move for a <span data-d="kills.k1.pcie_copy_MiB" data-dp="0">64</span> MiB copy (<span data-d="kills.k1.pcie_staged_ms" data-dp="1">8.4–12.0</span> ms as a program's staged copy) <span class="ev m">M</span>, <span data-d="kills.k1.x_pass" data-dp="0">30–190</span>× the <span data-d="s1.hbm_case.et_us" data-dp="0">28</span> µs pass. An H100 reads it from HBM in about <span data-d="kills.k1.h100_us" data-dp="0">21</span> µs. Only a static shard stays resident (S1).</td></tr>
 <tr><td><b>K2.</b> Many-query top-k with the hardware threshold, on its own</td><td>Selection is 10⁴–1.5×10⁵ inserts per query, free on a GPU; the state does not fit as first sized (1,000 queries × 10⁴ entries is 80 MB, over the 72 MB usable, and even 16 queries need 1.3 GB if every minion keeps its own heaps). Kept inside S1.</td></tr>
 <tr><td><b>K3.</b> Sparse-sketch accumulation, scatter-add recall</td><td>Under 1% of a gradient's cost, and a prefilter is about 10⁻⁶ of the bill. GPUs keep the buckets in L2, use the tensor-sketch FFT or factored projections (GPUSparse's 12.5 GB/s is for accumulators in HBM <span class="ev">X</span>). Measured since (S3 <span class="ev m">M</span>): a scatter-add runs at <span data-d="model.et.gs.upd_l2.ops_per_s" data-s="1e-9" data-dp="1">18.2</span>–<span data-d="model.et.gs.upd_l1.ops_per_s" data-s="1e-9" data-dp="0">139</span> G updates/s while each hart's buckets stay in its shire's L2 or its own L1, and <span data-d="model.et.gs.famoadd_l.ops_per_s" data-s="1e-9" data-dp="1">12.7</span> G/s as packed atomics on a table a shire shares; a sketch the size of a real index lives in DRAM, where it runs at <span data-d="model.et.gs.upd_dram.ops_per_s" data-s="1e-9" data-dp="2">0.42</span> G/s for <span data-d="model.et.gs.upd_dram.nj" data-dp="0">22</span> nJ an update, or at the home L3 (packed atomics on one table for the chip, <span data-d="model.et.gs.famoadd_g.ops_per_s" data-s="1e-9" data-dp="1">2.8</span> G/s), against the 10–19 G/s a posting stream from DRAM needs <span class="ev e">E</span>. The recall use rests on an open bet that sparse codes keep the top k.</td></tr>
 <tr><td><b>K4.</b> Lexical or bitmap prefilter (BM25, TF-IDF)</td><td>About 10⁻⁶ of the bill, and biased toward token overlap <span class="ev">O</span>. The host CPU's inverted index does it; on the chip it is DRAM-bound at 10⁷ documents (a 20-term query reads 25 MB of bitmaps: about <span data-d="kills.k4.ms" data-dp="2">0.33</span> ms and <span data-d="kills.k4.mJ" data-dp="0">11–15</span> mJ <span class="ev e">E</span>).</td></tr>
@@ -335,10 +339,17 @@ link. The candidates that looked ET-shaped die for other reasons.</p>
 
 <h2>5. The first experiment on a lab card</h2>
 <p>One new kernel settles S1, in one to two days of work. Nothing below has been run.</p>
+<p id="verdict-lead">Where the verdict would fall: this page's model for one query over the 65.5 MB shard, against the rule's pass and kill lines.</p>
+<div class="chart-title">The first experiment's rule, and where this page's model puts S1: board energy against time for one query</div>
+<div id="verdict-leg"></div>
+<div class="chart" id="verdict"></div>
+<p class="ck-readout" id="verdict-read"></p>
+<p class="small" id="verdict-cap"></p>
 <details class="more"><summary>The experiment plan, step by step</summary>
 <ol>
-<li><b>Prerequisite, about an hour.</b> Time the host link (host-to-device and back, 4 KB to 1 GB, with the <code>workloads/memhier</code>
-host; PCIe Gen4 x8 is 15.75 GB/s by spec and has never been timed), the round trip of a persistent kernel waiting on a
+<li><b>Prerequisite, about an hour.</b> The host link is timed (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link">Over the PCIe link</a>, E50,
+three cards: <span data-d="model.et.pcie.dma_Bps" data-s="1e-9" data-dp="1">12.5–12.6</span> GB/s to the card with the DMA alone, <span data-d="model.et.pcie.staged_Bps" data-s="1e-9" data-dp="1">5.2–7.8</span> GB/s as a program's staged copy,
+and an empty kernel <span data-d="model.et.pcie.launch_wait_us" data-dp="0">556–566</span> µs launched and waited for). What remains is the round trip of a persistent kernel waiting on a
 doorbell, and the board power of that waiting kernel. Poll a flag in the scratchpad, not a global atomic: 24 requesters on one
 line stop a shire (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">one hot line</a>).</li>
 <li><b>The kernel, <code>--test score</code> in <code>workloads/sparsity</code>.</b> Start from <code>--test gemv --gemv-tree</code>,
@@ -359,8 +370,8 @@ its governor lifts the clock). From the passes and the measured idle, report ene
 second.</li>
 <li><b>The GPU side, mandatory.</b> The same scoring on an A100 or H100, the shard in HBM and pinned in L2, timed and metered
 through NVML's energy counter over loops of 10 s or more. S1's lead is that ratio.</li>
-<li><b>Verdict.</b> Pass if one query over 65 MB takes 40 µs or less and 1.5 mJ or less of board energy, and the fused top-k adds
-at most 20%. Kill S1 if one query costs 3 mJ or more, or the GPU comes within 3× per pass.</li>
+<li><b>Verdict.</b> Pass if one query over 65 MB takes <span data-d="experiment.pass_us" data-dp="0">40</span> µs or less and <span data-d="experiment.pass_mJ" data-dp="1">1.5</span> mJ or less of board energy, and the fused top-k adds
+at most <span data-d="experiment.topk_max" data-f="pct">20</span>. Kill S1 if one query costs <span data-d="experiment.kill_mJ" data-dp="0">3</span> mJ or more, or the GPU comes within <span data-d="experiment.kill_gpu_within" data-dp="0">3</span>× per pass (the chart above).</li>
 </ol>
 <p>Then, if S1 passes: <b>S2</b> as <code>atlasscan</code>, a persistent kernel holding the atlas MLP, the digits and 100 query
 gradients; kill the speed story above 0.231 s and the energy story above the A100's metered joules, and time one LiSSA step
@@ -406,8 +417,9 @@ per pass ÷ Q; for the H100 and the CPU, energy per pass ÷ Q. A device is full 
 <span data-d="dense.board_w" data-dp="1">60.8</span> W of board power on random operands (aifoundry2, 80 °C) <span class="ev m">M</span> <span class="ev e">E</span> against an H100 at 40% of 989 TFLOP/s and 700 W, the author's
 cost model <span class="ev">O</span>.</li>
 <li><b>Measured since the first version</b>: gathers, scatters, packed atomics and random DRAM reads (S3; E48, three passes on
-each of three cards, 26 September; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#irregular-access-gathers-and-scatters-by-level">energy manual's §4.4</a> and §6).</li>
-<li><b>Not measured on the chip</b>: the host link; tensor ops with
+each of three cards, 26 September; the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#irregular-access-gathers-and-scatters-by-level">energy manual's §4.4</a> and §6), and the host link
+(E50, five runs on each of three cards, 27 September; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link">Over the PCIe link</a>): K1's copy over PCIe uses its rates.</li>
+<li><b>Not measured on the chip</b>: tensor ops with
 fewer than 16 rows outside fp32 batch 1; int8 scoring with fresh tiles from the scratchpad; persistent multi-layer kernels;
 a polling kernel's power.</li>
 <li><b>Corrections.</b> The two desk maps this page started from needed several; they are listed in the <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-influence-on-et">data README</a>.</li>
@@ -416,7 +428,11 @@ a polling kernel's power.</li>
 <li><b>Versions.</b> 25 September 2026: first version, desk analysis; no card was touched. 27 September: S3 measured (E48,
 three cards: section 3, K3, K6); the dense energy and S2 on random operands; the per-operation energies over each workload's
 own idle; the anchor's time at 600 MHz; the energy manual's three-card values; the corrections the two desk maps needed
-moved to the data README.</li>
+moved to the data README. Later on 27 September: the host link as measured (E50) in K1 (at the rate of a 64 MiB copy, the
+size nearest K1's), S2's host launch, section 4 and the first experiment's
+prerequisite; the idle-to-pass ratio taken on the same card (it had paired one card's idle with the other's pass: 19,000–36,000,
+now 25,000–27,000); the verdict chart in section 5, which marks that the model leaves out the fused top-k; S3's chart in the
+energy manual's colours.</li>
 </ul>
 </details>
 
@@ -431,10 +447,10 @@ fraction, the batch-1 layer, the host launch), <a href="https://spacesheep.dev/@
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">on-chip communication</a> (the 2.3 µs tree),
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-relay">on-chip relay</a> (2.25 MB usable per scratchpad),
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-hot-line">one hot line</a> (atomics); the energy manual's §4.4 and §6 (S3's
-gathers, scatters and scatter-add, E48).</li>
+gathers, scatters and scatter-add, E48); <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link">over the PCIe link</a> (the host link and the launch path, E50).</li>
 <li>Data read by the producer: <code>docs/reports/data/2026-09-23-energy-manual/manual.json</code>,
 <code>docs/reports/data/2026-09-18-aifoundry2/results.json</code>, <code>docs/reports/data/2026-09-18-sparsity-aifoundry3/</code>,
-<code>docs/reports/data/2026-09-18-nocbench-aifoundry2/</code>.</li>
+<code>docs/reports/data/2026-09-18-nocbench-aifoundry2/</code>, <code>docs/reports/data/2026-09-27-pcie/pcie.json</code>.</li>
 <li>The author's pages: <a href="https://spacesheep.dev/@yaroslavvb/influence-functions-hessians-sketching-weak-factoring">Influence
 functions: Hessians, cost, sketching, and weak factoring</a> (§3.1 the 8B price table, §4 sketching and retrieval); the MNIST
 influence atlas, its manifest's measured costs; the Bergson page (§9.4, the two-stage pipeline and the 3-million-dimension index,

@@ -1397,13 +1397,15 @@ const binOff = c => { const I = (D.v3 && D.v3.idle) || {}; return (I.a && I.a[c]
   // the SP pass (TEL-P1, P3, P5) and the board refresh per poller (TEL-S), per card
   const sp = V3.sp_pass_ms, rf = V3.refresh_ms, cs = CK.cardsIn(sp);
   const q = c => f0(median(sp[c].quiet_ms)), e = c => f0(median(sp[c].e10_ms));
-  V.passQ = `${q('aifoundry2')} ms on aifoundry2 (${q('aifoundry3')} ms on aifoundry3)`;
-  V.passE = `${e('aifoundry2')} and ${e('aifoundry3')} ms`;
+  // every card in the data, in the registry's order: the first named in full, the others in brackets
+  const andC = a => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
+  V.passQ = `${q(cs[0])} ms on ${cardLab(cs[0])}` + (cs.length > 1 ? ` (${cs.slice(1).map(c => `${q(c)} ms on ${cardLab(c)}`).join(', ')})` : '');
+  V.passE = `${andC(cs.map(e))} ms`;
   V.passE2 = e('aifoundry2');
   /* the board value's refresh the stream shows under the same sampler (TEL-S, the mean over the passes), and how much
      longer the SP trace's own pass under the sampler runs than that refresh, per card: the two methods differ */
   const mh = c => rf[c].P_H.reduce((a, b) => a + b, 0) / rf[c].P_H.length;
-  V.refH = `${f0(mh('aifoundry2'))} and ${f0(mh('aifoundry3'))} ms`;
+  V.refH = `${andC(cs.filter(c => rf[c]).map(c => f0(mh(c))))} ms`;
   const dd = cs.filter(c => rf[c]).map(c => median(sp[c].e10_ms) - mh(c));
   V.methodDiff = range(Math.min(...dd), Math.max(...dd), 0);
   V.passAll = cs.map(c => `${q(c)} ms on ${cardLab(c)}`).join(', ');

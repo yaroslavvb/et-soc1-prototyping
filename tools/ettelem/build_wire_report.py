@@ -141,6 +141,14 @@ def main():
                           "fadd_s_random_pj": cb["fadd.s/random/h2"]["mean"],
                           "add_random_pj": cb["add/random/h2"]["mean"],
                           "source": "docs/reports/data/2026-09-23-energy-manual/manual.json (catalogue.combined, reruns.levels_pj_per_byte)"}
+        # the fitted delivery loss of the minion rail per card (the unmetered attribution, fit_unmetered.py; the hub's
+        # section 4.2 quotes the same coefficients): the page's "board against rail" caveat
+        um = man.get("unmetered") or {}
+        loss = {c: um[c]["coef"]["minion"] for c in um if isinstance(um[c], dict) and "coef" in um[c]}
+        if loss:
+            out["context"]["minion_delivery_loss"] = loss
+            out["context"]["minion_delivery_loss_source"] = ("docs/reports/data/2026-09-23-energy-manual/manual.json "
+                                                             "unmetered.<card>.coef.minion (tools/ettelem/fit_unmetered.py)")
     except KeyError as e:
         raise SystemExit(f"build_wire_report: cannot read the energy manual context: {MANUAL} has no {e}")
 

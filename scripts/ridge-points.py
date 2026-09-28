@@ -8,8 +8,9 @@ ridge = peak compute / bandwidth of the level. No new measurements: compute peak
 Specification and the PRM, measured bandwidths from the raw data of the earlier reports (docs/reports/data/),
 checked against the 23 September reruns of the same probe on both cards (the rl-pass* runs the energy manual pools),
 spec bandwidths from the manuals and micro-architecture docs, and energy per FLOP and per byte from the energy
-manual's data (docs/reports/data/2026-09-23-energy-manual/manual.json: sections 2, 3.2, 4 and 5). Every constant
-below names its source. With the version-3 manual (26 Sep, three cards) the cards are every card it carries, the
+manual's data (docs/reports/data/2026-09-23-energy-manual/manual.json: sections 2, 3.2, 4 and 5). The host link's
+measured rate is the host-to-card DMA rate of a 256 MB copy, timed on three cards on 27 September
+(docs/reports/data/2026-09-27-pcie/pcie.json); its link figure stays the spec. Every constant below names its source. With the version-3 manual (26 Sep, three cards) the cards are every card it carries, the
 scratchpad levels are the random-data fill (the re-runs filled them with zeros or random data), a byte level is given per
 card when any two cards' passes differ (99% Welch), int8 is pooled over the cards, and the launch-temperature offset of
 the ablation's values (AMENDMENTS.md C2, revised) is embedded as a range (energy.c2). With --embed the script replaces the JSON inside the report's
@@ -28,6 +29,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "docs", "reports", "data")
 REPORTS = os.path.join(ROOT, "docs", "reports")
 MANUAL = os.path.join(DATA, "2026-09-23-energy-manual", "manual.json")  # the energy manual's data (23 Sep)
+PCIE = os.path.join(DATA, "2026-09-27-pcie", "pcie.json")  # the host link timed on three cards (27 Sep)
+PCIE_BYTES = 256 * 2 ** 20  # the largest copy each PCIe run makes: its large-copy rate
 # rl-pass*/runs.jsonl: the passes the energy manual pools (tools/ettelem/analyze_reruns.py)
 RERUN_DIRS = ("2026-09-23-reruns-aifoundry2-warm", "2026-09-23-reruns-aifoundry3")
 MINIONS = 1024  # compute minions that run user kernels (32 shires x 32); the die has 1,088
@@ -281,8 +284,26 @@ def main():
                   "both cards (gbps_card2 is the sparsity report's shorter probe on aifoundry3)"},
           {"bpc": to_bpc(SPEC["dram_cfg"][0]), "gbps": SPEC["dram_cfg"][0], "src": SPEC["dram_cfg"][2],
            "max_gbps": SPEC["dram_max"][0], "max_src": SPEC["dram_max"][2]}, "")
-    level("pcie", "Host memory over PCIe", "chip", "host RAM", "pcie", None,
+    # The host link, timed on three cards on 27 September (the PCIe link page; workloads/pciebench, reduce_pcie.py):
+    # each card's host-to-device DMA rate for a 256 MB copy (the mean of its five runs' medians), pooled over the cards
+    # as the level's measured bandwidth. The link figure stays the spec line. Without pcie.json the level keeps the
+    # link figure alone, as before 27 September.
+    pc_meas = None
+    if os.path.exists(PCIE):
+        pj = json.load(open(PCIE))
+        big = lambda c, d, how: next(e for e in pj["bw"][c][d][how] if e["bytes"] == PCIE_BYTES)["gbs"]["mean"]
+        pcs = [c for c in pj["cards"] if c in pj["bw"]]
+        h2d = {c: big(c, "h2d", "dma") for c in pcs}
+        pg = statistics.fmean(h2d.values())
+        pc_meas = {"bpc": to_bpc(pg), "gbps": pg, "gbps_by_card": h2d,
+                   "d2h_gbps_by_card": {c: big(c, "d2h", "dma") for c in pcs},
+                   "staged_gbps_by_card": {c: big(c, "h2d", "staged") for c in pcs},
+                   "src": "docs/reports/data/2026-09-27-pcie/pcie.json bw.<card>.h2d.dma at 256 MB (five runs per card, "
+                          "27 Sep), pooled over the cards; d2h: the same copy card to host; staged: a program's copy "
+                          "through the runtime's bounce buffer"}
+    level("pcie", "Host memory over PCIe", "chip", "host RAM", "pcie", pc_meas,
           {"bpc": to_bpc(SPEC["pcie"][0]), "gbps": SPEC["pcie"][0], "src": SPEC["pcie"][2]},
+          "Host-to-card DMA rate of a 256 MB copy, timed on three cards on 27 September." if pc_meas else
           "Not measured; only the per-launch overhead is known (see limits).")
     noc = embedded("2026-09-18-et-soc1-on-chip-communication.html", "nocbench-data")["energy"]["configs"]
     xs = [noc[k]["gb_per_s"] for k in noc if k.startswith("xshire") and not k.endswith("-c4")]
@@ -367,7 +388,7 @@ def main():
                                              ("st_stream_dram", "st_stream/dram/random"))}
 
     for lv in L:
-        if lv["key"] == "pcie" and limits["launch_overhead_ms_range"]:
+        if lv["key"] == "pcie" and limits["launch_overhead_ms_range"] and not lv.get("measured"):
             lo, hi = limits["launch_overhead_ms_range"]
             lv["note"] = f"Not measured; only the per-launch overhead ({lo:.2f}-{hi:.2f} ms) is known."
 

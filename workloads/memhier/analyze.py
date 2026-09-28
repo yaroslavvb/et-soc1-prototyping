@@ -16,7 +16,8 @@ docs/reports/data/2026-09-23-energy-manual/reruns.json, levels_pj_per_byte), cop
 lo-hi over every pass of every card, and each card's mean, standard error and number of passes; the scratchpad
 levels, whose contents the version-3 re-runs set, once per contents (levels_by_contents_pj_per_byte). With --v3
 docs/reports/data/2026-09-25-claims-v3/raw it also embeds v3: each card's chases from the version-3 claims check
-(26 September, 600 MHz, the passes V3-LAT kept; see v3_curves), which the latency chart draws beside this session's.
+(26 September, 600 MHz, the passes V3-LAT kept; see v3_curves), which the latency chart draws beside this session's,
+and v3.bw: each card's bandwidth per level in the same check's energy re-runs (v3_bandwidth), for the three-card chart.
 It also embeds gs, E48's gathers and scatters on the same three cards (26 September), as the energy manual's manual.json
 pools them (--manual, by default docs/reports/data/2026-09-23-energy-manual/manual.json), for the "Irregular access"
 section, with gs.stream: each level read contiguously per 4 B, the energy manual's own reference for that table.
@@ -146,6 +147,33 @@ def v3_curves(raw, lat_json):
         c0 = dict((s, m) for s, m, *_ in curves["shire 0"])
         print(f"V3 {card}: passes {sorted(kept)}, shire 0: L1 {c0[256]}, RB {c0[1024]}, L2 {c0[65536]}, "
               f"L3 {c0[4 << 20]}, 32 MB {c0[32 << 20]}, 64 MB {c0[64 << 20]}, DRAM {c0[256 << 20]} cycles")
+    return out
+
+
+V3_BW_LEVELS = ("l1", "l2", "scp-local", "l3", "scp-remote", "dram")
+
+
+def v3_bandwidth(raw):
+    """The three-card check's energy re-runs (26 September; the V3-RL block's rl passes, raw/<card>/rl/p*/{A,B}/
+    runs.jsonl, run_lab.sh's memhier_host stream and l1 probes) stream this page's six bandwidth probes on every card.
+    Per card and level: each run file's median GB/s (bytes over wall time) over its launches at 600 MHz (implied clock
+    0.59-0.61 GHz, as scripts/ridge-points.py counts them), then the median, lowest and highest over the files."""
+    out = {}
+    for card in sorted(os.listdir(raw)):
+        per = {}
+        for f in sorted(glob.glob(os.path.join(raw, card, "rl", "p*", "*", "runs.jsonl"))):
+            by = {}
+            for r in load(f):
+                lv = re.sub(r"-\d+$", "", r.get("label", ""))
+                if lv in V3_BW_LEVELS and r.get("launch", -1) >= 0 and r.get("bytes", 0) > 0 \
+                        and 0.59 <= r.get("implied_ghz", 0) <= 0.61:
+                    by.setdefault(lv, []).append(r["bytes"] / r["wall_s"] / 1e9)
+            for lv, v in by.items():
+                per.setdefault(lv, []).append(statistics.median(v))
+        if per:
+            out[card] = {lv: {"median": round(statistics.median(v), 3), "min": round(min(v), 3), "max": round(max(v), 3),
+                              "n": len(v)} for lv, v in sorted(per.items())}
+            print(f"V3 bandwidth {card}: " + ", ".join(f"{lv} {x['median']:.1f}" for lv, x in out[card].items()) + " GB/s")
     return out
 
 
@@ -324,6 +352,7 @@ def main():
             "layout": {str(s): list(xy) for s, xy in noc.MARTY.items()}, "empty_cells": [list(c) for c in noc.EMPTY]}
     if args.v3:
         data["v3"] = v3_curves(args.v3, args.v3_lat)
+        data["v3"]["bw"] = v3_bandwidth(args.v3)
     # Energy per byte by level (the spec sheet's dot plot): the energy manual's re-runs, as they are. Where the re-runs
     # set a level's contents (the version-3 passes fill the scratchpads with zeros or random data before reading them:
     # levels_by_contents_pj_per_byte), that level is given once per contents ("scp-local:zeros", ...) instead of pooled

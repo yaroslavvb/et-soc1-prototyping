@@ -101,6 +101,15 @@ const TOK = (function () {
     minion_pct: pc(CARDS.map(c => F[c].coef.minion)), dram_pj: pr(CARDS.map(c => F[c].coef.dram_pj_per_byte), 0),
     idle_unsensed: rng(Math.round(Math.min(...CARDS.map(c => IU[c].w[0]))), Math.round(Math.max(...CARDS.map(c => IU[c].w[1]))), 0, 'W'),
     idle15: f(P.idle_73c.unsensed_w, 0),
+    /* the host link on each card (E50, D.pcie), for the index row of "Over the PCIe link": ranges over the cards */
+    ...(function () {
+      const X = D.pcie || {per_card: {}}, rows = CK.cardsIn(X.per_card).map(c => X.per_card[c]), v = k => rows.map(r => r[k]);
+      if (!rows.length) return {};
+      const r1 = (k, dp) => pr(v(k), dp);
+      return {pcie_h2d: r1('h2d_dma_gbs', 1), pcie_d2h: r1('d2h_dma_gbs', 1), pcie_staged: r1('h2d_staged_gbs', 1), pcie_link: f(X.link_gbs, 2),
+        pcie_eff: pc(v('h2d_dma_gbs').map(g => g / X.link_gbs)), pcie_wait: r1('launch_wait_us', 0), pcie_queued: num(Math.round(v('launch_queued_us').reduce((a, b) => a + b, 0) / rows.length), 0),
+        pcie_two: pr(v('two_h2d_over_one'), 2)};
+    })(),
   };
 })();
 const fill = s => String(s == null ? '' : s).replace(/\{\{(\w+)\}\}/g, (m, k) => (k in TOK ? TOK[k] : m));
@@ -129,7 +138,7 @@ document.getElementById('toclist').innerHTML = [...document.querySelectorAll('h2
   const t = document.getElementById('reportstab');
   t.innerHTML = '<thead><tr><th style="width:18%">Report</th><th style="width:9%">When</th><th style="width:50%">What it established</th><th style="width:23%">Instruments</th></tr></thead><tbody>' +
     D.reports.map(r => { const g = r.group && r.group !== group ? `<tr class="grp"><td colspan="4"><b>${esc(r.group)}</b></td></tr>` : ''; if (r.group) group = r.group;
-      return g + `<tr><td class="lvl"><a href="${r.url}">${esc(r.title)}</a></td><td class="small" data-sort="${esc(r.pub)}">${esc(r.date)}</td><td>${r.what}</td><td class="small">${esc(r.instruments)}</td></tr>`; }).join('') + '</tbody>';
+      return g + `<tr><td class="lvl"><a href="${r.url}">${esc(r.title)}</a></td><td class="small" data-sort="${esc(r.pub)}">${esc(r.date)}</td><td>${fill(r.what)}</td><td class="small">${esc(r.instruments)}</td></tr>`; }).join('') + '</tbody>';
   CK.stackTable(t);
   sortGrouped(t);  /* "When" sorts by the day a report was first published */
 })();
@@ -905,7 +914,7 @@ function cardsOfText(str) {
   return CK.cardsIn(out);
 }
 (function () {
-  const GROUPS = [['This hub', 'Hub', 'var(--ref)'], ['Energy and power', 'Energy and power', 'var(--c1)'], ['Contention and moving data', 'Contention', 'var(--c3)'],
+  const GROUPS = [['This hub', 'Hub', 'var(--ref)'], ["Synthesis: the set's measurements in one picture", 'Synthesis', 'var(--c2)'], ['Energy and power', 'Energy and power', 'var(--c1)'], ['Contention and moving data', 'Contention', 'var(--c3)'],
     ['Memory and compute baselines, 18–19 September', 'Baselines', 'var(--c4)'], ['Research and exploratory', 'Research', 'var(--c5)'],
     ['Briefs: analysis, no new measurements', 'Briefs', 'var(--c7)']];
   const gOf = Object.fromEntries(GROUPS.map(([k, s, c], i) => [k, {s, c, i}]));
@@ -951,7 +960,7 @@ function cardsOfText(str) {
     if (n.kind === 'report') {
       const ses = SES.filter(s => s.reps.includes(n)), out = SUP.filter(e => e.fromR === n), inn = SUP.filter(e => e.to.some(t => t.r === n));
       panel.innerHTML = `<h4><a href="${n.url}">${esc(n.title)}</a></h4><p class="small">${esc(gOf[n.grp].s)} · first published ${n.day} September · ${esc(n.date)}</p><dl>` +
-        `<dt>What it established</dt><dd>${n.what}</dd><dt>Instruments</dt><dd>${esc(n.instruments)}</dd>` +
+        `<dt>What it established</dt><dd>${fill(n.what)}</dd><dt>Instruments</dt><dd>${esc(n.instruments)}</dd>` +
         (ses.length ? `<dt>Sessions behind it</dt><dd>${ses.map(btn).join(' ')}</dd>` : '') +
         (out.length ? `<dt>Superseded here: now held by a later page</dt><dd>${out.map(e => `${esc(e.what)} → ${e.to.map(t => `<a href="${t.r.url}#${t.anchor}">${esc(t.label)}</a>`).join(', ')}`).join('<br>')}</dd>` : '') +
         (inn.length ? `<dt>Current source for</dt><dd>${inn.map(e => `${esc(e.what)} (first given in ${btn(e.fromR)})`).join('<br>')}</dd>` : '') + '</dl>';
@@ -1212,4 +1221,258 @@ function cardsOfText(str) {
   }
   legend(); summary();
   const fr = CK.frame('claims', {height: W => layout(W).H, minW: 300, maxW: 1100, label: 'Claims on each page before and after the version-3 campaign, by verdict or by the cards whose data they rest on; a bar opens its page', draw});
+})();
+
+/* ---------- the late carry, cycle by cycle (§3): the RTL's mechanism simulated, and the cards' measurements ----------
+   D.carry (tools/ettelem/sync_hub_data.py): rtl = the constants of rtl-sim/pmu_carry (E2); per_card = the version-3
+   campaign's raw read pairs (MEM-R1) and fixcyc()'s leftover per corrected launch (MEM-R3). */
+(function () {
+  const C = D.carry;
+  if (!C || !document.getElementById('carry-anim')) return;
+  const K = C.rtl, N = K.counters, WR = Math.pow(2, K.pre_bits);
+  /* The RTL's rule for one counting counter (the testbench's): each cycle the adder serves the counter under its index if
+     that counter's carry is pending, and the index moves on while any carry is pending; it starts just past counter 0,
+     where it stopped after the last fold. A read returns post × 2^bits + pre and ignores a pending carry. */
+  const sim = [];
+  (function () {
+    let pre = 0, post = 0, ov = 0, idx = 1;
+    for (let t = 0; t < 2 * WR; t++) {
+      sim.push({t, pre, post, ov, idx, read: post * WR + pre});
+      const any = ov;
+      if (ov && idx === 0) { post += 1; ov = 0; }
+      if (any) idx = (idx + 1) % N;
+      pre += 1; if (pre === WR) { pre = 0; ov = 1; }
+    }
+  })();
+  const shortN = sim.filter(s => s.t >= WR && s.read !== s.t).length;  /* reads short per wrap in the simulation */
+  if (shortN !== K.sim_short_reads) console.warn('carry: the simulation gives ' + shortN + ' short reads, the RTL run ' + K.sim_short_reads);
+  const T0 = WR - 8, T1 = WR + shortN + 12;
+  const st = {t: WR - 3, timer: null};
+  const ctl = document.getElementById('carry-ctl'), read = CK.readout('carry-read');
+  const bbox = document.createElement('div'); bbox.className = 'controls'; bbox.style.margin = '0';
+  const mk = (txt, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.addEventListener('click', fn); bbox.appendChild(b); return b; };
+  const play = mk('Play', () => (st.timer ? stop() : start()));
+  mk('Step', () => { stop(); go(st.t >= T1 ? T0 : st.t + 1); });
+  mk('To the wrap', () => { stop(); go(WR - 1); });
+  ctl.appendChild(bbox);
+  const sb = document.createElement('div'); ctl.appendChild(sb);
+  const slider = CK.range(sb, {label: 'Cycle', min: T0, max: T1, step: 1, value: st.t, fmt: v => num(v, 0), onInput: v => { stop(); go(v); }});
+  function start() { if (st.t >= T1) go(T0); play.textContent = 'Pause'; play.setAttribute('aria-pressed', 'true');
+    st.timer = setInterval(() => { if (st.t >= T1) stop(); else go(st.t + 1); }, CK.reduced ? 900 : 420); }
+  function stop() { if (st.timer) clearInterval(st.timer); st.timer = null; play.textContent = 'Play'; play.setAttribute('aria-pressed', 'false'); }
+  function go(t) {  /* show cycle t; the slider follows without firing its own handler */
+    st.t = Math.max(T0, Math.min(T1, Math.round(t)));
+    slider.input.value = st.t; slider.input.setAttribute('aria-valuetext', num(st.t, 0)); slider.el.querySelector('output').textContent = num(st.t, 0);
+    fr.redraw(); say();
+  }
+  function say() {
+    const s = sim[st.t], wrapT = Math.floor(st.t / WR) * WR, k = st.t - wrapT;
+    if (s.ov) {
+      const m = (N - s.idx) % N;
+      read.set(`<b>Cycle ${num(st.t, 0)}</b>: the pre-counter wrapped ${k ? `${word(k)} cycle${k === 1 ? '' : 's'} ago` : 'this cycle'} and set its carry, which waits for the shared adder. ` +
+        `The adder is at counter ${s.idx} and reaches counter 0 ${m ? `in ${word(m)} cycle${m === 1 ? '' : 's'}` : 'this cycle, and folds the carry in'}. Until then a read returns ${num(s.post, 0)} × ${WR} + ${s.pre} = <b>${num(s.read, 0)}</b>: 128 short of ${num(st.t, 0)}.`);
+    } else if (st.t >= WR) {
+      read.set(`<b>Cycle ${num(st.t, 0)}</b>: the adder folded the carry into the post-counter ${word(st.t - WR - shortN + 1)} cycle${st.t - WR - shortN + 1 === 1 ? '' : 's'} ago, and stopped just past counter 0. A read returns ${num(s.read, 0)}, right again until the next wrap, ${num(WR - (st.t - WR), 0)} cycles on.`);
+    } else {
+      read.set(`<b>Cycle ${num(st.t, 0)}</b>: the pre-counter reads ${s.pre} of its ${WR} values and no carry is pending, so a read returns the true count, ${num(s.read, 0)}. ${WR - s.pre === 1 ? 'It wraps on the next cycle.' : `It wraps in ${word(WR - s.pre)} cycles.`}`);
+    }
+  }
+  const layout = W => { const wide = W >= 640; return wide ? {wide, R: 78, ringH: 232, valH: 0, H: 232 + 150} : {wide, R: 64, ringH: 196, valH: 186, H: 196 + 186 + 150}; };
+  function draw(f) {
+    const W = f.W, Lo = layout(W), s = sim[st.t], svg = f.svg;
+    const g0 = CK.el('g', {'aria-hidden': 'true'}, svg);
+    /* the ring of counters and the adder's index */
+    const cx = Lo.wide ? 150 : W / 2, cy = 26 + Lo.R + 14, R = Lo.R;
+    CK.txt(g0, Lo.wide ? 8 : cx, 16, Lo.wide ? `${N} counters share one adder; counter 0 counts cycles` : `${N} counters, one shared adder`, 'lab-strong', Lo.wide ? 'start' : 'middle');
+    const ring = CK.el('circle', {cx, cy, r: R, fill: 'none', 'stroke-dasharray': '2 4'}, g0); ring.style.stroke = 'var(--axis)';
+    const pos = i => { const a = -Math.PI / 2 + 2 * Math.PI * i / N; return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; };
+    const [hx, hy] = pos(s.idx), hl = 1 - 22 / R;
+    const hand = CK.el('line', {x1: cx, y1: cy, x2: cx + (hx - cx) * hl, y2: cy + (hy - cy) * hl, 'stroke-width': 3, 'stroke-linecap': 'round'}, g0);
+    hand.style.stroke = s.ov ? 'var(--warn)' : 'var(--ink-2)';
+    const hub = CK.el('circle', {cx, cy, r: 24}, g0); hub.style.fill = 'var(--surface)'; hub.style.stroke = 'var(--ink-2)'; hub.style.strokeWidth = '1.5';
+    CK.txt(g0, cx, cy + 4, 'adder', 'lab', 'middle');
+    for (let i = 0; i < N; i++) {
+      const [x, y] = pos(i), c0 = i === 0, pend = c0 && s.ov, here = i === s.idx;
+      const b = CK.el('circle', {cx: x, cy: y, r: 13}, g0);
+      b.style.fill = pend ? 'color-mix(in srgb, var(--warn) 55%, var(--surface))' : here ? 'color-mix(in srgb, var(--ink-2) 18%, var(--surface))' : 'var(--surface)';
+      b.style.stroke = c0 ? 'var(--c1)' : 'var(--axis)'; b.style.strokeWidth = c0 ? '2.5' : '1.2';
+      CK.txt(g0, x, y + 4, String(i), c0 || here || pend ? 'lab-strong' : 'tick', 'middle');
+    }
+    /* counter 0's value */
+    const vx = Lo.wide ? 320 : 8, vy = Lo.wide ? 30 : Lo.ringH + 8, bw = Lo.wide ? 30 : Math.min(30, Math.floor((W - 16) / (K.pre_bits + 4)));
+    CK.txt(g0, vx, vy, `Counter 0 (the cycle count): its pre-counter, ${K.pre_bits} bits`, 'lab-strong');
+    for (let b = 0; b < K.pre_bits; b++) {
+      const bit = (s.pre >> (K.pre_bits - 1 - b)) & 1, x = vx + b * (bw + 3), r = CK.el('rect', {x, y: vy + 10, width: bw, height: 26, rx: 4}, g0);
+      r.style.fill = bit ? 'var(--c1)' : 'var(--surface)'; r.style.stroke = bit ? 'var(--c1)' : 'var(--axis)';
+      const t = CK.txt(g0, x + bw / 2, vy + 28, String(bit), 'lab-strong', 'middle'); t.style.fill = bit ? inkOn('var(--c1)') : 'var(--ink-2)';
+    }
+    CK.txt(g0, vx + K.pre_bits * (bw + 3) + 6, vy + 28, `= ${s.pre}`, 'lab-strong');
+    const rows = [
+      ['carry into the post-counter', s.ov ? (Lo.wide ? 'pending: ignored by a read' : 'pending') : st.t >= WR ? (Lo.wide ? 'folded in by the adder' : 'folded in') : 'none pending'],
+      ['post-counter', `${num(s.post, 0)} (× ${WR} = ${num(s.post * WR, 0)})`],
+      ['a read returns post × ' + WR + ' + pre', num(s.read, 0)],
+      ['the true count', num(st.t, 0)],
+    ];
+    rows.forEach(([a, b], i) => { const y = vy + 60 + i * 22; CK.txt(g0, vx, y, a, 'lab'); CK.txt(g0, Lo.wide ? vx + 230 : W - 8, y, b, 'lab-strong', Lo.wide ? 'start' : 'end'); });
+    const short = s.read !== st.t, yv = vy + 60 + rows.length * 22 + 4;
+    const badge = CK.el('rect', {x: vx, y: yv - 2, width: short ? 128 : 96, height: 22, rx: 11}, g0);
+    badge.style.fill = short ? 'color-mix(in srgb, var(--warn) 40%, var(--surface))' : 'color-mix(in srgb, var(--ok) 22%, var(--surface))';
+    badge.style.stroke = short ? 'var(--warn)' : 'var(--ok)';
+    CK.txt(g0, vx + 10, yv + 13, short ? `read is ${WR} short` : 'read is right', 'lab-strong');
+    /* the trace: read minus the true count over the cycles around the wrap */
+    const tT = Lo.ringH + Lo.valH + 22, tB = tT + 78, L = 58, Rr = 12;
+    const x = CK.lin(T0 - 0.5, T1 + 0.5, L, W - Rr), y = v => (v === 0 ? tT + 10 : tB - 6);
+    CK.txt(g0, 2, tT - 10, 'read − true count, cycles', 'lab');
+    [0, -WR].forEach(v => { CK.el('line', {x1: L, x2: W - Rr, y1: y(v), y2: y(v), class: 'grid-line'}, g0); CK.txt(g0, L - 8, y(v) + 4, v ? `−${WR}` : '0', 'tick', 'end'); });
+    const sh = sim.filter(q => q.t >= T0 && q.t <= T1 && q.read !== q.t);
+    if (sh.length) { const r = CK.el('rect', {x: x(sh[0].t - 0.5), y: tT, width: x(sh[sh.length - 1].t + 0.5) - x(sh[0].t - 0.5), height: tB - tT}, g0); r.style.fill = 'color-mix(in srgb, var(--warn) 16%, transparent)'; }
+    let d = '';
+    for (let t = T0; t <= T1; t++) { const v = sim[t].read - t; d += (t === T0 ? `M${x(t - 0.5)},${y(v)}` : `L${x(t - 0.5)},${y(v)}`) + `L${x(t + 0.5)},${y(v)}`; }
+    const pth = CK.el('path', {d, fill: 'none', 'stroke-width': 2}, g0); pth.style.stroke = 'var(--c1)';
+    const step = W < 480 ? 8 : 4;
+    for (let t = T0; t <= T1; t += step) CK.txt(g0, x(t), tB + 16, num(t, 0), 'tick', 'middle');
+    CK.txt(g0, (L + W - Rr) / 2, tB + 34, `cycle (the pre-counter wraps at ${WR})`, 'lab', 'middle');
+    const xc = x(st.t), cur = CK.el('line', {x1: xc, x2: xc, y1: tT - 2, y2: tB + 2, 'stroke-width': 1.5}, g0); cur.style.stroke = 'var(--ink)';
+    const dot = CK.el('circle', {cx: xc, cy: y(sim[st.t].read - st.t), r: 5.5}, g0); dot.style.fill = 'var(--c1)'; dot.style.stroke = 'var(--surface)'; dot.style.strokeWidth = '2';
+    /* keyboard: one stop on the trace; arrows step the cycle, Home and End jump */
+    /* its top sits below the axis title, so the focus ring (2 px, 2 px out) clears the title's descenders */
+    const hit = CK.el('rect', {x: L, y: tT + 2, width: W - Rr - L, height: tB - tT + 2, class: 'ck-hit'}, svg);
+    hit.setAttribute('tabindex', '0'); hit.setAttribute('role', 'slider'); hit.setAttribute('aria-label', 'The cycle shown: use the arrow keys to step');
+    hit.setAttribute('aria-valuemin', T0); hit.setAttribute('aria-valuemax', T1); hit.setAttribute('aria-valuenow', st.t);
+    hit.addEventListener('keydown', ev => {
+      const k = ev.key, j = k === 'ArrowRight' || k === 'ArrowUp' ? st.t + 1 : k === 'ArrowLeft' || k === 'ArrowDown' ? st.t - 1 : k === 'Home' ? T0 : k === 'End' ? T1 : null;
+      if (j == null) return; ev.preventDefault(); stop(); go(j); fr.svg.querySelector('[role="slider"]').focus();
+    });
+    hit.addEventListener('pointerdown', ev => { const b = svg.getBoundingClientRect(), px = (ev.clientX - b.left) * (W / b.width); stop(); go(T0 + (px - L) / (W - Rr - L) * (T1 - T0 + 1) - 0.5); });
+  }
+  const fr = CK.frame('carry-anim', {height: W => layout(W).H, minW: 300, maxW: 900, label: `The late carry in the RTL: ${N} counters share one adder; after the pre-counter wraps, a read is ${WR} short until the adder reaches counter 0`, draw});
+  say();
+
+  /* ---- the cards: raw pairs and corrected intervals per launch ---- */
+  const CS = CK.cardsIn(C.per_card), gap = (C.per_card[CS[0]].raw[0] || {}).gap || 10;
+  /* phases (of WR) at which a pair gap cycles apart straddles a window of w short reads: 2w below the spacing,
+     2 × gap for any window of gap or more */
+  const w11 = K.card_short_reads_19sep, phases = w => { let n = 0; for (let a = 0; a < WR; a++) if ((a < w) !== ((a + gap) % WR < w)) n++; return n; };
+  const expRaw = phases(gap), p0 = expRaw / WR;
+  const rawF = r => (r.plus + r.minus) / r.pairs;
+  /* each card's raw launches against the prediction: a card whose launches bracket it matches; one whose every launch
+     reads lower fits a window shorter than the spacing (or one that varies) */
+  const rawMM = c => mm(C.per_card[c].raw.map(rawF));
+  const cMatch = CS.filter(c => rawMM(c)[0] <= p0 && rawMM(c)[1] >= p0), cLow = CS.filter(c => rawMM(c)[1] < p0), cHigh = CS.filter(c => rawMM(c)[0] > p0);
+  const spanOf = cs => rng(100 * Math.min(...cs.map(c => rawMM(c)[0])), 100 * Math.max(...cs.map(c => rawMM(c)[1])), 1) + '%';
+  /* the launch ids as words: p1/t_raw is pass 1's raw read pairs, p1/t_rawodd the same pairs each after a timestamp */
+  const PROG = {t_raw: 'raw read pairs', t_rawodd: 'raw read pairs, each after a timestamp', t_glitch: 'timed no-ops'};
+  const lname = (id, prog) => { const m = /^p(\d+)(?:\/(t_\w+))?$/.exec(id), k = m && (m[2] || prog);
+    return m ? `pass ${m[1]}, ${PROG[k] || esc(k)} (<code>${esc(k)}</code>)` : esc(id); };
+  const allRaw = CS.flatMap(c => C.per_card[c].raw.map(rawF)), allFix = CS.flatMap(c => C.per_card[c].fixed.map(q => q.frac));
+  const pc1 = v => num(100 * v, 1) + '%';
+  document.getElementById('carry-cards-title').textContent = `On the cards: read pairs ${gap} cycles apart that come out ${WR} off, raw and after the fix`;
+  CK.legend('carry-leg', CS.map(c => ({key: c, label: CK.card(c).label, color: CK.card(c).color, mark: CK.card(c).mark})));
+  const RW = 22, T = 30, B = 40, rowHf = W => 2 * RW + 26 + (W < 600 ? 16 : 0);
+  const fixText = c => { const v = C.per_card[c].fixed.map(q => q.frac), z = v.filter(x => x === 0).length, nz = v.filter(x => x > 0);
+    return z === v.length ? `0% in all ${word(v.length)} launches on ${c}` : z ? `0% in ${word(z)} of ${word(v.length)} launches on ${c} and ${rng(100 * Math.min(...nz), 100 * Math.max(...nz), 1)}% in the other${nz.length > 1 ? ` ${word(nz.length)}` : ''}`
+      : `${rng(100 * Math.min(...nz), 100 * Math.max(...nz), 1)}% in all ${word(v.length)} on ${c}`; };
+  const wLow = cLow.length ? (() => { const lo = Math.min(...cLow.map(c => rawMM(c)[0])), hi = Math.max(...cLow.map(c => rawMM(c)[1]));
+    const ws = []; for (let w = Math.max(1, Math.round(lo * WR / 2)); w <= Math.min(gap - 1, Math.round(hi * WR / 2)); w++) ws.push(w); return ws; })() : [];
+  const rawParts = [];
+  if (cMatch.length) rawParts.push(`${andList(cMatch)} read ${spanOf(cMatch)} of pairs, either side of the ${pc1(p0)} (${expRaw} of ${WR} phases) that any window of ${gap} or more short reads gives (at least the pairs' spacing)`);
+  if (cLow.length) rawParts.push(`${cLow.length > 1 ? andList(cLow) + ' read' : cLow[0] + '’s ' + word(C.per_card[cLow[0]].raw.length) + ' launches all read'} lower, ${spanOf(cLow)}, as a window shorter than the spacing or one that varies would` +
+    (wLow.length ? ` (a window of w < ${gap} cycles gives 2w of ${WR} phases: ${wLow.map((w, i) => `${w}${i ? '' : ' cycles'} gives ${pc1(phases(w) / WR)}`).join(', ')})` : '') +
+    `, which fits ${cLow.length > 1 ? 'their' : 'its'} fixcyc() leftover: fixcyc() adds ${WR} below ${K.fixcyc_below}, so it over-corrects a shorter window`);
+  if (cHigh.length) rawParts.push(`${andList(cHigh)} read${cHigh.length > 1 ? '' : 's'} higher, ${spanOf(cHigh)}`);
+  const cread = CK.readout('carry-cards-read'), csum = `Raw: ${rawParts.join('; ')}. After fixcyc(): ${andList(CS.map(fixText))}.`;
+  cread.set(csum);
+  setHTML('carry-lead', `<b>The late carry, cycle by cycle.</b> In the RTL a read ignores a carry that waits for the shared adder, so it comes back ${WR} short for ${word(shortN)} cycles after every wrap; ` +
+    `on the ${word(CS.length)} cards two raw reads ${gap} cycles apart come out ${WR} off ${rng(100 * Math.min(...allRaw), 100 * Math.max(...allRaw), 0)}% of the time, and the fixed correction leaves up to ${pc1(Math.max(...allFix))}.`);
+  setHTML('carry-cap', `Above: the RTL's rule simulated for counter 0 alone, as <code>rtl-sim/pmu_carry</code> runs <code>neigh_pmu.v</code>: ${N} counters, each a ${K.pre_bits}-bit pre-counter and a ${K.post_bits}-bit post-counter, share one adder whose index moves one counter a cycle while a carry is pending; ` +
+    `${word(shortN)} short reads per wrap in the simulation, ${word(w11)} (low bits 0–${w11 - 1}) on aifoundry2's card on 19 September, the window <code>fixcyc()</code> assumes (it adds ${WR} below ${K.fixcyc_below}). ` +
+    `Below: the version-3 campaign on each card (E35), every launch: the upper line of a card is its raw read pairs (MEM-R1: ${word(C.per_card[CS[0]].raw.length)} launches of ${num(C.per_card[CS[0]].raw[0].pairs, 0)} pairs on each card; in ${num(CS.reduce((a, c) => a + C.per_card[c].raw_launches_no_window, 0), 0)} of ${num(CS.reduce((a, c) => a + C.per_card[c].raw.length, 0), 0)} no single window fits), the lower the share of ${gap}-cycle intervals still ${WR} off after <code>fixcyc()</code> (MEM-R3, ${word(C.per_card[CS[0]].fixed.length)} launches). ` +
+    `The dashed line is the raw share that any window of ${gap} or more short reads gives (at least the pairs' spacing): ${expRaw} of ${WR} phases, ${pc1(p0)}; a window of w < ${gap} cycles gives 2w of ${WR}, less. Hover, tap or tab to a mark for its launch.`);
+  function cdraw(f) {
+    const W = f.W, nar = W < 600, L = nar ? 8 : 190, R = 16, H = f.H, yEnd = H - B, rowH = rowHf(W);
+    const xmax = Math.max(0.18, ...allRaw), x = CK.lin(0, xmax, L, W - R);
+    const g0 = CK.el('g', {'aria-hidden': 'true'}, f.svg), labs = [];
+    const ticks = [0, 0.05, 0.1, 0.15].filter(t => t <= xmax);
+    ticks.forEach(t => { CK.el('line', {x1: x(t), x2: x(t), y1: T, y2: yEnd, class: 'grid-line'}, g0); labs.push(CK.txt(g0, x(t), yEnd + 16, num(100 * t, 0) + '%', 'tick', 'middle')); });
+    labs.push(CK.txt(g0, (L + W - R) / 2, H - 6, `share of pairs ${gap} cycles apart that read ${WR} off`, 'lab', 'middle'));
+    const xe = x(expRaw / WR), ref = CK.el('line', {x1: xe, x2: xe, y1: T - 6, y2: yEnd, 'stroke-dasharray': '5 4', 'stroke-width': 1.4}, g0); ref.style.stroke = 'var(--ref)';
+    const nodes = [];
+    CS.forEach((c, i) => {
+      const y0 = T + i * rowH, cc = CK.card(c), yr = y0 + (nar ? 38 : 14), yf = yr + (nar ? 30 : RW);
+      if (nar) { CK.cardMark(g0, c, 12, y0 + 10, 5); CK.txt(g0, 24, y0 + 14, cc.label, 'lab-strong'); }
+      else { CK.cardMark(g0, c, 12, y0 + 22, 5); CK.txt(g0, 24, y0 + 26, cc.label, 'lab-strong'); }
+      /* a subline's name: left of the plot on a wide screen; on a phone above the line's left end, clear of its marks */
+      const sub = (yy, s, vals) => { CK.el('line', {x1: L, x2: W - R, y1: yy, y2: yy, class: 'grid-line', opacity: 0.7}, g0);
+        labs.push(nar ? CK.txt(g0, L, yy - 10, s, 'tick', 'start') : CK.txt(g0, L - 8, yy + 4, s, 'tick', 'end')); };
+      sub(yr, 'raw', C.per_card[c].raw.map(rawF)); sub(yf, 'after fixcyc()', C.per_card[c].fixed.map(q => q.frac));
+      const mark = (xx, yy, html) => { const gg = CK.el('g', {}, f.svg); CK.el('rect', {x: xx - 7, y: yy - 9, width: 14, height: 18, class: 'ck-hit'}, gg); CK.cardMark(gg, c, xx, yy, 4.5);
+        CK.tip(f, gg, html); gg.addEventListener('focus', () => cread.set(html)); gg.addEventListener('blur', () => cread.set(csum)); nodes.push(gg); };
+      C.per_card[c].raw.forEach(r => mark(x(rawF(r)), yr, `<b>${esc(cc.label)}</b>, ${lname(r.launch)}: ${num(r.plus + r.minus, 0)} of ${num(r.pairs, 0)} pairs ${gap} cycles apart read ${WR} off (${pc1(rawF(r))}: ${num(r.plus, 0)} by +${WR}, ${num(r.minus, 0)} by −${WR})`));
+      C.per_card[c].fixed.forEach(q => mark(x(q.frac), yf, `<b>${esc(cc.label)}</b>, ${lname(q.launch, 't_glitch')}, corrected by fixcyc(): ${pc1(q.frac)} of ${gap}-cycle intervals still ${WR} off; ` +
+        (q.e != null ? `one window fits the launch, low bits 0–${q.e}` : 'no single window fits the launch')));
+    });
+    labs.push(CK.txt(g0, xe, T - 12, `${pc1(expRaw / WR)}: expected raw`, 'tick', 'middle'));
+    CK.inside(f, labs);
+    CK.keynav(f, nodes);
+  }
+  CK.frame('carry-cards', {height: W => T + CS.length * rowHf(W) + B, minW: 300, maxW: 900, label: `Per launch and card, the share of read pairs ${gap} cycles apart that come out ${WR} off: raw, and after fixcyc()`, draw: cdraw});
+})();
+
+/* ---------- how often a new reading arrives, card by card (§4.1) ----------
+   energy_events.meter: the SP stats trace's own pass, quiet and under ettelem at 10 Hz (sp_pass_ms, three passes per
+   card), and the board value's refresh under ettelem (board_refresh_ms, phase-folded): every pass, with the medians
+   (the trace) and means (the stream) the text quotes. */
+(function () {
+  const M = D.energy_events.meter, SP = M.sp_pass_ms || {}, BR = M.board_refresh_ms || {};
+  if (!document.getElementById('timing')) return;
+  const CS = CK.cardsIn(SP).filter(c => SP[c].quiet_ms && SP[c].sampled_ms && BR[c]);
+  if (!CS.length) return;
+  const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+  const V = Object.fromEntries(CS.map(c => [c, {q: med(SP[c].quiet_ms), s: med(SP[c].sampled_ms), b: mean(BR[c].sampler_10hz_ms)}]));
+  const add = CS.map(c => V[c].s - V[c].q), over = CS.map(c => V[c].s - V[c].b);
+  const slow = CS.reduce((a, c) => (V[c].q > V[a].q ? c : a)), rest = CS.filter(c => c !== slow), ratio = V[slow].q / mean(rest.map(c => V[c].q));
+  /* the rows name their card in words and colour, without the registry's glyphs: here a ring means nothing polling
+     and a dot the sampler running, on every card */
+  const SER = [['q', 'the SP’s pass, nothing polling', 'ring'], ['s', 'the SP’s pass while ettelem samples', 'dot'], ['b', 'a new board value while ettelem samples (mean of three passes)', 'line']];
+  CK.legend('timing-leg', SER.map(([k, l, m]) => ({key: k, label: l, color: 'var(--ink-2)', mark: m})));
+  { const sw = document.querySelectorAll('#timing-leg .ck-li svg')[2];  /* the board value's glyph: the chart's vertical bar */
+    if (sw) { sw.textContent = ''; const r = CK.el('rect', {x: 7, y: 0, width: 4, height: 10, rx: 1.5}, sw); r.style.fill = 'var(--ink-2)'; } }
+  const read = CK.readout('timing-read');
+  const sum = `The sampler lengthens the pass by ${rng(Math.min(...add), Math.max(...add), 0, 'ms')} on ${CS.length === 2 ? 'both cards' : `all ${word(CS.length)} cards`}; ${slow}'s pass is about ${num(ratio, 1)} times the other ${word(rest.length)} cards' with nothing polling; ` +
+    `under the sampler the trace's pass runs ${rng(Math.min(...over), Math.max(...over), 0, 'ms')} longer than the refresh the board stream shows (two methods).`;
+  read.set(sum);
+  setHTML('timing-lead', `A reading can be no fresher than the service processor's pass, and reading it slows that pass: ${slow} gets a new value about every ${num(V[slow].b, 0)} ms while ettelem samples, the other ${word(rest.length)} every ${rng(...mm(rest.map(c => V[c].b)), 0, 'ms')}.`);
+  setHTML('timing-cap', `Per card, every pass of the version-3 campaign (three each): the SP stats trace's own pass interval with no sampler running and while <code>ettelem</code> samples at 10 Hz (TEL-P1, P3 and P5; the larger marks are the medians), and the interval between new board values in the board-power stream under the same sampler (TEL-S, phase-folded; the bar under each line is the mean of the three passes, the fainter lines the passes). Hover, tap or tab to a mark.`);
+  const rowH = 50, T = 12, B = 40;
+  function draw(f) {
+    const W = f.W, nar = W < 600, L = nar ? 8 : 150, R = 16, yEnd = T + CS.length * (rowH + (nar ? 16 : 0));
+    const lo = 10 * Math.floor(Math.min(...CS.flatMap(c => SP[c].quiet_ms.concat(BR[c].sampler_10hz_ms))) / 10) - 10, hi = 10 * Math.ceil(Math.max(...CS.flatMap(c => SP[c].sampled_ms)) / 10) + 10;
+    const x = CK.lin(lo, hi, L, W - R), g0 = CK.el('g', {'aria-hidden': 'true'}, f.svg), labs = [];
+    x.ticks(nar ? 4 : 8).forEach(t => { CK.el('line', {x1: x(t), x2: x(t), y1: T, y2: yEnd, class: 'grid-line'}, g0); labs.push(CK.txt(g0, x(t), yEnd + 16, num(t, 0), 'tick', 'middle')); });
+    labs.push(CK.txt(g0, (L + W - R) / 2, yEnd + 34, 'milliseconds between new values', 'lab', 'middle'));
+    const nodes = [];
+    CS.forEach((c, i) => {
+      const cc = CK.card(c), y0 = T + i * (rowH + (nar ? 16 : 0)), cy = y0 + (nar ? 16 : 0) + rowH / 2 - (nar ? 0 : 6);
+      if (nar) CK.txt(g0, 8, y0 + 13, cc.label, 'lab-strong'); else CK.txt(g0, 8, cy + 4, cc.label, 'lab-strong');
+      CK.el('line', {x1: L, x2: W - R, y1: cy, y2: cy, class: 'grid-line', opacity: 0.6}, g0);
+      const v = V[c], ar = CK.el('line', {x1: x(v.q) + 7, x2: x(v.s) - 8, y1: cy, y2: cy, 'stroke-width': 2}, g0); ar.style.stroke = cc.color;
+      const ah = CK.el('path', {d: `M${x(v.s) - 8},${cy} l-6,-4 l0,8 z`}, g0); ah.style.fill = cc.color;
+      labs.push(CK.txt(g0, (x(v.q) + x(v.s)) / 2, cy - 9, `+${num(v.s - v.q, 0)} ms`, 'tick', 'middle'));
+      const item = (xx, html, paint) => { const gg = CK.el('g', {}, f.svg); CK.el('rect', {x: xx - 7, y: cy - 10, width: 14, height: 34, class: 'ck-hit'}, gg); paint(gg); CK.tip(f, gg, html);
+        gg.addEventListener('focus', () => read.set(html)); gg.addEventListener('blur', () => read.set(sum)); nodes.push(gg); };
+      const ring = (gg, xx, r, fill) => { const e = CK.el('circle', {cx: xx, cy, r}, gg); e.style.fill = fill ? cc.color : 'var(--surface)'; e.style.stroke = cc.color; e.style.strokeWidth = fill ? '1' : '2'; };
+      /* the board value's refresh: a bar under the line at the mean, each pass a fainter line */
+      const tick = (gg, xx, mean) => { const e = mean ? CK.el('rect', {x: xx - 2, y: cy + 6, width: 4, height: 16, rx: 1.5}, gg) : CK.el('line', {x1: xx, x2: xx, y1: cy + 8, y2: cy + 20, 'stroke-width': 2}, gg);
+        if (mean) e.style.fill = cc.color; else { e.style.stroke = cc.color; e.style.opacity = '0.45'; } };
+      BR[c].sampler_10hz_ms.forEach((ms, k) => item(x(ms), `<b>${esc(cc.label)}</b>, pass ${k + 1}: a new board value every ${num(ms, 1)} ms while ettelem samples at 10 Hz (TEL-S)`, gg => tick(gg, x(ms), false)));
+      item(x(v.b), `<b>${esc(cc.label)}</b>: a new board value every ${num(v.b, 0)} ms on average over the three passes while ettelem samples`, gg => tick(gg, x(v.b), true));
+      SP[c].quiet_ms.forEach((ms, k) => item(x(ms), `<b>${esc(cc.label)}</b>, pass ${k + 1}: the SP's pass took ${num(ms, 1)} ms with nothing polling (TEL-P)`, gg => ring(gg, x(ms), 3, false)));
+      item(x(v.q), `<b>${esc(cc.label)}</b>: the SP's pass, ${num(v.q, 0)} ms with nothing polling (the median of three passes)`, gg => ring(gg, x(v.q), 6, false));
+      SP[c].sampled_ms.forEach((ms, k) => item(x(ms), `<b>${esc(cc.label)}</b>, pass ${k + 1}: the SP's pass took ${num(ms, 1)} ms while ettelem samples (TEL-P)`, gg => ring(gg, x(ms), 3, true)));
+      item(x(v.s), `<b>${esc(cc.label)}</b>: the SP's pass, ${num(v.s, 0)} ms while ettelem samples (the median of three passes), ${num(v.s - v.q, 0)} ms longer than with nothing polling`, gg => ring(gg, x(v.s), 6, true));
+    });
+    CK.inside(f, labs);
+    CK.keynav(f, nodes);
+  }
+  CK.frame('timing', {height: W => T + CS.length * (rowH + (W < 600 ? 16 : 0)) + B, minW: 300, maxW: 900, label: 'How often a new reading arrives on each card: the service processor’s pass with nothing polling and under the sampler, and the board value’s refresh', draw});
 })();

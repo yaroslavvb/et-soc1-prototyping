@@ -187,7 +187,9 @@ re-measured under a pre-registered plan on aifoundry2, aifoundry3 and aifoundry1
 per card): 6 held, 2 were corrected, 8 differ by card and 4 could not be confirmed. The energy per multiply-add and its factor
 of about 19 between int8 and fp32 held on every card; the integer loop's cost and the linearity in active cores differ by card
 (the loop's difference lies within the reduction's launch-temperature offset, post-data note C2: section 4);
-the leakage split was not re-tested. The 21 September session's numbers stay, labelled as its own
+the leakage split was not narrowed (the check's long idle passes, which would have re-fitted it, did not run, and its
+short cooling cycles on aifoundry2 could not narrow it: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-that-costs">the
+DVFS report, §5</a>). The 21 September session's numbers stay, labelled as its own
 (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">the record</a>).</div>
 
 <p class="lede">An A100 draws 330 to 400 W under a matrix multiply. This card, aifoundry2, draws 38 to 64 W at 80 °C (aifoundry3,
@@ -204,13 +206,13 @@ FLOP at dense matmul: the A100 spends 1.3 pJ per bf16 FLOP at the board, this ca
 3.3 and 6.9 pJ here, 2.6 and 5.5 pJ on aifoundry3 at its cooler 56 °C, and 4.1 and 8.5 pJ on aifoundry1-c1, whose idle is
 14 W higher). And the term Esperanto's slide leaves
 without a number, leakage, grows 0.65 W per degree at 80 °C and is the largest single item of the idle card: about 20 to
-29 W of its 36 W at 80 °C (this card, one session; the three-card check did not re-test it). Clock gating stops idle circuits switching, but no power gating was found on this card (one
-wake-up test), so they still leak.</p>
+29 W of its 36 W at 80 °C (this card, one session; the three-card check could not narrow the split). Clock gating stops idle circuits switching, but no power gating was found on any of the
+three cards (a wake-up test, three probes per card), so they still leak.</p>
 
 <div class="kpis">
   <div class="card kpi"><div class="lab">Switching power, same capacitance</div><div class="val">5–6× less</div><div class="sub">0.52 V and 600 MHz against about 0.85 V and 1,160–1,410 MHz: V² gives 2.7×, the clock 1.9–2.35×</div></div>
   <div class="card kpi"><div class="lab">A core spinning in an integer loop</div><div class="val">0.4–1.5 mW</div><div class="sub">by card, 26 September: 1,024 minions add 1.5 W on this card (1.46 W on 21 September), 0.4 W on aifoundry3 and 0.7 W on aifoundry1-c1; a tensor op on zeros 1.9, 0.8 and 1.2 W; random fp32 27.2, 24.7 and 27.8 W, as registered (at the die temperature of each launch, over the two readings of post-data note C2: the loop 0.8–1.6, 1.3–1.9 and 0.0–0.8 W, zeros 1.1–1.9, 1.7–2.2 and 0.4–1.2 W, random 26.5–27.2, 25.7–26.3 and 27.1–27.9 W). The energy manual's faster addi loop costs about 1.9 mW per minion on one hart (1.9–2.0 W for 1,024 minions on the three cards) and 3.0 mW on both</div></div>
-  <div class="card kpi"><div class="lab">Leakage at 80 °C</div><div class="val">+0.65 W per °C</div><div class="sub">the measured slope of idle power; of the 36 W idle, 20–29 W is leakage (23 W in the best fit), a split the idle data do not pin down (this card, one session; not re-tested on three cards)</div></div>
+  <div class="card kpi"><div class="lab">Leakage at 80 °C</div><div class="val">+0.65 W per °C</div><div class="sub">the measured slope of idle power; of the 36 W idle, 20–29 W is leakage (23 W in the best fit), a split the idle data do not pin down (this card, one session; the three-card check could not narrow it)</div></div>
   <div class="card kpi"><div class="lab">Energy per multiply-add, over idle</div><div class="val">0.32 · 2.7 · 6.0 pJ</div><div class="sub">int8 · fp16 · fp32 on random data. The chip was built for the first. Held on three cards on 26 September: 0.31 · 2.7 · 5.9 pJ here, 0.26 · 2.4 · 5.4 on aifoundry3, 0.31 · 2.7 · 6.1 on aifoundry1-c1</div></div>
   <div class="card kpi"><div class="lab">Dense matmul, per FLOP at the board</div><div class="val">3.3–7.0 vs 1.3 pJ</div><div class="sub">fp16–fp32 on this card (26 September: 2.6–5.5 pJ on aifoundry3, 4.1–8.5 pJ on aifoundry1-c1) against the A100's bf16 tensor cores: low power is not low energy per FLOP</div></div>
 </div>
@@ -262,7 +264,7 @@ effective capacitance. This card's fp32 matmul switches 27.6 W (<a href="#ablati
 <tr><td>V²</td><td class="num">0.72 V²</td><td class="num">0.27 V²</td><td class="num">2.7×</td><td class="small">on-die voltage telemetry; in the cool-start runs on this card (two readings per pattern) the 0.62 V point costs about <span id="vf-epo2"></span>× per op (<a href="#ablations">section 4</a>), close to V²'s <span id="vf-v2"></span>×. The A100's voltage is an assumption: 0.75 to 0.95 V gives 2.1 to 3.3×</td></tr>
 <tr><td>Clock</td><td class="num">1,160–1,410 MHz</td><td class="num">600 MHz</td><td class="num">1.9–2.35×</td><td class="small">cycle counter against wall clock here, 546 cycles per op for every data pattern; the A100's range is explained in section 1's table; the per-FLOP rows below do not depend on the clock</td></tr>
 <tr><td><b>Switching power</b></td><td class="num"><b>242 W</b></td><td class="num"><b>27.6 W</b></td><td class="num"><b>8.8×</b></td><td class="small">1.4 × 2.7 × 2.35 at 1,410 MHz; 1.7 × 2.7 × 1.9 at 1,160 MHz</td></tr>
-<tr><td>Idle floor</td><td class="num">88 W</td><td class="num">36 W</td><td class="num">2.4×</td><td class="small">of the ET's, 20 to 29 W is leakage at 80 °C (23 W in the best fit; one session, not re-tested); under the three-card check's runs aifoundry3 idled at 25.8 W (57 °C) and aifoundry1-c1 at 50.1 W (80 °C)</td></tr>
+<tr><td>Idle floor</td><td class="num">88 W</td><td class="num">36 W</td><td class="num">2.4×</td><td class="small">of the ET's, 20 to 29 W is leakage at 80 °C (23 W in the best fit; one session; the three-card check could not narrow the split); under the three-card check's runs aifoundry3 idled at 25.8 W (57 °C) and aifoundry1-c1 at 50.1 W (80 °C)</td></tr>
 <tr><td>FLOPs per second</td><td class="num">257 × 10¹²</td><td class="num">9.2 × 10¹²</td><td class="num">28×</td><td class="small">bf16 tensor cores against fp32 on general vector units; in fp16 this card does 18.4 × 10¹², 14×</td></tr>
 <tr><td>Capacitance switched per FLOP</td><td class="num">1.3 pF</td><td class="num">11 pF</td><td class="num">0.12×</td><td class="small">the GPU's matmul engines do 8.6 times more arithmetic per unit of switched capacitance (3.9 times against fp16, 5.0 pF)</td></tr>
 <tr><td>Switching energy per FLOP</td><td class="num">0.94 pJ</td><td class="num">3.0 pJ</td><td class="num">0.31×</td><td class="small">the voltage wins back 2.7× of that 8.6×</td></tr>

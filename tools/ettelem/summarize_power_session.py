@@ -38,6 +38,10 @@ existing --out file whose other sections (horace, horace2) are kept as they are:
                   every card of the version-3 claims check (busy_drift_loadstep_v3: V3-MMB item MMB-T/P1, four repeats
                   of this session's load step per card on 26 September 2026, fitted from 5 s after launch by
                   tools/claims-v3/mmb/x1_reduce.py; read from LOADSTEP_V3 when that file exists).
+  tel_v3          the version-3 claims check's V3-TEL, when TEL_V3 exists (27 September 2026): sp_pass, the service
+                  processor's pass in ms under each way of polling the card, per card and pass (sp_pass_v3); vmaps,
+                  the DEBUG block's per-shire voltage maps at idle and under load for the passes of item TEL-Q's Q4
+                  test, with that test's figures recomputed from the maps and checked against tel.json (vmaps_v3).
 
 The output is json.dumps with default separators and no final newline, as committed, with the top-level keys in a
 fixed order.
@@ -71,7 +75,19 @@ DRIFT_SESSIONS = {"aifoundry2": "docs/reports/data/2026-09-21-horace-aifoundry2/
 # The version-3 claims check (docs/reports/data/2026-09-25-claims-v3) repeated this session's load step four times on
 # each of three cards; its reduced results give each repeat's busy slope (MMB-T/P1). Added 26 September 2026.
 LOADSTEP_V3 = "docs/reports/data/2026-09-25-claims-v3/results/mmb.json"
-KEY_ORDER = ["thermal", "horace", "shires", "horace2", "context", "voltage_repeat", "mesh"]
+# Its meter and voltage-map tests (V3-TEL, tools/claims-v3/tel/reduce.py): the service processor's pass under each way
+# of polling the card (tel.json passes.<card>[].sp), and the per-shire voltage maps of the DEBUG block
+# (raw/<card>/tel/p<N>/dbg/x2-idle.bin and x2-load.bin, read with parse_sptrace_voltage.py as the reducer reads them).
+# Added 27 September 2026.
+TEL_V3 = "docs/reports/data/2026-09-25-claims-v3/results/tel.json"
+TEL_V3_RAW = "docs/reports/data/2026-09-25-claims-v3/raw"
+SP_ARMS = ["Q", "PWR", "L10", "VOLT", "E10", "E20", "E40"]  # the order of the check's arms, lightest first
+# what each arm ran (PLAN3.md, V3-TEL "Order"), and the interval it asked at, ms (None: no fixed interval)
+SP_ARM_WHAT = {"Q": ("nothing polling", None), "PWR": ("one power command every ~16 ms", 16),
+               "L10": ("one power command every 100 ms", 100), "VOLT": ("the voltage command, in a loop", None),
+               "E10": ("ettelem every 100 ms (10 Hz)", 100), "E20": ("ettelem every 50 ms (20 Hz)", 50),
+               "E40": ("ettelem every 25 ms (40 Hz)", 25)}
+KEY_ORDER = ["thermal", "horace", "shires", "horace2", "context", "voltage_repeat", "mesh", "tel_v3"]
 
 
 def load_jsonl(path):
@@ -223,6 +239,73 @@ def loadstep_v3(rel):
     return out
 
 
+def sp_pass_v3(tel):
+    """V3-TEL's service-processor pass, ms, per card and pass: the median interval of the SP's own stats records in each
+    arm of the pass (tel.json passes.<card>[].sp; reduce.py sp_pass_values), with the record count behind it. Q: quiet
+    segments, nothing polling; PWR: et-power-log's single power command, one per ~16 ms; L10: one power command per
+    0.1 s; VOLT: a loop of the module-voltage command; E10, E20, E40: ettelem sampling every 100, 50 and 25 ms."""
+    out = {}
+    for card in tel["cards"]["all"]:
+        rows = []
+        for p in tel["passes"].get(card, []):
+            sp = p["sp"]
+            rows.append({"pass": p["pass"], "ms": {a: sp.get(a) for a in SP_ARMS},
+                         "n": {a: sp.get("Q_n") if a == "Q" else sp["seg"].get(a, {}).get("n") for a in SP_ARMS}})
+        if rows:
+            out[card] = rows
+    return {"arms": [{"key": a, "what": SP_ARM_WHAT[a][0], "ask_ms": SP_ARM_WHAT[a][1]} for a in SP_ARMS], "cards": out}
+
+
+def vmaps_v3(tel):
+    """V3-TEL's per-shire voltage maps at idle and under a 7 s random-data burst, for each card's passes that entered
+    item TEL-Q's Q4 test (both dumps hold all 34 shires, the launch at 600 MHz): each map as parse_sptrace_voltage.py
+    reads the dump ({shire: {mnn, sram, noc: [now, low, high]}} mV), whether the dump held one whole pass, and the
+    item's Q4 figures for the pass, recomputed here from the maps' minion 'now' readings (each shire's deviation from
+    the 34-shire mean under load less the same at idle: its sd and largest magnitude; the load mean less the idle mean)
+    and checked against tel.json. Also each card's 99% upper bound on that sd and the registered tolerance, 0.5 mV."""
+    import io
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from parse_sptrace_voltage import parse
+    item = next(i for i in tel["items"] if i["item"] == "TEL-Q")
+    shires = [str(s) for s in range(34)]
+    out = {}
+    for card in tel["cards"]["all"]:
+        pc = item["per_card"].get(card) or {}
+        rows = []
+        for pr in pc.get("passes", []):
+            q4 = pr.get("Q4") or {}
+            if "sd_dev_change_mv" not in q4:
+                continue
+            d = os.path.join(ROOT, TEL_V3_RAW, card, "tel", "p%d" % pr["pass"], "dbg")
+            caps = {}
+            for key, name in (("idle", "x2-idle"), ("load", "x2-load")):
+                err = io.StringIO()
+                m = parse(open(os.path.join(d, name + ".bin"), "rb").read(), warn=err)
+                caps[key] = {"whole_pass": "no pass has all" not in err.getvalue() and len(m) == 34,
+                             "map": {s: m[s] for s in shires}}
+            iv = [caps["idle"]["map"][s]["mnn"][0] for s in shires]
+            lv = [caps["load"]["map"][s]["mnn"][0] for s in shires]
+            mi, ml = statistics.mean(iv), statistics.mean(lv)
+            dd = [(b - ml) - (a - mi) for a, b in zip(iv, lv)]
+            got = {"common_shift_mv": ml - mi, "sd_dev_change_mv": statistics.stdev(dd),
+                   "max_abs_dev_change_mv": max(abs(x) for x in dd)}
+            for k, v in got.items():
+                assert abs(v - q4[k]) < 0.006, (card, pr["pass"], k, v, q4[k])
+            rows.append(dict(caps, **{"pass": pr["pass"], "q4": {k: q4[k] for k in got}}))
+        if rows:
+            out[card] = {"passes": rows, "q4_sd_99_upper_mv": pc.get("Q4_sd_99_upper_mv"),
+                         "status": pc.get("status")}
+    return {"cards": out, "tolerance_mv": 0.5,
+            "test": "TEL-Q Q4: the 99% upper bound of the pass-level sd of each shire's deviation change, idle to load, "
+                    "at most 0.5 mV if each monitor carries a fixed offset"}
+
+
+def tel_v3():
+    tel = json.load(open(os.path.join(ROOT, TEL_V3)))
+    return {"sp_pass": sp_pass_v3(tel), "vmaps": vmaps_v3(tel),
+            "source": TEL_V3 + " (passes.<card>[].sp; items TEL-Q) and " + TEL_V3_RAW + "/<card>/tel/p<N>/dbg/x2-idle.bin, x2-load.bin"}
+
+
 def context():
     out = {}
     for key, (rel, get) in CONTEXT.items():
@@ -255,6 +338,8 @@ def main():
     out["context"] = context()
     out["voltage_repeat"] = voltage_repeat(a.dir, out["shires"])
     out["mesh"] = mesh()
+    if os.path.exists(os.path.join(ROOT, TEL_V3)):
+        out["tel_v3"] = tel_v3()
     # a fixed key order, so the file comes out the same whichever earlier version it is merged into
     out = {k: out[k] for k in KEY_ORDER + [k for k in out if k not in KEY_ORDER] if k in out}
     with open(a.out, "w") as f:

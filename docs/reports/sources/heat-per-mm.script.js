@@ -359,7 +359,7 @@ const MAPBUS=CK.bus('heat-map-d');
   const F=v=>{const p=CK.pick(v,card); return p?`${f0(p.mean)}${p.se!=null?` ± ${f1(p.se)}`:''}`:'no value';};
   const body=`the data-dependent part costs ${F(dj.wsep_d1_4.random_minus_zeros_fj_per_bit_hop)} fJ with every flow on its own links against ${F(dj.wu.random_minus_zeros_fj_per_bit_hop)} on the loaded mesh, the data-independent part ${F(dj.wsep_d1_4.zeros_fj_per_bit_hop)} against ${F(dj.wu.zeros_fj_per_bit_hop)}`;
   setText('contcap',`Per bit per hop over 1–4 hops, ${meterName(key)}, ${cardName(card)} (mean ± one standard error): ${body}. Solid: random data; dashed: zeros; points (${markWord(card)}): ${cardName(card)}'s means, ${bars}; the axis stays put, so switching cards shows how they differ${sel?`; rings: the ${sel}-hop points, the distance on the map`:''}.`);}
- CK.seg('contbtn',{label:'Meter',options:METERS,value:key,onChange:v=>{key=v;f.redraw();}});
+ CK.seg('contbtn',{label:'Meter',options:METERS,value:key,onChange:v=>{key=v;f.redraw();CK.bus('meter6').emit(v);}});   // the section's meter: the excess chart below follows it
  if(CARDS.length){const cs=CK.cardSeg('contcard',{cards:CARDS,pooled:true,onChange:v=>{card=v;f.redraw();}}); if(cs.value!==card){card=cs.value;f.redraw();}}
  MAPBUS.on(d=>{sel=d;f.redraw();});
 })();
@@ -557,6 +557,72 @@ const MAPBUS=CK.bus('heat-map-d');
   CK.keynav(f,nodes);
  }});
  CK.seg('altbtn',{label:'Meter',options:METERS,value:key,onChange:v=>{key=v;f.redraw();}});
+})();
+
+/* ---------- 6b. what sharing links adds, card by card (pages-v5) ----------
+   W_.disjoint_flows[meter]: per bit per hop over one to four hops, fitted per card and pass, the link-disjoint pairs
+   (wsep_d1_4) against the all-pairs loaded mesh (wu), split into the data-dependent part (random - zeros) and the rest
+   (zeros); pooled means and each card's mean ± se. The excess and its 99% interval per card are the three-card check's
+   own items (D.check_v3: P1 and P2 on the mesh rail, P5a and P5b on board power). The meter follows section 6's. */
+(function(){
+ const DF=W_.disjoint_flows; if(!DF||!document.getElementById('excess'))return;
+ const mOn=k=>k===NK?'the mesh rail':'board power';
+ const andList2=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+ const PARTS=[['random_minus_zeros_fj_per_bit_hop','the data-dependent part','data part',{[NK]:'P1',[BK]:'P5a'}],['zeros_fj_per_bit_hop','the rest, whatever the data','the rest',{[NK]:'P2',[BK]:'P5b'}]];
+ const ok=k=>DF[k]&&DF[k].wu&&DF[k].wsep_d1_4&&PARTS.every(([p])=>DF[k].wu[p]&&DF[k].wsep_d1_4[p]);
+ let key=ok(NK)?NK:BK; if(!ok(key))return;
+ const HS=CK.cardsIn(DF[key].wu[PARTS[0][0]].per_card||{}), ROWS=['pooled'].concat(HS);
+ const get=(k,set,part,h)=>{const q=DF[k][set][part]; if(h==='pooled')return {mean:q.mean,lo:q.lo,hi:q.hi,n:q.n}; const p=CK.pick(q,h); return p&&{mean:p.mean,se:p.se,n:p.n};};
+ const ci=(k,pi,h)=>{const id=PARTS[pi][3][k], c=CV[id]&&CV[id].per_card&&CV[id].per_card[h]; return c&&c.lo99!=null?c:null;};
+ const perMm=v=>f1(v/HOP);
+ CK.legend('excess-leg',[{key:'own',label:'every flow on its own links',color:'var(--muted)',mark:'dot'},{key:'ld',label:'a loaded mesh (in the card’s colour; all cards in ink)',color:'var(--ink)',mark:'dot'}].concat(CK.cardLegend(HS)));
+ const f=CK.frame('excess',{label:'Energy per bit per hop with every flow on its own links against a loaded mesh, per card, for the data-dependent part and the rest',
+  height:W=>W<600?2*(24+ROWS.length*26+34)+8:24+ROWS.length*30+40,draw:f=>{
+  const nar=f.narrow, L=nar?64:118, Rr=nar?8:14, gap=nar?0:34, pw=nar?f.W-L-Rr:(f.W-L-Rr-gap)/2, rowH=nar?26:30;
+  const xmax=Math.max(...[key].flatMap(k=>PARTS.flatMap(([p])=>ROWS.map(h=>{const a=get(k,'wu',p,h), b=get(k,'wsep_d1_4',p,h); return Math.max(a?a.mean:0,b?b.mean:0);}))));
+  const XM=Math.ceil(xmax*1.32/25)*25, nodes=[];
+  PARTS.forEach(([part,title,short],pi)=>{
+   const x0=nar?L:L+pi*(pw+gap), y0=nar?pi*(24+ROWS.length*rowH+34+8):0, T=y0+24, x=CK.lin(0,XM,x0,x0+pw);
+   CK.txt(f.svg,x0,y0+14,nar?`${short}`:title,'lab-strong');
+   const yb=T+ROWS.length*rowH;
+   CK.inside(f,x.ticks(nar?4:5).map(t=>{CK.el('line',{x1:x(t),x2:x(t),y1:T-4,y2:yb,class:'grid-line'},f.svg); return CK.txt(f.svg,x(t),yb+15,CK.fmt.num(t),'tick','middle');}));
+   CK.el('line',{x1:x0,x2:x0+pw,y1:yb,y2:yb,class:'ck-axis'},f.svg);
+   CK.txt(f.svg,x0+pw/2,yb+30,'fJ per bit per hop','lab','middle');
+   ROWS.forEach((h,i)=>{const yc=T+rowH*(i+0.5), own=get(key,'wsep_d1_4',part,h), ld=get(key,'wu',part,h); if(!own||!ld)return;
+    if(pi===0||nar)CK.txt(f.svg,L-8,yc+4,h==='pooled'?(nar?'all':'all cards'):(nar?CK.card(h).short:CK.card(h).label),h==='pooled'?'lab-strong':'lab','end');
+    const col=h==='pooled'?'var(--ink)':CK.card(h).color, gg=CK.el('g',{},f.svg), xa=x(own.mean), xb=x(ld.mean), dir=xb>=xa?1:-1;
+    CK.el('rect',{x:Math.min(xa,xb)-8,y:yc-9,width:Math.abs(xb-xa)+16,height:18,class:'ck-hit'},gg);
+    if(Math.abs(xb-xa)>16){CK.el('line',{x1:xa,x2:xb-dir*11,y1:yc,y2:yc,stroke:col,'stroke-width':2},gg);
+     CK.el('polygon',{points:`${xb-dir*13},${yc-4} ${xb-dir*7},${yc} ${xb-dir*13},${yc+4}`,fill:col},gg);}
+    else CK.el('line',{x1:xa,x2:xb,y1:yc,y2:yc,stroke:col,'stroke-width':2},gg);
+    if(h==='pooled'){CK.el('circle',{cx:xa,cy:yc,r:4,fill:'var(--muted)'},gg); CK.el('circle',{cx:xb,cy:yc,r:4.5,fill:col},gg);}
+    else{CK.cardMark(gg,h,xa,yc,3.5,'var(--muted)'); CK.cardMark(gg,h,xb,yc,4);}
+    const ex=ld.mean-own.mean, c=h==='pooled'?null:ci(key,pi,h), pct=100*(ld.mean/own.mean-1);
+    const t=CK.txt(f.svg,Math.max(xa,xb)+8,yc+4,`${ex<0?'−':'+'}${f0(Math.abs(ex))}`+(c?` [${f0(c.lo99)}, ${f0(c.hi99)}]`:` (+${f0(pct)}%)`),'tick','start');
+    if(c&&(c.lo99>0||c.hi99<0))t.setAttribute('class','lab-strong');
+    const fmt=v=>`${f0(v.mean)}${v.se!=null?` ± ${f1(v.se)}`:v.lo!=null?` [${f0(v.lo)}–${f0(v.hi)}]`:''} fJ (${perMm(v.mean)} per bit·mm)`;
+    CK.tip(f,gg,`<b>${cardName(h)}</b>, ${title}, ${meterName(key)}, per bit per hop over one to four hops<br>own links: ${fmt(own)}<br>loaded mesh: ${fmt(ld)}<br>`+
+     `sharing adds <b>${f0(ex)} fJ</b> (+${f0(pct)}%)`+(c?`, 99% interval [${f0(c.lo99)}, ${f0(c.hi99)}] over ${c.n||'its'} passes: ${c.lo99>0||c.hi99<0?'resolved from zero':'not resolved from zero'}`:', all cards pooled'));
+    nodes.push(gg);});
+  });
+  CK.keynav(f,nodes);
+  readout();
+ }});
+ function readout(){
+  const ex=(pi,h)=>{const p=PARTS[pi][0], a=get(key,'wu',p,h), b=get(key,'wsep_d1_4',p,h); return a&&b?a.mean-b.mean:null;};
+  const pc=(pi)=>{const p=PARTS[pi][0], a=get(key,'wu',p,'pooled'), b=get(key,'wsep_d1_4',p,'pooled'); return 100*(a.mean/b.mean-1);};
+  const span=xs=>{const a=f0(Math.min(...xs)), b=f0(Math.max(...xs)); return a===b?a:`${a} to ${b}`;};
+  const clear=pi=>HS.filter(h=>{const c=ci(key,pi,h); return c&&(c.lo99>0||c.hi99<0);});
+  const both=HS.filter(h=>clear(0).includes(h)&&clear(1).includes(h)), up=HS.every(h=>ex(0,h)>0&&ex(1,h)>0);
+  document.getElementById('excess-readout').innerHTML=`On ${mOn(key)}, ${up?'every card spends more on a loaded mesh':'the cards differ'}: sharing adds ${span(HS.map(h=>ex(0,h)))} fJ per bit per hop to the data-dependent part and ${span(HS.map(h=>ex(1,h)))} to the rest (${andList2(HS.map(h=>CK.card(h).label))}), `+
+   `${both.length===HS.length?`each 99% interval clear of zero on all ${nw(HS.length)} cards`:both.length?`both resolved from zero on ${andList2(both.map(h=>CK.card(h).label))}`:'not resolved from zero on any card'}. `+
+   `Pooled, the rest rises ${f0(pc(1))}% and the data-dependent part ${f0(pc(0))}%. Numbers: the excess in fJ, with the three-card check's 99% interval (bold where it excludes zero).`;
+  const le=document.getElementById('excesslead'); if(le&&!le.innerHTML){
+   /* the bold claim only if it holds on both meters: every card's excess positive, each 99% interval clear of zero */
+   const holds=[NK,BK].filter(ok).every(k=>HS.every(h=>[0,1].every(pi=>{const p=PARTS[pi][0], a=get(k,'wu',p,h), b=get(k,'wsep_d1_4',p,h), c=ci(k,pi,h); return a&&b&&a.mean>b.mean&&c&&c.lo99>0;})));
+   le.innerHTML=(holds?`<b>Sharing links costs energy on every card, in both parts of a hop and on both meters</b>: `:'')+`the chart sets the same one to four hops with every flow on its own links (grey) against the loaded mesh of sections 4 and 5, where flows share links, on the meter chosen above; the arrow is what sharing adds.`;}
+ }
+ CK.bus('meter6').on(v=>{if(ok(v)&&v!==key){key=v;f.redraw();}});
 })();
 
 /* ---------- 7. against the rule of thumb: the voltage explorer ---------- */
@@ -873,6 +939,9 @@ const MAPBUS=CK.bus('heat-map-d');
 
  /* 10. limits */
  setText('axistext',`(The first run's x-only and y-only pairs differ in link sharing as well as in direction, so they cannot separate the two either.)`);
+ // the fitted delivery loss of the minion rail, per card (the hub's unmetered attribution, carried in report.json context)
+ const RL=(D.context||{}).minion_delivery_loss;
+ if(RL&&CK.cardsIn(RL).length){const hs=CK.cardsIn(RL); setText('regloss',`${byCard(hs.map(h=>pc(RL[h])),hs)} of what the minion rail delivers lost between the 12 V input and the core`);}
  const SN=H_.sensitivity&&H_.sensitivity.no_leak_correction;
  if(SN){
   const ch=[];['v1','v2'].forEach(st=>['toggle_fj_per_bit_transition_hop','ones_fj_per_one_bit_hop'].forEach(k=>ch.push(SN[st].board[k].mean/H_.model[st].board[k].mean-1)));

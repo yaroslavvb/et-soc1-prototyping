@@ -437,10 +437,12 @@
       ['upd_l1', 'gather + fadd + scatter, buckets in the hart’s L1', 0], ['upd_l2', 'gather + fadd + scatter, buckets in the L2', 0],
       ['upd_scp', 'gather + fadd + scatter, buckets in the own scratchpad', 0], ['upd_dram', 'gather + fadd + scatter, buckets in DRAM', 0],
       ['famoadd_l', 'packed atomic famoaddl.pi, a table per shire', 1], ['famoadd_g', 'packed atomic famoaddg.pi, one table for the chip', 1],
-      ['amoadd_l', 'scalar atomic amoaddl.w, a table per shire', 2], ['amoadd_g', 'scalar atomic amoaddg.w, one table for the chip', 2],
+      ['amoadd_l', 'scalar atomic amoaddl.w, a table per shire', 1], ['amoadd_g', 'scalar atomic amoaddg.w, one table for the chip', 1],
     ].filter(p => G[p[0]]);
-    const GR = [['gather, fadd.ps and scatter, private buckets', 'var(--c1)', 'dot'], ['packed atomic add (famoadd*.pi)', 'var(--c2)', 'dot'], ['scalar atomic add (amoadd*.w)', 'var(--c3)', 'dot'],
-      ['global atomics spread over 32 lines (before S3)', 'var(--ref)', 'dot']];
+    /* the energy manual's families and marks (its section 6 chart of the same E48 rows), so a point looks the same on
+       both pages: the vector unit on private buckets, an atomic add on a shared table (packed or scalar), the hot line */
+    const GR = [['gather, fadd.ps and scatter, private buckets', 'var(--c4)', 'box'], ['an atomic add on a shared table: packed famoadd*.pi or scalar amoadd*.w', 'var(--c7)', 'dot'],
+      ['global atomics spread over 32 lines (the hot line, before S3)', 'var(--c5)', 'ring']];
     CK.legend('s3-leg', GR.map((g, i) => ({key: 'g' + i, label: g[0], color: g[1], mark: g[2]})));
     const read = CK.readout('s3-read');
     const nj = v => (v < 0.1 ? num(v, 3) : v < 10 ? num(v, 2) : num(v, 0)) + ' nJ';
@@ -451,21 +453,139 @@
       height: W => (W < 600 ? 300 : 320),
       draw(f) {
         const L = 56, R = 16, T = 24, B = 42, x = CK.log(1e8, 1e12, L, f.W - R), y = CK.log(0.01, 100, f.H - B, T);
-        CK.axes(f, {x, y, L, R, T, B, xt: [1e8, 1e9, 1e10, 1e11, 1e12], yt: [0.01, 0.1, 1, 10, 100], xfmt: v => (v >= 1e9 ? num(v / 1e9, 0) + ' G' : num(v / 1e6, 0) + ' M'),
+        /* no x tick in the corner, where it would meet the lowest y tick */
+        CK.axes(f, {x, y, L, R, T, B, xt: [1e9, 1e10, 1e11, 1e12], yt: [0.01, 0.1, 1, 10, 100], xfmt: v => (v >= 1e9 ? num(v / 1e9, 0) + ' G' : num(v / 1e6, 0) + ' M'),
           yfmt: v => num(v), xl: 'updates per second over the chip (log)', yl: 'nJ per update, above idle (log)'});
         const g = CK.el('g', {'aria-hidden': 'true'}, f.svg);
         CK.el('line', {x1: x(1e10), x2: x(1e10), y1: T, y2: f.H - B, style: 'stroke:var(--ink-2);stroke-width:1.2;stroke-dasharray:5 4'}, g);
         CK.inside(f, [CK.txt(g, x(1e10) + 5, T + 10, '10 G updates/s', 'lab', 'start')]);
         const nodes = [];
-        const pt = (v, e, col, html) => {
-          const gg = CK.el('g', {}, f.svg);
-          CK.el('circle', {cx: x(v), cy: y(e), r: 9, class: 'ck-hit'}, gg);
-          const c = CK.el('circle', {cx: x(v), cy: y(e), r: 5}, gg); c.style.fill = col; c.style.stroke = 'var(--surface)'; c.style.strokeWidth = '1.5';
+        const pt = (v, e, gr, html) => {
+          const gg = CK.el('g', {}, f.svg), cx = x(v), cy = y(e), [, col, mk] = gr;
+          CK.el('circle', {cx, cy, r: 9, class: 'ck-hit'}, gg);
+          const c = mk === 'box' ? CK.el('rect', {x: cx - 4.5, y: cy - 4.5, width: 9, height: 9, rx: 1.5}, gg) : CK.el('circle', {cx, cy, r: mk === 'ring' ? 4.5 : 5}, gg);
+          if (mk === 'ring') { c.style.fill = 'var(--surface)'; c.style.stroke = col; c.style.strokeWidth = '2'; }
+          else { c.style.fill = col; c.style.stroke = 'var(--surface)'; c.style.strokeWidth = '1.5'; }
           CK.tip(f, gg, html); gg.addEventListener('focus', () => read.set(html)); nodes.push(gg);
         };
-        P.forEach(([k, lab, gi]) => { const d = G[k]; pt(d.ops_per_s, d.nj, GR[gi][1], '<b>' + lab + '</b>: ' + gps(d.ops_per_s) + ' at ' + nj(d.nj) + ' per update [' + nj(d.lo) + '–' + nj(d.hi) + ']'); });
+        P.forEach(([k, lab, gi]) => { const d = G[k]; pt(d.ops_per_s, d.nj, GR[gi], '<b>' + lab + '</b>: ' + gps(d.ops_per_s) + ' at ' + nj(d.nj) + ' per update [' + nj(d.lo) + '–' + nj(d.hi) + ']'); });
         const A = ET.atomics_spread;
-        if (A) pt(A.ops_per_s, A.nj, 'var(--ref)', '<b>Global atomics spread over 32 lines</b> (the hot-line report, before S3): ' + gps(A.ops_per_s) + ' at ' + nj(A.nj));
+        if (A) pt(A.ops_per_s, A.nj, GR[2], '<b>Global atomics spread over 32 lines</b> (the hot-line report, before S3): ' + gps(A.ops_per_s) + ' at ' + nj(A.nj));
+        CK.keynav(f, nodes);
+      },
+    });
+  })();
+
+  /* ---------------------------------------------------------------- 5. the first experiment's verdict */
+  /* Board energy (log) against time for one query over the 65.5 MB int8 shard: the rule's pass box (D.experiment) and
+     kill region (its absolute line, and a third of the modelled H100's pass), with the model's predictions (s1.hbm_case,
+     s1.hbm_case_rows16), the H100's own pass, and the one measured pass (the anchor layer, model.et.anchor). Every bar
+     spans the idle range of its device, charged over the pass. */
+  (function verdictChart() {
+    const X = D.experiment, A = ET.anchor, c1 = s1.hbm_case, c16 = s1.hbm_case_rows16;
+    if (!X || !$('verdict') || !c1 || !c16) return;
+    const gpuKill = [c1.h100_mJ[0] / X.kill_gpu_within, c1.h100_mJ[1] / X.kill_gpu_within];
+    const killAt = Math.min(X.kill_mJ, gpuKill[0]);  // the lowest energy at which the rule could kill S1, as modelled
+    const where = (us, mJ) => (mJ[0] >= X.kill_mJ ? 'killed' : mJ[0] >= killAt ? 'at the kill line' : us <= X.pass_us && mJ[1] <= X.pass_mJ ? 'inside the pass box'
+      : us <= X.pass_us && mJ[0] <= X.pass_mJ ? 'across the pass line' : 'out of the pass box, short of the kill line');
+    const mj = v => num(v, v < 1 ? 2 : 1), mjr = v => range(v[0], v[1], mj) + ' mJ';
+    const PTS = [
+      {key: 's1', lab: 'S1 as modelled', col: 'var(--c1)', fill: true, us: c1.et_us, mJ: c1.et_mJ,
+        html: () => '<b>S1 as this page models it</b>: one query over the ' + num(c1.MB, 1) + ' MB int8 shard, ' + num(c1.et_us, 1) + ' µs and ' + mjr(c1.et_mJ)
+          + ' of board energy (the lower end at aifoundry3’s idle, the upper at aifoundry2’s), bound by ' + (c1.et_bound === 'memory' ? 'SRAM bandwidth' : 'the tensor unit') + ': ' + where(c1.et_us, c1.et_mJ)
+          + ' before the fused top-k; the dashed extension is the upper end with a top-k at the rule’s ' + pct(X.topk_max) + ' limit, ' + mj(c1.et_mJ[1] * (1 + X.topk_max)) + ' mJ'},
+      {key: 'r16', lab: 'if every op costs 16 rows', short: '16-row ops', col: 'var(--c1)', fill: false, us: c16.et_us, mJ: c16.et_mJ,
+        html: () => '<b>The same, if every tensor op costs a full 16 rows</b> (the third weakest assumption): ' + num(c16.et_us, 1) + ' µs and ' + mjr(c16.et_mJ)
+          + ', bound by ' + (c16.et_bound === 'memory' ? 'SRAM bandwidth' : 'the tensor unit') + ': ' + where(c16.et_us, c16.et_mJ)},
+      {key: 'h', lab: 'H100 from HBM', col: 'var(--c2)', fill: true, us: c1.h100_us, mJ: c1.h100_mJ,
+        html: () => '<b>An H100 reading the same shard from HBM</b> (this page’s estimate): ' + num(c1.h100_us, 1) + ' µs and ' + mjr(c1.h100_mJ)
+          + '; a third of it, ' + mjr(gpuKill) + ', is where “the GPU comes within ' + X.kill_gpu_within + '×” would kill S1'},
+      {key: 'm', lab: 'measured: a 16.8 MB layer', short: 'measured layer', col: 'var(--ink)', fill: true, sq: true, us: A.t_us, mJ: [A.board_j * 1e3, A.board_j * 1e3],
+        html: () => '<b>The one pass measured</b>: a 1024×4096 fp32 layer (' + num(A.bytes / 1e6, 1) + ' MB) read from the scratchpads in ' + num(A.t_us, 1) + ' µs for '
+          + mj(A.board_j * 1e3) + ' mJ of board energy (aifoundry3, one run); the model reproduces its energy above idle to within ' + num(100 * A.model_over_measured, 0) + '%'},
+    ];
+    CK.legend('verdict-leg', [
+      {key: 'et', label: 'ET-SoC-1, this page’s model', color: 'var(--c1)', mark: 'dot'},
+      {key: 'h', label: 'H100, this page’s estimate', color: 'var(--c2)', mark: 'dot'},
+      {key: 'm', label: 'measured on a card', color: 'var(--ink)', mark: 'box'},
+      {key: 'pass', label: 'the rule’s pass box', color: 'color-mix(in srgb, var(--ok) 30%, var(--surface))', mark: 'box'},
+      {key: 'kill', label: 'kill', color: 'color-mix(in srgb, var(--bad) 26%, var(--surface))', mark: 'box'},
+    ]);
+    const read = CK.readout('verdict-read');
+    const in1 = where(c1.et_us, c1.et_mJ), in16 = where(c16.et_us, c16.et_mJ);
+    const spareE = [1 - c1.et_mJ[1] / X.pass_mJ, 1 - c1.et_mJ[0] / X.pass_mJ], spareT = 1 - c1.et_us / X.pass_us;
+    /* the model has no selection cost: the fused top-k, which the rule lets add up to X.topk_max, comes on top */
+    const tk = 1 + X.topk_max, tkHi = c1.et_mJ[1] * tk, tkRoom = X.pass_mJ / c1.et_mJ[1] - 1;
+    const tkNote = in1 === 'inside the pass box' ? (tkHi > X.pass_mJ
+      ? '; the fused top-k is not in the model, and at the rule’s ' + pct(X.topk_max) + ' limit it would take the upper end to ' + mj(tkHi) + ' mJ (and ' + num(c1.et_us * tk, 0) + ' µs), over the '
+        + num(X.pass_mJ, 1) + ' mJ line: the upper end stays inside only if the top-k adds at most ' + pct(tkRoom)
+      : '; the fused top-k is not in the model, and even at the rule’s ' + pct(X.topk_max) + ' limit the upper end stays inside, at ' + mj(tkHi) + ' mJ') : '';
+    const summary = 'As modelled, before the fused top-k, one query takes ' + num(c1.et_us, 0) + ' µs and ' + mjr(c1.et_mJ) + ': ' + in1
+      + (in1 === 'inside the pass box' ? ', with ' + range(100 * spareE[0], 100 * spareE[1], v => num(v, 0)) + '% to spare on energy and ' + num(100 * spareT, 0) + '% on time' : '') + tkNote
+      + '. If every tensor op costs a full 16 rows it takes ' + mjr(c16.et_mJ) + ': ' + in16 + '. The H100’s own pass, ' + mjr(c1.h100_mJ) + ', puts “within '
+      + X.kill_gpu_within + '×” at ' + mjr(gpuKill) + ', next to the rule’s ' + num(X.kill_mJ, 0) + ' mJ.';
+    read.set(summary);
+    $('verdict-lead').textContent = 'Where the verdict would fall: this page’s model puts one query over the ' + num(c1.MB, 1) + ' MB shard '
+      + in1 + (in1 === 'inside the pass box' ? ', before the fused top-k it leaves out' + (tkHi > X.pass_mJ ? ' (a top-k at the rule’s ' + pct(X.topk_max) + ' limit would take the upper end over the pass line)' : '') : '') + (in16 !== in1 ? '; its third weakest assumption alone (tensor ops that cost a full 16 rows) moves it ' + (in16 === 'killed' || in16 === 'at the kill line' ? 'to the kill line' : 'out of the box, though not to the kill line') : '') + '.';
+    $('verdict-cap').innerHTML = 'Each bar spans its device’s idle charged over the pass: the ET card at ' + range(ET.idle_W.lo, ET.idle_W.hi, v => num(v, 1)) + ' W <span class="ev m">M</span>, the H100 at '
+      + range(HH.idle_W.lo, HH.idle_W.hi, v => num(v, 0)) + ' W <span class="ev e">E</span>. The rule is this section’s, set before any run <span class="ev e">E</span>: pass at ' + num(X.pass_us, 0) + ' µs and ' + num(X.pass_mJ, 1)
+      + ' mJ or less with the fused top-k adding at most ' + pct(X.topk_max) + '; kill at ' + num(X.kill_mJ, 0) + ' mJ or more, or within ' + X.kill_gpu_within + '× of the GPU (the hatched band under the kill line, from a third of the modelled H100’s pass, ' + mjr(gpuKill) + ')'
+      + '. The model has no top-k: the faint dashed extension above S1’s bar is its upper end with a top-k at that ' + pct(X.topk_max) + ' limit. Only the square was measured, and on a smaller layer, not on the shard.';
+    CK.frame('verdict', {
+      label: 'Board energy per query against time per pass: the first experiment’s pass box and kill region, with the model’s predictions for S1, an H100, and the one measured pass',
+      height: W => (W < 600 ? 330 : 360),
+      draw(f) {
+        const L = 52, R = 14, T = 24, B = 42, xMax = 50;
+        const x = CK.lin(0, xMax, L, f.W - R), y = CK.log(0.1, 20, f.H - B, T);
+        CK.axes(f, {x, y, L, R, T, B, xt: [0, 10, 20, 30, 40, 50], yt: [0.1, 0.3, 1, 3, 10], xfmt: v => num(v, 0), yfmt: v => num(v),
+          xl: 'time for one query, µs', yl: 'board energy for one query, mJ (log)'});
+        const g = CK.el('g', {'aria-hidden': 'true'}, f.svg), labs = [], nodes = [];
+        /* the regions: the pass box, the kill region from the rule's line, and the band a third of the modelled H100 adds */
+        const box = (x0, x1, y0, y1, fill) => CK.el('rect', {x: x(x0), y: y(y1), width: x(x1) - x(x0), height: y(y0) - y(y1), style: 'fill:' + fill}, g);
+        box(0, X.pass_us, 0.1, X.pass_mJ, 'color-mix(in srgb, var(--ok) 16%, transparent)');
+        box(0, xMax, X.kill_mJ, 20, 'color-mix(in srgb, var(--bad) 14%, transparent)');
+        if (killAt < X.kill_mJ) {  /* the band "within 3× of the GPU" adds: hatched, with its own label */
+          const pat = CK.el('pattern', {id: 'verdict-hatch', width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)'}, CK.el('defs', {}, g));
+          const hl = CK.el('line', {x1: 0, y1: 0, x2: 0, y2: 6, 'stroke-width': 2.5}, pat); hl.style.stroke = 'color-mix(in srgb, var(--bad) 55%, transparent)';
+          box(0, xMax, killAt, X.kill_mJ, 'url(#verdict-hatch)');
+          const edge = CK.el('line', {x1: x(0), x2: x(xMax), y1: y(killAt), y2: y(killAt), 'stroke-width': 1, 'stroke-dasharray': '2 3'}, g); edge.style.stroke = 'var(--bad)';
+          /* its label just above the kill line, at the right, where the kill region is empty */
+          labs.push(CK.txt(g, x(xMax) - 4, y(X.kill_mJ) - 6, (f.narrow ? 'within ' : 'kill: within ') + X.kill_gpu_within + '× of the H100, ' + mjr(gpuKill) + ' (hatched)', 'lab', 'end'));
+        }
+        const line = (x1_, y1_, x2_, y2_, col, dash) => CK.el('line', {x1: x1_, y1: y1_, x2: x2_, y2: y2_, style: 'stroke:' + col + ';stroke-width:1.4' + (dash ? ';stroke-dasharray:5 4' : '')}, g);
+        line(x(0), y(X.pass_mJ), x(X.pass_us), y(X.pass_mJ), 'var(--ok)', true);
+        line(x(X.pass_us), y(0.1), x(X.pass_us), y(X.pass_mJ), 'var(--ok)', true);
+        line(x(0), y(X.kill_mJ), x(xMax), y(X.kill_mJ), 'var(--bad)', true);
+        labs.push(CK.txt(g, x(1), y(0.1) - 8, 'pass: ≤ ' + num(X.pass_us, 0) + ' µs and ≤ ' + num(X.pass_mJ, 1) + ' mJ', 'lab-strong'));
+        labs.push(CK.txt(g, x(1), y(20) + 16, 'kill: ≥ ' + num(X.kill_mJ, 0) + ' mJ, or within ' + X.kill_gpu_within + '× of the GPU', 'lab-strong'));
+        labs.push(CK.txt(g, x(1), (y(X.pass_mJ) + y(killAt)) / 2 + 4, 'neither pass nor kill', 'tick', 'start'));
+        /* the points: a bar over the idle range with caps, and a mark at each end (the square: one measured value) */
+        PTS.forEach(p => {
+          const gg = CK.el('g', {}, f.svg), cx = x(p.us), ya = y(p.mJ[0]), yb = y(p.mJ[1]);
+          CK.el('rect', {x: cx - 11, y: yb - 11, width: 22, height: ya - yb + 22, class: 'ck-hit'}, gg);
+          if (p.sq) {
+            const s = CK.el('rect', {x: cx - 5.5, y: ya - 5.5, width: 11, height: 11, rx: 1.5}, gg); s.style.fill = p.col; s.style.stroke = 'var(--surface)'; s.style.strokeWidth = '1.5';
+          } else {
+            if (p.key === 's1' && X.topk_max) {  /* S1's upper end with a top-k at the rule's limit: a faint dashed whisker and cap */
+              const yt = y(p.mJ[1] * (1 + X.topk_max)), wk = CK.el('line', {x1: cx, x2: cx, y1: yb, y2: yt, 'stroke-width': 1.5, 'stroke-dasharray': '3 3', opacity: 0.6}, gg); wk.style.stroke = p.col;
+              const cap = CK.el('line', {x1: cx - 5, x2: cx + 5, y1: yt, y2: yt, 'stroke-width': 1.5, opacity: 0.6}, gg); cap.style.stroke = p.col;
+            }
+            const bar = CK.el('line', {x1: cx, x2: cx, y1: ya, y2: yb}, gg); bar.style.stroke = p.col; bar.style.strokeWidth = '3';
+            if (!p.fill) bar.style.strokeDasharray = '3 2';
+            [ya, yb].forEach(yy => {
+              const m = CK.el('circle', {cx, cy: yy, r: 5}, gg);
+              m.style.fill = p.fill ? p.col : 'var(--surface)'; m.style.stroke = p.fill ? 'var(--surface)' : p.col; m.style.strokeWidth = p.fill ? '1.5' : '2';
+            });
+          }
+          const right = p.key !== 'h';  /* the H100's label goes left, clear of S1's bars */
+          const lt = CK.txt(f.svg, cx + (right ? 12 : -12), (ya + yb) / 2 + 4, f.narrow && p.short ? p.short : p.lab, 'lab', right ? 'start' : 'end');
+          lt.setAttribute('aria-hidden', 'true'); labs.push(lt);
+          CK.tip(f, gg, p.html);
+          gg.addEventListener('focus', () => read.set(p.html()));
+          gg.addEventListener('blur', () => read.set(summary));
+          nodes.push(gg);
+        });
+        CK.inside(f, labs);
         CK.keynav(f, nodes);
       },
     });

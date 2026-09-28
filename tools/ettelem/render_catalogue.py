@@ -204,6 +204,7 @@ def main():
     mp = os.path.join(os.path.dirname(sys.argv[1]), "manual.json")
     man = json.load(open(mp)) if os.path.exists(mp) else {}
     V3 = man.get("v3", {})
+    WRB = man.get("wire_ref", {}).get("loaded/board")   # Heat per millimetre's per-hop figure (manual.json wire_ref)
     XC = man.get("catalogue", {}).get("cross_cards", {})
 
     def g(name, o, h=2):
@@ -214,8 +215,12 @@ def main():
 
     hw = [(c["hi"] - c["lo"]) / 2 / c["mean"] for c in C.values() if c["mean"] > 0 and c["cards"] > 1]
     import numpy as np
+    # the minion rail over the catalogue's bursts, each card's median reading (manual.json catalogue.rail_mv, which
+    # build_energy_manual.py reads from the catalogue's telemetry)
+    rmv = [v["minion"] / 1000 for v in (man.get("catalogue", {}).get("rail_mv") or {}).values()]
+    MV = (f"{min(rmv):.2f}" + (f"–{max(rmv):.2f}" if f"{min(rmv):.2f}" != f"{max(rmv):.2f}" else "") + " V on the minion rail") if rmv else "the minion rail's 0.5 V"
     s = ["# 3.1 Every instruction\n",
-         "Energy per instruction retired, above idle, at 600 MHz and 0.52 V, with both harts of all 1,024 minions "
+         "Energy per instruction retired, above idle, at 600 MHz and " + MV + ", with both harts of all 1,024 minions "
          "issuing it back to back. **Every figure is the mean over " + WORD[npc * len(cards)] + " measurements — " + WORD[npc] + " passes in shuffled order "
          "on each of " + NC + " cards (26 September) — and the bracket after it is the confidence bar: the range those " + WORD[npc * len(cards)] + " spanned.** The "
          "per-card columns give each card's own mean with its pass-to-pass standard error. Operands: zeros, and random "
@@ -289,7 +294,9 @@ def main():
         z6 = [slope6(w["zeros"]) for _, w in WA]
         t.append(f"**Over 1–6 hops**, leaving out d = 8, where only {shr(8)} shires have a partner and the point sits nearly level with d = 6, the same data give "
                  f"{and_list(f(x, 2) for x in r6)} pJ/B per hop on random data ({and_list(name(h) for h, _ in WA)}) and {and_list(f((a_ - b_) * 1000 / 8, 0) for a_, b_ in zip(r6, z6))} fJ per random bit per hop, "
-                 f"which is what [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) measures (2.17 pJ/B per hop on board power, loaded mesh): use its figures for wires.\n")
+                 f"which is what [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) measures"
+                 + (f" ({f(WRB['pj_per_byte_hop'], 2)} pJ/B per hop on board power, random data on a loaded mesh, three cards)" if WRB else "")
+                 + ": use its figures for wires.\n")
         # EN-1: the step out of the shire is about one hop over 1–6 hops; only the 1–8 fit, pulled down by the half-traffic 8-hop point, makes it two
         f6 = [fit6(w["random"]) for _, w in WA]
         loc = [w["random"].get("local_pj_per_byte") or 0 for _, w in WA]

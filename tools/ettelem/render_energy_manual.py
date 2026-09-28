@@ -507,8 +507,11 @@ def main():
     tl_keys = sorted(tl_by, key=lambda k: -len(tl_by[k]))
     tl_txt = f"{tl_keys[0]} °C" + (" (" + "; ".join(f"{k} °C on {and_list(name(h) for h in tl_by[k])}" for k in tl_keys[1:]) + ")" if len(tl_keys) > 1 else "")
     nrun = m["tensor"].get("runs_per_card", {})
+    # the minion rail over the catalogue's bursts, each card's median reading (catalogue.rail_mv)
+    rmv = [v["minion"] / 1000 for v in (m.get("catalogue", {}).get("rail_mv") or {}).values()]
+    MV = (f"{min(rmv):.2f}" + (f"–{max(rmv):.2f}" if f"{min(rmv):.2f}" != f"{max(rmv):.2f}" else "") + " V on the minion rail") if rmv else "the minion rail's 0.5 V"
     s = ["# 3. Instructions\n",
-         "Energy per instruction retired, above idle, at 600 MHz and 0.52 V, with both harts of all 1,024 minions running the instruction flat out. Three operand sets: all zeros, one constant everywhere, and random values in [0.5, 2).\n",
+         f"Energy per instruction retired, above idle, at 600 MHz and {MV}, with both harts of all 1,024 minions running the instruction flat out. Three operand sets: all zeros, one constant everywhere, and random values in [0.5, 2).\n",
          BARS + f" Three shuffled passes on each of {NC} cards (26 September), so n = {n_cat} for every entry. The full catalogue of 161 instructions is in [3.1](03a-every-instruction.md)"
          + (f", with the {len({c['op'] for c in m['gs']['configs'].values() if c['op'] not in ('flw', 'fsw', 'amoaddl.w', 'amoaddg.w', 'upd')})} gather, scatter and packed-atomic instructions of E48" if m.get("gs") else "") + ".\n",
          "## Scalar and vector units\n",
@@ -646,6 +649,7 @@ def main():
     # ---------------------------------------------------------------- 5 comm
     cm = m["comm"]
     MH = cm.get("mesh_hops", {})
+    WRN, WRB = (m.get("wire_ref", {}).get(k) for k in ("loaded/noc_rail", "loaded/board"))   # Heat per millimetre (manual.json wire_ref)
     rg = RR.get("rings_pj_per_byte") or {}
     rp = {x["medium"]: x for x in m["relay"]["power"]["media"]}
     rr = RR.get("relay_pj_per_byte") or {}
@@ -662,7 +666,7 @@ def main():
     x16 = next((x for x in cm["rows"] if x["ring"] == "xshire16"), None)
     s = ["# 5. Bytes between cores and shires\n",
          "Register file to register file over the tensor network (`TensorSend`/`TensorRecv`), 1 KB messages unless said otherwise, hart 0 of every minion sending and receiving in rings, at 600 MHz. "
-         "Shire IDs do not follow the mesh, so each ring between shires is given with its mean distance in mesh hops, the Manhattan distance between shire s and shire s + k averaged over all 32 compute shires on the shire map of [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication) (checked against latency on aifoundry2).\n",
+         "Shire IDs do not follow the mesh, so each ring between shires is given with its mean distance in mesh hops, the Manhattan distance between shire s and shire s + k averaged over all 32 compute shires on the shire map of [On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication) (checked against latency on all three cards: the version-3 check found the same map from the round-trip times in every pass).\n",
          BARS + (f" The rings were re-measured in the version-3 check (26 September) with the manual's own sampler, {npass(PP.get('rings', {}))}, the die held warm on the governor-free cards; they replace three passes on each of two cards of 23 September. The pair of 18 September runs on aifoundry2, sampled without the die temperature and so without a leakage correction, is not pooled; against aifoundry2's own new passes the values On-chip communication publishes from it read {pm(dev[0])}% to {pm(dev[-1])}% (median {pm(dev[len(dev) // 2])}%). "
                  + (f"**The s ↔ s+16 ring starves the service processor's own management path** — the sampler's latency rises from 22 ms to {min(x['sampler_median_ms'] for x in x16d):.0f}–{max(x['sampler_median_ms'] for x in x16d):.0f} ms and the board reading takes a new value about twice a second instead of six times — in every version-3 pass on {and_list(name(h) for h in x16c)}, so those bursts were dropped" + (f" and that row keeps {and_list(name(h) for h in fb16['cards'])}'s three passes of 23 September, when its sampler stayed at 22 ms" if fb16 else "") if x16d else "")
                  + (f" (On-chip communication gives {f(x16['pj_per_byte_local'], 1)} pJ/B for it on aifoundry2 on 18 September)." if x16 and x16.get("pj_per_byte_local") else ".") if rg else " Two independent runs averaged; ± is half their difference.") + "\n",
@@ -707,7 +711,8 @@ def main():
           f"- **Between the two minions of a pair a byte costs under a picojoule** ({f(pr, 2)} pJ); around a neighbourhood or a shire about {f(sh,1)} pJ; across the mesh {f(min(xs),0)}–{f(max(xs),0)} pJ."
           + (f" A straight line through the 1 KB rings between shires against their mean distances (the {WORD[len(both)]} that every card measured, {f(min(hb), 1)}–{f(max(hb), 1)} hops) gives {semi_list(f(pcf[h][0], 1) + (' pJ to leave the shire' if i == 0 else '') + ' plus ' + f(pcf[h][1], 1) + (' pJ per mesh hop' if i == 0 else '') + ' on ' + name(h) for i, h in enumerate(pcf))}"
              + (f"; the version-3 check finds no card's per-hop cost different from another's, {f(MSl['pooled'], 2)} pJ/B per hop pooled" if MSl.get("pooled") is not None else "")
-             + f". [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) measures 1.5 pJ/B per hop on the mesh rail and 2.2 on board power directly. **For messages, leaving the shire is the biggest step**, mostly because the same busy cores move " + (f"{gbr[0]:.0f}–{gbr[1]:.0f}" if gbr else "7–34") + "× fewer bytes across the mesh than around a shire ([On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication)); for tensor loads it costs about one hop ([4.3](04a-fine-grain.md))."
+             + (f". [Heat per millimetre](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm) measures {f(WRN['pj_per_byte_hop'], 1)} pJ/B per hop on the mesh rail and {f(WRB['pj_per_byte_hop'], 1)} on board power directly (random data, a loaded mesh)" if WRN and WRB else "")
+             + f". **For messages, leaving the shire is the biggest step**, mostly because the same busy cores move " + (f"{gbr[0]:.0f}–{gbr[1]:.0f}" if gbr else "7–34") + "× fewer bytes across the mesh than around a shire ([On-chip communication](https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication)); for tensor loads it costs about one hop ([4.3](04a-fine-grain.md))."
              + (f" The step out of the shire beyond one hop is {and_list(ci1(ES[h]) + ' pJ/B on ' + name(h) for h in esY)}" + (f", not resolved on {and_list(name(h) + ' (' + ci1(ES[h]) + ')' for h in esN)}" if esN else "") + " (99% intervals over six passes)." if esY else "") if pcf else ""),
           (f"- **Small messages cost more per byte**: the 128 B rows are dearer than the 1 KB ones on every card, by " + and_list(f"{min(o[h]['mean'] for h in o):.1f}–{max(o[h]['mean'] for h in o):.1f} pJ/B " + ("around a shire" if k.startswith("shire") else "between neighbouring shire IDs") for k, o in SMm.items()) + " (resolved from zero at 99% on each card)"
            if sm_all else "- Small messages cost more per byte in the 128 B rows")

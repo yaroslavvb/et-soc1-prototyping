@@ -108,6 +108,8 @@ svg text.halo { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; 
 .cell-off { fill: var(--grid); }
 .cell-skip { fill: color-mix(in srgb, var(--ink-2) 75%, var(--surface)); }  /* same mix as its legend swatch; about 3.2:1 on --grid in light, 4.8:1 in dark */
 .qfloor { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 6 4; }
+.le-idle { fill: var(--ref); fill-opacity: 0.45; }
+.le-sep { stroke: var(--grid); stroke-width: 1; }
 .chart-sub { font-size: 0.82rem; color: var(--ink-2); margin: 2px 0 4px; }
 .panels.lx { grid-template-columns: minmax(0, 1fr); align-items: start; }
 @media (min-width: 760px) { .panels.lx { grid-template-columns: 290px minmax(0, 1fr); } }
@@ -834,6 +836,11 @@ window.CK = (function () {
 </details>
 
 <p>Three effects add up. Masked loads cut the bytes, so at 50% zeros the layer drops from 7.5 to 5.7 µs. After that the per-slice fixed costs take over. Each nonempty slice waits for a load (at least 42 cycles) and an FMA, and the curve flattens at 5.4 µs. These times repeat to within 0.01 µs on all three cards. The big gains come only from skipping whole slices, which random sparsity allows only near the top: for independent zeros 18.5% of slices are empty at 90% zeros and 85% at 99% (0.9¹⁶ and 0.99¹⁶; the x drawn here had 14.9% and 87.5%). Energy per layer above idle falls from 67 to 5.9 µJ on aifoundry2 (19 at 90% zeros), from 75 to 4.5 µJ on aifoundry1 card 1 (16) and from 56 to 3.3 µJ on this card (12), mostly because skipped slices and masked loads do less work in less time (70 to 7 µJ, 19 at 90%, in the first run). The tensor unit's own gating adds no speed and little energy here: with every row loaded, 90% zeros in x cut the layer's power above idle only from 9.9 to 8.2 W on aifoundry2, 11.0 to 9.3 W on aifoundry1 card 1 and 8.4 to 6.8 W on this card, 16–19% (the three-card check ran the every-row kernel at both points; the first run, 9.4 to 8.3 W or about 12%, had the masked kernel at 0%, which with no zeros also loads every row).</p>
+<p class="muted">What the whole board spends per layer is another matter: once most slices are skipped, the power the card draws doing nothing, over the layer's few microseconds, is nearly all of it.</p>
+<div class="chart-title">Energy per layer on the board: the card's idle over the layer's time, and what the layer added above it</div>
+<div id="le-legend"></div>
+<div class="chart" id="c-lenergy"></div>
+<p class="ck-readout" id="le-read"></p>
 
 <details class="more"><summary>How the A100 comparison numbers were built up</summary>
 <p><b>Against the A100.</b> No one has published a timing for this exact layer on an A100, so the reference lines are rough references, not bounds. Launching even an empty kernel costs 2.26 µs, plus 1.44 µs for the kernel itself (measured on an A100-SXM4-80GB). Kernels queued back to back in a stream cost less, about 1.5–2.3 µs each on an A100 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication#every-primitive-against-a-gpu">on-chip communication report</a>). cuBLAS half-precision GEMM has a latency floor of about 4.5 µs. Streaming 16.8 MB of weights from L2 at 2.5–4.5 TB/s takes 3.7–6.7 µs. Added to the 2.26 µs launch, or to cuBLAS's 4.5 µs floor, a dense fp32 layer probably takes 6–11 µs, against 7.3–7.5 µs here. CUDA graphs cut launch cost to about 1.3 µs per kernel (measured on H100). At batch 1 a GPU's sparse GEMV is floor-bound too: TEAL's kernel gets 3× at 99–100% sparsity on a 4096×14336 fp16 layer, with 14× this one's weights and 7× its bytes (102 → 33 µs), and Deja Vu reported 1.8–2× end to end at about 75% sparsity (OPT-175B on 8 A100s, against FasterTransformer).</p>
@@ -966,7 +973,7 @@ window.CK = (function () {
 </ul>
 </details>
 <details class="more"><summary>Version history</summary>
-<p class="small">Versions: published 18 September 2026; revised 24 September 2026 (operand values, later measurements, the masked-DRAM cause, the work queue, the A100 launch comparison) and 25 September 2026 (the layer explorer, the later runs on the power chart and the queue-floor chart; this card's meter rate; shorter answers); 25 September (version 3): which card and how many runs each figure rests on, aifoundry2's values beside this card's, and the tensor unit's own all-zero power no longer quoted as a number (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>); 26 September: the three-card check (aifoundry2, aifoundry3, aifoundry1 card 1) in the text, the KPIs, the power chart, the TensorLoad chart and table and the layer table; 27 September: the masked-load hypothesis charted (per card), scenario 2 names the kernel behind each figure and takes the three-card energies, and aifoundry3's 600 MHz traced to the boot service that sets its TDP to 0 W.</p>
+<p class="small">Versions: published 18 September 2026; revised 24 September 2026 (operand values, later measurements, the masked-DRAM cause, the work queue, the A100 launch comparison) and 25 September 2026 (the layer explorer, the later runs on the power chart and the queue-floor chart; this card's meter rate; shorter answers); 25 September (version 3): which card and how many runs each figure rests on, aifoundry2's values beside this card's, and the tensor unit's own all-zero power no longer quoted as a number (record: <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>); 26 September: the three-card check (aifoundry2, aifoundry3, aifoundry1 card 1) in the text, the KPIs, the power chart, the TensorLoad chart and table and the layer table; 27 September: the masked-load hypothesis charted (per card), scenario 2 names the kernel behind each figure and takes the three-card energies, and aifoundry3's 600 MHz traced to the boot service that sets its TDP to 0 W; later that day, the layer's energy per card charted, idle against what the layer adds.</p>
 </details>
 
 <h2 id="caveats">Caveats</h2>
@@ -1572,7 +1579,74 @@ python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifo
   CK.legend("q-legend", [{ key: "st", label: "static, 8 lanes", mark: "box", color: "var(--c2)" }, { key: "rf", label: "refill", mark: "box", color: "var(--c1)" },
     { key: "sc", label: "scalar", mark: "box", color: "var(--c3)" }, { key: "fl", label: "queue floor", mark: "dash", color: "var(--ink)" }]);
 
-  renderFma(); renderPow(); renderTl(); renderHomeShires(); renderLayer(); renderGemvTable(); renderLane(); renderThr(); renderQueue();
+  /* §3 energy per layer by card (the three-card check's compute-only runs, D.v3.energy gemv-skip-*): each bar is the
+     board's energy per layer, split into the card's idle over the layer's time (j_per_unit − j_per_unit_above_idle) and
+     what the layer added above idle. The cards are the data's. */
+  function renderLayerEnergy() {
+    var host = document.getElementById("c-lenergy"); if (!host) return;
+    var LV = [["gemv-skip-0", "dense x (0% zeros)"], ["gemv-skip-90", "90% zeros"], ["gemv-skip-99", "99% zeros"]];
+    var cards = CK.cardsIn(V3E).filter(function (c) { return LV.every(function (l) { return V3E[c].configs[l[0]]; }); });
+    if (!cards.length) { host.parentNode.removeChild(host); return; }
+    var uj = function (v) { return v * 1e6; }, fu = function (v) { return num(v, v < 10 ? 1 : 0); };
+    var rows = [];
+    LV.forEach(function (l) {
+      var us = cards.map(function (c) { return 1e6 / V3E[c].configs[l[0]].per_s.mean; });
+      rows.push({ head: true, label: l[1], us: us });
+      cards.forEach(function (c) {
+        var q = V3E[c].configs[l[0]], tot = uj(q.j_per_unit.mean), add = uj(q.j_per_unit_above_idle.mean);
+        rows.push({ card: c, level: l[0], lname: l[1], tot: tot, add: add, idle: tot - add, idleW: V3E[c].idle_w, us: 1e6 / q.per_s.mean, n: q.n });
+      });
+    });
+    var maxT = Math.max.apply(null, rows.filter(function (r) { return !r.head; }).map(function (r) { return r.tot; }));
+    var X1 = Math.ceil(maxT * 1.12 / 50) * 50, HH = 24, RH = 36;
+    var height = 30 + rows.reduce(function (a, r) { return a + (r.head ? HH : RH); }, 0);
+    CK.frame("c-lenergy", { height: height, minW: 280, maxW: 900,
+      label: "Board energy per layer at 0, 90 and 99% zeros on each card, split into idle and the energy the layer added",
+      draw: function (f) {
+        var W = f.W, H = f.H, L = 8, R = 12, T = 4, B = 30, x = CK.lin(0, X1, L, W - R), nodes = [], y = T;
+        var xt = CK.lin(0, X1).ticks(f.narrow ? 4 : 8);
+        CK.axes(f, { x: x, y: CK.lin(0, 1, H - B, T), yt: [], xt: xt, L: L, R: R, T: T, B: B, grid: false, xfmt: function (v) { return v + " µJ"; } });
+        xt.forEach(function (t) { CK.el("line", { x1: x(t), x2: x(t), y1: T, y2: H - B, "class": "grid-line" }, f.svg); });
+        rows.forEach(function (r, k) {
+          if (r.head) {
+            if (k) CK.el("line", { x1: L, x2: W - R, y1: y + 2, y2: y + 2, "class": "le-sep" }, f.svg);
+            var a = Math.min.apply(null, r.us), b = Math.max.apply(null, r.us);
+            CK.txt(f.svg, L, y + 18, r.label + ": " + (b - a < 0.05 ? num(b, 1) : num(a, 1) + "–" + num(b, 1)) + " µs per layer", "lab-strong", "start");
+            y += HH; return;
+          }
+          var g = CK.el("g", {}, f.svg), yb = y + 17, bh = 14, cd = CK.card(r.card);
+          CK.el("rect", { x: L, y: y, width: W - L - R, height: RH, "class": "ck-hit" }, g);
+          CK.txt(g, L, y + 13, cd.label, "lab", "start");
+          CK.txt(g, W - R, y + 13, fu(r.tot) + " µJ · " + num(100 * r.idle / r.tot, 0) + "% idle", "lab", "end");
+          CK.el("rect", { x: x(0), y: yb, width: Math.max(0, x(r.idle) - x(0) - 1), height: bh, rx: 3, "class": "le-idle" }, g);
+          var ar = CK.el("rect", { x: x(r.idle) + 1, y: yb, width: Math.max(1.5, x(r.tot) - x(r.idle) - 1), height: bh, rx: 2 }, g);
+          ar.style.fill = cd.color;
+          CK.txt(g, x(r.tot) + 6, yb + 11.5, "+" + fu(r.add), "lab", "start");
+          CK.tip(f, g, "<b>" + cd.label + ", " + r.lname + "</b><br>" + fu(r.tot) + " µJ per layer on the board = " + fu(r.idle) + " µJ of idle (" + num(r.idleW, 1) + " W over " + num(r.us, 2) + " µs) + " +
+            fu(r.add) + " µJ the layer added above idle<br>masked loads + skip, compute only; mean of " + r.n + " runs, each with its own x");
+          nodes.push(g);
+          y += RH;
+        });
+        CK.keynav(f, nodes);
+      } });
+    CK.legend("le-legend", [{ key: "idle", label: "the card's idle over the layer's time", mark: "box", color: "var(--ref)" }]
+      .concat(CK.cardLegend(cards).map(function (c) { c.mark = "box"; c.label += ": added above idle"; return c; })));
+    var sw = document.querySelector("#le-legend svg rect"); if (sw) sw.style.fillOpacity = "0.45";
+    // the caption, from the same rows
+    var get = function (c, lv) { return rows.filter(function (r) { return r.card === c && r.level === lv; })[0]; };
+    var addX = cards.map(function (c) { return get(c, "gemv-skip-0").add / get(c, "gemv-skip-99").add; });
+    var totX = cards.map(function (c) { return get(c, "gemv-skip-0").tot / get(c, "gemv-skip-99").tot; });
+    var sh99 = cards.map(function (c) { var r = get(c, "gemv-skip-99"); return r.idle / r.tot; });
+    var r99 = cards.map(function (c) { return get(c, "gemv-skip-99"); }).sort(function (a, b) { return a.tot - b.tot; });
+    var rg = function (a, dp) { return CK.fmt.range(Math.min.apply(null, a), Math.max.apply(null, a), dp); };
+    var loIdle = r99.slice().sort(function (a, b) { return a.idleW - b.idleW; })[0];
+    CK.readout("le-read").set("From dense x to 99% zeros the energy the layer adds above idle falls " + rg(addX, 1) + "×, but the board's energy per layer only " + rg(totX, 1) +
+      "×: at 99% zeros the card's idle over the layer's time is " + rg(sh99.map(function (v) { return 100 * v; }), 0) + "% of it. " +
+      (r99[0].card === loIdle.card ? "So the card with the lowest idle, " + CK.card(loIdle.card).label + " (" + num(loIdle.idleW, 1) + " W), spends the least per layer: " : "Per layer at 99% zeros: ") +
+      r99.map(function (r, k) { return (k ? fu(r.tot) : fu(r.tot) + " µJ") + " on " + CK.card(r.card).label; }).join(r99.length > 2 ? ", " : " and ").replace(/, ([^,]*)$/, " and $1") + ".");
+  }
+
+  renderFma(); renderPow(); renderTl(); renderHomeShires(); renderLayer(); renderLayerEnergy(); renderGemvTable(); renderLane(); renderThr(); renderQueue();
   var hooks = document.querySelector("#zeros ~ .table-wrap table.wide");
   if (hooks) CK.stackTable(hooks);
   CK.stackTable(document.getElementById("t-tl").parentNode);   // the all-minion TensorLoad table, as cards on a phone

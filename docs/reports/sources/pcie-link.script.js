@@ -106,6 +106,64 @@ const VERD={PASS:'var(--ok)',FAIL:'var(--bad)',INCONCLUSIVE:'var(--warn)'};
  t.innerHTML='<thead><tr><th>Card</th><th>Direction</th><th class="num">DMA-only, GB/s</th><th class="num">Host memcpy, GB/s</th>'+
   '<th class="num">The two in series</th><th class="num">Staged, measured [99%]</th><th class="num">Measured / series</th></tr></thead><tbody>'+rows.join('')+'</tbody>';
  CK.stackTable(t);
+
+ /* The same numbers as a picture: one panel per direction, x the host's memcpy of 256 MB, y GB/s. Per card, its staged
+    rate (the card's mark, with its 99% interval) at its host's memcpy, and above it the same copy DMA-only (a tick),
+    joined by the drop the bounce copy costs. The curve is the series model 1/(1/DMA + 1/memcpy) at the cards' mean
+    DMA-only rate (each card's own series value is in its tooltip and the table). */
+ const SV={};
+ for(const dir of ['h2d','d2h']) SV[dir]=CS.map(c=>{const dma=bwAt(c,dir,'dma',BIG), stg=bwAt(c,dir,'staged',BIG), mc=D.hostcopy[c].find(e=>e.bytes===BIG).gbs;
+  return {c,dir,dma,stg,mc,series:1/(1/dma.mean+1/mc.mean)};});
+ const ALL=SV.h2d.concat(SV.d2h), mcMax=Math.max(...ALL.map(r=>r.mc.mean)), XMAX=Math.ceil(mcMax*1.15/5)*5;
+ CK.legend('serlegend',CK.cardLegend(CS).concat([{key:'dma',label:'the same copy, DMA-only',mark:'line',color:'var(--ink-2)'},
+  {key:'curve',label:'the two in series, 1/(1/DMA + 1/memcpy)',mark:'line',color:'var(--c7)'}]));
+ CK.frame('serchart',{label:'Staged copy bandwidth against the host memcpy rate, with the series model, both directions, every card',
+  height:W=>W<600?620:330,draw:f=>{
+  const narrow=f.narrow, gap=narrow?0:36, pw=narrow?f.W:(f.W-gap)/2, ph=narrow?f.H/2:f.H, nodes=[];
+  ['h2d','d2h'].forEach((dir,k)=>{
+   const ox=narrow?0:k*(pw+gap), oy=narrow?k*ph:0, L=ox+44, R=ox+pw-10, T=oy+30, B=oy+ph-40;
+   const x=CK.lin(0,XMAX,L,R), y=CK.lin(0,17,B,T), g=CK.el('g',{},f.svg), ax=CK.el('g',{class:'ck-axes','aria-hidden':'true'},g);
+   for(const v of [0,4,8,12,16]){CK.el('line',{x1:L,x2:R,y1:y(v),y2:y(v),class:'grid-line'},ax);CK.txt(ax,L-6,y(v)+4,num(v,0),'tick','end');}
+   CK.el('line',{x1:L,x2:R,y1:B,y2:B,class:'ck-axis'},ax);
+   for(let v=0;v<=XMAX;v+=5)CK.txt(ax,x(v),B+16,num(v,0),'tick','middle');
+   const labs=[CK.txt(ax,(L+R)/2,B+34,'host memcpy of 256 MB, GB/s','lab','middle'),
+    CK.txt(ax,ox+2,oy+14,dir==='h2d'?'Host to card: GB/s':'Card to host: GB/s','lab-strong')];
+   CK.el('line',{x1:L,x2:R,y1:y(LINK),y2:y(LINK),stroke:'var(--ref)','stroke-width':1.5,'stroke-dasharray':'6 4'},g);
+   labs.push(CK.txt(g,R,y(LINK)-5,`link figure ${g2(LINK)}`,'lab','end'));
+   const rs=SV[dir], dm=rs.reduce((a,r)=>a+r.dma.mean,0)/rs.length, pts=[];
+   for(let v=0.5;v<=XMAX+1e-9;v+=0.25)pts.push([v,1/(1/dm+1/v)]);
+   CK.el('path',{d:CK.path(pts,x,y),fill:'none','stroke-width':2,style:'stroke:var(--c7)','aria-hidden':'true'},g);
+   const xl=XMAX/2; labs.push(CK.txt(g,x(xl),y(1/(1/dm+1/xl))+20,'in series','lab','middle'));
+   rs.forEach(r=>{
+    const px=x(r.mc.mean), n=CK.el('g',{},g), col=CK.card(r.c).color;
+    CK.el('rect',{x:px-12,y:T,width:24,height:B-T,class:'ck-hit'},n);
+    CK.el('line',{x1:px,x2:px,y1:y(r.dma.mean),y2:y(r.stg.mean),'stroke-width':1.5,'stroke-dasharray':'3 3',style:`stroke:${col}`,'aria-hidden':'true'},n);
+    CK.el('line',{x1:px-9,x2:px+9,y1:y(r.dma.mean),y2:y(r.dma.mean),'stroke-width':2.5,'stroke-linecap':'round',style:'stroke:var(--ink-2)','aria-hidden':'true'},n);
+    if(r.stg.lo!=null)CK.el('line',{x1:px,x2:px,y1:y(r.stg.lo),y2:y(r.stg.hi),'stroke-width':2,style:`stroke:${col}`,'aria-hidden':'true'},n);
+    CK.cardMark(n,r.c,px,y(r.stg.mean),5);
+    const drop=1-r.stg.mean/r.dma.mean;
+    labs.push(CK.txt(n,px+9,(y(r.dma.mean)+y(r.stg.mean))/2+4,`−${num(100*drop,0)}%`,'lab'));
+    CK.tip(f,n,`<b>${lab(r.c)}</b>, ${DIRS[dir]}, 256 MB<br>host memcpy ${g1(r.mc.mean)} GB/s · DMA-only ${g2(r.dma.mean)} GB/s<br>`+
+     `in series: ${g2(r.series)} GB/s · staged, measured: ${ci(r.stg,g2)} GB/s, ${num(100*r.stg.mean/r.series,0)}% of it<br>`+
+     `the bounce copy takes ${num(100*drop,0)}% off the DMA-only rate`);
+    nodes.push(n);
+   });
+   CK.inside(f,labs);
+  });
+  CK.keynav(f,nodes);
+ }});
+ const fit=ALL.map(r=>100*r.stg.mean/r.series), drop=ALL.map(r=>100*(1-r.stg.mean/r.dma.mean));
+ const slow=ALL.reduce((a,r)=>r.mc.mean<a.mc.mean?r:a), fast=ALL.reduce((a,r)=>r.mc.mean>a.mc.mean?r:a);
+ const at=(c,dir)=>SV[dir].find(r=>r.c===c);
+ /* the staged rate's 99% interval, drawn as a bar through the mark: say so only if it shows (the mark is 10 px, about
+    0.6 GB/s on the 0-17 GB/s axis) */
+ const ciMax=Math.max(...ALL.filter(r=>r.stg.lo!=null).map(r=>r.stg.hi-r.stg.lo)), ciHid=ciMax<0.6;
+ $('sernote').textContent=`Each mark is a card's staged 256 MB copy (the mean of five runs; `+(ciHid?`its 99% interval, at most ${g2(ciMax)} GB/s wide, is smaller than the mark, and the tooltip gives it`:'the bar its 99% interval')+`), placed at its own host's memcpy of 256 MB; `+
+  `the grey tick above it is the same copy DMA-only, and the percentage the drop between the two, ${rng(drop,v=>num(v,0))}% here. `+
+  `The curve is the two copies in series at the cards' mean DMA-only rate; each card's staged rate is ${rng(fit,v=>num(v,0))}% of its own series value. `+
+  `The host decides: ${lab(slow.c)}'s memcpy, the slowest at ${g1(slow.mc.mean)} GB/s, stages ${g2(at(slow.c,'h2d').stg.mean)} GB/s to the card, `+
+  `and ${lab(fast.c)}'s, the fastest at ${g1(fast.mc.mean)} GB/s, ${g2(at(fast.c,'h2d').stg.mean)} GB/s, over the same link. `+
+  `Because the two copies take turns, even the fastest memcpy leaves the program ${rng([at(fast.c,'h2d'),at(fast.c,'d2h')].map(r=>100*r.stg.mean/r.dma.mean),v=>num(v,0))}% of the DMA-only rate.`;
 })();
 
 /* ---------- section 3: small copies ---------- */
@@ -174,6 +232,63 @@ const VERD={PASS:'var(--ok)',FAIL:'var(--bad)',INCONCLUSIVE:'var(--warn)'};
  $('launchnote').textContent=`Queued, an empty kernel on all 32 shires takes ${rng(b32,us)} µs of the card's time and on one shire ${rng(b1,us)} µs: `+
   `about ${rng(CS.map((c,i)=>b32[i]-b1[i]),us)} µs for the other 31 shires, the rest fixed. Waited for one at a time, a launch takes ${rng(one,us)} µs: `+
   `the queued cost plus most of a 500 µs sleep of the response thread, which a single launch meets nearly every time (within a run, the middle 80% of single launches lie within ${rng(CS.map(c=>D.launch[c].single_p10_p90_spread_us['32'].mean),us)} µs of each other).`;
+
+ /* Where the time of one operation goes. Two operations, each card a bar: an empty kernel on 32 shires launched and
+    waited for (single_us['32']) and a 4 KB copy after a random 0-1 ms gap (the mean of the four variants' mean_us).
+    The first segment is the operation's cost when many are queued, so that the response thread's polling overlaps the
+    work: 100 queued launches (b2b_us['32']) and 200 queued copies (pipelined_us_per_copy, the same four variants
+    averaged); the second is the rest, the wait for the response thread. The dashed line is its 500 us idle sleep
+    (kResponsePollingIntervalNoEventsOnFly, ResponseReceiver.cpp, cited in section 3). */
+ const V4=['d2h_dma','d2h_staged','h2d_dma','h2d_staged'], avg=a=>a.reduce((s,v)=>s+v,0)/a.length, SLEEP=500;
+ const OPS=[{key:'launch',label:'An empty kernel on 32 shires, launched and waited for',labelN:'An empty kernel, 32 shires',short:'empty kernel',
+   rows:CS.map(c=>({c,total:D.launch[c].single_us['32'],work:D.launch[c].b2b_us['32'].mean,
+    how:'100 launches queued, per launch'}))},
+  {key:'copy',label:'A 4 KB copy after a random 0–1 ms gap (the four variants averaged)',labelN:'A 4 KB copy after a random gap',short:'4 KB copy',
+   rows:CS.map(c=>({c,total:{mean:avg(V4.map(v=>D.lat[c].sporadic[v].mean_us.mean)),lo:null},work:avg(V4.map(v=>D.lat[c].pipelined_us_per_copy[v].mean)),
+    how:'200 copies queued, per copy'}))}];
+ CK.legend('waitlegend',[{key:'work',label:'its cost when queued, polling overlapped',mark:'box',color:'var(--c7)'},
+  {key:'wait',label:'the rest: waiting for the response thread',mark:'box',color:'var(--ref)'}]);
+ const tmax=Math.max(...OPS.map(o=>Math.max(...o.rows.map(r=>r.total.mean))));
+ CK.frame('waitchart',{label:'Time of one operation split into its queued cost and the wait for the response thread, per card',
+  height:W=>(W<600?58:44)*CS.length*OPS.length+(W<600?40:34)*OPS.length+56,draw:f=>{
+  const narrow=f.narrow, L=narrow?12:176, R=narrow?56:64, T=26, B=40, head=narrow?40:34, rowH=narrow?58:44, bh=narrow?16:18;
+  const x=CK.lin(0,Math.max(SLEEP,Math.ceil(tmax/100)*100),L,f.W-R), g=CK.el('g',{},f.svg), nodes=[], labs=[];
+  CK.axes(f,{x,y:CK.lin(0,1,f.H-B,T),L,R,T,B,yt:[],yfmt:()=>'',xt:[0,100,200,300,400,500,600].filter(v=>v<=x.domain[1]),xl:'microseconds'});
+  CK.el('line',{x1:x(SLEEP),x2:x(SLEEP),y1:T-4,y2:f.H-B,stroke:'var(--ink-2)','stroke-width':1.5,'stroke-dasharray':'5 4','aria-hidden':'true'},g);
+  labs.push(CK.txt(g,x(SLEEP),T-10,narrow?`idle sleep, ${num(SLEEP,0)} µs`:`the response thread's idle sleep, ${num(SLEEP,0)} µs`,'lab','middle'));
+  let yy=T;
+  OPS.forEach(o=>{
+   labs.push(CK.txt(g,narrow?L:4,yy+22,narrow?o.labelN:o.label,'lab-strong'));
+   yy+=head;
+   o.rows.forEach(r=>{
+    const cy=yy+(narrow?34:rowH/2), y0=cy-bh/2, t=r.total.mean, wait=t-r.work, n=CK.el('g',{},g);
+    CK.el('rect',{x:L,y:yy+2,width:f.W-L-R,height:rowH-4,class:'ck-hit'},n);
+    if(narrow)labs.push(CK.txt(n,L+14,yy+14,lab(r.c),'lab')); else labs.push(CK.txt(n,L-22,cy+4,lab(r.c),'lab','end'));
+    CK.cardMark(n,r.c,narrow?L+5:L-12,narrow?yy+10:cy,4);
+    const a=CK.el('rect',{x:x(0),y:y0,width:Math.max(1,x(r.work)-x(0)),height:bh,rx:2,'aria-hidden':'true'},n); a.style.fill='var(--c7)';
+    const b=CK.el('rect',{x:x(r.work)+2,y:y0,width:Math.max(1,x(t)-x(r.work)-2),height:bh,rx:2,'aria-hidden':'true'},n); b.style.fill='var(--ref)';
+    const tl=CK.txt(n,x(t)+6,cy+4,`${num(t,0)} µs`,'tick'); tl.setAttribute('style','paint-order:stroke;stroke:var(--page);stroke-width:4px;stroke-linejoin:round'); labs.push(tl);
+    /* a value that would reach the dashed sleep line moves to its far side, clear of it */
+    {let w=0; try{w=tl.getComputedTextLength();}catch(_){} if(!(w>0))w=7*tl.textContent.length; const xs=x(SLEEP);
+     if(x(t)+6<xs+4&&x(t)+6+w>xs-4)tl.setAttribute('x',(Math.max(x(t),xs)+6).toFixed(1));}
+    CK.tip(f,n,`<b>${lab(r.c)}</b> · ${o.short}<br>one at a time: ${ci(r.total,v=>num(v,0))} µs<br>`+
+     `its cost when queued (${r.how}): ${us(r.work)} µs, ${num(100*r.work/t,0)}%<br>the rest, waiting for the response thread: ${num(wait,0)} µs, ${num(100*wait/t,0)}%`);
+    nodes.push(n);
+    yy+=rowH;
+   });
+  });
+  CK.inside(f,labs);
+  CK.keynav(f,nodes);
+ }});
+ const share=o=>o.rows.map(r=>100*(1-r.work/r.total.mean)), L_=OPS[0], C_=OPS[1];
+ $('waitnote').textContent=`Each bar is one operation at a time (the mean of five runs); its first segment is what the same operation costs when many are queued, `+
+  `so that the runtime's polling overlaps the work (per launch with 100 queued; per copy with 200 queued, from section 3's table), and the rest is the wait. `+
+  `Waiting takes ${rng(share(L_),v=>num(v,0))}% of an empty kernel's ${rng(L_.rows.map(r=>r.total.mean),v=>num(v,0))} µs `+
+  `and ${rng(share(C_),v=>num(v,0))}% of a 4 KB copy's ${rng(C_.rows.map(r=>r.total.mean),v=>num(v,0))} µs. `+
+  `Against the response thread's ${num(SLEEP,0)} µs idle sleep, a launch waits ${rng(L_.rows.map(r=>(r.total.mean-r.work)/SLEEP),v=>num(v,2))} of one `+
+  `and a copy issued after a random gap, which lands anywhere in the sleep, ${rng(C_.rows.map(r=>(r.total.mean-r.work)/SLEEP),v=>num(v,2))} on average. `+
+  `Queued, a launch costs ${rng(L_.rows.map(r=>r.work),us)} µs on every card, and a copy ${andL(C_.rows.map(r=>`${us(r.work)} µs on ${lab(r.c)}`))}: `+
+  `the copies differ by host as the runtime builds do (section 3).`;
 })();
 
 /* ---------- section 5: several transfers at once ---------- */

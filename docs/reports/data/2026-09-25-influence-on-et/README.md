@@ -28,9 +28,11 @@ research/exploratory group of the set, next to the sparse-compute report it buil
 | The board meter's refresh per card and the rails' running average | same file, `v3.refresh_ms.<card>.sampler_10hz`, `catalogue.rail_filter.<card>.tau_s` (`model.et.meter`) |
 | The batch-1 1024×4096 fp32 layer in the scratchpads (S1's anchor), aifoundry3, one run | `../2026-09-18-sparsity-aifoundry3/energy-b/results.json` (`gemv-skip-0`: joules per layer, and layers per second at 600 MHz for its time, 7.36 µs) |
 | Chip-wide allreduce, 32 B, 1,024 minions, aifoundry2 | `../2026-09-18-nocbench-aifoundry2/xallreduce-c1.jsonl` |
+| The host link, three cards (E50, 27 September): host to card at 256 MB with the DMA alone and as a program's staged copy, and an empty kernel on 32 shires launched and waited for (section 4, the first experiment's prerequisite); K1's 64 MB copy at the rates of the copy size nearest it (64 MiB); S2's host launch, and each launch queued back to back | `../2026-09-27-pcie/pcie.json`: `bw.<card>.h2d.{dma,staged}[largest].gbs.mean`, `launch.<card>.single_us["32"].mean` (`model.et.pcie`); `bw.<card>.h2d.{dma,staged}[64 MiB].gbs.mean` (`kills.k1.pcie_*`); `launch.<card>.{single_us,b2b_us}["32"].mean` (`model.et.launch_ms`) |
+| Board power at rest of the card the model's idle range leaves out (aifoundry1-c1), for the explorer's note | `../2026-09-23-energy-manual/manual.json`: `v3.idle.bins.<card>.bins` (`model.et.idle_W_other`) |
 
 Stated in the producer with a source rather than read: the usable scratchpad (32 × 2.25 MB, from the on-chip relay
-report), the host launch (0.2–0.4 ms, sparse-compute report), PCIe and DRAM capacity (spec); the H100's datasheet
+report), the PCIe line rate and DRAM capacity (spec); the H100's datasheet
 rates, the A100 energies per bit by level (Antepara et al., SC'25, via the memory-hierarchy report's notes) and every
 H100 and host-CPU assumption (kind E); the author's 8B cost model and MNIST atlas costs (kind O, from his pages).
 
@@ -78,3 +80,13 @@ TB/s, CMP-2), "72 MB of on-chip SRAM" became the scratchpads' 72 MB usable of 80
 subtract each workload's own idle (int8 0.39 pJ, fp16 1.41 pJ; CMP-6), and S1's L2 lead prints one decimal (CMP-7).
 The measured inputs now come from the energy manual's three-card data, which moved the model's scratchpad energy from
 4.21 to 4.43 pJ/B and the anchor's model to 9% above the measured 68 µJ.
+
+**Later on 27 September.** The host link was timed on the three cards (E50, the PCIe page), so K1's copy over PCIe, the
+pipeline's two link notes, section 4 and the first experiment's prerequisite use its rates (`model.et.pcie`; K1's 64 MB
+takes 5.4 ms with the DMA alone and 8.4–12.0 ms as a program's staged copy at the rates measured for a 64 MiB copy,
+where the Gen4 x8 line rate gave 4.1 ms; a first version applied the 256 MB copy's rate, 5.1 and 8.2–12.3 ms). S2's
+host launch (`model.et.launch_ms`) is E50's too: 0.56–0.57 ms launched and waited for, 0.10 ms each queued back to
+back, in place of the sparse-compute report's first figure, 0.2–0.4 ms on aifoundry3. The
+idle-to-pass ratio (`duty.ratio_idle_to_active`) now takes the same card's idle on both sides (it had paired
+aifoundry3's idle with aifoundry2's pass energy and back: 19,000–36,000, now 25,000–27,000). `experiment` holds the first
+experiment's pass and kill rule, which the page's section 5 draws against `s1.hbm_case` and `s1.hbm_case_rows16`.

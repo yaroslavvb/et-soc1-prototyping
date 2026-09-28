@@ -207,7 +207,10 @@ const semiList=a=>a.length<2?a.join(''):a.slice(0,-1).join('; ')+'; and '+a[a.le
  /* the minion rail's voltage at 600 MHz and each card's firmware (v3.idle.clocks) */
  const CL=VI.clocks;
  if(CL){const ch=CK.cardsIn(CL), fw=[...new Set(ch.map(h=>CL[h].firmware))];
-  $('railmv').textContent=`the minion rail reads ${andList(ch.map(h=>`${(CL[h].mv/1000).toFixed(3)} V on ${cname(h)}`))} (firmware ${andList(ch.map(h=>CL[h].firmware))}, in that order)`;}
+  $('railmv').textContent=`the minion rail reads ${andList(ch.map(h=>`${(CL[h].mv/1000).toFixed(3)} V on ${cname(h)}`))} at idle in the version-3 idle cycles (firmware ${andList(ch.map(h=>CL[h].firmware))}, in that order)`;}
+ /* section 3's operating point: the minion rail over the catalogue's bursts, each card's median reading (catalogue.rail_mv) */
+ const RMV=D.catalogue.rail_mv||{}, rmv=CK.cardsIn(RMV).map(h=>RMV[h].minion/1000);
+ if(rmv.length){const lo=Math.min(...rmv).toFixed(2), hi=Math.max(...rmv).toFixed(2); $('instrmv').textContent=`${lo===hi?lo:lo+'–'+hi} V on the minion rail (each card's median reading over the catalogue; section 8 gives them)`;}
  /* section 10: the relay against the DRAM round trip, per card (reruns.relay_pj_per_byte) */
  const rr=RR.relay_pj_per_byte||{};
  if(rr.dram&&rr.hop){const rh=CK.cardsIn(rr.dram.per_card).filter(h=>rr.hop.per_card[h]);
@@ -361,7 +364,8 @@ const semiList=a=>a.length<2?a.join(''):a.slice(0,-1).join('; ')+'; and '+a[a.le
   OPS.forEach(([o])=>CK.keynav(f,nav[o]));
  }});
  const c0=q('add','random'), nc=Object.keys(c0.per_card).length;
- $('instrcap').innerHTML=`Both harts of every minion issuing the instruction back to back; the multiply and the transcendentals are multi-cycle and issue at 0.4× (<code>frcp.ps</code>) down to an eighth (<code>mul</code>) of the one-cycle rate. Whiskers: the range over ${WORD[c0.n/nc]||c0.n/nc} passes on each of ${WORD[nc]||nc} cards.`;
+ const r1=rate('add'), slowI=['mul','fexp.ps','frcp.ps'].map(n=>[n,rate(n)]).filter(x=>x[1]&&r1).sort((a,b)=>b[1]-a[1]);
+ $('instrcap').innerHTML=`Both harts of every minion issuing the instruction back to back; the multiply and the transcendentals are multi-cycle`+(slowI.length>1?` and issue at ${f2(slowI[0][1]/r1)}× (<code>${slowI[0][0]}</code>) down to ${f2(slowI[slowI.length-1][1]/r1)}× (<code>${slowI[slowI.length-1][0]}</code>) of the one-cycle rate (${cname(CARDS[0])}'s rates, the table's)`:'')+`. Whiskers: the range over ${WORD[c0.n/nc]||c0.n/nc} passes on each of ${WORD[nc]||nc} cards.`;
  $('instrtab').innerHTML='<thead><tr><th>Instruction</th><th class="num">zeros</th><th class="num">constant</th><th class="num">random</th><th class="num">random / zeros</th><th class="num">per lane, random</th><th class="num">issue / hart / cycle</th></tr></thead><tbody>'+
   list.map(l=>{const z=q(l[0],'zeros'),c=q(l[0],'const'),r=q(l[0],'random'); if(!(z&&r))return '';
    return `<tr><td><code>${l[1]}</code></td><td class="num">${bt(z,f1)}</td><td class="num">${bt(c,f1)}</td><td class="num">${bt(r,f1)}</td><td class="num">${f2(r.mean/z.mean)}×</td><td class="num">${l[2]>1?f1(r.mean/l[2]):'—'}</td><td class="num">${rate(l[0])!=null?f2(rate(l[0])):'—'}</td></tr>`;}).join('')+'</tbody>';
@@ -403,6 +407,111 @@ const semiList=a=>a.length<2?a.join(''):a.slice(0,-1).join('; ')+'; and '+a[a.le
   ` Until 25 September these rows were two runs on aifoundry2 and, for fp32, the 22 September card transfer.`;
  const fl=D.tensor.flips;
  $('flips').textContent=Object.keys(fl.e_fJ).map(c=>`${f3(fl.e_fJ[c])} fJ per ${fl.classes[c]}`).join(', ');
+})();
+
+/* ---------- 3.2 one multiply-add, by precision and data, on every card (pages-v5) ----------
+   D.tensor.bars (the version-3 ablation: mean and range over every run on every card, per_card mean ± se) as
+   registered, and each card's value at the die temperature of its launch (note C2: D.tensor.launch_offset, over its two
+   readings of the launch temperature) divided by the row's rate (D.tensor.rows[].per_s, the same on every card). The
+   dashed reference is one lane of a vector fmadd.ps (section 3, the catalogue: an eight-lane instruction over 8). */
+(function(){
+ if(!$('tmac'))return;
+ const PREC=[['fp32','fp32'],['fp16','fp16'],['int8','int8']], OPS=[['zeros','zeros'],['ones','ones'],['randn','random']];
+ const row=k=>D.tensor.rows.find(t=>t.config===k)||null;
+ const G=PREC.map(([p,pl])=>({p,pl,rows:OPS.map(([o,ol])=>({k:`${p}_${o}`,o,ol,b:TB[`${p}_${o}`],r:row(`${p}_${o}`)})).filter(x=>x.b&&x.r)})).filter(g=>g.rows.length);
+ if(!G.length)return;
+ const all=G.flatMap(g=>g.rows), HS=CK.cardsIn(Object.assign({},...all.map(x=>x.b.per_card||{})));
+ const pjAt=(h,k)=>{const r=row(k), a=atL(h,k), b=atLs(h,k); if(a==null||!r)return null; const v=[a,b==null?a:b].map(w=>w/r.per_s*1e12); return {lo:Math.min(...v),hi:Math.max(...v),reading:v[0]};};
+ const hasLaunch=CK.cardsIn(LO).length>0&&all.every(x=>CK.cardsIn(LO).every(h=>pjAt(h,x.k)));
+ const lane=CB['fmadd.ps/random/h2'], laneZ=CB['fmadd.ps/zeros/h2'], LN=[laneZ&&['zeros',laneZ.mean/8],lane&&['random data',lane.mean/8]].filter(Boolean);
+ const f3s=v=>v>=10?f1(v):v>=1?f2(v):f3(v);
+ const gOf=p=>G.find(g=>g.p===p), rOf=(p,o)=>{const g=gOf(p); return g&&g.rows.find(x=>x.o===o);};
+ const ratio=p=>{const z=rOf(p,'zeros'), r=rOf(p,'randn'); return z&&r?r.b.mean/z.b.mean:null;};
+ /* the lead: the data against the precision, both as ratios of the pooled means */
+ const rz=ratio('fp32'), r32=rOf('fp32','randn'), r8=rOf('int8','randn'), rp=r32&&r8?r32.b.mean/r8.b.mean:null;
+ if(rz&&rp){const cmp=rz/rp>1.5?'more than':rp/rz>1.5?'less than':'as much as';
+  $('tmaclead').innerHTML=`<b>On the tensor unit the data moves the energy of a multiply-add ${cmp} the precision does</b>: on random data an fp32 multiply-add costs ${f0(rz)}× what it costs on zeros, and an int8 one on random data costs 1/${f0(rp)} of the fp32 one. Each row below is one operand set at one precision, on all 1,024 minions.`;}
+ let view='reg';
+ const lo0=Math.min(...all.flatMap(x=>[x.b.lo].concat(hasLaunch?HS.map(h=>pjAt(h,x.k)?pjAt(h,x.k).lo:x.b.lo):[]))), hi0=Math.max(...all.map(x=>x.b.hi).concat(LN.map(l=>l[1])));
+ const X0=Math.pow(10,Math.floor(Math.log10(lo0*0.9))), X1=Math.pow(10,Math.ceil(Math.log10(hi0*1.1)));
+ /* the legend follows the view: as registered, the pooled mean and range; at each launch's temperature, the registered
+    range as a grey band behind the cards' bars */
+ const REGBAND='color-mix(in srgb, var(--muted) 22%, transparent)';
+ const legendFor=v=>CK.legend('tmac-legend',CK.cardLegend(HS).concat([v==='reg'?{key:'mean',label:'all cards: the mean, and the range over every run',color:'var(--ink)',mark:'line'}
+  :{key:'regband',label:'all cards as registered: the range over every run',color:'color-mix(in srgb, var(--muted) 45%, var(--surface))',mark:'box'}],LN.length?[{key:'lane',label:'one lane of a vector fmadd.ps (section 3)',color:'var(--ref)',mark:'dash'}]:[]));
+ legendFor(view);
+ const f=CK.frame('tmac',{label:'Energy per multiply-add on the tensor unit, by precision and operand set, each card and all cards',height:W=>10+G.length*(22+3*27+10)+(W<600?40:34),draw:f=>{
+  const L=f.narrow?58:84, Rr=f.narrow?10:16, T=10, B=f.narrow?40:34, x=CK.log(X0,X1,L,f.W-Rr), nodes=[], gh=22, pitch=27, gap=10;
+  /* grid: every decade labelled, 2 and 5 between them unlabelled */
+  for(let d=Math.log10(X0); d<=Math.log10(X1)+1e-9; d++){const v=Math.pow(10,d);
+   CK.el('line',{x1:x(v),x2:x(v),y1:T-6,y2:f.H-B,class:'grid-line'},f.svg); CK.txt(f.svg,x(v),f.H-B+16,CK.fmt.num(v,Math.max(0,-d)),'tick','middle');
+   [2,5].forEach(m=>{const u=m*v; if(u<X1)CK.el('line',{x1:x(u),x2:x(u),y1:T-6,y2:f.H-B,class:'grid-line','stroke-dasharray':'2 3'},f.svg);});}
+  CK.txt(f.svg,(L+f.W-Rr)/2,f.H-4,'pJ per multiply-add above idle (log)','lab','middle');
+  let y=T;
+  G.forEach((g,gi)=>{
+   const rz2=ratio(g.p), macs=g.p==='fp32'?4096:g.p==='fp16'?8192:16384;
+   const gl=CK.txt(f.svg,4,y+14,`${g.pl}`+(rz2?`: random data costs ${f0(rz2)}× zeros`:''),'lab-strong');
+   /* the instruction's size follows the group's name, leaving the right of the fp32 header to the lane's label */
+   const tw=t=>{let w=0; try{w=t.getComputedTextLength();}catch(_){} return w>0?w:7*t.textContent.length;};
+   let hEnd=4+tw(gl);
+   if(!f.narrow){const mt=CK.txt(f.svg,hEnd+10,y+14,`${nf(macs)} multiply-adds an instruction`,'tick'); hEnd+=10+tw(mt);}
+   /* the vector lane's two values in one label, over its lines at the right of the fp32 header: the longest form that
+      clears the header's own text */
+   if(g.p==='fp32'&&LN.length){const nm=w=>w==='random data'?'random':'zeros';
+    const forms=[(f.narrow?'lane: ':'one lane of a vector fmadd.ps (dashed): ')+LN.map(([w,v])=>`${f1(v)}${f.narrow?'':' pJ'} on ${nm(w)}`).join(', '),
+     'lane: '+LN.map(([w,v])=>`${f1(v)} ${nm(w)}`).join(', '),'lane: '+LN.map(([w,v])=>f1(v)).join(', ')];
+    const lt=CK.txt(f.svg,f.W-Rr,y+14,forms[0],'tick','end');
+    for(const s of forms){lt.textContent=s; if(f.W-Rr-tw(lt)>hEnd+12)break;}}
+   const y0g=y+gh;
+   /* the vector lane, for scale, across the fp32 rows only (the same multiply-add in fp32) */
+   if(g.p==='fp32')LN.forEach(([what,v],j)=>{const gg=CK.el('g',{},f.svg), X=x(v);
+    CK.el('rect',{x:X-5,y:y0g,width:10,height:3*pitch,class:'ck-hit'},gg);
+    CK.el('line',{x1:X,x2:X,y1:y0g,y2:y0g+3*pitch,stroke:'var(--ref)','stroke-width':1.5,'stroke-dasharray':'4 3'},gg);
+    CK.tip(f,gg,`<b>One lane of a vector <code>fmadd.ps</code></b>, ${what}: ${f2(v)} pJ (an eight-lane instruction, ${f1(8*v)} pJ, section 3), what the vector unit pays for the same fp32 multiply-add`);
+    nodes.push(gg);});
+   g.rows.forEach((r,i)=>{const yc=y0g+pitch*(i+0.5), b=r.b;
+    CK.txt(f.svg,L-8,yc+4,r.ol,'lab','end');
+    if(i>0)CK.el('line',{x1:L,x2:f.W-Rr,y1:y0g+pitch*i,y2:y0g+pitch*i,class:'grid-line','stroke-opacity':0.5},f.svg);
+    const reg=view==='reg';
+    /* all cards: the range over every run and the mean (registered values) */
+    const rg=CK.el('g',{},f.svg), st={stroke:'var(--ink-2)','stroke-width':1.5};
+    if(reg)CK.el('line',Object.assign({x1:x(b.lo),x2:x(b.hi),y1:yc,y2:yc},st),rg);
+    else CK.el('rect',{x:x(b.lo),y:yc-9,width:Math.max(2,x(b.hi)-x(b.lo)),height:18,rx:3,fill:REGBAND},rg);
+    if(reg){[b.lo,b.hi].forEach(v=>CK.el('line',Object.assign({x1:x(v),x2:x(v),y1:yc-4,y2:yc+4},st),rg));
+     CK.el('rect',{x:x(b.mean)-1.5,y:yc-10,width:3,height:20,fill:'var(--ink)'},rg);}
+    CK.el('rect',{x:x(b.lo)-4,y:yc-10,width:Math.max(8,x(b.hi)-x(b.lo)+8),height:20,class:'ck-hit'},rg);
+    if(reg){const ld=r.r, idleSh=ld&&ld.pj_loaded>0?1-ld.pj_marginal/ld.pj_loaded:null;
+     CK.tip(f,rg,`<b>${g.pl}, ${r.ol}</b>, all cards: <b>${f3s(b.mean)}</b> pJ per multiply-add [${f3s(b.lo)}–${f3s(b.hi)}] over ${b.n} runs`+
+      (ld?`<br>loaded, ${cname(LAWCARD)}'s idle included: ${f2(ld.pj_loaded)} pJ, ${f0(100*idleSh)}% of it the idle`:'')+`<br>${sci(ld?ld.per_s:0)} multiply-adds a second`);
+     nodes.push(rg);}
+    else{CK.tip(f,rg,`<b>${g.pl}, ${r.ol}</b>: the registered range over every run on every card, ${f3s(b.lo)}–${f3s(b.hi)} pJ (the grey band, for comparison)`); nodes.push(rg);}
+    /* each card: its registered mean, or its value at the die temperature of each launch (a bar over the two readings) */
+    HS.forEach((h,j)=>{const p=CK.pick(b,h); if(!p)return; const yy=yc+(j-(HS.length-1)/2)*6, c=CK.card(h);
+     if(reg){nodes.push(cmark(f,f.svg,h,x(p.mean),yy,3.5,7,`<b>${g.pl}, ${r.ol}</b>, ${cname(h)}: <b>${f3s(p.mean)}</b> ± ${more(p.se||0,f3s)} pJ per multiply-add (${p.n} runs, as registered)`+(hasLaunch&&pjAt(h,r.k)?`<br>at the die temperature of each launch: ${rng2(pjAt(h,r.k).lo,pjAt(h,r.k).hi,f3s)}`:'')));}
+     else{const q=pjAt(h,r.k); if(!q)return; const gg=CK.el('g',{},f.svg), x1=x(q.lo), x2=Math.max(x(q.hi),x1+2);
+      CK.el('rect',{x:x1-5,y:yy-5,width:x2-x1+10,height:10,class:'ck-hit'},gg);
+      CK.el('line',{x1,x2,y1:yy,y2:yy,stroke:c.color,'stroke-width':3,'stroke-linecap':'round'},gg);
+      CK.cardMark(gg,h,x(q.reading),yy,3);
+      CK.tip(f,gg,`<b>${g.pl}, ${r.ol}</b>, ${cname(h)}: ${rng2(q.lo,q.hi,f3s)} pJ per multiply-add at the die temperature of each launch (the mark: the whole-degree reading; the bar reaches the reading + ${f2(LO[h].step_c||0)} °C)<br>as registered: ${f3s(p.mean)}`);
+      nodes.push(gg);}});
+   });
+   y=y0g+3*pitch+gap;});
+  CK.keynav(f,nodes);
+  readout();
+ }});
+ function readout(){
+  const out=$('tmac-readout'); if(!out)return;
+  const rr=o=>G.map(g=>rOf(g.p,o)).filter(Boolean), sp=xs=>{const a=Math.min(...xs), b=Math.max(...xs); return [a,b];};
+  if(view==='reg'){
+   const rand=rr('randn'), zer=rr('zeros'), spr=r=>{const v=HS.map(h=>CK.pick(r.b,h)).filter(Boolean).map(p=>p.mean); return Math.max(...v)/Math.min(...v);};
+   out.innerHTML=`As registered (${runsN()}, launched at ${launchTxt()}): on random data a multiply-add costs ${andList(rand.map(r=>`${f3s(r.b.mean)} pJ in ${gOf(r.k.split('_')[0]).pl}`))}; on zeros ${andList(G.map(g=>ratio(g.p)).filter(Boolean).map(v=>f1(v)+'×'))} less. The cards' own means agree within ${f0(100*(Math.max(...rand.map(spr))-1))}% on random data and differ up to ${f1(Math.max(...zer.map(spr)))}× on zeros, where the launch-temperature offset of note C2 is as large as the signal: switch the view to see each card at the die temperature of its launch.`;}
+  else{
+   const mv=(o)=>{let m=0; rr(o).forEach(r=>HS.forEach(h=>{const p=CK.pick(r.b,h), q=pjAt(h,r.k); if(p&&q)m=Math.max(m,Math.abs(q.lo-p.mean)/p.mean,Math.abs(q.hi-p.mean)/p.mean);})); return m;};
+   const r32=rOf('fp32','randn'), z32=rOf('fp32','zeros'), at=r=>sp(HS.map(h=>pjAt(h,r.k)).filter(Boolean).flatMap(q=>[q.lo,q.hi])), rg=r=>sp(HS.map(h=>CK.pick(r.b,h)).filter(Boolean).map(p=>p.mean));
+   out.innerHTML=`At the die temperature of each launch (note C2; each card's bar spans its two readings of the launch temperature): fp32 on random data ${f2(at(r32)[0])}–${f2(at(r32)[1])} pJ over the ${WORD[HS.length]} cards (as registered ${f2(rg(r32)[0])}–${f2(rg(r32)[1])}), on zeros ${f2(at(z32)[0])}–${f2(at(z32)[1])} (as registered ${f2(rg(z32)[0])}–${f2(rg(z32)[1])}). The offset moves the random-data rows by at most ${f0(100*mv('randn'))}% and the zeros rows by up to ${f0(100*mv('zeros'))}%: which card is cheapest on zeros is not settled by these runs.`;}
+ }
+ function runsN(){const nr=D.tensor.runs_per_card||{}, n=[...new Set(CK.cardsIn(nr).map(h=>nr[h]))]; return n.length===1?`${WORD[n[0]]||n[0]} runs on each card`:'every run';}
+ if(hasLaunch)CK.seg('tmac-view',{label:'values',options:[['reg','as registered'],['launch','at each launch’s die temperature']],value:view,onChange:v=>{view=v;legendFor(v);f.redraw();}});
 })();
 
 /* ---------- 3.1 every instruction: a beeswarm per class (em-v3) ---------- */
@@ -680,7 +789,9 @@ const semiList=a=>a.length<2?a.join(''):a.slice(0,-1).join('; ')+'; and '+a[a.le
    (()=>{/* EN-1: over 1-6 hops the step out of the shire is about one hop; only the 1-8 fit, which the half-traffic 8-hop point pulls down, makes it two */
     const st6=WA.map(([h,w])=>{const q=fitOf(w.random,6); return (q.a-(w.random.local_pj_per_byte||0))/q.b;}), st8=WA.map(([h,w])=>(w.random.intercept_pj_per_byte-(w.random.local_pj_per_byte||0))/w.random.slope_pj_per_byte_per_hop);
     return `<b>Leaving the shire costs about one more hop</b>: over 1–6 hops the intercept is ${andList(WA.map(([h,w])=>f2(fitOf(w.random,6).a)))} pJ/B on random data (${andList(WA.map(([h])=>cname(h)))}) against ${andList(WA.map(([h,w])=>f2(w.random.local_pj_per_byte||0)))} for the shire's own scratchpad, ${f1(Math.min(...st6))}–${f1(Math.max(...st6))} hops' worth; the 1–${mxh}-hop fit, which the half-traffic ${mxh}-hop point pulls down, puts it at ${f1(Math.min(...st8))}–${f1(Math.max(...st8))}. `;})()+
-   `For wires, use <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a>: 2.17 pJ/B per hop on board power, split into bits that differ between flits and ones carried.`;
+   /* Heat per millimetre's own figure (manual.json wire_ref, from its report.json): the third run, three cards, loaded mesh */
+   (()=>{const WR=D.wire_ref||{}, lb=WR['loaded/board'], ln=WR['loaded/noc_rail'];
+    return `For wires, use <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a>`+(lb?`: ${f2(lb.pj_per_byte_hop)} pJ/B per hop on board power${ln?` (${f2(ln.pj_per_byte_hop)} on the mesh rail)`:''} for random data on a loaded mesh, split into bits that differ between flits, ones carried and a fixed part.`:', which splits a hop into bits that differ between flits, ones carried and a fixed part.');})();
  }
  /* ---- lines ---- */
  const fz=S['l1fill/stride32/zeros'],fr=S['l1fill/stride32/random'],gz=S['l1fill/stride64/zeros'],gr=S['l1fill/stride64/random'];
@@ -1357,6 +1468,114 @@ const gsStream=l=>{if(!l.stream)return null; const [k,key]=l.stream;
  $('gssynctext').innerHTML=`<b>The packed atomics and scatter-add</b> (E48, three passes on each of ${gsN} cards, 26 September; the table's last six rows). A packed atomic applies its eight lanes one after another: <code>famoaddl.pi</code> adds into a shire's table at ${gsRate(r(fl),' updates/s')}, the rate of scalar <code>amoaddl.w</code> on the same tables (${gsRate(r(al))}), for ${f2(p(fl)/p(al))}× its energy per update; at the home L3, <code>famoaddg.pi</code> runs ${gsRate(r(fg))} against ${gsRate(r(ag))}, for ${f2(p(fg)/p(ag))}×. `+
   `Every update counts: the verify launches checked every counter of the shared tables, and none was lost. On a table private to each hart, the vector unit's own gather, <code>fadd.ps</code> and scatter runs at ${up.map(([l,u])=>`${gsRate(r(u))} at ${p(u)<0.1?f3(p(u)):p(u)>=10?f1(p(u)):f2(p(u))} nJ in ${l}`).join('; ')}. `+
   `Past 10 G updates a second, the rate <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions">Influence functions on the ET-SoC-1</a> asked of a scatter-add: gather-add-scatter in ${andList(u10)}, and ${andList(a10)} on a shire's table; nothing that updates the home L3 or DRAM.`;
+})();
+
+/* ---------- 6: every way to add into a table, rate against energy per update (pages-v5) ----------
+   D.gs.updates (E48: the vector unit's gather, fadd.ps and scatter on a private table per hart, and the atomic adds on
+   tables the harts share), each at its rate over the chip (elements_per_s) and its energy per update (pj_per_element),
+   pooled or one card's; and the hot line's two runs (sync.atomics: the rate of the 22 September session, which the
+   bank fixes; the energy pooled over the reruns, reruns.hotline_nj_per_op). ASK is the scatter-add rate Influence
+   functions on the ET-SoC-1 asked of the chip, the threshold section 6's text uses. */
+(function(){
+ if(!GS||!$('updmap')||!GS.updates)return;
+ const ASK=1e10;
+ const WHERE={'dram-512B':'L1','dram-4K':'L2','scp-16K':'own scratchpad','dram-256K':'DRAM','shire-256K':'L2','chip-8M':'L3'};
+ const SHORT={'dram-512B':'L1','dram-4K':'L2','scp-16K':'scratchpad','dram-256K':'DRAM'};
+ const code=t=>String(t).replace(/`([^`]+)`/g,'<code>$1</code>');
+ /* label placement per point: [anchor, dx, dy] for the long (wide) and short (narrow) labels */
+ const P=[];
+ GS.updates.forEach(u=>{const e=gsK[u.cfg]; if(!e||!e.pj_per_element||!e.elements_per_s)return; if(u.cfg.indexOf('/bcast/')>=0)return;
+  const t=e.table, priv=u.op==='upd', w=WHERE[t]||t;
+  const lng=priv?`gather, add, scatter: ${w==='own scratchpad'?'own scratchpad':w==='DRAM'?'DRAM':'the '+w}`:`${u.op}, ${t.startsWith('shire')?'shire tables':'chip table'}`;
+  const sht=priv?(t==='dram-4K'?'L2, scratchpad':t==='scp-16K'?null:SHORT[t]):(u.op==='amoaddl.w'?'shire tables':u.op==='amoaddg.w'?'chip table':null);
+  /* the L2 and the own scratchpad run at the same rate and nearly the same energy: one label for the pair */
+  const lab=t==='dram-4K'?'gather, add, scatter: the L2, own scratchpad':t==='scp-16K'?null:lng;
+  const pos={'dram-512B':['end',-9,4],'dram-4K':['start',9,-5],'scp-16K':['start',9,12],'dram-256K':['start',9,4]}[t]||
+   (t==='chip-8M'?(u.op.startsWith('f')?['start',9,-4]:['end',-9,16]):(u.op.startsWith('f')?['start',9,-2]:['start',9,12]));
+  const posW=pos;
+  P.push({key:u.cfg,fam:priv?'priv':'shared',near:w!=='L3'&&w!=='DRAM',where:w,lng,lab,sht,pos:posW,tip:code(u.label),
+   rate:h=>CK.pick(e.elements_per_s,h), nj:h=>{const p=CK.pick(e.pj_per_element,h); return p&&{mean:p.mean/1000,se:p.se!=null?p.se/1000:null,n:p.n};},
+   bar:e.pj_per_element,per:e.pj_per_element.per_card});});
+ const hn=RR.hotline_nj_per_op||{};
+ [['contended','amoaddg, one line','one line','one contended global atomic: 1,024 minions on one line, the bank serialises them',['start',9,4],['end',-6,14]],
+  ['spread','amoaddg, 32 lines','32 lines','the same instruction spread over 32 lines, one per shire, each homed in its shire',['end',-9,-6]]].forEach(([k,lng,sht,tip,pos,posN])=>{
+  const e=hn[k], r=at[k]; if(!e||!r)return;
+  /* posN: on a phone the contended line's label goes below and left of its ring, clear of the DRAM square and of the
+     1 W line through the ring */
+  P.push({key:k,fam:'hot',near:false,where:'L3',lng,sht,pos,posN,tip:tip+` (the rate: ${cname(LAWCARD)}, 22 September; the energy: the hot line's passes, section 6's table)`,
+   rate:h=>(h==='pooled'||CK.pick(e,h))?{mean:r.ops_per_s}:null, nj:h=>h==='pooled'?{mean:e.mean,lo:e.lo,hi:e.hi,n:e.n}:(p=>p&&{mean:p.mean,se:p.se,n:p.n})(CK.pick(e,h)),bar:{lo:e.lo,hi:e.hi},per:e.per_card});});
+ if(P.length<3)return;
+ const FAM={priv:['the vector unit’s gather, fadd.ps and scatter on a private table per hart','var(--c4)','box'],shared:['an atomic add on a table the harts share','var(--c7)','dot'],hot:['the hot line’s runs: one global line, or 32','var(--c5)','ring']};
+ let card=CK.bus('card').value&&(CK.bus('card').value==='pooled'||gsCards.includes(CK.bus('card').value))?CK.bus('card').value:'pooled';
+ const val=(p,h)=>{const r=p.rate(h), e=p.nj(h); if(!r||!e||!(r.mean>0)||!(e.mean>0))return null; const lo=h==='pooled'?(p.bar.lo!=null?p.bar.lo/(p.fam==='hot'?1:1000):e.mean):(e.se!=null?e.mean-e.se:e.mean), hi=h==='pooled'?(p.bar.hi!=null?p.bar.hi/(p.fam==='hot'?1:1000):e.mean):(e.se!=null?e.mean+e.se:e.mean);
+  return {rate:r.mean,nj:e.mean,lo:Math.max(lo,e.mean*0.01),hi,se:e.se,n:e.n};};
+ const allV=P.flatMap(p=>['pooled'].concat(gsCards).map(h=>val(p,h)).filter(Boolean));
+ const X0=Math.pow(10,Math.floor(Math.log10(Math.min(...allV.map(v=>v.rate))/1.5))), X1=Math.pow(10,Math.ceil(Math.log10(Math.max(...allV.map(v=>v.rate))*1.5)));
+ const Y0=Math.pow(10,Math.floor(Math.log10(Math.min(...allV.map(v=>v.lo))/1.3))), Y1=Math.pow(10,Math.ceil(Math.log10(Math.max(...allV.map(v=>v.hi))*1.3)));
+ const fams=Object.keys(FAM).filter(k=>P.some(p=>p.fam===k));
+ CK.legend('upd-legend',fams.map(k=>({key:k,label:FAM[k][0],color:FAM[k][1],mark:FAM[k][2]})).concat([{key:'ask',label:'10 G updates a second: the rate Influence functions asks of a scatter-add',color:'var(--ink-2)',mark:'dash'},{key:'w',label:'constant power over idle',color:'var(--muted)',mark:'line'}]));
+ const nameOf=p=>p.lng.replace(/^gather, add, scatter: /,'gather, add and scatter in ');
+ const f=CK.frame('updmap',{label:'Updates per second over the chip against energy per update, for every way to add into a table',height:W=>W<600?360:380,draw:f=>{
+  const L=48, Rr=f.narrow?12:18, T=26, B=40, x=CK.log(X0,X1,L,f.W-Rr), y=CK.log(Y0,Y1,f.H-B,T), nodes=[];
+  /* the x ticks CK.axes would choose, less the one in the corner, where it would meet the lowest y tick */
+  const xt=x.ticks(Math.max(2,Math.round((f.W-L-Rr)/90))).filter(t=>t>X0*1.001);
+  /* a label's halo in the colour behind it: the green of the region past the rate asked, or the page */
+  const xAsk=ASK>X0&&ASK<X1?x(ASK):Infinity, haloFor=t=>{let w=0; try{w=t.getComputedTextLength();}catch(_){} const a=t.getAttribute('text-anchor')||'start', x0=+t.getAttribute('x')-(a==='end'?w:a==='middle'?w/2:0);
+   if(x0>=xAsk)t.style.stroke='color-mix(in srgb, var(--c3) 7%, var(--page))';};
+  CK.axes(f,{x,y,L,R:Rr,T,B,xt,xfmt:v=>v>=1e9?`${CK.fmt.num(v/1e9)} G`:`${CK.fmt.num(v/1e6)} M`,yfmt:v=>CK.fmt.num(v,v>=1?0:Math.ceil(-Math.log10(v)-1e-9)),xl:'updates per second over the chip, 1,024 minions (log)',yl:'nJ per update, above idle (log)'});
+  /* the part of the plane past the rate asked for, and the line itself */
+  if(ASK>X0&&ASK<X1){CK.el('rect',{x:x(ASK),y:T,width:f.W-Rr-x(ASK),height:f.H-B-T,fill:'var(--c3)','fill-opacity':0.07},f.svg);
+   CK.el('line',{x1:x(ASK),x2:x(ASK),y1:T,y2:f.H-B,stroke:'var(--ink-2)','stroke-width':1.5,'stroke-dasharray':'5 4'},f.svg);
+   CK.inside(f,[CK.txt(f.svg,f.W-Rr-4,T+13,f.narrow?'10 G/s asked':'past 10 G updates/s, the rate asked','lab','end')]);}
+  /* constant power over idle: nJ x (updates/s) = W */
+  const dl=[], xR=f.W-Rr, yB=f.H-B;
+  (f.narrow?[1,10]:[1,3,10,30]).forEach(Wt=>{const ya=Wt/(X0*1e-9), yb=Wt/(X1*1e-9); let xa=X0, xb=X1, y1=ya, y2=yb;
+   if(y1>Y1){xa=Wt/(Y1*1e-9); y1=Y1;} if(y2<Y0){xb=Wt/(Y0*1e-9); y2=Y0;} if(!(xa<xb&&xa<X1&&xb>X0))return;
+   CK.el('line',{x1:x(xa),y1:y(y1),x2:x(xb),y2:y(y2),stroke:'var(--muted)','stroke-width':1,'stroke-opacity':0.7},f.svg);
+   /* the label beside its line, never on it: along the top, just right of where the line comes in (the line falls to
+      the right, so the label clears it by 4 px at the label's lowest point), which keeps the labels in one row over the
+      empty top of the plot; else over where it enters at the left edge, right of where it meets the bottom, or under
+      where it meets the right edge */
+   const s=`${CK.fmt.num(Wt)} W`, tl=CK.txt(f.svg,0,0,s,'tick','start'); let w=0; try{w=tl.getComputedTextLength();}catch(_){} if(!(w>0))w=7.2*s.length;
+   const xAt=yy=>x(xa)+(yy-y(y1))*(x(xb)-x(xa))/(y(y2)-y(y1)), yTop=T+14, xTop=xAt(yTop+3)+4;
+   const X=[[xTop,yTop,'start',y1>=Y1*0.9999&&xTop+w<=xR-2],[L+3,y(y1)-6,'start',xa<=X0*1.0001&&y(y1)-18>=T],
+    [x(xb)+5,yB-5,'start',y2<=Y0*1.0001&&x(xb)+5+w<=xR-2],[xR-3,y(y2)+12,'end',xb>=X1*0.9999&&y(y2)+12<=yB-3]].find(c=>c[3]);
+   if(!X){tl.remove();return;}
+   tl.setAttribute('x',X[0]); tl.setAttribute('y',X[1]); tl.setAttribute('text-anchor',X[2]); tl.setAttribute('class','tick halo'); dl.push(tl);});
+  CK.inside(f,dl); dl.forEach(haloFor);
+  /* the points */
+  const labs=[];
+  P.forEach(p=>{const v=val(p,card); if(!v)return; const [lab,col,mk]=FAM[p.fam], cx=x(v.rate), cy=y(v.nj), gg=CK.el('g',{'data-series':p.fam},f.svg);
+   CK.el('circle',{cx,cy,r:10,class:'ck-hit'},gg);
+   if(v.hi>v.lo)CK.el('line',{x1:cx,x2:cx,y1:y(v.hi),y2:y(v.lo),stroke:col,'stroke-width':1.5},gg);
+   if(mk==='box')CK.el('rect',{x:cx-4.5,y:cy-4.5,width:9,height:9,rx:1.5,fill:col},gg);
+   else if(mk==='ring')CK.el('circle',{cx,cy,r:4.5,fill:'var(--surface)',stroke:col,'stroke-width':2},gg);
+   else CK.el('circle',{cx,cy,r:5,fill:col},gg);
+   const W=v.nj*1e-9*v.rate;
+   CK.tip(f,gg,`<b>${nameOf(p)}</b>, ${cname(card)}<br>${p.tip}<br>${gsRate(v.rate,' updates/s')} over the chip at <b>${v.nj>=1?f2(v.nj):f3(v.nj)} nJ</b> an update`+
+    (card==='pooled'&&p.bar.lo!=null?` [${(p.fam==='hot'?[p.bar.lo,p.bar.hi]:[p.bar.lo/1000,p.bar.hi/1000]).map(z=>z>=1?f2(z):f3(z)).join('–')}]`:v.se!=null?` ± ${more(v.se,v.nj>=1?f2:f3)}`:'')+
+    `, ${f1(W)} W over idle<br>${v.rate>ASK?'past':'short of'} the 10 G/s asked`+(card==='pooled'&&p.per?'<br>'+CK.cardsIn(p.per).map(h=>`${cname(h)} ${(p.fam==='hot'?p.per[h].mean:p.per[h].mean/1000).toFixed(v.nj>=1?2:3)} nJ`).join(' · '):''));
+   nodes.push(gg);
+   const s=f.narrow?p.sht:(p.lab===undefined?p.lng:p.lab); if(s){const [an,dx,dy]=(f.narrow&&p.posN)||p.pos; const t=CK.txt(f.svg,cx+dx,cy+dy,s,'lab',an); t.setAttribute('class','lab halo'); labs.push(t);}});
+  CK.inside(f,labs); labs.forEach(haloFor);
+  CK.keynav(f,nodes.sort((a,b)=>0));
+  readout();
+ }});
+ function readout(){
+  const V=P.map(p=>({p,v:val(p,card)})).filter(o=>o.v), fast=V.filter(o=>o.v.rate>ASK), slow=V.filter(o=>o.v.rate<=ASK);
+  const hot=V.find(o=>o.p.key==='contended'), clean=fast.every(o=>o.p.near)&&slow.every(o=>!o.p.near);
+  const lr=o=>`${nameOf(o.p).replace(/^gather, add and scatter in /,'').replace(/^own /,'the own ')} (${gsRate(o.v.rate)})`;
+  const fa=fast.filter(o=>o.p.fam!=='priv');
+  const missing=P.filter(p=>!val(p,card)).map(p=>p.lng);
+  $('upd-readout').innerHTML=`On ${cname(card)}, ${fast.length} of the ${V.length} ways pass 10 G updates a second: gather, add and scatter on a private table in ${andList(fast.filter(o=>o.p.fam==='priv').map(lr))}, and ${andList(fa.map(o=>`<code>${o.p.lng.split(',')[0]}</code>`))} on ${fa.every(o=>o.p.where==='L2')?"the shire's tables":'shared tables'} (${andList(fa.map(o=>gsRate(o.v.rate)))}). `+
+   (slow.length?`The others ${clean?'all update the home L3 or DRAM and ':''}run at ${gsRate(Math.min(...slow.map(o=>o.v.rate)))}–${gsRate(Math.max(...slow.map(o=>o.v.rate)))}. `:'')+
+   (hot?`One contended line holds ${f1(hot.v.nj*1e-9*hot.v.rate)} W over idle for ${gsRate(hot.v.rate,' updates/s')}, ${f0(hot.v.nj/Math.min(...V.map(o=>o.v.nj)))}× the cheapest update's energy. `:'')+
+   (missing.length?`Not measured on ${cname(card)}: ${andList(missing)}.`:'');
+  if(!$('updlead').innerHTML){const Vp=P.map(p=>({p,v:val(p,'pooled')})).filter(o=>o.v), fp=Vp.filter(o=>o.v.rate>ASK), sp=Vp.filter(o=>o.v.rate<=ASK);
+   $('updlead').innerHTML=(fp.every(o=>o.p.near)&&sp.every(o=>!o.p.near)?`<b>Only updates that stay in the L1, the L2 or the shire's own scratchpad reach 10 G a second</b>; every one that goes to the home L3 or to DRAM runs at ${gsRate(Math.max(...sp.map(o=>o.v.rate)))} or less. `:'')+
+    `The chart puts each way the chip can add into a table at the rate the whole chip reached and the energy one update cost (E48 and the hot line, section 6's table).`;}
+ }
+ const cs=CK.cardSeg('upd-card',{cards:gsCards,pooled:true,label:'card',value:card,onChange:v=>{card=v;f.redraw();}}); if(cs.value!==card){card=cs.value;f.redraw();}
 })();
 
 /* ---------- 9. how the bars were made, from the data ---------- */

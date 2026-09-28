@@ -1406,7 +1406,7 @@ const RUNS=[...D.requesters.map(r=>({...r,ser:'req'})),...D.pace.map(r=>({...r,s
  f=CK.frame('req',{label:'Host throughput against predicted bank load, both sweeps, every card',height:W=>W<600?340:380,
   draw(f){
    const svg=f.svg,W=f.W,H=f.H,L=48,R=14,T=26,B=46,narrow=f.narrow;
-   const x=CK.log(0.03,50,L,W-R), y=CK.lin(0,1.15,H-B,T);
+   const x=CK.log(0.03,50,L,W-R), y=CK.lin(-0.06,1.15,H-B,T);
    const sat=CK.el('rect',{x:x(1),y:T,width:W-R-x(1),height:H-B-T,'aria-hidden':'true'},svg); sat.style.fill='var(--grid)'; sat.style.opacity='0.6';
    CK.axes(f,{x,y,L,R,T,B,xt:narrow?[0.05,0.25,1,5,40]:[0.05,0.1,0.25,0.5,1,2,5,10,40],yt:[0,0.25,0.5,0.75,1],xfmt:v=>num(v),
     yfmt:v=>Math.round(100*v)+'%',xl:narrow?'predicted load on the bank (1 = saturated)':'predicted load on the host shire’s bank, N × 10 ÷ (P + 216); 1 = saturated'});
@@ -1636,7 +1636,7 @@ if(CTX.errata) $('errata').innerHTML=CTX.errata.map(e=>
  CK.frame('pace',{label:'Host and hammering shires against the pause between atomics',height:W=>W<600?300:330,
   draw(f){
    const svg=f.svg,W=f.W,H=f.H,L=48,R=14,T=26,B=46,narrow=f.narrow;
-   const x=CK.log(700,140000,L,W-R), y=CK.lin(0,1.05,H-B,T);
+   const x=CK.log(700,140000,L,W-R), y=CK.lin(-0.06,1.05,H-B,T);
    CK.axes(f,{x,y,L,R,T,B,xt:narrow?[1000,10000,100000]:[1000,4000,10000,40000,100000],yt:[0,0.25,0.5,0.75,1],
     yfmt:v=>Math.round(100*v)+'%',xfmt:v=>v>=1000?n0(v/1000)+'k':String(v),xl:'cycles a remote minion waits between atomics'});
    CK.txt(svg,4,T-10,'fraction of what each side gets unpaced','lab');

@@ -232,13 +232,28 @@ def refresh(data):
     # The probe's own time per op: the locked loop (evict, fence, stamp, timed load) spends its stamp-to-stamp
     # time minus the load on four op dispatches, each fetched from the L2 scratchpad.
     op = st.median((ts0[i + 1] - ts0[i]) % 2**32 - lat0[i] for i in range(len(ts0) - 1)) / 4
+    # The locked loop's lock: each turn (stamp to stamp) is the probe's own ops plus its load, so a turn whose load
+    # found the row open (< 220) has the loop's shortest period; four of them fall short of the refresh period, and
+    # the slow load (>= 220: the first after a refresh) makes up the difference. Kept per series: the medians of the
+    # open and slow loads and of the open turns, and how many gaps between consecutive slow loads are exactly four.
+    per = [(ts0[i + 1] - ts0[i]) % 2**32 for i in range(len(ts0) - 1)]
+    slow = [i for i, v in enumerate(lat0) if v >= 220]
+    locked = {"n": len(lat0), "slow": len(slow), "in_refresh": sum(1 for v in lat0 if v >= 250), "max": max(lat0),
+              "slow_med": st.median(lat0[i] for i in slow), "open_med": st.median(v for v in lat0 if v < 220),
+              "period_med": st.median(per), "period_open_med": st.median(p for p, v in zip(per, lat0) if v < 220),
+              "gaps": len(slow) - 1, "every4": sum(1 for a, b in zip(slow, slow[1:]) if b - a == 4)}
+    # the jittered series' open- and closed-row clusters (as v3_cards reads them): the activate a refresh adds, and
+    # the longest wait for a refresh, the slowest load over the closed-row median
+    cl, opn = [x for x in lat if 220 <= x < 232], [x for x in lat if 208 <= x < 220]
     return {"period_cycles": period, "period_us": period / 600, "n": len(lat), "hist": sorted(collections.Counter(v // 10 * 10 for v in lat).items()),
             "curve": curve, "locked_hist": sorted(collections.Counter(v // 2 * 2 for v in lat0).items()),
             "in_refresh": sum(1 for v in lat if v >= 240) / len(lat),
             "op_cycles": op,
             "rowlife": [{"gap": g_, "hit_no_refresh": v[0], "n_no_refresh": v[1], "hit_refresh": v[2], "n_refresh": v[3]}
                         for g_, v in sorted(life.items())],
-            "hit_by_phase": [{"phase": k, "hit": phase_hits[k][0], "n": phase_hits[k][1]} for k in range(50)]}
+            "hit_by_phase": [{"phase": k, "hit": phase_hits[k][0], "n": phase_hits[k][1]} for k in range(50)],
+            "closed_minus_open": st.mean(cl) - st.mean(opn), "closed_med": st.median(cl), "open_med": st.median(opn),
+            "max_wait": max(lat) - st.median(cl), "locked": locked}
 
 
 def pagetimeout(data, ref):
@@ -362,7 +377,11 @@ def v3_cards(raw, passes_json, out_path, model_json):
             per = [(ts0[i + 1] - ts0[i]) % 2**32 for i in range(len(ts0) - 1)]
             C["locked"].append({"period_med": st.median(per), "n": len(lat0), "slow": sum(1 for v in lat0 if v >= 220),
                                 "in_refresh": sum(1 for v in lat0 if v >= 250), "max": max(lat0),
-                                "slow_med": st.median(v for v in lat0 if v >= 220)})
+                                "slow_med": st.median(v for v in lat0 if v >= 220),
+                                # the lock (refresh() above, on the same re-referenced series)
+                                **{k: ref["locked"][k] for k in ("open_med", "period_open_med", "gaps", "every4")}})
+            if any(C["locked"][-1][k] != ref["locked"][k] for k in ("period_med", "n", "slow", "in_refresh", "max", "slow_med")):
+                raise SystemExit(f"{card} {pk}: the locked series reads differently in refresh() and here")
         C["ladder"] = dict(C["ladder"])
         C["l3_by_slice"] = {s: {"med": v, "hops": g.hops(0, s)} for s, v in sorted(C["l3_by_slice"].items())}
         C["mem_by_home"] = {s: v for s, v in sorted(C["mem_by_home"].items())}

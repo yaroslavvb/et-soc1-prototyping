@@ -72,6 +72,14 @@ dram_bw = per_card_mean("tload/dram/random", "bytes_per_s")
 idle = man["cards"]["idle"]                   # board W at rest: aifoundry2 (hot) and aifoundry3 (cool)
 idle_T = man["cards"]["launch"]
 idle_lo, idle_hi = min(idle.values()), max(idle.values())
+# the cards the model's idle range leaves out (since 26 September aifoundry1's card 1): their board power at rest over the
+# die temperatures the version-3 campaign's idle cycles covered (energy manual, manual.json v3.idle.bins, IDLE-b)
+idle_other = {}
+for c, b in ((man.get("v3") or {}).get("idle", {}).get("bins") or {}).items():
+    if c in idle or not b.get("bins"):
+        continue
+    lo_b, hi_b = min(b["bins"], key=lambda x: x["T"]), max(b["bins"], key=lambda x: x["T"])
+    idle_other[c] = {"lo": r(lo_b["W"], 3), "hi": r(hi_b["W"], 3), "T": [lo_b["T"], hi_b["T"]]}
 
 # SWAR estimate for 1-bit codes: packed-integer vector instructions (the chip has no popcount instruction)
 PI = ["fxor.pi/random/h2", "fand.pi/random/h2", "fsrl.pi/random/h2", "fadd.pi/random/h2"]
@@ -140,6 +148,25 @@ allreduce_us = xar["cycles_per_iter"] / 600e6 * 1e6
 
 SRAM_USABLE = 32 * 2.25e6  # D: 2.5 MB scratchpad per shire, less the first 256 KB (offset 0 faulted); on-chip relay
 
+# the host link, timed on three cards on 27 September (E50, the PCIe page): the largest copy (256 MB) host to card with
+# the DMA alone and as a program's staged copy (the runtime copies into a bounce buffer with the host's memcpy, then
+# transfers), and an empty kernel on 32 shires launched and waited for; each card's mean over its five runs
+PC = "2026-09-27-pcie/pcie.json"
+pcie = load(PC)
+_top = lambda rows: max(rows, key=lambda x: x["bytes"])  # noqa: E731
+pcie_cards = pcie["cards"]
+pcie_dma = {c: _top(pcie["bw"][c]["h2d"]["dma"])["gbs"]["mean"] * 1e9 for c in pcie_cards}
+pcie_staged = {c: _top(pcie["bw"][c]["h2d"]["staged"])["gbs"]["mean"] * 1e9 for c in pcie_cards}
+pcie_wait = {c: pcie["launch"][c]["single_us"]["32"]["mean"] for c in pcie_cards}
+pcie_b2b = {c: pcie["launch"][c]["b2b_us"]["32"]["mean"] for c in pcie_cards}  # each further launch queued back to back
+pcie_mb = _top(pcie["bw"][pcie_cards[0]]["h2d"]["dma"])["bytes"] / 2**20
+# K1's 64 MB copy at the rate measured for the copy size nearest it (64 MiB), not the 256 MB copy's
+K1_B = 64e6
+_near = lambda rows, B: min(rows, key=lambda x: abs(math.log(x["bytes"] / B)))  # noqa: E731
+k1_dma = {c: _near(pcie["bw"][c]["h2d"]["dma"], K1_B)["gbs"]["mean"] * 1e9 for c in pcie_cards}
+k1_staged = {c: _near(pcie["bw"][c]["h2d"]["staged"], K1_B)["gbs"]["mean"] * 1e9 for c in pcie_cards}
+k1_copy_MiB = _near(pcie["bw"][pcie_cards[0]]["h2d"]["dma"], K1_B)["bytes"] / 2**20
+
 
 def gs_keys():
     """S3, measured (26 September, E48 on three cards; the energy manual's §4.4 and §6): per element or update, both
@@ -183,8 +210,9 @@ et = {
     "dram_B": {"v": 32e9, "k": "S", "src": "LPDDR4X, 32 GB per card"},
     "dram_bw": {"v": r(dram_bw), "k": "M", "src": f"energy manual §4.1, tensor loads from DRAM, {ALLC}"},
     "dram_pj_B": {"v": r(dram_pj["mean"]), "lo": r(dram_pj["lo"]), "hi": r(dram_pj["hi"]), "k": "M", "src": "energy manual §4.1, above idle, random data"},
-    "idle_W": {"lo": r(idle_lo), "hi": r(idle_hi), "k": "M",
+    "idle_W": {"lo": r(idle_lo), "hi": r(idle_hi), "range": [r(idle_lo), r(idle_hi)], "k": "M",
                "src": f"board power at rest: aifoundry3 {idle['aifoundry3']:.1f} W at {idle_T['aifoundry3']['T']:.0f} °C, aifoundry2 {idle['aifoundry2']:.1f} W at {idle_T['aifoundry2']['T']:.0f} °C (energy manual, cards block)"},
+    "idle_W_other": idle_other | {"k": "M", "src": "board power at rest over the die temperatures of the version-3 campaign's idle cycles (energy manual, manual.json v3.idle.bins); not in the model's range"},
     "peak": {p: {"ops_per_s": r(v["ops_per_s"]), "board_w": r(v["board_w"]), "pj_op": r(v["pj_per_op_above_idle"]), "k": "M/D"} for p, v in peak.items()},
     "peak_src": f"docs/reports/data/{MM}: matmul benchmark, tiles in L2, aifoundry2, 600 MHz; pJ per op above the idle just before each workload, "
                 + ", ".join(f"{peak[p]['idle_before_w']:.2f} W for {p}" for p in ("fp32", "fp16", "int8") if p in peak) + " (D)",
@@ -194,7 +222,11 @@ et = {
             "src": f"no popcount instruction: SWAR on the vector unit, about {SWAR_INSTR_PER_256} packed-integer instructions per 256 bits (E) at the catalogue's measured {pi_rate/1e9:.0f} G instructions/s and {pi_pj:.1f} pJ each (M)"},
     "rows16": {"k": "E", "src": "a tensor op multiplies 16 rows of A; ops with fewer rows (one query per row) were measured only in fp32, at batch 1, where the pass stayed load-bound"},
     "l1_scp_B": {"v": 3072, "k": "S/M", "src": "the L1 in scratchpad mode: sets 0–11, 3 KB per minion (memory-hierarchy report); a 4,096-coordinate int8 query (4 KB) does not fit, so every minion re-reads the query tiles for each tile of 16 codes it holds (E)"},
-    "launch_ms": {"lo": 0.2, "hi": 0.4, "k": "M", "src": "host kernel launch on aifoundry3 (sparse-compute report); a persistent kernel avoids it"},
+    "launch_ms": {"range": [r(min(pcie_wait.values()) / 1e3, 3), r(max(pcie_wait.values()) / 1e3, 3)],
+                  "b2b": [r(min(pcie_b2b.values()) / 1e3, 3), r(max(pcie_b2b.values()) / 1e3, 3)], "k": "M",
+                  "src": f"docs/reports/data/{PC} (E50, 27 September): an empty kernel on 32 shires launched from the host and waited for "
+                         "(launch.<card>.single_us[32]), and each further launch queued back to back (b2b_us[32]); the range over the cards "
+                         "of each card's mean over five runs. A persistent kernel avoids it"},
     "allreduce_us": {"v": r(allreduce_us, 2), "k": "M", "src": "32 B TensorReduce + TensorBroadcast over 1,024 minions, aifoundry2 (on-chip communication report)"},
     "atomics_spread": {"ops_per_s": r(spread_rate, 3), "nj": r(hot_nj["mean"], 3), "k": "M", "src": "global atomics spread over 32 lines (hot-line report; energy from the energy manual's reruns)"},
     "gs": gs_keys(),
@@ -203,7 +235,11 @@ et = {
               "rail_tau_s": {c: v["tau_s"] for c, v in (man["catalogue"].get("rail_filter") or {}).items() if v},
               "rail_tau_range": [min(v["tau_s"] for v in man["catalogue"]["rail_filter"].values() if v), max(v["tau_s"] for v in man["catalogue"]["rail_filter"].values() if v)] if man["catalogue"].get("rail_filter") else None,
               "k": "M", "src": "the board meter's new value per service-processor pass under a 10 Hz sampler, per card (the version-3 check, E41), and the rails' running average (the catalogue's rail filter): energy manual §9"},
-    "pcie_Bps": {"v": 15.75e9, "k": "S", "src": "PCIe Gen4 x8, never timed on these cards"},
+    "pcie_Bps": {"v": r(pcie["meta"]["link_gbs"] * 1e9), "k": "S", "src": "PCIe Gen4 x8 by its line rate (16 GT/s, 8 lanes, 128b/130b)"},
+    "pcie": {"dma_Bps": [r(min(pcie_dma.values())), r(max(pcie_dma.values()))], "staged_Bps": [r(min(pcie_staged.values())), r(max(pcie_staged.values()))],
+             "launch_wait_us": [r(min(pcie_wait.values()), 3), r(max(pcie_wait.values()), 3)], "copy_MB": pcie_mb, "cards": pcie_cards, "k": "M",
+             "src": f"docs/reports/data/{PC} (E50, 27 September): host to card, {pcie_mb:.0f} MB, DMA alone and staged as a program copies, "
+                    "and an empty kernel on 32 shires launched and waited for; the range over the cards of each card's mean over five runs"},
     "anchor": {k: (r(v) if isinstance(v, float) else v) for k, v in anchor.items()},
 }
 
@@ -356,7 +392,8 @@ be_hbm, be_l2 = breakeven(16000), breakeven(9155)
 duty = {
     "et_idle_per_query_J_at_1qps": [r(idle_lo), r(idle_hi)],
     "et_active_mJ": [r(v, 3) for v in hc["et_mJ"]],
-    "ratio_idle_to_active": [r(idle_lo / (hc["et_mJ"][1] * 1e-3), 2), r(idle_hi / (hc["et_mJ"][0] * 1e-3), 2)],
+    # the same card on both sides: its idle per query at 1 query/s over the pass's board energy, which includes that idle
+    "ratio_idle_to_active": [r(idle_lo / (hc["et_mJ"][0] * 1e-3), 2), r(idle_hi / (hc["et_mJ"][1] * 1e-3), 2)],
     "hbm_case": be_hbm, "l2_case": be_l2,
     "breakeven_vs_h100_qps": [min(be_hbm["vs_h100_qps"][0], be_l2["vs_h100_qps"][0]), max(be_hbm["vs_h100_qps"][1], be_l2["vs_h100_qps"][1])],
     "breakeven_vs_cpu_qps": [min(be_hbm["vs_cpu_qps"][0], be_l2["vs_cpu_qps"][0]), max(be_hbm["vs_cpu_qps"][1], be_l2["vs_cpu_qps"][1])],
@@ -372,10 +409,16 @@ def dram_fetch(B):
     return {"MB": r(B / 1e6), "ms": r(t * 1e3, 2), "mJ": [r((e + idle_lo * t) * 1e3, 2), r((e + idle_hi * t) * 1e3, 2)]}
 
 
-k1 = dram_fetch(64e6)  # a per-query stage-2 shortlist of 64 MB (map-0 cand. 1)
-k1["pcie_ms"] = r(64e6 / 15.75e9 * 1e3, 2)
-k1["h100_us"] = r(64e6 / 3.0e12 * 1e6, 2)
-k1["x_pass"] = [r(64e6 / dram_bw / (hc["et_us"] * 1e-6), 2), r(64e6 / 15.75e9 / (hc["et_us"] * 1e-6), 2)]
+k1 = dram_fetch(K1_B)  # a per-query stage-2 shortlist of 64 MB (map-0 cand. 1)
+# over PCIe at the rates measured on the three cards (E50) for the copy size nearest 64 MB (64 MiB): the DMA alone
+# (the link), and a program's staged copy
+k1["pcie_Bps"] = [r(min(k1_dma.values())), r(max(k1_dma.values()))]
+k1["pcie_staged_Bps"] = [r(min(k1_staged.values())), r(max(k1_staged.values()))]
+k1["pcie_copy_MiB"] = k1_copy_MiB
+k1["pcie_ms"] = [r(K1_B / max(k1_dma.values()) * 1e3, 3), r(K1_B / min(k1_dma.values()) * 1e3, 3)]
+k1["pcie_staged_ms"] = [r(K1_B / max(k1_staged.values()) * 1e3, 3), r(K1_B / min(k1_staged.values()) * 1e3, 3)]
+k1["h100_us"] = r(K1_B / 3.0e12 * 1e6, 2)
+k1["x_pass"] = [r(K1_B / dram_bw / (hc["et_us"] * 1e-6), 2), r(K1_B / min(k1_dma.values()) / (hc["et_us"] * 1e-6), 2)]
 k4 = dram_fetch(25e6)  # a 20-term query over 10^7 documents: 20 bitmaps of 1.25 MB (map-0, E)
 k5_bits_n = 16000 * 8  # the same 65.5 MB as 1-bit codes, too big to pin in the H100's L2
 k5 = {"et_int8_pJ": [r(v * 1e-3 / (16000 * 4096) * 1e12, 2) for v in hc["et_mJ"]],
@@ -423,7 +466,7 @@ pipeline = [
     {"key": "scan", "label": "Scan 10⁷ candidates by recomputing gradients", "h": 702, "per": "per batch of 100 queries", "fit": "no", "k": "O",
      "why": f"dense backprop, the bill itself; one ET card is {dense['slower'][0]:.0f}–{dense['slower'][1]:.0f}× slower and spends {dense['energy'][0]:.1f}–{dense['energy'][1]:.1f}× the energy"},
     {"key": "build", "label": "Build a sketch index of 10⁷ gradients", "h": 1150, "per": "once per checkpoint", "fit": "no", "k": "O",
-     "why": "dense backprop plus a projection; the sparse sketches would need 16 GB per sequence over a 15.75 GB/s link"},
+     "why": f"dense backprop plus a projection; the sparse sketches would need 16 GB per sequence over a link measured at {min(pcie_dma.values()) / 1e9:.1f}–{max(pcie_dma.values()) / 1e9:.1f} GB/s"},
     {"key": "valid", "label": "Validation retrains (LDS)", "h": 506, "per": "per method", "fit": "no", "k": "O", "why": "training runs"},
     {"key": "rerank", "label": "Exact rerank of the top 10⁴ at 70B", "h": 6.0, "per": "per query", "fit": "no", "k": "E",
      "why": "10⁴ fresh gradients; with an EK-FAC iHVP it is over 99.9% of a query's energy"},
@@ -439,7 +482,7 @@ pipeline = [
     {"key": "prefilter", "label": "Lexical prefilter (BM25/TF-IDF)", "h": 1.27e-3 / H, "per": "per query", "fit": "killed", "k": "X",
      "why": "ET-shaped (per-core document ownership, no atomics) but about 10⁻⁶ of the bill; the host CPU's inverted index does it"},
     {"key": "scatter", "label": "Scatter the gradients' sparse parts into sketches", "h": 0.01 * 702, "per": "per batch of 100 queries (at most 1% of the scan)", "fit": "killed", "k": "E",
-     "why": "the one ET-shaped step with real size, but the data is born in the GPU's backward pass (16 GB per sequence would have to cross a 15.75 GB/s link); GPUs keep the buckets in L2 or avoid the scatter; "
+     "why": f"the one ET-shaped step with real size, but the data is born in the GPU's backward pass (16 GB per sequence would have to cross a link measured at {min(pcie_dma.values()) / 1e9:.1f}–{max(pcie_dma.values()) / 1e9:.1f} GB/s); GPUs keep the buckets in L2 or avoid the scatter; "
             + (f"the chip's scatter-add, measured since (S3), reaches 10 G updates a second only while the buckets stay in a shire, and runs at {et['gs']['upd_dram']['ops_per_s'] / 1e9:.2f} G/s into DRAM" if et.get("gs") and et["gs"].get("upd_dram") else "the chip's gather/scatter rate is unmeasured (S3)")},
     {"key": "shard", "label": "Score a static 65 MB shard, 1 query (S1)", "h": s1["hbm_case"]["h100_us"] * 1e-6 / H, "per": "per query", "fit": "research", "k": "E",
      "why": f"the one physical edge: {sram_pj['mean']:.1f} pJ/B from the chip's own scratchpad; no time win, and it needs a busy card"},
@@ -467,6 +510,10 @@ out = {
     "model": {"et": et, "h100": h100, "cpu": cpu, "bytes_per": BYTES_PER, "h_eff": H_EFF},
     "owner": owner,
     "s1": s1, "duty": duty, "kills": kills, "s2": s2, "dense": dense, "pipeline": pipeline, "presets": presets,
+    # the first experiment's rule (section 5), stated before any run: pass and kill thresholds for one query over the
+    # 65.5 MB int8 shard, which the page's verdict chart sets against the model's predictions (s1.hbm_case, s1.hbm_case_rows16)
+    "experiment": {"pass_us": 40, "pass_mJ": 1.5, "topk_max": 0.2, "kill_mJ": 3.0, "kill_gpu_within": 3, "k": "E",
+                   "src": "this page's pass and kill rule for the first experiment (section 5), set before any run"},
     "topk_inserts": {"N": [1e9, 1e10], "k": 1e4, "inserts": [r(1e4 * (1 + math.log(1e9 / 1e4)), 2), r(1e4 * (1 + math.log(1e10 / 1e4)), 2)]},
 }
 path = os.path.join(HERE, "analysis.json")

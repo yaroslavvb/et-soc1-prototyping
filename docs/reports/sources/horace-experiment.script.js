@@ -786,3 +786,106 @@ if (D.model && D.structured) (function(){const M=D.model,PW=M.power,amb=CK.bus('
   fBar.redraw();fT.redraw();}
  upd();
 })();
+
+/* §10, "The card, or its temperature?": the two-temperature test (V3-X5) drawn. D.cards.x5 (build_cards_data.py --v3,
+   from x5.json): per card and pattern, hot − cool switching power over idle with its registered interval (level, e.g.
+   99.75%), the three runs of each arm, whether the pattern was in the registered decision, and the same difference with
+   each run reduced at its own launch temperature (own_launch, not registered). The band is the registered ±band_w: a
+   card property would put both fp32 patterns inside it. Off-scale intervals end in an arrow at the edge. */
+(function () {
+  const X = D.cards && D.cards.x5;
+  if (!X || !document.getElementById('x5')) return;
+  const num = CK.fmt.num, sg = (v, dp) => (v > 0 ? '+' : '') + num(v, dp == null ? 2 : dp);
+  const ids = CK.cardsIn(X.per_card), band = X.band_w, lvl = X.level;
+  const PN = {fp32_randn: 'random normal, fp32', fp32_uniform: 'random uniform, fp32', fp16_randn: 'random normal, fp16',
+    fp32_ones: 'ones, fp32', fp32_zeros: 'zeros, fp32'};
+  const pname = k => PN[k] || k;
+  // tested patterns first (in the order x5.json lists them), then the reported ones
+  const pats = c => { const h = X.per_card[c].hot_minus_cool, ks = Object.keys(h);
+    const t = ks.filter(k => h[k].in_decision).sort((a, b) => (b === 'fp32_randn') - (a === 'fp32_randn'));
+    return t.concat(ks.filter(k => !h[k].in_decision)); };
+  const lvlTxt = lvl != null ? num(100 * lvl, 2).replace(/0+$/, '').replace(/\.$/, '') + '%' : 'registered';
+  const st = {mode: 'reg'};
+  const val = (c, k) => (st.mode === 'reg' ? X.per_card[c].hot_minus_cool[k] : (X.per_card[c].own_launch || {})[k]);
+  const L3 = c => X.per_card[c].launch;
+  const tEl = document.getElementById('x5-title');
+  if (tEl) tEl.textContent = `Switching power at the hot launch minus the cool one, per card and pattern, with its ${lvlTxt} interval (V3-X5, 26 September)`;
+  CK.seg('x5-mode', {label: 'Each run reduced at', options: [['reg', 'its arm’s temperature (registered)'], ['own', 'its own launch temperature (not registered)']],
+    value: st.mode, onChange: v => { st.mode = v; fr.redraw(); }});
+  CK.legend('x5-leg', CK.cardLegend(ids).concat([{key: 'band', label: `±${num(band, 1)} W: the same at both temperatures (a card property)`, mark: 'box', color: 'var(--grid)'},
+    {key: 'rep', label: 'faint: reported, not in the decision', mark: 'line', color: 'var(--muted)'}]));
+  const rows = ids.flatMap(c => [{head: c}].concat(pats(c).map(k => ({c, k}))));
+  const fr = CK.frame('x5', {label: 'Hot minus cool switching power per card and pattern, with intervals and the ±0.5 W band',
+    minW: 280, height: W => { const nar = W < 600; return 30 + rows.reduce((a, r) => a + (r.head ? 26 : nar ? 44 : 28), 0) + 40; }, draw: f => {
+      const nar = f.narrow, L = nar ? 12 : 200, R = 14, T = 30, B = 40, lim = 10, yb = f.H - B;
+      const x = CK.lin(-lim, lim, L, f.W - R), xt = [-10, -5, 0, 5, 10];
+      const g0 = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+      const bd = CK.el('rect', {x: x(-band), y: T - 6, width: x(band) - x(-band), height: yb - T + 6}, g0); bd.style.fill = 'var(--grid)';
+      for (const t of xt) CK.el('line', {x1: x(t), x2: x(t), y1: T - 6, y2: yb, class: t ? 'grid-line' : 'ck-axis'}, g0);
+      CK.axes(f, {x, y: CK.lin(0, 1, yb, T), L, R, T, B, xt, yt: [], grid: false, xfmt: v => sg(v, 0),
+        xl: 'hot − cool switching power over idle, W'});
+      CK.txt(g0, x(band) + 4, T - 12, nar ? `±${num(band, 1)} W` : `±${num(band, 1)} W band`, 'lab');
+      const nodes = [];
+      let y0 = T;
+      rows.forEach(r => {
+        if (r.head) {
+          const l = L3(r.head), cd = CK.card(r.head);
+          CK.txt(g0, nar ? L : 8, y0 + 18, nar ? `${cd.label}: ${num(l.hi.reading, 1)} and ${num(l.lo.reading, 1)} °C`
+            : `${cd.label} · launched at ${num(l.hi.reading, 1)} and ${num(l.lo.reading, 1)} °C`, 'lab-strong halo');
+          y0 += 26; return;
+        }
+        const rh = nar ? 44 : 28, y = y0 + (nar ? 30 : rh / 2), v = val(r.c, r.k), cd = CK.card(r.c), h = X.per_card[r.c].hot_minus_cool[r.k];
+        const tested = !!h.in_decision, lab = pname(r.k) + (tested ? ' · tested' : '');
+        CK.txt(g0, nar ? L : L - 10, nar ? y - 12 : y + 4, lab, tested ? 'lab' : 'tick halo', nar ? 'start' : 'end');
+        y0 += rh;
+        if (!v) return;
+        const gr = CK.el('g', {}, f.svg); gr.style.opacity = tested ? '1' : '0.6';
+        const lo = Math.max(-lim, v.lo), hi = Math.min(lim, v.hi), ln = CK.el('line', {x1: x(lo), x2: x(hi), y1: y, y2: y, 'stroke-width': 2}, gr);
+        ln.style.stroke = cd.color;
+        const end = (u, clipped, dir) => {
+          if (clipped) { const a = CK.el('polygon', {points: `${x(u)},${y} ${x(u) - dir * 7},${y - 4.5} ${x(u) - dir * 7},${y + 4.5}`}, gr); a.style.fill = cd.color; }
+          else { const cap = CK.el('line', {x1: x(u), x2: x(u), y1: y - 5, y2: y + 5, 'stroke-width': 2}, gr); cap.style.stroke = cd.color; }
+        };
+        end(lo, v.lo < -lim, -1); end(hi, v.hi > lim, 1);
+        if (Math.abs(v.point) <= lim) CK.cardMark(gr, r.c, x(v.point), y, 5);
+        CK.el('rect', {x: L, y: y - rh / 2 + 2, width: f.W - L - R, height: rh - 4, class: 'ck-hit'}, gr);
+        const runs = st.mode === 'reg' && h.values_x ? `<br>hot runs ${h.values_x.map(q => num(q, 2)).join(', ')} W; cool runs ${h.values_y.map(q => num(q, 2)).join(', ')} W` : '';
+        CK.tip(f, gr, `<b>${cd.label}, ${pname(r.k)}</b> (${tested ? 'in the registered decision' : 'reported, not in the decision'})` +
+          `<br>hot − cool ${sg(v.point)} W, ${lvlTxt} interval ${sg(v.lo)} to ${sg(v.hi)} W` + (st.mode === 'own' ? ' (each run at its own launch temperature, not registered)' : '') + runs);
+        nodes.push(gr);
+      });
+      CK.keynav(f, nodes);
+      caption();
+    }});
+  function caption() {
+    const reg = (c, k) => X.per_card[c].hot_minus_cool[k], own = (c, k) => (X.per_card[c].own_launch || {})[k];
+    // "switched more when hot": a tested pattern whose interval lies above zero, the registered temperature-effect reading
+    const moved = ids.flatMap(c => pats(c).filter(k => reg(c, k).in_decision && reg(c, k).lo > 0).map(k => ({c, k})));
+    const still = moved.filter(({c, k}) => own(c, k) && own(c, k).lo > 0);
+    const cl = a => { const out = []; a.forEach(({c}) => { if (!out.includes(c)) out.push(c); }); return out.map(c => CK.card(c).label); };
+    const and = a => (a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]);
+    const lead = document.getElementById('x5-lead-end');
+    const byPat = k => moved.filter(m => m.k === k);
+    const mk = [...new Set(moved.map(m => m.k))];
+    const gaps = ids.map(c => L3(c).hi.reading - L3(c).lo.reading);
+    const tk = ids.flatMap(c => pats(c).filter(k => reg(c, k).in_decision && !moved.some(m => m.c === c && m.k === k)).map(k => ({c, k})));
+    const dead = [...new Set(tk.map(t => t.k))].filter(k => tk.filter(t => t.k === k).length === ids.length && ids.every(c => reg(c, k).lo < 0 && reg(c, k).hi > 0));
+    if (lead) lead.textContent = moved.length
+      ? `Launching each card's runs ${CK.fmt.range(Math.min(...gaps), Math.max(...gaps), 1)} °C apart was to tell the card from its temperature: ` +
+        `${mk.map(k => `${pname(k)} switched more when hot on ${and(cl(byPat(k)))} (the interval above zero, as a temperature effect would)`).join('; ')}, ` +
+        (still.length ? `and stayed so on ${and(cl(still))} with each run at its own launch temperature; ` : `but not once each run is reduced at its own launch temperature; `) +
+        (dead.length ? `${and(dead.map(pname))}, the other tested pattern${dead.length > 1 ? 's' : ''}, gave no reading on any card (every interval includes zero).` : 'no other tested pattern moved clearly.')
+      : `No pattern on any card moved clearly between the two launch temperatures.`;
+    const wide = c => Math.min(...pats(c).map(k => reg(c, k).hi - reg(c, k).lo));
+    const a1 = ids.filter(c => wide(c) > 10 * band), uc = ids.filter(c => !a1.includes(c) && reg(c, 'fp32_uniform'));
+    const uni = uc.map(c => reg(c, 'fp32_uniform'));
+    const cap = document.getElementById('x5-cap');
+    if (cap) cap.innerHTML = `Each row is the difference between the two arms' switching power over idle (three runs each), with its Welch ${lvlTxt} interval, as registered ` +
+      `(${X.test ? 'fp32 uniform and random normal decide, the other patterns are reported' : ''}). ` +
+      moved.map(({c, k}) => `${CK.card(c).label}, ${pname(k)}: ${sg(reg(c, k).point)} W [${sg(reg(c, k).lo)}, ${sg(reg(c, k).hi)}]` +
+        (own(c, k) ? `, at each run's own launch temperature ${sg(own(c, k).point)} W [${sg(own(c, k).lo)}, ${sg(own(c, k).hi)}]` : '')).join('; ') + '. ' +
+      (uni.length ? `Uniform data read ${CK.fmt.range(Math.min(...uni.map(v => -v.point)), Math.max(...uni.map(v => -v.point)), 1)} W lower hot than cool on ${and(uc.map(c => CK.card(c).label))}: it ran first after the preheat, which inflated the idle subtracted from it. ` : '') +
+      (a1.length ? `On ${and(a1.map(c => CK.card(c).label))} every interval is at least ${and(a1.map(c => num(Math.floor(wide(c)), 0)))} W wide, because the idle before its runs moved. ` : '') +
+      `The registered verdict: ${X.verdict} (${X.all_cards}). Arrows mark intervals that run off the ±10 W scale; the tooltips give them in full.`;
+  }
+})();

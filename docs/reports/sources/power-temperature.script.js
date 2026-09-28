@@ -140,6 +140,91 @@ $('methods').innerHTML = '<thead><tr><th>What</th><th>Granularity</th><th>How</t
 CK.stackTable($('methods'));
 CK.sortTable('methods');  // after stackTable. (No filter box: chartkit's inserts it via t.parentNode before the .wide wrapper, which is that parent.)
 
+/* ---------- §1: what asking costs, the SP's pass under each way of polling (V3-TEL, D.tel_v3.sp_pass) ---------- */
+// sp_pass.cards.<card>[] holds each pass's median SP-record interval (ms) in each arm; arms are in the check's order,
+// lightest first. A fresh board value arrives once per pass, so 1000 / ms is the fresh readings per second.
+const SPP = D.tel_v3 && D.tel_v3.sp_pass;
+if (SPP && Object.keys(SPP.cards).length) {
+  const ARMS = SPP.arms, AC = CK.cardsIn(SPP.cards);
+  const vals = (c, a) => SPP.cards[c].map(p => p.ms[a]).filter(v => v != null && isFinite(v));
+  const mid = (c, a) => { const v = vals(c, a); return v.length ? median(v) : null; };
+  const rngMs = (c, a) => { const v = vals(c, a); return CK.fmt.range(Math.min(...v), Math.max(...v), 1, 'ms'); };
+  const perS = ms => 1000 / ms;
+  const R = (f, a, b) => CK.fmt.range(Math.min(a, b), Math.max(a, b), f);
+  const across = fn => { const v = AC.map(fn).filter(x => x != null && isFinite(x)); return [Math.min(...v), Math.max(...v)]; };
+  const cardList = fn => andList(AC.map(c => `${fn(c)} on ${CK.card(c).label}`));
+  const haloA = t => { Object.assign(t.style, {paintOrder: 'stroke', stroke: 'var(--page)', strokeWidth: '4px', strokeLinejoin: 'round'}); return t; };
+  CK.legend('askcost-leg', CK.cardLegend(AC).concat([{key: 'ask', label: 'the interval the host asked at', mark: 'line', color: 'var(--ink-2)'}]));
+  const hasE = ['E10', 'E20', 'E40'].every(a => ARMS.some(x => x.key === a));
+  CK.frame('askcost', {label: 'The service processor’s pass length under each way of polling the card, per card',
+    height: W => { const rowH = W < 600 ? 50 : 34; return 30 + rowH * ARMS.length + 42; }, minW: 280, draw: f => {
+      const nar = f.narrow, rowH = nar ? 50 : 34, L = nar ? 10 : 220, Rm = 56, T = 30, B = 42, yb = f.H - B;
+      const all = AC.flatMap(c => ARMS.flatMap(a => vals(c, a.key)));
+      const hi = Math.ceil(Math.max(...all) * 1.04 / 100) * 100;
+      const x = CK.lin(0, hi, L, f.W - Rm), xt = x.ticks(nar ? 4 : 6);
+      const g0 = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+      for (const t of xt) CK.el('line', {x1: x(t), x2: x(t), y1: T - 8, y2: yb, class: 'grid-line'}, g0);
+      CK.axes(f, {x, y: CK.lin(0, 1, yb, T), L, R: Rm, T, B, xt, yt: [], grid: false, xfmt: v => num(v, 0),
+        xl: 'service-processor pass, ms (one fresh board value per pass)'});
+      const rowY = i => T + rowH * i + (nar ? 34 : rowH / 2), rowLabs = [];
+      ARMS.forEach((a, i) => {
+        if (i) CK.el('line', {x1: nar ? L : 8, x2: f.W - Rm, y1: T + rowH * i, y2: T + rowH * i, class: 'grid-line'}, g0);
+        const y = rowY(i);
+        rowLabs.push(haloA(nar ? CK.txt(g0, L, y - 16, a.what, 'lab') : CK.txt(g0, L - 12, y + 4, a.what, 'lab', 'end')));
+      });
+      if (hasE) for (const c of AC) {   // ettelem at 10, 20 and 40 Hz: one thin line per card through its three medians
+        const pts = ['E10', 'E20', 'E40'].map(k => [mid(c, k), rowY(ARMS.findIndex(q => q.key === k))]).filter(p => p[0] != null);
+        const ln = CK.el('path', {d: pts.map((p, j) => (j ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + p[1].toFixed(1)).join(' '),
+          fill: 'none', 'stroke-width': 1.5, 'aria-hidden': 'true'}, f.svg);
+        ln.style.stroke = CK.card(c).color; ln.style.opacity = '0.55';
+      }
+      /* the row labels over those lines: on a phone the lines cross the labels' rows, and pass under their halo */
+      const gT = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+      rowLabs.forEach(t => gT.appendChild(t));
+      const nodes = [], ends = [];
+      ARMS.forEach((a, i) => {   // the interval the host asked at, where it asked at a fixed one
+        if (a.ask_ms == null) return;
+        const y = rowY(i), t = CK.el('line', {x1: x(a.ask_ms), x2: x(a.ask_ms), y1: y - 8, y2: y + 8, 'stroke-width': 2, 'aria-hidden': 'true'}, g0);
+        t.style.stroke = 'var(--ink-2)';
+      });
+      ARMS.forEach((a, i) => {
+        const y = rowY(i), q = ARMS[0].key;
+        AC.forEach((c, k) => {
+          const v = vals(c, a.key);
+          if (!v.length) return;
+          const m = mid(c, a.key), cd = CK.card(c), dy = (k - (AC.length - 1) / 2) * 3, gr = CK.el('g', {}, f.svg);
+          CK.cardMark(gr, c, x(m), y + dy, 5);
+          CK.el('rect', {x: x(m) - 9, y: y + dy - 9, width: 18, height: 18, class: 'ck-hit'}, gr);
+          const q0 = mid(c, q), ratio = q0 ? m / q0 : null;
+          CK.tip(f, gr, `<b>${cd.label}</b>, ${a.what}` +
+            `<br>pass ${num(m, 1)} ms (median of ${num(v.length, 0)} passes: ${rngMs(c, a.key)})` +
+            (a.key !== q && ratio ? `<br>${num(m - q0, 1)} ms longer than with nothing polling (×${num(ratio, 2)})` : '') +
+            `<br>a fresh board value ${num(perS(m), 1)} times a second` + (a.ask_ms ? `, asked for ${num(1000 / a.ask_ms, 0)} times a second` : ''));
+          nodes.push(gr);
+        });
+        const top = Math.max(...AC.flatMap(c => vals(c, a.key)));
+        if (a.key === 'E40' || a.key === q) {   // direct labels on the first and the heaviest arm only
+          const lab = AC.map(c => mid(c, a.key)).filter(v => v != null);
+          ends.push(haloA(CK.txt(g0, x(top) + 10, y + 4, R(0, Math.min(...lab), Math.max(...lab)) + ' ms', 'lab-strong')));
+        }
+      });
+      CK.inside(f, ends);
+      CK.keynav(f, nodes);
+    }});
+  // the caption, from the same numbers
+  const Q = c => mid(c, 'Q'), d = (c, a) => mid(c, a) - Q(c), rt = (c, a) => mid(c, a) / Q(c);
+  const one = across(c => Math.max(d(c, 'PWR'), d(c, 'L10')));
+  const e10 = across(c => d(c, 'E10')), vo = across(c => d(c, 'VOLT')), r40 = across(c => rt(c, 'E40'));
+  const f10 = across(c => perS(mid(c, 'E10'))), f40 = across(c => perS(mid(c, 'E40'))), e40 = ARMS.find(a => a.key === 'E40');
+  $('askcost-cap').innerHTML = `With nothing polling, the pass takes ${cardList(c => num(Q(c), 0) + ' ms')}. ` +
+    `A single power command, even every ~${num(ARMS.find(a => a.key === 'PWR').ask_ms, 0)} ms, lengthens it by at most ${num(Math.max(0, one[1]), 1)} ms; the voltage command loop by ` +
+    `${R(0, vo[0], vo[1])} ms; <code>ettelem</code>'s snapshot at 10 Hz by ${R(0, e10[0], e10[1])} ms, and by more the faster it samples. ` +
+    `At 40 Hz the pass is ${R(1, r40[0], r40[1])} times its quiet length: <code>ettelem</code> asks for ${num(1000 / e40.ask_ms, 0)} readings a second and ` +
+    `gets a fresh board value ${R(1, f40[0], f40[1])} times a second, fewer than at 10 Hz (${R(1, f10[0], f10[1])}). ` +
+    `The short grey ticks mark the interval the host asked at. Each mark is a card's median over its three passes, which agree within ${num(Math.max(...AC.flatMap(c => ARMS.map(a => { const v = vals(c, a.key); return v.length ? Math.max(...v) - Math.min(...v) : 0; }))), 1)} ms. ` +
+    `Source: V3-TEL, <code>tel.json</code> <code>passes.&lt;card&gt;[].sp</code>; the arms ran in a shuffled order, 30 s apart.`;
+}
+
 /* ---------- the time bus: one moment, shown on every chart ---------- */
 const TB = CK.bus('pt-time');
 const frames = [];
@@ -516,10 +601,19 @@ function redrawEdges() { fEdges.forEach(f => f.redraw()); }
 }
 
 /* ---------- §3: the per-shire voltage map ---------- */
-const VM = {rail: 'mnn', field: 'now'};
+// The map shows the 20 September capture (D.shires, aifoundry2 at idle) or, from the three-card check, a card's idle or
+// loaded dump (D.tel_v3.vmaps: for each card the passes of TEL-Q's Q4 test; the map uses the first pass whose two dumps
+// each held one whole pass, else the first).
+const VM = {rail: 'mnn', field: 'now', cap: 'sep20', card: 'aifoundry2'};
 const RAIL = {mnn: 'Minion rail', sram: 'SRAM rail', noc: 'Mesh rail'};
 const FIELD = {now: 'current reading', low: 'lowest captured', high: 'highest captured', swing: 'swing (high − low)'};
-const vOf = (s, rail, field) => { const v = D.shires[s][rail]; return field === 'now' ? v[0] : field === 'low' ? v[1] : field === 'high' ? v[2] : v[2] - v[1]; };
+const VMV3 = (D.tel_v3 && D.tel_v3.vmaps && D.tel_v3.vmaps.cards) || {};
+const VCARDS = CK.cardsIn(VMV3);
+const vPass = c => { const ps = VMV3[c].passes; return ps.find(p => p.idle.whole_pass && p.load.whole_pass) || ps[0]; };
+const curMap = () => (VM.cap === 'sep20' || !VMV3[VM.card] ? D.shires : vPass(VM.card)[VM.cap].map);
+const capName = () => (VM.cap === 'sep20' || !VMV3[VM.card] ? 'aifoundry2, 20 September, idle'
+  : `${CK.card(VM.card).label}, 26 September, ${VM.cap === 'load' ? 'under a 7 s load' : 'idle'} (pass ${vPass(VM.card).pass})`);
+const vOf = (s, rail, field) => { const v = curMap()[s][rail]; return field === 'now' ? v[0] : field === 'low' ? v[1] : field === 'high' ? v[2] : v[2] - v[1]; };
 const LAYOUT = D.mesh.layout, EMPTY = D.mesh.empty_cells;
 // the four cells without a compute shire, labelled as the spatial temperature brief infers them (heat-per-mm die study)
 const INFERRED = {'0,3': ['master', 'or spare'], '5,3': ['master', 'or spare'], '0,4': ['I/O or', 'PCIe'], '0,5': ['I/O or', 'PCIe']};
@@ -551,14 +645,27 @@ const chance = p => (p >= 0.05 ? `no more than random scatter would give (p = ${
     `${rep.map(r => num(r.differing, 0)).join(' and ')} of its ${num(rep[0].cells, 0)} cells, by at most ${num(Math.max(...rep.map(r => r.max_abs_mv)), 0)} mV, ` +
     `${rep.every(r => r.low_high_identical) ? 'always in the current reading; every low and high is the same.' : 'including some lows and highs.'}` : '');
 }
+if (VCARDS.length) {   // which capture: the 20 September one is aifoundry2's, so choosing it selects that card
+  const capSeg = CK.seg('vmap-cap', {label: 'Capture', options: [['sep20', '20 Sep, idle'], ['idle', '26 Sep, idle'], ['load', '26 Sep, under load']],
+    value: VM.cap, onChange: v => { VM.cap = v; if (v === 'sep20' && VM.card !== 'aifoundry2') { VM.card = 'aifoundry2'; cardSeg.quiet('aifoundry2'); } fMap.redraw(); }});
+  const cardSeg = CK.seg('vmap-card', {label: 'Card', options: VCARDS.map(c => [c, CK.card(c).label]), value: VM.card,
+    onChange: v => { VM.card = v; if (VM.cap === 'sep20' && v !== 'aifoundry2') { VM.cap = 'idle'; capSeg.quiet('idle'); } fMap.redraw(); }});
+}
 CK.seg('vmap-rail', {label: 'Rail', options: [['mnn', 'Minion'], ['sram', 'SRAM'], ['noc', 'Mesh']], value: VM.rail, onChange: v => { VM.rail = v; fMap.redraw(); }});
 CK.seg('vmap-field', {label: 'Value', options: [['now', 'Now'], ['low', 'Lowest captured'], ['high', 'Highest captured'], ['swing', 'Swing']], value: VM.field,
   onChange: v => { VM.field = v; fMap.redraw(); }});
 const vmLive = $('vmap-live');
+const VM_TILES = {};
+let VM_HI = null;   // a shire lit from the offset chart below, when the map shows that shire's card and a check capture
+function vmHi(sh) {   // sh: a list of shire numbers to outline on the map, or null
+  VM_HI = sh;
+  const on = new Set((sh || []).map(String));
+  for (const [k, r] of Object.entries(VM_TILES)) { r.style.stroke = on.has(k) ? 'var(--ink)' : ''; r.style.strokeWidth = on.has(k) ? '3px' : ''; }
+}
 const fMap = CK.frame('vmap', {height: W => { const cw = (W - 16) / 6; return Math.round(8 + 6 * cw + 24 + cw + 8); }, minW: 300, maxW: 520,
   label: 'The per-shire voltage map', draw: f => {
     const W = f.W, pad = 8, cw = (W - 2 * pad) / 6, gy = pad + 6 * cw, small = cw < 64;
-    const vals = Object.keys(D.shires).map(s => vOf(s, VM.rail, VM.field));
+    const vals = Object.keys(curMap()).map(s => vOf(s, VM.rail, VM.field));
     const lo = Math.min(...vals), hi = Math.max(...vals), spanMv = Math.max(hi - lo, 5);
     const P = v => (v - lo) / spanMv;
     for (const [cx, cy] of EMPTY) {
@@ -566,12 +673,14 @@ const fMap = CK.frame('vmap', {height: W => { const cw = (W - 16) / 6; return Ma
       const r = CK.el('rect', {x: X + 2, y: Y + 2, width: cw - 4, height: cw - 4, rx: 8, fill: 'none', 'stroke-width': 1.5, 'stroke-dasharray': '5 4'}, f.svg);
       r.style.stroke = 'var(--axis)';
       const lines = (INFERRED[cx + ',' + cy] || ['no compute', 'shire']).concat(['inferred']);
-      lines.forEach((t, i) => CK.txt(f.svg, X + cw / 2, Y + cw / 2 + (i - (lines.length - 1) / 2) * 13 + 4, t, 'vm-note', 'middle'));
+      const lh = 15;   /* 12 px text on 15 px lines: the three lines stay apart, even in a phone's small cell */
+      lines.forEach((t, i) => CK.txt(f.svg, X + cw / 2, Y + cw / 2 + (i - (lines.length - 1) / 2) * lh + 4, t, 'vm-note', 'middle'));
     }
     CK.txt(f.svg, pad + 2, gy + 17, small ? 'Not on the grid: master (32), spare (33)' : 'Not placed on the grid: the master shire (32) and the spare (33)', 'lab');
     const nodes = [];
+    for (const k in VM_TILES) delete VM_TILES[k];
     const tile = (s, X, Y) => {
-      const v = vOf(s, VM.rail, VM.field), p = P(v), row = D.shires[s], g = CK.el('g', {}, f.svg);
+      const v = vOf(s, VM.rail, VM.field), p = P(v), row = curMap()[s], g = CK.el('g', {}, f.svg);
       const r = CK.el('rect', {x: X + 2, y: Y + 2, width: cw - 4, height: cw - 4, rx: 8}, g); r.style.fill = CK.ramp(p);
       const ink = CK.rampInk(p), where = s in LAYOUT ? `(${LAYOUT[s].join(', ')})` : OFFNOTE[s];
       const t = (yy, str, cls) => { const e = CK.txt(g, X + cw / 2, yy, str, cls, 'middle'); e.style.fill = ink; return e; };
@@ -582,8 +691,9 @@ const fMap = CK.frame('vmap', {height: W => { const cw = (W - 16) / 6; return Ma
         t(Y + cw / 2 + 6, shown + (VM.field === 'swing' ? '' : ' mV'), 'vm-val');
         t(Y + cw / 2 + 22, VM.field === 'now' ? 'low ' + row[VM.rail][1] : 'now ' + row[VM.rail][0], 'vm-sub');
       }
-      CK.tip(f, g, () => `<b>Shire ${s}</b> ${where}<br>minion ${row.mnn[0]} mV [${row.mnn[1]}–${row.mnn[2]}]<br>SRAM ${row.sram[0]} [${row.sram[1]}–${row.sram[2]}]<br>mesh ${row.noc[0]} [${row.noc[1]}–${row.noc[2]}]`);
+      CK.tip(f, g, () => `<b>Shire ${s}</b> ${where} · ${capName()}<br>minion ${row.mnn[0]} mV [${row.mnn[1]}–${row.mnn[2]}]<br>SRAM ${row.sram[0]} [${row.sram[1]}–${row.sram[2]}]<br>mesh ${row.noc[0]} [${row.noc[1]}–${row.noc[2]}]`);
       nodes.push([s in LAYOUT ? LAYOUT[s][1] * 6 + LAYOUT[s][0] : 100 + +s, g]);
+      VM_TILES[s] = r;
     };
     for (const s of Object.keys(LAYOUT)) tile(s, pad + LAYOUT[s][0] * cw, pad + LAYOUT[s][1] * cw);
     OFFGRID.forEach((s, i) => tile(s, pad + i * cw, gy + 24));
@@ -592,9 +702,92 @@ const fMap = CK.frame('vmap', {height: W => { const cw = (W - 16) / 6; return Ma
     const sw = []; for (let v = lo; v <= hi; v++) sw.push(`<span class="vm-sw" style="background:${CK.ramp(P(v))};color:${CK.rampInk(P(v))}">${v}</span>`);
     $('vmap-leg').innerHTML = `<span class="vm-leg-lab">${RAIL[VM.rail]}, ${FIELD[VM.field]} (mV):</span> ${sw.join('')} <span class="vm-leg-lab">1 mV steps; the colour scale spans ${spanMv} mV</span>`;
     const pl = plane(VM.rail, VM.field);
-    vmLive.innerHTML = `${RAIL[VM.rail]}, ${FIELD[VM.field]}: ${CK.fmt.range(lo, hi, 0, 'mV')} over the ${vals.length} shires. A plane across the ${pl.n} grid ` +
+    vmLive.innerHTML = `<b>${capName()}.</b> ${RAIL[VM.rail]}, ${FIELD[VM.field]}: ${CK.fmt.range(lo, hi, 0, 'mV')} over the ${vals.length} shires. A plane across the ${pl.n} grid ` +
       `shires explains R² = ${num(pl.r2, 2)} of the spread, ${chance(pl.p)}.` +
-      (VM.field === 'low' || VM.field === 'swing' || VM.field === 'high' ? ' These are extremes since the last stats reset (when that was is not recorded for this capture), not idle values.' : '');
+      (VM.field === 'low' || VM.field === 'swing' || VM.field === 'high' ? ' These are extremes since the last stats reset' +
+        (VM.cap === 'sep20' ? ' (when that was is not recorded for this capture), not idle values.' : ', not current readings.') : '');
+    vmHi(VM_HI);
   }});
+
+/* ---------- §3: the offset test drawn (TEL-Q, item Q4): each shire's idle deviation against its loaded one ---------- */
+// One panel per card (D.tel_v3.vmaps, the pass the map above uses): x = the shire's minion-rail reading at idle less the
+// 34-shire idle mean, y = the same under the 7 s load. A fixed per-monitor offset puts every shire on y = x. Readings are
+// whole millivolts, so shires share points; a bubble's area grows with how many do.
+if (VCARDS.length) {
+  const S34 = Object.keys(VMV3[VCARDS[0]].passes[0].idle.map);
+  const sdv = a => { const m = mean(a); return Math.sqrt(a.reduce((t, v) => t + (v - m) ** 2, 0) / (a.length - 1)); };
+  const corr = (a, b) => { const ma = mean(a), mb = mean(b); let sab = 0, saa = 0, sbb = 0;
+    a.forEach((v, k) => { sab += (v - ma) * (b[k] - mb); saa += (v - ma) ** 2; sbb += (b[k] - mb) ** 2; }); return sab / Math.sqrt(saa * sbb); };
+  const PAN = VCARDS.map(c => {
+    const p = vPass(c), iv = S34.map(s => p.idle.map[s].mnn[0]), lv = S34.map(s => p.load.map[s].mnn[0]);
+    const mi = mean(iv), ml = mean(lv), pts = S34.map((s, k) => ({s, i: iv[k], l: lv[k], x: iv[k] - mi, y: lv[k] - ml}));
+    const cells = {};
+    pts.forEach(q => { const k = q.i + ',' + q.l; (cells[k] = cells[k] || []).push(q); });
+    const r = corr(iv, lv), sdI = sdv(iv), sdL = sdv(lv);
+    return {c, p, pts, cells: Object.values(cells).sort((a, b) => a[0].x - b[0].x || a[0].y - b[0].y), r, sdI, sdL, slope: r * sdL / sdI};
+  });
+  const lim = Math.ceil(Math.max(...PAN.flatMap(P => P.pts.flatMap(q => [Math.abs(q.x), Math.abs(q.y)]))) + 0.5);
+  const haloV = t => { Object.assign(t.style, {paintOrder: 'stroke', stroke: 'var(--page)', strokeWidth: '4px', strokeLinejoin: 'round'}); return t; };
+  const sgn = (v, dp) => (v > 0 ? '+' : '') + num(v, dp);
+  CK.legend('vmoff-leg', CK.cardLegend(VCARDS).concat([
+    {key: 'diag', label: 'a fixed offset: the diagonal', mark: 'dash', color: 'var(--ink-2)'},
+    {key: 'fit', label: 'least-squares line through the shires', mark: 'line', color: 'var(--ink-2)'}]));
+  const layout = W => { const cols = W >= 720 ? PAN.length : 1, gap = 22, pw = Math.min(cols === 1 ? 380 : 400, (W - gap * (cols - 1)) / cols);
+    const side = pw - 46 - 8; return {cols, gap, pw, side, ph: 44 + side + 46}; };
+  CK.frame('vmoff', {label: 'Each shire’s minion-rail deviation at idle against under load, one panel per card', minW: 280, maxW: 1240,
+    height: W => { const g = layout(W); return Math.ceil(PAN.length / g.cols) * g.ph; }, draw: f => {
+      const g = layout(f.W), nodes = [];
+      PAN.forEach((P, k) => {
+        const col = k % g.cols, row = Math.floor(k / g.cols), ox = col * (g.pw + g.gap), oy = row * g.ph, cd = CK.card(P.c);
+        const L = ox + 46, T = oy + 44, side = g.side, x = CK.lin(-lim, lim, L, L + side), y = CK.lin(-lim, lim, T + side, T);
+        const g0 = CK.el('g', {'aria-hidden': 'true'}, f.svg), tk = x.ticks(side < 260 ? 4 : 6);
+        for (const t of tk) {
+          CK.el('line', {x1: x(t), x2: x(t), y1: T, y2: T + side, class: 'grid-line'}, g0);
+          CK.el('line', {x1: L, x2: L + side, y1: y(t), y2: y(t), class: 'grid-line'}, g0);
+          CK.txt(g0, x(t), T + side + 16, sgn(t, 0), 'tick', 'middle');
+          CK.txt(g0, L - 6, y(t) + 4, sgn(t, 0), 'tick', 'end');
+        }
+        CK.el('rect', {x: L, y: T, width: side, height: side, fill: 'none', class: 'ck-axis'}, g0).style.stroke = 'var(--axis)';
+        CK.txt(g0, L + side / 2, T + side + 36, 'idle, mV from the 34-shire mean', 'lab', 'middle');
+        haloV(CK.txt(g0, ox + 2, oy + 14, `${cd.label} · pass ${P.p.pass}`, 'lab-strong'));
+        CK.txt(g0, ox + 2, oy + 31, `under load, mV from the mean · r = ${num(P.r, 2)}`, 'lab');
+        const dg = CK.el('line', {x1: x(-lim), y1: y(-lim), x2: x(lim), y2: y(lim), 'stroke-width': 1.5}, g0);
+        dg.style.stroke = 'var(--ink-2)'; dg.style.strokeDasharray = '5 4';
+        // least-squares line of y on x, clipped to the square
+        const b = P.slope, xe = Math.min(lim, lim / Math.abs(b)), fl = CK.el('line', {x1: x(-xe), y1: y(-b * xe), x2: x(xe), y2: y(b * xe), 'stroke-width': 2}, g0);
+        fl.style.stroke = cd.color; fl.style.opacity = '0.7';
+        for (const cell of P.cells) {
+          const q = cell[0], n = cell.length, gr = CK.el('g', {}, f.svg), R = 3 + 2 * Math.sqrt(n);
+          const m = CK.cardMark(gr, P.c, x(q.x), y(q.y), R);
+          if (cd.mark !== 'ring') { m.style.stroke = 'var(--surface)'; m.style.strokeWidth = '1.5'; }
+          CK.el('circle', {cx: x(q.x), cy: y(q.y), r: Math.max(9, R + 2), class: 'ck-hit'}, gr);
+          const names = cell.map(z => `${z.s}${z.s in LAYOUT ? ' (' + LAYOUT[z.s].join(', ') + ')' : ' (' + (OFFNOTE[z.s] || 'off grid') + ')'}`);
+          CK.tip(f, gr, `<b>${cd.label}</b>, pass ${P.p.pass}: shire${n > 1 ? 's' : ''} ${names.join(', ')}` +
+            `<br>idle ${num(q.i, 0)} mV (${sgn(q.x, 1)} from the mean), under load ${num(q.l, 0)} mV (${sgn(q.y, 1)})` +
+            `<br>deviation changed by ${sgn(q.y - q.x, 1)} mV; a fixed offset would leave it unchanged`);
+          const lit = () => { if (VM.card === P.c && VM.cap !== 'sep20') vmHi(cell.map(z => z.s)); };
+          gr.addEventListener('pointerenter', lit); gr.addEventListener('focus', lit);
+          gr.addEventListener('pointerleave', () => vmHi(null)); gr.addEventListener('blur', () => vmHi(null));
+          nodes.push(gr);
+        }
+      });
+      CK.keynav(f, nodes);
+    }});
+  // the lead's conclusion and the caption, from the same maps
+  const rs = PAN.map(P => P.r), sl = PAN.map(P => P.slope), sr = PAN.map(P => P.sdL / P.sdI);
+  const Q4 = VCARDS.flatMap(c => VMV3[c].passes.map(p => p.q4)), rng = (a, dp) => CK.fmt.range(Math.min(...a), Math.max(...a), dp);
+  const kept = Math.min(...rs) >= 0.5, steeper = Math.min(...sl) > 1.2;
+  put('vmoff-lead-end', kept && steeper
+    ? `on every card the shires keep their idle pattern under load (r = ${rng(rs, 2)}) but spread ${rng(sr, 1)} times as wide, so they fall on a line steeper than the diagonal, not on it.`
+    : 'the shires do not sit on it.');
+  $('vmoff-cap').innerHTML = `Each bubble is one or more shires with the same pair of whole-millivolt readings; its area grows with their number. ` +
+    `Idle and loaded deviations correlate at ${andList(PAN.map(P => `r = ${num(P.r, 2)} on ${CK.card(P.c).label}`))}, and the loaded map's spread is ` +
+    `${andList(PAN.map(P => `${num(P.sdL / P.sdI, 1)} times the idle one on ${CK.card(P.c).label} (sd ${num(P.sdL, 1)} against ${num(P.sdI, 1)} mV)`))}; ` +
+    `a least-squares line through the shires is ${rng(sl, 1)} times as steep as the diagonal (whole-millivolt readings blur the idle deviations, which tends to flatten it). ` +
+    `Under the load each shire's deviation changed with a standard deviation of ${rng(Q4.map(q => q.sd_dev_change_mv), 2)} mV over every pass of the check's test ` +
+    `(the largest single change ${rng(Q4.map(q => q.max_abs_dev_change_mv), 1)} mV), where a fixed offset would allow about ${num(D.tel_v3.vmaps.tolerance_mv, 1)} mV; ` +
+    `the whole map also sagged by ${rng(Q4.map(q => -q.common_shift_mv), 1)} mV, which measuring from each map's mean removes. ` +
+    `Pointing at a bubble outlines its shires on the map above when the map shows that card's check capture. Source: V3-TEL, the DEBUG block's dumps <code>dbg/x2-idle.bin</code> and <code>x2-load.bin</code>; item TEL-Q, Q4.`;
+}
 
 TB.emit(60.5, 'init');  // start every linked view at one minute in, mid-matmul

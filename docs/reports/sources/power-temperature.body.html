@@ -8,7 +8,7 @@ details.terms { font-size: 0.85rem; color: var(--ink-2); }
 details.terms p { margin: 6px 0 0; }
 .ck-frame .vm-val { font-size: 13px; font-weight: 650; font-variant-numeric: tabular-nums; }
 .ck-frame .vm-sub { font-size: 12px; }
-.ck-frame .vm-note { font-size: 11px; fill: var(--ink-2); }
+.ck-frame .vm-note { font-size: 12px; fill: var(--ink-2); }
 #vmap-leg { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 0.8rem; color: var(--ink-2); margin: 6px 0; }
 .vm-sw { display: inline-block; min-width: 2.6em; text-align: center; border-radius: 4px; padding: 1px 4px;
   font-variant-numeric: tabular-nums; font-weight: 600; }
@@ -70,6 +70,16 @@ with the tools in this repo; <span class="chip needs_fw_change">firmware</span> 
 image; <span class="chip needs_tooling">hardware</span> means physical access; <span class="chip research_only">lab admin only</span>
 means a change to the card that the lab's rules leave to its admin.</p>
 <div class="table-wrap wide"><table id="methods"></table></div>
+<p id="askcost-lead"><b>Asking has a price.</b> Every board-power value is refreshed once per service-processor pass, and
+the pass stretches with what the host asks of it: a single power command costs it almost nothing, but <code>ettelem</code>'s
+full snapshot lengthens it, and the faster <code>ettelem</code> samples, the longer each pass takes, so sampling harder
+returns fewer fresh readings, not more.</p>
+<div class="chart-block">
+<div class="chart-title">The service processor's pass under each way of polling the card, three passes per card (the three-card check, 26 September)</div>
+<div id="askcost-leg"></div>
+<div class="chart" id="askcost"></div>
+<p class="small" id="askcost-cap"></p>
+</div>
 <details class="more"><summary>More instruments, and the improvement ladder</summary>
 <p><b>Beyond these meters.</b> The Minion Debug Interface adds no power or temperature sensor: it reads the registers and
 memory of a halted hart (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#bits">Limits of
@@ -224,13 +234,15 @@ throughout.</li>
 each rail and the hardware's low/high capture. <code>ettelem loglevel debug</code> then <code>ettelem sptrace</code> reads
 them; the level is restored afterwards. The 4 KB dump holds all 34 shires only when it catches a whole pass: 22 of the
 three-card check's 27 idle, load and after dumps did, on all three cards. This is the finest spatial view of the power system the card gives: below is one
-pass over all 34 minion shires at idle, for each rail its current reading and the lowest and highest the monitor captured.
+pass over all 34 minion shires, for each rail its current reading and the lowest and highest the monitor captured: at idle
+on aifoundry2 on 20 September, or, from the three-card check, at idle and under a 7 s random-data load on each card.
 The 32 compute shires sit where marty1885's logical shire map
 (<a href="https://github.com/marty1885/etTopoScan">etTopoScan</a>) puts them on the mesh, the layout
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">the on-chip communication report</a> found
 on aifoundry2 by latency. The four
 dashed cells hold the master, spare, I/O and PCIe shires in an order not measured here (labelled as the spatial brief
 infers them), so shires 32 (the master) and 33 (the spare) are drawn below the grid.</p>
+<div class="ck-controls"><div id="vmap-cap"></div><div id="vmap-card"></div></div>
 <div class="ck-controls"><div id="vmap-rail"></div><div id="vmap-field"></div></div>
 <div id="vmap-leg"></div>
 <div class="chart" id="vmap" style="max-width:520px"></div>
@@ -259,6 +271,14 @@ aifoundry2 and aifoundry3 never gave (on aifoundry1-c1, in the two passes that d
 <i>temperature</i> is sampled by the same controllers but never logged; that needs firmware
 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">the spatial temperature brief</a> sets
 out the options).</p>
+<p id="vmoff-lead"><b>The offset test, drawn.</b> If each monitor carried a fixed offset, a shire that reads high at
+idle would read high by the same amount under load, and every shire would sit on the diagonal below; <span id="vmoff-lead-end">shires do not.</span></p>
+<div class="chart-block" style="max-width:none">
+<div class="chart-title">Each shire's minion-rail reading, idle against a 7 s load, as a deviation from its card's 34-shire mean (the three-card check, 26 September)</div>
+<div id="vmoff-leg"></div>
+<div class="chart" id="vmoff"></div>
+<p class="small" id="vmoff-cap"></p>
+</div>
 
 <h2>4. Reproduce</h2>
 <details class="more"><summary>Reproduce this</summary>
@@ -317,7 +337,9 @@ this session's; the repeats give 0.9–1.1 on aifoundry2), the refresh period, S
 map's offset hypothesis and the lows' "droops the polling misses" withdrawn. 27 September: the review of 26 September (the
 resting temperatures, the frequency sweep marked lab admin only, the cards named; the catalogue's DRAM streams on three
 cards), fresh readings ticked in the edge charts,
-and detail folded into sections.</p>
+and detail folded into sections. Later on 27 September: a chart of the service processor's pass under each way of polling
+(§1, the three-card check), and in §3 the voltage map's capture and card selectors (20 September, and each card idle and
+under load on 26 September) and a chart of the offset test (each shire idle against load).</p>
 </details>
 
 <h2>Related reports</h2>

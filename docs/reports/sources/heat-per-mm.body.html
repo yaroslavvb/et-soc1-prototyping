@@ -211,6 +211,11 @@ the block patterns of <a href="#lanes">§9</a> leave it. Drag the cursor, use th
 </div>
 <details class="more"><summary>What the link-sharing map shows</summary>
 <p class="small" id="mapcap"></p></details>
+<p id="excesslead"></p>
+<div class="chart-title">What sharing links adds to a bit's hop, card by card: the same one to four hops, every flow on its own links against a loaded mesh</div>
+<div id="excess-leg"></div>
+<div id="excess"></div>
+<div class="ck-readout small" id="excess-readout"></div>
 <p id="conttext"></p>
 <p id="conttext2"></p>
 
@@ -273,7 +278,7 @@ within 1% on the die plot, so the experiment cannot split a hop's energy between
 wire itself. <span id="axistext"></span></li>
 <li><b>Board against rail.</b> Board power is 12 V input power: it includes the regulator's loss and anything else that
 moves with the traffic. The regression in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">observability report (§4.2)</a>
-finds 20% of what the minion rail delivers lost between the 12 V input and the core on aifoundry2 and 18% on aifoundry3,
+finds <span id="regloss">part of what the minion rail delivers lost between the 12 V input and the core</span>,
 consistent with a regulator's loss, as far as the rails' own meters can be trusted. The
 mesh rail is the die's own supply but its meter's gain has not been checked independently. The truth is between the
 two. <span id="senstext"></span></li>
@@ -325,7 +330,8 @@ the 16–128 B blocks' shortfall is dropped, and the regulator's loss is no long
 over random data on board power is corrected (no card resolves it from zero), and board power's split of the
 free-link cost and of the contention excess (§5, §6) and the four-hop step's absence with link-disjoint flows (§4) are
 now resolved. 27 September: the lede's contention figure compares like with like over one to four hops (it had mixed
-two bases). Every earlier wording is in the repository's history of <code>docs/reports/sources/heat-per-mm.*</code>.</p></details>
+two bases); later that day, a chart of what sharing links adds on each card (§6), and the regulator's loss of §10 given
+per card from the fit on the three cards' catalogue (it quoted the 23 September fit on two cards). Every earlier wording is in the repository's history of <code>docs/reports/sources/heat-per-mm.*</code>.</p></details>
 
 <h2 id="related">12. Related reports</h2>
 <ul>

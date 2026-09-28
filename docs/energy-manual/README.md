@@ -22,7 +22,7 @@ up from parts, with every number traceable to the measurement that produced it.
 | 8 | [Card-to-card variation](08-cards.md) | aifoundry3 reads 0.97× aifoundry2 in the median (10–90%: 0.92–1.00), which its cooler die accounts for (the energy per operation rises 0.3–0.5% per °C); aifoundry1's card 1 reads 0.95× per instruction but 1.15× per byte, in line with its lower minion and higher SRAM rail voltage |
 | 9 | [Method and limits](09-method.md) | how each number was made, how the bars were made (three passes on each of three cards; warm die; bursts that moved the clock dropped, and in the reruns bursts that starved the sampler; the catalogue keeps the DRAM-read bursts that slowed it), and what it cannot tell you |
 
-Everything is at **600 MHz** (the minion rail at 0.52 V), the point the governor pins a warm card to, unless stated.
+Everything is at **600 MHz** (the minion rail at 0.50–0.52 V over the three cards: 0.518, 0.522 and 0.499 V on aifoundry2, aifoundry3 and aifoundry1's card 1, the catalogue's median readings), the point the governor pins a warm card to, unless stated.
 
 ## Regenerating
 
@@ -47,7 +47,9 @@ reproduces it). The card-side runners (`run_enercat.sh`, `run_catalogue.py`, `ru
 `run_rl_warm_a2.sh`, `run_rings_levels_power.sh` and `tools/claims-v3/*/block.sh`) are in
 docs/findings/03-experiments.md (E26–E29 and the version-3 check); `fit_unmetered.py` fits the attribution of the unmetered power and the DDR droop meter and writes
 `unmetered_fit.json`. `build_energy_manual.py` then collects every table from its data file (the JSON records which,
-including the hot-line, relay, DVFS and Horace files that their own reports' pipelines write); the next two render
+including the hot-line, relay, DVFS and Horace files that their own reports' pipelines write, and, for the wire figures
+that 4.3 and 5 point to, Heat per millimetre's `docs/reports/data/2026-09-24-wire-energy/report.json`, so rebuild that
+first: `tools/ettelem/build_wire_report.py`); the next two render
 the pages 01–06, 08, 03a and 04a from the data, so a number there is never typed by hand; the last builds the
 published page. This README, 00, 07 and 09 are written by hand. The instruction catalogue itself is
 `workloads/enercat`: `run_catalogue.py` measures (three shuffled passes), `analyze_catalogue.py` reduces.

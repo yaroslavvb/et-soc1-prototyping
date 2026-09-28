@@ -102,6 +102,8 @@ select { font: inherit; font-size: 0.88rem; padding: 5px 8px; border-radius: 8px
 .pa-btn:focus-visible, #pa-in:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
 #pa-cells .k code { font-size: 0.95em; }
 #pa-cells .v .small { font-weight: 400; }
+/* the lock chart (§5): the raster wider than the law beside it; stacked on a phone */
+@media (min-width: 760px) { .lock-views { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
 @media (max-width: 599px) { #mstable .pa { display: none; } #mstable th, #mstable td { padding: 6px 4px; } }
 /* section anchors and contents list (as in docs/reports/sources/report.template.html) */
 ol li, ul li { margin: 5px 0; }
@@ -726,8 +728,8 @@ the rest is paths on the chip. A DRAM row stays open until a refresh or a load t
 it; no idle timer was seen to close it.</p>
 <p class="lede">For energy, the finest view is <b>four destinations</b>: the minion cores, the SRAM arrays, the mesh
 (NoC), and the rest of the board, which is mostly the DDR side. The first three are metered rails; the rest is the
-board total minus those three. The meters gave a new value every 133 ms on this card (126–159 ms on aifoundry2 and
-aifoundry1's card 1 in the three-card check, 223–264 ms on aifoundry3, slower the harder the host polls), so each
+board total minus those three. The meters gave a new value every 133 ms on this card (126–189 ms on aifoundry2 and
+aifoundry1's card 1 in the three-card check, 223–322 ms on aifoundry3, slower the harder the host polls: every 0.1 s, at 10 Hz or at 20 Hz), so each
 energy number is an average over billions of identical loads.</p>
 
 <p class="small card"><b>Checked on three cards (26 September 2026).</b> This page's measurements are from one card,
@@ -845,7 +847,7 @@ or 307–309 (309 here), while L2 read @@v3_lad_l2@@ in every pass and L3 @@v3_l
 <details class="more"><summary>Row-open behaviour after an evict</summary>
 <p>Evicts keep working after the instruction retires, but none of the 256 loads timed straight after an evict to
 memory came back in L3 time: every one went to DRAM. What changes is the timing. With no fence, the load queues
-behind the evict (median 365, about 58 cycles above the §4 model; @@v3_lad_nofence@@ per pass and about 52 above the
+behind the evict (median 365, about @@nf_resid@@ cycles above the §4 model; @@v3_lad_nofence@@ per pass and about 52 above the
 model on the three cards). With a fence but no wait, 49 of the 128 loads (54–65 per pass on the three cards)
 find the row that the previous load of the same line opened still open, and read 6–12 cycles fast (median 10;
 minimum 213, on a line whose closed-row time is 225). In this run that was common for memory shires 0, 1, 2 and 4
@@ -984,18 +986,39 @@ three cards). That's close to the 281 ns all-bank refresh time, and the wait shr
 <li>Refresh also closes the open row. The next load pays an activate, 215 → 226 cycles: 11–12 cycles (about 19 ns),
 consistent with tRCD (18 ns), the activate-to-read delay. On the three cards the two clusters' means were
 @@v3_closed_open@@ cycles apart.</li>
-<li>With a fixed loop period of 576 cycles, a loop locks onto refresh: every fourth load is the slow one, and here
-none landed inside the refresh itself. Of those 576 cycles, about @@loop_outside@@ are the probe's own: it fetches
-each of its four ops (evict, fence, time stamp, timed load) from the scratchpad, about @@op_cycles@@ cycles apiece.
-The build the three-card check ran fetches an op in about @@v3_op_cycles@@ cycles and loops every @@v3_locked_period@@:
-it locks too, with @@v3_locked_slow@@ of loads slow on each card, but its slow load lands inside the refresh
-(@@v3_locked_inref@@ slow loads read 250 cycles or more; median @@v3_locked_slow_med@@, at most @@v3_locked_max@@).
-Every comparison of two loads below counts the probe's own time.</li>
+<li>A loop that repeats the same work locks onto refresh: every fourth load is the slow one
+(<a href="#why-every-fourth-load-is-slow">below</a>).</li>
 </ul>
 <div class="chart-title" id="refresh-title"></div>
 <div class="ck-controls"><span id="refresh-mode"></span></div>
 <div id="refresh-legend"></div>
 <div class="chart" id="refresh"></div>
+
+<h3 id="why-every-fourth-load-is-slow">Why every fourth load is slow</h3>
+<p>The probe's locked series loads one line over and over, each turn the same four ops (evict, fence, time stamp,
+timed load), each fetched from the scratchpad in about @@op_cycles@@ cycles. A turn whose load finds the row open takes
+@@lock_p@@ cycles, @@lock_open@@ of them the load, so four turns take @@lock_4p@@, <b>@@lock_short@@ cycles short of the
+refresh period</b>. The first load after each refresh makes up the shortfall: it reads @@lock_slow@@ cycles against
+@@lock_open@@ (medians), the activate (@@lock_act@@) and about @@lock_rest@@ cycles more, never 250 or more (at most
+@@lock_max@@), and the slow loads come exactly four apart in @@lock_every4@@ gaps. The build the three-card check ran
+fetches an op in about @@v3_op_cycles@@ cycles and turns in @@v3_lock_p@@ with the row open: four turns fall
+@@v3_lock_short@@ cycles short, so its slow load lands well inside the refresh (@@v3_locked_inref@@ slow loads read 250
+cycles or more; median @@v3_locked_slow_med@@, at most @@v3_locked_max@@), @@v3_lock_extra@@ cycles above an open-row
+load, with @@v3_locked_slow@@ of loads slow on each card and @@v3_lock_every4@@ of the gaps exactly four per pass. In
+every series the slow load's extra time equals the refresh period minus four open turns to within @@lock_fit@@ cycles:
+<b>the loop, not the DRAM, sets how slow the slow load is.</b> Every comparison of two loads below counts the probe's
+own time.</p>
+<div class="chart-title" id="lock-title">The locked loop against the refresh period: where each load is issued, and what the slow load pays</div>
+<div class="ck-controls"><span id="lock-p"></span></div>
+<div id="lock-legend"></div>
+<div class="panels lock-views">
+  <div class="chart" id="lock-raster"></div>
+  <div class="chart" id="lock-law"></div>
+</div>
+<p class="ck-readout" id="lock-read"></p>
+<details class="more"><summary>How the model works</summary>
+<p class="fn" id="lock-cap"></p>
+</details>
 
 <h3 id="how-long-a-row-stays-open">How long a row stays open, and what closes it</h3>
 <details class="more"><summary>How the fit and the counts were computed</summary>
@@ -1126,7 +1149,7 @@ table lists every instrument that turned out to work, at its finest granularity,
 <tr><td class="lvl">Two loads in flight</td><td data-label="Instrument">two <code>ld</code>s back to back</td><td data-label="Finest granularity">Second load's arrival</td><td data-label="Notes">Each minion has 2 miss handlers. This is how row conflicts show up (§5).</td></tr>
 <tr><td class="lvl">Which memory shire served a line</td><td data-label="Instrument">syscall 10 (<code>SYSCALL_PMC_MS_SAMPLE</code>)</td><td data-label="Finest granularity">Exact read count per memory shire</td><td data-label="Notes">16 DRAM loads of a line add 16 (15 for 4 lines) to one shire's read counter and 0 to the other seven (one stray 1), for 64 of 64 lines (§4; and in every pass on three cards). Syscall 9 does the same for the shire caches' read/write counters.</td></tr>
 <tr><td class="lvl">Core events</td><td data-label="Instrument"><code>hpmcounter4-8</code></td><td data-label="Finest granularity">Fixed events only</td><td data-label="Notes">Retired instructions, L1 misses and I-cache events, summed over a neighbourhood of 8 minions. Choosing other events needs M-mode.</td></tr>
-<tr><td class="lvl">Board power</td><td data-label="Instrument"><code>DM_CMD_GET_MODULE_POWER</code></td><td data-label="Finest granularity">10 mW, new value every 133 ms on this card; in the three-card check 126–139 ms on aifoundry2 and aifoundry1's card 1 and 223–224 ms on aifoundry3 when read every 0.1 s, 156–159 and 262–264 ms under a 10 Hz sampler</td><td data-label="Notes">The host can ask 60 times a second, but the service processor refreshes the value once per loop pass.</td></tr>
+<tr><td class="lvl">Board power</td><td data-label="Instrument"><code>DM_CMD_GET_MODULE_POWER</code></td><td data-label="Finest granularity">10 mW, new value every 133 ms on this card; in the three-card check 126–139 ms on aifoundry2 and aifoundry1's card 1 and 223–224 ms on aifoundry3 when read every 0.1 s, 156–159 and 262–264 ms under a 10 Hz sampler, 187–189 and 320–322 ms at 20 Hz</td><td data-label="Notes">The host can ask 60 times a second, but the service processor refreshes the value once per loop pass.</td></tr>
 <tr><td class="lvl">Rail power</td><td data-label="Instrument">Service processor stats trace (<code>dev_mngt_service -t SPST:extract</code>)</td><td data-label="Finest granularity">3 rails: minion cores, SRAM, NoC · one record per 133 ms on this card</td><td data-label="Notes">The PMIC's own running average (τ ≈ @@man_tau@@; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">hub §4.1</a>), copied once per service-processor pass, 133 ms here (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#a-load-step-seen-through-every-sensor">Power and temperature §2</a>). There is no DDR rail: the rest is the board minus the three rails.</td></tr>
 <tr><td class="lvl">Out of reach</td><td data-label="Instrument">—</td><td data-label="Finest granularity">—</td><td data-label="Notes">DRAM activate/precharge counts, shire-cache hit/miss and occupancy, NoC counters (all need an M-mode syscall to choose events), per-event energy and faster power sampling. §9 says what would reach them; the full list is in <code>docs/research/counters-and-dram.md</code>.</td></tr>
 </tbody></table></div>
@@ -1199,7 +1222,7 @@ a slope and a range. 26 September (version 4): the latencies re-checked on three
 row conflict (about +38 cycles, not +40) and the evict ladder's open-row split corrected; the board-power period given
 per card; the energy manual's figures (the note on energy, the DRAM figure at the top, §6 and the energy chart) are
 its version-3 values from three cards. The record is
-<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>. 27 September: the DRAM chip's share of a load is about 28 cycles (a 64-byte line is two bursts; was 25–28) and the memory shire's at most ~63; the explorer's row-conflict and refresh waits are the three-card values (38 and 208 cycles, were 40 and 210); the memory-shire leg charted per card; detail folded into collapsible sections.</p>
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>. 27 September: the DRAM chip's share of a load is about 28 cycles (a 64-byte line is two bursts; was 25–28) and the memory shire's at most ~63; the explorer's row-conflict and refresh waits are the three-card values (38 and 208 cycles, were 40 and 210); the memory-shire leg charted per card; detail folded into collapsible sections. 27 September, later: why every fourth load of the locked loop is slow, charted with a model that takes four numbers from the refresh series (the slow load's extra time is the refresh period minus four open turns, within a cycle in every series; the page had said that none of this session's slow loads landed inside the refresh); the bit chart's row-conflict label reads the measured +38.5 cycles (was rounded to +40); the no-fence loads' median excess over the §4 model is @@nf_resid@@ cycles (was 58); the board value's refresh in the three-card check includes its 20 Hz sampler (126–189 and 223–322 ms; was 126–159 and 223–264).</p>
 </details>
 
 <h2 id="related">Related reports</h2>
@@ -1725,7 +1748,7 @@ CK.seg('modelerr-src', {label: 'Show', options: SRC, value: errsrc, onChange: v 
   const role = b => b <= 12 ? 'c1' : b <= 17 ? 'c3' : 'c2';
   const band = (a, b) => { const v = bits.filter(k => k >= a && k <= b).map(k => D.bits[k].b_minus_b0_med).sort((p, q) => p - q); return v[Math.floor(v.length / 2)]; };
   const med = a => { const v = a.slice().sort((p, q) => p - q); return v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2; };
-  const step40 = med(bits.filter(b => b >= 18).map(b => D.bits[b].ab_med)) - med(bits.filter(b => b < 18).map(b => D.bits[b].ab_med));
+  const stepRow = med(bits.filter(b => b >= 18).map(b => D.bits[b].ab_med)) - med(bits.filter(b => b < 18).map(b => D.bits[b].ab_med));
   let mode = 'ab';
   const legend = () => CK.legend('bits-legend', mode === 'ab'
     ? [{key: 'b', label: 'bits 6–12: memory shire, channel, bank', mark: 'box', color: 'var(--c1)'}, {key: 'c', label: 'bits 13–17: column, same row', mark: 'box', color: 'var(--c3)'}, {key: 'r', label: 'bits 18+: row, same bank', mark: 'box', color: 'var(--c2)'}]
@@ -1755,8 +1778,9 @@ CK.seg('modelerr-src', {label: 'Show', options: SRC, value: errsrc, onChange: v 
     }
     CK.keynav(f, nodes);
     // above the plot area, clear of the whiskers (bit 22's reaches the top); right-aligned on a phone
-    const c40 = sgn(5 * Math.round(step40 / 5));
-    if (ab) txt(f.svg, f.narrow ? f.W - R : x(23.5), T - 10, f.narrow ? `bits 18+: ${c40}, a row conflict` : `bits 18+: about ${c40} cycles, a row conflict`, 'lab', f.narrow ? 'end' : 'middle');
+    // the same difference of medians the prose quotes (bits 18+ against bits 6-17), not rounded to a round number
+    const cRow = sgn(stepRow, Number.isInteger(stepRow) ? 0 : 1);
+    if (ab) txt(f.svg, f.narrow ? f.W - R : x(23.5), T - 10, f.narrow ? `bits 18+: ${cRow}, a row conflict` : `bits 18+: ${cRow} cycles (medians), a row conflict`, 'lab', f.narrow ? 'end' : 'middle');
   }});
   CK.seg('bits-mode', {label: 'Show', options: [['ab', 'issued together'], ['after', 'one after the other']], value: mode, onChange: v => { mode = v; legend(); title(); F.redraw(); }});
   legend(); title();
@@ -1952,6 +1976,150 @@ CK.seg('modelerr-src', {label: 'Show', options: SRC, value: errsrc, onChange: v 
   }});
   CK.seg('refresh-mode', {label: 'Show', options: [['lat', 'latency'], ['hits', 'row hits']], value: mode, onChange: v => { mode = v; legend(); title(); F.redraw(); }});
   legend(); title();
+})();
+
+/* ---------- 5b'. why every fourth load is slow: the locked loop against the refresh ---------- */
+(function () {
+  // The model's four inputs, from this session's refresh series (build_report.py D.lock): the refresh period R, an
+  // open-row load, the activate a refresh adds, and the longest wait for a refresh. A load issued in the first WAIT
+  // cycles of a refresh period waits until they end; the first load issued after a refresh pays the activate; a turn
+  // of the loop is the probe's own ops (the open turn minus an open load) plus its load. Nothing is fitted.
+  const K = D.lock, R = K.R, OPEN = K.open, ACT = K.act, WAIT = K.wait, L19 = K.locked;
+  const PHI = (R - ACT) / 4, PLO = (R - ACT - WAIT) / 4;  // the lock holds for open turns between these
+  const PMIN = 500, PMAX = 620, ROWS = 16;
+  const cards = CK.cardsIn(D.v3).filter(c => (D.v3[c].locked || []).length);
+  const med = a => { const v = a.slice().sort((p, q) => p - q), n = v.length; return n % 2 ? v[(n - 1) / 2] : (v[n / 2 - 1] + v[n / 2]) / 2; };
+  // the measured series: 19 September (this page's session) and each card's passes of the three-card check
+  const M = [{key: 's19', label: '19 Sep, aifoundry2', P: L19.period_open_med, extra: L19.slow_med - L19.open_med, R, passes: [L19]}]
+    .concat(cards.map(c => {
+      const ps = D.v3[c].locked;
+      return {key: c, label: CK.card(c).label + ', 26 Sep', P: med(ps.map(x => x.period_open_med)),
+        extra: med(ps.map(x => x.slow_med - x.open_med)), R: med(ps.map(x => x.R)), passes: ps};
+    }));
+  let P = L19.period_open_med;
+  function simulate(p) {
+    // start the first load just after a refresh window, far enough out that a locking loop takes a few periods to lock
+    const drift = 4 * p + ACT - R, ops = p - OPEN, loads = [];
+    let t = WAIT + (drift < 0 ? Math.min(R - WAIT - 1, 5 * -drift) : 20), prev = -Infinity;
+    while (t < ROWS * R && loads.length < 8 * ROWS) {
+      const j = Math.floor(t / R), ph = t - j * R;
+      let L, kind;
+      if (ph < WAIT) { L = OPEN + ACT + (WAIT - ph); kind = 'wait'; }
+      else if (prev < j * R) { L = OPEN + ACT; kind = 'closed'; }
+      else { L = OPEN; kind = 'open'; }
+      loads.push({t, j, ph, L, kind});
+      prev = t; t += ops + L;
+    }
+    return loads;
+  }
+  const locked = p => p >= PLO && p <= PHI;
+  // the load types in neutral tokens (the card colours mark the measured series on the right), and every mark of the
+  // right panel: the model line, this page's session (a square) and each card of the three-card check (its registry mark)
+  const OPENC = 'var(--ref)', SLOWC = 'var(--ink)';
+  CK.legend('lock-legend', [
+    {key: 'o', label: 'model: a load that finds its row open', mark: 'dot', color: OPENC},
+    {key: 's', label: 'model: the first load after a refresh (the slow one)', mark: 'dot', color: SLOWC},
+    {key: 'w', label: 'model: a load issued here waits for the refresh to end', mark: 'box', color: soft('var(--ref)', 30)},
+    {key: 'm', label: 'model: R − 4 × the open turn', mark: 'line', color: 'var(--ink-2)'},
+    {key: 's19', label: 'measured: ' + M[0].label + ' (this page’s session)', mark: 'box', color: 'var(--ink)'}]
+    .concat(cards.map(c => ({key: c, label: 'measured: ' + CK.card(c).label + ', 26 Sep', color: CK.card(c).color, mark: CK.card(c).mark}))));
+  const read = CK.readout('lock-read');
+  const raster = CK.frame('lock-raster', {label: 'Loads of the locked loop, one row per refresh period, by when in the period each is issued (model)',
+    height: W => (W < 600 ? 300 : 330), minW: 280, draw: f => {
+      const L = 46, Rm = 12, T = 30, B = 40, loads = simulate(P);
+      const x = CK.lin(0, R, L, f.W - Rm), rh = (f.H - T - B) / ROWS, y = j => T + (j + 0.5) * rh;
+      const xt = f.W < 480 ? [0, 1000, 2000] : [0, 500, 1000, 1500, 2000];
+      CK.axes(f, {x, y: CK.lin(0, 1, f.H - B, T), L, R: Rm, T, B, xt, yt: [], xl: `cycles into the refresh period (R = ${f1(R)})`});
+      const band = el('rect', {x: x(0), y: T, width: x(WAIT) - x(0), height: f.H - B - T, 'aria-hidden': 'true'}, f.svg);
+      band.style.fill = soft('var(--ref)', 30);
+      txt(f.svg, x(0) + 4, T - 8, f.narrow ? 'refresh' : `refresh: loads issued here wait (up to ${f0(WAIT)} cycles)`, 'lab');
+      txt(f.svg, 2, T - 8, 'period', 'lab');
+      for (const j of [0, 4, 8, 12, ROWS - 1]) txt(f.svg, L - 6, y(j) + 4, String(j + 1), 'tick', 'end');
+      const nodes = [];
+      for (let j = 0; j < ROWS; j++) {
+        const row = loads.filter(l => l.j === j), g = el('g', {}, f.svg);
+        hitRect(g, L, y(j) - rh / 2, f.W - Rm - L, rh);
+        for (const l of row) {
+          if (l.kind === 'wait') {
+            const w = el('line', {x1: x(l.ph), x2: x(WAIT), y1: y(j), y2: y(j), 'stroke-width': 2, 'aria-hidden': 'true'}, g);
+            w.style.stroke = SLOWC;
+          }
+          const d = el('circle', {cx: x(l.ph), cy: y(j), r: l.kind === 'open' ? 3.2 : 4.2, 'aria-hidden': 'true'}, g);
+          d.style.fill = l.kind === 'open' ? OPENC : SLOWC;
+        }
+        const say = l => `${f0(l.ph)} (${l.kind === 'open' ? 'open row, ' + f0(l.L) : l.kind === 'closed' ? 'after the refresh: activate, ' + f0(l.L)
+          : 'in the refresh: waits ' + f0(WAIT - l.ph) + ' and pays the activate, ' + f0(l.L)} cycles)`;
+        CK.tip(f, g, `<b>Refresh period ${j + 1}</b>: ${row.length} load${row.length === 1 ? '' : 's'} issued at ` + row.map(say).join(', '));
+        nodes.push(g);
+      }
+      CK.keynav(f, nodes);
+    }});
+  const law = CK.frame('lock-law', {label: 'The slow load’s extra time against the loop’s open turn: the model and the measured series',
+    height: W => (W < 600 ? 280 : 330), minW: 280, draw: f => {
+      const L = 44, Rm = 12, T = 30, B = 40;
+      const x = CK.lin(PMIN, PMAX, L, f.W - Rm), y = CK.lin(0, 240, f.H - B, T);
+      CK.axes(f, {x, y, L, R: Rm, T, B, xt: f.W < 420 ? [520, 560, 600] : [520, 540, 560, 580, 600], yt: [0, 60, 120, 180, 240],
+        xl: 'loop turn with the row open, cycles', yl: 'slow load − open-row load, cycles'});
+      for (const [a, b] of [[PMIN, PLO], [PHI, PMAX]]) {
+        const r = el('rect', {x: x(a), y: T, width: x(b) - x(a), height: f.H - B - T, 'aria-hidden': 'true'}, f.svg);
+        r.style.fill = soft('var(--ref)', 22);
+      }
+      txt(f.svg, x(PMIN) + 4, T + 14, 'no lock', 'lab');
+      txt(f.svg, x(PMAX) - 4, T + 14, 'no lock', 'lab', 'end');
+      const line = el('line', {x1: x(PLO), y1: y(R - 4 * PLO), x2: x(PHI), y2: y(R - 4 * PHI), 'stroke-width': 2, 'aria-hidden': 'true'}, f.svg);
+      line.style.stroke = 'var(--ink-2)';
+      halo(txt(f.svg, x(PLO + 0.3 * (PHI - PLO)) + 8, y(R - 4 * (PLO + 0.3 * (PHI - PLO))) - 6, 'R − 4 × turn', 'lab'));
+      const cur = el('line', {x1: x(P), x2: x(P), y1: T, y2: f.H - B, 'stroke-dasharray': '4 3', 'aria-hidden': 'true'}, f.svg);
+      cur.style.stroke = 'var(--muted)';
+      // each series at its own turn and extra time; a ring (aifoundry3) is drawn larger, under the others, so that two
+      // cards on the same point both show
+      const nodes = [], rad = m => (m.key !== 's19' && CK.card(m.key).mark === 'ring' ? 7 : 4.5);
+      M.map((m, k) => [m, k]).sort((a, b) => rad(b[0]) - rad(a[0])).forEach(([m, k]) => {
+        const g = el('g', {}, f.svg), cx = x(m.P), cy = y(m.extra);
+        hitRect(g, cx - 9, cy - 9, 18, 18);
+        if (m.key === 's19') { const b = el('rect', {x: cx - 4.5, y: cy - 4.5, width: 9, height: 9}, g); b.style.fill = 'var(--ink)'; }
+        else CK.cardMark(g, m.key, cx, cy, rad(m));
+        const ps = m.passes, rg = key => (ps.length > 1 ? CK.fmt.range(Math.min(...ps.map(x => x[key])), Math.max(...ps.map(x => x[key])), 0) : f0(ps[0][key]));
+        CK.tip(f, g, `<b>${m.label}</b>${ps.length > 1 ? ` (${ps.length} passes)` : ''}<br>open turn ${rg('period_open_med')} cycles; ` +
+          `slow load ${rg('slow_med')} against open ${rg('open_med')} (medians)<br>` +
+          `extra ${f0(m.extra)} cycles; R − 4 × turn = ${f1(m.R - 4 * m.P)}<br>slow loads four apart in ${pc(ps.reduce((a, x) => a + x.every4, 0) / ps.reduce((a, x) => a + x.gaps, 0))} of the gaps` +
+          '<br>Enter: set the loop to this turn');
+        nodes[k] = g;
+      });
+      CK.keynav(f, nodes, {onEnter: (n, k) => slider.set(M[k].P)});
+    }});
+  function text() {
+    const drift = 4 * P + ACT - R, sim = simulate(P), last = sim.filter(l => l.j >= ROWS / 2);
+    const slow = last.filter(l => l.kind !== 'open'), share = slow.length / last.length;
+    const hits = M.filter(m => Math.round(m.P) === Math.round(P));
+    let s = `<b>A turn of ${f0(P)} cycles</b> with the row open: four turns take ${f0(4 * P)}, `;
+    if (locked(P)) {
+      s += `${f1(R - 4 * P)} short of the refresh period (${f1(R)}). The loop locks: the first load after each refresh pays the activate ` +
+        `(${f1(ACT)}) and waits the other ${f1(R - 4 * P - ACT)} cycles at the end of its refresh, reading <b>${f1(R - 4 * P)} cycles</b> more than an ` +
+        `open-row load (${f0(OPEN + R - 4 * P)} in all).`;
+    } else if (P > PHI) {
+      s += `and with the activate ${f0(4 * P + ACT)}, more than the refresh period (${f1(R)}): each refresh comes ${f1(drift)} cycles earlier in the loop ` +
+        `than the one before, so there is no lock. The load after each refresh drifts until the one before it lands in the refresh and waits; ` +
+        `${pc(share)} of the loads in the last ${ROWS / 2} periods are slow.`;
+    } else {
+      s += `${f1(R - 4 * P)} short of the refresh period (${f1(R)}), more than the activate and the longest wait (${f0(WAIT)}) can make up: no lock, ` +
+        `and some periods take five loads; ${pc(share)} of the loads in the last ${ROWS / 2} periods are slow.`;
+    }
+    if (hits.length) s += ' Measured at this turn: ' + hits.map(m => `${m.label}, ${f0(m.extra)} cycles`).join('; ') + '.';
+    read.set(s);
+  }
+  const slider = CK.range('lock-p', {label: 'Loop turn with the row open', min: PMIN, max: PMAX, step: 1, value: P, fmt: v => f0(v) + ' cycles',
+    onInput: v => { P = v; raster.redraw(); law.redraw(); text(); }});
+  text();
+  const vr = M.slice(1), lo = Math.min(...M.map(m => m.P)), hi = Math.max(...M.map(m => m.P));
+  $('lock-cap').textContent = `The model takes four numbers from this page's refresh series and nothing from the slow loads: the refresh period (${f1(R)} cycles), ` +
+    `a load that finds its row open (${f0(OPEN)}, the locked series' median), the activate a refresh adds (${f1(ACT)}, the closed- minus the open-row cluster) ` +
+    `and the longest wait for a refresh (${f0(WAIT)}, the slowest load over the closed-row median). A load issued in the shaded window waits until it ends; the first load ` +
+    `issued after a refresh pays the activate; each turn is the probe's own ops (the open turn minus an open load) plus its load. The loop locks when four open turns ` +
+    `and the activate fit inside the refresh period, short of it by no more than the longest wait: open turns of ${f1(PLO)}–${f1(PHI)} cycles. There the slow load's ` +
+    `extra time is R − 4 × the open turn, with no fitted constant. The first panel (left, or above on a phone): the model's loads over ${ROWS} refresh periods, starting just after a refresh; a line from a ` +
+    `slow load to the window's edge is its wait. The second panel: the model, and each measured series' median slow load minus its median open-row load against its median open ` +
+    `turn (${f0(lo)}–${f0(hi)} cycles: this page's session and ${vr.length ? vr.map(m => m.label.replace(', 26 Sep', '')).join(', ') + ' in the three-card check, five passes each' : ''}).`;
 })();
 
 /* ---------- 5c. what closes a DRAM row ---------- */
