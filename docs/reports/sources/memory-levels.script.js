@@ -31,6 +31,10 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&': '&amp
 let REDUCED = !!CK.reduced;
 try { const mq = matchMedia('(prefers-reduced-motion: reduce)'); mq.addEventListener('change', e => { REDUCED = e.matches; }); } catch (_) { /* old browser */ }
 const fnum = (v, dp) => CK.fmt.num(v, dp);
+/* a touch screen (no keyboard, no hover: no keyboard hints) and a narrow portrait window (a phone: the details panel
+   always shows under the stage), as the chip tour decides them */
+const mqOn = q => { try { return matchMedia(q).matches; } catch (_) { return false; } };
+const TOUCHSCR = mqOn('(hover: none) and (pointer: coarse)'), PHQ = '(max-width: 899px) and (max-aspect-ratio: 1/1)';
 const V = k => { if (!N[k]) throw new Error('no number ' + k); return N[k].v; };
 const disp = t => String(t).replace(/(\d)x(?=$|[\s,;.)])/g, '$1×').replace(/(\d) x (\d)/g, '$1 × $2');
 /* a number from D.num, with its fact attached; a unit after it never wraps onto the next line */
@@ -4781,8 +4785,8 @@ function addrUI() {
   const el = $('addr'), sc = SC(), pa = sc.pa ? sc.pa() : ADDR.pa, f = sc.addrFields(pa);
   el.innerHTML = `<span>example line</span><span class="pa" data-f="${sc.paF || 'dram:dram.addr.region'}" title="${sc.pa ? 'a scratchpad line' : 'a DRAM-region line'}">${hexPA(pa)}</span>`
     + '<span class="flds">' + f.map(([nm, b, v, fid, hi]) => `<span class="fld${hi ? ' hi' : ''}" data-f="${fid}">${esc(nm)}${b ? ` <span>${esc(b)}</span>` : ''}${v !== '' ? ` <b>${esc(String(v))}</b>` : ''}</span>`).join('') + '</span>'
-    + (f.length ? '<button type="button" class="st-btn" data-act="newpa" style="min-height:26px;padding:1px 9px">New address</button>' : '')
-    + '<button type="button" class="st-btn fit" data-act="fit" style="min-height:26px;padding:1px 9px" aria-pressed="false">Fit</button>';
+    + (f.length ? '<button type="button" class="st-btn" data-act="newpa">New address</button>' : '')
+    + `<button type="button" class="st-btn fit" data-act="fit" aria-pressed="${$('svgwrap').classList.contains('fitted')}" title="The whole level at the screen's width (small text); again: a readable size, scrolling sideways">Fit to screen</button>`;
 }
 $('addr').addEventListener('click', e => { const b = e.target.closest('button[data-act]'); if (b && ACTS[b.dataset.act]) ACTS[b.dataset.act](b); });
 async function setLevel(lv, o) {
@@ -4945,7 +4949,8 @@ function endTour() {
   if (AC.k) { setKick(accKick(AC.k)); CAPACC = true; renderBar(); playBtn(); } else resetCap();
 }
 const toggleTour = all => { if (TOUR) { endTour(); stopAccess(); } else startTour(all, 0); };
-const HINT = '1–5 levels · [ ] accesses · Space pauses · ← → steps · + − zoom · V dive · F presents · P panel · C follow · T tour';
+const HINT = TOUCHSCR ? 'Tap a part for its details, again to zoom in · swipe the drawing sideways, or Fit to screen'
+  : '1–5 levels · [ ] accesses · Space pauses · ← → steps · + − zoom · V dive · F presents · P panel · C follow · T tour';
 function resetCap() {
   CAPACC = false;
   setKick(`${SC().title} · explore`);
@@ -5048,7 +5053,7 @@ function presenterWindow() {
 }
 $('toast').addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if (!b) return; if (b.dataset.t === 'win') presenterWindow(); else hideToast(); });
 const FRAMED = (() => { try { return window.self !== window.top; } catch (_) { return true; } })();
-function kbdHint() { const h = $('kbd-hint'); if (h) h.hidden = !FRAMED || document.hasFocus() || PRES || !!fsEl(); }
+function kbdHint() { const h = $('kbd-hint'); if (h) h.hidden = TOUCHSCR || !FRAMED || document.hasFocus() || PRES || !!fsEl(); }
 if (FRAMED) {
   window.addEventListener('focus', kbdHint); window.addEventListener('blur', kbdHint);
   $('kbd-hint').addEventListener('click', () => { window.focus(); kbdHint(); });
@@ -5127,7 +5132,8 @@ const ACTS = {
     toast(`<p>Zero line ${SCENES.l3.zero ? 'on: the example line is all zeros, so its data macros are skipped' : 'off'}.</p>`, 3000);
     if (AC.k && Z.lv === 'l3') restartStep();
   },
-  fit: b => { const w = $('svgwrap'), on = !w.classList.contains('fitted'); w.classList.toggle('fitted', on); b.setAttribute('aria-pressed', String(on)); },
+  // a narrow window: the drawing keeps a readable size, scrolling sideways from its left edge; Fit fits it to the width
+  fit: b => { const w = $('svgwrap'), on = !w.classList.contains('fitted'); w.classList.toggle('fitted', on); w.scrollLeft = 0; b.setAttribute('aria-pressed', String(on)); },
 };
 document.querySelectorAll('#btn-play').forEach(b => b.addEventListener('click', playPause));
 $('btn-tour').addEventListener('click', e => toggleTour(e.shiftKey));
@@ -5257,6 +5263,13 @@ function prose() {
 
 /* ================= start ================= */
 LEVELS.forEach(lv => SCENES[lv].setInst());
+// the page's gutters in a frame (CSS html.et-framed: spacesheep's comment tab covers the frame's left edge on a phone);
+// a touch screen that cannot go full screen offers no Present button
+if (FRAMED) document.documentElement.classList.add('et-framed');
+// (the portrait window's class follows the window: a phone turned)
+const phClass = () => $('stage').classList.toggle('ph', mqOn(PHQ));
+phClass(); try { matchMedia(PHQ).addEventListener('change', phClass); } catch (_) { /* an old browser: as loaded */ }
+if (TOUCHSCR) { $('stage').classList.add('touch'); if (!fsOK()) $('stage').classList.add('nofs'); }
 prose();
 (async () => {
   let q = null; try { q = new URLSearchParams(location.search); } catch (_) { /* no URL flags */ }
@@ -5273,7 +5286,6 @@ prose();
   if (q && q.get('tour')) { const all = q.get('tour') === 'all', lst = tourList(all); startTour(all, Math.max(0, lst.findIndex(it => it.lv === Z.lv))); }
   if (window.__ET_PRESENTER) setTimeout(() => toast('<p><b>Presenter window.</b> Press <kbd>F</kbd> for full screen; <kbd>T</kbd> starts the tour.</p>', 9000), 300);
   fitCap();
-  try { const w = $('svgwrap'); if (w.scrollWidth > w.clientWidth + 4) w.scrollLeft = 0; } catch (_) { /* not laid out */ }
 })();
 /* a read-only view of the state, for the page's tests (headless Chrome) */
 window.__memState = () => ({lv: Z.lv, path: Z.path.slice(), acc: AC.k, step: AC.i, done: AC.done, still: AC.still, clockOn: CLK.on,

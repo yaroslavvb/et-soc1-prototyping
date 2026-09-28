@@ -60,6 +60,7 @@ html.et-pres [data-ss-ui]{display:none!important}
 .addr .fld{display:inline-flex;align-items:baseline;gap:5px;border:1px solid var(--border);border-radius:6px;padding:0 7px;background:var(--surface);white-space:nowrap}
 .addr .fld b{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:600;color:var(--ink)}
 .addr .fld.hi{border-color:var(--c2);box-shadow:inset 0 -2px 0 var(--c2)}
+.addr .st-btn{min-height:26px;padding:1px 9px}
 .addr .fit{display:none}
 /* ---- the scale control: the current branch of scales, with - and + ---- */
 .zc{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:3px}
@@ -318,9 +319,10 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
 #asktab th:nth-child(1){width:19%}#asktab th:nth-child(2){width:35%}#asktab th:nth-child(3){width:22%}#asktab th:nth-child(4){width:12%}#asktab th:nth-child(5){width:12%}
 .prose .kd{font-size:.74rem}
 /* touch: every control at least 44 x 44 px */
-@media (pointer: coarse){.st-btn,.stg,.zc button,.tabs [role="tab"],.addr button{min-height:44px}.zc button.pm{min-width:44px}}
-/* ---- narrow windows and phones: the stage stacks and the page scrolls; the drawing keeps a readable size and scrolls
-   sideways in its own box ---- */
+@media (pointer: coarse){.st-btn,.stg,.zc button,.tabs [role="tab"],.addr .st-btn{min-height:44px}.zc button.pm{min-width:44px}}
+/* ---- narrow windows and phones: the stage stacks and the page scrolls; the drawing keeps a readable size, its text
+   set as on a short screen, and scrolls sideways in its own box, from its left edge; "Fit to screen" (.fitted) fits it
+   to the width, its text then small ---- */
 @media (max-width:899px){
   #stage{display:flex;flex-direction:column;height:auto;min-height:0;overflow:visible;gap:8px}
   .st-body{display:contents}
@@ -332,8 +334,19 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
   .st-btn .al{display:none}.st-btn .as{display:inline}
   .st-head .st-btn{padding:3px 9px;min-height:32px}
   .st-svg{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .st-svg.fitted{overflow:hidden}
   #mem{height:auto;aspect-ratio:1300/792;min-width:860px}
   .st-svg.fitted #mem{min-width:0}
+  .t-sm{font-size:20px}
+  .t-lab,.t-labb{font-size:22px}
+  .t-net{font-size:21px}
+  .t-mono,.t-smb{font-size:20px}
+  .tg text{font-size:19px}
+  /* a touch screen that cannot go full screen offers no Present; in a portrait window the panel shows under the
+     stage, so its button shows only while presenting, or once the panel is hidden (P, ?panel=off, or hidden while
+     presenting) */
+  #stage.nofs #btn-fs{display:none}
+  #stage.ph:not(.pres):not(:fullscreen):not(.nopanel) #btn-panel{display:none}
   .addr .fit{display:inline-flex}
   .addr>span:first-child,.addr .fld:not(.hi){display:none}
   .addr,.addr .flds{flex-wrap:wrap;white-space:normal}
@@ -354,6 +367,23 @@ svg .band-lab{font-size:17px;font-weight:600;fill:var(--ink-2)}
   #cap{min-height:0}
   #cap-sub{white-space:normal}
   .kbd-hint{top:40px}
+}
+/* a phone: the playback buttons in rows (Present, where it shows, after the steps), the steps in rows of three of one
+   width */
+@media (max-width:600px){
+  .st-bar{gap:6px 5px}
+  .st-bar .st-btn{padding:3px 10px}
+  .w-play{min-width:4.2em}.w-tour{min-width:4.8em}
+  #btn-fs,#btn-panel{order:6}
+  #btn-fs{margin-left:auto}
+  .stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stages li.stg-hint{grid-column:1/-1}
+}
+/* in a frame on a phone, spacesheep's comment tab (29 px wide, fixed to the frame's left edge) covers the page's left
+   edge: the gutter there is wider than it */
+@media (max-width:640px){
+  html.et-framed #stage{padding-left:32px;padding-right:12px}
+  html.et-framed .prose{padding-left:32px;padding-right:14px}
 }
 /* 900-1450 wide: short tab labels, short access names, tighter buttons */
 @media (min-width:900px) and (max-width:1450px){
@@ -489,6 +519,8 @@ down to the transistors, plays the circuit, and comes back up.</li>
 an arrow jumps a slide, Q (or End tour) ends the tour; Esc does not. <b>Present</b> (F) goes full screen, or fills the page's frame where full
 screen is not allowed. P hides the panel, D switches light and dark. From the address: <code>?theme=light</code>,
 <code>?panel=off</code>, <code>?dive=on</code>, <code>?tour=1</code> or <code>?tour=all</code>.</li>
+<li><b>On a phone</b> the drawing keeps a readable size and scrolls sideways, from its left edge. <b>Fit to screen</b>,
+beside the example address, shows the whole level at once, in small text; pinching enlarges it.</li>
 </ul>
 
 <h2 id="instead-of-sram">SRAM or not: what each level is built from</h2>

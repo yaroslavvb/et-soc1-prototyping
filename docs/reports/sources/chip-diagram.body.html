@@ -268,8 +268,10 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 #stage.present .pn-scroll:has(.legs) .pn-what{display:none}
 #stage.present .pn-kpi b{font-size:1.45em}
 #stage.present .pn .pn-key{display:none}
-/* presenting: a button that has nothing to do on a still slide takes no room */
-#stage.present #btn-play.void{display:none}
+/* presenting: a button that has nothing to do on a still slide takes no room; on a touch screen it keeps its room
+   (hidden), so that the arrows beside it stay under the thumb from a still slide to a flow's */
+#stage.present:not(.touch) #btn-play.void{display:none}
+#stage.present.touch #btn-play.void{visibility:hidden}
 /* a chart already drawn on the stage is not drawn again in the panel */
 #stage.present .pn .lad,#stage.present .pn .pn-h:has(+ .lad){display:none}
 #stage.present .num[data-f]{text-decoration:none;cursor:default}
@@ -304,9 +306,24 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   .st-head{order:0}.st-view{order:1}.st-bar{order:2}.st-cap{order:3}.pn{order:4}
   .st-row .lab2{display:none}
   .st-head .st-btn{padding:3px 9px;min-height:32px}
-  /* the drawing keeps a readable size and scrolls sideways inside its own box */
-  .st-svg{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  #chip{height:auto;aspect-ratio:1400/792;min-width:776px}
+  /* the drawing fits the width: nothing in it scrolls sideways. In a portrait window (a phone, #stage.ph) the script
+     gives each scale its own view and the box one shape for all of them (its inline aspect-ratio, set only when a flow
+     or the tour starts or stops); the text is set as on a short screen, the chip's labels larger still */
+  .st-svg{overflow:hidden}
+  #chip{height:auto;aspect-ratio:1400/792}
+  .t-sm{font-size:21px}
+  .t-lab,.t-labb{font-size:23px}
+  .t-unit{font-size:20px}
+  .t-sm.t-fit{font-size:19px}
+  .t-dcap{font-size:22px}
+  #chip .bkey{font-size:21px}
+  /* a phone's shire (a view 784 units wide): its own labels a little larger (not a flow's, drawn in .fx) */
+  #stage.ph .lay[data-level="1"] > :not(.fx) :is(.t-labb,.t-lab){font-size:24.5px}
+  #stage.ph .lay[data-level="1"] > :not(.fx) .t-sm:not(.t-fit){font-size:24px}
+  /* a touch screen that cannot go full screen offers no Present; on a phone the panel shows under the stage, so its
+     button shows only while presenting, or once the panel is hidden (P, ?panel=off, or hidden while presenting) */
+  #stage.nofs #btn-fs{display:none}
+  #stage.ph:not(.pres):not(:fullscreen):not(.nopanel) #btn-panel{display:none}
   .pip{width:44%}
   .st-bar{flex-wrap:wrap}
   .stages{flex:1 1 100%;order:5;flex-wrap:wrap}
@@ -316,7 +333,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   #stage:fullscreen,#stage.pres{height:100vh;overflow:hidden}
   #stage:fullscreen .st-view,#stage.pres .st-view{flex:1 1 auto;min-height:0}
   #stage:fullscreen .st-svg,#stage.pres .st-svg{overflow:hidden}
-  #stage:fullscreen #chip,#stage.pres #chip{height:100%;min-width:0;aspect-ratio:auto}
+  #stage:fullscreen #chip,#stage.pres #chip{height:100%;min-width:0;aspect-ratio:auto!important}
   #stage:fullscreen .pn,#stage.pres .pn{flex:0 1 26vh;min-height:0}
   #stage:fullscreen .pn-scroll,#stage.pres .pn-scroll{max-height:none}
   .pn-scroll{max-height:70vh}
@@ -324,6 +341,24 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   .zc{justify-content:flex-start;flex-wrap:wrap}
   #cap{min-height:0}
   #cap-sub{white-space:normal}
+}
+/* a phone: the playback buttons in one row (Present, where it shows, after the stages), the stages in rows of three
+   of one width */
+@media (max-width:600px){
+  .st-bar{gap:6px 5px}
+  .st-bar .st-btn{padding:3px 10px}
+  .w-play{min-width:4.2em}.w-tour{min-width:4.8em}
+  #btn-tour{margin-left:auto}
+  #btn-fs,#btn-panel{order:6}
+  #btn-fs{margin-left:auto}
+  .stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stages li.stg-hint{grid-column:1/-1}
+}
+/* in a frame on a phone, spacesheep's comment tab (29 px wide, fixed to the frame's left edge) covers the page's left
+   edge: the gutter there is wider than it */
+@media (max-width:640px){
+  html.et-framed #stage{padding-left:32px;padding-right:12px}
+  html.et-framed .prose{padding-left:32px;padding-right:14px}
 }
 /* where a stage's name may wrap (under 1700 wide) the bar keeps room for two lines whatever the flow, so that the
    drawing above it never changes size between flows (a short screen keeps them to one line, below) */
@@ -476,7 +511,9 @@ lose their dotted underline and the pointer hides when it rests. F (or Present) 
 instead and offers the browser's own full screen (F11) and a presenter window, a copy of this page in a window of its
 own where F works. P hides the details panel, D switches light and dark. The same from the address:
 <code>?theme=light</code>, <code>?panel=off</code>, <code>?flow=7</code>, <code>?tour=1</code>. The stage fits one screen from 1280 × 720
-up; on a narrow screen the drawing scrolls sideways.</li>
+up. On a phone the drawing fits the screen's width: the die with its packages at the chip's scale, a shire or a minion
+at theirs (a tap on a shire or a minion zooms into it), and a flow's charts under the die. A minion's labels are small
+there: pinch to enlarge them, or tap a part for its details.</li>
 </ul>
 
 <h2 id="summary">What the diagram shows</h2>

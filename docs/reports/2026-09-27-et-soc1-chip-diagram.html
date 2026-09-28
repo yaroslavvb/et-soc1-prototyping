@@ -448,8 +448,10 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 #stage.present .pn-scroll:has(.legs) .pn-what{display:none}
 #stage.present .pn-kpi b{font-size:1.45em}
 #stage.present .pn .pn-key{display:none}
-/* presenting: a button that has nothing to do on a still slide takes no room */
-#stage.present #btn-play.void{display:none}
+/* presenting: a button that has nothing to do on a still slide takes no room; on a touch screen it keeps its room
+   (hidden), so that the arrows beside it stay under the thumb from a still slide to a flow's */
+#stage.present:not(.touch) #btn-play.void{display:none}
+#stage.present.touch #btn-play.void{visibility:hidden}
 /* a chart already drawn on the stage is not drawn again in the panel */
 #stage.present .pn .lad,#stage.present .pn .pn-h:has(+ .lad){display:none}
 #stage.present .num[data-f]{text-decoration:none;cursor:default}
@@ -484,9 +486,24 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   .st-head{order:0}.st-view{order:1}.st-bar{order:2}.st-cap{order:3}.pn{order:4}
   .st-row .lab2{display:none}
   .st-head .st-btn{padding:3px 9px;min-height:32px}
-  /* the drawing keeps a readable size and scrolls sideways inside its own box */
-  .st-svg{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  #chip{height:auto;aspect-ratio:1400/792;min-width:776px}
+  /* the drawing fits the width: nothing in it scrolls sideways. In a portrait window (a phone, #stage.ph) the script
+     gives each scale its own view and the box one shape for all of them (its inline aspect-ratio, set only when a flow
+     or the tour starts or stops); the text is set as on a short screen, the chip's labels larger still */
+  .st-svg{overflow:hidden}
+  #chip{height:auto;aspect-ratio:1400/792}
+  .t-sm{font-size:21px}
+  .t-lab,.t-labb{font-size:23px}
+  .t-unit{font-size:20px}
+  .t-sm.t-fit{font-size:19px}
+  .t-dcap{font-size:22px}
+  #chip .bkey{font-size:21px}
+  /* a phone's shire (a view 784 units wide): its own labels a little larger (not a flow's, drawn in .fx) */
+  #stage.ph .lay[data-level="1"] > :not(.fx) :is(.t-labb,.t-lab){font-size:24.5px}
+  #stage.ph .lay[data-level="1"] > :not(.fx) .t-sm:not(.t-fit){font-size:24px}
+  /* a touch screen that cannot go full screen offers no Present; on a phone the panel shows under the stage, so its
+     button shows only while presenting, or once the panel is hidden (P, ?panel=off, or hidden while presenting) */
+  #stage.nofs #btn-fs{display:none}
+  #stage.ph:not(.pres):not(:fullscreen):not(.nopanel) #btn-panel{display:none}
   .pip{width:44%}
   .st-bar{flex-wrap:wrap}
   .stages{flex:1 1 100%;order:5;flex-wrap:wrap}
@@ -496,7 +513,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   #stage:fullscreen,#stage.pres{height:100vh;overflow:hidden}
   #stage:fullscreen .st-view,#stage.pres .st-view{flex:1 1 auto;min-height:0}
   #stage:fullscreen .st-svg,#stage.pres .st-svg{overflow:hidden}
-  #stage:fullscreen #chip,#stage.pres #chip{height:100%;min-width:0;aspect-ratio:auto}
+  #stage:fullscreen #chip,#stage.pres #chip{height:100%;min-width:0;aspect-ratio:auto!important}
   #stage:fullscreen .pn,#stage.pres .pn{flex:0 1 26vh;min-height:0}
   #stage:fullscreen .pn-scroll,#stage.pres .pn-scroll{max-height:none}
   .pn-scroll{max-height:70vh}
@@ -504,6 +521,24 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
   .zc{justify-content:flex-start;flex-wrap:wrap}
   #cap{min-height:0}
   #cap-sub{white-space:normal}
+}
+/* a phone: the playback buttons in one row (Present, where it shows, after the stages), the stages in rows of three
+   of one width */
+@media (max-width:600px){
+  .st-bar{gap:6px 5px}
+  .st-bar .st-btn{padding:3px 10px}
+  .w-play{min-width:4.2em}.w-tour{min-width:4.8em}
+  #btn-tour{margin-left:auto}
+  #btn-fs,#btn-panel{order:6}
+  #btn-fs{margin-left:auto}
+  .stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stages li.stg-hint{grid-column:1/-1}
+}
+/* in a frame on a phone, spacesheep's comment tab (29 px wide, fixed to the frame's left edge) covers the page's left
+   edge: the gutter there is wider than it */
+@media (max-width:640px){
+  html.et-framed #stage{padding-left:32px;padding-right:12px}
+  html.et-framed .prose{padding-left:32px;padding-right:14px}
 }
 /* where a stage's name may wrap (under 1700 wide) the bar keeps room for two lines whatever the flow, so that the
    drawing above it never changes size between flows (a short screen keeps them to one line, below) */
@@ -656,7 +691,9 @@ lose their dotted underline and the pointer hides when it rests. F (or Present) 
 instead and offers the browser's own full screen (F11) and a presenter window, a copy of this page in a window of its
 own where F works. P hides the details panel, D switches light and dark. The same from the address:
 <code>?theme=light</code>, <code>?panel=off</code>, <code>?flow=7</code>, <code>?tour=1</code>. The stage fits one screen from 1280 × 720
-up; on a narrow screen the drawing scrolls sideways.</li>
+up. On a phone the drawing fits the screen's width: the die with its packages at the chip's scale, a shire or a minion
+at theirs (a tap on a shire or a minion zooms into it), and a flow's charts under the die. A minion's labels are small
+there: pinch to enlarge them, or tap a part for its details.</li>
 </ul>
 
 <h2 id="summary">What the diagram shows</h2>
@@ -1324,6 +1361,45 @@ const DW = 2 * STRIP + 6 * TILE, DH = 6 * TILE, INS = 5;
 const VB = {x: -190, y: -84, w: 1400, h: 792};
 const SF = {x: 160, y: -36, w: 700, h: 700};          // where a shire is drawn when zoomed in (centred in the frame)
 const MF = {x: -60, y: -70, w: 1140, h: 760};          // where a minion is drawn when zoomed in
+/* Phones and narrow portrait windows (PH): the drawing fits the window's width and nothing in it scrolls sideways.
+   The die is drawn with narrow LPDDR4X packages beside it and the host above it, its labels larger (FS0: 11 px on the
+   screen, 29 to 32 units as the drawing is wide), and each scale has its own view (PV: the die, a shire, a minion).
+   The drawing's box keeps one height whatever the scale (the tallest view's; a shorter view sits at its top), so that
+   the controls under the drawing never move, and a zoom changes only the layers' transforms (the view is part of
+   them), never the page's layout. While a flow or the tour plays, the box is taller by the band that the flows' charts
+   fold into under the die (bandFold, phBox). PH follows the window: a phone turned, or a window resized across it,
+   rebuilds the drawing (phSwitch). TOUCH: no keyboard and no hover, so no keyboard hints, and a tap on a shire or a
+   minion zooms into it. */
+const mqOn = q => { try { return matchMedia(q).matches; } catch (_) { return false; } };
+const PHQ = '(max-width: 899px) and (max-aspect-ratio: 1/1)';
+const TOUCH = mqOn('(hover: none) and (pointer: coarse)');
+let PH = false, PKW = 110, PV = null, BANDX = Infinity, FS0 = 29;   // FS0: a phone's label size at the chip's scale, in units
+const pkgX = west => PH ? (west ? -12 - PKW : DW + 12) : (west ? -150 : DW + 40);   // an LPDDR4X package's left edge
+function phGeom() {
+  PH = mqOn(PHQ);
+  PKW = PH ? 40 : 110;                                 // an LPDDR4X package's width
+  PV = PH ? [{x: -24 - PKW, y: -162, w: DW + 2 * (PKW + 24), h: DH + 214}, {x: SF.x - 42, y: SF.y - 50, w: SF.w + 84, h: SF.w + 160},
+    {x: MF.x - 12, y: MF.y - 12, w: MF.w + 24, h: MF.h + 24}] : null;
+  BANDX = PH ? PV[0].x + PV[0].w : Infinity;           // on a phone, what is drawn right of this folds under the die
+  // the chip's labels 11 px on the screen, the drawing as wide as its box is now (a phone's width does not change)
+  if (PH) { const bw = $('svgwrap').clientWidth || innerWidth - 32; FS0 = Math.max(29, Math.min(32, Math.ceil(11.2 * PV[0].w / bw))); }
+}
+// (in a frame the page's gutters are wider on a phone: CSS html.et-framed; set before the drawing is measured)
+try { if (window.self !== window.top) document.documentElement.classList.add('et-framed'); } catch (_) { document.documentElement.classList.add('et-framed'); }
+phGeom();
+/* a phone's size for a label, in units (a wide screen keeps the class's); phFit: on a phone, a label no wider than w
+   units (measured once drawn): up to 8% too wide, it is set a little narrower (textLength), keeping its height; wider,
+   its size comes down too (a system font wider than the one it was set with) */
+const phSize = (t, u) => { if (PH) t.style.fontSize = u + 'px'; return t; };
+function phFit(t, w) {
+  if (!PH) return t;
+  try {
+    const l = t.getComputedTextLength(); if (!(l > w)) return t;
+    if (l > w * 1.08) t.style.fontSize = (parseFloat(getComputedStyle(t).fontSize) * w * 1.08 / l).toFixed(1) + 'px';
+    t.setAttribute('textLength', w.toFixed(1)); t.setAttribute('lengthAdjust', 'spacingAndGlyphs');
+  } catch (_) { /* not rendered */ }
+  return t;
+}
 const COL = {cshire: 'var(--c1)', master: 'var(--c7)', pcie: 'var(--c4)', io: 'var(--c5)', memshire: 'var(--c3)'};
 
 const CELLS = [], BYLOG = {}, BYDIE = {}, SH = {}, MSC = {};
@@ -1413,7 +1489,7 @@ function buildChip() {
   const PKG = {};
   [[0, 1], [2, 3], [4, 5], [6, 7]].forEach(ms => {
     const a = MSC[ms[0]], b = MSC[ms[1]], west = a.c === 0;
-    const x = west ? -150 : DW + 40, w = 110, y = a.y + 8, h = b.y + b.h - 8 - y;
+    const x = pkgX(west), w = PKW, y = a.y + 8, h = b.y + b.h - 8 - y;
     const g = comp(L, 'dram', {ms}, `LPDDR4X package, drawn beside memory shires ${ms[0]} and ${ms[1]} (pairing inferred): details`);
     ms.forEach(m => { const c = MSC[m];
       [-14, 14].forEach((dy, k) => {
@@ -1424,22 +1500,30 @@ function buildChip() {
     });
     boxShape(g, x, y, w, h, 'var(--c3)', {fo: 0.16, dash: true});
     const cx = x + w / 2, cy = y + h / 2;
-    T(g, cx, cy - 16, 'LPDDR4X', 't-labb', 'middle', 'dram.pkg-pairing');
-    T2(g, cx, cy + 10, ['four 16-bit', 'channels'], 't-sm t-fit', 'middle', 'L47');
+    if (PH) {
+      // a narrow package: its name turned to run up its length (its channels are in its details)
+      const t1 = phSize(T(g, cx + FS0 * 0.36, cy, 'LPDDR4X', 't-labb', 'middle', 'dram.pkg-pairing'), FS0);
+      t1.setAttribute('transform', `rotate(-90 ${t1.getAttribute('x')} ${cy})`);
+    } else {
+      T(g, cx, cy - 16, 'LPDDR4X', 't-labb', 'middle', 'dram.pkg-pairing');
+      T2(g, cx, cy + 10, ['four 16-bit', 'channels'], 't-sm t-fit', 'middle', 'L47');
+    }
   });
   AP[0].pkg = PKG;
   // the die: its outline is the component "chip", a quiet frame; its caption is a figure caption, not a title
   const gd = comp(L, 'chip', {}, 'The ET-SoC-1 die: details');
   S(E('rect', {class: 'shape', x: 0, y: 0, width: DW, height: DH, rx: 10}, gd), {fill: 'var(--surface)', stroke: 'color-mix(in srgb, var(--ink-2) 55%, var(--surface))', strokeWidth: 2.5});
   E('rect', {class: 'ring', x: -6, y: -6, width: DW + 12, height: DH + 12, rx: 14}, gd);
-  T(gd, 0, -22, `ET-SoC-1 · ${N.die_mm2.t} mm² · TSMC ${N.process.t}`, 't-dcap', 'start', 'chip.die-area chip.process');
+  phSize(T(gd, 0, PH ? -20 : -22, `ET-SoC-1 · ${N.die_mm2.t} mm² · TSMC ${N.process.t}`, 't-dcap', 'start', 'chip.die-area chip.process'), FS0);
   // the host and the PCIe link (from the PCIe shire's top edge), now timed on three cards
-  const pc = CELLS.find(c => c.type === 'pcie'), hx = 950, hy = -74, hw = 150, hh = 92, ly = -30;
+  // (on a phone above the die's right end, flush with the east packages, the link running up from the PCIe shire and
+  // across to it)
+  const pc = CELLS.find(c => c.type === 'pcie'), hw = 150, hh = 92, hx = PH ? pkgX(false) + PKW - hw : 950, hy = PH ? -150 : -74, ly = PH ? hy + hh / 2 : -30;
   const gh = comp(L, 'host', {}, 'The host and the PCIe link: details');
   S(E('path', {d: `M${pc.sx},${pc.y + INS} V${ly} H${hx}`, fill: 'none'}, gh), {stroke: 'var(--c4)', strokeWidth: 4, strokeLinejoin: 'round'});
   boxShape(gh, hx, hy, hw, hh, 'var(--ink-2)', {fo: 0});
-  T(gh, hx + hw / 2, hy + 54, 'Host', 't-mid', 'middle').style.fontSize = '22px';
-  T(gh, hx - 14, ly - 12, `PCIe Gen4 x8 · ${N.pcie_h2d.t} GB/s to the card`, 't-sm halo', 'end', 'pcie.h2d pcie.negotiated');
+  T(gh, hx + hw / 2, hy + (PH ? 56 : 54), 'Host', 't-mid', 'middle').style.fontSize = (PH ? FS0 : 22) + 'px';
+  phSize(T(gh, hx - 14, ly - 12, `PCIe Gen4 x8 · ${N.pcie_h2d.t} GB/s to the card`, 't-sm halo', 'end', 'pcie.h2d pcie.negotiated'), FS0);
   AP[0].host = [{x: hx + 4, y: ly}, {x: pc.sx, y: ly}, {x: pc.sx, y: pc.sy}];
   AP[0].hostBox = {x: hx, y: hy, w: hw, h: hh, ly};
   // mesh links and stops, under the translucent tiles (visual only: the tiles take the clicks)
@@ -1453,22 +1537,32 @@ function buildChip() {
   CELLS.forEach(c => {
     const g = comp(L, c.type, {cell: c}, tileLabel(c)); c.g = g;
     boxShape(g, c.x + INS, c.y + INS, c.w - 2 * INS, c.h - 2 * INS, COL[c.type], {fo: c.type === 'cshire' ? 0.14 : 0.12});
-    const x0 = c.x + INS + 9, y0 = c.y + INS;
+    const x0 = c.x + INS + (PH ? 6 : 9), y0 = c.y + INS, tw = c.w - 2 * INS - 9;
+    // (on a phone the labels are larger: a memory shire's number sits under its mesh stop, the master and spare shires
+    // show their number alone, as the compute shires do, and the I/O shire's Maxions are named in its details)
+    const big = t => phFit(phSize(t, FS0), c.type === 'memshire' ? c.w - 2 * INS - 2 : tw);
     if (c.type === 'cshire') T(g, x0, y0 + 38, String(c.id), 't-id');
-    else if (c.type === 'memshire') { T(g, c.x + c.w / 2, y0 + 26, 'MS', 't-labb halo-s', 'middle'); T(g, c.x + c.w / 2, y0 + 50, String(c.id), 't-labb halo-s', 'middle'); }
-    else if (c.type === 'master') { const north = c.r === 0; T(g, x0, y0 + 27, north ? 'Master' : 'Spare', 't-labb halo-s', 'start', 'fw.grey-cells'); T(g, x0, y0 + 50, 'shire ' + (north ? N.master_id.t : N.spare_id.t), 't-sm halo-s', 'start', 'fw.grey-cells chip.master-shire-id'); }
-    else if (c.type === 'pcie') T(g, x0, y0 + 30, 'PCIe', 't-labb halo-s');
-    else if (c.type === 'io') { T(g, x0, y0 + 27, 'I/O', 't-labb halo-s'); T(g, x0, y0 + 50, 'Maxions', 't-sm halo-s'); }
+    else if (c.type === 'memshire') { big(T(g, c.x + c.w / 2, y0 + (PH ? 32 : 26), 'MS', 't-labb halo-s', 'middle')); big(T(g, c.x + c.w / 2, y0 + (PH ? 86 : 50), String(c.id), 't-labb halo-s', 'middle')); }
+    else if (c.type === 'master') {
+      const north = c.r === 0, id = north ? N.master_id.t : N.spare_id.t;
+      big(T(g, x0, y0 + (PH ? 31 : 27), north ? 'Master' : 'Spare', 't-labb halo-s', 'start', 'fw.grey-cells'));
+      if (PH) big(T(g, x0, y0 + 86, id, 't-labb halo-s', 'start', 'fw.grey-cells chip.master-shire-id'));
+      else T(g, x0, y0 + 50, 'shire ' + id, 't-sm halo-s', 'start', 'fw.grey-cells chip.master-shire-id');
+    }
+    else if (c.type === 'pcie') big(T(g, x0, y0 + (PH ? 32 : 30), 'PCIe', 't-labb halo-s'));
+    else if (c.type === 'io') { big(T(g, x0, y0 + (PH ? 31 : 27), 'I/O', 't-labb halo-s')); if (!PH) T(g, x0, y0 + 50, 'Maxions', 't-sm halo-s'); }
   });
   // the mesh as a component, and a key for what is dashed (inferred) that opens what would settle it: plain labels
   // under the die, outlined only on hover or focus
+  // (on a phone larger, in a taller row, the key's words shorter)
+  const rh = PH ? 38 : 30, rb = PH ? DH + 36 : DH + 29, mw = PH ? FS0 * 12.6 : 262, iw = PH ? FS0 * 11.4 : 350;
   const gm = comp(L, 'mesh', {}, 'The mesh: details');
-  boxShape(gm, 0, DH + 8, 262, 30, 'var(--ink-2)', {fo: 0, quiet: true});
-  T(gm, 10, DH + 29, `The mesh: ${N.grid86.t}, ${N.stops.t} stops`, 't-sm', 'start', 'mesh.grid');
+  boxShape(gm, 0, DH + 8, mw, rh, 'var(--ink-2)', {fo: 0, quiet: true});
+  phSize(T(gm, 10, rb, `The mesh: ${N.grid86.t}, ${N.stops.t} stops`, 't-sm', 'start', 'mesh.grid'), FS0);
   const gi = comp(L, 'inferred', {}, 'What the drawing infers, and what would settle it: details');
-  boxShape(gi, DW - 350, DH + 8, 350, 30, 'var(--ink-2)', {fo: 0, quiet: true});
-  S(E('line', {x1: DW - 338, y1: DH + 23, x2: DW - 302, y2: DH + 23}, gi), {stroke: 'var(--c3)', strokeWidth: 2.5, strokeDasharray: '8 6'});
-  const ti = T(gi, DW - 10, DH + 29, 'inferred · what would settle it ›', 't-sm', 'end');
+  boxShape(gi, DW - iw, DH + 8, iw, rh, 'var(--ink-2)', {fo: 0, quiet: true});
+  S(E('line', {x1: DW - iw + 12, y1: rb - 6, x2: DW - iw + 48, y2: rb - 6}, gi), {stroke: 'var(--c3)', strokeWidth: 2.5, strokeDasharray: '8 6'});
+  const ti = phSize(T(gi, DW - 10, rb, PH ? 'what is inferred ›' : 'inferred · what would settle it ›', 't-sm', 'end'), FS0);
   // the dashed sample sits just left of its words (measured once drawn)
   try { const tl = ti.getComputedTextLength(); if (tl > 0) { const sl = gi.querySelector('line'); sl.setAttribute('x2', DW - 10 - tl - 10); sl.setAttribute('x1', DW - 10 - tl - 46); } } catch (_) { /* not rendered */ }
   FX[0] = E('g', {class: 'fx', 'pointer-events': 'none'}, L);
@@ -1490,25 +1584,39 @@ function buildShire(sid) {
   const fr = E('g', {}, L);
   S(E('rect', {x: X, y: Y, width: W, height: W, rx: 14}, fr), {fill: 'var(--c1)', fillOpacity: 0.05, stroke: 'var(--c1)', strokeWidth: 2.5});
   T(fr, X + 22, Y + 40, `Shire ${sid}`, 't-big');
-  T(fr, X + W - 22, Y + 38, `map (${cell.lx}, ${cell.ly}) · ${N.per_shire.t}`, 't-sm', 'end', 'mesh.logical-map shire.composition');
+  // (on a phone, the words around the frame are a little larger: SK units)
+  const SK = 24.5;
+  phSize(T(fr, X + W - 22, Y + 38, `map (${cell.lx}, ${cell.ly}) · ${N.per_shire.t}`, 't-sm', 'end', 'mesh.logical-map shire.composition'), SK);
   // mesh neighbours, in die orientation
   const nb = [[-1, 0, 'N'], [1, 0, 'S'], [0, -1, 'W'], [0, 1, 'E']].map(([dr, dc, s]) => [BYDIE[(cell.r + dr) + ',' + (cell.c + dc)], s]);
   P.edge = {};
   nb.forEach(([c, s]) => {
     const lab = c ? cellName(c) : 'die edge';
-    if (s === 'N') { if (c) mlink(fr, X + W / 2, Y, X + W / 2, Y - 24); T(fr, X + W / 2 + 12, Y - 18, (c ? '↑ ' : '') + lab, 't-sm'); P.edge.N = {x: X + W / 2, y: Y - 24}; }
-    if (s === 'S') { if (c) mlink(fr, X + W / 2, Y + W, X + W / 2, Y + W + 24); T(fr, X + W / 2 + 12, Y + W + 30, (c ? '↓ ' : '') + lab, 't-sm'); P.edge.S = {x: X + W / 2, y: Y + W + 24}; }
-    if (s === 'W') { if (c) mlink(fr, X, Y + W / 2, X - 24, Y + W / 2); T(fr, X - 30, Y + W / 2 + 6, lab + (c ? ' ←' : ''), 't-sm', 'end'); P.edge.W = {x: X - 24, y: Y + W / 2}; }
-    if (s === 'E') { if (c) mlink(fr, X + W, Y + W / 2, X + W + 24, Y + W / 2); T(fr, X + W + 30, Y + W / 2 + 6, (c ? '→ ' : '') + lab, 't-sm'); P.edge.E = {x: X + W + 24, y: Y + W / 2}; }
+    if (s === 'N') { if (c) mlink(fr, X + W / 2, Y, X + W / 2, Y - 24); phSize(T(fr, X + W / 2 + 12, Y - 18, (c ? '↑ ' : '') + lab, 't-sm'), SK); P.edge.N = {x: X + W / 2, y: Y - 24}; }
+    if (s === 'S') { if (c) mlink(fr, X + W / 2, Y + W, X + W / 2, Y + W + 24); phSize(T(fr, X + W / 2 + 12, Y + W + 30, (c ? '↓ ' : '') + lab, 't-sm'), SK); P.edge.S = {x: X + W / 2, y: Y + W + 24}; }
+    // on a phone the side neighbours' names run up the frame's edges, above their links (the view is the frame's width)
+    const sideLab = (x, y, str, rot) => { const t = phSize(T(fr, x, y, str, 't-sm', rot < 0 ? 'start' : 'end'), SK); t.setAttribute('transform', `rotate(${rot} ${x} ${y})`); };
+    if (s === 'W') { if (c) mlink(fr, X, Y + W / 2, X - 24, Y + W / 2); if (PH) sideLab(X - 10, Y + W / 2 - 14, lab, -90); else T(fr, X - 30, Y + W / 2 + 6, lab + (c ? ' ←' : ''), 't-sm', 'end'); P.edge.W = {x: X - 24, y: Y + W / 2}; }
+    if (s === 'E') { if (c) mlink(fr, X + W, Y + W / 2, X + W + 24, Y + W / 2); if (PH) sideLab(X + W + 10, Y + W / 2 - 14, lab, 90); else T(fr, X + W + 30, Y + W / 2 + 6, (c ? '→ ' : '') + lab, 't-sm'); P.edge.E = {x: X + W + 24, y: Y + W / 2}; }
   });
-  // key, in the left margin
-  const kx = VB.x + 14, ky = Y + 440;
-  T(fr, kx, ky, 'Key', 't-labb');
-  S(E('line', {x1: kx, y1: ky + 24, x2: kx + 36, y2: ky + 24}, fr), {stroke: 'var(--c4)', strokeWidth: 5, strokeLinecap: 'round'});
-  T2(fr, kx + 46, ky + 30, ['fast local', 'network edge'], 't-sm');
-  S(E('line', {x1: kx + 18, y1: ky + 70, x2: kx + 18, y2: ky + 104}, fr), {stroke: 'var(--ink-2)', strokeWidth: 2.5});
-  T2(fr, kx + 46, ky + 86, ['ET-Link to', 'the shire cache'], 't-sm');
-  T2(fr, kx, ky + 150, ['Block diagram,', 'not a floorplan'], 't-sm', 'start', 'L114');
+  if (PH) {
+    // key, in a row under the frame
+    const kx = X, ky = Y + W + 64;
+    T(fr, kx, ky, 'Key', 't-labb');
+    S(E('line', {x1: kx + 62, y1: ky - 7, x2: kx + 98, y2: ky - 7}, fr), {stroke: 'var(--c4)', strokeWidth: 5, strokeLinecap: 'round'});
+    S(E('line', {x1: kx + 282, y1: ky - 22, x2: kx + 282, y2: ky + 16}, fr), {stroke: 'var(--ink-2)', strokeWidth: 2.5});
+    [[kx + 108, ['fast local', 'network edge']], [kx + 296, ['ET-Link to', 'the shire cache']], [kx + 496, ['Block diagram,', 'not a floorplan'], 'L114']]
+      .forEach(([x, ls, f]) => phSize(T2(fr, x, ky, ls, 't-sm', 'start', f), SK));
+  } else {
+    // key, in the left margin
+    const kx = VB.x + 14, ky = Y + 440;
+    T(fr, kx, ky, 'Key', 't-labb');
+    S(E('line', {x1: kx, y1: ky + 24, x2: kx + 36, y2: ky + 24}, fr), {stroke: 'var(--c4)', strokeWidth: 5, strokeLinecap: 'round'});
+    T2(fr, kx + 46, ky + 30, ['fast local', 'network edge'], 't-sm');
+    S(E('line', {x1: kx + 18, y1: ky + 70, x2: kx + 18, y2: ky + 104}, fr), {stroke: 'var(--ink-2)', strokeWidth: 2.5});
+    T2(fr, kx + 46, ky + 86, ['ET-Link to', 'the shire cache'], 't-sm');
+    T2(fr, kx, ky + 150, ['Block diagram,', 'not a floorplan'], 't-sm', 'start', 'L114');
+  }
   // mesh stop
   const gs = comp(L, 'meshstop', {sid}, 'Mesh stop: details');
   boxShape(gs, X + 20, Y + 58, W - 40, 62, 'var(--ink-2)', {fo: 0.07});
@@ -1552,7 +1660,7 @@ function buildShire(sid) {
     P[k] = {x: px + w / 2, y: Y + 275};
     px += w;
   });
-  T2(fr, X + 530, Y + 272, ['mode M0 split', 'L2 not to scale'], 't-sm', 'start', 'shire.partition-m0 shire.partition-measured');
+  T2(fr, X + 530, Y + 272, ['mode M0 split', 'L2 not to scale'], 't-sm', 'start', 'shire.partition-m0 shire.partition-measured').style.fontSize = PH ? '21px' : '';   // (no room to grow)
   // crossbar
   const gx = comp(L, 'xbar', {}, 'Crossbar: details');
   boxShape(gx, X + 20, Y + 308, W - 40, 30, 'var(--ink-2)', {fo: 0.07, rx: 6});
@@ -1702,11 +1810,11 @@ function buildMinion(sid, nb, mi) {
 /* ---- the small picture of the die: what a stage on the die looks like while the camera is inside ---- */
 const PIP = {el: $('pip'), svg: $('pipsvg'), fx: null, tiles: {}, on: false};
 function buildPip() {
-  const s = PIP.svg; s.setAttribute('viewBox', `${VB.x} ${VB.y} ${VB.w} ${VB.h}`);
-  S(E('rect', {x: VB.x, y: VB.y, width: VB.w, height: VB.h}, s), {fill: 'var(--page)'});
+  const s = PIP.svg, V0 = PH ? PV[0] : VB; s.setAttribute('viewBox', `${V0.x} ${V0.y} ${V0.w} ${V0.h}`);
+  S(E('rect', {x: V0.x, y: V0.y, width: V0.w, height: V0.h}, s), {fill: 'var(--page)'});
   [[0, 1], [2, 3], [4, 5], [6, 7]].forEach(ms => {
-    const a = MSC[ms[0]], b = MSC[ms[1]], west = a.c === 0, x = west ? -150 : DW + 40;
-    S(E('rect', {x, y: a.y + 8, width: 110, height: b.y + b.h - 16 - a.y, rx: 6}, s), {fill: 'var(--c3)', fillOpacity: 0.16, stroke: 'var(--c3)', strokeWidth: 3, strokeDasharray: '10 8'});
+    const a = MSC[ms[0]], b = MSC[ms[1]], west = a.c === 0, x = pkgX(west);
+    S(E('rect', {x, y: a.y + 8, width: PKW, height: b.y + b.h - 16 - a.y, rx: 6}, s), {fill: 'var(--c3)', fillOpacity: 0.16, stroke: 'var(--c3)', strokeWidth: 3, strokeDasharray: '10 8'});
   });
   S(E('rect', {x: 0, y: 0, width: DW, height: DH, rx: 10}, s), {fill: 'var(--surface)', stroke: 'color-mix(in srgb, var(--ink-2) 55%, var(--surface))', strokeWidth: 3});
   const hb = AP[0].hostBox, pc = CELLS.find(c => c.type === 'pcie');
@@ -1863,6 +1971,87 @@ function lookOf(el) {
   return {o: o >= 0 && o <= 1 ? o : 1, s: m ? Math.min(1, +m[1]) : 1};
 }
 const CTX_LOW = 0.3;
+/* ---- the phone's view (PH) ----
+   The drawing's box keeps one shape (phBox): idle, as tall as the tallest scale's view; while a flow or the tour plays,
+   taller by the band under the die that a flow's charts fold into (FOLD.R units, the same for every flow, so that the
+   box keeps its size through the tour). A view shorter than the box sits at its top (preserveAspectRatio xMidYMin): the
+   folded charts sit under the die, and the small picture of the die (the pip, bottom right) under a shire or a minion.
+   The SVG's viewBox is the box's shape, 1000 units wide; a view r is part of the transform of the layer shown (viewM:
+   r's width on the box's, r's top at its top). A zoom moves it from one scale's view to the next in the transforms
+   the camera sets anyway (segOpen): the box's size, its viewBox and the page's layout never change during a zoom (a
+   viewBox changed at each frame would lay the page out again at each frame). */
+const PHV = {flow: false, extra: 0, ar: ''};
+/* the fold: parts scaled by up to K (at least KMIN, else the band grows for the flow: PHV.extra), their top FOLD.top */
+const FOLD = {K: 1.4, KMIN: 1.15, top: DH + 60, gap: 36, R: 420, pad: 18};
+const bandH = () => FOLD.R + PHV.extra;
+const pview = lv => (lv === 0 && PHV.flow ? Object.assign({}, PV[0], {h: PV[0].h + bandH()}) : PV[lv]);
+const viewM = r => { const k = 1000 / r.w; return [k, -k * r.x, -k * r.y]; };
+const cmpM = (V, M) => (!V ? M : !M ? V : [V[0] * M[0], V[0] * M[1] + V[1], V[0] * M[2] + V[2]]);
+/* the view r, on the layer at rest (the one shown) */
+function setView(r) { setT(LAYERS[Z.level], viewM(r)); }
+/* the box's shape (the tallest view's, the die's with its band while a flow or the tour plays): set when a flow or the
+   tour starts or stops, and when a flow's charts outgrow the band; never during a zoom */
+function phBox() {
+  if (!PH) return;
+  const flow = !!(TOUR || FL.k);
+  if (flow !== PHV.flow) { PHV.flow = flow; PHV.extra = 0; }
+  const hw = Math.max(...[0, 1, 2].map(lv => { const r = pview(lv); return r.h / r.w; }));
+  const H = (1000 * hw).toFixed(1), ar = `1000 / ${H}`;
+  if (ar !== PHV.ar) { PHV.ar = ar; svg.style.aspectRatio = ar; svg.setAttribute('viewBox', `0 0 1000 ${H}`); }
+  if (!ZW) setView(pview(Z.level));
+}
+/* The charts a flow draws right of the die (the band, BAND), and the callouts that stand there, fold under the die on
+   a phone, into the band the box keeps for them: each part scaled by K, in one column where it fits at FOLD.K, else in
+   the two columns (a column breaks only between parts that do not overlap in height) that fit it largest. Each part
+   keeps its place in the drawing (a stage's code finds it as before); only its CSS transform moves it. */
+function bandFold() {
+  if (!PH || !FX[0] || LAYERS[0].style.display === 'none') return;
+  const atoms = [], bb = el => { try { const b = el.getBBox(); return b.width || b.height ? b : null; } catch (_) { return null; } };
+  // a part: a chart's title, note or row (they keep their places in the chart: g, the chart), or a callout
+  const take = (el, g) => { const b = bb(el); if (b) atoms.push({el, g: g || el, x: b.x, y: b.y, w: b.width, h: b.height}); };
+  const scan = (box, deep) => [...box.children].forEach(ch => {
+    const cl = ch.classList;
+    if (cl.contains('band')) { [...ch.children].forEach(el => take(el, ch)); return; }
+    if (ch.tagName !== 'g' || cl.contains('pk')) return;
+    const b = bb(ch); if (!b) return;
+    if (b.x >= BANDX) take(ch); else if (deep && cl.contains('co') && ch.querySelector(':scope > .band')) scan(ch, false);
+  });
+  scan(FX[0], true);
+  if (!atoms.length) return;
+  // each chart (or callout) starts at its column's left edge
+  const gx = new Map(); atoms.forEach(a => gx.set(a.g, Math.min(a.x, gx.has(a.g) ? gx.get(a.g) : Infinity)));
+  const wOf = col => Math.max(...col.map(a => a.x + a.w - gx.get(a.g)));
+  atoms.sort((a, b) => a.y - b.y);
+  const y0 = atoms[0].y, y1 = Math.max(...atoms.map(a => a.y + a.h));
+  const avail = PV[0].w - 44, off = FOLD.top - (PV[0].y + PV[0].h);
+  const kOf = o => Math.min(FOLD.K, (bandH() - off - FOLD.pad) / o.hh, (avail - o.gap) / o.ww);
+  let best = {cols: [atoms], hh: y1 - y0, ww: wOf(atoms), gap: 0}; best.k = kOf(best);
+  if (best.k < FOLD.K - 1e-6) {
+    let bot = -Infinity;
+    for (let i = 0; i < atoms.length - 1; i++) {
+      bot = Math.max(bot, atoms[i].y + atoms[i].h);
+      if (atoms[i + 1].y < bot - 0.5) continue;
+      const c1 = atoms.slice(0, i + 1), c2 = atoms.slice(i + 1), o = {cols: [c1, c2], hh: Math.max(bot - y0, y1 - atoms[i + 1].y), ww: wOf(c1) + wOf(c2), gap: FOLD.gap};
+      o.k = kOf(o);
+      if (o.k > best.k + 1e-6 || (Math.abs(o.k - best.k) < 1e-6 && o.hh < best.hh)) best = o;
+    }
+  }
+  let K = best.k;
+  if (K < FOLD.KMIN) {
+    // too tall for the band even at KMIN: the band grows, for as long as the flows play (one step, never back)
+    K = Math.min(FOLD.KMIN, (avail - best.gap) / best.ww);
+    const need = off + best.hh * K + FOLD.pad;
+    if (need > bandH() + 1) { PHV.extra = Math.ceil(need - FOLD.R); phBox(); }
+  }
+  let x = PV[0].x + 22;
+  best.cols.forEach(col => {
+    const top = Math.min(...col.map(a => a.y)), ty = FOLD.top - K * top;
+    col.forEach(a => { const tx = x - K * gx.get(a.g); a.el.style.transform = `translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) scale(${K.toFixed(3)})`; });
+    x += wOf(col) * K + FOLD.gap;
+  });
+}
+let foldT = 0;
+function foldSoon() { if (!foldT) foldT = requestAnimationFrame(() => { foldT = 0; bandFold(); }); }
 /* the step in flight between two views, left partway by a newer request: the next plan goes on from there */
 let CUR = null;
 /* One zoom segment between LAYERS[lo] (the outer view) and LAYERS[lo + 1] (the inner one): e = 0 shows the outer view,
@@ -1906,8 +2095,9 @@ function segOpen(sg, req) {
     if (m && (li === lo || li === lo + 1)) { p0 = {x: +m[1], y: +m[2]}; inOuter = li === lo; cg = carry.cloneNode(true); svg.appendChild(cg); carry.style.visibility = 'hidden'; }
   }
   const frame = e => {
-    const R = zoomR(A, B, e), Mo = rmap(A, R), Mi = rmap(B, R);
-    setT(outer, Mo); setT(inner, Mi);
+    // (on a phone the view, moving from one scale's to the next, is part of both transforms)
+    const R = zoomR(A, B, e), Mo = rmap(A, R), Mi = rmap(B, R), V = PH ? viewM(lerpR(pview(lo), pview(lo + 1), e)) : null;
+    setT(outer, cmpM(V, Mo)); setT(inner, cmpM(V, Mi));
     const oo = 1 - band(e, 0.86, 1), k = easeS(band(e, 0, 0.3)), so = outer.style;
     so.opacity = oo; so.visibility = oo > 0 ? '' : 'hidden';
     inner.style.opacity = band(e, 0.1, 0.32);
@@ -1921,7 +2111,10 @@ function segOpen(sg, req) {
     inner.style.setProperty('--lab', P.midIn ? '0' : band(e, 0.62, 0.88).toFixed(3));
     inner.style.setProperty('--ctx', String(CTX_LOW));
     if (oo > 0) keep.set(Mo[0]);
-    if (cg) { const M = inOuter ? Mo : Mi; at(cg, {x: M[0] * p0.x + M[1], y: M[0] * p0.y + M[2]}); }
+    if (cg) {
+      const M = cmpM(V, inOuter ? Mo : Mi), q = {x: M[0] * p0.x + M[1], y: M[0] * p0.y + M[2]};
+      if (V) cg.setAttribute('transform', `translate(${q.x.toFixed(1)},${q.y.toFixed(1)}) scale(${V[0].toFixed(4)})`); else at(cg, q);
+    }
   };
   // the first frame goes on before either view is shown: a view un-hidden at full size and full opacity would be
   // painted for one frame
@@ -1942,6 +2135,7 @@ function segOpen(sg, req) {
       gone.style.display = 'none'; ctxClear(gone);
       setT(here, null); here.style.opacity = 1;
       Z.level = inIn ? lo + 1 : lo;
+      if (PH) { setView(pview(Z.level)); if (Z.level === 0) foldSoon(); }
       // the view the camera rests at loses the zoom's marks (the dimming that the step puts on arrives in the same
       // frame, arrive()); a view passed through keeps them for the next step
       if (last) { if (arrive) arrive(); ctxClear(here); LAYERS.forEach(l => l.classList.remove('busy')); }
@@ -2289,7 +2483,7 @@ const COMPS = {
     return {kick: 'Compute shire', title: `Shire ${c.id}`,
       what: `One of the ${n('cshires')} compute shires: ${n('neigh')} of ${n('per_neigh')}, ${n('cache_mb')} of SRAM and one mesh stop. On the measured map it sits at (${c.lx}, ${c.ly}); on this die view, row ${c.r}, column ${c.c}, as in the firmware's NoC-spec map. Its L3 slice homes the lines with PA[10:6] = ${c.id}, which memory shire ${cn(hi.ms, 'L43 dram.memshire-select')} serves, ${cn(hi.h, 'mesh.logical-map L40')} ${hi.h === 1 ? 'hop' : 'hops'} away.`,
       kpis: [kpi(cn(hi.mean, 'mesh.logical-map l3.home', 2), `mean hops to the ${n('cshires')} L3 slices`), kpi(cn(V('lat_l3_a') + V('lat_l3_b') * hi.mean, 'l3.latency mesh.logical-map', 0), 'L3 hit from here by the model, cycles'), K('flb', 'shire barrier, 32 minions')],
-      act: Z.level === 0 ? `<button type="button" class="st-btn" data-act="zoom" data-sid="${c.id}">Zoom into shire ${c.id}</button><span class="small">or double-click it</span>` : ''};
+      act: Z.level === 0 ? `<button type="button" class="st-btn" data-act="zoom" data-sid="${c.id}">Zoom into shire ${c.id}</button><span class="small">${TOUCH ? 'or tap it' : 'or double-click it'}</span>` : ''};
   },
   master: ctx => { const north = ctx.cell.r === 0;
     return {kick: north ? 'Master shire' : 'Spare shire', title: north ? `Master shire (${N.master_id.t})` : `Spare shire (${N.spare_id.t})`,
@@ -2344,7 +2538,7 @@ const COMPS = {
     return {kick: 'Minion', title: `Minion ${mi} · neighbourhood ${nb}`,
       what: `A dual-threaded (${n('harts')}), in-order, single-issue RV64IMFC core with a vector unit of ${n('lanes')}, whose FMA and int8 multiply-add units also run the tensor instructions (a sequencer in the vector unit drives them), and a ${n('l1_kb')} L1 data cache. Its harts are ${cn(h0, 'chip.harts', 0)} and ${cn(h0 + 1, 'chip.harts', 0)}. An awake minion costs ${n('awake')}.`,
       kpis: [kpi(n('vecpeak'), 'per cycle, fp32 peak, vector or tensor'), K('awake', 'awake, one hart')],
-      act: at1 && Z.level === 1 ? `<button type="button" class="st-btn" data-act="zoomm" data-nb="${nb}" data-mi="${mi}">Zoom into minion ${mi}</button><span class="small">or double-click it</span>` : ''};
+      act: at1 && Z.level === 1 ? `<button type="button" class="st-btn" data-act="zoomm" data-nb="${nb}" data-mi="${mi}">Zoom into minion ${mi}</button><span class="small">${TOUCH ? 'or tap it' : 'or double-click it'}</span>` : ''};
   },
   hart: ctx => ({kick: 'Minion', title: `Hart ${ctx.t}`,
     what: ctx.t === 0 ? `Hart 0 may issue every tensor instruction. Each hart has ${n('vregs')} (f0–f31).`
@@ -2389,7 +2583,7 @@ function zoomInto(g) {
 }
 function activate(g) {
   const zoomable = (g._key === 'cshire' && Z.level === 0) || (g._key === 'minion' && Z.level === 1 && g._ctx.mi != null);
-  if (zoomable && SEL === g) { zoomInto(g); return; }   // a second click zooms in
+  if (zoomable && (SEL === g || TOUCH)) { zoomInto(g); return; }   // a second click zooms in; on a touch screen, a tap
   select(g); showComp(g._key, g._ctx); scaleUI();
 }
 svg.addEventListener('click', e => { const g = e.target.closest && e.target.closest('.comp'); if (g && svg.contains(g)) activate(g); });
@@ -2480,9 +2674,13 @@ async function travel(tok, fx, pk, P, ms, o) {
    'r') in the band below the tiles' id labels, so that it covers no tile's number; with o.tl or o.tr, (x, y) is its
    top-left or top-right corner; otherwise it sits on side o.side of (x, y) ('c': centred on it). It lies above the
    packets of its drawing (packet() inserts them under it), and it fades in. */
+const fxLevel = fx => { const L = fx && fx.closest && fx.closest('.lay'); return L ? +L.dataset.level : 0; };
 function callout(fx, x, y, lines, o) {
   o = o || {};
-  const col = o.col || 'var(--c2)', fs = o.fs || 22, lh = fs * 1.28, pad = 11, acc = 9;
+  // on a phone a callout is larger at the chip's scale and a shire's, where the drawing is small (not one that stands
+  // in the band right of the die: that one folds under the die, enlarged with the charts)
+  const lv = PH ? fxLevel(fx) : 0, inBand = PH && lv === 0 && x >= BANDX, big = PH && !inBand ? [1.25, 1.1, 1][lv] : 1;
+  const col = o.col || 'var(--c2)', fs = (o.fs || 22) * big, lh = fs * 1.28, pad = 11, acc = 9;
   const g = E('g', {class: 'co'}, fx), lead = E('g', {class: 'co-lead'}, g);
   const box = S(E('rect', {class: 'co-box', rx: 6, filter: 'url(#co-sh)'}, g), {stroke: `color-mix(in srgb, ${col} 55%, var(--surface))`});
   const bar = S(E('rect', {class: 'co-acc', rx: 2, width: 4}, g), {fill: col});
@@ -2500,7 +2698,11 @@ function callout(fx, x, y, lines, o) {
     by = Math.min(c.y + 58, c.y + c.h + 12 - bh);
   }
   if (o.tl) { bx = x; by = y; } else if (o.tr) { bx = x - bw; by = y; }
-  bx = Math.max(VB.x + 4, Math.min(VB.x + VB.w - 4 - bw, bx)); by = Math.max(VB.y + 4, Math.min(VB.y + VB.h - 4 - bh, by));
+  // inside the drawing's frame; on a phone, inside the view of its scale, unless it stands in the band right of the die
+  // (then it folds under the die with the band's charts, bandFold)
+  let R = VB;
+  if (PH) { if (inBand) bx = Math.max(bx, BANDX + 4); else R = PV[lv]; }
+  bx = Math.max(R.x + 4, Math.min(R.x + R.w - 4 - bw, bx)); by = Math.max(R.y + 4, Math.min(R.y + R.h - 4 - bh, by));
   box.setAttribute('x', bx); box.setAttribute('y', by); box.setAttribute('width', bw); box.setAttribute('height', bh);
   bar.setAttribute('x', bx + 5); bar.setAttribute('y', by + 6); bar.setAttribute('height', Math.max(4, bh - 12));
   tx.forEach((t, i) => { t.setAttribute('x', bx + acc + pad - 2); t.setAttribute('y', by + pad / 2 + (i + 1) * lh - lh * 0.24); });
@@ -2687,7 +2889,7 @@ async function cam(tok, w, cut, o) {
 }
 /* the look a stage on the die gives it (most set the rest of the die back, CSS #chip.fdim): a zoom out to it ends there */
 const stageLook = (st, w) => (w.level === 0 && st.dim !== false ? DIMLOOK.fdim() : null);
-function pipOn() { PIP.el.hidden = false; $('pip-cap').textContent = `Flow ${KEYOF[FL.k]}, stage ${FL.i + 1}, on the die · click to return`; }
+function pipOn() { PIP.el.hidden = false; $('pip-cap').textContent = `Flow ${KEYOF[FL.k]}, stage ${FL.i + 1}, on the die · ${TOUCH ? 'tap' : 'click'} to return`; }
 function pipOff() { if (document.activeElement === PIP.el) $('btn-follow').focus({preventScroll: true}); PIP.el.hidden = true; }
 /* the flow's packet, in this drawing: the one it has if it is already here, else a new one at p. A packet that the
    zoom carried from the last view (it rode the zoom in place) is taken over as it is, with no second grow-in */
@@ -2707,7 +2909,7 @@ function startFlow(k, i, o) {
   FL.tok.dead = true; clearFx(FL.k !== k && !o.still); pipOff();
   const tok = {dead: false, k, ff: false, endDone: !!o.done};
   Object.assign(FL, {k, i, tok, done: false, still: !!o.still});
-  LASTFLOW = k;
+  LASTFLOW = k; phBox();
   if (!o.still) CLK.on = true;
   document.querySelectorAll('[data-flow]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.flow === k)));
   const ctx = FL.ctx = {k, tok, pick: prev || (def.pick ? def.pick() : {})};
@@ -2793,7 +2995,7 @@ async function markStage(tok, ctx, st, w) {
 }
 function killFlow(soft) { FL.tok.dead = true; clearFx(soft); pipOff(); }
 function stopFlow(keepCap, soft) {
-  killFlow(soft); FL.k = null; FL.done = false; FL.still = false;
+  killFlow(soft); FL.k = null; FL.done = false; FL.still = false; phBox();
   document.querySelectorAll('[data-flow]').forEach(b => b.setAttribute('aria-pressed', 'false'));
   renderBar(); playBtn();
   if (!TOUR && CAPFLOW && !keepCap) resetCap();
@@ -3229,7 +3431,10 @@ FLOWS.F = {
         const fx = c.fx; hiCells([c.pc], true);
         pcieChart(c, 4);
         const hb = AP[0].hostBox;
-        sayAt(c, fx, hb.x + hb.w / 2, hb.y + hb.h, [{t: 'memcpy, then DMA'}, {t: `memcpy ${N.pcie_memcpy.t} GB/s`, f: 'pcie.staged'}], {side: 'd', col: 'var(--c4)', fs: 20});
+        // (on a phone, in the band that folds under the die: under the host it would cover the I/O shire)
+        const lines = [{t: 'memcpy, then DMA'}, {t: `memcpy ${N.pcie_memcpy.t} GB/s`, f: 'pcie.staged'}];
+        if (PH) sayAt(c, fx, BAND.x - 20, BAND.y + 40, lines, {side: 'r', col: 'var(--c4)', fs: 20});
+        else sayAt(c, fx, hb.x + hb.w / 2, hb.y + hb.h, lines, {side: 'd', col: 'var(--c4)', fs: 20});
         hostStream(tok, c, 'var(--c4)', 560, true);
         await wait(tok, 7000);
       }},
@@ -3919,7 +4124,7 @@ function presentClass() {
   if (was !== on && !TOUR && !FL.k && !CAPFLOW) resetCap();
 }
 function startTour(at) {
-  TOUR = {i: 0}; $('btn-tour').textContent = 'End tour'; $('btn-tour').classList.add('on');
+  TOUR = {i: 0}; $('btn-tour').textContent = 'End tour'; $('btn-tour').classList.add('on'); phBox();
   presentClass();
   tourGo(at || 0);
 }
@@ -3927,7 +4132,7 @@ function endTour() {
   if (!TOUR) return;
   if (TOUR.tok) TOUR.tok.dead = true;
   TLAST = TOUR.i;
-  TOUR = null; $('btn-tour').textContent = 'Tour'; $('btn-tour').classList.remove('on');
+  TOUR = null; $('btn-tour').textContent = 'Tour'; $('btn-tour').classList.remove('on'); phBox();
   presentClass();
   dots(-1); clearDim();
   if (flowOn() || FL.k) { setKick(flowKick(FL.k)); CAPFLOW = true; renderBar(); playBtn(); }
@@ -3935,14 +4140,15 @@ function endTour() {
 }
 /* T and the Tour button: the tour picks up where it was left (from the start once it had reached its end) */
 const toggleTour = () => { if (TOUR) { endTour(); stopFlow(); } else startTour(TLAST >= STEPS.length - 1 ? 0 : TLAST); };
-const HINT = 'Space pauses · ← → stages · + − zoom · double-click zooms in · F presents · P panel · C follow · T tour';
+const HINT = TOUCH ? 'Tap a shire, then a minion, to zoom in · pinch to enlarge'
+  : 'Space pauses · ← → stages · + − zoom · double-click zooms in · F presents · P panel · C follow · T tour';
 function resetCap() {
   CAPFLOW = false;
   if ($('stage').classList.contains('present')) {
     setKick('ET-SoC-1'); setCap(STEPS[0].cap()); sub(STEPS[0].sub()); renderBar(); return;
   }
   setKick('Explore');
-  setCap(`Click any part of the chip, zoom with the scale control, pick one of ten flows, or press Tour to step through it all in ${STEPS.length} steps.`);
+  setCap(`${TOUCH ? 'Tap' : 'Click'} any part of the chip, zoom with the scale control, pick one of ten flows, or press Tour to step through it all in ${STEPS.length} steps.`);
   sub(HINT); $('cap-sub').classList.add('hint'); renderBar();
 }
 /* the stage bar: the active flow's stages, the current one marked; in the tour on a still step, the tour's still
@@ -3973,7 +4179,7 @@ function renderBar() {
       });
     } else {
       const li = document.createElement('li'); li.className = 'stg-hint';
-      li.textContent = 'Pick a flow above (keys 1 to 9 and 0) to see its stages here, or press Tour';
+      li.textContent = TOUCH ? 'Pick a flow above to see its stages here, or press Tour' : 'Pick a flow above (keys 1 to 9 and 0) to see its stages here, or press Tour';
       ol.appendChild(li);
     }
     refocus(ol, had);
@@ -4067,9 +4273,10 @@ function presenterWindow() {
 }
 $('toast').addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if (!b) return; if (b.dataset.t === 'win') presenterWindow(); else hideToast(); });
 /* In a frame (spacesheep shows the page in one), the keys reach the page only once the reader has clicked into it:
-   until then, and whenever the frame loses the focus, a hint over the drawing says so. A click anywhere hides it. */
+   until then, and whenever the frame loses the focus, a hint over the drawing says so. A click anywhere hides it. A
+   touch screen has no keys: no hint there. */
 const FRAMED = (() => { try { return window.self !== window.top; } catch (_) { return true; } })();
-function kbdHint() { const h = $('kbd-hint'); if (h) h.hidden = !FRAMED || document.hasFocus() || PRES || !!fsEl(); }
+function kbdHint() { const h = $('kbd-hint'); if (h) h.hidden = TOUCH || !FRAMED || document.hasFocus() || PRES || !!fsEl(); }
 if (FRAMED) {
   window.addEventListener('focus', kbdHint); window.addEventListener('blur', kbdHint);
   $('kbd-hint').addEventListener('click', () => { window.focus(); kbdHint(); });
@@ -4256,6 +4463,43 @@ function prose() {
 /* ================= start ================= */
 buildChip();
 buildPip();
+/* the phone's drawing on or off (PH): the stage's class, the box's shape, the view, and the band's fold whenever a flow
+   draws in the band (packets, trails, glows and pulses come and go too often to be worth a look) */
+let foldObs = null;
+function phApply() {
+  $('stage').classList.toggle('ph', PH);
+  svg.setAttribute('preserveAspectRatio', PH ? 'xMidYMin meet' : 'xMidYMid meet');
+  if (foldObs) { foldObs.disconnect(); foldObs = null; }
+  Object.assign(PHV, {flow: false, extra: 0, ar: ''});
+  if (!PH) { svg.style.aspectRatio = ''; svg.setAttribute('viewBox', `${VB.x} ${VB.y} ${VB.w} ${VB.h}`); if (!ZW) setT(LAYERS[Z.level], null); return; }
+  phBox();
+  const busy = n => n.nodeType !== 1 || n.tagName === 'circle' || /\b(pk|trail|glow)\b/.test(n.getAttribute('class') || '');
+  try { foldObs = new MutationObserver(ms => { if (ms.some(m => [...m.addedNodes, ...m.removedNodes].some(n => !busy(n)))) foldSoon(); }); foldObs.observe(FX[0], {childList: true, subtree: true}); } catch (_) { /* no observer */ }
+}
+/* The window crosses PH (a phone turned, a window resized): the die is drawn again for the new shape, at the chip's
+   scale; the tour or flow that played stops. A shire or a minion is drawn anew at each zoom into it. */
+let phT = 0;
+function phSwitch() {
+  clearTimeout(phT);
+  phT = setTimeout(() => {
+    if (mqOn(PHQ) === PH) return;
+    if (TOUR) endTour();
+    stopFlow(); select(null);
+    goTo({level: 0}, {total: 0}).then(() => {
+      if (mqOn(PHQ) === PH || ZW) return;
+      phGeom();
+      LAYERS[0].textContent = ''; buildChip();
+      PIP.svg.textContent = ''; PIP.tiles = {}; buildPip();
+      phApply(); scaleUI(); showComp('chip', {}); resetCap(); fitCap();
+    });
+  }, 250);
+}
+phApply();
+try { matchMedia(PHQ).addEventListener('change', phSwitch); } catch (_) { /* an old browser: the shape stays as loaded */ }
+/* in a frame, the page's gutters (CSS html.et-framed: spacesheep's comment tab covers the frame's left edge on a phone);
+   a touch screen that cannot go full screen offers no Present button */
+if (FRAMED) document.documentElement.classList.add('et-framed');
+if (TOUCH) { $('stage').classList.add('touch'); if (!fsOK()) $('stage').classList.add('nofs'); }
 scaleUI();
 prose();
 showComp('chip', {});
@@ -4274,8 +4518,6 @@ fitCap();
 window.__chipState = () => ({level: Z.level, sid: Z.sid, nb: Z.nb, mi: Z.mi, flow: FL.k, stage: FL.i, done: FL.done, still: FL.still,
   clockOn: CLK.on, clock: Math.round(CLK.t), follow: FOLLOW, zooming: ZW, pip: !PIP.el.hidden, pres: PRES, tour: TOUR ? TOUR.i : null,
   transform: [0, 1, 2].map(i => LAYERS[i].getAttribute('transform')), shown: [0, 1, 2].map(i => LAYERS[i].style.display !== 'none')});
-/* on a narrow screen the drawing scrolls sideways: start at its middle, the compute shires */
-try { const w = $('svgwrap'); if (w.scrollWidth > w.clientWidth + 4) w.scrollLeft = (w.scrollWidth - w.clientWidth) / 2; } catch (_) { /* not laid out */ }
 })();
 
 </script>
