@@ -1,0 +1,61 @@
+{
+  "_what": "OH (the effect of overheating, E53): every cap, band, condition and order the blocks use. Fixed before any card block; PREREG.md hashes this file.",
+  "caps": {
+    "abs_stop_c": 88,
+    "cap_high_c": 86,
+    "cap_mean_c": 85,
+    "cap_board_w": 78,
+    "hard_board_w": 82,
+    "cap_consecutive": 2,
+    "soft_release_c": 1,
+    "soft_release_w": 2,
+    "guard_gate_c": 85,
+    "guard_stop_c": 90,
+    "guard_stale_s": 10,
+    "guard_max_s": 2700,
+    "guard_refresh_s": 1500,
+    "sampler_stale_s": 3
+  },
+  "chain": {"cap_s": 150, "gap_s": 15},
+  "reset_ms": 1000,
+  "heater": {"mask": "0xffffffff", "per_shire_all32": 32, "per_shire_all24": 24, "seconds": 2,
+             "all24_above_c": {"aifoundry3": 999, "aifoundry1-c1": 75}},
+  "oh1": {
+    "preheat_c": 62,
+    "preheat_per_shire": 24,
+    "condition_s": 60,
+    "launch_s": 4,
+    "tail_s": 15,
+    "analysis_skip_s": 10,
+    "conditions": {
+      "IDLE":   {"mask": null, "per_shire": 0, "shires": []},
+      "ONE-C":  {"mask": "0x00004000", "per_shire": 32, "shires": [14], "where": "S14, grid row 3 column c3 (central)"},
+      "ONE-NE": {"mask": "0x10000000", "per_shire": 32, "shires": [28], "where": "S28, grid row 1 column c6 (next to the I/O corner)"},
+      "B4C":    {"mask": "0x00606000", "per_shire": 32, "shires": [13, 14, 21, 22], "where": "S13 S14 S21 S22, the central 2x2 block (E51's B4C@32)"}
+    },
+    "williams_rows": [
+      ["IDLE", "ONE-C", "B4C", "ONE-NE"],
+      ["ONE-C", "ONE-NE", "IDLE", "B4C"],
+      ["ONE-NE", "B4C", "ONE-C", "IDLE"],
+      ["B4C", "IDLE", "ONE-NE", "ONE-C"]
+    ],
+    "blocks": {"aifoundry3": 3, "aifoundry1-c1": 2}
+  },
+  "oh2": {
+    "bands": [
+      {"name": "B0", "lo": null, "hi": null, "batteries": 3, "rest_max_c": {"aifoundry3": 58, "aifoundry1-c1": 63}, "rest_wait_s": 600},
+      {"name": "B1", "lo": 65, "hi": 69, "target": 67, "batteries": 3},
+      {"name": "B2", "lo": 72, "hi": 76, "target": 74, "batteries": 3},
+      {"name": "B3", "lo": 78, "hi": 81, "target": 80, "batteries": 4},
+      {"name": "B4", "lo": 82, "hi": 84, "target": 82, "batteries": 4, "refresh": true}
+    ],
+    "cool_wait_s": 60,
+    "band_heat_s": 300,
+    "hold_heat_s": 30,
+    "tail_s": 360,
+    "tail_battery_at_c": 65,
+    "refresh": {"jit": {"n": 19000, "jitter": 3000, "start": "0x1000", "seed": 101}, "locked": {"n": 24000, "start": "0x1000"}},
+    "followup_repeats": 3
+  },
+  "cards": ["aifoundry3", "aifoundry1-c1"]
+}

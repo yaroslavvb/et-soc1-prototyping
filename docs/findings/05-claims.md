@@ -12,7 +12,8 @@ input and a fitted slope; `P→M` is a prediction later measured.
 Where a later session re-measured a number, the older row says so and points to the newer one; quote the newer.
 Rows that cite R3 for the governor describe the firmware source at `353f20e`; the cards' own trace strings match an
 older build (R3), so what the card runs may differ. Since 28 September the section "The governor on the cards' own
-build, and DV2" has the cards' builds read from source and E51's development data, and "Heat placement" E52's;
+build, and DV2" has the cards' builds read from source and E51's development data, "Heat placement" E52's, and
+"The effect of overheating" E53's pre-registered verdicts and the re-read record;
 rows marked **dev** there are development data, not validated. Terms are defined in [README.md](README.md#terms).
 
 Paths are relative to the repository root. `DATA` means `docs/reports/data/2026-09-21-horace-aifoundry2/`,
@@ -593,6 +594,48 @@ Only signs transfer between cards: the dev and val c1 sizes are each card's own.
 | Sustained heating on card 1 (**val c1**, PLACE-t, primary: **INSUFFICIENT**) | chains from 60 °C capped at 150 s: L = 0.198 [−0.423, 0.819], 1.22 [0.66–2.27] times; 7 of PLACE-t's 10 runs (10 of all 15 Tier L runs) never read 66 °C within 150 s, three of five blocks had both runs cut off (L = 0); the two blocks that decided had the perimeter longer (over 150 against 110.2 s; 142.6 against 72.1 s), none the interior. POWER −0.20 [−0.71, 0.32] W INSUFFICIENT; WORK PASS | P→M | E52 | `HP/val.json` `.validation.items["PLACE-t"]`, `["PLACE-t/POWER"]`; `HP/heat.json` `val_blocks.summary.L16` |
 | Transfer of development's signs, H11 (**val c1**) | INSUFFICIENT (PLACE-t INSUFFICIENT, PLACE-tS PASS); by DESIGN2's frozen table no theory survived and none was refuted: H2 undecided (PLACE-t INSUFFICIENT); H3 and H4 not registered (the table needs PLACE-t registered SIGN− or EQUIV; it was registered SIGN+); H13 INSUFFICIENT, H1/H1′ not tested on a card | P→M | E52 | `HP/val.json` `.validation.items.H11`; `HP/plan/DESIGN2.md` "Theories survived" |
 | Card 1's calibration chains were slower in the validation (**val c1**, reported) | 768-minion chains from 60 °C in the Tier L blocks 17.6–27.3 s (median 22.8 s, 6 chains) against 17.2–20.5 s (median 17.2 s) at V0; session 2's six Tier L runs were all cut off at 150 s | M | E52 | `HP/heat.json` `val_blocks.summary.L16.cal_t66`, `.by_session`; `HP/reductions/v0.json` |
+
+## The effect of overheating (E53, 28 Sep; pre-registered, aifoundry3 and aifoundry1's card 1)
+
+`OH` means `docs/reports/data/2026-09-28-overheating/`; `red/` its `reductions/` (`tools/claims-v3/oh/reduce.py --all`
+under PREREG SHA-256 `1b34d189…` (amendment 2; the original freeze `8d620b64…` at 10:11 PDT, before any OH-1 or OH-2
+block); `extras.json` is `OH/extras.py`, descriptive, no verdict); `an/` its `analysis/` (the existing record, re-read by
+`OH/scripts/*.py`, no card time). Temperatures are the host's whole-degree readings: the mean of the 34 minion-shire
+sensors, and the hottest single sensor in each 1 s window (a peak-hold reset every second, anonymous). **val** = a
+registered verdict; the page is "The effect of overheating".
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| The registered verdicts | 20 of 21 PASS; card 1's OH2-b INSUFFICIENT (it never passed a 76 °C mean); card 1's OH2-d growth not testable | M | E53 | `red/verdicts.json`; the per-card count: `OH/overheat.json` `verdicts` |
+| The hottest sensor at the 0.20.0 rule's point | mean 65 °C: hottest 66–68 °C (median 67); mean 66 °C (the first reading `mean > 65` acts on): 67–69 °C (median 68); both cards, 136 windows. A statistic of the sensors: neither card's governor acts (aifoundry3's is latched by its zero TDP; card 1's 0.18.0 build never moves its clock) | M | E53 | `red/extras.json` `near_65` |
+| Concentrating the load does not widen the gap (**val**, OH1-a/b/c PASS) | one shire at full load (32 minions, about 0.9 W) median +1 to +2 °C (max +2); central 2 × 2 block +2 (max +3); idle +1 to +2; largest in all 677 OH-1 windows +3 | M | E53 | `red/oh1.json` `by_card_cond`, `OH1-a` |
+| The gap under the whole-chip heater (**val**, OH2-d) | at most +3 inside heater launches; aifoundry3's median +2 at 60–70 °C, +3 at 80–85 °C; over all 3,631 OH-2 windows +4 17 times (aifoundry3 12, card 1 5), never +5 | M | E53 | `red/oh2.json` `OH2-d`, `dhot_all_windows` |
+| No wrong result hot (**val**, OH2-a PASS) | 663 exact-checked launches (342 in the verdict blocks, 321 in the stopped attempts; 1,395 compared records): 0 wrong, 0 tensor-error CSRs, 0 not ok, 0 void; hottest an 81 °C mean with a sensor at 84 °C (aifoundry3); 30 launches at 80–85 °C (95% upper bound 0.1 per launch); the DRAM relay checked to 81 °C (before: 66 °C) | M | E53 | `red/oh2.json` `OH2-a`, `by_bin`, `hottest_checked`; `red/oh2-aborted.json`; `red/extras.json` `totals` |
+| The same work per cycle hot (**val**, OH2-b on aifoundry3 PASS) | all 18 kernel metrics (fma fp32/fp16/int8 sweeps, GEMV, mmbench int8/fp32, DRAM and mesh relays) at an 80–85 °C mean within 0.052% of rest (limit 0.1%); card 1 at 70–80 °C (not registered): 17 of 18 within 0.1%, the DRAM relay −0.39% inside its 0.75% rest spread | M | E53 | `red/oh2.json` `OH2-b`; `red/extras.json` `warm_vs_rest` |
+| The clock does not move with heat (**val**, OH2-c PASS) | the heater's implied clock 0.5994–0.5995 GHz and 546.001 cycles per op in every 5 °C band, 50–85 °C (aifoundry3), 55–80 °C (card 1) | M | E53 | `red/oh2.json` `OH2-c` |
+| DRAM refresh stays at 1× hot (**val**, OH2-e PASS) | 2,325.4 minion cycles at die means of 52, 54, 73 and 75 °C, as programmed (3,616 DFI clocks at 933 MHz) with derating off | M, R | E53 | `red/oh2.json` `OH2-e`; `etsoc-hal/src/memshire_ddr_init_functions.c:4441-4443, 4686-4688` at `836a4ab60` |
+| The supply does not sag with heat | minion rail on the die 523 → 520 mV (aifoundry3), 499 → 498 mV (card 1) from 50–55 °C to the hottest band; SRAM 698 → 697 and 751 mV; NoC 484 → 483 and 486 mV | M | E53 | `red/oh2.json` `die_mv_by_band` |
+| The idle laws still hold (**val**, OH3-a/b PASS) | E53's idle board power per degree within 0.20 W (aifoundry3, 60–77 °C) and 0.22 W (card 1, 60–70 °C) of E44's laws; refitted leakage doubling 19.4 °C (aifoundry3), 25.0 °C (card 1) | M, F | E53 | `red/oh3.json` |
+| aifoundry1's card 0 after its September overheating | its service processor's standing statistics (never reset): maximum mean 119 °C, a sensor peak-hold of 123 °C, I/O shire 118 °C, board maximum 75.24 W; now 60–63 °C and 17.0–18.5 W at 300 MHz and 398–399 mV (5,353 guard samples), against 18.6–18.8 W reported before the episode at a die temperature not recorded (a loose comparison). Supersedes "115–117 °C" as its highest reading (that was the host's reading on 25 Sep) | M | E53 | `OH/raw/aifoundry1-c1/oh/p*/guard.jsonl.gz` (`sp.minion_c[2]`, `temp_c.minshire[2]`, `temp_c.ioshire[2]`, `sp.board_max_w`); `OH/overheat.json` `card0` |
+| The highest readings on record, per card | aifoundry2 a 103 °C mean with a 106 °C sensor (catalogue pass 11, 26 Sep, 600 MHz, nothing tripped); aifoundry3 90/93; card 1 88/91; card 0 119/123 | M | E36–E46, E52, E53 | `an/max_temps.json` (1,979,875 samples) |
+| Correctness across the September record | 151,984 launches joined to telemetry, 5,927 with results checked; the only wrong results are two DRAM relay launches at 65–66 °C on aifoundry2 during an 800 → 600 MHz step (23 Sep); aifoundry2's mmbench checks passed to a 97 °C mean; the catalogue's 91–103 °C pass completed but checks no arithmetic | M | E23–E52 | `an/correct_vs_temp.json` (E53's directory left out: its reducer covers it) |
+| The heater's cycles per op before E53 | 546.001 (546.001–546.002) in every bin from 40 to 101 °C on three cards; the catalogue's hot passes (88–96 °C) against warm (76–77 °C): median 0.00%, range −0.08 to +0.10% over 30 configurations | M | E36–E46 | `an/timing_vs_temp.json` |
+| Where idle leakage plus a full random matmul would reach the card's 88 W input (**derived, extrapolated**) | a die mean of about 90 °C (card 1), 102 °C (aifoundry3), 106 °C (aifoundry2): each card's E44 law plus the 27.2 W flip-count estimate (12-heat-management.md) against the 88 W 12 V input (docs/research/power-telemetry.md); the laws extrapolate to 77, 88 and 120 W idle at 116 °C | D | E44 | `OH/overheat.json` `idle.<card>.t_matmul_88w`, `an/idle_vs_temp.json` |
+| An hour hot, in wear | at 0.7–0.9 eV an hour at 117 °C ages the chip like 25–61 h at 65 °C or 6.4–10.9 h at 85 °C; aifoundry2's 106 °C sensor 13–28 times the 65 °C rate | D, X | JESD47 note a (Arrhenius) | `an/derived.json` `af_pairs` |
+| The firmware's thermal limits (BL2 0.20.0, aifoundry2 and aifoundry3; it acts on aifoundry2 only, aifoundry3's is latched; card 1 runs 0.18.0 and card 0 0.21.2: 14-card-behaviour.md) | throttle while the integer mean of 34 truncated shire sensors > 65 °C ("early indication"), one point per pass down to the lowest point, nothing below; a PMIC alarm at 75 °C and 75 W on the PMIC's own "system temperature" (a note says it reads 0; the statistic is fed a literal 0), whose handler sets the frequency register to 300 MHz and reprograms the PLL only if the voltage lookup fails; no shutdown path; the 52 °C "expected average temperature" is a default reset value, not a limit; per-sensor calibration fuses not read; process detectors `MEASUREMENT_DISABLED`, no reader | R | — | et-platform `ffca4cbb4`: `include/thermal_pwr_mgmt.h:31-32, 43-46, 66`; `services/thermal_pwr_mgmt.c:656-679, 663-664, 2001-2034, 2995`; `include/bl2_pmic_controller.h:261-282`; `driver/pvt_controller.c:1279-1306`; `include/bl2_pvt_controller.h:100-102, 127` |
+| The PMIC's 75 W threshold did not act | aifoundry2's board reached 86.9 W in the 90–103 °C catalogue pass 11 at 600 MHz, with no safe state | M | E36–E46 | `an/derived.json` `a2_p11`; 14-card-behaviour.md "Nothing limits the die's temperature" |
+| A swing to 120 °C against one to 65 °C (both from 25 °C), in package fatigue (**derived**) | 5.6–7.6 times the damage per cycle (Coffin-Manson, exponent 2 for solder joints in JESD47I Annex A, 2.35 for the package in RAMP §3.4) | D, X | — | `an/derived.json` `coffin_manson` |
+| Outside limits, for comparison | throttle points 95–110 °C (Ryzen 7000 95, i9-13900K 100, RX 5700 hotspot 110, Jetson Orin 99/103, shutdown 104.5/105); THERMTRIP near 125 °C; JESD47 qualification 1,000 h at Tj ≥ 125 °C, 0 of 231 may fail; LPDDR4X standard grade 85 °C case; simulated 7 nm crossover (ZTC) about 0.53 V | X | the page's sources | `OH/sources.json` |
+
+Corrections this work makes (the page carries them): the host has **no per-sensor temperature series** (E51 and E52 recorded
+the mean, anonymous peak-holds and the I/O-shire sensor, not 34 sensors at 10 Hz); "card 0 throttled 10 times" has no
+source (the 10 in 14-card-behaviour.md, "Selecting one card on a two-card host", counts aborted `dev_mngt_service`
+processes); the catalogue's 91–103 °C launches "completed", they were not arithmetic-checked; the SRAM rail is 0.70–0.75 V
+by card, not 0.705 V everywhere; the 75 °C PMIC alarm reads the PMIC's own temperature, not the die, and on 0.20.0 its
+handler does not reprogram the PLL; the 52 °C in the firmware header is a default reset value, not an expected die
+temperature; E53's two cards do not throttle at any temperature (aifoundry3 latched, card 1 on 0.18.0), so its mean-65
+numbers are sensor statistics, and "nothing limits the die at 600 MHz" holds for the 0.20.0 and 0.18.0 cards, not for
+card 0 (1.4.1), which dropped to 300 MHz after 115–117 °C.
 
 ## Ridge points (derived; no card time)
 

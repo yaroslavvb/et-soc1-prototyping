@@ -1,0 +1,50 @@
+(1) heater launches: TensorFMA fp32 random, cycles per op and implied GHz by die mean (all samples at 600 MHz)
+card           die C        n   cyc/op med   cyc/op min   cyc/op max    GHz med
+aifoundry1-c1  40-60      211      546.001      546.001      546.001     0.5994
+aifoundry1-c1  60-70     8182      546.001      546.001      546.002     0.5994
+aifoundry1-c1  70-80      271      546.001      546.001      546.001     0.5994
+aifoundry1-c1  80-90      446      546.001      546.001      546.001     0.5994
+aifoundry2     60-70      145      546.001      546.001      546.001     0.5994
+aifoundry2     70-80       14      546.001      546.001      546.001     0.5994
+aifoundry2     80-90      176      546.001      546.001      546.001     0.5994
+aifoundry3     40-60      474      546.001      546.001      546.001     0.5995
+aifoundry3     60-70    12858      546.001      546.001      546.002     0.5995
+aifoundry3     70-80      624      546.001      546.001      546.001     0.5995
+aifoundry3     80-90     1085      546.001      546.001      546.001     0.5995
+aifoundry3     90-101      14      546.001      546.001      546.001     0.5995
+
+(2) aifoundry2 catalogue: bytes per cycle (memory configs) or ops per cycle per hart, hot passes (hold 88 C) against warm passes, same configuration
+passes: {'W': [('p1', 76.5903), ('p10', 76.1737), ('p4', 76.485), ('p7', 76.6062)], 'H': [('p11', 96.4027), ('p3', 87.8543), ('p6', 88.3157), ('p9', 90.9707)]}
+config                       nW   nH   warm med    hot med hot/warm  warm sd%
+fadd.pi/random/h2            32   32     0.3729     0.3729   +0.01%     0.02%
+fadd.ps/random/h2            32   32     0.3730     0.3730   -0.00%     0.02%
+fadd.s/random/h2             32   32     0.3692     0.3693   +0.02%     0.55%
+fadd.s/zeros/h2              32   32     0.3701     0.3701   -0.01%     0.56%
+fcvt.s.w/random/h2           32   32     0.3683     0.3686   +0.10%     0.26%
+feq.ps/random/h2             32   32     0.3729     0.3729   +0.01%     0.08%
+fexp.ps/random/h2            32   32     0.0943     0.0943   -0.00%     0.00%
+flog.ps/random/h2            32   32     0.0933     0.0933   +0.00%     0.01%
+fmadd.ps/random/h2           32   32     0.3640     0.3642   +0.04%     0.22%
+fmadd.ps/zeros/h2            32   32     0.3643     0.3641   -0.06%     0.33%
+fmadd.s/random/h2            32   32     0.3695     0.3694   -0.02%     0.64%
+fmul.pi/random/h2            32   32     0.3736     0.3735   -0.00%     0.07%
+fmul.ps/random/h2            32   32     0.3734     0.3735   +0.02%     0.08%
+fmul.s/random/h2             32   32     0.3705     0.3705   +0.01%     0.34%
+fmul.s/zeros/h2              32   32     0.3706     0.3705   -0.02%     0.47%
+fnmadd.ps/random/h2          32   32     0.3703     0.3700   -0.08%     0.28%
+frcp.ps/random/h2            32   32     0.1190     0.1190   -0.00%     0.00%
+fround.ps/random/h2          32   32     0.3608     0.3609   +0.02%     0.45%
+fsgnj.ps/random/h2           32   32     0.3690     0.3692   +0.04%     0.24%
+fsub.ps/random/h2            32   32     0.3704     0.3703   -0.02%     0.30%
+fsw.ps/random/h2             32   32     0.3743     0.3743   -0.01%     0.04%
+fxor.pi/random/h2            32   32     0.3659     0.3663   +0.10%     0.29%
+st_stream/dram/random        32   32    44.8944    44.9038   +0.02%     0.13%
+tload/dram/random            32   32   126.7098   126.7145   +0.00%     0.06%
+tload/scp/random             32   32  4096.0073  4096.0084   +0.00%     0.00%
+tstore/dram/random           32   32   126.8690   126.8567   -0.01%     0.05%
+tstore/scp/random            32   32  2049.9039  2049.9671   +0.00%     0.01%
+wire/hop2/random             32   32  2227.6354  2227.7406   +0.00%     0.04%
+wire/hop4/random             32   32  1748.7873  1749.1794   +0.02%     0.02%
+wire/hop6/random             32   32  1379.9082  1379.8604   -0.00%     0.08%
+median hot/warm change over 30 configurations: +0.00%; range -0.08% .. +0.10%
+memory configurations: [('st_stream/dram/random', 0.02), ('tload/dram/random', 0.0), ('tload/scp/random', 0.0), ('tstore/dram/random', -0.01), ('tstore/scp/random', 0.0), ('wire/hop2/random', 0.0), ('wire/hop4/random', 0.02), ('wire/hop6/random', -0.0)]

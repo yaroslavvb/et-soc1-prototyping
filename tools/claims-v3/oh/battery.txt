@@ -1,0 +1,17 @@
+# OH-2's known-answer battery (params-oh.json, PREREG.md): one line per kernel, "name|tool|arguments".
+# tool: SPARSITY = the heater's sparsity_host (lib.sh HEATER), with --kernel <its sparsity.elf> added;
+#       MMB = the gp-sdk mmbench launcher (-k <mmbench.elf> -d silicon added; run in the block's run/ directory);
+#       ONCHIP = onchip_host (lib.sh ONCHIP).
+# Every kernel's output is compared on the host (reduce.py CHECKS): sparsity fma "result" in both/math/prm-literal
+# (exact: small-integer inputs), gemv "wrong" = 0, mmbench "check" exact with bad_minions = launch_errors = 0, relay
+# "wrong_elements" = 0 (every element), probe self_readback_wrong = remote_blocks_wrong = 0; tensor_errors = 0 and
+# ok true everywhere. A kernel that reports "unchecked" in the smoke is replaced before the first OH-2 block (README).
+K1-fma-fp32|SPARSITY|--test fma --type fp32 --pattern elem --sweep 0,0.5,0.875,1 --shires 0xffffffff --per-shire 32 --iters 4000 --budget 8
+K2-fma-fp16|SPARSITY|--test fma --type fp16 --pattern pair --sweep 0,0.5,1 --shires 0xffffffff --per-shire 32 --iters 4000 --budget 8
+K3-fma-int8|SPARSITY|--test fma --type int8 --pattern elem --sweep 0,0.5,0.875,1 --shires 0xffffffff --per-shire 32 --iters 4000 --budget 8
+K4-gemv|SPARSITY|--test gemv --gemv dense --sweep 0,0.9,0.99 --shires 0xffffffff --per-shire 32 --iters 2000 --budget 8
+K5-mmb-int8|MMB|-s 0xffffffff -m int8
+K6-mmb-fp32|MMB|-s 0xffffffff -m fp32
+K7-relay-dram|ONCHIP|--test relay --medium dram --stage-bytes 1M --stages 64 --work 1 --budget 8
+K8-relay-hop|ONCHIP|--test relay --medium hop --stage-bytes 1M --stages 64 --work 1 --budget 8
+K9-probe|ONCHIP|--test probe --method 0 --shift 1 --budget 8

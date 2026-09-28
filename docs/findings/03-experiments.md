@@ -2,14 +2,16 @@
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E52**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E53**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
 check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
 same three cards after each card's campaign blocks (26 September), E49 a card-free test of the runtime's log-level race,
 E50 the host link and the launch path timed on the three cards (27 September), and E51 the DV2 development night on
 aifoundry2 (28 September: what the governor compares, placement against the first throttle; **development data, not
 validated**), and E52 the heat-placement experiment (27–28 September: development on aifoundry3, calibration and a
-frozen validation on aifoundry1's card 1: the short-burst prediction PASS, the primary sustained one INSUFFICIENT).
+frozen validation on aifoundry1's card 1: the short-burst prediction PASS, the primary sustained one INSUFFICIENT), and E53 the overheating experiments (28 September, aifoundry3 and aifoundry1's card 1, pre-registered: the
+hottest sensor against the mean under concentrated load, exact-checked kernels from rest to an 82 °C mean, idle power;
+20 of 21 verdicts PASS, 1 INSUFFICIENT).
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
 (aifoundry2, aifoundry3 or both; E35–E46, E48 and E50 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
@@ -1798,6 +1800,102 @@ is inferred (a mirror image changes no class); aifoundry3's clock is pinned and 
 is the mean reading 66 °C, not a clock step; only signs transfer between cards.
 **Artifact:** the page "Where the work sits" (`docs/reports/2026-09-28-et-soc1-heat-placement.html`, not yet
 published), and the rows marked E52 in [05-claims.md](05-claims.md).
+
+## E53 — The effect of overheating: the hottest sensor under concentrated load, exact-checked kernels from rest to an 82 °C mean, and idle power (2026-09-28, 10:11–12:05 PDT, aifoundry3 and aifoundry1's card 1) — pre-registered: 20 of 21 verdicts PASS, 1 INSUFFICIENT
+
+**Question (Q61):** the owner's overheating questions, where the ET-SoC-1's data did not settle them: (1) how far the
+hottest of the 34 minion-shire sensors leads their mean (what the BL2 0.20.0 governor compares with 65 °C; on these two cards it does not act: aifoundry3's is latched, card 1 runs 0.18.0 and never moves its clock) under the
+most concentrated load the heater can make, one shire at full occupancy; (2) whether anything computes wrong, or does a
+different amount of work per cycle, as the die heats, on aifoundry3 (no checked launch above 70 °C before) and card 1,
+including the DRAM and mesh data paths (the relay had never been checked above 66 °C on any card); (3) whether the
+DRAM refresh period changes when hot; (4) whether each card's September idle law (E44) still holds. The outside research
+behind the page, and the analyses of the existing record, are in the page's data directory (below).
+**Method:** tools `tools/claims-v3/oh/` (copied from `hp/`, which is untouched; `README.md` has the rules and how they
+are enforced). **OH-1**: per block, four conditions in a Williams-balanced order: IDLE, ONE-C (shire 14, centre, mask
+`0x00004000`, 32 minions), ONE-NE (shire 28, by the I/O corner, `0x10000000`), B4C@32 (the central 2 × 2 block,
+`0x00606000`, 128 minions), each after a preheat to a 62 °C mean: 30 back-to-back 2 s launches of
+`sparsity_host --test fma --type fp32 --pattern none --values randn --per-shire 32 --seconds 2` (or 60 s idle), 1 s
+windows from 10 s in; 3 blocks on aifoundry3, 2 on card 1. **OH-2**: a battery of nine exact-checked kernels (sparsity
+fma fp32/fp16/int8 sweeps, a GEMV, mmbench int8 and fp32, the onchip relay over DRAM and over mesh hops, the cross-shire
+scratchpad probe; `oh/battery.txt`) at bands B0 (rest) to B4 (die mean 82–84 °C), each band reached and held with
+whole-chip heater launches (ALL32; ALL24 on card 1 above 75 °C), memprobe's refresh program at B4, then a cooling tail
+with one more battery when the mean read ≤ 65 °C; each launch's temperature is the hottest mean from 0.3 s before to 0.3 s
+after it. **OH-3**: idle board power per whole degree from the idle stretches of both (≥ 5 s after a launch) against
+E44's laws. Every sampler reset the service processor's statistics once a second (`ettelem --reset-ms 1000`, as in E52;
+each block first recorded the standing statistics), so each 1 s window gives the hottest single sensor (anonymous).
+Rules: every device process under `timeout 10` with the card lock held, chains ≤ 150 s, a hard stop at 88 °C (mean or any
+sensor) or 82 W, soft caps 86 °C (sensor), 85 °C (mean), 78 W; card 0 read only by a 1 Hz guard (never locked, reset or
+launched); nothing on aifoundry2. What ran (PDT):
+
+| Time | Card | Pass | What |
+|---|---|---|---|
+| 09:40–10:11 | — | — | tools, self-tests, `V3_DRY=1` runs of 901, 201, 101–103 on both hosts (`et-who` clean after each) |
+| 10:11 | — | PREREG | frozen: `tools/claims-v3/oh/prereg/PREREG.md`, SHA-256 `8d620b64dc60239a104c59e3d9bd8c42cf1b4adb9e482460499dedc836f36661` (a copy: `OH/PREREG.md`) |
+| 10:11–10:13 | both | 901 | smokes: every battery kernel checked once; refresh period 2,325.4 |
+| 10:13–10:33 | both | 201, stopped | a bug in `oh_heat_to` held the die at its target to the time cap; stopped by hand (SIGTERM, STOP), kept as `p201.aborted-a1` |
+| 10:39 | — | amendment 1 | the heating loop's sticky target flag; stopped blocks enter no verdict; SHA-256 `067a32b41014fdc65d0880008d090d022075b812c63e360d8dc831c4222ad22e` |
+| 10:39–10:59 | both | 201, stopped | the upper bands were above what the heater reaches within the 150 s chains (card 1 levelled off at 76 °C, aifoundry3 at 82 °C); stopped, kept as `p201.aborted-a2` |
+| 11:06 | — | amendment 2 | band heating 300 s, holds 30 s, B4 target 82 °C, a card that cannot reach a band held one degree below its highest mean; SHA-256 `1b34d189b5d9eb3d08d245da6dfacf042b255b9e606c9d1054b0e2d0622c7bb1` (current). No prediction or decision rule changed |
+| 11:06–11:43 | both | 201 | OH-2 (aifoundry3 11:06:41–11:39:36, card 1 11:06:46–11:43:22) |
+| 11:40–12:05 | aifoundry3 | 101–103 | OH-1, Williams rows 1–3 |
+| 11:44–11:58 | card 1 | 101, 102 | OH-1, Williams rows 1–2 |
+
+Card time with the lock held, from each block's `block.json`: 96 min on aifoundry3 and 89 min on card 1, 40 min of each
+in the stopped attempts. Maxima: aifoundry3 a mean of 82 °C, a sensor of 85 °C, 67.2 W; card 1 76 °C, 79 °C, 71.6 W. No
+soft cap or hard stop acted.
+**Raw data:** [`docs/reports/data/2026-09-28-overheating/`](../reports/data/2026-09-28-overheating/README.md) (`OH`
+below): `raw/<card>/oh/p<pass>/` (every block: `block.json`, `marks.jsonl`, `launches.jsonl`, 10 Hz telemetry
+`tel-*.jsonl.gz`, every process's output `k.tar.gz`, the refresh programs `mp/`, `stats-before.jsonl.gz`, card 1's
+`guard.jsonl.gz` of card 0, code and binary hashes, `et-lab-manifest`); `reductions/` (`python3
+tools/claims-v3/oh/reduce.py --all --data OH/raw --out OH/reductions`: `verdicts.json`, `oh1.json`, `oh2.json`,
+`oh3.json`, `oh2-aborted.json`, `checks.json`; `extras.py` → `extras.json`, the descriptive numbers); the analyses of the
+existing record, `scripts/` → `analysis/` (`max_temps`, `correct_vs_temp`, `timing_vs_temp`, `hot_minus_mean`,
+`idle_vs_temp`, `runaway`, `events_vs_temp`, and `derived.py`, arithmetic on cited inputs); `sources.json` (the page's
+68 sources); `build_overheat_data.py` → `overheat.json` (the page's data).
+**Result (verdicts as registered, `OH/reductions/verdicts.json`; one per item and card):**
+
+| Item | Rule | aifoundry3 | card 1 |
+|---|---|---|---|
+| OH1-a | every analysed 1 s window: hottest − mean ≤ +4 °C | PASS (max +3, 418 windows) | PASS (max +3, 259) |
+| OH1-b | one shire's median gap ≤ the 2 × 2 block's, per block | PASS (3 of 3: +2 vs +2) | PASS (2 of 2) |
+| OH1-c | each load's median gap within ±1 °C of idle's | PASS (ONE-C +1, ONE-NE 0, B4C +1) | PASS (0, 0, 0) |
+| OH2-a | 0 wrong, 0 tensor-error CSRs, 0 not-ok | PASS (171 checked) | PASS (171) |
+| OH2-b | each metric's cycles at 80–85 °C within 0.1% of rest | PASS (18 of 18, largest 0.052%) | INSUFFICIENT (never reached 80 °C) |
+| OH2-c | heater's implied clock 0.5994–0.5995 GHz per 5 °C band | PASS (7 bands, 50–85 °C) | PASS (5 bands, 55–80 °C) |
+| OH2-d | heater gap ≤ +4; median growth 60–70 → 80–85 °C 0/+1 | PASS, PASS (+2 → +3) | PASS (max +3); growth not testable |
+| OH2-e | refresh period 2,325.4 ± 0.1 cycles hot | PASS (die 52 and 75 °C) | PASS (54 and 73 °C) |
+| OH3-a | idle power per degree within ±1.5 W of E44 | PASS (18 bins 60–77 °C, ≤ 0.20 W) | PASS (10 bins 60–70 °C, ≤ 0.22 W) |
+| OH3-b | refitted leakage doubling 17–25 °C | PASS (19.4 °C) | PASS (25.0 °C) |
+
+- *The 0.20.0 rule's point* (sensor statistics; neither card's governor acts). When the mean read 65 °C the hottest sensor read 66–68 °C (median 67); at 66 °C, the first
+  reading `mean > 65` acts on, 67–69 °C (median 68); both cards, 136 windows (`extras.json` `near_65`).
+- *The gap by load and temperature.* Idle median +1 to +2, one shire +1 to +2 (max +2), the 2 × 2 block +2 (max +3),
+  the whole-chip heater +3 (max +3); over all 3,631 OH-2 windows +4 occurred 17 times (aifoundry3 12, card 1 5), never +5.
+- *Correctness.* 663 exact-checked launches, stopped attempts included (1,395 compared records), 0 wrong, 0
+  tensor errors, 0 not ok, 0 void; the hottest at an 81 °C mean with a sensor at 84 °C (aifoundry3; 30 launches at
+  80–85 °C, a 95% upper bound of 0.1 failures per launch there). The DRAM relay is now checked to 81 °C.
+- *Supply.* The minion rail on the die moved 523 → 520 mV (aifoundry3) and 499 → 498 mV (card 1) from 50–55 °C to the
+  hottest band; SRAM 698 → 697 and 751 mV; NoC 484 → 483 and 486 mV (`oh2.json` `die_mv_by_band`).
+- *Card 1 at 70–80 °C* (not registered): 17 of 18 metrics within 0.1% of rest; the DRAM relay −0.39%, inside its own
+  0.75% rest spread (aifoundry3's +0.41% the other way).
+- *Card 0* (guard only, 5,353 samples): 60–63 °C, 17.0–18.5 W at 300 MHz; its standing service-processor statistics
+  still read a 119 °C maximum mean, a 123 °C sensor peak-hold, 118 °C at the I/O shire and 75.24 W (never reset).
+**The existing record, re-read for the page (no card time; `OH/analysis/`):** the highest readings per card (aifoundry2
+a 103 °C mean with a 106 °C sensor, aifoundry3 90/93, card 1 88/91, card 0 119/123 from its service processor's standing
+statistics); 151,984 launches joined to telemetry, 5,927 of them checked, whose only wrong results are the two relay
+launches at 65–66 °C during an 800 → 600 MHz step on 23 September; the heater's 546.001 cycles per op from 40 to 101 °C
+on three cards; E44's idle laws and their extrapolations (77, 88, 120 W at 116 °C); and derived numbers (Arrhenius
+factors, the mean-against-maximum wear arithmetic, the temperature at which idle leakage plus a 27.2 W matmul estimate
+reaches the card's 88 W input: 90–106 °C by card).
+**Not measured, and why:** transistor speed against temperature from the 34 process detectors (their oscillator select
+is `MEASUREMENT_DISABLED`, their read functions have no caller, the PVT blocks are service-processor only: a firmware
+build is needed; the registered prediction: on the minion rail a count changes by less than ±2% from 55 to 85 °C, more
+likely up; on a rail ≥ 0.70 V it falls, by less than 5%); a DLL delay sweep (M-mode, neighbourhood resets); a clock or
+voltage shmoo (admin settings); the power-limit hypothesis for the ~120 °C stop (board power near the 88 W input); a
+DRAM retention hold. Card 1 could not be taken past a 76 °C mean under the frozen heater rule.
+**Cannot tell you:** which shire is hottest (the peak-holds are anonymous), anything inside a 3.7 mm tile, the DRAM's
+temperature, or what happens above 85 °C on a sensor (the hard stop was 88 °C).
+**Fed:** the page "The effect of overheating" (`docs/reports/2026-09-28-effect-of-overheating.html`, not yet published).
 
 ## A note on E10, re-analysed for Q20
 

@@ -1,0 +1,38 @@
+telemetry samples per card: {'aifoundry2': 778305, 'aifoundry3': 658991, 'aifoundry1-c1': 423616, 'aifoundry1-c0': 6694}
+launch records (deduplicated): 172070
+
+card           mean C   launches  checked  wrong tens.e not_ok
+aifoundry1-c1  0-60         2904       69      0      0      0
+aifoundry1-c1  60-70       23536      668      0      0      0
+aifoundry1-c1  70-80        4873      783      0      0      0
+aifoundry1-c1  80-90        6847      267      0      0      0
+aifoundry1-c1  no-tel        613      219      0      0      0
+aifoundry2     100-130        28        0      0      0      0
+aifoundry2     60-70        1354      137      2      0      2
+aifoundry2     70-80       27526     1517      0      0      0
+aifoundry2     80-90       28750      430      0      0      0
+aifoundry2     90-100        979       53      0      0      0
+aifoundry2     no-tel       1523      471      0      0      0
+aifoundry3     0-60        32801     1682      0      0      0
+aifoundry3     60-70       19760      317      0      0      0
+aifoundry3     70-80        1310        4      0      0      0
+aifoundry3     80-90        1302        0      0      0      0
+aifoundry3     90-100         14        0      0      0      0
+aifoundry3     no-tel       1376      717      0      0      0
+
+checked launches by kind, 80 C and above:
+  aifoundry1-c1 80-90 {'mmbench': 62, 'sparsity-fma': 55, 'sparsity-gemv': 150} all kinds: {'sparsity-fma': 6635, 'mmbench': 62, 'sparsity-gemv': 150}
+  aifoundry2 100-130 {} all kinds: {'enercat': 28}
+  aifoundry2 80-90 {'mmbench': 148, 'sparsity-diverge': 4, 'sparsity-fma': 95, 'sparsity-gemv': 183} all kinds: {'enercat': 8121, 'sparsity-fma': 20225, 'sparsity-other': 65, 'mmbench': 148, 'mmbench-private-by-design': 4, 'sparsity-diverge': 4, 'sparsity-gemv': 183}
+  aifoundry2 90-100 {'mmbench': 53} all kinds: {'sparsity-fma': 89, 'mmbench': 53, 'enercat': 837}
+  aifoundry3 80-90 {} all kinds: {'sparsity-fma': 1302}
+  aifoundry3 90-100 {} all kinds: {'sparsity-fma': 14}
+
+hottest CHECKED launch per card (mean C, kind, file, t_start_ms, windowed hottest sensor):
+  aifoundry1-c1 83 ('mmbench', 'docs/reports/data/2026-09-25-claims-v3/raw/aifoundry1-c1/mmb/p4/thermal/mm-8.out', 1790429697820, None)
+  aifoundry2 97 ('mmbench', 'docs/reports/data/2026-09-25-claims-v3/raw/aifoundry2/mmb/p3/thermal/mm-8.out', 1790414670614, None)
+  aifoundry3 70 ('mmbench', 'docs/reports/data/2026-09-25-claims-v3/raw/aifoundry3/mmb/p1/thermal/mm-8.out', 1790408820885, None)
+
+every launch with a wrong result, a tensor error or ok false (2):
+  ('aifoundry2', 65, None, 'relay', 'docs/reports/data/2026-09-23-reruns-aifoundry2/relay-pass1/runs.jsonl', {'label': 'dram', 'test': 'relay', 'wrong_elements': 1118, 'ok': False, 't_start_ms': 1790193093270})
+  ('aifoundry2', 66, None, 'relay', 'docs/reports/data/2026-09-23-reruns-aifoundry2/relay-pass1/runs.jsonl', {'label': 'dram', 'test': 'relay', 'wrong_elements': 1000, 'ok': False, 't_start_ms': 1790193097475})
