@@ -1596,7 +1596,7 @@ host-to-card DMA commands halve the rate, why card to host dips at 64 MB, and wh
 half the others' were not established (the hub's rungs ask-pcie-dma, ask-lab-root and exp-pcie-concurrency). No
 process held a card for more than 2.1 s, but the card's lock was held for a whole run of six processes, 12.8–14.9 s
 (`hosts.<card>.run_times_ms`), longer than the lab's 10 s rule for holding a device, which each process kept.
-**Artifact:** the page "Over the PCIe link" (`docs/reports/2026-09-27-et-soc1-pcie-link.html`, not yet published)
+**Artifact:** the page "Over the PCIe link" (`docs/reports/2026-09-27-et-soc1-pcie-link.html`; [et-soc1-pcie-link](https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link), public)
 and the chip diagram's PCIe shire, Host panel and flow 6.
 
 ## E51 — DV2: what the governor compares, and whether placement delays the throttle (2026-09-28, 00:33–02:54 PDT, aifoundry2; one read-only query of aifoundry3) — development, not validated
@@ -1851,7 +1851,7 @@ tools/claims-v3/oh/reduce.py --all --data OH/raw --out OH/reductions`: `verdicts
 `oh3.json`, `oh2-aborted.json`, `checks.json`; `extras.py` → `extras.json`, the descriptive numbers); the analyses of the
 existing record, `scripts/` → `analysis/` (`max_temps`, `correct_vs_temp`, `timing_vs_temp`, `hot_minus_mean`,
 `idle_vs_temp`, `runaway`, `events_vs_temp`, and `derived.py`, arithmetic on cited inputs); `sources.json` (the page's
-68 sources); `build_overheat_data.py` → `overheat.json` (the page's data).
+69 sources: 60 outside, 9 from the ET-SoC-1's own firmware and documents); `build_overheat_data.py` → `overheat.json` (the page's data).
 **Result (verdicts as registered, `OH/reductions/verdicts.json`; one per item and card):**
 
 | Item | Rule | aifoundry3 | card 1 |
@@ -1895,7 +1895,7 @@ voltage shmoo (admin settings); the power-limit hypothesis for the ~120 °C stop
 DRAM retention hold. Card 1 could not be taken past a 76 °C mean under the frozen heater rule.
 **Cannot tell you:** which shire is hottest (the peak-holds are anonymous), anything inside a 3.7 mm tile, the DRAM's
 temperature, or what happens above 85 °C on a sensor (the hard stop was 88 °C).
-**Fed:** the page "The effect of overheating" (`docs/reports/2026-09-28-effect-of-overheating.html`, not yet published).
+**Fed:** the page "The effect of overheating" (`docs/reports/2026-09-28-effect-of-overheating.html`; [et-soc1-effect-of-overheating](https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating), public since 28 September), and the hub's §7 and §5 (rungs 45 and 46; rungs 13, 24 and 42 extended).
 
 ## A note on E10, re-analysed for Q20
 

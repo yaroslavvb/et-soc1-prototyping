@@ -138,6 +138,15 @@ Read [Terms](#terms) first.
    INSUFFICIENT (PLACE-t: 7 of its 10 runs, 10 of all 15 Tier L runs, did not reach 66 °C within the 150 s cap; the two
    blocks that decided went the predicted way). By the frozen table no theory survived on card 1 and none was refuted.
    → [03-experiments.md](03-experiments.md), E52; [`reports/data/2026-09-28-heat-placement/`](../reports/data/2026-09-28-heat-placement/README.md)
+19. **Heat changed neither the results nor the work per cycle, and the hottest sensor stays close to the mean**
+   (E53, 28 September, pre-registered on aifoundry3 and aifoundry1's card 1: 20 of 21 verdicts PASS). The hottest of the
+   34 minion-shire sensors ran 1–3 °C above their mean (at most +4), even with the whole load on one shire, so where the
+   0.20.0 `mean > 65` rule acts it fires at a hottest sensor of 67–69 °C; every documented hard limit elsewhere (Intel,
+   AMD RX 5700, IBM POWER9, Jetson) acts on the hottest sensor or core. 663 exact-checked launches up to an 81 °C mean
+   computed nothing wrong, cycles per operation stayed within 0.05% of rest (aifoundry3; card 1 never passed a 76 °C
+   mean), the DRAM refresh period did not change, and each card's September idle law still held. On the 0.20.0 and
+   0.18.0 builds nothing limits the die once the clock is at 600 MHz. → [03-experiments.md](03-experiments.md), E53;
+   [05-claims.md](05-claims.md), "The effect of overheating"; [`reports/data/2026-09-28-overheating/`](../reports/data/2026-09-28-overheating/README.md)
 
 ## Terms
 
@@ -193,8 +202,8 @@ Four kinds of thing have IDs, and every claim cites them:
 | Prefix | Meaning | File |
 |---|---|---|
 | **R1–R14** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
-| **Q1–Q60** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E52** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 the DV2 development night on aifoundry2, 28 September, development only; E52 the heat placement, 27–28 September, development and a frozen validation) | [03-experiments.md](03-experiments.md) |
+| **Q1–Q61** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
+| **E1–E53** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 the DV2 development night on aifoundry2, 28 September, development only; E52 the heat placement, 27–28 September, development and a frozen validation; E53 the overheating experiments, 28 September, pre-registered) | [03-experiments.md](03-experiments.md) |
 | **A1–A19** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused) | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":

@@ -49,7 +49,7 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   2.04 [1.73–2.42] times as long, 5 of 5 blocks); sustained heating PLACE-t **INSUFFICIENT** (7 of its 10 runs, 10 of
   all 15 Tier L runs, cut off by the 150 s cap before the trip); transfer H11 INSUFFICIENT; by the frozen table no theory survived and none was
   refuted. Data: `docs/reports/data/2026-09-28-heat-placement/README.md`; the page "Where the work sits"
-  (`docs/reports/2026-09-28-et-soc1-heat-placement.html`, not yet published) opens with the summary of which
+  ([et-soc1-heat-placement](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-placement), public since 28 September) opens with the summary of which
   theories survived. **The heat-placement lock:** every file `PREREG.md`'s lock lists (in `tools/claims-v3/hp/`: `block.sh`,
   `hplib.sh`, `hplib.py`, `probe.sh`, `reduce.py`, `sptrace_events.py`, `placements.json`, `run_queue.sh`,
   `ettelem-hp/ettelem.cpp`, `prereg/`, `params/params-val-aifoundry1-c1.json`; and `tools/claims-v3/lib.sh`,
@@ -58,6 +58,20 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   stay as frozen, since `reduce.py --val` re-checks them to reproduce `val.json`. Q1's answer (the
   mean) rests on the source and E51: no on-card clock test could run here (both probes SILENT, aifoundry2 resting at
   66–67 °C).
+- **The effect of overheating (Q61, E53): done and published (28 September).** The owner's questions of that morning
+  (what temperatures processors are built for and why; whether a limit should watch the average or the hottest spot;
+  whether heat changes switching speed; why a hot chip stops and then works again) are answered from outside research
+  (60 sources) and checked on the ET-SoC-1: its firmware's limits per card build (only aifoundry2's 0.20.0 rule acts; on
+  the 0.20.0 and 0.18.0 cards nothing limits the die at 600 MHz), the existing record re-read, and E53, two
+  pre-registered experiments on aifoundry3 and aifoundry1's card 1 (10:11–12:05 PDT; `tools/claims-v3/oh/`; frozen at
+  10:11, two amendments before the data they touch): the hottest sensor ran 1–3 °C above the 34-sensor mean (at most
+  +4), 663 exact-checked launches up to an 81 °C mean computed nothing wrong, and cycles per operation stayed within
+  0.05% of rest; 20 of 21 verdicts PASS (card 1's work-per-cycle test INSUFFICIENT: it never passed a 76 °C mean). Data:
+  `docs/reports/data/2026-09-28-overheating/README.md`; the page
+  [et-soc1-effect-of-overheating](https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating)
+  (`docs/reports/2026-09-28-effect-of-overheating.html`, public). Open: its asks, on the hub as rungs 45 and 46 and
+  in rungs 13, 24 and 42; a hotter card-1 run and the rule readings E52 and E53 used, both for the owner (the data
+  README, "Rules and their reading").
 
 - **The lab, 25 September (evening).** Four cards work, on three firmware releases: aifoundry2 and aifoundry3 (1.3.1)
   and, since 15:02 that day, aifoundry1's two cards (card 0 on 1.4.1, card 1 on 1.2.0). aifoundry1's cards had been

@@ -391,8 +391,18 @@
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-placement",
    "date": "27–28 Sep",
    "what": "Does the same work run longer before the thermal trip in some parts of the die? Theories and predictions first, development on aifoundry3, then a frozen, hashed validation on aifoundry1's card 1 (E52): the same 512 minions on the 16 perimeter shires took 1.62 times as long as on the 16 interior ones to bring the sensors' mean from 61 to 66 °C in development (9 of 9 blocks, equal power), and 2.04 times [1.73–2.42] in the validation's short bursts (PASS, 5 of 5 blocks); the primary sustained test is INSUFFICIENT (1.22 times [0.66–2.27]; 7 of its 10 runs cut off by the 150 s cap), so by the frozen rules no theory counts as survived on card 1, and none was refuted.",
-   "instruments": "10 Hz telemetry with the 34 shire sensors (ettelem), board power and clock; the service processor's trace ring for each card's probe",
+   "instruments": "10 Hz telemetry of the 34 shire sensors' mean and peak-holds (ettelem), board power and clock; the service processor's trace ring for each card's probe",
    "short": "Heat placement",
+   "pub": "2026-09-28"
+  },
+  {
+   "group": "Energy and power",
+   "title": "The effect of overheating",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating",
+   "date": "28 Sep",
+   "what": "Outside research (60 sources) on what temperatures processors are built for and why, whether a limit should watch the average or the hottest spot, what heat does to switching speed, and why a hot chip stops and then works again, checked on the ET-SoC-1: every documented hard limit elsewhere acts on the hottest sensor or core; the ET's 0.20.0 rule compares the 34-sensor mean, but the hottest sensor ran only 1–3 °C above it (at most +4) in two pre-registered experiments on aifoundry3 and aifoundry1 card 1 (E53, 20 of 21 verdicts PASS); on the 0.20.0 and 0.18.0 cards nothing limits the die once the clock is at 600 MHz; 663 exact-checked launches up to an 81 °C mean computed nothing wrong, and the cycles per operation matched rest within 0.05%.",
+   "instruments": "outside documents; the firmware source (et-platform ffca4cbb4); E53: 1 s peak-hold windows of the 34 shire sensors, exact-checked kernels, the memory probe's refresh period, board power; the existing telemetry record",
+   "short": "Overheating",
    "pub": "2026-09-28"
   },
   {
@@ -4582,9 +4592,9 @@
    "status": "needs_fw_change",
    "what": "Enable the process detectors and the two external analog monitor inputs",
    "done": false,
-   "adds": "35 ring-oscillator process detectors (one per minion shire and the IO shire) are configured with measurement disabled and never read; two external analog channels of the voltage monitors have a stub reader and no caller.",
+   "adds": "35 ring-oscillator process detectors (one per minion shire and the IO shire) are configured with measurement disabled and never read; two external analog channels of the voltage monitors have a stub reader and no caller. The effect of overheating needs them for the one question it could not measure, whether heat makes this chip's transistors switch faster or slower: a service-processor build that selects a delay chain on the detectors, samples the 34 minion-shire detectors with each temperature pass and exposes the counts. E53 registered its prediction before any data: on the minion rail (about 0.5 V) a count changes by less than ±2% between 55 and 85 °C, more likely up (faster); on a rail at 0.70 V or more it falls, by less than 5%.",
    "cost": "driver already written; a firmware image; for the external inputs, finding what the board wires to them",
-   "effect": "Per-shire silicon speed and a leakage proxy that separates the card factor into process and voltage; possibly two board-level sense points."
+   "effect": "Per-shire silicon speed and a leakage proxy that separates the card factor into process and voltage; possibly two board-level sense points. For the overheating page: heat's effect on switching speed measured on this chip, and whether its low-voltage logic gets faster when hot (temperature inversion)."
   },
   {
    "rung": 14,
@@ -4667,7 +4677,7 @@
   {
    "rung": 21,
    "id": "ask-noc-docs",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "The NoC's reference manual and specification",
    "done": false,
@@ -4683,7 +4693,7 @@
   {
    "rung": 22,
    "id": "ask-floorplan",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "The chip's floorplan, or the die plot with its orientation stated",
    "done": false,
@@ -4695,7 +4705,7 @@
   {
    "rung": 23,
    "id": "ask-shire-floorplan",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "The minion shire's floorplan",
    "done": false,
@@ -4712,19 +4722,19 @@
   {
    "rung": 24,
    "id": "ask-databook",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
-   "what": "The ET-SoC-1 Data Book and a final datasheet",
+   "what": "The ET-SoC-1 Data Book and a final datasheet, with the chip's thermal ratings",
    "done": false,
-   "adds": "The Programmer's Reference Manual sends readers to the ET-SoC-1 Data Book for the hardware architecture (pdf p.9) and for the DMCTRL and AndOrTreeL2 debug registers; the Preliminary Datasheet Rev 1.0 leaves the electrical specifications (§8) and the package's thermal information (§9.1) to 'a future release' and has no ball map. The Data Book, or a later datasheet with its ball map, would show from which package edges the PCIe lanes and the four LPDDR4X interfaces leave: a second way to fix the die's orientation, against the package and the card.",
-   "cost": "an email",
-   "effect": "Chip diagram: the die view tied to the package and the card; the power pages gain the package's thermal data.",
+   "adds": "The Programmer's Reference Manual sends readers to the ET-SoC-1 Data Book for the hardware architecture (pdf p.9) and for the DMCTRL and AndOrTreeL2 debug registers; the Preliminary Datasheet Rev 1.0 leaves the electrical specifications (§8) and the package's thermal information (§9.1) to 'a future release' and has no ball map. The Data Book, or a later datasheet with its ball map, would show from which package edges the PCIe lanes and the four LPDDR4X interfaces leave: a second way to fix the die's orientation, against the package and the card. The effect of overheating asks for the ratings those sections would hold, or Esperanto's qualification records: the maximum junction temperature (Tj max), the temperature the timing was signed off at, the qualification conditions (the high-temperature operating life test's temperature and hours) and the design life. Without them the page can set the firmware's 65 °C rule and the lab's ~120 °C episode only against other vendors' limits (throttles at about 95–110 °C, shutdowns at about 105–125 °C).",
+   "cost": "an email; the thermal ratings may be in a qualification or reliability report rather than the datasheet",
+   "effect": "Chip diagram: the die view tied to the package and the card; the power pages gain the package's thermal data. The effect of overheating: the ET's own margin at 65–120 °C and its lifetime there, instead of other vendors'.",
    "diagram": "die orientation on the package and the card"
   },
   {
    "rung": 25,
    "id": "ask-card-schematic",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "The dev card's schematic and board file",
    "done": false,
@@ -4739,7 +4749,7 @@
   {
    "rung": 26,
    "id": "ask-memshire",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "The memory shire's description, or its programmed DDR registers",
    "done": false,
@@ -4755,7 +4765,7 @@
   {
    "rung": 27,
    "id": "ask-noc-registers",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "A way to read the NoC's router and bridge registers",
    "done": false,
@@ -4767,7 +4777,7 @@
   {
    "rung": 28,
    "id": "ask-design-docs",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "The rest of the design documents the drop cites",
    "done": false,
@@ -4784,7 +4794,7 @@
   {
    "rung": 29,
    "id": "ask-pcie-dma",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "The PCIe DMA engine's documentation and the settings the firmware gives it",
    "done": false,
@@ -4796,7 +4806,7 @@
   {
    "rung": 30,
    "id": "ask-lab-root",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "Two readings on the lab hosts that need root",
    "done": false,
@@ -4808,7 +4818,7 @@
   {
    "rung": 37,
    "id": "ask-not-sram",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "Which of the chip's memories are not SRAM, and what cells they use",
    "done": false,
@@ -4826,7 +4836,7 @@
   {
    "rung": 38,
    "id": "ask-memory-macros",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "Datasheets (or .lib summaries) of the memory macros",
    "done": false,
@@ -4843,7 +4853,7 @@
   {
    "rung": 39,
    "id": "ask-cache-latency",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "Where each cycle of a cache access goes",
    "done": false,
@@ -4860,7 +4870,7 @@
   {
    "rung": 40,
    "id": "ask-silicon-config",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "Which options of the open drop the silicon has",
    "done": false,
@@ -4875,7 +4885,7 @@
   {
    "rung": 41,
    "id": "ask-cache-esrs",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
    "what": "The live shire-cache settings on these cards",
    "done": false,
@@ -4891,18 +4901,40 @@
   {
    "rung": 42,
    "id": "ask-dram-part",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
    "status": "ask_team",
-   "what": "The DRAM part",
+   "what": "The DRAM part and its temperature grade",
    "done": false,
-   "adds": "The Micron part number, die density, dies per package, and x16 or byte-mode channels. The firmware reads the mode registers MR5 and MR8 at every boot and logs them (mem_controller_utils.c), but no log has been captured; a boot log or the card's BOM line settles it, and the part's datasheet gives whatever it publishes of the internal organisation. With temperature derating off, also whether the packages stay under 85 °C under load: a read of MR4 during a long run would show it.",
+   "adds": "The Micron part number, die density, dies per package, and x16 or byte-mode channels. The firmware reads the mode registers MR5 and MR8 at every boot and logs them (mem_controller_utils.c), but no log has been captured; a boot log or the card's BOM line settles it, and the part's datasheet gives whatever it publishes of the internal organisation. With temperature derating off, also whether the packages stay under 85 °C under load: a read of MR4 during a long run would show it. The effect of overheating adds the part's temperature grade, the range it is rated to operate and keep its data in: nothing on the card reads the DRAM's own temperature and the controllers' derating is off, so above 85 °C the fixed 1× refresh may not hold the data, one of the page's candidate causes of the stop near 120 °C (E53 read the same refresh period, 2,325.4 cycles, at a 75 °C die mean as at 52 °C).",
    "cost": "a boot log, or the card's BOM line; an email",
-   "effect": "Memory levels: the DRAM die drawn from the actual part instead of from the capacity and JEDEC; the generic die internals narrowed where the datasheet allows; whether the fixed refresh interval (3.875 µs) is enough at the packages' temperature under load.",
+   "effect": "Memory levels: the DRAM die drawn from the actual part instead of from the capacity and JEDEC; the generic die internals narrowed where the datasheet allows; whether the fixed refresh interval (3.875 µs) is enough at the packages' temperature under load. The effect of overheating: whether DRAM retention at the fixed refresh can explain a stop near 120 °C.",
    "levels": [
     ["dram/chan", "the channel and die"],
     ["dram/dbank", "the bank and subarray"],
     ["dram/dcell", "the DRAM cell"]
    ]
+  },
+  {
+   "rung": 45,
+   "id": "ask-overheat-records",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
+   "status": "ask_team",
+   "what": "What happened when a card overheated: the ~120 °C episode and card 0's 25 September run",
+   "done": false,
+   "adds": "The lab lead said in a meeting that an ET-SoC-1 was taken to about 120 °C, stopped working, and was fine again once cool; nothing in the repository records it. Which card and firmware release; what \"stopped\" meant (a hang, wrong results, a lost PCIe link, a power trip); whether a reset or a power cycle was needed; and whether board power and the PCIe link's error counters were logged. And aifoundry1's card 0, which read 115–117 °C on the host after its smoke blocks of 25 September and whose service processor still holds a 119 °C mean and a 123 °C sensor: those blocks' results, kept as a record of the fault (the version-3 plan's amendment A4) but not in the repository, and its service processor's trace from that day if it still holds it: what dropped it to 300 MHz (its 1.4.1 idle point or its PMIC's safe state), and whether any kernel computed wrong at 115–123 °C.",
+   "cost": "a question to the lab lead; for card 0, copying the kept smoke data (no card time) and a read-only trace read (the owner's and the lab's call)",
+   "effect": "The effect of overheating (§4.4): its ranked causes of the stop (power first, untested; then a protection action, the PCIe link, DRAM retention, a hold-time or SRAM failure, a clock losing lock, a joint that opens hot) narrowed to what the record shows, and whether the chip computes correctly past 115 °C."
+  },
+  {
+   "rung": 46,
+   "id": "ask-pmic-thermal",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open, the memory levels leave unknown and the overheating page could not settle",
+   "status": "ask_team",
+   "what": "The PMIC's temperature: what it measures, and what the PMIC does when hot",
+   "done": false,
+   "adds": "The only hardware thermal alarm in the open firmware is the PMIC's, at 75 °C, and it reads the PMIC's own \"System Temperature\" register, not the die's sensors. The service processor's firmware notes that the PMIC \"is currently reporting system temperature as 0\", reads that register only when its statistics are reset, and otherwise feeds its statistic a literal 0; the statistic read 0 in every sample of the three-card check and of card 0 (et-platform ffca4cbb4, thermal_pwr_mgmt.c). The alarm's 75 W threshold did not act either when aifoundry2 drew 86.9 W. Which sensor the PMIC reads (its own die, the board, the package), and whether its closed firmware power-cycles the board on over-temperature, and at what temperature: the headers define a reset cause for it, OVRTEMPR_PWRCYCLE (pmic_hal.h). The card's schematic (rung 25) would show what the PMIC's temperature input is wired to.",
+   "cost": "an email; the PMIC's firmware is closed",
+   "effect": "The effect of overheating (§3, §4.4): whether anything on the card stops a die that passes 100 °C at 600 MHz (on the 0.20.0 and 0.18.0 builds nothing in the service processor does), and whether a PMIC power cycle, which would clear itself as the card cooled, is a candidate for the stop near 120 °C."
   },
   {
    "rung": 31,
@@ -5584,7 +5616,7 @@
    "when": "28 Sep, 00:30–02:54",
    "card": "aifoundry2 (aifoundry3 read-only)",
    "what": "DV2, development (not validated): what the governor compares (the mean of 34 shire sensors or the hottest one) and whether placement delays the first step down from 800 MHz; 21 read-only watch cycles, NAT-4 sessions of 7 s lifts, the throttle-state residencies; stopped when aifoundry2's Master Minion hung at 02:50. The validation plan is frozen and has not run",
-   "instruments": "10 Hz ettelem telemetry with the 34 shire sensors; the service processor's trace ring (governor entries and exits); DM throttle residencies; host wall clock",
+   "instruments": "10 Hz ettelem telemetry of the 34 shire sensors' mean and peak-holds; the service processor's trace ring (governor entries and exits); DM throttle residencies; host wall clock",
    "data": [
     {
      "path": "docs/reports/data/2026-09-28-dvfs2-aifoundry2/",
@@ -5603,7 +5635,7 @@
    "when": "27–28 Sep",
    "card": "aifoundry3 (development), aifoundry1-c1 (calibration and validation), aifoundry2 (two short attempts)",
    "what": "Heat placement: the same 512-minion heater on the 16 interior shires, the 16 perimeter shires or spread over all 32, timed from the same start to the first reading of 66 °C on the sensors' mean, in chains of 2 s launches up to 150 s (Tier L) and in one 7 s launch (Tier S); development on aifoundry3 (27 Sep, 16:52–22:11), card 1's calibration, the predictions frozen at 22:50 (PREREG.md, SHA-256 a1bdc4e4…), then ten validation blocks on card 1 (27 Sep 23:45 – 28 Sep 07:49): short bursts PASS, the primary sustained test INSUFFICIENT",
-   "instruments": "10 Hz ettelem telemetry with the 34 shire sensors, board power and clock; the service processor's trace ring (the probes); host wall clock",
+   "instruments": "10 Hz ettelem telemetry of the 34 shire sensors' mean and peak-holds, board power and clock; the service processor's trace ring (the probes); host wall clock",
    "data": [
     {
      "path": "docs/reports/data/2026-09-28-heat-placement/",
@@ -5614,6 +5646,25 @@
     {
      "title": "Where the work sits: placement and the thermal trip",
      "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-placement"
+    }
+   ]
+  },
+  {
+   "id": "E53",
+   "when": "28 Sep, 10:11–12:05",
+   "card": "aifoundry3, aifoundry1-c1 (card 0 beside it watched read-only)",
+   "what": "The effect of overheating, pre-registered (frozen at 10:11, two amendments before the data they touch): how far the hottest of the 34 shire sensors leads their mean with the load on one shire, a 2 × 2 block or the whole chip (OH-1); nine exact-checked kernels, the DRAM relay among them, from rest to an 82 °C mean, and the DRAM refresh period hot (OH-2); idle power per degree against the September idle laws (OH-3). The hottest sensor ran 1–3 °C above the mean (at most +4); 663 checked launches computed nothing wrong; cycles per operation stayed within 0.05% of rest; 20 of 21 verdicts PASS, card 1's work-per-cycle test INSUFFICIENT (it never passed a 76 °C mean)",
+   "instruments": "10 Hz ettelem telemetry: the 34 shire sensors' mean and, with the statistics reset once a second, the hottest sensor in each 1 s window (anonymous); board power, rails and clock; exact-checked kernels; memprobe's refresh program; host wall clock",
+   "data": [
+    {
+     "path": "docs/reports/data/2026-09-28-overheating/",
+     "note": "raw/<card>/oh/p<pass>/ per block, reductions/ (verdicts.json), analysis/ (the existing record re-read), sources.json, overheat.json (the page's data), PREREG.md"
+    }
+   ],
+   "reports": [
+    {
+     "title": "The effect of overheating",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating"
     }
    ]
   }

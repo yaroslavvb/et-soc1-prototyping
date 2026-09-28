@@ -83,8 +83,8 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
 | ID | What | File |
 |---|---|---|
 | R1–R14 | resources that existed before any measurement: manuals, RTL, firmware source, papers, the machines | [`01-resources.md`](docs/findings/01-resources.md) |
-| Q1–Q57 | the owner's requests and what each produced (Q44–Q57: 25–27 September) | [`02-requests.md`](docs/findings/02-requests.md) |
-| E1–E49 | experiments: command, time, card, raw files. E35–E47 are the version-3 three-card check (25–26 September; its plan, results and raw data are in `docs/reports/data/2026-09-25-claims-v3/`), E48 the gathers and scatters on the same three cards (26 September), E49 the g3log race, reproduced without a card on 25 September, the fixed build checked on aifoundry3's card on 26 September | [`03-experiments.md`](docs/findings/03-experiments.md) |
+| Q1–Q61 | the owner's requests and what each produced (Q44–Q61: 25–28 September) | [`02-requests.md`](docs/findings/02-requests.md) |
+| E1–E53 | experiments: command, time, card, raw files. E35–E47 are the version-3 three-card check (25–26 September; its plan, results and raw data are in `docs/reports/data/2026-09-25-claims-v3/`), E48 the gathers and scatters on the same three cards (26 September), E49 the g3log race, reproduced without a card on 25 September, the fixed build checked on aifoundry3's card on 26 September, E50 the host link on the three cards (27 September), E51 the DV2 development night on aifoundry2 (28 September, development only), E52 the heat placement (27–28 September, development and a frozen validation), E53 the overheating experiments (28 September, pre-registered, aifoundry3 and aifoundry1's card 1) | [`03-experiments.md`](docs/findings/03-experiments.md) |
 | A1–A19 | published artifacts: pages, images, tools, commits | [`04-artifacts.md`](docs/findings/04-artifacts.md) |
 
 - **To answer a question:** the "where to look" table → the topic file (10–20) → the number in
@@ -100,7 +100,7 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
   `docs/reports/data/2026-09-23-energy-manual/manual.json` (since 26 September built from the version-3 check's three
   cards; 04-artifacts.md, A16). Edit the builders, never that markdown; the README, the rest of 00, 07 and 09 are
   written by hand.
-- **Known stale spots (2026-09-27).** Where a page and `docs/findings/` differ, the page holds. The pages carry each
+- **Known stale spots (2026-09-28).** Where a page and `docs/findings/` differ, the page holds. The pages carry each
   tested claim's three-card result (26 September; every claim with the items that test it:
   `docs/reports/data/2026-09-25-claims-v3/results/pagemap.md`), and `05-claims.md` gives the three-card values in
   "Version 3: the three-card check"; the topic files (10–19; 20-heat-per-mm.md has the third run) and README.md were
@@ -112,7 +112,12 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
   card 1 governed ("firmware DVFS") is stale too: its clock never moved in the campaign (27 September). Text that
   describes the governor as one table step per pass that acts only while a kernel runs describes the `353f20e`
   source, not the cards' own 0.20.0 build (28 September; 14-card-behaviour.md, "The clock governor, by firmware
-  build"). Trust 14-card-behaviour.md and this file.
+  build"). The overheating page (28 September) carries corrections that 05-claims.md lists at the end of "The effect of
+  overheating" and that 14-card-behaviour.md and the topic files do not yet: aifoundry1's card 0's highest readings are
+  its service processor's standing statistics (a 119 °C mean, a 123 °C sensor), not only the host's 115–117 °C of
+  25 September; E51 and E52 recorded the sensors' mean and anonymous peak-holds, not a series per sensor; aifoundry2's
+  catalogue launches at a 90–103 °C mean checked no arithmetic (the hottest checked launch is mmbench's, at 97 °C); the
+  SRAM rail is 0.70–0.75 V by card. Otherwise trust 14-card-behaviour.md and this file.
 
 ## 4. The machines
 
@@ -127,7 +132,7 @@ builds the same `/opt/et` natively (the README's setup section). **Never run `pr
 |---|---|---|---|
 | aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C; in this chassis the die rarely cools below 65 °C, so it usually runs at 600 | the main card; the git checkout is `~/claude/et-soc1-prototyping` here. Its Master Minion hung at 02:50 PDT on 28 Sep; the management reset restored it at 08:32 (owner-approved; the sysfs per-card reset had not), and it runs kernels again (14-card-behaviour.md) |
 | aifoundry3 | 1.3.1 | **pinned at 600 MHz**: a boot service sets a 0 W TDP at every boot, which also latches its governor (no step at any temperature) | compare switching power over idle, never absolute watts; about 1 host launch in 100 crashes at 1.08 s unless the program registers libetrt's log levels first (`registerRuntimeLogLevels()`, 14-card-behaviour.md) |
-| aifoundry1 card 0 | 1.4.1 | DVFS; idles at 300 MHz, and its 0.21.x governor acts only while a kernel runs (firmware source) | **overheats (115–117 °C): no sustained work on it**; excluded from the campaign |
+| aifoundry1 card 0 | 1.4.1 | DVFS; idles at 300 MHz, and its 0.21.x governor acts only while a kernel runs (firmware source) | **overheats (115–117 °C on the host on 25 Sep; its service processor's statistics still hold a 119 °C mean and a 123 °C sensor): no sustained work on it**; excluded from the campaign |
 | aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample since 25 Sep, cool or hot, busy or idle: its governor never raises the clock (off or latched; asked the lab) | fine; select a card on this host with `ET_DEVICES=<n>` |
 
 The hosts also differ in CPU, RAM and ET runtime build, which matters for host-side timing:
