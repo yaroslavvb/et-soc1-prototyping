@@ -219,6 +219,7 @@ No A-number yet. The build commands are in [`../reports/MIRROR.md`](../reports/M
 | Page | Source in this repository | Space | Visibility (2026-09-28) |
 |---|---|---|---|
 | Anatomy of a memory access, interactively: animated diagrams of each level of the memory system (the L1 data cache, latch RAM in the minion; the L2 in the shire cache; the L3 across the mesh; the scratchpad; the LPDDR4X DRAM), from the part that serves an access down to the transistors that switch, each access played step by step with its measured cycles and energy, every part marked documented, generic or unknown; which memories the documents call SRAM (the shire cache's compiled macros: L2, L3, scratchpad) and which not (the minion's L1, a latch RAM), with the cells themselves asked (the owner's question, after the lab lead said the chip is not using SRAM). 532 sourced facts; its 14 asks are on the hub | `docs/reports/sources/memory-levels.*`, `docs/reports/data/2026-09-28-memory-levels/` (`build_facts.py`; `research/`, the five levels' research files and `DESIGN.md`) | [et-soc1-memory-levels](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels), `3ec78e9e-1f89-4258-8e30-eee4ca4a27cc` | public (deployed 28 Sep) |
+| Where the work sits: placement and the thermal trip (E52, Q60): does the governor act on the mean of the die sensors or on the hottest one, and does the same work run longer before the thermal trip on the perimeter than in the interior? Theories and predictions first, development on aifoundry3, a frozen and hashed pre-registration (`tools/claims-v3/hp/prereg/PREREG.md`), card 1's calibration and ten validation blocks on aifoundry1's card 1; the page opens with which theories survived (by the frozen rules none on card 1, none refuted: short bursts PLACE-tS PASS, the primary sustained test PLACE-t INSUFFICIENT), then the placements on the die, the time to 66 °C, every verdict and the departures | `docs/reports/sources/heat-placement.*`, `docs/reports/data/2026-09-28-heat-placement/` (`build_heat_data.py` writes `heat.json` from the raw blocks, `val.json` and the reducer; the data README has the reproduction) | [et-soc1-heat-placement](https://spacesheep.dev/@yaroslavvb/et-soc1-heat-placement), space not yet created (`TBD-heat-placement` in MIRROR.md) | not yet deployed; public once deployed (MIRROR.md) |
 
 The hub (A2) gained §5's rungs 37–44 the same day, what the memory levels leave unknown: six asks to AI Foundry
 (Ainekko), `ask-not-sram` (which memories are not SRAM, and each one's cell), `ask-memory-macros`, `ask-cache-latency`,
@@ -240,6 +241,15 @@ and A3 and A15 (energy manual) say that nothing on the card limits the die tempe
 `tools/claims-v3/dv2/` (the development blocks), `tools/claims-v3/dv2v/` (the frozen validation, LOCK.sha256),
 `tools/claims-v3/dv2/recount_v3.py` (the recounts over the version-3 raw telemetry), and
 `data/2026-09-28-dvfs2-aifoundry2/incident/kernel_events.py` (the card's error events on one clock).
+
+**Heat placement (E52) and the restore, 28 September.** At `6ba8f47` (main, after the merge) the heat-placement page
+above rebuilt byte for byte from the committed `heat.json` (itself current: `build_heat_data.py --check`). The hub lists it in §1's index
+("Energy and power", with the development and validation numbers from `heat.json` and `val.json`) and E52 in §7. The
+DVFS page's §8 says that aifoundry2's card was restored at 08:32 (the sysfs per-card reset at 06:39 had not recovered
+the Master Minion; the management reset did; `data/2026-09-28-dvfs2-aifoundry2/incident/recovery.txt`), that the
+validation now waits only for the owner, and where aifoundry3's placement runs (E52's development,
+`data/2026-09-28-heat-placement/`) and its read-only query (`raw-aifoundry3/z2.json` in the DV2 data) are; the heat
+page's one sentence on the hang says the same.
 
 ## The visualization pass (26 September)
 

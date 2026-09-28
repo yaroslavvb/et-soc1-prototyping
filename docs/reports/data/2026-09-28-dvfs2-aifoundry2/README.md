@@ -10,8 +10,8 @@ on one hot shire, and can the same computation run longer before it is throttled
 
 **Card.** aifoundry2 only (firmware release 1.3.1, service-processor bootloader 0.20.0), the only card whose governor
 moves the clock. Nothing on aifoundry1. aifoundry3 had one read-only query (Z2, 00:33 PDT: uptime, the throttle-state
-residencies, configuration, the trace ring); its output is still on aifoundry3
-(`~/nekko/build/claims-v3/aifoundry3/dv2/z2-20260928T003343/z2.json`) and is not in this directory; its result is recorded
+residencies, configuration, the trace ring); its output is `raw-aifoundry3/` here (`z2.json` and the reads behind it,
+copied from `~/nekko/build/claims-v3/aifoundry3/dv2/z2-20260928T003343/` on aifoundry3); its result is recorded
 in `plan/DEV-RESULTS.md` §3 (TH8).
 
 **Nothing was set on the card:** no threshold, TDP, active power management, clock or voltage; the service
@@ -34,7 +34,8 @@ access). `dev-log.jsonl` is every development decision (DEV-n) and deviation (DE
 `nat-candidates.jsonl` the NAT start checks; `ALERT-MM-HANG.json`, `NIGHT-STOP` and `sp-level.json` the night's stop and
 log-level records. Beside `raw/`: `queue-dv2-aifoundry2.log`, the queue's own log of the night (a copy of
 `build/claims-v3/queue-dv2-aifoundry2.log`, unchanged), which is the only record of a pass that never started (`p1007`);
-and `incident/`, the host's kernel-log error events for the card with the calibration of their times (below).
+and `incident/`, the host's kernel-log error events for the card with the calibration of their times (below), and
+`recovery.txt`, the card's restore at 08:32 PDT.
 
 **A T-run** (`tools/claims-v3/dv2/block.sh`; the observables `tools/claims-v3/dv2/dv2obs.py`, computed live into
 `runs.jsonl`): lifts until the mean reads S+1; the falling S+1 → S edge (S = 62 in NAT-4) with a one-shot statistics reset
@@ -72,10 +73,11 @@ The files are byte-identical copies (the originals: `tools/claims-v3/dv2v/` for 
 **Why the validation has not run.** (1) It is a replication on aifoundry2 in a later session, since no other card's
 governor moves the clock (aifoundry3's is stuck at its 0 W TDP, aifoundry1's card 1 does not act); the owner has to
 accept that, and pick the full schedule (watch plus heating sessions) or the idle-only one. (2) The heating sessions need
-aifoundry2's Master Minion, which hung (below) and only the lab admin can restore. The read-only watch does not use it.
+aifoundry2's Master Minion, which hung (below); it was restored at 08:32 PDT on 28 September, so the validation now
+waits only for the owner's decision in (1). The read-only watch does not use it.
 Earliest start: 12:00 PDT on 28 September. The commands are in `plan/PREREG-VAL.md` §6.
 
-## The incident: aifoundry2's Master Minion hung, 28 September 2026, 02:50:53 PDT
+## The incident: aifoundry2's Master Minion hung, 28 September 2026, 02:50:53 PDT (restored at 08:32)
 
 - In `p6041`, the ADD run's lift 1 (UNI32@4, 7 s) ran normally: 800 MHz, "device held for 7.46 s".
 - A lift is not one 7 s kernel: the heater (`sparsity_host`) runs a 20,000-iteration calibration kernel and then a stream
@@ -101,8 +103,15 @@ Earliest start: 12:00 PDT on 28 September. The commands are in `plan/PREREG-VAL.
   be the hang's.
 - The service processor still answers: the watch cycles at 02:52 and 02:54 read 600 MHz, 25.9 and 25.8 W, a mean of
   60 °C and the threshold at 65.
-- No reset was attempted (the card rules). The lab admin must restore the Master Minion; until then no kernel can run on
-  aifoundry2.
+- No reset was attempted that night (the card rules), and no kernel could run on aifoundry2 until the restore.
+- **Restored at 08:32 PDT the same day, with the owner's approval** (`incident/recovery.txt`: the commands, the launches'
+  output and the kernel-log lines). At 06:39 the sysfs per-card reset
+  (`echo 1 > /sys/bus/pci/devices/0000:02:00.0/soc_reset/reinitiate`) re-attached the device ("enabling device", "added
+  peer-to-peer DMA memory" at 06:39:28), but the Master Minion stayed hung: launches at 06:40 and 06:47 failed with
+  "Couldn't use the HPSQ. Perhaps the Master Minion is hanged?". At 08:32:45 the management reset
+  (`dev_mngt_service -m DM_CMD_RESET_ETSOC -n 0`) recovered it: "Device is resetting" in the kernel log for about 6 s,
+  the device back at 08:32:52, and at 08:33 a test on 1 minion ran 3 launches of 0.49 s, each ok, at 600 MHz (the device
+  held 1.65 s). The sysfs reset did not recover a hung Master Minion; the management reset did.
 - **The cause is not established.** The 43 heater launches before it that night all ran (`raw/p*/launches.jsonl`: 46
   records in all, the hung lift and the two runtime-creation failures after it included). That the launch met the
   governor's clock change is a hypothesis.

@@ -1,0 +1,76 @@
+# aifoundry2's card restored, 28 September 2026 (times PDT). The owner approved both resets. What was run, what
+# each launch printed, and the card's lines in the host's kernel log from the three hours before 08:43 PDT, when they
+# were read (`dmesg | grep -v apparmor | grep "0000:02:00.0"` on aifoundry2). The hang itself (02:50:53) is in
+# ../README.md, "The incident", and in kernel-log.txt beside this file.
+
+## What was done, in order
+
+06:39     The sysfs per-card reset:
+              echo 1 > /sys/bus/pci/devices/0000:02:00.0/soc_reset/reinitiate
+          The driver re-attached the device: "enabling device" and "added peer-to-peer DMA memory" at 06:39:28 (the
+          kernel log below). The Master Minion stayed hung.
+06:40     A launch (build/sparsity/host/sparsity_host) failed at runtime creation, as the launches after the hang had:
+              FAIL: Exception message:Couldn't use the HPSQ. Perhaps the Master Minion is hanged?
+          (the call chain: rt::IRuntime::create -> RuntimeImp::RuntimeImp -> abortDevice -> abortCommand)
+06:47     A second launch, the same failure and the same message.
+08:32:45  The management reset:
+              dev_mngt_service -m DM_CMD_RESET_ETSOC -n 0
+          Its output (the log prefixes kept, colour codes removed):
+              2026/09/28 08:32:45 VERBOSE_LOW [dev_mngt_service.cc->validCommand:1499] command: DM_CMD_RESET_ETSOC code 52
+              2026/09/28 08:32:45 VERBOSE_LOW [dev_mngt_service.cc->check_dm_events:394] SP Buffer FULL event recieved, extracting traces
+              2026/09/28 08:32:45 INFO [dev_mngt_service.cc->decodeTraceEvents:247] Saving trace to file: dev0_traces.txt
+              2026/09/28 08:32:46 .. 08:32:51 INFO [DevicePcie.cpp->openWhenReady:261] Waiting for device /dev/et0_mgmt to be accessible ...  (6 lines, one a second)
+              2026/09/28 08:32:52 INFO [dev_mngt_service.cc->runService:465] Host Latency: 0 ms
+              2026/09/28 08:32:52 INFO [dev_mngt_service.cc->runService:466] Device Latency: 0 us
+              2026/09/28 08:32:52 INFO [dev_mngt_service.cc->runService:467] Service request succeeded
+08:33:01  A short test ran normally: sparsity_host, the fp32 fma test on 1 minion (shire mask 0x1), random data.
+          "device ready in 0.17 s"; its 20,000-iteration calibration kernel (0.019 s, 0.58 GHz), then 3 launches of
+          534,348 iterations, each ok: true, 0.487 s, 0.599 GHz (the 600 MHz point), tensor_errors 0; "device held
+          for 1.65 s". The three launches' lines, as printed:
+              SPARSITY {"test":"fma","type":"fp32","pattern":"none","values":"randn","minions":1,"shire_mask":"0x1","iters":534348,"launch":0,"cycles_max":291754705,"wall_s":0.486781,"t_start_ms":1790609581087,"t_end_ms":1790609581574,"ghz":0.5994,"tensor_errors":0,"ok":true}
+              SPARSITY {"test":"fma","type":"fp32","pattern":"none","values":"randn","minions":1,"shire_mask":"0x1","iters":534348,"launch":1,"cycles_max":291754499,"wall_s":0.486735,"t_start_ms":1790609581575,"t_end_ms":1790609582062,"ghz":0.5994,"tensor_errors":0,"ok":true}
+              SPARSITY {"test":"fma","type":"fp32","pattern":"none","values":"randn","minions":1,"shire_mask":"0x1","iters":534348,"launch":2,"cycles_max":291754476,"wall_s":0.486850,"t_start_ms":1790609582063,"t_end_ms":1790609582550,"ghz":0.5993,"tensor_errors":0,"ok":true}
+          (fields that were constant or zero, such as sparsity 0 and row_mask 0xffff, left out of these copies)
+
+So the sysfs reset re-attached the device over PCIe but did not recover a hung Master Minion; the management reset
+(DM_CMD_RESET_ETSOC) did. Not recorded here: the service processor's uptime and throttle-state residencies after the
+reset, which 14-card-behaviour.md asked to read before the first launch.
+
+## The kernel log, 0000:02:00.0, the three hours before 08:43 PDT
+
+Seconds since boot, as `dmesg` prints them:
+
+[831379.848074] ET 0000:02:00.0: enabling device (0000 -> 0002)
+[831379.941541] ET 0000:02:00.0: added peer-to-peer DMA memory 0x6001800000-0x67fbdfffff
+[838178.383789] ET 0000:02:00.0: Mgmt: Device is resetting, action cannot be completed!
+[838178.962860] ET 0000:02:00.0: enabling device (0000 -> 0002)
+[838179.383923] ET 0000:02:00.0: Mgmt: Device is resetting, action cannot be completed!
+[838180.384057] ET 0000:02:00.0: Mgmt: Device is resetting, action cannot be completed!
+[838181.384293] ET 0000:02:00.0: Mgmt: Device is resetting, action cannot be completed!
+[838182.384553] ET 0000:02:00.0: Mgmt: Device is resetting, action cannot be completed!
+[838183.384808] ET 0000:02:00.0: Mgmt: Device is resetting, action cannot be completed!
+[838184.147830] ET 0000:02:00.0: added peer-to-peer DMA memory 0x6001800000-0x67fbdfffff
+
+The same lines as `dmesg -T` prints them (it adds each stamp to one boot time, so by now it runs about 9 s late; see
+kernel_events.py):
+
+[Mon Sep 28 06:39:37 2026] ET 0000:02:00.0: enabling device (0000 -> 0002)
+[Mon Sep 28 06:39:37 2026] ET 0000:02:00.0: added peer-to-peer DMA memory 0x6001800000-0x67fbdfffff
+[Mon Sep 28 08:32:56 2026] ET 0000:02:00.0: Mgmt: Device is resetting, action cannot be completed!
+[Mon Sep 28 08:32:56 2026] ET 0000:02:00.0: enabling device (0000 -> 0002)
+[Mon Sep 28 08:32:57 2026] ET 0000:02:00.0: Mgmt: Device is resetting, action cannot be completed!
+[Mon Sep 28 08:32:58 2026] ET 0000:02:00.0: Mgmt: Device is resetting, action cannot be completed!
+[Mon Sep 28 08:32:59 2026] ET 0000:02:00.0: Mgmt: Device is resetting, action cannot be completed!
+[Mon Sep 28 08:33:00 2026] ET 0000:02:00.0: Mgmt: Device is resetting, action cannot be completed!
+[Mon Sep 28 08:33:01 2026] ET 0000:02:00.0: Mgmt: Device is resetting, action cannot be completed!
+[Mon Sep 28 08:33:02 2026] ET 0000:02:00.0: added peer-to-peer DMA memory 0x6001800000-0x67fbdfffff
+
+Mapped to wall time as kernel_events.py does, from the audit records' epoch stamps. The ring's last audit records
+(818268.258476 s = epoch 1790589656.666; 829068.127275 s = epoch 1790600456.404, 06:00:56 PDT) come before these
+lines, so the offset is extrapolated along their drift (-0.0436 s per hour): 831379.848074 -> 06:39:28.10 (the sysfs
+reset); 838178.383789 -> 08:32:46.55, the first "Device is resetting" (the management reset was issued at 08:32:45,
+and its six "Waiting for device" lines match the six "Device is resetting" lines); 838184.147830 -> 08:32:52.31, the
+device back ("Service request succeeded" at 08:32:52).
+
+The earlier lines of the same ring (up to the hang's SP runtime-error event at [817669.211747], 02:50:57.6) are in
+kernel-log.txt; nothing of 0000:02:00.0 was logged between that event and the sysfs reset.

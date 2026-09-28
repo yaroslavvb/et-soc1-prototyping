@@ -29,10 +29,11 @@ revision; this file is the current one.
 section after the next gives the governor of each firmware build, and aifoundry2's behaviour fits its own build's
 (E51, development). (2) aifoundry3's governor is latched and aifoundry1's card 1's does not raise the clock (the card
 table). (3) Nothing on aifoundry2, aifoundry3 or aifoundry1's card 1 limits the die's temperature (card 0 may be an
-exception): aifoundry2 ran a whole catalogue pass at a 90–103 °C mean with nothing acting (section below). (4) **aifoundry2 cannot run kernels:** its Master Minion hung at 02:50:53 PDT on
-28 September and needs the lab admin (next section).
+exception): aifoundry2 ran a whole catalogue pass at a 90–103 °C mean with nothing acting (section below). (4) **aifoundry2's Master Minion hung** at 02:50:53 PDT on
+28 September and took no kernel for almost six hours; the sysfs per-card reset did not recover it, and the management
+reset (`DM_CMD_RESET_ETSOC`) restored it at 08:32, with the owner's approval (next section).
 
-## aifoundry2 cannot run kernels until the lab admin restores it (since 28 September, 02:50 PDT)
+## aifoundry2's Master Minion hung on 28 September (02:50 PDT), and the management reset restored it (08:32)
 
 - **What happened.** In E51's development pass p6041 the ADD run's lifts heat with `sparsity_host` (random fp32
   data, 4 minions per shire on 32 shires). A lift is not one long kernel: it is a 20,000-iteration calibration kernel
@@ -50,15 +51,25 @@ exception): aifoundry2 ran a whole catalogue pass at a 90–103 °C mean with no
   25 September) did not stop the card, so the event need not be the hang's.
 - **What still works.** The service processor answers: at 02:52 and 02:54 it read 600 MHz, 25.9 W idle, 60 °C and a
   threshold of 65 °C. Telemetry and read-only management queries work; nothing that launches a kernel does.
-- **Needs the lab admin.** No reset was attempted (the card rules: never reset a card yourself). Until the Master
-  Minion is restored, no kernel can run on aifoundry2, and the DV2 validation (frozen, not run) waits for it.
+- **No reset that night.** No reset was attempted (the card rules: never reset a card yourself), and no kernel ran on
+  aifoundry2 until the restore.
+- **Restored at 08:32 PDT, with the owner's approval; only the management reset worked.** At 06:39 the sysfs per-card
+  reset (`echo 1 > /sys/bus/pci/devices/0000:02:00.0/soc_reset/reinitiate`) re-attached the device (the kernel log's
+  "enabling device" and "added peer-to-peer DMA memory"), but the Master Minion stayed hung: launches at 06:40 and
+  06:47 failed at runtime creation with the same "Couldn't use the HPSQ" message. At 08:32:45 the management reset
+  (`dev_mngt_service -m DM_CMD_RESET_ETSOC -n 0`, the reset used twice on 18 September) recovered it: the driver logged
+  "Device is resetting" for about 6 s and re-attached the device at 08:32:52, and at 08:33 a test on 1 minion ran
+  3 launches of 0.49 s, each ok, at 600 MHz (the device held 1.65 s). **Lesson (one case): the sysfs reset did not recover a
+  hung Master Minion; the management reset did.** Either is a card reset: the lab admin's or the owner's call, never
+  an agent's. The SP's uptime and throttle residencies after the reset are not in the record. The DV2 validation (frozen,
+  not run) no longer waits for the card, only for the owner's decision (getting-started.md).
 - **Cause: not established.** The night's 43 launches before it, which all ran (probes, smokes, runs, and lifts
   launched 0.52–0.58 s after the previous one ended, four times), with 57 climbs and 26 full descents of the clock, did not hang
-  (`raw/p*/launches.jsonl`). That this launch met the 800 → 600 MHz idle reset is a hypothesis, not a finding. After the
-  restore, record the SP's uptime and throttle residencies before any launch.
+  (`raw/p*/launches.jsonl`). That this launch met the 800 → 600 MHz idle reset is a hypothesis, not a finding.
 - **Evidence:** `docs/reports/data/2026-09-28-dvfs2-aifoundry2/raw/ALERT-MM-HANG.json` and `raw/p6041/`
   (`launches.jsonl`, `heater-1-pre.out.gz`, `tel-1.jsonl.gz`), the later read-only watch cycles `raw/p1111/z1.json`
-  and `raw/p1112/z1.json`, `incident/` (the kernel log's error events, `kernel_events.py`) and `dv2.json` `incident`.
+  and `raw/p1112/z1.json`, `incident/` (the kernel log's error events, `kernel_events.py`; the restore,
+  `recovery.txt`: the commands, the launches' output and the kernel-log lines) and `dv2.json` `incident`.
 
 ---
 

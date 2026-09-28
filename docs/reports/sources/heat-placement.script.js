@@ -235,8 +235,8 @@ function verdictPhrase(id) {
     `${word(dv.g1t_min.blocks)} blocks), so as a count the timing test is ${esc(dv.g1t_outcome)}.` +
     (idle ? ` On the idle card at ${idle.time} the mean read ${idle.mean} °C while the hottest sensor read ${idle.high_max} °C in all ` +
       `${word(idle.samples)} samples, and the governor stayed out of its thermal state.` : '') +
-    ` That is development data: its frozen validation waits for the card, whose Master Minion hung at 02:50 on 28 September ` +
-    `(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-triggers-a-step-down-and-does-placement-delay-it">DVFS page, §8</a>).`;
+    ` That is development data: its frozen validation waits for the owner's decision (the card's Master Minion hung at 02:50 on ` +
+    `28 September and was restored at 08:32; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-triggers-a-step-down-and-does-placement-delay-it">DVFS page, §8</a>).`;
   const p3 = pr[DEVCARD], p1 = pr[VALCARD];
   V.q1Here = `the design registered its own clock tests only where they could work: TRIG-A (the clock's step against the ` +
     `two readings) on a card whose clock moves from a die below 66 °C, TRIG-B (the governor's own trace lines) on a card ` +

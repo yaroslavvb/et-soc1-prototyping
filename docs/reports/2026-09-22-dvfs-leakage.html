@@ -796,7 +796,7 @@ for four.</li>
 </ul>
 </details>
 
-<p><b>28 September 2026, 02:50:53 PDT: aifoundry2's Master Minion hung.</b> <span data-v="hangText"></span></p>
+<p><b>28 September 2026, 02:50:53 PDT: aifoundry2's Master Minion hung (restored at 08:32 the same day).</b> <span data-v="hangText"></span></p>
 
 <details class="more"><summary>Method and limits of this section</summary>
 <ul>
@@ -967,7 +967,8 @@ correct" withdrawn. 26 September (version 4), the three-card check: aifoundry3's
 flashed; the busy leakage share is no longer said to exceed 30%. 27 September: the review's fixes (verdict row 6 cut) and
 charts. 28 September: §1 rewritten for the governor the cards run (firmware 0.20.0), with §2's steps explained by it;
 aifoundry3's zero limit stops its governor and aifoundry1's card 1's governor is inactive; no firmware temperature limit
-at the lowest point; a new §8, the night of 27–28 September; later, the review's cuts. What each version changed in full: this page's history in
+at the lowest point; a new §8, the night of 27–28 September; later, the review's cuts; then the card's restore at 08:32, and
+aifoundry3's query and placement runs pointed to their data. What each version changed in full: this page's history in
 the <a href="https://github.com/yaroslavvb/et-soc1-prototyping/commits/main/docs/reports/sources/dvfs-leakage.body.html">repository</a>.</p>
 </details>
 
@@ -1663,8 +1664,8 @@ const binOff = c => { const I = (D.v3 && D.v3.idle) || {}; return (I.a && I.a[c]
   V.a3latch = `The readings fit it: the three-card check heated aifoundry3 to a mean of ${range(Math.min(...tm), Math.max(...tm), 0)} °C in its ` +
     `cooling-cycle passes before it read any of its trace windows, and those windows held ${G3.aifoundry3.governor_lines === 0 ? 'no governor line at all' : G3.aifoundry3.governor_lines + ' governor lines'}; ` +
     `and a read-only query on 28 September found every throttle-state residency counter, which the source updates only when a loop ends, still ` +
-    `at zero after more than two days up (development; noted in the night's record, <code>plan/DEV-RESULTS.md</code>, while the query's own output ` +
-    `is still on aifoundry3, not yet in the repository).`;
+    `at zero after more than two days up (development; noted in the night's record, <code>plan/DEV-RESULTS.md</code>; the query's output is ` +
+    `<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-28-dvfs2-aifoundry2/raw-aifoundry3/z2.json"><code>raw-aifoundry3/z2.json</code></a> in the night's data).`;
 })();
 
 /* ---------- the seven cool-start runs and their 36 clock changes ---------- */
@@ -2534,7 +2535,8 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
   V.dvIntro = `On the night of 27–28 September aifoundry2 ran the development half of a pre-registered design (DV2): ${Z.length} ` +
     `read-only watch cycles from ${hhmm(Z[0].time)} to ${hhmm(Z[Z.length - 1].time)} PDT and ${word(nat.length)} heating sessions. These runs ` +
     `chose the parameters and the rules of a validation plan that was frozen afterwards; they test nothing, and every number in this ` +
-    `section is theirs. The validation has not run (the end of this section), and the night ended with the card's Master Minion hung.`;
+    `section is theirs. The validation has not run (the end of this section). The night ended with the card's Master Minion hung; ` +
+    `a management reset restored it at 08:32 that morning.`;
   const and2 = xs => (xs.length > 1 ? xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1] : xs.join(''));
   const WHY = {'night stop': 'the night stop that ended the first session', 'slot passed': 'while a session held the card'};
   const skipBy = [...new Set(skip.map(c => c.reason))].map(r => `${and2(skip.filter(c => c.reason === r).map(c => c.slot))} ` +
@@ -2579,8 +2581,10 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
     `two placements' slightly different power. ` + (first ? `On ${first.minions} minions (block ${first.block}) neither placement stepped within its launch. ` : '') +
     `Placement can act only through the mean (§1): spread over the perimeter, the same heat raises the 34-sensor mean more slowly. ` +
     `A heat-only model built on aifoundry3's placement runs of 27 September predicted ${f2(g.L_pred)} ± ${f2(g.b)}, below the development value; that ` +
-    `comparison is reported, not registered, and while its inputs are frozen as numbers in <code>plan/prereg-val.json</code>, the ` +
-    `placement runs they come from are not yet in the repository. Two blocks give no confidence interval; the frozen test asks for the log ratio above zero at 99% over ` +
+    `comparison is reported, not registered. Its inputs are frozen as numbers in <code>plan/prereg-val.json</code>, and the ` +
+    `placement runs they come from are the heat-placement experiment's development blocks (E52), in ` +
+    `<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-28-heat-placement/">docs/reports/data/2026-09-28-heat-placement</a> ` +
+    `(<code>reductions/dev-r3.json</code>). Two blocks give no confidence interval; the frozen test asks for the log ratio above zero at 99% over ` +
     `at least ${word(g.g4s_min_blocks)} blocks.`;
   // the loop
   const th = L.thermal, en = th.filter(x => x.kind === 'ENTER'), ex = th.filter(x => x.kind === 'EXIT');
@@ -2620,16 +2624,16 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
   // the validation and the hang
   const P = DV.prereg, H = N.incident, l1 = H.lifts[0], l2 = H.lifts[1], h2 = H.lift2 || {};
   V.valG4 = `${f2(P.g4.L_pred)} ± ${f2(P.g4.b)} for the log ratio over at least ${word(P.g4.g4_min_blocks)} blocks; the prediction comes from ` +
-    `aifoundry3's placement runs, whose data are not yet in the repository`;
+    `aifoundry3's placement runs of 27 September, E52's development blocks, reduced in <code>docs/reports/data/2026-09-28-heat-placement/reductions/dev-r3.json</code>`;
   V.valText = `The plan was frozen at about 03:15 PDT on 28 September, after the last development pass, as ` +
     `<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-28-dvfs2-aifoundry2/plan/PREREG-VAL.md">PREREG-VAL.md</a> ` +
     `(SHA-256 <code>${P.sha256.slice(0, 12)}…</code>); a lock file (SHA-256 <code>${P.lock_sha256.slice(0, 12)}…</code>) fixes the code, the numbers and ` +
     `the schedules it runs, and every pass refuses to start if any of them has changed. It tests the step's trigger, the placement effect's sign, ` +
     `the loop, the absent dead band, the latencies and the residency counter, on the idle card and in heating sessions, each with a pass and a ` +
     `fail rule written before any validation data. Only aifoundry2's governor moves the clock (aifoundry3's is stuck, aifoundry1's card 1 does ` +
-    `not act), so the validation is a replication on the same card in a later session, and it has not run for two reasons: the owner has to ` +
-    `accept a same-card replication and choose between the full schedule and an idle-only one, and the heating sessions need the Master Minion ` +
-    `back, which only the lab admin can restore. The read-only watch does not use the Master Minion. It could start no earlier than ` +
+    `not act), so the validation is a replication on the same card in a later session. It has not run: it waits for the owner, who has to ` +
+    `accept a same-card replication and choose between the full schedule and an idle-only one. Its heating sessions also needed the Master ` +
+    `Minion back, and the card was restored at 08:32 on 28 September (below). It could start no earlier than ` +
     `${P.not_before.replace('2026-09-28T', '')} on 28 September.`;
   const sr = H.kernel_log || [], last = sr[sr.length - 1], KL = H.kernel_log_last || {};
   const c1 = l1.calib || {}, c2 = l2.calib || {}, st = l1.stream || {};
@@ -2647,10 +2651,13 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
       `calibration kernel ended): “${last.desc}, ${last.syndrome}”, the counter's ${['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh'][sr.length] || f0(sr.length) + 'th'}. ` +
       `The first ${word(sr.length - 1)}, on ${dayList(sr.slice(0, -1).map(e => (e.pdt || '').slice(0, 10)))}, did not stop the card, so the event ` +
       `need not be the hang's` : '') +
-    `. The service processor still answers: at ${H.sp_after.map(x => hhmm(x.time)).join(' and ')} it read ${[...new Set(H.sp_after.map(x => x.mhz.join('/')))].join('/')} MHz, ` +
+    `. The service processor still answered: at ${H.sp_after.map(x => hhmm(x.time)).join(' and ')} it read ${[...new Set(H.sp_after.map(x => x.mhz.join('/')))].join('/')} MHz, ` +
     `${range(Math.min(...H.sp_after.map(x => x.board_w)), Math.max(...H.sp_after.map(x => x.board_w)), 1)} W, a mean of ` +
     `${range(Math.min(...H.sp_after.map(x => x.mean)), Math.max(...H.sp_after.map(x => x.mean)), 0)} °C and its threshold at ${H.sp_after[0].threshold_c} °C. ` +
-    `No reset was attempted (the card rules): the lab admin must restore the Master Minion, and until then no kernel can run on aifoundry2. ` +
+    `No reset was attempted that night (the card rules). At 06:39 the sysfs per-card reset re-attached the device but left the Master Minion ` +
+    `hung (launches at 06:40 and 06:47 failed the same way); at 08:32, with the owner's approval, the management reset ` +
+    `(<code>DM_CMD_RESET_ETSOC</code>) restored it, and a test on one minion then ran three launches, each ok, at 600 MHz ` +
+    `(<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-28-dvfs2-aifoundry2/incident/recovery.txt"><code>incident/recovery.txt</code></a>). ` +
     `The cause is not established. The ${H.launches_before} heater launches before it that night all ran, among them ${b['G2-C'].n} climbs ` +
     `and ${b['G2-D'].n} full descents of the clock; that this one met the clock change is a hypothesis, and the plan's heating sessions launch ` +
     `the same way, a risk it states.`;

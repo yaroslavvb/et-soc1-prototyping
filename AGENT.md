@@ -125,7 +125,7 @@ builds the same `/opt/et` natively (the README's setup section). **Never run `pr
 
 | Card | Firmware | Clock policy | Notes |
 |---|---|---|---|
-| aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C; in this chassis the die rarely cools below 65 °C, so it usually runs at 600 | the main card; the git checkout is `~/claude/et-soc1-prototyping` here. **Since 28 Sep 02:50 PDT its Master Minion is hung: no kernel runs until the lab admin restores it** (14-card-behaviour.md) |
+| aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C; in this chassis the die rarely cools below 65 °C, so it usually runs at 600 | the main card; the git checkout is `~/claude/et-soc1-prototyping` here. Its Master Minion hung at 02:50 PDT on 28 Sep; the management reset restored it at 08:32 (owner-approved; the sysfs per-card reset had not), and it runs kernels again (14-card-behaviour.md) |
 | aifoundry3 | 1.3.1 | **pinned at 600 MHz**: a boot service sets a 0 W TDP at every boot, which also latches its governor (no step at any temperature) | compare switching power over idle, never absolute watts; about 1 host launch in 100 crashes at 1.08 s unless the program registers libetrt's log levels first (`registerRuntimeLogLevels()`, 14-card-behaviour.md) |
 | aifoundry1 card 0 | 1.4.1 | DVFS; idles at 300 MHz, and its 0.21.x governor acts only while a kernel runs (firmware source) | **overheats (115–117 °C): no sustained work on it**; excluded from the campaign |
 | aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample since 25 Sep, cool or hot, busy or idle: its governor never raises the clock (off or latched; asked the lab) | fine; select a card on this host with `ET_DEVICES=<n>` |

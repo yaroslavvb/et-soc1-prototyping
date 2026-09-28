@@ -131,10 +131,13 @@ Many fix and cut items landed in the merge too; those are ticked below.
     - Rewrite hub §4.1, KPI 3 ("156–264 µJ"; board step "1.6–2.6 mJ"), the ladder rows and §6; "twice as slowly"
       becomes "about 1.7 times as slowly".
     - Then the other pages.
-- [ ] **Versions notes (cut, about 1,500 words).** Keep one dated line per version and only the corrections that
+- [x] **Versions notes (cut, about 1,500 words).** Keep one dated line per version and only the corrections that
   changed a claim; the history lives in `../findings/04-artifacts.md`. Pages: the hub (219 words), heat per mm (310),
   the power page (254), DVFS (243), the hot line (186), the spatial brief (169), the relay (153), on-chip
   communication (91), the L2 brief, Horace and why low power.
+  Done 28 Sep (`031c723`) on every page listed: one line per date with the corrections that changed a claim, and a
+  link to the source's history on GitHub. The full history is each source's git history, which `04-artifacts.md`
+  now points to; it is not in `04-artifacts.md` itself, as this item first said.
 
 ### Hub · `sources/limits-of-observability.*`
 
@@ -169,7 +172,8 @@ Many fix and cut items landed in the merge too; those are ticked below.
 - [x] NOC-10 (low). The hub links the relay's `#the-same-watts-a-thirtieth-of-the-work`
   (`data.json:3482,3502,3522`). Follow the relay's renamed ids (see the relay). Done 27 Sep: all three link
   `#power-within-a-watt-a-thirtieth-of-the-work`.
-- [ ] Cut (about 740 words):
+- [x] Cut (about 740 words):
+  Done 28 Sep (`031c723`).
   - one sentence per index cell;
   - the refresh period stated once (§4.1) instead of ten times;
   - §4.1's starved-meter paragraph;
@@ -219,8 +223,9 @@ Many fix and cut items landed in the merge too; those are ticked below.
 - [x] NOC-9 (low). `energy-manual.script.js:466` "both draw about 5 W" → "about 5 W while the kernel runs (4.3–4.4 W
   averaged over the burst, Hand it to the next shire §2)". Done 27 Sep: §7.2 ("while the kernel runs", with the
   burst averages).
-- [ ] Cut (about 350 words): the §4.2 L1 note (288 words, down to about 170), §7.1's compcap, §10's repeated numbers,
+- [x] Cut (about 350 words): the §4.2 L1 note (288 words, down to about 170), §7.1's compcap, §10's repeated numbers,
   the §1 idle caption and §9's hot-line bars. Partly landed: §7.1's compcap (27 September).
+  Done 28 Sep (`031c723`).
 - [x] Charts (done 27 Sep: `#sram`, `#relaycheck`, `#rings`):
   1. **§1.1 `#sram` for every card.** `inRange` (`script.js:190–193`) drops aifoundry3's bins, which hides the
      caption's key result: the fit misses aifoundry3 by about 2×.
@@ -234,11 +239,13 @@ Many fix and cut items landed in the merge too; those are ticked below.
   (`heat-per-mm.script.js:671–673`) mixes two bases. Like for like over one to four hops: "43–47% … on the mesh rail
   and 64–69% on board power". Part B holds the repository copies. Done 27 Sep: the lede says "like for like over
   one to four hops", per card from the three-card run.
-- [ ] Cut (about 470 words): Versions (310 words); §7 "At the voltage it runs at…"; §10 "Not resolved"; §8's
+- [x] Cut (about 470 words): Versions (310 words); §7 "At the voltage it runs at…"; §10 "Not resolved"; §8's
   line example, which the route calculator already shows; the repeats in the §2 and §6 captions.
+  Done 28 Sep (`031c723`).
 - [x] Chart: a card selector on §5's `model`, to show the per-card all-ones excess (5% against 9% on board power).
   Done 27 Sep: `#modelcard`.
-- [ ] Optional chart: §4's per-step increments beside the link-sharing share.
+- [x] Optional chart: §4's per-step increments beside the link-sharing share.
+  Done 28 Sep (`031c723`): `#incr`.
 
 ### The DVFS loop and its leakage · `sources/dvfs-leakage.*`
 
@@ -254,8 +261,9 @@ Many fix and cut items landed in the merge too; those are ticked below.
   - Done 27 Sep: §1 and §8 (the May 2024 build tests the PMIC's instantaneous reading).
 - [x] PWR-09 (low). Resting temperatures on this page and the power page's lede: "62–74 °C" and "aifoundry3 50–58 °C
   on 22–24 Sep (55–57 °C since 25 Sep)". Done 27 Sep: both pages.
-- [ ] Cut (about 245 words): verdict row 6 (`script.js:363`); §8's "The 36 transitions…" (`body:424–428`); §5's
+- [x] Cut (about 245 words): verdict row 6 (`script.js:363`); §8's "The 36 transitions…" (`body:424–428`); §5's
   Kanter paragraph; §2's split sentence. Partly landed: verdict row 6 (27 September; the page checks five claims).
+  Done 28 Sep (`031c723`).
 - [x] Chart: turn `#attrib` into a governor plane per card (plan.md §4(b)). Done 27 Sep: `#attrib` with
   `#attrib-card`.
   - Die °C against board W, shaded by the rule's action.
@@ -267,11 +275,13 @@ Many fix and cut items landed in the merge too; those are ticked below.
 - [x] PWR-10 (low). `script.js:125` says `DM_CMD_SET_FREQUENCY` with power management off "works now, with care",
   but AGENT.md §5 forbids changing a card's clocks. Change it to "lab admin only". Done 27 Sep: the
   "Static against dynamic power" row.
-- [ ] Cut (about 105 words): the "Later measurements" box (`body:30–41`) down to the law, its range and pointers;
+- [x] Cut (about 105 words): the "Later measurements" box (`body:30–41`) down to the law, its range and pointers;
   the refresh period stated five times and τ three times.
+  Done 28 Sep (`031c723`).
 - [x] Chart: tick the fresh readings under `#edge-a` and `#edge-b`: each 10 Hz sample whose `board` value changed,
   with a readout like "124 new values in 20 s, one per ~160 ms". Done 27 Sep.
-- [ ] Chart: the SP pass per card and sampler (V3-TEL's values are in; the page gives them as text).
+- [x] Chart: the SP pass per card and sampler (V3-TEL's values are in; the page gives them as text).
+  Done: built on 27 Sep as `#askcost`, closed in the sweep of 28 Sep (`031c723`).
 
 ### The Horace experiment · `sources/horace-experiment.*`
 
@@ -293,7 +303,8 @@ Many fix and cut items landed in the merge too; those are ticked below.
   Method says why the pages quote 63.9 and 63.4 W (two leakage slopes); "5 to 6 W over ones" gives random signs' 4.8
   to 5.1 W on three cards; the DFT pair was re-measured on three cards and its cause is "not known"; Hadamard sits 1.8
   to 2.1 W below random signs on each card; "moves between cards unchanged" is gone.
-- [ ] Cut (about 850 of the page's 12,600 words):
+- [x] Cut (about 850 of the page's 12,600 words):
+  Done 28 Sep (`031c723`).
   - §9's CLI transcript → one Method line;
   - §5 items that repeat §1 and §3;
   - §8's fit details → `11-thermal-model.md`;
@@ -315,7 +326,8 @@ Many fix and cut items landed in the merge too; those are ticked below.
   lies above it, so "brackets" is wrong. Done 27 Sep: bullet 3.
 - [x] HOR-11 (low). Activity, bullet 2 (`:141–143`): "Idle cores cost nothing measurable" holds only for the fp32
   matmul; the integer loop implies a floor of about 0.24 W. Done 27 Sep: bullet 2.
-- [ ] Cut (about 500 words):
+- [x] Cut (about 500 words):
+  Done 28 Sep (`031c723`).
   - Voltage bullet 1's 800 MHz note → Caveats;
   - Leakage bullets 1 and 3, whose canonical homes are DVFS §5 and energy manual §1;
   - the §1 prose after the ratio chart;
@@ -338,8 +350,9 @@ Many fix and cut items landed in the merge too; those are ticked below.
   table; "12,000 gives it 85%". Superseded 27 Sep by the version-3 passes (E36): Method says the energy table is
   aifoundry2's first session; the window table, the paced runs and "about … W … this session read …" are computed
   from the three passes on each of three cards.
-- [ ] Cut (about 330 words): Versions; the §1 caption and the paragraph after it; `#nrgcap`; the L2 bullet in
+- [x] Cut (about 330 words): Versions; the §1 caption and the paragraph after it; `#nrgcap`; the L2 bullet in
   Related; §4's impact sentence; §2's clock paragraph.
+  Done 28 Sep (`031c723`).
 - [x] Chart: "Stops, not slows", replacing `#wintab` in §2.
   - Log–log: operations against window. Remote atomics rise 400× while the host stays flat at 384; a dashed line
     shows "if it only slowed".
@@ -359,7 +372,8 @@ Many fix and cut items landed in the merge too; those are ticked below.
 - [x] NOC-10 (low). Rename `#how-far-the-slab-moves-does-not-change-the-bandwidth` and
   `#the-same-watts-a-thirtieth-of-the-work`. Keep empty spans with the old ids, and update the hub's links. Done
   27 Sep: both renamed, the old ids kept, the hub's links updated.
-- [ ] Cut (about 230 words):
+- [x] Cut (about 230 words):
+  Done 28 Sep (`031c723`).
   - Versions;
   - the §2 table, which duplicates `#samew`: move the chart into §2, the table into `<details>`, and say "within
     about a watt" once;
@@ -371,8 +385,9 @@ Many fix and cut items landed in the merge too; those are ticked below.
 
 ### On-chip communication · `2026-09-18-et-soc1-on-chip-communication.html`
 
-- [ ] Cut (about 80 words): the per-card fit sentence appears twice verbatim (the intro and script line 1500); keep
+- [x] Cut (about 80 words): the per-card fit sentence appears twice verbatim (the intro and script line 1500); keep
   the 800 MHz clause once.
+  Done 28 Sep (`031c723`).
 - [x] Charts (done 27 Sep: both added):
   1. A chain-order comparison (plan.md §12(b)). `#ring-btn` becomes a selector (ID order, every k IDs, a
      one-hop ring) that draws the path on `#mesh` and marks its longest step. It shows why the relay's 10-hop 31→0
@@ -381,8 +396,9 @@ Many fix and cut items landed in the merge too; those are ticked below.
 
 ### L2 mainline starvation (pointer page) · `2026-09-22-et-soc1-l2-mainline-starvation.html`
 
-- [ ] NOC-11 (low). `:78` "1D rings, 2D in barrier-separated phases, and the hardware trees" → "1D rings and the
+- [x] NOC-11 (low). `:78` "1D rings, 2D in barrier-separated phases, and the hardware trees" → "1D rings and the
   hardware trees, and, by the RTL rule (not run), 2D in barrier-separated phases."
+  Done 28 Sep (`031c723`).
 
 ### Anatomy of a memory access · `workloads/memprobe/report_template.html`
 
@@ -392,9 +408,10 @@ Many fix and cut items landed in the merge too; those are ticked below.
 - [x] MEM-4 (low; PLAN3 §1.2). §7 (`:1001–1005`): "lands 11 cycles late" beside "0–10 … 0–9". Apply PLAN3's wording
   to both. Done 27 Sep: §7 gives PLAN3's per-launch windows (0–10 and 0–9, 19 September) beside "about 11 cycles
   late", and V3-MEM's result (no single window fits 11 of the 15 launches).
-- [ ] Cut (about 205 words): §6's host-log bullet and its "Later measurements" bullet; §9 "Clock domains"; §2's
+- [x] Cut (about 205 words): §6's host-log bullet and its "Later measurements" bullet; §9 "Clock domains"; §2's
   closing paragraph. Partly landed on 27 September: the "Later measurements" bullet is gone and the host-log bullet
   is in `<details>`.
+  Done 28 Sep (`031c723`).
 - [x] Chart: the memory-shire leg against distance in §4. One dot per home shire on the 104/116/…/176 staircase, with
   a toggle for memory shires one or two hops out. Done 27 Sep: §4.
 
@@ -410,7 +427,8 @@ Many fix and cut items landed in the merge too; those are ticked below.
   - Done 27 Sep: 1.40 TB/s (1.77 labelled as the 80 GB part) and 14.8 TB/s (19.5 labelled as the peak).
 - [x] MEM-6 (low). The readout at `:1188` says "nearest line: 31 at 600 MHz", where 31 counts loads, not a shire.
   Fix: "nearest line: 600 MHz for all 31". Done 27 Sep.
-- [ ] Cut (about 240 words):
+- [x] Cut (about 240 words):
+  Done 28 Sep (`031c723`).
   - item 5's governor description, and the chase numbers repeated four times;
   - the spec-table note's L1 loop (energy manual §4.2 is canonical);
   - item 6;
@@ -427,8 +445,9 @@ Many fix and cut items landed in the merge too; those are ticked below.
   Done 27 Sep: "Other limits", "A lone minion" (rewritten on the three-card data).
 - [x] MEM-5 (low). `:744` "a 4,500 × 4,500 fp32 block" against the chart's "about 4,580" → "about 4,600 × 4,600",
   or fill it from `reuse-scpmax`. Done 27 Sep: "about 4,580 on a side".
-- [ ] Cut (about 170 words): the shared-32 KB-tile explanation once ("Own shire"); the energy chart's caption and
+- [x] Cut (about 170 words): the shared-32 KB-tile explanation once ("Own shire"); the energy chart's caption and
   table note.
+  Done 28 Sep (`031c723`).
 - [x] Charts:
   1. Bandwidth against the minion clock, in "Which ridge points move with the clock". Plot each launch's GB/s over
      its level's 600 MHz median. Data: `data/2026-09-18-memhier-aifoundry2/energy{,2}/runs.jsonl`, embedded through
@@ -440,7 +459,9 @@ Many fix and cut items landed in the merge too; those are ticked below.
 
 - [x] CMP-9 (low). The explorer's legend draws the A100 as a ring and a dot, but the chart uses diamonds. Use
   `CK.legend`'s `'diamond'`. Done 27 Sep.
-- [ ] Cut (about 330 words):
+- [x] Cut (about 330 words):
+  Done 28 Sep (`031c723`): every sub-item. The page is 16 words longer than before only because it now gives the hub
+  scoreboard's five counts.
   - `#eff-sum` (`:1003`), which repeats the Later box;
   - the gp-sdk lab notes (`:796–802`) → one sentence pointing to `patches/README.md`;
   - the Later box's last A100 sentence;
@@ -457,8 +478,9 @@ Many fix and cut items landed in the merge too; those are ticked below.
 
 - [x] CMP-8 (low). Scenario 2 (`:836`) pairs times from the on-chip-reduction kernel with energies from the
   host-reduced one. Label each. Done 27 Sep: Scenario 2.
-- [ ] Cut (about 220 words): the "Answers to the questions…" section (keep the fp16 rule and the messaging answer);
+- [x] Cut (about 220 words): the "Answers to the questions…" section (keep the fp16 rule and the messaging answer);
   two caveats bullets; the Later box's last sentence; the sync costs once (§5).
+  Done 28 Sep (`031c723`).
 - [x] Chart: masked DRAM loads with the home shires lit (plan.md §14(a); data `tload["dram-all"]`),
   labelled as the page's hypothesis. Done 27 Sep.
 
@@ -474,8 +496,9 @@ Many fix and cut items landed in the merge too; those are ticked below.
 
 ### Spatial temperature brief · `2026-09-22-et-soc1-spatial-temperature-brief.html`
 
-- [ ] Cut (about 100 words): turn the "On both cards." paragraph into a table built from `HOST_TEMP.cards`; trim
+- [x] Cut (about 100 words): turn the "On both cards." paragraph into a table built from `HOST_TEMP.cards`; trim
   Versions. Partly landed: the per-card table.
+  Done 28 Sep (`031c723`).
 - [x] Chart: the sensor-to-host pipeline in §2 (plan.md §17(b)). Draw the 35 sensors, the conversion and
   the host fields; hovering a field lights its inputs. Done 27 Sep: §2.
 
@@ -499,7 +522,8 @@ Many fix and cut items landed in the merge too; those are ticked below.
   1.41 pJ. Done 27 Sep: `make_analysis.py` (`idle_before_w`).
 - [x] CMP-7 (low). The lede and KPI show `s1.l2_case.lead` with `data-dp="0"` ("3–4×") where S1 prints 2.6–3.9×. Use
   `data-dp="1"`. Done 27 Sep.
-- [ ] Cut (about 300 words):
+- [x] Cut (about 300 words):
+  Done 28 Sep (`031c723`).
   - §6 "Corrections folded in…" → the data README;
   - the H100 energy caveat twice, not four times;
   - "What 'sparse-friendly' buys here";
@@ -511,19 +535,22 @@ Many fix and cut items landed in the merge too; those are ticked below.
 
 ### Over the PCIe link · `sources/pcie-link.*`, and the hub's rung 30
 
-- [ ] `pcie-link.body.html:131–132` says why aifoundry3's host copies memory at half the others' rate "was not
+- [x] `pcie-link.body.html:131–132` says why aifoundry3's host copies memory at half the others' rate "was not
   established; reading it needs root". It was read as a user on 27 September 22:18: aifoundry3 runs one DDR4-2666
   DIMM on a single memory channel, aifoundry2 two channels, aifoundry1 two channels of DDR4-3200
   (`data/2026-09-27-pcie/hosts.txt`, addendum). Say so, and in the hub (`limits-of-observability.data.json`,
   rung 30 "ask-lab-root") mark the memory part done by us; MaxPayload and MaxReadReq still need root.
+  Done 28 Sep (`031c723`): the page and rung 30 say the memory channels were read without root; rung 30 stays
+  `ask_team`, since MaxPayload and MaxReadReq still need root.
 
 ### The aifoundry1 pages (standalone HTML)
 
 - [x] PWR-01 and PWR-02: see part 0 and "aifoundry1 and aifoundry3 statements" above. Done 27 Sep: PWR-02 on both
   pages (the dated update box, the PCIe line); PWR-01 by the owner's decision (part 0: both pages stay public for now).
-- [ ] Cut (about 650 words): the fix page's §4 (with PWR-01); the troubleshooting page's lede (284 words), which
+- [x] Cut (about 650 words): the fix page's §4 (with PWR-01); the troubleshooting page's lede (284 words), which
   repeats its four boxes; §1's procedure into `<details>`. The fix page's §4 stays, with PWR-01 (part 0); the rest
   is open.
+  Done 28 Sep (`031c723`), except the fix page's §4, which stays by the owner's decision.
 
 ## B. Repository-only work not done in this pass
 
@@ -549,11 +576,19 @@ The heat code is frozen until its validation on aifoundry1's card 1 ends (about 
 
 - [ ] Rebuild aifoundry1's `build/<workload>` host programs with `registerRuntimeLogLevels()` (the item above), then
   update getting-started's "Where things stand".
+  Partly done 28 Sep (07:52 PDT, after card 1's validation queue ended): enercat, memhier, memprobe, nocbench, onchip
+  and sgemm rebuilt with the fix (each host now imports g3log's `addLogLevel`; the kernels are byte-identical). Left:
+  `build/sparsity`, the heat-placement lock's frozen heater (rebuild it when the owner releases that lock), and
+  `build/enercat_v2`, the campaign's catalogue host, whose hash its cat blocks record (`tools/claims-v3/gs/README.md`:
+  never rebuild it; aifoundry3's is unfixed too). No build of pmcsel or traceprof there; enercat_gs and pciebench
+  already had the fix.
 - [ ] The heat code's card-0 temperature guard (`tools/claims-v3/hp/`) takes card 0's lock for its lifetime, and the
   drain on a two-card host checks the other card's node with `et-who`, not only its lock (the stock
   `dev_mngt_service` opens both cards).
-- [ ] `workloads/pciebench/run_pcie.sh` releases the card lock between sub-tests (runs held it 12.8–14.9 s; AGENT.md
+- [x] `workloads/pciebench/run_pcie.sh` releases the card lock between sub-tests (runs held it 12.8–14.9 s; AGENT.md
   §5's 10 s rule is per device-opening process).
+  Done 28 Sep (`031c723`), dry-tested only: its next real run will be its first on a card, and with 20 s lock waits a
+  run can take longer than `schedule.sh`'s `timeout 150`.
 - [ ] The queues poll `et-who` less often, and scripts use `et-who --check`'s exit status instead of parsing its text
   (`tools/lab/README.md`).
 - [ ] `V3_DRY` fails closed for agents: a marker file, or real runs only with an explicit `V3_REAL=1`.
@@ -587,7 +622,8 @@ flagged the rest at the top of `../findings/README.md`.
     and dearest instruction" row still gives 4.6 and 1,486 pJ); the per-card L1 and L2 and "within 0.8%" (the "Levels
     at 600 MHz" row still says "both cards, n = 6", the "Bandwidth at 600 MHz" row "within 0.3%"); `:57`, `:135` and
     `:433` (HOR-2, HOR-R3); memory anatomy's counter carry; E50–E52; and `:120`'s "A different afternoon session".
-- [ ] The topic files:
+- [x] The topic files:
+  Done 28 Sep (`031c723`).
   - `17-hot-line.md:10–12,53–54,93–95,134–135,138`: "at a steady 600 MHz", seventeen loads per minion, 192–240, the
     barrier's single development run.
   - `18-on-chip-relay.md:96,119–120`: r = −0.3; "a path with no ready-flag handshake".
@@ -620,7 +656,8 @@ flagged the rest at the top of `../findings/README.md`.
 
 ### Records and commands
 
-- [ ] `04-artifacts.md` (partly landed on 27 September: all but A4's "six versions"):
+- [x] `04-artifacts.md` (partly landed on 27 September: all but A4's "six versions"):
+  Done 28 Sep (`031c723`).
   - rows in the Commits table after `bde52e0`;
   - a tools row for `tools/g3log-race/race.cpp` (E49);
   - A16's `sync_hub_data.py` blocks `power.checks` and `claims_status`;
@@ -640,21 +677,26 @@ flagged the rest at the top of `../findings/README.md`.
   - getting-started `:268,276,292–293`;
   - `README.md` "make run-hello DEVICE=silicon" (it also needs `deploy-lab-gpsdk.sh`);
   - the memhier, nocbench and sparsity READMEs ("Check `uptime`, `who` and `ps` first").
-- [ ] Clone lists (`README.md:208`, getting-started:188) omit et-testdrive and etTopoScan. `scripts/vm:4` gives
+- [x] Clone lists (`README.md:208`, getting-started:188) omit et-testdrive and etTopoScan. `scripts/vm:4` gives
   `make -C hello run` for `make run-hello`. Partly landed on 27 September: both clone lists name all five; left:
   `scripts/vm:4`.
+  Done 28 Sep (`031c723`): `scripts/vm:4` too.
 - [x] `01-resources.md`: R5's etiquette → AGENT.md §5; R10's resolver note (lab-access.md); R12, the L2 brief, is a
   pointer page since 25 September. Done 27 Sep: all three.
 
 ### Concision in the repository (about 4,000 words)
 
-- [ ] `README.md:21–182`, the per-report prose (about 2,380 words): one sentence and a 21-row table (page, code, raw
+- [x] `README.md:21–182`, the per-report prose (about 2,380 words): one sentence and a 21-row table (page, code, raw
   data) built from MIRROR.md and getting-started §8. Keep the only copy of the hub's survey-source location.
-- [ ] `getting-started.md`, replacing duplicates with links to their canonical homes:
+  Done 28 Sep (`031c723`): the table is kept by hand in `README.md` ("Add a row here with each new page"); its
+  generator stays out of the repository.
+- [x] `getting-started.md`, replacing duplicates with links to their canonical homes:
+  Done 28 Sep (`031c723`).
   - "Earlier work"'s "Done" (about 650 words) and the dated result bullets of "Where things stand" (about 650);
   - the etiquette (AGENT.md §5);
   - the publishing rules (MIRROR.md);
   - the card table (14-card-behaviour);
   - Tailscale (lab-access);
   - the energy-manual chain (04-artifacts A16).
-- [ ] AGENT.md §1 and §9: point to getting-started and MIRROR.md instead of keeping dated snapshots.
+- [x] AGENT.md §1 and §9: point to getting-started and MIRROR.md instead of keeping dated snapshots.
+  Done 28 Sep (`031c723`).

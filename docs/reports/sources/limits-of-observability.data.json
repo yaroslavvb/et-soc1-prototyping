@@ -387,6 +387,16 @@
   },
   {
    "group": "Energy and power",
+   "title": "Where the work sits: placement and the thermal trip",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-placement",
+   "date": "27–28 Sep",
+   "what": "Does the same work run longer before the thermal trip in some parts of the die? Theories and predictions first, development on aifoundry3, then a frozen, hashed validation on aifoundry1's card 1 (E52): the same 512 minions on the 16 perimeter shires took 1.62 times as long as on the 16 interior ones to bring the sensors' mean from 61 to 66 °C in development (9 of 9 blocks, equal power), and 2.04 times [1.73–2.42] in the validation's short bursts (PASS, 5 of 5 blocks); the primary sustained test is INSUFFICIENT (1.22 times [0.66–2.27]; 7 of its 10 runs cut off by the 150 s cap), so by the frozen rules no theory counts as survived on card 1, and none was refuted.",
+   "instruments": "10 Hz telemetry with the 34 shire sensors (ettelem), board power and clock; the service processor's trace ring for each card's probe",
+   "short": "Heat placement",
+   "pub": "2026-09-28"
+  },
+  {
+   "group": "Energy and power",
    "title": "Heat per millimetre",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm",
    "date": "24 Sep",
@@ -5585,6 +5595,25 @@
     {
      "title": "The DVFS loop and its leakage (§1 the governor as built, §8 the development results)",
      "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-triggers-a-step-down-and-does-placement-delay-it"
+    }
+   ]
+  },
+  {
+   "id": "E52",
+   "when": "27–28 Sep",
+   "card": "aifoundry3 (development), aifoundry1-c1 (calibration and validation), aifoundry2 (two short attempts)",
+   "what": "Heat placement: the same 512-minion heater on the 16 interior shires, the 16 perimeter shires or spread over all 32, timed from the same start to the first reading of 66 °C on the sensors' mean, in chains of 2 s launches up to 150 s (Tier L) and in one 7 s launch (Tier S); development on aifoundry3 (27 Sep, 16:52–22:11), card 1's calibration, the predictions frozen at 22:50 (PREREG.md, SHA-256 a1bdc4e4…), then ten validation blocks on card 1 (27 Sep 23:45 – 28 Sep 07:49): short bursts PASS, the primary sustained test INSUFFICIENT",
+   "instruments": "10 Hz ettelem telemetry with the 34 shire sensors, board power and clock; the service processor's trace ring (the probes); host wall clock",
+   "data": [
+    {
+     "path": "docs/reports/data/2026-09-28-heat-placement/",
+     "note": "raw/<card>/hp/p<pass>/ per block, reductions/, val.json (the verdicts), heat.json (the page's data), plan/ (DESIGN, CRITIQUE, DESIGN2)"
+    }
+   ],
+   "reports": [
+    {
+     "title": "Where the work sits: placement and the thermal trip",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-placement"
     }
    ]
   }

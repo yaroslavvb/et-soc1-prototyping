@@ -13,14 +13,17 @@ page, [`AGENT.md`](../AGENT.md) (the entry point for an agent) and `CLAUDE.md` c
 The repository is the source of truth: every result, the experiment that produced it and the raw data are here,
 and `docs/findings/` traces each claim to its file. If a session is lost, resume from this page.
 
-- **aifoundry2 cannot run kernels until the lab admin restores it.** Its Master Minion hung at 02:50:53 PDT on
-  28 September during E51's development session p6041: a heater launched 0.6 s after the previous one, as the
-  governor's idle reset took the clock from 800 to 600 MHz, ran its short calibration kernel and then never completed
-  the next kernel, and every launch since fails with "Couldn't use the HPSQ. Perhaps the Master Minion is hanged?". The service processor still answers (telemetry and read-only queries work).
-  No reset was attempted, by the card rules; the cause is not established. The DV2 queue is stopped
-  (`build/claims-v3/STOP` and `build/claims-v3/aifoundry2/dv2/NIGHT-STOP` in the checkout that ran it, on
-  aifoundry2; a person removes them). Evidence and what to record after the
-  restore: `docs/findings/14-card-behaviour.md`, "aifoundry2 cannot run kernels".
+- **aifoundry2 runs kernels again: its card was restored at 08:32 PDT on 28 September** (owner-approved). Its Master
+  Minion had hung at 02:50:53 PDT during E51's development session p6041: a heater launched 0.6 s after the previous
+  one, as the governor's idle reset took the clock from 800 to 600 MHz, ran its short calibration kernel and then never
+  completed the next kernel, and every launch after it failed with "Couldn't use the HPSQ. Perhaps the Master Minion
+  is hanged?"; the cause is not established. The sysfs per-card reset (06:39) re-attached the device but did not
+  recover the Master Minion (launches at 06:40 and 06:47 failed the same way); the management reset
+  (`dev_mngt_service -m DM_CMD_RESET_ETSOC -n 0`, 08:32:45) did, and a 1-minion test at 08:33 ran 3 launches, each
+  ok, at 600 MHz. The DV2 queue is still stopped (`build/claims-v3/STOP` and
+  `build/claims-v3/aifoundry2/dv2/NIGHT-STOP` in the checkout that ran it, on aifoundry2; a person removes them).
+  Evidence: `docs/findings/14-card-behaviour.md`, "aifoundry2's Master Minion hung on 28 September", and
+  `docs/reports/data/2026-09-28-dvfs2-aifoundry2/incident/recovery.txt`.
 - **DV2, the DVFS-and-heat experiments (Q59, E51): development done, validation frozen and waiting.** The development
   night on aifoundry2 (28 September, 00:33–02:54 PDT; `docs/reports/data/2026-09-28-dvfs2-aifoundry2/`, tools in
   `tools/claims-v3/dv2/`) points to the governor comparing the 34-sensor mean, not the hottest shire, and to the cards
@@ -33,7 +36,7 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   `schedule-dv2val-*.txt` and the binaries in `build/ettelem-dv2/` and `build/sparsity_t2/`: no edits and no merges
   touching them until the validation ends (AGENT.md §7; `lib.sh` stays at the locked bytes, so a745199's comment
   there is to be re-applied afterwards). The validation needs the owner's OK to validate on a later session of the
-  same card, and aifoundry2's Master Minion restored. aifoundry3's governor is latched by its zero TDP and aifoundry1's card 1's never raises the
+  same card (aifoundry2's Master Minion, which its heating sessions need, was restored at 08:32 on 28 September). aifoundry3's governor is latched by its zero TDP and aifoundry1's card 1's never raises the
   clock, so neither can stand in (`docs/findings/14-card-behaviour.md`, "The clock governor, by firmware build").
 - **Heat placement (Q60, E52): development, validation and verdicts done (28 September).** The owner's question of
   27 September: does the same work run longer before the thermal trip in some parts of the chip? Developed on
@@ -88,8 +91,9 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   without a card (E49, `tools/g3log-race/`). Every host program now registers the log levels first in `main`. On 26
   September the fixed gather/scatter build ran 641 host processes on aifoundry3 with no crash (6.4 expected at the old
   rate; E49), and aifoundry2's and aifoundry3's other host builds were rebuilt with the fix after their queues ended.
-  aifoundry1's `build/<workload>` directories are still to be rebuilt with it (its queues ended at 09:22 on
-  26 September).
+  On aifoundry1 six were rebuilt with it on 28 September at 07:52, after card 1's heat-placement queue ended
+  (enercat, memhier, memprobe, nocbench, onchip, sgemm); `build/sparsity` (the heat-placement lock's frozen heater)
+  and `build/enercat_v2` (the campaign's catalogue host, as on aifoundry3) are left (`docs/reports/TODO.md`, part B).
 - **The visualization pass (26 September):** charts and controls on 13 pages, the chart toolkit's card registry (a
   third card appears when its data does) and sortable tables; no number changed. Record:
   `reports/data/2026-09-26-visualization-pass/` and `findings/04-artifacts.md`.
@@ -197,7 +201,10 @@ on aifoundry3, and `tools/claims-v3` queues that hold a card for hours.
 - **Don't reset a card yourself.** On 2026-07-17 the lab admin, Afonso Oliveira, asked people not to reset the
   ET-SoC-1 cards, because a software reset can hang one. If a card hangs, ping him and he will power-cycle it. We
   reset aifoundry2 twice on 2026-09-18 with `dev_mngt_service -m DM_CMD_RESET_ETSOC -n 0`, both times with the user's
-  approval and before we had seen his request. It worked both times, but ask him first.
+  approval and before we had seen his request. It worked both times, but ask him first. On 2026-09-28, with the owner's
+  approval, it recovered aifoundry2's hung Master Minion after the sysfs per-card reset
+  (`echo 1 > /sys/bus/pci/devices/0000:02:00.0/soc_reset/reinitiate`) had re-attached the device without recovering it
+  (`docs/findings/14-card-behaviour.md`).
 - You can tell a card is wedged when every launch fails with `KernelLaunchCmIfaceMulticastFailed`, or with "Couldn't use
   the HPSQ. Perhaps the Master Minion is hanged?".
 

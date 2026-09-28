@@ -1676,11 +1676,15 @@ ended, with the clock still at 800 MHz; the host read the idle reset's 600 MHz a
 the stream, never completed, and the next two launches failed with "Couldn't use the HPSQ. Perhaps the Master Minion
 is hanged?". The host's kernel log has an SP runtime-error event, the counter's sixth, at 02:50:57.6 ± 0.07 s
 (`incident/kernel_events.py`; the first five, on 20, 22 and 25 September, did not stop the card). The service
-processor still answers. No reset was
-attempted; the lab admin must restore it, and until then no kernel can run on aifoundry2
-([14-card-behaviour.md](14-card-behaviour.md), "aifoundry2 cannot run kernels"). The cause is not established.
+processor still answered. No reset was
+attempted that night. At 06:39 the sysfs per-card reset re-attached the device but not the Master Minion (launches at
+06:40 and 06:47 failed the same way); at 08:32:45 the management reset (`DM_CMD_RESET_ETSOC`), with the owner's
+approval, restored it, and a test on 1 minion at 08:33 ran 3 launches, each ok, at 600 MHz (`incident/recovery.txt`;
+[14-card-behaviour.md](14-card-behaviour.md), "aifoundry2's Master Minion hung on 28 September"). The cause is not
+established.
 **Validation:** `plan/PREREG-VAL.md` is frozen (SHA-256 `e150ce16…`) and has **not run**: it needs the owner's OK to
-validate on a later session of the same card, and aifoundry2's Master Minion restored. It registers the placement and
+validate on a later session of the same card (aifoundry2's Master Minion, which its heating sessions need, was
+restored at 08:32 on 28 September). It registers the placement and
 trigger items, the host bands, the latencies, the sign test and six idle items, with a named deviation: two blocks under
 the final placement where the readiness rule asked for four. The validation's own heater is the one that was running
 at the hang, a stated risk; a schedule with no heating is provided.

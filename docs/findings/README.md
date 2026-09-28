@@ -125,7 +125,8 @@ Read [Terms](#terms) first.
    read 67 °C in 12 of 12 runs. Placing 192 minions on the perimeter held 800 MHz 1.4 and at least 1.8 times as long
    as in the interior (two blocks). aifoundry3's governor is latched by its zero TDP, aifoundry1's card 1's never
    raises the clock, and nothing on those three cards limits the die's temperature (a 90–103 °C mean on aifoundry2,
-   26 September). aifoundry2's Master Minion hung that night and waits for the lab admin.
+   26 September). aifoundry2's Master Minion hung that night; the management reset restored it at 08:32 the same
+   morning (the sysfs per-card reset had not).
    → [03-experiments.md](03-experiments.md), E51; [14-card-behaviour.md](14-card-behaviour.md)
 18. **Where the work sits changed the time to the thermal trip on aifoundry3; on card 1, short bursts PASS and the
    primary sustained test is INSUFFICIENT** (development on aifoundry3, 27 September; frozen validation on
