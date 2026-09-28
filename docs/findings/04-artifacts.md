@@ -209,6 +209,35 @@ The hub (A2) gained §5's rungs 21–36 the same day: the documents, interfaces 
 and the lab for, and the experiments on the cards, that would settle what the chip diagram infers and what the PCIe
 page left open (`docs/reports/sources/limits-of-observability.data.json`, `.improvements`, rows with an `id`).
 
+## Pages added on 28 September
+
+No A-number yet. The build commands are in [`../reports/MIRROR.md`](../reports/MIRROR.md), "How each page is built".
+
+| Page | Source in this repository | Space | Visibility (2026-09-28) |
+|---|---|---|---|
+| Anatomy of a memory access, interactively: animated diagrams of each level of the memory system (the L1 data cache, latch RAM in the minion; the L2 in the shire cache; the L3 across the mesh; the scratchpad; the LPDDR4X DRAM), from the part that serves an access down to the transistors that switch, each access played step by step with its measured cycles and energy, every part marked documented, generic or unknown; which memories the documents call SRAM (the shire cache's compiled macros: L2, L3, scratchpad) and which not (the minion's L1, a latch RAM), with the cells themselves asked (the owner's question, after the lab lead said the chip is not using SRAM). 532 sourced facts; its 14 asks are on the hub | `docs/reports/sources/memory-levels.*`, `docs/reports/data/2026-09-28-memory-levels/` (`build_facts.py`; `research/`, the five levels' research files and `DESIGN.md`) | [et-soc1-memory-levels](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels), to be created | to be public; not yet deployed |
+
+The hub (A2) gained §5's rungs 37–44 the same day, what the memory levels leave unknown: six asks to AI Foundry
+(Ainekko), `ask-not-sram` (which memories are not SRAM, and each one's cell), `ask-memory-macros`, `ask-cache-latency`,
+`ask-silicon-config`, `ask-cache-esrs` and `ask-dram-part`, and two experiments on the cards, `exp-cache-bottleneck` and
+`exp-zero-state`. Each row names the views of the page it would settle (`.improvements[].levels`, drawn as links). The
+page's other unknowns were added to the rows that already asked the same thing, rungs 20, 21 (and 32), 23, 25, 26 and
+28, instead of repeating them, and rungs 19 and 33 gained a note. The page is in §1's index and map. A1, the memory
+anatomy page, gained a link card under its title and links from §2–§6 and §9 to each level's diagram (`#l1`, `#l2`,
+`#l3`, `#scp`, `#dram`) and to the hub's asks.
+
+**DV2 (E51), 28 September.** The DVFS page (A11) gained §8, "What triggers a step down, and does placement delay it"
+(development results on aifoundry2, not validated; data `data/2026-09-28-dvfs2-aifoundry2/`, `dv2` block of `dvfs.json`
+built by `tools/ettelem/build_dv2_data.py`), and §1 now gives the governor the cards run (BL2 0.20.0 at et-platform
+`ffca4cbb4`; 0.18.0 at `da192816a` on aifoundry1-c1) line by line; §2 separates run 7 (the power loop only) from run 2
+(either loop); §9 the PMIC and guard text. A3 (power and temperature), A4 (Horace) and A5 (why low power) no longer say
+aifoundry1-c1 was launched warm (its governor never raised the clock: 318,667 samples, 9,461 busy and cool at 45-65 W),
+and A3 and A15 (energy manual) say that nothing on the card limits the die temperature (catalogue pass 11 ran at a
+90-103 C mean on aifoundry2). The hub's firmware caveat now names the older builds, and §7 lists E51. Tools:
+`tools/claims-v3/dv2/` (the development blocks), `tools/claims-v3/dv2v/` (the frozen validation, LOCK.sha256),
+`tools/claims-v3/dv2/recount_v3.py` (the recounts over the version-3 raw telemetry), and
+`data/2026-09-28-dvfs2-aifoundry2/incident/kernel_events.py` (the card's error events on one clock).
+
 ## The visualization pass (26 September)
 
 Charts and controls added to 13 pages (and a link on the L2 brief), with the toolkit's card registry and sortable tables; every new chart takes

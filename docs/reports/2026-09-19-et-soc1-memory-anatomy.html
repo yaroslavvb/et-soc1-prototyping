@@ -718,6 +718,7 @@ window.CK = (function () {
 <main>
 <h1>Anatomy of a memory access on the ET-SoC-1</h1>
 <p class="byline">19 September 2026 · aifoundry2's card; the latencies re-checked on three cards on 26 September · minion clock 600 MHz, NoC 400 MHz, LPDDR4X at 3,733 MT/s · workload <code>workloads/memprobe</code> · firmware source read at et-platform <code>353f20e</code>; the card's own trace strings match an older build (before et-platform commit <code>60b40c10f</code>, 24 Sep 2024) · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<a class="card" id="memory-levels-link" href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels" style="display:block;margin:0 0 18px;padding:16px 18px;border:2px solid var(--c1);border-radius:12px;text-decoration:none;color:var(--ink)"><span style="display:block;font-size:0.8rem;letter-spacing:0.04em;text-transform:uppercase;color:var(--c1);font-weight:700">Companion · interactive</span><span style="display:block;font-size:1.25rem;font-weight:700;margin:2px 0 4px">Each level, interactively: L1, L2, L3, scratchpad, DRAM down to the transistors →</span><span style="display:block;font-size:0.95rem;color:var(--ink-2)">Anatomy of a memory access, interactively: an animated diagram of each level, from the part that serves a load down to the transistors that switch, each access played step by step with the cycles and energy measured on three cards; every part marked documented, generic or unknown, with what each level is built from, SRAM or not, and what the team is asked.</span></a>
 
 <p class="lede">How finely can this chip show you where a load's time and energy go? For time, the answer is
 <b>one cycle, for a single load</b>. You can put any one line in L1, L2, L3 or DRAM, time one load of it, and
@@ -841,6 +842,9 @@ focus for their range). Evicting a dirty line and fencing, which is not a load, 
 write-back; one of 128 took 16, as fast as a clean one. On the three cards its median was 249–263 per pass.
 There the median of the loads left in memory was 299–309 from pass to pass, near one of two values, 299–300
 or 307–309 (309 here), while L2 read 49 in every pass and L3 170–172.</p>
+<p class="small">Each level of this ladder drawn down to the transistors: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#l1">the L1</a>, latch RAM
+inside the minion, where a hit takes 5 cycles; <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#l2">the L2</a>, in the shire cache; the L3 and the DRAM
+are linked from §3 and §4.</p>
 <details><summary>The numbers (min, median, 90th percentile, max, median in ns)</summary>
 <div class="table-wrap"><table id="ladder-table"></table></div>
 </details>
@@ -890,6 +894,9 @@ and about 61 ns do not (72 cycles + 61 ns = 109 cycles at 600 MHz), and a hop is
 <p class="small">L2 hits in the same run come in two flavours: 37 cycles when the line is still in the bank's
 8-entry read buffer, and 48 from the array. The split held on all three cards (26 September): 98–100% of lines read
 44–52 cycles on their first L2 load and 98–99% read 40 or less on the repeats.</p>
+<p class="small">Drawn: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#l3">the L3</a>, a hit played from the requesting shire across the mesh to the
+home shire's data panel and back, with this fit's cycles; the two L2 flavours are <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#l2/rbuf-hit">a
+read-buffer hit</a> and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#l2/load-hit">a load from the array</a> in the L2's diagram.</p>
 
 <h2 id="the-memory-shire-leg-91-cycles-plus-12-per-hop">4. The memory shire leg: 91 cycles plus 12 per hop</h2>
 <details class="more"><summary>How the fit was done</summary>
@@ -939,8 +946,14 @@ cycles together), from the controller's timing registers. The remaining cycles, 
 shire: controller queue, PHY, and the crossings between the 933 MHz DDR clock and the mesh. At most, because the fit
 puts the memory shires one hop outside the grid: each hop further out moves 12 cycles from this constant into the mesh
 legs, and latency alone cannot tell them apart. The frequency experiment in §9 would split this further.</p>
+<p class="small">Drawn: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#dram">the DRAM</a>, from the memory shire's two controllers and PHY down to the
+DRAM cell, with the ~63 cycles no measurement splits left hatched and asked of the team (<a
+href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#ask-memshire">the hub's rung 26</a>).</p>
 
 <h2 id="inside-the-dram-rows-banks-and-refresh">5. Inside the DRAM: rows, banks and refresh</h2>
+<p class="small">The rows, banks and refresh below, drawn down to the cell and the sense amplifier: <a
+href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#dram/row-hit">a row hit</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#dram/row-conflict">a row conflict</a> and <a
+href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#dram/refresh">a refresh</a>.</p>
 <h3 id="which-address-bits-share-a-row">Which address bits share a row</h3>
 <p>A second load B was issued one cycle behind load A, with B = A with one physical-address bit flipped. Both were
 cold in DRAM, 150 random A per bit. When B shares A's row, or sits in another bank or channel, it rides along and
@@ -1058,6 +1071,10 @@ check 0–3 of 300 per pass on aifoundry2 and aifoundry1's card 1, but 2–9 on 
 </details>
 
 <h2 id="where-the-energy-goes">6. Where the energy goes</h2>
+<p class="small">The SRAM rail feeds the shire cache's arrays, drawn down to the cell in the diagrams of <a
+href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#l2">the L2</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#l3">the L3</a> and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#scp">the scratchpad</a>, the 2.5 MB of each
+shire's cache that software manages. Which cell they use is asked of the team (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#ask-not-sram">the hub's
+rung 37</a>): the documents call them SRAM, and the lab lead says the chip is not using SRAM.</p>
 <details class="more"><summary>How energy was split by rail</summary>
 <p>On 19 September, hart 0 of all 1,024 minions walked a working set sized to hit exactly one level, with no evicts
 (sized by design and checked only by the load rates: no counter a user-mode kernel can read reports L2 or L3 hits
@@ -1174,6 +1191,11 @@ user-mode syscall that sets them (about 60 lines) has been written and works in 
 on the card needs a signed firmware image, and neither the signing tool nor a test key is available, so whether this
 card would boot a rebuilt image is untested (the hub's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">firmware
 caveat</a>).</li>
+<li><b>Asking the team.</b> What latency alone cannot split, such as the memory shire's ~63 cycles, the stages of the
+L3's 110 and the storage cell of each level, is asked in the hub's improvement ladder (<a
+href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#ask-memshire">rung 26</a>, <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#ask-cache-latency">rung 39</a>, <a
+href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#ask-not-sram">rung 37</a> and the rest of rungs 37–44), and <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels#asks">the interactive
+diagrams</a> link each unknown part to its rung.</li>
 </ul>
 </details>
 
@@ -1222,13 +1244,15 @@ a slope and a range. 26 September (version 4): the latencies re-checked on three
 row conflict (about +38 cycles, not +40) and the evict ladder's open-row split corrected; the board-power period given
 per card; the energy manual's figures (the note on energy, the DRAM figure at the top, §6 and the energy chart) are
 its version-3 values from three cards. The record is
-<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>. 27 September: the DRAM chip's share of a load is about 28 cycles (a 64-byte line is two bursts; was 25–28) and the memory shire's at most ~63; the explorer's row-conflict and refresh waits are the three-card values (38 and 208 cycles, were 40 and 210); the memory-shire leg charted per card; detail folded into collapsible sections. 27 September, later: why every fourth load of the locked loop is slow, charted with a model that takes four numbers from the refresh series (the slow load's extra time is the refresh period minus four open turns, within a cycle in every series; the page had said that none of this session's slow loads landed inside the refresh); the bit chart's row-conflict label reads the measured +38.5 cycles (was rounded to +40); the no-fence loads' median excess over the §4 model is 60 cycles (was 58); the board value's refresh in the three-card check includes its 20 Hz sampler (126–189 and 223–322 ms; was 126–159 and 223–264).</p>
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-25-claims-v3">docs/reports/data/2026-09-25-claims-v3</a>. 27 September: the DRAM chip's share of a load is about 28 cycles (a 64-byte line is two bursts; was 25–28) and the memory shire's at most ~63; the explorer's row-conflict and refresh waits are the three-card values (38 and 208 cycles, were 40 and 210); the memory-shire leg charted per card; detail folded into collapsible sections. 27 September, later: why every fourth load of the locked loop is slow, charted with a model that takes four numbers from the refresh series (the slow load's extra time is the refresh period minus four open turns, within a cycle in every series; the page had said that none of this session's slow loads landed inside the refresh); the bit chart's row-conflict label reads the measured +38.5 cycles (was rounded to +40); the no-fence loads' median excess over the §4 model is 60 cycles (was 58); the board value's refresh in the three-card check includes its 20 Hz sampler (126–189 and 223–322 ms; was 126–159 and 223–264). 28 September: a link to the companion page, Anatomy of a memory access, interactively, under the title, and from §2–§6 and §9 to its diagram of each level and to the hub's asks.</p>
 </details>
 
 <h2 id="related">Related reports</h2>
 <ul>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a>, the
 hub — every instrument used here, what the power meters can and cannot see, and what would extend them.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels">Anatomy of a memory access, interactively</a> — this page's companion: each level
+(L1, L2, L3, scratchpad, DRAM) drawn and animated down to the transistors, every part with its source.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — the pointer chase
 and the bandwidth of every level, measured the day before this page.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-on-chip-communication">On-chip communication</a> — the shire

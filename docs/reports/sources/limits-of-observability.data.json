@@ -353,7 +353,7 @@
   {
    "title": "Limits of observability (this page)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability",
-   "date": "20–27 Sep",
+   "date": "20–28 Sep",
    "what": "The hub: every instrument on the card, what it resolves, what it cannot see, the unmetered power attributed, and the ladder of improvements; since 26 September, the version-3 campaign on three cards and every page's claims before and after it.",
    "instruments": "all of them",
    "short": "This hub",
@@ -364,6 +364,16 @@
     [1, "differs by card"],
     [5, "not confirmed"]
    ]
+  },
+  {
+   "group": "Synthesis: the set's measurements in one picture",
+   "title": "Anatomy of a memory access, interactively",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels",
+   "date": "28 Sep",
+   "what": "Animated diagrams of each level of the memory system, from the part that serves an access down to the transistors that switch: the L1 data cache (latch RAM in the minion), the L2 in the shire cache, the L3 across the mesh, the scratchpad and the LPDDR4X DRAM, each access played step by step with the cycles and energy measured on the three cards, and every part marked documented, generic or unknown. SRAM or not, level by level: the L1 is latch RAM; the documents call the shire cache's arrays SRAM panels and give no cell. Its unknowns are <a href=\"#improve\">§5</a>'s rungs 37–44 and additions to rungs 20, 21, 23, 25, 26, 28 and 32, which already asked the same thing; each unknown part links to its rung. The companion of <a href=\"https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy\">Anatomy of a memory access</a>.",
+   "instruments": "none: a synthesis of the set's measurements, the manuals, the design documents, the firmware source and the RTL",
+   "short": "Memory levels",
+   "pub": "2026-09-28"
   },
   {
    "group": "Synthesis: the set's measurements in one picture",
@@ -4627,7 +4637,7 @@
    "status": "research_only",
    "what": "A cell library and netlist for the RTL",
    "done": false,
-   "adds": "Toggle counts from the RTL bench become joules only with a library the drop does not contain.",
+   "adds": "Toggle counts from the RTL bench become joules only with a library the drop does not contain. Rung 38 asks for the memories' part of it alone, which the team can answer without a library: the macros' geometry, energies and leakage.",
    "cost": "not in the open tree",
    "effect": "Energy per flip from simulation rather than from fits to board power."
   },
@@ -4637,26 +4647,33 @@
    "status": "impossible_on_silicon",
    "what": "Current sensing below the regulators",
    "done": false,
-   "adds": "Nothing on the die or the board measures the current of the DDR, VDDQ, PCIe, IO or Maxion rails; splitting them means shunts on the board.",
+   "adds": "Nothing on the die or the board measures the current of the DDR, VDDQ, PCIe, IO or Maxion rails; splitting them means shunts on the board. The memory-levels page leaves its DRAM ledger's energy cells hatched for this reason: the off-rail 73 pJ/B, split between the memory shires' logic, the PHY's I/O, the DRAM core and the DRAM's own I/O, and refresh energy, which is part of idle.",
    "cost": "board rework: not for a shared card",
-   "effect": "The last {{idle_unsensed}} of idle, and the DRAM term's split, stay inferred."
+   "effect": "The last {{idle_unsensed}} of idle, and the DRAM term's split, stay inferred. Memory levels: those hatched cells stay open.",
+   "levels": [
+    ["dram/load", "the DRAM load's energy ledger"]
+   ]
   },
   {
    "rung": 21,
    "id": "ask-noc-docs",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers and the PCIe page leaves open",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "ask_team",
    "what": "The NoC's reference manual and specification",
    "done": false,
-   "adds": "Three NoC documents are named in the open drop and missing from it: the NoC configuration's generated reference manual (noc/reference_manual/noc_reference_manual.htlm, so spelled, cited at core-et rtl/inc/debug_defines.vh:831-832), the Main NoC documentation that the CORE-ET Minion Shire Description's §3.3 says 'can be accessed here' (pdf p.11; the PDF carries no link), and the 'NOC spec' that the firmware's two shire maps are 'based on' (noc_reconfigure.h:76, 84). They would say whether a request turns x first or y first, whether a reply follows the same rule back, which of the nine router layers each kind of traffic takes, how wide a router-to-router link is, how each bridge's address map sends DRAM addresses (to an L3 home or straight to a memory shire), and what the router and bridge registers in noc_esr.h hold.",
+   "adds": "Three NoC documents are named in the open drop and missing from it: the NoC configuration's generated reference manual (noc/reference_manual/noc_reference_manual.htlm, so spelled, cited at core-et rtl/inc/debug_defines.vh:831-832), the Main NoC documentation that the CORE-ET Minion Shire Description's §3.3 says 'can be accessed here' (pdf p.11; the PDF carries no link), and the 'NOC spec' that the firmware's two shire maps are 'based on' (noc_reconfigure.h:76, 84). They would say whether a request turns x first or y first, whether a reply follows the same rule back, which of the nine router layers each kind of traffic takes, how wide a router-to-router link is, how each bridge's address map sends DRAM addresses (to an L3 home or straight to a memory shire), and what the router and bridge registers in noc_esr.h hold. The memory-levels page needs the same documents for the router pipeline per hop, which of the nine main-NoC layers carry L3 requests and replies, the flit width and the dimension order.",
    "cost": "an email; the manual is generated by the NoC vendor's tool, so its licence decides whether it can be shared",
-   "effect": "Chip diagram: every route the ten flows draw, x first on an assumption (fact L104), and the replies' routes become documented. Heat per millimetre's link-sharing shares, computed under x-first routing, are confirmed or recomputed; the link width bounds what one link can carry.",
-   "diagram": "the mesh, every route and every reply"
+   "effect": "Chip diagram: every route the ten flows draw, x first on an assumption (fact L104), and the replies' routes become documented. Heat per millimetre's link-sharing shares, computed under x-first routing, are confirmed or recomputed; the link width bounds what one link can carry. Memory levels: the mesh-hop scale of the L3 and of the remote scratchpad; with rung 39, the mesh's share of an L3 hit.",
+   "diagram": "the mesh, every route and every reply",
+   "levels": [
+    ["l3/hop", "the L3's mesh hop"],
+    ["scp/hop", "the scratchpad's mesh hop"]
+   ]
   },
   {
    "rung": 22,
    "id": "ask-floorplan",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers and the PCIe page leaves open",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "ask_team",
    "what": "The chip's floorplan, or the die plot with its orientation stated",
    "done": false,
@@ -4668,19 +4685,24 @@
   {
    "rung": 23,
    "id": "ask-shire-floorplan",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers and the PCIe page leaves open",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "ask_team",
    "what": "The minion shire's floorplan",
    "done": false,
-   "adds": "Where the four neighbourhoods, the four cache banks, the UC block and the mesh stop sit inside a shire's tile: no source gives it. The CORE-ET Minion Shire Description's Figure 1 (pdf p.5) is a logical block diagram; only the neighbourhood has a floorplan (Neighborhood MAS, Figure 2). One floorplan image of a minion shire from the physical-design team settles it.",
+   "adds": "Where the four neighbourhoods, the four cache banks, the UC block and the mesh stop sit inside a shire's tile: no source gives it. The CORE-ET Minion Shire Description's Figure 1 (pdf p.5) is a logical block diagram; only the neighbourhood has a floorplan (Neighborhood MAS, Figure 2). One floorplan image of a minion shire from the physical-design team settles it. The memory-levels page asks the same floorplan for more: the minion's partition (where the 8 LRAM macros, the tag register files and the TLB sit, and their area) and where the four banks, their sixteen sub-banks and 96 macros sit relative to the mesh stop and the four L3-slave ports.",
    "cost": "an email",
-   "effect": "Chip diagram: the shire view becomes a floorplan instead of a block diagram, and the distance from each neighbourhood to each bank becomes drawable.",
-   "diagram": "the inside of a shire"
+   "effect": "Chip diagram: the shire view becomes a floorplan instead of a block diagram, and the distance from each neighbourhood to each bank becomes drawable. Memory levels: the physical layer of the L1, L2 and L3: the distances an access travels inside the tile.",
+   "diagram": "the inside of a shire",
+   "levels": [
+    ["l1/minion", "the minion"],
+    ["l2/shire", "the L2's shire"],
+    ["l3/home", "the L3's home shire"]
+   ]
   },
   {
    "rung": 24,
    "id": "ask-databook",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers and the PCIe page leaves open",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "ask_team",
    "what": "The ET-SoC-1 Data Book and a final datasheet",
    "done": false,
@@ -4692,31 +4714,38 @@
   {
    "rung": 25,
    "id": "ask-card-schematic",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers and the PCIe page leaves open",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "ask_team",
    "what": "The dev card's schematic and board file",
    "done": false,
-   "adds": "The dev-card page in external/et-man links 'Schematic 09/27/2022', 'Board File V3.2' and the V3 schematic changes without including them. Its block diagram (pdf p.4), like the datasheet's Figure 2-6, draws each LPDDR4X package beside two neighbouring memory shires but does not number them; the datasheet says only that two memory shires communicate with each 64-bit device (pdf p.30). The schematic's nets say which two memory shires share each of the four packages and where the rails are sensed.",
+   "adds": "The dev-card page in external/et-man links 'Schematic 09/27/2022', 'Board File V3.2' and the V3 schematic changes without including them. Its block diagram (pdf p.4), like the datasheet's Figure 2-6, draws each LPDDR4X package beside two neighbouring memory shires but does not number them; the datasheet says only that two memory shires communicate with each 64-bit device (pdf p.30). The schematic's nets say which two memory shires share each of the four packages and where the rails are sensed. The memory-levels page also asks which card rail feeds the packages' VDD1 (1.8 V in JEDEC LPDDR4X).",
    "cost": "an email",
-   "effect": "Chip diagram: the four dashed LPDDR4X packages, paired as neighbours on an assumption (fact dram.pkg-pairing), become documented.",
-   "diagram": "the four LPDDR4X packages"
+   "effect": "Chip diagram: the four dashed LPDDR4X packages, paired as neighbours on an assumption (fact dram.pkg-pairing), become documented. Memory levels: the same pairing at the DRAM's card scale, and the DRAM's supplies drawn complete.",
+   "diagram": "the four LPDDR4X packages",
+   "levels": [
+    ["dram/chip", "the card and its packages"]
+   ]
   },
   {
    "rung": 26,
    "id": "ask-memshire",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers and the PCIe page leaves open",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "ask_team",
    "what": "The memory shire's description, or its programmed DDR registers",
    "done": false,
-   "adds": "Two things below the memory shire's mesh port are inferred: the DRAM address map past the memory-shire bits (PA[9] the channel, PA[12:10] the bank, PA[34:18] the row; decoded from ADDRMAP values in the firmware source and a tool comment, fact L50), and how much of a DRAM load's latency the DRAM itself takes against the memory shire's queue, controller, PHY and clock crossings (fact lat-dram-chip). A memory-shire description with its pipeline latencies, or each controller's programmed ADDRMAP and DRAMTMG registers read back by the service processor (its driver already reads controller registers, mem_controller.c ms_read_ddrc_reg), settles both. The errata cite Synopsys's uMCTL2 Databook v3.50a (pdf p.88); the register values are the realistic ask. A build that boots the DRAM at 800 or 1,066 MHz instead of 933 (mem_controller.c:643) would split the latency by experiment.",
+   "adds": "Two things below the memory shire's mesh port are inferred: the DRAM address map past the memory-shire bits (PA[9] the channel, PA[12:10] the bank, PA[34:18] the row; decoded from ADDRMAP values in the firmware source and a tool comment, fact L50), and how much of a DRAM load's latency the DRAM itself takes against the memory shire's queue, controller, PHY and clock crossings (fact lat-dram-chip). A memory-shire description with its pipeline latencies, or each controller's programmed ADDRMAP and DRAMTMG registers read back by the service processor (its driver already reads controller registers, mem_controller.c ms_read_ddrc_reg), settles both. The errata cite Synopsys's uMCTL2 Databook v3.50a (pdf p.88); the register values are the realistic ask. A build that boots the DRAM at 800 or 1,066 MHz instead of 933 (mem_controller.c:643) would split the latency by experiment. The memory-levels page (28 September) takes the row bits as measured and PA[9] as documented; the bank bits stay rung 33's. PA[9], the channel, is the memory shire's reset value (ms_regs.h:160), and the anatomy page's one-bit flips (§5), repeated on the three cards in the version-3 check, show which bits change the row. It asks the rest: how the up-to-63 cycles beyond the DRAM's own timing split between the L3 home's miss path and To_Sys crossings (about 12 cycles by the spec) and the memory shire's port and clock crossing, the controller's queues and the PHY; which traffic goes to each controller's two AXI ports; when a global atomic on a DRAM address is done in the memory shire's atomic unit rather than at the L3 home; the controller's total CAM depth; and where the memory shire's clock crossing sits.",
    "cost": "an email; or a service-processor command in a signed build",
-   "effect": "Chip diagram: the memory shire's address map and the DRAM chip's share of a load become documented or measured instead of inferred.",
-   "diagram": "the memory shire and its DRAM"
+   "effect": "Chip diagram: the memory shire's address map and the DRAM chip's share of a load become documented or measured instead of inferred. Memory levels: the hatched bar at the memory-shire scale, split between the L3 home and the memory shire; the controller's ports, CAM and atomic unit drawn from the design instead of from the init code.",
+   "diagram": "the memory shire and its DRAM",
+   "levels": [
+    ["dram/ms", "the memory shire"],
+    ["dram/load", "the DRAM load"]
+   ]
   },
   {
    "rung": 27,
    "id": "ask-noc-registers",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers and the PCIe page leaves open",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "ask_team",
    "what": "A way to read the NoC's router and bridge registers",
    "done": false,
@@ -4728,19 +4757,24 @@
   {
    "rung": 28,
    "id": "ask-design-docs",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers and the PCIe page leaves open",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "ask_team",
    "what": "The rest of the design documents the drop cites",
    "done": false,
-   "adds": "The open documents cite others that are not in the drop: the Power Spec (voltage domains and their regions; CORE-ET Minion Shire Description §5, pdf p.18), the UC Specification, the Shire Bus Master Specification, Minion Shire PLL and DLL Initialization, MAS: Minion Shire Debug, the Debug High-Level Specification and Debug Memory Map, Minion CSRs (the references of the Shire Description, pdf p.21, and of the Neighborhood MAS, pdf p.52), the DFT Specification (named in the Neighborhood MAS's interface table, pdf p.39), and the Maxion Shire MAS and Maxion Tile MAS (errata pdf pp.70, 79). They describe blocks the diagram draws from one line of text (the UC block, the I/O shire's Maxions) and the voltage regions behind the power pages. The Maxion documents would also settle the Maxions' cache, which the Preliminary Datasheet (pdf p.5) and the Programmer's Reference Manual (pdf p.486) give as 4 MB and the Shire Cache Specification (pdf p.22) as 'a cache total of 1 MB' for the I/O shire (the chip diagram's fact chip.io-shire).",
+   "adds": "The open documents cite others that are not in the drop: the Power Spec (voltage domains and their regions; CORE-ET Minion Shire Description §5, pdf p.18), the UC Specification, the Shire Bus Master Specification, Minion Shire PLL and DLL Initialization, MAS: Minion Shire Debug, the Debug High-Level Specification and Debug Memory Map, Minion CSRs (the references of the Shire Description, pdf p.21, and of the Neighborhood MAS, pdf p.52), the DFT Specification (named in the Neighborhood MAS's interface table, pdf p.39), and the Maxion Shire MAS and Maxion Tile MAS (errata pdf pp.70, 79). They describe blocks the diagram draws from one line of text (the UC block, the I/O shire's Maxions) and the voltage regions behind the power pages. The Maxion documents would also settle the Maxions' cache, which the Preliminary Datasheet (pdf p.5) and the Programmer's Reference Manual (pdf p.486) give as 4 MB and the Shire Cache Specification (pdf p.22) as 'a cache total of 1 MB' for the I/O shire (the chip diagram's fact chip.io-shire). For the memory-levels page the Power Spec would also say which rail feeds the shire cache's logic (the pipeline, crossbars, request queues, the high side of the voltage-crossing FIFOs, the UC block) as against its memory macros alone.",
    "cost": "an email; one list, sent once",
-   "effect": "Chip diagram: the UC block and the I/O shire drawn from their specifications, with one size for the Maxions' cache; the power pages: which blocks sit on which rail.",
-   "diagram": "the shire's blocks, the I/O shire and the power pages"
+   "effect": "Chip diagram: the UC block and the I/O shire drawn from their specifications, with one size for the Maxions' cache; the power pages: which blocks sit on which rail. Memory levels: the rail band of each block of the L2, L3 and scratchpad, and the split of the SRAM rail's energy between arrays and logic.",
+   "diagram": "the shire's blocks, the I/O shire and the power pages",
+   "levels": [
+    ["l2/xing", "the L2's voltage crossing"],
+    ["l2/shire", "the L2's rail bands"],
+    ["scp/shire", "the scratchpad's rail"]
+   ]
   },
   {
    "rung": 29,
    "id": "ask-pcie-dma",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers and the PCIe page leaves open",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "ask_team",
    "what": "The PCIe DMA engine's documentation and the settings the firmware gives it",
    "done": false,
@@ -4752,7 +4786,7 @@
   {
    "rung": 30,
    "id": "ask-lab-root",
-   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers and the PCIe page leaves open",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "ask_team",
    "what": "Three readings on the lab hosts that need root",
    "done": false,
@@ -4762,9 +4796,108 @@
    "diagram": "the host and the PCIe link"
   },
   {
+   "rung": 37,
+   "id": "ask-not-sram",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "status": "ask_team",
+   "what": "Which of the chip's memories are not SRAM, and what cells they use",
+   "done": false,
+   "adds": "The lab lead said the chip is \"not using SRAM\". The Shire Cache Specification calls the L2, L3 and scratchpad arrays \"SRAM memory panels\" (pdf p.48) and names compiled 1PUHD and 2PUHDRF macros (pdf p.51; a Synopsys compiler by inference from core-et-main/AGENTS.md:609), the datasheet counts 140 MB of SRAM (pdf p.4), and the minion's L1 data array is documented as latch RAM (the Minion DCache Description, pdf p.29). The ask: which memories he meant; the bitcell of the shire-cache macros (6T high-density, 8T, other); inside dcache_128x32_1r1w_lram, standard-cell latches placed like ET's rf_latch_1r_1w_reg library or a custom or compiled latch array, the transistors per bit, and a static mux-tree read or a precharged read bitline; the HDBULT08 and HDBULT11 cell families and the \"MMI (hand-tuned)\" logic; whether the L1 is latch RAM because the minion's low-voltage region (400-620 mV by the firmware's limits, 0.517 V measured) is below the panels' 585 mV Vmin (our inference); and which other minion arrays (the VPU register file vpu_64x32_3r2w, the TLB) are latch arrays. The neighbourhood's instruction-cache data RAM (saduls0g4l1p512x144, the data panels' 1PUHD family) has the same open question.",
+   "cost": "an email to the physical-design team",
+   "effect": "Memory levels: the transistor view of every on-chip level: the L1's latch cell and read path (now the generic latch template) and the L2, L3 and scratchpad cell (now a generic 6T marked unknown); whether a shire-cache cell needs refresh, which would add a refresh step; the \"why latches\" reading confirmed or corrected.",
+   "levels": [
+    ["l1/latch", "the L1's latch cell"],
+    ["l2/cell", "the L2 cell"],
+    ["l3/cell", "the L3 cell"],
+    ["scp/cell", "the scratchpad cell"],
+    ["scp/vmin", "why latches: the Vmin inset"]
+   ]
+  },
+  {
+   "rung": 38,
+   "id": "ask-memory-macros",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "status": "ask_team",
+   "what": "Datasheets (or .lib summaries) of the memory macros",
+   "done": false,
+   "adds": "For the shire cache's data panels (saduls0g4l1p4096x144m4b4...), tag RAM (...1024x116...) and state RAM (saculs0g4l2p1024x40...), and for the L1's dcache_128x32_1r1w_lram: rows × columns, the column mux and internal banks (is m4b4 a 4:1 mux and 4 banks?), the sense-amplifier type, bitline length, whether a global read bus is precharged, energy per read and per write at the running voltage, and leakage per macro. This is rung 19's need (a cell library and netlist) narrowed to the memories, and it can be asked for.",
+   "cost": "an email; the macros come from a memory compiler, whose licence decides whether the datasheets can be shared, while their geometry and energies can be quoted",
+   "effect": "Memory levels: the arrays and subarrays of the L1, L2, L3 and scratchpad drawn to scale instead of as illustrations; how many bitlines swing per access (the half-select energy); the ledgers' energy split between array and periphery, now \"not split\".",
+   "levels": [
+    ["l1/lram", "an L1 LRAM block"],
+    ["l2/panel", "the L2 data panel"],
+    ["l3/panel", "the L3 data panel"],
+    ["scp/panel", "the scratchpad data panel"]
+   ]
+  },
+  {
+   "rung": 39,
+   "id": "ask-cache-latency",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "status": "ask_team",
+   "what": "Where each cycle of a cache access goes",
+   "done": false,
+   "adds": "Only the totals are measured. The ask is the latency stage by stage: an L1 hit (is it ID-EX-TAG-MEM-WB plus one cycle, with no bypass from S3 to EX, and what costs hart 1 three extra cycles on every L1 miss?); an L2 hit (21 shire clocks inside the cache and 26 outside, of which only about 6 are placed); a read-buffer hit (10); an L3 hit (the 110-cycle constant: 72.2 clock-scaled cycles + 61.4 ns, 109 at 600 MHz, against the spec's 34 + 30 shire clocks); leaving and entering a shire for a remote scratchpad read (about 53 cycles); and the L3 home's extra cycles on a miss before the request leaves on To_Sys (the spec's 42 against 30 shire clocks). The mesh's share is rung 21's.",
+   "cost": "an email; a question for the design team, or the pipeline diagrams behind the specifications",
+   "effect": "Memory levels: per-step cycle labels on every access of the L1, L2, L3 and scratchpad, where only the totals are measured now.",
+   "levels": [
+    ["l1/load-hit", "the L1 load hit"],
+    ["l2/load-hit", "the L2 load hit"],
+    ["l3/load-hit", "the L3 load hit"],
+    ["scp/remote-load", "a remote scratchpad load"]
+   ]
+  },
+  {
+   "rung": 40,
+   "id": "ask-silicon-config",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "status": "ask_team",
+   "what": "Which options of the open drop the silicon has",
+   "done": false,
+   "adds": "The open core-et is the Erbium branch, and the Shire Cache Specification v1.1 also documents later chips. Does the taped-out L1 carry parity or ECC, and can the minion arrays sleep? Is there an L2 hardware prefetcher (shire_cache_bank_l2hpf)? What is the read buffer built from (flip-flops in the re-implementation)? Are the v1.1 macros the taped-out ones? Does an L3 request pick its mesh lane by the home bank, PA[12:11], as core-et-main's shirecache_mesh_master.sv:132-153 does? That file already contradicts the chip diagram's fact L103, which cites it for a lane from PA[7:6]: its lines 145-149 take PA[7:6] only for a remote-scratchpad request, so only the taped-out behaviour is asked.",
+   "cost": "an email; five yes-or-no questions",
+   "effect": "Memory levels: check bits drawn on each L1 row or not; the L2's prefetcher box drawn or removed; the read buffer's storage drawn; the L3 request's lane confirmed in silicon. The chip diagram's fact L103 (the lane from PA[7:6]) and Heat per millimetre's lane sharing misread the same file for L3 lines and need the correction, a follow-up rather than an ask.",
+   "levels": [
+    ["l1/dcache", "the L1 data cache"],
+    ["l2/bank", "the L2 bank: prefetcher and read buffer"]
+   ]
+  },
+  {
+   "rung": 41,
+   "id": "ask-cache-esrs",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "status": "ask_team",
+   "what": "The live shire-cache settings on these cards",
+   "done": false,
+   "adds": "sc_pipe_ctl (esr_sc_ram_delay, esr_sc_zero_state_enable, the read-buffer enables) and shire_cache_ram_cfg1-4 (RM, RME, RA, WA, WPULSE, BC) on each card, at the 705 mV rail, and esr_sc_axi_qos, the priority the shire cache gives its memory requests. The open firmware never writes the trims, and the functional model's reset values are the spec's RM0 \"650 mV nominal\" row: does the boot ROM or BL1 change them?",
+   "cost": "one service-processor read of one shire per card, or a one-time M-mode read (ESR 0x55); an email, or a signed build",
+   "effect": "Memory levels: the panel access time drawn (2 cycles, 3.3 ns, if the shire runs at the minions' clock); whether zero lines skip the panels on these cards; which read-assist and write-assist mode the cell animation shows; the memory requests' priority at the DRAM controller.",
+   "levels": [
+    ["l3/panel", "the L3 data panel's trims"],
+    ["scp/panel", "the scratchpad panel's trims"],
+    ["dram/ms", "the memory shire's controllers"]
+   ]
+  },
+  {
+   "rung": 42,
+   "id": "ask-dram-part",
+   "group": "asks to AI Foundry (Ainekko): the documents and interfaces behind what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "status": "ask_team",
+   "what": "The DRAM part",
+   "done": false,
+   "adds": "The Micron part number, die density, dies per package, and x16 or byte-mode channels. The firmware reads the mode registers MR5 and MR8 at every boot and logs them (mem_controller_utils.c), but no log has been captured; a boot log or the card's BOM line settles it, and the part's datasheet gives whatever it publishes of the internal organisation. With temperature derating off, also whether the packages stay under 85 °C under load: a read of MR4 during a long run would show it.",
+   "cost": "a boot log, or the card's BOM line; an email",
+   "effect": "Memory levels: the DRAM die drawn from the actual part instead of from the capacity and JEDEC; the generic die internals narrowed where the datasheet allows; whether the fixed refresh interval (3.875 µs) is enough at the packages' temperature under load.",
+   "levels": [
+    ["dram/chan", "the channel and die"],
+    ["dram/dbank", "the bank and subarray"],
+    ["dram/dcell", "the DRAM cell"]
+   ]
+  },
+  {
    "rung": 31,
    "id": "exp-mesh-stops",
-   "group": "experiments on the cards: what the chip diagram infers and the PCIe page leaves open",
+   "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "needs_tooling",
    "what": "Time counter reads from every shire to place the master shire and the memory shires",
    "done": false,
@@ -4776,23 +4909,26 @@
   {
    "rung": 32,
    "id": "exp-route-order",
-   "group": "experiments on the cards: what the chip diagram infers and the PCIe page leaves open",
+   "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "needs_tooling",
    "what": "A link-contention test for the mesh's routing order",
    "done": false,
    "adds": "Choose sets of tensor-load streams whose reply data would share one mesh link if the mesh routes x first and no link if it routes y first, and a mirrored set for the opposite order; a throughput drop in one set and not the other gives the dimension order, and shows whether replies follow the same rule. One reader does not fill a link (Heat per millimetre's research, §1b of its SYNTHESIS.md), so each stream needs several readers.",
    "cost": "a variant of the E27 tensor-load kernel; about 15 minutes on three cards",
-   "effect": "Chip diagram: routes and replies drawn from a measurement instead of an assumption (fact L104); Heat per millimetre's link sharing recomputed if the order is not x first.",
-   "diagram": "the mesh, every route and every reply"
+   "effect": "Chip diagram: routes and replies drawn from a measurement instead of an assumption (fact L104); Heat per millimetre's link sharing recomputed if the order is not x first. Memory levels: the dimension order at the L3's and the remote scratchpad's mesh-hop scale.",
+   "diagram": "the mesh, every route and every reply",
+   "levels": [
+    ["l3/hop", "the L3's mesh hop"]
+   ]
   },
   {
    "rung": 33,
    "id": "exp-dram-rows",
-   "group": "experiments on the cards: what the chip diagram infers and the PCIe page leaves open",
+   "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "needs_tooling",
    "what": "A row-conflict probe for the DRAM address map",
    "done": false,
-   "adds": "With the L3 defeated as in E28, alternate loads between two lines that agree in the candidate bank bits and differ in row, and between lines in different banks: a step of about one DRAM row cycle in latency marks the bank and row bits, and the same test across PA[9] checks the channel bit. Today these bits are decoded from the firmware's ADDRMAP values and a tool comment, not read back.",
+   "adds": "With the L3 defeated as in E28, alternate loads between two lines that agree in the candidate bank bits and differ in row, and between lines in different banks: a step of about one DRAM row cycle in latency marks the bank and row bits, and the same test across PA[9] checks the channel bit. Today these bits are decoded from the firmware's ADDRMAP values and a tool comment, not read back. The memory-levels page (28 September) counts the row bits as measured already, PA[18] and up: the anatomy page's one-bit flips (§5, 19 September) and the version-3 check's MEM-P4, which held on the three cards. A flipped bank bit costs nothing there, like PA[9], the channel (the memory shire's reset value, ms_regs.h:160), so which of the low bits pick the bank rather than the channel still comes from the programmed map.",
    "cost": "a memprobe mode; about ten minutes per card",
    "effect": "Chip diagram: the memory shire's address map (fact L50, inferred) becomes measured on three cards.",
    "diagram": "the memory shire's address map"
@@ -4800,7 +4936,7 @@
   {
    "rung": 34,
    "id": "exp-pcie-path",
-   "group": "experiments on the cards: what the chip diagram infers and the PCIe page leaves open",
+   "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "needs_tooling",
    "what": "First touch after a host copy: does the host write through the L3?",
    "done": false,
@@ -4812,7 +4948,7 @@
   {
    "rung": 35,
    "id": "exp-pcie-concurrency",
-   "group": "experiments on the cards: what the chip diagram infers and the PCIe page leaves open",
+   "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "needs_tooling",
    "what": "Why two host-to-card DMA commands halve the rate: a command-size sweep, and the IOMMU in passthrough",
    "done": false,
@@ -4824,7 +4960,7 @@
   {
    "rung": 36,
    "id": "exp-tensor-reload",
-   "group": "experiments on the cards: what the chip diagram infers and the PCIe page leaves open",
+   "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
    "status": "needs_tooling",
    "what": "Does the L2 keep tensor-loaded lines? A second TensorLoad of the same lines",
    "done": false,
@@ -4832,6 +4968,35 @@
    "cost": "a mode of the E36 TensorLoad probe (LAT-S2); minutes per card",
    "effect": "Chip diagram: the tensor sequencer's cache path, now from documents, becomes measured, and flow 7's stage fed from DRAM is drawn through the L2 or past it.",
    "diagram": "the tensor sequencer and flow 7"
+  },
+  {
+   "rung": 43,
+   "id": "exp-cache-bottleneck",
+   "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "status": "needs_tooling",
+   "what": "What caps a shire at 128 B per cycle",
+   "done": false,
+   "adds": "Own-scratchpad and L2 streams reach exactly 4.0 B per minion per cycle, 128 B per shire (2.46 TB/s chip-wide), half the four banks' 256 B. Sweep the tensor-load stride (64 B rotates the banks, 256 B stays in one bank and rotates its sub-banks, 1 KB stays in one bank and one sub-bank) and 1 to 4 neighbourhoods per shire (one alone reaches about 50 B per cycle), and ask the design team which block is the limit.",
+   "cost": "a mode of an existing tensor-load benchmark; about ten minutes per card",
+   "effect": "Memory levels: which block the scratchpad view highlights when all 1,024 minions stream: the sub-banks' busy time, the response crossbar, the neighbourhood's Fill FIFO or the minions' 256-bit ports.",
+   "levels": [
+    ["scp/shire", "the scratchpad's shire: the bandwidth question"]
+   ]
+  },
+  {
+   "rung": 44,
+   "id": "exp-zero-state",
+   "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
+   "status": "needs_fw_change",
+   "what": "How much the zero-line skip saves",
+   "done": false,
+   "adds": "Clear esr_sc_zero_state_enable on one card for one L3 run and compare zeros against random data; compare with the scratchpad, where the skip does not apply and zeros still save about 90 pJ per line on the SRAM rail on aifoundry2. Also write a line's quadwords to zero one at a time and time a later read, to see whether a partial write sets the zero bit.",
+   "cost": "an M-mode ESR write before the run, so a firmware change (the firmware caveat); then one L3 run on one card",
+   "effect": "Memory levels: whether the L3 view shows the data panels idle for zero lines, and where the rest of the data-dependent energy sits (datapath, ECC, crossings); whether a partial write that leaves a line zero sets the zero bit.",
+   "levels": [
+    ["l3/sub", "the L3 sub-bank's zero bit"],
+    ["l2/sub", "the L2 sub-bank's zero bit"]
+   ]
   }
  ],
  "sessions": [
@@ -5401,6 +5566,25 @@
     {
      "title": "The ET-SoC-1, interactively (the PCIe shire, the Host panel, flow 6)",
      "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram"
+    }
+   ]
+  },
+  {
+   "id": "E51",
+   "when": "28 Sep, 00:30–02:54",
+   "card": "aifoundry2 (aifoundry3 read-only)",
+   "what": "DV2, development (not validated): what the governor compares (the mean of 34 shire sensors or the hottest one) and whether placement delays the first step down from 800 MHz; 21 read-only watch cycles, NAT-4 sessions of 7 s lifts, the throttle-state residencies; stopped when aifoundry2's Master Minion hung at 02:50. The validation plan is frozen and has not run",
+   "instruments": "10 Hz ettelem telemetry with the 34 shire sensors; the service processor's trace ring (governor entries and exits); DM throttle residencies; host wall clock",
+   "data": [
+    {
+     "path": "docs/reports/data/2026-09-28-dvfs2-aifoundry2/",
+     "note": "raw/ per pass, reductions/, dv2.json (the page's reduction), plan/ (DESIGN, PREREG-DEV, the frozen PREREG-VAL), incident/"
+    }
+   ],
+   "reports": [
+    {
+     "title": "The DVFS loop and its leakage (§1 the governor as built, §8 the development results)",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-triggers-a-step-down-and-does-placement-delay-it"
     }
    ]
   }

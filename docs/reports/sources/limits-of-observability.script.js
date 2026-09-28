@@ -306,7 +306,7 @@ LAD = (function () {
   setHTML('ev-golden', `At the defaults (σ = 0.2 W, ±6%), one random bit carried 1 mm (${J(w1[0], 2)}) needs about ${sci(w1[1], 1)} a second and an fmadd.ps on random data (${J(w2[0], 2)}) about ${sci(w2[1], 1)}.`);
   const hot = EV.find(x => x.id === 's-contended').v.any;
   const ring = EV.find(x => x.id === 'm-xshire1');
-  setHTML('ev-note', `σ defaults to 0.2 W, about the idle law's rms (${num(M.idle_law_rms_w, 3)} W): the uncertainty of a baseline predicted from temperature. The hot line's contended atomic, about ${num(hot.e[0] * hot.rate, 1)} W over idle, carries a bar of ${sgn(100 * (hot.e[1] / hot.e[0] - 1), 0)}% to ${sgn(100 * (hot.e[2] / hot.e[0] - 1), 0)}%, about that size. ` +
+  setHTML('ev-note', `σ defaults to 0.2 W, about the idle law's rms per idle sample (${num(M.idle_law_rms_w, 3)} W): the uncertainty of a baseline predicted from temperature. The hot line's contended atomic, about ${num(hot.e[0] * hot.rate, 1)} W over idle, carries a bar of ${sgn(100 * (hot.e[1] / hot.e[0] - 1), 0)}% to ${sgn(100 * (hot.e[2] / hot.e[0] - 1), 0)}%, about that size. ` +
     `A burst bracketed by idle measured just before and after does better than σ = 0.2 W on one card; the bars are the range over every pass on every card measured, so they include the difference between the cards ` +
     `(${esc(ring.label)}: ${sgn(100 * (ring.v.any.e[1] / ring.v.any.e[0] - 1), 0)}% to ${sgn(100 * (ring.v.any.e[2] / ring.v.any.e[0] - 1), 0)}%${Object.keys(ring.v.any.cards || {}).length > 1 ? `, with ${andList(CK.cardsIn(ring.v.any.cards).map(c => `${J(ring.v.any.cards[c])} on ${c}`))}` : ''}); the flips and the wires were priced by fits over many bursts. ` +
     `Each event's rate is ${esc(E.rate_rule.split(':')[0])} (each event's tip names its source). The band is one reading's step on aifoundry2 while ettelem samples, 1 mW × about ${num(1000 * M.pass_s, 0)} ms on a rail and 10 mW × ${num(1000 * M.pass_s, 0)} ms on the board, one new board value ` +
@@ -854,13 +854,16 @@ function fitOf(card, line) {
   const fbox = document.getElementById('impfilters'), t = document.getElementById('imptab');
   const opts = [['all', 'all rungs'], ['done', 'done'], ['works_now', 'works now'], ['needs_tooling', 'tooling or lab hardware'], ['needs_fw_change', 'firmware'], ['research_only', 'research'], ['impossible_on_silicon', 'not on silicon'], ['ask_team', 'ask the team']];
   let group = null;
-  /* a rung with an id is a link target (the chip diagram links its dashed parts to #ask-… and #exp-… rows); r.diagram
-     names the part of the chip diagram the rung would settle */
+  /* a rung with an id is a link target (the chip diagram links its dashed parts to #ask-… and #exp-… rows, and the
+     memory-levels page its unknown parts); r.diagram names the part of the chip diagram the rung would settle, and
+     r.levels the views of the memory-levels page it would settle, as [hash, label] pairs (#l3/cell: a level and a scale,
+     or a level and an access) */
   t.innerHTML = '<thead><tr><th style="width:23%">Rung</th><th style="width:28%">What it adds</th><th style="width:15%">Cost</th><th style="width:24%">What changes in the numbers</th><th style="width:10%">Status</th></tr></thead><tbody>' +
     D.improvements.map((r, i) => { const g = r.group !== group ? `<tr class="grp"><td colspan="5"><b>${esc(r.group)}</b></td></tr>` : ''; group = r.group;
       const cap = !r.adds || /\.$/.test(r.adds), see = r.row ? `${r.adds ? ' ' : ''}<a href="#${ladId(r.row)}" class="seerow" data-row="${esc(r.row)}">${cap ? 'See' : 'see'} §2: ${esc(r.row)}</a>` : '';
       const dg = r.diagram ? ` <a href="${PAGES}et-soc1-chip-diagram#honest">Chip diagram: ${esc(r.diagram)}</a>.` : '';
-      return g + `<tr data-i="${i}"${r.id ? ` id="${esc(r.id)}"` : ''}><td class="lvl">${r.rung}. ${esc(r.what)}${r.done ? ' <span class="verif confirmed">done</span>' : ''}</td><td>${esc(fill(r.adds))}${see}${dg}</td><td class="small">${esc(r.cost)}</td><td>${esc(fill(r.effect))}</td><td class="inl">${chip(r.status)}</td></tr>`; }).join('') + '</tbody>';
+      const lv = r.levels ? ` Memory levels: ${r.levels.map(([h, t]) => `<a href="${PAGES}et-soc1-memory-levels#${esc(h)}">${esc(t)}</a>`).join(', ')}.` : '';
+      return g + `<tr data-i="${i}"${r.id ? ` id="${esc(r.id)}"` : ''}><td class="lvl">${r.rung}. ${esc(r.what)}${r.done ? ' <span class="verif confirmed">done</span>' : ''}</td><td>${esc(fill(r.adds))}${see}${dg}${lv}</td><td class="small">${esc(r.cost)}</td><td>${esc(fill(r.effect))}</td><td class="inl">${chip(r.status)}</td></tr>`; }).join('') + '</tbody>';
   t.querySelectorAll('a.seerow').forEach(a => a.addEventListener('click', ev => { ev.preventDefault(); goRow(a.dataset.row); }));
   CK.stackTable(t);
   const sorter = sortGrouped(t, {filter: true, filterLabel: 'Filter rungs', noun: 'rungs'});
