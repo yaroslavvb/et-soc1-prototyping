@@ -161,7 +161,11 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Last check: 2026-09-28, 05:08 PDT**, after the memory-levels page (new, public), the hub (rungs 37-44, E51, the
+**Last check: 2026-09-28, 09:20 PDT**, after the heat-placement page (new, public), the TODO sweep's 21 pages, the
+DVFS page and the hub (aifoundry2 restored, E52, the heat page in the index): 26 of 26 mirrored public pages equal to
+their files, no warnings, exit 0 (three deploys needed a retry after "fetch failed").
+
+**Earlier check: 2026-09-28, 05:08 PDT**, after the memory-levels page (new, public), the hub (rungs 37-44, E51, the
 firmware caveat), the memory anatomy page, the DV2 pages (DVFS, Horace, why low power, power and temperature, the
 energy manual) and the chip diagram's smooth zoom: 25 of 25 mirrored public pages equal to their files, no warnings,
 exit 0.
