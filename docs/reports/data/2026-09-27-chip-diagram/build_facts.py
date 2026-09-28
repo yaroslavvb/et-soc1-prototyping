@@ -76,11 +76,12 @@ ADD = [
     {'id': 'mm-board-w', 'component': 'board', 'topic': 'power', 'kind': 'derived',
      'statement': 'Board power during the fp32 L2 matmul that runs at 9.51 TFLOP/s, idle before the run plus the watts '
                   'over idle: aifoundry2 33.3 + 25.7 = 59.0 W (die 80 °C), aifoundry3 26.0 + 24.4 = 50.4 W (62 °C), '
-                  'aifoundry1-c1 41.8 + 27.2 = 69.0 W (75-76 °C): 50.4-69.0 W across the three cards (die 62-80 °C). '
+                  'aifoundry1-c1 41.83 + 27.25 = 69.1 W (75-76 °C): 50.4-69.1 W across the three cards (die 62-80 °C). '
                   '9.51 TFLOP/s over these is the 161, 189 and 138 GFLOP/s per W of the same run (138-189).',
      'value': 59.0, 'unit': 'W (aifoundry2)',
      'source': 'docs/findings/05-claims.md:418 (E37, MMB-c: docs/reports/data/2026-09-25-claims-v3/results/mmb.json '
-               '.items[item=MMB-c].per_card.<card>.fp32 mean, idle_before_w, die_c_mean) and :419 (MMB-d, GFLOP/s per W)',
+               '.items[item=MMB-c].per_card.<card>["fp32-tensor-L2"].board_w, .idle_before_w, .mean, .die_c_mean) and :419 '
+               '(MMB-d, GFLOP/s per W)',
      'card': 'aifoundry2, aifoundry3, aifoundry1-c1', 'page': 'Matmul efficiency', 'url': MATMUL,
      'note': 'The sum is this page\'s; 05-claims.md gives the watts over idle and the idle before each run. Idle power '
              'moves with the card and its temperature (26.0-41.8 W here).'},
@@ -293,7 +294,8 @@ N = [
     ('mhz', 'op-600', 600, '600 MHz', ''),
     ('noc_mhz', 'mesh.clock', 400, '400 MHz', ''),
     ('noc_v', 'L101', 0.485, '0.485 V', ''),
-    ('mmw', 'mm-board-w', 69.0, '50.4-69.0 W', '', '50-69 W'),
+    ('race_t0', 'heat.race', 80.9, '80.9-81.7 °C', ''),
+    ('mmw', 'mm-board-w', 69.1, '50.4-69.1 W', '', '50-69 W'),
     ('mmtemp', 'mm-board-w', 80, '62-80 °C', ''),
     ('perw', 'mm-board-w', 189, '138-189', 'GFLOP/s per W'),
     ('vecpeak', 'minion.vec-peak', 16, '16 FLOP', ''),

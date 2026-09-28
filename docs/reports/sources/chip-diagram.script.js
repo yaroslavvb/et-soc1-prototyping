@@ -593,7 +593,7 @@ function strokeKeeper(layer) {
   });
   let last = 1;
   return {
-    set: k => { k = Math.max(1, k); if (Math.abs(k - last) < 0.004) return; last = k; list.forEach(([el, w]) => { el.style.strokeWidth = (w / k).toFixed(3) + 'px'; }); },
+    set: k => { k = Math.max(1, k); if (Math.abs(Math.log(k / last)) < 0.1 && !(k === 1 && last !== 1)) return; last = k; list.forEach(([el, w]) => { el.style.strokeWidth = (w / k).toFixed(3) + 'px'; }); },
     done: () => list.forEach(([el, , s0]) => { el.style.strokeWidth = s0; }),
   };
 }
@@ -735,30 +735,38 @@ const moveMs = (cost, per) => { const t = per * cost; return cost <= 3 ? t : per
    Space stops); fn(t) runs at once for t = 0, then every frame. stop() true: a newer request came in; the timeline
    stops where it is and resolves false. A clock timeline whose token died goes on in real time, so that a stopped
    flow never leaves the camera halfway. */
+/* a timeline that stopped for a newer request, in a frame it did not draw: when it last drew (prev) and this frame
+   (now). The next timeline, started in the same frame, draws a whole frame's step at once, so a redirect never shows
+   the same position twice */
+let HAND = null;
 function timeline(T, fn, clk, stop) {
   return new Promise(res => {
     let done = false;
     const fin = ok => { if (!done) { done = true; res(ok); } };
     const step = t => { try { fn(t); } catch (e) { console.error(e); fin(true); return true; } return false; };
+    const h = HAND && HAND.now === CLK.last ? HAND : null; HAND = null;
     if (REDUCED || T <= 0) { step(T); return fin(true); }
-    if (step(0)) return;
+    const h0 = h ? Math.min(T, Math.max(0, h.now - h.prev)) : 0;
     if (clk) {
-      let acc = 0;
+      let acc = h && (CLK.on || clk.dead) ? h0 : 0, drawn = CLK.last;
+      if (step(acc)) return;
       const j = () => {
         if (done) { CLK.jobs.delete(j); return; }
-        if (stop()) { CLK.jobs.delete(j); fin(false); return; }
+        if (stop()) { CLK.jobs.delete(j); HAND = {prev: drawn, now: CLK.last}; fin(false); return; }
         if (CLK.on || clk.dead) acc += CLK.dt;
-        const t = Math.min(T, acc);
+        const t = Math.min(T, acc); drawn = CLK.last;
         if (step(t) || t >= T) { CLK.jobs.delete(j); fin(true); }
       };
       CLK.jobs.add(j); return;
     }
     // from the last frame's time, so that the first frame of a move (or of a redirected one) is a whole frame's step
-    const t0 = CLK.last && performance.now() - CLK.last < 100 ? CLK.last : performance.now();
+    const t0 = h ? h.prev : CLK.last && performance.now() - CLK.last < 100 ? CLK.last : performance.now();
+    if (step(h0)) return;
+    let drawn = t0;
     const f = now => {
       if (done) return;
-      if (stop()) { fin(false); return; }
-      const t = Math.min(T, Math.max(0, now - t0));
+      if (stop()) { HAND = {prev: drawn, now}; fin(false); return; }
+      const t = Math.min(T, Math.max(0, now - t0)); drawn = now;
       if (step(t) || t >= T) fin(true); else requestAnimationFrame(f);
     };
     requestAnimationFrame(f);
