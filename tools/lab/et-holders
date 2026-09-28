@@ -1,0 +1,22 @@
+#!/bin/sh
+# et-holders: list the processes that have an ET-SoC-1 device node (or a card lock file) open.
+# Installed by labfix 2026-09-25; idle sentence reworded 2026-09-27. Users run it as `et-who` (sudo -n, no password, no arguments allowed).
+# It never opens /dev/et*: fuser only stats the node and the /proc/<pid>/fd links.
+PATH=/usr/sbin:/usr/bin:/sbin:/bin; export PATH
+n=0
+for dev in /dev/et*_mgmt /dev/et*_ops; do
+  [ -c "$dev" ] || continue
+  for pid in $(fuser "$dev" 2>/dev/null); do
+    printf '%-14s %s\n' "$dev" "$(ps -o user:14=,pid=,etime=,args= -p "$pid" 2>/dev/null | cut -c1-140)"
+    n=$((n+1))
+  done
+done
+for lk in /run/lock/etsoc-*.lock; do
+  [ -e "$lk" ] || continue
+  for pid in $(fuser "$lk" 2>/dev/null); do
+    printf '%-14s %s\n' "lock:${lk##*/}" "$(ps -o user:14=,pid=,etime=,args= -p "$pid" 2>/dev/null | cut -c1-140)"
+    n=$((n+1))
+  done
+done
+[ "$n" -eq 0 ] && echo "No process holds an ET-SoC-1 device node or card lock."
+exit 0

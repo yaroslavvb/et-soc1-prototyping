@@ -1,0 +1,23 @@
+
+aifoundry2 - AI Foundry lab machine with 1 ET-SoC-1 card (driver et_soc1 0.20.0)
+  card 0  PCI 0000:02:00.0  /dev/et0_mgmt /dev/et0_ops  firmware 1.3.1 (as of 2026-09-25)
+  The card runs its firmware's own clock/power governor (TDP 65 W); it reaches 800 MHz only from a cool start,
+  and in this chassis its die rarely cools below 65 C, so it usually runs at 600 MHz.
+
+* Each device node can be open in ONE process at a time. Who is using the card: et-who (in scripts: et-who --check)
+* Reserve the card for a run:  flock /run/lock/etsoc-shire0.lock <command>
+* These commands change the card for every user: reset, trace level, telemetry stats reset (ettelem --reset-ms),
+  temperature thresholds, TDP, frequency, active power management.
+* Stop tools and samplers with Ctrl-C or plain kill, never kill -9: a request cut off mid-way leaves a
+  stale reply, and the next program that opens the card dies with std::bad_function_call. To clear it once:
+  /opt/et/bin/dev_mngt_service -m DM_CMD_GET_MODULE_POWER -n 0 -u 5000
+* Vendor tools: /opt/et/bin (stock et-platform 353f20e build; on PATH in login shells).
+  Link /opt/et/lib with -Wl,-rpath,/opt/et/lib.
+* Host programs: register the runtime's log levels first in main (a race in libetrt crashes about one launch
+  in 100 at 1.08 s otherwise): see registerRuntimeLogLevels() in github.com/yaroslavvb/et-soc1-prototyping.
+* A GitHub Actions runner (aifoundry-org/hf-hackathon, runs as root) can use the card for CI jobs.
+* tmux on this machine is a snap: /snap/bin/tmux (3.7c).
+* /tmp is cleared at every boot: keep your work in your home directory.
+* Crash dumps of your programs: coredumpctl list ; coredumpctl gdb <pid>
+* Machine facts to record with a measurement: et-lab-manifest.  Health check (read-only): et-lab-health
+* Lab accounts and notes: https://spacesheep.dev/@yaroslavvb/aifoundry-lab-accounts

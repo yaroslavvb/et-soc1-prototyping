@@ -14,3 +14,13 @@ MemTotal:       32651764 kB
 iommu units: dmar0 dmar1 
 model name	: 11th Gen Intel(R) Core(TM) i7-11700K @ 3.60GHz
 MemTotal:       131692912 kB
+
+== Addendum 2026-09-27 22:18 PDT: host memory layout (hub rung 30, the part a user can read)
+Method: `udevadm info --query=property --path=/devices/virtual/dmi/id` (the DMI memory-device table as udev exports
+it; no root, no dmidecode), as our user, read-only; serial numbers and asset tags dropped. No card node was opened.
+MaxPayload and MaxReadReq need root (lspci -vvv) and were not read.
+aifoundry1  ChannelA-DIMM0 32 GiB DDR4-3200 | ChannelA-DIMM1 32 GiB DDR4-3200 | ChannelB-DIMM0 32 GiB DDR4-3200 | ChannelB-DIMM1 32 GiB DDR4-3200  -> dual channel, 128 GiB
+aifoundry2  ChannelA-DIMM0 32 GiB DDR4-2666 | ChannelA-DIMM1 empty           | ChannelB-DIMM0 32 GiB DDR4-2666 | ChannelB-DIMM1 empty            -> dual channel, 64 GiB
+aifoundry3  ChannelA-DIMM0 empty           | ChannelA-DIMM1 32 GiB DDR4-2666 | ChannelB-DIMM0 empty           | ChannelB-DIMM1 empty            -> SINGLE channel, 32 GiB
+(All DIMMs dual-rank; configured speed shown. Host memcpy of 256 MB in this experiment: aifoundry1 21.4, aifoundry2 17.4,
+aifoundry3 9.2 GB/s: aifoundry3's half rate matches its single memory channel.)

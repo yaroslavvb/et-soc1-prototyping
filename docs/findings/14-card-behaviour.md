@@ -154,7 +154,7 @@ check first that nobody holds the card (`et-who`).
 | Firmware release (BL / PMIC / minion) | 1.3.1 (0.20.0 / 1.5.0 / 0.23.0) | 1.3.1 (the same) | 1.4.1 (0.21.2 / 1.6.1 / 0.24.0) | 1.2.0 (0.18.0 / 1.3.0 / 0.22.0) |
 | TDP the driver reports | 65 W | 65 W | 65 W | 65 W |
 | **TDP the firmware uses** | **65 W** | **0 W**, set at every boot (below) | 65 W | 65 W |
-| Clock | firmware DVFS: 600, 700 or 800 MHz; above 600 only below about 68 °C | **600 MHz** (NoC 400), never seen higher (10 Hz telemetry) | firmware DVFS; **idles at 300 MHz** (`low_power`) | firmware DVFS; idles at 600 MHz (`managed_power`) |
+| Clock | firmware DVFS: 600, 700 or 800 MHz; above 600 only below about 68 °C. In this chassis the die never read below 65 °C in the version-3 campaign (336,070 samples, 25–26 Sep), so it runs at 600 MHz unless it starts cold | **600 MHz** (NoC 400), never seen higher (10 Hz telemetry); no throttle or idle event in its trace since 25 Sep (E41 TEL-G), so it appears to make no thermal step either (27 Sep) | firmware DVFS; **idles at 300 MHz** (`low_power`); its 0.21.x governor acts only while a kernel runs (firmware source, 27 Sep) | **600 MHz in all 359,657 samples of 25–26 Sep**, below 65 °C and up to 88 °C: DVFS appears off (27 Sep; asked the lab) |
 | Idle | 31–36 W at 73–80 °C (27 W cold) | 23.6 W at 50 °C (25.1 W at 56 °C under the runs); the die idles at 55–57 °C since the host changes of 25 Sep | 18.6–18.8 W at 300 MHz; 26 W at 600 MHz | 33–35 W at 600 MHz and 57–62 °C |
 | Use it for | the main card | compare switching power over idle, never absolute watts | **nothing sustained: it overheats** (below) | anything; it peaked near 71 °C under the campaign's smoke blocks |
 | Version-3 campaign | yes | yes | excluded (amendment A4) | yes |
@@ -164,7 +164,7 @@ them; card-side numbers (cycles, power at a fixed operating point) do not depend
 
 | | aifoundry1 | aifoundry2 | aifoundry3 |
 |---|---|---|---|
-| CPU, RAM, BIOS | i7-11700K (8 cores, 16 threads), 128 GB, F5 | i5-11600 (6 cores, 12 threads), 64 GB, F5 | i7-11700K, 32 GB, F6 |
+| CPU, RAM, BIOS | i7-11700K (8 cores, 16 threads), 128 GB (4 × 32 GB DDR4-3200, two channels), F5 | i5-11600 (6 cores, 12 threads), 64 GB (2 × 32 GB DDR4-2666, two channels), F5 | i7-11700K, 32 GB (**one** DDR4-2666 DIMM: a single memory channel, so host memcpy runs at 9.2 GB/s against 17.4 and 21.4; E50), F6 |
 | `/opt/et` runtime and device layer | a local build of an et-platform fork (May 2026): its `libetrt.so` and `libdeviceLayer.a` differ from the others; the device layer honours `ET_DEVICES=<n>` and takes the DRAM ranges from the driver. Older ET copies in `/usr/local/bin` (February 2026: `esperanto_flash_tool`, `profiler_converter`) come first on PATH | the stock et-platform `353f20e` build (December 2025), runtime 0.19.0 | `353f20e`, except `libetrt.so`: a patched Release `-O3` build of `836a4ab` (2026-07-23, an event-id guard) |
 | The same on all three | the `et_soc1` driver 0.20.0 (one source since aifoundry1's fix), `libDM.so`, `dev_mngt_service`, `et-powertop`, and the RISC-V GCC 15.1, which generates identical code on all three (see Traps) | | |
 
@@ -210,8 +210,10 @@ changes from boot to boot. It does not stop the card, but link replays can add D
 
 **Selecting one card on a two-card host.** With aifoundry1's device layer, `ET_DEVICES=<n>` makes a program open only
 card n, which it then sees as device 0; programs built on aifoundry1 against its `/opt/et` honour it, `ettelem`
-included. `tools/claims-v3/lib.sh` sets it from `V3_DEVICE=<n>`. `/opt/et/bin/dev_mngt_service` is the stock build:
-it ignores `ET_DEVICES` and opens every card, so pass `-n <N>` to it.
+included. `tools/claims-v3/lib.sh` sets it from `V3_DEVICE=<n>`. `/opt/et/bin/dev_mngt_service` (and
+`et-powertop`) is the stock build: it ignores `ET_DEVICES` and opens every card's management node even with
+`-n <N>`, so run it only when both cards are free (`et-who`). On 26 September our stock `dev_mngt_service` call for card 1 collided with a
+watcher holding card 0: 13 refused opens in the kernel log and 10 aborts with core dumps.
 
 **Leave the cards' configuration alone.** aifoundry3's clock guard is deliberate. Changing a TDP, a clock, the
 firmware or the driver on a shared machine silently changes what other people's runs measure, in the middle of their
@@ -248,6 +250,13 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
 
 - **`sparsity_host --budget` defaults to 8 seconds** on silicon and silently stops a longer run. Raise it for
   anything past 8 s.
+- **`pgrep -f` over `ssh` matches itself.** The processes that run a remote command carry the whole command in
+  their own command lines (Tailscale SSH's `tailscaled be-child ssh … --cmd=<the command>`, and the `bash -c` that
+  runs a compound command), so `ssh host '… pgrep -f run_queue.sh …'` always finds a process: its own. On
+  27 September that made a starter on aifoundry3 refuse twice. Bracket the first letter
+  (`pgrep -af '[r]un_queue.sh'`), and never `pkill -f` over `ssh`. For "is the card free?" keep only `et-who`'s lines that start with `/dev/et` or `lock:` (or use
+  `et-who --check`, exit 0 free, 1 held, 2 failed, where the 27 September version in `tools/lab/` is installed):
+  the idle sentence was read as a holder the same evening.
 - **Never edit a runner script while it is running.** Bash reads the file as it executes; a mid-run edit
   aborted a four-hour session at the last step. An `scp` over a running script corrupts it the same way, and an
   `scp` to a new path drops the executable bit. Replace a script with `mv` (or `os.replace`) onto the old name, and

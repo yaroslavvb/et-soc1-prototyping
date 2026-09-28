@@ -1,10 +1,10 @@
 # Lab machine accounts
 
-The AI Foundry lab machines are x86_64 Ubuntu 24.04 boxes on the lab's Tailscale tailnet (updated 2026-09-25):
+The AI Foundry lab machines are x86_64 Ubuntu 24.04 boxes on the lab's Tailscale tailnet (updated 2026-09-27):
 
 | Machine | ET-SoC-1 cards | Device nodes |
 |---|---|---|
-| `aifoundry1` | 2: card 0 (firmware 1.4.1; **overheats under load, do not run sustained work on it**) and card 1 (firmware 1.2.0) | `/dev/et0_{mgmt,ops}`, `/dev/et1_{mgmt,ops}` |
+| `aifoundry1` | 2: card 0 (firmware 1.4.1; **overheats under load, do not run sustained work on it**) and card 1 (firmware 1.2.0; its clock stays at 600 MHz) | `/dev/et0_{mgmt,ops}`, `/dev/et1_{mgmt,ops}` |
 | `aifoundry2` | 1 (firmware 1.3.1) | `/dev/et0_{mgmt,ops}` |
 | `aifoundry3` | 1 (firmware 1.3.1; pinned at 600 MHz at every boot) | `/dev/et0_{mgmt,ops}` |
 
@@ -70,7 +70,11 @@ that `tailscale status` shows) as its `HostName` in `~/.ssh/config` on aifoundry
 ## On every machine (since 25 September 2026)
 
 - **`et-who`** lists who holds each card: every user's processes with a `/dev/et*` node or a card lock open. It
-  never opens a device node, so it is safe to run at any time. The login banner runs it too.
+  never opens a device node, so it is safe to run at any time. The login banner runs it too. In a script, keep only
+  the lines that start with `/dev/et` or `lock:`, and never parse the sentence plain `et-who` prints when nothing is
+  held. The 27 September version ([`tools/lab/`](../tools/lab/README.md), staged, to be installed) adds
+  **`et-who --check`**: it prints only the holders and exits 0 if nothing is held, 1 if a node or lock is held (your
+  own lock included), 2 if the check failed.
 - **Card locks.** `flock /run/lock/etsoc-shire<N>.lock <command>` reserves card N for the length of the command
   (aifoundry1 has `etsoc-shire0.lock` and `etsoc-shire1.lock`, the others `etsoc-shire0.lock`). The lock is advisory:
   it protects you only from tools that take it too. The `tools/claims-v3` blocks hold it, and aifoundry3's clock
@@ -79,10 +83,18 @@ that `tailscale status` shows) as its `HostName` in `~/.ssh/config` on aifoundry
   clock sync, `et_soc1` driver version, each card's PCIe link, the hashes of the ET runtime libraries, and
   aifoundry3's clock-guard marker. It reads files only. Save its output with every run, and the card's firmware from
   your own tool.
+- **`et-lab-health`** (27 September; staged, to be installed with the new `et-who`) is a read-only health check of
+  the machine: the driver version and the module for each installed kernel, each card's PCIe link and the error
+  counters the driver keeps, device-node modes, holders, aifoundry3's clock-guard marker, disk and ZFS use, packages,
+  systemd, time, power profile and CI runners. One line per check (`OK`, `WARN`, `INFO`); exit 1 if anything warns. It never opens a card.
+- **`/tmp` is cleared at every boot.** Keep work, logs and agents' scratch files in your home directory.
 - **Core dumps** of your programs are kept: `coredumpctl list`, then `coredumpctl gdb <pid>`.
 - **Time** is kept by chrony (several NTP sources), so timestamps agree across the machines.
 - **Kernel messages:** users can read `dmesg`. The journal is persistent.
 - **Python:** the system `python3-numpy` (1.26.4) and `venv` are installed on all three.
+
+The sources of `et-who`, `et-lab-health`, `et-lab-manifest` and the login banners are in
+[`tools/lab/`](../tools/lab/README.md).
 
 ## Sharing the cards
 

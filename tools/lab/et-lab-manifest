@@ -1,0 +1,15 @@
+#!/bin/sh
+# et-lab-manifest: print the machine facts a measurement should record (labfix 2026-09-25).
+# Reads sysfs and files only; never opens /dev/et*. Card firmware needs a card query, so record it from your tool.
+echo "host         $(hostname)   $(date -Is)"
+echo "kernel       $(uname -r)"
+echo "cpu          $(sed -n 's/^model name[[:space:]]*: //p' /proc/cpuinfo | head -1), $(nproc) threads, $(awk '/MemTotal/{printf "%.0f GiB", $2/1048576}' /proc/meminfo)"
+echo "power        profile=$(powerprofilesctl get 2>/dev/null) epp=$(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null) governor=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null)"
+echo "clock sync   $(chronyc -n tracking 2>/dev/null | awk -F': *' '/^System time/{s=$2} /^Leap status/{l=$2} END{print l"; "s}')"
+echo "et_soc1      version=$(cat /sys/module/et_soc1/version 2>/dev/null) srcversion=$(cat /sys/module/et_soc1/srcversion 2>/dev/null)"
+for d in /sys/bus/pci/drivers/ET/0000:*; do [ -e "$d" ] || continue
+  echo "card         ${d##*/}  link $(cat "$d/current_link_speed" 2>/dev/null) x$(cat "$d/current_link_width" 2>/dev/null)"; done
+for f in /opt/et/lib/libetrt.so /opt/et/lib/libdeviceLayer.a /opt/et/bin/dev_mngt_service; do
+  [ -e "$f" ] && echo "sha256       $(sha256sum "$f" | cut -c1-16)  $f"; done
+[ -e /run/et-board-clock-guard.ok ] && echo "clock guard  $(cat /run/et-board-clock-guard.ok) (boot_id minion_MHz noc_MHz tdp_W)"
+exit 0

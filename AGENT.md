@@ -71,6 +71,7 @@ tools/
   ettelem/              the telemetry client (C++) and the analysis and page-data scripts of the power work
   etcfg/                a read-only driver query: TDP, boot clock, shire mask, cache sizes
   g3log-race/           a card-free reproduction of the runtime's log-level race (aifoundry3's host crashes)
+  lab/                  what we installed on the lab machines: et-who, et-lab-health, et-lab-manifest, the banners
 scripts/                VM setup, lab deploys, page building (build-report.py, paste-chartkit.py), check-mirror.py
 rtl-sim/                Verilator benches on the original RTL: fma_toggle (switching activity), pmu_carry (a counter bug)
 patches/                local fixes to et-platform and to the lab's gp-sdk (README.md explains each)
@@ -123,8 +124,9 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
   text). What the review of 26 September found and is not yet fixed is in [`docs/reports/TODO.md`](docs/reports/TODO.md)
   (part A pages, part B the repository). A page that still says aifoundry1 cannot be used, blames `srcversion`, or
   calls aifoundry3's zero TDP flashed or set by firmware is stale: a boot service sets it at every boot.
-  `docs/reports/data/2026-09-25-claims-v3/firmware.md` is a dated record, and `tools/claims-v3/lib.sh` still says
-  aifoundry3 has no system numpy (it has, since 25 September). Trust 14-card-behaviour.md and this file.
+  `docs/reports/data/2026-09-25-claims-v3/firmware.md` is a dated record. A page or file that calls aifoundry1's
+  card 1 governed ("firmware DVFS") is stale too: its clock never moved in the campaign (27 September). Trust
+  14-card-behaviour.md and this file.
 
 ## 4. The machines
 
@@ -137,10 +139,10 @@ builds the same `/opt/et` natively (the README's setup section). **Never run `pr
 
 | Card | Firmware | Clock policy | Notes |
 |---|---|---|---|
-| aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C | the main card; the git checkout is `~/claude/et-soc1-prototyping` here |
+| aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C; in this chassis the die rarely cools below 65 °C, so it usually runs at 600 | the main card; the git checkout is `~/claude/et-soc1-prototyping` here |
 | aifoundry3 | 1.3.1 | **pinned at 600 MHz**: a boot service sets a 0 W TDP at every boot | compare switching power over idle, never absolute watts; about 1 host launch in 100 crashes at 1.08 s unless the program registers libetrt's log levels first (`registerRuntimeLogLevels()`, 14-card-behaviour.md) |
-| aifoundry1 card 0 | 1.4.1 | DVFS; idles at 300 MHz | **overheats (115–117 °C): no sustained work on it**; excluded from the campaign |
-| aifoundry1 card 1 | 1.2.0 | DVFS; idles at 600 MHz | fine; select a card on this host with `ET_DEVICES=<n>` |
+| aifoundry1 card 0 | 1.4.1 | DVFS; idles at 300 MHz, and its 0.21.x governor acts only while a kernel runs (firmware source) | **overheats (115–117 °C): no sustained work on it**; excluded from the campaign |
+| aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample since 25 Sep, cool or hot: its DVFS appears to be off (27 Sep; asked the lab) | fine; select a card on this host with `ET_DEVICES=<n>` |
 
 The hosts also differ in CPU, RAM and ET runtime build, which matters for host-side timing:
 [14-card-behaviour.md](docs/findings/14-card-behaviour.md#the-lab-machines-and-their-four-cards-are-not-interchangeable).
@@ -167,7 +169,7 @@ reason:
 |---|---|
 | Ask which machine (and card) to use; stay off machines other sessions use | the cards are shared with other people, CI runners (aifoundry1, aifoundry2), a demo (aifoundry3) and our own campaign queues |
 | Look first: `et-who`, `who`, `uptime`; hold card N's lock for your run (`flock -n /run/lock/etsoc-shire<N>.lock <cmd>`, which fails at once if someone holds it) | the management node is single-opener, and a second user of a card corrupts both measurements |
-| Never hold a device for more than 10 s: `timeout 10` on every launch | long holds block everyone else, and a card that hangs needs a power cycle only the lab admin can do |
+| Never hold a device for more than 10 s: `timeout 10` on every launch (per device-opening process; release the card lock between sub-tests) | long holds block everyone else, and a card that hangs needs a power cycle only the lab admin can do |
 | Stop tools with Ctrl-C or a plain `kill`, never `kill -9` | a sampler killed mid-request poisons the card's management queue for the next user |
 | Never reset a card or change its TDP, clocks, firmware or driver | a software reset can hang a card, and a configuration change silently alters other people's runs |
 | Keep disk and memory small: sources only, `nice -j4` builds | the machines are shared, and aifoundry1's disk is nearly full |
@@ -271,7 +273,8 @@ through ad-hoc scripts.
   inside one burst.
 
 **Long runs** start detached (`setsid nohup … < /dev/null &` over `ssh`): the agent harness kills a foreground command
-at its timeout, and the hosts' Wi-Fi drops now and then. A `pgrep -f` over `ssh` matches its own command line.
+at its timeout, and the hosts' Wi-Fi drops now and then. A `pgrep -f` over `ssh` matches its own command line: use a
+bracketed pattern (`pgrep -af '[q]ueue.sh'`).
 
 **Recording.** Commit raw data under `docs/reports/data/<date>-<name>-<host>/` with a README that says what ran,
 when, on which card, with which command, plus the `et-lab-manifest` output. Register the experiment in 03, its
@@ -340,8 +343,12 @@ copy it here too.
 3. Skim the findings in brief and the glossary ([`docs/findings/README.md`](docs/findings/README.md)), then
    [`14-card-behaviour.md`](docs/findings/14-card-behaviour.md) end to end.
 4. Find out where you are (section 4). On a lab machine, look without touching: `et-who`, `who`,
-   `pgrep -af queue.sh`, and the tail of `build/claims-v3/queue-*.log` in the campaign's tree
-   (`~/claude/et-soc1-prototyping` on aifoundry2, `~/nekko` on aifoundry1 and aifoundry3).
+   `pgrep -af '[q]ueue.sh'`, and the tail of `build/claims-v3/queue-*.log` in the campaign's tree
+   (`~/claude/et-soc1-prototyping` on aifoundry2, `~/nekko` on aifoundry1 and aifoundry3). Keep the brackets: over
+   `ssh` an unbracketed `pgrep -f` matches its own command line, because the processes that run a remote command
+   carry the whole command (Tailscale SSH's `tailscaled be-child ssh … --cmd=<the command>`, and `bash -c`). In a
+   script, keep only `et-who`'s lines that start with `/dev/et` or `lock:` (or, where the 27 September version in
+   `tools/lab/` is installed, use `et-who --check`: exit 0 free, 1 held, 2 failed).
 5. Ask the owner what to work on, which machine and card you may use, and whether any running queue must be left
    alone (assume it must).
 6. Ask a person for the steps only a person can do, when you reach them: the Tailscale approval, `spacesheep login`,

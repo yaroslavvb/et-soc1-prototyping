@@ -509,6 +509,14 @@ Many fix and cut items landed in the merge too; those are ticked below.
 - [x] Chart: S1's lead against queries per pass. A log-log plot of mJ per query against Q, for the ET card and the
   H100, from `s1.parity_*.table[]`, with the crossings marked. Done 27 Sep.
 
+### Over the PCIe link · `sources/pcie-link.*`, and the hub's rung 30
+
+- [ ] `pcie-link.body.html:131–132` says why aifoundry3's host copies memory at half the others' rate "was not
+  established; reading it needs root". It was read as a user on 27 September 22:18: aifoundry3 runs one DDR4-2666
+  DIMM on a single memory channel, aifoundry2 two channels, aifoundry1 two channels of DDR4-3200
+  (`data/2026-09-27-pcie/hosts.txt`, addendum). Say so, and in the hub (`limits-of-observability.data.json`,
+  rung 30 "ask-lab-root") mark the memory part done by us; MaxPayload and MaxReadReq still need root.
+
 ### The aifoundry1 pages (standalone HTML)
 
 - [x] PWR-01 and PWR-02: see part 0 and "aifoundry1 and aifoundry3 statements" above. Done 27 Sep: PWR-02 on both
@@ -522,15 +530,36 @@ Many fix and cut items landed in the merge too; those are ticked below.
 ### After the campaign (every block hashes `tools/claims-v3/`)
 
 - [ ] `tools/claims-v3/lib.sh`:
-  - `:17–18`: aifoundry3 has system numpy, and all three hosts have a venv, since 25 September.
+  - `:17–18`: aifoundry3 has system numpy, and all three hosts have a venv, since 25 September. Done 27 Sep (the
+    comment only; the two fallback lines stay for older checkouts, and the deployed copies are unchanged).
   - `:3–4`: add aifoundry1.
   - `:7`: note amendment A3.
   - `:52`: the data path `collect.sh` writes.
   - `:70–71`: a sudo detail (AGENT.md §10) → a variable.
+
+  Partly landed on 27 September: `:17–18`. Left: the other four.
 - [ ] With the results:
   - Landed: E35–E49 registered and "Cite as" widened (03-experiments.md); the requests of 25–27 September numbered
     (Q44–Q57); a results series in `CLAIM_SERIES`; AGENT.md and getting-started updated.
   - Left: rebuild aifoundry1's `build/<workload>` directories with the g3log fix.
+
+### Our tools, after the heat-placement work (from the lab re-check of 27 September)
+
+The heat code is frozen until its validation on aifoundry1's card 1 ends (about 08:00 PDT, 28 September). Then:
+
+- [ ] Rebuild aifoundry1's `build/<workload>` host programs with `registerRuntimeLogLevels()` (the item above), then
+  update getting-started's "Where things stand".
+- [ ] The heat code's card-0 temperature guard (`tools/claims-v3/hp/`) takes card 0's lock for its lifetime, and the
+  drain on a two-card host checks the other card's node with `et-who`, not only its lock (the stock
+  `dev_mngt_service` opens both cards).
+- [ ] `workloads/pciebench/run_pcie.sh` releases the card lock between sub-tests (runs held it 12.8–14.9 s; AGENT.md
+  §5's 10 s rule is per device-opening process).
+- [ ] The queues poll `et-who` less often, and scripts use `et-who --check`'s exit status instead of parsing its text
+  (`tools/lab/README.md`).
+- [ ] `V3_DRY` fails closed for agents: a marker file, or real runs only with an explicit `V3_REAL=1`.
+- [ ] Commit the heat branch, with the firmware findings behind it (per-release governor behaviour, aifoundry3's
+  latch at a 0 W TDP, card 1's fixed clock, the release-to-commit mapping) in `14-card-behaviour.md` and a
+  `data/2026-09-27-heat-placement/` directory: source lines and commits only.
 
 ### The knowledge base against the version-3 pages (the page holds)
 

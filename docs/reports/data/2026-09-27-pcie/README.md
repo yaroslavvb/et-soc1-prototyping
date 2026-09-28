@@ -77,4 +77,6 @@ per command, a 2,057 MB bounce buffer. The hosts differ: aifoundry2 an i5-11600 
 aifoundry1 an i7-11700K (16 threads); the runtime is the stock build on aifoundry2, a patched `-O3` build on
 aifoundry3 and a fork on aifoundry1 (`docs/findings/14-card-behaviour.md`; `manifest.txt` has the hashes). The host's memcpy, measured by `hostcopy`,
 sets the staged rate; the runtime build sets the per-command host overhead (the idle wait and the pipelined copies
-differ by build).
+differ by build). Addendum, 27 September 22:18: aifoundry3's memcpy is about half the others' because it runs a
+single DIMM on one memory channel, where aifoundry2 and aifoundry1 run two channels (`hosts.txt`, read from the DMI
+table as a user).

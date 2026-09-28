@@ -1,0 +1,16 @@
+#!/bin/sh
+# et-who: who is using the ET-SoC-1 cards on this machine (labfix 2026-09-25; --check added 2026-09-27).
+#   et-who           list every process that holds a /dev/et* node or a card lock file (exit status 0, as before)
+#   et-who --check   for scripts: print only the holders; exit 0 if nobody holds anything, 1 if someone does,
+#                    2 if the check itself failed. A lock your own script holds counts as held.
+case "${1:-}" in
+  "") exec sudo -n /usr/local/sbin/et-holders ;;
+  -c|--check) ;;
+  -h|--help) sed -n '2,5p' "$0"; exit 0 ;;
+  *) echo "usage: et-who [--check]" >&2; exit 2 ;;
+esac
+out=$(sudo -n /usr/local/sbin/et-holders 2>&1) || { printf 'et-who: %s\n' "$out" >&2; exit 2; }
+held=$(printf '%s\n' "$out" | awk '$1 ~ /^\/dev\/et/ || $1 ~ /^lock:/')
+[ -z "$held" ] && exit 0
+printf '%s\n' "$held"
+exit 1

@@ -1,0 +1,5 @@
+#!/bin/sh
+# labfix 2026-09-25: show at login who is using the ET-SoC-1 cards (reads /proc only)
+out=$(timeout 3 /usr/local/sbin/et-holders 2>/dev/null) || exit 0
+printf '\nET-SoC-1 cards right now (et-who):\n'; printf '%s\n' "$out" | sed 's/^/  /'
+exit 0
