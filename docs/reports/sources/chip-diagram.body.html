@@ -3,7 +3,8 @@ main{max-width:none;padding:0}
 .prose{max-width:940px;margin:0 auto;padding:28px 16px 72px}
 /* ---- the stage: one screen at 1920x1080 and 1280x720, nothing inside it scrolls but the details list ---- */
 #stage{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:7px;height:100vh;height:100dvh;min-height:560px;
-  padding:10px 16px;background:var(--page);color:var(--ink);overflow:hidden;position:relative}
+  padding:10px 16px;background:var(--page);color:var(--ink);overflow:hidden;position:relative;
+  --pnw:clamp(300px,24vw,470px)}
 #stage:fullscreen{width:100vw;height:100vh}
 #stage::backdrop{background:var(--page)}
 /* presenting inside the page's frame (the frame may forbid full screen): the stage covers the frame */
@@ -12,39 +13,43 @@ html.et-pres,html.et-pres body{overflow:hidden}
 html.et-pres [data-ss-ui]{display:none!important}
 .st-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;min-width:0}
 .st-title{display:flex;align-items:baseline;gap:2px 14px;flex-wrap:wrap;min-width:0;margin-right:auto}
-.st-title h1{font-size:clamp(1.15rem,.7vw + .85rem,1.75rem);margin:0;white-space:nowrap}
+.st-title h1{font-size:clamp(1.15rem,.7vw + .85rem,1.75rem);margin:0;white-space:nowrap;font-weight:650;letter-spacing:-.01em}
 .st-title .t-short{display:none}
 .st-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .st-row .lab2{color:var(--ink-2);font-size:clamp(.78rem,.3vw + .66rem,.98rem);margin-right:2px}
+/* ---- controls: one radius (8 px) for every button; the one filled button is the primary action (Tour). A choice
+   that is on (the flow, the scale) is tinted; a toggle (Follow, Panel) shows a dot. ---- */
 .st-btn{font:inherit;font-size:clamp(.8rem,.32vw + .66rem,1.05rem);background:var(--surface);color:var(--ink);border:1px solid var(--border);
-  border-radius:999px;padding:4px 12px;min-height:34px;cursor:pointer;white-space:nowrap;line-height:1.2}
+  border-radius:8px;padding:4px 12px;min-height:34px;cursor:pointer;white-space:nowrap;line-height:1.2}
 .st-btn:hover{border-color:var(--ink-2)}
-.st-btn[aria-pressed="true"]{background:var(--ink);color:var(--page);border-color:var(--ink)}
+.st-btn[aria-pressed="true"],.zc button[aria-pressed="true"]{background:color-mix(in srgb,var(--c1) 16%,var(--surface));border-color:var(--c1);color:var(--ink);font-weight:650}
+.st-btn.tog[aria-pressed]{display:inline-flex;align-items:center;gap:7px;font-weight:400}
+.st-btn.tog[aria-pressed]::before{content:"";width:7px;height:7px;border-radius:50%;flex:none;box-sizing:border-box;border:1.5px solid var(--ink-2)}
+.st-btn.tog[aria-pressed="true"]{background:var(--surface);border-color:var(--ink-2);color:var(--ink)}
+.st-btn.tog[aria-pressed="true"]::before{background:var(--c1);border-color:var(--c1)}
 /* the fill is --c1 darkened toward --ink so that --page text on it passes 4.5:1 in both themes */
 .st-btn.primary{background:color-mix(in srgb,var(--c1) 80%,var(--ink));border-color:color-mix(in srgb,var(--c1) 80%,var(--ink));color:var(--page);font-weight:650}
-.st-btn.primary.on{background:var(--ink);border-color:var(--ink);color:var(--page)}
-.st-btn:disabled{opacity:.4;cursor:default}
-.st-btn .k{display:inline-block;margin-right:6px;font-weight:750;color:color-mix(in srgb,var(--c2) 70%,var(--ink))}
-.st-btn[aria-pressed="true"] .k{color:inherit}
-.st-btn.new::after{content:"new";margin-left:6px;font-size:.72em;font-weight:700;color:color-mix(in srgb,var(--c3) 70%,var(--ink))}
-.st-btn[aria-pressed="true"].new::after{color:inherit}
+.st-btn.primary.on{background:transparent;border-color:var(--ink-2);color:var(--ink)}
+.st-btn:disabled,.st-btn.dis{opacity:.4;cursor:default}
+.st-btn .k{display:inline-block;margin-right:6px;font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.st-btn[aria-pressed="true"] .k{color:color-mix(in srgb,var(--c1) 65%,var(--ink))}
 .w-play{min-width:5.2em}.w-tour{min-width:6.4em}.w-fs{min-width:6.6em}
 .st-btn:focus-visible,.pn button:focus-visible,.pn a:focus-visible,.pn select:focus-visible,.pn summary:focus-visible,.zc button:focus-visible,.stg:focus-visible,.pip:focus-visible,.toast button:focus-visible{outline:3px solid var(--c1);outline-offset:2px}
-.st-body{display:grid;grid-template-columns:minmax(0,1fr) clamp(300px,24vw,470px);gap:14px;min-height:0;min-width:0}
+.st-body{display:grid;grid-template-columns:minmax(0,1fr) var(--pnw);gap:14px;min-height:0;min-width:0}
 .st-view{position:relative;min-height:0;min-width:0}
 .st-svg{position:relative;height:100%;min-height:0;min-width:0}
 #chip{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none}
-/* ---- the scale control: always there, under the drawing (it replaces the old path of links) ---- */
-.zc{display:flex;flex-wrap:wrap;align-items:center;gap:3px}
+/* ---- the scale control: always there, under the details panel, right-aligned (where maps keep their zoom) ---- */
+.zc{display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-end;gap:3px}
 .zc button{font:inherit;font-size:clamp(.76rem,.25vw + .66rem,.98rem);min-height:30px;padding:2px 9px;border-radius:8px;cursor:pointer;
   background:var(--surface);color:var(--ink);border:1px solid var(--border);line-height:1.15;white-space:nowrap}
 .zc button:hover{border-color:var(--ink-2)}
-.zc button[aria-pressed="true"]{background:var(--ink);color:var(--page);border-color:var(--ink)}
-.zc button.pm{font-size:1.1em;font-weight:700;min-width:2.1em}
-.zc button:disabled{opacity:.35;cursor:default}
+.zc button.pm{font-size:1.1em;font-weight:600;min-width:2.1em}
+.zc button:disabled,.zc button.dis{opacity:.35;cursor:default}
+.zc .zlab{font-size:clamp(.72rem,.2vw + .64rem,.86rem);color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;margin-right:6px}
 /* ---- the small picture of the die: a flow's stage on the die while the camera is inside a shire or a minion ---- */
-.pip{position:absolute;top:4px;right:4px;z-index:3;width:clamp(190px,26%,360px);border-radius:10px;overflow:hidden;cursor:pointer;
-  background:var(--surface);border:2px solid var(--c1);box-shadow:0 4px 18px rgba(0,0,0,.16)}
+.pip{position:absolute;bottom:8px;right:8px;z-index:3;width:clamp(180px,20%,300px);border-radius:8px;overflow:hidden;cursor:pointer;
+  background:var(--surface);border:1px solid var(--border);box-shadow:0 6px 20px rgba(0,0,0,.18)}
 .pip[hidden]{display:none}
 .pip svg{display:block;width:100%;height:auto}
 .pip .pip-cap{display:block;font-size:.78rem;color:var(--ink-2);padding:2px 8px 4px;border-top:1px solid var(--border)}
@@ -54,14 +59,20 @@ html.et-pres [data-ss-ui]{display:none!important}
   font-size:clamp(.84rem,.32vw + .72rem,1.05rem);line-height:1.45}
 .pn-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;padding:12px 14px 10px;overscroll-behavior:contain}
 .pn-scroll:focus{outline:none}
+.pn-scroll:focus-visible{outline:3px solid var(--c1);outline-offset:-3px}
 .pn-foot{flex:none;border-top:1px solid var(--border);padding:7px 12px}
 .pn-kick{color:var(--ink-2);font-size:.78em;text-transform:uppercase;letter-spacing:.06em;margin:0}
-.pn-title{font-size:1.35em;font-weight:700;line-height:1.2;margin:2px 0 6px}
+.pn-title{font-size:1.35em;font-weight:650;line-height:1.2;margin:2px 0 6px}
 .pn-what{margin:0 0 8px}
 .pn-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:6px;margin:6px 0 8px}
+/* four tiles: two by two, never three and one */
+.pn-kpis:has(>:nth-child(4):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}
+/* three tiles in a narrow panel: the first across the top, two under it (never two and an orphan) */
+.pn{container-type:inline-size}
+@container (max-width:390px){.pn-kpis:has(>:nth-child(3):last-child){grid-template-columns:repeat(2,minmax(0,1fr))}.pn-kpis:has(>:nth-child(3):last-child)>:first-child{grid-column:1/-1}}
 .pn-kpi{border:1px solid var(--border);border-radius:8px;padding:5px 8px;background:var(--page)}
-.pn-kpi b{display:block;font-size:1.28em;line-height:1.15;font-variant-numeric:tabular-nums}
-.pn-kpi>span{display:block;color:var(--ink-2);font-size:.78em;line-height:1.25}
+.pn-kpi b{display:block;font-size:1.28em;line-height:1.15;font-variant-numeric:tabular-nums;font-weight:650}
+.pn-kpi>span{display:block;color:var(--ink-2);font-size:.78em;line-height:1.25;text-wrap:balance}
 .pn-act{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:6px 0 8px}
 .pn-act label{font-size:.85em;color:var(--ink-2);display:inline-flex;align-items:center;gap:6px}
 .pn-act select{font:inherit;font-size:.92em;color:var(--ink);background:var(--page);border:1px solid var(--border);border-radius:6px;padding:2px 4px;min-height:32px}
@@ -73,9 +84,10 @@ html.et-pres [data-ss-ui]{display:none!important}
 .pn li.fact:hover{background:var(--page)}
 .pn .meta{display:flex;flex-wrap:wrap;gap:3px 8px;align-items:center;margin-top:3px;font-size:.86em;color:var(--ink-2)}
 .pn .fid{color:var(--ink-2);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
-/* what is inferred here, and what would settle it (the hub's asks) */
-.pn details.asks{margin:8px 0;border:1.5px dashed color-mix(in srgb,var(--warn) 70%,var(--ink-2));border-radius:8px;padding:4px 10px;background:var(--page)}
-.pn details.asks>summary{font-size:.9em;font-weight:650;color:var(--ink);padding:3px 0}
+/* what is inferred here, and what would settle it (the hub's asks): a quiet box, its state marked by a small dot */
+.pn details.asks{margin:8px 0;border:1px solid var(--border);border-radius:8px;padding:4px 10px;background:var(--page)}
+.pn details.asks>summary{font-size:.9em;font-weight:600;color:var(--ink);padding:3px 0}
+.pn details.asks>summary::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--warn);margin-left:8px;vertical-align:.1em}
 .pn .ask{border-top:1px solid var(--grid);padding:6px 0;font-size:.9em}
 .pn .ask p{margin:2px 0}
 .pn .ask .ask-h{font-weight:650}
@@ -85,24 +97,27 @@ html.et-pres [data-ss-ui]{display:none!important}
 .pn .ask-l a{white-space:normal}
 .kd{display:inline-block;font-size:.8em;font-weight:650;padding:0 7px;border-radius:999px;border:1.5px solid;white-space:nowrap;line-height:1.5}
 .kd.measured{color:var(--ok);border-color:var(--ok)}
-.kd.spec{color:var(--c1);border-color:var(--c1)}
+.kd.spec{color:color-mix(in srgb,var(--c1) 70%,var(--ink));border-color:var(--c1)}
 .kd.derived{color:var(--c7);border-color:var(--c7)}
 .kd.inferred{color:color-mix(in srgb,var(--warn) 55%,var(--ink));border-color:var(--warn)}
 .cd{white-space:nowrap}
 .legs{width:100%;border-collapse:collapse;font-size:.88em;margin:4px 0}
-.legs td,.legs th{padding:4px 5px;border-bottom:1px solid var(--grid);vertical-align:top}
+.legs td,.legs th{padding:4px 5px;border-bottom:1px solid var(--grid);vertical-align:top;-webkit-hyphens:manual;hyphens:manual;overflow-wrap:normal;word-break:normal}
+.legs td:first-child{min-width:6.5em}
 .legs th{color:var(--ink-2);font-weight:600}
 .legs td.num,.legs th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-.legs tr.on td{background:color-mix(in srgb,var(--c2) 18%,transparent)}
-.legs tr.todo td{color:var(--muted)}
+.legs tr.on td{background:color-mix(in srgb,var(--c2) 14%,transparent)}
+.legs tr.on td:first-child{box-shadow:inset 3px 0 0 var(--c2)}
+.legs tr.todo td{color:var(--ink-2)}
 .lad{display:grid;grid-template-columns:minmax(0,6.6em) minmax(0,1fr);gap:6px 8px;align-items:center;font-size:.9em;margin:6px 0 4px}
 .lad .nm{color:var(--ink-2);text-align:right;line-height:1.15}
 .lad .tr{position:relative;height:1.6em;background:var(--grid);border-radius:4px;overflow:hidden}
-.lad .tr u{position:absolute;left:0;top:0;bottom:0;width:0;background:color-mix(in srgb,var(--c2) 55%,transparent);text-decoration:none;border-radius:4px}
+.lad .tr u{position:absolute;left:0;top:0;bottom:0;width:0;background:color-mix(in srgb,var(--c2) var(--barmix,55%),transparent);text-decoration:none;border-radius:4px}
 .lad .tr.done u{background:color-mix(in srgb,var(--c2) 38%,transparent)}
 .lad .tr.pale u{background:color-mix(in srgb,var(--c3) 45%,transparent)}
 .lad .tr s{position:absolute;left:6px;right:6px;top:0;line-height:1.6em;text-decoration:none;font-weight:650;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* ---- the stage bar: the active flow's stages, under the drawing ---- */
+/* ---- the control bar, under the drawing: playback, the active flow's stages (or the tour's still steps), the camera
+   and presenting. Past stages read as progress (a thin bar), the current one is the one strong mark ---- */
 .st-bar{display:flex;align-items:center;gap:6px 8px;min-width:0;border-top:1px solid var(--border);padding-top:7px}
 .st-bar .st-btn{min-height:32px}
 .stages{list-style:none;margin:0;padding:0;display:flex;gap:4px;flex:1 1 auto;min-width:0}
@@ -111,35 +126,51 @@ html.et-pres [data-ss-ui]{display:none!important}
 .stg{font:inherit;font-size:clamp(.74rem,.27vw + .63rem,.98rem);flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:6px;position:relative;overflow:hidden;
   background:var(--surface);color:var(--ink-2);border:1px solid var(--border);border-radius:8px;padding:3px 8px;min-height:32px;cursor:pointer;text-align:left}
 .stg:hover{border-color:var(--ink-2);color:var(--ink)}
-.stg .sn{flex:none;font-weight:750;font-variant-numeric:tabular-nums;color:var(--ink-2)}
-.stg .st{min-width:0;overflow:hidden;line-height:1.1;overflow-wrap:break-word;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
-.stg.past{background:color-mix(in srgb,var(--c2) 10%,var(--surface));color:var(--ink)}
-.stg.on{background:color-mix(in srgb,var(--c2) 24%,var(--surface));border-color:color-mix(in srgb,var(--c2) 75%,var(--ink));color:var(--ink);font-weight:650}
-.stg.on .sn{color:var(--ink)}
-.stg.on::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--c2);opacity:.9}
-#stage.playing .stg.on::after{animation:stgrun 1.6s ease-in-out infinite}
-@keyframes stgrun{0%{transform:scaleX(.15);transform-origin:left}50%{transform:scaleX(1);transform-origin:left}100%{transform:scaleX(.15);transform-origin:right}}
-@media (prefers-reduced-motion: reduce){#stage.playing .stg.on::after{animation:none}}
+.stg .sn{flex:none;font-weight:650;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.stg .st{min-width:0;overflow:hidden;line-height:1.1;overflow-wrap:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
+/* the tour's still steps: each chip as wide as its name, never a word broken */
+.stages li.tchip{flex:0 1 auto}
+.stages li.tchip .stg{padding:3px 12px}
+.stg.past{background:var(--surface);color:var(--ink)}
+.stg.past .sn{color:color-mix(in srgb,var(--c2) 70%,var(--ink))}
+.stg.past::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:color-mix(in srgb,var(--c2) 45%,transparent)}
+.stg.on{background:color-mix(in srgb,var(--c2) 14%,var(--surface));border-color:var(--c2);color:var(--ink);font-weight:650}
+.stg.on .sn{color:color-mix(in srgb,var(--c2) 70%,var(--ink))}
+.stg.on::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--c2)}
 .bar-sep{flex:none;width:1px;align-self:stretch;background:var(--border);margin:0 2px}
-/* ---- caption ---- */
-.st-cap{display:grid;grid-template-columns:minmax(19.5em,22em) minmax(0,1fr);align-items:center;gap:6px 18px;min-width:0}
-.cap-k{font-size:clamp(.78rem,.3vw + .66rem,1rem);color:var(--ink-2);min-width:0}
-#cap-k{color:var(--ink);font-weight:650;margin-top:4px}
-.dots{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;min-height:10px}
-.dots button{width:12px;height:12px;border-radius:50%;background:var(--grid);display:block;border:0;padding:0;cursor:pointer}
-.dots button.past{background:var(--ink-2)}
-.dots button.on{background:var(--c2);box-shadow:0 0 0 2px color-mix(in srgb,var(--c2) 35%,transparent)}
-.dots button:focus-visible{outline:2px solid var(--c1);outline-offset:2px}
+/* ---- caption: the kicker, the caption and the line under it, in the drawing's column; the scale control in the
+   panel's column ---- */
+.st-cap{display:grid;grid-template-columns:minmax(0,1fr) var(--pnw);align-items:start;gap:4px 14px;min-width:0}
+#stage.nopanel .st-cap{grid-template-columns:minmax(0,1fr) auto}
 .cap-txt{min-width:0}
-#cap{margin:0;font-size:clamp(17px,.95vw + 11px,32px);line-height:1.25;min-height:2.5em;display:flex;align-items:center;font-weight:560;overflow:hidden}
+.cap-kick{display:flex;align-items:center;gap:6px 14px;min-height:18px;flex-wrap:wrap}
+#cap-k{font-size:clamp(12px,.3vw + 8px,14px);color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.cap-side{min-width:0;padding-top:1px}
+.dots{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.dots:empty{display:none}
+.dots button{width:8px;height:8px;border-radius:50%;background:var(--grid);display:block;border:0;padding:0;cursor:pointer}
+.dots button.past{background:color-mix(in srgb,var(--ink-2) 55%,var(--surface))}
+.dots button.on{background:var(--c2);box-shadow:0 0 0 2px color-mix(in srgb,var(--c2) 30%,transparent)}
+.dots button:focus-visible{outline:2px solid var(--c1);outline-offset:2px}
+#cap{margin:2px 0 0;font-size:clamp(17px,.95vw + 11px,32px);line-height:1.25;min-height:2.5em;display:flex;align-items:center;font-weight:560;overflow:hidden;letter-spacing:-.005em}
 #cap .cap-in{display:block;text-wrap:balance}
-/* the sub-caption wraps to a second line rather than losing its end (two lines are kept free, so the die never jumps) */
+/* the line under the caption wraps to a second line rather than losing its end (two lines are kept free, so the die
+   never jumps) */
 #cap-sub{margin:2px 0 0;font-size:clamp(13px,.5vw + 8.5px,19px);line-height:1.3;min-height:2.6em;color:var(--ink-2);overflow:hidden;
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
 .num[data-f]{text-decoration:underline dotted var(--muted);text-underline-offset:3px;cursor:help}
+#cap .num,#cap-sub .num{white-space:nowrap}
+/* arrows in text: a font that draws them at a proper size (the system font on Linux draws a low dash); on buttons, an
+   inline SVG arrow */
+.arr{font-family:"DejaVu Sans","Segoe UI Symbol",system-ui,sans-serif;font-size:1.08em;line-height:1;font-weight:400}
+#chip tspan.arr,#pipsvg tspan.arr{font-family:"DejaVu Sans","Segoe UI Symbol",system-ui,sans-serif}
+svg.ar{display:inline-block;width:1.05em;height:.72em;vertical-align:-.02em;overflow:visible}
+svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.st-btn svg.ar{margin:0 .12em}
+#btn-prev svg.ar,#btn-next svg.ar{width:1.25em;height:.85em;margin:0}
 /* ---- a note over the stage (presenting inside the frame, a blocked window) ---- */
 .toast{position:absolute;left:50%;top:56px;transform:translateX(-50%);z-index:6;max-width:min(720px,calc(100% - 24px));background:var(--surface);color:var(--ink);
-  border:1.5px solid var(--c1);border-radius:10px;padding:10px 14px;box-shadow:0 8px 28px rgba(0,0,0,.2);font-size:clamp(.85rem,.3vw + .72rem,1.05rem);line-height:1.4}
+  border:1px solid var(--border);border-radius:10px;padding:10px 14px;box-shadow:0 8px 28px rgba(0,0,0,.2);font-size:clamp(.85rem,.3vw + .72rem,1.05rem);line-height:1.4}
 .toast[hidden]{display:none}
 .toast p{margin:0 0 6px}
 .toast .tb{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
@@ -154,41 +185,99 @@ html.et-pres [data-ss-ui]{display:none!important}
 #srctip{position:fixed;z-index:2147483600;pointer-events:none;display:none;max-width:min(460px,calc(100vw - 16px));background:var(--surface);color:var(--ink);
   border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.84rem;line-height:1.4;box-shadow:0 6px 22px rgba(0,0,0,.18)}
 #srctip .s{color:var(--ink-2);display:block;margin-top:4px;overflow-wrap:anywhere}
-/* ---- the SVG ---- */
+/* ---- the SVG: one type scale (ids 32/650, titles 30/700, part names 24 and 20/600, labels 20, notes 17) and one
+   stroke scale (set in the script) ---- */
 #chip text,#pipsvg text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 #chip .comp{cursor:pointer}
 #chip .comp:focus{outline:none}
-#chip .ring{fill:none;stroke:var(--ink);stroke-width:5;opacity:0;pointer-events:none}
+#chip .ring{fill:none;stroke:var(--ink);stroke-width:5;opacity:0;pointer-events:none;transition:opacity .25s,stroke .25s}
 #chip .comp:focus-visible .ring{opacity:1;stroke-dasharray:none}
 #chip .comp.sel .ring{opacity:.9;stroke-dasharray:none;stroke:var(--c2)}
-#chip .comp:hover .shape{stroke-width:4.5}
-#chip.dimming .dimmable:not(.hi){opacity:.2}
-#chip.fdim .dimmable:not(.hi){opacity:.45}
+#chip .comp:hover .shape{stroke-width:3.5}
+#chip .comp .shape{transition:opacity .3s}
+#chip .comp text{transition:fill .3s}
+#chip .shape.quiet{stroke-opacity:0;transition:stroke-opacity .2s,opacity .3s}
+#chip .comp:hover .shape.quiet,#chip .comp:focus-visible .shape.quiet{stroke-opacity:.7}
+/* set back, not switched off: less opacity taken away, colour drained instead; changes fade */
+#chip .dimmable{transition:opacity .3s cubic-bezier(.4,0,.2,1),filter .3s cubic-bezier(.4,0,.2,1)}
+#chip.dimming .dimmable:not(.hi){opacity:.35;filter:saturate(.15)}
+#chip.fdim .dimmable:not(.hi){opacity:.55;filter:saturate(.3)}
 /* dimmed parts stay visible on a dark page (and on a projector) */
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #chip.dimming .dimmable:not(.hi){opacity:.38}:root:not([data-theme="light"]) #chip.fdim .dimmable:not(.hi){opacity:.55}}
-:root[data-theme="dark"] #chip.dimming .dimmable:not(.hi){opacity:.38}
-:root[data-theme="dark"] #chip.fdim .dimmable:not(.hi){opacity:.55}
-#chip .hi .shape{stroke-width:5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #chip.dimming .dimmable:not(.hi){opacity:.45}:root:not([data-theme="light"]) #chip.fdim .dimmable:not(.hi){opacity:.6}}
+:root[data-theme="dark"] #chip.dimming .dimmable:not(.hi){opacity:.45}
+:root[data-theme="dark"] #chip.fdim .dimmable:not(.hi){opacity:.6}
+#chip .hi .shape{stroke-width:4}
 #chip .lay.busy{pointer-events:none}
-#pipsvg .pt.hi{stroke-width:9}
-.t-id{font-size:36px;font-weight:750;fill:var(--ink)}
+/* the zoom (script: segOpen): labels of a view fade by --lab, the outer view's context by --ctx (--sat its colour, --ctxh
+   what stood out), the target (the tile or minion entered or left) by --tgt: all start from how the view looked */
+#chip .lay text,#chip .lay .mstop,#chip .lay .pk,#chip .lay .co,#chip .lay .band{opacity:var(--lab,1)}
+#chip .lay .zdim{opacity:var(--ctx,1)!important;transition:none!important;filter:none!important}
+#chip .lay.zsat .zdim{filter:saturate(var(--sat,1))!important}
+#chip .lay .zdim.zhi{opacity:var(--ctxh,1)!important;filter:none!important}
+#chip .lay .ztgt{opacity:var(--tgt,1)!important;transition:none!important;filter:none!important}
+#chip .lay.zsat .ztgt{filter:saturate(var(--tsat,1))!important}
+#chip .lay.zout .ring{opacity:0}
+#pipsvg .pt.hi{stroke-width:6}
+.t-id{font-size:32px;font-weight:650;fill:var(--ink);font-variant-numeric:tabular-nums}
 .t-lab{font-size:20px;fill:var(--ink-2)}
-.t-labb{font-size:20px;font-weight:650;fill:var(--ink)}
-.t-big{font-size:30px;font-weight:750;fill:var(--ink)}
-.t-mid{font-size:24px;font-weight:650;fill:var(--ink)}
+.t-labb{font-size:20px;font-weight:600;fill:var(--ink)}
+.t-big{font-size:30px;font-weight:700;fill:var(--ink)}
+.t-mid{font-size:24px;font-weight:600;fill:var(--ink)}
 .t-sm{font-size:17px;fill:var(--ink-2)}
+.t-unit{font-size:17px;fill:var(--ink-2)}
+.t-dcap{font-size:20px;font-weight:500;fill:var(--ink-2)}
 .t-link{font-size:17px;fill:var(--c1);text-decoration:underline}
 .halo{paint-order:stroke;stroke:var(--page);stroke-width:6px;stroke-linejoin:round}
 .halo-s{paint-order:stroke;stroke:var(--surface);stroke-width:6px;stroke-linejoin:round}
-.co-box{fill:var(--surface);stroke-width:3}
+#chip .mlink,#pipsvg .mlink{stroke:color-mix(in srgb,var(--ink-2) 40%,var(--surface));stroke-width:3;stroke-linecap:round}
+#pipsvg .mlink{stroke-width:4}
+#chip .mstop{fill:color-mix(in srgb,var(--ink-2) 75%,var(--surface))}
+#chip .links.hi .mlink{stroke:var(--c1);stroke-width:4}
+#chip .links.hi .mstop{fill:var(--c1)}
+#chip .links .mlink,#chip .links .mstop{transition:stroke .3s,fill .3s}
+.co-box{fill:var(--surface);stroke-width:1.5}
+#chip .bbar,#pipsvg .bbar{fill-opacity:.6}
+#chip .btrack{fill:var(--grid)}
+#chip .bkey{font-size:17px;fill:var(--ink-2)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #chip .bbar{fill-opacity:.88}:root:not([data-theme="light"]) #chip .btrack{fill:color-mix(in srgb,var(--grid) 70%,var(--ink-2))}:root:not([data-theme="light"]) .lad{--barmix:80%}}
+:root[data-theme="dark"] #chip .bbar{fill-opacity:.88}
+:root[data-theme="dark"] #chip .btrack{fill:color-mix(in srgb,var(--grid) 70%,var(--ink-2))}
+:root[data-theme="dark"] .lad{--barmix:80%}
+/* the tour's mesh slide: the tiles' outlines set back, their labels (with halos) kept over the lit links */
+#chip.mesh-on .dimmable:not(.hi){opacity:1!important;filter:none!important}
+#chip.mesh-on .comp:not(.hi) .shape{opacity:.3}
+#chip.mesh-on .comp:not(.hi) text{fill:var(--ink-2)}
+#co-sh feDropShadow{flood-opacity:.16}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #co-sh feDropShadow{flood-opacity:.5}}
+:root[data-theme="dark"] #co-sh feDropShadow{flood-opacity:.5}
 .co-t{font-size:22px;fill:var(--ink)}
-.co-t.b{font-weight:750}
-/* ---- presenting (the tour): panel text at 18 px or more at 1920 wide, no reference lists, no dotted numbers ---- */
+.co-t.b{font-weight:650}
+/* the minion's header: the harts' numbers give way to a flow's note */
+#chip .lay:has(.note) .m-harts{opacity:0}
+@media (prefers-reduced-motion: reduce){#chip .dimmable,#chip .ring,#chip .shape.quiet,#chip .links .mlink{transition:none}}
+/* ---- presenting (the tour, full screen, the stage filling the frame): panel text at 18 px or more at 1920 wide, no
+   reference lists, no dotted numbers, no reader's instructions, no pointer effects ---- */
 #stage.present .pn{font-size:clamp(.95rem,.55vw + .5rem,1.3rem)}
 #stage.present .pn-kpi>span,#stage.present .pn-kick{font-size:.88em}
 #stage.present .legs,#stage.present .lad{font-size:1em}
+/* presenting, a range in a number column may break after its dash, so that the prose column keeps its width */
+#stage.present .legs td.num{white-space:normal}
 #stage.present .pn-fh,#stage.present .pn ul.facts,#stage.present .pn-foot{display:none}
-#stage.present #cap .num[data-f],#stage.present #cap-sub .num[data-f]{text-decoration:none;cursor:default}
+#stage.present .pn details.asks,#stage.present .pn .pn-act,#stage.present .pn .pn-more,#stage.present .pn .pn-what.small{display:none}
+/* a flow's table says it stage by stage: its prose goes (it would push the table out of the panel) */
+#stage.present .pn-scroll:has(.legs) .pn-what{display:none}
+#stage.present .pn-kpi b{font-size:1.45em}
+#stage.present .pn .pn-key{display:none}
+/* presenting: a button that has nothing to do on a still slide takes no room */
+#stage.present #btn-play.void{display:none}
+/* a chart already drawn on the stage is not drawn again in the panel */
+#stage.present .pn .lad,#stage.present .pn .pn-h:has(+ .lad){display:none}
+#stage.present .num[data-f]{text-decoration:none;cursor:default}
+#stage.present .stg-hint,#stage.present #cap-sub.hint{visibility:hidden}
+#stage.present .st-title .t-long{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+#stage.present .st-title .t-short{display:inline}
+#stage.present #chip .comp:hover .shape{stroke-width:inherit}
+#stage.present.idle,#stage.present.idle *{cursor:none!important}
 /* ---- the panel hidden (P): the die takes the whole width ---- */
 #stage.nopanel .st-body{grid-template-columns:minmax(0,1fr)}
 #stage.nopanel .pn{display:none}
@@ -198,9 +287,10 @@ html.et-pres [data-ss-ui]{display:none!important}
 .skip a{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;background:var(--surface);color:var(--ink);
   border:2px solid var(--c1);border-radius:8px;padding:4px 10px;font-size:.95rem}
 .skip a:focus{position:static;width:auto;height:auto;clip-path:none;overflow:visible}
-/* in a frame that has not been clicked yet, the keys go to the host page: a hint says so (hidden once focused) */
-.kbd-hint{position:absolute;left:4px;top:4px;z-index:4;max-width:min(430px,70%);background:var(--surface);color:var(--ink);border:1.5px solid var(--c1);
-  border-radius:8px;padding:4px 10px;font-size:clamp(.78rem,.25vw + .68rem,.95rem);line-height:1.3;box-shadow:0 3px 12px rgba(0,0,0,.14);cursor:pointer}
+/* in a frame that has not been clicked yet, the keys go to the host page: a one-line hint in the drawing's empty top
+   left corner says so (hidden once focused, and while presenting) */
+.kbd-hint{position:absolute;left:6px;top:4px;z-index:4;background:var(--surface);color:var(--ink);border:1px solid var(--border);
+  border-radius:8px;padding:3px 10px;font-size:clamp(.76rem,.22vw + .66rem,.9rem);line-height:1.3;box-shadow:0 3px 12px rgba(0,0,0,.12);cursor:pointer;white-space:nowrap}
 .kbd-hint[hidden]{display:none}
 .kbd-hint kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--border);border-radius:4px;padding:0 4px;background:var(--page)}
 #facttab{table-layout:fixed}
@@ -212,11 +302,11 @@ html.et-pres [data-ss-ui]{display:none!important}
   #stage{display:flex;flex-direction:column;height:auto;min-height:0;overflow:visible;gap:8px}
   .st-body{display:contents}
   .st-head{order:0}.st-view{order:1}.st-bar{order:2}.st-cap{order:3}.pn{order:4}
-  .st-btn.new::after,.st-row .lab2{display:none}
+  .st-row .lab2{display:none}
   .st-head .st-btn{padding:3px 9px;min-height:32px}
   /* the drawing keeps a readable size and scrolls sideways inside its own box */
   .st-svg{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  #chip{height:auto;aspect-ratio:1300/792;min-width:720px}
+  #chip{height:auto;aspect-ratio:1400/792;min-width:776px}
   .pip{width:44%}
   .st-bar{flex-wrap:wrap}
   .stages{flex:1 1 100%;order:5;flex-wrap:wrap}
@@ -230,19 +320,22 @@ html.et-pres [data-ss-ui]{display:none!important}
   #stage:fullscreen .pn,#stage.pres .pn{flex:0 1 26vh;min-height:0}
   #stage:fullscreen .pn-scroll,#stage.pres .pn-scroll{max-height:none}
   .pn-scroll{max-height:70vh}
-  .st-cap{grid-template-columns:minmax(0,1fr)}
+  .st-cap,#stage.nopanel .st-cap{grid-template-columns:minmax(0,1fr)}
+  .zc{justify-content:flex-start;flex-wrap:wrap}
   #cap{min-height:0}
   #cap-sub{white-space:normal}
 }
+/* where a stage's name may wrap (under 1700 wide) the bar keeps room for two lines whatever the flow, so that the
+   drawing above it never changes size between flows (a short screen keeps them to one line, below) */
+@media (min-width:900px) and (max-width:1700px) and (min-height:781px){.stg{min-height:calc(2.2em + 8px)}}
 /* laptops and projectors, 900-1450 wide: tighter header buttons so that the header stays on one row */
 @media (min-width:900px) and (max-width:1450px){
   .st-head{gap:4px 10px}
   .st-row{gap:4px}
   .st-btn{padding:3px 8px}
   .st-btn .k{margin-right:4px}
-  .st-btn.new::after{display:none}
   .w-play{min-width:4.6em}.w-tour{min-width:5.2em}.w-fs{min-width:5.8em}
-  .st-row .lab2{display:none}
+  .st-row .lab2,.zc .zlab{display:none}
   .st-title .t-long{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
   .st-title .t-short{display:inline}
 }
@@ -253,13 +346,32 @@ html.et-pres [data-ss-ui]{display:none!important}
   .stages li:not(.on) .stg .st{display:none}
   .stages li.on{flex:1 1 auto}
 }
+/* a short screen (1280 x 720): the drawing is scaled to about 0.67, so its text is set larger; the kicker and the
+   tour's dots move beside the line under the caption (under the scale control), which keeps its two lines; the stage
+   names keep to one line, so that the bar, and the drawing above it, never change height */
 @media (max-height:780px) and (min-width:900px){
-  #stage{gap:5px;padding-top:6px;padding-bottom:6px}
+  #stage{gap:4px;padding-top:6px;padding-bottom:6px}
+  .st-head{gap:4px 10px}
   .st-btn{min-height:30px;padding:2px 9px}
-  .st-bar .st-btn,.stg{min-height:29px}
+  .st-bar .st-btn,.stg{min-height:30px}
   .st-bar{padding-top:5px}
+  .stg{font-size:15px}
+  .stg .st{display:block;white-space:nowrap;text-overflow:ellipsis;-webkit-line-clamp:none;line-clamp:none}
+  .stages li.on{flex:0 1 auto;min-width:min-content;max-width:40%}
+  .st-cap,#stage.nopanel .st-cap{grid-template-columns:minmax(0,1fr) var(--pnw);grid-template-areas:"cap side" "sub kick";row-gap:2px}
+  .cap-txt{display:contents}
+  #cap{grid-area:cap}
+  #cap-sub{grid-area:sub}
+  .cap-kick{grid-area:kick;justify-content:flex-end;align-self:start;text-align:right;padding-top:2px}
+  .cap-side{grid-area:side}
   #cap{font-size:clamp(16px,.8vw + 10px,26px)}
-  #cap-sub{font-size:clamp(12.5px,.45vw + 8px,17px)}
+  #cap-sub{font-size:16px;line-height:1.28}
+  .t-sm{font-size:21px}
+  .t-lab,.t-labb{font-size:23px}
+  .t-unit{font-size:20px}
+  .t-sm.t-fit{font-size:19px}
+  .t-dcap{font-size:22px}
+  #chip .bkey{font-size:21px}
 }
 </style>
 
@@ -269,23 +381,23 @@ html.et-pres [data-ss-ui]{display:none!important}
   <div class="st-title"><h1><span class="t-long">The ET-SoC-1, interactively</span><span class="t-short" aria-hidden="true">ET-SoC-1</span></h1></div>
   <div class="st-row" role="group" aria-label="Data flows">
     <span class="lab2">Flows</span>
-    <button type="button" class="st-btn" data-flow="A" aria-pressed="false" title="A load that misses to DRAM (key 1)"><span class="k">1</span>Load&#8202;&#8594;&#8202;DRAM</button>
+    <button type="button" class="st-btn" data-flow="A" aria-pressed="false" title="A load that misses to DRAM (key 1)"><span class="k">1</span>Load<svg class="ar" viewBox="0 0 16 10" aria-hidden="true"><path d="M1.5 5h12M9.5 1.5 13.5 5l-4 3.5"/></svg><span class="vh"> to </span>DRAM</button>
     <button type="button" class="st-btn" data-flow="B" aria-pressed="false" title="The latency ladder (key 2)"><span class="k">2</span>Ladder</button>
     <button type="button" class="st-btn" data-flow="C" aria-pressed="false" title="TensorSend between shires (key 3)"><span class="k">3</span>TensorSend</button>
     <button type="button" class="st-btn" data-flow="D" aria-pressed="false" title="The relay against DRAM (key 4)"><span class="k">4</span>Relay</button>
     <button type="button" class="st-btn" data-flow="E" aria-pressed="false" title="Gathers and scatters, E48 (key 5)"><span class="k">5</span>Gathers</button>
     <button type="button" class="st-btn" data-flow="F" aria-pressed="false" title="The host over PCIe, timed on three cards (key 6)"><span class="k">6</span>Host&#8202;/&#8202;PCIe</button>
-    <button type="button" class="st-btn new" data-flow="G" aria-pressed="false" title="A matmul on the tensor unit (key 7)"><span class="k">7</span>Matmul</button>
-    <button type="button" class="st-btn new" data-flow="H" aria-pressed="false" title="The same matmul on different data: watts and heat (key 8)"><span class="k">8</span>Data&#8202;&#8594;&#8202;watts</button>
-    <button type="button" class="st-btn new" data-flow="I" aria-pressed="false" title="One hot line stops a shire (key 9)"><span class="k">9</span>Hot line</button>
-    <button type="button" class="st-btn new" data-flow="J" aria-pressed="false" title="The allreduce tree (key 0)"><span class="k">0</span>Allreduce</button>
+    <button type="button" class="st-btn" data-flow="G" aria-pressed="false" title="A matmul on the tensor unit (key 7)"><span class="k">7</span>Matmul</button>
+    <button type="button" class="st-btn" data-flow="H" aria-pressed="false" title="The same matmul on different data: watts and heat (key 8)"><span class="k">8</span>Data<svg class="ar" viewBox="0 0 16 10" aria-hidden="true"><path d="M1.5 5h12M9.5 1.5 13.5 5l-4 3.5"/></svg><span class="vh"> to </span>watts</button>
+    <button type="button" class="st-btn" data-flow="I" aria-pressed="false" title="One hot line stops a shire (key 9)"><span class="k">9</span>Hot line</button>
+    <button type="button" class="st-btn" data-flow="J" aria-pressed="false" title="The allreduce tree (key 0)"><span class="k">0</span>Allreduce</button>
   </div>
 </div>
 <div class="st-body">
   <div class="st-view">
     <div class="st-svg" id="svgwrap"><svg id="chip" role="group" aria-label="Schematic of the ET-SoC-1 die. Every part is a button: Tab to it and press Space for its details, Enter to zoom into a shire or a minion." xmlns="http://www.w3.org/2000/svg"></svg></div>
-    <div class="kbd-hint" id="kbd-hint" hidden>Click the diagram once: then <kbd>F</kbd> presents, <kbd>Space</kbd> pauses and the arrows step</div>
-    <div class="pip" id="pip" hidden role="button" tabindex="0" aria-label="The flow's stage on the die: go to the chip scale"><svg id="pipsvg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg><span class="pip-cap" id="pip-cap">On the die · click for the chip scale</span></div>
+    <div class="kbd-hint" id="kbd-hint" hidden title="Then F presents, Space pauses and the arrows step">Click here, then press <kbd>F</kbd></div>
+    <div class="pip" id="pip" hidden role="button" tabindex="0" aria-label="The flow's stage on the die: follow the flow again"><svg id="pipsvg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg><span class="pip-cap" id="pip-cap">On the die · click to return</span></div>
   </div>
   <aside class="pn" id="panel" aria-label="Details">
     <p id="pn-live" class="vh" aria-live="polite"></p>
@@ -303,18 +415,25 @@ html.et-pres [data-ss-ui]{display:none!important}
 </div>
 <div class="st-bar" id="bar" role="group" aria-label="Playback">
   <button type="button" class="st-btn w-play" id="btn-play" title="Space">Play</button>
-  <button type="button" class="st-btn" id="btn-prev" aria-label="Previous stage (Left arrow)" title="Previous stage (Left arrow)">&#8592;</button>
+  <button type="button" class="st-btn" id="btn-prev" aria-label="Previous stage (Left arrow)" title="Previous stage (Left arrow)"><svg class="ar" viewBox="0 0 16 10" aria-hidden="true"><path d="M14.5 5h-12M6.5 1.5 2.5 5l4 3.5"/></svg></button>
   <ol class="stages" id="stages" aria-label="Stages of the flow"></ol>
-  <button type="button" class="st-btn" id="btn-next" aria-label="Next stage (Right arrow)" title="Next stage (Right arrow)">&#8594;</button>
-  <button type="button" class="st-btn" id="btn-follow" aria-pressed="true" title="The camera follows the flow (C)">Follow</button>
+  <button type="button" class="st-btn" id="btn-next" aria-label="Next stage (Right arrow)" title="Next stage (Right arrow)"><svg class="ar" viewBox="0 0 16 10" aria-hidden="true"><path d="M1.5 5h12M9.5 1.5 13.5 5l-4 3.5"/></svg></button>
+  <button type="button" class="st-btn tog" id="btn-follow" aria-pressed="true" title="The camera follows the flow (C)">Follow</button>
   <span class="bar-sep" aria-hidden="true"></span>
   <button type="button" class="st-btn primary w-tour" id="btn-tour" title="T; Shift+arrows step the tour; Q ends it">Tour</button>
   <button type="button" class="st-btn w-fs" id="btn-fs" title="F: full screen, or the stage fills the frame">Present</button>
-  <button type="button" class="st-btn" id="btn-panel" aria-pressed="true" title="P: hide or show the details panel">Panel</button>
+  <button type="button" class="st-btn tog" id="btn-panel" aria-pressed="true" title="P: hide or show the details panel">Panel</button>
 </div>
 <div class="st-cap">
-  <div class="cap-k">
+  <div class="cap-txt">
+    <div class="cap-kick"><span id="cap-k" aria-live="polite">Explore</span><div class="dots" id="dots" role="group" aria-label="Tour steps"></div></div>
+    <p id="cap" aria-live="polite">Click any part of the chip, pick a data flow, or press Tour to step through it.</p>
+    <p id="st-live" class="vh" aria-live="polite">No flow is playing.</p>
+    <p id="cap-sub" class="hint">Space pauses · ← → stages · + − zoom · F presents · P panel · C follow</p>
+  </div>
+  <div class="cap-side">
     <div class="zc" role="group" aria-label="Scale: zoom out, chip, shire, minion, zoom in">
+      <span class="zlab" aria-hidden="true">Scale</span>
       <button type="button" class="pm" id="z-out" aria-label="Zoom out (minus key)" title="Zoom out (−, Backspace)">&#8722;</button>
       <button type="button" data-z="0" id="z-0" aria-pressed="true" title="The whole chip">Chip</button>
       <button type="button" data-z="1" id="z-1" aria-pressed="false" title="A shire">Shire</button>
@@ -322,13 +441,6 @@ html.et-pres [data-ss-ui]{display:none!important}
       <button type="button" class="pm" id="z-in" aria-label="Zoom in (plus key)" title="Zoom in (+)">+</button>
     </div>
     <div class="vh" id="cap-scale" aria-live="polite">Scale: the chip</div>
-    <div id="cap-k" aria-live="polite">Explore</div>
-    <div class="dots" id="dots" role="group" aria-label="Tour steps"></div>
-  </div>
-  <div class="cap-txt">
-    <p id="cap" aria-live="polite">Click any part of the chip, pick a data flow, or press Tour to step through it.</p>
-    <p id="st-live" class="vh" aria-live="polite">No flow is playing.</p>
-    <p id="cap-sub">Space pauses · ← → stages · + − zoom · F presents · P panel · C follow</p>
   </div>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
@@ -346,7 +458,7 @@ with the latency, bandwidth, energy and heat measured on the lab's cards, the ho
 <li><b>Click</b> any part (or Tab to it and press Space) for what it is, its numbers with their units and card coverage,
 a link to the report that measured them, and, where the drawing infers something, what would settle it. Point at a
 number to see its source; from the keyboard, Tab to a fact in the details list.</li>
-<li><b>Zoom</b> with the scale control under the drawing (−, Chip, Shire, Minion, +, or the + and − keys): it is always there, so you can go back in as well as out. A double click, a second click, or Enter on a shire or
+<li><b>Zoom</b> with the scale control under the details (−, Chip, Shire, Minion, +, or the + and − keys): it is always there, so you can go back in as well as out; a second press while the camera moves goes on to the next scale. A double click, a second click, or Enter on a shire or
 a minion zooms into it; Backspace zooms out.</li>
 <li><b>Flows</b> 1 to 9 and 0 animate a load that misses to DRAM, the latency ladder, TensorSend across the mesh, the
 relay against DRAM, gathers and scatters, the host over PCIe (timed on three cards), a matmul on the tensor unit, the
@@ -356,13 +468,14 @@ everything that moves, the camera included; stepping while paused shows each sta
 <li><b>Follow</b> (C): the camera follows the flow from scale to scale. Turn it off, or zoom yourself, and the camera
 stays: a stage on the die then plays in a small picture of the die in the corner, and a stage inside a shire or a minion
 marks its place. Stepping turns following back on after your own zoom.</li>
-<li><b>Tour</b> (T) steps through sixteen slides: the arrows (or a clicker's PageDown and PageUp) step the stages of
-each flow and move on at its ends; Shift with an arrow, or a click on a dot, jumps a whole slide; Q ends the tour. The
-tour enlarges the panel's text and hides its fact lists.</li>
-<li><b>Presenting</b>: F (or Present) goes full screen. Where the page's frame forbids that, the stage fills the frame
+<li><b>Tour</b> (T) steps through seventeen slides: the arrows (or a clicker's PageDown and PageUp) step the stages of
+each flow and move on at its ends; Shift with an arrow, a click on a dot or on a slide's name in the bar, or a flow's
+key jumps to a slide; Q or End tour ends the tour, and T picks it up where it was left. Esc never ends it.</li>
+<li><b>Presenting</b> (the tour, or F): the panel's text is larger, its fact lists, asks and buttons are hidden, numbers
+lose their dotted underline and the pointer hides when it rests. F (or Present) goes full screen. Where the page's frame forbids that, the stage fills the frame
 instead and offers the browser's own full screen (F11) and a presenter window, a copy of this page in a window of its
 own where F works. P hides the details panel, D switches light and dark. The same from the address:
-<code>?theme=light</code>, <code>?panel=off</code>, <code>?flow=7</code>. The stage fits one screen from 1280 × 720
+<code>?theme=light</code>, <code>?panel=off</code>, <code>?flow=7</code>, <code>?tour=1</code>. The stage fits one screen from 1280 × 720
 up; on a narrow screen the drawing scrolls sideways.</li>
 </ul>
 
