@@ -125,8 +125,10 @@ shire, scratchpad, SP, PMIC), a "where to look" table, and the provenance scheme
   (part A pages, part B the repository). A page that still says aifoundry1 cannot be used, blames `srcversion`, or
   calls aifoundry3's zero TDP flashed or set by firmware is stale: a boot service sets it at every boot.
   `docs/reports/data/2026-09-25-claims-v3/firmware.md` is a dated record. A page or file that calls aifoundry1's
-  card 1 governed ("firmware DVFS") is stale too: its clock never moved in the campaign (27 September). Trust
-  14-card-behaviour.md and this file.
+  card 1 governed ("firmware DVFS") is stale too: its clock never moved in the campaign (27 September). Text that
+  describes the governor as one table step per pass that acts only while a kernel runs describes the `353f20e`
+  source, not the cards' own 0.20.0 build (28 September; 14-card-behaviour.md, "The clock governor, by firmware
+  build"). Trust 14-card-behaviour.md and this file.
 
 ## 4. The machines
 
@@ -139,10 +141,10 @@ builds the same `/opt/et` natively (the README's setup section). **Never run `pr
 
 | Card | Firmware | Clock policy | Notes |
 |---|---|---|---|
-| aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C; in this chassis the die rarely cools below 65 °C, so it usually runs at 600 | the main card; the git checkout is `~/claude/et-soc1-prototyping` here |
-| aifoundry3 | 1.3.1 | **pinned at 600 MHz**: a boot service sets a 0 W TDP at every boot | compare switching power over idle, never absolute watts; about 1 host launch in 100 crashes at 1.08 s unless the program registers libetrt's log levels first (`registerRuntimeLogLevels()`, 14-card-behaviour.md) |
+| aifoundry2 | 1.3.1 | the firmware's DVFS: 600–800 MHz, above 600 only on a die below about 68 °C; in this chassis the die rarely cools below 65 °C, so it usually runs at 600 | the main card; the git checkout is `~/claude/et-soc1-prototyping` here. **Since 28 Sep 02:50 PDT its Master Minion is hung: no kernel runs until the lab admin restores it** (14-card-behaviour.md) |
+| aifoundry3 | 1.3.1 | **pinned at 600 MHz**: a boot service sets a 0 W TDP at every boot, which also latches its governor (no step at any temperature) | compare switching power over idle, never absolute watts; about 1 host launch in 100 crashes at 1.08 s unless the program registers libetrt's log levels first (`registerRuntimeLogLevels()`, 14-card-behaviour.md) |
 | aifoundry1 card 0 | 1.4.1 | DVFS; idles at 300 MHz, and its 0.21.x governor acts only while a kernel runs (firmware source) | **overheats (115–117 °C): no sustained work on it**; excluded from the campaign |
-| aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample since 25 Sep, cool or hot: its DVFS appears to be off (27 Sep; asked the lab) | fine; select a card on this host with `ET_DEVICES=<n>` |
+| aifoundry1 card 1 | 1.2.0 | 600 MHz in every sample since 25 Sep, cool or hot, busy or idle: its governor never raises the clock (off or latched; asked the lab) | fine; select a card on this host with `ET_DEVICES=<n>` |
 
 The hosts also differ in CPU, RAM and ET runtime build, which matters for host-side timing:
 [14-card-behaviour.md](docs/findings/14-card-behaviour.md#the-lab-machines-and-their-four-cards-are-not-interchangeable).
@@ -223,6 +225,18 @@ their host program has its kernel's path compiled in. Each workload's `README.md
   queue runs, they are the way to build on another host (from a machine with a clone). gp-sdk kernels (`kernels/`)
   need `deploy-lab-gpsdk.sh`, which installs the patched gp-sdk `06605ab`.
 - After an rsync, build with `--clean-first`: rsync keeps the source's modification times.
+- **The DV2 validation lock (since 28 September, until that validation ends).** `tools/claims-v3/dv2v/LOCK.sha256`
+  pins 19 files, and every validation pass runs `sha256sum -c` on it and refuses to start on any difference: in
+  `tools/claims-v3/dv2v/` `block.sh`, `val.json`, `vn_check.py`, `reduce_val.py`, `prereg-val.json`; in
+  `tools/claims-v3/dv2/` `block.sh`, `dv2lib.sh`, `dv2lib.py`, `dv2obs.py`, `sptrace_events.py`, `placements.json`,
+  `reduce_dv2.py`; the shared framework `tools/claims-v3/lib.sh` and `tools/claims-v3/queue.sh`; both validation
+  schedules, `tools/claims-v3/schedule-dv2val-aifoundry2.txt` and `schedule-dv2val-idle-aifoundry2.txt`; and the
+  binaries `build/ettelem-dv2/ettelem`, `build/sparsity_t2/host/sparsity_host` and
+  `build/sparsity_t2/kernel/sparsity.elf`. Edit none of them, rebuild none of those binaries, and merge nothing into
+  the checkout that runs the validation that touches them, until it ends; run `sha256sum -c
+  tools/claims-v3/dv2v/LOCK.sha256` after every merge. A merge of main once broke it (`a745199`, a comment in
+  `lib.sh`): the branch `dvfs2` keeps `lib.sh` at the locked bytes (`d884e53`'s), so merging `dvfs2` into main reverts
+  that comment; re-apply `a745199`'s `lib.sh` comment after the validation.
 
 **Run one workload on a card by hand** (in the host's tree: the checkout on aifoundry2, `~/nekko` elsewhere):
 

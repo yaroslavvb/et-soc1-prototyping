@@ -118,6 +118,15 @@ Read [Terms](#terms) first.
    but 556–566 µs launched and waited for, most of it the runtime's 500 µs idle poll; two host-to-card DMA commands
    at once move half as much as one, for reasons not established. → [03-experiments.md](03-experiments.md), E50;
    [05-claims.md](05-claims.md), "The host link"
+17. **The governor the cards run, and what it compares** (development, 28 September; not validated). The cards run
+   an older governor than the source first read: on aifoundry2 a thermal episode is a blocking loop of about 0.405 s
+   steps that acts on an idle card too, and a climb goes to 800 MHz in one call. It compares the whole-degree mean of
+   the 34 minion-shire sensors, not the hottest one: the clock held 800 MHz for over a second after the hottest sensor
+   read 67 °C in 12 of 12 runs. Placing 192 minions on the perimeter held 800 MHz 1.4 and at least 1.8 times as long
+   as in the interior (two blocks). aifoundry3's governor is latched by its zero TDP, aifoundry1's card 1's never
+   raises the clock, and nothing on those three cards limits the die's temperature (a 90–103 °C mean on aifoundry2,
+   26 September). aifoundry2's Master Minion hung that night and waits for the lab admin.
+   → [03-experiments.md](03-experiments.md), E51; [14-card-behaviour.md](14-card-behaviour.md)
 
 ## Terms
 
@@ -174,7 +183,7 @@ Four kinds of thing have IDs, and every claim cites them:
 |---|---|---|
 | **R1–R14** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
 | **Q1–Q57** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E50** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September) | [03-experiments.md](03-experiments.md) |
+| **E1–E51** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 the DV2 development night on aifoundry2, 28 September, development only) | [03-experiments.md](03-experiments.md) |
 | **A1–A19** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused) | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":

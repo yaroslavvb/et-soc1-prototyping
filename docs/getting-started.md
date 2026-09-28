@@ -8,10 +8,33 @@ This page covers everything needed to pick the work up somewhere else: clone, co
 rerun, and republish. Claude Code's memory for this project lives outside the repo, on each machine, so this
 page, [`AGENT.md`](../AGENT.md) (the entry point for an agent) and `CLAUDE.md` carry the context.
 
-## Where things stand (2026-09-27)
+## Where things stand (2026-09-28)
 
 The repository is the source of truth: every result, the experiment that produced it and the raw data are here,
 and `docs/findings/` traces each claim to its file. If a session is lost, resume from this page.
+
+- **aifoundry2 cannot run kernels until the lab admin restores it.** Its Master Minion hung at 02:50:53 PDT on
+  28 September during E51's development session p6041: a heater launched 0.6 s after the previous one, as the
+  governor's idle reset took the clock from 800 to 600 MHz, ran its short calibration kernel and then never completed
+  the next kernel, and every launch since fails with "Couldn't use the HPSQ. Perhaps the Master Minion is hanged?". The service processor still answers (telemetry and read-only queries work).
+  No reset was attempted, by the card rules; the cause is not established. The DV2 queue is stopped
+  (`build/claims-v3/STOP` and `build/claims-v3/aifoundry2/dv2/NIGHT-STOP` in the checkout that ran it, on
+  aifoundry2; a person removes them). Evidence and what to record after the
+  restore: `docs/findings/14-card-behaviour.md`, "aifoundry2 cannot run kernels".
+- **DV2, the DVFS-and-heat experiments (Q59, E51): development done, validation frozen and waiting.** The development
+  night on aifoundry2 (28 September, 00:33–02:54 PDT; `docs/reports/data/2026-09-28-dvfs2-aifoundry2/`, tools in
+  `tools/claims-v3/dv2/`) points to the governor comparing the 34-sensor mean, not the hottest shire, and to the cards
+  running the 0.20.0 governor (a blocking thermal loop of about 0.405 s steps, a one-call climb); a perimeter placement
+  held 800 MHz longer than an interior one in both blocks. All of it is **development, not validated**. The validation
+  plan (`plan/PREREG-VAL.md` there, frozen, SHA-256 `e150ce16…`; its runner is `tools/claims-v3/dv2v/`) has not run.
+  Its lock, `tools/claims-v3/dv2v/LOCK.sha256`, pins 19 files, shared ones among them: `tools/claims-v3/lib.sh` and
+  `queue.sh`, `tools/claims-v3/dv2/{block.sh,dv2lib.sh,dv2lib.py,dv2obs.py,sptrace_events.py,placements.json,reduce_dv2.py}`,
+  `tools/claims-v3/dv2v/{block.sh,val.json,vn_check.py,reduce_val.py,prereg-val.json}`, both
+  `schedule-dv2val-*.txt` and the binaries in `build/ettelem-dv2/` and `build/sparsity_t2/`: no edits and no merges
+  touching them until the validation ends (AGENT.md §7; `lib.sh` stays at the locked bytes, so a745199's comment
+  there is to be re-applied afterwards). The validation needs the owner's OK to validate on a later session of the
+  same card, and aifoundry2's Master Minion restored. aifoundry3's governor is latched by its zero TDP and aifoundry1's card 1's never raises the
+  clock, so neither can stand in (`docs/findings/14-card-behaviour.md`, "The clock governor, by firmware build").
 
 - **The lab, 25 September (evening).** Four cards work, on three firmware releases: aifoundry2 and aifoundry3 (1.3.1)
   and, since 15:02 that day, aifoundry1's two cards (card 0 on 1.4.1, card 1 on 1.2.0). aifoundry1's cards had been

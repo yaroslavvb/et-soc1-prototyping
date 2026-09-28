@@ -43,7 +43,13 @@ checks out `836a4ab`, and `device-bootloaders/src/ServiceProcessorBL2/` is ident
 runtime, `sys_emu` functional simulator, and `libDM.so` management library. **Which firmware the cards run is not
 established:** their own trace strings match an older service-processor build, from before et-platform commit
 `60b40c10f` (24 September 2024, "Dvfs fixes and refactoring", which reworked the governor), and aifoundry2 and aifoundry3 report release 1.3.1 (aifoundry1's cards 1.4.1 and 1.2.0). Read every
-statement below about the governor as a statement about the `353f20e` source.
+statement below about the governor as a statement about the `353f20e` source. **Added 28 September:** the older builds
+have since been read in the same clone: `ffca4cbb4` (= `cafe03fc3^`, "Close development of version 0.20.0",
+17 May 2024), the closest public source to release 1.3.1's service-processor firmware (BL2 0.20.0), and `da192816a`
+(BL2 0.18.0, 27 March 2024) for release 1.2.0. Their governor differs from `353f20e` in ways that matter for heat
+(a blocking thermal loop with no busy test, an exit to the boot point, a one-call climb), and the development data of
+E51 fit 0.20.0's behaviour; [14-card-behaviour.md](14-card-behaviour.md), "The clock governor, by firmware build",
+has the differences.
 
 - **Authoritative for:** the service processor's power and thermal policy. The two thresholds quoted
   throughout this work are read directly from the source:
@@ -51,10 +57,21 @@ statement below about the governor as a statement about the `353f20e` source.
   `device-bootloaders/src/ServiceProcessorBL2/include/thermal_pwr_mgmt.h`, with the decision logic in
   `check_power_throttle_conditions()` of `services/thermal_pwr_mgmt.c` (thermal branch first, then power).
   The hardware catastrophic limits `TEMP_THRESHOLD_HW_CATASTROPHIC 75` and
-  `POWER_THRESHOLD_HW_CATASTROPHIC 75` are in `include/bl2_pmic_controller.h`. **Observed, not explained:** in every
-  session here the PMIC reading tracked the minion-shire reading within a degree, and both sat at 80–90 °C for
-  hours with no catastrophic event, so that 75 °C limit must apply to a different sensor or not be armed on
-  this card. Do not rely on it.
+  `POWER_THRESHOLD_HW_CATASTROPHIC 75` are in `include/bl2_pmic_controller.h`. `setup_pmic()`
+  (`driver/pmic_controller.c`) writes them into the PMIC as its own alarm thresholds, so the 75 °C alarm compares
+  the PMIC's temperature, not the die's sensors; the firmware notes that the PMIC reports its system temperature as
+  0. **Observed:** the die sat far above 75 °C with no catastrophic event. aifoundry2's minion-shire mean passed
+  90 °C in 12,176 samples of the version-3 telemetry, up to 103 °C (106 °C on the hottest sensor) at 600 MHz with no
+  safe state ([14-card-behaviour.md](14-card-behaviour.md), "Nothing limits the die's temperature"). The service
+  processor reads the PMIC's system temperature only when it starts or resets its statistics and feeds the
+  statistic's minimum and maximum a literal 0 on every other pass (`services/thermal_pwr_mgmt.c:2995–3001` and
+  `:663–664` at `ffca4cbb4`), so that statistic (`sp.system_c`), 0 on the three cards throughout the check, shows only
+  that the PMIC gave 0 at each reset; the telemetry above is the evidence. So the 75 °C alarm does not act on the
+  die's temperature on these cards. Do not rely on it.
+  **Correction (28 September):** this entry used to argue that "the PMIC reading tracked the minion-shire reading
+  within a degree". That host field (`temp_c.pmic`, `pmic_sys`) is filled with the same 34-shire mean
+  (`get_module_current_temperature()`; 3,679 of 3,681 samples agree on 20 September, [05-claims.md](05-claims.md)),
+  so it is no PMIC measurement, and the argument was circular; the conclusion stands on the evidence above.
 - **Not authoritative for:** what the card actually did on any given day. The governor's behaviour was
   measured in E10.
 - **Used by:** E4, E21, the governor explanation in [14-card-behaviour.md](14-card-behaviour.md) and

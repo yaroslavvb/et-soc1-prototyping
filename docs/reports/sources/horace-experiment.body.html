@@ -305,7 +305,9 @@ degree. Without that term it would under-predict the hot patterns' rise by about
 <li><b>The sensor.</b> One whole-degree number stands for the mean of 34 sensors. The thermal fit's residual is the rounding.
 The launch temperature is known to a few tenths of a degree in absolute terms, the same for every run, which matters only
 for the three coolest patterns. The hot spots are the multiply-add units, not the sensors, so the junctions that leak are
-presumably hotter than the reading (no hot spot was measured).</li>
+presumably hotter than the reading. The sensors' peak-hold high puts the hottest of the 34 at 2–4 °C above their mean at
+each rise (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">the spatial brief</a>), but
+nothing on the card measures a junction inside a shire.</li>
 <li><b>Board power is not die power.</b> About 7 of random normal's 30 W over zeros are on no rail sensor (4.9 of 26 W on
 aifoundry3). By the later
 attribution (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-unmetered-remainder-attributed">Limits
@@ -347,15 +349,20 @@ that starts below 65 °C. A card that has been busy idles above that (72 °C on 
 <a href="#same-flops-different-heat">section 1</a> were held at 80 °C), runs everything at 600 MHz, and shows the effect
 as heat instead of speed. Nor are the seven runs a controlled experiment: their start temperatures differ
 by up to 2 °C, and a die that has just run does not return to 62 °C for hours. aifoundry3 cannot show the effect at all: it
-stays at 600 MHz (<a href="#a-second-card-and-what-transfers">section 10</a>). aifoundry1-c1 has aifoundry2's governor settings (65 W, 65 °C), but the three-card check launched it
-warm and every sample read 600 MHz; no cool start was run on it.</p>
+stays at 600 MHz (<a href="#a-second-card-and-what-transfers">section 10</a>). Nor can aifoundry1-c1, although it has aifoundry2's governor settings (65 W,
+65 °C): its governor does not raise the clock. The three-card check ran it cool, busy and under 65 W in 9,461 samples
+(die at 64 °C or less, board at 45–65 W), where aifoundry2's governor steps up, and it read 600 MHz in all 318,667, as did
+the service processor's own minimum and maximum of the clock, which a statistics reset does not clear.</p>
 
 <h2 id="minutes-instead-of-seconds">7. Minutes instead of seconds</h2>
 <p>Seven seconds show the first two stages of the heating. To see the rest, the same patterns ran on aifoundry2 as single
 processes for up to ten minutes each, in one session on 21 September, from the same start: heat to 84 °C if below, idle
 until the sensor first reads 80 °C, launch. Most configurations ran once; the counts are given below. A run ends early when
 the die's mean reading reaches 90 °C, which keeps it inside what this card had already seen (on 20 September the mean reading
-had reached 90 °C and the hottest sensor 93 °C, at up to 70 W). 29 runs took four hours, because after a hot run the die
+had reached 90 °C and the hottest sensor 93 °C, at up to 70 W; the three-card check of 26 September later held it at a
+mean of up to 103 °C with nothing on the card acting:
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature#a-load-step-seen-through-every-sensor">Power and
+temperature, §2</a>). 29 runs took four hours, because after a hot run the die
 needs up to seven minutes to get back to 80 °C. Some runs used fewer minions per shire, which scales the flip rate without
 changing the flips themselves (and the switching power only roughly in proportion: per active minion it is about 5% higher
 on 1,024 minions than on 256 in the ablation session of 21 September, and 9, 24 and 25% higher on aifoundry2, aifoundry3 and
@@ -434,7 +441,7 @@ resistance \(R_k\) and a time constant \(\tau_k\).</p>
 </div>
 <p>The power line has a fixed part, leakage that grows exponentially with die temperature, the tensor state machines of the
 active minions, and an energy for each kind of flip. It was fitted to every 10 Hz sample of five hours of sessions: the
-leakage to the idle samples (rms error 0.20 W over bins at 64–67 and 81–88 °C, none between; aifoundry2, one day's sessions, not re-tested: the three-card
+leakage to the idle samples (rms error 0.20 W over those samples, which lie at 64–67 and 81–88 °C, none between; aifoundry2, one day's sessions, not re-tested: the three-card
 check's long idle passes were not run), then the flip energies to the busy samples (0.49 W). The idle
 samples fix the leakage's slope, 0.65 W per °C at 80 °C, but not how the idle power splits between the fixed part and the
 exponential: a temperature scale anywhere from 30 to 45 °C in the exponent (the fit above uses 36 °C) fits them as well, with 20 to 29 W of
@@ -734,7 +741,7 @@ every 156 ms on aifoundry2, 158 ms on aifoundry1-c1 and 263 ms on aifoundry3, wh
 mean minion-shire temperature (whole degrees), clock and core voltage at 10 Hz.</li>
 <li>Firmware: the governor of <a href="#the-speed-effect-appears-on-a-cool-die">section 6</a> was read in the et-platform
 source at <code>353f20e</code> (<code>thermal_pwr_mgmt.c</code>); the cards' own trace strings match an older build (before
-et-platform commit <code>60b40c10f</code>, 24 September 2024).</li>
+et-platform commit <code>60b40c10f</code>, 24 September 2024). The cards' own build (BL2 0.20.0 of release 1.3.1, et-platform <code>ffca4cbb4</code>) was read on 27 September: its thermal response is a blocking loop of steps about 0.4 s apart that also acts on an idle card, and a climb goes to the top point in one call (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">the DVFS report</a>).</li>
 <li>Power "at 80 °C": the mean over seconds 1–3 of a run, moved to the start temperature with the measured leakage slope and
 the temperature in that window. The correction is below 0.5 W for the cool patterns and about 2.4 W for random data (2.1 W in aifoundry2's repeat of
 26 September, whose nine precision and data patterns matched the 21 September ablation session's within 2%).</li>
@@ -784,7 +791,10 @@ error on the check's patterns, 0.9 to 1.0 W, set beside 0.5 W; post-data note C2
 27 September: the review of 26 September (aifoundry3's clock set by a boot service, not its firmware; the idle law's bins;
 aifoundry3's watts at launch; the ten-minute errors; the 2 W of zeros dated to 20–22 September; 0.924 named as the registered test's factor), a chart of seconds to 90 °C, and detail folded into sections. Later on
 27 September: a chart of the two-temperature test (V3-X5: switching power at the hot launch minus the cool one, per card
-and pattern, with its interval).</p>
+and pattern, with its interval). 28 September, after a review of the governor pages: aifoundry1-c1 was not "launched warm"
+(its governor never raised the clock, cool and busy included); the idle law's 0.20 W rms is per sample, not over bins;
+the hottest sensor's lead over the mean set beside "no hot spot"; the three-card check's 103 °C mean and the cards' own
+firmware build noted.</p>
 </details>
 
 <h2 id="related">12. Related reports</h2>

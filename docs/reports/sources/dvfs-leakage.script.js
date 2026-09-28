@@ -120,6 +120,33 @@ const binOff = c => { const I = (D.v3 && D.v3.idle) || {}; return (I.a && I.a[c]
     `${f1(-Math.max(...ln.map(l => l.intercept)))} to ${f1(-Math.min(...ln.map(l => l.intercept)))} W below zero, so power per minion grows a little with the count`;
 })();
 
+/* The governor the cards run (§1, §3, §9): the thermal loop's sleep in the service processor's own time, from its heartbeat
+   in the development night's trace rings (D.dv2), and what the three-card check's samples say about each card's service
+   processor (D.v3.sp_readouts: its own clock range, which a statistics reset does not clear, and the hottest mean; its
+   system-temperature statistic, which the SP takes from the PMIC only at a reset, is not quoted as a per-sample reading). */
+(function () {
+  const L = D.dv2.cards[CK.cardsIn(D.dv2.cards)[0]].lines, SR = V3.sp_readouts || {};
+  V.tickLoop = f2(1000 * L.heartbeat.tick_us / 1e6);
+  V.rmsIdle = f2(D.leak_model.rms_idle_W);
+  const c1 = SR['aifoundry1-c1'];
+  const hrs = r => f1((r.t_last_ms - r.t_first_ms) / 3.6e6);
+  V.a1gov = c1 ? `Its governor does not act: in all ${num(c1.samples, 0)} samples of the three-card check, spanning ${hrs(c1)} h, the service ` +
+    `processor's own minimum and maximum of the clock read ${c1.sp_mhz_min === c1.sp_mhz_max ? 'both ' + c1.sp_mhz_min : c1.sp_mhz_min + ' and ' + c1.sp_mhz_max} MHz (a statistics ` +
+    `reset does not clear them, so they reach back past the check, to the service processor's start), although ${num(c1.busy_cool, 0)} of those ` +
+    `samples were busy (45–65 W) at a mean of 64 °C or less, where a live governor climbs, and the mean reached ${c1.die_mean_max} °C, where it ` +
+    `steps down. Whether its active power management is off or its state latched early cannot be told read-only.` : '';
+  const ids = CK.cardsIn(SR);
+  V.noLimit = `The evidence is the telemetry itself: the hottest means the three-card check recorded, ` +
+    `${ids.map(c => `${SR[c].die_mean_max} °C on ${cardLab(c)}`).join(', ')}, all ran at ` +
+    `${[...new Set(ids.map(c => SR[c].mhz_at_die_mean_max))].join(', ')} MHz with no response from the card.`;
+  const G3 = V3.governor, tm = (V3.idle.tmax || {}).aifoundry3 || [];
+  V.a3latch = `The readings fit it: the three-card check heated aifoundry3 to a mean of ${range(Math.min(...tm), Math.max(...tm), 0)} °C in its ` +
+    `cooling-cycle passes before it read any of its trace windows, and those windows held ${G3.aifoundry3.governor_lines === 0 ? 'no governor line at all' : G3.aifoundry3.governor_lines + ' governor lines'}; ` +
+    `and a read-only query on 28 September found every throttle-state residency counter, which the source updates only when a loop ends, still ` +
+    `at zero after more than two days up (development; noted in the night's record, <code>plan/DEV-RESULTS.md</code>, while the query's own output ` +
+    `is still on aifoundry3, not yet in the repository).`;
+})();
+
 /* ---------- the seven cool-start runs and their 36 clock changes ---------- */
 const RUNS = [...D.traces].sort((a, b) => a.session.localeCompare(b.session) || a.proc - b.proc);
 const TR = D.transitions.map(r => {
@@ -133,7 +160,9 @@ const tally = (rows, k) => rows.reduce((m, r) => ((m[r[k]] = (m[r[k]] || 0) + 1)
 const byAfter = tally(DOWN, 'why'), byBefore = tally(DOWN, 'why_prev');
 const nOf = (m, k) => m[k] || 0;
 
-/* The governor's rule at 353f20e, as §1 reduces it: the frequency check is nested inside the thermal test. */
+/* The governor's rule as the cards run it (0.20.0, §1), reduced to what one sample can show: a mean above 65 starts the
+   thermal loop (a step down every 0.40 s until the mean reads 65, then the boot point), which locks the power branch
+   out, so at the floor nothing else is tested; below it, the power branch steps down above the TDP and climbs below it. */
 function rule(T, P, f) {
   if (T > TC) return f > FMIN ? {line: 1, act: 'down', test: 'thermal'} : {line: 2, act: 'hold', test: 'floor'};
   if (P > TW && f > FMIN) return {line: 3, act: 'down', test: 'power'};
@@ -141,16 +170,16 @@ function rule(T, P, f) {
   return {line: 5, act: 'hold'};
 }
 const CODE = [
-  `if T &gt; ${TC} °C:`,
-  `    if f &gt; ${FMIN}: step DOWN (thermal)`,
-  `    else:       hold (power not tested)`,
+  `if mean T &gt; ${TC} °C:`,
+  `    if f &gt; ${FMIN}: thermal loop: step DOWN`,
+  `    else:       hold (power branch locked out)`,
   `elif P &gt; ${TW} W and f &gt; ${FMIN}: step DOWN (power)`,
-  `elif P &lt; ${TW} W and f &lt; ${FMAX}: step UP`,
+  `elif P &lt; ${TW} W and f &lt; ${FMAX}: climb to ${FMAX}`,
   `else:              hold`,
-  `master minion idle: back to ${FMIN} MHz`];
-const say = r => (r.act === 'down' ? `the ${r.test} test fires: step down`
-  : r.act === 'up' ? `neither test fires and power is under ${TW} W: step up`
-  : r.test === 'floor' ? 'the thermal test fires at the floor: hold, and the power tests are not reached' : 'hold');
+  `idle, or the loop's exit: back to ${FMIN} MHz`];
+const say = r => (r.act === 'down' ? (r.test === 'thermal' ? 'the mean is above the threshold: the thermal loop steps down' : 'the power test fires: step down')
+  : r.act === 'up' ? `neither test fires and power is under ${TW} W: climb`
+  : r.test === 'floor' ? 'the thermal loop holds the floor, and the power branch is locked out' : 'hold');
 const predicts = r => [rule(r.T_prev, r.P_prev, r.f0).act === r.dir, rule(r.T, r.P, r.f0).act === r.dir];
 
 /* A legend built like CK.legend's, for marks it has no swatch for (triangles, shaded spans). */
@@ -279,7 +308,8 @@ const GOV = (function () {
           ? `<span class="sub"><b>The clock dropped straight to ${FMIN} MHz, and on our 10 Hz samples neither test fires</b>: ` +
             `this one looks like the boot-point reset (§1, last bullet), not a thermal step.</span>`
           : `<span class="sub"><b>The clock stepped ${dir}, but on our 10 Hz samples the rule says ${b.act === 'hold' ? 'hold' : 'step ' + b.act}</b>: ` +
-            `the service processor most likely read a different value between our samples (§8).</span>`;
+            (dir === 'down' && tr.mhz[i] === FMIN ? `a 700→600 MHz step at a reading of ${TC} °C is the thermal loop's exit to the boot point, or ` : '') +
+            `the service processor read a different mean between our samples (§1).</span>`;
       on = b.line; on2 = a.line;
     } else if (t < 0) {
       html = head + `${tr.mhz[i]} MHz · die ${f0(tr.T[i])} °C · board ${f1(tr.P[i])} W` +
@@ -356,7 +386,8 @@ const GOV = (function () {
     `Across the seven runs: ${TR.length} clock changes, ${UP.length} up and ${DOWN.length} down. The rule, applied to the last ` +
     `sample before each change, predicts ${nB} of them; applied to the first sample after it, ${nA}. Neither sample predicts ${nN}: ` +
     (nJ ? `${word(nJ)} ${nJ > 1 ? 'are drops' : 'is a drop'} straight to the boot point, and for the rest ` : '') +
-    `the service processor most likely read its sensors between our 10 Hz samples, on its own pass (about ${V.passE2} ms while we sample, §1; §8).`;
+    `the thermal loop exited to the boot point, or the service processor read its sensors between our 10 Hz samples, on its own pass ` +
+    `(about ${V.passE2} ms while we sample) or inside its loop (every ${V.tickLoop} s, §1).`;
   return {select(r) { stop(); if (r.run !== st.run) { st.run = r.run; seg.set(r.run); selectRun(r.run, r.i); } else setIdx(r.i); }};
 })();
 
@@ -424,9 +455,11 @@ const GOV = (function () {
       // a card whose clock never left 600 MHz in the check and whose trace windows held no governor line
       const lab = CK.card(cardId).label, h = (D.v3 && D.v3.clock_mhz[cardId]) || {}, n = Object.values(h).reduce((a, b) => a + b, 0);
       CK.txt(f.svg, L + 6, H - B - 10, 'no step to place', 'lab');
+      const sr = D.v3 && D.v3.sp_readouts && D.v3.sp_readouts[cardId];
       if (cap) cap.innerHTML = `${lab} reads the same settings as aifoundry2 (${cTW} W, ${cTC} °C), so the plane is aifoundry2's. ` +
-        `The three-card check launched it warm and its clock read ${Object.keys(h).join(', ')} MHz in all ${num(n, 0)} samples, ` +
-        `and its trace windows held no governor line, so it has no step to place.`;
+        `Its clock read ${Object.keys(h).join(', ')} MHz in all ${num(n, 0)} samples of the three-card check` +
+        (sr && sr.busy_cool ? `, ${num(sr.busy_cool, 0)} of them busy at a mean of 64 °C or less and under ${cTW} W, in the plane's step-up corner` : '') +
+        `, and its trace windows held no governor line: its governor does not act (<a href="#method-and-what-is-not-established">§9</a>), so it has no step to place.`;
     } else {
       const pw = (SP3 && SP3.pwr_mw) || [], rx = W - R - 9;
       pw.forEach(mw => {
@@ -462,9 +495,9 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
   const R = [['Any mature design runs a DVFS loop that steps voltage and frequency to stay inside a power and thermal envelope.', 'confirmed on aifoundry2',
     `On aifoundry2, three operating points, ${OPS.map(o => o.mhz + ' MHz at ' + f2(o.volts) + ' V').join(', ')}. Voltage moved with frequency in all ${TR.length} transitions of the cool-start runs${vAll}. On aifoundry3 a zero power limit, set at every boot, holds the clock at the first point (<a href="#the-same-firmware-on-three-cards">§3</a>).`],
   ['The chip counts bus bits and execution-unit activity factors and computes its own power estimate on millisecond timescales.', 'not on this chip',
-    'The loop reads the PMIC’s measured board power over I2C and the on-die PVT temperature. There is no activity counter anywhere in it, in the 353f20e source or in the older governor.'],
+    'The loop reads the PMIC’s measured board power over I2C and the mean of the on-die PVT sensors. There is no activity counter anywhere in it, in the build the cards run (0.20.0), the older one or the September 2024 rewrite.'],
   ['Thermal sensors are part of the same loop, because leakage depends on temperature.', 'confirmed, and thermal has priority',
-    `The temperature test comes before the power tests. On aifoundry2, ${nOf(byAfter, 'thermal')} of the ${DOWN.length} down-steps in the seven cool-start runs were thermal only on the sample after the step (${nOf(byBefore, 'thermal')} on the sample before), and none was the power test alone.`],
+    `The temperature test comes first: a mean above ${TC} °C starts a loop that locks the power tests out (<a href="#the-loop-as-built">§1</a>). It reads the mean of 34 sensors, never the hottest one, and on a development night the step followed that mean (<a href="#what-triggers-a-step-down-and-does-placement-delay-it">§8</a>, not yet validated). On aifoundry2, ${nOf(byAfter, 'thermal')} of the ${DOWN.length} down-steps in the seven cool-start runs were thermal only on the sample after the step (${nOf(byBefore, 'thermal')} on the sample before), and none was the power test alone.`],
   ['Cache data arrays sit behind leakage-suppression transistors; a lookup un-suppresses only the part it needs, at a small wake-up latency.', 'tied off in the open RTL',
     `The open RTL (Erbium, a later configuration of the same core, not the ET-SoC-1 chip) has per-minion sleep and isolation ports, tied off; no firmware line drives any power gating; and after 27 ms of idle no cache level shows a wake-up, on any of three cards (${V.wakeN}). Paired shifts on 22 September: ${w.levels.map(l => l.level + ' ' + sgn(l.paired_delta_cycles)).join(', ')} cycles; ${V.wakeV3}. The L2 shift comes from a slow no-idle baseline, and the DRAM ones from rows opening and closing.`],
   ['Leakage is typically 5–30% of a design’s power, about 20% common.', 'worse at idle; under load, not established',
@@ -485,14 +518,19 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
   const C = D.cards, cf = C.config, sp = C.sptrace_aifoundry3, V3 = D.v3, G3 = V3.governor;
   const ids = CK.cardsIn(G3), one = (c, f) => [...new Set(G3[c][f.split('.')[0]].map(v => f.split('.').slice(1).reduce((o, k) => o[k], v)))].join(' / ');
   const clk = c => { const h = V3.clock_mhz[c] || {}, n = Object.values(h).reduce((a, b) => a + b, 0), hi = Object.keys(h).filter(k => +k > FMIN);
-    return hi.length ? `${hi.join(', ')} MHz in the check` : (G3[c].config[0].tdp_w === 0 ? 'no: all ' + num(n, 0) + ' of its samples in the check' : 'not in the check: all ' + num(n, 0) + ' of its samples') + ` at ${Object.keys(h).join(', ')} MHz`; };
+    const sr = (V3.sp_readouts || {})[c];
+    const at = `all ${num(n, 0)} of its samples in the check at ${Object.keys(h).join(', ')} MHz`;
+    if (hi.length) return `${hi.join(', ')} MHz in the check`;
+    if (G3[c].config[0].tdp_w === 0) return `no: ${at}`;
+    if (sr && sr.busy_cool) return `no: ${at}, ${num(sr.busy_cool, 0)} of them busy at a mean of 64 °C or less and under ${TW} W, where a live governor climbs: its governor does not act (§9)`;
+    return `not in the check, which never found it cool and busy: ${at}`; };
   const bold = (c, v, odd) => (odd ? '<b>' + v + '</b>' : v);
   const R = [['Firmware release / PMIC', c => G3[c].fw.map(f => f.join(' / ')).join('; '), c => G3[c].fw[0][0] !== G3.aifoundry2.fw[0][0]],
     ['TDP the <i>driver</i> reports', c => one(c, 'driver.tdp_w') + ' W'],
     ['TDP the <i>service processor</i> reports', c => one(c, 'config.tdp_w') + ' W', c => G3[c].config[0].tdp_w !== TW],
     ['Software temperature threshold', c => one(c, 'config.temp_threshold_c') + ' °C'],
     ['Power state the firmware reports', c => one(c, 'config.power_state_name'), c => G3[c].config[0].tdp_w !== TW],
-    ['Minion clock ever observed above 600 MHz', c => (c === 'aifoundry2' ? 'yes, 700 and 800, from a cool die (21 and 23 Sep); ' : '') + clk(c), c => c === 'aifoundry3'],
+    ['Minion clock ever observed above 600 MHz', c => (c === 'aifoundry2' ? 'yes, 700 and 800, from a cool die (21 and 23 Sep; 28 Sep, §8); ' : '') + clk(c), c => c !== 'aifoundry2'],
     ['Usable for these measurements', () => 'yes']];
   const t = document.getElementById('cardcfg');
   t.innerHTML = '<thead><tr><th>&nbsp;</th>' + ids.map(c => `<th>${CK.card(c).label}</th>`).join('') + '</tr></thead><tbody>' +
@@ -509,11 +547,12 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
   if (sp) document.getElementById('spcount').innerHTML = `That 8 KB window of the card's trace buffer, read on 22 September, holds <b>${sp.down_events} throttle-down events</b>` +
     (ev ? ` alternating with <b>${ev.idle} idle events</b>` + (ev.consecutive_idle_pairs ? ` (one idle event follows another ${ev.consecutive_idle_pairs === 1 ? 'once' : ev.consecutive_idle_pairs + ' times'})` : '') : '') +
     `, and <b>${sp.up_events} throttle-up events</b>, every one of them printing a TDP level of ${sp.tdp_levels.join(', ')}. ` +
-    'One throttle-down per busy period is how the older governor logs, once per change of state (<a href="#method-and-what-is-not-established">§8</a>); ' +
+    'One throttle-down per busy period is how the cards\' governor logs, once per change of state (<a href="#the-loop-as-built">§1</a>); ' +
     'the 353f20e source would log on every pass or, at the lowest operating point, not at all. ' +
     `The three-card check read the same window after five launches in each of its passes on 26 September and found ` +
     (gl.every(v => v === 0) ? `<b>no governor line at all, on any card</b>: every window held only host-interface and performance-request messages. So this pattern rests on the one 22 September window.`
-      : `${ids.map((c, k) => `${gl[k]} governor lines on ${CK.card(c).label}`).join(', ')}.`);
+      : `${ids.map((c, k) => `${gl[k]} governor lines on ${CK.card(c).label}`).join(', ')}.`) +
+    (gl.every(v => v === 0) ? ' The cards\' source predicts that aifoundry3\'s lines never come back (below).' : '');
 })();
 
 /* ---------- V3: every repeat of the wake-up probe ---------- */
@@ -949,6 +988,442 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
   V.a3launch = `${f2(C.launch.aifoundry3.T)} ± ${f2(C.launch.aifoundry3.T_sd)} °C`;
 })();
 
+/* ---------- §8: the development night of 27-28 September on aifoundry2 (D.dv2, written by
+   tools/ettelem/build_dv2_data.py --merge from docs/reports/data/2026-09-28-dvfs2-aifoundry2). Development data: every
+   chart title, caption and sentence here says so. The block holds one entry per card (D.dv2.cards); every chart reads its
+   card from a selector that appears only when more than one card has such a night, so another card's night slots in. */
+const DV = D.dv2, DVC = CK.cardsIn(DV.cards);
+const PDT = ms => new Date(ms - 7 * 3600e3).toISOString().slice(11, 16);      // PDT is UTC-7 in September (DV.tz)
+const hhmm = t => (t || '').slice(0, 5);
+const PLACE = {B4C: 'the 4 central shires', INT16: '16 interior shires', PER16: '16 perimeter shires', UNI32: 'all 32 shires'};
+const placeOf = name => { const [g, n] = name.split('@'); return `${PLACE[g] || g}, ${n} minions each`; };
+const ucf = s => s.charAt(0).toUpperCase() + s.slice(1);
+/* A card selector for one chart, shown only when there is a choice; returns a getter for the selected card. */
+function dvCard(hostId, onChange) {
+  const h = document.getElementById(hostId);
+  if (DVC.length < 2) { const box = h.parentElement; h.remove(); if (box && !box.children.length) box.style.display = 'none'; return; }
+  CK.cardSeg(hostId, {cards: DVC, bus: 'dvfs-dv2-card', value: DVC[0], onChange});
+}
+const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
+
+/* The section's prose, from the first card with a night (aifoundry2). */
+(function () {
+  const N = DV.cards[DVC[0]], L = N.lines, Z = N.z1.filter(c => !c.skipped), skip = N.z1.filter(c => c.skipped);
+  const nat = N.sessions.filter(s => s.kind === 'NAT');
+  const tens = Z.filter(c => c.pass < 'p1100'), twos = Z.filter(c => c.pass >= 'p1100');
+  V.dvIntro = `On the night of 27–28 September aifoundry2 ran the development half of a pre-registered design (DV2): ${Z.length} ` +
+    `read-only watch cycles from ${hhmm(Z[0].time)} to ${hhmm(Z[Z.length - 1].time)} PDT and ${word(nat.length)} heating sessions. These runs ` +
+    `chose the parameters and the rules of a validation plan that was frozen afterwards; they test nothing, and every number in this ` +
+    `section is theirs. The validation has not run (the end of this section), and the night ended with the card's Master Minion hung.`;
+  const and2 = xs => (xs.length > 1 ? xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1] : xs.join(''));
+  const WHY = {'night stop': 'the night stop that ended the first session', 'slot passed': 'while a session held the card'};
+  const skipBy = [...new Set(skip.map(c => c.reason))].map(r => `${and2(skip.filter(c => c.reason === r).map(c => c.slot))} ` +
+    `(${WHY[r] || r || 'no record'})`);
+  V.dvWatch = `${ucf(word(Z.length))} cycles: every 10 minutes from ${hhmm(tens[0].time)}, where ${word(skip.length)} slots did not run: ` +
+    `${skipBy.join('; ')}; then every 2 minutes from ${hhmm(twos[0].time)} to ${hhmm(Z[Z.length - 1].time)}.`;
+  const NOTE = {p6035: 'ended early by a rule set in advance, since from a start of 65 °C none of its four runs reached 800 MHz',
+    p6038: 'three blocks of four runs, with the power-adder and reset runs around them',
+    p6041: 'the Master Minion hung at its first run, below'};
+  V.dvSessions = nat.map(s => `a ${s.branch} session at ${hhmm(s.start)}–${hhmm(s.end)}, from a rest of ${s.r0} °C (${NOTE[s.pass] || s.note})`).join('; ') +
+    `; and a single 2 s launch at ${hhmm((N.sessions.find(s => s.kind === 'SMOKE') || {}).start)} to check the tools. A fourth kind of session, ` +
+    `a 600 MHz placement run on a warm card, was skipped by its own rule: the card had rested at 64 °C or less within the hour`;
+  // Q1
+  const q = N.q1, sep = q.separating, fitM = sep.filter(r => r.fits_mean), off = sep.filter(r => !r.fits_mean && !r.fits_max);
+  const dmm = fitM.map(r => r.down_minus_mean), dmh = sep.map(r => r.down_minus_high);
+  const s0 = N.sessions.find(s => s.pass === (N.runs[0] || {}).session) || {};
+  V.q1Text = (q.g1h.holds === q.T_runs ? `In all ${word(q.T_runs)} valid runs of the session at ${hhmm(s0.start)}` : `In ${word(q.g1h.holds)} of the ${word(q.T_runs)} valid runs of the session at ${hhmm(s0.start)}`) + `, the clock held 800 MHz for at least a ` +
+    `second after the hottest sensor had risen to ${TC + 2} °C or more, up to ${TC + q.g1h.max_over_thr} °C; a rule on the hottest shire, ` +
+    `acting at 66, would have stepped within about half a second of its first 66. ${ucf(word(sep.length))} runs, in ${word(q.blocks.length)} blocks, ` +
+    `tell the two rules apart (the hottest sensor read 66 °C at least 1.5 s before the mean did): ${word(fitM.length)} of them stepped ` +
+    `${range(Math.min(...dmm), Math.max(...dmm), 1)} s after the mean first read 66, and none near the hottest sensor's first 66; ` +
+    `their steps came ${range(Math.min(...dmh), Math.max(...dmh), 1)} s after it. ` +
+    (off.length ? `The ${off.length === 1 ? 'other' : 'others'} stepped ${off.map(r => f1(-r.down_minus_mean)).join(' and ')} s before our samples ` +
+      `saw the mean at 66, which fits neither rule's window (the service processor reads the mean on its own pass, between our samples). ` : '') +
+    `The frozen rule asks for at least six such runs over at least three blocks, so as a count this falls short of a test; its direction is all the mean's.`;
+  const ic = q.idle_separating[0], cyc = ic ? Z.find(z => z.pass === ic.pass) : null;
+  const before = cyc ? L.crossings.filter(c => c.host_ms < cyc.t_ms) : [], after = cyc ? L.crossings.filter(c => c.host_ms > cyc.t_ms) : [];
+  const passMs = median(V3.sp_pass_ms[DVC[0]].quiet_ms);
+  V.q1Idle = ic ? `<b>The idle card agrees.</b> At ${hhmm(ic.time)} its mean read ${ic.mean} °C while its hottest sensor read ` +
+    `${range(ic.high_min, ic.high_max, 0)} °C in all ${word(ic.samples)} samples of that watch cycle. The governor had left its loop at ` +
+    `${before.length ? before[before.length - 1].time : '?'} and did not enter it again until ${after.length ? after[0].time : '?'} (its trace ring); ` +
+    `a rule on the hottest shire would have entered within one pass, about ${f0(passMs)} ms. That is one such cycle; the validation asks for ` +
+    `five over three separate stretches.` : '';
+  // Q2
+  const g = N.q2, fin = g.blocks.filter(b => b.final_candidate && b.L != null), first = g.blocks.find(b => !b.final_candidate);
+  const tx = (b, k) => (b['censored_' + k] ? 'at least ' : '') + f1(b['t800_' + k]) + ' s';
+  V.q2Text = `From the same start, a mean falling to 62 °C, the same work on ${fin.length ? fin[0].minions : '?'} minions held 800 MHz ` +
+    `${range(g.ratio[0], g.ratio[1], 1)} times as long before the first step when placed on the perimeter as when placed in the interior, ` +
+    `in both blocks run under the final settings: ` + fin.map((b, k) => `${tx(b, 'int')}${k ? '' : ' interior'} against ${tx(b, 'per')}${k ? '' : ' perimeter'} in block ${b.block}` +
+      (b.censored_per ? ', where the perimeter run held to its kernel’s end' : '')).join(', and ') + '. ' +
+    `The mean log ratio is ${f2(g.L_mean)} (standard deviation ${f2(g.L_sd)} over ${word(g.n)} blocks), ${f2(g.L_P_mean)} after correcting for the ` +
+    `two placements' slightly different power. ` + (first ? `On ${first.minions} minions (block ${first.block}) neither placement stepped within its launch. ` : '') +
+    `Placement can act only through the mean (§1): spread over the perimeter, the same heat raises the 34-sensor mean more slowly. ` +
+    `A heat-only model built on aifoundry3's placement runs of 27 September predicted ${f2(g.L_pred)} ± ${f2(g.b)}, below the development value; that ` +
+    `comparison is reported, not registered, and while its inputs are frozen as numbers in <code>plan/prereg-val.json</code>, the ` +
+    `placement runs they come from are not yet in the repository. Two blocks give no confidence interval; the frozen test asks for the log ratio above zero at 99% over ` +
+    `at least ${word(g.g4s_min_blocks)} blocks.`;
+  // the loop
+  const th = L.thermal, en = th.filter(x => x.kind === 'ENTER'), ex = th.filter(x => x.kind === 'EXIT');
+  const pr = a => [...new Set(a.map(x => x.T))].join(' and ');
+  const lp = L.loop, kc = {}; lp.forEach(x => (kc[x.k] = (kc[x.k] || 0) + 1));
+  const maxRes = Math.max(...lp.map(x => Math.abs(x.resid_ms)));
+  const exI = L.exit_next.filter(x => x.idle), exP = exI.filter(x => x.next === 'PIDLE'), enI = L.enter_prev.filter(x => x.idle);
+  const b = N.bands;
+  V.loopText = `The trace ring shows the loop itself. All ${en.length} ENTER lines of the night (“Thermal throttle down event”) printed a mean ` +
+    `of ${pr(en)} °C and all ${ex.length} EXIT lines (“Thermal idle state event”) ${pr(ex)} °C: no dead band. The ${lp.length} intervals under a ` +
+    `minute from an ENTER to the EXIT after it (${lp.filter(x => x.idle).length} on the idle card, ${word(lp.filter(x => !x.idle).length)} at the start ` +
+    `of a session) all lie within ${f1(maxRes)} ms of a whole number of ${f3(L.loop_period_s)} s periods: ` +
+    Object.keys(kc).sort().map(k => `${kc[k]} at ${k}`).join(', ') + '. One period is the loop’s sleep of 1000 ticks, ' +
+    `${V.tickLoop} s, plus its own work; zero periods mean the loop's first re-read found the mean back at 65. The September 2024 rewrite, ` +
+    `stepping once per pass with no loop, cannot give that grid. Every idle EXIT was followed, as the next governor line, by the idle reset ` +
+    `(${exP.length} of ${exI.length}, within ${f2(Math.max(...exP.map(x => x.dt_s)))} s, one pass), and ` +
+    (enI.every(x => x.prev === 'PIDLE') ? `every idle ENTER with a line before it (${enI.length})` : `${enI.filter(x => x.prev === 'PIDLE').length} of the ${enI.length} idle ENTERs with a line before them`) +
+    ` came straight after the service processor had itself called the card idle: the thermal branch does not wait ` +
+    `for a kernel. On the host's 10 Hz samples the heating runs agree: all ${b['G2-C'].le1} of ${b['G2-C'].n} climbs from 600 MHz passed 700 MHz in ` +
+    `at most one sample, the one-call climb, and all ${b['G2-D'].in_band} of ${b['G2-D'].n} descents to 600 MHz spent 0.3–0.7 s at 700 MHz ` +
+    `(median ${f1(b['G2-D'].dwell_median_s)} s), one period.`;
+  // the rest
+  const zm = Z.map(c => c.mean), lo = Z.find(c => c.mean === Math.min(...zm)), hi = Z.find(c => c.mean === Math.max(...zm));
+  const cr = L.crossings, res = N.residency, good = res.vs_episodes.filter(x => Math.abs(x.diff_ms) < 5), bad = res.vs_episodes.filter(x => Math.abs(x.diff_ms) >= 5);
+  const hs = N.host_sensors, dd = us => us / 86400e6;
+  V.restR = range(Math.min(...zm), Math.max(...zm), 0, ' and ');
+  V.tdDays = f2(dd(res.thermal_down.cumulative_us)); V.upDays = f2(res.uptime_days);
+  V.restText = `Watched through the night with no work of ours, aifoundry2's idle mean moved between ${Math.min(...zm)} and ${Math.max(...zm)} °C ` +
+    `within 10 to 30 minutes, and idle power followed it: ${f1(lo.board_w)} W at ${lo.mean} °C, ${f1(hi.board_w)} W at ${hi.mean} °C. What drives the ` +
+    `swing is not established: the host's ACPI zones read a constant ${hs.acpi_1 ? f1(hs.acpi_1[0]) : '?'} and ${hs.acpi_2 ? f1(hs.acpi_2[0]) : '?'} °C (probably ` +
+    `not live readings), its drive ${hs.nvme ? range(hs.nvme[0], hs.nvme[1], 0) : '?'} °C${hs.cpu_package ? ` and its CPU package ${range(hs.cpu_package[0], hs.cpu_package[1], 0)} °C` : ''}. Each time the mean crossed 65/66 °C the ring shows a burst of ENTER and EXIT ` +
+    `lines, ${word(cr.length)} crossings in all, the governor flickering in and out of its loop for up to ${f1(Math.max(...cr.map(c => c.dur_s)))} s. ` +
+    `Its residency counter, read at ${hhmm(res.at)}, had the card in the thermal state for ${V.tdDays} of the ${V.upDays} days since the service ` +
+    `processor last started, the longest stay ${f1(dd(res.thermal_down.maximum_us))} days; across the ${word(good.length)} intervals whose episodes ` +
+    `the ring kept${good.some(x => x.busy) ? ` (${word(good.filter(x => x.busy).length)} of them around a session's start)` : ''}, the counter grew by the episodes' length to within ${f1(Math.max(...good.map(x => Math.abs(x.diff_ms))))} ms` +
+    (bad.length ? `, and across the ${word(bad.length)} that spanned a heating session, whose lines our sampler pushed out of the ring, ` +
+      `it did not (by ${bad.map(x => f1(x.diff_ms / 1000) + ' s').join(' and ')})` : '') + '.';
+  // the validation and the hang
+  const P = DV.prereg, H = N.incident, l1 = H.lifts[0], l2 = H.lifts[1], h2 = H.lift2 || {};
+  V.valG4 = `${f2(P.g4.L_pred)} ± ${f2(P.g4.b)} for the log ratio over at least ${word(P.g4.g4_min_blocks)} blocks; the prediction comes from ` +
+    `aifoundry3's placement runs, whose data are not yet in the repository`;
+  V.valText = `The plan was frozen at about 03:15 PDT on 28 September, after the last development pass, as ` +
+    `<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-28-dvfs2-aifoundry2/plan/PREREG-VAL.md">PREREG-VAL.md</a> ` +
+    `(SHA-256 <code>${P.sha256.slice(0, 12)}…</code>); a lock file (SHA-256 <code>${P.lock_sha256.slice(0, 12)}…</code>) fixes the code, the numbers and ` +
+    `the schedules it runs, and every pass refuses to start if any of them has changed. It tests the step's trigger, the placement effect's sign, ` +
+    `the loop, the absent dead band, the latencies and the residency counter, on the idle card and in heating sessions, each with a pass and a ` +
+    `fail rule written before any validation data. Only aifoundry2's governor moves the clock (aifoundry3's is stuck, aifoundry1's card 1 does ` +
+    `not act), so the validation is a replication on the same card in a later session, and it has not run for two reasons: the owner has to ` +
+    `accept a same-card replication and choose between the full schedule and an idle-only one, and the heating sessions need the Master Minion ` +
+    `back, which only the lab admin can restore. The read-only watch does not use the Master Minion. It could start no earlier than ` +
+    `${P.not_before.replace('2026-09-28T', '')} on 28 September.`;
+  const sr = H.kernel_log || [], last = sr[sr.length - 1], KL = H.kernel_log_last || {};
+  const c1 = l1.calib || {}, c2 = l2.calib || {}, st = l1.stream || {};
+  V.hangText = `In the last session's first run, lift 1 ran normally. A lift is a stream of short kernels on all 32 shires ` +
+    `lasting about 7 s: a ${f0(1000 * c1.wall_s)} ms calibration kernel, then ${word(st.kernels)} back-to-back kernels of ` +
+    `${range(st.wall_s[0], st.wall_s[1], 2)} s. Lift 1's clock climbed to 800 MHz, and the device was held for ` +
+    `${f2(parseFloat((l1.message || '').replace(/[^0-9.]/g, '')))} s. Lift 2 was launched ${f1(l2.gap_s)} s after lift 1 ended, with the clock still at ` +
+    `${h2.mhz_at_start} MHz; ${f2(h2.first_600_s)} s later, at ${h2.first_600_at}, the host read the idle reset's 600 MHz, and the device was ready ` +
+    `${f2(l2.ready_s)} s after the launch. Lift 2's calibration kernel then ran, ${f0(h2.calib_after_first_600_ms)} ms after that reading, at ${c2.start}, ` +
+    `and returned ${c2.ok ? 'normally' : 'an error'}, measuring ${f2(c2.ghz)} GHz, between the two points, as if the clock changed while it ran. The next ` +
+    `kernel, the first of the stream, never completed: from ${f1(h2.board_idle_from_s)} s the board read the ${f0(l2.board_w[0])} W idle and the clock stayed at ` +
+    `${(h2.mhz_after_1s || []).join(', ')} MHz, until the heater gave up (“${l2.message}”). Lifts 3 and 4 failed at runtime creation ` +
+    `(“Couldn't use the HPSQ. Perhaps the Master Minion is hanged?”). The host's kernel log has an SP runtime-error event for the card ` +
+    (last ? `at ${(KL.pdt || '').slice(0, 10)} (±${f2(KL.pm_s)} s, its boot-relative stamp mapped to wall time; ${f1(KL.after_lift2_calib_end_s)} s after the ` +
+      `calibration kernel ended): “${last.desc}, ${last.syndrome}”, the counter's ${['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh'][sr.length] || f0(sr.length) + 'th'}. ` +
+      `The first ${word(sr.length - 1)}, on ${dayList(sr.slice(0, -1).map(e => (e.pdt || '').slice(0, 10)))}, did not stop the card, so the event ` +
+      `need not be the hang's` : '') +
+    `. The service processor still answers: at ${H.sp_after.map(x => hhmm(x.time)).join(' and ')} it read ${[...new Set(H.sp_after.map(x => x.mhz.join('/')))].join('/')} MHz, ` +
+    `${range(Math.min(...H.sp_after.map(x => x.board_w)), Math.max(...H.sp_after.map(x => x.board_w)), 1)} W, a mean of ` +
+    `${range(Math.min(...H.sp_after.map(x => x.mean)), Math.max(...H.sp_after.map(x => x.mean)), 0)} °C and its threshold at ${H.sp_after[0].threshold_c} °C. ` +
+    `No reset was attempted (the card rules): the lab admin must restore the Master Minion, and until then no kernel can run on aifoundry2. ` +
+    `The cause is not established. The ${H.launches_before} heater launches before it that night all ran, among them ${b['G2-C'].n} climbs ` +
+    `and ${b['G2-D'].n} full descents of the clock; that this one met the clock change is a hypothesis, and the plan's heating sessions launch ` +
+    `the same way, a risk it states.`;
+  V.dvFits = `${L.offset_fits} fits within ${f1(L.offset_spread_ms_max)} ms; one fit made from a single request line, ` +
+    `${L.offset_fits_dropped_s.map(v => f0(Math.abs(v))).join(', ')} s off the others, is set aside here, which the frozen reducer does not do`;
+  V.hbMed = f2(L.heartbeat.median_s); V.hbN = f0(L.heartbeat.n);
+})();
+
+/* V9 (§8, Q1): one run at a time, the clock, the mean and the hottest sensor, with the three moments the rules turn on. */
+(function () {
+  let card;
+  const st = {k: 0};
+  const runs = () => dvRuns(card);
+  const pick = () => { const R = runs(), k = R.findIndex(r => r.block === 2 && r.name.startsWith('B4C')); return k < 0 ? 0 : k; };
+  const read = CK.readout('q1-read');
+  let seg;
+  const mkSeg = () => { const R = runs();
+    seg = CK.seg('q1-run', {label: 'Run', options: R.map((r, k) => [k, `b${r.block} ${r.name}`]), value: st.k, onChange: v => { st.k = v; frame.redraw(); }}); };
+  card = DVC[0];
+  dvCard('q1-card', v => { card = v; st.k = pick(); mkSeg(); frame.redraw(); strip.redraw(); });
+  st.k = pick(); mkSeg();
+  legendHTML('q1-leg', [{mark: 'line', color: 'var(--c1)', label: 'minion clock'},
+    {mark: 'line', color: 'var(--c7)', label: 'mean of the 34 shire sensors (the governor’s input)'},
+    {mark: 'line', color: 'var(--c5)', w: 1.6, label: 'hottest sensor (peak since the reset at 63 °C)'},
+    {mark: 'dash', color: 'var(--bad)', label: `the governor acts above ${TC} °C`}]);
+  function draw(f) {
+    const r = runs()[st.k], T = r.tel, n = T.t.length, W = f.W, H = f.H, svg = f.svg;
+    const L = 46, R = 12, B = 34, top = 34, gap = 26;
+    const avail = H - top - B - gap, hc = avail * 0.28, hT = avail - hc, c0 = top, T0 = c0 + hc + gap, bot = T0 + hT;
+    const tEnd = k => (k + 1 < n ? T.t[k + 1] : T.t[n - 1] + 0.1);
+    const x = CK.lin(T.t[0], tEnd(n - 1), L, W - R);
+    const vals = T.mean.concat(T.high).filter(v => v != null);
+    const lo = Math.min(...vals, TC) - 0.5, hi = Math.max(...vals, TC + 1) + 0.5;
+    const yc = CK.lin(FMIN - 45, FMAX + 45, c0 + hc, c0), yT = CK.lin(lo, hi, bot, T0);
+    // outside the launch
+    for (const [a, z] of [[T.t[0], 0], [r.t_end, tEnd(n - 1)]]) if (z > a) CK.el('rect', {x: x(a), y: c0, width: x(z) - x(a), height: bot - c0, fill: 'var(--ref)', opacity: 0.12}, svg);
+    const g = CK.el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, svg);
+    const hline = (y, lab) => { CK.el('line', {x1: L, x2: W - R, y1: y, y2: y, class: 'grid-line'}, g); if (lab != null) CK.txt(g, L - 6, y + 4, lab, 'tick', 'end'); };
+    for (const o of OPS) hline(yc(o.mhz), f0(o.mhz));
+    const every = hT / (hi - lo) >= 16 ? 1 : 2;
+    for (let v = Math.ceil(lo); v <= hi; v++) hline(yT(v), v % every === 0 ? f0(v) : null);
+    CK.el('line', {x1: L, x2: W - R, y1: bot, y2: bot, class: 'ck-axis'}, g);
+    const step = (x.domain[1] - x.domain[0]) / Math.max(2, (W - L - R) / 60) > 1 ? 2 : 1;
+    for (let s = Math.ceil(T.t[0]); s <= tEnd(n - 1); s++) if (s % step === 0) CK.txt(g, x(s), bot + 16, f0(s), 'tick', 'middle');
+    CK.txt(g, (L + W - R) / 2, H - 4, 'seconds since the launch (shaded: no kernel running)', 'lab', 'middle');
+    CK.txt(g, 2, 12, 'minion clock, MHz', 'lab');
+    CK.txt(g, 2, T0 - 9, 'die temperature, °C (whole degrees)', 'lab');
+    CK.el('line', {x1: L, x2: W - R, y1: yT(TC + 0.5), y2: yT(TC + 0.5), stroke: 'var(--bad)', 'stroke-width': 1.3, 'stroke-dasharray': '5 4'}, svg);
+    const stairs = (a, y) => { let d = '', pen = false;
+      a.forEach((v, k) => { if (v == null) { pen = false; return; } d += `${pen ? 'L' : 'M'}${x(T.t[k]).toFixed(1)},${y(v).toFixed(1)}L${x(tEnd(k)).toFixed(1)},${y(v).toFixed(1)}`; pen = true; }); return d; };
+    CK.el('path', {d: stairs(T.mhz, yc), fill: 'none', stroke: 'var(--c1)', 'stroke-width': 2, 'stroke-linejoin': 'round'}, svg);
+    CK.el('path', {d: stairs(T.mean, yT), fill: 'none', stroke: 'var(--c7)', 'stroke-width': 2.2, 'stroke-linejoin': 'round'}, svg);
+    CK.el('path', {d: stairs(T.high, yT), fill: 'none', stroke: 'var(--c5)', 'stroke-width': 1.6, 'stroke-linejoin': 'round'}, svg);
+    // the three moments: a thin line through both panels and a mark above the clock panel
+    const M = [['t_hi', 'var(--c5)', 'diamond', 'the hottest sensor first reads 66 °C at 800 MHz'], ['t_m', 'var(--c7)', 'dot', 'the mean first reads 66 °C'],
+      ['t_down', 'var(--ink)', 'down', 'the clock steps 800→700 MHz']].filter(m => r[m[0]] != null);
+    const nodes = M.map(([k, c, shape, what], j) => {
+      const cx = x(r[k]), cy = c0 - 12 - (j % 2) * 0;
+      CK.el('line', {x1: cx, x2: cx, y1: c0 - 4, y2: bot, stroke: c, 'stroke-width': k === 't_down' ? 1.6 : 1.2, opacity: 0.9}, svg);
+      const node = shape === 'down' ? CK.el('polygon', {points: `${cx - 6},${cy - 5} ${cx + 6},${cy - 5} ${cx},${cy + 6}`, fill: c, stroke: 'var(--surface)', 'stroke-width': 1.2}, svg)
+        : shape === 'diamond' ? CK.el('polygon', {points: `${cx},${cy - 6} ${cx + 6},${cy} ${cx},${cy + 6} ${cx - 6},${cy}`, fill: c, stroke: 'var(--surface)', 'stroke-width': 1.2}, svg)
+        : CK.el('circle', {cx, cy, r: 5.5, fill: c, stroke: 'var(--surface)', 'stroke-width': 1.2}, svg);
+      CK.tip(f, node, `<b>${f2(r[k])} s</b>: ${what}`);
+      return node;
+    });
+    CK.keynav(f, nodes);
+    const held = r.t_down == null;
+    read.set(`<b>Block ${r.block} · ${r.name}</b> (${placeOf(r.name)}, ${num(r.minions, 0)} minions; ${hhmm(r.time)} PDT, development): ` +
+      `800 MHz ${f1(r.t_up)} s after the launch; the hottest sensor read 66 °C at ${f1(r.t_hi)} s` + (r.t_hi2 != null ? ` and 67 at ${f1(r.t_hi2)} s` : '') + '; ' +
+      (held ? `the mean ${r.t_m == null ? 'never read 66 within the launch' : `read 66 at ${f1(r.t_m)} s`}, and the clock held 800 MHz to the kernel's end at ${f1(r.t_end)} s: ` +
+          `${f1(r.t_end - r.t_up)} s at 800 MHz, a run held to the end.`
+        : `the mean read 66 at ${f1(r.t_m)} s and the clock stepped at ${f1(r.t_down)} s, ${sgn(+(r.t_down - r.t_m).toFixed(2), 1)} s from the mean's first 66 ` +
+          `and ${sgn(+(r.t_down - r.t_hi).toFixed(2), 1)} s from the hottest sensor's: ${f1(r.trip_s)} s at 800 MHz.`));
+  }
+  const frame = CK.frame('q1', {height: W => (W < 600 ? 340 : 320), minW: 280, maxW: 640, draw,
+    label: 'One development run at 800 MHz: the minion clock, the 34-sensor mean and the hottest sensor, sample by sample, with the moments the two rules turn on'});
+
+  // the strip: every separating run's step, against each reading's first 66 °C
+  legendHTML('q1s-leg', [{mark: 'dot', color: CK.card(card).color, label: 'one run that tells the rules apart'},
+    {mark: 'shade', color: 'var(--ref)', op: 0.3, label: 'where a rule on that reading steps (−0.3 to +0.6 s)'}]);
+  function drawS(f) {
+    const S = DV.cards[card].q1.separating, W = f.W, H = f.H, svg = f.svg, L = 14, R = 14, B = 36, top = 4;
+    const vals = S.flatMap(r => [r.down_minus_mean, r.down_minus_high]).filter(v => v != null);
+    const x = CK.lin(Math.min(-1.5, Math.floor(Math.min(...vals))), Math.ceil(Math.max(...vals)) + 0.5, L, W - R);
+    const rows = [['down_minus_mean', 'after the mean first read 66 °C'], ['down_minus_high', 'after the hottest sensor first read 66 °C']];
+    const rh = (H - top - B) / 2, [w0, w1] = DV.cards[card].q1.window_s;
+    const g = CK.el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, svg);
+    for (const t of x.ticks(Math.max(3, Math.round((W - L - R) / 70)))) { CK.el('line', {x1: x(t), x2: x(t), y1: top, y2: H - B, class: 'grid-line'}, g); CK.txt(g, x(t), H - B + 16, sgn(t, 0), 'tick', 'middle'); }
+    CK.el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    CK.txt(g, (L + W - R) / 2, H - 4, 'seconds from that reading’s first 66 °C to the step', 'lab', 'middle');
+    const nodes = [];
+    rows.forEach(([k, lab], i) => {
+      const y0 = top + i * rh, yc = y0 + 20 + (rh - 24) / 2;
+      CK.el('rect', {x: x(w0), y: y0 + 20, width: x(w1) - x(w0), height: rh - 24, fill: 'var(--ref)', opacity: 0.22}, svg);
+      CK.el('line', {x1: x(0), x2: x(0), y1: y0 + 20, y2: y0 + rh - 4, stroke: 'var(--ink-2)', 'stroke-width': 1.3}, svg);
+      const t = CK.txt(svg, L, y0 + 13, lab, 'lab-strong');
+      Object.assign(t.style, {paintOrder: 'stroke', stroke: 'var(--page)', strokeWidth: '4px', strokeLinejoin: 'round'});
+      const pts = S.filter(r => r[k] != null).map(r => ({r, v: r[k], px: x(r[k])})).sort((a, b) => a.v - b.v), last = {};
+      for (const p of pts) { for (let j = 0; ; j++) { const lane = j % 2 ? -(j + 1) / 2 : j / 2; if (last[lane] == null || p.px - last[lane] >= 12) { p.lane = lane; last[lane] = p.px; break; } } }
+      for (const p of pts) {
+        const m = CK.cardMark(svg, card, p.px, yc + p.lane * 10, 4.5);
+        CK.tip(f, m, `<b>Block ${p.r.block} · ${p.r.name}</b> (development): the step came ${sgn(p.r.down_minus_mean, 1)} s from the mean's first 66 °C ` +
+          `and ${sgn(p.r.down_minus_high, 1)} s from the hottest sensor's` + (p.r.fits_mean ? '' : '; it fits neither window'));
+        nodes.push(m);
+      }
+    });
+    CK.keynav(f, nodes);
+  }
+  const strip = CK.frame('q1s', {height: 216, minW: 280, maxW: 640, draw: drawS,
+    label: 'For each development run that tells the two rules apart, the time from the mean’s first 66 °C to the step, and from the hottest sensor’s first 66 °C to the step'});
+  const S0 = DV.cards[card].q1;
+  document.getElementById('q1s-cap').textContent = `Each mark is one of the ${word(S0.separating.length)} runs, in ${word(S0.blocks.length)} blocks, in which the ` +
+    `hottest sensor read 66 °C at least 1.5 s before the mean did. A rule on a reading predicts the step inside that reading's shaded window; ` +
+    `the steps line up with the mean and come seconds after the hottest sensor. Development counts (the frozen rule needs six runs over three blocks).`;
+})();
+
+/* V10 (§8, Q2): time at 800 MHz before the first step, interior against perimeter, per block, beside the placements' map. */
+(function () {
+  const COL = {INT16: 'var(--c4)', PER16: 'var(--c7)'};
+  let card = DVC[0];
+  dvCard('q2-card', v => { card = v; frame.redraw(); });
+  legendHTML('q2-leg', [{mark: 'shade', color: COL.INT16, op: 0.85, label: 'interior: 16 shires (INT16)'}, {mark: 'shade', color: COL.PER16, op: 0.85, label: 'perimeter: 16 shires (PER16)'},
+    {mark: 'box', color: 'var(--ink-2)', hollow: true, label: 'held 800 MHz to the kernel’s end (at least)'}]);
+  const P = DV.placements, grp = {};
+  for (const k of ['INT16', 'PER16']) for (const s of P.groups[k]) grp['S' + s] = k;
+  const B4 = new Set(P.groups.B4C.map(s => 'S' + s));
+  function draw(f) {
+    const q = DV.cards[card].q2, W = f.W, H = f.H, svg = f.svg, wide = W >= 560;
+    const mapS = wide ? 22 : 20, mapW = mapS * 6, mapH = mapS * 6;
+    const mx = wide ? 8 : Math.round((W - mapW) / 2), my = 20;
+    CK.txt(svg, wide ? mx : W / 2, 12, 'shires on the die (inferred grid)', 'lab', wide ? 'start' : 'middle');
+    P.grid.forEach((row, i) => row.forEach((c, j) => {
+      const k = grp[c], x0 = mx + j * mapS, y0 = my + i * mapS;
+      const rect = CK.el('rect', {x: x0 + 1, y: y0 + 1, width: mapS - 2, height: mapS - 2, rx: 2, fill: k ? COL[k] : 'var(--grid)', opacity: k ? 0.85 : 1}, svg);
+      if (B4.has(c)) CK.el('rect', {x: x0 + 2.5, y: y0 + 2.5, width: mapS - 5, height: mapS - 5, rx: 2, fill: 'none', stroke: 'var(--ink)', 'stroke-width': 1.6}, svg);
+      if (!k) Object.assign(CK.txt(svg, x0 + mapS / 2, y0 + mapS / 2 + 4, c.startsWith('IO') ? 'IO' : c, 'tick', 'middle').style, {fontSize: '11px', fill: 'var(--ink)'});
+      rect.setAttribute('aria-hidden', 'true');
+    }));
+    CK.txt(svg, mx, my + mapH + 14, 'outlined: B4C, the 4 central', 'tick');
+    // the bars
+    const L0 = wide ? mx + mapW + 28 : 12, T0 = wide ? 20 : my + mapH + 30, R = 60, B = 36;
+    const blocks = q.blocks, rowH = (H - T0 - B) / blocks.length, barH = Math.min(14, rowH / 3.4);
+    const tmax = Math.ceil(Math.max(...blocks.flatMap(b => [b.t800_int, b.t800_per])) + 0.5);
+    const x = CK.lin(0, tmax, L0, W - R);
+    const g = CK.el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, svg);
+    for (let t = 0; t <= tmax; t++) { CK.el('line', {x1: x(t), x2: x(t), y1: T0, y2: H - B, class: 'grid-line'}, g); if (t % (tmax > 8 ? 2 : 1) === 0) CK.txt(g, x(t), H - B + 16, f0(t), 'tick', 'middle'); }
+    CK.el('line', {x1: L0, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    CK.txt(g, (L0 + W - R) / 2, H - 4, 'seconds at 800 MHz before the first step', 'lab', 'middle');
+    const nodes = [];
+    blocks.forEach((b, i) => {
+      const y0 = T0 + i * rowH;
+      CK.txt(svg, L0, y0 + 12, `block ${b.block} · ${num(b.minions, 0)} minions` + (b.final_candidate ? '' : ' (dropped: both held)'), 'lab-strong');
+      [['int', 'INT16', b.int], ['per', 'PER16', b.per]].forEach(([k, grpK, name], j) => {
+        const t = b['t800_' + k], cen = b['censored_' + k], yb = y0 + 18 + j * (barH + 4);
+        const rect = CK.el('rect', {x: x(0), y: yb, width: Math.max(2, x(t) - x(0)), height: barH, rx: 3,
+          fill: cen ? 'var(--surface)' : COL[grpK], stroke: COL[grpK], 'stroke-width': cen ? 2 : 0}, svg);
+        if (cen) CK.el('polygon', {points: `${x(t) + 1},${yb} ${x(t) + 8},${yb + barH / 2} ${x(t) + 1},${yb + barH}`, fill: COL[grpK]}, svg);
+        CK.txt(svg, x(t) + (cen ? 11 : 5), yb + barH - 2, (cen ? '≥ ' : '') + f1(t) + ' s', 'tick');
+        CK.tip(f, rect, `<b>Block ${b.block} · ${name}</b> (${placeOf(name)}; development): ${cen ? 'held 800 MHz to its kernel’s end, at least ' : ''}${f2(t)} s at 800 MHz before the first step`);
+        nodes.push(rect);
+      });
+      if (b.L != null) CK.txt(svg, W - 4, y0 + 18 + barH + 6, '×' + f2(Math.exp(b.L)) + (b.censored_per || b.censored_int ? '+' : ''), 'lab-strong', 'end');
+    });
+    CK.keynav(f, nodes);
+  }
+  const q = DV.cards[card].q2;
+  const frame = CK.frame('q2', {height: W => (W < 560 ? 176 + 36 + 62 * q.blocks.length : Math.max(190, 56 + 62 * q.blocks.length)), minW: 280, maxW: 640, draw,
+    label: 'Development: seconds at 800 MHz before the first step for interior and perimeter placement, block by block, beside a map of the two placements'});
+  document.getElementById('q2-cap').innerHTML = `Right-hand figures: perimeter over interior time, per block (+: the perimeter run held to its kernel's end, so at least that). ` +
+    `The map is the shire grid as inferred for the die frame (<code>tools/claims-v3/dv2/placements.json</code>); the governor sees neither, only the 34-sensor mean. ` +
+    `Mean log ratio over the ${word(q.n)} blocks under the final settings ${f2(q.L_mean)} (development; the frozen reducer gives ${f2(q.reducer_L_mean)}).`;
+})();
+
+/* V11 (§8, the loop): every ENTER -> EXIT interval under a minute, against whole periods of the loop, and its residual. */
+(function () {
+  let card = DVC[0];
+  dvCard('loop-card', v => { card = v; frame.redraw(); });
+  legendHTML('loop-leg', [{mark: 'dot', color: CK.card(card).color, label: 'idle card'}, {mark: 'ring', color: 'var(--ref)', label: 'at the start of a session'},
+    {mark: 'dash', color: 'var(--ink-2)', label: 'whole periods of the loop'}]);
+  const L = 20, R = 16, top = 26, B = 36, gap = 50, STEP = 11, LANE = 8;
+  // the residual strip's lanes at a given width: marks closer than 9 px stack upwards
+  const lanes = (lp, W) => {
+    const rmax = Math.max(2, Math.ceil(Math.max(...lp.map(q => Math.abs(q.resid_ms))))), xr = CK.lin(-rmax, rmax, L, W - R), last = {};
+    const out = [...lp].sort((a, b) => a.resid_ms - b.resid_ms).map(q => { const px = xr(q.resid_ms); let k = 0;
+      while (last[k] != null && px - last[k] < 9) k++; last[k] = px; return {q, px, lane: k}; });
+    return {xr, rmax, out, n: Math.max(...out.map(o => o.lane)) + 1};
+  };
+  const colMax = lp => Math.max(...Object.values(lp.reduce((m, q) => ((m[q.k] = (m[q.k] || 0) + 1), m), {})));
+  const geom = W => { const lp = DV.cards[card].lines.loop, hTop = 16 + colMax(lp) * STEP, ln = lanes(lp, W);
+    return {lp, hTop, ln, H: top + hTop + gap + 14 + ln.n * LANE + B}; };
+  function draw(f) {
+    const Lz = DV.cards[card].lines, P = Lz.loop_period_s, W = f.W, H = f.H, svg = f.svg, G = geom(W), lp = G.lp;
+    const kmax = Math.max(...lp.map(x => x.k)), y1 = top + G.hTop, y2t = y1 + gap, y2 = H - B;
+    const x = CK.lin(-0.08, (kmax + 0.35) * P, L, W - R);
+    const g = CK.el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, svg);
+    for (let k = 0; k <= kmax; k++) {
+      CK.el('line', {x1: x(k * P), x2: x(k * P), y1: top - 6, y2: y1, stroke: 'var(--ink-2)', 'stroke-width': 1.2, 'stroke-dasharray': '4 3'}, g);
+      CK.txt(g, x(k * P), y1 + 15, k ? `${k} × ${f3(P)} s` : '0', 'tick', 'middle');
+    }
+    CK.el('line', {x1: L, x2: W - R, y1, y2: y1, class: 'ck-axis'}, g);
+    CK.txt(g, 2, 12, 'ENTER → EXIT interval, service-processor time', 'lab');
+    const nodes = [], byK = {};
+    lp.forEach(q => (byK[q.k] = byK[q.k] || []).push(q));
+    Object.keys(byK).sort((a, b) => a - b).forEach(k => byK[k].sort((p, q) => q.idle - p.idle || p.d_s - q.d_s).forEach((q, j) => {
+      const cx = x(q.d_s), cy = y1 - 7 - j * STEP;
+      const m = q.idle ? CK.cardMark(svg, card, cx, cy, 4.5) : CK.el('circle', {cx, cy, r: 4, fill: 'var(--surface)', stroke: 'var(--ref)', 'stroke-width': 2}, svg);
+      CK.tip(f, m, `<b>${q.time} PDT</b>${q.idle ? '' : ', at the start of a session'}: ENTER → EXIT ${f3(q.d_s)} s = ${q.k} × ${f3(P)} s ${sgn(q.resid_ms, 2)} ms (development)`);
+      nodes.push(m);
+    }));
+    // the residuals, on their own scale
+    const {xr, rmax, out} = G.ln;
+    CK.txt(g, 2, y2t - 12, 'distance from the nearest whole period, ms', 'lab');
+    for (let v = -rmax; v <= rmax; v++) { CK.el('line', {x1: xr(v), x2: xr(v), y1: y2t, y2, class: 'grid-line'}, g); CK.txt(g, xr(v), y2 + 16, sgn(v, 0), 'tick', 'middle'); }
+    CK.el('line', {x1: L, x2: W - R, y1: y2, y2, class: 'ck-axis'}, g);
+    CK.el('line', {x1: xr(0), x2: xr(0), y1: y2t, y2, stroke: 'var(--ink-2)', 'stroke-width': 1.2}, svg);
+    for (const o of out) {
+      const cy = y2 - 6 - o.lane * LANE;
+      const m = o.q.idle ? CK.cardMark(svg, card, o.px, cy, 3.5) : CK.el('circle', {cx: o.px, cy, r: 3, fill: 'var(--surface)', stroke: 'var(--ref)', 'stroke-width': 1.8}, svg);
+      m.setAttribute('aria-hidden', 'true');
+    }
+    CK.keynav(f, nodes);
+  }
+  const frame = CK.frame('loopq', {height: W => geom(W).H, minW: 280, maxW: 640, draw,
+    label: 'Development: every interval under a minute between the governor\u2019s ENTER and EXIT lines, against whole periods of its thermal loop, with each interval\u2019s distance from the nearest period'});
+  const P = DV.cards[card].lines.loop_period_s, th = DV.cards[card].lines.thermal;
+  document.getElementById('loop-cap').textContent = `Upper: one mark per interval, stacked where they coincide; the dashed lines are whole periods of ${f3(P)} s. ` +
+    `Lower: the same intervals' distance from the nearest period, in milliseconds (the frozen validation allows 15 ms). Every line of the night printed ` +
+    ['ENTER', 'EXIT'].map(k => { const a = th.filter(x => x.kind === k); return `${[...new Set(a.map(x => x.T))].join(' or ')} °C on ${k === 'ENTER' ? 'entry' : 'exit'} (${a.length} lines)`; }).join(' and ') + '.';
+})();
+
+/* V12 (§8, the night): the idle mean and hottest sensor at each watch cycle, the governor's crossings, the sessions. */
+(function () {
+  let card = DVC[0];
+  dvCard('night-card', v => { card = v; frame.redraw(); });
+  legendHTML('night-leg', [{mark: 'dot', color: CK.card(card).color, label: 'idle mean at a watch cycle'},
+    {mark: 'line', color: 'var(--c5)', label: 'up to the hottest sensor in that second'},
+    {mark: 'up', color: 'var(--ink-2)', label: 'into the loop (warming past 66)'}, {mark: 'down', color: 'var(--ink-2)', hollow: true, label: 'out of it (cooling past 65)'},
+    {mark: 'shade', color: 'var(--ref)', label: 'a heating session of ours'}, {mark: 'dash', color: 'var(--bad)', label: `the governor acts above ${TC} °C`}]);
+  function draw(f) {
+    const N = DV.cards[card], Z = N.z1.filter(c => !c.skipped), C = N.lines.crossings, S = N.sessions.filter(s => s.status !== 'skipped' && s.t0_ms);
+    const hang = N.incident.lifts[1] && N.incident.lifts[1].t_start_ms;
+    const W = f.W, H = f.H, svg = f.svg, L = 40, R = 14, T = 30, B = 38;
+    const ts = Z.map(c => c.t_ms).concat(C.map(c => c.host_ms), S.flatMap(s => [s.t0_ms, s.t1_ms]));
+    const x = CK.lin(Math.min(...ts) - 5 * 60e3, Math.max(...ts) + 5 * 60e3, L, W - R);
+    const ys = Z.flatMap(c => [c.mean, c.high_max]);
+    const y = CK.lin(Math.min(...ys, TC) - 2, Math.max(...ys) + 1, H - B, T);
+    // sessions first, under everything
+    const nodes = [];
+    for (const s of S) {
+      const a = x(s.t0_ms), w = Math.max(3, x(s.t1_ms) - a);
+      const r = CK.el('rect', {x: a, y: T, width: w, height: H - B - T, fill: 'var(--ref)', opacity: 0.2}, svg);
+      CK.tip(f, r, `<b>${s.branch || s.kind} (${s.pass})</b>, ${hhmm(s.start)}–${hhmm(s.end)} PDT: start reading ${s.r0 == null ? '—' : s.r0 + ' °C'}, ${s.launches} launches` +
+        (s.status === 'ok' ? '' : `; ${s.pass === 'p6041' ? 'the Master Minion hung' : 'ended early'}`));
+      nodes.push(r);
+      if (w > 24 && s.branch) CK.txt(svg, a + w / 2, T - 6, s.branch, 'tick', 'middle');
+    }
+    const g = CK.el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, svg);
+    for (let v = Math.ceil(y.domain[0]); v <= y.domain[1]; v++) if (v % 2 === 0) { CK.el('line', {x1: L, x2: W - R, y1: y(v), y2: y(v), class: 'grid-line'}, g); CK.txt(g, L - 6, y(v) + 4, f0(v), 'tick', 'end'); }
+    CK.el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    const first = Math.ceil(x.domain[0] / 1800e3) * 1800e3;
+    const every = (W - L - R) / ((x.domain[1] - x.domain[0]) / 1800e3) < 60 ? 2 : 1;
+    for (let t = first, k = 0; t <= x.domain[1]; t += 1800e3, k++) if (k % every === 0) CK.txt(g, x(t), H - B + 16, PDT(t), 'tick', 'middle');
+    CK.txt(g, (L + W - R) / 2, H - 4, 'time of night, PDT, 27–28 September', 'lab', 'middle');
+    CK.txt(g, 2, 12, 'die temperature at idle, °C', 'lab');
+    CK.el('line', {x1: L, x2: W - R, y1: y(TC + 0.5), y2: y(TC + 0.5), stroke: 'var(--bad)', 'stroke-width': 1.3, 'stroke-dasharray': '5 4'}, svg);
+    if (hang) { CK.el('line', {x1: x(hang), x2: x(hang), y1: T, y2: H - B, stroke: 'var(--bad)', 'stroke-width': 1.6}, svg);
+      CK.txt(svg, x(hang) - 4, H - B - 8, 'hang', 'lab-strong', 'end'); }
+    const items = [];
+    for (const c of Z) items.push({t: c.t_ms, draw: () => {
+      CK.el('line', {x1: x(c.t_ms), x2: x(c.t_ms), y1: y(c.mean), y2: y(c.high_max), stroke: 'var(--c5)', 'stroke-width': 2}, svg);
+      const m = CK.cardMark(svg, card, x(c.t_ms), y(c.mean), 4.5);
+      CK.tip(f, m, `<b>${c.time} PDT</b> (watch cycle, development): mean ${c.mean} °C, hottest sensor ${range(c.high_min, c.high_max, 0)} °C, ` +
+        `board ${f1(c.board_w)} W, ${c.mhz.join('/')} MHz` + (c.state ? `; the ring puts the governor ${c.state === 'IN' ? 'in' : 'out of'} its loop` : ''));
+      return m; }});
+    for (const c of C) items.push({t: c.host_ms, draw: () => {
+      const cx = x(c.host_ms), cy = y(TC + 0.5), up = c.ends === 'ENTER';
+      const m = CK.el('polygon', {points: up ? `${cx - 6},${cy + 5} ${cx + 6},${cy + 5} ${cx},${cy - 6}` : `${cx - 6},${cy - 5} ${cx + 6},${cy - 5} ${cx},${cy + 6}`,
+        fill: up ? 'var(--ink-2)' : 'var(--surface)', stroke: 'var(--ink-2)', 'stroke-width': 1.6}, svg);
+      CK.tip(f, m, `<b>${c.time} PDT</b>: the mean crossed ${up ? '66 °C warming' : '65 °C cooling'}${c.idle ? '' : ' (at the start of a session)'}; ` +
+        `${c.enter} ENTER and ${c.exit} EXIT lines over ${f2(c.dur_s)} s, ending ${up ? 'in' : 'out of'} the loop`);
+      return m; }});
+    items.sort((a, b) => a.t - b.t).forEach(it => nodes.push(it.draw()));
+    CK.keynav(f, nodes);
+  }
+  const frame = CK.frame('night', {height: W => (W < 600 ? 300 : 320), minW: 280, maxW: 640, draw,
+    label: 'Development: aifoundry2 through the night of 27–28 September: the idle mean and hottest sensor at each watch cycle, the governor’s threshold crossings from its trace ring, and the heating sessions'});
+  const N = DV.cards[card], hs = N.host_sensors;
+  document.getElementById('night-cap').textContent = `Each dot is one watch cycle's 1 s sample (its median mean); the line above it reaches the hottest sensor's ` +
+    `peak in that second. Triangles are the bursts of governor lines in the trace ring, at host time (the ring's clock mapped through the host's ` +
+    `own requests). The host's own sensors (${hs.samples} readings, ${hhmm(hs.from)}–${hhmm(hs.to)}) are not drawn: see the text.`;
+})();
+
 /* ---------- the body's computed fields ---------- */
 (function () {
   const ic = D.idle_check, upT = UP.map(r => r.T), first = D.transition_summary.first_change_s;
@@ -974,7 +1449,7 @@ document.getElementById('trans').innerHTML = '<thead><tr><th>Run, time</th><th c
       `${nOf(byBefore, 'thermal+power')} thermal+power and ${nOf(byBefore, 'unattributed')} unattributed (against ${nOf(byAfter, 'thermal')}, ` +
       `${nOf(byAfter, 'thermal+power')} and ${nOf(byAfter, 'unattributed')})`,
     first: range(Math.min(...first), Math.max(...first), 2, ' to '),
-    direct10: `${word(UP.filter(r => r.f0 === FMIN && r.f1 === FMAX).length)} of the ${UP.length}`,
+    direct10: `${ucf(word(UP.filter(r => r.f0 === FMIN && r.f1 === FMAX).length))} of the ${UP.length}`,
   });
   // the governor on aifoundry2 over two days (D.governor_days): every cool-start session of 21 and 23 September
   const upAll = Object.values(G.up_T), nUp = upAll.reduce((a, u) => a + u.n, 0), fc = G.first_change_s, gp = G.change_gap_s;

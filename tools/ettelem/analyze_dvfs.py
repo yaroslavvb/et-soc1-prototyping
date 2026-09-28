@@ -27,11 +27,16 @@ readouts, the SP pass and board refresh per card, the wake-up probes, the idle i
 active-minion runs, the clock of every sample), and adds its idle cooling cycles to idle_sessions as sessions marked
 campaign "v3" (summary_v3); without --v3 the output is what it was before.
 
-then build_cards_data.py ... --merge $D/2026-09-22-dvfs-aifoundry2/dvfs.json (tools/ettelem/finish_horace.sh runs it).
+then build_cards_data.py ... --merge $D/2026-09-22-dvfs-aifoundry2/dvfs.json (tools/ettelem/finish_horace.sh runs it),
+then build_dv2_data.py --data $D/2026-09-28-dvfs2-aifoundry2 --merge $D/2026-09-22-dvfs-aifoundry2/dvfs.json.
 
 Fits nothing. Every number is either read from telemetry or computed from it. The three-machine block
-("cards") is merged in afterwards by build_cards_data.py --merge dvfs.json; when --out already holds one, it is
-carried over, so rerunning this script alone does not drop it.
+("cards") is merged in afterwards by build_cards_data.py --merge dvfs.json, and the DV2 development block ("dv2",
+28 September 2026) by build_dv2_data.py --merge; when --out already holds them, they are carried over, so rerunning
+this script alone does not drop them. The blocks the optional inputs write (governor_days, idle_sessions, v3,
+sptrace_events) are not carried over: when --out holds one that this run would not write, the script stops and
+names the missing option (a shortened command once dropped them silently: review of 27 September, B9), unless
+--allow-drop is given.
 
 A down-step is attributed to the thermal test if the die reading was above 65 °C, to the power test if board
 power was above 65 W, to both if both; any other down-step is "unattributed": neither test fired on the values
@@ -58,6 +63,7 @@ TDP_W = 65.0        # POWER_THRESHOLD_SW_MANAGED, thermal_pwr_mgmt.h
 T_THRESHOLD_C = 65  # TEMP_THRESHOLD_SW_MANAGED
 CLOCK_HZ = 600e6    # the wake-up probe ran at the lowest operating point
 UNATTRIBUTED = "unattributed (reading ≤65 °C)"
+NOT_THE_CHECK = {"gs"}   # experiment directories in the version-3 raw tree that are not the check's (v3_block, clock_mhz)
 
 
 def jsonl(path):
@@ -568,26 +574,72 @@ def v3_block(root, pw):
         out["wakeup"][c] = {"probes": probes, "decision": v.get("decision"), "same_class": v.get("P4_same_class_pooled"),
                             "clock_basis": v.get("P6_basis")}
 
-    # the minion clock of every sample the check recorded
-    clk = {}
+    # the minion clock of every sample the check recorded. The raw tree also holds passes of a later experiment filed
+    # beside the check's (gs/: E48, gathers and scatters, 26 September 03:21-09:22 PDT): they are not the check's and are
+    # left out, which keeps the counts the page quotes (committed 26 September) reproducible.
+    # With it, the service processor's own readouts in the same samples (sp_readouts, added 28 September 2026):
+    # sp.minion_mhz is [current, min, max] of the governor's frequency register, updated on every SP pass, so it catches
+    # a clock change of one pass (about 133 ms) that the 10 Hz samples could miss. A statistics reset does not clear its
+    # min and max (Thermal_Pwr_Mgmt_Init_OP_Stats, thermal_pwr_mgmt.c:2963-2983 at et-platform ffca4cbb4, re-initialises
+    # temperature, power and voltage only; aifoundry2's max read 800 in every X3 sample just after a reset), so they
+    # cover the time since the service processor started, not only the check.
+    # sp.system_c is the SP statistics' system temperature (avg, min, max), NOT a per-sample reading of the PMIC's
+    # register: the SP reads the PMIC's temperature only when its statistics are initialised or reset (:2995-3001, under
+    # the TODO "PMIC is currently reporting system temperature as 0") and feeds min/max a literal 0 on every other pass
+    # (:663-664), so pmic_temp_nonzero counts that value, not the PMIC. temp_c.minshire[0] is the 34-sensor mean the
+    # governor compares with its threshold.
+    clk, spr = {}, {}
     for c in V3_CARDS:
         h = collections.Counter()
+        r = {"samples": 0, "sp_mhz_min": None, "sp_mhz_max": None, "pmic_temp_nonzero": 0, "pmic_temp_samples": 0,
+             "die_mean_max": None, "mhz_at_die_mean_max": None, "t_first_ms": None, "t_last_ms": None,
+             "busy_cool": 0, "busy_cool_mhz": collections.Counter()}
         for f in sorted(glob.glob(os.path.join(raw, c, "**", "*.jsonl*"), recursive=True)):
+            if os.path.relpath(f, os.path.join(raw, c)).split(os.sep)[0] in NOT_THE_CHECK:
+                continue
             try:
                 with (gzip.open(f, "rt") if f.endswith(".gz") else open(f)) as fh:
                     for line in fh:
                         if '"mhz"' not in line:
                             continue
                         try:
-                            m = json.loads(line).get("mhz", {})
+                            d = json.loads(line)
                         except ValueError:
                             continue
-                        if isinstance(m, dict) and "minion" in m:
-                            h[str(int(m["minion"]))] += 1
+                        m = d.get("mhz", {})
+                        if not (isinstance(m, dict) and "minion" in m):
+                            continue
+                        h[str(int(m["minion"]))] += 1
+                        sp, tc = d.get("sp") or {}, d.get("temp_c") or {}
+                        mm = sp.get("minion_mhz")
+                        if isinstance(mm, list) and len(mm) == 3:
+                            r["samples"] += 1
+                            r["sp_mhz_min"] = mm[1] if r["sp_mhz_min"] is None else min(r["sp_mhz_min"], mm[1])
+                            r["sp_mhz_max"] = mm[2] if r["sp_mhz_max"] is None else max(r["sp_mhz_max"], mm[2])
+                            t = d.get("t_ms")
+                            if t:
+                                r["t_first_ms"] = t if r["t_first_ms"] is None else min(r["t_first_ms"], t)
+                                r["t_last_ms"] = t if r["t_last_ms"] is None else max(r["t_last_ms"], t)
+                        sc = sp.get("system_c")
+                        if isinstance(sc, list) and sc:
+                            r["pmic_temp_samples"] += 1
+                            r["pmic_temp_nonzero"] += sc[0] != 0
+                        ms = tc.get("minshire")
+                        if isinstance(ms, list) and ms and ms[0] is not None and (r["die_mean_max"] is None or ms[0] > r["die_mean_max"]):
+                            r["die_mean_max"], r["mhz_at_die_mean_max"] = ms[0], int(m["minion"])
+                        # busy (board 45 W or more, well above the 26-31 W idle), under the 65 W TDP and at a mean of
+                        # 64 °C or less: where a live governor climbs above 600 MHz
+                        bw = d.get("board_w")
+                        if isinstance(ms, list) and ms and ms[0] is not None and ms[0] <= 64 and bw is not None and 45 <= bw < 65:
+                            r["busy_cool"] += 1
+                            r["busy_cool_mhz"][str(int(m["minion"]))] += 1
             except (OSError, EOFError):
                 continue
         clk[c] = dict(sorted(h.items()))
+        r["busy_cool_mhz"] = dict(sorted(r["busy_cool_mhz"].items()))
+        spr[c] = r
     out["clock_mhz"] = clk
+    out["sp_readouts"] = spr
 
     # the spin loop and the active-minion line (ABL-T6, ABL-T7), with the mean switching per minion count
     t6, t7 = item(abla, "ABL-T6")["per_card"], item(abla, "ABL-T7")["per_card"]
@@ -631,7 +683,23 @@ def main():
     ap.add_argument("--v3", help="the version-3 claims check's directory (docs/reports/data/2026-09-25-claims-v3): "
                                   "adds its per-card readouts (v3) and its idle cooling cycles to idle_sessions")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--allow-drop", action="store_true",
+                    help="write --out even though it holds blocks (governor_days, idle_sessions, v3, sptrace_events) "
+                         "that this run's options do not produce")
     a = ap.parse_args()
+    prev = {}
+    if os.path.exists(a.out):
+        try:
+            prev = json.load(open(a.out))
+        except ValueError:
+            prev = {}
+    need = {"governor_days": a.cool_passes, "idle_sessions": a.idle_sessions, "v3": a.v3, "sptrace_events": a.sptrace}
+    opt = {"governor_days": "--cool-passes", "idle_sessions": "--idle-sessions", "v3": "--v3", "sptrace_events": "--sptrace"}
+    lost = [k for k, v in need.items() if k in prev and not v]
+    if lost and not a.allow_drop:
+        raise SystemExit(f"{a.out} holds {', '.join(lost)}, which this run would drop: add "
+                         f"{', '.join(opt[k] for k in lost)} (the full command is in this script's docstring and the "
+                         "DVFS page's 'Reproduce this'), or pass --allow-drop")
 
     rows, osc = transitions(a.cold)
     VOLTS, volts_n = volts(a.cold)
@@ -666,8 +734,10 @@ def main():
         },
         "oscillation": osc,
         "traces": traces(a.cold, {(o["session"], o["values"], o["proc"]) for o in osc}),
+        # rms_idle_W: the law's rms error over its idle samples, one by one (model.json power.rms_idle, the 0.2 W other
+        # pages quote); leak_split's rms_W is over the sample-weighted whole-degree bin means instead
         "leak_model": {"P_fix": pw["P_fix"], "A_at_80": pw["A_leak_at_80"], "T_L": pw["T_L"],
-                       "idle_curve": pw.get("idle_curve")},
+                       "idle_curve": pw.get("idle_curve"), "rms_idle_W": pw.get("rms_idle")},
         # the overnight rest before the cool starts (21 September), with the idle law's watts at its temperature
         "overnight_idle": (lambda r: r | {"law_w": pw["P_fix"] + pw["A_leak_at_80"] * float(np.exp((r["die_c"] - 80) / pw["T_L"]))})(rest_before(a.cold[0])),
         "busy_randn_80c": ab["fp32_randn"]["p80"], "idle_80c": ab["fp32_zeros"]["idle"],
@@ -717,13 +787,9 @@ def main():
             "consecutive_idle_pairs": sum(1 for x, y in zip(ev, ev[1:]) if x == y == "idle"),
             "consecutive_down_pairs": sum(1 for x, y in zip(ev, ev[1:]) if x == y == "down"),
         }
-    if os.path.exists(a.out):
-        try:
-            prev = json.load(open(a.out))
-        except Exception:
-            prev = {}
-        if prev.get("cards") is not None:
-            out["cards"] = prev["cards"]   # the three-machine block that build_cards_data.py --merge added
+    for k in ("cards", "dv2"):
+        if prev.get(k) is not None:
+            out[k] = prev[k]   # the blocks that build_cards_data.py --merge and build_dv2_data.py --merge added
     json.dump(out, open(a.out, "w"), indent=1)
     s = out["transition_summary"]
     print(f"{s['total']} clock transitions ({s['up']} up, {s['down']} down); causes of down-steps: {s['by_cause']}; "
@@ -751,6 +817,11 @@ def main():
         print("version-3 cycles, mean over bins 51..Tmax: " + ", ".join(
             f"{r['card']} p{r['pass']} {r['offset_W_bins_51']:+.4f} W" for r in out["idle_sessions"]["sessions"] if r.get("campaign") == "v3"))
         print("version-3 clocks: " + "; ".join(f"{c} {h}" for c, h in out["v3"]["clock_mhz"].items()))
+        print("version-3 SP readouts: " + "; ".join(
+            f"{c}: {r['samples']} samples over {(r['t_last_ms'] - r['t_first_ms']) / 3.6e6:.1f} h, SP clock {r['sp_mhz_min']}-{r['sp_mhz_max']} MHz, "
+            f"PMIC temperature nonzero in {r['pmic_temp_nonzero']} of {r['pmic_temp_samples']}, hottest mean {r['die_mean_max']} C at {r['mhz_at_die_mean_max']} MHz, "
+            f"busy at <= 64 C under 65 W {r['busy_cool']} samples {r['busy_cool_mhz']}"
+            for c, r in out["v3"]["sp_readouts"].items()))
         print("version-3 wake-up paired deltas at the longest idle: " + "; ".join(
             f"{c} {p['probe']}: " + ", ".join(f"{l['level']} {l['paired_delta_cycles']:+g}" for l in p["levels"])
             for c, w in out["v3"]["wakeup"].items() for p in w["probes"]))
