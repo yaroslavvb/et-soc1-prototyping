@@ -1,0 +1,204 @@
+<style>
+.status-card { margin: 14px 0 8px; }
+.status-card .status-word { font-weight: 650; }
+.pl-controls { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin: 8px 0 6px; font-size: 0.86rem; }
+.pl-controls label { color: var(--ink-2); }
+.pl-controls select { font: inherit; font-size: 0.86rem; color: var(--ink); background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 4px 8px; min-height: 32px; max-width: 100%; }
+.pl-controls select:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.word { font-weight: 650; white-space: nowrap; }
+.word.pass { color: var(--ok); } .word.fail { color: var(--bad); } .word.insufficient, .word.pending { color: var(--warn); }
+.word.nt { color: var(--muted); font-weight: 600; }
+blockquote.owner { margin: 12px 0; padding: 8px 14px; border-left: 3px solid var(--axis); color: var(--ink-2); font-size: 0.95rem; }
+.dep-list li { margin-bottom: 6px; }
+.summary-card { margin: 8px 0 14px; }
+.summary-card .sum-head { margin: 0 0 6px; }
+.summary-card .sum-list { margin: 0 0 8px; padding-left: 1.2em; }
+.summary-card .sum-list li { margin-bottom: 6px; }
+.summary-card .sum-cav { margin: 0; }
+.dep-list li.late { list-style-type: disc; }
+</style>
+
+<h1>Where the work sits: placement and the thermal trip</h1>
+<p class="byline">27–28 September 2026 · development on aifoundry3, calibration and validation on aifoundry1 card 1,
+aifoundry2 for the clock · every prediction frozen before the validation (<span data-v="bylineSha"></span>) ·
+part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+
+<div class="card status-card" id="status-card"><span class="status-word" data-v="statusWord"></span>
+<span data-v="statusText"></span></div>
+
+<div class="card summary-card" id="summary-card">
+<p class="sum-head"><b>Which theories survived.</b> <span data-v="sumHead"></span></p>
+<ul class="sum-list" id="sumlist"></ul>
+<p class="small sum-cav"><span data-v="sumCaveats"></span></p>
+</div>
+
+<p class="lede">Does it matter where on the chip a computation runs, if the goal is to stay under the temperature at
+which the clock is throttled? Two questions. <b>First, what does the throttle look at?</b> <span data-v="ledeQ1"></span>
+<b>Second, can the same work run longer before that trip in some places than in others?</b> <span data-v="ledeQ2"></span></p>
+
+<details class="terms"><summary>Terms used on this page</summary>
+<p class="small">A <i>shire</i> is a tile of 32 small RISC-V cores (<i>minions</i>); the chip runs kernels on 32 shires
+laid out, with the master and spare shires and the I/O and PCIe shires, on a 6 × 6 grid. Each of the 34 minion shires
+has one temperature sensor. <i>The mean</i> is the whole-degree mean of those 34 sensors, each truncated to a whole
+degree first; the governor compares it with 65 °C and acts at 66. A <i>placement</i> is a set of shires and a number of
+minions per shire running the same random-data multiply-add heater; <i>INT16@32</i> is 16 interior shires with all 32
+minions each, <i>PER16@32</i> the 16 perimeter shires, <i>UNI32@16</i> all 32 shires with 16 minions each: 512 minions in
+every case. <i>t66</i> is the time from a run's first kernel launch to the first 10 Hz sample in which the mean reads
+66 °C. A <i>block</i> runs each placement once, in a balanced order; a card's value is the mean over its blocks with a
+99% Student t interval. <i>Development</i> chose the parameters and the predictions on one card and tests nothing;
+the <i>validation</i> runs the frozen protocol on another card.</p>
+</details>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">Perimeter against interior, same 512 minions: time to the trip</div><div class="val" data-v="k1"></div><div class="sub" data-v="k1s"></div></div>
+  <div class="card kpi"><div class="lab">What the governor compares with 65 °C</div><div class="val" data-v="k2"></div><div class="sub" data-v="k2s"></div></div>
+  <div class="card kpi"><div class="lab">Power, perimeter less interior</div><div class="val" data-v="k3"></div><div class="sub" data-v="k3s"></div></div>
+  <div class="card kpi"><div class="lab">Validation on aifoundry1 card 1</div><div class="val" data-v="k4"></div><div class="sub" data-v="k4s"></div></div>
+</div>
+
+<h2 id="the-question">1. The question, and how it was tested</h2>
+<p>The owner asked on 27 September (quoted in part):</p>
+<blockquote class="owner">“run experiments which confirm the spatial character of heat dissipation … for the same
+computation it matters where you place it if you care about keeping the temperature within a certain limit … Perhaps
+the corners are better cooled than the center … does voltage frequency scaling kick in when the average temperature
+exceeds the limit or when one of the dies exceeds the limit? It would make sense it should be the latter … run the same heat-intensive computation in different
+parts of the chip and demonstrate, if possible, that you can actually run it longer in some parts of the chip than in
+others before the frequency-voltage scaling kicks in … All the iterations should happen on one card and the validation
+should happen on another one or two cards. I don't want iterations after that … I want to see the summary of which of
+the theories survived this testing.”</blockquote>
+<p>That became two questions and one method. <b>Q1</b>: does the governor act on the mean of the die sensors or on one
+sensor? <b>Q2</b>: does the same work, placed on the edges of the die, run longer before the trip than placed in the
+interior? The method: <span data-v="method"></span></p>
+
+<h2 id="q1-the-mean">2. Q1: the governor compares the mean</h2>
+<p><b>From the firmware:</b> <span data-v="q1Fw"></span></p>
+<p><b>On a card:</b> <span data-v="q1Dv2"></span></p>
+<p><b>What this experiment could add, and why it could not:</b> <span data-v="q1Here"></span></p>
+<details class="more"><summary>The probe of each card, and aifoundry2's two attempts</summary>
+<div class="table-wrap"><table id="q1table"></table></div>
+<p class="small" data-v="q1Note"></p>
+</details>
+<p>So Q1's answer rests on the source and on the DVFS page's development night; a governor that acts on the mean is
+also why Q2 is asked of the mean: the trip is the first moment the mean reads 66 °C.</p>
+
+<h2 id="placements">3. The placements</h2>
+<p>Every placement runs the same kernel (<code>sparsity_host --test fma --type fp32 --values randn</code>: random fp32
+multiply-adds on the tensor unit, no memory traffic after set-up) on a chosen set of shires and minions; unselected
+minions return at once. The three registered placements put 512 minions to work each, <b>on the interior, on the
+perimeter, or half of every shire</b>, so that total power and total work are the same and only their place differs.
+<span data-v="plIntro"></span></p>
+<div class="pl-controls"><label for="plsel">Placement</label><select id="plsel"></select></div>
+<div class="chart-title" id="plmap-title">The die's 6 × 6 grid: minions at work in each shire</div>
+<div class="chart" id="plmap"></div>
+<p class="ck-readout" id="plread"></p>
+<details class="more"><summary>Every placement, its mask and where it sits</summary>
+<div class="table-wrap"><table id="pltable"></table></div>
+<p class="small" data-v="plNote"></p>
+</details>
+
+<h2 id="the-metric">4. The metric: time to 66 °C from the same start</h2>
+<p><span data-v="metric1"></span></p>
+<ol>
+<li><b>Preheat:</b> <span data-v="mStep1"></span>: <span data-v="targets"></span>.</li>
+<li><b>Wait for the edge:</b> with only the sampler open, until the mean first reads the start edge <i>S</i> on its way
+down (the <i>S</i>+1 → <i>S</i> step), so that every run starts from the same whole-degree reading, falling.</li>
+<li><b>Launch</b> within one sample of the edge: <span data-v="mStep3"></span></li>
+<li><b>t66</b> is the first 10 Hz sample with the mean at 66 °C, less the first launch's own start time; <span data-v="mStep4"></span></li>
+</ol>
+<p><span data-v="metric2"></span></p>
+<div class="chart-title">One block, three placements: the mean the governor compares, from each run's first launch</div>
+<div class="ck-controls"><div id="trcard"></div><div id="trtier"></div><div id="trblock"></div></div>
+<div id="trleg"></div>
+<div class="chart" id="traces"></div>
+<p class="small" id="trcap"></p>
+
+<h2 id="development">5. Development on aifoundry3</h2>
+<p><span data-v="dev1"></span></p>
+<div class="chart-title" id="pt-title">Perimeter against interior, block by block: the log of the ratio of their times to 66 °C</div>
+<div class="ck-controls"><div id="ptitem"></div></div>
+<div id="ptleg"></div>
+<div class="chart" id="placet"></div>
+<p class="small" id="ptcap"></p>
+<p><span data-v="dev2"></span></p>
+<p><span data-v="dev3"></span></p>
+<details class="more"><summary>Every development block: t66, power and the edge-cooling time of each run</summary>
+<div class="table-wrap"><table id="devtable"></table></div>
+<p class="small" data-v="devNote"></p>
+</details>
+<details class="more"><summary>What ran, block by block, on every card (times PDT)</summary>
+<div class="table-wrap"><table id="timetable"></table></div>
+</details>
+
+<h2 id="theories">6. The theories, and what was registered</h2>
+<p><span data-v="th1"></span></p>
+<div class="table-wrap wide"><table id="thtable" class="stack"></table></div>
+<p class="small" data-v="thNote"></p>
+
+<h2 id="calibration">7. Card 1's calibration</h2>
+<p><span data-v="v01"></span></p>
+<div class="chart-title">Calibration chains of 768 minions from each start edge: t66 against the acceptance band</div>
+<div id="v0leg"></div>
+<div class="chart" id="v0chart"></div>
+<p class="small" id="v0cap"></p>
+<p><span data-v="v02"></span></p>
+
+<h2 id="verdicts">8. Verdicts</h2>
+<div class="card" style="margin:10px 0"><span data-v="vIntro"></span></div>
+<div class="table-wrap wide"><table id="vtable" class="stack"></table></div>
+<p class="small" data-v="vNote"></p>
+<p><span data-v="vCens"></span></p>
+<details class="more"><summary>Card 1's validation blocks: each placement's time to 66 °C</summary>
+<div class="table-wrap"><table id="vbtable"></table></div>
+<p class="small" data-v="vbNote"></p>
+</details>
+<h3 id="which-theories-survived">Which theories survived</h3>
+<div class="table-wrap wide"><table id="survtable" class="stack"></table></div>
+<p class="small" data-v="survNote"></p>
+
+<h2 id="dropped">9. What was dropped, and why</h2>
+<ul id="droplist"></ul>
+
+<h2 id="departures">10. Departures from the design</h2>
+<p><span data-v="dep1"></span></p>
+<details class="more"><summary>All <span data-v="depN"></span> departures, as the tools' README records them</summary>
+<ol class="dep-list small" id="deplist"></ol>
+</details>
+
+<h2 id="method">11. Method, data, and how to reproduce</h2>
+<details class="more"><summary>Method notes and limits</summary>
+<ul>
+<li><b>Cards.</b> <span data-v="mCards"></span></li>
+<li><b>Safety.</b> <span data-v="mSafety"></span></li>
+<li><b>Void rules</b> (fixed before any data): <span data-v="mVoid"></span></li>
+<li><b>Statistics.</b> <span data-v="mStats"></span></li>
+<li><b>Only the mean.</b> The host reads whole degrees: the mean, and a peak-hold high and low since the last statistics
+reset, with no shire named. Which shire was hottest, and how heat spreads between shires, cannot be read.</li>
+</ul>
+</details>
+<p><b>Data.</b> Everything is in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-28-heat-placement">docs/reports/data/2026-09-28-heat-placement</a>:
+every block's raw record (<code>raw/</code>: 10 Hz telemetry, heater output, launches, runs, marks, plan, code and
+binary hashes), the queue logs, the reductions (<code>reductions/</code>), the design and its critique
+(<code>plan/</code>), and this page's data, <code>heat.json</code>, which <code>build_heat_data.py</code> writes
+<span data-v="dataVal"></span>. The tools are <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/tools/claims-v3/hp">tools/claims-v3/hp</a>;
+the frozen predictions are its <code>prereg/PREREG.md</code> (SHA-256 <code data-v="shaFull"></code>).</p>
+<pre><code>V=docs/reports/data/2026-09-28-heat-placement
+python3 tools/claims-v3/hp/reduce.py --data $V/raw/aifoundry3 --card aifoundry3 --dev --out dev.json    # = $V/reductions/dev-r3.json
+python3 tools/claims-v3/hp/reduce.py --data $V/raw/aifoundry3 --card aifoundry3 --p3 \
+    --cal-card1 $V/raw/aifoundry1-c1 --out reg.json                                                   # = $V/reductions/reg.json
+bash $V/collect_val.sh SRC LOGS                                                                      # card 1's validation blocks (README: the verdict step)
+python3 tools/claims-v3/hp/reduce.py --data $V/raw/aifoundry1-c1 --card aifoundry1-c1 --val \
+    --prereg tools/claims-v3/hp/prereg/prereg.json --out $V/val.json                                  # the verdicts
+python3 $V/build_heat_data.py                                                                         # heat.json
+python3 scripts/build-report.py heat-placement $V/heat.json docs/reports/2026-09-28-et-soc1-heat-placement.html</code></pre>
+
+<h2 id="related-reports">Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-triggers-a-step-down-and-does-placement-delay-it">DVFS and leakage, §8</a> — the governor on aifoundry2: the clock steps with the mean, and a perimeter placement held 800 MHz longer (development).</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature</a> — the 35 sensors, and why the host sees one mean.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> — where the die's heat comes from when data moves.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram">The ET-SoC-1, interactively</a> — the grid these placements are drawn on.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a> — the hub: every report, and what the meters cannot see.</li>
+<li><a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/findings">docs/findings/</a> — the knowledge base: this is experiment E52.</li>
+</ul>
+</main>

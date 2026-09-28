@@ -12,8 +12,8 @@ input and a fitted slope; `P→M` is a prediction later measured.
 Where a later session re-measured a number, the older row says so and points to the newer one; quote the newer.
 Rows that cite R3 for the governor describe the firmware source at `353f20e`; the cards' own trace strings match an
 older build (R3), so what the card runs may differ. Since 28 September the section "The governor on the cards' own
-build, and DV2" has the cards' builds read from source and E51's development data; rows marked **dev** there are
-development data, not validated. Terms are defined in [README.md](README.md#terms).
+build, and DV2" has the cards' builds read from source and E51's development data, and "Heat placement" E52's;
+rows marked **dev** there are development data, not validated. Terms are defined in [README.md](README.md#terms).
 
 Paths are relative to the repository root. `DATA` means `docs/reports/data/2026-09-21-horace-aifoundry2/`,
 `DATA2` means `docs/reports/data/2026-09-22-dvfs-aifoundry2/`, `DATA3` means
@@ -557,11 +557,38 @@ frozen validation's parameters and tests nothing; the validation (`DV2/plan/PRER
 | Climbs and descents (**dev**) | 57 of 57 climbs show at most one 700 MHz sample (33 none); 26 of 26 descents stay 0.3–0.7 s at 700 MHz (median 0.5 s) | M | E51 | `DV2/reductions/dv2-dev.json`, `host_bands` |
 | No hysteresis (**dev**) | every entry line printed 66 °C and every exit line 65 °C (20 each); 82 of 82 up-steps while hunting from a reading ≤ 66 °C (79 ≤ 65), none ≥ 67 | M | E51 | `DV2/dv2.json`; `DV2/reductions/dv2-dev.json`, `host_bands.G2-U` |
 | Latency (**dev**) | launch to the first 800 MHz sample: median 0.9 s, at most 1.11 s (14 launches); kernel end to 600 MHz: 0.00–1.15 s (9 runs) | M | E51 | `DV2/reductions/dev-idle.json` items `G3-L`, `G3-I` |
-| Placement against the first throttle, 192 minions at 800 MHz from 62 °C (**dev**) | interior (INT16@12) 3.60 and 3.90 s; perimeter (PER16@12) 5.00 s and more than 6.95 s (censored at the kernel's end): 1.4 and ≥ 1.8 times as long; mean log ratio 0.45 over 2 blocks, above the 0.28 ± 0.10 predicted from aifoundry3's couplings (the inputs are frozen as numbers in `DV2/plan/prereg-val.json`; aifoundry3's placement runs behind them are not yet in the repository) | M, P | E51 | `DV2/raw/p6038/runs.jsonl` (`obs.trip_s`); `DV2/reductions/dev-idle.json` item `G4` |
+| Placement against the first throttle, 192 minions at 800 MHz from 62 °C (**dev**) | interior (INT16@12) 3.60 and 3.90 s; perimeter (PER16@12) 5.00 s and more than 6.95 s (censored at the kernel's end): 1.4 and ≥ 1.8 times as long; mean log ratio 0.45 over 2 blocks, above the 0.28 ± 0.10 predicted from aifoundry3's couplings (the inputs are frozen as numbers in `DV2/plan/prereg-val.json`; aifoundry3's placement runs behind them are E52's development blocks, `docs/reports/data/2026-09-28-heat-placement/reductions/dev-r3.json` items `PLACE-t` and `SPREAD`) | M, P | E51 | `DV2/raw/p6038/runs.jsonl` (`obs.trip_s`); `DV2/reductions/dev-idle.json` item `G4` |
 | Recovery (**dev**) | 20 of 20 exits (19 on the idle card, 1 at a session start) followed by the SP's idle line, 17 of them one pass later (0.119–0.131 s) | M | E51 | `DV2/dv2.json` |
 | Time in the thermal state | aifoundry2 at 00:40 on 28 Sep: 747,342 s of thermal-down in 9 d 5 h 36 min of uptime (8.65 of 9.23 days; longest stay 184,180 s), power-up 23.05 s. aifoundry3 at 00:33: power-up, power-down, thermal-down, power-safe all 0 after 2 d 8 h (**dev**, one reading; its file is still on aifoundry3) | M | E51 | `DV2/raw/p1001/z1.json` (`residency`, `uptime`); aifoundry3 `~/nekko/build/claims-v3/aifoundry3/dv2/z2-20260928T003343/z2.json` |
 | aifoundry2's idle reading overnight (**dev**) | 59–72 °C on a 10–30 minute scale; idle power 25.7 W at 59 °C, 31.1 W at 72 °C | M | E51 | `DV2/raw/p1*/z1.json` (`reading_c`, `board_w`) |
 | aifoundry2's Master Minion hung | 02:50:53 PDT, 28 Sep: lift 2 (a stream of short kernels, launched 0.6 s after lift 1 ended) ran its 14 ms calibration kernel at 02:50:53.746, 21 ms after the host first read the idle reset's 600 MHz; it returned ok and measured 0.77 GHz; the next kernel never completed (board back at 26 W, clock 600 MHz); the next two launches failed with "Couldn't use the HPSQ. Perhaps the Master Minion is hanged?"; an SP runtime-error event, the counter's sixth, at 02:50:57.6 ± 0.07 s (the first five, 20–25 Sep, did not stop the card); the SP still answers (02:52: 600 MHz, 25.9 W, 60 °C). Cause not established; needs the lab admin | M | E51 | `DV2/raw/ALERT-MM-HANG.json`, `DV2/raw/p6041/` (`launches.jsonl`, `heater-1-pre.out.gz`, `tel-1.jsonl.gz`), `DV2/raw/p1111/z1.json`; `DV2/incident/` (`kernel_events.py`); `DV2/dv2.json` `incident` |
+
+## Heat placement (E52, 27–28 Sep; development, calibration and the frozen validation on aifoundry1's card 1)
+
+`HP` means `docs/reports/data/2026-09-28-heat-placement/`; `dev-r3` is `HP/reductions/dev-r3.json` (`reduce.py --dev`
+on `HP/raw/aifoundry3`, reproduced byte for byte), `.dev.items[<item>]`. **dev** = development data on aifoundry3: it
+chose the frozen validation's parameters and predictions and tests nothing; **cal** = card 1's calibration on a
+workload that is never tested; **val c1** = the frozen validation on aifoundry1's card 1 (`HP/val.json`,
+`reduce.py --val` on `HP/raw/aifoundry1-c1`, reproduced byte for byte; its words PASS, FAIL, INSUFFICIENT are final).
+t66 is the time from the first launch to the first 10 Hz sample with the host's mean at
+66 °C (the governor's trip), from the same falling start edge; L = ln(t66 A / t66 B); intervals are 99% t over blocks.
+Only signs transfer between cards: the dev and val c1 sizes are each card's own.
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| The same 512 minions on the perimeter take longer to the trip than on the interior, Tier L from 61 °C (**dev**) | PER16@32 against INT16@32: L = 0.479 [0.409, 0.550], 1.62 [1.51–1.73] times as long, longer in 9 of 9 blocks; means 87.8 s and 54.4 s; UNI32@16 (all 32 shires, 16 minions each) 76.5 s, L against the interior 0.339 [0.243, 0.435] | M | E52 | `dev-r3` items `PLACE-t`, `SPREAD`; the blocks' `runs.jsonl` |
+| At equal power and work (**dev**) | switching power over idle 14.02 (interior), 13.81 (perimeter), 13.87 W (spread); perimeter less interior −0.21 [−0.38, −0.05] W, inside ±0.5 W; work equal to within 0.002%; power-corrected L_P 0.464 [0.400, 0.529] | M | E52 | `dev-r3` `PLACE-t.power_w`, `.work`, `.L_P` |
+| The same, Tier S: one 7 s launch from 64 °C (**dev**) | L = 0.581 [0.454, 0.708], 1.79 times as long, 6 of 6 blocks; means 1.70 and 0.95 s | M | E52 | `dev-r3` item `PLACE-tS` |
+| The hottest sensor's lead over the mean (**dev**) | grew 1 °C less by the crossing with the perimeter work than with the interior work, in each of 9 Tier L blocks (whole degrees); concentrated against spread work (CONC, Tier S) 0.11 [−0.30, 0.52] °C, no measurable lift | M | E52 | `dev-r3` `PLACE-t.dhot`, item `CONC` |
+| The I/O sensor and work beside it (**dev**) | 0.67 [0.37, 0.97] °C warmer rise with 128 minions by the I/O corner (B4NE) than in the far corner (B4SW), Tier S | M | E52 | `dev-r3` item `MAP` |
+| Half power never reaches the trip on aifoundry3 (**dev**) | 256 minions from 64 °C: five of six placements (INT16@16, PER16@16, CEN8, EDGE8, MEM8) did not read 66 °C within 150 s; UNI32@16 (512) did in 21.3 s. L8 and G8 dropped by the rule D-L8 | M | E52 | `HP/raw/aifoundry3/hp/p2301/`; `python3 HP/reductions/dl8_check.py HP/raw/aifoundry3 2301` |
+| aifoundry1's card 1 heats faster than aifoundry3 (**cal**) | 768-minion chains from 61 °C: median t66 11.7 s against aifoundry3's 27.0 s (its R3 calibration chains); from 60 °C 17.2 s, where card 1's start edge settled; run-to-run spread of ln t66 0.101 against 0.047 (ratio 2.15) | M | E52 | `HP/reductions/v0.json`; `HP/raw/aifoundry1-c1/hp/p5501/`, `p5502/`; `tools/claims-v3/hp/prereg/prereg.json` `cv` |
+| No on-card test of the governor's input here | the probes read SILENT on aifoundry3 (latched) and card 1 (its clock never moves); aifoundry2 rested at 67 and 66 °C (27 Sep 16:51, 18:52), inside its thermal loop: NOT OBSERVABLE. What the governor compares rests on the source and E51 (the rows above) | M, R | E52 | `HP/raw/*/hp/p801/probe.json`, `HP/raw/aifoundry2/hp/a2/p*/a2.json` |
+| Registered for card 1 | PLACE-t and PLACE-tS, both SIGN+ (the perimeter lasts longer), 5 blocks each, with POWER ±0.5 W and WORK ±1% equivalence on their pair; κ, CONC, MAP and every L8/G8 item reported, not tested | P | E52 | `tools/claims-v3/hp/prereg/PREREG.md` (SHA-256 `a1bdc4e42c88c875f53afe112141df95bfac13370243650cf99b6b93c53ff890`) |
+| Short bursts: the perimeter lasts longer on card 1 too (**val c1**, PLACE-tS **PASS**) | one 7 s launch from 64 °C: L = 0.715 [0.546, 0.883], 2.04 [1.73–2.42] times as long (means 2.56 and 1.25 s), in 5 of 5 blocks; WORK PASS (within 0.009%); POWER waived (departure 37, for aifoundry3's sub-second interior runs; card 1's crossed in 1.14–1.41 s, so a value exists: −0.27 [−0.42, −0.13] W, reported) | P→M | E52 | `HP/val.json` `.validation.items["PLACE-tS"]`; `HP/heat.json` `val_blocks` |
+| Sustained heating on card 1 (**val c1**, PLACE-t, primary: **INSUFFICIENT**) | chains from 60 °C capped at 150 s: L = 0.198 [−0.423, 0.819], 1.22 [0.66–2.27] times; 7 of PLACE-t's 10 runs (10 of all 15 Tier L runs) never read 66 °C within 150 s, three of five blocks had both runs cut off (L = 0); the two blocks that decided had the perimeter longer (over 150 against 110.2 s; 142.6 against 72.1 s), none the interior. POWER −0.20 [−0.71, 0.32] W INSUFFICIENT; WORK PASS | P→M | E52 | `HP/val.json` `.validation.items["PLACE-t"]`, `["PLACE-t/POWER"]`; `HP/heat.json` `val_blocks.summary.L16` |
+| Transfer of development's signs, H11 (**val c1**) | INSUFFICIENT (PLACE-t INSUFFICIENT, PLACE-tS PASS); by DESIGN2's frozen table no theory survived and none was refuted: H2 undecided (PLACE-t INSUFFICIENT); H3 and H4 not registered (the table needs PLACE-t registered SIGN− or EQUIV; it was registered SIGN+); H13 INSUFFICIENT, H1/H1′ not tested on a card | P→M | E52 | `HP/val.json` `.validation.items.H11`; `HP/plan/DESIGN2.md` "Theories survived" |
+| Card 1's calibration chains were slower in the validation (**val c1**, reported) | 768-minion chains from 60 °C in the Tier L blocks 17.6–27.3 s (median 22.8 s, 6 chains) against 17.2–20.5 s (median 17.2 s) at V0; session 2's six Tier L runs were all cut off at 150 s | M | E52 | `HP/heat.json` `val_blocks.summary.L16.cal_t66`, `.by_session`; `HP/reductions/v0.json` |
 
 ## Ridge points (derived; no card time)
 
@@ -655,6 +682,13 @@ Two corrections to earlier reports came out of this, both verified in the raw da
   the validation has not run.
 - **What hung aifoundry2's Master Minion** (28 September, E51). A launch during the governor's idle reset is a
   hypothesis only.
+- **Whether the perimeter's longer time to the trip holds on another card in sustained heating** (E52). It held on
+  aifoundry1's card 1 in short bursts (PLACE-tS PASS); the sustained test (PLACE-t) is INSUFFICIENT: 7 of its 10 runs
+  (10 of all 15 Tier L runs) did not reach 66 °C within the 150 s cap, and 3 of its 5 blocks had both runs cut off. A test with longer chains, or a start edge chosen so card 1's
+  512-minion runs cross, would be a new pre-registration, not a re-analysis.
+- **Why the perimeter lasts longer** (E52). The die's edges may shed heat faster, or the 34 sensors of the mean may see
+  less of heat made beside the edges and the unsensed I/O and PCIe cells; the host reads only the whole-degree mean and
+  two unnamed extremes, which cannot tell these apart.
 - **Whether aifoundry1's card 1 has active power management off or a latched governor.** Both explain a clock that
   never rises; the power-up residency since boot would narrow it.
 - **The version-3 items that stayed INSUFFICIENT (E35–E47).** Each lacks the kept passes or cycles it needs on a card:

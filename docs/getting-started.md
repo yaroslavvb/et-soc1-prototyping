@@ -35,6 +35,26 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   there is to be re-applied afterwards). The validation needs the owner's OK to validate on a later session of the
   same card, and aifoundry2's Master Minion restored. aifoundry3's governor is latched by its zero TDP and aifoundry1's card 1's never raises the
   clock, so neither can stand in (`docs/findings/14-card-behaviour.md`, "The clock governor, by firmware build").
+- **Heat placement (Q60, E52): development, validation and verdicts done (28 September).** The owner's question of
+  27 September: does the same work run longer before the thermal trip in some parts of the chip? Developed on
+  aifoundry3 (27 September, 16:52–22:11 PDT): from the same 61 °C start, 512 minions on the 16 perimeter shires took
+  1.62 [1.51–1.73] times as long as on the 16 interior shires to bring the mean to 66 °C, in 9 of 9 blocks, at equal
+  power (development only). Card 1 of aifoundry1 was calibrated (V0), the predictions frozen at 22:50
+  (`tools/claims-v3/hp/prereg/PREREG.md`, SHA-256 `a1bdc4e4…`: PLACE-t and PLACE-tS, both SIGN+), and the validation
+  ran there on 27–28 September (the queue ended at 07:49:40 PDT on 28 September; card 1 is free of it). Verdicts
+  (`val.json`, `reduce.py --val`, the lock held for all 10 blocks): short bursts PLACE-tS **PASS** (the perimeter
+  2.04 [1.73–2.42] times as long, 5 of 5 blocks); sustained heating PLACE-t **INSUFFICIENT** (7 of its 10 runs, 10 of
+  all 15 Tier L runs, cut off by the 150 s cap before the trip); transfer H11 INSUFFICIENT; by the frozen table no theory survived and none was
+  refuted. Data: `docs/reports/data/2026-09-28-heat-placement/README.md`; the page "Where the work sits"
+  (`docs/reports/2026-09-28-et-soc1-heat-placement.html`, not yet published) opens with the summary of which
+  theories survived. **The heat-placement lock:** every file `PREREG.md`'s lock lists (in `tools/claims-v3/hp/`: `block.sh`,
+  `hplib.sh`, `hplib.py`, `probe.sh`, `reduce.py`, `sptrace_events.py`, `placements.json`, `run_queue.sh`,
+  `ettelem-hp/ettelem.cpp`, `prereg/`, `params/params-val-aifoundry1-c1.json`; and `tools/claims-v3/lib.sh`,
+  `queue.sh`, `tools/ettelem/ettelem.cpp`, `tools/ettelem/flip_thermal_model.py`) stays byte for byte as frozen, and
+  aifoundry1's `build/sparsity/` (the frozen heater) was not rebuilt until the verdicts were reduced; the lock files
+  stay as frozen, since `reduce.py --val` re-checks them to reproduce `val.json`. Q1's answer (the
+  mean) rests on the source and E51: no on-card clock test could run here (both probes SILENT, aifoundry2 resting at
+  66–67 °C).
 
 - **The lab, 25 September (evening).** Four cards work, on three firmware releases: aifoundry2 and aifoundry3 (1.3.1)
   and, since 15:02 that day, aifoundry1's two cards (card 0 on 1.4.1, card 1 on 1.2.0). aifoundry1's cards had been

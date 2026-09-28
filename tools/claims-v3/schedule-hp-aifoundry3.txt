@@ -1,0 +1,16 @@
+# aifoundry3, heat placement (DESIGN2 §5.2), development: R0, R1a, R1b. Run with
+#   setsid nohup tools/claims-v3/hp/run_queue.sh tools/claims-v3/schedule-hp-aifoundry3.txt > build/claims-v3/queue-hp-aifoundry3.log 2>&1 < /dev/null &
+# then: reduce.py --p1 (its D-L16/D-L8 part) on the scouting blocks -> params-r1-aifoundry3.json -> schedule-hp-aifoundry3-r1c.txt.
+hp 801
+hp 901
+# R1a: the one-shot (spends aifoundry3's first 65 C crossing since boot); a no-op unless the probe said STUCK; one
+# chain of <= 150 s (O1)
+hp 1701
+sleep 300
+# R1b scouting: L16 part (ALL24 CAL x2, UNI32@16 x2 at S_L), L8 part (CAL, CEN8 x2, W8b at S_L8), Tier S part
+hp 1601
+sleep 300
+hp 1602
+sleep 300
+hp 1603
+end

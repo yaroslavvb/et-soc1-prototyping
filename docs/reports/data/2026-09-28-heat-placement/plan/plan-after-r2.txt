@@ -1,0 +1,94 @@
+HEAT PLACEMENT: the plan from R2 to the verdicts (written 27 Sep 2026 20:25 PDT, while R2's 2301 runs)
+===========================================================================================================
+Shorthand:  W=/home/yaroslavvb/claude/et-soc1-heat
+            S=/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/heatplace/dev
+Every local command runs from $W. Start a queue so that ssh returns: the queue goes inside ( ... & ), or ssh holds the
+channel until the queue ends (harmless: the queue is setsid + nohup, so it survives a dropped ssh).
+Card rules: et-who and who before each start; aifoundry1 only with V3_DEVICE=1; card 0 never; nothing is committed
+(PREREG.md + its sha256 are committed by the owner).
+
+0. NOW (R2 part 1)  aifoundry3 queue started 20:18:10 PDT: hp 2301 (L8 at S_L8 64), expected end 20:40-20:45.
+   Watch:  ssh aifoundry3 'tail -n 12 ~/nekko/build/claims-v3/queue-hp-aifoundry3-r2.log'   (wait for "queue ends")
+
+1. ~20:45  D-L8 on 2301 (0 card time)
+   rsync -a aifoundry3:nekko/build/claims-v3/aifoundry3/hp/ $S/aifoundry3/hp/ && rsync -a 'aifoundry3:nekko/build/claims-v3/queue-hp-aifoundry3*.log' $S/
+   python3 $S/dl8_check.py $S/aifoundry3 2301          # prints DROP or KEEP and the next passes
+   DROP (expected: 256-minion runs censored at 64):
+     - params-r2-aifoundry3.json: "types": ["S", "L16"]  (the one edit allowed after a block: dropping), in $W and:
+       scp tools/claims-v3/hp/params/params-r2-aifoundry3.json aifoundry3:nekko/tools/claims-v3/hp/params/
+     - tools/claims-v3/schedule-hp-aifoundry3-r2.txt: replace the final "end" with
+         hp 2204 / sleep 300 / hp 2205 / sleep 300 / hp 2206 / end        (one per line; 2301 is skipped as done)
+       scp it to aifoundry3:nekko/tools/claims-v3/; sha256sum both sides of both files.
+     - ssh aifoundry3 'cd ~/nekko && et-who && who && (setsid nohup tools/claims-v3/hp/run_queue.sh tools/claims-v3/schedule-hp-aifoundry3-r2.txt > build/claims-v3/queue-hp-aifoundry3-r2b.log 2>&1 < /dev/null &); sleep 5; tail -n 3 build/claims-v3/queue-hp-aifoundry3-r2b.log'
+       3 L16 blocks: ~22 min card, ~32 min wall -> ~20:50-21:25.
+   KEEP: schedule lines hp 2302 / sleep 300 / hp 2303 / sleep 300 / hp 2401 / sleep 300 / hp 2402 / sleep 300 / hp 2403 / end
+     (~2 x 22 + 3 x 16 = 92 min card, ~115 min wall -> ~20:50-22:45); everything below then also runs L8 (and G8).
+
+2. In parallel, any time before PREREG: card 1's R0 (aifoundry1 card 1; its hp dir does not exist yet; the hp code there
+   matches this tree). ~3 min card.
+   bash tools/claims-v3/hp/deploy.sh aifoundry1 --check
+   ssh aifoundry1 'cd ~/nekko && V3_DEVICE=1 V3_DRY=1 bash tools/claims-v3/hp/block.sh 801 && et-who && who'
+   ssh aifoundry1 'cd ~/nekko && et-who && who && (V3_DEVICE=1 setsid nohup tools/claims-v3/hp/run_queue.sh tools/claims-v3/schedule-hp-aifoundry1-c1.txt > build/claims-v3/queue-hp-aifoundry1-c1.log 2>&1 < /dev/null &)'
+   (the schedule's live lines are hp 801, hp 901, end; V0 lines stay commented.)
+
+3. Before R3 (0 card time; decisions R3 must carry, because R3 is the frozen protocol and P3 reads each block's
+   plan.json):
+   a. kappa gate (dev may set 0.85-0.97; now 0.90): at 0.90 only 1 of 9 L16 runs and no S INT16@32 run gets a kappa
+      (floor match 0.80-0.89), so PLACE-kappa and PLACE-kappa-S go "reported, not tested". At 0.85 S gains INT16@32 in
+      all 3 S blocks and L16 gains 3 runs. Owner's call; leave 0.90 if nobody decides.
+   b. Tier-S POWER: INT16@32 crosses in 0.86-0.97 s, so its sw_W window (t0+1 s .. t0+t66) is empty and POWER cannot be
+      computed for any INT16@32 pair in Tier S (PLACE-tS's pair, CONC's INT-UNI pair); registered, it would be
+      INSUFFICIENT on card 1 by construction (card 1 heats faster). The sw_W definition may not change (§5.5):
+      owner's call before PREREG (e.g. state it in PREREG and take POWER for those pairs from L16).
+   c. If L8/G8 are dropped: prereg.py --val (line 310) and hplib.v0_final ("complete") require card 1's settled S_L8,
+      but V0's S_L8 series needs T_cal_s.L8 from R3 L8 CAL chains that will not exist, so PREREG would be refused.
+      Code fix (changes no observable): do not require S_L8 when types_kept has neither L8 nor G8 (frozen S_L8 then
+      unused); selftest; deploy.sh aifoundry3 and aifoundry1 (only while no queue runs there). Do it during R3.
+   d. params-r3-aifoundry3.json (both places): S_L 61, S_L8 64, "types" as R2 ended ([S, L16] after a drop), plus 3a.
+   e. tools/claims-v3/schedule-hp-aifoundry3-r3.txt (both places; the R1c pattern: an S block right after its L16
+      block, so its CAL reaches 68):
+        hp 3201 / hp 3101 / sleep 300 / hp 3202 / hp 3102 / sleep 300 / hp 3203 / hp 3103 / end
+      (KEEP case: add hp 3301..3303 and 3401..3403, each after a sleep 300.)
+      ssh aifoundry3 'cd ~/nekko && V3_DRY=1 bash tools/claims-v3/hp/block.sh 3201 && et-who'
+
+4. ~21:30-22:30  R3 on aifoundry3 (S + L16: ~50 min card, ~60 min wall, as R1c; KEEP case ~+110 min)
+   ssh aifoundry3 'cd ~/nekko && et-who && who && (setsid nohup tools/claims-v3/hp/run_queue.sh tools/claims-v3/schedule-hp-aifoundry3-r3.txt > build/claims-v3/queue-hp-aifoundry3-r3.log 2>&1 < /dev/null &)'
+
+5. ~22:35  params-v0-aifoundry1-c1.json (0 card time)
+   rsync as in 1; python3 tools/claims-v3/hp/reduce.py --data $S/aifoundry3 --card aifoundry3 --dev --out $S/dev-r3.json
+   T_cal_s.L = median t66 of the CAL runs of R3's L16 blocks (3201-3203; at S_L 61):
+     python3 -c "import json,statistics as s;d=json.load(open('$S/dev-r3.json'));print(s.median([r['t66_s'] for b in d['blocks'] if b['round']=='r3' and b['type']=='L16' for r in b['runs'] if r['role']=='cal' and r['t66_s']]))"
+   (R1c's L16 CALs at 61 were 26.8-29.0 s.) File: S_L 61, S_L8 64, L8_offset 3, T_cal_s {"L": <that>, "L8": null
+   (DROP) or R3's L8 CAL median (KEEP)}. Copy to aifoundry1:nekko/tools/claims-v3/hp/params/ and compare sha256.
+
+6. ~22:40-23:40  V0 on card 1 (5-15 min card; <= 3 edges x 3 ALL24 chains; a settled series ends its later blocks at once)
+   Uncomment in schedule-hp-aifoundry1-c1.txt: hp 5501 / sleep 900 / hp 5502 / sleep 900 / hp 5503 (KEEP: and the 5511-5513
+   lines); keep 801/901 (skipped as done); copy it to aifoundry1; dry: ssh aifoundry1 'cd ~/nekko && V3_DEVICE=1 V3_DRY=1 bash tools/claims-v3/hp/block.sh 5501'
+   ssh aifoundry1 'cd ~/nekko && et-who && who && (V3_DEVICE=1 setsid nohup tools/claims-v3/hp/run_queue.sh tools/claims-v3/schedule-hp-aifoundry1-c1.txt > build/claims-v3/queue-hp-aifoundry1-c1-v0.log 2>&1 < /dev/null &)'
+   Then on aifoundry1:
+   ssh aifoundry1 'cd ~/nekko && python3 tools/claims-v3/hp/hplib.py v0final --data build/claims-v3/aifoundry1-c1 --card aifoundry1-c1 --write v0.json && V3_DEVICE=1 V3_DRY=1 bash tools/claims-v3/hp/block.sh --binhash > bin-c1.json'
+   rsync -a aifoundry1:nekko/build/claims-v3/aifoundry1-c1/ $S/aifoundry1-c1/ && scp aifoundry1:nekko/v0.json aifoundry1:nekko/bin-c1.json $S/
+
+7. ~23:45  P3 and the PREREG freeze (0 card time; after 3c if L8 was dropped)
+   python3 tools/claims-v3/hp/reduce.py --data $S/aifoundry3 --card aifoundry3 --p3 --cal-card1 $S/aifoundry1-c1 --out $S/reg.json
+   python3 tools/claims-v3/hp/prereg.py --val --registration $S/reg.json --v0 $S/v0.json --bin-c1 $S/bin-c1.json \
+       --probe-a3 $S/aifoundry3/hp/p801/probe.json --probe-c1 $S/aifoundry1-c1/hp/p801/probe.json
+   -> record the printed PREREG.md sha256 OUTSIDE the tree (and give it to the owner to commit PREREG.md and note it in
+      docs/findings/03-experiments.md). bash tools/claims-v3/hp/deploy.sh aifoundry1 --with-prereg
+   Expected from R1c: L16 n_val 5 (PLACE-t: estimate +0.47, h(5) = 0.17 <= 0.33, times s_card1/s ratio), S n_val 5
+   (PLACE-tS h(5) = 0.22 <= 0.42); CONC's development CI does not support its fixed SIGN+ so far (reported).
+
+8. Validation on card 1 (~85 min card for 5 L16 x 7 + 5 S x 10; the cap is 300 min). Append to schedule-hp-aifoundry1-c1.txt
+   (before its "end"), priority L16 > S interleaved, >= 15 min apart, two sessions >= 4 h apart:
+     hp 9201 / sleep 900 / hp 9101 / sleep 900 / hp 9202 / sleep 900 / hp 9102 / sleep 900 / hp 9203 / sleep 14400 /
+     hp 9103 / sleep 900 / hp 9204 / sleep 900 / hp 9104 / sleep 900 / hp 9205 / sleep 900 / hp 9105
+     (plus 2-3 spare passes per type, 9206/9106..., used only to replace void or incomplete blocks: departure 24)
+   ssh aifoundry1 'cd ~/nekko && et-who && who && (HP_PREREG_SHA256=<sha> V3_DEVICE=1 setsid nohup tools/claims-v3/hp/run_queue.sh tools/claims-v3/schedule-hp-aifoundry1-c1.txt > build/claims-v3/queue-hp-aifoundry1-c1-val.log 2>&1 < /dev/null &)'
+   Wall: session 1 ~00:00-02:00 (28 Sep), 4 h gap, session 2 ~06:00-08:00.
+
+9. ~08:30 28 Sep  verdicts:  rsync the card-1 data, then
+   python3 tools/claims-v3/hp/reduce.py --data $S/aifoundry1-c1 --card aifoundry1-c1 --val --prereg tools/claims-v3/hp/prereg/prereg.json --out $S/verdicts.json
+
+Card time still to spend (DROP case): aifoundry3 ~20 (2301) + 22 (R2b) + 50 (R3) = ~1.5 h (caps: R2 130, R3 210 min);
+card 1 ~3 (R0) + 5-15 (V0) + 85 (validation) = ~1.6 h (cap 5.5 h). KEEP case: aifoundry3 +~3.5 h, card 1 +~2.5 h
+(L8 and G8 in V0 and validation). Wall-clock to the verdicts: ~12 h, most of it the card-1 spacing rules.

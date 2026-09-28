@@ -1,0 +1,30 @@
+# aifoundry1 card 1, heat placement (DESIGN2 §6.1): R0 (probe, smoke) any time before PREREG. Card 0 is never used; the
+# card-0 guard runs through every block. Run with V3_DEVICE=1:
+#   V3_DEVICE=1 setsid nohup tools/claims-v3/hp/run_queue.sh tools/claims-v3/schedule-hp-aifoundry1-c1.txt > build/claims-v3/queue-hp-aifoundry1-c1.log 2>&1 < /dev/null &
+hp 801
+hp 901
+# Only R0, V0 and validation run on this card (block.sh refuses anything else; card 0 is refused everywhere).
+# V0 (after R3 fills params-v0-aifoundry1-c1.json, before P3 and PREREG): S_L edges, then S_L8 edges (they start from
+# card 1's settled S_L + the L8 offset); each block ends at once ("skipped") when the rule has settled. Then
+# hplib.py v0final --write v0.json and block.sh --binhash (README "How to run") for P3 and prereg.py --val.
+# R3 done (27 Sep 22:11): params-v0 T_cal_s.L 27.022 s. L8 and G8 were dropped (D-L8 on p2301; departure 36), so the
+# S_L8 edges 5511-5513 stay commented.
+hp 5501
+sleep 900
+hp 5502
+sleep 900
+hp 5503
+# sleep 900
+# hp 5511
+# sleep 900
+# hp 5512
+# sleep 900
+# hp 5513
+# Validation lines (9xxx) are appended only after prereg.py --val, and run only in a queue started with
+# HP_PREREG_SHA256=<the recorded sha256> (run_queue.sh, README "The lock"): queue entries <= 25 min, >= 15 min apart
+# (sleep 900), on >= 2 sessions >= 4 h apart, priority L16 > L8 > S > G8 interleaved.
+# PREREG frozen 27 Sep 22:50 (n_val L16 5, S 5): the validation lines are in two files, one per session:
+# schedule-hp-aifoundry1-c1-val1.txt (9201 9101 9202 9102 9203) and schedule-hp-aifoundry1-c1-val2.txt (9103 9204 9104 9205 9105).
+# Session 1 stopped after p9201 on the W_idle guard (README departure 39): session 1b is schedule-hp-aifoundry1-c1-val1b.txt
+# (9101 9202 9102 9203, S first).
+end

@@ -1,0 +1,15 @@
+# aifoundry1 card 1, heat placement VALIDATION, session 1b (DESIGN2 §6.1; README "The lock", departure 39). Session 1
+# (schedule-hp-aifoundry1-c1-val1.txt, 23:45 27 Sep) ran p9201 (L16, ok) and stopped at p9101 (S) on the card-1 W_idle
+# guard: its baseline is the session's first measured run, and S (edge 64 C) idles ~2.3 W above L16 (edge 60 C). Every
+# validation session now starts with an S block (departure 39). p9201 stays session 1's L16 block; the aborted p9101 is
+# kept as p9101.guard-stop-27sep. Registered: n_val L16 5, S 5. Queue entries <= 25 min, >= 15 min apart (sleep 900);
+# session 2 (schedule-hp-aifoundry1-c1-val2.txt: 9103 9204 9104 9205 9105) starts >= 4 h after this session ends.
+#   HP_PREREG_SHA256=<sha> V3_DEVICE=1 setsid nohup tools/claims-v3/hp/run_queue.sh tools/claims-v3/schedule-hp-aifoundry1-c1-val1b.txt > build/claims-v3/queue-hp-aifoundry1-c1-val1b.log 2>&1 < /dev/null &
+hp 9101
+sleep 900
+hp 9202
+sleep 900
+hp 9102
+sleep 900
+hp 9203
+end

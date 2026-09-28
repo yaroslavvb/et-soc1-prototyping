@@ -2,13 +2,14 @@
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E51**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E52**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
 check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
 same three cards after each card's campaign blocks (26 September), E49 a card-free test of the runtime's log-level race,
 E50 the host link and the launch path timed on the three cards (27 September), and E51 the DV2 development night on
 aifoundry2 (28 September: what the governor compares, placement against the first throttle; **development data, not
-validated**).
+validated**), and E52 the heat-placement experiment (27–28 September: development on aifoundry3, calibration and a
+frozen validation on aifoundry1's card 1: the short-burst prediction PASS, the primary sustained one INSUFFICIENT).
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
 (aifoundry2, aifoundry3 or both; E35–E46, E48 and E50 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
@@ -1648,8 +1649,9 @@ aifoundry3 (`~/nekko/build/claims-v3/aifoundry3/dv2/z2-20260928T003343/z2.json`)
   3.60 and 3.90 s before the first down-step, the perimeter for 5.00 s and, in the second block, beyond its kernel's
   end (at least 6.95 s): 1.4 and at least 1.8 times as long (`raw/p6038/runs.jsonl`, `obs.trip_s`). Over the two
   blocks the mean log ratio, 0.45, lies above the band the theory predicted from aifoundry3's heat-placement couplings
-  (0.28 ± 0.10; `reductions/dev-idle.json`, item G4; its inputs are frozen as numbers in `plan/prereg-val.json`, but
-  aifoundry3's placement runs behind them are not yet in the repository), so TH5's size is not supported in
+  (0.28 ± 0.10; `reductions/dev-idle.json`, item G4; its inputs are frozen as numbers in `plan/prereg-val.json`; the
+  aifoundry3 placement runs behind them are E52's development blocks, items PLACE-t and SPREAD of
+  `docs/reports/data/2026-09-28-heat-placement/reductions/dev-r3.json`), so TH5's size is not supported in
   development; it is reported, not registered. Whether the perimeter lasts longer at all (a sign test) is registered.
 - *Recovery (TH7).* Each of the 20 exits (19 on the idle card, 1 at a session start) was followed by the SP's own
   idle line, 17 one pass later (0.119–0.131 s).
@@ -1680,6 +1682,111 @@ sampler running, the trace ring holds less than a second, so the SP-line items w
 prediction's couplings are aifoundry3's, since the calibration pass on aifoundry2 did not run.
 **Artifact:** the DVFS page (A11), [14-card-behaviour.md](14-card-behaviour.md),
 [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md), and the rows marked E51 in [05-claims.md](05-claims.md).
+
+## E52 — Heat placement: the same work on the interior, the perimeter or spread, timed to the thermal trip (2026-09-27 16:50 – 2026-09-28 07:49 PDT, aifoundry3 and aifoundry1's card 1; aifoundry2 read twice) — development, calibration and a frozen validation on aifoundry1's card 1: PLACE-tS PASS, PLACE-t INSUFFICIENT
+
+**Question (Q60):** does the governor act on the average of the die sensors or on one hot sensor, and can the same
+heat-intensive work run longer before the thermal trip in some parts of the chip than in others? The owner's method:
+theories and predictions first, every iteration on one card, a test on another card with no iteration after it.
+**Method:** a design (`plan/DESIGN.md`), an adversarial critique (`plan/CRITIQUE.md`) and a revision under the owner's
+decisions O1–O3 (`plan/DESIGN2.md`, 27 September 13:22; chains up to 150 s, the service processor's log level at
+WARNING only where a probe shows the governor alive, aifoundry2 tried the same day), all before any card work; the
+tools are `tools/claims-v3/hp/` (`block.sh` under `run_queue.sh` and `queue.sh`; `README.md` has the rules and 39
+departures). Every run uses one heater (`sparsity_host --test fma --type fp32 --values randn`, random fp32 multiply-adds
+on the tensor unit) on a chosen set of shires and minions: INT16@32 (the 16 interior shires, 32 minions each),
+PER16@32 (the 16 perimeter shires) and UNI32@16 (all 32 shires, 16 minions each), 512 minions each; B4NE and B4SW
+(4 shires by the I/O corner and in the far corner) for the I/O sensor; half-power (256-minion) L8 and G8 sets. A run
+preheats with 768-minion bursts, waits for the mean's falling S+1 → S edge, then launches: in Tier L a chain of 2 s
+launches (each process under `timeout 10`, the card lock held) until two launches after the mean reads 66 °C or 150 s;
+in Tier S one 7 s launch from 64 °C. **t66** is the time from the first launch to the first 10 Hz sample with the mean
+at 66 °C (the governor acts when the mean exceeds 65); a block runs each placement once in a balanced order; the unit
+is the block, with 99% t intervals. Safety: a run ends at a mean of 80 °C, a hottest sensor of 85 °C or 73 W; nothing
+may reach 90 °C; on aifoundry1 card 0 was never used and a read-only guard watched it. What ran (PDT):
+
+| Time | Card | Passes | What |
+|---|---|---|---|
+| 27 Sep 16:50, 18:52 | aifoundry2 | A2 attempts 1, 2 | the same-day clock test (frozen PREREG-A2): rest 67 and 66 °C, both WARM (the governor sits in its thermal loop at 600 MHz): TRIG-A, TRIG-B and H12 NOT OBSERVABLE, as pre-registered |
+| 16:52–17:31 | aifoundry3 | 801, 901, 1701, 1601–1603 | R0 probe (SILENT, as predicted for its latched governor) and smoke; R1b scouting (the Tier L edge raised to 61 °C, the half-power edge to 64 °C) |
+| 18:02–19:02 | aifoundry3 | 1201–1203, 1101–1103 | R1c: three Tier L blocks from 61 °C, three Tier S blocks from 64 °C |
+| 20:18–21:08 | aifoundry3 | 2301, 2204–2206 | R2: the half-power L8 block (five of six placements never reached 66 °C in 150 s: L8 and G8 dropped by the rule D-L8), then three more Tier L blocks |
+| 20:24 | aifoundry1 card 1 | 801, 901 | R0 probe (SILENT: its clock never leaves 600 MHz) and smoke |
+| 21:12–22:11 | aifoundry3 | 3201–3203, 3101–3103 | R3: three Tier L and three Tier S blocks under the final parameters and code |
+| 22:13–22:49 | aifoundry1 card 1 | 5501–5503 | V0, card 1's calibration on 768-minion chains (never a tested workload): its start edge settled at 60 °C |
+| 22:50 | — | — | P3 (`reduce.py --p3`) and the freeze (`prereg.py --val`): `tools/claims-v3/hp/prereg/PREREG.md`, SHA-256 `a1bdc4e42c88c875f53afe112141df95bfac13370243650cf99b6b93c53ff890` |
+| 27 Sep 23:45 – 28 Sep 07:49 | aifoundry1 card 1 | 9201, 9101–9105, 9202–9205 | the validation: session 1 (23:45) ran 9201 and stopped on the card-1 idle-power guard at 9101's first measured run (departure 39; the stopped copy `p9101.guard-stop-27sep`, status fail, never reduced); session 1b (00:27–01:52) 9101, 9202, 9102, 9203; session 2 (05:52–07:49) 9103, 9204, 9104, 9205, 9105. No block void or incomplete |
+
+**Raw data:** [`docs/reports/data/2026-09-28-heat-placement/`](../reports/data/2026-09-28-heat-placement/README.md)
+(`HP` below): `raw/aifoundry3/hp/p*/` (every development block: telemetry, heater output, launches, runs, marks, the
+block's own `plan.json`, code and binary hashes, `et-lab-manifest`), `raw/aifoundry1-c1/hp/` (R0, V0 and the
+validation blocks `p9*`, added by `collect_val.sh` from the lab copy after the queue ended at 07:49:40; the queue and
+waiter logs in `logs/`), `val.json` (`reduce.py --val`, reproduced byte for byte from `raw/aifoundry1-c1`),
+`raw/aifoundry2/hp/a2/` (the two attempts), `reductions/` (`dev-r3.json` = `reduce.py --dev`, `reg.json` = P3, both
+reproduced byte for byte from `raw/`; the P1 decisions; `v0.json`; `dl8_check.py`), `logs/`, `plan/`, and `heat.json`
+(`build_heat_data.py`, for the page).
+**Result (development on aifoundry3: it chose the parameters and the predictions and tests nothing):**
+- *Placement (Q2).* From the same falling 61 °C edge, the perimeter placement took longer than the interior one to bring
+  the mean to 66 °C in 9 of 9 Tier L blocks: L = ln(t66 PER16@32 / t66 INT16@32) = 0.479 [0.409, 0.550], 1.62
+  [1.51–1.73] times as long (87.8 s against 54.4 s on average); UNI32@16 took 76.5 s (L against the interior 0.339
+  [0.243, 0.435]). Power over idle 14.02, 13.81 and 13.87 W (interior, perimeter, spread); perimeter less interior
+  −0.21 [−0.38, −0.05] W, inside the ±0.5 W equivalence band; work equal to 0.002%; corrected for power, L_P 0.464
+  [0.400, 0.529]. Tier S (one 7 s launch from 64 °C): 0.581 [0.454, 0.708], 1.79 times as long, 6 of 6 blocks (1.70
+  against 0.95 s).
+- *The hottest sensor.* By the crossing, the peak-hold hottest sensor's lead over the mean had grown 1 °C less with the
+  perimeter work than with the interior work in each of the 9 Tier L blocks (whole degrees). Concentrating the work
+  (CONC, Tier S) did not lift the hottest sensor's lead measurably: 0.11 [−0.30, 0.52] °C. The I/O sensor warmed
+  0.67 [0.37, 0.97] °C more with 128 minions beside it (B4NE) than in the far corner (MAP).
+- *Half power.* At 256 minions from 64 °C (block 2301) five of six placements never read 66 °C in 150 s; UNI32@16
+  (512 minions) did in 21.3 s: the half-power steady state on aifoundry3 lies near or under 66 °C, so L8 and G8 (the
+  memory-strip, bare-edge, linearity and airflow theories) were dropped, as the rule fixed in advance required.
+- *Card 1 against aifoundry3.* Card 1 heats faster: its calibration chains from 61 °C crossed in a median 11.7 s
+  against aifoundry3's 27.0 s, from 60 °C in 17.2 s (inside the 0.5–2 × band: the edge settled at 60 °C); its
+  run-to-run spread of ln t66 was 0.101 against 0.047 (ratio 2.15), which P3 used to size card 1's blocks.
+- *Q1.* No on-card test ran here: the probes of aifoundry3 and card 1 read SILENT, and aifoundry2 rested in its
+  thermal loop at both attempts. The answer rests on the firmware source and E51's development night (the mean).
+**Registered for the validation (PREREG, mechanically from development):** PLACE-t (Tier L, SIGN+: the perimeter lasts
+longer; 5 blocks; primary) and PLACE-tS (Tier S, SIGN+; 5 blocks), with POWER (±0.5 W) and WORK (±1%) equivalence on
+their pair (Tier S POWER waived for INT16@32 pairs, whose power window was empty on aifoundry3: departure 37) and H11
+(transfer).
+Reported, not tested: the coupling gain κ (its 0.90 gate passed in 2 of 27 Tier L runs), CONC, MAP (not resolvable at
+5 blocks), every L8 and G8 item. TRIG-A on card 1 waived (departure 19).
+**Validation (aifoundry1's card 1, 27 Sep 23:45 – 28 Sep 07:49 PDT; `HP/val.json`, `reduce.py --val` under PREREG
+`a1bdc4e42c88…`: the lock held for all 10 blocks, 5 Tier L and 5 Tier S used, none void, none spare):**
+- *PLACE-tS (Tier S, SIGN+): **PASS**.* L = 0.715 [0.546, 0.883]: the perimeter took 2.04 [1.73–2.42] times as long as
+  the interior to bring the mean from 64 to 66 °C (2.56 against 1.25 s on average), in 5 of 5 blocks. WORK PASS
+  (−0.0007 [−0.0089, 0.0074]%); POWER waived (departure 37), Tier S −0.27 [−0.42, −0.13] W reported: on card 1 the
+  interior runs crossed in 1.14–1.41 s, so, unlike on aifoundry3, their power window was not empty.
+- *PLACE-t (Tier L, SIGN+, primary): **INSUFFICIENT**.* L = 0.198 [−0.423, 0.819], 1.22 [0.66–2.27] times. From card
+  1's frozen 60 °C edge, 10 of the 15 Tier L runs, 7 of PLACE-t's 10, never read 66 °C before the 150 s cap (INT16@32 3 of 5, PER16@32 4
+  of 5, UNI32@16 3 of 5; by session 2 of 3, 2 of 6 and 6 of 6). A cut-off run counts as 150 s, so the three blocks
+  with both runs cut off (9202, 9204, 9205) give L = 0; the two that decided went the predicted way (9201: perimeter
+  over 150 s, interior 110.2 s; 9203: 142.6 against 72.1 s), none the other way (sign count 2–0, 3 tied, p = 0.5).
+  POWER (−0.20 [−0.71, 0.32] W at about 14 W each) INSUFFICIENT; WORK PASS (0.0001 [−0.0009, 0.0011]%).
+- *H11 (transfer): **INSUFFICIENT*** (PLACE-t INSUFFICIENT, PLACE-tS PASS). TRIG-A not tested (waived). Reported only
+  on card 1: CONC −0.10 [−0.96, 0.76] °C, MAP 0.97 [0.52, 1.41] °C.
+- *Which theories survived* (DESIGN2's frozen table: H2 / H3 / H4 survive if PLACE-t is registered SIGN+ / SIGN− /
+  EQUIV and PASSes): none is counted as survived, none refuted. H2 (the edges trip later) rests on PLACE-t, so it is
+  undecided although its short-burst item passed. H3 (the centre) and H4 (total power only) are not registered:
+  PLACE-t was registered SIGN+, so the table gives them no entry. Outside the frozen rules (reported): PLACE-t's
+  interval decides neither; the short-burst interval lies wholly above 0 and above the ±10% band; on card 1, 7 blocks
+  were decided (2 Tier L, 5 Tier S), none the interior's way; in development 15 of 15 (9 Tier L, 6 Tier S) went the
+  perimeter's way. H11 and H13 INSUFFICIENT; H1/H1′ not tested on a card; H3′, H6, H7, H8, H9, H10, H12 not tested.
+- *Card 1's calibration chains during the validation* (reported; not tested as a cause of the cut-offs): in the
+  validation's Tier L blocks they took 17.6–27.3 s (median 22.8 s), against 17.2–20.5 s (median 17.2 s) at V0 from
+  the same 60 °C edge, and in session 2 every Tier L run was cut off. From 60 °C, card 1's 512-minion runs (about
+  14 W) often did not bring the mean to 66 °C within the 150 s the owner allowed a chain (O1); aifoundry3's had
+  crossed in 48–95 s from 61 °C.
+**Caveats:** one development card and one validation card (five blocks per tier); censoring at 150 s on card 1
+(above); departure 39 changed the order of the validation blocks after the first session's safety stop, no locked file
+or analysis (the re-run of 9101 began 13.8 min after the stop, under the design's 15 min between queue entries);
+departure 40, recorded after the validation, discloses that the block-void rule reads τ_c over the measured runs only
+(the locked reducer's reading; the burn-in CAL run that opens a Tier L block falls through its last degree in 1.0–2.2 s
+against 5.8–15.0 s, and counted it would void all 14 Tier L blocks on both cards); the host reads only whole degrees of the mean and two unnamed peak-hold extremes,
+so whether the perimeter's longer time comes from the die's edges shedding heat or from the 34 sensors seeing less of
+heat made beside the edges and the unsensed I/O and PCIe cells cannot be told apart; the die frame of the latency map
+is inferred (a mirror image changes no class); aifoundry3's clock is pinned and card 1's never moves, so the trip here
+is the mean reading 66 °C, not a clock step; only signs transfer between cards.
+**Artifact:** the page "Where the work sits" (`docs/reports/2026-09-28-et-soc1-heat-placement.html`, not yet
+published), and the rows marked E52 in [05-claims.md](05-claims.md).
 
 ## A note on E10, re-analysed for Q20
 
