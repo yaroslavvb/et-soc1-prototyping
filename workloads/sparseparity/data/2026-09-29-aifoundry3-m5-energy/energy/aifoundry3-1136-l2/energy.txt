@@ -1,0 +1,9 @@
+L2: 14 solves in 5.993 s (2.336/s; kernel 0.4270 s each, 2.342/s)
+  J per solve over idle (the SP's board average, the law on the die temperature): 6.196 (uncorrected 6.623, ramp baseline 6.425; the leakage's rise 0.260); board total per solve, idle included, 16.603 J
+  catalogue method (cross-check): 6.274 J (uncorrected 6.487, integral 6.107; 1 of 21 busy readings at idle, 0.1 expected, one pass = 0.314 J per solve); board 39.04 W in the burst, idle 23.89 W: +15.15 W, +14.66 W leakage-corrected (+0.50 W at 0.300 W/C)
+  die 51.0 C before, 53.2 C busy (max 54), 51.5 C brackets
+  rails, J per solve: minion 3.011, SRAM 2.886, NoC 0.042 (ramp baseline: upper bounds), unmetered 0.256 (the headline minus the rails)
+  host: 0.127 CPU s over the burst (0.02 cores busy on average; host_cpu_s.burst (getrusage over launch_epoch_ms)); its package, assumed, 4.37-8.91 J per solve
+  CPU 6T best at P(loss) <= 0.0001 (vexh two-stage, m1 1152, tau1 106, P(loss) 8.9e-05, 0.508 s): 63.5-127.5 J at an assumed 125-251 W; x3.8-7.7 the card's board alone (the host not counted); x2.5-6.1 the card's board + the host's package (4.37-8.91 J assumed)
+  RAPL on the host: root-only (400 root)
+  OK | 1 of 21 busy board_w readings at idle (a pass between launches; 0.1 expected): the catalogue value is about 5% low in this run; the SP average (the headline) does not alias them

@@ -1,0 +1,220 @@
+{
+ "dir": "/home/yaroslavvb/nekko/build/sparseparity-energy/dry-l1",
+ "run": {
+  "preset": "l1",
+  "card": "aifoundry3",
+  "dry": true,
+  "lock": "/run/lock/etsoc-shire0.lock",
+  "et_devices": null,
+  "build": "/home/yaroslavvb/nekko/build/sparseparity-i-src/../sparseparity-i",
+  "kernel_text_sha256": "4c2e7bdeb1b4e614109eca32fce8506291ff4ef49ac513237d84f5b57484015f",
+  "host_args": "--mode tensor --shires 0xffffffff --per-shire 32 --n 512 --k 4 --eta 0.3 --m 448 --seed 1  --variant m1 --cost fit --gen inc --oracle sample --oracle-work 3e8",
+  "reps_planned": 44,
+  "reps_fit": 51,
+  "target_s": 6,
+  "budget_s": 9,
+  "launch_est_s": 0.13,
+  "idle_before_s": 8,
+  "idle_after_s": 10,
+  "every_ms": 50,
+  "sampler": "/home/yaroslavvb/nekko/.venv/bin/python3 workloads/sparseparity/tools/energy_stub.py sample --sched /home/yaroslavvb/nekko/build/sparseparity-i-src/../sparseparity-energy/dry-l1/stub_sched.jsonl --truth /home/yaroslavvb/nekko/build/sparseparity-i-src/../sparseparity-energy/dry-l1/stub_truth.json",
+  "sampler_t0_ms": 1790698423201,
+  "host_t0_ms": 1790698431211,
+  "host_t1_ms": 1790698437736,
+  "end_ms": 1790698447862,
+  "host_rc": 0,
+  "foreign": null,
+  "rapl": "root-only (400 root)",
+  "rapl_uj": [
+   null,
+   null
+  ]
+ },
+ "flags": [
+  "DRY: test doubles, not a measurement"
+ ],
+ "hard": [],
+ "host": {
+  "status": "PASS",
+  "reps_requested": 44,
+  "reps_done": 44,
+  "reps_consistent": "ok",
+  "stop_reason": "",
+  "open_s": 0.18,
+  "setup_s": 0.0015,
+  "device_held_s": 6.08714,
+  "process_s": 6.50728,
+  "launch_epoch_ms": [
+   1790698431528,
+   1790698437430
+  ]
+ },
+ "instance": {
+  "n": 512,
+  "k": 4,
+  "eta": 0.3,
+  "m": 448,
+  "seed": 1
+ },
+ "slice": "0/1",
+ "variant": {
+  "variant": "m1",
+  "kernel": "m1",
+  "gen": "inc",
+  "cost": "fit"
+ },
+ "plan": {
+  "ops": 81989040,
+  "candidates": 2829877120,
+  "model_s": 0.11283,
+  "guard_s": 0.1622,
+  "timeout_s": 2,
+  "coverage": "full"
+ },
+ "result": {
+  "solved": true,
+  "unique": true,
+  "answer": null
+ },
+ "kernel_clock_mhz_est": 600.0,
+ "window": {
+  "source": "host launch_epoch_ms",
+  "lo_ms": 1790698431528,
+  "hi_ms": 1790698437430,
+  "wall_s": 5.902,
+  "board_edges_minus_host_s": [
+   0.301,
+   0.116
+  ]
+ },
+ "solves": 44,
+ "solves_per_s": 7.4551,
+ "launch_s_mean": 0.13012,
+ "launch_s_min": 0.12971,
+ "launch_s_max": 0.13054,
+ "solves_per_s_kernel": 7.68532,
+ "board": {
+  "idle_w": 24.34633,
+  "idle_before_w": 24.11969,
+  "idle_after_w": 24.57297,
+  "busy_w": 37.76315,
+  "over_idle_raw_w": 13.41682,
+  "over_idle_w": 13.32123,
+  "leak_correction_w": 0.09559,
+  "leak_slope_w_per_c": 0.33301,
+  "j_per_solve": 1.78686,
+  "j_per_solve_raw": 1.79968,
+  "j_per_solve_sp_avg": 1.82592,
+  "j_per_solve_sp_avg_raw": 1.91838,
+  "sp_avg_idle_w": 24.11,
+  "sp_avg_late_w": 24.5645,
+  "j_per_solve_integral": 1.73151,
+  "j_per_solve_integral_raw": 1.81804,
+  "j_per_solve_total": 5.06541,
+  "busy_readings": 21,
+  "busy_readings_at_idle": 1,
+  "windows_s": {
+   "busy": [
+    0.5,
+    0.0
+   ],
+   "before": [
+    -3.5,
+    -0.3
+   ],
+   "after": [
+    2.3,
+    5.5
+   ],
+   "integral": [
+    -1.0,
+    2.3
+   ],
+   "long": [
+    -1.0,
+    6.0
+   ],
+   "late": [
+    6.0,
+    8.0
+   ]
+  }
+ },
+ "rails": {
+  "minion_w": {
+   "idle_w": 5.5,
+   "late_minus_idle_w": 0.1854,
+   "j_per_solve": 1.00297,
+   "j_per_solve_raw": 1.04069,
+   "over_idle_w_plateau": 7.61511,
+   "j_per_solve_plateau": 1.02146
+  },
+  "sram_w": {
+   "idle_w": 3.1,
+   "late_minus_idle_w": 0.1322,
+   "j_per_solve": 0.22042,
+   "j_per_solve_raw": 0.24731,
+   "over_idle_w_plateau": 1.75445,
+   "j_per_solve_plateau": 0.23534
+  },
+  "noc_w": {
+   "idle_w": 2.4,
+   "late_minus_idle_w": 0.0019,
+   "j_per_solve": 0.14545,
+   "j_per_solve_raw": 0.14583,
+   "over_idle_w_plateau": 1.08196,
+   "j_per_solve_plateau": 0.14513
+  },
+  "unmetered": {
+   "j_per_solve": 0.45708,
+   "j_per_solve_raw": 0.48455,
+   "note": "the SP's board average minus the three rails, over the long window, with the same baselines"
+  }
+ },
+ "die_c": {
+  "before": 55.0,
+  "busy": 56.28704,
+  "idle_brackets": 56.0,
+  "after": 57.0,
+  "max_avg": 57.0,
+  "max_high": 58.0,
+  "busy_start": 55.0,
+  "busy_end": 57.0
+ },
+ "meter": {
+  "samples": 495,
+  "busy": 108,
+  "before": 64,
+  "after": 64,
+  "sample_period_ms": 49.99995,
+  "took_ms_median": 22.0,
+  "took_ms_max": 22.0,
+  "board_refresh_s": 0.251,
+  "minion_mhz_busy": [
+   600
+  ]
+ },
+ "cpu": {
+  "instance": "L1",
+  "cpu_6t_best_s": 0.148,
+  "cpu_6t_best": "mitm, expected over 10 seeds",
+  "cpu_6t_scan_s": 0.18,
+  "assumed_w": [
+   125.0,
+   251.0
+  ],
+  "cpu_6t_best_j": [
+   18.5,
+   37.148
+  ],
+  "note": "CPU energy assumed (package power x measured 6-thread time), not measured",
+  "card_board_total_j": 5.06541,
+  "card_over_idle_j": 1.78686,
+  "cpu_over_card_total": [
+   3.65222,
+   7.33366
+  ]
+ },
+ "rapl": "root-only (400 root)",
+ "ok": true
+}

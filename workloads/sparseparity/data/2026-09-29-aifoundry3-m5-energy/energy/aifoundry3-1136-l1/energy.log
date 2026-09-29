@@ -1,0 +1,15 @@
+11:37:46 sparseparity energy l1 on aifoundry3 (lock /run/lock/etsoc-shire0.lock), out /home/yaroslavvb/nekko/build/sparseparity-t-src/../sparseparity-energy/aifoundry3-1136-l1
+11:37:46 kernel /home/yaroslavvb/nekko/build/sparseparity-t-src/../sparseparity-t/kernel/sparseparity.elf: .text sha256 3e14be325df307751f424372d0a1dccad244b3ffe0e46e43d82baefb300cb820
+11:37:46 plan: 44 launches of ~0.130 s (budget allows 51, target 44): burst ~5.98 s from ~0.44 s of the process; the host starts no launch after 7.50 s (model 0.1128 s, guard 0.1622 s, timeout 2 s)
+11:37:47 sampler 1913998 at 10 Hz; idle 8 s
+11:38:02 host rc 0 in 6522 ms: PASS reps 44 of 44 launch_s mean 0.1353 solved True
+L1: 44 solves in 6.010 s (7.321/s; kernel 0.1353 s each, 7.390/s)
+  J per solve over idle (the SP's board average, the law on the die temperature): 1.660 (uncorrected 1.811, ramp baseline 1.753; the leakage's rise 0.088); board total per solve, idle included, 5.005 J
+  catalogue method (cross-check): 1.740 J (uncorrected 1.807, integral 1.657; 0 of 21 busy readings at idle, 0.2 expected, one pass = 0.087 J per solve); board 37.24 W in the burst, idle 24.01 W: +13.23 W, +12.74 W leakage-corrected (+0.50 W at 0.301 W/C)
+  die 51.0 C before, 53.3 C busy (max 54), 51.6 C brackets
+  rails, J per solve: minion 0.816, SRAM 0.788, NoC 0.012 (ramp baseline: upper bounds), unmetered 0.044 (the headline minus the rails)
+  host: 0.136 CPU s over the burst (0.02 cores busy on average; host_cpu_s.burst (getrusage over launch_epoch_ms)); its package, assumed, 1.40-2.85 J per solve
+  CPU 6T best at P(loss) <= 0.0001 (mitm, random halving, expected time over 10 seeds, P(loss) 0, 0.148 s): 18.5-37.1 J at an assumed 125-251 W; x3.7-7.4 the card's board alone (the host not counted); x2.4-5.8 the card's board + the host's package (1.40-2.85 J assumed)
+  RAPL on the host: root-only (400 root)
+  OK
+11:38:12 DONE l1: ok; /home/yaroslavvb/nekko/build/sparseparity-t-src/../sparseparity-energy/aifoundry3-1136-l1/energy.json

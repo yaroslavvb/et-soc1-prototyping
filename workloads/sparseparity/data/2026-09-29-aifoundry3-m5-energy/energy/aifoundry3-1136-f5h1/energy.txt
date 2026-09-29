@@ -1,0 +1,9 @@
+(256,5) slice 1/2: 3 solves in 4.638 s (0.647/s; kernel 1.5454 s each, 0.647/s)
+  J per solve over idle (the SP's board average, the law on the die temperature): 15.818 (uncorrected 16.746, ramp baseline 16.309; the leakage's rise 0.565); board total per solve, idle included, 53.398 J
+  catalogue method (cross-check): 16.165 J (uncorrected 16.687, integral 16.992; 0 of 14 busy readings at idle, 0.0 expected, one pass = 1.046 J per solve); board 34.82 W in the burst, idle 24.03 W: +10.79 W, +10.46 W leakage-corrected (+0.34 W at 0.303 W/C)
+  die 52.0 C before, 53.3 C busy (max 54), 52.2 C brackets
+  rails, J per solve: minion 7.978, SRAM 6.943, NoC 0.094 (ramp baseline: upper bounds), unmetered 0.803 (the headline minus the rails)
+  host: 0.096 CPU s over the burst (0.02 cores busy on average; host_cpu_s.burst (getrusage over launch_epoch_ms)); its package, assumed, 15.78-32.15 J per solve
+  CPU 6T best at P(loss) <= 0.0001 (vexh two-stage, m1 1152, tau1 106, P(loss) 8.9e-05, 1.769 s): 221.1-444.0 J at an assumed 125-251 W (slice 1/2: part of one solve; add the parts (energy_reduce.py combine) before comparing)
+  RAPL on the host: root-only (400 root)
+  OK

@@ -1,0 +1,26 @@
+09:13:42 sparseparity energy l1 on aifoundry3 (DRY: test doubles, no device), out /home/yaroslavvb/nekko/build/sparseparity-i-src/../sparseparity-energy/dry-l1
+09:13:42 kernel /home/yaroslavvb/nekko/build/sparseparity-i-src/../sparseparity-i/kernel/sparseparity.elf: .text sha256 4c2e7bdeb1b4e614109eca32fce8506291ff4ef49ac513237d84f5b57484015f
+09:13:42 plan: 44 launches of ~0.130 s (budget allows 51, target 44): burst ~5.98 s from ~0.45 s of the process; the host starts no launch after 7.50 s (model 0.1128 s, guard 0.1622 s, timeout 2 s)
+09:13:43 sampler 1881589 at 20 Hz; idle 8 s
+09:13:57 host rc 0 in 6525 ms: PASS reps 44 of 44 launch_s mean 0.1301 solved True
+L1: 44 solves in 5.902 s (7.455/s; kernel 0.1301 s each, 7.685/s)
+  board 37.76 W in the burst, idle 24.35 W: +13.42 W, +13.32 W leakage-corrected (+0.10 W at 0.333 W/C)
+  die 55.0 C before, 56.3 C busy (max 57), 56.0 C brackets
+  J per solve over idle: board 1.787 (uncorrected 1.800; the SP's board average 1.826, uncorrected 1.918; 1 of 21 busy readings at idle)
+  rails, J per solve: minion 1.003, SRAM 0.220, NoC 0.145, unmetered 0.457 (the SP average minus the rails)
+  board total per solve (idle included) 5.065 J
+  CPU 6T best (mitm, expected over 10 seeds, 0.148 s): 18.5-37.1 J at an assumed 125-251 W; x3.7-7.3 the card's total
+  RAPL on the host: root-only (400 root)
+  OK | DRY: test doubles, not a measurement
+  truth reps: reduced 44 vs injected 44 ok
+  truth board J/solve (catalogue method): reduced 1.7869 vs injected 1.8184 ok
+  truth board J/solve (integral): reduced 1.7315 vs injected 1.8184 ok
+  truth board J/solve (SP average): reduced 1.8259 vs injected 1.8184 ok
+  truth minion_w J/solve: reduced 1.003 vs injected 1.0001 ok
+  truth sram_w J/solve: reduced 0.2204 vs injected 0.2182 ok
+  truth noc_w J/solve: reduced 0.1454 vs injected 0.1455 ok
+  truth unmetered J/solve: reduced 0.4571 vs injected 0.4546 ok
+  truth burst start (s): reduced 1790698431.528 vs injected 1790698431.528 ok
+  truth burst end (s): reduced 1790698437.43 vs injected 1790698437.4306 ok
+  TRUTH PASS
+09:14:07 DONE l1: ok; /home/yaroslavvb/nekko/build/sparseparity-i-src/../sparseparity-energy/dry-l1/energy.json

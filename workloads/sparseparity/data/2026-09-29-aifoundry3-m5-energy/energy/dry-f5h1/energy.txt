@@ -1,0 +1,20 @@
+(256,5) slice 1/2: 3 solves in 4.780 s (0.628/s; kernel 1.5905 s each, 0.629/s)
+  board 38.97 W in the burst, idle 24.33 W: +14.64 W, +14.57 W leakage-corrected (+0.07 W at 0.333 W/C)
+  die 55.0 C before, 56.2 C busy (max 57), 56.0 C brackets
+  J per solve over idle: board 23.213 (uncorrected 23.326; the SP's board average 24.450, uncorrected 25.674; 1 of 17 busy readings at idle)
+  rails, J per solve: minion 13.437, SRAM 2.946, NoC 1.951, unmetered 6.117 (the SP average minus the rails)
+  board total per solve (idle included) 62.089 J
+  CPU 6T best (vexh two-stage, m1 = 1024, 1.58 s): 197.5-396.6 J at an assumed 125-251 W (slice 1/2: part of one solve; add the parts (energy_reduce.py combine) before comparing)
+  RAPL on the host: root-only (400 root)
+  OK | DRY: test doubles, not a measurement
+  truth reps: reduced 3 vs injected 3 ok
+  truth board J/solve (catalogue method): reduced 23.2133 vs injected 24.645 ok
+  truth board J/solve (integral): reduced 22.7827 vs injected 24.645 ok
+  truth board J/solve (SP average): reduced 24.4504 vs injected 24.645 ok
+  truth minion_w J/solve: reduced 13.4366 vs injected 13.5548 ok
+  truth sram_w J/solve: reduced 2.9463 vs injected 2.9574 ok
+  truth noc_w J/solve: reduced 1.9507 vs injected 1.9716 ok
+  truth unmetered J/solve: reduced 6.1168 vs injected 6.1613 ok
+  truth burst start (s): reduced 1790698457.14 vs injected 1790698457.1402 ok
+  truth burst end (s): reduced 1790698461.92 vs injected 1790698461.92 ok
+  TRUTH PASS

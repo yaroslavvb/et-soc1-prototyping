@@ -1,0 +1,26 @@
+09:14:08 sparseparity energy f5h0 on aifoundry3 (DRY: test doubles, no device), out /home/yaroslavvb/nekko/build/sparseparity-i-src/../sparseparity-energy/dry-f5h0
+09:14:08 kernel /home/yaroslavvb/nekko/build/sparseparity-i-src/../sparseparity-i/kernel/sparseparity.elf: .text sha256 4c2e7bdeb1b4e614109eca32fce8506291ff4ef49ac513237d84f5b57484015f
+09:14:08 plan: 6 launches of ~0.958 s (budget allows 6, target 6): burst ~5.78 s from ~0.48 s of the process; the host starts no launch after 5.50 s (model 0.8778 s, guard 1.4357 s, timeout 5 s)
+09:14:08 sampler 1881937 at 20 Hz; idle 8 s
+09:14:23 host rc 0 in 6394 ms: PASS reps 6 of 6 launch_s mean 0.9582 solved True
+(256,5) slice 0/2: 6 solves in 5.770 s (1.040/s; kernel 0.9582 s each, 1.044/s)
+  board 39.43 W in the burst, idle 24.37 W: +15.07 W, +14.96 W leakage-corrected (+0.10 W at 0.333 W/C)
+  die 55.0 C before, 56.3 C busy (max 57), 56.0 C brackets
+  J per solve over idle: board 14.391 (uncorrected 14.491; the SP's board average 14.301, uncorrected 15.032; 0 of 21 busy readings at idle)
+  rails, J per solve: minion 7.856, SRAM 1.726, NoC 1.139, unmetered 3.580 (the SP average minus the rails)
+  board total per solve (idle included) 37.923 J
+  CPU 6T best (vexh two-stage, m1 = 1024, 1.58 s): 197.5-396.6 J at an assumed 125-251 W (slice 0/2: part of one solve; add the parts (energy_reduce.py combine) before comparing)
+  RAPL on the host: root-only (400 root)
+  OK | DRY: test doubles, not a measurement
+  truth reps: reduced 6 vs injected 6 ok
+  truth board J/solve (catalogue method): reduced 14.3908 vs injected 14.3625 ok
+  truth board J/solve (integral): reduced 14.1674 vs injected 14.3625 ok
+  truth board J/solve (SP average): reduced 14.3012 vs injected 14.3625 ok
+  truth minion_w J/solve: reduced 7.856 vs injected 7.8994 ok
+  truth sram_w J/solve: reduced 1.7261 vs injected 1.7235 ok
+  truth noc_w J/solve: reduced 1.1394 vs injected 1.149 ok
+  truth unmetered J/solve: reduced 3.5797 vs injected 3.5906 ok
+  truth burst start (s): reduced 1790698456.967 vs injected 1790698456.9672 ok
+  truth burst end (s): reduced 1790698462.737 vs injected 1790698462.7369 ok
+  TRUTH PASS
+09:14:33 DONE f5h0: ok; /home/yaroslavvb/nekko/build/sparseparity-i-src/../sparseparity-energy/dry-f5h0/energy.json

@@ -1,0 +1,302 @@
+{
+ "dir": "/home/yaroslavvb/nekko/build/sparseparity-energy/aifoundry3-1136-f5h0",
+ "run": {
+  "preset": "f5h0",
+  "card": "aifoundry3",
+  "dry": false,
+  "lock": "/run/lock/etsoc-shire0.lock",
+  "et_devices": null,
+  "build": "/home/yaroslavvb/nekko/build/sparseparity-t-src/../sparseparity-t",
+  "kernel_text_sha256": "3e14be325df307751f424372d0a1dccad244b3ffe0e46e43d82baefb300cb820",
+  "host_args": "--mode tensor --shires 0xffffffff --per-shire 32 --n 256 --k 5 --eta 0.4 --m 1925 --seed 1 --slice 0/2 --slice-cost m1 --variant m1 --cost fit --gen inc --oracle sample --oracle-work 3e8",
+  "reps_planned": 6,
+  "reps_fit": 6,
+  "target_s": 6,
+  "budget_s": 9,
+  "launch_est_s": 0.958,
+  "idle_before_s": 8,
+  "idle_after_s": 10,
+  "every_ms": 100,
+  "sampler": "env LD_LIBRARY_PATH=/opt/et/lib /home/yaroslavvb/nekko/build/ettelem/ettelem sample",
+  "sampler_t0_ms": 1790707123378,
+  "host_t0_ms": 1790707131536,
+  "host_t1_ms": 1790707137696,
+  "end_ms": 1790707147963,
+  "host_rc": 0,
+  "foreign": null,
+  "rapl": "root-only (400 root)",
+  "rapl_uj": [
+   null,
+   null
+  ],
+  "host_cpu_ext_s": [
+   0.31,
+   0.289
+  ],
+  "stub_card": null
+ },
+ "flags": [],
+ "hard": [],
+ "host": {
+  "status": "PASS",
+  "reps_requested": 6,
+  "reps_done": 6,
+  "reps_consistent": "ok",
+  "stop_reason": "",
+  "open_s": 0.17851,
+  "setup_s": 0.00132,
+  "device_held_s": 5.85627,
+  "process_s": 6.15487,
+  "launch_epoch_ms": [
+   1790707131830,
+   1790707137506
+  ]
+ },
+ "instance": {
+  "n": 256,
+  "k": 5,
+  "eta": 0.4,
+  "m": 1925,
+  "seed": 1,
+  "hash": "747dfe6e655071a3",
+  "secret": [
+   7,
+   110,
+   135,
+   153,
+   183
+  ],
+  "source": "generated"
+ },
+ "slice": "0/2",
+ "variant": {
+  "variant": "m1",
+  "kernel": "m4",
+  "gen": "inc",
+  "epi": "m1",
+  "abuf": 2,
+  "cost": "fit",
+  "slice_cost": "m1",
+  "pipe_set": "",
+  "gen_probe": "",
+  "trust_model": false,
+  "flags": "0x20"
+ },
+ "plan": {
+  "ops": 654995125,
+  "candidates": 5063435554,
+  "model_s": 0.8778,
+  "guard_s": 1.43574,
+  "timeout_s": 5,
+  "coverage": "partial"
+ },
+ "result": {
+  "solved": true,
+  "unique": true,
+  "answer": [
+   7,
+   110,
+   135,
+   153,
+   183
+  ]
+ },
+ "kernel_clock_mhz_est": 599.714,
+ "window": {
+  "source": "host launch_epoch_ms",
+  "lo_ms": 1790707131830,
+  "hi_ms": 1790707137506,
+  "wall_s": 5.676,
+  "board_edges_minus_host_s": [
+   0.215,
+   0.043
+  ]
+ },
+ "solves": 6,
+ "solves_per_s": 1.05708,
+ "launch_s_mean": 0.94486,
+ "launch_s_min": 0.94187,
+ "launch_s_max": 0.94643,
+ "solves_per_s_kernel": 1.05836,
+ "board": {
+  "headline": "the SP's board average over the long window above the before bracket, less the leakage law on the measured die temperature",
+  "j_per_solve": 12.60488,
+  "j_per_solve_raw": 13.33849,
+  "j_per_solve_sp_avg_ramp": 13.02671,
+  "sp_avg_idle_w": 23.93688,
+  "sp_avg_late_w": 24.1485,
+  "leak_slope_w_per_c": 0.30346,
+  "leak_rise_j_per_solve": 0.421,
+  "j_per_solve_total": 35.67016,
+  "catalogue": {
+   "note": "the energy catalogue's method (analyze_catalogue.py): a cross-check; one run moves by one SP pass of its step per busy reading at idle",
+   "idle_w": 24.065,
+   "idle_before_w": 23.92906,
+   "idle_after_w": 24.20094,
+   "busy_w": 38.31577,
+   "over_idle_raw_w": 14.25077,
+   "over_idle_w": 13.91582,
+   "leak_correction_w": 0.33495,
+   "leak_slope_w_per_c": 0.30557,
+   "j_per_solve": 13.16436,
+   "j_per_solve_raw": 13.48123,
+   "j_per_solve_integral": 13.039,
+   "j_per_solve_integral_raw": 13.60122,
+   "j_per_solve_total": 36.24672,
+   "busy_readings": 20,
+   "busy_readings_at_idle": 0,
+   "busy_readings_at_idle_expected": 0.0242,
+   "gap_share": 0.00121,
+   "one_pass_j_per_solve": 0.69579
+  },
+  "windows_s": {
+   "busy": [
+    0.5,
+    0.0
+   ],
+   "before": [
+    -3.5,
+    -0.3
+   ],
+   "after": [
+    2.3,
+    5.5
+   ],
+   "integral": [
+    -1.0,
+    2.3
+   ],
+   "long": [
+    -1.0,
+    6.0
+   ],
+   "late": [
+    6.0,
+    8.0
+   ]
+  }
+ },
+ "rails": {
+  "minion_w": {
+   "idle_w": 6.95659,
+   "late_minus_idle_w": 0.08856,
+   "j_per_solve": 6.1126,
+   "j_per_solve_raw": 6.24306,
+   "over_idle_w_plateau": 6.52188,
+   "j_per_solve_plateau": 6.1697
+  },
+  "sram_w": {
+   "idle_w": 1.93456,
+   "late_minus_idle_w": 0.04654,
+   "j_per_solve": 5.79728,
+   "j_per_solve_raw": 5.86584,
+   "over_idle_w_plateau": 6.13795,
+   "j_per_solve_plateau": 5.8065
+  },
+  "noc_w": {
+   "idle_w": 2.137,
+   "late_minus_idle_w": 0.04685,
+   "j_per_solve": 0.08917,
+   "j_per_solve_raw": 0.15819,
+   "over_idle_w_plateau": 0.12743,
+   "j_per_solve_plateau": 0.12055
+  },
+  "unmetered": {
+   "j_per_solve": 0.60583,
+   "j_per_solve_raw": 1.0714,
+   "note": "the headline minus the three rails (a small difference of two larger numbers: +-15%)"
+  }
+ },
+ "die_c": {
+  "before": 52.0,
+  "busy": 53.59615,
+  "idle_brackets": 52.5,
+  "after": 53.0,
+  "max_avg": 54.0,
+  "max_high": 64.0,
+  "busy_start": 53.0,
+  "busy_end": 54.0
+ },
+ "meter": {
+  "samples": 247,
+  "busy": 52,
+  "before": 32,
+  "after": 32,
+  "sample_period_ms": 99.9999,
+  "took_ms_median": 22.0,
+  "took_ms_max": 23.0,
+  "board_refresh_s": 0.3,
+  "minion_mhz_busy": [
+   600
+  ]
+ },
+ "cpu": {
+  "instance": "(256,5)",
+  "cpu_6t_best_s": 1.769,
+  "cpu_6t_best": "vexh two-stage, m1 1152, tau1 106",
+  "cpu_6t_best_p_loss": 9e-05,
+  "p_loss_max": 0.0001,
+  "cpu_6t_methods": [
+   {
+    "method": "vexh two-stage, m1 1152, tau1 106",
+    "s": 1.769,
+    "p_loss": 9e-05
+   },
+   {
+    "method": "vexh two-stage, m1 1024, tau1 104",
+    "s": 1.58,
+    "p_loss": 0.00062
+   },
+   {
+    "method": "vexh one-stage scan",
+    "s": 2.57,
+    "p_loss": 0.0
+   }
+  ],
+  "assumed_w": [
+   125.0,
+   251.0
+  ],
+  "cpu_6t_best_j": [
+   221.125,
+   444.019
+  ],
+  "note": "CPU energy assumed (package power x measured 6-thread time, idle included), not measured",
+  "partial": "slice 0/2: part of one solve; add the parts (energy_reduce.py combine) before comparing"
+ },
+ "rapl": "root-only (400 root)",
+ "host_share": {
+  "cpu_s_burst": 0.11831,
+  "source": "host_cpu_s.burst (getrusage over launch_epoch_ms)",
+  "busy_cores_mean": 0.02084,
+  "host_cpu_s": {
+   "burst": [
+    0.04279,
+    0.07552
+   ],
+   "process": [
+    0.3091,
+    0.28904
+   ],
+   "note": "getrusage(RUSAGE_SELF) user, system; burst = launch_epoch_ms"
+  },
+  "host_cpu_ext_s": [
+   0.31,
+   0.289
+  ],
+  "assumed_idle_w": [
+   10.0,
+   20.0
+  ],
+  "assumed_core_w": [
+   10.0,
+   38.5
+  ],
+  "j_per_solve": [
+   9.65718,
+   19.67915
+  ],
+  "note": "assumed package power (RAPL is root-only): idle over the burst + per busy core-second"
+ },
+ "ok": true
+}
