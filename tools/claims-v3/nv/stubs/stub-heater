@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+# Named stub-* so that its process name never matches a device tool's (lib.sh DEV_COMM; the DV2 gate scans for those).
+"""NV dry-run stand-in for the heater (sparsity_host --test fma ... --seconds 2). Opens nothing: sleeps its seconds
+(scaled by NV_STUB_SCALE) and warms the stub die ($NV_STUB_STATE/die) by 4 C, to at most 84 C."""
+import math
+import os
+import sys
+import time
+
+st = os.environ.get("NV_STUB_STATE")
+if not st:
+    sys.exit(97)
+a = sys.argv[1:]
+scale = float(os.environ.get("NV_STUB_SCALE", "0.1"))
+secs = float(a[a.index("--seconds") + 1]) if "--seconds" in a else 2.0
+time.sleep(secs * scale)
+p = os.path.join(st, "die")
+d = 58.0
+if os.path.exists(p):
+    v, t = (float(x) for x in open(p).read().split())
+    d = 58.0 + (v - 58.0) * math.exp(-(time.time() - t) / (120.0 * scale))
+open(p, "w").write(f"{min(d + 4.0, 84.0):.2f} {time.time():.3f}")
+with open(os.path.join(st, "heater.log"), "a") as f:
+    f.write(f"{int(time.time() * 1000)} {' '.join(a)}\n")

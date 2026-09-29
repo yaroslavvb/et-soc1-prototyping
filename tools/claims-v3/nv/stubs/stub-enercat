@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+# Named stub-* so that its process name never matches a device tool's (lib.sh DEV_COMM; the DV2 gate scans for those).
+"""NV dry-run stand-in for build/enercat_v2/host/enercat_host. Opens nothing. A fill (tstore_uniq) sleeps 0.6 s; a
+burst (--budget N) prints N "ENERCAT {...}" launch lines of 0.4005 s and marks the burst window for the ettelem stub.
+Times are compressed by NV_STUB_SCALE. Faults (NV_STUB_FAIL): fill_fail:<k>: fill k exits 139, as E42's did once;
+burst_hang:<k>: burst k never ends (timeout 10 stops it, rc 124). Like the real device layer it prints its
+"PCIe target:" line on stderr (NV_STUB_PCIE_NODE, default /dev/et0_ops)."""
+import json
+import os
+import sys
+import time
+
+st = os.environ.get("NV_STUB_STATE")
+if not st:
+    sys.exit(97)
+a = sys.argv[1:]
+
+
+def opt(flag, d=None):
+    return a[a.index(flag) + 1] if flag in a else d
+
+
+scale = float(os.environ.get("NV_STUB_SCALE", "0.1"))
+fail = set(filter(None, os.environ.get("NV_STUB_FAIL", "").split(",")))
+print("PCIe target:".ljust(59) + os.environ.get("NV_STUB_PCIE_NODE", "/dev/et0_ops").ljust(20), file=sys.stderr, flush=True)
+if opt("--pattern") == "tstore_uniq":
+    cf = os.path.join(st, "fills")
+    k = (int(open(cf).read()) if os.path.exists(cf) else 0) + 1
+    open(cf, "w").write(str(k))
+    time.sleep(0.6 * scale)
+    sys.exit(139 if f"fill_fail:{k}" in fail else 0)
+budget = int(opt("--budget", "8"))
+bf = os.path.join(st, "bursts")
+kb = (int(open(bf).read()) if os.path.exists(bf) else 0) + 1
+open(bf, "w").write(str(kb))
+if f"burst_hang:{kb}" in fail:
+    open(os.path.join(st, "burst_until"), "w").write(str(time.time() * 1000 + 30000))
+    time.sleep(30)
+    sys.exit(0)
+hop = int(opt("--hop-distance", "0"))
+pairs = opt("--pairs", "")
+mean_hops = hop
+if pairs:   # the configuration's name carries the distance; the stub takes it from the pairs' count only for show
+    mean_hops = 0
+time.sleep(0.3 * scale)
+open(os.path.join(st, "burst_until"), "w").write(str(time.time() * 1000 + budget * 400.5 * scale))
+for j in range(budget):
+    t0 = int(time.time() * 1000)
+    time.sleep(0.4005 * scale)
+    r = {"pattern": opt("--pattern"), "unit": "tensor_load", "operands": opt("--operands"), "harts": 1, "shires": 32,
+         "participants": 1024, "bytes": 250666450944, "cycles_max": 240005217, "wall_s": 0.4005, "scp": True,
+         "hop_distance": hop, "hop_axis": "any", "mean_hops": mean_hops, "target_map": pairs.replace(":", ">"),
+         "t_start_ms": t0, "t_end_ms": int(time.time() * 1000), "ok": True}
+    print("ENERCAT " + json.dumps(r, separators=(",", ":")), flush=True)

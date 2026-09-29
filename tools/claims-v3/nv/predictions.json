@@ -1,0 +1,53 @@
+{
+  "what": "NV's predictions and decision rules (DESIGN.md §3 and §5). Fixed before the first card write: `freeze.sh --predictions` writes PREDICTIONS.sha256 over this file, every real block refuses unless it checks, and the validation freeze checks it again. Development may change nv.json's timing_s, limits, heater and analysis fields, never this file; a change here after PREDICTIONS.sha256 exists is an amendment, dated before any data it touches.",
+  "written": "2026-09-28",
+  "base_mv": 485,
+  "levels_mv": [485, 540, 600],
+  "bands": {
+    "n0": [-99, 0.5],
+    "v1": [0.5, 1.5],
+    "v2": [1.5, 2.5],
+    "vx": [2.5, 99],
+    "leak": [1.0, 3.5]
+  },
+  "items": {
+    "NV-D": {"quantity": "D", "role": "primary", "decided": [["TH-V2", "v2"], ["TH-V1", "v1"], ["TH-0", "n0"], ["TH-X", "vx"]],
+             "gated_by": ["C-METER", "C-BW"]},
+    "NV-Z": {"quantity": "Z", "role": "secondary", "decided": [["TH-DI", "v2"], ["TH-DI-V1", "v1"], ["TH-DI-0", "n0"], ["TH-DI-X", "vx"]],
+             "gated_by": ["C-METER", "C-BW"]},
+    "NV-I": {"quantity": "I_tc", "role": "secondary", "decided": [["TH-LEAK", "leak"], ["TH-I-0", "n0"]],
+             "gated_by": ["C-METER"],
+             "descriptive_split": 1.25,
+             "what": "decided on the idle rail corrected to the pass's 485 mV idle die temperature; TH-LEAK passes when the interval lies inside [1.0, 3.5] (the current rises with the voltage); where the interval sits against 1.25 (constant-current-like below, leakage-like above) is descriptive"},
+    "NV-T": {"quantity": "T", "role": "reported", "decided": [["TH-T-V2", "v2"], ["TH-T-V1", "v1"], ["TH-T-0", "n0"]],
+             "gated_by": ["C-METER", "C-BW"]}
+  },
+  "nv_i_temp_coef_per_c": 0.028,
+  "nv_i_temp_coef_source": "E44 cooling, 485 mV, whole-degree bins, d ln(noc_w)/dT: aifoundry3 2.69-2.86 %/C (54-84 C), aifoundry2 2.74-2.83 %/C (67-83 C), aifoundry1-c1 2.73-2.92 %/C; docs/reports/data/2026-09-25-claims-v3/raw/<card>/idle/p1-3",
+  "e42_reference_fj_per_bit_hop": {
+    "what": "mesh rail, wsep d1-4, median of E42's six passes per card (docs/reports/data/2026-09-25-claims-v3/raw/<card>/wire), recomputed with analyze_wire.bursts()",
+    "aifoundry3": {"data": 90.45, "zeros": 42.6, "idle_rail_w": 2.47, "idle_die_c": 57},
+    "aifoundry2": {"data": 89.48, "zeros": 43.87, "idle_rail_w": 4.1, "idle_die_c": 75}
+  },
+  "reproduction_tol_frac": 0.10,
+  "c_meter": {
+    "band": [0.9, 1.8],
+    "predicted": [1.1, 1.5],
+    "fixed_voltage_meter": [2.1, 2.8],
+    "min_rise_w": 0.25,
+    "what": "per pass, the least-squares slope of the 12 V board idle power on the mesh-rail idle power across the pass's levels, both corrected to the pass's 485 mV idle die temperature (board: analyze_wire's leakage law; rail: nv_i_temp_coef_per_c); a true rail meter gives 1/efficiency, a meter that multiplies the current by a fixed voltage about 2.1-2.8. A pass contributes only if its temperature-corrected rail idle rose by min_rise_w or more from 485 to 600 mV; if most valid passes' rail did not rise, C-METER is NOT APPLICABLE (the reading does not follow the rail) and only the zero theories (TH-0, TH-DI-0, TH-I-0) can be decided"
+  },
+  "c_bw_tol_frac": 0.005,
+  "min_valid_passes": {"dev": 3, "val": 5},
+  "val_passes_rule": {
+    "target_half_width": 0.25, "min": 6, "max": 12, "spares": 2,
+    "what": "N, the validation passes, is the smallest number with t(0.975, N-1) * SD_dev / sqrt(N) <= target_half_width, SD_dev the development per-pass SD of n_D; at least min; if more than max would be needed the design is revisited before any validation pass (an amendment)"
+  },
+  "r1": {"rule": "the 95% Welch interval of n_D(validation) - n_D(development) lies inside [-tol, +tol]; FAIL when it lies wholly outside"},
+  "bootstrap_b": 20000,
+  "bootstrap_seed": 20260928,
+  "q63": {
+    "gated_by": ["C-N", "C-RESTORE", "C-REPRO", "C-METER", "C-BW"],
+    "extrapolate_to_mv": 900
+  }
+}

@@ -1,0 +1,23 @@
+# NV validation on aifoundry2, only after DV2's validation there has ended, the card is released
+# (build/claims-v3/aifoundry2/nv/CARD-RELEASED) and NV is frozen (PREREG.md; block.sh refuses otherwise), and after
+# the validation probe (setsid nohup bash tools/claims-v3/nv/block.sh 101 --probe ...). Then:
+#   setsid nohup bash tools/claims-v3/nv/run-queue.sh tools/claims-v3/nv/schedule-val-aifoundry2.txt \
+#       > build/claims-v3/nv-queue-aifoundry2.log 2>&1 < /dev/null &
+# The first N passes (prereg.json val_passes, 6 to 12) are the validation; the next two are spares, which run only
+# while fewer than N passes ended ok and take the order of the earliest pass that did not (PREREG.md §4). Every
+# later line exits at once ("beyond the plan"). About 7 min each, plus heating.
+nv 101
+nv 102
+nv 103
+nv 104
+nv 105
+nv 106
+nv 107
+nv 108
+nv 109
+nv 110
+nv 111
+nv 112
+nv 113
+nv 114
+end

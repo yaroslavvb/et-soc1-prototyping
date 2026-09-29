@@ -1,0 +1,12 @@
+# NV development passes on aifoundry3 (DESIGN.md §8), run by NV's own queue after the probe and the smoke:
+#   setsid nohup bash tools/claims-v3/nv/run-queue.sh tools/claims-v3/nv/schedule-dev-aifoundry3.txt \
+#       > build/claims-v3/nv-queue-aifoundry3.log 2>&1 < /dev/null &
+# Passes 1-6 run the six voltage orders once each (nv.json orders); about 7 min each. The file is re-read before
+# every block: more development passes (7, 8 ...) can be appended before "end" while the queue runs.
+nv 1
+nv 2
+nv 3
+nv 4
+nv 5
+nv 6
+end

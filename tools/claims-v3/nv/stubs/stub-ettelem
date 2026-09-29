@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+# Named stub-* so that its process name never matches a device tool's (lib.sh DEV_COMM; the DV2 gate scans for those).
+"""NV dry-run stand-in for build/ettelem/ettelem ("sample" only). Opens nothing. Prints JSON lines in ettelem's format,
+on a 10 Hz timeline compressed by NV_STUB_SCALE, from the rail state the dev_mngt_service stub keeps in $NV_STUB_STATE
+and the burst window the enercat_host stub writes there. SIGTERM ends it after the current line, as ettelem does.
+Faults (NV_STUB_FAIL, counted over sampler starts in this state directory):
+  tel_nostart:<k>  start k prints nothing          tel_hot:<k>  start k reads a minion-shire mean of 86 C
+  tel_reg:<k>      start k reads the regulator 5 mV off the rail's level
+  tel_amps:<k>     start k reads the mesh rail at 25 W (over 35 A at any level)
+  tel_hiwm:<k>     start k reads a latched high watermark of 95 C (a sensor reached it); NV_STUB_HI_WM sets the
+                   standing watermark of every start (default 80 C, as the real card's hold for hours)
+The die temperature follows $NV_STUB_STATE/die (the heater stub warms it; it cools toward 58 C).
+"""
+import json
+import math
+import os
+import signal
+import sys
+import time
+
+st = os.environ.get("NV_STUB_STATE")
+if not st or len(sys.argv) < 2 or sys.argv[1] != "sample":
+    print("stub ettelem: sample only, with NV_STUB_STATE", file=sys.stderr)
+    sys.exit(97)
+a = sys.argv[2:]
+secs = float(a[a.index("--seconds") + 1]) if "--seconds" in a else 10.0
+every = int(a[a.index("--every-ms") + 1]) if "--every-ms" in a else 100
+scale = float(os.environ.get("NV_STUB_SCALE", "0.1"))
+fail = set(filter(None, os.environ.get("NV_STUB_FAIL", "").split(",")))
+cf = os.path.join(st, "sampler_starts")
+k = (int(open(cf).read()) if os.path.exists(cf) else 0) + 1
+open(cf, "w").write(str(k))
+stop = []
+signal.signal(signal.SIGTERM, lambda *_: stop.append(1))
+signal.signal(signal.SIGINT, lambda *_: stop.append(1))
+if f"tel_nostart:{k}" in fail:
+    time.sleep(secs * scale)
+    sys.exit(1)
+
+
+def die_c():
+    p = os.path.join(st, "die")
+    if not os.path.exists(p):
+        return 58.0
+    d, t = (float(x) for x in open(p).read().split())
+    return 58.0 + (d - 58.0) * math.exp(-(time.time() - t) / (120.0 * scale))
+
+
+t0 = int(time.time() * 1000)
+for i in range(int(secs * 1000 / every)):
+    if stop:
+        break
+    lvf = os.path.join(st, "level")
+    lv = int(open(lvf).read()) if os.path.exists(lvf) else 485
+    bf = os.path.join(st, "burst_until")
+    busy = os.path.exists(bf) and time.time() * 1000 < float(open(bf).read())
+    idle = 2.48 * (lv / 485.0) ** 2.4
+    noc = idle + (7.0 * (lv / 485.0) ** 2 if busy else 0.0)
+    if f"tel_amps:{k}" in fail:
+        noc = 25.0
+    tm = 86 if f"tel_hot:{k}" in fail else int(round(die_c()))
+    hi = int(os.environ.get("NV_STUB_HI_WM", "80"))   # a latched watermark (the [2] of each pair), not a reading
+    if f"tel_hiwm:{k}" in fail:
+        hi = 95                                      # the watermark rises to 95 C in this window
+    reg = lv + 5 if f"tel_reg:{k}" in fail else lv
+    s = {"t_ms": t0 + i * every, "took_ms": 22, "since_reset_ms": -1, "board_w": round(25.0 + 1.4 * (noc - idle), 2),
+         "sp": {"board_avg_w": 26.0, "board_min_w": 24.6, "board_max_w": 53.6,
+                "minion_w": [7.8, 7.0, 30.5], "sram_w": [2.57, 2.04, 10.6], "noc_w": [round(noc, 3), 2.1, 11.0],
+                "minion_mv": [522, 518, 527], "sram_mv": [698, 695, 700], "noc_mv": [lv - 1, lv - 4, lv + 2],
+                "minion_c": [tm, tm - 2, tm + 6], "system_c": [0, 0, 0], "minion_mhz": [600, 600, 600],
+                "noc_mhz": [400, 400, 400]},
+         "temp_c": {"pmic": tm, "ioshire": [tm, tm - 1, hi - 2], "minshire": [tm, tm - 3, hi]},
+         "die_mv": {"ddr": 767, "sram": 698, "maxion": 591, "minion": 522, "pshire": 766, "noc": lv - 1, "ioshire": 767},
+         "reg_mv": {"ddr": 800, "sram": 700, "maxion": 600, "minion": 525, "noc": reg, "pcie_logic": 775,
+                    "vddq": 1100, "vddqlp": 640},
+         "mhz": {"minion": 600, "noc": 400, "ddr": 933}}
+    print(json.dumps(s, separators=(",", ":")), flush=True)
+    time.sleep(every / 1000.0 * scale)

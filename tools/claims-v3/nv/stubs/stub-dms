@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+# Named stub-* so that its process name never matches a device tool's (lib.sh DEV_COMM; the DV2 gate scans for those).
+"""NV dry-run stand-in for /opt/et/bin/dev_mngt_service. Opens nothing: the rail's state is a file in
+$NV_STUB_STATE. Prints lines in the real tool's format (GET_VMIN_LUT writes dev<n>_vmin_lut.bin in the working
+directory, as the real tool does). NV_STUB_BL2 sets the BL2 version it reports (default 0.20.0). Faults (comma list
+in NV_STUB_FAIL):
+  set:<mv>       the set to <mv> reaches the regulator but the firmware's check fails (non-zero exit)
+  hang:<mv>      the set to <mv> never answers (the firmware's retry loop); the watchdog resets the card to 485 mV
+                 (its uptime restarts at 0) and the card answers nothing for NV_STUB_RESET_S seconds
+  readback:<mv>  the regulator lands 5 mV below <mv> (the read-back differs)
+  restore        every set to 485 mV fails and the rail stays where it is
+  stale485       the first set to 485 mV answers "succeeded" but leaves the rail where it was, and the next module
+                 read returns 485 (a stale reply); later reads and sets are true
+  flash          every set is also written to the VMIN table (as BL2 0.18.0 does): GET_VMIN_LUT changes
+  asic:<mv>      the on-die monitor reads 13 mV low at <mv> (inside the firmware's 5%, outside NV's 10 mV rule)
+  getfail        every module-voltage read fails
+  fw             the firmware release reads 9.9.9 (the wrong card)
+  hot            the temperature reads 88 C
+The die temperature follows $NV_STUB_STATE/die (the heater stub warms it; it cools toward 58 C). NV_STUB_HI_WM sets the
+latched high watermark (the "High" readings; default 80 C), as the PVT's HILO registers keep one for hours.
+"""
+import os
+import re
+import sys
+import time
+
+st = os.environ.get("NV_STUB_STATE")
+if not st:
+    print("stub: NV_STUB_STATE is not set", file=sys.stderr)
+    sys.exit(97)
+os.makedirs(st, exist_ok=True)
+a = sys.argv[1:]
+scale = float(os.environ.get("NV_STUB_SCALE", "0.1"))
+
+
+def opt(flag):
+    return a[a.index(flag) + 1] if flag in a and a.index(flag) + 1 < len(a) else None
+
+
+def sf(name, default=None):
+    p = os.path.join(st, name)
+    return open(p).read().strip() if os.path.exists(p) else default
+
+
+def wf(name, val):
+    open(os.path.join(st, name), "w").write(str(val))
+
+
+def die_c():
+    """The stub die: a value and when it was set, cooling toward 58 C with a 120 s time constant (scaled)."""
+    v = sf("die")
+    if not v:
+        return 58.0
+    d, t = (float(x) for x in v.split())
+    import math
+    return 58.0 + (d - 58.0) * math.exp(-(time.time() - t) / (120.0 * scale))
+
+
+m, v, n, u = opt("-m"), opt("-v"), opt("-n"), opt("-u")
+fail = set(filter(None, os.environ.get("NV_STUB_FAIL", "").split(",")))
+level = int(sf("level", "485"))
+with open(os.path.join(st, "calls.log"), "a") as f:
+    f.write(f"{int(time.time() * 1000)} {' '.join(a)} level={level}\n")
+P = "2026/09/28 00:00:00 000000\tINFO [dev_mngt_service.cc->stub]\tET [DEV_MNGT_SERVICE][TH:1]: "
+if n is None or u is None:
+    print(P + "Aborting, must provide a device node / timeout value")
+    sys.exit(234)
+rs = sf("resetting_until")
+if rs and time.time() < float(rs):
+    print(P + "Unable to open the management device", file=sys.stderr)
+    sys.exit(255)
+if not sf("boot_at"):
+    wf("boot_at", time.time() - 3 * 86400 - 7 * 3600)   # up 3 days 7 hours
+
+
+def ok():
+    print(P + "Host Latency: 1 ms")
+    print(P + "Service request succeeded")
+
+
+if m == "DM_CMD_SET_MODULE_VOLTAGE":
+    mm = re.fullmatch(r"NOC,([0-9]+)", v or "")
+    if not mm:
+        print(P + f"Aborting, argument: {v} is not valid")
+        sys.exit(234)
+    mv = int(mm.group(1))
+    if "flash" in fail:
+        wf("flash_noc", mv)
+    if f"hang:{mv}" in fail:
+        wf("level", 485)                       # what the watchdog's reset leaves (the flash boot value)
+        wf("boot_at", time.time() + float(os.environ.get("NV_STUB_RESET_S", "25")) * scale)
+        wf("resetting_until", time.time() + float(os.environ.get("NV_STUB_RESET_S", "25")) * scale)
+        time.sleep(30)                         # timeout 10 ends it
+        sys.exit(1)
+    if "restore" in fail and mv == 485:
+        print(P + "Service request failed: -1")
+        sys.exit(1)
+    if "stale485" in fail and mv == 485 and not sf("stale_done"):
+        wf("stale_done", 1)
+        wf("stale_pending", 1)                 # the rail stays; the next read answers 485
+        ok()
+        sys.exit(0)
+    if f"set:{mv}" in fail:
+        wf("level", mv)
+        print(P + "Service request failed: -16001")
+        sys.exit(1)
+    wf("level", mv - 5 if f"readback:{mv}" in fail else mv)
+    ok()
+    sys.exit(0)
+if m == "DM_CMD_GET_MODULE_VOLTAGE":
+    if "getfail" in fail:
+        print(P + "Service request failed: -1")
+        sys.exit(1)
+    shown = level
+    if sf("stale_pending"):
+        os.remove(os.path.join(st, "stale_pending"))
+        shown = 485
+    ok()
+    for k, x in (("DDR", 800), ("L2CACHE", 700), ("MAXION", 600), ("MINION", 525), ("PCIE", 800), ("NOC", shown)):
+        print(P + f"Module Voltage {k}: {x} mV")
+    sys.exit(0)
+if m == "DM_CMD_GET_ASIC_VOLTAGE":
+    ok()
+    noc = level - (13 if f"asic:{level}" in fail else 1)
+    for k, x in (("L2CACHE", 698), ("MAXION", 591), ("MINION", 522), ("PSHIRE", 766), ("NOC", noc)):
+        print(P + f"ASIC Voltage {k}: {x} mV")
+    sys.exit(0)
+if m == "DM_CMD_GET_MODULE_FIRMWARE_REVISIONS":
+    ok()
+    fw = "9.9.9" if "fw" in fail else os.environ.get("NV_STUB_FW", "1.3.1")
+    bl2 = os.environ.get("NV_STUB_BL2", "0.20.0")
+    ma, mi, re_ = fw.split(".")
+    print(P + f"Firmware release revision: Major: {ma} Minor: {mi} Revision: {re_}")
+    b1, b2, b3 = bl2.split(".")
+    print(P + f"BL1 Firmware versions: Major: {b1} Minor: {b2} Revision: {b3}")
+    print(P + f"BL2 Firmware versions: Major: {b1} Minor: {b2} Revision: {b3}")
+    print(P + "PMIC Firmware versions: Major: 1 Minor: 5 Revision: 0")
+    sys.exit(0)
+if m == "DM_CMD_GET_MODULE_UPTIME":
+    ok()
+    up = max(0, int((time.time() - float(sf("boot_at"))) / 60)) if time.time() >= float(sf("boot_at")) else 0
+    print(P + f"Module Uptime Output: {up // 1440} d {(up % 1440) // 60} h {up % 60} m")
+    sys.exit(0)
+if m == "DM_CMD_GET_VMIN_LUT":
+    ok()
+    noc_code = (int(sf("flash_noc", "485")) - 250) // 5
+    rows = bytearray()
+    for i in range(11):
+        for j in range(6):
+            rows += (600 + 50 * i).to_bytes(2, "little") + bytes([noc_code if (i == 0 and j == 2) else 0x40 + i])
+    open(f"dev{n}_vmin_lut.bin", "wb").write(bytes(rows))
+    sys.exit(0)
+if m == "DM_CMD_GET_MODULE_CURRENT_TEMPERATURE":
+    ok()
+    t = 88 if "hot" in fail else int(round(die_c()))
+    hi = int(os.environ.get("NV_STUB_HI_WM", "80"))   # a latched watermark, as the real PVT's HILO registers keep
+    for k, x in (("PMIC SYS", t - 3), ("IOSHIRE Current", t - 1), ("IOSHIRE High", hi - 2),
+                 ("MINSHIRE Current", t), ("MINSHIRE Low", t - 3), ("MINSHIRE High", hi)):
+        print(P + f"{k} Temperature Output: {x} c")
+    sys.exit(0)
+if m == "DM_CMD_GET_ASIC_FREQUENCIES":
+    ok()
+    print(P + "ASIC Frequency Minion Shire: 600 Mhz")
+    print(P + "ASIC Frequency NOC: 400 Mhz")
+    sys.exit(0)
+if m == "DM_CMD_GET_MODULE_POWER":
+    ok()
+    print(P + "Module Power Output: 25 W")
+    sys.exit(0)
+print(P + f"stub: command {m} not simulated")
+sys.exit(22)

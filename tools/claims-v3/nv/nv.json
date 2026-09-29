@@ -1,0 +1,87 @@
+{
+  "what": "NV runtime settings: levels, the whitelist, voltage orders, configurations, cards, timing, limits, the heater and the burst-drop thresholds. Read by nv/block.sh (through nvlib.py) and nv/reduce.py; DESIGN.md explains every value. The predictions and decision rules are in predictions.json, fixed before the first card write; development may change only timing_s, limits, heater and analysis here.",
+  "base_mv": 485,
+  "allowed_mv": [485, 540, 600],
+  "levels_mv": [485, 540, 600],
+  "orders": [[485, 540, 600], [600, 540, 485], [540, 600, 485], [485, 600, 540], [600, 485, 540], [540, 485, 600]],
+  "smoke_levels_mv": [485, 600],
+  "probe_levels_mv": [540, 600],
+  "configs_from": "tools/claims-v3/wire/configs.json",
+  "cfgs": ["wsep/p0/hop1", "wsep/p0/hop2", "wsep/p0/hop3", "wsep/p0/hop4",
+           "wsep/p0.5/hop1", "wsep/p0.5/hop2", "wsep/p0.5/hop3", "wsep/p0.5/hop4"],
+  "smoke_cfgs": ["wsep/p0.5/hop1", "wsep/p0.5/hop4"],
+  "seed0": 7100,
+  "min_bl2": "0.19.0",
+  "min_bl2_why": "BL2 0.18.0 (da192816a) writes every NoC set to the asset-config flash sector as the boot voltage (pwr_svc_set_module_voltage -> flash_fs_set_vmin_lut_boot_voltages, added 5f5c37abf, removed dd8927ce5 on 2024-04-05); 0.19.0 and later do not. block.sh's nv_set also refuses below 0.19.0, hard-coded.",
+  "cards": {
+    "aifoundry3": {"role": "dev", "dms_index": 0, "fw_release": "1.3.1", "pass_min": 1, "pass_max": 99, "heater": false},
+    "aifoundry2": {"role": "val", "dms_index": 0, "fw_release": "1.3.1", "pass_min": 101, "pass_max": 199, "heater": true,
+                   "release_file": "CARD-RELEASED",
+                   "release_why": "the card runs DV2's frozen validation (28 Sep); NV may use it only after DV2 ends and a person writes build/claims-v3/aifoundry2/nv/CARD-RELEASED with the owner's OK"}
+  },
+  "refused_cards": {
+    "aifoundry1-c0": "overheats; never used",
+    "aifoundry1-c1": "BL2 0.18.0: every NoC set would be written to the card's flash as its boot voltage (DESIGN.md §2); and on a two-card host the stock dev_mngt_service opens card 0's management node too"
+  },
+  "dev_passes": 6,
+  "restore_tries": 5,
+  "sampler_attempts": 5,
+  "heater": {
+    "heat_c": 76,
+    "warm_c": 69,
+    "max_launches": 150,
+    "args": "--test fma --type fp32 --pattern none --values randn --shires 0xffffffff --per-shire 32 --seconds 2 --seed 1",
+    "what": "E42's heater on a governor-free card (lib.sh GOV_FREE): heat to heat_c under the lock before the first set, and one 2 s launch before an idle window or a configuration whose die reads below warm_c"
+  },
+  "timing_s": {
+    "fill_gap": 1.5,
+    "first_line_max": 2.0,
+    "pre_burst": 2.8,
+    "fill_to_burst_min": 5.0,
+    "burst_latest_after_launch": 5.0,
+    "sampler_seconds": 9.0,
+    "between_windows": 1.0,
+    "settle_after_set": 6.0,
+    "probe_dwell": 10.0,
+    "restore_wait": 20.0,
+    "sampler_retry_wait": 2.0,
+    "verify_gap": 1.0,
+    "heater_gap": 2.0,
+    "guard_wait_max": 20.0
+  },
+  "limits": {
+    "die_mean_start_max_c": 85,
+    "die_mean_abort_c": 85,
+    "any_sensor_abort_c": 90,
+    "reg_tol_mv": 0,
+    "die_tol_mv": 10,
+    "asic_tol_frac": 0.05,
+    "noc_mhz": 400,
+    "noc_max_a": 35.0,
+    "current_aborts_before_stop": 2,
+    "idle_back_w": 0.3,
+    "min_window_lines": 20
+  },
+  "dms": {
+    "path": "/opt/et/bin/dev_mngt_service",
+    "u_get_ms": 5000,
+    "u_set_ms": 7000,
+    "set_arg": "NOC,{mv}",
+    "module_re": "Module Voltage NOC: *([0-9]+) *mV",
+    "asic_re": "ASIC Voltage NOC: *([0-9]+) *mV",
+    "fw_re": "Firmware release revision: Major: *([0-9]+) Minor: *([0-9]+) Revision: *([0-9]+)",
+    "bl2_re": "BL2 Firmware versions: Major: *([0-9]+) Minor: *([0-9]+) Revision: *([0-9]+)",
+    "uptime_re": "Module Uptime Output: *([0-9]+) d *([0-9]+) h *([0-9]+) m",
+    "noc_mhz_re": "ASIC Frequency NOC: *([0-9]+) *Mhz",
+    "ok_re": "Service request succeeded",
+    "vmin_file": "dev{idx}_vmin_lut.bin"
+  },
+  "analysis": {
+    "hops": [1, 2, 3, 4],
+    "min_hops_for_slope": 3,
+    "min_launches": 7,
+    "rail_spike_w": 2.0,
+    "min_kept_fraction": 0.75,
+    "idle_skip_s": 3.0
+  }
+}
