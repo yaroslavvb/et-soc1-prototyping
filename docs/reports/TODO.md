@@ -5,15 +5,16 @@ finding checked against the page text or the data before it was listed (the requ
 [`../findings/02-requests.md`](../findings/02-requests.md)). The live pages equalled their files on that day
 ([`MIRROR.md`](MIRROR.md), "Last check").
 
-**Status, 29 September 2026 (02:03 PDT):** 126 items: 106 done, 6 superseded by the version-3 results, 14 open (four
-of them the owner's, in part 0). The review of 26 September listed 110; the lab re-check of 27 September added 7 and
-the major pass of 28–29 September (Q65) 9 more.
+**Status, 29 September 2026 (12:50 PDT):** 133 items: 106 done, 6 superseded by the version-3 results, 21 open (five
+of them the owner's, in part 0). The review of 26 September listed 110; the lab re-check of 27 September added 7, the
+major pass of 28–29 September (Q65) 9 more, and the sparse parity work (Q66, E59) its 6 next steps and the owner's call on its page.
 
 - **Part 0** is for the owner. **Part A** changes published pages, so it waits for the next pass: edit the source
   named in MIRROR.md's "How each page is built", rebuild, run `check_page.sh`, deploy (MIRROR.md, "Deploying one
   page"), run `check-mirror.py`, and commit the page, its sources and this file together. **Part B** is
   repository-only work this pass did not reach. **Part C** is the card work and records that the major pass of
-  28–29 September (Q65) left: DV2's reduction, the third card's runs and two open results.
+  28–29 September (Q65) left: DV2's reduction, the third card's runs and two open results. **Part D** is the sparse
+  parity solver's next steps (Q66, E59).
 - **Reconciled on 27 September** with the merge `0cfc742` (the three-card pages of 26 September, this review's chart
   and collapsible-depth passes, and E48 on the pages) and the review pass after it, then checked item by item against
   the tree the same day: a ticked item says "done 27 Sep" or "superseded 27 Sep" and where; a partly landed item stays
@@ -78,6 +79,10 @@ the major pass of 28–29 September (Q65) 9 more.
   28 September (predictions frozen in `4312253`; the read-only probe at 22:54 PDT found BL2 0.20.0 and the NoC at
   485 mV), so the owner runs it or allows it. The smoke and the development passes follow on aifoundry3, then the
   validation on aifoundry2 after DV2 (part C).
+
+- [ ] **The sparse parity page is private** (`et-soc1-sparse-parity`, space `a6212e3c…`, deployed 29 Sep; AGENT.md
+  §8.4). If the owner makes it public: `git apply docs/reports/data/2026-09-29-sparse-parity/hub-link.patch`, rebuild
+  the hub in MIRROR.md's order, deploy it, update MIRROR.md's row and run `check-mirror.py`.
 
 ## A. Page changes (rebuild and deploy)
 
@@ -781,3 +786,50 @@ flagged the rest at the top of `../findings/README.md`.
   cycles against the frozen rule's 4, so T-DIRECT is refuted there and the places that rest on it (P5–P7) are not
   decided on that card; in development on card 1 it survived. The frozen rule stands for this run: decide the places
   with aifoundry2's run or a new pre-registration.
+
+## D. Sparse parity (Q66, E59): next steps
+
+E59 solved noisy sparse parity on aifoundry3's card on 29 September: L1 (512, 4, 0.3, 448) in 0.131 s, L2 (512, 4,
+0.4, 1,850) in 0.323 s and (256, 5, 0.4, 1,925) in 1.52 s on 1,024 minions, 1.1–1.6× six tuned AVX-512 threads
+(`../findings/03-experiments.md`, E59). What limits it
+(`workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/README.md` and `-m5-energy/README.md`): hart 1's row
+generation, the shire's bandwidth for streamed A (about 512 cycles per op at 32 minions per shire), and the epilogue
+(1,606 cycles per output tile with the tensor unit idle). The code, the builds and the card rules are in
+`workloads/sparseparity/README.md`; every card step is one locked `timeout 10` process.
+
+- [ ] **Cooperative B loads** (`tensor_coop`, PRM 9.2.4 and 9.3.1.1; `docs/research/sparse-parity/DESIGN.md` §2.2 and
+  §6). With A streamed, each op brings 2 KB through the shire's L2, and 32 private streams per shire run at about 512
+  cycles per op (E37's 511.94), which bounds L2's one-stage scan at 0.28 s from the ops alone, 0.30 s with the staged
+  rows counted (DESIGN.md, Amendments). If the 32 minions of a shire walk the same (column tile, sample slice)
+  sequence and load each B line once for all of them, an op needs about 1 KB plus the generated rows; DESIGN.md §2.2
+  predicts about 295 cycles per op. The planner must group 32 row tiles that share a first column tile into one shire
+  step. Never run in this repository: `sys_emu` first, then one neighbourhood, then one shire.
+- [ ] **Resident A.** Held in the L1 scratchpad (48 lines, 3 KB), a row tile's A is loaded once for all its column
+  tiles and only B streams (270 cycles per op with A held in E39's microbenchmark). It fits only at S ≤ 3 (m ≤ 192):
+  there the epilogue outweighs the 3 ops of an output tile, and at η = 0.4 a stage 1 at m1 ≤ 192 keeps 83% of the
+  candidates at P(loss) < 10⁻⁴ (and 57% at m1 = 320). M5's `m5-l1-res192` (L1, m1 192, τ1 40) launched in 0.127 s
+  against 0.125 s streamed at m1 320, at 1,996 cycles per op on its busiest minion, and kept 6.7 × 10⁶ survivors at
+  P(loss) 1.8 × 10⁻³: 0.266 s per solve. It could pay with a cheaper epilogue, or with a loop order that keeps A
+  resident at larger m.
+- [ ] **A faster row generator** (hart 1). On the (256, 5) instance generation is the limit: in M4 the busiest minion
+  of its second half ran 1,629 cycles per op against 270–280 for the op, with hart 0 waiting for rows
+  (`workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/f5-b/h1.log`, `cycles_per_op_busiest`,
+  `wait_cycles_max`). M4's incremental generation gained 1.1–1.2×; both harts generating would gain at most 1.06× (one
+  issue slot per minion). First run `card_run.sh m4gen` (timing only, not yet on a card): it separates the staged
+  stores' cost from the expansion's (`workloads/sparseparity/README.md`, "M4 on a card").
+- [ ] **Host-side early exit for sliced one-stage solves** (`docs/research/sparse-parity/DESIGN.md` §2.8 and its
+  Amendments). A solve that runs as several launches (`--slices N` in one process, or host-side slices, one process
+  each) could stop at the first launch whose records report c ≥ τ_acc: each hart's 64 B record already carries its
+  best c, so no survivor log is needed. Not implemented; the full-scan time stays the primary metric (§2.8).
+- [ ] **More cards.** E59 ran on aifoundry3's card only (pinned at 600 MHz). Run `card_run.sh m5` and `energy.sh`
+  with the same kernel (`.text` `3e14be32…`) on aifoundry1's card 1 (600 MHz; `card_run.sh` sets `ET_DEVICES=1` and
+  the shire1 lock; `/home` is nearly full, so keep one build; never card 0) and on aifoundry2 once DV2's validation
+  ends (about 16:45 PDT on 29 September; E29 saw its governor lift the clock to 700–800 MHz mid-burst below about
+  68 °C, `../findings/14-card-behaviour.md`, "The clock governor is thermal first", so record the clock with every
+  run). `energy.sh` refuses aifoundry2 unless `SPP_ALLOW_AIFOUNDRY2=1`: set it only after the DV2 lock ends.
+- [ ] **`lib.sh`'s device-process pattern, after DV2's lock ends** (review R4, finding 8). `ps` truncates
+  `sparseparity_host` to `sparseparity_ho` (15 characters), which `DEV_COMM`'s `_host$` in
+  `tools/claims-v3/lib.sh:57`, `tools/claims-v3/dv2/z2.sh:37` and `dv2lib.sh` never matches, so a campaign block
+  would not count a running sparse parity host as a device process (the card lock and `et-who`'s node holders still
+  protect the card). Add `^sparseparity_ho` to those patterns, as `workloads/sparseparity/energy.sh` already does.
+  `lib.sh` and `dv2/dv2lib.sh` are in DV2's lock (`tools/claims-v3/dv2v/LOCK.sha256`): with part B's `lib.sh` item.

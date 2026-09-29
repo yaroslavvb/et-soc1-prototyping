@@ -1,0 +1,399 @@
+<style>
+blockquote.owner { margin: 12px 0; padding: 8px 14px; border-left: 3px solid var(--axis); color: var(--ink-2); font-size: 0.95rem; }
+.answer { margin: 14px 0 8px; }
+.answer ul { margin: 6px 0 0; padding-left: 1.2em; }
+.answer li { margin: 5px 0; }
+.kpi .val { font-variant-numeric: normal; }
+.dg { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 12px 0 6px; }
+.dg-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; min-width: 0; }
+.dg-h { font-weight: 650; font-size: 0.92rem; margin: 0 0 6px; }
+.dg-t { font-size: 0.84rem; color: var(--ink-2); margin: 8px 0 0; line-height: 1.5; }
+.dg-flow { display: flex; flex-direction: column; gap: 0; }
+.dg-box { border: 1px solid var(--border); border-left: 4px solid var(--ref); border-radius: 8px; padding: 7px 10px;
+  font-size: 0.84rem; line-height: 1.45; background: var(--page); }
+.dg-box b { color: var(--ink); }
+.dg-box.h1 { border-left-color: var(--c2); }
+.dg-box.h0 { border-left-color: var(--c1); }
+.dg-box.ep { border-left-color: var(--c3); }
+.dg-box.out { border-left-color: var(--ink-2); }
+.dg-arrow { text-align: center; color: var(--muted); font-size: 0.8rem; line-height: 1.2; padding: 3px 0; }
+.dg-tu { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.8rem; color: var(--ink-2); }
+.cap { font-size: 0.85rem; color: var(--ink-2); margin: 4px 0 12px; }
+.assumed { font-weight: 650; color: var(--warn); }
+td .sub { display: block; font-size: 0.75rem; color: var(--muted); }
+.word { font-weight: 650; white-space: nowrap; }
+.word.pass { color: var(--ok); } .word.fail { color: var(--bad); }
+</style>
+
+<h1>Sparse parity on the ET-SoC-1</h1>
+<p class="byline">29 September 2026 · CPU prototypes on aifoundry1's host (28 September) and aifoundry3's host;
+every card run on aifoundry3's card at 600 MHz, 04:15–11:40 PDT (M1–M5) · commits <code>92b168f</code> to
+<code>6082cb9</code> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1
+measurement reports</a></p>
+
+<p class="lede">The ET-SoC-1 solves noisy sparse parity on all 1,024 of its kernel minions as an exhaustive
+correlation search, written as an int8 matrix product on the tensor units. On aifoundry3's card the flagship size,
+L2 (n = 512 features, a secret of k = 4 of them, labels flipped with probability η = 0.4, m = 1,850 samples:
+2.83 billion candidate subsets), solves in <b data-v="l2Solve"></b>. One core of the host's i7-11700K, running a
+tuned AVX-512 scan, takes <span data-v="l2cpu1"></span> (<span data-v="l2r1"></span>); six tuned threads running the
+CPU's best method at the same risk of missing the secret take <span data-v="l2cpu6"></span>
+(<span data-v="l2r6"></span>). Across the three showcase sizes the card is <b data-v="r1"></b> one core and
+<b data-v="r6"></b> six tuned threads. Against the whole 16-thread host, extrapolated from six threads, it is about
+level (<span data-v="r16"></span>). Energy was measured on the one-stage scan: the board alone uses
+<b data-v="rE"></b> less per solve than the CPU's package energy at an assumed 125–251 W, and
+<span data-v="rEhost"></span> less once the host that drives the card is counted. The design's first prediction, 3.5–16× a whole 16-thread host, did not survive a
+critique of its CPU baseline and the card's own measurements (§6).</p>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">L2 on the card, 2.83×10<sup>9</sup> candidates</div><div class="val" data-v="l2Solve"></div><div class="sub">(512, 4, 0.4, 1,850), two-stage screen, 1,024 minions</div></div>
+  <div class="card kpi"><div class="lab">Against one core (tuned AVX-512 scan)</div><div class="val" data-v="r1"></div><div class="sub">L1, L2 and (256,5)</div></div>
+  <div class="card kpi"><div class="lab">Against six tuned threads, the CPU's best method</div><div class="val" data-v="r6"></div><div class="sub">both sides lose the secret with P &lt; 10<sup>−4</sup></div></div>
+  <div class="card kpi"><div class="lab">Board energy per solve, idle included</div><div class="val" data-v="eAll"></div><div class="sub">L1 · L2 · (256,5), one-stage scan: the board alone <span data-v="rE"></span> below the CPU's <span class="assumed">assumed</span> package energy (<span data-v="rEhost"></span> with the host)</div></div>
+</div>
+
+<blockquote class="owner">The owner's request (28 September, 21:14 PDT): “prototype a sparse parity solver which is
+efficient on this machine. Come up with dimensions of the problem where it's visible to use the ~1,000 cores; toy
+prototyping first, experiment with various sizes, then a scalable solution which runs on the Esperanto
+chip.”</blockquote>
+
+<div class="card answer" id="in-short">
+<b>In short</b>
+<ul>
+<li><b>Which sizes.</b> Without noise the problem is a GF(2) linear solve: <span data-v="geMs"></span> on one core at
+n = 512. With noise (η = 0.3–0.4) the practical method is the exhaustive correlation search, and at n = 256–512,
+k = 4–5 it scores <span data-v="cand"></span> candidates, seconds to a quarter of a minute on one core (§1).</li>
+<li><b>How.</b> Each candidate's score is one entry of a ±1 matrix product. Hart 1 of every minion builds the rows,
+hart 0 feeds the tensor unit. On every run two closed-form checksums over all the candidates must come out exact,
+which a dropped, doubled or mis-scored tile fails, and a CPU oracle rescores whole minions (§2).</li>
+<li><b>How fast.</b> L1, L2 and (256,5) solve in <span data-v="cardAll"></span> on the card. One core takes
+<span data-v="cpu1"></span>; six tuned threads, with the CPU's best method at P(loss) ≤ 10<sup>−4</sup>,
+<span data-v="cpu6"></span> (§3).</li>
+<li><b>Energy.</b> Measured on the one-stage scan, the board uses <span data-v="eL1"></span>,
+<span data-v="eL2"></span> and <span data-v="eF5"></span> per solve, idle included. The board alone is
+<span data-v="rE"></span> below the CPU's package energy at an <span class="assumed">assumed</span> 125–251 W, and
+<span data-v="rEhost"></span> below it with the host that drives the card (§4).</li>
+<li><b>What limits it.</b> Hart 1's row generation, the shire's bandwidth for streamed operands (a floor of about 512
+cycles per tensor op at 32 minions per shire, against 270 in a microbenchmark whose rows stay resident), and the
+per-tile epilogue. Cooperative operand loads, resident rows and a faster row generator are what would help next (§5).</li>
+</ul>
+</div>
+
+<h2 id="problem">1. The problem, and where 1,024 cores become visible</h2>
+<p><b>The problem.</b> Each sample x is uniform in {±1}<sup>n</sup>. Its label y is the product of x over a secret
+subset S of k features, flipped with probability η. Given m samples, return S. A candidate subset T scores</p>
+$$c(T)=\sum_{i=1}^{m}\tilde y_i\prod_{t\in T}\tilde x_{it}=m-2\,d(T)$$
+<p>where the tildes mark ±1 values and d(T) counts the samples whose label disagrees with the parity of T. The answer
+is the candidate with the largest score; a tie counts as a failure. m is SP3's 99% sample count,
+about 2 ln C(n,k)/(1−2η)<sup>2</sup>, which SP3's binomial model predicted within 0.63–1.37× of 20-seed measurements
+at 85 points.</p>
+<p><b>Without noise it is not a many-core problem.</b> With m ≥ n samples the labels are a linear system over GF(2),
+and elimination solves n = 512 in <span data-v="geMs"></span> on one core (SP3, 400 runs, all solved by m = n + 6). The
+Sutro group's challenge tiers (n = 20, k = 3 and n = 32, k = 5, both noiseless) take microseconds. <b>With noise</b>
+elimination needs a clean subset of samples, and SP3's best elimination variant was 6–3,200× slower than the plain
+scan everywhere but k = 5, η = 0.1, n ≤ 128. What remains is the exhaustive correlation search, the statistical-query-optimal
+method: C(n,k) candidates times m samples. It is a matrix product, which is what the tensor unit does.</p>
+<p><b>Where the minions show.</b> A kernel launch on 32 shires costs about 0.56 ms and opening the device about 0.18 s,
+and the lab's rule caps a device-holding process at 10 s. So a solve is worth the card when its work
+W = C(n,k)·m is about 10<sup>12</sup> subset-samples or more: a kernel of 50 ms or longer, where the launch is under
+1% (DESIGN.md §1.3). Past about 8 s of card time a solve has to be split across processes. The chart shows where that falls: one core of SP3's
+AVX-512 bit scan at the 99% sample count, for n = 128–512, k = 3–5 and η = 0–0.4.</p>
+<div class="chart-title">One core's time for the exhaustive scan, by noise η, sample count at 99% success</div>
+<div id="gridleg"></div>
+<div class="chart" id="gridchart"></div>
+<p class="cap" id="gridcap">Filled marks: work C(n,k)·m ≥ 10<sup>12</sup>, where the 1,024 minions show; hollow: below it.
+Rings mark the three showcase sizes. Diamonds: GF(2) elimination on noiseless labels, the same for every k. SP3's
+scan (<code>workloads/sparseparity/proto/spbits.c</code>) on aifoundry1's i7-11700K, 28 September: measured at one
+thread where timed, else a timed slice, 4 threads × their measured speedup (<span data-v="sp4"></span>), or the
+per-subset fit. The tuned scan used as the baseline from §3 on is 2.4–4.4× faster on one core.</p>
+<details class="more"><summary>Every point: one core's time, m and C(n,k) <span class="more-hint">(the chart's table)</span></summary>
+<div class="table-wrap"><table id="gridtable"></table></div>
+<p class="small">m is SP3's measured 20-of-20 sample count where the 20-seed search ran, else its binomial model's 99%
+point. Source: <code data-v="gridSrc"></code>, through <code>workloads/sparseparity/proto/report.py</code>'s helpers.</p>
+</details>
+<p><b>The showcase sizes</b> follow from the chart. L1 (512, 4, 0.3, 448) is the strong-scaling size; L2
+(512, 4, 0.4, 1,850) the flagship; (256, 5, 0.4, 1,925) the k = 5 size. The design first made
+(512, 5, 0.2, 218) its flagship, where m is small and the card's predicted lead was largest. After its critique the
+flagship moved to η = 0.4 (DESIGN.md, Amendments), where the CPU's AVX-512 popcount is at its best, so the comparison
+is the harder one for the card.</p>
+<div class="table-wrap"><table id="showtable" class="stack"></table></div>
+
+<h2 id="algorithm">2. The algorithm and how it maps onto the chip</h2>
+<p><b>The scan as a matrix product.</b> Write a candidate as T = R ∪ {j}: R a (k−1)-subset, j a feature larger than
+every element of R. The row for R holds, for each sample, the label times the product of R's features; the column for
+j holds feature j itself. Their dot product over the samples is c(T). Bits become the int8 values +1 and −1, the
+tensor unit's int32 sums are exact, and padding samples are zero bytes. Rows are taken in colex order, which sorts
+them by their largest element, so the valid entries (j above max R) form a staircase and each k-subset appears
+exactly once.</p>
+<p><b>The tile.</b> <code>TensorIMA8A32</code> computes C[16×16] += A[16×64] × B[64×16] in int32. One output tile is
+16 consecutive rows by 16 features; it takes S = ⌈m/64⌉ ops, one per 64 samples, accumulating in the tensor unit's
+C registers. A comes from the minion's 3 KB L1 scratchpad, B streams in from the shire's scratchpad. Only hart 0 of a
+minion may issue tensor ops, so the two harts split the work:</p>
+<div class="dg" id="diagram">
+ <div class="dg-panel">
+  <div class="dg-h">1 · The scan as tiles</div>
+  <div class="chart" id="dgtiles"></div>
+  <p class="dg-t">Rows: the (k−1)-subsets R, 16 to a row tile, in colex order. Columns: the n features, 16 to a
+  tile. Only tiles right of the staircase (j &gt; max R) are computed; entries left of it inside a boundary tile are
+  masked. The coloured strip shows the planner's blocks, dealt round-robin to the shires.</p>
+ </div>
+ <div class="dg-panel">
+  <div class="dg-h">2 · One minion's two harts</div>
+  <div class="dg-flow">
+   <div class="dg-box h1"><b>Hart 1</b> builds a row tile: 16 rows × 64·S bytes of ±1, from bit-packed X and y
+   (XOR the features of R, then expand to bytes), and stages it in the shire's scratchpad.</div>
+   <div class="dg-arrow">↓ published through an L2 line</div>
+   <div class="dg-box h0"><b>Hart 0</b> loads A into its L1 scratchpad and a feature tile B into the tensor unit, then
+   issues <code>TensorIMA8A32</code> S times:<span class="dg-tu" style="display:block;margin-top:2px">C[16×16] += A[16×64]·B[64×16]</span></div>
+   <div class="dg-arrow">↓ after the last of the S ops</div>
+   <div class="dg-box ep"><b>Epilogue</b> (hart 0): mask the staircase, add Σc and Σc², keep the best score and a tie
+   flag; in M5 also log every candidate with c<sub>1</sub> ≥ τ<sub>1</sub>.</div>
+   <div class="dg-arrow">↓ at the end</div>
+   <div class="dg-box out">one 64 B record per hart; one survivor log per minion (M5)</div>
+  </div>
+ </div>
+ <div class="dg-panel">
+  <div class="dg-h">3 · 32 shires × 32 minions</div>
+  <div class="chart" id="dgchip"></div>
+  <p class="dg-t">The host cuts the row tiles into 4,096 blocks of equal modelled cost and deals block q to shire
+  q mod 32: four blocks per minion. The features are copied once into every shire's 2.5 MB scratchpad. Nothing
+  crosses between shires; the host reads 2,048 records back and checks them.</p>
+ </div>
+</div>
+<p class="cap">The mapping, schematically: the tile counts are illustrative (L2 has 1,381,776 row tiles and 32 column
+tiles). Only 32 of the chip's 34 minion shires run kernels: one is the firmware's master and one a spare.</p>
+<p><b>Checking coverage.</b> Two sums over all C(n,k) candidates have closed forms in the data alone, through the
+Krawtchouk polynomial K<sub>k</sub>(w) = Σ<sub>t</sub> (−1)<sup>t</sup> C(w,t) C(n−w,k−t), with w<sub>i</sub> the
+weight of sample i and d the Hamming distance:</p>
+$$\sum_T c(T)=\sum_i \tilde y_i\,K_k(w_i),\qquad \sum_T c(T)^2=\sum_{i,i'}\tilde y_i\,\tilde y_{i'}\,K_k\big(d(x_i,x_{i'})\big)$$
+<p>A run that covers every candidate must reproduce both exactly, which a dropped, doubled or mis-scored tile fails:
+the three negative controls (a tile dropped, a tile scanned twice, one tile's staircase shifted) fail both sums on the
+card, as they should. Two sums cannot rule out every compensating error (two candidates' scores swapped keep both), so
+the CPU oracle also rescores whole minions and compares every hart's record field by field: a sample of minions in the
+host process (17 and 8 in M3's L1 and L2), and all 1,024 offline for the steps that <code>card_run.sh</code>
+re-checked at the end of M4 and M5, M5's two-stage runs among them.</p>
+<p><b>The two-stage screen (M5).</b> The card scores every candidate on the first m<sub>1</sub> samples and logs those
+with c<sub>1</sub> ≥ τ<sub>1</sub>; the host rescores the survivors on all m. The secret is lost only if its own
+c<sub>1</sub> falls under τ<sub>1</sub>, a binomial tail that sets τ<sub>1</sub>: P(loss) is 8.8×10<sup>−5</sup> at L1
+(m<sub>1</sub> = 320) and 8.9×10<sup>−5</sup> at L2 and (256,5) (m<sub>1</sub> = 1,152). At L2 that leaves
+<span data-v="l2Found"></span> survivors of 2.83×10<sup>9</sup> for the host.</p>
+<details class="more"><summary>The details that make it work on this chip</summary>
+<ul>
+<li><b>Hand-off.</b> Hart 1 stages each row tile with stores that bypass its L1 (<code>fswg.ps</code> into the
+scratchpad), then publishes it with <code>fence; amoswapl.d</code> on an L2 line; hart 0 polls with a pause between
+polls. Whether that fence waits for the stores is not in the manual, so M1 ran a probe that loads every row tile right
+after it is published: <span data-v="probes"></span> probe runs exact, no race seen.</li>
+<li><b>No shared writes.</b> The L1 is not coherent: the features are written once in disjoint 1 KB tiles before a
+barrier, the staging areas are private, and each hart owns one 64 B record and each minion its log.</li>
+<li><b>The manual's wait is needed.</b> Skipping the <code>TensorWait</code> the manual requires before an A buffer is
+reloaded gave a wrong result on silicon (M2, <span data-v="nowait"></span>).</li>
+<li><b>The 10 s rule in the host.</b> It refuses a work list modelled over 4 s and launches only while the launch's
+timeout still ends inside 9 s of the process's start; a larger size runs as host-side slices, one process each.</li>
+<li><b>The survivor logs.</b> Each minion's log holds 1.5× its expected share plus 10σ; an overflow is counted,
+flagged and fails the run. The host fills the log area with all-ones before every launch, so a log line that never
+reached DRAM reads as an invalid entry, not as an old one.</li>
+</ul>
+</details>
+
+<h2 id="ladder">3. The ladder: M1 to M5</h2>
+<p>Every step ran on aifoundry3's card as its own process, under the card lock and a 10 s timeout, and the step
+scripts stop at the first unexpected result. The chart gives the time per solve of each size at each milestone against the CPU.</p>
+<ol>
+<li><b>M1, one minion</b> (04:15 PDT): the smallest size's 4,960 correlations equal the CPU's one by one, the three
+negative controls fail as they should, the tie instance is flagged, and C1 (128, 4, 0.2, 192) on 32 minions passes
+on <span data-v="seeds"></span> seeds. One minion at the L1 and L2 geometry ran <span data-v="m1cycOff"></span> cycles
+per tensor op with the epilogue off (<span data-v="m1cycOn"></span> with it), against the design's 270–280.</li>
+<li><b>M2, one shire:</b> from 1 to 32 minions a tensor op took <span data-v="knee"></span> cycles, so the shire's
+bandwidth is not the limit at this size. All of L1 on one shire solved in <span data-v="m2L1"></span>, the slowest
+minion <span data-v="m2imb"></span>× the median.</li>
+<li><b>M3, 1,024 minions:</b> L1 in <span data-v="m3L1"></span> and L2 in <span data-v="m3L2"></span>, both with exact
+checksums: <span data-v="m3OverPredR"></span> slower than the design's <span data-v="dPredM3"></span>.</li>
+<li><b>M4:</b> a cycle model fitted to the per-hart records of M1–M3 (19 constants, rms 1.8%) said why, and three fixes were tried as
+switches on one build. The planner weighted by the fitted model and incremental row generation (variant b) took
+L1 <span data-v="abL1"></span> and L2 <span data-v="abL2"></span>; the epilogue split between the next tile's ops
+ran 1.4–1.8× slower than its model on silicon.</li>
+<li><b>M5, the two-stage screen</b> (11:29 PDT): L1 <span data-v="l1two_s"></span>, L2 <span data-v="l2Solve"></span>,
+(256,5) <span data-v="f5Solve"></span>, launch, survivor readback and host stage 2 included; the secret survived in all
+three, and the full oracle confirmed every survivor set offline on all 1,024 minions.</li>
+</ol>
+<div class="chart-title">Time per solve at each milestone, against the CPU</div>
+<div id="ladleg"></div>
+<div class="chart" id="ladchart"></div>
+<p class="cap">Card: the kernel's launch time as the host measures it, on 32 shires × 32 minions except M2 (one shire);
+M5 adds the survivors' readback and stage 2 on six host threads. (256,5)'s M3 point is M1's kernel and planner run in
+two halves during M4's A/B. CPU lines: one core of the tuned AVX-512 scan (<code>spbase vexh</code>); six threads of the
+CPU's fastest method at P(loss) ≤ 10<sup>−4</sup> (L1 the meet in the middle, L2 and (256,5) the CPU's own two-stage
+screen). Hollow rings: DESIGN.md's first predictions, with private operand loads at M3 and cooperative loads at
+M4.</p>
+<div class="table-wrap wide"><table id="cmptable" class="stack"></table></div>
+<p class="small">16 threads are extrapolated from 6 (this work may use at most 6 threads on the host): linear to
+8 cores at the fast end, the measured 4 → 6 step efficiency at the slow end, SMT not counted (no SMT run of the
+two-stage screen or the meet in the middle; one core's one-stage scan gained <span data-v="smtU"></span> from its
+second thread)
+(<code>workloads/sparseparity/tools/table_cpu.py</code>).</p>
+<details class="more"><summary>Every point of the ladder, with its file</summary>
+<div class="table-wrap"><table id="laddertable" class="stack"></table></div>
+</details>
+<details class="more"><summary>M1 and M2, step by step</summary>
+<div class="table-wrap"><table id="m1table" class="stack"></table></div>
+<p class="small">Cycles per op are the busiest minion's (<code>hpmcounter3</code>, corrected). The timing steps run
+without the epilogue. Data: <code>workloads/sparseparity/data/2026-09-29-aifoundry3-card/</code>.</p>
+</details>
+<details class="more"><summary>M4's A/B: six variants on one build</summary>
+<p class="small">m1 = M1's kernel and planner; a = the planner weighted by the fitted cycle model; b = a + incremental
+row generation; c = a + the epilogue split between the next tile's ops; m4 = b + c; m4d = m4 + three A buffers. Each
+cell is one launch (for (256,5), two halves); the second line is the busiest minion's cycles per op.</p>
+<div class="table-wrap"><table id="abtable" class="stack"></table></div>
+<p class="small">Data: <code>workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/</code> (08:17–08:45 PDT).</p>
+</details>
+<details class="more"><summary>M5's two-stage runs, and its controls</summary>
+<div class="table-wrap"><table id="m5table" class="stack"></table></div>
+<p class="small" id="m5note"></p>
+<div class="table-wrap"><table id="ctltable" class="stack"></table></div>
+</details>
+
+<h2 id="energy">4. Energy per solve</h2>
+<p>The board's energy was measured for the one-stage scan (variant b), one host process of back-to-back solves between
+idle brackets, sampled at 10 Hz: the service processor's board average above idle, less the rise of leakage with the
+die's measured temperature, ±3% claimed. The board idled at <span data-v="idleW"></span> and read
+<span data-v="burstW"></span> during the solves; the die stayed at <span data-v="dieRise"></span>, and every busy sample
+read 600 MHz.</p>
+<p><b>The CPU's energy is <span class="assumed">assumed</span>, not measured.</b> The package's energy counter (RAPL) is
+root-only on the lab hosts, and the board lifts both package power limits to 4,095 W, so nothing bounds it either. The
+chart multiplies the CPU's measured six-thread time (at L1 the meet in the middle's expected time, a mean over 10
+seeds) by the i7-11700K's rated 125 W (PL1) and 251 W (PL2), idle included, as the card's figure is.</p>
+<div class="chart-title">Joules per solve: the card's board, measured, against the CPU's package, assumed</div>
+<div id="enleg"></div>
+<div class="chart" id="enchart"></div>
+<p class="cap">The card's board alone is <span data-v="rE"></span> below the CPU's assumed package energy. The host that
+drives the card is not free: its own package, assumed at 10–20 W idle plus 10–38.5 W per busy core-second (it kept
+<span data-v="hostBusy"></span> cores busy on average), adds <span data-v="hostJ"></span> per solve, and the ratio with it is
+<span data-v="rEhost"></span>. The two-stage screen's energy was not measured: its launch is shorter, and its stage 2
+runs on six host threads.</p>
+<details class="more"><summary>The energy runs, and the rails</summary>
+<div class="table-wrap"><table id="entable" class="stack"></table></div>
+<p class="small">The rails are the PMIC's running averages above idle: upper bounds, −2% to +7%; unmetered is the
+headline less the rails. The SRAM rail carries almost as much as the minion rail. Data:
+<code>workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/</code>, reduced by
+<code>workloads/sparseparity/tools/energy_reduce.py</code>.</p>
+</details>
+
+<h2 id="time">5. Where the time goes, and what would help next</h2>
+<p>A tensor op takes 270 cycles when its rows stay in the L1 scratchpad (E39) and 280 when both operands come from a
+small shared pool (mmbench, E37). M3 ran <span data-v="m3gapL1"></span>× and <span data-v="m3gapL2"></span>× slower than
+270 cycles per op at L1 and L2. The cycle model (<code>workloads/sparseparity/tools/cycle_model.py</code>, fitted to
+M1–M3's records before M4 and M5 ran: 33 runs, 146 sampled minions, rms 1.8%) splits that gap into a product: the planner's imbalance
+(<span data-v="m3imbL1"></span> and <span data-v="m3imbL2"></span>, busiest over mean minion), hart 0's overhead per op
+(<span data-v="m3ovhL1"></span> and <span data-v="m3ovhL2"></span>) and the op itself (<span data-v="cOp"></span>
+cycles streamed, <span data-v="m3opc"></span>× 270).</p>
+<div class="chart-title">Cycles per tensor op in M3, by what hart 0 was doing</div>
+<div id="cycleg"></div>
+<div class="chart" id="cycchart"></div>
+<p class="cap">The fitted model's split of hart 0's time on M3's L1 and L2, for the mean minion and the busiest one.
+Issue-slot sharing is hart 0 slowed by hart 1, the two harts sharing one issue slot; waiting for rows is hart 0 idle
+until hart 1 publishes the next row tile. The dashed lines are the two rates measured elsewhere: 270 cycles with the
+rows resident, 512 when all 32 minions of a shire stream 2 KB per op from its L2 (4 B per minion-cycle).</p>
+<p>Three limits remain after M4 and M5:</p>
+<ul>
+<li><b>Hart 1's row generation.</b> In M3 a row tile cost hart 1 about 2,081 + S·(2,108 + 570·(k−1)) cycles, 4.8× what
+the planner assumed; at L2 the mean minion's hart 0 waited <span data-v="waitL2"></span> cycles per op for rows, and
+the busiest <span data-v="waitL2b"></span>. Incremental generation (M4) gained 1.1–1.2×; the second half of (256,5)
+still ran at <span data-v="f5h1cyc"></span> cycles per op on its busiest minion.</li>
+<li><b>The shire's bandwidth for streamed rows.</b> When m &gt; 192 the rows do not fit the L1 scratchpad, so every op
+brings 2 KB into each of 32 minions, and the shire's 128 B per cycle caps an op at 512 cycles. At that rate L2's
+one-stage scan cannot run faster than <span data-v="floorL2one"></span> on 1,024 minions from the ops alone, or
+<span data-v="floorL2oneSt"></span> with the staged rows counted too (DESIGN.md's Amendments). Its two-stage stage 1 ran at
+<span data-v="l2two_cyc"></span> cycles per op on the busiest minion: a launch of <span data-v="l2launch"></span> where
+512 cycles per op would take <span data-v="floorL2"></span>.</li>
+<li><b>The epilogue.</b> Each output tile's epilogue costs <span data-v="eOut"></span> cycles with the tensor unit idle
+(<span data-v="epiL1"></span> cycles per op at L1, where S = 7). Hiding it between the next tile's ops (variant c), which
+the fitted model favoured, ran slower on silicon: L1 <span data-v="cL1"></span> and L2
+<span data-v="cL2"></span>, <span data-v="cModelL1"></span>× and <span data-v="cModelL2"></span>× its model.</li>
+</ul>
+<p><b>What would help next</b>, in the order the data suggests:</p>
+<ol>
+<li><b>Cooperative operand loads.</b> <code>tensor_coop</code> merges identical <code>TensorLoad</code>s from the
+minions of a shire into one L2 request, so 32 minions walking the same feature tiles in lockstep would bring about
+1.1 KB per op instead of 2 KB, under the 512-cycle floor; the design predicted about 295 cycles per op. It is not
+written, and lockstep across 32 minions has never run in this repository.</li>
+<li><b>Resident rows.</b> At m ≤ 192 a row tile can stay in the L1 scratchpad for all its column tiles, and only the
+features stream (270 cycles per op in E39's microbenchmark). At η = 0.4 the threshold that keeps P(loss) under
+10<sup>−4</sup> still passes <span data-v="resKept"></span> of the candidates at m<sub>1</sub> = 192–320; the cheapest
+screen was m<sub>1</sub> = 1,152. At L1 the resident screen (m<sub>1</sub> = 192) launched in
+<span data-v="resLaunch"></span> against <span data-v="l1twoLaunch"></span> streamed at m<sub>1</sub> = 320 (its
+epilogue dominates at S = 3: <span data-v="resCyc"></span> cycles per op on the busiest minion), kept
+<span data-v="resFound"></span> survivors at P(loss) <span data-v="resPloss"></span> and took
+<span data-v="resSolve"></span>, <span data-v="resStage2"></span> of it stage 2 on the host. It could pay at lower noise
+(DESIGN.md's S2, η = 0.2) or with a cheaper epilogue.</li>
+<li><b>A faster row generator.</b> Fewer instructions per staged byte on hart 1, or the balanced split of the design
+(both operands generated, shared across a shire once cooperative loads work). Letting both harts generate gains at most
+1.06×: they share one issue slot.</li>
+<li><b>The epilogue with the tensor unit busy.</b> The split that the model favoured needs a second look on silicon
+before it can pay.</li>
+</ol>
+<details class="more"><summary>The busiest minion's cycles per op, from M3 to M5</summary>
+<div class="table-wrap"><table id="latertable" class="stack"></table></div>
+<p class="small">The floor is the run's ops at 512 cycles each, spread over 1,024 minions: the time the streamed
+operands alone would take at the shire's measured rate. Counting the staged rows as well (1 KB per row tile and
+sample slice) adds <span data-v="stagedPct"></span> at L1 and L2: <span data-v="floorL1oneSt"></span> and
+<span data-v="floorL2oneSt"></span> for the one-stage scan, the figures in DESIGN.md's Amendments.</p>
+</details>
+<details class="more"><summary>The split of M3's cycles, as numbers</summary>
+<div class="table-wrap"><table id="cyctable" class="stack"></table></div>
+<p class="small">The busiest minion of M3's L1 drew <span data-v="tilesBusy"></span> row tiles to the median's
+<span data-v="tilesMed"></span>: M1's planner undercosted narrow row tiles, which is what the fitted planner (M4's
+variant a) corrected.</p>
+</details>
+
+<h2 id="method">6. Method and caveats</h2>
+<ul>
+<li><b>One card.</b> Every card run used aifoundry3's card, which a boot service pins at 600 MHz; the host's clock
+estimate read <span data-v="mhzRange"></span> in the timed runs (M3–M5). aifoundry2's card was running a frozen validation, and the other cards were
+not tried.</li>
+<li><b>One seed per showcase size on the card</b> (seed 1; C1 ran 20). A full scan's time does not depend on the data;
+the survivors' count does, and each two-stage run found <span data-v="foundRatio"></span> the expected number.</li>
+<li><b>What is timed.</b> The card's time is the launch as the host measures it: without the device open (0.18 s
+per process) and the instance's upload. The two-stage time adds the survivors' readback and stage 2 on six host
+threads. The CPU's times are the median of five repetitions, except L1's six-thread figure, the meet in the
+middle's expected time (a mean over 10 seeds); threads pinned one per core, niced, with the card idle.</li>
+<li><b>Equal risk on both sides.</b> m is SP3's 99% sample count for both. The card's screens and the CPU's lose the
+secret with P &lt; 10<sup>−4</sup> (binomial tail). The CPU's faster screen at m<sub>1</sub> = 1,024
+(<span data-v="screen1024"></span>) loses it with P = <span data-v="screen1024loss"></span> and is not used.</li>
+<li><b>The one-core baseline</b> is the tuned AVX-512 scan (<code>spbase vexh</code>, 8 candidates per 512-bit
+register), 2.4–4.4× faster on one core than SP3's scan. The card data's READMEs quote the first CPU run's one-core
+times (<span data-v="cpuFirst"></span>); this page uses the run after the reviews (<span data-v="cpuNow"></span>). For
+L1 the meet in the middle is faster in expectation even on one core; the ratio is to the scan.</li>
+<li><b>16 threads are extrapolated</b> from 6, not measured. Against them the card is about level
+(<span data-v="r16"></span>).</li>
+<li><b>CPU energy is <span class="assumed">assumed</span></b> (§4), and so is the share of the host that drives the
+card. Measuring either needs the lab's admin: read access to the package's energy counter, or a wall meter.</li>
+<li><b>The critique that corrected the design.</b> The design (DESIGN.md, brief SP4) first predicted the card at
+120–130× one core and about 15× the host at its flagship, and 3.5–16× a whole 16-thread host across its ladder. It
+set the card against SP3's slower scan and a 16-thread host assumed at 8.5× one core. An adversarial critique (SP5)
+and four reviews (R1–R4) replaced that with the CPU's best measured method at equal risk, made the CPU's energy an
+assumption rather than a bound, and moved the showcase to η = 0.4. Then the card itself ran
+<span data-v="m3OverPredR"></span> slower than the design's model at M3; M4 and M5 cut the card's time by
+<span data-v="m3toM5"></span> from there, and the ratio that stands is <span data-v="r6"></span> six tuned threads. The changes are listed in DESIGN.md's
+Amendments (SP5, R1–R3) and the workload README's table of what the reviews found (R4).</li>
+</ul>
+<p><b>Data and how to rebuild this page.</b> The design and research are in
+<code>docs/research/sparse-parity/</code> (literature, the chip's primitives, DESIGN.md with its amendments, and
+<code>docs/research/sparse-parity/design_model.py</code>); the code, the tests and every result file in
+<code>workloads/sparseparity/</code> (its README has the card runs' commands, which need the owner's go-ahead and a named
+card). This page's data is <code>docs/reports/data/2026-09-29-sparse-parity/page.json</code>, which
+<code>docs/reports/data/2026-09-29-sparse-parity/make_page_data.py</code> computes from those files, with no card:</p>
+<pre><code>python3 docs/reports/data/2026-09-29-sparse-parity/make_page_data.py
+NODE_PATH=$PWD/node_modules python3 scripts/build-report.py sparse-parity \
+    docs/reports/data/2026-09-29-sparse-parity/page.json docs/reports/2026-09-29-sparse-parity.html</code></pre>
+
+<h2 id="related-reports">Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a> — the hub: every ET-SoC-1 report, and what the meters cannot see.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">Matmul efficiency</a> — the tensor unit's matmul on all 1,024 minions at 91% of peak in int8 (97% in fp32 and fp16), the rate this scan falls short of.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">Sparse compute</a> — what the silicon does with zeros; its kernel was the template for this workload's shire masks and per-hart records.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — latency and bandwidth of every level, the shire's L2 behind the 512-cycle floor among them.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions">Influence functions on the ET-SoC-1</a> — another workload weighed against the chip's 1,024 minions, as a desk analysis.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The energy manual</a> — joules per operation, the idle law and the leakage correction used in §4.</li>
+</ul>
+<p class="small"><b>Versions.</b> 29 September 2026: first version, from the CPU prototypes of 28 September and the card
+runs M1–M5 of 29 September (04:15–11:40 PDT); built, not yet published.</p>
+</main>

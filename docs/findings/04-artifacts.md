@@ -2,10 +2,10 @@
 
 Three kinds of artifact came out of this work: **published reports** (HTML, deployed to spacesheep.dev),
 **repostable images**, and **tools** that can be re-run. Commits are listed at the end so any artifact can be
-tied to the state of the tree that produced it. Cite as **A1**...**A20** (A9 and A10 were never assigned):
+tied to the state of the tree that produced it. Cite as **A1**...**A21** (A9 and A10 were never assigned):
 A1–A5, A11, A13–A15, A17 and A19 are reports · A6–A8 images · A12 math rendering · A16 the rerun tools · A18 the
-wire tools · A20 the session timeline, page and tools. The public index of every report is the hub,
-[Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports) (A2).
+wire tools · A20 the session timeline, page and tools · A21 the sparse parity page and its workload. The public index
+of every report is the hub, [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports) (A2).
 
 Reports A2–A5, A11, A13–A15 and A17 are assembled by `scripts/build-report.py <name> <data.json> <out.html>` from
 `docs/reports/sources/<name>.{meta.json,body.html,script.js}` (A2 also keeps its data in
@@ -633,6 +633,36 @@ they were committed in `6bbf0f3` (28 Sep 21:52 PDT), refreshed to 21:15 PDT, and
   e-mail addresses, local paths, a space that MIRROR.md does not list as public); `build_timeline_data.py` refuses to
   write `timeline.json` while it fails.
 
+## A21 — Sparse parity on the ET-SoC-1 (29 September)
+
+The page for Q66 and E59: noisy sparse parity solved on the card's 1,024 minions, against the host CPU's best method.
+
+- **Page:** `docs/reports/2026-09-29-sparse-parity.html`, slug `et-soc1-sparse-parity`, space
+  `a6212e3c-63f8-4971-a833-06457e2824da` (deployed 29 Sep, 12:45 PDT), **private** until the owner decides (AGENT.md
+  §8.4: a new space starts private); [`../reports/MIRROR.md`](../reports/MIRROR.md) lists it so, with its build command.
+  The hub's link (§1's index under "Research and exploratory", beside the influence-functions page, and E59 in §7's
+  sessions) is written but held back, since every space the hub links is public (Q40): apply
+  `docs/reports/data/2026-09-29-sparse-parity/hub-link.patch`, rebuild the hub and deploy it once the page is public.
+- **What it rests on:** E59, milestones M1–M5 on aifoundry3's card on 29 September (L1 0.131 s, L2 0.323 s and
+  (256, 5) 1.52 s on 1,024 minions; 7.8–12× one core and 1.1–1.6× six tuned AVX-512 threads at P(loss) ≤ 10⁻⁴; board
+  energy per solve with idle, measured on the one-stage scan, 5.0, 16.6 and 89 J: the board alone 2.5–7.7× below the
+  CPU's assumed package energy at 125–251 W, 1.6–6.1× with the host that drives the card); the numbers are in
+  [05-claims.md](05-claims.md), "Sparse parity on the ET-SoC-1".
+- **Data:** `workloads/sparseparity/data/2026-09-29-aifoundry3-{card,card-m4,m5-energy}/` (the card),
+  `workloads/sparseparity/data/2026-09-29-aifoundry3-sysemu*/` (the simulator), `workloads/sparseparity/cpu/data/`
+  (the CPU baselines) and `workloads/sparseparity/proto/data/2026-09-28-aifoundry1/` (the toy prototypes).
+- **Research:** `docs/research/sparse-parity/`: `literature.md` (SP1), `chip.md` (SP2), `DESIGN.md` (SP4) with its
+  Amendments (the critique SP5 and the reviews R1–R3; R4's findings are in the workload README's "What the reviews
+  found, and what changed"), `design_model.py` and `estimate_ops.py`; SP3 is `workloads/sparseparity/proto/RESULTS.md`.
+- **Tools** ([`workloads/sparseparity/README.md`](../../workloads/sparseparity/README.md) has each one's flags): the
+  kernel and host (`kernel/sparseparity.c`, `host/main.cpp`, `host/spp_common.h`, `host/spp_selftest.cpp`); the CPU
+  reference and baselines (`cpu/spref.c`, `cpu/spbase.c`, `cpu/sp.h`); `tools/planner.py`, `tools/cycle_model.py`
+  (the two-hart cycle model fitted to the card's records), `tools/sptest.py` and `tools/spcore.py`,
+  `tools/bench_cpu.py` and `tools/table_cpu.py`, `tools/energy_reduce.py` and `tools/energy_stub.py`; the runners
+  `sysemu_check.sh` (every kernel path in `sys_emu`), `card_run.sh` (the card steps M1, the probe, M2, M4 and M5, one
+  locked `timeout 10` process each) and `energy.sh` (board energy per solve).
+- **Commits:** `92b168f`, `ddb493f`, `4aea801`, `65e6ba6`, `a768f84`, `6082cb9` (the table below).
+
 ## Cross-links between the reports
 
 - **2026-09-24, afternoon (`d04b29a`).** Every report got the byline clause "· part of the measurement reports",
@@ -885,6 +915,12 @@ one review of the set's structure, and wrote the plan (`PLAN2.md`); page owners 
 | `e5948f4` | tau validated on aifoundry3 |
 | `6397c8e` | memp2: development on aifoundry1's card 1, then frozen (lock `9712c3d6…`) before validation |
 | `bf8c7c9` | memp2 validated on aifoundry3 |
+| `92b168f` | Sparse parity (Q66): the research, the CPU prototypes, M0 (the reference in the card's formulation, the tuned CPU baselines, the planner, the checksums) and M1's kernel and host, tested in `sys_emu` before any card run |
+| `ddb493f` | Sparse parity on the card (E59): M1, the probe and M2 as expected; the first all-shire runs solve L1 and L2 in 0.20 and 0.81 s |
+| `4aea801` | Sparse parity M4 before its card run: the fitted cycle model, incremental row generation, the epilogue between ops, 3 A buffers, the planner weighted by the model |
+| `65e6ba6` | Sparse parity M4 on the card: variant b solves L1 in 0.130 s, L2 in 0.429 s and (256,5) in 2.55 s; the epilogue split is slower on silicon |
+| `a768f84` | Sparse parity M5 before its card run: the two-stage screen (survivor logs, host stage 2, offline full oracle) and the energy harness |
+| `6082cb9` | Sparse parity M5 on the card: the two-stage screen solves L2 in 0.323 s and (256,5) in 1.52 s; board energy 5.0, 16.6 and 89 J per solve with idle |
 
 ## Publishing notes, learned the hard way
 

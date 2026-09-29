@@ -58,6 +58,7 @@ of the manuals, firmware, RTL and tools, with each key claim checked by two furt
 | [Spatial temperature: a brief](https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief) · `docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html` | by hand; its two constants: `tools/ettelem/host_temp_fields.py` | `docs/reports/data/2026-09-20-power-aifoundry2/` |
 | [L2 mainline starvation: a brief](https://spacesheep.dev/@yaroslavvb/2026-09-22-et-soc1-l2-mainline-starvation) · `docs/reports/2026-09-22-et-soc1-l2-mainline-starvation.html` | by hand (a pointer page) | – |
 | [Influence functions on the ET-SoC-1](https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions) · `docs/reports/2026-09-25-influence-on-et.html` | `docs/reports/data/2026-09-25-influence-on-et/make_analysis.py` | `docs/reports/data/2026-09-25-influence-on-et/` |
+| [Sparse parity on the ET-SoC-1](https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-parity) (not yet deployed) · `docs/reports/2026-09-29-sparse-parity.html` | `workloads/sparseparity/`, `docs/reports/data/2026-09-29-sparse-parity/make_page_data.py` | `workloads/sparseparity/data/2026-09-29-aifoundry3-{card,card-m4,m5-energy}/`, `workloads/sparseparity/cpu/data/2026-09-29-aifoundry3-r/`, `workloads/sparseparity/proto/data/2026-09-28-aifoundry1/` |
 
 ## Also in the repository
 

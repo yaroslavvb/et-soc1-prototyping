@@ -13,6 +13,17 @@ page, [`AGENT.md`](../AGENT.md) (the entry point for an agent) and `CLAUDE.md` c
 The repository is the source of truth: every result, the experiment that produced it and the raw data are here,
 and `docs/findings/` traces each claim to its file. If a session is lost, resume from this page.
 
+- **Sparse parity (Q66, E59): done on aifoundry3's card, 29 September (04:15–11:40 PDT).** Noisy sparse parity
+  solved as an int8 tensor GEMM on 1,024 minions, checked by two closed-form checksums and a CPU oracle: L1
+  (512, 4, 0.3, 448) 0.131 s, L2 (512, 4, 0.4, 1,850) 0.323 s, (256, 5, 0.4, 1,925) 1.52 s (with the two-stage
+  screen); 7.8–12× one core, 1.1–1.6× six tuned AVX-512 threads. Board energy per solve with the idle, measured on
+  the one-stage scan: 5.0, 16.6 and 89 J; the board alone, 2.5–7.7× below the CPU's assumed package energy at
+  125–251 W (1.6–6.1× with the host that drives the card). The page is built, not yet deployed (private until the
+  owner decides its visibility). The code, its runs and the builds are in `workloads/sparseparity/README.md`, the
+  design in `docs/research/sparse-parity/DESIGN.md`, the data in
+  `workloads/sparseparity/data/2026-09-29-aifoundry3-{card,card-m4,m5-energy}/`, the page in
+  `docs/reports/2026-09-29-sparse-parity.html` (A21). Next steps (cooperative B loads, resident A, a faster row
+  generator, more cards): [`reports/TODO.md`](reports/TODO.md), part D.
 - **The major pass of 28–29 September (Q65, 20:40 PDT on 28 September to 01:10 PDT on 29 September).**
   - **DV2's validation is running on aifoundry2** (E51, the frozen `PREREG-VAL.md`), since 20:45:39 PDT on
     28 September, on the full schedule (the owner accepted a replication on the same card). Its three NAT-4
@@ -44,8 +55,6 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
     rebuilt with the g3log fix. `et-lab-health` rev 3 and `et-reset` are written, not installed
     ([lab-access.md](lab-access.md)).
   - **The session timeline** page, data and tools are in the repository (`6bbf0f3`, `tools/timeline/`).
-  - **Sparse parity (Q66)**: a design and CPU prototypes, no card yet (`docs/research/sparse-parity/DESIGN.md`,
-    `workloads/sparseparity/proto/RESULTS.md`); the implementation is under way.
   - Open from this pass: [`reports/TODO.md`](reports/TODO.md), part 0 (the owner's: the lab fixes, NV's first
     write) and part C (DV2's reduction, the third card, two open results).
 - **aifoundry2 runs kernels again: its card was restored at 08:32 PDT on 28 September** (owner-approved). Its Master

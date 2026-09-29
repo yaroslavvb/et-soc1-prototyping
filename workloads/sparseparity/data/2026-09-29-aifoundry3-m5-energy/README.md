@@ -27,7 +27,8 @@ the measured die temperature, +-3% claimed):**
 | L2 | 2.34 | 39.0 W | 23.9 W | 6.20 | 16.6 | |
 | (256,5) | 0.40 | 34.8-38.3 W | 24.0 W | 28.4 | 89.1 | 14.1 / 12.7 / 0.2 / 1.4 |
 
-The die rose about 1 C. The host CPU's energy cannot be read here (RAPL is root-only), so the comparison is with an
-assumed 125-251 W package for its measured best 6-thread time: L1 18.5-37 J, L2 63.5-127.5 J, (256,5) 221-444 J;
+The die read 51-52 C before a burst and 53.2-53.6 C on average during it (at most 54 C): it rose 1.3-2.3 C. The
+host CPU's energy cannot be read here (RAPL is root-only), so the comparison is with an assumed 125-251 W package for
+its measured best 6-thread time: L1 18.5-37 J, L2 63.5-127.5 J, (256,5) 221-444 J;
 the card's board uses 3.7-7.7x (L1, L2) and 2.5-5.0x ((256,5)) less per solve, idle included, before counting the
 host process that drives the card (assumed 1.4-52 J per solve; ratio with it 1.6-6.1x).

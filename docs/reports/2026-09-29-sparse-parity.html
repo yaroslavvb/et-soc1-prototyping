@@ -1,0 +1,1649 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sparse parity on the ET-SoC-1</title>
+<meta name="description" content="A noisy sparse parity solver for all 1,024 kernel minions of the ET-SoC-1: an exhaustive correlation search written as an int8 matrix product on the tensor units, checked on every run by two closed-form checksums over all the candidates and a CPU oracle. On aifoundry3's card it solves (512, 4, 0.4, 1,850), 2.83 billion candidates, in 0.323 s: 12× one core of the host's i7-11700K and 1.6× six tuned AVX-512 threads at the same risk of missing the secret. Across three sizes it is 7.8–12× one core, 1.1–1.6× six threads and about level with the whole 16-thread host (extrapolated). Measured on the one-stage scan, the board alone uses 2.5–7.7× less energy per solve than the CPU's assumed package energy (1.6–6.1× with the host that drives the card). Why these sizes, how the scan maps onto the chip, the five milestones, the energy, and where the time goes.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --code-bg: #f1f0ec;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100; --c5: #e87ba4; --c7: #4a3aa7; --ref: #8c8b85;
+  --ok: #008300; --warn: #eda100; --bad: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+    --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --code-bg: #242422;
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c7: #9085e9; --ref: #76756f;
+  --ok: #3aa83a; --warn: #c98500; --bad: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-text-size-adjust: 100%; }
+main { max-width: 940px; margin: 0 auto; padding: 28px 16px 72px; }
+h1 { font-size: 1.75rem; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; margin: 44px 0 10px; }
+h3 { font-size: 1rem; margin: 22px 0 8px; }
+.byline { color: var(--ink-2); font-size: 0.9rem; margin: 0 0 22px; }
+.lede { font-size: 1.05rem; }
+.small { font-size: 0.85rem; color: var(--ink-2); }
+a { color: var(--c1); }
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre code { padding: 0; background: none; border-radius: 0; font-size: inherit; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 18px 0 8px; }
+.kpi .lab { color: var(--ink-2); font-size: 0.8rem; }
+.kpi .val { font-size: 1.5rem; font-weight: 650; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.kpi .sub { color: var(--ink-2); font-size: 0.8rem; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.chart.scroll svg { min-width: 640px; }
+.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: 320px; display: none; }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lab { fill: var(--ink-2); font-size: 12px; }
+.lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; }
+td.lvl { font-weight: 600; white-space: nowrap; }
+.wide table { min-width: 760px; }
+.chip { display: inline-block; font-size: 0.74rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid transparent; }
+.chip.works_now { color: var(--ok); border-color: var(--ok); }
+.chip.needs_fw_change { color: var(--c1); border-color: var(--c1); }
+.chip.needs_tooling { color: var(--warn); border-color: var(--warn); }
+.chip.research_only { color: var(--muted); border-color: var(--muted); }
+.chip.impossible_on_silicon { color: var(--bad); border-color: var(--bad); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.82rem; color: var(--ink-2); margin: 6px 0 8px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 6px; }
+.controls button { font: inherit; font-size: 0.82rem; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 4px 12px; cursor: pointer; min-height: 30px; }
+.controls button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.verif { font-size: 0.74rem; color: var(--muted); white-space: nowrap; }
+.verif.confirmed::before { content: "✓ "; color: var(--ok); }
+.verif.disputed::before { content: "± "; color: var(--warn); }
+.verif.unverified::before { content: "· "; }
+ol li, ul li { margin: 5px 0; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--ink-2); font-size: 0.9rem; }
+.chart-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.s1 { stroke: var(--c1); } .s2 { stroke: var(--c2); } .s3 { stroke: var(--c3); } .s4 { stroke: var(--c4); } .s5 { stroke: var(--c5); }
+.ln { fill: none; stroke-width: 2; stroke-linejoin: round; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.math-display { display: block; overflow-x: auto; overflow-y: hidden; max-width: 100%; margin: 16px 0 18px;
+  padding: 2px 0; text-align: center; color: var(--ink); }
+.math-display svg { max-width: none; }
+.math-inline { color: var(--ink); }
+.math-inline svg, .math-display svg { vertical-align: middle; }
+h2, h3 { scroll-margin-top: 12px; }
+.hlink { margin-left: 8px; color: var(--muted); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .hlink, h3:hover .hlink, .hlink:focus { opacity: 1; }
+/* chartkit:css:begin (the chart toolkit's CSS; scripts/paste-chartkit.py copies this block into standalone pages) */
+.ck-frame { position: relative; width: 100%; }
+.ck-frame .ck-plot { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ck-frame svg { display: block; max-width: none; height: auto; }
+.ck-frame svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.ck-frame .tick { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ck-frame .lab { fill: var(--ink-2); font-size: 12px; }
+.ck-frame .lab-strong { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.ck-frame .grid-line { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-axis { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.ck-frame .ck-hit { fill: transparent; stroke: none; }
+.ck-tip { position: absolute; z-index: 5; pointer-events: none; display: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border, var(--grid)); border-radius: 8px; padding: 7px 10px; font-size: 0.8rem; line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); max-width: min(320px, calc(100% - 8px)); }
+.ck-frame svg [tabindex] { outline: none; }
+.ck-frame svg [tabindex]:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse)[tabindex]:not(.ck-hit):focus-visible,
+.ck-frame svg [tabindex]:focus-visible > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 2px; }
+.ck-frame svg :is(rect, circle, polygon, ellipse).ck-active:not(.ck-hit),
+.ck-frame svg .ck-active > :is(rect, circle, polygon, ellipse):not(.ck-hit) { stroke: var(--ink); stroke-width: 1.5px; }
+.ck-hidden { display: none !important; }
+.ck-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 8px 0 6px; }
+.ck-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 8px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-legend .ck-li { display: inline-flex; align-items: center; gap: 6px; }
+.ck-legend button.ck-li { font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 3px 10px; min-height: 32px; cursor: pointer; }
+.ck-legend button.ck-li[aria-pressed="false"] { opacity: 0.55; text-decoration: line-through; }
+.ck-legend svg { flex: none; overflow: visible; }
+.ck-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.82rem; }
+.ck-seg-label { color: var(--ink-2); }
+.ck-seg-group { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ck-seg [role="radio"] { font: inherit; background: var(--surface); color: var(--ink-2); border: 1px solid var(--border, var(--grid));
+  border-radius: 999px; padding: 4px 12px; min-height: 32px; cursor: pointer; }
+.ck-seg [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.ck-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-range input[type="range"] { flex: 0 1 200px; width: 200px; min-width: 120px; min-height: 32px; margin: 0; accent-color: var(--c1); }
+.ck-range output { flex: none; min-width: 3em; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ck-readout { min-height: 1.6em; margin: 6px 0; font-size: 0.9rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ck-legend button:focus-visible, .ck-seg [role="radio"]:focus-visible, .ck-range input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+.ck-sortable th[aria-sort] { padding: 0; }
+.ck-sortable th .ck-sort { font: inherit; font-weight: inherit; color: inherit; text-align: inherit; background: none; border: 0;
+  width: 100%; min-height: 32px; padding: inherit; padding: 6px 8px; cursor: pointer; }
+.ck-sortable th .ck-sort::after { content: ' \2195'; color: var(--muted); font-weight: 400; }
+.ck-sortable th[aria-sort="ascending"] .ck-sort::after { content: ' \2191'; color: var(--ink); }
+.ck-sortable th[aria-sort="descending"] .ck-sort::after { content: ' \2193'; color: var(--ink); }
+.ck-sortable th .ck-sort:focus-visible { outline: 2px solid var(--c1); outline-offset: -2px; }
+.ck-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 8px 0 6px; font-size: 0.82rem; color: var(--ink-2); }
+.ck-filter input { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--border, var(--grid));
+  border-radius: 8px; padding: 4px 8px; min-height: 32px; width: min(260px, 100%); }
+.ck-filter input:focus-visible { outline: 2px solid var(--c1); outline-offset: 1px; }
+.ck-filter-n { color: var(--muted); font-variant-numeric: tabular-nums; }
+/* Hyphenate cells (html lang="en-GB"). Not overflow-wrap:anywhere: in auto-layout tables it lets a column shrink to one
+   letter ("aifo/un/dry/2"); a page that wants it for a fixed-layout table sets it on that table. */
+th, td { overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+th.num { white-space: normal; }
+@media (max-width: 599px) {
+  table.stack, .wide table.stack { min-width: 0; }
+  table.stack thead { display: none; }
+  table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+  table.stack tr { border-bottom: 1px solid var(--grid); padding: 6px 0; }
+  table.stack td, table.stack td.num { border: 0; padding: 2px 0; text-align: left; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--muted); }
+  table.stack td:first-child::before { content: none; }
+  table.stack td:first-child { font-weight: 600; }
+}
+@media (max-width: 480px) { .math-display svg { max-width: 100%; height: auto; } }
+/* Collapsible depth: details.more (the toolkit's reveal() opens one when a link points inside it) */
+details.more { margin: 14px 0; border-left: 3px solid var(--grid); padding: 2px 0 2px 12px; }
+details.more > summary { cursor: pointer; color: var(--ink); font-weight: 600; font-size: 0.95rem; list-style: none; padding: 4px 0; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "\25B8\00a0"; color: var(--muted); }
+details.more[open] > summary::before { content: "\25BE\00a0"; }
+details.more > summary .more-hint { color: var(--muted); font-weight: 400; }
+details.more[open] > summary { margin-bottom: 6px; }
+/* chartkit:css:end */
+</style>
+</head>
+<body>
+<main>
+<style>
+blockquote.owner { margin: 12px 0; padding: 8px 14px; border-left: 3px solid var(--axis); color: var(--ink-2); font-size: 0.95rem; }
+.answer { margin: 14px 0 8px; }
+.answer ul { margin: 6px 0 0; padding-left: 1.2em; }
+.answer li { margin: 5px 0; }
+.kpi .val { font-variant-numeric: normal; }
+.dg { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 12px 0 6px; }
+.dg-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; min-width: 0; }
+.dg-h { font-weight: 650; font-size: 0.92rem; margin: 0 0 6px; }
+.dg-t { font-size: 0.84rem; color: var(--ink-2); margin: 8px 0 0; line-height: 1.5; }
+.dg-flow { display: flex; flex-direction: column; gap: 0; }
+.dg-box { border: 1px solid var(--border); border-left: 4px solid var(--ref); border-radius: 8px; padding: 7px 10px;
+  font-size: 0.84rem; line-height: 1.45; background: var(--page); }
+.dg-box b { color: var(--ink); }
+.dg-box.h1 { border-left-color: var(--c2); }
+.dg-box.h0 { border-left-color: var(--c1); }
+.dg-box.ep { border-left-color: var(--c3); }
+.dg-box.out { border-left-color: var(--ink-2); }
+.dg-arrow { text-align: center; color: var(--muted); font-size: 0.8rem; line-height: 1.2; padding: 3px 0; }
+.dg-tu { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.8rem; color: var(--ink-2); }
+.cap { font-size: 0.85rem; color: var(--ink-2); margin: 4px 0 12px; }
+.assumed { font-weight: 650; color: var(--warn); }
+td .sub { display: block; font-size: 0.75rem; color: var(--muted); }
+.word { font-weight: 650; white-space: nowrap; }
+.word.pass { color: var(--ok); } .word.fail { color: var(--bad); }
+</style>
+
+<h1>Sparse parity on the ET-SoC-1</h1>
+<p class="byline">29 September 2026 · CPU prototypes on aifoundry1's host (28 September) and aifoundry3's host;
+every card run on aifoundry3's card at 600 MHz, 04:15–11:40 PDT (M1–M5) · commits <code>92b168f</code> to
+<code>6082cb9</code> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1
+measurement reports</a></p>
+
+<p class="lede">The ET-SoC-1 solves noisy sparse parity on all 1,024 of its kernel minions as an exhaustive
+correlation search, written as an int8 matrix product on the tensor units. On aifoundry3's card the flagship size,
+L2 (n = 512 features, a secret of k = 4 of them, labels flipped with probability η = 0.4, m = 1,850 samples:
+2.83 billion candidate subsets), solves in <b data-v="l2Solve"></b>. One core of the host's i7-11700K, running a
+tuned AVX-512 scan, takes <span data-v="l2cpu1"></span> (<span data-v="l2r1"></span>); six tuned threads running the
+CPU's best method at the same risk of missing the secret take <span data-v="l2cpu6"></span>
+(<span data-v="l2r6"></span>). Across the three showcase sizes the card is <b data-v="r1"></b> one core and
+<b data-v="r6"></b> six tuned threads. Against the whole 16-thread host, extrapolated from six threads, it is about
+level (<span data-v="r16"></span>). Energy was measured on the one-stage scan: the board alone uses
+<b data-v="rE"></b> less per solve than the CPU's package energy at an assumed 125–251 W, and
+<span data-v="rEhost"></span> less once the host that drives the card is counted. The design's first prediction, 3.5–16× a whole 16-thread host, did not survive a
+critique of its CPU baseline and the card's own measurements (§6).</p>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">L2 on the card, 2.83×10<sup>9</sup> candidates</div><div class="val" data-v="l2Solve"></div><div class="sub">(512, 4, 0.4, 1,850), two-stage screen, 1,024 minions</div></div>
+  <div class="card kpi"><div class="lab">Against one core (tuned AVX-512 scan)</div><div class="val" data-v="r1"></div><div class="sub">L1, L2 and (256,5)</div></div>
+  <div class="card kpi"><div class="lab">Against six tuned threads, the CPU's best method</div><div class="val" data-v="r6"></div><div class="sub">both sides lose the secret with P &lt; 10<sup>−4</sup></div></div>
+  <div class="card kpi"><div class="lab">Board energy per solve, idle included</div><div class="val" data-v="eAll"></div><div class="sub">L1 · L2 · (256,5), one-stage scan: the board alone <span data-v="rE"></span> below the CPU's <span class="assumed">assumed</span> package energy (<span data-v="rEhost"></span> with the host)</div></div>
+</div>
+
+<blockquote class="owner">The owner's request (28 September, 21:14 PDT): “prototype a sparse parity solver which is
+efficient on this machine. Come up with dimensions of the problem where it's visible to use the ~1,000 cores; toy
+prototyping first, experiment with various sizes, then a scalable solution which runs on the Esperanto
+chip.”</blockquote>
+
+<div class="card answer" id="in-short">
+<b>In short</b>
+<ul>
+<li><b>Which sizes.</b> Without noise the problem is a GF(2) linear solve: <span data-v="geMs"></span> on one core at
+n = 512. With noise (η = 0.3–0.4) the practical method is the exhaustive correlation search, and at n = 256–512,
+k = 4–5 it scores <span data-v="cand"></span> candidates, seconds to a quarter of a minute on one core (§1).</li>
+<li><b>How.</b> Each candidate's score is one entry of a ±1 matrix product. Hart 1 of every minion builds the rows,
+hart 0 feeds the tensor unit. On every run two closed-form checksums over all the candidates must come out exact,
+which a dropped, doubled or mis-scored tile fails, and a CPU oracle rescores whole minions (§2).</li>
+<li><b>How fast.</b> L1, L2 and (256,5) solve in <span data-v="cardAll"></span> on the card. One core takes
+<span data-v="cpu1"></span>; six tuned threads, with the CPU's best method at P(loss) ≤ 10<sup>−4</sup>,
+<span data-v="cpu6"></span> (§3).</li>
+<li><b>Energy.</b> Measured on the one-stage scan, the board uses <span data-v="eL1"></span>,
+<span data-v="eL2"></span> and <span data-v="eF5"></span> per solve, idle included. The board alone is
+<span data-v="rE"></span> below the CPU's package energy at an <span class="assumed">assumed</span> 125–251 W, and
+<span data-v="rEhost"></span> below it with the host that drives the card (§4).</li>
+<li><b>What limits it.</b> Hart 1's row generation, the shire's bandwidth for streamed operands (a floor of about 512
+cycles per tensor op at 32 minions per shire, against 270 in a microbenchmark whose rows stay resident), and the
+per-tile epilogue. Cooperative operand loads, resident rows and a faster row generator are what would help next (§5).</li>
+</ul>
+</div>
+
+<h2 id="problem">1. The problem, and where 1,024 cores become visible</h2>
+<p><b>The problem.</b> Each sample x is uniform in {±1}<sup>n</sup>. Its label y is the product of x over a secret
+subset S of k features, flipped with probability η. Given m samples, return S. A candidate subset T scores</p>
+<span class="math-display"><svg style="vertical-align: -2.819ex;" xmlns="http://www.w3.org/2000/svg" width="32.907ex" height="6.354ex" role="img" focusable="false" viewBox="0 -1562.5 14544.7 2808.5" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-1-TEX-I-1D450" d="M34 159Q34 268 120 355T306 442Q362 442 394 418T427 355Q427 326 408 306T360 285Q341 285 330 295T319 325T330 359T352 380T366 386H367Q367 388 361 392T340 400T306 404Q276 404 249 390Q228 381 206 359Q162 315 142 235T121 119Q121 73 147 50Q169 26 205 26H209Q321 26 394 111Q403 121 406 121Q410 121 419 112T429 98T420 83T391 55T346 25T282 0T202 -11Q127 -11 81 37T34 159Z"></path><path id="MJX-1-TEX-N-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path><path id="MJX-1-TEX-I-1D447" d="M40 437Q21 437 21 445Q21 450 37 501T71 602L88 651Q93 669 101 677H569H659Q691 677 697 676T704 667Q704 661 687 553T668 444Q668 437 649 437Q640 437 637 437T631 442L629 445Q629 451 635 490T641 551Q641 586 628 604T573 629Q568 630 515 631Q469 631 457 630T439 622Q438 621 368 343T298 60Q298 48 386 46Q418 46 427 45T436 36Q436 31 433 22Q429 4 424 1L422 0Q419 0 415 0Q410 0 363 1T228 2Q99 2 64 0H49Q43 6 43 9T45 27Q49 40 55 46H83H94Q174 46 189 55Q190 56 191 56Q196 59 201 76T241 233Q258 301 269 344Q339 619 339 625Q339 630 310 630H279Q212 630 191 624Q146 614 121 583T67 467Q60 445 57 441T43 437H40Z"></path><path id="MJX-1-TEX-N-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path><path id="MJX-1-TEX-N-3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path><path id="MJX-1-TEX-LO-2211" d="M60 948Q63 950 665 950H1267L1325 815Q1384 677 1388 669H1348L1341 683Q1320 724 1285 761Q1235 809 1174 838T1033 881T882 898T699 902H574H543H251L259 891Q722 258 724 252Q725 250 724 246Q721 243 460 -56L196 -356Q196 -357 407 -357Q459 -357 548 -357T676 -358Q812 -358 896 -353T1063 -332T1204 -283T1307 -196Q1328 -170 1348 -124H1388Q1388 -125 1381 -145T1356 -210T1325 -294L1267 -449L666 -450Q64 -450 61 -448Q55 -446 55 -439Q55 -437 57 -433L590 177Q590 178 557 222T452 366T322 544L56 909L55 924Q55 945 60 948Z"></path><path id="MJX-1-TEX-I-1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"></path><path id="MJX-1-TEX-N-31" d="M213 578L200 573Q186 568 160 563T102 556H83V602H102Q149 604 189 617T245 641T273 663Q275 666 285 666Q294 666 302 660V361L303 61Q310 54 315 52T339 48T401 46H427V0H416Q395 3 257 3Q121 3 100 0H88V46H114Q136 46 152 46T177 47T193 50T201 52T207 57T213 61V578Z"></path><path id="MJX-1-TEX-I-1D45A" d="M21 287Q22 293 24 303T36 341T56 388T88 425T132 442T175 435T205 417T221 395T229 376L231 369Q231 367 232 367L243 378Q303 442 384 442Q401 442 415 440T441 433T460 423T475 411T485 398T493 385T497 373T500 364T502 357L510 367Q573 442 659 442Q713 442 746 415T780 336Q780 285 742 178T704 50Q705 36 709 31T724 26Q752 26 776 56T815 138Q818 149 821 151T837 153Q857 153 857 145Q857 144 853 130Q845 101 831 73T785 17T716 -10Q669 -10 648 17T627 73Q627 92 663 193T700 345Q700 404 656 404H651Q565 404 506 303L499 291L466 157Q433 26 428 16Q415 -11 385 -11Q372 -11 364 -4T353 8T350 18Q350 29 384 161L420 307Q423 322 423 345Q423 404 379 404H374Q288 404 229 303L222 291L189 157Q156 26 151 16Q138 -11 108 -11Q95 -11 87 -5T76 7T74 17Q74 30 112 181Q151 335 151 342Q154 357 154 369Q154 405 129 405Q107 405 92 377T69 316T57 280Q55 278 41 278H27Q21 284 21 287Z"></path><path id="MJX-1-TEX-I-1D466" d="M21 287Q21 301 36 335T84 406T158 442Q199 442 224 419T250 355Q248 336 247 334Q247 331 231 288T198 191T182 105Q182 62 196 45T238 27Q261 27 281 38T312 61T339 94Q339 95 344 114T358 173T377 247Q415 397 419 404Q432 431 462 431Q475 431 483 424T494 412T496 403Q496 390 447 193T391 -23Q363 -106 294 -155T156 -205Q111 -205 77 -183T43 -117Q43 -95 50 -80T69 -58T89 -48T106 -45Q150 -45 150 -87Q150 -107 138 -122T115 -142T102 -147L99 -148Q101 -153 118 -160T152 -167H160Q177 -167 186 -165Q219 -156 247 -127T290 -65T313 -9T321 21L315 17Q309 13 296 6T270 -6Q250 -11 231 -11Q185 -11 150 11T104 82Q103 89 103 113Q103 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Z"></path><path id="MJX-1-TEX-N-7E" d="M179 251Q164 251 151 245T131 234T111 215L97 227L83 238Q83 239 95 253T121 283T142 304Q165 318 187 318T253 300T320 282Q335 282 348 288T368 299T388 318L402 306L416 295Q375 236 344 222Q330 215 313 215Q292 215 248 233T179 251Z"></path><path id="MJX-1-TEX-LO-220F" d="M220 812Q220 813 218 819T214 829T208 840T199 853T185 866T166 878T140 887T107 893T66 896H56V950H1221V896H1211Q1080 896 1058 812V-311Q1076 -396 1211 -396H1221V-450H725V-396H735Q864 -396 888 -314Q889 -312 889 -311V896H388V292L389 -311Q405 -396 542 -396H552V-450H56V-396H66Q195 -396 219 -314Q220 -312 220 -311V812Z"></path><path id="MJX-1-TEX-I-1D461" d="M26 385Q19 392 19 395Q19 399 22 411T27 425Q29 430 36 430T87 431H140L159 511Q162 522 166 540T173 566T179 586T187 603T197 615T211 624T229 626Q247 625 254 615T261 596Q261 589 252 549T232 470L222 433Q222 431 272 431H323Q330 424 330 420Q330 398 317 385H210L174 240Q135 80 135 68Q135 26 162 26Q197 26 230 60T283 144Q285 150 288 151T303 153H307Q322 153 322 145Q322 142 319 133Q314 117 301 95T267 48T216 6T155 -11Q125 -11 98 4T59 56Q57 64 57 83V101L92 241Q127 382 128 383Q128 385 77 385H26Z"></path><path id="MJX-1-TEX-N-2208" d="M84 250Q84 372 166 450T360 539Q361 539 377 539T419 540T469 540H568Q583 532 583 520Q583 511 570 501L466 500Q355 499 329 494Q280 482 242 458T183 409T147 354T129 306T124 272V270H568Q583 262 583 250T568 230H124V228Q124 207 134 177T167 112T231 48T328 7Q355 1 466 0H570Q583 -10 583 -20Q583 -32 568 -40H471Q464 -40 446 -40T417 -41Q262 -41 172 45Q84 127 84 250Z"></path><path id="MJX-1-TEX-I-1D465" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path><path id="MJX-1-TEX-N-2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"></path><path id="MJX-1-TEX-N-32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path><path id="MJX-1-TEX-I-1D451" d="M366 683Q367 683 438 688T511 694Q523 694 523 686Q523 679 450 384T375 83T374 68Q374 26 402 26Q411 27 422 35Q443 55 463 131Q469 151 473 152Q475 153 483 153H487H491Q506 153 506 145Q506 140 503 129Q490 79 473 48T445 8T417 -8Q409 -10 393 -10Q359 -10 336 5T306 36L300 51Q299 52 296 50Q294 48 292 46Q233 -10 172 -10Q117 -10 75 30T33 157Q33 205 53 255T101 341Q148 398 195 420T280 442Q336 442 364 400Q369 394 369 396Q370 400 396 505T424 616Q424 629 417 632T378 637H357Q351 643 351 645T353 664Q358 683 366 683ZM352 326Q329 405 277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q233 26 290 98L298 109L352 326Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><use data-c="1D450" xlink:href="#MJX-1-TEX-I-1D450"></use></g><g data-mml-node="mo" transform="translate(433,0)"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mi" transform="translate(822,0)"><use data-c="1D447" xlink:href="#MJX-1-TEX-I-1D447"></use></g><g data-mml-node="mo" transform="translate(1526,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g><g data-mml-node="mo" transform="translate(2192.8,0)"><use data-c="3D" xlink:href="#MJX-1-TEX-N-3D"></use></g><g data-mml-node="munderover" transform="translate(3248.6,0)"><g data-mml-node="mo"><use data-c="2211" xlink:href="#MJX-1-TEX-LO-2211"></use></g><g data-mml-node="TeXAtom" transform="translate(148.2,-1087.9) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D456" xlink:href="#MJX-1-TEX-I-1D456"></use></g><g data-mml-node="mo" transform="translate(345,0)"><use data-c="3D" xlink:href="#MJX-1-TEX-N-3D"></use></g><g data-mml-node="mn" transform="translate(1123,0)"><use data-c="31" xlink:href="#MJX-1-TEX-N-31"></use></g></g><g data-mml-node="TeXAtom" transform="translate(411.6,1150) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D45A" xlink:href="#MJX-1-TEX-I-1D45A"></use></g></g></g><g data-mml-node="msub" transform="translate(4859.2,0)"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mover"><g data-mml-node="mi"><use data-c="1D466" xlink:href="#MJX-1-TEX-I-1D466"></use></g><g data-mml-node="mo" transform="translate(300.6,332) translate(-250 0)"><use data-c="7E" xlink:href="#MJX-1-TEX-N-7E"></use></g></g></g><g data-mml-node="mi" transform="translate(523,-150) scale(0.707)"><use data-c="1D456" xlink:href="#MJX-1-TEX-I-1D456"></use></g></g><g data-mml-node="munder" transform="translate(5842.8,0)"><g data-mml-node="mo"><use data-c="220F" xlink:href="#MJX-1-TEX-LO-220F"></use></g><g data-mml-node="TeXAtom" transform="translate(26.6,-1095.7) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D461" xlink:href="#MJX-1-TEX-I-1D461"></use></g><g data-mml-node="mo" transform="translate(361,0)"><use data-c="2208" xlink:href="#MJX-1-TEX-N-2208"></use></g><g data-mml-node="mi" transform="translate(1028,0)"><use data-c="1D447" xlink:href="#MJX-1-TEX-I-1D447"></use></g></g></g><g data-mml-node="msub" transform="translate(7287.5,0)"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mover"><g data-mml-node="mi"><use data-c="1D465" xlink:href="#MJX-1-TEX-I-1D465"></use></g><g data-mml-node="mo" transform="translate(313.8,332) translate(-250 0)"><use data-c="7E" xlink:href="#MJX-1-TEX-N-7E"></use></g></g></g><g data-mml-node="TeXAtom" transform="translate(605,-150) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D456" xlink:href="#MJX-1-TEX-I-1D456"></use></g><g data-mml-node="mi" transform="translate(345,0)"><use data-c="1D461" xlink:href="#MJX-1-TEX-I-1D461"></use></g></g></g><g data-mml-node="mo" transform="translate(8719.5,0)"><use data-c="3D" xlink:href="#MJX-1-TEX-N-3D"></use></g><g data-mml-node="mi" transform="translate(9775.3,0)"><use data-c="1D45A" xlink:href="#MJX-1-TEX-I-1D45A"></use></g><g data-mml-node="mo" transform="translate(10875.5,0)"><use data-c="2212" xlink:href="#MJX-1-TEX-N-2212"></use></g><g data-mml-node="mn" transform="translate(11875.7,0)"><use data-c="32" xlink:href="#MJX-1-TEX-N-32"></use></g><g data-mml-node="mstyle" transform="translate(12375.7,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="mi" transform="translate(12542.7,0)"><use data-c="1D451" xlink:href="#MJX-1-TEX-I-1D451"></use></g><g data-mml-node="mo" transform="translate(13062.7,0)"><use data-c="28" xlink:href="#MJX-1-TEX-N-28"></use></g><g data-mml-node="mi" transform="translate(13451.7,0)"><use data-c="1D447" xlink:href="#MJX-1-TEX-I-1D447"></use></g><g data-mml-node="mo" transform="translate(14155.7,0)"><use data-c="29" xlink:href="#MJX-1-TEX-N-29"></use></g></g></g></svg></span>
+<p>where the tildes mark ±1 values and d(T) counts the samples whose label disagrees with the parity of T. The answer
+is the candidate with the largest score; a tie counts as a failure. m is SP3's 99% sample count,
+about 2 ln C(n,k)/(1−2η)<sup>2</sup>, which SP3's binomial model predicted within 0.63–1.37× of 20-seed measurements
+at 85 points.</p>
+<p><b>Without noise it is not a many-core problem.</b> With m ≥ n samples the labels are a linear system over GF(2),
+and elimination solves n = 512 in <span data-v="geMs"></span> on one core (SP3, 400 runs, all solved by m = n + 6). The
+Sutro group's challenge tiers (n = 20, k = 3 and n = 32, k = 5, both noiseless) take microseconds. <b>With noise</b>
+elimination needs a clean subset of samples, and SP3's best elimination variant was 6–3,200× slower than the plain
+scan everywhere but k = 5, η = 0.1, n ≤ 128. What remains is the exhaustive correlation search, the statistical-query-optimal
+method: C(n,k) candidates times m samples. It is a matrix product, which is what the tensor unit does.</p>
+<p><b>Where the minions show.</b> A kernel launch on 32 shires costs about 0.56 ms and opening the device about 0.18 s,
+and the lab's rule caps a device-holding process at 10 s. So a solve is worth the card when its work
+W = C(n,k)·m is about 10<sup>12</sup> subset-samples or more: a kernel of 50 ms or longer, where the launch is under
+1% (DESIGN.md §1.3). Past about 8 s of card time a solve has to be split across processes. The chart shows where that falls: one core of SP3's
+AVX-512 bit scan at the 99% sample count, for n = 128–512, k = 3–5 and η = 0–0.4.</p>
+<div class="chart-title">One core's time for the exhaustive scan, by noise η, sample count at 99% success</div>
+<div id="gridleg"></div>
+<div class="chart" id="gridchart"></div>
+<p class="cap" id="gridcap">Filled marks: work C(n,k)·m ≥ 10<sup>12</sup>, where the 1,024 minions show; hollow: below it.
+Rings mark the three showcase sizes. Diamonds: GF(2) elimination on noiseless labels, the same for every k. SP3's
+scan (<code>workloads/sparseparity/proto/spbits.c</code>) on aifoundry1's i7-11700K, 28 September: measured at one
+thread where timed, else a timed slice, 4 threads × their measured speedup (<span data-v="sp4"></span>), or the
+per-subset fit. The tuned scan used as the baseline from §3 on is 2.4–4.4× faster on one core.</p>
+<details class="more"><summary>Every point: one core's time, m and C(n,k) <span class="more-hint">(the chart's table)</span></summary>
+<div class="table-wrap"><table id="gridtable"></table></div>
+<p class="small">m is SP3's measured 20-of-20 sample count where the 20-seed search ran, else its binomial model's 99%
+point. Source: <code data-v="gridSrc"></code>, through <code>workloads/sparseparity/proto/report.py</code>'s helpers.</p>
+</details>
+<p><b>The showcase sizes</b> follow from the chart. L1 (512, 4, 0.3, 448) is the strong-scaling size; L2
+(512, 4, 0.4, 1,850) the flagship; (256, 5, 0.4, 1,925) the k = 5 size. The design first made
+(512, 5, 0.2, 218) its flagship, where m is small and the card's predicted lead was largest. After its critique the
+flagship moved to η = 0.4 (DESIGN.md, Amendments), where the CPU's AVX-512 popcount is at its best, so the comparison
+is the harder one for the card.</p>
+<div class="table-wrap"><table id="showtable" class="stack"></table></div>
+
+<h2 id="algorithm">2. The algorithm and how it maps onto the chip</h2>
+<p><b>The scan as a matrix product.</b> Write a candidate as T = R ∪ {j}: R a (k−1)-subset, j a feature larger than
+every element of R. The row for R holds, for each sample, the label times the product of R's features; the column for
+j holds feature j itself. Their dot product over the samples is c(T). Bits become the int8 values +1 and −1, the
+tensor unit's int32 sums are exact, and padding samples are zero bytes. Rows are taken in colex order, which sorts
+them by their largest element, so the valid entries (j above max R) form a staircase and each k-subset appears
+exactly once.</p>
+<p><b>The tile.</b> <code>TensorIMA8A32</code> computes C[16×16] += A[16×64] × B[64×16] in int32. One output tile is
+16 consecutive rows by 16 features; it takes S = ⌈m/64⌉ ops, one per 64 samples, accumulating in the tensor unit's
+C registers. A comes from the minion's 3 KB L1 scratchpad, B streams in from the shire's scratchpad. Only hart 0 of a
+minion may issue tensor ops, so the two harts split the work:</p>
+<div class="dg" id="diagram">
+ <div class="dg-panel">
+  <div class="dg-h">1 · The scan as tiles</div>
+  <div class="chart" id="dgtiles"></div>
+  <p class="dg-t">Rows: the (k−1)-subsets R, 16 to a row tile, in colex order. Columns: the n features, 16 to a
+  tile. Only tiles right of the staircase (j &gt; max R) are computed; entries left of it inside a boundary tile are
+  masked. The coloured strip shows the planner's blocks, dealt round-robin to the shires.</p>
+ </div>
+ <div class="dg-panel">
+  <div class="dg-h">2 · One minion's two harts</div>
+  <div class="dg-flow">
+   <div class="dg-box h1"><b>Hart 1</b> builds a row tile: 16 rows × 64·S bytes of ±1, from bit-packed X and y
+   (XOR the features of R, then expand to bytes), and stages it in the shire's scratchpad.</div>
+   <div class="dg-arrow">↓ published through an L2 line</div>
+   <div class="dg-box h0"><b>Hart 0</b> loads A into its L1 scratchpad and a feature tile B into the tensor unit, then
+   issues <code>TensorIMA8A32</code> S times:<span class="dg-tu" style="display:block;margin-top:2px">C[16×16] += A[16×64]·B[64×16]</span></div>
+   <div class="dg-arrow">↓ after the last of the S ops</div>
+   <div class="dg-box ep"><b>Epilogue</b> (hart 0): mask the staircase, add Σc and Σc², keep the best score and a tie
+   flag; in M5 also log every candidate with c<sub>1</sub> ≥ τ<sub>1</sub>.</div>
+   <div class="dg-arrow">↓ at the end</div>
+   <div class="dg-box out">one 64 B record per hart; one survivor log per minion (M5)</div>
+  </div>
+ </div>
+ <div class="dg-panel">
+  <div class="dg-h">3 · 32 shires × 32 minions</div>
+  <div class="chart" id="dgchip"></div>
+  <p class="dg-t">The host cuts the row tiles into 4,096 blocks of equal modelled cost and deals block q to shire
+  q mod 32: four blocks per minion. The features are copied once into every shire's 2.5 MB scratchpad. Nothing
+  crosses between shires; the host reads 2,048 records back and checks them.</p>
+ </div>
+</div>
+<p class="cap">The mapping, schematically: the tile counts are illustrative (L2 has 1,381,776 row tiles and 32 column
+tiles). Only 32 of the chip's 34 minion shires run kernels: one is the firmware's master and one a spare.</p>
+<p><b>Checking coverage.</b> Two sums over all C(n,k) candidates have closed forms in the data alone, through the
+Krawtchouk polynomial K<sub>k</sub>(w) = Σ<sub>t</sub> (−1)<sup>t</sup> C(w,t) C(n−w,k−t), with w<sub>i</sub> the
+weight of sample i and d the Hamming distance:</p>
+<span class="math-display"><svg style="vertical-align: -3.028ex;" xmlns="http://www.w3.org/2000/svg" width="63.447ex" height="5.178ex" role="img" focusable="false" viewBox="0 -950 28043.6 2288.5" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-2-TEX-LO-2211" d="M60 948Q63 950 665 950H1267L1325 815Q1384 677 1388 669H1348L1341 683Q1320 724 1285 761Q1235 809 1174 838T1033 881T882 898T699 902H574H543H251L259 891Q722 258 724 252Q725 250 724 246Q721 243 460 -56L196 -356Q196 -357 407 -357Q459 -357 548 -357T676 -358Q812 -358 896 -353T1063 -332T1204 -283T1307 -196Q1328 -170 1348 -124H1388Q1388 -125 1381 -145T1356 -210T1325 -294L1267 -449L666 -450Q64 -450 61 -448Q55 -446 55 -439Q55 -437 57 -433L590 177Q590 178 557 222T452 366T322 544L56 909L55 924Q55 945 60 948Z"></path><path id="MJX-2-TEX-I-1D447" d="M40 437Q21 437 21 445Q21 450 37 501T71 602L88 651Q93 669 101 677H569H659Q691 677 697 676T704 667Q704 661 687 553T668 444Q668 437 649 437Q640 437 637 437T631 442L629 445Q629 451 635 490T641 551Q641 586 628 604T573 629Q568 630 515 631Q469 631 457 630T439 622Q438 621 368 343T298 60Q298 48 386 46Q418 46 427 45T436 36Q436 31 433 22Q429 4 424 1L422 0Q419 0 415 0Q410 0 363 1T228 2Q99 2 64 0H49Q43 6 43 9T45 27Q49 40 55 46H83H94Q174 46 189 55Q190 56 191 56Q196 59 201 76T241 233Q258 301 269 344Q339 619 339 625Q339 630 310 630H279Q212 630 191 624Q146 614 121 583T67 467Q60 445 57 441T43 437H40Z"></path><path id="MJX-2-TEX-I-1D450" d="M34 159Q34 268 120 355T306 442Q362 442 394 418T427 355Q427 326 408 306T360 285Q341 285 330 295T319 325T330 359T352 380T366 386H367Q367 388 361 392T340 400T306 404Q276 404 249 390Q228 381 206 359Q162 315 142 235T121 119Q121 73 147 50Q169 26 205 26H209Q321 26 394 111Q403 121 406 121Q410 121 419 112T429 98T420 83T391 55T346 25T282 0T202 -11Q127 -11 81 37T34 159Z"></path><path id="MJX-2-TEX-N-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path><path id="MJX-2-TEX-N-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path><path id="MJX-2-TEX-N-3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path><path id="MJX-2-TEX-I-1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"></path><path id="MJX-2-TEX-I-1D466" d="M21 287Q21 301 36 335T84 406T158 442Q199 442 224 419T250 355Q248 336 247 334Q247 331 231 288T198 191T182 105Q182 62 196 45T238 27Q261 27 281 38T312 61T339 94Q339 95 344 114T358 173T377 247Q415 397 419 404Q432 431 462 431Q475 431 483 424T494 412T496 403Q496 390 447 193T391 -23Q363 -106 294 -155T156 -205Q111 -205 77 -183T43 -117Q43 -95 50 -80T69 -58T89 -48T106 -45Q150 -45 150 -87Q150 -107 138 -122T115 -142T102 -147L99 -148Q101 -153 118 -160T152 -167H160Q177 -167 186 -165Q219 -156 247 -127T290 -65T313 -9T321 21L315 17Q309 13 296 6T270 -6Q250 -11 231 -11Q185 -11 150 11T104 82Q103 89 103 113Q103 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Z"></path><path id="MJX-2-TEX-N-7E" d="M179 251Q164 251 151 245T131 234T111 215L97 227L83 238Q83 239 95 253T121 283T142 304Q165 318 187 318T253 300T320 282Q335 282 348 288T368 299T388 318L402 306L416 295Q375 236 344 222Q330 215 313 215Q292 215 248 233T179 251Z"></path><path id="MJX-2-TEX-I-1D43E" d="M285 628Q285 635 228 637Q205 637 198 638T191 647Q191 649 193 661Q199 681 203 682Q205 683 214 683H219Q260 681 355 681Q389 681 418 681T463 682T483 682Q500 682 500 674Q500 669 497 660Q496 658 496 654T495 648T493 644T490 641T486 639T479 638T470 637T456 637Q416 636 405 634T387 623L306 305Q307 305 490 449T678 597Q692 611 692 620Q692 635 667 637Q651 637 651 648Q651 650 654 662T659 677Q662 682 676 682Q680 682 711 681T791 680Q814 680 839 681T869 682Q889 682 889 672Q889 650 881 642Q878 637 862 637Q787 632 726 586Q710 576 656 534T556 455L509 418L518 396Q527 374 546 329T581 244Q656 67 661 61Q663 59 666 57Q680 47 717 46H738Q744 38 744 37T741 19Q737 6 731 0H720Q680 3 625 3Q503 3 488 0H478Q472 6 472 9T474 27Q478 40 480 43T491 46H494Q544 46 544 71Q544 75 517 141T485 216L427 354L359 301L291 248L268 155Q245 63 245 58Q245 51 253 49T303 46H334Q340 37 340 35Q340 19 333 5Q328 0 317 0Q314 0 280 1T180 2Q118 2 85 2T49 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Z"></path><path id="MJX-2-TEX-I-1D458" d="M121 647Q121 657 125 670T137 683Q138 683 209 688T282 694Q294 694 294 686Q294 679 244 477Q194 279 194 272Q213 282 223 291Q247 309 292 354T362 415Q402 442 438 442Q468 442 485 423T503 369Q503 344 496 327T477 302T456 291T438 288Q418 288 406 299T394 328Q394 353 410 369T442 390L458 393Q446 405 434 405H430Q398 402 367 380T294 316T228 255Q230 254 243 252T267 246T293 238T320 224T342 206T359 180T365 147Q365 130 360 106T354 66Q354 26 381 26Q429 26 459 145Q461 153 479 153H483Q499 153 499 144Q499 139 496 130Q455 -11 378 -11Q333 -11 305 15T277 90Q277 108 280 121T283 145Q283 167 269 183T234 206T200 217T182 220H180Q168 178 159 139T145 81T136 44T129 20T122 7T111 -2Q98 -11 83 -11Q66 -11 57 -1T48 16Q48 26 85 176T158 471L195 616Q196 629 188 632T149 637H144Q134 637 131 637T124 640T121 647Z"></path><path id="MJX-2-TEX-I-1D464" d="M580 385Q580 406 599 424T641 443Q659 443 674 425T690 368Q690 339 671 253Q656 197 644 161T609 80T554 12T482 -11Q438 -11 404 5T355 48Q354 47 352 44Q311 -11 252 -11Q226 -11 202 -5T155 14T118 53T104 116Q104 170 138 262T173 379Q173 380 173 381Q173 390 173 393T169 400T158 404H154Q131 404 112 385T82 344T65 302T57 280Q55 278 41 278H27Q21 284 21 287Q21 293 29 315T52 366T96 418T161 441Q204 441 227 416T250 358Q250 340 217 250T184 111Q184 65 205 46T258 26Q301 26 334 87L339 96V119Q339 122 339 128T340 136T341 143T342 152T345 165T348 182T354 206T362 238T373 281Q402 395 406 404Q419 431 449 431Q468 431 475 421T483 402Q483 389 454 274T422 142Q420 131 420 107V100Q420 85 423 71T442 42T487 26Q558 26 600 148Q609 171 620 213T632 273Q632 306 619 325T593 357T580 385Z"></path><path id="MJX-2-TEX-N-2C" d="M78 35T78 60T94 103T137 121Q165 121 187 96T210 8Q210 -27 201 -60T180 -117T154 -158T130 -185T117 -194Q113 -194 104 -185T95 -172Q95 -168 106 -156T131 -126T157 -76T173 -3V9L172 8Q170 7 167 6T161 3T152 1T140 0Q113 0 96 17Z"></path><path id="MJX-2-TEX-N-32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path><path id="MJX-2-TEX-V-2032" d="M79 43Q73 43 52 49T30 61Q30 68 85 293T146 528Q161 560 198 560Q218 560 240 545T262 501Q262 496 260 486Q259 479 173 263T84 45T79 43Z"></path><path id="MJX-2-TEX-SO-28" d="M152 251Q152 646 388 850H416Q422 844 422 841Q422 837 403 816T357 753T302 649T255 482T236 250Q236 124 255 19T301 -147T356 -251T403 -315T422 -340Q422 -343 416 -349H388Q359 -325 332 -296T271 -213T212 -97T170 56T152 251Z"></path><path id="MJX-2-TEX-I-1D451" d="M366 683Q367 683 438 688T511 694Q523 694 523 686Q523 679 450 384T375 83T374 68Q374 26 402 26Q411 27 422 35Q443 55 463 131Q469 151 473 152Q475 153 483 153H487H491Q506 153 506 145Q506 140 503 129Q490 79 473 48T445 8T417 -8Q409 -10 393 -10Q359 -10 336 5T306 36L300 51Q299 52 296 50Q294 48 292 46Q233 -10 172 -10Q117 -10 75 30T33 157Q33 205 53 255T101 341Q148 398 195 420T280 442Q336 442 364 400Q369 394 369 396Q370 400 396 505T424 616Q424 629 417 632T378 637H357Q351 643 351 645T353 664Q358 683 366 683ZM352 326Q329 405 277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q233 26 290 98L298 109L352 326Z"></path><path id="MJX-2-TEX-I-1D465" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path><path id="MJX-2-TEX-SO-29" d="M305 251Q305 -145 69 -349H56Q43 -349 39 -347T35 -338Q37 -333 60 -307T108 -239T160 -136T204 27T221 250T204 473T160 636T108 740T60 807T35 839Q35 850 50 850H56H69Q197 743 256 566Q305 425 305 251Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="munder"><g data-mml-node="mo"><use data-c="2211" xlink:href="#MJX-2-TEX-LO-2211"></use></g><g data-mml-node="mi" transform="translate(473.1,-1095.7) scale(0.707)"><use data-c="1D447" xlink:href="#MJX-2-TEX-I-1D447"></use></g></g><g data-mml-node="mi" transform="translate(1610.7,0)"><use data-c="1D450" xlink:href="#MJX-2-TEX-I-1D450"></use></g><g data-mml-node="mo" transform="translate(2043.7,0)"><use data-c="28" xlink:href="#MJX-2-TEX-N-28"></use></g><g data-mml-node="mi" transform="translate(2432.7,0)"><use data-c="1D447" xlink:href="#MJX-2-TEX-I-1D447"></use></g><g data-mml-node="mo" transform="translate(3136.7,0)"><use data-c="29" xlink:href="#MJX-2-TEX-N-29"></use></g><g data-mml-node="mo" transform="translate(3803.4,0)"><use data-c="3D" xlink:href="#MJX-2-TEX-N-3D"></use></g><g data-mml-node="munder" transform="translate(4859.2,0)"><g data-mml-node="mo"><use data-c="2211" xlink:href="#MJX-2-TEX-LO-2211"></use></g><g data-mml-node="mi" transform="translate(600,-1084.4) scale(0.707)"><use data-c="1D456" xlink:href="#MJX-2-TEX-I-1D456"></use></g></g><g data-mml-node="msub" transform="translate(6469.9,0)"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mover"><g data-mml-node="mi"><use data-c="1D466" xlink:href="#MJX-2-TEX-I-1D466"></use></g><g data-mml-node="mo" transform="translate(300.6,332) translate(-250 0)"><use data-c="7E" xlink:href="#MJX-2-TEX-N-7E"></use></g></g></g><g data-mml-node="mi" transform="translate(523,-150) scale(0.707)"><use data-c="1D456" xlink:href="#MJX-2-TEX-I-1D456"></use></g></g><g data-mml-node="mstyle" transform="translate(7286.8,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="msub" transform="translate(7453.8,0)"><g data-mml-node="mi"><use data-c="1D43E" xlink:href="#MJX-2-TEX-I-1D43E"></use></g><g data-mml-node="mi" transform="translate(882,-150) scale(0.707)"><use data-c="1D458" xlink:href="#MJX-2-TEX-I-1D458"></use></g></g><g data-mml-node="mo" transform="translate(8754.2,0)"><use data-c="28" xlink:href="#MJX-2-TEX-N-28"></use></g><g data-mml-node="msub" transform="translate(9143.2,0)"><g data-mml-node="mi"><use data-c="1D464" xlink:href="#MJX-2-TEX-I-1D464"></use></g><g data-mml-node="mi" transform="translate(749,-150) scale(0.707)"><use data-c="1D456" xlink:href="#MJX-2-TEX-I-1D456"></use></g></g><g data-mml-node="mo" transform="translate(10186.2,0)"><use data-c="29" xlink:href="#MJX-2-TEX-N-29"></use></g><g data-mml-node="mo" transform="translate(10575.2,0)"><use data-c="2C" xlink:href="#MJX-2-TEX-N-2C"></use></g><g data-mml-node="mstyle" transform="translate(10853.2,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="munder" transform="translate(13019.9,0)"><g data-mml-node="mo"><use data-c="2211" xlink:href="#MJX-2-TEX-LO-2211"></use></g><g data-mml-node="mi" transform="translate(473.1,-1095.7) scale(0.707)"><use data-c="1D447" xlink:href="#MJX-2-TEX-I-1D447"></use></g></g><g data-mml-node="mi" transform="translate(14630.5,0)"><use data-c="1D450" xlink:href="#MJX-2-TEX-I-1D450"></use></g><g data-mml-node="mo" transform="translate(15063.5,0)"><use data-c="28" xlink:href="#MJX-2-TEX-N-28"></use></g><g data-mml-node="mi" transform="translate(15452.5,0)"><use data-c="1D447" xlink:href="#MJX-2-TEX-I-1D447"></use></g><g data-mml-node="msup" transform="translate(16156.5,0)"><g data-mml-node="mo"><use data-c="29" xlink:href="#MJX-2-TEX-N-29"></use></g><g data-mml-node="mn" transform="translate(422,413) scale(0.707)"><use data-c="32" xlink:href="#MJX-2-TEX-N-32"></use></g></g><g data-mml-node="mo" transform="translate(17259.9,0)"><use data-c="3D" xlink:href="#MJX-2-TEX-N-3D"></use></g><g data-mml-node="munder" transform="translate(18315.6,0)"><g data-mml-node="mo"><use data-c="2211" xlink:href="#MJX-2-TEX-LO-2211"></use></g><g data-mml-node="TeXAtom" transform="translate(281.7,-1101.4) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><use data-c="1D456" xlink:href="#MJX-2-TEX-I-1D456"></use></g><g data-mml-node="mo" transform="translate(345,0)"><use data-c="2C" xlink:href="#MJX-2-TEX-N-2C"></use></g><g data-mml-node="msup" transform="translate(623,0)"><g data-mml-node="mi"><use data-c="1D456" xlink:href="#MJX-2-TEX-I-1D456"></use></g><g data-mml-node="mo" transform="translate(378,289) scale(0.707)"><use data-c="2032" xlink:href="#MJX-2-TEX-V-2032"></use></g></g></g></g><g data-mml-node="msub" transform="translate(19926.3,0)"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mover"><g data-mml-node="mi"><use data-c="1D466" xlink:href="#MJX-2-TEX-I-1D466"></use></g><g data-mml-node="mo" transform="translate(300.6,332) translate(-250 0)"><use data-c="7E" xlink:href="#MJX-2-TEX-N-7E"></use></g></g></g><g data-mml-node="mi" transform="translate(523,-150) scale(0.707)"><use data-c="1D456" xlink:href="#MJX-2-TEX-I-1D456"></use></g></g><g data-mml-node="mstyle" transform="translate(20743.3,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="msub" transform="translate(20910.3,0)"><g data-mml-node="TeXAtom" data-mjx-texclass="ORD"><g data-mml-node="mover"><g data-mml-node="mi"><use data-c="1D466" xlink:href="#MJX-2-TEX-I-1D466"></use></g><g data-mml-node="mo" transform="translate(300.6,332) translate(-250 0)"><use data-c="7E" xlink:href="#MJX-2-TEX-N-7E"></use></g></g></g><g data-mml-node="TeXAtom" transform="translate(523,-150) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="msup"><g data-mml-node="mi"><use data-c="1D456" xlink:href="#MJX-2-TEX-I-1D456"></use></g><g data-mml-node="mo" transform="translate(378,289) scale(0.707)"><use data-c="2032" xlink:href="#MJX-2-TEX-V-2032"></use></g></g></g></g><g data-mml-node="mstyle" transform="translate(21923.4,0)"><g data-mml-node="mspace"></g></g><g data-mml-node="msub" transform="translate(22090.4,0)"><g data-mml-node="mi"><use data-c="1D43E" xlink:href="#MJX-2-TEX-I-1D43E"></use></g><g data-mml-node="mi" transform="translate(882,-150) scale(0.707)"><use data-c="1D458" xlink:href="#MJX-2-TEX-I-1D458"></use></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(23390.8,0)"><g data-mml-node="mo" transform="translate(0 -0.5)"><use data-c="28" xlink:href="#MJX-2-TEX-SO-28"></use></g></g><g data-mml-node="mi" transform="translate(23848.8,0)"><use data-c="1D451" xlink:href="#MJX-2-TEX-I-1D451"></use></g><g data-mml-node="mo" transform="translate(24368.8,0)"><use data-c="28" xlink:href="#MJX-2-TEX-N-28"></use></g><g data-mml-node="msub" transform="translate(24757.8,0)"><g data-mml-node="mi"><use data-c="1D465" xlink:href="#MJX-2-TEX-I-1D465"></use></g><g data-mml-node="mi" transform="translate(605,-150) scale(0.707)"><use data-c="1D456" xlink:href="#MJX-2-TEX-I-1D456"></use></g></g><g data-mml-node="mo" transform="translate(25656.8,0)"><use data-c="2C" xlink:href="#MJX-2-TEX-N-2C"></use></g><g data-mml-node="msub" transform="translate(26101.4,0)"><g data-mml-node="mi"><use data-c="1D465" xlink:href="#MJX-2-TEX-I-1D465"></use></g><g data-mml-node="TeXAtom" transform="translate(605,-150) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="msup"><g data-mml-node="mi"><use data-c="1D456" xlink:href="#MJX-2-TEX-I-1D456"></use></g><g data-mml-node="mo" transform="translate(378,289) scale(0.707)"><use data-c="2032" xlink:href="#MJX-2-TEX-V-2032"></use></g></g></g></g><g data-mml-node="mo" transform="translate(27196.6,0)"><use data-c="29" xlink:href="#MJX-2-TEX-N-29"></use></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(27585.6,0)"><g data-mml-node="mo" transform="translate(0 -0.5)"><use data-c="29" xlink:href="#MJX-2-TEX-SO-29"></use></g></g></g></g></svg></span>
+<p>A run that covers every candidate must reproduce both exactly, which a dropped, doubled or mis-scored tile fails:
+the three negative controls (a tile dropped, a tile scanned twice, one tile's staircase shifted) fail both sums on the
+card, as they should. Two sums cannot rule out every compensating error (two candidates' scores swapped keep both), so
+the CPU oracle also rescores whole minions and compares every hart's record field by field: a sample of minions in the
+host process (17 and 8 in M3's L1 and L2), and all 1,024 offline for the steps that <code>card_run.sh</code>
+re-checked at the end of M4 and M5, M5's two-stage runs among them.</p>
+<p><b>The two-stage screen (M5).</b> The card scores every candidate on the first m<sub>1</sub> samples and logs those
+with c<sub>1</sub> ≥ τ<sub>1</sub>; the host rescores the survivors on all m. The secret is lost only if its own
+c<sub>1</sub> falls under τ<sub>1</sub>, a binomial tail that sets τ<sub>1</sub>: P(loss) is 8.8×10<sup>−5</sup> at L1
+(m<sub>1</sub> = 320) and 8.9×10<sup>−5</sup> at L2 and (256,5) (m<sub>1</sub> = 1,152). At L2 that leaves
+<span data-v="l2Found"></span> survivors of 2.83×10<sup>9</sup> for the host.</p>
+<details class="more"><summary>The details that make it work on this chip</summary>
+<ul>
+<li><b>Hand-off.</b> Hart 1 stages each row tile with stores that bypass its L1 (<code>fswg.ps</code> into the
+scratchpad), then publishes it with <code>fence; amoswapl.d</code> on an L2 line; hart 0 polls with a pause between
+polls. Whether that fence waits for the stores is not in the manual, so M1 ran a probe that loads every row tile right
+after it is published: <span data-v="probes"></span> probe runs exact, no race seen.</li>
+<li><b>No shared writes.</b> The L1 is not coherent: the features are written once in disjoint 1 KB tiles before a
+barrier, the staging areas are private, and each hart owns one 64 B record and each minion its log.</li>
+<li><b>The manual's wait is needed.</b> Skipping the <code>TensorWait</code> the manual requires before an A buffer is
+reloaded gave a wrong result on silicon (M2, <span data-v="nowait"></span>).</li>
+<li><b>The 10 s rule in the host.</b> It refuses a work list modelled over 4 s and launches only while the launch's
+timeout still ends inside 9 s of the process's start; a larger size runs as host-side slices, one process each.</li>
+<li><b>The survivor logs.</b> Each minion's log holds 1.5× its expected share plus 10σ; an overflow is counted,
+flagged and fails the run. The host fills the log area with all-ones before every launch, so a log line that never
+reached DRAM reads as an invalid entry, not as an old one.</li>
+</ul>
+</details>
+
+<h2 id="ladder">3. The ladder: M1 to M5</h2>
+<p>Every step ran on aifoundry3's card as its own process, under the card lock and a 10 s timeout, and the step
+scripts stop at the first unexpected result. The chart gives the time per solve of each size at each milestone against the CPU.</p>
+<ol>
+<li><b>M1, one minion</b> (04:15 PDT): the smallest size's 4,960 correlations equal the CPU's one by one, the three
+negative controls fail as they should, the tie instance is flagged, and C1 (128, 4, 0.2, 192) on 32 minions passes
+on <span data-v="seeds"></span> seeds. One minion at the L1 and L2 geometry ran <span data-v="m1cycOff"></span> cycles
+per tensor op with the epilogue off (<span data-v="m1cycOn"></span> with it), against the design's 270–280.</li>
+<li><b>M2, one shire:</b> from 1 to 32 minions a tensor op took <span data-v="knee"></span> cycles, so the shire's
+bandwidth is not the limit at this size. All of L1 on one shire solved in <span data-v="m2L1"></span>, the slowest
+minion <span data-v="m2imb"></span>× the median.</li>
+<li><b>M3, 1,024 minions:</b> L1 in <span data-v="m3L1"></span> and L2 in <span data-v="m3L2"></span>, both with exact
+checksums: <span data-v="m3OverPredR"></span> slower than the design's <span data-v="dPredM3"></span>.</li>
+<li><b>M4:</b> a cycle model fitted to the per-hart records of M1–M3 (19 constants, rms 1.8%) said why, and three fixes were tried as
+switches on one build. The planner weighted by the fitted model and incremental row generation (variant b) took
+L1 <span data-v="abL1"></span> and L2 <span data-v="abL2"></span>; the epilogue split between the next tile's ops
+ran 1.4–1.8× slower than its model on silicon.</li>
+<li><b>M5, the two-stage screen</b> (11:29 PDT): L1 <span data-v="l1two_s"></span>, L2 <span data-v="l2Solve"></span>,
+(256,5) <span data-v="f5Solve"></span>, launch, survivor readback and host stage 2 included; the secret survived in all
+three, and the full oracle confirmed every survivor set offline on all 1,024 minions.</li>
+</ol>
+<div class="chart-title">Time per solve at each milestone, against the CPU</div>
+<div id="ladleg"></div>
+<div class="chart" id="ladchart"></div>
+<p class="cap">Card: the kernel's launch time as the host measures it, on 32 shires × 32 minions except M2 (one shire);
+M5 adds the survivors' readback and stage 2 on six host threads. (256,5)'s M3 point is M1's kernel and planner run in
+two halves during M4's A/B. CPU lines: one core of the tuned AVX-512 scan (<code>spbase vexh</code>); six threads of the
+CPU's fastest method at P(loss) ≤ 10<sup>−4</sup> (L1 the meet in the middle, L2 and (256,5) the CPU's own two-stage
+screen). Hollow rings: DESIGN.md's first predictions, with private operand loads at M3 and cooperative loads at
+M4.</p>
+<div class="table-wrap wide"><table id="cmptable" class="stack"></table></div>
+<p class="small">16 threads are extrapolated from 6 (this work may use at most 6 threads on the host): linear to
+8 cores at the fast end, the measured 4 → 6 step efficiency at the slow end, SMT not counted (no SMT run of the
+two-stage screen or the meet in the middle; one core's one-stage scan gained <span data-v="smtU"></span> from its
+second thread)
+(<code>workloads/sparseparity/tools/table_cpu.py</code>).</p>
+<details class="more"><summary>Every point of the ladder, with its file</summary>
+<div class="table-wrap"><table id="laddertable" class="stack"></table></div>
+</details>
+<details class="more"><summary>M1 and M2, step by step</summary>
+<div class="table-wrap"><table id="m1table" class="stack"></table></div>
+<p class="small">Cycles per op are the busiest minion's (<code>hpmcounter3</code>, corrected). The timing steps run
+without the epilogue. Data: <code>workloads/sparseparity/data/2026-09-29-aifoundry3-card/</code>.</p>
+</details>
+<details class="more"><summary>M4's A/B: six variants on one build</summary>
+<p class="small">m1 = M1's kernel and planner; a = the planner weighted by the fitted cycle model; b = a + incremental
+row generation; c = a + the epilogue split between the next tile's ops; m4 = b + c; m4d = m4 + three A buffers. Each
+cell is one launch (for (256,5), two halves); the second line is the busiest minion's cycles per op.</p>
+<div class="table-wrap"><table id="abtable" class="stack"></table></div>
+<p class="small">Data: <code>workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/</code> (08:17–08:45 PDT).</p>
+</details>
+<details class="more"><summary>M5's two-stage runs, and its controls</summary>
+<div class="table-wrap"><table id="m5table" class="stack"></table></div>
+<p class="small" id="m5note"></p>
+<div class="table-wrap"><table id="ctltable" class="stack"></table></div>
+</details>
+
+<h2 id="energy">4. Energy per solve</h2>
+<p>The board's energy was measured for the one-stage scan (variant b), one host process of back-to-back solves between
+idle brackets, sampled at 10 Hz: the service processor's board average above idle, less the rise of leakage with the
+die's measured temperature, ±3% claimed. The board idled at <span data-v="idleW"></span> and read
+<span data-v="burstW"></span> during the solves; the die stayed at <span data-v="dieRise"></span>, and every busy sample
+read 600 MHz.</p>
+<p><b>The CPU's energy is <span class="assumed">assumed</span>, not measured.</b> The package's energy counter (RAPL) is
+root-only on the lab hosts, and the board lifts both package power limits to 4,095 W, so nothing bounds it either. The
+chart multiplies the CPU's measured six-thread time (at L1 the meet in the middle's expected time, a mean over 10
+seeds) by the i7-11700K's rated 125 W (PL1) and 251 W (PL2), idle included, as the card's figure is.</p>
+<div class="chart-title">Joules per solve: the card's board, measured, against the CPU's package, assumed</div>
+<div id="enleg"></div>
+<div class="chart" id="enchart"></div>
+<p class="cap">The card's board alone is <span data-v="rE"></span> below the CPU's assumed package energy. The host that
+drives the card is not free: its own package, assumed at 10–20 W idle plus 10–38.5 W per busy core-second (it kept
+<span data-v="hostBusy"></span> cores busy on average), adds <span data-v="hostJ"></span> per solve, and the ratio with it is
+<span data-v="rEhost"></span>. The two-stage screen's energy was not measured: its launch is shorter, and its stage 2
+runs on six host threads.</p>
+<details class="more"><summary>The energy runs, and the rails</summary>
+<div class="table-wrap"><table id="entable" class="stack"></table></div>
+<p class="small">The rails are the PMIC's running averages above idle: upper bounds, −2% to +7%; unmetered is the
+headline less the rails. The SRAM rail carries almost as much as the minion rail. Data:
+<code>workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/</code>, reduced by
+<code>workloads/sparseparity/tools/energy_reduce.py</code>.</p>
+</details>
+
+<h2 id="time">5. Where the time goes, and what would help next</h2>
+<p>A tensor op takes 270 cycles when its rows stay in the L1 scratchpad (E39) and 280 when both operands come from a
+small shared pool (mmbench, E37). M3 ran <span data-v="m3gapL1"></span>× and <span data-v="m3gapL2"></span>× slower than
+270 cycles per op at L1 and L2. The cycle model (<code>workloads/sparseparity/tools/cycle_model.py</code>, fitted to
+M1–M3's records before M4 and M5 ran: 33 runs, 146 sampled minions, rms 1.8%) splits that gap into a product: the planner's imbalance
+(<span data-v="m3imbL1"></span> and <span data-v="m3imbL2"></span>, busiest over mean minion), hart 0's overhead per op
+(<span data-v="m3ovhL1"></span> and <span data-v="m3ovhL2"></span>) and the op itself (<span data-v="cOp"></span>
+cycles streamed, <span data-v="m3opc"></span>× 270).</p>
+<div class="chart-title">Cycles per tensor op in M3, by what hart 0 was doing</div>
+<div id="cycleg"></div>
+<div class="chart" id="cycchart"></div>
+<p class="cap">The fitted model's split of hart 0's time on M3's L1 and L2, for the mean minion and the busiest one.
+Issue-slot sharing is hart 0 slowed by hart 1, the two harts sharing one issue slot; waiting for rows is hart 0 idle
+until hart 1 publishes the next row tile. The dashed lines are the two rates measured elsewhere: 270 cycles with the
+rows resident, 512 when all 32 minions of a shire stream 2 KB per op from its L2 (4 B per minion-cycle).</p>
+<p>Three limits remain after M4 and M5:</p>
+<ul>
+<li><b>Hart 1's row generation.</b> In M3 a row tile cost hart 1 about 2,081 + S·(2,108 + 570·(k−1)) cycles, 4.8× what
+the planner assumed; at L2 the mean minion's hart 0 waited <span data-v="waitL2"></span> cycles per op for rows, and
+the busiest <span data-v="waitL2b"></span>. Incremental generation (M4) gained 1.1–1.2×; the second half of (256,5)
+still ran at <span data-v="f5h1cyc"></span> cycles per op on its busiest minion.</li>
+<li><b>The shire's bandwidth for streamed rows.</b> When m &gt; 192 the rows do not fit the L1 scratchpad, so every op
+brings 2 KB into each of 32 minions, and the shire's 128 B per cycle caps an op at 512 cycles. At that rate L2's
+one-stage scan cannot run faster than <span data-v="floorL2one"></span> on 1,024 minions from the ops alone, or
+<span data-v="floorL2oneSt"></span> with the staged rows counted too (DESIGN.md's Amendments). Its two-stage stage 1 ran at
+<span data-v="l2two_cyc"></span> cycles per op on the busiest minion: a launch of <span data-v="l2launch"></span> where
+512 cycles per op would take <span data-v="floorL2"></span>.</li>
+<li><b>The epilogue.</b> Each output tile's epilogue costs <span data-v="eOut"></span> cycles with the tensor unit idle
+(<span data-v="epiL1"></span> cycles per op at L1, where S = 7). Hiding it between the next tile's ops (variant c), which
+the fitted model favoured, ran slower on silicon: L1 <span data-v="cL1"></span> and L2
+<span data-v="cL2"></span>, <span data-v="cModelL1"></span>× and <span data-v="cModelL2"></span>× its model.</li>
+</ul>
+<p><b>What would help next</b>, in the order the data suggests:</p>
+<ol>
+<li><b>Cooperative operand loads.</b> <code>tensor_coop</code> merges identical <code>TensorLoad</code>s from the
+minions of a shire into one L2 request, so 32 minions walking the same feature tiles in lockstep would bring about
+1.1 KB per op instead of 2 KB, under the 512-cycle floor; the design predicted about 295 cycles per op. It is not
+written, and lockstep across 32 minions has never run in this repository.</li>
+<li><b>Resident rows.</b> At m ≤ 192 a row tile can stay in the L1 scratchpad for all its column tiles, and only the
+features stream (270 cycles per op in E39's microbenchmark). At η = 0.4 the threshold that keeps P(loss) under
+10<sup>−4</sup> still passes <span data-v="resKept"></span> of the candidates at m<sub>1</sub> = 192–320; the cheapest
+screen was m<sub>1</sub> = 1,152. At L1 the resident screen (m<sub>1</sub> = 192) launched in
+<span data-v="resLaunch"></span> against <span data-v="l1twoLaunch"></span> streamed at m<sub>1</sub> = 320 (its
+epilogue dominates at S = 3: <span data-v="resCyc"></span> cycles per op on the busiest minion), kept
+<span data-v="resFound"></span> survivors at P(loss) <span data-v="resPloss"></span> and took
+<span data-v="resSolve"></span>, <span data-v="resStage2"></span> of it stage 2 on the host. It could pay at lower noise
+(DESIGN.md's S2, η = 0.2) or with a cheaper epilogue.</li>
+<li><b>A faster row generator.</b> Fewer instructions per staged byte on hart 1, or the balanced split of the design
+(both operands generated, shared across a shire once cooperative loads work). Letting both harts generate gains at most
+1.06×: they share one issue slot.</li>
+<li><b>The epilogue with the tensor unit busy.</b> The split that the model favoured needs a second look on silicon
+before it can pay.</li>
+</ol>
+<details class="more"><summary>The busiest minion's cycles per op, from M3 to M5</summary>
+<div class="table-wrap"><table id="latertable" class="stack"></table></div>
+<p class="small">The floor is the run's ops at 512 cycles each, spread over 1,024 minions: the time the streamed
+operands alone would take at the shire's measured rate. Counting the staged rows as well (1 KB per row tile and
+sample slice) adds <span data-v="stagedPct"></span> at L1 and L2: <span data-v="floorL1oneSt"></span> and
+<span data-v="floorL2oneSt"></span> for the one-stage scan, the figures in DESIGN.md's Amendments.</p>
+</details>
+<details class="more"><summary>The split of M3's cycles, as numbers</summary>
+<div class="table-wrap"><table id="cyctable" class="stack"></table></div>
+<p class="small">The busiest minion of M3's L1 drew <span data-v="tilesBusy"></span> row tiles to the median's
+<span data-v="tilesMed"></span>: M1's planner undercosted narrow row tiles, which is what the fitted planner (M4's
+variant a) corrected.</p>
+</details>
+
+<h2 id="method">6. Method and caveats</h2>
+<ul>
+<li><b>One card.</b> Every card run used aifoundry3's card, which a boot service pins at 600 MHz; the host's clock
+estimate read <span data-v="mhzRange"></span> in the timed runs (M3–M5). aifoundry2's card was running a frozen validation, and the other cards were
+not tried.</li>
+<li><b>One seed per showcase size on the card</b> (seed 1; C1 ran 20). A full scan's time does not depend on the data;
+the survivors' count does, and each two-stage run found <span data-v="foundRatio"></span> the expected number.</li>
+<li><b>What is timed.</b> The card's time is the launch as the host measures it: without the device open (0.18 s
+per process) and the instance's upload. The two-stage time adds the survivors' readback and stage 2 on six host
+threads. The CPU's times are the median of five repetitions, except L1's six-thread figure, the meet in the
+middle's expected time (a mean over 10 seeds); threads pinned one per core, niced, with the card idle.</li>
+<li><b>Equal risk on both sides.</b> m is SP3's 99% sample count for both. The card's screens and the CPU's lose the
+secret with P &lt; 10<sup>−4</sup> (binomial tail). The CPU's faster screen at m<sub>1</sub> = 1,024
+(<span data-v="screen1024"></span>) loses it with P = <span data-v="screen1024loss"></span> and is not used.</li>
+<li><b>The one-core baseline</b> is the tuned AVX-512 scan (<code>spbase vexh</code>, 8 candidates per 512-bit
+register), 2.4–4.4× faster on one core than SP3's scan. The card data's READMEs quote the first CPU run's one-core
+times (<span data-v="cpuFirst"></span>); this page uses the run after the reviews (<span data-v="cpuNow"></span>). For
+L1 the meet in the middle is faster in expectation even on one core; the ratio is to the scan.</li>
+<li><b>16 threads are extrapolated</b> from 6, not measured. Against them the card is about level
+(<span data-v="r16"></span>).</li>
+<li><b>CPU energy is <span class="assumed">assumed</span></b> (§4), and so is the share of the host that drives the
+card. Measuring either needs the lab's admin: read access to the package's energy counter, or a wall meter.</li>
+<li><b>The critique that corrected the design.</b> The design (DESIGN.md, brief SP4) first predicted the card at
+120–130× one core and about 15× the host at its flagship, and 3.5–16× a whole 16-thread host across its ladder. It
+set the card against SP3's slower scan and a 16-thread host assumed at 8.5× one core. An adversarial critique (SP5)
+and four reviews (R1–R4) replaced that with the CPU's best measured method at equal risk, made the CPU's energy an
+assumption rather than a bound, and moved the showcase to η = 0.4. Then the card itself ran
+<span data-v="m3OverPredR"></span> slower than the design's model at M3; M4 and M5 cut the card's time by
+<span data-v="m3toM5"></span> from there, and the ratio that stands is <span data-v="r6"></span> six tuned threads. The changes are listed in DESIGN.md's
+Amendments (SP5, R1–R3) and the workload README's table of what the reviews found (R4).</li>
+</ul>
+<p><b>Data and how to rebuild this page.</b> The design and research are in
+<code>docs/research/sparse-parity/</code> (literature, the chip's primitives, DESIGN.md with its amendments, and
+<code>docs/research/sparse-parity/design_model.py</code>); the code, the tests and every result file in
+<code>workloads/sparseparity/</code> (its README has the card runs' commands, which need the owner's go-ahead and a named
+card). This page's data is <code>docs/reports/data/2026-09-29-sparse-parity/page.json</code>, which
+<code>docs/reports/data/2026-09-29-sparse-parity/make_page_data.py</code> computes from those files, with no card:</p>
+<pre><code>python3 docs/reports/data/2026-09-29-sparse-parity/make_page_data.py
+NODE_PATH=$PWD/node_modules python3 scripts/build-report.py sparse-parity \
+    docs/reports/data/2026-09-29-sparse-parity/page.json docs/reports/2026-09-29-sparse-parity.html</code></pre>
+
+<h2 id="related-reports">Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a> — the hub: every ET-SoC-1 report, and what the meters cannot see.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">Matmul efficiency</a> — the tensor unit's matmul on all 1,024 minions at 91% of peak in int8 (97% in fp32 and fp16), the rate this scan falls short of.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-compute">Sparse compute</a> — what the silicon does with zeros; its kernel was the template for this workload's shire masks and per-hart records.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — latency and bandwidth of every level, the shire's L2 behind the 512-cycle floor among them.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions">Influence functions on the ET-SoC-1</a> — another workload weighed against the chip's 1,024 minions, as a desk analysis.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The energy manual</a> — joules per operation, the idle law and the leakage correction used in §4.</li>
+</ul>
+<p class="small"><b>Versions.</b> 29 September 2026: first version, from the CPU prototypes of 28 September and the card
+runs M1–M5 of 29 September (04:15–11:40 PDT); built, not yet published.</p>
+</main>
+
+<script>
+/* chart toolkit: docs/reports/sources/chartkit.js */
+/* chartkit.js: the shared chart toolkit of the ET-SoC-1 reports (global CK; no library).
+   Source-built pages get it from report.template.html (scripts/build-report.py inlines it before the page script);
+   standalone pages get this file, the template's chartkit CSS and token aliases from scripts/paste-chartkit.py.
+   Colours are the template tokens only: series var(--c1..c5, c7), --ref, --ink/--ink-2/--muted, --grid/--axis,
+   --surface/--page. No hex colours. A frame's viewBox is its CSS width, so 12-unit text is 12 px on a phone.
+   API (see PLAN2 §2.5): el txt path frame lin log axes fmt tip keynav legend showSeries seg range readout bus
+   stackTable reduced ramp rampInk color, and inside(f, labels) to keep a page's own end-of-axis labels in the frame.
+   Added 26 Sep 2026: sortTable (sortable, filterable tables) and the card registry (cards, card, cardsIn, cardSeg,
+   pick, cardMark, cardLegend): aifoundry2 --c1 dot, aifoundry3 --c2 ring, aifoundry1-c1 --c3 diamond, all cards --ink. Every mark with a tooltip is reachable from the keyboard. */
+window.CK = (function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg', frames = [], buses = {};
+  let uid = 0;
+  const $ = h => (typeof h === 'string' ? document.getElementById(h) : h);
+  const mm = q => (window.matchMedia ? window.matchMedia(q) : {matches: false});
+  const reduced = mm('(prefers-reduced-motion: reduce)').matches;
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, str, cls, anchor) {
+    const t = el('text', {x, y, class: cls || 'tick', 'text-anchor': anchor || 'start'}, parent);
+    t.textContent = str;
+    return t;
+  }
+  const path = (pts, x, y) => pts.map((p, i) => (i ? 'L' : 'M') + x(p[0]).toFixed(1) + ',' + y(p[1]).toFixed(1)).join(' ');
+
+  /* ---- numbers ---- */
+  function num(v, dp) {
+    if (v == null || !isFinite(v)) return '\u2014';
+    const auto = dp == null;  // no dp: three significant digits, trailing zeros dropped
+    if (auto) dp = v === 0 ? 0 : Math.min(6, Math.max(0, 2 - Math.floor(Math.log10(Math.abs(v)))));
+    const s = Number(v).toLocaleString('en-GB', {minimumFractionDigits: auto ? 0 : dp, maximumFractionDigits: dp});
+    return /[1-9]/.test(s) ? s.replace('-', '\u2212') : s.replace('-', '');  // true minus; never "−0.00"
+  }
+  const fmt = {
+    num,
+    range: (a, b, dp, unit) => {
+      const s = num(a, dp), t = num(b, dp), u = unit ? '\u00a0' + unit : '';
+      return s === t ? s + u : s + (b < 0 ? ' to ' : '\u2013') + t + u;
+    },
+    pct: (v, dp) => num(100 * v, dp == null ? 0 : dp) + '%',
+  };
+
+  /* ---- scales ---- */
+  function niceTicks(a, b, n) {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    if (!(hi > lo)) return Object.assign([lo], {step: 1});
+    const raw = (hi - lo) / Math.max(1, n || 5), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+    const step = (m >= 7.5 ? 10 : m >= 3.5 ? 5 : m >= 1.5 ? 2 : 1) * p, out = [];
+    for (let i = Math.ceil(lo / step - 1e-9); i * step <= hi + step * 1e-9; i++) out.push(+(i * step).toPrecision(12));
+    out.step = step;
+    return out;
+  }
+  const tickDp = t => (t.step ? Math.max(0, -Math.floor(Math.log10(t.step) + 1e-9)) : null);
+  function lin(d0, d1, r0, r1) {
+    const s = v => r0 + (v - d0) * (r1 - r0) / (d1 - d0);
+    s.inv = p => d0 + (p - r0) * (d1 - d0) / (r1 - r0);
+    s.ticks = n => niceTicks(d0, d1, n);
+    s.domain = [d0, d1]; s.range = [r0, r1];
+    return s;
+  }
+  function log(d0, d1, r0, r1) {
+    const l0 = Math.log10(d0), l1 = Math.log10(d1);
+    const s = v => r0 + (Math.log10(v) - l0) * (r1 - r0) / (l1 - l0);
+    s.inv = p => Math.pow(10, l0 + (p - r0) * (l1 - l0) / (r1 - r0));
+    s.ticks = n => {
+      const lo = Math.min(l0, l1), hi = Math.max(l0, l1), k0 = Math.ceil(lo - 1e-9), k1 = Math.floor(hi + 1e-9);
+      const dec = k1 - k0 + 1, every = Math.max(1, Math.ceil(dec / (n || 6))), out = [];
+      const add = v => { v = +v.toPrecision(12); const lv = Math.log10(v); if (lv >= lo - 1e-9 && lv <= hi + 1e-9) out.push(v); };
+      if (dec <= 2) { for (let k = k0 - 1; k <= k1; k++) for (const m of [1, 2, 5]) add(m * Math.pow(10, k)); }
+      else for (let k = k0; k <= k1; k += every) add(Math.pow(10, k));
+      return out;
+    };
+    s.domain = [d0, d1]; s.range = [r0, r1]; s.log = true;
+    return s;
+  }
+  const logFmt = v => num(v, v >= 1 ? 0 : Math.ceil(-Math.log10(v) - 1e-9));
+
+  /* ---- frame: a responsive SVG sized to its host ---- */
+  function frame(hostId, o) {
+    const host = $(hostId);
+    if (!host) throw new Error('CK.frame: no element ' + hostId);
+    host.classList.add('ck-frame'); host.classList.remove('scroll');
+    host.textContent = '';
+    const plot = document.createElement('div'); plot.className = 'ck-plot'; host.appendChild(plot);
+    const svg = el('svg', {role: 'group', 'aria-label': o.label || null}, plot);
+    const tip = document.createElement('div'); tip.className = 'ck-tip'; tip.setAttribute('aria-hidden', 'true');
+    host.appendChild(tip);
+    const minW = o.minW == null ? 320 : o.minW, maxW = o.maxW == null ? 900 : o.maxW;
+    const f = {svg, host, tip, W: 0, H: 0, narrow: false, seriesOn: null, pinned: null, active: null, navIndex: 0};
+    const width = () => {
+      const cs = getComputedStyle(host), cw = host.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return Math.round(Math.max(minW, Math.min(maxW, cw > 0 ? cw : maxW)));
+    };
+    f.redraw = () => {
+      const W = width(), H = Math.round(typeof o.height === 'function' ? o.height(W) : (o.height || 300));
+      f.refocus = svg.contains(document.activeElement) ? f.navIndex : null;
+      hide(f, true);
+      Object.assign(f, {W, H, narrow: W < 600, navNodes: []});
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.setAttribute('height', H);
+      svg.style.width = W + 'px';
+      o.draw(f);
+      if (f.seriesOn) showSeries(f, f.seriesOn);
+    };
+    f.redraw();
+    frames.push(f);
+    if (window.ResizeObserver) {
+      let timer;
+      new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => { if (width() !== f.W) f.redraw(); }, 150); }).observe(host);
+    }
+    return f;
+  }
+
+  /* ---- axes: horizontal grid, tick labels, baseline, axis titles (y title sits above the plot) ---- */
+  function axes(f, o) {
+    const {x, y} = o, W = f.W, H = f.H;
+    const L = o.L == null ? 44 : o.L, R = o.R == null ? 12 : o.R, T = o.T == null ? 22 : o.T, B = o.B == null ? 38 : o.B;
+    const g = el('g', {class: 'ck-axes', 'aria-hidden': 'true'}, f.svg);
+    const yt = o.yt || y.ticks(Math.max(3, Math.round((H - T - B) / 48)));
+    const xt = o.xt || x.ticks(Math.max(2, Math.round((W - L - R) / 90)));
+    const auto = (s, t) => (s.log ? logFmt : v => num(v, tickDp(t)));
+    const xf = o.xfmt || auto(x, xt), yf = o.yfmt || auto(y, yt), labs = [];
+    for (const t of yt) {
+      if (o.grid !== false) el('line', {x1: L, x2: W - R, y1: y(t), y2: y(t), class: 'grid-line'}, g);
+      labs.push(txt(g, L - 6, y(t) + 4, yf(t), 'tick', 'end'));
+    }
+    el('line', {x1: L, x2: W - R, y1: H - B, y2: H - B, class: 'ck-axis'}, g);
+    for (const t of xt) labs.push(txt(g, x(t), H - B + 16, xf(t), 'tick', 'middle'));
+    if (o.xl) labs.push(txt(g, (L + W - R) / 2, H - 6, o.xl, 'lab', 'middle'));
+    if (o.yl) txt(g, 2, Math.max(12, T - 13), o.yl, 'lab');
+    inside(f, labs);
+    return g;
+  }
+  /* Keep labels inside the frame (0..f.W, 0..f.H, less pad): one that would cross the left or right edge is anchored
+     at that edge instead (text-anchor start or end, so its outer end sits pad px from the edge in any font; an end
+     tick label still covers its tick), and one that would cross the top or bottom is moved in. Labels already inside
+     are not touched. Widths are measured in the page's font; a chart drawn while hidden has no layout, so they are
+     estimated at 0.6 em a character. Vertically the glyphs are taken as 0.75 em above the baseline and 0.25 em below. */
+  function inside(f, labels, pad) {
+    pad = pad == null ? 2 : pad;
+    const m = labels.map(t => {
+      let w = 0, fs = 12;
+      try { w = t.getComputedTextLength(); fs = parseFloat(getComputedStyle(t).fontSize) || 12; } catch (_) { /* no layout */ }
+      return {w: w > 0 ? w : 0.6 * fs * t.textContent.length, fs};
+    });
+    labels.forEach((t, k) => {
+      const {w, fs} = m[k], a = t.getAttribute('text-anchor') || 'start', x = +t.getAttribute('x'), y = +t.getAttribute('y');
+      const x0 = a === 'end' ? x - w : a === 'middle' ? x - w / 2 : x;
+      if (x0 < pad) { t.setAttribute('text-anchor', 'start'); t.setAttribute('x', pad); }
+      else if (x0 + w > f.W - pad) { t.setAttribute('text-anchor', 'end'); t.setAttribute('x', +(f.W - pad).toFixed(1)); }
+      if (y - 0.75 * fs < pad) t.setAttribute('y', +(pad + 0.75 * fs).toFixed(1));
+      else if (y + 0.25 * fs > f.H - pad) t.setAttribute('y', +(f.H - pad - 0.25 * fs).toFixed(1));
+    });
+    return labels;
+  }
+
+  /* ---- tooltip: pointer, keyboard focus and touch all show the same text ---- */
+  const strip = html => new DOMParser().parseFromString(String(html).replace(/<br\s*\/?>/gi, '; '), 'text/html')
+    .body.textContent.replace(/\s+/g, ' ').trim();
+  function place(f, cx, cy) {
+    const t = f.tip; t.style.display = 'block';
+    const hw = f.host.clientWidth, hh = f.host.clientHeight, tw = t.offsetWidth, th = t.offsetHeight;
+    let top = cy + 14;
+    if (top + th > hh && cy - th - 10 >= 0) top = cy - th - 10;  // flip above the pointer
+    t.style.left = Math.max(0, Math.min(cx + 12, hw - tw)) + 'px';
+    t.style.top = top + 'px';
+  }
+  function show(f, node, html, cx, cy) {
+    if (f.active && f.active !== node) f.active.classList.remove('ck-active');
+    f.active = node; node.classList.add('ck-active');
+    f.tip.innerHTML = typeof html === 'function' ? html() : html;
+    if (cx == null) {
+      const r = node.getBoundingClientRect(), b = f.host.getBoundingClientRect();
+      cx = r.left + r.width / 2 - b.left; cy = r.top + r.height / 2 - b.top;
+    }
+    place(f, cx, cy);
+  }
+  function hide(f, force) {
+    if (f.pinned && !force) return;
+    f.pinned = null; f.tip.style.display = 'none';
+    if (f.active) f.active.classList.remove('ck-active');
+    f.active = null;
+  }
+  function tip(f, node, html, o) {
+    o = o || {};
+    if (!node.hasAttribute('data-ck-nav')) node.setAttribute('tabindex', '0');
+    node.setAttribute('role', o.role || 'img');
+    node.setAttribute('aria-label', strip(typeof html === 'function' ? html() : html));
+    node._ckTip = html;
+    const at = ev => { const b = f.host.getBoundingClientRect(); show(f, node, html, ev.clientX - b.left, ev.clientY - b.top); };
+    node.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointermove', ev => { if (ev.pointerType !== 'touch' && !f.pinned) at(ev); });
+    node.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') hide(f); });
+    node.addEventListener('pointerdown', ev => {  // touch: a tap toggles the tooltip and pins it until the next tap
+      if (ev.pointerType !== 'touch') return;
+      f.touchT = Date.now();
+      if (f.active === node && f.tip.style.display === 'block') hide(f, true); else { hide(f, true); at(ev); f.pinned = node; }
+    });
+    node.addEventListener('focus', () => { if (Date.now() - (f.touchT || 0) > 600 && !f.pinned) show(f, node, html); });
+    node.addEventListener('blur', () => hide(f));
+    node.addEventListener('keydown', ev => { if (ev.key === 'Escape') hide(f, true); });
+    return node;
+  }
+  document.addEventListener('pointerdown', ev => {  // a tap elsewhere unpins
+    for (const f of frames) if (f.pinned && !f.pinned.contains(ev.target)) hide(f, true);
+  }, true);
+
+  /* ---- keynav: one tab stop per mark group; arrows step, Home/End jump, Enter pins, Escape hides ---- */
+  function keynav(f, nodes, o) {
+    o = o || {};
+    nodes = nodes.filter(Boolean);
+    if (!nodes.length) return;
+    const seen = n => !n.closest('.ck-hidden');
+    const next = (k, d) => { for (let j = k + d; j >= 0 && j < nodes.length; j += d) if (seen(nodes[j])) return j; return k; };
+    let cur = Math.min(f.navIndex || 0, nodes.length - 1);
+    nodes.forEach((n, k) => {
+      n.setAttribute('data-ck-nav', '');
+      n.setAttribute('tabindex', k === cur ? '0' : '-1');
+      n.addEventListener('focus', () => {
+        nodes.forEach(m => m.setAttribute('tabindex', '-1')); n.setAttribute('tabindex', '0');
+        f.navIndex = k;
+        if (o.onFocus) o.onFocus(n, k);
+      });
+      n.addEventListener('keydown', ev => {
+        const K = ev.key;
+        let j = null;
+        if (o.step) j = o.step(k, K, nodes);
+        if (j == null) {
+          if (K === 'ArrowRight' || K === 'ArrowDown') j = next(k, 1);
+          else if (K === 'ArrowLeft' || K === 'ArrowUp') j = next(k, -1);
+          else if (K === 'Home') j = next(-1, 1);
+          else if (K === 'End') j = next(nodes.length, -1);
+        }
+        if (K === 'Enter' || K === ' ') {
+          ev.preventDefault();
+          if (n._ckTip) { if (f.pinned === n) hide(f, true); else { hide(f, true); show(f, n, n._ckTip); f.pinned = n; } }
+          if (o.onEnter) o.onEnter(n, k);
+        } else if (j != null) { ev.preventDefault(); if (j !== k) { hide(f, true); nodes[j].focus(); } }
+      });
+    });
+    f.navNodes = (f.navNodes || []).concat([nodes]);
+    if (f.refocus != null && nodes[f.refocus]) { nodes[f.refocus].focus(); f.refocus = null; }
+  }
+
+  /* ---- legend (HTML, above the chart) and series toggling ---- */
+  function swatch(it) {
+    const s = el('svg', {viewBox: '0 0 18 10', width: 18, height: 10, 'aria-hidden': 'true'}), c = it.color || 'var(--c1)';
+    const m = it.mark || 'box';
+    const e = m === 'dot' ? el('circle', {cx: 9, cy: 5, r: 4}, s) : m === 'ring' ? el('circle', {cx: 9, cy: 5, r: 3.5}, s)
+      : m === 'diamond' ? el('polygon', {points: '9,0 14,5 9,10 4,5'}, s)
+      : m === 'box' ? el('rect', {x: 3, y: 0, width: 12, height: 10, rx: 2}, s) : el('line', {x1: 1, x2: 17, y1: 5, y2: 5}, s);
+    if (m === 'dot' || m === 'box' || m === 'diamond') e.style.fill = c;
+    else { e.style.fill = 'none'; e.style.stroke = c; e.style.strokeWidth = '2'; }
+    if (it.dash) e.style.strokeDasharray = it.dash; else if (m === 'dash') e.style.strokeDasharray = '4 3';
+    return s;
+  }
+  function legend(hostEl, items, o) {
+    o = o || {};
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-legend');
+    const on = new Set(items.map(it => it.key)), btn = {};
+    for (const it of items) {
+      const b = document.createElement(o.toggle ? 'button' : 'span'); b.className = 'ck-li';
+      b.append(swatch(it), document.createTextNode(it.label));
+      if (o.toggle) {
+        b.type = 'button'; b.setAttribute('aria-pressed', 'true');
+        b.addEventListener('click', () => {
+          const was = on.has(it.key);
+          if (was && on.size === 1) return;  // keep at least one series
+          if (was) on.delete(it.key); else on.add(it.key);
+          b.setAttribute('aria-pressed', String(!was));
+          if (o.onChange) o.onChange([...on]);
+        });
+      }
+      btn[it.key] = b; h.appendChild(b);
+    }
+    return {el: h, on, set(keys) { on.clear(); keys.forEach(k => on.add(k)); for (const k in btn) if (o.toggle) btn[k].setAttribute('aria-pressed', String(on.has(k))); }};
+  }
+  function showSeries(f, keysOn) {
+    f.seriesOn = [...keysOn];
+    f.svg.querySelectorAll('[data-series]').forEach(n => n.classList.toggle('ck-hidden', !f.seriesOn.includes(n.getAttribute('data-series'))));
+    for (const group of f.navNodes || []) {  // keep one reachable tab stop per group
+      const vis = group.filter(n => !n.closest('.ck-hidden'));
+      if (vis.length && !vis.some(n => n.getAttribute('tabindex') === '0')) { group.forEach(n => n.setAttribute('tabindex', '-1')); vis[0].setAttribute('tabindex', '0'); }
+    }
+    if (f.active && f.active.closest('.ck-hidden')) hide(f, true);
+  }
+
+  /* ---- controls ---- */
+  function seg(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-seg');
+    const g = document.createElement('div'); g.setAttribute('role', 'radiogroup'); g.className = 'ck-seg-group';
+    if (o.label) {
+      const s = document.createElement('span'); s.className = 'ck-seg-label'; s.id = 'ck-l' + (++uid); s.textContent = o.label;
+      h.appendChild(s); g.setAttribute('aria-labelledby', s.id);
+    }
+    const opts = o.options, api = {el: h, value: o.value == null ? opts[0][0] : o.value};
+    const btns = opts.map(([v, t], k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.textContent = t;
+      b.addEventListener('click', () => set(v, true));
+      b.addEventListener('keydown', ev => {
+        const d = ev.key === 'ArrowRight' || ev.key === 'ArrowDown' ? 1 : ev.key === 'ArrowLeft' || ev.key === 'ArrowUp' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const j = (k + d + opts.length) % opts.length;
+        set(opts[j][0], true); btns[j].focus();
+      });
+      g.appendChild(b); return b;
+    });
+    function set(v, fire) {
+      api.value = v;
+      btns.forEach((b, k) => { const c = opts[k][0] === v; b.setAttribute('aria-checked', String(c)); b.tabIndex = c ? 0 : -1; });
+      if (fire && o.onChange) o.onChange(v);
+    }
+    h.appendChild(g); set(api.value, false);
+    api.set = v => set(v, true);
+    api.quiet = v => set(v, false);  // show v as selected without calling onChange
+    return api;
+  }
+  function range(hostEl, o) {
+    const h = $(hostEl); h.textContent = ''; h.classList.add('ck-range');
+    const id = 'ck-r' + (++uid), stops = o.stops, f1 = o.fmt || (v => num(v));
+    const lab = document.createElement('label'); lab.htmlFor = id; lab.textContent = o.label;
+    const inp = document.createElement('input'); inp.type = 'range'; inp.id = id;
+    const out = document.createElement('output'); out.setAttribute('for', id);
+    if (stops) { inp.min = 0; inp.max = stops.length - 1; inp.step = 1; } else { inp.min = o.min; inp.max = o.max; inp.step = o.step == null ? 'any' : o.step; }
+    const val = () => (stops ? stops[+inp.value] : +inp.value);
+    const put = v => { inp.value = stops ? stops.reduce((b, s, k) => (Math.abs(s - v) < Math.abs(stops[b] - v) ? k : b), 0) : v; };
+    const upd = fire => { const v = val(), s = f1(v); out.textContent = s; inp.setAttribute('aria-valuetext', s); if (fire && o.onInput) o.onInput(v); };
+    inp.addEventListener('input', () => upd(true));
+    h.append(lab, inp, out); put(o.value == null ? (stops ? stops[0] : o.min) : o.value); upd(false);
+    return {el: h, input: inp, get value() { return val(); }, set(v) { put(v); upd(true); }};
+  }
+  function readout(hostEl) {
+    const h = $(hostEl); h.classList.add('ck-readout'); h.setAttribute('aria-live', 'polite');
+    h.set = html => { h.innerHTML = html; };
+    return h;
+  }
+  function bus(name) {
+    if (!buses[name]) { const fns = []; buses[name] = {value: undefined, on(fn) { fns.push(fn); }, emit(v, from) { this.value = v; fns.forEach(fn => fn(v, from)); }}; }
+    return buses[name];
+  }
+  /* Card layout for a table under 600 px: each cell shows its column's header (CSS table.stack). */
+  function stackTable(table) {
+    const t = $(table), heads = [], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (hr) for (const c of hr.cells) for (let k = 0; k < (c.colSpan || 1); k++) heads.push(c.textContent.replace(/\s+/g, ' ').trim());
+    for (const tb of t.tBodies) for (const r of tb.rows) { let k = 0; for (const c of r.cells) { if (heads[k]) c.setAttribute('data-label', heads[k]); k += c.colSpan || 1; } }
+    t.classList.add('stack');
+    return t;
+  }
+
+  /* ---- cards: one registry for every page (fixed colour, mark and label per card), a shared card selector and a picker
+     for values shaped {mean, se, n, per_card: {<card>: {mean, se, n}}}. aifoundry1-c0 is kept for old data only: it is
+     excluded from the version-3 campaign (amendment A4) and never offered by cardSeg unless a page passes it. ---- */
+  const CARDS = [
+    {id: 'aifoundry2', short: 'a2', label: 'aifoundry2', color: 'var(--c1)', mark: 'dot'},
+    {id: 'aifoundry3', short: 'a3', label: 'aifoundry3', color: 'var(--c2)', mark: 'ring'},
+    {id: 'aifoundry1-c1', short: 'a1c1', label: 'aifoundry1 card 1', color: 'var(--c3)', mark: 'diamond'},
+    {id: 'aifoundry1-c0', short: 'a1c0', label: 'aifoundry1 card 0', color: 'var(--ref)', mark: 'box'},
+  ];
+  const POOLED = {id: 'pooled', short: 'all', label: 'all cards', color: 'var(--ink)', mark: 'dot'};
+  const cardIndex = {};
+  CARDS.forEach(c => { cardIndex[c.id] = c; cardIndex[c.short] = c; });
+  /* The registry entry for a card id or short name; an unknown card gets --ref and its own name. */
+  function card(id) {
+    if (id === 'pooled' || id === 'all') return POOLED;
+    return cardIndex[id] || {id, short: id, label: id, color: 'var(--ref)', mark: 'box'};
+  }
+  /* The cards present in an object's keys (or a list), in registry order, then any others in their order. */
+  function cardsIn(keysOrObj) {
+    const ks = Array.isArray(keysOrObj) ? keysOrObj : Object.keys(keysOrObj || {});
+    const norm = ks.map(k => (cardIndex[k] ? cardIndex[k].id : k));
+    return CARDS.map(c => c.id).filter(id => norm.includes(id)).concat(norm.filter(k => !cardIndex[k]));
+  }
+  /* A card selector on bus('card'): options are o.cards (default: every registered card but aifoundry1-c0), with
+     "all cards" first when o.pooled. Every cardSeg on a page follows the others. */
+  function cardSeg(hostEl, o) {
+    o = o || {};
+    const ids = (o.cards || CARDS.filter(c => c.id !== 'aifoundry1-c0').map(c => c.id)).map(k => card(k).id);
+    const opts = (o.pooled ? [['pooled', o.pooledLabel || POOLED.label]] : []).concat(ids.map(id => [id, card(id).label]));
+    const b = bus(o.bus || 'card');
+    const start = b.value != null && opts.some(x => x[0] === b.value) ? b.value : (o.value || opts[0][0]);
+    const api = seg(hostEl, {label: o.label == null ? 'Card' : o.label, options: opts, value: start,
+      onChange: v => { b.emit(v, api); if (o.onChange) o.onChange(v); }});
+    b.on((v, from) => { if (from !== api && opts.some(x => x[0] === v) && api.value !== v) { api.quiet(v); if (o.onChange) o.onChange(v); } });
+    return api;
+  }
+  /* {mean, se, n, card} of v for a card ('pooled' = v itself), or null when the card has no value (never a zero). */
+  function pick(v, id) {
+    if (v == null) return null;
+    if (typeof v === 'number') return {mean: v, se: null, n: null, card: 'pooled'};
+    const c = id == null || id === 'pooled' || id === 'all' ? null : card(id).id;
+    const src = c == null ? v : (v.per_card || {})[c];
+    if (src == null) return null;
+    const m = typeof src === 'number' ? src : src.mean;
+    if (m == null || !isFinite(m)) return null;
+    return {mean: m, se: typeof src === 'number' ? null : (src.se == null ? null : src.se), n: typeof src === 'number' ? null : (src.n == null ? null : src.n), card: c || 'pooled'};
+  }
+  /* A card's mark at (x, y) in an SVG group: dot, ring, diamond or box, in the card's colour (or colour, if given). */
+  function cardMark(g, id, x, y, r, colour) {
+    const c = Object.assign({}, card(id)), R = r || 4;
+    if (colour) c.color = colour;
+    let e;
+    if (c.mark === 'diamond') e = el('polygon', {points: `${x},${y - R * 1.25} ${x + R * 1.25},${y} ${x},${y + R * 1.25} ${x - R * 1.25},${y}`}, g);
+    else if (c.mark === 'box') e = el('rect', {x: x - R, y: y - R, width: 2 * R, height: 2 * R}, g);
+    else e = el('circle', {cx: x, cy: y, r: c.mark === 'ring' ? R - 0.5 : R}, g);
+    if (c.mark === 'ring') { e.style.fill = 'var(--surface)'; e.style.stroke = c.color; e.style.strokeWidth = '2'; }
+    else e.style.fill = c.color;
+    return e;
+  }
+  /* Legend items for a list of cards (for legend()). */
+  const cardLegend = ids => ids.map(id => { const c = card(id); return {key: c.id, label: c.label, color: c.color, mark: c.mark}; });
+
+  /* ---- a sortable, filterable table: click a header to sort (aria-sort), numbers parsed with the true minus, thin
+     spaces and thousands commas; o.filter adds a text box that hides rows not containing it. Rows keep their DOM
+     nodes, so any listeners on them survive. A header with data-nosort is left alone. ---- */
+  function cellValue(td) {
+    const raw = (td.getAttribute('data-sort') != null ? td.getAttribute('data-sort') : td.textContent).trim();
+    const t = raw.replace(/−/g, '-').replace(/[   ,]/g, '').replace(/^[~≈<>≤≥]\s*/, '');
+    const m = t.match(/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?/i);
+    return m && (t.length === m[0].length || /^[\s%×x°a-zA-Zµ/()]/.test(t.slice(m[0].length))) ? {n: parseFloat(m[0])} : {s: raw.toLowerCase()};
+  }
+  function sortTable(table, o) {
+    o = o || {};
+    const t = $(table), tb = t.tBodies[0], hr = t.tHead && t.tHead.rows[t.tHead.rows.length - 1];
+    if (!tb || !hr) return null;
+    const orig = [...tb.rows];
+    let col = -1, dir = 0;
+    const heads = [...hr.cells];
+    let k = 0;
+    const colOf = heads.map(h => { const c = k; k += h.colSpan || 1; return c; });
+    heads.forEach((h, i) => {
+      if (h.hasAttribute('data-nosort') || (h.colSpan || 1) > 1) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ck-sort';
+      while (h.firstChild) b.appendChild(h.firstChild);
+      h.appendChild(b); h.setAttribute('aria-sort', 'none');
+      b.addEventListener('click', () => {
+        dir = col === colOf[i] ? (dir === 1 ? -1 : dir === -1 ? 0 : 1) : 1; col = colOf[i];
+        heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none'));
+        if (dir) h.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
+        const rows = dir ? [...orig].sort((a, b2) => {
+          const ca = a.cells[col], cb = b2.cells[col];
+          if (!ca || !cb) return 0;
+          const va = cellValue(ca), vb = cellValue(cb);
+          if (va.n != null && vb.n != null) return dir * (va.n - vb.n);
+          if (va.n != null) return -1;
+          if (vb.n != null) return 1;
+          return dir * va.s.localeCompare(vb.s);
+        }) : orig;
+        rows.forEach(r => tb.appendChild(r));
+      });
+    });
+    if (o.filter) {
+      const w = document.createElement('div'); w.className = 'ck-filter';
+      const id = 'ck-f' + (++uid), lab = document.createElement('label'), inp = document.createElement('input');
+      lab.htmlFor = id; lab.textContent = o.filterLabel || 'Filter rows'; inp.id = id; inp.type = 'search';
+      const cnt = document.createElement('span'); cnt.className = 'ck-filter-n'; cnt.setAttribute('aria-live', 'polite');
+      inp.addEventListener('input', () => {
+        const q = inp.value.trim().toLowerCase(); let n = 0;
+        orig.forEach(r => { const on = !q || r.textContent.toLowerCase().includes(q); r.classList.toggle('ck-hidden', !on); if (on) n++; });
+        cnt.textContent = q ? `${n} of ${orig.length} rows` : '';
+      });
+      w.append(lab, inp, cnt);
+      const ref = t.closest('.wide, .scroll, .ck-table-wrap') || t; ref.parentNode.insertBefore(w, ref);
+    }
+    t.classList.add('ck-sortable');
+    return {table: t, reset() { col = -1; dir = 0; heads.forEach(x => x.hasAttribute('aria-sort') && x.setAttribute('aria-sort', 'none')); orig.forEach(r => tb.appendChild(r)); }};
+  }
+
+  /* ---- colour: series in fixed order (no cycling: past six series use --ref), a one-hue sequential ramp ---- */
+  const SERIES = [1, 2, 3, 4, 5, 7];
+  const color = i => (i >= 0 && i < SERIES.length ? `var(--c${SERIES[i]})` : 'var(--ref)');
+  const clamp01 = p => Math.max(0, Math.min(1, +p || 0));
+  const ramp = p => `color-mix(in srgb, var(--c1) ${(15 + 85 * clamp01(p)).toFixed(1)}%, var(--surface))`;
+  function rgb(css) {  // resolve any CSS colour (tokens, color-mix) to linear-light luminance via a probe
+    const s = document.createElement('span'); s.style.color = css; s.style.display = 'none';
+    document.body.appendChild(s);
+    const c = getComputedStyle(s).color; s.remove();
+    const v = (c.match(/[\d.]+/g) || [0, 0, 0]).map(Number), unit = /^color\(/.test(c) ? 1 : 255;
+    const lin1 = x => { x /= unit; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin1(v[0]) + 0.7152 * lin1(v[1]) + 0.0722 * lin1(v[2]);
+  }
+  const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  /* Text colour for a ramp cell, chosen for the current theme: whichever of --ink and --page contrasts more. */
+  function rampInk(p) {
+    const bg = rgb(ramp(p));
+    return contrast(bg, rgb('var(--ink)')) >= contrast(bg, rgb('var(--page)')) ? 'var(--ink)' : 'var(--page)';
+  }
+  const redrawAll = () => frames.forEach(f => f.redraw());  // rampInk depends on the theme
+  if (window.MutationObserver) new MutationObserver(redrawAll).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  const dark = mm('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', redrawAll);
+
+  /* Collapsible depth: <details class="more"> hides what a quick reader can skip. An address or link that points
+     inside one opens it, and every <details> around it, so every anchor keeps working; printing opens them all. */
+  function reveal(id) {
+    let t = null;
+    try { t = id && document.getElementById(decodeURIComponent(id)); } catch (e) { t = null; }
+    if (!t) return false;
+    let opened = false;
+    for (let d = t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details'))
+      if (!d.open) { d.open = true; opened = true; }
+    if (opened) requestAnimationFrame(() => t.scrollIntoView());
+    return opened;
+  }
+  const fromHash = () => reveal(location.hash.slice(1));
+  window.addEventListener('hashchange', fromHash);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a) reveal(a.getAttribute('href').slice(1));
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+
+  return {el, txt, path, frame, lin, log, axes, inside, fmt, tip, keynav, legend, showSeries, seg, range, readout, bus,
+    stackTable, sortTable, reduced, ramp, rampInk, color, hide: f => hide(f, true),
+    cards: CARDS, card, cardsIn, cardSeg, pick, cardMark, cardLegend, reveal};
+})();
+
+</script>
+<script>
+const D = {"generated_by":"docs/reports/data/2026-09-29-sparse-parity/make_page_data.py","inst":[{"id":"L1","label":"L1","full":"L1 (512, 4, 0.3, 448)","n":512,"k":4,"eta":0.3,"m":448,"cand":2829877120,"secret":[9,216,281,366],"W":1267784949760},{"id":"L2","label":"L2","full":"L2 (512, 4, 0.4, 1,850)","n":512,"k":4,"eta":0.4,"m":1850,"cand":2829877120,"secret":[9,216,281,366],"W":5235272672000},{"id":"F5","label":"(256,5)","full":"(256, 5, 0.4, 1,925)","n":256,"k":5,"eta":0.4,"m":1925,"cand":8809549056,"secret":[7,110,135,153,183],"W":16958381932800}],"v":{"l1Solve":"0.131 s","l2Solve":"0.323 s","f5Solve":"1.52 s","r1":"7.8\u201312\u00d7","r6":"1.1\u20131.6\u00d7","r16":"0.85\u20131.2\u00d7","rE":"2.5\u20137.7\u00d7","rEhost":"1.6\u20136.1\u00d7","eAll":"5.0 \u00b7 16.6 \u00b7 89 J","m3toM5":"1.6\u20132.6\u00d7","eL1":"5.0 J","eL2":"16.6 J","eF5":"89 J","m3L1":"0.2045 s","m3L2":"0.8069 s","cand":"2.8\u00d710<sup>9</sup>\u20138.8\u00d710<sup>9</sup>","geMs":"1.26 ms","l2cpu1":"3.94 s","l2cpu6":"0.508 s","l2r1":"12\u00d7","l2r6":"1.6\u00d7","l2Found":"2,780,146","dPredM3":"73.0 ms and 0.301 s","m3OverPred":"2.8\u00d7","nowait":"FAIL","seeds":"20 of 20","seedsSolved":"20","probes":"8 of 8","knee":"428, 432, 443, 451, 462, 503","m1cycOff":"428 and 411","m1cycOn":"677 and 471","m2L1":"6.37 s","m2imb":"1.58","m3gapL1":"5.67","m3gapL2":"5.40","m3imbL1":"1.52","m3imbL2":"1.48","m3ovhL1":"2.65","m3ovhL2":"2.61","m3opc":"1.40","cOp":"378","eOut":"1,606","waitL2":"534","waitL2b":"1,151","epiL1":"229","tilesBusy":"2,703","tilesMed":"1,176","abL1":"0.205 \u2192 0.142 \u2192 0.130 s","abL2":"0.755 \u2192 0.530 \u2192 0.429 s","cL1":"0.203 s","cL2":"0.708 s","cModelL1":"1.8","cModelL2":"1.4","f5h1cyc":"1,629","floorL2":"0.176 s","floorL2one":"0.283 s","floorF5":"0.595 s","floorL2oneSt":"0.300 s","floorL1oneSt":"72.4 ms","stagedPct":"5.9%","l2two_cyc":"675","l2launch":"0.262 s","f5two_cyc":"993","resSolve":"0.266 s","resFound":"6.7\u00d710<sup>6</sup>","resLaunch":"0.127 s","l1twoLaunch":"0.125 s","resCyc":"1,996","resKept":"57\u201383%","resPloss":"1.8\u00d710<sup>\u22123</sup>","resStage2":"0.121 s","l1two_s":"0.131 s","l1one_s":"0.130 s","l2one":"0.429 s","f5one":"2.55 s","l2two_ratio":"1.3\u00d7","f5two_ratio":"1.7\u00d7","b6":"0.69\u20131.2\u00d7","cpuFirst":"1.06 s, 3.95 s, 15.0 s","cpuNow":"1.03 s, 3.94 s, 14.9 s","cpu1":"1.03 s, 3.94 s, 14.9 s","cpu6":"0.148 s, 0.508 s, 1.77 s","cpu6scan":"0.180 s, 0.699 s, 2.63 s","cardAll":"0.131 s, 0.323 s, 1.52 s","screen1024":"0.459 s and 1.58 s","screen1024loss":"6.2\u00d710<sup>\u22124</sup>","l1two6":"0.166 s","idleW":"24 W","burstW":"34.8\u201339.0 W","dieRise":"51\u201354 \u00b0C","hostJ":"1.4\u201352 J","gridSrc":"workloads/sparseparity/proto/data/2026-09-28-aifoundry1","m3OverPredR":"2.7\u20132.8\u00d7","hostBusy":"0.021\u20130.023","mhzRange":"598\u2013600 MHz","foundRatio":"0.997\u20131.000\u00d7","sp4":"3.89","smtU":"0.94\u20131.09\u00d7"},"grid":{"ns":[128,256,512],"ks":[3,4,5],"etas":[0.0,0.1,0.2,0.3,0.4],"pts":[{"n":128,"k":3,"eta":0.0,"m":22,"msrc":"measured","cand":341376,"W":7510272,"t":0.000256,"tsrc":"measured"},{"n":128,"k":3,"eta":0.1,"m":65,"msrc":"measured","cand":341376,"W":22189440,"t":0.000345,"tsrc":"measured"},{"n":128,"k":3,"eta":0.2,"m":108,"msrc":"measured","cand":341376,"W":36868608,"t":0.000344,"tsrc":"measured"},{"n":128,"k":3,"eta":0.3,"m":201,"msrc":"measured","cand":341376,"W":68616576,"t":0.000476,"tsrc":"measured"},{"n":128,"k":3,"eta":0.4,"m":1006,"msrc":"measured","cand":341376,"W":343424256,"t":0.000874,"tsrc":"measured"},{"n":128,"k":4,"eta":0.0,"m":29,"msrc":"measured","cand":10668000,"W":309372000,"t":0.006676,"tsrc":"measured"},{"n":128,"k":4,"eta":0.1,"m":73,"msrc":"measured","cand":10668000,"W":778764000,"t":0.009422,"tsrc":"measured"},{"n":128,"k":4,"eta":0.2,"m":129,"msrc":"measured","cand":10668000,"W":1376172000,"t":0.010977,"tsrc":"measured"},{"n":128,"k":4,"eta":0.3,"m":272,"msrc":"measured","cand":10668000,"W":2901696000,"t":0.019781,"tsrc":"measured"},{"n":128,"k":4,"eta":0.4,"m":1454,"msrc":"measured","cand":10668000,"W":15511272000,"t":0.03139,"tsrc":"measured"},{"n":128,"k":5,"eta":0.0,"m":34,"msrc":"measured","cand":264566400,"W":8995257600,"t":0.181576,"tsrc":"measured"},{"n":128,"k":5,"eta":0.1,"m":78,"msrc":"measured","cand":264566400,"W":20636179200,"t":0.22669,"tsrc":"measured"},{"n":128,"k":5,"eta":0.2,"m":130,"msrc":"measured","cand":264566400,"W":34393632000,"t":0.276231,"tsrc":"measured"},{"n":128,"k":5,"eta":0.3,"m":312,"msrc":"measured","cand":264566400,"W":82544716800,"t":0.503344,"tsrc":"measured"},{"n":128,"k":5,"eta":0.4,"m":1465,"msrc":"measured","cand":264566400,"W":387589776000,"t":0.789241,"tsrc":"measured"},{"n":256,"k":3,"eta":0.0,"m":27,"msrc":"measured","cand":2763520,"W":74615040,"t":0.00165,"tsrc":"measured"},{"n":256,"k":3,"eta":0.1,"m":68,"msrc":"measured","cand":2763520,"W":187919360,"t":0.002268,"tsrc":"measured"},{"n":256,"k":3,"eta":0.2,"m":121,"msrc":"measured","cand":2763520,"W":334385920,"t":0.002247,"tsrc":"measured"},{"n":256,"k":3,"eta":0.3,"m":272,"msrc":"measured","cand":2763520,"W":751677440,"t":0.004927,"tsrc":"measured"},{"n":256,"k":3,"eta":0.4,"m":1123,"msrc":"measured","cand":2763520,"W":3103432960,"t":0.007896,"tsrc":"measured"},{"n":256,"k":4,"eta":0.0,"m":35,"msrc":"measured","cand":174792640,"W":6117742400,"t":0.093873,"tsrc":"measured"},{"n":256,"k":4,"eta":0.1,"m":77,"msrc":"measured","cand":174792640,"W":13459033280,"t":0.134526,"tsrc":"measured"},{"n":256,"k":4,"eta":0.2,"m":136,"msrc":"measured","cand":174792640,"W":23771799040,"t":0.157223,"tsrc":"measured"},{"n":256,"k":4,"eta":0.3,"m":327,"msrc":"measured","cand":174792640,"W":57157193280,"t":0.298438,"tsrc":"measured"},{"n":256,"k":4,"eta":0.4,"m":1537,"msrc":"measured","cand":174792640,"W":268656287680,"t":0.570788,"tsrc":"measured"},{"n":256,"k":5,"eta":0.0,"m":40,"msrc":"model","cand":8809549056,"W":352381962240,"t":5.103118,"tsrc":"measured"},{"n":256,"k":5,"eta":0.1,"m":97,"msrc":"model","cand":8809549056,"W":854526258432,"t":6.481358,"tsrc":"measured"},{"n":256,"k":5,"eta":0.2,"m":195,"msrc":"model","cand":8809549056,"W":1717862065920,"t":9.74007,"tsrc":"measured"},{"n":256,"k":5,"eta":0.3,"m":466,"msrc":"model","cand":8809549056,"W":4105249860096,"t":15.435707,"tsrc":"measured"},{"n":256,"k":5,"eta":0.4,"m":1925,"msrc":"model","cand":8809549056,"W":16958381932800,"t":28.940095,"tsrc":"measured"},{"n":512,"k":3,"eta":0.0,"m":29,"msrc":"measured","cand":22238720,"W":644922880,"t":0.011471,"tsrc":"measured"},{"n":512,"k":3,"eta":0.1,"m":76,"msrc":"measured","cand":22238720,"W":1690142720,"t":0.016039,"tsrc":"measured"},{"n":512,"k":3,"eta":0.2,"m":125,"msrc":"measured","cand":22238720,"W":2779840000,"t":0.016025,"tsrc":"measured"},{"n":512,"k":3,"eta":0.3,"m":281,"msrc":"measured","cand":22238720,"W":6249080320,"t":0.037361,"tsrc":"measured"},{"n":512,"k":3,"eta":0.4,"m":1502,"msrc":"measured","cand":22238720,"W":33402557440,"t":0.064108,"tsrc":"measured"},{"n":512,"k":4,"eta":0.0,"m":39,"msrc":"model","cand":2829877120,"W":110365207680,"t":1.383123,"tsrc":"measured"},{"n":512,"k":4,"eta":0.1,"m":93,"msrc":"model","cand":2829877120,"W":263178572160,"t":1.997206,"tsrc":"measured"},{"n":512,"k":4,"eta":0.2,"m":187,"msrc":"model","cand":2829877120,"W":529187021440,"t":2.351422,"tsrc":"measured"},{"n":512,"k":4,"eta":0.3,"m":448,"msrc":"model","cand":2829877120,"W":1267784949760,"t":4.656298,"tsrc":"measured"},{"n":512,"k":4,"eta":0.4,"m":1850,"msrc":"model","cand":2829877120,"W":5235272672000,"t":9.435595,"tsrc":"measured"},{"n":512,"k":5,"eta":0.0,"m":45,"msrc":"model","cand":287515515392,"W":12938198192640,"t":145.6162011,"tsrc":"4 threads \u00d7 3.89"},{"n":512,"k":5,"eta":0.1,"m":109,"msrc":"model","cand":287515515392,"W":31339191177728,"t":191.2045921,"tsrc":"4 threads \u00d7 3.89"},{"n":512,"k":5,"eta":0.2,"m":218,"msrc":"model","cand":287515515392,"W":62678382355456,"t":290.864415,"tsrc":"timed 1/32 slice"},{"n":512,"k":5,"eta":0.3,"m":521,"msrc":"model","cand":287515515392,"W":149795583519232,"t":640.4327514,"tsrc":"timed 1/32 slice"},{"n":512,"k":5,"eta":0.4,"m":2151,"msrc":"model","cand":287515515392,"W":618445873608192,"t":1125.3412812,"tsrc":"timed 1/32 slice"}],"ge":[{"n":128,"s":7.549999999999999e-05,"extra_max":5,"runs":80,"ok":80},{"n":256,"s":0.000307,"extra_max":6,"runs":80,"ok":80},{"n":512,"s":0.0012555,"extra_max":4,"runs":80,"ok":80}],"sp4":3.89,"show":{"L1":[512,4,0.3],"L2":[512,4,0.4],"F5":[256,5,0.4]},"timing_runs":291,"timing_ok":291,"src":"workloads/sparseparity/proto/data/2026-09-28-aifoundry1"},"ladder":{"ms":[{"id":"M2","label":"M2","sub":"one shire (32 minions)"},{"id":"M3","label":"M3","sub":"1,024 minions, M1's kernel"},{"id":"M4","label":"M4","sub":"fitted plan + incremental rows (b)"},{"id":"M5","label":"M5","sub":"two-stage screen"}],"series":{"L1":[{"ms":"M2","s":6.37081,"note":"all of L1 on one shire, M1's kernel","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/aifoundry3-20260929-041640/m2-l1-full.json"},{"ms":"M3","s":0.204504,"note":"first all-shire run, M1's kernel and planner","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/m3-manual-0420/l1.log"},{"ms":"M4","s":0.130268,"note":"variant b: the fitted planner and incremental row generation","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/m4/m4-32s-l1-b.json"},{"ms":"M5","s":0.131379,"note":"two-stage: launch + survivor readback + host stage 2","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/m5/m5-l1-s320.json"}],"L2":[{"ms":"M3","s":0.8069,"note":"first all-shire run, M1's kernel and planner","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/m3-manual-0420/l2.log"},{"ms":"M4","s":0.42934,"note":"variant b: the fitted planner and incremental row generation","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/m4/m4-32s-l2-b.json"},{"ms":"M5","s":0.322552,"note":"two-stage: launch + survivor readback + host stage 2","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/m5/m5-l2-s1152.json"}],"F5":[{"ms":"M3","s":3.9055600000000004,"note":"M1's kernel and planner on 1,024 minions, in two halves (run in M4's A/B, 08:17-08:45 PDT)","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/m4/m4-32s-f5-h0-m1.json, workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/m4/m4-32s-f5-h1-m1.json"},{"ms":"M4","s":2.5471269999999997,"note":"variant b, in two halves (one process each, under 10 s)","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/f5-b/h0.log, workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/f5-b/h1.log"},{"ms":"M5","s":1.52191,"note":"two-stage, whole, one process","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/m5/m5-f5-s1152.json"}]},"design":{"L1":{"M3":0.07303963136842105,"M4":0.03994509699342105},"L2":{"M3":0.30083275852631575,"M4":0.1637268304013158},"F5":{"M3":1.164767850232456,"M4":0.6682705537220394}},"cpu1":{"L1":1.028487,"L2":3.940263,"F5":14.85985},"cpu6":{"L1":{"s":0.148353,"method":"meet in the middle","ploss":0.0},"L2":{"s":0.508131,"method":"two-stage AVX-512 scan","ploss":8.902472235983172e-05},"F5":{"s":1.769189,"method":"two-stage AVX-512 scan","ploss":8.902472235983172e-05}}},"ladder_rows":[{"id":"L1","ms":"M2","s":6.37081,"note":"all of L1 on one shire, M1's kernel","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/aifoundry3-20260929-041640/m2-l1-full.json"},{"id":"L1","ms":"M3","s":0.204504,"note":"first all-shire run, M1's kernel and planner","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/m3-manual-0420/l1.log"},{"id":"L1","ms":"M4","s":0.130268,"note":"variant b: the fitted planner and incremental row generation","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/m4/m4-32s-l1-b.json"},{"id":"L1","ms":"M5","s":0.131379,"note":"two-stage: launch + survivor readback + host stage 2","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/m5/m5-l1-s320.json"},{"id":"L2","ms":"M3","s":0.8069,"note":"first all-shire run, M1's kernel and planner","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/m3-manual-0420/l2.log"},{"id":"L2","ms":"M4","s":0.42934,"note":"variant b: the fitted planner and incremental row generation","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/m4/m4-32s-l2-b.json"},{"id":"L2","ms":"M5","s":0.322552,"note":"two-stage: launch + survivor readback + host stage 2","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/m5/m5-l2-s1152.json"},{"id":"F5","ms":"M3","s":3.9055600000000004,"note":"M1's kernel and planner on 1,024 minions, in two halves (run in M4's A/B, 08:17-08:45 PDT)","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/m4/m4-32s-f5-h0-m1.json, workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/m4/m4-32s-f5-h1-m1.json"},{"id":"F5","ms":"M4","s":2.5471269999999997,"note":"variant b, in two halves (one process each, under 10 s)","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/f5-b/h0.log, workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/f5-b/h1.log"},{"id":"F5","ms":"M5","s":1.52191,"note":"two-stage, whole, one process","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/m5/m5-f5-s1152.json"}],"m4ab":[{"id":"L1","vals":{"m1":0.204741,"a":0.142282,"b":0.130268,"c":0.202641,"m4":0.197942,"m4d":0.215861},"cyc":{"m1":1643.61,"a":927.759,"b":905.565,"c":1272.48,"m4":1288.61,"m4d":1363.99}},{"id":"L2","vals":{"m1":0.754926,"a":0.529668,"b":0.42934,"c":0.707516,"m4":0.580739,"m4d":0.62471},"cyc":{"m1":1466.19,"a":819.061,"b":726.872,"c":1065.92,"m4":924.565,"m4d":962.299}},{"id":"F5","vals":{"m1":3.9055600000000004,"m4":3.22049,"m4d":3.39601,"b":2.5471269999999997},"cyc":{"m1":2852.55,"m4":1992.84,"m4d":1937.35,"b":1629.12}}],"m5":[{"id":"L1","m1":320,"tau1":66,"ploss":8.82291e-05,"found":376740,"expected":377854,"launch":0.125003,"readback":0.00177728,"stage2":0.00459932,"solve":0.131379,"model":0.100877,"log_mb":7.85431,"survived":true,"solved":true,"cyc_op":1226.82,"offline":"exact, all 1024 minions","one_stage":0.130268,"one_stage_rerun":0.135287,"cpu6":0.148353,"file":"workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/m5/m5-l1-s320.json","floor":0.048803},{"id":"L2","m1":1152,"tau1":106,"ploss":8.90247e-05,"found":2780146,"expected":2779940.0,"launch":0.261847,"readback":0.00845944,"stage2":0.0522456,"solve":0.322552,"model":0.262451,"log_mb":37.9109,"survived":true,"solved":true,"cyc_op":674.822,"offline":"exact, all 1024 minions","one_stage":0.42934,"one_stage_rerun":0.426792,"cpu6":0.508131,"file":"workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/m5/m5-l2-s1152.json","floor":0.1756908},{"id":"F5","m1":1152,"tau1":106,"ploss":8.90247e-05,"found":8656197,"expected":8654100.0,"launch":1.33486,"readback":0.024022,"stage2":0.163028,"solve":1.52191,"model":1.22242,"log_mb":108.236,"survived":true,"solved":true,"cyc_op":993.267,"offline":"exact, all 1024 minions","one_stage":2.5471269999999997,"one_stage_rerun":null,"cpu6":1.769189,"file":"workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/m5/m5-f5-s1152.json","floor":0.59517678}],"controls":[{"step":"m5-ovf","status":"FAIL","expect":"FAIL","what":"every survivor log too small: the overflow is flagged and the run fails"},{"step":"m5-negmask","status":"FAIL","expect":"FAIL","what":"one tile's staircase shifted: both closed forms fail"},{"step":"m5-negtau","status":"FAIL","expect":"FAIL","what":"the kernel screens at \u03c41 + 2: the survivor oracle disagrees on every minion"},{"step":"m5-lostlog","status":"FAIL","expect":"FAIL","what":"the kernel logs into a spare area: the poisoned log fails the entries and stage 2"}],"res192":{"m1":192,"tau1":40,"ploss":0.00181431,"found":6726770,"solve":0.266244,"launch":0.126517,"stage2":0.12072},"cpu":{"per":{"L1":{"one_core":1.028487,"one_core_first":1.058354,"t6_scan":0.180096,"t16_scan":[0.135072,0.13599843598160669],"mhz_1t":4900,"smt_u":0.9422391402932567,"best6":0.148353,"best6_method":"meet in the middle with a random halving of the features (expected time, mean over 10 seeds)","best6_short":"meet in the middle","best6_ploss":0.0,"best16":[0.11126475000000001,0.11460269250000002],"best_seeds_ok":10,"two_stage6":{"m1":320,"tau":66,"s":0.165642,"ploss":8.822910706662856e-05}},"L2":{"one_core":3.940263,"one_core_first":3.953645,"t6_scan":0.69915,"t16_scan":[0.5075825561263297,0.5286970368161773],"mhz_1t":4900,"smt_u":1.0330585511088644,"best6":0.508131,"best6_method":"its own two-stage screen: the AVX-512 scan at m1 = 1,152, \u03c41 = 106, survivors rescored on all m","best6_short":"two-stage AVX-512 scan","best6_ploss":8.902472235983172e-05,"best16":[0.38109824999999997,0.38431083556542134],"screen1024":{"s":0.45882799999999996,"ploss":0.0006203684734324977}},"F5":{"one_core":14.85985,"one_core_first":15.039382,"t6_scan":2.63349,"t16_scan":[1.8113496306634995,1.9942634356466957],"mhz_1t":4900,"smt_u":1.090412069853412,"best6":1.769189,"best6_method":"its own two-stage screen: the AVX-512 scan at m1 = 1,152, \u03c41 = 106, survivors rescored on all m","best6_short":"two-stage AVX-512 scan","best6_ploss":8.902472235983172e-05,"best16":[1.3268917499999997,1.338232923064987],"screen1024":{"s":1.583225,"ploss":0.0006203684734324977}}},"host":"i7-11700K (8 cores, 16 threads, AVX-512 VPOPCNTQ), aifoundry3's host","src":["workloads/sparseparity/cpu/data/2026-09-29-aifoundry3-r/bench.jsonl","workloads/sparseparity/data/2026-09-29-aifoundry3-sysemu-m5/cpu2s.jsonl"],"r1":{"L1":7.828397232434407,"L2":12.215900071926386,"F5":9.763947933846284},"r6":{"L1":1.1291987303907018,"L2":1.5753459907239762,"F5":1.162479384457688},"r16":{"L1":[0.8468990477930264,0.8723060192268173],"L2":[1.1815094930429821,1.191469392734881],"F5":[0.8718595383432658,0.879311472468797]},"r6_b":{"L1":1.138829182915221,"L2":1.1835165603018587,"F5":0.6945821704218126}},"energy":[{"id":"L1","solves":44,"solves_per_s":7.32113,"kernel_s":0.13532,"board_w":37.24109,"idle_w":24.00859,"j_over":1.66008,"j_total":5.00456,"j_catalogue":1.7398,"die":[51.0,53.27273],"mhz":[600],"host":[1.39679,2.85069],"cpu_j":[18.5,37.148],"cpu_s":0.148,"cpu_method":"mitm, random halving, expected time over 10 seeds","ratio_board":[3.69663,7.42283],"ratio_host":[2.35511,5.80315],"rails_j":{"minion":0.8159,"sram":0.7878,"noc":0.01229,"unmetered":0.0441},"host_busy":0.02261,"file":"workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l1/energy.json"},{"id":"L2","solves":14,"solves_per_s":2.33606,"kernel_s":0.42696,"board_w":39.04164,"idle_w":23.88719,"j_over":6.19562,"j_total":16.6034,"j_catalogue":6.27386,"die":[51.0,53.16364],"mhz":[600],"host":[4.37124,8.90994],"cpu_j":[63.5,127.508],"cpu_s":0.508,"cpu_method":"vexh two-stage, m1 1152, tau1 106","ratio_board":[3.82452,7.67963],"ratio_host":[2.48889,6.07915],"rails_j":{"minion":3.01108,"sram":2.88646,"noc":0.04225,"unmetered":0.25582},"host_busy":0.02115,"file":"workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l2/energy.json"},{"id":"F5","solves":[6,3],"solves_per_s":0.4012841091492777,"kernel_s":2.4902,"board_w":[38.31577,34.82268],"idle_w":24.046955,"j_over":28.4226,"j_total":89.0681,"j_catalogue":29.3295,"die":[52.0,53.5962],"mhz":[600],"host":[25.4372,51.8311],"cpu_j":[221.125,444.019],"cpu_s":1.769,"cpu_method":"vexh two-stage, m1 1152, tau1 106","ratio_board":[2.4826,4.9852],"ratio_host":[1.5694,3.8777],"rails_j":{"minion":14.091,"sram":12.74,"noc":0.1831,"unmetered":1.4085},"host_busy":0.02084,"file":"workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-f5.json"}],"cycles":{"runs":[{"run":"m3-l1","S":7,"mean":{"op":378.20000000000107,"epi":229.42857142857142,"smt":199.9519601771833,"wait":127.61938883074383,"other":66.13053695096276},"mean_total":1001.3304573874611,"busiest":{"op":378.2,"epi":229.42857142857142,"smt":269.4915900094549,"wait":659.3314506287022,"other":127.08515479776047},"busiest_model_total":1663.5367668644892,"busiest_meas":1643.8381954322213,"busiest_tiles":2703,"median_tiles":1176,"imbalance":1.5248623530921734,"overhead":2.6529896613664734,"opcost":1.4007407407407406,"gap":5.666618306092655,"launch_ms":204.17018333333334},{"run":"m3-l2","S":29,"mean":{"op":378.1999999999999,"epi":55.37931034482759,"smt":0.0,"wait":533.8425043246433,"other":19.84521392688759},"mean_total":987.2670285963536,"busiest":{"op":378.2,"epi":55.37931034482759,"smt":0.0,"wait":1151.1677804335918,"other":34.612266817162656},"busiest_model_total":1619.359357595499,"busiest_meas":1563.5007714227493,"busiest_tiles":2712,"median_tiles":1170,"imbalance":1.475142447108779,"overhead":2.612057626737957,"opcost":1.4007407407407406,"gap":5.397274101722787,"launch_ms":805.6432833333333}],"fitted":{"E_OUT":1606,"C_OP_str":378.2,"G_TILE":2081,"G_SLICE":2108,"G_K":570.3},"src":"workloads/sparseparity/tools/cycle_model.py","fit_rms":"1.8%"},"later":[{"label":"M3, L1 (M1's kernel)","cyc_op":1643.84,"imb":1.6350379255530003,"launch":0.204504,"floor":0.0683242},{"label":"M3, L2 (M1's kernel)","cyc_op":1563.5,"imb":1.5643103275309134,"launch":0.8069,"floor":0.2830574},{"label":"M4 b, L1","cyc_op":905.565,"imb":1.0376248482007797,"launch":0.130268,"floor":0.0683242},{"label":"M4 b, L2","cyc_op":726.872,"imb":1.0208690102183295,"launch":0.42934,"floor":0.2830574},{"label":"M4 b, (256,5), second half","cyc_op":1629.12,"imb":null,"launch":null,"floor":null},{"label":"M5 two-stage, L1 (m1 = 320)","cyc_op":1226.82,"imb":1.0253685369140029,"launch":0.125003,"floor":0.048803},{"label":"M5 two-stage, L2 (m1 = 1,152)","cyc_op":674.822,"imb":1.0299845320197045,"launch":0.261847,"floor":0.1756908},{"label":"M5 two-stage, (256,5) (m1 = 1,152)","cyc_op":993.267,"imb":1.0401017976985094,"launch":1.33486,"floor":0.59517678}],"m1":[{"step":"m1-c0-scalar","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/aifoundry3-20260929-041532/m1-c0-scalar.json","status":"PASS","launch":0.00251346,"cyc_op":2924.34,"solved":true,"sum_c":"ok","oracle":"exact, all 1 minions"},{"step":"m1-c0-tensor","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/aifoundry3-20260929-041532/m1-c0-tensor.json","status":"PASS","launch":0.000976927,"cyc_op":5711.84,"solved":true,"sum_c":"ok","oracle":"exact, all 1 minions"},{"step":"m1-neg-drop","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/aifoundry3-20260929-041532/m1-neg-drop.json","status":"FAIL","launch":0.000913038,"cyc_op":5284.67,"solved":true,"sum_c":"MISMATCH","oracle":"exact, all 1 minions"},{"step":"m1-neg-dup","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/aifoundry3-20260929-041532/m1-neg-dup.json","status":"FAIL","launch":0.00107714,"cyc_op":5055.06,"solved":true,"sum_c":"MISMATCH","oracle":"exact, all 1 minions"},{"step":"m1-neg-mask","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/aifoundry3-20260929-041532/m1-neg-mask.json","status":"FAIL","launch":0.000938959,"cyc_op":5149.92,"solved":true,"sum_c":"MISMATCH","oracle":"MISMATCH 1 of all 1 minions"},{"step":"m1-tie","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/aifoundry3-20260929-041532/m1-tie.json","status":"PASS","launch":0.0009528,"cyc_op":4960.66,"solved":false,"sum_c":"ok","oracle":"exact, all 1 minions"},{"step":"m1-c1","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/aifoundry3-20260929-041532/m1-c1.json","status":"PASS","launch":0.586577,"cyc_op":2250.29,"solved":true,"sum_c":"ok","oracle":"exact, all 1 minions"},{"step":"m1-l1-timing","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/aifoundry3-20260929-041532/m1-l1-timing.json","status":"TIMING","launch":0.952621,"cyc_op":428.336,"solved":false,"sum_c":"timing-only","oracle":"skipped"},{"step":"m1-l1","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/aifoundry3-20260929-041532/m1-l1.json","status":"PASS","launch":1.50613,"cyc_op":677.285,"solved":false,"sum_c":"partial","oracle":"exact, all 1 minions"},{"step":"m1-l2-timing","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/aifoundry3-20260929-041532/m1-l2-timing.json","status":"TIMING","launch":1.2138,"cyc_op":411.32,"solved":false,"sum_c":"timing-only","oracle":"skipped"},{"step":"m1-l2","file":"workloads/sparseparity/data/2026-09-29-aifoundry3-card/runs/aifoundry3-20260929-041532/m1-l2.json","status":"PASS","launch":1.38939,"cyc_op":470.821,"solved":false,"sum_c":"partial","oracle":"exact, all 1 minions"}],"knee":[{"p":1,"cyc_op":428.336},{"p":2,"cyc_op":432.003},{"p":4,"cyc_op":443.063},{"p":8,"cyc_op":450.775},{"p":16,"cyc_op":461.834},{"p":32,"cyc_op":502.858}],"checks":["L2 two-stage solve 0.323 s","(256,5) two-stage solve 1.52 s","L1 two-stage solve 0.131 s","M3 L1 0.204 s, L2 0.807 s","variant b L1 0.130, L2 0.429, (256,5) 2.55 s","energy 5.0 / 16.6 / 89 J with idle","CPU 6T best 0.148 / 0.508 / 1.769 s","P(loss) 8.8e-5 at L1, 8.9e-5 at L2 and (256,5)","L2 has 1,381,776 row tiles and 32 column tiles","the plan has 4,096 blocks on 1,024 minions, 2,560 KB of scratchpad per shire","the device open is about 0.18 s","the M3 gap to 270 cycles is 5.67x / 5.40x","P(loss) of the screens under 1e-4","every M5 two-stage run found the secret","the offline full oracle passed on all 1,024 minions","the controls failed as designed","the epilogue fit is 1,606 cycles per output tile","the design's first M3 prediction 73 ms / 301 ms","C(512,4) = 2.83e9, C(256,5) = 8.81e9","GF(2) elimination at n = 512 in about 1.3 ms","the (256,5) rails sum to its headline (J per solve)","aifoundry3's card at 600 MHz","one minion: 428 and 411 cycles per op without the epilogue, 677 and 471 with it","the resident screen: launch 0.127 s against 0.125 s streamed, 1,996 cycles per op, 6.7e6 survivors","at eta 0.4 a screen at P(loss) < 1e-4 passes 83% (m1 192) and 57% (m1 320) of the candidates","L2's one-stage floor 0.283 s from the ops alone, 0.300 s with the staged rows; L1's 68 and 72 ms","one core's SMT uplift 0.94-1.09","M3's L1 busiest minion 1.64x the median, L2's 1.56x"]};
+/* sparse-parity.script.js: the page "Sparse parity on the ET-SoC-1".
+   D is docs/reports/data/2026-09-29-sparse-parity/page.json (make_page_data.py beside it); CK is the chart toolkit. */
+(function () {
+  'use strict';
+  const V = D.v;
+  document.querySelectorAll('[data-v]').forEach(e => {
+    const k = e.getAttribute('data-v');
+    if (!(k in V)) throw new Error('page.json has no v.' + k);
+    e.innerHTML = V[k];
+  });
+
+  const num = CK.fmt.num;
+  const NB = ' ';
+  const g3 = x => (x >= 1000 ? num(Math.round(x), 0) : Number(x).toPrecision(3));
+  function fmtS(t) {
+    if (t == null || !isFinite(t)) return '—';
+    if (t < 1e-3) return g3(t * 1e6) + NB + 'µs';
+    if (t < 0.1) return g3(t * 1e3) + NB + 'ms';
+    if (t < 120) return g3(t) + NB + 's';
+    return g3(t / 60) + NB + 'min';
+  }
+  const tTick = v => (v < 1e-3 ? num(v * 1e6) + ' µs' : v < 1 ? num(v * 1e3) + ' ms' : num(v) + ' s');
+  const SUP = {'-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵',
+    '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'};
+  const expo = v => { const e = Math.floor(Math.log10(Math.abs(v))); return [v / Math.pow(10, e), e]; };
+  const sciU = (v, d) => { const [m, e] = expo(v); return num(m, d == null ? 1 : d) + '×10' + String(e).split('').map(c => SUP[c]).join(''); };
+  const sciH = (v, d) => { const [m, e] = expo(v); return num(m, d == null ? 1 : d) + '×10<sup>' + String(e).replace('-', '−') + '</sup>'; };
+  const x2 = v => (v < 10 ? Number(v).toPrecision(2) : num(Math.round(v), 0));
+  const rngX = (a, b) => { const lo = x2(Math.min(a, b)), hi = x2(Math.max(a, b)); return (lo === hi ? lo : lo + '–' + hi) + '×'; };
+  const INST = {};
+  D.inst.forEach(i => { INST[i.id] = i; });
+  const LAB = id => INST[id].label;
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const mix = (c, p) => `color-mix(in srgb, ${c} ${p}%, var(--surface))`;
+
+  /* ---- tables ---- */
+  function table(id, head, rows, o) {
+    o = o || {};
+    const t = document.getElementById(id);
+    if (!t) throw new Error('no table #' + id);
+    t.textContent = '';
+    const th = t.createTHead().insertRow();
+    head.forEach(h => { const c = document.createElement('th'); c.innerHTML = h.html || h; if (h.num) c.className = 'num'; th.appendChild(c); });
+    const tb = t.createTBody();
+    rows.forEach(r => {
+      const tr = tb.insertRow();
+      r.forEach((v, k) => {
+        const c = tr.insertCell();
+        c.innerHTML = v == null ? '—' : v;
+        if (head[k] && head[k].num) c.className = 'num';
+      });
+    });
+    if (t.classList.contains('stack')) CK.stackTable(t);
+    if (o.sort) CK.sortTable(t);
+    return t;
+  }
+  const sub = s => `<span class="sub">${s}</span>`;
+  const word = (s, ok) => `<span class="word ${ok ? 'pass' : 'fail'}">${s}</span>`;
+
+  /* ---- a panel's axes: horizontal grid, y ticks, baseline, x ticks ---- */
+  function panelAxes(g, b, x, y, yt, xt, o) {
+    o = o || {};
+    const labs = [];
+    yt.forEach(t => {
+      CK.el('line', {x1: b.x0, x2: b.x1, y1: y(t), y2: y(t), class: 'grid-line'}, g);
+      if (o.ylab !== false) labs.push(CK.txt(g, b.x0 - 6, y(t) + 4, (o.yfmt || tTick)(t), 'tick', 'end'));
+    });
+    CK.el('line', {x1: b.x0, x2: b.x1, y1: b.y1, y2: b.y1, class: 'ck-axis'}, g);
+    xt.forEach(t => labs.push(CK.txt(g, x(t.v), b.y1 + 16, t.label, 'tick', 'middle')));
+    return labs;
+  }
+
+  /* ================= 1. one core's time over n, k, eta ================= */
+  const G = D.grid;
+  const NCOL = {};
+  G.ns.forEach((n, i) => { NCOL[n] = CK.color(i); });
+  CK.legend('gridleg', G.ns.map(n => ({key: 'n' + n, label: 'n = ' + n, color: NCOL[n], mark: 'line'})).concat([
+    {key: 'ge', label: 'GF(2) elimination, noiseless', color: 'var(--ink-2)', mark: 'diamond'},
+    {key: 'big', label: 'work ≥ 10¹²', color: 'var(--ink-2)', mark: 'dot'},
+    {key: 'small', label: 'work < 10¹²', color: 'var(--ink-2)', mark: 'ring'}]));
+  const showKey = {};
+  Object.entries(G.show).forEach(([id, t]) => { showKey[t.join(',')] = id; });
+
+  function drawGrid(f) {
+    const W = f.W, wide = W >= 700, L = 62, R = 12, T = 30, ph = 200, stride = ph + 76;
+    const pw = wide ? (W - L - R - 40) / 3 : W - L - R;
+    const nodes = [], labs = [];
+    const y0s = G.ks.map((k, i) => (wide ? T : T + i * stride));
+    G.ks.forEach((k, i) => {
+      const b = {x0: wide ? L + i * (pw + 20) : L, y0: y0s[i]};
+      b.x1 = b.x0 + pw; b.y1 = b.y0 + ph;
+      const x = CK.lin(-0.035, 0.435, b.x0 + 4, b.x1 - 4), y = CK.log(3e-5, 4e3, b.y1, b.y0);
+      const g = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+      labs.push(...panelAxes(g, b, x, y, [1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1000],
+        G.etas.map(e => ({v: e, label: num(e, e ? 1 : 0)})), {ylab: !wide || i === 0}));
+      const c512 = G.pts.find(p => p.n === 512 && p.k === k).cand;
+      labs.push(CK.txt(g, b.x0, b.y0 - 12, `k = ${k}`, 'lab-strong'));
+      labs.push(CK.txt(g, b.x0 + 40, b.y0 - 12, `C(512, ${k}) = ${sciU(c512)}`, 'lab'));
+      if (!wide || i === 1) labs.push(CK.txt(g, (b.x0 + b.x1) / 2, b.y1 + 34, 'noise η', 'lab', 'middle'));
+      G.ns.forEach(n => {
+        const pts = G.pts.filter(p => p.n === n && p.k === k).sort((a, c) => a.eta - c.eta);
+        CK.el('path', {d: CK.path(pts.map(p => [p.eta, p.t]), x, y), class: 'ln', style: `stroke:${NCOL[n]}`, 'data-series': 'n' + n}, f.svg);
+      });
+      /* noiseless elimination: one diamond per n at eta = 0, a little left of the scan's point */
+      G.ge.forEach(ge => {
+        const gx = x(0) - 9, gy = y(ge.s), gg = CK.el('g', {'data-series': 'n' + ge.n}, f.svg);
+        CK.el('circle', {cx: gx, cy: gy, r: 10, class: 'ck-hit'}, gg);
+        const d = CK.el('polygon', {points: `${gx},${gy - 5} ${gx + 5},${gy} ${gx},${gy + 5} ${gx - 5},${gy}`}, gg);
+        d.style.fill = NCOL[ge.n]; d.style.stroke = 'var(--surface)'; d.style.strokeWidth = '1.5';
+        CK.tip(f, gg, `<b>GF(2) elimination, noiseless, n = ${ge.n}</b><br>${fmtS(ge.s)} on one core (median, k = 3; any k)` +
+          `<br>full rank by m = n + ${ge.extra_max} in all ${ge.runs} runs`);
+        nodes.push(gg);
+      });
+      G.ns.forEach(n => {
+        G.pts.filter(p => p.n === n && p.k === k).sort((a, c) => a.eta - c.eta).forEach(p => {
+          const px = x(p.eta), py = y(p.t), gg = CK.el('g', {'data-series': 'n' + n}, f.svg);
+          CK.el('circle', {cx: px, cy: py, r: 11, class: 'ck-hit'}, gg);
+          const big = p.W >= 1e12;
+          const c = CK.el('circle', {cx: px, cy: py, r: 4.5}, gg);
+          c.style.fill = big ? NCOL[n] : 'var(--surface)'; c.style.stroke = big ? 'var(--surface)' : NCOL[n];
+          c.style.strokeWidth = big ? '1.5' : '2';
+          const sk = showKey[[n, k, p.eta].join(',')];
+          CK.tip(f, gg, `<b>n = ${n}, k = ${k}, η = ${p.eta}</b>${sk ? ' · ' + LAB(sk) : ''}<br>m = ${num(p.m, 0)} samples (${p.msrc}); ` +
+            `${sciH(p.cand, 2)} candidates; work ${sciH(p.W, 2)}<br>one core: <b>${fmtS(p.t)}</b> (${p.tsrc})`);
+          nodes.push(gg);
+          if (sk) {
+            const ring = CK.el('circle', {cx: px, cy: py, r: 9, 'aria-hidden': 'true'}, f.svg);
+            ring.style.fill = 'none'; ring.style.stroke = 'var(--ink)'; ring.style.strokeWidth = '1.5';
+            labs.push(CK.txt(f.svg, px - 12, py - 10, LAB(sk), 'lab-strong', 'end'));
+          }
+        });
+      });
+    });
+    CK.inside(f, labs);
+    CK.keynav(f, nodes);
+  }
+  CK.frame('gridchart', {label: "One core's time for the exhaustive scan against noise, by n and k",
+    height: W => (W >= 700 ? 30 + 200 + 46 : 3 * 276), draw: drawGrid});
+
+  const gridRows = [];
+  G.ns.forEach(n => G.ks.forEach(k => {
+    const ps = G.pts.filter(p => p.n === n && p.k === k).sort((a, c) => a.eta - c.eta);
+    gridRows.push([String(n), String(k), sciH(ps[0].cand, 2)].concat(ps.map(p => `${fmtS(p.t)}${sub('m = ' + num(p.m, 0) + (p.msrc === 'model' ? ' (model)' : ''))}`)));
+  }));
+  table('gridtable', [{html: 'n'}, {html: 'k'}, {html: 'C(n,k)', num: true}].concat(G.etas.map(e => ({html: 'η = ' + num(e, e ? 1 : 0), num: true}))), gridRows);
+
+  const cpu = D.cpu.per;
+  table('showtable', ['Size', '(n, k, η, m)', {html: 'Candidates C(n,k)', num: true}, {html: 'Work C(n,k)·m', num: true},
+    {html: "One core, SP3's scan", num: true}, {html: 'One core, tuned scan', num: true}],
+  D.inst.map(i => {
+    const p = G.pts.find(q => q.n === i.n && q.k === i.k && q.eta === i.eta);
+    return [`<b>${i.label}</b>`, `(${i.n}, ${i.k}, ${i.eta}, ${num(i.m, 0)})`, num(i.cand, 0), sciH(i.W, 2),
+      fmtS(p.t) + sub(p.tsrc + ', aifoundry1'), fmtS(cpu[i.id].one_core) + sub('<code>spbase vexh</code>, aifoundry3')];
+  }));
+
+  /* ================= 2. the diagram ================= */
+  const SH = [0, 1, 2, 3, 4];  // the first five blocks, dealt to shires 0-4
+  function drawTiles(f) {
+    const W = f.W, NR = 10, NC = 8, c0 = [0, 0, 1, 1, 2, 2, 3, 4, 5, 6];
+    const gx = 20, gy = 26, cell = Math.min(24, (W - gx - 6) / NC), labs = [];
+    labs.push(CK.txt(f.svg, gx, 14, 'features j, 16 per column tile →', 'lab'));
+    for (let r = 0; r < NR; r++) {
+      const blk = Math.floor(r / 2), strip = CK.el('rect', {x: 4, y: gy + r * cell + 1, width: 9, height: cell - 2, rx: 2, 'aria-hidden': 'true'}, f.svg);
+      strip.style.fill = CK.color(SH[blk]);
+      for (let c = 0; c < NC; c++) {
+        const valid = c >= c0[r], edge = c === c0[r];
+        const rect = CK.el('rect', {x: gx + c * cell + 1, y: gy + r * cell + 1, width: cell - 2, height: cell - 2, rx: 2, 'aria-hidden': 'true'}, f.svg);
+        rect.style.fill = valid ? mix('var(--ink)', edge ? 10 : 24) : 'var(--page)';
+        rect.style.stroke = valid ? 'var(--surface)' : 'var(--grid)';
+      }
+    }
+    const hr = 6, hc = 5, hg = CK.el('g', {}, f.svg);
+    const hi = CK.el('rect', {x: gx + hc * cell + 1, y: gy + hr * cell + 1, width: cell - 2, height: cell - 2, rx: 2}, hg);
+    hi.style.fill = mix('var(--c1)', 55); hi.style.stroke = 'var(--c1)'; hi.style.strokeWidth = '2';
+    CK.tip(f, hg, '<b>One output tile</b><br>16 rows × 16 features: S = ⌈m/64⌉ int8 tensor ops of 64 samples each, accumulated in int32; L2 has S = 29');
+    const edgeG = CK.el('g', {}, f.svg);
+    const er = 4, ec = c0[er];
+    const hitE = CK.el('rect', {x: gx + ec * cell + 1, y: gy + er * cell + 1, width: cell - 2, height: cell - 2, class: 'ck-hit'}, edgeG);
+    CK.tip(f, edgeG, '<b>A boundary tile</b><br>computed whole; the entries with j ≤ max R are masked in the epilogue');
+    void hitE;
+    labs.push(CK.txt(f.svg, gx, gy + NR * cell + 16, '↓ rows R, 16 per row tile, colex order', 'lab'));
+    CK.inside(f, labs);
+    CK.keynav(f, [hg, edgeG]);
+  }
+  CK.frame('dgtiles', {label: 'The staircase of tiles', minW: 200, maxW: 420, height: W => 26 + 10 * Math.min(24, (W - 26) / 8) + 24, draw: drawTiles});
+
+  function drawChip(f) {
+    const W = f.W, cols = 8, rows = 4, gap = 4, sw = (W - 8 - gap * (cols - 1)) / cols, sh = sw * 0.72, nodes = [], labs = [];
+    for (let s = 0; s < 32; s++) {
+      const cx = 4 + (s % cols) * (sw + gap), cy = 4 + Math.floor(s / cols) * (sh + gap), g = CK.el('g', {}, f.svg);
+      const box = CK.el('rect', {x: cx, y: cy, width: sw, height: sh, rx: 3}, g);
+      const k = SH.indexOf(s);
+      box.style.fill = k >= 0 ? mix(CK.color(k), 30) : 'var(--page)';
+      box.style.stroke = k >= 0 ? CK.color(k) : 'var(--axis)';
+      for (let m = 0; m < 32; m++) {
+        const d = CK.el('circle', {cx: cx + sw * ((m % 8) + 1) / 9, cy: cy + sh * (Math.floor(m / 8) + 1) / 5, r: Math.max(0.8, Math.min(1.6, sw / 24)), 'aria-hidden': 'true'}, g);
+        d.style.fill = 'var(--ink-2)';
+      }
+      CK.tip(f, g, `<b>Shire ${s}</b>: 32 minions, a 2.5 MB scratchpad holding the features; blocks ${s}, ${s + 32}, ${s + 64} and ${s + 96} of the plan's 4,096 go to its minions 0–3, and so on`);
+      nodes.push(g);
+    }
+    labs.push(CK.txt(f.svg, 4, 4 + rows * (sh + gap) + 14, 'block q → shire q mod 32 (first five coloured)', 'lab'));
+    CK.inside(f, labs);
+    CK.keynav(f, nodes);
+  }
+  CK.frame('dgchip', {label: 'The 32 shires of 32 minions', minW: 200, maxW: 420,
+    height: W => { const sw = (W - 8 - 28) / 8; return 4 + 4 * (sw * 0.72 + 4) + 22; }, draw: drawChip});
+
+  /* ================= 3. the ladder ================= */
+  const LD = D.ladder, MS = LD.ms.map(m => m.id);
+  CK.legend('ladleg', [
+    {key: 'card', label: 'card, measured', color: 'var(--c1)', mark: 'dot'},
+    {key: 'design', label: "design's first prediction", color: 'var(--ref)', mark: 'ring'},
+    {key: 'cpu1', label: 'CPU, one core (tuned scan)', color: 'var(--c2)', mark: 'line'},
+    {key: 'cpu6', label: 'CPU, six threads, best method', color: 'var(--c3)', mark: 'line'}]);
+  function drawLadder(f) {
+    const W = f.W, wide = W >= 720, L = 52, R = 50, T = 30, ph = 210, stride = ph + 90, ids = ['L1', 'L2', 'F5'];
+    const ow = wide ? (W - 24) / 3 : W, nodes = [], labs = [];
+    const y0s = ids.map((id, i) => (wide ? T : T + i * stride));
+    ids.forEach((id, i) => {
+      const ox = wide ? i * (ow + 12) : 0, b = {x0: ox + L, x1: ox + ow - R, y0: y0s[i]};
+      b.y1 = b.y0 + ph;
+      const y = CK.log(0.03, 30, b.y1, b.y0), slot = j => b.x0 + (j + 0.5) * (b.x1 - b.x0) / MS.length;
+      const g = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+      labs.push(...panelAxes(g, b, v => v, y, [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20], MS.map((m, j) => ({v: slot(j), label: m})),
+        {yfmt: v => num(v) + ' s'}));
+      const I = INST[id];
+      const tup = `(${I.n}, ${I.k}, ${I.eta}, ${num(I.m, 0)})`;
+      if (id === 'F5') labs.push(CK.txt(g, b.x0, b.y0 - 12, tup, 'lab-strong'));
+      else { labs.push(CK.txt(g, b.x0, b.y0 - 12, I.label, 'lab-strong')); labs.push(CK.txt(g, b.x0 + 22, b.y0 - 12, tup, 'lab')); }
+      /* CPU reference lines, labelled in the right margin */
+      const refs = [['cpu1', LD.cpu1[id], 'var(--c2)', '1 core', `CPU, one core: the tuned AVX-512 scan, one stage: <b>${fmtS(LD.cpu1[id])}</b>`],
+        ['cpu6', LD.cpu6[id].s, 'var(--c3)', '6 thr.', `CPU, six threads: ${LD.cpu6[id].method}, P(loss) ${LD.cpu6[id].ploss ? sciH(LD.cpu6[id].ploss, 1) : '0 (it verifies every hit)'}: <b>${fmtS(LD.cpu6[id].s)}</b>`]];
+      let lastY = -99;
+      refs.sort((a, c) => c[1] - a[1]).forEach(([key, v, col, short, tipText]) => {
+        const rg = CK.el('g', {}, f.svg), yy = y(v);
+        CK.el('line', {x1: b.x0, x2: b.x1, y1: yy, y2: yy, class: 'ck-hit', style: 'stroke:transparent;stroke-width:12'}, rg);
+        const ln = CK.el('line', {x1: b.x0, x2: b.x1, y1: yy, y2: yy}, rg);
+        ln.style.stroke = col; ln.style.strokeWidth = '2';
+        CK.tip(f, rg, tipText);
+        nodes.push(rg);
+        let ty = yy + 4;
+        if (ty - lastY < 13) ty = lastY + 13;
+        lastY = ty;
+        labs.push(CK.txt(f.svg, b.x1 + 5, ty, short, 'lab'));
+      });
+      /* design predictions (M3 private loads, M4 cooperative loads) */
+      ['M3', 'M4'].forEach(m => {
+        const v = LD.design[id][m], j = MS.indexOf(m), gg = CK.el('g', {}, f.svg);
+        CK.el('circle', {cx: slot(j), cy: y(v), r: 10, class: 'ck-hit'}, gg);
+        const c = CK.el('circle', {cx: slot(j), cy: y(v), r: 5}, gg);
+        c.style.fill = 'var(--surface)'; c.style.stroke = 'var(--ref)'; c.style.strokeWidth = '2';
+        CK.tip(f, gg, `<b>DESIGN.md's first prediction, ${m}</b><br>${m === 'M3' ? 'private operand loads' : 'cooperative operand loads (never built)'}: ${fmtS(v)}`);
+        nodes.push(gg);
+      });
+      /* the card */
+      const pts = LD.series[id];
+      CK.el('path', {d: CK.path(pts.map(p => [slot(MS.indexOf(p.ms)), p.s]), v => v, y), class: 'ln', style: 'stroke:var(--c1)', 'aria-hidden': 'true'}, f.svg);
+      pts.forEach((p, k) => {
+        const px = slot(MS.indexOf(p.ms)), py = y(p.s), gg = CK.el('g', {}, f.svg);
+        CK.el('circle', {cx: px, cy: py, r: 11, class: 'ck-hit'}, gg);
+        const c = CK.el('circle', {cx: px, cy: py, r: 5}, gg);
+        c.style.fill = 'var(--c1)'; c.style.stroke = 'var(--surface)'; c.style.strokeWidth = '2';
+        CK.tip(f, gg, `<b>${I.label}, ${p.ms}: ${fmtS(p.s)}</b><br>${esc(p.note)}`);
+        nodes.push(gg);
+        /* the card's times as a row under the milestone labels, the last in bold */
+        labs.push(CK.txt(f.svg, px, b.y1 + 32, fmtS(p.s), k === pts.length - 1 ? 'lab-strong' : 'lab', 'middle'));
+      });
+      if (!wide || i === 1) labs.push(CK.txt(g, (b.x0 + b.x1) / 2, b.y1 + 50, 'milestone · card time', 'lab', 'middle'));
+    });
+    CK.inside(f, labs);
+    CK.keynav(f, nodes);
+  }
+  CK.frame('ladchart', {label: 'Time per solve at each milestone against the CPU', height: W => (W >= 720 ? 30 + 210 + 58 : 3 * 300), draw: drawLadder});
+
+  const r1 = D.cpu.r1, r6 = D.cpu.r6, r16 = D.cpu.r16;
+  const m5by = {};
+  D.m5.forEach(r => { m5by[r.id] = r; });
+  table('cmptable', ['Size', {html: 'Card, two-stage', num: true}, {html: 'Card, one stage', num: true},
+    {html: 'CPU, 1 core', num: true}, {html: 'CPU, 6 threads', num: true}, {html: 'CPU, 16 threads, extrapolated', num: true},
+    {html: 'Card vs 1 core', num: true}, {html: 'vs 6 threads', num: true}, {html: 'vs 16 threads', num: true}],
+  D.inst.map(i => {
+    const c = cpu[i.id], m = m5by[i.id];
+    return [`<b>${i.label}</b>`, `<b>${fmtS(m.solve)}</b>`, fmtS(m.one_stage), fmtS(c.one_core) + sub('tuned AVX-512 scan'),
+      fmtS(c.best6) + sub(c.best6_short + (c.best6_ploss ? ', P(loss) ' + sciH(c.best6_ploss, 1) : '')),
+      `${fmtS(c.best16[0])}–${fmtS(c.best16[1])}`, x2(r1[i.id]) + '×', x2(r6[i.id]) + '×', rngX(r16[i.id][0], r16[i.id][1])];
+  }));
+
+  table('laddertable', ['Size', 'Milestone', {html: 'Time', num: true}, 'What ran', 'Data'],
+    D.ladder_rows.map(r => [`<b>${LAB(r.id)}</b>`, r.ms, fmtS(r.s), esc(r.note),
+      r.file.split(', ').map(p => `<code>${esc(p.replace('workloads/sparseparity/data/', ''))}</code>`).join('<br>')]));
+
+  const M1TXT = {
+    'm1-c0-scalar': ['C0 (32, 3, 0.1, 128), scalar path, 1 minion', 'every one of the 4,960 correlations equal to the CPU\'s'],
+    'm1-c0-tensor': ['C0, tensor path, 1 minion', 'every correlation equal to the CPU\'s'],
+    'm1-neg-drop': ['control: one tile dropped', 'both closed forms must fail'],
+    'm1-neg-dup': ['control: one tile scanned twice', 'both closed forms must fail'],
+    'm1-neg-mask': ['control: one tile\'s staircase shifted', 'both closed forms must fail'],
+    'm1-tie': ['the tie instance, 1 minion', 'solved must be false: two candidates tie'],
+    'm1-c1': ['C1 (128, 4, 0.2, 192), 1 minion, rows resident (S = 3)', 'closed forms, oracle'],
+    'm1-l1-timing': ['L1 slice 0 of 64, 1 minion, no epilogue (S = 7)', 'cycles per op against 280'],
+    'm1-l1': ['L1 slice 0 of 64, 1 minion, with the epilogue', 'oracle'],
+    'm1-l2-timing': ['L2 slice 0 of 200, 1 minion, no epilogue (S = 29)', 'cycles per op against 280'],
+    'm1-l2': ['L2 slice 0 of 200, 1 minion, with the epilogue', 'oracle'],
+  };
+  const m1rows = D.m1.map(r => {
+    const t = M1TXT[r.step] || [r.step, ''];
+    const expectFail = /neg-/.test(r.step), ok = expectFail ? r.status === 'FAIL' : r.status !== 'FAIL';
+    return [`<code>${r.step}</code>`, t[0] + sub(t[1]), word(r.status, ok) + (expectFail ? sub('as designed') : ''), fmtS(r.launch), num(r.cyc_op, 0)];
+  });
+  m1rows.push(['<code>m1-c1-32-seed1…20</code>', 'C1 on one shire\'s 32 minions, seeds 1–20' + sub('closed forms on each'), word(V.seeds + ' PASS', true) + sub('solved on ' + V.seedsSolved), '—', '—']);
+  m1rows.push(['<code>probe-*</code>', 'the hand-off probe: 16–32 minions consume each row tile right after it is published' + sub('scratchpad and DRAM staging, 1 and 2 buffers'), word(V.probes + ' PASS', true) + sub('full oracle on every minion'), '—', '—']);
+  D.knee.forEach(k => m1rows.push([`<code>m2-knee-p${k.p}-timing</code>`, `L1 slice on ${k.p} minion${k.p > 1 ? 's' : ''} of one shire, the same work each` + sub('no epilogue'), word('TIMING', true), '—', num(k.cyc_op, 0)]));
+  m1rows.push(['<code>m2-l1-full</code>', 'all of L1 on one shire (32 minions)' + sub('closed forms'), word('PASS', true) + sub('slowest minion ' + V.m2imb + '× the median'), V.m2L1, '—']);
+  m1rows.push(['<code>m2-l2-q0-nowait</code>', 'L2 slice without the manual\'s TensorWait before an A reload' + sub('silicon only'), word(V.nowait, false) + sub('a wrong result: the wait is needed'), '—', '—']);
+  table('m1table', ['Step', 'What it runs', 'Result', {html: 'Launch', num: true}, {html: 'Cycles per op', num: true}], m1rows);
+
+  const AB = ['m1', 'a', 'b', 'c', 'm4', 'm4d'];
+  table('abtable', ['Size'].concat(AB.map(v => ({html: v === 'b' ? '<b>b</b>' : v, num: true}))),
+    D.m4ab.map(r => [`<b>${LAB(r.id)}</b>`].concat(AB.map(v => (r.vals[v] == null ? '—'
+      : (v === 'b' ? `<b>${fmtS(r.vals[v])}</b>` : fmtS(r.vals[v])) + sub(num(r.cyc[v], 0) + ' cyc/op'))))));
+
+  table('m5table', ['Size', 'Stage 1', {html: 'P(loss)', num: true}, {html: 'Survivors', num: true}, {html: 'Launch', num: true},
+    {html: 'Readback + stage 2', num: true}, {html: 'Solve', num: true}, {html: 'One stage (b)', num: true}, 'Full oracle, offline'],
+  D.m5.map(r => [`<b>${LAB(r.id)}</b>`, `m<sub>1</sub> = ${num(r.m1, 0)}, τ<sub>1</sub> = ${r.tau1}`, sciH(r.ploss, 1),
+    num(r.found, 0) + sub(`${num(r.found / r.expected, 3)}× expected; ${num(r.log_mb, 0)} MB of logs`), fmtS(r.launch),
+    `${fmtS(r.readback)} + ${fmtS(r.stage2)}`, `<b>${fmtS(r.solve)}</b>` + sub('model ' + fmtS(r.model)), fmtS(r.one_stage),
+    esc(r.offline.replace('1024', '1,024'))]));
+  document.getElementById('m5note').innerHTML = `Every run found the secret, and it survived stage 1. Stage 2 runs on six host threads and
+    re-derives every logged c<sub>1</sub>. A resident stage 1 at L1 (m<sub>1</sub> = ${D.res192.m1}, τ<sub>1</sub> = ${D.res192.tau1})
+    risked more: P(loss) ${sciH(D.res192.ploss, 1)}, ${sciH(D.res192.found, 1)} survivors, ${fmtS(D.res192.solve)} to solve.
+    The one-stage column is variant b in M4's A/B; M5's session reran it at L1 and L2 in
+    ${D.m5.filter(r => r.one_stage_rerun).map(r => fmtS(r.one_stage_rerun)).join(' and ')}.
+    The controls below ran on one shire or a slice and must fail as shown.`;
+  table('ctltable', ['Control', 'What it does', 'Result'], D.controls.map(c => [`<code>${c.step}</code>`, esc(c.what),
+    word(c.status, c.status === c.expect) + sub('expected ' + c.expect)]));
+
+  /* ================= 4. energy ================= */
+  CK.legend('enleg', [
+    {key: 'over', label: 'card board above idle', color: 'var(--c1)', mark: 'ring'},
+    {key: 'total', label: 'card board, idle included', color: 'var(--c1)', mark: 'dot'},
+    {key: 'host', label: "+ the host's package (assumed)", color: 'var(--c1)', mark: 'dash'},
+    {key: 'cpu', label: 'CPU package, assumed 125–251 W', color: 'var(--c2)', mark: 'box'}]);
+  function drawEnergy(f) {
+    const W = f.W, L = W < 480 ? 58 : 70, R = 14, T = 12, rowH = 76, rows = D.energy, nodes = [], labs = [];
+    const x = CK.log(1, 2000, L, W - R), ytop = T, ybot = T + rows.length * rowH;
+    const g = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+    [1, 3, 10, 30, 100, 300, 1000].forEach(t => {
+      CK.el('line', {x1: x(t), x2: x(t), y1: ytop, y2: ybot, class: 'grid-line'}, g);
+      labs.push(CK.txt(g, x(t), ybot + 16, num(t) + ' J', 'tick', 'middle'));
+    });
+    CK.el('line', {x1: L, x2: W - R, y1: ybot, y2: ybot, class: 'ck-axis'}, g);
+    labs.push(CK.txt(g, (L + W - R) / 2, ybot + 34, 'joules per solve (log scale)', 'lab', 'middle'));
+    rows.forEach((e, i) => {
+      const yc = T + i * rowH + 16;
+      labs.push(CK.txt(f.svg, L - 10, yc + 4, LAB(e.id), 'lab-strong', 'end'));
+      labs.push(CK.txt(f.svg, L - 10, yc + 22, 'CPU', 'lab', 'end'));
+      /* card + host range */
+      const hg = CK.el('g', {}, f.svg), h0 = x(e.j_total + e.host[0]), h1 = x(e.j_total + e.host[1]);
+      CK.el('rect', {x: h0 - 4, y: yc - 10, width: h1 - h0 + 8, height: 20, class: 'ck-hit'}, hg);
+      const hl = CK.el('line', {x1: h0, x2: h1, y1: yc, y2: yc}, hg);
+      hl.style.stroke = 'var(--c1)'; hl.style.strokeWidth = '2'; hl.style.strokeDasharray = '4 3';
+      [h0, h1].forEach(xx => { const t = CK.el('line', {x1: xx, x2: xx, y1: yc - 5, y2: yc + 5}, hg); t.style.stroke = 'var(--c1)'; t.style.strokeWidth = '2'; });
+      CK.tip(f, hg, `<b>${LAB(e.id)}: the card's board plus the host's package, assumed</b><br>${num(e.j_total + e.host[0], 1)}–${num(e.j_total + e.host[1], 1)} J per solve (the host: ${num(e.host[0], 1)}–${num(e.host[1], 1)} J)`);
+      /* card: above idle (ring), total (dot) */
+      const og = CK.el('g', {}, f.svg);
+      CK.el('circle', {cx: x(e.j_over), cy: yc, r: 10, class: 'ck-hit'}, og);
+      const oc = CK.el('circle', {cx: x(e.j_over), cy: yc, r: 5}, og);
+      oc.style.fill = 'var(--surface)'; oc.style.stroke = 'var(--c1)'; oc.style.strokeWidth = '2';
+      CK.tip(f, og, `<b>${LAB(e.id)}: the board above idle</b><br>${num(e.j_over, 2)} J per solve (the SP's board average less the leakage's rise, ±3%)`);
+      const tg = CK.el('g', {}, f.svg);
+      CK.el('circle', {cx: x(e.j_total), cy: yc, r: 10, class: 'ck-hit'}, tg);
+      const tc = CK.el('circle', {cx: x(e.j_total), cy: yc, r: 5.5}, tg);
+      tc.style.fill = 'var(--c1)'; tc.style.stroke = 'var(--surface)'; tc.style.strokeWidth = '2';
+      CK.tip(f, tg, `<b>${LAB(e.id)}: the board, idle included</b><br>${num(e.j_total, 1)} J per solve; ${num(e.solves_per_s, 2)} solves per second`);
+      labs.push(CK.txt(f.svg, x(e.j_total), yc - 11, num(e.j_total, e.j_total < 50 ? 1 : 0) + ' J', 'lab-strong', 'middle'));
+      /* CPU, assumed */
+      const cg = CK.el('g', {}, f.svg), c0 = x(e.cpu_j[0]), c1 = x(e.cpu_j[1]);
+      const cr = CK.el('rect', {x: c0, y: yc + 13, width: Math.max(2, c1 - c0), height: 12, rx: 2}, cg);
+      cr.style.fill = mix('var(--c2)', 35); cr.style.stroke = 'var(--c2)'; cr.style.strokeWidth = '1.5'; cr.style.strokeDasharray = '4 2';
+      labs.push(CK.txt(f.svg, c1 + 6, yc + 23, `${num(e.cpu_j[0], e.cpu_j[0] < 50 ? 1 : 0)}–${num(e.cpu_j[1], 0)} J`, 'lab'));
+      CK.tip(f, cg, `<b>${LAB(e.id)}: the CPU's package, assumed</b><br>${num(e.cpu_j[0], 1)}–${num(e.cpu_j[1], 0)} J = ${fmtS(e.cpu_s)} (six threads, ${esc(e.cpu_method)}) × 125–251 W, idle included; not measured`);
+      labs.push(CK.txt(f.svg, L, yc + 44, `CPU ÷ card: ${rngX(e.ratio_board[0], e.ratio_board[1])} (board), ${rngX(e.ratio_host[0], e.ratio_host[1])} (with the host)`, 'lab'));
+      nodes.push(og, tg, hg, cg);
+    });
+    CK.inside(f, labs);
+    CK.keynav(f, nodes);
+  }
+  CK.frame('enchart', {label: "Joules per solve: the card's board against the CPU's assumed package", height: () => 8 + 3 * 76 + 44, draw: drawEnergy});
+
+  table('entable', ['Size', 'Solves', 'Board: burst / idle', 'J per solve: above idle / with idle',
+    'Rails above idle, J: minion / SRAM / NoC / unmetered', 'CPU, J (<span class="assumed">assumed</span>)', 'CPU ÷ card'],
+  D.energy.map(e => {
+    const bw = Array.isArray(e.board_w) ? e.board_w.map(v => num(v, 1)).join(', ') : num(e.board_w, 1);
+    const sv = Array.isArray(e.solves) ? e.solves.join(' + ') + ' halves' : String(e.solves);
+    const rj = e.rails_j;
+    return [`<b>${LAB(e.id)}</b>`, sv + sub(num(e.solves_per_s, 2) + ' solves/s'), `${bw} / ${num(e.idle_w, 1)} W` + sub(`die ${num(e.die[0], 0)} → ${num(e.die[1], 1)} °C`),
+      `${num(e.j_over, 2)} / <b>${num(e.j_total, 1)}</b>` + sub('catalogue method ' + num(e.j_catalogue, 2) + ' above idle'),
+      `${num(rj.minion, 2)} / ${num(rj.sram, 2)} / ${num(rj.noc, 2)} / ${num(rj.unmetered, 2)}`,
+      `${num(e.cpu_j[0], 1)}–${num(e.cpu_j[1], 0)}` + sub(fmtS(e.cpu_s) + ' × 125–251 W'),
+      rngX(e.ratio_board[0], e.ratio_board[1]) + sub('with the host ' + rngX(e.ratio_host[0], e.ratio_host[1]))];
+  }));
+
+  /* ================= 5. where the time goes ================= */
+  const PARTS = [['op', 'tensor op'], ['epi', 'epilogue'], ['smt', 'issue-slot sharing'], ['wait', "waiting for hart 1's rows"], ['other', 'other overhead']];
+  CK.legend('cycleg', PARTS.map(([k, l], i) => ({key: k, label: l, color: CK.color(i), mark: 'box'})));
+  const CR = [];
+  D.cycles.runs.forEach(r => {
+    const nm = r.run === 'm3-l1' ? 'L1' : 'L2';
+    CR.push({lab: `M3 ${nm} (S = ${r.S}), mean minion`, parts: r.mean, total: r.mean_total});
+    CR.push({lab: `M3 ${nm}, busiest minion`, parts: r.busiest, total: r.busiest_model_total, meas: r.busiest_meas});
+  });
+  function drawCycles(f) {
+    const W = f.W, L = 8, R = 16, T = 34, rowH = 50, barH = 18, nodes = [], labs = [];
+    const x = CK.lin(0, 1750, L, W - R), ybot = T + CR.length * rowH;
+    const g = CK.el('g', {'aria-hidden': 'true'}, f.svg);
+    [0, 250, 500, 750, 1000, 1250, 1500, 1750].forEach(t => {
+      CK.el('line', {x1: x(t), x2: x(t), y1: T - 4, y2: ybot, class: 'grid-line'}, g);
+      if (t % 500 === 0 || W >= 560) labs.push(CK.txt(g, x(t), ybot + 16, num(t, 0), 'tick', 'middle'));
+    });
+    CK.el('line', {x1: L, x2: W - R, y1: ybot, y2: ybot, class: 'ck-axis'}, g);
+    labs.push(CK.txt(g, (L + W - R) / 2, ybot + 34, 'cycles per tensor op, hart 0, at 600 MHz', 'lab', 'middle'));
+    CR.forEach((r, i) => {
+      const yb = T + i * rowH + 18;
+      labs.push(CK.txt(f.svg, L, yb - 6, r.lab, 'lab'));
+      let acc = 0;
+      PARTS.forEach(([k, l], j) => {
+        const v = r.parts[k] || 0;
+        if (v <= 0.5) return;
+        const sg = CK.el('g', {}, f.svg), x0 = x(acc), w = x(acc + v) - x0;
+        const rect = CK.el('rect', {x: x0, y: yb, width: Math.max(1, w - (w > 3 ? 2 : 0)), height: barH, rx: 2}, sg);
+        rect.style.fill = CK.color(j);
+        CK.tip(f, sg, `<b>${r.lab}</b><br>${l}: ${num(v, 0)} cycles per op (${num(100 * v / r.total, 0)}% of ${num(r.total, 0)})`);
+        nodes.push(sg);
+        acc += v;
+      });
+      if (r.meas) {
+        const mg = CK.el('g', {}, f.svg), mx = x(r.meas);
+        CK.el('rect', {x: mx - 6, y: yb - 6, width: 12, height: barH + 12, class: 'ck-hit'}, mg);
+        const ml = CK.el('line', {x1: mx, x2: mx, y1: yb - 5, y2: yb + barH + 5}, mg);
+        ml.style.stroke = 'var(--ink)'; ml.style.strokeWidth = '2';
+        CK.tip(f, mg, `<b>${r.lab}: measured</b><br>${num(r.meas, 0)} cycles per op (the model: ${num(r.total, 0)})`);
+        nodes.push(mg);
+      }
+    });
+    [[270, '270'], [512, '512']].forEach(([v, t]) => {
+      CR.forEach((r, i) => {
+        const yb = T + i * rowH + 18, rl = CK.el('line', {x1: x(v), x2: x(v), y1: yb - 4, y2: yb + barH + 4, 'aria-hidden': 'true'}, f.svg);
+        rl.style.stroke = 'var(--ink)'; rl.style.strokeWidth = '1.5'; rl.style.strokeDasharray = '3 2';
+      });
+      labs.push(CK.txt(f.svg, x(v), T - 14, t, 'lab-strong', 'middle'));
+    });
+    CK.inside(f, labs);
+    CK.keynav(f, nodes);
+  }
+  CK.frame('cycchart', {label: "Cycles per tensor op in M3, split by the fitted model", height: () => 34 + 4 * 50 + 40, draw: drawCycles});
+
+  table('cyctable', ['Minion', {html: 'Tensor op', num: true}, {html: 'Epilogue', num: true}, {html: 'Issue-slot sharing', num: true},
+    {html: 'Waiting for rows', num: true}, {html: 'Other', num: true}, {html: 'Total (model)', num: true}, {html: 'Measured', num: true}],
+  CR.map(r => [r.lab].concat(PARTS.map(([k]) => num(r.parts[k] || 0, 0)), [num(r.total, 0), r.meas ? num(r.meas, 0) : '—'])));
+
+  table('latertable', ['Run', {html: 'Busiest minion, cycles per op', num: true}, {html: 'Busiest / median minion', num: true},
+    {html: 'Launch', num: true}, {html: 'Floor at 512 cycles per op', num: true}],
+  D.later.map(r => [esc(r.label), num(r.cyc_op, 0), r.imb ? num(r.imb, 2) : '—', r.launch ? fmtS(r.launch) : '—',
+    r.floor ? fmtS(r.floor) : '—']));
+})();
+
+</script>
+<script>
+/* Section anchors. Every h2/h3 gets an id (its own, or one made from its text) and a # link; clicking a heading
+   or a table-of-contents link puts #id in the URL. When the page is framed by spacesheep.dev the fragment is
+   mirrored into the outer, shareable URL (postMessage ss-hash), and an outer #fragment is forwarded in on load. */
+(function () {
+  const slug = t => t.toLowerCase().replace(/^\d+(\.\d+)*\.?\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const post = h => { if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h}, '*'); } catch (_) {} } };
+  const go = id => { try { history.replaceState(null, '', location.pathname + location.search + '#' + id); } catch (_) {}
+    const el = document.getElementById(id); if (el) el.scrollIntoView({block: 'start'}); post('#' + id); };
+  const seen = new Set();
+  document.querySelectorAll('main h2, main h3').forEach(h => {
+    if (!h.id) { let id = slug(h.textContent) || 'section', n = 2; while (seen.has(id) || document.getElementById(id)) id = slug(h.textContent) + '-' + n++; h.id = id; }
+    seen.add(h.id);
+    const a = document.createElement('a'); a.href = '#' + h.id; a.className = 'hlink'; a.textContent = '#'; a.title = 'link to this section'; h.appendChild(a);
+    h.style.cursor = 'pointer';
+    h.addEventListener('click', ev => { if (ev.target.tagName === 'A' && ev.target !== a) return; ev.preventDefault(); go(h.id); });
+  });
+  window.addEventListener('hashchange', () => post(location.hash));
+  if (location.hash) { post(location.hash); const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => el.scrollIntoView({block: 'start'}), 50); }
+})();
+</script>
+<script>
+/* Contents list, link back to the reports hub, and repository paths as links. Runs after the section-anchor
+   script above, whose h2 ids the contents list links to. Pages not built from this template paste both blocks
+   before </main>.
+   - Contents: a page with 6 or more h2s and no #toclist of its own gets a numbered list before its first h2.
+   - Footer: every page but the hub ends with a link to the hub's list of reports, unless it already has one.
+   - Paths: an inline <code> whose whole text is a repository path (docs/…, workloads/…, tools/…, scripts/…,
+     kernels/…, rtl-sim/…) becomes a GitHub link. Code blocks, code already in a link and globs stay as they are. */
+(function () {
+  const main = document.querySelector('main'); if (!main) return;
+  const HUB = 'https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability';
+  const BACK = '← All ET-SoC-1 measurement reports';
+  const REPO = 'https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/';
+  const text = el => { const c = el.cloneNode(true); c.querySelectorAll('.hlink').forEach(a => a.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+  const NUM = /^(?:§\s*\d+(?:\.\d+)*\.?|\d+(?:\.\d+)*\.|\d+(?:\.\d+)+)\s+/;  /* "3. ", "4.2 ", "§5 "; not "600 MHz" */
+
+  const h2s = [...main.querySelectorAll('h2')];
+  if (h2s.length >= 6 && !document.getElementById('toclist')) {
+    const nav = document.createElement('nav'); nav.className = 'card';
+    const b = document.createElement('b'); b.textContent = 'Contents';
+    const ol = document.createElement('ol'); ol.id = 'toclist';
+    h2s.forEach(h => {
+      if (!h.id) return;
+      const t = text(h), m = t.match(/^§?\s*(\d+)[.\s]/), li = document.createElement('li'), a = document.createElement('a');
+      if (m && NUM.test(t)) li.value = +m[1];
+      a.href = '#' + h.id; a.textContent = t.replace(NUM, '') || t;
+      li.appendChild(a); ol.appendChild(li);
+    });
+    nav.append(b, ol);
+    h2s[0].parentNode.insertBefore(nav, h2s[0]);
+  }
+
+  const h1 = main.querySelector('h1');
+  const isHub = !!h1 && /^limits of observability/i.test(text(h1));
+  const hasBack = [...document.querySelectorAll('a')].some(a => a.textContent.replace(/\s+/g, ' ').trim() === BACK);
+  if (!isHub && !hasBack) {
+    const p = document.createElement('p'); p.className = 'small';
+    const a = document.createElement('a'); a.href = HUB + '#reports'; a.textContent = BACK;
+    p.appendChild(a); main.appendChild(p);
+  }
+
+  const PATH = /^(docs|workloads|tools|scripts|kernels|rtl-sim)\/[\w./-]+$/;
+  main.querySelectorAll('code').forEach(c => {
+    if (c.closest('pre, a')) return;
+    const t = c.textContent.trim(); if (!PATH.test(t)) return;
+    const a = document.createElement('a'); a.href = REPO + t;
+    c.parentNode.insertBefore(a, c); a.appendChild(c);
+  });
+})();
+</script>
+</body>
+</html>

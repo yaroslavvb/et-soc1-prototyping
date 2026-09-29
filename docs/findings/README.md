@@ -178,6 +178,13 @@ Read [Terms](#terms) first.
    rail) and the board average by 16–17%; undone with each card's τ (`tools/ettelem/deconv.py`), the bursts' energy
    comes back within 0.3% of the step and their plateau within 1.1% on aifoundry3. → [03-experiments.md](03-experiments.md),
    E58; [`reports/data/2026-09-29-tau-aifoundry3/`](../reports/data/2026-09-29-tau-aifoundry3/README.md)
+24. **A sparse parity solver on the card's 1,024 minions is 1.1–1.6× six tuned CPU threads** (E59, 29 September,
+   aifoundry3; an engineering benchmark, not pre-registered). Noisy sparse parity, as an int8 tensor GEMM checked by
+   two closed-form checksums: L1 (512, 4, 0.3, 448) in 0.131 s, L2 (512, 4, 0.4, 1,850) in 0.323 s, (256, 5, 0.4,
+   1,925) in 1.52 s; 7.8–12× one core. Board energy per solve with the idle, measured on the one-stage scan: 5.0, 16.6
+   and 89 J; the board alone, 2.5–7.7× below the CPU's assumed package energy at 125–251 W (1.6–6.1× with the host
+   that drives the card). → [03-experiments.md](03-experiments.md), E59;
+   [`workloads/sparseparity/`](../../workloads/sparseparity/README.md)
 
 ## Terms
 
@@ -234,8 +241,8 @@ Four kinds of thing have IDs, and every claim cites them:
 |---|---|---|
 | **R1–R14** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
 | **Q1–Q66** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E58** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 DV2 on aifoundry2, development on 28 September and a frozen validation running since that evening; E52 the heat placement, 27–28 September, development and a frozen validation; E53 the overheating experiments, 28 September, pre-registered; E54 NV, the mesh rail's voltage step, predictions frozen, not run; E55–E58 the major pass's pcie2, nocr, memp2 and tau, 28–29 September, developed on aifoundry1's card 1 and validated on aifoundry3) | [03-experiments.md](03-experiments.md) |
-| **A1–A20** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused; A20 the session timeline) | [04-artifacts.md](04-artifacts.md) |
+| **E1–E59** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 DV2 on aifoundry2, development on 28 September and a frozen validation running since that evening; E52 the heat placement, 27–28 September, development and a frozen validation; E53 the overheating experiments, 28 September, pre-registered; E54 NV, the mesh rail's voltage step, predictions frozen, not run; E55–E58 the major pass's pcie2, nocr, memp2 and tau, 28–29 September, developed on aifoundry1's card 1 and validated on aifoundry3; E59 the sparse parity solver on aifoundry3, 29 September, an engineering benchmark) | [03-experiments.md](03-experiments.md) |
+| **A1–A21** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused; A20 the session timeline; A21 the sparse parity page) | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":
 

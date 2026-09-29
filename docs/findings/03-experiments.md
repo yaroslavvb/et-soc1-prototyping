@@ -2,7 +2,7 @@
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E58**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E59**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
 check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
 same three cards after each card's campaign blocks (26 September), E49 a card-free test of the runtime's log-level race,
@@ -15,7 +15,8 @@ hottest sensor against the mean under concentrated load, exact-checked kernels f
 written yet). E55–E58 are the major pass's four pre-registered experiments (Q65, 28–29 September), each developed on
 aifoundry1's card 1, frozen, then validated on aifoundry3: E55 the host link's concurrency and where a host write lands,
 E56 the mesh's routing order and stops, E57 the DRAM address map, the tensor reload, the shire's 128 B cap and
-stride-256 energy, E58 the rails' one-second filter.
+stride-256 energy, E58 the rails' one-second filter. E59 is the sparse parity solver on aifoundry3's card (Q66,
+29 September): an engineering benchmark, not pre-registered.
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
 (aifoundry2, aifoundry3 or both; E35–E46, E48 and E50 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
@@ -2147,6 +2148,146 @@ p1–p3, `report.json`) and [`docs/reports/data/2026-09-29-tau-aifoundry3/`](../
 **Fed:** the rows marked E58 in [05-claims.md](05-claims.md), which supersede E27's τ ≈ 1.15–1.22 s, and the telemetry
 table of [14-card-behaviour.md](14-card-behaviour.md); the hub's rung 4, §2, §4.1 and §7, and Power and temperature's §1
 table and §2.
+
+## E59 — Sparse parity on the ET-SoC-1: noisy sparse parity solved on 1,024 minions, against the host CPU's best method (Q66; card runs 2026-09-29, 04:15–11:40 PDT, aifoundry3) — an engineering benchmark, not pre-registered
+
+**Asked (Q66):** a sparse parity solver that is efficient on this chip, at sizes where its ~1,000 cores are visible:
+toy prototypes first, experiments at several sizes, then a scalable solution that runs on the card.
+**Not pre-registered.** Each card step of `workloads/sparseparity/card_run.sh` states its expected verdict (PASS, a
+negative control's FAIL, TIMING) and its modelled time before it runs, and the script stops at the first unexpected
+verdict; but no prediction, error band or decision rule was frozen, and the speed-ups were not registered in advance.
+`docs/research/sparse-parity/DESIGN.md` projected 3.5–16× a 16-thread host before any card run; the measurements
+below supersede it (its Amendments).
+**The problem and the sizes.** x uniform in {±1}ⁿ; y the parity of a secret k-subset of x, flipped with probability η;
+m samples, SP3's 99% count (`workloads/sparseparity/proto/RESULTS.md`); success is the exact secret, and a tie counts
+as a failure. Without noise the problem is a GF(2) solve (n = 512 in 1.3 ms on one core, SP3), so the sizes are noisy:
+L1 (512, 4, 0.3, 448) and L2 (512, 4, 0.4, 1,850), 2.83 × 10⁹ candidates each, and (256, 5, 0.4, 1,925), 8.81 × 10⁹;
+C0 (32, 3, 0.1, 128) and C1 (128, 4, 0.2, 192) for bring-up. Seed 1 for every timed instance; C1 also seeds 1–20.
+**Method** (`workloads/sparseparity/README.md` has every flag and step). A candidate T = R ∪ {j}, R a (k−1)-subset of
+0..n−2 in colex order and j > max R, scores c(T) = Σᵢ ỹᵢ ∏ₜ x̃ᵢₜ, an exact int32. The scan is an int8 GEMM on ±1
+bytes: one `TensorIMA8A32` multiplies 16 rows by 16 columns over 64 samples; the rows ỹ·∏_{r∈R} x̃_r are built by hart
+1 in its vector registers and staged in the shire's scratchpad, the columns are the n features, copied once into every
+shire's scratchpad; hart 0 issues only the tensor ops and each output tile's epilogue (the staircase mask, Σc, Σc²,
+the lane maxima). The host plans the row tiles over 32 shires × 32 minions = 1,024 minions, launches, reads one 64 B
+record per hart and checks: the candidate count and ops against the plan; on full coverage the **two closed forms**,
+Σc and Σc² over all C(n, k) candidates (Krawtchouk polynomials), which a dropped, doubled or mis-scored tile fails
+(the three negative controls do; two sums cannot rule out every compensating error, such as two candidates' scores
+swapped); the best rescored on the CPU; and a **CPU oracle** that rescores whole minions field by field (a random
+sample in-process, every minion offline with `--verify-records`). Every device process held the card's lock, ran under
+`timeout 10` (the host's own budget ends its last launch by 9 s) and followed an `et-who` check; the builds were our
+own directories (`~/nekko/build/sparseparity-{f,h,t}`), never a campaign's. aifoundry3's card: release 1.3.1, pinned
+at 600 MHz by its zero TDP. Before any card run every kernel path passed in `sys_emu` (27 cases with M1's code, 66
+with M4's, 83 with M5's: `workloads/sparseparity/data/2026-09-29-aifoundry3-sysemu*/`) and the CPU side its 107 checks
+(`tools/sptest.py`).
+**The CPU side** (aifoundry3's i7-11700K; niced, at most 6 threads pinned one per physical core, no card opened;
+medians of 5): one core running the tuned AVX-512 one-stage scan (`spbase vexh`, 8 candidates per 512-bit register)
+takes 1.03 s at L1, 3.94 s at L2 and 14.9 s at (256, 5) (`workloads/sparseparity/cpu/data/2026-09-29-aifoundry3-r/`,
+03:52–04:07 PDT, the run after review R2; the first run, `cpu/data/2026-09-29-aifoundry3/` beside it, 01:19–01:33,
+gave 1.06, 3.95 and 15.0 s). On six threads, the fastest method that keeps the secret with P(loss) ≤ 10⁻⁴: L1 the
+meet in the middle with a random halving of the features, 0.148 s expected over 10 seeds; L2 the CPU's own two-stage
+screen at m1 1,152, τ1 106, 0.508 s; (256, 5) the same screen, 1.769 s
+(`workloads/sparseparity/data/2026-09-29-aifoundry3-sysemu-m5/cpu2s.jsonl`, 10:03 PDT). 16 threads were not measured
+(this work may use 6 there). The CPU's energy is assumed, not measured: the package's energy counter (RAPL) is
+root-only and the board lifts both package power limits to 4,095 W, so it is taken as the 6-thread time × an assumed
+125–251 W.
+**M1, the hand-off probe and M2** (04:15–04:20 PDT; kernel `.text` sha256 `68b3f273…`, commit `92b168f`'s sources;
+`card_run.sh m1`, `probe`, `m2`): every step as expected. C0 on one minion, scalar and tensor paths: all 4,960
+correlations equal to the CPU's; the three negative controls (a tile dropped, a tile scanned twice, one tile's
+staircase shifted) fail both closed forms; the tie instance is reported not unique; C1 on one shire's 32 minions is
+solved with exact closed forms on seeds 1–20. One minion at L1's and L2's geometry: 428 and 411 cycles per op with
+the epilogue off (the design's 270–280), 677 and 471 with it. The probe (16–32 minions each consuming a row tile as soon
+as hart 1 publishes it; scratchpad and DRAM staging, 1 and 2 buffers): the oracle exact on every minion, no race seen;
+such narrow tiles are bound by hart 1 (hart 0 waits about 85% of its cycles). M2's knee (a slice of L1 on 1 to 32
+minions of one shire): 428, 432, 443, 451, 462 and 503 cycles per op, so the shire's private streams were not the
+limit at that size. All of L1 on one shire: solved, both closed forms exact, 6.37 s (model 2.3 s; the slowest minion
+1.58× the median). Slices of L2, (256, 5) and L5 exact offline. `--nowait-a` (no `TensorWait` before an A buffer is
+reloaded, which the PRM requires) gave an oracle MISMATCH: the wait is needed.
+**M3, the first all-shire runs** (04:20 PDT, by hand): L1 0.2045 s and L2 0.807 s on 1,024 minions (M1's model:
+73 ms and 0.30 s), the secret found and unique, both closed forms exact, the sampled oracle exact (17 and 8 minions).
+The busiest minion ran 1,564–1,644 cycles per op and the slowest took 1.56–1.64× the median.
+**M4** (08:17–08:45 PDT; kernel `4c2e7bde…`, commit `4aea801`'s sources; `card_run.sh m4`, 42 processes).
+`tools/cycle_model.py`, a two-hart model fitted to M1–M3's per-hart records (33 runs, 146 sampled minions; 19
+constants, rms 1.8% of a minion's cycles), put M3's gap on hart 1's row generation (4.8× its assumed cost), a
+planner that undercosts narrow row tiles, and a 1,606-cycle epilogue per output tile with the tensor unit idle. The
+A/B, launch time in seconds on 1,024 minions:
+
+| Instance | m1: M1 as run | a: planner by the fitted model | **b: a + incremental generation** | c: a + the epilogue between ops | m4: b + c | m4d: m4 + 3 A buffers |
+|---|---|---|---|---|---|---|
+| L1 | 0.205 | 0.142 | **0.130** | 0.203 | 0.198 | 0.216 |
+| L2 | 0.755 | 0.530 | **0.429** | 0.708 | 0.581 | 0.625 |
+| (256, 5), two halves | 3.90 | | **2.55** (0.958 + 1.589) | | 3.22 | 3.40 |
+
+Every run found the secret, with exact closed forms where it covered every candidate, and the full oracle offline
+passed on every step it re-checked. Variant b is the best: the planner weighted by the fitted model gains 1.4–1.5×,
+incremental generation 1.1–1.2× more. The epilogue split between the next tile's ops (c), which the fitted model
+favoured, ran 1.4–1.8× slower than its model on silicon and drags m4 and m4d down; 3 A buffers did not help. The
+whole (256, 5) in one M4 launch was skipped by its own gate (its halves ran slower than 1.3× their model).
+**M5, the two-stage screen** (11:29–11:35 PDT; kernel `3e14be32…`, commit `a768f84`'s sources; `card_run.sh m5`, 11
+processes). Stage 1 on the card scores every candidate on the first m1 samples, in variant b's kernel, and logs those
+with c1 ≥ τ1 in a survivor log per minion; the host re-derives every logged c1 and rescores the survivors on all m
+samples on 6 threads. τ1 keeps the secret with P(loss) < 10⁻⁴ (its binomial tail); at η = 0.4 an m1 ≤ 192 (A resident
+in the L1 scratchpad) would keep 83% of the candidates at that risk, so stage 1 streams A:
+
+| Instance | m1, τ1 (P(loss)) | Survivors | Launch | Solve: launch + readback + stage 2 | One stage (b) |
+|---|---|---|---|---|---|
+| L1 | 320, 66 (8.8 × 10⁻⁵) | 376,740 | 0.125 s | 0.131 s | 0.135 s (this session), 0.130 s (M4) |
+| L2 | 1,152, 106 (8.9 × 10⁻⁵) | 2,780,146 | 0.262 s | **0.323 s** | 0.427 s, 0.429 s |
+| (256, 5) | 1,152, 106 (8.9 × 10⁻⁵) | 8,656,197 | 1.335 s | **1.522 s** | 2.55 s (M4, two halves) |
+
+The secret survived stage 1 and was the unique answer in all three, and the full oracle offline confirmed every
+minion's survivor list entry by entry. The controls: logs too small overflow on all 32 minions of a shire and fail the
+run, the stored prefixes exact; the mask control fails both closed forms; `--perturb tau` (the kernel screens at τ1 +
+2) is caught by the survivor oracle on 32 of 32 minions and by the counts (0.88 of the expected); `--perturb lostlog`
+(a log that never reaches DRAM) fails the entries, stage 2 and the survivor oracle. L1 with A resident (m1 192, τ1 40,
+P(loss) 1.8 × 10⁻³) launched in 0.127 s but kept 6.7 × 10⁶ survivors: 0.266 s per solve.
+**Board energy per solve** (11:35–11:40 PDT; `energy.sh`, the same build, variant b in one stage): one host process
+of back-to-back solves (L1 44, L2 14, the (256, 5) halves 6 and 3), 8 s idle before and 10 s after, `ettelem` at
+10 Hz; J per solve over idle from the SP's board average less the leakage law on the measured die temperature
+(claimed ±3%, tested on two simulated cards, `workloads/sparseparity/data/2026-09-29-aifoundry3-energy-dry/`):
+
+| Instance | Solves per s | Board in the burst, idle | J per solve over idle | J per solve, idle included | CPU on 6 threads at an assumed 125–251 W | CPU over the card's board |
+|---|---|---|---|---|---|---|
+| L1 | 7.32 | 37.2 W, 24.0 W | 1.66 | **5.0** | 18.5–37.1 J | 3.7–7.4× |
+| L2 | 2.34 | 39.0 W, 23.9 W | 6.20 | **16.6** | 63.5–127.5 J | 3.8–7.7× |
+| (256, 5) | 0.40 | 34.8–38.3 W, 24.0 W | 28.4 | **89.1** | 221–444 J | 2.5–5.0× |
+
+The (256, 5) row combines its two halves (`energy_reduce.py combine`); its rails over idle are minion 14.1 J, SRAM
+12.7, NoC 0.2 and unmetered 1.4 J per solve. The die read 51–52 °C before a burst and 53.2–53.6 °C on average during
+it (at most 54 °C), and the minion clock 600 MHz in every busy sample. The host process that drives the card is not in
+the board figure: bounded by assumption at 1.4–2.9, 4.4–8.9 and 25–52 J per solve, it brings the ratios to 2.4–5.8×,
+2.5–6.1× and 1.6–3.9×.
+**Result:** on 1,024 minions the card solves L1 in 0.131 s, L2 in 0.323 s and (256, 5) in 1.52 s with the two-stage
+screen (L1 also in 0.130 s in one stage), both closed forms exact and, for the two-stage runs, the full oracle offline
+exact on every minion: 7.8–12× one core running the tuned AVX-512 scan (L1 7.8×, L2 12.2×, (256, 5) 9.8×), and
+1.1–1.6× six tuned AVX-512 threads running the CPU's best method at P(loss) ≤ 10⁻⁴ (L1 1.13×, L2 1.57×, (256, 5)
+1.16×). Against the whole 16-thread host, extrapolated from six threads, it is about level (0.85–1.2×), where the
+design first projected 3.5–16×. From M3's first runs the fitted planner and incremental generation gained 1.6–1.9×,
+and the two-stage screen 1.3–1.7× more at η = 0.4 (none at L1). Board energy per solve, idle included, measured on the
+one-stage scan: the board alone, 2.5–7.7× below the CPU's assumed package energy (1.6–6.1× with the host that drives
+the card). The limits: hart 1's row generation (the busiest minion of the (256, 5) second half ran 1,629 cycles per op
+in M4, against 270–280 for the op), the shire's bandwidth floor for streamed A (about 512 cycles per op at 32 minions
+per shire, which bounds L2's one-stage scan at 0.28 s from the ops alone, 0.30 s with the staged rows counted as
+DESIGN.md's Amendments do), and the epilogue (1,606 cycles per output tile with the tensor unit idle), whose split
+between ops was slower on silicon than its model. What would help next: cooperative B loads (`tensor_coop`), A held
+resident, and a faster row generator ([`../reports/TODO.md`](../reports/TODO.md), part D).
+**Caveats:** one card, pinned at 600 MHz (aifoundry2 can run at 800 MHz when cool; aifoundry1's card 1 holds 600).
+One seed per timed size and one launch per A/B configuration; M5's rerun of variant b's one-stage scan came within 4%
+of M4's (0.135 against 0.130 s, 0.427 against 0.429 s). A card time is the kernel launch waited for (one stage), or
+that plus the survivors' readback and stage 2 (two stages), without the process's device open (0.18 s) or the host's
+copy of the instance into the card's DRAM; a CPU time is its solve alone. The CPU's 16 threads were not measured and
+its energy is assumed. The board energy is the one-stage scan's; the two-stage path's, with stage 2 on six host
+threads, was not measured. B1 (1,024 small instances on the vector path) and L5 (512, 5, 0.4, 2,151) did not run on
+the card.
+**Data:** [`workloads/sparseparity/data/2026-09-29-aifoundry3-card/`](../../workloads/sparseparity/data/2026-09-29-aifoundry3-card/README.md)
+(M1, the probe, M2 and M3), [`-card-m4/`](../../workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/README.md) (M4)
+and [`-m5-energy/`](../../workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/README.md) (M5 in `m5/`, the
+energy runs in `energy/`), with the `sys_emu` runs beside them; the CPU in
+[`workloads/sparseparity/cpu/data/2026-09-29-aifoundry3-r/`](../../workloads/sparseparity/cpu/data/2026-09-29-aifoundry3-r/README.md)
+and SP3's prototypes in `workloads/sparseparity/proto/data/2026-09-28-aifoundry1/`. Commits `92b168f` (the research,
+the CPU side, M0 and M1's code), `ddb493f` (M1–M3 on the card), `4aea801` and `65e6ba6` (M4's code and its A/B),
+`a768f84` and `6082cb9` (M5's code, then M5 and the energy on the card).
+**Fed:** the page "Sparse parity on the ET-SoC-1" (`docs/reports/2026-09-29-sparse-parity.html`, A21), the rows marked
+E59 in [05-claims.md](05-claims.md), and Q66.
 
 ## A note on E10, re-analysed for Q20
 

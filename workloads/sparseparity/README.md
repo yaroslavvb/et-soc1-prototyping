@@ -24,8 +24,11 @@ the epilogue in pieces was slower on silicon than its model. **M5's code** ("M5:
 screen's stage 1 in variant b's epilogue (a survivor log per minion, counted and flagged when full) and stage 2 on
 the host; at η = 0.4 A cannot stay resident (m1 ≤ 192 keeps 83% of the candidates at P(loss) < 1e-4), so it screens
 at m1 = 320 (L1) and 1,152 (L2, (256,5)). It passes every CPU test and 83 `sys_emu` cases (survivor logs equal to
-`spref`'s byte for byte); **it has not run on a card**: `card_run.sh m5` predicts L1 0.10-0.12 s, L2 0.26 s and
-(256,5) 1.22-1.33 s, 1.3-1.9x the CPU's own two-stage screen at the same P(loss). A review of M5 and of the board
+`spref`'s byte for byte). `card_run.sh m5` predicted L1 0.10-0.12 s, L2 0.26 s and (256,5) 1.22-1.33 s, 1.3-1.9x
+the CPU's own two-stage screen at the same P(loss); **it ran on aifoundry3's card at 11:29-11:35 PDT**
+([`data/2026-09-29-aifoundry3-m5-energy/`](data/2026-09-29-aifoundry3-m5-energy/README.md)): L1 0.131 s, L2 0.323 s
+and (256,5) 1.52 s per solve (launches 0.125, 0.262 and 1.335 s), 1.1-1.6x the CPU's best method on six threads at
+P(loss) <= 1e-4. A review of M5 and of the board
 energy tooling (R4, below) found no card-safety blocker; its findings are applied: the energy headline is the SP's
 board average with the leakage law on the measured die temperature (±3%, tested on a second, adversarial test card
 as well as the plumbing one), the card-against-CPU energy ratio is stated for the card's board alone and with the
@@ -399,8 +402,10 @@ staged stores' cost.
 
 Board energy per solve of variant b on one card, with the energy catalogue's discipline (`tools/claims-v3/lib.sh`:
 the card lock for the whole run, the sampler started with retries and stopped with SIGTERM only, every device
-process under `timeout 10`) and its method beside a better headline. **It has not run on a card.** R4 (below) found
-no card-safety blocker in it; its findings are applied.
+process under `timeout 10`) and its method beside a better headline. It ran on aifoundry3's card at 11:35-11:40 PDT
+on 29 September ([`data/2026-09-29-aifoundry3-m5-energy/`](data/2026-09-29-aifoundry3-m5-energy/README.md),
+`energy/`): 5.0, 16.6 and 89 J per solve with the idle at L1, L2 and (256,5). R4 (below) found no card-safety blocker
+in it before that run; its findings are applied.
 
 **The host change it needs.** `sparseparity_host` opened the card's management node as well as its ops node
 (`createPcieDeviceLayer(true, true)`), and the driver lets one process hold the management node
@@ -474,9 +479,8 @@ with every I in 0..N-1 exactly once: a rerun of a half is not a third part. Name
 below give each run its own directory), never with a glob.
 
 **The CPU side.** The CPU's energy per solve is its measured 6-thread time x an assumed 125-251 W, idle included:
-aifoundry3's package energy counter is root-only (`/sys/class/powercap/intel-rapl:0/energy_uj` 0400 root;
-`/dev/cpu/*/msr` 0600 root; `perf_event_paranoid` 2; the only sudo rule is `et-holders`; checked 29 September, and
-`energy.sh` records it with every run). Its time is its fastest method that keeps the secret with P(loss) ≤ 1e-4,
+aifoundry3's package energy counter (RAPL) cannot be read without root (checked 29 September, and `energy.sh`
+records it with every run). Its time is its fastest method that keeps the secret with P(loss) ≤ 1e-4,
 since the card's one-stage scan loses nothing: L1 the meet in the middle, 0.148 s (expected over 10 seeds; the
 two-stage screen at 8.8e-5 takes 0.166 s); L2 the two-stage screen at m1 1,152, 0.508 s (P(loss) 8.9e-5; the earlier
 0.459 s at m1 1,024 loses the secret with 6.2e-4); (256,5) the same, 1.769 s (8.9e-5; 1.58 s at 6.2e-4). The reducer
@@ -551,8 +555,9 @@ solve is level. The CPU's side and the host's share are assumed; measuring them 
 
 DESIGN.md §2.7: the card scores every candidate on the first m1 samples and logs those with c1 ≥ τ1; the host
 rescores the survivors on all m samples. The secret is lost only when its own c1 falls under τ1, since whenever it
-survives it is also the best survivor on all m. **It has not run on a card**: `card_run.sh m5` is the step for the
-owner's session ("M5 on a card"). The kernel, the host and the scripts are new; everything else is M4's.
+survives it is also the best survivor on all m. It ran on aifoundry3's card at 11:29-11:35 PDT on 29 September
+(`card_run.sh m5`, "M5 on a card"; [`data/2026-09-29-aifoundry3-m5-energy/`](data/2026-09-29-aifoundry3-m5-energy/README.md),
+`m5/`). The kernel, the host and the scripts are new; everything else is M4's.
 
 **Why not m1 ≤ 192 (A resident).** Keeping the secret with P(loss) < 1e-4 fixes τ1 from its binomial tail (its
 disagreements are Bin(m1, η); `design_model.py screen_at`, the host's `screenKept`), and at η = 0.4 and m1 = 192 that
@@ -696,8 +701,10 @@ exact int32; bit 0 is +1 (`0x01`), bit 1 is −1 (`0xFF`), padding samples are 0
 column tiles 16 features; row tile t visits column tiles ⌊(p_min+1)/16⌋ … ⌈n/16⌉−1 and the staircase (j ≤ max(R))
 and padding are masked; each output tile is S = ⌈m/64⌉ `TensorIMA8A32` ops. The answer is the largest c; a tie goes to
 the smallest colex rank C(j,k) + ρ, and is reported as not unique. The two checksums Σc and Σc² (mod 2⁶⁴) over all
-C(n,k) candidates have closed forms in the data alone (Krawtchouk polynomials), so a run that covers everything proves
-each candidate was scored once and correctly.
+C(n,k) candidates have closed forms in the data alone (Krawtchouk polynomials), so a run that covers everything must
+reproduce both exactly, which a dropped, doubled or mis-scored tile fails (the three negative controls do). Two sums
+cannot rule out every compensating error (two candidates' scores swapped keep both), so the CPU oracle also rescores
+whole minions, record by record.
 
 **The kernel, per minion** (`SPP_TENSOR`):
 - hart 0 copies its share of X (the B tiles) into its shire's scratchpad with `TensorLoadL2Scp`, meets the other
@@ -920,7 +927,9 @@ M1's code passed the first 27 the same way (03:36–03:51 PDT,
 29 September: niced to 19, at most 6 threads pinned one per physical core, no card opened (`et-who` empty before and
 after every run). Every timed point is the median of 5 repetitions, with the range. 16 threads are extrapolated from
 6, not measured (this work may use at most 6 threads there): the fast end linear to 8 cores, the slow end at the
-measured 4 → 6 step efficiency (0.96–0.97); SMT adds nothing to this port-bound scan (0.94–1.09 on one core). The
+measured 4 → 6 step efficiency (0.96–0.97) and no SMT gain; the fast end of the one-stage scan's range is also divided
+by one core's SMT uplift (0.94–1.09, counted only above 1: `tools/table_cpu.py`). The two-stage screens had no SMT
+run, so their 16-thread range counts no SMT. The
 data, the generated tables and the reasons are in [`cpu/data/2026-09-29-aifoundry3-r/`](cpu/data/2026-09-29-aifoundry3-r/README.md)
 ([`tables.md`](cpu/data/2026-09-29-aifoundry3-r/tables.md)).
 
