@@ -1,0 +1,16 @@
+== aifoundry3 (validation, passes [111, 112, 211, 212])
+  R33a: PASS  15/15 conditions as the L50 map predicts; bank-bit step -20.0 cycles (band (-27.0, -15.0))
+  R33b: PASS  refresh-domain bits PA[6,7,8,9]: per-controller (the refresh domain is the controller, PA[9] among its bits, as L50 predicts); PA[6] different; PA[7] different; PA[8] different; PA[9] different; PA[10] same; PA[11] same; PA[12] same; PA[13] same; PA[18] same
+  R33c: INSUFFICIENT  PA[11] unclear, PA[12] unclear; PA[6] +7.5 [+3.0, +11.0]; PA[7] +9.5 [+3.0, +11.0]; PA[8] +9.0 [+2.0, +12.0]; PA[9] +3.5 [+2.0, +11.5]; PA[10] +5.5 [+2.0, +12.0]; PA[11] +4.0 [+2.0, +12.0]; PA[12] +3.5 [+2.0, +11.0]; PA[13] +3.0 [+1.0, +11.0]; PA[18] +39.0 [+38.0, +46.0]
+  R36: PASS  second TensorLoad 199 cycles (like L2; L2 ref 199, L3 ref 744, first 1344); scalar probe after it 42 (L2)
+  R43: FAIL  surviving theories: none (A and D were refuted before memp2); T43-B misses 7, Cc misses 5
+  E102: {'E102-bw': 'PASS', 'E102-e': 'PASS', 'E102-T': 'PASS'}  zeros: BW 256/64 0.665, dE +41.9 pJ/64B [+28.4, +55.4], T102 71.8; random: BW 256/64 0.665, dE +49.9 pJ/64B [+27.9, +72.0], T102 71.8
+== theories (survive = PASS on every validation card that decided)
+  L50 bank/row split (R33a): True (decided on 1 validation card(s); aifoundry3 PASS)
+  Refresh domain = controller, PA[6-9] its bits (R33b): True (decided on 1 validation card(s); aifoundry3 PASS)
+  PA[11], PA[12] share the controller (R33c): None (decided on 0 validation card(s); aifoundry3 INSUFFICIENT)
+  T36: the L2 keeps TensorLoad lines: True (decided on 1 validation card(s); aifoundry3 PASS)
+  T43-B: 32 B/cycle per bank: False (decided on 1 validation card(s); aifoundry3 FAIL)
+  E102-bw: the same bank costs a third of the bandwidth: True (decided on 1 validation card(s); aifoundry3 PASS)
+  E102-e: stride-256 energy per byte resolved above the others: True (decided on 1 validation card(s); aifoundry3 PASS)
+  T102: the extra is the awake minions' time: True (decided on 1 validation card(s); aifoundry3 PASS)
