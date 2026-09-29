@@ -1,0 +1,22 @@
+L1: 44 solves in 5.900 s (7.458/s; kernel 0.1301 s each, 7.688/s)
+  J per solve over idle (the SP's board average, the law on the die temperature): 1.768 (uncorrected 1.911, ramp baseline 1.818; the leakage's rise 0.053); board total per solve, idle included, 5.055 J
+  catalogue method (cross-check): 1.698 J (uncorrected 1.712, integral 1.694; 2 of 19 busy readings at idle, 0.6 expected, one pass = 0.086 J per solve); board 37.11 W in the burst, idle 24.34 W: +12.77 W, +12.66 W leakage-corrected (+0.10 W at 0.333 W/C)
+  die 55.0 C before, 56.3 C busy (max 57), 56.0 C brackets
+  rails, J per solve: minion 0.999, SRAM 0.220, NoC 0.145 (ramp baseline: upper bounds), unmetered 0.405 (the headline minus the rails)
+  host: 5.900 CPU s over the burst (1.00 cores busy on average; host_cpu_s.burst (getrusage over launch_epoch_ms)); its package, assumed, 2.68-7.84 J per solve
+  CPU 6T best at P(loss) <= 0.0001 (mitm, random halving, expected time over 10 seeds, P(loss) 0, 0.148 s): 18.5-37.1 J at an assumed 125-251 W; x3.7-7.3 the card's board alone (the host not counted); x1.4-4.8 the card's board + the host's package (2.68-7.84 J assumed)
+  RAPL on the host: root-only (400 root)
+  OK | 2 of 19 busy board_w readings at idle (a pass between launches; 0.6 expected): the catalogue value is about 8% low in this run; the SP average (the headline) does not alias them; DRY: test doubles, not a measurement
+  truth reps: reduced 44 vs injected 44 (+0.00%, allowed -0.0000/+0.0000) ok
+  truth board J/solve (headline: SP average, law on T): reduced 1.7685 vs injected 1.82 (-2.83%, allowed -0.0546/+0.0546) ok
+  truth board total J/solve (idle included): reduced 5.0546 vs injected 5.0933 (-0.76%, allowed -0.1019/+0.1019) ok
+  truth board J/solve (catalogue method): reduced 1.698 vs injected 1.82 (-6.70%, allowed -0.2644/+0.2644) ok
+  truth board J/solve (catalogue integral): reduced 1.6945 vs injected 1.82 (-6.90%, allowed -0.3507/+0.3507) ok
+  truth minion_w J/solve (ramp baseline): reduced 0.9988 vs injected 1.001 (-0.22%, allowed -0.0200/+0.0701) ok
+  truth sram_w J/solve (ramp baseline): reduced 0.2195 vs injected 0.2184 (+0.52%, allowed -0.0050/+0.0153) ok
+  truth noc_w J/solve (ramp baseline): reduced 0.1449 vs injected 0.1456 (-0.50%, allowed -0.0050/+0.0102) ok
+  truth unmetered J/solve: reduced 0.4052 vs injected 0.455 (-10.94%, allowed -0.0682/+0.0682) ok
+  (not checked: the ramp baseline 1.8179 J, -0.11% of the injected)
+  truth burst start (s): reduced 1790705681.908 vs injected 1790705681.9085 (-0.00%, allowed -0.0100/+0.0100) ok
+  truth burst end (s): reduced 1790705687.808 vs injected 1790705687.8086 (-0.00%, allowed -0.0100/+0.0100) ok
+  TRUTH PASS (a test of the reducer against the test double's card, not a measurement)

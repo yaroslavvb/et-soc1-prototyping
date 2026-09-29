@@ -46,6 +46,13 @@
 #define SPP_F_GEN_NOSTORE 256u // timing probe only (with SPP_F_GEN_INC and SPP_F_NOEPI): hart 1 generates and
                                // expands every row but writes it to a 256 B buffer in its own L1 instead of the
                                // staging buffer, so hart 0 multiplies stale rows; tells the staged stores' cost apart
+// M5: the two-stage screen's stage 1 (DESIGN.md 2.7). The launch scans the first m1 samples (args.m = m1) and hart 0
+// logs every candidate with c1 >= tau1 (args.tau1 >= 1) into its minion's survivor log (SppMinion.surv_base /
+// surv_cap entries of the u64 array args.surv, cpu/sp.h's packing: row | j << 40 | c1 << 52), in the order it scores
+// them; one SppSurvHdr per minion slot counts them all, logged or not (a full log is counted and flagged, never
+// silent). Tensor mode, M1's epilogue only (no SPP_F_EPI_HIDE, no SPP_F_ABUF3): the screen runs inside it, on the
+// output tile in f0..f31, with packed compares into mask registers (fltm.pi) and mova.x.m.
+#define SPP_F_SCREEN 512u
 
 #define SPP_KMAX 6u     // k <= 6: a row subset has at most 5 elements
 #define SPP_NMAX 2048u  // n <= 2048 (subset elements are uint16)
@@ -101,6 +108,9 @@ struct SppArgs {
   uint64_t poll_limit;  // polls of the other hart's line (and barrier polls) before a hart gives up; the host sizes
                         // it so that a hart gives up well inside the launch's timeout
   uint64_t xt;          // packed X slice-major (SPP_F_GEN_INC): word s of feature f at xt[s * n + f]
+  uint64_t tau1;        // SPP_F_SCREEN: log candidates with c >= tau1 (tau1 >= 1, so a masked entry, 0, never passes)
+  uint64_t surv;        // SPP_F_SCREEN: the survivor logs, uint64 entries (SppMinion.surv_base, .surv_cap)
+  uint64_t surv_hdr;    // SPP_F_SCREEN: SppSurvHdr[1024], indexed by minion slot
 };
 
 // The work list. A minion processes its blocks in order; a block is a run of consecutive row tiles.
@@ -108,7 +118,23 @@ struct SppMinion {
   uint32_t first_block;  // index into the block array
   uint32_t nblocks;
   uint64_t dump_base;    // SPP_F_DUMP: index of this minion's first output tile in the dump buffer
+  uint64_t surv_base;    // SPP_F_SCREEN: index of this minion's first log entry in args.surv (a multiple of 8)
+  uint64_t surv_cap;     // SPP_F_SCREEN: entries its log holds (a multiple of 8)
 };
+
+// SPP_F_SCREEN: one 64 B line per minion slot, written by hart 0 at its end.
+struct SppSurvHdr {
+  uint64_t found;      // candidates this hart scored with c >= tau1, logged or not
+  uint64_t stored;     // entries written to the log: min(found, cap)
+  uint64_t cap;        // the log's capacity as the kernel read it
+  uint64_t sum;        // sum of every found entry's packed value (mod 2^64): a checksum of the whole survivor set
+  uint64_t sum_c1;     // sum of c1 over every found entry
+  uint64_t tiles_hit;  // output tiles with at least one survivor
+  uint32_t epoch;      // the launch's epoch (a header left from another launch does not match)
+  uint32_t flags;      // SPP_SURV_OVERFLOW: found > cap
+  uint64_t pad;
+};
+#define SPP_SURV_OVERFLOW 1u
 
 struct SppBlock {
   uint32_t tile0;    // first row tile (the host refuses an instance with 2^32 row tiles or more)
@@ -132,8 +158,9 @@ struct SppRecord {
 };
 
 #ifdef __cplusplus
-static_assert(sizeof(SppArgs) == 27 * 8, "SppArgs layout must match on host and device");
-static_assert(sizeof(SppMinion) == 16, "SppMinion is 16 bytes");
+static_assert(sizeof(SppArgs) == 30 * 8, "SppArgs layout must match on host and device");
+static_assert(sizeof(SppMinion) == 32, "SppMinion is 32 bytes");
+static_assert(sizeof(SppSurvHdr) == 64, "SppSurvHdr must be one cache line");
 static_assert(sizeof(SppBlock) == 32, "SppBlock is 32 bytes");
 static_assert(sizeof(SppRecord) == 64, "SppRecord must be one cache line");
 #endif

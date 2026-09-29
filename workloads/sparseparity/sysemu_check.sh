@@ -4,7 +4,9 @@
 # flb_check, tstore_check: the runtime's defaults) plus -vpurf_warn, filtered to the kernel's PCs (the relocated
 # kernel runs at 0x8005...; the firmware's own hazards, at 0x40... and 0x8000..., are not ours).
 #
-#   bash workloads/sparseparity/sysemu_check.sh [--quick] [--build DIR] [--cpu DIR] [--keep]   from the tree's root
+#   bash workloads/sparseparity/sysemu_check.sh [--quick] [--build DIR] [--cpu DIR] [--keep] [--only REGEX]
+#                                                                                        from the tree's root
+# --only REGEX: the cases whose name matches (bash =~), e.g. '^ts-' for M5's two-stage cases.
 #
 # The M0 cross-check (unless --quick): M0's planner writes the work list (tools/planner.py plan --topm 0), the kernel
 # runs it (--plan, --out), and tools/sptest.py card compares every hart's record with M0's reference, spref, field
@@ -26,15 +28,26 @@
 # (L2), every raw output tile compared with the CPU, in the scratchpad (1 and 2 buffers) and in DRAM. The review of
 # M4 added 14: k = 6 and k = 2 on the new paths, the mask control on the streamed and 3-buffer paths, 3 A buffers
 # with DRAM staging, S = 40, a tie across 8 minions with A streamed, and the race probe on DRAM staging.
+# M5 (the two-stage screen, ts-*): stage 1 in variant b's kernel (M1's epilogue, incremental generation) logs every
+# candidate with c1 >= tau1; each case runs the in-process oracle on every minion (its survivor list entry by entry)
+# and, where the plan covers every candidate, compares the host's --surv-out file byte for byte with the CPU
+# reference's own survivor log (spref scan m1= tau1= log=): resident (S1 = 1, 3) and streamed (S1 = 4, 5, 18) A, k = 1,
+# 2, 3, 4, 5, m1 not a multiple of 64, 2 shires, 8 minions with tau1 = 1 (half the candidates survive: every register
+# and lane), 1 staging buffer, DRAM staging, M1's generation, 2 reps, the L1, L2 and (256,5) geometries at their m1,
+# a tie, and four controls: a log too small (OVERFLOW, flagged, everything else exact), the mask control, the kernel
+# screening at tau1 + 2 while the host checks tau1 (--perturb tau: the survivor oracle must say MISMATCH, stage 1 and
+# stage 2 exact) and the log never reaching the area the host reads (--perturb lostlog: the poison the host writes
+# before each launch fails the entries, their oracle and stage 2).
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 2
 BUILD=build/sparseparity-m1
 CPU=build/sparseparity-cpu
-QUICK=; KEEP=
+QUICK=; KEEP=; ONLY=
 while [ $# -gt 0 ]; do
   case "$1" in
     --quick) QUICK=1 ;;
     --keep) KEEP=1 ;;
+    --only) ONLY=$2; shift ;;
     --build) BUILD=$2; shift ;;
     --cpu) CPU=$2; shift ;;
     *) echo "unknown option $1" >&2; exit 2 ;;
@@ -62,6 +75,9 @@ mkdir -p "$WD"
 for i in $(seq 0 31); do echo "0 $i $((1250000 + 4000 * i)) 1"; done > "$WD/plan_hi.txt"
 printf '0 0 0 2\n0 1 1001 2\n0 2 1381773 3\n' > "$WD/plan_lgeo.txt"   # (512, 4): 1,381,776 row tiles
 L1G="--n 512 --k 4 --eta 0.3 --m 448 --seed 1 --per-shire 3 --plan $WD/plan_lgeo.txt"
+printf '0 0 0 2\n0 1 5000000 2\n0 2 10753842 3\n' > "$WD/plan_f5geo.txt"   # (256, 5): 10,753,845 row tiles
+VB="--variant m1 --cost fit --gen inc"   # variant b (M4 on a card: the best), whose epilogue holds the screen
+TS4="--n 48 --k 3 --eta 0.1 --m 512 --seed 9 --m1 256 --tau1 30"
 L2G="--n 512 --k 4 --eta 0.4 --m 1850 --seed 1 --per-shire 3 --plan $WD/plan_lgeo.txt"
 S4="--n 48 --k 3 --eta 0.1 --m 256 --seed 9"
 
@@ -146,6 +162,36 @@ if [ -z "$QUICK" ]; then
     "probe-dram1|PASS|--mode tensor $S4 --per-shire 4 --probe narrow:6 --oracle on --stage dram --nbuf 1"
   )
 fi
+# M5: the two-stage screen (TS = PASS with the survivors, their oracle and stage 2 exact, and spref's log equal where
+# the plan covers everything; TSOVF = the log overflows: flagged, FAIL, every other check exact; TSTIE = TS with
+# stage 2's answer not unique; TSNEGT = --perturb tau: the survivor oracle MISMATCH, stage 1 and stage 2 exact;
+# TSLOST = --perturb lostlog: the entries, their oracle and stage 2 MISMATCH, stage 1 exact)
+[ -z "$QUICK" ] && cases+=(
+  "ts-c0-res|TS|--mode tensor $VB --n 32 --k 3 --eta 0.1 --m 128 --seed 1 --m1 64 --tau1 8 --dump --oracle on --surv-out surv.bin"
+  "ts-res3-2shires|TS|--mode tensor $VB --n 40 --k 4 --eta 0.1 --m 384 --seed 5 --m1 192 --tau1 20 --shires 0x3 --per-shire 2 --dump --oracle on --surv-out surv.bin"
+  "ts-s4-str|TS|--mode tensor $VB $TS4 --dump --oracle on --surv-out surv.bin"
+  "ts-s4-nbuf1|TS|--mode tensor $VB $TS4 --nbuf 1 --oracle on --surv-out surv.bin"
+  "ts-s4-dram1|TS|--mode tensor $VB $TS4 --stage dram --nbuf 1 --per-shire 2 --oracle on --surv-out surv.bin"
+  "ts-s4-m1gen|TS|--mode tensor --variant m1 $TS4 --oracle on --surv-out surv.bin"
+  "ts-k5|TS|--mode tensor $VB --n 24 --k 5 --eta 0.1 --m 256 --seed 3 --m1 128 --tau1 16 --dump --oracle on --surv-out surv.bin"
+  "ts-k2-m100|TS|--mode tensor $VB --n 40 --k 2 --eta 0.1 --m 300 --seed 4 --m1 100 --tau1 10 --dump --oracle on --surv-out surv.bin"
+  "ts-k1|TS|--mode tensor $VB --n 20 --k 1 --eta 0.1 --m 90 --seed 2 --m1 40 --tau1 4 --dump --oracle on --surv-out surv.bin"
+  "ts-dense8|TS|--mode tensor $VB --n 64 --k 3 --eta 0.2 --m 640 --seed 2 --m1 320 --tau1 1 --per-shire 8 --oracle on --surv-out surv.bin"
+  "ts-reps2|TS|--mode tensor $VB $TS4 --per-shire 2 --reps 2 --oracle on --surv-out surv.bin"
+  "ts-l1geo|TS|--mode tensor $VB $L1G --m1 320 --tau1 30 --dump --oracle on"
+  "ts-l2geo|TS|--mode tensor $VB --n 512 --k 4 --eta 0.4 --m 1850 --seed 1 --per-shire 3 --plan $WD/plan_lgeo.txt --m1 1152 --tau1 60 --dump --oracle on"
+  "ts-f5geo|TS|--mode tensor $VB --n 256 --k 5 --eta 0.4 --m 1925 --seed 1 --per-shire 3 --plan $WD/plan_f5geo.txt --m1 1152 --tau1 60 --oracle on"
+  "ts-tie|TSTIE|--mode tensor $VB --instance $WD/tie.spi --m1 64 --tau1 8 --oracle on"
+  "ts-ovf|TSOVF|--mode tensor $VB --n 32 --k 3 --eta 0.1 --m 128 --seed 1 --m1 64 --tau1 8 --surv-cap 16 --oracle on"
+  "ts-negmask|NEGM|--mode tensor $VB $TS4 --perturb mask --oracle on"
+  "ts-negtau|TSNEGT|--mode tensor $VB $TS4 --perturb tau --oracle on"
+  "ts-lostlog|TSLOST|--mode tensor $VB $TS4 --perturb lostlog --oracle on"
+)
+if [ -n "$ONLY" ]; then
+  sel=()
+  for c in "${cases[@]}"; do [[ "${c%%|*}" =~ $ONLY ]] && sel+=("$c"); done
+  cases=("${sel[@]}")
+fi
 
 # before each case: wait while the card is held (et-who --check: 0 free, 1 held, 2 failed)
 wait_free() {
@@ -167,9 +213,9 @@ for c in "${cases[@]}"; do
   [[ " ${cmd[*]} " == *" --sysemu "* ]] || { say "internal: no --sysemu in $name"; exit 2; }
   t0=$(date +%s)
   ( cd "$d" && timeout 1800 nice -n 19 "${cmd[@]}" > out.json 2> err.log < /dev/null ); rc=$?
-  line=$(python3 - "$d" "$expect" "$rc" <<'EOF'
-import json, re, sys
-d, expect, rc = sys.argv[1], sys.argv[2], int(sys.argv[3])
+  line=$(python3 - "$d" "$expect" "$rc" "$CPU" <<'EOF'
+import json, os, re, subprocess, sys
+d, expect, rc, cpu = sys.argv[1], sys.argv[2], int(sys.argv[3]), sys.argv[4]
 try:
     j = json.loads(open(d + "/out.json").read().strip().splitlines()[-1])
 except Exception:
@@ -185,6 +231,39 @@ if expect in ("PASS", "TIMING"):
     ok = rc == 0 and st == expect and clean
 elif expect == "TIE":
     ok = rc == 0 and st == "PASS" and res.get("unique") is False and res.get("solved") is False and clean
+elif expect in ("TS", "TSTIE"):  # M5: survivors, their oracle and stage 2 exact; spref's own log where it applies
+    ts = j.get("two_stage", {})
+    ok = (rc == 0 and st == "PASS" and clean and c.get("survivors", "").startswith("ok") and
+          c.get("survivors_oracle", "").startswith("exact") and c.get("stage2", "").startswith("ok"))
+    if expect == "TSTIE":
+        ok = ok and ts.get("unique") is False
+    if os.path.exists(d + "/surv.bin") and j.get("plan", {}).get("coverage") == "full":
+        inst, tp = j.get("instance", {}), ts.get("plan", {})
+        if os.path.exists(cpu + "/spref") and inst.get("source") == "generated" and inst.get("k", 0) >= 2:  # spref: 2 <= k
+            r = subprocess.run([cpu + "/spref", "scan", f"n={inst['n']}", f"k={inst['k']}", f"eta={inst['eta']}",
+                                f"m={tp['m']}", f"seed={inst['seed']}", f"m1={tp['m1']}", f"tau1={tp['tau1']}",
+                                "threads=2", "log=" + d + "/spref.bin"], capture_output=True, text=True)
+            same = r.returncode == 0 and open(d + "/surv.bin", "rb").read() == open(d + "/spref.bin", "rb").read()
+            n = os.path.getsize(d + "/spref.bin") // 8 if os.path.exists(d + "/spref.bin") else -1
+            ok = ok and same
+            res = dict(res, solved=f"{ts.get('solved')} spref={'=' if same else 'DIFF'}{n}")
+        else:
+            res = dict(res, solved=f"{ts.get('solved')} spref=n/a")
+    else:
+        res = dict(res, solved=f"{ts.get('solved')} surv={ts.get('found')}")
+elif expect == "TSOVF":  # the log too small: flagged and failed; the stored prefix and every other check exact
+    ok = (st == "FAIL" and c.get("survivors", "").startswith("OVERFLOW") and c.get("survivors_oracle", "").startswith("exact")
+          and c.get("sum_c") == "ok" and c.get("sum_c2") == "ok" and c.get("oracle", "").startswith("exact")
+          and c.get("records") == "ok" and c.get("launch") == "ok" and clean)
+elif expect == "TSNEGT":  # the kernel screened at tau1 + 2: only the survivor oracle (and maybe the counts) see it
+    ok = (st == "FAIL" and c.get("survivors_oracle", "").startswith("MISMATCH") and c.get("stage2", "").startswith("ok")
+          and c.get("survivors", "").split(" ")[0].rstrip(",") in ("ok", "COUNT") and c.get("sum_c") == "ok"
+          and c.get("sum_c2") == "ok" and c.get("oracle", "").startswith("exact") and c.get("records") == "ok"
+          and c.get("launch") == "ok" and clean)
+elif expect == "TSLOST":  # the log area read back holds only the host's poison
+    ok = (st == "FAIL" and c.get("survivors", "").startswith("MISMATCH") and c.get("survivors_oracle", "").startswith("MISMATCH")
+          and c.get("stage2", "").startswith("MISMATCH") and c.get("sum_c") == "ok" and c.get("sum_c2") == "ok"
+          and c.get("oracle", "").startswith("exact") and c.get("records") == "ok" and c.get("launch") == "ok" and clean)
 elif expect == "REJECT":
     ok = rc != 0 and fatal > 0 and all("L1-SCP-Checker" in l for l in log.splitlines() if "FATAL" in l)
 elif expect == "ABORT":  # the harts give up and say so in their records; the launch itself completes
@@ -197,7 +276,8 @@ else:  # negative control: the closed forms must catch it, everything else must 
     ok = (st == "FAIL" and "MISMATCH" in (c.get("sum_c", "") + c.get("sum_c2", "")) and
           c.get("oracle", "").startswith("exact") and c.get("records") == "ok" and c.get("launch") == "ok" and clean)
 print(("OK " if ok else "BAD ") + f"{st:<6} {c.get('sum_c','-'):<8} {c.get('sum_c2','-'):<8} {c.get('oracle','-')[:6]:<6} "
-      f"{c.get('dump','-')[:22]:<22} {str(j.get('result',{}).get('solved','-')):<8} {vp:<5} {fatal}")
+      f"{c.get('dump','-')[:22]:<22} {str(res.get('solved','-')):<8} {vp:<5} {fatal}"
+      + (f"  survivors '{c.get('survivors')}' oracle '{c.get('survivors_oracle')}'" if 'survivors' in c and c.get('survivors') != 'n/a' else ""))
 EOF
 )
   verdict=${line%% *}; rest=${line#* }
@@ -219,6 +299,11 @@ if [ -z "$QUICK" ]; then
     say "M0 cross-check skipped: no $CPU/spref or no numpy"
     m0cases=()
   fi
+fi
+if [ -n "$ONLY" ]; then
+  sel=()
+  for c in "${m0cases[@]}"; do [[ "${c%%|*}" =~ $ONLY ]] && sel+=("$c"); done
+  m0cases=("${sel[@]}")
 fi
 for c in "${m0cases[@]}"; do
   name=${c%%|*}; rest=${c#*|}; inst=${rest%%|*}; popt=${rest#*|}

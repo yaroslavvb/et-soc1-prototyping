@@ -57,6 +57,16 @@ implements them, and each finding's status.
   within x1.3 of the model. The A/B also runs the hand-off probe with M4's generation first, M4's kernel on M1's
   fitted plan (the kernel's gain apart from the plan's balance), and the full oracle offline on its full-coverage
   M4 steps.
+- **M5, the two-stage screen (§2.7), after M4's card A/B.** Keeping the secret with P(loss) < 1e-4 fixes τ₁ from
+  its binomial tail, and at η = 0.4 with m1 ≤ 192 (A resident) τ₁ is −12: 83% of the candidates survive, so
+  "m1 = 192 also keeps A resident" (§2.7) helps only at small η (S2, η = 0.2). At L1 (η = 0.3) m1 = 192 keeps 7.2e7. §2.7's
+  L2 row (m1 = 832, τ₁ = 80) keeps the secret with 0.9989, not 1 − 1e-4. The card screens at L1 m1 = 320, τ₁ = 66
+  (P(loss) 8.8e-5, 3.8e5 survivors) and at L2 and (256,5) m1 = 1,152, τ₁ = 106 (8.9e-5; 2.8e6 and 8.7e6), with
+  A streamed, in variant b's kernel (the best of M4's A/B): each output tile's epilogue compares the tile with τ₁ in
+  the vector unit (`fltm.pi` into mask registers) and logs survivors per minion, counted and flagged when a log is
+  full; stage 2 runs on 6 host threads and re-derives every logged c₁. §2.7's survivor log is per minion as designed,
+  sized at 1.5x its expected share + 10σ; an overflow fails the run instead of rescanning. The workload README's "M5"
+  sections hold the details, the `sys_emu` evidence and `card_run.sh m5`.
 
 ## The design in one screen
 

@@ -1,0 +1,22 @@
+case               expect status sum_c    sum_c2   oracle dump                   solved   vpurf mem
+ts-c0-res          TS     PASS   ok       ok       exact, exact 9472 entries     True spref==989 0     0  survivors 'ok, 989 found' oracle 'exact, 1 minions'  (33s)
+ts-res3-2shires    TS     PASS   ok       ok       exact, exact 225792 entries   True spref==7881 0     0  survivors 'ok, 7881 found' oracle 'exact, 4 minions'  (36s)
+ts-s4-str          TS     PASS   ok       ok       exact, exact 26880 entries    True spref==624 0     0  survivors 'ok, 624 found' oracle 'exact, 1 minions'  (33s)
+ts-s4-nbuf1        TS     PASS   ok       ok       exact, n/a                    True spref==624 0     0  survivors 'ok, 624 found' oracle 'exact, 1 minions'  (34s)
+ts-s4-dram1        TS     PASS   ok       ok       exact, n/a                    True spref==624 0     0  survivors 'ok, 624 found' oracle 'exact, 2 minions'  (34s)
+ts-s4-m1gen        TS     PASS   ok       ok       exact, n/a                    True spref==624 0     0  survivors 'ok, 624 found' oracle 'exact, 1 minions'  (33s)
+ts-k5              TS     PASS   ok       ok       exact, exact 163840 entries   True spref==4018 0     0  survivors 'ok, 4018 found' oracle 'exact, 1 minions'  (38s)
+ts-k2-m100         TS     PASS   ok       ok       exact, exact 1536 entries     True spref==138 0     0  survivors 'ok, 138 found' oracle 'exact, 1 minions'  (33s)
+ts-k1              TS     PASS   ok       ok       exact, exact 512 entries      True spref=DIFF-1 0     0  survivors 'ok, 6 found' oracle 'exact, 1 minions'  (32s)
+    E20260929 09:08:53.237689 1880331 SysEmuImp.cpp:457] ET [SYS_EMU]: PU UART1 TX FIFO path /home/yaroslavvb/nekko/build/sparseparity-s/sysemu/20260929-090417/ts-k1/pu_uart1_tx.log
+    	
+    device open 31.9189 s, load+copy-in 0.017878 s, held 32.2872 s
+ts-dense8          TS     PASS   ok       ok       exact, n/a                    True spref==19960 0     0  survivors 'ok, 19960 found' oracle 'exact, 8 minions'  (35s)
+ts-reps2           TS     PASS   ok       ok       exact, n/a                    True spref==624 0     0  survivors 'ok, 624 found' oracle 'exact, 2 minions'  (35s)
+ts-l1geo           TS     PASS   partial  partial  exact, exact 32512 entries    False surv=1581 0     0  survivors 'ok, 1581 found' oracle 'exact, 3 minions'  (33s)
+ts-l2geo           TS     PASS   partial  partial  exact, exact 32512 entries    False surv=1329 0     0  survivors 'ok, 1329 found' oracle 'exact, 3 minions'  (34s)
+ts-f5geo           TS     PASS   partial  partial  exact, n/a                    False surv=389 0     0  survivors 'ok, 389 found' oracle 'exact, 3 minions'  (33s)
+ts-tie             TSTIE  PASS   ok       ok       exact, n/a                    False surv=993 0     0  survivors 'ok, 993 found' oracle 'exact, 1 minions'  (33s)
+ts-ovf             TSOVF  FAIL   ok       ok       exact, n/a                    True     0     0  survivors 'OVERFLOW 1 minions (found 989, stored 16)' oracle 'exact, 1 minions'  (33s)
+ts-negmask         NEGM   FAIL   MISMATCH MISMATCH MISMAT n/a                    True     0     0  survivors 'ok, 624 found' oracle 'exact, 1 minions'  (33s)
+09:13:55 sysemu: SYSEMU FAIL: 1 of 17 cases (logs in /home/yaroslavvb/nekko/build/sparseparity-s-src/../sparseparity-s/sysemu/20260929-090417)

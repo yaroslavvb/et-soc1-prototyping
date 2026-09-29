@@ -17,7 +17,15 @@
 //    secret found at a noise level the model says is easy;
 // 5. M4: plans cut by the fitted pipeline's costs cover every tile once with the same oracle; the C++ pipeline
 //    model equals tools/cycle_model.py's (its table at L1, L2 and C1, M1's kernel and M4's) to 0.1%.
+// 6. M5 (the two-stage screen): the m1-sample prefix of an instance equals the instance generated with m1 samples;
+//    the plan-order survivor oracle (merged over minions) equals brute force's survivor set; stage 2 on those
+//    survivors finds brute force's best among them on all m samples and flags corrupted entries; the screen's
+//    probabilities equal design_model.py's.
+//   spp_selftest --bench-stage2 N K ETA M M1 NSURV THREADS   stage 2's speed on NSURV random valid entries in the
+//                                         kernel's order (ns per survivor and 64-sample word)
 #include <chrono>
+#include <random>
+#include <thread>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -55,6 +63,79 @@ static Acc brute(const Instance& I) {
     colexNext(T);
   }
   return a;
+}
+
+// M5: the survivors of the first m1 samples by brute force (c1 >= tau1), sorted by colex key.
+static std::vector<uint64_t> bruteSurvivors(const Instance& I1, int tau1) {
+  std::vector<uint64_t> out;
+  std::vector<int> T(I1.k);
+  for (int i = 0; i < I1.k; ++i) T[i] = i;
+  const uint64_t N = binom64(I1.n, I1.k);
+  for (uint64_t r = 0; r < N; ++r) {
+    const int32_t c = scoreSubset(I1, T);
+    if (c >= tau1) out.push_back(survPack(r - binom64(T.back(), I1.k), uint32_t(T.back()), c));
+    colexNext(T);
+  }
+  std::sort(out.begin(), out.end(), [](uint64_t a, uint64_t b) { return survKey(a) < survKey(b); });
+  return out;
+}
+
+static void checkScreen(int n, int k, double eta, int m, int m1, int tau1, uint64_t seed) {
+  const Instance F = generate(n, k, eta, m, seed);
+  const Instance I1 = prefixInstance(F, m1), G1 = generate(n, k, eta, m1, seed);
+  CHECK(I1.X == G1.X && I1.y == G1.y && I1.secret == G1.secret && instHash(I1) == instHash(G1),
+        "prefix (%d,%d,%g,%d) to m1 = %d differs from the instance generated with m1", n, k, eta, m, m1);
+  const std::vector<uint64_t> want = bruteSurvivors(I1, tau1);
+  const Geometry G(I1);
+  std::vector<uint64_t> got;
+  for (uint64_t mask : {0x1ull, 0x5ull}) {
+    const Plan P = makePlan(G, mask, 3, 2, 0, G.workTiles);
+    got.clear();
+    Acc merged;
+    for (int g : P.activeSlots()) {
+      Acc a;
+      std::vector<uint64_t> sv;
+      scoreBlocks(I1, G, P.slots[g], a, nullptr, false, &sv, tau1);
+      for (size_t q = 1; q < sv.size(); ++q)  // the kernel's order: row tile, then column tile, row, column
+        CHECK(survRow(sv[q]) / 16 >= survRow(sv[q - 1]) / 16 || P.slots[g].size() > 1, "survivor order in slot %d", g);
+      got.insert(got.end(), sv.begin(), sv.end());
+      merged.merge(a);
+    }
+    std::sort(got.begin(), got.end(), [](uint64_t a, uint64_t b) { return survKey(a) < survKey(b); });
+    CHECK(got == want, "survivors (%d,%d,%g,m1=%d,tau1=%d) mask %llx: plan oracle %zu, brute force %zu", n, k, eta, m1,
+          tau1, (unsigned long long)mask, got.size(), want.size());
+  }
+  // stage 2 over the survivors: brute force's best among them on all m samples; every entry passes
+  Stage2 s2;
+  stage2Range(F, m1, tau1, want.data(), want.size(), s2);
+  Acc best;
+  for (uint64_t e : want) {
+    std::vector<int> T = unrank(survRow(e), k - 1);
+    T.push_back(int(survJ(e)));
+    best.add(scoreSubset(F, T), rankOf(T));
+  }
+  CHECK(s2.bad == 0 && s2.entries == want.size() && s2.acc.best == best.best && s2.acc.bestRank == best.bestRank &&
+            s2.acc.tie == best.tie,
+        "stage 2 (%d,%d,m=%d,m1=%d): bad %llu, best %d@%llu vs %d@%llu", n, k, m, m1, (unsigned long long)s2.bad,
+        s2.acc.best, (unsigned long long)s2.acc.bestRank, best.best, (unsigned long long)best.bestRank);
+  const uint64_t sr = rankOf(F.secret);
+  bool secretIn = false;
+  for (uint64_t e : want) secretIn |= survRow(e) + binom64(survJ(e), k) == sr;
+  CHECK(s2.secretIn == secretIn, "stage 2's secret flag");
+  // corrupted entries are flagged: c1 off by 2, j at max(R), a row past the last
+  if (!want.empty()) {
+    const uint64_t e = want[want.size() / 2];
+    std::vector<int> R = unrank(survRow(e), k - 1);
+    const uint64_t bad[3] = {survPack(survRow(e), survJ(e), survC1(e) + 2),
+                             k > 1 ? survPack(survRow(e), uint32_t(R.back()), survC1(e)) : survPack(survRow(e), survJ(e), survC1(e) - 2),
+                             survPack(binom64(n - 1, k - 1), survJ(e), survC1(e))};
+    Stage2 b;
+    stage2Range(F, m1, tau1, bad, 3, b);
+    CHECK(b.bad == 3, "stage 2 flags %llu of 3 corrupted entries", (unsigned long long)b.bad);
+  }
+  std::printf("ok screen (%d,%d,%g,m=%d) m1=%d tau1=%d: prefix = generated; %zu survivors, plan oracle = brute "
+              "force; stage 2 best %d (secret %s)\n",
+              n, k, eta, m, m1, tau1, want.size(), s2.acc.best, secretIn ? "kept" : "lost");
 }
 
 static void checkInstance(int n, int k, double eta, int m, uint64_t seed) {
@@ -201,6 +282,47 @@ int main(int argc, char** argv) {
                 I.k, I.m, G.S, (unsigned long long)nt, words, s, words / s, (unsigned long long)a.count);
     return 0;
   }
+  if (argc == 9 && std::string(argv[1]) == "--bench-stage2") {
+    // NSURV random valid entries (rows ascending, as a minion logs them), their c1 exact; then stage 2 timed
+    const Instance F = generate(std::atoi(argv[2]), std::atoi(argv[3]), std::atof(argv[4]), std::atoi(argv[5]), 1);
+    const int m1 = std::atoi(argv[6]), nt = std::max(1, std::atoi(argv[8]));
+    const Instance I1 = prefixInstance(F, m1);
+    const uint64_t ns = std::strtoull(argv[7], nullptr, 0), nrows = binom64(F.n - 1, F.k - 1);
+    std::mt19937_64 rng(7);
+    std::vector<uint64_t> rows(ns);
+    for (auto& r : rows) r = rng() % nrows;
+    std::sort(rows.begin(), rows.end());
+    std::vector<uint64_t> e(ns);
+    std::vector<uint64_t> P(size_t(I1.W));
+    for (uint64_t q = 0; q < ns; ++q) {
+      const std::vector<int> R = unrank(rows[q], F.k - 1);
+      const int lo = R.empty() ? 0 : R.back() + 1;
+      rowBits(I1, R, P.data());
+      int j = lo, c = 0;
+      for (int tries = 0; tries < 64; ++tries) {  // a positive c1, as a survivor has
+        j = lo + int(rng() % uint64_t(F.n - lo));
+        if ((c = corr(I1, P.data(), j)) >= 1) break;
+      }
+      e[q] = survPack(rows[q], uint32_t(j), std::max(1, c));
+    }
+    std::vector<Stage2> part(static_cast<size_t>(nt));
+    const auto t0 = std::chrono::steady_clock::now();
+    std::vector<std::thread> th;
+    for (int t = 0; t < nt; ++t)
+      th.emplace_back([&, t]() {
+        const uint64_t a = ns * uint64_t(t) / uint64_t(nt), b = ns * uint64_t(t + 1) / uint64_t(nt);
+        stage2Range(F, m1, -4096, e.data() + a, size_t(b - a), part[size_t(t)]);
+      });
+    for (auto& t : th) t.join();
+    const double sec = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    uint64_t bad = 0;
+    for (const auto& p : part) bad += p.bad;
+    std::printf("stage2 n=%d k=%d m=%d W=%d m1=%d survivors=%llu threads=%d: %.4f s = %.1f ns per survivor, %.3f ns "
+                "per survivor-word x threads (bad entries %llu)\n",
+                F.n, F.k, F.m, F.W, m1, (unsigned long long)ns, nt, sec, sec / double(ns) * 1e9,
+                sec / double(ns) / F.W * 1e9 * nt, (unsigned long long)bad);
+    return 0;
+  }
   if ((argc == 9 || argc == 10) && std::string(argv[1]) == "--pipe-table") {
     const Instance I = generate(std::atoi(argv[2]), std::atoi(argv[3]), 0.1, std::atoi(argv[4]), 1);
     const Geometry G(I);
@@ -291,6 +413,20 @@ int main(int argc, char** argv) {
   checkInstance(48, 3, 0.1, 256, 9);   // S = 4: the streamed-A path
   checkInstance(37, 4, 0.1, 200, 11);
   checkInstance(24, 6, 0.1, 150, 13);
+  // 6. M5: the two-stage screen's host side
+  checkScreen(24, 3, 0.2, 300, 128, 20, 3);
+  checkScreen(40, 4, 0.1, 400, 192, 40, 5);   // n not a multiple of 16; S1 = 3 (A resident)
+  checkScreen(20, 5, 0.3, 260, 100, 16, 2);   // m1 not a multiple of 64
+  checkScreen(30, 2, 0.4, 700, 640, 50, 4);
+  checkScreen(20, 1, 0.1, 90, 64, 8, 2);      // k = 1
+  checkScreen(48, 3, 0.1, 256, 256, 70, 9);   // m1 = m
+  {
+    // design_model.py screen_at(512, 4, 0.4, 1024, 104): P(kept) 0.9993796315265675, E[survivors] 1806172.x
+    const double pk = screenKept(1024, 104, 0.4), E = screenNull(1024, 104) * double(binom64(512, 4));
+    CHECK(std::fabs(pk - 0.9993796315265675) < 1e-9 && std::fabs(E / 1806172.0 - 1) < 1e-5,
+          "screen probabilities: kept %.12f, E %.1f", pk, E);
+    std::printf("ok screen probabilities = design_model.py (L2, m1 = 1024, tau1 = 104: kept %.6f, E %.0f)\n", pk, E);
+  }
   // A tie: two identical features make two candidates score the same; the smaller colex rank must win.
   {
     Instance I = generate(20, 2, 0.0, 64, 21);

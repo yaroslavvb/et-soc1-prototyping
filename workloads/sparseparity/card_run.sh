@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-# sparseparity on a card: the M1, M2 and M4 steps (README.md, "M1 on a card", "M2 on a card" and "M4 on a card"),
-# one process per step.
+# sparseparity on a card: the M1, M2, M4 and M5 steps (README.md, "M1 on a card", "M2 on a card", "M4 on a card" and
+# "M5 on a card"), one process per step.
 #
-#   bash workloads/sparseparity/card_run.sh <m1|probe|m2|m4|m4gen|list> [--dry] [--build DIR] [--out DIR] [--from STEP]
+#   bash workloads/sparseparity/card_run.sh <m1|probe|m2|m4|m4gen|m5|list> [--dry] [--build DIR] [--out DIR] [--from STEP]
 #
+# m5 (the two-stage screen: stage 1 on the card with variant b's kernel, planner and generation, stage 2 on the host)
+# needs a build of the M5 sources with R4's fixes (default build/sparseparity-t): its host knows --m1 and --tau1,
+# --perturb tau|lostlog, and poisons the survivor logs before each launch.
 # m4 and m4gen need a build of the M4 sources (default build/sparseparity-h): the host's --variant m1 runs M1's kernel
 # and planner on that build, so every A/B pair runs one binary. --build and --out may be absolute, or relative to the
 # tree's root (the directory two levels above this script).
@@ -42,8 +45,8 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-case "$WHAT" in m1|probe|m2|m4|m4gen|list) ;; *) echo "usage: $0 <m1|probe|m2|m4|m4gen|list> [--dry] [--build DIR] [--out DIR] [--from STEP]" >&2; exit 2 ;; esac
-case "$WHAT" in m4|m4gen) BUILD=${BUILD:-build/sparseparity-h} ;; *) BUILD=${BUILD:-build/sparseparity-f} ;; esac
+case "$WHAT" in m1|probe|m2|m4|m4gen|m5|list) ;; *) echo "usage: $0 <m1|probe|m2|m4|m4gen|m5|list> [--dry] [--build DIR] [--out DIR] [--from STEP]" >&2; exit 2 ;; esac
+case "$WHAT" in m4|m4gen) BUILD=${BUILD:-build/sparseparity-h} ;; m5) BUILD=${BUILD:-build/sparseparity-t} ;; *) BUILD=${BUILD:-build/sparseparity-f} ;; esac
 case "$BUILD" in /*) ;; *) BUILD=$PWD/$BUILD ;; esac
 HOST_BIN=$BUILD/host/sparseparity_host
 SELFTEST=$BUILD/host/spp_selftest
@@ -52,6 +55,11 @@ if [ "$WHAT" = m4 ] || [ "$WHAT" = m4gen ]; then   # the usage text only: nothin
   u=$("$HOST_BIN" --no-such-option 2>&1)
   grep -q -- '--variant m4|m1' <<< "$u" && grep -q -- '--trust-model' <<< "$u" || \
     { echo "$HOST_BIN has no --variant or no --trust-model: build these M4 sources" >&2; exit 2; }
+fi
+if [ "$WHAT" = m5 ]; then
+  u=$("$HOST_BIN" --no-such-option 2>&1)
+  grep -q -- '--m1 M1 --tau1 T' <<< "$u" || { echo "$HOST_BIN has no --m1/--tau1: build the M5 sources" >&2; exit 2; }
+  grep -q -- 'lostlog' <<< "$u" || { echo "$HOST_BIN has no --perturb tau|lostlog (nor the logs' poisoning): build R4's sources (build/sparseparity-t)" >&2; exit 2; }
 fi
 H=$(hostname)
 LOCK=/run/lock/etsoc-shire0.lock
@@ -189,8 +197,41 @@ M4GEN=(
   "m4gen-f5-inc|TIMING|61 ms|$GP $F5 --gen inc"
   "m4gen-f5-nostore|TIMING|61 ms|$GP $F5 --gen inc --gen-probe nostore"
 )
+# M5 (README.md, "M5: the two-stage screen"): stage 1 on the first m1 samples with variant b (M4 on a card: the best),
+# whose epilogue logs every candidate with c1 >= tau1; the host reads the logs back in one copy and rescores the
+# survivors on all m samples with 6 threads (stage 2). (m1, tau1) keep the secret with P(loss) < 1e-4 (exact binomial
+# tails, design_model.py screen_at) at the fewest modelled seconds: L1 320/66 (P(loss) 8.8e-5, 3.8e5 survivors), L2
+# and (256,5) 1152/106 (8.9e-5; 2.8e6 and 8.7e6). m1 <= 192 (A resident) cannot reach 1e-4 at eta = 0.4 with fewer
+# survivors than candidates (tau1 = -12 keeps 83% of them), so its step is L1's, as a measurement of the resident
+# regime at P(loss) 1.8e-3. Expect S2 = PASS and stage 2's answer the secret, unique; OVF = the survivor logs overflow
+# (--surv-cap 8): flagged, the run fails, every other check passes; NEGT = --perturb tau, the kernel screens at
+# tau1 + 2 while the host checks tau1: it misses survivors, and the survivor oracle (on every minion, --oracle on) must
+# say MISMATCH while stage 1's checks and stage 2 pass (the proof that the survivor checks catch a missed survivor);
+# LOST = --perturb lostlog, the kernel logs into a spare area and the host reads the log area it poisoned (all-ones)
+# before the launch, as if no log line reached DRAM: the entries, their oracle and stage 2 must fail (the proof that
+# the poisoning works on the card). An S2 step on 1,024 minions checks its survivors in-process on a sample of
+# minions only: its S2 is provisional until the full oracle offline (at the end of the stage) confirms it.
+# "model" is the host's model_solve_s: stage 1's kernel (variant b's fitted model with the screen's assumed cost) +
+# the log's readback + stage 2 (--dry prints it).
+M5=(
+  "m5-1s-small|S2|70 ms|$ONE --n 128 --k 4 --eta 0.4 --m 1850 --seed 1 --m1 1152 --tau1 60 --oracle on $CB"
+  "m5-ovf|OVF|0.16 s|$ONE $L1 --slice 0/16 --slice-cost m1 --m1 320 --tau1 66 --surv-cap 8 $CB"
+  "m5-negmask|NEGM|15 ms|$ONE $C1 --seed 1 --m1 128 --tau1 24 --perturb mask $CB"
+  "m5-negtau|NEGT|70 ms|$ONE --n 128 --k 4 --eta 0.4 --m 1850 --seed 1 --m1 1152 --tau1 60 --oracle on --perturb tau $CB"
+  "m5-lostlog|LOST|70 ms|$ONE --n 128 --k 4 --eta 0.4 --m 1850 --seed 1 --m1 1152 --tau1 60 --oracle on --perturb lostlog $CB"
+  "m5-l1-b|PASS|113 ms|$ALL $L1 $CB"
+  "m5-l1-s320|S2|101 ms|$ALL $L1 --m1 320 --tau1 66 $CB"
+  "m5-l1-res192|S2|127 ms|$ALL $L1 --m1 192 --tau1 40 $CB"
+  "m5-l2-b|PASS|427 ms|$ALL $L2 $CB"
+  "m5-l2-s1152|S2|262 ms|$ALL $L2 --m1 1152 --tau1 106 $CB"
+  "m5-f5-s1152|S2|1.22 s|$ALL $F5 --m1 1152 --tau1 106 $CB"
+)
+# Full-coverage M5 steps that also get the full oracle offline (every minion's survivor list, entry by entry), at
+# the end of the stage (no device).
+VERIFY_FULL5=" m5-l1-s320 m5-l1-res192 m5-l2-s1152 m5-f5-s1152 "
 case "$WHAT" in m1) STEPS=("${M1[@]}") ;; probe) STEPS=("${PROBE[@]}") ;; m2) STEPS=("${M2[@]}") ;; m4) STEPS=("${M4[@]}") ;;
-  m4gen) STEPS=("${M4GEN[@]}") ;; list) STEPS=("${M1[@]}" "${PROBE[@]}" "${M2[@]}" "${M4[@]}" "${M4GEN[@]}") ;; esac
+  m4gen) STEPS=("${M4GEN[@]}") ;; m5) STEPS=("${M5[@]}"); VERIFY_FULL=$VERIFY_FULL5 ;;
+  list) STEPS=("${M1[@]}" "${PROBE[@]}" "${M2[@]}" "${M4[@]}" "${M4GEN[@]}" "${M5[@]}") ;; esac
 if [ "$WHAT" = list ]; then
   for c in "${STEPS[@]}"; do IFS='|' read -r n e t a <<< "$c"; printf '%-22s %-6s %-7s %s\n' "$n" "$e" "$t" "$a"; done
   exit 0
@@ -248,9 +289,13 @@ except Exception:
 st = j.get("status", "NONE")
 if dry:
     ok = st == "DRY" and not j.get("refused_on_silicon")
+    ts = j.get("two_stage") or {}
+    tss = (f" two-stage m1 {ts.get('m1')} tau1 {ts.get('tau1')} P(loss) {ts.get('p_loss', 0):.2g} survivors "
+           f"{ts.get('expected_survivors', 0):.3g} log {ts.get('log_mb', 0):.0f} MB readback {ts.get('readback_est_s', 0):.3f} s "
+           f"stage2 {ts.get('stage2_est_s', 0):.3f} s solve {ts.get('model_solve_s', 0):.3g} s") if ts else ""
     print(("OK " if ok else "BAD ") + f"DRY model {j.get('model_s', 0):.3g} s est {j.get('est_s', 0):.3g} s "
           f"fallback {j.get('model_fallback_s', 0):.3g} s guard {j.get('guard_s', 0):.3g} s "
-          f"stage {j.get('stage')} nbuf {j.get('nbuf')} scp {j.get('scp_layout_kb')} KB coverage {j.get('coverage')}")
+          f"stage {j.get('stage')} nbuf {j.get('nbuf')} scp {j.get('scp_layout_kb')} KB coverage {j.get('coverage')}{tss}")
     sys.exit()
 c, res, k, pl = j.get("checks", {}), j.get("result", {}), j.get("kernel", {}), j.get("plan", {})
 # the launch against the host's model: x1.3 is the margin the guard gives an M4 change (x1.15 M1's kernel)
@@ -258,8 +303,27 @@ ls = j.get("launch_s") or [0]
 ratio = ls[0] / pl["model_s"] if pl.get("model_s") else 0.0
 margin = 1.15 if j.get("m4", {}).get("kernel") == "m1" else 1.3
 speed = f"x{ratio:.2f} of model{' SLOW' if ratio > margin else ''}"
+ts = j.get("two_stage") or {}
 if expect in ("PASS", "TIMING"):
     ok = rc == 0 and st == expect
+elif expect == "S2":  # M5: PASS (survivors, their oracle, stage 2) and stage 2's answer the secret, unique
+    ok = (rc == 0 and st == "PASS" and ts.get("solved") is True and c.get("survivors", "").startswith("ok")
+          and c.get("stage2", "").startswith("ok"))
+elif expect == "NEGT":  # M5: the kernel screened at tau1 + 2: the survivor oracle catches the missed survivors,
+    # everything else holds (the per-minion count check may also fire: COUNT)
+    ok = (st == "FAIL" and c.get("survivors_oracle", "").startswith("MISMATCH") and c.get("records") == "ok"
+          and c.get("launch") == "ok" and c.get("count") == "ok" and c.get("sum_c") == "ok" and c.get("sum_c2") == "ok"
+          and c.get("oracle", "").startswith("exact") and c.get("stage2", "").startswith("ok")
+          and c.get("survivors", "").split(" ")[0].rstrip(",") in ("ok", "COUNT"))
+elif expect == "LOST":  # M5: the log area read back holds only the poison: entries, their oracle and stage 2 fail
+    ok = (st == "FAIL" and c.get("survivors", "").startswith("MISMATCH") and c.get("survivors_oracle", "").startswith("MISMATCH")
+          and c.get("stage2", "").startswith("MISMATCH") and c.get("records") == "ok" and c.get("launch") == "ok"
+          and c.get("count") == "ok" and c.get("sum_c") == "ok" and c.get("sum_c2") == "ok"
+          and c.get("oracle", "").startswith("exact"))
+elif expect == "OVF":  # M5: the logs overflow: flagged and failed, every other check passes
+    ok = (st == "FAIL" and c.get("survivors", "").startswith("OVERFLOW") and c.get("records") == "ok"
+          and c.get("launch") == "ok" and c.get("count") == "ok" and "MISMATCH" not in c.get("oracle", "")
+          and "MISMATCH" not in c.get("survivors_oracle", ""))
 elif expect == "TIE":
     ok = rc == 0 and st == "PASS" and res.get("unique") is False
 elif expect == "NEGM":
@@ -270,13 +334,23 @@ else:  # NEG
           and c.get("records") == "ok" and c.get("launch") == "ok")
 if ok and expect == "PASS" and 0 < ratio <= 1.3:
     open(fast, "w").write(f"{ratio:.4f}\n")   # a gate for a step that trusts the model
+s2note = ""
+if ok and expect == "S2":  # the survivor oracle on every minion in-process, or only on a sample (provisional)
+    s2note = (" [S2 confirmed in-process: the survivor oracle covered every minion]" if "all " in c.get("oracle", "")
+              else " [S2 PROVISIONAL: the survivor oracle sampled minions; the full oracle offline decides]")
 print(("OK " if ok else "BAD ") + f"{st} launch_s {j.get('launch_s')} {speed} open_s {j.get('open_s', 0):.2f} "
       f"cyc/op {k.get('cycles_per_op_busiest', 0):.1f} MHz {k.get('clock_mhz_est', 0):.0f} "
       f"cyc max/med {k.get('cycles_max', 0)}/{k.get('cycles_median', 0):.0f} wait {k.get('wait_cycles_max')} "
       f"solved {res.get('solved')} unique {res.get('unique')} sum_c {c.get('sum_c')} sum_c2 {c.get('sum_c2')} "
       f"oracle '{c.get('oracle')}' coverage {j.get('plan', {}).get('coverage')} "
       f"stage {j.get('plan', {}).get('stage')}/{j.get('plan', {}).get('nbuf')} scp_kb_device "
-      f"{j.get('plan', {}).get('scp_kb_device')} problems {j.get('problems')}")
+      f"{j.get('plan', {}).get('scp_kb_device')} problems {j.get('problems')}"
+      + (f" | two-stage found {ts.get('found')} (x{ts.get('found_over_expected', 0):.3f} of expected) overflow "
+         f"{ts.get('overflow_minions')} readback {ts.get('readback_s', 0):.4f} s stage2 {ts.get('stage2_s', 0):.4f} s "
+         f"solve {ts.get('solve_s', 0):.4f} s (model {ts.get('model_solve_s', 0):.4f}) answer {ts.get('answer')} "
+         f"solved {ts.get('solved')} secret survived {ts.get('secret_survived')} survivors '{c.get('survivors')}' "
+         f"oracle '{c.get('survivors_oracle')}' stage2 '{c.get('stage2')}' poison {ts.get('poison_s', 0):.4f} s" if ts else "")
+      + s2note)
 EOF
 )
   say "$name [$expect, model $model] $verdict"
@@ -293,7 +367,7 @@ EOF
     say "  $name offline verify: $v"
     [ "${v%% *}" = PASS ] || { say "STOP at $name: the offline oracle disagrees (resume: --from $name)"; exit 1; }
   fi
-  [ -z "$DRY" ] && [ "$expect" = PASS ] && [[ "$VERIFY_FULL" == *" $name "* ]] && DEFER+=("$name|$args")
+  [ -z "$DRY" ] && { [ "$expect" = PASS ] || [ "$expect" = S2 ]; } && [[ "$VERIFY_FULL" == *" $name "* ]] && DEFER+=("$name|$args")
 done
 # The full oracle offline on the full-coverage M4 steps (no device; about 1 s per 1.4e9 units of oracle work, one
 # thread: L1 ~40 s, L2 ~85 s, (256,5) ~5 min).
@@ -302,10 +376,20 @@ for d in "${DEFER[@]}"; do
   IFS='|' read -r name args <<< "$d"
   # shellcheck disable=SC2086
   nice -n 10 "$HOST_BIN" $args --verify-records "$OUT/$name.rec" > "$OUT/$name.verify.json" 2> /dev/null
-  v=$(python3 -c 'import json,sys; j=json.loads(open(sys.argv[1]).read().splitlines()[-1]); print(j["status"], j["checks"]["oracle"])' "$OUT/$name.verify.json" 2> /dev/null)
+  v=$(python3 -c 'import json,sys; j=json.loads(open(sys.argv[1]).read().splitlines()[-1]); c=j["checks"]; print(j["status"], c["oracle"], ("survivors: " + c["survivors_oracle"]) if c.get("survivors_oracle", "n/a") != "n/a" else "")' "$OUT/$name.verify.json" 2> /dev/null)
   say "  $name offline verify (full oracle): $v"
   [ "${v%% *}" = PASS ] || vbad=1
 done
+# M5's survivor logs (<step>.rec.surv: 64 KB of headers, then the stored entries: 20-70 MB per step), once the offline
+# oracle has read them: each kept gzipped (gunzip -k before another --verify-records), with its sha256 and its headers
+# alone (<step>.rec.surv.hdr.gz, a few KB), which are what goes into the repository, never the log itself.
+for f in "$OUT"/*.rec.surv; do
+  [ -f "$f" ] || continue
+  (cd "$OUT" && sha256sum "$(basename "$f")") > "$f.sha256"
+  head -c 65536 "$f" | gzip -9 > "$f.hdr.gz"
+  nice -n 19 gzip -f -1 "$f"
+done
 [ $vbad = 0 ] || { say "STOP: an offline oracle disagrees with a full-coverage step (see its .verify.json)"; exit 1; }
+[ ${#DEFER[@]} -gt 0 ] && [ "$WHAT" = m5 ] && say "S2 confirmed by the full oracle offline: $(for d in "${DEFER[@]}"; do printf '%s ' "${d%%|*}"; done)"
 if [ ${#SKIPPED[@]} -gt 0 ]; then say "DONE $WHAT: every step run as expected; skipped (gates): ${SKIPPED[*]}"; exit 0; fi
 say "DONE $WHAT: every step as expected"

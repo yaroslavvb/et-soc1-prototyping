@@ -1,0 +1,108 @@
+PASS gen C = Python (instance, +-1, B tiles) (32, 3, 0.1, 128, 1)
+PASS gen C = Python (instance, +-1, B tiles) (128, 4, 0.2, 192, 1)
+PASS gen C = Python (instance, +-1, B tiles) (512, 4, 0.3, 448, 1)
+PASS gen C = Python (instance, +-1, B tiles) (512, 4, 0.4, 1850, 1)
+PASS gen C = Python (instance, +-1, B tiles) (256, 5, 0.4, 1925, 1)
+PASS gen C = Python (instance, +-1, B tiles) (512, 5, 0.4, 2151, 1)
+PASS gen C = Python (instance, +-1, B tiles) (64, 4, 0.1, 64, 7)
+PASS gen C = Python (instance, +-1, B tiles) (33, 3, 0.3, 70, 7)
+PASS generator is prefix-consistent (two-stage stage 1 = the first m1 samples)
+PASS closed forms: Python = C = brute force (C) = brute force (Python) (12, 3, 0.2, 20, 1)
+PASS closed forms: Python = C = brute force (C) = brute force (Python) (16, 4, 0.1, 37, 2)
+PASS closed forms: Python = C = brute force (C) = brute force (Python) (10, 5, 0.3, 9, 3)
+PASS closed forms: Python = C = brute force (C) = brute force (Python) (32, 3, 0.1, 128, 1)
+PASS closed forms: Python = C = brute force (C) = brute force (Python) (24, 6, 0.2, 40, 4)
+PASS closed forms: Python = C = brute force (C) = brute force (Python) (40, 2, 0.4, 300, 5)
+PASS closed forms: Python = C = brute force (C) = brute force (Python) (48, 4, 0.25, 99, 6)
+PASS closed forms Python = C (512, 4, 0.4, 1850, 1)
+PASS closed forms Python = C (256, 5, 0.4, 1925, 1)
+PASS closed forms Python = C (512, 5, 0.4, 2151, 1)
+PASS spref selftest (13 sizes: closed = brute = bits = int8 = merged plan; negative controls)
+PASS C0: all 4,960 correlations of the int8 path = Python brute force
+PASS C1 seeds 1-2: int8 path = bits path (answer, top-8, checksums, ops) and = closed forms
+PASS plan 0 (32, 3, 0.1, 128, 1): every block within one row tile of its equal share of modelled cycles (error 0.000 tiles)
+PASS plan 0 (32, 3, 0.1, 128, 1) slice p0.bin: spref's per-range ops and candidates = the planner's
+PASS plan 0 (32, 3, 0.1, 128, 1) 1x1 minions, 1 blocks, 1 slices: merge ok, coverage complete, closed forms match, = full scan
+PASS plan 1 (32, 3, 0.1, 128, 1): every block within one row tile of its equal share of modelled cycles (error 0.838 tiles)
+PASS plan 1 (32, 3, 0.1, 128, 1) slice p1.bin: spref's per-range ops and candidates = the planner's
+PASS plan 1 (32, 3, 0.1, 128, 1) 1x32 minions, 1 blocks, 1 slices: merge ok, coverage complete, closed forms match, = full scan
+PASS plan 2 (128, 4, 0.2, 192, 1): every block within one row tile of its equal share of modelled cycles (error 0.639 tiles)
+PASS plan 2 (128, 4, 0.2, 192, 1) slice p2.bin: spref's per-range ops and candidates = the planner's
+PASS plan 2 (128, 4, 0.2, 192, 1) 1x32 minions, 1 blocks, 1 slices: merge ok, coverage complete, closed forms match, = full scan
+PASS plan 3 (128, 4, 0.2, 192, 2): every block within one row tile of its equal share of modelled cycles (error 0.712 tiles)
+PASS plan 3 (128, 4, 0.2, 192, 2) slice p3.bin: spref's per-range ops and candidates = the planner's
+PASS plan 3 (128, 4, 0.2, 192, 2) 32x32 minions, 1 blocks, 1 slices: merge ok, coverage complete, closed forms match, = full scan
+PASS negative control 3: a hart that flags a tie makes the answer not unique (the only evidence with --topm 0)
+PASS negative control 3: a record's sum_c off by 2 fails the closed-form check
+PASS negative control 3: a record's best_j off by 2 fails the host's rescoring
+PASS negative control 3: a duplicated range is caught (overlap and checksums)
+PASS negative control 3: a dropped range leaves a coverage gap and fails
+PASS plan 4 (128, 4, 0.2, 192, 3): every block within one row tile of its equal share of modelled cycles (error 0.737 tiles)
+PASS plan 4 (128, 4, 0.2, 192, 3) slice p4.0.bin: spref's per-range ops and candidates = the planner's
+PASS plan 4 (128, 4, 0.2, 192, 3) slice p4.1.bin: spref's per-range ops and candidates = the planner's
+PASS plan 4 (128, 4, 0.2, 192, 3) slice p4.2.bin: spref's per-range ops and candidates = the planner's
+PASS plan 4 (128, 4, 0.2, 192, 3) 4x32 minions, 2 blocks, 3 slices: merge ok, coverage complete, closed forms match, = full scan
+PASS plan 5 (64, 5, 0.3, 300, 4): every block within one row tile of its equal share of modelled cycles (error 0.802 tiles)
+PASS plan 5 (64, 5, 0.3, 300, 4) slice p5.0.bin: spref's per-range ops and candidates = the planner's
+PASS plan 5 (64, 5, 0.3, 300, 4) slice p5.1.bin: spref's per-range ops and candidates = the planner's
+PASS plan 5 (64, 5, 0.3, 300, 4) 3x7 minions, 2 blocks, 2 slices: merge ok, coverage complete, closed forms match, = full scan
+PASS plan 6 (80, 4, 0.4, 700, 5): every block within one row tile of its equal share of modelled cycles (error 0.973 tiles)
+PASS plan 6 (80, 4, 0.4, 700, 5) slice p6.0.bin: spref's per-range ops and candidates = the planner's
+PASS plan 6 (80, 4, 0.4, 700, 5) slice p6.1.bin: spref's per-range ops and candidates = the planner's
+PASS plan 6 (80, 4, 0.4, 700, 5) slice p6.2.bin: spref's per-range ops and candidates = the planner's
+PASS plan 6 (80, 4, 0.4, 700, 5) slice p6.3.bin: spref's per-range ops and candidates = the planner's
+PASS plan 6 (80, 4, 0.4, 700, 5) 32x32 minions, 1 blocks, 4 slices: merge ok, coverage complete, closed forms match, = full scan
+PASS negative control 6: a record's sum_c off by 2 fails the closed-form check
+PASS negative control 6: a record's best_j off by 2 fails the host's rescoring
+PASS negative control 6: a duplicated range is caught (overlap and checksums)
+PASS negative control 6: a dropped range leaves a coverage gap and fails
+PASS plan 7 (200, 3, 0.3, 500, 6): every block within one row tile of its equal share of modelled cycles (error 0.630 tiles)
+PASS plan 7 (200, 3, 0.3, 500, 6) slice p7.bin: spref's per-range ops and candidates = the planner's
+PASS plan 7 (200, 3, 0.3, 500, 6) 2x16 minions, 3 blocks, 1 slices: merge ok, coverage complete, closed forms match, = full scan
+PASS plan 8 (128, 4, 0.3, 400, 7): every block within one row tile of its equal share of modelled cycles (error 0.813 tiles)
+PASS plan 8 (128, 4, 0.3, 400, 7) slice p8.0.bin: spref's per-range ops and candidates = the planner's
+PASS plan 8 (128, 4, 0.3, 400, 7) slice p8.1.bin: spref's per-range ops and candidates = the planner's
+PASS plan 8 (128, 4, 0.3, 400, 7) 8x32 minions, 1 blocks, 2 slices two-stage: merge ok, coverage complete, closed forms match, = full scan
+PASS plan (n=512, k=4, m=448, cost m1) on 32 x 32 minions in 1 launch(es): tiles covered once, all C(n,k) candidates, cut error 0.787 tiles, minion imbalance 1.0017
+PASS plan (n=512, k=4, m=1850, cost m1) on 32 x 32 minions in 1 launch(es): tiles covered once, all C(n,k) candidates, cut error 0.787 tiles, minion imbalance 1.0017
+PASS plan (n=256, k=5, m=1925, cost m1) on 32 x 32 minions in 1 launch(es): tiles covered once, all C(n,k) candidates, cut error 0.602 tiles, minion imbalance 1.0002
+PASS plan (n=512, k=5, m=1280, cost m1) on 32 x 32 minions in 4 launch(es): tiles covered once, all C(n,k) candidates, cut error 0.784 tiles, minion imbalance 1.0001
+PASS plan (n=512, k=5, m=2151, cost m1) on 32 x 32 minions in 6 launch(es): tiles covered once, all C(n,k) candidates, cut error 0.805 tiles, minion imbalance 1.0001
+PASS plan (n=512, k=4, m=448, cost fit) on 32 x 32 minions in 1 launch(es): tiles covered once, all C(n,k) candidates, cut error 0.702 tiles, minion imbalance 1.0010
+PASS plan (n=512, k=4, m=1850, cost fit) on 32 x 32 minions in 1 launch(es): tiles covered once, all C(n,k) candidates, cut error 0.859 tiles, minion imbalance 1.0016
+PASS plan (n=256, k=5, m=1925, cost fit) on 32 x 32 minions in 1 launch(es): tiles covered once, all C(n,k) candidates, cut error 0.719 tiles, minion imbalance 1.0001
+PASS plan (n=512, k=5, m=1280, cost fit) on 32 x 32 minions in 4 launch(es): tiles covered once, all C(n,k) candidates, cut error 0.868 tiles, minion imbalance 1.0001
+PASS plan (n=512, k=5, m=2151, cost fit) on 32 x 32 minions in 6 launch(es): tiles covered once, all C(n,k) candidates, cut error 0.860 tiles, minion imbalance 1.0001
+PASS vexh = reference (answer, ties, both checksums = closed forms) (32, 3, 0.1, 128, 1)
+PASS mitm (split=0) finds the reference's answer (32, 3, 0.1, 128, 1)
+PASS vexh = reference (answer, ties, both checksums = closed forms) (128, 4, 0.2, 192, 1)
+PASS mitm (split=0) finds the reference's answer (128, 4, 0.2, 192, 1)
+PASS mitm (split=1) finds the reference's answer (128, 4, 0.2, 192, 1)
+PASS vexh = reference (answer, ties, both checksums = closed forms) (128, 4, 0.2, 192, 5)
+PASS mitm (split=0) finds the reference's answer (128, 4, 0.2, 192, 5)
+PASS mitm (split=1) finds the reference's answer (128, 4, 0.2, 192, 5)
+PASS vexh = reference (answer, ties, both checksums = closed forms) (64, 5, 0.2, 300, 2)
+PASS mitm (split=0) finds the reference's answer (64, 5, 0.2, 300, 2)
+PASS mitm (split=1) finds the reference's answer (64, 5, 0.2, 300, 2)
+PASS vexh = reference (answer, ties, both checksums = closed forms) (160, 4, 0.4, 1850, 3)
+PASS mitm (split=0) finds the reference's answer (160, 4, 0.4, 1850, 3)
+PASS mitm (split=1) finds the reference's answer (160, 4, 0.4, 1850, 3)
+PASS vexh = reference (answer, ties, both checksums = closed forms) (96, 5, 0.4, 1925, 4)
+PASS mitm (split=0) finds the reference's answer (96, 5, 0.4, 1925, 4)
+PASS mitm (split=1) finds the reference's answer (96, 5, 0.4, 1925, 4)
+PASS vexh = reference (answer, ties, both checksums = closed forms) (80, 5, 0.4, 2151, 5)
+PASS mitm (split=0) finds the reference's answer (80, 5, 0.4, 2151, 5)
+PASS mitm (split=1) finds the reference's answer (80, 5, 0.4, 2151, 5)
+PASS vexh = reference (answer, ties, both checksums = closed forms) (512, 3, 0.3, 448, 6)
+PASS mitm (split=0) finds the reference's answer (512, 3, 0.3, 448, 6)
+PASS vexh = reference (answer, ties, both checksums = closed forms) (120, 4, 0.3, 832, 7)
+PASS mitm (split=0) finds the reference's answer (120, 4, 0.3, 832, 7)
+PASS mitm (split=1) finds the reference's answer (120, 4, 0.3, 832, 7)
+PASS two-stage: survivors, secret kept, stage-2 answer: reference = vexh (128, 4, 0.3, 448, 1, 192, 40)
+PASS two-stage: survivors, secret kept, stage-2 answer: reference = vexh (64, 5, 0.4, 1000, 2, 400, 60)
+PASS two-stage: survivors, secret kept, stage-2 answer: reference = vexh (160, 4, 0.4, 1850, 3, 832, 80)
+PASS batch lanes=1 (B1 shape, eta 0.1, 24 instances) solves exactly what the reference solves
+PASS batch lanes=0 (B1 shape, eta 0.1, 24 instances) solves exactly what the reference solves
+PASS batch lanes=1 (B1 shape, eta 0.3, 21 instances) solves exactly what the reference solves
+PASS batch lanes=0 (B1 shape, eta 0.3, 21 instances) solves exactly what the reference solves
+ALL PASS

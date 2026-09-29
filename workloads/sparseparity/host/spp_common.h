@@ -732,8 +732,19 @@ struct Acc {
 // Visits the output tiles of a slot's blocks in the kernel's order: f(tile t, J, J0, rows' subsets, validity).
 // Scores every valid candidate into acc; if `tiles` is given, appends each output tile's raw 16 x 16 GEMM values
 // (tensor dump) or its scalar-dump image (valid entries c, others INT32_MIN).
+// surv (M5, with tau1 >= 1): every valid candidate with c >= tau1 as a survivor entry (cpu/sp.h's packing), in the
+// order the kernel logs them (row tile, column tile, row, column).
+inline uint64_t survPack(uint64_t row, uint32_t j, int32_t c1) {
+  return (row & 0xFFFFFFFFFFull) | (uint64_t(j & 0xFFF) << 40) | (uint64_t(uint32_t(c1) & 0xFFF) << 52);
+}
+inline uint64_t survRow(uint64_t e) { return e & 0xFFFFFFFFFFull; }
+inline uint32_t survJ(uint64_t e) { return uint32_t((e >> 40) & 0xFFF); }
+inline int32_t survC1(uint64_t e) { return int32_t(e >> 52); }
+inline uint64_t survKey(uint64_t e) { return (uint64_t(survJ(e)) << 40) | survRow(e); }  // colex order (spref's log=)
+
 inline void scoreBlocks(const Instance& I, const Geometry& G, const std::vector<Block>& blocks, Acc& acc,
-                        std::vector<int32_t>* tiles = nullptr, bool scalarImage = false) {
+                        std::vector<int32_t>* tiles = nullptr, bool scalarImage = false,
+                        std::vector<uint64_t>* surv = nullptr, int32_t tau1 = 0) {
   const int k1 = I.k - 1;
   std::vector<uint64_t> P(size_t(16) * I.W);
   for (const Block& b : blocks) {
@@ -761,6 +772,7 @@ inline void scoreBlocks(const Instance& I, const Geometry& G, const std::vector<
             if (valid[i]) raw = corr(I, &P[size_t(i) * I.W], j);
             const bool ok = valid[i] && j > pmax[i] && j < I.n;
             if (ok) acc.add(raw, rank0 + i + binom64(j, I.k));
+            if (ok && surv && tau1 >= 1 && raw >= tau1) surv->push_back(survPack(rank0 + i, uint32_t(j), raw));
             img[i * 16 + jj] = scalarImage ? (ok ? raw : INT32_MIN) : raw;
           }
         }
@@ -845,6 +857,144 @@ inline double estCycles(const Geometry& G, const std::vector<Block>& blocks) {
     }
   }
   return c;
+}
+
+// ---------------------------------------------------------------- the two-stage screen (M5; DESIGN.md 2.7)
+
+// The instance on the first m1 samples of F: the generator is prefix-consistent (X's and y's bit i depend on i
+// alone), so this equals generate(n, k, eta, m1, seed) for a generated F (spp_selftest checks it).
+inline Instance prefixInstance(const Instance& F, int m1) {
+  if (m1 < 1 || m1 > F.m) throw std::runtime_error("prefixInstance: need 1 <= m1 <= m");
+  Instance I;
+  I.n = F.n;
+  I.k = F.k;
+  I.m = m1;
+  I.eta = F.eta;
+  I.seed = F.seed;
+  I.W = (m1 + 63) / 64;
+  I.secret = F.secret;
+  const uint64_t last = (m1 % 64) ? ((1ULL << (m1 % 64)) - 1) : ~0ULL;
+  I.X.assign(size_t(I.n) * I.W, 0);
+  I.y.assign(I.W, 0);
+  for (int f = 0; f < I.n; ++f)
+    for (int w = 0; w < I.W; ++w) {
+      const uint64_t v = F.X[size_t(f) * F.W + w];
+      I.X[size_t(f) * I.W + w] = w == I.W - 1 ? (v & last) : v;
+    }
+  for (int w = 0; w < I.W; ++w) I.y[w] = w == I.W - 1 ? (F.y[w] & last) : F.y[w];
+  return I;
+}
+
+// P(Bin(m, p) <= d), in log space (design_model.py binom_cdf).
+inline double binomCdf(int64_t d, int64_t m, double p) {
+  if (d < 0) return 0.0;
+  if (d >= m) return 1.0;
+  const double lp = std::log(p), lq = std::log1p(-p);
+  double s = 0;
+  for (int64_t i = 0; i <= d; ++i)
+    s += std::exp(std::lgamma(double(m + 1)) - std::lgamma(double(i + 1)) - std::lgamma(double(m - i + 1)) + i * lp +
+                  (m - i) * lq);
+  return std::min(1.0, s);
+}
+
+// Keeping c1 >= tau1 on m1 samples: a null candidate survives with P(Bin(m1, 1/2) <= (m1 - tau1) / 2), the secret
+// (disagreements ~ Bin(m1, eta)) with P(Bin(m1, eta) <= (m1 - tau1) / 2) (design_model.py screen_at).
+inline double screenNull(int m1, int tau1) { return binomCdf((int64_t(m1) - tau1) / 2, m1, 0.5); }
+inline double screenKept(int m1, int tau1, double eta) { return binomCdf((int64_t(m1) - tau1) / 2, m1, eta); }
+
+// Stage 2: survivors rescored on all of F's samples. Each entry is also checked: a valid candidate (row < C(n-1,
+// k-1), max(R) < j < n), c1 >= tau1, and its logged c1 equal to its correlation on the first m1 samples (so every
+// logged value is verified, not only the sampled minions'). acc takes (c on all m, colex rank).
+struct Stage2 {
+  Acc acc;
+  uint64_t entries = 0, bad = 0, firstBad = 0;
+  bool haveBad = false, secretIn = false;
+  void merge(const Stage2& o) {
+    acc.merge(o.acc);
+    entries += o.entries;
+    if (o.haveBad && !haveBad) firstBad = o.firstBad, haveBad = true;
+    bad += o.bad;
+    secretIn = secretIn || o.secretIn;
+  }
+};
+
+// Moves R (the (k-1)-subset of colex rank cur) to rank row >= cur: r0 (the smallest element, which varies fastest)
+// jumps straight to its value while it stays below r1, and one colexNext carries past the end of each run.
+inline void colexAdvance(std::vector<int>& R, uint64_t cur, uint64_t row) {
+  uint64_t d = row - cur;
+  const size_t k1 = R.size();
+  while (d && k1) {
+    const int64_t lim = k1 > 1 ? R[1] : int64_t(1) << 40;  // r0 < r1
+    const uint64_t room = uint64_t(lim - 1 - R[0]);
+    if (d <= room) {
+      R[0] += int(d);
+      return;
+    }
+    d -= room + 1;
+    R[0] = int(lim - 1);
+    colexNext(R);
+  }
+}
+
+// Survivors e[0..n), in any order (fastest in the kernel's: rows ascending within a minion). The row prefix
+// y ^ x_r1 ^ .. ^ x_r(k-2) is cached while consecutive entries share it; each entry then costs one pass over W words
+// (the prefix, x_r0, x_j) with W + 1 popcounts.
+inline void stage2Range(const Instance& F, int m1, int tau1, const uint64_t* e, size_t n, Stage2& out) {
+  const int k1 = F.k - 1, W = F.W, W1 = (m1 + 63) / 64;
+  const uint64_t last1 = (m1 % 64) ? ((1ULL << (m1 % 64)) - 1) : ~0ULL;
+  const uint64_t nrows = binom64(F.n - 1, k1);
+  const uint64_t secretRank = F.secret.size() == size_t(F.k) ? rankOf(F.secret) : ~0ull;
+  std::vector<uint64_t> binK(static_cast<size_t>(F.n)), Q(static_cast<size_t>(W)), zero(static_cast<size_t>(W), 0);
+  for (int j = 0; j < F.n; ++j) binK[size_t(j)] = binom64(j, F.k);
+  std::vector<int> R, qKey;
+  bool qValid = false;
+  uint64_t curRow = ~0ull;
+  for (size_t q = 0; q < n; ++q) {
+    const uint64_t v = e[q], row = survRow(v);
+    const uint32_t j = survJ(v);
+    const int32_t c1 = survC1(v);
+    ++out.entries;
+    auto fail = [&]() {
+      if (!out.haveBad) out.firstBad = v, out.haveBad = true;
+      ++out.bad;
+    };
+    if (row >= nrows || int(j) >= F.n || c1 < tau1) {
+      fail();
+      continue;
+    }
+    if (curRow == ~0ull || row < curRow || row - curRow > (1ull << 20)) R = unrank(row, k1);
+    else colexAdvance(R, curRow, row);
+    curRow = row;
+    if (k1 && int(j) <= R[size_t(k1 - 1)]) {
+      fail();
+      continue;
+    }
+    if (!qValid || !std::equal(R.begin() + (k1 ? 1 : 0), R.end(), qKey.begin(), qKey.end())) {
+      qKey.assign(R.begin() + (k1 ? 1 : 0), R.end());
+      for (int w = 0; w < W; ++w) {
+        uint64_t x = F.y[size_t(w)];
+        for (int r : qKey) x ^= F.X[size_t(r) * W + w];
+        Q[size_t(w)] = x;
+      }
+      qValid = true;
+    }
+    const uint64_t* x0 = k1 ? &F.X[size_t(R[0]) * W] : zero.data();
+    const uint64_t* xj = &F.X[size_t(j) * W];
+    const uint64_t* qp = Q.data();
+    int d1 = 0, d = 0;
+    for (int w = 0; w < W1 - 1; ++w) d1 += popc(qp[w] ^ x0[w] ^ xj[w]);
+    const uint64_t z = qp[W1 - 1] ^ x0[W1 - 1] ^ xj[W1 - 1];
+    d1 += popc(z & last1);
+    d = d1 + popc(z & ~last1);
+    for (int w = W1; w < W; ++w) d += popc(qp[w] ^ x0[w] ^ xj[w]);
+    if (m1 - 2 * d1 != c1) {
+      fail();
+      continue;
+    }
+    const uint64_t rank = row + binK[j];
+    out.acc.add(F.m - 2 * d, rank);
+    if (rank == secretRank) out.secretIn = true;
+  }
 }
 
 // ---------------------------------------------------------------- the closed forms (DESIGN.md 4.1)

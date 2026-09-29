@@ -1,0 +1,28 @@
+11:14:33 sparseparity energy l2 on aifoundry3 (DRY: test doubles (card base), no device), out /home/yaroslavvb/nekko/build/sparseparity-t-energy-dry/l2-base
+11:14:33 kernel /home/yaroslavvb/nekko/build/sparseparity-t-src/../sparseparity-t/kernel/sparseparity.elf: .text sha256 3e14be325df307751f424372d0a1dccad244b3ffe0e46e43d82baefb300cb820
+11:14:33 plan: 14 launches of ~0.429 s (budget allows 14, target 14): burst ~6.09 s from ~0.43 s of the process; the host starts no launch after 6.50 s (model 0.4274 s, guard 0.6545 s, timeout 3 s)
+11:14:33 sampler 1907277 at 10 Hz; idle 8 s
+11:14:48 host rc 0 in 6685 ms: PASS reps 14 of 14 launch_s mean 0.429 solved True
+L2: 14 solves in 6.059 s (2.311/s; kernel 0.4290 s each, 2.331/s)
+  J per solve over idle (the SP's board average, the law on the die temperature): 6.736 (uncorrected 7.204, ramp baseline 6.852; the leakage's rise 0.186); board total per solve, idle included, 17.356 J
+  catalogue method (cross-check): 6.897 J (uncorrected 6.959, integral 6.924; 0 of 19 busy readings at idle, 0.2 expected, one pass = 0.341 J per solve); board 40.47 W in the burst, idle 24.39 W: +16.08 W, +15.94 W leakage-corrected (+0.14 W at 0.334 W/C)
+  die 55.0 C before, 56.4 C busy (max 57), 56.0 C brackets
+  rails, J per solve: minion 3.765, SRAM 0.828, NoC 0.546 (ramp baseline: upper bounds), unmetered 1.598 (the headline minus the rails)
+  host: 6.059 CPU s over the burst (1.00 cores busy on average; host_cpu_s.burst (getrusage over launch_epoch_ms)); its package, assumed, 8.66-25.32 J per solve
+  CPU 6T best at P(loss) <= 0.0001 (vexh two-stage, m1 1152, tau1 106, P(loss) 8.9e-05, 0.508 s): 63.5-127.5 J at an assumed 125-251 W; x3.7-7.3 the card's board alone (the host not counted); x1.5-4.9 the card's board + the host's package (8.66-25.32 J assumed)
+  RAPL on the host: root-only (400 root)
+  OK | DRY: test doubles, not a measurement
+  truth reps: reduced 14 vs injected 14 (+0.00%, allowed -0.0000/+0.0000) ok
+  truth board J/solve (headline: SP average, law on T): reduced 6.7356 vs injected 6.8571 (-1.77%, allowed -0.2057/+0.2057) ok
+  truth board total J/solve (idle included): reduced 17.3565 vs injected 17.4413 (-0.49%, allowed -0.3488/+0.3488) ok
+  truth board J/solve (catalogue method): reduced 6.897 vs injected 6.8571 (+0.58%, allowed -0.6037/+0.6037) ok
+  truth board J/solve (catalogue integral): reduced 6.9237 vs injected 6.8571 (+0.97%, allowed -0.9452/+0.9452) ok
+  truth minion_w J/solve (ramp baseline): reduced 3.7645 vs injected 3.7714 (-0.18%, allowed -0.0754/+0.2640) ok
+  truth sram_w J/solve (ramp baseline): reduced 0.8277 vs injected 0.8229 (+0.59%, allowed -0.0165/+0.0576) ok
+  truth noc_w J/solve (ramp baseline): reduced 0.5458 vs injected 0.5486 (-0.50%, allowed -0.0110/+0.0384) ok
+  truth unmetered J/solve: reduced 1.5976 vs injected 1.7143 (-6.81%, allowed -0.2571/+0.2571) ok
+  (not checked: the ramp baseline 6.8519 J, -0.08% of the injected)
+  truth burst start (s): reduced 1790705681.894 vs injected 1790705681.8941 (-0.00%, allowed -0.0100/+0.0100) ok
+  truth burst end (s): reduced 1790705687.953 vs injected 1790705687.9538 (-0.00%, allowed -0.0100/+0.0100) ok
+  TRUTH PASS (a test of the reducer against the test double's card, not a measurement)
+11:14:58 DONE l2: ok; /home/yaroslavvb/nekko/build/sparseparity-t-energy-dry/l2-base/energy.json

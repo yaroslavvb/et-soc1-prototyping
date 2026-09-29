@@ -1,0 +1,10 @@
+# the sys_emu run (build sparseparity-s-wipb = these sources before the stage-2 model refit; 09:19 PDT):
+#   sparseparity_host --sysemu --sim-args -vpurf_warn --mode tensor --variant m1 --cost fit --gen inc --n 64 --k 3 --eta 0.2 --m 640 --seed 2 --m1 320 --tau1 20 --per-shire 4 --records-out rec.bin
+# then, with the final build/sparseparity-s host: --verify-records on it, on a copy with one entry c1 bit flipped (rec2), and on a copy with slot 0 found count lowered by 1 (rec3)
+## rec.bin rc=0
+sys_emu run: PASS | oracle exact, all 4 minions | survivors ok, 5958 found | survivors_oracle exact, 4 minions | stage2 ok, 5958 entries rescored, every c1 exact | found 5958 answer [31, 39, 52] solved True
+verify: PASS | oracle exact, all 4 minions | survivors ok, 5958 found | survivors_oracle exact, 4 minions | stage2 ok, 5958 entries rescored, every c1 exact | problems []
+## rec2.bin rc=1
+verify: FAIL | oracle exact, all 4 minions | survivors MISMATCH 1 minions' entries | survivors_oracle MISMATCH 1 of 4 minions | stage2 MISMATCH: 1 bad entries (first 0x1f00c0000000001) | problems ['minion slot 0: its stored survivor entries disagree with its header or its blocks', 'stage 2: MISMATCH: 1 bad entries (first 0x1f00c0000000001)', 'minion slot 0 survivors: card found 1724 sum 0xff0eb500000c9eac, CPU 1724 sum 0xff0eb500000c9eac']
+## rec3.bin rc=1
+verify: FAIL | oracle exact, all 4 minions | survivors BAD 1 headers | survivors_oracle MISMATCH 1 of 4 minions | stage2 n/a | problems ['minion slot 0 survivor header: epoch 0xc4539fe9 (0xc4539fe9) cap 3336 (3336) found 1723 stored 1724 flags 0', 'minion slot 0 survivors: card found 1723 sum 0xff0eb500000c9eac, CPU 1724 sum 0xff0eb500000c9eac']

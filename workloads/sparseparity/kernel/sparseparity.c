@@ -22,6 +22,11 @@
  *              scanned in scalar code for the exact position (rare: a few dozen times per hart). The hart's
  *              record flags a tie: another of its candidates with c equal to its best c.
  *
+ *              M5, the two-stage screen's stage 1 (SPP_F_SCREEN, with M1's epilogue): the launch scans the first m1
+ *              samples and each output tile's epilogue logs its candidates with c1 >= tau1 (fltm.pi against tau1 - 1
+ *              into mask registers, read with mova.x.m; the values from the reduction's own spill) into the
+ *              minion's survivor log, counting every one in its SppSurvHdr (a full log is flagged, never silent).
+ *
  * No early exit: every launch scans its whole work list. Every hart writes one 64 B record; nothing a minion
  * writes during the scan is read by another minion. Only hart 0 reads hpmcounter3 (erratum 1.23).
  * sys_emu cannot check errata 1.29 type F (its VPURF checker ignores tensor writes to f registers): the TOUCH_ALL
@@ -684,11 +689,17 @@ struct TileInfo {
 struct T0 {
     const struct SppArgs* a;
     uint64_t S, n, xb_scp;
-    bool resident, dump, noepi, perturb;
+    bool resident, dump, noepi, perturb, screen;
     struct Acc acc;
     uint64_t ops, best_scans;
+    // SPP_F_SCREEN (M5): this minion's survivor log and its counts (every found entry, logged or not)
+    volatile uint64_t* surv_log;
+    uint64_t surv_cap, surv_found, surv_sum, surv_sumc, surv_tiles;
+    uint64_t taum1;  // tau1 - 1: c >= tau1 <=> tau1 - 1 < c (fltm.pi)
     uint8_t tgt[SPP_SMAX];  // SPP_F_EPI_HIDE: pieces of the pending epilogue done after slot s
-    uint32_t buf[256] __attribute__((aligned(64)));  // spills, results and best scans (hart 0's L1 / stack)
+    // spills, results and best scans (hart 0's L1 / stack): M1's epilogue uses [0..151]; the screen's [0..127] (rows
+    // 8-15), [128..255] (rows 0-7, only when they hold a survivor) and [256..279] (SQ, SUM, MAX)
+    uint32_t buf[280] __attribute__((aligned(64)));
 };
 
 INLINE uint64_t xb_addr(const struct T0* c, uint64_t J, uint64_t s)
@@ -746,6 +757,134 @@ INLINE void reduce_tile(uint32_t* buf)
         TAKEN
         "fsw.ps f16, 512(%0)\n fsw.ps f17, 544(%0)\n fsw.ps f0, 576(%0)\n"
         : : "r"(buf) : "memory", FREGS);
+}
+
+/* ---------------------------------------------------------------- SPP_F_SCREEN (M5): the survivor screen
+
+   Inside M1's epilogue, on the masked output tile in f0..f31 (a masked entry is 0 < tau1): the reduction's own spill
+   of rows 8-15 (f16..f31) frees f16 for tau1 - 1 broadcast, and fltm.pi md, f16, fr sets lane l of mask md when
+   entry l of register r is >= tau1. Seven registers go to m1..m7 and one mova.x.m reads them all (m0, the active
+   mask, stays 0xFF in bits 0..7): three groups per half (registers 0-6, 7-13, 14-15). Rows 0-7 are stored beside
+   the spill only when a mask of theirs is set, since their reduction overwrites them; rows 8-15 are in the spill
+   already. Errata 1.29: f16 is written by fbcx.ps (type B) and read after a taken branch; f0..f15 are read after
+   mask_tile's taken branch (or TOUCH_ALL) and, reloaded, after an fmv.x.w each and a taken branch, as in
+   reduce_tile. Mask registers are outside the VPURF erratum, and mova.x.m is the erratum's own dependency
+   resolver. */
+#define SCREEN_HALF(H0, H1, H2)                                                                                 \
+    "fbcx.ps f16, %[t]\n" TAKEN                                                                                 \
+    "fltm.pi m1, f16, f0\n fltm.pi m2, f16, f1\n fltm.pi m3, f16, f2\n fltm.pi m4, f16, f3\n"                   \
+    "fltm.pi m5, f16, f4\n fltm.pi m6, f16, f5\n fltm.pi m7, f16, f6\n"                                         \
+    "mova.x.m %[" H0 "]\n"                                                                                      \
+    "fltm.pi m1, f16, f7\n fltm.pi m2, f16, f8\n fltm.pi m3, f16, f9\n fltm.pi m4, f16, f10\n"                  \
+    "fltm.pi m5, f16, f11\n fltm.pi m6, f16, f12\n fltm.pi m7, f16, f13\n"                                      \
+    "mova.x.m %[" H1 "]\n"                                                                                      \
+    "fltm.pi m1, f16, f14\n fltm.pi m2, f16, f15\n"                                                             \
+    "mova.x.m %[" H2 "]\n"
+
+// Masks of rows 0-7 (h[0..2]): spills rows 8-15 (f16..f31) to buf[0..127] first, as reduce_tile does.
+INLINE void screen_lo(uint32_t* buf, uint64_t taum1, uint64_t* h)
+{
+    uint64_t h0, h1, h2;
+    __asm__ __volatile__(
+        "fsw.ps f16, 0(%[b])\n   fsw.ps f17, 32(%[b])\n  fsw.ps f18, 64(%[b])\n  fsw.ps f19, 96(%[b])\n"
+        "fsw.ps f20, 128(%[b])\n fsw.ps f21, 160(%[b])\n fsw.ps f22, 192(%[b])\n fsw.ps f23, 224(%[b])\n"
+        "fsw.ps f24, 256(%[b])\n fsw.ps f25, 288(%[b])\n fsw.ps f26, 320(%[b])\n fsw.ps f27, 352(%[b])\n"
+        "fsw.ps f28, 384(%[b])\n fsw.ps f29, 416(%[b])\n fsw.ps f30, 448(%[b])\n fsw.ps f31, 480(%[b])\n"
+        SCREEN_HALF("h0", "h1", "h2")
+        : [h0] "=&r"(h0), [h1] "=&r"(h1), [h2] "=&r"(h2)
+        : [b] "r"(buf), [t] "r"(taum1)
+        : "memory", FREGS);
+    h[0] = h0;
+    h[1] = h1;
+    h[2] = h2;
+}
+
+// Rows 0-7 (f0..f15) to buf[128..255], when one of them holds a survivor.
+INLINE void screen_keep_lo(uint32_t* buf)
+{
+    __asm__ __volatile__(
+        "fsw.ps f0, 512(%0)\n  fsw.ps f1, 544(%0)\n  fsw.ps f2, 576(%0)\n  fsw.ps f3, 608(%0)\n"
+        "fsw.ps f4, 640(%0)\n  fsw.ps f5, 672(%0)\n  fsw.ps f6, 704(%0)\n  fsw.ps f7, 736(%0)\n"
+        "fsw.ps f8, 768(%0)\n  fsw.ps f9, 800(%0)\n  fsw.ps f10, 832(%0)\n fsw.ps f11, 864(%0)\n"
+        "fsw.ps f12, 896(%0)\n fsw.ps f13, 928(%0)\n fsw.ps f14, 960(%0)\n fsw.ps f15, 992(%0)\n"
+        : : "r"(buf) : "memory");
+}
+
+/* reduce_tile's reduction with the masks of rows 8-15 (h[3..5]) taken between the reload and their reduction; the
+   lanes of SQ, SUM and MAX go to buf[256..279] (bytes 1024, 1056, 1088), clear of the rows kept in buf[0..255]. */
+INLINE void screen_hi_reduce(uint32_t* buf, uint64_t taum1, uint64_t* h)
+{
+    uint64_t h3, h4, h5;
+    __asm__ __volatile__(
+        REDUCE_HALF
+        "fsw.ps f16, 1024(%[b])\n fsw.ps f17, 1056(%[b])\n fsw.ps f0, 1088(%[b])\n"
+        "flw.ps f0, 0(%[b])\n    flw.ps f1, 32(%[b])\n   flw.ps f2, 64(%[b])\n   flw.ps f3, 96(%[b])\n"
+        "flw.ps f4, 128(%[b])\n  flw.ps f5, 160(%[b])\n  flw.ps f6, 192(%[b])\n  flw.ps f7, 224(%[b])\n"
+        "flw.ps f8, 256(%[b])\n  flw.ps f9, 288(%[b])\n  flw.ps f10, 320(%[b])\n flw.ps f11, 352(%[b])\n"
+        "flw.ps f12, 384(%[b])\n flw.ps f13, 416(%[b])\n flw.ps f14, 448(%[b])\n flw.ps f15, 480(%[b])\n"
+        // errata 1.29 type A: an fmv.x.w of each loaded register, then at least one more instruction
+        "fmv.x.w x0, f0\n fmv.x.w x0, f1\n fmv.x.w x0, f2\n fmv.x.w x0, f3\n fmv.x.w x0, f4\n fmv.x.w x0, f5\n"
+        "fmv.x.w x0, f6\n fmv.x.w x0, f7\n fmv.x.w x0, f8\n fmv.x.w x0, f9\n fmv.x.w x0, f10\n fmv.x.w x0, f11\n"
+        "fmv.x.w x0, f12\n fmv.x.w x0, f13\n fmv.x.w x0, f14\n fmv.x.w x0, f15\n"
+        TAKEN
+        SCREEN_HALF("h3", "h4", "h5")
+        REDUCE_HALF
+        "flw.ps f18, 1024(%[b])\n flw.ps f19, 1056(%[b])\n flw.ps f20, 1088(%[b])\n"
+        "fmv.x.w x0, f18\n fmv.x.w x0, f19\n fmv.x.w x0, f20\n"
+        TAKEN
+        "fadd.pi f16, f16, f18\n fadd.pi f17, f17, f19\n fmax.pi f0, f0, f20\n"
+        TAKEN
+        "fsw.ps f16, 1024(%[b])\n fsw.ps f17, 1056(%[b])\n fsw.ps f0, 1088(%[b])\n"
+        : [h3] "=&r"(h3), [h4] "=&r"(h4), [h5] "=&r"(h5)
+        : [b] "r"(buf), [t] "r"(taum1)
+        : "memory", FREGS);
+    h[3] = h3;
+    h[4] = h4;
+    h[5] = h5;
+}
+
+// Masks m1..m7 of a group (bits 8..63 of mova.x.m); group 2 holds two registers (m1, m2).
+INLINE uint64_t screen_bits(const uint64_t* h, uint64_t i)
+{
+    return (h[i] >> 8) & ((i % 3) == 2 ? 0xFFFFull : 0xFFFFFFFFFFFFFFull);
+}
+
+/* Logs the tile's survivors in (row, column) order: rows 0-7 from buf[128..255], rows 8-15 from buf[0..127]; mask k
+   of group g of a half is register r = 7g + k - 1 of that half (row 8 * half + r / 2, columns 8 (r & 1) ..). Every
+   found entry is counted and summed; it is stored while the log has room. Plain C, no f registers: it may be
+   called between the epilogue's asm statements. */
+static void screen_log(struct T0* c, const struct TileInfo* ti, uint64_t J, const uint64_t* h)
+{
+    const uint64_t j0 = 16 * J;
+    for (uint64_t hf = 0; hf < 2; ++hf) {
+        const uint32_t* vals = hf ? c->buf : c->buf + 128;
+        for (uint64_t g = 0; g < 3; ++g) {
+            uint64_t w = screen_bits(h, 3 * hf + g);
+            for (uint64_t k = 0; w; ++k, w >>= 8) {
+                const uint64_t bits = w & 0xFF;
+                if (!bits) {
+                    continue;
+                }
+                const uint64_t r = 7 * g + k;
+                const uint64_t row = ti->rank0 + 8 * hf + (r >> 1);
+                for (uint64_t l = 0; l < 8; ++l) {
+                    if (!((bits >> l) & 1)) {
+                        continue;
+                    }
+                    const int32_t v = (int32_t)vals[r * 8 + l];
+                    const uint64_t j = j0 + 8 * (r & 1) + l;
+                    const uint64_t e = (row & 0xFFFFFFFFFFull) | ((j & 0xFFF) << 40) | ((uint64_t)(v & 0xFFF) << 52);
+                    if (c->surv_found < c->surv_cap) {
+                        c->surv_log[c->surv_found] = e;
+                    }
+                    ++c->surv_found;
+                    c->surv_sum += e;
+                    c->surv_sumc += (uint64_t)(int64_t)v;
+                }
+            }
+        }
+    }
+    ++c->surv_tiles;
 }
 
 /* Zero the invalid entries of the tile in f0..f31: inv[r] is the byte mask of lanes of register fr to clear. */
@@ -849,12 +988,27 @@ INLINE void epilogue(struct T0* c, const struct TileInfo* ti, uint64_t J, uint64
     } else {
         cnt = 256;
     }
-    reduce_tile(c->buf);
+    uint64_t res = 128;  // where the reduction left the lanes of SQ, SUM, MAX
+    if (c->screen) {
+        uint64_t h[6];
+        screen_lo(c->buf, c->taum1, h);
+        const uint64_t lo = screen_bits(h, 0) | screen_bits(h, 1) | screen_bits(h, 2);
+        if (lo) {
+            screen_keep_lo(c->buf);
+        }
+        screen_hi_reduce(c->buf, c->taum1, h);
+        if (lo | screen_bits(h, 3) | screen_bits(h, 4) | screen_bits(h, 5)) {
+            screen_log(c, ti, J, h);
+        }
+        res = 256;
+    } else {
+        reduce_tile(c->buf);
+    }
     int32_t tmax = INT32_MIN;
     for (uint64_t l = 0; l < 8; ++l) {
-        c->acc.sq += c->buf[128 + l];
-        c->acc.sum += (int32_t)c->buf[136 + l];
-        const int32_t v = (int32_t)c->buf[144 + l];
+        c->acc.sq += c->buf[res + l];
+        c->acc.sum += (int32_t)c->buf[res + 8 + l];
+        const int32_t v = (int32_t)c->buf[res + 16 + l];
         tmax = v > tmax ? v : tmax;
     }
     c->acc.count += cnt;
@@ -1274,6 +1428,13 @@ NOINLINE void run_t0(const struct SppArgs* a, uint64_t shire, uint64_t mi, uint6
     c->dump = (a->flags & SPP_F_DUMP) != 0;
     c->noepi = (a->flags & SPP_F_NOEPI) != 0;
     c->perturb = (a->flags & SPP_F_PERTURB_MASK) != 0 && SPP_PERTURB_SLOT(a->flags) == g;
+    {
+        const struct SppMinion* ms = (const struct SppMinion*)a->minions + g;
+        c->screen = (a->flags & SPP_F_SCREEN) != 0 && !c->noepi;  // args_ok: M1's epilogue, 1 <= tau1 <= 4095
+        c->surv_log = (volatile uint64_t*)a->surv + ms->surv_base;
+        c->surv_cap = ms->surv_cap;
+        c->taum1 = (a->tau1 - 1) & 0xFFFFFFFFull;
+    }
     // M4 (flags; none set = M1): the epilogue in pieces, 3 A buffers (streamed A only; always with the pieces)
     const bool abuf3 = (a->flags & SPP_F_ABUF3) != 0 && !c->resident && !nowait;
     const bool hide = (a->flags & SPP_F_EPI_HIDE) != 0 || abuf3;
@@ -1420,7 +1581,9 @@ INLINE bool args_ok(const struct SppArgs* a)
 {
     return a->k >= 1 && a->k <= SPP_KMAX && a->n >= a->k && a->n <= SPP_NMAX && a->S >= 1 && a->S <= SPP_SMAX &&
            a->m >= 1 && a->m <= 64 * a->S && a->nJ == (a->n + 15) / 16 && a->per_shire >= 1 && a->per_shire <= 32 &&
-           (a->mode != SPP_TENSOR || a->nbuf == 1 || a->nbuf == 2);
+           (a->mode != SPP_TENSOR || a->nbuf == 1 || a->nbuf == 2) &&
+           (!(a->flags & SPP_F_SCREEN) || (a->mode == SPP_TENSOR && !(a->flags & (SPP_F_EPI_HIDE | SPP_F_ABUF3)) &&
+                                           a->tau1 >= 1 && a->tau1 <= 4095 && a->m <= 4095));
 }
 
 int64_t entry_point(const struct SppArgs* args)
@@ -1447,7 +1610,12 @@ int64_t entry_point(const struct SppArgs* args)
     c.acc.tie = 0;
     c.ops = 0;
     c.perturb = false;
+    c.screen = false;
     c.best_scans = 0;
+    c.surv_found = 0;
+    c.surv_sum = 0;
+    c.surv_sumc = 0;
+    c.surv_tiles = 0;
     if (!args_ok(args)) {
         err |= SPP_ERR_ARGS;
     } else if (mode == SPP_SCALAR) {
@@ -1457,6 +1625,18 @@ int64_t entry_point(const struct SppArgs* args)
         run_t0(args, shire, mi, g, &err, &c, &wait, &copyc);
         count = c.acc.count;
         work = c.ops;
+        if (c.screen) {  // the survivor counts: every found entry, logged or not
+            volatile struct SppSurvHdr* sh = (volatile struct SppSurvHdr*)args->surv_hdr + g;
+            sh->found = c.surv_found;
+            sh->stored = c.surv_found < c.surv_cap ? c.surv_found : c.surv_cap;
+            sh->cap = c.surv_cap;
+            sh->sum = c.surv_sum;
+            sh->sum_c1 = c.surv_sumc;
+            sh->tiles_hit = c.surv_tiles;
+            sh->epoch = (uint32_t)args->epoch;
+            sh->flags = c.surv_found > c.surv_cap ? SPP_SURV_OVERFLOW : 0;
+            sh->pad = 0;
+        }
     } else if (mode == SPP_TENSOR && (args->flags & SPP_F_GEN_INC) && args->k >= 2) {
         run_gen_inc(args, shire, mi, g, &err, &count, &wait);
     } else if (mode == SPP_TENSOR) {

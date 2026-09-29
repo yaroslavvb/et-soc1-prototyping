@@ -13,6 +13,10 @@
 //                  | --probe narrow:N: N consecutive one-column-tile row tiles per minion (the hand-off race probe:
 //                    hart 0 consumes every tile right after hart 1 publishes it; run it with --oracle on)
 //                  [--perturb drop|dup|mask]   (negative controls: the checksums must fail)
+//                  [--perturb tau|lostlog]     (M5's controls: tau = the kernel screens at tau1 + 2 while the host
+//                                    checks tau1, so it misses survivors and the survivor oracle must fail; lostlog =
+//                                    the kernel logs into a spare buffer and the host reads the poisoned one, as if
+//                                    no log line reached DRAM: the entries, stage 2 and the survivor oracle must fail)
 //       staging:   --nbuf auto|1|2 --stage auto|scp|dram   (auto: scratchpad with 2 buffers, else scratchpad with
 //                  1, else DRAM with 2) [--scp-kb KB] (the scratchpad per shire the layout may use; default 2560,
 //                  and the device's own size is read after opening: a layout past it is refused)
@@ -44,6 +48,20 @@
 //       nothing; review of M4, finding 1).
 //                  --trust-model  guard on est_s alone, not on model_fallback_s: only once a launch of the same
 //                                    kernel has run within x1.3 of its model (card_run.sh m4 gates it so)
+//       M5, the two-stage screen (DESIGN.md 2.7; M1's epilogue: --variant m1, e.g. variant b = --variant m1 --cost
+//       fit --gen inc):
+//                  --m1 M1 --tau1 T  the card scans the first M1 samples of the --m (or --instance) instance and logs
+//                                    every candidate with c1 >= T; the host reads the logs back in one copy and
+//                                    rescores the survivors on all m samples (stage 2, --stage2-threads, default 6).
+//                                    Stage 1 keeps every check (closed forms on m1 samples, oracle); the survivor
+//                                    headers, entries (c1 re-derived for every entry) and the sampled oracle's
+//                                    survivor sets are checked too; a full log is an OVERFLOW (FAIL), never silent
+//                  --surv-cap N | --surv-factor F  entries per minion's log (default 1.5 x its expected share +
+//                                    10 sigma + 256)     --surv-out FILE  every stored entry, spref log= order
+//       --records-out FILE also writes FILE.surv (the headers and the stored entries), which --verify-records reads.
+//       Before every launch the host fills the whole log area with all-ones (outside the timed launch): an entry the
+//       kernel did not write reads as row 2^40 - 1, j 4095, c1 -1, which fails the entry checks, stage 2 and the
+//       oracle, so a log line that never reached DRAM cannot pass as an earlier run's identical entry.
 //
 // Value checks. The count, the ops and the rescoring of the best come from every run. The two closed-form checksums
 // apply when the plan covers all C(n,k) candidates. The oracle rescores whole minions on the CPU and compares each
@@ -57,6 +75,13 @@
 // counted from the process's start, at most 9.5 s); each launch's timeout is min(8, 2 x the model + 1.5 s, the time
 // left); after a timed-out launch it aborts the stream and reads nothing back; the harts give up waiting for each
 // other well inside the timeout. Run it as `flock -n /run/lock/etsoc-shire<N>.lock timeout 10 sparseparity_host ...`.
+// It opens the card's ops node only, never the management node, which the driver lets one process open at a time
+// (et-soc1-pcie.c: EBUSY): so ettelem can sample the card's power while it runs (energy.sh). The JSON's
+// launch_epoch_ms is [the first launch's start, the last completed launch's end] in Unix ms, for the telemetry, and
+// host_cpu_s the process's CPU seconds (getrusage, every thread: user, system) over that burst and over the whole
+// process, for the host's share of the energy per solve.
+#include <sys/resource.h>
+
 #include <g3log/loglevels.hpp>
 #include <runtime/IRuntime.h>
 #include <runtime/Types.h>
@@ -76,6 +101,7 @@
 #include <random>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "Constants.h"
@@ -103,6 +129,14 @@ static double secondsSince(Clock::time_point t0) { return std::chrono::duration<
 static constexpr double kOracleUnitsPerS = 8e8;
 static constexpr double kDeadlineMax = 9.5;     // the host's own cap under `timeout 10`
 static constexpr double kChecksDeadline = 9.7;  // on silicon the in-process checks stop here (sampled oracle)
+// M5: the screen's cost on hart 0 per output tile, assumed (A) until a card measures it: the two extra groups of
+// fltm.pi / mova.x.m and their tests (~60 instructions), keeping rows 0-7 (16 stores, their lines written back)
+// when one holds a survivor, and each survivor's entry. Added to the fitted model's epilogue (E_OUT).
+static constexpr double kScreenTile = 100, kScreenKeep = 200, kScreenSurv = 60;
+// The survivor log's readback (a program's staged copy card to host, E50: 4.8-7.0 GB/s) and stage 2's rescoring,
+// thread-ns per survivor + per survivor and 64-sample word (spp_selftest --bench-stage2 on aifoundry3's i7-11700K,
+// 29 September, 6 threads: 7.6 / 10.2 / 5.6 ns per survivor at W = 29 / 31 / 7), for the models.
+static constexpr double kSurvReadBps = 4.5e9, kStage2NsPerSurv = 24.0, kStage2NsPerWord = 1.14;
 
 static std::vector<std::byte> readFile(const std::string& path) {
   std::ifstream file(path, std::ios::binary);
@@ -112,8 +146,25 @@ static std::vector<std::byte> readFile(const std::string& path) {
   return data;
 }
 
+static long long epochMsNow() {
+  return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
+// The process's CPU seconds so far, every thread (the runtime's too): {user, system}.
+struct CpuTimes {
+  double user = 0, sys = 0;
+};
+static CpuTimes cpuNow() {
+  rusage u{};
+  getrusage(RUSAGE_SELF, &u);
+  return {double(u.ru_utime.tv_sec) + 1e-6 * double(u.ru_utime.tv_usec),
+          double(u.ru_stime.tv_sec) + 1e-6 * double(u.ru_stime.tv_usec)};
+}
+
 static std::unique_ptr<dev::IDeviceLayer> makeDeviceLayer(bool sysemu, const std::string& simArgs) {
-  if (!sysemu) return dev::IDeviceLayer::createPcieDeviceLayer(true, true);
+  // ops node only (the device properties come through it too, as in pciebench); the management node stays free
+  // for a telemetry sampler
+  if (!sysemu) return dev::IDeviceLayer::createPcieDeviceLayer(true, false);
   emu::SysEmuOptions o;
   o.bootromTrampolineToBL2ElfPath = BOOTROM_TRAMPOLINE_TO_BL2_ELF;
   o.spBL2ElfPath = BL2_ELF;
@@ -164,6 +215,11 @@ struct Opts {
   int abuf = 0;
   bool genInc = true, epiHide = true, costFit = true, sliceFit = true;
   bool trustModel = false;
+  // M5: the two-stage screen (stage 1 on the card, stage 2 here)
+  int m1 = 0, tau1 = 0, stage2Threads = 6;
+  long long survCap = -1;
+  double survFactor = 1.5;
+  std::string survOut;
 };
 
 [[noreturn]] static void usage(const char* argv0, const std::string& why = "") {
@@ -172,11 +228,12 @@ struct Opts {
             << " [--sysemu [--sim-args ARGS]] [--n N --k K --eta E --m M --seed S | --instance FILE]"
                " [--save-instance FILE] [--mode tensor|scalar] [--two-hart] [--dump] [--nowait-a]"
                " [--shires MASK] [--per-shire P] [--rounds R] [--slice I/N] [--plan FILE] [--probe narrow:N]"
-               " [--perturb drop|dup|mask] [--nbuf auto|1|2] [--stage auto|scp|dram] [--scp-kb KB] [--reps R]"
+               " [--perturb drop|dup|mask|tau|lostlog] [--nbuf auto|1|2] [--stage auto|scp|dram] [--scp-kb KB] [--reps R]"
                " [--budget S] [--max-kernel-s S] [--poll-limit N] [--oracle auto|on|sample|off] [--oracle-work W]"
                " [--kernel ELF] [--records-out FILE] [--dump-out FILE] [--out FILE] [--verify-records FILE] [--dry]"
                " [--timing-only] [--variant m4|m1] [--gen m1|inc] [--epi m1|hide] [--abuf 2|3] [--cost m1|fit]"
-               " [--slice-cost m1|fit] [--pipe-set K=V,..] [--gen-probe nostore] [--trust-model]\n";
+               " [--slice-cost m1|fit] [--pipe-set K=V,..] [--gen-probe nostore] [--trust-model]"
+               " [--m1 M1 --tau1 T [--surv-cap N | --surv-factor F] [--stage2-threads N] [--surv-out FILE]]\n";
   std::exit(2);
 }
 
@@ -243,6 +300,12 @@ static Opts parse(int argc, char** argv) {
     else if (a == "--pipe-set") o.pipeSet = next();
     else if (a == "--gen-probe") o.genProbe = next();
     else if (a == "--trust-model") o.trustModel = true;
+    else if (a == "--m1") o.m1 = std::stoi(next());
+    else if (a == "--tau1") o.tau1 = std::stoi(next());
+    else if (a == "--surv-cap") o.survCap = std::stoll(next());
+    else if (a == "--surv-factor") o.survFactor = std::stod(next());
+    else if (a == "--stage2-threads") o.stage2Threads = std::stoi(next());
+    else if (a == "--surv-out") o.survOut = next();
     else usage(argv[0], "unknown option " + a);
   }
   if (o.variant != "m4" && o.variant != "m1") usage(argv[0], "--variant m4|m1");
@@ -265,13 +328,28 @@ static Opts parse(int argc, char** argv) {
   if (!o.outPath.empty() && o.mode != "tensor") usage(argv[0], "--out needs tensor mode");
   if (o.nbuf != 0 && o.nbuf != 1 && o.nbuf != 2) usage(argv[0], "--nbuf auto|1|2");
   if (o.sliceN < 1 || o.sliceI < 0 || o.sliceI >= o.sliceN) usage(argv[0], "--slice I/N with 0 <= I < N");
-  if (!o.perturb.empty() && o.perturb != "drop" && o.perturb != "dup" && o.perturb != "mask") usage(argv[0], "--perturb drop|dup|mask");
+  if (!o.perturb.empty() && o.perturb != "drop" && o.perturb != "dup" && o.perturb != "mask" && o.perturb != "tau" &&
+      o.perturb != "lostlog")
+    usage(argv[0], "--perturb drop|dup|mask|tau|lostlog");
+  if ((o.perturb == "tau" || o.perturb == "lostlog") && !o.m1) usage(argv[0], "--perturb tau|lostlog are M5's controls: they need --m1 and --tau1");
   if (o.perturb == "mask" && o.mode != "tensor") usage(argv[0], "--perturb mask is a tensor-mode control");
   if (o.stage != "auto" && o.stage != "scp" && o.stage != "dram") usage(argv[0], "--stage auto|scp|dram");
   if (o.oracle != "auto" && o.oracle != "on" && o.oracle != "sample" && o.oracle != "off") usage(argv[0], "--oracle auto|on|sample|off");
   if (o.perShire < 1 || o.perShire > 32 || (o.shires & ~0xFFFFFFFFull) || !o.shires) usage(argv[0], "--shires / --per-shire out of range");
   if (o.probeTiles < 0 || (o.probeTiles && (!o.planPath.empty() || o.sliceN > 1))) usage(argv[0], "--probe excludes --plan and --slice");
   if (o.scpKB < 512 || o.scpKB > 4096) usage(argv[0], "--scp-kb 512..4096");
+  if (o.m1 || o.tau1) {  // M5: stage 1 runs in M1's epilogue (the screen lives there), tensor mode, scores kept
+    if (o.m1 < 1 || o.m1 > 4095 || o.tau1 < 1 || o.tau1 > o.m1) usage(argv[0], "--m1 M1 --tau1 T: 1 <= T <= M1 <= 4095");
+    if (o.perturb == "tau" && o.tau1 + 2 > 4095) usage(argv[0], "--perturb tau: tau1 + 2 is at most 4095");
+    if (o.instPath.empty() && o.m1 > o.m) usage(argv[0], "--m1 is at most --m");
+    if (o.mode != "tensor" || o.timingOnly || !o.genProbe.empty()) usage(argv[0], "--m1: tensor mode, no --timing-only or --gen-probe");
+    if (o.epiHide || o.abuf == 3)
+      usage(argv[0], "--m1: the screen runs in M1's epilogue: --variant m1 (variant b: --variant m1 --cost fit --gen inc) or --epi m1, --abuf 2");
+    if (o.survCap < -1 || o.survFactor < 1.0 || o.stage2Threads < 1 || o.stage2Threads > 64)
+      usage(argv[0], "--surv-cap >= 0, --surv-factor >= 1, --stage2-threads 1..64");
+  } else if (o.survCap >= 0 || !o.survOut.empty()) {
+    usage(argv[0], "--surv-cap and --surv-out need --m1 and --tau1");
+  }
   if (o.budget < 0) o.budget = o.sysemu ? 1e9 : 9.0;  // the simulator is private; a real card is shared
   if (!o.sysemu && o.budget > kDeadlineMax) usage(argv[0], "--budget is at most 9.5 s on a card (the run is under timeout 10)");
   return o;
@@ -295,7 +373,7 @@ static Plan probePlan(const Geometry& G, uint64_t shireMask, int perShire, int N
 
 // M0's binary work list (cpu/sp.h section 6). Logical minion q = shire_index * mps + minion_in_shire, with
 // shire_index the rank of the physical shire among the mask's set bits. Fills the plan (physical slots) and
-// logical[q] = slot. Two-stage lists are refused: M1 has no survivor log.
+// logical[q] = slot. A two-stage list (stage 1: its m is m1) needs the same tau1 as the run's --tau1.
 struct M0Plan {
   sp_wl_hdr_t hdr{};
   std::vector<int> logical;  // q -> physical slot shire * 32 + minion
@@ -308,14 +386,17 @@ static bool isM0Plan(const std::string& path) {
   return f && magic == SP_WL_MAGIC;
 }
 
-static Plan readM0Plan(const std::string& path, const Geometry& G, M0Plan& m0) {
+static Plan readM0Plan(const std::string& path, const Geometry& G, M0Plan& m0, int tau1) {
   std::ifstream f(path, std::ios::binary);
   sp_wl_hdr_t& h = m0.hdr;
   f.read(reinterpret_cast<char*>(&h), sizeof h);
   if (!f || h.magic != SP_WL_MAGIC || h.version != SP_WL_VERSION) throw std::runtime_error(path + ": not an SPWL v1 work list");
   if (int(h.n) != G.n || int(h.k) != G.k || int(h.m) != G.m || int(h.S) != G.S)
     throw std::runtime_error(path + ": the work list is for another (n, k, m, S)");
-  if (h.flags & SP_WL_TWOSTAGE) throw std::runtime_error(path + ": two-stage work lists need the survivor log (M3/M4)");
+  if ((h.flags & SP_WL_TWOSTAGE) && (tau1 < 1 || h.tau1 != tau1))
+    throw std::runtime_error(path + ": a two-stage work list (tau1 " + std::to_string(h.tau1) + "): run it with --m1 " +
+                             std::to_string(h.m) + " --tau1 " + std::to_string(h.tau1));
+  if (!(h.flags & SP_WL_TWOSTAGE) && tau1 >= 1) throw std::runtime_error(path + ": not a two-stage work list, and --tau1 is set");
   if (h.NT != G.ntiles) throw std::runtime_error(path + ": the work list has " + std::to_string(h.NT) + " row tiles, the host " + std::to_string(G.ntiles));
   std::vector<int> shires;
   for (int s = 0; s < 32; ++s)
@@ -487,10 +568,16 @@ int main(int argc, char** argv) {
   const bool verify = !o.verifyRecords.empty();
 
   // ---------------------------------------------------------------- instance, geometry, plan (no device)
-  Instance I;
+  // Two-stage (M5): F is the whole instance (m samples), stage 2's; I, what the card scans, its first m1 samples.
+  const bool twoStage = o.m1 > 0;
+  Instance I, F;
   try {
     I = o.instPath.empty() ? generate(o.n, o.k, o.eta, o.m, o.seed) : loadInstance(o.instPath);
     if (!o.saveInst.empty()) saveInstance(o.saveInst, I);
+    if (twoStage) {
+      F = I;
+      I = prefixInstance(F, o.m1);
+    }
   } catch (const std::exception& e) {
     std::cerr << "instance: " << e.what() << "\n";
     return 2;
@@ -514,7 +601,7 @@ int main(int argc, char** argv) {
         plan = probePlan(G, o.shires, o.perShire, o.probeTiles);
         planSource = "probe narrow:" + std::to_string(o.probeTiles);
       } else if ((fromM0 = isM0Plan(o.planPath))) {
-        plan = readM0Plan(o.planPath, G, m0);
+        plan = readM0Plan(o.planPath, G, m0, o.tau1);
         o.shires = plan.shireMask;
         o.perShire = plan.perShire;
         o.sliceI = int(m0.hdr.slice);
@@ -594,6 +681,12 @@ int main(int argc, char** argv) {
       return 2;
     }
   }
+  // M5: the screen's assumed cost joins each output tile's epilogue, in the plan's costs and in every model.
+  const double pNull = twoStage ? screenNull(o.m1, o.tau1) : 0.0;
+  const double screenCyc = twoStage ? kScreenTile + kScreenKeep * (1.0 - std::pow(1.0 - pNull, 128.0)) +
+                                          kScreenSurv * 256.0 * pNull
+                                    : 0.0;
+  pipe.E_OUT += screenCyc;
   const int epiOn = o.timingOnly ? 0 : 1;
   TileCost fitCost;
   try {
@@ -634,7 +727,8 @@ int main(int argc, char** argv) {
   // Device images of the plan.
   std::vector<SppMinion> minions(SPP_MINION_SLOTS);
   std::vector<SppBlock> blocks;
-  std::vector<uint64_t> tilesPerSlot(SPP_MINION_SLOTS, 0), rowTilesPerSlot(SPP_MINION_SLOTS, 0);
+  std::vector<uint64_t> tilesPerSlot(SPP_MINION_SLOTS, 0), rowTilesPerSlot(SPP_MINION_SLOTS, 0),
+      candPerSlot(SPP_MINION_SLOTS, 0);
   uint64_t dumpTiles = 0, planCand = 0, planOps = 0, maxOps = 0;
   double maxModel = 0, sumModel = 0, maxEst = 0, maxM1 = 0;
   int busy = 0;
@@ -655,7 +749,8 @@ int main(int argc, char** argv) {
     const uint64_t ot = countOutputTiles(G, plan.slots[g]);
     tilesPerSlot[g] = ot;
     dumpTiles += ot;
-    planCand += countCandidates(G, plan.slots[g]);
+    candPerSlot[g] = countCandidates(G, plan.slots[g]);
+    planCand += candPerSlot[g];
     const uint64_t ops = ot * uint64_t(G.S);
     planOps += ops;
     maxOps = std::max(maxOps, ops);
@@ -667,6 +762,40 @@ int main(int argc, char** argv) {
     busy += plan.slots[g].empty() ? 0 : 1;
   }
   if (blocks.empty()) blocks.push_back(SppBlock{});
+  // M5: each minion's survivor log holds survFactor x its expected share + 10 sigma + 256 entries (the null
+  // survival rate is exact in expectation: the CPU's screens at L2 and (256,5) counted within 0.3% of it), or
+  // --surv-cap entries; a multiple of 8, so every log starts on its own 64 B line.
+  uint64_t survTotal = 0, survCapMin = ~0ull, survCapMax = 0;
+  double survExpect = 0, survExpectMax = 0;
+  std::vector<double> survExpectSlot(SPP_MINION_SLOTS, 0.0);
+  if (twoStage) {
+    for (int g : slots) {
+      const double E = double(candPerSlot[g]) * pNull;
+      survExpectSlot[g] = E;
+      survExpect += E;
+      survExpectMax = std::max(survExpectMax, E);
+      uint64_t cap = o.survCap >= 0 ? uint64_t(o.survCap) : uint64_t(std::ceil(o.survFactor * E + 10.0 * std::sqrt(E) + 256.0));
+      cap = (cap + 7) & ~7ull;
+      minions[g].surv_base = survTotal;
+      minions[g].surv_cap = cap;
+      survTotal += cap;
+      survCapMin = std::min(survCapMin, cap);
+      survCapMax = std::max(survCapMax, cap);
+    }
+    // the card's DRAM holds the logs and the host a copy (a spare set too under --perturb lostlog): at most 512 MB
+    // for a card (the largest planned step, (256,5) at m1 = 1,152, takes 108 MB), 3 GB in the simulator
+    const uint64_t survLimit = o.sysemu ? (3ull << 30) : (512ull << 20);
+    if (survTotal * 8 > survLimit) {
+      std::cerr << "refused: the survivor logs would take " << (survTotal * 8 >> 20) << " MB, over "
+                << (survLimit >> 20) << " MB (raise --tau1 or --m1)\n";
+      return 2;
+    }
+  }
+  const double pKept = twoStage ? screenKept(o.m1, o.tau1, I.eta) : 1.0;
+  const double survReadEstS = twoStage ? double(survTotal) * 8.0 / kSurvReadBps + 0.002 : 0.0;
+  const double survPoisonEstS = survReadEstS;  // the all-ones fill before each launch: the same bytes, host to card
+  const double stage2EstS =
+      twoStage ? survExpect * (kStage2NsPerSurv + F.W * kStage2NsPerWord) * 1e-9 / std::max(1, o.stage2Threads) : 0.0;
   for (int g : slots)
     if (rowTilesPerSlot[g] >= 0xFFFFFFFFull) {
       std::cerr << "refused: minion slot " << g << " has " << rowTilesPerSlot[g] << " row tiles (32-bit counts)\n";
@@ -726,7 +855,9 @@ int main(int argc, char** argv) {
       modelS = simulate(pipe, fitU, fitImbalance) / 600e6;
       if (!m1Kernel && o.pipeSet.empty()) {
         double u = 0, imb = 0;
-        fallbackS = simulate(pipeVariant(false, false, false), u, imb) / 600e6;
+        PipeConst fb = pipeVariant(false, false, false);
+        fb.E_OUT += screenCyc;
+        fallbackS = simulate(fb, u, imb) / 600e6;
       }
     } catch (const std::exception& e) {
       std::cerr << "model: " << e.what() << "\n";
@@ -778,12 +909,20 @@ int main(int argc, char** argv) {
   int maxSlot = 0;
   for (int g : slots) maxSlot = std::max(maxSlot, g);
   const size_t stageDramBytes = (tensor && !stageScp) ? size_t(maxSlot + 1) * stride : 64;
+  // M5: the survivor logs and their per-minion counts
+  std::vector<SppSurvHdr> survHdr(SPP_MINION_SLOTS), zeroHdr(SPP_MINION_SLOTS), firstHdr;
+  std::memset(survHdr.data(), 0, survHdr.size() * sizeof(SppSurvHdr));
+  std::memset(zeroHdr.data(), 0, zeroHdr.size() * sizeof(SppSurvHdr));
+  std::vector<uint64_t> survLog;  // allocated after --dry's return
+  double survReadS = 0, survPoisonS = 0;
+  bool survRead = false;
 
   const uint64_t flags = (o.dump ? SPP_F_DUMP : 0) | (o.twoHart ? SPP_F_TWOHART : 0) |
                          (o.nowaitA ? SPP_F_NOWAIT_A : 0) | (o.timingOnly ? SPP_F_NOEPI : 0) |
                          (o.perturb == "mask" && perturbSlot >= 0 ? (SPP_F_PERTURB_MASK | (uint64_t(perturbSlot) << 32)) : 0) |
                          (tensor && o.genInc ? SPP_F_GEN_INC : 0) | (tensor && o.epiHide ? SPP_F_EPI_HIDE : 0) |
-                         (tensor && o.abuf == 3 ? SPP_F_ABUF3 : 0) | (tensor && !o.genProbe.empty() ? SPP_F_GEN_NOSTORE : 0);
+                         (tensor && o.abuf == 3 ? SPP_F_ABUF3 : 0) | (tensor && !o.genProbe.empty() ? SPP_F_GEN_NOSTORE : 0) |
+                         (twoStage ? SPP_F_SCREEN : 0);
   // What runs, for the JSON line: the kernel's changes (3 A buffers apply to streamed A only, and bring the
   // epilogue in pieces with them), the plan's cost, and the fitted model's constants overridden.
   std::string m4json;
@@ -797,6 +936,21 @@ int main(int argc, char** argv) {
       << "\",\"gen_probe\":\"" << o.genProbe << "\",\"trust_model\":" << tf(o.trustModel) << ",\"flags\":\""
       << hex(flags & 0xFFFFFFFFull) << "\"}";
     m4json = m.str();
+  }
+  // M5: the two-stage plan and its model, for the JSON line (also with --dry). model_solve_s = the stage-1 kernel's
+  // model (the screen's assumed cost included) + the log's readback + stage 2 on --stage2-threads host threads.
+  std::string tsPlanJson = "null";
+  if (twoStage) {
+    std::ostringstream t;
+    t << "{\"m\":" << F.m << ",\"m1\":" << o.m1 << ",\"tau1\":" << o.tau1 << ",\"S1\":" << G.S << ",\"W\":" << F.W
+      << ",\"p_null\":" << pNull << ",\"p_kept\":" << pKept << ",\"p_loss\":" << 1.0 - pKept
+      << ",\"expected_survivors\":" << survExpect << ",\"expected_max_minion\":" << survExpectMax
+      << ",\"cap_total\":" << survTotal << ",\"cap_min\":" << (survTotal ? survCapMin : 0) << ",\"cap_max\":" << survCapMax
+      << ",\"cap_factor\":" << o.survFactor << ",\"cap_fixed\":" << o.survCap << ",\"log_mb\":" << double(survTotal) * 8 / 1048576.0
+      << ",\"screen_cycles_per_tile\":" << screenCyc << ",\"readback_est_s\":" << survReadEstS << ",\"stage2_est_s\":"
+      << stage2EstS << ",\"stage2_threads\":" << o.stage2Threads << ",\"model_solve_s\":" << modelS + survReadEstS + stage2EstS
+      << "}";
+    tsPlanJson = t.str();
   }
   std::mt19937_64 rng(uint64_t(std::chrono::high_resolution_clock::now().time_since_epoch().count()) ^ 0x5eed);
   const uint32_t epochBase = uint32_t(rng());
@@ -833,13 +987,17 @@ int main(int argc, char** argv) {
       << (tensor ? (stageScp ? "scp" : "dram") : "none") << "\",\"nbuf\":" << nbuf << ",\"scp_layout_kb\":"
       << (layoutEnd + 1023) / 1024 << ",\"dump_tiles\":" << dumpTiles << ",\"timeout_s\":" << timeoutPlan
       << ",\"poll_limit\":" << pollLimit << ",\"refused_on_silicon\":" << tf(guardS > o.maxKernelS)
-      << ",\"status\":\"DRY\"}";
+      << ",\"two_stage\":" << tsPlanJson << ",\"status\":\"DRY\"}";
     std::cout << s.str() << std::endl;
     return 0;
   }
+  // M5: the host's copy of the logs; all-ones (the poison each launch's log area starts from, below) until read back
+  if (twoStage) survLog.assign(size_t(survTotal), ~0ull);
 
   // ---------------------------------------------------------------- the device (held only in this block)
   std::vector<double> launchS;
+  long long launchEpochMs0 = 0, launchEpochMs1 = 0;  // Unix ms: the first launch's start, the last completed one's end
+  CpuTimes cpuBurst0, cpuBurst1;                     // the process's CPU time at those two moments
   std::vector<uint32_t> epochs;
   double openS = 0, setupS = 0, heldS = 0;
   bool launchOk = true, repsConsistent = true;
@@ -882,7 +1040,24 @@ int main(int argc, char** argv) {
       std::cerr << "cannot read " << SPP_HARTS << " records from " << o.verifyRecords << "\n";
       return 2;
     }
-    const uint32_t ep = slots.empty() ? 0 : (records[size_t(2 * slots[0])].status >> 16);
+    uint32_t ep = slots.empty() ? 0 : (records[size_t(2 * slots[0])].status >> 16);
+    if (twoStage) {  // <records>.surv: the headers, then each active slot's stored entries (writeSurv below)
+      std::ifstream sf(o.verifyRecords + ".surv", std::ios::binary);
+      sf.read(reinterpret_cast<char*>(survHdr.data()), std::streamsize(survHdr.size() * sizeof(SppSurvHdr)));
+      bool ok = bool(sf);
+      for (int g : slots) {
+        const uint64_t st = std::min(survHdr[g].stored, minions[g].surv_cap);
+        if (st) sf.read(reinterpret_cast<char*>(&survLog[minions[g].surv_base]), std::streamsize(st * 8));
+        ok = ok && bool(sf);
+      }
+      if (!ok) {
+        std::cerr << "cannot read the survivor logs from " << o.verifyRecords << ".surv\n";
+        return 2;
+      }
+      survRead = true;
+      // the full epoch, from the headers (the records keep its low 16 bits)
+      if (!slots.empty() && (survHdr[slots[0]].epoch & 0xFFFF) == ep) ep = survHdr[slots[0]].epoch;
+    }
     epochs.push_back(ep);
     repCheck(ep, 0);
     repsDone = 1;
@@ -936,6 +1111,11 @@ int main(int argc, char** argv) {
     std::byte* dSync = alloc(sync.size());
     std::byte* dStage = alloc(stageDramBytes);
     std::byte* dXT = alloc(xt.size() * 8);
+    std::byte* dSurv = alloc(twoStage ? size_t(survTotal) * 8 : 64);
+    std::byte* dSurvHdr = alloc(survHdr.size() * sizeof(SppSurvHdr));
+    // --perturb lostlog: the kernel logs into this spare area; the host poisons and reads back dSurv as always
+    const bool lostLog = twoStage && o.perturb == "lostlog";
+    std::byte* dSurvSpare = alloc(lostLog ? size_t(survTotal) * 8 : 64);
     if (launchOk) {
       put(dX, I.X.data(), I.X.size() * 8);
       put(dY, I.y.data(), I.y.size() * 8);
@@ -980,6 +1160,10 @@ int main(int argc, char** argv) {
     args.nbuf = uint64_t(nbuf);
     args.poll_limit = pollLimit;
     args.xt = reinterpret_cast<uint64_t>(dXT);
+    // --perturb tau: the kernel screens at tau1 + 2 (the next c1 of the same parity), the host checks tau1
+    args.tau1 = twoStage ? uint64_t(o.tau1 + (o.perturb == "tau" ? 2 : 0)) : 0;
+    args.surv = reinterpret_cast<uint64_t>(lostLog ? dSurvSpare : dSurv);
+    args.surv_hdr = reinterpret_cast<uint64_t>(dSurvHdr);
 
     rt::KernelLaunchOptions lo;
     lo.setShireMask(o.shires);
@@ -988,28 +1172,48 @@ int main(int argc, char** argv) {
       // Launch only if the launch's whole timeout, plus a readback, still ends by the budget (review R1, finding 2).
       const double elapsed = secondsSince(tProc);
       // whole seconds (the runtime's wait takes std::chrono::seconds), rounded down so the launch ends in time
-      const int toS = int(std::floor(o.sysemu ? timeoutPlan : std::min(timeoutPlan, o.budget - elapsed - 0.5)));
+      // (M5: less the log's poisoning before the launch and its readback after the last)
+      const int toS = int(std::floor(o.sysemu ? timeoutPlan
+                                              : std::min(timeoutPlan, o.budget - elapsed - 0.5 - survPoisonEstS - survReadEstS)));
       if (!o.sysemu && (toS < 1 || toS < 1.25 * guardS + 0.5)) {
         stopReason = "stopped after " + std::to_string(r) + " launch(es): " + std::to_string(o.budget - elapsed) +
-                     " s left before --budget, a launch needs " + std::to_string(1.25 * guardS + 1.0) +
-                     " s (its timeout, rounded down to whole seconds, and a readback)";
+                     " s left before --budget; a launch needs a timeout of at least max(1, 1.25 x guard + 0.5) = " +
+                     std::to_string(std::max(1.0, 1.25 * guardS + 0.5)) +
+                     " s (whole seconds, rounded down, of the time left less 0.5 s" +
+                     (twoStage ? std::string(" and the log's poisoning and readback)") : std::string(")"));
         std::cerr << stopReason << "\n";
         break;
       }
       uint32_t ep = epochBase + uint32_t(r) * 0x10001u;
       if ((ep & 0xFFFF) == 0) ep |= 1;
       args.epoch = ep;
+      const auto tc = Clock::now();
       put(dRec, zeroRecords.data(), zeroRecords.size() * sizeof(SppRecord));
+      // M5: the headers zeroed, and the whole log area poisoned (all-ones, survLog's content until the readback):
+      // an entry this launch does not write fails every entry check
+      if (twoStage) {
+        put(dSurvHdr, zeroHdr.data(), zeroHdr.size() * sizeof(SppSurvHdr));
+        put(dSurv, survLog.data(), survLog.size() * 8);
+      }
       if (!runtime->waitForStream(stream, wait)) {
         launchErr = "clearing the records did not finish";
         launchOk = false;
         break;
       }
+      if (twoStage) survPoisonS = std::max(survPoisonS, secondsSince(tc));
       epochs.push_back(ep);
+      if (r == 0) {
+        launchEpochMs0 = epochMsNow();
+        cpuBurst0 = cpuNow();
+      }
       const auto tl = Clock::now();
       runtime->kernelLaunch(stream, load.kernel_, reinterpret_cast<const std::byte*>(&args), sizeof(args), lo);
       launchOk = runtime->waitForStream(stream, std::chrono::seconds(toS));
       launchS.push_back(secondsSince(tl));
+      if (launchOk) {
+        launchEpochMs1 = epochMsNow();
+        cpuBurst1 = cpuNow();
+      }
       if (!launchOk) {
         launchErr = "kernel did not finish within " + std::to_string(toS) + " s; stream aborted, nothing read back";
         std::cerr << launchErr << "\n";
@@ -1023,6 +1227,9 @@ int main(int argc, char** argv) {
       if (!launchOk) break;
       runtime->memcpyDeviceToHost(stream, dRec, reinterpret_cast<std::byte*>(records.data()),
                                   records.size() * sizeof(SppRecord));
+      if (twoStage)
+        runtime->memcpyDeviceToHost(stream, dSurvHdr, reinterpret_cast<std::byte*>(survHdr.data()),
+                                    survHdr.size() * sizeof(SppSurvHdr));
       if (!runtime->waitForStream(stream, wait)) {
         launchErr = "reading the records back did not finish";
         launchOk = false;
@@ -1030,12 +1237,37 @@ int main(int argc, char** argv) {
       }
       ++repsDone;
       repCheck(ep, r);
+      if (twoStage) {  // every rep finds the same survivors (counts and checksums)
+        if (r == 0) {
+          firstHdr = survHdr;
+        } else {
+          for (int g : slots)
+            if (survHdr[g].found != firstHdr[g].found || survHdr[g].sum != firstHdr[g].sum) {
+              if (repsConsistent && problems.size() < 8)
+                problems.push_back("rep " + std::to_string(r) + ": minion slot " + std::to_string(g) + "'s survivors differ from rep 0");
+              repsConsistent = false;
+            }
+        }
+      }
+    }
+    // M5: the survivor logs, once, after the last launch: one copy of the whole log area (a copy per minion would
+    // cost ~0.1-0.4 ms each, E50), timed; it counts in the solve's time.
+    if (twoStage && launchOk && repsDone > 0) {
+      const auto tr = Clock::now();
+      runtime->memcpyDeviceToHost(stream, dSurv, reinterpret_cast<std::byte*>(survLog.data()), survLog.size() * 8);
+      if (!runtime->waitForStream(stream, wait)) {
+        launchErr += (launchErr.empty() ? "" : "; ") + std::string("survivor readback did not finish");
+      } else {
+        survReadS = secondsSince(tr);
+        survRead = true;
+      }
     }
     if (o.dump && launchOk && repsDone > 0) {
       runtime->memcpyDeviceToHost(stream, dDump, reinterpret_cast<std::byte*>(dumpHost.data()), dumpBytes);
       if (!runtime->waitForStream(stream, wait)) launchErr += (launchErr.empty() ? "" : "; ") + std::string("dump readback did not finish");
     }
-    for (std::byte* p : {dX, dY, dXB, dBin, dMin, dBlk, dRec, dDump, dSync, dStage, dXT}) runtime->freeDevice(device, p);
+    for (std::byte* p : {dX, dY, dXB, dBin, dMin, dBlk, dRec, dDump, dSync, dStage, dXT, dSurv, dSurvHdr, dSurvSpare})
+      runtime->freeDevice(device, p);
     runtime->unloadCode(load.kernel_);
     runtime->destroyStream(stream);
     heldS = secondsSince(tOpen);
@@ -1045,6 +1277,14 @@ int main(int argc, char** argv) {
   if (!o.recordsOut.empty() && !verify) {
     std::ofstream f(o.recordsOut, std::ios::binary);
     f.write(reinterpret_cast<const char*>(records.data()), std::streamsize(records.size() * sizeof(SppRecord)));
+    if (twoStage && survRead) {  // <records>.surv: the headers, then each active slot's stored entries
+      std::ofstream sf(o.recordsOut + ".surv", std::ios::binary);
+      sf.write(reinterpret_cast<const char*>(survHdr.data()), std::streamsize(survHdr.size() * sizeof(SppSurvHdr)));
+      for (int g : slots) {
+        const uint64_t st = std::min(survHdr[g].stored, minions[g].surv_cap);
+        if (st) sf.write(reinterpret_cast<const char*>(&survLog[minions[g].surv_base]), std::streamsize(st * 8));
+      }
+    }
   }
   const uint32_t ep = epochs.empty() ? 0 : epochs.back();
   if (!o.outPath.empty()) {
@@ -1132,6 +1372,135 @@ int main(int argc, char** argv) {
   const bool unique = dev.count > 0 && !dev.tie;
   const bool solved = !I.secret.empty() && answer == I.secret && unique;
 
+  // ---------------------------------------------------------------- M5: stage 1's survivors, then stage 2 (before the
+  // sampled oracle, which fills the time left)
+  // Every minion's header: this launch's epoch, the capacity the host set, stored = min(found, cap), the overflow
+  // flag; its stored entries: c1 >= tau1, in its blocks' order, and (nothing overflowed) their sums equal the
+  // header's. Stage 2 rescores every stored entry on all m samples and re-derives each logged c1 on the first m1.
+  std::string survCheck = "n/a", survOracle = "n/a", stage2Check = "n/a";
+  uint64_t survOracleBad = 0, survOracleDone = 0;  // the sampled oracle's minions' survivor sets, entry by entry
+  uint64_t survFound = 0, survStored = 0, survOverflow = 0, survTilesHit = 0, survFoundMax = 0, survHdrBad = 0,
+           survEntryBad = 0, survFoundMin = ~0ull, survOutliers = 0;
+  double survZMax = 0;  // the largest |found - expected| / sqrt(expected + 1) over the minions
+  Stage2 s2;
+  double stage2S = 0;
+  int stage2Nt = 0;
+  std::vector<int> answer2;
+  int32_t rescored2 = INT32_MIN;
+  bool unique2 = false, solved2 = false;
+  if (twoStage && haveRecords) {
+    for (int g : slots) {
+      const SppSurvHdr& h = survHdr[g];
+      const SppMinion& mp = minions[g];
+      const bool hok = h.epoch == ep && h.cap == mp.surv_cap && h.stored == std::min(h.found, h.cap) &&
+                       ((h.flags & SPP_SURV_OVERFLOW) != 0) == (h.found > h.cap);
+      survFound += h.found;
+      survFoundMax = std::max(survFoundMax, h.found);
+      survFoundMin = std::min(survFoundMin, h.found);
+      {
+        // survivor counts per minion against its expected share: null candidates survive independently in pairs
+        // (the CPU's screens counted within 0.3% of the expectation), so 8 sigma is far outside chance
+        const double E = survExpectSlot[g], z = (double(h.found) - E) / std::sqrt(E + 1.0);
+        survZMax = std::max(survZMax, std::fabs(z));
+        if (E >= 100 && std::fabs(z) > 8.0 && !plan.slots[g].empty()) {
+          if (survOutliers < 3)
+            problems.push_back("minion slot " + std::to_string(g) + " found " + std::to_string(h.found) +
+                               " survivors, expected " + std::to_string(E) + " (" + std::to_string(z) + " sigma)");
+          ++survOutliers;
+        }
+      }
+      survTilesHit += h.tiles_hit;
+      if (h.found > h.cap) ++survOverflow;
+      if (!hok) {
+        if (survHdrBad < 4) {
+          std::ostringstream t;
+          t << "minion slot " << g << " survivor header: epoch " << hex(h.epoch) << " (" << hex(ep) << ") cap " << h.cap
+            << " (" << mp.surv_cap << ") found " << h.found << " stored " << h.stored << " flags " << h.flags;
+          problems.push_back(t.str());
+        }
+        ++survHdrBad;
+        continue;
+      }
+      survStored += h.stored;
+      if (!survRead) continue;
+      const std::vector<Block>& bl = plan.slots[g];
+      size_t bi = 0;
+      uint64_t sum = 0, sumc = 0, lastTile = 0;
+      bool eok = true;
+      for (uint64_t q = 0; q < h.stored; ++q) {
+        const uint64_t e = survLog[mp.surv_base + q], t = survRow(e) / 16;
+        sum += e;
+        sumc += uint64_t(int64_t(survC1(e)));
+        if (survC1(e) < o.tau1) eok = false;
+        if (bi < bl.size() && t >= bl[bi].tile0 && t < bl[bi].tile0 + bl[bi].ntiles && t >= lastTile) {
+          lastTile = t;
+          continue;
+        }
+        while (++bi < bl.size() && !(t >= bl[bi].tile0 && t < bl[bi].tile0 + bl[bi].ntiles)) {
+        }
+        if (bi >= bl.size()) eok = false;
+        lastTile = t;
+      }
+      if (h.found <= h.cap && (sum != h.sum || sumc != h.sum_c1)) eok = false;
+      if (!eok) {
+        if (survEntryBad < 4) problems.push_back("minion slot " + std::to_string(g) + ": its stored survivor entries disagree with its header or its blocks");
+        ++survEntryBad;
+      }
+    }
+    const double ratio = survExpect > 0 ? double(survFound) / survExpect : 1.0;
+    if (survExpect >= 1e5 && std::fabs(ratio - 1.0) > 0.05)
+      problems.push_back("survivors found " + std::to_string(survFound) + ", " + std::to_string(ratio) + " of expected");
+    survCheck = !survRead ? "NOT READ"
+                : survHdrBad ? "BAD " + std::to_string(survHdrBad) + " headers"
+                : survOverflow ? "OVERFLOW " + std::to_string(survOverflow) + " minions (found " + std::to_string(survFound) + ", stored " + std::to_string(survStored) + ")"
+                : survEntryBad ? "MISMATCH " + std::to_string(survEntryBad) + " minions' entries"
+                : survOutliers ? "COUNT " + std::to_string(survOutliers) + " minions over 8 sigma from their share"
+                               : "ok, " + std::to_string(survFound) + " found";
+    if (survOverflow) problems.push_back("survivor logs overflowed on " + std::to_string(survOverflow) + " minions: stage 2 would miss survivors");
+    if (survRead && survHdrBad == 0) {
+      // Stage 2 on the host: the stored entries of every minion, split evenly over the threads.
+      std::vector<std::pair<const uint64_t*, uint64_t>> spans;
+      for (int g : slots)
+        if (survHdr[g].stored) spans.push_back({&survLog[minions[g].surv_base], survHdr[g].stored});
+      stage2Nt = int(std::max<uint64_t>(1, std::min<uint64_t>(uint64_t(o.stage2Threads), survStored / 16384 + 1)));
+      std::vector<Stage2> part(static_cast<size_t>(stage2Nt));
+      const auto t2 = Clock::now();
+      auto work = [&](int ti) {
+        const uint64_t a = survStored * uint64_t(ti) / uint64_t(stage2Nt), b = survStored * uint64_t(ti + 1) / uint64_t(stage2Nt);
+        uint64_t base = 0;
+        for (const auto& sp : spans) {
+          const uint64_t lo = std::max(a, base), hi = std::min(b, base + sp.second);
+          if (lo < hi) stage2Range(F, o.m1, o.tau1, sp.first + (lo - base), size_t(hi - lo), part[size_t(ti)]);
+          base += sp.second;
+          if (base >= b) break;
+        }
+      };
+      std::vector<std::thread> th;
+      for (int ti = 1; ti < stage2Nt; ++ti) th.emplace_back(work, ti);
+      work(0);
+      for (auto& t : th) t.join();
+      for (const Stage2& p : part) s2.merge(p);
+      stage2S = secondsSince(t2);
+      if (s2.acc.count && s2.acc.bestRank < binom64(F.n, F.k)) {
+        answer2 = unrank(s2.acc.bestRank, F.k);
+        rescored2 = scoreSubset(F, answer2);
+      }
+      unique2 = s2.acc.count > 0 && !s2.acc.tie;
+      solved2 = !F.secret.empty() && answer2 == F.secret && unique2;
+      const bool s2ok = s2.bad == 0 && (s2.acc.count == 0 || rescored2 == s2.acc.best) && s2.entries == survStored;
+      stage2Check = s2ok ? "ok, " + std::to_string(s2.entries) + " entries rescored, every c1 exact"
+                         : "MISMATCH: " + std::to_string(s2.bad) + " bad entries (first " + hex(s2.firstBad) + ")";
+      if (!s2ok) problems.push_back("stage 2: " + stage2Check);
+      if (!o.survOut.empty()) {  // every stored entry, in spref's log= order (sorted by (j, row))
+        std::vector<uint64_t> all;
+        all.reserve(size_t(survStored));
+        for (const auto& sp : spans) all.insert(all.end(), sp.first, sp.first + sp.second);
+        std::sort(all.begin(), all.end(), [](uint64_t x, uint64_t y) { return survKey(x) < survKey(y); });
+        std::ofstream sf(o.survOut, std::ios::binary);
+        sf.write(reinterpret_cast<const char*>(all.data()), std::streamsize(all.size() * 8));
+      }
+    }
+  }
   // The per-minion oracle and the dump.
   auto slotWords = [&](int g) { return double(tilesPerSlot[g]) * 256.0 * (G.S + 12) + double(rowTilesPerSlot[g]) * 16 * G.S * I.k; };
   double oracleWork = 0;
@@ -1177,8 +1546,28 @@ int main(int argc, char** argv) {
       if (!inSample[g] && !o.dump) continue;
       if (deadlined && oracleMode == "sample" && oracleDone > 0 && secondsSince(tProc) > checksDeadline) break;
       Acc a;
-      scoreBlocks(I, G, plan.slots[g], a, o.dump ? &expect : nullptr, !tensor);
+      std::vector<uint64_t> sv;
+      scoreBlocks(I, G, plan.slots[g], a, o.dump ? &expect : nullptr, !tensor, twoStage ? &sv : nullptr, o.tau1);
       if (!plan.slots[g].empty()) ++oracleDone;
+      if (twoStage && !plan.slots[g].empty()) {
+        // the card's log against the CPU's list: every found entry counted and summed, the stored ones equal in order
+        const SppSurvHdr& h = survHdr[g];
+        uint64_t sum = 0, sumc = 0;
+        for (uint64_t e : sv) sum += e, sumc += uint64_t(int64_t(survC1(e)));
+        bool same = h.found == sv.size() && h.sum == sum && h.sum_c1 == sumc && survRead;
+        const uint64_t st = std::min<uint64_t>(sv.size(), minions[g].surv_cap);
+        for (uint64_t q = 0; same && q < st; ++q) same = survLog[minions[g].surv_base + q] == sv[q];
+        ++survOracleDone;
+        if (!same) {
+          if (survOracleBad < 4) {
+            std::ostringstream s2;
+            s2 << "minion slot " << g << " survivors: card found " << h.found << " sum " << hex(h.sum) << ", CPU "
+               << sv.size() << " sum " << hex(sum);
+            problems.push_back(s2.str());
+          }
+          ++survOracleBad;
+        }
+      }
       const Acc d = accOf(records, g, !tensor && o.twoHart);
       const bool same = d.count == a.count && d.sum == a.sum && uint64_t(d.sq) == uint64_t(a.sq) &&
                         (a.count == 0 || (d.best == a.best && d.bestRank == a.bestRank && d.tie == a.tie));
@@ -1217,6 +1606,12 @@ int main(int argc, char** argv) {
       }
     }
   }
+  if (survOracleDone)
+    survOracle = survOracleBad ? "MISMATCH " + std::to_string(survOracleBad) + " of " + std::to_string(survOracleDone) + " minions"
+                               : "exact, " + std::to_string(survOracleDone) + " minions";
+  const bool survOk = !twoStage || (survRead && survHdrBad == 0 && survOverflow == 0 && survEntryBad == 0 && survOutliers == 0 &&
+                                    survOracleBad == 0 && stage2Check.rfind("ok", 0) == 0);
+
   // Every value check that ran; on silicon a run without one fails (review R1, finding 1).
   const bool valueChecked = o.timingOnly || (fullCoverage && sumCheck == "ok" && sqCheck == "ok") || oracleDone > 0;
   if (!valueChecked && !o.sysemu) problems.push_back("no value check ran (partial coverage and no oracle)");
@@ -1225,7 +1620,7 @@ int main(int argc, char** argv) {
 
   const bool pass = launchOk && haveRecords && repsOk && repsConsistent && badRecords == 0 && countOk && rescoreOk &&
                     sumCheck != "MISMATCH" && sqCheck != "MISMATCH" && oracleBad == 0 && dumpBad == 0 &&
-                    dumpCheck.rfind("SIZE", 0) != 0 && (valueChecked || o.sysemu) && problems.empty();
+                    dumpCheck.rfind("SIZE", 0) != 0 && (valueChecked || o.sysemu) && survOk && problems.empty();
   if (!countOk) problems.push_back("count " + std::to_string(dev.count) + " != plan " + std::to_string(planCand));
   if (!rescoreOk) problems.push_back("best c " + std::to_string(dev.best) + " rescored " + std::to_string(rescored));
 
@@ -1272,6 +1667,7 @@ int main(int argc, char** argv) {
   j.kv("open_s", openS);
   j.kv("setup_s", setupS);
   j.raw("launch_s", jarr(launchS));
+  j.raw("launch_epoch_ms", "[" + std::to_string(launchEpochMs0) + "," + std::to_string(launchEpochMs1) + "]");
   j.kv("reps_requested", o.reps);
   j.kv("reps_done", repsDone);
   j.ks("reps_consistent", repsConsistent ? "ok" : "MISMATCH");
@@ -1294,6 +1690,24 @@ int main(int argc, char** argv) {
       << "\",\"sum_c2_mod64\":\"" << uint64_t(dev.sq) << "\",\"count\":" << dev.count << "}";
     j.raw("result", s.str());
   }
+  if (twoStage) {  // M5: result above is stage 1's (the best on the first m1 samples); the answer is stage 2's
+    const double l = launchS.empty() ? 0.0 : launchS.back();
+    std::ostringstream s;
+    s << "{\"plan\":" << tsPlanJson << ",\"instance_hash_m\":\"" << std::hex << instHash(F) << std::dec
+      << "\",\"found\":" << survFound << ",\"stored\":" << survStored << ",\"overflow_minions\":" << survOverflow
+      << ",\"found_max_minion\":" << survFoundMax << ",\"found_min_minion\":" << (survFound ? survFoundMin : 0)
+      << ",\"minion_z_max\":" << survZMax << ",\"tiles_hit\":" << survTilesHit << ",\"found_over_expected\":"
+      << (survExpect > 0 ? double(survFound) / survExpect : 0.0) << ",\"readback_s\":" << survReadS
+      << ",\"readback_mb\":" << double(survTotal) * 8 / 1048576.0 << ",\"stage2_s\":" << stage2S
+      << ",\"stage2_threads\":" << stage2Nt << ",\"entries\":" << s2.entries << ",\"bad_entries\":" << s2.bad
+      << ",\"best_c\":" << s2.acc.best << ",\"best_rank\":" << s2.acc.bestRank << ",\"answer\":" << jarr(answer2)
+      << ",\"rescored_c\":" << rescored2 << ",\"unique\":" << tf(unique2) << ",\"solved\":" << tf(solved2)
+      << ",\"secret_survived\":" << tf(s2.secretIn) << ",\"secret\":" << jarr(F.secret) << ",\"launch_s\":" << l
+      << ",\"poison_s\":" << survPoisonS << ",\"solve_s\":" << l + survReadS + stage2S
+      << ",\"model_solve_s\":" << modelS + survReadEstS + stage2EstS
+      << "}";
+    j.raw("two_stage", s.str());
+  }
   {
     std::ostringstream s;
     s << "{\"records\":\"" << (badRecords ? std::to_string(badRecords) + " bad" : haveRecords ? "ok" : "none")
@@ -1301,7 +1715,8 @@ int main(int argc, char** argv) {
       << sqCheck << "\",\"closed_form_sum_c\":\"" << (fullCoverage ? i128(cfSum) : "")
       << "\",\"closed_form_sum_c2\":\"" << (fullCoverage ? i128(__int128(cfSq)) : "") << "\",\"best_rescore\":\""
       << (rescoreOk ? "ok" : "MISMATCH") << "\",\"oracle\":\"" << oracleCheck << "\",\"oracle_mode\":\"" << oracleMode
-      << "\",\"value_checked\":" << tf(valueChecked) << ",\"dump\":\"" << dumpCheck << "\",\"launch\":\""
+      << "\",\"value_checked\":" << tf(valueChecked) << ",\"dump\":\"" << dumpCheck << "\",\"survivors\":\"" << survCheck
+      << "\",\"survivors_oracle\":\"" << survOracle << "\",\"stage2\":\"" << stage2Check << "\",\"launch\":\""
       << (launchOk ? "ok" : "FAILED") << "\"}";
     j.raw("checks", s.str());
   }
@@ -1317,6 +1732,14 @@ int main(int argc, char** argv) {
     j.raw("problems", s.str());
   }
   j.ks("launch_error", launchErr);
+  {
+    const CpuTimes all = cpuNow();
+    std::ostringstream s;
+    s << "{\"burst\":[" << (launchEpochMs1 ? cpuBurst1.user - cpuBurst0.user : 0.0) << ","
+      << (launchEpochMs1 ? cpuBurst1.sys - cpuBurst0.sys : 0.0) << "],\"process\":[" << all.user << "," << all.sys
+      << "],\"note\":\"getrusage(RUSAGE_SELF) user, system; burst = launch_epoch_ms\"}";
+    j.raw("host_cpu_s", s.str());
+  }
   j.kv("process_s", secondsSince(tProc));
   j.ks("status", pass ? (o.timingOnly ? "TIMING" : "PASS") : "FAIL");
   j.s << "}";

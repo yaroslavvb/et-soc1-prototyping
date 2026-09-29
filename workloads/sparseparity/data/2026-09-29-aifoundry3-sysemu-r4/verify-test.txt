@@ -1,0 +1,21 @@
+== sysemu run with --records-out
+rc 0
+PASS ok, 624 found | exact, 2 minions | ok, 624 entries rescored, every c1 exact | poison_s 0.00618505 | host_cpu_s {'burst': [0.779182, 0.028036], 'process': [32.5706, 0.074033], 'note': 'getrusage(RUSAGE_SELF) user, system; burst = launch_epoch_ms'}
+-rw-r--r-- 1 yaroslavvb yaroslavvb 131072 Sep 29 11:24 rec.bin
+-rw-r--r-- 1 yaroslavvb yaroslavvb  70528 Sep 29 11:24 rec.bin.surv
+== verify-records
+rc 0
+PASS exact, all 2 minions | ok, 624 found | exact, 2 minions | ok, 624 entries rescored, every c1 exact
+== card_run.sh packing
+-rw-r--r--  1 yaroslavvb yaroslavvb    2932 Sep 29 11:24 rec.bin.surv.gz
+-rw-r--r--  1 yaroslavvb yaroslavvb     169 Sep 29 11:24 rec.bin.surv.hdr.gz
+-rw-r--r--  1 yaroslavvb yaroslavvb      79 Sep 29 11:24 rec.bin.surv.sha256
+3014117ac870bb209c2d65ff8f49ec9899c468fd7513777490df03ada9a72450  rec.bin.surv
+rec.bin.surv: OK
+hdr = the first 64 KB
+re-verify rc 0
+PASS
+== one entry's c1 bit flipped
+rc 1
+FAIL | MISMATCH 1 minions' entries | MISMATCH 1 of 2 minions | MISMATCH: 1 bad entries (first 0x260070000000005)
+DONE

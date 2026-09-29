@@ -17,9 +17,22 @@ buffers as an option; M1's kernel and planner stay one flag away (`--variant m1`
 M4's code (R3, below) found no correctness bug; its findings on the time budget and the card's coverage are applied
 (the host's guard no longer trusts M4's predicted constants alone; `card_run.sh m4` gains the race probe with M4's
 generation, a plan-balance control, a speed gate and offline full-oracle checks), and it found a stall in the
-pipeline model past 1e10 cycles, now fixed. It passes every CPU test and 66 `sys_emu` cases; **it has not run on a
-card**: [`card_run.sh m4`](card_run.sh) is the A/B for the owner's session, with the model's expected times
-(L1 0.207 -> 0.086 s, L2 0.835 -> 0.403 s on 1,024 minions; commands in "M4 on a card").
+pipeline model past 1e10 cycles, now fixed. `card_run.sh m4` ran on aifoundry3's card at 08:17-08:45 PDT
+([`data/2026-09-29-aifoundry3-card-m4/`](data/2026-09-29-aifoundry3-card-m4/README.md)): variant b (the fitted plan
+and the incremental generation, M1's epilogue) is the best, L1 0.130 s, L2 0.429 s, (256,5) 2.55 s in two halves;
+the epilogue in pieces was slower on silicon than its model. **M5's code** ("M5: the two-stage screen") puts the
+screen's stage 1 in variant b's epilogue (a survivor log per minion, counted and flagged when full) and stage 2 on
+the host; at η = 0.4 A cannot stay resident (m1 ≤ 192 keeps 83% of the candidates at P(loss) < 1e-4), so it screens
+at m1 = 320 (L1) and 1,152 (L2, (256,5)). It passes every CPU test and 83 `sys_emu` cases (survivor logs equal to
+`spref`'s byte for byte); **it has not run on a card**: `card_run.sh m5` predicts L1 0.10-0.12 s, L2 0.26 s and
+(256,5) 1.22-1.33 s, 1.3-1.9x the CPU's own two-stage screen at the same P(loss). A review of M5 and of the board
+energy tooling (R4, below) found no card-safety blocker; its findings are applied: the energy headline is the SP's
+board average with the leakage law on the measured die temperature (±3%, tested on a second, adversarial test card
+as well as the plumbing one), the card-against-CPU energy ratio is stated for the card's board alone and with the
+host's package added, `combine` refuses anything but one solve's slices; the host poisons the survivor logs before
+each launch, and two controls show on the card that the checks catch a missed survivor (`--perturb tau`) and a log
+that never reached DRAM (`--perturb lostlog`); S2 is provisional until the offline full oracle. **Both card runs
+(`card_run.sh m5`, `energy.sh`) use `build/sparseparity-t`** ("Build"; kernel `.text` `3e14be32…`, M5's, unchanged).
 
 ## Contents
 
@@ -29,8 +42,9 @@ card**: [`card_run.sh m4`](card_run.sh) is the A/B for the owner's session, with
 | `host/main.cpp` | `sparseparity_host`: generate or load an instance, plan, open the card (or `--sysemu`), launch, read back the per-hart records, check everything on the CPU, print one JSON line. |
 | `host/spp_common.h` | The host's instance generator, colex ranks and tile geometry (the same as `cpu/sp.h`), the cost model and planner, the CPU oracle and the closed-form checksums. |
 | `host/spp_selftest.cpp` | `spp_selftest`: the host model's CPU-only tests; also `--tie-instance`, `--bench-oracle`, `--plan`, `--hash`. |
-| `sysemu_check.sh` | Every kernel path in `sys_emu` (66 cases: M4's kernel by default, M1's with `--variant m1`), with the simulator's checkers on. |
-| `card_run.sh` | The M1, probe, M2 and M4 card steps (`m1`, `probe`, `m2`, `m4`, `m4gen`), one locked, `timeout 10` process each, stopping at the first unexpected result; each step's launch time over its model; the M4 stage's speed gate and offline full-oracle checks. `--dry` runs them without a device. |
+| `sysemu_check.sh` | Every kernel path in `sys_emu` (85 cases: M4's kernel by default, M1's with `--variant m1`, and M5's two-stage screen, `ts-*`, whose survivor logs are compared byte for byte with `spref`'s, with its four controls), with the simulator's checkers on; `--only REGEX` runs a subset. |
+| `card_run.sh` | The M1, probe, M2, M4 and M5 card steps (`m1`, `probe`, `m2`, `m4`, `m4gen`, `m5`), one locked, `timeout 10` process each, stopping at the first unexpected result; each step's launch time over its model; the M4 stage's speed gate and offline full-oracle checks; M5's two-stage fields, its controls, provisional S2 and the survivor logs' packing. `--dry` runs them without a device. |
+| `energy.sh`, `tools/energy_reduce.py`, `tools/energy_stub.py` | Board energy per solve on one card: idle, one host process of back-to-back solves, idle, under `ettelem` at 10 Hz; the reduction (J per solve over idle from the SP's board average, the catalogue's method beside it, the rails, the host's share, the CPU ratios; `combine` for one solve's slices); the test doubles for `--dry`, a plumbing card and an adversarial one. "Energy per solve (`energy.sh`)" below. |
 | `tools/cycle_model.py` | The two-hart cycle model fitted to the card's records (`check`, `fit`, `validate`, `explain`, `whatif`), the host's model of a launch (`host`, `table`: the same numbers `sparseparity_host --dry` and `spp_selftest --pipe-table` print), and the M4 steps' predictions (`m4`). |
 | `cpu/sp.h` | Header-only C11/C++: the instance generator (bit-identical to `proto/spbits.c` and `proto/sp.py`), the ±1 and B-tile layouts, colex ranks and the T2 geometry, the closed forms, and the binary formats (work list, records, top lists, survivors). |
 | `cpu/spref.c` | The reference solver in exactly the card's formulation: `gen`, `scan` (full, by work list, two-stage), `check`, `selftest`. |
@@ -39,7 +53,7 @@ card**: [`card_run.sh m4`](card_run.sh) is the A/B for the owner's session, with
 | `tools/sptest.py`, `tools/spcore.py` | The CPU tests (107 checks; 115 with `--spbits`) and `sptest.py card` (a card's output against the reference, hart by hart); `spcore.py` is `sp.h` in Python. |
 | `tools/bench_cpu.py`, `tools/table_cpu.py` | The CPU baseline ladder and its tables. |
 | `cpu/data/2026-09-29-aifoundry3-r/` | The CPU baselines after the reviews (the table below). `cpu/data/2026-09-29-aifoundry3/` is the first run, superseded. |
-| `data/2026-09-29-aifoundry3-sysemu-m4r/` | The `sys_emu` suite's results, the CPU test logs and R3's checks of the code as it stands (`-sysemu/`: M1's code; `-sysemu-m4/`: M4 before R3's fixes). |
+| `data/2026-09-29-aifoundry3-sysemu-m5/` | M5: the `sys_emu` suite (83 cases), the CPU tests, the stage-2 benchmark, `card_run.sh m5 --dry`, the offline-verify test and the CPU's two-stage screens at P(loss) < 1e-4. `-sysemu-r4/`: M5 after R4's fixes (`build/sparseparity-t`). `-energy-dry/`: `energy.sh --dry` on both test cards. `-sysemu-m4r/`: M4 after R3 (`-sysemu/`: M1's code; `-sysemu-m4/`: M4 before R3's fixes). |
 
 ## Build
 
@@ -101,6 +115,37 @@ make -C workloads/sparseparity/cpu O=$HOME/nekko/build/sparseparity-h-cpu
 
 (R1 found that an earlier report quoted a wrong hash, `76eb2d2f…`, for the previous kernel: its `.text`, extracted
 this way on three hosts, was `d32d702ad0ffb4c4…`.)
+
+**M5's sources build into `build/sparseparity-s`** (and `-s-cpu`; `-h` and `-i` keep M4's kernel). Its kernel's
+`.text` sha256 is `3e14be325df307751f424372d0a1dccad244b3ffe0e46e43d82baefb300cb820` (aifoundry3, 29 September
+10:04 PDT); without `--m1` it runs M4's paths (the screen is a flag, and the host sets it only for a two-stage run).
+The tree also holds the energy change ("Energy per solve"): this host opens the ops node only.
+
+```bash
+tar --exclude=__pycache__ -czf - workloads/sparseparity docs/research/sparse-parity | \
+    ssh aifoundry3 'mkdir -p ~/nekko/build/sparseparity-s-src && tar xzf - -C ~/nekko/build/sparseparity-s-src'
+cd ~/nekko/build/sparseparity-s-src                          # on aifoundry3, while et-who shows the card free
+cmake -S workloads/sparseparity -B ../sparseparity-s -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev
+nice -n 19 cmake --build ../sparseparity-s -j6
+make -C workloads/sparseparity/cpu O=$HOME/nekko/build/sparseparity-s-cpu
+../sparseparity-s/host/spp_selftest                          # SELFTEST PASS (with M5's checks)
+```
+
+**R4's fixes build into `build/sparseparity-t`** (and `-t-cpu`; sources in `~/nekko/build/sparseparity-t-src`,
+aifoundry3, 29 September 11:08 PDT). They change the host and the scripts only: the kernel's `.text` sha256 is
+`3e14be325df307751f424372d0a1dccad244b3ffe0e46e43d82baefb300cb820`, M5's, and `spp_selftest` passes. Both card
+runs use it: `card_run.sh m5 --build ../sparseparity-t` and `energy.sh --build ../sparseparity-t`.
+
+```bash
+tar --exclude=__pycache__ -czf - workloads/sparseparity docs/research/sparse-parity | \
+    ssh aifoundry3 'mkdir -p ~/nekko/build/sparseparity-t-src && tar xzf - -C ~/nekko/build/sparseparity-t-src'
+cd ~/nekko/build/sparseparity-t-src                          # on aifoundry3, while et-who shows the card free
+cmake -S workloads/sparseparity -B ../sparseparity-t -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev
+nice -n 19 cmake --build ../sparseparity-t -j6
+make -C workloads/sparseparity/cpu O=$HOME/nekko/build/sparseparity-t-cpu
+../sparseparity-t/host/spp_selftest                          # SELFTEST PASS
+/opt/et/bin/riscv64-unknown-elf-objcopy -O binary -j .text ../sparseparity-t/kernel/sparseparity.elf /dev/stdout | sha256sum   # 3e14be32…
+```
 
 ## The milestones and how to run each
 
@@ -245,7 +290,7 @@ every such call (`CALL_GUARD`), and every function that carries a partial epilog
 
 **Not done.** 2 staging buffers at L2 (the model's best L2 case, 301-337 ms) need 3.0 MB of scratchpad against 2.5 MB:
 22 minions per shire fit, but lose 31% of the tensor units, which the model says gains nothing; the two-stage screen
-(m1 = 832, S = 13) needs the survivor log. E (both harts generate) is at most 1.06x (one issue slot). R1-7's earlier
+is M5 (below), in M1's epilogue, at m1 = 320 and 1,152. E (both harts generate) is at most 1.06x (one issue slot). R1-7's earlier
 release of the staging buffer conflicts with the deferred rescans, which reread A from it.
 
 **The model's uncertainty.** M1's kernel is fitted (M3's busiest minion +1.4% / +3.6%; held out +5.0% / +7.5%). M4's
@@ -349,6 +394,299 @@ cannot say what `nostore` gives: the difference is the staged stores' cost, whic
 (R3-9): the 256 B buffer is 4 of the 8 L1 lines hart 1 has in scratchpad mode, shared with the slice-major X lines and
 the stack, so its dirty write-backs may count as generation time, and incremental minus `nostore` can understate the
 staged stores' cost.
+
+### Energy per solve (`energy.sh`)
+
+Board energy per solve of variant b on one card, with the energy catalogue's discipline (`tools/claims-v3/lib.sh`:
+the card lock for the whole run, the sampler started with retries and stopped with SIGTERM only, every device
+process under `timeout 10`) and its method beside a better headline. **It has not run on a card.** R4 (below) found
+no card-safety blocker in it; its findings are applied.
+
+**The host change it needs.** `sparseparity_host` opened the card's management node as well as its ops node
+(`createPcieDeviceLayer(true, true)`), and the driver lets one process hold the management node
+(`et-driver/et-soc1-pcie.c`: `EBUSY`), which `ettelem` holds while it samples: the build that ran M4
+(`build/sparseparity-h`) cannot run under the sampler. The host now opens the ops node only, as `pciebench`'s host
+does (the device properties come through it: `DevicePcie.cpp:365-368`; `sgemm`'s host still opens both). Its JSON
+line carries `launch_epoch_ms` (the first launch's start and the last completed launch's end, Unix ms) and
+`host_cpu_s` (the process's CPU time, every thread, `getrusage`: over that burst and over the whole process).
+`energy.sh` refuses a host binary without `launch_epoch_ms`. **The build is `build/sparseparity-t`** (M5's sources
+with R4's fixes: kernel `.text` `3e14be32…`, "Build"), whose kernel without `--m1` runs variant b's paths; the steps
+`m5-l1-b` and `m5-l2-b` of `card_run.sh m5` rerun variant b on it against 29 September's 0.130 and 0.429 s. The build
+that R4 checked, `build/sparseparity-i` (the kernel that ran M4, `4c2e7bde…`, and the ops-node host without
+`host_cpu_s`), also runs: `energy.sh` then bounds the host's share by the whole process's CPU time.
+
+**One run** is one preset: `l1`, `l2`, `f5h0` or `f5h1` (the two halves of (256,5) as `data/2026-09-29-aifoundry3-card-m4/f5-b`
+ran them, `--slice I/2 --slice-cost m1`), all `--variant m1 --cost fit --gen inc` on 32 x 32 minions. The script
+plans with the host's `--dry` (no device, niced) how many launches fill `--target-s` (6 s) and still start under the
+host's own budget rule (a launch needs a timeout of at least max(1, 1.25 x guard + 0.5) s, whole seconds of the time
+left before 9 s less 0.5 s); waits for `et-who --check` and no other user's device process; takes the card lock on
+fd 9 for the whole run; starts `ettelem sample --every-ms 100` (10 Hz, as `lib.sh` and the catalogue: `board_w` is
+held for one SP pass, which a 20 Hz sampler only lengthens, 0.255 to 0.296 s, E58); idles 8 s; runs ONE `timeout 10`
+host process with `--reps R --oracle sample` (every launch read back and checked against the first), its CPU time
+taken by bash's `times`; idles 10 s; stops the sampler; releases the lock; reduces. About 30 s per run: the lock
+about 27 s, the card's ops node at most 10 s. It refuses aifoundry2 (the DV2 validation treats a sampler or a
+`*_host` process as foreign) unless `SPP_ALLOW_AIFOUNDRY2=1`; there only the stubs' `--dry` runs.
+
+| Preset | Launches | Burst | Launch (29 Sep) |
+|---|---|---|---|
+| `l1` | 44 | 5.9 s | 0.130 s |
+| `l2` | 14 | 6.1 s | 0.429 s |
+| `f5h0` | 6 | 5.8 s | 0.958 s |
+| `f5h1` | 3 | 4.8 s (its guard leaves the host no fourth start) | 1.589 s |
+
+These are the first card runs with `--reps` > 1 (every earlier card JSON has one launch), and L1's 44 launches at
+7.3 per second are the densest stream of short kernels yet (aifoundry2's Master Minion hang came in such a stream,
+cause not established): run a 3-launch smoke run and `l2` before `l1`. Each launch keeps its own timeout, and the
+host checks every one.
+
+**The reduction** (`tools/energy_reduce.py DIR`, no device). The burst [lo, hi] is the host's `launch_epoch_ms`.
+- **The headline, J per solve over idle: the SP's board average** (`sp.board_avg_w`, the PMIC's own running average
+  of its input power; unit gain, 1.00-1.01 against first-order-filtered `board_w` on E58's bursts, R4) integrated over
+  [lo - 1, hi + 6] above the before bracket, less the leakage's rise: the catalogue's law (23.257/36 e^((T-80)/36)
+  W/°C) times the measured die temperature over the before bracket's, sample by sample. The average does not alias
+  the gaps between launches, and a unit-gain filter keeps the energy it delays. **Claimed: ±3%** (the die
+  temperature reads whole degrees; the law is aifoundry2's, and aifoundry3's own idle curve is 0.26-0.30 W/°C at
+  55-57 °C against its 0.33, `2026-09-22-horace-aifoundry3/leakage_crosscard.json`).
+- **The board total per solve, idle included** (the before bracket's idle over the burst, the leakage's rise, the
+  headline): ±2%.
+- **Cross-checks.** The catalogue's method (`analyze_catalogue.py`'s windows and law on the point-sampled `board_w`,
+  so the numbers sit beside the catalogue's): ±3% plus one pass of the step per busy reading at idle more or fewer
+  than expected (the busy passes x the gaps' share), and one more; one such reading moves a run by 1/N of its step,
+  N the busy passes (4-6% here), which is why it is no longer the headline. The ramp baseline (the SP average above
+  a straight line from the before bracket to a late bracket [hi + 6, hi + 8]; no temperature, no law): it misses the
+  fast thermal stages (`docs/findings/11-thermal-model.md`: 1.5 s and 4 s, 0.16 °C/W, which heat the die within the
+  burst and let it cool within seconds of its end) and reads about 4% high on the adversarial test card. The
+  uncorrected value (all of the leakage's rise).
+- **The rails** (minion, SRAM, NoC: the PMIC's running averages, tau ~1.05 s, E58) over the ramp baseline, since no
+  law is known per rail: upper bounds, -2% to +7%; unmetered = the headline minus the rails, ±15% (a small difference
+  of larger numbers).
+- **The host's share.** The card does not solve alone: the host drives it (the runtime polls the device, E50) and its
+  package idles meanwhile. Its package energy is root-only on aifoundry3 (below), so it is bounded: an assumed idle of
+  10-20 W over the burst plus 10-38.5 W per busy core-second (38.5 = the CPU side's own 251 W spread over its 6
+  busy cores), the busy core-seconds the host's `host_cpu_s.burst`.
+- Also: mean board watts, solves per second (wall and kernel), die temperature before, busy and after, the clock in
+  every busy sample, the sampler's latency; flags for a moved clock, a starved sampler, short windows, a host short of
+  its reps, a foreign device process, and the catalogue method off the headline by more than both claims.
+
+**`combine`** adds the slices of one solve (`combine DIR DIR --label NAME`: the halves of (256,5)) and refuses
+(exit 2) unless the parts are one instance (its hash), one variant and one kernel, and their slices are I/N for one N
+with every I in 0..N-1 exactly once: a rerun of a half is not a third part. Name the parts explicitly (the commands
+below give each run its own directory), never with a glob.
+
+**The CPU side.** The CPU's energy per solve is its measured 6-thread time x an assumed 125-251 W, idle included:
+aifoundry3's package energy counter is root-only (`/sys/class/powercap/intel-rapl:0/energy_uj` 0400 root;
+`/dev/cpu/*/msr` 0600 root; `perf_event_paranoid` 2; the only sudo rule is `et-holders`; checked 29 September, and
+`energy.sh` records it with every run). Its time is its fastest method that keeps the secret with P(loss) ≤ 1e-4,
+since the card's one-stage scan loses nothing: L1 the meet in the middle, 0.148 s (expected over 10 seeds; the
+two-stage screen at 8.8e-5 takes 0.166 s); L2 the two-stage screen at m1 1,152, 0.508 s (P(loss) 8.9e-5; the earlier
+0.459 s at m1 1,024 loses the secret with 6.2e-4); (256,5) the same, 1.769 s (8.9e-5; 1.58 s at 6.2e-4). The reducer
+states two ratios: the CPU over **the card's board alone** (the host not counted) and over **the card's board plus the
+host's package** (the bounds above). An M5 run's energy (not measured here) must add stage 2 on 6 host threads the
+same way (`two_stage.stage2_s` x 6 busy cores).
+
+**Dry tests** (`--dry`: `tools/energy_stub.py` stands in for the host and the sampler, in real time; no device, no
+lock). `--stub-card base` simulates a card with the reducer's own laws (the same leakage law, unit-gain first-order
+filters with the tau it assumes, one slow thermal stage, the launch edges the host's): a **plumbing test**, not a
+test of the method. `--stub-card alt` breaks each of those: another leakage law (aifoundry3's idle curve, 0.27 W/°C
+at 56 °C), `11-thermal-model.md`'s thermal chain, the board average with gain 1.01 and tau 0.8 s, the rails with
+tau 1.3 s, `board_w` one SP pass late, other rail shares, the die idling at 55.7 °C instead of 55.3 °C (the whole-degree
+rounding the other way), and the card's power starting 5 ms after the host's launch mark and ending 3 ms before its
+end mark (the truth's burst is the card's own). The reducer's TRUTH check holds each value to its claim above.
+Nine runs on aifoundry3 (29 September, 11:14-11:17 PDT, `--real-plan`: the real host's `--dry` plan with
+`build/sparseparity-t`; `data/2026-09-29-aifoundry3-energy-dry/`), every preset on both cards and L1 on the alt card
+at 20 Hz, every one TRUTH PASS; error against the injected energy, %:
+
+| Run | Headline (±3) | Total (±2) | Catalogue (at idle / busy readings, expected) | Ramp | Rails: minion, SRAM, NoC (-2..+7) | Unmetered (±15) | Edges, ms |
+|---|---|---|---|---|---|---|---|
+| l1 base | -2.83 | -0.76 | -6.70 (2/19, 0.6) | -0.11 | -0.22, +0.52, -0.49 | -10.9 | -0.5 / -0.6 |
+| l2 base | -1.77 | -0.49 | +0.58 (0/19, 0.2) | -0.08 | -0.18, +0.59, -0.50 | -6.8 | -0.1 / -0.8 |
+| f5h0 base | -2.15 | -0.63 | +0.03 (0/20, 0.1) | +0.03 | -0.08, +0.60, -0.38 | -8.6 | -0.2 / -0.4 |
+| f5h1 base | -2.74 | -0.78 | +0.14 (0/15, 0.0) | +0.06 | -0.05, +0.44, -0.24 | -11.0 | -0.7 / -0.3 |
+| l1 alt | +0.95 | +1.05 | -0.66 (2/21, 0.6) | +4.39 | +1.32, +5.80, +1.90 | -2.0 | -5.6 / +3.0 |
+| l2 alt | +0.56 | +0.79 | -2.47 (1/22, 0.2) | +4.32 | +1.34, +5.88, +1.92 | -3.7 | -5.3 / +3.0 |
+| f5h0 alt | +0.89 | +0.91 | +0.87 (0/20, 0.1) | +4.49 | +1.39, +5.91, +2.05 | -2.5 | -5.2 / +2.5 |
+| f5h1 alt | +1.47 | +1.18 | +0.34 (0/17, 0.0) | +4.63 | +1.28, +5.65, +1.86 | +0.3 | -5.7 / +2.7 |
+| l1 alt, 20 Hz | +0.94 | +1.05 | -7.92 (3/18, 0.5) | +4.32 | +1.33, +5.86, +1.95 | -2.1 | -5.4 / +2.1 |
+
+The headline's error follows the whole-degree rounding of the die temperature (low when the idle die sits at
+55.3 °C, high at 55.7 °C); the catalogue's follows its readings at idle (-6.7% and -7.9% with 2 and 3 of them against
+0.5-0.6 expected); the ramp is exact on the base card and 4.3-4.6% high on the alt one (the fast thermal stages).
+`combine` of the two halves gave (256,5) 38.0 J (base) and 39.3 J (alt) over idle, 100.6 / 100.5 J with the idle,
+and refused f5h1 twice, f5h1 twice with l1, and one half alone (exit 2). A host that stops short of its `--reps`
+is flagged, not failed; a host binary without `launch_epoch_ms` is refused before anything runs; on aifoundry2 a
+non-dry or `--real-plan` run is refused.
+
+**On aifoundry3** (the build as in "Build"; `et-who` first; about 30 s each, with a pause between; one start time
+`S` names the session's directories, so that `combine` gets exactly the two halves):
+
+```bash
+cd ~/nekko/build/sparseparity-t-src
+S=$(date +%H%M); E=workloads/sparseparity/energy.sh; B="--build ../sparseparity-t"; D=../sparseparity-energy/aifoundry3
+bash $E l2 --dry --real-plan $B --out $D-$S-dry-l2          # no device: the real host's plan, the stubs
+bash $E l2 --reps 3 $B --out $D-$S-smoke-l2                 # the first multi-launch card run: 3 launches
+bash $E l2   $B --out $D-$S-l2
+bash $E l1   $B --out $D-$S-l1
+bash $E f5h0 $B --out $D-$S-f5h0
+bash $E f5h1 $B --out $D-$S-f5h1
+~/nekko/.venv/bin/python3 workloads/sparseparity/tools/energy_reduce.py combine $D-$S-f5h0 $D-$S-f5h1 --label "(256,5)" --json $D-$S-f5.json
+```
+
+**Expected** (a prediction, not a measurement): each run `DONE <preset>: ok`, the host `PASS` with every launch
+done (l1 44, l2 14, f5h0 6, f5h1 3; the smoke run 3) and solved (the halves: f5h0 finds the secret, f5h1 does not
+hold it). aifoundry3 idles at about 24-26 W at 55-60 °C; its full-rate int8 matmul adds 26.3 W (E37), and this
+kernel keeps the tensor unit busy about 35-45% of the time (318 of 730-910 cycles per op) while hart 1 generates
+rows, so about +12-20 W and 36-46 W of board power in the burst. Over idle, J per solve: L1 1.3-2.9 (about 2), L2
+4.5-9 (about 7), `f5h0` 10-20 (about 15), (256,5) whole 26-55 (about 36); the board total with the idle about 5.5,
+18 and 100 J; 7.3-7.5, 2.3 and 1.0 solves per second (L1, L2, `f5h0`); the die 1-3 °C above its idle; the minion rail
+most of it, unmetered about a sixth; the catalogue method within its claim of the headline. The host: its CPU time
+over the burst is measured for the first time (the runtime's idle poll is every 500 µs, E50: between 0.1 and 1 core
+busy), so its share is 1.5-8 J per solve at L1, 5-25 J at L2 and 28-150 J for (256,5). Against the CPU's best at
+P(loss) ≤ 1e-4 (L1 18.5-37 J, L2 63.5-128 J, (256,5) 221-444 J, all assumed): the card's board alone about 3-8x (L1,
+L2) and 2-5x ((256,5)) in the card's favour; with the host's package added, about 1.3-6x (L1, L2) and 0.8-3.8x
+((256,5)): at the pessimistic end (a host core busy through the burst at 38.5 W, a 20 W idle) the whole (256,5)
+solve is level. The CPU's side and the host's share are assumed; measuring them needs the lab admin: read access to
+`energy_uj`, or a wall meter.
+
+### M5: the two-stage screen (stage 1 on the card, stage 2 on the host)
+
+DESIGN.md §2.7: the card scores every candidate on the first m1 samples and logs those with c1 ≥ τ1; the host
+rescores the survivors on all m samples. The secret is lost only when its own c1 falls under τ1, since whenever it
+survives it is also the best survivor on all m. **It has not run on a card**: `card_run.sh m5` is the step for the
+owner's session ("M5 on a card"). The kernel, the host and the scripts are new; everything else is M4's.
+
+**Why not m1 ≤ 192 (A resident).** Keeping the secret with P(loss) < 1e-4 fixes τ1 from its binomial tail (its
+disagreements are Bin(m1, η); `design_model.py screen_at`, the host's `screenKept`), and at η = 0.4 and m1 = 192 that
+τ1 is −12: 83% of L2's 2.8e9 candidates and of (256,5)'s 8.8e9 survive, more than a one-stage scan costs. At L1
+(η = 0.3) m1 = 192 needs τ1 = 28 and keeps 7.2e7 (580 MB of log). The resident regime also buys less than it seemed:
+at S ≤ 3 the epilogue (1,606 cycles per output tile, M3's fit) outweighs the ops (3 × 256), so the fitted model puts
+L1's scan at m1 = 192 only 30% under m1 = 320. The exact tails at P(loss) < 1e-4, with the fitted model of variant
+b's scan at m1 on 1,024 minions (the screen's own cost not included):
+
+| Instance | m1 = 192 (S1 = 3) | m1 = 320 (5) | m1 = 1,024 (16) | m1 = 1,152 (18) | m1 = 1,280 (20) |
+|---|---|---|---|---|---|
+| L1 (512,4,0.3,448) | τ1 28, 7.2e7 survivors, 65 ms | **τ1 66, 3.8e5, 93 ms** | | | |
+| L2 (512,4,0.4,1850) | τ1 −12, 2.3e9 | τ1 −2, 1.6e9 | τ1 88, 9.2e6, 202 ms | **τ1 106, 2.8e6, 222 ms** | τ1 124, 8.2e5, 243 ms |
+| (256,5,0.4,1925) | τ1 −12, 7.3e9 | τ1 −2, 5.0e9 | τ1 88, 2.9e7, 1.00 s | **τ1 106, 8.7e6, 1.10 s** | τ1 124, 2.6e6, 1.21 s |
+
+The scan plus the log's readback plus stage 2 is least at the bold points: L1 m1 = 320, τ1 = 66 (P(loss) 8.8e-5);
+L2 and (256,5) m1 = 1,152, τ1 = 106 (8.9e-5). The rule is one-sided, c1 ≥ τ1, as `spref`'s and `spbase`'s screens
+are: the secret's c is positive at η < 0.5, and |c1| ≥ τ1 would double the survivors for nothing. `card_run.sh m5`
+keeps one resident step, L1 at m1 = 192 with τ1 = 40 (P(loss) 1.8e-3, 6.7e6 survivors), to measure that regime.
+
+**The kernel** (`SPP_F_SCREEN`; M1's epilogue, as in variant b = `--variant m1 --cost fit --gen inc`; the kernel and
+the host refuse the screen with `--epi hide` or `--abuf 3`). Each output tile's epilogue, after the staircase mask
+(a masked entry is 0, and τ1 ≥ 1), compares the tile with τ1 in the vector unit: the reduction already spills rows
+8-15 (f16..f31), which frees f16 for τ1 − 1 broadcast; `fltm.pi md, f16, fr` sets lane l of mask md when entry l of
+register r is ≥ τ1, seven registers into m1..m7, and one `mova.x.m` reads them all (m0, the active mask, stays 0xFF):
+32 compares and 6 moves per tile. Rows 0-7 are stored beside the spill only when one of their masks is set (their
+reduction overwrites them); rows 8-15 are in the spill already. A tile with a survivor goes through plain C that logs
+each set bit as `cpu/sp.h`'s entry (row | j << 40 | c1 << 52) in (row, column) order into the minion's log. Every
+found entry is counted and summed into the minion's `SppSurvHdr` (found, stored, the capacity, the sums of the packed
+entries and of c1, the tiles with a hit, the epoch, an overflow flag); an entry is stored while the log has room, so
+a full log is counted, flagged and fails the run, never silent. Errata 1.29: f16 is written by `fbcx.ps` (type B)
+and read after a taken branch; f0..f15 after `mask_tile`'s taken branch or `TOUCH_ALL`; the reloaded rows after an
+`fmv.x.w` each and a taken branch, as in `reduce_tile`; the mask registers are outside the VPURF erratum, and
+`mova.x.m` is its own dependency resolver. Hart 0's stack: 2.4 KB on the screen's path (4,160 B allowed). The
+screen's cost is assumed (A) until a card measures it: 100 cycles per output tile, 200 more when rows 0-7 hold a
+survivor, 60 per survivor, added to the fitted model's epilogue (`E_OUT`) in the plan's costs and every model (139
+cycles per tile at L2's m1 = 1,152, against a tile's 18 × 378 + 1,606).
+
+**The host** (`--m1 M1 --tau1 T`): the card's instance is the first m1 samples of the m-sample one (the generator is
+prefix-consistent: `spp_selftest` checks the prefix against the instance generated with m1), so every stage-1 check
+is M1's on m1 samples: the count, both closed forms (they apply with m1), the best rescored, the oracle. Each
+minion's log holds 1.5 × its expected share (its candidates × the null tail) + 10σ + 256 entries (`--surv-cap N`,
+`--surv-factor F`): the CPU's screens counted within 0.3% of the expectation at L2 and (256,5). After the last
+launch the host reads the headers and the whole log area in one copy (a copy per minion would cost 0.1-0.4 ms each,
+E50), timed. **Before every launch it fills the whole log area with all-ones** (R4), outside the timed launch (about
+21 ms for (256,5)'s 108 MB at aifoundry3's 5.2 GB/s staged rate, E50; `two_stage.poison_s`, and the budget rule
+counts it): an entry the kernel did not write reads as row 2^40 - 1, j 4095, c1 -1, which fails the entry checks,
+stage 2 and the oracle, so a log line that never reached DRAM cannot pass as an identical entry an earlier launch or
+process left there (the entries carry no epoch, and the header sums come from registers; `sys_emu` starts its DRAM at
+0xDEADBEEF, a card at whatever the last process left). The logs may take 512 MB on a card (3 GB in `sys_emu`), and
+the host allocates its copy after `--dry`'s return. Then, before the sampled oracle (which fills the time left):
+- **headers**: this launch's epoch, the capacity the host set, stored = min(found, cap), the overflow flag; **counts
+  per minion**: found within 8σ of its expected share (and the total within 5% once 1e5 are expected); **entries**:
+  c1 ≥ τ1, each in its minion's blocks and in their order, and (nothing overflowed) their sums equal the header's;
+- **stage 2** (`--stage2-threads`, default 6): every stored entry rescored on all m samples (the row's prefix
+  y ^ x_r1 ^ .. cached and r0 advanced in place: 23 ns per survivor on one aifoundry3 thread at L2, 7.6 ns on six),
+  and **each logged c1 re-derived on the first m1 samples**, so every value the card logged is checked, and an
+  invalid entry (a row past the last, j ≤ max(R)) is caught; the answer is the best on all m, a tie flagged;
+- **the oracle's survivors**: on the minions the oracle rescores (all with `--oracle on`, a sample under `auto`), the
+  CPU's list of c1 ≥ τ1 in the kernel's order equals the log entry by entry, with the found count and both sums.
+
+The JSON line's `result` is stage 1's (the best on the first m1 samples); `two_stage` has the plan (m1, τ1, P(kept),
+the expected survivors, the logs' size, the model), found and stored, overflowed minions, `found_over_expected`,
+`minion_z_max`, the readback's and stage 2's times, stage 2's answer, `solved`, `secret_survived`, and `solve_s` =
+the launch + the readback + stage 2 (`model_solve_s` its model); `checks` adds `survivors`, `survivors_oracle` and
+`stage2`. `--records-out FILE` also writes `FILE.surv` (the headers and the stored entries), which `--verify-records`
+reads for the full oracle offline; `--surv-out FILE` writes every stored entry in `spref log=`'s order. Offline, a
+flipped c1 bit in one entry fails three ways (the minion's sums, its oracle list, stage 2) and a lowered found count
+fails the header check and the oracle (`data/2026-09-29-aifoundry3-sysemu-m5/verify-test.txt`).
+
+**Two controls** (R4): `--perturb tau` gives the kernel τ1 + 2 (the next c1 of the same parity) while the host checks
+τ1, so the kernel misses every survivor at τ1 and τ1 + 1; every stage-1 check, the entries (each c1 ≥ τ1 + 2 ≥ τ1)
+and stage 2 still pass, and only the survivor oracle (and, with enough survivors, the counts) can see it: it must say
+MISMATCH. On the minions the sampled oracle skips, the checks are self-consistency and the counts (8σ per minion, 5%
+in total), which miss a small loss, so a whole-instance S2 on a card is provisional until the full oracle offline
+passes. `--perturb lostlog` has the kernel log into a spare area while the host poisons and reads back the usual one,
+as if no log line reached DRAM: the entries, their oracle and stage 2 must fail.
+
+### M5 on a card
+
+`card_run.sh m5` needs R4's M5 build (default `--build build/sparseparity-t`; it refuses a host without
+`--perturb tau|lostlog`, which also means without the logs' poisoning). Every step is one locked, `timeout 10` process with
+`--records-out`; the four whole-instance two-stage steps also get the full oracle offline at the end of the stage
+(every minion's survivor list; about 1 min at L1 and L2, 3 min at (256,5), no device): their S2 is printed
+PROVISIONAL at the step and confirmed (or the stage stops) at the end. Then each `<step>.rec.surv` (20-70 MB, about
+150 MB per session) is gzipped beside its sha256 and its 64 KB of headers alone (`.rec.surv.hdr.gz`, a few KB):
+commit those two, never the logs (`gunzip -k` one before another `--verify-records`). "Model" is the host's `model_solve_s` (`card_run.sh m5 --dry` prints it): stage 1's kernel (variant b's
+fitted model with the screen's assumed cost) + the log's readback + stage 2 on 6 threads. Variant b ran L1, L2 and
+(256,5) at x1.15, x1.00 and x1.10 of its fitted model on 29 September.
+
+| Step | What it runs | Expect | Model |
+|---|---|---|---|
+| `m5-1s-small` | (128,4,0.4,1850), m1 1,152, τ1 60, one shire, the full oracle in-process (every minion's survivors) | S2 | 70 ms |
+| `m5-ovf` | L1 slice 0/16 on one shire, m1 320, τ1 66, `--surv-cap 8`: every log too small | OVF | 0.16 s |
+| `m5-negmask` | C1 (128,4,0.2,192), m1 128, τ1 24, one shire: the mask control | NEGM | 15 ms |
+| `m5-negtau` | `m5-1s-small` with `--perturb tau`: the kernel screens at τ1 + 2 = 62, the host checks 60 | NEGT | 70 ms |
+| `m5-lostlog` | `m5-1s-small` with `--perturb lostlog`: the kernel logs into a spare area, the host reads the poisoned one | LOST | 70 ms |
+| `m5-l1-b` | L1 one stage, variant b (this session's reference; 0.130 s on 29 September) | PASS | 113 ms |
+| `m5-l1-s320` | L1, m1 320, τ1 66 (P(loss) 8.8e-5, 3.8e5 survivors, 8 MB of logs) | S2 | 101 ms |
+| `m5-l1-res192` | L1, m1 192, τ1 40: A resident (P(loss) 1.8e-3, 6.7e6 survivors, 85 MB) | S2 | 127 ms |
+| `m5-l2-b` | L2 one stage, variant b (0.429 s on 29 September) | PASS | 427 ms |
+| `m5-l2-s1152` | L2, m1 1,152, τ1 106 (P(loss) 8.9e-5, 2.8e6 survivors, 38 MB) | S2 | 262 ms |
+| `m5-f5-s1152` | (256,5), m1 1,152, τ1 106 (8.9e-5, 8.7e6 survivors, 108 MB), whole, one process (guard 2.17 s) | S2 | 1.22 s |
+
+S2 = PASS (the survivors, their oracle and stage 2 exact) and stage 2's answer the secret, unique; OVF = every log
+overflows: flagged, the run fails, and every other check passes (the stored prefixes equal the oracle's); NEGM as in
+M1; NEGT = FAIL with the survivor oracle MISMATCH on every minion, the survivors `ok` or `COUNT` (the per-minion and
+total counts: 12% fewer at τ1 + 2 here), and the records, count, closed forms, oracle and stage 2 exact; LOST = FAIL
+with the survivors, their oracle and stage 2 MISMATCH (every entry the poison), everything else exact. Each line shows the launch over its stage-1 model and the two-stage fields: found (and over the expectation),
+overflow, the readback, stage 2, `solve_s` against `model_solve_s`, the answer.
+
+```bash
+cd ~/nekko/build/sparseparity-t-src        # aifoundry3: these sources, built into ../sparseparity-t ("Build")
+bash workloads/sparseparity/card_run.sh m5 --dry --build ../sparseparity-t --out ../sparseparity-t-dry-m5   # no device
+et-who                                      # nobody on the card
+bash workloads/sparseparity/card_run.sh m5 --build ../sparseparity-t --out ../sparseparity-card/aifoundry3-m5-$(date +%H%M)
+```
+
+Eleven processes, each at most 10 s (about 1-2 minutes of card time), then about 6 minutes of offline oracle.
+
+**Expected, against the CPU's two-stage screen at the same P(loss).** The card: the model, and in brackets the model
+with stage 1 at variant b's measured ratio. The CPU: `spbase vexh` with m1 and τ1, stage 2 on m (6 threads pinned to
+cores 0-5, aifoundry3, 29 September 10:03 PDT, median of 5, stage 2 once; `data/2026-09-29-aifoundry3-sysemu-m5/cpu2s.jsonl`).
+
+| Instance | card two-stage (P) | card one stage b (measured) | CPU two-stage, P(loss) < 1e-4 | CPU / card |
+|---|---|---|---|---|
+| L1 (512,4,0.3,448) | 0.101 s (0.115 s) at m1 320 | 0.130 s | 0.166 s at m1 320 (0.165 + 0.001); the CPU's best is the meet in the middle, 0.148 s expected | 1.3-1.5x vs MITM |
+| L2 (512,4,0.4,1850) | 0.262 s at m1 1,152 | 0.429 s | **0.508 s** at m1 1,152 (0.488 + 0.020); 0.524 at 1,280; 0.551 at 1,024/88 | **1.9x** |
+| (256,5,0.4,1925) | 1.22 s (1.33 s) at m1 1,152 | 2.55 s (two halves) | **1.769 s** at m1 1,152 (1.694 + 0.075); 1.854 at 1,280; 1.932 at 1,024/88 | **1.3-1.45x** |
+
+The CPU's earlier two-stage figures (L2 0.459 s, (256,5) 1.58 s) were at m1 = 1,024, τ1 = 104, which loses the secret
+with P = 6.2e-4; rerun in this session they took 0.450 and 1.573 s. At P(loss) < 1e-4 the CPU's best screen is
+m1 = 1,152 as well, 11-13% slower. The card's side is a prediction: stage 1 carries the screen's assumed cost and
+variant b's fitted constants, and `m5-l1-b` and `m5-l2-b` rerun the one-stage reference in the same session.
 
 ## How the kernel and the host work
 
@@ -475,6 +813,33 @@ deferred offline oracle, run against a test double of the host (no device, no lo
 (256,5) and the run ends DONE; a disagreeing offline oracle stops it; a resume keeps the gates only in the same
 `--out`.
 
+**M5 after R4's fixes, 29 September on aifoundry3** (`build/sparseparity-t`, kernel `.text` `3e14be32…`, the same
+as M5's; [`data/2026-09-29-aifoundry3-sysemu-r4/`](data/2026-09-29-aifoundry3-sysemu-r4/README.md)): the host now
+poisons the logs before each launch, allocates its copy after `--dry`, reports `host_cpu_s` and has the two controls.
+`sysemu_check.sh --only '^(ts-|c0-tensor$|reps2$|neg-mask$|s4-tensor-m1$)'`, **23 of 23 as expected** (11:08–11:21
+PDT): the 17 two-stage cases, the survivors again equal to `spref`'s byte for byte (989, 7,881, 624, 4,018, 138, 19,960
+entries) with the poisoned log area; `ts-negtau` (FAIL: 462 found against the oracle's 624, `survivors_oracle`
+MISMATCH on its minion, the survivors' own checks, both closed forms, the oracle and stage 2 exact: without the
+oracle only the count, 5.7σ low here, under the 8σ flag, would have hinted at it) and `ts-lostlog` (FAIL: the entries
+MISMATCH, stage 2 624 bad entries, each `0xffffffffffffffff`, the survivor oracle MISMATCH, stage 1 exact); and four
+of M4's cases on the same host (`c0-tensor`, `reps2`, `neg-mask`, `s4-tensor-m1`). 0 VPURF warnings at the kernel's
+PCs and no FATAL. `spp_selftest` SELFTEST PASS; `tools/sptest.py`: 107 of 107; `card_run.sh m5 --dry`: 11 steps, none
+refused; `--records-out` then `--verify-records` on a two-stage `sys_emu` run (2 minions, 624 survivors): PASS in-process and
+offline; after `card_run.sh`'s packing (the gzipped log, its headers alone, its sha256) the gunzipped copy matches its
+sha256, the headers file is its first 64 KB, and the offline oracle passes again; one flipped c1 bit fails the
+entries, the survivor oracle and stage 2 (`verify-test.txt`).
+
+**M5 (the two-stage screen), 29 September on aifoundry3** (`build/sparseparity-s`, kernel `.text` `3e14be32…`;
+[`data/2026-09-29-aifoundry3-sysemu-m5/`](data/2026-09-29-aifoundry3-sysemu-m5/README.md)): `sysemu_check.sh`, **83 of
+83 cases as expected** (09:14–10:02 PDT): the 66 below, unchanged, and 17 two-stage cases (`ts-*`, the last rows of the
+table), all with 0 VPURF warnings at the kernel's PCs and no FATAL; the two-stage cases rerun on the final host
+(which adds the per-minion count check), 17 of 17 again. In every full-coverage `ts-*` case the host's `--surv-out`
+file equals `spref scan m1= tau1= log=`'s byte for byte, and every case's in-process oracle equals the card's log entry
+by entry on every minion. `spp_selftest` (SELFTEST PASS) adds: the m1-prefix of 6 instances = the instance generated
+with m1; the plan-order survivor oracle, merged over two plans, = brute force's survivor set; stage 2 over those
+survivors = brute force's best, and it flags corrupted entries; the screen's probabilities = `design_model.py`'s.
+`tools/sptest.py`: 107 of 107.
+
 **`sys_emu` (`sysemu_check.sh`), M4's code after R3's fixes: 66 of 66 cases as expected, on aifoundry3, 07:33–08:11
 PDT on 29 September** (`build/sparseparity-h`, kernel `.text` `4c2e7bde…`;
 [`data/2026-09-29-aifoundry3-sysemu-m4r/`](data/2026-09-29-aifoundry3-sysemu-m4r/README.md)). The first 52 gave the
@@ -537,6 +902,17 @@ M1's code passed the first 27 the same way (03:36–03:51 PDT,
 | s40-m4, s40-abuf3 | (64, 3, 0.1, 2560): S = 40, the largest m, on 4 minions, oracle on every minion; 2 and 3 A buffers | PASS | PASS each; closed forms ok/ok; dump exact 58,368 entries |
 | tie-str-8 | the m = 256 tie instance on 8 minions (the two tied candidates on two harts, A streamed) | TIE | PASS; unique False |
 | probe-dram1 | `--probe narrow:6` on 4 minions, S = 4, M4's generation, DRAM staging with 1 buffer, `--oracle on` | PASS | PASS; oracle exact, all 4 minions |
+| ts-c0-res | M5, variant b: C0 at m 128, m1 64 (S1 = 1, A resident), τ1 8, dumped | TS | PASS; closed forms ok/ok; dump exact; 989 survivors = `spref`'s; stage 2 solved |
+| ts-res3-2shires | (40, 4, 0.1, 384), m1 192 (S1 = 3), τ1 20, 2 shires x 2 minions, dumped | TS | PASS; 7,881 survivors = `spref`'s; oracle's survivors exact on 4 minions |
+| ts-s4-str, -nbuf1, -dram1, -m1gen, ts-reps2 | (48, 3, 0.1, 512), m1 256 (S1 = 4, A streamed), τ1 30: 2 and 1 staging buffers, DRAM with 1 buffer on 2 minions, M1's generation, 2 reps | TS | PASS each; 624 survivors = `spref`'s |
+| ts-k5, ts-k2-m100, ts-k1 | k = 5 (m1 128), k = 2 (m1 100: not a multiple of 64), k = 1 (m1 40) | TS | PASS; 4,018 and 138 survivors = `spref`'s; k = 1 (`spref` needs k ≥ 2): 6, the oracle's |
+| ts-dense8 | (64, 3, 0.2, 640), m1 320, τ1 1 on 8 minions: about half the candidates survive (every register, lane and mask) | TS | PASS; 19,960 survivors = `spref`'s |
+| ts-l1geo, ts-l2geo, ts-f5geo | the L1, L2 and (256,5) geometries at m1 320, 1,152, 1,152 (τ1 30, 60, 60), 7 row tiles on 3 minions | TS | PASS; 1,581, 1,329 and 389 survivors, the oracle's on every minion; L1, L2 dumps exact |
+| ts-tie | the tie instance, m1 64, τ1 8 | TSTIE | PASS; stage 2's answer not unique |
+| ts-ovf | C0 two-stage with `--surv-cap 16` | TSOVF | FAIL: survivors OVERFLOW (found 989, stored 16); the stored prefix = the oracle's; closed forms, oracle, records ok |
+| ts-negmask | the mask control, m1 256 | NEGM | FAIL: both closed forms and the oracle |
+| ts-negtau | R4: `--perturb tau` on (48, 3, 0.1, 512), m1 256: the kernel screens at τ1 + 2 = 32 | TSNEGT | FAIL: 462 found against 624; the survivor oracle MISMATCH; closed forms, oracle, the entries' own checks and stage 2 exact |
+| ts-lostlog | R4: `--perturb lostlog`, the same instance: the kernel logs into a spare area | TSLOST | FAIL: the entries, stage 2 (624 poisoned entries) and the survivor oracle MISMATCH; stage 1 exact |
 
 ## CPU baselines, and the card against the CPU's best method
 
@@ -647,6 +1023,30 @@ about the time budget, what the A/B can tell apart and the card's coverage.
 | 8 | NIT: `pipeSimMinion` did not check that it reached the last row tile | **Fixed, and it found a bug:** with the check, 887 of R3's 153,600 configurations stopped early, all runs past 1.1e10 cycles (18 s), where a double's step exceeds the loop's epsilon and the event loop stalled (a model that understated the time). A run now ends at its end time (C++ and Python alike), 0 of 153,600 stop early, and a model that stops early throws. Nothing under 4 s was affected: the models of every step here are unchanged. |
 | 9 | NIT: `nostore`'s 256 B buffer is half of hart 1's L1 lines | Documented next to `m4gen` and in the kernel: incremental minus `nostore` can understate the staged stores' cost. |
 | 10 | NIT: hart 1's constants in f8-f11 and f13 are live across C code undeclared | Documented at `gen_consts` (what the generators may call; reload after anything that uses FP). |
+
+**R4 (the board-energy tooling E and M5's two-stage screen S, 29 September).** No card-safety blocker: the review
+rebuilt S (the same `.text`, `3e14be32…`), passed its 17 `ts-*` cases in `sys_emu` and `spp_selftest` on both
+builds, ran two energy dry runs with the real host's plan, checked the SP's board average for unit gain on E58's
+aifoundry3 bursts (1.00-1.01), the card etiquette, the ops-node-only host, the screen's maths, the kernel's compares,
+indexing and erratum sequences, the survivor logs' layout and epochs, and stage 2. Its findings are about what the
+measurements can claim, the reducer's and the host's robustness, and the tests' coverage; all but one (outside this
+directory) are applied, in `build/sparseparity-t`.
+
+| # | Finding | Status |
+|---|---|---|
+| 1 | MEDIUM: the "3-7x in the card's favour" set the card's board alone against the CPU's whole package; the host that drives the card (and, for M5, stage 2 on 6 threads) was not counted | **Fixed.** The host reports its CPU time over the burst (`host_cpu_s`, getrusage) and `energy.sh` measures the whole process's (bash `times`); the reducer bounds the host's package (10-20 W idle over the burst + 10-38.5 W per busy core-second, assumed: RAPL is root-only) and states two ratios, the card's board alone (labelled so) and the card's board plus the host's package. The README's expectation is restated both ways (at the pessimistic end the whole (256,5) is level); an M5 energy must add stage 2's threads the same way. |
+| 2 | LOW-MEDIUM: `combine` summed whatever it was given (`f5h1 f5h1 l1` printed a "(256,5)" solve) and the README's glob picked up reruns | **Fixed.** `combine` refuses (exit 2) unless the parts are one instance (hash), variant and kernel and their slices are exactly 0..N-1 of one N, once each; dry and card runs cannot mix. The README names each run's directory from one start time. Tested: the valid pair, and three refusals. |
+| 3 | LOW-MEDIUM: the catalogue method's single-run aliasing (±5-6%) was as wide as the TRUTH tolerance, so TRUTH PASS could not tell a -5.8% error from a correct reducer | **Fixed, and it found more.** The headline is the SP's board average (no aliasing). A second test card (finding 10) showed that its ramp baseline, which the dry runs had validated, reads 4.3-4.6% high when the die has fast thermal stages (`11-thermal-model.md`): the headline now corrects the leakage with the catalogue's law on the measured die temperature (-2.8% to +1.5% on both cards; claimed ±3%). Every TRUTH tolerance is now the claim: headline ±3%, total ±2%, catalogue 3% + one pass per reading at idle beyond the expected number and one more, rails -2..+7%, unmetered ±15%, edges 10 ms. |
+| 4 | LOW-MEDIUM: the survivor log was never cleared and its entries carry no epoch: stale identical entries in DRAM (a rerun, `--from`) would pass every check, and `sys_emu` (0xDEADBEEF) cannot show it | **Fixed as proposed, per launch:** the host fills the whole log area with all-ones before every launch (outside the timed launch; the budget rule counts it); an unwritten entry fails the entries, stage 2 and the oracle. `--perturb lostlog` (the kernel logs elsewhere) shows it: `sys_emu` `ts-lostlog` and card step `m5-lostlog`. |
+| 5 | LOW: nothing on the card showed that the survivor checks catch a missed survivor (`m5-negmask` does not change the survivor set); off the sampled minions the checks are self-consistency and counts | **Fixed as proposed:** `--perturb tau` (the kernel gets τ1 + 2, the host checks τ1) in `sys_emu` (`ts-negtau`) and on the card (`m5-negtau`, full oracle in-process): the survivor oracle must say MISMATCH. A whole-instance S2 on 1,024 minions is printed PROVISIONAL until the full oracle offline passes at the end of the stage. |
+| 6 | LOW: the energy runs are the first card runs with `--reps` > 1; L1 is 44 launches at 7.3 per second, and aifoundry2's Master Minion hang came in a stream of short kernels | **Applied:** the commands run a 3-launch smoke run (`l2 --reps 3`) and `l2` (14) before `l1`; `energy.sh` says so. |
+| 7 | LOW: `energy.sh` did not refuse aifoundry2, and `--dry --real-plan` ran the real host without `nice` | **Fixed:** refused on aifoundry2 (non-dry or `--real-plan`) unless `SPP_ALLOW_AIFOUNDRY2=1`; the plan step and the reduction run at `nice -n 19`. |
+| 8 | LOW, lab-wide: `ps` truncates `sparseparity_host` to `sparseparity_ho`, which `tools/claims-v3/lib.sh:57`, `dv2/z2.sh:37` and `dv2lib.sh`'s `DEV_COMM` (`_host$`) never match | **Not applied here** (outside this directory; `energy.sh` already matches `^sparseparity_ho`): for the owner's session, add `^sparseparity_ho` to those patterns. The card lock and `et-who`'s node holders still protect the card. |
+| 9 | LOW: the CPU baselines in the reducer (0.459 s, 1.58 s) were the two-stage screens at P(loss) 6.2e-4 | **Fixed:** the reducer lists each CPU method with its P(loss) and takes the fastest at ≤ 1e-4: L1 0.148 s (the meet in the middle), L2 0.508 s, (256,5) 1.769 s (the screens at m1 1,152). |
+| 10 | LOW: the dry TRUTH check was circular (the stub's leakage law, filters, tau and launch edges were the reducer's own); the stub's SP pass was 0.25 s; 20 Hz only lengthens the pass | **Fixed:** the base card is called a plumbing test; `--stub-card alt` breaks each assumption (another leakage law, `11-thermal-model.md`'s thermal chain, the board average's gain 1.01 and tau 0.8 s, the rails' tau 1.3 s, `board_w` a pass late, the die idling on the other side of a half degree, the card's edges 5 / 3 ms inside the host's marks); the SP pass is E58's (0.255 s at 10 Hz, 0.296 s at 20 Hz); `energy.sh` samples at 10 Hz. |
+| 11 | LOW: the host allocated its survivor copy before `--dry`'s return (up to 3 GiB zero-filled by a dry plan), and allowed 3 GB of logs on a card | **Fixed:** allocated after the return; at most 512 MB on a card (the largest step takes 108 MB), 3 GB in `sys_emu`. |
+| 12 | LOW: each `FILE.surv` holds every stored entry (about 150 MB per m5 session) | **Fixed:** `card_run.sh` gzips each after the offline oracle and writes its sha256 and its headers alone (`.surv.hdr.gz`), which are what gets committed. |
+| 13 | NITS: E's report said every other workload's host opens the ops node only (`sgemm`'s opens both); the SP pass was given as 0.25 s; the host's stop message said 1.25 guard + 1.0 s for a rule of + 0.5 s | **Fixed** (the README names `pciebench`; 0.296 s at 20 Hz, 0.255 s at 10 Hz; the message states the rule). |
 
 **The critique (SP5).** (1) The AVX-512 scan and the bucketed meet in the middle are the baselines, tuned further per
 R2, and the card is compared with the best CPU method. (2) The ladder is at η = 0.4 (C0, C1, B1 for bring-up); the
