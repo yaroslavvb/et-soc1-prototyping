@@ -14,7 +14,11 @@ and board power sampled during those runs) and energy-*/results.json (run_energy
     reruns.json), embedded with their fit against the mean hop count (pooled, and per card over the rings every card
     kept) and, per card, the range of watts over idle of the ring bursts behind them (re-reduced with
     tools/ettelem/analyze_reruns.py from the passes the file was built from: the version-3 V3-RL passes when it names
-    them in "v3_rl", else the rerun directories in "dirs"). A ring the file keeps from the rerun directories only
+    them in "v3_rl", else the rerun directories in "dirs"). From the same bursts, reruns.over_idle_w gives each ring's
+    watts over idle pooled as its pJ/B is (one value per pass, the mean of its kept bursts; mean, the passes' range,
+    each card's mean), and reruns.spin_over_idle_w the same cores spinning with no messages (V3-RL's spin brackets);
+    reruns.first_vs_rerun compares the 18 September runs with the pooled means (the page's "first measured" note).
+    A ring the file keeps from the rerun directories only
     because no V3-RL burst of it was kept ("fallback_23sep": s <-> s+16, aifoundry3's 23 September passes) is shown
     but left out of the pooled fit, which then runs over the rings measured on every card (as V3-RL's RL-a does), and
     its watts come from those rerun passes. The scratchpad levels are also embedded by the contents the V3-RL passes
@@ -564,22 +568,66 @@ def main():
         # (tools/ettelem/analyze_reruns.py), so the range covers exactly the bursts behind the pJ/B above.
         ar = _load_module(os.path.join(ROOT, "tools", "ettelem", "analyze_reruns.py"), "analyze_reruns")
         watts = {}
+        # The same bursts per ring (28 September, for the chart's middle panel and its table): one value per pass, the
+        # mean watts over idle of that ring's kept bursts in it, pooled over the passes and cards as the pJ/B above
+        # (analyze_reruns.stats: mean, the range the passes spanned, each card's mean). The spin brackets (the same
+        # cores in an integer loop, no messages: V3-RL's nspin-first and nspin-last) give the busy-core reference.
+        ring_w, spin_w = {}, {}
         keep = lambda b: b["clock_moved_frac"] <= 0.02 and b["sampler_median_ms"] <= 60
+
+        def per_pass(card, red, labels, spin):
+            per = {}
+            for lab, b in red.items():
+                key = "spin" if lab in ("nspin-first", "nspin-last") else lab
+                if keep(b) and (key in labels or (spin and key == "spin")):
+                    per.setdefault(key, []).append(b["over_idle_w"])
+            for key, v in per.items():
+                (spin_w if key == "spin" else ring_w.setdefault(key, {})).setdefault(card, []).append(float(np.mean(v)))
         if v3rl:
             for card, k, contents, pd in ar.v3_rl_passes(os.path.join(ROOT, v3rl)):
-                for lab, b in ar.reduce_dir(os.path.join(pd, "A")).items():
+                red = ar.reduce_dir(os.path.join(pd, "A"))
+                for lab, b in red.items():
                     if lab in rings and lab not in fallback and keep(b):
                         watts.setdefault(card, []).append(b["over_idle_w"])
+                per_pass(card, red, set(rings) - fallback, True)
         for rd in rr.get("dirs", []):
             for pd in sorted(glob.glob(os.path.join(ROOT, rd, "rl-pass*[0-9]"))):
                 if not ar.complete(pd):
                     continue
-                for lab, b in ar.reduce_dir(pd).items():
+                red = ar.reduce_dir(pd)
+                for lab, b in red.items():
                     if lab in rings and (lab in fallback or not v3rl) and keep(b):
                         watts.setdefault(ar.host_of(rd), []).append(b["over_idle_w"])
+                per_pass(ar.host_of(rd), red, fallback if v3rl else set(rings), not v3rl)
         data["reruns"]["over_idle_w_per_card"] = {h: {"lo": min(v), "hi": max(v), "n": len(v)} for h, v in sorted(watts.items())}
         print("  over idle, every ring burst kept: " + ", ".join(
             f"{h} {min(v):.2f}-{max(v):.2f} W ({len(v)})" for h, v in sorted(watts.items())))
+        pool = ar.stats
+        data["reruns"]["over_idle_w"] = {k: pool(v) for k, v in ring_w.items()}
+        if spin_w:
+            data["reruns"]["spin_over_idle_w"] = pool(spin_w)
+        ow = data["reruns"]["over_idle_w"]
+        print("  over idle per ring, pass means pooled: " + ", ".join(
+            f"{k} {v['mean']:.2f} [{v['lo']:.2f}-{v['hi']:.2f}]" for k, v in ow.items()))
+        if spin_w:
+            sw = data["reruns"]["spin_over_idle_w"]
+            print(f"  the spin (no messages): {sw['mean']:.2f} [{sw['lo']:.2f}-{sw['hi']:.2f}] W over idle, per card "
+                  + ", ".join(f"{h} {v['mean']:.2f}" for h, v in sw["per_card"].items()))
+        # The first measurement (18 September, aifoundry2, two runs, no leakage correction) against these, for the
+        # page's one "first measured" note: its range inside a shire and across the mesh (1 KB messages), and how far
+        # it reads above the pooled means and above aifoundry2's own passes, over every ring both have.
+        first = {k: c["pj_per_byte"] for k, c in energy["configs"].items() if c.get("pj_per_byte") is not None}
+        inside = [first[k] for k in first if not k.startswith("xshire") and not k.endswith("-c4") and k != "spin"]
+        across = [first[k] for k in first if k.startswith("xshire") and not k.endswith("-c4")]
+        both = [k for k in first if k in rings]
+        r_pool = [first[k] / rings[k]["mean"] for k in both]
+        a2 = [first[k] / rr["rings_pj_per_byte"][k]["per_card"]["aifoundry2"]["mean"] for k in both
+              if "aifoundry2" in rr["rings_pj_per_byte"][k].get("per_card", {})]
+        data["reruns"]["first_vs_rerun"] = {"inside": [min(inside), max(inside)], "across": [min(across), max(across)],
+                                           "over_pooled": [min(r_pool), max(r_pool)], "over_aifoundry2": [min(a2), max(a2)] if a2 else None}
+        print(f"  first measured (18 Sep, aifoundry2): inside a shire {min(inside):.2f}-{max(inside):.2f}, across the mesh "
+              f"{min(across):.2f}-{max(across):.2f} pJ/B (1 KB); {min(r_pool):.3f}-{max(r_pool):.3f} x the pooled means"
+              + (f", {min(a2):.3f}-{max(a2):.3f} x aifoundry2's own" if a2 else ""))
 
     # Bulk data between shires for comparison: every minion streaming 1 KB TensorLoads from the scratchpad 16 shire
     # IDs away (the memory-hierarchy probe), median GB/s of its launches at 600 MHz (as scripts/ridge-points.py).

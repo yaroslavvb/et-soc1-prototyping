@@ -23,9 +23,10 @@ An A100 draws 330–400 W under a matmul. This card draws 38–64 W, and Esperan
 - It does 14 to 28 times fewer FLOPs per second (fp16 or fp32 here, against the A100's bf16).
 - It is **not** more efficient per FLOP at dense matmul: 7.0 pJ per FLOP in fp32 and 3.3 pJ in fp16, against the
   A100's 1.28 in bf16, so the A100's tensor cores are 5.4× and 2.6× better. Only against the A100's fp32 CUDA-core
-  datasheet figure (19.5 TFLOPS at 400 W) is this card better: about 2.9× on random data and 3.4× on the matmul
-  benchmark's ±1/±2 operands ([matmul efficiency](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency), R4),
-  a comparison of this card's measurement with the A100's datasheet.
+  datasheet figure (19.5 TFLOPS at 400 W) is this card better: about 2.9× on random data and, on the matmul
+  benchmark's ±1/±2 operands, 2.8–3.9× by card (3.3× on aifoundry2; [matmul efficiency](https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency),
+  E37, `docs/reports/data/2026-09-25-claims-v3/results/mmb.json`; 3.4× in its first run on aifoundry2, R4), a comparison
+  of this card's measurement with the A100's datasheet.
 - Leakage, the term Esperanto's slide leaves without a number, is the largest item of this card's idle: 20 to 29 W
   of the 36 W at 80 °C (23 W in the best fit; aifoundry2, one session, a split the idle data do not pin down and the
   three-card check could not narrow).
@@ -40,7 +41,7 @@ An A100 draws 330–400 W under a matmul. This card draws 38–64 W, and Esperan
 | Dense matmul, measured | 257 TFLOPS at 330 W | 9.18 TFLOPS at 63.9 W | A100: R8's 8192³ run, **bf16** on tensor cores, random data. ET: fp32 `TensorFMA`, random data, 80 °C |
 | Board energy per FLOP | **1.28 pJ** (bf16) | **7.0 pJ** (fp32) | the A100's tensor cores are 5.4× better |
 | Board energy per FLOP, 16-bit inputs (fp16 here, bf16 on the A100) | 1.28 pJ | 3.3 pJ (fp16, 61.1 W at 18.4 TFLOPS, E15) | the closest like for like: the A100 is ~2.6× better |
-| Board energy per FLOP, fp32 by datasheet | 20.5 pJ (19.5 TFLOPS at 400 W, CUDA cores) | 7.0 pJ | this card is ~2.9× better (3.4× in the matmul benchmark, R4) |
+| Board energy per FLOP, fp32 by datasheet | 20.5 pJ (19.5 TFLOPS at 400 W, CUDA cores) | 7.0 pJ | this card is ~2.9× better (in the matmul benchmark 2.8–3.9× by card, 3.3× on aifoundry2, E37; 3.4× in its first run, R4) |
 | Idle | 88 W | 26.7 W at 62 °C, 36.3 W at 80 °C | |
 | Power per transistor under load | 6.1 nW | 2.7 nW | |
 | Power density under load | 0.40 W/mm² | 0.11 W/mm² | board power over die area; both include memory and regulators |

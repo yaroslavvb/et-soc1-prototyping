@@ -59,12 +59,15 @@ refresh the report's charts:
 
 ```bash
 python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifoundry3 \
-    --later docs/reports/data/2026-09-22-horace-aifoundry3/horace3.json \
     --embed docs/reports/2026-09-18-et-soc1-sparsity.html
 ```
 
-`--later` adds the same loop's later, temperature-controlled runs on this card (zeros, ones and random normal, from the
-Horace experiment) to the power chart.
+Since 28 September every power figure on the page is the version-3 check's, on three cards: `--claims-v3` (default
+`docs/reports/data/2026-09-25-claims-v3`) embeds V3-ABL-B's runs of these configurations and V3-ABL-A's runs of the same
+loop on all zeros, all ones and random normal data (`results/ablb.runs.json`, `results/abla.runs.json`), and the script
+ends by printing the values the page's text quotes. This data directory's energy runs (18 September, this card, no
+temperature control) are the page's one "first measured" note. Until then `--later` added the Horace experiment's
+22 September runs of the loop on this card to the power chart; the three-card runs replaced them.
 
 Without a card, add `--sysemu` to any `sparsity_host` command. That checks the kernels and the data; the simulator's
 cycle counts mean nothing. For example, the fp16 one-zero-pair check:

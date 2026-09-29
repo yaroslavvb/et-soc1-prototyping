@@ -592,7 +592,7 @@
    "title": "Matmul efficiency",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency",
    "date": "18 Sep",
-   "what": "A tensor-unit matmul loop on cached tiles, all 1,024 minions: 9.5 TFLOP/s fp32, 19.0 fp16 and 71.8 TOP/s int8 (91–97% of peak, the same to 0.1% on all three cards), with board power on ±1 and ±2 operands (aifoundry2) and a spec-sheet comparison with the A100.",
+   "what": "A tensor-unit matmul loop on cached tiles, all 1,024 minions: 9.5 TFLOP/s fp32, 19.0 fp16 and 71.8 TOP/s int8 (91–97% of peak, the same to 0.1% on all three cards), with board power on ±1 and ±2 operands on three cards (four passes each) and a spec-sheet comparison with the A100.",
    "instruments": "cycle counter, board power",
    "short": "Matmul",
    "pub": "2026-09-18",
@@ -5046,7 +5046,7 @@
    "id": "—",
    "when": "18 Sep",
    "card": "aifoundry2; aifoundry3 for sparsity",
-   "what": "Before the register: matmul power, and tensor-unit power against sparsity (board power polled through dev_mngt_service)",
+   "what": "Before the register: matmul power, and tensor-unit power against sparsity (board power polled through dev_mngt_service; the matmul page now carries the three-card check's power and efficiency, E37, and the sparse compute page its power, E38 and E39, each with this run as one note)",
    "instruments": "board power, cycle counter",
    "data": [
     {
@@ -5072,7 +5072,7 @@
    "id": "E33",
    "when": "18 Sep, 17:44–17:52",
    "card": "aifoundry2",
-   "what": "Registered on 25 September for a session that predates the register: the load-to-use latency and bandwidth of each memory level and of another shire's scratchpad by distance, with board power per level (its energies per byte superseded by the energy manual's §4, E29)",
+   "what": "Registered on 25 September for a session that predates the register: the load-to-use latency and bandwidth of each memory level and of another shire's scratchpad by distance, with board power per level (its energies per byte superseded by the energy manual's §4, E29, and on 26 September by the three-card check's, E43, which the page now carries; the first runs are one note there)",
    "instruments": "cycle counter, board power",
    "data": [
     {
@@ -5090,7 +5090,7 @@
    "id": "E34",
    "when": "18 Sep, 19:14–19:28",
    "card": "aifoundry2",
-   "what": "Registered on 25 September, like E33: TensorSend round trips, reductions and barriers, and the energy of message rings at several distances from board power (its ring energies superseded by the energy manual's reruns, E29)",
+   "what": "Registered on 25 September, like E33: TensorSend round trips, reductions and barriers, and the energy of message rings at several distances from board power (its ring energies superseded by the energy manual's reruns, E29, and on 26 September by the three-card check's, E43, which the page now carries; the first runs are one note there)",
    "instruments": "cycle counter, board power",
    "data": [
     {
@@ -5108,7 +5108,7 @@
    "id": "E1",
    "when": "19 Sep",
    "card": "aifoundry2",
-   "what": "One memory access by stage and by rail: 46 pJ per L1 load to 5.1 nJ per DRAM load, from the SP's rail trace, two runs (superseded: re-measured on three cards in the energy manual)",
+   "what": "One memory access by stage and by rail: 46 pJ per L1 load to 5.1 nJ per DRAM load, from the SP's rail trace, two runs (re-measured on three cards in the energy manual, E43 and E46, whose values the page's §6 and explorer now carry; the first runs are one note there)",
    "instruments": "cycle counter, SP stats trace",
    "data": [
     {

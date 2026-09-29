@@ -2479,7 +2479,7 @@ const L2P = SCENES.l2.parts = {
   ls: () => ({kick: 'L2 · crossing', title: 'The level shifter', badge: [['generic', 'textbook'], ['documented', 'that it is there']],
     what: `A request bit leaves the minion rail at ${n('l1_v')} and enters the HV region. A low-to-high shifter is typically a cross-coupled PMOS pair on the high rail driven by an NMOS differential pair: the input pulls one side down and the PMOS pair snaps the other to the high rail (textbook). The ET RTL models it as a buffer; the physical cell and the HV logic's rail are not documented.`}),
   energy: () => ({kick: 'L2 · energy', title: 'What an L2 access costs', badge: [['documented', 'measured'], ['unknown', 'the split']],
-    what: `Reading the L2 with tensor loads on every minion costs ${n('l2_e')}, about ${n('l2_e_line')} per line for the whole path. On one card on 19 September an L2 hit split into ${n('l2_e_sram')} on the SRAM rail, ${n('l2_e_min')} on the minion rail and ${n('l2_e_noc')} on the NoC rail, of ${n('l2_e_tot')}. A scratchpad write costs about twice a read (${n('l2_e_wr')}); a random fsw through the L1 costs ${n('l2_fsw')}. How much of the SRAM rail's share is the arrays and how much the logic is asked.`}),
+    what: `Reading the L2 with tensor loads on every minion costs ${n('l2_e')}, about ${n('l2_e_line')} per line for the whole path. No L2 hit has been split between the rails on three cards; read as the own scratchpad, the same arrays put ${n('l2_rails_sram')} of the power on the SRAM rail and ${n('l2_rails_min')} on the minion rail (aifoundry2, aifoundry3 and aifoundry1 card 1). A scratchpad write costs about twice a read (${n('l2_e_wr')}); a random fsw through the L1 costs ${n('l2_fsw')}. How much of the SRAM rail's share is the arrays and how much the logic is asked.`}),
 };
 
 Object.assign(L2P, {
@@ -2671,7 +2671,7 @@ SCENES.l2.tour = [
     cap: () => 'The cell is drawn as a textbook 6T SRAM cell: the spec says SRAM, the lab lead said the chip is not using SRAM',
     sub: () => 'The bitcell is not documented. Which memories are not SRAM, and what cell these macros use, is the first ask.'},
   {name: 'Energy and asks', path: ['shire'], panel: 'energy', hi: ['rail', 'banks'],
-    cap: () => `About ${n('l2_e_line')} per line read (${n('l2_e')}); on one card, ${n('l2_e_sram')} of an L2 hit was on the SRAM rail`,
+    cap: () => `About ${n('l2_e_line')} per line read (${n('l2_e')}); read as the own scratchpad, the same arrays put ${n('l2_rails_sram')} on the SRAM rail, by card`,
     sub: () => 'How that splits between the arrays and the logic around them is asked, as are the per-stage cycles.'},
 ];
 
@@ -3033,7 +3033,7 @@ function buildHop(L, ap, o) {
   gf._box = {x: -136, y: 512, w: 1214, h: 80};
   E('rect', {class: 'ring', x: -141, y: 507, width: 1224, height: 90, rx: 10}, gf);
   // the energy of a hop, and what is unknown
-  part(L, 'hopE', -136, 604, 600, 84, COL.aux, 'a 64 B reply over one hop', {sub: [{t: `≈ ${nt('l3_hop69')} on the mesh rail (derived); ${nt('l3_hop47')} measured`, f: nf('l3_hop69') + ' ' + nf('l3_hop47')}]});
+  part(L, 'hopE', -136, 604, 600, 84, COL.aux, 'a 64 B reply over one hop', {sub: [{t: `≈ ${nt('l3_hop69')} on the mesh rail (derived); ${nt('l3_hop_rb')} on the board (measured)`, f: nf('l3_hop69') + ' ' + nf('l3_hop_rb')}]});
   part(L, 'nochop', 480, 604, 598, 84, 'var(--warn)', 'unknown: the router pipeline per hop', {kind: 'unknown', sub: [{t: 'which of the 9 layers, flit width, dimension order', f: 'l3:u.noc-hop'}]});
 }
 /* the request's (or the reply's) way through the hop drawing */
@@ -3436,7 +3436,7 @@ const L3P = SCENES.l3.parts = {
     act: `<button type="button" class="st-btn tog" data-act="zero" aria-pressed="${SCENES.l3.zero}">Zero line: the example line all zeros</button>`}),
   dc: () => ({kick: 'L3 · sub-bank', title: 'Data complete', badge: [['documented', 'spec']], facts: 'pipe', what: 'The line is OR\'d out of the sub-bank to the L3-slave response mux and goes back over the mesh as one 512-bit data beat.'}),
   energy: () => ({kick: 'L3 · energy', title: 'What an L3 access costs', badge: [['documented', 'measured'], ['unknown', 'the zero-line share']], facts: 'energy',
-    what: `An L3 byte costs ${n('lad_e_l3')} above idle (three cards), ${n('l3_e_line')} per line: about ${cn(V('lad_e_l3') / V('l2_e'), 'l3:l3.energy l2:l2.e.level', 1)} times an L2 byte and about an eighth of a DRAM byte (${cn(V('lad_e_dram') / V('lad_e_l3'), 'l3:l3.energy dram:dram.e.per-byte', 1)} times less). Random data costs ${n('l3_e_cont')}. Per load with a local home, ${n('l3_load643')}: ${n('l3_306')} on the SRAM rail, ${n('l3_120')} on the mesh, ${n('l3_110')} on the minions. Far homes add ${n('l3_59')}.`}),
+    what: `An L3 byte costs ${n('lad_e_l3')} above idle (three cards), ${n('l3_e_line')} per line: about ${cn(V('lad_e_l3') / V('l2_e'), 'l3:l3.energy l2:l2.e.level', 1)} times an L2 byte and about an eighth of a DRAM byte (${cn(V('lad_e_dram') / V('lad_e_l3'), 'l3:l3.energy dram:dram.e.per-byte', 1)} times less). Random data costs ${n('l3_e_cont')}. Read through the mesh by tensor loads, an L3 line puts ${n('l3_rails_sram')} of its power on the SRAM rail, ${n('l3_rails_mesh')} on the mesh and ${n('l3_rails_min')} on the minions (three cards, random data); each mesh hop adds ${n('l3_hop_r')} and ${n('l3_hop_z')}.`}),
   latency: () => ({kick: 'L3 · latency', title: 'The cycles that do not add up', badge: [['documented', 'spec and measured'], ['unknown', 'the split']], facts: 'latency',
     what: `Measured: ${n('l3_fit_c')}; of the constant, ${n('l3_72')} scale with the core clock and ${n('l3_61')} do not. The spec: an L2 miss ${n('l2_spec_miss')} shire clocks plus an L3 hit ${n('l3_spec30')}, ${cn(V('l2_spec_miss') + V('l3_spec30'), 'l2:l2.lat.spec l3:l3.spec-latency', 0)} in all, and the L1 and neighbourhood path about ${n('l2_over')} more: about ${cn(V('l2_spec_miss') + V('l3_spec30') + V('l2_over'), 'l2:l2.lat.spec l3:l3.spec-latency l2:l2.lat.overhead', 0)}, against the ${n('l3_72')} of the constant that scale with the clock. The page draws each step without a cycle count ("not split: asked") until the team gives the stage-by-stage latencies.`}),
   // the mesh hop
@@ -3451,7 +3451,7 @@ const L3P = SCENES.l3.parts = {
     what: 'Each mesh stop has 9 main-NoC routers (layers 0–8) and a debug router, with 8 ports of 4 virtual-channel slots each, parity-protected. Inside, textbook stages: input VC buffers, route computation, VC and switch allocators, a crossbar and output drivers. Which layer carries L3 traffic, the flit width, the pipeline depth and the dimension order are asked.'}),
   router2: () => L3P.router(), more: () => L3P.link(),
   link: () => ({kick: 'L3 · mesh hop', title: 'A link', badge: [['documented', 'the energy, the length'], ['generic', 'repeaters']], facts: 'wire',
-    what: `One hop is about ${n('l3_hopmm')} of wire, broken by repeaters. A random bit costs ${n('l3_fj')} per mm on the mesh rail, so a 64-byte reply over one hop is ${n('l3_hop69')} (derived), close to the ${n('l3_hop47')} measured per line per hop. Zeros do not toggle the wires: they cost several times less.`,
+    what: `One hop is about ${n('l3_hopmm')} of wire, broken by repeaters. A random bit costs ${n('l3_fj')} per mm on the mesh rail, so a 64-byte reply over one hop is ${n('l3_hop69')} on the mesh rail (derived); measured on board power, a hop adds ${n('l3_hop_r')} and ${n('l3_hop_z')}. Zeros do not toggle the wires: they cost several times less.`,
     act: `<button type="button" class="st-btn" data-act="zoom" data-to="rep">Zoom into a repeater</button>`}),
   flits: () => ({kick: 'L3 · mesh hop', title: 'What crosses a hop', badge: [['documented', 'spec'], ['unknown', 'the header']], facts: 'flits', what: `A read request is ${n('l3_req_bits')} (AXI AR); the reply is ${n('l3_reply')} plus RID, RRESP and RLAST, and a NetSpeed header of unknown width. Only the reply carries the line.`}),
   hopE: () => L3P.link(),
@@ -3535,7 +3535,7 @@ L3A['load-hit'] = {
         fadeIn(T(c.fx, m.x + 14, m.rowY - 12, 'written', 't-labb halo', 'start'));   // above the row: the L3's rows are near the macro's foot
       },
       deep: {panel: (tok, c) => panelRead(tok, c), cell: (tok, c) => cellRead(tok, c, {half: true})}},
-    {name: 'The reply', where: 'chip', dive: ['rep'], say: () => `The ${n('l3_reply')} goes back ${I3().hops} hop${I3().hops === 1 ? '' : 's'} to R: ${n('l3_hop69')} per hop on the mesh rail for random data (derived), ${n('l3_hop47')} measured`,
+    {name: 'The reply', where: 'chip', dive: ['rep'], say: () => `The ${n('l3_reply')} goes back ${I3().hops} hop${I3().hops === 1 ? '' : 's'} to R: ${n('l3_hop69')} per hop on the mesh rail for random data (derived), ${n('l3_hop_rb')} on the board (measured)`,
       run: async (tok, c) => {
         const [R, H] = RH3(); litTile(c, 'shire', R.id); litTile(c, 'shire', H.id);
         counter(c, `≈ ${nt('l3_hop69')} a hop`, 'mesh rail, random data (derived)');
