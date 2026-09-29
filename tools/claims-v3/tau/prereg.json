@@ -1,0 +1,449 @@
+{
+ "about": "TAU predictions (PREREG.md), read by reduce.py report. tau_s: the offline fits on the committed catalogue data (tools/claims-v3/tau/offline.json; rails with the one-pass model, board_avg_w with no lag); pass_s: E41's SP pass under a 10 Hz ('100') and a 20 Hz ('50') ettelem; extra_d_s: the offline one-pass fit's extra delay per rail, the centre of P2a and the offset of P2b and P3 (T3 with the offline values); t3_decides: the cards whose 20 Hz pass is long enough to separate T3 from the rival (elsewhere the T3 items are reported only); board_drift_per_s: board_w's in-burst drift per s on the catalogue's 15-40 W steps, [p10 (floored at 0), p90] (offline.py --drift), P4d's range and the T1 'untested' line; bands: the prior bands; published_err: the model's error of the published last-0.6 s / 0.94 rail split for bursts of 2.0, 3.2 and 4.0 s (enercat --seconds 2, 3, 4), widened; calibrated: per card, the bands set by calibrate.py from simulated replicates (PREREG.md, 'Calibration'): an item's band is the calibrated one where given, else the prior.",
+ "tau_s": {
+  "aifoundry3": {
+   "minion_w": 1.04,
+   "sram_w": 1.03,
+   "noc_w": 1.04,
+   "board_avg_w": 1.05
+  },
+  "aifoundry1-c1": {
+   "minion_w": 1.06,
+   "sram_w": 0.53,
+   "noc_w": 1.07,
+   "board_avg_w": 1.11
+  },
+  "aifoundry2": {
+   "minion_w": 1.06,
+   "sram_w": 1.02,
+   "noc_w": 1.05,
+   "board_avg_w": 1.08
+  }
+ },
+ "pass_s": {
+  "aifoundry3": {
+   "100": 0.263,
+   "50": 0.321
+  },
+  "aifoundry1-c1": {
+   "100": 0.158,
+   "50": 0.188
+  },
+  "aifoundry2": {
+   "100": 0.156,
+   "50": 0.187
+  }
+ },
+ "extra_d_s": {
+  "aifoundry3": {
+   "minion_w": -0.01,
+   "sram_w": 0.0,
+   "noc_w": -0.02
+  },
+  "aifoundry1-c1": {
+   "minion_w": -0.01,
+   "sram_w": 0.03,
+   "noc_w": -0.02
+  },
+  "aifoundry2": {
+   "minion_w": 0.0,
+   "sram_w": 0.02,
+   "noc_w": 0.0
+  }
+ },
+ "t3_decides": [
+  "aifoundry3"
+ ],
+ "board_drift_per_s": {
+  "aifoundry3": [
+   0.0081,
+   0.0148
+  ],
+  "aifoundry1-c1": [
+   0.0,
+   0.0244
+  ],
+  "aifoundry2": [
+   0.0016,
+   0.0234
+  ]
+ },
+ "bands": {
+  "tau": 0.06,
+  "tau_a1c1_sram": 0.08,
+  "rel_rms": 0.015,
+  "rel_rms_a1c1_sram": 0.025,
+  "rise_fall": 0.06,
+  "m_vs_h": 0.06,
+  "extra_d": 0.05,
+  "d_vs_pass": 0.05,
+  "pass": 0.02,
+  "plateau": 0.02,
+  "energy": 0.02,
+  "edge_s": 0.1,
+  "rms_flat": 0.06
+ },
+ "method": {
+  "primary": [
+   "gauss",
+   0.1
+  ],
+  "secondary": [
+   "tv",
+   0.03
+  ]
+ },
+ "published_err": {
+  "default": {
+   "2.0": [
+    -0.28,
+    -0.14
+   ],
+   "3.0": [
+    -0.08,
+    0.02
+   ],
+   "4.0": [
+    -0.04,
+    0.07
+   ]
+  },
+  "aifoundry1-c1:sram_w": {
+   "2.0": [
+    -0.06,
+    0.07
+   ],
+   "3.0": [
+    -0.01,
+    0.12
+   ],
+   "4.0": [
+    0.0,
+    0.13
+   ]
+  },
+  "aifoundry3:board_avg_w": {},
+  "aifoundry1-c1:board_avg_w": {},
+  "aifoundry2:board_avg_w": {}
+ },
+ "calibrated": {
+  "aifoundry3": {
+   "bands": {
+    "P1 tau minion_w": 0.06,
+    "P4a residual minion_w": 0.015,
+    "P4b rise=fall minion_w": 0.09,
+    "P2a one-pass extra d minion_w": 0.05,
+    "P2b fixed d = pass minion_w": 0.05,
+    "P3 20 Hz fixed d = 20 Hz pass minion_w": 0.05,
+    "P4c tau M = H (step size)": 0.065,
+    "P5a plateau minion_w 2.0s": 0.034,
+    "P5b energy minion_w 2.0s": 0.02,
+    "P5c edges minion_w 2.0s": 0.1,
+    "P5d flat scatter minion_w 2.0s": 0.06,
+    "P5e plateau vs free fit minion_w 2.0s": 0.037,
+    "P5a plateau minion_w 3.0s": 0.02,
+    "P5b energy minion_w 3.0s": 0.02,
+    "P5c edges minion_w 3.0s": 0.1,
+    "P5d flat scatter minion_w 3.0s": 0.075,
+    "P5e plateau vs free fit minion_w 3.0s": 0.027,
+    "P5a plateau minion_w 4.0s": 0.02,
+    "P5b energy minion_w 4.0s": 0.02,
+    "P5c edges minion_w 4.0s": 0.1,
+    "P5d flat scatter minion_w 4.0s": 0.06,
+    "P5e plateau vs free fit minion_w 4.0s": 0.027,
+    "P6 published split minion_w 2.0s": [
+     -0.28,
+     -0.14
+    ],
+    "P6 published split minion_w 3.0s": [
+     -0.08,
+     0.02
+    ],
+    "P6 published split minion_w 4.0s": [
+     -0.04,
+     0.07
+    ],
+    "P1 tau sram_w": 0.065,
+    "P4a residual sram_w": 0.016,
+    "P4b rise=fall sram_w": 0.115,
+    "P2a one-pass extra d sram_w": 0.05,
+    "P2b fixed d = pass sram_w": 0.05,
+    "P3 20 Hz fixed d = 20 Hz pass sram_w": 0.05,
+    "P5a plateau sram_w 2.0s": 0.037,
+    "P5b energy sram_w 2.0s": 0.022,
+    "P5c edges sram_w 2.0s": 0.1,
+    "P5d flat scatter sram_w 2.0s": 0.075,
+    "P5e plateau vs free fit sram_w 2.0s": 0.047,
+    "P5a plateau sram_w 3.0s": 0.02,
+    "P5b energy sram_w 3.0s": 0.02,
+    "P5c edges sram_w 3.0s": 0.1,
+    "P5d flat scatter sram_w 3.0s": 0.07,
+    "P5e plateau vs free fit sram_w 3.0s": 0.032,
+    "P5a plateau sram_w 4.0s": 0.02,
+    "P5b energy sram_w 4.0s": 0.02,
+    "P5c edges sram_w 4.0s": 0.1,
+    "P5d flat scatter sram_w 4.0s": 0.08,
+    "P5e plateau vs free fit sram_w 4.0s": 0.026,
+    "P6 published split sram_w 2.0s": [
+     -0.28,
+     -0.14
+    ],
+    "P6 published split sram_w 3.0s": [
+     -0.08,
+     0.02
+    ],
+    "P6 published split sram_w 4.0s": [
+     -0.04,
+     0.07
+    ],
+    "P1 tau noc_w": 0.06,
+    "P4a residual noc_w": 0.015,
+    "P4b rise=fall noc_w": 0.085,
+    "P2a one-pass extra d noc_w": 0.05,
+    "P2b fixed d = pass noc_w": 0.05,
+    "P3 20 Hz fixed d = 20 Hz pass noc_w": 0.05,
+    "P5a plateau noc_w 2.0s": 0.034,
+    "P5b energy noc_w 2.0s": 0.02,
+    "P5c edges noc_w 2.0s": 0.11,
+    "P5d flat scatter noc_w 2.0s": 0.07,
+    "P5e plateau vs free fit noc_w 2.0s": 0.042,
+    "P5a plateau noc_w 3.0s": 0.02,
+    "P5b energy noc_w 3.0s": 0.02,
+    "P5c edges noc_w 3.0s": 0.1,
+    "P5d flat scatter noc_w 3.0s": 0.06,
+    "P5e plateau vs free fit noc_w 3.0s": 0.028,
+    "P5a plateau noc_w 4.0s": 0.02,
+    "P5b energy noc_w 4.0s": 0.02,
+    "P5c edges noc_w 4.0s": 0.12,
+    "P5d flat scatter noc_w 4.0s": 0.065,
+    "P5e plateau vs free fit noc_w 4.0s": 0.029,
+    "P6 published split noc_w 2.0s": [
+     -0.28,
+     -0.14
+    ],
+    "P6 published split noc_w 3.0s": [
+     -0.08,
+     0.02
+    ],
+    "P6 published split noc_w 4.0s": [
+     -0.04,
+     0.07
+    ],
+    "P1 tau board_avg_w": 0.06,
+    "P4a residual board_avg_w": 0.015,
+    "P4b rise=fall board_avg_w": 0.06,
+    "P2c board_avg d board_avg_w": 0.05,
+    "P5a plateau board_avg_w 2.0s": 0.024,
+    "P5b energy board_avg_w 2.0s": 0.02,
+    "P5c edges board_avg_w 2.0s": 0.1,
+    "P5d flat scatter board_avg_w 2.0s": 0.06,
+    "P5e plateau vs free fit board_avg_w 2.0s": 0.037,
+    "P5a plateau board_avg_w 3.0s": 0.02,
+    "P5b energy board_avg_w 3.0s": 0.02,
+    "P5c edges board_avg_w 3.0s": 0.1,
+    "P5d flat scatter board_avg_w 3.0s": 0.06,
+    "P5e plateau vs free fit board_avg_w 3.0s": 0.02,
+    "P5a plateau board_avg_w 4.0s": 0.02,
+    "P5b energy board_avg_w 4.0s": 0.02,
+    "P5c edges board_avg_w 4.0s": 0.1,
+    "P5d flat scatter board_avg_w 4.0s": 0.06,
+    "P5e plateau vs free fit board_avg_w 4.0s": 0.02,
+    "P3b d shift 20-10 Hz, mean of the rails": 0.029
+   },
+   "replicates": 40,
+   "noise": [
+    1.25
+   ],
+   "items_per_theory": {
+    "T2": 4,
+    "T1": 9,
+    "T3": 11,
+    "T4": 69
+   },
+   "sd_inflation": 1.186,
+   "source": [
+    "build/claims-v3-dry/tau-calib/a3-true-k125-A.jsonl"
+   ],
+   "widened": {
+    "P4b rise=fall minion_w": "prior 0.06 -> 0.09 (mean +0.0245, sd_up 0.0226, z 2.77, n 9)",
+    "P4c tau M = H (step size)": "prior 0.06 -> 0.065 (mean -0.0047, sd_up 0.0205, z 2.77, n 9)",
+    "P5a plateau minion_w 2.0s": "prior 0.02 -> 0.034 (mean +0.0019, sd_up 0.0092, z 3.38, n 69)",
+    "P5e plateau vs free fit minion_w 2.0s": "prior 0.02 -> 0.037 (mean -0.0022, sd_up 0.0100, z 3.38, n 69)",
+    "P5d flat scatter minion_w 3.0s": "prior 0.06 -> 0.075 (mean +0.0535, sd_up 0.0058, z 3.18, n 69)",
+    "P5e plateau vs free fit minion_w 3.0s": "prior 0.02 -> 0.027 (mean -0.0037, sd_up 0.0067, z 3.38, n 69)",
+    "P5e plateau vs free fit minion_w 4.0s": "prior 0.02 -> 0.027 (mean -0.0033, sd_up 0.0069, z 3.38, n 69)",
+    "P1 tau sram_w": "prior 0.06 -> 0.065 (mean +0.0078, sd_up 0.0212, z 2.50, n 4)",
+    "P4a residual sram_w": "prior 0.015 -> 0.016 (mean +0.0144, sd_up 0.0006, z 2.54, n 9)",
+    "P4b rise=fall sram_w": "prior 0.06 -> 0.115 (mean +0.0285, sd_up 0.0302, z 2.77, n 9)",
+    "P5a plateau sram_w 2.0s": "prior 0.02 -> 0.037 (mean +0.0002, sd_up 0.0109, z 3.38, n 69)",
+    "P5b energy sram_w 2.0s": "prior 0.02 -> 0.022 (mean -0.0002, sd_up 0.0062, z 3.38, n 69)",
+    "P5d flat scatter sram_w 2.0s": "prior 0.06 -> 0.075 (mean +0.0530, sd_up 0.0067, z 3.18, n 69)",
+    "P5e plateau vs free fit sram_w 2.0s": "prior 0.02 -> 0.047 (mean -0.0031, sd_up 0.0129, z 3.38, n 69)",
+    "P5d flat scatter sram_w 3.0s": "prior 0.06 -> 0.07 (mean +0.0527, sd_up 0.0043, z 3.18, n 69)",
+    "P5e plateau vs free fit sram_w 3.0s": "prior 0.02 -> 0.032 (mean -0.0025, sd_up 0.0084, z 3.38, n 69)",
+    "P5d flat scatter sram_w 4.0s": "prior 0.06 -> 0.08 (mean +0.0531, sd_up 0.0069, z 3.18, n 69)",
+    "P5e plateau vs free fit sram_w 4.0s": "prior 0.02 -> 0.026 (mean -0.0016, sd_up 0.0070, z 3.38, n 69)",
+    "P4b rise=fall noc_w": "prior 0.06 -> 0.085 (mean +0.0228, sd_up 0.0210, z 2.77, n 9)",
+    "P5a plateau noc_w 2.0s": "prior 0.02 -> 0.034 (mean -0.0002, sd_up 0.0099, z 3.38, n 69)",
+    "P5c edges noc_w 2.0s": "prior 0.1 -> 0.11 (mean +0.0380, sd_up 0.0216, z 3.18, n 69)",
+    "P5d flat scatter noc_w 2.0s": "prior 0.06 -> 0.07 (mean +0.0479, sd_up 0.0056, z 3.18, n 69)",
+    "P5e plateau vs free fit noc_w 2.0s": "prior 0.02 -> 0.042 (mean -0.0059, sd_up 0.0105, z 3.38, n 69)",
+    "P5e plateau vs free fit noc_w 3.0s": "prior 0.02 -> 0.028 (mean -0.0052, sd_up 0.0067, z 3.38, n 69)",
+    "P5c edges noc_w 4.0s": "prior 0.1 -> 0.12 (mean +0.0426, sd_up 0.0235, z 3.18, n 69)",
+    "P5d flat scatter noc_w 4.0s": "prior 0.06 -> 0.065 (mean +0.0487, sd_up 0.0048, z 3.18, n 69)",
+    "P5e plateau vs free fit noc_w 4.0s": "prior 0.02 -> 0.029 (mean -0.0047, sd_up 0.0069, z 3.38, n 69)",
+    "P5a plateau board_avg_w 2.0s": "prior 0.02 -> 0.024 (mean +0.0005, sd_up 0.0068, z 3.38, n 69)",
+    "P5e plateau vs free fit board_avg_w 2.0s": "prior 0.02 -> 0.037 (mean -0.0048, sd_up 0.0092, z 3.38, n 69)",
+    "P3b d shift 20-10 Hz, mean of the rails": "true replicates need 0.0287 (mean -0.0002, sd 0.0101); the band stays at the prior 0.029 (the midpoint)"
+   }
+  },
+  "aifoundry1-c1": {
+   "bands": {
+    "P1 tau minion_w": 0.06,
+    "P4a residual minion_w": 0.015,
+    "P4b rise=fall minion_w": 0.06,
+    "P2a one-pass extra d minion_w": 0.05,
+    "P2b fixed d = pass minion_w": 0.05,
+    "P3 20 Hz fixed d = 20 Hz pass minion_w": 0.05,
+    "P4c tau M = H (step size)": 0.06,
+    "P5a plateau minion_w 2.0s": 0.02,
+    "P5b energy minion_w 2.0s": 0.02,
+    "P5c edges minion_w 2.0s": 0.1,
+    "P5d flat scatter minion_w 2.0s": 0.06,
+    "P5e plateau vs free fit minion_w 2.0s": 0.034,
+    "P5a plateau minion_w 3.0s": 0.02,
+    "P5b energy minion_w 3.0s": 0.02,
+    "P5c edges minion_w 3.0s": 0.1,
+    "P5d flat scatter minion_w 3.0s": 0.06,
+    "P5e plateau vs free fit minion_w 3.0s": 0.02,
+    "P5a plateau minion_w 4.0s": 0.02,
+    "P5b energy minion_w 4.0s": 0.02,
+    "P5c edges minion_w 4.0s": 0.1,
+    "P5d flat scatter minion_w 4.0s": 0.06,
+    "P5e plateau vs free fit minion_w 4.0s": 0.02,
+    "P6 published split minion_w 2.0s": [
+     -0.28,
+     -0.14
+    ],
+    "P6 published split minion_w 3.0s": [
+     -0.08,
+     0.02
+    ],
+    "P6 published split minion_w 4.0s": [
+     -0.04,
+     0.07
+    ],
+    "P1 tau sram_w": 0.08,
+    "P4a residual sram_w": 0.025,
+    "P4b rise=fall sram_w": 0.06,
+    "P2a one-pass extra d sram_w": 0.05,
+    "P2b fixed d = pass sram_w": 0.05,
+    "P3 20 Hz fixed d = 20 Hz pass sram_w": 0.05,
+    "P5a plateau sram_w 2.0s": 0.02,
+    "P5b energy sram_w 2.0s": 0.02,
+    "P5c edges sram_w 2.0s": 0.1,
+    "P5d flat scatter sram_w 2.0s": 0.06,
+    "P5e plateau vs free fit sram_w 2.0s": 0.029,
+    "P5a plateau sram_w 3.0s": 0.02,
+    "P5b energy sram_w 3.0s": 0.02,
+    "P5c edges sram_w 3.0s": 0.1,
+    "P5d flat scatter sram_w 3.0s": 0.06,
+    "P5e plateau vs free fit sram_w 3.0s": 0.02,
+    "P5a plateau sram_w 4.0s": 0.02,
+    "P5b energy sram_w 4.0s": 0.02,
+    "P5c edges sram_w 4.0s": 0.1,
+    "P5d flat scatter sram_w 4.0s": 0.06,
+    "P5e plateau vs free fit sram_w 4.0s": 0.02,
+    "P6 published split sram_w 2.0s": [
+     -0.06,
+     0.07
+    ],
+    "P6 published split sram_w 3.0s": [
+     -0.01,
+     0.12
+    ],
+    "P6 published split sram_w 4.0s": [
+     0.0,
+     0.13
+    ],
+    "P1 tau noc_w": 0.06,
+    "P4a residual noc_w": 0.015,
+    "P4b rise=fall noc_w": 0.07,
+    "P2a one-pass extra d noc_w": 0.05,
+    "P2b fixed d = pass noc_w": 0.05,
+    "P3 20 Hz fixed d = 20 Hz pass noc_w": 0.05,
+    "P5a plateau noc_w 2.0s": 0.025,
+    "P5b energy noc_w 2.0s": 0.02,
+    "P5c edges noc_w 2.0s": 0.1,
+    "P5d flat scatter noc_w 2.0s": 0.06,
+    "P5e plateau vs free fit noc_w 2.0s": 0.043,
+    "P5a plateau noc_w 3.0s": 0.02,
+    "P5b energy noc_w 3.0s": 0.02,
+    "P5c edges noc_w 3.0s": 0.1,
+    "P5d flat scatter noc_w 3.0s": 0.06,
+    "P5e plateau vs free fit noc_w 3.0s": 0.026,
+    "P5a plateau noc_w 4.0s": 0.02,
+    "P5b energy noc_w 4.0s": 0.02,
+    "P5c edges noc_w 4.0s": 0.1,
+    "P5d flat scatter noc_w 4.0s": 0.06,
+    "P5e plateau vs free fit noc_w 4.0s": 0.024,
+    "P6 published split noc_w 2.0s": [
+     -0.28,
+     -0.14
+    ],
+    "P6 published split noc_w 3.0s": [
+     -0.08,
+     0.02
+    ],
+    "P6 published split noc_w 4.0s": [
+     -0.04,
+     0.07
+    ],
+    "P1 tau board_avg_w": 0.06,
+    "P4a residual board_avg_w": 0.015,
+    "P4b rise=fall board_avg_w": 0.06,
+    "P2c board_avg d board_avg_w": 0.05,
+    "P5a plateau board_avg_w 2.0s": 0.02,
+    "P5b energy board_avg_w 2.0s": 0.02,
+    "P5c edges board_avg_w 2.0s": 0.1,
+    "P5d flat scatter board_avg_w 2.0s": 0.06,
+    "P5e plateau vs free fit board_avg_w 2.0s": 0.027,
+    "P5a plateau board_avg_w 3.0s": 0.02,
+    "P5b energy board_avg_w 3.0s": 0.02,
+    "P5c edges board_avg_w 3.0s": 0.1,
+    "P5d flat scatter board_avg_w 3.0s": 0.06,
+    "P5e plateau vs free fit board_avg_w 3.0s": 0.02,
+    "P5a plateau board_avg_w 4.0s": 0.02,
+    "P5b energy board_avg_w 4.0s": 0.02,
+    "P5c edges board_avg_w 4.0s": 0.1,
+    "P5d flat scatter board_avg_w 4.0s": 0.06,
+    "P5e plateau vs free fit board_avg_w 4.0s": 0.02,
+    "P3b d shift 20-10 Hz, mean of the rails": 0.015
+   },
+   "replicates": 40,
+   "noise": [
+    1.25
+   ],
+   "items_per_theory": {
+    "T2": 4,
+    "T1": 9,
+    "T4": 69
+   },
+   "sd_inflation": 1.186,
+   "source": [
+    "build/claims-v3-dry/tau-calib/a1-true-k125-A.jsonl"
+   ],
+   "widened": {
+    "P5e plateau vs free fit minion_w 2.0s": "prior 0.02 -> 0.034 (mean -0.0053, sd_up 0.0083, z 3.38, n 69)",
+    "P5e plateau vs free fit sram_w 2.0s": "prior 0.02 -> 0.029 (mean +0.0006, sd_up 0.0081, z 3.38, n 69)",
+    "P4b rise=fall noc_w": "prior 0.06 -> 0.07 (mean +0.0152, sd_up 0.0180, z 2.77, n 9)",
+    "P5a plateau noc_w 2.0s": "prior 0.02 -> 0.025 (mean +0.0012, sd_up 0.0069, z 3.38, n 69)",
+    "P5e plateau vs free fit noc_w 2.0s": "prior 0.02 -> 0.043 (mean -0.0047, sd_up 0.0111, z 3.38, n 69)",
+    "P5e plateau vs free fit noc_w 3.0s": "prior 0.02 -> 0.026 (mean -0.0051, sd_up 0.0059, z 3.38, n 69)",
+    "P5e plateau vs free fit noc_w 4.0s": "prior 0.02 -> 0.024 (mean -0.0056, sd_up 0.0053, z 3.38, n 69)",
+    "P5e plateau vs free fit board_avg_w 2.0s": "prior 0.02 -> 0.027 (mean -0.0019, sd_up 0.0072, z 3.38, n 69)",
+    "P3b d shift 20-10 Hz, mean of the rails": "true replicates need 0.0173 (mean -0.0000, sd 0.0088); the band stays at the prior 0.015 (the midpoint)"
+   }
+  }
+ }
+}

@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+# Named stub-* so that its process name never matches a device tool's (lib.sh DEV_COMM; the DV2 gate scans for those).
+"""TAU dry-run stand-in for build/ettelem/ettelem ("sample" only). Opens nothing. Prints ettelem-format lines at the
+requested rate in virtual time (stub-common.sample_row: the SP copies its values once per pass, the rails one pass
+late plus the card's extra delay, with the card's noise and in-burst creep); TAU_STUB_FIXED_DELAY=<s> makes the rails
+a fixed delay late instead (the rival theory, for a negative control). SIGTERM ends it after the current line, as
+ettelem does. Faults (TAU_STUB_FAIL, counted over sampler starts): tel_nostart:<k> (start k prints nothing),
+tel_hot:<k> (91 C), tel_warm:<k> (75 C), tel_slow:<k> (the first line comes 8 s late), tel_notemp:<k> (lines without temp_c),
+tel_ignoreterm:<k> (ignores SIGTERM and prints nothing for 60 s of wall time: the block must SIGKILL it)."""
+import os, signal, sys, time
+import importlib.util
+sys.dont_write_bytecode = True
+spec = importlib.util.spec_from_file_location("sc", os.path.join(os.path.dirname(os.path.abspath(__file__)), "stub-common.py"))
+sc = importlib.util.module_from_spec(spec); spec.loader.exec_module(sc)
+import json
+
+a = sys.argv[1:]
+if not sc.ST or not a or a[0] != "sample":
+    print("stub ettelem: sample only, with TAU_STUB_STATE", file=sys.stderr); sys.exit(97)
+secs = float(a[a.index("--seconds") + 1]) if "--seconds" in a else 10.0
+every = int(a[a.index("--every-ms") + 1]) if "--every-ms" in a else 100
+k = sc.counter("sampler_starts")
+stop = []
+if f"tel_ignoreterm:{k}" in sc.FAIL:
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    time.sleep(60); sys.exit(1)
+signal.signal(signal.SIGTERM, lambda *_: stop.append(1))
+if f"tel_nostart:{k}" in sc.FAIL:
+    for _ in range(int(secs * 10)):
+        if stop:
+            break
+        sc.vsleep(100)
+    sys.exit(1)
+sc.vsleep(300 + (8000 if f"tel_slow:{k}" in sc.FAIL else 0))   # ettelem's start
+t0 = sc.vnow()
+fixed = os.environ.get("TAU_STUB_FIXED_DELAY")
+for i in range(int(secs * 1000 / every)):
+    if stop:
+        break
+    hot = 91 if f"tel_hot:{k}" in sc.FAIL else 75 if f"tel_warm:{k}" in sc.FAIL else 57
+    s = sc.sample_row(t0 + i * every, every, sc.bursts(), hot=hot, fixed_delay=float(fixed) if fixed else None,
+                      temp=f"tel_notemp:{k}" not in sc.FAIL)
+    print(json.dumps(s, separators=(",", ":")), flush=True)
+    open(os.path.join(os.path.dirname(sc.ST), "tau-stub-vlast"), "w").write(str(s["t_ms"]))
+    sc.vsleep(every)

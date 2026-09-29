@@ -10,6 +10,21 @@
 //       t.tbl (from ../gen_ops.py): u64 n_addrs, then n_addrs u64 arena offsets per minion of --shires.
 //       With --stride S --lines N, minion m instead cycles through its first table address + j * S, j < N.
 //   memprobe_host --info      prints the arena's device address and exits.
+//   (MP_EXT builds, -DMEMPROBE_EXT=ON, e.g. build/memprobe2; tools/claims-v3/memp2:)
+//   memprobe_host --tloop --stride S [--where scp|arena] [--tl-lines 16] [--span 32K] [--minions MASK]
+//       [--shires MASK] [--spread same|bank|sub|onebank] [--iters N] [--reps R] [--name NAME]
+//       TensorLoad bandwidth: hart 0 of every minion in --minions (per shire) streams --tl-lines-line TensorLoads,
+//       S bytes apart inside a load, the next load 16 x S further on (--tl-lines x S), wrapping every --span bytes.
+//       scp: minion m's region starts at 256 KB + m x (span + 1 KB) of its own shire's scratchpad; arena: an L2-resident
+//       buffer of span bytes per minion in DRAM (each minion scalar-loads its span before the timed part, and the
+//       first launch warms it too). --spread moves each minion's start by (m mod 4) x 64 B (bank), also by
+//       ((m / 4) mod 4) x 256 B (sub), or by (m mod 4) x 256 B only (onebank: every minion in bank 0, on sub-bank
+//       m mod 4); same = every minion starts in bank 0, sub-bank 0. One MEMPROBE line per launch, with per-shire
+//       bytes per cycle; tensor_errors counts minions whose tensor_error gained a bit during the launch. A launch
+//       that does not finish (or a stream error) ends the program at once with exit code 3: no further launch.
+//   In an op program (MP_EXT), OP_TTLOAD times one TensorLoad and OP_TERR records tensor_error; a program with
+//   OP_TTLOAD must run on an even hart (hart 0 of a minion). In MP_EXT builds a program launch that does not finish
+//   (or a stream error) ends the run at once with exit code 3: the next program is not launched.
 //
 // The card is shared, so the device is open only while measuring, and a budget (--budget, default
 // 8 s on silicon) stops further launches.
@@ -100,6 +115,17 @@ struct Options {
   double seconds = 2.0;
   double budget = -1;
   std::string kernel = KERNEL_ELF;
+#ifdef MP_EXT
+  bool tloop = false;
+  std::string where = "scp";
+  uint64_t tlLines = 16;
+  uint64_t span = 32 * 1024;
+  uint64_t minionMask = 0xffffffff;
+  std::string spread = "same";
+  uint64_t iters = 20000;
+  int reps = 3;
+  std::string name;
+#endif
 };
 
 class Session {
@@ -257,6 +283,23 @@ int runPrograms(const Options& o, const std::vector<std::byte>& elf) {
                code == OP_TNOP || code == OP_MSREAD;
       timed += code == OP_RAW ? 4 : 0;
       timed += code == OP_TLOAD2;
+#ifdef MP_EXT
+      timed += code == OP_TTLOAD || code == OP_TERR;
+      if (code == OP_TTLOAD && (o.hart & 1)) {
+        std::fprintf(stderr, "%s: OP_TTLOAD needs hart 0 of a minion (an even --hart)\n", o.programs[i].c_str());
+        return 2;
+      }
+      if (code == OP_TERR) {
+        continue;
+      }
+      if (code == OP_TTLOAD && !(w[k + 1] >> 63)) {
+        const uint64_t arg = w[k] >> 8, lines = (arg & 0xF) + 1, stride = (arg >> 8) ? (arg >> 8) : 64;
+        if (w[k + 1] + (lines - 1) * stride + 64 > o.arena) {
+          std::fprintf(stderr, "%s: op %zu: the TensorLoad leaves the arena\n", o.programs[i].c_str(), k / 2);
+          return 2;
+        }
+      }
+#endif
       if (code != OP_DELAY && code != OP_FENCE && code != OP_TFENCE && code != OP_STAMP && code != OP_END &&
           code != OP_TNOP && code != OP_RAW && code != OP_MSREAD) {
         const uint64_t a = w[k + 1];
@@ -281,6 +324,9 @@ int runPrograms(const Options& o, const std::vector<std::byte>& elf) {
     double wall = 0;
     long long t0 = 0, t1 = 0;
     bool ok = dev.launch(a, 1ull << (o.hart / 64), st, wall, t0, t1);
+#ifdef MP_EXT
+    const bool launched = ok;
+#endif
     const MpStatus& s = st[o.hart];
     ok = ok && s.magic == MP_MAGIC && s.count == std::min<uint64_t>(timed, MP_MAX_RESULTS);
     std::vector<uint32_t> res(s.count);
@@ -299,6 +345,12 @@ int runPrograms(const Options& o, const std::vector<std::byte>& elf) {
                 (unsigned long long)s.count, (unsigned long long)s.cycles, wall, t0, t1, outPath.c_str(),
                 ok ? "true" : "false");
     std::fflush(stdout);
+#ifdef MP_EXT
+    if (!launched) {  // the kernel did not finish (or a stream error): launch nothing more on this card
+      std::fprintf(stderr, "memprobe: launch failed (did not finish or stream error): no further launch\n");
+      return 3;
+    }
+#endif
   }
   return bad ? 1 : 0;
 }
@@ -409,7 +461,142 @@ int runLoop(const Options& o, const std::vector<std::byte>& elf) {
   return 0;
 }
 
+
+#ifdef MP_EXT
+// TensorLoad bandwidth (MP_TLOOP): see the comment at the top. Every launch prints one MEMPROBE line with the
+// per-shire bytes per shire-cycle (all streaming minions' bytes over the slowest of them) and the per-minion cycles
+// per load; tensor_error from every minion (the status line's sink) must be 0.
+int runTloop(const Options& o, const std::vector<std::byte>& elf) {
+  const uint64_t stride = o.stride ? o.stride : 64;
+  const uint64_t step = o.tlLines * stride;
+  const uint64_t nsh = __builtin_popcountll(o.shireMask), nmin = __builtin_popcountll(o.minionMask & 0xffffffffull);
+  const uint64_t scpOff = 256 * 1024, scpBytes = 0x280000;  // start 256 KB in (offset 0 faults for some ops)
+  if (o.tlLines < 1 || o.tlLines > 16 || stride % 64 || stride == 0 || nmin == 0 || (o.minionMask >> 32) ||
+      o.span % step || (o.tlLines - 1) * stride + 64 > o.span || o.iters == 0 || o.reps < 1 ||
+      (o.where != "scp" && o.where != "arena") ||
+      (o.spread != "same" && o.spread != "bank" && o.spread != "sub" && o.spread != "onebank")) {
+    std::fprintf(stderr, "tloop: bad --tl-lines/--stride/--span/--minions/--iters/--reps/--where/--spread "
+                         "(the span must be a multiple of tl-lines x stride and hold one load)\n");
+    return 2;
+  }
+  auto spreadOff = [&](uint64_t m) -> uint64_t {
+    if (o.spread == "same") return 0;
+    if (o.spread == "onebank") return (m % 4) * 256;  // bank 0 (PA[7:6] = 0), sub-bank m mod 4 (PA[9:8])
+    const uint64_t bank = (m % 4) * 64;
+    return o.spread == "bank" ? bank : bank + ((m / 4) % 4) * 256;
+  };
+  const uint64_t slot = o.span + 1024;  // room for the spread offset
+  if (o.where == "scp" && scpOff + 32 * slot > scpBytes) {
+    std::fprintf(stderr, "tloop: 32 minions x %llu B does not fit the 2.5 MB scratchpad from 256 KB\n",
+                 (unsigned long long)slot);
+    return 2;
+  }
+  if (o.where == "arena" && nsh * 32 * slot > o.arena) {
+    std::fprintf(stderr, "tloop: the arena is smaller than %llu minions x %llu B\n", (unsigned long long)(nsh * 32),
+                 (unsigned long long)slot);
+    return 2;
+  }
+  Session dev(o, elf);
+  const uint64_t base = o.where == "arena" ? reinterpret_cast<uint64_t>(allocArena(dev, o.arena)) : 0;
+  std::vector<uint64_t> tbl(nsh * 32);
+  for (uint64_t si = 0; si < nsh; ++si) {
+    for (uint64_t m = 0; m < 32; ++m) {
+      tbl[si * 32 + m] = o.where == "scp" ? MP_SCP_ADDR(0x7F, scpOff + m * slot + spreadOff(m))
+                                          : base + (si * 32 + m) * slot + spreadOff(m);
+    }
+  }
+  std::byte* dTbl = dev.alloc(tbl.size() * 8);
+  dev.toDevice(tbl.data(), dTbl, tbl.size() * 8);
+  MpArgs a{};
+  a.mode = MP_TLOOP;
+  a.table = reinterpret_cast<uint64_t>(dTbl);
+  a.n_addrs = 1;
+  a.stride = stride;
+  a.iters = o.sysemu ? std::min<uint64_t>(o.iters, 8) : o.iters;
+  a.minion_mask = o.minionMask;
+  a.tl_lines = o.tlLines;
+  a.tl_step = step;
+  a.tl_span = o.span;
+  a.tl_flags = o.where == "arena" ? MP_TL_WARM : 0;
+  const std::string name = o.name.empty() ? "tloop" : o.name;
+  std::vector<MpStatus> st;
+  int bad = 0;
+  for (int launchNo = 0; launchNo < o.reps; ++launchNo) {
+    if (dev.overBudget()) {
+      std::fprintf(stderr, "stopping: device-time budget of %.1f s used\n", o.budget);
+      return 1;
+    }
+    double wall = 0;
+    long long t0 = 0, t1 = 0;
+    bool ok = dev.launch(a, o.shireMask, st, wall, t0, t1);
+    const bool launched = ok;
+    uint64_t reported = 0, terr = 0, stale = 0, cmax = 0;
+    double csum = 0;
+    std::string bpc = "[", cpl = "[";
+    for (uint64_t s = 0, si = 0; s < 32; ++s) {
+      if (!((o.shireMask >> s) & 1)) continue;
+      uint64_t smax = 0, n = 0;
+      double scsum = 0;
+      for (uint64_t m = 0; m < 32; ++m) {
+        if (!((o.minionMask >> m) & 1)) continue;
+        const MpStatus& x = st[s * 64 + m * 2];
+        if (x.magic != MP_MAGIC || x.hart != s * 64 + m * 2 || x.count != a.iters) {
+          ok = false;
+          continue;
+        }
+        ++reported;
+        ++n;
+        const uint64_t e0 = x.sink >> 32, e1 = x.sink & 0xFFFFFFFFull;
+        terr += (e1 & ~e0) != 0;  // a bit this launch added
+        stale += e0 != 0;         // set before the first tensor op (an earlier kernel)
+        smax = std::max<uint64_t>(smax, x.cycles);
+        scsum += double(x.cycles);
+      }
+      cmax = std::max(cmax, smax);
+      csum += scsum;
+      const double bytes = double(n) * double(a.iters) * double(o.tlLines) * 64.0;
+      char buf[64];
+      std::snprintf(buf, sizeof buf, "%s%.3f", si ? "," : "", smax ? bytes / double(smax) : 0.0);
+      bpc += buf;
+      std::snprintf(buf, sizeof buf, "%s%.2f", si ? "," : "", n ? scsum / double(n) / double(a.iters) : 0.0);
+      cpl += buf;
+      ++si;
+    }
+    bpc += "]";
+    cpl += "]";
+    ok = ok && reported == nsh * nmin && terr == 0;
+    bad += !ok;
+    std::printf("MEMPROBE {\"test\":\"tloop\",\"name\":\"%s\",\"where\":\"%s\",\"stride\":%llu,\"tl_lines\":%llu,"
+                "\"span\":%llu,\"spread\":\"%s\",\"minion_mask\":\"0x%llx\",\"shire_mask\":\"0x%llx\",\"minions\":%llu,"
+                "\"iters\":%llu,\"launch\":%d,\"t_start_ms\":%lld,\"t_end_ms\":%lld,\"wall_s\":%.6f,\"cycles_max\":%llu,"
+                "\"cycles_mean\":%.1f,\"tensor_errors\":%llu,\"tensor_error_stale\":%llu,\"launch_ok\":%s,"
+                "\"bytes_per_shire_cycle\":%s,\"cycles_per_load\":%s,\"ok\":%s}\n",
+                name.c_str(), o.where.c_str(), (unsigned long long)stride, (unsigned long long)o.tlLines,
+                (unsigned long long)o.span, o.spread.c_str(), (unsigned long long)o.minionMask,
+                (unsigned long long)o.shireMask, (unsigned long long)reported, (unsigned long long)a.iters, launchNo, t0,
+                t1, wall, (unsigned long long)cmax, reported ? csum / double(reported) : 0.0,
+                (unsigned long long)terr, (unsigned long long)stale, launched ? "true" : "false", bpc.c_str(),
+                cpl.c_str(), ok ? "true" : "false");
+    std::fflush(stdout);
+    if (!launched) {  // the kernel did not finish (or a stream error): launch nothing more on this card
+      std::fprintf(stderr, "tloop: launch failed (did not finish or stream error): no further launch\n");
+      return 3;
+    }
+  }
+  return bad ? 1 : 0;
+}
+#endif
 }  // namespace
+
+#ifdef MP_EXT
+// The sha256 of the main.cpp and memprobe_args.h this binary was configured from (host/CMakeLists.txt passes it):
+// tools/claims-v3/memp2/block.sh refuses a build/memprobe2 whose tag does not match the tree's sources.
+#ifndef MP2_SRC_TAG
+#define MP2_SRC_TAG "memp2-src:unknown"
+#endif
+extern "C" const char memp2_src_tag[];
+extern "C" __attribute__((used)) const char memp2_src_tag[] = MP2_SRC_TAG;
+#endif
 
 int main(int argc, char** argv) {
   registerRuntimeLogLevels();  // first, before any library starts a thread
@@ -439,6 +626,17 @@ int main(int argc, char** argv) {
     else if (a == "--seconds") o.seconds = std::atof(next().c_str());
     else if (a == "--budget") o.budget = std::atof(next().c_str());
     else if (a == "--kernel") o.kernel = next();
+#ifdef MP_EXT
+    else if (a == "--tloop") o.tloop = true;
+    else if (a == "--where") o.where = next();
+    else if (a == "--tl-lines") o.tlLines = std::strtoull(next().c_str(), nullptr, 0);
+    else if (a == "--span") o.span = parseSize(next());
+    else if (a == "--minions") o.minionMask = std::strtoull(next().c_str(), nullptr, 0);
+    else if (a == "--spread") o.spread = next();
+    else if (a == "--iters") o.iters = std::strtoull(next().c_str(), nullptr, 0);
+    else if (a == "--reps") o.reps = std::atoi(next().c_str());
+    else if (a == "--name") o.name = next();
+#endif
     else {
       std::fprintf(stderr, "unknown option %s (see the comment at the top of host/main.cpp)\n", a.c_str());
       return 2;
@@ -468,6 +666,11 @@ int main(int argc, char** argv) {
     if (o.loop) {
       return runLoop(o, elf);
     }
+#ifdef MP_EXT
+    if (o.tloop) {
+      return runTloop(o, elf);
+    }
+#endif
     if (!o.programs.empty()) {
       return runPrograms(o, elf);
     }

@@ -1,0 +1,82 @@
+{
+ "about": "EXPERIMENT nocr parameters (tools/claims-v3/nocr/README.md). Cycles are minion cycles (600 MHz on every card this runs on). Frozen with LOCK.sha256 before validation. r31_pair_slopes: the per-hop cost of one ESR load plus one store (pmc 3 - null, and pmc 0 - pmc 3, in the compiled firmware).",
+ "r31": {
+  "mesh_launches": 3,
+  "mesh_reps": 8,
+  "mesh_warm_reps": 1,
+  "mesh_slot_cycles": 6000000,
+  "mesh_lead_cycles": 3000000,
+  "gap_cycles": 256,
+  "callers": "0xffffffff",
+  "master_launches": 1,
+  "master_reps": 16,
+  "master_warm_reps": 1,
+  "master_slot_cycles": 1000000,
+  "master_lead_cycles": 3000000
+ },
+ "r32": {
+  "window_cycles": 30000000,
+  "slice_bytes": 32768,
+  "read_repeats": 3,
+  "write_repeats": 3,
+  "clock_mhz": 600
+ },
+ "smoke": {
+  "callers": "0x80000001",
+  "targets_sc": [
+   0,
+   11,
+   31
+  ],
+  "targets_ms": [
+   0,
+   7
+  ],
+  "reps": 2,
+  "master_callers": "0x1",
+  "master_reps": 2,
+  "window_cycles": 6000000,
+  "read_labels": [
+   "solo:10>19",
+   "solo:17>11",
+   "set:rowE2"
+  ],
+  "write_labels": [
+   "solo:10>19"
+  ]
+ },
+ "safety": {
+  "stop_die_c": 90,
+  "process_timeout_s": 10,
+  "host_budget_s": 8,
+  "pause_between_processes_s": 2
+ },
+ "decision": {
+  "r31_rms_max_cycles": 4.0,
+  "r31_rms_max_frac_of_slope": 0.1,
+  "r31_r2_min": 0.98,
+  "r31_pair_slopes": {
+   "posted": [
+    10.0,
+    14.0
+   ],
+   "acked": [
+    20.0,
+    28.0
+   ]
+  },
+  "r31_pair_consistency": {
+   "abs_cycles": 2.0,
+   "rel": 0.15
+  },
+  "r31_null_spread_max_cycles": 10.0,
+  "r31_margin_frac_of_slope": 0.333,
+  "r31_place_rms_max_frac_of_slope": 0.167,
+  "r31_ms_slope_rel_tol": 0.15,
+  "r32_hold_min": 0.95,
+  "r32_drop_max": 0.9,
+  "r32_monotone_tol": 0.02,
+  "r32_contrast_min": 0.1,
+  "r32w_power_min": 1.2
+ }
+}

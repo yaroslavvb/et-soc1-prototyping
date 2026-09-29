@@ -20,3 +20,13 @@ target_include_directories(memprobe_host PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${C
 target_compile_features(memprobe_host PRIVATE cxx_std_17)
 target_compile_options(memprobe_host PRIVATE -O2)
 target_link_libraries(memprobe_host PRIVATE runtime::etrt deviceLayer::deviceLayer sw-sysemu::sw-sysemu)
+# -DMEMPROBE_EXT=ON: the MP_EXT modes (--tloop, the TensorLoad ops); off, the host is unchanged.
+# The binary carries "memp2-src:<sha256 main.cpp>:<sha256 memprobe_args.h>" (tools/claims-v3/memp2 refuses a stale
+# build); a change to either file re-runs the configure step, so the tag follows the sources.
+if(MEMPROBE_EXT)
+  file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp MP2_MAIN_SHA)
+  file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/../memprobe_args.h MP2_ARGS_SHA)
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+               ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../memprobe_args.h)
+  target_compile_definitions(memprobe_host PRIVATE MP_EXT=1 MP2_SRC_TAG="memp2-src:${MP2_MAIN_SHA}:${MP2_ARGS_SHA}")
+endif()

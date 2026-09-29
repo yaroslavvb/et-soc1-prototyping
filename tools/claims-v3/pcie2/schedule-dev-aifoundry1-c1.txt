@@ -1,0 +1,13 @@
+# PCIE2 development on aifoundry1's card 1 (fw 1.2.0, 600 MHz): the smoke, then three development passes, two
+# minutes apart. Run it with run_passes.sh, not queue.sh: on a two-card host queue.sh reads the die before every block
+# through lib's die_c (timeout 20, without the card lock), which this experiment's etiquette does not allow.
+#   V3_DEVICE=1 setsid nohup bash tools/claims-v3/pcie2/run_passes.sh tools/claims-v3/pcie2/schedule-dev-aifoundry1-c1.txt \
+#       > build/claims-v3/pcie2-dev-aifoundry1-c1.log 2>&1 < /dev/null &
+pcie2 901
+sleep 120
+pcie2 101
+sleep 120
+pcie2 102
+sleep 120
+pcie2 103
+end

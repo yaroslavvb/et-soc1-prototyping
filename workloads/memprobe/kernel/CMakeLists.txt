@@ -14,3 +14,7 @@ target_sources(memprobe.elf PRIVATE memprobe.c crt.S)
 target_include_directories(memprobe.elf PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 target_link_libraries(memprobe.elf PRIVATE et-common-libs::cm-umode)
 set_target_properties(memprobe.elf PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+# -DMEMPROBE_EXT=ON (top level, e.g. build/memprobe2) compiles the MP_EXT modes in; off, the kernel is unchanged.
+if(MEMPROBE_EXT)
+  target_compile_definitions(memprobe.elf PRIVATE MP_EXT=1)
+endif()

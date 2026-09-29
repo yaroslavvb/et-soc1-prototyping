@@ -1,0 +1,5 @@
+#!/bin/sh
+# Named stub-* so that its process name never matches a device tool's. TAU dry-run stand-in for et-who --check:
+# exit TAU_STUB_ETWHO_RC (default 0: nobody holds a card).
+[ "${TAU_STUB_ETWHO_RC:-0}" = 0 ] || echo "/dev/et0_ops someone 1234 stub"
+exit "${TAU_STUB_ETWHO_RC:-0}"

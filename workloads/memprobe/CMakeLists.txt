@@ -5,6 +5,9 @@
 # Structure adapted from https://github.com/marty1885/et-testdrive (Apache-2.0).
 cmake_minimum_required(VERSION 3.17)
 project(memprobe VERSION 0.1.0)
+# ON compiles the extension modes of memprobe_args.h (MP_EXT: MP_TLOOP, OP_TTLOAD, OP_TERR) into kernel and host;
+# build it into its own directory (build/memprobe2, tools/claims-v3/memp2). OFF (the default) builds memprobe as before.
+option(MEMPROBE_EXT "compile the MP_EXT modes" OFF)
 
 include(ExternalProject)
 
@@ -21,6 +24,7 @@ ExternalProject_Add(memprobe_kernel
         -DCMAKE_MODULE_PATH=${CMAKE_PREFIX_PATH}/lib/cmake/cmake-modules
         -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_INSTALL_LIBDIR=lib
+        -DMEMPROBE_EXT=${MEMPROBE_EXT}
     INSTALL_COMMAND ""
     BUILD_ALWAYS TRUE
     BUILD_BYPRODUCTS ${KERNEL_BINARY_DIR}/memprobe.elf

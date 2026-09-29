@@ -1,7 +1,9 @@
 #!/bin/sh
-# et-lab-health: a read-only health check of an AI Foundry ET-SoC-1 lab host (2026-09-27; rev 2: a ZFS WARN sets the exit status).
-# Reads sysfs, /proc, the kernel log (dmesg), package and unit state only. It never opens a /dev/et* node,
-# never queries or resets a card, and changes nothing. Any user can run it; run as root for the journal checks.
+# et-lab-health: a read-only health check of an AI Foundry ET-SoC-1 lab host (2026-09-27; rev 3 of 28 Sep: logins from
+# logind, the journal's boot count without its header, a timeout on every command, the kernel log read once).
+# Reads sysfs, /proc, the kernel log, package, pool, unit and session state only. It never opens a /dev/et* node (it
+# only stats them), never queries or resets a card, and changes nothing. Any user can run it, with or without a tty; a
+# daily timer runs it as nobody. Root, or the adm or systemd-journal group, adds the journal line.
 # One line per check: OK, WARN or INFO. Exit status: 0 if there is no WARN, 1 otherwise.
 PATH=/usr/sbin:/usr/bin:/sbin:/bin; export PATH
 LC_ALL=C; export LC_ALL
@@ -9,8 +11,11 @@ w=0
 ok()   { printf 'OK    %-16s %s\n' "$1" "$2"; }
 warn() { printf 'WARN  %-16s %s\n' "$1" "$2"; w=1; }
 info() { printf 'INFO  %-16s %s\n' "$1" "$2"; }
-up_h=$(awk '{printf "%.1f", $1/3600}' /proc/uptime)
-info host "$(hostname) $(uname -r), up ${up_h} h, $(date '+%Y-%m-%d %H:%M %Z')"
+# t <seconds> <command...>: run it with no stdin and no stderr, and stop it if it takes longer (no command here opens a card)
+t() { _ts=$1; shift; timeout -k 2 "$_ts" "$@" </dev/null 2>/dev/null; }
+me=$(id -un 2>/dev/null || id -u)
+up_s=$(cut -d' ' -f1 /proc/uptime); up_s=${up_s%.*}
+info host "$(hostname) $(uname -r), up $(awk -v s="$up_s" 'BEGIN {printf "%.1f", s/3600}') h, $(date '+%Y-%m-%d %H:%M %Z'), run as $me"
 
 # 1. The driver: an empty version makes every ET tool refuse the card (C1).
 v=$(tr -d '[:space:]' < /sys/module/et_soc1/version 2>/dev/null)
@@ -20,11 +25,28 @@ case "$v" in
   *)  warn driver "et_soc1 version '$v' is not x.y.z" ;;
 esac
 for d in /lib/modules/*; do
-  k=${d##*/}; mv=$(modinfo -k "$k" -F version et_soc1 2>/dev/null | head -1)
+  k=${d##*/}; [ -e "/boot/vmlinuz-$k" ] || continue    # a directory left by a removed kernel is not bootable
+  mv=$(t 10 modinfo -k "$k" -F version et_soc1 | head -1)
   if [ -n "$mv" ]; then ok "kernel $k" "et_soc1 $mv built"; else warn "kernel $k" "no et_soc1 module for this kernel (booting it hides the cards)"; fi
 done
 
-# 2. Each card: device nodes, PCIe link, error counters the driver keeps (world-readable), kernel-log events.
+# The kernel log, read once. dmesg is world-readable on these hosts (kernel.dmesg_restrict=0); where it is not, this
+# boot's kernel messages come from the journal if this user may read it. dmesg's buffer wraps on a noisy host.
+jr=0; [ "$(id -u)" -eq 0 ] && jr=1
+case " $(id -Gn 2>/dev/null) " in *" adm "*|*" systemd-journal "*) jr=1 ;; esac
+klog=$(t 10 dmesg); ksrc="dmesg's buffer wrapped"; kscope="this boot"
+if [ -z "$klog" ] && [ "$jr" -eq 1 ]; then klog=$(t 60 journalctl -k -b -q --no-pager -o short-monotonic); ksrc="the journal was trimmed"; fi
+if [ -z "$klog" ]; then
+  info "kernel log" "not readable as $me: the per-card kernel-log counts are skipped"
+else
+  k0=$(printf '%s\n' "$klog" | sed -n '1s/^\[ *\([0-9]*\).*/\1/p')
+  if [ "${k0:-0}" -gt 60 ]; then
+    kh=$(awk -v a="$up_s" -v b="$k0" 'BEGIN {printf "%.1f", (a-b)/3600}'); kscope="in the last $kh h"
+    info "kernel log" "it starts $(awk -v b="$k0" 'BEGIN {printf "%.1f", b/3600}') h after boot ($ksrc): the counts below cover only its last $kh h"
+  fi
+fi
+
+# 2. Each card: PCIe link, the error counters the driver keeps (world-readable), kernel-log events, node modes, card locks.
 n=0
 for dev in /sys/bus/pci/drivers/ET/0000:*; do
   [ -e "$dev" ] || continue
@@ -42,17 +64,17 @@ for dev in /sys/bus/pci/drivers/ET/0000:*; do
   rp=$(readlink -f "$dev/..")
   if [ -r "$rp/aer_dev_correctable" ]; then
     tot=$(awk '$1 == "TOTAL_ERR_COR" {print $2}' "$rp/aer_dev_correctable")
-    rate=$(awk -v t="${tot:-0}" '{printf "%.0f", t / ($1/3600)}' /proc/uptime)
+    rate=$(awk -v t="${tot:-0}" -v s="$up_s" 'BEGIN {printf "%.0f", t / (s/3600 + 0.001)}')
     if [ "${rate:-0}" -gt 100 ]; then warn "card $bdf" "root port ${rp##*/}: $tot corrected PCIe errors since boot (~$rate an hour)"
     else ok "card $bdf" "root port ${rp##*/}: $tot corrected PCIe errors since boot"; fi
   fi
-  if dmesg >/dev/null 2>&1; then
-    ev=$(dmesg | grep -c "ET $bdf: Error Event Detected")
-    busy=$(dmesg | grep -c "ET $bdf: Mgmt: Tried to open same device")
-    en=$(dmesg | grep -c "ET $bdf: enabling device")
-    [ "$ev" -gt 0 ] && info "card $bdf" "kernel log: $ev card error events this boot (dmesg | grep 'Error Event')"
-    [ "$busy" -gt 0 ] && info "card $bdf" "kernel log: $busy refused second opens this boot"
-    [ "$en" -gt 1 ] && info "card $bdf" "kernel log: enabled $en times this boot (a card reset re-enables it)"
+  if [ -n "$klog" ]; then
+    ev=$(printf '%s\n' "$klog" | grep -c "ET $bdf: Error Event Detected")
+    busy=$(printf '%s\n' "$klog" | grep -c "ET $bdf: Mgmt: Tried to open same device")
+    en=$(printf '%s\n' "$klog" | grep -c "ET $bdf: enabling device")
+    [ "$ev" -gt 0 ] && info "card $bdf" "kernel log: $ev card error events $kscope (dmesg | grep 'Error Event')"
+    [ "$busy" -gt 0 ] && info "card $bdf" "kernel log: $busy refused second opens $kscope"
+    [ "$en" -gt 1 ] && info "card $bdf" "kernel log: enabled $en times $kscope (a card reset re-enables it)"
   fi
 done
 [ "$n" -eq 0 ] && warn cards "no PCI device bound to the ET driver"
@@ -61,26 +83,43 @@ for node in /dev/et*_mgmt /dev/et*_ops; do
   m=$(stat -c %a "$node")
   [ "$m" = 666 ] || warn nodes "$node has mode $m (users expect 0666)"
 done
-if [ -x /usr/local/sbin/et-holders ] && out=$(sudo -n /usr/local/sbin/et-holders 2>/dev/null); then
-  held=$(printf '%s\n' "$out" | awk '$1 ~ /^\/dev\/et/ || $1 ~ /^lock:/' | wc -l)
-  if [ "$held" -gt 0 ]; then info holders "$held node or lock holder(s) right now: run et-who"; else ok holders "no process holds a card node or lock"; fi
+# One lock file per card, made by root at boot (tmpfiles). A missing one is created by the first user's flock, and in
+# the sticky /run/lock (fs.protected_regular) nobody else's flock can then open it.
+for node in /dev/et*_mgmt; do
+  [ -e "$node" ] || continue
+  i=${node#/dev/et}; i=${i%_mgmt}; lk=/run/lock/etsoc-shire$i.lock
+  if [ ! -e "$lk" ]; then warn locks "$lk is missing (as root: systemd-tmpfiles --create)"
+  elif [ "$(stat -c %u "$lk")" != 0 ]; then warn locks "$lk belongs to $(stat -c %U "$lk"), not root: other users' flock cannot open it"
+  else ok locks "$lk present, owned by root"; fi
+done
+if [ -x /usr/local/sbin/et-holders ]; then
+  if out=$(t 10 sudo -n /usr/local/sbin/et-holders); then
+    held=$(printf '%s\n' "$out" | awk '$1 ~ /^\/dev\/et/ || $1 ~ /^lock:/' | wc -l)
+    if [ "$held" -gt 0 ]; then info holders "$held node or lock holder(s) right now: run et-who"; else ok holders "no process holds a card node or lock"; fi
+  else info holders "not checked: sudo -n et-holders failed as $me"; fi
 fi
 
 # 3. aifoundry3's clock guard: its marker must belong to this boot; it does not re-check the card after a reset (C6).
-if [ -e /run/et-board-clock-guard.ok ]; then
-  set -- $(cat /run/et-board-clock-guard.ok)
-  if [ "$1" = "$(cat /proc/sys/kernel/random/boot_id)" ]; then ok "clock guard" "marker for this boot: $2 MHz minion, $3 MHz NoC, TDP $4 W"
-  else warn "clock guard" "marker is not from this boot"; fi
+gm=/run/et-board-clock-guard.ok
+if [ -e "$gm" ]; then
+  if [ -r "$gm" ]; then
+    set -- $(cat "$gm")
+    if [ "${1:-}" = "$(cat /proc/sys/kernel/random/boot_id)" ]; then ok "clock guard" "marker for this boot: $2 MHz minion, $3 MHz NoC, TDP $4 W"
+    else warn "clock guard" "marker is not from this boot"; fi
+  else info "clock guard" "marker $gm not readable as $me"; fi
 fi
 
-# 4. The host: disk, packages, units, time, power profile, network, CI runners.
+# 4. The host: memory, disk, packages, units, time, power profile, network, CI runners, logins, journal.
+ma=$(awk '/^MemTotal:/ {t=$2} /^MemAvailable:/ {a=$2} END {printf "%.0f %.0f %.0f", a/1048576, t/1048576, 100*a/(t+1)}' /proc/meminfo)
+set -- $ma
+if [ "$3" -lt 10 ]; then warn memory "$1 of $2 GiB available"; else ok memory "$1 of $2 GiB available"; fi
 for fs in / /home; do
-  p=$(df -P "$fs" 2>/dev/null | awk 'NR==2 {sub("%", "", $5); print $5}')
+  p=$(t 10 df -P "$fs" | awk 'NR==2 {sub("%", "", $5); print $5}')
   [ -n "$p" ] || continue
   if [ "$p" -ge 90 ]; then warn "disk $fs" "$p% used"; elif [ "$p" -ge 85 ]; then warn "disk $fs" "$p% used (alert level 85%)"; else ok "disk $fs" "$p% used"; fi
 done
 if command -v zpool >/dev/null 2>&1; then
-  zl=$(zpool list -H -o name,capacity,health 2>/dev/null)
+  zl=$(t 20 zpool list -H -o name,capacity,health)
   while read -r z c h; do   # a here-document, not a pipe: warn must set w in this shell
     [ -n "$z" ] || continue
     c=${c%\%}
@@ -88,28 +127,47 @@ if command -v zpool >/dev/null 2>&1; then
   done <<ZEOF
 $zl
 ZEOF
-  zs=$(zpool status -x 2>/dev/null | head -1)
-  case "$zs" in "all pools are healthy"|"") ;; *) info zfs "$zs (zpool status -v)" ;; esac
+  # zpool status -x names only unhealthy pools: print each one's status sentence and its last scan
+  t 20 zpool status -x | awk '
+    /^ *pool:/ {p=$2; s=""; c=""}
+    /^status:/ {sub(/^status: */, ""); s=$0; st=1; next}
+    st && /^\t/ {sub(/^\t */, ""); s=s " " $0; next}
+    {st=0}
+    /^ *scan:/ {sub(/^ *scan: */, ""); c=$0}
+    /^config:/ && s != "" {gsub(/  +/, " ", s); printf "INFO  %-16s %s (%s; zpool status -v)\n", "zfs " p, s, c}'
 fi
-a=$(dpkg --audit 2>/dev/null | head -c 200)
+a=$(t 60 dpkg --audit | head -c 200)
 if [ -n "$a" ]; then warn packages "dpkg --audit reports a half-done install (run dpkg --configure -a as root)"; else ok packages "dpkg --audit clean"; fi
 [ -e /var/run/reboot-required ] && info reboot "pending since $(date -r /var/run/reboot-required '+%d %b %H:%M'): $(tr '\n' ' ' < /var/run/reboot-required.pkgs 2>/dev/null)"
-s=$(systemctl is-system-running 2>/dev/null); f=$(systemctl --failed --no-legend 2>/dev/null | wc -l)
+s=$(t 10 systemctl is-system-running)
+fl=$(t 10 systemctl --failed --no-legend --plain | awk '{print $1}')
+f=$(printf '%s' "$fl" | grep -c .)
 if [ "$s" = running ] && [ "$f" -eq 0 ]; then ok systemd "running, no failed units"
-else warn systemd "$s, $f failed unit(s) (systemctl --failed; 'starting' for days means plymouth is waiting: plymouth quit)"; fi
+else warn systemd "${s:-unknown}, $f failed unit(s): $(printf '%s\n' "$fl" | head -3 | paste -sd' ' -) (systemctl --failed; 'starting' for days means plymouth is waiting: plymouth quit)"; fi
 if command -v chronyc >/dev/null 2>&1; then
-  l=$(chronyc -n tracking 2>/dev/null | awk -F': *' '/^Leap status/ {print $2}')
+  l=$(t 10 chronyc -n tracking | awk -F': *' '/^Leap status/ {print $2}')
   [ "$l" = Normal ] && ok time "chrony synchronised" || warn time "chrony leap status '${l:-unknown}'"
 fi
-pp=$(powerprofilesctl get 2>/dev/null); [ -n "$pp" ] && { [ "$pp" = performance ] && ok power "profile performance" || warn power "profile $pp (host timings differ from performance)"; }
+pp=$(t 10 powerprofilesctl get); [ -n "$pp" ] && { [ "$pp" = performance ] && ok power "profile performance" || warn power "profile $pp (host timings differ from performance)"; }
 for nic in /sys/class/net/en*; do [ -e "$nic" ] || continue
   [ "$(cat "$nic/carrier" 2>/dev/null)" = 1 ] && ok "net ${nic##*/}" "wired link up" || info "net ${nic##*/}" "no wired link (Wi-Fi only)"; done
-for u in $(systemctl list-units --all --plain --no-legend 'actions.runner.*' 2>/dev/null | awk '{print $1}'); do
-  info "ci runner" "$u $(systemctl is-active "$u" 2>/dev/null)/$(systemctl is-enabled "$u" 2>/dev/null), jobs running: $(ps -eo comm= | grep -cx Runner.Worker)"
+for u in $(t 10 systemctl list-units --all --plain --no-legend 'actions.runner.*' | awk '{print $1}'); do
+  info "ci runner" "$u $(t 10 systemctl is-active "$u")/$(t 10 systemctl is-enabled "$u"), jobs running: $(ps -eo comm= | grep -cx Runner.Worker)"
 done
-users=$(who | awk '{print $1}' | sort -u | paste -sd' ' -)
-info logins "${users:-nobody} logged in"
-if [ "$(id -u)" -eq 0 ]; then
-  info journal "$(journalctl --disk-usage 2>/dev/null | sed 's/.*take up //; s/ in the file system.//'), $(journalctl --list-boots --no-pager 2>/dev/null | grep -c .) boots kept"
+# Logins: logind's sessions, which uptime's user count also comes from. utmp (who) misses sessions without a
+# terminal, such as Tailscale SSH commands; it is the fallback where loginctl fails. "closing" means logged out
+# with processes left running (tmux, nohup).
+sess=$(t 10 loginctl list-sessions --no-legend --no-pager)
+if [ -n "$sess" ]; then
+  info logins "$(printf '%s\n' "$sess" | grep -c .) session(s): $(printf '%s\n' "$sess" | awk '{print $3 ($6 == "closing" ? " (closing)" : "")}' | sort | uniq -c | awk '{c=$1; $1=""; sub(/^ /, ""); printf "%s%s%s", sep, $0, (c > 1 ? " x" c : ""); sep=", "}')"
+else
+  users=$(t 10 who | awk '{print $1}' | sort -u | paste -sd' ' -)
+  info logins "${users:-nobody} logged in (utmp; loginctl gave nothing)"
+fi
+if [ "$jr" -eq 1 ]; then
+  jb=$(t 60 journalctl --list-boots --no-pager | awk '$1 ~ /^-?[0-9]+$/ {n++; if (n == 1) d=$4} END {printf "%d boots kept, the oldest from %s", n, d}')
+  info journal "$(t 60 journalctl --disk-usage | sed 's/.*take up //; s/ in the file system.//'), $jb"
+else
+  info journal "not checked: reading the system journal needs root or the adm or systemd-journal group"
 fi
 exit $w

@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+# Named stub-* so that its process name never matches a device tool's (lib.sh DEV_COMM; the DV2 gate scans for those).
+"""TAU dry-run stand-in for build/enercat/host/enercat_host. Opens nothing. After 0.7 s of (virtual) device setup it
+records its burst for the ettelem stub (kind from the arguments: fmadd.ps random M, zeros H, tload_pat D) and prints
+one "ENERCAT {...}" line per 0.4 s launch while less than --seconds has passed (enercat's loop: 2 s -> 5 launches,
+3 s -> 8, 4 s -> 10). Fault (TAU_STUB_FAIL): enercat_crash:<k> (launch k exits 139 after 1.08 s, as the host crash
+of builds without the g3log fix did)."""
+import json, os, sys
+import importlib.util
+sys.dont_write_bytecode = True
+spec = importlib.util.spec_from_file_location("sc", os.path.join(os.path.dirname(os.path.abspath(__file__)), "stub-common.py"))
+sc = importlib.util.module_from_spec(spec); spec.loader.exec_module(sc)
+
+a = sys.argv[1:]
+def opt(f, d=None):
+    return a[a.index(f) + 1] if f in a else d
+if not sc.ST:
+    sys.exit(97)
+k = sc.counter("enercat_runs")
+if f"enercat_crash:{k}" in sc.FAIL:
+    sc.vsleep(1080); sys.exit(139)
+pat, ops, secs = opt("--pattern"), opt("--operands"), float(opt("--seconds", "1"))
+kind = "D" if pat == "tload_pat" else ("M" if ops == "random" else "H")
+sc.vsleep(700)
+on = sc.vnow()
+rec = sc.burst_record(on, secs, kind)
+with open(os.path.join(sc.ST, "bursts.jsonl"), "a") as f:
+    f.write(json.dumps(rec) + "\n")
+for j in range(rec["n"]):
+    t0 = on + j * (sc.LAUNCH_MS + sc.GAP_MS)
+    sc.vsleep(max(0.0, t0 + sc.LAUNCH_MS - sc.vnow()))
+    r = {"pattern": pat, "unit": "stub", "operands": ops, "harts": 2, "shires": 32, "ops": 1, "bytes": 0, "wall_s": 0.4005,
+         "t_start_ms": int(t0), "t_end_ms": int(t0 + sc.LAUNCH_MS), "ok": True}
+    print("ENERCAT " + json.dumps(r, separators=(",", ":")), flush=True)
+    sc.vsleep(max(0.0, t0 + sc.LAUNCH_MS + sc.GAP_MS - sc.vnow()))

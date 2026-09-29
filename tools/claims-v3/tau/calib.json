@@ -1,0 +1,283 @@
+{
+ "about": "TAU calibration (calibrate.py score): per card, the rate at which each theory fails on simulated replicates (three pooled full passes each) under the bands of prereg.json, for the true model at noise k (the residual k times the card's offline one) and for the rival (the rails a fixed 0.263 s late); item_fails counts the failing items. Replicates: build/claims-v3-dry/tau-calib/*.jsonl (regenerated from the seeds in 'sources').",
+ "cards": {
+  "aifoundry3": {
+   "bands": "calibrated",
+   "sources": [
+    "build/claims-v3-dry/tau-calib/a3-true-k100-B.jsonl",
+    "build/claims-v3-dry/tau-calib/a3-true-k125-B.jsonl",
+    "build/claims-v3-dry/tau-calib/a3-rival-k100-B.jsonl",
+    "build/claims-v3-dry/tau-calib/a3-rival-k125-B.jsonl"
+   ],
+   "seeds": {
+    "a3-true-k100-B.jsonl": "2000-2039 (40)",
+    "a3-true-k125-B.jsonl": "3000-3039 (40)",
+    "a3-rival-k100-B.jsonl": "4000-4039 (40)",
+    "a3-rival-k125-B.jsonl": "5000-5039 (40)"
+   },
+   "rows": [
+    {
+     "model": "true",
+     "noise": 1.0,
+     "replicates": 40,
+     "theory_fail_rate": {
+      "T1": 0.0,
+      "T2": 0.0,
+      "T3": 0.0,
+      "T4": 0.0
+     },
+     "item_fails": {}
+    },
+    {
+     "model": "true",
+     "noise": 1.25,
+     "replicates": 40,
+     "theory_fail_rate": {
+      "T1": 0.0,
+      "T2": 0.0,
+      "T3": 0.0,
+      "T4": 0.0
+     },
+     "item_fails": {}
+    },
+    {
+     "model": "rival fixed 0.263 s",
+     "noise": 1.0,
+     "replicates": 40,
+     "theory_fail_rate": {
+      "T1": 0.0,
+      "T2": 0.025,
+      "T3": 1.0,
+      "T4": 0.0
+     },
+     "item_fails": {
+      "P3b d shift 20-10 Hz, mean of the rails": 40,
+      "(P3b alone)": 40,
+      "P3 20 Hz fixed d = 20 Hz pass sram_w": 25,
+      "P3 20 Hz fixed d = 20 Hz pass minion_w": 15,
+      "P1 tau sram_w": 1,
+      "P3 20 Hz fixed d = 20 Hz pass noc_w": 1
+     }
+    },
+    {
+     "model": "rival fixed 0.263 s",
+     "noise": 1.25,
+     "replicates": 40,
+     "theory_fail_rate": {
+      "T1": 0.0,
+      "T2": 0.0,
+      "T3": 1.0,
+      "T4": 0.0
+     },
+     "item_fails": {
+      "P3b d shift 20-10 Hz, mean of the rails": 40,
+      "(P3b alone)": 40,
+      "P3 20 Hz fixed d = 20 Hz pass sram_w": 29,
+      "P3 20 Hz fixed d = 20 Hz pass minion_w": 9,
+      "P3 20 Hz fixed d = 20 Hz pass noc_w": 3
+     }
+    }
+   ]
+  },
+  "aifoundry3 (prior bands)": {
+   "bands": "prior",
+   "sources": [
+    "build/claims-v3-dry/tau-calib/a3-true-k100-B.jsonl",
+    "build/claims-v3-dry/tau-calib/a3-true-k125-B.jsonl",
+    "build/claims-v3-dry/tau-calib/a3-rival-k100-B.jsonl",
+    "build/claims-v3-dry/tau-calib/a3-rival-k125-B.jsonl"
+   ],
+   "seeds": {
+    "a3-true-k100-B.jsonl": "2000-2039 (40)",
+    "a3-true-k125-B.jsonl": "3000-3039 (40)",
+    "a3-rival-k100-B.jsonl": "4000-4039 (40)",
+    "a3-rival-k125-B.jsonl": "5000-5039 (40)"
+   },
+   "rows": [
+    {
+     "model": "true",
+     "noise": 1.0,
+     "replicates": 40,
+     "theory_fail_rate": {
+      "T1": 0.0,
+      "T2": 0.0,
+      "T3": 0.0,
+      "T4": 0.175
+     },
+     "item_fails": {
+      "P5e plateau vs free fit noc_w 2.0s": 6,
+      "P5e plateau vs free fit sram_w 2.0s": 3,
+      "P5e plateau vs free fit board_avg_w 2.0s": 1
+     }
+    },
+    {
+     "model": "true",
+     "noise": 1.25,
+     "replicates": 40,
+     "theory_fail_rate": {
+      "T1": 0.175,
+      "T2": 0.0,
+      "T3": 0.0,
+      "T4": 0.55
+     },
+     "item_fails": {
+      "P5d flat scatter sram_w 2.0s": 6,
+      "P5e plateau vs free fit minion_w 2.0s": 5,
+      "P5d flat scatter sram_w 4.0s": 4,
+      "P4a residual sram_w": 4,
+      "P5e plateau vs free fit noc_w 2.0s": 4,
+      "P4b rise=fall sram_w": 3,
+      "P5e plateau vs free fit board_avg_w 2.0s": 3,
+      "P5d flat scatter minion_w 3.0s": 3,
+      "P5e plateau vs free fit sram_w 2.0s": 2,
+      "P5e plateau vs free fit sram_w 3.0s": 2,
+      "P5a plateau noc_w 2.0s": 2,
+      "P5a plateau sram_w 2.0s": 1,
+      "P5a plateau minion_w 2.0s": 1,
+      "P5e plateau vs free fit minion_w 4.0s": 1,
+      "P5e plateau vs free fit noc_w 3.0s": 1
+     }
+    },
+    {
+     "model": "rival fixed 0.263 s",
+     "noise": 1.0,
+     "replicates": 40,
+     "theory_fail_rate": {
+      "T1": 0.025,
+      "T2": 0.025,
+      "T3": 1.0,
+      "T4": 0.275
+     },
+     "item_fails": {
+      "P3b d shift 20-10 Hz, mean of the rails": 40,
+      "(P3b alone)": 40,
+      "P3 20 Hz fixed d = 20 Hz pass sram_w": 25,
+      "P3 20 Hz fixed d = 20 Hz pass minion_w": 15,
+      "P5e plateau vs free fit minion_w 2.0s": 3,
+      "P5e plateau vs free fit sram_w 2.0s": 3,
+      "P5e plateau vs free fit noc_w 2.0s": 2,
+      "P5a plateau minion_w 2.0s": 2,
+      "P1 tau sram_w": 1,
+      "P5e plateau vs free fit sram_w 3.0s": 1,
+      "P4b rise=fall minion_w": 1,
+      "P3 20 Hz fixed d = 20 Hz pass noc_w": 1,
+      "P5e plateau vs free fit minion_w 3.0s": 1,
+      "P5a plateau sram_w 2.0s": 1
+     }
+    },
+    {
+     "model": "rival fixed 0.263 s",
+     "noise": 1.25,
+     "replicates": 40,
+     "theory_fail_rate": {
+      "T1": 0.125,
+      "T2": 0.0,
+      "T3": 1.0,
+      "T4": 0.45
+     },
+     "item_fails": {
+      "P3b d shift 20-10 Hz, mean of the rails": 40,
+      "(P3b alone)": 40,
+      "P3 20 Hz fixed d = 20 Hz pass sram_w": 29,
+      "P3 20 Hz fixed d = 20 Hz pass minion_w": 9,
+      "P5d flat scatter sram_w 4.0s": 5,
+      "P5e plateau vs free fit minion_w 2.0s": 4,
+      "P5d flat scatter sram_w 2.0s": 4,
+      "P3 20 Hz fixed d = 20 Hz pass noc_w": 3,
+      "P5e plateau vs free fit noc_w 2.0s": 3,
+      "P5a plateau sram_w 2.0s": 2,
+      "P4b rise=fall sram_w": 2,
+      "P5a plateau minion_w 2.0s": 2,
+      "P4a residual sram_w": 2,
+      "P4b rise=fall noc_w": 1,
+      "P5e plateau vs free fit sram_w 2.0s": 1,
+      "P5d flat scatter noc_w 2.0s": 1,
+      "P5e plateau vs free fit board_avg_w 2.0s": 1
+     }
+    }
+   ]
+  },
+  "aifoundry1-c1": {
+   "bands": "calibrated",
+   "sources": [
+    "build/claims-v3-dry/tau-calib/a1-true-k100-B.jsonl",
+    "build/claims-v3-dry/tau-calib/a1-true-k125-B.jsonl"
+   ],
+   "seeds": {
+    "a1-true-k100-B.jsonl": "2000-2039 (40)",
+    "a1-true-k125-B.jsonl": "3000-3039 (40)"
+   },
+   "rows": [
+    {
+     "model": "true",
+     "noise": 1.0,
+     "replicates": 40,
+     "theory_fail_rate": {
+      "T1": 0.0,
+      "T2": 0.0,
+      "T3": 0.0,
+      "T4": 0.0
+     },
+     "item_fails": {}
+    },
+    {
+     "model": "true",
+     "noise": 1.25,
+     "replicates": 40,
+     "theory_fail_rate": {
+      "T1": 0.0,
+      "T2": 0.0,
+      "T3": 0.0,
+      "T4": 0.0
+     },
+     "item_fails": {
+      "P3b d shift 20-10 Hz, mean of the rails": 1
+     }
+    }
+   ]
+  },
+  "aifoundry1-c1 (prior bands)": {
+   "bands": "prior",
+   "sources": [
+    "build/claims-v3-dry/tau-calib/a1-true-k100-B.jsonl",
+    "build/claims-v3-dry/tau-calib/a1-true-k125-B.jsonl"
+   ],
+   "seeds": {
+    "a1-true-k100-B.jsonl": "2000-2039 (40)",
+    "a1-true-k125-B.jsonl": "3000-3039 (40)"
+   },
+   "rows": [
+    {
+     "model": "true",
+     "noise": 1.0,
+     "replicates": 40,
+     "theory_fail_rate": {
+      "T1": 0.0,
+      "T2": 0.0,
+      "T3": 0.0,
+      "T4": 0.025
+     },
+     "item_fails": {
+      "P5e plateau vs free fit noc_w 2.0s": 1
+     }
+    },
+    {
+     "model": "true",
+     "noise": 1.25,
+     "replicates": 40,
+     "theory_fail_rate": {
+      "T1": 0.0,
+      "T2": 0.0,
+      "T3": 0.0,
+      "T4": 0.1
+     },
+     "item_fails": {
+      "P5e plateau vs free fit minion_w 2.0s": 2,
+      "P5e plateau vs free fit noc_w 2.0s": 2,
+      "P3b d shift 20-10 Hz, mean of the rails": 1
+     }
+    }
+   ]
+  }
+ }
+}

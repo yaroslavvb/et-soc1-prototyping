@@ -1,0 +1,15 @@
+# PCIE2 validation on aifoundry3 (fw 1.3.1, pinned at 600 MHz), after the freeze (LOCK.sha256; block.sh refuses
+# passes 1-99 without it). Five passes, five minutes apart: about 25 s of card time each. Run it with run_passes.sh,
+# which stops at the first pass that fails (queue.sh would log it and go on to the next pass):
+#   setsid nohup bash tools/claims-v3/pcie2/run_passes.sh tools/claims-v3/pcie2/schedule-val-aifoundry3.txt \
+#       > build/claims-v3/pcie2-val-aifoundry3.log 2>&1 < /dev/null &
+pcie2 1
+sleep 300
+pcie2 2
+sleep 300
+pcie2 3
+sleep 300
+pcie2 4
+sleep 300
+pcie2 5
+end

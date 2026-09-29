@@ -1,0 +1,139 @@
+#!/bin/sh
+# et-reset: a checked management reset of one ET-SoC-1 card (lab report U16; written 28 Sep 2026, not installed yet).
+#   et-reset N             reset card N: dev_mngt_service -m DM_CMD_RESET_ETSOC -n N, with the checks below
+#   et-reset --dry-run N   run the read-only checks and print what it would do; takes no lock, sends nothing
+# It refuses unless et-who --check shows nothing held, holds the card lock files (flock -n) for the whole reset, sends
+# the management reset, waits up to 60 s for the kernel log to show the card re-added, and logs who ran it with
+# logger -t et-reset. On a host with several cards it holds every card's lock: the stock dev_mngt_service opens every
+# card's management node whatever -n says (aifoundry1: -n 1 opens card 0's too, C13). The management reset is the one
+# that recovered aifoundry2's hung Master Minion on 28 Sep, where the sysfs reset (soc_reset/reinitiate) did not (C27).
+# A reset ends whatever runs on the card. Who may reset is the lab's rule: installed 0750 root:sudo, for root and the
+# sudo group only. Agents never run it (CLAUDE.md: never reset a card yourself, ask the lab admin).
+# aifoundry3: its admin's et-board-clock-guard.service sets the card's clocks and TDP at boot and does not re-check the
+# card after a reset (C6). et-reset never touches that service; it prints a reminder instead.
+# Exit status: 0 reset confirmed (or a dry run whose checks passed), 1 refused or not confirmed, 2 usage error.
+PATH=/usr/sbin:/usr/bin:/sbin:/bin; export PATH
+LC_ALL=C; export LC_ALL
+DMS=/opt/et/bin/dev_mngt_service
+WHO=/usr/local/bin/et-who
+WAIT_S=60
+usage() { echo "usage: et-reset [--dry-run] N   (N: the card, 0-63, as in /dev/etN_mgmt; et-reset --help for more)" >&2; exit 2; }
+die() { echo "et-reset: $*" >&2; exit 1; }
+
+dry=0; N=
+for a in "$@"; do
+  case "$a" in
+    --dry-run) dry=1 ;;
+    -h|--help) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -*) echo "et-reset: unknown option '$a'" >&2; usage ;;
+    *) [ -z "$N" ] || { echo "et-reset: one card number only" >&2; usage; }; N=$a ;;
+  esac
+done
+[ -n "$N" ] || usage
+case "$N" in 0|[1-9]|[1-5][0-9]|6[0-3]) ;; *) echo "et-reset: '$N' is not a card number (0-63, no leading zero)" >&2; usage ;; esac
+
+# The card: its nodes, and its PCI address from the driver's devnum attribute (driver memory, not a card query).
+cards=$(for m in /dev/et*_mgmt; do [ -c "$m" ] && { i=${m#/dev/et}; echo "${i%_mgmt}"; }; done | sort -n | paste -sd' ' -)
+[ -c "/dev/et${N}_mgmt" ] && [ -c "/dev/et${N}_ops" ] || die "no card $N on $(hostname) (cards: ${cards:-none})"
+bdf=
+for d in /sys/bus/pci/drivers/ET/0000:*; do
+  [ "$(cat "$d/devnum" 2>/dev/null)" = "$N" ] && bdf=${d##*/}
+done
+[ -n "$bdf" ] || die "card $N has nodes but no PCI device bound to the ET driver reports devnum $N"
+[ -x "$DMS" ] || die "$DMS not found"
+[ -x "$WHO" ] || die "et-who not installed: cannot check for holders"
+uid=$(id -u); user=$(id -un)
+who_ran="$user (uid $uid)"; [ "$uid" -eq 0 ] && [ -n "${SUDO_USER:-}" ] && who_ran="$SUDO_USER via sudo"
+if [ "$dry" -eq 0 ] && [ "$uid" -ne 0 ]; then
+  case " $(id -Gn) " in *" sudo "*) ;; *) die "only root and the sudo group may reset a card (the lab's rule until it decides otherwise)" ;; esac
+fi
+echo "et-reset: card $N = /dev/et${N}_mgmt, PCI $bdf, on $(hostname) (cards: $cards), run by $who_ran"
+
+# The kernel log must be readable: it is how the reset is confirmed.
+t0=$(dmesg 2>/dev/null | tail -1 | sed -n 's/^\[ *\([0-9]*\.[0-9]*\)\].*/\1/p')
+[ -n "$t0" ] || die "cannot read the kernel log (dmesg) as $user, so the reset could not be confirmed: run it as root"
+
+# 1. Nothing may be held: no node open, no card lock taken (a lock held by the caller's own script counts too).
+held=$(timeout 10 "$WHO" --check 2>&1); rc=$?
+case $rc in
+  0) echo "check: et-who --check: nothing held" ;;
+  1) printf '%s\n' "$held" | sed 's/^/  /' >&2; die "refused: a process holds a card node or lock (above)" ;;
+  *) printf '%s\n' "$held" | sed 's/^/  /' >&2; die "refused: et-who --check failed (exit $rc)" ;;
+esac
+
+# 2. The locks: every card's if there are several (see the header), else this card's. Opened read-only, never
+#    created: in the sticky /run/lock a lock file made by someone else could not be opened by anyone else afterwards.
+set -- $cards; nc=$#
+locks=
+for i in $cards; do
+  [ "$nc" -gt 1 ] || [ "$i" = "$N" ] || continue
+  lk=/run/lock/etsoc-shire$i.lock
+  [ -f "$lk" ] || die "refused: $lk is missing (as root: systemd-tmpfiles --create)"
+  locks="$locks $lk"
+done
+set -- $locks
+[ $# -le 7 ] || die "more than 7 cards: this script holds one lock per file descriptor 3-9"
+guard=0; { [ -e /run/et-board-clock-guard.ok ] || [ -e /etc/systemd/system/et-board-clock-guard.service ]; } && guard=1
+remind() {
+  [ "$guard" -eq 1 ] || return 0
+  echo "reminder: this host's et-board-clock-guard.service (its admin's) set the card's clocks and TDP at boot and does"
+  echo "  not re-check the card after a reset (C6). et-reset has not touched it: tell its admin the card was reset,"
+  echo "  so they can re-apply the pin, and check the card's clock before measuring."
+}
+cmd="timeout 10 $DMS -m DM_CMD_RESET_ETSOC -n $N -u 9000"
+if [ "$dry" -eq 1 ]; then
+  echo "would take (flock -n, held until the end):$locks"
+  echo "would re-check that no process has a card node open"
+  echo "would run, in a new directory under ${TMPDIR:-/tmp} (the tool may save SP traces to its working directory):"
+  echo "  $cmd"
+  echo "would wait up to $WAIT_S s for the kernel log, after [$t0], to show 'ET $bdf: added peer-to-peer DMA memory'"
+  echo "would log: logger -t et-reset \"card $N ($bdf) reset by $who_ran: ...\""
+  remind
+  echo "dry run: nothing was locked, sent or logged"
+  exit 0
+fi
+fd=3
+for lk in $locks; do
+  eval "exec $fd<\"\$lk\"" || die "refused: cannot open $lk"
+  flock -n "$fd" || die "refused: $lk was taken since the check"
+  fd=$((fd + 1))
+done
+echo "locked:$locks"
+held=$(timeout 10 "$WHO" --check 2>&1); rc=$?
+[ "$rc" -le 1 ] || die "refused: et-who --check failed after locking (exit $rc)"
+nodes=$(printf '%s\n' "$held" | grep '^/dev/et')
+[ -z "$nodes" ] || { printf '%s\n' "$nodes" | sed 's/^/  /' >&2; die "refused: a process opened a card node without the lock (above)"; }
+
+# 3. The reset. dev_mngt_service sends it, then waits for the node to reopen; -u 9000 ends that wait before timeout's
+#    10 s. The reset itself gets no reply, so stopping the tool then leaves nothing stale in the queue (C10); its only
+#    other request, a trace-buffer read when the SP's buffer is full, took under a second on 28 Sep.
+wd=$(mktemp -d "${TMPDIR:-/tmp}/et-reset.XXXXXX") || die "cannot make a working directory"
+t0=$(dmesg | tail -1 | sed -n 's/^\[ *\([0-9]*\.[0-9]*\)\].*/\1/p')
+logger -t et-reset "card $N ($bdf) reset by $who_ran: sending DM_CMD_RESET_ETSOC"
+trap 'logger -t et-reset "card $N ($bdf) reset by $who_ran: et-reset interrupted"; exit 1' INT TERM HUP
+echo "$(date '+%H:%M:%S') running: $cmd"
+(cd "$wd" && $cmd) > "$wd/dev_mngt_service.out" 2>&1; drc=$?
+echo "$(date '+%H:%M:%S') dev_mngt_service exit $drc: $(grep -o 'Service request [a-z]*' "$wd/dev_mngt_service.out" | tail -1) (its output: $wd/dev_mngt_service.out)"
+
+# 4. Wait for the card: the driver logs "added peer-to-peer DMA memory" at the end of its re-initialisation, and
+#    "Unable to detect the device on bus", "PCIe re-initialization failed" or "reset cannot be done" if it fails.
+new=; s=0
+while [ "$s" -le "$WAIT_S" ]; do
+  new=$(dmesg | awk -v t0="$t0" -v b="ET $bdf: " 'substr($0, 2, index($0, "]") - 2) + 0 > t0 + 0 && index($0, b)')
+  case "$new" in
+    *"Unable to detect the device on bus"*|*"re-initialization failed"*|*"reset cannot be done"*) break ;;
+    *"added peer-to-peer DMA memory"*) [ -c "/dev/et${N}_mgmt" ] && [ -c "/dev/et${N}_ops" ] && break ;;
+  esac
+  sleep 1; s=$((s + 1))
+done
+printf '%s\n' "$new" | tail -6 | sed 's/^/  kernel: /'
+case "$new" in
+  *"Unable to detect the device on bus"*|*"re-initialization failed"*|*"reset cannot be done"*) res="FAILED: the driver reported an error (above)"; rc=1 ;;
+  *"added peer-to-peer DMA memory"*) res="done: the card was re-added after ${s} s, link $(cat "/sys/bus/pci/devices/$bdf/current_link_speed" 2>/dev/null) x$(cat "/sys/bus/pci/devices/$bdf/current_link_width" 2>/dev/null)"; rc=0 ;;
+  *) res="NOT CONFIRMED: no re-add in the kernel log within $WAIT_S s (dev_mngt_service exit $drc)"; rc=1 ;;
+esac
+logger -t et-reset "card $N ($bdf) reset by $who_ran: $res"
+echo "et-reset: card $N $res"
+[ "$rc" -eq 0 ] && echo "next: a short test kernel under the card's lock shows whether the Master Minion takes work again"
+remind
+exit $rc

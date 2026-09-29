@@ -22,7 +22,7 @@ ExternalProject_Add(pciebench_kernel
         -DCMAKE_INSTALL_LIBDIR=lib
     INSTALL_COMMAND ""
     BUILD_ALWAYS TRUE
-    BUILD_BYPRODUCTS ${KERNEL_BINARY_DIR}/empty.elf
+    BUILD_BYPRODUCTS ${KERNEL_BINARY_DIR}/empty.elf ${KERNEL_BINARY_DIR}/touch.elf
 )
 
 add_subdirectory(host)

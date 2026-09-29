@@ -31,6 +31,33 @@ the lab machines' older `/opt/et`.
 | `pagetimeout` | Same-row second load after a set delay: whether anything but refresh closes a row |
 | `table --pattern …` | Address tables for the power loops: `l1 l2 l3near l3far dram_seq dram_row` |
 
+## The MP_EXT modes (build/memprobe2, tools/claims-v3/memp2)
+
+Built only with `-DMEMPROBE_EXT=ON`, into a directory of their own (`build/memprobe2`); without the option the kernel
+and host compile exactly as before (their `.text` byte-identical, checked on 28 Sep), so `build/memprobe` and
+`build/memprobe-v3` are never affected.
+
+- **`OP_TTLOAD`** (op 14): one TensorLoad of 1-16 lines at a stride (arg bits 3:0 = lines - 1, bits 55:8 = stride),
+  timed from issue until `TensorWait` returns; the program must run on an even hart (hart 0 of a minion).
+  **`OP_TERR`** (op 15) records the `tensor_error` CSR; record it before the first tensor op too, since an earlier
+  kernel may have left bits set.
+- **`--tloop`** (`MP_TLOOP`): hart 0 of the minions in `--minions` of every shire in `--shires` streams TensorLoads
+  (two in flight) from its own region of the shire's scratchpad (`--where scp`, from 256 KB in) or an L2-sized DRAM
+  buffer (`--where arena`, which each minion first reads with scalar loads), `--stride` bytes apart inside a load,
+  `--spread same|bank|sub|onebank` for the regions' starting bank and sub-bank (`onebank`: all in bank 0, starts
+  staggered over its four sub-banks); one MEMPROBE line per launch with the bytes per shire-cycle of every shire and
+  `tensor_errors`, the minions whose `tensor_error` gained a bit during the launch.
+- In an MP_EXT build a launch that does not finish (the 6 s timeout) or reports a stream error ends the program at
+  once with exit code 3 (`--tloop` and op programs alike): nothing more is launched on that card.
+- The MP_EXT host binary carries `memp2-src:<sha256 host/main.cpp>:<sha256 memprobe_args.h>` (set at configure time),
+  so a stale build can be recognised with `grep -a`.
+- `gen_ops2.py` (next to `gen_ops.py`, which is unchanged: the OH experiment's lock pins it) writes the programs
+  `rowalt`, `rrd`, `refphase` (DRAM rows, channels and refresh phase) and `treload` (the TensorLoad cache path).
+
+```bash
+cmake -S workloads/memprobe -B build/memprobe2 -DCMAKE_PREFIX_PATH=/opt/et -DMEMPROBE_EXT=ON -Wno-dev && nice cmake --build build/memprobe2 -j4
+```
+
 ## Things this relies on
 
 - `hpmcounter3` on this card reads 128 short when its low 7 bits are 0–10 (the bit-7 carry lands 11 cycles late).

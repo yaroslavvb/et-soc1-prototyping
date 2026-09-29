@@ -23,6 +23,16 @@
 #define OP_TLOAD2 12  // load addr, then at once a timed load of the next op's addr: the time until the second arrives
 #define OP_RAW 11     // four results: two raw back-to-back hpmcounter3 reads, then two `cycle` reads if arg == 1
 
+#ifdef MP_EXT
+// Extension (build with -DMEMPROBE_EXT=ON, e.g. into build/memprobe2; tools/claims-v3/memp2). Without MP_EXT the
+// header, kernel and host compile exactly as before, so a default build of build/memprobe is unchanged.
+#define MP_TLOOP 3    // hart 0 of every minion in minion_mask (per shire) of shire_mask streams TensorLoads (bandwidth)
+#define OP_TTLOAD 14  // timed TensorLoad into L1 scratchpad lines 0..: arg bits 3:0 = lines - 1, bits 55:8 = stride
+                      // in bytes (0 = 64); records the cycles from issue to TensorWait's return (hart 0 of a minion only)
+#define OP_TERR 15    // records the tensor_error CSR (0x808): nonzero after a faulted tensor op (it may still hold an
+                      // earlier kernel's bits: record it before the first tensor op too, count only bits added after)
+#endif
+
 #define MP_MAGIC 0x4D50524Fu  // "MPRO"
 #define MP_MAX_HARTS 2048
 
@@ -57,7 +67,22 @@ struct MpArgs {
   // A cyclic walk over more lines than a cache holds misses it every time (LRU), with no evicts.
   uint64_t stride;
   uint64_t n_lines;
+#ifdef MP_EXT
+  // MP_TLOOP: minion m (hart 0, minion bit set in minion_mask) streams `iters` TensorLoads of tl_lines lines,
+  // `stride` bytes apart inside each load, starting at table[m] (an absolute address, one per minion of every shire
+  // in shire_mask), the next load tl_step bytes further on, wrapping every tl_span bytes. Two loads in flight.
+  uint64_t minion_mask;  // minions (0..31) of each shire that stream
+  uint64_t tl_lines;     // 1..16
+  uint64_t tl_step;
+  uint64_t tl_span;
+  uint64_t tl_flags;     // MP_TL_WARM: scalar-load every line of the span before the timed part (the arena source)
+  // The status line's sink carries tensor_error: (its value before the first tensor op << 32) | its value at the end;
+  // an error is a bit set at the end that was not set before (an earlier kernel may have left the CSR set).
+#endif
 };
+#ifdef MP_EXT
+#define MP_TL_WARM 1ull
+#endif
 
 // One cache line per hart.
 struct MpStatus {
@@ -70,6 +95,10 @@ struct MpStatus {
 };
 
 #ifdef __cplusplus
+#ifdef MP_EXT
+static_assert(sizeof(MpArgs) == 18 * 8, "MpArgs layout must match on host and device");
+#else
 static_assert(sizeof(MpArgs) == 13 * 8, "MpArgs layout must match on host and device");
+#endif
 static_assert(sizeof(MpStatus) == 64, "MpStatus must be one cache line");
 #endif

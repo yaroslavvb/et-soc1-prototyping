@@ -1,0 +1,37 @@
+{
+ "about": "TAU block parameters (tools/claims-v3/tau/README.md). A schedule entry is [sampler every_ms, kind, burst seconds(, sampler seconds)]; kind idle holds no burst. Each entry is one sampler window: timeout <timeout_s> ettelem sample --seconds <sampler seconds, default sampler_seconds> --every-ms <rate>, with the burst's host process launched pre_burst_s after the sampler's first line. A sampler that gives no line in first_line_max_s (or exits) is a failed start: retried up to sampler_attempts times, with one queue drain after drain_after_failed_starts failures (never on aifoundry1, whose stock dev_mngt_service opens card 0: there the block writes tau/STOP and ends after a1_stop_after_failed_starts failures in one window, or any SIGKILL). A first line so late that pre + setup_allow + burst + post_burst_min no longer fit in timeout_s is a late start: no burst, the window is repeated (at most burst_tries windows per entry). The full schedule's bursts are put in a seeded order per pass (shuffle_seed + pass; the leading idle window stays first). The block ends at stop_c (die mean) and does not start its bursts when the idle window's die mean is above start_max_c.",
+ "sampler_seconds": 9,
+ "timeout_s": 10,
+ "first_line_max_s": 10,
+ "pre_burst_s": 1.5,
+ "post_burst_min_s": 2.0,
+ "setup_allow_s": 1.2,
+ "sampler_attempts": 6,
+ "drain_after_failed_starts": 2,
+ "a1_stop_after_failed_starts": 2,
+ "sampler_retry_wait_s": 2,
+ "window_wall_max_s": 12,
+ "burst_tries": 3,
+ "stop_c": 90,
+ "start_max_c": 72,
+ "bursts": {
+  "M": ["--pattern", "fmadd.ps", "--operands", "random", "--harts", "2"],
+  "H": ["--pattern", "fmadd.ps", "--operands", "zeros", "--harts", "2"],
+  "D": ["--pattern", "tload_pat", "--operands", "random", "--slice-bytes", "256K", "--stride", "8K", "--access-bytes", "1K", "--region", "256K"]
+ },
+ "burst_common": ["--window", "240000000", "--budget", "8"],
+ "schedules": {
+  "full": [[100, "idle", 0], [100, "M", 2], [100, "D", 2], [100, "M", 3], [100, "D", 3], [100, "M", 4], [100, "D", 4],
+           [100, "H", 3], [100, "D", 3], [50, "M", 3], [50, "D", 3], [50, "M", 3], [50, "D", 3]],
+  "smoke": [[100, "idle", 0, 3], [100, "idle", 0, 3], [100, "idle", 0, 3], [100, "idle", 0, 3], [100, "idle", 0, 3],
+            [100, "idle", 0, 3], [100, "idle", 0, 3], [100, "idle", 0, 3], [100, "idle", 0, 3], [100, "idle", 0, 3],
+            [100, "M", 2], [50, "D", 2]]
+ },
+ "shuffle": {"full": true, "smoke": false},
+ "shuffle_seed": 7000,
+ "cards": {
+  "aifoundry1-c1": {"role": "development", "passes": [1, 99], "device": 1},
+  "aifoundry3": {"role": "validation", "passes": [101, 199], "device": 0},
+  "aifoundry2": {"role": "third card (only after DV2 ends: TAU_A2_OK=1)", "passes": [201, 299], "device": 0, "needs_env": "TAU_A2_OK"}
+ }
+}
