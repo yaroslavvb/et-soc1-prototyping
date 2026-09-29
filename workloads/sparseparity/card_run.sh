@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
-# sparseparity on a card: the M1 and M2 steps (README.md, "M1 on a card" and "M2 on a card"), one process per step.
+# sparseparity on a card: the M1, M2 and M4 steps (README.md, "M1 on a card", "M2 on a card" and "M4 on a card"),
+# one process per step.
 #
-#   bash workloads/sparseparity/card_run.sh <m1|probe|m2|list> [--dry] [--build DIR] [--out DIR] [--from STEP]
+#   bash workloads/sparseparity/card_run.sh <m1|probe|m2|m4|m4gen|list> [--dry] [--build DIR] [--out DIR] [--from STEP]
+#
+# m4 and m4gen need a build of the M4 sources (default build/sparseparity-h): the host's --variant m1 runs M1's kernel
+# and planner on that build, so every A/B pair runs one binary. --build and --out may be absolute, or relative to the
+# tree's root (the directory two levels above this script).
 #
 # Run it from the tree's root on the card's host (~/nekko on aifoundry1 and aifoundry3, the checkout on aifoundry2),
 # only with the owner's go-ahead for that card. Every step is one host process run as
@@ -12,7 +17,12 @@
 # etsoc-shire1.lock); card 0 overheats. It stops at the first step whose result is not the expected one (a
 # negative control must FAIL on its checksums and pass everything else), so a person can look before going on.
 # After a step whose plan does not cover every candidate, the full per-minion oracle runs offline on the saved
-# records (--verify-records: no device, no lock, no timeout).
+# records (--verify-records: no device, no lock, no timeout); stage m4 also runs it, at the end, on its full-coverage
+# M4 steps (the closed forms do not check the lane maxima, the best or the tie flag the new epilogue computes).
+# Every step's line shows its launch time over the host's model (xR); in stage m4 a step whose guard trusts M4's
+# predicted model (--trust-model: the whole (256,5), 2.25 s modelled, 3.66 s at M1's fitted speed) runs only after
+# its gate steps, the same instance's halves with the same kernel, ran within x1.3 of their model in this --out
+# directory; otherwise it is skipped (not a stop) and says why.
 #
 # --dry: every step with the host's --dry (plan and model only; the device is never opened, no lock is taken).
 # --from STEP: skip the steps before STEP (after a stop). Output: --out DIR (default
@@ -21,7 +31,7 @@
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 2
 WHAT=${1:-}; shift || true
-DRY=; BUILD=build/sparseparity-f; OUT=; FROM=
+DRY=; BUILD=; OUT=; FROM=
 while [ $# -gt 0 ]; do
   case "$1" in
     --dry) DRY=1 ;;
@@ -32,10 +42,17 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-case "$WHAT" in m1|probe|m2|list) ;; *) echo "usage: $0 <m1|probe|m2|list> [--dry] [--build DIR] [--out DIR] [--from STEP]" >&2; exit 2 ;; esac
-HOST_BIN=$PWD/$BUILD/host/sparseparity_host
-SELFTEST=$PWD/$BUILD/host/spp_selftest
+case "$WHAT" in m1|probe|m2|m4|m4gen|list) ;; *) echo "usage: $0 <m1|probe|m2|m4|m4gen|list> [--dry] [--build DIR] [--out DIR] [--from STEP]" >&2; exit 2 ;; esac
+case "$WHAT" in m4|m4gen) BUILD=${BUILD:-build/sparseparity-h} ;; *) BUILD=${BUILD:-build/sparseparity-f} ;; esac
+case "$BUILD" in /*) ;; *) BUILD=$PWD/$BUILD ;; esac
+HOST_BIN=$BUILD/host/sparseparity_host
+SELFTEST=$BUILD/host/spp_selftest
 [ -x "$HOST_BIN" ] && [ -x "$SELFTEST" ] || { echo "build first: $HOST_BIN" >&2; exit 2; }
+if [ "$WHAT" = m4 ] || [ "$WHAT" = m4gen ]; then   # the usage text only: nothing is opened
+  u=$("$HOST_BIN" --no-such-option 2>&1)
+  grep -q -- '--variant m4|m1' <<< "$u" && grep -q -- '--trust-model' <<< "$u" || \
+    { echo "$HOST_BIN has no --variant or no --trust-model: build these M4 sources" >&2; exit 2; }
+fi
 H=$(hostname)
 LOCK=/run/lock/etsoc-shire0.lock
 if [ "$H" = aifoundry1 ]; then export ET_DEVICES=1; LOCK=/run/lock/etsoc-shire1.lock; fi
@@ -91,7 +108,89 @@ M2+=(
   # last: skips the PRM's TensorWait before an A buffer is reloaded (sys_emu's checker rejects it); silicon only
   "m2-l2-q0-nowait|PASS|2.4 s|--mode tensor $L2 --per-shire 32 --slice 0/4 --nowait-a"
 )
-case "$WHAT" in m1) STEPS=("${M1[@]}") ;; probe) STEPS=("${PROBE[@]}") ;; m2) STEPS=("${M2[@]}") ;; list) STEPS=("${M1[@]}" "${PROBE[@]}" "${M2[@]}") ;; esac
+# M4 (README.md, "M4 on a card"): A/B of M1's kernel and planner against each change, on one build. Configurations:
+# m1 = --variant m1 (M1 exactly: kernel and planner as on 29 September); a = M1's kernel, the plan cut by the fitted
+# model; b, c = a with the incremental generation or the epilogue in pieces alone; m4 = both (the default); m4d = m4
+# with 3 A buffers. A sliced step cuts its slice by M1's cost (--slice-cost m1), so its configurations scan the same
+# tiles. "model" is tools/cycle_model.py m4's prediction (the host's --dry prints the same model_s): M1's kernel is
+# fitted (M3 within +1.4%/+3.6%), M4's changes are predictions; the host refuses a launch whose model x1.3 (x1.15 for
+# M1's kernel) is over 4 s.
+ONE="--mode tensor --shires 0x1 --per-shire 32"
+ALL="--mode tensor --shires 0xffffffff --per-shire 32"
+CM1="--variant m1"; CA="--variant m1 --cost fit"; CB="--variant m1 --cost fit --gen inc"
+CC="--variant m1 --cost fit --epi hide"; CM4="--variant m4"; CM4D="--variant m4 --abuf 3"
+# m4a = M4's kernel on the plan cut by M1's fitted constants (--pipe-set changes only the plan and the model): the
+# kernel's gain apart from the plan's balance (review of M4, finding 2)
+CM4A="--variant m4 --pipe-set HIDDEN=0,G_TILE=2081,G_SLICE=2108,G_K=570.3"
+M4=(
+  # first, the hand-off race probe with M4's faster (incremental) generation, which the probe stage ran only with M1's;
+  # the DRAM staging (fswl.ps) runs nowhere else in this stage (review of M4, finding 3)
+  "m4-probe-l2-scp1|PASS|0.29 s|--mode tensor $L2 --per-shire 32 --probe narrow:2000 --oracle on --stage scp --nbuf 1 $CM4"
+  "m4-probe-l2-dram1|PASS|0.49 s|--mode tensor $L2 --per-shire 32 --probe narrow:2000 --oracle on --stage dram --nbuf 1 $CM4"
+  "m4-probe-l2-dram2|PASS|0.45 s|--mode tensor $L2 --per-shire 32 --probe narrow:2000 --oracle on --stage dram --nbuf 2 $CM4"
+  "m4-probe-l2-scp1-abuf3|PASS|0.28 s|--mode tensor $L2 --per-shire 32 --probe narrow:2000 --oracle on --stage scp --nbuf 1 $CM4D"
+  "m4-probe-c1-scp1|PASS|5 ms|--mode tensor $C1 --seed 1 --per-shire 32 --probe narrow:200 --oracle on --stage scp --nbuf 1 $CM4"
+  "m4-probe-c1-dram1|PASS|7 ms|--mode tensor $C1 --seed 1 --per-shire 32 --probe narrow:200 --oracle on --stage dram --nbuf 1 $CM4"
+  "m4-1s-l1-w-m1|PASS|1.12 s|$ONE $L1 --slice 0/3 --slice-cost m1 $CM1"
+  "m4-1s-l1-w-a|PASS|1.11 s|$ONE $L1 --slice 0/3 --slice-cost m1 $CA"
+  "m4-1s-l1-w-m4|PASS|0.69 s|$ONE $L1 --slice 0/3 --slice-cost m1 $CM4"
+  "m4-1s-l1-w-m4d|PASS|0.59 s|$ONE $L1 --slice 0/3 --slice-cost m1 $CM4D"
+  "m4-1s-l1-n-m1|PASS|2.48 s|$ONE $L1 --slice 2/3 --slice-cost m1 $CM1"
+  "m4-1s-l1-n-a|PASS|1.92 s|$ONE $L1 --slice 2/3 --slice-cost m1 $CA"
+  "m4-1s-l1-n-m4|PASS|1.25 s|$ONE $L1 --slice 2/3 --slice-cost m1 $CM4"
+  "m4-1s-l1-n-m4d|PASS|1.20 s|$ONE $L1 --slice 2/3 --slice-cost m1 $CM4D"
+  "m4-1s-l2-w-m1|PASS|1.50 s|$ONE $L2 --slice 0/8 --slice-cost m1 $CM1"
+  "m4-1s-l2-w-a|PASS|1.48 s|$ONE $L2 --slice 0/8 --slice-cost m1 $CA"
+  "m4-1s-l2-w-m4|PASS|1.18 s|$ONE $L2 --slice 0/8 --slice-cost m1 $CM4"
+  "m4-1s-l2-w-m4d|PASS|1.01 s|$ONE $L2 --slice 0/8 --slice-cost m1 $CM4D"
+  "m4-1s-l2-n-m1|PASS|2.71 s|$ONE $L2 --slice 15/16 --slice-cost m1 $CM1"
+  "m4-1s-l2-n-a|PASS|2.52 s|$ONE $L2 --slice 15/16 --slice-cost m1 $CA"
+  "m4-1s-l2-n-m4|PASS|1.66 s|$ONE $L2 --slice 15/16 --slice-cost m1 $CM4"
+  "m4-1s-l2-n-m4d|PASS|1.59 s|$ONE $L2 --slice 15/16 --slice-cost m1 $CM4D"
+  "m4-32s-l1-m1|PASS|207 ms|$ALL $L1 $CM1"
+  "m4-32s-l1-a|PASS|134 ms|$ALL $L1 $CA"
+  "m4-32s-l1-b|PASS|113 ms|$ALL $L1 $CB"
+  "m4-32s-l1-c|PASS|110 ms|$ALL $L1 $CC"
+  "m4-32s-l1-m4|PASS|86 ms|$ALL $L1 $CM4"
+  "m4-32s-l1-m4d|PASS|78 ms|$ALL $L1 $CM4D"
+  "m4-32s-l2-m1|PASS|835 ms|$ALL $L2 $CM1"
+  "m4-32s-l2-a|PASS|545 ms|$ALL $L2 $CA"
+  "m4-32s-l2-b|PASS|427 ms|$ALL $L2 $CB"
+  "m4-32s-l2-c|PASS|520 ms|$ALL $L2 $CC"
+  "m4-32s-l2-m4|PASS|403 ms|$ALL $L2 $CM4"
+  "m4-32s-l2-m4d|PASS|362 ms|$ALL $L2 $CM4D"
+  "m4-32s-l2-m4a|PASS|545 ms|$ALL $L2 $CM4A"
+  "m4-32s-f5-h0-m1|PASS|1.30 s|$ALL $F5 --slice 0/2 --slice-cost m1 $CM1"
+  "m4-32s-f5-h0-m4|PASS|0.83 s|$ALL $F5 --slice 0/2 --slice-cost m1 $CM4"
+  "m4-32s-f5-h0-m4d|PASS|0.76 s|$ALL $F5 --slice 0/2 --slice-cost m1 $CM4D"
+  "m4-32s-f5-h1-m1|PASS|2.55 s|$ALL $F5 --slice 1/2 --slice-cost m1 $CM1"
+  "m4-32s-f5-h1-m4|PASS|1.41 s|$ALL $F5 --slice 1/2 --slice-cost m1 $CM4"
+  "m4-32s-f5-h1-m4d|PASS|1.34 s|$ALL $F5 --slice 1/2 --slice-cost m1 $CM4D"
+  "m4-32s-f5-m4|PASS|2.25 s|$ALL $F5 $CM4 --trust-model"
+)
+# The gates of a step that runs with --trust-model: each must have run in this --out directory within x1.3 of its
+# model (review of M4, finding 1: M4's constants are predictions until the card measures them).
+declare -A GATE=([m4-32s-f5-m4]="m4-32s-f5-h0-m4 m4-32s-f5-h1-m4")
+# Full-coverage M4 steps that also get the full oracle offline, at the end of the stage (review of M4, finding 4).
+VERIFY_FULL=" m4-32s-l1-m4 m4-32s-l1-m4d m4-32s-l2-m4 m4-32s-l2-m4d m4-32s-f5-m4 "
+# The generation probe (the analysis' open question): 32 minions x 400 one-column-tile row tiles, timing only, so the
+# pipeline runs at hart 1's pace; M1's generation, the incremental one, and the incremental one with its staged stores
+# sent to hart 1's own L1 instead (hart 0 then multiplies stale rows: timing only). Cycles per row tile =
+# kernel.cycles_max / 400; at k = 4 (L1, L2) and k = 5 (F5).
+GP="--mode tensor --shires 0x1 --per-shire 32 --probe narrow:400 --timing-only --variant m1"
+M4GEN=(
+  "m4gen-l1-m1|TIMING|23 ms|$GP $L1"
+  "m4gen-l1-inc|TIMING|14 ms|$GP $L1 --gen inc"
+  "m4gen-l1-nostore|TIMING|14 ms|$GP $L1 --gen inc --gen-probe nostore"
+  "m4gen-l2-m1|TIMING|92 ms|$GP $L2"
+  "m4gen-l2-inc|TIMING|57 ms|$GP $L2 --gen inc"
+  "m4gen-l2-nostore|TIMING|57 ms|$GP $L2 --gen inc --gen-probe nostore"
+  "m4gen-f5-m1|TIMING|111 ms|$GP $F5"
+  "m4gen-f5-inc|TIMING|61 ms|$GP $F5 --gen inc"
+  "m4gen-f5-nostore|TIMING|61 ms|$GP $F5 --gen inc --gen-probe nostore"
+)
+case "$WHAT" in m1) STEPS=("${M1[@]}") ;; probe) STEPS=("${PROBE[@]}") ;; m2) STEPS=("${M2[@]}") ;; m4) STEPS=("${M4[@]}") ;;
+  m4gen) STEPS=("${M4GEN[@]}") ;; list) STEPS=("${M1[@]}" "${PROBE[@]}" "${M2[@]}" "${M4[@]}" "${M4GEN[@]}") ;; esac
 if [ "$WHAT" = list ]; then
   for c in "${STEPS[@]}"; do IFS='|' read -r n e t a <<< "$c"; printf '%-22s %-6s %-7s %s\n' "$n" "$e" "$t" "$a"; done
   exit 0
@@ -110,9 +209,20 @@ OBJCOPY=objcopy; [ -x /opt/et/bin/riscv64-unknown-elf-objcopy ] && OBJCOPY=/opt/
 $OBJCOPY -O binary -j .text "$BUILD/kernel/sparseparity.elf" "$OUT/kernel.text" 2> /dev/null
 say "kernel $BUILD/kernel/sparseparity.elf: .text sha256 $(sha256sum < "$OUT/kernel.text" | cut -c1-64)"
 started=${FROM:+0}; started=${started:-1}
+DEFER=(); SKIPPED=()
 for c in "${STEPS[@]}"; do
   IFS='|' read -r name expect model args <<< "$c"
   [ "$started" = 0 ] && { [ "$name" = "$FROM" ] && started=1 || continue; }
+  rm -f "$OUT/$name.fast"
+  if [ -z "$DRY" ] && [ -n "${GATE[$name]:-}" ]; then
+    missing=
+    for g in ${GATE[$name]}; do [ -f "$OUT/$g.fast" ] || missing="$missing $g"; done
+    if [ -n "$missing" ]; then
+      say "SKIP $name: its guard trusts M4's predicted model (--trust-model), and not every gate ran within x1.3 of its model in $OUT:$missing (run the gates with --out $OUT first, or refit the constants and pass --pipe-set)"
+      SKIPPED+=("$name")
+      continue
+    fi
+  fi
   if [ -z "$DRY" ]; then
     waited=0
     until card_free; do
@@ -128,9 +238,9 @@ for c in "${STEPS[@]}"; do
     rc=$?
   fi
   grep -v '^I20' "$OUT/$name.err" > "$OUT/$name.err.txt" 2> /dev/null; mv -f "$OUT/$name.err.txt" "$OUT/$name.err"
-  verdict=$(python3 - "$OUT/$name.json" "$expect" "$rc" "${DRY:-0}" <<'EOF'
+  verdict=$(python3 - "$OUT/$name.json" "$expect" "$rc" "${DRY:-0}" "$OUT/$name.fast" <<'EOF'
 import json, sys
-path, expect, rc, dry = sys.argv[1], sys.argv[2], int(sys.argv[3]), sys.argv[4] == "1"
+path, expect, rc, dry, fast = sys.argv[1], sys.argv[2], int(sys.argv[3]), sys.argv[4] == "1", sys.argv[5]
 try:
     j = json.loads(open(path).read().strip().splitlines()[-1])
 except Exception:
@@ -139,9 +249,15 @@ st = j.get("status", "NONE")
 if dry:
     ok = st == "DRY" and not j.get("refused_on_silicon")
     print(("OK " if ok else "BAD ") + f"DRY model {j.get('model_s', 0):.3g} s est {j.get('est_s', 0):.3g} s "
+          f"fallback {j.get('model_fallback_s', 0):.3g} s guard {j.get('guard_s', 0):.3g} s "
           f"stage {j.get('stage')} nbuf {j.get('nbuf')} scp {j.get('scp_layout_kb')} KB coverage {j.get('coverage')}")
     sys.exit()
-c, res, k = j.get("checks", {}), j.get("result", {}), j.get("kernel", {})
+c, res, k, pl = j.get("checks", {}), j.get("result", {}), j.get("kernel", {}), j.get("plan", {})
+# the launch against the host's model: x1.3 is the margin the guard gives an M4 change (x1.15 M1's kernel)
+ls = j.get("launch_s") or [0]
+ratio = ls[0] / pl["model_s"] if pl.get("model_s") else 0.0
+margin = 1.15 if j.get("m4", {}).get("kernel") == "m1" else 1.3
+speed = f"x{ratio:.2f} of model{' SLOW' if ratio > margin else ''}"
 if expect in ("PASS", "TIMING"):
     ok = rc == 0 and st == expect
 elif expect == "TIE":
@@ -152,7 +268,9 @@ elif expect == "NEGM":
 else:  # NEG
     ok = (st == "FAIL" and c.get("count") == "ok" and "MISMATCH" in c.get("sum_c", "") + c.get("sum_c2", "")
           and c.get("records") == "ok" and c.get("launch") == "ok")
-print(("OK " if ok else "BAD ") + f"{st} launch_s {j.get('launch_s')} open_s {j.get('open_s', 0):.2f} "
+if ok and expect == "PASS" and 0 < ratio <= 1.3:
+    open(fast, "w").write(f"{ratio:.4f}\n")   # a gate for a step that trusts the model
+print(("OK " if ok else "BAD ") + f"{st} launch_s {j.get('launch_s')} {speed} open_s {j.get('open_s', 0):.2f} "
       f"cyc/op {k.get('cycles_per_op_busiest', 0):.1f} MHz {k.get('clock_mhz_est', 0):.0f} "
       f"cyc max/med {k.get('cycles_max', 0)}/{k.get('cycles_median', 0):.0f} wait {k.get('wait_cycles_max')} "
       f"solved {res.get('solved')} unique {res.get('unique')} sum_c {c.get('sum_c')} sum_c2 {c.get('sum_c2')} "
@@ -175,5 +293,19 @@ EOF
     say "  $name offline verify: $v"
     [ "${v%% *}" = PASS ] || { say "STOP at $name: the offline oracle disagrees (resume: --from $name)"; exit 1; }
   fi
+  [ -z "$DRY" ] && [ "$expect" = PASS ] && [[ "$VERIFY_FULL" == *" $name "* ]] && DEFER+=("$name|$args")
 done
+# The full oracle offline on the full-coverage M4 steps (no device; about 1 s per 1.4e9 units of oracle work, one
+# thread: L1 ~40 s, L2 ~85 s, (256,5) ~5 min).
+vbad=0
+for d in "${DEFER[@]}"; do
+  IFS='|' read -r name args <<< "$d"
+  # shellcheck disable=SC2086
+  nice -n 10 "$HOST_BIN" $args --verify-records "$OUT/$name.rec" > "$OUT/$name.verify.json" 2> /dev/null
+  v=$(python3 -c 'import json,sys; j=json.loads(open(sys.argv[1]).read().splitlines()[-1]); print(j["status"], j["checks"]["oracle"])' "$OUT/$name.verify.json" 2> /dev/null)
+  say "  $name offline verify (full oracle): $v"
+  [ "${v%% *}" = PASS ] || vbad=1
+done
+[ $vbad = 0 ] || { say "STOP: an offline oracle disagrees with a full-coverage step (see its .verify.json)"; exit 1; }
+if [ ${#SKIPPED[@]} -gt 0 ]; then say "DONE $WHAT: every step run as expected; skipped (gates): ${SKIPPED[*]}"; exit 0; fi
 say "DONE $WHAT: every step as expected"

@@ -12,11 +12,20 @@
 # make -C workloads/sparseparity/cpu O=$PWD/build/sparseparity-cpu); without them those cases are skipped.
 #
 # Refuses on aifoundry2 (its DV2 validation treats any sys_emu or *_host process as a foreign device process) and
-# while any tools/claims-v3 queue, block or series runs on the host. Runs niced (19), one simulator at a time.
+# while any tools/claims-v3 queue, block or series runs on the host. Runs niced (19), one simulator at a time, and
+# before each case waits while `et-who --check` shows the host's card held (someone measuring on it).
 # Each run boots the simulated firmware (about 47 s). Output: <build>/sysemu/<time>/<case>/ (out.json, err.txt =
 # stderr without the runtime's INFO lines, and sysemu.log for failed cases or with --keep); the summary goes to
 # stdout. Exit 0 when every case behaves as expected (negative controls must FAIL on the checksums and nothing else;
 # the abort case must fail cleanly, with the harts' error flags and no hang).
+#
+# The host's default is M4's kernel (--variant m4: incremental row generation, the epilogue in pieces), so the M1
+# cases run it; the *-m1 cases run M1's kernel (--variant m1) on the same build, and the M4 cases add each change alone,
+# 3 A buffers, and the L geometries: 7 row tiles of (512, 4) on 3 minions (the first two, which hold many prefix
+# runs; two with a prefix change inside a tile; the last three, one-column and padded) at S = 7 (L1) and S = 29
+# (L2), every raw output tile compared with the CPU, in the scratchpad (1 and 2 buffers) and in DRAM. The review of
+# M4 added 14: k = 6 and k = 2 on the new paths, the mask control on the streamed and 3-buffer paths, 3 A buffers
+# with DRAM staging, S = 40, a tie across 8 minions with A streamed, and the race probe on DRAM staging.
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 2
 BUILD=build/sparseparity-m1
@@ -32,8 +41,9 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-HOST_BIN=$PWD/$BUILD/host/sparseparity_host
-SELFTEST=$PWD/$BUILD/host/spp_selftest
+case "$BUILD" in /*) ;; *) BUILD=$PWD/$BUILD ;; esac
+HOST_BIN=$BUILD/host/sparseparity_host
+SELFTEST=$BUILD/host/spp_selftest
 say() { echo "$(date +%T) sysemu: $*"; }
 [ "$(hostname)" = aifoundry2 ] && [ "${SPP_ALLOW_AIFOUNDRY2:-}" != 1 ] && { say "aifoundry2: refused (DV2 validation)"; exit 2; }
 p=$(pgrep -af '[t]ools/claims-v3/(queue\.sh|[a-z0-9_/-]+/(block|series|run_queue)\.sh)' 2>/dev/null | cut -c1-120 | tr '\n' ';')
@@ -43,12 +53,17 @@ p=$(pgrep -af '[t]ools/claims-v3/(queue\.sh|[a-z0-9_/-]+/(block|series|run_queue
 [ -x /opt/et/bin/sys_emu ] || { say "no /opt/et/bin/sys_emu"; exit 2; }
 case "$(hostname)" in aifoundry1) export ET_DEVICES=1 ;; esac   # belt and braces: nothing here opens a card
 
-WD=$PWD/$BUILD/sysemu/$(date +%Y%m%d-%H%M%S)
+WD=$BUILD/sysemu/$(date +%Y%m%d-%H%M%S)
 mkdir -p "$WD"
 # inputs: the tie instance (C0's shape, two candidates at c = m) and R1's wide text plan (32 minions, one row tile
 # each, 1-2 column tiles, n = 512, m = 2304: the scratchpad layout ends at exactly 2,560 KB with 1 buffer)
 "$SELFTEST" --tie-instance "$WD/tie.spi" > /dev/null || { say "cannot write the tie instance"; exit 2; }
+"$SELFTEST" --tie-instance "$WD/tie256.spi" 256 > /dev/null || { say "cannot write the S = 4 tie instance"; exit 2; }
 for i in $(seq 0 31); do echo "0 $i $((1250000 + 4000 * i)) 1"; done > "$WD/plan_hi.txt"
+printf '0 0 0 2\n0 1 1001 2\n0 2 1381773 3\n' > "$WD/plan_lgeo.txt"   # (512, 4): 1,381,776 row tiles
+L1G="--n 512 --k 4 --eta 0.3 --m 448 --seed 1 --per-shire 3 --plan $WD/plan_lgeo.txt"
+L2G="--n 512 --k 4 --eta 0.4 --m 1850 --seed 1 --per-shire 3 --plan $WD/plan_lgeo.txt"
+S4="--n 48 --k 3 --eta 0.1 --m 256 --seed 9"
 
 # name|expect|args   (expect: PASS; TIMING = a --timing-only run that must finish cleanly; NEG = the closed-form
 # checksums must fail and every other check pass; NEGM = the mask control: the count holds, both closed forms and
@@ -83,14 +98,71 @@ if [ -z "$QUICK" ]; then
     "reps2|PASS|--mode tensor --dump --n 48 --k 3 --eta 0.1 --m 256 --seed 9 --per-shire 2 --reps 2"
     "abort|ABORT|--mode tensor --n 48 --k 3 --eta 0.1 --m 256 --seed 9 --per-shire 4 --poll-limit 2"
     "hi-auto|PASS|--mode tensor --n 512 --k 4 --eta 0.4 --m 2304 --seed 7 --per-shire 32 --plan $WD/plan_hi.txt --oracle on"
+    # M1's kernel on the new build
+    "c0-tensor-m1|PASS|--mode tensor --dump --variant m1"
+    "s4-tensor-m1|PASS|--mode tensor --dump $S4 --variant m1"
+    "s4-nbuf1-m1|PASS|--mode tensor --dump $S4 --nbuf 1 --variant m1"
+    "s4-dram-m1|PASS|--mode tensor --dump $S4 --stage dram --variant m1"
+    "k4-2shires-m1|PASS|--mode tensor --dump --n 40 --k 4 --eta 0.1 --m 192 --seed 5 --shires 0x3 --per-shire 2 --variant m1"
+    "neg-mask-m1|NEGM|--mode tensor --perturb mask --variant m1"
+    # M4's changes one at a time, and 3 A buffers
+    "c0-gen-only|PASS|--mode tensor --dump --variant m1 --gen inc"
+    "c0-epi-only|PASS|--mode tensor --dump --variant m1 --epi hide"
+    "c0-dram|PASS|--mode tensor --dump --stage dram"
+    "s4-gen-only|PASS|--mode tensor --dump $S4 --variant m1 --gen inc"
+    "s4-epi-only|PASS|--mode tensor --dump $S4 --variant m1 --epi hide"
+    "s4-abuf3|PASS|--mode tensor --dump $S4 --abuf 3"
+    "s4-abuf3-nbuf1|PASS|--mode tensor --dump $S4 --abuf 3 --nbuf 1 --per-shire 2"
+    "s5-abuf3-8|PASS|--mode tensor --dump --n 64 --k 3 --eta 0.2 --m 320 --seed 2 --per-shire 8 --abuf 3"
+    "tie-str|TIE|--mode tensor --instance $WD/tie256.spi"
+    "tie-str-m1|TIE|--mode tensor --instance $WD/tie256.spi --variant m1"
+    "tie-abuf3|TIE|--mode tensor --instance $WD/tie256.spi --abuf 3 --per-shire 2"
+    "gen-nostore|TIMING|--mode tensor --timing-only --gen-probe nostore $S4 --per-shire 2"
+    # the L geometries (A streamed), every raw tile against the CPU
+    "l1geo-scp|PASS|--mode tensor --dump $L1G --stage scp"
+    "l1geo-dram|PASS|--mode tensor --dump $L1G --stage dram"
+    "l1geo-abuf3|PASS|--mode tensor --dump $L1G --abuf 3"
+    "l1geo-m1|PASS|--mode tensor --dump $L1G --variant m1"
+    "l2geo-scp1|PASS|--mode tensor --dump $L2G --stage scp --nbuf 1"
+    "l2geo-dram|PASS|--mode tensor --dump $L2G --stage dram"
+    "l2geo-abuf3|PASS|--mode tensor --dump $L2G --abuf 3 --nbuf 1"
+    # the review of M4: k = 6 (the incremental generation's last prefix slot) with A resident, streamed and in 3
+    # buffers; k = 2 streamed; the mask control streamed and with 3 A buffers; 3 A buffers with DRAM staging; DRAM
+    # with 1 buffer; timing-only with 3 A buffers and resident; S = 40 (the largest m) with 2 and 3 A buffers; the
+    # S = 4 tie across 8 minions; the race probe with M4's generation on DRAM staging, 1 buffer
+    "k6-res|PASS|--mode tensor --dump --n 20 --k 6 --eta 0.1 --m 64 --seed 3"
+    "k6-str|PASS|--mode tensor --dump --n 20 --k 6 --eta 0.1 --m 256 --seed 3 --per-shire 3"
+    "k6-str-abuf3|PASS|--mode tensor --dump --n 20 --k 6 --eta 0.1 --m 256 --seed 3 --per-shire 3 --abuf 3"
+    "k2-str|PASS|--mode tensor --dump --n 40 --k 2 --eta 0.1 --m 300 --seed 4 --per-shire 2"
+    "negmask-str|NEGM|--mode tensor $S4 --perturb mask"
+    "negmask-abuf3|NEGM|--mode tensor $S4 --perturb mask --abuf 3"
+    "abuf3-dram|PASS|--mode tensor --dump $S4 --abuf 3 --stage dram --per-shire 2"
+    "s4-dram1|PASS|--mode tensor --dump $S4 --stage dram --nbuf 1 --per-shire 2"
+    "timing-abuf3|TIMING|--mode tensor --timing-only $S4 --abuf 3 --per-shire 2"
+    "timing-res|TIMING|--mode tensor --timing-only"
+    "s40-m4|PASS|--mode tensor --dump --n 64 --k 3 --eta 0.1 --m 2560 --seed 5 --per-shire 4 --oracle on"
+    "s40-abuf3|PASS|--mode tensor --dump --n 64 --k 3 --eta 0.1 --m 2560 --seed 5 --per-shire 4 --oracle on --abuf 3"
+    "tie-str-8|TIE|--mode tensor --instance $WD/tie256.spi --per-shire 8"
+    "probe-dram1|PASS|--mode tensor $S4 --per-shire 4 --probe narrow:6 --oracle on --stage dram --nbuf 1"
   )
 fi
+
+# before each case: wait while the card is held (et-who --check: 0 free, 1 held, 2 failed)
+wait_free() {
+  command -v et-who > /dev/null || return 0
+  local said=
+  until et-who --check > /dev/null 2>&1; do
+    [ -z "$said" ] && { say "the card is held (et-who): waiting before the next case"; said=1; }
+    sleep 15
+  done
+}
 
 fails=0
 printf '%-18s %-6s %-6s %-8s %-8s %-6s %-22s %-8s %-5s %s\n' case expect status sum_c sum_c2 oracle dump solved vpurf mem
 for c in "${cases[@]}"; do
   name=${c%%|*}; rest=${c#*|}; expect=${rest%%|*}; args=${rest#*|}
   d=$WD/$name; mkdir -p "$d"
+  wait_free
   cmd=("$HOST_BIN" --sysemu --sim-args "-vpurf_warn" $args)
   [[ " ${cmd[*]} " == *" --sysemu "* ]] || { say "internal: no --sysemu in $name"; exit 2; }
   t0=$(date +%s)
@@ -152,6 +224,7 @@ for c in "${m0cases[@]}"; do
   name=${c%%|*}; rest=${c#*|}; inst=${rest%%|*}; popt=${rest#*|}
   IFS=, read -r n k eta m seed <<< "$inst"
   d=$WD/$name; mkdir -p "$d"
+  wait_free
   t0=$(date +%s)
   python3 workloads/sparseparity/tools/planner.py plan --n "$n" --k "$k" --m "$m" $popt --topm 0 --out "$d/wl.bin" \
     > "$d/plan.txt" 2>&1 || { say "$name: planner failed"; fails=$((fails + 1)); continue; }

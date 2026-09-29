@@ -235,15 +235,19 @@ def t_plan(B, a):
 
 
 def t_plan_big(B, a):
-    """the showcase plans: balance and cut error only (no scan)"""
-    P = planner.model_constants()
-    for n, k, m, nsl in [(512, 4, 448, 1), (512, 4, 1850, 1), (256, 5, 1925, 1), (512, 5, 1280, 4), (512, 5, 2151, 6)]:
+    """the showcase plans: balance and cut error only (no scan), under M1's cost and the fitted pipeline's (M4)"""
+    P1 = planner.model_constants()
+    Pf = dict(P1, COST="fit", KERNEL="m4", ABUF=2, NBUF=0, STAGE="auto")
+    for (n, k, m, nsl), P in [(x, P) for P in (P1, Pf) for x in
+                              [(512, 4, 448, 1), (512, 4, 1850, 1), (256, 5, 1925, 1), (512, 5, 1280, 4),
+                               (512, 5, 2151, 6)]]:
         plans, G, prof = planner.make_plan(n, k, m, 32, 32, 1, nsl, P)
         bal = [planner.balance(W, P) for W in plans]
         cov = sorted((r["tile_begin"], r["tile_end"]) for W in plans for r in W.ranges)
         tiles_ok = cov[0][0] == 0 and cov[-1][1] == G.NT and all(x[1] == y[0] for x, y in zip(cov, cov[1:]))
         cands_ok = sum(W.hdr["total_cands"] for W in plans) == G.Ncand
-        check(f"plan (n={n}, k={k}, m={m}) on 32 x 32 minions in {nsl} launch(es): tiles covered once, all C(n,k) "
+        check(f"plan (n={n}, k={k}, m={m}, cost {P.get('COST', 'm1')}) on 32 x 32 minions in {nsl} launch(es): "
+              f"tiles covered once, all C(n,k) "
               f"candidates, cut error {prof.cut_error_tiles:.3f} tiles, minion imbalance "
               f"{max(b['minion_imbalance'] for b in bal):.4f}",
               tiles_ok and cands_ok and prof.cut_error_tiles <= 1.0 + 1e-9 and

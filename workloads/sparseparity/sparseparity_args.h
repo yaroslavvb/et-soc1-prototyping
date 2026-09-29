@@ -31,6 +31,21 @@
                                 // allows it (each scores j = max(R) and drops its last valid j), so the count is
                                 // unchanged and both checksums must fail (cpu/spref.c's selftest mirrors it)
 #define SPP_PERTURB_SLOT(flags) (((flags) >> 32) & 0x3FFu)
+// M4's changes (tools/cycle_model.py's analysis of the 29 September card runs). Each is a flag, so the M1 kernel
+// (none of them set) stays available for an A/B on the same build; the host sets GEN_INC | EPI_HIDE by default.
+#define SPP_F_GEN_INC 32u      // tensor hart 1 (k >= 2): incremental row generation. Rows are prefix ^ x_r0, with
+                               // the prefix (y ^ x_r1 ^ ..) computed once per run of rows that share it (r0 varies
+                               // fastest in colex order) and x read from the slice-major copy `xt`, so a slice's
+                               // 16 row words are 2-3 lines, not 16 x (k-1) loads through a pointer table
+#define SPP_F_EPI_HIDE 64u     // tensor hart 0: an output tile's epilogue runs in pieces between the next output
+                               // tile's first S-1 ops (they accumulate in TenC; only the last op writes f0..f31);
+                               // a spill of 8 registers (256 B), not 16; rescans of possible bests are deferred to
+                               // the end of the row tile (the same records: the best, its rank and the tie flag)
+#define SPP_F_ABUF3 128u       // tensor hart 0, A streamed: 3 A buffers in the L1 scratchpad (lines 0-47), ops
+                               // issued in pairs with one TensorWait 7 per pair instead of one per op
+#define SPP_F_GEN_NOSTORE 256u // timing probe only (with SPP_F_GEN_INC and SPP_F_NOEPI): hart 1 generates and
+                               // expands every row but writes it to a 256 B buffer in its own L1 instead of the
+                               // staging buffer, so hart 0 multiplies stale rows; tells the staged stores' cost apart
 
 #define SPP_KMAX 6u     // k <= 6: a row subset has at most 5 elements
 #define SPP_NMAX 2048u  // n <= 2048 (subset elements are uint16)
@@ -85,6 +100,7 @@ struct SppArgs {
   uint64_t nbuf;        // staging buffers per minion: 1 or 2
   uint64_t poll_limit;  // polls of the other hart's line (and barrier polls) before a hart gives up; the host sizes
                         // it so that a hart gives up well inside the launch's timeout
+  uint64_t xt;          // packed X slice-major (SPP_F_GEN_INC): word s of feature f at xt[s * n + f]
 };
 
 // The work list. A minion processes its blocks in order; a block is a run of consecutive row tiles.
@@ -116,7 +132,7 @@ struct SppRecord {
 };
 
 #ifdef __cplusplus
-static_assert(sizeof(SppArgs) == 26 * 8, "SppArgs layout must match on host and device");
+static_assert(sizeof(SppArgs) == 27 * 8, "SppArgs layout must match on host and device");
 static_assert(sizeof(SppMinion) == 16, "SppMinion is 16 bytes");
 static_assert(sizeof(SppBlock) == 32, "SppBlock is 32 bytes");
 static_assert(sizeof(SppRecord) == 64, "SppRecord must be one cache line");

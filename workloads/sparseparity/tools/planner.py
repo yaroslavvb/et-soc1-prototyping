@@ -12,7 +12,12 @@
                bytes  = B loads (1 KB per op; 1 KB/32 with cooperative loads) + A reads + generated rows (16*mp)
            with cyc_op = 270 (A resident, S <= 3) or 280.35 and BW = 4 B per minion-cycle (measured, from
            docs/research/sparse-parity/design_model.py), CYC_EPI = 450 per output tile and CYC_GEN_SLICE = 800 per
-           slice of a row tile (assumed). M2 calibrates them: --model FILE.json.
+           slice of a row tile (assumed). That is M1's cost (--cost m1). M3 showed it 1.3-6.7x low (one-column row
+           tiles the most), so by default (--cost fit) a row tile costs the period of tools/cycle_model.py's two-hart
+           pipeline, fitted to the 29 September card records, for the kernel the plan is for (--kernel m4, with the
+           M4 changes as the model predicts them, or m1; --abuf 3), at the host's staging (--nbuf/--stage auto: the
+           scratchpad with 2 buffers, else 1, else DRAM) and at the shire's L2 demand M3 measured (0.58 at 32
+           minions per shire, in proportion below); host/spp_common.h pipeTileCost is the same function.
            --slices N cuts every minion's work into N launches of equal modelled cost (host-side slicing: no
            early exit inside the kernel in M1-M3); --slice i writes launch i (default: all, as FILE.i.bin).
   show     print a work list's header, per-minion and per-shire modelled cycles, and its balance
@@ -61,6 +66,17 @@ def model_constants(path: str | None = None) -> dict:
     return P
 
 
+def fitted_table(n: int, k: int, m: int, mps: int, P: dict) -> dict:
+    """--cost fit: {column tiles: the fitted pipeline's cycles per row tile} (cycle_model.pipe_table, keyed by nJ)."""
+    import cycle_model as cm
+    G = cm.Geom(n, k, m)
+    scp, nb = cm.host_stage(G, mps, P.get("STAGE", "auto"), int(P.get("NBUF", 0)))
+    Q = cm.variant_constants(P.get("KERNEL", "m4") == "m4", P.get("KERNEL", "m4") == "m4",
+                             int(P.get("ABUF", 2)) == 3 and G.S > 3)
+    tab = cm.pipe_table(G, Q, nb, not scp, 0.58 * mps / 32.0)
+    return {G.nJ - J: c for J, c in tab.items() if J < G.nJ}
+
+
 def tile_cycles(nJ: int, S: int, P: dict, coop: bool) -> float:
     """Modelled cycles of one row tile that visits nJ column tiles with S sample slices (critique, finding 3; the
     epilogue and hart 1's generation from reviews R1-6 and R2-6). The M1 kernel loads a resident A synchronously
@@ -81,12 +97,13 @@ def tile_cycles(nJ: int, S: int, P: dict, coop: bool) -> float:
 class CostProfile:
     """Prefix sums of the modelled cost over the row tiles, in closed form per run of equal nJ."""
 
-    def __init__(self, G: sc.Geom, P: dict, coop: bool):
+    def __init__(self, G: sc.Geom, P: dict, coop: bool, mps: int = 32):
         self.G = G
         self.runs = []                               # (t0, t1, nJ, cost per tile, cumulative cost at t0)
         acc = 0.0
+        fit = fitted_table(G.n, G.k, G.m, mps, P) if P.get("COST") == "fit" else None
         for t0, t1, nJ in G.runs():
-            c = tile_cycles(nJ, G.S, P, coop)
+            c = fit[nJ] if fit else tile_cycles(nJ, G.S, P, coop)
             self.runs.append((t0, t1, nJ, c, acc))
             acc += (t1 - t0) * c
         self.total = acc
@@ -116,7 +133,7 @@ def make_plan(n, k, m, nshires, mps, bpm, nslices, P, coop=False, topm=8, tau1=N
     G = sc.Geom(n, k, m)
     if tau1 is not None and (G.NR >= 1 << 40 or m > 4095):
         raise ValueError(f"two-stage: {G.NR} rows and m1 = {m} do not fit a survivor entry (rows < 2^40, m1 <= 4095)")
-    prof = CostProfile(G, P, coop)
+    prof = CostProfile(G, P, coop, mps)
     nmin = nshires * mps
     NB = nmin * bpm * nslices
     if contiguous:                                   # equal ops, not equal cycles
@@ -190,8 +207,18 @@ def balance(W: sc.WorkList, P: dict) -> dict:
                 ranges=len(W.ranges), empty_minions=sum(1 for c in per_min if c == 0))
 
 
-def cmd_plan(a):
+def plan_constants(a) -> dict:
     P = model_constants(a.model)
+    P.update(COST=a.cost, KERNEL=a.kernel, ABUF=a.abuf, NBUF=a.nbuf, STAGE=a.stage)
+    if a.cost == "fit":
+        if a.coop:
+            sys.exit("--coop models M4's cooperative loads under M1's cost: pass --cost m1")
+        P["source"] = f"fitted pipeline (tools/cycle_model.py), kernel {a.kernel}, abuf {a.abuf}"
+    return P
+
+
+def cmd_plan(a):
+    P = plan_constants(a)
     nshires = a.shires if a.shire_mask is None else bin(int(a.shire_mask, 0)).count("1")
     mask = None if a.shire_mask is None else int(a.shire_mask, 0)
     plans, G, prof = make_plan(a.n, a.k, a.m, nshires, a.mps, a.blocks_per_minion, a.slices, P, coop=a.coop,
@@ -381,6 +408,12 @@ def main():
     p.add_argument("--topm", type=int, default=8)
     p.add_argument("--tau1", type=int, default=None, help="two-stage: log survivors with c1 >= tau1")
     p.add_argument("--model", default=None, help="JSON overrides of the cost constants (M2's calibration)")
+    p.add_argument("--cost", default="fit", choices=["fit", "m1"],
+                   help="fit (default): the fitted pipeline's cost; m1: M1's model (the plans M1-M3 ran)")
+    p.add_argument("--kernel", default="m4", choices=["m4", "m1"], help="--cost fit: the kernel the plan is for")
+    p.add_argument("--abuf", type=int, default=2, choices=[2, 3], help="--cost fit: 3 A buffers (streamed A)")
+    p.add_argument("--nbuf", type=int, default=0, choices=[0, 1, 2], help="--cost fit: staging buffers (0: auto)")
+    p.add_argument("--stage", default="auto", choices=["auto", "scp", "dram"], help="--cost fit: staging")
     p.add_argument("--out", required=True)
     p.add_argument("--compact", action="store_true")
     p.set_defaults(fn=cmd_plan)

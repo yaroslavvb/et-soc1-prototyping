@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+# Test double of sparseparity_host for card_run.sh (run.sh): no device, a canned JSON line per step. FAKE_SLOW=a,b makes
+# those steps launch at x1.5 of their model (else x1.1); FAKE_VERIFY_BAD=name makes its --verify-records disagree.
+import sys, json, os
+a = sys.argv[1:]
+if "--no-such-option" in a:
+    sys.stderr.write("usage: x [--variant m4|m1] [--trust-model]\n"); sys.exit(2)
+def val(k):
+    return a[a.index(k) + 1] if k in a else None
+if "--verify-records" in a:
+    name = os.path.basename(val("--verify-records"))[:-4]
+    bad = os.environ.get("FAKE_VERIFY_BAD", "") == name
+    print(json.dumps({"status": "FAIL" if bad else "PASS", "checks": {"oracle": ("MISMATCH 1 of all 1024 minions" if bad else "exact, all 1024 minions")}})); sys.exit(0)
+name = os.path.basename(val("--records-out"))[:-4]
+open(val("--records-out"), "wb").write(b"x")
+slow = os.environ.get("FAKE_SLOW", "").split(",")
+model = 1.0
+ratio = 1.5 if name in slow else 1.1
+full = "--slice" not in a
+kern = "m1" if ("--variant" in a and val("--variant") == "m1" and "--gen" not in a and "--epi" not in a) else "m4"
+j = {"status": "PASS", "launch_s": [model * ratio], "open_s": 0.18, "plan": {"model_s": model, "coverage": "full" if full else "partial"},
+     "m4": {"kernel": kern, "trust_model": "--trust-model" in a}, "checks": {"oracle": "exact, all 1024 minions" if "--probe" in a else "exact, 17 sampled minions"},
+     "coverage": "full" if full else "partial", "kernel": {}, "result": {}}
+print(json.dumps(j, separators=(",", ":")))

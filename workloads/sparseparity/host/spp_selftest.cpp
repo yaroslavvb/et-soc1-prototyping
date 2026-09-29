@@ -1,16 +1,22 @@
 // CPU-only checks of the host's model of the scan (no device, no runtime library):
 //   spp_selftest                          all checks below; exit 0 when all pass
 //   spp_selftest --hash N K ETA M SEED    print the instance hash (compare with `spbits gen`)
-//   spp_selftest --plan N K ETA M SEED SHIRE_MASK PER_SHIRE [SLICE_I SLICE_N]   the built-in plan's model
-//   spp_selftest --tie-instance FILE      write the tie instance (C0's shape, two candidates at c = m) as SPI1
+//   spp_selftest --plan N K ETA M SEED SHIRE_MASK PER_SHIRE [SLICE_I SLICE_N]   M1's built-in plan and M1's model
+//                                         (sparseparity_host --dry prints M4's plan and the fitted model's time)
+//   spp_selftest --tie-instance FILE [M]  write the tie instance (C0's shape, two candidates at c = m) as SPI1; M
+//                                         samples (default 128; 256 or more streams A)
 //   spp_selftest --bench-oracle N K ETA M TILES   the CPU oracle's speed (words popcounted per second)
+//   spp_selftest --pipe-table N K M NBUF GEN_INC EPI_HIDE ABUF3 [U]   the fitted pipeline's cycles per row tile by
+//                                         column tiles (tools/cycle_model.py table prints the same numbers)
 // 1. colex rank/unrank round trips; the closed-form J0 runs against a row-by-row walk; sp.h's row count;
 // 2. both closed-form checksums against brute force over all C(n,k) subsets;
 // 3. plans (several shire masks, minions and rounds): every row tile in exactly one block, candidates counted in
 //    closed form equal C(n,k), and the plan-order oracle's sum, sum of squares, count, argmax and tie flag equal
 //    brute force;
 // 4. the argmax tie rule (smallest colex rank, and the tie flag, within one Acc and across merged ones) and the
-//    secret found at a noise level the model says is easy.
+//    secret found at a noise level the model says is easy;
+// 5. M4: plans cut by the fitted pipeline's costs cover every tile once with the same oracle; the C++ pipeline
+//    model equals tools/cycle_model.py's (its table at L1, L2 and C1, M1's kernel and M4's) to 0.1%.
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -80,13 +86,15 @@ static void checkInstance(int n, int k, double eta, int m, uint64_t seed) {
         m);
   CHECK(s2 == B.sq, "sum c^2: closed form %s, brute %s (n=%d k=%d m=%d)", i128(__int128(s2)).c_str(),
         i128(__int128(B.sq)).c_str(), n, k, m);
-  // 3. plans
+  // 3. plans (M1's cost, and the fitted pipeline's for M4's kernel)
   const uint64_t masks[] = {0x1, 0x3, 0x80000001ull, 0xF0F0};
   const int pers[] = {1, 3, 32};
+  const TileCost fit = pipeTileCost(G, pipeVariant(true, true, false), 2, false, 0.58);
+  for (int cf = 0; cf < 2; ++cf)
   for (uint64_t mask : masks)
     for (int per : pers)
       for (int rounds : {1, 4}) {
-        const Plan P = makePlan(G, mask, per, rounds, 0, G.workTiles);
+        const Plan P = makePlan(G, mask, per, rounds, 0, G.workTiles, cf ? fit : TileCost{});
         std::vector<int> seen(G.ntiles, 0);
         Acc A;
         uint64_t cand = 0;
@@ -123,6 +131,28 @@ static void checkInstance(int n, int k, double eta, int m, uint64_t seed) {
               "merged per-minion oracle != brute force (mask=%llx per=%d rounds=%d)", (unsigned long long)mask, per,
               rounds);
       }
+  // 3b. host-side slices (sliceRange) are positional: slice i is equal-cost block i of N, the slices tile
+  // [0, workTiles) in order, and an empty block (one row tile costing more than a slice's share) stays in its place
+  // (review of M4, finding 7). N up to 4x the row tiles forces empty blocks.
+  for (int cf = 0; cf < 2; ++cf)
+    for (uint64_t N : {uint64_t(2), uint64_t(3), uint64_t(7), G.workTiles, 4 * G.workTiles + 1}) {
+      const std::vector<Block> cut = cutBlocks(G, N, 0, G.workTiles, cf ? fit : TileCost{});
+      CHECK(cut.size() == N, "cutBlocks: %zu blocks for N = %llu", cut.size(), (unsigned long long)N);
+      uint64_t next = 0, empty = 0;
+      for (uint64_t i = 0; i < N; ++i) {
+        uint64_t a = 0, b = 0;
+        sliceRange(G, int(i), int(N), a, b, cf ? fit : TileCost{});
+        CHECK(a == next && b >= a && a == cut[i].tile0 && b == cut[i].tile0 + cut[i].ntiles,
+              "slice %llu/%llu = [%llu, %llu), expected from %llu", (unsigned long long)i, (unsigned long long)N,
+              (unsigned long long)a, (unsigned long long)b, (unsigned long long)next);
+        empty += b == a;
+        next = b;
+      }
+      CHECK(next == G.workTiles, "slices of N = %llu end at %llu of %llu", (unsigned long long)N,
+            (unsigned long long)next, (unsigned long long)G.workTiles);
+      if (N > G.workTiles) CHECK(empty >= N - G.workTiles, "N = %llu: %llu empty slices", (unsigned long long)N,
+                                 (unsigned long long)empty);
+    }
   // 4. the answer
   if (eta <= 0.1 && m >= 96) {
     const std::vector<int> T = unrank(B.bestRank, k);
@@ -138,8 +168,8 @@ static void checkInstance(int n, int k, double eta, int m, uint64_t seed) {
 
 // The tie instance: C0's shape with no noise and one feature duplicated from a secret feature, so two candidates
 // score c = m (the secret and its twin); the answer is the one of smaller colex rank and it is not unique.
-static Instance tieInstance() {
-  Instance I = generate(32, 3, 0.0, 128, 1);
+static Instance tieInstance(int m = 128) {
+  Instance I = generate(32, 3, 0.0, m, 1);
   const int b = I.secret[2];
   int dup = -1;
   for (int f = 0; f < I.n && dup < 0; ++f)
@@ -149,8 +179,8 @@ static Instance tieInstance() {
 }
 
 int main(int argc, char** argv) {
-  if (argc == 3 && std::string(argv[1]) == "--tie-instance") {
-    const Instance I = tieInstance();
+  if ((argc == 3 || argc == 4) && std::string(argv[1]) == "--tie-instance") {
+    const Instance I = tieInstance(argc == 4 ? std::atoi(argv[3]) : 128);
     saveInstance(argv[2], I);
     const Acc B = brute(I);
     std::printf("tie instance %s: best c %d at rank %llu, tie %d\n", argv[2], B.best, (unsigned long long)B.bestRank,
@@ -171,6 +201,20 @@ int main(int argc, char** argv) {
                 I.k, I.m, G.S, (unsigned long long)nt, words, s, words / s, (unsigned long long)a.count);
     return 0;
   }
+  if ((argc == 9 || argc == 10) && std::string(argv[1]) == "--pipe-table") {
+    const Instance I = generate(std::atoi(argv[2]), std::atoi(argv[3]), 0.1, std::atoi(argv[4]), 1);
+    const Geometry G(I);
+    const int nbuf = std::atoi(argv[5]);
+    const PipeConst P = pipeVariant(std::atoi(argv[6]) != 0, std::atoi(argv[7]) != 0, std::atoi(argv[8]) != 0 && G.S > 3);
+    const double U = argc == 10 ? std::atof(argv[9]) : 0.58;
+    std::printf("{\"n\": %d, \"k\": %d, \"m\": %d, \"S\": %d, \"nbuf\": %d, \"U\": %g, \"cycles_per_row_tile\": {", I.n,
+                I.k, I.m, G.S, nbuf, U);
+    for (int nout = 1; nout <= G.nJ; ++nout)
+      std::printf("%s\"%d\": %.1f", nout > 1 ? ", " : "", nout,
+                  pipeSteady(nout, G.S, I.k - 1, G.S <= 3, nbuf, 1, false, U, P));
+    std::printf("}}\n");
+    return 0;
+  }
   if (argc == 7 && std::string(argv[1]) == "--hash") {
     const Instance I = generate(std::atoi(argv[2]), std::atoi(argv[3]), std::atof(argv[4]), std::atoi(argv[5]),
                                 std::strtoull(argv[6], nullptr, 0));
@@ -188,12 +232,12 @@ int main(int argc, char** argv) {
     const uint64_t mask = std::strtoull(argv[7], nullptr, 0);
     const int per = std::atoi(argv[8]);
     const int si = argc >= 11 ? std::atoi(argv[9]) : 0, sn = argc >= 11 ? std::atoi(argv[10]) : 1;
-    uint64_t t0 = 0, t1 = G.workTiles;
-    if (sn > 1) {
-      const Plan p = makePlan(G, 0x1, 1, sn, 0, G.workTiles);
-      t0 = p.slots[0][si].tile0;
-      t1 = t0 + p.slots[0][si].ntiles;
+    if (sn < 1 || si < 0 || si >= sn) {
+      std::fprintf(stderr, "--plan: slice I/N with 0 <= I < N\n");
+      return 2;
     }
+    uint64_t t0 = 0, t1 = G.workTiles;
+    sliceRange(G, si, sn, t0, t1);
     const Plan P = makePlan(G, mask, per, 4, t0, t1);
     double mx = 0, sum = 0, est = 0;
     uint64_t ops = 0, cand = 0, opsMax = 0;
@@ -214,6 +258,29 @@ int main(int argc, char** argv) {
                 (unsigned long long)cand, (unsigned long long)ops, (unsigned long long)opsMax, mx / 600e6,
                 est / 600e6, mx / (sum / nact), double(cand) / nact * (24.0 * G.S + 40.0) / 600e6);
     return 0;
+  }
+  // 5. the C++ pipeline model against tools/cycle_model.py table (29 September FITTED; values printed by
+  //    `cycle_model.py table --n N --k K --m M --nbuf B [--variant m4 [--abuf 3]]`, U = 0.58, scratchpad staging)
+  {
+    struct Ref {
+      int n, k, m, nbuf;
+      bool m4, abuf3;
+      int nout;
+      double cyc;
+    };
+    const Ref refs[] = {{512, 4, 448, 2, false, false, 1, 37272.5},    {512, 4, 448, 2, false, false, 8, 53156.2},
+                        {512, 4, 448, 2, false, false, 32, 156611.4},  {512, 4, 448, 2, true, false, 1, 23044.2},
+                        {512, 4, 448, 2, true, false, 32, 97088.2},    {512, 4, 1850, 1, false, false, 1, 147082.9},
+                        {512, 4, 1850, 1, false, false, 32, 543167.1}, {512, 4, 1850, 1, true, false, 8, 170050.4},
+                        {512, 4, 1850, 1, true, true, 32, 364615.8},   {128, 4, 192, 2, true, false, 8, 24398.7}};
+    for (const Ref& r : refs) {
+      const int S = (r.m + 63) / 64;
+      const double c = pipeSteady(r.nout, S, r.k - 1, S <= 3, r.nbuf, 1, false, 0.58,
+                                  pipeVariant(r.m4, r.m4, r.abuf3 && S > 3));
+      CHECK(std::fabs(c / r.cyc - 1) < 1e-3, "pipeline model (%d,%d,%d) nbuf %d %s nout %d: %.1f, cycle_model.py %.1f",
+            r.n, r.k, r.m, r.nbuf, r.m4 ? (r.abuf3 ? "m4 abuf3" : "m4") : "m1", r.nout, c, r.cyc);
+    }
+    std::printf("ok pipeline model = cycle_model.py on %zu table entries\n", sizeof(refs) / sizeof(refs[0]));
   }
   checkInstance(32, 3, 0.1, 128, 1);   // C0
   checkInstance(12, 3, 0.2, 20, 7);
@@ -273,6 +340,37 @@ int main(int argc, char** argv) {
       std::printf("ok L2 (512,4,0.4,1850) plan rounds=%d: %zu minions, max/mean modelled cycles %.4f, "
                   "max %.3g cycles = %.3f s at 600 MHz\n",
                   rounds, act.size(), mx / (sum / double(act.size())), mx, mx / 600e6);
+    }
+  }
+  // M4's planner at L1 on 32 x 32 minions: every minion's row tiles simulated in the fitted pipeline model. M1's
+  // plan (M1's cost) with M1's kernel is M3's run (0.204 s measured, busiest 1.55x the mean); the fitted cost must
+  // balance it (under 1.02) with M1's kernel and with M4's.
+  {
+    const Instance I = generate(512, 4, 0.3, 448, 1);
+    const Geometry G(I);
+    auto simPlan = [&](const Plan& P, const PipeConst& pc, double& imb) {
+      double mx = 0, sum = 0;
+      int nb = 0;
+      for (int g : P.activeSlots()) {
+        const double c = pipeSimMinion(blocksRle(G, P.slots[g]), G.S, 3, false, 2, 1, false, 0.58, 5000, pc).cycles;
+        mx = std::max(mx, c);
+        sum += c;
+        ++nb;
+      }
+      imb = mx / (sum / nb);
+      return mx / 600e6;
+    };
+    for (int v = 0; v < 2; ++v) {
+      const PipeConst pc = pipeVariant(v == 1, v == 1, false);
+      double imbM1 = 0, imbFit = 0;
+      const double tM1 = simPlan(makePlan(G, 0xFFFFFFFFull, 32, 4, 0, G.workTiles), pc, imbM1);
+      const double tFit = simPlan(makePlan(G, 0xFFFFFFFFull, 32, 4, 0, G.workTiles, pipeTileCost(G, pc, 2, false, 0.58)),
+                                  pc, imbFit);
+      CHECK(imbFit < 1.02 && imbM1 > 1.3, "L1 %s kernel: fitted plan max/mean %.3f, M1's plan %.3f", v ? "m4" : "m1",
+            imbFit, imbM1);
+      std::printf("ok L1 (512,4,0.3,448) on 32 x 32, %s kernel (model, U = 0.58): M1's plan %.1f ms (max/mean %.3f), "
+                  "fitted plan %.1f ms (max/mean %.3f)\n",
+                  v ? "M4" : "M1", tM1 * 1e3, imbM1, tFit * 1e3, imbFit);
     }
   }
   std::printf(fails ? "SELFTEST FAIL (%d)\n" : "SELFTEST PASS\n", fails);

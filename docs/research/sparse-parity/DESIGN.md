@@ -41,6 +41,22 @@ implements them, and each finding's status.
   epilogue, the tensor unit idles about 420 cycles per op at S = 3 (R1).
 - [`design_model.py`](design_model.py) now also prints the two-stage screens at two m1 per showcase size, the card
   side of the paired table.
+- **M4, after the first card runs (29 September).** M3 ran L1 and L2 on 1,024 minions in 0.204 s and 0.807 s,
+  2.8x §3's prediction: `workloads/sparseparity/tools/cycle_model.py`, fitted to the card's per-hart records, puts
+  it on hart 1's row generation (4.8x the assumed cost), a planner that undercosts narrow row tiles (the busiest
+  minion 1.55x the mean) and a 1,606-cycle epilogue per output tile with the tensor unit idle. The code now has, as
+  flags beside M1's path: the plan cut by the fitted model's cost (§2.5's balance, measured instead of assumed),
+  incremental row generation from a slice-major copy of X (§2.4), the epilogue in pieces between the next tile's
+  first S-1 ops (R1-7, which this document deferred), and optionally 3 A buffers with one TensorWait 7 per two ops.
+  The model predicts L1 86 ms and L2 403 ms on 1,024 minions; the cooperative B loads that §2.2 counts on for large m
+  are still not written, and the shire's L2 (2 KB per streamed op) bounds private loads at 72 ms / 300 ms. The
+  workload README's "M4" sections hold the details and the card A/B (`card_run.sh m4`).
+- **§4.4's 4 s rule while M4's constants are predictions** (review R3 of M4's code): the host's guard also takes the
+  plan simulated with M1's fitted constants x1.15 (the launch if M4's changes gain nothing), unless the run passes
+  `--trust-model`, which `card_run.sh m4` does only for the whole (256,5) after the same kernel ran its two halves
+  within x1.3 of the model. The A/B also runs the hand-off probe with M4's generation first, M4's kernel on M1's
+  fitted plan (the kernel's gain apart from the plan's balance), and the full oracle offline on its full-coverage
+  M4 steps.
 
 ## The design in one screen
 

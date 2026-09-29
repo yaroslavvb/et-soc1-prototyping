@@ -25,6 +25,25 @@
 //                  and run every check on it, with the full oracle (the offline value check of a large run)
 //       --dry      plan and model only: print the JSON line and exit without opening any device
 //       --timing-only  tensor mode without the epilogue: cycles per op alone (no scores; status TIMING)
+//       M4 (tensor mode; tools/cycle_model.py's analysis of the 29 September card runs):
+//                  --variant m4|m1   m4 (default): the kernel's incremental row generation and its epilogue in pieces
+//                                    (SPP_F_GEN_INC | SPP_F_EPI_HIDE) and the plan balanced by the fitted pipeline
+//                                    model; m1: the M1 kernel and M1's planner, exactly as run on 29 September
+//                  --gen m1|inc  --epi m1|hide  --abuf 2|3  --cost m1|fit  --slice-cost m1|fit
+//                                    one change at a time, over the variant's defaults (--abuf 3: SPP_F_ABUF3, streamed
+//                                    A only; --slice-cost: the cost --slice I/N cuts by, default --cost's; an A/B passes
+//                                    --slice-cost m1 so that every configuration scans the same tiles)
+//                  --pipe-set K=V,..  override the fitted model's constants (a recalibration; spp_common.h PipeConst)
+//                  --gen-probe nostore  (with --timing-only, --gen inc) hart 1 expands every row but stores it in its
+//                                    own L1: the staged stores' share of the generation time
+//       The modelled kernel time (model_s) is the fitted model's prediction for the kernel that runs, whatever the
+//       plan was balanced by; est_s adds a margin (x1.15 for M1's kernel, which the fit reproduces within 8%; x1.3
+//       once an M4 change is on, which only the card can check). The --max-kernel-s guard (guard_s) is the largest
+//       of est_s, M1's own model and, while an M4 change runs on predicted constants (no --pipe-set), the same plan
+//       simulated with M1's fitted constants x1.15 (model_fallback_s: what the launch takes if the M4 changes gain
+//       nothing; review of M4, finding 1).
+//                  --trust-model  guard on est_s alone, not on model_fallback_s: only once a launch of the same
+//                                    kernel has run within x1.3 of its model (card_run.sh m4 gates it so)
 //
 // Value checks. The count, the ops and the rescoring of the best come from every run. The two closed-form checksums
 // apply when the plan covers all C(n,k) candidates. The oracle rescores whole minions on the CPU and compares each
@@ -140,6 +159,11 @@ struct Opts {
   std::string kernel = KERNEL_ELF;
   std::string recordsOut, dumpOut, outPath, verifyRecords;
   bool dry = false, timingOnly = false;
+  // M4
+  std::string variant = "m4", gen, epi, cost, sliceCost, pipeSet, genProbe;
+  int abuf = 0;
+  bool genInc = true, epiHide = true, costFit = true, sliceFit = true;
+  bool trustModel = false;
 };
 
 [[noreturn]] static void usage(const char* argv0, const std::string& why = "") {
@@ -151,7 +175,8 @@ struct Opts {
                " [--perturb drop|dup|mask] [--nbuf auto|1|2] [--stage auto|scp|dram] [--scp-kb KB] [--reps R]"
                " [--budget S] [--max-kernel-s S] [--poll-limit N] [--oracle auto|on|sample|off] [--oracle-work W]"
                " [--kernel ELF] [--records-out FILE] [--dump-out FILE] [--out FILE] [--verify-records FILE] [--dry]"
-               " [--timing-only]\n";
+               " [--timing-only] [--variant m4|m1] [--gen m1|inc] [--epi m1|hide] [--abuf 2|3] [--cost m1|fit]"
+               " [--slice-cost m1|fit] [--pipe-set K=V,..] [--gen-probe nostore] [--trust-model]\n";
   std::exit(2);
 }
 
@@ -209,8 +234,32 @@ static Opts parse(int argc, char** argv) {
     else if (a == "--verify-records") o.verifyRecords = next();
     else if (a == "--dry") o.dry = true;
     else if (a == "--timing-only") o.timingOnly = true;
+    else if (a == "--variant") o.variant = next();
+    else if (a == "--gen") o.gen = next();
+    else if (a == "--epi") o.epi = next();
+    else if (a == "--abuf") o.abuf = std::stoi(next());
+    else if (a == "--cost") o.cost = next();
+    else if (a == "--slice-cost") o.sliceCost = next();
+    else if (a == "--pipe-set") o.pipeSet = next();
+    else if (a == "--gen-probe") o.genProbe = next();
+    else if (a == "--trust-model") o.trustModel = true;
     else usage(argv[0], "unknown option " + a);
   }
+  if (o.variant != "m4" && o.variant != "m1") usage(argv[0], "--variant m4|m1");
+  const bool m4 = o.variant == "m4";
+  if (!o.gen.empty() && o.gen != "m1" && o.gen != "inc") usage(argv[0], "--gen m1|inc");
+  if (!o.epi.empty() && o.epi != "m1" && o.epi != "hide") usage(argv[0], "--epi m1|hide");
+  if (!o.cost.empty() && o.cost != "m1" && o.cost != "fit") usage(argv[0], "--cost m1|fit");
+  if (!o.sliceCost.empty() && o.sliceCost != "m1" && o.sliceCost != "fit") usage(argv[0], "--slice-cost m1|fit");
+  if (o.abuf != 0 && o.abuf != 2 && o.abuf != 3) usage(argv[0], "--abuf 2|3");
+  if (!o.genProbe.empty() && o.genProbe != "nostore") usage(argv[0], "--gen-probe nostore");
+  o.genInc = o.gen.empty() ? m4 : o.gen == "inc";
+  o.epiHide = o.epi.empty() ? m4 : o.epi == "hide";
+  o.costFit = o.cost.empty() ? m4 : o.cost == "fit";
+  o.sliceFit = o.sliceCost.empty() ? o.costFit : o.sliceCost == "fit";
+  if (o.abuf == 0) o.abuf = 2;
+  if (o.abuf == 3 && o.nowaitA) usage(argv[0], "--abuf 3 excludes --nowait-a");
+  if (!o.genProbe.empty() && (!o.timingOnly || !o.genInc)) usage(argv[0], "--gen-probe needs --timing-only and --gen inc");
   if (o.mode != "tensor" && o.mode != "scalar") usage(argv[0], "--mode tensor|scalar");
   if (o.timingOnly && (o.mode != "tensor" || o.dump || !o.perturb.empty())) usage(argv[0], "--timing-only: tensor, no dump, no perturb");
   if (!o.outPath.empty() && o.mode != "tensor") usage(argv[0], "--out needs tensor mode");
@@ -228,22 +277,7 @@ static Opts parse(int argc, char** argv) {
   return o;
 }
 
-// Tiles [t0, t1) of slice i of n: equal modelled cost.
-static void sliceRange(const Geometry& G, int i, int n, uint64_t& t0, uint64_t& t1) {
-  if (n == 1) {
-    t0 = 0;
-    t1 = G.workTiles;
-    return;
-  }
-  const Plan p = makePlan(G, 0x1, 1, n, 0, G.workTiles);  // n contiguous equal-cost blocks, in order
-  const auto& b = p.slots[0];
-  t0 = 0;
-  t1 = 0;
-  if (i < int(b.size())) {
-    t0 = b[i].tile0;
-    t1 = b[i].tile0 + b[i].ntiles;
-  }
-}
+// sliceRange (host-side slices, cut by position) is in spp_common.h.
 
 // The race probe: N consecutive row tiles with one column tile each (the last run, J0 = nJ - 1) per active minion,
 // disjoint across minions; the run before it is used when the last one is too short.
@@ -473,8 +507,9 @@ int main(int argc, char** argv) {
   bool fromM0 = false;
   bool fullCoverage = false;
   std::string planSource = "built-in";
+  const bool filePlan = !o.planPath.empty() || o.probeTiles;
   try {
-    if (!o.planPath.empty() || o.probeTiles) {
+    if (filePlan) {
       if (o.probeTiles) {
         plan = probePlan(G, o.shires, o.perShire, o.probeTiles);
         planSource = "probe narrow:" + std::to_string(o.probeTiles);
@@ -506,101 +541,15 @@ int main(int argc, char** argv) {
           t1 = std::max(t1, b.tile0 + b.ntiles);
         }
       if (t1 == 0) t0 = 0;
-    } else {
-      sliceRange(G, o.sliceI, o.sliceN, t0, t1);
-      plan = makePlan(G, o.shires, o.perShire, o.rounds, t0, t1);
-      fullCoverage = o.sliceN == 1;
     }
   } catch (const std::exception& e) {
     std::cerr << "plan: " << e.what() << "\n";
     return 2;
   }
-  const std::vector<int> slots = plan.activeSlots();
-  int perturbSlot = -1;
-  if (!o.perturb.empty()) {  // negative controls: drop one tile, scan one twice, or shift one staircase mask
-    for (int g : slots)
-      if (!plan.slots[g].empty()) {
-        perturbSlot = g;
-        break;
-      }
-    if (perturbSlot >= 0) {
-      auto& bl = plan.slots[perturbSlot];
-      if (o.perturb == "drop") {
-        if (--bl.front().ntiles == 0) bl.erase(bl.begin());
-      } else if (o.perturb == "dup") {
-        bl.push_back({bl.front().tile0, 1});
-      }
-    }
-  }
-
-  // Device images of the plan.
-  std::vector<SppMinion> minions(SPP_MINION_SLOTS);
-  std::vector<SppBlock> blocks;
-  std::vector<uint64_t> tilesPerSlot(SPP_MINION_SLOTS, 0), rowTilesPerSlot(SPP_MINION_SLOTS, 0);
-  uint64_t dumpTiles = 0, planCand = 0, planOps = 0, maxOps = 0;
-  double maxModel = 0, sumModel = 0, maxEst = 0;
-  int busy = 0;
-  for (int g : slots) {
-    SppMinion& mp = minions[g];
-    mp.first_block = uint32_t(blocks.size());
-    mp.nblocks = uint32_t(plan.slots[g].size());
-    mp.dump_base = dumpTiles;
-    for (const Block& b : plan.slots[g]) {
-      SppBlock sb{};
-      sb.tile0 = uint32_t(b.tile0);
-      sb.ntiles = uint32_t(b.ntiles);
-      const std::vector<int> sub = unrank(16 * b.tile0, I.k - 1);
-      for (int e = 0; e < I.k - 1; ++e) sb.sub[e] = uint16_t(sub[e]);
-      blocks.push_back(sb);
-      rowTilesPerSlot[g] += b.ntiles;
-    }
-    const uint64_t ot = countOutputTiles(G, plan.slots[g]);
-    tilesPerSlot[g] = ot;
-    dumpTiles += ot;
-    planCand += countCandidates(G, plan.slots[g]);
-    const uint64_t ops = ot * uint64_t(G.S);
-    planOps += ops;
-    maxOps = std::max(maxOps, ops);
-    const double mc = modelCycles(G, plan.slots[g]);
-    maxModel = std::max(maxModel, mc);
-    maxEst = std::max(maxEst, estCycles(G, plan.slots[g]));
-    sumModel += mc;
-    busy += plan.slots[g].empty() ? 0 : 1;
-  }
-  if (blocks.empty()) blocks.push_back(SppBlock{});
-  for (int g : slots)
-    if (rowTilesPerSlot[g] >= 0xFFFFFFFFull) {
-      std::cerr << "refused: minion slot " << g << " has " << rowTilesPerSlot[g] << " row tiles (32-bit counts)\n";
-      return 2;
-    }
-  // Modelled kernel time at 600 MHz: the cost model (spp_common.h) per minion. Scalar: about 12 instructions per
-  // 64-sample word per candidate at 0.5 instructions per cycle (one hart; two harts halve it).
-  double modelS = maxModel / 600e6, estS = maxEst / 600e6;
-  if (!tensor) {
-    double mx = 0;
-    for (int g : slots) mx = std::max(mx, double(countCandidates(G, plan.slots[g])) * (24.0 * G.S + 40.0));
-    modelS = estS = mx / 600e6 / (o.twoHart ? 2.0 : 1.0);
-  }
-  const double guardS = std::max(modelS, estS);
-  const bool onCard = !o.sysemu && !o.dry && !verify;
-  if (onCard && guardS > o.maxKernelS) {
-    std::cerr << "refused: the modelled kernel time " << guardS << " s is over --max-kernel-s " << o.maxKernelS
-              << " s (use more shires, or --slice I/N)\n";
-    return 2;
-  }
-  if (o.dump && dumpTiles * SPP_TILE_BYTES > (512ull << 20)) {
-    std::cerr << "refused: the dump would be " << (dumpTiles >> 10) << " MB\n";
-    return 2;
-  }
-  // A value check is required on a card whenever the closed forms cannot catch a wrong value (review R1, finding 1).
-  if (onCard && !o.timingOnly && o.oracle == "off" && (!fullCoverage || o.nowaitA)) {
-    std::cerr << "refused: --oracle off on a card needs a plan that covers every candidate (closed forms) and no "
-                 "--nowait-a; use --oracle auto|sample|on, and --records-out for an offline --verify-records\n";
-    return 2;
-  }
 
   // Scratchpad layout (tensor): X_B at 256 KB, then the staging buffers of minions 0..P-1 (or staging in DRAM).
-  // auto: the scratchpad with 2 buffers, else with 1, else DRAM with 2 (review R1, finding 5).
+  // auto: the scratchpad with 2 buffers, else with 1, else DRAM with 2 (review R1, finding 5). Decided before the
+  // built-in plan, whose fitted costs depend on the buffers.
   const uint64_t scpBytes = o.scpKB * 1024;
   const uint64_t xbBytes = uint64_t(G.nJ) * G.S * SPP_TILE_BYTES;
   const uint64_t stageBytes = 16ull * G.S * 64;
@@ -635,10 +584,191 @@ int main(int argc, char** argv) {
   }
   const uint64_t stride = uint64_t(nbuf) * stageBytes;
 
+  // The fitted pipeline model of the kernel that runs (M4 changes as flags), and the costs the plan is cut by.
+  const bool m1Kernel = !(tensor && (o.genInc || o.epiHide || o.abuf == 3));
+  PipeConst pipe = pipeVariant(tensor && o.genInc, tensor && o.epiHide, tensor && o.abuf == 3 && G.S > 3);
+  {
+    std::string bad;
+    if (!pipeSet(pipe, o.pipeSet, bad)) {
+      std::cerr << "--pipe-set: unknown or malformed '" << bad << "'\n";
+      return 2;
+    }
+  }
+  const int epiOn = o.timingOnly ? 0 : 1;
+  TileCost fitCost;
+  try {
+    if (tensor && (o.costFit || o.sliceFit)) fitCost = pipeTileCost(G, pipe, nbuf, !stageScp, pipePlanU(o.perShire), epiOn);
+  } catch (const std::exception& e) {
+    std::cerr << "model: " << e.what() << "\n";
+    return 2;
+  }
+  const TileCost planCost = tensor && o.costFit ? fitCost : TileCost{};
+  if (!filePlan) {
+    try {
+      sliceRange(G, o.sliceI, o.sliceN, t0, t1, tensor && o.sliceFit ? fitCost : TileCost{});
+      plan = makePlan(G, o.shires, o.perShire, o.rounds, t0, t1, planCost);
+      fullCoverage = o.sliceN == 1;
+    } catch (const std::exception& e) {
+      std::cerr << "plan: " << e.what() << "\n";
+      return 2;
+    }
+  }
+  const std::vector<int> slots = plan.activeSlots();
+  int perturbSlot = -1;
+  if (!o.perturb.empty()) {  // negative controls: drop one tile, scan one twice, or shift one staircase mask
+    for (int g : slots)
+      if (!plan.slots[g].empty()) {
+        perturbSlot = g;
+        break;
+      }
+    if (perturbSlot >= 0) {
+      auto& bl = plan.slots[perturbSlot];
+      if (o.perturb == "drop") {
+        if (--bl.front().ntiles == 0) bl.erase(bl.begin());
+      } else if (o.perturb == "dup") {
+        bl.push_back({bl.front().tile0, 1});
+      }
+    }
+  }
+
+  // Device images of the plan.
+  std::vector<SppMinion> minions(SPP_MINION_SLOTS);
+  std::vector<SppBlock> blocks;
+  std::vector<uint64_t> tilesPerSlot(SPP_MINION_SLOTS, 0), rowTilesPerSlot(SPP_MINION_SLOTS, 0);
+  uint64_t dumpTiles = 0, planCand = 0, planOps = 0, maxOps = 0;
+  double maxModel = 0, sumModel = 0, maxEst = 0, maxM1 = 0;
+  int busy = 0;
+  for (int g : slots) {
+    SppMinion& mp = minions[g];
+    mp.first_block = uint32_t(blocks.size());
+    mp.nblocks = uint32_t(plan.slots[g].size());
+    mp.dump_base = dumpTiles;
+    for (const Block& b : plan.slots[g]) {
+      SppBlock sb{};
+      sb.tile0 = uint32_t(b.tile0);
+      sb.ntiles = uint32_t(b.ntiles);
+      const std::vector<int> sub = unrank(16 * b.tile0, I.k - 1);
+      for (int e = 0; e < I.k - 1; ++e) sb.sub[e] = uint16_t(sub[e]);
+      blocks.push_back(sb);
+      rowTilesPerSlot[g] += b.ntiles;
+    }
+    const uint64_t ot = countOutputTiles(G, plan.slots[g]);
+    tilesPerSlot[g] = ot;
+    dumpTiles += ot;
+    planCand += countCandidates(G, plan.slots[g]);
+    const uint64_t ops = ot * uint64_t(G.S);
+    planOps += ops;
+    maxOps = std::max(maxOps, ops);
+    const double mc = modelCycles(G, plan.slots[g], planCost);
+    maxModel = std::max(maxModel, mc);
+    maxM1 = std::max(maxM1, modelCycles(G, plan.slots[g], TileCost{}));  // M1's model, whatever cut the plan
+    maxEst = std::max(maxEst, estCycles(G, plan.slots[g]));
+    sumModel += mc;
+    busy += plan.slots[g].empty() ? 0 : 1;
+  }
+  if (blocks.empty()) blocks.push_back(SppBlock{});
+  for (int g : slots)
+    if (rowTilesPerSlot[g] >= 0xFFFFFFFFull) {
+      std::cerr << "refused: minion slot " << g << " has " << rowTilesPerSlot[g] << " row tiles (32-bit counts)\n";
+      return 2;
+    }
+  // Modelled kernel time at 600 MHz. Tensor: the fitted pipeline model of the kernel that runs, every minion's row
+  // tiles simulated in order (pipeSimMinion) at the shire's L2 demand U, iterated on the sum of the steady costs.
+  // Kept alongside for the guard: M1's model (modelCycles / estCycles with M1's cost, which M3 showed 2.7x low;
+  // model_m1_s), the plan's own cost summed (model_plan_s: the fitted steady costs under --cost fit) and, while an
+  // M4 change runs on predicted constants, the same plan simulated with M1's fitted constants (model_fallback_s:
+  // the launch if the M4 changes gain nothing; review of M4, finding 1). Scalar: about 12 instructions per
+  // 64-sample word per candidate at 0.5 instructions per cycle (one hart; two harts halve it).
+  const double modelPlanS = maxModel / 600e6, modelM1S = maxM1 / 600e6, estM1S = maxEst / 600e6;
+  double modelS = modelM1S, estS = estM1S, fitImbalance = 0, fitU = 0, fallbackS = 0;
+  if (tensor) {
+    const bool res = G.S <= 3;
+    const int k1 = I.k - 1;
+    const double copy = 5000.0 + 200.0 * double((uint64_t(G.nJ) * G.S + o.perShire - 1) / o.perShire);
+    std::vector<std::vector<std::pair<int, uint64_t>>> rles;
+    for (int g : slots) rles.push_back(blocksRle(G, plan.slots[g]));
+    // The busiest minion's cycles under constants P; U and the max/mean imbalance on the side.
+    auto simulate = [&](const PipeConst& P, double& Uout, double& imb) -> double {
+      double U = pipePlanU(o.perShire);
+      for (int it = 0; it < 3; ++it) {  // U from the steady costs (cheap), then one full simulation
+        const TileCost tc = pipeTileCost(G, P, nbuf, !stageScp, U, epiOn);
+        std::vector<double> est;
+        std::vector<double> sb(32, 0.0);
+        std::vector<int> sn(32, 0);
+        for (size_t i = 0; i < slots.size(); ++i) {
+          if (rles[i].empty()) continue;
+          est.push_back(copy + modelCycles(G, plan.slots[slots[i]], tc));
+          sb[slots[i] / 32] += pipeShireBytes(rles[i], G.S, res);
+          sn[slots[i] / 32] = 1;
+        }
+        if (est.empty()) break;
+        std::sort(est.begin(), est.end());
+        double bsum = 0;
+        int ns = 0;
+        for (int sh = 0; sh < 32; ++sh)
+          if (sn[sh]) bsum += sb[sh], ++ns;
+        U = (bsum / ns) / (est[est.size() / 2] * 128.0);
+      }
+      Uout = U;
+      double mx = 0, sum = 0;
+      int nb = 0;
+      for (size_t i = 0; i < slots.size(); ++i) {
+        if (rles[i].empty()) continue;
+        const double c = pipeSimMinion(rles[i], G.S, k1, res, nbuf, epiOn, !stageScp, U, copy, P).cycles;
+        mx = std::max(mx, c);
+        sum += c;
+        ++nb;
+      }
+      imb = nb ? mx / (sum / nb) : 0;
+      return mx;
+    };
+    try {
+      modelS = simulate(pipe, fitU, fitImbalance) / 600e6;
+      if (!m1Kernel && o.pipeSet.empty()) {
+        double u = 0, imb = 0;
+        fallbackS = simulate(pipeVariant(false, false, false), u, imb) / 600e6;
+      }
+    } catch (const std::exception& e) {
+      std::cerr << "model: " << e.what() << "\n";
+      return 2;
+    }
+    estS = modelS * (m1Kernel ? 1.15 : 1.3);
+  } else {
+    double mx = 0;
+    for (int g : slots) mx = std::max(mx, double(countCandidates(G, plan.slots[g])) * (24.0 * G.S + 40.0));
+    modelS = estS = mx / 600e6 / (o.twoHart ? 2.0 : 1.0);
+  }
+  const double guardS = tensor ? std::max({modelS, estS, modelM1S, estM1S, modelPlanS,
+                                           o.trustModel ? 0.0 : 1.15 * fallbackS})
+                               : std::max(modelS, estS);
+  const bool onCard = !o.sysemu && !o.dry && !verify;
+  if (onCard && guardS > o.maxKernelS) {
+    std::cerr << "refused: the modelled kernel time " << guardS << " s is over --max-kernel-s " << o.maxKernelS
+              << " s (use more shires, or --slice I/N"
+              << (!o.trustModel && 1.15 * fallbackS >= guardS
+                      ? "; the M4 kernel's model x1.3 is " + std::to_string(estS) +
+                            " s, but the plan at M1's fitted speed x1.15 is " + std::to_string(1.15 * fallbackS) +
+                            " s: --trust-model once the same kernel ran within x1.3 of its model"
+                      : std::string())
+              << ")\n";
+    return 2;
+  }
+  if (o.dump && dumpTiles * SPP_TILE_BYTES > (512ull << 20)) {
+    std::cerr << "refused: the dump would be " << (dumpTiles >> 10) << " MB\n";
+    return 2;
+  }
+  // A value check is required on a card whenever the closed forms cannot catch a wrong value (review R1, finding 1).
+  if (onCard && !o.timingOnly && o.oracle == "off" && (!fullCoverage || o.nowaitA)) {
+    std::cerr << "refused: --oracle off on a card needs a plan that covers every candidate (closed forms) and no "
+                 "--nowait-a; use --oracle auto|sample|on, and --records-out for an offline --verify-records\n";
+    return 2;
+  }
+
   // Host images.
   std::vector<uint64_t> binomK(I.n);
   for (int j = 0; j < I.n; ++j) binomK[j] = binom64(j, I.k);
   const std::vector<uint8_t> xb = tensor ? makeXB(I) : std::vector<uint8_t>(SPP_TILE_BYTES, 0);
+  const std::vector<uint64_t> xt = tensor ? makeXT(I) : std::vector<uint64_t>(8, 0);  // slice-major X (GEN_INC)
   std::vector<SppRecord> records(SPP_HARTS), zeroRecords(SPP_HARTS);
   std::memset(zeroRecords.data(), 0, zeroRecords.size() * sizeof(SppRecord));
   std::memset(records.data(), 0, records.size() * sizeof(SppRecord));
@@ -651,7 +781,23 @@ int main(int argc, char** argv) {
 
   const uint64_t flags = (o.dump ? SPP_F_DUMP : 0) | (o.twoHart ? SPP_F_TWOHART : 0) |
                          (o.nowaitA ? SPP_F_NOWAIT_A : 0) | (o.timingOnly ? SPP_F_NOEPI : 0) |
-                         (o.perturb == "mask" && perturbSlot >= 0 ? (SPP_F_PERTURB_MASK | (uint64_t(perturbSlot) << 32)) : 0);
+                         (o.perturb == "mask" && perturbSlot >= 0 ? (SPP_F_PERTURB_MASK | (uint64_t(perturbSlot) << 32)) : 0) |
+                         (tensor && o.genInc ? SPP_F_GEN_INC : 0) | (tensor && o.epiHide ? SPP_F_EPI_HIDE : 0) |
+                         (tensor && o.abuf == 3 ? SPP_F_ABUF3 : 0) | (tensor && !o.genProbe.empty() ? SPP_F_GEN_NOSTORE : 0);
+  // What runs, for the JSON line: the kernel's changes (3 A buffers apply to streamed A only, and bring the
+  // epilogue in pieces with them), the plan's cost, and the fitted model's constants overridden.
+  std::string m4json;
+  {
+    std::ostringstream m;
+    const bool ab3 = tensor && o.abuf == 3 && G.S > 3;
+    m << "{\"variant\":\"" << o.variant << "\",\"kernel\":\"" << (m1Kernel ? "m1" : "m4") << "\",\"gen\":\""
+      << (tensor && o.genInc ? "inc" : "m1") << "\",\"epi\":\"" << (tensor && (o.epiHide || ab3) ? "hide" : "m1")
+      << "\",\"abuf\":" << (ab3 ? 3 : 2) << ",\"cost\":\"" << (tensor && o.costFit ? "fit" : "m1")
+      << "\",\"slice_cost\":\"" << (tensor && o.sliceFit ? "fit" : "m1") << "\",\"pipe_set\":\"" << o.pipeSet
+      << "\",\"gen_probe\":\"" << o.genProbe << "\",\"trust_model\":" << tf(o.trustModel) << ",\"flags\":\""
+      << hex(flags & 0xFFFFFFFFull) << "\"}";
+    m4json = m.str();
+  }
   std::mt19937_64 rng(uint64_t(std::chrono::high_resolution_clock::now().time_since_epoch().count()) ^ 0x5eed);
   const uint32_t epochBase = uint32_t(rng());
 
@@ -680,7 +826,10 @@ int main(int argc, char** argv) {
       << planSource << "\",\"tiles\":[" << t0 << "," << t1 << "],\"coverage\":\"" << (fullCoverage ? "full" : "partial")
       << "\",\"plan_candidates\":" << planCand << ",\"ops\":" << planOps << ",\"ops_max\":" << maxOps
       << ",\"model_s\":" << modelS << ",\"est_s\":" << estS << ",\"model_imbalance\":"
-      << (busy ? maxModel / (sumModel / busy) : 0) << ",\"stage\":\""
+      << (tensor ? fitImbalance : busy ? maxModel / (sumModel / busy) : 0) << ",\"model_m1_s\":" << modelM1S
+      << ",\"est_m1_s\":" << estM1S << ",\"model_plan_s\":" << modelPlanS << ",\"model_fallback_s\":" << fallbackS
+      << ",\"guard_s\":" << guardS << ",\"plan_imbalance\":" << (busy ? maxModel / (sumModel / busy) : 0)
+      << ",\"model_U\":" << fitU << ",\"m4\":" << m4json << ",\"stage\":\""
       << (tensor ? (stageScp ? "scp" : "dram") : "none") << "\",\"nbuf\":" << nbuf << ",\"scp_layout_kb\":"
       << (layoutEnd + 1023) / 1024 << ",\"dump_tiles\":" << dumpTiles << ",\"timeout_s\":" << timeoutPlan
       << ",\"poll_limit\":" << pollLimit << ",\"refused_on_silicon\":" << tf(guardS > o.maxKernelS)
@@ -786,6 +935,7 @@ int main(int argc, char** argv) {
     std::byte* dDump = alloc(dumpBytes);
     std::byte* dSync = alloc(sync.size());
     std::byte* dStage = alloc(stageDramBytes);
+    std::byte* dXT = alloc(xt.size() * 8);
     if (launchOk) {
       put(dX, I.X.data(), I.X.size() * 8);
       put(dY, I.y.data(), I.y.size() * 8);
@@ -795,6 +945,7 @@ int main(int argc, char** argv) {
       put(dBlk, blocks.data(), blocks.size() * sizeof(SppBlock));
       put(dDump, dumpHost.data(), dumpBytes);
       put(dSync, sync.data(), sync.size());
+      put(dXT, xt.data(), xt.size() * 8);
       if (!runtime->waitForStream(stream, wait)) {
         launchErr = "copy-in did not finish";
         launchOk = false;
@@ -828,6 +979,7 @@ int main(int argc, char** argv) {
     args.stage_global = stageScp ? 0 : 1;
     args.nbuf = uint64_t(nbuf);
     args.poll_limit = pollLimit;
+    args.xt = reinterpret_cast<uint64_t>(dXT);
 
     rt::KernelLaunchOptions lo;
     lo.setShireMask(o.shires);
@@ -883,7 +1035,7 @@ int main(int argc, char** argv) {
       runtime->memcpyDeviceToHost(stream, dDump, reinterpret_cast<std::byte*>(dumpHost.data()), dumpBytes);
       if (!runtime->waitForStream(stream, wait)) launchErr += (launchErr.empty() ? "" : "; ") + std::string("dump readback did not finish");
     }
-    for (std::byte* p : {dX, dY, dXB, dBin, dMin, dBlk, dRec, dDump, dSync, dStage}) runtime->freeDevice(device, p);
+    for (std::byte* p : {dX, dY, dXB, dBin, dMin, dBlk, dRec, dDump, dSync, dStage, dXT}) runtime->freeDevice(device, p);
     runtime->unloadCode(load.kernel_);
     runtime->destroyStream(stream);
     heldS = secondsSince(tOpen);
@@ -1085,6 +1237,7 @@ int main(int argc, char** argv) {
   j.ks("mode", o.mode);
   j.raw("flags", std::string("{\"dump\":") + tf(o.dump) + ",\"two_hart\":" + tf(o.twoHart) + ",\"nowait_a\":" +
                      tf(o.nowaitA) + ",\"timing_only\":" + tf(o.timingOnly) + "}");
+  j.raw("m4", m4json);
   {
     std::ostringstream s;
     s << "{\"n\":" << I.n << ",\"k\":" << I.k << ",\"eta\":" << I.eta << ",\"m\":" << I.m << ",\"seed\":" << I.seed
@@ -1105,7 +1258,11 @@ int main(int argc, char** argv) {
       << o.sliceN << "\",\"tiles\":[" << t0 << "," << t1 << "],\"blocks\":" << blocks.size() << ",\"source\":\""
       << planSource << "\",\"coverage\":\"" << (fullCoverage ? "full" : "partial") << "\",\"perturb\":\"" << o.perturb
       << "\",\"candidates\":" << planCand << ",\"ops\":" << planOps << ",\"ops_max\":" << maxOps << ",\"model_s\":"
-      << modelS << ",\"est_s\":" << estS << ",\"model_imbalance\":" << (busy ? maxModel / (sumModel / busy) : 0)
+      << modelS << ",\"est_s\":" << estS << ",\"model_imbalance\":"
+      << (tensor ? fitImbalance : busy ? maxModel / (sumModel / busy) : 0) << ",\"model_m1_s\":" << modelM1S
+      << ",\"est_m1_s\":" << estM1S << ",\"model_plan_s\":" << modelPlanS << ",\"model_fallback_s\":" << fallbackS
+      << ",\"guard_s\":" << guardS << ",\"plan_imbalance\":" << (busy ? maxModel / (sumModel / busy) : 0)
+      << ",\"model_U\":" << fitU
       << ",\"stage\":\"" << (tensor ? (stageScp ? "scp" : "dram") : "none") << "\",\"nbuf\":" << nbuf
       << ",\"scp_layout_kb\":" << (layoutEnd + 1023) / 1024 << ",\"scp_kb_assumed\":" << o.scpKB
       << ",\"scp_kb_device\":" << scpKBDevice << ",\"timeout_s\":" << timeoutPlan << ",\"poll_limit\":" << pollLimit
