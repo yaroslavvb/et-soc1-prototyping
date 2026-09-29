@@ -1,0 +1,63 @@
+nocr: /home/yaroslavvb/nekko/build/claims-v3/aifoundry3/nocr, passes [11]; map equals nocbench's: True
+R31 SC pmc0 over 992 shire pairs: 1554.4 + 36.07 x hops cycles, rms 5.72, r2 0.9930; additive (hub) model rms 62.03
+    fit_sc_pmc0_q10: slope 36.00/hop, const 1545.0, rms 3.60
+    fit_pmc0_minus_pmc3: slope 24.06/hop, const 99.3, rms 6.52
+    fit_pmc3_minus_null: slope 11.98/hop, const 138.7, rms 4.49
+    fit_ms_fw_cells: slope 35.99/hop, const 1594.1, rms 1.03
+R32 read: yx; capacity from falling sets 92.160798
+    colN2   rho 1.008  85.5 GB/s  per pass 1.008
+    colN3   rho 0.771  92.2 GB/s  per pass 0.771
+    colN5   rho 0.542  96.0 GB/s  per pass 0.542
+    colS2   rho 1.009  85.5 GB/s  per pass 1.009
+    colS3   rho 0.771  92.2 GB/s  per pass 0.771
+    colS5   rho 0.548  96.0 GB/s  per pass 0.548
+    neg1    rho 1.000  233.7 GB/s  per pass 1.000
+    neg2    rho 1.000  152.2 GB/s  per pass 1.000
+    posCol  rho 0.788  92.2 GB/s  per pass 0.788
+    posRow  rho 0.788  92.2 GB/s  per pass 0.788
+    rowE2   rho 1.000  84.8 GB/s  per pass 1.000
+    rowE3   rho 1.000  119.6 GB/s  per pass 1.000
+    rowE5   rho 1.000  171.8 GB/s  per pass 1.000
+    rowF2   rho 1.000  84.8 GB/s  per pass 1.000
+    rowF3   rho 1.000  116.9 GB/s  per pass 1.000
+    rowF5   rho 1.000  172.6 GB/s  per pass 1.000
+    rowW2   rho 1.000  84.8 GB/s  per pass 1.000
+    rowW3   rho 1.000  116.8 GB/s  per pass 1.000
+R32 write: xy; capacity from falling sets 92.163216; power {'read_capacity_gbs': 92.160798, 'min_k5_write_demand_gbs': 182.793486, 'need_gbs': 110.59295759999999}
+    colN2   rho 1.000  85.1 GB/s  per pass 1.000
+    colN3   rho 1.000  122.8 GB/s  per pass 1.000
+    colN5   rho 1.000  187.8 GB/s  per pass 1.000
+    colS2   rho 1.000  85.1 GB/s  per pass 1.000
+    colS3   rho 1.000  122.7 GB/s  per pass 1.000
+    colS5   rho 1.000  186.1 GB/s  per pass 1.000
+    neg1    rho 1.000  225.4 GB/s  per pass 1.000
+    neg2    rho 1.000  160.0 GB/s  per pass 1.000
+    posCol  rho 0.764  92.2 GB/s  per pass 0.764
+    posRow  rho 0.764  92.2 GB/s  per pass 0.764
+    rowE2   rho 0.990  84.2 GB/s  per pass 0.990
+    rowE3   rho 0.751  92.2 GB/s  per pass 0.751
+    rowE5   rho 0.525  96.0 GB/s  per pass 0.525
+    rowF2   rho 0.990  84.2 GB/s  per pass 0.990
+    rowF3   rho 0.764  92.2 GB/s  per pass 0.764
+    rowF5   rho 0.522  96.0 GB/s  per pass 0.522
+    rowW2   rho 0.990  84.2 GB/s  per pass 0.990
+    rowW3   rho 0.765  92.2 GB/s  per pass 0.765
+theories:
+  P1 T-DIRECT (an ESR call costs a constant plus a term per mesh hop to the target): refuted
+  P4 T-NULL (the null call costs the same from every shire): survived
+  P2 T-12 (one ESR load + one store: 12 cycles/hop if stores are posted, 24 if acknowledged): not decided (T-DIRECT refuted)
+  P3 ESR-STORES (posted, or acknowledged; the latter not separable from 24-cycle loads): not decided (T-DIRECT refuted)
+  P5 T-FW-MASTER (shire 32 at (0,3), the top grey cell): not decided (T-DIRECT refuted)
+  P6 T-FW-MS (memory shires 0-3 at (1..4,-1), 4-7 at (1..4,6)): not decided (T-DIRECT refuted)
+  P6b memory shire 2 at (3,-1): not decided (T-DIRECT refuted)
+  P7 T-SAME-SLOPE (memory-shire calls cost the same per hop, within 15%): not decided (T-DIRECT refuted)
+  hub-rms (additive caller + target model against the hop law): 62.0 vs 5.7
+  reads (the replies' order): yx
+  writes (the requests' order): xy
+  P8 T-XY (replies go x first, as every route on the chip diagram assumes, L104): refuted
+  P9 T-YX (replies go y first): survived
+  P10 T-WIDE (no link saturates at up to 170 GB/s): refuted
+  P11 T-ADAPT (minimal adaptive or mixed routing): refuted
+  P12 T-SAME-RULE (requests use the replies' order): refuted (opposite order: replies retrace requests)
+  P13 T-REQ (a read's requests load the reversed links, c of a reply each): not decided
+  request-cost: c < 0.54 (the request family's k=5 sets hold)

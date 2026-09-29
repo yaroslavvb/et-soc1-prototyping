@@ -1,0 +1,226 @@
+{
+ "data": "/home/yaroslavvb/nekko/build/claims-v3/aifoundry1-c1/nocr",
+ "passes": [
+  9
+ ],
+ "map_equals_nocbench": true,
+ "notes": [],
+ "r31": {
+  "counts": {
+   "calls": 50,
+   "sc_pmc0_pairs": 6,
+   "sc_pmc3_pairs": 6,
+   "ms_pairs": 4,
+   "master_callers": 1
+  },
+  "nop_median": 10.0,
+  "rv_check": {
+   "null_all_incorrect_counter": true,
+   "reads_never_incorrect_counter": true
+  },
+  "null_sc": {
+   "median": 1313.5,
+   "spread": 7.0,
+   "per_caller": {
+    "0": 1317.0,
+    "31": 1310.0
+   }
+  },
+  "null_ms": {
+   "median": 1340.0,
+   "spread": 0.0
+  },
+  "fit_sc_pmc0": {
+   "const": 1557.5,
+   "slope": 35.25,
+   "rms": 2.8339460121886586,
+   "max_abs_res": 4.0,
+   "r2": 0.9989669151563998,
+   "n": 4
+  },
+  "self_offset_cycles": -8.75,
+  "fit_sc_pmc0_q10": {
+   "const": 1547.0,
+   "slope": 35.9,
+   "rms": 0.7905694150420949,
+   "max_abs_res": 1.0,
+   "r2": 0.9999224150638912,
+   "n": 4
+  },
+  "fit_sc_pmc3": {
+   "const": 1453.25,
+   "slope": 11.75,
+   "rms": 4.419417382415922,
+   "max_abs_res": 6.25,
+   "r2": 0.9778663125276671,
+   "n": 4
+  },
+  "fit_pmc0_minus_pmc3": {
+   "const": 104.25,
+   "slope": 23.5,
+   "rms": 7.25,
+   "max_abs_res": 10.25,
+   "r2": 0.9849998216387829,
+   "n": 4
+  },
+  "fit_pmc3_minus_null": {
+   "const": 139.75,
+   "slope": 11.75,
+   "rms": 3.147419578003543,
+   "max_abs_res": 3.5,
+   "r2": 0.9886499937342237,
+   "n": 4
+  },
+  "additive_rms": 127.72192695461496,
+  "master": {
+   "grey_ranking": [
+    {
+     "cell": [
+      0,
+      3
+     ],
+     "const": 1561.75,
+     "rms": 0.0
+    },
+    {
+     "cell": [
+      5,
+      3
+     ],
+     "const": 1385.5,
+     "rms": 0.0
+    },
+    {
+     "cell": [
+      0,
+      4
+     ],
+     "const": 1526.5,
+     "rms": 0.0
+    },
+    {
+     "cell": [
+      0,
+      5
+     ],
+     "const": 1491.25,
+     "rms": 0.0
+    }
+   ],
+   "best_of_36": [
+    {
+     "cell": [
+      0,
+      0
+     ],
+     "const": 1667.5,
+     "rms": 0.0
+    },
+    {
+     "cell": [
+      1,
+      0
+     ],
+     "const": 1632.25,
+     "rms": 0.0
+    },
+    {
+     "cell": [
+      2,
+      0
+     ],
+     "const": 1597.0,
+     "rms": 0.0
+    },
+    {
+     "cell": [
+      3,
+      0
+     ],
+     "const": 1561.75,
+     "rms": 0.0
+    },
+    {
+     "cell": [
+      4,
+      0
+     ],
+     "const": 1526.5,
+     "rms": 0.0
+    }
+   ],
+   "free_slope_at_best": null,
+   "const_minus_compute_const": 4.25
+  },
+  "ms_common_const": null,
+  "ms": {},
+  "fit_ms_fw_cells": {
+   "const": 1599.5,
+   "slope": 36.0,
+   "rms": 0.0,
+   "max_abs_res": 0.0,
+   "r2": 1.0,
+   "n": 4
+  }
+ },
+ "r32": {
+  "read": {
+   "verdict": "no data",
+   "detail": {},
+   "sets": {
+    "rowE2": {
+     "rho_pooled": 1.0012092203691372,
+     "rho_per_pass": {
+      "9": 1.0012092203691372
+     },
+     "set_gbs": 84.71220000000001
+    }
+   },
+   "solo_gbs": {
+    "10>19": 46.604742,
+    "17>11": 38.005146
+   },
+   "launches_dropped": [],
+   "capacity_gbs_from_dropping_sets": null,
+   "k5_demand_gbs": {
+    "rowE5": null,
+    "rowF5": null,
+    "colS5": null,
+    "colN5": null
+   }
+  },
+  "write": {
+   "verdict": "no data",
+   "detail": {},
+   "sets": {},
+   "solo_gbs": {
+    "10>19": 45.09620400000001
+   },
+   "launches_dropped": [],
+   "capacity_gbs_from_dropping_sets": null,
+   "k5_demand_gbs": {
+    "rowE5": null,
+    "rowF5": null,
+    "colS5": null,
+    "colN5": null
+   }
+  }
+ },
+ "theories": {
+  "P1 T-DIRECT (an ESR call costs a constant plus a term per mesh hop to the target)": "survived",
+  "P4 T-NULL (the null call costs the same from every shire)": "survived",
+  "access-check (pmc 0 - pmc 3 and pmc 3 - null: one load + one store each in the compiled firmware)": "DIFFER: 23.50 and 11.75 cycles/hop (tolerance 2.00)",
+  "P2 T-12 (one ESR load + one store: 12 cycles/hop if stores are posted, 24 if acknowledged)": "not decided (this card's firmware does not make the compiled code's accesses: pmc 0 - pmc 3 23.50/hop, pmc 3 - null 11.75/hop)",
+  "P3 ESR-STORES (posted, or acknowledged; the latter not separable from 24-cycle loads)": "not decided (this card's firmware does not make the compiled code's accesses: pmc 0 - pmc 3 23.50/hop, pmc 3 - null 11.75/hop)",
+  "P5 T-FW-MASTER (shire 32 at (0,3), the top grey cell)": "not decided",
+  "master-placed": "(0, 3) (rms 0.0, next (5, 3) rms 0.0)",
+  "reads (the replies' order)": "no data",
+  "writes (the requests' order)": "no data",
+  "P8 T-XY (replies go x first, as every route on the chip diagram assumes, L104)": "not tested",
+  "P9 T-YX (replies go y first)": "not tested",
+  "P10 T-WIDE (no link saturates at up to 170 GB/s)": "not tested",
+  "P11 T-ADAPT (minimal adaptive or mixed routing)": "not tested",
+  "P12 T-SAME-RULE (requests use the replies' order)": "not decided",
+  "P13 T-REQ (a read's requests load the reversed links, c of a reply each)": "not decided (no reply order identified)"
+ }
+}

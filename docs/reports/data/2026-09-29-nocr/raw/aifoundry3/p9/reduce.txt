@@ -1,0 +1,25 @@
+nocr: /home/yaroslavvb/nekko/build/claims-v3/aifoundry3/nocr, passes [9]; map equals nocbench's: True
+R31 SC pmc0 over 4 shire pairs: 1554.5 + 35.45 x hops cycles, rms 2.53, r2 0.9992; additive (hub) model rms 116.24
+    fit_sc_pmc0_q10: slope 36.10/hop, const 1544.5, rms 0.79
+    fit_pmc0_minus_pmc3: slope 23.75/hop, const 100.8, rms 6.58
+    fit_pmc3_minus_null: slope 11.70/hop, const 140.2, rms 2.80
+    fit_ms_fw_cells: slope 35.94/hop, const 1599.1, rms 0.71
+R32 read: no data; capacity from falling sets None
+    rowE2   rho 1.000  84.8 GB/s  per pass 1.000
+R32 write: no data; capacity from falling sets None
+theories:
+  P1 T-DIRECT (an ESR call costs a constant plus a term per mesh hop to the target): survived
+  P4 T-NULL (the null call costs the same from every shire): survived
+  access-check (pmc 0 - pmc 3 and pmc 3 - null: one load + one store each in the compiled firmware): DIFFER: 23.75 and 11.70 cycles/hop (tolerance 2.00)
+  P2 T-12 (one ESR load + one store: 12 cycles/hop if stores are posted, 24 if acknowledged): not decided (this card's firmware does not make the compiled code's accesses: pmc 0 - pmc 3 23.75/hop, pmc 3 - null 11.70/hop)
+  P3 ESR-STORES (posted, or acknowledged; the latter not separable from 24-cycle loads): not decided (this card's firmware does not make the compiled code's accesses: pmc 0 - pmc 3 23.75/hop, pmc 3 - null 11.70/hop)
+  P5 T-FW-MASTER (shire 32 at (0,3), the top grey cell): not decided
+  master-placed: (0, 5) (rms 0.0, next (0, 4) rms 0.0)
+  reads (the replies' order): no data
+  writes (the requests' order): no data
+  P8 T-XY (replies go x first, as every route on the chip diagram assumes, L104): not tested
+  P9 T-YX (replies go y first): not tested
+  P10 T-WIDE (no link saturates at up to 170 GB/s): not tested
+  P11 T-ADAPT (minimal adaptive or mixed routing): not tested
+  P12 T-SAME-RULE (requests use the replies' order): not decided
+  P13 T-REQ (a read's requests load the reversed links, c of a reply each): not decided (no reply order identified)
