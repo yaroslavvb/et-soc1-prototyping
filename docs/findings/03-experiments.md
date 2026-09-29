@@ -1897,6 +1897,23 @@ DRAM retention hold. Card 1 could not be taken past a 76 °C mean under the froz
 temperature, or what happens above 85 °C on a sensor (the hard stop was 88 °C).
 **Fed:** the page "The effect of overheating" (`docs/reports/2026-09-28-effect-of-overheating.html`; [et-soc1-effect-of-overheating](https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating), public since 28 September), and the hub's §7 and §5 (rungs 45 and 46; rungs 13, 24 and 42 extended).
 
+## E54 — NV: the mesh rail's voltage step (485, 540, 600 mV at a fixed 400 MHz NoC), the owner's NoC validation of Q63's voltage explanation (registered 2026-09-28, 23:20 PDT) — predictions frozen; development on aifoundry3 next, validation on aifoundry2 after DV2
+
+**Asked:** the owner, 28 September evening ("do the other items, like the noc validation"), for the test that the
+heat-per-mm page's §7 proposed (Q63): does the mesh's cost per bit·mm follow its 0.485 V supply?
+**Registered before any card write:** `tools/claims-v3/nv/predictions.json`, SHA-256
+`c0d946c787a02776bff69e2d76406862af6c22793bd02d01caa018521bbb73c3` (`PREDICTIONS.sha256`, commit `4312253`). Theories
+(`tools/claims-v3/nv/DESIGN.md` §3): the data part D of a hop's energy goes as V² (TH-V2, ×1.530 at 600 mV), against V
+(TH-V1) and no dependence (TH-0); the zeros part Z as V² (TH-DI); the idle rail rises with V (TH-LEAK, exponent in
+[1.0, 3.5]). Controls gate the verdicts: C-METER (board against rail idle across the levels) and C-BW (bytes per
+launch within ±0.5% of the 485 mV value).
+**Safety:** only 485, 540 and 600 mV are ever written (`DM_CMD_SET_MODULE_VOLTAGE`, NOC); a restore guardian returns
+the rail to 485 mV and verifies it on every exit path; BL2 below 0.19.0 is refused, since 0.18.0 writes each set to
+flash (aifoundry1's card 1); a failed regulator write on these builds retries for ever and would let the service
+processor's 10 s watchdog reset the card (source-read, `DESIGN.md` §7).
+**Probe (read-only, 22:54 PDT, aifoundry3):** firmware 1.3.1, BL2 0.20.0; NOC set-point 485 mV, 484 on the die, 400 MHz;
+the voltage table's NoC boot entry 485 mV at 400 MHz (525 at 500); die 54 °C.
+
 ## A note on E10, re-analysed for Q20
 
 The governor transitions in [16-dvfs-and-leakage.md](16-dvfs-and-leakage.md) are **not** a new experiment.
