@@ -7,7 +7,7 @@ data_dir (default docs/reports/data/2026-09-27-session-timeline) holds the seven
 $TIMELINE_DIR, where the extraction scripts of this folder wrote them (then sanitize_extracts.py removes from them
 what the page withholds; README.md gives the whole pipeline):
 
-  human.json          extract_main.py      the owner's inputs (123 at the 28 Sep 21:15 snapshot, 5 of them from a page's
+  human.json          extract_main.py      the owner's inputs (123 at the 29 Sep 02:14 snapshot, 5 of them from a page's
                                            Talk tab): time, category, a hand-written summary of at most 12 words (never
                                            the text), estimated reading + typing time; engagement sessions
   main_agent.json     extract_main.py      the main agent's busy intervals, tokens per message, compactions, limits,
@@ -287,14 +287,16 @@ FAMS = [  # family groups, in time order; members are cards.json families; 'dev'
      ['Heat placement: development and validation (27-28 Sep)']),
     ('dv2', 'DV2: the governor and heat, development on aifoundry2 (28 Sep)', ['DV2: the governor and heat, development (28 Sep)']),
     ('oh', 'The effect of overheating, E53, on aifoundry3 and aifoundry1 card 1 (28 Sep)', ['The effect of overheating, E53 (28 Sep)']),
-    ('dv2v', 'DV2: the validation on aifoundry2 under the frozen plan (28 Sep)', ['DV2: the governor and heat, validation (28 Sep)']),
+    ('dv2v', 'DV2: the validation on aifoundry2 under the frozen plan (28–29 Sep)', ['DV2: the governor and heat, validation (28-29 Sep)']),
+    ('mp', 'The major pass: E55–E58, development on aifoundry1 card 1, validation on aifoundry3 (28–29 Sep)',
+     ['The major pass: E55-E58 (28-29 Sep)']),
     ('smoke', 'Claims check v3: smoke tests', ['Claims check v3: smoke tests (25-26 Sep)']),
     ('dev', 'Development and debug runs, from the transcripts (no data file)', []),
 ]
 FAM_SHORT = {'early': '19–22 Sep experiments', 'energy': 'Energy manual (23 Sep)', 'heat': 'Heat per mm (24 Sep)',
              'pre': 'v3, before the fixes', 'campaign': 'v3 campaign after the fixes', 'gs': 'E48 gathers and scatters',
              'pcie': 'E50 host link', 'hp': 'heat placement', 'dv2': 'E51 DV2 development', 'oh': 'E53 overheating',
-             'dv2v': 'E51 DV2 validation',
+             'dv2v': 'E51 DV2 validation', 'mp': 'E55–E58, the major pass',
              'smoke': 'v3 smoke tests', 'dev': 'development runs (transcripts)'}
 DEV = [k for k, _, _ in FAMS].index('dev')
 fam_of = {m: i for i, (_, _, ms) in enumerate(FAMS) for m in ms}
@@ -653,8 +655,8 @@ n_q63 = sum(1 for r in agents if q63 <= r['s'] <= q63 + 900 and AK[r['kind']] in
 cyan_req = msg_of(r'^Heat per mm: a light cyan background')[0][0]
 cyan_dep = deploys_of('et-soc1-heat-per-mm', cyan_req)[0]
 tl_notes = [msg_of(r'^Timeline: lead with what each message asked')[0][0], msg_of(r'^Timeline highlights should link')[0][0]]
-tl_dep = deploys_of('et-soc1-session-timeline', ref_t)
 major_t = msg_of(r'^Asks for a major pass')[0][0]
+tl_dep = [x for x in deploys_of('et-soc1-session-timeline', ref_t) if x < major_t]   # the refresh and the owner's two notes
 parity = msg_of(r'^Next: prototype a sparse-parity solver')
 dv2v = [r for r in civ if FAMK[r[3]] == 'dv2v']
 dv2v_read = [r for r in dv2v if r[2] - r[1] < 30]   # the plan's read-only temperature readings (about 1 s each)
@@ -667,6 +669,23 @@ lab_labels = [LAB_WHAT[x] for x in _lab_rows if x in LAB_WHAT]            # the 
 lab_next = (', then designs the NoC-voltage experiment and its runner' if any(re.match(r'NV design', x) for x in _lab_rows)
             else ', then goes on' if len(lab_labels) < len(_lab_rows) else '')
 snap_all = out['meta']['snapshot_end']
+# 28-29 September: the major pass
+tl_wf = next(w for w in WF if w['name'] == 'session-timeline-into-repo')
+tl_repo_t = commit_t('The session timeline in the repository')
+tl_repo_dep = deploys_of('et-soc1-session-timeline', major_t)
+dv2v_nat = sorted([r for r in dv2v if r[2] - r[1] >= 30], key=lambda r: r[1])   # the replication sessions (17-38 min)
+nv_t = commit_t('NV (the owner')
+# a call's end: when its readings were in (the probe 22:53:45-22:54:02, the PCIe runner 23:55:35-23:56:09)
+nv_probe = min(rel(c[1]) for c in CC['calls'] if c[2] == 'aifoundry3' and c[3] == 'dev_mngt_service' and rel(c[0]) >= major_t)
+mp = [r for r in civ if FAMK[r[3]] == 'mp']
+mp_dev = [r for r in mp if CARD_IDS[r[0]] == 'aifoundry1-c1']
+mp_val = [r for r in mp if CARD_IDS[r[0]] == 'aifoundry3']
+mp_built = commit_t("The major pass's lab experiments")
+n_mp_build = n_wf_agents(['lab-experiments-build'])
+pcie_fix_run = min(rel(c[1]) for c in CC['calls'] if c[3] == 'run_pcie.sh' and rel(c[0]) >= major_t)
+sp_req = parity[0][0] if parity else None
+sp_res = next((w for w in WF if w['name'] == 'sparse-parity-research'), None)
+sp_build = next((w for w in WF if w['name'] == 'sparse-parity-build'), None)
 HL = [
     dict(t=out['meta']['session_start'], a=out['meta']['session_start'], b=T(19, '10:30'), track='human', title='The session starts',
          caption='Remote control on, the repository cloned, spacesheep set up; at 09:26 the first research request: '
@@ -844,21 +863,61 @@ HL = [
                  f'{n_q63} agents and forks read the figure’s papers, talks and interviews and the NoC energies measured '
                  f'on other chips; the answer is committed at {clock(q63_t)[-5:]} and live at {clock(q63_dep)[-5:]}. At '
                  f'{clock(cyan_req)[-5:]} the owner asks for a light cyan background: live at {clock(cyan_dep)[-5:]}.'),
-    dict(t=major_t, a=major_t - 900, b=snap_all + 300, track='human', title='A major pass, and this timeline in the repository',
+    dict(t=major_t, a=major_t - 900, b=tl_repo_dep[0] + 900, track='human', title='A major pass, and this timeline in the repository',
          caption=f'At {clock(major_t)[-5:]} the owner asks for a major pass now that the lab works again: every '
                  'remaining lab fix and check, the NoC validation, the to-do list, and this timeline committed to the '
-                 'repository. By the snapshot'
-                 + (f', the DV2 validation on aifoundry2 has begun under its frozen plan ({len(dv2v_read)} read-only '
-                    f'temperature readings from {clock(min(r[1] for r in dv2v))[-5:]}'
-                    + (f', and {len(dv2v) - len(dv2v_read)} heating blocks)' if len(dv2v) > len(dv2v_read) else
-                       '; no heating block had started, the card being above the plan’s start temperature)')
-                    if dv2v else '')
-                 + f', a workflow of {lab_wf["agents"]} agents studies ' + ', '.join(lab_labels[:-1])
-                 + f' and {lab_labels[-1]}{lab_next}, and another moves this page and its tools into the repository. '
-                 + (f'At {clock(parity[0][0])[-5:]} the owner queues the next task: a sparse-parity solver, prototyped at '
-                    'toy sizes first and then scaled to the whole chip. ' if parity else '')
-                 + f'The data ends at the snapshot, {clock(snap_all)[-5:]} on {DAYS[day_of(snap_all)]} Sep.'),
+                 'repository. At 20:51 four of the lab report’s host fixes go in on aifoundry1, owner-approved (among them '
+                 'a headless default and unused desktop services turned off); the rest, on all three machines, wait for '
+                 'the owner, since the session’s permission check refused them. '
+                 f'A workflow of {lab_wf["agents"]} agents studies ' + ', '.join(lab_labels[:-1])
+                 + f' and {lab_labels[-1]}{lab_next}; another of {tl_wf["agents"]} moves this page and its tools into the '
+                 f'repository, with a privacy scan of its data (commit {clock(tl_repo_t)[-5:]}, live at '
+                 f'{clock(tl_repo_dep[0])[-5:]}).'),
+    dict(t=dv2v_nat[0][1], a=min(r[1] for r in dv2v) - 600, b=snap_all, track='cards', title='DV2 validation: three sessions',
+         caption=f'The DV2 validation on aifoundry2 has run under its frozen plan since {clock(min(r[1] for r in dv2v))[-5:]} '
+                 f'on 28 Sep: a read-only temperature reading every 3 minutes ({len(dv2v_read)} by the snapshot; the idle '
+                 'card read 73–75 °C at night), and a heating session only when the card is cool enough. '
+                 f'{len(dv2v_nat)} replication sessions ran, '
+                 + ', '.join(f'{clock(r[1])[-5:]}–{clock(r[2])[-5:]}' for r in dv2v_nat[:-1])
+                 + f' and {clock(dv2v_nat[-1][1])[-5:]}–{clock(dv2v_nat[-1][2])[-5:]}, each starting at 59–60 °C, with '
+                 '1, 2 and 4 complete test blocks (the queue log); the Master Minion, which hung on the development '
+                 'night, kept taking work. The readings go on until about 16:45 on 29 Sep; the reduction comes after.'),
+    dict(t=nv_t, a=nv_probe - 600, b=nv_t + 900, track='artifacts', title='NV: the NoC validation, frozen and waiting',
+         caption=f'The NoC validation the owner asked for (E54): does the mesh’s energy per bit·mm follow its 0.485 V '
+                 'supply, as heat per mm’s answer to Q63 assumed? A read-only probe of aifoundry3 at '
+                 f'{clock(nv_probe)[-5:]} finds the NoC rail at 485 mV and 400 MHz; at {clock(nv_t)[-5:]} the '
+                 'predictions are frozen and the experiment registered, before any card write. The first voltage '
+                 'write, 540 then 600 mV and back, did not start: the session’s permission check refused a command that '
+                 'changes a shared card’s state, so it waits for the owner. The validation is planned on aifoundry2 '
+                 'after DV2.'),
+    dict(t=min(r[1] for r in mp), a=mp_built - 600, b=max(r[2] for r in mp) + 900, track='cards',
+         title='Four experiments, developed and validated',
+         caption=f'{n_mp_build} agents build and pre-register four experiments on the hub’s open questions (commit '
+                 f'{clock(mp_built)[-5:]}). Each is developed on aifoundry1 card 1 '
+                 f'({clock(min(r[1] for r in mp_dev))[-5:]}–{clock(max(r[2] for r in mp_dev))[-5:]}), frozen, then '
+                 f'validated on aifoundry3 ({clock(min(r[1] for r in mp_val))[-5:]}–{clock(max(r[2] for r in mp_val))[-5:]}), '
+                 f'{card_h_between(0, 0, FAMK.index("mp")):.1f} card-hours in all. E55: two host-to-card copies in flight '
+                 'in one stream move 0.49 of what one moves at 64 MB, while one in each of two streams loses nothing, '
+                 'and a host write lands in the L3. E56: read replies go y first and write requests x first on both cards, where the chip '
+                 'diagram assumed x first for every route; a link saturates near 92 GB/s. E57: the DRAM bank and row map '
+                 'and per-controller refresh hold on aifoundry3, the L2 keeps TensorLoad lines, and stride-256 runs at '
+                 '0.665 of the bandwidth; no theory of the 128 B per cycle cap survives. E58: the rails’ meters filter '
+                 'with a time constant of 1.01–1.06 s on every rail of aifoundry3 (0.54 s on card 1’s SRAM rail). The '
+                 f'PCIe runner’s first card run since its lock fix, at {clock(pcie_fix_run)[-5:]}, exits cleanly.'),
 ]
+if sp_req is not None and sp_res is not None:
+    HL.append(dict(
+        t=sp_build['s'] if sp_build else sp_res['s'], a=sp_req - 300, b=snap_all + 300, track='agents',
+        title='Sparse parity: research, then a build',
+        caption=f'At {clock(sp_req)[-5:]} the owner queues the next task: a sparse-parity solver that uses the chip’s '
+                'thousand cores, prototyped at toy sizes first and then scaled to the whole chip. A workflow of '
+                f'{sp_res["agents"]} agents ({clock(sp_res["s"])[-5:]}–{clock(sp_res["e"])[-5:]}, no card) surveys the '
+                'literature, maps the problem onto the chip and tries CPU toys: the design finds a noisy sparse parity by '
+                'exhaustive correlation, computed as int8 tensor matrix products, and its critique puts the honest '
+                'gain at about 2–5× a tuned 8-core host and 5–10× less energy.'
+                + (f' From {clock(sp_build["s"])[-5:]} on {DAYS[day_of(sp_build["s"])]} Sep a second workflow builds '
+                   'the CPU reference and the first kernel.' if sp_build else '')
+                + f' The data ends at the snapshot, {clock(snap_all)[-5:]} on {DAYS[day_of(snap_all)]} Sep.'))
 HL.sort(key=lambda h: h['t'])
 # the published pages each highlight produced or changed (slug, then an optional #anchor); only pages the page list shows
 # as public: the report for the lab lead and the pages outside the set are never linked
@@ -892,8 +951,11 @@ HL_LINKS = {
     'The superseded energies folded in': ['et-soc1-memory-anatomy', 'et-soc1-memory-hierarchy', 'et-soc1-on-chip-communication',
                                           'et-soc1-matmul-efficiency', 'et-soc1-sparse-compute'],
     'Heat per mm: the 2× gap (Q63)': ['et-soc1-heat-per-mm#dally-node'],
-    'A major pass, and this timeline in the repository': ['et-soc1-review-todo',
-                                                          'et-soc1-dvfs-leakage#what-triggers-a-step-down-and-does-placement-delay-it'],
+    'A major pass, and this timeline in the repository': ['et-soc1-review-todo'],
+    'DV2 validation: three sessions': ['et-soc1-dvfs-leakage#what-triggers-a-step-down-and-does-placement-delay-it'],
+    'NV: the NoC validation, frozen and waiting': ['et-soc1-heat-per-mm#dally-node'],
+    'Four experiments, developed and validated': ['et-soc1-limits-of-observability#improve', 'et-soc1-pcie-link',
+                                                  'et-soc1-chip-diagram'],
 }
 _pub = {pg['key']: pg['title'] for pg in pages if not pg['private']}
 _unknown = sorted(set(HL_LINKS) - {h['title'] for h in HL})

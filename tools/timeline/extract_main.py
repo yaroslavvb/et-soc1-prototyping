@@ -14,8 +14,8 @@ of a monitor ({"spacesheep_talk": true, "from": "the account owner ...", "messag
 kind 'talk' (its text is never kept, only its length).
 
 $TIMELINE_CUTOFF (an ISO time) ends the transcript there, so a rerun reproduces a snapshot of a session that has
-gone on since; the page's snapshot is 2026-09-29T04:00:00Z (the earlier ones, 2026-09-28T20:57:00Z,
-2026-09-28T13:23:04Z and 2026-09-27T18:21:05.646Z). Paths: tools/timeline/paths.py.
+gone on since; the page's snapshot is 2026-09-29T09:14:00Z (the earlier ones, 2026-09-29T04:00:00Z,
+2026-09-28T20:57:00Z, 2026-09-28T13:23:04Z and 2026-09-27T18:21:05.646Z). Paths: tools/timeline/paths.py.
 """
 import json, os, re, sys, collections, math
 from datetime import datetime, timezone, timedelta

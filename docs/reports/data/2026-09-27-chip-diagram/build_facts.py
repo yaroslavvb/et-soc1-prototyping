@@ -35,6 +35,13 @@ broadcast half was never timed alone; the shire cache's rule for one line read b
 pollers; the ESR broadcast and the IPI; the launch's multicast (firmware source); and what the other 31 shires add to
 a queued launch (computed from ../2026-09-27-pcie/pcie.json).
 
+The major pass (29 Sep) adds the measurements of the hub's rungs 31-36, each read from its reduction with its
+verdicts asserted: the routing order (E56, fact L104) from ../2026-09-29-nocr/raw/<card>/summary.json; where a host
+copy lands (E55, the new fact pcie.write-l3) and which DMA commands collide (pcie.conc) from
+../2026-09-29-pcie2/pcie2.json and its dev-aifoundry1-c1.md; the DRAM address map (L50, now measured) and the L2's
+hold on TensorLoad lines (minion.tensor-cache-path) from ../2026-09-29-memp2/val-aifoundry3/memp2.json and
+dev-aifoundry1-c1/memp2.json (AMEND2, AMEND3).
+
 Output, facts.json:
   facts  the facts the page uses, by id, with one page link field (`url`, a spacesheep URL, or null), the lab cards
          each one covers (`cards`: a2, a3, a1c1) and, for the CARDS entries, the text shown for them (`cards_txt`)
@@ -183,7 +190,9 @@ AMEND = {
             'source': '; superseded 27 Sep by fw.grey-cells',
             'note': 'Superseded 27 Sep: the firmware\'s maps name the four cells (fact fw.grey-cells): (0,3) the master '
                     '(shire 32), (5,3) the spare (33), (0,4) the PCIe shire and (0,5) the I/O shire, the order of PRM '
-                    'Fig. 1-3. Timing a counter read on shire 32 would confirm the master\'s cell on the cards.'},
+                    'Fig. 1-3. Timing a counter read on shire 32 confirms the master\'s cell on a card: E56 (29 Sep, '
+                    'docs/reports/data/2026-09-29-nocr) placed it there on aifoundry1 card 1 and decided nothing on '
+                    'aifoundry3.'},
     'L33': {'source': '; settled 27 Sep by fw.map-match except the handedness (die.handedness)',
             'note': 'Settled 27 Sep except the east-west handedness: the firmware\'s NoC-spec map, renamed as the boot '
                     'firmware renames the shires, equals the measured map in every pair distance with no rotation or '
@@ -218,6 +227,172 @@ for fid, a in AMEND.items():
             f[k] = a[k]
 # the measured range the ridge amendment quotes is the one fact pcie.h2d gives
 assert H2D_RNG in ALL['pcie.h2d']['statement'], H2D_RNG
+
+# ---- the mesh's routing order, measured (29 Sep 2026, E56 "nocr", hub rung 32). Until then L104 was inferred: every
+# route on this page, and heat-per-mm's link model, assumed x first for every packet. E56 streamed 1 KB tensor loads
+# (the data travel as replies) and tensor stores (the data travel as requests) in sets chosen so that their streams
+# share one directed link under one order and none under the other. Development on aifoundry1's card 1, then the
+# frozen validation on aifoundry3 (tools/claims-v3/nocr/PREREG.md, sha256 2472ab3e...). The numbers are read here from
+# each card's summary.json (reduce.py); the statement quotes them, so a new reduction changes the page with it.
+NOCR = os.path.join(HERE, '..', '2026-09-29-nocr', 'raw')
+NOCR_CARDS = ['aifoundry1-c1', 'aifoundry3']
+NR = {c: json.load(open(os.path.join(NOCR, c, 'summary.json')))['r32'] for c in NOCR_CARDS}
+for c in NOCR_CARDS:   # the verdicts this section states
+    assert NR[c]['read']['verdict'] == 'yx' and NR[c]['write']['verdict'] == 'xy', c
+
+
+def rho(mode, sets):
+    v = [NR[c][mode]['sets'][s]['rho_pooled'] for c in NOCR_CARDS for s in sets]
+    return min(v), max(v)
+
+
+ROW35, COL35 = ['rowE3', 'rowE5', 'rowF3', 'rowF5', 'rowW3'], ['colS3', 'colS5', 'colN3', 'colN5']
+R_FELL, R_HELD = rho('read', COL35), rho('read', ROW35)     # reads: the sets that share a link under y first fell
+W_FELL, W_HELD = rho('write', ROW35), rho('write', COL35)   # stores: the sets that share a link under x first fell
+assert R_FELL[1] <= 0.90 and W_FELL[1] <= 0.90 and R_HELD[0] >= 0.95 and W_HELD[0] >= 0.95   # the frozen fall and hold
+CAP = [NR[c][m]['capacity_gbs_from_dropping_sets'] for c in NOCR_CARDS for m in ('read', 'write')]
+f2 = lambda lo_hi: f'{lo_hi[0]:.2f}-{lo_hi[1]:.2f}'   # noqa: E731
+ROUTE_CAP = f'{statistics.median(CAP):.0f}'
+assert max(CAP) - min(CAP) < 1, CAP
+ALL['L104'].update({
+    'statement': 'The mesh routes in dimension order, and a request and its reply take opposite orders: a request goes x '
+                 'first, then y, and a reply y first, then x, on the logical map, so a reply retraces its request\'s '
+                 'route backwards. Measured on 29 September (E56) with sets of streams between shires chosen so that '
+                 'their streams share one directed link under one order and none under the other: 1 KB tensor loads, '
+                 f'whose data travel as replies, fell to {f2(R_FELL)} of their bandwidth alone when they shared a link '
+                 f'under y first and held at {R_HELD[0]:.2f} when they shared one under x first; tensor stores, whose '
+                 f'data travel as requests, showed the mirror ({f2(W_FELL)} against {W_HELD[0]:.2f}). A shared link '
+                 f'carried about {ROUTE_CAP} GB/s. The same on aifoundry1 card 1 (development) and aifoundry3 (the '
+                 'frozen validation), three passes each.',
+    'source': 'tools/claims-v3/nocr/PREREG.md (frozen 29 Sep about 00:10 PDT, sha256 2472ab3e...; the sets: '
+              'workloads/nocroute/meshmap.py, tools/claims-v3/nocr/sets.json); docs/reports/data/2026-09-29-nocr/raw/'
+              '<card>/summary.json .r32.read and .r32.write: .verdict, .sets.<set>.rho_pooled (sets of 3 and 5 streams), '
+              '.capacity_gbs_from_dropping_sets; docs/reports/data/2026-09-29-nocr/README.md',
+    'kind': 'measured', 'card': 'aifoundry1-c1, aifoundry3', 'url': None, 'page': None,
+    'note': 'Until 29 September this fact was inferred: the analyses assumed x first for every packet (as Chang infers), '
+            'and every route on this page was drawn so (docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md '
+            '§1b \'Routing\'; heat-per-mm.script.js\'s route map, x first by default until 29 September: its `order` and the \'Routing order\' toggle). What E56 saw is the data: a load\'s replies '
+            'and a store\'s requests. That a load\'s own requests go x first and a store\'s acknowledgements y first '
+            'follows if the order is set by the kind of packet; those small packets never slowed a set (each costs a '
+            'link under 0.54 of a reply). On the die view x runs down the die\'s rows: a request first moves north or '
+            'south, then east or west, and a reply first east or west.'})
+AMEND2 = {
+    'mesh.shortest-paths': {'find': 'The order in which the mesh routes a request (x first or y first) was not measured.',
+                            'statement': 'The order was measured later, on 29 September: requests x first, replies y first '
+                                         '(fact L104).',
+                            'source': '; the order: fact L104 (E56, docs/reports/data/2026-09-29-nocr)'},
+    'addr.load-model': {'source': '', 'note': 'The model counts hops, not routes. The route order inside the mesh was '
+                                                'measured on 29 September (fact L104): each request x first, each reply y '
+                                                'first.'},
+    'mesh.xy-assumption': {'source': '; settled 29 Sep by fact L104 (E56)',
+                           'note': 'Settled 29 Sep: an analysis assumption, not a documented routing rule. E56 measured the '
+                                   'order (fact L104): requests x first, replies y first, so a load\'s data travel y first '
+                                   '(the YX case this analysis also checks) and a store\'s x first.'},
+}
+for fid, a in AMEND2.items():
+    f = ALL[fid]
+    if 'find' in a:
+        assert a['find'] in f['statement'], fid
+        f['statement'] = f['statement'].replace(a['find'], a['statement'])
+    f['source'] += a['source']
+    if 'note' in a:
+        f['note'] = a['note']
+
+# ---- E55 and E57 on this page (29 Sep 2026, the major pass; hub rungs 33, 34, 35 and 36). pcie2 (E55) timed where a
+# host copy lands and which DMA commands collide; memp2 (E57) the DRAM address map and a TensorLoad's second load. Each
+# was developed on aifoundry1's card 1, frozen, then validated on aifoundry3 (tools/claims-v3/pcie2/PREREG.md, sha256
+# f632d6b3...; tools/claims-v3/memp2/prereg/PREREG.md, lock 9712c3d6...). The numbers are read from the reductions and
+# the verdicts asserted, so a reduction that changes a verdict stops this build.
+P2DIR = os.path.join(HERE, '..', '2026-09-29-pcie2')
+P2 = json.load(open(os.path.join(P2DIR, 'pcie2.json')))['cards']['aifoundry3']
+assert P2['theories']['T34-A'] == 'survives' and P2['theories']['T35-S'] == 'survives', P2['theories']
+assert all(P2['theories'][t] == 'refuted' for t in ('T34-B', 'T34-C', 'T34-D', 'T35-A', 'T35-BC', 'T35-E', 'T35-X'))
+assert not any(P2['stats']['bad']['values'])   # no first-touch value differed from the last pattern written
+P2DEV = open(os.path.join(P2DIR, 'dev-aifoundry1-c1.md')).read()   # card 1's development table (reduce.py)
+for t, v in (('T35-S', 'survives'), ('T34-A', 'survives')):
+    assert re.search(r'\| ' + t + r' \|[^\n]*\| ' + v + r' \|', P2DEV), t
+
+
+def p2dev(item):
+    return float(re.search(r'\| ' + item + r' \|[^\n]*?(?:PASS|FAIL|INCONCLUSIVE): ([\d.]+)', P2DEV).group(1))
+
+
+L3PCT = f"{100 * min(P2['stats']['fw']['mean'], P2['stats']['fc']['mean']):.1f}"   # h2d_warm, h2d_cold: lines at L3 latency
+L3PCT1 = f"{100 * min(p2dev('P34-7'), p2dev('P34-8')):.1f}"
+ONE_STREAM, TWO_STREAMS, TWO_STREAMS1 = f"{P2['stats']['h64']['mean']:.3f}", f"{P2['stats']['s2']['mean']:.3f}", f"{p2dev('P35-6'):.3f}"
+PCIEPG_ = 'https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link'
+ALL['pcie.write-l3'] = {
+    'id': 'pcie.write-l3', 'component': 'pcie', 'topic': 'data flow', 'kind': 'measured', 'set': 'page',
+    'statement': 'A host-to-card copy goes through each line\'s L3 home, which allocates the line: after a staged 4 MB '
+                 f'copy, {L3PCT}% of the lines read at L3 latency on aifoundry3 ({L3PCT1}% on aifoundry1-c1), whether '
+                 'the L3 held the buffer before or not, and every value read was the last one written. A kernel\'s first '
+                 'touch of a freshly copied buffer hits the L3, not DRAM (tested for a 4 MB buffer).',
+    'value': float(L3PCT), 'unit': '% of lines at L3 latency (aifoundry3)',
+    'source': 'tools/claims-v3/pcie2/PREREG.md (frozen 29 Sep 00:04 PDT, sha256 f632d6b3...); '
+              'docs/reports/data/2026-09-29-pcie2/pcie2.json .cards.aifoundry3.stats.fw and .fc (h2d_warm, h2d_cold: '
+              'the share of lines whose first touch is L3-like), .stats.bad (wrong values), .theories["T34-A"]; '
+              'dev-aifoundry1-c1.md P34-7, P34-8 (card 1, development)',
+    'card': 'aifoundry1-c1, aifoundry3', 'url': PCIEPG_ + '#where-a-host-copy-lands', 'page': 'Over the PCIe link',
+    'note': 'E55\'s T34-A (29 September). The rivals, an L3 that updates only lines it already holds (T34-B) and writes '
+            'that go to the memory shires with the L3\'s copy invalidated (T34-C) or left stale (T34-D), were refuted on '
+            'both cards. When the L3 writes the lines back to DRAM was not timed; flow 6 draws that leg dashed.'}
+M2DIR = os.path.join(HERE, '..', '2026-09-29-memp2')
+M2 = {c: json.load(open(os.path.join(M2DIR, d, 'memp2.json')))['cards'][c]['items']
+      for c, d in (('aifoundry3', 'val-aifoundry3'), ('aifoundry1-c1', 'dev-aifoundry1-c1'))}
+assert M2['aifoundry3']['R33a']['outcome'] == 'PASS' and M2['aifoundry1-c1']['R33a']['outcome'] == 'PASS'
+assert M2['aifoundry3']['R33b']['outcome'] == 'PASS' and M2['aifoundry3']['R33b']['refresh_domain_bits'] == ['6', '7', '8', '9']
+assert M2['aifoundry1-c1']['R33b']['outcome'] == 'FAIL'
+assert all(M2[c]['R33c']['outcome'] == 'INSUFFICIENT' for c in M2)
+assert all(M2[c]['R36']['outcome'] == 'PASS' and M2[c]['R36']['tl2_like'] == 'L2' for c in M2)
+HITD = sorted({-M2[c]['R33a']['step_bank_bits'] for c in M2})   # the bank-bit step, cycles (a row hit's saving)
+assert len(HITD) == 1 and not any(M2[c]['R33a']['misclassified'] for c in M2), HITD
+TL2 = {c: M2[c]['R36']['medians'] for c in M2}
+assert TL2['aifoundry3']['tl2'] == TL2['aifoundry3']['ref_l2'] == TL2['aifoundry1-c1']['tl2']
+f_ = lambda v: f'{v:,.0f}' if v == int(v) else f'{v:,.1f}'   # noqa: E731
+AMEND3 = {
+    'L50': {'find': 'Inferred DRAM address map: ', 'statement': 'DRAM address map: ',
+            'append': ' Measured on 29 September (E57): another row in the same bank is a row conflict, and a row that '
+                      f'also differs in any of PA[6-12] (the memory shire, the controller, the bank) reads as a row hit, '
+                      f'{f_(HITD[0])} cycles faster, on aifoundry1-c1 and aifoundry3 (15 of 15 conditions); on aifoundry3 PA[6-9] '
+                      'set the refresh phase and PA[10-13] and PA[18] do not, so each controller refreshes on its own.',
+            'source': '; measured: tools/claims-v3/memp2/prereg/PREREG.md (lock 9712c3d6...), '
+                      'docs/reports/data/2026-09-29-memp2/val-aifoundry3/memp2.json and dev-aifoundry1-c1/memp2.json '
+                      '.cards.<card>.items.R33a.per_cond, .R33b.refresh_domain_bits, .R33c',
+            'kind': 'measured', 'card': 'aifoundry1-c1, aifoundry3',
+            'note': 'Inferred until 29 September (from a tool comment, NoC mask values and ADDRMAP registers, not a '
+                    'readback). E57 measured the bank and row split on both cards (R33a) and the refresh domain on '
+                    'aifoundry3 (R33b; on aifoundry1-c1 PA[7] read unclear and no registered reading fitted). Still open: '
+                    'whether two accesses on one controller serialise (R33c, insufficient on both cards).'},
+    'minion.tensor-cache-path': {
+            'source': '; the L2: docs/reports/data/2026-09-29-memp2/val-aifoundry3/memp2.json and '
+                      'dev-aifoundry1-c1/memp2.json .cards.<card>.items.R36.medians (tl1, tl2, ref_l2, ref_l3, probe_tl)',
+            'note': 'Settled 29 Sep for the L2: E57 (R36) TensorLoaded the same fresh 1 KB twice, and the second load took '
+                    f'{f_(TL2["aifoundry3"]["tl2"])} cycles, the L2 reference\'s {f_(TL2["aifoundry3"]["ref_l2"])} '
+                    f'(the L3 reference {f_(TL2["aifoundry3"]["ref_l3"])}, the first load {f_(TL2["aifoundry3"]["tl1"])}), '
+                    f'and a scalar load after it {f_(TL2["aifoundry3"]["probe_tl"])}, an L2 hit, on aifoundry3 and '
+                    'aifoundry1-c1: a TensorLoad that misses allocates its lines in the L2. Not measured: whether the L3 '
+                    'keeps them and whether tensor stores skip the L2 (the Shire Cache Specification says they do).'},
+    'pcie.conc': {'find': '(two streams: 5.96 / 6.00 / 5.96 GB/s in total)',
+                  'statement': '(two streams with both of each stream\'s commands in flight, four in all: 5.96 / 6.00 / '
+                               '5.96 GB/s in total; with one command in flight in each of two streams nothing is lost, '
+                               f'{TWO_STREAMS} of one at a time on aifoundry3 and {TWO_STREAMS1} on aifoundry1-c1, E55)',
+                  'source': '; E55: docs/reports/data/2026-09-29-pcie2/pcie2.json .cards.aifoundry3.stats.s2 and .h64, '
+                            '.theories["T35-S"]; dev-aifoundry1-c1.md P35-6',
+                  'note': f'E55 (29 September) found which commands collide: two in flight in one stream move {ONE_STREAM} '
+                          f'of one at 2 x 64 MB on aifoundry3, one in each of two streams {TWO_STREAMS} (T35-S); a shared '
+                          'read engine, the IOMMU, a fixed cost per overlap, a slow onset and a loss per element were '
+                          'refuted on both cards.'},
+}
+for fid, a in AMEND3.items():
+    f = ALL[fid]
+    if 'find' in a:
+        assert a['find'] in f['statement'], fid
+        f['statement'] = f['statement'].replace(a['find'], a['statement'])
+    f['statement'] += a.get('append', '')
+    f['source'] += a['source']
+    for k in ('note', 'kind', 'card'):
+        if k in a:
+            f[k] = a[k]
 
 # ---- card coverage set by hand where the card string's aside names a card that was not measured, or the number the
 # page prints covers fewer cards than the fact (27 Sep review). Value: (cards, text shown for them)
@@ -515,6 +690,12 @@ N = [
     ('hop_ns', 'mesh-hop-lat', 20, '20 ns', ''),
     ('hop_mm', 'chip.hop-pitch', 3.72, '3.72 mm', ''),
     ('bitmm', 'mesh-bit-mm-free', 37, '37 fJ', 'per bit·mm (mesh rail, free links)'),
+    # the routing order (E56, 29 Sep): what a set of streams sharing one link kept, and what the link carried
+    ('route_rd', 'L104', R_FELL[0], f2(R_FELL), "of the loads' bandwidth alone"),
+    ('route_wr', 'L104', W_FELL[0], f2(W_FELL), "of the stores' bandwidth alone"),
+    ('route_gbs', 'L104', float(ROUTE_CAP), f'{ROUTE_CAP} GB/s', 'a shared link, saturated'),
+    # where a host copy lands (E55, 29 Sep): the share of a copied buffer's lines that read at L3 latency
+    ('pcie_l3pct', 'pcie.write-l3', float(L3PCT), f'{L3PCT}%', 'of lines at L3 latency (aifoundry3)'),
     # latency (minion cycles at 600 MHz)
     ('lat_l1', 'lat-l1', 5.25, '5.25', 'cycles'),
     ('lat_rb', 'lat-rb', 36, '36', 'cycles'),
@@ -680,7 +861,7 @@ COMP = {
                'mesh.single-attach', 'L11', 'chip.hop-pitch', 'sync-shire-barrier', 'L123', 'L121'],
     'master': ['fw.grey-cells', 'fw.map-match', 'chip.master-shire-id', 'chip.spare-shire-id', 'L26', 'L31', 'L32', 'chip.compute-array',
                'chip.cm-shire-mask', 'die.handedness'],
-    'pcie': ['pcie.negotiated', 'pcie.h2d', 'pcie.d2h', 'pcie.staged', 'pcie.conc', 'pcie.nhalf', 'fw.grey-cells', 'chip.pcie-shire',
+    'pcie': ['pcie.negotiated', 'pcie.h2d', 'pcie.d2h', 'pcie.staged', 'pcie.conc', 'pcie.write-l3', 'pcie.nhalf', 'fw.grey-cells', 'chip.pcie-shire',
              'L28', 'pcie.link', 'bw-pcie', 'addr.regions', 'L24', 'die.handedness', 'L25'],
     'io': ['chip.io-shire', 'L29', 'chip.maxions', 'chip.service-processor', 'volt.other', 'L24', 'L32', 'L25', 'fw.grey-cells', 'die.handedness'],
     'memshire': ['chip.memshires', 'L40', 'ms-fit-3cards', 'L41', 'L43', 'L42', 'ms2-forced', 'mesh.grid', 'L44', 'L46', 'L48', 'dram.memshire-select',
@@ -730,26 +911,26 @@ COMP = {
     'flowB': ['lat-l1', 'lat-rb', 'lat-l2', 'lat-scp-own', 'lat-scp-remote', 'lat-l3-hop', 'l3.latency', 'lat-l3-avg',
               'dram.leg', 'lat-dram-typical', 'lat-dram', 'bw-l1', 'bw-l2', 'bw-scp-own', 'bw-scp-remote', 'bw-l3',
               'bw-dram', 'e-l1', 'e-l2', 'e-scp-own-zeros', 'e-scp-own-rand', 'e-scp-remote-zeros',
-              'e-scp-remote-rand', 'e-l3', 'e-dram'],
+              'e-scp-remote-rand', 'e-l3', 'e-dram', 'L104'],
     'flowC': ['ts-rt-mesh', 'L70', 'L71', 'L72', 'minion.tensorsend', 'mesh-hop-ring', 'L86', 'L87', 'bw-tsend-mesh',
               'bw-tsend-link', 'mesh.1kb-knee', 'minion.one-ready-bit', 'L104'],
     'flowD': ['relay-energy', 'relay-13x', 'relay-bw', 'relay.speedup', 'L93', 'L94', 'relay-watts', 'e-dram-vs-scp',
               'addr.load-path', 'minion.tensor-cache-path', 'l3.home', 'dram.memshire-select', 'L104'],
     'flowE': ['gs-g-dram-512B', 'gs-g-dram-4K', 'gs-g-scp-16K', 'gs-g-rscp-16K', 'gs-g-dram-256K', 'gs-s-dram-512B',
               'gs-s-dram-4K', 'gs-s-scp-16K', 'gs-s-rscp-16K', 'gs-s-dram-256K', 'gs-mh', 'gs-dram', 'gs-l1', 'gs-uc',
-              'gs-add', 'gs-card'],
+              'gs-add', 'gs-card', 'L104'],
     'flowF': ['pcie.negotiated', 'pcie.h2d', 'pcie.d2h', 'pcie.staged', 'pcie.nhalf', 'pcie.small', 'pcie.poll', 'pcie.launch',
-              'pcie.conc', 'bw-pcie', 'chip.pcie-shire', 'addr.regions', 'addr.dram-region', 'dram.memshire-select',
+              'pcie.conc', 'pcie.write-l3', 'l3.home', 'bw-pcie', 'chip.pcie-shire', 'addr.regions', 'addr.dram-region', 'dram.memshire-select',
               'fw.grey-cells', 'chip.master-shire-id', 'chip.cm-shire-mask', 'L104'],
     # the second version's flows (27 Sep): 7 the matmul's data flow, 8 data sets the watts, 9 the hot line, 0 the allreduce
     'flowG': ['minion.tensorload', 'tl.one', 'tl.all', 'minion.tensorfma-546', 'tfma.tenb', 'mm.reload', 'minion.tensor-hart0',
               'minion.vec-peak', 'mm-peak', 'mm-rate', 'neigh.coop-tload', 'minion.tensor-cache-path', 'mm.dram', 'e-scp-tload',
-              'e-dram-tload', 'e-tfma-fp32'],
+              'e-dram-tload', 'e-tfma-fp32', 'L104'],
     'flowH': ['mm.w-data', 'mm.w-3cards', 'e-tfma-fp32', 'e-tfma-fp32-zeros', 'heat.race', 'heat.fewer', 'heat.leak',
               'mm-board-w', 'power.idle', 'board.meters', 'mm-rate'],
     'flowI': ['hot.fair', 'hot-cost', 'hot.cliff', 'hot-edge', 'hot-energy', 'mem.global-atomic', 'L43', 'l3.home'],
     'flowJ': ['ar.tree', 'neigh.fln-edges', 'sync.tree-levels', 'sync-allreduce32', 'sync-allreduce1024', 'sync-shire-barrier',
-              'sync-chip-barrier', 'sync.flb', 'sync.fcc', 'ts-rt-fln'],
+              'sync-chip-barrier', 'sync.flb', 'sync.fcc', 'ts-rt-fln', 'L104'],
     # the broadcast (B, 28 Sep): the tree, the relay against DRAM, one line read by everyone, the launch's multicast
     'flowK': ['minion.vpu-regs', 'minion.tensor-hart0', 'bc.tensorbroadcast', 'ar.tree', 'neigh.fln-edges', 'sync.tree-levels',
               'sync-allreduce32', 'sync-allreduce1024', 'bc.allreduce-1kb', 'bc.half', 'ts-e-pair', 'relay-energy', 'relay-13x',
@@ -767,7 +948,7 @@ for k, ids in COMP.items():
 NOTE = ['mesh.orientation', 'L33', 'L34', 'L32', 'L24', 'L42', 'L40', 'L104', 'mesh.xy-assumption', 'mesh.shortest-paths',
         'chip.die-dims', 'L114', 'chip.hop-pitch', 'addr.load-model', 'L37', 'chip.io-shire', 'L47', 'L23', 'dram.pkg-pairing',
         'ms-fit-3cards', 'ms2-forced', 'mesh.grid', 'fw.map-match', 'fw.grey-cells', 'fw.memshires', 'die.handedness',
-        'sc.l3-miss']
+        'sc.l3-miss', 'pcie.write-l3', 'L50', 'minion.tensor-cache-path', 'pcie.conc']
 for i in NOTE:
     assert i in ALL, i
 used.update(NOTE)

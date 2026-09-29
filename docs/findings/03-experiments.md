@@ -2,16 +2,20 @@
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E53**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E58**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
 check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
 same three cards after each card's campaign blocks (26 September), E49 a card-free test of the runtime's log-level race,
 E50 the host link and the launch path timed on the three cards (27 September), and E51 the DV2 development night on
-aifoundry2 (28 September: what the governor compares, placement against the first throttle; **development data, not
-validated**), and E52 the heat-placement experiment (27–28 September: development on aifoundry3, calibration and a
-frozen validation on aifoundry1's card 1: the short-burst prediction PASS, the primary sustained one INSUFFICIENT), and E53 the overheating experiments (28 September, aifoundry3 and aifoundry1's card 1, pre-registered: the
+aifoundry2 (28 September: what the governor compares, placement against the first throttle; **development data**;
+its frozen validation has run on the same card since 20:45 PDT that evening and is not yet reduced), and E52 the
+heat-placement experiment (27–28 September: development on aifoundry3, calibration and a frozen validation on aifoundry1's card 1: the short-burst prediction PASS, the primary sustained one INSUFFICIENT), and E53 the overheating experiments (28 September, aifoundry3 and aifoundry1's card 1, pre-registered: the
 hottest sensor against the mean under concentrated load, exact-checked kernels from rest to an 82 °C mean, idle power;
-20 of 21 verdicts PASS, 1 INSUFFICIENT).
+20 of 21 verdicts PASS, 1 INSUFFICIENT). E54 is NV, the mesh rail's voltage step (registered 28 September; no voltage
+written yet). E55–E58 are the major pass's four pre-registered experiments (Q65, 28–29 September), each developed on
+aifoundry1's card 1, frozen, then validated on aifoundry3: E55 the host link's concurrency and where a host write lands,
+E56 the mesh's routing order and stops, E57 the DRAM address map, the tensor reload, the shire's 128 B cap and
+stride-256 energy, E58 the rails' one-second filter.
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
 (aifoundry2, aifoundry3 or both; E35–E46, E48 and E50 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
@@ -1428,7 +1432,7 @@ random +21.4 [−26.2–69.0], +24.7 [13.8–35.5], +22.1 [14.9–29.3]
 −1.00 pJ/op on zeros, every interval excluding 0
 (`.items[item=CAT-f].per_card.<card>.fence_vs_nop_expected_within_noise`).
 **Caveats:** the hot holds fell short on a3 and a1c1 (busy 69.6–71.1 °C and 70.6–74.9 °C after 150 heater launches per
-pass), shrinking ΔT; a2's ran at 87.9–96.4 °C. Stride-256 was not run (energy-manual-102 untested).
+pass), shrinking ΔT; a2's ran at 87.9–96.4 °C. Stride-256 was not run here (energy-manual-102 untested; E57 ran it on 29 September).
 **Report:** [The energy manual](https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual) (A15); [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability) (A2).
 
 ## E46 — The energy manual's full catalogue, three passes on three cards (2026-09-25 17:28 – 09-26 04:58, three cards)
@@ -1599,7 +1603,7 @@ process held a card for more than 2.1 s, but the card's lock was held for a whol
 **Artifact:** the page "Over the PCIe link" (`docs/reports/2026-09-27-et-soc1-pcie-link.html`; [et-soc1-pcie-link](https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link), public)
 and the chip diagram's PCIe shire, Host panel and flow 6.
 
-## E51 — DV2: what the governor compares, and whether placement delays the throttle (2026-09-28, 00:33–02:54 PDT, aifoundry2; one read-only query of aifoundry3) — development, not validated
+## E51 — DV2: what the governor compares, and whether placement delays the throttle (2026-09-28, 00:33–02:54 PDT, aifoundry2; one read-only query of aifoundry3) — development; the frozen validation running since 28 Sep 20:45 PDT, not yet reduced
 
 **Question (Q59):** does the clock governor act on the mean of the 34 minion-shire sensors or on the hottest shire;
 can the same work run longer at 800 MHz before the first throttle when it is placed elsewhere on the chip; and which
@@ -1684,12 +1688,22 @@ attempted that night. At 06:39 the sysfs per-card reset re-attached the device b
 approval, restored it, and a test on 1 minion at 08:33 ran 3 launches, each ok, at 600 MHz (`incident/recovery.txt`;
 [14-card-behaviour.md](14-card-behaviour.md), "aifoundry2's Master Minion hung on 28 September"). The cause is not
 established.
-**Validation:** `plan/PREREG-VAL.md` is frozen (SHA-256 `e150ce16…`) and has **not run**: it needs the owner's OK to
-validate on a later session of the same card (aifoundry2's Master Minion, which its heating sessions need, was
-restored at 08:32 on 28 September). It registers the placement and
+**Validation:** `plan/PREREG-VAL.md` is frozen (SHA-256 `e150ce16…`). It registers the placement and
 trigger items, the host bands, the latencies, the sign test and six idle items, with a named deviation: two blocks under
 the final placement where the readiness rule asked for four. The validation's own heater is the one that was running
-at the hang, a stated risk; a schedule with no heating is provided.
+at the hang, a stated risk; a schedule with no heating is provided. **Running since 28 September 20:45:39 PDT
+(Q65), not yet reduced.** The owner accepted a replication on the same card and chose the full schedule (the idle
+watch VZ, a cycle every 3 minutes, and the NAT-4 heating sessions VN, tried after every fifth cycle and started only
+from a reading of 60 °C or less). The first five tries (20:58–21:58) found 73, 72, 65, 63 and 63 °C. Three sessions
+ran, the plan's maximum: p6051 22:13–22:30 from 59 °C (one T-block), p6052 22:42–23:06 from 60 °C (two), p6053
+23:19–23:56 from 59 °C (four), 7 complete G4 blocks in all (the plan stops starting sessions at 16). Every session
+ended ok; all 52 of their launches returned 0, 7 of them launched 0.49–0.58 s after the previous one ended, as lift 2
+was at the hang: **the Master Minion did not hang**. The idle watch continues until about 16:45 PDT on 29 September
+(its 20 h window); `reduce_val.py` runs after the queue ends, so no item has a verdict yet. On the idle card the mean
+read 75 °C at 20:45 (32.5 W) and 73–75 °C until 21:09, fell to 59 °C by 22:12 (25.6 W), read 68 °C when the last
+session ended and 73–74 °C from 00:11 to 01:00 with no session running (31.7–32.4 W). Until it is collected, the
+validation's raw data is on aifoundry2 (`~/claude/et-soc1-dvfs2/build/claims-v3/aifoundry2/dv2v/`: `p91*/z1.json`,
+`p605*/`, `nat-candidates.jsonl`).
 **Caveats:** one card, one night; the host samples at 10 Hz and reads whole degrees; at the SP's INFO log level with a
 sampler running, the trace ring holds less than a second, so the SP-line items were not registered; the placement
 prediction's couplings are aifoundry3's, since the calibration pass on aifoundry2 did not run.
@@ -1897,9 +1911,9 @@ DRAM retention hold. Card 1 could not be taken past a 76 °C mean under the froz
 temperature, or what happens above 85 °C on a sensor (the hard stop was 88 °C).
 **Fed:** the page "The effect of overheating" (`docs/reports/2026-09-28-effect-of-overheating.html`; [et-soc1-effect-of-overheating](https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating), public since 28 September), and the hub's §7 and §5 (rungs 45 and 46; rungs 13, 24 and 42 extended).
 
-## E54 — NV: the mesh rail's voltage step (485, 540, 600 mV at a fixed 400 MHz NoC), the owner's NoC validation of Q63's voltage explanation (registered 2026-09-28, 23:20 PDT) — predictions frozen; development on aifoundry3 next, validation on aifoundry2 after DV2
+## E54 — NV: the mesh rail's voltage step (485, 540, 600 mV at a fixed 400 MHz NoC), the owner's NoC validation of Q63's voltage explanation (registered 2026-09-28, 23:06 PDT) — predictions frozen; the first voltage write waits for the owner; development on aifoundry3, validation on aifoundry2 after DV2
 
-**Asked:** the owner, 28 September evening ("do the other items, like the noc validation"), for the test that the
+**Asked:** the owner, 28 September evening (Q65: "do the other items, like the noc validation"), for the test that the
 heat-per-mm page's §7 proposed (Q63): does the mesh's cost per bit·mm follow its 0.485 V supply?
 **Registered before any card write:** `tools/claims-v3/nv/predictions.json`, SHA-256
 `c0d946c787a02776bff69e2d76406862af6c22793bd02d01caa018521bbb73c3` (`PREDICTIONS.sha256`, commit `4312253`). Theories
@@ -1913,6 +1927,226 @@ flash (aifoundry1's card 1); a failed regulator write on these builds retries fo
 processor's 10 s watchdog reset the card (source-read, `DESIGN.md` §7).
 **Probe (read-only, 22:54 PDT, aifoundry3):** firmware 1.3.1, BL2 0.20.0; NOC set-point 485 mV, 484 on the die, 400 MHz;
 the voltage table's NoC boot entry 485 mV at 400 MHz (525 at 500); die 54 °C.
+**The first write: not started.** The development probe (`block.sh 1 --probe` on aifoundry3: 540 mV, then 600 mV, with
+idle windows, then the restore to 485) could not be started: the session's permission check refused the command, since
+it changes a shared card's state. It waits for the owner, to run it or to allow it. No voltage has been written to any
+card, so there are no development data and nothing is frozen beyond the predictions. The validation card stays
+aifoundry2, after DV2's validation there ends (about 16:45 PDT on 29 September) and the owner releases the card;
+aifoundry1's card 1 is refused, since its BL2 0.18.0 writes every NoC set to flash.
+**Fed:** heat per mm's §7 and §10 (the registration, the probe and the hazard) and the hub's §7 row, with no result
+yet; [14-card-behaviour.md](14-card-behaviour.md) has the two firmware hazards read for it, and
+[05-claims.md](05-claims.md) the probe's readings.
+
+## E55 — pcie2: why two host-to-card DMA commands halve the rate, and where a host write lands (hub rungs 34 and 35; 2026-09-28 23:47 – 09-29 00:27 PDT, aifoundry1's card 1 and aifoundry3) — pre-registered: T35-S and T34-A survived on both cards
+
+**Asked:** the owner's major pass (Q65, 28 September about 20:40 PDT: "do things you can do on AI Foundry now that it
+works: a major pass, extra checks"): the hub's rung 35 (`exp-pcie-concurrency`: why E50's two host-to-card DMA
+commands in flight moved 0.49 of one) and rung 34 (`exp-pcie-path`: does a host write go through the L3?).
+**Registered:** `tools/claims-v3/pcie2/PREREG.md`, written about 22:00 PDT and revised about 23:00 before any pcie2
+process ran (committed in `5538de2`, 23:47). R35: five theories, T35-A (a fixed cost per overlap), T35-BC (a shared DMA
+read engine, B, or the IOMMU, C; this design cannot tell B from C; B or C was the expected answer), T35-E (a slow
+onset), T35-X (elements, not commands, collide) and T35-S (only two commands of one stream collide). R34: four, T34-A
+(through the line's L3 home, which allocates it), T34-B (the home updates a line it holds and allocates none), T34-C
+(to the memory shires, the L3's copy invalidated) and T34-D (the L3 keeps a stale copy). 22 predictions (P35-1…10,
+P34-1…9) with each theory's conditions, and instrument controls that must pass before any T34 verdict. Frozen after
+development, with the development result written into it first and no prediction changed: SHA-256
+`f632d6b3447ea5cf313cf896f92143e7920513cd6227b75e12208a33804fb73f` (`PREREG.sha256`; `LOCK.sha256` over the block's
+files, the probe's build and `TEXT.sha256`, the kernels' `.text`), commit `76ae05e` (29 September 00:04).
+**Method:** `workloads/pciebench` (`--test conc` sweeps, `--test touch`) under `tools/claims-v3/pcie2/block.sh`, every
+process under `timeout 10` with the card lock held, about 25 s of card time per pass. R35: 2 commands of 1, 4, 16 and
+64 MB per stream, DMA-only, in five configurations (both commands of one stream in flight, or the barrier on each, in
+each direction; one command in each of two streams), and as 8-element lists. R34: a 4 MB buffer written by a staged
+copy, then one hart times the first load of 4,096 of its lines against DRAM and L3 references taken in the same
+repetition, with the L3 holding the buffer's old lines (h2d_warm) or none of them (h2d_cold); every first-touch value is
+checked against the pattern written. A card's value is the mean over its passes with a 99% t interval.
+**Development (aifoundry1's card 1, 28 September 23:47–23:55 PDT: smoke p901, passes p101–p103):** two commands of one
+stream 0.493 of one at 64 MB; one command in each of two streams 1.019; after a host write 99.9% of lines read at L3
+latency, no wrong value. T35-S and T34-A survived, every other theory was refuted (`dev-aifoundry1-c1.md`). No file
+changed afterwards.
+**Validation (aifoundry3, 29 September 00:05–00:27 PDT: smoke p901, passes p1–p5, frozen; `results.md`, `pcie2.json`
+from `reduce.py --data`):** 18 of 22 predictions PASS; P35-6 FAIL (T35-BC's: two streams would halve too); P35-5a–c
+INCONCLUSIVE (card to host at 1–16 MB, 0.78–0.94 with wide intervals).
+**Result (aifoundry3; card 1's development values in brackets where they differ):**
+- *R35.* Two host-to-card commands in flight in one stream move 0.488 [0.486, 0.491] of one at 2 × 64 MB (0.493),
+  0.516 at 16 MB, 0.534 at 4 MB and 0.750 at 1 MB. The rate ratio, from the slope of wall time against bytes over
+  1–64 MB, is 0.484 [0.481, 0.486] (0.487): the loss is in the rate, not a fixed cost per command. One command in each
+  of two streams moves 1.012 [1.000, 1.025] of one (1.019): nothing is lost. One 8-element command alone moves as much
+  as a 1-element one (0.994), and two 8-element commands of one stream lose the same half (0.490). Card to host at
+  2 × 64 MB: 1.104. **T35-S survived** on both cards; T35-A, T35-BC, T35-E and T35-X were refuted on both.
+- *R34.* The controls passed: a first touch from DRAM 304 cycles, from the L3 175, their per-line difference 118 (126),
+  an L2 hit 53; 0.7% of lines had references within 40 cycles of each other. After a host write 99.52% of lines read at
+  L3 latency, whether the L3 held the buffer before (h2d_warm) or not (h2d_cold), and no first-touch value was wrong in
+  any pass: **T34-A survived** (a host write goes through its line's L3 home, which allocates the line); T34-B, T34-C
+  and T34-D were refuted on both cards.
+- Also: `workloads/pciebench/run_pcie.sh`'s first card run since its lock fix (aifoundry1's card 1, 28 September
+  23:56; every sub-test exited 0; `run_pcie-r101/`).
+**Caveats:** two cards, both at 600 MHz; aifoundry2 (a third card, after DV2) has not run. T35-S says where the loss is
+(two commands of one stream), not what serves them in turn (the runtime or the master minion's DMA worker). B and C
+were refuted together, as registered, so the rung's reboot with the IOMMU in passthrough is not needed to answer it.
+**Data:** [`docs/reports/data/2026-09-29-pcie2/`](../reports/data/2026-09-29-pcie2/README.md): `raw/aifoundry1-c1/pcie2/`,
+`raw/aifoundry3/pcie2/`, `dev-aifoundry1-c1.md`, `results.md`, `pcie2.json`, `run_pcie-r101/` (commit `9d5164c`).
+**Fed:** the rows marked E55 in [05-claims.md](05-claims.md) and a trap in [14-card-behaviour.md](14-card-behaviour.md);
+the PCIe page's §5 (`#which-commands-collide`, `#where-a-host-copy-lands`), the hub's rungs 34–35 and §7, and the chip
+diagram (flow 6's host path through the L3 homes, fact `pcie.write-l3`, and `pcie.conc`).
+
+## E56 — nocr: the mesh's routing order, and where the master and memory shires sit (hub rungs 31 and 32; 2026-09-28 23:57 – 09-29 00:32 PDT, aifoundry1's card 1 and aifoundry3) — pre-registered: read replies go y first and write requests x first on both cards; the placements decided on card 1 only
+
+**Asked:** the owner's major pass (Q65; E55): the hub's rung 32 (`exp-route-order`: does the mesh route x first or
+y first? every route on the chip diagram and on heat-per-mm assumes x first, fact L104, kind "inferred") and rung 31
+(`exp-mesh-stops`: place the master shire and the eight memory shires by timing).
+**Registered:** `tools/claims-v3/nocr/PREREG.md`, written 28 September before any card data and revised after review,
+still before any (committed in `5538de2`): P1–P7 for R31 (T-DIRECT, an ESR call costs a constant plus a term per mesh
+hop, which gates every placement; T-12 and the stores' kind; T-NULL; T-FW-MASTER, shire 32 at (0,3); T-FW-MS, the
+memory shires at the firmware map's cells; T-SAME-SLOPE) and P8–P13 for R32 (T-XY, T-YX, T-WIDE, T-ADAPT,
+T-SAME-RULE, T-REQ), the decision rules and thresholds (`params.json`), and a dry model of the master's stats worker,
+which samples every shire's counters each millisecond. Development changed nothing ("Amendments: none"). Frozen after
+development: SHA-256 `2472ab3e02c7730a924c00a9ac920aaf9ae24cacf4772d8250c061cb2c502325`, with `LOCK.sha256` and
+`kernel-text.sha256`, commit `c0b4a05` (29 September 00:08).
+**Method:** R31: hart 0 of minion 0 in each compute shire times stock syscalls that make M-mode read and write another
+block's ESRs over the mesh (a cache bank's counter, a memory shire's, and a null call), the 32 callers taking turns, 8
+repetitions per pass over 32 compute targets, the 8 memory shires and shire 32; a caller-target pair's value is its
+median. R32 (`workloads/nocroute`, E27's wire kernel): sets of flows chosen by `meshmap.py` so that one directed link
+carries two flows' replies under x first (the row families) or under y first (the column families), with positive and
+negative controls; rho = the set's bytes per cycle over the same flows alone in the same repeat; reads and writes (a
+write's data travel as requests, so the write verdict is the requests' order). Every process at 600 MHz, under
+`timeout 10`, with the card lock held.
+**Development (aifoundry1's card 1, 28 September 23:57 – 29 September 00:01 PDT: smoke p9, passes p1–p3):** R32 as
+in the validation, to 0.01 in every rho. R31: T-DIRECT survived (1,557.5 + 35.96 cycles per hop, rms 3.4, r² 0.998);
+the master shire placed at (0,3), the firmware map's top grey cell (rms 1.1; the next cell, (0,4), 33.1); memory shires
+0–2, 4, 5 and 7 at their firmware cells, 3 and 6 undecided; the per-access check differed (23.79 against 12.17 cycles
+per hop), so P2 and P3 were not decided.
+**Validation (aifoundry3, 29 September 00:28–00:32 PDT: smoke p9, passes p11–p13, frozen; `raw/aifoundry3/summary.json`
+from `reduce.py`):**
+- *R32, the routing order (the same on both cards).* Reads: the column families' sets of 3 and 5 flows fell (rho 0.77
+  and 0.54–0.55), every row family set held (1.00), both positive controls fell (0.79) and the negatives held:
+  **read replies travel y first** (P9 T-YX survived; P8 T-XY, the chip diagram's assumption, refuted). Writes: the
+  row families' sets of 3 and 5 flows fell (0.75–0.77 and 0.52) and the column ones held: **write requests travel x first**,
+  so a read's reply retraces its request's path (P12 T-SAME-RULE refuted: "opposite order"). The sets that fell carried
+  a median of 92.16 GB/s: a directed link saturates near 92 GB/s (P10 T-WIDE refuted; P11 T-ADAPT refuted). A request
+  loads a link at less than 0.54 of its reply (P13 not decided).
+- *R31, the stops.* An ESR call costs 1,556.9 + 35.9 cycles per hop over the 992 caller-target pairs (r² 0.995), with
+  an rms of 4.7 cycles against the frozen limit of 4: **T-DIRECT refuted** by its rule, so P2, P3, P5, P6, P6b and P7
+  are "not decided" on aifoundry3. The additive "via a hub" model's rms is 62. T-NULL survived (1,317 cycles from every
+  shire). Reported, not decided on: the fit on each pair's 10th percentile, 1,545.0 + 36.0 cycles per hop with an rms
+  of 0.28 (card 1: 0.33); shire 32 fits (0,3) best (rms 0.46; (0,4) 33.4); the memory shires fit the firmware map's
+  cells with an rms of 0.74.
+**Caveats:** two cards on two firmware releases, both at 600 MHz; aifoundry2 has not run. The order is read from the
+contrast between mirrored families, under the registered assumption that a control packet (a request, an
+acknowledgement) never costs a link more than its data. Why the medians scatter more on aifoundry3 (rms 4.7 against 3.4)
+is not established. Q63's second test (a hop through a memory-shire column) was not run: no minimal route between
+compute shires enters one (`PREREG.md`, the end).
+**Data:** [`docs/reports/data/2026-09-29-nocr/`](../reports/data/2026-09-29-nocr/README.md): `raw/aifoundry1-c1/`
+(p9, p1–p3) and `raw/aifoundry3/` (p9, p11–p13), each with its `summary.json` (commit `9d5164c`).
+**Fed:** the rows marked E56 in [05-claims.md](05-claims.md) and [14-card-behaviour.md](14-card-behaviour.md). It
+refuted the x-first routes of the chip diagram (fact L104) and of heat per mm; the hub's rungs 31–32 and §7, the chip
+diagram (L104, every route), the memory levels (`l3.route`, `chip:L104`) and heat per mm's route map (y first by
+default, the shares under both orders) carry it.
+
+## E57 — memp2: the DRAM address map, the tensor reload, the shire's 128 B cap and stride-256 energy (hub rungs 33, 36 and 43, energy-manual-102; 2026-09-29 00:41–01:06 PDT, aifoundry1's card 1 and aifoundry3) — pre-registered: R33a, R33b, R36 and E102 PASS on aifoundry3, R33c INSUFFICIENT, R43 FAIL
+
+**Asked:** the owner's major pass (Q65; E55): the hub's rungs 33 (`exp-dram-rows`: which address bits pick the DRAM
+bank, the controller and the row; the chip diagram's map, fact L50, is inferred), 36 (`exp-tensor-reload`: does the L2
+keep the lines a TensorLoad brought in?) and 43 (`exp-cache-bottleneck`: what caps a shire at 128 B per cycle?), and
+energy-manual-102 (stride-256 scratchpad loads, which E45 did not run).
+**Registered:** `tools/claims-v3/memp2/prereg/PREREG.md`, written 28 September before any memp2 data and revised after
+an adversarial review, still before any (committed in `5538de2`): R33a (bank against row: 15 conditions, and a
+bank-bit step of −27 to −15 cycles), R33b (the refresh domain by refresh phase: per-controller predicted, three
+alternatives registered), R33c (two accesses that share a controller serialise by about 6 cycles), T36 (a TensorLoad
+that misses allocates its lines in the L2), R43's theories A, B (predicted: each bank returns 32 B per cycle), C, Cc
+and D over 20 configurations (A and D already refuted by earlier data), and E102, a replication of E46's stride-256 row
+with theory T102 (the extra energy is the waiting minions' awake time). Before any card time every new kernel path ran
+in `sys_emu` (`sysemu.sh`: 18 runs, PASS). Frozen after development: `LOCK.sha256` (27 files and the kernel's `.text`),
+whose own SHA-256, `9712c3d6d012638d1ee1b91028e190abb323cefbb7c8922020252b9e86444038`, every validation pass checks;
+`PREREG.md` SHA-256 `fe83c14b…` (`prereg/PREREG.sha256`); commit `6397c8e` (29 September 00:54). No file, parameter,
+theory or rule changed after development.
+**Method:** `workloads/memprobe`'s `MEMPROBE_EXT` modes (`build/memprobe2`): hart 0 of shire 0 times single DRAM loads
+for R33 (every line evicted to memory first) and single TensorLoads for R36; R43 streams 16-line TensorLoads from 1–4
+neighbourhoods of all 32 shires at strides of 64 B, 256 B and 1 KB, in several start layouts; E102 runs three
+replicates of `tools/claims-v3/cat/run_catalogue_t10.py` (E45 and E46's timing) per ENERGY block over
+`scpline/stride{64,128,256}/{zeros,random}` and `spin/zeros/h1`. Per card: a smoke ladder, two PROBE and two ENERGY
+blocks through `series.sh`, every launch under `timeout 10`, the card lock held.
+**Development (aifoundry1's card 1, 29 September 00:41–00:53 PDT: p901, p101, p102, p201, p202; `dev-aifoundry1-c1/`):**
+R33a PASS, R33b FAIL (the refresh-domain bits PA[6, 8, 9], PA[7] unclear: no registered reading fits), R33c
+INSUFFICIENT, R36 PASS, R43 FAIL, E102 PASS on all three parts.
+**Validation (aifoundry3, 29 September 00:55–01:06 PDT: p911, p111, p112, p211, p212, frozen; `val-aifoundry3/`,
+`reduce.py --all`):**
+- *R33a PASS* (card 1 the same). All 15 conditions classified as the L50 map predicts (48 trials): another row in
+  the same bank is a row conflict; another row that also differs in any of PA[6–12] (the memory shire, the controller,
+  the bank) reads as row hits, 20 cycles faster; one that also differs in a column bit (PA[13–17]) still conflicts.
+- *R33b PASS* on aifoundry3: PA[6], PA[7], PA[8] and PA[9] change the refresh phase and PA[10–13] and PA[18] do not
+  (period 2,325.4 cycles): the refresh domain is the controller, with PA[9] among its bits, as L50 predicts. It
+  failed in development on card 1 (PA[7] unclear there), so it holds on one card of two.
+- *R33c INSUFFICIENT* on both: PA[11] and PA[12] read "unclear" (+4.0 and +3.5 cycles, 95% intervals from +2.0),
+  with the controls in their bands (same row +3.0, same bank and another row +39.0).
+- *R36 PASS* on both: a second TensorLoad of the same 1 KB takes 199 cycles, the L2 reference 199, against 744 for the
+  L3 reference (card 1 815) and 1,344.5 for the first load (above its predicted 600–1,300; reported); a scalar load after
+  it takes 42 cycles, an L2 hit: **the L2 keeps TensorLoad lines** (T36 survived).
+- *R43 FAIL* on both, the two cards within 0.22 B per cycle of each other. Per shire-cycle: stride 64 streams 50, 100,
+  128 and 128 B with 1–4 neighbourhoods; stride 256 (every minion in one bank) 37, 64, 64 and 64, and 64 also when the
+  minions start on the bank's four sub-banks out of lockstep; stride 1 KB (one sub-bank) 32 at every count. No
+  registered theory survives: B misses 7 configurations (every stride-256 configuration, and the 1 KB quad layout at 64), Cc 5; C (a shared 128 B path, banks
+  at 64, sub-banks at 32) misses one, one neighbourhood at stride 256 (37.1 against 51.2), and one miss refutes.
+- *E102 PASS* on bandwidth, energy and T102: stride 256 gets 0.665 of stride 64's bandwidth (stride 128: 1.000) and
+  costs +41.9 [+28.4, +55.4] pJ per 64 B more on zeros and +49.9 [+27.9, +72.0] on random data (99%; card 1 +46.7 and
+  +54.2); the awake minions' time predicts +71.8, ratios 0.58 and 0.70 (0.5–1.5 registered).
+**Caveats:** two cards; aifoundry2 (a third card, after DV2) has not run. R33 rests on one hart's load latencies, and
+R33c's method did not resolve a 6-cycle serialisation on either card. The 128 B cap stays unexplained (R43).
+**Data:** [`docs/reports/data/2026-09-29-memp2/`](../reports/data/2026-09-29-memp2/README.md): `raw/aifoundry1-c1/`,
+`raw/aifoundry3/`, `dev-aifoundry1-c1/` and `val-aifoundry3/` (`memp2.json`, `memp2.log`) (commit `bf8c7c9`).
+**Fed:** the rows marked E57 in [05-claims.md](05-claims.md) and [14-card-behaviour.md](14-card-behaviour.md); it
+answers E45's "stride-256 was not run"; the hub's rungs 33, 36 and 43 and §7, and the chip diagram (fact L50 measured,
+`minion.tensor-cache-path` settled for the L2).
+
+## E58 — tau: the rails' one-second filter per card and rail, and what deconvolution recovers (hub rung 4; 2026-09-29 00:01–00:45 PDT, aifoundry1's card 1 and aifoundry3) — pre-registered: T1–T3 survived on aifoundry3, T4 falsified by one item; card 1's SRAM rail averages over 0.54 s
+
+**Asked:** the owner's major pass (Q65; E55): the hub's rung 4 ("Undo the rails' one-second average"). The rail
+readings (`sp.minion_w`, `sram_w`, `noc_w`) and `board_avg_w` are running averages, quoted as τ ≈ 1.15–1.22 s (E27),
+which hide anything shorter than a few seconds.
+**Registered:** `tools/claims-v3/tau/PREREG.md`, written 28 September before any tau block ran and revised after
+review, still before any (committed in `5538de2`); development did not change it. It starts from an offline fit of
+5,956 committed bursts on three cards (`offline.py` → `offline.json`): taken one SP pass late, every rail fits one
+first-order τ of 1.02–1.07 s except aifoundry1's card 1's SRAM rail, 0.53 s (`board_avg_w` 1.05–1.11 s with no lag),
+and the single-parameter 1.15–1.22 s had folded the pass into τ. Theories: T1, each reading is one linear first-order average (rise and fall agree); T2, τ per card and rail as
+the offline table; T3, the rails are published one SP pass late, not a fixed time late (decided on aifoundry3 only,
+where the 20 Hz sampler lengthens the pass by about 58 ms, E41); T4, the inverse (`tools/ettelem/deconv.py`, Gaussian 0.1 s)
+recovers square bursts. 96 items, their bands calibrated on simulated replicates so that a true theory fails at most 5%
+of the time (`calibrate.py`, `calib.json`). Frozen after development: SHA-256
+`7d4fabad9feb19e0b0c7053fa3399b3d4f640703923e0da9d7b87de84ae16988` (`PREREG.sha256`; `LOCK.sha256` over the block's
+files, `deconv.py`, `lib.sh` and `queue.sh`), commit `3054fa9` (29 September 00:17).
+**Method:** `tools/claims-v3/tau/block.sh`: per pass, an idle window and twelve `build/enercat` bursts of 2.0, 3.2 and
+4.0 s in a seeded order: M (`fmadd.ps` on random data, about 20 W on the minion rail), H (the same on zeros, about
+10 W) and D (DRAM row walks, about 8 W on each of the SRAM and NoC rails), eight under the 10 Hz sampler and four under
+20 Hz, each in its own 9 s window with at least 2 s of idle either side, never with `--reset-ms`; a pass starts at a die
+mean of 72 °C or less. Three passes per card, pooled; `reduce.py report` scores every item.
+**Development (aifoundry1's card 1, 29 September 00:01–00:13 PDT: smoke, passes p1–p3; 0 failed sampler starts):**
+94 PASS, 2 FAIL. τ minion 1.08, SRAM 0.54, NoC 1.08 and `board_avg_w` 1.10 s (P1 PASS on all four). The minion rail
+rose with 1.32 s and fell with 1.02 s (P4b FAIL; one of its 12 bursts fitted 1.80 s alone), with `board_w`'s in-burst
+drift inside the card's offline range, so by the rule T1 is falsified on that card. T2 and T4 survived; T3 is
+reported only there (P3b 0.04 s against 0.02 ± 0.015).
+**Validation (aifoundry3, 29 September 00:34–00:45 PDT: smoke, passes p101–p103 through `queue.sh`, frozen;
+`report.json`):** 94 PASS, 2 FAIL.
+- *T1, T2 and T3 survived.* τ, one pass late: minion 1.06, SRAM 1.01, NoC 1.04 s; `board_avg_w` 1.05 s with no lag
+  (P1 PASS on all four). Rise against fall: minion 1.08 / 1.07, SRAM 1.05 / 1.02, NoC 1.09 / 1.04. From the 10 Hz to
+  the 20 Hz sampler the fitted delay grew 0.063 s (P3b: 0.041 ± 0.029 for one pass late; a fixed latency predicts 0).
+- *T4 falsified by one item of 69:* P5d, the scatter of the deconvolved 2 s minion bursts away from their edges, 0.084
+  of the step against 0.06. The other 68 passed: with the card's frozen τ the deconvolved readings give the bursts'
+  energy within 0.3% of the step, their plateau within 1.1% (the 2 s minion bursts −2.6%, inside their calibrated
+  3.4%) and their edges within 0.06 s of the kernel's.
+- *P0 (context, not a theory):* the SP pass 0.255 s under the 10 Hz sampler, against 0.263 ± 0.02 registered from
+  E41 (PASS), and 0.296 s under 20 Hz, against 0.321 ± 0.02 (FAIL, reported only): the second of the two FAILs.
+**Result:** on aifoundry3 each rail is a first-order running average of 1.01–1.06 s, published one SP pass late, and
+`board_avg_w` a current 1.05 s average. aifoundry1's card 1's SRAM rail averages over 0.54 s, half as long as its
+other rails and aifoundry3's SRAM rail: the cards' SRAM meters differ. T2 reads it as the PMIC firmware (card 1 runs
+PMIC 1.3.0, the 1.3.1 cards 1.5.0); that cause was not tested separately.
+**Caveats:** one validation card; aifoundry2 needs an amendment first (a heat step, its own start temperature and
+calibration). T3 is decided on aifoundry3 only. `deconv.py` refuses streams sampled with `--reset-ms` (E52, E53 and
+DV2's), whose statistics resets restart the average.
+**Data:** [`docs/reports/data/2026-09-29-tau-aifoundry1-c1/`](../reports/data/2026-09-29-tau-aifoundry1-c1/) (smoke,
+p1–p3, `report.json`) and [`docs/reports/data/2026-09-29-tau-aifoundry3/`](../reports/data/2026-09-29-tau-aifoundry3/README.md)
+(smoke, p101–p103, `report.json`) (commits `3054fa9`, `e5948f4`).
+**Fed:** the rows marked E58 in [05-claims.md](05-claims.md), which supersede E27's τ ≈ 1.15–1.22 s, and the telemetry
+table of [14-card-behaviour.md](14-card-behaviour.md); the hub's rung 4, §2, §4.1 and §7, and Power and temperature's §1
+table and §2.
 
 ## A note on E10, re-analysed for Q20
 

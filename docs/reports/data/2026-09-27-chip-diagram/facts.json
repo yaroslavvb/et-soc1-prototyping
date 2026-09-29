@@ -9,14 +9,14 @@
    "research/asks.json",
    "../../sources/limits-of-observability.data.json (the hub rows the asks link to)"
   ],
-  "n_facts": 290,
+  "n_facts": 291,
   "kinds": {
    "derived": 23,
-   "measured": 155,
+   "measured": 158,
    "spec": 99,
-   "inferred": 13
+   "inferred": 11
   },
-  "n_num": 274,
+  "n_num": 278,
   "et_platform_head": "836a4ab"
  },
  "facts": {
@@ -115,17 +115,20 @@
    "id": "L104",
    "component": "mesh",
    "topic": "routing",
-   "statement": "Routing is minimal (latency is linear in Manhattan distance), but the dimension order was not measured; the analyses assume x first (XY). Chang infers XY.",
+   "statement": "The mesh routes in dimension order, and a request and its reply take opposite orders: a request goes x first, then y, and a reply y first, then x, on the logical map, so a reply retraces its request's route backwards. Measured on 29 September (E56) with sets of streams between shires chosen so that their streams share one directed link under one order and none under the other: 1 KB tensor loads, whose data travel as replies, fell to 0.54-0.77 of their bandwidth alone when they shared a link under y first and held at 1.00 when they shared one under x first; tensor stores, whose data travel as requests, showed the mirror (0.52-0.76 against 1.00). A shared link carried about 92 GB/s. The same on aifoundry1 card 1 (development) and aifoundry3 (the frozen validation), three passes each.",
    "value": null,
    "unit": null,
-   "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b 'Routing'; docs/reports/sources/heat-per-mm.script.js:521; docs/reports/2026-09-19-et-soc1-memory-anatomy.html:784-785",
-   "kind": "inferred",
-   "card": null,
-   "note": null,
+   "source": "tools/claims-v3/nocr/PREREG.md (frozen 29 Sep about 00:10 PDT, sha256 2472ab3e...; the sets: workloads/nocroute/meshmap.py, tools/claims-v3/nocr/sets.json); docs/reports/data/2026-09-29-nocr/raw/<card>/summary.json .r32.read and .r32.write: .verdict, .sets.<set>.rho_pooled (sets of 3 and 5 streams), .capacity_gbs_from_dropping_sets; docs/reports/data/2026-09-29-nocr/README.md",
+   "kind": "measured",
+   "card": "aifoundry1-c1, aifoundry3",
+   "note": "Until 29 September this fact was inferred: the analyses assumed x first for every packet (as Chang infers), and every route on this page was drawn so (docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1b 'Routing'; heat-per-mm.script.js's route map, x first by default until 29 September: its `order` and the 'Routing order' toggle). What E56 saw is the data: a load's replies and a store's requests. That a load's own requests go x first and a store's acknowledgements y first follows if the order is set by the kind of packet; those small packets never slowed a set (each costs a link under 0.54 of a reply). On the die view x runs down the die's rows: a request first moves north or south, then east or west, and a reply first east or west.",
    "range": null,
-   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#contention",
-   "page": "Heat per millimetre",
-   "cards": [],
+   "url": null,
+   "page": null,
+   "cards": [
+    "a3",
+    "a1c1"
+   ],
    "set": "layout"
   },
   "L105": {
@@ -405,7 +408,7 @@
    "source": "docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md §1a row 'Logical map vs die'; docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html:765-786 (cells labelled 'master or spare' and 'I/O or PCIe', 'inferred'); superseded 27 Sep by fw.grey-cells",
    "kind": "inferred",
    "card": null,
-   "note": "Superseded 27 Sep: the firmware's maps name the four cells (fact fw.grey-cells): (0,3) the master (shire 32), (5,3) the spare (33), (0,4) the PCIe shire and (0,5) the I/O shire, the order of PRM Fig. 1-3. Timing a counter read on shire 32 would confirm the master's cell on the cards.",
+   "note": "Superseded 27 Sep: the firmware's maps name the four cells (fact fw.grey-cells): (0,3) the master (shire 32), (5,3) the spare (33), (0,4) the PCIe shire and (0,5) the I/O shire, the order of PRM Fig. 1-3. Timing a counter read on shire 32 confirms the master's cell on a card: E56 (29 Sep, docs/reports/data/2026-09-29-nocr) placed it there on aifoundry1 card 1 and decided nothing on aifoundry3.",
    "range": null,
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief#mesh",
    "page": "Spatial temperature: a brief",
@@ -642,17 +645,20 @@
    "id": "L50",
    "component": "memory shire",
    "topic": "address map",
-   "statement": "Inferred DRAM address map: PA[9] selects the controller (channel) within the memory shire, PA[12:10] the DRAM bank (8 banks), PA[34:18] the row; the page policy is open-page.",
+   "statement": "DRAM address map: PA[9] selects the controller (channel) within the memory shire, PA[12:10] the DRAM bank (8 banks), PA[34:18] the row; the page policy is open-page. Measured on 29 September (E57): another row in the same bank is a row conflict, and a row that also differs in any of PA[6-12] (the memory shire, the controller, the bank) reads as a row hit, 20 cycles faster, on aifoundry1-c1 and aifoundry3 (15 of 15 conditions); on aifoundry3 PA[6-9] set the refresh phase and PA[10-13] and PA[18] do not, so each controller refreshes on its own.",
    "value": null,
    "unit": null,
-   "source": "docs/research/counters-and-dram.md:66-85",
-   "kind": "inferred",
-   "card": null,
-   "note": "From a tool comment, NoC mask values and ADDRMAP registers, not a programmed-register readback (the doc says so).",
+   "source": "docs/research/counters-and-dram.md:66-85; measured: tools/claims-v3/memp2/prereg/PREREG.md (lock 9712c3d6...), docs/reports/data/2026-09-29-memp2/val-aifoundry3/memp2.json and dev-aifoundry1-c1/memp2.json .cards.<card>.items.R33a.per_cond, .R33b.refresh_domain_bits, .R33c",
+   "kind": "measured",
+   "card": "aifoundry1-c1, aifoundry3",
+   "note": "Inferred until 29 September (from a tool comment, NoC mask values and ADDRMAP registers, not a readback). E57 measured the bank and row split on both cards (R33a) and the refresh domain on aifoundry3 (R33b; on aifoundry1-c1 PA[7] read unclear and no registered reading fitted). Still open: whether two accesses on one controller serialise (R33c, insufficient on both cards).",
    "range": null,
    "url": null,
    "page": null,
-   "cards": [],
+   "cards": [
+    "a3",
+    "a1c1"
+   ],
    "set": "layout"
   },
   "L70": {
@@ -893,7 +899,7 @@
    "source": "docs/et-soc1-notes.md:164-166; anatomy page §1 'Trace one load' and headline tiles; docs/findings/05-claims.md:403-404 (V3 check: L3 within ±4 cycles for 99.4-99.97% of lines, DRAM within ±3 for 93-97%)",
    "kind": "measured",
    "card": "aifoundry2, aifoundry3, aifoundry1-c1",
-   "note": "The route order inside the mesh was not measured.",
+   "note": "The model counts hops, not routes. The route order inside the mesh was measured on 29 September (fact L104): each request x first, each reply y first.",
    "range": null,
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#trace-one-load",
    "page": "Anatomy of a memory access",
@@ -3741,10 +3747,10 @@
    "id": "mesh.shortest-paths",
    "component": "mesh",
    "topic": "routing",
-   "statement": "Round trips fit a + b × Manhattan distance on the map over all 496 shire pairs (worst residual 1.1-1.4 cycles), so routes are shortest paths through all 36 cells, the four non-compute cells included. The order in which the mesh routes a request (x first or y first) was not measured.",
+   "statement": "Round trips fit a + b × Manhattan distance on the map over all 496 shire pairs (worst residual 1.1-1.4 cycles), so routes are shortest paths through all 36 cells, the four non-compute cells included. The order was measured later, on 29 September: requests x first, replies y first (fact L104).",
    "value": null,
    "unit": null,
-   "source": "docs/findings/05-claims.md:381, 412; on-chip communication page §'What the numbers say'; anatomy page §1 ('the order in which the mesh routes a request was not measured')",
+   "source": "docs/findings/05-claims.md:381, 412; on-chip communication page §'What the numbers say'; anatomy page §1 ('the order in which the mesh routes a request was not measured'); the order: fact L104 (E56, docs/reports/data/2026-09-29-nocr)",
    "kind": "measured",
    "card": "aifoundry2, aifoundry3, aifoundry1-c1",
    "note": null,
@@ -3805,10 +3811,10 @@
    "statement": "The heat-per-mm analysis assumes dimension-ordered XY routing on the logical map (and checks YX); under it, links are shared by 0 / 22 / 32 / 55 / 72% of link-hops at 1 / 2 / 3 / 4 / 6 hops in the all-pairs traffic.",
    "value": null,
    "unit": null,
-   "source": "workloads/enercat/analyze_wire.py:38, 149-176; docs/findings/05-claims.md:348 (WIRE `checks.link_sharing`)",
+   "source": "workloads/enercat/analyze_wire.py:38, 149-176; docs/findings/05-claims.md:348 (WIRE `checks.link_sharing`); settled 29 Sep by fact L104 (E56)",
    "kind": "inferred",
    "card": null,
-   "note": "An analysis assumption, not a documented routing rule.",
+   "note": "Settled 29 Sep: an analysis assumption, not a documented routing rule. E56 measured the order (fact L104): requests x first, replies y first, so a load's data travel y first (the YX case this analysis also checks) and a store's x first.",
    "range": null,
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#contention",
    "page": "Heat per millimetre",
@@ -4054,10 +4060,10 @@
    "statement": "Tensor loads skip the L1 but are cached in the L2 and L3; tensor stores skip the L1 and the L2.",
    "value": null,
    "unit": null,
-   "source": "docs/energy-manual/04-bytes-memory.md:21, 38",
+   "source": "docs/energy-manual/04-bytes-memory.md:21, 38; the L2: docs/reports/data/2026-09-29-memp2/val-aifoundry3/memp2.json and dev-aifoundry1-c1/memp2.json .cards.<card>.items.R36.medians (tl1, tl2, ref_l2, ref_l3, probe_tl)",
    "kind": "inferred",
    "card": null,
-   "note": "Stated by the energy manual; the PRM confirms only that TensorLoad bypasses the L1 data cache.",
+   "note": "Settled 29 Sep for the L2: E57 (R36) TensorLoaded the same fresh 1 KB twice, and the second load took 199 cycles, the L2 reference's 199 (the L3 reference 744, the first load 1,344.5), and a scalar load after it 42, an L2 hit, on aifoundry3 and aifoundry1-c1: a TensorLoad that misses allocates its lines in the L2. Not measured: whether the L3 keeps them and whether tensor stores skip the L2 (the Shire Cache Specification says they do).",
    "range": null,
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual#reads-and-writes-measured-together",
    "page": "The energy manual",
@@ -4582,13 +4588,13 @@
    "id": "pcie.conc",
    "component": "pcie",
    "topic": "bandwidth",
-   "statement": "Two host-to-device commands in flight on one stream move 6.09 / 6.09 / 6.03 GB/s (aifoundry2 / aifoundry3 / aifoundry1-c1), half the 12.39 / 12.48 / 12.28 GB/s of one command at a time (two streams: 5.96 / 6.00 / 5.96 GB/s in total); both directions at once, one command each at a time, move 16.97 / 16.89 / 16.92 GB/s together (2 × 64 MB per stream, DMA only).",
+   "statement": "Two host-to-device commands in flight on one stream move 6.09 / 6.09 / 6.03 GB/s (aifoundry2 / aifoundry3 / aifoundry1-c1), half the 12.39 / 12.48 / 12.28 GB/s of one command at a time (two streams with both of each stream's commands in flight, four in all: 5.96 / 6.00 / 5.96 GB/s in total; with one command in flight in each of two streams nothing is lost, 1.012 of one at a time on aifoundry3 and 1.019 on aifoundry1-c1, E55); both directions at once, one command each at a time, move 16.97 / 16.89 / 16.92 GB/s together (2 × 64 MB per stream, DMA only).",
    "value": 16.97,
    "unit": "GB/s (aifoundry2, both directions)",
-   "source": "docs/reports/data/2026-09-27-pcie/pcie.json: conc.<card>.dma.h2d.agg_gbs.mean (no barrier: both commands of the stream in flight), .\"h2d/ser\" (a barrier on every copy), .\"2xh2d\", .\"h2d+d2h/ser\"",
+   "source": "docs/reports/data/2026-09-27-pcie/pcie.json: conc.<card>.dma.h2d.agg_gbs.mean (no barrier: both commands of the stream in flight), .\"h2d/ser\" (a barrier on every copy), .\"2xh2d\", .\"h2d+d2h/ser\"; E55: docs/reports/data/2026-09-29-pcie2/pcie2.json .cards.aifoundry3.stats.s2 and .h64, .theories[\"T35-S\"]; dev-aifoundry1-c1.md P35-6",
    "kind": "measured",
    "card": "aifoundry2, aifoundry3, aifoundry1-c1",
-   "note": null,
+   "note": "E55 (29 September) found which commands collide: two in flight in one stream move 0.488 of one at 2 x 64 MB on aifoundry3, one in each of two streams 1.012 (T35-S); a shared read engine, the IOMMU, a fixed cost per overlap, a slow onset and a loss per element were refuted on both cards.",
    "range": null,
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link",
    "page": "Over the PCIe link",
@@ -4779,6 +4785,26 @@
     "a1c1"
    ],
    "set": "v2"
+  },
+  "pcie.write-l3": {
+   "id": "pcie.write-l3",
+   "component": "pcie",
+   "topic": "data flow",
+   "statement": "A host-to-card copy goes through each line's L3 home, which allocates the line: after a staged 4 MB copy, 99.5% of the lines read at L3 latency on aifoundry3 (99.9% on aifoundry1-c1), whether the L3 held the buffer before or not, and every value read was the last one written. A kernel's first touch of a freshly copied buffer hits the L3, not DRAM (tested for a 4 MB buffer).",
+   "value": 99.5,
+   "unit": "% of lines at L3 latency (aifoundry3)",
+   "source": "tools/claims-v3/pcie2/PREREG.md (frozen 29 Sep 00:04 PDT, sha256 f632d6b3...); docs/reports/data/2026-09-29-pcie2/pcie2.json .cards.aifoundry3.stats.fw and .fc (h2d_warm, h2d_cold: the share of lines whose first touch is L3-like), .stats.bad (wrong values), .theories[\"T34-A\"]; dev-aifoundry1-c1.md P34-7, P34-8 (card 1, development)",
+   "kind": "measured",
+   "card": "aifoundry1-c1, aifoundry3",
+   "note": "E55's T34-A (29 September). The rivals, an L3 that updates only lines it already holds (T34-B) and writes that go to the memory shires with the L3's copy invalidated (T34-C) or left stale (T34-D), were refuted on both cards. When the L3 writes the lines back to DRAM was not timed; flow 6 draws that leg dashed.",
+   "range": null,
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link#where-a-host-copy-lands",
+   "page": "Over the PCIe link",
+   "cards": [
+    "a3",
+    "a1c1"
+   ],
+   "set": "page"
   },
   "power.idle": {
    "id": "power.idle",
@@ -6167,6 +6193,30 @@
    "u": "per bit·mm (mesh rail, free links)",
    "f": "mesh-bit-mm-free"
   },
+  "route_rd": {
+   "v": 0.5420074768291434,
+   "t": "0.54–0.77",
+   "u": "of the loads' bandwidth alone",
+   "f": "L104"
+  },
+  "route_wr": {
+   "v": 0.5218189190051248,
+   "t": "0.52–0.76",
+   "u": "of the stores' bandwidth alone",
+   "f": "L104"
+  },
+  "route_gbs": {
+   "v": 92.0,
+   "t": "92 GB/s",
+   "u": "a shared link, saturated",
+   "f": "L104"
+  },
+  "pcie_l3pct": {
+   "v": 99.5,
+   "t": "99.5%",
+   "u": "of lines at L3 latency (aifoundry3)",
+   "f": "pcie.write-l3"
+  },
   "lat_l1": {
    "v": 5.25,
    "t": "5.25",
@@ -7277,6 +7327,7 @@
    "pcie.d2h",
    "pcie.staged",
    "pcie.conc",
+   "pcie.write-l3",
    "pcie.nhalf",
    "fw.grey-cells",
    "chip.pcie-shire",
@@ -7612,7 +7663,8 @@
    "e-scp-remote-zeros",
    "e-scp-remote-rand",
    "e-l3",
-   "e-dram"
+   "e-dram",
+   "L104"
   ],
   "flowC": [
    "ts-rt-mesh",
@@ -7660,7 +7712,8 @@
    "gs-l1",
    "gs-uc",
    "gs-add",
-   "gs-card"
+   "gs-card",
+   "L104"
   ],
   "flowF": [
    "pcie.negotiated",
@@ -7672,6 +7725,8 @@
    "pcie.poll",
    "pcie.launch",
    "pcie.conc",
+   "pcie.write-l3",
+   "l3.home",
    "bw-pcie",
    "chip.pcie-shire",
    "addr.regions",
@@ -7698,7 +7753,8 @@
    "mm.dram",
    "e-scp-tload",
    "e-dram-tload",
-   "e-tfma-fp32"
+   "e-tfma-fp32",
+   "L104"
   ],
   "flowH": [
    "mm.w-data",
@@ -7733,7 +7789,8 @@
    "sync-chip-barrier",
    "sync.flb",
    "sync.fcc",
-   "ts-rt-fln"
+   "ts-rt-fln",
+   "L104"
   ],
   "flowK": [
    "minion.vpu-regs",
@@ -8236,7 +8293,7 @@
     "chip.master-shire-id"
    ],
    "what_is_inferred": "Which grey cell is the master shire (32), the spare (33), the PCIe shire and the I/O shire.",
-   "what_settles_it": "Settled by the same firmware map (docs/reports/data/2026-09-27-chip-diagram/research/firmware_map.json grey_cells): logical (0,3) = shire 32, the master (top row, die column 4); (5,3) = shire 33, the spare (bottom row); (0,4) = the bridge map's 'pcie0'; (0,5) = 'io0' (noc_reconfigure.h:84-90). This is L32's alternative reading (PCIe west of I/O, as PRM Fig. 1-3). To confirm on the cards: time SYSCALL_PMC_SC_SAMPLE on shire 32 from each compute shire (a + b x hops picks the top or bottom cell). PCIe/I/O order rests on the two firmware comments and the PRM; the NoC spec would confirm it.",
+   "what_settles_it": "Settled by the same firmware map (docs/reports/data/2026-09-27-chip-diagram/research/firmware_map.json grey_cells): logical (0,3) = shire 32, the master (top row, die column 4); (5,3) = shire 33, the spare (bottom row); (0,4) = the bridge map's 'pcie0'; (0,5) = 'io0' (noc_reconfigure.h:84-90). This is L32's alternative reading (PCIe west of I/O, as PRM Fig. 1-3). To confirm on the cards: time SYSCALL_PMC_SC_SAMPLE on shire 32 from each compute shire (a + b x hops picks the top or bottom cell). E56 did so on 29 September (docs/reports/data/2026-09-29-nocr, hub rung 31): on aifoundry1 card 1 shire 32 placed at (0,3), the firmware's cell (rms 1.1 cycles; the next cell, (0,4), 33.1); on aifoundry3 the calls' cost missed the frozen fit rule for a constant plus a term per hop (rms 4.7 cycles, at most 4 allowed), so the cell was not decided there, and the rule reports a place only when every card run agrees. PCIe/I/O order rests on the two firmware comments and the PRM; the NoC spec would confirm it.",
    "ask": "experiment (confirm) / document (NoC spec)",
    "ask_detail": "exp-mesh-stops; the NOC spec that the firmware maps cite",
    "hub_anchor": "exp-mesh-stops",
@@ -8257,7 +8314,7 @@
     "ms2-forced"
    ],
    "what_is_inferred": "The memory shires' places come from a DRAM-latency fit on one card; memory shire 2's fit ties three places and is forced by elimination.",
-   "what_settles_it": "The firmware map puts mc0-mc3 on the west at rows 1-4 and mc4-mc7 on the east at rows 1-4 (docs/reports/data/2026-09-27-chip-diagram/research/firmware_map.json memshires): the fit's places for the 7 memory shires it places on its own, provided the firmware's mcN is the memory shire selected by PA[8:6] = N. With those 7 in place memory shire 2 has one cell left in both, so the map confirms the frame, not memory shire 2 on its own. What settles it on the cards: time SYSCALL_PMC_MS_SAMPLE (ms 0-7) from each of the 32 compute shires; each call's cycles are a constant plus a per-hop term to that memory shire, with no L3-home leg (the confound behind the tie).",
+   "what_settles_it": "The firmware map puts mc0-mc3 on the west at rows 1-4 and mc4-mc7 on the east at rows 1-4 (docs/reports/data/2026-09-27-chip-diagram/research/firmware_map.json memshires): the fit's places for the 7 memory shires it places on its own, provided the firmware's mcN is the memory shire selected by PA[8:6] = N. With those 7 in place memory shire 2 has one cell left in both, so the map confirms the frame, not memory shire 2 on its own. What settles it on the cards: time SYSCALL_PMC_MS_SAMPLE (ms 0-7) from each of the 32 compute shires; each call's cycles are a constant plus a per-hop term to that memory shire, with no L3-home leg (the confound behind the tie). E56 did so on 29 September (docs/reports/data/2026-09-29-nocr, hub rung 31): on aifoundry1 card 1 memory shires 0, 1, 2, 4, 5 and 7 placed where the firmware map puts them, memory shire 2 at (3,-1), and 3 and 6 were not decided; on aifoundry3 nothing was decided (the calls' cost missed the frozen fit rule, as for the grey cells).",
    "ask": "experiment (confirm)",
    "ask_detail": "exp-mesh-stops",
    "hub_anchor": "exp-mesh-stops",
@@ -8293,16 +8350,17 @@
     "mesh.shortest-paths",
     "L105"
    ],
-   "what_is_inferred": "Whether a request turns x first or y first (the diagram draws x first; y first where x first crosses an empty corner); also the router-to-router flit width (L105 note).",
-   "what_settles_it": "Documents: the NoC configuration's generated reference manual (noc/reference_manual/noc_reference_manual.htlm, named at core-et rtl/inc/debug_defines.vh:831-832), the Main NoC documentation linked from CORE-ET Minion Shire Description §3.3 (pdf p.11, link missing), and the 'NOC spec' (noc_reconfigure.h:76, 84). Experiment: tensor-load streams that share a link under x-first routing but not y-first (and the mirror), several readers per stream; a throughput drop in one set only gives the order. Interface: the routers' VC-status registers (noc_esr.h RIVCS/ROVCS), SP-only.",
-   "ask": "document / experiment / interface",
-   "ask_detail": "ask-noc-docs; exp-route-order; ask-noc-registers",
-   "hub_anchor": "ask-noc-docs",
-   "hub_url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#ask-noc-docs",
+   "what_is_inferred": "Measured on 29 September (E56, fact L104): a request goes x first and its reply y first, back along the request's links; the diagram draws every route so (before, it drew every leg x first). Still inferred: which of a flow's packets travel as requests (TensorSend, TensorReduce and TensorBroadcast are drawn x first, like a store's data; E56 timed only tensor loads and stores), and the router-to-router flit width (L105 note).",
+   "what_settles_it": "Settled for loads and stores by experiment: E56 ran sets of 1 KB tensor-load and tensor-store streams that share one directed link under one order and none under the other, frozen before the validation (tools/claims-v3/nocr/PREREG.md; docs/reports/data/2026-09-29-nocr). On aifoundry1 card 1 and aifoundry3 the loads slowed only where their replies would share a link under y first, the stores only where their data would share one under x first, and a shared link carried about 92 GB/s. What is left: the same sets with TensorSend streams would place the tensor messages; the NoC configuration's generated reference manual (noc/reference_manual/noc_reference_manual.htlm, named at core-et rtl/inc/debug_defines.vh:831-832), the Main NoC documentation linked from CORE-ET Minion Shire Description §3.3 (pdf p.11, link missing) and the 'NOC spec' (noc_reconfigure.h:76, 84) would give the rule for every packet and the flit width. Interface: the routers' VC-status registers (noc_esr.h RIVCS/ROVCS), SP-only.",
+   "ask": "done (loads, stores) / experiment / document / interface",
+   "ask_detail": "exp-route-order (E56); ask-noc-docs; ask-noc-registers",
+   "hub_anchor": "exp-route-order",
+   "hub_url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#exp-route-order",
    "also": [
-    "exp-route-order",
+    "ask-noc-docs",
     "ask-noc-registers"
-   ]
+   ],
+   "state": "nearly"
   },
   {
    "part": "the way back of a DRAM load (Flow 1, Load -> DRAM)",
@@ -8314,15 +8372,16 @@
     "addr.load-model",
     "L45"
    ],
-   "what_is_inferred": "The reply's path: the diagram draws it from the memory shire through the L3 home to the requester.",
-   "what_settles_it": "The leg order is documented in a manual already in the repo: CORE-ET Shire Cache Specification §3.2.2 'L3 REQ_Read' (pdf p.55): L3 reads that miss go out the to_sys mesh port, the data returns to the L3 as L3_Fill, then the reply goes to the requester, so memory shire -> L3 home -> requester is spec. Only each leg's route (x or y first) is open: the routing ask and the contention experiment.",
+   "what_is_inferred": "The reply's path: the diagram draws it from the memory shire through the L3 home to the requester, each leg y first.",
+   "what_settles_it": "The leg order is documented in a manual already in the repo: CORE-ET Shire Cache Specification §3.2.2 'L3 REQ_Read' (pdf p.55): L3 reads that miss go out the to_sys mesh port, the data returns to the L3 as L3_Fill, then the reply goes to the requester, so memory shire -> L3 home -> requester is spec. Each leg's route: a reply goes y first (E56, 29 September, fact L104), so the drawing takes each leg back along its request's links. What is left: E56's streams ran between compute shires' scratchpads, so that a memory shire's and an L3 home's replies follow the same rule is inferred.",
    "ask": "document (in repo) + experiment",
-   "ask_detail": "cite the Shire Cache Specification; exp-route-order for the route of each leg",
+   "ask_detail": "cite the Shire Cache Specification; exp-route-order (E56) for the route of each leg",
    "hub_anchor": "exp-route-order",
    "hub_url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#exp-route-order",
    "also": [
     "ask-noc-docs"
-   ]
+   ],
+   "state": "nearly"
   },
   {
    "part": "the inside of a shire (banks, neighbourhoods, UC block, mesh stop)",
@@ -8390,24 +8449,26 @@
    "settled": true
   },
   {
-   "part": "the Host -> DRAM path (Flow 6: 'the path from the PCIe shire is not established')",
+   "part": "the Host -> DRAM path (Flow 6, 'Into DRAM')",
    "comps": [
     "flow:F",
     "pcie"
    ],
    "facts": [
+    "pcie.write-l3",
     "bw-pcie"
    ],
-   "what_is_inferred": "Whether the host's writes reach DRAM through the lines' L3 homes or straight to the memory shires.",
-   "what_settles_it": "The PCIe shire's to-sys bridge has DRAM address-map entries for every shire's L3 slave (SHn_L3D) and for each memory shire (MC0..MC7_MEM) (etsoc-hal hwinc/noc_esr.h, BRIDGE_PS0_TOSYS ... MAP_MEM_DRAM; its to-L3 bridge only to L3 slaves), so the programmed ADBASE/ADMASK decide. Experiment: copy a buffer from the host, then time each line's first load in a kernel launched without flushL3: L3-hit latency = through the L3 homes, DRAM latency = to the memory shires. Or read the programmed values (SP-only) / the NoC documents.",
-   "ask": "experiment / document",
-   "ask_detail": "exp-pcie-path; ask-noc-docs",
+   "what_is_inferred": "Measured on 29 September (E55, fact pcie.write-l3): the host's writes go through their lines' L3 homes, which allocate the lines. After a staged 4 MB copy 99.5% of the lines read at L3 latency on aifoundry3 (99.9% on aifoundry1 card 1), whether the L3 held the buffer before or not, and no value read was stale. Still inferred, and drawn dashed: the L3's later write-back of those lines to the memory shires and DRAM.",
+   "what_settles_it": "Settled by experiment: copy a buffer from the host, then time each line's first load in a kernel launched without the L3 flush; L3-hit latency means through the L3 homes (tools/claims-v3/pcie2/PREREG.md, frozen before the validation; docs/reports/data/2026-09-29-pcie2). What is left: why the bridge sends the writes there. The PCIe shire's to-sys bridge has DRAM address-map entries for every shire's L3 slave (SHn_L3D) and for each memory shire (MC0..MC7_MEM) (etsoc-hal hwinc/noc_esr.h, BRIDGE_PS0_TOSYS ... MAP_MEM_DRAM), so the programmed ADBASE/ADMASK decide: read them (SP-only) or the NoC documents.",
+   "ask": "done (experiment) / document / interface",
+   "ask_detail": "exp-pcie-path (E55); ask-noc-docs; ask-noc-registers",
    "hub_anchor": "exp-pcie-path",
    "hub_url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#exp-pcie-path",
    "also": [
     "ask-noc-docs",
     "ask-noc-registers"
-   ]
+   ],
+   "state": "nearly"
   },
   {
    "part": "the DRAM address map below the memory shire",
@@ -8418,15 +8479,16 @@
    "facts": [
     "L50"
    ],
-   "what_is_inferred": "PA[9] channel, PA[12:10] bank, PA[34:18] row: decoded from firmware ADDRMAP values and a tool comment, not read back.",
-   "what_settles_it": "Experiment: a row-conflict probe with the L3 defeated (latency step of one row cycle marks bank/row bits; same across PA[9] for the channel). Or a service-processor readback of each controller's ADDRMAP registers.",
-   "ask": "experiment / interface",
-   "ask_detail": "exp-dram-rows; ask-memshire",
+   "what_is_inferred": "PA[9] channel, PA[12:10] bank, PA[34:18] row, decoded from firmware ADDRMAP values and a tool comment, and measured on 29 September (E57, fact L50): another row in the same bank conflicts, and a row that also differs in any of PA[6-12] reads as a row hit, on aifoundry1 card 1 and aifoundry3 (R33a); PA[6-9] set the refresh phase, so each controller refreshes on its own, on aifoundry3 (R33b; not established on card 1). Still open: whether two accesses on one controller serialise (R33c, insufficient on both cards).",
+   "what_settles_it": "Settled for the banks and rows by experiment: single DRAM loads with every line evicted first, timed against the rows and banks the map predicts (tools/claims-v3/memp2/prereg/PREREG.md, frozen before the validation; docs/reports/data/2026-09-29-memp2). What is left: the controller's serialisation (R33c's method did not resolve 6 cycles) and the refresh domain on a second card; a service-processor readback of each controller's ADDRMAP registers would settle the whole map.",
+   "ask": "done (experiment, in part) / interface",
+   "ask_detail": "exp-dram-rows (E57); ask-memshire",
    "hub_anchor": "exp-dram-rows",
    "hub_url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#exp-dram-rows",
    "also": [
     "ask-memshire"
-   ]
+   ],
+   "state": "nearly"
   },
   {
    "part": "the DRAM chip's share of a load (memory shire panel)",
@@ -8453,13 +8515,14 @@
    "facts": [
     "minion.tensor-cache-path"
    ],
-   "what_is_inferred": "Tensor loads skip the L1 but are cached in L2 and L3; tensor stores skip the L1 and L2 (energy manual; PRM confirms only the L1 bypass).",
-   "what_settles_it": "Mostly documents already in the repo: CORE-ET Shire Cache Specification §3.5 'REQ_WriteAround' (pdf p.62): TensorStores issue writeArounds that bypass the L2 (coalesced in its buffer, written to the L3 or a remote scratchpad); Minion DCache Description: TensorLoad requests go out the L2 miss interface (pdf p.32) and fill the L1 scratchpad straight from the L2 interface (pdf p.41). Whether the L2 allocates tensor-load lines: a re-load timing test (second TensorLoad of the same lines at L2-hit cost) or shire-cache counters.",
-   "ask": "document (in repo) + experiment",
-   "ask_detail": "exp-tensor-reload (no team ask needed)",
+   "what_is_inferred": "Tensor loads skip the L1 but are cached in L2 and L3; tensor stores skip the L1 and L2 (energy manual; PRM confirms only the L1 bypass). The L2 part is measured (E57, 29 September): a second TensorLoad of the same 1 KB took 199 cycles, the L2 reference's 199, on aifoundry3 and aifoundry1 card 1. Not measured: whether the L3 keeps the lines, and the stores' bypass.",
+   "what_settles_it": "Mostly documents already in the repo: CORE-ET Shire Cache Specification §3.5 'REQ_WriteAround' (pdf p.62): TensorStores issue writeArounds that bypass the L2 (coalesced in its buffer, written to the L3 or a remote scratchpad); Minion DCache Description: TensorLoad requests go out the L2 miss interface (pdf p.32) and fill the L1 scratchpad straight from the L2 interface (pdf p.41). Whether the L2 allocates tensor-load lines: settled by the re-load timing test (tools/claims-v3/memp2/prereg/PREREG.md, R36; docs/reports/data/2026-09-29-memp2). What is left: the L3's copy, by the same test with the L2 evicted between the loads, or shire-cache counters.",
+   "ask": "document (in repo) + experiment (done for the L2)",
+   "ask_detail": "exp-tensor-reload (E57; no team ask needed)",
    "hub_anchor": "exp-tensor-reload",
    "hub_url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#exp-tensor-reload",
-   "also": []
+   "also": [],
+   "state": "nearly"
   },
   {
    "part": "the UC block, the I/O shire and the shire's voltage regions (one-line descriptions)",
@@ -8490,10 +8553,10 @@
     "pcie.d2h",
     "pcie.staged"
    ],
-   "what_is_inferred": "Not inferred but unexplained, from the PCIe page: why two host-to-card DMA commands at once move half as much as one, why card-to-host DMA dips at 32-64 MB per copy, and why aifoundry3's host copies memory at about half the others' rate.",
-   "what_settles_it": "The PCIe DMA engine's documentation, or the settings the firmware programs (channel arbitration, read-request size, element splitting); root reads on the hosts (lspci -vvv for the payload and read-request sizes, dmidecode for the memory channels); and an experiment: the concurrency test swept over command sizes and element counts, and repeated on a host with the IOMMU in passthrough.",
-   "ask": "document / lab admin / experiment",
-   "ask_detail": "ask-pcie-dma; ask-lab-root; exp-pcie-concurrency",
+   "what_is_inferred": "Not inferred but unexplained, from the PCIe page: why two host-to-card DMA commands of one stream at once move half as much as one, and why card-to-host DMA dips at 32-64 MB per copy. E55 (29 September) found where the loss is: two commands in flight in one stream move 0.488 of one at 2 x 64 MB on aifoundry3, one command in each of two streams 1.012 (T35-S), and a shared read engine, the IOMMU, a fixed cost per overlap, a slow onset and a loss per element were refuted on both cards tested. aifoundry3's host copies memory at about half the others' rate because it runs one memory channel (docs/reports/data/2026-09-27-pcie/hosts.txt).",
+   "what_settles_it": "What serves one stream's two commands in turn: the runtime's source for a stream's DMA queue, or the master minion's DMA worker in the firmware; the PCIe DMA engine's documentation, or the settings the firmware programs (channel arbitration, read-request size, element splitting), for the card-to-host dip; the lab admin's reads on the hosts (lspci -vvv for the payload and read-request sizes).",
+   "ask": "document / lab admin / experiment (done: E55)",
+   "ask_detail": "ask-pcie-dma; ask-lab-root; exp-pcie-concurrency (E55)",
    "hub_anchor": "exp-pcie-concurrency",
    "hub_url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#exp-pcie-concurrency",
    "also": [
@@ -8601,27 +8664,27 @@
   "exp-route-order": {
    "rung": 32,
    "what": "A link-contention test for the mesh's routing order",
-   "status": "needs_tooling"
+   "status": "works_now"
   },
   "exp-dram-rows": {
    "rung": 33,
    "what": "A row-conflict probe for the DRAM address map",
-   "status": "needs_tooling"
+   "status": "works_now"
   },
   "exp-pcie-path": {
    "rung": 34,
    "what": "First touch after a host copy: does the host write through the L3?",
-   "status": "needs_tooling"
+   "status": "works_now"
   },
   "exp-pcie-concurrency": {
    "rung": 35,
    "what": "Why two host-to-card DMA commands halve the rate: a command-size sweep, and the IOMMU in passthrough",
-   "status": "needs_tooling"
+   "status": "works_now"
   },
   "exp-tensor-reload": {
    "rung": 36,
    "what": "Does the L2 keep tensor-loaded lines? A second TensorLoad of the same lines",
-   "status": "needs_tooling"
+   "status": "works_now"
   },
   "exp-cache-bottleneck": {
    "rung": 43,

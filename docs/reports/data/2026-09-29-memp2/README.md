@@ -14,7 +14,7 @@ time the new kernel paths ran in `sys_emu` (`sysemu.sh`: 18 runs, PASS).
 - R33b PASS on aifoundry3 (the refresh domain is the controller, PA[6-9] its bits), after FAIL in development on card 1.
 - R33c INSUFFICIENT on both cards (PA[11], PA[12] unclear).
 - R36 PASS on both: a second TensorLoad of the same lines takes 199 cycles, an L2 hit (L3 reference 744-815, the first
-  load about 1,345): the L2 keeps TensorLoad lines.
+  load 1,344.5): the L2 keeps TensorLoad lines.
 - R43 FAIL on both: no registered theory of the 128 B per cycle cap survives (T43-B misses 7 conditions, Cc 5).
 - E102 (reported): stride-256 reads get 0.665 of stride-64's bandwidth and cost +42 to +50 pJ per 64 B more (zeros,
   random), explained by the awake minions' longer time (T102).

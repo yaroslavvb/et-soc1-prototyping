@@ -20,7 +20,7 @@
    "access": "host, management node",
    "status": "works_now",
    "check": "changed",
-   "note": "The output side (w_out) of the three PMBus regulators only; the other rails have no power telemetry, and the input side is read by the SP but not forwarded (§4.1). ettelem --reset-ms reads the min/max over a chosen window (in every pass on aifoundry2 and aifoundry3; on aifoundry1-c1 one pass of three saw the maximum fall once with no reset), and each reset restarts the running average: with a reset every second, a rail had fallen 93% of the way one second after a burst, on all three cards (§4.1)."
+   "note": "The output side (w_out) of the three PMBus regulators only; the other rails have no power telemetry, and the input side is read by the SP but not forwarded (§4.1). ettelem --reset-ms reads the min/max over a chosen window (in every pass on aifoundry2 and aifoundry3; on aifoundry1-c1 one pass of three saw the maximum fall once with no reset), and each reset restarts the running average: with a reset every second, a rail had fallen 93% of the way one second after a burst, on all three cards (§4.1). E58 (29 September) fitted the filter rail by rail with the SP's one-pass delay kept apart: τ 1.01–1.06 s on aifoundry3's rails, 1.08 s on aifoundry1-c1's minion and NoC rails and 0.54 s on its SRAM rail; tools/ettelem/deconv.py undoes it (rung 4)."
   },
   {
    "level": "Energy per event",
@@ -353,8 +353,8 @@
   {
    "title": "Limits of observability (this page)",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability",
-   "date": "20–28 Sep",
-   "what": "The hub: every instrument on the card, what it resolves and what it cannot see, the unmetered power attributed, the ladder of improvements, and every page's claims before and after the three-card campaign.",
+   "date": "20–29 Sep",
+   "what": "The hub: every instrument on the card, what it resolves and what it cannot see, the unmetered power attributed, the ladder of improvements (rungs 4, 31–36 and 43 tested on the cards on 28–29 September), and every page's claims before and after the three-card campaign.",
    "instruments": "all of them",
    "short": "This hub",
    "pub": "2026-09-20",
@@ -4498,12 +4498,12 @@
   {
    "rung": 4,
    "group": "software, on the data the card already gives",
-   "status": "needs_tooling",
+   "status": "works_now",
    "what": "Undo the rails' one-second average",
-   "done": false,
-   "adds": "The PMIC's rail averages, as the SP forwards them, are roughly first-order ({{rf_1s}} of a step at 1 s, {{rf_2s}} at 2 s; τ ≈ {{rf_tau}} s, measured on the catalogue's bursts with no reset; a reset restarts the average, §4.1). Inverting that filter sample by sample recovers rail power every refresh (§4.1).",
-   "cost": "~50 lines in the analysis scripts; a calibration burst to pin τ",
-   "effect": "Rail split of bursts shorter than 3 s; per-launch rail energy; the minion/SRAM/NoC split of transients."
+   "done": true,
+   "adds": "The PMIC's rail averages, as the SP forwards them, are roughly first-order ({{rf_1s}} of a step at 1 s, {{rf_2s}} at 2 s; τ ≈ {{rf_tau}} s, measured on the catalogue's bursts with no reset, a fit that also absorbs the SP's one-pass delay; a reset restarts the average, §4.1). E58 (28–29 September) measured the filter on each rail with step bursts of 2.0, 3.2 and 4.0 s and inverted it (tools/ettelem/deconv.py, for streams sampled without --reset-ms). With the one-pass delay kept apart, τ is 1.06 s on the minion rail, 1.01 s on SRAM, 1.04 s on the NoC and 1.05 s for the board's average on aifoundry3, the validation card, and 1.08, 0.54, 1.08 and 1.10 s on aifoundry1-c1 in development: that card's SRAM meter averages twice as fast. On aifoundry3 each reading is one first-order average with its card's τ, published one pass late (T1–T3 held). Deconvolved with the frozen τ, every burst's level came back within 3% of the step and its energy within 1%, but the flat top of the 2 s minion bursts scattered by 8.4% of the step against at most 6%, so T4 (a clean inverse) failed on aifoundry3. On aifoundry1-c1 the minion rail rose with τ 1.32 s and fell with 1.02 s, so one first-order average does not describe it (T1 failed there, in development).",
+   "cost": "done (E58, 29 Sep): tools/ettelem/deconv.py; plan tools/claims-v3/tau/PREREG.md, frozen after development (SHA-256 7d4fabad…); data docs/reports/data/2026-09-29-tau-aifoundry3/ (validation) and docs/reports/data/2026-09-29-tau-aifoundry1-c1/ (development)",
+   "effect": "Rail split of bursts shorter than 3 s; per-launch rail energy; the minion/SRAM/NoC split of transients. The published readings understate a 2 s burst by 19–22% on the three rails (all but aifoundry1-c1's SRAM rail) and 16–17% for the board average, the deconvolved ones by at most 3% (Power and temperature, §2). Streams sampled with a statistics reset every second (E52, E53, DV2) need the reset in the model first."
   },
   {
    "rung": 5,
@@ -4681,9 +4681,9 @@
    "status": "ask_team",
    "what": "The NoC's reference manual and specification",
    "done": false,
-   "adds": "Three NoC documents are named in the open drop and missing from it: the NoC configuration's generated reference manual (noc/reference_manual/noc_reference_manual.htlm, so spelled, cited at core-et rtl/inc/debug_defines.vh:831-832), the Main NoC documentation that the CORE-ET Minion Shire Description's §3.3 says 'can be accessed here' (pdf p.11; the PDF carries no link), and the 'NOC spec' that the firmware's two shire maps are 'based on' (noc_reconfigure.h:76, 84). They would say whether a request turns x first or y first, whether a reply follows the same rule back, which of the nine router layers each kind of traffic takes, how wide a router-to-router link is, how each bridge's address map sends DRAM addresses (to an L3 home or straight to a memory shire), and what the router and bridge registers in noc_esr.h hold. The memory-levels page needs the same documents for the router pipeline per hop, which of the nine main-NoC layers carry L3 requests and replies, the flit width and the dimension order.",
+   "adds": "Three NoC documents are named in the open drop and missing from it: the NoC configuration's generated reference manual (noc/reference_manual/noc_reference_manual.htlm, so spelled, cited at core-et rtl/inc/debug_defines.vh:831-832), the Main NoC documentation that the CORE-ET Minion Shire Description's §3.3 says 'can be accessed here' (pdf p.11; the PDF carries no link), and the 'NOC spec' that the firmware's two shire maps are 'based on' (noc_reconfigure.h:76, 84). E56 (29 September) measured requests x first and replies y first for loads and stores (fact L104); the documents would confirm it for small requests, acknowledgements and tensor messages, and say which of the nine router layers each kind of traffic takes, how wide a router-to-router link is, how each bridge's address map sends DRAM addresses (to an L3 home or straight to a memory shire), and what the router and bridge registers in noc_esr.h hold. The memory-levels page needs the same documents for the router pipeline per hop, which of the nine main-NoC layers carry L3 requests and replies and the flit width (the dimension order was measured by E56).",
    "cost": "an email; the manual is generated by the NoC vendor's tool, so its licence decides whether it can be shared",
-   "effect": "Chip diagram: every route the eleven flows draw, x first on an assumption (fact L104), and the replies' routes become documented. Heat per millimetre's link-sharing shares, computed under x-first routing, are confirmed or recomputed; the link width bounds what one link can carry. Memory levels: the mesh-hop scale of the L3 and of the remote scratchpad; with rung 39, the mesh's share of an L3 hit.",
+   "effect": "Chip diagram: the routes E56 measured for loads and stores (fact L104: requests x first, replies y first) become documented for every kind of packet, tensor messages among them. Heat per millimetre's link-sharing shares, given under both orders since 29 September, are confirmed; the link width bounds what one link can carry. Memory levels: the mesh-hop scale of the L3 and of the remote scratchpad; with rung 39, the mesh's share of an L3 hit.",
    "diagram": "the mesh, every route and every reply",
    "levels": [
     ["l3/hop", "the L3's mesh hop"],
@@ -4798,7 +4798,7 @@
    "status": "ask_team",
    "what": "The PCIe DMA engine's documentation and the settings the firmware gives it",
    "done": false,
-   "adds": "Two results of the PCIe page have no explanation: two host-to-card DMA commands in flight on one stream move about half as much as one at a time (0.49 times on all three cards, docs/reports/data/2026-09-27-pcie/pcie.json derived.<card>.h2d_two_in_flight_over_one), and card-to-host DMA is fastest at 16 MB per copy, slowest at 64 MB and partly recovers by 256 MB (bw.<card>.d2h.dma). The firmware gives the engine four read and four write channels, one command each (pcie_dma.h, dmaw.c in the firmware), but how the channels share the link, what read-request size the engine issues and how it splits a 128 MB element are in no document of the open drop. The PCIe controller's and DMA engine's documentation, or the register values the firmware programs, would say whether the halving is the engine's, the IOMMU's or the host's read completions.",
+   "adds": "Two results of the PCIe page have no explanation: two host-to-card DMA commands in flight on one stream move about half as much as one at a time (0.49 times on all three cards, docs/reports/data/2026-09-27-pcie/pcie.json derived.<card>.h2d_two_in_flight_over_one), and card-to-host DMA is fastest at 16 MB per copy, slowest at 64 MB and partly recovers by 256 MB (bw.<card>.d2h.dma). The firmware gives the engine four read and four write channels, one command each (pcie_dma.h, dmaw.c in the firmware), but how the channels share the link, what read-request size the engine issues and how it splits a 128 MB element are in no document of the open drop. E55 (29 September) put the halving inside one stream (T35-S: one command in each of two streams loses nothing; a shared engine and the IOMMU were refuted). The PCIe controller's and DMA engine's documentation, or the register values the firmware programs, would say which part of a stream serves its two commands in turn, and why card-to-host DMA dips.",
    "cost": "an email; the controller is licensed IP, so its documentation may not be shareable, while the programmed values are",
    "effect": "PCIe page: section 5's 'not established' gets a cause, and so does the dip in card-to-host rates; the chip diagram's PCIe shire (fact pcie.conc) says why a program should not queue two copies at once.",
    "diagram": "the PCIe shire and the host link"
@@ -4812,7 +4812,7 @@
    "done": false,
    "adds": "A normal user cannot read them, and the PCIe page needed both: (1) lspci -vvv for each card and its root port, the negotiated maximum payload size and maximum read-request size, which set how much of the link's 15.75 GB/s a transfer can use; (2) the IOMMU's configuration beyond its group type (every host runs it translated, docs/reports/data/2026-09-27-pcie/hosts.txt). A third reading this rung asked for, the memory channels populated, we made on 27 September without root (udev's copy of the DMI memory table, hosts.txt, pcie.json hostmem): aifoundry3's host runs one DDR4-2666 module on a single channel, aifoundry2's two on two channels and aifoundry1's four DDR4-3200 on two, consistent with aifoundry3's host copying memory at 9.2 GB/s against 17.4 and 21.4 GB/s on the other two (pcie.json hostcopy.<card>, 256 MB), though no run isolated the channel count as the cause.",
    "cost": "a request to the lab admin; minutes, and no card time",
-   "effect": "PCIe page: the payload size behind the link's efficiency (aifoundry3's slow staged copies are consistent with its single memory channel, read without root); the concurrency experiment's IOMMU half becomes plannable.",
+   "effect": "PCIe page: the payload size behind the link's efficiency (aifoundry3's slow staged copies are consistent with its single memory channel, read without root); the IOMMU reading is no longer needed for rung 35: E55 refuted the shared read engine or IOMMU as the cause of the halving (two streams lose nothing).",
    "diagram": "the host and the PCIe link"
   },
   {
@@ -4943,21 +4943,21 @@
    "status": "needs_tooling",
    "what": "Time counter reads from every shire to place the master shire and the memory shires",
    "done": false,
-   "adds": "Two stock syscalls make M-mode read another block's counters for a user kernel: SYSCALL_PMC_SC_SAMPLE a cache bank's counter in a given shire, SYSCALL_PMC_MS_SAMPLE a memory shire's (docs/research/counters-and-dram.md §2.3 and §3.5; each call stops, reads and restarts one counter). Timed from each of the 32 compute shires, a call should cost a constant plus a term per hop to its target. Aimed at shire 32 it says whether the master shire is the top grey cell or the bottom one; aimed at each memory shire it places all eight directly, without the L3 home in between that leaves memory shire 2 a tie in the DRAM-latency fit. The firmware's map agrees with the fit's other seven places, which leaves memory shire 2 one cell in both: it confirms the frame, not memory shire 2 on its own, so this timing is what settles it. Leave shire 33, the spare, alone: after the remap the active mask stops at shire 32 (main.c:288-289), so it may not answer.",
-   "cost": "a kernel, then about ten minutes per card; no firmware change",
-   "effect": "Chip diagram: the master and spare cells and the memory shires' places, now taken from the firmware's map and the fit, become measured on the cards.",
+   "adds": "Two stock syscalls make M-mode read another block's counters for a user kernel: SYSCALL_PMC_SC_SAMPLE a cache bank's counter in a given shire, SYSCALL_PMC_MS_SAMPLE a memory shire's (docs/research/counters-and-dram.md §2.3 and §3.5; each call stops, reads and restarts one counter). Timed from each of the 32 compute shires, a call should cost a constant plus a term per hop to its target, which places the master shire (shire 32) and the eight memory shires directly, without the L3 home that leaves memory shire 2 a tie in the DRAM-latency fit. E56 (28–29 September, workloads/nocroute) ran it. In development on aifoundry1-c1 a call cost a constant plus 35–36 cycles per hop (T-DIRECT held), the master shire placed at (0,3), the firmware map's top grey cell (rms 1.1 cycles against 33 for the next grey cell), and memory shires 0–2, 4, 5 and 7 where the firmware map puts them (3 and 6 undecided). On aifoundry3, the validation card, the calls fit 1,557 + 35.9 cycles per hop over 992 caller-target pairs (r² 0.995) with an rms of 4.7 cycles, above the frozen rule's 4: T-DIRECT failed there, so the places that rest on it were not decided (the same fit ranks (0,3) first there too, rms 0.5; by the rule that is reported, not decided). Shire 33, the spare, was never called.",
+   "cost": "a kernel (workloads/nocroute), about ten minutes per card, no firmware change; run as E56: plan tools/claims-v3/nocr/PREREG.md, frozen after development (SHA-256 2472ab3e…); data docs/reports/data/2026-09-29-nocr/ (raw/<card>/, summary.json per card). Open: a validation on which the timing meets the frozen rule",
+   "effect": "Chip diagram: the master and spare cells and the memory shires' places stay the firmware map's and the fit's. The development card agrees with the firmware's map; the validation card decided nothing.",
    "diagram": "the grey cells and the memory shires"
   },
   {
    "rung": 32,
    "id": "exp-route-order",
    "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
-   "status": "needs_tooling",
+   "status": "works_now",
    "what": "A link-contention test for the mesh's routing order",
-   "done": false,
-   "adds": "Choose sets of tensor-load streams whose reply data would share one mesh link if the mesh routes x first and no link if it routes y first, and a mirrored set for the opposite order; a throughput drop in one set and not the other gives the dimension order, and shows whether replies follow the same rule. One reader does not fill a link (Heat per millimetre's research, §1b of its SYNTHESIS.md), so each stream needs several readers.",
-   "cost": "a variant of the E27 tensor-load kernel; about 15 minutes on three cards",
-   "effect": "Chip diagram: routes and replies drawn from a measurement instead of an assumption (fact L104); Heat per millimetre's link sharing recomputed if the order is not x first. Memory levels: the dimension order at the L3's and the remote scratchpad's mesh-hop scale.",
+   "done": true,
+   "adds": "Sets of tensor-load streams whose reply data share one directed mesh link if the mesh routes x first and none if it routes y first, a mirrored set for the opposite order, and the same flows as tensor stores, whose data travel as requests: a throughput drop in one set and not the other gives the dimension order. E56 (28–29 September, workloads/nocroute) ran it on aifoundry1-c1 (development) and aifoundry3 (validation), with the same result on both: read replies travel y first (T-YX held) and write requests x first, so replies retrace their requests' path. T-XY, the chip diagram's assumption for every route (fact L104), is refuted for replies. A directed link saturates near 92 GB/s (T-WIDE refuted), and the routing is not adaptive (T-ADAPT refuted). How much a read's requests load the reversed links was not decided (less than 0.54 of the reply).",
+   "cost": "done (E56, 29 Sep): plan tools/claims-v3/nocr/PREREG.md, frozen after development (SHA-256 2472ab3e…); data docs/reports/data/2026-09-29-nocr/ (raw/<card>/, summary.json per card)",
+   "effect": "Chip diagram: routes from a measurement instead of an assumption (fact L104): requests x first, replies y first along the request's route reversed. Heat per millimetre's link model assumed x first for every packet, and its tensor-load data travel as replies: since 29 September its route map draws y first and gives the link sharing under both orders (0 / 22 / 30 / 55 / 78% of link-hops at 1 / 2 / 3 / 4 / 6 hops y first, against 0 / 22 / 32 / 55 / 72% x first). Memory levels: the dimension order at the L3's and the remote scratchpad's mesh-hop scale.",
    "diagram": "the mesh, every route and every reply",
    "levels": [
     ["l3/hop", "the L3's mesh hop"]
@@ -4967,48 +4967,48 @@
    "rung": 33,
    "id": "exp-dram-rows",
    "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
-   "status": "needs_tooling",
+   "status": "works_now",
    "what": "A row-conflict probe for the DRAM address map",
-   "done": false,
-   "adds": "With the L3 defeated as in E28, alternate loads between two lines that agree in the candidate bank bits and differ in row, and between lines in different banks: a step of about one DRAM row cycle in latency marks the bank and row bits, and the same test across PA[9] checks the channel bit. Today these bits are decoded from the firmware's ADDRMAP values and a tool comment, not read back. The memory-levels page (28 September) counts the row bits as measured already, PA[18] and up: the anatomy page's one-bit flips (§5, 19 September) and the version-3 check's MEM-P4, which held on the three cards. A flipped bank bit costs nothing there, like PA[9], the channel (the memory shire's reset value, ms_regs.h:160), so which of the low bits pick the bank rather than the channel still comes from the programmed map.",
-   "cost": "a memprobe mode; about ten minutes per card",
-   "effect": "Chip diagram: the memory shire's address map (fact L50, inferred) becomes measured on three cards.",
+   "done": true,
+   "adds": "With every timed load from DRAM, alternate loads between two lines that agree in the candidate bank bits and differ in row, and between lines in different banks: a step of about one DRAM row cycle marks the bank and row bits; fold each line's refresh stalls to find which bits change the refresh schedule; and time two accesses issued back to back. Until then the bits were decoded from the firmware's ADDRMAP values and a tool comment (the memory-levels page counts the row bits, PA[18] and up, as measured already: the anatomy's one-bit flips and MEM-P4). E57 (29 September, memprobe's new modes) ran it. On aifoundry3, the validation card: rows and banks split as the inferred map L50 says, in 15 of 15 conditions, with a bank-bit step of −20 cycles (R33a PASS, as in development on aifoundry1-c1); the refresh domain is the controller, with PA[6–9] its bits and PA[10–12] inside it (R33b PASS; in development on aifoundry1-c1 PA[7] read unclear and the test failed); whether PA[11] and PA[12] share a controller back to back was not resolved on either card (R33c INSUFFICIENT).",
+   "cost": "done (E57, 29 Sep): plan tools/claims-v3/memp2/prereg/PREREG.md, frozen after development (lock SHA-256 9712c3d6…); data docs/reports/data/2026-09-29-memp2/ (raw/<card>/, val-aifoundry3/, dev-aifoundry1-c1/). Not run on aifoundry2 (DV2 holds it)",
+   "effect": "Chip diagram: the memory shire's address map (fact L50, inferred until 29 September) is measured on aifoundry3: its bank and row split, and PA[6–9] as the controller's bits by their refresh schedule; on aifoundry1-c1 the split only.",
    "diagram": "the memory shire's address map"
   },
   {
    "rung": 34,
    "id": "exp-pcie-path",
    "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
-   "status": "needs_tooling",
+   "status": "works_now",
    "what": "First touch after a host copy: does the host write through the L3?",
-   "done": false,
-   "adds": "The PCIe shire's to-sys bridge has DRAM address-map entries both for every shire's L3 slave and for each memory shire (noc_esr.h, the PS0_TOSYS …MAP_MEM_DRAM registers), so a host write may land in its line's L3 home or go straight to a memory shire, depending on how they are programmed. Copy a buffer from the host, then time each line's first load in a kernel launched without the L3 flush: L3-hit latency means the copy went through the L3 homes, DRAM latency that it went to the memory shires.",
-   "cost": "the PCIe timing tool (workloads/pciebench) and a memprobe read; minutes per card",
-   "effect": "Chip diagram: the Host / PCIe flow's path from the PCIe shire to DRAM, now 'not established', becomes measured.",
+   "done": true,
+   "adds": "The PCIe shire's to-sys bridge has DRAM address-map entries both for every shire's L3 slave and for each memory shire (noc_esr.h), so a host write may land in its line's L3 home or go straight to a memory shire. Copy a buffer from the host, then time each line's first load in a kernel launched without the L3 flush. E55 (28–29 September) ran it on aifoundry1-c1 (development) and aifoundry3 (validation, five passes): after a host write 99.5% of lines read at L3 latency on aifoundry3 (99.9% in development), whether or not the L3 held the line before, and no line read a wrong value. The host writes through the lines' L3 homes, which allocate them (T34-A held); an L3 that only updates lines it holds (T34-B) and writes that go to the memory shires, with the L3's copy invalidated or left stale (T34-C, T34-D), are refuted.",
+   "cost": "done (E55, 29 Sep): workloads/pciebench --test touch; plan tools/claims-v3/pcie2/PREREG.md, frozen after development (SHA-256 f632d6b3…); data docs/reports/data/2026-09-29-pcie2/ (README.md, results.md, pcie2.json)",
+   "effect": "Chip diagram: the Host / PCIe flow's path from the PCIe shire to DRAM, drawn as not established, is measured: through the L3 homes, where a kernel's first touch of a freshly copied buffer hits.",
    "diagram": "the Host / PCIe flow's path to DRAM"
   },
   {
    "rung": 35,
    "id": "exp-pcie-concurrency",
    "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
-   "status": "needs_tooling",
+   "status": "works_now",
    "what": "Why two host-to-card DMA commands halve the rate: a command-size sweep, and the IOMMU in passthrough",
-   "done": false,
-   "adds": "Rerun workloads/pciebench's conc test with 2 × 1, 4, 16 and 64 MB per stream, one and two commands in flight, and with the copy split into more DMA elements, on the three cards; then the same on one host booted with the IOMMU in passthrough. A halving that follows the number of elements in flight points at the DMA engine; one that disappears in passthrough, at the IOMMU's translation of the card's reads.",
-   "cost": "a pciebench option and about ten minutes per card; the passthrough half needs the lab admin to reboot one host",
-   "effect": "PCIe page: section 5's collapse gets a cause; whether a program can overlap its copies at all.",
+   "done": true,
+   "adds": "The test: workloads/pciebench's conc test with 2 × 1, 4, 16 and 64 MB, one and two commands in flight, in one stream or two, and with the copy split into 8 DMA elements. E55 (28–29 September) ran it on aifoundry1-c1 (development) and aifoundry3 (validation, five passes), with the same result on both: two host-to-card commands in flight in one stream move 0.49 of one at 64 MB (a rate ratio of 0.48 over 1–64 MB on aifoundry3), but one command in each of two streams loses nothing (1.01), and 8 elements move as much as 1 (0.99). Only two commands of one stream collide (T35-S held); a fixed cost per overlap (T35-A), a shared DMA read engine or the IOMMU (T35-BC), a queue that fills (T35-E) and the elements (T35-X) are refuted. Card to host, two commands in flight move 1.10 of one at 64 MB; at 1–16 MB the result was inconclusive. What inside one stream serialises its two commands is not established.",
+   "cost": "done (E55, 29 Sep): a pciebench option; plan tools/claims-v3/pcie2/PREREG.md, frozen after development (SHA-256 f632d6b3…); data docs/reports/data/2026-09-29-pcie2/. The IOMMU passthrough run is no longer needed",
+   "effect": "PCIe page: section 5's collapse is a property of one stream: the same two copies in two streams lose nothing.",
    "diagram": "the PCIe shire and the host link"
   },
   {
    "rung": 36,
    "id": "exp-tensor-reload",
    "group": "experiments on the cards: what the chip diagram infers, the PCIe page leaves open and the memory levels leave unknown",
-   "status": "needs_tooling",
+   "status": "works_now",
    "what": "Does the L2 keep tensor-loaded lines? A second TensorLoad of the same lines",
-   "done": false,
-   "adds": "The Minion DCache Description (pdf pp.32, 41) and the Shire Cache Specification (pdf p.62) say how TensorLoad reaches the L2 and how tensor stores bypass it, but not whether the L2 allocates the lines a TensorLoad fetched from the L3 or DRAM (the chip diagram's fact minion.tensor-cache-path). With the L3 flushed, TensorLoad the same 16 lines from DRAM twice: a second load at the L2's cost (fact tl.one) means the L2 kept them, one at the DRAM cost that it did not. The shire cache's counters (SYSCALL_PMC_SC_SAMPLE) would count the fills as a check.",
-   "cost": "a mode of the E36 TensorLoad probe (LAT-S2); minutes per card",
-   "effect": "Chip diagram: the tensor sequencer's cache path, now from documents, becomes measured, and flow 7's stage fed from DRAM is drawn through the L2 or past it.",
+   "done": true,
+   "adds": "The Minion DCache Description (pdf pp.32, 41) and the Shire Cache Specification (pdf p.62) say how TensorLoad reaches the L2 and how tensor stores bypass it, but not whether the L2 allocates the lines a TensorLoad fetched from the L3 or DRAM (the chip diagram's fact minion.tensor-cache-path). E57 (29 September) TensorLoaded the same fresh 1 KB block from DRAM twice: on aifoundry3 the first load took 1,344.5 cycles (a median) and the second 199, the L2 reference's 199 (the L3 reference 744), and a scalar load after it read the L2 (42 cycles); aifoundry1-c1 gave the same in development (199 against the L3's 815). The L2 keeps TensorLoad lines (T36 held on both cards). The shire cache's counters were not read as a check.",
+   "cost": "done (E57, 29 Sep): memprobe's OP_TTLOAD mode; plan tools/claims-v3/memp2/prereg/PREREG.md (lock SHA-256 9712c3d6…); data docs/reports/data/2026-09-29-memp2/",
+   "effect": "Chip diagram: the tensor sequencer's cache path, from documents until now, is measured: flow 7's stage fed from DRAM goes through the L2, and a second TensorLoad of the same lines is an L2 hit.",
    "diagram": "the tensor sequencer and flow 7"
   },
   {
@@ -5018,9 +5018,9 @@
    "status": "needs_tooling",
    "what": "What caps a shire at 128 B per cycle",
    "done": false,
-   "adds": "Own-scratchpad and L2 streams reach exactly 4.0 B per minion per cycle, 128 B per shire (2.46 TB/s chip-wide), half the four banks' 256 B. Sweep the tensor-load stride (64 B rotates the banks, 256 B stays in one bank and rotates its sub-banks, 1 KB stays in one bank and one sub-bank) and 1 to 4 neighbourhoods per shire (one alone reaches about 50 B per cycle), and ask the design team which block is the limit.",
-   "cost": "a mode of an existing tensor-load benchmark; about ten minutes per card",
-   "effect": "Memory levels: which block the scratchpad view highlights when all 1,024 minions stream: the sub-banks' busy time, the response crossbar, the neighbourhood's Fill FIFO or the minions' 256-bit ports.",
+   "adds": "Own-scratchpad and L2 streams reach exactly 4.0 B per minion per cycle, 128 B per shire (2.46 TB/s chip-wide), half the four banks' 256 B. E57 (29 September) swept the tensor-load stride (64 B rotates the banks, 256 B stays in one bank, 1 KB in one sub-bank) over 1–4 neighbourhoods per shire, with the minions' starting banks and sub-banks staggered or not, on aifoundry1-c1 (development) and aifoundry3 (validation), with the same numbers on both: 128 B per shire-cycle at stride 64 from three neighbourhoods up (one alone: 50), 64 in one bank (stride 256), 32 in one sub-bank (stride 1 KB), and 37 for one neighbourhood in one bank. No registered theory survives (R43 FAIL on both cards): 32 B per cycle per bank (T43-B) misses 7 configurations and a lockstep convoy (Cc) 5; a 128 B response path with 64 B banks and 32 B sub-banks (C) misses only the one neighbourhood in one bank (37 against 51.2). Which block is the limit is the question for the design team.",
+   "cost": "run as E57 (29 Sep): memprobe's MP_TLOOP mode; plan tools/claims-v3/memp2/prereg/PREREG.md (lock SHA-256 9712c3d6…); data docs/reports/data/2026-09-29-memp2/. Open: a theory registered before another run, or the design team's answer",
+   "effect": "Memory levels: which block the scratchpad view highlights when all 1,024 minions stream (the sub-banks' busy time, the response crossbar, the neighbourhood's Fill FIFO or the minions' 256-bit ports) is still open; the caps per bank (64 B per cycle) and per sub-bank (32) are measured.",
    "levels": [
     ["scp/shire", "the scratchpad's shire: the bandwidth question"]
    ]
@@ -5613,14 +5613,18 @@
   },
   {
    "id": "E51",
-   "when": "28 Sep, 00:30–02:54",
+   "when": "28–29 Sep",
    "card": "aifoundry2 (aifoundry3 read-only)",
-   "what": "DV2, development (not validated): what the governor compares (the mean of 34 shire sensors or the hottest one) and whether placement delays the first step down from 800 MHz; 21 read-only watch cycles, NAT-4 sessions of 7 s lifts, the throttle-state residencies; stopped when aifoundry2's Master Minion hung at 02:50. The validation plan is frozen and has not run",
+   "what": "DV2: what the governor compares (the mean of 34 shire sensors or the hottest one) and whether placement delays the first step down from 800 MHz. Development (28 Sep, 00:30–02:54): 21 read-only watch cycles, NAT-4 sessions of 7 s lifts, the throttle-state residencies; stopped when aifoundry2's Master Minion hung at 02:50 (restored at 08:32). Validation on the same card under the plan frozen after development (PREREG-VAL, SHA-256 e150ce16…), a replication the owner accepted: started at 20:45 on 28 Sep; three NAT-4 sessions (22:13–22:30, 22:42–23:06, 23:19–23:56) ran seven complete placement blocks (the placement test needs six) and the Master Minion did not hang; the idle watch cycles run until about 16:45 on 29 Sep (the idle card read 73–75 °C from 20:45 to 21:09 and 59 °C by 22:12, and 73–74 °C again from 00:11 to 01:00 with no session running). Not yet reduced: no validation verdict",
    "instruments": "10 Hz ettelem telemetry of the 34 shire sensors' mean and peak-holds; the service processor's trace ring (governor entries and exits); DM throttle residencies; host wall clock",
    "data": [
     {
      "path": "docs/reports/data/2026-09-28-dvfs2-aifoundry2/",
-     "note": "raw/ per pass, reductions/, dv2.json (the page's reduction), plan/ (DESIGN, PREREG-DEV, the frozen PREREG-VAL), incident/"
+     "note": "development: raw/ per pass, reductions/, dv2.json (the page's reduction), plan/ (DESIGN, PREREG-DEV, the frozen PREREG-VAL), incident/"
+    },
+    {
+     "path": "tools/claims-v3/dv2v/",
+     "note": "the validation's frozen plan and lock; its data comes after the reduction"
     }
    ],
    "reports": [
@@ -5665,6 +5669,117 @@
     {
      "title": "The effect of overheating",
      "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating"
+    }
+   ]
+  },
+  {
+   "id": "E54",
+   "when": "28 Sep, 22:54",
+   "card": "aifoundry3 (read-only)",
+   "what": "NV, the owner's NoC validation of Q63's voltage explanation: does the mesh's energy per bit·mm follow its 0.485 V supply? The NoC rail is to be set to 485, 540 and 600 mV at a fixed 400 MHz, with a restore to 485 mV on every exit path. Predictions frozen before any card write (predictions.json, SHA-256 c0d946c7…, registered at 23:06): the data part of a hop's energy goes as V² (×1.53 at 600 mV), against V or no dependence. A read-only probe of aifoundry3: firmware 1.3.1, BL2 0.20.0, the NoC set to 485 mV (484 on the die) at 400 MHz, the voltage table's NoC boot entry 485 mV. The first voltage write, the development probe, has not run: it waits for the owner. Validation on aifoundry2 after DV2; aifoundry1's card 1 is refused, since its BL2 0.18.0 writes every NoC setting to flash. The source read found that a failed regulator write retries for ever on these BL2 builds (fixed upstream in 7c6049087, 10 October 2024), so the service processor's 10 s watchdog would reset the card",
+   "instruments": "read-only so far: ettelem, the SP trace, the NoC set-point, the on-die voltage and the voltage table",
+   "data": [
+    {
+     "path": "tools/claims-v3/nv/",
+     "note": "DESIGN.md, PREREG.md, the frozen predictions.json and PREDICTIONS.sha256"
+    }
+   ],
+   "reports": [
+    {
+     "title": "Heat per millimetre (§7, and §10: the test E54 registers)",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm#dally-node"
+    }
+   ]
+  },
+  {
+   "id": "E55",
+   "when": "28–29 Sep, 23:47–00:27",
+   "card": "aifoundry1-c1 (development), aifoundry3 (validation)",
+   "what": "pcie2, for rungs 34 and 35: why two host-to-card DMA commands halve the rate (1–64 MB, one or two commands in flight, one or two streams, 1 or 8 elements), and where a host write lands (each line's first touch after a copy, timed in a kernel launched without the L3 flush). Development on aifoundry1-c1 (23:47–23:55), predictions frozen (SHA-256 f632d6b3…), validation on aifoundry3 (29 Sep, 00:05–00:27, five passes). On both cards two commands in flight in one stream moved 0.49 of one at 64 MB, but one in each of two streams lost nothing (1.01): only two commands of one stream collide (T35-S); a shared read engine or the IOMMU, a fixed cost, a queue that fills and the elements are refuted. After a host write 99.5% of lines read at L3 latency with no wrong value: the host writes through the lines' L3 homes (T34-A). Also the fixed run_pcie.sh's first card run (aifoundry1-c1, 23:56, every sub-test exit 0)",
+   "instruments": "host wall clock through the runtime API (workloads/pciebench --test conc and --test touch); the cycle counter in the first-touch kernel",
+   "data": [
+    {
+     "path": "docs/reports/data/2026-09-29-pcie2/",
+     "note": "README.md; raw/<card>/pcie2/ per pass; results.md and pcie2.json (validation); dev-aifoundry1-c1.md; run_pcie-r101/"
+    }
+   ],
+   "reports": [
+    {
+     "title": "This page, §5: rungs 34 and 35",
+     "url": "#exp-pcie-path"
+    },
+    {
+     "title": "Over the PCIe link (§5: which commands collide; where a host copy lands)",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link#which-commands-collide"
+    }
+   ]
+  },
+  {
+   "id": "E56",
+   "when": "28–29 Sep, 23:57–00:32",
+   "card": "aifoundry1-c1 (development), aifoundry3 (validation)",
+   "what": "nocr, for rungs 31 and 32: the places of the master shire and the memory shires, from the time of counter-sampling syscalls made from each of the 32 compute shires, and the mesh's routing order, from which sets of tensor-load and tensor-store flows between shires lose bandwidth together. Development on aifoundry1-c1 (23:57–00:01), frozen (SHA-256 2472ab3e…), validation on aifoundry3 (29 Sep, 00:28–00:32). On both cards read replies travel y first and write requests x first, so replies retrace requests; x first for every route, the chip diagram's assumption (fact L104), is refuted for replies; a directed link saturates near 92 GB/s; the routing is not adaptive. A call costs 1,557 + 35.9 cycles per hop on aifoundry3 (992 pairs, r² 0.995) with an rms of 4.7 cycles, above the frozen rule's 4, so the places were not decided there; in development the master shire placed at (0,3), the firmware map's top grey cell",
+   "instruments": "cycle counter in kernels (workloads/nocroute); the syscalls SYSCALL_PMC_SC_SAMPLE and SYSCALL_PMC_MS_SAMPLE; bytes per cycle of each flow",
+   "data": [
+    {
+     "path": "docs/reports/data/2026-09-29-nocr/",
+     "note": "README.md; raw/<card>/ per pass, summary.json per card (reduce.py)"
+    }
+   ],
+   "reports": [
+    {
+     "title": "This page, §5: rungs 31 and 32",
+     "url": "#exp-mesh-stops"
+    },
+    {
+     "title": "The ET-SoC-1, interactively (fact L104: the routing order)",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram"
+    }
+   ]
+  },
+  {
+   "id": "E57",
+   "when": "29 Sep, 00:41–01:06",
+   "card": "aifoundry1-c1 (development), aifoundry3 (validation)",
+   "what": "memp2, for rungs 33, 36 and 43 and the energy manual's stride-256 read: the DRAM address map by row conflicts, refresh phases and back-to-back accesses; a second TensorLoad of the same lines; tensor-load streams of 1–4 neighbourhoods per shire at strides of 64 B, 256 B and 1 KB. 18 sys_emu runs first (PASS); development on aifoundry1-c1 (00:41–00:53), frozen (lock SHA-256 9712c3d6…), validation on aifoundry3 (00:55–01:06). On aifoundry3: rows and banks split as the inferred map L50 says (R33a PASS); the refresh domain is the controller, PA[6–9] its bits (R33b PASS; FAIL in development); PA[11] and PA[12] not resolved (R33c INSUFFICIENT); a second TensorLoad takes 199 cycles, an L2 hit (R36 PASS); no registered theory of the 128 B per cycle cap survives (R43 FAIL); stride-256 reads get 0.665 of stride-64's bandwidth and cost 42–50 pJ more per 64 B, the awake minions' longer time (T102 held)",
+   "instruments": "cycle counter in memprobe programs (build/memprobe2) and tensor-load streams; board power, die temperature and clock (ettelem) for the stride-256 energies",
+   "data": [
+    {
+     "path": "docs/reports/data/2026-09-29-memp2/",
+     "note": "README.md; raw/<card>/ per pass; val-aifoundry3/ and dev-aifoundry1-c1/ (memp2.json, memp2.log)"
+    }
+   ],
+   "reports": [
+    {
+     "title": "This page, §5: rungs 33, 36 and 43",
+     "url": "#exp-dram-rows"
+    }
+   ]
+  },
+  {
+   "id": "E58",
+   "when": "29 Sep, 00:01–00:45",
+   "card": "aifoundry1-c1 (development), aifoundry3 (validation)",
+   "what": "tau, for rung 4: the rails' averaging filter per rail and card, from step bursts of 2.0, 3.2 and 4.0 s (a 20 W and a 10 W minion step, a DRAM step on the SRAM and NoC rails) under 10 Hz and 20 Hz samplers, and its inverse (tools/ettelem/deconv.py). Development on aifoundry1-c1 (00:01–00:13): τ 1.08 s on the minion rail, 0.54 on SRAM, 1.08 on the NoC, 1.10 for the board's average; the minion rail rose with 1.32 s and fell with 1.02 s (T1 failed there). Frozen (SHA-256 7d4fabad…); validation on aifoundry3 (00:34–00:45, three passes): 1.06, 1.01, 1.04 and 1.05 s; one first-order average per rail with its card's τ, published one SP pass late (T1–T3 held); deconvolved, every burst's level within 3% of the step and its energy within 1%, but the 2 s minion bursts' flat top scattered by 8.4% against at most 6% (T4 falsified); 94 of 96 items PASS",
+   "instruments": "ettelem at 10 and 20 Hz with no statistics reset (the three rails, board power and its average, die temperature, clock); enercat bursts",
+   "data": [
+    {
+     "path": "docs/reports/data/2026-09-29-tau-aifoundry3/",
+     "note": "validation: p101–p103, report.json, README.md"
+    },
+    {
+     "path": "docs/reports/data/2026-09-29-tau-aifoundry1-c1/",
+     "note": "development: p1–p3, report.json"
+    }
+   ],
+   "reports": [
+    {
+     "title": "This page, §5: rung 4",
+     "url": "#improve"
+    },
+    {
+     "title": "Power and temperature telemetry (§2: the filter, rail by rail)",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature"
     }
    ]
   }

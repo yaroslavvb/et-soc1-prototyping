@@ -35,8 +35,9 @@ Output, facts.json (the page's D):
             rows that get a new effect; every unknown fact belongs to exactly one ask
   rungs     the hub rows the asks link to, read from the hub's own data; proposed rows are marked proposed
   layout    the chip tour's layout (the measured map, the die view, the memory shires), read only, for the chip-scale
-            views of the L3, the scratchpad and the DRAM; the five chip-tour facts those views cite (the measured map,
-            the grid, the memory shires' places and tie, the routers) are copied into facts as "chip:<id>"
+            views of the L3, the scratchpad and the DRAM; the six chip-tour facts those views cite (the measured map,
+            the grid, the memory shires' places and tie, the routers and, since 29 September, the routing order) are
+            copied into facts as "chip:<id>"
   addr      the example addresses
   conflicts where the sources disagree and what the page does about it
 The build refuses to write facts.json if a printed number has no source, a reference is missing, an unknown lacks an
@@ -560,6 +561,33 @@ L3STEPFIX[('load_hit', 2)] = {'energy': f"part of the SRAM rail's {RS['l3_sram']
 L3STEPFIX[('load_hit', 8)] = {'energy': _l3s[8]['energy'][:-len(_old)] + f"; {RS['hop_rb']} per line per hop measured on board "
                                                                          f"power, {RS['hop_z']} (l3.energy-per-load)"}
 
+# ---------------------------------------------------------------- the routing order, measured (29 September)
+# Until 29 September the dimension order was not known, and the chip views drew every route x first. E56 ("nocr", hub
+# rung 32) measured it on aifoundry1's card 1 and, frozen, on aifoundry3: a request goes x first and a reply y first
+# (the chip tour's fact L104, copied below as chip:L104). l3.route now says so, and u.noc-hop no longer asks for it.
+_r = row_of('l3', 'l3.route')
+_old = "whether a request turns x or y first, which of the nine router layers L3 traffic uses and how wide a link is are not documented in the drop."
+if not _r['statement'].endswith(_old):
+    raise SystemExit('l3.route: its research statement changed; revisit it')
+FIX[('l3', 'l3.route')] = {
+    'statement': _r['statement'][:-len(_old)] + "and in dimension order: a request goes x first, then y, and its reply y first, "
+                 "then x, back along the request's links (measured on aifoundry1 card 1 and aifoundry3 on 29 September, E56; "
+                 "chip:L104). Which of the nine router layers L3 traffic uses and how wide a link is are not documented in "
+                 "the drop.",
+    'source': _r['source'] + "; the order: docs/reports/data/2026-09-29-nocr (E56), the chip tour's fact L104",
+    'card': "aifoundry2, aifoundry3, aifoundry1-c1 (the order: aifoundry3 and aifoundry1 card 1)",
+    'note': "Until 29 September the order was not known and this page drew every route x first. E56 streamed tensor loads "
+            "and stores between compute shires' scratchpads; that an L3 home's and a memory shire's replies take the same "
+            "order is inferred."}
+_u = row_of('l3', 'u.noc-hop')
+_old = "which of the 9 main-NoC layers carries L3 requests and replies, the dimension order, and the flit width."
+if not _u['statement'].endswith(_old):
+    raise SystemExit('u.noc-hop: its research statement changed; revisit it')
+FIX[('l3', 'u.noc-hop')] = {
+    'statement': _u['statement'][:-len(_old)] + "which of the 9 main-NoC layers carries L3 requests and replies, and the flit "
+                 "width. The dimension order, asked here until 29 September, is measured (l3.route).",
+    'source': _u['source'] + "; the order: docs/reports/data/2026-09-29-nocr (E56)"}
+
 for (lv, fid), upd in FIX.items():
     r = row_of(lv, fid)
     for k, v in upd.items():
@@ -693,7 +721,7 @@ for lv in LEVELS:
 # memory shires' places, the routers), copied read-only under "chip:<id>"; the chip tour's "inferred" kind is kept as
 # derived with a note
 CHIP = json.load(open(os.path.join(REPORTS, 'data', '2026-09-27-chip-diagram', 'facts.json')))
-CHIP_FACTS = ['mesh.logical-map', 'mesh.grid', 'L40', 'L42', 'L105']
+CHIP_FACTS = ['mesh.logical-map', 'mesh.grid', 'L40', 'L42', 'L105', 'L104']   # L104: the routing order (E56, 29 Sep)
 for cid in CHIP_FACTS:
     f = CHIP['facts'][cid]
     kind = {'inferred': 'derived'}.get(f['kind'], f['kind'])
@@ -1292,7 +1320,7 @@ PARTS['l3'] = {
                   'l3.observe', 'l3.process', 'u.latency-split', 'u.bitcell'),
     'shire': L('l3', 'chip:mesh.logical-map', 'l3.homes', 'l3.home-measured', 'l3.lat-fit', 'l3.mean-hops', 'l3.alias'),
     'memshire': L('l3', 'chip:L40', 'chip:L42', 'l3.miss-path', 'l3.dram-leg'),
-    'hop': L('l3', 'l3.hop', 'l3.hop-noc-cycles', 'l3.route', 'l3.tsend-compare', 'chip:mesh.grid', 'u.noc-hop'),
+    'hop': L('l3', 'l3.hop', 'l3.hop-noc-cycles', 'l3.route', 'chip:L104', 'l3.tsend-compare', 'chip:mesh.grid', 'u.noc-hop'),
     'homebox': L('l3', 'l3.homes', 'l3.decode', 'l3.home-measured', 'l3.alias'),
     'fit': L('l3', 'l3.lat-fit', 'l3.lat-by-home', 'l3.lat-clock-split', 'l3.spec-latency', 'l3.lat-reconcile', 'l3.tsend-compare', 'u.latency-split'),
     'mean': L('l3', 'l3.mean-hops', 'l3.lat-by-requester', 'l3.bw', 'l3.bw-tload'),
@@ -1320,7 +1348,7 @@ PARTS['l3'] = {
     'latency': L('l3', 'l3.lat-fit', 'l3.lat-clock-split', 'l3.spec-latency', 'l3.lat-reconcile', 'u.latency-split'),
     'lane': L('l3', 'l3.lane', 'l3.ports', 'l3.flits'),
     'xing': L('l3', 'l3.ports', 'g.crossing', 'l3.hv-region', 'l3.mesh-rail', 'l3.sram-rail', 'l2:l2.vc-fifo'),
-    'router': L('l3', 'chip:L105', 'g.router', 'l3.route', 'u.noc-hop'),
+    'router': L('l3', 'chip:L105', 'g.router', 'l3.route', 'chip:L104', 'u.noc-hop'),
     'wire': L('l3', 'l3.wire-energy', 'g.wire-energy', 'l3.energy-per-load', 'l3.mesh-rail'),
     'flits': L('l3', 'l3.flits', 'u.noc-hop'),
     'nochop': L('l3', 'u.noc-hop', 'l3.hop-noc-cycles', 'l3.hop'),
@@ -1347,7 +1375,7 @@ PARTS['scp'] = {
     'size': L('scp', 'scp.size', 'scp.m0-rows', 'scp.always-hit', 'scp.no-victims', 'scp.panel-count', 'scp.banks'),
     'relay': L('scp', 'scp.relay', 'scp.relay-mech', 'scp.remote-write'),
     'shire': L('scp', 'chip:mesh.logical-map', 'scp.lat-remote'),
-    'hop': L('scp', 'l3:l3.hop', 'scp.e-hop', 'l3:l3.route', 'l3:u.noc-hop'),
+    'hop': L('scp', 'l3:l3.hop', 'scp.e-hop', 'l3:l3.route', 'chip:L104', 'l3:u.noc-hop'),
     'nbrpath': L('scp', 'scp.bw-spec-port', 'scp.hv-region', 'scp.xbar'),
     'tl': L('scp', 'scp.tensorload', 'scp.tl-dest', 'scp.tl-one', 'scp.tl-pipelining', 'scp.coop', 'scp.tl-l2scp'),
     'xbar': L('scp', 'scp.xbar', 'scp.coop'),
@@ -1386,7 +1414,7 @@ PARTS['scp'] = {
 PARTS['dram'] = {
     'overview': L('dram', 'dram.org.capacity', 'dram.topo.memshires', 'dram.ctl.clock', 'dram.ctl.peak-bw', 'dram.ctl.measured-bw', 'dram.lat.typical',
                   'dram.lat.dram-chip-share', 'dram.e.per-byte', 'dram.e.unmetered', 'dram.e.vs-scp', 'gen.cell', 'dram.org.part'),
-    'chipmap': L('dram', 'chip:mesh.logical-map', 'dram.addr.memshire', 'dram.lat.model', 'dram.lat.ms-hops'),
+    'chipmap': L('dram', 'chip:mesh.logical-map', 'dram.addr.memshire', 'dram.lat.model', 'dram.lat.ms-hops', 'chip:L104'),
     'memshire': L('dram', 'chip:L40', 'chip:L42', 'dram.topo.memshires', 'dram.addr.memshire', 'dram.topo.controllers', 'dram.topo.phy', 'dram.topo.floorplan'),
     'pkg': L('dram', 'dram.topo.packages', 'dram.topo.pkg-pairing', 'dram.org.capacity'),
     'model': L('dram', 'dram.lat.model', 'dram.lat.ms-hops', 'dram.lat.l3-miss', 'dram.lat.clock-scaling', 'dram.lat.typical', 'dram.lat.chase',
@@ -1518,9 +1546,10 @@ ASKS = [
                  "placement of the banks, sub-banks and 96 macros relative to the mesh stop and the L3 slave ports.",
      'settles': "The physical layer of the L1, L2 and L3: the distances an access travels inside the tile.",
      'facts': ['l1:l1.u-floorplan', 'l2:l2.floorplan', 'l3:u.slice-floorplan'], 'also': [], 'l3_asks': ['ask-l3-floorplan']},
-    {'id': 'ask-noc-docs', 'extends': ['ask-noc-docs', 'exp-route-order'], 'title': 'The router pipeline and the routing order',
-     'question': "The router pipeline per hop, which of the 9 main-NoC layers carry L3 requests and replies, the flit width, and "
-                 "the dimension order.",
+    # the dimension order, asked here until 29 September, was measured by E56 (rung 32, exp-route-order; l3.route)
+    {'id': 'ask-noc-docs', 'extends': ['ask-noc-docs'], 'title': 'The router pipeline',
+     'question': "The router pipeline per hop, which of the 9 main-NoC layers carry L3 requests and replies, and the flit "
+                 "width (the dimension order was measured on 29 September: l3.route).",
      'settles': "The mesh-hop scale of the L3 and of the remote scratchpad.",
      'facts': ['l3:u.noc-hop'], 'also': [], 'l3_asks': ['ask-l3-noc']},
     {'id': 'ask-memshire', 'extends': ['ask-memshire'], 'title': "Where a DRAM load's last 63 cycles go, and the memory shire's rules",

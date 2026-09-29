@@ -700,7 +700,8 @@ const presetBtns = [];
     ['Review and overnight validation', [H('report review').a - 1800, H('Validation overnight').b + 1800]],
     ['Claims check v3, four cards to three', [H('Claims check v3 begins').a, H('v3 campaign').b]],
     ['The last queue and the pause', [H('Gathers and scatters').a - 3600, H('The weekly limit').b]],
-    ['Chip diagram, heat and DV2', [H('Chip diagram and this timeline').a, FULL[1]]],
+    ['Chip diagram, heat and DV2', [H('Chip diagram and this timeline').a, H('A major pass').a]],
+    ['The major pass', [H('A major pass').a, FULL[1]]],
   ];
   spans.forEach(([t, v]) => presetBtns.push(button(sp, t, () => animateTo(...v), {view: clampV(...v)})));
   const tgs = document.getElementById('tg-sub'), tgp = document.getElementById('tg-pages'), det = document.getElementById('tl-detail'), detLeg = document.getElementById('tl-detail-leg');

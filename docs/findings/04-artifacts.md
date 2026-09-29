@@ -2,9 +2,9 @@
 
 Three kinds of artifact came out of this work: **published reports** (HTML, deployed to spacesheep.dev),
 **repostable images**, and **tools** that can be re-run. Commits are listed at the end so any artifact can be
-tied to the state of the tree that produced it. Cite as **A1**...**A19** (A9 and A10 were never assigned):
+tied to the state of the tree that produced it. Cite as **A1**...**A20** (A9 and A10 were never assigned):
 A1–A5, A11, A13–A15, A17 and A19 are reports · A6–A8 images · A12 math rendering · A16 the rerun tools · A18 the
-wire tools. The public index of every report is the hub,
+wire tools · A20 the session timeline, page and tools. The public index of every report is the hub,
 [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports) (A2).
 
 Reports A2–A5, A11, A13–A15 and A17 are assembled by `scripts/build-report.py <name> <data.json> <out.html>` from
@@ -243,10 +243,10 @@ None has an A-number yet.
 
 No A-number yet. The build commands are in [`../reports/MIRROR.md`](../reports/MIRROR.md), "How each page is built".
 
-| Page | Source in this repository | Space | Visibility (2026-09-27) |
+| Page | Source in this repository | Space | Visibility (2026-09-29) |
 |---|---|---|---|
-| The ET-SoC-1, interactively: an animated chip schematic with clickable parts, flows and a presenting tour; every number a sourced fact (`83c3bf9`). **Second version** (Q58, not yet deployed): a stage bar with the Left and Right arrows, Space pausing the camera too, the scale control for zooming back in, the PCIe link as measured in E50, the die view taken from the firmware's NoC-spec map, four new flows (the matmul's data flow, watts by data, the hot line, the allreduce tree) drawn from measurements already in the repository, and for each inferred or dashed part what would settle it, linked to the hub's rungs 21–36. **The broadcast flow** (Q62, 28 September; branch `broadcast`, not yet deployed): flow B, one value to every minion four ways (the hardware tree, the relay against DRAM, one line read by every minion, the launch's multicast), with eight facts written for it in `build_facts.py` (`BC`) | `docs/reports/sources/chip-diagram.*`, `docs/reports/data/2026-09-27-chip-diagram/` (`build_facts.py`, `research/`) | [et-soc1-chip-diagram](https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram) `6cfdea5c-a598-438e-bd1a-613093ede523` | public (the first version) |
-| Over the PCIe link: what the host gets. The host link through the runtime on three cards: bandwidth from 4 KB to 256 MB, staged and DMA-only, small copies and the runtime's polling, launches, several transfers at once, against predictions written before the runs (E50) | `docs/reports/sources/pcie-link.*`, `docs/reports/data/2026-09-27-pcie/pcie.json` (`workloads/pciebench/reduce_pcie.py`) | not yet deployed; the diagram and the hub link `et-soc1-pcie-link`, so it must be published first and public | — |
+| The ET-SoC-1, interactively: an animated chip schematic with clickable parts, flows and a presenting tour; every number a sourced fact (`83c3bf9`). **Second version** (Q58, deployed 27 September): a stage bar with the Left and Right arrows, Space pausing the camera too, the scale control for zooming back in, the PCIe link as measured in E50, the die view taken from the firmware's NoC-spec map, four new flows (the matmul's data flow, watts by data, the hot line, the allreduce tree) drawn from measurements already in the repository, and for each inferred or dashed part what would settle it, linked to the hub's rungs 21–36. **The broadcast flow** (Q62, 28 September; deployed that day, MIRROR.md's check of 17:37 PDT): flow B, one value to every minion four ways (the hardware tree, the relay against DRAM, one line read by every minion, the launch's multicast), with eight facts written for it in `build_facts.py` (`BC`) | `docs/reports/sources/chip-diagram.*`, `docs/reports/data/2026-09-27-chip-diagram/` (`build_facts.py`, `research/`) | [et-soc1-chip-diagram](https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram) `6cfdea5c-a598-438e-bd1a-613093ede523` | public |
+| Over the PCIe link: what the host gets. The host link through the runtime on three cards: bandwidth from 4 KB to 256 MB, staged and DMA-only, small copies and the runtime's polling, launches, several transfers at once, against predictions written before the runs (E50) | `docs/reports/sources/pcie-link.*`, `docs/reports/data/2026-09-27-pcie/pcie.json` (`workloads/pciebench/reduce_pcie.py`) | [et-soc1-pcie-link](https://spacesheep.dev/@yaroslavvb/et-soc1-pcie-link) `2016e21b-711c-4879-8204-cb03791584a4` | public (MIRROR.md) |
 
 The hub (A2) gained §5's rungs 21–36 the same day: the documents, interfaces and readings to ask AI Foundry (Ainekko)
 and the lab for, and the experiments on the cards, that would settle what the chip diagram infers and what the PCIe
@@ -303,6 +303,19 @@ timing sign-off temperature, qualification and design life) and rung 42, `ask-dr
 grade). The chip diagram's and the memory levels' `facts.json` read those rungs, so both pages were rebuilt (only their
 `rungs` block changed). Not on the hub: a hotter run on card 1 and the owner's confirmation of the rule readings, both the
 owner's decisions (the data README's "Rules and their reading" and "Not measured, and the asks for the hub").
+
+**The major pass (Q65), 28–29 September.** Pages changed for E51 and E54–E58, and for the pass's two audits, each
+rebuilt from its source with MIRROR.md's commands and deployed with the pass. The hub (A2): rungs 4, 21, 29, 31–36
+and 43 carry E55–E58's results, §2 and §4.1 the rails' measured filter, §7 E51's validation and E54–E58, and the
+byline and the sessions chart run to 29 September. The PCIe page: §5, `#which-commands-collide` and
+`#where-a-host-copy-lands` (E55). Power and temperature (A3): §1's table gains the deconvolved rails and §2 the filter
+measured rail by rail (E58). The DVFS page (A11): §8's frozen validation, running since 20:45 PDT on 28 September
+(E51). Heat per mm (A17): §7 and §10 register E54 with its probe, and the route map draws read data y first by
+default, with the link-sharing shares under both orders (E56). The chip diagram: every reply drawn y first (fact L104
+measured, E56); flow 6's host copies through their lines' L3 homes, with only the L3's write-back to DRAM dashed
+(E55); fact L50 measured and the tensor unit's cache path settled for the L2 (E57); `pcie.conc` and four asks
+rewritten. The memory levels: `l3.route` and the chip views take the measured order (`chip:L104`). The TODO page
+follows `TODO.md`. The lab problems report (public, not mirrored) gained the evening's lab fixes.
 
 ## The visualization pass (26 September)
 
@@ -424,6 +437,13 @@ their repo files.
 | `tools/claims-v3/` (2026-09-25) | The measurement framework of E35–E48: `lib.sh` (the lab rules in code: no start while anyone else uses the card, `timeout 10`, the card lock, code hashes, `V3_DRY=1`), `queue.sh` and `schedule-<card>.txt`, one directory per experiment (`block.sh`, `reduce.py`, a README), `collect.sh` and `reduce_all.sh`; AGENT.md §7 |
 | `workloads/enercat` with `-DENERCAT_GS=ON` (2026-09-25) | Gathers, scatters and packed atomics: `gs_catalogue.py` (the configurations), `gen_gs.py` (tables and kernel cases), `analyze_gs.py` (the analysis), run by `tools/claims-v3/gs/` (E48) |
 | `tools/g3log-race/race.cpp` (2026-09-25) | Reproduces the runtime's log-level race without a card: resets g3log's levels, releases four threads that each make the first `g3::logLevel()` call, and counts the trials that corrupt the level map, with and without registering the level first (E49) |
+| `tools/claims-v3/nv/` (2026-09-28) | NV (E54), the mesh rail's voltage step: `block.sh` (development passes 1–99 on aifoundry3, validation 101–199 on aifoundry2), its own `run-queue.sh`, `nvlib.py`, `reduce.py` (with `--self-test` and `--monte-carlo`), `selftest.sh` (40 dry scenarios with stand-ins for every device tool), `freeze.sh`; only 485, 540 and 600 mV can be sent, only on BL2 0.19.0 or later, and a restore guardian returns the rail to 485 mV on every exit path. No voltage has been written yet |
+| `tools/claims-v3/pcie2/`, `workloads/pciebench` `--test conc` and `--test touch` (2026-09-28) | pcie2 (E55), hub rungs 34 and 35: host-to-card DMA commands in flight in one stream and in two, and where a host write lands (the touch kernel times the first load of each line the host has just written); `PREREG.md`, a reducer, a dry test. `workloads/pciebench/run_pcie.sh` gained `timeout 10` on its samples, the card lock released between sub-tests, never card 0, and `CARDS` from the environment |
+| `tools/claims-v3/nocr/`, `workloads/nocroute` (2026-09-28) | nocr (E56), hub rungs 31 and 32: an ESR call's cost per mesh hop over caller-target pairs, the place of the master shire, and the routing order of read replies and write requests; `meshmap.py` draws the mesh, `reduce.py` holds the frozen rules |
+| `tools/claims-v3/memp2/`, `workloads/memprobe` `MEMPROBE_EXT` (`gen_ops2.py`, built as `build/memprobe2`) (2026-09-28) | memp2 (E57), hub rungs 33, 36 and 43 and energy-manual-102: DRAM bank and row bits, the refresh domain, whether the L2 keeps TensorLoad lines, the 128 B per cycle cap, stride-256 energy; `sysemu.sh` ran the new kernel paths in `sys_emu` before any card time (18 runs, PASS) |
+| `tools/claims-v3/tau/`, `tools/ettelem/deconv.py` (2026-09-28) | tau (E58), hub rung 4: each rail's averaging time constant, fitted to burst edges, and `deconv.py`, which inverts the first-order filter to recover square bursts from the rail readings; `calibrate.py`, `offline.py` (the fit on stored data), stand-ins for dry runs |
+| `tools/lab/et-lab-health` rev 3, `tools/lab/et-reset` (2026-09-28) | The lab tools' third revision: the health check counts logins through logind, counts the journal's boots correctly and runs safely from a timer; `et-reset` is a checked management reset of one card. Both written and dry-tested, **not installed** ([`tools/lab/README.md`](../../tools/lab/README.md)) |
+| `tools/timeline/` (2026-09-28) | The session timeline's extraction, privacy scan and build (A20) |
 | `workloads/sparsity/host/main.cpp` | Extended in this work with `--values` (operand patterns, including `file:<path>` for custom tiles), `--dump-tiles`, `--stop-file` and fp16/int8 value fills |
 
 ## A16 — The rerun and attribution tools (2026-09-23)
@@ -589,6 +609,30 @@ list of files). `enercat.json` is unchanged (the 13-instruction first catalogue 
   V3-RL, both pages' `--v3`); on that day each step again reproduced its file in the tree ("Rebuilding the version-3
   data").
 
+## A20 — The session timeline (published 27 September; page, data and tools in the repository since 28 September)
+
+[A week with the ET-SoC-1: the session timeline](https://spacesheep.dev/@yaroslavvb/et-soc1-session-timeline)
+(`b0669cbd-6132-4ac6-b35a-9b928a2ef926`, public): the session's week on one time axis, with the owner's requests as
+summaries, the main agent and its subagents, the four cards, and every deploy and commit. Until 28 September its page
+and tools lived outside the repository (MIRROR.md's check of 17:37 PDT warned about it); at the owner's request (Q65)
+they were committed in `6bbf0f3` (28 Sep 21:52 PDT), refreshed to 21:15 PDT, and the live page redeployed.
+
+- **Page:** `docs/reports/2026-09-27-session-timeline.html`, built by `scripts/build-report.py session-timeline` from
+  `docs/reports/sources/session-timeline.*` and `docs/reports/data/2026-09-27-session-timeline/timeline.json` (the
+  build line is in MIRROR.md, "How each page is built").
+- **Data:** the seven extracts in `docs/reports/data/2026-09-27-session-timeline/` (`human.json`, `main_agent.json`,
+  `agents.json`, `tokens_by_time.json`, `card_calls.json`, `cards.json`, `artifacts.json`), from which any checkout
+  rebuilds the page. The owner's messages appear as hand-written summaries, never their text.
+- **Tools:** [`tools/timeline/`](../../tools/timeline/README.md). The extraction (`extract_main.py`,
+  `extract_agents.py`, `tokens_by_time.py`, `extract_card_calls.py`, `build_cards.py`, `scan_spacesheep.py`,
+  `build_artifacts.py`) reads the session's transcripts and the lab machines' queue logs, which are not in the
+  repository, so only the owner's machine runs it; `paths.py` holds every path, set by environment variables. The build
+  (`sanitize_extracts.py`, then `build_timeline_data.py`) needs only the committed extracts.
+- **The privacy scan:** `sanitize_extracts.py` rewrites the extracts with the page's redactions from a local privacy
+  table (never committed) and fails on anything AGENT.md §10 excludes (privilege words, access terms, addresses, keys,
+  e-mail addresses, local paths, a space that MIRROR.md does not list as public); `build_timeline_data.py` refuses to
+  write `timeline.json` while it fails.
+
 ## Cross-links between the reports
 
 - **2026-09-24, afternoon (`d04b29a`).** Every report got the byline clause "· part of the measurement reports",
@@ -694,7 +738,8 @@ one review of the set's structure, and wrote the plan (`PLAN2.md`); page owners 
   sampler; stores through the L1 explain the unmetered fit's DRAM residual (the fit is kept as published); the hot
   line's bank rule is necessary, not sufficient; heat per mm's per-second bound holds on the mesh rail only; the
   ridge points' energy conclusion holds for random operands; On-chip communication quotes the 23 September energies.
-  Set-wide: board and rail readings change about every 250 ms on aifoundry3 (133 ms is aifoundry2's, PLAN2 D2′); the rails' filter is measured, 55–57% of a step after 1 s and 83–84% after 2 s (τ ≈ 1.15–1.22 s),
+  Set-wide: board and rail readings change about every 250 ms on aifoundry3 (133 ms is aifoundry2's, PLAN2 D2′); the rails' filter is measured, 55–57% of a step after 1 s and 83–84% after 2 s (τ ≈ 1.15–1.22 s; superseded by E58
+  on 29 September: 1.01–1.10 s, one SP pass late, and 0.54 s on aifoundry1's card 1's SRAM rail),
   with the `/0.94` correction kept and its systematic stated (the minion delivery loss moves about 1.2 points per 1%
   of rail scale).
 - **Redundancy and structure.** Topics that were told at length on three to eight pages each now have one canonical
@@ -827,6 +872,19 @@ one review of the set's structure, and wrote the plan (`PLAN2.md`); page owners 
 | `a7478c9` | DVFS, Power and temperature, the spatial brief and the aifoundry1 pages: detail folded into collapsible sections |
 | `0dfe668` | The collapsible-depth pass recorded: 04-artifacts and MIRROR's last check (22 of 22 equal) |
 | `305fe0d` | E48, gathers and scatters on three cards: the raw passes and the reduction (GS-L1, GS-MH, GS-DRAM, GS-CHECK pass on every card; GS-UC fails on every card) |
+| `8e9f3bc` | Heat per mm: a light cyan background (dark mode: a dark page tinted cyan), at the owner's request (Q64) |
+| `6bbf0f3` | The session timeline in the repository: its sources, data, tools (portable paths, a privacy scan) and MIRROR rows (A20) |
+| `d937076` | Q47, Q48 and the aifoundry1 fix log no longer say what access the fixes were made with (AGENT.md section 10) |
+| `4312253` | NV (the owner's NoC validation, Q63's voltage test): design, predictions frozen before any card write, runner and reducer |
+| `a5604b6` | E54 registered: NV's frozen predictions before the development probe |
+| `5538de2` | The major pass's lab experiments before any development data (pcie2, nocr, memp2, tau); lab tools: et-lab-health rev 3, et-reset |
+| `76ae05e` | pcie2 frozen before validation (PREREG `f632d6b3…`), the development result recorded first |
+| `c0b4a05` | nocr frozen before validation (PREREG `2472ab3e…`), the development result recorded first |
+| `3054fa9` | tau: development on aifoundry1's card 1, then frozen before validation |
+| `9d5164c` | pcie2 and nocr: development and validation data, and what survived |
+| `e5948f4` | tau validated on aifoundry3 |
+| `6397c8e` | memp2: development on aifoundry1's card 1, then frozen (lock `9712c3d6…`) before validation |
+| `bf8c7c9` | memp2 validated on aifoundry3 |
 
 ## Publishing notes, learned the hard way
 

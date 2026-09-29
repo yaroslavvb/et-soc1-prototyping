@@ -2893,7 +2893,10 @@ LAYM.mesh.forEach((row, y) => row.forEach((v, x) => {
 LAYM.memshires.forEach(m => { const c = {lx: m.pos[0], ly: m.pos[1], type: 'memshire', id: m.id, tie: !!m.tie_break}; CELLS.push(c); BYLOG[c.lx + ',' + c.ly] = c; MSC[m.id] = c; });
 const ckey = c => c.type === 'cshire' ? 's' + c.id : c.type === 'memshire' ? 'm' + c.id : 'g' + c.lx + '_' + c.ly;
 const hopsC = (a, b) => Math.abs(a.lx - b.lx) + Math.abs(a.ly - b.ly);
-/* a route on the map: x first, then y, as the chip tour draws it (the order is not documented: l3.route, asked) */
+/* a route on the map, as the mesh takes it (E56, 29 September: l3.route, chip:L104): a request goes x first, then y;
+   a reply y first, then x, back along its request's links. routeC draws a request (a read's or a write's request, a
+   victim, a write-around), routeR a reply (the line a read brings back). No route drawn here needs the other order
+   (requests reach a memory shire along its column, replies leave it that way); one across an empty corner takes it. */
 function xyRoute(a, b, xFirst) {
   const out = [a]; let x = a.lx, y = a.ly;
   const step = (dx, dy) => { x += dx; y += dy; const c = BYLOG[x + ',' + y]; if (c) out.push(c); return !!c; };
@@ -2902,6 +2905,7 @@ function xyRoute(a, b, xFirst) {
   return (xFirst ? X() && Y() : Y() && X()) ? out : null;
 }
 const routeC = (a, b) => xyRoute(a, b, true) || xyRoute(a, b, false) || [a, b];
+const routeR = (a, b) => xyRoute(a, b, false) || xyRoute(a, b, true) || [a, b];
 /* the chip-wide mean hop count of a line's home from a requester (the average over the 32 homes) */
 const meanHops = r => Object.values(SHC).reduce((s, c) => s + hopsC(r, c), 0) / 32;
 const MAPF = 'chip:mesh.logical-map chip:L40';
@@ -2958,10 +2962,10 @@ function mapMark(g, b, m, i) {
 }
 /* the stops of a route, as points */
 const routeP = (ap, a, b) => routeC(a, b).map(c => ap.P[ckey(c)]);
-/* a packet along a route, a counter of hops beside it */
+/* a packet along a route (o.reply: a reply's, y first), a counter of hops beside it */
 async function hopTravel(tok, c, a, b, o) {
   o = o || {};
-  const cells = routeC(a, b), P = cells.map(x => c.ap.P[ckey(x)]), n0 = cells.length - 1;
+  const cells = (o.reply ? routeR : routeC)(a, b), P = cells.map(x => c.ap.P[ckey(x)]), n0 = cells.length - 1;
   const pk = packet(c.fx, o.col || 'var(--c2)', o.r || 11); at(pk, P[0]);
   if (!n0) { await pulse(tok, c.fx, P[0], 900, o.col); return pk; }
   // the running count goes after the frame's counter (top right), where it covers no tile's number
@@ -3034,7 +3038,7 @@ function buildHop(L, ap, o) {
   E('rect', {class: 'ring', x: -141, y: 507, width: 1224, height: 90, rx: 10}, gf);
   // the energy of a hop, and what is unknown
   part(L, 'hopE', -136, 604, 600, 84, COL.aux, 'a 64 B reply over one hop', {sub: [{t: `≈ ${nt('l3_hop69')} on the mesh rail (derived); ${nt('l3_hop_rb')} on the board (measured)`, f: nf('l3_hop69') + ' ' + nf('l3_hop_rb')}]});
-  part(L, 'nochop', 480, 604, 598, 84, 'var(--warn)', 'unknown: the router pipeline per hop', {kind: 'unknown', sub: [{t: 'which of the 9 layers, flit width, dimension order', f: 'l3:u.noc-hop'}]});
+  part(L, 'nochop', 480, 604, 598, 84, 'var(--warn)', 'unknown: the router pipeline per hop', {kind: 'unknown', sub: [{t: 'which of the 9 layers, the flit width', f: 'l3:u.noc-hop'}]});
 }
 /* the request's (or the reply's) way through the hop drawing */
 async function hopPlay(tok, c, o) {
@@ -3173,19 +3177,19 @@ const fit3 = h => V('l3_fit_c') + V('l3_fit_hop') * h;   // l3.lat-fit: 110.5 + 
 function buildL3Chip(L, ap, inst) {
   const R = SHC[inst.req], H = SHC[inst.home], hh = hopsC(R, H);
   frame(L, {title: `Chip · the L3: ${nt('l3_mb')} in 32 slices`, f: nf('l3_mb'), sub: 'the measured map of the mesh; a line lives in the slice of its home shire, PA[10:6]', subf: MAPF + ' l3:l3.homes',
-    tags: [['unknown', '? route order · asked'], ['documented', 'measured']]});
+    tags: [['documented', 'measured: the map, the route order']]});
   chipMap(L, ap, {C: 74, X0: -150, Y0: 22, tile: c => c.type === 'cshire'
     ? {marks: [c.id === inst.home ? 'H' : null, c.id === inst.req ? 'R' : null].filter(Boolean), hi: c.id === inst.home || c.id === inst.req, child: c.id === inst.home ? 'home' : null, cur: c.id === inst.home}
     : c.type === 'memshire' ? {marks: c.id === inst.ms ? ['M'] : [], fo: 0.06} : {}});
-  // the route R -> H, drawn x first (the order is not documented), and the first hop to zoom into
+  // the request's route R -> H, x first (measured, l3.route), and the first hop to zoom into
   const rc = routeC(R, H), P = rc.map(c => ap.P[ckey(c)]);
   if (P.length > 1) routeLine(L, ap, P);
   const a0 = rc[0], b0 = rc[1] || CELLS.find(x => hopsC(x, a0) === 1), p0 = ap.P[ckey(a0)], q0 = ap.P[ckey(b0)];
   ap.hopBox = {x: (p0.x + q0.x) / 2 - 17, y: (p0.y + q0.y) / 2 - 17, w: 34, h: 34};
   part(L, 'link', ap.hopBox.x, ap.hopBox.y, 34, 34, COL.net, '', {child: 'hop', cur: true, fo: 0.3, rx: 17, label: 'A mesh hop on the route: Enter zooms into it'});
   T(L, -150, 640, 'the map: measured on three cards;', 't-sm', 'start', MAPF);
-  T(L, -150, 661, 'memory shires: a latency fit; routes', 't-sm', 'start', MAPF);
-  T(L, -150, 682, 'drawn x first (the order: not documented)', 't-sm', 'start', 'l3:l3.route');
+  T(L, -150, 661, 'memory shires: a latency fit; a request', 't-sm', 'start', MAPF);
+  T(L, -150, 682, 'goes x first, its reply y first (measured)', 't-sm', 'start', 'l3:l3.route chip:L104');
   // the line's home and the requester
   const X = 330, W = 748;
   part(L, 'homebox', X, 18, W, 96, COL.logic, `home = PA[10:6] = ${inst.home} → shire ${inst.home}`, {f: 'l3:l3.homes l3:l3.decode', fo: 0.06,
@@ -3448,7 +3452,7 @@ const L3P = SCENES.l3.parts = {
     act: `<button type="button" class="st-btn" data-act="zoom" data-to="rep">Zoom into the transistors</button>`}),
   slave: () => ({kick: 'L3 · mesh hop', title: 'The home\'s L3-slave port', badge: [['documented', 'spec']], facts: 'ports', what: 'The request climbs back into the Shire Channel through the port\'s VC FIFO, becomes an ET-Link request and waits in the bank\'s L3-slave FIFO.'}),
   router: () => ({kick: 'L3 · mesh hop', title: 'A router', badge: [['generic', 'textbook stages'], ['documented', 'layers, ports'], ['unknown', 'its pipeline']], facts: 'router',
-    what: 'Each mesh stop has 9 main-NoC routers (layers 0–8) and a debug router, with 8 ports of 4 virtual-channel slots each, parity-protected. Inside, textbook stages: input VC buffers, route computation, VC and switch allocators, a crossbar and output drivers. Which layer carries L3 traffic, the flit width, the pipeline depth and the dimension order are asked.'}),
+    what: `Each mesh stop has 9 main-NoC routers (layers 0–8) and a debug router, with 8 ports of 4 virtual-channel slots each, parity-protected. Inside, textbook stages: input VC buffers, route computation, VC and switch allocators, a crossbar and output drivers. Which layer carries L3 traffic, the flit width and the pipeline depth are asked; ${src('the dimension order was measured on 29 September', 'l3:l3.route chip:L104')}: a request goes x first, its reply y first.`}),
   router2: () => L3P.router(), more: () => L3P.link(),
   link: () => ({kick: 'L3 · mesh hop', title: 'A link', badge: [['documented', 'the energy, the length'], ['generic', 'repeaters']], facts: 'wire',
     what: `One hop is about ${n('l3_hopmm')} of wire, broken by repeaters. A random bit costs ${n('l3_fj')} per mm on the mesh rail, so a 64-byte reply over one hop is ${n('l3_hop69')} on the mesh rail (derived); measured on board power, a hop adds ${n('l3_hop_r')} and ${n('l3_hop_z')}. Zeros do not toggle the wires: they cost several times less.`,
@@ -3539,7 +3543,7 @@ L3A['load-hit'] = {
       run: async (tok, c) => {
         const [R, H] = RH3(); litTile(c, 'shire', R.id); litTile(c, 'shire', H.id);
         counter(c, `≈ ${nt('l3_hop69')} a hop`, 'mesh rail, random data (derived)');
-        await hopTravel(tok, c, H, R, {col: 'var(--c7)', w: 9, label: (k, n0) => `hop ${k} of ${n0}`});
+        await hopTravel(tok, c, H, R, {col: 'var(--c7)', w: 9, reply: true, label: (k, n0) => `hop ${k} of ${n0}`});
       },
       deep: {rep: (tok, c) => repToggle(tok, c, {})}},
     {name: 'Fills', where: 'chip', say: () => `R's L2 is filled (the tags, the state and four panels, none for a zero line), then its L1: ${cn(fit3(I3().hops), 'l3:l3.lat-fit', 1)} cycles by the fit`,
@@ -4061,7 +4065,7 @@ SA['remote-load'] = {
       run: async (tok, c) => { lit(c, ['reqq', 'arb']); tagsIdle(c); await sPanelsLit(tok, c, ''); lit(c, 'rbuf'); slotOn(c, c.ap.rb[1]); },
       deep: {panel: (tok, c) => panelRead(tok, c), cell: (tok, c) => cellRead(tok, c, {half: true})}},
     {name: 'Back', where: 'chip', say: () => `The line crosses back to shire ${IS().req}'s bank and on to the minion: ${cn(fitS(hopsC(SHC[IS().req], SHC[IS().shire])), 'scp:scp.lat-remote', 1)} cycles by the fit`,
-      run: async (tok, c) => { const R = SHC[IS().req], Tg = SHC[IS().shire]; litTile(c, 'shire', R.id); counter(c, `${fnum(fitS(hopsC(R, Tg)), 1)} cycles`, 'the fit, three cards'); await hopTravel(tok, c, Tg, R, {col: 'var(--c7)', w: 9}); }},
+      run: async (tok, c) => { const R = SHC[IS().req], Tg = SHC[IS().shire]; litTile(c, 'shire', R.id); counter(c, `${fnum(fitS(hopsC(R, Tg)), 1)} cycles`, 'the fit, three cards'); await hopTravel(tok, c, Tg, R, {col: 'var(--c7)', w: 9, reply: true}); }},
   ]};
 SA['remote-store'] = {
   led: [[null, null], [null, null], [null, null]], tot: () => ({c: `${n('scp_hop12')} per hop`, e: `${n('scp_relay')}`}), ask: {c: 'ask-cache-latency'},
@@ -4080,7 +4084,7 @@ SA.fill = {
   cap: () => 'TensorLoadL2Scp copies up to 16 lines from memory into this shire\'s scratchpad, bypassing the L1 and L2: not measured separately.',
   steps: [
     {name: 'Mesh read', where: 'chip', say: () => 'CSR 0x85F (hart 1 may issue it): for each line the bank issues a Mesh_Read of the source, an L3 home, DRAM or a remote scratchpad',
-      run: async (tok, c) => { const R = SHC[IS().req], S0 = TR(); litTile(c, 'shire', R.id); litTile(c, 'shire', S0.id); await hopTravel(tok, c, R, S0, {r: 9}); await hopTravel(tok, c, S0, R, {col: 'var(--c7)', w: 9}); }},
+      run: async (tok, c) => { const R = SHC[IS().req], S0 = TR(); litTile(c, 'shire', R.id); litTile(c, 'shire', S0.id); await hopTravel(tok, c, R, S0, {r: 9}); await hopTravel(tok, c, S0, R, {col: 'var(--c7)', w: 9, reply: true}); }},
     {name: 'SCP_Fill', where: 'panel', dive: ['cell'], say: () => 'When the line returns, an SCP_Fill writes it into the local scratchpad row: no victim, no tag',
       run: async (tok, c) => { counter(c, 'SCP_Fill', 'no victim, no tag'); await panelRead(tok, c, {write: true}); },
       deep: {cell: cellWrite}},
@@ -4663,7 +4667,7 @@ DA.load = {
     {name: 'Back', where: 'ms', say: () => 'The line goes back through the controller and the clock crossing onto the 512-bit NoC port. The row stays open: no precharge follows (open page)',
       run: async (tok, c) => { const C0 = c.ap.ctl[I5().ch]; lit(c, ['ctl', 'noc']); const pk = PKM(c, {x: 912, y: C0.sch.y}, 'var(--c7)'); await travel(tok, c.fx, pk, [{x: 912, y: C0.sch.y}, C0.sch, {x: 380, y: C0.sch.y}, c.ap.st, c.ap.xg, c.ap.noc], 1300, {col: 'var(--c7)'}); sayAt(c, 572, C0.box.y + 30, ['the row stays open'], {side: 'u'}); }},
     {name: 'To the requester', where: 'chip', say: () => { const [R, H, M] = H5(); return `The line returns to the L3 home, which installs it, and on to the requester: ${cn(load5(hopsC(R, H), hopsC(H, M)), 'dram:dram.lat.model', 0)} cycles by the fit, ${n('lad_dram')} typical`; },
-      run: async (tok, c) => { const [R, H, M] = H5(); litTile(c, 'memshire', M.id); litTile(c, 'shire', R.id); counter(c, `${fnum(load5(hopsC(R, H), hopsC(H, M)))} cycles`, 'the fit, three cards'); await hopTravel(tok, c, M, H, {col: 'var(--c7)', w: 9}); await hopTravel(tok, c, H, R, {col: 'var(--c7)', w: 9}); }},
+      run: async (tok, c) => { const [R, H, M] = H5(); litTile(c, 'memshire', M.id); litTile(c, 'shire', R.id); counter(c, `${fnum(load5(hopsC(R, H), hopsC(H, M)))} cycles`, 'the fit, three cards'); await hopTravel(tok, c, M, H, {col: 'var(--c7)', w: 9, reply: true}); await hopTravel(tok, c, H, R, {col: 'var(--c7)', w: 9, reply: true}); }},
   ]};
 DA['row-hit'] = {
   led: [[src('− ' + nt('dr_rowhit'), nf('dr_rowhit')), src(nt('dr_rows_e'), nf('dr_rows_e'))]], tot: () => ({c: `saves ${n('dr_rowhit')}`, e: 'the same per byte'}),

@@ -7,10 +7,10 @@
    D.layout the measured 6 x 6 map of the compute shires, the die view and the memory-shire fit
    D.asks   what would settle each inferred or dashed part, and the hub's ladder row that asks for it (D.rungs: the
             titles of those rows, read from the hub's own data)
-   A value the page computes (a route's hops, a model's cycles) cites the facts it comes from. Every leg, a reply
-   included, is drawn on its own route, x first, then y, on the logical map; where x first would cross an empty
-   corner (some legs from a memory shire), y first. The mesh's routing order was not measured (fact L104). Colours
-   are the template's tokens only.
+   A value the page computes (a route's hops, a model's cycles) cites the facts it comes from. Every leg is drawn on
+   the route the mesh takes, as E56 measured it on 29 September (fact L104): a request x first, then y, on the logical
+   map, and a reply y first, then x, back along its request's links (route and reply below). Colours are the
+   template's tokens only.
 
    Second version (27 September). Every flow is a list of stages, shown in the stage bar under the drawing: a click
    or the Left and Right arrows go to a stage, and Space pauses everything that moves, the camera included (stepping
@@ -155,11 +155,17 @@ function xy(a, b, xFirst) {
   const Y = () => { while (y !== b.ly) if (!step(0, Math.sign(b.ly - y))) return false; return true; };
   return (xFirst ? X() && Y() : Y() && X()) ? out : null;
 }
-/* every leg on its own route: x first, then y, on the logical map; a leg that x first would take across an empty
-   corner of the grid (from a memory shire along its column towards logical row 0 or 5) goes y first */
+/* The mesh's routing order, measured by E56 (29 September, aifoundry1 card 1 and aifoundry3; fact L104): a request
+   goes x first, then y, on the logical map; a reply y first, then x, so it retraces its request's route backwards.
+   route() draws a request: a load's or an atomic's request, a store's data, a TensorSend (E56 timed loads and stores;
+   the tensor messages are drawn as requests too). reply() draws a reply: the data a load brings back. On the die view x
+   runs down the rows, so a request first moves north or south. No leg drawn here needs the other order (requests
+   reach a memory shire along its column, replies leave it that way); one that would cross an empty corner takes it. */
 function route(a, b) { return xy(a, b, true) || xy(a, b, false) || [a, b]; }
-/* a path through several stops, each leg on its own route */
+function reply(a, b) { return xy(a, b, false) || xy(a, b, true) || [a, b]; }
+/* a path through several stops, each leg a request's route (via) or a reply's (viaR) */
 function via(...cs) { let out = [cs[0]]; for (let i = 1; i < cs.length; i++) out = out.concat(route(cs[i - 1], cs[i]).slice(1)); return out; }
+function viaR(...cs) { let out = [cs[0]]; for (let i = 1; i < cs.length; i++) out = out.concat(reply(cs[i - 1], cs[i]).slice(1)); return out; }
 const pts = cells => cells.map(c => ({x: c.sx, y: c.sy}));
 /* a reply's lane: its route moved d units to the right of its direction of travel, so that a reply running back
    along a request's mesh line takes its own side of it and the two never overprint; from (a point on the request's
@@ -1232,7 +1238,7 @@ const COMPS = {
     what: `${n('channels')} channels of ${n('ch_bits')}, ${n('dram_gb')} on these cards, run at ${n('mts')} MT/s: ${n('dram_peak')} GB/s peak, and the chip streams ${n('dram_bw')} GB/s. Each package holds ${n('pkg_ch')} and serves two memory shires; which two is not documented, so the drawing's pairing of neighbours${ctx.ms ? ` (memory shires ${ctx.ms.join(' and ')} here)` : ''} is ${src('inferred', 'dram.pkg-pairing L23 L47')}: the dashed parts.`,
     kpis: [kpi(n('dram_bw', 'GB/s'), 'measured stream'), kpi(n('lat_dram'), 'cycles, a typical load'), kpi(n('e_dram', 'pJ/B'), `to read a byte, above idle (${n('e_dram_rng')} over passes)`), K('dram_gb', 'on the card')]}),
   mesh: () => ({kick: 'Network on chip', title: 'The mesh',
-    what: `An ${n('grid86')} grid of ${n('stops')} stops joins the shires. Each hop adds ${n('hop_cyc')} (${n('hop_ns')}) to a round trip and is about ${n('hop_mm')} of wire. It runs at ${n('noc_mhz')} and ${n('noc_v')} on aifoundry2. Routes are shortest paths; whether x or y goes first was not measured. The flows draw every leg, replies included, on its own route: x first on the measured map, and y first where x first would cross an empty corner (some legs from a memory shire).`,
+    what: `An ${n('grid86')} grid of ${n('stops')} stops joins the shires. Each hop adds ${n('hop_cyc')} (${n('hop_ns')}) to a round trip and is about ${n('hop_mm')} of wire. It runs at ${n('noc_mhz')} and ${n('noc_v')} on aifoundry2. Routes are shortest paths in dimension order, ${src('measured on two cards on 29 September', 'L104')}: a request goes x first, then y, and its reply y first, back along the same links; a link that two streams share carries about ${n('route_gbs')}. The flows draw every leg so. On the die, x runs down the rows: a request first moves north or south, a reply east or west.`,
     kpis: [K('hop_cyc', 'per hop, round trip'), K('hop_mm', 'per hop (die plot)'), kpi(n('bitmm'), 'per bit and mm, free links')]}),
   host: () => ({kick: 'Host', title: 'Host and PCIe',
     what: `The card sits in a PCIe slot of the host; the link trained at ${n('pcie_neg')} on every card. Timed on three cards on 27 September: ${n('pcie_h2d', 'GB/s')} to the card with the DMA alone (${n('pcie_h2d_pct')} of the link figure); a program's staged copies get ${n('pcie_stg_h', 'GB/s')}, because the runtime first copies into a bounce buffer at the host's memcpy rate (${n('pcie_memcpy', 'GB/s')}) and only then transfers. An empty kernel on all 32 shires costs the card ${n('pcie_b2b', 'µs')} each when launches are queued; one launch waited for takes ${n('pcie_launch', 'µs')}, the extra ${n('pcie_wait_rng')} mostly the runtime's idle poll. A lone 4 KB copy takes ${n('pcie_4k', 'µs')} for the same reason: the runtime's response thread polls every ${n('poll50')} while commands are in flight and ${n('poll500')} when none are.`,
@@ -1869,7 +1875,7 @@ FLOWS.A = {
         const fx = c.fx; hiCells([c.rc, c.hc, c.mc], true); hiPkg(c.a.ms); unsay(c);
         const pc = AP[0].pkg[c.a.ms + ':' + c.a.ch], pk = pkIn(c, fx, pc, 'var(--c2)', 12);
         // a reply: its colour and its own lane beside the request's line, not a dash
-        const back = lane([{x: c.mc.sx, y: pc.y}].concat(pts(via(c.mc, c.hc, c.rc))), LANE, pc);
+        const back = lane([{x: c.mc.sx, y: pc.y}].concat(pts(viaR(c.mc, c.hc, c.rc))), LANE, pc);
         await travel(tok, fx, pk, back, HOP_MS * (c.h1 + c.h2 + 1), {col: 'var(--c7)', even: true});
         quiet(pulse(tok, fx, back[back.length - 1], 900, 'var(--c7)', 34));
         c.res = bandText(fx, 'The whole load', [{t: `${fnum(c.tot)} cycles`, b: 1, f: 'addr.load-model'}, {t: `by the model, ${fnum(ns(c.tot))} ns`, f: 'addr.load-model op-600'}, {t: `${N.lat_dram.t} typical, measured`, f: 'lat-dram-typical'}]);
@@ -1893,9 +1899,9 @@ FLOWS.B = {
       {nm: 'L2 read buffer', sn: 'L2 read buffer', cyc: V('lat_rb'), lab: n('lat_rb'), sv: N.lat_rb.t, e: '', bw: '', say: `L2 read buffer: ${n('lat_rb')} cycles`},
       {nm: 'L2', sn: 'L2', cyc: V('lat_l2'), lab: n('lat_l2'), sv: N.lat_l2.t, e: `${n('e_l2')} (${n('e_l2_rng')})`, bw: n('bw_l2', 'TB/s'), say: `L2 hit: ${n('lat_l2')} cycles, in the own shire`},
       {nm: 'own scratchpad', sn: 'own scratchpad', cyc: V('lat_scp'), lab: n('lat_scp'), sv: N.lat_scp.t, e: `${n('e_scp0')}–${n('e_scp1')}`, bw: n('bw_scp', 'TB/s'), say: `The shire's own scratchpad: ${n('lat_scp')} cycles, the same SRAM as the L2`},
-      {nm: `scratchpad, shire ${a.home}`, sn: `scratchpad ${a.home}`, cyc: rs, lab: `${cn(rs, 'lat-scp-remote', 0)} · ${h1} ${hopw(h1)}`, sv: `${fnum(rs)} · ${h1} ${hopw(h1)}`, tn: `another shire's scratchpad, ${rsHop}`, e: `${n('e_rs0')}–${n('e_rs1')}`, bw: n('bw_rs', 'TB/s'), back: route(hc, rc), path: r1, say: `Shire ${a.home}'s scratchpad, ${h1} ${hopw(h1)}: ${n('lat_rs_a')} + ${n('lat_rs_b')} × ${h1} = ${cn(rs, 'lat-scp-remote', 0)} cycles`},
-      {nm: `L3, home ${a.home}`, sn: `L3, home ${a.home}`, cyc: l3, lab: `${cn(l3, 'l3.latency', 0)} · ${h1} ${hopw(h1)}`, sv: `${fnum(l3)} · ${h1} ${hopw(h1)}`, e: `${n('e_l3')} (${n('e_l3_rng')})`, bw: n('bw_l3', 'TB/s'), back: route(hc, rc), path: r1, say: `L3 hit in home shire ${a.home}, ${h1} ${hopw(h1)}: ${n('lat_l3_a')} + ${n('l3_b12')} × ${h1} = ${cn(l3, 'l3.latency', 0)} cycles (${n('lat_l3_avg')} averaged over slices)`},
-      {nm: 'DRAM', sn: `DRAM, ${N.lat_dram.t} typical`, cyc: dram, lab: `${cn(dram, 'addr.load-model', 0)} model · ${n('lat_dram')} typ.`, sv: `${fnum(dram)} model`, e: `${n('e_dram')} (${n('e_dram_rng')})`, bw: n('dram_bw', 'GB/s'), path: r1.concat(r2.slice(1)), back: via(mc, hc, rc), dram: true, say: `DRAM through memory shire ${a.ms}: ${cn(dram, 'addr.load-model', 0)} cycles by the model; a typical load takes ${n('lat_dram')}: ${cn(V('lat_dram') / V('lat_l1'), 'lat-l1 lat-dram-typical', 0)}× an L1 hit`},
+      {nm: `scratchpad, shire ${a.home}`, sn: `scratchpad ${a.home}`, cyc: rs, lab: `${cn(rs, 'lat-scp-remote', 0)} · ${h1} ${hopw(h1)}`, sv: `${fnum(rs)} · ${h1} ${hopw(h1)}`, tn: `another shire's scratchpad, ${rsHop}`, e: `${n('e_rs0')}–${n('e_rs1')}`, bw: n('bw_rs', 'TB/s'), back: reply(hc, rc), path: r1, say: `Shire ${a.home}'s scratchpad, ${h1} ${hopw(h1)}: ${n('lat_rs_a')} + ${n('lat_rs_b')} × ${h1} = ${cn(rs, 'lat-scp-remote', 0)} cycles`},
+      {nm: `L3, home ${a.home}`, sn: `L3, home ${a.home}`, cyc: l3, lab: `${cn(l3, 'l3.latency', 0)} · ${h1} ${hopw(h1)}`, sv: `${fnum(l3)} · ${h1} ${hopw(h1)}`, e: `${n('e_l3')} (${n('e_l3_rng')})`, bw: n('bw_l3', 'TB/s'), back: reply(hc, rc), path: r1, say: `L3 hit in home shire ${a.home}, ${h1} ${hopw(h1)}: ${n('lat_l3_a')} + ${n('l3_b12')} × ${h1} = ${cn(l3, 'l3.latency', 0)} cycles (${n('lat_l3_avg')} averaged over slices)`},
+      {nm: 'DRAM', sn: `DRAM, ${N.lat_dram.t} typical`, cyc: dram, lab: `${cn(dram, 'addr.load-model', 0)} model · ${n('lat_dram')} typ.`, sv: `${fnum(dram)} model`, e: `${n('e_dram')} (${n('e_dram_rng')})`, bw: n('dram_bw', 'GB/s'), path: r1.concat(r2.slice(1)), back: viaR(mc, hc, rc), dram: true, say: `DRAM through memory shire ${a.ms}: ${cn(dram, 'addr.load-model', 0)} cycles by the model; a typical load takes ${n('lat_dram')}: ${cn(V('lat_dram') / V('lat_l1'), 'lat-l1 lat-dram-typical', 0)}× an L1 hit`},
     ];
     Object.assign(c, {rq, a, rc, hc, mc, LV, pkg: AP[0].pkg[a.ms + ':' + a.ch], max: Math.max(dram, V('lat_dram'))});
     flowPanel('B', 'The latency ladder',
@@ -1939,7 +1945,7 @@ FLOWS.C = {
     flowPanel('C', 'TensorSend between shires',
       `<p class="pn-what">A hart sends ${n('b32')} of vector registers to a minion in another shire and waits for the reply. The round trip is ${n('ts_a')} cycles to leave and re-enter the shires plus ${n('ts_b')} per hop, on all three cards. The energy, measured with 1 KB messages, is ${n('ts_e_a')} to leave the shire plus ${n('ts_e_b', 'per mean hop')}.</p>`
       + `<table class="legs"><thead><tr><th>From → to</th><th class="num">hops</th><th class="num">cycles</th><th class="num">ns</th></tr></thead><tbody>${c.rows.map((r, i) => `<tr class="todo" data-leg="${i}"><td>shire ${r[0]} → ${r[1]}</td><td class="num">${cn(r[2], 'mesh.logical-map', 0)}</td><td class="num">${cn(r[3], 'ts-rt-mesh', 0)}</td><td class="num">${cn(ns(r[3]), 'ts-rt-mesh op-600', 0)}</td></tr>`).join('')}</tbody></table>`
-      + `<p class="pn-what">Inside a shire the same round trip is ${n('ts_fln')} on a tree edge and ${n('ts_xbar')} cycles otherwise. The reply takes its own route, x first.</p>`);
+      + `<p class="pn-what">Inside a shire the same round trip is ${n('ts_fln')} on a tree edge and ${n('ts_xbar')} cycles otherwise. The reply is the partner's own TensorSend back, drawn like the first as a request, x first: the mesh takes a request x first and a load's reply y first (${src('measured on two cards', 'L104')}); whether a TensorSend travels as a request was not tested.</p>`);
   },
   stages: PAIRS.map(([s, d], i) => ({
     name: `Shire ${s} → ${d}`, where: () => ({level: 0}),
@@ -1966,7 +1972,7 @@ FLOWS.D = {
     const directC = route(A, B), h = directC.length - 1;
     const bars = [['through DRAM', 'rl_e_dram', 'rl_bw_dram', 'var(--c2)'], ['to the next shire', 'rl_e_next', 'rl_bw_next', 'var(--c3)'], ['in the own scratchpad', 'rl_e_own', 'rl_bw_own', 'var(--c1)']];
     Object.assign(c, {A, B, HOME, mc, pkg, h, direct: pts(directC), bars, emax: V('rl_e_dram'), bmax: V('rl_bw_own'),
-      loop: pts(via(A, HOME, mc)).concat([{x: mc.sx, y: pkg.y}, pkg, {x: mc.sx, y: pkg.y}]).concat(pts(via(mc, HOME, B)))});
+      loop: pts(via(A, HOME, mc)).concat([{x: mc.sx, y: pkg.y}, pkg, {x: mc.sx, y: pkg.y}]).concat(pts(viaR(mc, HOME, B)))});
     flowPanel('D', 'The relay: next shire or DRAM',
       `<p class="pn-what">A pipeline stage hands its output to the next stage. Through DRAM it writes its output out and the next shire reads it back, each line through its L3 home and memory shire (one line is drawn, homed in ${src('shire 16, served by memory shire 0', 'l3.home L43 addr.load-path')}); on chip it writes straight into the next shire's scratchpad (shire 0 to shire 1 here, ${cn(h, 'mesh.logical-map', 0)} ${hopw(h)}).</p>`
       + `<p class="pn-h">Energy per byte (write + read)</p><div class="lad">${bars.map(b => `<div class="nm">${b[0]}</div><div class="tr"><u style="width:${(100 * V(b[1]) / c.emax).toFixed(1)}%;background:color-mix(in srgb,${b[3]} 50%,transparent)"></u><s>${n(b[1], 'pJ/B')}</s></div>`).join('')}</div>`
@@ -2080,7 +2086,7 @@ function gsStage(tok, c, i) {
     c.ch = bandChart(fx, g ? 'Gathers done' : 'Scatters done', c.LN.map(l => ({name: SN[l.k], val: '', f: key})), {note: 'done (log scale) · cycles each'});
     c.ch.rows.forEach((r, j) => { const y = +r.val.getAttribute('y'); T(r.g, BAND.x + BAND.w - 7, y, `${N[c.p + c.LN[j].k + '_c'].t} cyc`, 't-sm', 'end', 'gs-' + (g ? 'g' : 's') + '-dram-256K').style.fill = 'var(--ink)'; });
     c.trs = c.LN.map((l, j) => document.querySelector(`#race .tr[data-i="${j}"]`));
-    c.toRq = g ? pts(route(c.far, c.rq)) : pts(route(c.rq, c.far));
+    c.toRq = g ? pts(reply(c.far, c.rq)) : pts(route(c.rq, c.far));
     pnReveal($('race'));
     // A count race on a log scale: each running lane's bar is log(1 + done) against the leader's, so a lane a hundred
     // times slower still shows (no bar restarts with every instruction). A lane drawn while paused shows its speed
@@ -2115,7 +2121,7 @@ function gsStage(tok, c, i) {
   }
   if ((i === 4 || i === 5) && !c.drOn) {
     c.drOn = true; const t0 = CLK.t, d = V(c.p + 'dr_c') * c.SCALE / 8; let nx = 0;
-    every(tok, t => { while (nx <= t - t0) { const home = Math.floor(Math.random() * 32), hc = SH[home], mc = MSC[home % 8]; shoot(pts(g ? via(mc, hc, c.rq) : via(c.rq, hc, mc)), 'var(--c2)'); nx += d; } });
+    every(tok, t => { while (nx <= t - t0) { const home = Math.floor(Math.random() * 32), hc = SH[home], mc = MSC[home % 8]; shoot(pts(g ? viaR(mc, hc, c.rq) : via(c.rq, hc, mc)), 'var(--c2)'); nx += d; } });
   }
 }
 
@@ -2131,7 +2137,7 @@ FLOWS.F = {
         ['the link', `trained at ${n('pcie_neg')} on every card: ${n('pcie_link')} per direction`, '', ''],
         ['DMA', `${n('pcie_h2d', 'GB/s')} to the card, ${n('pcie_d2h', 'GB/s')} back: ${n('pcie_h2d_pct')} and ${n('pcie_d2h_pct')} of the link`, '', ''],
         ['staged', `a program's copies: ${n('pcie_stg_h', 'GB/s')} (host memcpy ${n('pcie_memcpy', 'GB/s')} first, then the DMA)`, '', ''],
-        ['into DRAM', `lines rotate over the ${n('ms8')} memory shires (PA[8:6]); the path from the PCIe shire is not established`, '', ''],
+        ['into DRAM', `each line through its L3 home (PA[10:6]), which keeps it: ${n('pcie_l3pct')} of a copied buffer's lines then read at L3 latency (E55); the L3's write-back to the ${n('ms8')} memory shires (PA[8:6]) not timed`, '', ''],
         ['launch', `an empty kernel on ${n('cshires')} shires: ${n('pcie_b2b', 'µs')} each when queued, the card's own cost; one launch waited for takes ${n('pcie_launch', 'µs')}, the extra ${n('pcie_wait_rng')} mostly the runtime's ${n('poll500')} idle poll`, '', ''],
         ['small copies', `a lone 4 KB copy: ${n('pcie_4k', 'µs')}, the runtime's polling (${n('poll50')} in flight, ${n('poll500')} idle)`, '', ''],
       ])
@@ -2168,18 +2174,24 @@ FLOWS.F = {
         await wait(tok, 7000);
       }},
     {name: 'Into DRAM', where: () => ({level: 0}),
-      say: () => `Buffers go to device DRAM: lines rotate over the ${n('ms8')} memory shires by PA[8:6]; the path from the PCIe shire is not established (drawn dashed)`,
+      say: () => `Each line of a copied buffer goes to its L3 home (PA[10:6]), which keeps it: ${n('pcie_l3pct')} of the lines then read at L3 latency (E55); the L3's later write-back to the ${n('ms8')} memory shires (PA[8:6]) is drawn dashed`,
       run: async (tok, c) => {
-        const fx = c.fx; hiCells(Object.values(MSC).concat([c.pc]), true); unsay(c);
+        const fx = c.fx; unsay(c);
         if (c.ch && c.ch.g.parentNode) c.ch.g.remove();
-        const legs1 = [];
-        for (let m = 0; m < 8; m++) {
-          // inferred paths (dashed), kept a quiet suggestion under the text: thin, faint, small packets
-          const mc = MSC[m], pkg = AP[0].pkg[m + ':' + (m % 2)], pk = packet(fx, 'var(--c3)', 8);
-          legs1.push(quiet(travel(tok, fx, pk, pts(route(c.pc, mc)).concat([{x: mc.sx, y: pkg.y}, pkg]), 2600, {col: 'var(--c3)', w: 3, op: 0.5, dash: '6 8'})));
-          await wait(tok, 200);
-        }
-        await Promise.all(legs1);
+        // eight lines of a buffer, their homes spread over the chip: line k's L3 home is shire k (PA[10:6]) and its
+        // memory shire k % 8 (PA[8:6])
+        const K = [0, 9, 18, 27, 4, 13, 22, 31];
+        hiCells(K.map(k => SH[k]).concat(Object.values(MSC), [c.pc]), true);
+        const legs = K.map((k, i) => quiet((async () => {
+          await wait(tok, 200 * i);
+          const hc = SH[k], mc = MSC[k % 8], pkg = AP[0].pkg[mc.id + ':' + (mc.id % 2)], pk = packet(fx, 'var(--c3)', 8);
+          // measured (E55, fact pcie.write-l3): the host's write reaches the line's L3 home, which allocates the line
+          await travel(tok, fx, pk, pts(route(c.pc, hc)), 1500, {col: 'var(--c3)', w: 4});
+          await pulse(tok, fx, {x: hc.sx, y: hc.sy}, 500, 'var(--c3)', 24);
+          // not timed: the L3's write-back to the memory shire and its DRAM package, a quiet dashed suggestion
+          await travel(tok, fx, pk, pts(route(hc, mc)).concat([{x: mc.sx, y: pkg.y}, pkg]), 1800, {col: 'var(--c3)', w: 3, op: 0.5, dash: '6 8'});
+        })()));
+        await Promise.all(legs);
       }},
     {name: 'Launch', where: () => ({level: 0}),
       say: () => `The master shire (${n('master_id')}) starts the kernel on all ${n('cshires')} shires: ${n('pcie_b2b_rng')} each when queued; ${n('pcie_launch_rng')} when waited for, mostly the host's ${n('poll500')} poll`,
@@ -2376,7 +2388,7 @@ FLOWS.G = {
           const t0 = CLK.t; let nx = 0;
           // each line from its memory shire through its L3 home to the loading shire, as an L2 miss returns (fact sc.l3-miss)
           every(tok, t => { while (nx <= t - t0) { const s = Object.values(SH)[Math.floor(Math.random() * 32)], home = Math.floor(Math.random() * 32), m = MSC[home % 8], pk = packet(fx, 'var(--c3)', 8);
-            const P = pts(via(m, SH[home], s));
+            const P = pts(viaR(m, SH[home], s));
             quiet(travel(tok, fx, pk, P, 380 * Math.max(4, P.length - 1), {trail: false, even: true, linear: true}).then(() => pk.remove(), e => { pk.remove(); throw e; })); nx += 240; } });
         }
         await wait(tok, 1200);
@@ -2630,7 +2642,7 @@ FLOWS.J = {
         ['back down', `TensorBroadcast: all ${n('n1024')} minions have the sum after ${n('ar1024')} (${n('ar_us')})`, '', ''],
         ['against a barrier', `a chip barrier from global atomics and credits: ${n('chipbar')} cycles (${n('chipbar_us')})`, '', ''],
       ])
-      + `<p class="pn-what small">One shire's 32 minions reduce in ${n('ar32')}; the per-level costs are from the on-chip communication page's ladder. The tree is the benchmark's (nocbench); the mesh legs are drawn x first like every route here.</p>`);
+      + `<p class="pn-what small">One shire's 32 minions reduce in ${n('ar32')}; the per-level costs are from the on-chip communication page's ladder. The tree is the benchmark's (nocbench); its mesh legs are drawn as requests, x first (${src('the order was measured for loads and stores', 'L104')}; whether the tree's messages travel as requests was not tested).</p>`);
   },
   stages: [
     {name: 'Levels 0-2', where: () => ({level: 1, sid: 0}),
@@ -2739,15 +2751,16 @@ function bcDram(tok, c) {
   if (REDUCED) return;
   const fx = c.fx, t0 = CLK.t; let nx = 0;
   every(tok, t => { if (st.stop || !CLK.on) return; while (nx <= t - t0) {
-    const s = c.all[Math.floor(Math.random() * 32)], home = Math.floor(Math.random() * 32), m = MSC[home % 8], pk = packet(fx, 'var(--c2)', 7), P = pts(via(m, SH[home], s));
+    const s = c.all[Math.floor(Math.random() * 32)], home = Math.floor(Math.random() * 32), m = MSC[home % 8], pk = packet(fx, 'var(--c2)', 7), P = pts(viaR(m, SH[home], s));
     quiet(travel(tok, fx, pk, P, 280 * Math.max(4, P.length - 1), {trail: false, even: true, linear: true}).then(() => pk.remove(), e => { pk.remove(); throw e; }));
     nx += 170; } });
 }
-/* a packet from a to b and back, the reply its own packet on its own lane (the reply colour), removed at the end */
+/* a load's request from a to b and its reply back, y first along the request's links, its own packet on its own lane
+   (the reply colour), removed at the end */
 async function bcTrip(tok, fx, a, b, ms, col) {
   const P = pts(route(a, b)), q = packet(fx, col || 'var(--c2)', 7); at(q, P[0]);
   try { await travel(tok, fx, q, P, ms, {trail: false, even: true}); } finally { q.remove(); }
-  const back = lane(pts(route(b, a)), LANE, {x: b.sx, y: b.sy}), r = packet(fx, 'var(--c7)', 7); at(r, back[0]);
+  const back = lane(pts(reply(b, a)), LANE, {x: b.sx, y: b.sy}), r = packet(fx, 'var(--c7)', 7); at(r, back[0]);
   try { await travel(tok, fx, r, back, ms, {trail: false, even: true}); } finally { r.remove(); }
 }
 /* On a phone the text must read at 11 px or more: a callout of the chip or a shire at 21 (the callout enlarges it by
@@ -2797,7 +2810,7 @@ FLOWS.K = {
         ['compared', `to all ${n('n1024')}: the tree ${n('ar_us')} (32 B) or ${n('bc_1k_us')} (1 KB); a chip barrier alone ${n('chipbar_us2')}; a queued launch ${n('pcie_b2b_rng')}`, '', ''],
       ])
       + `<p class="pn-what small"><b>Not measured:</b> the tree's broadcast half on its own (it was timed only with the reduction) and the tree's energy (${src('fact bc.half', 'bc.half')}); how long a relay takes to reach every shire (the relay moved 1 MB slabs down a pipeline); every minion loading one line at once (the hot-line runs used atomics); the launch's multicast apart from the rest of a launch, and its energy (${src('fact bc.launch-31', 'bc.launch-31')}).</p>`
-      + `<p class="pn-what small">The tree's mesh legs, the relay's hand-offs and the reads are drawn x first, like every route here. The interrupt that starts a launch is drawn at each shire, not along a route: its path over the mesh is not documented.</p>`);
+      + `<p class="pn-what small">The mesh takes a request x first and a reply y first (${src('measured for loads and stores', 'L104')}): the relay's hand-offs and the reads' requests are drawn x first, the lines they bring back y first, and the tree's messages as requests, x first. The interrupt that starts a launch is drawn at each shire, not along a route: its path over the mesh is not documented.</p>`);
   },
   stages: [
     {name: 'The value', where: () => ({level: 2, sid: 0, nb: 0, mi: 0}),
@@ -3045,7 +3058,7 @@ const STEPS = [
   {name: 'Shires', cap: () => `${n('cshires')} compute shires of ${n('per_shire')} run the kernels; the master shire (${n('master_id')}) schedules them and a spare (${n('spare_id')}) waits for yield recovery.`,
     view: {level: 0}, hi: ['cshire', 'master'], panel: ['cshire', () => ({cell: SH[0]})], sel: () => SH[0].g, sub: () => `Placed by measured distances, all ${n('pairs496')} shire pairs; the firmware's NoC-spec map agrees in ${n('fw_pairs')} pair distances. Shire 0, ringed, is the one we open next.`},
   {name: 'Mesh', cap: () => `An ${n('grid86')} mesh of ${n('stops')} stops joins them. Each hop adds ${n('hop_cyc')} (${n('hop_ns')}) to a round trip and is about ${n('hop_mm')} of wire.`,
-    view: {level: 0}, hi: ['mesh', 'links'], cls: 'mesh-on', panel: ['mesh'], sub: () => `${src("The grid's four corners are empty", 'mesh.grid')}. Routes are shortest paths; the flows draw each leg x first (the order was not measured).`},
+    view: {level: 0}, hi: ['mesh', 'links'], cls: 'mesh-on', panel: ['mesh'], sub: () => `${src("The grid's four corners are empty", 'mesh.grid')}. Routes are shortest paths: a request goes x first, its reply y first (${src('measured', 'L104')}).`},
   {name: 'Memory', cap: () => `${n('memshires')} memory shires drive ${n('channels')} LPDDR4X channels (${n('dram_gb')}), ${n('dram_peak')} GB/s peak at ${n('mts')} MT/s; the chip streams ${n('dram_bw')} GB/s.`,
     view: {level: 0}, hi: ['memshire', 'dram'], panel: ['dram', () => ({ms: [0, 1]})], sub: () => `Placed by a fit of DRAM latencies on aifoundry2, within ±3 cycles for ${n('ms_fit')} of loads on all three cards; the firmware's map agrees on the seven the fit places alone.`},
   {name: 'Shire', cap: () => `Inside a shire, ${n('neigh')} of ${n('per_neigh')} share ${n('cache_mb')} of SRAM: ${n('scp_mb')} scratchpad, ${n('l2_kb')} L2 and a ${n('l3_mb')} slice of the L3.`,
@@ -3477,29 +3490,29 @@ function prose() {
     `<p><b>The chip.</b> The ET-SoC-1 has ${n('cores')} RISC-V cores on a ${n('die_mm2')} mm² die in TSMC ${n('process')}: ${n('minions')} minions in ${n('shires')} shires, ${n('maxions')} and a service processor. The diagram draws the die (width and height from a published die plot) with ${n('cshires')} compute shires, the master (${n('master_id')}) and spare (${n('spare_id')}) shires, the PCIe and I/O shires, and ${n('memshires').toLowerCase()} memory shires, on an ${n('grid86')} mesh of ${n('stops')} stops. The compute shires sit where measured distances put them, and the firmware's NoC-spec map, once its boot-time renaming is applied, puts every one in the same cell (${n('fw_pairs')} pair distances). Each mesh hop adds ${n('hop_cyc')} (${n('hop_ns')}) to a round trip and is about ${n('hop_mm')} of wire. Off the die, four LPDDR4X packages hold ${n('channels')} channels of ${n('ch_bits')}, ${n('dram_gb')}; the chip streams ${n('dram_bw')} GB/s from them against ${n('dram_peak')} GB/s peak at their ${n('mts')} MT/s. The host links through the PCIe shire: Gen4 x8, trained at ${n('pcie_neg')} on every card, ${n('pcie_h2d')} GB/s to the card by DMA. The fp32 matmul at ${n('tflops')} TFLOP/s draws ${n('mmw')} at the board on the three cards, ${n('perw')} GFLOP/s per watt.</p>`,
     `<p><b>A shire.</b> ${n('neigh')} of ${n('per_neigh')} share ${n('cache_mb')} of SRAM in ${n('banks')}. The cards run mode M0: ${n('scp_mb')} of scratchpad that any shire can address, ${n('l2_kb')} of L2 private to the shire, and a ${n('l3_mb')} slice of the chip's ${n('l3_chip')} L3. The shire meets the mesh at one stop, and inside a neighbourhood minions talk fastest along the tree edges of the fast local network (${n('ts_fln')} round trip, against ${n('ts_xbar')} cycles for other pairs).</p>`,
     `<p><b>A minion.</b> ${n('harts')}, in-order and single-issue, a vector unit of ${n('lanes')} and a ${n('l1_kb')} L1 data cache, of which the firmware makes ${n('l1_scp')} a tensor scratchpad and leaves each hart ${n('l1_hart')}. The tensor instructions are no separate unit: state machines in the vector unit run them on its lanes' FMA and int8 multiply-add units, so the tensor peak (${n('peak32')}, ${n('peak16')} or ${n('peak8')} operations per cycle) is the lanes' peak. On ${n('n1024')} minions at ${n('mhz')} they sustain ${n('tflops')} TFLOP/s fp32.</p>`,
-    `<p><b>The flows.</b> (1) A load that misses every cache: ${n('lat_l1')} cycles would have been an L1 hit and ${n('lat_l2')} an L2 hit; the L3 home is PA[10:6] and costs ${n('lat_l3_a')} + ${n('lat_l3_b')}; the memory shire is PA[8:6] and adds ${n('lat_ms_a')} + ${n('lat_ms_b')} cycles per hop; a typical DRAM load takes ${n('lat_dram')}, of which ${n('lat_dram_chip')} are the DRAM chip. (2) The ladder adds the read buffer (${n('lat_rb')}), the own scratchpad (${n('lat_scp')}) and another shire's scratchpad (${n('lat_rs_a')} + ${n('lat_rs_b')} per hop). (3) TensorSend: ${n('ts_a')} cycles plus ${n('ts_b')} per hop, round trip. (4) The relay: ${n('rl_e_next')} pJ/B to the next shire against ${n('rl_e_dram')} through DRAM (${n('rl_x')} less). (5) Gathers from scattered lines: ${n('g_l1_r')}, ${n('g_l2_r')}, ${n('g_rs_r')} and ${n('g_dr_r')} G elements/s from L1, L2, a scratchpad two hops away and DRAM. (6) The host over PCIe, timed on three cards: ${n('pcie_h2d')} GB/s to the card and ${n('pcie_d2h')} back by DMA (${n('pcie_h2d_pct')} and ${n('pcie_d2h_pct')} of the link), ${n('pcie_stg_rng')} GB/s for a program's staged copies; an empty kernel costs the card ${n('pcie_b2b_rng')} queued, while one launch waited for takes ${n('pcie_launch_rng')}, most of it the runtime's ${n('poll500')} idle poll. (7) A matmul step: TensorLoad ${n('tl_l2')} cycles, TensorFMA ${n('tfma_tenb')}, ${n('mm_op')} per op with the next load hidden. (8) The Horace runs of the matmul (${n('w_tflops')} TFLOP/s, timed from the host) on zeros, ones and random data: ${n('w_zeros')}, ${n('w_ones')} and ${n('w_randn')} W at the board at the launch temperature; random data reaches 90 °C in ${n('race_rand')} s, zeros never. (9) One hot line: fair shares (${n('hot_host')} for the host shire), and 22 requesters stop the host shire's own loads (${n('hot22')}). (0) The allreduce tree: ${n('ar1024')} for all ${n('n1024')} minions, against ${n('chipbar')} cycles for a chip barrier. (B) One value to every minion, four ways: the hardware tree (TensorBroadcast down the allreduce's tree) has it everywhere within the allreduce's ${n('ar1024')} (${n('ar_us')}) for 32 B and ${n('bc_1k', 'cycles')} (${n('bc_1k_us')}) for 1 KB, the broadcast half never timed alone; a relay hands a buffer from shire to shire at ${n('rl_e_next')} pJ/B a hand-off, where every shire reading its own copy from DRAM pays ${n('e_dram')} pJ per byte; one line that every minion loads costs each shire one request to its home, but hammered with atomics it is the hot line of flow 9; and every kernel launch is itself a broadcast of one 64-byte message, ${n('pcie_b2b_rng')} for an empty kernel queued on 32 shires.</p>`,
+    `<p><b>The flows.</b> (1) A load that misses every cache: ${n('lat_l1')} cycles would have been an L1 hit and ${n('lat_l2')} an L2 hit; the L3 home is PA[10:6] and costs ${n('lat_l3_a')} + ${n('lat_l3_b')}; the memory shire is PA[8:6] and adds ${n('lat_ms_a')} + ${n('lat_ms_b')} cycles per hop; a typical DRAM load takes ${n('lat_dram')}, of which ${n('lat_dram_chip')} are the DRAM chip. (2) The ladder adds the read buffer (${n('lat_rb')}), the own scratchpad (${n('lat_scp')}) and another shire's scratchpad (${n('lat_rs_a')} + ${n('lat_rs_b')} per hop). (3) TensorSend: ${n('ts_a')} cycles plus ${n('ts_b')} per hop, round trip. (4) The relay: ${n('rl_e_next')} pJ/B to the next shire against ${n('rl_e_dram')} through DRAM (${n('rl_x')} less). (5) Gathers from scattered lines: ${n('g_l1_r')}, ${n('g_l2_r')}, ${n('g_rs_r')} and ${n('g_dr_r')} G elements/s from L1, L2, a scratchpad two hops away and DRAM. (6) The host over PCIe, timed on three cards: ${n('pcie_h2d')} GB/s to the card and ${n('pcie_d2h')} back by DMA (${n('pcie_h2d_pct')} and ${n('pcie_d2h_pct')} of the link), ${n('pcie_stg_rng')} GB/s for a program's staged copies, whose lines land in their L3 homes (${n('pcie_l3pct')} then read at L3 latency); an empty kernel costs the card ${n('pcie_b2b_rng')} queued, while one launch waited for takes ${n('pcie_launch_rng')}, most of it the runtime's ${n('poll500')} idle poll. (7) A matmul step: TensorLoad ${n('tl_l2')} cycles, TensorFMA ${n('tfma_tenb')}, ${n('mm_op')} per op with the next load hidden. (8) The Horace runs of the matmul (${n('w_tflops')} TFLOP/s, timed from the host) on zeros, ones and random data: ${n('w_zeros')}, ${n('w_ones')} and ${n('w_randn')} W at the board at the launch temperature; random data reaches 90 °C in ${n('race_rand')} s, zeros never. (9) One hot line: fair shares (${n('hot_host')} for the host shire), and 22 requesters stop the host shire's own loads (${n('hot22')}). (0) The allreduce tree: ${n('ar1024')} for all ${n('n1024')} minions, against ${n('chipbar')} cycles for a chip barrier. (B) One value to every minion, four ways: the hardware tree (TensorBroadcast down the allreduce's tree) has it everywhere within the allreduce's ${n('ar1024')} (${n('ar_us')}) for 32 B and ${n('bc_1k', 'cycles')} (${n('bc_1k_us')}) for 1 KB, the broadcast half never timed alone; a relay hands a buffer from shire to shire at ${n('rl_e_next')} pJ/B a hand-off, where every shire reading its own copy from DRAM pays ${n('e_dram')} pJ per byte; one line that every minion loads costs each shire one request to its home, but hammered with atomics it is the hot line of flow 9; and every kernel launch is itself a broadcast of one 64-byte message, ${n('pcie_b2b_rng')} for an empty kernel queued on 32 shires.</p>`,
   ].join('');
   // what is measured, specified, derived and inferred
   const fs = Object.values(F), of = k => fs.filter(f => f.kind === k), meas = of('measured');
   const mc = k => meas.filter(f => f.cards.length === k).length;
   const lk = id => `<a href="#facts" data-f="${id}" class="num">${id}</a>`;
-  const SETTLED = f => /^(Superseded|Settled) 27 Sep/.test(f.note || '');   // an inferred fact the firmware's map has since settled (build_facts.py, AMEND)
+  const SETTLED = f => /^(Superseded|Settled) 2[79] Sep/.test(f.note || '');   // an inferred fact settled since: by the firmware's map (27 Sep) or E56 (29 Sep) (build_facts.py, AMEND, AMEND2)
   $('honest-text').innerHTML = `<p>The page rests on ${fs.length} facts: <b>${meas.length} measured</b>, ${of('spec').length} from the specification (the datasheet, the Programmer's Reference Manual, the core-et documents and the firmware and runtime source), ${of('derived').length} derived from others and <b>${of('inferred').length} inferred</b>. Of the measured facts, ${mc(3)} hold on all three lab cards (aifoundry2, aifoundry3 and aifoundry1 card 1), ${mc(2)} on two and ${mc(1)} on one, mostly aifoundry2${mc(0) ? `; ${mc(0)} ${mc(0) === 1 ? 'names' : 'name'} no card` : ''}. Every table here is at ${n('mhz')}, where a warm card sits.</p>`
-    + `<p>What the drawing assumes, and what the second version (27 September) settled:</p><ul>`
+    + `<p>What the drawing assumes, and what the second version (27 September) and the measurements of 29 September settled:</p><ul>`
     + `<li><b>Where the compute shires are</b> is measured: all ${n('pairs496')} shire pairs fit a constant plus ${n('hop_cyc')} per hop of Manhattan distance on the logical map (${lk('mesh.shortest-paths')}). <b>How that map sits on the die</b> was inferred (${lk('mesh.orientation')}, ${lk('L33')}, ${lk('L34')}); it is now the firmware's own: the "default Shire Virtual ID Map, based on the NOC spec", renamed as the boot firmware renames the shires, matches the measured map in ${n('fw_pairs')} pair distances with no rotation or mirror (${lk('fw.map-match')}; fact ${lk('L37')}, which compared the map before the renaming, is superseded). Still open: whether the silicon has this handedness or the published die plot's, its mirror (${lk('die.handedness')}, ${lk('L24')}).</li>`
-    + `<li><b>The four cells without a compute shire</b>: the firmware's maps name them, the master (shire 32) in the north cell, the spare (33) in the south one, PCIe and then I/O east of the master (${lk('fw.grey-cells')}). They are drawn solid now; timing a counter read on shire 32 from every compute shire would confirm the master's cell on the cards.</li>`
-    + `<li><b>The memory shires' places</b> come from a fit of DRAM latencies on one card, aifoundry2 (${lk('L40')}), within ±3 cycles for ${n('ms_fit')} of loads on all three cards (${lk('ms-fit-3cards')}). The firmware's map puts the 7 memory shires the fit places on its own in the same places, if its mcN is the memory shire that PA[8:6] = N selects; memory shire 2, a tie in the fit, then has one cell left in both (${lk('fw.memshires')}, ${lk('ms2-forced')}), so the map confirms the frame, not memory shire 2 on its own. Timing a counter read on each memory shire would place it directly.</li>`
+    + `<li><b>The four cells without a compute shire</b>: the firmware's maps name them, the master (shire 32) in the north cell, the spare (33) in the south one, PCIe and then I/O east of the master (${lk('fw.grey-cells')}). They are drawn solid now. Timing a counter read on shire 32 from every compute shire confirms the master's cell on a card: E56 did so on 29 September, and it placed shire 32 in the firmware's cell on aifoundry1 card 1 and decided nothing on aifoundry3 (the asks below).</li>`
+    + `<li><b>The memory shires' places</b> come from a fit of DRAM latencies on one card, aifoundry2 (${lk('L40')}), within ±3 cycles for ${n('ms_fit')} of loads on all three cards (${lk('ms-fit-3cards')}). The firmware's map puts the 7 memory shires the fit places on its own in the same places, if its mcN is the memory shire that PA[8:6] = N selects; memory shire 2, a tie in the fit, then has one cell left in both (${lk('fw.memshires')}, ${lk('ms2-forced')}), so the map confirms the frame, not memory shire 2 on its own. Timing a counter read on each memory shire places it directly: E56's timings (29 September) put six of the eight, memory shire 2 among them, where the drawing has them on aifoundry1 card 1, and decided nothing on aifoundry3 (the asks below).</li>`
     + `<li><b>Which two memory shires share each LPDDR4X package</b> is not documented; the drawing pairs neighbours (${lk('dram.pkg-pairing')}, ${lk('L23')}). The packages are dashed: the card's schematic settles it.</li>`
-    + `<li><b>Routes</b>: every leg, a reply included, is drawn on its own route, x first, then y, on the logical map; where x first would cross an empty corner of the grid (some legs from a memory shire), y first. The mesh's routing order was never measured (${lk('L104')}); only the hop count is.</li>`
-    + `<li><b>The way back</b> of a DRAM load: the data returns through the L3 home, as the shire cache specification describes an L3 miss (${lk('sc.l3-miss')}); the model pays the mesh round trip on both legs (${lk('addr.load-model')}). Only each leg's route is drawn on an assumption, the same for a request and a reply: replies are told by their colour. <b>Dashes</b> mark only what is inferred: the four LPDDR4X packages, and the host's path from the PCIe shire into DRAM in flow 6.</li>`
+    + `<li><b>Routes</b> are measured now (${lk('L104')}, 29 September): the mesh takes a request x first, then y, on the logical map, and a reply y first, then x, back along its request's links. E56 streamed tensor loads and stores between shires in sets that share one link under one order and none under the other: loads slowed to ${n('route_rd')} of their bandwidth alone only where their replies share a link under y first, stores to ${n('route_wr')} only where their data share one under x first, on aifoundry1 card 1 and, frozen beforehand, on aifoundry3. Until then every leg here was drawn x first. Still drawn on an assumption: that a load's small request goes x first and a store's acknowledgement y first (too small to slow a link, they were not seen), that a memory shire's replies follow the same rule, and that TensorSend and the tree's messages travel as requests.</li>`
+    + `<li><b>The way back</b> of a DRAM load: the data returns through the L3 home, as the shire cache specification describes an L3 miss (${lk('sc.l3-miss')}); the model pays the mesh round trip on both legs (${lk('addr.load-model')}). Each leg of the way back is a reply, drawn y first, beside its request's line: replies are told by their colour and their own lane. <b>Dashes</b> mark only what is inferred: the four LPDDR4X packages, and in flow 6 the L3's write-back of the host's lines to DRAM.</li>`
     + `<li><b>Inside a shire</b>, the drawing is a block diagram: no source gives where the banks and neighbourhoods sit in the tile (${lk('L114')}). The minions' order in a neighbourhood follows the core-et floorplan (${lk('L115')}).</li>`
     + `<li><b>Sizes</b>: the die's width and height and the tile pitch are pixel estimates on one vendor die plot scaled to ${n('die_mm2')} mm² (${lk('chip.die-dims')}, ${lk('chip.hop-pitch')}).</li>`
-    + `<li><b>The host link</b> is measured now, on three cards (${lk('pcie.h2d')}, ${lk('pcie.d2h')}, ${lk('pcie.staged')}, ${lk('pcie.launch')}); which way the host's writes reach DRAM (through the L3 homes or straight to the memory shires) is not established.</li>`
+    + `<li><b>The host link</b> is measured now, on three cards (${lk('pcie.h2d')}, ${lk('pcie.d2h')}, ${lk('pcie.staged')}, ${lk('pcie.launch')}). Since 29 September (E55, on aifoundry1 card 1 and aifoundry3) so is the way the host's writes reach the chip: through their lines' L3 homes, which keep them, so a kernel's first touch of a freshly copied buffer hits the L3 (${lk('pcie.write-l3')}); only the L3's later write-back to DRAM is drawn dashed. Two DMA commands collide only inside one stream (${lk('pcie.conc')}).</li>`
     + `<li><b>Gathers and scatters</b> (E48) were reduced on 27 September and have no published page yet; the heat race of flow 8 is one card's (aifoundry2).</li>`
-    + `<li><b>What was measured for this version.</b> Only the host link was measured anew (27 September, three cards: ${lk('pcie.h2d')}). Flows 7, 8, 9 and 0 draw measurements already in the repository: the matmul benchmark and the tensor-load timings, the Horace runs of the same matmul on different data, the hot-line passes and the allreduce ladder, each fact with its data file.</li>`
+    + `<li><b>What was measured for this version.</b> Only the host link was measured anew (27 September, three cards: ${lk('pcie.h2d')}), and on 29 September the routing order (${lk('L104')}), which moved every reply onto its own route, where a host copy lands (${lk('pcie.write-l3')}), the DRAM address map's banks and rows (${lk('L50')}) and that the L2 keeps a TensorLoad's lines (${lk('minion.tensor-cache-path')}). Flows 7, 8, 9 and 0 draw measurements already in the repository: the matmul benchmark and the tensor-load timings, the Horace runs of the same matmul on different data, the hot-line passes and the allreduce ladder, each fact with its data file.</li>`
     + `<li><b>The broadcast (flow B, 28 September)</b> measures nothing new either: it draws the allreduce ladder (its 1 KB rows read from the version-3 raw files, ${lk('bc.allreduce-1kb')}), the relay, the hot line's passes and the launch timings, with the firmware source for the launch's own multicast (${lk('bc.launch-multicast')}). What was not measured is said on its stages: the tree's broadcast half on its own and the tree's energy (${lk('bc.half')}), a relay's time to reach every shire, every minion loading one line at once (${lk('bc.one-request')}), and the launch's multicast apart from the rest of a launch (${lk('bc.launch-31')}).</li></ul>`
     + `<p>The inferred facts still open:</p><ul>${of('inferred').filter(f => !SETTLED(f)).map(f => `<li>${esc(f.statement)} <span class="small">(${lk(f.id)})</span></li>`).join('')}</ul>`
-    + `<p>Inferred before 27 September and settled since by the firmware's map (each fact's note says what is left):</p><ul>${of('inferred').filter(SETTLED).map(f => `<li>${esc(f.statement)} <span class="small">(${lk(f.id)}: ${esc(f.note)})</span></li>`).join('')}</ul>`;
+    + `<p>Inferred before and settled since, by the firmware's map (27 September) or by a measurement (29 September); each fact's note says what is left:</p><ul>${of('inferred').filter(SETTLED).map(f => `<li>${esc(f.statement)} <span class="small">(${lk(f.id)}: ${esc(f.note)})</span></li>`).join('')}</ul>`;
   // the asks: what would settle each inferred part, and the hub's row that asks for it
   const BADGE = {settled: '<span class="kd measured">settled</span>', nearly: '<span class="kd spec">nearly settled</span>', confirm: '<span class="kd spec">to confirm</span>'};
   $('asktab').querySelector('tbody').innerHTML = ASKS.map(a => `<tr><td data-label="Part"><b>${esc(a.part)}</b>${BADGE[askState(a)] ? ' ' + BADGE[askState(a)] : ''}</td><td data-label="What is inferred">${esc(a.what_is_inferred)}</td><td data-label="What would settle it" class="small">${esc(a.what_settles_it)}</td><td data-label="Ask">${askLinks(a).join('<br>') || esc(a.ask_detail || '')}</td></tr>`).join('');

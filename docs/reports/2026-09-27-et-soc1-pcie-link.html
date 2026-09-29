@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Over the PCIe link · ET-SoC-1</title>
-<meta name="description" content="The host link of the ET-SoC-1, timed through the runtime on three cards: copy bandwidth from 4 KB to 256 MB against the Gen4 x8 figure, staged and DMA-only, small-copy latency and the runtime's polling behind it, empty-kernel launch latency, and what several transfers at once do; every value with its 99% interval over five runs, against predictions stated before the runs.">
+<meta name="description" content="The host link of the ET-SoC-1, timed through the runtime on three cards: copy bandwidth from 4 KB to 256 MB against the Gen4 x8 figure, staged and DMA-only, small-copy latency and the runtime's polling behind it, empty-kernel launch latency, and what several transfers at once do (two host-to-card commands of one stream halve the rate, one on each of two streams does not) and where a host copy lands (the L3); every value with its 99% interval over five runs, against predictions stated before the runs.">
 <style>
 :root {
   color-scheme: light;
@@ -179,7 +179,7 @@ details.more[open] > summary { margin-bottom: 6px; }
 <body>
 <main>
 <h1>Over the PCIe link: what the host gets</h1>
-<p class="byline">27 September 2026 · three ET-SoC-1 cards, aifoundry2, aifoundry3 and aifoundry1 card 1, five runs on each, 12 minutes apart · a new probe, <code>workloads/pciebench</code>, through the runtime API only · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="byline">27 September 2026, with a follow-up on 28–29 September (section 5) · three ET-SoC-1 cards, aifoundry2, aifoundry3 and aifoundry1 card 1, five runs on each, 12 minutes apart · a new probe, <code>workloads/pciebench</code>, through the runtime API only · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
 
 <p class="lede">Every ET-SoC-1 page so far measured the chip from the inside. This one times the way in: the
 PCIe Gen4 x8 link between the host and the card, <span id="l-spec"></span> per direction by its line rate
@@ -287,6 +287,32 @@ commands in flight move less than one.</b></p>
 <div class="chart" id="ccchart"></div>
 <p class="small" id="ccnote"></p>
 
+<h3 id="which-commands-collide">Which commands collide (29 September)</h3>
+<p>A pre-registered follow-up, experiment E55 (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">the
+hub's rungs 34 and 35</a>), asked why. Its rules were set in development on aifoundry1's card 1 (28 September,
+23:47–23:55 PDT), frozen (<code>tools/claims-v3/pcie2/PREREG.md</code>, sha256 <code>f632d6b3…</code>), and validated on
+aifoundry3 (29 September, 00:05–00:27 PDT, five passes). It timed two DMA-only copies per stream of 1, 4, 16 and 64 MB:
+both commands in flight, one at a time, and one command in each of two streams. <b>Only two commands of one stream
+collide.</b> Two host-to-card commands in flight in one stream moved 0.49 of one at 64 MB (a rate ratio of 0.48 from the
+fit over 1–64 MB), and 0.49 again with each command split into eight DMA elements; one command in each of two streams
+moved 1.01 of one. A read engine or an IOMMU shared by the two commands would have halved that case too, so both are
+refuted, and so are a fixed cost per overlapping command, a loss that sets in only after a long overlap, and a loss per
+element. Development on card 1 gave the same verdicts. So two streams move as much as one command alone, no more, and two
+commands in one stream move half as much. Card to host, two commands in flight moved 1.10 of one at 64 MB; at 1–16 MB
+the passes spread too wide to decide (0.78–0.94). Why one stream's two commands collide is not established.</p>
+
+<h3 id="where-a-host-copy-lands">Where a host copy lands on the card</h3>
+<p>The same experiment asked where the bytes of a host-to-card copy are written: into the L3 slice that is each line's
+home, or past it to DRAM. A 4 MB buffer was written by the normal (staged) copy; then one hart on shire 0 timed the first
+load of 4,096 of its lines, one at a time, in a kernel launched without the L3 flush. Two references were timed the same
+way: every line from DRAM (a median of 304 cycles) and every line from the L3 (175 cycles). <b>A host write lands in the
+L3.</b> After the copy, 99.5% of the lines read at L3 latency on aifoundry3 (99.9% on card 1 in development), whether or
+not the L3 held the buffer when the host wrote it, and every value read was the one last written. The rival accounts,
+an L3 that updates only lines it already holds, and writes that go to DRAM with the L3's copy invalidated or left stale,
+are refuted. A kernel that reads a buffer the host has just copied therefore starts from the L3, not from DRAM; that was
+tested for a 4 MB buffer only. Data: <code>docs/reports/data/2026-09-29-pcie2/</code> (its README and
+<code>results.md</code>, every prediction with its verdict).</p>
+
 <h2 id="predictions">6. The predictions, and how they fared</h2>
 <p>The predictions were written down before any timed transfer (<code>docs/reports/data/2026-09-27-pcie/PREREG.md</code>,
 its sha256 in the data), from the link's figure, what GPUs achieve on such links, and the runtime's source. A
@@ -354,8 +380,8 @@ python3 scripts/build-report.py pcie-link docs/reports/data/2026-09-27-pcie/pcie
 </details>
 
 <details class="more"><summary>Version history and provenance</summary>
-<p class="small">First written 27 September 2026, from the runs of that afternoon; later that day, the staged path drawn against the hosts' memcpy (section 2) and the time of one launch or small copy split into its queued cost and the wait for the response thread (section 4); 28 September, the hosts' memory channels (section 2), read as a user the night before, where the page had said reading them needs root. Every number on this page is
-computed by its script from <code>docs/reports/data/2026-09-27-pcie/pcie.json</code>, except the link figure's
+<p class="small">First written 27 September 2026, from the runs of that afternoon; later that day, the staged path drawn against the hosts' memcpy (section 2) and the time of one launch or small copy split into its queued cost and the wait for the response thread (section 4); 28 September, the hosts' memory channels (section 2), read as a user the night before, where the page had said reading them needs root; 29 September, which commands collide and where a host copy lands (section 5), from E55; the page had left the first open. Every number on this page is
+computed by its script from <code>docs/reports/data/2026-09-27-pcie/pcie.json</code>, except section 5's two follow-ups, whose figures are quoted from <code>docs/reports/data/2026-09-29-pcie2/results.md</code> (aifoundry3) and <code>dev-aifoundry1-c1.md</code> (card 1, development), and the link figure's
 arithmetic (16 GT/s × 8 lanes × 128/130 ÷ 8, also in the data) and the runtime's and firmware's constants, which
 are cited to their source files above.</p>
 </details>
@@ -1234,7 +1260,7 @@ const VERD={PASS:'var(--ok)',FAIL:'var(--bad)',INCONCLUSIVE:'var(--warn)'};
   `${rng(r('h2d_two_in_flight_over_one'),g2)} times as much, and four in flight on two streams no more. D2H gains a little from a second command (${rng(r('d2h_two_in_flight_over_one'),g2)} times). `+
   `The link is full duplex: one command each way at a time gives ${rng(r('duplex_ser_over_faster_ser'),g2)} times the faster direction alone. `+
   `DMA-only, two host-to-card copies at once halve the rate; a program's staged copies, queued two at a time as the runtime's asynchronous API invites, keep ${rng(stg,g2)} of their one-at-a-time rate (staged, not shown in the chart), because the host copy between the DMAs hides part of the loss. `+
-  `Why concurrent DMA reads collapse (the engine, the IOMMU or the host's read completions) is not established; the hub lists what would settle it.`;
+  `A later test found what collides: not a shared engine or the IOMMU, but two commands of one stream (below).`;
 })();
 
 /* ---------- section 6: predictions ---------- */

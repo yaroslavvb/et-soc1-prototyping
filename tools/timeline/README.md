@@ -31,6 +31,7 @@ On the owner's machine (aifoundry2), from the repository root:
 
 ```bash
 export TIMELINE_DIR=/path/to/a/scratch/folder          # copy the lab machines' queue logs to $TIMELINE_DIR/hostlogs/<host>/ first
+export TIMELINE_DV2V_BUILD=$TIMELINE_DIR/dvfs2/claims-v3   # a copy of the claims-v3 build folder that holds the DV2 validation
 export TIMELINE_CUTOFF=$(date -u +%Y-%m-%dT%H:%M:00Z)   # the snapshot
 export TIMELINE_SKIP=<this refresh's own workflow or agent id>   # its commands only search for spacesheep calls
 python3 tools/timeline/extract_main.py
@@ -48,6 +49,12 @@ python3 scripts/build-report.py session-timeline $D/timeline.json docs/reports/2
 bash docs/reports/data/2026-09-24-report-review/tools/check_page.sh docs/reports/2026-09-27-session-timeline.html
 DARK=1 bash docs/reports/data/2026-09-24-report-review/tools/check_page.sh docs/reports/2026-09-27-session-timeline.html
 ```
+
+The logs to copy (read-only, with `scp`): every `*.log` in `~/nekko/build/claims-v3/` of aifoundry1 and aifoundry3 (the
+queue logs, and the series and run logs of the experiments that ran without `queue.sh`, such as pcie2, nocr, memp2 and
+tau); a waiter's own log (`*-waiter.log`) is not a queue log and stays behind. aifoundry2's are local: the claims-v3
+queue and smoke logs, and the DV2 queue logs of the build folder the validation runs in (`queue-dv2-*.log`,
+`queue-dv2val-*.log`), which is also the folder to copy for `TIMELINE_DV2V_BUILD`.
 
 Before the first step, give every new owner message a summary in `extract_main.py`'s `SUMMARIES` (keyed by the UTC
 second it was sent). The script prints the ones it has no summary for as `unsummarised`. A summary says what was

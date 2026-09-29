@@ -20,13 +20,15 @@ code{background:var(--code);padding:.05rem .3rem;border-radius:4px;font-size:.88
 finding checked against the page text or the data before it was listed (the request is in
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/02-requests.md"><code>../findings/02-requests.md</code></a>). The live pages equalled their files on that day
 (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/MIRROR.md"><code>MIRROR.md</code></a>, "Last check").</p>
-<p><strong>Status, 27 September 2026:</strong> 110 items: 70 done, 6 superseded by the version-3 results, 34 open (two of them the
-owner's, in part 0).</p>
+<p><strong>Status, 29 September 2026 (02:03 PDT):</strong> 126 items: 106 done, 6 superseded by the version-3 results, 14 open (four
+of them the owner's, in part 0). The review of 26 September listed 110; the lab re-check of 27 September added 7 and
+the major pass of 28–29 September (Q65) 9 more.</p>
 <ul>
 <li><strong>Part 0</strong> is for the owner. <strong>Part A</strong> changes published pages, so it waits for the next pass: edit the source
   named in MIRROR.md's "How each page is built", rebuild, run <code>check_page.sh</code>, deploy (MIRROR.md, "Deploying one
   page"), run <code>check-mirror.py</code>, and commit the page, its sources and this file together. <strong>Part B</strong> is
-  repository-only work this pass did not reach.</li>
+  repository-only work this pass did not reach. <strong>Part C</strong> is the card work and records that the major pass of
+  28–29 September (Q65) left: DV2's reduction, the third card's runs and two open results.</li>
 <li><strong>Reconciled on 27 September</strong> with the merge <code>0cfc742</code> (the three-card pages of 26 September, this review's chart
   and collapsible-depth passes, and E48 on the pages) and the review pass after it, then checked item by item against
   the tree the same day: a ticked item says "done 27 Sep" or "superseded 27 Sep" and where; a partly landed item stays
@@ -55,15 +57,50 @@ owner's, in part 0).</p>
   - Remove the transcript from the tree.</p>
 <p>Rewriting git history, and whether the two pages stay public, are the owner's decisions. Nothing was changed.</p>
 <p>Done 27 Sep, by the owner's decision: the two aifoundry1 pages and the disk transcript stay public for now; the
-  proposed changes were not made.
-- ☐ <code>scripts/add-lab-user.sh:4</code> names a root SSH route ("Needs <code>ssh root@aifoundryN</code>"), which AGENT.md §10
+  proposed changes were not made.</p>
+<ul>
+<li>
+<p>☐ <code>scripts/add-lab-user.sh:4</code> names an administrative SSH route word for word, which AGENT.md §10
   excludes. Reword it ("administrative SSH to each machine, the lab admin's"), unless the owner decides otherwise.
-  Open on 27 September: the owner's.
-- ☐ CLAUDE.md, the owner's file, was not edited (open on 27 September: the owner's):
-  - :16 "Every published page is a committed file" → "Every public page is a committed file listed in MIRROR.md
-    (private pages are listed there by name only)".
-  - :64 runs <code>make mmbench-check DEVICE=silicon</code> without <code>et-who</code>, the card lock or <code>timeout 10</code>.
-  - :35–36 lists three of the five upstream clones.</p>
+  Open on 27 September: the owner's.</p>
+</li>
+<li>
+<p>☐ CLAUDE.md, the owner's file, was not edited (open on 27 September: the owner's):</p>
+</li>
+<li>:16 "Every published page is a committed file" → "Every public page is a committed file listed in MIRROR.md
+    (private pages are listed there by name only)".</li>
+<li>:64 runs <code>make mmbench-check DEVICE=silicon</code> without <code>et-who</code>, the card lock or <code>timeout 10</code>.</li>
+<li>
+<p>:35–36 lists three of the five upstream clones.</p>
+</li>
+<li>
+<p>☐ <strong>The lab report's remaining fixes (its section 2.8), waiting for the owner (Q65).</strong> On 28 September the
+  session's permission check refused them, so the owner runs each or allows it. aifoundry1 already has U20, U22, U24
+  and U27 (20:51 PDT, owner-approved; <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/lab-access.md"><code>../lab-access.md</code></a>, "aifoundry1's lab fixes of
+  28 September").</p>
+</li>
+<li>U16: install <code>et-reset</code> on the three hosts (<code>tools/lab/README.md</code>, "et-reset").</li>
+<li>U17: the ZFS pool scrub.</li>
+<li>U18: <code>et-lab-health</code> rev 3 and its daily timer (<code>tools/lab/README.md</code>, "The daily timer").</li>
+<li>U19 and U26: the reboots.</li>
+<li>U20 on aifoundry2 and aifoundry3: bluetooth, cups-browsed and the firmware-updater snap disabled, apport's
+    core-dump hook masked.</li>
+<li>U22 on aifoundry2 and aifoundry3: the login-service setting aifoundry1 got.</li>
+<li>U23 on aifoundry3: its login-service item.</li>
+<li>U24 on aifoundry2 and aifoundry3: the other two machines pinned to their tailnet names in <code>/etc/hosts</code>.</li>
+<li>U25: the PCIe Gen3 link test of aifoundry1's card 0.</li>
+<li>
+<p>U27 on aifoundry2 and aifoundry3: boot to the text console (the headless default target).</p>
+</li>
+<li>
+<p>☐ <strong>NV's first voltage write (E54), waiting for the owner.</strong> The probe block on aifoundry3
+  (<code>tools/claims-v3/nv/README.md</code>: <code>block.sh 1 --probe</code>, detached; 540 mV, then 600, then the restore to 485, about
+  a minute) is NV's first command that changes the card's state. The session's permission check refused it on
+  28 September (predictions frozen in <code>4312253</code>; the read-only probe at 22:54 PDT found BL2 0.20.0 and the NoC at
+  485 mV), so the owner runs it or allows it. The smoke and the development passes follow on aifoundry3, then the
+  validation on aifoundry2 after DV2 (part C).</p>
+</li>
+</ul>
 <h2 id="a-page-changes-rebuild-and-deploy">A. Page changes (rebuild and deploy)</h2>
 <p><strong>Charts: done on 26–27 September</strong> (commits <code>6f207ce</code> to <code>974d120</code>, then the merge <code>0cfc742</code>). Every "Chart"/"Charts"
 item below is built, except two: heat per mm's optional per-step increments and a chart of the power page's SP pass
@@ -268,6 +305,11 @@ Many fix and cut items landed in the merge too; those are ticked below.</p>
   Done 27 Sep: <code>#modelcard</code>.</li>
 <li>☑ Optional chart: §4's per-step increments beside the link-sharing share.
   Done 28 Sep (<code>031c723</code>): <code>#incr</code>.</li>
+<li>☑ <strong>The routing order (E56):</strong> the route map drew every leg x first, "as the analysis assumes", and said the
+  order was not measured; read data travel y first on both cards tested. Default the map to y first, relabel the
+  toggle, and quote the shares under y first (<code>wire.json</code> <code>checks.link_sharing.&lt;cfg&gt;.shared_link_hop_fraction_yx</code>:
+  0 / 22 / 30 / 55 / 78% at 1 / 2 / 3 / 4 / 6 hops, against 0 / 22 / 32 / 55 / 72% under x first).
+  Done 29 Sep (the major pass): <code>heat-per-mm.script.js</code>; <code>../findings/20-heat-per-mm.md</code> notes it.</li>
 </ul>
 <h3 id="the-dvfs-loop-and-its-leakage-sourcesdvfs-leakage">The DVFS loop and its leakage · <code>sources/dvfs-leakage.*</code></h3>
 <ul>
@@ -574,46 +616,76 @@ Many fix and cut items landed in the merge too; those are ticked below.</p>
   is open.
   Done 28 Sep (<code>031c723</code>), except the fix page's §4, which stays by the owner's decision.</li>
 </ul>
+<h3 id="the-et-soc-1-interactively-the-chip-diagram-sourceschip-diagram">The ET-SoC-1, interactively (the chip diagram) · <code>sources/chip-diagram.*</code></h3>
+<ul>
+<li>☑ <strong>The chip diagram's routes (E56):</strong> read replies go y first and write requests x first on both cards, so fact
+  L104 and every route the diagram draws x first are wrong for replies (<code>data/2026-09-29-nocr/</code>; the frozen
+  <code>PREREG.md</code>, <code>2472ab3e…</code>). Draw replies y first and correct L104 in
+  <code>data/2026-09-27-chip-diagram/build_facts.py</code>; rebuild, check and deploy the diagram (and the memory levels, if
+  its views use L104).
+  Done 29 Sep (the major pass): L104 is kind "measured", and <code>build_facts.py</code> asserts both cards' verdicts from
+  <code>data/2026-09-29-nocr/raw/&lt;card&gt;/summary.json</code>; every reply is drawn y first, on the diagram and the memory levels.</li>
+<li>☑ <strong>E55 and E57 on the chip diagram</strong> (the hub's rungs 33, 34 and 36 said the diagram's parts were measured while
+  it still drew them as before): flow 6's "Into DRAM" through the lines' L3 homes (T34-A, fact <code>pcie.write-l3</code>), with
+  only the L3's write-back to DRAM dashed; L50 measured (R33a on both cards, R33b on aifoundry3); fact
+  <code>minion.tensor-cache-path</code> settled for the L2 (R36); <code>pcie.conc</code> says E50's two streams had four commands in flight
+  and adds E55's one command per stream (1.012); the asks "the Host -&gt; DRAM path", "the DRAM address map", "the
+  tensor unit's cache path" and "the host link's open questions" rewritten.
+  Done 29 Sep (the major pass): <code>build_facts.py</code> (AMEND2 and the E55/E57 section), <code>research/make_asks.py</code>,
+  <code>chip-diagram.script.js</code>.</li>
+</ul>
 <h2 id="b-repository-only-work-not-done-in-this-pass">B. Repository-only work not done in this pass</h2>
 <h3 id="after-the-campaign-every-block-hashes-toolsclaims-v3">After the campaign (every block hashes <code>tools/claims-v3/</code>)</h3>
 <ul>
-<li>☐ <code>tools/claims-v3/lib.sh</code>:</li>
-<li><code>:17–18</code>: aifoundry3 has system numpy, and all three hosts have a venv, since 25 September. Done 27 Sep (the
-    comment only; the two fallback lines stay for older checkouts, and the deployed copies are unchanged).</li>
+<li>☐ <code>tools/claims-v3/lib.sh</code>, <strong>after DV2's validation ends</strong> (about 16:45 PDT, 29 September; <code>lib.sh</code> is in its
+  lock, <code>tools/claims-v3/dv2v/LOCK.sha256</code>):</li>
+<li><code>:17–18</code>: aifoundry3 has system numpy, and all three hosts have a venv, since 25 September. Landed on
+    27 September (<code>a745199</code>, the comment only) and reverted on 28 September by DV2's commit <code>8eb0e38</code>, which keeps
+    <code>lib.sh</code> at the locked bytes (<code>d884e53</code>'s): re-apply <code>a745199</code>'s comment.</li>
 <li><code>:3–4</code>: add aifoundry1.</li>
 <li><code>:7</code>: note amendment A3.</li>
 <li><code>:52</code>: the data path <code>collect.sh</code> writes.</li>
 <li><code>:70–71</code>: a sudo detail (AGENT.md §10) → a variable.</li>
 </ul>
-<p>Partly landed on 27 September: <code>:17–18</code>. Left: the other four.
-- ☐ With the results:
+<p>Left: all five.
+- ☑ With the results:
   - Landed: E35–E49 registered and "Cite as" widened (03-experiments.md); the requests of 25–27 September numbered
     (Q44–Q57); a results series in <code>CLAIM_SERIES</code>; AGENT.md and getting-started updated.
-  - Left: rebuild aifoundry1's <code>build/&lt;workload&gt;</code> directories with the g3log fix.</p>
+  - Left: rebuild aifoundry1's <code>build/&lt;workload&gt;</code> directories with the g3log fix.
+  - Done 28 Sep: the rebuild (the next section's first item).</p>
 <h3 id="our-tools-after-the-heat-placement-work-from-the-lab-re-check-of-27-september">Our tools, after the heat-placement work (from the lab re-check of 27 September)</h3>
 <p>The heat code is frozen until its validation on aifoundry1's card 1 ends (about 08:00 PDT, 28 September). Then:</p>
 <ul>
-<li>☐ Rebuild aifoundry1's <code>build/&lt;workload&gt;</code> host programs with <code>registerRuntimeLogLevels()</code> (the item above), then
+<li>☑ Rebuild aifoundry1's <code>build/&lt;workload&gt;</code> host programs with <code>registerRuntimeLogLevels()</code> (the item above), then
   update getting-started's "Where things stand".
   Partly done 28 Sep (07:52 PDT, after card 1's validation queue ended): enercat, memhier, memprobe, nocbench, onchip
   and sgemm rebuilt with the fix (each host now imports g3log's <code>addLogLevel</code>; the kernels are byte-identical). Left:
   <code>build/sparsity</code>, the heat-placement lock's frozen heater (rebuild it when the owner releases that lock), and
   <code>build/enercat_v2</code>, the campaign's catalogue host, whose hash its cat blocks record (<code>tools/claims-v3/gs/README.md</code>:
   never rebuild it; aifoundry3's is unfixed too). No build of pmcsel or traceprof there; enercat_gs and pciebench
-  already had the fix.</li>
+  already had the fix.
+  Done 28 Sep (20:56 PDT, Q65): <code>build/sparsity</code> rebuilt with the fix (host <code>e0fbecce…</code>, the kernel unchanged), the
+  frozen heater kept as <code>build/sparsity.frozen-hp-20260922</code>; <code>build/enercat_v2</code> stays unfixed on purpose.
+  getting-started's "Where things stand" updated on 29 September.</li>
 <li>☐ The heat code's card-0 temperature guard (<code>tools/claims-v3/hp/</code>) takes card 0's lock for its lifetime, and the
   drain on a two-card host checks the other card's node with <code>et-who</code>, not only its lock (the stock
   <code>dev_mngt_service</code> opens both cards).</li>
 <li>☑ <code>workloads/pciebench/run_pcie.sh</code> releases the card lock between sub-tests (runs held it 12.8–14.9 s; AGENT.md
   §5's 10 s rule is per device-opening process).
   Done 28 Sep (<code>031c723</code>), dry-tested only: its next real run will be its first on a card, and with 20 s lock waits a
-  run can take longer than <code>schedule.sh</code>'s <code>timeout 150</code>.</li>
+  run can take longer than <code>schedule.sh</code>'s <code>timeout 150</code>. Its first card run: aifoundry1's card 1, 28 Sep 23:56 PDT,
+  every sub-test exit 0 (<code>data/2026-09-29-pcie2/run_pcie-r101/</code>).</li>
 <li>☐ The queues poll <code>et-who</code> less often, and scripts use <code>et-who --check</code>'s exit status instead of parsing its text
-  (<code>tools/lab/README.md</code>).</li>
-<li>☐ <code>V3_DRY</code> fails closed for agents: a marker file, or real runs only with an explicit <code>V3_REAL=1</code>.</li>
-<li>☐ Commit the heat branch, with the firmware findings behind it (per-release governor behaviour, aifoundry3's
+  (<code>tools/lab/README.md</code>; <code>et-who --check</code> is installed on all three hosts since 28 September). After DV2's
+  validation: <code>queue.sh</code> and <code>lib.sh</code> are in its lock.</li>
+<li>☐ <code>V3_DRY</code> fails closed for agents: a marker file, or real runs only with an explicit <code>V3_REAL=1</code>. After DV2's
+  validation, for the same reason.</li>
+<li>☑ Commit the heat branch, with the firmware findings behind it (per-release governor behaviour, aifoundry3's
   latch at a 0 W TDP, card 1's fixed clock, the release-to-commit mapping) in <code>14-card-behaviour.md</code> and a
-  <code>data/2026-09-27-heat-placement/</code> directory: source lines and commits only.</li>
+  <code>data/2026-09-27-heat-placement/</code> directory: source lines and commits only.
+  Done 28 Sep: merged at <code>6ba8f47</code> (<code>heatpage</code>, the page at <code>a8b3984</code>; <code>heat-placement</code> is merged too); the firmware
+  findings are in <code>14-card-behaviour.md</code>, "The clock governor, by firmware build", and the source read in
+  <code>data/2026-09-28-heat-placement/plan/notes/firmware.md</code> (the heat data's directory is dated 28 September).</li>
 </ul>
 <h3 id="the-knowledge-base-against-the-version-3-pages-the-page-holds">The knowledge base against the version-3 pages (the page holds)</h3>
 <p><code>docs/findings/</code> predates the version-3 first pass (<code>0399048</code>). This pass fixed the summaries in its commit and
@@ -718,5 +790,24 @@ flagged the rest at the top of <code>../findings/README.md</code>.</p>
 <li>the energy-manual chain (04-artifacts A16).</li>
 <li>☑ AGENT.md §1 and §9: point to getting-started and MIRROR.md instead of keeping dated snapshots.
   Done 28 Sep (<code>031c723</code>).</li>
+</ul>
+<h2 id="c-card-work-and-its-records-after-the-major-pass-of-2829-september-q65">C. Card work and its records, after the major pass of 28–29 September (Q65)</h2>
+<ul>
+<li>☐ <strong>Reduce DV2's validation</strong> (E51) after its idle cycles end on aifoundry2, about 16:45 PDT on 29 September:
+  collect the passes and run <code>tools/claims-v3/dv2v/reduce_val.py</code> against the frozen <code>PREREG-VAL.md</code> (<code>e150ce16…</code>);
+  then the DVFS page's §8, <code>14-card-behaviour.md</code> and E51. Until then nothing in its lock changes (AGENT.md §7).
+  After it: part B's <code>lib.sh</code> item, and its two items on <code>et-who --check</code> and <code>V3_DRY</code>.</li>
+<li>☐ <strong>The third card:</strong> after DV2, run pcie2 (E55), nocr (E56), memp2 (E57) and tau (E58) on aifoundry2 under their
+  frozen pre-registrations (tau only after the amendment its <code>PREREG.md</code> requires for aifoundry2: a heat step, its
+  own start temperature, a D burst that does not starve its sampler and its own calibration, written before any
+  aifoundry2 data), as a third card beside aifoundry1's card 1 and aifoundry3. Then NV's validation there
+  (<code>tools/claims-v3/nv/schedule-val-aifoundry2.txt</code>), once its first write and development on aifoundry3 are done
+  (part 0).</li>
+<li>☐ <strong>memp2's R43 is open:</strong> no registered theory of the 128 B per cycle cap survives on either card (T43-B misses
+  7 conditions, Cc 5; <code>data/2026-09-29-memp2/README.md</code>). New theories need a new pre-registration.</li>
+<li>☐ <strong>nocr's R31 rule on aifoundry3:</strong> the ESR fit is 1,557 + 35.9 cycles per hop (r² 0.995) but its rms is 4.7
+  cycles against the frozen rule's 4, so T-DIRECT is refuted there and the places that rest on it (P5–P7) are not
+  decided on that card; in development on card 1 it survived. The frozen rule stands for this run: decide the places
+  with aifoundry2's run or a new pre-registration.</li>
 </ul>
 </main></body></html>

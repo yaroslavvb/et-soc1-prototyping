@@ -360,6 +360,22 @@ reading at every service-processor pass. The rail figures are the PMIC's own run
 which the service processor copies each pass, roughly first-order with τ ≈ <span id="rf-tau"></span>: a step reaches
 <span id="rf-12s"></span> (medians over <span id="rf-n"></span>;
 <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#the-chain">Limits of observability, §4.1</a>). So board minus rails swings at every load edge until the rails catch up.
+<b>The filter, measured rail by rail (29 September).</b> Experiment E58 (the hub's
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">rung 4</a>) timed square bursts of 2
+to 4 s: development on aifoundry1-c1 (00:01–00:13 PDT), then, with its predictions frozen
+(<code>tools/claims-v3/tau/PREREG.md</code>, sha256 <code>7d4fabad…</code>), validation on aifoundry3 (00:34–00:45 PDT, three
+passes). Fitted as first-order averages, with the service processor's one-pass delay kept apart, the readings give
+τ = 1.06 s on aifoundry3's minion rail, 1.01 s on its SRAM rail, 1.04 s on its mesh rail and 1.05 s for the PMIC's
+board average; on aifoundry1-c1, 1.08 s on the minion and mesh rails, 1.10 s for the board average and <b>0.54 s on the SRAM
+rail</b>, whose meter differs from the other cards'. The τ above is a single-parameter fit over the catalogue's bursts, which
+also absorbs that one-pass delay (0.16 s on aifoundry1-c1 and 0.26 s on aifoundry3 while <code>ettelem</code> samples at
+10 Hz), so it reads longer. Undoing the filter with the measured values (<code>tools/ettelem/deconv.py</code>) recovers each
+burst's level to within 3% of the step and its energy to within 1%, where the published readings understate a 2 s burst
+by 19–22% on the three rails (all but aifoundry1-c1's faster SRAM rail) and 16–17% for the board average. On aifoundry3 the first-order form, the per-rail values and the one-pass delay survived as predicted (T1–T3). The
+recovered top of the 2 s minion bursts scattered by 8.4% of the step against the predicted 6% at most, so the claim that the
+inverse comes out clean (T4) was falsified. On aifoundry1-c1 in development the minion rail rose with τ 1.32 s and fell
+with 1.02 s, so the first-order form (T1) failed there. Data: <code>docs/reports/data/2026-09-29-tau-aifoundry3/</code>
+(its README) and <code>2026-09-29-tau-aifoundry1-c1/</code>.
 <div class="chart-title" style="margin-top:10px">The unmetered remainder at the load edges</div>
 <div class="ck-controls"><div id="edge-tau"></div></div>
 <div class="controls" id="edge-btns"></div>
@@ -523,7 +539,8 @@ and the clause that busy power climbs faster per degree than idle is withdrawn. 
 busy slope is 0.9–1.1 W/°C on aifoundry2, this session's 0.8 its low end; the voltage map's offset idea and the lows'
 "droops the polling misses" withdrawn). 27 September: the review's fixes and charts. 28 September: aifoundry1-c1's
 governor never raises the clock, aifoundry3's can only ask to step down, and nothing on the card limits the die's
-temperature (§2); later, the review's cuts. What each version changed in full: this page's history in the
+temperature (§2); later, the review's cuts. 29 September: the rails' filter measured rail by rail and undone (E58; §1's
+table and §2). What each version changed in full: this page's history in the
 <a href="https://github.com/yaroslavvb/et-soc1-prototyping/commits/main/docs/reports/sources/power-temperature.body.html">repository</a>.</p>
 </details>
 
@@ -1197,6 +1214,7 @@ const M = [
  ['Board power, now', 'whole card · a new value each SP pass: about every 156 ms on aifoundry2, 158 ms on aifoundry1-c1 and 263 ms on aifoundry3 while ettelem samples at 10 Hz (126–135, 134–139 and 223–224 ms with a one-command poller at 10 Hz; three passes per card) · 10 mW', 'DM_CMD_GET_MODULE_POWER (ettelem: up to 45 samples/s; the SP refreshes it once per pass)', 'works_now', 'works now'],
  ['Board power, PMIC average / min / max', 'whole card · the PMIC\'s running average, like the rails; min and max since the last stats reset', 'DM_CMD_GET_SP_STATS via ettelem (the stock CLI calls it unsupported), or the SPST trace', 'works_now', 'works now'],
  ['Rail power: minion cores, SRAM, mesh', '3 rails · 1 mW · the PMIC\'s running average (its τ per card: §2), one record per SP pass, plus min/max', 'same snapshot; the SPST trace keeps the last 6,500–6,700 records, one per pass, with µs stamps: about 17 min on aifoundry2, 16 min on aifoundry1-c1 and 29 min on aifoundry3 (the longest extracts of the three-card check)', 'works_now', 'works now'],
+ ['Rail power, the average undone', '3 rails and the board average · smoothed to 0.1 s, a 10–90% rise of 0.2–0.5 s instead of the average\'s 2.2 τ, about 2.3 s; on 2–4 s bursts the level within 3% of the step and the energy within 1% (E58, aifoundry3 and aifoundry1-c1)', 'tools/ettelem/deconv.py on the records above, with each card\'s measured τ and the one-pass delay (§2); the recovered top of a 2 s burst scatters by 2–8% of the step', 'works_now', 'works now'],
  ['Rail voltage and clock', '3 rails · 1 mV · avg/min/max; minion and mesh MHz', 'same snapshot', 'works_now', 'works now'],
  ['On-die voltage per domain', '7 domains (DDR, SRAM, Maxion, minion, PCIe shire, mesh, IO shire) · 1 mV', 'DM_CMD_GET_ASIC_VOLTAGE; compare with the regulator set-points from DM_CMD_GET_MODULE_VOLTAGE for the drop to the die', 'works_now', 'works now'],
  ['On-die voltage per shire', '34 minion shires × 3 rails · 1 mV · current, and hardware low/high between polls; the 8 memory shires × 2 are printed only right after a telemetry query, so idle dumps hold the 34 minion shires', 'SP log at DEBUG level: ettelem loglevel debug + sptrace (4 KB buffer, wraps about once per pass: 22 of 27 dumps on three cards held a whole pass)', 'works_now', 'works now'],

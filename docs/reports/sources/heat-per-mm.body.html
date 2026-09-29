@@ -331,7 +331,13 @@ those launches) are in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-l
 report (§4.1; the stray write in §3)</a>.</li>
 <li><b>Voltage scaling</b> assumes full-swing CMOS at constant capacitance; whether the links are low-swing is not known.
 Gate capacitance is somewhat lower near threshold, so constant-C scaling slightly understates the 0.9 V figure for
-full-swing links; low-swing links would make it overstate.</li>
+full-swing links; low-swing links would make it overstate. Experiment E54 (NV) is registered to measure it: the mesh rail
+at 485, 540 and 600 mV, with its predictions frozen on 28 September (<code>tools/claims-v3/nv/</code>; the table in
+<a href="#dally-node">§7</a>). A read-only probe of aifoundry3 at 22:54 PDT that day found the rail set to 485 mV and
+reading 484 mV on the die, with the mesh at 400 MHz. The first voltage write waits for the owner's go-ahead: it changes a
+shared card, and the service-processor bootloader these cards run retries a failed regulator write without end (fixed
+upstream in et-platform <code>7c6049087</code>, 10 October 2024), so a failed write would end in the 10 s watchdog resetting
+the card. Development is to run on aifoundry3, and validation on aifoundry2 after its DVFS validation ends.</li>
 </ul></details>
 
 <h2 id="data">11. Data and tools</h2>
@@ -368,7 +374,9 @@ excess over random data on board power is not resolved from zero on any card. 27
 compares like with like over one to four hops (it had mixed two bases); the regulator's loss given per card. 28 September:
 the review's cuts, and a chart of what each further hop adds beside the link-sharing share (§4); later that day, at the
 owner's request, which process Dally's figure is for and whether a gap of two below it is expected (§7), with his
-figures from 2008 to 2023. Every earlier
+figures from 2008 to 2023. 29 September: the voltage test of §7's first explanation registered as E54, with its frozen
+predictions (§7, §10); the route map (§6) and the transfer calculator (§8) draw read data y first, the order E56 measured
+on two cards, with the analysis's x first a choice on the map. Every earlier
 wording is in the repository's history of <code>docs/reports/sources/heat-per-mm.*</code>.</p></details>
 
 <h2 id="related">12. Related reports</h2>

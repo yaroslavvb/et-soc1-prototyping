@@ -1,6 +1,6 @@
 # Lab machine accounts
 
-The AI Foundry lab machines are x86_64 Ubuntu 24.04 boxes on the lab's Tailscale tailnet (updated 2026-09-27):
+The AI Foundry lab machines are x86_64 Ubuntu 24.04 boxes on the lab's Tailscale tailnet (updated 2026-09-29):
 
 | Machine | ET-SoC-1 cards | Device nodes |
 |---|---|---|
@@ -72,9 +72,9 @@ that `tailscale status` shows) as its `HostName` in `~/.ssh/config` on aifoundry
 - **`et-who`** lists who holds each card: every user's processes with a `/dev/et*` node or a card lock open. It
   never opens a device node, so it is safe to run at any time. The login banner runs it too. In a script, keep only
   the lines that start with `/dev/et` or `lock:`, and never parse the sentence plain `et-who` prints when nothing is
-  held. The 27 September version ([`tools/lab/`](../tools/lab/README.md), staged, to be installed) adds
+  held. Since 28 September (installed on all three hosts; source in [`tools/lab/`](../tools/lab/README.md)) it has
   **`et-who --check`**: it prints only the holders and exits 0 if nothing is held, 1 if a node or lock is held (your
-  own lock included), 2 if the check failed.
+  own lock included), 2 if the check failed. Scripts should use its exit status.
 - **Card locks.** `flock /run/lock/etsoc-shire<N>.lock <command>` reserves card N for the length of the command
   (aifoundry1 has `etsoc-shire0.lock` and `etsoc-shire1.lock`, the others `etsoc-shire0.lock`). The lock is advisory:
   it protects you only from tools that take it too. The `tools/claims-v3` blocks hold it, and aifoundry3's clock
@@ -83,18 +83,45 @@ that `tailscale status` shows) as its `HostName` in `~/.ssh/config` on aifoundry
   clock sync, `et_soc1` driver version, each card's PCIe link, the hashes of the ET runtime libraries, and
   aifoundry3's clock-guard marker. It reads files only. Save its output with every run, and the card's firmware from
   your own tool.
-- **`et-lab-health`** (27 September; staged, to be installed with the new `et-who`) is a read-only health check of
-  the machine: the driver version and the module for each installed kernel, each card's PCIe link and the error
-  counters the driver keeps, device-node modes, holders, aifoundry3's clock-guard marker, disk and ZFS use, packages,
-  systemd, time, power profile and CI runners. One line per check (`OK`, `WARN`, `INFO`); exit 1 if anything warns. It never opens a card.
+- **`et-lab-health`** is a read-only health check of the machine: the driver version and the module for each
+  installed kernel, each card's PCIe link and the error counters the driver keeps, device-node modes, holders,
+  aifoundry3's clock-guard marker, disk and ZFS use, packages, systemd, time, power profile and CI runners. One line
+  per check (`OK`, `WARN`, `INFO`); exit 1 if anything warns. It never opens a card. The hosts run rev 2 (installed
+  28 September). Rev 3, written on 28 September and **not installed yet**, lists logins from logind's sessions (rev 2
+  missed sessions without a terminal), counts the journal's boots without the header line, and is safe to run from a
+  timer; its daily timer (a oneshot service as `nobody`, once a day, output in `journalctl -u et-lab-health`) is
+  written in `tools/lab/README.md` and not installed either. Installing them is an admin step that waits for the
+  owner's go-ahead.
+- **`et-reset`** (28 September; written and dry-tested, **not installed**) is a checked management reset of one card,
+  for the lab admin: it refuses while anyone holds any card, takes every card's lock on the host, logs the reset,
+  and succeeds only when the driver has re-added the card. Agents never run it: a reset is the lab admin's
+  ([AGENT.md](../AGENT.md) §5).
 - **`/tmp` is cleared at every boot.** Keep work, logs and agents' scratch files in your home directory.
 - **Core dumps** of your programs are kept: `coredumpctl list`, then `coredumpctl gdb <pid>`.
 - **Time** is kept by chrony (several NTP sources), so timestamps agree across the machines.
 - **Kernel messages:** users can read `dmesg`. The journal is persistent.
 - **Python:** the system `python3-numpy` (1.26.4) and `venv` are installed on all three.
 
-The sources of `et-who`, `et-lab-health`, `et-lab-manifest` and the login banners are in
-[`tools/lab/`](../tools/lab/README.md).
+The sources of `et-who`, `et-lab-health`, `et-lab-manifest`, `et-reset` and the login banners are in
+[`tools/lab/`](../tools/lab/README.md), with what is installed where.
+
+## aifoundry1's lab fixes of 28 September
+
+At 20:51 PDT on 28 September aifoundry1 got four of the items in the lab report's section 2.8 (owner-approved lab
+fixes, each logged on the host):
+
+- **U27:** it boots to the text console (a headless default target) from its next boot; the running system is
+  unchanged until then.
+- **U20:** bluetooth, cups-browsed and the firmware-updater snap are disabled, and apport's core-dump hook is masked.
+- **U22:** one login-service setting (the lab report has it).
+- **U24:** aifoundry2 and aifoundry3 are pinned to their tailnet names in `/etc/hosts`, so from aifoundry1 they are
+  reached over the tailnet (the problem aifoundry2 has, above).
+
+The same four on aifoundry2 and aifoundry3, and the report's other items (the `et-reset` install, a pool scrub, the
+daily health timer, the reboots, card 0's link test, aifoundry3's login-service item), wait for the owner
+([`reports/TODO.md`](reports/TODO.md), part 0). In our own account only, the firmware notifier and wireplumber are
+masked in the user service manager on all three hosts on 28 September, and the notifier's timer on aifoundry2 and
+aifoundry3 (aifoundry1 has none since U20 disabled the snap); other accounts are unchanged.
 
 ## Sharing the cards
 

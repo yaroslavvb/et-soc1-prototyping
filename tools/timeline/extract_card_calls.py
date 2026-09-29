@@ -6,11 +6,13 @@
 Streams the main agent's transcript line by line and keeps each foreground Bash call whose
 command runs a program on a card, as the first word of one of its commands: a host program (..._host,
 ..._launcher), the runtime's it_test, the management service's -m/-n/-t queries, ettelem sampling, a
-run_*.py / run_*.sh measurement script or a make with DEVICE=silicon. A call's span
+run_*.py / run_*.sh measurement script or a make with DEVICE=silicon (a program named through a shell variable set in
+the same command, D=...; $D, counts as its value). A call's span
 is its tool_use to its tool_result, so it includes any build or copy in the same command: an upper bound on the time
 the card was in use. The card is the machine the command ran on: aifoundry2 when local (the session's machine), else
-the lab machine the command was sent to; on aifoundry1 the card is ET_DEVICES (card 0 when unset). Excluded: simulator runs, --help,
-dry runs (V3_DRY=1), the text of heredocs that only write a script, and background calls (their card time is in
+the lab machine the command was sent to; on aifoundry1 the card is ET_DEVICES or the claims-v3 scripts' V3_DEVICE (card 0
+when neither is set). Excluded: simulator runs, --help, dry runs (V3_DRY=1), the text of heredocs that only write a script,
+quoted arguments with no space in them (a grep pattern before a script's name), and background calls (their card time is in
 the data files or queue logs). Subagents are left out: their card work went through the logged claims-v3 queues
 (agents that only write code may not reach a card), and their commands that match are analysis scripts named run_*
 re-run from raw data. Writes card_calls.json to $TIMELINE_DIR:
@@ -36,6 +38,9 @@ SKIP = re.compile(r'sysemu|--help|-h 2>|V3_DRY=1|--dry-run')
 HEREDOC = re.compile(r"<<-?\s*['\"]?(\w+)['\"]?[^\n]*\n.*?\n\s*\1\s*(?:\n|$)", re.S)
 SPLIT = re.compile(r"&&|\|\||[;|&\n()'\"`]|\$\(|\bdo\b|\bthen\b|\belse\b")
 PREFIX = {'timeout', 'nohup', 'nice', 'sudo', 'exec', 'time', 'env', 'bash', 'sh', 'python3', 'python', 'stdbuf', 'flock'}
+WORD_QUOTED = re.compile(r"""(?<=\s)(['"])[^'"\s]*\1(?=\s|$)""")   # a whole word, not part of one ("$D"/x.sh)
+ASSIGN = re.compile(r'(?:^|(?<=[\s;&|(]))([A-Za-z_]\w*)=([^\s;&|\'"`$()]+)')   # NAME=value, a value with no space
+VAR = re.compile(r'"?\$\{?([A-Za-z_]\w*)\}?"?')
 SSH = re.compile(r'\bssh\b[^|;&\n]*?\b(?:\w+@)?(aifoundry[123])\b')
 
 
@@ -52,7 +57,7 @@ def card_of(cmd):
     host = m.group(1) if m else 'aifoundry2'
     if host != 'aifoundry1':
         return host
-    d = re.search(r'ET_DEVICES=(\d)', cmd)
+    d = re.search(r'\b(?:ET_DEVICES|V3_DEVICE)=(\d)', cmd)   # the runtime's card, or the claims-v3 scripts' own setting
     return 'aifoundry1-c' + (d.group(1) if d else '0')
 
 
@@ -78,6 +83,10 @@ def command_words(cmd):
 
 def program(cmd):
     body = HEREDOC.sub('\n', cmd)       # a heredoc's text is a file being written, not a command being run
+    names = dict(ASSIGN.findall(body))      # D=/opt/et/bin/dev_mngt_service; ... $D -m ...: the program is D's value
+    if names:
+        body = VAR.sub(lambda m: names.get(m.group(1), m.group(0)), body)
+    body = WORD_QUOTED.sub(' ARG ', body)   # a quoted string with no space in it is one argument (grep "a\|b" x.sh)
     if SKIP.search(body):
         return None
     for first, rest in command_words(body):

@@ -15,7 +15,10 @@ Sources, in order of authority:
      docs/reports/data/2026-09-28-dvfs2-aifoundry2/raw), E50's PCIe runs (hosts.<card>.run_times_ms of
      docs/reports/data/2026-09-27-pcie/pcie.json), E53's overheating queues on aifoundry3 and aifoundry1 card 1 (their
      oh queue and smoke logs, source 1), and the DV2 validation on aifoundry2 from 28 Sep 20:45 (its dv2v block.json
-     files in a claims-v3 build folder, $TIMELINE_DV2V_BUILD, until they are committed)
+     files in a claims-v3 build folder, $TIMELINE_DV2V_BUILD, until they are committed; its queue log, source 1, adds the
+     replication sessions' own lines)
+  6. 28-29 Sep, the major pass: E55 pcie2, E56 nocr, E57 memp2 and E58 tau, development on aifoundry1 card 1 and
+     validation on aifoundry3, from their queue and series logs (source 1; their smoke passes count with them)
 A queue that is still running at the snapshot ($TIMELINE_CUTOFF, else now) has its open pass closed at the snapshot;
 a block that began after the snapshot is left out.
 All times: log lines are the lab machines' local time (UTC-7, PDT); epoch ms elsewhere. Output in PDT.
@@ -49,7 +52,11 @@ GAP_MS = 120 * 1000  # merge rule: holds closer than 2 min are one hold
 SESSION_START_MS = datetime.datetime(2026, 9, 19, 16, 19, tzinfo=datetime.timezone.utc).timestamp() * 1000
 
 V3_E = {'mem': 'E35', 'lat': 'E36', 'mmb': 'E37', 'abla': 'E38', 'ablb': 'E39', 'x5': 'E40', 'tel': 'E41',
-        'wire': 'E42', 'rl': 'E43', 'idle': 'E44', 'cat': 'E45', 'catfull': 'E46', 'gs': 'E48', 'dv2': 'E51', 'dv2v': 'E51', 'hp': 'E52', 'oh': 'E53'}
+        'wire': 'E42', 'rl': 'E43', 'idle': 'E44', 'cat': 'E45', 'catfull': 'E46', 'gs': 'E48', 'dv2': 'E51', 'dv2v': 'E51', 'hp': 'E52', 'oh': 'E53',
+        'pcie2': 'E55', 'nocr': 'E56', 'memp2': 'E57', 'tau': 'E58'}
+# the major pass's four experiments (28-29 Sep): development on aifoundry1 card 1, validation on aifoundry3
+MP = ('pcie2', 'nocr', 'memp2', 'tau')
+MP_ROLE = {'aifoundry1-c1': 'development', 'aifoundry3': 'validation'}
 V3_NAME = {'mem': 'V3-MEM memory anatomy, cycle window, wake-up probe', 'lat': 'V3-LAT latency and bandwidth sweeps',
            'mmb': 'V3-MMB matmul benchmark', 'abla': 'V3-ABL-A tensor-unit energy', 'ablb': 'V3-ABL-B sparse compute',
            'x5': 'V3-X5 two launch temperatures', 'tel': 'V3-TEL meter chain', 'wire': 'V3-WIRE heat per mm',
@@ -58,7 +65,11 @@ V3_NAME = {'mem': 'V3-MEM memory anatomy, cycle window, wake-up probe', 'lat': '
            'gs': 'GS gathers and scatters', 'hp': 'V3-HP heat placement and the thermal governor',
            'dv2': 'DV2 what the governor compares (development)', 'pcie': 'The host link and the launch path',
            'dv2v': 'DV2 what the governor compares (the frozen validation)',
-           'oh': 'E53 the effect of overheating: hottest against mean, correctness and timing against temperature'}
+           'oh': 'E53 the effect of overheating: hottest against mean, correctness and timing against temperature',
+           'pcie2': 'E55 pcie2: two host-to-card copies at once, and where a host write lands',
+           'nocr': 'E56 nocr: the mesh’s routing order and where the master and memory shires sit',
+           'memp2': 'E57 memp2: the DRAM address map, the tensor reload, the 128 B cap, stride-256 energy',
+           'tau': 'E58 tau: the rails’ one-second filter, per card and rail'}
 
 FAMILY = {}
 for e in ['matmul-18sep', 'sparsity-18sep', 'E33', 'E34', 'E1', 'E3']:
@@ -83,8 +94,9 @@ def v3_family(phase):
             'pcie': 'The host link, E50 (27 Sep)',
             'hp': 'Heat placement: development and validation (27-28 Sep)',
             'dv2': 'DV2: the governor and heat, development (28 Sep)',
-            'dv2v': 'DV2: the governor and heat, validation (28 Sep)',
-            'oh': 'The effect of overheating, E53 (28 Sep)'}[phase]
+            'dv2v': 'DV2: the governor and heat, validation (28-29 Sep)',
+            'oh': 'The effect of overheating, E53 (28 Sep)',
+            'mp': 'The major pass: E55-E58 (28-29 Sep)'}[phase]
 
 
 def iso(ms):
@@ -98,7 +110,7 @@ def parse_local(s):
 
 # ---------------------------------------------------------------- 1. host logs
 LINE = re.compile(r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:[-+]\d{2}:\d{2})?\s+\[([\w-]+)\]\s+(.*)$')
-BEG = re.compile(r'^([\w-]+) p(\d+) begins(?: \(die (\d+) C\))?')
+BEG = re.compile(r'^([\w-]+) p(\d+)(?: \([\w ]+\))? begins(?: \(die (\d+) C\))?')   # pcie2: 'p101 (development) begins'
 END = re.compile(r'^([\w-]+) p(\d+) ends:?\s*(.*)$')
 FAIL = re.compile(r'^([\w-]+) p(\d+) failed \(rc (\d+)\)')
 PRE_REBOOT_END = parse_local('2026-09-25T16:20:00')
@@ -193,7 +205,9 @@ log_intervals = ded
 
 for iv in log_intervals:
     base = iv['exp'][:-len('-smoke')] if iv['exp'].endswith('-smoke') else iv['exp']
-    if iv['exp'].endswith('-smoke'):
+    if base in MP:
+        phase = 'mp'          # its smoke passes too: they belong to the experiment, not to the 25-26 Sep smoke tests
+    elif iv['exp'].endswith('-smoke'):
         phase = 'smoke'
     elif base in ('hp', 'dv2', 'dv2v', 'oh'):
         phase = base
@@ -207,6 +221,7 @@ for iv in log_intervals:
     iv['exp_short'] = base
     iv['E'] = V3_E.get(base)
     iv['label'] = (f"HP p{iv['pass_']}" if base == 'hp' else
+                   f"{V3_E[base]} {iv['exp']} p{iv['pass_']} ({MP_ROLE.get(iv['card'], '?')})" if phase == 'mp' else
                    f"{V3_E.get(base, '?')} {base}{'-smoke' if phase == 'smoke' else ''} p{iv['pass_']}")
     iv['name'] = V3_NAME.get(base, base)
     iv['family'] = v3_family(phase)
@@ -393,8 +408,8 @@ def card_of(rel, hosts):
 early_files = []
 for p in sorted(glob.glob(os.path.join(DATA, '*', '**', '*.jsonl*'), recursive=True)):
     rel = os.path.relpath(p, DATA)
-    if rel.startswith(('2026-09-25-claims-v3/', '2026-09-26-', '2026-09-27-', '2026-09-28-')):
-        continue   # sources 1, 2 and 5
+    if rel.startswith(('2026-09-25-claims-v3/', '2026-09-26-', '2026-09-27-', '2026-09-28-', '2026-09-29-')):
+        continue   # sources 1, 2, 5 and 6
     base = os.path.basename(p)
     if not re.search(r'(telemetry|runs|starts|marks|sweep|idle_20h|phases)', base):
         continue
@@ -548,7 +563,7 @@ def union(ivs, gap=0):
     ivs = sorted((a, b) for a, b in ivs)
     out = []
     for a, b in ivs:
-        if out and a - out[-1][1] <= gap:
+        if out and (a - out[-1][1] < gap or a <= out[-1][1]):   # a gap under 2 min (the rule), or an overlap
             out[-1][1] = max(out[-1][1], b)
         else:
             out.append([a, b])
@@ -627,7 +642,7 @@ series = {'start': day0.isoformat(), 'step_minutes': 1, 'n': nmin,
 cross = []
 for E, ent in sorted(doc.items(), key=lambda kv: int(kv[0][1:])):
     xs = [x for x in intervals if x['E'] and (x['E'] == E or E in x['E'].split('/')) and not x.get('approx')
-          and x['phase'] in ('early', 'campaign', 'gs-queue', 'pcie', 'dv2', 'oh')]
+          and x['phase'] in ('early', 'campaign', 'gs-queue', 'pcie', 'dv2', 'oh', 'mp')]
     row = {'E': E, 'title': ent['title'], 'stated': ent.get('paren')}
     if xs:
         a = min(x['start_ms'] for x in xs)
@@ -687,7 +702,10 @@ out = {
                                "aifoundry2's two sessions (27-28 Sep)",
                          'dv2': 'E51 DV2 development night on aifoundry2, 28 Sep 00:40-02:54 (ended by the Master Minion hang)',
                          'dv2v': 'E51 DV2 validation on aifoundry2 under the frozen plan, from 28 Sep 20:45 (its read-only '
-                                 'VZ readings first; a session starts only below the plan\'s temperature)',
+                                 'VZ readings every 3 min; a session starts only below the plan\'s temperature: three '
+                                 'NAT-4 sessions ran, 22:13-23:56)',
+                         'mp': 'the major pass, 28 Sep 23:47 - 29 Sep 01:06: E55 pcie2, E56 nocr, E57 memp2 and E58 tau, '
+                               'development on aifoundry1 card 1, then validation on aifoundry3 (with their smoke passes)',
                          'oh': 'E53 the effect of overheating on aifoundry3 and aifoundry1 card 1, 28 Sep 10:11-12:05 (two pre-registered experiments)'}},
     'cards': [{'id': c, 'host': c.split('-')[0], 'label': {'aifoundry2': 'aifoundry2', 'aifoundry3': 'aifoundry3',
                                                             'aifoundry1-c0': 'aifoundry1 card 0', 'aifoundry1-c1': 'aifoundry1 card 1'}[c],

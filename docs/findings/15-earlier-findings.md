@@ -67,7 +67,7 @@ How far down you can see on this card, from a user account:
 |---|---|
 | Time | **1 cycle** (`hpmcounter3`, corrected) |
 | Architectural state | **64 bits** — one register, CSR or memory word of a halted hart, per management round trip |
-| Energy | **133 µJ** (1 mW × 133 ms on a rail on aifoundry2, behind the PMIC's running average, τ ≈ 1.2 s; aifoundry3's readings change only every ~250 ms); one bit flip is ~10⁻¹⁶ J |
+| Energy | **133 µJ** (1 mW × 133 ms on a rail on aifoundry2, behind the PMIC's running average, τ ≈ 1.2 s (superseded by E58: 1.01–1.10 s, one SP pass late; 0.54 s on aifoundry1's card 1's SRAM rail); aifoundry3's readings change only every ~250 ms); one bit flip is ~10⁻¹⁶ J |
 | Every net, every cycle | **RTL simulation only** |
 
 **Can individual bit flips be tracked on silicon? No, and no firmware change would fix it.** Nothing on the

@@ -116,7 +116,7 @@ Read [Terms](#terms) first.
    10.41–10.54 GB/s back by DMA alone on each of the three cards (79–80% and 66–67% of its 15.75 GB/s); a program's
    staged copies get 5.20–7.79 GB/s, set by each host's memcpy. An empty kernel costs the card about 104 µs queued,
    but 556–566 µs launched and waited for, most of it the runtime's 500 µs idle poll; two host-to-card DMA commands
-   at once move half as much as one, for reasons not established. → [03-experiments.md](03-experiments.md), E50;
+   of one stream at once move half as much as one (E55, item 20, found where). → [03-experiments.md](03-experiments.md), E50;
    [05-claims.md](05-claims.md), "The host link"
 17. **The governor the cards run, and what it compares** (development, 28 September; not validated). The cards run
    an older governor than the source first read: on aifoundry2 a thermal episode is a blocking loop of about 0.405 s
@@ -127,6 +127,8 @@ Read [Terms](#terms) first.
    raises the clock, and nothing on those three cards limits the die's temperature (a 90–103 °C mean on aifoundry2,
    26 September). aifoundry2's Master Minion hung that night; the management reset restored it at 08:32 the same
    morning (the sysfs per-card reset had not).
+   Its frozen validation on the same card began at 20:45 PDT on 28 September (three heating sessions, seven placement
+   blocks, no hang); it is reduced after its idle cycles end, about 16:45 PDT on 29 September.
    → [03-experiments.md](03-experiments.md), E51; [14-card-behaviour.md](14-card-behaviour.md)
 18. **Where the work sits changed the time to the thermal trip on aifoundry3; on card 1, short bursts PASS and the
    primary sustained test is INSUFFICIENT** (development on aifoundry3, 27 September; frozen validation on
@@ -147,6 +149,35 @@ Read [Terms](#terms) first.
    mean), the DRAM refresh period did not change, and each card's September idle law still held. On the 0.20.0 and
    0.18.0 builds nothing limits the die once the clock is at 600 MHz. → [03-experiments.md](03-experiments.md), E53;
    [05-claims.md](05-claims.md), "The effect of overheating"; [`reports/data/2026-09-28-overheating/`](../reports/data/2026-09-28-overheating/README.md)
+20. **Two DMA commands collide only inside one stream, and a host write lands in the L3** (E55, 28–29 September,
+   pre-registered: development on aifoundry1's card 1, validation on aifoundry3). Two host-to-card commands in flight in
+   one stream move 0.488 [0.486, 0.491] of one at 2 × 64 MB on aifoundry3 (0.493 on card 1), a rate ratio of 0.484
+   over 1–64 MB; one command in each of two streams moves 1.012 [1.000, 1.025] of one. T35-S survived; a shared read
+   engine, the IOMMU, a fixed cost per overlap, a slow onset and a loss per element were refuted on both cards. After a
+   staged host copy 99.5% of a 4 MB buffer's lines read at L3 latency on aifoundry3 (99.9% on card 1), whether the L3
+   held them before or not, and no value read was wrong: a host write goes through its line's L3 home, which allocates
+   it (T34-A). → [03-experiments.md](03-experiments.md), E55; [`reports/data/2026-09-29-pcie2/`](../reports/data/2026-09-29-pcie2/README.md)
+21. **Read replies cross the mesh y first, write requests x first** (E56, the same cards and plan). Sets of 1 KB
+   tensor-load streams that share one directed link only under y first fell to 0.54–0.77 of their bandwidth alone and
+   those that share one only under x first held at 1.00; tensor stores showed the mirror (0.52–0.76 against 0.99–1.00),
+   the same on both cards. A reply retraces its request's route, and a shared link saturates near 92 GB/s. An ESR call
+   costs 1,556.9 + 35.9 cycles per mesh hop on aifoundry3, with an rms of 4.7 cycles against the frozen limit of 4, so
+   the placements were not decided there; on card 1 the master shire placed at (0,3), the firmware map's cell.
+   → [03-experiments.md](03-experiments.md), E56; [`reports/data/2026-09-29-nocr/`](../reports/data/2026-09-29-nocr/README.md)
+22. **The DRAM map holds, the L2 keeps TensorLoad lines, and the 128 B cap is unexplained** (E57, the same cards and
+   plan). The L50 map's bank and row split held in 15 of 15 conditions on both cards (a row that also differs in any of
+   PA[6–12] reads as a row hit, 20 cycles faster); PA[6–9] set the refresh phase on aifoundry3, so the refresh domain
+   is the controller there (not established on card 1). A second TensorLoad of the same 1 KB takes 199 cycles, an L2
+   hit. No registered theory of the shire's 128 B per cycle TensorLoad cap survives. Stride-256 scratchpad loads get
+   0.665 of stride 64's bandwidth and cost +41.9 (zeros) and +49.9 (random) pJ per 64 B more, which the waiting
+   minions' awake time explains. → [03-experiments.md](03-experiments.md), E57; [`reports/data/2026-09-29-memp2/`](../reports/data/2026-09-29-memp2/README.md)
+23. **The rails are a first-order average of about one second, published one SP pass late** (E58, the same cards and
+   plan). On aifoundry3 τ is 1.06 s on the minion rail, 1.01 s on SRAM and 1.04 s on the mesh rail, and the PMIC's board
+   average 1.05 s with no lag; aifoundry1's card 1's SRAM rail averages over 0.54 s, its other rails 1.08 s. E27's
+   1.15–1.22 s had folded the pass into τ. The published rails understate a 2 s burst by 19–22% (all but card 1's SRAM
+   rail) and the board average by 16–17%; undone with each card's τ (`tools/ettelem/deconv.py`), the bursts' energy
+   comes back within 0.3% of the step and their plateau within 1.1% on aifoundry3. → [03-experiments.md](03-experiments.md),
+   E58; [`reports/data/2026-09-29-tau-aifoundry3/`](../reports/data/2026-09-29-tau-aifoundry3/README.md)
 
 ## Terms
 
@@ -202,9 +233,9 @@ Four kinds of thing have IDs, and every claim cites them:
 | Prefix | Meaning | File |
 |---|---|---|
 | **R1–R14** | Resources that existed before any measurement: manuals, RTL, firmware source, prior reports, external papers, expert accounts, and the lab machines | [01-resources.md](01-resources.md) |
-| **Q1–Q62** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
-| **E1–E53** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 the DV2 development night on aifoundry2, 28 September, development only; E52 the heat placement, 27–28 September, development and a frozen validation; E53 the overheating experiments, 28 September, pre-registered) | [03-experiments.md](03-experiments.md) |
-| **A1–A19** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused) | [04-artifacts.md](04-artifacts.md) |
+| **Q1–Q66** | Requests from the repo owner, and what each produced | [02-requests.md](02-requests.md) |
+| **E1–E58** | Experiments: what ran, when, on what, with which command, producing which raw files (E33–E34 are the 18 September memory-hierarchy and on-chip communication sessions, registered later; E35–E47 the version-3 three-card check of 25–26 September; E48 the gathers and scatters on the same three cards; E49 the runtime's log-level race, 25–26 September; E50 the host link on the three cards, 27 September; E51 DV2 on aifoundry2, development on 28 September and a frozen validation running since that evening; E52 the heat placement, 27–28 September, development and a frozen validation; E53 the overheating experiments, 28 September, pre-registered; E54 NV, the mesh rail's voltage step, predictions frozen, not run; E55–E58 the major pass's pcie2, nocr, memp2 and tau, 28–29 September, developed on aifoundry1's card 1 and validated on aifoundry3) | [03-experiments.md](03-experiments.md) |
+| **A1–A20** | Artifacts published: reports, spaces, GIFs, tools, commits (A9 and A10 are unused; A20 the session timeline) | [04-artifacts.md](04-artifacts.md) |
 
 **To trace a claim** — say someone tells you "the ET-SoC-1 runs at 0.52 V":
 

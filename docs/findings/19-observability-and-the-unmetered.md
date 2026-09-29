@@ -17,7 +17,7 @@ a current value, a minimum and maximum since reset, and a running average — 84
 every loop pass: with nothing polling about every 133 ms on aifoundry2, 135 ms on aifoundry1's card 1 and 224 ms on
 aifoundry3, and 156, 158 and 263 ms while ettelem samples at 10 Hz (E41; why aifoundry3's pass is longer is not
 established). It forwards the PMIC's own running average of each **output-side power** (roughly first-order: a
-step reaches 55–57% after 1 s and 83–84% after 2 s, τ ≈ 1.15–1.22 s, measured over 242 and 229 bursts in
+step reaches 55–57% after 1 s and 83–84% after 2 s, τ ≈ 1.15–1.22 s (superseded by E58: 1.01–1.10 s, one SP pass late; 0.54 s on aifoundry1's card 1's SRAM rail), measured over 242 and 229 bursts in
 `catalogue.json` `rail_filter`; the SP does no filtering of its own) with its
 min and max, and the input power; `ettelem` samples them at 10 Hz. The other rails — DDR core 0.8 V, VDDQ 1.1 V, VDDQLP, PCIe logic, PCIe/PShire, IO shire,
 Maxion — have set points in the PMIC and no telemetry. So one number for the card, three for its inside, and at

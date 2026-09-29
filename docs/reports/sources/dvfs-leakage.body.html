@@ -44,7 +44,7 @@ part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observ
 Its governor reads a power meter instead of estimating power, and its 65 °C threshold has no dead band, so near it
 aifoundry2's clock hunts. The temperature it compares is one number, the whole-degree mean of 34 shire sensors, never the
 hottest one; on a development night (27–28 September, <a href="#what-triggers-a-step-down-and-does-placement-delay-it">§8</a>,
-not yet validated) aifoundry2's clock stepped down with that mean, seconds after the hottest shire had passed the threshold,
+not yet validated: the validation began on 28 September and its verdicts come after about 16:45 PDT on 29 September) aifoundry2's clock stepped down with that mean, seconds after the hottest shire had passed the threshold,
 and the same work placed on the perimeter held 800 MHz longer than placed in the interior. Its open RTL has per-minion sleep controls that are tied off, and none of three cards shows any
 sign of array power gating. What is left is leakage. On aifoundry2, idle power climbs <b><span data-v="slope80"></span> W
 for every degree</b> at 80 °C, and the leakage behind that slope is <b><span data-v="leakR"></span> W, <span data-v="idleShR"></span>
@@ -522,8 +522,8 @@ moves the clock, and so the throughput, by up to a third within a single 7-secon
 <p>The owner asked two things after the three-card check: does voltage-frequency scaling act on the average temperature or
 on one hot shire, and can the same computation run longer before it is throttled in some places on the chip? §1 answers the
 first from the source. The development night asked aifoundry2, the only card whose governor moves the clock, and wrote down
-beforehand what each answer would look like. It also set the rules for a validation that has not run yet (at the end of this
-section).</p>
+beforehand what each answer would look like. It also set the rules for a validation, which began on the same card on the
+evening of 28 September and has no verdicts yet (at the end of this section).</p>
 
 <details class="more"><summary>What ran on the night, and how one run works</summary>
 <ul>
@@ -597,7 +597,7 @@ was never changed. No reset was attempted, including after the hang below.</li>
   <p class="small" id="night-cap"></p>
 </div>
 
-<p><b>The frozen validation, and why it has not run.</b> <span data-v="valText"></span></p>
+<p><b>The frozen validation, running since 28 September.</b> <span data-v="valText"></span></p>
 <details class="more"><summary>What the validation registers, item by item</summary>
 <ul>
 <li><b>On the idle card</b> (read-only watch cycles, no heat): I1, the governor's state against the mean and the hottest
@@ -639,7 +639,7 @@ could raise it without the governor ever seeing it.</li>
 the rings record (<span data-v="dvFits"></span>). Intervals between lines are in the service processor's clock.</li>
 <li><b>One card, one chassis, one night, at the native threshold of 65 °C.</b> aifoundry3's governor is stuck (§3) and
 aifoundry1's card 1 does not act (§9), so no other card can replicate the governor results; the plan's answer is a
-replication on aifoundry2 in a later session.</li>
+replication on aifoundry2 in a later session, which began at 20:45 PDT on 28 September (above).</li>
 </ul>
 </details>
 
@@ -742,7 +742,8 @@ aifoundry1's card 1 has active power management off or a state latched early; wh
 factor, 0.93–0.95 at its own launch temperature against 0.96–0.99 on aifoundry2, §6) is silicon, package or board regulator,
 which neither the third card nor the two-temperature test separated; whether each unattributed down-step of §2 is a thermal
 step or the loop's exit, decided on readings between our samples (the likeliest reading: §8's governor lines show the loop's
-period and its exits on the idle card, in development); everything in §8, until the frozen validation runs; how the idle
+period and its exits on the idle card, in development); everything in §8, until the frozen validation is reduced (after about
+16:45 PDT on 29 September); how the idle
 law's power divides between fixed and leakage beyond the range of §5; and why two relay
 launches on aifoundry2 returned wrong elements (1,118 and 1,000) on 23 September, in one pass of the discarded first
 attempt at a cool-card rerun. Both ran while the governor dropped the clock from 800 to 600 MHz inside the launch, and
@@ -788,7 +789,8 @@ flashed; the busy leakage share is no longer said to exceed 30%. 27 September: t
 charts. 28 September: §1 rewritten for the governor the cards run (firmware 0.20.0), with §2's steps explained by it;
 aifoundry3's zero limit stops its governor and aifoundry1's card 1's governor is inactive; no firmware temperature limit
 at the lowest point; a new §8, the night of 27–28 September; later, the review's cuts; then the card's restore at 08:32, and
-aifoundry3's query and placement runs pointed to their data. What each version changed in full: this page's history in
+aifoundry3's query and placement runs pointed to their data. 29 September: §8's validation, started at 20:45 PDT on 28 September,
+its three heating sessions done and its reduction due after about 16:45 PDT. What each version changed in full: this page's history in
 the <a href="https://github.com/yaroslavvb/et-soc1-prototyping/commits/main/docs/reports/sources/dvfs-leakage.body.html">repository</a>.</p>
 </details>
 

@@ -190,7 +190,7 @@ Things to know when measuring:
 - **`evict_va` is asynchronous.** Fence and wait a few hundred cycles before timing. Level codes name where the line is
   left (1 L2, 2 L3, 3 memory; 0 does nothing). Evicts from many minions serialise in the shire cache.
 - **Rail power:** `dev_mngt_service -n 0 -t SPST:extract` gives minion, SRAM and NoC rail power (the PMIC's running
-  average, τ ≈ 1.2 s, one record per 133 ms on aifoundry2) plus board power. The ring holds ~15 minutes, and an extract returns only records since the
+  average, τ ≈ 1.2 s (superseded by E58: 1.01–1.10 s, one SP pass late; 0.54 s on aifoundry1's card 1's SRAM rail), one record per 133 ms on aifoundry2) plus board power. The ring holds ~15 minutes, and an extract returns only records since the
   last wrap. No rail covers the memory shires or DRAM.
 
 ## Power and temperature, measured (aifoundry2, 2026-09-20)
@@ -243,7 +243,7 @@ Full write-ups: `docs/reports/2026-09-20-et-soc1-power-temperature.html`, `docs/
 - **The temperature sensor reads whole degrees.** Use step times, not levels: fit the heating power that reproduces a run's
   readings through the thermal network (`analyze_horace_strict.py`). It agrees with the electrical power to about 1 W.
 - **Rail figures are the PMIC's roughly first-order running averages (55–57% of a step after 1 s, 83–84% after 2 s,
-  τ ≈ 1.15–1.22 s on the two cards);** board power is refreshed every 133 ms on aifoundry2 (the readings change only
+  τ ≈ 1.15–1.22 s on the two cards; superseded by E58: 1.01–1.10 s, one SP pass late; 0.54 s on aifoundry1's card 1's SRAM rail);** board power is refreshed every 133 ms on aifoundry2 (the readings change only
   about every 250 ms on aifoundry3). Skip 2-3 s after a step before averaging.
 - **Board minus the three rails** (DDR, PCIe, Maxions, IO, regulator loss; no sensors) is 15 W idle, ~21 W under matmul or DRAM load.
 - `tools/ettelem` reads the per-rail snapshot the stock CLI refuses (`DM_CMD_GET_SP_STATS`), samples the full telemetry set 45

@@ -335,7 +335,7 @@ const VERD={PASS:'var(--ok)',FAIL:'var(--bad)',INCONCLUSIVE:'var(--warn)'};
   `${rng(r('h2d_two_in_flight_over_one'),g2)} times as much, and four in flight on two streams no more. D2H gains a little from a second command (${rng(r('d2h_two_in_flight_over_one'),g2)} times). `+
   `The link is full duplex: one command each way at a time gives ${rng(r('duplex_ser_over_faster_ser'),g2)} times the faster direction alone. `+
   `DMA-only, two host-to-card copies at once halve the rate; a program's staged copies, queued two at a time as the runtime's asynchronous API invites, keep ${rng(stg,g2)} of their one-at-a-time rate (staged, not shown in the chart), because the host copy between the DMAs hides part of the loss. `+
-  `Why concurrent DMA reads collapse (the engine, the IOMMU or the host's read completions) is not established; the hub lists what would settle it.`;
+  `A later test found what collides: not a shared engine or the IOMMU, but two commands of one stream (below).`;
 })();
 
 /* ---------- section 6: predictions ---------- */

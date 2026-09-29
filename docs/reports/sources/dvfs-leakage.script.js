@@ -1014,7 +1014,7 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
   V.dvIntro = `On the night of 27–28 September aifoundry2 ran the development half of a pre-registered design (DV2): ${Z.length} ` +
     `read-only watch cycles from ${hhmm(Z[0].time)} to ${hhmm(Z[Z.length - 1].time)} PDT and ${word(nat.length)} heating sessions. These runs ` +
     `chose the parameters and the rules of a validation plan that was frozen afterwards; they test nothing, and every number in this ` +
-    `section is theirs. The validation has not run (the end of this section). The night ended with the card's Master Minion hung; ` +
+    `section is theirs. The validation began at 20:45 PDT on 28 September and is not yet reduced (the end of this section). The night ended with the card's Master Minion hung; ` +
     `a management reset restored it at 08:32 that morning.`;
   const and2 = xs => (xs.length > 1 ? xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1] : xs.join(''));
   const WHY = {'night stop': 'the night stop that ended the first session', 'slot passed': 'while a session held the card'};
@@ -1110,10 +1110,15 @@ const dvRuns = c => DV.cards[c].runs.filter(r => r.kind === 'T' && r.valid);
     `the schedules it runs, and every pass refuses to start if any of them has changed. It tests the step's trigger, the placement effect's sign, ` +
     `the loop, the absent dead band, the latencies and the residency counter, on the idle card and in heating sessions, each with a pass and a ` +
     `fail rule written before any validation data. Only aifoundry2's governor moves the clock (aifoundry3's is stuck, aifoundry1's card 1 does ` +
-    `not act), so the validation is a replication on the same card in a later session. It has not run: it waits for the owner, who has to ` +
-    `accept a same-card replication and choose between the full schedule and an idle-only one. Its heating sessions also needed the Master ` +
-    `Minion back, and the card was restored at 08:32 on 28 September (below). It could start no earlier than ` +
-    `${P.not_before.replace('2026-09-28T', '')} on 28 September.`;
+    `not act), so the validation is a replication on the same card in a later session. The owner accepted the same-card replication and ` +
+    `chose the full schedule, idle watch and heating sessions (the Master Minion they need was restored at 08:32 on 28 September, below), ` +
+    `and it started on aifoundry2 at 20:45:39 PDT on 28 September, after the plan's earliest start of ` +
+    `${P.not_before.replace('2026-09-28T', '')}. Its NAT-4 replication ran the plan's limit of three heating sessions: p6051 (22:13–22:30 PDT, ` +
+    `one block of four runs), p6052 (22:42–23:06, two blocks) and p6053 (23:19–23:56, four blocks), seven complete placement blocks where G4-S ` +
+    `needs at least six. The Master Minion did not hang. The idle card read 73–75 °C from 20:45 to 21:09 PDT and 59 °C by 22:12, and ` +
+    `73–74 °C again from 00:11 to 01:00 with no session running. The read-only watch cycles go on ` +
+    `until about 16:45 PDT on 29 September, the end of the plan's 20-hour window, and the frozen reducer runs after that. <b>No item has a ` +
+    `verdict yet</b>, so every number in this section is still the development night's.`;
   const sr = H.kernel_log || [], last = sr[sr.length - 1], KL = H.kernel_log_last || {};
   const c1 = l1.calib || {}, c2 = l2.calib || {}, st = l1.stream || {};
   V.hangText = `In the last session's first run, lift 1 ran normally. A lift is a stream of short kernels on all 32 shires ` +

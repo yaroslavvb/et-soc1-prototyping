@@ -48,7 +48,8 @@ const parseWhen = w => {
   if (!m) return [NaN, NaN];  /* not a September date: the map leaves it out, the table sorts it last */
   const d0 = +m[1], d1 = m[2] ? +m[2] : d0;
   const T = (d, h, mi) => d - 18 + (h + mi / 60) / 24;
-  if (m[3]) { const a = T(d0, +m[3], +m[4]); return [a, m[5] ? T(d0, +m[5], +m[6]) : a]; }
+  /* a range of days with times ("28–29 Sep, 23:47–00:27") starts on the first day and ends on the second */
+  if (m[3]) { const a = T(d0, +m[3], +m[4]); return [a, m[5] ? T(d1, +m[5], +m[6]) : a]; }
   return [T(d0, 12, 0), T(d1, 12, 0)];
 };
 /* CK.sortTable on a table whose tr.grp rows head groups: while a column is sorted the group rows step aside, and

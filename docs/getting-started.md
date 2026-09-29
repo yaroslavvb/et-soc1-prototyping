@@ -8,11 +8,46 @@ This page covers everything needed to pick the work up somewhere else: clone, co
 rerun, and republish. Claude Code's memory for this project lives outside the repo, on each machine, so this
 page, [`AGENT.md`](../AGENT.md) (the entry point for an agent) and `CLAUDE.md` carry the context.
 
-## Where things stand (2026-09-28)
+## Where things stand (2026-09-29)
 
 The repository is the source of truth: every result, the experiment that produced it and the raw data are here,
 and `docs/findings/` traces each claim to its file. If a session is lost, resume from this page.
 
+- **The major pass of 28–29 September (Q65, 20:40 PDT on 28 September to 01:10 PDT on 29 September).**
+  - **DV2's validation is running on aifoundry2** (E51, the frozen `PREREG-VAL.md`), since 20:45:39 PDT on
+    28 September, on the full schedule (the owner accepted a replication on the same card). Its three NAT-4
+    replication sessions ran (p6051 22:13–22:30, p6052 22:42–23:06, p6053 23:19–23:56 PDT: 7 complete G4 blocks; the
+    Master Minion did not hang). Its idle cycles run until about 16:45 PDT on 29 September; then collect and reduce it
+    (not done yet). Until then leave aifoundry2's card and every file of the DV2 lock alone (the DV2 bullet below).
+  - **Four pre-registered experiments on the hub's rungs**, each developed on aifoundry1's card 1, frozen, then
+    validated on aifoundry3 (28 Sep 23:47 – 29 Sep 01:06 PDT); what survived:
+    - pcie2 (E55, rungs 34, 35): two host-to-card DMA commands in flight in one stream move 0.49 of one at 64 MB, but
+      one in each of two streams loses nothing (T35-S); a host write lands in the L3 (T34-A).
+      `docs/reports/data/2026-09-29-pcie2/`.
+    - nocr (E56, rungs 31, 32): read replies go y first and write requests x first, on both cards, and the chip
+      diagram now draws replies y first (fact L104, measured); links saturate near 92 GB/s. An ESR call costs 1,557 + 35.9
+      cycles per hop on aifoundry3 (rms 4.7 cycles, over the frozen rule's 4, so the places that rest on a direct
+      call are not decided there; in development on card 1 the master shire placed at (0,3)).
+      `docs/reports/data/2026-09-29-nocr/`.
+    - memp2 (E57, rungs 33, 36, 43, energy-manual-102): the L50 bank and row map holds; the refresh domain is the
+      controller on aifoundry3 (not established on card 1, where R33b failed in development); the L2 keeps TensorLoad lines (a second load 199 cycles); no theory of
+      the 128 B per cycle cap survives; stride-256 reads get 0.665 of the bandwidth at +42 to +50 pJ per 64 B.
+      `docs/reports/data/2026-09-29-memp2/`.
+    - tau (E58, rung 4): the rails' filter has a time constant of 1.01–1.06 s on aifoundry3 (in development card 1's
+      SRAM rail read 0.54 s); `tools/ettelem/deconv.py` undoes it. `docs/reports/data/2026-09-29-tau-aifoundry3/` and
+      `-aifoundry1-c1/`.
+  - **NV (E54)**, the owner's NoC validation of Q63's voltage explanation: its predictions are frozen and aifoundry3
+    was probed read-only (NoC at 485 mV, 400 MHz), but its first voltage write has not run: the session's permission
+    check refused it, so it waits for the owner. Its validation is on aifoundry2, after DV2 (`tools/claims-v3/nv/`).
+  - **The lab.** aifoundry1 got four of the lab report's fixes at 20:51 PDT on 28 September (owner-approved; logged
+    on the host); the other items wait for the owner (`reports/TODO.md`, part 0). aifoundry1's `build/sparsity` was
+    rebuilt with the g3log fix. `et-lab-health` rev 3 and `et-reset` are written, not installed
+    ([lab-access.md](lab-access.md)).
+  - **The session timeline** page, data and tools are in the repository (`6bbf0f3`, `tools/timeline/`).
+  - **Sparse parity (Q66)**: a design and CPU prototypes, no card yet (`docs/research/sparse-parity/DESIGN.md`,
+    `workloads/sparseparity/proto/RESULTS.md`); the implementation is under way.
+  - Open from this pass: [`reports/TODO.md`](reports/TODO.md), part 0 (the owner's: the lab fixes, NV's first
+    write) and part C (DV2's reduction, the third card, two open results).
 - **aifoundry2 runs kernels again: its card was restored at 08:32 PDT on 28 September** (owner-approved). Its Master
   Minion had hung at 02:50:53 PDT during E51's development session p6041: a heater launched 0.6 s after the previous
   one, as the governor's idle reset took the clock from 800 to 600 MHz, ran its short calibration kernel and then never
@@ -20,23 +55,24 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   is hanged?"; the cause is not established. The sysfs per-card reset (06:39) re-attached the device but did not
   recover the Master Minion (launches at 06:40 and 06:47 failed the same way); the management reset
   (`dev_mngt_service -m DM_CMD_RESET_ETSOC -n 0`, 08:32:45) did, and a 1-minion test at 08:33 ran 3 launches, each
-  ok, at 600 MHz. The DV2 queue is still stopped (`build/claims-v3/STOP` and
-  `build/claims-v3/aifoundry2/dv2/NIGHT-STOP` in the checkout that ran it, on aifoundry2; a person removes them).
-  Evidence: `docs/findings/14-card-behaviour.md`, "aifoundry2's Master Minion hung on 28 September", and
+  ok, at 600 MHz. Since 20:45 PDT that evening it runs DV2's validation (above). Evidence:
+  `docs/findings/14-card-behaviour.md`, "aifoundry2's Master Minion hung on 28 September", and
   `docs/reports/data/2026-09-28-dvfs2-aifoundry2/incident/recovery.txt`.
-- **DV2, the DVFS-and-heat experiments (Q59, E51): development done, validation frozen and waiting.** The development
+- **DV2, the DVFS-and-heat experiments (Q59, E51): development done, validation running** (since 20:45 PDT on
+  28 September; reduce it after its idle cycles end, about 16:45 PDT on 29 September). The development
   night on aifoundry2 (28 September, 00:33–02:54 PDT; `docs/reports/data/2026-09-28-dvfs2-aifoundry2/`, tools in
   `tools/claims-v3/dv2/`) points to the governor comparing the 34-sensor mean, not the hottest shire, and to the cards
   running the 0.20.0 governor (a blocking thermal loop of about 0.405 s steps, a one-call climb); a perimeter placement
-  held 800 MHz longer than an interior one in both blocks. All of it is **development, not validated**. The validation
-  plan (`plan/PREREG-VAL.md` there, frozen, SHA-256 `e150ce16…`; its runner is `tools/claims-v3/dv2v/`) has not run.
+  held 800 MHz longer than an interior one in both blocks. All of it is **development, not validated** until the
+  validation is reduced. The validation plan (`plan/PREREG-VAL.md` there, frozen, SHA-256 `e150ce16…`; its runner is
+  `tools/claims-v3/dv2v/`) is running.
   Its lock, `tools/claims-v3/dv2v/LOCK.sha256`, pins 19 files, shared ones among them: `tools/claims-v3/lib.sh` and
   `queue.sh`, `tools/claims-v3/dv2/{block.sh,dv2lib.sh,dv2lib.py,dv2obs.py,sptrace_events.py,placements.json,reduce_dv2.py}`,
   `tools/claims-v3/dv2v/{block.sh,val.json,vn_check.py,reduce_val.py,prereg-val.json}`, both
   `schedule-dv2val-*.txt` and the binaries in `build/ettelem-dv2/` and `build/sparsity_t2/`: no edits and no merges
   touching them until the validation ends (AGENT.md §7; `lib.sh` stays at the locked bytes, so a745199's comment
-  there is to be re-applied afterwards). The validation needs the owner's OK to validate on a later session of the
-  same card (aifoundry2's Master Minion, which its heating sessions need, was restored at 08:32 on 28 September). aifoundry3's governor is latched by its zero TDP and aifoundry1's card 1's never raises the
+  there is to be re-applied afterwards). The owner accepted validating on a later session of the same card
+  (28 September, evening). aifoundry3's governor is latched by its zero TDP and aifoundry1's card 1's never raises the
   clock, so neither can stand in (`docs/findings/14-card-behaviour.md`, "The clock governor, by firmware build").
 - **Heat placement (Q60, E52): development, validation and verdicts done (28 September).** The owner's question of
   27 September: does the same work run longer before the thermal trip in some parts of the chip? Developed on
@@ -54,7 +90,8 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   `hplib.sh`, `hplib.py`, `probe.sh`, `reduce.py`, `sptrace_events.py`, `placements.json`, `run_queue.sh`,
   `ettelem-hp/ettelem.cpp`, `prereg/`, `params/params-val-aifoundry1-c1.json`; and `tools/claims-v3/lib.sh`,
   `queue.sh`, `tools/ettelem/ettelem.cpp`, `tools/ettelem/flip_thermal_model.py`) stays byte for byte as frozen, and
-  aifoundry1's `build/sparsity/` (the frozen heater) was not rebuilt until the verdicts were reduced; the lock files
+  aifoundry1's `build/sparsity/` (the frozen heater) was not rebuilt until the verdicts were reduced (it was rebuilt
+  at 20:56 PDT on 28 September, the frozen copy kept as `build/sparsity.frozen-hp-20260922`); the lock files
   stay as frozen, since `reduce.py --val` re-checks them to reproduce `val.json`. Q1's answer (the
   mean) rests on the source and E51: no on-card clock test could run here (both probes SILENT, aifoundry2 resting at
   66–67 °C).
@@ -106,8 +143,9 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   September the fixed gather/scatter build ran 641 host processes on aifoundry3 with no crash (6.4 expected at the old
   rate; E49), and aifoundry2's and aifoundry3's other host builds were rebuilt with the fix after their queues ended.
   On aifoundry1 six were rebuilt with it on 28 September at 07:52, after card 1's heat-placement queue ended
-  (enercat, memhier, memprobe, nocbench, onchip, sgemm); `build/sparsity` (the heat-placement lock's frozen heater)
-  and `build/enercat_v2` (the campaign's catalogue host, as on aifoundry3) are left (`docs/reports/TODO.md`, part B).
+  (enercat, memhier, memprobe, nocbench, onchip, sgemm), and `build/sparsity` at 20:56 (host `e0fbecce…`, the kernel
+  unchanged). `build/enercat_v2`, the campaign's catalogue host, stays unfixed on purpose, as on aifoundry3: its cat
+  blocks record its hash (`tools/claims-v3/gs/README.md`).
 - **The visualization pass (26 September):** charts and controls on 13 pages, the chart toolkit's card registry (a
   third card appears when its data does) and sortable tables; no number changed. Record:
   `reports/data/2026-09-26-visualization-pass/` and `findings/04-artifacts.md`.
@@ -136,9 +174,13 @@ and `docs/findings/` traces each claim to its file. If a session is lost, resume
   `findings/19-observability-and-the-unmetered.md`, heat per millimetre in `findings/20-heat-per-mm.md`, the traps in
   `findings/14-card-behaviour.md`). The energy manual's rebuild, in order: `findings/04-artifacts.md`, A16; the
   reviews and validations of 24–26 September: `findings/04-artifacts.md` and `reports/data/2026-09-24-report-review/`.
-- **Next:** the ladder's first undone rungs — deconvolving the rails' filter (τ ≈ 1.15–1.22 s, measured), calibrating the per-shire
-  IR-drop map from the SP DEBUG trace into a spatial current map, and a PCIe riser with shunts for millisecond
-  board power. The earlier "next" items below (a real GEMM, prefetching, Discord) still stand.
+- **Next:** after DV2 ends on aifoundry2 (about 16:45 PDT on 29 September): reduce its validation, then run pcie2,
+  nocr, memp2 and tau there as a third card under their frozen pre-registrations (tau only after the amendment its
+  `PREREG.md` requires for aifoundry2: a heat step, its own start temperature, a D burst that does not starve its
+  sampler and its own calibration, written before any aifoundry2 data), and NV's validation once its first write is done (the owner's). The
+  ladder's next undone rungs: calibrating the per-shire IR-drop map from the SP DEBUG trace into a spatial current
+  map, and a PCIe riser with shunts for millisecond board power (rung 4, the rails' filter, was done by E58). The
+  earlier "next" items below (a real GEMM, prefetching, Discord) still stand.
 
 ## Earlier work (18–21 September), and where it stood
 

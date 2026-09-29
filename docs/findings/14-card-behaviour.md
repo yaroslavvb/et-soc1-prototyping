@@ -7,7 +7,10 @@ and [The ET-SoC-1's DVFS loop](https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-l
 **Sources:** E5, E6 (telemetry and rails), E9 (the protocol), E10 (the governor), E12 (long runs), E20 and E21 (the
 second card, the three machines), E27 and E29 (the rails' filter, the meter traps), R3 (the firmware policy, and since
 27 September the cards' own firmware builds), E35–E46 (the three-card check's raw telemetry), E51 (the DV2 development
-night of 28 September, **development data, not validated**). For
+night of 28 September, **development data, not validated**; its frozen validation has run since that evening), E54 (NV's
+source reading of the voltage-set command), E55–E58 (the pre-registered experiments of 28–29 September: the host
+link's concurrency and a host write's path, the mesh's routing order, the memory system's rung items, the rails'
+filter). For
 25 September: the aifoundry1 investigation and fix ([troubleshooting report](https://spacesheep.dev/@yaroslavvb/aifoundry1-troubleshooting),
 [fix log](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix), evidence in
 [`docs/reports/data/2026-09-25-aifoundry1/`](../reports/data/2026-09-25-aifoundry1/README.md)), the read-only audit
@@ -33,6 +36,15 @@ exception): aifoundry2 ran a whole catalogue pass at a 90–103 °C mean with no
 28 September and took no kernel for almost six hours; the sysfs per-card reset did not recover it, and the management
 reset (`DM_CMD_RESET_ETSOC`) restored it at 08:32, with the owner's approval (next section).
 
+**Updated 2026-09-29.** (1) The mesh routes a read's reply **y first** and a write's request x first, on aifoundry3
+and aifoundry1's card 1; every route on the chip diagram assumed x first (E56; "Traps" below). (2) Two host-to-card
+copies in flight **on one stream** move half as much as one; one on each of two streams lose nothing (E55). (3) A
+host write lands in its line's L3 home, and a TensorLoad's lines stay in the L2 (E55, E57). (4) The rails' filter,
+measured per rail: 1.01–1.06 s on aifoundry3, but **0.54 s on card 1's SRAM rail** (E58; the telemetry table).
+(5) Two firmware hazards for anyone who sets a voltage: BL2 0.18.0 writes every NoC set to flash, and a failed set
+retries until the watchdog resets the card (section "Setting a rail's voltage"). (6) aifoundry2's Master Minion ran
+the DV2 validation's three heating sessions without a hang, and its idle die read 73–75 °C at night (the card table).
+
 ## aifoundry2's Master Minion hung on 28 September (02:50 PDT), and the management reset restored it (08:32)
 
 - **What happened.** In E51's development pass p6041 the ADD run's lifts heat with `sparsity_host` (random fp32
@@ -54,15 +66,17 @@ reset (`DM_CMD_RESET_ETSOC`) restored it at 08:32, with the owner's approval (ne
 - **No reset that night.** No reset was attempted (the card rules: never reset a card yourself), and no kernel ran on
   aifoundry2 until the restore.
 - **Restored at 08:32 PDT, with the owner's approval; only the management reset worked.** At 06:39 the sysfs per-card
-  reset (`echo 1 > /sys/bus/pci/devices/0000:02:00.0/soc_reset/reinitiate`) re-attached the device (the kernel log's
+  reset (the lab admin's) re-attached the device (the kernel log's
   "enabling device" and "added peer-to-peer DMA memory"), but the Master Minion stayed hung: launches at 06:40 and
   06:47 failed at runtime creation with the same "Couldn't use the HPSQ" message. At 08:32:45 the management reset
   (`dev_mngt_service -m DM_CMD_RESET_ETSOC -n 0`, the reset used twice on 18 September) recovered it: the driver logged
   "Device is resetting" for about 6 s and re-attached the device at 08:32:52, and at 08:33 a test on 1 minion ran
   3 launches of 0.49 s, each ok, at 600 MHz (the device held 1.65 s). **Lesson (one case): the sysfs reset did not recover a
   hung Master Minion; the management reset did.** Either is a card reset: the lab admin's or the owner's call, never
-  an agent's. The SP's uptime and throttle residencies after the reset are not in the record. The DV2 validation (frozen,
-  not run) no longer waits for the card, only for the owner's decision (getting-started.md).
+  an agent's. The SP's uptime and throttle residencies after the reset are not in the record. The DV2 validation
+  (frozen) started on the restored card at 20:45:39 PDT the same day; its three heating sessions (22:13–23:56) ran 52
+  launches, every one returning 0, 7 of them launched 0.49–0.58 s after the previous one ended as lift 2 was, and the
+  Master Minion did not hang (E51).
 - **Cause: not established.** The night's 43 launches before it, which all ran (probes, smokes, runs, and lifts
   launched 0.52–0.58 s after the previous one ended, four times), with 57 climbs and 26 full descents of the clock, did not hang
   (`raw/p*/launches.jsonl`). That this launch met the 800 → 600 MHz idle reset is a hypothesis, not a finding.
@@ -155,7 +169,8 @@ What each card shows:
 - **aifoundry2 behaves as 0.20.0 predicts.** Its SP's throttle residency (a read-only management query, E51) put it in
   the thermal state for 747,342 s, 8.65 of its 9.23 days of uptime, with one stay of 2.1 days: whenever its rest is above
   65 °C it sits in the thermal loop at 600 MHz, and its idle reset waits. Every idle exit (20 of 20) was followed by the
-  SP's own idle line, 17 of them one pass later (0.119–0.131 s). (E51, development; the frozen validation has not run.)
+  SP's own idle line, 17 of them one pass later (0.119–0.131 s). (E51, development; the frozen validation has run since
+  28 September 20:45 PDT and is not yet reduced.)
 - **aifoundry3's governor is latched.** Under 0.20.0 its boot-time TDP of 0 W sends the first kernel after boot into a
   power-down loop that can never exit (the exit needs an average under 1.05 × 0 W, or 300 MHz, and the clock is already
   at the bottom point), so the power task spins; the first time the mean then passes 65 °C the thermal state is set and
@@ -204,6 +219,30 @@ over90` (every telemetry file whose mean passed 90 °C), `… pass` (catalogue p
 `… cool-busy` (aifoundry1's card 1, above), each over the three-card check's passes only (E48's `gs/` passes, filed in the
 same tree, come in with `--with-gs`), so they equal the DVFS page's counts (`dvfs.json` `v3.sp_readouts`).
 
+## Setting a rail's voltage: two firmware hazards (read from source for E54, 28 September)
+
+NV (E54) sets the mesh (NoC) rail with `DM_CMD_SET_MODULE_VOLTAGE`. Reading that command's path in each build the cards
+run found two hazards; neither has been triggered on a card, since no voltage has been written yet.
+
+- **BL2 0.18.0 writes every NoC voltage set to flash** (release 1.2.0: aifoundry1's card 1). Its
+  `pwr_svc_set_module_voltage` calls `flash_fs_set_vmin_lut_boot_voltages()` for the NoC, which erases and
+  reprograms the 4 KB asset-config sector (the part number and the VMIN table) that the boot code takes the NoC rail's
+  boot voltage from. The write came in with et-platform `5f5c37abf` (2024-03-20) and went out with `dd8927ce5`
+  (2024-04-05); 0.20.0 (`ffca4cbb4`, aifoundry2 and aifoundry3) does not write the flash. On card 1 every set would
+  become the boot voltage, a crash before the restore would leave it booting at the new value, a reset during the
+  erase could corrupt the sector, and the flash write's status replaces the set's own. NV refuses any BL2 below 0.19.0
+  and does not use card 1.
+- **A failed set retries until the watchdog resets the card.** On 0.20.0 the command's range check
+  (`pmic_set_voltage`: 400–600 mV) returns its error into `Thermal_Pwr_Mgmt_Set_Validate_Voltage`'s retry loop, which
+  counts its retries down only on the on-die (PVT) failure branch. A range error, or a regulator write or read-back
+  that fails, loops inside a critical section until the service processor's 10 s watchdog resets the SoC. 0.18.0 has
+  no range check at all. The fix, et-platform `7c6049087` (2024-10-10), is later than the lab's builds, so a whitelist
+  of values in the caller is the only guard (NV sends only 485, 540 and 600 mV). A reset also clears aifoundry3's
+  clock guard until it runs again.
+
+The source reading is in `tools/claims-v3/nv/DESIGN.md` §2 and §9. Setting a voltage changes a shared card's state:
+it is the owner's call (the lab rules below).
+
 ## The telemetry, and what each number really is
 
 `tools/ettelem` reads the management library directly (`libDM.so`), which exposes more than the stock CLI:
@@ -211,7 +250,7 @@ same tree, come in with `--with-gs`), so they equal the DVFS page's counts (`dvf
 | Field | Meaning | Gotcha |
 |---|---|---|
 | `board_w` | board power, 10 mW steps | refreshed once per service-processor pass, and a poller lengthens the pass: under ettelem at 10 Hz a new value every 156 ms on aifoundry2, 158 on aifoundry1's card 1 and 263 on aifoundry3; with nothing polling the pass is 133, 135 and 224 ms (E41, 26 September); near-instantaneous otherwise |
-| `sp.minion_w`, `sram_w`, `noc_w` | per-rail power | **the PMIC's running average, roughly first-order with τ ≈ 1.15–1.22 s**: a step reaches 55–57% after 1 s, 83–84% after 2 s and about 94% after 3 s (E27, `catalogue.json` `rail_filter`, both cards), copied by the SP each pass (so on aifoundry3 the copy changes only every 263 ms under ettelem); not a moving average. Skip 2–3 s after any change before averaging. `ettelem sample --reset-ms` resets the statistics on a schedule, and the reset also restarts the running average: with a reset every second, one second after a burst the rail has fallen 93% of the way on every card (E41) |
+| `sp.minion_w`, `sram_w`, `noc_w` | per-rail power | **the PMIC's running average, first-order, published one SP pass late** (E58, pre-registered): τ minion 1.06 s, SRAM 1.01, NoC 1.04 on aifoundry3; minion 1.08 and NoC 1.08 on aifoundry1's card 1, but **its SRAM rail 0.54 s**, so the cards' SRAM meters differ. (E27's single-parameter τ ≈ 1.15–1.22 s folded the SP's pass into τ; a step reaches 55–57% after 1 s and 83–84% after 2 s as read.) The published rail split (the last 0.6 s of a burst, divided by 0.94) assumes τ near 1.1 s: on the catalogue's 3.2 s bursts it errs by −1.8 to −4.3% on every rail but card 1's SRAM rail, where it errs by +5.5% (offline, `tools/claims-v3/tau/PREREG.md`). `tools/ettelem/deconv.py` undoes the filter with each card's τ (a burst's energy within 0.3% of the step on aifoundry3). The SP copies the reading each pass (so on aifoundry3 the copy changes only every 263 ms under ettelem); not a moving average. Skip 2–3 s after any change before averaging. `ettelem sample --reset-ms` resets the statistics on a schedule, and the reset also restarts the running average: with a reset every second, one second after a burst the rail has fallen 93% of the way on every card (E41) |
 | `temp_c.minshire[0]` | die temperature | **whole degrees**, and it is the *mean of 34 shire sensors*. Hot spots are hotter |
 | `die_mv.*` | on-die voltage per rail | the minion rail droops ~1 mV under 18 W more load: the regulator senses at the die |
 | `mhz.minion`, `mhz.noc`, `mhz.ddr` | clocks | the only reliable way to catch the governor |
@@ -283,7 +322,7 @@ check first that nobody holds the card (`et-who`).
 | TDP the driver reports | 65 W | 65 W | 65 W | 65 W |
 | **TDP the firmware uses** | **65 W** | **0 W**, set at every boot (below) | 65 W | 65 W |
 | Clock | firmware DVFS: 600, 700 or 800 MHz; above 600 only below about 68 °C. In this chassis the die never read below 65 °C in the version-3 campaign (336,070 samples, 25–26 Sep), so it runs at 600 MHz unless it starts cold | **600 MHz** (NoC 400), never seen higher (10 Hz telemetry); its governor is latched by the zero TDP: no governor line in its trace since 25 Sep (E41 TEL-G), and its throttle residencies all 0 after 2 d 8 h up (28 Sep; E51, development); it makes no thermal step at any temperature | firmware DVFS; **idles at 300 MHz** (`low_power`); its 0.21.x governor acts only while a kernel runs (firmware source, 27 Sep) | **600 MHz in all 318,667 samples of the three-card check (25–26 Sep)**, and in the SP's own minimum and maximum, although 9,461 were busy at 45–65 W at 64 °C or less and the mean reached 88 °C: its governor does not raise the clock (active power management off, or latched; asked the lab). Its build steps 50 MHz between 300 and 700 MHz, so it could never reach 800 |
-| Idle | 31–36 W at 73–80 °C (27 W cold) | 23.6 W at 50 °C (25.1 W at 56 °C under the runs); the die idles at 55–57 °C since the host changes of 25 Sep | 18.6–18.8 W at 300 MHz; 26 W at 600 MHz | 33–35 W at 600 MHz and 57–62 °C |
+| Idle | 31–36 W at 73–80 °C (27 W cold); on the night of 28–29 Sep (DV2's idle watch) 73–75 °C and 31.4–32.5 W at 20:45–21:09 and 00:11–01:00 PDT, 59 °C and 25.4–25.6 W at 22:12 and 23:15–23:18 (idle cycles only; its heating sessions ran 22:13–23:56) | 23.6 W at 50 °C (25.1 W at 56 °C under the runs); the die idles at 55–57 °C since the host changes of 25 Sep | 18.6–18.8 W at 300 MHz; 26 W at 600 MHz | 33–35 W at 600 MHz and 57–62 °C |
 | Use it for | the main card | compare switching power over idle, never absolute watts | **nothing sustained: it overheats** (below) | anything; it peaked near 71 °C under the campaign's smoke blocks |
 | Version-3 campaign | yes | yes | excluded (amendment A4) | yes |
 
@@ -348,7 +387,7 @@ watcher holding card 0: 13 refused opens in the kernel log and 10 aborts with co
 **Leave the cards' configuration alone.** aifoundry3's clock guard is deliberate. Changing a TDP, a clock, the
 firmware or the driver on a shared machine silently changes what other people's runs measure, in the middle of their
 experiments. Those are lab-admin decisions: ask. The same goes for resets. A lab admin can reset one card through
-sysfs (`/sys/bus/pci/devices/<BDF>/soc_reset/reinitiate`, root): on 25 September that brought aifoundry3's card back
+the sysfs per-card reset (the lab admin's): on 25 September that brought aifoundry3's card back
 in about 8 s with no host reboot, after which its clock guard had to run again. Reloading the kernel module does not
 reset a card's firmware. Do not reset a card yourself ([getting-started.md](../getting-started.md) §2, lab norms).
 
@@ -477,6 +516,26 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
   aifoundry2 or aifoundry3 is zstd-compressed and aifoundry1's `lto1` cannot read it, so build on the host that
   links. **Correction:** a note of the same morning said the toolchains differ and produce different code; they do
   not.
+- **Two host-to-card copies in flight on one stream move half as much as one** (E55, aifoundry3 and aifoundry1's
+  card 1, pre-registered). At 2 × 64 MB, DMA-only, they moved 0.488 of one at a time on aifoundry3 (the rate itself
+  0.484 over 1–64 MB), while one copy on each of two streams moved 1.012: nothing lost. Splitting a copy into
+  elements changes nothing. To overlap host-to-card copies, give each its own stream. Card to host does not collapse
+  (1.10 at 2 × 64 MB).
+- **Read data cross the mesh y first; write data x first** (E56, both cards, pre-registered). With flows chosen to
+  share one link under only one order, reads' replies collided only under y first and writes' requests only under
+  x first, so a reply retraces its request's path. Until 29 September every route drawn on the chip diagram and on heat per
+  mm, and E32's link-sharing counts, assumed x first for all traffic; both pages now draw read data y first, and under
+  y first E32's all-pairs set shares 0 / 22 / 30 / 55 / 78% of its link-hops at 1 / 2 / 3 / 4 / 6 hops, against
+  0 / 22 / 32 / 55 / 72% under x first (`wire.json` `checks.link_sharing.<cfg>.shared_link_hop_fraction_yx`).
+  Recompute a route's links before reasoning about contention. A
+  directed link saturated near 92 GB/s.
+- **A host copy leaves its lines in the L3, and a TensorLoad leaves them in the L2** (E55, E57). After a staged host
+  copy, 99.5% of a buffer's lines read at L3 latency, whether the L3 held them before or not (a host write goes
+  through the line's L3 home, which allocates it); a second TensorLoad of the same 1 KB took 199 cycles, an L2 hit,
+  against 744 from the L3 and 1,344.5 for the first. A probe that means to time DRAM or the L3 must evict first
+  and time only fresh lines; a stream that reuses its buffer measures the L2 after its first pass.
+- **aifoundry1's card 1's SRAM rail averages over 0.54 s, not about 1 s** (E58). Deconvolve each card's rails with its
+  own τ (`tools/ettelem/deconv.py` has them), and do not compare card 1's SRAM rail split with another card's.
 
 ## Related
 
@@ -492,4 +551,6 @@ cards agree to 8%, and one scale factor removes even that. See [11-thermal-model
 - [11-thermal-model.md](11-thermal-model.md): the thermal network and the step-time trick for the whole-degree
   sensor.
 - [03-experiments.md](03-experiments.md): the standard protocol and every session's command; E51 is the DV2
-  development night of 28 September (the governor's build, the mean against the hottest sensor, the Master Minion hang).
+  development night of 28 September (the governor's build, the mean against the hottest sensor, the Master Minion hang)
+  and its validation's status; E54 is NV (not yet run); E55–E58 are the pre-registered experiments of 28–29 September
+  behind this file's 29 September changes.

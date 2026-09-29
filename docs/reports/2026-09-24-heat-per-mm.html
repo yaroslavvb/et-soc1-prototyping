@@ -511,7 +511,13 @@ those launches) are in the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-l
 report (§4.1; the stray write in §3)</a>.</li>
 <li><b>Voltage scaling</b> assumes full-swing CMOS at constant capacitance; whether the links are low-swing is not known.
 Gate capacitance is somewhat lower near threshold, so constant-C scaling slightly understates the 0.9 V figure for
-full-swing links; low-swing links would make it overstate.</li>
+full-swing links; low-swing links would make it overstate. Experiment E54 (NV) is registered to measure it: the mesh rail
+at 485, 540 and 600 mV, with its predictions frozen on 28 September (<code>tools/claims-v3/nv/</code>; the table in
+<a href="#dally-node">§7</a>). A read-only probe of aifoundry3 at 22:54 PDT that day found the rail set to 485 mV and
+reading 484 mV on the die, with the mesh at 400 MHz. The first voltage write waits for the owner's go-ahead: it changes a
+shared card, and the service-processor bootloader these cards run retries a failed regulator write without end (fixed
+upstream in et-platform <code>7c6049087</code>, 10 October 2024), so a failed write would end in the 10 s watchdog resetting
+the card. Development is to run on aifoundry3, and validation on aifoundry2 after its DVFS validation ends.</li>
 </ul></details>
 
 <h2 id="data">11. Data and tools</h2>
@@ -548,7 +554,9 @@ excess over random data on board power is not resolved from zero on any card. 27
 compares like with like over one to four hops (it had mixed two bases); the regulator's loss given per card. 28 September:
 the review's cuts, and a chart of what each further hop adds beside the link-sharing share (§4); later that day, at the
 owner's request, which process Dally's figure is for and whether a gap of two below it is expected (§7), with his
-figures from 2008 to 2023. Every earlier
+figures from 2008 to 2023. 29 September: the voltage test of §7's first explanation registered as E54, with its frozen
+predictions (§7, §10); the route map (§6) and the transfer calculator (§8) draw read data y first, the order E56 measured
+on two cards, with the analysis's x first a choice on the map. Every earlier
 wording is in the repository's history of <code>docs/reports/sources/heat-per-mm.*</code>.</p></details>
 
 <h2 id="related">12. Related reports</h2>
@@ -1524,7 +1532,7 @@ const MAPBUS=CK.bus('heat-map-d');
  const MX=IN.mesh_xy&&IN.mesh_xy.value, LS=W_.checks.link_sharing, C=W_.configs; if(!MX)return;
  const SETS={wu:{pre:'wu/p0.5/hop',label:'loaded mesh (all pairs)',short:'loaded mesh'},wsep:{pre:'wsep/p0.5/hop',label:'own links',short:'own links'}};
  const has=(s,d)=>!!(LS[SETS[s].pre+d]&&LS[SETS[s].pre+d].target_map);
- let d=4, set='wu', order='xy';
+ let d=4, set='wu', order='yx';   // read data travel y first (E56, 29 September)
  const XY=s=>MX[String(s)];
  function route(tg,rd,ord){let [x,y]=XY(tg); const [x1,y1]=XY(rd), out=[];   // as analyze_wire.route(): data flow target -> reader
   for(const ax of ord){if(ax==='x')while(x!==x1){const nx=x+(x1>x?1:-1);out.push([x,y,nx,y]);x=nx;} else while(y!==y1){const ny=y+(y1>y?1:-1);out.push([x,y,x,ny]);y=ny;}}
@@ -1566,7 +1574,7 @@ const MAPBUS=CK.bus('heat-map-d');
  }});
  const segD=CK.seg('map-d',{label:'Distance',options:[1,2,3,4,5,6].map(v=>[v,`${v}`]),value:d,onChange:v=>{d=v;fix('d');}});
  const segS=CK.seg('map-set',{label:'Flows',options:[['wu','loaded mesh'],['wsep','own links']],value:set,onChange:v=>{set=v;fix('set');}});
- CK.seg('map-order',{label:'Route',options:[['xy','x first (as the analysis assumes)'],['yx','y first']],value:order,onChange:v=>{order=v;fix();}});
+ CK.seg('map-order',{label:'Route',options:[['yx','y first (measured, E56)'],['xy','x first (the analysis’s assumption)']],value:order,onChange:v=>{order=v;fix();}});
  function fix(what){   // a distance that one set did not run: keep the choice and switch the other
   if(!has(set,d)){if(what==='set'){const ds=[1,2,3,4,5,6].filter(q=>has(set,q)); d=ds.reduce((b,q)=>Math.abs(q-d)<Math.abs(b-d)?q:b,ds[0]); segD.set(d); return;} set=set==='wu'?'wsep':'wu'; segS.set(set); return;}
   segD.el.querySelectorAll('[role=radio]').forEach((b,i)=>b.setAttribute('aria-label',`${i+1} hop${i?'s':''}${has(set,i+1)?'':' (not run for this set)'}`));
@@ -1580,7 +1588,7 @@ const MAPBUS=CK.bus('heat-map-d');
    rows.map(r=>`<tr><td>${r[0]}</td><td class="num">${cell(a,r[1])}</td><td class="num">${cell(b,r[1])}</td></tr>`).join('')+'</tbody></table>');}
  fix();
  const sx=dd=>LS[`wu/p0.5/hop${dd}`];
- setText('mapcap',`The map is the logical 6 × 6 grid of the 32 compute shires (the coordinates of <a href="#die">§2</a>), and each arrow a directed link that carries data from a target's scratchpad to its reader. Routes are drawn dimension-ordered, as the analysis assumes; the chip's routing order is not measured, so the map can route y first too, and the shares hardly change (3 hops: ${f0(100*sx(3).shared_link_hop_fraction)}% x first, ${f0(100*sx(3).shared_link_hop_fraction_yx)}% y first; 6 hops: ${f0(100*sx(6).shared_link_hop_fraction)}% and ${f0(100*sx(6).shared_link_hop_fraction_yx)}%). The own-links pairs use only straight paths, so both orders give the same routes (the table beside the map gives each set's flows). Hover, tap or tab to a reader shire to see its route, or to a link to list its flows.`);
+ setText('mapcap',`The map is the logical 6 × 6 grid of the 32 compute shires (the coordinates of <a href="#die">§2</a>), and each arrow a directed link that carries data from a target's scratchpad to its reader. Routes are drawn dimension-ordered, y first: read data travel y first (E56, measured on two cards on 29 September), while the analysis assumed x first, and the shares hardly change (3 hops: ${f0(100*sx(3).shared_link_hop_fraction_yx)}% y first, ${f0(100*sx(3).shared_link_hop_fraction)}% x first; 6 hops: ${f0(100*sx(6).shared_link_hop_fraction_yx)}% and ${f0(100*sx(6).shared_link_hop_fraction)}%). The own-links pairs use only straight paths, so both orders give the same routes (the table beside the map gives each set's flows). Hover, tap or tab to a reader shire to see its route, or to a link to list its flows.`);
 })();
 
 /* ---------- 8. price a transfer: two shires on the logical map, a payload and its data ----------
@@ -1609,8 +1617,9 @@ const MAPBUS=CK.bus('heat-map-d');
   if(ys.some(v=>v==null))return null; const mx=meanOf(DS), my=meanOf(ys); let sxy=0,sxx=0; DS.forEach((x,i)=>{sxy+=(x-mx)*(ys[i]-my);sxx+=(x-mx)*(x-mx);});
   const sl=sxy/sxx; return {slope:sl,icpt:my-sl*mx};}
  const hopPj=(k,cd,p)=>{const fl=lineFit(k,cd,p); return fl?fl.slope:null;};   // pJ per byte per hop: the line's slope
- /* x first, as analyze_wire.route(): the stops from the data's shire to the reader */
- function route(a,b){let [x,y]=XY(a); const [x1,y1]=XY(b), out=[[x,y]]; while(x!==x1){x+=x1>x?1:-1;out.push([x,y]);} while(y!==y1){y+=y1>y?1:-1;out.push([x,y]);} return out;}
+ /* y first, as read data travel (E56, 29 September; analyze_wire.route() assumed x first, which is as long): the stops
+    from the data's shire to the reader */
+ function route(a,b){let [x,y]=XY(a); const [x1,y1]=XY(b), out=[[x,y]]; while(y!==y1){y+=y1>y?1:-1;out.push([x,y]);} while(x!==x1){x+=x1>x?1:-1;out.push([x,y]);} return out;}
  const meshNj=(s,k)=>{const h=hopPj(k,card,P); return h==null?null:bytes*h*hops(from,s)/1000;};
  CK.legend('route-leg',[{key:'f',label:'the data’s shire (from)',mark:'box',color:'var(--c2)'},{key:'t',label:'the reader (to)',mark:'box',color:'var(--c7)'},
   {key:'r',label:`route, within the ${DLO}–${DHI} hops measured`,mark:'line',color:'var(--ink)'},{key:'x',label:'extrapolated',mark:'dash',color:'var(--ink)'},
@@ -1681,7 +1690,7 @@ const MAPBUS=CK.bus('heat-map-d');
   else if(d>0&&!board)h+=`<p class="small">The mesh rail leaves out the regulator's loss and everything off the mesh, so it is not like for like with the DRAM and scratchpad figures, which are board power.</p>`;
   if(card!=='pooled'&&(hj==null||(d>0&&whole==null)))h+=`<p class="small">“no value”: the data has no ${cn} value for that quantity.</p>`;
   out.set(h);}
- setText('routecap',`Shires are placed by their logical coordinates (marty1885's map, as in <a href="#contention">§6</a>; the die appears to be this map turned a quarter, which changes no distance), drawn at the die's ${f2(px)} × ${f2(py)} mm tile pitch, and a route is dimension-ordered, x first, as the analysis assumes (y first is as long). `+
+ setText('routecap',`Shires are placed by their logical coordinates (marty1885's map, as in <a href="#contention">§6</a>; the die appears to be this map turned a quarter, which changes no distance), drawn at the die's ${f2(px)} × ${f2(py)} mm tile pitch, and a route is dimension-ordered, y first, as read data travel (E56; x first, which the analysis assumed, is as long). `+
   `For each density of ones the third run measured on every card (${DATA.map(q=>q[1]).join(', ')}), the straight line through its measured ${DS.join(', ')}-hop points on the loaded mesh gives the cost per hop (its slope) and the whole read (the line at the route's distance, so it includes the far scratchpad read and leaving the shire); “all cards” uses the means over every pass of the ${nw(CARDS.length)} cards, a single card its own. `+
   `DRAM and the own scratchpad are the energy manual's random-data tensor loads on board power (${f1(X.tload_dram_random_pj_per_byte)} and ${f2(X.own_scratchpad_pj_per_byte)} pJ per byte). Beyond ${DHI} hops the route is dashed and every figure extrapolated along those lines. Click or tap a shire, or tab to the map and move with the arrow keys; Enter picks.`);
  update();
@@ -1949,7 +1958,7 @@ const MAPBUS=CK.bus('heat-map-d');
  const nomV=[vn('7nm'),vn('28nm')];
  const W=[
   ['Supply voltage (<i>CV</i>²)',`÷${f1(1/sq(nomV[0]))}–${f1(1/sq(nomV[1]))} from the nominal ${f2(nomV[0])}–${f2(nomV[1])} V his group gives 7–28 nm to ${V0} V; ÷${f1(1/sq(Math.min(...vv)))}–${f1(1/sq(Math.max(...vv)))} from the ${Math.min(...vv)}–${Math.max(...vv)} V his figures that have one give; the ~${noc?noc.fj_bit_mm:50} and ~100 give none`,'explains it: the mesh lower',
-   'Step the mesh rail (its firmware allows 485–600 mV for 300–500 MHz): full-swing wires at 0.6 V should cost ×1.53. It changes a shared card, so it needs the owner’s approval.'],
+   'Step the mesh rail (its firmware allows 485–600 mV for 300–500 MHz). Registered on 28 September as experiment E54 (NV): 485, 540 and 600 mV at a fixed 400 MHz mesh clock, with its predictions frozen before any card write (<code>tools/claims-v3/nv/predictions.json</code>, sha256 <code>c0d946c7…</code>). Full-swing wires (TH-V2, Q63 as stated) should cost ×1.24 at 540 mV and ×1.53 at 600 mV; low-swing links (TH-V1) ×1.11 and ×1.24; a cost that does not follow this rail (TH-0) ×1. It changes a shared card, so its first voltage write waits for the owner’s go-ahead.'],
   ['How the bits are counted',`up to ÷4: for one wire of ${ex.c_rep_ff_mm} fF/mm at 0.9 V his group has written "about 0.5pJ/mm" per bit (<i>CV</i>², ${ex.year}), ${kek.per_transition} per transition and ${f0(kek.fj_bit_mm)} per random bit (${kek.year})${own?`, and its ${own.node} network links of ${own.year} count every link "fully active"`:''}; none of the ~100 statements says which. On this mesh a random bit costs ×${f1((aN+bN)/2/aN)} a flit-to-flit difference, because ones cost too`,'explains it, if the 100 counts more than a random bit',
    'Measured here (<a href="#ones">§5</a>: <i>a</i> per difference, <i>b</i> per one); for the 100, only its author can say.'],
   ['What a hop counts: routers, flops, clock, headers, the request',`everything is ×${f1(ut/ud)}–${f1(ht/hd)} the data-dependent part, and that part ×${rng(ud/W485[2],hd/W485[0],f1)} a plain 7 nm wire’s ${f0(W485[0])}–${f0(W485[2])} fJ; the data-independent part is ${rng(100*uf/ut,100*hf/ht,f0)}% of a hop here${pit?`, ${f0(100*pit.pj_flit_hop.none/pit.pj_flit_hop.half)}% in Piton`:''}${noc?`; Dally: the router is "a fraction" of a tile's wire energy`:''}`,'against it: the mesh higher',
@@ -1960,7 +1969,7 @@ const MAPBUS=CK.bus('heat-map-d');
   ['Ones carried, and the encoding',`the per-one term is ${Math.round(100*bshare)}% of a random bit’s data cost; all ones cost ${ones.length?pcr(ones):'—'} more per hop than random data`,'against it: a wire that holds its value pays only for changes',
    'Measured (<a href="#ones">§5</a>); a complemented encoding would test it in software.'],
   ['Wire kind, metal layer, swing',`top metal has about 0.6 of the capacitance per mm of the middle layers (ASAP7: 0.093–0.104 against 0.156–0.187 fF/µm), and Dally puts networks on the upper layers; low-swing links cut ½ (Dally 2018) to ¾ (charge recycling)`,'unknown here',
-   'The link circuit and metal stack (documents); on the cards, the voltage step: full swing goes as <i>V</i>², a fixed swing as <i>V</i>.'],
+   'The link circuit and metal stack (documents); on the cards, the voltage step (E54, row 1): full swing goes as <i>V</i>², a fixed swing as <i>V</i>.'],
   ['Routed length against the pitch',`the metal between routers can only be longer than the ${f2(HOP)} mm pitch, so per mm of wire the cost is lower; size unknown`,'explains it, per mm of wire','The floorplan (documents); hops of another length.'],
   ['Process node, apart from its voltage',`×${f2(s287/v287)} from 28 to 7 nm in his group’s model (its ×${f2(s287)} less the voltage), ×${rngs(k10,f2)} from 40 to 10 nm in his 2011–14 tables; for logic he expects "another factor of two to two and a half" from 16 to 5 nm (2021), for wires "sort of a constant c" (2022)`,'explains a little: the mesh lower','Documents only.'],
   ['Temperature','switching energy does not depend on it; the mesh-rail figures carry no leakage correction (about 2%)','small','Repeat the same configurations on a cool and a warm die.']];
@@ -1996,6 +2005,7 @@ const MAPBUS=CK.bus('heat-map-d');
  const kek=D.literature.find(l=>l.who.startsWith('Keckler')), KEK=kek?kek.fj_bit_mm:121;
  const dn=W_.disjoint_flows.noc_pj_per_byte, db=W_.disjoint_flows.pj_per_byte;
  const sh=c=>CHK.link_sharing&&CHK.link_sharing[c]?CHK.link_sharing[c].shared_link_hop_fraction:0;
+ const shy=c=>CHK.link_sharing&&CHK.link_sharing[c]?CHK.link_sharing[c].shared_link_hop_fraction_yx:0;   // y first (E56)
  const shH=c=>HCHK.link_sharing&&HCHK.link_sharing[c]?HCHK.link_sharing[c].shared_link_hop_fraction:0;
  const hosts=CK.cardsIn(W_.hosts), hostsH=CK.cardsIn(H_.hosts);
  const D6=[1,2,3,4,6];
@@ -2119,7 +2129,7 @@ const MAPBUS=CK.bus('heat-map-d');
  // the loaded mesh's excess over link-disjoint flows, 1-4 hops (the check's P1, P2 mesh rail; P5a, P5b board power)
  const exc=(id)=>`${cvL(id,cvH(id),1,f0)}`, outOf=id=>cvH(id).filter(h=>cvC(id,h).status==='sign');
  setText('conttext',
-  `In the all-pairs traffic of sections 4 and 5, flows share links more as the distance grows (none at one hop, ${pcs([sh('wu/p0.5/hop2'),sh('wu/p0.5/hop3')])} of link-hops at two and three, ${pc(sh('wu/p0.5/hop4'))} at four, ${pc(sh('wu/p0.5/hop6'))} at six, with dimension-ordered routing). `+
+  `In the all-pairs traffic of sections 4 and 5, flows share links more as the distance grows (none at one hop, ${pcs([sh('wu/p0.5/hop2'),sh('wu/p0.5/hop3')])} of link-hops at two and three, ${pc(sh('wu/p0.5/hop4'))} at four, ${pc(sh('wu/p0.5/hop6'))} at six, with dimension-ordered routing x first, as the analysis assumed; y first, the order E56 measured for read data, gives ${pc(shy('wu/p0.5/hop3'))} at three hops and ${pc(shy('wu/p0.5/hop6'))} at six). `+
   `The second run added pairs chosen so that no two flows share a link and every scratchpad has one reader. At one hop, where neither set shares a link, the data-dependent parts agree within 5% ${onC(p16,cvH('P16'))} (${byCard(p16.map(h=>neg(f0)(100*cvC('P16',h).mean)+'%'),p16)}, 99% intervals inside ±5%)`+
   (p16u.length?`; on ${list(p16u.map(lab))} the one-hop data part is too noisy to tell (${list(p16u.map(h=>cvI('P16',h,100,f0,'%')))})`:'')+
   `. The totals on the mesh rail come out `+

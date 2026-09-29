@@ -86,7 +86,9 @@ stored complemented would cost 36% of what it does now.
 ## Sharing a link costs energy
 
 In the all-pairs traffic, link sharing grows with distance: 0, 22, 32, 55 and 72% of link-hops at 1, 2, 3, 4 and 6
-hops (dimension-ordered routing on the recorded maps). Over the same one to four hops, the loaded mesh costs **129
+hops (dimension-ordered routing on the recorded maps, x first, as the analysis assumed). E56 (29 September) measured
+that read data travel y first; under y first the shares are 0, 22, 30, 55 and 78% (`wire.json`
+`checks.link_sharing.<cfg>.shared_link_hop_fraction_yx`), and the page's route map draws y first since then. Over the same one to four hops, the loaded mesh costs **129
 against 92 fJ per bit per hop** for the data-dependent part and 81 against 45 for the rest, on the mesh rail. Each
 reader's bandwidth is within 6% of what it gets on free links, so flits are not held long; straight x-only flows
 that share links cost as much as the loaded mesh, which points to sharing rather than turns.

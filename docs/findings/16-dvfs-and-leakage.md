@@ -204,7 +204,7 @@ die) with no array power gating in play.
   reporting the card's own power here is one query. MLPerf's measured power is the whole system (host, power supply,
   cooling), which this meter does not see, and the card's meter takes a new board value once per service-processor
   pass (133, 224 and 135 ms on aifoundry2, aifoundry3 and aifoundry1's card 1 with nothing polling; 156, 263 and
-  158 ms under a 10 Hz sampler: E41), with the rails behind the PMIC's running average (τ ≈ 1.2 s).
+  158 ms under a 10 Hz sampler: E41), with the rails behind the PMIC's running average (τ ≈ 1.2 s; superseded by E58: 1.01–1.10 s, one SP pass late; 0.54 s on aifoundry1's card 1's SRAM rail).
 - **A provisioned-power metric cannot see the hunting.** Normalising by nameplate kilowatts scores a card by
   its rating, while on this card a badly damped governor moves real throughput by tens of percent inside a
   single 7-second run.
