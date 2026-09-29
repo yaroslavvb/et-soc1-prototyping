@@ -5,7 +5,7 @@ finding checked against the page text or the data before it was listed (the requ
 [`../findings/02-requests.md`](../findings/02-requests.md)). The live pages equalled their files on that day
 ([`MIRROR.md`](MIRROR.md), "Last check").
 
-**Status, 29 September 2026 (12:50 PDT):** 133 items: 106 done, 6 superseded by the version-3 results, 21 open (five
+**Status, 29 September 2026 (12:50 PDT):** 133 items: 107 done, 6 superseded by the version-3 results, 20 open (four
 of them the owner's, in part 0). The review of 26 September listed 110; the lab re-check of 27 September added 7, the
 major pass of 28–29 September (Q65) 9 more, and the sparse parity work (Q66, E59) its 6 next steps and the owner's call on its page.
 
@@ -80,9 +80,8 @@ major pass of 28–29 September (Q65) 9 more, and the sparse parity work (Q66, E
   485 mV), so the owner runs it or allows it. The smoke and the development passes follow on aifoundry3, then the
   validation on aifoundry2 after DV2 (part C).
 
-- [ ] **The sparse parity page is private** (`et-soc1-sparse-parity`, space `a6212e3c…`, deployed 29 Sep; AGENT.md
-  §8.4). If the owner makes it public: `git apply docs/reports/data/2026-09-29-sparse-parity/hub-link.patch`, rebuild
-  the hub in MIRROR.md's order, deploy it, update MIRROR.md's row and run `check-mirror.py`.
+- [x] **The sparse parity page is public** (`et-soc1-sparse-parity`, space `a6212e3c…`): the owner made it public on
+  29 September (Q67), and the hub's link went out with it.
 
 ## A. Page changes (rebuild and deploy)
 

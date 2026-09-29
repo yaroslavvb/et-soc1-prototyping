@@ -149,7 +149,8 @@ From aifoundry2, name the other machines by their full tailnet names, or `ssh` g
 
 **Steps only a person can do** (ask, then wait): approving the Tailscale check; `spacesheep login` (a browser
 approval); anything that needs a GitHub key, such as a push; any admin action on a lab machine (accounts, drivers,
-card resets, services), which is the lab admin's; any change to a page's visibility, which is the owner's; and
+card resets, services), which is the lab admin's; any change to an existing page's visibility, which is the owner's (new report pages are published public by default,
+the owner's rule of 29 September; §8); and
 claiming a machine on the AI Foundry Discord (#community-lab: "using aifoundryN", then "released"), the lab's own norm
 (getting-started.md §2).
 
@@ -306,9 +307,10 @@ numbers in 05, the request in 02, and any published artifact in 04 and MIRROR.md
    its page list is still the 24 September manifest, so it reports the hub's link to the influence-functions page as
    a problem: expect that one line until the manifest is updated.
 4. **Deploy** from a directory of its own, with `--space <uuid>`, and with `--slug` whenever you pass `--title`
-   ([MIRROR.md, "Deploying one page"](docs/reports/MIRROR.md#deploying-one-page)). A new space starts private;
-   making it public is the owner's decision. Check `spacesheep --version`: the pages up to 25 September were deployed
-   with 1.5.1; 1.9.1 (npm's latest from the evening of 25 September) reads them back the same, and a 1.9.1 redeploy
+   ([MIRROR.md, "Deploying one page"](docs/reports/MIRROR.md#deploying-one-page)). A new report page is deployed
+   with `--visibility public` (the owner's rule of 29 September: the experiments are for sharing; the CLI's default
+   is private), unless it holds something §10 keeps out of public view. Check `spacesheep --version`: the pages up
+   to 25 September were deployed with 1.5.1; 1.9.1 (npm's latest from the evening of 25 September) reads them back the same, and a 1.9.1 redeploy
    of an existing space keeps its slug, title and visibility (tested 25 Sep, 23:40). An older CLI (npm's latest was
    1.2.1 until then) may not. Never put the CLI's key in the repository.
 5. **Verify**: `spacesheep list` (visibility and address unchanged), then `python3 scripts/check-mirror.py --only <slug>`.

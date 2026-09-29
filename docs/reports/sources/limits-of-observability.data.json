@@ -630,6 +630,16 @@
    ]
   },
   {
+   "group": "Research and exploratory",
+   "title": "Sparse parity on the ET-SoC-1",
+   "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-parity",
+   "date": "29 Sep",
+   "what": "Noisy sparse parity solved on the card's 1,024 minions as an int8 tensor GEMM, checked on every run by two closed-form checksums over all the candidates and a CPU oracle: (512, 4, 0.4) in 0.323 s and (256, 5, 0.4) in 1.52 s on aifoundry3, 7.8–12× one CPU core and 1.1–1.6× six tuned AVX-512 threads; measured on the one-stage scan, the board alone uses 2.5–7.7× less energy per solve than the CPU's energy at an assumed package power, and 1.6–6.1× less with the host that drives the card (E59).",
+   "instruments": "cycle counter, host wall clock (kernelLaunch → waitForStream), board power, die temperature and clock (ettelem)",
+   "short": "Sparse parity",
+   "pub": "2026-09-29"
+  },
+  {
    "title": "Influence functions on the ET-SoC-1",
    "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions",
    "date": "25 Sep",
@@ -5780,6 +5790,33 @@
     {
      "title": "Power and temperature telemetry (§2: the filter, rail by rail)",
      "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature"
+    }
+   ]
+  },
+  {
+   "id": "E59",
+   "when": "29 Sep, 04:15–11:40",
+   "card": "aifoundry3",
+   "what": "Sparse parity (Q66), an engineering benchmark, not pre-registered: noisy sparse parity solved as an int8 tensor GEMM, from one minion (M1) and one shire (M2) to all 1,024 minions (M3), an A/B of kernel and planner variants (M4) and the two-stage screen (M5), each run checked by two closed-form checksums over every candidate and a CPU oracle; then board energy per solve, one host process of back-to-back solves between idle brackets. On 1,024 minions (512, 4, 0.3) takes 0.131 s, (512, 4, 0.4) 0.323 s and (256, 5, 0.4) 1.52 s, 1.1–1.6× the host CPU's best method on six threads at P(loss) ≤ 1e-4; board energy per solve, measured on the one-stage scan, 5.0, 16.6 and 89 J with the idle (1.7, 6.2 and 28 J over it): the board alone 2.5–7.7× below the CPU's assumed package energy at 125–251 W, 1.6–6.1× with the host that drives the card (RAPL is root-only).",
+   "instruments": "cycle counter, host wall clock through the runtime API; board power (the SP's board average), rails, die temperature and clock (ettelem at 10 Hz)",
+   "data": [
+    {
+     "path": "workloads/sparseparity/data/2026-09-29-aifoundry3-card/",
+     "note": "M1, the probe, M2 and M3"
+    },
+    {
+     "path": "workloads/sparseparity/data/2026-09-29-aifoundry3-card-m4/",
+     "note": "M4's A/B"
+    },
+    {
+     "path": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/",
+     "note": "M5 in m5/, the energy runs in energy/"
+    }
+   ],
+   "reports": [
+    {
+     "title": "Sparse parity on the ET-SoC-1",
+     "url": "https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-parity"
     }
    ]
   }

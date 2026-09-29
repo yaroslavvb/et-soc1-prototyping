@@ -638,11 +638,9 @@ they were committed in `6bbf0f3` (28 Sep 21:52 PDT), refreshed to 21:15 PDT, and
 The page for Q66 and E59: noisy sparse parity solved on the card's 1,024 minions, against the host CPU's best method.
 
 - **Page:** `docs/reports/2026-09-29-sparse-parity.html`, slug `et-soc1-sparse-parity`, space
-  `a6212e3c-63f8-4971-a833-06457e2824da` (deployed 29 Sep, 12:45 PDT), **private** until the owner decides (AGENT.md
-  §8.4: a new space starts private); [`../reports/MIRROR.md`](../reports/MIRROR.md) lists it so, with its build command.
-  The hub's link (§1's index under "Research and exploratory", beside the influence-functions page, and E59 in §7's
-  sessions) is written but held back, since every space the hub links is public (Q40): apply
-  `docs/reports/data/2026-09-29-sparse-parity/hub-link.patch`, rebuild the hub and deploy it once the page is public.
+  `a6212e3c-63f8-4971-a833-06457e2824da`: deployed private at 12:45 PDT on 29 September, made public at the owner's
+  word that afternoon (Q67). On the hub it sits beside the influence-functions page, in §1's index under "Research
+  and exploratory", with E59 in §7's sessions. [`../reports/MIRROR.md`](../reports/MIRROR.md) has its build command.
 - **What it rests on:** E59, milestones M1–M5 on aifoundry3's card on 29 September (L1 0.131 s, L2 0.323 s and
   (256, 5) 1.52 s on 1,024 minions; 7.8–12× one core and 1.1–1.6× six tuned AVX-512 threads at P(loss) ≤ 10⁻⁴; board
   energy per solve with idle, measured on the one-stage scan, 5.0, 16.6 and 89 J: the board alone 2.5–7.7× below the

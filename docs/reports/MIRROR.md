@@ -51,7 +51,7 @@ before `</body>`. Private pages are listed but not mirrored.
 | [Spatial temperature: a brief](https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief) | `bc391cfe-64e2-4f36-884c-9bbfcb267de8` | public | `docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html` | file |
 | [L2 mainline starvation: a brief](https://spacesheep.dev/@yaroslavvb/2026-09-22-et-soc1-l2-mainline-starvation) (a pointer page) | `49ca367f-886f-4c0a-b472-12d8fc449300` | public | `docs/reports/2026-09-22-et-soc1-l2-mainline-starvation.html` | file |
 | [Influence functions on the ET-SoC-1](https://spacesheep.dev/@yaroslavvb/et-soc1-influence-functions) (exploratory, 25 Sep) | `55ae9267-3fc8-42a4-8621-4102fd7c97f7` | public | `docs/reports/2026-09-25-influence-on-et.html` | file |
-| [Sparse parity on the ET-SoC-1](https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-parity) (exploratory, 29 Sep: Q66 and E59, noisy sparse parity solved on the card's 1,024 minions against the host CPU's best method; not yet linked from the hub, which links only public spaces) | `a6212e3c-63f8-4971-a833-06457e2824da` | private (deployed 29 Sep; a new space starts private; making it public is the owner's decision, AGENT.md §8.4; the hub's link waits for that: `docs/reports/data/2026-09-29-sparse-parity/hub-link.patch`) | `docs/reports/2026-09-29-sparse-parity.html` | file |
+| [Sparse parity on the ET-SoC-1](https://spacesheep.dev/@yaroslavvb/et-soc1-sparse-parity) (exploratory, 29 Sep: Q66 and E59, noisy sparse parity solved on the card's 1,024 minions against the host CPU's best method; in the hub's §1 index beside the influence-functions page, and E59 in §7) | `a6212e3c-63f8-4971-a833-06457e2824da` | public (deployed private at 12:45 PDT on 29 Sep, made public at the owner's word the same afternoon) | `docs/reports/2026-09-29-sparse-parity.html` | file |
 
 ### The lab machines
 
@@ -140,11 +140,14 @@ python3 scripts/check-mirror.py --only "$SLUG"
 - Deploy from a directory of its own, never from `docs/reports/` itself: the CLI writes a `.spacesheep.json` pin file
   into the deployed directory, and a stale pin once published one report over another (22 September).
 - Always pass `--space` on an update. Passing `--title` without `--slug` re-slugs the space and breaks its address.
-- A new page: pass `--title`, `--slug`, `--emoji` and `--description` on the first deploy. The space starts
-  private. Make it public (`spacesheep share <uuid> --visibility public`) only when the owner says so, then add its
-  row here with the uuid from `spacesheep list --json`.
-- A deploy can change a space's visibility. Visibility is the owner's call: compare `spacesheep list` with this file
-  after every deploy.
+- A new page: pass `--title`, `--slug`, `--emoji`, `--description` and **`--visibility public`** on the first deploy.
+  The owner's rule since 29 September: the experiments are for sharing, so every new report page is public by
+  default (the CLI's own default is private; 1.9.1 has no "unlisted" level, and `public` means anyone with the link).
+  Keep a page private only when it holds something that must not be public (AGENT.md §10: access paths, privileges,
+  other people's accounts, a private conversation). Then add its row here with the uuid from `spacesheep list --json`.
+  An existing private page: `spacesheep share <uuid> --visibility public`.
+- A deploy can change a space's visibility. Compare `spacesheep list` with this file after every deploy; changing an
+  existing page's visibility (other than publishing a new report page as above) is the owner's call.
 - Commit the page file and this file together with the deploy, so the repository and the live page never disagree
   for long.
 - Push before you deploy. The pages link files on GitHub by `tree/main` and `blob/main` addresses (the version-3
