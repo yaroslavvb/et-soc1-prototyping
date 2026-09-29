@@ -1,0 +1,16 @@
+== aifoundry1-c1 (development, passes [101, 102, 201, 202])
+  R33a: PASS  15/15 conditions as the L50 map predicts; bank-bit step -20.0 cycles (band (-27.0, -15.0))
+  R33b: FAIL  refresh-domain bits PA[6,8,9]: other (no registered reading fits); PA[6] different; PA[7] unclear; PA[8] different; PA[9] different; PA[10] same; PA[11] same; PA[12] same; PA[13] same; PA[18] same
+  R33c: INSUFFICIENT  PA[11] unclear, PA[12] unclear; PA[6] +5.5 [+2.0, +11.0]; PA[7] +2.0 [+1.0, +9.5]; PA[8] +4.0 [+2.0, +11.0]; PA[9] +3.0 [+2.0, +11.5]; PA[10] +3.5 [+2.0, +10.5]; PA[11] +8.5 [+3.0, +13.0]; PA[12] +3.0 [+2.0, +7.5]; PA[13] +2.5 [+1.0, +7.0]; PA[18] +38.0 [+38.0, +39.5]
+  R36: PASS  second TensorLoad 199 cycles (like L2; L2 ref 199, L3 ref 815, first 1348); scalar probe after it 42 (L2)
+  R43: FAIL  surviving theories: none (A and D were refuted before memp2); T43-B misses 7, Cc misses 5
+  E102: {'E102-bw': 'PASS', 'E102-e': 'PASS', 'E102-T': 'PASS'}  zeros: BW 256/64 0.665, dE +46.7 pJ/64B [+27.8, +65.6], T102 67.3; random: BW 256/64 0.665, dE +54.2 pJ/64B [+28.1, +80.3], T102 67.3
+== theories (survive = PASS on every validation card that decided)
+  L50 bank/row split (R33a): None (decided on 0 validation card(s); aifoundry1-c1 PASS)
+  Refresh domain = controller, PA[6-9] its bits (R33b): None (decided on 0 validation card(s); aifoundry1-c1 FAIL)
+  PA[11], PA[12] share the controller (R33c): None (decided on 0 validation card(s); aifoundry1-c1 INSUFFICIENT)
+  T36: the L2 keeps TensorLoad lines: None (decided on 0 validation card(s); aifoundry1-c1 PASS)
+  T43-B: 32 B/cycle per bank: None (decided on 0 validation card(s); aifoundry1-c1 FAIL)
+  E102-bw: the same bank costs a third of the bandwidth: None (decided on 0 validation card(s); aifoundry1-c1 PASS)
+  E102-e: stride-256 energy per byte resolved above the others: None (decided on 0 validation card(s); aifoundry1-c1 PASS)
+  T102: the extra is the awake minions' time: None (decided on 0 validation card(s); aifoundry1-c1 PASS)

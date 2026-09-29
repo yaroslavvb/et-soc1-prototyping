@@ -1,0 +1,156 @@
+{
+ "host": "aifoundry1-c1",
+ "hostname": "aifoundry1",
+ "et_devices": "1",
+ "host_bin": "build/enercat/host/enercat_host",
+ "args": {
+  "out": "/home/yaroslavvb/nekko/build/claims-v3/aifoundry1-c1/memp2/p201/e3",
+  "root": "/home/yaroslavvb/nekko",
+  "passes": 1,
+  "burst": 3.0,
+  "gap": 4.5,
+  "only": "scpline/,spin/zeros/h1",
+  "seed": 2013,
+  "host_bin": "build/enercat/host/enercat_host",
+  "hold_hot": null,
+  "hold_max": 5,
+  "hold_limit": null,
+  "hold_after": 5.8,
+  "heat_settle": 1.5,
+  "heater": null,
+  "tel_live": "/home/yaroslavvb/nekko/build/claims-v3/aifoundry1-c1/memp2/p201/e3/telemetry.jsonl.raw",
+  "stall_s": 6.0,
+  "no_yield": false,
+  "lead": 10.0,
+  "card": "aifoundry1-c1",
+  "dry": false,
+  "list": false
+ },
+ "cfgs": [
+  {
+   "cfg": "spin/zeros/h1",
+   "args": [
+    "--pattern",
+    "spin",
+    "--operands",
+    "zeros",
+    "--harts",
+    "1"
+   ]
+  },
+  {
+   "cfg": "scpline/stride64/zeros",
+   "prefill": "zeros",
+   "args": [
+    "--pattern",
+    "tload_pat",
+    "--operands",
+    "zeros",
+    "--scp",
+    "--slice-bytes",
+    "32K",
+    "--stride",
+    "64",
+    "--access-bytes",
+    "64",
+    "--region",
+    "32K"
+   ]
+  },
+  {
+   "cfg": "scpline/stride128/zeros",
+   "prefill": "zeros",
+   "args": [
+    "--pattern",
+    "tload_pat",
+    "--operands",
+    "zeros",
+    "--scp",
+    "--slice-bytes",
+    "32K",
+    "--stride",
+    "128",
+    "--access-bytes",
+    "64",
+    "--region",
+    "32K"
+   ]
+  },
+  {
+   "cfg": "scpline/stride256/zeros",
+   "prefill": "zeros",
+   "args": [
+    "--pattern",
+    "tload_pat",
+    "--operands",
+    "zeros",
+    "--scp",
+    "--slice-bytes",
+    "32K",
+    "--stride",
+    "256",
+    "--access-bytes",
+    "64",
+    "--region",
+    "32K"
+   ]
+  },
+  {
+   "cfg": "scpline/stride64/random",
+   "prefill": "random",
+   "args": [
+    "--pattern",
+    "tload_pat",
+    "--operands",
+    "random",
+    "--scp",
+    "--slice-bytes",
+    "32K",
+    "--stride",
+    "64",
+    "--access-bytes",
+    "64",
+    "--region",
+    "32K"
+   ]
+  },
+  {
+   "cfg": "scpline/stride128/random",
+   "prefill": "random",
+   "args": [
+    "--pattern",
+    "tload_pat",
+    "--operands",
+    "random",
+    "--scp",
+    "--slice-bytes",
+    "32K",
+    "--stride",
+    "128",
+    "--access-bytes",
+    "64",
+    "--region",
+    "32K"
+   ]
+  },
+  {
+   "cfg": "scpline/stride256/random",
+   "prefill": "random",
+   "args": [
+    "--pattern",
+    "tload_pat",
+    "--operands",
+    "random",
+    "--scp",
+    "--slice-bytes",
+    "32K",
+    "--stride",
+    "256",
+    "--access-bytes",
+    "64",
+    "--region",
+    "32K"
+   ]
+  }
+ ]
+}

@@ -231,4 +231,11 @@ firmware or log-level command.
 
 ## Development notes (filled in before the freeze)
 
-- (none yet)
+- Development on aifoundry1's card 1, 29 September 2026 00:41-00:53 PDT (after `sysemu.sh`: SYSEMU PASS, 18 runs):
+  smoke 901, PROBE 101 and 102, ENERGY 201 and 202, all ok. No file, parameter, theory or rule changed afterwards.
+- `reduce.py --all` on the development passes: R33a PASS (15 of 15 conditions as the L50 map predicts; bank-bit step
+  -20.0 cycles); R33b FAIL (the refresh-domain bits PA[6,8,9]: no registered reading fits); R33c INSUFFICIENT (PA[11],
+  PA[12] unclear); R36 PASS (a second TensorLoad 199 cycles, as an L2 hit; the L3 reference 815, the first load 1,348);
+  R43 FAIL (no theory survives: T43-B misses 7 conditions, Cc 5); E102 PASS on bandwidth (stride-256 at 0.665 of
+  stride-64), energy (+46.7 and +54.2 pJ per 64 B for zeros and random data) and T102.
+- The validation on aifoundry3 tests every item as registered above.
