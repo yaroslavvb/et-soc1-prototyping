@@ -170,7 +170,12 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Last check: 2026-09-28, 17:37 PDT**, after the superseded energies were folded into the pages (memory anatomy,
+**Last check: 2026-09-29, 02:30 PDT**, after the major pass (E55-E58 on the hub, the chip diagram's y-first reads and
+host writes through the L3 homes, memory levels, PCIe, power and temperature's filter, DVFS's DV2 validation, heat per
+mm's NV and routes, the TODO page, the session timeline refreshed to 29 September, and the lab report's statuses):
+28 of 28 mirrored public pages equal to their files, no warnings, exit 0 (the session timeline listed since `6bbf0f3`).
+
+**Earlier check: 2026-09-28, 17:37 PDT**, after the superseded energies were folded into the pages (memory anatomy,
 memory hierarchy, on-chip communication, matmul efficiency, sparse compute, and their leftovers on memory levels, the
 energy manual, power and temperature, why low power and the hub), the chip diagram's flow B (Broadcast) and heat per
 mm's Q63 section: 27 of 27 mirrored public pages equal to their files, exit 0; one warning: the session timeline is
