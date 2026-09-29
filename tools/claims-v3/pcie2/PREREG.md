@@ -205,3 +205,15 @@ the draft, before development:
   turn and two commands in flight overlap, B/C gives h(1) up to 1.11 and h(4) up to 0.79 (above). The new P35-10,
   the rate ratio from the fit over 1-64 MB, is B/C's rate itself (0.44-0.54), and T35-A gains rr >= 0.85.
 - Validation passes count only if they ran frozen on this file; V3_DRY passes never count.
+
+### Development result (aifoundry1's card 1, passes 101-103, 28 September 23:48-23:55 PDT), before the freeze
+
+Nothing above is changed by it; it is recorded so that the validation reads against it. Two H2D commands in flight
+in one stream moved 0.493 (64 MB), 0.529 (16 MB) and 0.568 (4 MB) of one (P35-1..3 PASS; the rate ratio P35-10
+0.487), and splitting a command into 8 elements changed nothing (P35-7, P35-8 PASS); but one H2D command in each of
+two streams moved 1.019 of one (P35-6 FAIL against 0.44-0.60). So T35-A, T35-BC, T35-E and T35-X were refuted and
+**T35-S (only two commands of one stream collide) survived**: the loss is in how one stream serves two commands, not in
+a shared read engine or the IOMMU. D2H at 64 MB: 1.096 (P35-5d PASS); D2H at 1-16 MB INCONCLUSIVE (0.89-0.90, wide).
+R34: every control passed; after a host write 99.9% of lines read at L3 latency whether the L3 held them before or
+not, with no wrong value (P34-7, -8, -9 PASS): **T34-A survived**, T34-B, -C and -D refuted. The validation tests
+every theory as registered above.
