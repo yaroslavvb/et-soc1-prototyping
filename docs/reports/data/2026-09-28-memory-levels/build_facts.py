@@ -11,6 +11,10 @@ Inputs, in research/ next to this script (copied from the session that made them
   facts-dram.json  LPDDR4X behind the memory shires (list; steps have field "seq")
   build_facts_{l1,l2,l3,scp,dram}.py, the builders that read the repository and the manuals, kept as a record
   DESIGN.md        the page's design (structure, scales, accesses, labelling rules, the asks), kept as a record
+and, since 28 September, the energy manual's manual.json (docs/reports/data/2026-09-23-energy-manual/): the rail splits of
+an L1 hit, a read of the shire's own scratchpad and an L3 read through the mesh on every card it carries, and the energy
+of a mesh hop, which l1.e-rails (until then l1.e-19sep), l2.e.rails and l3.energy-per-load give in place of the first
+runs of 19 September (see "the rail splits of three cards" below).
 Every row has a source (a repo file with a line or field, a manual PDF page, or an RTL file and line) and a kind:
 et-spec, et-measured, et-derived, generic (textbook, drawn as an illustration) or unknown (an ask for the team). The
 research copies say "the lab lead" where the session's notes named him; so does this page.
@@ -402,6 +406,160 @@ NEW = {
     ],
 }
 
+# ---------------------------------------------------------------- the rail splits of three cards (28 September)
+# Until 28 September three rows quoted the first runs of Anatomy of a memory access (19 September, one card: an L1 hit,
+# an L2 hit and a local L3 hit, each split between the rails), two of them citing lines of
+# workloads/memprobe/report_template.html that no longer hold those numbers. They now give the split that page's §6
+# shows: the energy manual's catalogue on every card it carries (E46, 26 September), each metered rail's share of a
+# path's power over idle and the rest on no metered rail, computed here from manual.json as
+# workloads/memprobe/build_report.py computes it (rounded half away from zero, as it rounds). The rows and steps that
+# compared themselves with those first runs follow them: the wire energy, the L2's power per shire and three steps.
+MAN_SRC = 'docs/reports/data/2026-09-23-energy-manual/manual.json'
+MAN = json.load(open(os.path.join(REPORTS, 'data', '2026-09-23-energy-manual', 'manual.json')))
+MCC = MAN['catalogue']['cards']
+MCARDS = [c for c in ('aifoundry2', 'aifoundry3', 'aifoundry1-c1') if c in MCC]   # the chart kit's registry order
+MCARD_N = {2: 'two', 3: 'three', 4: 'four'}.get(len(MCARDS), str(len(MCARDS)))
+MCARD_TXT = ', '.join({'aifoundry1-c1': 'aifoundry1 card 1'}.get(c, c) for c in MCARDS[:-1]) + ' and ' + \
+    {'aifoundry1-c1': 'aifoundry1 card 1'}.get(MCARDS[-1], MCARDS[-1])
+ANATOMY6 = 'https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes'
+
+
+def rnd(x):
+    """Round half away from zero, as the anatomy page's builder does."""
+    return int(x + 0.5) if x >= 0 else -int(-x + 0.5)
+
+
+def per_card(vals, unit='%'):
+    """'69, 68 and 49%': each card's value in registry order, or one value when every card rounds to it; a share under
+    1.5% on every card is '1% or less'."""
+    if unit == '%' and max(vals) < 1.5:
+        return '1% or less'
+    r = [f'{rnd(v):,}' for v in vals]
+    return (r[0] if len(set(r)) == 1 else ', '.join(r[:-1]) + ' and ' + r[-1]) + unit
+
+
+def rail_split(cfg):
+    """Per card, each metered rail's share of the path's power over idle and the rest's (no metered rail), in %."""
+    out = {}
+    for c in MCARDS:
+        r = MCC[c]['summary'][cfg]
+        if not r.get('all_600mhz'):
+            raise SystemExit(f'{c} {cfg}: not every burst at 600 MHz')
+        w = r['over_idle_w']['mean']
+        s = {k: 100 * r['rails_over_w'][k + '_w']['mean'] / w for k in ('minion', 'sram', 'noc')}
+        s['rest'] = 100 - sum(s.values())
+        s['pjb'] = r['pj_per_byte']['mean'] if r.get('pj_per_byte') else None
+        out[c] = s
+    return out
+
+
+SPL = {'l1': rail_split('flw.ps/random/h2'), 'scp': rail_split('tload/scp/random'), 'l3': rail_split('dramrow/stride8K/random')}
+SC = lambda p, k: [SPL[p][c][k] for c in MCARDS]   # noqa: E731
+# a mesh hop per 64 B line: the mean over the cards of the manual's straight line through another shire's scratchpad
+HOP = {d: sum(MCC[c]['wire'][d]['slope_pj_per_byte_per_hop'] for c in MCARDS) / len(MCARDS) for d in ('zeros', 'random')}
+HOPS = sorted(p['hops'] for p in MCC[MCARDS[0]]['wire']['random']['points'])
+# the qualitative claims below, on every card: the L1 is the minion rail's, a scratchpad read the SRAM rail's, and an L3
+# read through the mesh puts a large share on the mesh rail
+for c in MCARDS:
+    if not (SPL['l1'][c]['minion'] > 75 and SPL['l1'][c]['sram'] < 5):
+        raise SystemExit(f'{c}: an L1 hit is no longer mostly on the minion rail')
+    if max(('minion', 'sram', 'noc', 'rest'), key=lambda k: SPL['scp'][c][k]) != 'sram':
+        raise SystemExit(f'{c}: the SRAM rail no longer carries most of a scratchpad read')
+    if SPL['l3'][c]['noc'] < 25:
+        raise SystemExit(f'{c}: an L3 read through the mesh no longer puts a quarter or more on the mesh rail')
+# l2.e.rails's note: the card with the largest unmetered share of a scratchpad read is the one whose unmetered power
+# rises most with its SRAM rail's
+if max(MCARDS, key=lambda c: SPL['scp'][c]['rest']) != max(MCARDS, key=lambda c: MAN['unmetered'][c]['coef']['sram']):
+    raise SystemExit("the scratchpad read's largest unmetered share is no longer on the card with the largest SRAM coefficient")
+RS = {
+    'l1_min': per_card(SC('l1', 'minion')), 'l1_sram': per_card(SC('l1', 'sram')), 'l1_noc': per_card(SC('l1', 'noc')),
+    'l1_rest': per_card(SC('l1', 'rest')),
+    'scp_sram': per_card(SC('scp', 'sram')), 'scp_min': per_card(SC('scp', 'minion')), 'scp_noc': per_card(SC('scp', 'noc')),
+    'scp_rest': per_card(SC('scp', 'rest')),
+    'l3_sram': per_card(SC('l3', 'sram')), 'l3_noc': per_card(SC('l3', 'noc')), 'l3_min': per_card(SC('l3', 'minion')),
+    'l3_rest': per_card(SC('l3', 'rest')), 'l3_line': per_card([64 * v for v in SC('l3', 'pjb')], ' pJ'),
+    'l3_pjb': ', '.join(f'{v:.1f}' for v in SC('l3', 'pjb')[:-1]) + f' and {SC("l3", "pjb")[-1]:.1f} pJ/B',
+    'hop_r': f"{rnd(64 * HOP['random'])} pJ per line on random data", 'hop_z': f"{rnd(64 * HOP['zeros'])} on zeros",
+    'hop_rb': f"{rnd(64 * HOP['random'])} pJ", 'hop_pjb': f"{HOP['random']:.2f} and {HOP['zeros']:.2f} pJ/B",
+    'hop_fit': f'{HOPS[0]}-{HOPS[-1]} hops',
+}
+FIRST_NOTE = ("Until 28 September this row gave the first measurement, on 19 September on aifoundry2 alone ({}); Anatomy of a "
+              "memory access keeps those runs as one note, and its §6 shows this split.")
+FIX[('l1', 'l1.e-19sep')] = {
+    'id': 'l1.e-rails',
+    'statement': f"Split by rail on {MCARD_N} cards (the energy manual's catalogue, 26 September): both harts of every minion "
+                 f"re-reading the L1 with 32-byte vector loads (flw.ps, random data) put {RS['l1_min']} of the power above idle "
+                 f"on the minion rail, {RS['l1_sram']} on the SRAM rail, {RS['l1_noc']} on the mesh and {RS['l1_rest']} on no "
+                 f"metered rail ({MCARD_TXT}). An L1 hit is the minion rail's.",
+    'value': rnd(SPL['l1'][MCARDS[0]]['minion']), 'unit': '% on the minion rail (' + MCARDS[0] + ')',
+    'source': f"{MAN_SRC} catalogue.cards.<card>.summary['flw.ps/random/h2'] (rails_over_w, over_idle_w), as Anatomy of a "
+              f"memory access §6 splits it (workloads/memprobe/build_report.py)",
+    'card': ', '.join(MCARDS), 'page_link': ANATOMY6,
+    'note': FIRST_NOTE.format("an 8-byte ld hitting the L1 in a power loop; docs/reports/data/2026-09-19-memprobe-aifoundry2/"
+                              "power/summary.json summary.l1")}
+FIX[('l2', 'l2.e.rails')] = {
+    'statement': f"No L2 hit has been split between the rails on {MCARD_N} cards. Read as the shire's own scratchpad (1 KB "
+                 f"tensor loads, no tag check, random data), the same arrays put {RS['scp_sram']} of the power above idle on "
+                 f"the SRAM rail, {RS['scp_min']} on the minion rail, {RS['scp_noc']} on the mesh and {RS['scp_rest']} on no "
+                 f"metered rail ({MCARD_TXT}; the energy manual's catalogue, 26 September).",
+    'value': rnd(SPL['scp'][MCARDS[0]]['sram']), 'unit': '% on the SRAM rail (own-scratchpad read, ' + MCARDS[0] + ')',
+    'source': f"{MAN_SRC} catalogue.cards.<card>.summary['tload/scp/random'] (rails_over_w, over_idle_w), as Anatomy of a "
+              f"memory access §6 splits it (workloads/memprobe/build_report.py)",
+    'card': ', '.join(MCARDS), 'page_link': ANATOMY6,
+    'note': FIRST_NOTE.format("an L2 hit by 8-byte loads; docs/reports/data/2026-09-19-memprobe-aifoundry2/summary.json power.l2")
+            + " The unmetered share is highest on the card whose unmetered power rises most with its SRAM rail's (the energy "
+              "manual's fit of the unmetered power, §4.5: unmetered.<card>.coef.sram)."}
+FIX[('l3', 'l3.energy-per-load')] = {
+    'statement': f"Per 64 B line read from the L3 by 1 KB tensor loads through the mesh (a working set whose lines are homed "
+                 f"across the chip), on random data: {RS['l3_line']} above idle ({RS['l3_pjb']}), of which {RS['l3_sram']} on "
+                 f"the SRAM rail (the L2 miss, the L3 read and the L2 fill), {RS['l3_noc']} on the mesh rail, {RS['l3_min']} on "
+                 f"the minion rail and {RS['l3_rest']} on no metered rail ({MCARD_TXT}). Each mesh hop adds {RS['hop_r']} and "
+                 f"{RS['hop_z']} ({RS['hop_pjb']}, the mean of the energy manual's straight lines through another shire's "
+                 f"scratchpad at {RS['hop_fit']}).",
+    'value': rnd(SPL['l3'][MCARDS[0]]['sram']), 'unit': '% on the SRAM rail (L3 read through the mesh, ' + MCARDS[0] + ')',
+    'source': f"{MAN_SRC} catalogue.cards.<card>.summary['dramrow/stride8K/random'] (rails_over_w, over_idle_w, pj_per_byte) "
+              f"and catalogue.cards.<card>.wire.<zeros|random>.slope_pj_per_byte_per_hop, as Anatomy of a memory access §6 "
+              f"gives them (workloads/memprobe/build_report.py)",
+    'card': ', '.join(MCARDS), 'page_link': ANATOMY6,
+    'note': FIRST_NOTE.format("one 8-byte ld per line, a local or a far home; docs/reports/data/2026-09-19-memprobe-aifoundry2/"
+                              "summary.json power.l3near, .l3far")}
+_w = row_of('l3', 'l3.wire-energy')['statement']
+_old_tail = ', close to the 47-59 pJ per hop of l3.energy-per-load.'
+if not _w.endswith(_old_tail):
+    raise SystemExit('l3.wire-energy: its research statement changed; revisit the comparison with l3.energy-per-load')
+FIX[('l3', 'l3.wire-energy')] = {
+    'statement': _w[:-len(_old_tail)] + f"; on board power a hop measures {RS['hop_rb']} per line on random data and "
+                                        f"{RS['hop_z']} (l3.energy-per-load)."}
+# the L2's power per shire, split as the own scratchpad's read is (the SRAM rail's share on each card)
+_s = row_of('l2', 'l2.e.shire')['statement']
+_bw = row_of('l2', 'l2.bw.measured')['value']                       # TB/s
+_mw = _bw * MAN['reruns']['levels_pj_per_byte']['l2']['mean'] / 32 * 1000   # mW per shire (TB/s x pJ/B = W; 32 shires)
+_old = "If the 19 September rail split holds (61% on the SRAM rail), roughly 145 mW of that is on the SRAM rail"
+if _old not in _s or f"about {rnd(_mw / 10) * 10} mW per shire" not in _s:
+    raise SystemExit('l2.e.shire: its research statement or the L2 energy changed; revisit the split per shire')
+_lo, _hi = (rnd(_mw * v / 100 / 5) * 5 for v in (min(SC('scp', 'sram')), max(SC('scp', 'sram'))))
+FIX[('l2', 'l2.e.shire')] = {
+    'statement': _s.replace(_old, f"If an L2 read puts as large a share on the SRAM rail as a read of the same arrays as the own "
+                                  f"scratchpad does ({rnd(min(SC('scp', 'sram')))}-{rnd(max(SC('scp', 'sram')))}%, by card; "
+                                  f"l2.e.rails), roughly {_lo}-{_hi} mW of that is on the SRAM rail")}
+_e = row_of('l2', 'l2.seq.load-hit.09')['energy']
+_old = "the SRAM rail carried ~112 pJ per L2 hit (19 Sep); how much of that is this data read"
+if not _e.startswith(_old):
+    raise SystemExit('l2.seq.load-hit.09: its research energy changed; revisit it')
+STEPFIX[('l2', 'l2.seq.load-hit.09')] = {
+    'energy': f"read as the own scratchpad, these arrays put {RS['scp_sram']} of the power on the SRAM rail, by card (l2.e.rails); "
+              f"how much of an L2 hit's energy is this data read" + _e[len(_old):]}
+_l3s = {s['n']: s for s in RAW['l3']['access_sequence']['load_hit']}
+if _l3s[2]['energy'] != "part of 306 pJ SRAM rail per L3 load (l3.energy-per-load)":
+    raise SystemExit('l3 load_hit step 2: its research energy changed; revisit it')
+_old = "; 47-59 pJ measured (l3.energy-per-load)"
+if not _l3s[8]['energy'].endswith(_old):
+    raise SystemExit('l3 load_hit step 8: its research energy changed; revisit it')
+L3STEPFIX[('load_hit', 2)] = {'energy': f"part of the SRAM rail's {RS['l3_sram']} of an L3 read through the mesh, by card "
+                                        f"(l3.energy-per-load)"}
+L3STEPFIX[('load_hit', 8)] = {'energy': _l3s[8]['energy'][:-len(_old)] + f"; {RS['hop_rb']} per line per hop measured on board "
+                                                                         f"power, {RS['hop_z']} (l3.energy-per-load)"}
+
 for (lv, fid), upd in FIX.items():
     r = row_of(lv, fid)
     for k, v in upd.items():
@@ -413,6 +571,8 @@ for (acc, n), upd in L3STEPFIX.items():
     s = next(x for x in RAW['l3']['access_sequence'][acc] if x['n'] == n)
     if 'action' in upd:
         s['action'] = upd['action']
+    if 'energy' in upd:
+        s['energy'] = upd['energy']
     if 'circuit' in upd:
         s['circuit'] = (s.get('circuit') or []) + upd['circuit']
         if 'g.no-refresh' not in s['facts']:
@@ -804,10 +964,9 @@ N = [
     ('l2_bw256', 'l2:l2.bw.measured', 256, '256 B', ''),
     ('l2_e', 'l2:l2.e.level', 3.11, '3.11 pJ/B', ''),
     ('l2_e_line', 'l2:l2.e.level', 199, '199 pJ', ''),
-    ('l2_e_sram', 'l2:l2.e.rails', 112, '112 pJ', ''),
-    ('l2_e_min', 'l2:l2.e.rails', 64, '64 pJ', ''),
-    ('l2_e_noc', 'l2:l2.e.rails', 2, '2 pJ', ''),
-    ('l2_e_tot', 'l2:l2.e.rails', 183, '183 pJ', ''),
+    # the split of the same arrays read as the own scratchpad, on each card (computed above from manual.json, since 28 Sep)
+    ('l2_rails_sram', 'l2:l2.e.rails', rnd(SC('scp', 'sram')[0]), RS['scp_sram'], ''),
+    ('l2_rails_min', 'l2:l2.e.rails', rnd(SC('scp', 'minion')[0]), RS['scp_min'], ''),
     ('l2_e_scp', 'l2:l2.e.scp-contents', 144, 'about 144 vs 282 pJ', ''),
     ('l2_e_wr', 'l2:l2.e.tload-tstore', 8.58, '4.65 / 8.58 pJ/B', ''),
     ('l2_fsw', 'l2:l2.e.scalar', 774, '774 pJ', ''),
@@ -857,12 +1016,13 @@ N = [
     ('l3_hopmm', 'l3:l3.wire-energy', 3.72, '3.72 mm', ''),
     ('l3_fj', 'l3:l3.wire-energy', 36.2, '36.2 fJ', ''),
     ('l3_hop69', 'l3:l3.wire-energy', 69, 'about 69 pJ', '', '69 pJ'),
-    ('l3_hop47', 'l3:l3.wire-energy', 47, '47-59 pJ per hop', ''),
-    ('l3_59', 'l3:l3.energy-per-load', 59, 'about 59 pJ per line per hop', ''),
-    ('l3_load643', 'l3:l3.energy-per-load', 643, '643 pJ', ''),
-    ('l3_306', 'l3:l3.energy-per-load', 306, '306 on the SRAM rail', '', '306 pJ'),
-    ('l3_120', 'l3:l3.energy-per-load', 120, '120 mesh', '', '120 pJ'),
-    ('l3_110', 'l3:l3.energy-per-load', 110, '110 minion', '', '110 pJ'),
+    # an L3 read through the mesh on each card, and a mesh hop per line (computed above from manual.json, since 28 Sep)
+    ('l3_rails_sram', 'l3:l3.energy-per-load', rnd(SC('l3', 'sram')[0]), RS['l3_sram'], ''),
+    ('l3_rails_mesh', 'l3:l3.energy-per-load', rnd(SC('l3', 'noc')[0]), RS['l3_noc'], ''),
+    ('l3_rails_min', 'l3:l3.energy-per-load', rnd(SC('l3', 'minion')[0]), RS['l3_min'], ''),
+    ('l3_hop_r', 'l3:l3.energy-per-load', rnd(64 * HOP['random']), RS['hop_r'], ''),
+    ('l3_hop_z', 'l3:l3.energy-per-load', rnd(64 * HOP['zeros']), RS['hop_z'], ''),
+    ('l3_hop_rb', 'l3:l3.wire-energy', rnd(64 * HOP['random']), RS['hop_rb'], ''),
     ('l3_e_line', 'l3:l3.energy', 0.94, '0.94 nJ', ''),
     ('l3_e_cont', 'l3:l3.energy-contents', 7.6, '7.6 vs 19.3 pJ/B', ''),
     ('l3_mesh_v', 'l3:l3.mesh-rail', 485, '485 mV', ''),
@@ -1074,7 +1234,7 @@ PARTS = {
         'latch': L('l1', 'g.latch-cell', 'g.latch-write', 'l1.transistors', 'l1.bits', 'l1.u-cell', 'l1.u-library'),
         'sram6t': L('l1', 'g.sram-6t', 'l1.icache-sram', 'l2:l2.storage-question'),
         'energy': L('l1', 'l1.e-vload', 'l1.e-vstore', 'l1.e-scalar', 'l1.e-store-ratio', 'l1.e-fill', 'l1.e-per-bit', 'l1.e-memhier',
-                    'l1.e-19sep', 'l1.u-energy'),
+                    'l1.e-rails', 'l1.u-energy'),
     },
     'l2': {
         'overview': L('l2', 'l2.sc.what', 'l2.partition.default', 'l2.partition.rows', 'l2.private', 'l2.assoc', 'l2.lat.measured',

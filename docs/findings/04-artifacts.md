@@ -91,6 +91,25 @@ here: its row is in "Other spaces the hub links" below. In brief, for every repo
   median idle, the governor free). Why low power (A5): its link to Memory hierarchy says that page's energies are the
   manual's. The hub's reading-path tags say where the energies now come from (memory anatomy's too), and its session
   notes (E1, E33, E34 and the matmul session) that the pages carry them.
+  Later that day, Sparse compute: every power and energy figure is the three-card check's. The "Later measurements" box
+  (the Horace experiment's 22 September session on aifoundry3) became §1's paragraph on operand values with a new chart,
+  the same loop on all zeros, all ones and random normal data on each card (V3-ABL-A, E38, as the energy manual's §3.2)
+  beside the page's own −3…3 configurations (V3-ABL-B, E39); the power chart lost its first-run view and the 22 September
+  toggle, the layer table and explorer the first run's rows, and the first run (18 September, no temperature control) is
+  one "first measured" note in the method; aifoundry1 card 1's saving at the same die temperature reads 92–96% on
+  V3-ABL-B's registered metric (it said 91–96%, what the runs' dropout-rule metric gives). `workloads/sparsity/analyze.py` embeds
+  `v3.operands` (from `results/abla.runs.json`) and each configuration's `at_die_w`, prints the values the text quotes
+  (`page_summary()`), and no longer takes `--later`. The hub tags the page "18 Sep baseline; power from three cards".
+  Memory levels: `l1.e-19sep` (now `l1.e-rails`), `l2.e.rails` and `l3.energy-per-load` give the per-card rail splits of
+  Memory anatomy §6 (an L1 hit, the own scratchpad's read of the L2's arrays, an L3 read through the mesh, a mesh hop per
+  line) in place of E1's 19 September runs, two of them citing lines of `workloads/memprobe/report_template.html` that no
+  longer held those numbers; `build_facts.py` computes them from `manual.json` and stops if the data stop bearing out
+  their qualitative claims, and `l3.wire-energy`, `l2.e.shire`, the L2 load hit's step 9 and the L3 load hit's steps 2
+  and 8 follow, as do the L2 and L3 energy panels, the hop diagram and the reply step. The energy manual (A15): §5's ring
+  note, in the markdown (`render_energy_manual.py`) and on the page, says On-chip communication shows the manual's values
+  and keeps the 18 September pair as one note, and gives the s ↔ s+16 row's 13.27 pJ/B, not that run's 14.3. Power and
+  temperature (A3): its Related link to Memory anatomy describes §6 as it now is. In `docs/findings/`, 13's A100 fp32
+  lead is the matmul page's 2.8–3.9× by card (was 3.4×), and 15 points to Memory anatomy §6 for E1's current values.
 
 ### A4's versions
 
@@ -132,7 +151,7 @@ Each command rewrites only its page's embedded JSON and is idempotent (a second 
 | Page | Command (from the repository root) |
 |---|---|
 | Matmul efficiency, and the test drive's ladder | `python3 scripts/mmbench-report-data.py docs/reports/data/2026-09-18-aifoundry2 --manual docs/reports/data/2026-09-23-energy-manual/manual.json --embed docs/reports/2026-09-18-et-soc1-matmul-efficiency.html --ladder docs/report/index.html`. `--manual` adds the efficiency explorer's data; `--v3` (the default, the three-card check's `mmb.json`) embeds every energy the page quotes since 28 September and prints the three-card summary its tables quote; `--ladder` writes the test drive's `ladder-data`, the FOSDEM rungs parsed from `docs/et-soc1-notes.md`, and stops if that table changes shape |
-| Sparse compute | `python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifoundry3 --later docs/reports/data/2026-09-22-horace-aifoundry3/horace3.json --embed docs/reports/2026-09-18-et-soc1-sparsity.html` (since 26 September `--claims-v3` defaults to `docs/reports/data/2026-09-25-claims-v3` and embeds the three cards' TensorLoad rows and V3-ABL-B configurations as `v3`; `--claims-v3 none` leaves them out) |
+| Sparse compute | `python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifoundry3 --embed docs/reports/2026-09-18-et-soc1-sparsity.html` (since 26 September `--claims-v3` defaults to `docs/reports/data/2026-09-25-claims-v3` and embeds the three cards' TensorLoad rows and V3-ABL-B configurations as `v3`; `--claims-v3 none` leaves them out; since 28 September it also embeds V3-ABL-A's runs of the same loop on all zeros, all ones and random normal data as `v3.operands`, every power figure the page shows is the check's, and it ends by printing the values the text quotes; until then `--later docs/reports/data/2026-09-22-horace-aifoundry3/horace3.json` added the 22 September runs) |
 | Memory hierarchy | `python3 workloads/memhier/analyze.py docs/reports/data/2026-09-18-memhier-aifoundry2 --v3 docs/reports/data/2026-09-25-claims-v3/raw --embed docs/reports/2026-09-18-et-soc1-memory-hierarchy.html` (E33; `--v3` embeds each card's V3-LAT chases, the passes `results/lat.json` keeps; `--reruns` defaults to the energy manual's `reruns.json`) |
 | On-chip communication | `python3 workloads/nocbench/analyze.py docs/reports/data/2026-09-18-nocbench-aifoundry2 --memhier docs/reports/data/2026-09-18-memhier-aifoundry2 --search --v3 docs/reports/data/2026-09-25-claims-v3 --embed docs/reports/2026-09-18-et-soc1-on-chip-communication.html` (E34; about 30 s with `--search`; `--v3` takes the check's directory, not its `raw/`, and embeds each card's LAT-N1, N2 and N4 passes; `--reruns` defaults to the energy manual's `reruns.json`, and since 28 September the rings' watts over idle and the spin are re-reduced from the passes it names) |
 | Ridge points (A19) | `python3 scripts/ridge-points.py --embed docs/reports/2026-09-18-et-soc1-ridge-points.html` (A19 gives its input chain; since 26 September its cards are every card the energy manual carries in the entries it uses) |
@@ -161,9 +180,8 @@ python3 workloads/memhier/analyze.py $D/2026-09-18-memhier-aifoundry2 --v3 $R \
 # memory anatomy's three cards (the V3-MEM passes the reducer kept); build_report.py reads this file by default
 python3 workloads/memprobe/analyze.py --v3 $R --v3-passes $V3/results/mem.passes.json \
     --out $D/2026-09-26-memprobe-3cards/cards.json
-# sparse compute: --claims-v3 defaults to $V3
-python3 workloads/sparsity/analyze.py $D/2026-09-18-sparsity-aifoundry3 --later $D/2026-09-22-horace-aifoundry3/horace3.json \
-    --embed docs/reports/2026-09-18-et-soc1-sparsity.html
+# sparse compute: --claims-v3 defaults to $V3 (since 28 September without --later)
+python3 workloads/sparsity/analyze.py $D/2026-09-18-sparsity-aifoundry3 --embed docs/reports/2026-09-18-et-soc1-sparsity.html
 # hot line (A13): the three cards' V3-LAT hot-line passes
 python3 workloads/nocbench/analyze_hotline.py --v3 $R --power $D/2026-09-22-hotline-aifoundry2/power.json \
     --context $D/2026-09-22-hotline-aifoundry2/context.json --barrier $D/2026-09-18-nocbench-aifoundry2/barrier-chip1.jsonl \

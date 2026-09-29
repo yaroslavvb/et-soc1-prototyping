@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """Summarize the sparsity runs into the numbers and chart data used by the report.
 
-    python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifoundry3 \
-        --later docs/reports/data/2026-09-22-horace-aifoundry3/horace3.json [--embed REPORT_HTML]
+    python3 workloads/sparsity/analyze.py docs/reports/data/2026-09-18-sparsity-aifoundry3 [--embed REPORT_HTML]
 
 The data directory holds the SPARSITY lines of each run (*.jsonl from run_lab.sh; diverge/ for the divergence
 sweep), clock.csv (minion clock and board power during those runs) and energy-*/ (run_energy.py). With --embed
 the script replaces the JSON inside the report's <script type="application/json" id="sparsity-data"> tag.
 
---later HORACE3_JSON adds energy.later: the same TensorFMA loop on the same card, four days later and
-temperature-controlled (the Horace experiment's aifoundry3 run): power above the idle just before each pattern
-(p80 - p_before; the Horace analysis's p80 is the power at the run's launch temperature, about 55 C on this card,
-not 80 C), the launch temperature and the throughput, for zeros, ones and random-normal operands.
+"energy" is the page's first run of the power configurations (18 September, this card, no temperature control),
+which the page keeps as one "first measured" note since 28 September; every power figure the page shows is the
+three-card check's ("v3" below). The script ends by printing the values the page's text quotes (page_summary()).
+Until 28 September --later HORACE3_JSON added the Horace experiment's 22 September runs of the same loop on this card
+(zeros, ones, random normal); v3.operands, the three-card check's runs of those patterns, replaced them.
 
 --claims-v3 DIR (default: docs/reports/data/2026-09-25-claims-v3, when it exists; "none" skips it) adds "v3": the
 three-card check of 25-26 September on every card it holds (aifoundry2, aifoundry3, aifoundry1-c1), read in the
@@ -24,7 +24,14 @@ version-3 layout, which this script's own readers cannot take as a data director
       above idle, J per unit above idle and on the board (p80 / rate), the idle just before the runs and the
       launch temperature; and c2_reads_high_w: how far its registered above-idle values read from the runs' launch
       temperature (the check's note C2, revised; W, positive = high), as the pair [die at the sensor's whole-degree
-      launch reading, die V3_C2_STEP_C above it], with leak and reference from ablb.runs.json's params_by_card.
+      launch reading, die V3_C2_STEP_C above it], with leak and reference from ablb.runs.json's params_by_card;
+  v3.operands.<card>: V3-ABL-A's runs of the same TensorFMA fp32 loop on all 1,024 minions (A and B in the L1
+      scratchpad, 546 cycles per op) with A and B all zeros, all ones and random normal data (results/abla.runs.json;
+      kept runs of the passes the reducer used, the registered "switching" metric: p80 after the pre-registered
+      dropout rule, minus p_before), as the energy manual's section 3.2 reduces them (tools/ettelem/
+      build_energy_manual.py): per pattern the runs, above-idle power and pJ per multiply-add (each run's switching
+      / rate) as mean, min and max, and the idle, rate and launch temperature; per card c2_reads_high_w over these
+      runs, as for v3.energy, and at_die_w: each pattern's mean at the die temperature of its launches, at both ends.
 """
 import argparse
 import glob
@@ -44,6 +51,9 @@ V3_BLOCKS = [1, 2, 3]  # V3-ABL-B's registered blocks (tools/claims-v3/ablb/redu
 # or up to V3_C2_STEP_C above it, which cannot be settled. A run's value at its launch temperature is its registered
 # value + leak x (t_die - reference). The registered values are kept; c2_reads_high_w gives the mean offset, both ends.
 V3_C2_STEP_C = 0.96
+# V3-ABL-A's configurations of this page's TensorFMA fp32 loop on other operand values (tools/claims-v3/abla/abl_a.cfg)
+V3_OPERANDS = [("fp32_zeros", "zeros"), ("fp32_ones", "ones"), ("fp32_randn", "randn")]
+MAC_PER_FP32_OP = 16 * 16 * 16
 
 
 def load(path):
@@ -80,8 +90,18 @@ def claims_v3(root):
     cards = [c for c in V3_CARD_ORDER if os.path.isdir(os.path.join(raw, c, "lat"))]
     cards += sorted(c for c in os.listdir(raw) if os.path.isdir(os.path.join(raw, c, "lat")) and c not in cards
                     and c != "aifoundry1-c0")  # card 0 is outside the campaign (amendment A4)
-    out = {"source": "docs/reports/data/2026-09-25-claims-v3: raw/<card>/lat/p*/sp (V3-LAT) and results/ablb.runs.json (V3-ABL-B)",
-           "cards": cards, "tload": {}, "energy": {}}
+    out = {"source": "docs/reports/data/2026-09-25-claims-v3: raw/<card>/lat/p*/sp (V3-LAT), results/ablb.runs.json (V3-ABL-B) "
+                     "and results/abla.runs.json (V3-ABL-A)",
+           "cards": cards, "tload": {}, "energy": {}, "operands": {}}
+
+    def col(vals):
+        vals = [x for x in vals if x is not None]
+        return {"mean": statistics.mean(vals), "min": min(vals), "max": max(vals)} if vals else None
+
+    def at_die(rs, metric, leak, ref):
+        """The mean of a run's metric at the die temperature of its launch (note C2, revised), both ends: the die at the
+        sensor's whole-degree reading, and V3_C2_STEP_C above it."""
+        return [statistics.mean(r[metric] + leak * (r["t_launch"] + s - ref) for r in rs) for s in (0.0, V3_C2_STEP_C)]
     ns = 1000.0 / 600  # V3-LAT keeps only launches at 600 MHz (its clock rule)
     for c in cards:
         passes = []
@@ -114,9 +134,6 @@ def claims_v3(root):
                 by.setdefault(r["config"], []).append(r)
             cf = {}
             for name, v in sorted(by.items()):
-                def col(vals):
-                    vals = [x for x in vals if x is not None]
-                    return {"mean": statistics.mean(vals), "min": min(vals), "max": max(vals)} if vals else None
                 rated = [r for r in v if r.get("per_s")]
                 x = {"n": len(v), "unit": v[0].get("unit"), "above_idle_w": col([r["dyn"] for r in v]),
                      "per_s": col([r["per_s"] for r in rated]),
@@ -133,6 +150,8 @@ def claims_v3(root):
                     x["rows_on"] = rows_on(tiled[0])
                     # multiplies with a nonzero A element in an enabled row, the reducer's x (ABLB-3c)
                     x["frac"] = col([r["nnz_a"] / r["a_elems"] * rows_on(r) / 16 for r in tiled])
+                if c in C2P:  # at the die temperature of the launches (note C2, revised), both ends
+                    x["at_die_w"] = at_die(v, "dyn", C2P[c]["leak"], C2P[c]["launch"])
                 cf[name] = x
             out["energy"][c] = {"blocks": sorted({r["pass"] for r in rs}), "idle_w": statistics.mean(r["p_before"] for r in rs),
                                 "launch_c": statistics.mean(r["start_temp"] for r in rs), "configs": cf}
@@ -140,7 +159,110 @@ def claims_v3(root):
                 leak, ref = C2P[c]["leak"], C2P[c]["launch"]
                 off = statistics.mean(leak * (r["t_launch"] - ref) for r in rs)
                 out["energy"][c]["c2_reads_high_w"] = [-off, -(off + leak * V3_C2_STEP_C)]
+    # V3-ABL-A: the same loop on all zeros, all ones and random normal data, reduced as the energy manual's section 3.2
+    abla_path = os.path.join(root, "results", "abla.runs.json")
+    if os.path.exists(abla_path):
+        AJ = json.load(open(abla_path))
+        used, C2A = AJ.get("passes_used", {}), AJ.get("params_by_card", {})
+        for c in cards:
+            rs = [r for r in AJ["runs"].get(c, []) if r.get("kept") and r.get("pass") in used.get(c, [])
+                  and r["config"] in dict(V3_OPERANDS)]
+            if not rs:
+                continue
+            pats = {}
+            for cfg, key in V3_OPERANDS:
+                v = [r for r in rs if r["config"] == cfg]
+                if not v:
+                    continue
+                pats[key] = {"config": cfg, "n": len(v), "above_idle_w": col([r["switching"] for r in v]),
+                             "pj_mac": col([r["switching"] / r["per_s"] * 1e12 for r in v]),
+                             "per_s": statistics.mean(r["per_s"] for r in v), "idle_w": statistics.mean(r["p_before"] for r in v),
+                             "launch_c": statistics.mean(r["t_launch"] for r in v)}
+                if c in C2A:
+                    pats[key]["at_die_w"] = at_die(v, "switching", C2A[c]["leak"], C2A[c]["launch"])
+            out["operands"][c] = {"passes": sorted({r["pass"] for r in rs}), "patterns": pats}
+            if c in C2A:
+                leak, ref = C2A[c]["leak"], C2A[c]["launch"]
+                off = statistics.mean(leak * (r["t_launch"] - ref) for r in rs)
+                out["operands"][c]["c2_reads_high_w"] = [-off, -(off + leak * V3_C2_STEP_C)]
     return out
+
+
+def page_summary(data):
+    """Print the power and energy values the page's text quotes, as it rounds them: the three-card check's
+    (v3.energy, V3-ABL-B, E39; v3.operands, V3-ABL-A, E38) and the first run's, which the page keeps as one note."""
+    v3, en = data.get("v3") or {}, data.get("energy") or {}
+    E, O = v3.get("energy") or {}, v3.get("operands") or {}
+    cards = [c for c in v3.get("cards", []) if c in E]
+    span = lambda xs, dp, pct=False: (lambda a, b: a if a == b else f"{a}-{b}")(
+        *(f"{(100 * x if pct else x):.{dp}f}" for x in (min(xs), max(xs))))
+    save = lambda z, d: 1 - z / d
+    reads = lambda r: ("from " if (r[0] >= 0) != (r[1] >= 0) else "") + f"{r[0]:+.2f} to {r[1]:+.2f} W (+ = high)"
+    print("\nthe values the page's text quotes (registered values; 'at the die' = at the die temperature of the launches,"
+          " note C2's two readings):")
+    if cards:
+        print("  this page's TensorFMA loop, operands -3..3 (V3-ABL-B, E39):")
+        rate, sv, svd = [], [], []
+        for c in cards:
+            cf = E[c]["configs"]
+            d, z = cf["fma-dense"], cf["fma-zero"]
+            s = save(z["above_idle_w"]["mean"], d["above_idle_w"]["mean"])
+            sd = [save(zz, dd) for zz, dd in zip(z.get("at_die_w", [0, 0]), d.get("at_die_w", [1, 1]))]
+            sv.append(s)
+            svd += sd
+            rate += [cf[k]["per_s"][m] / MAC_PER_FP32_OP for k in cf if k.startswith("fma-") and cf[k].get("per_s")
+                     for m in ("min", "max")]
+            print(f"    {c}: dense +{d['above_idle_w']['mean']:.1f} -> all-zero A +{z['above_idle_w']['mean']:.1f} W, "
+                  f"{100 * s:.0f}% saved ({span(sd, 0, True)}% at the die); rows masked +{cf['fma-rowmask']['above_idle_w']['mean']:.1f} W, "
+                  f"half zeros +{cf['fma-50']['above_idle_w']['mean']:.1f} W; the integer loop +{cf['spin']['above_idle_w']['mean']:.1f} "
+                  f"of the zeros' {z['above_idle_w']['mean']:.1f} W; pJ per multiply slot dense {d['pj_slot']['mean']:.1f}, "
+                  f"all-zero A {z['pj_slot']['mean']:.1f}; idle {E[c]['idle_w']:.1f} W; the values read {reads(E[c]['c2_reads_high_w'])}")
+        print(f"    across the cards: {span(sv, 0, True)}% saved ({span(svd, 0, True)}% at the die); dense "
+              f"{span([E[c]['configs']['fma-dense']['above_idle_w']['mean'] for c in cards], 1)} W, all-zero A "
+              f"{span([E[c]['configs']['fma-zero']['above_idle_w']['mean'] for c in cards], 1)} W; pJ per slot dense "
+              f"{span([E[c]['configs']['fma-dense']['pj_slot']['mean'] for c in cards], 1)}, all-zero A "
+              f"{span([E[c]['configs']['fma-zero']['pj_slot']['mean'] for c in cards], 1)}; every run "
+              f"{min(rate) / 1e9:.2f}-{max(rate) / 1e9:.2f} x 10^9 ops/s")
+        for c in cards:
+            cf = E[c]["configs"]
+            d0, d9 = cf["gemv-dense-0"]["above_idle_w"]["mean"], cf["gemv-dense-90"]["above_idle_w"]["mean"]
+            uj = lambda k, f: cf[k][f]["mean"] * 1e6
+            print(f"    {c} layer: above idle {uj('gemv-skip-0', 'j_per_unit_above_idle'):.1f} / {uj('gemv-skip-90', 'j_per_unit_above_idle'):.1f} / "
+                  f"{uj('gemv-skip-99', 'j_per_unit_above_idle'):.1f} uJ, board {uj('gemv-skip-0', 'j_per_unit'):.0f} / "
+                  f"{uj('gemv-skip-90', 'j_per_unit'):.0f} / {uj('gemv-skip-99', 'j_per_unit'):.0f} uJ at 0 / 90 / 99% zeros; every row "
+                  f"loaded, 0 -> 90% zeros {d0:.1f} -> {d9:.1f} W ({100 * save(d9, d0):.0f}% less)")
+    oc = [c for c in v3.get("cards", []) if c in O]
+    if oc:
+        print("  the same loop on other operand values, A and B alike (V3-ABL-A, E38):")
+        P = lambda c, k, f="above_idle_w": O[c]["patterns"][k][f]["mean"]
+        for c in oc:
+            pt = O[c]["patterns"]
+            at = {k: pt[k]["at_die_w"] for k in pt if "at_die_w" in pt[k]}
+            print(f"    {c}: zeros +{P(c, 'zeros'):.1f} W ({P(c, 'zeros', 'pj_mac'):.2f} pJ per multiply-add), ones +{P(c, 'ones'):.1f} "
+                  f"({P(c, 'ones', 'pj_mac'):.2f}), random normal +{P(c, 'randn'):.1f} ({P(c, 'randn', 'pj_mac'):.2f}); "
+                  f"{pt['zeros']['n']}, {pt['ones']['n']}, {pt['randn']['n']} runs, launched at {pt['zeros']['launch_c']:.0f} C; zeros save "
+                  f"{100 * save(P(c, 'zeros'), P(c, 'ones')):.1f}% against ones, {100 * save(P(c, 'zeros'), P(c, 'randn')):.1f}% against "
+                  f"random normal" + (f" ({span([save(a, b) for a, b in zip(at['zeros'], at['ones'])], 1, True)}% and "
+                                      f"{span([save(a, b) for a, b in zip(at['zeros'], at['randn'])], 1, True)}% at the die)" if at else "")
+                  + (f"; the values read {reads(O[c]['c2_reads_high_w'])}" if "c2_reads_high_w" in O[c] else ""))
+        rng = lambda k, f="above_idle_w", dp=1: span([P(c, k, f) for c in oc], dp)
+        atd = lambda k: [save(a, b) for c in oc for a, b in zip(O[c]["patterns"]["zeros"].get("at_die_w", []),
+                                                                  O[c]["patterns"][k].get("at_die_w", []))]
+        print(f"    across the cards: zeros {rng('zeros')} W ({rng('zeros', 'pj_mac', 2)} pJ), ones {rng('ones')} W "
+              f"({rng('ones', 'pj_mac', 2)}), random normal {rng('randn')} W ({rng('randn', 'pj_mac', 2)}); zeros save "
+              f"{span([save(P(c, 'zeros'), P(c, 'ones')) for c in oc], 0, True)}% against ones and "
+              f"{span([save(P(c, 'zeros'), P(c, 'randn')) for c in oc], 0, True)}% against random normal "
+              f"({span(atd('ones'), 0, True)}% and {span(atd('randn'), 0, True)}% at the die)")
+    C = en.get("configs") or {}
+    if C:
+        a = lambda k: C[k]["above_idle_w"]["mean"]
+        uj = lambda k: C[k]["j_per_unit_above_idle"]["mean"] * 1e6
+        print(f"  first run (18 Sep, this card, runs {', '.join(en['runs'])}; idle {min(en['idle_w']):.1f}-{max(en['idle_w']):.1f} W): "
+              f"dense +{a('fma-dense'):.1f} -> all-zero A +{a('fma-zero'):.1f} W ({100 * save(a('fma-zero'), a('fma-dense')):.0f}% saved), "
+              f"{C['fma-dense']['pj_slot']['mean']:.1f} pJ per multiply slot dense; rows masked +{a('fma-rowmask'):.1f} W; the integer loop "
+              f"+{a('spin'):.1f} W; layer above idle {uj('gemv-skip-0'):.0f} / {uj('gemv-skip-90'):.0f} / {uj('gemv-skip-99'):.1f} uJ at "
+              f"0 / 90 / 99% zeros; gating with the masked kernel at 0%: {a('gemv-skip-0'):.1f} -> {a('gemv-dense-90'):.1f} W "
+              f"({100 * save(a('gemv-dense-90'), a('gemv-skip-0')):.0f}% less)")
 
 
 def pareto_eff(alpha, n):
@@ -154,7 +276,6 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("data_dir")
     p.add_argument("--embed", metavar="REPORT_HTML")
-    p.add_argument("--later", metavar="HORACE3_JSON", help="later runs of the same loop on this card (energy.later)")
     p.add_argument("--claims-v3", metavar="DIR", default=CLAIMS_V3,
                    help="the three-card check's data directory (adds v3; default %(default)s when it exists; 'none' skips it)")
     args = p.parse_args()
@@ -275,15 +396,6 @@ def main():
             c = en["configs"][name]
             c["nnz_a"], c["a_elems"], c["row_mask"] = tile[name]
             c["rows_on"] = bin(int(c["row_mask"], 16)).count("1")  # of 16 rows of C
-    if args.later:
-        h = json.load(open(args.later))
-        en["later"] = {"source": args.later, "patterns": {}}
-        for k in ["zeros", "ones", "randn"]:
-            q = h["patterns"][k]
-            w = q["p80"] - q["p_before"]
-            en["later"]["patterns"][k] = {"above_idle_w": round(w, 3), "tflops": round(q["tflops"], 4),
-                                          "pj_mac": round(w / (q["tflops"] * 1e12 / 2) * 1e12, 3),
-                                          "launch_c": round(q["start_temp"], 1)}
     data["energy"] = en
     if energy:
         print(f"\nenergy: runs {en['runs']}, idle {[round(w, 2) for w in en['idle_w']]} W")
@@ -297,12 +409,6 @@ def main():
                 extra = f"  {c['j_per_unit_above_idle']['mean'] * 1e6:.3f} uJ/{c['unit']} above idle"
             print(f"  {name:14s} {c['mean_w']['mean']:6.2f} W (+{c['above_idle_w']['mean']:5.2f}, "
                   f"{c['above_idle_w']['min']:.2f}-{c['above_idle_w']['max']:.2f}){extra}")
-    if "later" in en:
-        L = en["later"]["patterns"]
-        print("later runs of the loop on this card (" + en["later"]["source"] + "): "
-              + ", ".join(f"{k} +{v['above_idle_w']:.2f} W ({v['pj_mac']:.2f} pJ per multiply-add)" for k, v in L.items())
-              + "; zero-skip saves " + ", ".join(f"{1 - L['zeros']['above_idle_w'] / L[k]['above_idle_w']:.0%} against {k}"
-                                                  for k in ["ones", "randn"]))
 
     if args.claims_v3 != "none" and os.path.isdir(args.claims_v3):
         v3 = claims_v3(args.claims_v3)
@@ -320,6 +426,7 @@ def main():
                       f"+{cf['fma-dense']['above_idle_w']['mean']:.2f} W, zeros +{cf['fma-zero']['above_idle_w']['mean']:.2f} W, "
                       f"layer board uJ " + ", ".join(f"{k[10:]}% {cf[k]['j_per_unit']['mean'] * 1e6:.0f}" for k in
                                                    ("gemv-skip-0", "gemv-skip-90", "gemv-skip-99")))
+    page_summary(data)
     if args.embed:
         html = open(args.embed).read()
         pat = re.compile(r'(<script type="application/json" id="sparsity-data">)(.*?)(</script>)', re.S)

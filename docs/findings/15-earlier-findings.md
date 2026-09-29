@@ -40,6 +40,9 @@ board-power log's (5.1 nJ per DRAM load on the trace, 5.9 on the log). The energ
 that is about 48 pJ read from L1 (not comparable with the 46 pJ above, which is one 8-byte `ld` and its loop, moving
 no line), and 199 pJ, 0.94 nJ and **7.3 nJ** per line from L2, L3 and DRAM. For DRAM, quote the E43 figure (E29's of
 23 September, two cards: L1 0.77, L2 2.51, L3 10.5, DRAM 122 [117–129] pJ/B, 7.8 nJ per line).
+**The current values are in [Anatomy of a memory access, §6](https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy#where-the-energy-goes)**,
+which since 28 September gives the energy manual's three-card figures (E43, E46) in place of the 19 September ones above,
+each level on each card and each way of reading it split between the rails (`05-claims.md`, "Memory anatomy's energies").
 
 ## The cycle counter is wrong, and the RTL says why (E2)
 
