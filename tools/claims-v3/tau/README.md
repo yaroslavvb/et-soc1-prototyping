@@ -179,3 +179,9 @@ The validation passes (101-199) and aifoundry2's (201-299) refuse to start, a sm
   count as done; `deconv.passes` per sampler segment; the rails' extra delays and board_w's creep in the stubs; a
   seeded burst order per pass, a start gate on the die and the die's start and end in `block.json`; `build/enercat`
   instead of `enercat_v2`; `et-who --check` after the block.
+- 2026-09-29, 00:05-00:13 PDT, development passes 1-3 on aifoundry1's card 1 (smoke at 00:01): all ok, 0 failed
+  sampler starts; no file changed afterwards. `reduce.py report`: 94 PASS, 2 FAIL. tau per rail: minion 1.08, SRAM
+  0.54, NoC 1.08, board_avg 1.10 s (P1 PASS on all four). The minion rail's rise and fall differ (1.32 and 1.02 s;
+  P4b FAIL), so T1 (one linear, time-invariant first-order average per rail) is falsified on that card's minion rail;
+  T2 and T4 survive; P3b (reported) FAIL, 0.04 against 0.02 +- 0.015. The data:
+  `docs/reports/data/2026-09-29-tau-aifoundry1-c1/` (`report.json`). The validation tests every item as registered.
