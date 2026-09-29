@@ -1,0 +1,193 @@
+<style>
+main{max-width:1440px}
+main>p,main>ul,main>ol,main>details,main>h1,main>.prose{max-width:880px}
+.kpis{max-width:1100px}
+.tl-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;margin:10px 0 4px}
+.tl-bar .controls{margin:0;gap:6px}
+.tl-bar .tl-lab{font-size:.8rem;color:var(--ink-2);margin-right:2px}
+.controls button{min-height:32px}
+.controls button.icon{min-width:36px;padding:4px 10px;font-weight:600}
+.controls button:focus-visible{outline:2px solid var(--c1);outline-offset:2px}
+#tl-readout{font-size:.86rem;color:var(--ink-2);margin:6px 0 2px}
+#tl-readout b{color:var(--ink);font-weight:600}
+.tl-legends{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;align-items:start;margin:6px 0 4px;font-size:.8rem}
+.tl-legends>.tl-track{font-weight:600;color:var(--ink-2);letter-spacing:.04em;font-size:.72rem;line-height:1.2;padding-top:5px}
+.tl-legends .ck-legend{margin:2px 0;gap:4px 12px}
+.tl-legends .ck-controls{margin:2px 0 4px}
+#tl-detail-leg{margin:6px 0 0}
+#tl-detail-leg[hidden]{display:none}
+nav.toc-line{margin:4px 0 18px;font-size:.86rem;color:var(--ink-2)}
+nav.toc-line ol{display:inline;list-style:none;margin:0;padding:0}
+nav.toc-line li{display:inline}
+nav.toc-line li+li::before{content:" · ";color:var(--muted)}
+.kpis{margin-top:10px}
+.tl-hint{font-size:.8rem;color:var(--muted);margin:2px 0 6px}
+#tl svg,#tl-detail svg{touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+#tl svg.dragging,#tl-detail svg.dragging{cursor:grabbing}
+#tl-detail{margin-top:4px}
+.hl-list{list-style:none;padding:0;margin:10px 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;max-width:none}
+.hl-list li{margin:0;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.hl-list li:hover{border-color:var(--ink-2)}
+.hl-list button{all:unset;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;text-align:left;
+ width:100%;flex:1 1 auto;cursor:pointer;border-radius:10px;padding:10px 12px;font-size:.86rem;line-height:1.45;color:var(--ink)}
+.hl-list .hl-links{margin:0 12px;padding:6px 0 10px;border-top:1px solid var(--grid);font-size:.82rem;line-height:1.5}
+.hl-list .hl-links-lab{color:var(--ink-2);font-weight:600;margin-right:2px}
+.hl-list .hl-sep{color:var(--muted)}
+.hl-list button:focus-visible{outline:2px solid var(--c1);outline-offset:2px}
+.hl-list .hl-n{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;
+ background:var(--ink);color:var(--page);font-size:.75rem;font-weight:700;margin-right:8px;vertical-align:1px}
+.hl-list .hl-when{display:block;color:var(--ink-2);font-size:.78rem;margin:2px 0 4px}
+.hl-list .hl-head{display:flex;align-items:center;gap:0;width:100%}
+.hl-list .hl-head b{flex:1 1 auto}
+.hl-list .hl-track{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;margin-left:8px;flex:none}
+.hl-list .hl-cap{display:block}
+.tl-wrap{display:flex;flex-direction:column}
+.tl-wrap>p{max-width:880px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:12px 36px;align-items:start}
+.two>div{min-width:0}
+.est{display:inline-block;font-size:.7rem;font-weight:600;color:var(--ink-2);border:1px solid var(--ink-2);border-radius:999px;padding:0 7px;
+ margin-left:6px;vertical-align:2px;letter-spacing:.03em}
+#tok-table td.num,#tok-table th.num,#day-table td.num,#day-table th.num{font-variant-numeric:tabular-nums}
+#tok-table tr.total td,#day-table tr.total td{font-weight:650;border-top:1.5px solid var(--axis)}
+#day-table td:first-child{white-space:nowrap}
+.note{font-size:.84rem;color:var(--ink-2)}
+.ask-day{max-width:880px;margin:14px 0 4px}
+.ask-day h3{font-size:1rem;margin:0 0 4px}
+.ask-day .ask-n{font-weight:400;font-size:.78rem;color:var(--muted);margin-left:6px}
+.ask-list{list-style:none;margin:0;padding:0}
+.ask-list li{margin:0;border-top:1px solid var(--grid)}
+.ask-list li[hidden]{display:none}
+.ask-list button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:18px minmax(0,1fr);column-gap:8px;width:100%;
+ padding:6px 4px;cursor:pointer;border-radius:6px}
+.ask-list button:hover{background:color-mix(in srgb,var(--ink) 5%,transparent)}
+.ask-list button:focus-visible{outline:2px solid var(--c1);outline-offset:1px}
+.ask-list .ask-mark{grid-row:1 / span 2;margin-top:4px}
+.ask-list .ask-sum{font-size:.98rem;line-height:1.4;color:var(--ink)}
+.ask-list .ask-meta{font-size:.74rem;line-height:1.3;color:var(--ink-2)}
+.ask-list .ask-est{color:var(--muted)}
+.kpi .kpi-est{display:block;font-size:.72rem;color:var(--muted);margin-top:3px}
+details.human-time{margin-top:10px}
+details.human-time summary{font-size:.9rem;color:var(--ink-2);cursor:pointer}
+details.human-time p,details.human-time li{font-size:.8rem}
+@media (max-width:599px){
+ .tl-wrap>.o-zoom{order:1} .tl-wrap>#tl{order:2} .tl-wrap>.o-tog{order:3} .tl-wrap>#tl-detail-leg{order:4} .tl-wrap>#tl-detail{order:5}
+ .tl-wrap>#tl-readout{order:6} .tl-wrap>.o-spans{order:7} .tl-wrap>.tl-legends{order:8} .tl-wrap>#tl-cap{order:9}
+ .tl-legends{grid-template-columns:1fr}
+ .tl-legends>.tl-track{margin-top:4px}
+ .hl-list{grid-template-columns:1fr}
+}
+</style>
+<h1>The session timeline</h1>
+<p class="byline">19–28 September 2026, all times Pacific (PDT) · built from the session’s transcripts, the lab machines’ queue logs and the repository · data and tools in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">yaroslavvb/et-soc1-prototyping</a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+
+<p class="lede">One Claude Code session ran the ET-SoC-1 work for a week. It started with the owner’s first message at <b>09:19 on
+Saturday 19 September</b> and this snapshot ends at <b id="l-end"></b>. Four things happened at once, and the chart below
+puts them on one time axis. <b>The owner</b> sent <b id="l-n"></b> messages. <b>The agents</b> were the main agent and
+<b id="l-agents"></b> subagents, most of them started by <b id="l-wf"></b> workflow runs. <b>The cards</b> were four ET-SoC-1 cards in three lab
+machines. <b>The artifacts</b> were <b id="l-dep"></b> deploys of published pages and <b id="l-com"></b> commits to the repository.</p>
+<p class="small">The owner’s messages appear only as summaries of at most 12 words, never their text. One report
+for the lab lead appears without its name, content or link.</p>
+<nav class="toc-line" aria-label="Contents"><b>Contents:</b> <ol id="toclist"><li><a href="#timeline">1. The week on one time axis</a></li><li><a href="#highlights">2. Highlights</a></li><li><a href="#asked">3. What the owner asked</a></li><li><a href="#totals">4. The totals</a></li><li><a href="#method">5. How it was counted</a></li></ol></nav>
+
+<h2 id="timeline">1. The week on one time axis</h2>
+<p class="small">Zoom with the buttons, <b>Ctrl or ⌘ with the scroll wheel</b> or a <b>pinch</b>; pan by <b>dragging</b>, with
+Shift and the wheel or with the arrows. The numbered flags are the highlights of <a href="#highlights">§2</a>: click one to
+zoom there. Hover, tap or tab to any mark for its details; on the time axis ← → pan, + − zoom and 0 shows the whole week.</p>
+<div class="tl-wrap">
+<div class="tl-bar o-zoom">
+ <div class="controls" id="tl-zoom" role="group" aria-label="Zoom and pan"></div>
+ <div class="controls" id="tl-days" role="group" aria-label="Show one day"></div>
+</div>
+<div class="tl-bar o-spans"><div class="controls" id="tl-spans" role="group" aria-label="Show a highlighted span"></div></div>
+<div id="tl-readout"></div>
+<div id="tl"></div>
+<div class="tl-bar o-tog">
+ <div class="controls" role="group" aria-label="More detail">
+  <button type="button" id="tg-sub" aria-pressed="false">Show every subagent, grouped by workflow</button>
+  <button type="button" id="tg-pages" aria-pressed="false">A lane per page</button>
+ </div>
+</div>
+<div id="tl-detail-leg" hidden></div>
+<div id="tl-detail" hidden></div>
+<div class="tl-legends">
+ <span class="tl-track">HUMAN</span><div id="leg-human"></div>
+ <span class="tl-track">AGENTS</span><div id="leg-agents"></div>
+ <span class="tl-track">CARDS</span><div><div id="leg-cards"></div><div id="cards-mode" class="ck-controls"></div></div>
+ <span class="tl-track">ARTIFACTS</span><div id="leg-art"></div>
+</div>
+<p class="small" id="tl-cap"></p>
+</div>
+
+<h2 id="highlights">2. Highlights</h2>
+<p class="small">The week’s turning points across all four tracks, in order. Click one to zoom the timeline there.</p>
+<ol class="hl-list" id="hl-list"></ol>
+
+<h2 id="asked">3. What the owner asked</h2>
+<p class="small">Every message of the week, in order: what was asked, as a summary of at most 12 words that describes the
+message without quoting it. The time, the kind of message and its request number in the knowledge base are small labels;
+the estimate of the time spent reading and writing it is smaller still. Click a message to see it on the timeline.</p>
+<div id="asked-filter" class="ck-controls"></div>
+<div id="asked-list"></div>
+
+<h2 id="totals">4. The totals</h2>
+<div class="kpis">
+ <div class="card kpi"><div class="lab">What the owner asked</div><div class="val" id="k-human"></div><div class="sub" id="k-human-sub"></div></div>
+ <div class="card kpi"><div class="lab">Agent time</div><div class="val" id="k-agents"></div><div class="sub" id="k-agents-sub"></div></div>
+ <div class="card kpi"><div class="lab">Card time</div><div class="val" id="k-cards"></div><div class="sub" id="k-cards-sub"></div></div>
+ <div class="card kpi"><div class="lab">Tokens, from the transcripts’ usage fields</div><div class="val" id="k-tok"></div><div class="sub" id="k-tok-sub"></div></div>
+</div>
+<h3 id="who-did-the-time">Who did the time</h3>
+<p>Every total below is taken from the timeline. The totals are in different units, so read them side by side and do not
+add them: the owner’s hours are estimated from what was read and typed, agent time is <i>agent-hours</i> (two agents busy
+for an hour count 2), and card time is <i>card-hours</i>. The session’s wall clock from the first message to the snapshot
+is <b id="l-wall"></b>.</p>
+<div id="who-leg"></div>
+<div id="who"></div>
+<p class="small" id="who-cap"></p>
+
+<div class="two">
+<div>
+<h3 id="card-hours">Card-hours per card</h3>
+<div id="cardh-leg"></div>
+<div id="cardh"></div>
+<p class="small" id="cardh-cap"></p>
+</div>
+<div>
+<details class="more human-time" id="human-time"><summary>How long the owner’s messages took <span class="est">estimate</span></summary>
+<p class="note" id="human-text"></p>
+<ul class="note" id="human-rules"></ul>
+</details>
+</div>
+</div>
+
+<h3 id="tokens">Tokens</h3>
+<p id="tok-text"></p>
+<div class="table-wrap"><table id="tok-table"></table></div>
+<div class="ck-controls"><div id="tok-seg"></div></div>
+<div id="tok-leg"></div>
+<div id="tokday"></div>
+<p class="small" id="tok-cap"></p>
+
+<h3 id="per-day">Day by day</h3>
+<p class="small">Each row is one day, from midnight to midnight. From the top, the thin lanes show the owner’s messages,
+the main agent’s busy time, how many subagents were busy (scaled to <span id="d-scale"></span>, as the peak of the agents that did
+not fail is <span id="d-okpk"></span>; failed starts are drawn in grey on top and cut, as in the minute the usage limit hit on
+20 September, when <span id="d-pk"></span> were counted),
+and how many cards were in use (up to 4). Click a row, or press Enter on it, to open that day in the timeline.</p>
+<div id="days-leg"></div>
+<div id="days"></div>
+<div class="table-wrap wide"><table id="day-table"></table></div>
+
+<h2 id="method">5. How it was counted</h2>
+<ul id="method-list"></ul>
+<p class="small">Data: <code>docs/reports/data/2026-09-27-session-timeline</code>, which holds the seven extracts and <code>timeline.json</code>,
+which this page draws. Generator: <code>tools/timeline/build_timeline_data.py</code>. Extraction scripts:
+<code>tools/timeline</code>, whose <code>README.md</code> gives their order and settings. They read the session’s transcripts and the lab machines’ logs, which are not in the
+repository, so the committed extracts are the page’s inputs; <code>tools/timeline/sanitize_extracts.py</code> removes from
+them what the page withholds and checks that nothing private is left.</p>
+
+<h2 id="related">Related reports</h2>
+<ul>
+ <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a>: the hub,
+ which lists every report this week produced.</li>
+</ul>

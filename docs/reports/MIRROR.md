@@ -60,6 +60,12 @@ before `</body>`. Private pages are listed but not mirrored.
 | [aifoundry1 is fixed](https://spacesheep.dev/@yaroslavvb/aifoundry1-fix) (25 Sep, the fix log) | `31e35ba7-36f4-486e-b6f3-687f7c7ad3a0` | public | `docs/reports/2026-09-25-aifoundry1-fix.html` | file |
 | [ET-SoC-1 review: the TODO list](https://spacesheep.dev/@yaroslavvb/et-soc1-review-todo) (26 Sep) | `1db405d2-34c6-45f0-b939-03b74d3d68b4` | public | `docs/reports/2026-09-26-review-todo.html` | file (rendered from docs/reports/TODO.md by scripts/build-todo-page.py; redeploy after every change to TODO.md) |
 
+### The session
+
+| Page | Space | Visibility | Repo file | Deploy |
+|---|---|---|---|---|
+| [A week with the ET-SoC-1: the session timeline](https://spacesheep.dev/@yaroslavvb/et-soc1-session-timeline) (27 Sep, refreshed 28 Sep: the session's week on one time axis, the owner's requests as summaries, the agents, the four cards and every deploy and commit; built by `tools/timeline/`, whose README has the pipeline) | `b0669cbd-6132-4ac6-b35a-9b928a2ef926` | public | `docs/reports/2026-09-27-session-timeline.html` | file |
+
 ### Public, not mirrored
 
 | Page | Space | Visibility | Repo file | Why |
@@ -107,6 +113,7 @@ once for mathjax-full).
 | Memory hierarchy, On-chip communication, Matmul efficiency and the Test drive's ladder, Sparse compute, Ridge points | the prose in the HTML; an `--embed` script rewrites only the embedded JSON | the commands in 04-artifacts.md, "Rebuilding the standalone pages" (memory hierarchy with `--v3 .../raw`, on-chip communication with `--v3 docs/reports/data/2026-09-25-claims-v3`; sparse compute reads the check by default), then `python3 scripts/paste-chartkit.py PAGE` | the energy data (04-artifacts.md A16) for the pages that read `manual.json` or `reruns.json` |
 | Spatial temperature brief, L2 mainline-starvation brief | the HTML, by hand | none (`python3 tools/ettelem/host_temp_fields.py --check docs/reports/2026-09-22-et-soc1-spatial-temperature-brief.html` tests the brief's two constants) | none |
 | The two aifoundry1 pages | the HTML, by hand (standalone) | none | the evidence is in `docs/reports/data/2026-09-25-aifoundry1/` |
+| Session timeline (27 Sep) | `sources/session-timeline.*` | `python3 tools/timeline/sanitize_extracts.py` (scans the seven committed extracts in `docs/reports/data/2026-09-27-session-timeline/` and exits 1 if anything private is left; with the local privacy table it first rewrites them with the page's redactions), `python3 tools/timeline/build_timeline_data.py` (writes `timeline.json` beside them), then `python3 scripts/build-report.py session-timeline docs/reports/data/2026-09-27-session-timeline/timeline.json docs/reports/2026-09-27-session-timeline.html` | the extracts themselves come from the session's transcripts and the lab machines' queue logs, which are not in the repository: `tools/timeline/README.md` gives the order of the extraction scripts and their environment variables |
 
 On 2026-09-25 each of the ten `build-report.py` steps above rebuilt its committed page byte for byte from the
 committed data (hub, energy manual, heat per mm, DVFS, power and temperature, Horace, why low power, hot line,
