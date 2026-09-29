@@ -248,6 +248,16 @@ page.
   bits over 10 mm, 121 fJ/bit·mm on random data); Dally's 10 nm projection (174 pJ per 256 bits over 10 mm,
   68 fJ/bit·mm); Dally et al., VLSI Symposium 2018 (20–40 fJ/bit-mm, 16 nm, about 200 fF/mm); Ho's 2003
   thesis (measured, 0.18 µm, 1.8 V).
+- **Which process the ~100 is for (Q63, 28 September):** `research/DALLY-NODES.md` quotes 29 statements of an on-chip
+  wire energy per bit·mm by Dally and his co-authors, 2002–2023, each with its page, slide or video time: the HPCA 2002
+  panel and ACM Queue 2004 (0.13 µm, 1.2 V), Khailany et al. 2003, Owens et al. 2007 (22 nm, 0.7 V), the DARPA exascale
+  study 2008 (32 nm, 0.6 V, 300 fF/mm; 600 with repeaters), the SC09 and SC10/SC12 keynotes (a slide labelled 28 nm),
+  Keckler et al. and Gebhart et al. 2011, Yale Patt 75 and his 2014 talks, Villa et al. SC14 (his group's scaling from
+  28 to 7 nm, Table II), Das et al. 2015, HiPEAC 2015, Wilson et al. 2016, Mohammadi et al. 2016, VLSI 2018, Turner et
+  al. 2018, MICRO 2019, CACM 2020 (a 14 nm cost model: "Communication energy remains roughly constant"), his 2021–22
+  talks, CACM 2022, NOCS 2022 ("~50fJ/bit-mm" for a 5 nm network-on-chip), and SatIn, Hot Chips, AHA and Hot
+  Interconnects in 2023. Two other meshes measured on silicon with the data's switching controlled: Piton (McKeown et
+  al., HPCA 2018, IBM 32 nm SOI, 1.0 V) and Raw (Kim et al., ISLPED 2003, IBM 0.15 µm, 1.8 V).
 - **The die:** 570 mm² (Hot Chips 33 slide 20; IEEE Micro 42(3), 2022, p. 37); the tile pitch measured in
   pixels on the published die plot (IEEE Micro 2022, Fig. 7) scaled to that area: 3.73 mm in x, 3.70 mm in y,
   3.72 mm per hop (3.64–3.74 over three readings of what the area covers). The mesh is 8 × 6 stops (ET

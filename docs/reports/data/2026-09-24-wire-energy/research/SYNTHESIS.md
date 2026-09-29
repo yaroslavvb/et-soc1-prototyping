@@ -10,6 +10,13 @@
 > the 100 fJ/bit-mm in a paragraph about 14 nm on-chip memory; and the AHA 2023 talk's conclusion slide sets the
 > figure beside "Reduce V until it gets too slow (~0.5V)". Board power carries the regulator's loss, so only the
 > mesh rail's numbers should be V²-scaled for a comparison with die-level wire figures.
+>
+> **Which process Dally's figure is for (28 September, Q63): `DALLY-NODES.md`** re-reads Dally's own statements from 2002
+> to 2023 and corrects §1d, §1e and §4 here: CACM 2020 gives the 100 twice, in a cost model whose arithmetic and memory are
+> "in 14 nm", and the 2023 figure repeats that model; the SC12 slide is labelled 28 nm and first appeared at SC10 (2010),
+> its bus lengths labelled on its 2009 version; Keckler's "per transition" is ½CV² of a 600 fF/mm repeated wire (the 2008
+> exascale study's 300 fF/mm of line plus as much of repeaters), which resolves open question 2; and for a 5 nm
+> network-on-chip Dally gives "~50fJ/bit-mm" (NOCS 2022).
 
 All arithmetic in section 2 is in `scratchpad/wire-research/synthesis/convert.py`. Run it with `python3`. The scratchpad root is `/tmp/claude-1019/-home-yaroslavvb-claude/ed6d06d5-de26-4323-94f1-0dc808eafbda/scratchpad/wire-research/`. Repository paths are relative to `/home/yaroslavvb/claude/et-soc1-prototyping/`. Every value marked "estimate" is derived here and not stated by a vendor or author.
 

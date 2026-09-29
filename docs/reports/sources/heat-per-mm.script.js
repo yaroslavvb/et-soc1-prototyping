@@ -688,7 +688,8 @@ const MAPBUS=CK.bus('heat-map-d');
  const CUR=[{key:'df',label:'data, free links',p:UN.random_bit_data,color:'var(--c1)',dash:null},{key:'dl',label:'data, loaded mesh',p:HN.random_bit_data,color:'var(--c1)',dash:'7 4'},
             {key:'af',label:'everything, free links',p:UN.random_bit_total,color:'var(--c7)',dash:null},{key:'al',label:'everything, loaded mesh',p:HN.random_bit_total,color:'var(--c7)',dash:'7 4'}];
  const kek=D.literature.find(l=>/^Keckler/.test(l.who)), d14=D.literature.find(l=>l.v&&l.v<0.8&&/Dally/.test(l.who));
- const litV=D.literature.filter(l=>l.v&&l.v<=1.0), litN=D.literature.filter(l=>!l.v);
+ const onChart=l=>l.chart!==false;   // entries marked chart: false are in the table of section 7b only
+ const litV=D.literature.filter(l=>onChart(l)&&l.v&&l.v<=1.0), litN=D.literature.filter(l=>onChart(l)&&!l.v);
  let V=0.9, FV=null;
  const LG=CK.legend('volt-leg',[...CUR.map(c=>({key:c.key,label:c.key[0]==='a'?c.label+' (assumes the fixed part also scales as CV²)':c.label,mark:c.dash?'dash':'line',color:c.color})),
   {key:'wire',label:'plain 7 nm wire, first principles',mark:'box',color:'var(--c3)'},{key:'kek',label:'Keckler 2011, scaled as CV²',mark:'dash',color:'var(--c2)'},
@@ -771,6 +772,102 @@ const MAPBUS=CK.bus('heat-map-d');
  update();
 })();
 
+/* ---------- 7b. which process is Dally's figure for, and is a 2x gap expected? (the owner's question, 28 Sep, Q63)
+   His per-mm figures are the D.literature entries marked `dally` (the table shows those not marked `table: false`),
+   two other measured meshes are those marked `mesh`, and his group's own node scaling is D.wire_scaling (all in
+   build_wire_report.py; every quote with its page, slide or time is in research/DALLY-NODES.md, and
+   research/lit/dally_gap.py prints the same arithmetic). Each figure is moved to this mesh's voltage as C V^2 at
+   constant C: through the capacitance the source gives where it gives one (a random bit switches its wire half the time
+   at 1/2 C V^2, so E = C V^2 / 4 per random bit per mm), from the voltage it states or its talk gives where there is
+   one, and otherwise from each of the three voltages Dally's own sources name (0.9 V his 40 nm table, 0.7 V his 10 nm
+   projection, "~0.5V today" in 2023). ---------- */
+(function(){
+ const t=document.getElementById('dallytab'), tw=document.getElementById('whytab'); if(!t||!tw||!D.wire_scaling)return;
+ const V0=IN.noc_v.value, sq=v=>(V0/v)*(V0/v), VS=[0.9,0.7,0.5];
+ const LA=D.literature.filter(l=>l.dally), L=LA.filter(l=>l.table!==false).sort((a,b)=>a.year-b.year||(b.v||0)-(a.v||0));
+ const Ce=(e,v)=>4*e/(v*v);
+ const kek=LA.find(l=>l.node==='40 nm'&&l.v), ten=LA.filter(l=>l.node==='10 nm'&&l.v), vl=LA.find(l=>l.c_ff_mm&&l.range), ex=LA.find(l=>l.c_rep_ff_mm);
+ const noc=LA.find(l=>l.noc), dl=LA.find(l=>l.v_label&&l.range), hip=LA.find(l=>l.fj_bit_mm===200), geb=LA.find(l=>l.c_ff_mm&&l.v===0.9&&!l.range&&!l.c_rep_ff_mm);
+ const own=LA.find(l=>l.counting&&!l.c_ff_mm);   // a full charge per bit without a stated capacitance (Owens et al. 2007)
+ const vv=LA.filter(l=>l.v).map(l=>l.v), C40=Ce(kek.fj_bit_mm,kek.v), Cw=vl.c_ff_mm;
+ const k10=ten.map(l=>l.fj_bit_mm/kek.fj_bit_mm/((l.v/kek.v)**2));   // 40 -> 10 nm in his 2011-14 tables, the voltage taken out
+ const W485=D.first_principles.at_0485.per_random_bit_fj_mm;
+ const ud=UN.random_bit_data.mean, hd=HN.random_bit_data.mean, ut=UN.random_bit_total.mean, ht=HN.random_bit_total.mean;
+ const uf=UN.fixed_per_bit.mean, hf=HN.fixed_per_bit.mean;
+ const rng=(a,b,fn)=>fn(a)===fn(b)?fn(a):`${fn(Math.min(a,b))}–${fn(Math.max(a,b))}`, rngs=(xs,fn)=>rng(Math.min(...xs),Math.max(...xs),fn);
+ // his group's node scaling (SC14, Table II): 28 -> 7 nm and 14 -> 7 nm, each split into its voltage part and the rest
+ const WS=D.wire_scaling, ix=n=>WS.nodes.indexOf(n), e=n=>WS.ewire[ix(n)], vn=n=>WS.v_nominal[ix(n)];
+ const s287=e('7nm')/e('28nm'), v287=(vn('7nm')/vn('28nm'))**2, s147=e('7nm')/e('14nm');
+ const r28=100*s287*sq(vn('7nm')), r14=100*s147*sq(vn('7nm'));   // a 100 fJ figure at 28 or 14 nm, taken to 7 nm, then to V0
+ // two other meshes measured on silicon with the data's switching controlled, per bit per mm at their own voltage
+ const pit=D.literature.find(l=>l.mesh&&l.pj_flit_hop), raw=D.literature.find(l=>l.mesh&&l.pj_word_hop_full_toggle);
+ const pd=pit?[0,1].map(i=>(pit.pj_flit_hop.half-pit.pj_flit_hop.none)/pit.flit_bits*1000/pit.hop_mm[1-i]):null;   // [lo, hi] fJ per bit.mm
+ const pf=pit?[0,1].map(i=>pit.pj_flit_hop.none/pit.flit_bits*1000/pit.hop_mm[1-i]):null;
+ const rd=raw?raw.pj_word_hop_full_toggle/raw.word_bits*1000/2/raw.hop_mm[0]:null;
+ const given=l=>(l.range?`${l.range[0]}–${l.range[1]}`:(l.approx?'~':'')+f0(l.fj_bit_mm))+
+  (l.per_transition?` <span class="small">(${l.per_transition} per transition)</span>`:l.counting?` <span class="small">(${l.counting})</span>`:'');
+ const pred=l=>l.predict===false?'<span class="small">— (no voltage)</span>'
+  :l.c_rep_ff_mm?`<b>${f0(l.c_ff_mm*V0*V0/4)}–${f0(l.c_rep_ff_mm*V0*V0/4)}</b> <span class="small">(¼<i>CV</i>² with its ${l.c_ff_mm} fF/mm of wire, ${l.c_rep_ff_mm} with repeaters)</span>`
+  :l.c_ff_mm?`<b>${f0(l.c_ff_mm*V0*V0/4)}</b> <span class="small">(¼<i>CV</i>² with its ${l.c_ff_mm} fF/mm)</span>`
+  :l.counting&&l.v?`<b>${f0(l.fj_bit_mm*sq(l.v)/4)}</b> <span class="small">(a random bit is ¼ of a full charge; ${f0(l.fj_bit_mm*sq(l.v))} as it counts)</span>`
+  :l.v?`<b>${l.range?`${f0(l.range[0]*sq(l.v))}–${f0(l.range[1]*sq(l.v))}`:f0(l.fj_bit_mm*sq(l.v))}</b>`
+  :`${VS.map(v=>f0(l.fj_bit_mm*sq(v))).join(' · ')} <span class="small">if made at ${VS.join(' · ')} V</span>`;
+ setText('nodetext',
+  `<b>No single process, by design — and for a network-on-chip on a modern process Dally himself gives half.</b> None of his statements of the ~100 fJ per bit·mm names a process, a voltage or how the bits are counted. `+
+  `The one this page quotes (2023) repeats, number for number, the cost model of CACM 2020, and that paper says why it has no process: logic and memory energies scale with technology "while supply voltage is held constant", but "Communication energy remains roughly constant". `+
+  `Its arithmetic and memory are "in 14 nm", so if one process must be named it is 14 nm (an inference; at Hot Chips he said it with Horowitz's table of 45 nm energies on the screen); the number itself is older, carried from figures for 28–40 nm made at ${Math.min(ex.v,kek.v)}–${kek.v} V (${ex.year}–2017). `+
+  (noc?`But in his ${noc.year} keynote on networks-on-chip, for "a typical chip say five nanometer chip today", his slide puts the network's upper-layer wires at <b>"~${noc.fj_bit_mm}fJ/bit-mm"</b>, with the router "a fraction of this energy"; `:'')+
+  `his other figures for chips of their own day run ${vl.range[0]}–${dl?dl.range[1]:vl.range[1]} (2018–2023).`);
+ t.innerHTML='<thead><tr><th>Source</th><th>Process</th><th>Supply</th><th>As stated</th><th class="num">fJ per bit·mm</th><th class="num">Predicts here: fJ per random bit·mm at '+V0+' V</th></tr></thead><tbody>'+
+  L.map(l=>`<tr><td><a href="${l.url}">${l.label}</a></td><td>${l.node} <span class="small">(${l.node_basis})</span></td><td>${l.v_label?`<span class="small">${l.v_label}</span>`:l.v?l.v+' V':'<span class="small">not stated</span>'}</td><td class="small">${l.shown}</td><td class="num">${given(l)}</td><td class="num">${pred(l)}</td></tr>`).join('')+
+  `<tr><td><b>This mesh, measured</b></td><td>7 nm <span class="small">(TSMC)</span></td><td>${V0} V</td><td class="small">mesh rail, free links to loaded mesh</td><td class="num">data <b>${rng(ud,hd,f0)}</b>; in all <b>${rng(ut,ht,f0)}</b></td><td class="num">—</td></tr></tbody>`;
+ CK.stackTable(t);
+ const n07=noc?noc.fj_bit_mm*sq(vn('7nm')):null;
+ setText('gaptext',
+  `<b>Is a 2× gap expected? Yes, by Dally's own numbers, and most of it is voltage.</b> `+
+  (noc?`His ${noc.node} network-on-chip figure, ${noc.fj_bit_mm}, is half his rule of thumb, and this ${'7 nm'} mesh at ${V0} V measures ${rng(ut,ht,f0)} in all, about that figure as he states it. `:'')+
+  `His scaling says the same: his group's model (Villa, Keckler, Dally and colleagues, SC14) takes a fixed length of wire from 28 nm to 7 nm at ×${f2(s287)} of its energy, ×${f2(v287)} of it through the lower supply (${f2(vn('28nm'))} → ${f2(vn('7nm'))} V) and ×${f2(s287/v287)} the rest; of wires themselves he says "the wires have sort of a constant c" (2022). `+
+  `Taken on to this mesh's ${V0} V, below 7 nm's nominal supply, a wire costs <b>${rng(r28,r14,f0)} fJ</b> per bit·mm by his rule (the 28 nm slide or the 14 nm model, scaled by SC14)${noc?` and ${f0(n07)} by his ${noc.node} figure if it was made at 7 nm's nominal ${f2(vn('7nm'))} V`:''}; the mesh rail measures ${rng(ud,hd,f0)} for the data and ${rng(ut,ht,f0)} in all, the rest being the routers, clocking and contention a mesh adds (below). `+
+  (pit&&raw?`It is not unusually frugal either: the two other meshes measured with the data's switching controlled scale to the same, Piton (${pit.node}, ${pit.v.toFixed(1)} V, ${pit.year}) to ${rng(pd[0]*sq(pit.v),pd[1]*sq(pit.v),f0)} fJ per bit·mm for data that switches like random data plus ${rng(pf[0]*sq(pit.v),pf[1]*sq(pit.v),f0)} for none, and Raw (${raw.node.replace(' (SA-27E)','').replace('um','µm')}, ${raw.v} V, ${raw.year}) to ${f0(rd*sq(raw.v))}, against this mesh's ${rng(ud,hd,f0)} and ${rng(uf,hf,f0)}; `+
+   `for the data all three switch about the same capacitance per mm of hop, ${f0(Ce(rd,raw.v))}, ${rng(Ce(pd[0],pit.v),Ce(pd[1],pit.v),f0)} and ${rng(Ce(ud,V0),Ce(hd,V0),f0)} fF, from 0.15 µm to 7 nm. What the process changes is mostly the voltage it runs at. `:'')+
+  `Only a 100 per random bit made at the ~0.5 V the 2023 talk recommends would leave this mesh ${rng(100*sq(0.5)/ht,100*sq(0.5)/ut,f1)} times below the rule in all, and that would need ${f0(4*100/0.25)} fF/mm, ${f0(4*100/0.25/Cw)} times the ${Cw} he gives a wire.`);
+ const s09=D.scaled['0.9'], a09=[ut*s09,ht*s09], n09=[ud*s09,hd*s09];
+ const vlo=Math.sqrt(4*vl.range[0]/Cw), vhi=Math.sqrt(4*vl.range[1]/Cw);
+ setText('gaptext2',
+  `<b>Which 2×?</b> Three comparisons on this page come out near a factor of two. (a) The measurement as it stands, ${rng(ut,ht,f0)} fJ per bit·mm on the mesh rail, ${rng(ut/100,ht/100,f2)} of 100: the one above, most likely the one meant. `+
+  `(b) Everything scaled to 0.9 V, ${rng(a09[0],a09[1],f0)}, up to ${f1(Math.max(...a09)/100)} times 100: expected too, since it scales clocking, flops, headers and contention as if they were wire; the data alone at 0.9 V is ${rng(n09[0],n09[1],f0)}. `+
+  `(c) Dally against himself: ${vl.range[0]}–${dl?dl.range[1]:vl.range[1]} for chips of their own day${hip?` and ${hip.fj_bit_mm} for conventional full-swing wires in his 2014–${String(hip.year).slice(2)} talks`:''}, against 100 — a factor of two either way inside his own figures. ${vl.range[0]}–${vl.range[1]} is ¼<i>CV</i>² of a bare ${Cw} fF/mm wire (at ${f2(vlo)}–${f2(vhi)} V by his own formula), while the 100 descends from tables of a repeated wire of ${ex.c_rep_ff_mm} fF/mm: ${ex.c_ff_mm} of wire and ${ex.c_rep_ff_mm-ex.c_ff_mm} of repeaters in the ${ex.year} study, just what the ${kek.year} table's ${kek.per_transition} per transition and ${f0(kek.fj_bit_mm)} per random bit at ${kek.v} V imply (${f0(C40)} fF/mm; an inference)`+
+  (geb?`, where the same year his group's register-file papers used ${geb.c_ff_mm} fF/mm without repeaters, ${f0(geb.fj_bit_mm)} per random bit at ${geb.v} V`:'')+`.`);
+ const dn=W_.disjoint_flows.noc_pj_per_byte, hs=CK.cardsIn(dn.wu.random_fj_per_bit_hop.per_card||{}).filter(h=>(dn.wsep_d1_4.random_fj_per_bit_hop.per_card||{})[h]);
+ const cont=hs.map(h=>dn.wu.random_fj_per_bit_hop.per_card[h].mean/dn.wsep_d1_4.random_fj_per_bit_hop.per_card[h].mean-1);
+ const pcr=xs=>{const a=Math.round(100*Math.min(...xs)),b=Math.round(100*Math.max(...xs));return a===b?`${a}%`:`${a}–${b}%`;};
+ const ones=(CV.P6a?CK.cardsIn(CV.P6a.per_card).map(h=>CV.P6a.per_card[h].mean):[]);
+ const aN=MN.per_transition.mean, bN=MN.per_one.mean, bshare=bN/(aN+bN);
+ const UBt=UB.random_bit_total.mean, HBt=HB.random_bit_total.mean, MS=IN.memshire_w_mm.range;
+ const SN=H_.sensitivity&&H_.sensitivity.no_leak_correction, sens=SN?[].concat(...['v1','v2'].map(st=>['toggle_fj_per_bit_transition_hop','ones_fj_per_one_bit_hop'].map(k=>SN[st].board[k].mean/H_.model[st].board[k].mean-1))):[];
+ const nomV=[vn('7nm'),vn('28nm')];
+ const W=[
+  ['Supply voltage (<i>CV</i>²)',`÷${f1(1/sq(nomV[0]))}–${f1(1/sq(nomV[1]))} from the nominal ${f2(nomV[0])}–${f2(nomV[1])} V his group gives 7–28 nm to ${V0} V; ÷${f1(1/sq(Math.min(...vv)))}–${f1(1/sq(Math.max(...vv)))} from the ${Math.min(...vv)}–${Math.max(...vv)} V his figures that have one give; the ~${noc?noc.fj_bit_mm:50} and ~100 give none`,'explains it: the mesh lower',
+   'Step the mesh rail (its firmware allows 485–600 mV for 300–500 MHz): full-swing wires at 0.6 V should cost ×1.53. It changes a shared card, so it needs the owner’s approval.'],
+  ['How the bits are counted',`up to ÷4: for one wire of ${ex.c_rep_ff_mm} fF/mm at 0.9 V his group has written "about 0.5pJ/mm" per bit (<i>CV</i>², ${ex.year}), ${kek.per_transition} per transition and ${f0(kek.fj_bit_mm)} per random bit (${kek.year})${own?`, and its ${own.node} network links of ${own.year} count every link "fully active"`:''}; none of the ~100 statements says which. On this mesh a random bit costs ×${f1((aN+bN)/2/aN)} a flit-to-flit difference, because ones cost too`,'explains it, if the 100 counts more than a random bit',
+   'Measured here (<a href="#ones">§5</a>: <i>a</i> per difference, <i>b</i> per one); for the 100, only its author can say.'],
+  ['What a hop counts: routers, flops, clock, headers, the request',`everything is ×${f1(ut/ud)}–${f1(ht/hd)} the data-dependent part, and that part ×${rng(ud/W485[2],hd/W485[0],f1)} a plain 7 nm wire’s ${f0(W485[0])}–${f0(W485[2])} fJ; the data-independent part is ${rng(100*uf/ut,100*hf/ht,f0)}% of a hop here${pit?`, ${f0(100*pit.pj_flit_hop.none/pit.pj_flit_hop.half)}% in Piton`:''}${noc?`; Dally: the router is "a fraction" of a tile's wire energy`:''}`,'against it: the mesh higher',
+   `Hops of another length: a memory-shire column is ${f2(MS[0])}–${f2(MS[1])} mm wide against ${f2(HOP)} mm tiles, so a route through it separates per hop from per mm; or the router’s netlist and floorplan (documents).`],
+  ['Contention',`+${pcr(cont)} per mm, loaded mesh against free links over the same 1–4 hops (mesh rail, by card)`,'against it, on a loaded mesh','Measured (<a href="#contention">§6</a>).'],
+  ['The meter',`board power ×${f1(UBt/ut)}–${f1(HBt/ht)} the mesh rail (the regulator’s loss)${sens.length?`; board coefficients move ${pcr(sens)} with the leakage correction`:''}`,'against it, on board power',
+   'Check the mesh-rail meter’s gain against a known load; the rail is the die’s own supply, board power is not.'],
+  ['Ones carried, and the encoding',`the per-one term is ${Math.round(100*bshare)}% of a random bit’s data cost; all ones cost ${ones.length?pcr(ones):'—'} more per hop than random data`,'against it: a wire that holds its value pays only for changes',
+   'Measured (<a href="#ones">§5</a>); a complemented encoding would test it in software.'],
+  ['Wire kind, metal layer, swing',`top metal has about 0.6 of the capacitance per mm of the middle layers (ASAP7: 0.093–0.104 against 0.156–0.187 fF/µm), and Dally puts networks on the upper layers; low-swing links cut ½ (Dally 2018) to ¾ (charge recycling)`,'unknown here',
+   'The link circuit and metal stack (documents); on the cards, the voltage step: full swing goes as <i>V</i>², a fixed swing as <i>V</i>.'],
+  ['Routed length against the pitch',`the metal between routers can only be longer than the ${f2(HOP)} mm pitch, so per mm of wire the cost is lower; size unknown`,'explains it, per mm of wire','The floorplan (documents); hops of another length.'],
+  ['Process node, apart from its voltage',`×${f2(s287/v287)} from 28 to 7 nm in his group’s model (its ×${f2(s287)} less the voltage), ×${rngs(k10,f2)} from 40 to 10 nm in his 2011–14 tables; for logic he expects "another factor of two to two and a half" from 16 to 5 nm (2021), for wires "sort of a constant c" (2022)`,'explains a little: the mesh lower','Documents only.'],
+  ['Temperature','switching energy does not depend on it; the mesh-rail figures carry no leakage correction (about 2%)','small','Repeat the same configurations on a cool and a warm die.']];
+ tw.innerHTML='<thead><tr><th>Explanation, most to least</th><th>Size, from the data and the sources</th><th>Effect on the gap</th><th>How to test it</th></tr></thead><tbody>'+
+  W.map((r,i)=>`<tr><td>${i+1}. ${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="small">${r[3]}</td></tr>`).join('')+'</tbody>';
+ CK.stackTable(tw);
+})();
+
 /* ---------- table of contents (anchors are in the template) ---------- */
 (function(){const ol=document.getElementById('toclist'); if(!ol)return;
  ol.innerHTML=[...document.querySelectorAll('main h2')].map(h=>{if(!h.id)h.id=h.textContent.toLowerCase().replace(/^\d+\.\s*/,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,50);return `<li><a href="#${h.id}">${h.textContent.replace(/^\d+\.\s*/,'')}</a></li>`;}).join('');})();
@@ -839,6 +936,7 @@ const MAPBUS=CK.bus('heat-map-d');
  setText('l-ones1',`${pcs(onesLess1)} less in all on the mesh rail`);
  setText('l-09',`${f0(UN.random_bit_data.mean*s09)}–${f0(HN.random_bit_data.mean*s09)} fJ per bit·mm`);
  setText('l-05',`${span([100/(UN.random_bit_data.mean*s05),100/(HN.random_bit_data.mean*s05)],f1)} times`);
+ if(D.wire_scaling){const WS=D.wire_scaling, e=n=>WS.ewire[WS.nodes.indexOf(n)]; setText('l-sc14',`${f2(e('7nm')/e('28nm'))}`);}
  const drops=[].concat(...Object.values(H_.dropped||{}));
  const why=[...new Set(drops.map(x=>x.why))];
  setText('l-drop',`${drops.length} bursts${why.length===1&&why[0]==='service processor starved'?' (a starved meter)':''}`);
@@ -966,11 +1064,13 @@ const MAPBUS=CK.bus('heat-map-d');
  // 'at' the top of the plain-wire range when that top lies inside each card's 99% interval (t over passes) of the
  // free-link data cost; otherwise above or below it
  const T99={1:63.657,2:9.925,3:5.841,4:4.604,5:4.032,6:3.707};
+ // his group's wire scaling from 28 to 7 nm (SC14, Table II) with the voltage part, (V7/V28)^2, taken out (section 7b)
+ const WSC=D.wire_scaling?(n=>{const W=D.wire_scaling, i=m=>W.nodes.indexOf(m); return W.ewire[i('7nm')]/W.ewire[i('28nm')]/((W.v_nominal[i('7nm')]/W.v_nominal[i('28nm')])**2);})():null;
  const wireIn=hosts.every(h=>{const c=UN.per_hop.random_bit_data.per_card[h], t=T99[c.n-1]||2.576, lo=(c.mean-t*c.se)/L, hi=(c.mean+t*c.se)/L;return w485[2]>=lo&&w485[2]<=hi;});
  const wireTop=wireIn?'at':UN.random_bit_data.mean>w485[2]?'above':'below';
  setText('comparetext2',
-  `Being ${f1(n09[0]/KEK)}–${f1(n09[1]/KEK)} of Keckler's wire figure with the routers included is roughly what one would expect: wire capacitance per mm barely changes between process nodes (Dally 2018: "about 200fF/mm and independent of scaling"), and <b>the mesh's advantage over the 0.9 V literature is mostly V²</b>. `+
-  `A plain repeated wire estimated from a predictive 7 nm kit (ASAP7) with Ho's repeater factors would cost ${f0(w485[0])}–${f0(w485[2])} fJ per random bit·mm at 0.485 V (${f0(w09[0])}–${f0(w09[2])} at 0.9 V, ${f1(w09[0]/KEK)}–${f1(w09[2]/KEK)} of Keckler's figure, which therefore holds more than an ideal wire or counts differently). The free-link mesh-rail data cost, ${f0(UN.random_bit_data.mean)}, is ${wireTop} the top of that range; these data cannot say how much the routers add.`);
+  `Being ${f1(n09[0]/KEK)}–${f1(n09[1]/KEK)} of Keckler's wire figure with the routers included is roughly what one would expect: wire capacitance per mm changes little between process nodes (Dally 2018: "about 200fF/mm and independent of scaling"; his group's 2014 model, ${WSC?`×${f2(WSC)} from 28 to 7 nm once the lower voltage is taken out`:'little'}; <a href="#dally-node">below</a>), and <b>the mesh's advantage over the 0.9 V literature is mostly V²</b>. `+
+  `A plain repeated wire estimated from a predictive 7 nm kit (ASAP7) with Ho's repeater factors would cost ${f0(w485[0])}–${f0(w485[2])} fJ per random bit·mm at 0.485 V (${f0(w09[0])}–${f0(w09[2])} at 0.9 V, ${f1(w09[0]/KEK)}–${f1(w09[2]/KEK)} of Keckler's figure, which is a wire of about 600 fF/mm: 300 of line and as much again of speed-optimal repeaters, as the 2008 exascale study that Dally and Keckler co-authored puts it; <a href="#dally-node">below</a>). The free-link mesh-rail data cost, ${f0(UN.random_bit_data.mean)}, is ${wireTop} the top of that range; these data cannot say how much the routers add.`);
 
  /* 8. in practice: every comparison on board power, the energy manual's meter */
  if(X.tload_dram_random_pj_per_byte){

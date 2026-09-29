@@ -32,6 +32,9 @@ main{max-width:1100px}
  #modeltab.stack td:nth-child(2)::before{content:none}
  #modeltab.stack td.small{font-weight:400}
  #modeltab.stack tfoot tr{display:block}
+ #dallytab.stack tr{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px}
+ #dallytab.stack td{width:auto}
+ #dallytab.stack td:first-child,#dallytab.stack td:nth-child(4){grid-column:1/-1}
 }
 details.terms{margin:14px 0}
 details.terms p{margin:6px 0 0}
@@ -56,10 +59,14 @@ share links, the same bit costs <b id="l-load"></b>: <b id="l-cont"></b>.</p>
 bits that differ between consecutive flits, but the <em>ones</em> carried. A stream of all ones, which never changes from
 one flit to the next, costs as much per hop as random data (<span id="l-ones"></span>), though at one hop it costs
 <span id="l-ones1"></span>.</p>
-<p class="lede">Dally states no voltage. Scaled to 0.9 V (the voltage of Keckler 2011's 40 nm wire figure, his
-likeliest source; <a href="#question">§1</a>), the mesh rail's
-data-dependent cost is <b id="l-09"></b>, so the rule of thumb holds, to within its own vagueness. Read instead at the
-"~0.5V" his 2023 talk sets beside it, the figure is <span id="l-05"></span> what this mesh spends on the data.</p>
+<p class="lede">Dally states no voltage and no process: the same figure has served a 28 nm slide and a 14 nm cost model
+(<a href="#dally-node">§7</a>). Scaled to 0.9 V (the voltage of the 40 nm table he published with Keckler in 2011, its
+likeliest source; <a href="#question">§1</a>), the mesh rail's data-dependent cost is <b id="l-09"></b>, so the rule of
+thumb holds, to within its own vagueness. <b>The gap of about two below it at the chip's own 0.485 V is expected, and
+mostly voltage:</b> for a network-on-chip on a 5 nm chip Dally himself gives "~50fJ/bit-mm", his group's scaling takes a
+28 nm wire to 7 nm at <span id="l-sc14"></span> of its energy, most of it through the lower supply, and this mesh runs
+below even 7 nm's nominal one. Read instead at the "~0.5V" his 2023 talk sets beside it, the figure is
+<span id="l-05"></span> what this mesh spends on the data.</p>
 <details class="terms more"><summary>Terms used on this page</summary>
 <p class="small">The ET-SoC-1's cores are <i>minions</i> (two hardware threads, <i>harts</i>, each), 32 to a
 <i>shire</i>; part of each shire's 4 MB of SRAM is a 2.5 MB <i>scratchpad</i> that any shire can address, and a
@@ -83,15 +90,21 @@ cards: those in the lab machines aifoundry2 and aifoundry3, and card 1 of aifoun
 
 <h2 id="question">1. The number, and what it hides</h2>
 <p>Dally's keynote to the Stanford AHA retreat (2023) splits the energy of computing, E = ½CV², into three kinds of
-capacitance: "Communication (~100fJ/b-mm on-chip) · Memory (~50fJ/b for small RAM) · Operations (~1fJ/b for add)".
-The same 100 fJ/bit-mm appears in his CACM 2020 paper with Turakhia and Han. <b>Neither gives a voltage or a data
-activity.</b> CACM 2020 states it in a paragraph about 14 nm on-chip memory, and the 2023 talk's conclusion slide sets it
-beside "Reduce V until it gets too slow (~0.5V)" without saying it applies there. A wire's energy goes as CV², so the
-voltage alone moves the number by 3.4× between 0.9 V and 0.485 V, and "per bit" can mean per bit sent (random data flips
-half its bits) or per transition. The likeliest lineage — an inference; no source states it — runs through Keckler,
-Dally and colleagues (IEEE Micro 2011): 310 pJ for 256 random bits over 10 mm at 40 nm and 0.9 V, 121 fJ per bit·mm.
-Dally's own later numbers are 68 fJ at a projected 10 nm and 0.7 V, and 20–40 fJ/bit-mm "in present day chips" (VLSI
-Symposium 2018, a paper set in 16 nm). The sources and quotes are in <code>docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md</code>.</p>
+capacitance: "Communication (~100fJ/b-mm on-chip) · Memory (~50fJ/b for small RAM) · Operations (~1fJ/b for add)"; at
+Hot Chips the same week he put communication at "about ... 100 femtojoules per bit millimeter". The same 100 fJ/bit-mm
+is in his CACM 2020 paper with Turakhia and Han. <b>None of them gives a process, a voltage or a data activity.</b>
+CACM 2020 states it twice, in a cost model whose arithmetic and local memory are "in 14 nm", and the 2023 talk's
+conclusion slide sets it beside "Reduce V until it gets too slow (~0.5V)" without saying it applies there. A wire's energy
+goes as CV², so the voltage alone moves the number by 3.4× between 0.9 V and 0.485 V, and "per bit" can mean per bit
+sent (random data flips half its bits), per transition, or a full charge of the wire for every bit. Its likeliest
+ancestors — an inference; no source states it — are Dally's own earlier figures: 110 fJ/bit-mm at 32 nm and 0.6 V in the
+2008 DARPA exascale study, whose authors include him; a keynote slide labelled 28 nm that he showed from 2010 to 2017;
+and 310 pJ for 256 random bits over 10 mm at 40 nm and 0.9 V (Keckler, Dally and colleagues, IEEE Micro 2011), 121 fJ
+per bit·mm. His later numbers are 68 fJ at a projected 10 nm and 0.7 V, 20–40 fJ/bit-mm "in present day chips" (VLSI
+Symposium 2018, a paper set in 16 nm), 30 in 2022, and for the wires of a network-on-chip on "a typical chip say five
+nanometer chip today", "~50fJ/bit-mm" (his NOCS keynote, 2022). Which process the figure is for, and whether a gap of two
+below it is expected: <a href="#dally-node">§7</a>. The sources and quotes are in
+<code>docs/reports/data/2026-09-24-wire-energy/research/DALLY-NODES.md</code> and <code>SYNTHESIS.md</code> beside it.</p>
 
 <h2 id="die">2. How long is a hop?</h2>
 <div class="chart-title">The ET-SoC-1 die, to scale</div>
@@ -235,6 +248,22 @@ the block patterns of <a href="#lanes">§9</a> leave it. Drag the cursor, use th
 <p id="comparetext"></p>
 <p id="comparetext2"></p>
 
+<h3 id="dally-node">Which process is Dally's figure for, and is a 2× gap expected?</h3>
+<p id="nodetext"></p>
+<div class="chart-title">Dally's per-millimetre figures, and what each predicts for this mesh</div>
+<div class="table-wrap"><table id="dallytab"></table></div>
+<p class="small">Each figure is moved to 0.485 V as <i>CV</i>² at constant capacitance: through the capacitance the
+source gives where it gives one (the 2008 study, Gebhart 2011, VLSI 2018), from its own voltage where it states one, and
+otherwise from each of the three voltages Dally's own sources name (0.9 V, his 40 nm table; 0.7 V, his 10 nm projection;
+"~0.5V today", 2023). A random bit switches its wire half the time, at ½<i>CV</i>² a switch, so it costs a quarter of a
+figure that counts a full charge, <i>CV</i>², for every bit (the 2007, 2008 and SatIn rows). The quotes, with their pages and
+slides, are in <code>docs/reports/data/2026-09-24-wire-energy/research/DALLY-NODES.md</code>, and
+<code>research/lit/dally_gap.py</code> there prints the arithmetic.</p>
+<p id="gaptext"></p>
+<p id="gaptext2"></p>
+<div class="chart-title">Why this mesh and the rule of thumb differ: each explanation, its size, and how to test it</div>
+<div class="table-wrap"><table id="whytab"></table></div>
+
 <h2 id="meaning">8. What it means in practice</h2>
 <p id="practice"></p>
 <p id="practice2"></p>
@@ -319,7 +348,9 @@ and <code>docs/reports/data/2026-09-24-wire2-aifoundry3/</code>, the third in
 runs) and <code>wire3.json</code> (the third), and the page draws its charts and computed figures from
 <code>docs/reports/data/2026-09-24-wire-energy/report.json</code>.</li>
 <li>Research notes behind the conversion to millimetres (die geometry, the NoC, the literature), gathered by AI agents
-run by the author: <code>docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md</code>. An independent
+run by the author: <code>docs/reports/data/2026-09-24-wire-energy/research/SYNTHESIS.md</code>; which process Dally's figure
+is for, with every statement of it we found and its page or slide: <code>research/DALLY-NODES.md</code> (the arithmetic in
+<code>research/lit/dally_gap.py</code>). An independent
 re-analysis and adversarial review of this page, also by AI agents: <code>docs/reports/data/2026-09-24-wire-energy/review/VERDICT.md</code>;
 the measurements reproduced, and its corrections are applied here.</li>
 </ul></details>
@@ -331,7 +362,9 @@ differences no longer findings; the 16–128 B blocks' shortfall dropped; the re
 load). 26 September (version 4): the three-card check's third run is the basis of every figure it covers; all ones'
 excess over random data on board power is not resolved from zero on any card. 27 September: the lede's contention figure
 compares like with like over one to four hops (it had mixed two bases); the regulator's loss given per card. 28 September:
-the review's cuts, and a chart of what each further hop adds beside the link-sharing share (§4). Every earlier
+the review's cuts, and a chart of what each further hop adds beside the link-sharing share (§4); later that day, at the
+owner's request, which process Dally's figure is for and whether a gap of two below it is expected (§7), with his
+figures from 2008 to 2023. Every earlier
 wording is in the repository's history of <code>docs/reports/sources/heat-per-mm.*</code>.</p></details>
 
 <h2 id="related">12. Related reports</h2>

@@ -78,7 +78,7 @@ LIT = [
      "conditions": "no node, voltage or data activity stated; the talk's conclusion sets it beside 'Reduce V until it gets too slow (~0.5V)'", "v": None,
      "url": "https://aha.stanford.edu/sites/g/files/sbiybj20066/files/media/file/aha-retreat-2023_dally_keynote_en_eff_ai_hw_0.pdf"},
     {"who": "Dally, Turakhia, Han, CACM 2020", "what": "'This communication costs 100fJ/bit-mm'", "fj_bit_mm": 100,
-     "conditions": "in a paragraph about 14 nm on-chip memory; no voltage or data activity stated", "v": None,
+     "conditions": "in a cost model whose arithmetic and local memory are 'in 14 nm'; no voltage or data activity stated", "v": None,
      "url": "https://www.doc.ic.ac.uk/~wl/teachlocal/arch/papers/cacm20dsa.pdf"},
     {"who": "Keckler, Dally et al., IEEE Micro 2011, Table 1", "what": "256 bits over 10 mm: 310 pJ", "fj_bit_mm": 121,
      "conditions": "40 nm, 0.9 V, random data (50% transitions)", "v": 0.9,
@@ -94,6 +94,164 @@ LIT = [
      "conditions": "0.18 um, 1.8 V; per random bit this is half", "v": 1.8, "per_transition": 984,
      "url": "https://vlsiweb.stanford.edu/people/alum/pdf/0303_Ho_Wires.pdf"},
 ]
+# Dally's per-mm figures as the page's section 7 table gives them (research/DALLY-NODES.md has every quote with its
+# page or slide): "dally" marks them; "label" names the row; "node" and "node_basis" say which process each is for and
+# how that is known (stated with the figure, the label of its slide, the setting of its paper, or inferred);
+# "c_ff_mm" is a capacitance the source itself gives, used in place of a voltage ("c_rep_ff_mm" with repeaters);
+# "chart": False keeps an entry off the voltage chart, "table": False off the section 7 table (the data and
+# research/DALLY-NODES.md keep it), "predict": False leaves its prediction blank (no voltage, and a node far from any
+# his sources give one for); "v_label" is how the table shows a voltage that is not stated with the figure itself.
+# The entries appended below are figures the chart does not draw.
+DALLY_ROWS = {
+    "Dally, AHA retreat keynote 2023, slide 8": {
+        "label": "Dally, Hot Chips keynote and AHA retreat, 2023", "year": 2023, "node": "none stated",
+        "node_basis": "its three numbers, 100 fJ/b-mm, 50 fJ/b for a small RAM and ~1 fJ/b for an add, are CACM 2020's 14 nm model",
+        "shown": "\"Communication (~100fJ/b-mm on-chip)\"; spoken at Hot Chips: \"about ... 100 femtojoules per bit millimeter\""},
+    "Dally, Turakhia, Han, CACM 2020": {
+        "label": "Dally, Turakhia, Han, CACM 2020", "year": 2020, "node": "14 nm",
+        "node_basis": "the cost model's: its arithmetic is \"In 14 nm technology\", its local memory \"in 14nm\"",
+        "shown": "\"Communication between blocks on chip ... at a rate of 100fJ/bit-mm\"; logic and memory energies scale \"while supply voltage is held constant\", but \"Communication energy remains roughly constant\""},
+    "Keckler, Dally et al., IEEE Micro 2011, Table 1": {
+        "label": "Keckler, Dally et al., IEEE Micro 2011", "year": 2011, "node": "40 nm", "node_basis": "stated, Table 1",
+        "per_transition": 240, "shown": "\"240 femtojoules (fJ) per bit per mm\" per transition; 310 pJ for 256 random bits over 10 mm"},
+    "Dally (Yale Patt 75, 2014; DLI 2017)": {
+        "label": "Dally, Yale Patt 75 (2014), again in 2017", "year": 2014, "node": "10 nm", "node_basis": "stated, a projection",
+        "shown": "174 pJ for 256 bits over 10 mm"},
+    "Dally et al., VLSI Symposium 2018": {
+        "label": "Dally et al., VLSI Symposium 2018", "year": 2018, "node": "16 nm",
+        "node_basis": "the paper's setting; the sentence says \"present day chips\"", "c_ff_mm": 200,
+        "shown": "\"between 20-40 fJ/bit-mm\"; a wire's energy \"~ CV2\", C \"about 200fF/mm\""},
+    "Dally, CACM 2022": {
+        "label": "Dally, CACM 2022", "year": 2022, "node": "none stated", "node_basis": "\"today\"",
+        "shown": "\"Moving the two 32-bit words ... 1mm takes 1.9pJ\"; 64 bits 40 mm corner to corner, 77 pJ"},
+}
+for _l in LIT:
+    if _l["who"] in DALLY_ROWS:
+        _l.update(DALLY_ROWS[_l["who"]], dally=True)
+LIT += [
+    {"who": "Kogge et al. (Dally and Keckler among the authors), DARPA Exascale Computing Study 2008, p. 130",
+     "what": "'At the 32 nm node, we estimate a line capacitance of 300 fF/mm. With a 0.6 V power supply, full swing signaling gives a signaling energy of 110 fJ/bit-mm'",
+     "fj_bit_mm": 110, "v": 0.6, "c_ff_mm": 300, "c_rep_ff_mm": 600,
+     "conditions": "32 nm, 0.6 V, 300 fF/mm: C V^2, a full charge of the wire for every bit. p. 220: 'the repeater capacitance "
+                   "equals the line capacitance for a total of 600fF/mm. At the ITRS supply level of 0.9V, sending a bit on chip "
+                   "using conventional full-swing signaling requires about 0.5pJ/mm' (C V^2 again)",
+     "url": "https://people.eecs.berkeley.edu/~yelick/papers/Exascale_final_report.pdf",
+     "label": "DARPA exascale study (Kogge et al., with Dally and Keckler), 2008", "year": 2008, "node": "32 nm", "node_basis": "stated",
+     "shown": "\"At the 32 nm node ... 300 fF/mm. With a 0.6 V power supply, full swing signaling gives a signaling energy of 110 fJ/bit-mm\" (p. 130); with repeaters \"a total of 600fF/mm\", \"about 0.5pJ/mm\" at 0.9 V (p. 220): C V² per bit",
+     "counting": "C V² per bit", "dally": True, "chart": False},
+    {"who": "Dally, SC10 keynote 2010, slide 37 (again Salishan 2011, SC12 slide 14, HiPEAC 2015, 2017)", "what": "256-bit buses: 26 pJ, 256 pJ and 1 nJ on a 20 mm die",
+     "fj_bit_mm": 100, "approx": True, "v": None,
+     "conditions": "the slide is labelled 28nm; no voltage or activity; its 2009 version labels the bars '64b 1mm Channel 25pJ/word' "
+                   "and '10mm 250pJ', and the 2010 speaker notes call the longest 'Corner to corner (32mm)': 102, 100 and 122 fJ per bit-mm",
+     "url": "https://www.nvidia.com/content/PDF/sc_2010/theater/Dally_SC10.pdf",
+     "label": "Dally, SC10 and SC12 keynotes (2010, 2012), again to 2017", "year": 2010, "node": "28 nm", "node_basis": "the slide's label",
+     "shown": "256-bit buses at 26 pJ, 256 pJ and 1 nJ on a 20 mm die; the 2009 version labels the first two \"64b 1mm Channel 25pJ/word\" and \"10mm 250pJ\", his 2010 notes the longest \"Corner to corner (32mm)\"",
+     "dally": True, "chart": False},
+    {"who": "Dally, SC09 keynote 'The Future of GPU Computing', slide 14", "what": "'64b 1mm Channel 25pJ/word', '10mm 250pJ, 4cycles', 'Moving a word across die = 10FMAs'",
+     "fj_bit_mm": 391, "v": None, "conditions": "no node or voltage; a 64-bit word; the same energies are 256-bit buses on the 2010 slide",
+     "url": "https://www.nvidia.com/content/GTC/documents/SC09_Dally.pdf",
+     "label": "Dally, SC09 keynote, 2009", "year": 2009, "node": "none stated", "node_basis": "its 64b FPU at 50 pJ/op is the 40 nm DFMA of 2011",
+     "shown": "\"64b 1mm Channel 25pJ/word\", \"10mm 250pJ, 4cycles\", \"Moving a word across die = 10FMAs\"", "dally": True, "chart": False, "table": False},
+    {"who": "Dally, HPCA 2002 panel, slide 5 (again Stanford EE482C 2002, Queue 2004 Table 1, ISSCC 2005 slide 4)",
+     "what": "'Transfer 32b across chip (10mm)': '100pJ' (0.13um), '17pJ' (0.05um); Queue 2004: '32-bit traverse 10mm wire 100 pJ', 'Energy Per Operation (0.13µm, 1.2V)'",
+     "fj_bit_mm": 313, "v": 1.2,
+     "conditions": "0.13 um, 1.2 V (Queue 2004); 17 pJ (53 fJ per bit per mm) projected for 0.05 um in 2010; activity not stated",
+     "url": "http://cva.stanford.edu/publications/2004/spqueue.pdf",
+     "label": "Dally, HPCA panel (2002), again ACM Queue 2004", "year": 2002, "node": "0.13 µm", "node_basis": "stated; 53 projected for 0.05 µm",
+     "shown": "\"Transfer 32b across chip (10mm)\": \"100pJ\" at 0.13um (2002), \"17pJ\" at 0.05um; \"32-bit traverse 10mm wire 100 pJ\" in \"Energy Per Operation (0.13µm, 1.2V)\" (Queue 2004)",
+     "dally": True, "chart": False},
+    {"who": "Owens, Dally, Ho, Jayasimha, Keckler, Peh, 'Research Challenges for On-Chip Interconnection Networks', IEEE Micro 2007, p. 99",
+     "what": "'In a 22-nm technology ... The chip, running at 0.7 V ... Optimistic wire technology projections estimate ... a power cost of 0.25 mW/Gbps/mm'",
+     "fj_bit_mm": 250, "v": 0.7, "counting": "C V² per bit",
+     "conditions": "a 2015 CMP's mesh links; 'assuming every single link is fully active at its peak bandwidth', with 25% as the lower activity",
+     "url": "https://www.ece.ucdavis.edu/~ocin06/owens-research-challenges-ocin-micro07.pdf",
+     "label": "Owens, Dally, Keckler et al., IEEE Micro 2007", "year": 2007, "node": "22 nm", "node_basis": "stated, a projection for 2015",
+     "shown": "mesh links of a 22 nm chip \"running at 0.7 V\": \"a power cost of 0.25 mW/Gbps/mm\", every link \"fully active\" (an \"optimistic\" projection)",
+     "dally": True, "chart": False},
+    {"who": "Gebhart, Johnson, Tarjan, Keckler, Dally, Lindholm, Skadron, ISCA 2011, Table 3 (again MICRO 2011, MICRO 2012)",
+     "what": "'Wire capacitance 300 fF/mm', 'Voltage 0.9 Volts', 'Wire Energy (32 bits) 1.9 pJ/mm'", "fj_bit_mm": 59.4, "v": 0.9, "c_ff_mm": 300,
+     "conditions": "wire only, random data: 1/4 x 300 fF x 0.81 V^2 x 32 = 1.94 pJ; the setting is a 40 nm (MICRO 2011) or 32 nm (MICRO 2012) GPU",
+     "url": "https://www.cs.utexas.edu/~skeckler/pubs/RF_ISCA_11.pdf",
+     "label": "Gebhart, Keckler, Dally et al., ISCA 2011", "year": 2011, "node": "40 nm", "node_basis": "the setting: MICRO 2011 \"a commercial 40 nm\" library; 32 nm in 2012",
+     "shown": "\"Wire capacitance 300 fF/mm\", \"Voltage 0.9 Volts\", \"Wire Energy (32 bits) 1.9 pJ/mm\"", "dally": True, "chart": False},
+    {"who": "Khailany, Dally, Rixner, Kapasi, Owens, Towles, HPCA 2003, Table 1 and footnote 1", "what": "'the wire propagation energy per wire track (0.093 fJ in 0.18 micron technology)'",
+     "fj_bit_mm": 65, "v": None, "c_ff_mm": 260,
+     "conditions": "'Calculated from an assumed wire capacitance of 0.26 fF per micron including repeater capacitance with a 25% 1-to-0 transition probability': 1/4 C V^2, 65 V^2 fJ per bit-mm; no voltage",
+     "url": "http://cva.stanford.edu/publications/2003/khailany_im_scalability.pdf",
+     "label": "Khailany, Dally et al., HPCA 2003", "year": 2003, "node": "0.18 µm", "node_basis": "stated",
+     "shown": "\"0.26 fF per micron including repeater capacitance with a 25% 1-to-0 transition probability\"", "dally": True, "chart": False, "table": False},
+    {"who": "Dally, HiPEAC 2015 keynote, slide 51", "what": "'Goal: reduce Energy/bit 200fJ/bit-mm → 20fJ/bit-mm'", "fj_bit_mm": 200, "v": None,
+     "conditions": "the baseline of NVIDIA's on-chip signaling work; a test site on a GM2xx GPU measured '<45fJ/bit-mm'",
+     "url": "https://www.cs.colostate.edu/~cs575dl/Sp2015/Lectures/Dally2015.pdf",
+     "label": "Dally, HiPEAC keynote, 2015", "year": 2015, "node": "28 nm", "node_basis": "inferred: its test site is on a GM2xx (Maxwell) GPU",
+     "shown": "\"Goal: reduce Energy/bit 200fJ/bit-mm → 20fJ/bit-mm\"; a test site on a GM2xx GPU \"<45fJ/bit-mm\"", "dally": True, "chart": False, "table": False},
+    {"who": "Dally, 'Deep Learning Hardware' talks: IEEE Santa Clara Valley, Nov 2021, 39:55-40:49; Orange County ACM, Mar 2022, 38:42-40:20",
+     "what": "spoken: 'from around 40 or 50 [fJ] per bit today' (slide: '4x Energy Saving – 5-10fJ/bit-mm')", "fj_bit_mm": 45, "range": [40, 50],
+     "v": 1.0, "v_label": "~1 V, spoken", "conditions": "slide: 'Numbers above are for 16nm'; spoken: 'we still have to keep nominal one volt supplies almost everywhere'",
+     "url": "https://www.youtube.com/watch?v=AGcv_PRKrPQ&t=2322",
+     "label": "Dally, Deep Learning Hardware talks, 2021–22", "year": 2022, "node": "16 nm", "node_basis": "slide: \"Numbers above are for 16nm\"",
+     "shown": "spoken: \"from around 40 or 50 [fJ] per bit today\" (slide: \"4x Energy Saving – 5-10fJ/bit-mm\"), \"nominal one volt supplies almost everywhere\"; for logic, to 5 nm \"another factor of two to two and a half in energy\"",
+     "dally": True, "chart": False},
+    {"who": "Dally, NOCS 2022 keynote (slide at 14:10, spoken at 15:48)", "what": "'Energy ~50fJ/bit-mm' for NoC wires on a 5 nm chip", "fj_bit_mm": 50, "v": None,
+     "conditions": "spoken: 'in a typical chip say five nanometer chip today ... we tend to use the upper layers for the NoC ... the energy is 50 femtojoules per bit millimeter ... going through the router is a fraction of this energy'",
+     "url": "https://www.youtube.com/watch?v=Nk3oQm9NxcY&t=848",
+     "label": "Dally, keynote on networks-on-chip (NOCS), 2022", "year": 2022, "node": "5 nm", "node_basis": "spoken: \"a typical chip say five nanometer chip today\"",
+     "shown": "slide \"Wire pitch today ... ~80nm on upper layers ... Energy ~50fJ/bit-mm\"; spoken: \"the energy is 50 femtojoules per bit millimeter ... going through the router is a fraction of this energy\"",
+     "dally": True, "chart": False, "noc": True},
+    {"who": "Zhu, Rucker, Wang, Dally, 'SatIn: Hardware for Boolean Satisfiability Inference', arXiv 2303.02588 (2023), p. 10",
+     "what": "'With 32 nm technology, it takes about 0.2 pJ per millimeter to send one bit in a densely packed bus on M7'",
+     "fj_bit_mm": 200, "v": 1.05, "counting": "C V² per bit sent",
+     "conditions": "32 nm, the design's 'nominal voltage of 1.05 V' (p. 8); wire only: 'Each router ... consumes almost no power'; "
+                   "the network's power then applies 'the activity factor of 34%'",
+     "url": "https://arxiv.org/pdf/2303.02588",
+     "label": "Zhu, Rucker, Wang, Dally, SatIn (arXiv 2023)", "year": 2023, "node": "32 nm", "node_basis": "stated",
+     "shown": "\"With 32 nm technology, it takes about 0.2 pJ per millimeter to send one bit in a densely packed bus on M7\"; the design's \"nominal voltage of 1.05 V\"; a router \"consumes almost no power\"",
+     "dally": True, "chart": False},
+    {"who": "Dally, Hot Interconnects 2023 keynote, slide at 21:50", "what": "on-chip logic to logic, 2 mm: '100Tb/s, 0.1pJ/b'",
+     "fj_bit_mm": 50, "v": None, "conditions": "a 2 mm link inside a GPU or switch die; no node, voltage or activity stated",
+     "url": "https://www.youtube.com/watch?v=napEsaJ5hMU&t=1310",
+     "label": "Dally, Hot Interconnects keynote, 2023", "year": 2023, "node": "none stated", "node_basis": "a GPU or switch die",
+     "shown": "logic to logic on the die, 2 mm: \"100Tb/s, 0.1pJ/b\"", "dally": True, "chart": False, "table": False},
+    # two other meshes measured on silicon with the data's bit switching controlled ("mesh": the page's section 7b
+    # scales them to this mesh's voltage as C V^2); "hop_mm" is the tile pitch range, per flit/word figures as printed
+    {"who": "McKeown et al., Piton, HPCA 2018, Fig. 12 (measured)", "mesh": True, "chart": False,
+     "what": "NoC energy per 64-bit flit per hop: 'NSW (~3.58 pJ/hop)', 'HSW (~11.16 pJ/hop)', 'FSW (~16.68 pJ/hop)'",
+     "flit_bits": 64, "pj_flit_hop": {"none": 3.58, "half": 11.16, "full": 16.68}, "hop_mm": [1.053, 1.14452], "v": 1.0,
+     "fj_bit_mm": round((11.16 - 3.58) / 64 * 1000 / ((1.053 + 1.14452) / 2), 1),
+     "node": "IBM 32 nm SOI", "year": 2018,
+     "conditions": "VDD 1.00 V, 500 MHz; half switching (HSW) flips half the bits between flits, the rate of random data; "
+                   "per-hop slope over a zero-hop baseline; tile pitch 1.14452 mm (x), 1.053 mm (y)",
+     "url": "https://parallel.princeton.edu/papers/piton-power-hpca18.pdf"},
+    {"who": "Kim, Taylor, Miller, Wentzlaff, Raw, ISLPED 2003 (measured)", "mesh": True, "chart": False,
+     "what": "'an amortized cost of 85 pJ per 32-bit maximal-toggle word that is routed'", "word_bits": 32,
+     "pj_word_hop_full_toggle": 85, "hop_mm": [4, 4], "v": 1.8, "fj_bit_mm": round(85 / 32 * 1000 / 2 / 4, 1),
+     "node": "IBM 0.15 um (SA-27E)", "year": 2003,
+     "conditions": "1.8 V, 100 MHz; every bit toggling; 'the graphs do not include clock energy'; 4 mm inter-tile wires; "
+                   "a random bit toggles half the time, so half of it",
+     "url": "https://groups.csail.mit.edu/cag/raw/documents/islped_raw_2003.pdf"},
+    {"who": "Keckler, Dally et al., IEEE Micro 2011, Table 1 (10 nm, high frequency)", "what": "256 bits over 10 mm: 200 pJ", "fj_bit_mm": 78.1,
+     "conditions": "10 nm projection for 2017, 0.75 V, random data", "v": 0.75, "per_transition": 150,
+     "url": "https://www.cs.toronto.edu/~pekhimenko/courses/csc2224-f19/docs/GPU.pdf",
+     "label": "Keckler, Dally et al., 2011: 10 nm, high frequency", "year": 2011, "node": "10 nm", "node_basis": "stated, a projection",
+     "shown": "150 fJ/bit/mm per transition; 200 pJ for 256 random bits over 10 mm", "dally": True, "chart": False, "table": False},
+    {"who": "Keckler, Dally et al., IEEE Micro 2011, Table 1 (10 nm, low voltage)", "what": "256 bits over 10 mm: 150 pJ", "fj_bit_mm": 58.6,
+     "conditions": "10 nm projection for 2017, 0.65 V, random data", "v": 0.65, "per_transition": 115,
+     "url": "https://www.cs.toronto.edu/~pekhimenko/courses/csc2224-f19/docs/GPU.pdf",
+     "label": "Keckler, Dally et al., 2011: 10 nm, low voltage", "year": 2011, "node": "10 nm", "node_basis": "stated, a projection",
+     "shown": "115 fJ/bit/mm per transition; 150 pJ for 256 random bits over 10 mm", "dally": True, "chart": False, "table": False},
+]
+# How Dally's group scales a fixed length of on-chip wire from 28 nm to 7 nm, and the supplies it takes for each node:
+# Villa, Johnson, O'Connor, ..., Keckler and Dally, "Scaling the Power Wall: A Path to Exascale", SC14, Table II
+# ("Technology scaling factors from 28nm to 7nm"; the text: "fixed-length wire energy (Ewire) scaling at between 0.75x
+# and 0.9x per generation"). The page splits each factor into its voltage part, (V_node / V_28)^2, and the rest.
+WIRE_SCALING = {
+    "source": "Villa et al. (with Keckler and Dally), SC14, Table II, p. 7",
+    "url": "https://research.nvidia.com/sites/default/files/pubs/2014-11_Scaling-the-Power//villa.sc2014.pdf",
+    "nodes": ["28nm", "20nm", "14nm", "10nm", "7nm"],
+    "ewire": [1.0, 0.89, 0.75, 0.62, 0.46],
+    "v_nominal": [0.90, 0.85, 0.75, 0.725, 0.70],
+    "v_low": [0.85, 0.80, 0.70, 0.675, 0.65],
+}
 # A plain repeated 7 nm wire from first principles: C 200-400 fF/mm (ASAP7 0.166 fF/um x 1.34-1.87 for repeaters);
 # half of C V^2 per transition; a random bit transitions half the time (research/lit/first-principles-estimate.md).
 C_WIRE = (200e-15, 300e-15, 400e-15)
@@ -128,7 +286,7 @@ def main():
                          "source": "workloads/nocbench/analyze.py MARTY and EMPTY (marty1885's shire coordinates; run_wire.py MESH is the same map)"}
     L = INPUTS["hop_mm"]["value"]
     Llo, Lhi = INPUTS["hop_mm"]["range"]
-    out = {"inputs": INPUTS, "literature": LIT, "wire": w3, "wire_sep24": w,
+    out = {"inputs": INPUTS, "literature": LIT, "wire_scaling": WIRE_SCALING, "wire": w3, "wire_sep24": w,
            "first_principles": {"at_0485": wire_first_principles(V_NOC), "at_09": wire_first_principles(0.9)}}
     # context from the energy manual (docs/reports/data/2026-09-23-energy-manual/manual.json), same cards and clock
     try:
