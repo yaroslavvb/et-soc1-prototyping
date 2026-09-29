@@ -163,7 +163,7 @@ mangled. For every private row with a uuid it checks that neither address serves
 everything matches, 1 on any difference (content, visibility or a private page served anonymously), 2 when a page
 could not be reached and nothing else was wrong.
 
-**Last check: 2026-09-28, 17:40 PDT**, after the superseded energies were folded into the pages (memory anatomy,
+**Last check: 2026-09-28, 17:37 PDT**, after the superseded energies were folded into the pages (memory anatomy,
 memory hierarchy, on-chip communication, matmul efficiency, sparse compute, and their leftovers on memory levels, the
 energy manual, power and temperature, why low power and the hub), the chip diagram's flow B (Broadcast) and heat per
 mm's Q63 section: 27 of 27 mirrored public pages equal to their files, exit 0; one warning: the session timeline is
