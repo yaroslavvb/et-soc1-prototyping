@@ -1,12 +1,11 @@
 # nocr: pre-registration (hub rungs 31 and 32)
 
-Status: DRAFT, written 28 September 2026 before any card data, and revised the same day, still before any card data,
-after review (see "Revisions before any data" at the end). Development on aifoundry1's card 1 may change the
-parameters in `params.json` (windows, repetitions, slot lengths) and must record each change under "Amendments"
-below; it may not change a theory, a prediction or a decision rule. Before validation: set the status line to
-`Status: FROZEN`, then run `bash tools/claims-v3/nocr/make_lock.sh <kernel ELF>`, which writes `PREREG.sha256`,
-`LOCK.sha256` (every file a block runs, `lib.sh` and `queue.sh` included) and `kernel-text.sha256`. Validation
-passes (11-19) refuse to start unless all three match.
+Status: FROZEN (29 September 2026, about 00:10 PDT), after development on aifoundry1's card 1 (passes 9, 1-3,
+28 September 23:57-00:01 PDT). It was written on 28 September before any card data and revised the same day, still
+before any card data, after review (see "Revisions before any data" at the end). Development changed no parameter,
+theory, prediction or rule (see "Amendments"). `make_lock.sh` wrote `PREREG.sha256`, `LOCK.sha256` (every file a block
+runs, `lib.sh` and `queue.sh` included) and `kernel-text.sha256`; validation passes (11-19) refuse to start unless all
+three match.
 
 ## Questions
 
@@ -167,4 +166,15 @@ the prerequisite, and the test is left for after it.
 
 ## Amendments
 
-None yet.
+None: development changed no parameter in `params.json`, and nothing above.
+
+**The development result, recorded before the freeze** (aifoundry1's card 1, fw 1.2.0; `reduce.py` over passes 1-3):
+- R31: an ESR call costs a constant plus 35-36 cycles per mesh hop (P1 T-DIRECT survived; the null call is the same
+  from every shire, P4 survived). The per-access check differs from the compiled firmware's one load and one store
+  (23.79 and 12.17 cycles per hop), so P2 and P3 are not decided on this card. The master shire placed at (0,3), the
+  firmware map's top grey cell (P5 survived; next best (0,4) rms 33.1 against 1.1). Memory shires 0-2 and 4, 5 and 7
+  placed where the firmware map puts them; 3 and 6 undecided (P6 not decided, P6b and P7 survived).
+- R32: reads' replies go **y first** (P9 T-YX survived; P8 T-XY, which every route on the chip diagram assumes,
+  refuted); writes' requests go x first, so replies retrace requests (P12 refuted, "opposite order"); links saturate
+  near 92 GB/s (P10 T-WIDE refuted; P11 T-ADAPT refuted); P13 not decided (c < 0.54).
+The validation on aifoundry3 tests every item as registered above.
