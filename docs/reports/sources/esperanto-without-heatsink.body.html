@@ -1,0 +1,740 @@
+<style>
+.answers { margin: 14px 0 10px; }
+.answers .ans-title { margin: 0 0 8px; font-size: 1.1rem; }
+.answers dl { margin: 0; }
+.answers dt { font-weight: 650; margin: 12px 0 2px; }
+.answers dt:first-child { margin-top: 0; }
+.answers dd { margin: 0; color: var(--ink); }
+.answers dd .more-link { white-space: nowrap; }
+.cite { font-size: 0.8em; color: var(--ink-2); white-space: nowrap; }
+.cite a { text-decoration: none; }
+.cite a:hover, .cite a:focus-visible { text-decoration: underline; }
+.kind { display: inline-block; font-size: 0.72rem; font-weight: 600; color: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 0 7px; margin-left: 4px; white-space: nowrap; vertical-align: 1px; }
+blockquote.owner { margin: 12px 0; padding: 8px 14px; border-left: 3px solid var(--axis); color: var(--ink-2); font-size: 0.95rem; }
+ol.srcs { list-style: none; padding-left: 0.4em; font-size: 0.86rem; }
+ol.srcs li { margin: 6px 0; overflow-wrap: anywhere; }
+ol.srcs li .used { color: var(--ink-2); }
+ol.srcs li:target { background: var(--code-bg); border-radius: 6px; }
+.reading { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 12px 0; }
+.reading .card p { margin: 6px 0 0; }
+.reading .verdict { font-weight: 650; }
+.verdict.yes { color: var(--ok); } .verdict.no { color: var(--bad); }
+.opt-feas { font-weight: 600; white-space: nowrap; }
+.opt-feas.now { color: var(--ok); } .opt-feas.no { color: var(--bad); }
+#otable td:first-child { font-variant-numeric: tabular-nums; font-weight: 650; }
+.tcell small { display: block; color: var(--ink-2); font-size: 0.74rem; }
+.lead-in { font-weight: 650; }
+.halo { paint-order: stroke; stroke: var(--page); stroke-width: 3px; stroke-linejoin: round; }
+#vtable td:first-child, #wtable td:first-child, #itable td:first-child { font-weight: 600; }
+#vtable tr.ours td { color: var(--ink-2); }
+h3.srch { margin-top: 22px; }
+</style>
+
+<h1>Feasibility of running the ET-SoC-1 without its heatsink</h1>
+<p class="byline">30 September 2026 · a feasibility study from the cards' measured record, the vendor's documents, a
+Monte Carlo model of the bare package and published outside work; no card was touched · part of the
+<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+
+<p class="lede"><b>No: a lab card cannot run without its heatsink at 600 MHz</b>, the clock three of the four cards
+run at. <b>Taping a thermocouple to the heatsink base, heatsink on, is feasible, cheap and safe with the card off;
+pointing a sensor at the bare chip is not.</b> The proposal was to measure the chip's temperature with a sensor of our
+own, either taped to the heatsink or pointed straight at the chip with the heatsink off. This page works out whether a
+card can run bare in the lab, what a sensor would see if it did, and which ways of adding a physical temperature are
+safe.</p>
+
+<h3 id="two-readings">The proposal, read two ways</h3>
+<div class="reading">
+<div class="card"><b>A sensor on the heatsink or the lid, heatsink in place</b>
+<p class="verdict yes">Taped to the heatsink: feasible, cheap, safe with the card off.</p>
+<p class="verdict">Soldered into a groove in the lid: only with the lab's consent, at moderate risk.</p>
+<p>Either logs a physical temperature independent of the host and its whole-degree sensor mean; the lid groove is where
+Intel measures case temperature. Each measures one point, not a map (options 2 and 3 in
+<a href="#options">section 5</a>).</p></div>
+<div class="card"><b>The heatsink off, a sensor pointed at the chip</b>
+<p class="verdict no">Not feasible in a lab host.</p>
+<p>The card cannot hold a temperature without its heatsink (<a href="#runaway">section 2</a>). In the model, bare
+aifoundry2 passes 90 °C <span data-v="offStill"></span> after a cold power-on at idle in still air (card 1 in
+<span data-v="offC1"></span>), and with a fan in <span data-v="offFan"></span> <span class="kind">model</span>
+(<a href="#heating">section 3</a>). What a sensor would see is a lid at nearly one temperature
+(<a href="#sensor-view">section 4</a>). The only view of the chip worth that risk is of a delidded die on a card set
+aside for it.</p></div>
+</div>
+
+<div class="card answers" id="the-answers">
+<p class="ans-title" id="answers"><b>The answers</b></p>
+<dl>
+<dt>Can a card run without its heatsink?</dt>
+<dd><b>No, not at 600 MHz</b>, the clock three of the four lab cards run at. With its heatsink a card sheds heat at
+<span data-v="ansSink"></span>. Bare, the package can lose heat only through its lid into the air and
+through its balls into the board: an estimated 4–12 °C/W in still air and 2–7 °C/W with a fan <span class="kind">model</span>, a range that
+holds the vendors' tables for AMD's lidded 40–47.5 mm packages and Microchip's 35 mm MPF500T with no heatsink
+(5.4–7.9 °C/W in still air, 2.7–5.8 at 1–2.5 m/s) <span class="cite">[<a href="#src-1">1</a>, <a href="#src-2">2</a>]</span>. The card's idle power (mostly the chip's) also rises
+as it warms, by 0.50–1.02 W for each degree at 70–80 °C on those three cards <span class="kind">fitted</span>, so every degree of heating
+brings more heat. A temperature is stable only while the thermal resistance times that slope stays below 1, which on
+these cards needs <span data-v="ansMax"></span> °C/W or less <span class="kind">model</span>. Bare, the die keeps heating:
+<span data-v="ansMC"></span> From a cold power-on, the model puts bare aifoundry2 in still air past 90 °C after
+<span data-v="ansT90"></span> at idle. The host needs an assumed 30–90 s to boot, by which that die is at
+<span data-v="ansBootT"></span>; from then a random-data matmul leaves
+<span data-v="ansBootWin"></span> before the die reaches 90 °C <span class="kind">model, boot assumed</span>. Nothing has been seen to stop
+it: at 600 MHz no firmware limit has been seen to act (card 1's build has a 75 W alarm, read from source and untested:
+<a href="#feedback">section 2.2</a>), short of shutting the whole host down nothing switches the card off, and
+Esperanto publishes no junction limit or thermal trip <span class="cite">[<a href="#src-3">3</a>, <a href="#src-4">4</a>, <a href="#src-5">5</a>]</span>. In published bare runs, a processor that
+throttled itself kept running, and two burned out within a second, one with no protection and one whose board-level
+protection reacted too slowly <span class="cite">[<a href="#src-6">6</a>]</span>; Intel requires a tripped Atom 330's supply to be turned off within 500 ms
+<span class="cite">[<a href="#src-7">7</a>]</span>. The one marginal case is aifoundry1 card 0 idling at 300 MHz, and any kernel lifts it to 600 MHz; on
+25 September its release 1.4.1 firmware did step it back to 300 MHz after it read 115–117 °C, by a path not established
+<span class="cite">[<a href="#src-r3">R3</a>]</span>. <a class="more-link" href="#runaway">Sections 2–3</a>, <a class="more-link" href="#others-bare">6.1</a></dd>
+<dt>What would a sensor pointed at the chip see?</dt>
+<dd>One temperature. With the heatsink off, the lid, and the die beneath it, spread heat sideways over
+<span data-v="ansSpread"></span> mm <span class="kind">model</span>, about the width of the die, while the shires sit 3.7 mm apart: a 1 W hot
+shire would lift the lid by only about <span data-v="ansBump"></span> °C over a broad patch <span class="kind">model</span>. The lid is
+plated metal, which an infrared camera reads low and mostly as reflections of the room unless it is taped: a study of
+processor thermography put a metal package's emissivity at about 0.01 and covered the surface with masking tape of
+emissivity 0.92 <span class="cite">[<a href="#src-8">8</a>]</span>. The lab's planned camera sees 8–14 µm, where sapphire, fused silica and Czochralski silicon
+windows do not transmit well and fluorinated coolants likely absorb; a view of the die in that band would need a
+germanium, zinc-selenide, zinc-sulphide, chalcogenide-glass or diamond window over a coolant that transmits there. A thin
+film of mineral oil is the candidate, untested, and it has one absorption band at 13.9 µm, inside that range
+<span class="kind">inference</span>. <a class="more-link" href="#sensor-view">Section 4</a></dd>
+<dt>What should we do instead?</dt>
+<dd>Keep the heatsink on. For a physical temperature that does not depend on the host, tape a fine thermocouple to the
+heatsink base or fins (half an hour on site with the card off, $30–100 <span class="kind">estimate</span>), never between the lid and the
+heatsink: AMD warns that one there may add stress and leaves the paste thicker or uneven <span class="cite">[<a href="#src-1">1</a>]</span>. For the case
+temperature itself, and only with the lab's consent and at moderate risk, use Intel's method: a 36-gauge type T
+thermocouple soldered into a groove cut in the lid's centre <span class="cite">[<a href="#src-9">9</a>]</span>; calibrated, it reads the lid to about
+<span data-v="ansTc"></span> °C <span class="kind">model</span>. Put emissivity tape wherever the camera looks. The natural moment is the
+on-site check of aifoundry1 card 0's cooling that the lab-problems page already requests (SH1). For where the heat goes,
+use the thermal-camera plan's view of the back of the board with the on-die voltage map. A shire-scale thermal image
+needs a delidded card that may be lost, an infrared-window cooler and a mid-wave camera, as in the published setups:
+weeks and thousands of dollars <span class="kind">estimate</span>. <a class="more-link" href="#options">Section 5</a></dd>
+</dl>
+</div>
+
+<div class="kpis">
+  <div class="card kpi"><div class="lab">The largest thermal resistance at which an idle 600 MHz card still settles <span class="kind">model</span></div><div class="val" data-v="k1"></div><div class="sub" data-v="k1s"></div></div>
+  <div class="card kpi"><div class="lab">Monte Carlo draws in which a bare 600 MHz card settles at idle <span class="kind">model</span></div><div class="val" data-v="k2"></div><div class="sub" data-v="k2s"></div></div>
+  <div class="card kpi"><div class="lab">Bare aifoundry2, cold power-on to 90 °C at idle (median) <span class="kind">model</span></div><div class="val" data-v="k3"></div><div class="sub" data-v="k3s"></div></div>
+  <div class="card kpi"><div class="lab">How far heat spreads sideways with the heatsink off <span class="kind">model</span></div><div class="val" data-v="k4"></div><div class="sub" data-v="k4s"></div></div>
+</div>
+
+<details class="more" id="request"><summary>The owner's request (29 September 2026, 17:30 PDT), verbatim</summary>
+<blockquote class="owner">“There was a proposal to install a temperature sensor by taping a heatsink and having a
+temperature sensor directly pointed at the chip. Can you study the feasibility of this? Can you actually run one of these
+cards without the heatsink in the lab? Make this a report. Cross-link it to the other reports. I think I had a spaceship
+report about doing the thermal camera. Make a report called something like ‘Feasibility of Esperanto Without Heatsink’
+and cross-link it appropriately.”</blockquote>
+</details>
+
+<details class="terms"><summary>Terms and labels used on this page</summary>
+<p class="small"><i>θ</i> (theta): thermal resistance, the temperature rise in °C per watt of heat. <i>θ<sub>JA</sub></i>
+runs from the junction (the transistors) to the ambient air, <i>θ<sub>JC</sub></i> from the junction to the top of the
+lid (the case), <i>θ<sub>JB</sub></i> from the junction into the board. The <i>lid</i> is the metal plate glued over the
+die; the paste between lid and heatsink is <i>TIM2</i>. <i>Loop gain</i>: θ times the rise of power per degree,
+dP/dT; below 1 a temperature can settle, at 1 or above it cannot. The <i>Foster chain</i> is the six-stage thermal model
+fitted to aifoundry2 with its heatsink. The <i>decay length</i> is the distance over which a hot spot's excess
+temperature falls by a factor of e (2.7) sideways. <i>LWIR</i> and <i>MWIR</i>: long-wave (8–14 µm) and mid-wave
+(3–5 µm) infrared. <i>Delidding</i>: removing the lid to expose the die. <i>Cards</i>: aifoundry2, aifoundry3 and
+aifoundry1 card 1 run at 600 MHz; aifoundry1 card 0 idles at 300 MHz and 399 mV. Numbers carry their kind where it
+matters: <span class="kind">measured</span> on our cards, <span class="kind">from source</span> read from a vendor
+document or an outside source, <span class="kind">derived</span> arithmetic on those, <span class="kind">fitted</span>,
+<span class="kind">model</span> (5th–95th percentile of the Monte Carlo unless stated), <span class="kind">assumed</span>,
+<span class="kind">estimate</span> a rough cost or time, <span class="kind">inference</span>. References in brackets link to
+the lists at the end: [R1] and so on to the project's own record and the vendor's documents, [1] and so on to outside
+sources.</p>
+</details>
+
+<h2 id="package">1. The package and the card</h2>
+<p><b>Answer.</b> The chip sits in a lidded 45 mm package whose datasheet gives no temperature limit and no thermal
+resistance. The card takes up to 88 W at its card-edge 12 V input (an auxiliary 12 V header joins after the current
+sense), has a fan header, and has no power switch the host can operate.</p>
+<ul>
+<li><b>The package.</b> A 45.0 × 45.0 mm flip-chip ball-grid array (FCBGA) with a full-coverage 44.8 mm lid, 2,494 balls
+and a maximum height of 3.95 mm (datasheet Fig. 9-1, p. 33) <span class="cite">[<a href="#src-r1">R1</a>]</span>
+<span class="kind">from source</span>. The lid's top is 1.91 mm above the substrate, which leaves a lid plate about
+1.0–1.3 mm thick <span class="kind">derived</span>. The dev-card manual's photo shows the bare metal lid (p. 2)
+<span class="cite">[<a href="#src-r2">R2</a>]</span>. The die is 25.6 × 22.2 mm
+<span class="cite">[<a href="#src-r10">R10</a>]</span>. Esperanto's Hot Chips 33 slides give the same 45 × 45 mm and
+2,494 balls, with over 30,000 bumps to the die <span class="cite">[<a href="#src-3">3</a>]</span>.</li>
+<li><b>No thermal ratings.</b> The datasheet's thermal section (§9.1) and its ratings (§8.1–8.2) are placeholders: there
+is no maximum junction temperature and no θ<sub>JA</sub> or θ<sub>JC</sub> <span class="cite">[<a href="#src-r1">R1</a>]</span>.
+None was found in Esperanto's public papers and pages either: they give power figures and air cooling, but no junction
+limit, throttling or thermal trip <span class="cite">[<a href="#src-3">3</a>, <a href="#src-4">4</a>, <a href="#src-5">5</a>]</span>. The 90 °C stop used in this project is the owner's rule,
+not a rating.</li>
+<li><b>Power.</b> The card's power tree shows “+12V, 7.3A Max, 88W Max” at the card edge, the ATX auxiliary 12 V
+joining after the current sense, a “12V Fan” branch and a thermal diode (p. 5); the assembly drawing shows a P1 “FAN”
+header and the P7 auxiliary header (p. 3); an LTC4218 hot-swap switch sits on the 12 V input
+<span class="cite">[<a href="#src-r2">R2</a>]</span>. The highest draw on record is 87.8 W
+<span class="cite">[<a href="#src-r3">R3</a>]</span> <span class="kind">measured</span>.</li>
+<li><b>No power control from the host.</b> None is documented. The card is powered whenever its host is, a reset does
+not remove its power, and the lab admin power-cycles a host on request. Shutting the host down removes the card's 12 V,
+but nothing switches the card alone off, and no remote power-on is recorded
+<span class="cite">[<a href="#src-r11">R11</a>, <a href="#src-r12">R12</a>]</span>.</li>
+<li><b>No protection seen at 600 MHz.</b> On firmware builds 0.20.0 and 0.18.0 nothing has been seen to limit the die
+once the clock is at 600 MHz. The PMIC's 75 °C / 75 W alarm watches the PMIC's own temperature reading, which reads 0,
+and on aifoundry2's 0.20.0 build it did not act at 86.9 W (that build's safe state would not change the clock anyway);
+card 1's 0.18.0 build has a real 300 MHz safe state on the same alarm, read from source and untested. There is no
+shutdown path <span class="cite">[<a href="#src-r3">R3</a>, <a href="#src-r4">R4</a>]</span>. The
+stop near 120 °C that the lab lead described is not on record
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating#the-120-c-story">the effect of overheating, §4.4</a>).</li>
+<li><b>Not recorded:</b> which heatsink the lab cards carry, whether each has a fan, and whether the sink also covers the
+DRAM (open question 4 in the full thermal-camera plan) <span class="cite">[<a href="#src-r13">R13</a>]</span>.</li>
+</ul>
+
+<h2 id="runaway">2. Why the chip cannot hold a temperature bare</h2>
+<p><b>Answer.</b> The heatsink is what keeps the chip's leakage from feeding on itself. A card's idle power rises with
+its temperature; with the heatsink, the extra heat of each degree is carried away faster than it is made, and the die
+settles. Without it the thermal resistance is about 3–8 times as large in still air and 1.4–5 times with a fan; the
+loop gain passes 1 before any balance point, and in the model only 1 of 3,600 draws at 600 MHz settles at idle.</p>
+
+<h3 id="resistance">2.1 The thermal resistance, with and without the heatsink</h3>
+<p><b>With the heatsink.</b> The six-stage model fitted to aifoundry2 totals 1.47 °C/W
+<span class="cite">[<a href="#src-r5">R5</a>]</span> <span class="kind">fitted</span>. From each card's idle point, the
+effective resistance is <span data-v="sinkThetas"></span> <span class="kind">derived</span>. Card 0's cooling is about
+1.3–2 times worse than the others'; on 25 September it read 115–117 °C at 600 MHz with nothing running (66–71 W), until
+its firmware dropped it to 300 MHz <span class="cite">[<a href="#src-r3">R3</a>]</span>.</p>
+<details class="more"><summary>The fitted chain, stage by stage</summary>
+<div class="table-wrap"><table id="ftable"></table></div>
+<p class="small">Resistances and time constants from <code>docs/findings/11-thermal-model.md</code> lines 29–31, fitted on
+aifoundry2 only; the heat capacity of each stage is C = τ/R. The first stage's 14 J/K matches the package's own heat
+capacity (section 3), so it is most likely the package into the paste, the second the heatsink's base, and the third its
+body <span class="kind">inference</span>.</p>
+</details>
+<p><b>Without the heatsink.</b> Heat leaves by two parallel paths: from the lid's top into the air, and down through the
+balls into the board, which then acts as a fin <span class="kind">model</span>:</p>
+$$\theta_{JA} = \left[\frac{1}{\theta_{JC} + 1/(h\,A_{\mathrm{lid}})} + \frac{1}{\theta_{JB} + R_{\mathrm{board}}}\right]^{-1}$$
+<p>with a lid area A<sub>lid</sub> of 20.1 cm², θ<sub>JB</sub> of 1–3 °C/W <span class="kind">assumed</span> and the
+board as an annular fin. In still air the lid-top path alone is <span data-v="rLid"></span> °C/W and carries only
+<span data-v="lidShare"></span> of the heat. The two paths together give θ<sub>JA</sub> of <span data-v="thStill"></span>
+°C/W in still air and <span data-v="thFan"></span> °C/W with a 1–2.5 m/s fan <span class="kind">model</span>. The
+vendors' tables for lidded packages with no heatsink sit at and above that: 5.4–7.9 °C/W in still air for AMD's 40–47.5 mm
+packages, 5.7–7.4 for its four lidded 45 mm ones, and 2.7–4.8 °C/W at 1.3–2.5 m/s <span class="cite">[<a href="#src-1">1</a>]</span>; 7.75, 5.80 and 4.98 °C/W for
+Microchip's MPF500T in its 35 mm package in still air, at 1.0 and at 2.5 m/s <span class="cite">[<a href="#src-2">2</a>]</span>. AMD gives its values
+“for device/package comparison purposes only” <span class="cite">[<a href="#src-1">1</a>]</span>. So §2's steady-state analysis carries wider ranges forward that
+hold both the model and the tables: <b>4–12 °C/W in still air and 2–7 °C/W with a fan</b>, against 1.47 °C/W with the
+heatsink.</p>
+<div class="table-wrap"><table id="vtable">
+<thead><tr><th>Package, lidded, no heatsink</th><th class="num">Size</th><th class="num">Still air</th><th class="num">1.0–1.3 m/s</th><th class="num">2.5 m/s</th><th class="num">3.8 m/s</th></tr></thead>
+<tbody>
+<tr><td>AMD FFVA1517</td><td class="num">40 mm</td><td class="num">7.9</td><td class="num">4.8</td><td class="num">4.1</td><td class="num">3.8</td></tr>
+<tr><td>AMD FLVD1924</td><td class="num">45 mm</td><td class="num">7.0</td><td class="num">4.2</td><td class="num">3.5</td><td class="num">3.3</td></tr>
+<tr><td>AMD FLGF1924</td><td class="num">45 mm</td><td class="num">5.7</td><td class="num">3.5</td><td class="num">2.9</td><td class="num">2.8</td></tr>
+<tr><td>AMD FLGA2104</td><td class="num">47.5 mm</td><td class="num">5.4</td><td class="num">3.3</td><td class="num">2.7</td><td class="num">2.6</td></tr>
+<tr><td>Microchip MPF500T-FCG1152</td><td class="num">35 mm</td><td class="num">7.75</td><td class="num">5.80</td><td class="num">4.98</td><td class="num">—</td></tr>
+<tr class="ours"><td>ET-SoC-1 on its card, this page's model</td><td class="num">45 mm</td><td class="num" data-v="vtStill"></td><td class="num" colspan="2" data-v="vtFan"></td><td class="num">—</td></tr>
+<tr class="ours"><td>Carried forward in §2–3</td><td class="num">45 mm</td><td class="num">4–12</td><td class="num" colspan="2">2–7</td><td class="num">—</td></tr>
+</tbody></table></div>
+<p class="small">θ<sub>JA</sub> in °C/W <span class="kind">from source</span>. AMD's columns are its 250, 500 and 750 LFM
+(1.27, 2.54 and 3.81 m/s) on a JEDEC four-layer test board, and its table notes that “All θJA-Effective values assume no
+heat sink” <span class="cite">[<a href="#src-1">1</a>]</span>; Microchip's are still air, 1.0 and 2.5 m/s <span class="cite">[<a href="#src-2">2</a>]</span>. The lid helps even without a heatsink:
+Microchip's MPF300T is 9.50 °C/W in its 29 mm lidded package and 11.21 °C/W in the same package as a bare die <span class="cite">[<a href="#src-2">2</a>]</span>. The model's
+row gives its 5th–95th percentiles, with the fan at 1–2.5 m/s <span class="kind">model</span>.</p>
+
+<h3 id="feedback">2.2 Leakage feedback, and the runaway condition</h3>
+<p>Each card's idle board power follows a law fitted to its cooling runs in September: a fixed part plus a leakage part
+that grows exponentially with the die's temperature <span class="cite">[<a href="#src-r9">R9</a>]</span>
+<span class="kind">fitted</span>. A temperature T* where the heat made equals the heat removed,
+T* = T<sub>amb</sub> + θ·P(T*), is stable only if a small rise in temperature adds less heat than it removes:</p>
+$$\theta \cdot \frac{dP}{dT}\bigg|_{T^*} < 1$$
+<p>This is the stability test used for power devices: a system is “thermally unstable in case the power generation …
+rises faster than the power dissipation … over temperature” <span class="cite">[<a href="#src-10">10</a>]</span>, written dP<sub>tot</sub>/dT<sub>j</sub> &lt;
+1/R<sub>thj-a</sub> for Schottky diodes <span class="cite">[<a href="#src-11">11</a>]</span>. In chips, a higher junction temperature “causes further increase on
+the standby leakage current”, leading to “possibly the thermal runaway” under burn-in <span class="cite">[<a href="#src-12">12</a>]</span>, and a stable point “may be greater
+than the operating limit” <span class="cite">[<a href="#src-13">13</a>]</span>. An Athlon 64 drew 5.3% more power per 13 °C <span class="cite">[<a href="#src-14">14</a>]</span>; aifoundry2's idle
+board power rises 26% from 70 to 83 °C <span class="cite">[<a href="#src-r9">R9</a>]</span>
+<span class="kind">derived</span>.</p>
+<p>With the heatsink, aifoundry2's loop gain is 0.95 at 80 °C and reaches 1 at 81.9 °C; at the fitted intercept of
+22.8 °C the model rests at 62.1 °C and runs away from 98.7 °C, and at 28.0 °C it has no balance point at all
+<span class="cite">[<a href="#src-r9">R9</a>]</span>. That last result is a failure of the fit, not a measure of the
+margin: the fit puts all of the board's power on the die, and every cooling run on record settles
+(<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating#leakage">the effect of overheating, §5.2</a>).
+On the SoC's share of the power, this page's model has aifoundry2 needing θ at or below 1.63–2.17 °C/W for a stable idle
+temperature <span class="kind">model</span>, and its heatsink gives an effective 1.42–1.61 °C/W on board power <span class="kind">derived</span>: a margin, but
+a modest one. Bare, the loop gain at
+60 °C is <span data-v="gain60"></span> <span class="kind">model</span>. Without the feedback, the idle power alone would
+hold the die <span data-v="openLoop"></span> above the room.</p>
+<div id="slopeleg"></div>
+<div class="chart" id="slope"></div>
+<p class="small">Lines: how fast each card's idle board power rises with temperature, the derivative of its fitted law
+(solid over the temperatures it was fitted on, dashed where extrapolated; card 0's law was measured only at 60–64 °C at
+300 MHz, so its shape above that is the model's assumption). Bands and line: 1/θ for each kind of cooling. Where a card's
+line lies above a band, a temperature there cannot settle with that cooling. Lying in or below a band is not enough: a
+stable temperature must also be a balance point, and bare in still air the idle power alone would hold the die of a
+600 MHz card <span data-v="olStill"></span> above the room (the paragraph above), so where a line dips into the
+still-air band at lower temperatures, below about 50 °C, a bare card would still not settle there <span class="kind">model</span>. The slopes are of board power; 80–95% of
+each slope is on the die, which lowers each line by at most a fifth <span class="kind">assumed</span>.</p>
+
+<p>The same condition gives, for each card, the largest θ at which any stable idle temperature exists, from the most
+favourable case (a 22 °C room, the least of the power on the die) to the least (30 °C, the most)
+<span class="kind">model</span>. It sits between the heatsink's value and the bare ranges:</p>
+<div id="thetaleg"></div>
+<div class="chart" id="theta"></div>
+<p class="small">Per card: the largest θ that still allows a stable idle temperature (bar, on the SoC's power), and the
+effective θ with its own heatsink at its measured idle point (mark, on board power). Shaded: the bare package, 4–12 °C/W
+in still air and 2–7 °C/W with a fan. Log scale. Card 0 is at 300 MHz and 399 mV; at 600 MHz its bar would lie with the others <span class="kind">inference</span>.</p>
+
+<p><span class="lead-in">The Monte Carlo.</span> Drawing θ across the bare ranges, the room at 22–30 °C and the die's share of
+the power across its range, <span data-v="mcText"></span> At 116 °C the idle laws give 77, 88 and 120 W on aifoundry2,
+aifoundry3 and card 1 <span class="cite">[<a href="#src-r4">R4</a>]</span>, extrapolated: a bare card at idle would
+approach its 88 W input at about 105–122 °C. No limit has been seen to act before then on these cards. One is on paper:
+card 1's 0.18.0 build has a real 300 MHz safe state on the PMIC's 75 W alarm (from source, untested), which by its
+idle law a bare card 1 would reach near 99 °C <span class="kind">derived</span>; the model leaves it out. The hot-swap switch's current
+limit is not documented.</p>
+<div class="table-wrap wide"><table id="ctable"></table></div>
+
+<h2 id="heating">3. How fast it heats</h2>
+<p><b>Answer.</b> In seconds to minutes. The package has a heat capacity of about 12–17 J/K; the heatsink's base and
+body behind it add hundreds of J/K more. Bare in still air, aifoundry2 reaches 90 °C 1–3 minutes after a cold power-on at
+idle (card 1 in 41–99 s; aifoundry2 with a fan in 1.3–8 minutes, and 4% of its draws never by 900 s), and in about half a
+minute under load if the load could start at power-on. A heatsink lifted from a running card at 73 °C would leave
+<span data-v="hotIdle"></span> at idle and <span data-v="hotLoad"></span> under load <span class="kind">model</span>.</p>
+<p>The die (0.4–0.7 J/K), the lid (7.8–9.7 J/K, taken as copper <span class="kind">assumed</span>) and the part of the substrate that follows them within seconds
+(6.3–7.8 J/K in all) make a package of <span data-v="cJ"></span> J/K <span class="kind">model</span>, which matches the
+14 J/K of the fitted chain's 1.5 s stage. Without the heatsink's 80 and 256 J/K stages behind it, the idle power alone
+heats the die at <span data-v="rateIdle"></span> °C/s at first, and <span data-v="rateLoad"></span> °C/s with 23 W more
+on the die. The model is two nodes, the package and the board around it (30–80 J/K), each losing heat to the air.</p>
+<div class="ck-controls" id="trajctl"></div>
+<div id="trajleg"></div>
+<div class="chart" id="traj"></div>
+<p class="small" id="trajcap">aifoundry2 from a cold power-on.</p>
+
+<p>The time to a given temperature, from a cold card at room temperature, for each card and cooling
+<span class="kind">model</span>:</p>
+<div class="ck-controls" id="tctl"></div>
+<div class="table-wrap"><table id="ttable"></table></div>
+<p class="small" data-v="tNote"></p>
+
+<h3 id="boot-window">3.1 The host-boot window</h3>
+<p>A lab card is powered whenever its host is, and nothing can run on it until the host has booted and loaded the
+driver. How long that takes is not recorded; this page <b>assumes 30–90 s</b> from power-on to the first telemetry
+reading <span class="kind">assumed</span>. By then the bare die, in still air, is already at
+<span data-v="bootA2"></span> on aifoundry2 and <span data-v="bootC1"></span> on card 1. From there to 90 °C:
+<span data-v="bootWin"></span> So in still air bare aifoundry2 would allow one load of about
+<span data-v="burstA2"></span> per power cycle, and card 1 about <span data-v="burstC1"></span>
+<span class="kind">model, boot assumed</span>. The die keeps heating between loads, so no modulated run fits, and short of shutting the
+whole host down nothing switches the card off; no remote power-on is recorded either.</p>
+<details class="more"><summary>The die at the end of the host boot, and the seconds left to 90 °C, per card</summary>
+<div class="table-wrap"><table id="btable"></table></div>
+<p class="small">Each row: 300 draws; the card idles through a boot of 30–90 s, then the load starts. “Already past 90”:
+draws in which the die was at 90 °C or more when the host came up (150 means it had passed 150 °C, where the model stops).</p>
+</details>
+
+<h2 id="sensor-view">4. What a sensor would see</h2>
+<p><b>Answer.</b> With the heatsink off: a plated lid at nearly one temperature, which a camera reads mostly as the
+room's reflection unless it is taped. With it on: nothing of the chip, since the heatsink covers the lid. The only view
+that resolves shires is of a delidded die under an infrared-transparent cooler, which needs a card that may be lost and,
+as in the published setups, a mid-wave camera; in the long-wave band of the lab's camera it needs a germanium,
+zinc-selenide or similar window and a coolant that transmits there, for which a thin mineral-oil film is the untested
+candidate (section 4.2). A thermocouple on the lid adds one accurate
+point, not a picture.</p>
+<div class="chart" id="decay"></div>
+<p class="small">How far a hot spot spreads sideways (decay length, 5th–95th percentile, log scale), against the 3.7 mm
+spacing of the shires and the die's 22–26 mm width <span class="kind">model</span>. A view resolves single shires only
+if its length is near or below the shire spacing.</p>
+<ul>
+<li><b>The bare lid.</b> As a plate cooled by still air (copper <span class="kind">assumed</span>), the lid alone would spread heat over
+<span data-v="dBareLid"></span> mm, many times its own 45 mm width, so the full thermal-camera plan's estimate of about
+200 mm (its target 9) holds <span class="cite">[<a href="#src-r13">R13</a>]</span>. With the heatsink off the heat
+is forced down into the substrate, and the die and lid together still spread it over <span data-v="dBare"></span> mm,
+about the die's width. A 1 W load in one shire would leave a broad bump of <span data-v="bump2"></span> °C over the lid
+at 2 mm and <span data-v="bump10"></span> °C at 10 mm, so “no spatial structure at all” slightly overstates it, but in the raw image no shire could be told from its
+neighbour. Sadiqbatcha et al. argue that a thin spreader “will distribute the heat across its surface” but “the spacial
+locations of the underlying heat-sources do not change”, and recover them in simulation with a 2D Laplacian
+<span class="cite">[<a href="#src-15">15</a>]</span>. Here the lid is 1.0–1.3 mm thick and that bump is about a degree, so
+whether the method would work on this lid depends on the camera's noise, and on taping the lid
+<span class="kind">inference</span>.</li>
+<li><b>Reading it.</b> The model takes the plated lid's emissivity as 0.05–0.3 <span class="kind">assumed</span>. In KIT's
+emissivity test of a packaged chip, the metal read “very inaccurate (emissivity ~0.01). Most heat measured is reflection
+from surroundings” <span class="cite">[<a href="#src-8">8</a>]</span>. An infrared camera therefore reads bare metal low and mostly sees the room, unless
+the metal is covered with tape or paint; KIT covered it with masking tape “with an emissivity of 0.92”, and calibrated
+the camera against the chip's own thermal diode <span class="cite">[<a href="#src-8">8</a>]</span>. An emissivity below the model's range
+would only raise the bare θ a little, through less radiation <span class="kind">inference</span>. A thermocouple reads
+the lid correctly, but one lid temperature adds little to the die's own sensor mean, which the host already has.</li>
+<li><b>With the heatsink on.</b> The lid's decay length falls to <span data-v="dSink"></span> mm (the full plan's target 9
+estimates about 3.7 mm), short enough to show structure, but the heatsink covers it.</li>
+<li><b>A delidded die under an IR-window cooler.</b> Liquid flowing across the bare die under a window transparent to
+infrared shortens the length to <span data-v="dDelid"></span> mm, or <span data-v="dLock"></span> mm with 5–10 Hz lock-in
+excitation: that resolves single shires. Every published cooler of this kind that states its band was imaged by a
+mid-wave camera or microscope, at 3–5, 3.4–5.1 or 2.5–5.1 µm, with mineral oil or a fluorinated liquid as the coolant,
+and sapphire where a window is named (section 6.4). The lab's planned camera, the
+Thermal Master P3, sees long-wave infrared, 8–14 µm, at 25 Hz <span class="cite">[<a href="#src-r13">R13</a>]</span>,
+where sapphire and fused silica fail, Czochralski silicon transmits poorly and fluorinated coolants likely absorb; it
+would need one of the windows and a coolant of section 4.2, a combination none of the setups in section 6.4 used. Realistically this is
+a job for a mid-wave camera.</li>
+<li><b>Long-wave without a window.</b> KIT opens the package and cools the bare silicon from behind, “through the PCB”,
+with a Peltier element <span class="cite">[<a href="#src-8">8</a>]</span>, imaging the exposed silicon from above with an 8–14 µm camera <span class="cite">[<a href="#src-16">16</a>]</span>; a UC Riverside group does the same
+with a FLIR A325sc (7.5–13 µm) on laptop processors, an RTX 4060 and a Coral TPU, and notes that through-PCB cooling's
+“efficiency is significantly reduced” <span class="cite">[<a href="#src-15">15</a>]</span>. On this card the board path starts with θ<sub>JB</sub>, assumed at
+1–3 °C/W, already near the <span data-v="ansMax"></span> °C/W at which an idle card can still settle, so rear cooling
+may not hold it <span class="kind">inference</span>.</li>
+</ul>
+<h3 id="thermocouple">4.1 A thermocouple on the lid</h3>
+<p>Intel defines case temperature at the geometric centre of the lid and solders a 36-gauge type T thermocouple into a
+groove cut in the lid there <span class="cite">[<a href="#src-9">9</a>]</span>, and AMD warns against any thermocouple between the package and the heatsink
+<span class="cite">[<a href="#src-1">1</a>]</span>. A calibrated 36–40 AWG type T bead at the lid's centre has an absolute error of <span data-v="tcErr"></span> °C
+(±2–3 °C for an uncalibrated type K), resolves steps of 0.02–0.1 °C on a 24-bit logger and responds in 0.1–0.5 s
+<span class="kind">model</span>. The model's budget is for a bead in a groove in the heatsink base, pressed on the lid,
+where part of the paste's temperature drop can fall between bead and lid; soldered into the lid, that term goes, so the
+estimate is if anything high <span class="kind">inference</span>. The die's mean sits above the lid by
+θ<sub>JC</sub>·P, about <span data-v="dieLidIdle"></span> °C at idle and <span data-v="dieLidLoad"></span> °C under the
++23 W random-data load, with θ<sub>JC</sub> taken as 0.03–0.10 °C/W <span class="kind">assumed</span>. The host sees only a whole-degree
+mean of the 34 shire sensors and an anonymous peak-hold <span class="cite">[<a href="#src-r3">R3</a>, <a href="#src-r4">R4</a>]</span>.</p>
+<p>What it adds: a physical point between the die and the cooler, which separates the chain's first two stages from the
+heatsink's; θ<sub>JC</sub> to ±30–60% under load; an absolute check on the sensors' mean; and a log that runs when the
+host does not. What it does not add: anything spatial. Re-pasting the heatsink resets that card's fitted thermal
+constants, so the groove belongs on a card whose heatsink is coming off anyway. Intel solders the bead in at
+150 ± 3 °C <span class="cite">[<a href="#src-9">9</a>]</span>; done on a card, the package would see that temperature, above the 115–117 °C card 0 read on
+25 September <span class="kind">inference</span>, which is one more reason the lid groove needs the lab's consent.</p>
+
+<h3 id="windows">4.2 Windows and coolants for the lab's long-wave camera</h3>
+<p>A camera looking at a cooled die sees it through the window and through the coolant film under it, and both must
+transmit in the camera's band. For the P3's 8–14 µm <span class="cite">[<a href="#src-r13">R13</a>]</span>
+<span class="kind">from source</span>:</p>
+<div class="table-wrap"><table id="wtable">
+<thead><tr><th>Window</th><th>Transmits</th><th>At 8–14 µm</th><th>Price, 50 mm</th></tr></thead>
+<tbody>
+<tr><td>Germanium</td><td>“the whole of the 8-14 micron thermal band”; uncoated it loses 53% to reflection; it “becomes opaque at all wavelengths a little above 350K” (77 °C) <span class="cite">[<a href="#src-17">17</a>]</span></td><td>yes, anti-reflection coated and kept below about 77 °C</td><td>about $919, 1 mm, coated for 8–12 µm <span class="cite">[<a href="#src-18">18</a>]</span></td></tr>
+<tr><td>Zinc selenide</td><td>0.5–20 µm; “slightly toxic” <span class="cite">[<a href="#src-19">19</a>]</span></td><td>yes</td><td>about $875, 2 mm, coated for 8–12 µm <span class="cite">[<a href="#src-20">20</a>]</span></td></tr>
+<tr><td>Zinc sulphide (FLIR grade)</td><td>1.0–13 µm <span class="cite">[<a href="#src-21">21</a>]</span></td><td>yes, to 13 µm</td><td>—</td></tr>
+<tr><td>Chalcogenide glass (AMTIR-1)</td><td>0.75–14.0 µm <span class="cite">[<a href="#src-22">22</a>]</span></td><td>yes</td><td>—</td></tr>
+<tr><td>CVD diamond</td><td>“a compelling choice for some more extreme far infrared (8–14 μm) window applications” <span class="cite">[<a href="#src-23">23</a>]</span></td><td>yes</td><td>—</td></tr>
+<tr><td>Barium fluoride</td><td>to about 12.5 µm <span class="cite">[<a href="#src-19">19</a>]</span>; “useful” at 0.265–10 µm <span class="cite">[<a href="#src-24">24</a>]</span></td><td>partly</td><td>$264 at 50.8 mm <span class="cite">[<a href="#src-24">24</a>]</span></td></tr>
+<tr><td>Calcium fluoride</td><td>cuts off at 8.7–10.5 µm, by thickness <span class="cite">[<a href="#src-19">19</a>]</span></td><td>partly, the short end</td><td>about $295, uncoated <span class="cite">[<a href="#src-25">25</a>]</span></td></tr>
+<tr><td>Sapphire</td><td>0.17–5.5 µm <span class="cite">[<a href="#src-26">26</a>]</span></td><td>no</td><td>—</td></tr>
+<tr><td>Fused silica</td><td>poor or unusable in the long-wave band <span class="cite">[<a href="#src-19">19</a>]</span></td><td>no</td><td>—</td></tr>
+<tr><td>Silicon (Czochralski)</td><td>used “primarily in the 3 to 5 micron band”, with an oxygen absorption band at 9 µm <span class="cite">[<a href="#src-27">27</a>]</span>; lattice absorption about 1 cm⁻¹ at 9 µm and over 2 cm⁻¹ at 11–16 µm <span class="cite">[<a href="#src-28">28</a>]</span>; transmission depends on doping <span class="cite">[<a href="#src-29">29</a>]</span></td><td>poorly</td><td>—</td></tr>
+<tr><td>KBr, NaCl</td><td>transmit, but “soluble in water” <span class="cite">[<a href="#src-19">19</a>]</span></td><td>yes, but water-soluble</td><td>—</td></tr>
+</tbody></table></div>
+<p class="small">The Edmund prices are from search-result listings in September 2026 and were not checked on Edmund's
+pages, which block automated fetching; the EKSMA price is from its page. Prices are for the window alone.</p>
+<p><b>Coolants.</b> Fluorolube, a fluorocarbon mulling agent, has “strong carbon-to-fluorine bond absorptions from
+1300 cm−1 onwards to 400 cm−1” <span class="cite">[<a href="#src-30">30</a>]</span>, that is from 7.7 to 25 µm; other
+perfluorinated coolants likely absorb across much of 8–14 µm too <span class="kind">inference</span>. They suit the mid-wave better:
+FC-70 transmits over 90% there, though at the tested film thickness it too appeared opaque to the Stanford group's
+mid-wave microscope <span class="cite">[<a href="#src-31">31</a>]</span>. Mineral oil (Nujol) has its major absorption
+peaks at 2950–2800, 1465–1450 and 1380–1300 cm⁻¹, that is 3.4–3.6, 6.8–6.9 and 7.2–7.7 µm
+<span class="cite">[<a href="#src-32">32</a>]</span>, and serves spectroscopy from 1370 cm⁻¹ into the far infrared,
+except for one band at 720 cm⁻¹ (13.9 µm), at the long edge of the P3's band
+<span class="cite">[<a href="#src-33">33</a>]</span>. A thin mineral-oil film is therefore the coolant to try in the P3's
+band, but it is untested: a spectroscopy mull is a paste pressed between salt plates
+<span class="cite">[<a href="#src-30">30</a>]</span>, not a flowing layer thick enough to carry the heat, and how much
+such a layer absorbs across 8–14 µm is not known <span class="kind">inference</span>. Water is “not transparent”
+<span class="cite">[<a href="#src-14">14</a>]</span>. The film must also be thin for accuracy: with Galden HT-170 the
+error is about 0.1 °C under a plenum of less than 500 µm and up to 43 °C for a 2 mm channel, where the film is
+“effectively opaque” <span class="cite">[<a href="#src-31">31</a>]</span>.</p>
+
+<h2 id="options">5. What would work, ranked</h2>
+<p><b>Answer.</b> Keep the heatsink, and tape a thermocouple to its base during a visit already needed, never between it
+and the lid. For the case temperature as Intel defines it, and only with the lab's consent and at moderate risk, solder
+one into a groove in the lid. Put emissivity tape wherever the camera looks. Anything that takes the heatsink off for good belongs
+on a card set aside for it, on a bench, not in a lab host.</p>
+<div class="table-wrap wide"><table id="otable"></table></div>
+<p class="small" data-v="prereq"></p>
+<p><b>Who does what.</b> AI Foundry's people do all physical work on site; the lab admin powers hosts down and up; the
+lab lead and AI Foundry decide what happens to the cards. The lab's rules still hold for any run: no resets or
+configuration changes, the card lock, and at most 10 s holding a device (<a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/AGENT.md#5-the-labs-etiquette-and-why">AGENT.md §5</a>).
+Tape goes on with the card off, and it is polyimide rather than vinyl (pitfall 10 in the full camera plan) <span class="cite">[<a href="#src-r13">R13</a>]</span>.
+If a heatsink comes off, AMD's guidance for its own lidded packages applies: warm a large part to about 40–60 °C and
+twist the heatsink free; wipe the residue off with a cloth wetted with solvent, as AMD's removal steps do (isopropyl
+alcohol is on its list), without flooding the package, since AMD's soldering chapter warns that washing solvents “can
+compromise the lid adhesive”; and refit with thermal paste (a heatsink without it “is not sufficient”) at 20–50 psi with
+four-corner mounting <span class="cite">[<a href="#src-1">1</a>]</span>.</p>
+<p><b>Why card 0 for the groove.</b> aifoundry1 card 0 is excluded from the measurement campaign
+<span class="cite">[<a href="#src-r14">R14</a>]</span> but works at 300 MHz. It is the lab's card and shares aifoundry1 with
+card 1 and the CI runners, so any physical work there takes both cards down. The lab-problems page already asks for an
+on-site check of its fan, heatsink seating and thermal paste
+(<a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman#req-sh1">request SH1</a>): its heatsink is
+likely to come off then anyway, and its cooling is already suspect (1.3–2 times worse than the others'), so re-pasting it loses no
+fitted constant we rely on. Cutting its lid is a permanent change, and destructive use of any card needs
+AI Foundry's consent. The full camera plan's line (under E-T20) that “aifoundry1's two are unusable” is out of
+date <span class="cite">[<a href="#src-r13">R13</a>]</span>.</p>
+
+<h2 id="others">6. What others have done</h2>
+<p><b>Answer.</b> The outside record agrees with the model. Lidded packages of this size are rated at 5.4–7.9 °C/W with
+no heatsink in still air (section 2.1). In published bare runs a processor that throttled itself kept running, and two
+burned out within a second, one with no protection and one whose board-level protection reacted too slowly; Intel
+requires a tripped Atom 330's power removed within half a second.
+Case temperature is measured with a thermocouple in a groove in the lid, not under the heatsink. Die maps come from
+opened chips under infrared-transparent coolers imaged in the mid-wave band, or cooled through the board and imaged in
+the long-wave. Esperanto publishes no temperature limit for this chip.</p>
+
+<h3 id="others-bare">6.1 Running a processor without its heatsink</h3>
+<ul>
+<li><b>Tom's Hardware, 2001.</b> The site pulled the heatsinks off running processors <span class="cite">[<a href="#src-6">6</a>]</span>. An Athlon 1400, a bare
+die with no thermal protection (Socket A dies were exposed <span class="cite">[<a href="#src-34">34</a>]</span>), burned out: “In less than a second Athlon 1400
+dies the heat death”, its core reaching, by the article's account, 370 °C. An Athlon MP, whose motherboard read its thermal
+diode, crashed “a split second after the heat sink had been taken off” and then died near 300 °C; the diode could handle
+“only 1 degree/s”. A Pentium 4 kept running because “the
+thermal unit throttles down the clock … until a safe temperature has been reached”, and a Pentium III hung but survived
+<span class="cite">[<a href="#src-6">6</a>]</span>.</li>
+<li><b>The trip, and the power behind it.</b> Intel's Atom 330 stops execution through its thermal trip (THERMTRIP)
+“when the junction temperature exceeds approximately 125°C”, but “leakage current can be high enough such that the
+processor cannot be protected … without the removal of power”, so the supply “must be turned off within 500 ms to
+prevent permanent silicon damage due to thermal runaway” <span class="cite">[<a href="#src-7">7</a>]</span>. NVIDIA's GPUs report a slowdown temperature, at
+which they “begin slowing itself down through HW”, and a shutdown temperature <span class="cite">[<a href="#src-35">35</a>]</span>. No rigorous public
+time-to-trip data for bare GPUs was found.</li>
+<li><b>A modern bare run.</b> A Ryzen 3 4300U reportedly ran Crysis with no cooler only after its limit was cut
+“to 90C down from 100C”, and scored 327 in Cinebench R15 <span class="cite">[<a href="#src-36">36</a>]</span>.</li>
+<li><b>A model.</b> KIT's model of an Alpha processor runs at 90 °C cooled and at “> 200◦ C (when both packaging and heat
+sink are removed)” <span class="cite">[<a href="#src-8">8</a>]</span>.</li>
+<li><b>This card.</b> At 600 MHz on the lab's firmware nothing has been seen to act (section 1), and no public source
+gives a limit <span class="cite">[<a href="#src-3">3</a>, <a href="#src-4">4</a>, <a href="#src-5">5</a>]</span>. The
+Athlon MP is the closer case, a protection that existed but acted too slowly: here the host reads only a whole-degree
+mean <span class="cite">[<a href="#src-r3">R3</a>]</span>, and nothing short of a host shutdown cuts the card's power
+<span class="kind">inference</span>. The model's minutes to 90 °C, against the Athlons' second, owe much to the lid and
+package's 12–17 J/K (section 3) <span class="kind">inference</span>.</li>
+</ul>
+
+<h3 id="others-tcase">6.2 Measuring case temperature</h3>
+<ul>
+<li><b>Intel.</b> “The measurement location for TC is the geometric center of the IHS”: the method cuts a groove in the
+lid, lays an “Omega, 36 gauge, ‘T’ Type” thermocouple in it and solders it at 150 ± 3 °C <span class="cite">[<a href="#src-9">9</a>]</span>. This is option 3,
+which on a lab card needs the lab's consent.</li>
+<li><b>AMD.</b> “Thermocouples should not be present between the package and the heat sink”: one there “might cause
+additional mechanical and/or thermal stress” and makes the paste layer “thicker and or uneven” <span class="cite">[<a href="#src-1">1</a>]</span>. This is why
+option 2 tapes the thermocouple to the heatsink's base or fins, outside the joint, and why this page does not put a bead
+in a groove in the heatsink base, in the joint.</li>
+</ul>
+
+<h3 id="others-refit">6.3 Taking a heatsink off, and delidding</h3>
+<ul>
+<li><b>Refitting.</b> AMD's guidance for its FPGA packages: a heatsink without thermal interface material “is not
+sufficient”; the pressure should be “20 to 50 PSI”, “the same for both lidded and lidless”, with four-corner mounting
+and a bracket; remove it by twisting, warming large parts “to about 40°C–60°C” first (Laird's advice for phase-change material,
+which AMD quotes), and wipe the residue away with a cloth wetted with toluene, acetone, an isoparaffin or isopropyl
+alcohol; its soldering chapter warns separately that washing solvents “can compromise the lid adhesive”
+<span class="cite">[<a href="#src-1">1</a>]</span>.</li>
+<li><b>Delidding.</b> The exposed dies of Socket A processors “were susceptible to damage” when coolers were installed
+incorrectly or systems were handled roughly <span class="cite">[<a href="#src-34">34</a>]</span>; soldered lids need 165–180 °C to lift,
+and delidding “voids the manufacturer's warranty” <span class="cite">[<a href="#src-37">37</a>]</span>; “With one slip, you can damage the surface-mounted
+components” <span class="cite">[<a href="#src-38">38</a>]</span>. A bare-die package also runs hotter with no heatsink: Microchip's MPF300T is 11.21 °C/W as a
+bare die against 9.50 lidded <span class="cite">[<a href="#src-2">2</a>]</span>.</li>
+</ul>
+
+<h3 id="others-imaging">6.4 Imaging a working die</h3>
+<p>Published power maps of working processors, and what each took <span class="kind">from source</span>:</p>
+<div class="table-wrap wide"><table id="itable">
+<thead><tr><th>Group</th><th>Chip, window, coolant</th><th>Camera band</th><th>Heat removed, accuracy</th></tr></thead>
+<tbody>
+<tr><td>IBM (Hamann et al., 2007) <span class="cite">[<a href="#src-39">39</a>, <a href="#src-40">40</a>]</span></td><td>“effectively cooled using an IR-transparent heat sink”; the patent's window “polished silicon, quartz, sapphire or diamond”, coolant “perflouro-octane, perflouro-hexane, octane, or hexane” (or “water or a cold gas”) in a 0.1–20 mm duct</td><td>not stated in the abstract or patent; quartz and sapphire pass only the mid-wave, and a companion paper reportedly used an InSb (mid-wave) detector</td><td>“up to 200 Watts/cm2 with a corresponding temperature increase of 70 degrees C”</td></tr>
+<tr><td>UC Santa Cruz (Mesa-Martínez et al., 2007 and 2010) <span class="cite">[<a href="#src-14">14</a>, <a href="#src-41">41</a>]</span></td><td>a “non-lidded” Athlon 64 under mineral oil “designed for infrared spectrography”; water rejected; “a 3mm thick sapphire window” in 2010</td><td>FLIR SC-4000 InSb, “3-5μm”; “Si has a fairly uniform 55% transmittance from 1.5μm to 6μm”</td><td>“up to 100W”</td></tr>
+<tr><td>Brown (Reda, Nowroz, Dev) <span class="cite">[<a href="#src-42">42</a>, <a href="#src-43">43</a>]</span></td><td>oil in a “1 mm” channel between “two infrared-transparent sapphire windows”, the oil doubling as the thermal interface</td><td>FLIR SC5600, “2.5 – 5.1 µm”</td><td>oil at “5 m/s” and “20 Celsius”; “about 90% of the heat flows upward”</td></tr>
+<tr><td>Stanford, with AMD (Hom et al., 2012) <span class="cite">[<a href="#src-31">31</a>]</span></td><td>Galden HT-170 over the die under a sapphire window; FC-70 transmits over 90% in the mid-wave, though at the tested film thickness it too appeared opaque</td><td>mid-wave, 3.4–5.1 µm (an infrared microscope)</td><td>“~0.1 °C error … if the fluid plenum height is less than 500 μm. For a 2 mm channel, the error can be as high as 43°C”</td></tr>
+<tr><td>KIT (Amrouch and Henkel, 2015) <span class="cite">[<a href="#src-8">8</a>, <a href="#src-16">16</a>]</span></td><td>an opened, bare-silicon chip, no window, cooled “through the PCB” by a Peltier element; masking tape (emissivity 0.92) and the chip's thermal diode to calibrate the camera</td><td>DIAS PYROVIEW 380L, 8–14 µm</td><td>metal package: emissivity “~0.01”, mostly reflection</td></tr>
+<tr><td>UC Riverside (Sadiqbatcha et al., 2019; Lu and Tan, 2024) <span class="cite">[<a href="#src-15">15</a>]</span></td><td>laptop processors, an RTX 4060, a Coral TPU; cooled through the board</td><td>FLIR A325sc, 7.5–13 µm</td><td>through-PCB cooling “efficiency is significantly reduced”</td></tr>
+</tbody></table></div>
+<p><b>Lock-in thermography.</b> The chip's power is “periodically amplitude-modulated”, which reveals heat sources “of
+a few µW corresponding to a local temperature modulation of a few µK”; it works for “backside inspection”, and at 1–25 Hz it sees “through 100-400 µm package material”. The same
+review notes that the mid-wave gives better spatial resolution <span class="cite">[<a href="#src-29">29</a>]</span>. This page's lock-in decay lengths
+(section 4) assume 5–10 Hz.</p>
+
+<h3 id="others-esperanto">6.5 Esperanto's own public numbers</h3>
+<ul>
+<li><b>Hot Chips 33 (2021).</b> TSMC 7 nm, 570 mm²; “Power typically &lt; 20 watts, can be adjusted for 10 to 60+ watts
+under SW control”; a 45 × 45 mm package with 2,494 balls and over 30,000 bumps; target cards “must be air-cooled”, and
+on a low-profile PCIe card the chip's budget “increases to ~60W” <span class="cite">[<a href="#src-3">3</a>]</span>.</li>
+<li><b>IEEE Micro (2022).</b> At “around 0.4 V, one chip would take about 20 W”; the Hot Chips performance numbers “were
+projections based on gate-level simulations” <span class="cite">[<a href="#src-4">4</a>]</span>. The 20 W is a modelled figure, not a measurement.</li>
+<li><b>The product page.</b> The card has a “Full set of monitoring sensors” <span class="cite">[<a href="#src-5">5</a>]</span>.</li>
+<li><b>Not found:</b> any public junction-temperature limit, throttling or thermal-trip specification.</li>
+</ul>
+
+<h2 id="other-pages">7. What our other pages already say</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating">The effect of overheating</a>: at 600 MHz
+nothing limits the die on the cards' builds; the DRAM beside it has no thermometer and a fixed refresh; one swing to
+120 °C costs 5.6–7.6 times the solder fatigue of a swing to 65 °C <span class="cite">[<a href="#src-r4">R4</a>]</span>.
+A bare run would be such a swing, at best.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-placement">Where the work sits</a>: placement changes the
+time to the governor's 66 °C step. The same work took 1.62 times as long on aifoundry3's perimeter as in its interior
+(99% interval 1.51–1.73), and 2.04 times as long in short bursts on card 1, where the sustained test was insufficient;
+the host reads only the mean. A bare lid, spreading heat over <span data-v="dBare"></span> mm, would not show where the
+work sits.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-thermal-camera-experiments#experiments">The thermal-camera
+plan</a>: removing a heatsink stays off shared cards without the lab admin (E-T20 in its full plan), since the bare lid
+is (nearly) isothermal (section 4); its view of the back of the board is the spatial channel that survives with the
+heatsink on.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature</a>: the chip's 35
+sensors, and why the host sees one mean.</li>
+</ul>
+
+<h2 id="method">8. Method and caveats</h2>
+<p>Every number on this page comes from the cards' own record, the vendor's documents, the owner's thermal-camera
+plan, the model published with this page or the outside sources numbered at the end, and carries its kind where it
+matters (the terms at the top). All of it is arithmetic on the record; no card was used. The outside sources were read, not reproduced, and their
+caveats are listed with them. The model, <code>nohs_calc.py</code>, draws each uncertain
+input from its range (uniformly, or log-uniformly for the resistances and the board's conductance) and reports the 5th,
+50th and 95th percentiles; its seed is fixed, and its full printout is published beside it.</p>
+<details class="more"><summary>Which inputs are measured, and which are estimates</summary>
+<ul>
+<li><b>Measured or fitted on our cards:</b> each card's idle power law and idle point; card 0's power at 300 MHz
+(12,035 samples at 60–64 °C, <code>card0_guard.py</code>); aifoundry2's Foster chain; the heating times with the heatsink;
+the peak draw.</li>
+<li><b>From the vendor:</b> the package's dimensions, the card's 88 W input and its power tree.</li>
+<li><b>Estimates:</b> θ<sub>JB</sub> 1–3 °C/W and θ<sub>JC</sub> 0.03–0.10 °C/W; the board's in-plane conductance;
+heat-transfer coefficients in still air and under a 1–2.5 m/s fan; the lid's emissivity; the share of idle power that is
+off the die (3.8–9 W by card) and the share of its slope on the die (0.80–0.95); the heat capacities of the package
+(9–18 J/K in the transient model) and of the nearby board (30–80 J/K); a room of 22–30 °C; and the 30–90 s host boot.
+The unmetered 13.7–17.5 W at 70 °C is split between die and board only by inference
+<span class="cite">[<a href="#src-r8">R8</a>]</span>. The §3 transients draw the lid and board paths directly, an
+effective θ of about 3.8–7.8 °C/W in still air and 1.9–3.8 °C/W with a fan <span class="kind">model</span>.</li>
+<li><b>The laws are extrapolated.</b> They were fitted up to 82–85 °C. Bare, the loop gain passes 1 inside that range,
+so the verdict does not rest on the extrapolation; the times to 120 °C, the powers at 116 °C, card 1's 75 W point near 99 °C,
+card 0's law above 64 °C and the with-heatsink threshold of 98.7 °C do.</li>
+</ul>
+</details>
+<p><b>What would change the answer.</b> A bare θ<sub>JA</sub> below 1.2–2.2 °C/W, which only a heatsink provides. A much
+flatter leakage law, like card 0's at 300 MHz, where the card is marginal <span class="kind">model</span>. A firmware limit
+that acts at 600 MHz, or a relay on the card's 12 V, which would make short bare runs survivable but not informative.</p>
+<p><b>Data and reproduction.</b> Everything is in
+<a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-30-without-heatsink">docs/reports/data/2026-09-30-without-heatsink</a>:
+the model (<code>nohs_calc.py</code>, its printout <code>nohs_calc.out</code>), card 0's analysis
+(<code>card0_guard.py</code>, <code>card0_guard.out</code>), and this page's data (<code>make_page_data.py</code>,
+<code>page.json</code>).</p>
+<pre><code>V=docs/reports/data/2026-09-30-without-heatsink
+python3 $V/nohs_calc.py > $V/nohs_calc.out        # the model, seed 20260929 (about 3 minutes)
+python3 $V/card0_guard.py > $V/card0_guard.out    # card 0's idle power at 300 MHz, from the guard samples
+python3 $V/make_page_data.py                      # page.json: checks nohs_calc.out, adds the trajectories
+python3 scripts/build-report.py esperanto-without-heatsink $V/page.json docs/reports/2026-09-30-esperanto-without-heatsink.html</code></pre>
+
+<h2 id="sources">Sources</h2>
+<p class="small">The ET-SoC-1's documents are in <a href="https://github.com/aifoundry-org/et-man">aifoundry-org/et-man</a>;
+repository paths are in <a href="https://github.com/yaroslavvb/et-soc1-prototyping">yaroslavvb/et-soc1-prototyping</a>,
+with line numbers as of 30 September 2026.</p>
+<ol class="srcs">
+<li id="src-r1"><b>[R1]</b> Esperanto, <i>ET Preliminary Datasheet</i>, Rev 1.0: Fig. 9-1 (p. 33), §8.1–8.2 and §9.1.
+<br><span class="used">Used: the package's dimensions; the missing ratings.</span></li>
+<li id="src-r2"><b>[R2]</b> Esperanto, <i>ET-PCIe-Dev-Card-V3</i>: pp. 2, 3 and 5, and its text on the input switch.
+<br><span class="used">Used: the lid photo, the fan and auxiliary headers, the 88 W input, the hot-swap switch.</span></li>
+<li id="src-r3"><b>[R3]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/14-card-behaviour.md">docs/findings/14-card-behaviour.md</a>, lines 138, 148–151, 161–177, 204–229, 268, 333–340 and 385–388.
+<br><span class="used">Used: the peak draw, the card table, the governor table and the PMIC alarm on each build, the protection at 600 MHz, the sensors the host sees, card 0 at 115–117 °C on 25 September.</span></li>
+<li id="src-r4"><b>[R4]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/05-claims.md">docs/findings/05-claims.md</a>, lines 497–499, 651–666 and 934–936.
+<br><span class="used">Used: the power on the die, the effect-of-overheating conclusions, the idle laws at 116 °C.</span></li>
+<li id="src-r5"><b>[R5]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/11-thermal-model.md">docs/findings/11-thermal-model.md</a>, lines 18 and 29–33.
+<br><span class="used">Used: the Foster chain, its intercepts, the load in the heatsink trajectory.</span></li>
+<li id="src-r6"><b>[R6]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/12-heat-management.md">docs/findings/12-heat-management.md</a>, lines 20 and 28.
+<br><span class="used">Used: 80 → 90 °C with the heatsink in 19–26 s (random normal) and 107–167 s (ones); the matmul's 27.2 W.</span></li>
+<li id="src-r7"><b>[R7]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/16-dvfs-and-leakage.md">docs/findings/16-dvfs-and-leakage.md</a>, lines 187–191.
+<br><span class="used">Used: the metered rails at aifoundry2's idle point.</span></li>
+<li id="src-r8"><b>[R8]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/findings/19-observability-and-the-unmetered.md">docs/findings/19-observability-and-the-unmetered.md</a>, lines 36, 51–53 and 67.
+<br><span class="used">Used: the unmetered power and its split, the regulator loss.</span></li>
+<li id="src-r9"><b>[R9]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-28-overheating/analysis">docs/reports/data/2026-09-28-overheating/analysis</a>: <code>idle_vs_temp.txt</code> lines 1–24 and <code>runaway.txt</code> lines 1–4.
+<br><span class="used">Used: each card's idle law and its fitted range; the loop gain with the heatsink.</span></li>
+<li id="src-r10"><b>[R10]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-27-chip-diagram/research/facts-numbers.json">docs/reports/data/2026-09-27-chip-diagram/research/facts-numbers.json</a>, line 1356.
+<br><span class="used">Used: the die's size and the shire spacing.</span></li>
+<li id="src-r11"><b>[R11]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/getting-started.md">docs/getting-started.md</a>, lines 287–288.
+<br><span class="used">Used: power cycles are the lab admin's, on request.</span></li>
+<li id="src-r12"><b>[R12]</b> <a href="https://spacesheep.dev/@yaroslavvb/aifoundry-lab-problems-for-roman">What trips people up on the AI Foundry lab</a> (25 and 27 September), requests SH1 and SH6, and problem H21.
+<br><span class="used">Used: no console or out-of-band access on record; the requested on-site check of card 0's cooling.</span></li>
+<li id="src-r13"><b>[R13]</b> <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-thermal-camera-experiments">Pointing a thermal camera at the ET-SoC-1</a> (the owner's plan), its instrument and experiments; and the full plan behind it, <code>plan.md</code>, linked from the page's footer: §1, §3 target 9, E-T20, §7 pitfall 10 and §8 questions 4 and 6.
+<br><span class="used">Used: the P3's band and rate; the lid decay lengths it estimated (target 9); E-T20 and its line on aifoundry1's cards; polyimide tape (pitfall 10); open questions 4 and 6; the heatsink as the state behind the 107 against 162–167 s scatter (§1).</span></li>
+<li id="src-r14"><b>[R14]</b> <a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md">docs/reports/data/2026-09-25-claims-v3/AMENDMENTS.md</a>, lines 841–849.
+<br><span class="used">Used: card 0 is excluded from the campaign.</span></li>
+</ol>
+<h3 class="srch" id="outside-sources">Outside sources</h3>
+<p class="small">Numbered in order of first citation, each with what the page uses from it. Read in September 2026.
+Caveats: the Edmund Optics prices come from search-result listings, since Edmund's pages block automated fetching; the
+full Hamann et al. paper was not read, so IBM's camera band is not confirmed (its windows and a companion paper point to the mid-wave); the
+20 W at 0.4 V figure for ET-SoC-1 is from a modelled study, not a measurement.</p>
+<ol class="srcs" id="outside-list">
+<li id="src-1"><b>[1]</b> AMD, <i>UltraScale and UltraScale+ FPGAs Packaging and Pinouts</i>, UG575 v1.22 (10 March 2026), chapters 7, 10–11: <a href="https://docs.amd.com/v/u/en-US/ug575-ultrascale-pkg-pinout">docs.amd.com/v/u/en-US/ug575-ultrascale-pkg-pinout</a> (PDF: <a href="https://docs.amd.com/api/khub/documents/GnuVZDIoTcrlIuu8Aok5XQ/content">docs.amd.com/api/khub/documents/GnuVZDIoTcrlIuu8Aok5XQ/content</a>).
+<br><span class="used">Used: Table 10-1’s θJA with no heatsink and its conditions; no thermocouple between package and heatsink; thermal paste, 20–50 psi, removal by twisting at 40–60 °C (Laird's advice for phase-change material, quoted in chapter 11) and the solvent wipe of chapter 11; chapter 7's warning that washing solvents can compromise the lid adhesive.</span></li>
+<li id="src-2"><b>[2]</b> Microchip, <i>PolarFire FPGA Packaging and Pin Descriptions</i>, UG0722, Table 9-1: <a href="https://ww1.microchip.com/downloads/aemDocuments/documents/FPGA/ProductDocuments/PackagingSpecifications/polarfire_fpga_packaging_and_pin_descriptions_ug0722_v12.pdf">ww1.microchip.com/downloads/aemDocuments/documents/FPGA/ProductDocuments/PackagingSpecifications/polarfire_fpga_packaging_and_pin_descriptions_ug0722_v12.pdf</a>.
+<br><span class="used">Used: the MPF500T-FCG1152’s θJA in still air, at 1.0 and at 2.5 m/s; the MPF300T in its 29 mm package, lidded (9.50 °C/W) and as a bare die (11.21 °C/W).</span></li>
+<li id="src-3"><b>[3]</b> D. Ditzel, Esperanto ET-SoC-1, Hot Chips 33 (2021), slides: <a href="https://hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf">hc33.hotchips.org/assets/program/conference/day2/HC2021.Esperanto.Dave_Ditzel.presentation.v1submitted.pdf</a>.
+<br><span class="used">Used: the process and die area, the power figures, the package, “must be air-cooled”, the ~60 W card budget.</span></li>
+<li id="src-4"><b>[4]</b> D. Ditzel et al., IEEE Micro (2022): <a href="https://www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf">www.esperanto.ai/wp-content/uploads/2022/05/Dave-IEEE-Micro.pdf</a>.
+<br><span class="used">Used: about 20 W at around 0.4 V, a modelled figure; the Hot Chips performance numbers as gate-level projections.</span></li>
+<li id="src-5"><b>[5]</b> Esperanto, products page: <a href="https://www.esperanto.ai/products/">www.esperanto.ai/products/</a>.
+<br><span class="used">Used: “Full set of monitoring sensors”.</span></li>
+<li id="src-6"><b>[6]</b> Tom’s Hardware (Pabst), “Hot Spot” (2001), pages 3–6: <a href="https://www.tomshardware.com/reviews/hot-spot,365-3.html">www.tomshardware.com/reviews/hot-spot,365-3.html</a> (also 365-4, 365-5 and 365-6).
+<br><span class="used">Used: the Athlon 1400, Athlon MP, Pentium 4 and Pentium III run with their heatsinks pulled; the Athlon MP's board protection, too slow at “only 1 degree/s”, and its death near 300 °C (page 5); both Athlons dead “within fractions of a second” (page 6).</span></li>
+<li id="src-7"><b>[7]</b> Intel, <i>Atom Processor 330 Datasheet</i>, 320528-003, §3.5 and §4.3: <a href="https://www.intel.la/content/dam/doc/datasheet/atom-330-datasheet.pdf">www.intel.la/content/dam/doc/datasheet/atom-330-datasheet.pdf</a>.
+<br><span class="used">Used: the trip at about 125 °C (§4.3, THRMTRIP#), leakage beyond its reach, and the supply off within 500 ms (§3.5).</span></li>
+<li id="src-8"><b>[8]</b> H. Amrouch and J. Henkel (KIT), “Lucid Infrared Thermography of Thermally-Constrained Processors”, ISLPED 2015: <a href="https://ces.itec.kit.edu/img/Lucid_Infrared_Thermography_of_Thermally_Constrained_Processors.pdf">ces.itec.kit.edu/img/Lucid_Infrared_Thermography_of_Thermally_Constrained_Processors.pdf</a>.
+<br><span class="used">Used: the metal package’s emissivity of about 0.01; masking tape at 0.92; cooling through the PCB with a Peltier; the Alpha model above 200 °C bare.</span></li>
+<li id="src-9"><b>[9]</b> Intel, <i>Thermal and Mechanical Design Guidelines</i>, 318734-017, §3.4 and Appendix D: <a href="https://www.intel.pl/content/dam/doc/design-guide/core-2-e8000-e7000-pentium-e6000-e5000-celeron-e3000-guide.pdf">www.intel.pl/content/dam/doc/design-guide/core-2-e8000-e7000-pentium-e6000-e5000-celeron-e3000-guide.pdf</a>.
+<br><span class="used">Used: case temperature at the lid’s centre; the groove; the 36-gauge type T thermocouple soldered at 150 ± 3 °C.</span></li>
+<li id="src-10"><b>[10]</b> Infineon, application note on linear-mode operation and the safe operating diagram of MOSFETs (2017): <a href="https://www.infineon.com/dgdl/Infineon-ApplicationNote_Linear_Mode_Operation_Safe_Operation_Diagram_MOSFETs-AN-v01_00-EN.pdf?fileId=db3a30433e30e4bf013e3646e9381200">www.infineon.com/dgdl/Infineon-ApplicationNote_Linear_Mode_Operation_Safe_Operation_Diagram_MOSFETs-AN-v01_00-EN.pdf?fileId=db3a30433e30e4bf013e3646e9381200</a>.
+<br><span class="used">Used: the definition of thermal instability.</span></li>
+<li id="src-11"><b>[11]</b> Taiwan Semiconductor, “Thermal Runaway on Schottky Diodes” (white paper, 2020): <a href="https://services.taiwansemi.com/storage/resources/white-paper-6/White-Paper_Thermal-Runaway-on-Schottky-Diodes_EN_20200901.pdf">services.taiwansemi.com/storage/resources/white-paper-6/White-Paper_Thermal-Runaway-on-Schottky-Diodes_EN_20200901.pdf</a>.
+<br><span class="used">Used: the condition dPtot/dTj &lt; 1/Rthj-a.</span></li>
+<li id="src-12"><b>[12]</b> A. Vassighi and M. Sachdev, IEEE Transactions on Device and Materials Reliability (2006): <a href="https://doi.org/10.1109/TDMR.2006.876577">doi.org/10.1109/TDMR.2006.876577</a> (abstract via <a href="https://api.openalex.org/works/doi:10.1109/TDMR.2006.876577">api.openalex.org/works/doi:10.1109/TDMR.2006.876577</a>).
+<br><span class="used">Used: leakage feedback and thermal runaway in chips under burn-in.</span></li>
+<li id="src-13"><b>[13]</b> G. Bhat, S. Gumussoy and U. Ogras, arXiv:2003.11081: <a href="https://arxiv.org/abs/2003.11081">arxiv.org/abs/2003.11081</a>.
+<br><span class="used">Used: an unstable system runs away; a stable point may exceed the operating limit.</span></li>
+<li id="src-14"><b>[14]</b> F. J. Mesa-Martínez et al., ISCA 2007: <a href="https://users.soe.ucsc.edu/~renau/docs/isca07.pdf">users.soe.ucsc.edu/~renau/docs/isca07.pdf</a>.
+<br><span class="used">Used: the Athlon 64’s 5.3% per 13 °C; the mineral-oil cooler, its camera and 100 W; silicon’s 55% transmittance; water rejected as not transparent.</span></li>
+<li id="src-15"><b>[15]</b> S. Sadiqbatcha et al., DATE 2019: <a href="https://past.date-conference.com/proceedings-archive/2019/pdf/0519.pdf">past.date-conference.com/proceedings-archive/2019/pdf/0519.pdf</a>; and Lu and Tan, MLCAD 2024: <a href="https://par.nsf.gov/servlets/purl/10542848">par.nsf.gov/servlets/purl/10542848</a>.
+<br><span class="used">Used: the FLIR A325sc at 7.5–13 µm, the chips imaged, the reduced efficiency of through-PCB cooling; that a thin spreader does not move the heat sources, which a 2D Laplacian recovers in simulation.</span></li>
+<li id="src-16"><b>[16]</b> DIAS Infrared, PYROVIEW 380L compact (the page now lists its successor, the 380L compact+): <a href="https://dias-infrared.com/products/infrared-cameras/infraredcameras-pyroview-compact">dias-infrared.com/products/infrared-cameras/infraredcameras-pyroview-compact</a>.
+<br><span class="used">Used: the 8–14 µm band, as listed for the current 380L compact+; KIT used the earlier 380L.</span></li>
+<li id="src-17"><b>[17]</b> Crystran, germanium: <a href="https://www.crystran.com/optical-materials/germanium-ge">www.crystran.com/optical-materials/germanium-ge</a>.
+<br><span class="used">Used: the 8–14 µm band, the 53% reflection loss, opacity above about 350 K.</span></li>
+<li id="src-18"><b>[18]</b> Edmund Optics #26503, 50 mm × 1 mm germanium window, AR-coated for 8–12 µm: <a href="https://www.edmundoptics.com/p/50mm-dia-x-1mm-thick-8-12mum-ar-coated-ge-window/26503/">www.edmundoptics.com/p/50mm-dia-x-1mm-thick-8-12mum-ar-coated-ge-window/26503/</a>.
+<br><span class="used">Used: about $919, from a search-result listing (September 2026), not checked on the page.</span></li>
+<li id="src-19"><b>[19]</b> Specac, TN21-04, transmission windows: <a href="https://specac.com/wp-content/uploads/2022/06/TN21-04-Transmission-Windows.pdf">specac.com/wp-content/uploads/2022/06/TN21-04-Transmission-Windows.pdf</a>.
+<br><span class="used">Used: zinc selenide, barium and calcium fluoride, fused silica, KBr and NaCl.</span></li>
+<li id="src-20"><b>[20]</b> Edmund Optics #23151, 50 mm × 2 mm zinc-selenide window, coated for 8–12 µm: <a href="https://www.edmundoptics.com/p/50mm-dia-x-2mm-thickness-8-12mum-coated-znse-window/23151/">www.edmundoptics.com/p/50mm-dia-x-2mm-thickness-8-12mum-coated-znse-window/23151/</a>.
+<br><span class="used">Used: about $875, from a search-result listing (September 2026), not checked on the page.</span></li>
+<li id="src-21"><b>[21]</b> Crystran, zinc sulphide, FLIR grade: <a href="https://www.crystran.com/optical-materials/zinc-sulphide-zinc-sulfide-flir-zns/">www.crystran.com/optical-materials/zinc-sulphide-zinc-sulfide-flir-zns/</a>.
+<br><span class="used">Used: 1.0–13 µm.</span></li>
+<li id="src-22"><b>[22]</b> Knight Optical, AMTIR: <a href="https://www.knightoptical.com/custom/infrared-optics/amtir/">www.knightoptical.com/custom/infrared-optics/amtir/</a>.
+<br><span class="used">Used: AMTIR-1 at 0.75–14.0 µm.</span></li>
+<li id="src-23"><b>[23]</b> T. P. Mollart and K. L. Lewis, “The Infrared Optical Properties of CVD Diamond at Elevated Temperatures”, physica status solidi (a) 186 (2001): <a href="https://doi.org/10.1002/1521-396X(200108)186:2<309::AID-PSSA309>3.0.CO;2-I">doi.org/10.1002/1521-396X(200108)186:2&lt;309::AID-PSSA309&gt;3.0.CO;2-I</a>.
+<br><span class="used">Used: CVD diamond for “some more extreme” 8–14 µm windows.</span></li>
+<li id="src-24"><b>[24]</b> EKSMA Optics, barium fluoride windows: <a href="https://eksmaoptics.com/optical-components/uv-and-ir-optics/barium-fluoride-baf2-windows/">eksmaoptics.com/optical-components/uv-and-ir-optics/barium-fluoride-baf2-windows/</a>.
+<br><span class="used">Used: the useful range 0.265–10 µm; $264 at 50.8 mm.</span></li>
+<li id="src-25"><b>[25]</b> Edmund Optics #7803, 50 mm uncoated calcium-fluoride window: <a href="https://www.edmundoptics.com/p/50mm-diameter-uncoated-calcium-fluoride-window/7803/">www.edmundoptics.com/p/50mm-diameter-uncoated-calcium-fluoride-window/7803/</a>.
+<br><span class="used">Used: about $295, from a search-result listing (September 2026), not checked on the page.</span></li>
+<li id="src-26"><b>[26]</b> Crystran, sapphire: <a href="https://www.crystran.com/optical-materials/sapphire-al2o3">www.crystran.com/optical-materials/sapphire-al2o3</a>.
+<br><span class="used">Used: 0.17–5.5 µm.</span></li>
+<li id="src-27"><b>[27]</b> Crystran, silicon: <a href="https://www.crystran.com/optical-materials/silicon-si/">www.crystran.com/optical-materials/silicon-si/</a>.
+<br><span class="used">Used: silicon as a 3–5 µm window; the oxygen band at 9 µm in Czochralski silicon.</span></li>
+<li id="src-28"><b>[28]</b> Topsil, HiTran application note (October 2013): <a href="https://www.topsil.com/wp-content/uploads/2023/05/hitran_application_note_october2013.pdf">www.topsil.com/wp-content/uploads/2023/05/hitran_application_note_october2013.pdf</a>.
+<br><span class="used">Used: the lattice absorption at 9 and 11–16 µm.</span></li>
+<li id="src-29"><b>[29]</b> O. Breitenstein et al., lock-in thermography, ASM 2011: <a href="https://www-old.mpi-halle.mpg.de/mpi/publi/pdf/10496_11.pdf">www-old.mpi-halle.mpg.de/mpi/publi/pdf/10496_11.pdf</a>.
+<br><span class="used">Used: lock-in modulation, its µW and µK sensitivity, backside inspection through 100–400 µm at 1–25 Hz; silicon’s doping-dependent transmission; the mid-wave’s resolution.</span></li>
+<li id="src-30"><b>[30]</b> Wikipedia, “Mulling (spectroscopy)”: <a href="https://en.wikipedia.org/wiki/Mulling_(spectroscopy)">en.wikipedia.org/wiki/Mulling_(spectroscopy)</a>.
+<br><span class="used">Used: Fluorolube’s carbon–fluorine absorptions from 1300 to 400 cm⁻¹; a mull pressed between salt plates.</span></li>
+<li id="src-31"><b>[31]</b> Hom et al. (Stanford, with AMD), ITHERM 2012: <a href="https://nanoheat.stanford.edu/wp-content/uploads/2012/09/ITHERM2012_Lewis_FINAL.pdf">nanoheat.stanford.edu/wp-content/uploads/2012/09/ITHERM2012_Lewis_FINAL.pdf</a>.
+<br><span class="used">Used: the Galden HT-170 plenum error and its opaque 2 mm film; FC-70’s mid-wave transmission, and that it too appeared opaque to their microscope; the sapphire window; the 3.4–5.1 µm band.</span></li>
+<li id="src-32"><b>[32]</b> Wikipedia, “Nujol”: <a href="https://en.wikipedia.org/wiki/Nujol">en.wikipedia.org/wiki/Nujol</a>.
+<br><span class="used">Used: mineral oil’s major absorption peaks.</span></li>
+<li id="src-33"><b>[33]</b> International Crystal Laboratories, Fluorolube and Nujol: <a href="https://www.internationalcrystal.net/fluorolube-nujol/">www.internationalcrystal.net/fluorolube-nujol/</a>.
+<br><span class="used">Used: Nujol from 1370 cm⁻¹ into the far infrared, with one absorption band at 720 cm⁻¹.</span></li>
+<li id="src-34"><b>[34]</b> Wikipedia, “Socket A”: <a href="https://en.wikipedia.org/wiki/Socket_A">en.wikipedia.org/wiki/Socket_A</a>.
+<br><span class="used">Used: Socket A dies were exposed, and their corners were susceptible to damage when coolers were installed incorrectly or systems handled roughly.</span></li>
+<li id="src-35"><b>[35]</b> nvidia-smi manual page: <a href="https://www.mankier.com/1/nvidia-smi">www.mankier.com/1/nvidia-smi</a>.
+<br><span class="used">Used: the GPU slowdown and shutdown temperatures.</span></li>
+<li id="src-36"><b>[36]</b> TechRadar, an AMD Ryzen 4000 APU running Crysis without a CPU cooler: <a href="https://www.techradar.com/news/so-an-amd-ryzen-4000-apu-can-apparently-run-crysis-without-a-cpu-cooler">www.techradar.com/news/so-an-amd-ryzen-4000-apu-can-apparently-run-crysis-without-a-cpu-cooler</a>.
+<br><span class="used">Used: the Ryzen 3 4300U run, which the article hedges as “apparently” achieved, its limit cut to 90 °C, its Cinebench score.</span></li>
+<li id="src-37"><b>[37]</b> Thermal Grizzly, on delidding Intel Arrow Lake processors: <a href="https://www.thermal-grizzly.com/en/blog/important-information-regarding-the-delidding-of-intel-arrow-lake-cpus">www.thermal-grizzly.com/en/blog/important-information-regarding-the-delidding-of-intel-arrow-lake-cpus</a>.
+<br><span class="used">Used: 165–180 °C for a soldered lid; the voided warranty.</span></li>
+<li id="src-38"><b>[38]</b> XDA Developers, “Why I will never delid my CPU”: <a href="https://www.xda-developers.com/why-i-will-never-delid-my-cpu/">www.xda-developers.com/why-i-will-never-delid-my-cpu/</a>.
+<br><span class="used">Used: one slip damages the surface-mounted parts.</span></li>
+<li id="src-39"><b>[39]</b> H. F. Hamann et al., IEEE Journal of Solid-State Circuits (2007): <a href="https://doi.org/10.1109/JSSC.2006.885064">doi.org/10.1109/JSSC.2006.885064</a> (abstract via <a href="https://api.openalex.org/works/doi:10.1109/JSSC.2006.885064">api.openalex.org/works/doi:10.1109/JSSC.2006.885064</a>; the full paper was not read).
+<br><span class="used">Used: the IR-transparent heat sink. Its camera band is not stated in the abstract; a companion paper reportedly used an InSb detector (from a search snippet, not read).</span></li>
+<li id="src-40"><b>[40]</b> US 7,167,806 B2 (IBM): <a href="https://patents.google.com/patent/US7167806B2/en">patents.google.com/patent/US7167806B2/en</a>.
+<br><span class="used">Used: the coolants (including water or a cold gas), windows and duct; 200 W/cm² at a 70 °C rise.</span></li>
+<li id="src-41"><b>[41]</b> F. J. Mesa-Martínez, E. K. Ardestani and J. Renau, ASPLOS 2010: <a href="https://users.soe.ucsc.edu/~renau/docs/asplos10.pdf">users.soe.ucsc.edu/~renau/docs/asplos10.pdf</a>.
+<br><span class="used">Used: the 3 mm sapphire window.</span></li>
+<li id="src-42"><b>[42]</b> K. Dev et al. (Reda group, Brown): <a href="https://arxiv.org/pdf/1808.09651">arxiv.org/pdf/1808.09651</a>.
+<br><span class="used">Used: the SC5600 at 2.5–5.1 µm; the 1 mm oil channel between sapphire windows; oil as the thermal interface.</span></li>
+<li id="src-43"><b>[43]</b> US 10,175,705 B2 (Brown University): <a href="https://patents.google.com/patent/US10175705B2/en">patents.google.com/patent/US10175705B2/en</a>.
+<br><span class="used">Used: oil at 5 m/s and 20 °C; about 90% of the heat upward.</span></li>
+</ol>
+
+<h2 id="related-reports">Related reports</h2>
+<ul>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-thermal-camera-experiments">Pointing a thermal camera at the ET-SoC-1</a> — the owner's thermal-camera plan: what the camera can resolve, and where to point it.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-effect-of-overheating">The effect of overheating</a> — processor temperature limits, and what heat costs this chip.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-placement">Where the work sits</a> — placement and the time to the governor's 66 °C step (E52).</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-power-temperature">Power and temperature telemetry</a> — every way the card's power and temperature can be read, and the 34-shire voltage map.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> — what it costs to move a bit one millimetre across the chip's mesh.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature</a> — the 35 sensors, and why the host sees one mean.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a> — the hub: every report, and what the meters cannot see.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/heat-aware-compiler">A compiler that knows where the fan is</a> — a pitch (22 September), not a measurement report: the case for a thermally aware compiler, citing ET-SoC-1 measurements.</li>
+</ul>
+<p class="small"><b>Versions.</b> 30 September 2026: first edition, with a citation check of every outside source and a
+review of the page applied before publication.</p>
+</main>

@@ -82,7 +82,10 @@ returns fewer fresh readings, not more.</p>
 memory of a halted hart (<a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#bits">Limits of
 observability, §3</a>). Its one use for energy work, writing the counter event selectors before a launch, is rung 17 of
 the hub's <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#improve">improvement ladder</a>,
-which also ranks what firmware changes or physical access would add and marks what has since been done.</p>
+which also ranks what firmware changes or physical access would add and marks what has since been done. A direct
+temperature reading needs the heatsink left on: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-without-heatsink">Feasibility of running the ET-SoC-1 without its heatsink</a> finds that
+in its model a 600 MHz card almost never holds a stable idle temperature (1 of 3,600 draws) without it, so a thermocouple taped to the heatsink base, or, with the lab's
+consent, one soldered into a groove in the lid, is the option, not a sensor pointed at the bare chip.</p>
 </details>
 
 <h2>2. A load step, seen through every sensor</h2>
@@ -380,6 +383,8 @@ access</a> — each level's energy split by these meters on three cards, and the
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature: a brief</a> — what
 the 35 on-die temperature sensors hold, and what firmware would have to export for a per-shire temperature map like §3's
 voltage map.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-without-heatsink">Feasibility of running the ET-SoC-1 without its heatsink</a> — whether the die's temperature can be read directly: not with the heatsink off;
+a thermocouple soldered into a groove in the lid reads the lid, about 1–2 °C below the die mean at idle and 2–5 °C under load (an estimate), and one taped to the heatsink base reads the heatsink.</li>
 <li><a href="https://github.com/yaroslavvb/et-soc1-prototyping/blob/main/docs/research/power-telemetry.md">Power telemetry
 research notes</a> — every sensor, register and management command behind this page, with firmware line references.</li>
 </ul>

@@ -462,7 +462,10 @@ leakage, the loop can run away if the cooling cannot keep up <span class="cite" 
 <div id="idleleg"></div>
 <div class="chart" id="idle"></div>
 <p class="small" id="idlecap"></p>
-<p><span data-v="idleText"></span> <span data-v="runawayText"></span></p>
+<p><span data-v="idleText"></span> <span data-v="runawayText"></span> With the heatsink removed the cooling could
+not keep up: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-without-heatsink">Feasibility of running the ET-SoC-1 without its heatsink</a> estimates with a Monte Carlo model that a bare 600 MHz
+card almost never settles at idle (1 of 3,600 draws), and that bare aifoundry2 in still air passes 90 °C 1–3 minutes
+after a cold power-on at idle (card 1 in 41–99 s).</p>
 
 <h2 id="et-soc1">6. What this means for the ET-SoC-1</h2>
 <div class="table-wrap wide"><table class="stack" id="practable">
@@ -541,7 +544,8 @@ entry names what the page uses from it.</p>
 <h2 id="related-reports">Related reports</h2>
 <ul>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage">The DVFS loop and its leakage</a> — the governor on the cards' firmware, and leakage at 80 °C.</li>
-<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-placement">Where the work sits</a> — placement and the time to the thermal trip (E52).</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-placement">Where the work sits</a> — placement and the time to the governor's 66 °C step (E52).</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-without-heatsink">Feasibility of running the ET-SoC-1 without its heatsink</a> — §5.2's leakage loop with the heatsink off: in its model a 600 MHz card almost never settles at idle.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature</a> — the 35 sensors, and why the host sees one mean.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-why-low-power">Why the chip is low power</a> — the low-voltage design point.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a> — the hub: every report, and what the meters cannot see.</li>

@@ -173,7 +173,9 @@ down (the <i>S</i>+1 → <i>S</i> step), so that every run starts from the same 
 <li><b>Void rules</b> (fixed before any data): <span data-v="mVoid"></span></li>
 <li><b>Statistics.</b> <span data-v="mStats"></span></li>
 <li><b>Only the mean.</b> The host reads whole degrees: the mean, and a peak-hold high and low since the last statistics
-reset, with no shire named. Which shire was hottest, and how heat spreads between shires, cannot be read.</li>
+reset, with no shire named. Which shire was hottest, and how heat spreads between shires, cannot be read. Pointing a
+sensor at the chip is no way round this on a lab card: <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-without-heatsink">Feasibility of running the ET-SoC-1 without its heatsink</a> finds that in its model a 600 MHz card almost never holds a stable
+idle temperature (1 of 3,600 draws) with its heatsink off, and that the bare lid would show nearly one temperature anyway.</li>
 </ul>
 </details>
 <p><b>Data.</b> Everything is in <a href="https://github.com/yaroslavvb/et-soc1-prototyping/tree/main/docs/reports/data/2026-09-28-heat-placement">docs/reports/data/2026-09-28-heat-placement</a>:
@@ -196,6 +198,7 @@ python3 scripts/build-report.py heat-placement $V/heat.json docs/reports/2026-09
 <ul>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-dvfs-leakage#what-triggers-a-step-down-and-does-placement-delay-it">DVFS and leakage, §8</a> — the governor on aifoundry2: the clock steps with the mean, and a perimeter placement held 800 MHz longer (development).</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-spatial-temperature-brief">Spatial temperature</a> — the 35 sensors, and why the host sees one mean.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-without-heatsink">Feasibility of running the ET-SoC-1 without its heatsink</a> — why a sensor cannot usefully look at the chip with the heatsink off in a lab host, and where a thermocouple can go instead.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-heat-per-mm">Heat per millimetre</a> — where the die's heat comes from when data moves.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-chip-diagram">The ET-SoC-1, interactively</a> — the grid these placements are drawn on.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a> — the hub: every report, and what the meters cannot see.</li>
